@@ -89,6 +89,15 @@ WBStripeManager::Init(void)
     }
 }
 
+WBStripeManager::~WBStripeManager(void)
+{
+    for (auto& stripeToClear : wbStripeArray)
+    {
+        delete stripeToClear;
+    }
+    delete stripeBufferPool;
+}
+
 Stripe*
 WBStripeManager::GetStripe(StripeAddr& lsa)
 {

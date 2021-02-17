@@ -236,8 +236,6 @@ endif
 
 ifeq ($(CONFIG_IBOF),y)
 SYS_LIBS += -ltcmalloc
-#COMMON_CFLAGS += -DQOS_ENABLED_FE
-#COMMON_CFLAGS += -D_ADMIN_ENABLED
 endif
 
 AIR_ROOT_DIR=$(SPDK_ROOT_DIR)/../air/
