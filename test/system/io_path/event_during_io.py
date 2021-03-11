@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import pos_util
 import common_test_lib
 
 import os
@@ -12,6 +11,7 @@ import argparse
 
 current_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(1, current_path + "/../lib/")
+import pos_util
 
 #######################################################################################
 # edit test parameters into these lists to run different workloads
