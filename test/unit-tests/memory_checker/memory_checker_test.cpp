@@ -87,11 +87,13 @@ TEST(MemoryChecker, CheckDoubleFree)
 
 TEST(MemoryChecker, EraseFromFreeList)
 {
-  //   Given : Enabling as true
+    // Given : Enabling as true
     MemoryChecker::Enable(true);
-   //  When : New void pointer created, Erase From free list
+    // When : New void pointer created, Erase From free list
     int* ptr = (int *)MemoryChecker::New(20);
     delete ptr;
+    // Then : It should not be recursive call
+    MemoryChecker::Enable(false);
     MemoryChecker::EraseFromFreeList(reinterpret_cast<uint64_t>(ptr), 8);
     MemoryChecker::EraseFromFreeList(reinterpret_cast<uint64_t>(ptr) + 8, 20);
 }
