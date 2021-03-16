@@ -1,8 +1,8 @@
 set print elements 0
 set print pretty
 set height unlimited
-source ./ibof_gdb.py
-ibofgdb log memory
+source ./posgdb.py
+posgdb log memory
 
 set logging file call_stack.info
 set logging on
@@ -11,7 +11,7 @@ set logging off
 
 set logging file pending_io.info
 set logging on
-ibofgdb pending io
-ibofgdb pending ubio
+posgdb pending io
+posgdb pending ubio
 set logging off
 
