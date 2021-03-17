@@ -79,7 +79,7 @@ else
         echo "set solib-absolute-prefix ""$ROOT_PATH""$DUMP_EXTRACT_PATH" > load.gdb
         echo "core ""$DUMP_EXTRACT_PATH" >> load.gdb
         cat ../get_first_info_from_dump.gdb >> load.gdb
-        sed -i 's/ibof_gdb.py/..\/ibof_gdb.py/g' load.gdb
+        sed -i 's/posgdb.py/..\/posgdb.py/g' load.gdb
         gdb ./poseidonos -x load.gdb -batch
         rm -rf load.gdb
     fi

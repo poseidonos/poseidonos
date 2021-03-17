@@ -70,6 +70,7 @@ AsyncByteIO::_CallbackFunc(void *callbackPtr)
         {
             EventSchedulerSingleton::Instance()->EnqueueEvent(*callbackSmartPtr);
         }
+        IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
         delete callbackSmartPtr;
     }
 }

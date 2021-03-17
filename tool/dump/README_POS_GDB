@@ -12,6 +12,7 @@ posgdb [command] [subcommand]
 
 2) posgdb pending io
    show pending ios for every thread and devices
+   check device io
 
 3) posgdb pending ubio
    show pending ubio when debug option is on.
@@ -30,3 +31,13 @@ posgdb [command] [subcommand]
 
 8) posgdb log memory
    in memory (dump) log
+
+9) posgdb pending object [enum type name]
+   show object buffer of "dumpSharedPtr"
+   ex ) posgdb pending object IO_CONTEXT
+
+10) posgdb backend io 
+   summary of backend io
+
+11) posgdb volume io
+   summary of volume io

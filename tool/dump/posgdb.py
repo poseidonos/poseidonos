@@ -1,15 +1,27 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 current_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(1, current_path)
+sys.path.insert(1, current_path + "/gdb_scripts/")
 import core_dump_lib
 import subprocess
-import sys
 import datetime
 import argparse
 import shutil
 import gdb
+
+import dump_buffer
+import gdb_lib
+import log_memory
+import pending_object
+import pending_callback
+import pending_io
+import pending_iocontext
+import pending_ubio
+import backend_io
+import volume_io
 
 class PosGdbCmd(gdb.Command):
 
@@ -26,301 +38,6 @@ class PosGdbCmd(gdb.Command):
         # internal tab-completion handler for symbols
         return gdb.COMPLETE_SYMBOL
 
-    def show_dev_context(self, ublock_addr):
-        gdb.execute("set print repeats 0", to_string=True)
-
-        output = gdb.execute(
-            "p ((pos::UBlockDevice *) " + ublock_addr + ")->property", to_string=True)
-        print(output)
-
-        output = gdb.execute(
-            "p ((pos::UBlockDevice *) " + ublock_addr + ")->contextArray", to_string=True)
-
-        memaddr = output.split('=')[1].split(',')
-        first = True
-
-        index = 0
-
-        for mem in memaddr:
-            if (first == True):
-                first = False
-                continue
-            memhex = mem.lstrip(' {').rstrip('\n }')
-
-            if (memhex == '0x0'):
-                break
-
-            output = gdb.parse_and_eval(
-                '((pos::UnvmeDeviceContext *)' + memhex + ')->pendingIoCount')
-
-            print('\t=== Thread %d\'s Pending Io ===' % (index))
-            print('================================================')
-            print("pending IO count : ", output)
-
-            output = gdb.parse_and_eval(
-                '((pos::UnvmeDeviceContext *)' + memhex + ')->pendingErrorList')
-
-            print("pending Error List : ", output)
-            print('================================================')
-            index = index + 1
-
-    def show_pending_io(self):
-
-        output = gdb.execute(
-            'p pos::debugInfo->deviceManager->devices', to_string=True)
-        output_list = output.split('\n')
-        index = 0
-        for output_elem in output_list:
-            if ("get()" in output_elem):
-                memhex = output_elem.split('=')[1].rstrip(',\n ')
-                print("###### Device %d Information ###############" % (index))
-                self.show_dev_context(memhex)
-                index = index + 1
-                print("############################################\n")
-
-    def show_callback_list(self, callback_mem):
-
-        callback_set = (gdb.execute("p *((Callback *) %s) " %
-                        (callback_mem), to_string=True)).split('\n')
-        check_callee = False
-        output_callee = ""
-        output_subclass = ""
-        for line_callback_set in callback_set:
-            if("vptr.Event" in line_callback_set):
-                output_subclass = line_callback_set.split(
-                    'for')[1].split('+')[0].rstrip(' \n').lstrip(' ')
-            if("callee" in line_callback_set):
-                check_callee = True
-
-            if(check_callee == True and "get()" in line_callback_set):
-                output_callee = line_callback_set.split(
-                    '=')[1].rstrip(' \n').lstrip(' ')
-                check_callee = False
-
-        print("callback ptr : %s | callback subclass : %s | callback's callee : %s" % (
-            callback_mem, output_subclass, output_callee))
-        if (output_callee != "" and output_callee != "0x0" and output_callee != "0"):
-            self.show_callback_list(output_callee)
-
-    def show_stqh_first(self, mem, cnt):
-
-        stqh_first_set = (gdb.execute(
-            "p *(struct nvme_request *)%s" % (mem), to_string=True)).split('\n')
-        check_callee = False
-
-        for line in stqh_first_set:
-            if("cid" in line):
-                cid = line.split('=')[1].rstrip(' ,\n').lstrip(' ')
-                print(cnt, cid)
-                break
-
-        for line in stqh_first_set:
-            if("stqe_next" in line):
-                stqe_next = line.split('=')[1].rstrip(' ,\n').lstrip(' ')
-                if(stqe_next != "0x0"):
-                    self.show_stqh_first(stqe_next, cnt + 1)
-                break
-
-    def show_pending_ubio(self):
-        output = gdb.execute("p pos::gDumpSharedModulePtr", to_string=True)
-        pending_object_list = core_dump_lib.parse_shared_dump_header(
-            current_path + '/../../')
-        index = 0
-        for pending_object in pending_object_list:
-            if(pending_object == 'UBIO'):
-                break
-            index = index + 1
-
-        memaddr = output.split('=')[1].split(
-            ',')[index].rstrip('\n }').lstrip(' {')
-        if (memaddr == "0x0" or memaddr == "0"):
-            print("Ubio is not used before")
-            return
-        output = gdb.execute("p ((pos::DumpSharedModule<pos::Ubio *, %d> *) %s)->dumpMap "
-                             % (index, memaddr), to_string=True)
-        lines = output.split('\n')
-
-        index = 0
-        tv_sec = 0.0
-        tv_usec = 0.0
-        tmp_str = ""
-        output_callback_ele = "0x0"
-        for line in lines:
-            if ("buffer" in line):
-                ubio_memaddr = (line.split('=')[1].lstrip(' ').rstrip(' ,\n'))
-                output_ubio = gdb.execute(
-                    "p *((Ubio *)%s)" % (ubio_memaddr), to_string=True).split('\n')
-                for line in output_ubio:
-                    if ("_vptr.Ubio" in line):
-                        if ("pos::VolumeIo" in line):
-                            output_rba = gdb.parse_and_eval(
-                                "((VolumeIo *) %s)->sectorRba " % (ubio_memaddr))
-                        else:
-                            output_rba = "Not VolumeIo"
-                        break
-                output_dir = gdb.parse_and_eval(
-                    "((Ubio *) %s)->dir " % (ubio_memaddr))
-                output_lba = gdb.parse_and_eval(
-                    "((Ubio *) %s)->lba " % (ubio_memaddr))
-                output_sync = gdb.execute(
-                    "p ((Ubio *) %s)->sync " % (ubio_memaddr), to_string=True).split('\n')
-                output_sync_ele = ""
-
-                for line_sync in output_sync:
-                    if ("_M_i" in line_sync):
-                        output_sync_ele = line_sync.split(
-                            '=')[1].rstrip(' \n').lstrip(' ')
-
-                output_callback = (gdb.execute(
-                    "p ((Ubio *) %s)->callback " % (ubio_memaddr), to_string=True)).split('\n')
-
-                check_callee = False
-                output_callback_ele = ""
-                for line_callback in output_callback:
-                    if ("get()" in line_callback):
-                        output_callback_ele = line_callback.split(
-                            '=')[1].rstrip(' \n').lstrip(' ')
-                        if (output_callback_ele == "0x0" or output_callback_ele == "0x0"):
-                            break
-
-                tmp_str = ("ubio address : " + ubio_memaddr + " dir : %s rba : %s deviceLba : %s sync : %s callback pointer : %s"
-                           % (output_dir, output_rba, output_lba, output_sync_ele, output_callback_ele))
-
-            if ("tv_sec = " in line):
-                tv_sec = int(line.split()[2].rstrip(","))
-            if ("tv_usec = " in line):
-                tv_usec = int(line.split()[2].rstrip(","))
-                time_zone = core_dump_lib.check_time_zone("binary_info")
-                tmp_str = core_dump_lib.printout_timestamp(
-                    tv_sec, tv_usec, time_zone) + " " + tmp_str
-                print(tmp_str)
-                if (output_callback_ele != "" and output_callback_ele != "0x0" and output_callback_ele != "0x0"):
-                    self.show_callback_list(output_callback_ele)
-                index = index + 1
-                output_callback_ele = "0x0"
-                print('')
-
-        if (index == 0):
-            print("There are no pending ubio")
-
-    def show_pending_callback(self):
-        output = gdb.execute("p pos::gDumpSharedModulePtr", to_string=True)
-        pending_object_list = core_dump_lib.parse_shared_dump_header(
-            current_path + '/../../')
-        index = 0
-        for pending_object in pending_object_list:
-            if(pending_object == 'CALLBACK'):
-                break
-            index = index + 1
-
-        memaddr = output.split('=')[1].split(
-            ',')[index].rstrip('\n }').lstrip(' {')
-        output = gdb.execute("p ((pos::DumpSharedModule<pos::Callback *, %d> *) %s)->dumpMap "
-                             % (index, memaddr), to_string=True)
-        lines = output.split('\n')
-
-        index = 0
-        tmp_str = ""
-        callback_memaddr = "0x0"
-        for line in lines:
-            if ("buffer" in line):
-                callback_memaddr = (line.split(
-                    '=')[1].lstrip(' ').rstrip(' ,\n'))
-                tmp_str = " callback address : " + callback_memaddr
-            if ("tv_sec = " in line):
-                tv_sec = int(line.split()[2].rstrip(","))
-            if ("tv_usec = " in line):
-                tv_usec = int(line.split()[2].rstrip(","))
-                time_zone = core_dump_lib.check_time_zone("binary_info")
-                tmp_str = core_dump_lib.printout_timestamp(
-                    tv_sec, tv_usec, time_zone) + " " + tmp_str
-                print(tmp_str)
-                if (callback_memaddr != "0x0" and callback_memaddr != "0"):
-                    self.show_callback_list(callback_memaddr)
-                tmp_str = ""
-                index = index + 1
-                callback_memaddr = "0x0"
-                print('')
-        if (index == 0):
-            print("There are no pending callback")
-
-    def show_dump_buffer(self, input_str):
-        output = gdb.execute("p %s->dumpQueue" % (input_str), to_string=True)
-        lines = output.split('\n')
-
-        index = 0
-        tmp_str = ""
-        for line in lines:
-            if ("get() = " in line):
-                callback_memaddr = (line.split(
-                    '=')[1].lstrip(' ').rstrip(' ,\n'))
-                tmp_str = " dump buffer address : " + callback_memaddr
-            if ("tv_sec = " in line):
-                tv_sec = int(line.split()[2].rstrip(","))
-            if ("tv_usec = " in line):
-                tv_usec = int(line.split()[2].rstrip(","))
-                time_zone = core_dump_lib.check_time_zone("binary_info")
-                tmp_str = core_dump_lib.printout_timestamp(
-                    tv_sec, tv_usec, time_zone) + " " + tmp_str
-                print(tmp_str)
-                tmp_str = ""
-                index = index + 1
-                print('')
-        if (index == 0):
-            print("There are no log for given dump module")
-
-    def show_pending_iocontext(self):
-        output = gdb.execute("p pos::gDumpSharedModulePtr", to_string=True)
-        pending_object_list = core_dump_lib.parse_shared_dump_header(
-            current_path + '/../../')
-        index = 0
-        for pending_object in pending_object_list:
-            if(pending_object == 'IO_CONTEXT'):
-                break
-            index = index + 1
-
-        memaddr = output.split('=')[1].split(
-            ',')[index].rstrip('\n }').lstrip(' {')
-        output = gdb.execute("p ((pos::DumpSharedModule<pos::IOContext *, %d> *) %s)->dumpMap "
-                             % (index, memaddr), to_string=True)
-        lines = output.split('\n')
-
-        index = 0
-        for line in lines:
-            if ("buffer" in line):
-                iocontext_memaddr = (line.split(
-                    '=')[1].lstrip(' ').rstrip(' ,\n'))
-                print("io context address : " + iocontext_memaddr)
-                index = index + 1
-
-        if (index == 0):
-            print("There are no pending io context")
-
-    def check_log_level_debug(self):
-        output = str(gdb.parse_and_eval(
-            "pos::debugInfo->logger->preferences->logLevel"))
-        print(output)
-        if ("spdlog::level::debug" in output):
-            return True
-        else:
-            return False
-
-    def get_in_memory_log(self):
-        logger_list = core_dump_lib.parse_logger_header(
-            current_path + '/../../')
-        output_string_list = []
-        index = 0
-        for logger_module in logger_list:
-            output = gdb.execute(
-                "p (pos::debugInfo->logger->dumpModule[%d]->dumpQueue)\n" % (index), to_string=True)
-            output_list = output.split('\n')
-            output_string_list = output_string_list + output_list
-            index = index + 1
-        print(len(output_string_list))
-        core_dump_lib.internal_parse_dump(
-            output_string_list, "poseidonos.inmemory.log")
-        print('Result file is \"poseidonos.inmemory.log\"')
-
     def invoke(self, args, from_tty):
         # We can pass args here and use Python CLI utilities like argparse
         # to do argument parsing
@@ -329,62 +46,48 @@ class PosGdbCmd(gdb.Command):
         gdb.execute("set height unlimited", to_string=True)
         print("Args Passed: %s" % args)
 
-        print("Add Poseidonos stack")
-        output = gdb.execute("thread apply all bt", to_string=True)
-        thread_num = -1
-        callstack_num = 0
-        line_list = output.split('\n')
-        for line in line_list:
-            if ("Thread" in line[0:8]):
-                split_str = line.split()
-                if (len(split_str) >= 2):
-                    thread_num = int(split_str[1])
-            if ("in pos::" in line):
-                split_str = line.split()
-                callstack_num = int(split_str[0].lstrip("#"))
-                break
-        if (thread_num == -1):
-            print(
-                "There are no poseidonos stack, could you check this core file is for poseidonos?")
-            exit(1)
-
-        print("We move thread %d frame %d" % (thread_num, callstack_num))
-        gdb.execute("thread %d" % (thread_num), to_string=True)
-        gdb.execute("f %d" % (callstack_num), to_string=True)
+        gdb_lib.switch_to_pos_stack()
 
         if(args == 'debuginfo'):
             self.show_debug_info()
 
         elif(args == 'pending io'):
-            self.show_pending_io()
+            pending_io.show_pending_io()
 
         elif(args == 'pending ubio'):
-            if (self.check_log_level_debug() == False):
+            if (gdb_lib.check_log_level_debug() is False):
                 print("Log level is not set as debug")
             else:
-                self.show_pending_ubio()
+                pending_ubio.show_pending_ubio()
 
         elif(args == 'pending callback'):
-            if (self.check_log_level_debug() == False):
+            if (gdb_lib.check_log_level_debug() is False):
                 print("Log level is not set as debug")
             else:
-                self.show_pending_callback()
+                pending_callback.show_pending_callback()
 
         elif('dumpbuffer' in args):
             split_args = args.split()[1]
-            self.show_dump_buffer(split_args)
+            dump_buffer.show_dump_buffer(split_args)
 
         elif (args == 'pending iocontext'):
-            if (self.check_log_level_debug() == False):
+            if (gdb_lib.check_log_level_debug() is False):
                 print("Log level is not set as debug")
             else:
-                self.show_pending_iocontext()
+                pending_iocontext.show_pending_iocontext()
 
         elif ('callback' in args):
             split_args = args.split()[1]
-            self.show_callback_list(split_args)
+            gdb_lib.show_callback_list(split_args)
+        elif ('pending object' in args):
+            split_args = args.split()[2]
+            pending_object.show_pending_object(split_args)
         elif ('log memory' == args):
-            self.get_in_memory_log()
+            log_memory.get_in_memory_log()
+        elif ('backend io' == args):
+            backend_io.backend_io()
+        elif ('volume io' == args):
+            volume_io.volume_io()
         else:
             print("Help : ")
             help_f = open(current_path + '/README_POS_GDB')

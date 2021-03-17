@@ -5,25 +5,26 @@ import os
 import pytz
 
 #subprcess.call ('ls -al', shell=True)
-GDB_SCRIPT     = 'parse_debug_dumpmanager_trace.gdb'
+GDB_SCRIPT = 'parse_debug_dumpmanager_trace.gdb'
 GDB_SCRIPT_OUT = 'parse_debug_dumpmanager_trace.gdb.out'
-LOGGER_HEADER  = 'src/logger/logger.h'
-DUMP_HEADER    = 'src/dump/dump_shared_ptr.h'
+LOGGER_HEADER = 'src/logger/logger.h'
+DUMP_HEADER = 'src/dump/dump_shared_ptr.h'
+
 
 def parse_logger_header(ibofos_root):
     logger_list = []
     f = open(ibofos_root + LOGGER_HEADER)
-    in_class = False       
+    in_class = False
     for line in f:
         if ("enum class ModuleInDebugLogDump" in line):
-            in_class = True;
+            in_class = True
 
         if(in_class == True):
-        
-            if("MAX_SIZE" in line):
-                break;
 
-            if(","  in line):
+            if("MAX_SIZE" in line):
+                break
+
+            if("," in line):
                 elem = line.split(",")
                 for e in elem:
                     st = e.lstrip(" ").rstrip(" ").rstrip("\n")
@@ -37,24 +38,24 @@ def parse_logger_header(ibofos_root):
 def parse_shared_dump_header(ibofos_root):
     shared_dump_list = []
     f = open(ibofos_root + DUMP_HEADER)
-    in_class = False       
+    in_class = False
     for line in f:
         if ("enum class DumpSharedPtrType" in line):
-            in_class = True;
+            in_class = True
 
         if(in_class == True):
-        
-            if("MAX_DUMP_PTR" in line):
-                break;
 
-            if(","  in line):
+            if("MAX_DUMP_PTR" in line):
+                break
+
+            if("," in line):
                 elem = line.split(",")
                 for e in elem:
                     st = e.lstrip(" ").rstrip(" ").rstrip("\n")
                     if(st != ""):
                         shared_dump_list.append(st)
 
-    f.close() 
+    f.close()
     return shared_dump_list
 
 
@@ -107,10 +108,11 @@ def check_module_number_and_change_script():
 
     f.close()
 
+
 def check_time_zone(binary_info_file):
     st = "Asia/Seoul"
     try:
-        f = open (binary_info_file)        
+        f = open(binary_info_file)
         for line in f:
             if('Time zone:' in line):
                 st = line.split()[2]
@@ -119,16 +121,18 @@ def check_time_zone(binary_info_file):
     except:
         return st
 
+
 def printout_timestamp(tv_sec, tv_usec, time_zone):
     date = datetime.fromtimestamp(tv_sec, pytz.timezone(time_zone))
     fmt = '%Y-%m-%d %H:%M:%S'
-    return (str(date.strftime(fmt)) + "." +\
-        ("%06ld" % tv_usec))
+    return (str(date.strftime(fmt)) + "." +
+            ("%06ld" % tv_usec))
+
 
 def internal_parse_dump(gdb_input_str_vector, gdb_output_file):
     current_path = os.path.dirname(os.path.realpath(__file__))
     logger_list = parse_logger_header(current_path + '/../../')
-    print (logger_list)
+    print(logger_list)
     f_write = open(gdb_output_file, 'w')
     f_out_str = {}
     laststr = ""
@@ -138,7 +142,7 @@ def internal_parse_dump(gdb_input_str_vector, gdb_output_file):
     time_zone = check_time_zone("binary_info")
     first_number = -1
     for line in gdb_input_str_vector:
-        if ( "$" in line and "=" in line):
+        if ("$" in line and "=" in line):
             if (first_number == -1):
                 first_number = int(line.split("$")[1].split(" ")[0])
                 module_index = 0
@@ -162,6 +166,7 @@ def internal_parse_dump(gdb_input_str_vector, gdb_output_file):
     for key, value in sorted(f_out_str.items()):
         f_write.write(value)
     f_write.close()
+
 
 def parse_dump(gdb_input_file, gdb_output_file):
     f = open(gdb_input_file)
