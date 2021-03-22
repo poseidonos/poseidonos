@@ -50,9 +50,7 @@ enum class CoreType
     EVENT_SCHEDULER,
     EVENT_WORKER,
     GENERAL_USAGE,
-#if defined QOS_ENABLED_BE
     QOS,
-#endif
     META_SCHEDULER,
     META_IO,
     COUNT

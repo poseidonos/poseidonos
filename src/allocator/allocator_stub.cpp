@@ -36,6 +36,7 @@
 #include "src/event_scheduler/event.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/allocator/block_manager/block_allocator_stub.h"
+#include "src/array_models/interface/i_array_info.h"
 
 namespace pos
 {

@@ -39,9 +39,6 @@
 #include "src/allocator/context_manager/context_manager.h"
 #include "src/allocator/block_manager/block_manager.h"
 #include "src/mapper/i_stripemap.h"
-#if defined QOS_ENABLED_BE
-#include "src/qos/qos_manager.h"
-#endif
 
 #include <string>
 

@@ -37,9 +37,7 @@
 #include "src/gc/copier_read_completion.h"
 #include "src/io_submit_interface/i_io_submit_handler.h"
 #include "src/logger/logger.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 
 #include <string>
 
@@ -54,9 +52,7 @@ StripeCopier::StripeCopier(StripeId victimStripeId,
   stripeOffset(victimStripeId % STRIPES_PER_SEGMENT),
   copyIndex(copyIndex)
 {
-#if defined QOS_ENABLED_BE
     SetEventType(BackendEvent_GC);
-#endif
 }
 
 StripeCopier::~StripeCopier(void)
@@ -164,9 +160,7 @@ StripeCopier::CopyEvent::Execute(void)
             listIndex,
             buffer, meta,
             stripeId));
-#if defined QOS_ENABLED_BE$
     callback->SetEventType(BackendEvent_GC);
-#endif
     AIRLOG(PERF_COPY, 0, AIR_READ, BLOCK_SIZE * numPage);
     IIOSubmitHandler::GetInstance()->SubmitAsyncIO(IODirection::READ,
         bufferList, lsa, numPage,

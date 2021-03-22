@@ -33,18 +33,11 @@
 #include "src/event_scheduler/event.h"
 namespace pos
 {
-#if defined QOS_ENABLED_BE
 Event::Event(bool isFrontEndEvent, BackendEvent eventType)
 : frontEndEvent(isFrontEndEvent),
   event(eventType)
 {
 }
-#else
-Event::Event(bool isFrontEndEvent)
-: frontEndEvent(isFrontEndEvent)
-{
-}
-#endif
 Event::~Event(void)
 {
 }
@@ -54,7 +47,7 @@ Event::IsFrontEnd(void)
 {
     return frontEndEvent;
 }
-#if defined QOS_ENABLED_BE
+
 BackendEvent
 Event::GetEventType(void)
 {
@@ -70,5 +63,4 @@ Event::SetEventType(BackendEvent eventType)
 {
     event = eventType;
 }
-#endif
 } // namespace pos

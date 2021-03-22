@@ -39,7 +39,6 @@
 
 namespace pos_cli
 {
-#if defined QOS_ENABLED_BE
 class UpdateEventWrrPolicyCommand : public Command
 {
 public:
@@ -58,5 +57,4 @@ private:
         {"fe_rebuild", pos::BackendEvent_FrontendIO}
     };
 };
-#endif
 }; // namespace pos_cli

@@ -968,9 +968,7 @@ void set_ibof_volume_info(const char *bdev_name, const char *nqn, int nqn_id)
 			if (nqn) {
 				strncpy(disk->volume.nqn, nqn, sizeof(disk->volume.nqn));
 				disk->volume.nqn[sizeof(disk->volume.nqn) - 1] = '\0';
-#if defined QOS_ENABLED_FE
 				disk->volume.nqn_id = nqn_id;
-#endif
 			}
 		}
 	}
@@ -1025,7 +1023,7 @@ const char *get_attached_subsystem_nqn(const char *bdev_name)
 	struct ibof_disk *disk = (struct ibof_disk *)bdev->ctxt;
 	return disk->volume.nqn;
 }
-#if defined QOS_ENABLED_FE
+
 uint32_t get_attached_subsystem_id(const char *bdev_name)
 {
 	struct spdk_bdev *bdev = spdk_bdev_get_by_name(bdev_name);
@@ -1036,5 +1034,5 @@ uint32_t get_attached_subsystem_id(const char *bdev_name)
 	struct ibof_disk *disk = (struct ibof_disk *)bdev->ctxt;
 	return disk->volume.nqn_id;
 }
-#endif
+
 SPDK_LOG_REGISTER_COMPONENT(bdev_ibof)

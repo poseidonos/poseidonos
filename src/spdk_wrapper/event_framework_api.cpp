@@ -203,19 +203,13 @@ EventFrameworkApi::_SendEventToSpareQueue(uint32_t core, EventFuncOneParam func,
 void
 EventFrameworkApi::SpdkNvmfInitializeReactorSubsystemMapping(void)
 {
-#if defined QOS_ENABLED_FE
     spdk_nvmf_initialize_reactor_subsystem_mapping();
-#endif
 }
 
 uint32_t
 EventFrameworkApi::SpdkNvmfGetReactorSubsystemMapping(uint32_t reactor, uint32_t id)
 {
-#if defined QOS_ENABLED_FE
     return spdk_nvmf_get_reactor_subsystem_mapping(reactor, id);
-#else
-    return 0;
-#endif
 }
 
 void
@@ -250,11 +244,7 @@ EventFrameworkApi::SpdkPollerRegister(SpdkPollerFunction func,
 uint32_t
 EventFrameworkApi::GetAttachedSubsystemId(const char* bdev_name)
 {
-#if defined QOS_ENABLED_FE
     return get_attached_subsystem_id(bdev_name);
-#else
-    return 0;
-#endif
 }
 
 } // namespace pos

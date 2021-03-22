@@ -34,9 +34,7 @@
 
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/io/backend_io/flush_submission.h"
 #include "src/logger/logger.h"
@@ -48,9 +46,7 @@ FlushReadCompletion::FlushReadCompletion(Stripe* stripe, std::string& arrayName)
   stripe(stripe),
   arrayName(arrayName)
 {
-#if defined QOS_ENABLED_BE
     SetEventType(BackendEvent_Flush);
-#endif
 }
 
 FlushReadCompletion::~FlushReadCompletion(void)

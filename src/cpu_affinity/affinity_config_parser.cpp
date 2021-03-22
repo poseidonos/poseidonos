@@ -52,9 +52,7 @@ const CoreDescriptionArray AffinityConfigParser::DEFAULT_CORE_DESCRIPTIONS =
         CoreDescription{CoreType::EVENT_SCHEDULER, {1, 0}, "2"},
         CoreDescription{CoreType::EVENT_WORKER, {3, 0}, "3-5"},
         CoreDescription{CoreType::GENERAL_USAGE, {1, 0}, "6"},
-#if defined QOS_ENABLED_BE
         CoreDescription{CoreType::QOS, {1, 0}, "7"},
-#endif
         CoreDescription{CoreType::META_SCHEDULER, {1, 0}, "8"},
         CoreDescription{CoreType::META_IO, {2, 0}, "9-10"},
 };
@@ -67,9 +65,7 @@ const AffinityConfigParser::ConfigKeyAndCoreTypes
             ConfigKeyAndCoreType{CoreType::EVENT_SCHEDULER, "event_scheduler"},
             ConfigKeyAndCoreType{CoreType::EVENT_WORKER, "event_worker"},
             ConfigKeyAndCoreType{CoreType::GENERAL_USAGE, "general_usage"},
-#if defined QOS_ENABLED_BE
             ConfigKeyAndCoreType{CoreType::QOS, "qos"},
-#endif
             ConfigKeyAndCoreType{CoreType::META_SCHEDULER, "meta_scheduler"},
             ConfigKeyAndCoreType{CoreType::META_IO, "meta_io"},
 };

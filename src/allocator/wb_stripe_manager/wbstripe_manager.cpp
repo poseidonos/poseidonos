@@ -37,9 +37,7 @@
 #include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/include/branch_prediction.h"
 #include "src/gc/gc_flush_submission.h"
-#if defined QOS_ENABLED_BE
 #include "src/qos/qos_manager.h"
-#endif
 
 #include <vector>
 
@@ -89,15 +87,6 @@ WBStripeManager::Init(void)
     }
 }
 
-WBStripeManager::~WBStripeManager(void)
-{
-    for (auto& stripeToClear : wbStripeArray)
-    {
-        delete stripeToClear;
-    }
-    delete stripeBufferPool;
-}
-
 Stripe*
 WBStripeManager::GetStripe(StripeAddr& lsa)
 {
@@ -120,9 +109,7 @@ WBStripeManager::FreeWBStripeId(StripeId lsid)
     std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
     assert(!IsUnMapStripe(lsid));
     contextManager->GetWbLsidBitmap()->ClearBit(lsid);
-#if defined QOS_ENABLED_BE
     QosManagerSingleton::Instance()->DecreaseUsedStripeCnt();
-#endif
 }
 
 void

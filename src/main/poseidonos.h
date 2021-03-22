@@ -56,9 +56,7 @@ private:
 
     void _InitMemoryChecker(void);
 
-#if defined QOS_ENABLED_BE
     void _SetPerfImpact(void);
-#endif
     void _LoadConfiguration(void);
     void _RunCLIService(void);
     void _SetupThreadModel(void);

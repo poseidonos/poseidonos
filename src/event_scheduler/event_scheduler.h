@@ -39,13 +39,8 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-
-#if defined QOS_ENABLED_BE
 #include <queue>
 #include "src/include/backend_event.h"
-#include "src/qos/qos_manager.h"
-#endif
-
 #include "src/include/smart_ptr_type.h"
 #include "src/lib/singleton.h"
 
@@ -54,7 +49,6 @@ namespace pos
 class ISchedulerPolicy;
 class EventQueue;
 class EventWorker;
-class QosManager;
 class SchedulerQueue;
 /* --------------------------------------------------------------------------*/
 /**
@@ -73,10 +67,8 @@ public:
     void Initialize(void);
     uint32_t GetWorkerIDMinimumJobs(void);
     virtual void EnqueueEvent(EventSmartPtr input);
-#if defined QOS_ENABLED_BE
     std::mutex queueLock[BackendEvent_Count];
     std::queue<EventSmartPtr> DequeueEvents(void);
-#endif
     void Run(void);
 
     Event* GetNextEvent(void);
@@ -90,13 +82,9 @@ private:
     std::thread* schedulerThread;
     cpu_set_t schedulerCPUSet;
     std::vector<cpu_set_t> cpuSetVector;
-#if defined QOS_ENABLED_BE
     SchedulerQueue* eventQueue[BackendEvent_Count];
     int32_t oldWeight[BackendEvent_Count] = {0};
     int32_t runningWeight[BackendEvent_Count] = {0};
-#else
-    EventQueue* eventQueue;
-#endif
 };
 
 using EventSchedulerSingleton = Singleton<EventScheduler>;

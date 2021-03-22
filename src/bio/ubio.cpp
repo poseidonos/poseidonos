@@ -50,19 +50,14 @@
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
-
-#if defined QOS_ENABLED_BE
 #include "src/qos/qos_manager.h"
-#endif
 
 namespace pos
 {
 Ubio::Ubio(void* buffer, uint32_t unitCount, std::string arrayName)
 : dir(UbioDir::Read),
   ubioPrivate(nullptr),
-#if defined QOS_ENABLED_BE
   eventIoType(BackendEvent_Unknown),
-#endif
   dataBuffer(unitCount * BYTES_PER_UNIT, buffer),
   callback(nullptr),
   retry(false),
@@ -91,9 +86,7 @@ Ubio::Ubio(const Ubio& ubio)
     SetAsyncMode();
     ubioPrivate = ubio.ubioPrivate;
 
-#if defined QOS_ENABLED_BE
     eventIoType = ubio.eventIoType;
-#endif
 }
 
 Ubio::~Ubio(void)
@@ -106,18 +99,18 @@ Ubio::IsSyncMode(void)
     return sync;
 }
 
-#if defined QOS_ENABLED_BE
 void
 Ubio::SetEventType(BackendEvent eventType)
 {
     eventIoType = eventType;
 }
+
 BackendEvent
 Ubio::GetEventType(void)
 {
     return (eventIoType);
 }
-#endif
+
 void
 Ubio::FreeDataBuffer(void)
 {

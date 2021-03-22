@@ -928,13 +928,11 @@ spdk_nvmf_host_get_nqn(const struct spdk_nvmf_host *host)
 	return host->nqn;
 }
 
-#if defined QOS_ENABLED_FE
 uint32_t
 spdk_nvmf_subsystem_get_id(struct spdk_nvmf_subsystem *subsystem)
 {
 	return subsystem->id;
 }
-#endif
 
 struct spdk_nvmf_subsystem_listener *
 nvmf_subsystem_find_listener(struct spdk_nvmf_subsystem *subsystem,

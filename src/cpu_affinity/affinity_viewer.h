@@ -55,9 +55,7 @@ private:
         GENERAL,
         META_SCHEDULER,
         META_IO,
-#if defined QOS_ENABLED_BE
         QOS,
-#endif
         ROLE_COUNT,
     };
 
@@ -106,9 +104,7 @@ private:
         AffinityManager& affinityManager;
 
         void _RegisterReactorCpu(void);
-#if defined QOS_ENABLED_BE
         void _RegisterQoSCpu(void);
-#endif
         void _RegisterEventCpu(void);
         void _RegisterUserIoCpu(void);
         void _RegisterSchedulerCpu(void);

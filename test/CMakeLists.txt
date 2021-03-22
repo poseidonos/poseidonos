@@ -297,8 +297,7 @@ endif()
 #maybe we could embed likely() unlikely() macro into add_definitions() for unit-test's build context
 #commented out UNVME_BUILD since this requires rte_malloc() to function properly, which is meaningful 
 #only in prod release build, but not in unit test build
-add_definitions(-DQOS_ENABLED_BE 
-    -DPOS_VERSION="pos-0.8.0-alpha1" 
+add_definitions(-DPOS_VERSION="pos-0.8.0-alpha1" 
     #-DUNVME_BUILD 
     -DSPDLOG_COMPILED_LIB
     -D_ADMIN_ENABLED

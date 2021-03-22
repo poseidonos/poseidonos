@@ -115,6 +115,7 @@ public:
     std::map<uint32_t, uint32_t>& GetVolumeReactorMap(uint32_t volId);
     uint32_t GetVolumeTotalConnection(uint32_t volId);
     int VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* aioSubmission);
+    bool IsFeQosEnabled(void);
 
 private:
     void _Finalize(void);
@@ -156,6 +157,7 @@ private:
     QosVolumeManager* qosVolumeManager;
     QosEventManager* qosEventManager;
     QosSpdkManager* spdkManager;
+    bool feQosEnabled;
 };
 
 using QosManagerSingleton = Singleton<QosManager>;
@@ -163,7 +165,7 @@ using QosManagerSingleton = Singleton<QosManager>;
 class QosVolumeManager : public VolumeEvent
 {
 public:
-    explicit QosVolumeManager(QosPolicyManager* policyMgr);
+    explicit QosVolumeManager(QosPolicyManager* policyMgr, bool feQos);
     ~QosVolumeManager(void);
     bool VolumeCreated(std::string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
     bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName) override;
@@ -197,6 +199,7 @@ private:
     std::queue<ibof_io*> volumesUbioQueue[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     std::mutex volQueueLock[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     uint64_t pendingVolumeIO[M_MAX_REACTORS][MAX_VOLUME_COUNT];
+    bool feQosEnabled;
 };
 
 class QosEventManager
@@ -238,7 +241,7 @@ private:
 class QosSpdkManager
 {
 public:
-    QosSpdkManager(void);
+    explicit QosSpdkManager(bool feQos);
     ~QosSpdkManager(void);
     void Initialize(void);
     void Finalize(void);
@@ -253,12 +256,14 @@ public:
     void SetReactorId(uint32_t id);
     static std::atomic<bool> registerQosPollerDone;
     static std::atomic<bool> unregistrationComplete;
+    bool IsFeQosEnabled(void);
 
 private:
     void _SetupQosReactorPoller(void);
     poller_structure reactorData[M_MAX_REACTORS];
     spdk_poller* spdkPollers[M_MAX_REACTORS];
     uint32_t reactorId;
+    bool feQosEnabled;
 };
 
 } // namespace pos

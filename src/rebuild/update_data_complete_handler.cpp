@@ -32,6 +32,8 @@
 
 #include "update_data_complete_handler.h"
 #include "src/logger/logger.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/include/backend_event.h"
 
 namespace pos
 {

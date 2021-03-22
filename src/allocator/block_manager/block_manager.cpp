@@ -35,10 +35,7 @@
 #include "src/allocator/context_manager/segment/segment_ctx.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/include/branch_prediction.h"
-#if defined QOS_ENABLED_BE
 #include "src/qos/qos_manager.h"
-#endif
-
 #include <string>
 
 namespace pos
@@ -249,11 +246,7 @@ BlockManager::_AllocateWriteBufferStripeId(void)
         // POS_TRACE_INFO(ALLOCATOR_NO_FREE_WB_STRIPE, "WB stripeId exhausted, wbLsid:{}", wbLsid);
         return UNMAP_STRIPE;
     }
-
-#if defined QOS_ENABLED_BE
     QosManagerSingleton::Instance()->IncreaseUsedStripeCnt();
-#endif
-
     return wbLsid;
 }
 

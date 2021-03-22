@@ -1,4 +1,3 @@
-#define QOS_ENABLED_BE
 #define UNVME_BUILD
 
 #include "library_unit_test.h"

@@ -38,9 +38,7 @@
 #include "src/allocator/allocator.h"
 #include "src/allocator/wb_stripe_manager/stripe.h"
 #include "src/include/pos_event_id.hpp"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/logger/logger.h"
 #include "src/gc/copier_write_completion.h"
@@ -50,7 +48,6 @@
 
 namespace pos
 {
-#if defined QOS_ENABLED_BE
 GcFlushSubmission::GcFlushSubmission(Stripe* inputStripe, std::string arrayName)
 : Event(false, BackendEvent_Flush),
   stripe(inputStripe),
@@ -58,14 +55,6 @@ GcFlushSubmission::GcFlushSubmission(Stripe* inputStripe, std::string arrayName)
 {
     SetEventType(BackendEvent_Flush);
 }
-#else
-GcFlushSubmission::GcFlushSubmission(Stripe* inputStripe, std::string arrayName)
-: Event(false),
-  stripe(inputStripe),
-  arrayName(arrayName)
-{
-}
-#endif
 
 GcFlushSubmission::~GcFlushSubmission(void)
 {

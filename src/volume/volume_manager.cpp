@@ -40,9 +40,7 @@
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#if defined QOS_ENABLED_FE
 #include "src/qos/qos_manager.h"
-#endif
 #include "src/volume/volume_creator.h"
 #include "src/volume/volume_base.h"
 #include "src/volume/volume_deleter.h"
@@ -365,20 +363,34 @@ VolumeManager::StateChanged(StateContext* prev, StateContext* next)
         stopped = false;
     }
 }
-#if defined QOS_ENABLED_FE
+
 int
 VolumeManager::UpdateVolumePolicy(std::string volName, qos_vol_policy volPolicy)
 {
     uint32_t volId = VolumeID(volName);
-    return QosManagerSingleton::Instance()->UpdateVolumePolicy(volId, volPolicy);
+    QosManager* qosManager = QosManagerSingleton::Instance();
+    if (true == qosManager->IsFeQosEnabled())
+    {
+        return QosManagerSingleton::Instance()->UpdateVolumePolicy(volId, volPolicy);
+    }
+    else
+    {
+        return (int)POS_EVENT_ID::QOS_NOT_SUPPORTED;
+    }
 }
+
 qos_vol_policy
 VolumeManager::GetVolumePolicy(std::string volName)
 {
     uint32_t volId = VolumeID(volName);
-    return QosManagerSingleton::Instance()->GetVolumePolicy(volId);
+    qos_vol_policy volPolicy;
+    QosManager* qosManager = QosManagerSingleton::Instance();
+    if (true == qosManager->IsFeQosEnabled())
+    {
+        volPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volId);
+    }
+    return volPolicy;
 }
-#endif
 
 int
 VolumeManager::_CheckPrerequisite(void)

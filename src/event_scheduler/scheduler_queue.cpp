@@ -37,9 +37,7 @@
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
-#if defined QOS_ENABLED_BE
 #include "src/qos/qos_manager.h"
-#endif
 namespace pos
 {
 /* --------------------------------------------------------------------------*/
@@ -100,15 +98,15 @@ SchedulerQueue::EnqueueEvent(EventSmartPtr input)
     {
         queue.push(input);
     }
-#if defined QOS_ENABLED_FE
+    QosManager* qosManager = QosManagerSingleton::Instance();
+    if (true == qosManager->IsFeQosEnabled())
     {
         if ((input->IsFrontEnd() == false))
         {
-            QosManagerSingleton::Instance()->IncreasePendingEvents(input->GetEventType());
-            QosManagerSingleton::Instance()->LogEvent(input->GetEventType());
+            qosManager->IncreasePendingEvents(input->GetEventType());
+            qosManager->LogEvent(input->GetEventType());
         }
     }
-#endif
 }
 
 } // namespace pos

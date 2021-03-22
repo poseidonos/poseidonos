@@ -40,6 +40,7 @@
 #include "src/journal_service/journal_service.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {

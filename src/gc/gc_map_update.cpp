@@ -34,9 +34,7 @@
 
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/free_buffer_pool.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "Air.h"
 #include "src/allocator/allocator.h"
 #include "src/allocator_service/allocator_service.h"
@@ -67,10 +65,8 @@ GcMapUpdate::GcMapUpdate(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* 
   eventScheduler(eventScheduler),
   arrayName(arrayName)
 {
-#if defined QOS_ENABLED_BE
     SetFrontEnd(false);
     SetEventType(BackendEvent_GC);
-#endif
     AIRLOG(LAT_BDEV_READ, 0, 0, stripe->GetVsid());
 
     IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);

@@ -37,7 +37,6 @@
 
 namespace pos_cli
 {
-#if defined QOS_ENABLED_BE
 ResetEventWrrPolicyCommand::ResetEventWrrPolicyCommand(void)
 {
 }
@@ -53,5 +52,4 @@ ResetEventWrrPolicyCommand::Execute(json& doc, string rid)
     QosManagerSingleton::Instance()->ResetEventPolicy();
     return jFormat.MakeResponse("RESETEVENTWRRPOLICY", rid, SUCCESS, "DONE", GetPosInfo());
 }
-#endif
 }; // namespace pos_cli

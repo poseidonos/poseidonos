@@ -495,6 +495,7 @@ enum class POS_EVENT_ID
 
     // --------------QOS Manager (4600)----------------
     QOS_SET_EVENT_POLICY = 4600,
+    QOS_NOT_SUPPORTED,
     // --------------IO Path nvmf (5000)----------------
     IONVMF_START = 5000,
 

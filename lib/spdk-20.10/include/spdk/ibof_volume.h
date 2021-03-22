@@ -68,11 +68,8 @@ typedef struct unvmf_io_handler {
 	unvmf_submit_handler submit;
 	unvmf_complete_handler complete;
 } unvmf_io_handler;
-#if defined QOS_ENABLED_FE
 uint32_t get_attached_subsystem_id(const char *bdev_name);
-#endif
 void spdk_bdev_ibof_register_io_handler(const char *bdev_name, unvmf_io_handler handler);
-
 struct spdk_thread *get_nvmf_thread_from_reactor(int reactor);
 void spdk_bdev_ibof_unregister_io_handler(const char *bdev_name);
 
@@ -88,9 +85,7 @@ struct ibof_volume_info {
 	char name[VOLUME_NAME_MAX_LEN + 1];
 	char nqn[SPDK_NVMF_NQN_MAX_LEN + 1];
 	char array_name[ARRAY_NAME_MAX_LEN + 1];
-#if defined QOS_ENABLED_FE
 	uint32_t nqn_id;
-#endif
 	uint64_t size_mb;
 	uint64_t iops_limit;
 	uint64_t bw_limit;

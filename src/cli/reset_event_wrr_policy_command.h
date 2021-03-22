@@ -37,7 +37,6 @@
 
 namespace pos_cli
 {
-#if defined QOS_ENABLED_BE
 class ResetEventWrrPolicyCommand : public Command
 {
 public:
@@ -45,5 +44,4 @@ public:
     ~ResetEventWrrPolicyCommand(void) override;
     string Execute(json& doc, string rid) override;
 };
-#endif
 }; // namespace pos_cli

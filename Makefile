@@ -137,14 +137,6 @@ ifeq ($(CONFIG_LIBRARY_BUILD), y)
 LDEXTRAFLAGS += -shared -Wl,-z,nodelete
 endif
 
-ifeq ($(CONFIG_BE_QOS),y)
-DEFINE += -DQOS_ENABLED_BE
-endif
-
-ifeq ($(CONFIG_FE_QOS),y)
-DEFINE += -DQOS_ENABLED_FE
-endif
-#DEFINE += -D_ADMIN_ENABLED
 INSTALL_DIR = /usr/local/bin
 
 UDEV_DIR = /etc/udev/rules.d

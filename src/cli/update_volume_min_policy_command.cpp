@@ -38,7 +38,6 @@
 
 namespace pos_cli
 {
-#if defined QOS_ENABLED_FE
 UpdateVolumeMinPolicyCommand::UpdateVolumeMinPolicyCommand(void)
 {
 }
@@ -119,5 +118,4 @@ UpdateVolumeMinPolicyCommand::Execute(json& doc, string rid)
         return jFormat.MakeResponse("UPDATEVOLUMEMINPOLICY", rid, BADREQUEST, "Check parameters", GetPosInfo());
     }
 }
-#endif
 }; // namespace pos_cli

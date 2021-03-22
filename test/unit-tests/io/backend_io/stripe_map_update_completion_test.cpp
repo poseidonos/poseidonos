@@ -8,9 +8,7 @@
 #include "src/allocator_service/allocator_service.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/branch_prediction.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "src/io/backend_io/flush_completion.h"
 #include "src/mapper_service/mapper_service.h"
 #include "test/unit-tests/allocator/i_segment_ctx_mock.h"

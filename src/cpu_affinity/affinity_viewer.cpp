@@ -50,12 +50,8 @@ const char* AffinityViewer::Cpu::ROLE_DESCRIPTIONS[ROLE_COUNT] =
         "Scheduler",
         "General",
         "MetaScheduler",
-#if defined QOS_ENABLED_BE
         "MetaIO",
         "QOS"};
-#else
-        "MetaIO"};
-#endif
 
 AffinityViewer::Socket::Socket(void)
 : id(0),
@@ -165,14 +161,14 @@ AffinityViewer::Numa::_RegisterReactorCpu(void)
     cpu_set_t reactorCpuSet = affinityManager.GetCpuSet(CoreType::REACTOR);
     _RegisterCpuSetRole(reactorCpuSet, REACTOR);
 }
-#if defined QOS_ENABLED_BE
+
 void
 AffinityViewer::Numa::_RegisterQoSCpu(void)
 {
     cpu_set_t reactorCpuSet = affinityManager.GetCpuSet(CoreType::QOS);
     _RegisterCpuSetRole(reactorCpuSet, QOS);
 }
-#endif
+
 void
 AffinityViewer::Numa::_RegisterCpuRole(int cpuId, Role role)
 {
@@ -251,9 +247,7 @@ AffinityViewer::Numa::RegisterEveryCpuRole(void)
     _RegisterGeneralCpu();
     _RegisterMetaSchedulerCpu();
     _RegisterMetaCpu();
-#if defined QOS_ENABLED_BE
     _RegisterQoSCpu();
-#endif
 }
 
 void

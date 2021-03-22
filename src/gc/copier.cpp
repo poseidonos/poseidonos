@@ -42,9 +42,7 @@
 #include "src/gc/reverse_map_load_completion.h"
 #include "src/gc/stripe_copy_submission.h"
 #include "src/io/general_io/io_submit_handler.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "src/logger/logger.h"
 #include "src/event_scheduler/event_scheduler.h"
 
@@ -73,9 +71,7 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus,
 
     victimIndex = 0;
 
-#if defined QOS_ENABLED_BE
     SetEventType(BackendEvent_GC);
-#endif
 }
 
 Copier::~Copier(void)

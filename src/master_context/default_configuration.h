@@ -99,9 +99,7 @@ private:
         {"event_scheduler", "\"2\""},
         {"event_worker", "\"3-5\""},
         {"general_usage", "\"6\""},
-    #if defined QOS_ENABLED_BE
         {"qos", "\"7\""},
-    #endif
         {"meta_scheduler", "\"8\""},
         {"meta_io", "\"9-10\""}
     };
@@ -115,6 +113,9 @@ private:
         {"gc", "\"high\""},
         {"rebuild", "\"low\""}
     };
+    vector<ConfigKeyValue> feQosData = {
+        {"enable", "true"}
+    };
 
     using ConfigList =
         std::vector<ConfigModuleData>;
@@ -124,7 +125,8 @@ private:
         {"ioat", ioatData},
         {"affinity_manager", affinityManagerData},
         {"user_nvme_driver", userNvmeDriverData},
-        {"perf_impact", perfImpactData}
+        {"perf_impact", perfImpactData},
+        {"fe_qos", feQosData}
     };
 
     const string CONFIGURATION_PATH = "/etc/pos/";

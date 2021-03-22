@@ -33,14 +33,11 @@
 #include "src/cli/update_event_wrr_policy_command.h"
 
 #include "src/cli/cli_event_code.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "src/qos/qos_manager.h"
 
 namespace pos_cli
 {
-#if defined QOS_ENABLED_BE
 UpdateEventWrrPolicyCommand::UpdateEventWrrPolicyCommand(void)
 {
 }
@@ -117,5 +114,4 @@ UpdateEventWrrPolicyCommand::_GetEventId(string eventName)
     }
     return (pos::BackendEvent_Unknown);
 }
-#endif
 }; // namespace pos_cli

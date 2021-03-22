@@ -74,13 +74,9 @@
 #include "src/cli/set_log_level_command.h"
 #include "src/cli/handle_wbt_command.h"
 #include "src/cli/list_wbt_command.h"
-#if defined QOS_ENABLED_BE
 #include "src/cli/update_event_wrr_policy_command.h"
 #include "src/cli/reset_event_wrr_policy_command.h"
-#endif
-#if defined QOS_ENABLED_FE
 #include "src/cli/update_volume_min_policy_command.h"
-#endif
 
 namespace pos_cli
 {
@@ -126,13 +122,9 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["SETLOGLEVEL"] = new SetLogLevelCommand();
     cmdDictionary["LISTWBT"] = new ListWbtCommand();
     cmdDictionary["WBT"] = new HandleWbtCommand();
-#if defined QOS_ENABLED_BE
     cmdDictionary["UPDATEEVENTWRRPOLICY"] = new UpdateEventWrrPolicyCommand();
     cmdDictionary["RESETEVENTWRRPOLICY"] = new ResetEventWrrPolicyCommand();
-#endif
-#if defined QOS_ENABLED_FE
     cmdDictionary["UPDATEVOLUMEMINPOLICY"] = new UpdateVolumeMinPolicyCommand();
-#endif
 }
 
 RequestHandler::~RequestHandler(void)

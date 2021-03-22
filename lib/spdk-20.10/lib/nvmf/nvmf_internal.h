@@ -49,10 +49,8 @@
 
 #define NVMF_MAX_ASYNC_EVENTS	(4)
 
-#if defined QOS_ENABLED_FE
 #define M_INVALID_SUBSYSTEM (0)
 #define M_VALID_SUBSYSTEM (1)
-#endif
 
 enum spdk_nvmf_subsystem_state {
 	SPDK_NVMF_SUBSYSTEM_INACTIVE = 0,

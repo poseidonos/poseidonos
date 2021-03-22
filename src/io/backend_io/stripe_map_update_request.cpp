@@ -38,12 +38,11 @@
 #include "src/allocator/wb_stripe_manager/stripe.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/io/backend_io/stripe_map_update.h"
 #include "src/mapper_service/mapper_service.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -51,9 +50,7 @@ StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, std::string& arra
 : StripeMapUpdateRequest(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
       EventSchedulerSingleton::Instance(), arrayName, isGc)
 {
-#if defined QOS_ENABLED_BE
     SetEventType(BackendEvent_Flush);
-#endif
 }
 
 StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap,

@@ -40,10 +40,6 @@
 
 namespace pos
 {
-#if defined QOS_ENABLED_BE
-class QosManager;
-#endif
-
 class Event;
 
 /* --------------------------------------------------------------------------*/

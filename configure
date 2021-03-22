@@ -26,8 +26,7 @@ function usage()
 	echo " mfs-raid                  Build IBOF with Meta FileSystem with RAID1 capability"
 	echo " library-build             Build IBOF with library"
 	echo " gcov                      Build IBOF with gcov"	
-    echo " be-qos                    Build IBOF with BE QoS"
-    echo " fe-qos                    Build IBOF with BE & FE QoS"
+    echo " fe-qos                    Build IBOF with FE QoS"
     #Just another example 
     #echo " mbr-mock                  Build IBOF with mock mbr."
 	echo ""
@@ -80,15 +79,7 @@ for i in "$@"; do
 		--without-gcov)
 			CONFIG[GCOV]=n
 			;;
-        --with-be-qos)
-            CONFIG[BE_QOS]=y
-            ;;
-        --without-be-qos)
-            CONFIG[BE_QOS]=n
-            CONFIG[FE_QOS]=n
-            ;;
         --with-fe-qos)
-            CONFIG[BE_QOS]=y
             CONFIG[FE_QOS]=y
             ;;
         --without-fe-qos)

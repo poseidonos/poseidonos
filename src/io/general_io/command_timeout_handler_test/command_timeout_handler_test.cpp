@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define QOS_ENABLED_BE
 #define UNVME_BUILD
 
 #include "src/io/general_io/command_timeout_handler.h"

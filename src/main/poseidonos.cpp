@@ -53,9 +53,7 @@
 #include "src/io/general_io/io_recovery_event_factory.h"
 #include "src/event_scheduler/io_completer.h"
 #include "src/io_scheduler/io_dispatcher.h"
-#if defined QOS_ENABLED_BE
 #include "src/qos/qos_manager.h"
-#endif
 
 namespace pos
 {
@@ -64,9 +62,7 @@ Poseidonos::Init(int argc, char** argv)
 {
     _LoadConfiguration();
     _LoadVersion();
-#if defined QOS_ENABLED_BE
     _SetPerfImpact();
-#endif
     _InitSpdk(argc, argv);
     _InitAffinity();
     _SetupThreadModel();
@@ -198,7 +194,6 @@ Poseidonos::_LoadVersion(void)
         "POS Version {}", version.c_str());
 }
 
-#if defined QOS_ENABLED_BE
 void
 Poseidonos::_SetPerfImpact(void)
 {
@@ -224,7 +219,6 @@ Poseidonos::_SetPerfImpact(void)
         }
     }
 }
-#endif
 
 void
 Poseidonos::_RunCLIService(void)

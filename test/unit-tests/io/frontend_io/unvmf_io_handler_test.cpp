@@ -11,10 +11,8 @@
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-#if defined QOS_ENABLED_FE
 #include "src/qos/qos_manager.h"
 #include "src/io/frontend_io/aio_submission_adapter.h"
-#endif
 
 namespace pos
 {

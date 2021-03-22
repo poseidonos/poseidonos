@@ -40,9 +40,7 @@
 #include "src/allocator_service/allocator_service.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/meta_const.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/logger/logger.h"
 #include "src/array/service/array_service_layer.h"
@@ -58,7 +56,6 @@ FlushSubmission::FlushSubmission(Stripe* inputStripe, std::string& arrayName)
 {
 }
 
-#if defined QOS_ENABLED_BE
 FlushSubmission::FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, std::string& arrayName)
 : Event(false, BackendEvent_Flush),
   stripe(inputStripe),
@@ -68,16 +65,6 @@ FlushSubmission::FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStri
 {
     SetEventType(BackendEvent_Flush);
 }
-#else
-FlushSubmission::FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, std::string& arrrayName)
-: Event(false),
-  stripe(inputStripe),
-  iWBStripeAllocator(wbStripeAllocator),
-  iIOSubmitHandler(ioSubmitHandler),
-  arrayName(arrayName)
-{
-}
-#endif
 
 FlushSubmission::~FlushSubmission(void)
 {

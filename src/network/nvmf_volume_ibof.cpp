@@ -40,10 +40,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/volume/volume_manager.h"
-
-#if defined QOS_ENABLED_FE
 #include "src/qos/qos_manager.h"
-#endif
 
 namespace pos
 {
@@ -179,13 +176,9 @@ NvmfVolumeIbof::_VolumeMountHandler(void* arg1, void* arg2)
     {
         string subNqn(vInfo->nqn);
         string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
-#if defined QOS_ENABLED_FE
         uint32_t nqn_id = target.GetVolumeNqnId(subNqn);
         QosManagerSingleton::Instance()->UpdateSubsystemToVolumeMap(nqn_id, vInfo->id);
         set_ibof_volume_info(bdevName.c_str(), subNqn.c_str(), nqn_id);
-#else
-        set_ibof_volume_info(bdevName.c_str(), subNqn.c_str(), 0);
-#endif
         target.SetVolumeQos(bdevName, vInfo->iops_limit, vInfo->bw_limit);
         delete vInfo;
   }

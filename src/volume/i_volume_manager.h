@@ -36,10 +36,7 @@
 
 #include "src/volume/volume_list.h"
 #include "src/volume/volume_base.h"
-
-#if defined QOS_ENABLED_FE
 #include "src/qos/qos_common.h"
-#endif
 
 namespace pos
 {
@@ -55,10 +52,8 @@ public:
     virtual int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw) = 0;
     virtual int Rename(std::string oldname, std::string newname) = 0;
     virtual int Resize(std::string name, uint64_t newsize) = 0;
-#if defined QOS_ENABLED_FE
     virtual int UpdateVolumePolicy(std::string volName, qos_vol_policy volPolicy) = 0;
     virtual qos_vol_policy GetVolumePolicy(std::string volName) = 0;
-#endif
     virtual void DetachVolumes(void) = 0;
     virtual bool CheckVolumeIdle(int volId) = 0;
 

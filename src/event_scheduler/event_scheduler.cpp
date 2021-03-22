@@ -44,10 +44,7 @@
 #include "src/event_scheduler/event_worker.h"
 #include "src/event_scheduler/minimum_job_policy.h"
 #include "src/event_scheduler/scheduler_queue.h"
-
-#if defined QOS_ENABLED_BE
 #include "src/qos/qos_manager.h"
-#endif
 
 namespace pos
 {
@@ -58,15 +55,11 @@ EventScheduler::EventScheduler(void)
   schedulerThread(nullptr)
 {
     CPU_ZERO(&schedulerCPUSet);
-#if defined QOS_ENABLED_BE
     for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count;
             event++)
     {
         eventQueue[event] = new SchedulerQueue;
     }
-#else
-    eventQueue = new EventQueue;
-#endif
 }
 
 
@@ -114,20 +107,15 @@ EventScheduler::~EventScheduler(void)
     {
         schedulerThread->join();
     }
-#if defined QOS_ENABLED_BE
     for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count;
             event++)
     {
         delete eventQueue[event];
     }
-#else
-    delete eventQueue;
-#endif
     if (nullptr != schedulerThread)
     {
         delete schedulerThread;
     }
-
     for (auto eventWorker : workerArray)
     {
         delete eventWorker;
@@ -185,7 +173,6 @@ EventScheduler::Run(void)
     // Select thread according to SchedulerPolicy to execute event in Event Queue
     while (false == exit)
     {
-#if defined QOS_ENABLED_BE
         std::queue<EventSmartPtr> eventList = DequeueEvents();
         if (eventList.empty())
         {
@@ -208,25 +195,6 @@ EventScheduler::Run(void)
             workerArray[workerID]->EnqueueEvent(event);
             eventList.pop();
         }
-#else
-        EventSmartPtr event = eventQueue->DequeueEvent();
-        if (unlikely(nullptr == event))
-        {
-            usleep(1);
-            continue;
-        }
-
-        uint32_t workerID = policy->GetProperWorkerID();
-        if (unlikely(workerID >= workerCount))
-        {
-            PosEventId::Print(POS_EVENT_ID::EVTSCHDLR_INVALID_WORKER_ID,
-                EventLevel::WARNING);
-            EnqueueEvent(event);
-            continue;
-        }
-
-        workerArray[workerID]->EnqueueEvent(event);
-#endif
     }
 }
 
@@ -241,7 +209,6 @@ EventScheduler::Run(void)
 void
 EventScheduler::EnqueueEvent(EventSmartPtr input)
 {
-#if defined QOS_ENABLED_BE
     if (input->GetEventType() == BackendEvent_Unknown)
     {
         input->SetEventType(BackendEvent_FrontendIO);
@@ -281,12 +248,8 @@ EventScheduler::EnqueueEvent(EventSmartPtr input)
                 break;
         }
     }
-
-#else
-    eventQueue->EnqueueEvent(input);
-#endif
 }
-#if defined QOS_ENABLED_BE
+
 /* --------------------------------------------------------------------------*/
 /**
   * @Synopsis
@@ -356,5 +319,4 @@ EventScheduler::DequeueEvents(void)
     }
     return eventList;
 }
-#endif
 } // namespace pos

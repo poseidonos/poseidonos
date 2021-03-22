@@ -38,9 +38,7 @@
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/meta_const.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "src/io/backend_io/flush_read_completion.h"
 #include "src/io/backend_io/flush_submission.h"
 #include "src/logger/logger.h"
@@ -55,7 +53,6 @@ FlushReadSubmission::FlushReadSubmission(Stripe* stripe, std::string arrayName)
 {
 }
 
-#if defined QOS_ENABLED_BE
 FlushReadSubmission::FlushReadSubmission(Stripe* stripe, IIOSubmitHandler* handler, std::string arrayName)
 : Event(false, BackendEvent_Flush),
   stripe(stripe),
@@ -64,15 +61,6 @@ FlushReadSubmission::FlushReadSubmission(Stripe* stripe, IIOSubmitHandler* handl
 {
     SetEventType(BackendEvent_Flush);
 }
-#else
-FlushReadSubmission::FlushReadSubmission(Stripe* stripe, IIOSubmitHandler* handler, std::string arrayName)
-: Event(false),
-  stripe(stripe),
-  ioSubmitHandler(handler),
-  arrayName(arrayName)
-{
-}
-#endif
 
 FlushReadSubmission::~FlushReadSubmission(void)
 {

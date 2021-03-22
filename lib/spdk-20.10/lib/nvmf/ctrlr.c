@@ -74,7 +74,6 @@ static struct spdk_nvmf_custom_admin_cmd g_nvmf_custom_admin_cmd_hdlrs[SPDK_NVME
 
 static void _nvmf_request_complete(void *ctx);
 
-#if defined QOS_ENABLED_FE
 //This will be Changed to getting info from POS reactor info
 #define M_MAX_REACTOR (100)
 #define M_MAX_SUBSYSTEM (1024)
@@ -119,7 +118,6 @@ _nvmf_reactor_subsystem_connection_update(void *ctx)
 	}
 	spdk_nvmf_request_complete(req);
 }
-#endif
 
 static inline void
 nvmf_invalid_connect_response(struct spdk_nvmf_fabric_connect_rsp *rsp,
@@ -556,15 +554,16 @@ nvmf_ctrlr_add_io_qpair(void *ctx)
 	}
 
 	ctrlr_add_qpair_and_update_rsp(qpair, ctrlr, rsp);
-#if defined QOS_ENABLED_FE
-	if (spdk_likely(qpair->group->thread != spdk_get_thread())) {
-		spdk_thread_send_msg(qpair->group->thread, _nvmf_reactor_subsystem_connection_update, req);
-		return;
-	} else {
-		_nvmf_reactor_subsystem_connection_update(req);
-		return;
-	}
-#endif
+    if (spdk_likely(qpair->group->thread != spdk_get_thread()))
+    {
+        spdk_thread_send_msg(qpair->group->thread, _nvmf_reactor_subsystem_connection_update, req);
+        return;
+    }
+    else
+    {
+        _nvmf_reactor_subsystem_connection_update(req);
+        return;
+    }
 end:
 	spdk_nvmf_request_complete(req);
 }

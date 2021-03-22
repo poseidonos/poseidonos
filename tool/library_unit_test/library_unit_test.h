@@ -1,6 +1,5 @@
 #pragma once
 
-#define QOS_ENABLED_BE
 #define UNVME_BUILD
 
 #include <future>

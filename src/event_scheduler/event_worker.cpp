@@ -40,9 +40,7 @@
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_queue.h"
 #include "src/event_scheduler/event_scheduler.h"
-#if defined QOS_ENABLED_BE
 #include "src/qos/qos_manager.h"
-#endif
 
 namespace pos
 {

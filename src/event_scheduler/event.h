@@ -32,10 +32,8 @@
 
 #pragma once
 
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
 #include "src/include/event_priority.h"
-#endif
 
 namespace pos
 {
@@ -49,23 +47,17 @@ namespace pos
 class Event
 {
 public:
-#if defined QOS_ENABLED_BE
     Event(bool isFrontEndEvent = false, BackendEvent event = BackendEvent_Unknown);
     BackendEvent GetEventType(void);
     void SetFrontEnd(bool state);
     void SetEventType(BackendEvent event);
-#else
-    Event(bool isFrontEndEvent = false);
-#endif
     virtual ~Event(void);
     virtual bool Execute(void) = 0;
     bool IsFrontEnd(void);
 
 private:
     bool frontEndEvent;
-#if defined QOS_ENABLED_BE
     BackendEvent event;
-#endif
 };
 
 } // namespace pos

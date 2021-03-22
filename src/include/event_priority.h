@@ -34,7 +34,6 @@
 
 namespace pos
 {
-#if defined QOS_ENABLED_BE
 enum EventPriority
 {
     EventPriority_Start = 0,
@@ -45,6 +44,4 @@ enum EventPriority
     EventPriority_Count = EventPriority_End - EventPriority_Start,
     EventPriority_Unknown
 };
-#endif
 } // namespace pos
-

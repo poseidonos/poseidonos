@@ -40,9 +40,7 @@
 #include "mss_disk_place.h"
 #include "src/io_submit_interface/i_io_submit_handler.h"
 #include "src/event_scheduler/callback.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 
 #define INPLACE 1
 
@@ -63,9 +61,7 @@ public:
     : Callback(false),
       cbCxt(cb)
     {
-#if defined QOS_ENABLED_BE
         SetEventType(BackendEvent_MetaIO);
-#endif
     }
 
     ~MssIoCompletion(void) override

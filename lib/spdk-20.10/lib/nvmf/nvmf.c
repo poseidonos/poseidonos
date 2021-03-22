@@ -1010,12 +1010,9 @@ spdk_nvmf_qpair_disconnect(struct spdk_nvmf_qpair *qpair, nvmf_qpair_disconnect_
 	}
 	assert(qpair->state == SPDK_NVMF_QPAIR_ACTIVE);
 	nvmf_qpair_set_state(qpair, SPDK_NVMF_QPAIR_DEACTIVATING);
-#if defined QOS_ENABLED_FE
-	if (qpair->qid != 0) {
-		spdk_nvmf_set_reactor_subsystem_mapping(spdk_env_get_current_core(), qpair->ctrlr->subsys->id,
-							M_INVALID_SUBSYSTEM);
-	}
-#endif
+    if (qpair->qid != 0) {
+        spdk_nvmf_set_reactor_subsystem_mapping(spdk_env_get_current_core(), qpair->ctrlr->subsys->id, M_INVALID_SUBSYSTEM);
+    }
 	qpair_ctx = calloc(1, sizeof(struct nvmf_qpair_disconnect_ctx));
 	if (!qpair_ctx) {
 		SPDK_ERRLOG("Unable to allocate context for nvmf_qpair_disconnect\n");

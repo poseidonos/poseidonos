@@ -565,7 +565,6 @@ struct spdk_nvmf_host *spdk_nvmf_subsystem_get_next_host(struct spdk_nvmf_subsys
  */
 const char *spdk_nvmf_host_get_nqn(const struct spdk_nvmf_host *host);
 
-#if defined QOS_ENABLED_FE
 /**
  * Get the NQN ID of the specified subsystem.
  *
@@ -587,7 +586,6 @@ void spdk_nvmf_initialize_reactor_subsystem_mapping(void);
  *
  */
 uint32_t spdk_nvmf_get_reactor_subsystem_mapping(uint32_t reactorId, uint32_t subsystemId);
-#endif
 
 /**
  * Accept new connections on the address provided.

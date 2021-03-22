@@ -38,9 +38,7 @@
 #include "src/include/array_config.h"
 #include "src/include/pos_event_id.h"
 #include "src/include/branch_prediction.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "src/array_models/dto/partition_physical_size.h"
 #include "src/array/service/array_service_layer.h"
 #include "src/bio/ubio.h"
@@ -112,9 +110,7 @@ Raid1Rebuild::Read(void)
         }
 
         EventSmartPtr complete(new RebuildCompleted(this));
-#if defined QOS_ENABLED_BE
         complete->SetEventType(BackendEvent_MetadataRebuild);
-#endif
         EventSchedulerSingleton::Instance()->EnqueueEvent(complete);
         baseStripe = 0;
         return true;
@@ -167,10 +163,8 @@ Raid1Rebuild::Read(void)
         PhysicalBlkAddr addr = ctx->translate(fta);
         ubio->SetPba(addr);
         CallbackSmartPtr callback(new UpdateDataHandler(stripeId, ubio, this));
-#if defined QOS_ENABLED_BE
         callback->SetEventType(BackendEvent_MetadataRebuild);
         ubio->SetEventType(BackendEvent_MetadataRebuild);
-#endif
         ubio->SetCallback(callback);
         RebuildRead rebuildRead;
         int res = rebuildRead.Recover(ubio);
@@ -192,9 +186,7 @@ bool Raid1Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
     POS_TRACE_DEBUG(2831, "Raid1Rebuild::Write, target stripe:{}", targetId);
     CallbackSmartPtr event(
         new UpdateDataCompleteHandler(targetId, ubio, this));
-#if defined QOS_ENABLED_BE
     event->SetEventType(BackendEvent_MetadataRebuild);
-#endif
     IODispatcher* ioDisp = IODispatcherSingleton::Instance();
 
     ubio->ClearCallback();
@@ -223,9 +215,7 @@ bool Raid1Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
     if (currentTaskCnt == 0)
     {
         EventSmartPtr nextEvent(new Rebuilder(this));
-#if defined QOS_ENABLED_BE
         nextEvent->SetEventType(BackendEvent_MetadataRebuild);
-#endif
         EventSchedulerSingleton::Instance()->EnqueueEvent(nextEvent);
     }
     rebuildBuffer->ReturnBuffer(ubio->GetBuffer());

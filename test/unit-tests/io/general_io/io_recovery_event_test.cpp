@@ -9,9 +9,7 @@
 #include "src/event_scheduler/io_completer.h"
 #include "src/include/branch_prediction.h"
 #include "src/io/backend_io/rebuild_io/rebuild_read.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "test/unit-tests/event_scheduler/io_completer_mock.h"
 
 using namespace std;

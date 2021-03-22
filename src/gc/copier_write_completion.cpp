@@ -31,12 +31,9 @@
  */
 
 #include "src/gc/copier_write_completion.h"
-
 #include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/logger/logger.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "src/allocator/allocator.h"
 #include "src/allocator/wb_stripe_manager/stripe.h"
 #include "src/allocator_service/allocator_service.h"
@@ -70,10 +67,8 @@ GcFlushCompletion::GcFlushCompletion(Stripe* stripe, IStripeMap* stripeMap, Even
   eventScheduler(eventScheduler),
   arrayName(arrayName)
 {
-#if defined QOS_ENABLED_BE
     SetFrontEnd(false);
     SetEventType(BackendEvent_GC);
-#endif
     AIRLOG(LAT_BDEV_READ, 0, 0, stripe->GetVsid());
 
     IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);

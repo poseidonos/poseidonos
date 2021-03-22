@@ -34,16 +34,12 @@
 
 #include "src/allocator_service/allocator_service.h"
 #include "src/allocator/i_wbstripe_allocator.h"
-
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 
 #include <string>
 
 namespace pos
 {
-#if defined QOS_ENABLED_BE
 StripePutEvent::StripePutEvent(Stripe& stripe, StripeId prevLsid, std::string& arrayName)
 : Event(false, BackendEvent_Flush),
   stripe(stripe),
@@ -53,16 +49,6 @@ StripePutEvent::StripePutEvent(Stripe& stripe, StripeId prevLsid, std::string& a
 {
     SetEventType(BackendEvent_Flush);
 }
-#else
-StripePutEvent::StripePutEvent(Stripe& stripe, StripeId prevLsid, std::string& arrayName)
-: Event(false),
-  stripe(stripe),
-  prevLsid(prevLsid),
-  iWBStripeAllocator(AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName)),
-  arrayName(arrayName)
-{
-}
-#endif
 
 bool
 StripePutEvent::Execute(void)

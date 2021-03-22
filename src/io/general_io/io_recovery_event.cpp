@@ -38,9 +38,7 @@
 #include "src/event_scheduler/io_completer.h"
 #include "src/io/backend_io/rebuild_io/rebuild_read.h"
 #include "src/include/branch_prediction.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 
 namespace pos
 {
@@ -75,9 +73,7 @@ IoRecoveryEvent::Execute(void)
         case UbioDir::Read:
         {
             ubio->ResetError();
-#if defined QOS_ENABLED_BE
             ubio->SetEventType(BackendEvent_FrontendIO);
-#endif
             RebuildRead rebuildRead;
             int ret = rebuildRead.Recover(ubio);
             if (unlikely(0 != ret))

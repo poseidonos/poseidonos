@@ -50,9 +50,6 @@ class EventScheduler;
 class IOQueue;
 class Ubio;
 class UBlockDevice;
-#if defined QOS_ENABLED_BE
-class QosManager;
-#endif
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -74,10 +71,8 @@ public:
 
     void Run(void);
 
-#if defined QOS_ENABLED_BE
     void DecreaseCurrentOutstandingIoCount(int count);
     uint32_t GetWorkerId(void);
-#endif
 
 private:
     void _SubmitAsyncIO(UbioSmartPtr ubio);

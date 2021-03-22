@@ -34,7 +34,6 @@
 
 namespace pos
 {
-#if defined QOS_ENABLED_BE
 enum BackendEvent
 {
     BackendEvent_Start = 0,
@@ -48,5 +47,4 @@ enum BackendEvent
     BackendEvent_Count = BackendEvent_End - BackendEvent_Start,
     BackendEvent_Unknown
 };
-#endif
 } // namespace pos

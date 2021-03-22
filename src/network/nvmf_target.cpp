@@ -42,9 +42,7 @@
 #include "src/network/nvmf_volume_ibof.hpp"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
-#if defined QOS_ENABLED_FE
 #include "src/qos/qos_manager.h"
-#endif
 
 using namespace std;
 
@@ -401,7 +399,6 @@ NvmfTarget::GetVolumeNqn(struct spdk_nvmf_subsystem* subsystem)
     return spdk_nvmf_subsystem_get_nqn(subsystem);
 }
 
-#if defined QOS_ENABLED_FE
 uint32_t
 NvmfTarget::GetVolumeNqnId(const string& subnqn)
 {
@@ -412,7 +409,6 @@ NvmfTarget::GetVolumeNqnId(const string& subnqn)
     }
     return spdk_nvmf_subsystem_get_id(subsystem);
 }
-#endif
 
 void
 NvmfTarget::QosEnableDone(void* cbArg, int status)
@@ -422,9 +418,10 @@ NvmfTarget::QosEnableDone(void* cbArg, int status)
 void
 NvmfTarget::SetVolumeQos(const string& bdevName, uint64_t maxIops, uint64_t maxBw)
 {
-#if defined QOS_ENABLED_FE
-    // if POS QOS FE throttling is enabled , SPDK throttling is disabled
-#else
+    if (true == QosManagerSingleton::Instance()->IsFeQosEnabled())
+    {
+        return;
+    }
     uint64_t limits[SPDK_BDEV_QOS_NUM_RATE_LIMIT_TYPES];
     struct spdk_bdev* bdev = spdk_bdev_get_by_name(bdevName.c_str());
     if (bdev == nullptr)
@@ -439,7 +436,6 @@ NvmfTarget::SetVolumeQos(const string& bdevName, uint64_t maxIops, uint64_t maxB
     limits[SPDK_BDEV_QOS_R_BPS_RATE_LIMIT] = 0;
     limits[SPDK_BDEV_QOS_W_BPS_RATE_LIMIT] = 0;
     spdk_bdev_set_qos_rate_limits(bdev, limits, QosEnableDone, nullptr);
-#endif
 }
 
 bool

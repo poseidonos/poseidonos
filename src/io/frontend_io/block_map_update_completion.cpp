@@ -40,6 +40,7 @@
 #include "src/bio/volume_io.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/event_scheduler/event_scheduler.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {

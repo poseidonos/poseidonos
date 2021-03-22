@@ -37,7 +37,6 @@
 
 namespace pos_cli
 {
-#if defined QOS_ENABLED_FE
 class UpdateVolumeMinPolicyCommand : public Command
 {
 public:
@@ -45,5 +44,4 @@ public:
     ~UpdateVolumeMinPolicyCommand(void) override;
     string Execute(json& doc, string rid) override;
 };
-#endif
 }; // namespace pos_cli

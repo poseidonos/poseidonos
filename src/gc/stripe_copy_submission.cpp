@@ -38,9 +38,7 @@
 #include "src/gc/stripe_copier.h"
 #include "src/logger/logger.h"
 #include "src/event_scheduler/event_scheduler.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 
 namespace pos
 {
@@ -52,9 +50,7 @@ StripeCopySubmission::StripeCopySubmission(StripeId baseStripeId,
   copyIndex(copyIndex),
   isLoaded(false)
 {
-#if defined QOS_ENABLED_BE
     SetEventType(BackendEvent_GC);
-#endif
 }
 
 StripeCopySubmission::~StripeCopySubmission(void)

@@ -107,15 +107,11 @@ MergedIO::Process(std::string& arrayName)
         ubio->SetPba(startPba);
 
         CallbackSmartPtr event(new InternalReadCompletion(blockCount));
-#if defined QOS_ENABLED_BE
         event->SetEventType(callback->GetEventType());
-#endif
         event->SetCallee(callback);
         ubio->SetCallback(event);
 
-#if defined QOS_ENABLED_BE
         ubio->SetEventType(callback->GetEventType());
-#endif
         IODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
         if (ioDispatcher->Submit(ubio) < 0)
         {

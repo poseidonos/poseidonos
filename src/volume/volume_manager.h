@@ -42,10 +42,7 @@
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/state/interface/i_state_control.h"
 #include "src/state/interface/i_state_observer.h"
-#if defined QOS_ENABLED_FE
 #include "src/qos/qos_common.h"
-#endif
-
 #include "src/state/state_manager.h"
 #include "src/volume/volume_service.h"
 #include "src/volume/volume_list.h"
@@ -74,10 +71,8 @@ public:
     int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw) override;
     int Rename(std::string oldname, std::string newname) override;
     int Resize(std::string name, uint64_t newsize) override;
-#if defined QOS_ENABLED_FE
     int UpdateVolumePolicy(std::string volName, qos_vol_policy volPolicy) override;
     qos_vol_policy GetVolumePolicy(std::string volName) override;
-#endif
     void DetachVolumes(void) override;
     bool CheckVolumeIdle(int volId) override;
 

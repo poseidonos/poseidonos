@@ -51,9 +51,10 @@
 #include "src/include/io_error_type.h"
 #include "src/include/memory.h"
 #include "src/include/smart_ptr_type.h"
-#if defined QOS_ENABLED_BE
+#include "src/include/io_error_type.h"
+#include "src/bio/data_buffer.h"
+#include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event.h"
-#endif
 
 struct ibof_io;
 
@@ -141,16 +142,11 @@ public:
     bool NeedRecovery(void);
 
     std::string& GetArrayName(void);
-
-#if defined QOS_ENABLED_BE
     void SetEventType(BackendEvent event);
     BackendEvent GetEventType(void);
-#endif
 
 protected:
-#if defined QOS_ENABLED_BE
     BackendEvent eventIoType;
-#endif
     void _ReflectSplit(UbioSmartPtr newUbio, uint32_t sectors,
         bool removalFromTail);
 

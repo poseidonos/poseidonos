@@ -40,11 +40,7 @@ EventScheduler::EventScheduler(void)
   exit(false),
   workerCount(UINT32_MAX),
   schedulerThread(nullptr),
-#if defined QOS_ENABLED_BE
   eventQueue {0, }
-#else
-  eventQueue(nullptr)
-#endif
 {
     CPU_ZERO(&schedulerCPUSet);
 }

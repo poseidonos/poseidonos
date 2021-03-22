@@ -33,9 +33,7 @@
 #include "src/gc/copier_read_completion.h"
 
 #include "Air.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "src/gc/copier_write_completion.h"
 #include "src/io/frontend_io/write_submission.h"
 #include "src/include/branch_prediction.h"

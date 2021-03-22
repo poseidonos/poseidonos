@@ -34,15 +34,9 @@
 
 namespace pos
 {
-#if defined QOS_ENABLED_BE
 Event::Event(bool isFrontEndEvent, BackendEvent event)
 {
 }
-#else
-Event::Event(bool isFrontEndEvent)
-{
-}
-#endif
 Event::~Event(void)
 {
 }
@@ -53,11 +47,9 @@ Event::IsFrontEnd(void)
     return false;
 }
 
-#if defined QOS_ENABLED_BE
 BackendEvent
 Event::GetEventType(void)
 {
     return BackendEvent_Unknown;
 }
-#endif
 } // namespace pos

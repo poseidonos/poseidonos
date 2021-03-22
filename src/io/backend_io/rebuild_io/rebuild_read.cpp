@@ -87,10 +87,8 @@ RebuildRead::Recover(UbioSmartPtr ubio)
 
     rebuildUbio->SetCallback(rebuildCompletion);
     rebuildUbio->SetOriginUbio(ubio);
-#if defined QOS_ENABLED_BE
     rebuildCompletion->SetEventType(ubio->GetEventType());
     rebuildUbio->SetEventType(ubio->GetEventType());
-#endif
     list<UbioSmartPtr> splitList;
     for (auto pba : rm.srcAddr)
     {
@@ -101,10 +99,8 @@ RebuildRead::Recover(UbioSmartPtr ubio)
         CallbackSmartPtr event(
             new RebuildReadIntermediateCompleteHandler(split));
         event->SetCallee(rebuildCompletion);
-#if defined QOS_ENABLED_BE
         event->SetEventType(ubio->GetEventType());
         split->SetEventType(ubio->GetEventType());
-#endif
         split->SetCallback(event);
         split->SetOriginUbio(rebuildUbio);
         splitList.push_back(split);

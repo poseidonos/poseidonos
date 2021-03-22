@@ -45,13 +45,13 @@
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/io/frontend_io/aio_submission_adapter.h"
+#include "src/master_context/config_manager.h"
+#include "src/include/branch_prediction.h"
 namespace pos
 {
 // SPDK MANAGER INITIALIZATIONS
-#if defined QOS_ENABLED_FE
 std::atomic<bool> QosSpdkManager::registerQosPollerDone(false);
 std::atomic<bool> QosSpdkManager::unregistrationComplete(false);
-#endif
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -76,8 +76,11 @@ QosSpdkManager::GetSpdkPoller(uint32_t reactor)
 void
 QosSpdkManager::PollerUnregister(void* arg1, void* arg2)
 {
-#if defined QOS_ENABLED_FE
     QosSpdkManager* spdkManager = static_cast<QosSpdkManager*>(arg1);
+    if (false == spdkManager->IsFeQosEnabled())
+    {
+        return;
+    }
     uint32_t reactor = spdkManager->GetReactorId();
     spdk_poller* poller = spdkManager->GetSpdkPoller(reactor);
     EventFrameworkApi::SpdkPollerUnregister(&poller);
@@ -91,7 +94,6 @@ QosSpdkManager::PollerUnregister(void* arg1, void* arg2)
         spdkManager->SetReactorId(nextReactor);
         EventFrameworkApi::SendSpdkEvent(nextReactor, PollerUnregister, spdkManager, nullptr);
     }
-#endif
 }
 
 /* --------------------------------------------------------------------------*/
@@ -104,7 +106,10 @@ QosSpdkManager::PollerUnregister(void* arg1, void* arg2)
 void
 QosSpdkManager::Finalize(void)
 {
-#if defined QOS_ENABLED_FE
+    if (false == feQosEnabled)
+    {
+        return;
+    }
     reactorId = EventFrameworkApi::GetFirstReactor();
     bool succeeded = EventFrameworkApi::SendSpdkEvent(reactorId, QosSpdkManager::PollerUnregister, this, nullptr);
     if (unlikely(false == succeeded))
@@ -116,7 +121,6 @@ QosSpdkManager::Finalize(void)
     {
         usleep(1);
     }
-#endif
 }
 
 /* --------------------------------------------------------------------------*/
@@ -130,9 +134,10 @@ QosSpdkManager::Finalize(void)
 void
 QosManager::_Finalize(void)
 {
-#if defined QOS_ENABLED_FE
-    spdkManager->Finalize();
-#endif
+    if (true == feQosEnabled)
+    {
+        spdkManager->Finalize();
+    }
     quitQos = true;
     if (nullptr != qosThread)
     {
@@ -151,7 +156,10 @@ QosManager::_Finalize(void)
 void
 QosSpdkManager::_SetupQosReactorPoller(void)
 {
-#if defined QOS_ENABLED_FE
+    if (false == feQosEnabled)
+    {
+        return;
+    }
     EventFrameworkApi::SpdkNvmfInitializeReactorSubsystemMapping();
     registerQosPollerDone = false;
     reactorId = EventFrameworkApi::GetFirstReactor();
@@ -168,7 +176,6 @@ QosSpdkManager::_SetupQosReactorPoller(void)
             usleep(1);
         }
     }
-#endif
 }
 
 /* --------------------------------------------------------------------------*/
@@ -219,8 +226,11 @@ QosSpdkManager::GetReactorData(uint32_t reactor)
 void
 QosSpdkManager::RegisterQosPoller(void* arg1, void* arg2)
 {
-#if defined QOS_ENABLED_FE
     QosSpdkManager* spdkManager = static_cast<QosSpdkManager*>(arg1);
+    if (false == spdkManager->IsFeQosEnabled())
+    {
+        return;
+    }
     uint32_t reactor = spdkManager->GetReactorId();
     poller_structure& pollerData = spdkManager->GetReactorData(reactor);
     pollerData.qosTimeSlice = IBOF_QOS_TIMESLICE_IN_USEC * EventFrameworkApi::SpdkGetTicksHz() / SPDK_SEC_TO_USEC;
@@ -247,7 +257,6 @@ QosSpdkManager::RegisterQosPoller(void* arg1, void* arg2)
             registerQosPollerDone = true;
         }
     }
-#endif
 }
 
 /* --------------------------------------------------------------------------*/
@@ -338,7 +347,10 @@ QosManager::AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, ibof_io* vo
 void
 QosVolumeManager::AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, ibof_io* volIo)
 {
-#if defined QOS_ENABLED_FE
+    if (false == feQosEnabled)
+    {
+        return;
+    }
     uint32_t reactorId = EventFrameworkApi::GetCurrentReactor();
     uint32_t volId = volIo->volume_id;
     uint64_t currentBw = 0;
@@ -372,7 +384,6 @@ QosVolumeManager::AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, ibof_
         }
     }
     volumeQosParam[reactorId][volId].currentBW = currentBw;
-#endif
 }
 
 /* --------------------------------------------------------------------------*/
@@ -457,15 +468,24 @@ QosManager::QosManager()
 : quitQos(false),
   qosThread(nullptr)
 {
-    spdkManager = new QosSpdkManager();
-    policyManager = new QosPolicyManager();
-    qosVolumeManager = new QosVolumeManager(policyManager);
-    qosEventManager = new QosEventManager(policyManager);
+    feQosEnabled = false;
     usedStripeCnt = 0;
     for (uint32_t volId = 0; volId < MAX_VOLUME_COUNT; volId++)
     {
         wtUpdate[volId] = 0;
     }
+    ConfigManager& configManager = *ConfigManagerSingleton::Instance();
+    bool enabled = false;
+    int ret = configManager.GetValue("fe_qos", "enable", &enabled,
+        CONFIG_TYPE_BOOL);
+    if (ret == (int)POS_EVENT_ID::SUCCESS)
+    {
+        feQosEnabled = enabled;
+    }
+    spdkManager = new QosSpdkManager(feQosEnabled);
+    policyManager = new QosPolicyManager();
+    qosVolumeManager = new QosVolumeManager(policyManager, feQosEnabled);
+    qosEventManager = new QosEventManager(policyManager);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -505,12 +525,24 @@ QosManager::Initialize(void)
         eventLog[event] = M_RESET_TO_ZERO;
         oldLog[event] = M_RESET_TO_ZERO;
     }
-
     qosThread = new std::thread(&QosManager::_QosWorkerPoller, this);
+    if (true == feQosEnabled)
+    {
+        spdkManager->Initialize();
+    }
+}
 
-#if defined QOS_ENABLED_FE
-    spdkManager->Initialize();
-#endif
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+QosManager::IsFeQosEnabled(void)
+{
+    return feQosEnabled;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -538,11 +570,9 @@ QosManager::_QosWorkerPoller(void)
 {
     sched_setaffinity(0, sizeof(cpuSet), &cpuSet);
     pthread_setname_np(pthread_self(), "QoSWorker");
-#if defined QOS_ENABLED_FE
     std::vector<int> volList;
     uint32_t activeConnectionCtr = 0;
     uint64_t endTimeStamp = M_RESET_TO_ZERO;
-#endif
     while (1)
     {
         if (quitQos == true)
@@ -550,50 +580,51 @@ QosManager::_QosWorkerPoller(void)
             break;
         }
         policyManager->CopyEventPolicy();
-#if defined QOS_ENABLED_FE
-        policyManager->CopyVolumePolicy();
-        do
+        if (true == feQosEnabled)
         {
-            activeConnectionCtr = M_RESET_TO_ZERO;
-            volReactorMap.clear();
-            reactorVolMap.clear();
-            for (uint32_t reactor = 0; reactor < M_MAX_REACTORS; reactor++)
+            policyManager->CopyVolumePolicy();
+            do
             {
-                for (uint32_t subsys = 0; subsys < M_MAX_SUBSYSTEMS; subsys++)
+                activeConnectionCtr = M_RESET_TO_ZERO;
+                volReactorMap.clear();
+                reactorVolMap.clear();
+                for (uint32_t reactor = 0; reactor < M_MAX_REACTORS; reactor++)
                 {
-                    uint32_t reactorSubsystemMapping = EventFrameworkApi::SpdkNvmfGetReactorSubsystemMapping(reactor, subsys);
-                    if (reactorSubsystemMapping != M_INVALID_SUBSYSTEM)
+                    for (uint32_t subsys = 0; subsys < M_MAX_SUBSYSTEMS; subsys++)
                     {
-                        volList = _GetVolumeFromActiveSubsystem(subsys);
-                        for (uint32_t index = 0; index < volList.size(); index++)
+                        uint32_t reactorSubsystemMapping = EventFrameworkApi::SpdkNvmfGetReactorSubsystemMapping(reactor, subsys);
+                        if (reactorSubsystemMapping != M_INVALID_SUBSYSTEM)
                         {
-                            activeConnectionCtr++;
-                            uint32_t volumeId = volList[index];
-                            _UpdatePolicyManagerActiveVolumeData(reactor, subsys, volumeId);
+                            volList = _GetVolumeFromActiveSubsystem(subsys);
+                            for (uint32_t index = 0; index < volList.size(); index++)
+                            {
+                                activeConnectionCtr++;
+                                uint32_t volumeId = volList[index];
+                                _UpdatePolicyManagerActiveVolumeData(reactor, subsys, volumeId);
+                            }
                         }
                     }
                 }
-            }
-            if ((activeConnectionCtr == 0) || (false == policyManager->VolumeMinimumPolicyInEffect()))
+                if ((activeConnectionCtr == 0) || (false == policyManager->VolumeMinimumPolicyInEffect()))
+                {
+                    break;
+                }
+            } while (!((activeConnectionCtr <= policyManager->GetActiveConnectionsCount()) && activeConnectionCtr));
+            _UpdateMaxVolumeWeightReactorVolume();
+            if (activeConnectionCtr == 0)
             {
-                break;
+                policyManager->ResetAll();
+                continue;
             }
-        } while (!((activeConnectionCtr <= policyManager->GetActiveConnectionsCount()) && activeConnectionCtr));
-        _UpdateMaxVolumeWeightReactorVolume();
-        if (activeConnectionCtr == 0)
-        {
-            policyManager->ResetAll();
-            continue;
+            if (false == policyManager->VolumeMinimumPolicyInEffect())
+            {
+                continue;
+            }
+            else
+            {
+                _HandleVolumeMinimumPolicy(endTimeStamp);
+            }
         }
-        if (false == policyManager->VolumeMinimumPolicyInEffect())
-        {
-            continue;
-        }
-        else
-        {
-            _HandleVolumeMinimumPolicy(endTimeStamp);
-        }
-#endif
     }
 }
 
@@ -1141,7 +1172,10 @@ QosVolumeManager::VolumeMounted(std::string volName, std::string subnqn, int vol
 bool
 QosVolumeManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName)
 {
-#if defined QOS_ENABLED_FE
+    if (false == feQosEnabled)
+    {
+        return true;
+    }
     uint32_t nqnId = EventFrameworkApi::GetAttachedSubsystemId(volName.c_str());
     uint32_t i = 0;
     for (i = 0; i < nqnVolumeMap[nqnId].size(); i++)
@@ -1151,7 +1185,6 @@ QosVolumeManager::VolumeUnmounted(std::string volName, int volID, std::string ar
             nqnVolumeMap[nqnId].erase(nqnVolumeMap[nqnId].begin() + i);
         }
     }
-#endif
     return true;
 }
 
@@ -1269,11 +1302,14 @@ QosSpdkManager::SpdkVolumeQosPoller(void* arg1)
 int
 QosManager::VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter *aioSubmission)
 {
-#if defined QOS_ENABLED_FE
-    return qosVolumeManager->VolumeQosPoller(param, aioSubmission);
-#else
-    return 0;
-#endif
+    if (true == feQosEnabled)
+    {
+        return qosVolumeManager->VolumeQosPoller(param, aioSubmission);
+    }
+    else
+    {
+        return 0;
+    }
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -1285,8 +1321,11 @@ QosManager::VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter *ai
 int
 QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissionAdapter *aioSubmission)
 {
+    if (false == feQosEnabled)
+    {
+        return 0;
+    }
     uint32_t retVal = 0;
-#if defined QOS_ENABLED_FE
     uint32_t reactor = param->id;
     uint64_t now = EventFrameworkApi::SpdkGetTicks();
     ibof_io* queuedVolumeIo = nullptr;
@@ -1336,7 +1375,6 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
             }
         }
     }
-#endif
     return retVal;
 }
 
@@ -1802,10 +1840,11 @@ QosManager::GetVolumeTotalConnection(uint32_t volId)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosVolumeManager::QosVolumeManager(QosPolicyManager* policyMgr)
-: VolumeEvent("QosManager", "")
+QosVolumeManager::QosVolumeManager(QosPolicyManager* policyMgr, bool feQos)
+  : VolumeEvent("QosManager", ""),
+    qosPolicyManager(policyMgr),
+    feQosEnabled(feQos)
 {
-    qosPolicyManager = policyMgr;
     for (uint32_t reactor = 0; reactor < M_MAX_REACTORS; reactor++)
     {
         for (uint32_t volId = 0; volId < MAX_VOLUME_COUNT; volId++)
@@ -1902,13 +1941,14 @@ QosEventManager::~QosEventManager(void)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosSpdkManager::QosSpdkManager(void)
+QosSpdkManager::QosSpdkManager(bool feQos)
+  : reactorId(M_MAX_REACTORS + 1),
+    feQosEnabled(feQos)
 {
     for (int i = 0; i < M_MAX_REACTORS; i++)
     {
         spdkPollers[i] = nullptr;
     }
-    reactorId = M_MAX_REACTORS + 1;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -1946,6 +1986,19 @@ void
 QosSpdkManager::SetReactorId(uint32_t id)
 {
     reactorId = id;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+QosSpdkManager::IsFeQosEnabled(void)
+{
+    return feQosEnabled;
 }
 
 } // namespace pos

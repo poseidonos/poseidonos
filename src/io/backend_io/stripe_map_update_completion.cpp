@@ -37,12 +37,11 @@
 #include "src/allocator_service/allocator_service.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/branch_prediction.h"
-#if defined QOS_ENABLED_BE
 #include "src/include/backend_event.h"
-#endif
 #include "src/io/backend_io/flush_completion.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/gc/copier_write_completion.h"
+#include "src/logger/logger.h"
 
 #include <string>
 
@@ -58,7 +57,6 @@ StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe, std::s
 {
 }
 
-#if defined QOS_ENABLED_BE
 StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe,
     ISegmentCtx* iSegmentCtx,
     IStripeMap* iStripeMap,
@@ -75,23 +73,6 @@ StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe,
 {
     SetEventType(BackendEvent_Flush);
 }
-#else
-StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe,
-    ISegmentCtx* iSegmentCtx,
-    IStripeMap* iStripeMap,
-    EventScheduler* eventScheduler,
-    std::string& arrayName,
-    bool isGc)
-: Event(false),
-  stripe(inputStripe),
-  iSegmentCtx(iSegmentCtx),
-  iStripeMap(iStripeMap),
-  eventScheduler(eventScheduler),
-  isGc(isGc),
-  arrayName(arrayName)
-{
-}
-#endif
 
 StripeMapUpdateCompletion::~StripeMapUpdateCompletion(void)
 {

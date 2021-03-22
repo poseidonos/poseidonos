@@ -46,8 +46,6 @@
 #include "src/logger/logger.h"
 #include "src/io_scheduler/io_queue.h"
 #include "src/include/branch_prediction.h"
-
-#if defined QOS_ENABLED_BE
 #include "spdk/event.h"
 #include "io_worker_submission_notifier.h"
 #include "src/device/base/ublock_device_submission_adapter.h"
@@ -55,7 +53,6 @@
 #include "src/qos/qos_common.h"
 #include "src/qos/qos_manager.h"
 #include "src/event_scheduler/event.h"
-#endif
 
 namespace pos
 {
@@ -188,11 +185,9 @@ IOWorker::Run(void)
             _SubmitAsyncIO(ubio);
             _DoPeriodicJob();
             ubio = ioQueue->DequeueUbio();
-#if defined QOS_ENABLED_BE
             UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
             currentOutstandingIOCount -=
                 QosManagerSingleton::Instance()->EventQosPoller(id, &ublockDeviceSubmission);
-#endif
         }
         _DoPeriodicJob();
         usleep(1);
@@ -235,7 +230,6 @@ IOWorker::_HandleDeviceOperation(void)
     operation->SetDone();
 }
 
-#if defined QOS_ENABLED_BE
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis Decrement the current outstanding io count
@@ -248,6 +242,7 @@ IOWorker::DecreaseCurrentOutstandingIoCount(int count)
 {
     currentOutstandingIOCount -= count;
 }
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis Decrement the current outstanding io count
@@ -260,7 +255,6 @@ IOWorker::GetWorkerId(void)
 {
     return id;
 }
-#endif
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -273,16 +267,10 @@ void
 IOWorker::_SubmitAsyncIO(UbioSmartPtr ubio)
 {
     currentOutstandingIOCount++;
-#if defined QOS_ENABLED_BE
     UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
     IOWorkerSubmissionNotifier ioWorkerSubmissionNotifier(this);
     QosManagerSingleton::Instance()->SubmitAsyncIO(&ublockDeviceSubmission,
                         &ioWorkerSubmissionNotifier, id, ubio);
-#else
-    int completionCount = 0;
-    completionCount = ubio->GetUBlock()->SubmitAsyncIO(ubio);
-    currentOutstandingIOCount -= completionCount;
-#endif
 }
 
 /* --------------------------------------------------------------------------*/
