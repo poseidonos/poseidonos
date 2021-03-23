@@ -21,7 +21,7 @@ BINDIR = $(TOP)/bin
 #################################################
 # nvme driver : unvme, libaio
 
-POS_VERSION = v0.9.11
+POS_VERSION = v0.9.12
 
 DEFINE += -DPOS_VERSION=\"$(POS_VERSION)\"
 DEFINE += -DUNVME_BUILD
