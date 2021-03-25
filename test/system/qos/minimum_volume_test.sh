@@ -367,14 +367,16 @@ start_pos(){
 # Setup pos single array
 ###################################################
 setup_pos_single_array(){
+    IRQ_CORE="46-52"
     if [ ${PM_MACHINE} -eq 1 ]; then
         SUBSYSTEM=8
         NR_VOLUME=8
     else
         SUBSYSTEM=4
         NR_VOLUME=4
+	IRQ_CORE="11"
     fi
-    texecc $TARGET_ROOT_DIR/test/system/io_path/setup_ibofos_nvmf_volume.sh -c 1 -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM -v $NR_VOLUME -u "unvme-ns-0,unvme-ns-1,unvme-ns-2" -p "unvme-ns-3"
+    texecc $TARGET_ROOT_DIR/test/system/io_path/setup_ibofos_nvmf_volume.sh -q $IRQ_CORE -c 1 -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM -v $NR_VOLUME -u "unvme-ns-0,unvme-ns-1,unvme-ns-2" -p "unvme-ns-3"
     EXPECT_PASS "setup_ibofos_nvmf_volume.sh" $?
 }
 
@@ -434,6 +436,11 @@ launch_fio()
     printValue=${10}
     volData=${11}
     multiarray=${12}
+    cpu_list="4"
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        cpu_list="53-55"
+    fi
+
     echo -e "============================================================"
     echo -e "=================  FIO CONFIGURATION  ======================"
     echo -e "============================================================"
@@ -452,9 +459,9 @@ launch_fio()
 
     if [ $run_background -eq 1 ]; then
         print_info "FIO Running in background"
-        $INITIATOR_ROOT_DIR/test/system/qos/qos_fio_bench.py --file_num="${file_num}" --numjobs="${num_job}" --iodepth="${io_depth}" --bs="${bs}" --readwrite="${readwrite}" --run_time="${runtime}" --group_reporting="${group}" --workload_type="${workload}" --traddr="$TARGET_IP" --trtype="$TRANSPORT" --port="$PORT" --multiArray=${multiarray}  & >> $INITIATOR_ROOT_DIR/test/system/qos/qos_fio.log
+        $INITIATOR_ROOT_DIR/test/system/qos/qos_fio_bench.py --file_num="${file_num}" --numjobs="${num_job}" --iodepth="${io_depth}" --bs="${bs}" --readwrite="${readwrite}" --run_time="${runtime}" --group_reporting="${group}" --workload_type="${workload}" --traddr="$TARGET_IP" --trtype="$TRANSPORT" --port="$PORT" --multiArray=${multiarray} --cpus_allowed=${cpu_list} & >> $INITIATOR_ROOT_DIR/test/system/qos/qos_fio.log
     else
-        $INITIATOR_ROOT_DIR/test/system/qos/qos_fio_bench.py --file_num="${file_num}" --numjobs="${num_job}" --iodepth="${io_depth}" --bs="${bs}" --readwrite="${readwrite}" --run_time="${runtime}" --group_reporting="${group}" --workload_type="${workload}" --traddr="$TARGET_IP" --trtype="$TRANSPORT" --port="$PORT" --multiArray=${multiarray} >> $INITIATOR_ROOT_DIR/test/system/qos/qos_fio.log
+        $INITIATOR_ROOT_DIR/test/system/qos/qos_fio_bench.py --file_num="${file_num}" --numjobs="${num_job}" --iodepth="${io_depth}" --bs="${bs}" --readwrite="${readwrite}" --run_time="${runtime}" --group_reporting="${group}" --workload_type="${workload}" --traddr="$TARGET_IP" --trtype="$TRANSPORT" --port="$PORT" --multiArray=${multiarray} --cpus_allowed=${cpu_list} >> $INITIATOR_ROOT_DIR/test/system/qos/qos_fio.log
     fi
 
     EXPECT_PASS "FIO Launch" $?
@@ -1818,7 +1825,12 @@ run_fio_tests(){
 # ENABLE FE QOS
 ###################################################
 enable_fe_qos(){
-    texecc $TARGET_ROOT_DIR/test/system/qos/fe_qos_config.py -s true -f true -i low
+
+    if [ ${PM_MACHINE} -eq 1 ]; then
+    	texecc $TARGET_ROOT_DIR/test/system/qos/fe_qos_config.py -s true -f true -v false -i low
+    else
+    	texecc $TARGET_ROOT_DIR/test/system/qos/fe_qos_config.py -s true -f true -v true -i low
+    fi
     texecc sleep 10s
 }
 
@@ -1826,7 +1838,11 @@ enable_fe_qos(){
 # DISABLE FE QOS
 ###################################################
 disable_fe_qos(){
-    texecc $TARGET_ROOT_DIR/test/system/qos/fe_qos_config.py -s true -f false -i low
+    if [ ${PM_MACHINE} -eq 1 ]; then
+        texecc $TARGET_ROOT_DIR/test/system/qos/fe_qos_config.py -s true -f false -v false -i low
+    else
+        texecc $TARGET_ROOT_DIR/test/system/qos/fe_qos_config.py -s true -f false -v true -i low
+    fi
     texecc sleep 10s
 }
 

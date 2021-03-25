@@ -75,7 +75,7 @@ run_time=['20']
 mix=['100']
 
 # cpuset and affinity to run fio
-cpus_allowed=['4']
+cpus_allowed = ['53-55']
 
 # iter_num parameter is used to run the test multiple times.
 # set iter_num = ['1', '2', '3'] to repeat each test 3 times

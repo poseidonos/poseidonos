@@ -2,15 +2,20 @@
 
 import getopt
 import sys
+import os
 import json
 
 setConfig = "true"
 feEnable = "true"
 rebuildImpact = "low"
+conf_file = "/../../../config/ibofos_for_perf_ci.conf"
+
+current_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(1, current_path + "./")
 
 
 def config_change(feEnable, impact):
-    with open("/etc/pos/pos.conf", "r") as jsonFile:
+    with open(current_path + conf_file, "r") as jsonFile:
         data = json.load(jsonFile)
 
     with open("default_ibofos.conf", "w") as jsonFile:
@@ -45,15 +50,13 @@ def config_reset():
 
 def help():
     print('Use below command:')
-    print('config.py -s true/false -f true/false -i high/low')
+    print('config.py -s true/false -v true/false -f true/false -i high/low')
 
 
 def main(argv):
-    if (6 != len(argv)):
-        help()
-        sys.exit(2)
+    global conf_file
     try:
-        opts, args = getopt.getopt(argv, "hs:f:i:", ["set", "fe=", "impact="])
+        opts, args = getopt.getopt(argv, "hs:v:f:i:", ["set", "fe=", "impact=", "vm="])
     except getopt.GetoptError:
         help()
         sys.exit(2)
@@ -61,6 +64,9 @@ def main(argv):
         if opt == '-h':
             help()
             sys.exit()
+        elif opt in ("-v", "--vm"):
+            if ("true" == arg):
+                conf_file = "/../../../config/pos.conf"
         elif opt in ("-s", "--set"):
             if ("true" != arg and "false" != arg):
                 help()
