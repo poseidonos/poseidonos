@@ -84,7 +84,7 @@ VolumeDetacher::DoAll(void)
     {
         int ret = (int)POS_EVENT_ID::VOL_DETACH_FAIL;
         POS_TRACE_ERROR(ret,
-            "Internal error during detach volumes. Some of them might be unmounted");
+            "Detach volume failed due to internal error or unmount timeout. Only some of them might be unmounted");
     }
 }
 } // namespace pos

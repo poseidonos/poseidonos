@@ -36,6 +36,7 @@
 #include <string>
 
 #include "spdk/event.h"
+#include "src/lib/system_timeout_checker.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
@@ -297,18 +298,15 @@ NvmfVolumePos::VolumeDetached(vector<int>& volList, string arrayName)
     }
 }
 
-uint32_t
-NvmfVolumePos::VolumeDetachCompleted(void)
-{
-    return volumeDetachedCnt;
-}
-
 bool
 NvmfVolumePos::WaitRequestedVolumesDetached(uint32_t volCnt)
 {
-    while (volumeDetachedCnt != volCnt)
+    SystemTimeoutChecker timeChecker;
+    uint64_t time = 15 * 1000000000ULL;
+    timeChecker.SetTimeout(time);
+    while ((volumeDetachedCnt < volCnt))
     {
-        if (detachFailed == true)
+        if ((true == detachFailed) || (true == timeChecker.CheckTimeout()))
         {
             volumeDetachedCnt = 0;
             detachFailed = false;
