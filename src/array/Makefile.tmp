@@ -1,0 +1,14 @@
+ARRAY_DIR=$(CURDIR)
+IBOF_DIR=$(abspath $(ARRAY_DIR)/../..)
+
+OBJDIR = $(abspath $(IBOF_DIR)/obj)
+
+CPPFLAGS = -g -Wall -O2 -std=c++14 
+
+INCLUDE += 
+
+SRCS += $(wildcard *.cpp) \
+		device/array_device_manager.cpp \
+		meta/array_meta_manager.cpp
+
+include $(IBOF_DIR)/Makefile.rules

@@ -1,0 +1,3 @@
+pub_sub_test.cpp shows how to publish and subscriber for an async event.
+In the example, Publisher:Subscriber = 2:2 mapping.
+Hence, 2 Publishers send notification to 2 subscibers registered.

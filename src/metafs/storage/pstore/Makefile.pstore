@@ -1,0 +1,16 @@
+DEFINE += -DWITH_PSTORE_STORAGE
+
+#VPATH += \
+    ./storage/pstore/unit_test \
+
+ifeq ($(ALL_IBOFOS_OBJS_INCLUDE), 1)
+DEFINE += -DSTANDALONE_START_IBOF
+#SRCS += start_ibof.cpp
+endif
+
+DEFINE += -DMSS_PSTORE_EN
+
+MSS_SRCS += \
+	mss_disk_place.cpp \
+	mss_disk_inplace.cpp \
+	mss_on_disk.cpp

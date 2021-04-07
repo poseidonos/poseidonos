@@ -1,0 +1,38 @@
+IBOF_DIR = ../..
+UT_INCLUDE=-I$(IBOF_DIR) -I$(IBOF_DIR)/lib 
+
+UT_OBJDIR_REL=obj_output
+UT_OBJDIR=$(abspath $(UT_OBJDIR_REL))
+
+TEST_SRCS = \
+$(IBOF_DIR)/src/volume/volume_manager.cpp \
+$(IBOF_DIR)/src/volume/volume_list.cpp \
+$(IBOF_DIR)/src/volume/volume_base_stub.cpp \
+$(IBOF_DIR)/src/volume/volume.cpp \
+$(IBOF_DIR)/src/volume/volume_name_policy.cpp \
+$(IBOF_DIR)/src/volume/volume_meta_intf_stub.cpp \
+$(IBOF_DIR)/src/helper/json_helper.cpp \
+$(IBOF_DIR)/src/logger/logger.cpp \
+$(IBOF_DIR)/src/sys_info/space_info_stub.cpp \
+$(IBOF_DIR)/src/sys_event/volume_event_publisher.cpp \
+$(IBOF_DIR)/src/volume/volume_test.cpp
+
+UT_CPPFLAGS = -g ${UT_INCLUDE} -Wall -Wunused -std=c++14 --coverage
+UT_LFLAGS += -lgmock_main -lpthread 
+OUTPUT = volume_ut
+
+TARGET_OBJECTS = $(TEST_SRCS:.cpp=.o)
+
+ut: $(UT_OBJDIR) $(TARGET_OBJECTS)
+	g++ $(UT_INCLUDE) $(UT_OBJDIR)/*.o ${UT_CPPFLAGS} -o ${OUTPUT} $(UT_LFLAGS)
+
+%.o: %.cpp
+	@echo "Compling [$(<F)]..."
+	@g++ $(UT_INCLUDE) $(UT_CPPFLAGS) -c $< -o $(UT_OBJDIR)/$(notdir $@)
+
+$(UT_OBJDIR):
+	mkdir -p $@
+
+clean:
+	rm -rf ${OUTPUT} ${UT_OBJDIR}
+

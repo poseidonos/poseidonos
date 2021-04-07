@@ -1,0 +1,30 @@
+DPDK_16.11 {
+	global:
+	rte_net_get_ptype;
+
+	local: *;
+};
+
+DPDK_17.05 {
+	global:
+
+	rte_net_crc_calc;
+	rte_net_crc_set_alg;
+
+} DPDK_16.11;
+
+DPDK_19.08 {
+	global:
+
+	rte_eth_random_addr;
+	rte_ether_format_addr;
+
+} DPDK_17.05;
+
+EXPERIMENTAL {
+	global:
+
+	rte_net_make_rarp_packet;
+	rte_net_skip_ip6_ext;
+	rte_ether_unformat_addr;
+};

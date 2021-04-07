@@ -1,0 +1,18 @@
+[global]
+ioengine=./fio_plugin
+thread=1
+group_reporting=1
+direct=1
+verify=0
+time_based=1
+ramp_time=0
+runtime=5
+iodepth=128
+rw=randrw
+bs=4k
+
+[test]
+numjobs=1
+
+#Note : need to change NVMf target information
+filename=trtype=RDMA adrfam=IPv4 traddr=172.16.1.1 trsvcid=1158 ns=1

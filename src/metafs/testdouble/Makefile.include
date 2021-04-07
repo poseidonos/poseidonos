@@ -1,0 +1,9 @@
+TESTDOUBLE_TOP_DIR=testdouble
+
+MFS_INCLUDE_PATH += \
+    $(TESTDOUBLE_TOP_DIR) \
+
+MFS_INCLUDE_PATH += \
+    $(TESTDOUBLE_TOP_DIR)/stub \
+    $(TESTDOUBLE_TOP_DIR)/mock \
+    $(TESTDOUBLE_TOP_DIR)/fake

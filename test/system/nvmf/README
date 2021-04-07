@@ -1,0 +1,117 @@
+- iBoF uNVMf Target and Initiator TC applications
+Note:  build spdk/dpdk first prior to run nvmf scripts here.
+
+-Source Tree
+	/root/ibofos/test/testcase/nvmf/
+	├── Makefile
+	├── README
+	├── initiator
+	│   ├── fio_full_bench.py
+	│   ├── nvmf_initiator_fio.sh
+	│   ├── nvmf_initiator_nvme_cli.sh
+	│   └── nvmf_initiator_perf.sh
+	└── target
+	    ├── Makefile
+	    ├── c
+	    │   ├── Makefile
+	    │   └── ibof_nvmf_main.c
+	    ├── core
+	    ├── cpp
+	    │   ├── Makefile
+	    │   └── NvmfTargetTest.cpp
+	    ├── gtest
+	    │   ├── Makefile
+	    │   └── NvmfTargetGtest.cpp
+	    ├── nqn_1.conf
+	    ├── nqn_2.conf
+	    ├── nqn_ibof.conf
+	    ├── nvmf_target.sh
+
+
+- target : target directory include 4 nvmf examples written in rpc/c/c++/gtest respectively,
+
+	#nvmf_target.sh {c|cpp|rpc|kill} // nvmf target launcher
+	Note : "nvmf_target.sh rpc" show how to start nvmf target with rpc command. Now it dose the same configuration with nqn_ibof.conf
+
+nvmf configuration : nqn_ibof.conf
+	nqn_ibof.conf introduces the new bdev type, Volume, for iBOF.
+
+	[Volume]
+	VolumeID 1
+	VolumeSizeInMB 8192
+	VolumeTypeInMemory false  # true = ramdisk, false = forward io to below (ibofos frontend)
+
+	[Ioat]
+	Enable true  # only activated when VolumeTypeInMemory is true, hence ramdisk mode. 
+		     # When Ioat Enable is setted as true, it will use DMA engine for ramdisk copy, otherwise will use memcpy.
+
+
+	.......
+
+	[Subsystem1]
+	NQN nqn.2016-06.io.spdk:cnode1
+	#Core 0
+	Listen RDMA 172.16.1.1:1158
+	AllowAnyHost Yes
+	Host nqn.2016-06.io.spdk:init
+	SN SPDK00000000000001
+	Namespace Volume0 1
+	Namespace Volume1 2
+
+
+- nvmf initiator : 3 applications over spdk function as nvmf initiator
+	├── nvmf_initiator_fio.sh
+	├── nvmf_initiator_nvme_cli.sh
+	├── nvmf_initiator_perf.sh
+
+	#nvmf_initiator_nvme_cli.sh // based on nvme-cli, perform simple nvmf session establishment such as discovery, connect, and disconnect 
+	#nvmf_initiator_perf.sh // based on spdk perf, generate actual io workloads
+	#nvmf_initiator_fio.sh // based on spdk fio, generate sophisticated io workloads
+
+
+fio_full_bench.py : edit fio_full_bench.py for your own test scenario
+#######################################################################################
+# edit test parameters into these lists to run different workloads
+
+# could be either nvme or nvmf
+#filename='trtype=pcie traddr=0000.02.00.0 ns=1'
+filename='trtype=RDMA adrfam=IPv4 traddr=172.16.1.1 trsvcid=1158 ns=1'
+
+# the configuration below runs QD 1 & 128.
+# To add set q_depth=['1', '32', '128']
+q_depth=['1', '32']
+
+# io_size and block_size specifies the size in bytes of the IO workload.
+# To add 64K IOs set io_size = ['4096', '65536'] and block_size = [ '512', '1024', '4096' ]
+io_size=['10g']
+block_size=['512', '4096']
+
+# type of I/O pattern : write, read, trim, randread, randwrite, randtrim, readwrite, randrw
+readwrite=['write', 'randwrite']
+
+# verify = True | False. applied on sorts of write I/O patterns
+verify=True
+
+# run_time parameter specifies how long to run each test.
+# Set run_time = ['10', '600'] to run the test for given seconds
+run_time=['5', '10']
+
+# mixed rw ratio
+mix=['100']
+
+# cpu to run fio
+core_mask=['0x1']
+
+# iter_num parameter is used to run the test multiple times.
+# set iter_num = ['1', '2', '3'] to repeat each test 3 times
+iter_num=['1']
+
+# setting profile_mode True | False. True will remains profile json file and .csv result file
+profile_mode=False
+
+# verbose = True | False. setting True will show more fio log
+verbose=True
+
+# extra fio options
+extra_fio_options=" --numjobs=1 --ramp_time=0 --norandommap=1 --bs_unaligned=1 "
+

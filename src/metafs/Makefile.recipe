@@ -1,0 +1,31 @@
+# default makefile recipe
+.PHONY : default
+default: all
+TARGET := mfs
+######################################################
+
+CC = ccache g++
+
+# recipes
+TARGET_OBJS=$(addprefix $(OBJDIR)/, $(OBJS))
+
+all: $(OBJDIR) $(TARGET) 
+	@echo target: $(TARGET)
+
+# build mfs obj only and provide it to ibofos build
+iboftarget: $(OBJDIR) $(TARGET_OBJS)
+
+$(TARGET): $(TARGET_OBJS)
+	@$(CC) $(CPPFLAGS) -o $(TARGET) $(TARGET_OBJS) $(LFLAGS)
+	$(info target: $(TARGET))
+$(OBJDIR)/%.o: %.cpp
+	@echo "Compiling [$(<F)]..."
+	@$(CC) $(CPPFLAGS) $(addprefix -I, $(VPATH)) $(DEFINE) -c $< -o $@
+
+$(OBJDIR):
+	mkdir -p $@
+
+clean:
+	@echo "Clean up..."
+	rm -rf $(OBJDIR) $(TARGET)
+	

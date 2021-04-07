@@ -1,0 +1,46 @@
+1) fio_full_test_and_result.sh
+
+Run python script (automatically run fio_full_bench.py) and parse the redirected output
+
+    # sudo ./fio_full_test_and_result.sh
+
+You need iter_num in fio_full_bench.py as 1. If you want to run the test mutilple times, please convert below 
+
+TEST_NR=4
+
+If use Patch file, Please invalidate comment in "fio_full_test_and_result.sh"
+
+#DIFF_FILE='full_test.diff'
+#git checkout -- ../fio_full_bench.py
+#patch -p5 < $DIFF_FILE
+
+#git checkout -- ../fio_full_bench.py
+This script print results in [subdirectory with date]/full_result
+
+2) parse_result.py
+
+This python script parses redirected file generated from "fio_full_bench.py".
+This script can be used independently with fio_full_test_and_result.sh
+This script is called by fio_full_test_and_result.sh. but you can call this independently. 
+     
+   # ./parse_result.py [redirected file name]
+   # ./parse_result.py [pre_fix of the redirected file] [nr of test]
+
+Example 1) extract result from only single test.
+   # ../fio_full_bench.py > fio_full_log_2019-09-30_19\:08\:54/full_result_422dbbc20_0
+   # ./parse_result.py fio_full_log_2019-09-30_19\:08\:54/full_result_422dbbc20_0
+
+Example 2) extract average result from mutiple test. 
+   # ../fio_full_bench.py > test_0
+   # ../fio_full_bench.py > test_1
+   # ../fio_full_bench.py > test_2
+   # ../fio_full_bench.py > test_3
+   # ./parse_result.py ../test 4
+
+
+
+
+
+
+
+

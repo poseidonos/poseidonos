@@ -1,0 +1,18 @@
+[global]
+ioengine=bin/ibofos_library
+thread=1
+group_reporting=1
+direct=1
+verify=0
+time_based=1
+ramp_time=10
+runtime=5
+iodepth=128
+rw=randread
+bs=4k
+size=2G
+filename='vol=bdev0 setup_path=tool/ibof_bdev_fio_plugin'
+cpus_allowed=4 # 4 is kernel I/O thread, may be idle.
+
+[test]
+numjobs=1
