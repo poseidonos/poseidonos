@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+#This configure script is copied from spdk/configure
+
+cd $(dirname $0)
+
+set -e
+
+trap 'echo -e "\n\nConfiguration failed\n\n" >&2' ERR
+
+function usage()
+{
+	echo "'configure' configures IBOF to compile on CUSTOM FLAGS."
+	echo ""
+	echo "Usage: ./configure [OPTION]..."
+	echo ""
+	echo "Defaults for the options are specified in brackets."
+	echo ""
+	echo "General:"
+	echo " -h, --help                Display this help and exit"
+	echo ""
+	echo "Specifying Configuration Variables:"
+	echo "--with-DEPENDENCY[=path]   Use the given config parameter."    
+	echo "--without-DEPENDENCY       Do not use this config parameter."
+	echo ""
+	echo "Valid dependencies are listed below."
+	echo " mfs-raid                  Build IBOF with Meta FileSystem with RAID1 capability"
+	echo " library-build             Build IBOF with library"
+	echo " gcov                      Build IBOF with gcov"	
+    echo " be-qos                    Build IBOF with BE QoS"
+    echo " fe-qos                    Build IBOF with BE & FE QoS"
+    echo " nvme-flush                Build IBOF with nvme flush enabled"
+    #Just another example 
+    #echo " mbr-mock                  Build IBOF with mock mbr."
+	echo ""
+}
+
+# Load default values
+# Convert config to sourcable configuration file
+sed -r 's/CONFIG_([[:alnum:]_]+)=(.*)/CONFIG[\1]=\2/g' mk/IBOF_CONFIG > IBOF_CONFIG.sh
+declare -A CONFIG
+source IBOF_CONFIG.sh
+rm IBOF_CONFIG.sh
+
+
+function check_dir() {
+	arg="$1"
+	dir="${arg#*=}"
+	if [ ! -d "$dir" ]; then
+		echo "$arg: directory not found"
+		exit 1
+	fi
+}
+
+for i in "$@"; do
+	case "$i" in
+		-h|--help)
+			usage
+			exit 0
+			;;
+		--with-mfs-raid)
+			CONFIG[MFS_RAID]=y
+			;;
+		--without-mfs-raid)
+			CONFIG[MFS_RAID]=n
+			;;
+		--with-library-build)
+			CONFIG[LIBRARY_BUILD]=y
+			;;
+ 		--without-library-build)
+			CONFIG[LIBRARY_BUILD]=n
+			;;
+ 		--with-mockfs)
+			CONFIG[USE_MOCK_FS]=y
+			;;
+ 		--without-mockfs)
+			CONFIG[USE_MOCK_FS]=n
+			;;
+		--with-gcov)
+			CONFIG[GCOV]=y
+			;;
+		--without-gcov)
+			CONFIG[GCOV]=n
+			;;
+        --with-be-qos)
+            CONFIG[BE_QOS]=y
+            ;;
+        --without-be-qos)
+            CONFIG[BE_QOS]=n
+            CONFIG[FE_QOS]=n
+            ;;
+        --with-fe-qos)
+            CONFIG[BE_QOS]=y
+            CONFIG[FE_QOS]=y
+            ;;
+        --without-fe-qos)
+            CONFIG[FE_QOS]=n
+            ;;
+        --with-nvme-flush)
+            CONFIG[NVME_FLUSH]=y
+            ;;
+        --without-nvme-flush)
+            CONFIG[NVME_FLUSH]=n
+            ;;
+		--)
+			break
+			;;
+		*)
+			echo "Unrecognized option $i"
+			usage
+			exit 1
+	esac
+done
+
+# We are now ready to generate final configuration. But first do sanity
+# check to see if all keys in CONFIG array have its reflection in CONFIG file.
+if [ $(egrep -c "^\s*CONFIG_[[:alnum:]_]+=" mk/IBOF_CONFIG) -ne ${#CONFIG[@]} ]; then
+	echo ""
+	echo "BUG: Some configuration options are not present in CONFIG file. Please update this file."
+	echo "Missing options in CONFIG (+) file and in current config (-): "
+	diff -u --label "mk/IBOF_CONFIG file" --label "CONFIG[@]" \
+		<(sed -r -e '/^\s*$/d; /^\s*#.*/d; s/(CONFIG_[[:alnum:]_]+)=.*/\1/g' mk/IBOF_CONFIG | sort) \
+		<(printf "CONFIG_%s\n" ${!CONFIG[@]} | sort)
+	exit 1
+fi
+
+echo -n "Creating mk/ibof_config.mk..."
+cp -f mk/IBOF_CONFIG mk/ibof_config.mk
+for key in ${!CONFIG[@]}; do
+	sed -i.bak -r "s#^\s*CONFIG_${key}=.*#export CONFIG_${key}\?=${CONFIG[$key]}#g" mk/ibof_config.mk
+done
+
+config_h="mk/ibof_config.h"
+rm -rf ${config_h}; touch ${config_h}
+echo "#pragma once" >> ${config_h}
+echo "" >> ${config_h}
+python script/genconfig.py >> ${config_h}
+
+
+# On FreeBSD sed -i 'SUFFIX' - SUFFIX is mandatory. So no way but to delete the backed file.
+rm -f mk/ibof_config.mk.bak
+
+if [[ "$OSTYPE" == "freebsd"* ]]; then
+	echo "Type 'gmake' to build."
+else
+	echo "Type 'make' to build."
+fi
+
+exit 0

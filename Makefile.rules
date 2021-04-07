@@ -1,0 +1,35 @@
+ifeq ($(CACHE), Y)
+CC = ccache g++
+else
+CC = g++
+endif
+RM = rm
+
+TEST_SRCS = $(filter %_stub.cpp, $(SRCS))
+TEST_SRCS += $(filter %_mock.cpp, $(SRCS))
+TEST_SRCS += $(filter %_fake.cpp, $(SRCS))
+TEST_SRCS += $(filter %_test.cpp, $(SRCS))
+BUILD_SRCS = $(filter-out $(TEST_SRCS), $(SRCS))
+
+OBJECTS = $(BUILD_SRCS:.cpp=.o)
+
+TEST_OBJECTS = $(TEST_SRCS:.cpp=.o)
+TEST_CPPFLAGS = $(CPPFLAGS) -lgmock
+
+all : $(OBJECTS) $(TEST_OBJECTS)
+
+sam : $(OBJECTS)
+
+%.o: %.cpp
+	@echo "Compiling [$(notdir $<)]..."
+	@$(CC) $(INCLUDE) $(CPPFLAGS) -MMD -MP $(DEFINE) -c $< -o $@
+
+clean:
+	@echo "clean"
+	@find . -name "*.o" -delete
+	@find . -name "*.d" -delete
+	@find . -name "*.gcda" -delete
+	@find . -name "*.gcno" -delete
+
+.PHONY:clean
+-include $(OBJECTS:.o=.d)

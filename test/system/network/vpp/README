@@ -1,0 +1,84 @@
+
+=======  vpp scripts ===========
+
+VPP is the user level network layer to avoid accesss to kernel. 
+This folder contains scripts for VPP test and operation. 
+some script is located in other folder so it can be easier for a user to explore directories with less depth.
+If the document does not explicit "VPP ONLY", we use this script in normal (ibofos , vanilla spdk). 
+
+===============================
+1. Build VPP and spdk with vpp
+===============================
+
+1) ./build_ibof_lib.sh
+  (1) build vpp
+     ./build_ibof_lib.sh vpp
+  (2) spdk with vpp 
+
+      In build_ibof_lib.sh file, please add below. 
+      Even if you build with vpp option, spdk will execute with kTCP network without vpp application.
+     	#please add --with-vpp if you need to use VPP
+		./configure --with-dpdk=$ROOT_DIR/dpdk-stable-19.08.2/ --with-rdma --with-fio=$ROOT_DIR/${FIO_SOURCE} --with-ibof --without-isal
+
+      rm spdk-19.10/mk/config.mk
+      ./build_ibof_lib.sh spdk 
+
+
+===========================
+2. In this folder ... 
+===========================
+
+1) test_connect_multiple.py 
+  This is for nvmf connection test. fio runs during 1 sec, expired and run again. 
+  You can expolit the itereation with ./connect_test.py [iter_num]. Otherwise, default iteration is 100.
+
+2) test_longterm_fio.py 
+  IO with multiple initiator. (16 hours * 3 tests)
+  TBD : Performance test. Test will be failed if I/O performance cannot reach some point of performance. 
+
+3) test_longterm_fio_verify.py (16 hours * 3 tests)
+  IO with single job initator, with verification.
+  (Multiple job option does not support verification) 
+
+4) prepare_nvmf_target.sh    
+   This can be used for normal initialization.
+   It initializes spdk target with null or memory storage.
+   if you want to kill nvmf target, please run finalize_nvmf_target.sh
+
+5) test_vpp_open_close_multiple.sh (VPP_ONLY)
+   vpp -> spdk on -> connection test -> spdk off -> vpp off.
+   You need execute "./test_vpp_open_close_multiple.sh server" in server side first, 
+   and execute "./test_vpp_open_close_multiple.sh client" in client side.
+
+
+5) test_vpp_open_close_multiple.sh (VPP_ONLY)
+   vpp -> spdk on -> connection test -> spdk off -> vpp off -> spdk on (kTCP) -> connection -> spdk off ...
+   You need execute "./test_vpp_open_close_multiple.sh server" in server side first, 
+   and execute "./test_vpp_open_close_multiple.sh client" in client side.
+
+
+
+===========================
+3. [root]/scrtipt ......
+===========================
+
+1) setup_vpp.sh   (VPP_ONLY)
+   Execute vpp and setting network. 
+
+
+2) clear_vpp.sh   (VPP_ONLY)
+   kill vpp and return settings for normal ibofos.
+
+
+======================================
+4. test/system/nvmf/initiator ......
+======================================
+
+1) nvmf/initiator/nvmf_initiator_nvme_cli.sh
+   Run initator with cli. 
+   ./nvmf_initiator_nvme_cli [iter_num] 
+   Default iteration is 1.
+
+
+
+

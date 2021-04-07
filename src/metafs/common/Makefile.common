@@ -1,0 +1,5 @@
+include $(MFS_TOP_DIR)/common/Makefile.include
+
+SRCS += \
+	meta_region_mgr.cpp \
+	mfs_fb_top.cpp
