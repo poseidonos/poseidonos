@@ -1,4 +1,4 @@
-# AIR User Guide 0.5.x-beta
+# AIR User Guide 0.5.5-beta
 
 
 ## 1. Overview
@@ -18,9 +18,8 @@ The AIR currently supports:
 
 | Terms   | Terminology & Acronyms                    |
 | ------- | ----------------------------------------- |
-| iBoF    | Intelligent Bunch of Flash                |
-| iBoF OS | Samsung proprietary Storage Management OS |
-| AIR     | iBoF Profiler, Analytics In Real-time     |
+| POS     | Poseidon OS                               |
+| AIR     | POS Profiler, Analytics In Real-time      |
 | CLI     | Command Line Interface                    |
 | TUI     | Text-based User Interface                 |
 | GUI     | Graphical User Interface                  |
@@ -29,38 +28,16 @@ The AIR currently supports:
 
 ## 2. Build 
 
-### 2.1. Source Code
+### 2.1. AIR Static Library (Stand Alone)
 
-**[AIR Stand Alone]** <br>
-`git URL: http://10.227.30.174:7990/scm/ibof/ibofprofiling.git `
-
-<br>
-
-**[AIR with iBoF OS]** <br>
-`git URL: http://10.227.30.174:7990/scm/ibof/ibofos.git`
-
-<br>
-
-**[AIR GUI Client]** <br>
-`git URL: http://10.227.30.174:7990/scm/ibof/airclient.git`
-
-<br>
-
-**[AIR GUI Server]** <br>
-`git URL: http://10.227.30.174:7990/scm/ibof/airserver.git`
-
-<br>
-
-### 2.2. AIR Static Library (Stand Alone)
-
-#### 2.2.1. Configuration
+#### 2.1.1. Configuration
 
 Before build the AIR, configuration setting should be the first.
 
 * **Set Configuration**
 
 ``` bash
-# From ibofprofiling root directory
+# From POS root directory
 $ cd lib/air/config
 $ vim air.cfg
 ```
@@ -135,7 +112,7 @@ R"AIR(    // do not change this format!!
 
 <br>
 
-#### 2.2.2. Build
+#### 2.1.2. Build (Stand Alone)
 
 ``` bash
 # From AIR main directory
@@ -146,31 +123,31 @@ When build AIR, user can select one of the air config file in config folder with
 
 <br>
 
-#### 2.2.3. Library
+#### 2.1.3. Library (Stand Alone)
 
 ``` bash
 # From AIR main directory
-$ cd lib/air/lib
+$ cd lib
 $ libair.a
 ```
 
 <br>
 
-### 2.3. AIR with iBoF OS
+### 2.3. AIR with POS
 
 The build sequence is as follows:
 
 1. build AIR 
 2. build SPDK
-3. build iBoFOS
+3. build POS
 
-The build shell is in the file `"ibofos_root_dir/lib/build_ibof_lib.sh"`. When you try to run like this `"./build_ibof_lib.sh all"`, 1 & 2 build sequence will be done. After it succeed, you can build iBoFOS as usual. The usecase AIR with iBoFOS is handled in AIR Tutorial.
+The build shell is in the file `"root_dir/lib/build_ibof_lib.sh"`. When you try to run like this `"./build_ibof_lib.sh all"`, 1 & 2 build sequence will be done. After it succeed, you can build POS as usual. The usecase AIR with POS is handled in AIR Tutorial.
 
 <br>
 
 ## 3. API
 
-There are two types of APIs, the one is functions for preparing the profiling and the other is data collecting functions. To use the AIR APIs it is needed that including `"air.h"`.
+There are two types of APIs, the one is functions for preparing the profiling and the other is data collecting functions. To use the AIR APIs it is needed that including `"Air.h"`.
 
 ### 3.1. Preparing Functions
 
@@ -183,9 +160,9 @@ There are two types of APIs, the one is functions for preparing the profiling an
 
 **Example** 
 
-``` c++
+``` cpp file
 ...
-#include "air.h"
+#include "Air.h"
 ...
 int main(void)
 {
@@ -376,53 +353,14 @@ From AIR 0.2.0-alpha, AIR can profile SPDK source code. Since SPDK is based on C
 
 <br>
 
-## 4 GUI
+## 4. TUI
 
-### 4.1 Install & Run AIR Daemon
+The AIR TUI(Text User Interface) is the visualization tool shows profiling results in text. The profiling results are shown according to the type of node in real-time. In every dump interval(default is 1 second), profiling result is updated. The profiling result of each node is thread-aware, also each thread breaks down to a specified user named AID. The detailed description is below.
 
-```bash
-# cd ibofos_root_dir/lib/air/script
-# ./install_daemon.sh
-# service aird start
-# service aird status
+``` bash
+$ air_tui
+
 ```
-
-<br>
-
-### 4.2. Web Dashboard
-
-User can access to GUI through web-browser such as Firefox at their own OA PC: `"http://10.1.2.2` or `"http://air.io"`. And user also has to set the proxy: `12.36.76.108:3128`.
-
-* **File Control Panel** <br>
-  The file control panel is on the top of the browser. <br>
-  * **Select Server** <br> 
-  Click a `select server` panel and  select the server ip. <br>
-  * **Select Case** <Br> 
-  Click the `case` panel named as start time and pid. The water icon is a case where profiling is completed. And the fire icon is a case where profiling is in progress. <br>
-
-* **Control Panel** <br>
-  The control panel on the left is activated when profilng is in progress. <br>
-  The role of this panel is the same as that of an air cli. This can update the streaming interval and init/run/stop node(s). <br>
-
-* **Data Panel** <br>
-  The data panel plots graphs of profiling data in real time or in a replay manner. <br>
-  * **Stop & Resume Button** <br>
-  Click the graph, and `stop or resume icon` is activated. <br>
-  * **Time Slice Bar** <br>
-  Move the `red box` on the time slice bar to a certain time. <br> 
-  * **Zoom in/out y-axis** <br>
-  Move the cursor on the graph and `scroll` a mouse wheel. <br> 
-  * **Zoom in/out x-axis** <br> 
-  Move the cursor on the graph and press `"shift"` or `"z"` key and `scroll` a mouse wheel. <br> <br>
-
-![gui](../image/readme/gui.png)
-
-<br>
-
-## 5. TUI
-
-The AIR TUI(Text User Interface) is the visualization tool shows profiling results in text. The profiling results are shown according to the type of node in real-time. In every dump interval(default is 1 second), profiling result is updated. The profiling result of each node is thread-aware, also each thread breaks down to a specified user named AID. Resource profiling results are shown bottom of the normal data and detailed data page. 
-This keys are basic commands of TUI. The detailed description is below.
 
 | key  | Description                                                          |
 | ---- | -------------------------------------------------------------------- |
@@ -436,14 +374,12 @@ This keys are basic commands of TUI. The detailed description is below.
 
 ![tui](../image/readme/tui.png)
 
-## 6. CLI
+## 5. CLI
 
 The AIR command-line interface (CLI) is the software interface used to access your AIR profiler. The CLI provides a set of commands that you can use to monitor its operations and adjust the configuration as needed in run-time.
 
 ``` bash
-# From AIR main directory
-$ cd bin
-$ ./air_cli --pid=<target_pid> [options] ...
+$ air_cli --pid=<target_pid> [options] ...
 
 ```
 
