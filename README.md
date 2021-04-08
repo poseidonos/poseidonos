@@ -5,7 +5,7 @@ Poseidon OS (POS) is a light-weight storage OS that offers the best performance 
 
 # Table of Contents
 - [Source Code](#source-code)
-- [How to build](#how-to-build)
+- [How to Build](#how-to-build)
 - [Preparation](#preparation)
 - [Run POS](#run-pos)
 - [Learning POS Commands](#learning-pos-commands)
@@ -14,7 +14,7 @@ Poseidon OS (POS) is a light-weight storage OS that offers the best performance 
 ## Source Code
 
 ```bash
-git clone https://github.com/poseidonos/poseidonos
+git clone https://github.com/poseidonos/poseidonos.git
 
 ```
 
@@ -27,7 +27,7 @@ cd script
 sudo ./pkgdep.sh
 ```
 
-## How to build
+## How to Build
 
 ### 1. Build Library
 
@@ -36,7 +36,7 @@ cd lib
 sudo ./build_ibof_lib.sh all
 ```
 
-### 2. Build source code
+### 2. Build Source Code
 
 ```bash
 cd script
