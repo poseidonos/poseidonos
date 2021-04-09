@@ -3,11 +3,12 @@ POS provides a lot of knobs so that,
   1) The benefits of using fast NVMe-oF storage could be fully achieved with various environments and
   2) The integration efforts with existing infrastructure could be minimized.
 
-In this section, we will go over the list of configuration variables that can affect the behavior of POS. 
-Some of those are meaningful to POS developers only, unlikely to change by users. 
-Though, we explicitly list up all of them here to share hidden assumptions and magic numbers to be able to explain any side effects quickly that could happen due to user-specific environment issues. 
-The configuration is encoded in json at /etc/ibofos/conf/ibofos.conf. 
-The following tables describe a list of (config name, the range of valid values, the default value, whether it can change at runtime, whether it is supported today). 
+In this section, we will go over the list of configuration variables that can affect the behavior of POS. Some of those are meaningful to POS developers only, unlikely to change by users. </br>
+Though, we explicitly list up all of them here to share hidden assumptions and magic numbers to be able to explain any side effects quickly that could happen due to user-specific environment issues. </br>
+
+The configuration is encoded in json at /etc/ibofos/conf/ibofos.conf. </br>
+
+The following tables describe a list of (config name, the range of valid values, the default value, whether it can change at runtime, whether it is supported today). </br>
 
 
 |                   Name                   |         Category        |                           Value                          | Note                                                                                                                                                                                                                                                                                                                                                                                                                                         |
