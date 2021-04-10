@@ -34,7 +34,7 @@
 
 #include "Air.h"
 #include "src/include/backend_event.h"
-#include "src/gc/copier_write_completion.h"
+#include "src/gc/gc_flush_submission.h"
 #include "src/io/frontend_io/write_submission.h"
 #include "src/include/branch_prediction.h"
 #include "src/bio/volume_io.h"
@@ -79,55 +79,61 @@ CopierReadCompletion::_DoSpecificJob(void)
 
     uint32_t volId = blkInfoList.begin()->volID;
     uint32_t remainCnt = blkCnt - allocatedCnt;
-
     while (remainCnt)
     {
-        VirtualBlks vsas;
-        Stripe* stripe;
-        std::tie(vsas, stripe) = gcStripeManager->AllocateBlocks(volId, remainCnt);
+        uint32_t startOffset;
+        uint32_t numBlks;
 
-        if (IsUnMapVsa(vsas.startVsa))
+        bool ret = gcStripeManager->AllocateWriteBufferBlks(volId, remainCnt, startOffset, numBlks);
+        if (false == ret)
         {
             return false;
         }
 
-        for (uint32_t i = 0; i < vsas.numBlks; i++)
+        GcWriteBuffer* dataBuffer = gcStripeManager->GetWriteBuffer(volId);
+
+        std::vector<BlkInfo>* allocatedBlkInfoList = gcStripeManager->GetBlkInfoList(volId);
+        for (uint32_t i = 0; i < numBlks; i++)
         {
             list<BlkInfo>::iterator it = blkInfoList.begin();
             std::advance(it, offset);
             BlkInfo blkInfo = *it;
-            uint32_t vsaOffset = vsas.startVsa.offset + i;
-
-            stripe->UpdateReverseMap(vsaOffset, blkInfo.rba, volId);
-            stripe->UpdateVictimVsa(vsaOffset, blkInfo.vsa);
-            _MemCopyValidData(stripe, vsaOffset, blkInfo);
+            uint32_t vsaOffset = startOffset + i;
+            gcStripeManager->SetBlkInfo(volId, vsaOffset, blkInfo);
+            _MemCopyValidData(dataBuffer, vsaOffset, blkInfo);
 
             offset++;
         }
 
-        allocatedCnt += vsas.numBlks;
+        allocatedCnt += numBlks;
         remainCnt = blkCnt - allocatedCnt;
-        uint32_t remainBlks = stripe->DecreseBlksRemaining(vsas.numBlks);
-        if (0 == remainBlks)
+
+        if (gcStripeManager->DecreaseRemainingAndCheckIsFull(volId, numBlks))
         {
-            EventSmartPtr flushEvent(new GcFlushSubmission(stripe, meta->GetArrayName()));
-            stripe->Flush(flushEvent);
-            AIRLOG(PERF_COPY, 0, AIR_WRITE, meta->GetBlksPerStripe() * BLOCK_SIZE);
+            EventSmartPtr flushEvent(new GcFlushSubmission(meta->GetArrayName(),
+                        allocatedBlkInfoList,
+                        volId,
+                        dataBuffer,
+                        gcStripeManager));
+            EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
+            gcStripeManager->SetFlushed(volId);
         }
     }
 
     meta->ReturnBuffer(stripeId, buffer);
     meta->SetDoneCopyBlks(blkCnt);
+    AIRLOG(PERF_COPY, 0, AIR_READ, BLOCK_SIZE * blkCnt);
 
     return true;
 }
 
 void
-CopierReadCompletion::_MemCopyValidData(Stripe* stripe, uint32_t offset, BlkInfo blkInfo)
+CopierReadCompletion::_MemCopyValidData(GcWriteBuffer* dataBuffer, uint32_t offset, BlkInfo blkInfo)
 {
     uint32_t bufferIndex = offset / BLOCKS_IN_CHUNK;
     uint32_t bufferOffset = offset % BLOCKS_IN_CHUNK;
-    DataBufferIter bufferIt = stripe->DataBufferBegin();
+
+    GcWriteBuffer::iterator bufferIt = dataBuffer->begin();
     std::advance(bufferIt, bufferIndex);
 
     void* srcBuffer = (void*)((char*)buffer + ((blkInfo.vsa.offset % BLOCKS_IN_CHUNK) * BLOCK_SIZE));

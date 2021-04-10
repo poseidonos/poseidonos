@@ -46,8 +46,8 @@ class EventScheduler;
 class StripeMapUpdateRequest : public Callback
 {
 public:
-    explicit StripeMapUpdateRequest(Stripe* stripe, std::string& arrayName, bool isGc = false);
-    StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* eventScheduler, std::string& arrayName, bool isGc = false);
+    explicit StripeMapUpdateRequest(Stripe* stripe, std::string& arrayName);
+    StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* eventScheduler, std::string& arrayName);
     ~StripeMapUpdateRequest(void) override;
 
 private:

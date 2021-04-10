@@ -39,6 +39,11 @@
 
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator/i_block_allocator.h"
+#include "src/spdk_wrapper/free_buffer_pool.h"
+
+#include "src/include/branch_prediction.h"
+
+#include "src/logger/logger.h"
 
 #include <utility>
 
@@ -48,28 +53,228 @@ GcStripeManager::GcStripeManager(IArrayInfo* array)
 : array(array)
 {
     arrayName = array->GetName();
-    iBlockAllocator = AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName);
-    iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName);
+    udSize = array->GetSizeInfo(PartitionType::USER_DATA);
+
+    gcWriteBufferPool = new FreeBufferPool(udSize->chunksPerStripe * GC_WRITE_BUFFER_CONUNT, CHUNK_SIZE);
+    for (uint32_t volId = 0; volId < GC_VOLUME_COUNT; volId++)
+    {
+        bool ret = _CreateActiveWriteBuffer(volId);
+        assert(true == ret);
+
+        _SetActiveStripeTail(volId, 0);
+        _SetActiveStripeRemaining(volId, udSize->blksPerStripe);
+        _CreateBlkInfoList(volId);
+        flushed[volId] = true;
+    }
+    flushedStripeCnt = 0;
 }
 
 GcStripeManager::~GcStripeManager(void)
 {
-}
-
-std::pair <VirtualBlks, Stripe*>
-GcStripeManager::AllocateBlocks(uint32_t volumeId, uint32_t remainCount)
-{
-    VirtualBlks vsas = iBlockAllocator->AllocateWriteBufferBlks(volumeId,
-                remainCount, true);
-    Stripe* stripe = nullptr;
-    if (IsUnMapVsa(vsas.startVsa) == false)
+    for (uint32_t volumeId = 0; volumeId < GC_VOLUME_COUNT; volumeId++)
     {
-        Translator translator(vsas.startVsa, arrayName);
-        StripeAddr lsidEntry = translator.GetLsidEntry(0);
-        stripe = iWBStripeAllocator->GetStripe(lsidEntry);
+        if (blkInfoList[volumeId] != nullptr)
+        {
+            blkInfoList[volumeId]->clear();
+            delete blkInfoList[volumeId];
+        }
+
+        if (gcActiveWriteBuffers[volumeId] != nullptr)
+        {
+            _ReturnBuffer(gcActiveWriteBuffers[volumeId]);
+            gcActiveWriteBuffers[volumeId]->clear();
+            delete gcActiveWriteBuffers[volumeId];
+        }
     }
 
-    return make_pair(vsas, stripe);
+    delete gcWriteBufferPool;
 }
 
+GcWriteBuffer*
+GcStripeManager::GetWriteBuffer(uint32_t volumeId)
+{
+    return gcActiveWriteBuffers[volumeId];
+}
+
+bool
+GcStripeManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks)
+{
+    std::unique_lock<std::mutex> bufferLock(GetWriteBufferLock(volumeId));
+    bool ret;
+
+    if (_IsWriteBufferFull(volumeId))
+    {
+        ret = _CreateActiveWriteBuffer(volumeId);
+        if (unlikely(false == ret))
+        {
+            return false;
+        }
+        flushed[volumeId] = false;
+        _SetActiveStripeTail(volumeId, 0);
+        _SetActiveStripeRemaining(volumeId, udSize->blksPerStripe);
+        _CreateBlkInfoList(volumeId);
+    }
+
+    ret =  _AllocateBlks(volumeId, numBlks, offset, allocatedBlks);
+    if (false == ret)
+    {
+        return false;
+    }
+    return true;
+}
+
+void
+GcStripeManager::MoveActiveWriteBuffer(uint32_t volumeId, GcWriteBuffer* buffer)
+{
+    std::unique_lock<std::mutex> bufferLock(GetWriteBufferLock(volumeId));
+    buffer = std::move(gcActiveWriteBuffers[volumeId]);
+}
+
+void
+GcStripeManager::_ReturnBuffer(GcWriteBuffer* buffer)
+{
+    for (auto it = buffer->begin(); it != buffer->end(); it++)
+    {
+        gcWriteBufferPool->ReturnBuffer(*it);
+    }
+}
+
+void
+GcStripeManager::SetFinished(GcWriteBuffer* buffer)
+{
+    _ReturnBuffer(buffer);
+    delete buffer;
+    flushedStripeCnt--;
+}
+
+bool
+GcStripeManager::IsAllFinished(void)
+{
+    return (flushedStripeCnt == 0);
+}
+
+std::vector<BlkInfo>*
+GcStripeManager::GetBlkInfoList(uint32_t volumeId)
+{
+    return blkInfoList[volumeId];
+}
+
+std::mutex&
+GcStripeManager::GetWriteBufferLock(uint32_t volumeId)
+{
+    return gcWriteBufferLock[volumeId];
+}
+
+bool
+GcStripeManager::DecreaseRemainingAndCheckIsFull(uint32_t volumeId, uint32_t cnt)
+{
+    std::unique_lock<std::mutex> bufferLock(GetWriteBufferLock(volumeId));
+
+    uint32_t remaining = _DecreaseActiveStripeRemaining(volumeId, cnt);
+
+    return (0 == remaining);
+}
+
+void
+GcStripeManager::SetBlkInfo(uint32_t volumeId, uint32_t offset, BlkInfo blkInfo)
+{
+    blkInfoList[volumeId]->at(offset) = blkInfo;
+}
+
+void
+GcStripeManager::SetFlushed(uint32_t volumeId)
+{
+    assert(flushed[volumeId] == false);
+    blkInfoList[volumeId] = nullptr;
+    gcActiveWriteBuffers[volumeId] = nullptr;
+    flushedStripeCnt++;
+    flushed[volumeId] = true;
+}
+
+uint32_t
+GcStripeManager::_DecreaseActiveStripeRemaining(uint32_t volumeId, uint32_t cnt)
+{
+    assert(cnt <= gcActiveStripeRemaining[volumeId]);
+
+    uint32_t remainCount = gcActiveStripeRemaining[volumeId] -= cnt;
+
+    return remainCount;
+}
+
+void
+GcStripeManager::_SetActiveStripeRemaining(uint32_t volumeId, uint32_t cnt)
+{
+    gcActiveStripeRemaining[volumeId] = cnt;
+}
+
+void
+GcStripeManager::_CreateBlkInfoList(uint32_t volumeId)
+{
+    blkInfoList[volumeId] = new std::vector<BlkInfo>(udSize->blksPerStripe);
+}
+
+bool
+GcStripeManager::_CreateActiveWriteBuffer(uint32_t volumeId)
+{
+    gcActiveWriteBuffers[volumeId] = new GcWriteBuffer();
+    for (uint32_t chunkCnt = 0; chunkCnt < udSize->chunksPerStripe; ++chunkCnt)
+    {
+        void* buffer = gcWriteBufferPool->GetBuffer();
+        if (nullptr == buffer)
+        {
+            for (auto it = gcActiveWriteBuffers[volumeId]->begin(); it != gcActiveWriteBuffers[volumeId]->end(); it++)
+            {
+                gcWriteBufferPool->ReturnBuffer(*it);
+            }
+            delete gcActiveWriteBuffers[volumeId];
+            return false;
+        }
+        gcActiveWriteBuffers[volumeId]->push_back(buffer);
+    }
+    return true;
+}
+
+bool
+GcStripeManager::_IsWriteBufferFull(uint32_t volumeId)
+{
+    return (true == flushed[volumeId]);
+}
+
+uint32_t
+GcStripeManager::_GetActiveStripeTail(uint32_t volumeId)
+{
+    return gcActiveStripeTail[volumeId];
+}
+
+void
+GcStripeManager::_SetActiveStripeTail(uint32_t volumeId, uint32_t offset)
+{
+    gcActiveStripeTail[volumeId] = offset;
+}
+
+bool
+GcStripeManager::_AllocateBlks(uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks)
+{
+    assert(0 != numBlks);
+
+    offset = _GetActiveStripeTail(volumeId);
+    if (udSize->blksPerStripe == offset)
+    {
+        allocatedBlks = 0;
+        return false;
+    }
+
+    if (udSize->blksPerStripe < offset + numBlks)
+    {
+        allocatedBlks = udSize->blksPerStripe - offset;
+    }
+    else
+    {
+        allocatedBlks = numBlks;
+    }
+
+    _SetActiveStripeTail(volumeId, offset + allocatedBlks);
+
+    return true;
+}
 } // namespace pos

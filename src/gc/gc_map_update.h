@@ -36,10 +36,15 @@
 #include <cstdint>
 #include <map>
 #include <string>
-
+#include <vector>
 
 #include "src/include/address_type.h"
 #include "src/event_scheduler/event.h"
+#include "src/event_scheduler/callback.h"
+#include "src/journal_service/journal_service.h"
+#include "src/mapper/i_vsamap.h"
+#include "src/mapper/include/mpage_info.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
 
 namespace pos
 {
@@ -51,8 +56,10 @@ class GcMapUpdate : public Event
 {
 public:
     GcMapUpdate(void) = delete;
-    explicit GcMapUpdate(Stripe* stripe, std::string& arrayName);
-    GcMapUpdate(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* eventScheduler, std::string& arrayName);
+    explicit GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
+                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, EventScheduler* eventScheduler, uint32_t volumeId);
+    GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
+                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, uint32_t volumeId);
     ~GcMapUpdate(void) override;
     bool Execute(void) override;
 
@@ -70,6 +77,10 @@ private:
     uint32_t stripesPerSegment;
     uint32_t stripeOffset = 0;
     std::string arrayName;
+
+    uint32_t volumeId;
+    GcStripeMapUpdateList mapUpdateInfoList;
 };
 
 } // namespace pos
+

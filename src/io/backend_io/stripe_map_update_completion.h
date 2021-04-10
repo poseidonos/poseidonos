@@ -47,13 +47,12 @@ class EventScheduler;
 class StripeMapUpdateCompletion : public Event
 {
 public:
-    StripeMapUpdateCompletion(Stripe* inputStripe, std::string& arrayName, bool isGc = false);
+    StripeMapUpdateCompletion(Stripe* inputStripe, std::string& arrayName);
     StripeMapUpdateCompletion(Stripe* inputStripe,
         ISegmentCtx* iSegmentCtx,
         IStripeMap* iStripeMap,
         EventScheduler* eventScheduler,
-        std::string& arrayName,
-        bool isGc = false);
+        std::string& arrayName);
     virtual ~StripeMapUpdateCompletion(void);
 
     virtual bool Execute(void) override;
@@ -63,7 +62,6 @@ private:
     ISegmentCtx* iSegmentCtx;
     IStripeMap* iStripeMap;
     EventScheduler* eventScheduler;
-    bool isGc;
     std::string arrayName;
 };
 

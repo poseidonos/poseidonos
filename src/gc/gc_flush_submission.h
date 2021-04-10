@@ -34,8 +34,13 @@
 
 #include "src/io_submit_interface/i_io_submit_handler.h"
 #include "src/event_scheduler/event.h"
+#include "src/gc/victim_stripe.h"
+#include "src/gc/gc_stripe_manager.h"
 
 #include <string>
+#include <list>
+#include <utility>
+#include <vector>
 
 namespace pos
 {
@@ -44,13 +49,22 @@ class Stripe;
 class GcFlushSubmission : public Event
 {
 public:
-    explicit GcFlushSubmission(Stripe* inputStripe, std::string arrayName);
+    explicit GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId, GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager);
     ~GcFlushSubmission(void) override;
     bool Execute(void) override;
+
+    std::pair <VirtualBlks, Stripe*> AllocateBlocks(uint32_t volumeId);
 
 private:
     Stripe* stripe;
     std::string arrayName;
+    std::vector<BlkInfo>* blkInfoList;
+    uint32_t volumeId;
+    GcWriteBuffer* dataBuffer;
+    GcStripeManager* gcStripeManager;
+
+    IBlockAllocator* iBlockAllocator;
+    IWBStripeAllocator* iWBStripeAllocator;
 };
 
 } // namespace pos

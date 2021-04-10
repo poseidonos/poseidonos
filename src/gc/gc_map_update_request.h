@@ -36,8 +36,15 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <vector>
 
+#include "src/include/address_type.h"
 #include "src/event_scheduler/event.h"
+#include "src/event_scheduler/callback.h"
+#include "src/journal_service/journal_service.h"
+#include "src/mapper/i_vsamap.h"
+#include "src/mapper/include/mpage_info.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
 
 namespace pos
 {
@@ -45,21 +52,36 @@ class Stripe;
 class IStripeMap;
 class EventScheduler;
 
-class GcFlushCompletion : public Event
+class GcMapUpdateRequest : public Event
 {
 public:
-    GcFlushCompletion(void) = delete;
-    explicit GcFlushCompletion(Stripe* stripe, std::string arrayName);
-    GcFlushCompletion(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* eventScheduler, std::string arrayName);
-    ~GcFlushCompletion(void) override;
-    bool Execute(void) override;
+    GcMapUpdateRequest(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
+                    IVSAMap *iVSAMap, JournalService *journalService, EventScheduler *eventScheduler);
+    GcMapUpdateRequest(Stripe* stripe, std::string arrayName);
+    virtual bool Execute(void) override;
 
 private:
-    Stripe* stripe;
-    IStripeMap* iStripeMap;
-    EventScheduler* eventScheduler;
-    uint32_t totalBlksPerUserStripe;
-    std::string arrayName;
-};
+    void _AddBlockMapUpdateLog(BlkAddr rba, VirtualBlkAddr writeVsa);
+    void _GetDirtyPages(uint32_t volId, BlkAddr rba);
+    void _AddVsaMapUpdateLog(uint32_t volId, BlkAddr rba, VirtualBlks writeVsaRange);
+    void _RegisterInvalidateSegments(VirtualBlkAddr vsa);
 
+    std::string arrayName;
+    IVSAMap* iVSAMap;
+
+    Stripe* stripe;
+    JournalService *journalService;
+    EventScheduler *eventScheduler;
+
+    uint32_t totalBlksPerUserStripe;
+    uint32_t stripesPerSegment;
+    uint32_t stripeOffset;
+    IStripeMap* iStripeMap;
+    uint32_t numValidate = 0;
+
+    std::map<SegmentId, uint32_t > invalidSegCnt;
+
+    GcStripeMapUpdateList mapUpdates;
+};
 } // namespace pos
+

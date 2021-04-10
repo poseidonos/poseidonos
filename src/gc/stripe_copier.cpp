@@ -161,7 +161,6 @@ StripeCopier::CopyEvent::Execute(void)
             buffer, meta,
             stripeId));
     callback->SetEventType(BackendEvent_GC);
-    AIRLOG(PERF_COPY, 0, AIR_READ, BLOCK_SIZE * numPage);
     IIOSubmitHandler::GetInstance()->SubmitAsyncIO(IODirection::READ,
         bufferList, lsa, numPage,
         partitionType, callback, arrayName);

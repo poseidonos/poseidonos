@@ -2,14 +2,14 @@
 #include <string>
 #include <list>
 #include <vector>
-#include "src/gc/copier.h"
+#include "src/gc/gc_map_update_request.h"
 
 namespace pos
 {
-class MockCopier : public Copier
+class MockGcMapUpdateRequest : public GcMapUpdateRequest
 {
 public:
-    using Copier::Copier;
+    using GcMapUpdateRequest::GcMapUpdateRequest;
     MOCK_METHOD(bool, Execute, (), (override));
 };
 

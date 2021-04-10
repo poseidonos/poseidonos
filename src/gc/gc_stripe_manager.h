@@ -35,6 +35,7 @@
 
 #include "src/allocator/wb_stripe_manager/stripe.h"
 #include "src/array_models/interface/i_array_info.h"
+#include "src/gc/victim_stripe.h"
 
 #include <string>
 #include <utility>
@@ -44,20 +45,55 @@ namespace pos
 class IBlockAllocator;
 class IWBStripeAllocator;
 
+using GcWriteBuffer = std::vector<void*>;
+
 class GcStripeManager
 {
 public:
     explicit GcStripeManager(IArrayInfo* array);
     ~GcStripeManager(void);
-    std::pair <VirtualBlks, Stripe*> AllocateBlocks(uint32_t volumeId, uint32_t remainCount);
-    Stripe* GetStripe(uint32_t volumeId);
+
+    bool AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks);
+    bool AllocateWriteBuffer(uint32_t volumeId, GcWriteBuffer* buffer);
+    bool IsWriteBufferFull(uint32_t volumeId);
+    void MoveActiveWriteBuffer(uint32_t volumeId, GcWriteBuffer* buffer);
+    std::mutex& GetWriteBufferLock(uint32_t volumeId);
+    void SetFinished(GcWriteBuffer* buffer);
+    GcWriteBuffer* GetWriteBuffer(uint32_t volumeId);
+    bool DecreaseRemainingAndCheckIsFull(uint32_t volumeId, uint32_t cnt);
+    void SetBlkInfo(uint32_t volumeId, uint32_t offset, BlkInfo blkInfo);
+    std::vector<BlkInfo>* GetBlkInfoList(uint32_t volumeId);
+    void SetFlushed(uint32_t volumeId);
+    bool IsAllFinished(void);
+
+    static const uint32_t GC_WRITE_BUFFER_CONUNT = 1024;
+    static const uint32_t GC_VOLUME_COUNT = MAX_VOLUME_COUNT;
 
 private:
+    void _ReturnBuffer(GcWriteBuffer* buffer);
+    bool _CreateActiveWriteBuffer(uint32_t volumeId);
+    uint32_t _GetActiveStripeTail(uint32_t volumeId);
+    void _SetActiveStripeTail(uint32_t volumeId, uint32_t offset);
+    uint32_t _DecreaseActiveStripeRemaining(uint32_t volumeId, uint32_t cnt);
+    void _SetActiveStripeRemaining(uint32_t volumeId, uint32_t cnt);
+    bool _AllocateBlks(uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks);
+    bool _IsWriteBufferFull(uint32_t volumeId);
+    void _CreateBlkInfoList(uint32_t volumeId);
+
     std::vector<Stripe*> gcStripeArray;
     IArrayInfo* array;
-    IBlockAllocator* iBlockAllocator;
-    IWBStripeAllocator* iWBStripeAllocator;
     std::string arrayName;
+
+    FreeBufferPool* gcWriteBufferPool;
+    GcWriteBuffer* gcActiveWriteBuffers[GC_VOLUME_COUNT];
+    uint32_t gcActiveStripeTail[GC_VOLUME_COUNT];
+    uint32_t gcActiveStripeRemaining[GC_VOLUME_COUNT];
+    bool flushed[GC_VOLUME_COUNT];
+
+    std::mutex gcWriteBufferLock[GC_VOLUME_COUNT];
+    std::vector<BlkInfo>* blkInfoList[GC_VOLUME_COUNT];
+    const PartitionLogicalSize* udSize;
+    std::atomic<uint32_t> flushedStripeCnt;
 };
 
 } // namespace pos

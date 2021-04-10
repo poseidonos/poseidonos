@@ -42,21 +42,20 @@
 
 namespace pos
 {
-StripeMapUpdate::StripeMapUpdate(Stripe* stripe, std::string& arrayName, bool isGc)
+StripeMapUpdate::StripeMapUpdate(Stripe* stripe, std::string& arrayName)
 : StripeMapUpdate(stripe,
     MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
     JournalServiceSingleton::Instance(), EventSchedulerSingleton::Instance(),
-    arrayName, isGc)
+    arrayName)
 {
 }
 
 StripeMapUpdate::StripeMapUpdate(Stripe* stripe, IStripeMap* iStripeMap,
-    JournalService* journalService, EventScheduler* scheduler, std::string& arrayName, bool isGc)
+    JournalService* journalService, EventScheduler* scheduler, std::string& arrayName)
 : stripe(stripe),
   iStripeMap(iStripeMap),
   journalService(journalService),
   eventScheduler(scheduler),
-  isGc(isGc),
   arrayName(arrayName)
 {
 }
@@ -76,7 +75,7 @@ StripeMapUpdate::Execute(void)
 
         MpageList dirty = iStripeMap->GetDirtyStripeMapPages(stripe->GetVsid());
         StripeAddr oldAddr = iStripeMap->GetLSA(stripe->GetVsid());
-        EventSmartPtr callbackEvent(new StripeMapUpdateCompletion(stripe, arrayName, isGc));
+        EventSmartPtr callbackEvent(new StripeMapUpdateCompletion(stripe, arrayName));
 
         int result = journal->AddStripeMapUpdatedLog(stripe, oldAddr,
             dirty, callbackEvent);
@@ -85,7 +84,7 @@ StripeMapUpdate::Execute(void)
     }
     else
     {
-        StripeMapUpdateCompletion event(stripe, arrayName, isGc);
+        StripeMapUpdateCompletion event(stripe, arrayName);
         executionSuccessful = event.Execute();
         if (unlikely(false == executionSuccessful))
         {
@@ -94,7 +93,7 @@ StripeMapUpdate::Execute(void)
             POS_TRACE_ERROR(static_cast<int>(eventId),
                 PosEventId::GetString(eventId));
 
-            EventSmartPtr event(new StripeMapUpdateCompletion(stripe, arrayName, isGc));
+            EventSmartPtr event(new StripeMapUpdateCompletion(stripe, arrayName));
             eventScheduler->EnqueueEvent(event);
 
             executionSuccessful = true;

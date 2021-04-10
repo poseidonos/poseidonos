@@ -30,67 +30,56 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/gc/copier_write_completion.h"
-#include "src/spdk_wrapper/free_buffer_pool.h"
+#include "src/gc/gc_map_update_completion.h"
+
 #include "src/logger/logger.h"
+#include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/include/backend_event.h"
+#include "Air.h"
 #include "src/allocator/allocator.h"
-#include "src/allocator/wb_stripe_manager/stripe.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_mgmt/array_manager.h"
-#include "src/mapper/mapper.h"
-#include "src/mapper_service/mapper_service.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/gc/copier_meta.h"
+#include "src/io/backend_io/flush_completion.h"
+#include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/io/general_io/rba_state_manager.h"
 #include "src/io/general_io/rba_state_service.h"
-#include "src/io/backend_io/stripe_map_update_request.h"
-#include "src/io/backend_io/flush_completion.h"
-#include "src/gc/copier_meta.h"
-#include "src/gc/gc_map_update.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "Air.h"
+#include "src/mapper/mapper.h"
+#include "src/mapper_service/mapper_service.h"
+#include "src/volume/volume_service.h"
 
 #include <list>
 #include <string>
 
 namespace pos
 {
-GcFlushCompletion::GcFlushCompletion(Stripe* stripe, std::string arrayName)
-: GcFlushCompletion(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
-      EventSchedulerSingleton::Instance(), arrayName)
-{
-}
-
-GcFlushCompletion::GcFlushCompletion(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* eventScheduler, std::string arrayName)
-: Event(true),
+GcMapUpdateCompletion::GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap, EventScheduler* eventScheduler)
+: Event(false),
   stripe(stripe),
-  iStripeMap(stripeMap),
-  eventScheduler(eventScheduler),
-  arrayName(arrayName)
+  arrayName(arrayName),
+  iStripeMap(iStripeMap),
+  eventScheduler(eventScheduler)
 {
-    SetFrontEnd(false);
-    SetEventType(BackendEvent_GC);
-    AIRLOG(LAT_BDEV_READ, 0, 0, stripe->GetVsid());
-
     IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
     const PartitionLogicalSize* udSize =
         info->GetSizeInfo(PartitionType::USER_DATA);
     totalBlksPerUserStripe = udSize->blksPerStripe;
 }
 
-GcFlushCompletion::~GcFlushCompletion(void)
+GcMapUpdateCompletion::~GcMapUpdateCompletion(void)
 {
 }
 
 bool
-GcFlushCompletion::Execute(void)
+GcMapUpdateCompletion::Execute(void)
 {
-    RBAStateManager* rbaStateManager =
-        RBAStateServiceSingleton::Instance()->GetRBAStateManager(arrayName);
-
     BlkAddr rba;
     uint32_t volId;
+
+    RBAStateManager* rbaStateManager =
+        RBAStateServiceSingleton::Instance()->GetRBAStateManager(arrayName);
     std::list<RbaAndSize> rbaList;
-    bool wrapupSuccessful = true;
 
     for (uint32_t i = 0; i < totalBlksPerUserStripe; i++)
     {
@@ -103,24 +92,25 @@ GcFlushCompletion::Execute(void)
         }
     }
     std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
-    bool ownershipAcquired = rbaStateManager->AcquireOwnershipRbaList(volId,
-            rbaList);
-    if (false == ownershipAcquired)
-    {
-        return false;
-    }
+    rbaStateManager->ReleaseOwnershipRbaList(volId, rbaList);
 
-    EventSmartPtr event(new GcMapUpdate(stripe, arrayName));
-    if (likely(event != nullptr))
+    FlushCompletion event(stripe, iStripeMap, eventScheduler, arrayName);
+    bool done = event.Execute();
+    bool wrapupSuccessful = true;
+
+    if (unlikely(false == done))
     {
-        EventSchedulerSingleton::Instance()->EnqueueEvent(event);
-    }
-    else
-    {
-        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MAP_UPDATE_HANDLER_EVENT_ALLOCATE_FAIL),
-            "Failed to allocate flush wrapup event");
-        wrapupSuccessful = false;
-        rbaStateManager->ReleaseOwnershipRbaList(volId, rbaList);
+        EventSmartPtr event(new FlushCompletion(stripe, arrayName));
+        if (likely(event != nullptr))
+        {
+            eventScheduler->EnqueueEvent(event);
+        }
+        else
+        {
+            POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MAP_UPDATE_HANDLER_EVENT_ALLOCATE_FAIL),
+                "Failed to allocate flush wrapup event");
+            wrapupSuccessful = false;
+        }
     }
 
     return wrapupSuccessful;

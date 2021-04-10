@@ -39,20 +39,34 @@
 #include "src/allocator/wb_stripe_manager/stripe.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/backend_event.h"
-#include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/logger/logger.h"
-#include "src/gc/copier_write_completion.h"
+#include "src/gc/gc_flush_completion.h"
 #include "src/io/general_io/rba_state_manager.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 
+#include "src/include/address_type.h"
+
+#include "src/allocator/i_block_allocator.h"
+#include "src/io/general_io/translator.h"
+#include "src/io/general_io/rba_state_service.h"
+
+#include "src/array_mgmt/array_manager.h"
+#include "src/volume/volume_service.h"
+
 namespace pos
 {
-GcFlushSubmission::GcFlushSubmission(Stripe* inputStripe, std::string arrayName)
+
+GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId, GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager)
 : Event(false, BackendEvent_Flush),
-  stripe(inputStripe),
-  arrayName(arrayName)
+  arrayName(arrayName),
+  blkInfoList(blkInfoList),
+  volumeId(volumeId),
+  dataBuffer(dataBuffer),
+  gcStripeManager(gcStripeManager)
 {
+    iBlockAllocator = AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName);
+    iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName);
     SetEventType(BackendEvent_Flush);
 }
 
@@ -63,22 +77,44 @@ GcFlushSubmission::~GcFlushSubmission(void)
 bool
 GcFlushSubmission::Execute(void)
 {
-    IWBStripeAllocator* iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName);
+    VirtualBlks vsas;
+    Stripe* stripe;
+
+    std::tie(vsas, stripe) = AllocateBlocks(volumeId);
+
+    if (IsUnMapVsa(vsas.startVsa))
+    {
+        return false;
+    }
+
     StripeId logicalStripeId = iWBStripeAllocator->AllocateUserDataStripeId(stripe->GetVsid());
+
+    for (uint32_t offset = 0; offset < vsas.numBlks; offset++)
+    {
+        std::vector<BlkInfo>::iterator it = blkInfoList->begin();
+        std::advance(it, offset);
+        BlkInfo blkInfo = *it;
+        stripe->UpdateReverseMap(offset, blkInfo.rba, volumeId);
+        stripe->UpdateVictimVsa(offset, blkInfo.vsa);
+    }
+
+    blkInfoList->clear();
+    delete blkInfoList;
 
     std::list<BufferEntry> bufferList;
     uint64_t blocksInStripe = 0;
 
-    for (auto it = stripe->DataBufferBegin(); it != stripe->DataBufferEnd(); ++it)
+    for (auto it = dataBuffer->begin(); it != dataBuffer->end(); ++it)
     {
         BufferEntry bufferEntry(*it, BLOCKS_IN_CHUNK);
         bufferList.push_back(bufferEntry);
         blocksInStripe += BLOCKS_IN_CHUNK;
     }
+    assert(vsas.numBlks == blocksInStripe);
 
     stripe->SetUserLsid(logicalStripeId);
 
-    CallbackSmartPtr callback(new StripeMapUpdateRequest(stripe, arrayName, true));
+    CallbackSmartPtr callback(new GcFlushCompletion(stripe, arrayName, gcStripeManager, dataBuffer));
 
     LogicalBlkAddr startLSA = {
         .stripeId = logicalStripeId,
@@ -97,6 +133,25 @@ GcFlushSubmission::Execute(void)
         arrayName);
 
     return (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned);
+}
+
+std::pair <VirtualBlks, Stripe*>
+GcFlushSubmission::AllocateBlocks(uint32_t volumeId)
+{
+    VirtualBlks vsas = iBlockAllocator->AllocateWriteBufferBlks(volumeId,
+                blkInfoList->size(), true);
+
+    Stripe* stripe = nullptr;
+    if (IsUnMapVsa(vsas.startVsa) == false)
+    {
+        assert(vsas.numBlks == blkInfoList->size());
+        Translator translator(vsas.startVsa, arrayName);
+        StripeAddr lsidEntry = translator.GetLsidEntry(0);
+        stripe = iWBStripeAllocator->GetStripe(lsidEntry);
+        stripe->DecreseBlksRemaining(vsas.numBlks);
+    }
+
+    return make_pair(vsas, stripe);
 }
 
 } // namespace pos

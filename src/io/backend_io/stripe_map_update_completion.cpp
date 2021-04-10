@@ -40,20 +40,18 @@
 #include "src/include/backend_event.h"
 #include "src/io/backend_io/flush_completion.h"
 #include "src/mapper_service/mapper_service.h"
-#include "src/gc/copier_write_completion.h"
 #include "src/logger/logger.h"
 
 #include <string>
 
 namespace pos
 {
-StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe, std::string& arrayName, bool isGc)
+StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe, std::string& arrayName)
 : StripeMapUpdateCompletion(inputStripe,
     AllocatorServiceSingleton::Instance()->GetISegmentCtx(arrayName),
     MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
     EventSchedulerSingleton::Instance(),
-    arrayName,
-    isGc)
+    arrayName)
 {
 }
 
@@ -61,14 +59,12 @@ StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe,
     ISegmentCtx* iSegmentCtx,
     IStripeMap* iStripeMap,
     EventScheduler* eventScheduler,
-    std::string& arrayName,
-    bool isGc)
+    std::string& arrayName)
 : Event(false, BackendEvent_Flush),
   stripe(inputStripe),
   iSegmentCtx(iSegmentCtx),
   iStripeMap(iStripeMap),
   eventScheduler(eventScheduler),
-  isGc(isGc),
   arrayName(arrayName)
 {
     SetEventType(BackendEvent_Flush);
@@ -86,44 +82,21 @@ StripeMapUpdateCompletion::Execute(void)
     iStripeMap->SetLSA(stripe->GetVsid(), stripe->GetUserLsid(), IN_USER_AREA);
     iSegmentCtx->UpdateOccupiedStripeCount(currentLsid);
 
-    if (isGc == false)
-    {
-        FlushCompletion event(stripe, iStripeMap, eventScheduler, arrayName);
-        bool done = event.Execute();
+    FlushCompletion event(stripe, iStripeMap, eventScheduler, arrayName);
+    bool done = event.Execute();
 
-        if (unlikely(false == done))
+    if (unlikely(false == done))
+    {
+        EventSmartPtr eventForSchedule(new FlushCompletion(stripe, arrayName));
+        if (likely(eventForSchedule != nullptr))
         {
-            EventSmartPtr eventForSchedule(new FlushCompletion(stripe, arrayName));
-            if (likely(eventForSchedule != nullptr))
-            {
-                eventScheduler->EnqueueEvent(eventForSchedule);
-            }
-            else
-            {
-                POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MAP_UPDATE_HANDLER_EVENT_ALLOCATE_FAIL),
-                    "Failed to allocate flush wrapup event");
-                wrapupSuccessful = false;
-            }
+            eventScheduler->EnqueueEvent(eventForSchedule);
         }
-    }
-    else
-    {
-        GcFlushCompletion event(stripe, iStripeMap, eventScheduler, arrayName);
-        bool done = event.Execute();
-
-        if (unlikely(false == done))
+        else
         {
-            EventSmartPtr eventForSchedule(new GcFlushCompletion(stripe, arrayName));
-            if (likely(eventForSchedule != nullptr))
-            {
-                eventScheduler->EnqueueEvent(eventForSchedule);
-            }
-            else
-            {
-                POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MAP_UPDATE_HANDLER_EVENT_ALLOCATE_FAIL),
-                    "Failed to allocate flush wrapup event");
-                wrapupSuccessful = false;
-            }
+            POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MAP_UPDATE_HANDLER_EVENT_ALLOCATE_FAIL),
+                "Failed to allocate flush wrapup event");
+            wrapupSuccessful = false;
         }
     }
 

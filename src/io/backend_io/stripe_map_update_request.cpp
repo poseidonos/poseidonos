@@ -46,20 +46,19 @@
 
 namespace pos
 {
-StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, std::string& arrayName, bool isGc)
+StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, std::string& arrayName)
 : StripeMapUpdateRequest(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
-      EventSchedulerSingleton::Instance(), arrayName, isGc)
+      EventSchedulerSingleton::Instance(), arrayName)
 {
     SetEventType(BackendEvent_Flush);
 }
 
 StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap,
-    EventScheduler* eventScheduler, std::string& arrayName, bool isGc)
+    EventScheduler* eventScheduler, std::string& arrayName)
 : Callback(false),
   stripe(stripe),
   iStripeMap(stripeMap),
   eventScheduler(eventScheduler),
-  isGc(isGc),
   arrayName(arrayName)
 {
 }
@@ -79,6 +78,7 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         stripe->GetVsid(),
         static_cast<uint32_t>(writeBufferArea),
         wbStripeAddr.stripeId);
+
     if (_GetErrorCount() > 0)
     {
         POS_EVENT_ID eventId =
@@ -96,7 +96,7 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         return true;
     }
 
-    EventSmartPtr event(new StripeMapUpdate(stripe, arrayName, isGc));
+    EventSmartPtr event(new StripeMapUpdate(stripe, arrayName));
     if (unlikely(nullptr == event))
     {
         POS_EVENT_ID eventId =

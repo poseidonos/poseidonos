@@ -33,71 +33,40 @@
 #pragma once
 
 #include <atomic>
+#include <cstdint>
+#include <map>
 #include <string>
 #include <vector>
 
-#include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/include/address_type.h"
-#include "src/gc/gc_stripe_manager.h"
-#include "src/lib/bitmap.h"
-#include "src/allocator_service/allocator_service.h"
-#include "src/gc/victim_stripe.h"
+#include "src/event_scheduler/event.h"
+#include "src/event_scheduler/callback.h"
+#include "src/journal_service/journal_service.h"
+#include "src/mapper/i_vsamap.h"
+#include "src/mapper/include/mpage_info.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
 
 namespace pos
 {
-class CopierMeta
+class Stripe;
+class IStripeMap;
+class EventScheduler;
+
+class GcMapUpdateCompletion : public Event
 {
 public:
-    explicit CopierMeta(IArrayInfo* array);
-    ~CopierMeta(void);
-
-    void* GetBuffer(StripeId stripeId);
-    void ReturnBuffer(StripeId stripeId, void* buffer);
-
-    void SetStartCopyStripes(void);
-    void SetStartCopyBlks(uint32_t blocks);
-    void SetDoneCopyBlks(uint32_t blocks);
-    uint32_t GetStartCopyBlks(void);
-    uint32_t GetDoneCopyBlks(void);
-    void InitProgressCount(void);
-
-    uint32_t SetInUseBitmap(void);
-    bool IsSynchronized(void);
-    bool IsAllVictimSegmentCopyDone(void);
-    bool IsCopyDone(void);
-    bool IsReadytoCopy(uint32_t index);
-
-    uint32_t GetStripePerSegment(void);
-    uint32_t GetBlksPerStripe(void);
-    VictimStripe* GetVictimStripe(uint32_t victimSegmentIndex, uint32_t stripeOffset);
-
-    GcStripeManager* GetGcStripeManager(void);
-    std::string GetArrayName(void);
-
-    static const uint32_t GC_BUFFER_COUNT = 1024;
-    static const uint32_t GC_CONCURRENT_COUNT = 16;
-    static const uint32_t GC_VICTIM_SEGMENT_COUNT = 2;
+    GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap, EventScheduler* eventScheduler);
+    ~GcMapUpdateCompletion(void) override;
+    bool Execute(void) override;
 
 private:
-    void _CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize);
-    std::atomic<uint32_t> requestStripeCount;
-    std::atomic<uint32_t> requestBlockCount;
-    std::atomic<uint32_t> doneBlockCount;
-    FreeBufferPool* gcBufferPool[GC_BUFFER_COUNT];
-
-    BitMapMutex* inUseBitmap;
-    GcStripeManager* gcStripeManager;
-
-    uint32_t stripesPerSegment;
-    uint32_t blksPerStripe;
-
-    uint32_t victimSegmentIndex = 0;
-    std::vector<VictimStripe*> victimStripe[GC_VICTIM_SEGMENT_COUNT];
-
-    uint32_t copyIndex = 0;
-    bool firstGc = true;
-    std::atomic_flag copyLock = ATOMIC_FLAG_INIT;
+    Stripe* stripe;
     std::string arrayName;
+    IStripeMap* iStripeMap;
+    EventScheduler* eventScheduler;
+
+    uint32_t totalBlksPerUserStripe;
 };
 
 } // namespace pos
+

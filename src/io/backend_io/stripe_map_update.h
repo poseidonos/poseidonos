@@ -47,9 +47,9 @@ class JournalService;
 class StripeMapUpdate : public Event
 {
 public:
-    explicit StripeMapUpdate(Stripe* stripe, std::string& arrayName, bool isGc = false);
+    explicit StripeMapUpdate(Stripe* stripe, std::string& arrayName);
     StripeMapUpdate(Stripe* stripe, IStripeMap* iStripeMap, JournalService* journalService,
-        EventScheduler* scheduler, std::string& arrayName, bool isGc = false);
+        EventScheduler* scheduler, std::string& arrayName);
     virtual ~StripeMapUpdate(void) override;
     virtual bool Execute(void) override;
 
@@ -58,7 +58,6 @@ private:
     IStripeMap* iStripeMap;
     JournalService* journalService;
     EventScheduler* eventScheduler;
-    bool isGc;
     std::string arrayName;
 };
 

@@ -131,6 +131,12 @@ Copier::_Stop(void)
         }
     }
 
+    GcStripeManager* gcStripeManager = meta->GetGcStripeManager();
+    if (false == gcStripeManager->IsAllFinished())
+    {
+        return false;
+    }
+
     isStopped = false;
     _ChangeEventState(CopierStateType::COPIER_READY_TO_END_STATE);
 

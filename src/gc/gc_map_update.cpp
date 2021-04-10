@@ -31,6 +31,7 @@
  */
 
 #include "src/gc/gc_map_update.h"
+#include "src/gc/gc_map_update_completion.h"
 
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/free_buffer_pool.h"
@@ -53,17 +54,22 @@
 
 namespace pos
 {
-GcMapUpdate::GcMapUpdate(Stripe* stripe, std::string& arrayName)
-: GcMapUpdate(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
-      EventSchedulerSingleton::Instance(), arrayName)
+GcMapUpdate::GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
+                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, uint32_t volumeId)
+: GcMapUpdate(stripe, arrayName, mapUpdateInfoList, invalidSegCnt, iStripeMap,
+      EventSchedulerSingleton::Instance(), volumeId)
 {
 }
 
-GcMapUpdate::GcMapUpdate(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* eventScheduler, std::string& arrayName)
+GcMapUpdate::GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
+                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, EventScheduler* eventScheduler, uint32_t volumeId)
 : stripe(stripe),
-  iStripeMap(stripeMap),
+  iStripeMap(iStripeMap),
   eventScheduler(eventScheduler),
-  arrayName(arrayName)
+  invalidSegCnt(invalidSegCnt),
+  arrayName(arrayName),
+  volumeId(volumeId),
+  mapUpdateInfoList(mapUpdateInfoList)
 {
     SetFrontEnd(false);
     SetEventType(BackendEvent_GC);
@@ -84,83 +90,34 @@ bool
 GcMapUpdate::Execute(void)
 {
     IVSAMap* iVSAMap = MapperServiceSingleton::Instance()->GetIVSAMap(arrayName);
+    ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx(arrayName);
     StripeId stripeId = stripe->GetVsid();
     BlkAddr rba;
-    uint32_t volId;
-    VirtualBlkAddr currentVsa;
-    bool isValidData = false;
-    uint32_t numValidate = 0;
+    uint32_t volId = volumeId;
+    VirtualBlkAddr writeVsa;
 
-    if (stripeOffset != totalBlksPerUserStripe)
+    StripeId currentLsid = stripe->GetUserLsid();
+    iStripeMap->SetLSA(stripe->GetVsid(), stripe->GetUserLsid(), IN_USER_AREA);
+    iSegmentCtx->UpdateOccupiedStripeCount(currentLsid);
+
+    uint32_t validCount = mapUpdateInfoList.blockMapUpdateList.size();
+    for (auto it : mapUpdateInfoList.blockMapUpdateList)
     {
-        for (; stripeOffset < totalBlksPerUserStripe; stripeOffset++)
-        {
-            std::tie(rba, volId) = stripe->GetReverseMapEntry(stripeOffset);
-            if (likely(INVALID_RBA != rba))
-            {
-                int shouldRetry = CALLER_EVENT;
-                currentVsa = iVSAMap->GetVSAInternal(volId, rba, shouldRetry);
+        rba = it.rba;
+        writeVsa = it.vsa;
+        VirtualBlks writeVsaRange = {writeVsa, 1};
+        iVSAMap->SetVSAsInternal(volId, rba, writeVsaRange);
+    }
+    _InvalidateBlock();
+    _ValidateBlock(stripeId, validCount);
 
-                if (NEED_RETRY == shouldRetry)
-                {
-                    return false;
-                }
-                VirtualBlkAddr oldVsa = stripe->GetVictimVsa(stripeOffset);
-                isValidData = (currentVsa == oldVsa);
-
-                uint32_t oneBlockCount = 1;
-                VirtualBlkAddr writeVsa = {stripeId, stripeOffset};
-                VirtualBlks writeVsaRange = {writeVsa, oneBlockCount};
-
-                                if (isValidData == true)
-                {
-                    iVSAMap->SetVSAsInternal(volId, rba, writeVsaRange);
-                    _RegisterInvalidateSegments(currentVsa);
-                    numValidate++;
-                }
-            }
-        }
-        _InvalidateBlock();
-        _ValidateBlock(stripeId, numValidate);
-
-        RBAStateManager* rbaStateManager =
-            RBAStateServiceSingleton::Instance()->GetRBAStateManager(arrayName);
-        std::list<RbaAndSize> rbaList;
-
-        for (uint32_t i = 0; i < totalBlksPerUserStripe; i++)
-        {
-            std::tie(rba, volId) = stripe->GetReverseMapEntry(i);
-            if (likely(rba != INVALID_RBA))
-            {
-                RbaAndSize rbaAndSize = {rba * VolumeIo::UNITS_PER_BLOCK,
-                    BLOCK_SIZE};
-                rbaList.push_back(rbaAndSize);
-            }
-        }
-        std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
-        rbaStateManager->ReleaseOwnershipRbaList(volId, rbaList);
+    EventSmartPtr event(new GcMapUpdateCompletion(stripe, arrayName, iStripeMap, eventScheduler));
+    if (likely(event != nullptr))
+    {
+        eventScheduler->EnqueueEvent(event);
     }
 
-    FlushCompletion event(stripe, iStripeMap, eventScheduler, arrayName);
-    bool done = event.Execute();
-    bool wrapupSuccessful = true;
-
-    if (unlikely(false == done))
-    {
-        EventSmartPtr event(new FlushCompletion(stripe, arrayName));
-        if (likely(event != nullptr))
-        {
-            eventScheduler->EnqueueEvent(event);
-        }
-        else
-        {
-            POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MAP_UPDATE_HANDLER_EVENT_ALLOCATE_FAIL),
-                "Failed to allocate flush wrapup event");
-            wrapupSuccessful = false;
-        }
-    }
-
-    return wrapupSuccessful;
+    return true;
 }
 
 void

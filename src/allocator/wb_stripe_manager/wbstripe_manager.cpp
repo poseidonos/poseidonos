@@ -36,7 +36,6 @@
 #include "src/mapper_service/mapper_service.h"
 #include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/include/branch_prediction.h"
-#include "src/gc/gc_flush_submission.h"
 #include "src/qos/qos_manager.h"
 
 #include <vector>
@@ -431,19 +430,17 @@ void
 WBStripeManager::PickActiveStripe(uint32_t volumeId, std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone)
 {
     Stripe* activeStripe = nullptr;
+    ASTailArrayIdx index = volumeId;
 
-    for (ASTailArrayIdx index = volumeId; index < ACTIVE_STRIPE_TAIL_ARRAYLEN; index += MAX_VOLUME_COUNT)
+    activeStripe = _FinishActiveStripe(index);
+    if (activeStripe != nullptr)
     {
-        activeStripe = _FinishActiveStripe(index);
-        if (activeStripe != nullptr)
-        {
-            POS_TRACE_INFO(EID(PICKUP_ACTIVE_STRIPE),
-                "Picked Active Stripe: index:{}  wbLsid:{}  vsid:{}  remaining:{}", index,
-                activeStripe->GetWbLsid(), activeStripe->GetVsid(),
-                activeStripe->GetBlksRemaining());
-            stripesToFlush.push_back(activeStripe);
-            vsidToCheckFlushDone.push_back(activeStripe->GetVsid());
-        }
+        POS_TRACE_INFO(EID(PICKUP_ACTIVE_STRIPE),
+            "Picked Active Stripe: index:{}  wbLsid:{}  vsid:{}  remaining:{}", index,
+            activeStripe->GetWbLsid(), activeStripe->GetVsid(),
+            activeStripe->GetBlksRemaining());
+        stripesToFlush.push_back(activeStripe);
+        vsidToCheckFlushDone.push_back(activeStripe->GetVsid());
     }
 }
 
@@ -583,17 +580,8 @@ WBStripeManager::_FinishRemainingBlocks(VirtualBlks remainingVsaRange)
         {
             POS_TRACE_DEBUG(EID(ALLOCATOR_TRIGGER_FLUSH), "Flush stripe (vsid {})", vsid);
             int ret = 0;
-            uint32_t asTailArrayIndex = activeStripe->GetAsTailArrayIdx();
-            if (asTailArrayIndex < MAX_VOLUME_COUNT)
-            {
-                EventSmartPtr event(new FlushReadSubmission(activeStripe, arrayName));
-                ret = activeStripe->Flush(event);
-            }
-            else
-            {
-                EventSmartPtr event(new GcFlushSubmission(activeStripe, arrayName));
-                ret = activeStripe->Flush(event);
-            }
+            EventSmartPtr event(new FlushReadSubmission(activeStripe, arrayName));
+            ret = activeStripe->Flush(event);
 
             if (ret != 0)
             {
