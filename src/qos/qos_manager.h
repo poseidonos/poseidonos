@@ -158,6 +158,7 @@ private:
     QosEventManager* qosEventManager;
     QosSpdkManager* spdkManager;
     bool feQosEnabled;
+    bool initialized;
 };
 
 using QosManagerSingleton = Singleton<QosManager>;

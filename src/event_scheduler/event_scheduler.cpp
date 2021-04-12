@@ -125,6 +125,9 @@ EventScheduler::~EventScheduler(void)
     {
         delete policy;
     }
+#if defined QOS_ENABLED_BE
+    QosManagerSingleton::ResetInstance();
+#endif
 }
 
 void

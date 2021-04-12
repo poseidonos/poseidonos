@@ -486,6 +486,7 @@ QosManager::QosManager()
     policyManager = new QosPolicyManager();
     qosVolumeManager = new QosVolumeManager(policyManager, feQosEnabled);
     qosEventManager = new QosEventManager(policyManager);
+    initialized = false;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -498,6 +499,7 @@ QosManager::QosManager()
 QosManager::~QosManager()
 {
     _Finalize();
+    initialized = false;
     delete qosThread;
     delete spdkManager;
     delete policyManager;
@@ -515,6 +517,10 @@ QosManager::~QosManager()
 void
 QosManager::Initialize(void)
 {
+    if (true == initialized)
+    {
+        return;
+    }
     AffinityManager* affinityManager = AffinityManagerSingleton::Instance();
     cpuSet = affinityManager->GetCpuSet(CoreType::QOS);
 
@@ -530,6 +536,7 @@ QosManager::Initialize(void)
     {
         spdkManager->Initialize();
     }
+    initialized = true;
 }
 
 /* --------------------------------------------------------------------------*/

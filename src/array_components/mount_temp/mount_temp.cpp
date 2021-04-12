@@ -71,9 +71,6 @@ MountTemp::Unmount2(void)
     FlushCmdManagerSingleton::ResetInstance();
     POS_TRACE_INFO(eventId, "start meta file system mgr unmount");
     metaFs.mgmt.UnmountSystem(arrayName);
-    POS_TRACE_INFO(eventId, "start qos manager reset instance");
-    QosManagerSingleton::ResetInstance();
-
     _ResetNvmf();
 
     return ret;
