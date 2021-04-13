@@ -78,6 +78,9 @@ public:
     virtual ArrayDevice* GetFaulty(void);
     virtual ArrayDevice* GetRebuilding(void);
 
+    // This is UT helper method and doesn't need to be inherited. This isn't for production use.
+    void SetArrayDeviceList(ArrayDeviceList* arrayDeviceList);
+
 private:
     int _CheckDevs(const ArrayDeviceSet& devSet);
     int _CheckConstraints(ArrayDeviceList* devs);

@@ -85,7 +85,7 @@ TEST(ReadSubmission, ReadSubmission_Heap)
     readSubmission = nullptr;
 }
 
-TEST(ReadSubmission, Execute_SingleBlock)
+TEST(ReadSubmission, DISABLED_Execute_SingleBlock)
 {
     // Given
     char buf[1024];
@@ -130,7 +130,7 @@ TEST(ReadSubmission, Execute_SingleBlock)
     ASSERT_EQ(expectedStripeId, actualStripeId);
 }
 
-TEST(ReadSubmission, Execute_MultiBlocks)
+TEST(ReadSubmission, DISABLED_Execute_MultiBlocks)
 {
     // Given
     char buf[1024];

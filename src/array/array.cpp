@@ -49,12 +49,14 @@ namespace pos
 const int Array::LOCK_ACQUIRE_FAILED = -1;
 
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
-: Array(name, rbdr, abr, new ArrayDeviceManager(DeviceManagerSingleton::Instance()), DeviceManagerSingleton::Instance(), new PartitionManager(name, abr), new ArrayState(iState), new ArrayInterface())
+: Array(name, rbdr, abr, new ArrayDeviceManager(DeviceManagerSingleton::Instance()), DeviceManagerSingleton::Instance(),
+    new PartitionManager(name, abr), new ArrayState(iState), new ArrayInterface(), EventSchedulerSingleton::Instance())
 {
 }
 
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
-    ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr, PartitionManager* ptnMgr, ArrayState* arrayState, ArrayInterface* arrayInterface)
+    ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr, PartitionManager* ptnMgr, ArrayState* arrayState,
+    ArrayInterface* arrayInterface, EventScheduler* eventScheduler)
 : state(arrayState),
   intf(arrayInterface),
   ptnMgr(ptnMgr),
@@ -62,7 +64,8 @@ Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
   devMgr_(devMgr)/*initialize with devMgr*/,
   sysDevMgr(sysDevMgr)/*assign with devMgr*/,
   rebuilder(rbdr),
-  abrControl(abr)
+  abrControl(abr),
+  eventScheduler(eventScheduler)
 {
     pthread_rwlock_init(&stateLock, nullptr);
 }
@@ -295,7 +298,7 @@ Array::AddSpare(string devName)
     }
 
     EventSmartPtr event(new RebuildHandler(this, nullptr));
-    EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+    eventScheduler->EnqueueEvent(event);
     pthread_rwlock_unlock(&stateLock);
     POS_TRACE_INFO(ret, "Spare device was successfully added");
 
@@ -532,7 +535,7 @@ void
 Array::_ResumeRebuild(void)
 {
     EventSmartPtr event(new RebuildHandler(this, nullptr));
-    EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+    eventScheduler->EnqueueEvent(event);
 }
 
 void
@@ -602,9 +605,8 @@ Array::_DetachData(ArrayDevice* target)
     }
     else if (isRebuildable)
     {
-        EventScheduler* scheduler = EventSchedulerSingleton::Instance();
         EventSmartPtr event(new RebuildHandler(this, target));
-        scheduler->EnqueueEvent(event);
+        eventScheduler->EnqueueEvent(event);
     }
 }
 

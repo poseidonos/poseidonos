@@ -19,7 +19,6 @@ using ::testing::Return;
 
 namespace pos
 {
-    
 TEST(FlushReadSubmission, FlushReadSubmission_Constructor_OneArgument_Stack)
 {
     // Given

@@ -71,7 +71,6 @@ public:
     RaidType GetRaidType(void);
 
 protected:
-    virtual LogicalBlkAddr _Translate(const FtBlkAddr&) = 0;
     virtual void _BindRecoverFunc(void) = 0;
 
     FtSizeInfo ftSize_ = {

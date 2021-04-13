@@ -2,9 +2,28 @@ cmake_minimum_required(VERSION 3.10.0)
 
 # https://gcc.gnu.org/onlinedocs/gcc/Gcov-Data-Files.html
 
-# TODO(yyu): parameterize "-O2" option so that CI could build with -O2
+# Default options
+option(POS_BUILD_LARGE_UT "Coalesce all UTs/ITs into two binaries" ON)
+option(POS_PRESERVE_TEST_DIR "Build test binaries at `test/build/` while preserving their original dir hierarchy (works only when POS_BUILD_LARGE_UT is OFF)" OFF)
+option(POS_BUILD_WITH_O2 "Use gcc O2 optimization to be on par with prod build" OFF)
+option(POS_SKIP_UT_BUILD "Skip compiling test/unit-tests/**/*_test.cpp" OFF)
+option(POS_SKIP_IT_BUILD "Skip compiling test/integration-tests/**/*_test.cpp" OFF)
+option(POS_BUILD_SHARED_LIB "Build POS as shared library (vs. static)" ON)
+option(POS_TESTEXEC_WITH_NATIVE_GTEST "Run UTs/ITs by executing gtest binaries directly (vs. ctest)" ON)
+
+# By default, we use 4 threads to run unit tests and 1 thread to run integration tests.
+# Those numbers are to limit the tests from consuming too much resource of a build server, 
+# but may not be relevant to users' perf requirement. You could either optimize test execution times
+# by increasing the parallelism, or throttle by decreasing the value.
+set(POS_PARALLEL_EXEC_UT "4" CACHE STRING "Specify the number of parallel threads to run unit tests")
+set(POS_PARALLEL_EXEC_IT "1" CACHE STRING "Specify the number of parallel threads to run integration tests")
+
 set(CMAKE_CXX_FLAGS "--coverage -ftest-coverage -fpermissive -fPIC")
 set(CMAKE_SHARED_LINKER_FLAGS "--coverage -ftest-coverage")
+
+if(POS_BUILD_WITH_O2)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+endif(POS_BUILD_WITH_O2)
 
 # If needed, we could specify which C++ standard to use.
 # POS is currently implemented in C++14. 
@@ -70,15 +89,46 @@ MACRO(POS_CMAKE_SUBDIR_ALL)
     endforeach(file_cmakelists ${files_cmakelists})
 ENDMACRO()
 
+# ${test_type} should be either unit-tests or integration-tests
+MACRO(POS_MOVE_BINARIES_IFNEEDED target_bin target_testfile test_type)
+    if(POS_PRESERVE_TEST_DIR)
+        set(target_testfile_dir ${CMAKE_CURRENT_SOURCE_DIR})
+        string(REPLACE ${POS_TEST_ROOT}/${test_type}/ "" dir_without_proj_prefix ${target_testfile_dir})
+
+        set(TARGET_DIR ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${test_type}/${dir_without_proj_prefix})
+        add_custom_command(TARGET ${target_bin} POST_BUILD 
+            COMMAND mkdir -p ${TARGET_DIR}
+                && mv ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${target_bin} ${TARGET_DIR})
+    endif()
+ENDMACRO()
+
 MACRO(POS_ADD_UNIT_TEST ut_bin ut_testfile)
-    message("\t- Populating Makefile(s) for unit test: ${ut_bin}...")
-    add_executable(${ut_bin} ${ut_testfile} ${ARGN})
-    target_include_directories(${ut_bin} PUBLIC ${POS_UT_INCLUDE_DIRS})
-    target_link_libraries(${ut_bin} PUBLIC ${DEP_LIBRARIES})
-    gtest_add_tests(TARGET ${ut_bin})
+    if(POS_SKIP_UT_BUILD)
+        return()
+    endif(POS_SKIP_UT_BUILD)
+
+    message("\t- Populating Makefile(s) for unit test: ${ut_bin} at ${CMAKE_CURRENT_SOURCE_DIR}")
+    get_filename_component(ut_testfile_fullpath ${ut_testfile} ABSOLUTE)
+    if(POS_BUILD_LARGE_UT)
+        # just append to the global list and build at the last stage
+        list(APPEND ut_test_files ${ut_testfile_fullpath})
+        set(ut_test_files ${ut_test_files} PARENT_SCOPE)
+    else()
+        # add to gtest immediately
+        add_executable(${ut_bin} ${ut_testfile} ${ARGN})
+        target_include_directories(${ut_bin} PUBLIC ${POS_UT_INCLUDE_DIRS})
+        target_link_libraries(${ut_bin} PUBLIC ${DEP_LIBRARIES})
+        gtest_add_tests(TARGET ${ut_bin})
+        POS_MOVE_BINARIES_IFNEEDED(${ut_bin} ${ut_testfile} "unit-tests")
+
+    endif(POS_BUILD_LARGE_UT)
 ENDMACRO()
 
 MACRO(POS_ADD_INTEGRATION_TEST it_bin it_testfile)
+    if(POS_SKIP_IT_BUILD)
+        return()
+    endif(POS_SKIP_IT_BUILD)
+
     message("\t- Populating Makefile(s) for integration test: ${it_bin}...")
 
     message("\t\t- picking up cpp files from ${CMAKE_CURRENT_SOURCE_DIR}/")
@@ -87,31 +137,25 @@ MACRO(POS_ADD_INTEGRATION_TEST it_bin it_testfile)
     foreach(f ${cpps_in_the_same_dir})
         #message("\t${f}...")
     endforeach(f)
+    if(POS_BUILD_LARGE_UT)
+        # just append to the global list and build at the last stage
+        get_filename_component(it_testfile_fullpath ${it_testfile} ABSOLUTE)
+        list(APPEND it_test_files ${it_testfile_fullpath} ${cpps_in_the_same_dir})
+        set(it_test_files ${it_test_files} PARENT_SCOPE)
+    else()
+        # add to gtest immediately
+        add_executable(${it_bin} ${it_testfile} ${ARGN} ${cpps_in_the_same_dir})
+        target_include_directories(${it_bin} PUBLIC ${POS_UT_INCLUDE_DIRS})
+        target_link_libraries(${it_bin} PUBLIC ${DEP_LIBRARIES})
+        gtest_add_tests(TARGET ${it_bin})
 
-    add_executable(${it_bin} ${it_testfile} ${ARGN} ${cpps_in_the_same_dir})
-    target_include_directories(${it_bin} PUBLIC ${POS_UT_INCLUDE_DIRS})
-    target_link_libraries(${it_bin} PUBLIC ${DEP_LIBRARIES})
-    gtest_add_tests(TARGET ${it_bin})
+        POS_MOVE_BINARIES_IFNEEDED(${it_bin} ${it_testfile} "integration-tests")
+    endif(POS_BUILD_LARGE_UT)
 ENDMACRO()
 
 MACRO(POS_ADD_SYSTEM_TEST st_bin st_testfile)
-    message("Populating Makefile(s) for system test: ${st_bin}...")
-
+    message("Not supported at the moment: ${st_bin}...")
     # It's pretty similar to POS_ADD_UNIT_TEST for now, but may contain more compile & link variations in the future
-    add_executable(${st_bin} ${st_testfile} ${ARGN})
-    target_include_directories(${st_bin} PUBLIC ${POS_UT_INCLUDE_DIRS})
-    target_link_libraries(${st_bin} PUBLIC ${DEP_LIBRARIES})
-    gtest_add_tests(TARGET ${st_bin})
-ENDMACRO()
-
-# Experimental: use this macro only when you want to directly link .o files to 
-# your UT binaries (vs. linking with libposlib.a)
-MACRO(POS_ADD_TEST_DIRECT ut_bin ut_testfile)
-    message("Building ${ut_bin} with objects linked directly...")
-    add_executable(${ut_bin} ${ut_testfile} ${ARGN} ${dep_src})
-    target_include_directories(${ut_bin} PUBLIC ${POS_UT_INCLUDE_DIRS})
-    target_link_libraries(${ut_bin} PUBLIC ${DEP_LIBRARIES})
-    gtest_add_tests(TARGET ${ut_bin})
 ENDMACRO()
 
 MACRO(POS_ASSERT_FILE_EXIST target_file)
@@ -320,10 +364,11 @@ endforeach(f)
 
 # Tried with OBJECT library described at https://stackoverflow.com/questions/1388877/how-to-build-object-files-only-once-with-cmake
 # but ran into sigkill when compiling & linking UT binaries (cyclic dep?). Let's use shared lib for now since it's smaller and a bit faster than static build/link. 
-add_library(
-    poslib SHARED ${dep_src} 
-    #poslib STATIC ${dep_src}
-)
+if(POS_BUILD_SHARED_LIB)
+    add_library(poslib SHARED ${dep_src})
+else(POS_BUILD_SHARED_LIB)
+    add_library(poslib STATIC ${dep_src})
+endif(POS_BUILD_SHARED_LIB)
 
 file(GLOB_RECURSE fixture_src ${POS_TEST_ROOT}/fixtures/*.cpp LIST_DIRECTORIES true)
 file(GLOB_RECURSE utils_src ${POS_TEST_ROOT}/utils/*.cpp LIST_DIRECTORIES true)
@@ -407,24 +452,80 @@ add_custom_target(
 )
 
 # -T allows to generate the test results in xml
-add_custom_target(
-    run_basic_tests COMMAND ctest -T Test -E "SystemTest"
-)
+if(POS_TESTEXEC_WITH_NATIVE_GTEST)
 
-add_custom_target(
-    run_full_tests COMMAND ctest -T Test
-)
+    if(NOT POS_BUILD_LARGE_UT)
+        message(FATAL_ERROR "POS_BUILD_LARGE_UT must be enabled if you'd like to use POS_TESTEXEC_WITH_NATIVE_GTEST! Quitting...")
+        exit(1)
+    endif(NOT POS_BUILD_LARGE_UT)
 
-add_custom_target(
-    run_st COMMAND ctest -T Test -R "SystemTest"
-)
+    add_custom_target(
+        run_basic_tests COMMAND ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/pos_ut --gtest_output=xml:${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/test_detail_ut.xml
+            && ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/pos_it --gtest_output=xml:${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/test_detail_it.xml
+    )
 
-add_custom_target(
-    run_it COMMAND ctest -T Test -R "IntegrationTest"
-)
+    add_custom_target(
+        run_full_tests COMMAND echo "full test has been deprecated"
+    )
 
-add_custom_target(
-    run_ut COMMAND ctest -T Test -E "SystemTest\\\|IntegrationTest\\\|VolumeTest"
-)
+    add_custom_target(
+        run_st COMMAND echo "system test has been deprecated"
+    )
+
+    add_custom_target(
+        run_it COMMAND ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/pos_it --gtest_output=xml:${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/test_detail_it.xml
+    )
+
+    add_custom_target(
+        run_ut COMMAND ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/pos_ut --gtest_output=xml:${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/test_detail_ut.xml
+    )
+
+else(POS_TESTEXEC_WITH_NATIVE_GTEST)
+    add_custom_target(
+        run_basic_tests COMMAND NUM_PROCS_UT=${POS_PARALLEL_EXEC_UT} NUM_PROCS_IT=${POS_PARALLEL_EXEC_IT} ./run_tests_in_parallel.sh
+    )
+
+    add_custom_target(
+        run_full_tests COMMAND ctest -T Test
+    )
+
+    add_custom_target(
+        run_st COMMAND ctest -T Test -R "SystemTest"
+    )
+
+    add_custom_target(
+        run_it COMMAND ctest -T Test -R "IntegrationTest" -j ${POS_PARALLEL_EXEC_IT}
+    )
+
+    add_custom_target(
+        run_ut COMMAND ctest -T Test -E "SystemTest\\\|IntegrationTest" -j ${POS_PARALLEL_EXEC_UT}
+    )
+
+endif(POS_TESTEXEC_WITH_NATIVE_GTEST)
 
 POS_CMAKE_SUBDIR_ALL()
+
+if(POS_BUILD_LARGE_UT)
+    if(NOT POS_SKIP_UT_BUILD)
+        # Build one UT binary
+        set(ONE_UT_BINARY "pos_ut")
+        message("Building one large UT binary: pos_ut")
+
+        add_executable(${ONE_UT_BINARY} ${ut_test_files})
+        target_include_directories(${ONE_UT_BINARY} PUBLIC ${POS_UT_INCLUDE_DIRS})
+        target_link_libraries(${ONE_UT_BINARY} PUBLIC ${DEP_LIBRARIES})
+        gtest_add_tests(TARGET ${ONE_UT_BINARY})
+    endif(NOT POS_SKIP_UT_BUILD)
+
+    if(NOT POS_SKIP_IT_BUILD)
+        # Build one IT binary
+        set(ONE_IT_BINARY "pos_it")
+        message("Building one large IT binary: pos_it")
+
+        add_executable(${ONE_IT_BINARY} ${it_test_files})
+        target_include_directories(${ONE_IT_BINARY} PUBLIC ${POS_UT_INCLUDE_DIRS})
+        target_link_libraries(${ONE_IT_BINARY} PUBLIC ${DEP_LIBRARIES})
+        gtest_add_tests(TARGET ${ONE_IT_BINARY})
+    endif(NOT POS_SKIP_IT_BUILD)
+endif(POS_BUILD_LARGE_UT)
+

@@ -17,12 +17,18 @@ using ::testing::Return;
 namespace pos
 {
 void
-fillWithZeros(struct ArrayBootRecord& abr)
+fillWithZeroes(struct ArrayBootRecord& abr)
 {
     memset(&abr, 0, sizeof(struct ArrayBootRecord));
 }
 
-ArrayMeta
+void
+fillMbrWithZeroes(struct masterBootRecord& mbr)
+{
+    memset(&mbr, 0, sizeof(struct masterBootRecord));
+}
+
+static ArrayMeta
 buildArrayMeta(string arrayName, int numDataDevices, int numBufferDevices)
 {
     ArrayMeta arrayMeta;
@@ -50,7 +56,7 @@ struct ArrayBootRecord
 buildArrayBootRecordFrom(const ArrayMeta& arrayMeta)
 {
     struct ArrayBootRecord abr;
-    fillWithZeros(abr);
+    fillWithZeroes(abr);
 
     string arrayName = arrayMeta.arrayName;
     arrayName.copy(abr.arrayName, arrayName.length(), 0);
@@ -178,6 +184,7 @@ TEST(MbrManager, CreateAbr_testWithExistingAbrName)
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
         int i = 0;
         struct masterBootRecord* mbr = new struct masterBootRecord; // this is freed() within m.LoadMgr(), so should be allocated from heap
+        fillMbrWithZeroes(*mbr);
         pMBRs->push_back(mbr);
         mbr->mbrVersion = 1,
         mbr->mbrParity = 1234;
@@ -639,6 +646,7 @@ TEST(MbrManager, UpdateDeviceIndexMap_testIfMbrMapManagerRefreshesDeviceMap)
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
         int i = 0;
         struct masterBootRecord* mbr = new struct masterBootRecord; // this is freed() within m.LoadMgr(), so should be allocated from heap
+        fillMbrWithZeroes(*mbr);
         mbr->mbrVersion = 1,
         mbr->mbrParity = 1234;
         mbr->arrayNum = 1;

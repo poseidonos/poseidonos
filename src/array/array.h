@@ -48,6 +48,7 @@
 #include "src/bio/ubio.h"
 #include "src/include/address_type.h"
 #include "src/include/array_config.h"
+#include "src/event_scheduler/event_scheduler.h"
 
 #ifdef _ADMIN_ENABLED
 #include "src/array/device/i_array_device_manager.h"
@@ -69,7 +70,8 @@ class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker
 
 public:
     Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState);
-    Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr, PartitionManager* ptnMgr, ArrayState* arrayState, ArrayInterface* arrayInterface);
+    Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr,
+        PartitionManager* ptnMgr, ArrayState* arrayState, ArrayInterface* arrayInterface, EventScheduler* eventScheduler);
     virtual ~Array(void);
     int Init(void) override;
     void Dispose(void) override;
@@ -136,6 +138,7 @@ private:
     IArrayRebuilder* rebuilder = nullptr;
     static const int LOCK_ACQUIRE_FAILED;
     IAbrControl* abrControl = nullptr;
+    EventScheduler* eventScheduler = nullptr;
 };
 } // namespace pos
 #endif // ARRAY_H_

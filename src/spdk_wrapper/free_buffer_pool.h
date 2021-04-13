@@ -43,9 +43,9 @@ class FreeBufferPool
 {
 public:
     FreeBufferPool(uint64_t maxBufferCount, uint32_t bufferSize);
-    ~FreeBufferPool(void);
-    void* GetBuffer(void);
-    void ReturnBuffer(void*);
+    virtual ~FreeBufferPool(void);
+    virtual void* GetBuffer(void);
+    virtual void ReturnBuffer(void*);
 
 private:
     static const uint32_t ALLOCATION_SIZE_BYTE = 2 * 1024 * 1024;

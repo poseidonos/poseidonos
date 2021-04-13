@@ -72,26 +72,6 @@ Raid5::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
     return 0;
 }
 
-LogicalBlkAddr
-Raid5::_Translate(const FtBlkAddr& fsa)
-{
-    LogicalBlkAddr lsa = {.stripeId = fsa.stripeId,
-        .offset = fsa.offset};
-    uint32_t chunkIndex = fsa.offset / ftSize_.blksPerChunk;
-    uint32_t parityIndex = _GetParityOffset(lsa.stripeId);
-    if (chunkIndex == parityIndex)
-    {
-        assert(0);
-        // TODO Error; This address is not logical address;
-    }
-    else if (chunkIndex > parityIndex)
-    {
-        lsa.offset -= ftSize_.blksPerChunk;
-    }
-
-    return lsa;
-}
-
 list<FtBlkAddr>
 Raid5::GetRebuildGroup(FtBlkAddr fba)
 {

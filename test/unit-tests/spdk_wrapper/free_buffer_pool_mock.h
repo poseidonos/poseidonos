@@ -12,6 +12,8 @@ class MockFreeBufferPool : public FreeBufferPool
 {
 public:
     using FreeBufferPool::FreeBufferPool;
+    MOCK_METHOD(void*, GetBuffer, (), (override));
+    MOCK_METHOD(void, ReturnBuffer, (void*), (override));
 };
 
 } // namespace pos

@@ -57,7 +57,6 @@ public:
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
 
 private:
-    virtual LogicalBlkAddr _Translate(const FtBlkAddr&) override;
     virtual void _BindRecoverFunc(void) override;
     void _RebuildData(void* dst, void* src, uint32_t size);
     BufferEntry _AllocBuffer();

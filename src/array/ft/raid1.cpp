@@ -64,22 +64,6 @@ Raid1::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
     return 0;
 }
 
-LogicalBlkAddr
-Raid1::_Translate(const FtBlkAddr& fsa)
-{
-    LogicalBlkAddr lsa = {.stripeId = fsa.stripeId,
-        .offset = fsa.offset};
-    if (lsa.offset >= ftSize_.backupBlkCnt)
-    {
-        assert(0);
-        // TODO Error
-    }
-
-    _BindRecoverFunc();
-
-    return lsa;
-}
-
 int
 Raid1::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
 {

@@ -623,4 +623,9 @@ ArrayDeviceManager::_GetBaseline(const vector<ArrayDevice*>& devs)
     return baseline;
 }
 
+void
+ArrayDeviceManager::SetArrayDeviceList(ArrayDeviceList* arrayDeviceList)
+{
+    this->devs_ = arrayDeviceList;
+}
 } // namespace pos

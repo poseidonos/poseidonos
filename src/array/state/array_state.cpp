@@ -420,7 +420,7 @@ ArrayState::IsRecoverable(void)
         {
             return true;
         }
-        // TODO if poseidonos is not online, it will cause the error
+        // TODO(srm) if poseidonos is not online, it will cause the error
         // case ArrayStateEnum::BROKEN:
         // {
         //     return false;
