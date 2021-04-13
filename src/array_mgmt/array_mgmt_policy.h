@@ -37,6 +37,6 @@ namespace pos
 class ArrayMgmtPolicy
 {
 public:
-    static const int MAX_ARRAY_CNT = 1;
+    static const int MAX_ARRAY_CNT = 2;
 };
 } // namespace pos
