@@ -43,16 +43,23 @@ TEST(AbrManager, LoadAbr_testIfAbrDataLoadedCorrectly)
 {
     // Given : In mbr, array named with mockArrayname exists
     string mockArrayName = "POSArray";
-    string mockDeviceName = "unvme-ns-0";
+    string mockNvmDeviceName = "unvme-nvm";
+    string mockSpareDeviceName = "unvme-spare";
+    string mockDeviceName = "unvme-ns-";
     MockMbrManager* mockMbrManager = new MockMbrManager();
-    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([ = ](string targetArrayName, struct ArrayBootRecord** abr)
+    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr)
     {
         using AbrPtr = struct ArrayBootRecord*;
         AbrPtr newAbr = new struct ArrayBootRecord; // Done with SaveAbr in product code
-        newAbr->totalDevNum = 4;
+        newAbr->totalDevNum = 5;
         newAbr->dataDevNum = 3;
         newAbr->spareDevNum = 1;
-        CopyData(newAbr->devInfo[0].deviceUid, mockDeviceName, DEVICE_UID_SIZE);
+        newAbr->nvmDevNum = 1;
+        CopyData(newAbr->devInfo[0].deviceUid, mockNvmDeviceName, DEVICE_UID_SIZE);
+        CopyData(newAbr->devInfo[1].deviceUid, mockDeviceName + "0", DEVICE_UID_SIZE);
+        CopyData(newAbr->devInfo[2].deviceUid, mockDeviceName + "1", DEVICE_UID_SIZE);
+        CopyData(newAbr->devInfo[3].deviceUid, mockDeviceName + "2", DEVICE_UID_SIZE);
+        CopyData(newAbr->devInfo[4].deviceUid, mockSpareDeviceName, DEVICE_UID_SIZE);
         *abr = newAbr;
         return 0;
     });
@@ -62,7 +69,11 @@ TEST(AbrManager, LoadAbr_testIfAbrDataLoadedCorrectly)
     abrMgr->LoadAbr(mockArrayName, meta);
 
     // Then : meta have array data
-    EXPECT_EQ(mockDeviceName, meta.devs.data.at(0).uid);
+    EXPECT_EQ(mockNvmDeviceName, meta.devs.nvm.at(0).uid);
+    EXPECT_EQ(mockDeviceName + "0", meta.devs.data.at(0).uid);
+    EXPECT_EQ(mockDeviceName + "1", meta.devs.data.at(1).uid);
+    EXPECT_EQ(mockDeviceName + "2", meta.devs.data.at(2).uid);
+    EXPECT_EQ(mockSpareDeviceName, meta.devs.spares.at(0).uid);
     delete mockMbrManager;
 }
 
@@ -99,7 +110,7 @@ TEST(AbrManager, GetMfsInit_testGettingMfsInitZero)
     string mockArrayName = "POSArray";
     int expectedMfsInitVal = 0;
     MockMbrManager* mockMbrManager = new MockMbrManager();
-    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([ = ](string targetArrayName, struct ArrayBootRecord** abr)
+    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr)
     {
         using AbrPtr = struct ArrayBootRecord*;
         AbrPtr newAbr = new struct ArrayBootRecord; // Done with SaveAbr in product code
@@ -121,7 +132,7 @@ TEST(AbrManager, GetMfsInit_testGettingMfsInitOne)
     string mockArrayName = "POSArray";
     int expectedMfsInitVal = 1;
     MockMbrManager* mockMbrManager = new MockMbrManager();
-    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([ = ](string targetArrayName, struct ArrayBootRecord** abr)
+    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr)
     {
         using AbrPtr = struct ArrayBootRecord*;
         AbrPtr newAbr = new struct ArrayBootRecord; // Done with SaveAbr in product code
@@ -240,7 +251,7 @@ TEST(AbrManager, FindArrayWithDeviceSN_testCommandPassing)
     string mockArrayName = "POSArray";
     string devName = "unvme-ns-0";
     NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
-    EXPECT_CALL(*mockMbrManager, FindArrayWithDeviceSN(_)).WillOnce([ = ](string devName)
+    EXPECT_CALL(*mockMbrManager, FindArrayWithDeviceSN(_)).WillOnce([=](string devName)
     {
         return mockArrayName;
     });

@@ -40,6 +40,7 @@
 #include "partition.h"
 #include "src/array/rebuild/rebuild_target.h"
 #include "src/array/service/io_recover/i_recover.h"
+#include "src/io_scheduler/io_dispatcher.h"
 
 using namespace std;
 
@@ -56,6 +57,12 @@ public:
                     PartitionPhysicalSize physicalSize,
                     vector<ArrayDevice *> devs,
                     Method *method);
+    StripePartition(string array,
+                    PartitionType type,
+                    PartitionPhysicalSize physicalSize,
+                    vector<ArrayDevice *> devs,
+                    Method *method,
+                    IODispatcher* ioDispatcher);
     virtual ~StripePartition();
     int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
     int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
@@ -73,6 +80,7 @@ private:
     list<PhysicalBlkAddr> _GetRebuildGroup(FtBlkAddr fba);
     void _Trim(void);
     int _CheckTrimValue(void);
+    IODispatcher* ioDispatcher_;
 };
 
 } // namespace pos

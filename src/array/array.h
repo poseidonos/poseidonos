@@ -73,24 +73,24 @@ public:
     Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr,
         PartitionManager* ptnMgr, ArrayState* arrayState, ArrayInterface* arrayInterface, EventScheduler* eventScheduler);
     virtual ~Array(void);
-    int Init(void) override;
-    void Dispose(void) override;
-    void Shutdown(void) override;
-    int Load(void);
-    int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
-    int Delete(void);
-    int AddSpare(string devName);
-    int RemoveSpare(string devName);
-    int DetachDevice(UblockSharedPtr uBlock);
-    void MountDone(void);
-    int CheckUnmountable(void);
-    int CheckDeletable(void);
-    void
+    virtual int Init(void) override;
+    virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
+    virtual int Load(void);
+    virtual int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
+    virtual int Delete(void);
+    virtual int AddSpare(string devName);
+    virtual int RemoveSpare(string devName);
+    virtual int DetachDevice(UblockSharedPtr uBlock);
+    virtual void MountDone(void);
+    virtual int CheckUnmountable(void);
+    virtual int CheckDeletable(void);
+    virtual void
     SetMetaRaidType(string raidType)
     {
         meta_.metaRaidType = raidType;
     };
-    void
+    virtual void
     SetDataRaidType(string raidType)
     {
         meta_.dataRaidType = raidType;
@@ -108,7 +108,7 @@ public:
     uint32_t GetRebuildingProgress(void) override;
     bool IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
     IArrayDevice* FindDevice(string devSn) override;
-    bool TriggerRebuild(ArrayDevice* target);
+    virtual bool TriggerRebuild(ArrayDevice* target);
 #ifdef _ADMIN_ENABLED
     IArrayDevMgr* GetArrayManager(void);
 #endif

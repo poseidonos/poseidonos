@@ -152,6 +152,4 @@ TEST(MbrMapManager, FindArrayIndex_testFindingArrayIndexWithNoInfoInMap)
     EXPECT_EQ(failedResult, result);
 }
 
-
-
 } // namespace pos

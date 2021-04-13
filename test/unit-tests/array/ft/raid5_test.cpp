@@ -50,7 +50,6 @@ verifyIfXORProducesZeroBuffer(std::list<BufferEntry> buffers, int bufSize)
 
     delete xorBuffer;
 }
-
 TEST(Raid5, Raid5_testIfConstructorIsInvoked)
 {
     // Given
@@ -60,11 +59,9 @@ TEST(Raid5, Raid5_testIfConstructorIsInvoked)
 
     // When
     Raid5 raid5(&physicalSize, 10 /* meaningless in this UT file */);
-
-    // Then: nothing
 }
 
-TEST(Raid5, Translate_testIfDestionationOffsetIsAdjustedWhenChunkIndexIsLargerThanParityIndex)
+TEST(Raid5, Raid5_testIfTranslateCalculatesDestinationOffsetProperly)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
@@ -96,11 +93,11 @@ TEST(Raid5, Convert_testIfParityBufferIsProperlyCalculated)
     // Given
     const PartitionPhysicalSize physicalSize{
         .blksPerChunk = 4,
-        .chunksPerStripe = 10};
+        .chunksPerStripe = 4};
     Raid5 raid5(&physicalSize, physicalSize.blksPerChunk * 2 /* just to be large enough */);
 
     std::list<BufferEntry> buffers;
-    int NUM_BLOCKS = 1;
+    int NUM_BLOCKS = 2;
     BufferEntry be1 = generateRandomBufferEntry(NUM_BLOCKS, false);
     BufferEntry be2 = generateRandomBufferEntry(NUM_BLOCKS, false);
     BufferEntry be3 = generateRandomBufferEntry(NUM_BLOCKS, false);
@@ -160,12 +157,10 @@ TEST(Raid5, Getters_testIfGettersAreInvoked)
         .chunksPerStripe = 100};
     Raid5 raid5(&physicalSize, 10);
 
-    // When
-    raid5.GetSizeInfo();
-    raid5.GetRecoverFunc();
-
-    // Then
+    // When & Then
     ASSERT_EQ(RaidTypeEnum::RAID5, raid5.GetRaidType());
+    ASSERT_EQ(27, raid5.GetSizeInfo()->blksPerChunk);
+    ASSERT_EQ(100, raid5.GetSizeInfo()->chunksPerStripe);
 }
 
 } // namespace pos

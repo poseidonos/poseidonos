@@ -42,6 +42,7 @@ class IStateObserver;
 class IStateControl
 {
 public:
+    virtual ~IStateControl(void) = default; // needed since ArrayComponents takes this to free the resource within ~ArrayComponents()
     virtual void Subscribe(IStateObserver* sub, string name) = 0;
     virtual void Unsubscribe(IStateObserver* sub) = 0;
     virtual StateContext* GetState(void) = 0;

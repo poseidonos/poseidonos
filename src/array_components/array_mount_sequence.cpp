@@ -43,24 +43,44 @@ namespace pos
 
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
     IAbrControl* abr, IStateControl* iState, string name)
-: temp(abr, name),
+: ArrayMountSequence(seq, new MountTemp(abr, name), iState, name,
+    new StateContext(typeid(*this).name(), SituationEnum::TRY_MOUNT),
+    new StateContext(typeid(*this).name(), SituationEnum::TRY_UNMOUNT),
+    new StateContext(typeid(*this).name(), SituationEnum::NORMAL),
+    VolumeServiceSingleton::Instance()->GetVolumeManager(name))
+{
+    // delegated to other constructor. The other constructor doesn't have IAbrControl in its
+    // params because ArrayMountSequence uses IAbrControl just to instantiate MountTemp!
+}
+
+ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
+    MountTemp* mntTmp, IStateControl* iState, string name,
+    StateContext* mountState, StateContext* unmountState, StateContext* normalState,
+    IVolumeManager* volMgr)
+: temp(mntTmp),
   state(iState),
-  arrayName(name)
+  mountState(mountState),
+  unmountState(unmountState),
+  normalState(normalState),
+  arrayName(name),
+  volMgr(volMgr)
 {
     sequence.assign(seq.begin(), seq.end());
     string sender = typeid(*this).name();
-    mountState = new StateContext(sender, SituationEnum::TRY_MOUNT);
-    unmountState = new StateContext(sender, SituationEnum::TRY_UNMOUNT);
-    normalState = new StateContext(sender, SituationEnum::NORMAL);
     state->Subscribe(this, sender);
 }
 
 ArrayMountSequence::~ArrayMountSequence(void)
 {
     state->Unsubscribe(this);
-    delete normalState;
-    delete unmountState;
-    delete mountState;
+    if (normalState != nullptr)
+        delete normalState;
+    if (unmountState != nullptr)
+        delete unmountState;
+    if (mountState != nullptr)
+        delete mountState;
+    if (temp != nullptr)
+        delete temp;
     sequence.clear();
 }
 
@@ -85,7 +105,7 @@ int ArrayMountSequence::Mount(void)
     }
 
     // mount temp.mount1
-    ret = temp.Mount1();
+    ret = temp->Mount1();
     if (ret != 0)
     {
         goto error;
@@ -111,7 +131,7 @@ int ArrayMountSequence::Mount(void)
     return ret;
 
 error:
-    for (; it != sequence.begin(); --it)
+    for (; it != sequence.begin(); --it) // TODO(srm): the first sequence wouldn't call Dispose(). fix this unless intended.
     {
         (*it)->Dispose();
     }
@@ -137,8 +157,6 @@ int ArrayMountSequence::Unmount(void)
         return (int)POS_EVENT_ID::ARRAY_UNMOUNT_PRIORITY_ERROR;
     }
 
-    IVolumeManager* volMgr =
-        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     volMgr->DetachVolumes();
     for (auto it = sequence.rbegin(); it != sequence.rend(); ++it)
     {
@@ -150,7 +168,7 @@ int ArrayMountSequence::Unmount(void)
 
         (*it)->Dispose();
     }
-    temp.Unmount2();
+    temp->Unmount2();
     // do array-dispose finally.
     sequence.front()->Dispose();
     state->Remove(normalState);
@@ -161,15 +179,13 @@ int ArrayMountSequence::Unmount(void)
 
 void ArrayMountSequence::Shutdown(void)
 {
-    IVolumeManager* volMgr =
-        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     volMgr->DetachVolumes();
     for (auto it = sequence.rbegin(); it != sequence.rend(); ++it)
     {
         (*it)->Shutdown();
     }
 
-    temp.Shutdown();
+    temp->Shutdown();
 }
 
 void ArrayMountSequence::StateChanged(StateContext* prev, StateContext* next)

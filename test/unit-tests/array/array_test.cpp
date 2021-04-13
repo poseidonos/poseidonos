@@ -15,9 +15,9 @@
 #include "test/unit-tests/array/state/array_state_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
 #include "test/unit-tests/device/device_manager_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/rebuild/array_rebuilder_mock.h"
 #include "test/unit-tests/state/interface/i_state_control_mock.h"
-#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/utils/spdk_util.h"
 
 using ::testing::_;

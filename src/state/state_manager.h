@@ -49,9 +49,9 @@ class StateManager
 public:
     StateManager(void);
     virtual ~StateManager(void);
-    IStateControl* CreateStateControl(string array);
-    IStateControl* GetStateControl(string array);
-    void RemoveStateControl(string array);
+    virtual IStateControl* CreateStateControl(string array);
+    virtual IStateControl* GetStateControl(string array);
+    virtual void RemoveStateControl(string array);
 
 private:
     StateControl* _Find(string array);

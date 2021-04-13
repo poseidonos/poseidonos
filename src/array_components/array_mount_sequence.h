@@ -35,6 +35,7 @@
 #include "src/array_components/mount_temp/mount_temp.h"
 #include "src/state/interface/i_state_observer.h"
 #include "src/state/interface/i_state_control.h"
+#include "src/volume/i_volume_manager.h"
 
 #include <vector>
 #include <string>
@@ -53,7 +54,14 @@ class ArrayMountSequence : public IStateObserver
 {
 public:
     ArrayMountSequence(vector<IMountSequence*> seq, IAbrControl* abr,
-                       IStateControl* iState, string name);
+                        IStateControl* iState, string name);
+    ArrayMountSequence(vector<IMountSequence*> seq, MountTemp* mntTmp,
+                        IStateControl* iState, string name,
+                        StateContext* mountState,
+                        StateContext* unmountState,
+                        StateContext* normalState,
+                        IVolumeManager* volMgr);
+
     virtual ~ArrayMountSequence(void);
     virtual int Mount(void);
     virtual int Unmount(void);
@@ -63,8 +71,8 @@ public:
 private:
     bool _WaitState(StateContext* goal);
 
-    MountTemp temp;
-    IStateControl* state;
+    MountTemp* temp = nullptr;
+    IStateControl* state = nullptr;
     vector<IMountSequence*> sequence;
     StateContext* mountState = nullptr;
     StateContext* unmountState = nullptr;
@@ -73,5 +81,6 @@ private:
     std::condition_variable cv;
 
     string arrayName = "";
+    IVolumeManager* volMgr = nullptr;
 };
 } // namespace pos

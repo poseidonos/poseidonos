@@ -12,6 +12,9 @@ class MockArrayMountSequence : public ArrayMountSequence
 {
 public:
     using ArrayMountSequence::ArrayMountSequence;
+    MOCK_METHOD(int, Mount, (), (override));
+    MOCK_METHOD(int, Unmount, (), (override));
+    MOCK_METHOD(void, Shutdown, (), (override));
     MOCK_METHOD(void, StateChanged, (StateContext * prev, StateContext* next), (override));
 };
 

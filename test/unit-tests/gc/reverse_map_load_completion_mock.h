@@ -1,7 +1,9 @@
 #include <gmock/gmock.h>
-#include <string>
+
 #include <list>
+#include <string>
 #include <vector>
+
 #include "src/gc/reverse_map_load_completion.h"
 
 namespace pos

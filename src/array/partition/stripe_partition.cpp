@@ -58,7 +58,18 @@ StripePartition::StripePartition(
     PartitionPhysicalSize physicalSize,
     vector<ArrayDevice*> devs,
     Method* method)
-: Partition(array, type, physicalSize, devs, method)
+: StripePartition(array, type, physicalSize, devs, method, IODispatcherSingleton::Instance())
+{}
+
+StripePartition::StripePartition(
+    string array,
+    PartitionType type,
+    PartitionPhysicalSize physicalSize,
+    vector<ArrayDevice*> devs,
+    Method* method,
+    IODispatcher* ioDispatcher)
+: Partition(array, type, physicalSize, devs, method),
+  ioDispatcher_(ioDispatcher)
 {
     _SetLogicalSize();
 }
@@ -356,8 +367,7 @@ StripePartition::_Trim(void)
                 .arrayDev = devs_[i] };
             ubio->SetPba(pba);
             ubio->SetUblock(devs_[i]->GetUblock());
-            IODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
-            result = ioDispatcher->Submit(ubio, true);
+            result = ioDispatcher_->Submit(ubio, true);
             POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
                 "Try to trim from {} for {} on {}",
                 pba.lba, unitCount, devs_[i]->GetUblock()->GetName());
@@ -415,8 +425,7 @@ StripePartition::_CheckTrimValue(void)
             .lba = startLba,
             .arrayDev = devs_[i] };
         readUbio->SetPba(pba);
-        IODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
-        ioDispatcher->Submit(readUbio, true);
+        ioDispatcher_->Submit(readUbio, true);
         result = memcmp(readUbio->GetBuffer(), zerobuffer, Ubio::BYTES_PER_UNIT);
 
         if (result != 0)

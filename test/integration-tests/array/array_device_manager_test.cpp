@@ -318,7 +318,6 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalIsSuccessful)
     ArrayDevice spare1Dev(spare1, ArrayDeviceState::NORMAL);
     DeviceSet<ArrayDevice*> deviceSet;
     deviceSet.spares.push_back(&spare1Dev);
-
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
@@ -525,7 +524,6 @@ TEST(ArrayDeviceManager, GetRebuilding_testIfRebuildDeviceIsReturned)
     deviceSet.data.push_back(&rebuildDev);
 
     EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
-
     // When
     ArrayDevice* actual = arrDevMgr.GetRebuilding();
 

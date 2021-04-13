@@ -53,24 +53,24 @@ class GarbageCollector : public IGCControl, public IMountSequence,
 public:
     GarbageCollector(IArrayInfo* i, IStateControl* s);
     virtual ~GarbageCollector(void) {}
-    int Start(void) override;
-    void End(void) override;
+    virtual int Start(void) override;
+    virtual void End(void) override;
 
-    void StateChanged(StateContext* prev, StateContext* next) override;
-    int Init(void) override;
-    void Dispose(void) override;
-    void Shutdown(void) override;
+    virtual void StateChanged(StateContext* prev, StateContext* next) override;
+    virtual int Init(void) override;
+    virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
 
-    void Pause(void) { copierPtr->Pause(); }
-    void Resume(void) { copierPtr->Resume(); }
-    bool IsPaused(void) { return copierPtr->IsPaused(); }
+    virtual void Pause(void) { copierPtr->Pause(); }
+    virtual void Resume(void) { copierPtr->Resume(); }
+    virtual bool IsPaused(void) { return copierPtr->IsPaused(); }
 
-    int DisableThresholdCheck(void);
-    int IsEnabled(void);
+    virtual int DisableThresholdCheck(void);
+    virtual int IsEnabled(void);
 
-    bool GetGcRunning(void) { return gcStatus.GetGcRunning(); }
-    struct timeval GetStartTime(void) { return gcStatus.GetStartTime(); }
-    struct timeval GetEndTime(void) { return gcStatus.GetEndTime(); }
+    virtual bool GetGcRunning(void) { return gcStatus.GetGcRunning(); }
+    virtual struct timeval GetStartTime(void) { return gcStatus.GetStartTime(); }
+    virtual struct timeval GetEndTime(void) { return gcStatus.GetEndTime(); }
 
 private:
     void _DoGC(void);

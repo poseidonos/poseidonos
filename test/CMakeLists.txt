@@ -483,6 +483,7 @@ if(POS_TESTEXEC_WITH_NATIVE_GTEST)
 
     add_custom_target(
         run_it COMMAND ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/pos_it --gtest_output=xml:${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/test_detail_it.xml
+            && rm -f *.bin
     )
 
     add_custom_target(

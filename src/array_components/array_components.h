@@ -33,6 +33,7 @@
 #pragma once
 
 #include "src/array/array.h"
+#include "src/array_components/meta_mount_sequence.h"
 #include "src/gc/garbage_collector.h"
 #include "src/journal_manager/journal_manager.h"
 #include "src/mapper/mapper.h"
@@ -41,6 +42,7 @@
 #include "src/io/general_io/rba_state_manager.h"
 #include <vector>
 #include <string>
+#include <functional>
 
 using namespace std;
 
@@ -58,31 +60,55 @@ class ArrayComponents
 
 public:
     ArrayComponents(string name, IArrayRebuilder* rebuilder, IAbrControl* abr);
+    ArrayComponents(string arrayName,
+        IArrayRebuilder* rebuilder,
+        IAbrControl* abr,
+        StateManager* stateMgr,
+        IStateControl* state,
+        Array* array,
+        MetaFs* metafs,
+        VolumeManager* volMgr,
+        GarbageCollector* gc,
+        Mapper* mapper,
+        Allocator* allocator,
+        JournalManager* journal,
+        RBAStateManager* rbaStateMgr,
+        function<MetaFs* (Array*, bool)> metaFsFactory);
     virtual ~ArrayComponents(void);
-    int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
-    int Load(void);
-    int Mount(void);
-    int Unmount(void);
-    int Delete(void);
-    int PrepareRebuild(void);
-    void RebuildDone(void);
-    Array* GetArray(void) { return array; }
+    virtual int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
+    virtual int Load(void);
+    virtual int Mount(void);
+    virtual int Unmount(void);
+    virtual int Delete(void);
+    virtual int PrepareRebuild(void);
+    virtual void RebuildDone(void);
+    virtual Array* GetArray(void) { return array; }
 
 private:
     void _SetMountSequence(void);
 
     string arrayName = "";
+
+    // injected from outside
+    IStateControl* state = nullptr;
     IArrayRebuilder* arrayRebuilder = nullptr;
     IAbrControl* iAbr = nullptr;
+    StateManager* stateMgr = nullptr;
     Array* array = nullptr;
     GarbageCollector* gc = nullptr;
     JournalManager* journal = nullptr;
-    ArrayMountSequence* arrayMountSequence = nullptr;
     VolumeManager* volMgr = nullptr;
     Mapper* mapper = nullptr;
     Allocator* allocator = nullptr;
     MetaFs* metafs = nullptr;
     RBAStateManager* rbaStateMgr = nullptr;
+
+    // instantiated internally
     vector<IMountSequence*> mountSequence;
+    ArrayMountSequence* arrayMountSequence = nullptr;
+    MetaMountSequence* metaMountSequence = nullptr;
+
+    // MetaFs factory: MetaFs creation is not determined during ArrayComponents construction. Hence, we need a lambda.
+    function<MetaFs* (Array*, bool)> metaFsFactory = nullptr;
 };
 } // namespace pos

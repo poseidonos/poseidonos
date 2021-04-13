@@ -1,9 +1,9 @@
-#include <gtest/gtest.h>
 #include "src/gc/gc_map_update_request.h"
+
+#include <gtest/gtest.h>
 
 namespace pos
 {
-
 TEST(GcMapUpdateRequest, GcMapUpdateRequest_)
 {
 }
@@ -28,4 +28,4 @@ TEST(GcMapUpdateRequest, _RegisterInvalidateSegments_)
 {
 }
 
-}  // namespace pos
+} // namespace pos

@@ -46,9 +46,10 @@ class MountTemp
 {
 public:
     explicit MountTemp(IAbrControl* abr, string name);
-    int Mount1(void);
-    int Unmount2(void);
-    void Shutdown(void);
+    virtual ~MountTemp(void) = default;
+    virtual int Mount1(void);
+    virtual int Unmount2(void);
+    virtual void Shutdown(void);
 
 private:
     void _InitNvmf(void);
