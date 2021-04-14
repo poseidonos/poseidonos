@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(metafs_trace_manager_ut metafs_trace_manager_test.cpp)
+POS_ADD_UNIT_TEST(metafs_log_ut metafs_log_test.cpp)

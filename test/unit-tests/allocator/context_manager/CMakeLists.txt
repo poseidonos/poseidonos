@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(context_manager_ut context_manager_test.cpp)
+POS_ADD_UNIT_TEST(active_stripe_index_info_ut active_stripe_index_info_test.cpp)

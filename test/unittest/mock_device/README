@@ -1,0 +1,20 @@
+Unit test for MockDevice
+
+To build unit test, execute a command below.
+    $ make
+    $ ./mock_device_ut
+It will generate mock_device_ut binary file.
+You can do MockDevice unit test with executing the binary file.
+
+The unit test consists of 5 scenarios.
+    1.OpenAndClose
+    2.UnmapRead
+    3.WriteAndRead
+    4.OverWriteAndRead
+    5.WriteAndUnalignedRead
+
+If each test scenario is passed, you can see
+
+    [TestName] Success
+Otherwise,
+    [TestName] Fail

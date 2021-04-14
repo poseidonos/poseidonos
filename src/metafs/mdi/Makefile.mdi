@@ -1,0 +1,27 @@
+include $(MFS_TOP_DIR)/mdi/Makefile.include
+
+UT_MDI_EN := 0
+MOCK_MDI_EN := 0
+
+ifeq ($(MFS_INTEGRATION_TEST_EN),1)
+else
+	ifeq ($(ut),mdi)
+		$(info Meta filesystem unit test option enabled - for "MDI block" ...)
+		MFS_INTEGRATION_TEST_EN = 0
+		UT_MDI_EN = 1
+	else ifeq ($(ut),)
+	else
+	MOCK_MDI_EN = 1
+	endif
+endif
+########################################
+MDI_SRCS += \
+	mdi_manager.cpp \
+
+ifeq ($(MOCK_MDI_EN), 1)
+MDI_SRCS += \
+	#mdi_mock.cpp \
+
+endif
+
+SRCS += $(MDI_SRCS)

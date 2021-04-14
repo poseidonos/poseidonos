@@ -1,0 +1,53 @@
+======== AffinityManager =======
+
+Description
+  AffinityManager will be pinning cores for specical purposes. 
+  AffinityManager sets core count for diverse purposes, and it considers its multi-socket architecture.
+  
+
+Objectives 
+  1) Sets core count for each purpose, each numa. (Event, Reactor, Meta ... ) 
+  2) Poverty option will be set dynamically,
+     if core count is not enough to allocate the cores a user assigns. (ex : VM)
+  3) Exculded core count can be used for external implementation or process (ex : soft irq, VPP, bdev fio plugin)
+
+
+Usage
+
+From below, xxxx_CORE_COUNT[] indicates each numa core count user want to assigns for each purpose. 
+you can modify core count if that core count is defined as "static const"
+
+   1) For example, USER_DEVICE_IO_CORE_COUNT[0] means core count to be allocated for numa 0. 
+      USER_DEVICE_IO_CORE_COUNT[1] means core count to be allocated for numa 1. 
+
+   2) POVERTY_REACTOR_CORE_COUNT will be used if the total count over system is less than MIN_TOTAL_CORE_COUNT (KERNEL+REACTOR+MIN+USER+META+SCHEDULE+GENERAL) (ex. vm) 
+   3) The remainder (TOTAL_CORE_COUNT[numa]-MIN_TOTAL_CORE_COUNT[numa]) of each numa cores will be set as EVENT_CORE_COUNT automatically.   4) If poverty is true(vm), all cores except reactor will be assigned to a single core.
+
+You can set affinity as cpu mask string, 
+You need to set USE_CORE_MASK as true to use cpu mask instead of XXXX_CORE_COUNT. 
+if you want to allow overlapping among different functions, please set PROHIBIT_CORE_MASK_OVERLAPPED as false.
+
+const uint32_t AffinityManager::KERNEL_DEVICE_IO_CORE_COUNT[] = {1, 0};
+const uint32_t AffinityManager::MIN_EVENT_CORE_COUNT[] = {1, 0};
+const uint32_t AffinityManager::POVERTY_REACTOR_CORE_COUNT[] = {2, 0};
+const uint32_t AffinityManager::REACTOR_CORE_COUNT[] = {15, 0};
+const uint32_t AffinityManager::USER_DEVICE_IO_CORE_COUNT[] = {1, 2};
+const uint32_t AffinityManager::SCHEDULER_CORE_COUNT[] = {1, 0};
+const uint32_t AffinityManager::GENERAL_CORE_COUNT[] = {1, 0}; // This core is used for all purpose except reactor in case of vm.
+const uint32_t AffinityManager::META_IO_CORE_COUNT[] = {1, 0}; // FIXME: scale up according to performance analysis
+const uint32_t AffinityManager::EXCLUDED_CORE_COUNT[] = {0, 28};
+
+const uint32_t AffinityManager::MAX_NUMA_COUNT = 2;
+uint32_t AffinityManager::NUMA_COUNT;
+
+const bool AffinityManager::USE_CORE_MASK = true;
+const bool AffinityManager::PROHIBIT_CORE_MASK_OVERLAPPED = false;
+
+uint32_t AffinityManager::STATIC_CORE_COUNT[MAX_NUMA_COUNT];
+uint32_t AffinityManager::EVENT_CORE_COUNT[MAX_NUMA_COUNT];
+uint32_t AffinityManager::MIN_TOTAL_CORE_COUNT[MAX_NUMA_COUNT];
+uint32_t AffinityManager::TOTAL_CORE_COUNT[MAX_NUMA_COUNT];
+uint32_t AffinityManager::MIN_POVERTY_CORE_COUNT[MAX_NUMA_COUNT];
+uint32_t AffinityManager::FIRST_CORE[MAX_NUMA_COUNT];
+
+   

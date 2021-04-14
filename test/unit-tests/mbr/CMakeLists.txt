@@ -1,0 +1,5 @@
+POS_ADD_UNIT_TEST(mbr_info_ut mbr_info_test.cpp)
+POS_ADD_UNIT_TEST(abr_manager_ut abr_manager_test.cpp)
+POS_ADD_UNIT_TEST(mbr_util_ut mbr_util_test.cpp)
+POS_ADD_UNIT_TEST(mbr_map_manager_ut mbr_map_manager_test.cpp)
+POS_ADD_UNIT_TEST(mbr_manager_ut mbr_manager_test.cpp)

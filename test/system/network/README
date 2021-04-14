@@ -1,0 +1,22 @@
+- README: network_test.sh performs network transport test between two report nodes, whichs functions initiator and target.
+The test is needed to check connectivity between two nodes prior to ibofos E2E test
+
+- Configuration : network_config.sh
+	TRANSPORT=rdma or tcp (case-sensitive)
+
+	SERVER_NIC=the name of server side NIC, retrieve as a result of  ifconfig
+	SERVER_IP=an ip of the SERVER_NIC
+
+	CLIENT_NIC=the name of server side NIC, retrieve as a result of  ifconfig
+	CLIENT_IP=an ip of the CLIENT_NIC
+	
+
+- Useage:
+	@target : #network_test.sh server
+	@initiator : #network_test.sh client
+
+	
+- Prerequisite : run ibofos/script/pkgdep.sh
+	apt-get isntall -y iperf
+	apt-get isntall -y libibverbs-dev librdmacm-dev
+

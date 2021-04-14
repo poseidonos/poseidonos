@@ -1,0 +1,51 @@
+IBOF_DIR = ../../../
+UT_INCLUDE=-I$(IBOF_DIR) -I$(IBOF_DIR)lib
+
+UT_OBJDIR_REL=obj_output
+UT_OBJDIR=$(abspath $(UT_OBJDIR_REL))
+
+UT_TARGET_FILE =	$(IBOF_DIR)src/array/device/array_device.cpp \
+				$(IBOF_DIR)src/dump/dump_manager.cpp \
+				$(IBOF_DIR)src/dump/dump_shared_ptr.cpp \
+				$(IBOF_DIR)src/io/general_io/buffer_entry.cpp \
+				$(IBOF_DIR)src/io/general_io/device_io.cpp \
+				$(IBOF_DIR)src/io/general_io/io_submit_handler.cpp \
+				$(IBOF_DIR)src/io/general_io/request_context.cpp \
+				$(IBOF_DIR)src/logger/pos_event_id.cpp \
+				$(IBOF_DIR)src/logger/logger.cpp \
+				$(IBOF_DIR)src/master_context/config_manager.cpp \
+				$(IBOF_DIR)src/scheduler/io_queue.cpp \
+				$(IBOF_DIR)src/state/state_context.cpp
+
+UT_FAKE_FILE = io_array_fake.cpp \
+			io_array_device_list_fake.cpp \
+			io_array_device_manager_fake.cpp \
+			io_free_buffer_pool_fake.cpp \
+			io_io_dispatcher_fake.cpp \
+			io_io_worker_fake.cpp \
+			io_ubio_fake.cpp
+
+UT_TEST_FILE = io_submit_handler_test.cpp
+
+UT_TARGET_FILE += $(UT_FAKE_FILE)
+
+UT_CPPFLAGS = -lpthread -g
+UT_OUTPUT = io_submit_handler_ut
+
+UT_OBJ_FILES = $(UT_TARGET_FILE:.cpp=.o)
+UT_OBJ_FILES += $(UT_TEST_FILE:.cpp=.o)
+
+export UT_OBJDIR
+
+ut: $(UT_OBJDIR) $(UT_OBJ_FILES)
+	g++ $(UT_INCLUDE) $(UT_OBJDIR)/*.o ${UT_CPPFLAGS} -o ${UT_OUTPUT}
+
+%.o: %.cpp
+	@echo "Compling [$(<F)]..."
+	@g++ $(UT_INCLUDE) $(DEFINE) $(UT_CPPFLAGS) -c $< -o $(UT_OBJDIR)/$(notdir $@)
+
+$(UT_OBJDIR):
+	mkdir -p $@
+
+clean:
+	rm -rf ${UT_OUTPUT} ${UT_OBJDIR}

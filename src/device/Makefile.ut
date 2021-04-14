@@ -1,0 +1,150 @@
+IBOF_SRC_DIR := $(abspath $(CURDIR)/../../)
+SPDK_ROOT_DIR := $(abspath $(CURDIR)/../../lib/spdk)
+DPDK_ROOT_DIR := $(abspath $(CURDIR)/../../lib/dpdkpdk)
+include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
+include $(SPDK_ROOT_DIR)/mk/spdk.app.mk
+include $(SPDK_ROOT_DIR)/mk/spdk.modules.mk
+
+APP_NVME = ./nvme_test
+APP_UNVME = ./unvme_test
+APP_URAM = ./uram_test
+APP_NVME_BLOCK = ./nvme_block_device_test
+APP_UNVME_BLOCK = ./unvme_block_device_test
+APP_URAM_BLOCK = ./uram_block_device_test
+
+COMMON_SRC_LIST := $(IBOF_SRC_DIR)/src/device/device_context.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/device/device_driver.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/device/event_framework_api.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/device/ioat_api.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/device/io_context.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/device/kernel_device_context.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/device/kernel_io_context.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/device/nvme_driver.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/device/spdk/spdk.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/device/ublock_device.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/dump/dump_manager.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/dump/dump_shared_ptr.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/io/general_io/affinity_manager.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/io/general_io/io_ubio_fake.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/lib/system_timeout_checker.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/lib/timeout_checker.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/logger/pos_event_id.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/logger/logger.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/master_context/config_manager.cpp
+COMMON_SRC_LIST += $(IBOF_SRC_DIR)/src/scheduler/thread.cpp
+
+NVME_SRC_LIST := $(COMMON_SRC_LIST)
+NVME_SRC_LIST += nvme_base_test.cpp
+NVME_SRC_LIST += nvme_test.cpp
+
+UNVME_SRC_LIST := $(COMMON_SRC_LIST)
+UNVME_SRC_LIST += nvme_base_test.cpp
+UNVME_SRC_LIST += $(IBOF_SRC_DIR)/src/device/spdk/nvme.cpp
+UNVME_SRC_LIST += $(IBOF_SRC_DIR)/src/device/unvme/unvme_device_context.cpp
+UNVME_SRC_LIST += $(IBOF_SRC_DIR)/src/device/unvme/unvme_drv.cpp
+UNVME_SRC_LIST += $(IBOF_SRC_DIR)/src/device/unvme/unvme_ssd.cpp
+UNVME_SRC_LIST += $(IBOF_SRC_DIR)/src/device/unvme/unvme_test.cpp
+UNVME_SRC_LIST += $(IBOF_SRC_DIR)/src/device/unvme/unvme_io_context.cpp
+
+URAM_SRC_LIST := $(COMMON_SRC_LIST)
+URAM_SRC_LIST += nvme_base_test.cpp
+URAM_SRC_LIST += $(IBOF_SRC_DIR)/src/array/device/array_device.cpp
+URAM_SRC_LIST += $(IBOF_SRC_DIR)/src/device/spdk/nvme.cpp
+URAM_SRC_LIST += $(IBOF_SRC_DIR)/src/device/uram/uram.cpp
+URAM_SRC_LIST += $(IBOF_SRC_DIR)/src/device/uram/uram_drv.cpp
+URAM_SRC_LIST += $(IBOF_SRC_DIR)/src/device/uram/uram_main_test.cpp
+URAM_SRC_LIST += $(IBOF_SRC_DIR)/src/device/uram/uram_io_context.cpp
+URAM_SRC_LIST += $(IBOF_SRC_DIR)/src/device/uram/uram_device_context.cpp
+URAM_SRC_LIST += $(IBOF_SRC_DIR)/src/io/general_io/chaining_completion_handler_stub.cpp
+URAM_SRC_LIST += $(IBOF_SRC_DIR)/src/event_scheduler/event.cpp
+
+NVME_BLOCK_SRC_LIST := $(COMMON_SRC_LIST)
+NVME_BLOCK_SRC_LIST += ublock_device_base_test.cpp
+NVME_BLOCK_SRC_LIST += ublock_device_test.cpp
+NVME_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/array/device/array_device.cpp
+
+UNVME_BLOCK_SRC_LIST := $(COMMON_SRC_LIST)
+UNVME_BLOCK_SRC_LIST += ublock_device_base_test.cpp
+UNVME_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/array/device/array_device.cpp
+UNVME_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/device/spdk/nvme.cpp
+UNVME_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/device/unvme/unvme_device_context.cpp
+UNVME_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/device/unvme/unvme_block_device_test.cpp
+UNVME_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/device/unvme/unvme_drv.cpp
+UNVME_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/device/unvme/unvme_ssd.cpp
+UNVME_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/device/unvme/unvme_io_context.cpp
+
+URAM_BLOCK_SRC_LIST := $(COMMON_SRC_LIST)
+URAM_BLOCK_SRC_LIST += ublock_device_base_test.cpp
+URAM_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/array/device/array_device.cpp
+URAM_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/device/spdk/nvme.cpp
+URAM_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/device/uram/uram.cpp
+URAM_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/device/uram/uram_block_device_test.cpp
+URAM_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/device/uram/uram_drv.cpp
+URAM_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/device/uram/uram_io_context.cpp
+URAM_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/device/uram/uram_device_context.cpp
+URAM_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/io/general_io/chaining_completion_handler_stub.cpp
+URAM_BLOCK_SRC_LIST += $(IBOF_SRC_DIR)/src/event_scheduler/event.cpp
+
+NVME_OBJ_LIST := $(subst .cpp,.o,$(NVME_SRC_LIST))
+UNVME_OBJ_LIST := $(subst .cpp,.o,$(UNVME_SRC_LIST))
+URAM_OBJ_LIST := $(subst .cpp,.o,$(URAM_SRC_LIST))
+NVME_BLOCK_OBJ_LIST := $(subst .cpp,.o,$(NVME_BLOCK_SRC_LIST))
+UNVME_BLOCK_OBJ_LIST := $(subst .cpp,.o,$(UNVME_BLOCK_SRC_LIST))
+URAM_BLOCK_OBJ_LIST := $(subst .cpp,.o,$(URAM_BLOCK_SRC_LIST))
+
+OBJ_LIST := $(NVME_OBJ_LIST) $(UNVME_OBJ_LIST) $(URAM_OBJ_LIST)
+OBJ_LIST += $(NVME_BLOCK_OBJ_LIST) $(UNVME_BLOCK_OBJ_LIST) $(URAM_BLOCK_OBJ_LIST)
+
+DEP_LIST := $(subst .cpp,.d,$(NVME_SRC_LIST))
+DEP_LIST += $(subst .cpp,.d,$(UNVME_SRC_LIST))
+DEP_LIST += $(subst .cpp,.d,$(URAM_SRC_LIST))
+DEP_LIST += $(subst .cpp,.d,$(NVME_BLOCK_SRC_LIST))
+DEP_LIST += $(subst .cpp,.d,$(UNVME_BLOCK_SRC_LIST))
+DEP_LIST += $(subst .cpp,.d,$(URAM_BLOCK_SRC_LIST))
+
+SPDK_LIB_LIST = $(ALL_MODULES_LIST)
+SPDK_LIB_LIST += event_bdev event_copy event_nvmf event_net event_vmd
+SPDK_LIB_LIST += nvmf event log trace conf thread util bdev copy rpc jsonrpc json net sock
+SPDK_LIB_LIST += app_rpc log_rpc bdev_rpc notify
+
+ifeq ($(OS),Linux)
+SPDK_LIB_LIST += event_nbd nbd
+endif
+
+CXXFLAGS += -I$(IBOF_SRC_DIR) -I$(IBOF_SRC_DIR)/lib -I$(DPDK_ROOT_DIR)
+CXXFLAGS += -I$(IBOF_SRC_DIR)/src/device -DUNVME_BUILD
+
+COMMON_CFLAGS := $(filter-out -DDEBUG, $(COMMON_CFLAGS))
+
+all : $(APP_NVME) $(APP_UNVME) $(APP_URAM) $(APP_NVME_BLOCK) $(APP_UNVME_BLOCK) $(APP_URAM_BLOCK)
+	@:
+
+$(APP_NVME) : $(NVME_OBJ_LIST)
+	$(Q)echo "  LINK $S/$@"; \
+	$(CXX) -o $@ $(CPPFLAGS) $(LDFLAGS) $(NVME_OBJ_LIST) $(LIBS) $(ENV_LINKER_ARGS) $(SYS_LIBS)
+
+$(APP_UNVME) : $(UNVME_OBJ_LIST)
+	$(Q)echo "  LINK $S/$@"; \
+	$(CXX) -o $@ $(CPPFLAGS) $(LDFLAGS) $(UNVME_OBJ_LIST) $(LIBS) $(ENV_LINKER_ARGS) $(SYS_LIBS)
+
+$(APP_URAM) : $(URAM_OBJ_LIST)
+	$(Q)echo "  LINK $S/$@"; \
+	$(CXX) -o $@ $(CPPFLAGS) $(LDFLAGS) $(URAM_OBJ_LIST) $(LIBS) $(ENV_LINKER_ARGS) $(SYS_LIBS)
+
+$(APP_NVME_BLOCK) : $(NVME_BLOCK_OBJ_LIST)
+	$(Q)echo "  LINK $S/$@"; \
+	$(CXX) -o $@ $(CPPFLAGS) $(LDFLAGS) $(NVME_BLOCK_OBJ_LIST) $(LIBS) $(ENV_LINKER_ARGS) $(SYS_LIBS)
+
+$(APP_UNVME_BLOCK) : $(UNVME_BLOCK_OBJ_LIST)
+	$(Q)echo "  LINK $S/$@"; \
+	$(CXX) -o $@ $(CPPFLAGS) $(LDFLAGS) $(UNVME_BLOCK_OBJ_LIST) $(LIBS) $(ENV_LINKER_ARGS) $(SYS_LIBS)
+
+$(APP_URAM_BLOCK) : $(URAM_BLOCK_OBJ_LIST)
+	$(Q)echo "  LINK $S/$@"; \
+	$(CXX) -o $@ $(CPPFLAGS) $(LDFLAGS) $(URAM_BLOCK_OBJ_LIST) $(LIBS) $(ENV_LINKER_ARGS) $(SYS_LIBS)
+
+clean :
+	$(CLEAN_C) $(APP_NVME) $(APP_UNVME) $(APP_URAM) $(APP_NVME_BLOCK) $(APP_UNVME_BLOCK) $(APP_URAM_BLOCK)
+	@rm -rf $(OBJ_LIST) $(DEP_LIST)
+
+include $(SPDK_ROOT_DIR)/mk/spdk.deps.mk

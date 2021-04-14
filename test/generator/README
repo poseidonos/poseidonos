@@ -1,0 +1,34 @@
+
+The mock/test generator is an application that generates mock and test files of source codes.
+It is modified version of the original code Google Mock generator.
+For more information about Google Mock generator, visit
+https://github.com/google/googletest/tree/master/googlemock/scripts/generator
+
+The mock/test generator requires Python 2.3.5 or later.  If you don't have Python
+installed on your system, you will also need to install it.  You can download
+Python from:  http://www.python.org/download/releases/
+
+To use the Google Mock class generator, you need to call it
+on the command line passing the header file and class for which you want
+to generate a Google Mock class and test file.
+
+Make sure to install the scripts somewhere in your path.  Then you can
+run the program.
+
+  python generator.py SourceDirectory
+
+To change the indentation from the default of 4, set INDENT in
+the environment.  For example to use an indent of 2 spaces:
+
+INDENT=2 python generator.py SourceDirectory
+
+This version was made from tag release-1.10.0 in the googletest repository.
+
+Known Limitations
+-----------------
+Not all code will be generated properly.  For example, when mocking templated
+classes, the template information is lost.  You will need to add the template
+information manually.
+
+Not all permutations of using multiple pointers/references will be rendered
+properly.  These will also have to be fixed manually.

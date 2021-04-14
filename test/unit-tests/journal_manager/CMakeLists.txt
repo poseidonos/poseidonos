@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(journal_manager_ut journal_manager_test.cpp)

@@ -1,0 +1,133 @@
+#include "test/integration-tests/journal/utils/written_logs.h"
+
+#include "src/journal_manager/log/log_handler.h"
+
+namespace pos
+{
+WrittenLogs::WrittenLogs(void)
+{
+    numJournalIssued = 0;
+    numJournalAdded = 0;
+}
+
+WrittenLogs::~WrittenLogs(void)
+{
+    Reset();
+}
+
+void
+WrittenLogs::Reset(void)
+{
+    for (auto log : writeLogList)
+    {
+        delete log;
+    }
+    writeLogList.clear();
+}
+
+void
+WrittenLogs::_AddToList(LogHandlerInterface* entry)
+{
+    std::lock_guard<std::mutex> lock(logListLock);
+    writeLogList.push_back(entry);
+}
+
+void
+WrittenLogs::AddToWriteList(VolumeIoSmartPtr volumeIo)
+{
+    numJournalIssued++;
+
+    int volumeId = volumeIo->GetVolumeId();
+    BlkAddr rba = ChangeSectorToBlock(volumeIo->GetSectorRba());
+    uint64_t numBlks = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
+    VirtualBlkAddr startVsa = volumeIo->GetVsa();
+    StripeAddr writeBufferStripe = volumeIo->GetLsidEntry();
+    ActiveStripeTailArrIdxInfo indexFinder = ActiveStripeTailArrIdxInfo(volumeId, false);
+    int index = indexFinder.GetActiveStripeTailArrIdx();
+    VirtualBlkAddr oldVsa = volumeIo->GetOldVsa();
+    bool isGC = volumeIo->IsGc();
+
+    LogHandlerInterface* entry = new BlockWriteDoneLogHandler(volumeId,
+        rba, numBlks, startVsa, index, writeBufferStripe, oldVsa, isGC);
+
+    _AddToList(entry);
+}
+
+void
+WrittenLogs::AddToWriteList(Stripe* stripe, StripeAddr oldAddr)
+{
+    numJournalIssued++;
+
+    StripeAddr newAddr = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = stripe->GetUserLsid()};
+    LogHandlerInterface* entry = new StripeMapUpdatedLogHandler(stripe->GetVsid(), oldAddr, newAddr);
+
+    _AddToList(entry);
+}
+
+bool
+WrittenLogs::CheckLogInTheList(LogHandlerInterface* log)
+{
+    bool exist = false;
+    for (auto it = writeLogList.begin(); it != writeLogList.end(); it++)
+    {
+        if ((*it)->GetType() == log->GetType())
+        {
+            if (log->GetType() == LogType::BLOCK_WRITE_DONE)
+            {
+                BlockWriteDoneLogHandler* cmp1 = reinterpret_cast<BlockWriteDoneLogHandler*>(*it);
+                BlockWriteDoneLogHandler* cmp2 = reinterpret_cast<BlockWriteDoneLogHandler*>(log);
+
+                exist = (*cmp1 == *cmp2);
+            }
+            else if (log->GetType() == LogType::STRIPE_MAP_UPDATED)
+            {
+                StripeMapUpdatedLogHandler* cmp1 = reinterpret_cast<StripeMapUpdatedLogHandler*>(*it);
+                StripeMapUpdatedLogHandler* cmp2 = reinterpret_cast<StripeMapUpdatedLogHandler*>(log);
+
+                exist = (*cmp1 == *cmp2);
+            }
+            else if (log->GetType() == LogType::VOLUME_DELETED)
+            {
+                VolumeDeletedLogEntry* cmp1 = reinterpret_cast<VolumeDeletedLogEntry*>(*it);
+                VolumeDeletedLogEntry* cmp2 = reinterpret_cast<VolumeDeletedLogEntry*>(log);
+
+                exist = (*cmp1 == *cmp2);
+            }
+
+            if (exist == true)
+            {
+                break;
+            }
+        }
+    }
+    return exist;
+}
+
+void
+WrittenLogs::JournalWriteDone(void)
+{
+    numJournalAdded++;
+}
+
+void
+WrittenLogs::WaitForAllLogWriteDone(void)
+{
+    while (numJournalIssued != numJournalAdded)
+    {
+    }
+}
+
+bool
+WrittenLogs::AreAllLogWritesDone(void)
+{
+    return (numJournalIssued == numJournalAdded);
+}
+
+uint32_t
+WrittenLogs::GetNumLogsInTesting(void)
+{
+    return numJournalIssued;
+}
+} // namespace pos

@@ -1,0 +1,6 @@
+# MFS_INCLUDE_PATH
+MIM_TOP_DIR=mim
+
+MFS_INCLUDE_PATH += \
+	$(MIM_TOP_DIR) \
+	$(MIM_TOP_DIR)/unit_test 

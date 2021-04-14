@@ -1,0 +1,7 @@
+# MFS_INCLUDE_PATH
+MSC_TOP_DIR=msc
+
+MFS_INCLUDE_PATH += \
+    $(MSC_TOP_DIR) \
+    $(MSC_TOP_DIR)/mbr \
+    $(MSC_TOP_DIR)/unit_test

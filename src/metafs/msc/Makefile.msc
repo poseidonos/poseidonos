@@ -1,0 +1,59 @@
+include $(MFS_TOP_DIR)/msc/Makefile.include
+
+UT_MSC_EN := 0
+MOCK_MSC_EN := 0
+STUB_MSC_EN := 0
+
+ifeq ($(MFS_INTEGRATION_TEST_EN),1)
+else
+ifeq ($(ut),msc)
+$(info Meta filesystem unit test option enabled - for "MSC block" ...)
+MFS_INTEGRATION_TEST_EN = 0
+UT_MSC_EN = 1
+else ifeq ($(ut),)
+else
+MOCK_MSC_EN = 1
+endif
+endif # MFS_INTEGRATION_TEST_EN
+########################################
+MSC_SRCS += \
+	msc_req.cpp \
+
+ifeq ($(MOCK_MSC_EN),1)
+
+MFS_INCLUDE_PATH += \
+	$(MSC_TOP_DIR)/mock \
+
+MSC_SRCS += \
+	msc_top_mock.cpp
+
+else
+
+MSC_SRCS += \
+	metafs_system_manager.cpp \
+	metafs_mbr.cpp \
+	metafs_mbr_mgr.cpp \
+	mfs_state_mgr.cpp \
+	mfs_state_machine.cpp \
+	mfs_state_procedure.cpp \
+
+endif
+
+ifeq ($(UT_MSC_EN), 1)
+UT_SRCS += \
+	msc_test.cpp \
+	metafs_system_manager_test.cpp \
+	mfs_mbr_test.cpp \
+	mfs_mbr_mgr_test.cpp \
+
+endif
+
+ifeq ($(UT_MSC_EN), 1)
+UT_PATH += \
+	msc/unit_test \
+
+endif
+
+SRCS += $(MSC_SRCS)
+
+DEFINE += "-DMFS_MOCK_MSC_EN=$(MOCK_MSC_EN)"

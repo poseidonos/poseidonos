@@ -1,0 +1,18 @@
+[global]
+ioengine=./fio_plugin
+thread=1
+group_reporting=1
+direct=1
+verify=0
+time_based=1
+ramp_time=0
+runtime=2
+iodepth=128
+rw=randrw
+bs=4k
+
+[test]
+numjobs=1
+
+#Note : need to change BDF address of local NVMe SSD
+filename=trtype=PCIe traddr=0000.02.00.0 ns=1

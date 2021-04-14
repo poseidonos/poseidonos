@@ -1,0 +1,362 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'open3'
+def get_box_type(distro)
+  spdk_distro = 'spdk/' + distro
+  localboxes, stderr, status = Open3.capture3("vagrant box list")
+  return spdk_distro if localboxes.include?(spdk_distro)
+
+  distro_to_type = {
+    'centos7'    => 'centos/7',
+    'centos8'    => 'centos/8',
+    'ubuntu1604' => 'peru/ubuntu-16.04-server-amd64',
+    'ubuntu1804' => 'peru/ubuntu-18.04-server-amd64',
+    'fedora30'   => 'generic/fedora30',
+    'fedora31'   => 'generic/fedora31',
+    'fedora32'   => 'generic/fedora32',
+    'arch'       => 'generic/arch',
+    'freebsd11'  => 'generic/freebsd11',
+    'freebsd12'  => 'generic/freebsd12',
+    'clearlinux' => 'AntonioMeireles/ClearLinux'
+  }
+  abort("Invalid argument! #{distro}") unless distro_to_type.key?(distro)
+
+  return distro_to_type[distro]
+end
+
+def setup_proxy(config,distro)
+  return unless ENV['http_proxy']
+
+  if Vagrant.has_plugin?("vagrant-proxyconf")
+    config.proxy.http     = ENV['http_proxy']
+    config.proxy.https    = ENV['https_proxy']
+    config.proxy.no_proxy = "localhost,127.0.0.1"
+  end
+
+  # Proxyconf does not seem to support FreeBSD boxes or at least it's
+  # docs do not mention that. Set up proxy configuration manually.
+  if distro.include?("freebsd")
+    $freebsd_proxy = <<-SCRIPT
+    sudo -s
+    echo "export http_proxy=#{ENV['http_proxy']}" >> /etc/profile
+    echo "export https_proxy=#{ENV['http_proxy']}" >> /etc/profile
+    echo "pkg_env: {http_proxy: #{ENV['http_proxy']}}" > /usr/local/etc/pkg.conf
+    chown root:wheel /usr/local/etc/pkg.conf
+    chmod 644 /usr/local/etc/pkg.conf
+    SCRIPT
+    config.vm.provision "shell", inline: $freebsd_proxy
+  end
+end
+
+def copy_gitconfig(config)
+  src_path = '~/.gitconfig'
+  return unless File.file?(File.expand_path(src_path))
+
+  config.vm.provision  "file", source: src_path, destination: ".gitconfig"
+end
+
+def copy_tsocks(config)
+  tsocks_file = 'tsocks.conf'
+  tsocks_file_path = '/etc/' + tsocks_file
+
+  return unless File.file?(tsocks_file_path)
+
+  $tsocks_copy_cmd = <<-SCRIPT
+  sudo -s
+  mv -f "#{tsocks_file}" "#{tsocks_file_path}"
+  chown root "#{tsocks_file_path}"
+  chmod 644 "#{tsocks_file_path}"
+  SCRIPT
+
+  config.vm.provision  "file", source: tsocks_file_path, destination: tsocks_file
+  config.vm.provision "shell", inline: $tsocks_copy_cmd
+end
+
+def copy_vagrant_tools(config,files_sync_backend)
+  src_path = '~/vagrant_tools'
+  return unless File.directory?(File.expand_path(src_path))
+
+  config.vm.synced_folder src_path, "/home/vagrant/tools", files_sync_backend
+end
+
+def copy_spdk_dir(config, files_sync_backend)
+  return unless ENV['COPY_SPDK_DIR'] == "1"
+  return unless ENV['SPDK_DIR']
+
+  config.vm.synced_folder ENV['SPDK_DIR'], '/home/vagrant/spdk_repo/spdk', files_sync_backend
+end
+
+def copy_spdk_artifacts(config, plugins_sync_backend)
+  return unless ENV['COPY_SPDK_ARTIFACTS'] == "1"
+
+  vagrantfile_dir=(ENV['VAGRANTFILE_DIR'] || "none")
+  config.vm.synced_folder "#{vagrantfile_dir}/output", "/home/vagrant/spdk_repo/output", plugins_sync_backend
+end
+
+def make_spdk_local_copy_of_nfs(config,distro)
+  user_group = 'vagrant:vagrant'
+  if distro.include? 'clearlinux'
+    user_group = 'clear:clear'
+  end
+
+  spdk_path = '/home/vagrant/spdk_repo/spdk'
+  spdk_tmp_path = '/tmp/spdk'
+  $spdk_repo_cmd = <<-SCRIPT
+  sudo -s
+  cp -R '#{spdk_path}' '#{spdk_tmp_path}'
+  umount '#{spdk_path}' && rm -rf '#{spdk_path}'
+  mv '#{spdk_tmp_path}' '#{spdk_path}'
+  chown -R #{user_group} '#{spdk_path}'
+  SCRIPT
+
+  config.vm.provision "shell", inline: $spdk_repo_cmd
+end
+
+def clear_cflags(config)
+  $clearcflags_cmd = <<-SCRIPT
+  echo "export CFLAGS=" >> /etc/profile.d/clearcflags.sh
+  echo "export CFFLAGS=" >> /etc/profile.d/clearcflags.sh
+  echo "export CXXFLAGS=" >> /etc/profile.d/clearcflags.sh
+  echo "export FFLAGS=" >> /etc/profile.d/clearcflags.sh
+  echo "export THEANO_FLAGS=" >> /etc/profile.d/clearcflags.sh
+  SCRIPT
+  config.vm.provision "shell", inline: $clearcflags_cmd, run: "always"
+end
+
+def get_nvme_disk(disk, index)
+  if ENV['NVME_FILE']
+    nvme_file = ENV['NVME_FILE'].split(',')
+    nvme_disk = nvme_file[index]
+  else
+    nvme_disk = '/var/lib/libvirt/images/nvme_disk.img'
+  end
+
+  unless File.exist? (nvme_disk)
+    puts 'If run with libvirt provider please execute create_nvme_img.sh'
+  end
+
+  return nvme_disk
+end
+
+def setup_nvme_disk(libvirt, disk, index)
+  nvme_disk_id = disk + '-' + index.to_s
+  nvme_disk = get_nvme_disk(disk, index)
+
+  nvme_namespaces=(ENV['NVME_DISKS_NAMESPACES'] || "").split(',')
+  nvme_cmbs=(ENV['NVME_CMB'] || "").split(',')
+
+  libvirt.qemuargs :value => "-drive"
+  libvirt.qemuargs :value => "format=raw,file=#{nvme_disk},if=none,id=#{nvme_disk_id}"
+  libvirt.qemuargs :value => "-device"
+  nvme_drive = "nvme,drive=#{nvme_disk_id},serial=1234#{index}"
+  if !nvme_namespaces[index].nil? && nvme_namespaces[index] != "1"
+    nvme_drive << ",namespaces=#{nvme_namespaces[index]}"
+  end
+
+  if !nvme_cmbs[index].nil? && nvme_cmbs[index] == "true"
+    # Fix the size of the buffer to 128M
+    nvme_drive << ",cmb_size_mb=128"
+  end
+  libvirt.qemuargs :value => nvme_drive
+end
+
+def setup_ocssd_disk(libvirt, disk, index)
+  nvme_disk_id = disk + '-' + index.to_s
+  nvme_disk = get_nvme_disk(disk, index)
+
+  libvirt.qemuargs :value => "-drive"
+  libvirt.qemuargs :value => "format=raw,file=#{nvme_disk},if=none,id=#{nvme_disk_id}"
+  libvirt.qemuargs :value => "-device"
+  # create ocssd drive with special parameters
+  # lba_index=4 it is LBA namespace format, 4 means that block size is 4K and have 64B metadata
+  # lnum_lun, lnum_pln, lpgs_per_blk, lsecs_per_pg, lblks_per_pln this are parameters describing the device geometry
+  # we need to multiply these parameters by ourselves to have backend file minimal size:
+  # in our case: 4K * 8 * 2 * 1536 * 2 * 45 = 8640 MB
+  libvirt.qemuargs :value => "nvme,drive=#{nvme_disk_id},serial=deadbeef,oacs=0,namespaces=1,lver=2,lba_index=4,mdts=10,lnum_lun=8,lnum_pln=2,lpgs_per_blk=1536,lsecs_per_pg=2,lblks_per_pln=45,metadata=#{nvme_disk}_ocssd_md,nsdatafile=#{nvme_disk}_ocssd_blknvme.ns,laer_thread_sleep=3000,stride=4"
+end
+
+def setup_ssh(config)
+  config.ssh.forward_agent = true
+  config.ssh.forward_x11 = true
+  if ENV['VAGRANT_PASSWORD_AUTH'] == "1"
+    config.ssh.username = "vagrant"
+    config.ssh.password = "vagrant"
+    config.ssh.private_key_path = nil
+  end
+end
+
+def setup_vagrant_cachier(config, plugins_sync_backend)
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.scope = :box
+    config.cache.synced_folder_opts = plugins_sync_backend
+  else
+    puts 'vagrant-cachier caches apt/yum etc to speed subsequent vagrant up'
+    puts 'to enable install vagrant-cachier plugin: '
+    puts 'vagrant plugin install vagrant-cachier'
+  end
+end
+
+def deploy_test_vm(config)
+  return unless ENV['DEPLOY_TEST_VM'] == "1"
+  return unless ENV['SPDK_DIR']
+
+  config.vm.provision "shell" do |setup|
+    setup.path = ENV['SPDK_DIR'] + '/test/common/config/vm_setup.sh'
+    setup.privileged = false
+    setup.args = ["-u", "-i"]
+  end
+end
+
+def setup_virtualbox(config, vmcpu, vmram)
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize ["modifyvm", :id, "--ioapic", "on"]
+    vb.memory = vmram
+    vb.cpus = vmcpu
+
+    nvme_disk=(ENV['NVME_FILE'] || "nvme_disk.img")
+    unless File.exist? (nvme_disk)
+      vb.customize ["createhd", "--filename", nvme_disk, "--variant", "Fixed", "--size", "1024"]
+      vb.customize ["storagectl", :id, "--name", "nvme", "--add", "pcie", "--controller", "NVMe", "--portcount", "1", "--bootable", "off"]
+      vb.customize ["storageattach", :id, "--storagectl", "nvme", "--type", "hdd", "--medium", nvme_disk, "--port", "0"]
+    end
+
+    #support for the SSE4.x instruction is required in some versions of VB.
+    vb.customize ["setextradata", :id, "VBoxInternal/CPUM/SSE4.1", "1"]
+    vb.customize ["setextradata", :id, "VBoxInternal/CPUM/SSE4.2", "1"]
+  end
+end
+
+def setup_libvirt(config, vmcpu, vmram, distro)
+  emulated_nvme_types=(ENV['NVME_DISKS_TYPE'] || "nvme").split(',')
+
+  config.vm.provider "libvirt" do |libvirt, override|
+    libvirt.random_hostname = "1"
+    libvirt.driver = "kvm"
+    libvirt.graphics_type = "vnc"
+    libvirt.memory = vmram
+    libvirt.cpus = vmcpu
+    libvirt.video_type = "cirrus"
+
+    if (distro.include?("freebsd"))
+      # generic/freebsd boxes need to be explicitly run with SCSI bus,
+      # otherwise boot process fails on mounting the disk
+      libvirt.disk_bus = "scsi"
+    elsif (distro.include?("arch"))
+      # Run generic/arch boxes explicitly with IDE bus,
+      # otherwise boot process fails on mounting the disk
+      libvirt.disk_bus = "ide"
+    else
+      libvirt.disk_bus = "virtio"
+    end
+
+    if ENV['SPDK_QEMU_EMULATOR']
+      libvirt.emulator_path = ENV['SPDK_QEMU_EMULATOR']
+      libvirt.machine_type = "pc"
+    end
+
+    # we put nvme_disk inside default pool to eliminate libvirt/SELinux Permissions Problems
+    # and to be able to run vagrant from user $HOME directory
+
+    # Loop to create all emulated disks set
+    emulated_nvme_types.each_with_index { |disk, index|
+      if disk == "nvme"
+        setup_nvme_disk(libvirt, disk, index)
+      elsif disk == "ocssd"
+        setup_ocssd_disk(libvirt, disk, index)
+      end
+    }
+
+    if ENV['VAGRANT_HUGE_MEM'] == "1"
+      libvirt.memorybacking :hugepages
+    end
+
+    # Optional field if we want use other storage pools than default
+    # libvirt.storage_pool_name = "vm"
+  end
+end
+
+#################################################################################################
+# Pick the right distro and bootstrap, default is fedora30
+distro = (ENV['SPDK_VAGRANT_DISTRO'] || "fedora30")
+provider = (ENV['SPDK_VAGRANT_PROVIDER'] || "virtualbox")
+
+# Get all variables for creating vm
+vmcpu = (ENV['SPDK_VAGRANT_VMCPU'] || 2)
+vmram = (ENV['SPDK_VAGRANT_VMRAM'] || 4096)
+nfs_sync_backend_distros = ['freebsd', 'clearlinux']
+openstack_network = (ENV['SPDK_OPENSTACK_NETWORK'] || false)
+
+# generic/freebsd boxes do not work properly with vagrant-proxyconf and
+# have issues installing rsync and sshfs for syncing files. NFS is
+# pre-installed, so use it.
+# generic/fedora boxes on the other hand have problems running NFS
+# service so use sshfs+rsync combo instead.
+if (nfs_sync_backend_distros.any? { |d| distro.include?(d) })
+  files_sync_backend = {type: :nfs, nfs_udp: false,  mount_options: ['ro']}
+  plugins_sync_backend = {type: :nfs, nfs_udp: false}
+else
+  # Remove --copy-links from default rsync cmdline since we do want to sync
+  # actual symlinks as well. Also, since copy is made between host and its
+  # local VM we don't need to worry about saturating the local link so skip
+  # the compression to speed up the whole transfer.
+  files_sync_backend = {type: "rsync", rsync__auto: false, rsync__args: ["--archive", "--verbose", "--delete"]}
+  plugins_sync_backend = {type: :sshfs}
+end
+
+Vagrant.configure(2) do |config|
+  config.vm.box = get_box_type(distro)
+  config.vm.box_check_update = false
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+
+  # Add network interface for openstack tests
+  if openstack_network == "1"
+    config.vm.network "private_network", ip: "10.0.2.15"
+  end
+  # Copy in the .gitconfig if it exists
+  copy_gitconfig(config)
+
+  # Copy the tsocks configuration file for use when installing some spdk test pool dependencies
+  copy_tsocks(config)
+
+  # Copy in the user's tools if they exists
+  copy_vagrant_tools(config,files_sync_backend)
+
+  # rsync the spdk directory if provision hasn't happened yet
+  # Warning: rsync does not work with freebsd boxes, so this step is disabled
+  copy_spdk_dir(config, files_sync_backend)
+
+  # rsync artifacts from build
+  copy_spdk_artifacts(config, plugins_sync_backend)
+
+  # vagrant-cachier caches apt/yum etc to speed subsequent
+  # vagrant up
+  setup_vagrant_cachier(config, plugins_sync_backend)
+
+  # use http proxy if avaiable
+  setup_proxy(config, distro)
+
+  # Clear CFLAGS in clear linux
+  clear_cflags(config) if distro == 'clearlinux'
+
+  # freebsd and clearlinux boxes in order to have spdk sources synced from
+  # host properly will use NFS with "ro" option enabled to prevent changes
+  # on host filesystem.
+  # To make sources usable in the guest VM we need to unmount them and use
+  # local copy.
+  make_spdk_local_copy_of_nfs(config,distro) if plugins_sync_backend[:type] == :nfs
+
+  # Setup SSH
+  setup_ssh(config)
+
+  # Virtualbox configuration
+  setup_virtualbox(config,vmcpu,vmram)
+
+  # This setup was Tested on Fedora 27
+  # libvirt configuration need modern Qemu(tested on 2.10) & vagrant-libvirt in version 0.0.39+
+  # There are few limitation for SElinux - The file added outside libvirt must have proper SE ACL policy or setenforce 0
+  setup_libvirt(config,vmcpu,vmram,distro)
+
+  # provision the vm with all of the necessary spdk dependencies for running the autorun.sh tests
+  deploy_test_vm(config)
+end

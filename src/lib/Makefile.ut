@@ -1,0 +1,15 @@
+IBOF_DIR = ../..
+UT_INCLUDE=-I$(IBOF_DIR) -I$(IBOF_DIR)/lib
+
+TEST_SRCS = bitmap.cpp bitmap_test.cpp 
+
+UT_CPPFLAGS = -lgtest -lgmock_main -lpthread -g
+UT_OUTPUT = bitmap_ut
+
+TEST_OBJS = $(TEST_SRCS:.cpp=.o)
+
+ut: $(TEST_OBJS)
+	g++ $(UT_INCLUDE) $(TEST_SRCS) $(UT_CPPFLAGS) -o $(UT_OUTPUT)
+
+clean_ut:
+	rm -rf $(UT_OUTPUT) *.o

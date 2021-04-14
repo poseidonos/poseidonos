@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(mfs_api_wrapper_ut mfs_api_wrapper_test.cpp)

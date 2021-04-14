@@ -1,0 +1,38 @@
+
+######################################################
+# top-level Unit test configuration
+ifeq ($(ut),mfs)
+$(info Top-level unit test option enabled...)
+	MFS_INTEGRATION_TEST_EN = 1
+else ifeq ($(ut),wbt)
+$(info Top-level WBT API unit test option enabled...)
+	MFS_INTEGRATION_TEST_EN = 1
+	MFS_WBT_API_TEST_EN=1
+endif	
+######################################################
+
+ifeq ($(MFS_INTEGRATION_TEST_EN), 1)			
+
+	ifeq ($(MFS_WBT_API_TEST_EN),1)
+	UT_SRCS += \
+		mfs_wbt_test.cpp \
+
+	else
+	UT_SRCS  += \
+		mfs_aio_test.cpp \
+		mfs_functional_test.cpp \
+		mfs_perf_test.cpp \
+		mfs_data_consistency_test.cpp
+
+	endif
+	
+    UT_SRCS += \
+        mfs_test.cpp \
+
+else
+
+    UT_SRCS += \
+        mfs_top_init_test.cpp
+endif
+
+DEFINE += "-DMFS_MFS_INTEGRATION_TEST_EN=$(MFS_INTEGRATION_TEST_EN)"

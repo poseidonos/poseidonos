@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(io_recover_ut io_recover_test.cpp)
+POS_ADD_UNIT_TEST(i_io_recover_ut i_io_recover_test.cpp)
+POS_ADD_UNIT_TEST(i_recover_ut i_recover_test.cpp)

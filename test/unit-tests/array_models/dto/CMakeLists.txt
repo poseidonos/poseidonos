@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(device_set_ut device_set_test.cpp)
+POS_ADD_UNIT_TEST(partition_logical_size_ut partition_logical_size_test.cpp)
+POS_ADD_UNIT_TEST(partition_physical_size_ut partition_physical_size_test.cpp)

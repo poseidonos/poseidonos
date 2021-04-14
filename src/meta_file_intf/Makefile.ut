@@ -1,0 +1,32 @@
+IBOF_DIR_REL = ../..
+IBOF_DIR = $(abspath $(IBOF_DIR_REL))
+UT_INCLUDE=-I$(IBOF_DIR) -I$(IBOF_DIR)/lib
+
+UT_OBJDIR_REL=obj_output
+UT_OBJDIR=$(abspath $(UT_OBJDIR_REL))
+
+INTF_SRCS = $(wildcard $(IBOF_DIR)/src/meta_file_intf/*.cpp)
+INTF_EXCLUDE = $(IBOF_DIR)/src/metafs_file_intf.cpp
+TEST_SRCS=$(filter-out $(INTF_EXCLUDE), $(INTF_SRCS))
+
+UT_CPPFLAGS =-g
+UT_LFLAGS += -lgmock_main -lpthread
+OUTPUT = metaintf_ut
+
+TARGET_OBJECTS = $(TEST_SRCS:.cpp=.o)
+
+ut: $(UT_OBJDIR) $(TARGET_OBJECTS)
+	g++ $(UT_INCLUDE) $(UT_OBJDIR)/*.o $(UT_CPPFLAGS) -o $(OUTPUT) $(UT_LFLAGS) $(LFLAGS)
+
+%.o: %.cpp
+	@echo "Compling [$(<F)]..."
+	@g++ $(UT_INCLUDE) $(UT_DEFINE) $(UT_CPPFLAGS) -c $< -o $(UT_OBJDIR)/$(notdir $@)
+
+$(UT_OBJDIR):
+	mkdir -p $@
+
+clean:
+	rm -rf ${OUTPUT} ${UT_OBJDIR} TestData
+    
+reset:
+	rm -rf TestData *.bin

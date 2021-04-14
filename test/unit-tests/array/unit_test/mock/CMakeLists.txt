@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(mock_ublock_device_ut mock_ublock_device_test.cpp)

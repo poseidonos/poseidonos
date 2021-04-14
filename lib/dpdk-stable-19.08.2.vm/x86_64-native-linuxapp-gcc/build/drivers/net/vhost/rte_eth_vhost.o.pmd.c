@@ -1,0 +1,1 @@
+const char net_vhost_pmd_info[] __attribute__((used)) = "PMD_INFO_STRING= {\"name\" : \"net_vhost\", \"params\" : \"iface=<ifc> queues=<int> client=<0|1> dequeue-zero-copy=<0|1> iommu-support=<0|1> postcopy-support=<0|1>\", \"pci_ids\" : []}";

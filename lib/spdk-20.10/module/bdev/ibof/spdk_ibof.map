@@ -1,0 +1,11 @@
+{
+global:
+	# bdev ibof related
+	spdk_delete_ibof_complete;
+	create_ibof_disk;
+	delete_ibof_disk;
+	get_ibof_volume_id;
+    get_nvmf_thread_from_reactor;
+	# anything else
+	local: *;
+};

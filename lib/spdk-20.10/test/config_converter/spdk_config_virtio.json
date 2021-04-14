@@ -1,0 +1,133 @@
+{
+  "subsystems": [
+    {
+      "subsystem": "accel",
+      "config": null
+    },
+    {
+      "subsystem": "interface",
+      "config": null
+    },
+    {
+      "subsystem": "net_framework",
+      "config": null
+    },
+    {
+      "subsystem": "bdev",
+      "config": [
+        {
+          "params": {
+            "bdev_io_pool_size": 65536,
+            "bdev_io_cache_size": 256
+          },
+          "method": "bdev_set_options"
+        },
+        {
+          "params": {
+            "retry_count": 4,
+            "timeout_us": 0,
+            "nvme_adminq_poll_period_us": 1000000,
+            "nvme_ioq_poll_period_us": 0,
+            "action_on_timeout": "none"
+          },
+          "method": "bdev_nvme_set_options"
+        },
+        {
+          "params": {
+            "enable": false,
+            "period_us": 100000
+          },
+          "method": "bdev_nvme_set_hotplug"
+        },
+        {
+          "params": {
+            "name": "VirtioScsi0",
+            "dev_type": "scsi",
+            "vq_size": 512,
+            "trtype": "user",
+            "traddr": "naa.vhost.0",
+            "vq_count": 8
+          },
+          "method": "bdev_virtio_attach_controller"
+        },
+        {
+          "params": {
+            "name": "VirtioScsi1",
+            "dev_type": "scsi",
+            "vq_size": 512,
+            "trtype": "user",
+            "traddr": "naa.vhost.1",
+            "vq_count": 8
+          },
+          "method": "bdev_virtio_attach_controller"
+        },
+        {
+          "params": {
+            "name": "VirtioBlk4",
+            "dev_type": "blk",
+            "vq_size": 512,
+            "trtype": "user",
+            "traddr": "vhost.1",
+            "vq_count": 1
+          },
+          "method": "bdev_virtio_attach_controller"
+        }
+      ]
+    },
+    {
+      "subsystem": "scsi",
+      "config": null
+    },
+    {
+      "subsystem": "nvmf",
+      "config": [
+        {
+          "params": {
+            "acceptor_poll_rate": 10000
+          },
+          "method": "nvmf_set_config"
+        },
+        {
+          "params": {
+            "max_subsystems": 1024
+          },
+          "method": "nvmf_set_max_subsystems"
+        }
+      ]
+    },
+    {
+      "subsystem": "nbd",
+      "config": []
+    },
+    {
+      "subsystem": "vhost",
+      "config": []
+    },
+    {
+      "subsystem": "iscsi",
+      "config": [
+        {
+          "params": {
+            "allow_duplicated_isid": false,
+            "default_time2retain": 20,
+            "mutual_chap": false,
+            "require_chap": false,
+            "immediate_data": true,
+            "node_base": "iqn.2016-06.io.spdk",
+            "nop_in_interval": 30,
+            "max_connections_per_session": 2,
+            "first_burst_length": 8192,
+            "max_queue_depth": 64,
+            "nop_timeout": 60,
+            "chap_group": 0,
+            "max_sessions": 128,
+            "error_recovery_level": 0,
+            "disable_chap": false,
+            "default_time2wait": 2
+          },
+          "method": "iscsi_set_options"
+        }
+      ]
+    }
+  ]
+}

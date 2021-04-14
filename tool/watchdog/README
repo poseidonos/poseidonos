@@ -1,0 +1,26 @@
+ibofd - ibof watchdog daemon process
+
+Description : the ibofd watchdog monitors whether ibofos process run or not, and start process when needs.
+
+Options: ibofd.py allows four options for now
+	-i, --inverval : monitoring interval seconds, by default 10s
+	-l, --log : logfile, by default /var/log/syslog
+	-d, --daemon : run ibofd as daemon(1) or process (0)
+	-f, --finalize: -f 1 will terminate ibofd as well as ibofos
+
+
+How to Run:
+An user can install and run ibofd one of following two ways
+1) Manual : run ibofd.py on your own after boot
+	- Start: ibofd.py (=ibofd.py -d 1) 
+	- Stop : ibofd.py -f 1
+
+2) Manual as System Service : register ibofd as system service. Working as system service, ibofd can be controlled by service daemon
+	- 1. install_ibofd.sh : register ibofd as system service
+	- 2. service ibofd start | stop | restart
+	- 3. uninstall_ibofd.sh : unregister ibofd from system service
+	- Note1: ibofd and ibofos requires hugememory reservation and using userspace driver, which forces to detach kernel driver. 
+		 As this is debatable, we determained to remain it as an user's choice. 
+		 e.g) register 'service ibofd start' at bootup script such as rcS, it will make ibofos run in an autonomous way even after boot up.
+	- Note2: The service script has dependency on posix distribution. current script is checked on ubuntu distro 18.04 / 19.10
+

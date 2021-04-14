@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(segment_info_ut segment_info_test.cpp)
+POS_ADD_UNIT_TEST(segment_ctx_ut segment_ctx_test.cpp)
+POS_ADD_UNIT_TEST(segment_states_ut segment_states_test.cpp)

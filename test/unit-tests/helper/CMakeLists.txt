@@ -1,0 +1,5 @@
+POS_ADD_UNIT_TEST(time_helper_ut time_helper_test.cpp)
+POS_ADD_UNIT_TEST(string_checker_ut string_checker_test.cpp)
+POS_ADD_UNIT_TEST(directory_ut directory_test.cpp)
+POS_ADD_UNIT_TEST(json_helper_ut json_helper_test.cpp)
+POS_ADD_UNIT_TEST(string_helper_ut string_helper_test.cpp)

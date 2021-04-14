@@ -1,0 +1,1 @@
+../../lib/librte_eal/linux/eal/include/rte_kni_common.h

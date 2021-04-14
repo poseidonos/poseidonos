@@ -1,0 +1,331 @@
+/*
+ *   BSD LICENSE
+ *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without
+ *   modification, are permitted provided that the following conditions
+ *   are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided with the
+ *       distribution.
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
+ *
+ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "src/network/nvmf_volume_ibof.hpp"
+
+#include <map>
+#include <string>
+
+#include "spdk/event.h"
+#include "src/spdk_wrapper/event_framework_api.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/volume/volume_manager.h"
+
+#if defined QOS_ENABLED_FE
+#include "src/qos/qos_manager.h"
+#endif
+
+namespace pos
+{
+NvmfTarget NvmfVolumeIbof::target;
+
+std::atomic<bool> NvmfVolumeIbof::detachFailed;
+std::atomic<uint32_t> NvmfVolumeIbof::volumeDetachedCnt;
+
+NvmfVolumeIbof::NvmfVolumeIbof(void)
+{
+}
+
+NvmfVolumeIbof::~NvmfVolumeIbof(void)
+{
+}
+
+void
+NvmfVolumeIbof::_NamespaceDetachedHandler(void* cbArg, int status)
+{
+    struct ibof_volume_info* vInfo = (struct ibof_volume_info*)cbArg;
+    if (status == NvmfCallbackStatus::SUCCESS)
+    {
+        if (vInfo)
+        {
+            volumeDetachedCnt++;
+            string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
+            reset_ibof_volume_info(bdevName.c_str());
+        }
+    }
+    else
+    {
+        SPDK_ERRLOG("Could not detach volume\n");
+        if (vInfo)
+        {
+            delete vInfo;
+        }
+        detachFailed = true;
+    }
+}
+
+void
+NvmfVolumeIbof::_NamespaceDetachedAllHandler(void* cbArg, int status)
+{
+    int failedVolCount = 0;
+    if (status == NvmfCallbackStatus::SUCCESS ||
+        status == NvmfCallbackStatus::PARTIAL_FAILED)
+    {
+        volumeListInfo volsInfo = *(static_cast<volumeListInfo*>(cbArg));
+        string subnqn = volsInfo.subnqn;
+        vector<int> volList = volsInfo.vols;
+
+        for (auto volId : volList)
+        {
+            string bdevName = target.GetBdevName(volId, volsInfo.arrayName);
+            struct spdk_nvmf_subsystem* subsystem = target.FindSubsystem(subnqn);
+            struct spdk_nvmf_ns* ns = target.GetNamespace(subsystem, bdevName);
+            if (ns != nullptr)
+            {
+                SPDK_NOTICELOG("Requested volume(%s) is still attached\n", bdevName.c_str());
+                failedVolCount++;
+                continue;
+            }
+            volumeDetachedCnt++;
+            reset_ibof_volume_info(bdevName.c_str());
+        }
+        if (failedVolCount > 0)
+        {
+            detachFailed = true;
+            SPDK_ERRLOG("Failed to Detach All Volumes in Subsystem(%s)\n",
+                subnqn.c_str());
+            SPDK_NOTICELOG("Only %d out of %lu got detached. Retry Volume Detach\n",
+                failedVolCount, volList.size());
+        }
+    }
+    else
+    {
+        detachFailed = true;
+        SPDK_ERRLOG("Cannot detach all volumes\n");
+    }
+    delete (static_cast<volumeListInfo*>(cbArg));
+}
+
+void
+NvmfVolumeIbof::_VolumeCreateHandler(void* arg1, void* arg2)
+{
+    struct ibof_volume_info* vInfo = (struct ibof_volume_info*)arg1;
+    if (vInfo)
+    {
+        string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
+        bool res = target.CreateIBoFBdev(bdevName, vInfo->id, vInfo->size_mb, 512, false, vInfo->array_name);
+        if (res == true)
+        {
+            spdk_bdev_ibof_register_io_handler(bdevName.c_str(), vInfo->unvmf_io);
+        }
+        delete vInfo;
+    }
+}
+
+void
+NvmfVolumeIbof::VolumeCreated(struct ibof_volume_info* vInfo)
+{
+    vInfo->unvmf_io = GetuNVMfIOHandler();
+    EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(),
+        _VolumeCreateHandler, vInfo, nullptr);
+}
+
+void
+NvmfVolumeIbof::_VolumeDeleteHandler(void* arg1, void* arg2)
+{
+    struct ibof_volume_info* vInfo = (struct ibof_volume_info*)arg1;
+    if (vInfo)
+    {
+        string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
+        spdk_bdev_ibof_unregister_io_handler(bdevName.c_str());
+        target.DeleteIBoFBdev(bdevName);
+        delete vInfo;
+    }
+}
+
+void
+NvmfVolumeIbof::VolumeDeleted(struct ibof_volume_info* vInfo)
+{
+    EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(),
+        _VolumeDeleteHandler, vInfo, nullptr);
+}
+
+void
+NvmfVolumeIbof::_VolumeMountHandler(void* arg1, void* arg2)
+{
+    struct ibof_volume_info* vInfo = (struct ibof_volume_info*)arg1;
+
+    if (vInfo)
+    {
+        string subNqn(vInfo->nqn);
+        string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
+#if defined QOS_ENABLED_FE
+        uint32_t nqn_id = target.GetVolumeNqnId(subNqn);
+        QosManagerSingleton::Instance()->UpdateSubsystemToVolumeMap(nqn_id, vInfo->id);
+        set_ibof_volume_info(bdevName.c_str(), subNqn.c_str(), nqn_id);
+#else
+        set_ibof_volume_info(bdevName.c_str(), subNqn.c_str(), 0);
+#endif
+        target.SetVolumeQos(bdevName, vInfo->iops_limit, vInfo->bw_limit);
+        delete vInfo;
+  }
+}
+
+void
+NvmfVolumeIbof::VolumeMounted(struct ibof_volume_info* vInfo)
+{
+    EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(),
+        _VolumeMountHandler, vInfo, nullptr);
+}
+
+void
+NvmfVolumeIbof::_VolumeUnmountHandler(void* arg1, void* arg2)
+{
+    struct ibof_volume_info* vInfo = (struct ibof_volume_info*)arg1;
+    bool ret = false;
+    if (vInfo)
+    {
+        string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
+        const char* nqn = get_attached_subsystem_nqn(bdevName.c_str());
+        string subnqn(nqn);
+        ret = target.DetachNamespace(subnqn, 0, _NamespaceDetachedHandler, vInfo);
+    }
+    if (ret == false)
+    {
+        detachFailed = true;
+        if (vInfo)
+        {
+            delete vInfo;
+        }
+    }
+}
+
+void
+NvmfVolumeIbof::VolumeUnmounted(struct ibof_volume_info* vInfo)
+{
+    bool mounted = target.CheckVolumeAttached(vInfo->id, vInfo->array_name);
+    if (mounted == false)
+    {
+        volumeDetachedCnt++;
+    }
+    else
+    {
+        volumeDetachedCnt = 0;
+        EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(),
+            _VolumeUnmountHandler, vInfo, nullptr);
+    }
+}
+
+void
+NvmfVolumeIbof::_VolumeUpdateHandler(void* arg1, void* arg2)
+{
+    struct ibof_volume_info* vInfo = (struct ibof_volume_info*)arg1;
+    if (vInfo)
+    {
+        string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
+        target.SetVolumeQos(bdevName, vInfo->iops_limit, vInfo->bw_limit);
+        delete vInfo;
+    }
+}
+
+void
+NvmfVolumeIbof::VolumeUpdated(struct ibof_volume_info* vInfo)
+{
+    EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(),
+        _VolumeUpdateHandler, vInfo, nullptr);
+}
+
+void
+NvmfVolumeIbof::_VolumeDetachHandler(void* volListInfo, void* arg)
+{
+    int ret = false;
+    volumeListInfo volsInfo = *(static_cast<volumeListInfo*>(volListInfo));
+    string subnqn = volsInfo.subnqn;
+    ret = target.DetachNamespaceAll(subnqn, _NamespaceDetachedAllHandler, volListInfo);
+    if (ret == false)
+    {
+        detachFailed = true;
+        delete (static_cast<volumeListInfo*>(volListInfo));
+    }
+}
+
+void
+NvmfVolumeIbof::VolumeDetached(vector<int>& volList, string arrayName)
+{
+    uint32_t volsCountToDetach = 0;
+    map<string, vector<int>> volsPerSubsystem;
+    for (auto volId : volList)
+    {
+        string bdevName = target.GetBdevName(volId, arrayName);
+        const char* nqn = get_attached_subsystem_nqn(bdevName.c_str());
+        if (nqn != nullptr)
+        {
+            string subnqn(nqn);
+            if (subnqn.empty() == false && target.CheckVolumeAttached(volId, arrayName) == true)
+            {
+                volsPerSubsystem[subnqn].push_back(volId);
+                volsCountToDetach++;
+            }
+        }
+    }
+    if (volsCountToDetach == 0)
+    {
+        return;
+    }
+    uint32_t target_core = EventFrameworkApi::GetFirstReactor();
+    for (auto volumes : volsPerSubsystem)
+    {
+        volumeListInfo* volsInfo = new volumeListInfo;
+        volsInfo->subnqn = volumes.first;
+        volsInfo->vols = volumes.second;
+        volsInfo->arrayName = arrayName;
+        EventFrameworkApi::SendSpdkEvent(target_core, _VolumeDetachHandler,
+            volsInfo, nullptr);
+    }
+}
+
+uint32_t
+NvmfVolumeIbof::VolumeDetachCompleted(void)
+{
+    return volumeDetachedCnt;
+}
+
+bool
+NvmfVolumeIbof::WaitRequestedVolumesDetached(uint32_t volCnt)
+{
+    while (volumeDetachedCnt != volCnt)
+    {
+        if (detachFailed == true)
+        {
+            volumeDetachedCnt = 0;
+            detachFailed = false;
+            return false;
+        }
+        usleep(1);
+    }
+    volumeDetachedCnt = 0;
+    detachFailed = false;
+    return true;
+}
+
+} // namespace pos

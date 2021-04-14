@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(mapper_service_ut mapper_service_test.cpp)
+POS_ADD_UNIT_TEST(mapper_interface_container_ut mapper_interface_container_test.cpp)

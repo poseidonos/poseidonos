@@ -1,0 +1,6 @@
+POS_ADD_UNIT_TEST(rebuild_handler_ut rebuild_handler_test.cpp)
+POS_ADD_UNIT_TEST(i_array_rebuilder_ut i_array_rebuilder_test.cpp)
+POS_ADD_UNIT_TEST(rebuild_context_ut rebuild_context_test.cpp)
+POS_ADD_UNIT_TEST(rebuild_progress_ut rebuild_progress_test.cpp)
+POS_ADD_UNIT_TEST(rebuild_result_ut rebuild_result_test.cpp)
+POS_ADD_UNIT_TEST(rebuild_target_ut rebuild_target_test.cpp)

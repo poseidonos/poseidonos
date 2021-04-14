@@ -1,0 +1,4 @@
+POS_ADD_UNIT_TEST(nvm_partition_ut nvm_partition_test.cpp)
+POS_ADD_UNIT_TEST(stripe_partition_ut stripe_partition_test.cpp)
+POS_ADD_UNIT_TEST(partition_manager_ut partition_manager_test.cpp)
+POS_ADD_UNIT_TEST(partition_ut partition_test.cpp)

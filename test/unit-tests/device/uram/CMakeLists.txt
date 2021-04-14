@@ -1,0 +1,7 @@
+POS_ADD_UNIT_TEST(uram_drv_ut uram_drv_test.cpp)
+POS_ADD_UNIT_TEST(uram_test_ut uram_test_test.cpp)
+POS_ADD_UNIT_TEST(uram_ut uram_test.cpp)
+POS_ADD_UNIT_TEST(uram_device_context_ut uram_device_context_test.cpp)
+POS_ADD_UNIT_TEST(uram_block_device_test_ut uram_block_device_test_test.cpp)
+POS_ADD_UNIT_TEST(uram_io_context_ut uram_io_context_test.cpp)
+POS_ADD_UNIT_TEST(uram_restore_completion_ut uram_restore_completion_test.cpp)

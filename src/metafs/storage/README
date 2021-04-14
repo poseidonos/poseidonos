@@ -1,0 +1,8 @@
+Meta storage subsystem 
+: It provides a storage interface that meta filesystem can load and store individual meta pages by page-unit io
+
+Meta storage sbusystem supports two type of storage considering test capability
+1) vstore - virtual storage that all data is stored into pure system memory only.
+2) pstore - persistent storage that all data is stored into non-volatile media such as nv-ram and ssd
+
+pstore is our target for meta storage subsystem but vstore is established to allow that other modules can test their code before pstore is ready.

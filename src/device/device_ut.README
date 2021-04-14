@@ -1,0 +1,80 @@
+
+1. Prerequisite
+ - dpdk/spdk shall be prepared.
+
+ - At least one nvme drive shall be prepared detected by kernel to test 
+   "nvmeTest"
+    : ex) /dev/nvme0n1
+
+ - At least one nvme driver shall be prepared detected by spdk library through
+   setup.sh with "PCI_WHITELIST" to test "UBlockDevices and DeviceDrivers"
+
+ - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   !!!!!! MAKE SURE NOT TO SELECT THE MAIN OS DRIVE FOR THE TEST TARGET !!!!!!!
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+2. Description
+ a. Test includes below things by the particular device driver,
+  - Scanning devices
+  - Opening/Closing devices
+  - Synchronous I/O
+  - Asynchronous I/O
+  - Buffered I/O
+  - Vectorred I/O
+
+ b. nvme_test, nvme_block_device_test
+  - Tests DeviceDriver and UblockDevice using libaio library.
+
+ c. unvme_test, unvme_block_device_test
+  - Tests UnvmeDrv and UnvmeSsd using nvme driver library supported by
+    intel spdk library.
+
+ d. uram_test, uram_block_device_test
+  - Tests UramDrv and Uram using userspace ramdisk(malloc bdev) supported by
+    intel spdk library.
+
+3. Build
+  - $ make
+  - six executables(nvme_test, unvme_test, uram_test, nvme_block_device_test, 
+    unvme_block_device_test, uram_block_device_test) will be generated if
+    the build process has been successfully done.
+
+4. Usage
+ a. nvme_test
+  - # nvme_test DEVICE_NAME
+  - DEVICE_NAME shall be specified to prevent the case that main OS drive is
+    used by the test.
+  - Test mainly includes reading and writing also, so if we mistakenly select
+    the main OS drive for the testing target, the main OS is to be CRUSHED!!!!!
+
+ b. unvme_test
+  - # unvme_test
+  - A test target is selected from the list in PCI_WHITELIST for the setup.sh
+  - No parameters are needed since there is no case that we could select
+    the main OS drive if the PCI_WHITELIST is securely defined.
+
+ c. uram_test
+  - # uram_test
+  - A test target is selected as malloc bdev(userspace ramdisk) inside the test
+    made by spdk API.
+  - No parameters are needed since there is no case that we could select
+    the main OS drive if the PCI_WHITELIST is securely defined.
+  - malloc bdev is made with the Hugepages allocated by setup.sh.
+  - you can check if Hugepages are allocated,
+    $ cat /proc/meminfo
+
+ d. ublock_device_test
+  - # nvme_block_device_test DEVICE_NAME [IO_CONTEXT_COUNT]
+  - DEVICE_NAME shall be specified to prevent the case that main OS drive is
+    used by the test.
+  - Test mainly includes reading and writing also, so if we mistakenly select
+    the main OS drive for the testing target, the main OS is to be CRUSHED!!!!!
+
+ e. unvme_block_device_test
+  - # unvme_block_device_test [IO_CONTEXT_COUNT]
+  - A test target is selected from the list in PCI_WHITELIST for the setup.sh
+  - No parameters are needed since there is no case that we could select
+    the main OS drive if the PCI_WHITELIST is securely defined.
+
+ f. uram_block_device_test
+  - # uram_block_device_test [IO_CONTEXT_COUNT]

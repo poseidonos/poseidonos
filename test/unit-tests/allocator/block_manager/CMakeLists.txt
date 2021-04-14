@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(block_manager_ut block_manager_test.cpp)
+POS_ADD_UNIT_TEST(block_allocator_stub_ut block_allocator_stub_test.cpp)

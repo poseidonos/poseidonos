@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(array_service_layer_ut array_service_layer_test.cpp)

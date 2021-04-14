@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(journal_configuration_ut journal_configuration_test.cpp)

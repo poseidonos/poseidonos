@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(volume_event_ut volume_event_test.cpp)
+POS_ADD_UNIT_TEST(volume_event_publisher_ut volume_event_publisher_test.cpp)

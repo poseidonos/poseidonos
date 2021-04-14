@@ -1,0 +1,30 @@
+clone_depth: 1 # NB: this stops FIO-VERSION-GEN making tag based versions
+
+environment:
+  CYG_MIRROR: http://cygwin.mirror.constant.com
+  CYG_ROOT: C:\cygwin64
+  MAKEFLAGS: -j 2
+  matrix:
+    - platform: x64
+      PACKAGE_ARCH: x86_64
+      CONFIGURE_OPTIONS:
+    - platform: x86
+      PACKAGE_ARCH: i686
+      CONFIGURE_OPTIONS: --build-32bit-win --target-win-ver=xp
+
+install:
+  - '%CYG_ROOT%\setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --site "%CYG_MIRROR%" --packages "mingw64-%PACKAGE_ARCH%-zlib" > NUL'
+  - SET PATH=%CYG_ROOT%\bin;%PATH% # NB: Changed env variables persist to later sections
+
+build_script:
+  - 'bash.exe -lc "cd \"${APPVEYOR_BUILD_FOLDER}\" && ./configure --disable-native --extra-cflags=\"-Werror\" ${CONFIGURE_OPTIONS} && make.exe'
+
+after_build:
+  - cd os\windows && dobuild.cmd %PLATFORM%
+
+test_script:
+  - 'bash.exe -lc "cd \"${APPVEYOR_BUILD_FOLDER}\" && file.exe fio.exe && make.exe test'
+
+artifacts:
+  - path: os\windows\*.msi
+    name: msi

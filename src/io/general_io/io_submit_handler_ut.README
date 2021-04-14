@@ -1,0 +1,56 @@
+1. Description
+ a. Abstraction APIs for Backend IO Request
+  - All APIs shall be called by stripe based, so if an IO requester(could be a
+    module or all kinds of user who want to get backend IO service) wants to get
+    IO service about two or more different stripes, it will call two or more
+    times in accordance with the number of different stripe count.
+
+ b. Synchronous and Asynchronous IO are supported.
+
+    static int 
+    SyncIO(IODirection direction,
+            std::list<IOSubmitBufferListEntry *> &bufferList,
+            LogicalBlkAddr &startLSA, uint64_t blockCount,
+            PartitionType partitionToIO);
+
+    - SyncIO provides IO services on the IO requester's stack and context.
+      It returns after all subsequent operations are done.
+      Returns zero on successful, otherwise Non-zero.
+    
+    
+    static int
+    SubmitAsyncIO(IODirection direction,
+            std::list<IOSubmitBufferListEntry *> &bufferList,
+            LogicalBlkAddr &startLSA, uint64_t blockCount,
+            PartitionType partitionToIO,
+            RequestContext *requestContext);
+
+    - SubmitAsyncIO provides IO services on the different stack and context from IO
+      requester's. So, IO requesters shall provide its context to use after the
+      callback.
+
+      To use the SubmitAsyncIO API, we need to know,
+
+           "RequestContextHeader" and "RequestContext" classes
+
+      which are used to pass the IO Requester's context.
+
+      All SubmitAsyncIO calls can be used to make devide and conquer.
+         ex) 1 ContextHeader : n Context
+      
+      If you want to acheive N jobs into one total by utilizing SubmitAsyncIO, you can
+      do it with creating a RequestContextHeader and N RequestContexts linked to
+      the single Header. Callbacks can be done for each Request and for the one 
+      time at the very last point in total.
+      IO requesters can make additional class inheriting from both classes and
+      add additional contexts as they want. The base classes are just to
+      guarantee synchronization on 1 : N request.
+  
+2. Build
+  - $ make
+  - An executable(io_submit_handler_ut) will be generated if
+    the build process has been successfully done.
+
+3. Usage
+  - $ ./io_submit_handler_ut
+ 

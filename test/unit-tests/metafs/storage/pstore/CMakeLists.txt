@@ -1,0 +1,6 @@
+POS_ADD_UNIT_TEST(mss_disk_handler_ut mss_disk_handler_test.cpp)
+POS_ADD_UNIT_TEST(mss_on_disk_ut mss_on_disk_test.cpp)
+POS_ADD_UNIT_TEST(mss_disk_inplace_ut mss_disk_inplace_test.cpp)
+POS_ADD_UNIT_TEST(mss_disk_place_ut mss_disk_place_test.cpp)
+POS_ADD_UNIT_TEST(mss_disk_outofplace_ut mss_disk_outofplace_test.cpp)
+POS_ADD_UNIT_TEST(mss_status_callback_ut mss_status_callback_test.cpp)

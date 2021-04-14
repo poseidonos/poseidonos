@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(mock_status_callback_ut mock_status_callback_test.cpp)
+POS_ADD_UNIT_TEST(mock_driver_ut mock_driver_test.cpp)

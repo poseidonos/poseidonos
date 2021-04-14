@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(reverse_map_ut reverse_map_test.cpp)
+POS_ADD_UNIT_TEST(reversemap_manager_ut reversemap_manager_test.cpp)

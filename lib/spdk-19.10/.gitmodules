@@ -1,0 +1,12 @@
+[submodule "dpdk"]
+	path = dpdk
+	url = https://github.com/spdk/dpdk.git
+[submodule "intel-ipsec-mb"]
+	path = intel-ipsec-mb
+	url = https://github.com/spdk/intel-ipsec-mb.git
+[submodule "isa-l"]
+	path = isa-l
+	url = https://github.com/spdk/isa-l.git
+[submodule "ocf"]
+	path = ocf
+	url = https://github.com/Open-CAS/ocf.git

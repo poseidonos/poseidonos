@@ -1,0 +1,13 @@
+DPDK_20.0 {
+	global:
+
+	rte_pmd_softnic_run;
+
+	local: *;
+};
+
+EXPERIMENTAL {
+	global:
+
+	rte_pmd_softnic_manage;
+};

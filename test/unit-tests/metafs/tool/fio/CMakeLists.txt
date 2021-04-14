@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(meta_scheduler_ut meta_scheduler_test.cpp)

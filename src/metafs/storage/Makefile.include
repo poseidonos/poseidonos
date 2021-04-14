@@ -1,0 +1,8 @@
+# MFS_INCLUDE_PATH
+MSS_TOP_DIR=storage
+
+# MFS_INCLUDE_PATH
+MFS_INCLUDE_PATH += \
+    $(MSS_TOP_DIR) \
+    $(MSS_TOP_DIR)/vstore \
+    $(MSS_TOP_DIR)/pstore

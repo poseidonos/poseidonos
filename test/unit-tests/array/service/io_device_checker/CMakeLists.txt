@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(io_device_checker_ut io_device_checker_test.cpp)
+POS_ADD_UNIT_TEST(i_device_checker_ut i_device_checker_test.cpp)
+POS_ADD_UNIT_TEST(i_io_device_checker_ut i_io_device_checker_test.cpp)

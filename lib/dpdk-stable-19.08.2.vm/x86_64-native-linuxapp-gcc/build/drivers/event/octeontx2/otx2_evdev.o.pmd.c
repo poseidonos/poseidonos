@@ -1,0 +1,1 @@
+const char event_octeontx2_pmd_info[] __attribute__((used)) = "PMD_INFO_STRING= {\"name\" : \"event_octeontx2\", \"params\" : \"xae_cnt=<int>single_ws=1qos=<string>selftest=1\", \"kmod\" : \"vfio-pci\", \"pci_ids\" : [[6013, 41209, 65535, 65535] ]}";
