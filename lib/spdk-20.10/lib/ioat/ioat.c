@@ -595,7 +595,6 @@ spdk_ioat_detach(struct spdk_ioat_chan *ioat)
 	TAILQ_REMOVE(&driver->attached_chans, ioat, tailq);
 	pthread_mutex_unlock(&driver->lock);
 
-	spdk_pci_device_detach(ioat->device);
 	ioat_channel_destruct(ioat);
 	free(ioat);
 }
