@@ -49,11 +49,22 @@ ContextManager::ContextManager(AllocatorAddressInfo* info, std::string arrayName
   userBlkAllocProhibited(false),
   ctxStoredVersion(INVALID_VERSION),
   ctxDirtyVersion(INVALID_VERSION),
+  wbLsidBitmap(nullptr),
   flushInProgress(false),
   addrInfo(info),
   numAsyncIoIssued(0),
   arrayName(arrayName)
 {
+    for (int volumeId = 0; volumeId < MAX_VOLUME_COUNT; ++volumeId)
+    {
+        blkAllocProhibited[volumeId] = false;
+    }
+
+    for (ASTailArrayIdx asTailArrayIdx = 0; asTailArrayIdx < ACTIVE_STRIPE_TAIL_ARRAYLEN; ++asTailArrayIdx)
+    {
+        activeStripeTail[asTailArrayIdx] = UNMAP_VSA;
+    }
+
     segmentCtx = new SegmentCtx(info, arrayName);
     rebuildCtx = new RebuildCtx(segmentCtx, this, arrayName);
 }
@@ -71,10 +82,6 @@ ContextManager::Init(void)
     rebuildCtx->Init(addrInfo);
 
     wbLsidBitmap = new BitMapMutex(addrInfo->GetnumWbStripes());
-    for (ASTailArrayIdx asTailArrayIdx = 0; asTailArrayIdx < ACTIVE_STRIPE_TAIL_ARRAYLEN; ++asTailArrayIdx)
-    {
-        activeStripeTail[asTailArrayIdx] = UNMAP_VSA;
-    }
 
     _UpdateCtxList();
 
@@ -95,11 +102,6 @@ ContextManager::Init(void)
         ctxFile->Open();
         _LoadSync();
         ctxDirtyVersion = ctxStoredVersion + 1;
-    }
-
-    for (int i = 0; i < MAX_VOLUME_COUNT; i++)
-    {
-        blkAllocProhibited[i] = false;
     }
 }
 

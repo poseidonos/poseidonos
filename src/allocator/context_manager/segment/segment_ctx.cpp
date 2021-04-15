@@ -52,6 +52,7 @@ SegmentCtx::SegmentCtx(AllocatorAddressInfo* info, std::string arrayName)
   currentSsdLsid(UNMAP_STRIPE),
   segmentStates(nullptr),
   segmentInfos(nullptr),
+  versionSegInfo(UINT32_MAX),
   headerSize(sizeof(SegInfoHeader)),
   writeBufferSize(0),
   thresholdSegments(20),
@@ -89,7 +90,7 @@ SegmentCtx::Init(void)
     else
     {
         POS_TRACE_ERROR(EID(ERROR_REINIT_WITHOUT_DISPOSE), "failed to initalize segInfofile object!!!");
-        assert(0);
+        assert(false);
     }
 
     if (segInfoFile->DoesFileExist() == false)

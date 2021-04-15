@@ -45,8 +45,10 @@
 namespace pos
 {
 // Header data to be stored in the map header
-struct MpageValidInfo
+class MpageValidInfo
 {
+public:
+    MpageValidInfo(void) : numValidMpages(UINT64_MAX), numTotalMpages(UINT64_MAX) {}
     uint64_t numValidMpages;
     uint64_t numTotalMpages;
 };
