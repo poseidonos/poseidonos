@@ -40,7 +40,7 @@
 #include "src/spdk_wrapper/event_framework_api.h"
 namespace pos
 {
-SmartLogUpdateRequest::SmartLogUpdateRequest(struct spdk_nvme_health_information_page* resultPage, struct spdk_nvme_health_information_page* page, ibof_io* io, uint32_t originCore)
+SmartLogUpdateRequest::SmartLogUpdateRequest(struct spdk_nvme_health_information_page* resultPage, struct spdk_nvme_health_information_page* page, pos_io* io, uint32_t originCore)
 : Callback(false),
   resultPage(resultPage),
   page(page),

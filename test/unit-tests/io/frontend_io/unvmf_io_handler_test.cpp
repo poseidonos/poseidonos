@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 #include <exception>
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/branch_prediction.h"
 #include "src/io/frontend_io/aio.h"
@@ -26,45 +26,45 @@ TEST(UNVMfIOHandler, UNVMfCompleteHandler_Normal)
     // Then: Do Nothing
 }
 
-TEST(UNVMfIOHandler, UNVMfSubmitHandler_ibofIoNullptr)
+TEST(UNVMfIOHandler, UNVMfSubmitHandler_posIoNullptr)
 {
-    // Given: ibof_io is nullptr
-    struct ibof_io *io = nullptr;
+    // Given: pos_io is nullptr
+    struct pos_io *io = nullptr;
     int actual, expected;
 
-    // When: Submit ibof_io 
+    // When: Submit pos_io 
     actual = UNVMfSubmitHandler(io);
     
     // Then: UNVMfSubmitHandler throws exception and return succeess
-    expected = IBOF_IO_STATUS_SUCCESS;
+    expected = POS_IO_STATUS_SUCCESS;
     ASSERT_EQ(actual, expected);
 }
 
 TEST(UNVMfIOHandler, UNVMfSubmitHandler_InvalidIOType)
 {
     // Given
-    struct ibof_io io = {4, 1, nullptr, 1, 0, 0, nullptr, nullptr};
+    struct pos_io io = {4, 1, nullptr, 1, 0, 0, nullptr, nullptr};
     int actual, expected;
     
     // When
     actual = UNVMfSubmitHandler(&io);
 
     // Then: UNVMfSubmitHandler throws exception and return success
-    expected = IBOF_IO_STATUS_SUCCESS;
+    expected = POS_IO_STATUS_SUCCESS;
     ASSERT_EQ(actual, expected);
 }
 
 TEST(UNVMfIOHandler, UNVMfSubmitHandler_WrongBuffer)
 {
     // Given
-    struct ibof_io io = {IO_TYPE::READ, 1, nullptr, 0, 0, 0, nullptr, nullptr};
+    struct pos_io io = {IO_TYPE::READ, 1, nullptr, 0, 0, 0, nullptr, nullptr};
     int actual, expected;
 
     // When
     actual = UNVMfSubmitHandler(&io);
 
     // Then: UNVMfSubmitHandler throws exception and return success
-    expected = IBOF_IO_STATUS_SUCCESS;
+    expected = POS_IO_STATUS_SUCCESS;
     ASSERT_EQ(actual, expected);
 }
 }

@@ -44,7 +44,7 @@ AioSubmissionAdapter::~AioSubmissionAdapter(void)
 }
 
 void
-AioSubmissionAdapter::Do(ibof_io* volIo)
+AioSubmissionAdapter::Do(pos_io* volIo)
 {
     AIO aio;
     aio.SubmitAsyncIO(*volIo);

@@ -39,7 +39,7 @@
 extern "C"
 {
 #include "spdk/bdev_module.h"
-#include "spdk/ibof_volume.h"
+#include "spdk/pos_volume.h"
 }
 
 namespace pos
@@ -53,10 +53,10 @@ void HandleMetaIoCompletion(void* arg1);
 void
 HandleMetaIoCompletion(void* arg1)
 {
-    ibof_io* io = static_cast<ibof_io*>(arg1);
+    pos_io* io = static_cast<pos_io*>(arg1);
     if (io->complete_cb)
     {
-        io->complete_cb(io, IBOF_IO_STATUS_SUCCESS); // always success for perf test
+        io->complete_cb(io, POS_IO_STATUS_SUCCESS); // always success for perf test
     }
 }
 
@@ -84,31 +84,31 @@ int MetaIoHandler::fdList[4] = {
 int MetaIoHandler::index = 0;
 
 int
-MetaIoHandler::IoSubmitHandler0(struct ibof_io* io)
+MetaIoHandler::IoSubmitHandler0(struct pos_io* io)
 {
     return MetaIoHandler::MetaFsIOSubmitHandler(io, MetaIoHandler::fdList[0]);
 }
 
 int
-MetaIoHandler::IoSubmitHandler1(struct ibof_io* io)
+MetaIoHandler::IoSubmitHandler1(struct pos_io* io)
 {
     return MetaIoHandler::MetaFsIOSubmitHandler(io, MetaIoHandler::fdList[1]);
 }
 
 int
-MetaIoHandler::IoSubmitHandler2(struct ibof_io* io)
+MetaIoHandler::IoSubmitHandler2(struct pos_io* io)
 {
     return MetaIoHandler::MetaFsIOSubmitHandler(io, MetaIoHandler::fdList[2]);
 }
 
 int
-MetaIoHandler::IoSubmitHandler3(struct ibof_io* io)
+MetaIoHandler::IoSubmitHandler3(struct pos_io* io)
 {
     return MetaIoHandler::MetaFsIOSubmitHandler(io, MetaIoHandler::fdList[3]);
 }
 
 int
-MetaIoHandler::MetaFsIOSubmitHandler(struct ibof_io* io, int fd)
+MetaIoHandler::MetaFsIOSubmitHandler(struct pos_io* io, int fd)
 {
     assert(io->ioType == IO_TYPE::READ || io->ioType == IO_TYPE::WRITE);
     // assert(io->length == 4096); // LIMITATION: currently 4KB workload is targeted to metafs perf evaluation!

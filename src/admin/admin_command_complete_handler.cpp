@@ -43,9 +43,9 @@ using namespace std;
 
 namespace pos
 {
-AdminCommandCompleteHandler::AdminCommandCompleteHandler(ibof_io* ibofIo, uint32_t originCore, CallbackSmartPtr callback)
+AdminCommandCompleteHandler::AdminCommandCompleteHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback)
 : Callback(false),
-  io(ibofIo),
+  io(posIo),
   originCore(originCore),
   callback(callback)
 {

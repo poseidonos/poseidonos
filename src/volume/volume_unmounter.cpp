@@ -40,7 +40,7 @@
 #include "src/volume/volume.h"
 #include "src/volume/volume_list.h"
 #include "src/event_scheduler/event_scheduler.h"
-#include "src/network/nvmf_volume_ibof.hpp"
+#include "src/network/nvmf_volume_pos.hpp"
 namespace pos
 {
 
@@ -73,7 +73,7 @@ VolumeUnmounter::Do(string name)
             name, vol->ID, arrayName);
 
 
-        bool volumeUnmounted = NvmfVolumeIbof::WaitRequestedVolumesDetached(1);
+        bool volumeUnmounted = NvmfVolumePos::WaitRequestedVolumesDetached(1);
         if (volumeUnmounted == false)
         {
             ret = (int)POS_EVENT_ID::VOL_UNMOUNT_FAIL;

@@ -177,7 +177,7 @@ MountTemp::_MakeMetaStorageMediaInfo(PartitionType ptnType)
 void
 MountTemp::_InitNvmf(void)
 {
-    nvmfVolume = new pos::NvmfVolumeIbof();
+    nvmfVolume = new pos::NvmfVolumePos();
     unvmf_io_handler handler = {.submit = UNVMfSubmitHandler,
         .complete = UNVMfCompleteHandler};
     nvmfVolume->SetuNVMfIOHandler(handler);

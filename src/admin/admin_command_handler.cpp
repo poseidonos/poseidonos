@@ -35,7 +35,7 @@
 
 #include "Air.h"
 #include "lib/spdk-19.10/include/spdk/bdev_module.h"
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "src/admin/smart_log_page_handler.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
@@ -44,8 +44,8 @@
 #include "src/spdk_wrapper/event_framework_api.h"
 namespace pos
 {
-AdminCommandHandler::AdminCommandHandler(ibof_io* ibofIo, uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo, IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr)
-: io(ibofIo),
+AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo, IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr)
+: io(posIo),
   originCore(originCore),
   callback(callback),
   arrayInfo(info),
@@ -54,8 +54,8 @@ AdminCommandHandler::AdminCommandHandler(ibof_io* ibofIo, uint32_t originCore, C
   arrayDevMgr(arrayDevMgr)
 {
     void* bio = io->context;
-    struct spdk_bdev_io* bioIbof = (struct spdk_bdev_io*)bio;
-    void* callerContext = bioIbof->internal.caller_ctx;
+    struct spdk_bdev_io* bioPos = (struct spdk_bdev_io*)bio;
+    void* callerContext = bioPos->internal.caller_ctx;
 
     req = (struct spdk_nvmf_request*)callerContext;
     cmd = &req->cmd->nvme_cmd;

@@ -91,8 +91,8 @@ BLOCKDEV_MODULES_LIST += bdev_pmem
 SYS_LIBS += -lpmemblk -lpmem
 endif
 
-ifeq ($(CONFIG_IBOF),y)
-BLOCKDEV_MODULES_LIST += bdev_ibof
+ifeq ($(CONFIG_POS),y)
+BLOCKDEV_MODULES_LIST += bdev_pos
 endif
 
 SOCK_MODULES_LIST = sock_posix

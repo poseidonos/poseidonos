@@ -234,7 +234,7 @@ ifneq ($(CONFIG_NVME_CUSE)$(CONFIG_FUSE),nn)
 SYS_LIBS += -lfuse3
 endif
 
-ifeq ($(CONFIG_IBOF),y)
+ifeq ($(CONFIG_POS),y)
 SYS_LIBS += -ltcmalloc
 endif
 

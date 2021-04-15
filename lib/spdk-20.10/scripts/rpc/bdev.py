@@ -253,9 +253,9 @@ def bdev_null_create(client, num_blocks, block_size, name, uuid=None, md_size=No
         params['dif_is_head_of_md'] = dif_is_head_of_md
     return client.call('bdev_null_create', params)
 
-@deprecated_alias('construct_ibof_bdev')
-def bdev_ibof_create(client, volume_id, volume_size_mb, volume_type_in_memory, name=None, uuid=None):
-    """Construct a bdev supporting iBoF volume.
+@deprecated_alias('construct_pos_bdev')
+def bdev_pos_create(client, volume_id, volume_size_mb, volume_type_in_memory, name=None, uuid=None):
+    """Construct a bdev supporting Pos volume.
 
     Args:
         volume_id : volume_id
@@ -272,18 +272,18 @@ def bdev_ibof_create(client, volume_id, volume_size_mb, volume_type_in_memory, n
         params['name'] = name
     if uuid:
         params['uuid'] = uuid
-    return client.call('bdev_ibof_create', params)
+    return client.call('bdev_pos_create', params)
 
 
-@deprecated_alias('delete_ibof_delete')
-def bdev_ibof_delete(client, name):
-    """Delete an iBoF bdev.
+@deprecated_alias('delete_pos_delete')
+def bdev_pos_delete(client, name):
+    """Delete an Pos bdev.
 
     Args:
-        bdev_name: name of ibof bdev to delete
+        bdev_name: name of pos bdev to delete
     """
     params = {'name': name}
-    return client.call('bdev_ibof_delete', params)
+    return client.call('bdev_pos_delete', params)
 
 @deprecated_alias('delete_null_bdev')
 def bdev_null_delete(client, name):

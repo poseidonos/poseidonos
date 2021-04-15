@@ -34,7 +34,7 @@
 
 #include <vector>
 
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/branch_prediction.h"
 #include "src/io/frontend_io/aio.h"
@@ -66,7 +66,7 @@ UNVMfCompleteHandler(void)
 }
 
 int
-UNVMfSubmitHandler(struct ibof_io* io)
+UNVMfSubmitHandler(struct pos_io* io)
 {
     try
     {
@@ -82,7 +82,7 @@ UNVMfSubmitHandler(struct ibof_io* io)
         {
             AIO aio;
             aio.SubmitAsyncAdmin(*io);
-            return IBOF_IO_STATUS_SUCCESS;
+            return POS_IO_STATUS_SUCCESS;
         }
 #endif
         if (io->ioType != IO_TYPE::FLUSH)
@@ -116,9 +116,9 @@ UNVMfSubmitHandler(struct ibof_io* io)
 
         if (nullptr != io && nullptr != io->complete_cb)
         {
-            io->complete_cb(io, IBOF_IO_STATUS_FAIL);
+            io->complete_cb(io, POS_IO_STATUS_FAIL);
         }
     }
 
-    return IBOF_IO_STATUS_SUCCESS;
+    return POS_IO_STATUS_SUCCESS;
 }

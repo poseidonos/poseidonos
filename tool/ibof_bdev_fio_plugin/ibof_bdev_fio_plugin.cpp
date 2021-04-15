@@ -55,7 +55,7 @@ extern "C"
 #include "fio.h"
 #include "optgroup.h"
 
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "spdk/ibof_volume.h"
 #include "spdk/event.h"
 

@@ -34,13 +34,13 @@
 SPDK_ROOT_DIR := $(abspath $(CURDIR)/../../..)
 include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
 
-C_SRCS = bdev_ibof.c bdev_ibof_rpc.c
-LIBNAME = bdev_ibof
+C_SRCS = bdev_pos.c bdev_pos_rpc.c
+LIBNAME = bdev_pos
 LOCAL_SYS_LIBS = -luuid
 
 SO_VER := 2
 SO_MINOR := 0
 
-SPDK_MAP_FILE = $(SPDK_ROOT_DIR)/mk/spdk_ibof.map
+SPDK_MAP_FILE = $(SPDK_ROOT_DIR)/module/bdev/pos/spdk_pos.map
 
 include $(SPDK_ROOT_DIR)/mk/spdk.lib.mk

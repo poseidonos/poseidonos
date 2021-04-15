@@ -31,16 +31,16 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPDK_IBOF_H_
-#define SPDK_IBOF_H_
+#ifndef SPDK_POS_H_
+#define SPDK_POS_H_
 
 #include "spdk/stdinc.h"
 #include "nvmf_spec.h"
 
-struct ibof_io;
+struct pos_io;
 
-#include "ibof_nvmf.h"
-#include "ibof_volume.h"
+#include "pos_nvmf.h"
+#include "pos_volume.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,4 +54,4 @@ extern "C" {
 }
 #endif
 
-#endif /* SPDK_IBOF_H_ */
+#endif /* SPDK_POS_H_ */

@@ -704,7 +704,7 @@ WbtMetafsCmdHandler::SetupMetaFioTest(Args argv)
     target.append(to_string(MetaIoHandler::index));
     MetaIoHandler ioHandler(stoi(argv["size"].get<std::string>()));
     unvmf_io_handler handler = {.submit = MetaIoHandler::submitHandlerList[MetaIoHandler::index], .complete = MetaIoHandler::MetaFsIOCompleteHandler};
-    spdk_bdev_ibof_register_io_handler(target.c_str(), handler);
+    spdk_bdev_pos_register_io_handler(target.c_str(), handler);
     MetaIoHandler::index++;
 
     std::cout << "Testing environment for metafs fio has been setup! [target vol]=" << target.c_str() << " [fd]=" << argv["size"].get<std::string>() << std::endl;

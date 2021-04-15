@@ -47,22 +47,18 @@ struct volumeListInfo
     string subnqn;
     vector<int> vols;
 };
-/*
- * NvmfVolumeIbof : The class is used by iBofOS with iBof Volume. 
- * 		    Note - When the class is instantiated, a real iBof Volume have to be existed
- * 		
- * */
-class NvmfVolumeIbof final : public NvmfVolume
+
+class NvmfVolumePos final : public NvmfVolume
 {
 public:
-    NvmfVolumeIbof(void);
-    ~NvmfVolumeIbof(void);
+    NvmfVolumePos(void);
+    ~NvmfVolumePos(void);
 
-    void VolumeCreated(struct ibof_volume_info* info) override;
-    void VolumeDeleted(struct ibof_volume_info* info) override;
-    void VolumeMounted(struct ibof_volume_info* info) override;
-    void VolumeUnmounted(struct ibof_volume_info* info) override;
-    void VolumeUpdated(struct ibof_volume_info* info) override;
+    void VolumeCreated(struct pos_volume_info* info) override;
+    void VolumeDeleted(struct pos_volume_info* info) override;
+    void VolumeMounted(struct pos_volume_info* info) override;
+    void VolumeUnmounted(struct pos_volume_info* info) override;
+    void VolumeUpdated(struct pos_volume_info* info) override;
     void VolumeDetached(vector<int>& volList, string arrayName) override;
 
     static uint32_t VolumeDetachCompleted(void);
@@ -81,7 +77,7 @@ private:
     static void _VolumeDetachHandler(void* arg1, void* arg2);
     static void _NamespaceDetachedHandler(void* cbArg, int status);
     static void _NamespaceDetachedAllHandler(void* cbArg, int status);
-    static void _CompleteVolumeUnmount(struct ibof_volume_info* vInfo);
+    static void _CompleteVolumeUnmount(struct pos_volume_info* vInfo);
 };
 
 } // namespace pos

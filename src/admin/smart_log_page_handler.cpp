@@ -36,7 +36,7 @@
 #include "lib/spdk-19.10/include/spdk/bdev_module.h"
 #include "lib/spdk-19.10/include/spdk/nvme_spec.h"
 #include "lib/spdk-19.10/lib/nvmf/nvmf_internal.h"
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "src/admin/admin_command_handler.h"
 #include "src/admin/disk_query_manager.h"
 #include "src/event_scheduler/event_scheduler.h"
@@ -45,7 +45,7 @@
 #include "src/spdk_wrapper/event_framework_api.h"
 namespace pos
 {
-SmartLogPageHandler::SmartLogPageHandler(struct spdk_nvme_cmd* cmd, ibof_io* io, void* smartLogPageData, uint32_t originCore,
+SmartLogPageHandler::SmartLogPageHandler(struct spdk_nvme_cmd* cmd, pos_io* io, void* smartLogPageData, uint32_t originCore,
     CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
     IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr)
 : cmd(cmd),

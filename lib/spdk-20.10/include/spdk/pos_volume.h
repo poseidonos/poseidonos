@@ -31,19 +31,19 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPDK_IBOF_VOLUME_H_
-#define SPDK_IBOF_VOLUME_H_
+#ifndef SPDK_POS_VOLUME_H_
+#define SPDK_POS_VOLUME_H_
 
 #include "spdk/stdinc.h"
 #include "nvmf_spec.h"
-#include "ibof.h"
+#include "pos.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define IBOF_IO_STATUS_SUCCESS (0)
-#define IBOF_IO_STATUS_FAIL (-1)
+#define POS_IO_STATUS_SUCCESS (0)
+#define POS_IO_STATUS_FAIL (-1)
 
 #define VOLUME_NAME_MAX_LEN (255)
 #define NR_MAX_VOLUME (256)
@@ -60,27 +60,28 @@ enum IO_TYPE {
 #endif
 };
 /*
- * register the IO submit/compete callback that links uNVMf ibof_bdev and Frontend
+ * register the IO submit/compete callback that links uNVMf pos_bdev and Frontend
  */
-typedef int (*unvmf_submit_handler)(struct ibof_io *io);
+typedef int (*unvmf_submit_handler)(struct pos_io *io);
 typedef void (*unvmf_complete_handler)(void);
 typedef struct unvmf_io_handler {
 	unvmf_submit_handler submit;
 	unvmf_complete_handler complete;
 } unvmf_io_handler;
 uint32_t get_attached_subsystem_id(const char *bdev_name);
-void spdk_bdev_ibof_register_io_handler(const char *bdev_name, unvmf_io_handler handler);
-struct spdk_thread *get_nvmf_thread_from_reactor(int reactor);
-void spdk_bdev_ibof_unregister_io_handler(const char *bdev_name);
+void spdk_bdev_pos_register_io_handler(const char *bdev_name, unvmf_io_handler handler);
 
-void set_ibof_volume_info(const char *bdev_name, const char *nqn, int nqn_id);
-void reset_ibof_volume_info(const char *bdev_name);
+struct spdk_thread *get_nvmf_thread_from_reactor(int reactor);
+void spdk_bdev_pos_unregister_io_handler(const char *bdev_name);
+
+void set_pos_volume_info(const char *bdev_name, const char *nqn, int nqn_id);
+void reset_pos_volume_info(const char *bdev_name);
 void send_msg_to_all_nvmf_thread(uint32_t current_core, void *fn, void *arg1);
 const char *get_attached_subsystem_nqn(const char *bdev_name);
 
-/* uNVMf to ibof volume information */
-typedef int (*ibof_bdev_io_handler)(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io);
-struct ibof_volume_info {
+/* uNVMf to pos volume information */
+typedef int (*pos_bdev_io_handler)(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io);
+struct pos_volume_info {
 	uint32_t id;
 	char name[VOLUME_NAME_MAX_LEN + 1];
 	char nqn[SPDK_NVMF_NQN_MAX_LEN + 1];
@@ -89,22 +90,22 @@ struct ibof_volume_info {
 	uint64_t size_mb;
 	uint64_t iops_limit;
 	uint64_t bw_limit;
-	/* handler between spdk bdev and ibof bdev */
-	ibof_bdev_io_handler ibof_bdev_io;
-	/* handler between spdk bdev and ibof bdev for NVMe flush command handling */
-	ibof_bdev_io_handler ibof_bdev_flush;
+	/* handler between spdk bdev and pos bdev */
+	pos_bdev_io_handler pos_bdev_io;
+	/* handler between spdk bdev and pos bdev for NVMe flush command handling */
+	pos_bdev_io_handler pos_bdev_flush;
 #ifdef _ADMIN_ENABLED
-	/* handler between spdk bdev and ibof bdev for admin commands */
-	ibof_bdev_io_handler ibof_bdev_admin;
+	/* handler between spdk bdev and pos bdev for admin commands */
+	pos_bdev_io_handler pos_bdev_admin;
 #endif
 
-	/* handler between ibof bdev and unvmf */
+	/* handler between pos bdev and unvmf */
 	unvmf_io_handler unvmf_io;
 };
 
-/* uNVMf to ibof IO descriptor */
-typedef void (*ibof_bdev_io_complete_callback)(struct ibof_io *io, int status);
-struct ibof_io {
+/* uNVMf to pos IO descriptor */
+typedef void (*pos_bdev_io_complete_callback)(struct pos_io *io, int status);
+struct pos_io {
 	int ioType;
 	uint32_t volume_id;
 	struct iovec *iov;
@@ -113,7 +114,7 @@ struct ibof_io {
 	uint64_t offset;
 	void *context;
 	char *arrayName;
-	ibof_bdev_io_complete_callback complete_cb;
+	pos_bdev_io_complete_callback complete_cb;
 };
 
 
@@ -121,4 +122,4 @@ struct ibof_io {
 }
 #endif
 
-#endif /* SPDK_IBOF_H_ */
+#endif /* SPDK_POS_H_ */

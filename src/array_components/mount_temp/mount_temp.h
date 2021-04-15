@@ -37,7 +37,7 @@
 #include "metafs.h"
 #include "src/include/partition_type.h"
 #include "src/network/nvmf_volume.hpp"
-#include "src/network/nvmf_volume_ibof.hpp"
+#include "src/network/nvmf_volume_pos.hpp"
 #include "src/network/nvmf_target_event_subscriber.hpp"
 
 namespace pos

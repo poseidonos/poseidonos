@@ -41,6 +41,6 @@ class AioSubmissionAdapter : public IbofIoSubmissionAdapter
 public:
     AioSubmissionAdapter(void);
     virtual  ~AioSubmissionAdapter(void);
-    void Do(ibof_io* volIo) override;
+    void Do(pos_io* volIo) override;
 };
 } // namespace pos

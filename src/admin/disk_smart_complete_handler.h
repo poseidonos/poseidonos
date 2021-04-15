@@ -33,7 +33,7 @@
 #ifdef _ADMIN_ENABLED
 #pragma once
 
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "spdk/nvme_spec.h"
 #include "src/admin/component_manager.h"
 #include "src/admin/smart_log_mgr.h"
@@ -49,7 +49,7 @@ static const int KELVIN_TO_CELSIUS = 273;
 class DiskSmartCompleteHandler : public Callback
 {
 public:
-    DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t origincore, ibof_io* io, CallbackSmartPtr callback);
+    DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t origincore, pos_io* io, CallbackSmartPtr callback);
     ~DiskSmartCompleteHandler(void) override;
 
 private:
@@ -59,7 +59,7 @@ private:
     struct spdk_nvme_health_information_page* resultPage;
     uint32_t volId;
     uint32_t originCore;
-    ibof_io* io;
+    pos_io* io;
     CallbackSmartPtr callback;
 };
 } // namespace pos

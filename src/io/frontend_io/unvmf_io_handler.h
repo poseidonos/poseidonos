@@ -36,7 +36,7 @@
 
 #include "spdk/bdev_module.h"
 
-int UNVMfSubmitHandler(struct ibof_io* io);
+int UNVMfSubmitHandler(struct pos_io* io);
 void UNVMfCompleteHandler(void);
 
 // namespace pos

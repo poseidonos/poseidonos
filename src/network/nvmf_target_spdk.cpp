@@ -45,14 +45,14 @@
 #include "src/spdk_wrapper/spdk.hpp"
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/network/nvmf_target.hpp"
-#include "src/network/nvmf_volume_ibof.hpp"
+#include "src/network/nvmf_volume_pos.hpp"
 
 extern struct spdk_nvmf_tgt* g_spdk_nvmf_tgt;
 
 namespace pos
 {
 struct EventContext*
-AllocEventContext(IBoFNvmfEventDoneCallback_t callback, void* userArg)
+AllocEventContext(PosNvmfEventDoneCallback_t callback, void* userArg)
 {
     struct EventContext* e = (struct EventContext*)malloc(sizeof(struct EventContext));
     if (!e)
@@ -102,12 +102,12 @@ GenericCallback(const char* caller, void* arg, int status)
 }
 
 static void
-CreateIbofBdevDone(void* arg, int status)
+CreatePosBdevDone(void* arg, int status)
 {
     GenericCallback(__FUNCTION__, arg, status);
 }
 static void
-DeleteIbofBdevDone(void* arg, int status)
+DeletePosBdevDone(void* arg, int status)
 {
     GenericCallback(__FUNCTION__, arg, status);
 }
@@ -137,7 +137,7 @@ SubsystemResumeDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status
 }
 
 void
-activateSubsystem(void* arg1)
+ActivateSubsystem(void* arg1)
 {
     int ret;
     struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
@@ -147,7 +147,7 @@ activateSubsystem(void* arg1)
         SPDK_NOTICELOG("Failed to pause subsystem(%s) during activating subsystem : Retrying\n",
             spdk_nvmf_subsystem_get_nqn(subsystem));
         EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(),
-            activateSubsystem, subsystem);
+            ActivateSubsystem, subsystem);
     }
     ret = spdk_nvmf_subsystem_resume(subsystem, nullptr, nullptr);
     if (ret != 0)
@@ -227,7 +227,7 @@ AttachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int s
     else
     {
         GenericCallback(__FUNCTION__, arg, NvmfCallbackStatus::FAILED);
-        activateSubsystem(subsystem);
+        ActivateSubsystem(subsystem);
     }
 }
 
@@ -279,7 +279,7 @@ DetachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int s
     else
     {
         GenericCallback(__FUNCTION__, arg, NvmfCallbackStatus::FAILED);
-        activateSubsystem(subsystem);
+        ActivateSubsystem(subsystem);
     }
 }
 
@@ -330,7 +330,7 @@ DetachNamespaceAllPauseDone(struct spdk_nvmf_subsystem* subsystem,
     else
     {
         GenericCallback(__FUNCTION__, arg, NvmfCallbackStatus::FAILED);
-        activateSubsystem(subsystem);
+        ActivateSubsystem(subsystem);
     }
 }
 
@@ -379,7 +379,7 @@ AttachListenerPauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int st
     else
     {
         GenericCallback(__FUNCTION__, arg, NvmfCallbackStatus::FAILED);
-        activateSubsystem(subsystem);
+        ActivateSubsystem(subsystem);
     }
 }
 
@@ -407,7 +407,7 @@ DetachListenerPauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int st
     else
     {
         GenericCallback(__FUNCTION__, arg, NvmfCallbackStatus::FAILED);
-        activateSubsystem(subsystem);
+        ActivateSubsystem(subsystem);
     }
 }
 
@@ -416,8 +416,8 @@ InitNvmfCallbacks(struct NvmfTargetCallbacks* nvmfCallbacks)
 {
     if (nvmfCallbacks)
     {
-        nvmfCallbacks->createIbofBdevDone = CreateIbofBdevDone;
-        nvmfCallbacks->deleteIbofBdevDone = DeleteIbofBdevDone;
+        nvmfCallbacks->createPosBdevDone = CreatePosBdevDone;
+        nvmfCallbacks->deletePosBdevDone = DeletePosBdevDone;
         nvmfCallbacks->createTransportDone = CreateTransportDone;
         nvmfCallbacks->subsystemStartDone = SubsystemStartDone;
         nvmfCallbacks->subsystemStopDone = SubsystemStopDone;

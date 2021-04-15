@@ -33,12 +33,12 @@
 #ifdef _ADMIN_ENABLED
 #pragma once
 
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event.h"
 #include "src/io/frontend_io/aio.h"
 
-struct ibof_io;
+struct pos_io;
 
 namespace pos
 {
@@ -46,12 +46,12 @@ class AdminCommandCompleteHandler : public Callback,
                                     public std::enable_shared_from_this<AdminCommandCompleteHandler>
 {
 public:
-    AdminCommandCompleteHandler(ibof_io* ibofIo, uint32_t originCore, CallbackSmartPtr callback);
+    AdminCommandCompleteHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback);
     ~AdminCommandCompleteHandler(void) override;
 
 private:
     bool _DoSpecificJob(void) override;
-    ibof_io* io;
+    pos_io* io;
     uint32_t originCore;
     CallbackSmartPtr callback;
 };

@@ -39,7 +39,7 @@
 #include "src/bio/ubio.h"
 #include "src/include/smart_ptr_type.h"
 
-struct ibof_io;
+struct pos_io;
 
 namespace pos
 {

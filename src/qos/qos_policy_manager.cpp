@@ -35,7 +35,7 @@
 #include <utility>
 
 #include "src/logger/logger.h"
-#include "src/network/nvmf_volume_ibof.hpp"
+#include "src/network/nvmf_volume_pos.hpp"
 #include "src/qos/qos_avg_compute.h"
 #include "src/qos/qos_manager.h"
 #include "src/sys_event/volume_event_publisher.h"

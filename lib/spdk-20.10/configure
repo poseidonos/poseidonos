@@ -432,8 +432,8 @@ for i in "$@"; do
 		--without-idxd)
 			CONFIG[IDXD]=n
 			;;
-		--with-ibof)
-			CONFIG[IBOF]=y
+		--with-pos)
+			CONFIG[POS]=y
 			;;
 		--)
 			break

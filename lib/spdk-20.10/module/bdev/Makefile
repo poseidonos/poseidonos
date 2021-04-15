@@ -49,7 +49,7 @@ DIRS-y += aio ftl
 DIRS-$(CONFIG_ISCSI_INITIATOR) += iscsi
 DIRS-$(CONFIG_VIRTIO) += virtio
 DIRS-$(CONFIG_PMDK) += pmem
-DIRS-$(CONFIG_IBOF) += ibof
+DIRS-$(CONFIG_POS) += pos
 endif
 
 DIRS-$(CONFIG_RBD) += rbd

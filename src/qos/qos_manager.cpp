@@ -41,7 +41,7 @@
 #include "src/io/frontend_io/aio.h"
 #include "src/io_scheduler/io_worker.h"
 #include "src/logger/logger.h"
-#include "src/network/nvmf_volume_ibof.hpp"
+#include "src/network/nvmf_volume_pos.hpp"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/io/frontend_io/aio_submission_adapter.h"
@@ -332,7 +332,7 @@ QosVolumeManager::_UpdateRateLimit(uint32_t reactor, int volId, uint64_t size)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosManager::AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, ibof_io* volIo)
+QosManager::AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, pos_io* volIo)
 {
     qosVolumeManager->AioSubmitAsyncIO(aioSubmission, volIo);
 }
@@ -345,7 +345,7 @@ QosManager::AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, ibof_io* vo
  */
 /* --------------------------------------------------------------------------*/
 void
-QosVolumeManager::AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, ibof_io* volIo)
+QosVolumeManager::AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, pos_io* volIo)
 {
     if (false == feQosEnabled)
     {
@@ -371,7 +371,7 @@ QosVolumeManager::AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, ibof_
             {
                 break;
             }
-            ibof_io* queuedVolumeIo = nullptr;
+            pos_io* queuedVolumeIo = nullptr;
             queuedVolumeIo = _DequeueVolumeUbio(reactorId, volId);
             if (queuedVolumeIo == nullptr)
             {
@@ -840,7 +840,7 @@ QosVolumeManager::DequeueVolumeParams(uint32_t reactor, uint32_t volId)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosVolumeManager::_EnqueueVolumeUbio(uint32_t reactorId, uint32_t volId, ibof_io* io)
+QosVolumeManager::_EnqueueVolumeUbio(uint32_t reactorId, uint32_t volId, pos_io* io)
 {
     volumesUbioQueue[reactorId][volId].push(io);
 }
@@ -852,10 +852,10 @@ QosVolumeManager::_EnqueueVolumeUbio(uint32_t reactorId, uint32_t volId, ibof_io
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-ibof_io*
+pos_io*
 QosVolumeManager::_DequeueVolumeUbio(uint32_t reactorId, uint32_t volId)
 {
-    ibof_io* ret = nullptr;
+    pos_io* ret = nullptr;
     if (volumesUbioQueue[reactorId][volId].empty() == false)
     {
         ret = volumesUbioQueue[reactorId][volId].front();
@@ -1335,7 +1335,7 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
     uint32_t retVal = 0;
     uint32_t reactor = param->id;
     uint64_t now = EventFrameworkApi::SpdkGetTicks();
-    ibof_io* queuedVolumeIo = nullptr;
+    pos_io* queuedVolumeIo = nullptr;
     uint64_t currentBW = 0;
     uint64_t next_tick = param->nextTimeStamp;
     std::vector<int> volList;

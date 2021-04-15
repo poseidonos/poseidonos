@@ -38,7 +38,7 @@
 #include "src/event_scheduler/spdk_event_scheduler.h"
 namespace pos
 {
-DiskSmartCompleteHandler::DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t originCore, ibof_io* io, CallbackSmartPtr callback)
+DiskSmartCompleteHandler::DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t originCore, pos_io* io, CallbackSmartPtr callback)
 : Callback(false),
   resultPage(resultPage),
   volId(volId),

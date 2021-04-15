@@ -366,7 +366,7 @@ SET(DEP_LIBRARIES
     spdk_bdev
     spdk_notify
     spdk_ioat
-    spdk_bdev_ibof
+    spdk_bdev_pos
     spdk_bdev_malloc
     spdk_env_dpdk
     spdk_conf

@@ -3,7 +3,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "src/bio/flush_io.h"
 #include "src/include/pos_event_id.h"
 #include "src/include/smart_ptr_type.h"

@@ -32,7 +32,7 @@
 
 #pragma once
 #include "src/debug/debug_info.h"
-#include "src/network/nvmf_volume_ibof.hpp"
+#include "src/network/nvmf_volume_pos.hpp"
 
 namespace pos
 {

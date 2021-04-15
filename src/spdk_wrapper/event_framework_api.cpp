@@ -39,8 +39,8 @@
 #include "src/include/core_const.h"
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/logger/logger.h"
-#include "spdk/ibof.h"
-#include "spdk/ibof_volume.h"
+#include "spdk/pos.h"
+#include "spdk/pos_volume.h"
 #include "spdk/thread.h"
 #include "spdk/nvmf.h"
 

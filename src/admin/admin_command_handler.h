@@ -34,12 +34,12 @@
 #pragma once
 
 #include "lib/spdk-19.10/lib/nvmf/nvmf_internal.h"
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "src/admin/admin_command_complete_handler.h"
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event.h"
 #include "src/io_scheduler/io_dispatcher.h"
-struct ibof_io;
+struct pos_io;
 namespace pos
 {
 class IArrayInfo;
@@ -49,12 +49,12 @@ class IArrayDevMgr;
 class AdminCommandHandler : public Event
 {
 public:
-    AdminCommandHandler(ibof_io* ibofIo, uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo, IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr);
+    AdminCommandHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo, IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr);
     ~AdminCommandHandler(void);
     bool Execute(void);
 
 private:
-    ibof_io* io;
+    pos_io* io;
     struct spdk_nvmf_request* req;
     struct spdk_nvme_cmd* cmd;
     uint32_t originCore;

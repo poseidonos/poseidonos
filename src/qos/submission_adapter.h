@@ -51,7 +51,7 @@ public:
     IbofIoSubmissionAdapter(void);
     virtual ~IbofIoSubmissionAdapter(void);
 
-    virtual void Do(ibof_io* volIo) = 0;
+    virtual void Do(pos_io* volIo) = 0;
 };
 
 } // namespace pos

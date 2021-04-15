@@ -31,8 +31,8 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
- # Build config iBOF
- CONFIG_IBOF=n
+ # Build config POS
+CONFIG_POS=n
 
 # Installation prefix
 CONFIG_PREFIX="/usr/local"

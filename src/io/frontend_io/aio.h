@@ -35,6 +35,7 @@
 #include <cstdint>
 #include <functional>
 
+#include "spdk/pos.h"
 #include "src/bio/flush_io.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/callback.h"
@@ -59,10 +60,10 @@ class AioCompletion : public Callback,
                       public std::enable_shared_from_this<AioCompletion>
 {
 public:
-    AioCompletion(FlushIoSmartPtr flushIo, ibof_io& ibofIo, IOCtx& ioContext);
-    AioCompletion(FlushIoSmartPtr flushIo, ibof_io& ibofIo, IOCtx& ioContext, std::function<bool(uint32_t)> isSameReactorNowFunc);
-    AioCompletion(VolumeIoSmartPtr volumeIo, ibof_io& ibofIo, IOCtx& ioContext);
-    AioCompletion(VolumeIoSmartPtr volumeIo, ibof_io& ibofIo, IOCtx& ioContext, std::function<bool(uint32_t)> isSameReactorNowFunc);
+    AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo, IOCtx& ioContext);
+    AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo, IOCtx& ioContext, std::function<bool(uint32_t)> isSameReactorNowFunc);
+    AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo, IOCtx& ioContext);
+    AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo, IOCtx& ioContext, std::function<bool(uint32_t)> isSameReactorNowFunc);
     ~AioCompletion(void) override;
 
 private:
@@ -71,7 +72,7 @@ private:
 
     FlushIoSmartPtr flushIo;
     VolumeIoSmartPtr volumeIo;
-    ibof_io& ibofIo;
+    pos_io& posIo;
     IOCtx& ioContext;
     static VolumeService& volumeService;
     std::function<bool(uint32_t)> isSameReactorNowFunc;
@@ -81,16 +82,16 @@ class AIO
 {
 public:
     AIO(void);
-    void SubmitAsyncIO(ibof_io& ibofIo);
+    void SubmitAsyncIO(pos_io& posIo);
     void CompleteIOs(void);
 #ifdef _ADMIN_ENABLED
-    void SubmitAsyncAdmin(ibof_io& io);
+    void SubmitAsyncAdmin(pos_io& io);
 #endif
 
 private:
     static thread_local IOCtx ioContext;
-    VolumeIoSmartPtr _CreateVolumeIo(ibof_io& ibofIo);
-    FlushIoSmartPtr _CreateFlushIo(ibof_io& ibofIo);
+    VolumeIoSmartPtr _CreateVolumeIo(pos_io& posIo);
+    FlushIoSmartPtr _CreateFlushIo(pos_io& posIo);
 };
 #ifdef _ADMIN_ENABLED
 class AdminCompletion : public Callback,
@@ -98,12 +99,12 @@ class AdminCompletion : public Callback,
 
 {
 public:
-    AdminCompletion(ibof_io* ibofIo, IOCtx& ioContext);
+    AdminCompletion(pos_io* posIo, IOCtx& ioContext);
     ~AdminCompletion(void) override;
 
 private:
     bool _DoSpecificJob(void) override;
-    ibof_io* io;
+    pos_io* io;
     IOCtx& ioContext;
 };
 #endif

@@ -108,7 +108,7 @@ public:
     int SetEventPolicy(string eventName, string perfImpact);
     void ResetEventPolicy(void);
     void CopyEventPolicy(void);
-    void AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, ibof_io* io);
+    void AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, pos_io* io);
     BackendEvent GetEventId(string eventName);
     void SetMaxVolWeightCli(uint32_t volId, uint64_t weight);
     uint64_t GetMaxVolumeWeight(uint32_t volId);
@@ -177,7 +177,7 @@ public:
     void VolumeDetached(vector<int> volList, std::string arrayName) override;
     void UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId);
     std::vector<int> GetVolumeFromActiveSubsystem(uint32_t nqnId);
-    void AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, ibof_io* io);
+    void AioSubmitAsyncIO(IbofIoSubmissionAdapter* aioSubmission, pos_io* io);
     void SetVolumeWeight(uint32_t reactor, uint32_t volId, uint32_t weight);
     uint32_t GetVolumeWeight(uint32_t reactor, uint32_t volId);
     volume_qos_params DequeueVolumeParams(uint32_t reactor, uint32_t volId);
@@ -188,16 +188,16 @@ private:
     void _ResetRateLimit(uint32_t reactor, int volId);
     bool _RateLimit(uint32_t reactor, int volId);
     void _UpdateRateLimit(uint32_t reactor, int volId, uint64_t size);
-    void _EnqueueVolumeUbio(uint32_t rectorId, uint32_t volId, ibof_io* io);
+    void _EnqueueVolumeUbio(uint32_t rectorId, uint32_t volId, pos_io* io);
     void _UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxbw);
-    ibof_io* _DequeueVolumeUbio(uint32_t reactorId, uint32_t volId);
+    pos_io* _DequeueVolumeUbio(uint32_t reactorId, uint32_t volId);
     QosPolicyManager* qosPolicyManager;
     std::unordered_map<int32_t, std::vector<int>> nqnVolumeMap;
     volume_qos_params volumeQosParam[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     int64_t remainingLimit[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     std::atomic<uint64_t> volReactorWeight[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     std::queue<volume_qos_params> volumesParamsQueue[M_MAX_REACTORS][MAX_VOLUME_COUNT];
-    std::queue<ibof_io*> volumesUbioQueue[M_MAX_REACTORS][MAX_VOLUME_COUNT];
+    std::queue<pos_io*> volumesUbioQueue[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     std::mutex volQueueLock[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     uint64_t pendingVolumeIO[M_MAX_REACTORS][MAX_VOLUME_COUNT];
     bool feQosEnabled;

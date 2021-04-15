@@ -9,7 +9,7 @@
 #include "spdk/stdinc.h"
 #include "spdk/env.h"
 #include "spdk/event.h"
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "nvmf_volume.hpp"
 
 namespace pos{

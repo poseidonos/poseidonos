@@ -55,17 +55,17 @@ public:
     ~NvmfTarget(void);
 
     bool IsTargetExist(void);
-    bool CreateIBoFBdev(const string& bdevName, uint32_t id, uint64_t volumeSizeInMb,
+    bool CreatePosBdev(const string& bdevName, uint32_t id, uint64_t volumeSizeInMb,
         uint32_t blockSize, bool volumeTypeInMem, const string& arrayName);
-    bool DeleteIBoFBdev(const string& bdevName);
+    bool DeletePosBdev(const string& bdevName);
 
     bool AttachNamespace(const string& nqn, const string& bdevName,
-        IBoFNvmfEventDoneCallback_t cb, void* cbArg);
+        PosNvmfEventDoneCallback_t cb, void* cbArg);
     bool AttachNamespace(const string& nqn, const string& bdevName, uint32_t nsid,
-        IBoFNvmfEventDoneCallback_t cb, void* cbArg);
+        PosNvmfEventDoneCallback_t cb, void* cbArg);
     bool DetachNamespace(const string& nqn, uint32_t nsid,
-        IBoFNvmfEventDoneCallback_t cb, void* cbArg);
-    bool DetachNamespaceAll(const string& nqn, IBoFNvmfEventDoneCallback_t cb,
+        PosNvmfEventDoneCallback_t cb, void* cbArg);
+    bool DetachNamespaceAll(const string& nqn, PosNvmfEventDoneCallback_t cb,
         void* cbArg);
 
     uint32_t GetSubsystemNsCnt(struct spdk_nvmf_subsystem* subsystem);
@@ -91,7 +91,7 @@ private:
     static const char* BDEV_NAME_PREFIX;
     static atomic<int> attachedNsid;
 
-    struct EventContext* _CreateEventContext(IBoFNvmfEventDoneCallback_t callback,
+    struct EventContext* _CreateEventContext(PosNvmfEventDoneCallback_t callback,
         void* userArg, void* eventArg1, void* eventArg2);
     static void _DetachNamespaceWithPause(void* arg1, void* arg2);
     static void _AttachNamespaceWithPause(void* arg1, void* arg2);

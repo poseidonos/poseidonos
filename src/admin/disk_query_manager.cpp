@@ -38,7 +38,7 @@
 #include <tuple>
 #include <vector>
 
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "spdk/nvme.h"
 #include "spdk/nvme_spec.h"
 #include "src/admin/disk_smart_complete_handler.h"
@@ -58,7 +58,7 @@ GetLogPageContext::GetLogPageContext(void* data, uint16_t lid)
 {
 }
 
-DiskQueryManager::DiskQueryManager(struct spdk_nvme_cmd* cmd, struct spdk_nvme_health_information_page* resultPage, ibof_io* io,
+DiskQueryManager::DiskQueryManager(struct spdk_nvme_cmd* cmd, struct spdk_nvme_health_information_page* resultPage, pos_io* io,
     uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
     IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr)
 : cmd(cmd),

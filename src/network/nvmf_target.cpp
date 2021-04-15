@@ -35,11 +35,11 @@
 #include <iostream>
 #include <string>
 
-#include "spdk/ibof_volume.h"
+#include "spdk/pos_volume.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/spdk.hpp"
 #include "src/network/nvmf_target_spdk.hpp"
-#include "src/network/nvmf_volume_ibof.hpp"
+#include "src/network/nvmf_volume_pos.hpp"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/qos/qos_manager.h"
@@ -63,11 +63,11 @@ NvmfTarget::~NvmfTarget(void)
 }
 
 bool
-NvmfTarget::CreateIBoFBdev(const string& bdevName, uint32_t id,
+NvmfTarget::CreatePosBdev(const string& bdevName, uint32_t id,
     uint64_t volumeSizeInMb, uint32_t blockSize, bool volumeTypeInMem, const string& arrayName)
 {
     uint64_t volumeSizeInByte = volumeSizeInMb * MB;
-    struct spdk_bdev* bdev = spdk_bdev_create_ibof_disk(bdevName.c_str(), id, nullptr,
+    struct spdk_bdev* bdev = spdk_bdev_create_pos_disk(bdevName.c_str(), id, nullptr,
         volumeSizeInByte / blockSize, blockSize, volumeTypeInMem, arrayName.c_str());
     if (bdev == nullptr)
     {
@@ -80,12 +80,12 @@ NvmfTarget::CreateIBoFBdev(const string& bdevName, uint32_t id,
     {
         return false;
     }
-    nvmfCallbacks.createIbofBdevDone(ctx, NvmfCallbackStatus::SUCCESS);
+    nvmfCallbacks.createPosBdevDone(ctx, NvmfCallbackStatus::SUCCESS);
     return true;
 }
 
 bool
-NvmfTarget::DeleteIBoFBdev(const string& bdevName)
+NvmfTarget::DeletePosBdev(const string& bdevName)
 {
     struct spdk_bdev* bdev = spdk_bdev_get_by_name(bdevName.c_str());
     if (bdev == nullptr)
@@ -100,7 +100,7 @@ NvmfTarget::DeleteIBoFBdev(const string& bdevName)
     {
         return false;
     }
-    spdk_bdev_delete_ibof_disk(bdev, nvmfCallbacks.deleteIbofBdevDone, ctx);
+    spdk_bdev_delete_pos_disk(bdev, nvmfCallbacks.deletePosBdevDone, ctx);
     return true;
 }
 
@@ -153,14 +153,14 @@ NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName
 
 bool
 NvmfTarget::AttachNamespace(const string& nqn, const string& bdevName,
-    IBoFNvmfEventDoneCallback_t callback, void* arg)
+    PosNvmfEventDoneCallback_t callback, void* arg)
 {
     return AttachNamespace(nqn, bdevName, 0, callback, arg);
 }
 
 bool
 NvmfTarget::AttachNamespace(const string& nqn, const string& bdevName,
-    uint32_t nsid, IBoFNvmfEventDoneCallback_t callback, void* arg)
+    uint32_t nsid, PosNvmfEventDoneCallback_t callback, void* arg)
 {
     if (!IsTargetExist())
     {
@@ -223,7 +223,7 @@ NvmfTarget::GetNamespace(
 
 bool
 NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
-    IBoFNvmfEventDoneCallback_t callback, void* arg)
+    PosNvmfEventDoneCallback_t callback, void* arg)
 {
     if (!IsTargetExist())
     {
@@ -244,7 +244,7 @@ NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
     bool nsidUndefined = (nsid == 0);
     if (nsidUndefined)
     {
-        struct ibof_volume_info* vInfo = (struct ibof_volume_info*)arg;
+        struct pos_volume_info* vInfo = (struct pos_volume_info*)arg;
         string bdevName = GetBdevName(vInfo->id, vInfo->array_name);
         struct spdk_nvmf_ns* ns = GetNamespace(subsystem, bdevName);
         if (ns == nullptr)
@@ -300,7 +300,7 @@ NvmfTarget::_DetachNamespaceWithPause(void* arg1, void* arg2)
 
 bool
 NvmfTarget::DetachNamespaceAll(const string& nqn,
-    IBoFNvmfEventDoneCallback_t callback, void* arg)
+    PosNvmfEventDoneCallback_t callback, void* arg)
 {
     if (!IsTargetExist())
     {
@@ -461,7 +461,7 @@ NvmfTarget::FindSubsystem(const string& nqn)
 }
 
 struct EventContext*
-NvmfTarget::_CreateEventContext(IBoFNvmfEventDoneCallback_t callback,
+NvmfTarget::_CreateEventContext(PosNvmfEventDoneCallback_t callback,
     void* userArg, void* eventArg1, void* eventArg2)
 {
     struct EventContext* ctx = AllocEventContext(callback, userArg);

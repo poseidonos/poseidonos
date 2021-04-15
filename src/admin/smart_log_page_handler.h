@@ -33,11 +33,11 @@
 #ifdef _ADMIN_ENABLED
 #pragma once
 
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event.h"
 #include "src/io_scheduler/io_dispatcher.h"
-struct ibof_io;
+struct pos_io;
 namespace pos
 {
 class IArrayInfo;
@@ -47,14 +47,14 @@ class IArrayDevMgr;
 class SmartLogPageHandler : public Event
 {
 public:
-    SmartLogPageHandler(struct spdk_nvme_cmd* cmd, ibof_io* io, void* smartLogPageData, uint32_t originCore,
+    SmartLogPageHandler(struct spdk_nvme_cmd* cmd, pos_io* io, void* smartLogPageData, uint32_t originCore,
         CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
         IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr);
     bool Execute(void);
 
 private:
     struct spdk_nvme_cmd* cmd;
-    ibof_io* io;
+    pos_io* io;
     void* smartLogPageData;
     struct spdk_nvme_health_information_page* page;
     uint32_t originCore;

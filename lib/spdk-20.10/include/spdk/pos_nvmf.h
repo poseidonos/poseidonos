@@ -31,21 +31,57 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPDK_BDEV_IBOF_H
-#define SPDK_BDEV_IBOF_H
+#ifndef SPDK_POS_NVMF_H_
+#define SPDK_POS_NVMF_H_
 
 #include "spdk/stdinc.h"
+#include "nvmf_spec.h"
+#include "pos.h"
 
-#include "spdk/bdev.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef void (*spdk_delete_ibof_complete)(void *cb_arg, int bdeverrno);
+#define NR_MAX_NAMESPACE 128
+#define NR_MAX_TRANSPORT 4
 
-struct spdk_bdev *create_ibof_disk(const char *volume_name, uint32_t volume_id,
-				   const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size,
-				   bool volume_type_in_memory, const char *array_name);
+typedef void (*pos_bdev_delete_callback)(void *cb_arg, int bdeverrno);
 
-void delete_ibof_disk(struct spdk_bdev *bdev, spdk_delete_ibof_complete cb_fn, void *cb_arg);
-int get_ibof_volume_id(struct spdk_bdev *bdev);
-struct spdk_thread *get_nvmf_thread_from_reactor(int reactor);
+/* uNVMf composition descriptor */
+struct nvmf_namespace {
+	char name[32];
+	uint16_t nsid;
+};
 
-#endif /* SPDK_BDEV_IBOF_H */
+struct nvmf_transport {
+	char type[16];
+	char adrfam[16];
+	char traddr[SPDK_NVMF_TRADDR_MAX_LEN + 1];
+	char trsvcid[SPDK_NVMF_TRSVCID_MAX_LEN + 1];
+};
+
+struct nvmf_subsystem {
+	char nqn[SPDK_NVMF_NQN_MAX_LEN + 1];
+	uint16_t nr_namespace;
+	struct nvmf_namespace ns[NR_MAX_NAMESPACE];
+	uint16_t nr_transport;
+	struct nvmf_transport tr[NR_MAX_TRANSPORT];
+};
+
+/*
+ * create pos_bdev disk that will be attached on uNVMf
+ */
+struct spdk_bdev *spdk_bdev_create_pos_disk(const char *volume_name, uint32_t volume_id,
+		const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size,
+		bool volume_type_in_memory, const char *array_name);
+
+/*
+ * delete pos_bdev disk
+ */
+void spdk_bdev_delete_pos_disk(struct spdk_bdev *bdev, pos_bdev_delete_callback cb_fn,
+				void *cb_arg);
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* SPDK_POS_H_ */

@@ -33,14 +33,14 @@
 #ifdef _ADMIN_ENABLED
 #pragma once
 #include "lib/spdk-19.10/lib/nvmf/nvmf_internal.h"
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "src/admin/admin_command_handler.h"
 #include "src/admin/smart_log_page_handler.h"
 #include "src/bio/ubio.h"
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event.h"
 
-struct ibof_io;
+struct pos_io;
 namespace pos
 {
 class IArrayInfo;
@@ -60,7 +60,7 @@ public:
 class DiskQueryManager : public Event
 {
 public:
-    DiskQueryManager(struct spdk_nvme_cmd* cmd, struct spdk_nvme_health_information_page* resultPage, ibof_io* io,
+    DiskQueryManager(struct spdk_nvme_cmd* cmd, struct spdk_nvme_health_information_page* resultPage, pos_io* io,
         uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
         IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr);
     bool Execute(void);
@@ -70,7 +70,7 @@ public:
 private:
     struct spdk_nvme_cmd* cmd;
     struct spdk_nvme_health_information_page* resultPage;
-    ibof_io* io;
+    pos_io* io;
     uint32_t originCore;
     CallbackSmartPtr cb;
     IArrayInfo* arrayInfo;

@@ -42,13 +42,13 @@
 #include "spdk/stdinc.h"
 #include "spdk/string.h"
 
-typedef void (*IBoFNvmfEventDoneCallback_t)(void* cb_arg, int status);
+typedef void (*PosNvmfEventDoneCallback_t)(void* cb_arg, int status);
 
 namespace pos
 {
 struct EventContext
 {
-    IBoFNvmfEventDoneCallback_t userCallback;
+    PosNvmfEventDoneCallback_t userCallback;
     void* userArg;
     void* eventArg1;
     void* eventArg2;
@@ -56,11 +56,11 @@ struct EventContext
 
 struct NvmfTargetCallbacks
 {
-    struct EventContext* (*allocEventContext)(IBoFNvmfEventDoneCallback_t callback, void* userArg);
+    struct EventContext* (*allocEventContext)(PosNvmfEventDoneCallback_t callback, void* userArg);
     void (*freeEventContext)(struct EventContext* e);
 
-    void (*createIbofBdevDone)(void* arg, int status);
-    void (*deleteIbofBdevDone)(void* arg, int status);
+    void (*createPosBdevDone)(void* arg, int status);
+    void (*deletePosBdevDone)(void* arg, int status);
 
     void (*createTransportDone)(void* arg, int status);
 
@@ -81,7 +81,7 @@ struct NvmfTargetCallbacks
 };
 
 void InitNvmfCallbacks(struct NvmfTargetCallbacks* nvmfCallbacks);
-struct EventContext* AllocEventContext(IBoFNvmfEventDoneCallback_t callback, void* userArg);
+struct EventContext* AllocEventContext(PosNvmfEventDoneCallback_t callback, void* userArg);
 void FreeEventContext(struct EventContext* e);
 void ActivateSubsystem(void* arg1, void* arg2);
 

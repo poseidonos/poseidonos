@@ -414,30 +414,30 @@ if __name__ == "__main__":
     p.set_defaults(func=bdev_uring_delete)
 
 
-    def bdev_ibof_create(args):
-        print(rpc.bdev.bdev_ibof_create(args.client,
+    def bdev_pos_create(args):
+        print(rpc.bdev.bdev_pos_create(args.client,
                                              volume_id=int(args.volume_id),
                                              volume_size_mb=int(args.volume_size_mb),
                                              volume_type_in_memory=args.volume_type_in_memory,
                                              name=args.name,
                                              uuid=args.uuid))
-    p = subparsers.add_parser('bdev_ibof_create',
-                              help='Create a bdev supporting iBoF Volume')
+    p = subparsers.add_parser('bdev_pos_create',
+                              help='Create a bdev supporting Pos Volume')
     p.add_argument('-b', '--name', help="Name of the bdev")
     p.add_argument('-u', '--uuid', help="UUID of the bdev")
     p.add_argument(
-        'volume_size_mb', help='iBoF Volume Size in MB (int > 0)', type=int)
+        'volume_size_mb', help='Pos Volume Size in MB (int > 0)', type=int)
     p.add_argument('volume_id', help='volume id', type=int)
     p.add_argument('volume_type_in_memory', help='Volume type (1=in-memory or 0=not) for this bdev. This is for debugging purpose', type=int)
-    p.set_defaults(func=bdev_ibof_create)
+    p.set_defaults(func=bdev_pos_create)
 
-    def bdev_ibof_delete(args):
-        rpc.bdev.bdev_ibof_delete(args.client,
+    def bdev_pos_delete(args):
+        rpc.bdev.bdev_pos_delete(args.client,
                                  name=args.name)
 
-    p = subparsers.add_parser('bdev_ibof_delete', help='Delete a iBoF bdev')
-    p.add_argument('name', help='iBof bdev name')
-    p.set_defaults(func=bdev_ibof_delete)
+    p = subparsers.add_parser('bdev_pos_delete', help='Delete a Pos bdev')
+    p.add_argument('name', help='Pos bdev name')
+    p.set_defaults(func=bdev_pos_delete)
 
     def bdev_nvme_set_options(args):
         rpc.bdev.bdev_nvme_set_options(args.client,

@@ -1,0 +1,11 @@
+{
+global:
+	# bdev pos related
+	spdk_delete_pos_complete;
+	create_pos_disk;
+	delete_pos_disk;
+	get_pos_volume_id;
+    get_nvmf_thread_from_reactor;
+	# anything else
+	local: *;
+};

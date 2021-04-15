@@ -34,7 +34,7 @@
 #pragma once
 #include <mutex>
 
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "spdk/nvme_spec.h"
 #include "src/admin/admin_command_complete_handler.h"
 #include "src/io/general_io/io_submit_handler.h"
@@ -43,7 +43,7 @@ namespace pos
 class SmartLogUpdateRequest : public Callback
 {
 public:
-    SmartLogUpdateRequest(struct spdk_nvme_health_information_page* resultPage, struct spdk_nvme_health_information_page* page, ibof_io* io, uint32_t originCore);
+    SmartLogUpdateRequest(struct spdk_nvme_health_information_page* resultPage, struct spdk_nvme_health_information_page* page, pos_io* io, uint32_t originCore);
     ~SmartLogUpdateRequest(void) override;
 
 private:
@@ -52,7 +52,7 @@ private:
     void _ClearMemory(void);
     struct spdk_nvme_health_information_page* resultPage;
     struct spdk_nvme_health_information_page* page;
-    ibof_io* io;
+    pos_io* io;
     uint32_t originCore;
     std::mutex updateMutex;
 };

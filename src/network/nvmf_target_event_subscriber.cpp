@@ -32,7 +32,7 @@
 
 #include "src/network/nvmf_target_event_subscriber.hpp"
 
-#include "spdk/ibof.h"
+#include "spdk/pos.h"
 #include "src/sys_event/volume_event_publisher.h"
 
 namespace pos
@@ -61,7 +61,7 @@ bool
 NvmfTargetEventSubscriber::VolumeCreated(string volName, int volId,
     uint64_t volSizeByte, uint64_t maxIops, uint64_t maxBw, string arrayName)
 {
-    struct ibof_volume_info* vInfo = new ibof_volume_info;
+    struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
         CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
@@ -80,7 +80,7 @@ bool
 NvmfTargetEventSubscriber::VolumeDeleted(string volName, int volId,
     uint64_t volSizeByte, string arrayName)
 {
-    struct ibof_volume_info* vInfo = new ibof_volume_info;
+    struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
         CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
@@ -96,7 +96,7 @@ bool
 NvmfTargetEventSubscriber::VolumeMounted(string volName, string subNqn, int volId,
     uint64_t volSizeByte, uint64_t maxIops, uint64_t maxBw, string arrayName)
 {
-    struct ibof_volume_info* vInfo = new ibof_volume_info;
+    struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
         CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
@@ -115,7 +115,7 @@ NvmfTargetEventSubscriber::VolumeMounted(string volName, string subNqn, int volI
 bool
 NvmfTargetEventSubscriber::VolumeUnmounted(string volName, int volId, string arrayName)
 {
-    struct ibof_volume_info* vInfo = new ibof_volume_info;
+    struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
         CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
@@ -138,7 +138,7 @@ bool
 NvmfTargetEventSubscriber::VolumeUpdated(string volName, int volId,
     uint64_t maxIops, uint64_t maxBw, string arrayName)
 {
-    struct ibof_volume_info* vInfo = new ibof_volume_info;
+    struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
         CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);

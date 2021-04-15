@@ -56,7 +56,7 @@
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event.h"
 
-struct ibof_io;
+struct pos_io;
 
 namespace pos
 {

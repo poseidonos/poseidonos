@@ -120,7 +120,7 @@ build_spdk(){
 
 	cd spdk
 
-	SPDK_CONFIG=" --with-dpdk=$ROOT_DIR/${DPDK_SOURCE}/ --with-rdma --with-fio=$ROOT_DIR/${FIO_SOURCE} --with-ibof --without-isal --without-vhost --with-pmdk"
+	SPDK_CONFIG=" --with-dpdk=$ROOT_DIR/${DPDK_SOURCE}/ --with-rdma --with-fio=$ROOT_DIR/${FIO_SOURCE} --with-pos --without-isal --without-vhost --with-pmdk"
     if [ $IS_SPDK_DBG_BUILD = "y" ]; then
         SPDK_CONFIG=$SPDK_CONFIG" --enable-debug"
     fi
