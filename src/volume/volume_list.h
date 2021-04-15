@@ -39,8 +39,6 @@
 
 #include "src/volume/volume_base.h"
 
-#define MAX_VOLUME_COUNT (256)
-
 namespace pos
 {
 class VolumeList

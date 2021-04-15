@@ -55,7 +55,6 @@ public:
     virtual int UpdateVolumePolicy(std::string volName, qos_vol_policy volPolicy) = 0;
     virtual qos_vol_policy GetVolumePolicy(std::string volName) = 0;
     virtual void DetachVolumes(void) = 0;
-    virtual bool CheckVolumeIdle(int volId) = 0;
 
     virtual int VolumeName(int volId, std::string& volName) = 0;
     virtual int VolumeID(std::string volName) = 0;
@@ -66,8 +65,8 @@ public:
     virtual VolumeList* GetVolumeList(void) = 0;
     virtual std::string GetStatusStr(VolumeStatus status) = 0;
 
-    virtual int IncreasePendingIOCount(int volId, uint32_t ioCountToSubmit = 1) = 0;
-    virtual int DecreasePendingIOCount(int volId, uint32_t ioCountCompleted = 1) = 0;
+    virtual int IncreasePendingIOCountIfNotZero(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountToSubmit = 1) = 0;
+    virtual int DecreasePendingIOCount(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountCompleted = 1) = 0;
     virtual VolumeBase* GetVolume(int volId) = 0;
 };
 

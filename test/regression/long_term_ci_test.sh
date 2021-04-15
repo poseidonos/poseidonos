@@ -3,11 +3,11 @@
 logfile="pos.log"
 rootdir=$(readlink -f $(dirname $0))/../..
 fiodir=${rootdir}/test/system/io_path
-ip="10.100.1.25"
-test_iteration=2000
+ip="10.100.11.15"
+test_iteration=4
 totalsize=100 #pm : 12500
 volcnt=4
-test_time=3600
+test_time=300
 cpusallowed="10-11"
 
 # array mode [normal, degraded]
@@ -17,9 +17,11 @@ shutdowntype="none"
 # rebuild mode [none, rebuild_before_gc, rebuild_after_gc]
 rebuild="none"
 
+# volume test [none, vol_unmount, vol_delete]
+volumetest="none"
 res=0
 
-while getopts "f:t:i:s:c:p:a:r:" opt
+while getopts "f:t:i:s:c:p:a:r:v:" opt
 do
     case "$opt" in
         f) ip="$OPTARG"
@@ -37,6 +39,8 @@ do
         a) arraymode="$OPTARG"
             ;;
         r) rebuild="$OPTARG"
+            ;;
+        v) volumetest="$OPTARG"
     esac
 done
 
@@ -153,6 +157,20 @@ do
     sudo ${fiodir}/fio_bench.py --traddr=${ip} --trtype=tcp --readwrite=${iotype} --io_size=${sizepervol}G --verify=true --bs=${blocksize} --time_based=${timebase} --run_time=${runtime} --iodepth=4 --file_num=${volcnt} --cpus_allowed=${cpuallowed}
     res=$?
     check_result
+
+    if [ $volumetest != "none" ]; then
+        if [ $volcnt == 1 ]; then
+            break;
+        fi
+        volName=vol$((volcnt-i+1))
+        echo "vol name : $volName"
+        sudo ${rootdir}/bin/cli volume unmount --name $volName --array POSArray
+        if [ $volumetest == "vol_delete" ]; then
+            sudo ${rootdir}/bin/cli volume delete --name $volName --array POSArray
+        fi
+        volcnt=$((volcnt-1))
+        echo "vol cnt : $volcnt"
+    fi
 
     if [ ${rebuild} == "rebuild_after_gc" ]; then
         rebuild=none

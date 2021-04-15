@@ -40,25 +40,27 @@
 
 namespace pos
 {
+
+std::atomic<uint32_t> VolumeBase::pendingIOCount[MAX_VOLUME_COUNT][static_cast<uint32_t>(VolumeStatus::MaxVolumeStatus)];
+std::atomic<bool> VolumeBase::possibleIncreaseIOCount[MAX_VOLUME_COUNT][static_cast<uint32_t>(VolumeStatus::MaxVolumeStatus)];
+
 VolumeBase::VolumeBase(std::string volName, uint64_t volSizeByte)
-: pendingIOCount(0)
 {
     name = volName;
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
-    ID = -1;
+    ID = INVALID_VOL_ID;
     POS_TRACE_INFO(POS_EVENT_ID::VOL_CREATED, "Volume name:{} size:{} created", name, totalSize);
 }
 
 VolumeBase::VolumeBase(std::string volName, uint64_t volSizeByte, uint64_t _maxiops, uint64_t _maxbw)
-: pendingIOCount(0)
 {
     name = volName;
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
     maxiops = _maxiops;
     maxbw = _maxbw;
-    ID = -1;
+    ID = INVALID_VOL_ID;
     POS_TRACE_INFO(POS_EVENT_ID::VOL_CREATED, "Volume name:{} size:{} iops:{} bw:{} created",
         name, totalSize, maxiops, maxbw);
 }
@@ -73,14 +75,21 @@ VolumeBase::Mount(void)
     int errorCode = static_cast<int>(POS_EVENT_ID::SUCCESS);
     if (VolumeStatus::Mounted != status)
     {
-        if (pendingIOCount != 0)
+        if (ID == INVALID_VOL_ID)
+        {
+            errorCode = static_cast<int>(POS_EVENT_ID::INVALID_VOL_ID_ERROR);
+            POS_TRACE_WARN(errorCode, "invalid vol id. vol name : {}", name);
+            return errorCode;
+        }
+        if (pendingIOCount[ID][VolumeStatus::Mounted] != 0)
         {
             errorCode = static_cast<int>(POS_EVENT_ID::VOL_UNEXPECTED_PENDING_IO_COUNT);
             POS_TRACE_ERROR(errorCode, "PendingIOCount is over  0 -> {}, VOLUME ID: {}",
-                    pendingIOCount, ID);
+                pendingIOCount[ID][VolumeStatus::Mounted], ID);
             return errorCode;
         }
         status = VolumeStatus::Mounted;
+        InitializePendingIOCount(ID, VolumeStatus::Mounted);
         POS_TRACE_INFO(POS_EVENT_ID::VOL_MOUNTED,
             "Volume mounted name: {}", name);
     }
@@ -125,9 +134,31 @@ VolumeBase::UnlockStatus(void)
 }
 
 bool
-VolumeBase::CheckIdle(void)
+VolumeBase::CheckIdleAndSetZero(int volId, VolumeStatus volumeStatus)
 {
-    return (0 == pendingIOCount);
+    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    uint32_t oldPendingIOCount = pendingIOCount[volId][index].load();
+    // If oldPendingIOCount is greater than 0
+    // If oldPendingIOCount == 1, decrease and return idle as true.
+    do
+    {
+        if (unlikely(oldPendingIOCount > 1))
+        {
+            return false;
+        }
+    } while (!pendingIOCount[volId][index].compare_exchange_weak(oldPendingIOCount, oldPendingIOCount - 1));
+    assert(oldPendingIOCount == 1);
+    return true;
+}
+
+void
+VolumeBase::WaitUntilIdle(int volId, VolumeStatus volumeStatus)
+{
+    possibleIncreaseIOCount[volId][volumeStatus] = false;
+    while (false == CheckIdleAndSetZero(volId, volumeStatus))
+    {
+        usleep(1);
+    }
 }
 
 void
@@ -184,10 +215,35 @@ VolumeBase::RemainingSize(void)
 }
 
 void
-VolumeBase::IncreasePendingIOCount(uint32_t ioSubmissionCount)
+VolumeBase::InitializePendingIOCount(int volId, VolumeStatus volumeStatus)
 {
-    uint32_t oldPendingIOCount = pendingIOCount.fetch_add(ioSubmissionCount,
-        memory_order_relaxed);
+    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    pendingIOCount[volId][index] = 1;
+    possibleIncreaseIOCount[volId][index] = true;
+}
+
+// This function check possibleIncreaseIOCount before increase pendingIO Count to avoid waiting infinite IO from HOST (or Internal Module)
+// Even if possibleIncreaseIOCount is false, we need to check pendingIOCount == 0 or not
+// because there is a possibility that calls in sequence of "WaitUntilIdle => IncreasePendingIOCountIfoNozero"
+
+bool
+VolumeBase::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeStatus, uint32_t ioSubmissionCount)
+{
+    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    if (unlikely (possibleIncreaseIOCount[volId][index] == false))
+    {
+        return false;
+    }
+    uint32_t oldPendingIOCount = pendingIOCount[volId][index].load();
+    do
+    {
+        if (unlikely(oldPendingIOCount == 0))
+        {
+            // already volume base is deleted
+            return false;
+        }
+    } while (!pendingIOCount[volId][index].compare_exchange_weak(oldPendingIOCount, oldPendingIOCount + ioSubmissionCount));
+
     if (unlikely((UINT32_MAX - oldPendingIOCount) < ioSubmissionCount))
     {
         POS_TRACE_ERROR(POS_EVENT_ID::VOL_UNEXPECTED_PENDING_IO_COUNT,
@@ -195,13 +251,16 @@ VolumeBase::IncreasePendingIOCount(uint32_t ioSubmissionCount)
             "Submission Count: {}",
             oldPendingIOCount,
             ioSubmissionCount);
+        return false;
     }
+    return true;
 }
 
 void
-VolumeBase::DecreasePendingIOCount(uint32_t ioCompletionCount)
+VolumeBase::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint32_t ioCompletionCount)
 {
-    uint32_t oldPendingIOCount = pendingIOCount.fetch_sub(ioCompletionCount,
+    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    uint32_t oldPendingIOCount = pendingIOCount[volId][index].fetch_sub(ioCompletionCount,
         memory_order_relaxed);
     if (unlikely(oldPendingIOCount < ioCompletionCount))
     {

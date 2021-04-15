@@ -73,8 +73,8 @@ public:
     int Resize(std::string name, uint64_t newsize) override;
     int UpdateVolumePolicy(std::string volName, qos_vol_policy volPolicy) override;
     qos_vol_policy GetVolumePolicy(std::string volName) override;
+
     void DetachVolumes(void) override;
-    bool CheckVolumeIdle(int volId) override;
 
     int VolumeName(int volId, std::string& volName) override;
     int VolumeID(std::string volName) override;
@@ -85,10 +85,11 @@ public:
     VolumeList* GetVolumeList(void) override;
     std::string GetStatusStr(VolumeStatus status) override;
 
-    int IncreasePendingIOCount(int volId, uint32_t ioCountToSubmit = 1) override;
-    int DecreasePendingIOCount(int volId, uint32_t ioCountCompleted = 1) override;
+    int IncreasePendingIOCountIfNotZero(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountToSubmit = 1) override;
+    int DecreasePendingIOCount(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountCompleted = 1) override;
     VolumeBase* GetVolume(int volId) override;
     void StateChanged(StateContext* prev, StateContext* next) override;
+
 
 private:
     int _LoadVolumes(void);

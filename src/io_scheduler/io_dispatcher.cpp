@@ -197,7 +197,7 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync)
         POS_TRACE_ERROR(static_cast<int>(eventId),
             PosEventId::GetString(eventId));
         IoCompleter ioCompleter(ubio);
-        ioCompleter.CompleteUbio(IOErrorType::GENERIC_ERROR, true);
+        ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::GENERIC_ERROR, true);
         return PARAM_FAILED;
     }
 

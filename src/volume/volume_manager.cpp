@@ -262,7 +262,7 @@ VolumeManager::_LoadVolumes(void)
 }
 
 int
-VolumeManager::IncreasePendingIOCount(int volId, uint32_t ioCountToSubmit)
+VolumeManager::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeStatus, uint32_t ioCountToSubmit)
 {
     VolumeBase* vol = volumes.GetVolume(volId);
     if (unlikely(nullptr == vol))
@@ -271,13 +271,18 @@ VolumeManager::IncreasePendingIOCount(int volId, uint32_t ioCountToSubmit)
             "The requested volume does not exist");
         return (int)POS_EVENT_ID::VOL_NOT_EXIST;
     }
-
-    vol->IncreasePendingIOCount(ioCountToSubmit);
-    return (int)POS_EVENT_ID::SUCCESS;
+    bool success = VolumeBase::IncreasePendingIOCountIfNotZero(volId, volumeStatus, ioCountToSubmit);
+    if (success)
+    {
+        return static_cast<int>(POS_EVENT_ID::SUCCESS);
+    }
+    POS_TRACE_WARN(POS_EVENT_ID::VOL_NOT_EXIST,
+        "The requested volume is already deleted");
+    return static_cast<int>(POS_EVENT_ID::VOL_NOT_EXIST);
 }
 
 int
-VolumeManager::DecreasePendingIOCount(int volId, uint32_t ioCountCompleted)
+VolumeManager::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint32_t ioCountCompleted)
 {
     VolumeBase* vol = volumes.GetVolume(volId);
     if (unlikely(nullptr == vol))
@@ -286,27 +291,8 @@ VolumeManager::DecreasePendingIOCount(int volId, uint32_t ioCountCompleted)
             "The requested volume does not exist");
         return (int)POS_EVENT_ID::VOL_NOT_EXIST;
     }
-
-    vol->DecreasePendingIOCount(ioCountCompleted);
-    return (int)POS_EVENT_ID::SUCCESS;
-}
-
-bool
-VolumeManager::CheckVolumeIdle(int volId)
-{
-    bool volumeIdle = false;
-    VolumeBase* vol = volumes.GetVolume(volId);
-    if (vol == nullptr)
-    {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST,
-            "The requested volume does not exist");
-    }
-    else
-    {
-        volumeIdle = vol->CheckIdle();
-    }
-
-    return volumeIdle;
+    VolumeBase::DecreasePendingIOCount(volId, volumeStatus, ioCountCompleted);
+    return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }
 
 void

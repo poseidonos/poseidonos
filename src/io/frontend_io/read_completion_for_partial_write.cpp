@@ -132,7 +132,7 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
             if (origin != nullptr)
             {
                 IoCompleter ioCompleter(origin);
-                ioCompleter.CompleteUbio(IOErrorType::GENERIC_ERROR, true);
+                ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::GENERIC_ERROR, true);
             }
             delete (static_cast<CopyParameter*>(argument));
         }
@@ -179,7 +179,7 @@ ReadCompletionForPartialWrite::_DoSpecificJob(void)
         if (origin != nullptr)
         {
             IoCompleter ioCompleter(origin);
-            ioCompleter.CompleteUbio(IOErrorType::GENERIC_ERROR, true);
+            ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::GENERIC_ERROR, true);
         }
     }
 

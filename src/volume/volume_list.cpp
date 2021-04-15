@@ -88,7 +88,7 @@ VolumeList::Add(VolumeBase* volume)
     volume->ID = id;
     items[id] = volume;
     volCnt++;
-
+    VolumeBase::InitializePendingIOCount(id, VolumeStatus::Unmounted);
     POS_TRACE_DEBUG((int)POS_EVENT_ID::SUCCESS, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
     return (int)POS_EVENT_ID::SUCCESS;
 }
@@ -102,6 +102,7 @@ VolumeList::Add(VolumeBase* volume, int id)
         volume->ID = id;
         items[id] = volume;
         volCnt++;
+        VolumeBase::InitializePendingIOCount(id, VolumeStatus::Unmounted);
         POS_TRACE_DEBUG((int)POS_EVENT_ID::VOL_ADDED, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
         return (int)POS_EVENT_ID::SUCCESS;
     }

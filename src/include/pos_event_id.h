@@ -105,6 +105,7 @@ enum class POS_EVENT_ID
     VOL_DETACH_FAIL = 2104,
     VOL_DATA_SIZE_TOO_BIG = 2110,
     VOL_DATA_SIZE_TOO_SMALL = 2111,
+    INVALID_VOL_ID_ERROR = 2112,
     // --------------Mbr (2300)-----------------------
     MBR_START = 2300,
     MBR_ALLOCATE_MEMORY = MBR_START,

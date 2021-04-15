@@ -40,6 +40,7 @@ enum class IOErrorType
     DEVICE_ERROR,
     GENERIC_ERROR,
     ABORTED,
+    VOLUME_UMOUNTED,
     CALLBACK_ERROR_MAX_COUNT
 };
 

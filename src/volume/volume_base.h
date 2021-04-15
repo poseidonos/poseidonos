@@ -33,17 +33,21 @@
 #ifndef VOLUME_BASE_H_
 #define VOLUME_BASE_H_
 
+#include <array>
 #include <atomic>
 #include <cstdint>
 #include <mutex>
 #include <string>
+
+#define MAX_VOLUME_COUNT (256)
 
 namespace pos
 {
 enum VolumeStatus
 {
     Unmounted,
-    Mounted
+    Mounted,
+    MaxVolumeStatus
 };
 
 class VolumeBase
@@ -113,11 +117,14 @@ public:
     {
         totalSize = val;
     }
-    void IncreasePendingIOCount(uint32_t ioSubmissionCount = 1);
-    void DecreasePendingIOCount(uint32_t ioCompletionCount = 1);
-    bool CheckIdle(void);
 
     int ID;
+
+    static bool IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeStatus = VolumeStatus::Mounted, uint32_t ioSubmissionCount = 1);
+    static void DecreasePendingIOCount(int volId, VolumeStatus volumeStatus = VolumeStatus::Mounted, uint32_t ioCompletionCount = 1);
+    static void WaitUntilIdle(int volId, VolumeStatus volumeStatus = VolumeStatus::Mounted);
+    static bool CheckIdleAndSetZero(int volId, VolumeStatus volumeStatus = VolumeStatus::Mounted);
+    static void InitializePendingIOCount(int volId, VolumeStatus volumeStatus);
 
 protected:
     VolumeStatus status;
@@ -138,7 +145,9 @@ protected:
     const uint64_t MAX_BW_LIMIT = UINT64_MAX / MIB_IN_BYTE;
 
 private:
-    std::atomic<uint32_t> pendingIOCount;
+    static std::atomic<bool> possibleIncreaseIOCount[MAX_VOLUME_COUNT][static_cast<uint32_t>(VolumeStatus::MaxVolumeStatus)];
+    static std::atomic<uint32_t> pendingIOCount[MAX_VOLUME_COUNT][static_cast<uint32_t>(VolumeStatus::MaxVolumeStatus)];
+    static const int INVALID_VOL_ID = -1;
 };
 
 } // namespace pos

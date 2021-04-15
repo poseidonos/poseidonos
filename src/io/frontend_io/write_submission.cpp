@@ -113,7 +113,7 @@ WriteSubmission::Execute(void)
         if (nullptr != volumeIo)
         {
             IoCompleter ioCompleter(volumeIo);
-            ioCompleter.CompleteUbio(IOErrorType::GENERIC_ERROR, true);
+            ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::GENERIC_ERROR, true);
         }
         volumeIo = nullptr;
         return true;

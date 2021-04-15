@@ -58,6 +58,7 @@
 #include "src/spdk_wrapper/spdk.hpp"
 #include "src/volume/volume_manager.h"
 #include "src/volume/volume_service.h"
+#include "src/event_scheduler/io_completer.h"
 
 #ifdef _ADMIN_ENABLED
 #include "src/admin/admin_command_handler.h"
@@ -182,7 +183,10 @@ AioCompletion::_SendUserCompletion(void)
     else
     {
         IVolumeManager* volumeManager = volumeService.GetVolumeManager(volumeIo->GetArrayName());
-        volumeManager->DecreasePendingIOCount(volumeIo->GetVolumeId());
+        if (likely(_GetMostCriticalError() != IOErrorType::VOLUME_UMOUNTED))
+        {
+            volumeManager->DecreasePendingIOCount(volumeIo->GetVolumeId());
+        }
     }
     volumeIo = nullptr;
     flushIo = nullptr;
@@ -282,17 +286,31 @@ AIO::SubmitAsyncIO(ibof_io& ibofIo)
         case UbioDir::Write:
         {
             AIRLOG(PERF_VOLUME, ibofIo.volume_id, AIR_WRITE, ibofIo.length);
-            volumeManager->IncreasePendingIOCount(volumeIo->GetVolumeId());
-            SpdkEventScheduler::ExecuteOrScheduleEvent(core,
-                std::make_shared<WriteSubmission>(volumeIo));
+            if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volumeIo->GetVolumeId())))
+            {
+                IoCompleter ioCompleter(volumeIo);
+                ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::VOLUME_UMOUNTED, true);
+            }
+            else
+            {
+                SpdkEventScheduler::ExecuteOrScheduleEvent(core,
+                    std::make_shared<WriteSubmission>(volumeIo));
+            }
             break;
         }
         case UbioDir::Read:
         {
             AIRLOG(PERF_VOLUME, ibofIo.volume_id, AIR_READ, ibofIo.length);
-            volumeManager->IncreasePendingIOCount(volumeIo->GetVolumeId());
-            SpdkEventScheduler::ExecuteOrScheduleEvent(core,
-                std::make_shared<ReadSubmission>(volumeIo));
+            if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volumeIo->GetVolumeId())))
+            {
+                IoCompleter ioCompleter(volumeIo);
+                ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::VOLUME_UMOUNTED, true);
+            }
+            else
+            {
+                SpdkEventScheduler::ExecuteOrScheduleEvent(core,
+                    std::make_shared<ReadSubmission>(volumeIo));
+            }
             break;
         }
         default:

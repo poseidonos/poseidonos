@@ -68,6 +68,7 @@ VolumeUnmounter::Do(string name)
     bool res = true;
     if (VolumeStatus::Unmounted != vol->GetStatus())
     {
+        VolumeBase::WaitUntilIdle(vol->ID, VolumeStatus::Mounted);
         res = VolumeEventPublisherSingleton::Instance()->NotifyVolumeUnmounted(
             name, vol->ID, arrayName);
 
