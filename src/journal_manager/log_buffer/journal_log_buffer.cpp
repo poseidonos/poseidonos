@@ -51,6 +51,7 @@ JournalLogBuffer::JournalLogBuffer(void)
 : config(nullptr),
   numInitializedLogGroup(0),
   logBufferLoaded(false),
+  logFile(nullptr),
   initializedDataBuffer(nullptr)
 {
 }

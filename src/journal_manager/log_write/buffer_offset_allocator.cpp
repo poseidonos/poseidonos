@@ -44,7 +44,9 @@ namespace pos
 BufferOffsetAllocator::BufferOffsetAllocator(void)
 : config(nullptr),
   releaser(nullptr),
-  currentLogGroupId(INT32_MAX)
+  nextSeqNumber(UINT32_MAX),
+  currentLogGroupId(INT32_MAX),
+  maxOffsetPerGroup(UINT64_MAX)
 {
 }
 

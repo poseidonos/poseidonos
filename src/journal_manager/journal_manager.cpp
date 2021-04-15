@@ -56,7 +56,20 @@
 namespace pos
 {
 JournalManager::JournalManager(void)
-: journalManagerStatus(JOURNAL_INVALID)
+: arrayInfo(nullptr),
+  journalService(nullptr),
+  config(nullptr),
+  statusProvider(nullptr),
+  journalManagerStatus(JOURNAL_INVALID),
+  logBuffer(nullptr),
+  logFactory(nullptr),
+  logWriteHandler(nullptr),
+  volumeEventHandler(nullptr),
+  bufferAllocator(nullptr),
+  logGroupReleaser(nullptr),
+  dirtyMapManager(nullptr),
+  logFilledNotifier(nullptr),
+  replayHandler(nullptr)
 {
 }
 

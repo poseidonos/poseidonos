@@ -44,7 +44,9 @@ namespace pos
 {
 // Constructor for product code
 LogWriteHandler::LogWriteHandler(void)
-: logWriteStats(new LogWriteStatistics()),
+: logBuffer(nullptr),
+  bufferAllocator(nullptr),
+  logWriteStats(new LogWriteStatistics()),
   waitingList(new WaitingLogList())
 {
 }
