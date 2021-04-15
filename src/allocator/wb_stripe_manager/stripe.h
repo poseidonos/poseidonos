@@ -49,7 +49,7 @@ class Stripe
 public:
     Stripe(void);
     virtual ~Stripe(void) {}
-    virtual void Assign(StripeId vsid, StripeId lsid, ASTailArrayIdx tailarrayidx);
+    virtual void Assign(StripeId vsid, StripeId lsid, ASTailArrayIdx tailarrayidx, std::string arrayName);
 
     virtual uint32_t GetAsTailArrayIdx(void);
     virtual StripeId GetVsid(void);

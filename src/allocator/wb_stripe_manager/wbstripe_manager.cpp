@@ -468,7 +468,7 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
     }
 
     stripe = GetStripe(wbLsid);
-    stripe->Assign(vsid, wbLsid, tailarrayidx);
+    stripe->Assign(vsid, wbLsid, tailarrayidx, arrayName);
 
     uint32_t remainingBlks = stripe->DecreseBlksRemaining(blockCount);
     if (remainingBlks == 0)
