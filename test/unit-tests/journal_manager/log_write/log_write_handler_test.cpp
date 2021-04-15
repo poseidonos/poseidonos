@@ -181,7 +181,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfCallbackExecuted)
     // Given: Log write handler is initialized, waiting list is empty,
     // LogWriteStatistics update failed
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
-    EXPECT_CALL(*waitingList, IsEmpty).WillOnce(Return(true));
+    EXPECT_CALL(*waitingList, GetWaitingIo).WillOnce(Return(nullptr));
     EXPECT_CALL(*logWriteStats, UpdateStatus).WillOnce(Return(false));
 
     // Then: The written context callback should be called    
@@ -199,7 +199,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfLogWriteStatisticsUpdated)
     // Given: Log write handler is initialized, waiting list is empty, and
     // LogWriteContext is given 
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
-    EXPECT_CALL(*waitingList, IsEmpty).WillOnce(Return(true));
+    EXPECT_CALL(*waitingList, GetWaitingIo).WillOnce(Return(nullptr));
 
     NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
 
@@ -226,7 +226,6 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfWaitingListIsRestarted)
     NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
 
     // When: Waiting log list is not empty, and statistics update is failed
-    EXPECT_CALL(*waitingList, IsEmpty).WillOnce(Return(false));
     NiceMock<MockLogWriteContext>* waitingContext = new NiceMock<MockLogWriteContext>;
     EXPECT_CALL(*waitingList, GetWaitingIo).WillOnce(Return(waitingContext));
 
@@ -265,7 +264,6 @@ TEST_F(LogWriteHandlerTestFixture, LogBufferReseted_testIfWaitingListIsRestarted
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
 
     // When: Waiting log list is not empty
-    EXPECT_CALL(*waitingList, IsEmpty).WillOnce(Return(false));
     NiceMock<MockLogWriteContext>* waitingContext = new NiceMock<MockLogWriteContext>;
     EXPECT_CALL(*waitingList, GetWaitingIo).WillOnce(Return(waitingContext));
 

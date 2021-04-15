@@ -149,9 +149,9 @@ LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
 void
 LogWriteHandler::_StartWaitingIos(void)
 {
-    if (waitingList->IsEmpty() == false)
+    auto log = waitingList->GetWaitingIo();
+    if (log != nullptr)
     {
-        auto log = waitingList->GetWaitingIo();
         _AddLogInternal(log);
     }
 }
