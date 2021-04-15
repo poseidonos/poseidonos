@@ -51,9 +51,10 @@ LogWriteContextFactory::~LogWriteContextFactory(void)
 }
 
 void
-LogWriteContextFactory::Init(LogBufferWriteDoneNotifier* target)
+LogWriteContextFactory::Init(LogBufferWriteDoneNotifier* target, CallbackSequenceController* sequencer)
 {
     notifier = target;
+    sequenceController = sequencer;
 }
 
 LogWriteContext*
@@ -83,8 +84,8 @@ LogWriteContextFactory::CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
     MapPageList dirtyMap;
     dirtyMap.emplace(volId, dirty);
 
-    MapUpdateLogWriteContext* logWriteContext = new BlockMapUpdatedLogWriteContext(log, dirtyMap,
-        callbackEvent, notifier);
+    MapUpdateLogWriteContext* logWriteContext
+        = new MapUpdateLogWriteContext(log, dirtyMap, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }
@@ -102,8 +103,8 @@ LogWriteContextFactory::CreateStripeMapLogWriteContext(Stripe* stripe,
     MapPageList dirtyMap;
     dirtyMap.emplace(STRIPE_MAP_ID, dirty);
 
-    MapUpdateLogWriteContext* logWriteContext = new StripeMapUpdatedLogWriteContext(log, dirtyMap, callbackEvent,
-        notifier);
+    MapUpdateLogWriteContext* logWriteContext
+        = new MapUpdateLogWriteContext(log, dirtyMap, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }
@@ -115,17 +116,17 @@ LogWriteContextFactory::CreateGcStripeFlushedLogWriteContext(int volumeId,
     GcStripeFlushedLogHandler* log = new GcStripeFlushedLogHandler(volumeId, mapUpdates);
 
     MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
-        dirty, callbackEvent, notifier);
+        dirty, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }
 
 LogWriteContext*
 LogWriteContextFactory::CreateVolumeDeletedLogWriteContext(int volId,
-    uint64_t contextVersion, JournalInternalEventCallback callback)
+    uint64_t contextVersion, EventSmartPtr callback)
 {
     LogHandlerInterface* log = new VolumeDeletedLogEntry(volId, contextVersion);
-    LogWriteContext* logWriteContext = new VolumeDeletedLogWriteContext(volId, log, callback);
+    LogWriteContext* logWriteContext = new LogWriteContext(log, callback);
 
     return logWriteContext;
 }

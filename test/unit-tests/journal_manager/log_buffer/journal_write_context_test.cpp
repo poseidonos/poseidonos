@@ -60,18 +60,6 @@ TEST(StripeMapUpdatedLogWriteContext, StripeMapUpdatedLogWriteContext_)
 
 namespace pos
 {
-TEST(VolumeDeletedLogWriteContext, VolumeDeletedLogWriteContext_)
-{
-}
-
-TEST(VolumeDeletedLogWriteContext, LogWriteDone_)
-{
-}
-
-} // namespace pos
-
-namespace pos
-{
 TEST(JournalResetContext, JournalResetContext_)
 {
 }

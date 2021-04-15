@@ -30,63 +30,23 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/journal_manager/log_write/volume_deleted_log_write_callback.h"
 
-#include <condition_variable>
-#include <map>
-#include <mutex>
-#include <string>
-#include <vector>
-
-#include "allocator_context_flush_completed_event.h"
-#include "src/allocator/i_allocator_ctx.h"
-#include "src/journal_service/i_volume_event.h"
+#include "src/journal_manager/log_write/journal_volume_event_handler.h"
 
 namespace pos
 {
-class LogWriteContextFactory;
-class DirtyMapManager;
-class LogWriteHandler;
-class JournalConfiguration;
-
-class JournalVolumeEventHandler : public IVolumeEventHandler, public IAllocatorContextFlushed
+VolumeDeletedLogWriteCallback::VolumeDeletedLogWriteCallback(JournalVolumeEventHandler* volumeEventHandler, int volumeId)
+: volumeEventHandler(volumeEventHandler),
+  volumeId(volumeId)
 {
-public:
-    JournalVolumeEventHandler(void);
-    virtual ~JournalVolumeEventHandler(void);
+}
 
-    virtual void Init(LogWriteContextFactory* logFactory, DirtyMapManager* dirtyPages,
-        LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration,
-        IAllocatorCtx* allocatorCtx);
-
-    virtual int VolumeDeleted(int volID) override;
-    virtual void AllocatorContextFlushed(void) override;
-
-    virtual void VolumeDeletedLogWriteDone(int volumeId);
-
-private:
-    int _WriteVolumeDeletedLog(int volumeId, uint64_t allocatorCtxVer);
-    void _WaitForLogWriteDone(int volumeId);
-
-    int _FlushAllocatorContext(void);
-    void _WaitForAllocatorContextFlushCompleted(void);
-
-    bool isInitialized;
-
-    IAllocatorCtx* allocatorCtx;
-
-    JournalConfiguration* config;
-    LogWriteContextFactory* logFactory;
-    DirtyMapManager* dirtyPageManager;
-    LogWriteHandler* logWriteHandler;
-
-    std::mutex logWriteMutex;
-    std::condition_variable logWriteCondVar;
-    bool logWriteInProgress;
-
-    std::mutex flushMutex;
-    std::condition_variable flushCondVar;
-    bool flushInProgress;
-};
+bool
+VolumeDeletedLogWriteCallback::Execute(void)
+{
+    volumeEventHandler->VolumeDeletedLogWriteDone(volumeId);
+    return true;
+}
 
 } // namespace pos

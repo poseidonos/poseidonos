@@ -35,17 +35,18 @@
 #include <iostream>
 #include <string>
 
-#include "checkpoint/dirty_map_manager.h"
-#include "checkpoint/log_group_releaser.h"
-#include "config/journal_configuration.h"
-#include "log_buffer/journal_log_buffer.h"
-#include "log_buffer/log_write_context_factory.h"
-#include "log_buffer/buffer_write_done_notifier.h"
-#include "log_write/buffer_offset_allocator.h"
-#include "log_write/journal_volume_event_handler.h"
-#include "log_write/log_write_handler.h"
-#include "replay/replay_handler.h"
-#include "status/journal_status_provider.h"
+#include "src/journal_manager/checkpoint/dirty_map_manager.h"
+#include "src/journal_manager/checkpoint/log_group_releaser.h"
+#include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/log_write_context_factory.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
+#include "src/journal_manager/log_write/buffer_offset_allocator.h"
+#include "src/journal_manager/log_write/journal_volume_event_handler.h"
+#include "src/journal_manager/log_write/log_write_handler.h"
+#include "src/journal_manager/replay/replay_handler.h"
+#include "src/journal_manager/status/journal_status_provider.h"
 
 #include "src/array_models/interface/i_array_info.h"
 #include "src/include/pos_event_id.h"
@@ -84,6 +85,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     LogGroupReleaser* groupReleaser,
     DirtyMapManager* dirtyManager,
     LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
+    CallbackSequenceController* callbackSequenceController,
     ReplayHandler* replay,
     IArrayInfo* info, JournalService* service)
 : JournalManager()
@@ -101,6 +103,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
 
     dirtyMapManager = dirtyManager;
     logFilledNotifier = logBufferWriteDoneNotifier;
+    sequenceController = callbackSequenceController;
 
     replayHandler = replay;
 
@@ -120,6 +123,7 @@ JournalManager::JournalManager(IArrayInfo* info, IStateControl* state)
     new LogGroupReleaser(),
     new DirtyMapManager(),
     new LogBufferWriteDoneNotifier(),
+    new CallbackSequenceController(),
     new ReplayHandler(state),
     info, JournalServiceSingleton::Instance())
 {
@@ -129,6 +133,7 @@ JournalManager::~JournalManager(void)
 {
     delete replayHandler;
 
+    delete sequenceController;
     delete logFilledNotifier;
     delete dirtyMapManager;
 
@@ -382,7 +387,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     bufferAllocator->Init(logGroupReleaser, config);
     dirtyMapManager->Init(config);
 
-    logFactory->Init(logFilledNotifier);
+    logFactory->Init(logFilledNotifier, sequenceController);
 
     // Note that bufferAllocator should be notified after dirtyMapManager,
     // and logWriteHandler should be notified after bufferAllocator
@@ -390,7 +395,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     logFilledNotifier->Register(bufferAllocator);
     logFilledNotifier->Register(logWriteHandler);
 
-    logGroupReleaser->Init(logFilledNotifier, logBuffer, dirtyMapManager,
+    logGroupReleaser->Init(logFilledNotifier, logBuffer, dirtyMapManager, sequenceController,
         mapFlush, allocatorCtx);
 
     logWriteHandler->Init(bufferAllocator, logBuffer, config);

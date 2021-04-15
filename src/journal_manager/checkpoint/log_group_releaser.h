@@ -45,6 +45,7 @@ class JournalLogBuffer;
 class CheckpointHandler;
 class DirtyMapManager;
 class LogBufferWriteDoneNotifier;
+class CallbackSequenceController;
 
 class IMapFlush;
 class IAllocatorCtx;
@@ -56,7 +57,8 @@ public:
     virtual ~LogGroupReleaser(void);
 
     virtual void Init(LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer,
-        DirtyMapManager* dirtyPage, IMapFlush* mapFlush, IAllocatorCtx* allocatorCtx);
+        DirtyMapManager* dirtyPage, CallbackSequenceController* sequencer,
+        IMapFlush* mapFlush, IAllocatorCtx* allocatorCtx);
     void Reset(void);
 
     virtual void AddToFullLogGroup(int groupId);
@@ -86,6 +88,7 @@ protected:
 
     JournalLogBuffer* logBuffer;
     DirtyMapManager* dirtyPageManager;
+    CallbackSequenceController* sequenceController;
 
     std::mutex fullLogGroupLock;
     std::list<int> fullLogGroup;

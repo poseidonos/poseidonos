@@ -32,61 +32,33 @@
 
 #pragma once
 
-#include <condition_variable>
-#include <map>
 #include <mutex>
-#include <string>
-#include <vector>
-
-#include "allocator_context_flush_completed_event.h"
-#include "src/allocator/i_allocator_ctx.h"
-#include "src/journal_service/i_volume_event.h"
+#include <atomic>
 
 namespace pos
 {
-class LogWriteContextFactory;
-class DirtyMapManager;
-class LogWriteHandler;
-class JournalConfiguration;
 
-class JournalVolumeEventHandler : public IVolumeEventHandler, public IAllocatorContextFlushed
+class CallbackSequenceController
 {
 public:
-    JournalVolumeEventHandler(void);
-    virtual ~JournalVolumeEventHandler(void);
+    CallbackSequenceController(void);
+    CallbackSequenceController(int numCallbacks, bool checkpointTriggered);
+    virtual ~CallbackSequenceController(void) = default;
 
-    virtual void Init(LogWriteContextFactory* logFactory, DirtyMapManager* dirtyPages,
-        LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration,
-        IAllocatorCtx* allocatorCtx);
+    void GetCallbackExecutionApproval(void);
+    void NotifyCallbackCompleted(void);
 
-    virtual int VolumeDeleted(int volID) override;
-    virtual void AllocatorContextFlushed(void) override;
+    void GetCheckpointExecutionApproval(void);
+    void AllowCallbackExecution(void);
 
-    virtual void VolumeDeletedLogWriteDone(int volumeId);
+    // These functions are for unit testing
+    int GetNumPendingCallbacks(void);
+    bool IsCheckpointInProgress(void);
 
 private:
-    int _WriteVolumeDeletedLog(int volumeId, uint64_t allocatorCtxVer);
-    void _WaitForLogWriteDone(int volumeId);
+    std::mutex sequenceLock;
 
-    int _FlushAllocatorContext(void);
-    void _WaitForAllocatorContextFlushCompleted(void);
-
-    bool isInitialized;
-
-    IAllocatorCtx* allocatorCtx;
-
-    JournalConfiguration* config;
-    LogWriteContextFactory* logFactory;
-    DirtyMapManager* dirtyPageManager;
-    LogWriteHandler* logWriteHandler;
-
-    std::mutex logWriteMutex;
-    std::condition_variable logWriteCondVar;
-    bool logWriteInProgress;
-
-    std::mutex flushMutex;
-    std::condition_variable flushCondVar;
-    bool flushInProgress;
+    std::atomic<int> numCallbacksInExecution;
+    std::atomic<bool> checkpointTriggerInProgress;
 };
-
 } // namespace pos

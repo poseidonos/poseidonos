@@ -41,7 +41,8 @@ JournalLogBufferIntegrationTest::SetUp(void)
     ON_CALL(config, GetLogBufferSize).WillByDefault(Return(LOG_BUFFER_SIZE));
     ON_CALL(config, GetLogGroupSize).WillByDefault(Return(LOG_GROUP_SIZE));
 
-    factory.Init(&notifier);
+    // TODO(huijeong.kim) This injected modules should be deleted
+    factory.Init(new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
 
     logBuffer = new JournalLogBuffer(new MockFileIntf(GetLogFileName(), "POSArray"));
     logBuffer->Delete();
@@ -73,9 +74,6 @@ JournalLogBufferIntegrationTest::SimulateSPOR(void)
 LogWriteContext*
 JournalLogBufferIntegrationTest::_CreateContextForBlockWriteDoneLog(void)
 {
-    LogWriteContextFactory factory;
-    factory.Init(new LogBufferWriteDoneNotifier());
-
     VolumeIoSmartPtr volumeIo(new VolumeIo(nullptr, 0, ""));
     volumeIo->SetSectorRba(0);
     volumeIo->SetVolumeId(TEST_VOLUME_ID);

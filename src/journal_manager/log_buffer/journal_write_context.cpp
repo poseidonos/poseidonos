@@ -32,7 +32,8 @@
 
 #include "journal_write_context.h"
 
-#include "../log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/event_scheduler/event_scheduler.h"
@@ -41,12 +42,14 @@ namespace pos
 {
 LogWriteContext::LogWriteContext(void)
 : log(nullptr),
+  callbackEvent(nullptr),
   logGroupId(INVALID_LOG_INDEX)
 {
 }
 
-LogWriteContext::LogWriteContext(LogHandlerInterface* log)
+LogWriteContext::LogWriteContext(LogHandlerInterface* log, EventSmartPtr callback)
 : log(log),
+  callbackEvent(callback),
   logGroupId(INVALID_LOG_INDEX)
 {
 }
@@ -92,12 +95,25 @@ LogWriteContext::SetIoRequest(MetaFsIoOpcode op, int fileDescriptor, uint64_t of
     this->buffer = log->GetData();
 }
 
+void
+LogWriteContext::LogWriteDone(void)
+{
+    bool executionSuccessful = callbackEvent->Execute();
+
+    // TODO(huijeong.kim) handle execution fail case
+    assert(executionSuccessful == true);
+
+    callbackEvent = nullptr;
+}
+
 MapUpdateLogWriteContext::MapUpdateLogWriteContext(LogHandlerInterface* log,
-    MapPageList dirtyList, EventSmartPtr callback, LogBufferWriteDoneNotifier* target)
-: LogWriteContext(log),
+    MapPageList dirtyList, EventSmartPtr callback,
+    LogBufferWriteDoneNotifier* target,
+    CallbackSequenceController* sequencer)
+: LogWriteContext(log, callback),
   logFilledNotifier(target),
-  dirty(dirtyList),
-  callbackEvent(callback)
+  sequenceController(sequencer),
+  dirty(dirtyList)
 {
 }
 
@@ -110,41 +126,12 @@ MapUpdateLogWriteContext::GetDirtyList(void)
 void
 MapUpdateLogWriteContext::LogWriteDone(void)
 {
-    bool executionSuccessful = callbackEvent->Execute();
-    // BlockMapUpdateCompletion never fails for now
-    // If it can fail, need to set callback to notify log filled to this event
-    assert(executionSuccessful == true);
-
-    callbackEvent = nullptr;
+    sequenceController->GetCallbackExecutionApproval();
+    LogWriteContext::LogWriteDone();
+    sequenceController->NotifyCallbackCompleted();
 
     // Log filled notify should be after the callback function completed
     logFilledNotifier->NotifyLogFilled(GetLogGroupId(), dirty);
-}
-
-BlockMapUpdatedLogWriteContext::BlockMapUpdatedLogWriteContext(LogHandlerInterface* log,
-    MapPageList dirty, EventSmartPtr callback, LogBufferWriteDoneNotifier* target)
-: MapUpdateLogWriteContext(log, dirty, callback, target)
-{
-}
-
-StripeMapUpdatedLogWriteContext::StripeMapUpdatedLogWriteContext(LogHandlerInterface* log,
-    MapPageList dirty, EventSmartPtr callback, LogBufferWriteDoneNotifier* target)
-: MapUpdateLogWriteContext(log, dirty, callback, target)
-{
-}
-
-VolumeDeletedLogWriteContext::VolumeDeletedLogWriteContext(int inputVolumeId,
-    LogHandlerInterface* log, JournalInternalEventCallback callback)
-: LogWriteContext(log),
-  volumeId(inputVolumeId),
-  callerCallback(callback)
-{
-}
-
-void
-VolumeDeletedLogWriteContext::LogWriteDone(void)
-{
-    callerCallback(volumeId);
 }
 
 JournalResetContext::JournalResetContext(int id, JournalInternalEventCallback callback)

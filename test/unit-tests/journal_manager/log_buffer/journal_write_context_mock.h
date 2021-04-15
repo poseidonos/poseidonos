@@ -26,25 +26,6 @@ public:
     MOCK_METHOD(void, LogWriteDone, (), (override));
 };
 
-class MockBlockMapUpdatedLogWriteContext : public BlockMapUpdatedLogWriteContext
-{
-public:
-    using BlockMapUpdatedLogWriteContext::BlockMapUpdatedLogWriteContext;
-};
-
-class MockStripeMapUpdatedLogWriteContext : public StripeMapUpdatedLogWriteContext
-{
-public:
-    using StripeMapUpdatedLogWriteContext::StripeMapUpdatedLogWriteContext;
-};
-
-class MockVolumeDeletedLogWriteContext : public VolumeDeletedLogWriteContext
-{
-public:
-    using VolumeDeletedLogWriteContext::VolumeDeletedLogWriteContext;
-    MOCK_METHOD(void, LogWriteDone, (), (override));
-};
-
 class MockJournalResetContext : public JournalResetContext
 {
 public:

@@ -30,63 +30,75 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <condition_variable>
-#include <map>
-#include <mutex>
-#include <string>
-#include <vector>
-
-#include "allocator_context_flush_completed_event.h"
-#include "src/allocator/i_allocator_ctx.h"
-#include "src/journal_service/i_volume_event.h"
+#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 
 namespace pos
 {
-class LogWriteContextFactory;
-class DirtyMapManager;
-class LogWriteHandler;
-class JournalConfiguration;
-
-class JournalVolumeEventHandler : public IVolumeEventHandler, public IAllocatorContextFlushed
+// Constructor for product code
+CallbackSequenceController::CallbackSequenceController(void)
+: numCallbacksInExecution(0),
+  checkpointTriggerInProgress(false)
 {
-public:
-    JournalVolumeEventHandler(void);
-    virtual ~JournalVolumeEventHandler(void);
+}
 
-    virtual void Init(LogWriteContextFactory* logFactory, DirtyMapManager* dirtyPages,
-        LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration,
-        IAllocatorCtx* allocatorCtx);
+// Constructor for injecting member variables in unit test
+CallbackSequenceController::CallbackSequenceController(int numCallbacks, bool checkpointTriggered)
+: CallbackSequenceController()
+{
+    numCallbacksInExecution = numCallbacks;
+    checkpointTriggerInProgress = checkpointTriggered;
+}
 
-    virtual int VolumeDeleted(int volID) override;
-    virtual void AllocatorContextFlushed(void) override;
+void
+CallbackSequenceController::GetCallbackExecutionApproval(void)
+{
+    std::lock_guard<std::mutex> lock(sequenceLock);
 
-    virtual void VolumeDeletedLogWriteDone(int volumeId);
+    // Assume checkpoint trigger is completed in short time
+    while (checkpointTriggerInProgress == true)
+    {
+        ;
+    }
 
-private:
-    int _WriteVolumeDeletedLog(int volumeId, uint64_t allocatorCtxVer);
-    void _WaitForLogWriteDone(int volumeId);
+    numCallbacksInExecution++;
+}
 
-    int _FlushAllocatorContext(void);
-    void _WaitForAllocatorContextFlushCompleted(void);
+void
+CallbackSequenceController::NotifyCallbackCompleted(void)
+{
+    numCallbacksInExecution--;
+}
 
-    bool isInitialized;
+void
+CallbackSequenceController::GetCheckpointExecutionApproval(void)
+{
+    std::lock_guard<std::mutex> lock(sequenceLock);
 
-    IAllocatorCtx* allocatorCtx;
+    // Assume callback execution is completed in short time
+    while (numCallbacksInExecution != 0)
+    {
+        ;
+    }
 
-    JournalConfiguration* config;
-    LogWriteContextFactory* logFactory;
-    DirtyMapManager* dirtyPageManager;
-    LogWriteHandler* logWriteHandler;
+    checkpointTriggerInProgress = true;
+}
 
-    std::mutex logWriteMutex;
-    std::condition_variable logWriteCondVar;
-    bool logWriteInProgress;
+void
+CallbackSequenceController::AllowCallbackExecution(void)
+{
+    checkpointTriggerInProgress = false;
+}
 
-    std::mutex flushMutex;
-    std::condition_variable flushCondVar;
-    bool flushInProgress;
-};
+int
+CallbackSequenceController::GetNumPendingCallbacks(void)
+{
+    return numCallbacksInExecution;
+}
+
+bool
+CallbackSequenceController::IsCheckpointInProgress(void)
+{
+    return checkpointTriggerInProgress;
+}
 
 } // namespace pos

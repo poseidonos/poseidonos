@@ -44,6 +44,7 @@ namespace pos
 {
 class VolumeIo;
 class LogBufferWriteDoneNotifier;
+class CallbackSequenceController;
 
 using JournalInternalEventCallback = std::function<void(int)>;
 
@@ -51,7 +52,7 @@ class LogWriteContext : public AsyncMetaFileIoCtx
 {
 public:
     LogWriteContext(void);
-    explicit LogWriteContext(LogHandlerInterface* log);
+    LogWriteContext(LogHandlerInterface* log, EventSmartPtr callbackEvent);
     virtual ~LogWriteContext(void);
 
     LogHandlerInterface* GetLog(void);
@@ -62,10 +63,12 @@ public:
     virtual void SetAllocated(int groupId, uint32_t seqNum, MetaIoCbPtr cb);
     virtual void SetIoRequest(MetaFsIoOpcode op, int fileDescriptor, uint64_t offset);
 
-    virtual void LogWriteDone(void) = 0;
+    virtual void LogWriteDone(void);
 
 private:
     LogHandlerInterface* log;
+    EventSmartPtr callbackEvent;
+
     int logGroupId;
 
     static const uint32_t INVALID_LOG_INDEX = UINT32_MAX;
@@ -75,48 +78,17 @@ class MapUpdateLogWriteContext : public LogWriteContext
 {
 public:
     MapUpdateLogWriteContext(LogHandlerInterface* log, MapPageList dirtyList,
-        EventSmartPtr callback, LogBufferWriteDoneNotifier* target);
+        EventSmartPtr callback, LogBufferWriteDoneNotifier* target,
+        CallbackSequenceController* sequencer);
     virtual ~MapUpdateLogWriteContext(void) = default;
 
     MapPageList& GetDirtyList(void);
-    virtual void LogWriteDone(void);
+    virtual void LogWriteDone(void) override;
 
 protected:
     LogBufferWriteDoneNotifier* logFilledNotifier;
-
+    CallbackSequenceController* sequenceController;
     MapPageList dirty;
-    EventSmartPtr callbackEvent;
-};
-
-class BlockMapUpdatedLogWriteContext : public MapUpdateLogWriteContext
-{
-public:
-    BlockMapUpdatedLogWriteContext(void) = delete;
-    BlockMapUpdatedLogWriteContext(LogHandlerInterface* log, MapPageList dirty,
-        EventSmartPtr callbackEvent, LogBufferWriteDoneNotifier* target);
-    virtual ~BlockMapUpdatedLogWriteContext(void) = default;
-};
-
-class StripeMapUpdatedLogWriteContext : public MapUpdateLogWriteContext
-{
-public:
-    StripeMapUpdatedLogWriteContext(void) = delete;
-    StripeMapUpdatedLogWriteContext(LogHandlerInterface* log, MapPageList dirty,
-        EventSmartPtr callbackEvent, LogBufferWriteDoneNotifier* target);
-    virtual ~StripeMapUpdatedLogWriteContext(void) = default;
-};
-
-class VolumeDeletedLogWriteContext : public LogWriteContext
-{
-public:
-    VolumeDeletedLogWriteContext(int volumeId, LogHandlerInterface* log, JournalInternalEventCallback callback);
-    virtual ~VolumeDeletedLogWriteContext(void) = default;
-
-    virtual void LogWriteDone(void) override;
-
-private:
-    int volumeId;
-    JournalInternalEventCallback callerCallback;
 };
 
 class JournalResetContext : public AsyncMetaFileIoCtx

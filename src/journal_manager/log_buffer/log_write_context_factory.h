@@ -35,6 +35,8 @@
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 #include "src/journal_manager/log_buffer/journal_write_context.h"
+#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
+
 #include "src/include/address_type.h"
 #include "src/bio/volume_io.h"
 #include "src/mapper/include/mpage_info.h"
@@ -49,7 +51,8 @@ public:
     LogWriteContextFactory(void);
     virtual ~LogWriteContextFactory(void);
 
-    virtual void Init(LogBufferWriteDoneNotifier* target);
+    virtual void Init(LogBufferWriteDoneNotifier* target,
+        CallbackSequenceController* sequencer);
 
     virtual LogWriteContext* CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
         MpageList dirty, EventSmartPtr callbackEvent);
@@ -58,10 +61,11 @@ public:
     virtual LogWriteContext* CreateGcStripeFlushedLogWriteContext(int volumeId,
         GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
     LogWriteContext* CreateVolumeDeletedLogWriteContext(int volId,
-        uint64_t contextVersion, JournalInternalEventCallback callback);
+        uint64_t contextVersion, EventSmartPtr callback);
 
 private:
     LogBufferWriteDoneNotifier* notifier;
+    CallbackSequenceController* sequenceController;
 };
 
 } // namespace pos

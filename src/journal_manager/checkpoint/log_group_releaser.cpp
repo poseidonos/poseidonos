@@ -32,11 +32,12 @@
 
 #include "log_group_releaser.h"
 
-#include "../log_buffer/journal_log_buffer.h"
-#include "../log_buffer/buffer_write_done_notifier.h"
-#include "../log_write/log_write_handler.h"
-#include "checkpoint_handler.h"
-#include "dirty_map_manager.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
+#include "src/journal_manager/log_write/log_write_handler.h"
+#include "src/journal_manager/checkpoint/checkpoint_handler.h"
+#include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
@@ -60,11 +61,13 @@ LogGroupReleaser::~LogGroupReleaser(void)
 void
 LogGroupReleaser::Init(LogBufferWriteDoneNotifier* released,
     JournalLogBuffer* buffer, DirtyMapManager* dirtyPage,
+    CallbackSequenceController* sequencer,
     IMapFlush* mapFlush, IAllocatorCtx* allocatorCtx)
 {
     releaseNotifier = released;
     logBuffer = buffer;
     dirtyPageManager = dirtyPage;
+    sequenceController = sequencer;
 
     checkpointHandler->Init(mapFlush, allocatorCtx);
 }
@@ -116,10 +119,16 @@ LogGroupReleaser::_HasFullLogGroup(void)
 int
 LogGroupReleaser::StartCheckpoint(void)
 {
+    // TODO(huijeong.kim) Create event for this job, not to be called in front-end write path
+
     MapPageList dirtyPages = dirtyPageManager->GetDirtyList(flushingLogGroupId);
     POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STARTED,
         "Checkpoint started for log group {}", flushingLogGroupId);
+
+    sequenceController->GetCheckpointExecutionApproval();
     int ret = checkpointHandler->Start(dirtyPages);
+    sequenceController->AllowCallbackExecution();
+
     if (ret != 0)
     {
         // TODO(huijeong.kim): Go to the fail mode - not to journal any more

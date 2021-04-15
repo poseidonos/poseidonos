@@ -23,7 +23,7 @@ int
 MapFlushHandlerMock::FlushMapWithPageList(MpageList dirtyPages,
     EventSmartPtr callback)
 {
-    std::chrono::seconds sleeptime(1);
+    std::chrono::microseconds sleeptime(5);
     std::this_thread::sleep_for(sleeptime);
 
     callbackEvent = callback;

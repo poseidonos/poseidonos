@@ -66,6 +66,7 @@ class JournalStatusProvider;
 
 class DirtyMapManager;
 class LogBufferWriteDoneNotifier;
+class CallbackSequenceController;
 
 class Stripe;
 
@@ -97,6 +98,7 @@ public:
         LogGroupReleaser* groupReleaser,
         DirtyMapManager* dirtyManager,
         LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
+        CallbackSequenceController* sequenceController,
         ReplayHandler* replayHandler,
         IArrayInfo* arrayInfo, JournalService* service);
     virtual ~JournalManager(void);
@@ -161,6 +163,7 @@ protected:
     LogGroupReleaser* logGroupReleaser;
     DirtyMapManager* dirtyMapManager;
     LogBufferWriteDoneNotifier* logFilledNotifier;
+    CallbackSequenceController* sequenceController;
 
     ReplayHandler* replayHandler;
 };

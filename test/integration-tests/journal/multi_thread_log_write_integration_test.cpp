@@ -39,6 +39,7 @@ MultiThreadLogWriteIntegrationTest::SetUp(void)
 void
 MultiThreadLogWriteIntegrationTest::TearDown(void)
 {
+    WaitForThreads();
 }
 
 void

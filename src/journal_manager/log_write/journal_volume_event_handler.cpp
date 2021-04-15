@@ -34,12 +34,13 @@
 
 #include <functional>
 
-#include "../checkpoint/dirty_map_manager.h"
-#include "../config/journal_configuration.h"
-#include "../log_buffer/journal_log_buffer.h"
-#include "../log_buffer/log_write_context_factory.h"
-#include "log_write_handler.h"
 #include "src/include/pos_event_id.h"
+#include "src/journal_manager/checkpoint/dirty_map_manager.h"
+#include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/log_write_context_factory.h"
+#include "src/journal_manager/log_write/log_write_handler.h"
+#include "src/journal_manager/log_write/volume_deleted_log_write_callback.h"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -115,9 +116,10 @@ JournalVolumeEventHandler::VolumeDeleted(int volumeId)
 int
 JournalVolumeEventHandler::_WriteVolumeDeletedLog(int volumeId, uint64_t allocatorCtxVer)
 {
+    EventSmartPtr callback(new VolumeDeletedLogWriteCallback(this, volumeId));
+
     LogWriteContext* logWriteContext =
-        logFactory->CreateVolumeDeletedLogWriteContext(volumeId, allocatorCtxVer,
-        std::bind(&JournalVolumeEventHandler::VolumeDeletedLogWriteDone, this, std::placeholders::_1));
+        logFactory->CreateVolumeDeletedLogWriteContext(volumeId, allocatorCtxVer, callback);
 
     logWriteInProgress = true;
     return logWriteHandler->AddLog(logWriteContext);

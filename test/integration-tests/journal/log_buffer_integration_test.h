@@ -59,7 +59,6 @@ protected:
     const int TEST_VOLUME_ID = 1;
 
     NiceMock<MockJournalConfiguration> config;
-    NiceMock<LogBufferWriteDoneNotifier> notifier;
 
     LogWriteContextFactory factory;
     JournalLogBuffer* logBuffer;

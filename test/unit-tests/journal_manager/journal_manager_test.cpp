@@ -8,6 +8,7 @@
 #include "test/unit-tests/journal_manager/checkpoint/log_group_releaser_mock.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_factory_mock.h"
 #include "test/unit-tests/journal_manager/log_write/buffer_offset_allocator_mock.h"
@@ -19,7 +20,7 @@
 
 using ::testing::_;
 using ::testing::InSequence;
-using testing::NiceMock;
+using ::testing::NiceMock;
 using ::testing::Return;
 
 namespace pos
@@ -60,6 +61,7 @@ public:
         logGroupReleaser = new NiceMock<MockLogGroupReleaser>;
         dirtyMapManager = new NiceMock<MockDirtyMapManager>;
         logFilledNotifier = new NiceMock<MockLogBufferWriteDoneNotifier>;
+        callbackSequenceController = new NiceMock<MockCallbackSequenceController>;
         replayHandler = new NiceMock<MockReplayHandler>;
         arrayInfo = new NiceMock<MockIArrayInfo>;
         service = new NiceMock<MockJournalService>;
@@ -67,7 +69,7 @@ public:
         journal = new JournalManager(config, statusProvider,
             logWriteContextFactory, logWriteHandler, volumeEventHandler, logBuffer,
             bufferAllocator, logGroupReleaser, dirtyMapManager, logFilledNotifier,
-            replayHandler, arrayInfo, service);
+            callbackSequenceController, replayHandler, arrayInfo, service);
     }
 
     virtual void
@@ -92,6 +94,7 @@ protected:
     NiceMock<MockLogGroupReleaser>* logGroupReleaser;
     NiceMock<MockDirtyMapManager>* dirtyMapManager;
     NiceMock<MockLogBufferWriteDoneNotifier>* logFilledNotifier;
+    NiceMock<MockCallbackSequenceController>* callbackSequenceController;
     NiceMock<MockReplayHandler>* replayHandler;
     NiceMock<MockIArrayInfo>* arrayInfo;
     NiceMock<MockJournalService>* service;
