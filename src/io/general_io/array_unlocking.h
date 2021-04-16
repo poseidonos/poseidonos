@@ -40,10 +40,11 @@
 
 namespace pos
 {
+class IIOLocker;
 class ArrayUnlocking : public Callback
 {
 public:
-    ArrayUnlocking(PartitionType type, StripeId stripeId, const std::string& arrayName);
+    ArrayUnlocking(PartitionType type, StripeId stripeId, const std::string& arrayName, IIOLocker* locker = nullptr);
     ~ArrayUnlocking(void) override;
 
 private:
@@ -52,5 +53,6 @@ private:
     PartitionType type;
     StripeId stripeId;
     std::string arrayName;
+    IIOLocker* locker;
 };
 } // namespace pos
