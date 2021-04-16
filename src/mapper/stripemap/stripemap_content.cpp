@@ -68,7 +68,7 @@ StripeMapContent::GetEntry(StripeId vsid)
 
     if (unlikely(mpage == nullptr))
     {
-        StripeAddr unmapped = { .stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = UNMAP_STRIPE };        
+        StripeAddr unmapped = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = UNMAP_STRIPE};
         POS_TRACE_ERROR(EID(MPAGE_NULLPTR), "mpage is nullptr when vsid:{}", vsid);
         return unmapped;
     }
