@@ -59,7 +59,7 @@ Stripe::Stripe(std::string arrayName)
 {
     IArrayInfo* iArrayInfo = (ArrayMgr::Instance()->GetArrayInfo(arrayName));
     const PartitionLogicalSize* udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-    totalBlksPerUserStripe = udSize->blksPerStripe;    
+    totalBlksPerUserStripe = udSize->blksPerStripe;
 }
 
 void

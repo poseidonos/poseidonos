@@ -36,8 +36,9 @@
 #include "src/mapper/reversemap/reverse_map.h"
 
 #include <atomic>
-#include <vector>
+#include <string>
 #include <tuple>
+#include <vector>
 
 namespace pos
 {
@@ -48,7 +49,7 @@ class Stripe
 {
 public:
     Stripe(void);
-    Stripe(std::string arrayName);
+    explicit Stripe(std::string arrayName);
     virtual ~Stripe(void) {}
     virtual void Assign(StripeId vsid, StripeId lsid, ASTailArrayIdx tailarrayidx);
 
