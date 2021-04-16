@@ -48,8 +48,9 @@ class Stripe
 {
 public:
     Stripe(void);
+    Stripe(std::string arrayName);
     virtual ~Stripe(void) {}
-    virtual void Assign(StripeId vsid, StripeId lsid, ASTailArrayIdx tailarrayidx, std::string arrayName);
+    virtual void Assign(StripeId vsid, StripeId lsid, ASTailArrayIdx tailarrayidx);
 
     virtual uint32_t GetAsTailArrayIdx(void);
     virtual StripeId GetVsid(void);
@@ -96,6 +97,7 @@ private:
     std::atomic<uint32_t> referenceCount;
     std::vector<void*> dataBuffer;
     std::vector<VirtualBlkAddr> oldVsaList;
+    uint32_t totalBlksPerUserStripe;
 };
 
 } // namespace pos

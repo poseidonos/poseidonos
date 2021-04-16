@@ -54,6 +54,14 @@ Stripe::Stripe(void)
 {
 }
 
+Stripe::Stripe(std::string arrayName)
+: Stripe()
+{
+    IArrayInfo* iArrayInfo = (ArrayMgr::Instance()->GetArrayInfo(arrayName));
+    const PartitionLogicalSize* udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    totalBlksPerUserStripe = udSize->blksPerStripe;    
+}
+
 void
 Stripe::UpdateReverseMap(uint32_t offset, BlkAddr rba, uint32_t volumeId)
 {
@@ -116,15 +124,11 @@ Stripe::UnLinkReverseMap(void)
 }
 
 void
-Stripe::Assign(StripeId inputVsid, StripeId inputLsid, ASTailArrayIdx inputTailArrayIdx, std::string arrayName)
+Stripe::Assign(StripeId inputVsid, StripeId inputLsid, ASTailArrayIdx inputTailArrayIdx)
 {
     vsid = inputVsid;
     wbLsid = inputLsid;
     asTailArrayIdx = inputTailArrayIdx;
-
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
-    const PartitionLogicalSize* udSize = info->GetSizeInfo(PartitionType::USER_DATA);
-    uint32_t totalBlksPerUserStripe = udSize->blksPerStripe;
     oldVsaList.assign(totalBlksPerUserStripe, UNMAP_VSA);
     remaining.store(totalBlksPerUserStripe, memory_order_release);
     finished = false;

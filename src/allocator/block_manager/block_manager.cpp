@@ -218,7 +218,7 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
 
     // 3. Get Stripe object for wbLsid and link it with reverse map for vsid
     Stripe* stripe = iWBStripeInternal->GetStripe(wbLsid);
-    stripe->Assign(newVsid, wbLsid, asTailArrayIdx, arrayName);
+    stripe->Assign(newVsid, wbLsid, asTailArrayIdx);
 
     // TODO (jk.man.kim): Don't forget to insert array name in the future.
     IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);

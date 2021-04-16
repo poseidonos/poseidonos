@@ -78,7 +78,7 @@ WBStripeManager::Init(void)
 
     for (uint32_t stripeCnt = 0; stripeCnt < totalNvmStripes; ++stripeCnt)
     {
-        Stripe* stripe = new Stripe;
+        Stripe* stripe = new Stripe(arrayName);
 
         for (uint32_t chunkCnt = 0; chunkCnt < chunksPerStripe; ++chunkCnt)
         {
@@ -468,7 +468,7 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
     }
 
     stripe = GetStripe(wbLsid);
-    stripe->Assign(vsid, wbLsid, tailarrayidx, arrayName);
+    stripe->Assign(vsid, wbLsid, tailarrayidx);
 
     uint32_t remainingBlks = stripe->DecreseBlksRemaining(blockCount);
     if (remainingBlks == 0)
