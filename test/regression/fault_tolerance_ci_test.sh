@@ -58,7 +58,7 @@ detach_dev="unvme-ns-0"
 target_spare_dev="unvme-ns-3"
 nvme_cli="nvme"
 root_dir="../../"
-ibof_cli="${root_dir}bin/cli request"
+ibof_cli="${root_dir}bin/cli "
 network_config_file="${root_dir}test/system/network/network_config.sh"
 total_iter=3
 #---------------------------------
@@ -176,11 +176,11 @@ start_ibofos()
         ${root_dir}/test/regression/start_ibofos.sh
     fi
 
-	result=`${root_dir}/bin/cli request info --json | jq '.Response.info.state' 2>/dev/null`
+	result=`${root_dir}/bin/cli system info --json | jq '.Response.info.state' 2>/dev/null`
 	while [ -z ${result} ] || [ ${result} != '"NOT_EXIST"' ];
 	do
 		echo "Wait PoseidonOS..."
-		result=`${root_dir}/bin/cli request info --json | jq '.Response.info.state' 2>/dev/null`
+		result=`${root_dir}/bin/cli system info --json | jq '.Response.info.state' 2>/dev/null`
 		sleep 0.5
 	done
 
@@ -308,8 +308,8 @@ write_pattern()
 shutdown_ibofos()
 {
     notice "Shutting down ibofos..."
-	${ibof_cli} unmount_ibofos
-	${ibof_cli} exit_ibofos
+	${ibof_cli} array unmount
+	${ibof_cli} system exit
     notice "Shutdown has been completed!"
 
     disconnect_nvmf_contollers;
@@ -342,26 +342,26 @@ bringup_ibofos()
     ${spdk_rpc_script} nvmf_create_subsystem ${nss} -a -s IBOF00000000000001  -d IBOF_VOLUME #>> ${logfile}
     ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512
 
-    ${ibof_cli} scan_dev >> ${logfile}
-    ${ibof_cli} list_dev >> ${logfile}
+    ${ibof_cli} device scan >> ${logfile}
+    ${ibof_cli} device list >> ${logfile}
 
 	if [ $create_array -eq 1 ]; then
         ${root_dir}bin/cli array reset
 		info "Target device list=${target_dev_list}"
-		${ibof_cli} create_array -b uram0 -d ${target_dev_list}
+		${ibof_cli} array create -b uram0 -d ${target_dev_list}
 	fi
 	
-	${ibof_cli} mount_ibofos
+	${ibof_cli} array mount
 
     if [ ${ibofos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        ${ibof_cli} create_vol --name ${volname} --size ${ibof_phy_volume_size_byte} >> ${logfile};
+        ${ibof_cli} volume create --name ${volname} --size ${ibof_phy_volume_size_byte} >> ${logfile};
         check_result_err_from_logfile
     fi
 
     if [ ${ibofos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
-        ${ibof_cli} mount_vol --name ${volname} >> ${logfile};
+        ${ibof_cli} volume mount --name ${volname} >> ${logfile};
         check_result_err_from_logfile
     fi
     
@@ -409,14 +409,14 @@ detach_device()
 	local dev_name=${detach_dev}
     ${root_dir}/test/script/detach_device.sh ${dev_name} 1
     sleep 0.1
-    notice "${dev_name} is detected."
+    notice "${dev_name} is detached."
 }
 
 add_spare()
 {
     notice "add spare device ${dev_name}"
 	local dev_name=${target_spare_dev}
-	${ibof_cli} add_dev --spare ${dev_name}
+	${ibof_cli} array add --spare ${dev_name}
 }
 
 waiting_for_rebuild_complete()
@@ -424,11 +424,11 @@ waiting_for_rebuild_complete()
 	notice "waiting for rebuild complete"
 	while :
 	do
-		state=$(${ibof_cli} --json info | jq '.Response.info.state')
+		state=$(${ibof_cli} system info --json | jq '.Response.info.state')
 		if [ $state = "\"NORMAL\"" ]; then
 			break;
 		else
-            rebuild_progress=$(${ibof_cli} --json info | jq '.Response.info.rebuildingProgress')
+            rebuild_progress=$(${ibof_cli} system info --json | jq '.Response.info.rebuildingProgress')
             info "Rebuilding Progress [${rebuild_progress}]"
 			sleep 3
 		fi
