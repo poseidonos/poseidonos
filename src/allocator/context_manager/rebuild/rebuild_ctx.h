@@ -32,21 +32,22 @@
 
 #pragma once
 
-#include "src/allocator/i_rebuild_ctx.h"
 #include "src/allocator/i_context_internal.h"
+#include "src/allocator/i_rebuild_ctx.h"
+#include "src/allocator/i_rebuild_ctx_internal.h"
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/segment/segment_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/meta_file_intf/meta_file_intf.h"
 
 #include <set>
-#include <utility>
 #include <string>
+#include <utility>
 
 namespace pos
 {
 
-class RebuildCtx : public IRebuildCtx
+class RebuildCtx : public IRebuildCtx, public IRebuildCtxInternal
 {
 public:
     RebuildCtx(SegmentCtx* segCtx, IContextInternal* iCtxInternal, std::string arrayName);
@@ -58,14 +59,17 @@ public:
     int ReleaseRebuildSegment(SegmentId segmentId) override;
     bool NeedRebuildAgain(void) override;
 
-    void FlushRebuildCtx(void);
-    void ClearRebuildTargetSegments(void);
-    std::pair<RTSegmentIter, bool> EmplaceRebuildTargetSegment(SegmentId segmentId);
+    void FreeSegmentInRebuildTarget(SegmentId segId) override;
+
     bool IsRebuidTargetSegmentsEmpty(void);
-    uint32_t GetTargetSegmentCnt(void);
     RTSegmentIter FindRebuildTargetSegment(SegmentId segmentId);
     RTSegmentIter RebuildTargetSegmentsBegin(void);
     RTSegmentIter RebuildTargetSegmentsEnd(void);
+    std::pair<RTSegmentIter, bool> EmplaceRebuildTargetSegment(SegmentId segmentId);
+    void ClearRebuildTargetSegments(void);
+    uint32_t GetTargetSegmentCnt(void);
+    void FlushRebuildCtx(void);
+    void SetUnderRebuildSegmentId(SegmentId segmentId);
 
 private:
     int _PrepareRebuildCtx(void);
@@ -74,10 +78,12 @@ private:
     void _StoreRebuildCtx(void);
     void _EraseRebuildTargetSegments(RTSegmentIter iter);
     void _FlushRebuildCtxCompleted(AsyncMetaFileIoCtx* ctx);
+    SegmentId _GetUnderRebuildSegmentId(void);
 
     bool needRebuildCont;
     uint32_t targetSegmentCnt;
     std::set<SegmentId> rebuildTargetSegments; // No lock
+    SegmentId underRebuildSegmentId;
     MetaFileIntf* rebuildSegmentsFile;
     char* bufferInObj;
     std::string arrayName;

@@ -30,12 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/segment/segment_ctx.h"
-
 #include <mutex>
 
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/io_ctx/allocator_context_io_ctx.h"
+#include "src/allocator/context_manager/segment/segment_ctx.h"
 #include "src/allocator/context_manager/segment/segment_info.h"
 #include "src/allocator/context_manager/segment/segment_states.h"
 #include "src/include/pos_event_id.h"
@@ -57,9 +56,10 @@ SegmentCtx::SegmentCtx(AllocatorAddressInfo* info, std::string arrayName)
   writeBufferSize(0),
   thresholdSegments(20),
   urgentSegments(5),
+  arrayName(arrayName),
   addrInfo(info),
   segInfoFile(nullptr),
-  arrayName(arrayName)
+  iRebuildCtxInternal(nullptr)
 {
 }
 
@@ -290,8 +290,8 @@ SegmentCtx::_FreeSegment(SegmentId segId)
     segmentInfos->SetOccupiedStripeCount(segId, 0 /* count */);
     segmentStates[segId].Setstate(SegmentState::FREE);
     segmentBitmap->ClearBit(segId);
-
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was freed by allocator", segId);
+    iRebuildCtxInternal->FreeSegmentInRebuildTarget(segId);
 }
 
 void
@@ -429,6 +429,12 @@ SegmentCtx::GetCtxSectionInfo(AllocatorCtxType type, int& sectionSize)
             break;
     }
     return ret;
+}
+
+void
+SegmentCtx::SetIRebuildCtxInternal(IRebuildCtxInternal* irebuildCtxInternal)
+{
+    iRebuildCtxInternal = irebuildCtxInternal;
 }
 
 } // namespace pos

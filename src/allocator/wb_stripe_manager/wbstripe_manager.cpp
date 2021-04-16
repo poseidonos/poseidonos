@@ -336,7 +336,7 @@ WBStripeManager::StopRebuilding(void)
     // Clear rebuildTargetSegments
     rbCtx->ClearRebuildTargetSegments();
     rbCtx->FlushRebuildCtx();
-
+    rbCtx->SetUnderRebuildSegmentId(UINT32_MAX);
     return 0;
 }
 

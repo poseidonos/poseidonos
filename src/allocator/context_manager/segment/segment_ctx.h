@@ -34,11 +34,12 @@
 
 #include <string>
 
-#include "src/allocator/include/allocator_const.h"
+#include "src/allocator/i_rebuild_ctx_internal.h"
+#include "src/allocator/i_segment_ctx.h"
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/segment/segment_info.h"
 #include "src/allocator/context_manager/segment/segment_states.h"
-#include "src/allocator/i_segment_ctx.h"
+#include "src/allocator/include/allocator_const.h"
 #include "src/include/address_type.h"
 #include "src/lib/bitmap.h"
 #include "src/meta_file_intf/async_context.h"
@@ -95,37 +96,35 @@ public:
     SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
     void ResetExVictimSegment(void);
     char* GetCtxSectionInfo(AllocatorCtxType type, int& sectionSize);
+    void SetIRebuildCtxInternal(IRebuildCtxInternal* irebuildCtxInternal);
 
 private:
     int _LoadSegmentInfoSync(void);
     void _HeaderUpdate(char* pBuf);
     void _HeaderLoaded(char* pBuf);
     void _FreeSegment(SegmentId segId);
+    // void _FreeSegmentInRebuildTarget(SegmentId segId);
 
     static const int SIG_SEGMENT_INFO = 0x46495347; // "SGIF"
-
     // Segment
     BitMapMutex* segmentBitmap; // Unset:Free, Set:Not-Free
     StripeId prevSsdLsid;       // allocatorMetaLock
     StripeId currentSsdLsid;    // allocatorMetaLock
     SegmentStates* segmentStates;
     SegmentInfo* segmentInfos;
-
-    // context file info
+    // Context file info
     uint32_t versionSegInfo;
     uint32_t headerSize;
     uint32_t writeBufferSize;
-
-    // gc threshold
+    // GC thresholds
     uint32_t thresholdSegments;
     uint32_t urgentSegments;
-
+    // Multi-Array
+    std::string arrayName;
     // DOCs
     AllocatorAddressInfo* addrInfo;
     MetaFileIntf* segInfoFile;
-
-    // array
-    std::string arrayName;
+    IRebuildCtxInternal* iRebuildCtxInternal;
 };
 
 } // namespace pos

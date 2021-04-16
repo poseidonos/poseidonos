@@ -35,6 +35,7 @@
 #include "src/allocator/context_manager/segment/segment_info.h"
 #include "src/metafs/metafs_file_intf.h"
 #include "src/meta_file_intf/meta_file_include.h"
+
 #include <string>
 #include <utility>
 
@@ -44,6 +45,7 @@ namespace pos
 RebuildCtx::RebuildCtx(SegmentCtx* segCtx, IContextInternal* iCtxInternal, std::string arrayName)
 : needRebuildCont(false),
   targetSegmentCnt(0),
+  underRebuildSegmentId(UINT32_MAX),
   rebuildSegmentsFile(nullptr),
   bufferInObj(nullptr),
   arrayName(arrayName),
@@ -121,6 +123,7 @@ RebuildCtx::GetRebuildTargetSegment(void)
         }
 
         POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "segmentId:{} is going to be rebuilt", segmentId);
+        SetUnderRebuildSegmentId(segmentId);
         break;
     }
 
@@ -136,17 +139,16 @@ RebuildCtx::ReleaseRebuildSegment(SegmentId segmentId)
     auto iter = FindRebuildTargetSegment(segmentId);
     if (iter == RebuildTargetSegmentsEnd())
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE),
-        "There is no segmentId:{} in rebuildTargetSegments but tried to release", segmentId);
-        assert(false);
+        POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "There is no segmentId:{} in rebuildTargetSegments, seemed to be freed by GC", segmentId);
+        SetUnderRebuildSegmentId(UINT32_MAX);
+        return 0;
     }
 
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "segmentId:{} Rebuild Done!", segmentId);
-
     // Delete segmentId in rebuildTargetSegments
     _EraseRebuildTargetSegments(iter);
     FlushRebuildCtx();
-
+    SetUnderRebuildSegmentId(UINT32_MAX);
     return 0;
 }
 
@@ -209,6 +211,44 @@ RTSegmentIter
 RebuildCtx::RebuildTargetSegmentsEnd(void)
 {
     return rebuildTargetSegments.end();
+}
+
+void
+RebuildCtx::FreeSegmentInRebuildTarget(SegmentId segId)
+{
+    if (IsRebuidTargetSegmentsEmpty())  // No need to check below
+    {
+        return;
+    }
+
+    std::unique_lock<std::mutex> lock(iContextInternal->GetCtxLock());
+    auto iter = FindRebuildTargetSegment(segId);
+    if (iter == RebuildTargetSegmentsEnd())
+    {
+        return;
+    }
+
+    if (_GetUnderRebuildSegmentId() == segId)
+    {
+        POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "segmentId:{} is reclaimed by GC, but still under rebuilding", segId);
+        return;
+    }
+
+    _EraseRebuildTargetSegments(iter);
+    POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "segmentId:{} in Rebuild Target has been Freed by GC", segId);
+    _StoreRebuildCtx();
+}
+
+SegmentId
+RebuildCtx::_GetUnderRebuildSegmentId(void)
+{
+    return underRebuildSegmentId;
+}
+
+void
+RebuildCtx::SetUnderRebuildSegmentId(SegmentId segmentId)
+{
+    underRebuildSegmentId = segmentId;
 }
 //----------------------------------------------------------------------------//
 int

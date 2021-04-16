@@ -67,6 +67,7 @@ ContextManager::ContextManager(AllocatorAddressInfo* info, std::string arrayName
 
     segmentCtx = new SegmentCtx(info, arrayName);
     rebuildCtx = new RebuildCtx(segmentCtx, this, arrayName);
+    segmentCtx->SetIRebuildCtxInternal(rebuildCtx);
 }
 
 ContextManager::~ContextManager(void)
