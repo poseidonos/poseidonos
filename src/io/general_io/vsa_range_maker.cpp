@@ -37,8 +37,8 @@
 namespace pos
 {
 VsaRangeMaker::VsaRangeMaker(uint32_t volumeId, BlkAddr startRba,
-    uint32_t blockCount, bool isGc)
-: VsaRangeMaker(volumeId, startRba, blockCount, isGc, MapperServiceSingleton::Instance()->GetIVSAMap("") )
+    uint32_t blockCount, bool isGc, std::string arrayName)
+: VsaRangeMaker(volumeId, startRba, blockCount, isGc, MapperServiceSingleton::Instance()->GetIVSAMap(arrayName) )
 {
 }
 

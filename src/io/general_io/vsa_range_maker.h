@@ -35,7 +35,7 @@
 #include "src/include/address_type.h"
 
 #include <vector>
-
+#include <string>
 namespace pos
 {
 class Allocator;
@@ -45,7 +45,7 @@ class VsaRangeMaker
 {
 public:
     VsaRangeMaker(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
-        bool isGc);
+        bool isGc, std::string arrayName);
     VsaRangeMaker(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
         bool isGc, IVSAMap* iVSAMap);
     virtual ~VsaRangeMaker(void);
