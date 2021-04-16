@@ -385,6 +385,12 @@ Array::GetState(void)
     return state->GetState();
 }
 
+StateContext*
+Array::GetStateCtx(void)
+{
+    return state->GetSysState();
+}
+
 uint32_t
 Array::GetRebuildingProgress(void)
 {

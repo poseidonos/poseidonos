@@ -15,6 +15,7 @@ import pos_constant
 import time
 
 POS_ROOT = '../../../'
+ARRAYNAME = "POSArray"
 LOG_PATH = "rebuild_perf_log"
 
 EST_SECONDS_FOR_REBUILD = 250
@@ -193,7 +194,7 @@ def scan_dev():
 
 def create_array():
     DATA = DEV_1 + "," + DEV_2 + "," + DEV_3
-    out = cli.create_array("uram0", DATA, DEV_4, "", "")
+    out = cli.create_array("uram0", DATA, DEV_4, ARRAYNAME, "")
     write_log(out)
     code = json_parser.get_response_code(out)
     if code == 0:
@@ -204,7 +205,7 @@ def create_array():
         return False
 
 def mount_pos():
-    out = cli.mount_array("")
+    out = cli.mount_array(ARRAYNAME)
     write_log(out)
     code = json_parser.get_response_code(out)
     if code == 0:
@@ -215,7 +216,7 @@ def mount_pos():
         return False
 
 def unmount_pos():
-    out = cli.unmount_array("")
+    out = cli.unmount_array(ARRAYNAME)
     write_log(out)
     code = json_parser.get_response_code(out)
     if code == 0:
@@ -229,7 +230,7 @@ def create_and_mount_vol():
     global VOL_CNT
     vol_name = VOL_NAME_PREFIX + str(VOL_CNT)
     write_log ("try to create volume, name: " + vol_name + ", size: " + str(VOL_SIZE))
-    out = cli.create_volume(vol_name, str(VOL_SIZE), "", "", "")
+    out = cli.create_volume(vol_name, str(VOL_SIZE), "", "", ARRAYNAME)
     out = out.replace('Create Volume !!!!', '')
     write_log(out)
     code = json_parser.get_response_code(out)
@@ -242,7 +243,7 @@ def create_and_mount_vol():
         return False
 
 def mount_vol(vol_name):
-    out = cli.mount_volume(vol_name, "", "")
+    out = cli.mount_volume(vol_name, ARRAYNAME, "")
     write_log(out)
     code = json_parser.get_response_code(out)
     if code == 0:
@@ -257,7 +258,7 @@ def detach_data(target):
     time.sleep(0.1)
 
 def add_spare(spare):
-    out = cli.add_device(spare, "")
+    out = cli.add_device(spare, ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("Spare device: " + spare + " has been added successfully")
@@ -290,9 +291,8 @@ def add_new_vol_and_do_io(cnt = 1):
     return True
 
 def get_state():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    state = data['Response']['info']['state']
+    out = cli.array_info(ARRAYNAME)
+    state = json_parser.get_state(out) 
     return state
 
 def check_state(state_expected):
@@ -303,13 +303,26 @@ def check_state(state_expected):
     write_log ("current state is " + state + " but we expected " + state_expected)
     return False
 
+def get_situation():
+    out = cli.array_info(ARRAYNAME)
+    situ = json_parser.get_situation(out)
+    return situ
+
+def check_situation(situ_expected):
+    situ = get_situation()
+    if situ == situ_expected:
+        write_log ("current situation is " + situ)
+        return True
+    write_log ("current situation is " + situ + " but we expected " + situ_expected)
+    return False
+
 def wait_until_rebuild_start():
-    while check_state("REBUILD") == False:
+    while check_situation("REBUILDING") == False:
         time.sleep(1)
     return True
 
 def wait_until_rebuild_done():
-    while check_state("REBUILD") == True:
+    while check_situation("REBUILDING") == True:
         time.sleep(1)
     return True
 
@@ -328,7 +341,7 @@ def do_event(elapsed_hour):
         return check_state("NORMAL")
 
     elif elapsed_hour == 12:
-        print (cli.array_info(""))
+        print (cli.array_info(ARRAYNAME))
         detach_data(DEV_1)
         if wait_until_rebuild_start() == True:
             rebuild_start_time = datetime.now()

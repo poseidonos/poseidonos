@@ -13,6 +13,7 @@ import test_result
 import pos_constant
 import DELETE_ARRAY_WITH_VOL
 
+ARRAYNAME = DELETE_ARRAY_WITH_VOL.ARRAYNAME
 DATA = "unvme-ns-0,unvme-ns-1,unvme-ns-2"
 SPARE = "unvme-ns-3"
 
@@ -34,9 +35,9 @@ def set_result(detail):
 
 def execute():
     DELETE_ARRAY_WITH_VOL.execute()
-    cli.create_array("uram0", DATA, SPARE, "", "")
-    cli.mount_array(DELETE_ARRAY_WITH_VOL.ARRAYNAME)
-    out = cli.get_pos_info()
+    cli.create_array("uram0", DATA, SPARE, ARRAYNAME, "")
+    cli.mount_array(ARRAYNAME)
+    out = cli.array_info(ARRAYNAME)
     return out
 
 if __name__ == "__main__":

@@ -22,6 +22,8 @@ import TEST
 import TEST_LOG
 import TEST_DEBUGGING
 
+ARRAYNAME = "POSArray"
+
 ######################################################################################
 isIbofExecuted = False
 ######################################################################################
@@ -64,7 +66,7 @@ def shutdown_pos():
 
     isIbofExecuted = False
     TEST_LOG.print_info("* Exiting POS")
-    out = cli.unmount_array("")
+    out = cli.unmount_array(ARRAYNAME)
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to unmount pos")
@@ -145,9 +147,9 @@ def setup():
     TEST_LOG.print_info("* Setup POS")
 
 def create_array():
-    out = cli.create_array("uram0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "unvme-ns-3", "", "")
+    out = cli.create_array("uram0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "unvme-ns-3", ARRAYNAME, "")
 #   pmem
-#    out = cli.create_array("pmem0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "unvme-ns-3", "", "")
+#    out = cli.create_array("pmem0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "unvme-ns-3", ARRAYNAME, "")
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to create array")
@@ -156,7 +158,7 @@ def create_array():
     TEST_LOG.print_info("* Array created")
 
 def mount_array():
-    out = cli.mount_array("")
+    out = cli.mount_array(ARRAYNAME)
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to mount pos")
@@ -165,7 +167,7 @@ def mount_array():
     TEST_LOG.print_info("* POS mounted")
 
 def unmount_array():
-    out = cli.unmount_array("")
+    out = cli.unmount_array(ARRAYNAME)
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to unmount pos")
@@ -184,7 +186,7 @@ def get_volname(volumeId):
     return "vol"+str(volumeId)
 
 def create_volume(volumeId, subnqn=""):
-    out = cli.create_volume(get_volname(volumeId), str(TEST.volSize), "0", "0", "")
+    out = cli.create_volume(get_volname(volumeId), str(TEST.volSize), "0", "0", ARRAYNAME)
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to create volume")
@@ -201,7 +203,7 @@ def mount_volume(volumeId):
         TEST_LOG.print_err("Failed to create volume")
         sys.exit(1)
 
-    out = cli.mount_volume(get_volname(volumeId), "", TEST.NQN + str(volumeId))
+    out = cli.mount_volume(get_volname(volumeId), ARRAYNAME, TEST.NQN + str(volumeId))
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to mount volume")
@@ -211,7 +213,7 @@ def mount_volume(volumeId):
     TEST_LOG.print_info("* Volume {} mounted".format(volumeId))
 
 def unmount_volume(volumeId):
-    out = cli.unmount_volume(get_volname(volumeId), "")
+    out = cli.unmount_volume(get_volname(volumeId), ARRAYNAME)
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to unmount volume")
@@ -228,7 +230,7 @@ def unmount_volume(volumeId):
     TEST_LOG.print_info("* Volume {} unmounted".format(volumeId))
 
 def delete_volume(volumeId):
-    out = cli.delete_volume(get_volname(volumeId), "")
+    out = cli.delete_volume(get_volname(volumeId), ARRAYNAME)
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to delete volume")

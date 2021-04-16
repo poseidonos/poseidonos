@@ -10,6 +10,8 @@ import cli
 import test_result
 import DELETE_ARRAY_AFTER_UNMOUNT
 
+ARRAYNAME = DELETE_ARRAY_AFTER_UNMOUNT.ARRAYNAME
+
 def set_result(detail):
     code = json_parser.get_response_code(detail)
     result = test_result.expect_false(code)
@@ -20,7 +22,7 @@ def execute():
     out = DELETE_ARRAY_AFTER_UNMOUNT.execute()
     ret = json_parser.get_response_code(out)
     if ret == 0:
-        out = cli.delete_array(DELETE_ARRAY_AFTER_UNMOUNT.ARRAYNAME)
+        out = cli.delete_array(ARRAYNAME)
     return out
 
 if __name__ == "__main__":

@@ -11,6 +11,8 @@ import test_result
 import json
 import ADD_SPARE_BASIC
 
+ARRAYNAME = ADD_SPARE_BASIC.ARRAYNAME
+
 def set_result(detail):
     code = json_parser.get_response_code(detail)
     result = test_result.expect_false(code)
@@ -20,7 +22,7 @@ def set_result(detail):
 
 def execute():
     ADD_SPARE_BASIC.execute()
-    out = cli.add_device(ADD_SPARE_BASIC.SPARE_DEV, ADD_SPARE_BASIC.ARRAYNAME)
+    out = cli.add_device(ADD_SPARE_BASIC.SPARE_DEV, ARRAYNAME)
     return out
 
 if __name__ == "__main__":

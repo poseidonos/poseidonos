@@ -15,7 +15,7 @@ import CREATE_ARRAY_NO_SPARE
 
 DATA = "unvme-ns-0,unvme-ns-1,unvme-ns-2"
 SPARE = "unvme-ns-3"
-ARRAY_NAME = CREATE_ARRAY_NO_SPARE.ARRAYNAME
+ARRAYNAME = CREATE_ARRAY_NO_SPARE.ARRAYNAME
 
 def check_result(detail):
     state = json_parser.is_online(detail)
@@ -28,7 +28,7 @@ def set_result(detail):
     code = json_parser.get_response_code(detail)
     result = test_result.expect_true(code)
     if result == "pass":
-        out = cli.get_pos_info()
+        out = cli.array_info(ARRAYNAME)
         result = check_result(out)
     
     with open(__file__ + ".result", "w") as result_file:
@@ -38,24 +38,24 @@ def execute():
     pos_util.pci_rescan()
     out = CREATE_ARRAY_NO_SPARE.execute()
     print (out)
-    out = cli.mount_array(ARRAY_NAME)
+    out = cli.mount_array(ARRAYNAME)
     print (out)
     pos_util.pci_detach(CREATE_ARRAY_NO_SPARE.DATA_DEV_1)
     time.sleep(2)
     pos_util.pci_detach(CREATE_ARRAY_NO_SPARE.DATA_DEV_2)
     time.sleep(2)
-    out = cli.unmount_array(ARRAY_NAME)
+    out = cli.unmount_array(ARRAYNAME)
     print (out)
-    out = cli.delete_array(ARRAY_NAME)
+    out = cli.delete_array(ARRAYNAME)
     print (out)
     pos.exit_pos()
     pos_util.pci_rescan()
     pos.start_pos()
     cli.scan_device()
     cli.list_device()
-    out = cli.create_array("uram0", DATA, SPARE, ARRAY_NAME, "RAID5")
+    out = cli.create_array("uram0", DATA, SPARE, ARRAYNAME, "RAID5")
     print (out)
-    out = cli.mount_array(ARRAY_NAME)
+    out = cli.mount_array(ARRAYNAME)
     print (out)
 
     return out

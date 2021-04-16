@@ -14,6 +14,8 @@ import json
 import time
 import MOUNT_ARRAY_BASIC
 
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
+
 def clear_result():
     if os.path.exists( __file__ + ".result"):
         os.remove( __file__ + ".result")
@@ -41,10 +43,10 @@ def execute():
     print(cli.list_device())
     pos_util.pci_detach(MOUNT_ARRAY_BASIC.ANY_OTHER_DATA)
 
-    out = cli.unmount_array(MOUNT_ARRAY_BASIC.ARRAYNAME)
+    out = cli.unmount_array(ARRAYNAME)
     print (out)
 
-    cur_info = json.loads(cli.array_info(""))
+    cur_info = json.loads(cli.array_info(ARRAYNAME))
     cur_state = cur_info['Response']['info']['situation']
     print(cur_state)
     if cur_state != 'FAULT':
@@ -55,7 +57,7 @@ def execute():
         print ("Wait to cancel rebuild " + str(i) + " seconds left")
         time.sleep(1)
 
-    out = cli.unmount_array(MOUNT_ARRAY_BASIC.ARRAYNAME)
+    out = cli.unmount_array(ARRAYNAME)
     print (out)
     return out
 

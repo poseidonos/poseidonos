@@ -16,17 +16,16 @@ import time
 import MOUNT_VOL_BASIC_1
 import MOUNT_ARRAY_BASIC
 DETACH_TARGET_DEV = MOUNT_ARRAY_BASIC.SPARE
-
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 def check_result():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    if data['Response']['info']['state'] == "NORMAL":
-        list = cli.array_info("")
-        data = json.loads(list)
+    out = cli.array_info(ARRAYNAME)
+    state = json_parser.get_state(out)
+    if state == "NORMAL":
+        data = json.loads(out)
         for item in data['Response']['result']['data']['devicelist']:
             if item['name'] == DETACH_TARGET_DEV :
-                return "fail", list
+                return "fail", out
         return "pass", out
     return "fail", out
 

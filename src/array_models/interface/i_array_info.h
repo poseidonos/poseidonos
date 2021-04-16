@@ -38,6 +38,7 @@
 #include "src/array_models/dto/partition_logical_size.h"
 #include "src/include/array_state_type.h"
 #include "src/include/partition_type.h"
+#include "src/state/state_context.h"
 
 #ifdef _ADMIN_ENABLED
 #include "src/array/device/i_array_device_manager.h"
@@ -57,6 +58,7 @@ public:
     virtual string GetCreateDatetime(void) = 0;
     virtual string GetUpdateDatetime(void) = 0;
     virtual ArrayStateType GetState(void) = 0;
+    virtual StateContext* GetStateCtx(void) = 0;
     virtual uint32_t GetRebuildingProgress(void) = 0;
 #ifdef _ADMIN_ENABLED
     virtual IArrayDevMgr* GetArrayManager(void) = 0;

@@ -31,7 +31,7 @@
  */
 
 #include "src/cli/array_info_command.h"
-
+#include "src/sys_info/space_info.h"
 #include "src/cli/cli_event_code.h"
 #include "src/array_mgmt/array_manager.h"
 
@@ -55,8 +55,6 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     }
 
     JsonFormat jFormat;
-    JsonElement data("data");
-
     IArrayInfo* array = ArrayMgr::Instance()->GetArrayInfo(arrayName);
     if (array == nullptr)
     {
@@ -64,12 +62,17 @@ ArrayInfoCommand::Execute(json& doc, string rid)
             arrayName + " does not exist", GetPosInfo());
     }
 
-    string state = array->GetState().ToString();
-    data.SetAttribute(JsonAttribute("state", "\"" + state + "\""));
+    JsonElement data("data");
+    string state = array->GetStateCtx()->ToStateType().ToString();
+    string situ = array->GetStateCtx()->GetSituation().ToString();
     data.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
+    data.SetAttribute(JsonAttribute("state", "\"" + state + "\""));
+    data.SetAttribute(JsonAttribute("situation", "\"" + situ + "\""));
     data.SetAttribute(JsonAttribute("createDatetime", "\"" + array->GetCreateDatetime() + "\""));
     data.SetAttribute(JsonAttribute("updateDatetime", "\"" + array->GetUpdateDatetime() + "\""));
-
+    data.SetAttribute(JsonAttribute("rebuildingProgress", "\"" + to_string(array->GetRebuildingProgress()) + "\""));
+    data.SetAttribute(JsonAttribute("capacity", to_string(SpaceInfo::SystemCapacity(arrayName))));
+    data.SetAttribute(JsonAttribute("used", to_string(SpaceInfo::Used(arrayName))));
     DeviceSet<string> nameSet = array->GetDevNames();
 
     if (nameSet.nvm.size() == 0 && nameSet.data.size() == 0)

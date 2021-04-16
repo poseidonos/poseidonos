@@ -16,28 +16,21 @@ import MOUNT_VOL_BASIC_1
 import fio
 import time
 DETACH_TARGET_DEV = MOUNT_VOL_BASIC_1.ANY_DATA
-
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 def check_result():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    if data['Response']['info']['state'] == "NORMAL":
-        list = cli.array_info("")
-        data = json.loads(list)
+    out = cli.array_info(ARRAYNAME)
+    state = json_parser.get_state(out)
+    if state == "NORMAL":
+        data = json.loads(out)
         for item in data['Response']['result']['data']['devicelist']:
             if item['name'] == DETACH_TARGET_DEV :
-                return "fail", list
+                return "fail", out
         return "pass", out
     return "fail", out
 
 def set_result():
-    detail = cli.get_pos_info()
-    code = json_parser.get_response_code(detail)
-    if code == 0:
-        result, out = check_result()
-    else:
-        result = "fail"
-        out = detail
+    result, out = check_result()
 
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + out)
@@ -55,8 +48,9 @@ def execute():
     rebuild_started = False
     wait_threshold = 60
     for i in range(0, wait_threshold):
-        out = cli.get_pos_info()
-        if out.find("REBUILD") >= 0:
+        out = cli.array_info(ARRAYNAME)
+        situ = json_parser.get_situation(out)
+        if situ.find("REBUILD") >= 0:
             print ("rebuilding started")
             rebuild_started = True
             break
@@ -65,8 +59,9 @@ def execute():
     if rebuild_started == True: 
         fio_proc2 = fio.start_fio(0, 120)
         while True:
-            out = cli.get_pos_info()
-            if out.find("REBUILD") == -1:
+            out = cli.array_info(ARRAYNAME)
+            situ = json_parser.get_situation(out)
+            if situ.find("REBUILD") == -1:
                 print ("rebuilding done")
                 fio.wait_fio(fio_proc2)
                 break

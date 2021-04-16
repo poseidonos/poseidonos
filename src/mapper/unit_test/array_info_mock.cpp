@@ -90,6 +90,12 @@ MockArrayInfo::GetState(void)
     return ast;
 }
 
+StateContext*
+MockArrayInfo::GetStateCtx(void)
+{
+    return nullptr;
+}
+
 uint32_t
 MockArrayInfo::GetRebuildingProgress(void)
 {

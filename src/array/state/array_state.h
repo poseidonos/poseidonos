@@ -74,7 +74,7 @@ public:
     virtual bool IsMounted(void);
     virtual bool IsBroken(void);
     virtual ArrayStateType GetState(void);
-    virtual StateEnum GetSysState(void);
+    virtual StateContext* GetSysState(void);
 
     virtual void StateChanged(StateContext* prev, StateContext* next) override;
 

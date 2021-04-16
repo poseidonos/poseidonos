@@ -51,6 +51,7 @@ public:
     string GetMetaRaidType(void) override;
     string GetDataRaidType(void) override;
     ArrayStateType GetState(void) override;
+    StateContext* GetStateCtx(void) override;
     uint32_t GetRebuildingProgress(void) override;
 
 private:

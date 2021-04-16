@@ -27,7 +27,7 @@ from collections import defaultdict
 #subprcess.call ('ls -al', shell=True)
 FIO_BENCH_SCRIPT = './fio_bench.py'
 CLI_CMD = '../../../bin/cli'
-IBOFOS_ROOT = '../../../'
+POS_ROOT = '../../../'
 IBOFOS_CMD = '../../../bin/ibofos'
 SETUP_IBOFOS_PATH = '../../../script/'
 SETUP_IBOFOS_CMD = './setup_ibofos_nvmf_volume.sh'
@@ -86,7 +86,7 @@ def ReadWriteCommand(lbaList, sizeList, cmd, verify, addedCmd = ""):
 
 def PowerOff():
     stdout_type = subprocess.DEVNULL
-    common_test_lib.terminate_ibofos(IBOFOS_ROOT, stdout_type)
+    common_test_lib.terminate_ibofos(POS_ROOT, stdout_type)
     
     print("########## disconnect nvmf controllers ##########")
     command = NVME_CLI_CMD + ' disconnect -n ' + NQN;
@@ -105,7 +105,7 @@ def PowerOn(clean):
     
     bringup_argument = {
         'log_path' : LOG_PATH,
-        'ibof_root' : IBOFOS_ROOT,
+        'ibof_root' : POS_ROOT,
         'transport' : TR_TYPE,
         'target_ip' : args.fabric_ip,
         'volume_size' : SIZE,
@@ -198,7 +198,7 @@ def ClearEnv():
                 proc.wait()                
         except psutil.NoSuchProcess:
             pass
-    common_test_lib.terminate_ibofos(IBOFOS_ROOT, subprocess.DEVNULL)
+    common_test_lib.terminate_ibofos(POS_ROOT, subprocess.DEVNULL)
 
     command = NVME_CLI_CMD + ' disconnect -n ' + NQN;
     ret = subprocess.call(command, shell=True);

@@ -51,7 +51,7 @@ def check_result(detail):
     return "pass"
 
 def set_result(detail):
-    out = cli.list_volume("")
+    out = cli.list_volume(ARRAYNAME)
     result = check_result(out)
     code = json_parser.get_response_code(out)
     with open(__file__ + ".result", "w") as result_file:

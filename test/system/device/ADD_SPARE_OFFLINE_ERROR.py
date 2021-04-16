@@ -13,7 +13,7 @@ import json
 import CREATE_ARRAY_NO_SPARE
 
 SPARE_DEV = CREATE_ARRAY_NO_SPARE.REMAINING_DEV
-
+ARRAYNAME = CREATE_ARRAY_NO_SPARE.ARRAYNAME
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)
@@ -24,7 +24,7 @@ def set_result(detail):
 
 def execute():
     CREATE_ARRAY_NO_SPARE.execute()
-    out = cli.add_device(SPARE_DEV, "")
+    out = cli.add_device(SPARE_DEV, ARRAYNAME)
     return out
 
 if __name__ == "__main__":

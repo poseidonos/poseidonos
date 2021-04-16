@@ -37,6 +37,8 @@ VOL_CNT = 0
 PREVIOUS_TIME = "0"
 START_GC = False
 
+ARRAYNAME = "POSArray"
+
 class FIO():
     def __init__(self):
         self._list = {}
@@ -104,7 +106,7 @@ def start_pos():
 def exit_pos():
     write_log ("exiting pos...")
     state = get_state();
-    if state == "NORMAL" or state == "DEGRADED" or state == "BROKEN":
+    if state == "NORMAL" or state == "BUSY":
         ret = unmount_pos()
         if ret == False:
             write_log("pos unmounting failed")
@@ -138,7 +140,7 @@ def scan_dev():
 
 def create_array():
     DATA = DEV_1 + "," + DEV_2 + "," + DEV_3
-    out = cli.create_array("uram0", DATA, "", "", "")
+    out = cli.create_array("uram0", DATA, "", ARRAYNAME, "")
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array created successfully")
@@ -148,7 +150,7 @@ def create_array():
         return False
 
 def mount_pos():
-    out = cli.mount_array("")
+    out = cli.mount_array(ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array mounted successfully")
@@ -158,7 +160,7 @@ def mount_pos():
         return False
 
 def unmount_pos():
-    out = cli.unmount_array("")
+    out = cli.unmount_array(ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array unmounted successfully")
@@ -171,7 +173,7 @@ def create_and_mount_vol():
     global VOL_CNT
     vol_name = VOL_NAME_PREFIX + str(VOL_CNT)
     write_log ("try to create volume, name: " + vol_name + ", size: " + str(VOL_SIZE))
-    out = cli.create_volume(vol_name, str(VOL_SIZE), "", "", "")
+    out = cli.create_volume(vol_name, str(VOL_SIZE), "", "", ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         VOL_CNT = VOL_CNT + 1
@@ -182,7 +184,7 @@ def create_and_mount_vol():
         return False
 
 def mount_vol(vol_name):
-    out = cli.mount_volume(vol_name, "", "")
+    out = cli.mount_volume(vol_name, ARRAYNAME, "")
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("volume: " + vol_name + " mounted successfully")
@@ -251,23 +253,8 @@ def check_gc_done():
     return False
 
 def get_state():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    state = data['Response']['info']['state']
-    return state
-
-def check_state(state_expected):
-    state = get_state()
-    if state == state_expected:
-        write_log ("current state is " + state)
-        return True
-    write_log ("current state is " + state + " but we expected " + state_expected)
-    return False
-
-def get_state():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    state = data['Response']['info']['state']
+    out = cli.array_info(ARRAYNAME)
+    state = json_parser.get_state(out)
     return state
 
 def check_state(state_expected):

@@ -13,20 +13,18 @@ import test_result
 import json
 import time
 import CREATE_ARRAY_BASIC
-
-
-def check_result(detail):
-    state = json_parser.get_state(detail)
-    if state == "REBUILD":
-        return "pass"
-    return "fail"
+ARRAYNAME = CREATE_ARRAY_BASIC.ARRAYNAME
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)
     result = test_result.expect_true(code)
     if result == "pass":
-        detail = cli.get_pos_info()
-        result = check_result(detail)
+        out = cli.array_info(ARRAYNAME)
+        situ = json_parser.get_situation(out)
+        if situ.find("REBUILD") >= 0 :
+            result = "pass"
+        else:
+            result = "fail"
     
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + detail)

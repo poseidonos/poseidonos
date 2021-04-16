@@ -13,6 +13,8 @@ import time
 import pos_util
 import CREATE_ARRAY_BASIC
 
+ARRAYNAME = CREATE_ARRAY_BASIC.ARRAYNAME
+
 def check_result(out):
     data = json.loads(out)
     for item in data['Response']['result']['data']['devicelist']:
@@ -25,7 +27,7 @@ def set_result(detail):
     code = json_parser.get_response_code(detail)
     result = test_result.expect_true(code)
     if result == "pass":
-        out = cli.list_array_device(CREATE_ARRAY_BASIC.ARRAYNAME)
+        out = cli.list_array_device(ARRAYNAME)
         result = check_result(out)
     
     with open(__file__ + ".result", "w") as result_file:
@@ -36,12 +38,12 @@ def execute():
     spare = CREATE_ARRAY_BASIC.SPARE
     pos_util.pci_detach(spare)
     time.sleep(0.1)
-    cli.unmount_array(CREATE_ARRAY_BASIC.ARRAYNAME)
+    cli.unmount_array(ARRAYNAME)
     pos.exit_pos()
     time.sleep(5)
     pos.start_pos()
     cli.scan_device()
-    out = cli.mount_array(CREATE_ARRAY_BASIC.ARRAYNAME)
+    out = cli.mount_array(ARRAYNAME)
     return out
 
 if __name__ == "__main__":

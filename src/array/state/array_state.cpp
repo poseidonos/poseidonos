@@ -65,10 +65,10 @@ ArrayState::GetState(void)
     return state;
 }
 
-StateEnum
+StateContext*
 ArrayState::GetSysState(void)
 {
-    return iStateControl->GetState()->ToStateType();
+    return iStateControl->GetState();
 }
 
 void

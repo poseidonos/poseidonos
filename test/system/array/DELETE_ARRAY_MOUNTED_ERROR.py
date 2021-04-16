@@ -10,6 +10,8 @@ import cli
 import test_result
 import MOUNT_ARRAY_BASIC
 
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
+
 def set_result(detail):
     code = json_parser.get_response_code(detail)
     result = test_result.expect_false(code)
@@ -20,7 +22,7 @@ def execute():
     out = MOUNT_ARRAY_BASIC.execute()
     ret = json_parser.get_response_code(out)
     if ret == 0:
-        out = cli.delete_array(MOUNT_ARRAY_BASIC.ARRAYNAME)
+        out = cli.delete_array(ARRAYNAME)
     return out
 
 if __name__ == "__main__":

@@ -12,6 +12,8 @@ import test_result
 import CREATE_ARRAY_BASIC
 import array_device
 
+ARRAYNAME = CREATE_ARRAY_BASIC.ARRAYNAME
+
 def check_result(detail):
     expected_list = []
     expected_list.append(array_device.ArrayDevice("uram0", "BUFFER"))
@@ -46,7 +48,7 @@ def execute():
     out = CREATE_ARRAY_BASIC.execute()
     ret = json_parser.get_response_code(out)
     if ret == 0:
-        out = cli.list_array_device(CREATE_ARRAY_BASIC.ARRAYNAME)
+        out = cli.list_array_device(ARRAYNAME)
     return out
 
 if __name__ == "__main__":

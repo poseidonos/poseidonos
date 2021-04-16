@@ -21,20 +21,14 @@ REMAINING_DEV = "unvme-ns-4"
 ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 def check_result():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    if data['Response']['info']['state'] == "DEGRADED":
+    out = cli.array_info(ARRAYNAME)
+    situ = json_parser.get_situation(out)
+    if situ == "DEGRADED":
         return "pass", out
     return "fail", out
 
 def set_result():
-    detail = cli.get_pos_info()
-    code = json_parser.get_response_code(detail)
-    if code == 0:
-        result, out = check_result()
-    else:
-        result = "fail"
-        out = detail
+    result, out = check_result()
 
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + out)
@@ -47,8 +41,9 @@ def execute():
     time.sleep(0.1)
 
     while True:
-        out = cli.get_pos_info()
-        if out.find("REBUILD") >= 0:
+        out = cli.array_info(ARRAYNAME)
+        situ = json_parser.get_situation(out)
+        if situ.find("REBUILD") >= 0:
             print ("rebuilding started")
             pos_util.pci_detach_and_attach(SECOND_DETACH_TARGET_DEV)
             break
@@ -56,8 +51,9 @@ def execute():
 
     timeout = 80
     for i in range(timeout):
-        out = cli.get_pos_info()
-        if out.find("REBUILD") < 0:
+        out = cli.array_info(ARRAYNAME)
+        situ = json_parser.get_situation(out)
+        if situ.find("REBUILD") < 0:
             break
         time.sleep(1)
 

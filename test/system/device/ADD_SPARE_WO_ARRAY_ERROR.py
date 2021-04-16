@@ -11,7 +11,6 @@ import test_result
 import json
 import SCAN_DEV_BASIC
 
-
 def set_result(detail):
     code = json_parser.get_response_code(detail)
     result = test_result.expect_false(code)
@@ -21,7 +20,7 @@ def set_result(detail):
 
 def execute():
     SCAN_DEV_BASIC.execute()
-    out = cli.add_device("unmve-ns-3", "")
+    out = cli.add_device("unmve-ns-3", "NOARRAY")
     return out
 
 if __name__ == "__main__":

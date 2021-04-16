@@ -13,6 +13,7 @@ import test_result
 import CREATE_VOL_BASIC_1
 import volume
 
+ARRAYNAME = CREATE_VOL_BASIC_1.ARRAYNAME
 NAME = CREATE_VOL_BASIC_1.VOL_NAME
 SIZE = CREATE_VOL_BASIC_1.VOL_SIZE
 IOPS = CREATE_VOL_BASIC_1.VOL_IOPS
@@ -47,7 +48,7 @@ def check_result(detail):
     return "pass"
 
 def set_result():
-    out = cli.list_volume("")
+    out = cli.list_volume(ARRAYNAME)
     result = check_result(out)
     code = json_parser.get_response_code(out)
     with open(__file__ + ".result", "w") as result_file:
@@ -56,7 +57,7 @@ def set_result():
 def execute():
     clear_result()
     CREATE_VOL_BASIC_1.execute()
-    out = cli.rename_volume(NAME, NEW_NAME, "")
+    out = cli.rename_volume(NAME, NEW_NAME, ARRAYNAME)
     return out
 
 if __name__ == "__main__":

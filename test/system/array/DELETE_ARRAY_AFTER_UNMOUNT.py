@@ -22,7 +22,7 @@ def execute():
     out = UNMOUNT_ARRAY_BASIC.execute()
     ret = json_parser.get_response_code(out)
     if ret == 0:
-        out = cli.delete_array(UNMOUNT_ARRAY_BASIC.ARRAYNAME)
+        out = cli.delete_array(ARRAYNAME)
     return out
 
 if __name__ == "__main__":

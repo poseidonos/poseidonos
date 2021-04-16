@@ -12,6 +12,8 @@ import cli
 import test_result
 import CREATE_VOL_BASIC_1
 
+ARRAYNAME = CREATE_VOL_BASIC_1.ARRAYNAME
+
 def clear_result():
     if os.path.exists( __file__ + ".result"):
         os.remove( __file__ + ".result")
@@ -25,8 +27,8 @@ def set_result(detail):
 def execute():
     clear_result()
     CREATE_VOL_BASIC_1.execute()
-    cli.mount_volume(CREATE_VOL_BASIC_1.VOL_NAME, "", "")
-    out = cli.mount_volume(CREATE_VOL_BASIC_1.VOL_NAME, "", "")
+    cli.mount_volume(CREATE_VOL_BASIC_1.VOL_NAME, ARRAYNAME, "")
+    out = cli.mount_volume(CREATE_VOL_BASIC_1.VOL_NAME, ARRAYNAME, "")
     return out
 
 if __name__ == "__main__":

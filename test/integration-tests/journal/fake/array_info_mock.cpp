@@ -67,6 +67,12 @@ ArrayInfoMock::GetState(void)
     return ArrayStateEnum::NORMAL;
 }
 
+StateContext*
+ArrayInfoMock::GetStateCtx(void)
+{
+    return nullptr;
+}
+
 uint32_t
 ArrayInfoMock::GetRebuildingProgress(void)
 {

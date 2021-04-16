@@ -13,16 +13,16 @@ import test_result
 import json
 import MOUNT_ARRAY_BASIC
 SPARE = MOUNT_ARRAY_BASIC.SPARE
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
 
 def check_result():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    if data['Response']['info']['state'] == "NORMAL":
-        list = cli.array_info("")
-        data = json.loads(list)
+    out = cli.array_info(ARRAYNAME)
+    state = json_parser.get_state(out)
+    if state == "NORMAL":
+        data = json.loads(out)
         for item in data['Response']['result']['data']['devicelist']:
             if item['name'] == SPARE :
-                return "fail", list
+                return "fail", out
         return "pass", out
     return "fail", out
 
@@ -39,7 +39,7 @@ def set_result(detail):
 
 def execute():
     MOUNT_ARRAY_BASIC.execute()
-    out = cli.remove_device(SPARE, "")
+    out = cli.remove_device(SPARE, ARRAYNAME)
     return out
 
 if __name__ == "__main__":

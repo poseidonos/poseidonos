@@ -6,13 +6,14 @@ import psutil
 import argparse
 
 import cli
+import pos_array_api
 
 allowed_nodes = ["pm", "vm"]
 
 def kill_pos_safe(root_dir):
     print("killing ibofos safe")
 
-    cli.unmount_array("")
+    pos_array_api.unmount_all_arrays()
     cli.exit_pos()
 
     while (check_ibofos_running()):

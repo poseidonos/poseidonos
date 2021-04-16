@@ -12,6 +12,8 @@ import cli
 import test_result
 import CREATE_VOL_BASIC_1
 
+ARRAYNAME = CREATE_VOL_BASIC_1.ARRAYNAME
+
 def clear_result():
     if os.path.exists( __file__ + ".result"):
         os.remove( __file__ + ".result")
@@ -26,7 +28,7 @@ def execute():
     clear_result()
     CREATE_VOL_BASIC_1.execute()
     wrong_name = "wrong_vol"
-    out = cli.delete_volume(wrong_name, "")
+    out = cli.delete_volume(wrong_name, ARRAYNAME)
     return out
 
 if __name__ == "__main__":

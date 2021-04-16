@@ -12,8 +12,9 @@ import cli
 import test_result
 import json
 import CREATE_ARRAY_BASIC
-SPARE = CREATE_ARRAY_BASIC.SPARE
 
+SPARE = CREATE_ARRAY_BASIC.SPARE
+ARRAYNAME = CREATE_ARRAY_BASIC.ARRAYNAME
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)
@@ -24,7 +25,7 @@ def set_result(detail):
 
 def execute():
     CREATE_ARRAY_BASIC.execute()
-    out = cli.remove_device(SPARE, CREATE_ARRAY_BASIC.ARRAYNAME)
+    out = cli.remove_device(SPARE, ARRAYNAME)
     return out
 
 if __name__ == "__main__":

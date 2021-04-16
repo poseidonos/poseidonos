@@ -19,7 +19,7 @@ def set_result(detail):
 
 def execute():
     SCAN_DEV_BASIC.execute()
-    out = cli.remove_device("unvme-ns-0", "POSArray")
+    out = cli.remove_device("unvme-ns-0", "NOARRAY")
     return out
 
 if __name__ == "__main__":

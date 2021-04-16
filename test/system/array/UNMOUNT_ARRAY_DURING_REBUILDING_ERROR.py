@@ -14,6 +14,7 @@ import json
 import time
 import MOUNT_ARRAY_BASIC
 
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)
@@ -25,7 +26,7 @@ def execute():
     MOUNT_ARRAY_BASIC.execute()
     pos_util.pci_detach(MOUNT_ARRAY_BASIC.ANY_DATA)
     time.sleep(5)
-    out = cli.unmount_array(MOUNT_ARRAY_BASIC.ARRAYNAME)
+    out = cli.unmount_array(ARRAYNAME)
     return out
 
 if __name__ == "__main__":

@@ -20,6 +20,7 @@ public:
     MOCK_METHOD(string, GetCreateDatetime, (), (override));
     MOCK_METHOD(string, GetUpdateDatetime, (), (override));
     MOCK_METHOD(ArrayStateType, GetState, (), (override));
+    MOCK_METHOD(StateContext*, GetStateCtx, (), (override));
     MOCK_METHOD(uint32_t, GetRebuildingProgress, (), (override));
     MOCK_METHOD(IArrayDevMgr*, GetArrayManager, (), (override));
 };

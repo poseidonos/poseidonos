@@ -11,7 +11,9 @@ import pos
 import cli
 import test_result
 import MOUNT_VOL_BASIC_1
+
 VOL_NAME = MOUNT_VOL_BASIC_1.VOL_NAME
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -26,7 +28,7 @@ def set_result(detail):
 def execute():
     clear_result()
     MOUNT_VOL_BASIC_1.execute()
-    out = cli.unmount_volume(VOL_NAME, "")
+    out = cli.unmount_volume(VOL_NAME, ARRAYNAME)
     return out
 
 if __name__ == "__main__":

@@ -43,7 +43,7 @@ def terminate_pos(ibof_root, stdout_type):
     print("\tTerminate POS")
     if 'ibof_proc' in globals():
         ibof_cli = ibof_root + "bin/cli"
-        subprocess.call([ibof_cli, "request", "unmount_ibofos"],\
+        subprocess.call([ibof_cli, "array", "unmount", "--name", "POSArray"],\
             stdout=stdout_type, stderr=subprocess.STDOUT)
         subprocess.call([ibof_cli, "request", "exit_ibofos"],\
             stdout=stdout_type, stderr=subprocess.STDOUT)

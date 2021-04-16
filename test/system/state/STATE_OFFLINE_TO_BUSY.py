@@ -15,9 +15,9 @@ import MOUNT_ARRAY_DEGRADED_BASIC
 
 
 def check_result():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    if data['Response']['info']['state'] == "DEGRADED":
+    out = cli.array_info(ARRAYNAME)
+    situ = json_parser.get_situation(out)
+    if situ == "DEGRADED":
         return "pass"
     return "fail"
 

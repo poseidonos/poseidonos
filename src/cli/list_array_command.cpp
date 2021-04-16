@@ -85,7 +85,12 @@ ListArrayCommand::Execute(json& doc, string rid)
             string arrayName(abr.arrayName);
             string createDatetime(abr.createDatetime);
             string updateDatetime(abr.updateDatetime);
+            string arrayStatus("Unmounted");
+            IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+            if (info != nullptr)
+                arrayStatus = "Mounted";
             arrayElement.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
+            arrayElement.SetAttribute(JsonAttribute("status", "\"" + arrayStatus + "\""));
             arrayElement.SetAttribute(JsonAttribute("createDatetime", "\"" + createDatetime + "\""));
             arrayElement.SetAttribute(JsonAttribute("updateDatetime", "\"" + updateDatetime + "\""));
 

@@ -17,7 +17,6 @@ ARRAYNAME = MOUNT_ARRAY_NO_SPARE.ARRAYNAME
 
 def check_result(out):
     data = json.loads(out)
-    list = []
     for item in data['Response']['result']['data']['devicelist']:
         if item['type'] == "SPARE" and item['name'] == SPARE_DEV :
             return "pass"
@@ -26,7 +25,7 @@ def check_result(out):
 def set_result(detail):
     code = json_parser.get_response_code(detail)
     if code == 0:
-        out = cli.array_info("")
+        out = cli.array_info(ARRAYNAME)
         result = check_result(out)
     else:
         result = "fail"

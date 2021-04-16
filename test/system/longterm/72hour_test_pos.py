@@ -15,6 +15,7 @@ import pos_constant
 import time
 
 POS_ROOT = '../../../'
+ARRAYNAME = "POSArray"
 
 #SECONDS FOR A MINUTE
 #SET 60 FOR REALTIME TESTING
@@ -181,7 +182,8 @@ def start_pos():
 
 def exit_pos():
     write_log ("exiting pos...")
-    if get_state() != "OFFLINE":
+    state = get_state()
+    if state == "NORMAL" or state == "BUSY":
         ret = unmount_pos()
         if ret == False:
             write_log("pos unmounting failed")
@@ -229,7 +231,7 @@ def create_array():
         if i < INIT_DATA_DEV_CNT + INIT_SPARE_DEV_CNT - 1:
             SPARE = SPARE + ","
 
-    out = cli.create_array("uram0", DATA, SPARE, "", "")
+    out = cli.create_array("uram0", DATA, SPARE, ARRAYNAME, "")
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array created successfully")
@@ -239,7 +241,7 @@ def create_array():
         return False
 
 def mount_pos():
-    out = cli.mount_array("")
+    out = cli.mount_array(ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array mounted successfully")
@@ -249,7 +251,7 @@ def mount_pos():
         return False
 
 def unmount_pos():
-    out = cli.unmount_array("")
+    out = cli.unmount_array(ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         global MOUNTED_VOL_CNT
@@ -268,7 +270,7 @@ def create_and_mount_vol():
 
     vol_name = VOL_NAME_PREFIX + str(VOL_CNT)
     write_log ("try to create volume, name: " + vol_name + ", size: " + str(VOL_SIZE))
-    out = cli.create_volume(vol_name, str(VOL_SIZE), "", "", "")
+    out = cli.create_volume(vol_name, str(VOL_SIZE), "", "", ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         VOL_CNT = VOL_CNT + 1
@@ -280,7 +282,7 @@ def create_and_mount_vol():
         return False
 
 def mount_vol(vol_name):
-    out = cli.mount_volume(vol_name, "", "")
+    out = cli.mount_volume(vol_name, ARRAYNAME, "")
     code = json_parser.get_response_code(out)
     if code == 0:
         global MOUNTED_VOL_CNT
@@ -292,7 +294,7 @@ def mount_vol(vol_name):
         return False
 
 def umnmount_vol(vol_name):
-    out = cli.unmount_volume(vol_name, "")
+    out = cli.unmount_volume(vol_name, ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         global MOUNTED_VOL_CNT
@@ -311,7 +313,7 @@ def detach_data(target):
 
 def add_spare(spare):
     write_log("add_spare : " + spare)
-    out = cli.add_device(spare, "")
+    out = cli.add_device(spare, ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("Spare device: " + spare + " has been added successfully")
@@ -373,9 +375,8 @@ def mount_vols_and_do_io(cnt = 1):
     return True
 
 def get_situation():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    situ = data['Response']['info']['situation']
+    out = cli.array_info(ARRAYNAME)
+    situ = json_parser.get_situation(out)
     return situ
 
 def check_situation(situ_expected):
@@ -387,9 +388,8 @@ def check_situation(situ_expected):
     return False
 
 def get_state():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    state = data['Response']['info']['state']
+    out = cli.array_info(ARRAYNAME)
+    state = json_parser.get_state(out)
     return state
 
 def check_state(state_expected):
@@ -415,7 +415,7 @@ def get_system_dev_for_spare():
 
 def do_event(elapsed_hour):
     global REBUILDING_DELAY_MIN
-    write_log(cli.list_volume(""))
+    write_log(cli.list_volume(ARRAYNAME))
     if elapsed_hour == 0:
         ret = init_test()
         if ret == True:

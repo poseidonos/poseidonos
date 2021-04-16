@@ -13,6 +13,8 @@ import test_result
 import pos_constant
 import CREATE_VOL_BASIC_1
 
+ARRAYNAME = CREATE_VOL_BASIC_1.ARRAYNAME
+
 def clear_result():
     if os.path.exists( __file__ + ".result"):
         os.remove( __file__ + ".result")
@@ -33,8 +35,8 @@ def set_result(detail):
 def execute():
     clear_result()
     CREATE_VOL_BASIC_1.execute()
-    cli.unmount_array(CREATE_VOL_BASIC_1.ARRAYNAME)
-    out = cli.list_volume(CREATE_VOL_BASIC_1.ARRAYNAME)
+    cli.unmount_array(ARRAYNAME)
+    out = cli.list_volume(ARRAYNAME)
     return out
 
 if __name__ == "__main__":

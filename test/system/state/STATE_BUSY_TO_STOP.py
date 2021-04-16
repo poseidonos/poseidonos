@@ -16,12 +16,10 @@ import MOUNT_ARRAY_DEGRADED_BASIC
 
 ARRAYNAME = MOUNT_ARRAY_DEGRADED_BASIC.ARRAYNAME
 
-
 def check_result():
-    out = cli.get_pos_info()
-    print (out)
-    data = json.loads(out)
-    if data['Response']['info']['state'] == "BROKEN":
+    out = cli.array_info(ARRAYNAME)
+    situ = json_parser.get_situation(out)
+    if situ == "FAULT":
         return "pass"
     return "fail"
 

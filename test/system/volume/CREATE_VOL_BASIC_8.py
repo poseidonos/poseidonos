@@ -14,6 +14,7 @@ import pos_constant
 import MOUNT_ARRAY_BASIC
 import volume
 
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
 VOL_NAME_PREFIX = "vol"
 VOL_SIZE = pos_constant.SIZE_1MB * 100
 VOL_IOPS = 10
@@ -49,7 +50,7 @@ def check_result(detail):
     return "pass"
 
 def set_result(detail):
-    out = cli.list_volume("")
+    out = cli.list_volume(ARRAYNAME)
     result = check_result(out)
     code = json_parser.get_response_code(out)
     with open(__file__ + ".result", "w") as result_file:
@@ -60,7 +61,7 @@ def execute():
     MOUNT_ARRAY_BASIC.execute()
     for i in range(0, pos_constant.MAX_VOL_CNT):
         print ("creating " + VOL_NAME_PREFIX + str(i+1))
-        out = cli.create_volume(VOL_NAME_PREFIX + str(i+1), str(VOL_SIZE), str(VOL_IOPS), str(VOL_BW), "")
+        out = cli.create_volume(VOL_NAME_PREFIX + str(i+1), str(VOL_SIZE), str(VOL_IOPS), str(VOL_BW), ARRAYNAME)
         ret = json_parser.get_response_code(out)
         if ret != 0:
             break;

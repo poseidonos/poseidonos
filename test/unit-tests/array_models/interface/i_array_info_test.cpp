@@ -36,6 +36,10 @@ TEST(IArrayInfo, GetState_)
 {
 }
 
+TEST(IArrayInfo, GetStateCtx_)
+{
+}
+
 TEST(IArrayInfo, GetRebuildingProgress_)
 {
 }

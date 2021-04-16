@@ -19,28 +19,28 @@ def get_value_from_json(fileName, key):
     data = json.load(fileName)
     return data[key]
 
-def get_list(src):
-    data = json.loads(src)
-    return data
-
-def get_state(src):
-    data = json.loads(src)
-    state = data['Response']['info']['state']
+def get_state(arrayinfo):
+    data = json.loads(arrayinfo)
+    state = data['Response']['result']['data']['state']
     return state
 
-def get_capacity(src):
-    data = json.loads(src)
-    capa = data['Response']['info']['capacity']
-    return capa;
+def get_situation(arrayinfo):
+    data = json.loads(arrayinfo)
+    situ = data['Response']['result']['data']['situation']
+    return situ
 
-def get_used(src):
-    data = json.loads(src)
-    used = data['Response']['info']['used']
-    return used;
+def get_capacity(arrayinfo):
+    data = json.loads(arrayinfo)
+    capa = data['Response']['result']['data']['capacity']
+    return capa
 
-def is_online(src):
-    data = json.loads(src)
-    state = data['Response']['info']['state']
+def get_used(arrayinfo):
+    data = json.loads(arrayinfo)
+    used = data['Response']['result']['data']['used']
+    return used
+
+def is_online(arrayinfo):
+    state = get_state(arrayinfo)
     if state == "NORMAL" or state == "DEGRADED" or state == "REBUILD":
         return True
     else:

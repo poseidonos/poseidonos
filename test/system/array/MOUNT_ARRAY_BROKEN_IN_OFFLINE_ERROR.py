@@ -12,6 +12,7 @@ import test_result
 import json
 import time
 import CREATE_ARRAY_NO_SPARE
+ARRAYNAME = CREATE_ARRAY_NO_SPARE.ARRAYNAME
 
 def check_result(detail):
     if json_parser.is_online(detail) == False:
@@ -23,7 +24,7 @@ def set_result(detail):
     code = json_parser.get_response_code(detail)
     result = test_result.expect_false(code)
     if result == "pass":
-        out = cli.get_pos_info()
+        out = cli.array_info(ARRAYNAME)
         result = check_result(out)
     
     with open(__file__ + ".result", "w") as result_file:

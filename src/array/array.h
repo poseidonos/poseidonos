@@ -101,6 +101,7 @@ public:
     string GetCreateDatetime(void) override;
     string GetUpdateDatetime(void) override;
     ArrayStateType GetState(void) override;
+    StateContext* GetStateCtx(void) override;
     uint32_t GetRebuildingProgress(void) override;
     bool IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
     IArrayDevice* FindDevice(string devSn) override;

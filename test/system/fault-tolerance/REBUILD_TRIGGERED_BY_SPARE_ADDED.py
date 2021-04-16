@@ -17,42 +17,37 @@ import time
 
 DETACH_TARGET_DEV = DETACH_DEV_DATA_AND_DEGRADED_IO.DETACH_TARGET_DEV
 NEW_SPARE = DETACH_DEV_DATA_AND_DEGRADED_IO.REMAINING_DEV
-
+ARRAYNAME  DETACH_DEV_DATA_AND_DEGRADED_IO.ARRAYNAME
 
 def check_result():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    if data['Response']['info']['state'] == "NORMAL":
-        list = cli.array_info("")
-        data = json.loads(list)
+    out = cli.array_info(ARRAYNAME)
+    state = json_parser.get_state(out)
+    if state == "NORMAL":
+        data = json.loads(out)
         for item in data['Response']['result']['data']['devicelist']:
             if item['name'] == DETACH_TARGET_DEV :
-                return "fail", list
+                return "fail", out
         return "pass", out
     return "fail", out
 
 def set_result():
-    detail = cli.get_pos_info()
-    code = json_parser.get_response_code(detail)
-    if code == 0:
-        result, out = check_result()
-    else:
-        result = "fail"
-        out = detail
+    result, out = check_result()
+    code = json_parser.get_response_code(out)
 
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + out)
 
 def execute():
     DETACH_DEV_DATA_AND_DEGRADED_IO.execute()
-    out = cli.add_device(NEW_SPARE, DETACH_DEV_DATA_AND_DEGRADED_IO.ARRAYNAME)
+    out = cli.add_device(NEW_SPARE, ARRAYNAME)
     rebuild_started = False
     while True:
-        out = cli.get_pos_info()
-        if out.find("REBUILD") == -1 and rebuild_started == True:
+        out = cli.array_info(ARRAYNAME)
+        situ = json_parser.get_situation(out)
+        if situ.find("REBUILD") == -1 and rebuild_started == True:
             print ("rebuilding done")
             break
-        elif rebuild_started == False and out.find("REBUILD") >= 0:
+        elif rebuild_started == False and situ.find("REBUILD") >= 0:
             print ("rebuilding started")
             rebuild_started = True
         time.sleep(1)

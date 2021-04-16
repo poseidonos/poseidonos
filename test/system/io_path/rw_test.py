@@ -8,10 +8,10 @@ import argparse
 
 #######################################################################################
 # edit test parameters into these lists to run different workloads
-ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
+pos_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
 default_transport = "tcp"
 default_target_ip = "10.100.11.16"
-script_path = ibof_root + "script/"
+script_path = pos_root + "script/"
 default_log_path = "pos.log"
 default_volume_size_gb = 16
 default_print_on = False
@@ -19,7 +19,7 @@ default_print_on = False
 
 def execute_fio(readwrite, offset, verify):
     print("\tExecute FIO")
-    fio_bench = ibof_root + "test/system/io_path/fio_bench.py"
+    fio_bench = pos_root + "test/system/io_path/fio_bench.py"
     ret = subprocess.call([fio_bench, \
         "--bs", "4k", \
         "--readwrite", readwrite, \
@@ -35,11 +35,11 @@ def execute_fio(readwrite, offset, verify):
 def write_test():
     test_name = "Write"
     common_test_lib.print_start(test_name)
-    common_test_lib.bringup_ibofos(**bringup_argument)
+    common_test_lib.bringup_pos(**bringup_argument)
 
     ret = execute_fio(readwrite="write", offset=0, verify=False)
 
-    common_test_lib.terminate_ibofos(ibof_root, stdout_type)
+    common_test_lib.terminate_pos(pos_root, stdout_type)
     success = (ret == 0)
     common_test_lib.print_result(test_name, success)
     return success
@@ -47,11 +47,11 @@ def write_test():
 def write_out_range_fail_test():
     test_name = "Write out of range"
     common_test_lib.print_start(test_name)
-    common_test_lib.bringup_ibofos(**bringup_argument)
+    common_test_lib.bringup_pos(**bringup_argument)
 
     ret = execute_fio(readwrite="write", offset=volume_size, verify=False)
 
-    common_test_lib.terminate_ibofos(ibof_root, stdout_type)
+    common_test_lib.terminate_pos(pos_root, stdout_type)
     success = (ret == 1)
     common_test_lib.print_result(test_name, success)
     return success
@@ -59,11 +59,11 @@ def write_out_range_fail_test():
 def verify_test():
     test_name = "Verify"
     common_test_lib.print_start(test_name)
-    common_test_lib.bringup_ibofos(**bringup_argument)
+    common_test_lib.bringup_pos(**bringup_argument)
 
     ret = execute_fio(readwrite="write", offset=0, verify=True)
 
-    common_test_lib.terminate_ibofos(ibof_root, stdout_type)
+    common_test_lib.terminate_pos(pos_root, stdout_type)
     success = (ret == 0)
     common_test_lib.print_result(test_name, success)
     return success
@@ -71,11 +71,11 @@ def verify_test():
 def read_test():
     test_name = "Read"
     common_test_lib.print_start(test_name)
-    common_test_lib.bringup_ibofos(**bringup_argument)
+    common_test_lib.bringup_pos(**bringup_argument)
 
     ret = execute_fio(readwrite="read", offset=0, verify=False)
 
-    common_test_lib.terminate_ibofos(ibof_root, stdout_type)
+    common_test_lib.terminate_pos(pos_root, stdout_type)
     success = (ret == 0)
     common_test_lib.print_result(test_name, success)
     return success
@@ -83,11 +83,11 @@ def read_test():
 def read_out_range_fail_test():
     test_name = "Read out of range"
     common_test_lib.print_start(test_name)
-    common_test_lib.bringup_ibofos(**bringup_argument)
+    common_test_lib.bringup_pos(**bringup_argument)
 
     ret = execute_fio(readwrite="read", offset=volume_size, verify=False)
 
-    common_test_lib.terminate_ibofos(ibof_root, stdout_type)
+    common_test_lib.terminate_pos(pos_root, stdout_type)
     success = (ret == 1)
     common_test_lib.print_result(test_name, success)
     return success
@@ -119,7 +119,7 @@ def get_argument():
 
     bringup_argument = {
         'log_path' : args.log_path,
-        'ibof_root' : ibof_root,
+        'ibof_root' : pos_root,
         'transport' : args.transport,
         'target_ip' : args.fabric_ip,
         'volume_size' : volume_size,

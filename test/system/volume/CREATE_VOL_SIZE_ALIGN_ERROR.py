@@ -13,6 +13,8 @@ import test_result
 import pos_constant
 import MOUNT_ARRAY_BASIC
 
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
+
 def clear_result():
     if os.path.exists( __file__ + ".result"):
         os.remove( __file__ + ".result")
@@ -27,7 +29,7 @@ def execute():
     clear_result()
     MOUNT_ARRAY_BASIC.execute()
     size = pos_constant.SIZE_1GB - 2
-    out = cli.create_volume("vol1", str(size),"","","")
+    out = cli.create_volume("vol1", str(size),"","",ARRAYNAME)
     return out
 
 if __name__ == "__main__":

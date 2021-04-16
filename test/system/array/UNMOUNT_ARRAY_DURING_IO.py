@@ -14,10 +14,11 @@ import MOUNT_VOL_BASIC_1
 import fio
 import time
 
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
-def check_result(detail):
-    state = json_parser.is_online(detail)
-    if state == False:
+def check_result():
+    out = cli.array_info(ARRAYNAME)
+    if json_parser.is_online(out) == False:
         return "pass"
     return "fail"
 
@@ -25,7 +26,7 @@ def set_result(detail):
     code = json_parser.get_response_code(detail)
     result = test_result.expect_true(code)
     if result == "pass":
-        result = check_result(detail)
+        result = check_result()
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
@@ -33,7 +34,7 @@ def execute():
     MOUNT_VOL_BASIC_1.execute()
     fio_proc = fio.start_fio(0, 60)
     time.sleep(5)
-    out = cli.unmount_array(MOUNT_VOL_BASIC_1.ARRAYNAME)
+    out = cli.unmount_array(ARRAYNAME)
     fio.stop_fio(fio_proc)
     return out
 

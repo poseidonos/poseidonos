@@ -13,7 +13,7 @@ import time
 import test_result
 import EXIT_POS_AFTER_UNMOUNT_VOL
 
-IBOFOS_ROOT = '../../../'
+POS_ROOT = '../../../'
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)
@@ -24,7 +24,7 @@ def set_result(detail):
 def execute():
     EXIT_POS_AFTER_UNMOUNT_VOL.execute()
     time.sleep(5)
-    ibofos_mbr_reset = IBOFOS_ROOT + "/test/script/mbr_reset.sh"
+    ibofos_mbr_reset = POS_ROOT + "/test/script/mbr_reset.sh"
     subprocess.call([ibofos_mbr_reset])
     pos.start_pos()
     cli.scan_device()

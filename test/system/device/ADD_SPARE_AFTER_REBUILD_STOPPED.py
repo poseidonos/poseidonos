@@ -14,6 +14,8 @@ import json
 import time
 import REBUILD_STOP_BASIC
 
+ARRAYNAME = REBUILD_STOP_BASIC.ARRAYNAME
+
 def set_result(detail):
     code = json_parser.get_response_code(detail)
     result = test_result.expect_false(code)
@@ -22,7 +24,8 @@ def set_result(detail):
 
 def execute():
     REBUILD_STOP_BASIC.execute()
-    out = cli.add_device(REBUILD_STOP_BASIC.REMAINING_DEV, REBUILD_STOP_BASIC.ARRAYNAME)
+    out = cli.add_device(REBUILD_STOP_BASIC.REMAINING_DEV, ARRAYNAME)
+    print (out)
     return out
 
 if __name__ == "__main__":

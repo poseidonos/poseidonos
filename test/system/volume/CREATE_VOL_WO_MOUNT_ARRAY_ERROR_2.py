@@ -12,6 +12,7 @@ import cli
 import test_result
 import pos_constant
 import UNMOUNT_ARRAY_BASIC
+ARRAYNAME = UNMOUNT_ARRAY_BASIC.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -28,7 +29,7 @@ def execute():
     UNMOUNT_ARRAY_BASIC.execute()
     size = pos_constant.SIZE_1GB
     name = "vol2"
-    out = cli.create_volume(name , str(size),"","","")
+    out = cli.create_volume(name , str(size),"","",ARRAYNAME)
     return out
 
 if __name__ == "__main__":

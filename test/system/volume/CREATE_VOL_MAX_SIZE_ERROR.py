@@ -13,6 +13,8 @@ import test_result
 import pos_constant
 import MOUNT_ARRAY_BASIC
 
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
+
 def clear_result():
     if os.path.exists( __file__ + ".result"):
         os.remove( __file__ + ".result")
@@ -26,12 +28,11 @@ def set_result(detail):
 def execute():
     clear_result()
     MOUNT_ARRAY_BASIC.execute()
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    capacity = data['Response']['info']['capacity']
+    out = cli.array_info(ARRAYNAME)
+    capacity = json_parser.get_capacity(out)
     print("capa: " + str(capacity))
     size = capacity + pos_constant.SIZE_1GB
-    out = cli.create_volume("vol1", str(size), "", "", "")
+    out = cli.create_volume("vol1", str(size), "", "", ARRAYNAME)
     return out
 
 if __name__ == "__main__":

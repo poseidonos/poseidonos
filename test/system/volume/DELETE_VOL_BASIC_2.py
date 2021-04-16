@@ -13,6 +13,7 @@ import test_result
 import UNMOUNT_VOL_BASIC_1
 
 VOL_NAME = UNMOUNT_VOL_BASIC_1.VOL_NAME
+ARRAYNAME = UNMOUNT_VOL_BASIC_1.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -27,7 +28,7 @@ def set_result(detail):
 def execute():
     clear_result()
     UNMOUNT_VOL_BASIC_1.execute()
-    out = cli.delete_volume(UNMOUNT_VOL_BASIC_1.VOL_NAME, "")
+    out = cli.delete_volume(VOL_NAME, ARRAYNAME)
     return out
 
 if __name__ == "__main__":

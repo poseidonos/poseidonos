@@ -28,55 +28,45 @@ def create_array(buffer, data, spare, array, raid):
         param_str += " -d " + data
     if spare != "":
         param_str += " -s " + spare
-    if array != "":
-        param_str += " --name " + array
+    param_str += " --name " + array
     if raid != "":
         param_str += " --raidtype " + raid
     return send_request("array create " + param_str)
 
 def delete_array(array):
     param_str = ""
-    if array != "":
-        param_str += "--name " + array
+    param_str += "--name " + array
     return send_request("array delete " + param_str)
 
 def mount_array(array):
     param_str = ""
-    if array != "":
-        param_str += "--name " + array
+    param_str += "--name " + array
     return send_request("array mount " + param_str)
 
 def unmount_array(array):
     param_str = ""
-    if array != "":
-        param_str += "--name " + array
+    param_str += "--name " + array
     return send_request("array unmount " + param_str)
 
 def list_array_device(array):
     param_str = ""
-    if array != "":
-        param_str += "--name " + array
+    param_str += "--name " + array
     return send_request("array list_device " + param_str)
 
 def list_array():
     return send_request("array list")
 
 def array_info(array):
-    param_str = ""
-    if array != "":
-        param_str += "--name " + array
-    return send_request("array info " + param_str)
+    return send_request("array info --name " + array)
 
 def add_device(spare, array):
     param_str = "--spare " + spare
-    if array != "":
-        param_str += " --array " + array
+    param_str += " --array " + array
     return send_request("array add " + param_str)
 
 def remove_device(spare, array):
     param_str = "--spare " + spare
-    if array != "":
-        param_str += " --array " + array
+    param_str += " --array " + array
     return send_request("array remove " + param_str)
 
 def create_volume(vol_name, size, iops, bw, array):
@@ -85,35 +75,30 @@ def create_volume(vol_name, size, iops, bw, array):
         param_str += " --maxiops " + iops
     if bw != "":
         param_str += " --maxbw " + bw
-    if array != "":
-        param_str += " --array " + array
+    param_str += " --array " + array
 
     return send_request("volume create " + param_str)
 
 def delete_volume(vol_name, array):
     param_str = "--name " + vol_name
-    if array != "":
-        param_str += " --array " + array
+    param_str += " --array " + array
     return send_request("volume delete " + param_str)
 
 def mount_volume(vol_name, array, subnqn):
     param_str = "--name " + vol_name
-    if array != "":
-        param_str += " --array " + array
+    param_str += " --array " + array
     if subnqn != "":
         param_str += " --subnqn " + subnqn
     return send_request("volume mount " + param_str)
 
 def unmount_volume(vol_name, array):
     param_str = "--name " + vol_name
-    if array != "":
-        param_str += " --array " + array
+    param_str += " --array " + array
     return send_request("volume unmount " + param_str)
 
 def list_volume(array):
     param_str = ""
-    if array != "":
-        param_str += " --array " + array
+    param_str += " --array " + array
     return send_request("volume list " + param_str)
 
 def update_volume_qos(vol_name, iops, bw, array):
@@ -122,15 +107,13 @@ def update_volume_qos(vol_name, iops, bw, array):
         param_str += " --maxiops " + iops
     if bw != "":
         param_str += " --maxbw " + bw
-    if array != "":
-        param_str += " --array " + array
+    param_str += " --array " + array
 
     return send_request("volume update_qos " + param_str)
 
 def rename_volume(vol_name, new_name, array):
     param_str = "--name " + vol_name + " --newname " + new_name
-    if array != "":
-        param_str += " --array " + array
+    param_str += " --array " + array
 
     return send_request("volume rename " + param_str)
 

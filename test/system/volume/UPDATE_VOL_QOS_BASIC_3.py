@@ -17,6 +17,7 @@ NAME = UPDATE_VOL_QOS_BASIC_2.NAME
 SIZE = UPDATE_VOL_QOS_BASIC_2.SIZE
 IOPS = (2**64-1) // 1000    # Refer to SRS: http://globalwiki.itplatform.sec.samsung.net:8099/display/ibof/2.3.1+%5BIBOFOS_SW_FRID_0301%5D+Create+Volume
 BW = 0
+ARRAYNAME = UPDATE_VOL_QOS_BASIC_2.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -46,7 +47,7 @@ def check_result(detail):
     return "pass"
 
 def set_result():
-    out = cli.list_volume("")
+    out = cli.list_volume(ARRAYNAME)
     result = check_result(out)
     code = json_parser.get_response_code(out)
     with open(__file__ + ".result", "w") as result_file:
@@ -55,7 +56,7 @@ def set_result():
 def execute():
     clear_result()
     UPDATE_VOL_QOS_BASIC_2.execute()
-    out = cli.update_volume_qos(NAME, str(IOPS), str(BW), "")
+    out = cli.update_volume_qos(NAME, str(IOPS), str(BW), ARRAYNAME)
     return out
 
 if __name__ == "__main__":

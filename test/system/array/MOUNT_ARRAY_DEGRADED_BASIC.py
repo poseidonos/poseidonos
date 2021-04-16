@@ -27,7 +27,7 @@ def set_result(detail):
     code = json_parser.get_response_code(detail)
     result = test_result.expect_true(code)
     if result == "pass":
-        out = cli.get_pos_info()
+        out = cli.array_info(ARRAYNAME)
         result = check_result(out)
     
     with open(__file__ + ".result", "w") as result_file:

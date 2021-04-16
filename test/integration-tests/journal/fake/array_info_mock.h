@@ -24,6 +24,7 @@ public:
     virtual string GetMetaRaidType(void);
     virtual string GetDataRaidType(void);
     virtual ArrayStateType GetState(void);
+    virtual StateContext* GetStateCtx(void);
     virtual uint32_t GetRebuildingProgress(void);
     virtual string GetCreateDatetime(void);
     virtual string GetUpdateDatetime(void);

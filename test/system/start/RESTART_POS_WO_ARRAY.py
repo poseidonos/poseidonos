@@ -12,20 +12,11 @@ import test_result
 import json
 import time
 import EXIT_POS_BASIC
-import START_POS_BASIC
-
-
-def check_result(detail):
-    isOnline = json_parser.is_online(detail)
-    if isOnline == False:
-        return "pass"
-    return "fail"
 
 def set_result():
     out = cli.get_pos_info()
-    print (out)
     code = json_parser.get_response_code(out)
-    result = check_result(out)
+    result = test_result.expect_true(code)
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + out)
 

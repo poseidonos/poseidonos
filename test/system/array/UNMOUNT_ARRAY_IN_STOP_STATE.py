@@ -15,9 +15,11 @@ import STATE_BUSY_TO_STOP
 import fio
 import time
 
-def check_result(detail):
-    state = json_parser.is_online(detail)
-    if state == False:
+ARRAYNAME = STATE_BUSY_TO_STOP.ARRAYNAME
+
+def check_result():
+    out = cli.array_info(ARRAYNAME)
+    if json_parser.is_online(out) == False:
         return "pass"
     return "fail"
 
@@ -25,13 +27,13 @@ def set_result(detail):
     code = json_parser.get_response_code(detail)
     result = test_result.expect_false(code)
     if result == "pass":
-        result = check_result(detail)
+        result = check_result()
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
 def execute():
     STATE_BUSY_TO_STOP.execute()
-    out = cli.unmount_array(STATE_BUSY_TO_STOP.ARRAYNAME)
+    out = cli.unmount_array(ARRAYNAME)
     return out
 
 if __name__ == "__main__":

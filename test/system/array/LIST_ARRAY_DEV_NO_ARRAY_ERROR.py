@@ -23,7 +23,7 @@ def set_result(detail):
 
 def execute():
     SCAN_DEV_BASIC.execute()
-    out = cli.list_array_device("")
+    out = cli.list_array_device("TEMPARRAY")
     return out
 
 if __name__ == "__main__":

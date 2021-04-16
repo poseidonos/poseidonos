@@ -36,7 +36,7 @@ def set_result(detail):
 def execute():
     clear_result()
     CREATE_VOL_NO_SPARE.execute()
-    out = cli.mount_volume(CREATE_VOL_NO_SPARE.VOL_NAME, "", "")
+    out = cli.mount_volume(CREATE_VOL_NO_SPARE.VOL_NAME, ARRAYNAME, "")
     return out
 
 if __name__ == "__main__":

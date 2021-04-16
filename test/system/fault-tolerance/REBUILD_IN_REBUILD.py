@@ -16,22 +16,18 @@ import MOUNT_VOL_BASIC_1
 import fio
 import time
 DETACH_TARGET_DEV = MOUNT_VOL_BASIC_1.ANY_DATA
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 def check_result():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    if data['Response']['info']['state'] == "NORMAL":
+    out = cli.array_info(ARRAYNAME)
+    state = json_parser.get_state(out)
+    if state == "NORMAL":
         return "pass", out
     return "fail", out
 
 def set_result():
-    detail = cli.get_pos_info()
-    code = json_parser.get_response_code(detail)
-    if code == 0:
-        result, out = check_result()
-    else:
-        result = "fail"
-        out = detail
+    result, out = check_result()
+    code = json_parser.get_response_code(out)
 
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + out)
@@ -45,15 +41,16 @@ def execute():
     time.sleep(detach_dev_timeout)
     print(cli.list_device())
     spare_dev_newly_attached = "unvme-ns-4"
-    result = cli.add_device(spare_dev_newly_attached, MOUNT_VOL_BASIC_1.ARRAYNAME)
+    result = cli.add_device(spare_dev_newly_attached, ARRAYNAME)
     code = json_parser.get_response_code(result)
     if code == 0:
         print ("device added successfully")
         rebuild_trigger_timeout = 100
         rebuild_started = False
         for i in range(rebuild_trigger_timeout):
-            out = cli.get_pos_info()
-            if out.find("REBUILD") >= 0:
+            out = cli.array_info(ARRAYNAME)
+            situ = json_parser.get_situation(out)
+            if situ.find("REBUILD") >= 0:
                 print ("rebuilding started")
                 rebuild_duration = 5
                 time.sleep(rebuild_duration)
@@ -73,12 +70,13 @@ def execute():
         
         rebuild_started = False
         while True:
-            out = cli.get_pos_info()
-            if out.find("REBUILD") == -1 and rebuild_started == True:
+            out = cli.array_info(ARRAYNAME)
+            situ = json_parser.get_situation(out)
+            if situ.find("REBUILD") == -1 and rebuild_started == True:
                 print ("2nd rebuilding done")
                 fio.wait_fio(fio_proc)
                 return True
-            elif rebuild_started == False and out.find("REBUILD") >= 0:
+            elif rebuild_started == False and situ.find("REBUILD") >= 0:
                 print ("2nd rebuilding started")
                 rebuild_started = True
             time.sleep(1)

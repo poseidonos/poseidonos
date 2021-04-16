@@ -13,6 +13,7 @@ import test_result
 import pos_constant
 import CREATE_VOL_BASIC_8
 
+ARRAYNAME = CREATE_VOL_BASIC_8.ARRAYNAME
 VOL_NAME_PREFIX = "vol"
 VOL_SIZE = pos_constant.SIZE_1MB * 100
 VOL_IOPS = 10
@@ -31,7 +32,7 @@ def set_result(detail):
 def execute():
     clear_result()
     CREATE_VOL_BASIC_8.execute()
-    out = cli.create_volume(VOL_NAME_PREFIX + str(257), str(VOL_SIZE), str(VOL_IOPS), str(VOL_BW), "")
+    out = cli.create_volume(VOL_NAME_PREFIX + str(257), str(VOL_SIZE), str(VOL_IOPS), str(VOL_BW), ARRAYNAME)
     return out
 
 if __name__ == "__main__":

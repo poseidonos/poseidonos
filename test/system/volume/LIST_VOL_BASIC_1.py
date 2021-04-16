@@ -20,7 +20,7 @@ import CREATE_VOL_BASIC_5
 import CREATE_VOL_BASIC_6
 import CREATE_VOL_BASIC_7
 
-
+ARRAYNAME = CREATE_VOL_BASIC_1.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -63,7 +63,7 @@ def check_result(detail):
     return "pass"
 
 def set_result():
-    out = cli.list_volume("")
+    out = cli.list_volume(ARRAYNAME)
     result = check_result(out)
     code = json_parser.get_response_code(out)
     with open(__file__ + ".result", "w") as result_file:

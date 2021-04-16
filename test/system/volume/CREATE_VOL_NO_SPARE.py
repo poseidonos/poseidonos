@@ -14,6 +14,7 @@ import pos_constant
 import MOUNT_ARRAY_NO_SPARE
 import volume
 
+ARRAYNAME = MOUNT_ARRAY_NO_SPARE.ARRAYNAME
 VOL_NAME = "vol1"
 VOL_SIZE = pos_constant.SIZE_1GB * 20
 VOL_IOPS = 0
@@ -21,7 +22,6 @@ VOL_BW = 0
 
 REMAINING_DEV = MOUNT_ARRAY_NO_SPARE.REMAINING_DEV
 ANY_DATA = MOUNT_ARRAY_NO_SPARE.ANY_DATA
-ARRAYNAME = MOUNT_ARRAY_NO_SPARE.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -51,7 +51,7 @@ def check_result(detail):
     return "pass"
 
 def set_result(detail):
-    out = cli.list_volume("")
+    out = cli.list_volume(ARRAYNAME)
     result = check_result(out)
     code = json_parser.get_response_code(out)
     with open(__file__ + ".result", "w") as result_file:
@@ -60,7 +60,7 @@ def set_result(detail):
 def execute():
     clear_result()
     MOUNT_ARRAY_NO_SPARE.execute()
-    out = cli.create_volume(VOL_NAME, str(VOL_SIZE),"","",MOUNT_ARRAY_NO_SPARE.ARRAYNAME)
+    out = cli.create_volume(VOL_NAME, str(VOL_SIZE),"","",ARRAYNAME)
     return out
 
 if __name__ == "__main__":

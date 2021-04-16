@@ -13,6 +13,7 @@ import test_result
 import UNMOUNT_VOL_BASIC_1
 import volume
 
+ARRAYNAME = UNMOUNT_VOL_BASIC_1.ARRAYNAME
 IOPS = 10
 BW = 10
 
@@ -29,8 +30,8 @@ def set_result(detail):
 def execute():
     clear_result()
     UNMOUNT_VOL_BASIC_1.execute()
-    cli.delete_volume(UNMOUNT_VOL_BASIC_1.VOL_NAME, "")
-    out = cli.update_volume_qos(UNMOUNT_VOL_BASIC_1.VOL_NAME, str(IOPS), str(BW), "")
+    cli.delete_volume(UNMOUNT_VOL_BASIC_1.VOL_NAME, ARRAYNAME)
+    out = cli.update_volume_qos(UNMOUNT_VOL_BASIC_1.VOL_NAME, str(IOPS), str(BW), ARRAYNAME)
     return out
 
 if __name__ == "__main__":

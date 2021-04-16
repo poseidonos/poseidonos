@@ -12,6 +12,7 @@ import cli
 import test_result
 import pos_constant
 import MOUNT_ARRAY_BASIC
+ARRAYNAME= MOUNT_ARRAY_BASIC.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -33,7 +34,7 @@ def set_result(detail):
 def execute():
     clear_result()
     MOUNT_ARRAY_BASIC.execute()
-    out = cli.list_volume("")
+    out = cli.list_volume(ARRAYNAME)
     return out
 
 if __name__ == "__main__":

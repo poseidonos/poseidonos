@@ -35,7 +35,7 @@ public:
     MOCK_METHOD(bool, IsMounted, (), (override));
     MOCK_METHOD(bool, IsBroken, (), (override));
     MOCK_METHOD(ArrayStateType, GetState, (), (override));
-    MOCK_METHOD(StateEnum, GetSysState, (), (override));
+    MOCK_METHOD(StateContext*, GetSysState, (), (override));
     MOCK_METHOD(void, StateChanged, (StateContext * prev, StateContext* next), (override));
 };
 

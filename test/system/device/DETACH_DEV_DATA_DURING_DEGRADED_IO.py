@@ -18,22 +18,18 @@ import time
 import DETACH_DEV_DATA_DURING_IO
 
 DETACH_TARGET = DETACH_DEV_DATA_DURING_IO.ANY_OTHER_DATA
-
+ARRAYNAME = DETACH_DEV_DATA_DURING_IO.ARRAYNAME
 
 def check_result():
-    out = cli.get_pos_info()
-    data = json.loads(out)
-    if data['Response']['info']['state'] == "BROKEN":
-        return "pass"
-    return "fail"
+    out = cli.array_info(ARRAYNAME)
+    situ = json_parser.get_situation(out)
+    if situ == "FAULT":
+        return "pass", out
+    return "fail", out
 
-def set_result(detail):
-    code = json_parser.get_response_code(detail)
-    out = detail
-    if code == 0:
-        result = check_result()
-    else:
-        result = "fail"
+def set_result():
+    result, out = check_result()
+    code = json_parser.get_response_code(out)
 
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + out)
@@ -42,13 +38,9 @@ def execute():
     DETACH_DEV_DATA_DURING_IO.execute()
     pos_util.pci_detach(DETACH_TARGET)
 
-    out = cli.get_pos_info()
-    print ("info : " + out)
-    return out
-
 if __name__ == "__main__":
     test_result.clear_result(__file__)
-    out = execute()
-    set_result(out)
+    execute()
+    set_result()
     pos.kill_pos()
     pos_util.pci_rescan()

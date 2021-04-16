@@ -12,6 +12,7 @@ import cli
 import test_result
 import MOUNT_VOL_BASIC_1
 
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 NAME = MOUNT_VOL_BASIC_1.VOL_NAME
 LONG_NAME = "aaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaabbbbbbbbccccccccdddddddd"
 
@@ -28,7 +29,7 @@ def set_result(detail):
 def execute():
     clear_result()
     MOUNT_VOL_BASIC_1.execute()
-    out = cli.rename_volume(NAME, LONG_NAME, "")
+    out = cli.rename_volume(NAME, LONG_NAME, ARRAYNAME)
     return out
 
 if __name__ == "__main__":
