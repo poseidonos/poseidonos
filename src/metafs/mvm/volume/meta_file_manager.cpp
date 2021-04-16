@@ -36,6 +36,8 @@
 #include "metafs_log.h"
 #include "src/include/memory.h"
 
+#include <string>
+
 namespace pos
 {
 MetaFileManager::MetaFileManager(void)

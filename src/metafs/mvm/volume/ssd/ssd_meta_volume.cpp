@@ -34,6 +34,7 @@
 
 #include "src/logger/logger.h"
 
+#include <string>
 namespace pos
 {
 SsdMetaVolume::SsdMetaVolume(std::string arrayName, MetaLpnType maxVolumePageNum)

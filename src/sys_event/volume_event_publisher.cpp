@@ -32,10 +32,11 @@
 
 #include "volume_event_publisher.h"
 
-#include <iostream>
-
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+
+#include <iostream>
+#include <utility>
 
 namespace pos
 {

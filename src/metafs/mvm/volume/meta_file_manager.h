@@ -40,6 +40,8 @@
 #include "mss.h"
 #include "on_volume_meta_region_mgr.h"
 
+#include <string>
+
 namespace pos
 {
 using FileDescriptorSet = std::unordered_set<FileDescriptorType>;

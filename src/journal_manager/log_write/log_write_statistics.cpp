@@ -109,7 +109,7 @@ LogWriteStatistics::UpdateStatus(LogWriteContext* context)
         LogHandlerInterface* log = context->GetLog();
 
         if (log->GetType() == LogType::BLOCK_WRITE_DONE)
-        {    
+        {
             StripeLogWriteStatus* stripeStats = _FindStripeLogs(groupId, log->GetVsid());
             BlockWriteDoneLog dat = *(reinterpret_cast<BlockWriteDoneLog*>(log->GetData()));
             stripeStats->BlockLogFound(dat);

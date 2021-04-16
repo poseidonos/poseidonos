@@ -36,6 +36,8 @@
 #include "metafs_log.h"
 #include "mss.h"
 
+#include <string>
+
 namespace pos
 {
 VolumeCatalogManager::VolumeCatalogManager(void)

@@ -34,6 +34,8 @@
 
 #include "meta_volume.h"
 
+#include <string>
+
 namespace pos
 {
 class SsdMetaVolume : public MetaVolume

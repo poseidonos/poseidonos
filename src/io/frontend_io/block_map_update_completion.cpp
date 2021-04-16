@@ -45,9 +45,9 @@
 namespace pos
 {
 BlockMapUpdateCompletion::BlockMapUpdateCompletion(
-    VolumeIoSmartPtr input, CallbackSmartPtr originCallback, 
+    VolumeIoSmartPtr input, CallbackSmartPtr originCallback,
     function<bool(void)> IsReactorNow,
-    IVSAMap *iVSAMap, EventScheduler *eventScheduler, 
+    IVSAMap *iVSAMap, EventScheduler *eventScheduler,
     WriteCompletion *writeCompletion, IBlockAllocator* iBlockAllocator)
 : Event(IsReactorNow()),
   volumeIo(input),

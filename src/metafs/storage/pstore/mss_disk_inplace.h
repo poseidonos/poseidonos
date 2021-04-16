@@ -35,6 +35,8 @@
 
 #include "mss_disk_place.h"
 
+#include <string>
+
 namespace pos
 {
 /**

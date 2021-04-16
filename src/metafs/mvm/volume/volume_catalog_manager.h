@@ -35,6 +35,8 @@
 #include "volume_catalog.h"
 #include "on_volume_meta_region_mgr.h"
 
+#include <string>
+
 namespace pos
 {
 class VolumeCatalogManager : public OnVolumeMetaRegionManager

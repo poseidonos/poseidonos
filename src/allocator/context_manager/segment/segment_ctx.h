@@ -90,7 +90,7 @@ public:
     AllocatorContextIoCtx* StoreSegmentInfoAsync(MetaIoCbPtr cb);
     void ReleaseRequestIo(AsyncMetaFileIoCtx* ctx);
     bool IsSegmentInfoRequestIo(char* pBuf);
-    bool CheckSegmentState(SegmentId segmentId, SegmentState state);    
+    bool CheckSegmentState(SegmentId segmentId, SegmentState state);
 
     SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
     void ResetExVictimSegment(void);

@@ -32,12 +32,13 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
-#include <vector>
-
 #include "src/lib/singleton.h"
 #include "volume_event.h"
+
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 using namespace std;
 
