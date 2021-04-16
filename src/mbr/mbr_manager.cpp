@@ -39,8 +39,8 @@
 #include <string>
 #include <utility>
 
-#include "src/array/device/array_device_list.h"
 #include "src/array/array_name_policy.h"
+#include "src/array/device/array_device_list.h"
 #include "src/device/base/ublock_device.h"
 #include "src/device/device_manager.h"
 #include "src/helper/time_helper.h"
@@ -699,8 +699,23 @@ MbrManager::_LoadIndexMap(void)
             }
         }
     }
-
     return 0;
+}
+
+string
+MbrManager::FindArray(string devname)
+{
+    pthread_rwlock_rdlock(&mbrLock);
+    int arrayIndex = mapMgr->FindArrayIndex(devname);
+    pthread_rwlock_unlock(&mbrLock);
+    if (0 <= arrayIndex)
+    {
+        return systeminfo.arrayInfo[arrayIndex].arrayName;
+    }
+    else
+    {
+        return "";
+    }
 }
 
 } // namespace pos

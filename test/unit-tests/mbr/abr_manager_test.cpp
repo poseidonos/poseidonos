@@ -51,7 +51,7 @@ TEST(AbrManager, LoadAbr_testIfAbrDataLoadedCorrectly)
         newAbr->totalDevNum = 4;
         newAbr->dataDevNum = 3;
         newAbr->spareDevNum = 1;
-        CopyData(newAbr->devInfo[0].deviceUid , mockDeviceName , DEVICE_UID_SIZE );
+        CopyData(newAbr->devInfo[0].deviceUid, mockDeviceName, DEVICE_UID_SIZE);
         *abr = newAbr;
         return 0;
     });
@@ -61,7 +61,7 @@ TEST(AbrManager, LoadAbr_testIfAbrDataLoadedCorrectly)
     abrMgr->LoadAbr(mockArrayName, meta);
 
     // Then : meta have array data
-    EXPECT_EQ(mockDeviceName, meta.devs.data.at(0).uid );
+    EXPECT_EQ(mockDeviceName, meta.devs.data.at(0).uid);
     delete mockMbrManager;
 }
 
@@ -80,7 +80,7 @@ TEST(AbrManager, SaveAbr_testAbrDataUpdateAndDataCheck)
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
 
     // When : save abr with updated information
-    ArrayMeta meta = buildArrayMeta(mockArrayName,3,1); // array have own arraymeta in product code
+    ArrayMeta meta = buildArrayMeta(mockArrayName, 3, 1); // array have own arraymeta in product code
     string builtDevName0 = mockArrayName + "_data_dev0";
     EXPECT_EQ(builtDevName0, meta.devs.data.at(0).uid);
     abrMgr->SaveAbr(mockArrayName, meta);
@@ -108,7 +108,7 @@ TEST(AbrManager, GetMfsInit_testGettingMfsInitZero)
     // When : GetMfsInit
     bool mfsinitVal = abrMgr->GetMfsInit(mockArrayName);
     // Then : The value is same as expected
-    EXPECT_EQ(expectedMfsInitVal,mfsinitVal);
+    EXPECT_EQ(expectedMfsInitVal, mfsinitVal);
     delete mockMbrManager;
 }
 
@@ -129,7 +129,7 @@ TEST(AbrManager, GetMfsInit_testGettingMfsInitOne)
     // When : GetMfsInit
     bool mfsinitVal = abrMgr->GetMfsInit(mockArrayName);
     // Then : The value is same as expected
-    EXPECT_EQ(expectedMfsInitVal,mfsinitVal);
+    EXPECT_EQ(expectedMfsInitVal, mfsinitVal);
     delete mockMbrManager;
 }
 
@@ -149,10 +149,10 @@ TEST(AbrManager, SetMfsInit_testIfMfsInitValSetToZero)
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
 
     // When : set mfsinit value
-    abrMgr->SetMfsInit(mockArrayName,expectedMfsInitVal);
+    abrMgr->SetMfsInit(mockArrayName, expectedMfsInitVal);
     // Then : check mfsinit value
     bool mfsinitVal = abrMgr->GetMfsInit(mockArrayName);
-    EXPECT_EQ(expectedMfsInitVal,mfsinitVal);
+    EXPECT_EQ(expectedMfsInitVal, mfsinitVal);
     delete mockMbrManager;
 }
 
@@ -172,10 +172,10 @@ TEST(AbrManager, SetMfsInit_testIfMfsInitValSetToOne)
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
 
     // When : set mfsinit value
-    abrMgr->SetMfsInit(mockArrayName,expectedMfsInitVal);
+    abrMgr->SetMfsInit(mockArrayName, expectedMfsInitVal);
     // Then : check mfsinit value
     bool mfsinitVal = abrMgr->GetMfsInit(mockArrayName);
-    EXPECT_EQ(expectedMfsInitVal,mfsinitVal);
+    EXPECT_EQ(expectedMfsInitVal, mfsinitVal);
     delete mockMbrManager;
 }
 
@@ -226,6 +226,22 @@ TEST(AbrManager, GetAbrList_testCommandPassing)
     vector<ArrayBootRecord> abrList;
     abrMgr->GetAbrList(abrList);
     // Then : Nothing
+}
+
+TEST(AbrManager, FindArray_testCommandPassing)
+{
+    // Given : AbrManger
+    string mockArrayName = "POSArray";
+    string devName = "unvme-ns-0";
+    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
+    EXPECT_CALL(*mockMbrManager, FindArray(_)).WillOnce([=](string devName) {
+        return mockArrayName;
+    });
+    AbrManager* abrMgr = new AbrManager(mockMbrManager);
+    // When : Call FindArray
+    string result = abrMgr->FindArray(devName);
+    // Then : Compare Result
+    EXPECT_EQ(mockArrayName, result);
 }
 
 } // namespace pos

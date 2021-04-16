@@ -123,4 +123,35 @@ TEST(MbrMapManager, CheckDevices_testDeviceInfoWithOneInfoInMap)
     EXPECT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), result);
 }
 
+TEST(MbrMapManager, FindArrayIndex_testFindingArrayIndexWithOneInfoInMap)
+{
+    // Given : deviceIndexMap with on deivce info
+    MbrMapManager* mmMgr = new MbrMapManager;
+    string mockDeviceUid = "unvme-ns-0";
+    int mockArrayIndex = 0;
+    mmMgr->InsertDevice(mockDeviceUid, mockArrayIndex);
+
+    // When : Find array index with device name
+    int result = mmMgr->FindArrayIndex(mockDeviceUid);
+
+    // Then : Result array index is equal to info
+    EXPECT_EQ(mockArrayIndex, result);
+}
+
+TEST(MbrMapManager, FindArrayIndex_testFindingArrayIndexWithNoInfoInMap)
+{
+    // Given : deviceIndexMap with on deivce info
+    MbrMapManager* mmMgr = new MbrMapManager;
+    string mockDeviceUid = "unvme-ns-0";
+    int failedResult = -1;
+
+    // When : Find array index with device name
+    int result = mmMgr->FindArrayIndex(mockDeviceUid);
+
+    // Then : Result array index is equal to info
+    EXPECT_EQ(failedResult, result);
+}
+
+
+
 } // namespace pos

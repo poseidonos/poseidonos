@@ -60,6 +60,7 @@ public:
     virtual int DeleteAbr(string arrayName, ArrayMeta& meta) override;
     virtual int ResetMbr(void) override;
     int GetAbrList(std::vector<ArrayBootRecord>& abrList);
+    virtual string FindArray(string devName);
 
 private:
     MbrManager* mbrManager;

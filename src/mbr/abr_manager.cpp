@@ -217,4 +217,12 @@ AbrManager::GetAbrList(std::vector<ArrayBootRecord>& abrList)
     return result;
 }
 
+string
+AbrManager::FindArray(string devName)
+{
+    string arrayName = mbrManager->FindArray(devName);
+
+    return arrayName;
+}
+
 } // namespace pos

@@ -17,6 +17,7 @@ public:
     MOCK_METHOD(int, DeleteDevices, (unsigned int arrayIndex), (override));
     MOCK_METHOD(int, ResetMap, (), (override));
     MOCK_METHOD(int, CheckDevices, (ArrayMeta & meta), (override));
+    MOCK_METHOD(int, FindArrayIndex, (string devName), (override));
 };
 
 } // namespace pos

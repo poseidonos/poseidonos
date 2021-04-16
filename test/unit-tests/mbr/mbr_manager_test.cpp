@@ -30,6 +30,7 @@ buildArrayMeta(string arrayName, int numDataDevices, int numBufferDevices)
 
     for (int i = 0; i < numDataDevices; i += 1)
     {
+        // The UID is different from the device name
         string uid = arrayName + "_data_dev" + std::to_string(i);
         DeviceMeta dm(uid);
         arrayMeta.devs.data.push_back(dm);
@@ -673,6 +674,66 @@ TEST(MbrManager, UpdateDeviceIndexMap_testIfMbrMapManagerRefreshesDeviceMap)
     newOtherArrayMeta.arrayName = newOtherArrayName;
     newOtherArrayMeta.devs.spares.push_back(DeviceMeta(newSpareDeviceName));
     ASSERT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), mbrMapManager->CheckDevices(newOtherArrayMeta));
+}
+
+TEST(MbrManager, FindArray_testFindingArraySuccessfully)
+{
+    // Given : MbrManager with one array
+    int expectedArrayNum = 1;
+    int defaultArrayIndex = 0;
+    string mockArrayName = "POSArray";
+    string mockDevName = "unvme-ns-0";
+    MockDeviceManager mockDevMgr;
+    EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([=](DeviceIterFunc func, void* ctx) {
+        std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
+        using MBR = struct masterBootRecord;
+        MBR* mbr = new MBR;
+        mbr->mbrVersion = 1;
+        mbr->arrayNum = expectedArrayNum;
+        mbr->arrayValidFlag[defaultArrayIndex] = 1;
+        CopyData(mbr->arrayInfo[defaultArrayIndex].arrayName, mockArrayName, ARRAY_NAME_SIZE);
+
+        pMBRs->push_back(mbr);
+
+        return 0;
+    });
+    NiceMock<MockMbrMapManager>* mockMbrMapMgr = new NiceMock<MockMbrMapManager>;
+    EXPECT_CALL(*mockMbrMapMgr, FindArrayIndex(_)).WillOnce([=](string devName) {
+        return defaultArrayIndex;
+    });
+    MbrManager mbrMgr(NULL, "", NULL, NULL, &mockDevMgr, mockMbrMapMgr);
+
+    // When : Call FindArray
+    mbrMgr.LoadMbr();
+    string result = mbrMgr.FindArray(mockDevName);
+
+    // Then : array found
+    EXPECT_EQ(mockArrayName, result);
+}
+
+TEST(MbrManager, FindArray_testFindingArrayWithNoArray)
+{
+    // Given : MbrManager with one array
+    int expectedArrayNum = 1;
+    int defaultArrayIndex = 0;
+    string mockDevName = "unvme-ns-0";
+    MockDeviceManager mockDevMgr;
+    EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([=](DeviceIterFunc func, void* ctx) {
+        std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
+        return 0;
+    });
+    NiceMock<MockMbrMapManager>* mockMbrMapMgr = new NiceMock<MockMbrMapManager>;
+    EXPECT_CALL(*mockMbrMapMgr, FindArrayIndex(_)).WillOnce([=](string devName) {
+        return -1;
+    });
+    MbrManager mbrMgr(NULL, "", NULL, NULL, &mockDevMgr, mockMbrMapMgr);
+
+    // When : Call FindArray
+    mbrMgr.LoadMbr();
+    string result = mbrMgr.FindArray(mockDevName);
+
+    // Then : array found
+    EXPECT_EQ("", result);
 }
 
 } // namespace pos

@@ -79,6 +79,7 @@ public:
 
 private:
     ArrayComponents* _FindArray(string name);
+    ArrayComponents* _FindArrayWithDevName(string devName);
     ArrayDevice* _FindDevice(string devSn);
     int _Load(string name);
     void _Erase(string name);

@@ -152,14 +152,13 @@ ArrayManager::RemoveDevice(string name, string dev)
 int
 ArrayManager::DeviceDetached(UblockSharedPtr dev)
 {
-    // TODO_MULTIARRAY:Finding an array containing the device
-    ArrayComponents* array = _FindArray("");
+    ArrayComponents* array = _FindArrayWithDevName(dev->GetName());
     if (array != nullptr)
     {
         return array->GetArray()->DetachDevice(dev);
     }
 
-    return 0;
+    return 0; // this function will be void type when device lock is removed
 }
 
 bool
@@ -243,8 +242,6 @@ ArrayManager::Load(list<string>& failedArrayList)
 int
 ArrayManager::_Load(string name)
 {
-    // TODO_MULTIARRAY : load all arrays automatically.
-
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
     {
@@ -327,6 +324,21 @@ ArrayManager::_FindArray(string name)
     }
 
     return it->second;
+}
+
+ArrayComponents*
+ArrayManager::_FindArrayWithDevName(string devName)
+{
+    string arrayName = abrManager->FindArray(devName);
+    if (arrayName == "")
+    {
+        int eventId = (int)POS_EVENT_ID::ARRAY_NOT_FOUND;
+        POS_TRACE_INFO(eventId, "There are no arrays with that device");
+        return nullptr;
+    }
+    ArrayComponents* array = _FindArray(arrayName);
+
+    return array;
 }
 
 ArrayDevice*

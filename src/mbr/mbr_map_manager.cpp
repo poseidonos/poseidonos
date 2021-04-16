@@ -32,9 +32,9 @@
 
 #include "mbr_map_manager.h"
 
-#include "src/include/pos_event_id.h"
-
 #include <utility>
+
+#include "src/include/pos_event_id.h"
 
 namespace pos
 {
@@ -116,6 +116,26 @@ MbrMapManager::ResetMap(void)
 {
     arrayDeviceIndexMap.clear();
     return 0;
+}
+
+int
+MbrMapManager::FindArrayIndex(string devname)
+{
+    arrayDeviceIndexMapIter devIter;
+    for (devIter = arrayDeviceIndexMap.begin(); devIter !=
+         arrayDeviceIndexMap.end();)
+    {
+        if (devIter->first == devname)
+        {
+            return devIter->second;
+        }
+        else
+        {
+            ++devIter;
+        }
+    }
+
+    return -1;
 }
 
 } // namespace pos
