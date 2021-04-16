@@ -1,9 +1,7 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
 #include "src/journal_manager/log/log_event.h"
 
 namespace pos
@@ -24,6 +22,18 @@ class MockStripeMapUpdatedLog : public StripeMapUpdatedLog
 {
 public:
     using StripeMapUpdatedLog::StripeMapUpdatedLog;
+};
+
+class MockGcBlockMapUpdate : public GcBlockMapUpdate
+{
+public:
+    using GcBlockMapUpdate::GcBlockMapUpdate;
+};
+
+class MockGcStripeFlushedLog : public GcStripeFlushedLog
+{
+public:
+    using GcStripeFlushedLog::GcStripeFlushedLog;
 };
 
 class MockVolumeDeletedLog : public VolumeDeletedLog

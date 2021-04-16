@@ -341,6 +341,22 @@ JournalManager::AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
 }
 
 int
+JournalManager::AddGcStripeFlushedLog(int volumeId, GcStripeMapUpdateList mapUpdates,
+    MapPageList dirty, EventSmartPtr callbackEvent)
+{
+    int result = 0;
+    if ((result = _CanJournalBeWritten()) == 0)
+    {
+        LogWriteContext* logWriteContext =
+            logFactory->CreateGcStripeFlushedLogWriteContext(volumeId, mapUpdates, dirty, callbackEvent);
+        return logWriteHandler->AddLog(logWriteContext);
+    }
+    else
+    {
+        return result;
+    }
+}
+int
 JournalManager::_Reset(void)
 {
     if (journalManagerStatus != JOURNAL_INVALID)

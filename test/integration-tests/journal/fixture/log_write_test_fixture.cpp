@@ -138,6 +138,50 @@ LogWriteTestFixture::WriteStripeLog(StripeId vsid, StripeAddr oldAddr, StripeAdd
     return (result >= 0);
 }
 
+bool
+LogWriteTestFixture::WriteGcStripeLog(int volumeId, StripeId vsid)
+{
+    GcStripeMapUpdateList mapUpdates;
+    mapUpdates.vsid = vsid;
+    mapUpdates.stripeAddr = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = vsid
+    };
+
+    MpageList volumeDirtyList;
+    for (BlkOffset offset = 0; offset < testInfo->numBlksPerStripe; offset++)
+    {
+        GcBlockMapUpdate update = {
+            .rba = offset,
+            .vsa = {
+                .stripeId = vsid,
+                .offset = offset
+            }
+        };
+        mapUpdates.blockMapUpdateList.push_back(update);
+        auto dirty = mapper->GetVSAMapMock()->GetDirtyVsaMapPages(volumeId, update.rba, 1);
+        volumeDirtyList.insert(dirty.begin(), dirty.end());
+    }
+    MapPageList dirtyMap;
+    dirtyMap[volumeId] = volumeDirtyList;
+    dirtyMap[STRIPE_MAP_ID] = (mapper->GetStripeMapMock())->GetDirtyStripeMapPages(vsid);
+
+    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
+    int result = journal->AddGcStripeFlushedLog(volumeId, mapUpdates, dirtyMap, event);
+    if (result == 0)
+    {
+        testingLogs.AddToWriteList(volumeId, mapUpdates);
+        _AddToDirtyPageList(volumeId, dirtyMap[volumeId]);
+        _AddToDirtyPageList(STRIPE_MAP_ID, dirtyMap[STRIPE_MAP_ID]);
+    }
+    else
+    {
+        cout << "Log write failed " << endl;
+    }
+
+    return (result >= 0);
+}
+
 void
 LogWriteTestFixture::_AddToDirtyPageList(int mapId, MpageList dirty)
 {

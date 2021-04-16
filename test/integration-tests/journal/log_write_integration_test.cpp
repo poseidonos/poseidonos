@@ -52,10 +52,9 @@ TEST_F(LogWriteIntegrationTest, WriteLogWithJournalDisabled)
     EXPECT_TRUE(readLogs.size() == 0);
 }
 
-TEST_F(LogWriteIntegrationTest, WriteLog)
+TEST_F(LogWriteIntegrationTest, WriteLog_UserStripe)
 {
-    POS_TRACE_DEBUG(9999, "LogWriteIntegrationTest::WriteLog");
-
+    POS_TRACE_DEBUG(9999, "LogWriteIntegrationTest::WriteLog_UserStripe");
     InitializeJournal();
 
     StripeId vsid = 100;
@@ -84,6 +83,22 @@ TEST_F(LogWriteIntegrationTest, WriteLog)
     writeTester->WaitForAllLogWriteDone();
 
     EXPECT_TRUE(journal->GetNumLogsAdded() == 2);
+    writeTester->CompareLogs();
+}
+
+TEST_F(LogWriteIntegrationTest, WriteLog_GcStripe)
+{
+    POS_TRACE_DEBUG(9999, "LogWriteIntegrationTest::WriteLog_GcStripe");
+    InitializeJournal();
+
+    int volumeId = testInfo->defaultTestVol;
+    StripeId vsid = 200;
+
+    bool writeSuccessful = writeTester->WriteGcStripeLog(volumeId, vsid);
+    EXPECT_TRUE(writeSuccessful == true);
+    writeTester->WaitForAllLogWriteDone();
+
+    EXPECT_TRUE(journal->GetNumLogsAdded() == 1);
     writeTester->CompareLogs();
 }
 

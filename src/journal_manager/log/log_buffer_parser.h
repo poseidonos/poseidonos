@@ -32,7 +32,9 @@
 
 #pragma once
 
-#include "log_handler.h"
+#include <cstdint>
+
+#include "src/journal_manager/log/log_handler.h"
 
 namespace pos
 {

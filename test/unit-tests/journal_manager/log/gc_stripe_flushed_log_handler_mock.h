@@ -2,14 +2,14 @@
 #include <string>
 #include <list>
 #include <vector>
-#include "src/journal_manager/log/log_handler.h"
+#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
 
 namespace pos
 {
-class MockLogHandlerInterface : public LogHandlerInterface
+class MockGcStripeFlushedLogHandler : public GcStripeFlushedLogHandler
 {
 public:
-    using LogHandlerInterface::LogHandlerInterface;
+    using GcStripeFlushedLogHandler::GcStripeFlushedLogHandler;
     MOCK_METHOD(LogType, GetType, (), (override));
     MOCK_METHOD(uint32_t, GetSize, (), (override));
     MOCK_METHOD(char*, GetData, (), (override));

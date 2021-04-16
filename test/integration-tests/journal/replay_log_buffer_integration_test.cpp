@@ -2,6 +2,7 @@
 
 #include "test/integration-tests/journal/fixture/journal_manager_test_fixture.h"
 #include "test/integration-tests/journal/utils/used_offset_calculator.h"
+#include "src/journal_manager/log/log_event.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -88,7 +89,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayCirculatedLogBuffer)
     while (1)
     {
         StripeTestFixture stripe(currentVsid++, testInfo->defaultTestVol);
-        uint32_t logSize = sizeof(BlockWriteDoneLogHandler) * stripe.GetBlockMapList().size()
+        uint32_t logSize = sizeof(BlockWriteDoneLog) * stripe.GetBlockMapList().size()
             + sizeof(StripeMapUpdatedLog);
         if (usedOffset.CanBeWritten(logSize) == true)
         {

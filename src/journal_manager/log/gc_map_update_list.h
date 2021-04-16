@@ -32,63 +32,24 @@
 
 #pragma once
 
+#include <vector>
+
 #include "src/include/address_type.h"
+#include "src/journal_manager/log/log_event.h"
 
 namespace pos
 {
-static const uint32_t VALID_MARK = 0xCECECECE;
-
-enum class LogType
+struct GcBlockMapUpdate
 {
-    BLOCK_WRITE_DONE,
-    STRIPE_MAP_UPDATED,
-    GC_STRIPE_FLUSHED,
-    VOLUME_DELETED,
-    NUM_LOG_TYPE
+    BlkAddr rba;
+    VirtualBlkAddr vsa;
 };
 
-#pragma pack(push, 4)
-struct Log
+struct GcStripeMapUpdateList
 {
-    int mark = VALID_MARK;
-    LogType type;
-    uint32_t seqNum;
-};
-
-struct BlockWriteDoneLog : Log
-{
-    int volId;
-    BlkAddr startRba;
-    uint32_t numBlks;
-    VirtualBlkAddr startVsa;
-    int wbIndex;
-    StripeAddr writeBufferStripeAddress;
-    bool isGC;
-    VirtualBlkAddr oldVsa;
-};
-
-struct StripeMapUpdatedLog : Log
-{
-    StripeId vsid;
-    StripeAddr oldMap;
-    StripeAddr newMap;
-};
-
-struct GcStripeFlushedLog : Log
-{
-    int volId;
+    std::vector<GcBlockMapUpdate> blockMapUpdateList;
     StripeId vsid;
     StripeAddr stripeAddr;
-    int numBlockMaps;
-    // BlockMap list should be appended
 };
-
-struct VolumeDeletedLog : Log
-{
-    int volId;
-    uint64_t allocatorContextVersion;
-};
-
-#pragma pack(pop)
 
 } // namespace pos

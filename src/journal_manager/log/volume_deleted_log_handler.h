@@ -30,69 +30,32 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "journal_service.h"
-#include "journal_writer_stub.h"
-#include "volume_event_handler_stub.h"
-#include "journal_status_provider_stub.h"
+#pragma once
+
+#include "src/journal_manager/log/log_handler.h"
 
 namespace pos
 {
-JournalService::JournalService(void)
+class VolumeDeletedLogEntry : public LogHandlerInterface
 {
-}
+public:
+    VolumeDeletedLogEntry(void) = default;
+    explicit VolumeDeletedLogEntry(int volId, uint64_t contextVersion);
+    explicit VolumeDeletedLogEntry(VolumeDeletedLog& log);
+    virtual ~VolumeDeletedLogEntry(void) = default;
 
-JournalService::~JournalService(void)
-{
-}
+    bool operator==(VolumeDeletedLogEntry log);
 
-bool
-JournalService::IsEnabled(std::string arrayName)
-{
-    return false;
-}
+    virtual LogType GetType(void);
+    virtual uint32_t GetSize(void);
+    virtual char* GetData(void);
+    virtual StripeId GetVsid(void);
 
-void
-JournalService::Register(std::string arrayName, IJournalWriter* writer)
-{
-}
+    virtual uint32_t GetSeqNum(void);
+    virtual void SetSeqNum(uint32_t num);
 
-void
-JournalService::Register(std::string arrayName, IVolumeEventHandler* writer)
-{
-}
-
-void
-JournalService::Register(std::string arrayName, IJournalStatusProvider* writer)
-{
-}
-
-void
-JournalService::Unregister(std::string arrayName)
-{
-}
-
-IJournalWriter*
-JournalService::GetWriter(std::string arrayName)
-{
-    // Note caller should delete the stub
-    JournalWriterStub* stub = new JournalWriterStub();
-    return stub;
-}
-
-IVolumeEventHandler*
-JournalService::GetVolumeEventHandler(std::string arrayName)
-{
-    // Note caller should delete the stub
-    VolumeEventHandlerStub* stub = new VolumeEventHandlerStub();
-    return stub;
-}
-
-IJournalStatusProvider*
-JournalService::GetStatusProvider(std::string arrayName)
-{
-    // Note caller should delete the stub
-    JournalStatusProviderStub* stub = new JournalStatusProviderStub();
-    return stub;
-}
+private:
+    VolumeDeletedLog dat;
+};
 
 } // namespace pos

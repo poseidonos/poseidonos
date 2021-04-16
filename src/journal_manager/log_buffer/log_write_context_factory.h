@@ -32,8 +32,9 @@
 
 #pragma once
 
-#include "buffer_write_done_notifier.h"
-#include "journal_write_context.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/journal_write_context.h"
 #include "src/include/address_type.h"
 #include "src/bio/volume_io.h"
 #include "src/mapper/include/mpage_info.h"
@@ -54,6 +55,8 @@ public:
         MpageList dirty, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateStripeMapLogWriteContext(Stripe* stripe,
         StripeAddr oldAddr, MpageList dirty, EventSmartPtr callbackEvent);
+    virtual LogWriteContext* CreateGcStripeFlushedLogWriteContext(int volumeId,
+        GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
     LogWriteContext* CreateVolumeDeletedLogWriteContext(int volId,
         uint64_t contextVersion, JournalInternalEventCallback callback);
 

@@ -33,62 +33,29 @@
 #pragma once
 
 #include "src/include/address_type.h"
+#include "src/journal_manager/log/log_handler.h"
 
 namespace pos
 {
-static const uint32_t VALID_MARK = 0xCECECECE;
-
-enum class LogType
+class StripeMapUpdatedLogHandler : public LogHandlerInterface
 {
-    BLOCK_WRITE_DONE,
-    STRIPE_MAP_UPDATED,
-    GC_STRIPE_FLUSHED,
-    VOLUME_DELETED,
-    NUM_LOG_TYPE
+public:
+    StripeMapUpdatedLogHandler(void) = default;
+    StripeMapUpdatedLogHandler(StripeId vsid, StripeAddr oldAddr, StripeAddr newAddr);
+    explicit StripeMapUpdatedLogHandler(StripeMapUpdatedLog& log);
+    virtual ~StripeMapUpdatedLogHandler(void) = default;
+
+    bool operator==(StripeMapUpdatedLogHandler log);
+
+    virtual LogType GetType(void);
+    virtual uint32_t GetSize(void);
+    virtual char* GetData(void);
+    virtual StripeId GetVsid(void);
+
+    virtual uint32_t GetSeqNum(void);
+    virtual void SetSeqNum(uint32_t num);
+
+private:
+    StripeMapUpdatedLog dat;
 };
-
-#pragma pack(push, 4)
-struct Log
-{
-    int mark = VALID_MARK;
-    LogType type;
-    uint32_t seqNum;
-};
-
-struct BlockWriteDoneLog : Log
-{
-    int volId;
-    BlkAddr startRba;
-    uint32_t numBlks;
-    VirtualBlkAddr startVsa;
-    int wbIndex;
-    StripeAddr writeBufferStripeAddress;
-    bool isGC;
-    VirtualBlkAddr oldVsa;
-};
-
-struct StripeMapUpdatedLog : Log
-{
-    StripeId vsid;
-    StripeAddr oldMap;
-    StripeAddr newMap;
-};
-
-struct GcStripeFlushedLog : Log
-{
-    int volId;
-    StripeId vsid;
-    StripeAddr stripeAddr;
-    int numBlockMaps;
-    // BlockMap list should be appended
-};
-
-struct VolumeDeletedLog : Log
-{
-    int volId;
-    uint64_t allocatorContextVersion;
-};
-
-#pragma pack(pop)
-
 } // namespace pos

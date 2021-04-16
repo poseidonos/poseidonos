@@ -24,6 +24,7 @@ public:
 
     bool WriteBlockLog(int volId, BlkAddr rba, VirtualBlks blks);
     bool WriteStripeLog(StripeId vsid, StripeAddr oldAddr, StripeAddr newAddr);
+    bool WriteGcStripeLog(int volumeId, StripeId vsid);
 
     void WriteLogsWithSize(uint64_t sizeToFill);
 

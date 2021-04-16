@@ -34,9 +34,7 @@
 
 #include <list>
 
-#include "../log/log_event.h"
-#include "src/allocator/context_manager/active_stripe_index_info.h"
-#include "src/include/address_type.h"
+#include "src/journal_manager/log/log_event.h"
 
 namespace pos
 {
@@ -53,74 +51,6 @@ public:
 
     virtual uint32_t GetSeqNum(void) = 0;
     virtual void SetSeqNum(uint32_t num) = 0;
-};
-
-class BlockWriteDoneLogHandler : public LogHandlerInterface
-{
-public:
-    BlockWriteDoneLogHandler(void) = default;
-    BlockWriteDoneLogHandler(int volId, BlkAddr startRba, uint32_t numBlks,
-        VirtualBlkAddr startVsa, int wbIndex, StripeAddr stripeAddr,
-        VirtualBlkAddr oldVsa, bool isGC);
-    explicit BlockWriteDoneLogHandler(BlockWriteDoneLog& log);
-    virtual ~BlockWriteDoneLogHandler(void) = default;
-
-    bool operator==(BlockWriteDoneLogHandler log);
-
-    virtual LogType GetType(void);
-    virtual uint32_t GetSize(void);
-    virtual char* GetData(void);
-    virtual StripeId GetVsid(void);
-
-    virtual uint32_t GetSeqNum(void);
-    virtual void SetSeqNum(uint32_t num);
-
-private:
-    BlockWriteDoneLog dat;
-};
-
-class StripeMapUpdatedLogHandler : public LogHandlerInterface
-{
-public:
-    StripeMapUpdatedLogHandler(void) = default;
-    StripeMapUpdatedLogHandler(StripeId vsid, StripeAddr oldAddr, StripeAddr newAddr);
-    explicit StripeMapUpdatedLogHandler(StripeMapUpdatedLog& log);
-    virtual ~StripeMapUpdatedLogHandler(void) = default;
-
-    bool operator==(StripeMapUpdatedLogHandler log);
-
-    virtual LogType GetType(void);
-    virtual uint32_t GetSize(void);
-    virtual char* GetData(void);
-    virtual StripeId GetVsid(void);
-
-    virtual uint32_t GetSeqNum(void);
-    virtual void SetSeqNum(uint32_t num);
-
-private:
-    StripeMapUpdatedLog dat;
-};
-
-class VolumeDeletedLogEntry : public LogHandlerInterface
-{
-public:
-    VolumeDeletedLogEntry(void) = default;
-    explicit VolumeDeletedLogEntry(int volId, uint64_t contextVersion);
-    explicit VolumeDeletedLogEntry(VolumeDeletedLog& log);
-    virtual ~VolumeDeletedLogEntry(void) = default;
-
-    bool operator==(VolumeDeletedLogEntry log);
-
-    virtual LogType GetType(void);
-    virtual uint32_t GetSize(void);
-    virtual char* GetData(void);
-    virtual StripeId GetVsid(void);
-
-    virtual uint32_t GetSeqNum(void);
-    virtual void SetSeqNum(uint32_t num);
-
-private:
-    VolumeDeletedLog dat;
 };
 
 using LogList = std::list<LogHandlerInterface*>;

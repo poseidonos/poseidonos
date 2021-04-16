@@ -30,65 +30,64 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "src/include/address_type.h"
+#include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 
 namespace pos
 {
-static const uint32_t VALID_MARK = 0xCECECECE;
-
-enum class LogType
+StripeMapUpdatedLogHandler::StripeMapUpdatedLogHandler(StripeId vsid,
+    StripeAddr oldAddr, StripeAddr newAddr)
 {
-    BLOCK_WRITE_DONE,
-    STRIPE_MAP_UPDATED,
-    GC_STRIPE_FLUSHED,
-    VOLUME_DELETED,
-    NUM_LOG_TYPE
-};
+    dat.type = LogType::STRIPE_MAP_UPDATED;
+    dat.vsid = vsid;
+    dat.oldMap = oldAddr;
+    dat.newMap = newAddr;
+}
 
-#pragma pack(push, 4)
-struct Log
+StripeMapUpdatedLogHandler::StripeMapUpdatedLogHandler(StripeMapUpdatedLog& log)
 {
-    int mark = VALID_MARK;
-    LogType type;
-    uint32_t seqNum;
-};
+    dat = log;
+}
 
-struct BlockWriteDoneLog : Log
+bool
+StripeMapUpdatedLogHandler::operator==(StripeMapUpdatedLogHandler log)
 {
-    int volId;
-    BlkAddr startRba;
-    uint32_t numBlks;
-    VirtualBlkAddr startVsa;
-    int wbIndex;
-    StripeAddr writeBufferStripeAddress;
-    bool isGC;
-    VirtualBlkAddr oldVsa;
-};
+    return ((dat.vsid == log.dat.vsid) && (dat.newMap == log.dat.newMap));
+}
 
-struct StripeMapUpdatedLog : Log
+LogType
+StripeMapUpdatedLogHandler::GetType(void)
 {
-    StripeId vsid;
-    StripeAddr oldMap;
-    StripeAddr newMap;
-};
+    return dat.type;
+}
 
-struct GcStripeFlushedLog : Log
+uint32_t
+StripeMapUpdatedLogHandler::GetSize(void)
 {
-    int volId;
-    StripeId vsid;
-    StripeAddr stripeAddr;
-    int numBlockMaps;
-    // BlockMap list should be appended
-};
+    return sizeof(StripeMapUpdatedLog);
+}
 
-struct VolumeDeletedLog : Log
+char*
+StripeMapUpdatedLogHandler::GetData(void)
 {
-    int volId;
-    uint64_t allocatorContextVersion;
-};
+    return (char*)&dat;
+}
 
-#pragma pack(pop)
+StripeId
+StripeMapUpdatedLogHandler::GetVsid(void)
+{
+    return dat.vsid;
+}
+
+uint32_t
+StripeMapUpdatedLogHandler::GetSeqNum(void)
+{
+    return dat.seqNum;
+}
+
+void
+StripeMapUpdatedLogHandler::SetSeqNum(uint32_t num)
+{
+    dat.seqNum = num;
+}
 
 } // namespace pos

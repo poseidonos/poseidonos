@@ -34,6 +34,10 @@
 
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/journal_manager/log/block_write_done_log_handler.h"
+#include "src/journal_manager/log/stripe_map_updated_log_handler.h"
+#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
+#include "src/journal_manager/log/volume_deleted_log_handler.h"
 
 namespace pos
 {
@@ -56,6 +60,7 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
     uint64_t numBlockMapUpdatedLogs = 0;
     uint64_t numStripeMapUpdatedLogs = 0;
     uint64_t numVolumeDeletedLogs = 0;
+    uint64_t numGcStripeFlushedLogs = 0;
 
     while ((logPtr = _GetNextValidLogEntry((char*)buffer, currentOffset,
                 currentLogType, bufferSize)) != nullptr)
@@ -79,6 +84,15 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
 
             numStripeMapUpdatedLogs++;
         }
+        else if (currentLogTypeCast == LogType::GC_STRIPE_FLUSHED)
+        {
+            GcStripeFlushedLogHandler* log = new GcStripeFlushedLogHandler(logPtr);
+
+            currentOffset += log->GetSize();
+            logs.push_back(log);
+
+            numGcStripeFlushedLogs++;
+        }
         else if (currentLogTypeCast == LogType::VOLUME_DELETED)
         {
             VolumeDeletedLogEntry* log = new VolumeDeletedLogEntry(*reinterpret_cast<VolumeDeletedLog*>(logPtr));
@@ -98,8 +112,8 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
     }
 
     int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_DEBUG);
-    POS_TRACE_DEBUG(eventId, "{} block map updated, {} stripe flushed, {} volumes deleted",
-        numBlockMapUpdatedLogs, numStripeMapUpdatedLogs, numVolumeDeletedLogs);
+    POS_TRACE_DEBUG(eventId, "Logs found: {} block map, {} stripe map, {} gc stripes, {} volumes deleted",
+        numBlockMapUpdatedLogs, numStripeMapUpdatedLogs, numGcStripeFlushedLogs, numVolumeDeletedLogs);
 
     return result;
 }

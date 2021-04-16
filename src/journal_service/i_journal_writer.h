@@ -35,6 +35,7 @@
 #include "src/include/address_type.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/mapper/include/mpage_info.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
 
 namespace pos
 {
@@ -48,6 +49,8 @@ public:
         MpageList dirty, EventSmartPtr callbackEvent) = 0;
     virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
         MpageList dirty, EventSmartPtr callbackEvent) = 0;
+    virtual int AddGcStripeFlushedLog(int volumeId, GcStripeMapUpdateList mapUpdates,
+        MapPageList dirty, EventSmartPtr callbackEvent) = 0;
 };
 
 } // namespace pos

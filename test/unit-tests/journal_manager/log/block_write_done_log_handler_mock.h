@@ -2,14 +2,14 @@
 #include <string>
 #include <list>
 #include <vector>
-#include "src/journal_manager/log/log_handler.h"
+#include "src/journal_manager/log/block_write_done_log_handler.h"
 
 namespace pos
 {
-class MockLogHandlerInterface : public LogHandlerInterface
+class MockBlockWriteDoneLogHandler : public BlockWriteDoneLogHandler
 {
 public:
-    using LogHandlerInterface::LogHandlerInterface;
+    using BlockWriteDoneLogHandler::BlockWriteDoneLogHandler;
     MOCK_METHOD(LogType, GetType, (), (override));
     MOCK_METHOD(uint32_t, GetSize, (), (override));
     MOCK_METHOD(char*, GetData, (), (override));

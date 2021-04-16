@@ -30,65 +30,72 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "src/include/address_type.h"
+#include "src/journal_manager/log/block_write_done_log_handler.h"
 
 namespace pos
 {
-static const uint32_t VALID_MARK = 0xCECECECE;
-
-enum class LogType
+BlockWriteDoneLogHandler::BlockWriteDoneLogHandler(int volId, BlkAddr startRba,
+    uint32_t numBlks, VirtualBlkAddr startVsa, int wbIndex,
+    StripeAddr stripeAddr, VirtualBlkAddr oldVsa, bool isGC)
 {
-    BLOCK_WRITE_DONE,
-    STRIPE_MAP_UPDATED,
-    GC_STRIPE_FLUSHED,
-    VOLUME_DELETED,
-    NUM_LOG_TYPE
-};
+    dat.type = LogType::BLOCK_WRITE_DONE;
+    dat.volId = volId;
+    dat.startRba = startRba;
+    dat.numBlks = numBlks;
+    dat.startVsa = startVsa;
+    dat.wbIndex = wbIndex;
+    dat.writeBufferStripeAddress = stripeAddr;
+    dat.oldVsa = oldVsa;
+    dat.isGC = isGC;
+}
 
-#pragma pack(push, 4)
-struct Log
+BlockWriteDoneLogHandler::BlockWriteDoneLogHandler(BlockWriteDoneLog& log)
 {
-    int mark = VALID_MARK;
-    LogType type;
-    uint32_t seqNum;
-};
+    dat = log;
+}
 
-struct BlockWriteDoneLog : Log
+bool
+BlockWriteDoneLogHandler::operator==(BlockWriteDoneLogHandler log)
 {
-    int volId;
-    BlkAddr startRba;
-    uint32_t numBlks;
-    VirtualBlkAddr startVsa;
-    int wbIndex;
-    StripeAddr writeBufferStripeAddress;
-    bool isGC;
-    VirtualBlkAddr oldVsa;
-};
+    return ((dat.volId == log.dat.volId) && (dat.startRba == log.dat.startRba)
+        && (dat.numBlks == log.dat.numBlks) && (dat.startVsa == log.dat.startVsa)
+        && (dat.wbIndex == log.dat.wbIndex) && (dat.writeBufferStripeAddress == log.dat.writeBufferStripeAddress));
+}
 
-struct StripeMapUpdatedLog : Log
+LogType
+BlockWriteDoneLogHandler::GetType(void)
 {
-    StripeId vsid;
-    StripeAddr oldMap;
-    StripeAddr newMap;
-};
+    return dat.type;
+}
 
-struct GcStripeFlushedLog : Log
+uint32_t
+BlockWriteDoneLogHandler::GetSize(void)
 {
-    int volId;
-    StripeId vsid;
-    StripeAddr stripeAddr;
-    int numBlockMaps;
-    // BlockMap list should be appended
-};
+    return sizeof(BlockWriteDoneLog);
+}
 
-struct VolumeDeletedLog : Log
+char*
+BlockWriteDoneLogHandler::GetData(void)
 {
-    int volId;
-    uint64_t allocatorContextVersion;
-};
+    return (char*)&dat;
+}
 
-#pragma pack(pop)
+StripeId
+BlockWriteDoneLogHandler::GetVsid(void)
+{
+    return dat.startVsa.stripeId;
+}
+
+uint32_t
+BlockWriteDoneLogHandler::GetSeqNum(void)
+{
+    return dat.seqNum;
+}
+
+void
+BlockWriteDoneLogHandler::SetSeqNum(uint32_t num)
+{
+    dat.seqNum = num;
+}
 
 } // namespace pos

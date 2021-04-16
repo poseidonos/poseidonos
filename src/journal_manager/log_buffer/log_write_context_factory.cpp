@@ -32,7 +32,10 @@
 
 #include "log_write_context_factory.h"
 
-#include "../log/log_handler.h"
+#include "src/journal_manager/log/block_write_done_log_handler.h"
+#include "src/journal_manager/log/stripe_map_updated_log_handler.h"
+#include "src/journal_manager/log/volume_deleted_log_handler.h"
+#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
 #include "src/allocator/context_manager/active_stripe_index_info.h"
 #include "src/allocator/wb_stripe_manager/stripe.h"
 
@@ -101,6 +104,18 @@ LogWriteContextFactory::CreateStripeMapLogWriteContext(Stripe* stripe,
 
     MapUpdateLogWriteContext* logWriteContext = new StripeMapUpdatedLogWriteContext(log, dirtyMap, callbackEvent,
         notifier);
+
+    return logWriteContext;
+}
+
+LogWriteContext*
+LogWriteContextFactory::CreateGcStripeFlushedLogWriteContext(int volumeId,
+    GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent)
+{
+    GcStripeFlushedLogHandler* log = new GcStripeFlushedLogHandler(volumeId, mapUpdates);
+
+    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
+        dirty, callbackEvent, notifier);
 
     return logWriteContext;
 }

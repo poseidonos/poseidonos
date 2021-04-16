@@ -107,6 +107,9 @@ public:
     virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
         MpageList dirty, EventSmartPtr callbackEvent) override;
 
+    virtual int AddGcStripeFlushedLog(int volumeId, GcStripeMapUpdateList mapUpdates,
+        MapPageList dirty, EventSmartPtr callbackEvent) override;
+
     virtual int Init(void) override;
     virtual void Dispose(void) override;
 
