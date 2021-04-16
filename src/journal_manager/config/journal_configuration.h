@@ -45,6 +45,8 @@ public:
     virtual ~JournalConfiguration(void);
 
     virtual void Init(void);
+
+    // Can be called before initialized
     virtual bool IsEnabled(void);
     virtual bool IsDebugEnabled(void);
 

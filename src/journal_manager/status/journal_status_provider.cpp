@@ -36,8 +36,6 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
-#include <list>
-
 #include "i_checkpoint_status.h"
 #include "i_log_buffer_status.h"
 #include "src/journal_manager/config/journal_configuration.h"
@@ -73,20 +71,20 @@ JournalStatusProvider::Init(ILogBufferStatus* bufferStatusProvider, JournalConfi
     checkpointStatusMap[CheckpointStatus::COMPLETED] = "COMPLETED";
 }
 
-JsonElement
+ElementList
 JournalStatusProvider::GetJournalStatus(void)
 {
-    JsonElement statusElement("journalStatus");
+    ElementList statusList;
 
     JsonElement configElement = _CreateConfigElement();
     JsonElement bufferElement = _CreateBuferStatusElement();
     JsonElement checkpointElement = _CreateCheckpointStatusElement();
 
-    statusElement.SetElement(configElement);
-    statusElement.SetElement(bufferElement);
-    statusElement.SetElement(checkpointElement);
+    statusList.push_back(configElement);
+    statusList.push_back(bufferElement);
+    statusList.push_back(checkpointElement);
 
-    return statusElement;
+    return statusList;
 }
 
 JsonElement

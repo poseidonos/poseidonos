@@ -50,13 +50,23 @@ GetJournalStatusWbtCommand::~GetJournalStatusWbtCommand(void)
 int
 GetJournalStatusWbtCommand::Execute(Args& argv, JsonElement& elem)
 {
-    IJournalStatusProvider* status = JournalServiceSingleton::Instance()->GetStatusProvider("");
-    if (status != nullptr)
+    JsonElement journalStatusElem("journalStatus");
+    std::string arrayName = _GetParameter(argv, "array");
+
+    bool isEnabled = JournalServiceSingleton::Instance()->IsEnabled(arrayName);
+    journalStatusElem.SetAttribute(JsonAttribute("enabled", std::to_string(isEnabled)));
+    if (isEnabled == true)
     {
-        JsonElement journalStatusElem = status->GetJournalStatus();
-        elem.SetElement(journalStatusElem);
+        IJournalStatusProvider* status = JournalServiceSingleton::Instance()->GetStatusProvider(arrayName);
+        ElementList statusList = status->GetJournalStatus();
+
+        for (auto element : statusList)
+        {
+            journalStatusElem.SetElement(element);
+        }
     }
 
+    elem.SetElement(journalStatusElem);
     return 0;
 }
 

@@ -53,7 +53,7 @@ public:
     virtual void Init(ILogBufferStatus* bufferStatusProvider, JournalConfiguration* journalConfig,
         ICheckpointStatus* checkpointStatusProvider);
 
-    virtual JsonElement GetJournalStatus(void) override;
+    virtual ElementList GetJournalStatus(void) override;
 
 private:
     JsonElement _CreateConfigElement(void);

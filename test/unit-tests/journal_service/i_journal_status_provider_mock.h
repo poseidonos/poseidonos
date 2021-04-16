@@ -12,7 +12,7 @@ class MockIJournalStatusProvider : public IJournalStatusProvider
 {
 public:
     using IJournalStatusProvider::IJournalStatusProvider;
-    MOCK_METHOD(JsonElement, GetJournalStatus, (), (override));
+    MOCK_METHOD(ElementList, GetJournalStatus, (), (override));
 };
 
 } // namespace pos

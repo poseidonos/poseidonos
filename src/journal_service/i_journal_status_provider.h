@@ -32,14 +32,17 @@
 
 #pragma once
 
-#include "src/helper/json_helper.h"
+#include <list>
 
+#include "src/helper/json_helper.h"
 namespace pos
 {
+using ElementList = std::list<JsonElement>;
+
 class IJournalStatusProvider
 {
 public:
-    virtual JsonElement GetJournalStatus(void) = 0;
+    virtual ElementList GetJournalStatus(void) = 0;
 };
 
 } // namespace pos

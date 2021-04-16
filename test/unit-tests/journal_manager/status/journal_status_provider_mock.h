@@ -13,7 +13,7 @@ class MockJournalStatusProvider : public JournalStatusProvider
 public:
     using JournalStatusProvider::JournalStatusProvider;
     MOCK_METHOD(void, Init, (ILogBufferStatus * bufferStatusProvider, JournalConfiguration* journalConfig, ICheckpointStatus* checkpointStatusProvider), (override));
-    MOCK_METHOD(JsonElement, GetJournalStatus, (), (override));
+    MOCK_METHOD(ElementList, GetJournalStatus, (), (override));
 };
 
 } // namespace pos

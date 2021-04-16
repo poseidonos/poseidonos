@@ -95,7 +95,7 @@ def get_num_thread():
     return num_thread
 
 def get_checkpoint_status():
-    out = cli.send_request("wbt get_journal_status")
+    out = cli.send_request("wbt get_journal_status --array POSArray")
     if json_parser.get_response_code(out) != 0:
         return -1
     else:
@@ -103,7 +103,7 @@ def get_checkpoint_status():
         return total_info["journalStatus"]["checkpointStatus"]["status"]
 
 def get_log_buffer_size():
-    out = cli.send_request("wbt get_journal_status")
+    out = cli.send_request("wbt get_journal_status --array POSArray")
     if json_parser.get_response_code(out) != 0:
         return -1
     else:
