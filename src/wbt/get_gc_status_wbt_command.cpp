@@ -57,7 +57,13 @@ GetGcStatusWbtCommand::~GetGcStatusWbtCommand(void)
 int
 GetGcStatusWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
-    GarbageCollector* gc = _GetGC("");
+    if (!argv.contains("name"))
+    {
+        return -1;
+    }
+    std::string arrayName = argv["name"].get<std::string>();
+    GarbageCollector* gc = _GetGC(arrayName);
+
     if (gc == nullptr)
     {
         return -1;
@@ -69,7 +75,7 @@ GetGcStatusWbtCommand::Execute(Args &argv, JsonElement &elem)
     }
 
     bool gcRunning = gc->GetGcRunning();
-    ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx("");
+    ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx(arrayName);
     uint32_t freeSegments = iSegmentCtx->GetNumOfFreeUserDataSegment();
     uint32_t numGcThreshold = iSegmentCtx->GetGcThreshold();
     uint32_t numUrgentThreshold = iSegmentCtx->GetUrgentThreshold();
@@ -148,8 +154,7 @@ GetGcStatusWbtCommand::Execute(Args &argv, JsonElement &elem)
     gcElem.SetElement(timeElem);
 
     const PartitionLogicalSize* udSize;
-    string emptyStringToGetFirstArray = "";
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(emptyStringToGetFirstArray);
+    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
     udSize = info->GetSizeInfo(PartitionType::USER_DATA);
     uint32_t totalSegments = udSize->totalSegments;
 

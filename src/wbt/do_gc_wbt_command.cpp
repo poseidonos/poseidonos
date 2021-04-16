@@ -51,7 +51,13 @@ int
 DoGcWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
     int returnValue = -1;
-    GarbageCollector* gc = _GetGC("");
+    if (!argv.contains("name"))
+    {
+        return returnValue;
+    }
+    std::string arrayName = argv["name"].get<std::string>();
+    GarbageCollector* gc = _GetGC(arrayName);
+
     if (gc == nullptr)
     {
         return returnValue;

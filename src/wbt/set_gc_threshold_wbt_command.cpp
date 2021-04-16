@@ -56,7 +56,18 @@ SetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
     int returnValue = -1;
 
-    GarbageCollector* gc = _GetGC("");
+    if (!argv.contains("name"))
+    {
+        return returnValue;
+    }
+    std::string arrayName = argv["name"].get<std::string>();
+    GarbageCollector* gc = _GetGC(arrayName);
+
+    if (gc == nullptr)
+    {
+        return returnValue;
+    }
+
     int isEnabled = gc->IsEnabled();
     if (0 != isEnabled)
     {
@@ -86,16 +97,16 @@ SetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
             return returnValue;
         }
 
-        IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt("");
+        IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt(arrayName);
         iAllocatorWbt->SetGcThreshold(numGcThreshold);
         iAllocatorWbt->SetUrgentThreshold(numUrgentThreshold);
-        ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx("");
+        ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx(arrayName);
         uint32_t freeSegmentId = iSegmentCtx->GetNumOfFreeUserDataSegment();
 
         if (iSegmentCtx->GetUrgentThreshold() < freeSegmentId)
         {
             IBlockAllocator* iBlockAllocator =
-                AllocatorServiceSingleton::Instance()->GetIBlockAllocator("");
+                AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName);
             iBlockAllocator->PermitUserBlkAlloc();
         }
 

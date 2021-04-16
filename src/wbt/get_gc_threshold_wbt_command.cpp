@@ -50,7 +50,13 @@ GetGcThresholdWbtCommand::~GetGcThresholdWbtCommand(void)
 int
 GetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
-    GarbageCollector* gc = _GetGC("");
+    if (!argv.contains("name"))
+    {
+        return -1;
+    }
+    std::string arrayName = argv["name"].get<std::string>();
+    GarbageCollector* gc = _GetGC(arrayName);
+
     if (gc == nullptr)
     {
         return -1;
@@ -61,7 +67,7 @@ GetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
         return -1;
     }
 
-    ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx("");
+    ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx(arrayName);
     uint32_t numGcThreshold = iSegmentCtx->GetGcThreshold();
     uint32_t numUrgentThreshold = iSegmentCtx->GetUrgentThreshold();
 
