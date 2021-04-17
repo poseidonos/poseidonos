@@ -80,6 +80,7 @@ array      : create_array     : Provides device configuration information for co
 device     : scan_dev         : Scan devices in the system.                                      : not needed
            : list_dev         : Show all devices in the system.                                  : not needed
            : smart            : Get SMART from NVMe device.                                      : -n [dev name]
+           : create           : Create buffer device.                                            : -t [type, pmem/uram] -n [dev name] -b [number of blocks] -s [block size]
 
 system     : run_ibofos       : Run iBoFOS.                                                      : not needed
            : exit_ibofos      : Exit iBoFOS.                                                     : not needed
@@ -221,6 +222,15 @@ func RequestSend(cmd *cobra.Command, args []string) (model.Response, error) {
 		}
 		if cmd.PersistentFlags().Changed("array") && len(array) > 0 {
 			param.Array = array
+		}
+		if cmd.PersistentFlags().Changed("type") && len(devType) > 0 {
+			param.DevType = devType
+		}
+		if cmd.PersistentFlags().Changed("num_blocks") && numBlocks > 0 {
+			param.NumBlocks = numBlocks
+		}
+		if cmd.PersistentFlags().Changed("block_size") && blockSize > 0 {
+			param.BlockSize = blockSize
 		}
 
 		if param != (model.DeviceParam{}) {

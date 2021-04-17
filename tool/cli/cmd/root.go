@@ -40,6 +40,10 @@ var size string
 var maxiops uint64
 var maxbw uint64
 
+var devType string
+var numBlocks uint
+var blockSize uint
+
 var prio uint
 var weight uint
 
@@ -171,6 +175,15 @@ func Send(cmd *cobra.Command, args []string) (model.Response, error) {
 
 		if cmd.PersistentFlags().Changed("name") && len(name) > 0 {
 			param.Name = name
+		}
+		if cmd.PersistentFlags().Changed("type") && len(devType) > 0 {
+			param.DevType = devType
+		}
+		if cmd.PersistentFlags().Changed("num_blocks") && numBlocks > 0 {
+			param.NumBlocks = numBlocks
+		}
+		if cmd.PersistentFlags().Changed("block_size") && blockSize > 0 {
+			param.BlockSize = blockSize
 		}
 
 		if param != (model.DeviceParam{}) {

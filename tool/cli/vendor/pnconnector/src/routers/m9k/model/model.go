@@ -58,6 +58,9 @@ type DeviceParam struct {
 	Name        string `json:"name,omitempty"`
 	Spare       string `json:"spare,omitempty"`
 	Array       string `json:"array,omitempty"`
+	DevType		string `json:"dev_type,omitempty"`
+	NumBlocks	uint `json:"num_blocks,omitempty"`
+	BlockSize	uint `json:"block_size,omitempty"`
 }
 type VolumeParam struct {
 	Name        string `json:"name,omitempty"`

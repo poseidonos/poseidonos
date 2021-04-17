@@ -52,6 +52,8 @@ if [ -f /etc/debian_version ]; then
     apt install -y python3-tz
     # for gdb
     apt install -y gdb
+	# rpc client for cpp for invoke spdk rpc
+	apt install -y libjsonrpccpp-dev libjsoncpp-dev
 
 else
     echo "pkgdep: unknown system type."

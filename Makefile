@@ -118,6 +118,7 @@ IBOF_LDFLAGS += -L./lib/$(SPDLOG_SOURCE)/lib -lspdlog
 
 CXXFLAGS += $(INCLUDE)
 
+IBOF_LDFLAGS += -ljsoncpp -ljsonrpccpp-common -ljsonrpccpp-client
 IBOF_LDFLAGS += -no-pie -laio -ltcmalloc
 IBOF_LDFLAGS += -lnuma
 

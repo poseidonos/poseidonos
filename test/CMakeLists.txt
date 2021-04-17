@@ -385,6 +385,9 @@ SET(DEP_LIBRARIES
     numa
     dl
     pthread
+	jsoncpp
+	jsonrpccpp-common
+	jsonrpccpp-client
 )
 
 # For on-demand execution

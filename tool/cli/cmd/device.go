@@ -11,6 +11,7 @@ var DeviceCommand = map[string]func(string, interface{}) (model.Request, model.R
 	"scan":  iBoFOS.ScanDevice,
 	"list":  iBoFOS.ListDevice,
 	"smart": iBoFOS.GetSMART,
+	"create": iBoFOS.CreateDevice,
 }
 
 var deviceCmd = &cobra.Command{
@@ -25,6 +26,7 @@ Available msg list :
 device     : scan        : Scan devices in the system.                                      : not needed
            : list        : Show all devices in the system.                                  : not needed
            : smart       : Get SMART from NVMe device.                                      : -n [dev name]
+           : create      : Create buffer device.                                            : -t [type, pmem/uram] -n [dev name] -b [number of blocks] -s [block size]
 
 
 If you want to input multiple flag parameter, you have to seperate with ",". 
@@ -63,5 +65,8 @@ func init() {
 
 	rootCmd.AddCommand(deviceCmd)
 
+	deviceCmd.PersistentFlags().StringVarP(&devType, "type", "t", "", "set buffer device type. pmem / uram")
 	deviceCmd.PersistentFlags().StringVarP(&name, "name", "n", "", "set name \"-n vol01\"")
+	deviceCmd.PersistentFlags().UintVarP(&numBlocks, "num_blocks", "b", 0, "set number of blocks for buffer device")
+	deviceCmd.PersistentFlags().UintVarP(&blockSize, "block_size", "s", 0, "set block size for buffer device")
 }
