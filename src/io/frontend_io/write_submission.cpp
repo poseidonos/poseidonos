@@ -59,10 +59,8 @@
 
 namespace pos
 {
-WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo)
+WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inputRbaStateManager, IBlockAllocator* inputIBlockAllocator)
 : Event(EventFrameworkApi::IsReactorNow()),
-  rbaStateManager(*RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayName())),
-  iBlockAllocator(AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayName())),
   volumeIo(volumeIo),
   volumeId(volumeIo->GetVolumeId()),
   arrayName(volumeIo->GetArrayName()),
@@ -72,6 +70,23 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo)
   allocatedBlockCount(0),
   processedBlockCount(0)
 {
+    if (nullptr == inputRbaStateManager)
+    {
+        rbaStateManager = RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayName());
+    }
+    else
+    {
+        rbaStateManager = inputRbaStateManager;
+    }
+
+    if (nullptr == inputIBlockAllocator)
+    {
+        iBlockAllocator = AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayName());
+    }
+    else
+    {
+        iBlockAllocator = inputIBlockAllocator;
+    }
 }
 
 WriteSubmission::~WriteSubmission(void)
@@ -84,7 +99,7 @@ WriteSubmission::Execute(void)
     try
     {
         BlkAddr startRba = blockAlignment.GetHeadBlock();
-        bool ownershipAcquired = rbaStateManager.BulkAcquireOwnership(volumeId,
+        bool ownershipAcquired = rbaStateManager->BulkAcquireOwnership(volumeId,
             startRba, blockCount);
         if (false == ownershipAcquired)
         {
@@ -94,7 +109,7 @@ WriteSubmission::Execute(void)
 
         if (unlikely(!done))
         {
-            rbaStateManager.BulkReleaseOwnership(volumeId, startRba,
+            rbaStateManager->BulkReleaseOwnership(volumeId, startRba,
                 blockCount);
         }
         else

@@ -59,10 +59,10 @@ public:
         const VolumeIo::RbaList& sectorRbaList);
     void ReleaseOwnershipRbaList(uint32_t volumeId,
         const VolumeIo::RbaList& sectorRbaList);
-    bool BulkAcquireOwnership(uint32_t volumeID,
+    virtual bool BulkAcquireOwnership(uint32_t volumeID,
         BlkAddr startRba,
         uint32_t count);
-    void BulkReleaseOwnership(uint32_t volumeID,
+    virtual void BulkReleaseOwnership(uint32_t volumeID,
         BlkAddr startRba,
         uint32_t count);
 

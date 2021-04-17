@@ -55,14 +55,13 @@ class IBlockAllocator;
 class WriteSubmission : public IOController, public Event
 {
 public:
-    WriteSubmission(VolumeIoSmartPtr volumeIo);
+    WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* rbaStateManager = nullptr, IBlockAllocator* iBlockAllocator = nullptr);
     ~WriteSubmission(void) override;
 
     bool Execute(void) override;
 
 private:
-    RBAStateManager& rbaStateManager;
-
+    RBAStateManager* rbaStateManager;
     IBlockAllocator* iBlockAllocator;
     VolumeIoSmartPtr volumeIo;
     uint32_t volumeId;

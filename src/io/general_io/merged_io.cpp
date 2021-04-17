@@ -44,13 +44,21 @@
 
 namespace pos
 {
-MergedIO::MergedIO(CallbackSmartPtr callback)
+MergedIO::MergedIO(CallbackSmartPtr callback, IODispatcher* inputIoDispatcher, StateType intputStateType)
 : bufferEntry(new BufferEntry(nullptr, 0)),
   startPba({.lba = static_cast<uint64_t>(-1), .arrayDev = nullptr}),
   nextContiguousLba(UINT64_MAX),
   callback(callback),
-  ioDispatcher(*IODispatcherSingleton::Instance())
+  stateType(intputStateType)
 {
+    if (inputIoDispatcher == nullptr)
+    {
+        ioDispatcher = IODispatcherSingleton::Instance();
+    }
+    else
+    {
+        ioDispatcher = inputIoDispatcher;
+    }
 }
 
 MergedIO::~MergedIO(void)
@@ -112,7 +120,6 @@ MergedIO::Process(std::string& arrayName)
         ubio->SetCallback(event);
 
         ubio->SetEventType(callback->GetEventType());
-        IODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
         if (ioDispatcher->Submit(ubio) < 0)
         {
             IOSubmitHandlerStatus status =
@@ -127,8 +134,13 @@ MergedIO::Process(std::string& arrayName)
 IOSubmitHandlerStatus
 MergedIO::_CheckAsyncReadError(POS_EVENT_ID eventId, const std::string& arrayName)
 {
-    IStateControl* stateControl = StateManagerSingleton::Instance()->GetStateControl(arrayName);
-    if (stateControl->GetState()->ToStateType() == StateEnum::STOP)
+    if (StateEnum::TYPE_COUNT == stateType)
+    {
+        IStateControl* stateControl = StateManagerSingleton::Instance()->GetStateControl(arrayName);
+        stateType = stateControl->GetState()->ToStateType();
+    }
+
+    if (StateEnum::STOP == stateType)
     {
         POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
         return IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP;
