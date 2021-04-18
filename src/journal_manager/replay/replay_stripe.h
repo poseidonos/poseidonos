@@ -78,12 +78,10 @@ public:
 
 private:
     void _CreateBlockWriteReplayEvent(BlockWriteDoneLog dat);
-    void _CreateStripeFlushReplayEvent(StripeMapUpdatedLog dat);
-    void _CreateStripeAllocationEvent(void);
 
-    bool _IsSegmentAllocationReplayRequired(void);
-    bool _IsStripeAllocationReplayRequired(void);
-    bool _IsStripeFlushReplayRequired(StripeMapUpdatedLog dat);
+    void _CreateStripeEvents(void);
+    void _CreateStripeAllocationEvent(void);
+    void _CreateStripeFlushReplayEvent(void);
 
     void _UpdateStripeInfo(BlockWriteDoneLog log);
     void _UpdateStripeInfo(StripeMapUpdatedLog log);

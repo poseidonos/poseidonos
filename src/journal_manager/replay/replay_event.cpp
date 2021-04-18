@@ -33,12 +33,13 @@
 #include "replay_event.h"
 
 #include "src/allocator/allocator.h"
+#include "src/array_models/interface/i_array_info.h"
 #include "src/include/pos_event_id.h"
+#include "src/journal_manager/statistics/stripe_replay_status.h"
 #include "src/logger/logger.h"
-#include "src/mapper/include/mapper_const.h"
 #include "src/mapper/i_stripemap.h"
 #include "src/mapper/i_vsamap.h"
-#include "src/journal_manager/statistics/stripe_replay_status.h"
+#include "src/mapper/include/mapper_const.h"
 
 namespace pos
 {
@@ -91,58 +92,30 @@ ReplayBlockMapUpdate::Replay(void)
 
         if (IsSameVsa(read, currentVsa) == false)
         {
-            bool needToUpdateMap = _InvalidateOldBlock(offset);
-            if (needToUpdateMap == true)
-            {
-                result = _UpdateMap(offset);
-            }
+            _InvalidateOldBlock(offset);
+            result = _UpdateMap(offset);
         }
     }
 
     return result;
 }
 
-bool
+void
 ReplayBlockMapUpdate::_InvalidateOldBlock(uint32_t offset)
 {
-    bool isCurrentBlockValid = true;
-
-    VirtualBlkAddr old = _GetOldVsa(offset);
     VirtualBlkAddr read = readMap[offset];
-    VirtualBlkAddr current = _GetVsa(offset);
 
-    VirtualBlks blksToInvalidate = {
-        .startVsa = UNMAP_VSA,
-        .numBlks = 1};
+    // TODO (huijeong.kim) : remove isGC, oldVsa from the log
+    assert(logData.isGC == false);
 
-    if (logData.isGC == true)
+    if (read.stripeId != UNMAP_STRIPE)
     {
-        if (IsSameVsa(read, old))
-        {
-            blksToInvalidate.startVsa = read;
-        }
-        else
-        {
-            assert(read.stripeId != UNMAP_STRIPE);
-            blksToInvalidate.startVsa = current;
-            isCurrentBlockValid = false;
-        }
-    }
-    else
-    {
-        if (read.stripeId != UNMAP_STRIPE)
-        {
-            blksToInvalidate.startVsa = read;
-        }
-    }
-
-    if (IsSameVsa(blksToInvalidate.startVsa, UNMAP_VSA) == false)
-    {
+        VirtualBlks blksToInvalidate = {
+            .startVsa = read,
+            .numBlks = 1};
         blockAllocator->InvalidateBlks(blksToInvalidate);
         status->BlockInvalidated(blksToInvalidate.numBlks);
     }
-
-    return isCurrentBlockValid;
 }
 
 int
@@ -161,10 +134,10 @@ ReplayBlockMapUpdate::_UpdateMap(uint32_t offset)
 }
 
 ReplayStripeMapUpdate::ReplayStripeMapUpdate(IStripeMap* stripeMap,
-    StripeReplayStatus* status, StripeMapUpdatedLog dat)
+    StripeReplayStatus* status, StripeLoc dest)
 : ReplayEvent(status),
   stripeMap(stripeMap),
-  logData(dat)
+  dest(dest)
 {
 }
 
@@ -175,19 +148,23 @@ ReplayStripeMapUpdate::~ReplayStripeMapUpdate(void)
 int
 ReplayStripeMapUpdate::Replay(void)
 {
-    int ret = stripeMap->SetLSA(logData.vsid, logData.newMap.stripeId,
-        logData.newMap.stripeLoc);
-
+    int ret = 0;
+    if (dest == IN_WRITE_BUFFER_AREA)
+    {
+        ret = stripeMap->SetLSA(status->GetVsid(), status->GetWbLsid(), IN_WRITE_BUFFER_AREA);
+    }
+    else if (dest == IN_USER_AREA)
+    {
+        ret = stripeMap->SetLSA(status->GetVsid(), status->GetUserLsid(), IN_USER_AREA);
+    }
     return ret;
 }
 
 ReplayStripeAllocation::ReplayStripeAllocation(IStripeMap* stripeMap, IWBStripeCtx* wbStripeCtx,
-    StripeReplayStatus* status, StripeId vsid, StripeId wbLsid)
+    StripeReplayStatus* status)
 : ReplayEvent(status),
   stripeMap(stripeMap),
-  wbStripeCtx(wbStripeCtx),
-  vsid(vsid),
-  wbLsid(wbLsid)
+  wbStripeCtx(wbStripeCtx)
 {
 }
 
@@ -199,6 +176,9 @@ int
 ReplayStripeAllocation::Replay(void)
 {
     int result = 0;
+
+    StripeId vsid = status->GetVsid();
+    StripeId wbLsid = status->GetWbLsid();
 
     result = stripeMap->SetLSA(vsid, wbLsid, IN_WRITE_BUFFER_AREA);
 
@@ -212,11 +192,11 @@ ReplayStripeAllocation::Replay(void)
     return result;
 }
 
-ReplaySegmentAllocation::ReplaySegmentAllocation(ISegmentCtx* segCtx,
-    StripeReplayStatus* status, StripeId userLsid)
+ReplaySegmentAllocation::ReplaySegmentAllocation(ISegmentCtx* isegCtx,
+    IArrayInfo* arrayInfo, StripeReplayStatus* status)
 : ReplayEvent(status),
-  segmentCtx(segCtx),
-  userLsid(userLsid)
+  segmentCtx(isegCtx),
+  arrayInfo(arrayInfo)
 {
 }
 
@@ -227,19 +207,20 @@ ReplaySegmentAllocation::~ReplaySegmentAllocation(void)
 int
 ReplaySegmentAllocation::Replay(void)
 {
-    segmentCtx->ReplaySegmentAllocation(userLsid);
+    int stripesPerSegment = arrayInfo->GetSizeInfo(PartitionType::USER_DATA)->stripesPerSegment;
+    int segId = status->GetUserLsid() / stripesPerSegment;
+    StripeId firstStripe = segId * stripesPerSegment;
+
+    segmentCtx->ReplaySegmentAllocation(firstStripe);
     status->SegmentAllocated();
     return 0;
 }
 
 ReplayStripeFlush::ReplayStripeFlush(IWBStripeCtx* wbStripeCtx, ISegmentCtx* segCtx,
-     StripeReplayStatus* status, StripeId vsid, StripeId wbLsid, StripeId userLsid)
+    StripeReplayStatus* status)
 : ReplayEvent(status),
   wbStripeCtx(wbStripeCtx),
-  segmentCtx(segCtx),
-  vsid(vsid),
-  wbLsid(wbLsid),
-  userLsid(userLsid)
+  segmentCtx(segCtx)
 {
 }
 
@@ -250,8 +231,8 @@ ReplayStripeFlush::~ReplayStripeFlush(void)
 int
 ReplayStripeFlush::Replay(void)
 {
-    wbStripeCtx->ReplayStripeFlushed(wbLsid);
-    segmentCtx->UpdateOccupiedStripeCount(userLsid);
+    wbStripeCtx->ReplayStripeFlushed(status->GetWbLsid());
+    segmentCtx->UpdateOccupiedStripeCount(status->GetUserLsid());
 
     status->StripeFlushed();
 

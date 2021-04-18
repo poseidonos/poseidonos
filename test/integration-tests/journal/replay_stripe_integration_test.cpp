@@ -50,6 +50,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayOverwrite)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     replayTester->ExpectReplayOverwrittenBlockLog(stripe);
 
     VirtualBlks writtenLastBlock = stripe.GetBlockMapList().back().second;
@@ -72,6 +73,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayFullStripe)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     replayTester->ExpectReplayFullStripe(stripe);
     replayTester->ExpectReplayFlushedActiveStripe();
 
@@ -101,6 +103,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayFullStripeSeveralTimes)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenStripes)
     {
         replayTester->ExpectReplayFullStripe(stripeLog);
@@ -127,6 +130,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayeSeveralUnflushedStripe)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     {
         InSequence s;
 
@@ -173,6 +177,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesFromStart)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     {
         InSequence s;
 
@@ -200,7 +205,35 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWrites)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     replayTester->ExpectReplayStripeAllocation(stripe.GetVsid(), stripe.GetWbAddr().stripeId);
+    replayTester->ExpectReplayBlockLogsForStripe(stripe.GetVolumeId(), stripe.GetBlockMapList());
+
+    VirtualBlks writtenLastBlock = stripe.GetBlockMapList().back().second;
+    VirtualBlkAddr tail = ReplayTestFixture::GetNextBlock(writtenLastBlock);
+
+    replayTester->ExpectReplayUnflushedActiveStripe(tail, stripe);
+
+    EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
+}
+
+TEST_F(ReplayStripeIntegrationTest, ReplayBlockWrites_WhenStripeMapCheckpointed)
+{
+    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayBlockWrites_WhenStripeMapCheckpointed");
+
+    InitializeJournal();
+
+    StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
+    int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
+    writeTester->WriteBlockLogsForStripe(stripe, testInfo->numBlksPerStripe - numBlks, numBlks);
+    writeTester->WaitForAllLogWriteDone();
+
+    SimulateSPORWithoutRecovery();
+
+    StripeAddr stroedAddr = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
+        .stripeId = stripe.GetWbLsid(stripe.GetVsid())};
+    replayTester->ExpectReturningStripeAddr(stripe.GetVsid(), stroedAddr);
     replayTester->ExpectReplayBlockLogsForStripe(stripe.GetVolumeId(), stripe.GetBlockMapList());
 
     VirtualBlks writtenLastBlock = stripe.GetBlockMapList().back().second;
@@ -223,6 +256,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesFromStartToEnd)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     {
         InSequence s;
 
@@ -255,12 +289,77 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
+
     {
         InSequence s;
 
         replayTester->ExpectReplayStripeAllocation(stripe.GetVsid(), stripe.GetWbAddr().stripeId);
         replayTester->ExpectReplayBlockLogsForStripe(stripe.GetVolumeId(), stripe.GetBlockMapList());
         replayTester->ExpectReplayStripeFlush(stripe);
+    }
+
+    replayTester->ExpectReplayFlushedActiveStripe();
+
+    EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
+}
+
+TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush_WhenStripeMapCheckpointed)
+{
+    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayBlockWritesAndFlush_WhenStripeMapCheckpointed");
+
+    InitializeJournal();
+
+    StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
+    int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
+    uint32_t startOffset = testInfo->numBlksPerStripe - numBlks;
+    writeTester->WriteBlockLogsForStripe(stripe, startOffset, numBlks);
+    bool writeSuccessful = writeTester->WriteStripeLog(stripe.GetVsid(), stripe.GetWbAddr(), stripe.GetUserAddr());
+    EXPECT_TRUE(writeSuccessful == true);
+
+    writeTester->WaitForAllLogWriteDone();
+    SimulateSPORWithoutRecovery();
+
+    StripeAddr stroedAddr = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
+        .stripeId = stripe.GetWbAddr().stripeId};
+    replayTester->ExpectReturningStripeAddr(stripe.GetVsid(), stroedAddr);
+
+    {
+        InSequence s;
+        replayTester->ExpectReplayBlockLogsForStripe(stripe.GetVolumeId(), stripe.GetBlockMapList());
+        replayTester->ExpectReplayStripeFlush(stripe);
+    }
+
+    replayTester->ExpectReplayFlushedActiveStripe();
+
+    EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
+}
+
+TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush_WhenStripeMapCheckpointed2)
+{
+    POS_TRACE_DEBUG(9999, "ReplayStripeIntegrationTest::ReplayBlockWritesAndFlush_WhenStripeMapCheckpointed2");
+
+    InitializeJournal();
+
+    StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
+    int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
+    uint32_t startOffset = testInfo->numBlksPerStripe - numBlks;
+    writeTester->WriteBlockLogsForStripe(stripe, startOffset, numBlks);
+    bool writeSuccessful = writeTester->WriteStripeLog(stripe.GetVsid(), stripe.GetWbAddr(), stripe.GetUserAddr());
+    EXPECT_TRUE(writeSuccessful == true);
+
+    writeTester->WaitForAllLogWriteDone();
+    SimulateSPORWithoutRecovery();
+
+    StripeAddr stroedAddr = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = stripe.GetUserAddr().stripeId};
+    replayTester->ExpectReturningStripeAddr(stripe.GetVsid(), stroedAddr);
+
+    {
+        InSequence s;
+        replayTester->ExpectReplayBlockLogsForStripe(stripe.GetVolumeId(), stripe.GetBlockMapList());
     }
 
     replayTester->ExpectReplayFlushedActiveStripe();
@@ -281,6 +380,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayFlush)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     replayTester->ExpectReplayStripeAllocation(stripe.GetVsid(), stripe.GetWbAddr().stripeId);
     replayTester->ExpectReplayStripeFlush(stripe);
 
@@ -288,4 +388,5 @@ TEST_F(ReplayStripeIntegrationTest, ReplayFlush)
 
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
+
 } // namespace pos

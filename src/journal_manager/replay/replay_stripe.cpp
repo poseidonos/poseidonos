@@ -80,7 +80,7 @@ ReplayStripe::AddLog(LogHandlerInterface* log)
     {
         StripeMapUpdatedLog dat = *(reinterpret_cast<StripeMapUpdatedLog*>(log->GetData()));
         status->StripeLogFound(dat);
-        _CreateStripeFlushReplayEvent(dat);
+        // Stripe flush log will be added in Replay
     }
 }
 
@@ -93,66 +93,21 @@ ReplayStripe::_CreateBlockWriteReplayEvent(BlockWriteDoneLog dat)
 }
 
 void
-ReplayStripe::_CreateStripeFlushReplayEvent(StripeMapUpdatedLog dat)
+ReplayStripe::_CreateStripeFlushReplayEvent(void)
 {
-    assert(dat.oldMap.stripeLoc == IN_WRITE_BUFFER_AREA);
-    assert(dat.newMap.stripeLoc == IN_USER_AREA);
-
-    ReplayEvent* replayEvent = new ReplayStripeMapUpdate(stripeMap, status, dat);
+    ReplayEvent* replayEvent = new ReplayStripeMapUpdate(stripeMap, status, IN_USER_AREA);
     replayEvents.push_back(replayEvent);
 
-    ReplayEvent* flushEvent = new ReplayStripeFlush(wbStripeCtx, segmentCtx,
-        status, dat.vsid, dat.oldMap.stripeId, dat.oldMap.stripeId);
+    ReplayEvent* flushEvent = new ReplayStripeFlush(wbStripeCtx, segmentCtx, status);
     replayEvents.push_back(flushEvent);
 }
-
-bool
-ReplayStripe::_IsSegmentAllocationReplayRequired(void)
-{
-    const PartitionLogicalSize* userDataSize =
-        arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-    StripeId stripesPerSegment = userDataSize->stripesPerSegment;
-    return (status->GetUserLsid() % stripesPerSegment == 0);
-}
-
-// TODO (huijeong.kim) Currently these 2 functions are not used, change required
-bool
-ReplayStripe::_IsStripeAllocationReplayRequired(void)
-{
-    StripeAddr readStripeAddr = stripeMap->GetLSA(status->GetVsid());
-    bool stripeNotAllocated =
-        (readStripeAddr.stripeLoc != IN_WRITE_BUFFER_AREA ||
-            readStripeAddr.stripeId != status->GetWbLsid());
-
-    // TODO(huijeong.kim) gc handler doesn't set UNMAP after clear the lsid
-    // Check if always' UNMAP when LSID is not set before
-
-    return stripeNotAllocated;
-}
-
-bool
-ReplayStripe::_IsStripeFlushReplayRequired(StripeMapUpdatedLog dat)
-{
-    StripeAddr readStripeAddr = stripeMap->GetLSA(dat.vsid);
-
-    if (readStripeAddr.stripeId == dat.newMap.stripeId &&
-        readStripeAddr.stripeLoc == IN_USER_AREA)
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
-}
-
 
 int
 ReplayStripe::Replay(void)
 {
     int result = 0;
 
-    _CreateStripeAllocationEvent();
+    _CreateStripeEvents();
 
     if ((result = _ReplayEvents()) != 0)
     {
@@ -168,18 +123,49 @@ ReplayStripe::Replay(void)
 }
 
 void
+ReplayStripe::_CreateStripeEvents(void)
+{
+    StripeAddr readStripeAddr = stripeMap->GetLSA(status->GetVsid());
+    StripeAddr wbStripeAddr = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
+        .stripeId = status->GetWbLsid()};
+    StripeAddr userStripeAddr = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = status->GetUserLsid()};
+
+    if (status->IsFlushed() == false)
+    {
+        if (!(readStripeAddr == wbStripeAddr))
+        {
+            _CreateStripeAllocationEvent();
+        }
+    }
+    else
+    {
+        if (readStripeAddr == wbStripeAddr)
+        {
+            _CreateStripeFlushReplayEvent();
+        }
+        else if (readStripeAddr == userStripeAddr)
+        {
+            // Map is already upated to user stripe
+        }
+        else
+        {
+            _CreateStripeAllocationEvent();
+            _CreateStripeFlushReplayEvent();
+        }
+    }
+}
+
+void
 ReplayStripe::_CreateStripeAllocationEvent(void)
 {
-    ReplayEvent* replayEvent = new ReplayStripeAllocation(stripeMap, wbStripeCtx,
-        status, status->GetVsid(), status->GetWbLsid());
-    replayEvents.push_front(replayEvent);
+    ReplayEvent* stripeAllocEvent = new ReplayStripeAllocation(stripeMap, wbStripeCtx, status);
+    replayEvents.push_front(stripeAllocEvent);
 
-    if (_IsSegmentAllocationReplayRequired())
-    {
-        ReplayEvent* replayEvent = new ReplaySegmentAllocation(segmentCtx,
-            status, status->GetUserLsid());
-        replayEvents.push_front(replayEvent);
-    }
+    ReplayEvent* segmentAllocEvent = new ReplaySegmentAllocation(segmentCtx, arrayInfo, status);
+    replayEvents.push_front(segmentAllocEvent);
 }
 
 int

@@ -1,5 +1,6 @@
 #include "test/integration-tests/journal/fixture/replay_test_fixture.h"
 
+using ::testing::AnyNumber;
 using ::testing::InSequence;
 using ::testing::Return;
 
@@ -18,13 +19,6 @@ ReplayTestFixture::~ReplayTestFixture(void)
 }
 
 void
-ReplayTestFixture::ExpectReturningUnmapStripe(StripeId vsid)
-{
-    EXPECT_CALL(*(mapper->GetStripeMapMock()),
-        GetLSA(vsid)).WillOnce(Return(unmapAddr));
-}
-
-void
 ReplayTestFixture::ExpectReturningUnmapStripes(void)
 {
     EXPECT_CALL(*(mapper->GetStripeMapMock()),
@@ -32,21 +26,21 @@ ReplayTestFixture::ExpectReturningUnmapStripes(void)
 }
 
 void
-ReplayTestFixture::ExpectReturningUnmapStripes(StripeId vsid)
+ReplayTestFixture::ExpectReturningStripeAddr(StripeId vsid, StripeAddr addr)
 {
     EXPECT_CALL(*(mapper->GetStripeMapMock()),
-        GetLSA(vsid)).WillRepeatedly(Return(unmapAddr));
+        GetLSA(vsid))
+        .WillRepeatedly(Return(addr));
 }
 
 void
 ReplayTestFixture::ExpectReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
 {
-    if (vsid % testInfo->numStripesPerSegment == 0)
-    {
-        EXPECT_CALL(*(allocator->GetSegmentCtxMock()),
-            ReplaySegmentAllocation(vsid))
-            .Times(1);
-    }
+    StripeId firstStripe = vsid / testInfo->numStripesPerSegment * testInfo->numStripesPerSegment;
+    EXPECT_CALL(*(allocator->GetSegmentCtxMock()),
+        ReplaySegmentAllocation(firstStripe))
+        .Times(AnyNumber());
+
     EXPECT_CALL(*(mapper->GetStripeMapMock()),
         SetLSA(vsid, wbLsid, IN_WRITE_BUFFER_AREA))
         .Times(1);

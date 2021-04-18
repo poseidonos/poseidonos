@@ -58,6 +58,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayFullLogBuffer)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     replayTester->ExpectReplayOverwrittenBlockLog(stripe);
 
     VirtualBlks writtenLastBlock = stripe.GetBlockMapList().back().second;
@@ -115,6 +116,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayCirculatedLogBuffer)
 
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenLogs)
     {
         replayTester->ExpectReplayFullStripe(stripeLog);

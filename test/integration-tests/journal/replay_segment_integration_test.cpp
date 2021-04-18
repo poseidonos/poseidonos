@@ -54,6 +54,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplaySegmentsWithPatial)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenStripes)
     {
         replayTester->ExpectReplayFullStripe(stripeLog);
@@ -84,6 +85,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplaySegment)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenStripes)
     {
         replayTester->ExpectReplayFullStripe(stripeLog);
@@ -114,6 +116,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplayFullSegment)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenStripes)
     {
         replayTester->ExpectReplayFullStripe(stripeLog);
@@ -151,6 +154,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplayReusedSegment)
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
+    replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenStripes)
     {
         replayTester->ExpectReplayFullStripe(stripeLog);

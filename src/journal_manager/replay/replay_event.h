@@ -43,6 +43,7 @@ class IStripeMap;
 class IBlockAllocator;
 class IWBStripeCtx;
 class ISegmentCtx;
+class IArrayInfo;
 class StripeReplayStatus;
 
 enum class ReplayEventType
@@ -90,7 +91,7 @@ public:
 private:
     void _ReadBlockMap(void);
 
-    bool _InvalidateOldBlock(uint32_t offset);
+    void _InvalidateOldBlock(uint32_t offset);
     int _UpdateMap(uint32_t offset);
 
     inline VirtualBlkAddr
@@ -128,15 +129,10 @@ class ReplayStripeMapUpdate : public ReplayEvent
 {
 public:
     ReplayStripeMapUpdate(IStripeMap* istripeMap, StripeReplayStatus* status,
-        StripeMapUpdatedLog dat);
+        StripeLoc dest);
     virtual ~ReplayStripeMapUpdate(void);
 
     virtual int Replay(void) override;
-    inline StripeMapUpdatedLog
-    GetLog(void)
-    {
-        return logData;
-    }
 
     inline ReplayEventType
     GetType(void)
@@ -146,14 +142,14 @@ public:
 
 private:
     IStripeMap* stripeMap;
-    StripeMapUpdatedLog logData;
+    StripeLoc dest;
 };
 
 class ReplayStripeAllocation : public ReplayEvent
 {
 public:
     ReplayStripeAllocation(IStripeMap* istripeMap, IWBStripeCtx* iwbStripeCtx,
-        StripeReplayStatus* status, StripeId vsid, StripeId wbLsid);
+        StripeReplayStatus* status);
     virtual ~ReplayStripeAllocation(void);
 
     virtual int Replay(void) override;
@@ -167,15 +163,12 @@ public:
 private:
     IStripeMap* stripeMap;
     IWBStripeCtx* wbStripeCtx;
-    StripeId vsid;
-    StripeId wbLsid;
 };
 
 class ReplaySegmentAllocation : public ReplayEvent
 {
 public:
-    ReplaySegmentAllocation(ISegmentCtx* isegCtx,
-        StripeReplayStatus* status, StripeId userLsid);
+    ReplaySegmentAllocation(ISegmentCtx* isegCtx, IArrayInfo* arrayInfo, StripeReplayStatus* status);
     virtual ~ReplaySegmentAllocation(void);
 
     virtual int Replay(void) override;
@@ -188,14 +181,14 @@ public:
 
 private:
     ISegmentCtx* segmentCtx;
-    StripeId userLsid;
+    IArrayInfo* arrayInfo;
 };
 
 class ReplayStripeFlush : public ReplayEvent
 {
 public:
     ReplayStripeFlush(IWBStripeCtx* iwbStripeCtx, ISegmentCtx* isegCtx,
-        StripeReplayStatus* status, StripeId vsid, StripeId wbLsid, StripeId userLsid);
+        StripeReplayStatus* status);
     virtual ~ReplayStripeFlush(void);
 
     virtual int Replay(void) override;
@@ -209,9 +202,6 @@ public:
 private:
     IWBStripeCtx* wbStripeCtx;
     ISegmentCtx* segmentCtx;
-    StripeId vsid;
-    StripeId wbLsid;
-    StripeId userLsid;
 };
 
 } // namespace pos

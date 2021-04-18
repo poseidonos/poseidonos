@@ -137,22 +137,12 @@ StripeReplayStatus::BlockInvalidated(uint32_t numBlks)
 void
 StripeReplayStatus::SegmentAllocated(void)
 {
-    if (segmentAllocated == true)
-    {
-        int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
-        POS_TRACE_DEBUG(eventId, "[Replay] Segment allocation replayed more than once");
-    }
     segmentAllocated = true;
 }
 
 void
 StripeReplayStatus::StripeAllocated(void)
 {
-    if (stripeAllocated == true)
-    {
-        int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
-        POS_TRACE_DEBUG(eventId, "[Replay] Stripe allocation replayed more than once");
-    }
     stripeAllocated = true;
 }
 

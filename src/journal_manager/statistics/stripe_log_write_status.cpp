@@ -93,6 +93,9 @@ StripeLogWriteStatus::BlockLogFound(BlockWriteDoneLog dat)
 void
 StripeLogWriteStatus::StripeLogFound(StripeMapUpdatedLog dat)
 {
+    assert(dat.oldMap.stripeLoc == IN_WRITE_BUFFER_AREA);
+    assert(dat.newMap.stripeLoc == IN_USER_AREA);
+
     std::lock_guard<std::mutex> lock(statusLock);
 
     stripeFlushed = true;

@@ -83,6 +83,8 @@ void
 JournalVolumeIntegrationTest::ExpectReplayStripes(StripeList &writtenStripes,
     int numVolumes, Volumes &deletedVolumes)
 {
+    replayTester->ExpectReturningUnmapStripes();
+
     for (int volId = 0; volId < numVolumes; volId++)
     {
         auto stripe = writtenStripes[volId];

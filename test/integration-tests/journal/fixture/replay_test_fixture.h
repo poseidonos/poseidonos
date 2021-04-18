@@ -15,9 +15,8 @@ public:
     ReplayTestFixture(MockMapper* mapper, AllocatorMock* allocator, TestInfo* testInfo);
     virtual ~ReplayTestFixture(void);
 
-    void ExpectReturningUnmapStripe(StripeId vsid);
     void ExpectReturningUnmapStripes(void);
-    void ExpectReturningUnmapStripes(StripeId vsid);
+    void ExpectReturningStripeAddr(StripeId vsid, StripeAddr addr);
 
     void ExpectReplayStripeAllocation(StripeId vsid, StripeId wbLsid);
     void ExpectReplayBlockLogsForStripe(int volId, BlockMapList blksToWrite);
