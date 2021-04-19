@@ -66,12 +66,13 @@ ReverseMapPack::~ReverseMapPack(void)
 }
 
 void
-ReverseMapPack::Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file)
+ReverseMapPack::Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file, std::string arrName)
 {
     mpageSize = mpsize;
     numMpagesPerStripe = nmpPerStripe;
     fileSizePerStripe = mpageSize * numMpagesPerStripe;
     revMapfile = file;
+    arrayName = arrName;
 
     for (uint64_t mpage = 0; mpage < numMpagesPerStripe; ++mpage)
     {
@@ -369,7 +370,7 @@ ReverseMapPack::ReconstructMap(uint32_t volumeId, StripeId vsid, StripeId lsid, 
         "[RMR]START, volumeId:{}  wbLsid:{}  vsid:{}  blockCount:{}",
         volumeId, lsid, vsid, blockCount);
 
-    ret = reconstructStatus.Init(lsid, vsid, volumeId);
+    ret = reconstructStatus.Init(lsid, vsid, volumeId, arrayName);
     if (ret != 0)
     {
         return ret;
@@ -440,16 +441,15 @@ ReverseMapPack::_FindRba(uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba)
 }
 
 int
-ReverseMapPack::ReconstructInfo::Init(StripeId inputLsid, StripeId inputVsid, uint32_t volumeId)
+ReverseMapPack::ReconstructInfo::Init(StripeId inputLsid, StripeId inputVsid, uint32_t volumeId, std::string arrName)
 {
-    IVolumeManager& volumeManager = *VolumeServiceSingleton::Instance()->GetVolumeManager("");
+    IVolumeManager& volumeManager = *VolumeServiceSingleton::Instance()->GetVolumeManager(arrName);
 
     uint64_t volSize = 0;
     int ret = volumeManager.GetVolumeSize(volumeId, volSize);
     if (ret != 0)
     {
-        POS_TRACE_WARN(EID(GET_VOLUMESIZE_FAILURE),
-            "[RMR]GetVolumeSize failure, volumeId:{}", volumeId);
+        POS_TRACE_WARN(EID(GET_VOLUMESIZE_FAILURE), "[RMR]GetVolumeSize failure, volumeId:{}", volumeId);
         return -(int)EID(GET_VOLUMESIZE_FAILURE);
     }
 

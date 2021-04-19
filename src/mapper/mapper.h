@@ -57,7 +57,7 @@ class Mapper : public IMapFlush, public IMapperWbt, public IMountSequence
     friend class MapperTestFixture;
 
 public:
-    Mapper(IArrayInfo* info, IStateControl* iState);
+    Mapper(IArrayInfo* iarrayInfo, IStateControl* iState);
     virtual ~Mapper(void);
 
     virtual int Init(void) override;

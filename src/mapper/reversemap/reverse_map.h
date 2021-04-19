@@ -139,7 +139,7 @@ public:
     ReverseMapPack(void);
     virtual ~ReverseMapPack(void);
 
-    void Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file);
+    void Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file, std::string arrName);
     void Init(StripeId wblsid, IVSAMap* ivsaMap, IStripeMap* istripeMap);
     int LinkVsid(StripeId vsid); // vsid == SSD LSID
     int UnLinkVsid(void);
@@ -179,6 +179,7 @@ private:
 
     IVSAMap* iVSAMap;
     IStripeMap* iStripeMap;
+    std::string arrayName;
 
     struct ReconstructInfo
     {
@@ -187,7 +188,7 @@ private:
         uint32_t volId;
         BlkAddr totalRbaNum;
 
-        int Init(StripeId lsid, StripeId vsid, uint32_t volumeId);
+        int Init(StripeId lsid, StripeId vsid, uint32_t volumeId, std::string arrName);
     };
     ReconstructInfo reconstructStatus;
 };

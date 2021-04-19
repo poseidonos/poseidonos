@@ -47,16 +47,15 @@ namespace pos
 
 MpageList IMapFlush::DEFAULT_DIRTYPAGE_SET;
 
-Mapper::Mapper(IArrayInfo* info, IStateControl* iState)
-: iArrayinfo(info),
+Mapper::Mapper(IArrayInfo* iarrayInfo, IStateControl* iState)
+: iArrayinfo(iarrayInfo),
   iStateControl(iState),
   isInitialized(false)
 {
     addrInfo = new MapperAddressInfo();
-    vsaMapManager = new VSAMapManager(addrInfo, info->GetName());
-    stripeMapManager = new StripeMapManager(addrInfo, info->GetName());
-    reverseMapManager = new ReverseMapManager(vsaMapManager->GetIVSAMap(), stripeMapManager);
-    reverseMapManager->SetDoC(info);
+    vsaMapManager = new VSAMapManager(addrInfo, iarrayInfo->GetName());
+    stripeMapManager = new StripeMapManager(addrInfo, iarrayInfo->GetName());
+    reverseMapManager = new ReverseMapManager(vsaMapManager->GetIVSAMap(), stripeMapManager, iArrayinfo);
 }
 
 Mapper::~Mapper(void)

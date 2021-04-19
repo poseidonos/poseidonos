@@ -46,7 +46,7 @@ namespace pos
 class ReverseMapManager : public IReverseMap
 {
 public:
-    ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap);
+    ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, IArrayInfo* iarrayInfo);
     virtual ~ReverseMapManager(void);
 
     void Init(MapperAddressInfo& info);
@@ -64,7 +64,6 @@ public:
 private:
     int _SetPageSize(StorageOpt storageOpt = StorageOpt::DEFAULT);
     int _SetNumMpages(void);
-    void _SetDefaultDoC(void);
 
     uint64_t mpageSize;          // Optimal page size for each FS (MFS, legacy)
     uint64_t numMpagesPerStripe; // It depends on block count per a stripe

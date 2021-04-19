@@ -42,7 +42,7 @@
 namespace pos
 {
 
-ReverseMapManager::ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap)
+ReverseMapManager::ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, IArrayInfo* iarrayInfo)
 : mpageSize(0),
   numMpagesPerStripe(0),
   fileSizePerStripe(0),
@@ -51,7 +51,7 @@ ReverseMapManager::ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap)
   revMapWholefile(nullptr),
   iVSAMap(ivsaMap),
   iStripeMap(istripeMap),
-  iArrayInfo(nullptr)
+  iArrayInfo(iarrayInfo)
 {
 }
 
@@ -72,7 +72,6 @@ ReverseMapManager::~ReverseMapManager(void)
 void
 ReverseMapManager::Init(MapperAddressInfo& info)
 {
-    _SetDefaultDoC();
     _SetPageSize();
     _SetNumMpages();
 
@@ -98,7 +97,7 @@ ReverseMapManager::Init(MapperAddressInfo& info)
     revMapPacks = new ReverseMapPack[info.numWbStripes]();
     for (StripeId wbLsid = 0; wbLsid < info.numWbStripes; ++wbLsid)
     {
-        revMapPacks[wbLsid].Init(mpageSize, numMpagesPerStripe, revMapWholefile);
+        revMapPacks[wbLsid].Init(mpageSize, numMpagesPerStripe, revMapWholefile, iArrayInfo->GetName());
         revMapPacks[wbLsid].Init(wbLsid, iVSAMap, iStripeMap);
     }
 }
@@ -150,7 +149,7 @@ ReverseMapPack*
 ReverseMapManager::AllocReverseMapPack(void)
 {
     ReverseMapPack* obj = new ReverseMapPack;
-    obj->Init(mpageSize, numMpagesPerStripe, revMapWholefile);
+    obj->Init(mpageSize, numMpagesPerStripe, revMapWholefile, iArrayInfo->GetName());
     return obj;
 }
 
@@ -232,15 +231,6 @@ ReverseMapManager::_SetNumMpages(void)
         fileSizePerStripe);
 
     return 0;
-}
-
-void
-ReverseMapManager::_SetDefaultDoC(void)
-{
-    if (nullptr == iArrayInfo)
-    {
-        iArrayInfo = ArrayMgr::Instance()->GetArrayInfo("");
-    }
 }
 
 } // namespace pos
