@@ -32,10 +32,13 @@
 
 #include "src/cli/exit_ibofos_command.h"
 
+#include <vector>
+
+#include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_event_code.h"
 #include "src/cli/request_handler.h"
-#include "src/array_mgmt/array_manager.h"
 #include "src/logger/logger.h"
+#include "src/mbr/mbr_info.h"
 
 namespace pos_cli
 {
@@ -54,18 +57,46 @@ ExitIbofosCommand::Execute(json& doc, string rid)
     RequestHandler requestHandler;
 
     int ret = 0;
-    string emptyStringToGetFirstArray = "";
-    IArrayInfo* arrayInfo = ArrayMgr::Instance()->GetArrayInfo(emptyStringToGetFirstArray);
-
-    if (arrayInfo != nullptr && arrayInfo->GetState() >= ArrayStateEnum::NORMAL)
-    {
-        int eventId = (int)POS_EVENT_ID::MOUNTED_ARRAY_EXISTS;
-        POS_TRACE_ERROR(eventId, "Failed to exit system. Some mounted arrays exist");
-        ret = eventId;
-    }
+    std::vector<ArrayBootRecord> abrList;
+    ret = ArrayMgr::Instance()->GetAbrList(abrList);
 
     if (ret == 0)
     {
+        if (!abrList.empty())
+        {
+            int eventId = (int)POS_EVENT_ID::MBR_ABR_LIST_SUCCESS;
+            POS_TRACE_DEBUG(eventId, "Found {} arrays from abr list", abrList.size());
+            for (const auto& abr : abrList)
+            {
+                IArrayInfo* arrayInfo = ArrayMgr::Instance()->GetArrayInfo(abr.arrayName);
+
+                if (arrayInfo == nullptr)
+                {
+                    eventId = (int)POS_EVENT_ID::ARRAY_NO_ARRAY_INFO;
+                    POS_TRACE_ERROR(eventId, "No array info for array '{}'", abr.arrayName);
+                }
+                else
+                {
+                    eventId = (int)POS_EVENT_ID::ARRAY_ARRAY_INFO_FOUND;
+                    POS_TRACE_DEBUG(eventId, "Found array '{}' in state '{}'",
+                        abr.arrayName, arrayInfo->GetState().ToString());
+
+                    if (arrayInfo->GetState() >= ArrayStateEnum::TRY_MOUNT)
+                    {
+                        eventId = (int)POS_EVENT_ID::MOUNTED_ARRAY_EXISTS;
+                        POS_TRACE_ERROR(eventId,
+                            "Failed to exit system. Array '{}' is still mounted with state '{}'",
+                            abr.arrayName, arrayInfo->GetState().ToString());
+
+                        return jFormat.MakeResponse(
+                            "EXITIBOFOS", rid, eventId,
+                            "failed to terminate POS (code:" + to_string(eventId) + ")",
+                            GetPosInfo());
+                    }
+                }
+            }
+        }
+
         if (requestHandler.IsExit() == false)
         {
             requestHandler.SetExit(true);
