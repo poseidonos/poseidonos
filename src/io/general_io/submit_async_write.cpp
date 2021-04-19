@@ -84,9 +84,7 @@ SubmitAsyncWrite::Execute(
         new ArrayUnlocking(partitionToIO, stripeId, arrayName));
     arrayUnlocking->SetCallee(callback);
     arrayUnlocking->SetWaitingCount(totalIoCount);
-#if defined QOS_ENABLED_BE
     arrayUnlocking->SetEventType(callback->GetEventType());
-#endif
     for (PhysicalWriteEntry& physicalWriteEntry : physicalWriteEntries)
     {
         for (BufferEntry& buffer : physicalWriteEntry.buffers)
@@ -103,10 +101,8 @@ SubmitAsyncWrite::Execute(
             }
             ubio->SetPba(physicalWriteEntry.addr);
             CallbackSmartPtr event(new InternalWriteCompletion(buffer));
-#if defined QOS_ENABLED_BE
             ubio->SetEventType(callback->GetEventType());
             event->SetEventType(ubio->GetEventType());
-#endif
             event->SetCallee(arrayUnlocking);
             ubio->SetCallback(event);
 
