@@ -26,8 +26,8 @@ ioengine = ibof_root + "/lib/spdk/examples/" + str(fio_plugin) + "/fio_plugin/fi
 #ioengine = ibof_root + "/bin/ibof_bdev_fio_plugin"
 spdk_conf= ibof_root + "test/system/nvmf/initiator/spdk_tcp_fio/BDEV.conf"
 
-file_num=1
-traddr='172.16.1.1'
+file_num=2
+traddr='10.100.4.17'
 # could be either nvme or nvmf or bdev
 #filename='trtype=pcie traddr=0000.02.00.0 ns=1'
 #filename="Nvme1n1"
@@ -37,18 +37,18 @@ filename="trtype=tcp adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=
 
 # the configuration below runs QD 1 & 128. 
 # To add set q_depth=['1', '32', '128']
-q_depth=['1','32']
+q_depth=['32']
 
 # io_size and block_size specifies the size in bytes of the IO workload.
 # To add 64K IOs set io_size = ['4096', '65536'] and block_size = [ '512', '1024', '4096' ]
 io_size=['8g']
-block_size=['4096', '512b-128k']
+block_size=['4096']
 
 # type of I/O pattern : write, read, trim, randread, randwrite, randtrim, readwrite, randrw, rw
-readwrite=['write', 'randwrite', 'randrw']
+readwrite=['write']
 
 # verify = True | False. applied on sorts of write I/O patterns
-verify=True
+verify=False
 
 # run_time parameter specifies how long to run each test.
 # Set run_time = ['10', '600'] to run the test for given seconds

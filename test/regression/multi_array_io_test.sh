@@ -46,7 +46,8 @@ volname="Volume0"
 io_size_kb_list=(64 128 256) #KB
 spdk_rpc_script="${IBOFOS_ROOT}/lib/spdk/scripts/rpc.py"
 spdk_nvmf_tgt="../lib/spdk/app/nvmf_tgt/nvmf_tgt"
-nss="nqn.2019-04.ibof:subsystem1"
+nss1="nqn.2019-04.ibof:subsystem1"
+nss2="nqn.2019-04.ibof:subsystem2"
 echo_slient=1
 logfile="/var/log/ibofos/multi_array_bringup.log"
 #---------------------------------
@@ -209,7 +210,8 @@ establish_nvmef_target()
         texecc ${spdk_rpc_script} nvmf_create_transport -t ${create_trtype} -b 64 -n 4096 #>> ${logfile}
     fi
 
-    texecc ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss} -t ${trtype} -a ${target_fabric_ip} -s ${port} #>> ${logfile}
+    texecc ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss1} -t ${trtype} -a ${target_fabric_ip} -s ${port} #>> ${logfile}
+    texecc ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss2} -t ${trtype} -a ${target_fabric_ip} -s ${port} #>> ${logfile}
 
     notice "New NVMe subsystem accessiable via Fabric has been added successfully to target!"
 }
@@ -221,7 +223,8 @@ discover_n_connect_nvme_from_initiator()
     notice "Discovery has been finished!"
     
     notice "Connecting remote NVMe drives..."
-    iexecc ${nvme_cli} connect -t ${trtype} -n ${nss} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
+    iexecc ${nvme_cli} connect -t ${trtype} -n ${nss1} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
+    iexecc ${nvme_cli} connect -t ${trtype} -n ${nss2} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
     echo `sudo nvme list | grep -E 'SPDK|IBOF|iBoF'`
     target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -1`
     echo $target_nvme
@@ -238,7 +241,8 @@ discover_n_connect_nvme_from_initiator()
 
 disconnect_nvmf_contollers()
 {
-    iexecc ${nvme_cli} disconnect -n ${nss} #>> ${logfile} 
+    iexecc ${nvme_cli} disconnect -n ${nss1} #>> ${logfile} 
+    iexecc ${nvme_cli} disconnect -n ${nss2} #>> ${logfile} 
     notice "Remote NVMe drive has been disconnected..."
 }
 
@@ -279,7 +283,8 @@ bringup_ibofos()
 
     start_ibofos;
 
-    texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss} -a -s IBOF00000000000001  -d IBOF_VOLUME #>> ${logfile}
+    texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss1} -a -s IBOF00000000000001  -d IBOF_VOLUME -m 256 #>> ${logfile}
+    texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss2} -a -s IBOF00000000000001  -d IBOF_VOLUME -m 256 #>> ${logfile}
     texecc ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512
     sleep 5
     texecc ${spdk_rpc_script} bdev_malloc_create -b uram1 1024 512
@@ -308,20 +313,20 @@ bringup_ibofos()
 
     if [ ${ibofos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
-        texecc ${IBOFOS_ROOT}/bin/cli volume mount --name ${volname} --array ${target_name_0} >> ${logfile};
-        texecc ${IBOFOS_ROOT}/bin/cli volume mount --name ${volname} --array ${target_name_1} >> ${logfile};
+        texecc ${IBOFOS_ROOT}/bin/cli volume mount --name ${volname} --array ${target_name_0} --subnqn ${nss1} >> ${logfile};
+        texecc ${IBOFOS_ROOT}/bin/cli volume mount --name ${volname} --array ${target_name_1} --subnqn ${nss2} >> ${logfile};
         #check_result_err_from_logfile
     fi
     
     establish_nvmef_target;
-    discover_n_connect_nvme_from_initiator;
+    #discover_n_connect_nvme_from_initiator;
     
     notice "Bring-up iBoFOS done!"
 }
 
 io_test()
 {
-	texecc ${IBOFOS_ROOT}/test/system/nvmf/initiator/fio_full_bench.py --iodepth 128 --io_size 10m --file_num 2 --ramp_time 0 --run_time 120 --time_based 0 --bs 512,4K,128K,512-128K --trtype tcp --traddr $target_fabric_ip
+	texecc ${IBOFOS_ROOT}/test/system/nvmf/initiator/fio_full_bench.py --iodepth 4 --io_size 100m --file_num 2 --ramp_time 0 --run_time 15 --time_based 1 --bs 128k --trtype tcp --traddr $target_fabric_ip
 }
 
 date=
