@@ -88,7 +88,7 @@ FlushSubmission::Execute(void)
         IIOTranslator* translator = ArrayService::Instance()->Getter()->GetTranslator();
         PhysicalBlkAddr physicalWriteEntry;
         translator->Translate(
-            "", WRITE_BUFFER, physicalWriteEntry, startWbLSA);
+            arrayName, WRITE_BUFFER, physicalWriteEntry, startWbLSA);
         char *offset = static_cast<char *>(BdevApi::GetBufferPointer()) + (physicalWriteEntry.lba * ArrayConfig::SECTOR_SIZE_BYTE);
         for (auto it = stripe->DataBufferBegin(); it != stripe->DataBufferEnd(); ++it)
         {
