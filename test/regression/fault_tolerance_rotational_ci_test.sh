@@ -302,7 +302,7 @@ write_pattern()
 shutdown_ibofos()
 {
     notice "Shutting down ibofos..."
-	${ibof_cli} array unmount
+	${ibof_cli} array unmount --name $array_name
 	${ibof_cli} system exit
     notice "Shutdown has been completed!"
 
@@ -343,20 +343,20 @@ bringup_ibofos()
 	if [ $create_array -eq 1 ]; then
         ${ibof_cli} array reset
 		info "Target device list=${target_dev_list}"
-		${ibof_cli} array create -b uram0 -d ${target_dev_list}
+		${ibof_cli} array create -b uram0 -d ${target_dev_list} --name $array_name
 	fi
 	
-	${ibof_cli} array mount
+	${ibof_cli} array mount --name $array_name
 
     if [ ${ibofos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        ${ibof_cli} volume create --name ${volname} --size ${ibof_phy_volume_size_byte} >> ${logfile};
+        ${ibof_cli} volume create --name ${volname} --size ${ibof_phy_volume_size_byte} --array $array_name >> ${logfile};
         check_result_err_from_logfile
     fi
 
     if [ ${ibofos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
-        ${ibof_cli} volume mount --name ${volname} >> ${logfile};
+        ${ibof_cli} volume mount --name ${volname} --array $array_name >> ${logfile};
         check_result_err_from_logfile
     fi
     
@@ -413,7 +413,7 @@ add_spare()
 {
 	local spare_dev_name="unvme-ns-"${attach_index}
     notice "add spare device ${spare_dev_name}"
-	${ibof_cli} array add --spare ${spare_dev_name}
+	${ibof_cli} array add --spare ${spare_dev_name} --array $array_name
 	attach_index=$((attach_index+1))
 }
 

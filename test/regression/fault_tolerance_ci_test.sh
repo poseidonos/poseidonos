@@ -61,6 +61,7 @@ root_dir="../../"
 ibof_cli="${root_dir}bin/cli "
 network_config_file="${root_dir}test/system/network/network_config.sh"
 total_iter=3
+array_name="POSArray"
 #---------------------------------
 # internal configuration
 target_nvme=""
@@ -308,7 +309,7 @@ write_pattern()
 shutdown_ibofos()
 {
     notice "Shutting down ibofos..."
-	${ibof_cli} array unmount
+	${ibof_cli} array unmount --name $array_name
 	${ibof_cli} system exit
     notice "Shutdown has been completed!"
 
@@ -348,20 +349,20 @@ bringup_ibofos()
 	if [ $create_array -eq 1 ]; then
         ${root_dir}bin/cli array reset
 		info "Target device list=${target_dev_list}"
-		${ibof_cli} array create -b uram0 -d ${target_dev_list}
+		${ibof_cli} array create -b uram0 -d ${target_dev_list} --name $array_name
 	fi
 	
-	${ibof_cli} array mount
+	${ibof_cli} array mount --name $array_name
 
     if [ ${ibofos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        ${ibof_cli} volume create --name ${volname} --size ${ibof_phy_volume_size_byte} >> ${logfile};
+        ${ibof_cli} volume create --name ${volname} --size ${ibof_phy_volume_size_byte} --array $array_name >> ${logfile};
         check_result_err_from_logfile
     fi
 
     if [ ${ibofos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
-        ${ibof_cli} volume mount --name ${volname} >> ${logfile};
+        ${ibof_cli} volume mount --name ${volname} --array $array_name >> ${logfile};
         check_result_err_from_logfile
     fi
     
@@ -416,7 +417,7 @@ add_spare()
 {
     notice "add spare device ${dev_name}"
 	local dev_name=${target_spare_dev}
-	${ibof_cli} array add --spare ${dev_name}
+	${ibof_cli} array add --spare ${dev_name} --array $array_name
 }
 
 waiting_for_rebuild_complete()
