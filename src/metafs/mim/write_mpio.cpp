@@ -96,6 +96,7 @@ WriteMpio::_MakeReady(MpAioState expNextState)
             io.opcode, io.tagId, io.mpioId, currLpn, prevLpn, currBuf, prevBuf);
 
 #if RANGE_OVERLAP_CHECK_EN
+  #if MPIO_CACHE_EN
         if (MetaStorageType::NVRAM == io.targetMediaType)
         {
             switch (cacheState)
@@ -121,6 +122,7 @@ WriteMpio::_MakeReady(MpAioState expNextState)
             }
         }
         else
+  #endif
         {
             SetNextState(MpAioState::Read);
         }

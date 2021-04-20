@@ -92,7 +92,7 @@ MpioHandler::BottomhalfMioProcessing(void)
         }
     }
 
-#if RANGE_OVERLAP_CHECK_EN
+#if MPIO_CACHE_EN
     mpioPool->ReleaseCache();
 #endif
 }
