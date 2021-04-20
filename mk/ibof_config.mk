@@ -21,8 +21,14 @@ export CONFIG_USE_MOCK_FS?=n
 # for gcov
 export CONFIG_GCOV?=n
 
+# for be qos
+export CONFIG_BE_QOS?=y
+
 # for fe qos
 export CONFIG_FE_QOS?=n
 
 #Build PoseidonOS as library
 export CONFIG_LIBRARY_BUILD?=n
+
+#Build PoseidonOS with -FPIC option
+export CONFIG_FPIC?=y

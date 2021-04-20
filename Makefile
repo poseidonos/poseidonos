@@ -77,6 +77,9 @@ CPPFLAGS = -g -Wall -O2 -std=c++14 -Werror
 ifeq ($(CONFIG_LIBRARY_BUILD), y)
 CPPFLAGS += -fpermissive -fPIC
 endif
+ifeq ($(CONFIG_FPIC), y)
+CPPFLAGS += -fpermissive -fPIC
+endif
 
 ifeq ($(CONFIG_GCOV),y)
 CPPFLAGS += --coverage
@@ -97,10 +100,7 @@ endif
 
 INCLUDE = -I$(TOP) -I$(SPDK_ROOT_DIR)/include -I$(SPDK_ROOT_DIR)/module -I$(TOP)/lib \
 		  -I$(TOP)/src/ibofos/network/ -I$(TOP)/src/logger/
-
-ifeq ($(CONFIG_LIBRARY_BUILD), y)
-INCLUDE += -I$(TOP)/lib/$(FIO_SOURCE)
-endif          
+  
 
 export MFS_TOP_DIR=$(TOP)/src/metafs
 include $(MFS_TOP_DIR)/mfs_include.mk

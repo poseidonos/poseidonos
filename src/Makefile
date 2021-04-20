@@ -34,7 +34,6 @@ SUBDIRS = allocator \
         volume \
         device \
         spdk_wrapper \
-        cpu_affinity \
         mbr \
         bio \
         device/unvme \

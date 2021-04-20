@@ -29,3 +29,6 @@ CONFIG_FE_QOS=n
 
 #Build PoseidonOS as library
 CONFIG_LIBRARY_BUILD=n
+
+#Build PoseidonOS with -FPIC option
+CONFIG_FPIC=n

@@ -25,6 +25,7 @@ function usage()
 	echo "Valid dependencies are listed below."
 	echo " mfs-raid                  Build IBOF with Meta FileSystem with RAID1 capability"
 	echo " library-build             Build IBOF with library"
+	echo " fpic                      Build IBOF with fpic option"	
 	echo " gcov                      Build IBOF with gcov"	
     echo " fe-qos                    Build IBOF with FE QoS"
     #Just another example 
@@ -78,6 +79,12 @@ for i in "$@"; do
 			;;
 		--without-gcov)
 			CONFIG[GCOV]=n
+			;;
+		--with-fpic)
+			CONFIG[FPIC]=y
+			;;
+		--without-fpic)
+			CONFIG[FPIC]=n
 			;;
         --with-fe-qos)
             CONFIG[FE_QOS]=y

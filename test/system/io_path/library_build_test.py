@@ -19,8 +19,6 @@ def build_ibofos_library_option():
     current_path = os.getcwd()
     os.chdir(ibof_root)
 
-    subprocess.call(["make", "clean"])
-
     subprocess.call(["./configure", \
         "--with-library-build"])
     
