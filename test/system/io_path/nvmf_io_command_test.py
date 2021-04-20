@@ -112,7 +112,7 @@ def PowerOn(clean):
         'stdout_type' : stdout_type,
         'clean' : clean}
 
-    common_test_lib.bringup_ibofos(**bringup_argument)
+    common_test_lib.bringup_pos(**bringup_argument)
 
     Wait(3)
     command = NVME_CLI_CMD + " connect " + " -t " + TR_TYPE + " -a " +\
