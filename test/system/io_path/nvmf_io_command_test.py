@@ -86,7 +86,7 @@ def ReadWriteCommand(lbaList, sizeList, cmd, verify, addedCmd = ""):
 
 def PowerOff():
     stdout_type = subprocess.DEVNULL
-    common_test_lib.terminate_ibofos(POS_ROOT, stdout_type)
+    common_test_lib.terminate_pos(POS_ROOT, stdout_type)
     
     print("########## disconnect nvmf controllers ##########")
     command = NVME_CLI_CMD + ' disconnect -n ' + NQN;
@@ -198,7 +198,7 @@ def ClearEnv():
                 proc.wait()                
         except psutil.NoSuchProcess:
             pass
-    common_test_lib.terminate_ibofos(POS_ROOT, subprocess.DEVNULL)
+    common_test_lib.terminate_pos(POS_ROOT, subprocess.DEVNULL)
 
     command = NVME_CLI_CMD + ' disconnect -n ' + NQN;
     ret = subprocess.call(command, shell=True);

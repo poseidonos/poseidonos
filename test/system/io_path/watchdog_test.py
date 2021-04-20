@@ -6,8 +6,8 @@ import argparse
 
 #######################################################################################
 # edit test parameters into these lists to run different workloads
-ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
-watchdog_path = ibof_root + "tool/watchdog/ibofd.py"
+pos_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
+watchdog_path = pos_root + "tool/watchdog/ibofd.py"
 default_timeout = 30
 #######################################################################################
 
@@ -39,7 +39,7 @@ def execute_watchdog(deamon=0, log_path="watchdog.log"):
     watchdog_proc = subprocess.Popen([watchdog_path,
         "-d", str(deamon),
         "-l", log_path,
-        "-p", ibof_root],
+        "-p", pos_root],
         stdout=FNULL, stderr=FNULL)
     FNULL.close
 
@@ -57,7 +57,7 @@ def run_test():
     common_test_lib.clear_env()
     execute_watchdog(deamon = 0)
     executed = wait_ibofos_execution()
-    common_test_lib.terminate_ibofos(ibof_root, subprocess.DEVNULL)
+    common_test_lib.terminate_pos(pos_root, subprocess.DEVNULL)
     common_test_lib.clear_env()
     common_test_lib.print_result(test_name, executed)
     return executed
@@ -69,7 +69,7 @@ def deamonize_test():
     execute_watchdog(deamon = 1)
     wait_deamonize()
     executed = wait_ibofos_execution()
-    common_test_lib.terminate_ibofos(ibof_root,  subprocess.DEVNULL)
+    common_test_lib.terminate_pos(pos_root,  subprocess.DEVNULL)
     common_test_lib.clear_env()
     common_test_lib.print_result(test_name, executed)
     return executed
@@ -82,7 +82,7 @@ def log_path_test():
     execute_watchdog(deamon = 1, log_path = log_file_name)
     wait_deamonize()
     found = find_log_file(log_file_name)
-    common_test_lib.terminate_ibofos(ibof_root, subprocess.DEVNULL)
+    common_test_lib.terminate_pos(pos_root, subprocess.DEVNULL)
     common_test_lib.clear_env()
     success = (found == True)
     common_test_lib.print_result(test_name, success)

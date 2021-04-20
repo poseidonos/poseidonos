@@ -72,7 +72,7 @@ def parse_argument():
     args = parser.parse_args()
     print (args)
 
-def terminate_ibofos():
+def terminate_pos():
     unmount_array_command = args.ibofos_root + "/bin/cli array unmount --name POSArray"
     remote_execute(args.target_ip, args.target_id, args.target_pw, unmount_array_command)
     exit_ibofos_command = args.ibofos_root + "/bin/cli request exit_ibofos"
@@ -89,15 +89,15 @@ if __name__ == "__main__":
     try:
         bring_up_ibofos()
         execute_filebench_test()
-        terminate_ibofos()
+        terminate_pos()
 
     except subprocess.CalledProcessError:
         print("Fail to execute command")
-        terminate_ibofos()
+        terminate_pos()
         sys.exit(-1)
     except Exception as e:
         print("Fail to execute remote command", e)
-        terminate_ibofos()
+        terminate_pos()
         sys.exit(-1)
 
     sys.exit(0)
