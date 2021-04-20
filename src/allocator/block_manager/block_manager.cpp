@@ -239,11 +239,10 @@ StripeId
 BlockManager::_AllocateWriteBufferStripeId(void)
 {
     std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
-    StripeId wbLsid = contextManager->GetWbLsidBitmap()->SetFirstZeroBit();
+    StripeId wbLsid = contextManager->GetWbLsidBitmap()->SetNextZeroBit();
 
     if (contextManager->GetWbLsidBitmap()->IsValidBit(wbLsid) == false)
     {
-        // POS_TRACE_INFO(ALLOCATOR_NO_FREE_WB_STRIPE, "WB stripeId exhausted, wbLsid:{}", wbLsid);
         return UNMAP_STRIPE;
     }
     QosManagerSingleton::Instance()->IncreaseUsedStripeCnt();

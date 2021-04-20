@@ -265,7 +265,7 @@ ContextManager::GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx)
 SegmentId
 ContextManager::AllocateUserDataSegmentId(void)
 {
-    SegmentId segmentId = segmentCtx->GetSegmentBitmap()->SetFirstZeroBit();
+    SegmentId segmentId = segmentCtx->GetSegmentBitmap()->SetNextZeroBit();
 
     // This 'segmentId' should not be a target of rebuilding
     while (segmentCtx->GetSegmentBitmap()->IsValidBit(segmentId) && (rebuildCtx->FindRebuildTargetSegment(segmentId) != rebuildCtx->RebuildTargetSegmentsEnd()))

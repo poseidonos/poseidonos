@@ -42,7 +42,7 @@ namespace pos
 class BitMap
 {
 public:
-    BitMap(uint64_t totalBits);
+    explicit BitMap(uint64_t totalBits);
     virtual ~BitMap(void);
 
     uint64_t GetNumBits(void);
@@ -52,18 +52,19 @@ public:
     uint64_t* GetMapAddr(void);
 
     void PrintMap(void);
-    bool SetBit(uint64_t bitOffset);
-    bool ClearBit(uint64_t bitOffset);
-    bool ClearBits(uint64_t begin, uint64_t end);
-    void ResetBitmap(void);
-    bool IsSetBit(uint64_t bit);
-    void FlipBit(uint64_t bit);
-    uint64_t FindFirstSet(uint64_t begin);
-    uint64_t FindFirstZero(void);
-    uint64_t FindFirstZero(uint64_t begin);
-    uint64_t FindFirstZero(uint64_t begin, uint64_t end);
-    bool IsValidBit(uint64_t bitOffset);
-    bool Set(BitMap &inputBitMap);
+    virtual bool SetBit(uint64_t bitOffset);
+    virtual bool ClearBit(uint64_t bitOffset);
+    virtual bool ClearBits(uint64_t begin, uint64_t end);
+    virtual void ResetBitmap(void);
+    virtual bool IsSetBit(uint64_t bit);
+    virtual void FlipBit(uint64_t bit);
+    virtual uint64_t FindFirstSet(uint64_t begin);
+    virtual uint64_t FindFirstZero(void);
+    virtual uint64_t FindFirstZero(uint64_t begin);
+    virtual uint64_t FindFirstZero(uint64_t begin, uint64_t end);
+    virtual uint64_t FindNextZero(void);
+    virtual bool IsValidBit(uint64_t bitOffset);
+    virtual bool Set(BitMap &inputBitMap);
 
 private:
     uint64_t _GetMask(uint64_t numSetBits, uint64_t offset);
@@ -72,18 +73,22 @@ private:
     uint64_t numBits; // The total number of bits set by the Ctor
     uint64_t numEntry;
     uint64_t numBitsSet;
+    uint64_t lastSetPosition;
 };
 
 class BitMapMutex
 {
 public:
-    BitMapMutex(uint64_t totalBits);
+    explicit BitMapMutex(BitMap* bitmap);       // Ctor for DoCs Injection in UT
+    explicit BitMapMutex(uint64_t totalBits);   // Ctor for Production code
+    virtual ~BitMapMutex(void);
 
     bool IsValidBit(uint64_t bitOffset);
     uint64_t FindFirstSetBit(uint64_t begin);
     uint64_t SetFirstZeroBit(void);
     uint64_t SetFirstZeroBit(uint64_t begin);
     uint64_t SetFirstZeroBit(uint64_t begin, uint64_t end);
+    uint64_t SetNextZeroBit(void);
     bool SetBit(uint64_t bit);
     bool ClearBit(uint64_t bit);
     bool ClearBits(uint64_t begin, uint64_t end);
@@ -100,8 +105,9 @@ public:
     bool SetBitMap(BitMapMutex& inputBitMapMutex);
 
 private:
-    BitMap bitmap;
     std::mutex bitmapMutex;
+    // DoCs
+    BitMap* bitMap;
 };
 
 } // namespace pos

@@ -1,4 +1,5 @@
 #include "src/lib/bitmap.h"
+#include "test/unit-tests/lib/bitmap_mock.h"
 
 #include <gtest/gtest.h>
 
@@ -64,6 +65,54 @@ TEST(BitMap, FindFirstZero_)
 {
 }
 
+TEST(BitMap, FindNextZero_CheckFirstCall)
+{
+    // Given
+    uint64_t bit = 0;
+    BitMap bitMapSUT(16);
+    
+    // When
+    bit = bitMapSUT.FindNextZero();
+
+    // Then
+    EXPECT_EQ(bit, 0);
+}
+
+TEST(BitMap, FindNextZero_ReturnRightNextPosition)
+{
+    // Given
+    uint64_t bit = 0;
+    BitMap bitMapSUT(16);
+    bitMapSUT.SetBit(7);
+    
+    // When
+    bit = bitMapSUT.FindNextZero();
+
+    // Then
+    EXPECT_EQ(bit, 8);
+}
+
+TEST(BitMap, FindNextZero_FullSet)
+{
+    // Given
+    uint64_t bit_first = 0, bit_second = 0;
+    BitMap bitMapSUT(16);
+
+    for (int i = 0; i <= 14; ++i)
+    {
+        bitMapSUT.SetBit(i);
+    }
+    bit_first = bitMapSUT.FindNextZero();
+    bitMapSUT.SetBit(bit_first);
+    
+    // When
+    bit_second = bitMapSUT.FindNextZero();
+
+    // Then
+    EXPECT_EQ(bit_first, 15);
+    EXPECT_EQ(bit_second, 16);
+}
+
 TEST(BitMap, IsValidBit_)
 {
 }
@@ -93,6 +142,10 @@ TEST(BitMapMutex, FindFirstSetBit_)
 }
 
 TEST(BitMapMutex, SetFirstZeroBit_)
+{
+}
+
+TEST(BitMapMutex, SetNextZeroBit_)
 {
 }
 
