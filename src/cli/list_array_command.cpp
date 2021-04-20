@@ -87,7 +87,7 @@ ListArrayCommand::Execute(json& doc, string rid)
             string updateDatetime(abr.updateDatetime);
             string arrayStatus("Unmounted");
             IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
-            if (info != nullptr)
+            if (info != nullptr && info->GetState() >= ArrayStateEnum::NORMAL)
                 arrayStatus = "Mounted";
             arrayElement.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
             arrayElement.SetAttribute(JsonAttribute("status", "\"" + arrayStatus + "\""));
