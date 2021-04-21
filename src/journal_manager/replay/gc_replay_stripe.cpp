@@ -30,96 +30,61 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/journal_manager/replay/gc_replay_stripe.h"
 
-#include <assert.h>
-
-#include "src/include/address_type.h"
 #include "src/include/pos_event_id.h"
+#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
+#include "src/journal_manager/replay/active_user_stripe_replayer.h"
+#include "src/journal_manager/replay/replay_event_factory.h"
 #include "src/logger/logger.h"
+#include "src/mapper/i_stripemap.h"
 
 namespace pos
 {
-class BlockWriteDoneLog;
-class StripeMapUpdatedLog;
-
-class StripeInfo
+GcReplayStripe::GcReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
+    IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
+    IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
+    ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer)
+: ReplayStripe(vsid, vsaMap, stripeMap, wbStripeCtx, segmentCtx, blockAllocator,
+      arrayInfo, wbReplayer, userReplayer)
 {
-public:
-    StripeInfo(void) = delete;
-    explicit StripeInfo(StripeId inputVsid);
-    StripeInfo(int volumeId, StripeId vsid, StripeId wbLsid, StripeId userLsid, BlkOffset lastOffset, int wbIndex);
+}
 
-    inline int
-    GetVolumeId(void)
+void
+GcReplayStripe::AddLog(LogHandlerInterface* log)
+{
+    assert(log->GetType() == LogType::GC_STRIPE_FLUSHED);
+
+    GcStripeFlushedLogHandler* gcLogHandler = dynamic_cast<GcStripeFlushedLogHandler*>(log);
+    GcStripeFlushedLog* gcLog = gcLogHandler->GetGcStripeFlushedLog();
+    GcBlockMapUpdate* blockLogs = gcLogHandler->GetGcBlockMapUpdateLogs();
+
+    status->GcBlockLogFound(blockLogs, gcLog->numBlockMaps);
+    for (int blkCount = 0; blkCount < gcLog->numBlockMaps; blkCount++)
     {
-        return volId;
+        ReplayEvent* blockWriteEvent =
+            replayEventFactory->CreateBlockWriteReplayEvent(gcLog->volId,
+                blockLogs[blkCount].rba, blockLogs[blkCount].vsa, 1);
+        replayEvents.push_back(blockWriteEvent);
     }
 
-    inline StripeId
-    GetVsid(void)
+    assert(gcLog->stripeAddr.stripeLoc == IN_USER_AREA);
+
+    status->GcStripeLogFound(*gcLog);
+    _CreateStripeFlushReplayEvent();
+
+    _CreateSegmentAllocationEvent();
+}
+
+int
+GcReplayStripe::Replay(void)
+{
+    int result = ReplayStripe::Replay();
+    if (result == 0)
     {
-        return vsid;
+        userStripeReplayer->Update(status->GetUserLsid());
     }
-
-    inline StripeId
-    GetWbLsid(void)
-    {
-        return wbLsid;
-    }
-
-    inline StripeId
-    GetUserLsid(void)
-    {
-        return userLsid;
-    }
-
-    inline BlkOffset
-    GetLastOffset(void)
-    {
-        return lastOffset;
-    }
-
-    inline void
-    ResetOffset(void)
-    {
-        lastOffset = UINT64_MAX;
-    }
-
-    inline bool
-    IsLastOffsetValid(void)
-    {
-        return (lastOffset != UINT64_MAX);
-    }
-
-    inline int
-    GetWbIndex(void)
-    {
-        return wbIndex;
-    }
-
-    inline bool
-    IsWbIndexValid(void)
-    {
-        return (wbIndex != INT32_MAX);
-    }
-
-protected:
-    void _UpdateVolumeId(int inputVolId);
-    void _UpdateWbLsid(StripeId inputWbLsid);
-    void _UpdateUserLsid(StripeId inputUserLsid);
-    void _UpdateLastOffset(BlkOffset curEndOffset);
-    void _UpdateWbIndex(int inputIndex);
-
-private:
-    void _Reset(void);
-
-    int volId;
-    StripeId vsid;
-    StripeId wbLsid;
-    StripeId userLsid;
-    BlkOffset lastOffset;
-    int wbIndex;
-};
+    return result;
+}
 
 } // namespace pos

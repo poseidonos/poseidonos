@@ -31,12 +31,14 @@
  */
 
 #include "replay_logs.h"
-#include "pending_stripe.h"
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
+#include "pending_stripe.h"
 #include "src/include/pos_event_id.h"
+#include "src/journal_manager/replay/gc_replay_stripe.h"
+#include "src/journal_manager/replay/user_replay_stripe.h"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -102,6 +104,15 @@ ReplayLogs::_CreateReplayStripe(void)
         {
             _DeleteVolumeLogs(log);
         }
+        else if (log->GetType() == LogType::GC_STRIPE_FLUSHED)
+        {
+            ReplayStripe* stripe = new GcReplayStripe(log->GetVsid(), vsaMap, stripeMap,
+                wbStripeCtx, segmentCtx, blockAllocator, arrayInfo,
+                wbStripeReplayer, userStripeReplayer);
+            replayStripeList.push_back(stripe);
+
+            stripe->AddLog(log);
+        }
         else
         {
             ReplayStripe* stripe = _FindStripe(log->GetVsid());
@@ -109,7 +120,7 @@ ReplayLogs::_CreateReplayStripe(void)
             {
                 // TODO(huijeong.kim) There can be two stripes with same vsid
                 // if there was a GC in-between
-                stripe = new ReplayStripe(log->GetVsid(), vsaMap, stripeMap,
+                stripe = new UserReplayStripe(log->GetVsid(), vsaMap, stripeMap,
                     wbStripeCtx, segmentCtx, blockAllocator, arrayInfo,
                     wbStripeReplayer, userStripeReplayer);
                 replayStripeList.push_back(stripe);

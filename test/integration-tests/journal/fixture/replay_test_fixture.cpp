@@ -34,13 +34,17 @@ ReplayTestFixture::ExpectReturningStripeAddr(StripeId vsid, StripeAddr addr)
 }
 
 void
-ReplayTestFixture::ExpectReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
+ReplayTestFixture::ExpectReplaySegmentAllocation(StripeId userLsid)
 {
-    StripeId firstStripe = vsid / testInfo->numStripesPerSegment * testInfo->numStripesPerSegment;
+    StripeId firstStripe = userLsid / testInfo->numStripesPerSegment * testInfo->numStripesPerSegment;
     EXPECT_CALL(*(allocator->GetSegmentCtxMock()),
         ReplaySegmentAllocation(firstStripe))
         .Times(AnyNumber());
+}
 
+void
+ReplayTestFixture::ExpectReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
+{
     EXPECT_CALL(*(mapper->GetStripeMapMock()),
         SetLSA(vsid, wbLsid, IN_WRITE_BUFFER_AREA))
         .Times(1);
@@ -82,13 +86,19 @@ ReplayTestFixture::_GetBlock(VirtualBlks blks, uint32_t offset)
 }
 
 void
-ReplayTestFixture::ExpectReplayStripeFlush(StripeTestFixture stripe)
+ReplayTestFixture::ExpectReplayStripeFlush(StripeTestFixture stripe, bool wbLsidProvided)
 {
     EXPECT_CALL(*(mapper->GetStripeMapMock()), SetLSA(stripe.GetVsid(),
         stripe.GetUserAddr().stripeId, stripe.GetUserAddr().stripeLoc)).Times(1);
-    EXPECT_CALL(*(allocator->GetWBStripeCtxMock()),
-        ReplayStripeFlushed(stripe.GetWbAddr().stripeId))
-        .Times(1);
+
+    // TODO (huijeong.kim) un-comment this after adding wbLsid to gc stripe flushed log
+    if (wbLsidProvided == true)
+    {
+        EXPECT_CALL(*(allocator->GetWBStripeCtxMock()),
+            ReplayStripeFlushed(stripe.GetWbAddr().stripeId))
+            .Times(1);
+    }
+
     EXPECT_CALL(*(allocator->GetSegmentCtxMock()),
         UpdateOccupiedStripeCount(stripe.GetUserAddr().stripeId))
         .Times(1);
@@ -103,6 +113,7 @@ ReplayTestFixture::ExpectReplayFullStripe(StripeTestFixture stripe)
     {
         InSequence s;
 
+        ExpectReplaySegmentAllocation(stripe.GetUserAddr().stripeId);
         ExpectReplayStripeAllocation(stripe.GetVsid(), stripe.GetWbAddr().stripeId);
         ExpectReplayStripeFlush(stripe);
     }
@@ -114,6 +125,7 @@ void
 ReplayTestFixture::ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe)
 {
     BlockMapList writtenVsas = stripe.GetBlockMapList();
+    ExpectReplaySegmentAllocation(stripe.GetUserAddr().stripeId);
     ExpectReplayStripeAllocation(stripe.GetVsid(), stripe.GetWbAddr().stripeId);
     ExpectReplayBlockLogsForStripe(stripe.GetVolumeId(), writtenVsas);
 

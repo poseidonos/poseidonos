@@ -36,10 +36,10 @@
 
 #include "src/include/address_type.h"
 #include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/journal_manager/log/log_event.h"
-
 #include "src/journal_manager/statistics/stripe_info.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -53,6 +53,10 @@ public:
 
     virtual void BlockLogFound(BlockWriteDoneLog dat);
     virtual void StripeLogFound(StripeMapUpdatedLog dat);
+
+    virtual void GcBlockLogFound(GcBlockMapUpdate* mapUpdate, uint32_t numBlks);
+    virtual void GcStripeLogFound(GcStripeFlushedLog dat);
+
     virtual void Print(void);
 
     bool IsFlushed(void) { return stripeFlushed == true; }
@@ -69,6 +73,10 @@ protected:
     std::mutex statusLock;
 
     static const BlkOffset INVALID_OFFSET = UINT64_MAX;
+
+private:
+    void _UpdateOffset(BlkOffset startOffset, uint32_t numBlks);
+    void _UpdateRba(BlkAddr rba, uint32_t numBlks);
 };
 
 } // namespace pos

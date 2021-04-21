@@ -30,12 +30,13 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "stripe_log_write_status.h"
+#include "src/journal_manager/statistics/stripe_log_write_status.h"
 
 #include <iomanip>
 #include <iostream>
 
 #include "src/include/pos_event_id.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -66,28 +67,44 @@ StripeLogWriteStatus::BlockLogFound(BlockWriteDoneLog dat)
 
     numFoundBlockMaps += dat.numBlks;
 
-    if ((firstBlockOffset == INVALID_OFFSET) ||
-        (dat.startVsa.offset < firstBlockOffset))
-    {
-        firstBlockOffset = dat.startVsa.offset;
-    }
+    _UpdateOffset(dat.startVsa.offset, dat.numBlks);
+    _UpdateRba(dat.startRba, dat.numBlks);
+
     BlkOffset curEndOffset = dat.startVsa.offset + dat.numBlks - 1;
+    _UpdateLastOffset(curEndOffset);
+    _UpdateVolumeId(dat.volId);
+    _UpdateWbLsid((dat.writeBufferStripeAddress).stripeId);
+    _UpdateWbIndex(dat.wbIndex);
+}
+
+void
+StripeLogWriteStatus::_UpdateOffset(BlkOffset startOffset, uint32_t numBlks)
+{
+    BlkOffset endOffset = startOffset + numBlks - 1;
+    if ((firstBlockOffset == INVALID_OFFSET) ||
+        (startOffset < firstBlockOffset))
+    {
+        firstBlockOffset = startOffset;
+    }
+
     if ((lastBlockOffset == INVALID_OFFSET) ||
-        (lastBlockOffset < curEndOffset))
+        (lastBlockOffset < endOffset))
     {
-        lastBlockOffset = curEndOffset;
+        lastBlockOffset = endOffset;
     }
+}
 
-    if (smallestRba > dat.startRba)
+void
+StripeLogWriteStatus::_UpdateRba(BlkAddr rba, uint32_t numBlks)
+{
+    if (smallestRba > rba)
     {
-        smallestRba = dat.startRba;
+        smallestRba = rba;
     }
-    if (largestRba < dat.startRba + dat.numBlks - 1)
+    if (largestRba < rba + numBlks - 1)
     {
-        largestRba = dat.startRba + dat.numBlks - 1;
+        largestRba = rba + numBlks - 1;
     }
-
-    Update(dat);
 }
 
 void
@@ -103,8 +120,47 @@ StripeLogWriteStatus::StripeLogFound(StripeMapUpdatedLog dat)
     finalStripeAddr.stripeId = dat.newMap.stripeId;
     finalStripeAddr.stripeLoc = IN_USER_AREA;
 
-    Update(dat);
+    _UpdateWbLsid(dat.oldMap.stripeId);
+    _UpdateUserLsid(dat.newMap.stripeId);
+
     ResetOffset();
+}
+
+void
+StripeLogWriteStatus::GcBlockLogFound(GcBlockMapUpdate* mapUpdate, uint32_t numBlks)
+{
+    std::lock_guard<std::mutex> lock(statusLock);
+
+    numFoundBlockMaps += numBlks;
+
+    if (numBlks == 0)
+    {
+        return;
+    }
+
+    for (uint32_t count = 0; count < numBlks; count++)
+    {
+        _UpdateOffset(mapUpdate[count].vsa.offset, 1);
+        _UpdateRba(mapUpdate[count].rba, 1);
+    }
+
+    _UpdateLastOffset(lastBlockOffset);
+}
+
+void
+StripeLogWriteStatus::GcStripeLogFound(GcStripeFlushedLog dat)
+{
+    assert(dat.stripeAddr.stripeLoc == IN_USER_AREA);
+
+    std::lock_guard<std::mutex> lock(statusLock);
+
+    stripeFlushed = true;
+
+    finalStripeAddr = dat.stripeAddr;
+
+    _UpdateVolumeId(dat.volId);
+    _UpdateWbLsid(UNMAP_STRIPE);
+    _UpdateUserLsid(dat.stripeAddr.stripeId);
 }
 
 // TODO (cheolho.kang) Will be updated after introducing LogWriteStatistics

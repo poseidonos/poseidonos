@@ -34,28 +34,24 @@
 
 #include <list>
 
-#include "../log/log_handler.h"
-#include "replay_event.h"
-#include "src/journal_manager/statistics/stripe_info.h"
-#include "src/journal_manager/statistics/stripe_replay_status.h"
-
-#include "src/allocator/context_manager/active_stripe_index_info.h"
 #include "src/include/address_type.h"
-
-#include "src/mapper/i_vsamap.h"
-#include "src/mapper/i_stripemap.h"
-#include "src/allocator/i_wbstripe_ctx.h"
-#include "src/allocator/i_segment_ctx.h"
-#include "src/allocator/i_block_allocator.h"
-#include "src/array_models/interface/i_array_info.h"
+#include "src/journal_manager/statistics/stripe_replay_status.h"
 
 namespace pos
 {
-class ReplayStripe;
+class IVSAMap;
+class IStripeMap;
+class IWBStripeCtx;
+class ISegmentCtx;
+class IBlockAllocator;
+class IArrayInfo;
+
+class LogHandlerInterface;
+class StripeReplayStatus;
 class ReplayEventFactory;
-class ReplayEvent;
 class ActiveWBStripeReplayer;
 class ActiveUserStripeReplayer;
+class ReplayEvent;
 
 class ReplayStripe
 {
@@ -67,32 +63,25 @@ public:
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
     virtual ~ReplayStripe(void);
 
-    void AddLog(LogHandlerInterface* log);
-    int Replay(void);
+    virtual void AddLog(LogHandlerInterface* log) = 0;
+    virtual int Replay(void);
 
-    // TODO(huijeong.kim): remove this function
     StripeId GetVsid(void) { return status->GetVsid(); }
     int GetVolumeId(void) { return status->GetVolumeId(); }
     bool IsFlushed(void) { return status->IsFlushed(); }
 
     void DeleteBlockMapReplayEvents(void);
 
-private:
-    void _CreateBlockWriteReplayEvent(BlockWriteDoneLog dat);
-
-    void _CreateStripeEvents(void);
+protected:
+    void _CreateSegmentAllocationEvent(void);
     void _CreateStripeAllocationEvent(void);
     void _CreateStripeFlushReplayEvent(void);
 
-    void _UpdateStripeInfo(BlockWriteDoneLog log);
-    void _UpdateStripeInfo(StripeMapUpdatedLog log);
-
-    int _UpdateActiveStripeInfo(void);
     int _ReplayEvents(void);
 
     StripeReplayStatus* status;
-
     ReplayEventFactory* replayEventFactory;
+
     // TODO (huijeong.kim) to be moved out, to ReplayLogs
     std::list<ReplayEvent*> replayEvents;
 

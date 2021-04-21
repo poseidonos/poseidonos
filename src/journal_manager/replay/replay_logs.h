@@ -37,7 +37,6 @@
 #include "../log/log_handler.h"
 #include "active_user_stripe_replayer.h"
 #include "active_wb_stripe_replayer.h"
-#include "replay_stripe.h"
 #include "replay_task.h"
 
 #include "src/mapper/i_vsamap.h"
@@ -49,10 +48,15 @@
 
 namespace pos
 {
-class Mapper;
-class Allocator;
+class IVSAMap;
+class IStripeMap;
+class IWBStripeCtx;
+class ISegmentCtx;
+class IBlockAllocator;
+class IArrayInfo;
 
 class LogReplayer;
+class ReplayStripe;
 
 class ReplayLogs : public ReplayTask
 {

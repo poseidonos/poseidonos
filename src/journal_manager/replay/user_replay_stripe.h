@@ -30,103 +30,30 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "stripe_info.h"
+#pragma once
+
 #include "src/journal_manager/log/log_event.h"
+#include "src/journal_manager/replay/replay_stripe.h"
 
 namespace pos
 {
-
-StripeInfo::StripeInfo(StripeId inputVsid)
+class UserReplayStripe : public ReplayStripe
 {
-    _Reset();
-    vsid = inputVsid;
-    userLsid = inputVsid;
-}
+public:
+    UserReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
+        IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
+        IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
+        ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
+    virtual ~UserReplayStripe(void) = default;
 
-StripeInfo::StripeInfo(int volumeId, StripeId vsid, StripeId wbLsid, StripeId userLsid, BlkOffset lastOffset, int wbIndex)
-: volId(volumeId),
-  vsid(vsid),
-  wbLsid(wbLsid),
-  userLsid(userLsid),
-  lastOffset(lastOffset),
-  wbIndex(wbIndex)
-{
-}
+    virtual void AddLog(LogHandlerInterface* log) override;
+    virtual int Replay(void) override;
 
-void
-StripeInfo::_Reset(void)
-{
-    volId = INT32_MAX;
-    vsid = UINT32_MAX;
-    wbLsid = UINT32_MAX;
-    userLsid = UINT32_MAX;
-    lastOffset = UINT64_MAX;
-    wbIndex = INT32_MAX;
-}
+private:
+    void _CreateBlockWriteReplayEvent(BlockWriteDoneLog dat);
+    void _CreateStripeEvents(void);
 
-void
-StripeInfo::_UpdateVolumeId(int inputVolId)
-{
-    if (volId != INT32_MAX)
-    {
-        assert(volId == inputVolId);
-    }
-    else
-    {
-        volId = inputVolId;
-    }
-}
-
-void
-StripeInfo::_UpdateWbLsid(StripeId inputWbLsid)
-{
-    if (wbLsid != UINT32_MAX)
-    {
-        assert(wbLsid == inputWbLsid);
-    }
-    else
-    {
-        wbLsid = inputWbLsid;
-    }
-}
-
-void
-StripeInfo::_UpdateUserLsid(StripeId inputUserLsid)
-{
-    if (userLsid != UINT32_MAX)
-    {
-        assert(userLsid == inputUserLsid);
-    }
-    else
-    {
-        userLsid = inputUserLsid;
-    }
-}
-
-void
-StripeInfo::_UpdateLastOffset(BlkOffset curEndOffset)
-{
-    if (lastOffset == UINT64_MAX)
-    {
-        lastOffset = curEndOffset;
-    }
-    else if (lastOffset < curEndOffset)
-    {
-        lastOffset = curEndOffset;
-    }
-}
-
-void
-StripeInfo::_UpdateWbIndex(int inputIndex)
-{
-    if (wbIndex != INT32_MAX)
-    {
-        assert(wbIndex == inputIndex);
-    }
-    else
-    {
-        wbIndex = inputIndex;
-    }
-}
-
+    void _UpdateStripeInfo(BlockWriteDoneLog log);
+    void _UpdateStripeInfo(StripeMapUpdatedLog log);
+};
 } // namespace pos

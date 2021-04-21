@@ -30,8 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/journal_manager/replay/active_user_stripe_replayer.h"
-#include "src/journal_manager/replay/active_wb_stripe_replayer.h"
 #include "src/journal_manager/replay/replay_stripe.h"
 #include "src/journal_manager/replay/replay_event_factory.h"
 
@@ -66,38 +64,10 @@ ReplayStripe::~ReplayStripe(void)
     delete replayEventFactory;
 }
 
-void
-ReplayStripe::AddLog(LogHandlerInterface* log)
-{
-    if (log->GetType() == LogType::BLOCK_WRITE_DONE)
-    {
-        BlockWriteDoneLog dat = *(reinterpret_cast<BlockWriteDoneLog*>(log->GetData()));
-        status->BlockLogFound(dat);
-        _CreateBlockWriteReplayEvent(dat);
-    }
-    else if (log->GetType() == LogType::STRIPE_MAP_UPDATED)
-    {
-        StripeMapUpdatedLog dat = *(reinterpret_cast<StripeMapUpdatedLog*>(log->GetData()));
-        status->StripeLogFound(dat);
-        // Stripe flush log will be added in Replay
-    }
-}
-
-void
-ReplayStripe::_CreateBlockWriteReplayEvent(BlockWriteDoneLog dat)
-{
-    ReplayEvent* blockWriteEvent =
-        replayEventFactory->CreateBlockWriteReplayEvent(dat.volId,
-        dat.startRba, dat.startVsa, dat.numBlks);
-    replayEvents.push_back(blockWriteEvent);
-}
-
 int
 ReplayStripe::Replay(void)
 {
     int result = 0;
-
-    _CreateStripeEvents();
 
     if ((result = _ReplayEvents()) != 0)
     {
@@ -105,47 +75,15 @@ ReplayStripe::Replay(void)
     }
     status->Print();
 
-    if ((result = _UpdateActiveStripeInfo()) != 0)
-    {
-        return result;
-    }
     return result;
 }
 
 void
-ReplayStripe::_CreateStripeEvents(void)
+ReplayStripe::_CreateSegmentAllocationEvent(void)
 {
-    StripeAddr readStripeAddr = stripeMap->GetLSA(status->GetVsid());
-    StripeAddr wbStripeAddr = {
-        .stripeLoc = IN_WRITE_BUFFER_AREA,
-        .stripeId = status->GetWbLsid()};
-    StripeAddr userStripeAddr = {
-        .stripeLoc = IN_USER_AREA,
-        .stripeId = status->GetUserLsid()};
-
-    if (status->IsFlushed() == false)
-    {
-        if (!(readStripeAddr == wbStripeAddr))
-        {
-            _CreateStripeAllocationEvent();
-        }
-    }
-    else
-    {
-        if (readStripeAddr == wbStripeAddr)
-        {
-            _CreateStripeFlushReplayEvent();
-        }
-        else if (readStripeAddr == userStripeAddr)
-        {
-            // Map is already upated to user stripe
-        }
-        else
-        {
-            _CreateStripeAllocationEvent();
-            _CreateStripeFlushReplayEvent();
-        }
-    }
+    ReplayEvent* segmentAllocation =
+        replayEventFactory->CreateSegmentAllocationReplayEvent(status->GetUserLsid());
+    replayEvents.push_front(segmentAllocation);
 }
 
 void
@@ -154,12 +92,7 @@ ReplayStripe::_CreateStripeAllocationEvent(void)
     ReplayEvent* stripeAllocation =
         replayEventFactory->CreateStripeAllocationReplayEvent(status->GetVsid(), status->GetWbLsid());
         replayEvents.push_front(stripeAllocation);
-
-    ReplayEvent* segmentAllocation =
-        replayEventFactory->CreateSegmentAllocationReplayEvent(status->GetUserLsid());
-    replayEvents.push_front(segmentAllocation);
 }
-
 
 void
 ReplayStripe::_CreateStripeFlushReplayEvent(void)
@@ -192,15 +125,6 @@ ReplayStripe::_ReplayEvents(void)
         }
     }
     return result;
-}
-
-int
-ReplayStripe::_UpdateActiveStripeInfo(void)
-{
-    wbStripeReplayer->Update(*status);
-    userStripeReplayer->Update(status->GetUserLsid());
-
-    return 0;
 }
 
 void

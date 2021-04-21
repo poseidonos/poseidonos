@@ -89,6 +89,7 @@ JournalVolumeIntegrationTest::ExpectReplayStripes(StripeList &writtenStripes,
     {
         auto stripe = writtenStripes[volId];
 
+        replayTester->ExpectReplaySegmentAllocation(stripe.GetUserAddr().stripeId);
         replayTester->ExpectReplayStripeAllocation(stripe.GetVsid(), stripe.GetWbAddr().stripeId);
 
         if (deletedVolumes.find(volId) == deletedVolumes.end())

@@ -148,4 +148,16 @@ GcStripeFlushedLogHandler::SetSeqNum(uint32_t num)
     logPtr->seqNum = num;
 }
 
+GcStripeFlushedLog*
+GcStripeFlushedLogHandler::GetGcStripeFlushedLog(void)
+{
+    return logPtr;
+}
+
+GcBlockMapUpdate*
+GcStripeFlushedLogHandler::GetGcBlockMapUpdateLogs(void)
+{
+    return blockLogPtr;
+}
+
 } // namespace pos

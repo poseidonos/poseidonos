@@ -56,6 +56,9 @@ public:
     virtual uint32_t GetSeqNum(void);
     virtual void SetSeqNum(uint32_t num);
 
+    GcStripeFlushedLog* GetGcStripeFlushedLog(void);
+    GcBlockMapUpdate* GetGcBlockMapUpdateLogs(void);
+
 private:
     int logSize;
     GcStripeFlushedLog* logPtr;

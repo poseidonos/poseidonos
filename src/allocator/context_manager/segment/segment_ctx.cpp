@@ -322,11 +322,7 @@ SegmentCtx::ReplaySegmentAllocation(StripeId userLsid)
     {
         SegmentId segmentId = userLsid / addrInfo->GetstripesPerSegment();
         std::lock_guard<std::mutex> lock(segmentStates[segmentId].GetSegmentLock());
-        if (segmentStates[segmentId].Getstate() != SegmentState::FREE)
-        {
-            POS_TRACE_DEBUG(EID(ALLOCATOR_REPLAY_SEGMENT_STATUS), "SegmentId:{} is already allocated", segmentId);
-        }
-        else
+        if (segmentStates[segmentId].Getstate() == SegmentState::FREE)
         {
             segmentStates[segmentId].Setstate(SegmentState::NVRAM);
             POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_REPLAY_STATUS, "SegmentId:{} is allocated", segmentId);

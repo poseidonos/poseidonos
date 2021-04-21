@@ -18,9 +18,10 @@ public:
     void ExpectReturningUnmapStripes(void);
     void ExpectReturningStripeAddr(StripeId vsid, StripeAddr addr);
 
+    void ExpectReplaySegmentAllocation(StripeId userLsid);
     void ExpectReplayStripeAllocation(StripeId vsid, StripeId wbLsid);
     void ExpectReplayBlockLogsForStripe(int volId, BlockMapList blksToWrite);
-    void ExpectReplayStripeFlush(StripeTestFixture stripe);
+    void ExpectReplayStripeFlush(StripeTestFixture stripe, bool wbLsidProvided = true);
 
     void ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe);
     void ExpectReplayFullStripe(StripeTestFixture stripe);
