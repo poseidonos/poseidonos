@@ -86,7 +86,9 @@ ReplayStripe::AddLog(LogHandlerInterface* log)
 void
 ReplayStripe::_CreateBlockWriteReplayEvent(BlockWriteDoneLog dat)
 {
-    ReplayEvent* blockWriteEvent = replayEventFactory->CreateBlockWriteReplayEvent(dat);
+    ReplayEvent* blockWriteEvent =
+        replayEventFactory->CreateBlockWriteReplayEvent(dat.volId,
+        dat.startRba, dat.startVsa, dat.numBlks);
     replayEvents.push_back(blockWriteEvent);
 }
 

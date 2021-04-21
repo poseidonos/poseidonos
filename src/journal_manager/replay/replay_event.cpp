@@ -53,11 +53,14 @@ ReplayEvent::~ReplayEvent(void)
 }
 
 ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, IBlockAllocator* blkAllocator,
-    StripeReplayStatus* status, BlockWriteDoneLog dat)
+    StripeReplayStatus* status, int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks)
 : ReplayEvent(status),
   vsaMap(vsaMap),
   blockAllocator(blkAllocator),
-  logData(dat)
+  volId(volId),
+  startRba(startRba),
+  startVsa(startVsa),
+  numBlks(numBlks)
 {
 }
 
@@ -68,13 +71,12 @@ ReplayBlockMapUpdate::~ReplayBlockMapUpdate(void)
 void
 ReplayBlockMapUpdate::_ReadBlockMap(void)
 {
-    readMap.resize(logData.numBlks);
+    readMap.resize(numBlks);
 
-    for (uint32_t offset = 0; offset < logData.numBlks; offset++)
+    for (uint32_t offset = 0; offset < numBlks; offset++)
     {
         int shouldRetry = CALLER_NOT_EVENT;
-        readMap[offset] = vsaMap->GetVSAInternal(logData.volId,
-            logData.startRba + offset, shouldRetry);
+        readMap[offset] = vsaMap->GetVSAInternal(volId, startRba + offset, shouldRetry);
         assert(shouldRetry == OK_READY);
     }
 }
@@ -85,7 +87,7 @@ ReplayBlockMapUpdate::Replay(void)
     _ReadBlockMap();
 
     int result = 0;
-    for (uint32_t offset = 0; offset < logData.numBlks; offset++)
+    for (uint32_t offset = 0; offset < numBlks; offset++)
     {
         VirtualBlkAddr currentVsa = _GetVsa(offset);
         VirtualBlkAddr read = readMap[offset];
@@ -105,9 +107,6 @@ ReplayBlockMapUpdate::_InvalidateOldBlock(uint32_t offset)
 {
     VirtualBlkAddr read = readMap[offset];
 
-    // TODO (huijeong.kim) : remove isGC, oldVsa from the log
-    assert(logData.isGC == false);
-
     if (read.stripeId != UNMAP_STRIPE)
     {
         VirtualBlks blksToInvalidate = {
@@ -126,7 +125,7 @@ ReplayBlockMapUpdate::_UpdateMap(uint32_t offset)
         .startVsa = _GetVsa(offset),
         .numBlks = 1};
 
-    int result = vsaMap->SetVSAsInternal(logData.volId, rba, virtualBlks);
+    int result = vsaMap->SetVSAsInternal(volId, rba, virtualBlks);
     blockAllocator->ValidateBlks(virtualBlks);
     status->BlockWritten(virtualBlks.startVsa.offset, virtualBlks.numBlks);
 

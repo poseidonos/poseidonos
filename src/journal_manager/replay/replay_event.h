@@ -72,15 +72,11 @@ class ReplayBlockMapUpdate : public ReplayEvent
 {
 public:
     ReplayBlockMapUpdate(IVSAMap* ivsaMa, IBlockAllocator* iblkAllocator,
-        StripeReplayStatus* status, BlockWriteDoneLog dat);
+        StripeReplayStatus* status,
+        int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks);
     virtual ~ReplayBlockMapUpdate(void);
 
     virtual int Replay(void) override;
-    inline BlockWriteDoneLog
-    GetLog(void)
-    {
-        return logData;
-    }
 
     inline ReplayEventType
     GetType(void)
@@ -97,31 +93,25 @@ private:
     inline VirtualBlkAddr
     _GetVsa(uint32_t offset)
     {
-        VirtualBlkAddr vsa = {
-            .stripeId = logData.startVsa.stripeId,
-            .offset = logData.startVsa.offset + offset};
+        VirtualBlkAddr vsa = startVsa;
+        vsa.offset += offset;
         return vsa;
-    }
-
-    inline VirtualBlkAddr
-    _GetOldVsa(uint32_t offset)
-    {
-        VirtualBlkAddr oldVsa = {
-            .stripeId = logData.oldVsa.stripeId,
-            .offset = logData.oldVsa.offset + offset};
-        return oldVsa;
     }
 
     inline BlkAddr
     _GetRba(uint32_t offset)
     {
-        return logData.startRba + offset;
+        return startRba + offset;
     }
 
     IVSAMap* vsaMap;
     IBlockAllocator* blockAllocator;
 
-    BlockWriteDoneLog logData;
+    int volId;
+    BlkAddr startRba;
+    VirtualBlkAddr startVsa;
+    uint64_t numBlks;
+
     std::vector<VirtualBlkAddr> readMap;
 };
 
