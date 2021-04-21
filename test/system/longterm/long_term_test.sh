@@ -19,6 +19,8 @@ shutdowntype="none"
 # rebuild mode [none, rebuild_before_gc, rebuild_after_gc]
 rebuild="none"
 
+array_name="POSArray"
+
 while getopts "f:p:a:" opt
 do
     case "$opt" in
@@ -42,11 +44,11 @@ shutdown()
 			break;
 		fi
 
-		state=$(../bin/cli request info --json | jq -r '.Response.info.state' 2>/dev/null)
+		state=$(../bin/cli array info --name ${array_name} --json | jq -r '.Response.info.state' 2>/dev/null)
 		if [[ $state = "NORMAL" ]]; then
-			../bin/cli request unmount_ibofos
+			../bin/cli array unmount --name ${array_name}
 		elif [[ $state = *"EXIST"* ]]; then
-			../bin/cli request exit_ibofos
+			../bin/cli system exit
 		fi
 
 		sleep 1s

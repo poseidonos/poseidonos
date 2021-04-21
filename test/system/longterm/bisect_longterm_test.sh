@@ -60,7 +60,7 @@ do
 
     if [ $shutdowntype != "none" ]; then
         if [ $shutdowntype == "npor" ]; then
-            sudo ${rootdir}/bin/cli request exit_ibofos
+            sudo ${rootdir}/bin/cli system exit
         else
             echo "add spor test"
         fi

@@ -20,6 +20,7 @@ rebuild="none"
 # volume test [none, vol_unmount, vol_delete]
 volumetest="none"
 res=0
+array_name="POSArray"
 
 while getopts "f:t:i:s:c:p:a:r:v:" opt
 do
@@ -55,11 +56,11 @@ shutdown()
 			break;
 		fi
 
-		state=$(${rootdir}/bin/cli request info --json | jq -r '.Response.info.state' 2>/dev/null)
+		state=$(${rootdir}/bin/cli array info --name ${array_name} --json | jq -r '.Response.info.state' 2>/dev/null)
 		if [[ $state = "NORMAL" ]]; then
-			${rootdir}/bin/cli request unmount_ibofos
+			${rootdir}/bin/cli array unmount --name $array_name
 		elif [[ $state = *"EXIST"* ]]; then
-			${rootdir}/bin/cli request exit_ibofos
+			${rootdir}/bin/cli system exit
 		fi
 
 		sleep 1s
@@ -139,6 +140,10 @@ do
 			shutdown
         else
             echo "add spor test"
+            sudo ${rootdir}/test/script/kill_ibofos.sh
+            sleep 5
+            sudo ${rootdir}/script/backup_latest_hugepages_for_uram.sh
+            sleep 5
         fi
         
         while [ `pgrep "ibofos"` ]

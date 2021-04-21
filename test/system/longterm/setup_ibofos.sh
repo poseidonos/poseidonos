@@ -11,7 +11,7 @@ numofsubsystem=$numofvol
 ip=$5
 limitspeed=0
 
-
+array_name="POSArray"
 PORT_NUM=1
 
 sizepervol=`expr $totalsize / $numofvol`
@@ -22,7 +22,7 @@ sizepervol=`expr $sizepervol \* $GBtoB`
 ## 
 sudo $spdkdir/scripts/rpc.py nvmf_create_transport -t TCP -b 64 -n 4096
 sudo $spdkdir/scripts/rpc.py bdev_malloc_create -b uram0 1024 512
-sudo $rootdir/bin/cli request scan_dev
+sudo $rootdir/bin/cli device scan
 # VM on VxRail server has only limited nvme drives
 
 create_array=0
@@ -45,30 +45,30 @@ done
 if [ $create_array -eq 1 ]; then
     sudo $rootdir/bin/cli array reset
     if [ $degradedmode -eq 1 ]; then
-        sudo $rootdir/bin/cli request create_array -b uram0 -d unvme-ns-0,unvme-ns-1,unvme-ns-2
+        sudo $rootdir/bin/cli array create --name $array_name -b uram0 -d unvme-ns-0,unvme-ns-1,unvme-ns-2
     else
-        sudo $rootdir/bin/cli request create_array -b uram0 -d unvme-ns-0,unvme-ns-1,unvme-ns-2 -s unvme-ns-3
+        sudo $rootdir/bin/cli array create --name $array_name -b uram0 -d unvme-ns-0,unvme-ns-1,unvme-ns-2 -s unvme-ns-3
     fi
     
-    sudo $rootdir/bin/cli request mount_ibofos
+    sudo $rootdir/bin/cli array mount --name $array_name
     
     if [ $degradedmode -eq 1 ]; then
         sudo $root_dir/script/detach_device.sh unvme-ns-0 1
     fi
 else
-    sudo $rootdir/bin/cli request mount_ibofos
+    sudo $rootdir/bin/cli array mount --name $array_name
 fi
 
 for ((i=1;i<=$numofvol;i++))
 do
     if [ ${create_array} -eq 1 ]; then
-        sudo $rootdir/bin/cli request create_vol --name vol$i --size $sizepervol --maxbw ${limitspeed}
+        sudo $rootdir/bin/cli volume create --name vol$i --size $sizepervol --maxbw ${limitspeed} --array $array_name
     fi
-    sudo $rootdir/bin/cli request mount_vol --name vol$i
+    sudo $rootdir/bin/cli volume mount --name vol$i --array $array_name
 done
 
 sudo $spdkdir/scripts/rpc.py nvmf_get_subsystems
-sudo $rootdir/bin/cli request set_log_level --level info
+sudo $rootdir/bin/cli logger set_level --level info
 
 #for ((i=1;i<=$numofvol;i++))
 #do
