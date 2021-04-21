@@ -242,6 +242,7 @@ TEST(AbrManager, FindArray_testCommandPassing)
     string result = abrMgr->FindArray(devName);
     // Then : Compare Result
     EXPECT_EQ(mockArrayName, result);
+    delete mockMbrManager;
 }
 
 } // namespace pos
