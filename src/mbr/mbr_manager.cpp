@@ -703,10 +703,10 @@ MbrManager::_LoadIndexMap(void)
 }
 
 string
-MbrManager::FindArray(string devname)
+MbrManager::FindArrayWithDeviceSN(string devSN)
 {
     pthread_rwlock_rdlock(&mbrLock);
-    int arrayIndex = mapMgr->FindArrayIndex(devname);
+    int arrayIndex = mapMgr->FindArrayIndex(devSN);
     pthread_rwlock_unlock(&mbrLock);
     if (0 <= arrayIndex)
     {

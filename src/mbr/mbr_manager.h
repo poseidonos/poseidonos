@@ -73,7 +73,7 @@ public:
     virtual struct masterBootRecord& GetMbr(void);
     virtual int GetMbrVersionInMemory(void);
     virtual int UpdateDeviceIndexMap(string arrayName);
-    virtual string FindArray(string devname);
+    virtual string FindArrayWithDeviceSN(string devSN);
 
 private:
     struct DiskIoContext

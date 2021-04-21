@@ -152,7 +152,7 @@ ArrayManager::RemoveDevice(string name, string dev)
 int
 ArrayManager::DeviceDetached(UblockSharedPtr dev)
 {
-    ArrayComponents* array = _FindArrayWithDevName(dev->GetName());
+    ArrayComponents* array = _FindArrayWithDevSN(dev->GetSN());
     if (array != nullptr)
     {
         return array->GetArray()->DetachDevice(dev);
@@ -327,16 +327,16 @@ ArrayManager::_FindArray(string name)
 }
 
 ArrayComponents*
-ArrayManager::_FindArrayWithDevName(string devName)
+ArrayManager::_FindArrayWithDevSN(string devSN)
 {
-    string arrayName = abrManager->FindArray(devName);
+    string arrayName = abrManager->FindArrayWithDeviceSN(devSN);
     if (arrayName == "")
     {
         int eventId = (int)POS_EVENT_ID::ARRAY_NOT_FOUND;
-        POS_TRACE_INFO(eventId, "There are no arrays with that device");
+        POS_TRACE_INFO(eventId, "There is no array that owns device '{}'", devSN);
         return nullptr;
     }
-    ArrayComponents* array = _FindArray(arrayName);
+    ArrayComponents* array = _FindArrayWithDevSN(arrayName);
 
     return array;
 }

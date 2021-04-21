@@ -218,9 +218,9 @@ AbrManager::GetAbrList(std::vector<ArrayBootRecord>& abrList)
 }
 
 string
-AbrManager::FindArray(string devName)
+AbrManager::FindArrayWithDeviceSN(string devSN)
 {
-    string arrayName = mbrManager->FindArray(devName);
+    string arrayName = mbrManager->FindArrayWithDeviceSN(devSN);
 
     return arrayName;
 }

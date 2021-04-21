@@ -53,7 +53,7 @@ public:
     virtual int DeleteDevices(unsigned int arrayIndex);
     virtual int ResetMap(void);
     virtual int CheckDevices(ArrayMeta& meta);
-    virtual int FindArrayIndex(string devname);
+    virtual int FindArrayIndex(string devSN);
 
 private:
     map<string, unsigned int> arrayDeviceIndexMap;

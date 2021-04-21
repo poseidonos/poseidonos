@@ -119,13 +119,13 @@ MbrMapManager::ResetMap(void)
 }
 
 int
-MbrMapManager::FindArrayIndex(string devname)
+MbrMapManager::FindArrayIndex(string devSN)
 {
     arrayDeviceIndexMapIter devIter;
     for (devIter = arrayDeviceIndexMap.begin(); devIter !=
          arrayDeviceIndexMap.end();)
     {
-        if (devIter->first == devname)
+        if (devIter->first == devSN)
         {
             return devIter->second;
         }
