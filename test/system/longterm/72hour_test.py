@@ -230,7 +230,7 @@ def scan_dev():
 
 def create_array():
     DATA = DEV_1 + "," + DEV_2 + "," + DEV_3
-    out = cli.create_array("uram0", DATA, "", ARRAYNAME "")
+    out = cli.create_array("uram0", DATA, "", ARRAYNAME, "")
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array created successfully")
@@ -274,7 +274,7 @@ def create_and_mount_vol():
         return False
 
 def mount_vol(vol_name):
-    out = cli.mount_volume(vol_name, ARRAYNAME "")
+    out = cli.mount_volume(vol_name, ARRAYNAME, "")
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("volume: " + vol_name + " mounted successfully")
