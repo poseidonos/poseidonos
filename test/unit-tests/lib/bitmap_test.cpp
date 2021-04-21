@@ -70,7 +70,7 @@ TEST(BitMap, FindNextZero_CheckFirstCall)
     // Given
     uint64_t bit = 0;
     BitMap bitMapSUT(16);
-    
+
     // When
     bit = bitMapSUT.FindNextZero();
 
@@ -84,7 +84,7 @@ TEST(BitMap, FindNextZero_ReturnRightNextPosition)
     uint64_t bit = 0;
     BitMap bitMapSUT(16);
     bitMapSUT.SetBit(7);
-    
+
     // When
     bit = bitMapSUT.FindNextZero();
 
@@ -104,7 +104,7 @@ TEST(BitMap, FindNextZero_FullSet)
     }
     bit_first = bitMapSUT.FindNextZero();
     bitMapSUT.SetBit(bit_first);
-    
+
     // When
     bit_second = bitMapSUT.FindNextZero();
 

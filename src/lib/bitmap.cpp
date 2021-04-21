@@ -483,7 +483,7 @@ BitMapMutex::SetNextZeroBit(void)
     std::unique_lock<std::mutex> lock(bitmapMutex);
     uint32_t bit = bitMap->FindNextZero();
     bitMap->SetBit(bit);
-    return bit;    
+    return bit;
 }
 
 bool
