@@ -45,7 +45,8 @@ TEST(AbrManager, LoadAbr_testIfAbrDataLoadedCorrectly)
     string mockArrayName = "POSArray";
     string mockDeviceName = "unvme-ns-0";
     MockMbrManager* mockMbrManager = new MockMbrManager();
-    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr) {
+    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([ = ](string targetArrayName, struct ArrayBootRecord** abr)
+    {
         using AbrPtr = struct ArrayBootRecord*;
         AbrPtr newAbr = new struct ArrayBootRecord; // Done with SaveAbr in product code
         newAbr->totalDevNum = 4;
@@ -72,7 +73,8 @@ TEST(AbrManager, SaveAbr_testAbrDataUpdateAndDataCheck)
     using AbrPtr = struct ArrayBootRecord*;
     AbrPtr newAbr = new struct ArrayBootRecord;
     NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
-    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillRepeatedly([&](string targetArrayName, struct ArrayBootRecord** abr) {
+    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillRepeatedly([&](string targetArrayName, struct ArrayBootRecord** abr)
+    {
         *abr = newAbr;
         return 0;
     });
@@ -97,7 +99,8 @@ TEST(AbrManager, GetMfsInit_testGettingMfsInitZero)
     string mockArrayName = "POSArray";
     int expectedMfsInitVal = 0;
     MockMbrManager* mockMbrManager = new MockMbrManager();
-    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr) {
+    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([ = ](string targetArrayName, struct ArrayBootRecord** abr)
+    {
         using AbrPtr = struct ArrayBootRecord*;
         AbrPtr newAbr = new struct ArrayBootRecord; // Done with SaveAbr in product code
         newAbr->mfsInit = expectedMfsInitVal;
@@ -118,7 +121,8 @@ TEST(AbrManager, GetMfsInit_testGettingMfsInitOne)
     string mockArrayName = "POSArray";
     int expectedMfsInitVal = 1;
     MockMbrManager* mockMbrManager = new MockMbrManager();
-    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr) {
+    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([ = ](string targetArrayName, struct ArrayBootRecord** abr)
+    {
         using AbrPtr = struct ArrayBootRecord*;
         AbrPtr newAbr = new struct ArrayBootRecord; // Done with SaveAbr in product code
         newAbr->mfsInit = expectedMfsInitVal;
@@ -141,7 +145,8 @@ TEST(AbrManager, SetMfsInit_testIfMfsInitValSetToZero)
     using AbrPtr = struct ArrayBootRecord*;
     AbrPtr newAbr = new struct ArrayBootRecord;
     NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
-    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillRepeatedly([&](string targetArrayName, struct ArrayBootRecord** abr) {
+    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillRepeatedly([&](string targetArrayName, struct ArrayBootRecord** abr)
+    {
         *abr = newAbr;
         return 0;
     });
@@ -164,7 +169,8 @@ TEST(AbrManager, SetMfsInit_testIfMfsInitValSetToOne)
     using AbrPtr = struct ArrayBootRecord*;
     AbrPtr newAbr = new struct ArrayBootRecord;
     NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
-    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillRepeatedly([&](string targetArrayName, struct ArrayBootRecord** abr) {
+    EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillRepeatedly([&](string targetArrayName, struct ArrayBootRecord** abr)
+    {
         *abr = newAbr;
         return 0;
     });
@@ -234,7 +240,8 @@ TEST(AbrManager, FindArrayWithDeviceSN_testCommandPassing)
     string mockArrayName = "POSArray";
     string devName = "unvme-ns-0";
     NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
-    EXPECT_CALL(*mockMbrManager, FindArrayWithDeviceSN(_)).WillOnce([=](string devName) {
+    EXPECT_CALL(*mockMbrManager, FindArrayWithDeviceSN(_)).WillOnce([ = ](string devName)
+    {
         return mockArrayName;
     });
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
