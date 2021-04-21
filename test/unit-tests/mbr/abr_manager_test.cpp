@@ -228,18 +228,18 @@ TEST(AbrManager, GetAbrList_testCommandPassing)
     // Then : Nothing
 }
 
-TEST(AbrManager, FindArray_testCommandPassing)
+TEST(AbrManager, FindArrayWithDeviceSN_testCommandPassing)
 {
     // Given : AbrManger
     string mockArrayName = "POSArray";
     string devName = "unvme-ns-0";
     NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
-    EXPECT_CALL(*mockMbrManager, FindArray(_)).WillOnce([=](string devName) {
+    EXPECT_CALL(*mockMbrManager, FindArrayWithDeviceSN(_)).WillOnce([=](string devName) {
         return mockArrayName;
     });
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
     // When : Call FindArray
-    string result = abrMgr->FindArray(devName);
+    string result = abrMgr->FindArrayWithDeviceSN(devName);
     // Then : Compare Result
     EXPECT_EQ(mockArrayName, result);
     delete mockMbrManager;

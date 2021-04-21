@@ -676,13 +676,13 @@ TEST(MbrManager, UpdateDeviceIndexMap_testIfMbrMapManagerRefreshesDeviceMap)
     ASSERT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), mbrMapManager->CheckDevices(newOtherArrayMeta));
 }
 
-TEST(MbrManager, FindArray_testFindingArraySuccessfully)
+TEST(MbrManager, FindArrayWithDeviceSN_testFindingArraySuccessfully)
 {
     // Given : MbrManager with one array
     int expectedArrayNum = 1;
     int defaultArrayIndex = 0;
     string mockArrayName = "POSArray";
-    string mockDevName = "unvme-ns-0";
+    string mockDevSN = "unvme-ns-0";
     MockDeviceManager mockDevMgr;
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([=](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
@@ -705,18 +705,18 @@ TEST(MbrManager, FindArray_testFindingArraySuccessfully)
 
     // When : Call FindArray
     mbrMgr.LoadMbr();
-    string result = mbrMgr.FindArray(mockDevName);
+    string result = mbrMgr.FindArrayWithDeviceSN(mockDevSN);
 
     // Then : array found
     EXPECT_EQ(mockArrayName, result);
 }
 
-TEST(MbrManager, FindArray_testFindingArrayWithNoArray)
+TEST(MbrManager, FindArrayWithDeviceSN_testFindingArrayWithNoArray)
 {
     // Given : MbrManager with one array
     int expectedArrayNum = 1;
     int defaultArrayIndex = 0;
-    string mockDevName = "unvme-ns-0";
+    string mockDevSN = "unvme-ns-0";
     MockDeviceManager mockDevMgr;
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([=](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
@@ -730,7 +730,7 @@ TEST(MbrManager, FindArray_testFindingArrayWithNoArray)
 
     // When : Call FindArray
     mbrMgr.LoadMbr();
-    string result = mbrMgr.FindArray(mockDevName);
+    string result = mbrMgr.FindArrayWithDeviceSN(mockDevSN);
 
     // Then : array found
     EXPECT_EQ("", result);

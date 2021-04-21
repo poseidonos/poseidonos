@@ -16,7 +16,7 @@ public:
     MOCK_METHOD(int, GetMbrVersionInMemory, (), (override));
     MOCK_METHOD(void, GetAbr, (string targetArrayName, struct ArrayBootRecord** abr), (override));
     MOCK_METHOD(int, SaveMbr, (), (override));
-    MOCK_METHOD(string, FindArray, (string devName), (override));
+    MOCK_METHOD(string, FindArrayWithDeviceSN, (string devNSN), (override));
 };
 
 } // namespace pos
