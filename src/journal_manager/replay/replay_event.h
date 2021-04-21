@@ -128,8 +128,8 @@ private:
 class ReplayStripeMapUpdate : public ReplayEvent
 {
 public:
-    ReplayStripeMapUpdate(IStripeMap* istripeMap, StripeReplayStatus* status,
-        StripeLoc dest);
+    ReplayStripeMapUpdate(IStripeMap* stripeMap, StripeReplayStatus* status,
+        StripeId vsid, StripeAddr dest);
     virtual ~ReplayStripeMapUpdate(void);
 
     virtual int Replay(void) override;
@@ -142,14 +142,16 @@ public:
 
 private:
     IStripeMap* stripeMap;
-    StripeLoc dest;
+
+    StripeId vsid;
+    StripeAddr dest;
 };
 
 class ReplayStripeAllocation : public ReplayEvent
 {
 public:
     ReplayStripeAllocation(IStripeMap* istripeMap, IWBStripeCtx* iwbStripeCtx,
-        StripeReplayStatus* status);
+        StripeReplayStatus* status, StripeId vsid, StripeId wbLsid);
     virtual ~ReplayStripeAllocation(void);
 
     virtual int Replay(void) override;
@@ -163,12 +165,16 @@ public:
 private:
     IStripeMap* stripeMap;
     IWBStripeCtx* wbStripeCtx;
+
+    StripeId vsid;
+    StripeId wbLsid;
 };
 
 class ReplaySegmentAllocation : public ReplayEvent
 {
 public:
-    ReplaySegmentAllocation(ISegmentCtx* isegCtx, IArrayInfo* arrayInfo, StripeReplayStatus* status);
+    ReplaySegmentAllocation(ISegmentCtx* isegCtx, IArrayInfo* arrayInfo,
+        StripeReplayStatus* status, StripeId stripeId);
     virtual ~ReplaySegmentAllocation(void);
 
     virtual int Replay(void) override;
@@ -182,13 +188,15 @@ public:
 private:
     ISegmentCtx* segmentCtx;
     IArrayInfo* arrayInfo;
+
+    StripeId userLsid;
 };
 
 class ReplayStripeFlush : public ReplayEvent
 {
 public:
     ReplayStripeFlush(IWBStripeCtx* iwbStripeCtx, ISegmentCtx* isegCtx,
-        StripeReplayStatus* status);
+        StripeReplayStatus* status, StripeId vsid, StripeId wbLsid, StripeId userLsid);
     virtual ~ReplayStripeFlush(void);
 
     virtual int Replay(void) override;
@@ -199,9 +207,31 @@ public:
         return ReplayEventType::STRIPE_FLUSH;
     }
 
+    StripeId
+    GetVsid(void)
+    {
+        return vsid;
+    }
+
+    StripeId
+    GetWbLsid(void)
+    {
+        return wbLsid;
+    }
+
+    StripeId
+    GetUserLsid(void)
+    {
+        return userLsid;
+    }
+
 private:
     IWBStripeCtx* wbStripeCtx;
     ISegmentCtx* segmentCtx;
+
+    StripeId vsid;
+    StripeId wbLsid;
+    StripeId userLsid;
 };
 
 } // namespace pos

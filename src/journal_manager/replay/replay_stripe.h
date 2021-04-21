@@ -52,6 +52,7 @@
 namespace pos
 {
 class ReplayStripe;
+class ReplayEventFactory;
 class ReplayEvent;
 class ActiveWBStripeReplayer;
 class ActiveUserStripeReplayer;
@@ -91,6 +92,7 @@ private:
 
     StripeReplayStatus* status;
 
+    ReplayEventFactory* replayEventFactory;
     // TODO (huijeong.kim) to be moved out, to ReplayLogs
     std::list<ReplayEvent*> replayEvents;
 
@@ -99,10 +101,6 @@ private:
 
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
-    IWBStripeCtx* wbStripeCtx;
-    ISegmentCtx* segmentCtx;
-    IBlockAllocator* blockAllocator;
-    IArrayInfo* arrayInfo;
 };
 
 } // namespace pos

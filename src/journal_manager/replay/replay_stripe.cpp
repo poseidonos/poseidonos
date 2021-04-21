@@ -30,10 +30,10 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "replay_stripe.h"
-
-#include "active_user_stripe_replayer.h"
-#include "active_wb_stripe_replayer.h"
+#include "src/journal_manager/replay/active_user_stripe_replayer.h"
+#include "src/journal_manager/replay/active_wb_stripe_replayer.h"
+#include "src/journal_manager/replay/replay_stripe.h"
+#include "src/journal_manager/replay/replay_event_factory.h"
 
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -44,16 +44,14 @@ ReplayStripe::ReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap
     IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
     IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
     ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer)
-: status(new StripeReplayStatus(vsid)),
-  wbStripeReplayer(wbReplayer),
+: wbStripeReplayer(wbReplayer),
   userStripeReplayer(userReplayer),
   vsaMap(vsaMap),
-  stripeMap(stripeMap),
-  wbStripeCtx(wbStripeCtx),
-  segmentCtx(segmentCtx),
-  blockAllocator(blockAllocator),
-  arrayInfo(arrayInfo)
+  stripeMap(stripeMap)
 {
+    status = new StripeReplayStatus(vsid);
+    replayEventFactory = new ReplayEventFactory(status,
+        vsaMap, stripeMap, wbStripeCtx, segmentCtx, blockAllocator, arrayInfo);
 }
 
 ReplayStripe::~ReplayStripe(void)
@@ -65,6 +63,7 @@ ReplayStripe::~ReplayStripe(void)
     replayEvents.clear();
 
     delete status;
+    delete replayEventFactory;
 }
 
 void
@@ -87,19 +86,8 @@ ReplayStripe::AddLog(LogHandlerInterface* log)
 void
 ReplayStripe::_CreateBlockWriteReplayEvent(BlockWriteDoneLog dat)
 {
-    ReplayBlockMapUpdate* replayEvent = new ReplayBlockMapUpdate(vsaMap, blockAllocator,
-        status, dat);
-    replayEvents.push_back(replayEvent);
-}
-
-void
-ReplayStripe::_CreateStripeFlushReplayEvent(void)
-{
-    ReplayEvent* replayEvent = new ReplayStripeMapUpdate(stripeMap, status, IN_USER_AREA);
-    replayEvents.push_back(replayEvent);
-
-    ReplayEvent* flushEvent = new ReplayStripeFlush(wbStripeCtx, segmentCtx, status);
-    replayEvents.push_back(flushEvent);
+    ReplayEvent* blockWriteEvent = replayEventFactory->CreateBlockWriteReplayEvent(dat);
+    replayEvents.push_back(blockWriteEvent);
 }
 
 int
@@ -161,11 +149,31 @@ ReplayStripe::_CreateStripeEvents(void)
 void
 ReplayStripe::_CreateStripeAllocationEvent(void)
 {
-    ReplayEvent* stripeAllocEvent = new ReplayStripeAllocation(stripeMap, wbStripeCtx, status);
-    replayEvents.push_front(stripeAllocEvent);
+    ReplayEvent* stripeAllocation =
+        replayEventFactory->CreateStripeAllocationReplayEvent(status->GetVsid(), status->GetWbLsid());
+        replayEvents.push_front(stripeAllocation);
 
-    ReplayEvent* segmentAllocEvent = new ReplaySegmentAllocation(segmentCtx, arrayInfo, status);
-    replayEvents.push_front(segmentAllocEvent);
+    ReplayEvent* segmentAllocation =
+        replayEventFactory->CreateSegmentAllocationReplayEvent(status->GetUserLsid());
+    replayEvents.push_front(segmentAllocation);
+}
+
+
+void
+ReplayStripe::_CreateStripeFlushReplayEvent(void)
+{
+    StripeAddr dest = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = status->GetUserLsid()
+    };
+    ReplayEvent* stripeMapUpdate =
+        replayEventFactory->CreateStripeMapUpdateReplayEvent(status->GetVsid(), dest);
+    replayEvents.push_back(stripeMapUpdate);
+
+    ReplayEvent* flushEvent =
+        replayEventFactory->CreateStripeFlushReplayEvent(status->GetVsid(),
+        status->GetWbLsid(), status->GetUserLsid());
+    replayEvents.push_back(flushEvent);
 }
 
 int

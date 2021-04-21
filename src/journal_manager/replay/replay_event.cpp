@@ -134,9 +134,10 @@ ReplayBlockMapUpdate::_UpdateMap(uint32_t offset)
 }
 
 ReplayStripeMapUpdate::ReplayStripeMapUpdate(IStripeMap* stripeMap,
-    StripeReplayStatus* status, StripeLoc dest)
+    StripeReplayStatus* status, StripeId vsid, StripeAddr dest)
 : ReplayEvent(status),
   stripeMap(stripeMap),
+  vsid(vsid),
   dest(dest)
 {
 }
@@ -148,23 +149,19 @@ ReplayStripeMapUpdate::~ReplayStripeMapUpdate(void)
 int
 ReplayStripeMapUpdate::Replay(void)
 {
-    int ret = 0;
-    if (dest == IN_WRITE_BUFFER_AREA)
-    {
-        ret = stripeMap->SetLSA(status->GetVsid(), status->GetWbLsid(), IN_WRITE_BUFFER_AREA);
-    }
-    else if (dest == IN_USER_AREA)
-    {
-        ret = stripeMap->SetLSA(status->GetVsid(), status->GetUserLsid(), IN_USER_AREA);
-    }
+    int ret = stripeMap->SetLSA(vsid, dest.stripeId, dest.stripeLoc);
+    // TODO(huijeong.kim) notify replay status that stripe map is updated
     return ret;
 }
 
-ReplayStripeAllocation::ReplayStripeAllocation(IStripeMap* stripeMap, IWBStripeCtx* wbStripeCtx,
-    StripeReplayStatus* status)
+ReplayStripeAllocation::ReplayStripeAllocation(IStripeMap* stripeMap,
+    IWBStripeCtx* wbStripeCtx, StripeReplayStatus* status,
+    StripeId vsid, StripeId wbLsid)
 : ReplayEvent(status),
   stripeMap(stripeMap),
-  wbStripeCtx(wbStripeCtx)
+  wbStripeCtx(wbStripeCtx),
+  vsid(vsid),
+  wbLsid(wbLsid)
 {
 }
 
@@ -176,9 +173,6 @@ int
 ReplayStripeAllocation::Replay(void)
 {
     int result = 0;
-
-    StripeId vsid = status->GetVsid();
-    StripeId wbLsid = status->GetWbLsid();
 
     result = stripeMap->SetLSA(vsid, wbLsid, IN_WRITE_BUFFER_AREA);
 
@@ -193,10 +187,11 @@ ReplayStripeAllocation::Replay(void)
 }
 
 ReplaySegmentAllocation::ReplaySegmentAllocation(ISegmentCtx* isegCtx,
-    IArrayInfo* arrayInfo, StripeReplayStatus* status)
+    IArrayInfo* arrayInfo, StripeReplayStatus* status, StripeId stripeId)
 : ReplayEvent(status),
   segmentCtx(isegCtx),
-  arrayInfo(arrayInfo)
+  arrayInfo(arrayInfo),
+  userLsid(stripeId)
 {
 }
 
@@ -207,9 +202,9 @@ ReplaySegmentAllocation::~ReplaySegmentAllocation(void)
 int
 ReplaySegmentAllocation::Replay(void)
 {
-    int stripesPerSegment = arrayInfo->GetSizeInfo(PartitionType::USER_DATA)->stripesPerSegment;
-    int segId = status->GetUserLsid() / stripesPerSegment;
-    StripeId firstStripe = segId * stripesPerSegment;
+    uint32_t numStripesPerSegment = arrayInfo->GetSizeInfo(PartitionType::USER_DATA)->stripesPerSegment;
+    SegmentId segmentId = userLsid / numStripesPerSegment;
+    StripeId firstStripe = segmentId * numStripesPerSegment;
 
     segmentCtx->ReplaySegmentAllocation(firstStripe);
     status->SegmentAllocated();
@@ -217,10 +212,13 @@ ReplaySegmentAllocation::Replay(void)
 }
 
 ReplayStripeFlush::ReplayStripeFlush(IWBStripeCtx* wbStripeCtx, ISegmentCtx* segCtx,
-    StripeReplayStatus* status)
+    StripeReplayStatus* status, StripeId vsid, StripeId wbLsid, StripeId userLsid)
 : ReplayEvent(status),
   wbStripeCtx(wbStripeCtx),
-  segmentCtx(segCtx)
+  segmentCtx(segCtx),
+  vsid(vsid),
+  wbLsid(wbLsid),
+  userLsid(userLsid)
 {
 }
 
@@ -231,8 +229,8 @@ ReplayStripeFlush::~ReplayStripeFlush(void)
 int
 ReplayStripeFlush::Replay(void)
 {
-    wbStripeCtx->ReplayStripeFlushed(status->GetWbLsid());
-    segmentCtx->UpdateOccupiedStripeCount(status->GetUserLsid());
+    wbStripeCtx->ReplayStripeFlushed(wbLsid);
+    segmentCtx->UpdateOccupiedStripeCount(userLsid);
 
     status->StripeFlushed();
 
