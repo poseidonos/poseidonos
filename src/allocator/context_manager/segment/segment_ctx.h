@@ -58,7 +58,14 @@ class SegmentCtx : public ISegmentCtx
     };
 
 public:
-    explicit SegmentCtx(AllocatorAddressInfo* info, std::string arrayName);
+    // Ctor for DoCs Injection for UT
+    SegmentCtx(BitMapMutex* segmentBitmap_, StripeId prevSsdLsid_, StripeId currentSsdLsid_,
+               SegmentStates* segmentStates_, SegmentInfo* segmentInfo_, uint32_t versionSegInfo_,
+               uint32_t headerSize_, uint32_t writeBufferSize_, uint32_t thresholdSegments_,
+               uint32_t urgentSegments_, std::string arrayName_, AllocatorAddressInfo* addrInfo_,
+               MetaFileIntf* segInfoFile_, IRebuildCtxInternal* iRebuildCtxInternal_);
+    // Ctor for Production code
+    SegmentCtx(AllocatorAddressInfo* info, std::string arrayName_);
     virtual ~SegmentCtx(void);
     void Init(void);
     void Close(void);
@@ -67,13 +74,13 @@ public:
     uint32_t GetUrgentThreshold(void) override { return urgentSegments;}
     SegmentId GetGCVictimSegment(void) override;
     uint64_t GetNumOfFreeUserDataSegment(void) override;
-    void FreeUserDataSegment(SegmentId segId) override;
     void ReplaySsdLsid(StripeId currentSsdLsid) override;
     void ReplaySegmentAllocation(StripeId userLsid) override;
     void UpdateOccupiedStripeCount(StripeId lsid) override;
+    void FreeAllInvalidatedSegment(void) override;
+
     void SetGcThreshold(uint32_t inputThreshold) { thresholdSegments = inputThreshold;}
     void SetUrgentThreshold(uint32_t inputThreshold) { urgentSegments = inputThreshold;}
-
     StripeId GetPrevSsdLsid(void);
     void SetPrevSsdLsid(StripeId stripeId);
     StripeId GetCurrentSsdLsid(void);
@@ -81,6 +88,7 @@ public:
     SegmentStates& GetSegmentState(SegmentId segmentId);
     void UsedSegmentStateChange(SegmentId segmentId, SegmentState state);
     BitMapMutex* GetSegmentBitmap(void) { return segmentBitmap;}
+    void FreeUserDataSegment(SegmentId segId);
 
     uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
     int32_t DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
@@ -103,7 +111,6 @@ private:
     void _HeaderUpdate(char* pBuf);
     void _HeaderLoaded(char* pBuf);
     void _FreeSegment(SegmentId segId);
-    // void _FreeSegmentInRebuildTarget(SegmentId segId);
 
     static const int SIG_SEGMENT_INFO = 0x46495347; // "SGIF"
     // Segment

@@ -50,7 +50,7 @@ public:
     uint32_t GetnumUserAreaStripes(void) { return numUserAreaStripes; }
     uint32_t GetblksPerSegment(void) { return blksPerSegment; }
     uint32_t GetstripesPerSegment(void) { return stripesPerSegment; }
-    uint32_t GetnumUserAreaSegments(void) { return numUserAreaSegments; }
+    virtual uint32_t GetnumUserAreaSegments(void) { return numUserAreaSegments; }
 
     void SetblksPerStripe(uint32_t value) { blksPerStripe = value; }
     void SetchunksPerStripe(uint32_t value) { chunksPerStripe = value; }

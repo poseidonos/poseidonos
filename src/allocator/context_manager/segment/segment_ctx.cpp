@@ -45,21 +45,31 @@
 
 namespace pos
 {
-SegmentCtx::SegmentCtx(AllocatorAddressInfo* info, std::string arrayName)
-: segmentBitmap(nullptr),
-  prevSsdLsid(UNMAP_STRIPE),
-  currentSsdLsid(UNMAP_STRIPE),
-  segmentStates(nullptr),
-  segmentInfos(nullptr),
-  versionSegInfo(UINT32_MAX),
-  headerSize(sizeof(SegInfoHeader)),
-  writeBufferSize(0),
-  thresholdSegments(20),
-  urgentSegments(5),
-  arrayName(arrayName),
-  addrInfo(info),
-  segInfoFile(nullptr),
-  iRebuildCtxInternal(nullptr)
+
+SegmentCtx::SegmentCtx(BitMapMutex* segmentBitmap_, StripeId prevSsdLsid_, StripeId currentSsdLsid_,
+                       SegmentStates* segmentStates_, SegmentInfo* segmentInfo_, uint32_t versionSegInfo_,
+                       uint32_t headerSize_, uint32_t writeBufferSize_, uint32_t thresholdSegments_,
+                       uint32_t urgentSegments_, std::string arrayName_, AllocatorAddressInfo* addrInfo_,
+                       MetaFileIntf* segInfoFile_, IRebuildCtxInternal* iRebuildCtxInternal_)
+: segmentBitmap(segmentBitmap_),
+  prevSsdLsid(prevSsdLsid_),
+  currentSsdLsid(currentSsdLsid_),
+  segmentStates(segmentStates_),
+  segmentInfos(segmentInfo_),
+  versionSegInfo(versionSegInfo_),
+  headerSize(headerSize_),
+  writeBufferSize(writeBufferSize_),
+  thresholdSegments(thresholdSegments_),
+  urgentSegments(urgentSegments_),
+  arrayName(arrayName_),
+  addrInfo(addrInfo_),
+  segInfoFile(segInfoFile_),
+  iRebuildCtxInternal(iRebuildCtxInternal_)
+{
+}
+
+SegmentCtx::SegmentCtx(AllocatorAddressInfo* info, std::string arrayName_)
+: SegmentCtx(nullptr, UNMAP_STRIPE, UNMAP_STRIPE, nullptr, nullptr, UINT32_MAX, sizeof(SegInfoHeader), UINT32_MAX, 20, 5, arrayName_, info, nullptr, nullptr)
 {
 }
 
@@ -70,6 +80,10 @@ SegmentCtx::~SegmentCtx(void)
 void
 SegmentCtx::Init(void)
 {
+    if (segmentBitmap != nullptr)   // DoCs already inserted
+    {
+        return;
+    }
     uint32_t numSegment = addrInfo->GetnumUserAreaSegments();
     segmentBitmap = new BitMapMutex(numSegment);
     currentSsdLsid = STRIPES_PER_SEGMENT - 1;
@@ -121,8 +135,11 @@ SegmentCtx::Close(void)
     }
 
     delete[] segmentStates;
+    segmentStates = nullptr;
     delete segmentBitmap;
+    segmentBitmap = nullptr;
     delete segmentInfos;
+    segmentInfos = nullptr;
 }
 
 int
@@ -138,6 +155,7 @@ SegmentCtx::StoreSegmentInfoSync(void)
     }
 
     delete[] bufferInObj;
+    bufferInObj = nullptr;
     return ret;
 }
 
@@ -175,7 +193,9 @@ void
 SegmentCtx::ReleaseRequestIo(AsyncMetaFileIoCtx* ctx)
 {
     delete[] ctx->buffer;
+    ctx->buffer = nullptr;
     delete ctx;
+    ctx = nullptr;
 }
 
 bool
@@ -205,6 +225,7 @@ SegmentCtx::_LoadSegmentInfoSync(void)
     }
 
     delete[] bufferInObj;
+    bufferInObj = nullptr;
     return ret;
 }
 
@@ -400,6 +421,20 @@ SegmentCtx::ResetExVictimSegment(void)
         {
             UsedSegmentStateChange(segmentId, SegmentState::SSD);
             POS_TRACE_INFO(EID(SEGMENT_WAS_VICTIM), "segmentId:{} was VICTIM, so changed to SSD", segmentId);
+        }
+    }
+}
+
+void
+SegmentCtx::FreeAllInvalidatedSegment(void)
+{
+    for (uint32_t segmentId = 0; segmentId < addrInfo->GetnumUserAreaSegments(); ++segmentId)
+    {
+        std::lock_guard<std::mutex> lock(segmentStates[segmentId].GetSegmentLock());
+        if ((GetSegmentState(segmentId).Getstate() == SegmentState::SSD) && (segmentInfos->GetValidBlockCount(segmentId) == 0))
+        {
+            segmentStates[segmentId].Setstate(SegmentState::FREE);
+            POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was All Invalidated, so changed to FREE", segmentId);
         }
     }
 }

@@ -22,7 +22,7 @@ public:
     virtual uint32_t GetUrgentThreshold(void) override { return 0; }
     virtual SegmentId GetGCVictimSegment(void) override { return 0; }
     virtual uint64_t GetNumOfFreeUserDataSegment(void) override { return 0; }
-    virtual void FreeUserDataSegment(SegmentId segId) override {}
+    virtual void FreeAllInvalidatedSegment(void) override {};
 };
 
 } // namespace pos

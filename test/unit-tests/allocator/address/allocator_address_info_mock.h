@@ -12,6 +12,7 @@ class MockAllocatorAddressInfo : public AllocatorAddressInfo
 {
 public:
     using AllocatorAddressInfo::AllocatorAddressInfo;
+    MOCK_METHOD(uint32_t, GetnumUserAreaSegments, (), (override));
 };
 
 } // namespace pos

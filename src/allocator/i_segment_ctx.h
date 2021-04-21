@@ -44,10 +44,10 @@ public:
     virtual uint32_t GetUrgentThreshold(void) = 0;
     virtual SegmentId GetGCVictimSegment(void) = 0;
     virtual uint64_t GetNumOfFreeUserDataSegment(void) = 0;
-    virtual void FreeUserDataSegment(SegmentId segId) = 0;
     virtual void ReplaySsdLsid(StripeId currentSsdLsid) = 0;
     virtual void ReplaySegmentAllocation(StripeId userLsid) = 0;
     virtual void UpdateOccupiedStripeCount(StripeId lsid) = 0;
+    virtual void FreeAllInvalidatedSegment(void) = 0;
 };
 
 } // namespace pos

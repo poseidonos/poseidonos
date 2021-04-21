@@ -44,7 +44,7 @@ public:
 
     uint32_t GetNumSegment(void) { return numSegment;}
 
-    uint32_t GetValidBlockCount(SegmentId segId);
+    virtual uint32_t GetValidBlockCount(SegmentId segId);
     uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t inc);
     int32_t DecreaseValidBlockCount(SegmentId segId, uint32_t dec);
 
