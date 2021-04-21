@@ -42,7 +42,6 @@
 
 namespace pos
 {
-
 class SystemTimeoutChecker;
 
 class Callback : public Event
@@ -65,8 +64,8 @@ private:
     bool _IsCalleeSet(void);
     virtual bool _DoSpecificJob(void) = 0;
     void _InvokeCallee(void);
-    bool _RecordCallerCompletionAndCheckOkToCall(uint32_t transferredErrorCount,
-            BitMapMutex& inputErrorBitMap, uint32_t transferredWeight);
+    virtual bool _RecordCallerCompletionAndCheckOkToCall(uint32_t transferredErrorCount,
+        BitMapMutex& inputErrorBitMap, uint32_t transferredWeight);
 
     std::atomic<uint32_t> errorCount;
     BitMapMutex errorBitMap;

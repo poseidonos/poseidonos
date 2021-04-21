@@ -32,15 +32,15 @@
 
 #pragma once
 
-#include "src/include/address_type.h"
+#include <functional>
+
 #include "src/allocator_service/allocator_service.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event_scheduler.h"
+#include "src/include/address_type.h"
 #include "src/io/frontend_io/block_map_update.h"
 #include "src/io/frontend_io/write_completion.h"
-#include "src/io/general_io/vsa_range_maker.h"
-#include <functional>
 
 namespace pos
 {
@@ -53,24 +53,17 @@ class BlockMapUpdateRequest : public Callback
 public:
     BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback = nullptr);
     BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback,
-        AllocatorService *allocatorService, EventSmartPtr blockMapUpdateEvent,
-        WriteCompletionFunc writeCompletionFunc, EventScheduler *eventScheduler, VsaRangeMaker* VsaRangeMaker);
+        EventSmartPtr blockMapUpdateEvent, EventScheduler* eventScheduler);
     virtual ~BlockMapUpdateRequest(void) override;
 
 private:
     bool _DoSpecificJob(void) override;
     virtual void _UpdateMeta(void);
-    Stripe& _GetStripe(StripeAddr& lsidEntry);
-    virtual void _UpdateReverseMap(Stripe& stripe);
 
     VolumeIoSmartPtr volumeIo;
     CallbackSmartPtr originCallback;
-    bool retryNeeded;
-    AllocatorService* allocatorService;
     EventSmartPtr blockMapUpdateEvent;
-    WriteCompletionFunc writeCompletionFunc;
-    EventScheduler *eventScheduler;
-    VsaRangeMaker *vsaRangeMaker;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos

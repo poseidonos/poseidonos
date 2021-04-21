@@ -14,7 +14,6 @@ public:
     using BlockMapUpdateRequest::BlockMapUpdateRequest;
     MOCK_METHOD(bool, _DoSpecificJob, (), (override));
     MOCK_METHOD(void, _UpdateMeta, (), (override));
-    MOCK_METHOD(void, _UpdateReverseMap, (Stripe & stripe), (override));
 };
 
 } // namespace pos
