@@ -8,7 +8,7 @@ import TEST
 import TEST_FIO
 import TEST_LIB
 import TEST_LOG
-import TEST_SETUP_IBOFOS
+import TEST_SETUP_POS
 
 current_test = 0
 volId = 1
@@ -26,11 +26,11 @@ def test(offset, size):
     TEST_LIB.create_new_pattern(volId)
     TEST_FIO.write(volId, offset, size, TEST_LIB.get_latest_pattern(volId))
 
-    TEST_SETUP_IBOFOS.trigger_spor()
-    TEST_SETUP_IBOFOS.dirty_bringup()
+    TEST_SETUP_POS.trigger_spor()
+    TEST_SETUP_POS.dirty_bringup()
 
-    TEST_SETUP_IBOFOS.create_subsystem(volId)
-    TEST_SETUP_IBOFOS.mount_volume(volId)
+    TEST_SETUP_POS.create_subsystem(volId)
+    TEST_SETUP_POS.mount_volume(volId)
 
     TEST_FIO.verify(volId, offset, size, TEST_LIB.get_latest_pattern(volId))
 
@@ -56,10 +56,10 @@ if __name__ == "__main__":
     filename = sys.argv[0].split("/")[-1].split(".")[0]
     TEST_LIB.set_up(argv=sys.argv, test_name=filename)
 
-    TEST_SETUP_IBOFOS.clean_bringup()
+    TEST_SETUP_POS.clean_bringup()
 
-    TEST_SETUP_IBOFOS.create_subsystem(volId)
-    TEST_SETUP_IBOFOS.create_volume(volId)
+    TEST_SETUP_POS.create_subsystem(volId)
+    TEST_SETUP_POS.create_volume(volId)
 
     execute()
 

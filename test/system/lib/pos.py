@@ -22,7 +22,7 @@ def start_pos():
         return
 
     global pos_proc
-    pos_execution = POS_ROOT + "bin/ibofos"
+    pos_execution = POS_ROOT + "bin/poseidonos"
     with open(LOG_PATH, "w") as output_file:
         pos_proc = subprocess.Popen(pos_execution, \
                 stdout=output_file, stderr=output_file)

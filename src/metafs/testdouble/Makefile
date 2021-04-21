@@ -99,7 +99,7 @@ OBJS += $(SRCS:.cpp=.o)
 # recipes
 _OBJS=$(addprefix $(OBJDIR)/, $(OBJS))
 
-# build mfs obj only and provide it to ibofos build
+# build mfs obj only and provide it to poseidonos build
 stub: $(OBJDIR) $(TARGET_SLIB)
 mock: $(OBJDIR) $(TARGET_SLIB)
 fake: $(OBJDIR) $(TARGET_SLIB)

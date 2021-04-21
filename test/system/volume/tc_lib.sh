@@ -147,7 +147,7 @@ normal_shutdown()
 
     iexecc rm -rf shutdown.txt result.txt
 
-    texecc ps -ef | grep ibofos | awk '{print $2}' | head -1 > result.txt
+    texecc ps -ef | grep poseidonos | awk '{print $2}' | head -1 > result.txt
     result=$(<result.txt)
 
     texecc ./bin/cli system unmount --json > shutdown.txt
@@ -238,7 +238,7 @@ start_pos()
     texecc rm -rf /dev/shm/ibof_nvmf_trace.pid*
 
     print_info "Starting pos..."
-    texecc ./script/start_ibofos.sh
+    texecc ./script/start_poseidonos.sh
 
     sleep 5 # takes longer if pos accesses actual drives
     print_info "Now pos is running..."

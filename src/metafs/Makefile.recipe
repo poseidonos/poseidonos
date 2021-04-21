@@ -12,7 +12,7 @@ TARGET_OBJS=$(addprefix $(OBJDIR)/, $(OBJS))
 all: $(OBJDIR) $(TARGET) 
 	@echo target: $(TARGET)
 
-# build mfs obj only and provide it to ibofos build
+# build mfs obj only and provide it to poseidonos build
 iboftarget: $(OBJDIR) $(TARGET_OBJS)
 
 $(TARGET): $(TARGET_OBJS)

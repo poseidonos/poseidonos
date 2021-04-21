@@ -30,7 +30,7 @@ def run_pre_proc():
     return os.system(ibofos_pre_proc['cleanup'])
 
 def run_post_proc(clean_start):
-    logger.info("ibofos bringup script - clean_start:" + str(clean_start))
+    logger.info("poseidonos bringup script - clean_start:" + str(clean_start))
     time.sleep(3)
     os.chdir(ibofos_post_proc['path'])
     if clean_start:
@@ -58,7 +58,7 @@ def check_process_exist(name):
     return 0
 
 def check_clean_start():
-    #Note - dirty mode ibofos start vased segfault. temporally blocks
+    #Note - dirty mode poseidonos start vased segfault. temporally blocks
     #return !os.path.exists(process_lock)
     return True
 
@@ -116,41 +116,41 @@ def init():
     handler = logging.FileHandler(logfile)
     handler.setFormatter(formatter)
     logger.addHandler(handler) 
-    logger.info("Run ibofd (logfile={}, monitor_interval={})".format(logfile, monitor_interval))
+    logger.info("Run poseidon_daemon (logfile={}, monitor_interval={})".format(logfile, monitor_interval))
     #logger.debug("debug")
     #logger.warn("warn")
     #logger.error("error")
     signal.signal(signal.SIGINT, sigHandler)
 
 def finalize():
-    ibofd_pid = check_process_exist("ibofd.py")
+    ibofd_pid = check_process_exist("poseidon_daemon.py")
     if ibofd_pid:
-        logger.info("Finalize ibofd({})".format(ibofd_pid))
+        logger.info("Finalize poseidon_daemon({})".format(ibofd_pid))
         os.kill(ibofd_pid, signal.SIGINT)
     ibofos_pid = check_process_exist(ibofos_proc['name'])
     if ibofos_pid:
-        logger.info("Finalize ibofos({})".format(ibofos_pid))
+        logger.info("Finalize poseidonos({})".format(ibofos_pid))
         os.kill(ibofos_pid, signal.SIGKILL)
 
 def sigHandler(sig, frame):
     ibofos_pid = check_process_exist(ibofos_proc['name'])
     if ibofos_pid:
-        logger.info("Finalize ibofos({})".format(ibofos_pid))
+        logger.info("Finalize poseidonos({})".format(ibofos_pid))
         os.kill(ibofos_pid, signal.SIGKILL)
     sys.exit(0)
 
 parser = optparse.OptionParser()
 parser.add_option("-l", "--log", dest="log", help="set log file", default=logfile)
 parser.add_option("-i", "--interval", dest="interval", help="monitoring interval", default=monitor_interval)
-parser.add_option("-d", "--daemon", dest="daemon", help="run ibofd as process=0, daemon=1, service=2", default=run_mode)
-parser.add_option("-f", "--finish", dest="finish", help="finalize both ibofd and ibofos", default=0)
-parser.add_option("-p", "--path", dest="path", help="select ibofos root directory", default=ibofos_dir)
+parser.add_option("-d", "--daemon", dest="daemon", help="run poseidon_daemon as process=0, daemon=1, service=2", default=run_mode)
+parser.add_option("-f", "--finish", dest="finish", help="finalize both poseidon_daemon and poseidonos", default=0)
+parser.add_option("-p", "--path", dest="path", help="select poseidonos root directory", default=ibofos_dir)
 (options, args) = parser.parse_args()
 logfile=options.log
 run_mode=int(options.daemon)
 finish=int(options.finish)
 monitor_stopinterval=int(options.interval)
-logger = logging.getLogger("ibofd")
+logger = logging.getLogger("poseidon_daemon")
 ibofos_dir = options.path
 
 ibofos_pre_system={
@@ -164,7 +164,7 @@ ibofos_pre_proc={
         }
 ibofos_proc={
         'name':'primary',
-        'cmd': ibofos_dir + '/bin/ibofos primary &'
+        'cmd': ibofos_dir + '/bin/poseidonos primary &'
         }
 ibofos_post_proc={
         'path': ibofos_dir + '/script',
@@ -182,16 +182,16 @@ if __name__ == '__main__':
             run_pre_system()
 
         if run_mode == 0:
-            logger.info("run ibofd as process")
+            logger.info("run poseidon_daemon as process")
             do_work()
         elif run_mode == 1:
-            logger.info("run ibofd as daemon")
-            if check_process_exist("ibofd.py"):
-                logger.error("ibofd is already running")
+            logger.info("run poseidon_daemon as daemon")
+            if check_process_exist("poseidon_daemon.py"):
+                logger.error("poseidon_daemon is already running")
                 sys.exit(1)
             daemonize()
         elif run_mode == 2:
-            logger.info("run ibofd as service")
+            logger.info("run poseidon_daemon as service")
             daemonize()
         else:
             logger.info("invalid run mode" + run_mode)

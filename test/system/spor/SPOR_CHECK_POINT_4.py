@@ -6,7 +6,7 @@ import os
 import TEST_FIO
 import TEST_LIB
 import TEST_LOG
-import TEST_SETUP_IBOFOS
+import TEST_SETUP_POS
 import TEST_DEBUGGING
 
 log_buffer_size_mb = 5
@@ -33,16 +33,16 @@ def test(offset, size):
         TEST_DEBUGGING.dump_vsamap(volId, "VSAMap"+str(volId)+"_BeforeSPO")
         TEST_DEBUGGING.dump_stripemap("StripeMap_BeforeSPO")
         
-    TEST_SETUP_IBOFOS.trigger_spor()
-    TEST_SETUP_IBOFOS.dirty_bringup()
+    TEST_SETUP_POS.trigger_spor()
+    TEST_SETUP_POS.dirty_bringup()
 
     for volId in volumes:
         TEST_DEBUGGING.dump_vsamap(volId, "VSAMap"+str(volId)+"_AfterSPO")
         TEST_DEBUGGING.dump_stripemap("StripeMap_AfterSPO")
 
     for volId in volumes:
-        TEST_SETUP_IBOFOS.create_subsystem(volId)
-        TEST_SETUP_IBOFOS.mount_volume(volId)
+        TEST_SETUP_POS.create_subsystem(volId)
+        TEST_SETUP_POS.mount_volume(volId)
 
     for index in range(len(TEST_LIB.patterns[volId])):
         for volId in volumes:
@@ -60,10 +60,10 @@ if __name__ == "__main__":
     TEST_LIB.set_up(argv=sys.argv, test_name=filename)
     TEST_LIB.set_log_buffer_size(log_buffer_size_mb)
 
-    TEST_SETUP_IBOFOS.clean_bringup()
+    TEST_SETUP_POS.clean_bringup()
     for volId in volumes:
-        TEST_SETUP_IBOFOS.create_subsystem(volId)
-        TEST_SETUP_IBOFOS.create_volume(volId)
+        TEST_SETUP_POS.create_subsystem(volId)
+        TEST_SETUP_POS.create_volume(volId)
 
     execute()
 

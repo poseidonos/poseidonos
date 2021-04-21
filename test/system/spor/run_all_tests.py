@@ -6,7 +6,7 @@ import glob
 import subprocess
 
 import TEST_LIB
-import TEST_SETUP_IBOFOS
+import TEST_SETUP_POS
 
 GREEN = "\033[1;32m"
 RED = "\033[1;31m"

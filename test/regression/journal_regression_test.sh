@@ -96,14 +96,14 @@ build_ibofos()
 {
     cd ${ibof_root}
     if [ ! -d "bin" ]; then
-        log_info "[Build] ibofos"
+        log_info "[Build] poseidonos"
         ./configure
         make clean && make -j $(grep -c ^processor /proc/cpuinfo)
         ret=$?
         if [ $ret = 0 ]; then
-			log_info "[Build] ibofos.. Done"
+			log_info "[Build] poseidonos.. Done"
 		else
-			log_error "[Build] ibofos.. Error"
+			log_error "[Build] poseidonos.. Error"
 		fi
     fi
     cd -

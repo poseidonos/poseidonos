@@ -138,7 +138,7 @@ Please note that the first parameter ends with "IntegrationTest". Then, `make ru
 
 ## How to Add System Tests? (experimental)
 
-You could bring up `ibofos` application, perform tests against it, and shut it down within gtest context. This will help to implement various system tests flexibly even without CLI supports. 
+You could bring up `poseidonos` application, perform tests against it, and shut it down within gtest context. This will help to implement various system tests flexibly even without CLI supports. 
 Please refer to `test/integration-tests/srm/main_test.cpp` for further details. 
 
 ## Tips and Troublshootings

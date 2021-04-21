@@ -208,8 +208,10 @@ exit_pos(){
         return
     fi
     echo "Unmount is complete" >> result
+
     texecc $TARGET_ROOT_DIR/bin/cli system exit
-    texecc ps -C ibofos > /dev/null >> ${logfile}
+    texecc ps -C poseidonos > /dev/null >> ${logfile}
+
     n=1
     while [[ ${?} == 0 ]]
     do
@@ -220,7 +222,7 @@ exit_pos(){
         texecc sleep 10
         n=$(( n+1 ))
         print_info "Waiting for POS to exit ($n of 30)"
-        texecc ps -C ibofos > /dev/null >> ${logfile}
+        texecc ps -C poseidonos > /dev/null >> ${logfile}
     done
     print_info "POS Instance Exited"
 }
@@ -317,13 +319,13 @@ kill_pos(){
     texecc $TARGET_ROOT_DIR/test/script/kill_ibofos.sh
     echo ""
     texecc sleep 2
-    texecc ps -C ibofos > /dev/null >> ${logfile}
+    texecc ps -C poseidonos > /dev/null >> ${logfile}
     echo "$?"
     while [[ ${?} == 0 ]]
     do
         echo "$?"
         texecc sleep 1s
-        texecc ps -C ibofos > /dev/null >> ${logfile}
+        texecc ps -C poseidonos > /dev/null >> ${logfile}
     done
     return
     echo "Old Instance POS is killed"
@@ -376,7 +378,7 @@ setup_test_environment(){
 # START POS
 ###################################################
 start_pos(){
-    texecc $TARGET_ROOT_DIR/test/regression/start_ibofos.sh
+    texecc $TARGET_ROOT_DIR/test/regression/start_poseidonos.sh
     EXPECT_PASS "POS OS Launch"  $?
 
     texecc sleep 10

@@ -7,13 +7,13 @@ import argparse
 #######################################################################################
 # edit test parameters into these lists to run different workloads
 pos_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
-watchdog_path = pos_root + "tool/watchdog/ibofd.py"
+watchdog_path = pos_root + "tool/watchdog/poseidon_daemon.py"
 default_timeout = 30
 #######################################################################################
 
 def find_ibofos():
     for proc in psutil.process_iter():
-        if "ibofos" in proc.name():
+        if "poseidonos" in proc.name():
             return True
     return False
 

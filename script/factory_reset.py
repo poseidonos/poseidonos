@@ -6,7 +6,7 @@ import glob
 
 def kill_ibofos():
     print("kill pos")
-    for line in os.popen("ps ax | grep " + "ibofos" + " | grep -v grep"):
+    for line in os.popen("ps ax | grep " + "poseidonos" + " | grep -v grep"):
         fields = line.split() 
         pid = fields[0]
         print("kill process pid : " + str(pid))

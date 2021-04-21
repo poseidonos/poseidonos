@@ -21,7 +21,7 @@ def setup_log(test_name):
     os.mkdir(current_log_dir)
     TEST.test_log_path = current_log_dir + "/" + test_name + ".log"
     TEST.output_log_path = current_log_dir + "/" + test_name + "_out.log"
-    TEST.ibof_log_path = current_log_dir + "/pos.log"
+    TEST.pos_log_path = current_log_dir + "/pos.log"
 
     print_info("Test log directory : " + current_log_dir)
 

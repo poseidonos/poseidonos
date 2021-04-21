@@ -15,7 +15,7 @@ texecc()
 processCheck()
 {
     rm -rf processList_${target_ip}
-    sshpass -p bamboo ssh -tt root@${target_ip} ps -ef | grep ibofos > processList_${target_ip}
+    sshpass -p bamboo ssh -tt root@${target_ip} ps -ef | grep poseidonos > processList_${target_ip}
     cat processList_${target_ip}
     rm -rf processList_${target_ip}
 }
@@ -43,7 +43,7 @@ printVariable()
 coreDump()
 {
     echo "Deleting previously-generated core dump files.."
-    texecc pkill -11 ibofos
+    texecc pkill -11 poseidonos
     sshpass -p bamboo ssh -tt root@${target_ip} "cd $ibof_root/tool/dump/; sudo ./trigger_core_dump.sh crashed"
 
     sshpass -p bamboo ssh -tt root@${target_ip} [[ ! -d $ibof_core/$test_name/$test_rev ]]

@@ -85,12 +85,12 @@ def delete_file(args):
             exit(1)
 
     
-    files_to_delete.append('ibofos.library')
-    files_to_delete.append('ibofos.lloutput')
+    files_to_delete.append('poseidonos.library')
+    files_to_delete.append('poseidonos.lloutput')
     files_to_delete.append('pos.log')
     files_to_delete.append('library.tar.gz')
-    files_to_delete.append('ibofos.inmemory.log')
-    files_to_delete.append('ibofos.memory.log')
+    files_to_delete.append('poseidonos.inmemory.log')
+    files_to_delete.append('poseidonos.memory.log')
     files_to_delete.append('call_stack.info')
     files_to_delete.append('pending_io.info')
 

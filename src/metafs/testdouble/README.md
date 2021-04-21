@@ -33,7 +33,7 @@ Then, link metafs test double library to the target & do final build:
 # MetaFS Test Double Details
 ## Stub
  - Return always success whenever you call metafs API
- - Thus, stub is not capable of full ibofos integration test and applicable to only specific unit test
+ - Thus, stub is not capable of full poseidonos integration test and applicable to only specific unit test
 
 ## Mock
  - MetaFS Mock is implemented adapting Google Mock framework
@@ -41,4 +41,4 @@ Then, link metafs test double library to the target & do final build:
  
 ## Fake
  - Provides fake-level functionality that metafs stores all files into OS filesystem other than PoseidonOS partitions
- - Fake is capable of full ibofos integration test in a case that product code of metafs doesn't work properly
+ - Fake is capable of full poseidonos integration test in a case that product code of metafs doesn't work properly

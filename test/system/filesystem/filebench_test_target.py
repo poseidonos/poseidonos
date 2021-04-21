@@ -17,7 +17,7 @@ def parse_arguments():
     print (args)
 
 def bring_up_pos():
-    start_pos_script = pos_root + "test/regression/start_ibofos.sh"
+    start_pos_script = pos_root + "test/regression/start_poseidonos.sh"
     subprocess.call(start_pos_script)
     bring_up_script = pos_root + "/test/system/io_path/setup_ibofos_nvmf_volume.sh"
     subprocess.call([bring_up_script,
@@ -30,7 +30,7 @@ def bring_up_pos():
 def kill_pos():
     for proc in psutil.process_iter():
         try:
-            if "ibofos" in proc.name():
+            if "poseidonos" in proc.name():
                 proc.kill()
                 proc.wait()
         except psutil.NoSuchProcess:

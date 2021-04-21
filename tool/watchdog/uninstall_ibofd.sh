@@ -1,3 +1,3 @@
 #!/bin/bash
-systemctl stop ibofd
-systemctl disable ibofd
+systemctl stop poseidon_daemon
+systemctl disable poseidon_daemon

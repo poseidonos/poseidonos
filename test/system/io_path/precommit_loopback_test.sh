@@ -12,7 +12,7 @@ TEST_COUNT=5
 
 check_stopped()
 {
-    while [ `pgrep ibofos -c` -ne 0 ]
+    while [ `pgrep poseidonos -c` -ne 0 ]
     do
         sleep 0.5
     done
@@ -41,9 +41,9 @@ while getopts i:t:s:v:c:n: ARG ; do
     esac
 done
 
-pkill -9 ibofos
+pkill -9 poseidonos
 check_stopped
-${ROOT_DIR}/test/regression/start_ibofos.sh
+${ROOT_DIR}/test/regression/start_poseidonos.sh
 
 sudo $ROOT_DIR/test/system/io_path/setup_ibofos_nvmf_volume.sh -c $CLEAN_BRINGUP -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM_COUNT -v $VOLUME_COUNT
 
@@ -51,7 +51,7 @@ sudo $ROOT_DIR/test/system/io_path/nvmf_initiator_nvme_cli.sh -v $VOLUME_COUNT -
 
 if [ $? -ne 0 ];then
     echo "Precommit Failed : nvme connection test"
-    pkill -9 ibofos
+    pkill -9 poseidonos
     check_stopped
     exit 1
 fi
@@ -60,5 +60,5 @@ sudo $ROOT_DIR/test/system/nvmf/initiator/fio_full_bench.py --iodepth 128 --io_s
 
 ${ROOT_DIR}/bin/cli wbt flush_gcov
 
-pkill -9 ibofos
+pkill -9 poseidonos
 check_stopped

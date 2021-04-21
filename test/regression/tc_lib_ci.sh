@@ -389,11 +389,11 @@ normal_shutdown()
 
     texecc ./bin/cli system exit --json > shutdown.txt
     
-    ps -C ibofos > /dev/null
+    ps -C poseidonos > /dev/null
     while [[ ${?} == 0 ]]
     do
         sleep 1s
-        ps -C ibofos > /dev/null
+        ps -C poseidonos > /dev/null
     done
 
     iexecc cat shutdown.txt | jq ".Response.result.status.code" > result.txt
@@ -453,11 +453,11 @@ graceful_shutdown()
 
     texecc ./bin/cli system exit --json > shutdown.txt
 
-    ps -C ibofos > /dev/null
+    ps -C poseidonos > /dev/null
     while [[ ${?} == 0 ]]
     do
         sleep 1s
-        ps -C ibofos > /dev/null
+        ps -C poseidonos > /dev/null
     done
 
     iexecc rm -rf shutdown.txt
@@ -532,7 +532,7 @@ start_pos()
     texecc rm -rf /dev/shm/ibof_nvmf_trace.pid*
 
     print_info "Starting pos..."
-    texecc ./test/regression/start_ibofos.sh
+    texecc ./test/regression/start_poseidonos.sh
 
     sleep 5 # takes longer if pos accesses actual drives
     print_info "Now pos is running..."

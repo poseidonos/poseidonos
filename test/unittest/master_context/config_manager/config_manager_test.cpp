@@ -102,7 +102,7 @@ TEST_F(ConfigTest, FormatErrorTest)
 
 TEST_F(ConfigTest, FileNotExistErrorTest)
 {
-    system("rm /etc/pos/ibofos.conf");
+    system("rm /etc/pos/pos.conf");
     
     string ip;
     int ret;

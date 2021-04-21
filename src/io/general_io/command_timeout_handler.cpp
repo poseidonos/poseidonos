@@ -229,7 +229,7 @@ CommandTimeoutHandler::_ResetHandler(
 }
 
 // In callback function is called, device can be already detached.
-// so, we protect the case that ibofos access nullptr or weird pointer value which points detached dev.
+// so, we protect the case that poseidonos access nullptr or weird pointer value which points detached dev.
 void
 CommandTimeoutHandler::_TryResetHandler(
     struct spdk_nvme_ctrlr* ctrlr,

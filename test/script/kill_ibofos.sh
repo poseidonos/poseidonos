@@ -2,7 +2,7 @@
 
 logfile="pos.log"
 
-echo "kill ibofos now..."
-pgrep ibofos | xargs kill -9
-echo "ibofos killed.."
+echo "kill poseidonos now..."
+pgrep poseidonos | xargs kill -9
+echo "poseidonos killed.."
 

@@ -151,13 +151,13 @@ do
 done
 
 
-echo "------------[Kill & Start ibofos]----------------------------------"
+echo "------------[Kill & Start poseidonos]----------------------------------"
 
 sudo ${ROOT_DIR}/test/script/kill_ibofos.sh
-sudo ${ROOT_DIR}/script/start_ibofos.sh
+sudo ${ROOT_DIR}/script/start_poseidonos.sh
 sleep 10
 
-echo ------------[setup ibofos]-------------------------------------------
+echo ------------[setup poseidonos]-------------------------------------------
 
 #sudo ${ROOT_DIR}/test/system/longterm/setup_ibofos.sh create ${arraymode} ${totalsize} ${volcnt} ${ip}
 
@@ -420,7 +420,7 @@ rm -rf result.txt
 rm -rf ${inputFile}
 rm -rf ${cliOutput}
 
-echo "------------[WBT Test End, Kill ibofos]----------------------------------"
+echo "------------[WBT Test End, Kill poseidonos]----------------------------------"
 sudo ${ROOT_DIR}/test/script/kill_ibofos.sh
 
 if [ $exit_result -eq 0 ];then

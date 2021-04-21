@@ -305,7 +305,7 @@ def tick_hour():
     RC = do_event(ELAPSED_HOUR)
 
 def init_test():
-    # pos_util.kill_process("ibofos")
+    # pos_util.kill_process("poseidonos")
     start_pos()
     scan_dev()
     mbr_reset()

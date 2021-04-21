@@ -53,7 +53,7 @@ sudo ./setup_env.sh
 ## Run POS
 
 ```bash
-sudo ./bin/ibofos
+sudo ./bin/poseidonos
 ```
 
 ## Learning POS Commands
@@ -72,7 +72,7 @@ Hardware: Poseidon server
  - PCIe generation: gen4
  - Storage: E1.S SSD * 32 ea
 OS: Ubuntu 18.04 (kernel: 5.3.0-19-generic)
-Application binary: ibofos, cli
+Application binary: poseidonos, cli
 Application config: /etc/pos/conf/pos.conf
 Application scripts to configure environments
 Writable file system for RPC socket, application logs/dump, and hugepage info
@@ -92,7 +92,7 @@ Disk /dev/nvme3n1: 64 GiB, 68719476736 bytes, 134217728 sectors
 ibof@ibof-target:~$ sudo -s
  
 # Start POS
-root@ibof-target:IBOF_HOME/script# ./start_ibofos.sh
+root@ibof-target:IBOF_HOME/script# ./start_poseidonos.sh
  
 # The first four messages show that the local NVMe devices have been detached from the OS, which exploits its Kernel Device Driver. The last four messages show that they are now attached to SPDK, which exploits Userspace Device Driver.
 0000:04:00.0 (15ad 07f0): uio_pci_generic -> nvme
@@ -107,7 +107,7 @@ root@ibof-target:IBOF_HOME/script# ./start_ibofos.sh
 # The hugepage reservation is done at this step, but no message is displayed.
 # Hugepages are reserved for about 1/3 of total size of primary memory in the target system.
  
-/home/ibof/projects/ibofos-devel/script
+/home/ibof/projects/poseidonos-devel/script
 apport.service is not a native service, redirecting to systemd-sysv-install.
 Executing: /lib/systemd/systemd-sysv-install disable apport
 Current maximum # of memory map areas per process is 65535.
@@ -117,8 +117,8 @@ Setup env. done!
 POS is running in background...logfile=pos.log
  
 # Verify if the application is up and running
-root@ibof-target:IBOF_HOME/script# ps -ef | grep ibofos | grep -v grep
-root      1400     1 99 Nov 26 ?      10-12:03:09 ../bin/ibofos
+root@ibof-target:IBOF_HOME/script# ps -ef | grep poseidonos | grep -v grep
+root      1400     1 99 Nov 26 ?      10-12:03:09 ../bin/poseidonos
  
 # At this point, you shouldn't see NVMe devices except for the OS device itself if it is also an NVMe device.
 # All of them should have been detached from the OS and attached to SPDK library with Userspace Device Driver.
@@ -1079,7 +1079,7 @@ Response from Poseidon OS
 ```
 Please make sure that POS is not running anymore as in the following.
 ```bash
-ibof@ibof-target:IBOF_HOME/bin$ ps -ef | grep ibofos | grep -v grep
+ibof@ibof-target:IBOF_HOME/bin$ ps -ef | grep poseidonos | grep -v grep
 ```
 
 

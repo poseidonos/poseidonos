@@ -39,7 +39,7 @@ printVariable()
 
 processKill()
 {
-    echo "Killing previously-running ibofos..."
+    echo "Killing previously-running poseidonos..."
     texecc $ibof_root/test/script/kill_ibofos.sh
 }
 
@@ -57,7 +57,7 @@ buildTest()
 {
     texecc $ibof_root/script/pkgdep.sh
     texecc rm -rf /dev/shm/*
-    texecc rm $ibof_root/bin/ibofos
+    texecc rm $ibof_root/bin/poseidonos
 
     texecc ./configure $config_option
     texecc ./lib/build_ibof_lib.sh clean_ci
@@ -67,7 +67,7 @@ buildTest()
 
     if [ $? -eq 0 ];
     then
-        sshpass -p bamboo ssh -tt root@${target_ip} "cp $ibof_bin/ibofos_${test_rev} $ibof_root/bin/ibofos"
+        sshpass -p bamboo ssh -tt root@${target_ip} "cp $ibof_bin/ibofos_${test_rev} $ibof_root/bin/poseidonos"
         texecc $ibof_root/tool/cli/script/build_cli.sh
         texecc cp $ibof_root/tool/cli/bin/cli $ibof_root/bin
         echo "Binary Copied"
@@ -93,7 +93,7 @@ buildTest()
     texecc make install
     texecc make udev_install
 
-    sshpass -p bamboo ssh -tt root@${target_ip} [[ -f $ibof_root/bin/ibofos ]]
+    sshpass -p bamboo ssh -tt root@${target_ip} [[ -f $ibof_root/bin/poseidonos ]]
     if [ $? -eq 0 ]
     then
         echo "Build Success"
@@ -103,7 +103,7 @@ buildTest()
             texecc mkdir -p $ibof_bin
         fi
 
-        texecc cp $ibof_root/bin/ibofos $ibof_bin/ibofos_${test_rev}
+        texecc cp $ibof_root/bin/poseidonos $ibof_bin/ibofos_${test_rev}
     else
         echo "Build Failed"
         exit 1

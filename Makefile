@@ -70,7 +70,7 @@ endif
 ifeq ($(CONFIG_LIBRARY_BUILD), y)
 APP = $(BINDIR)/ibofos_library
 else
-APP = $(BINDIR)/ibofos
+APP = $(BINDIR)/poseidonos
 endif
 
 CPPFLAGS = -g -Wall -O2 -std=c++14 -Werror
@@ -207,10 +207,12 @@ sam: makedir
 	@echo SAM Build
 	$(MAKE) -C src sam
 
-$(APP) : $(SPDK_LIB_FILES) ibofos
+$(APP) : $(SPDK_LIB_FILES) poseidonos
 	$(LINK_CXX) $(shell find src/ -name *.o -and ! -name *_test.o -and ! -name *_fake.o -and ! -name *_stub.o -and ! -name *_mock.o -and ! -name *_fixture.o) $(IBOF_LDFLAGS) $(LDEXTRAFLAGS)
+	rm bin/ibofos -rf
+	ln -s $(shell pwd -P)/bin/poseidonos bin/ibofos
 
-ibofos: makedir
+poseidonos: makedir
 	$(MAKE) -C src
 	$(CLI_DIR)/script/build_cli.sh
 	mv -f $(CLI_DIR)/bin/cli $(BINDIR)

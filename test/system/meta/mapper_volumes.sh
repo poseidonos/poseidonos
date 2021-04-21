@@ -25,7 +25,7 @@ ibofos_forced_kill() {
 }
 
 ibofos_bringup() {
-    sudo $rootdir/script/start_ibofos.sh
+    sudo $rootdir/script/start_poseidonos.sh
     sleep 10
 }
 

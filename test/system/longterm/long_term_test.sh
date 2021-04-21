@@ -39,7 +39,7 @@ shutdown()
 {
 	while :
 	do
-		ps -C ibofos > /dev/null
+		ps -C poseidonos > /dev/null
 		if [[ ${?} != 0 ]]; then
 			break;
 		fi
@@ -79,7 +79,7 @@ check_result()
 }
 
 sudo ${rootdir}/test/script/kill_ibofos.sh
-sudo ${rootdir}/script/start_ibofos.sh
+sudo ${rootdir}/script/start_poseidonos.sh
 sleep 10
 
 sudo ./setup_ibofos.sh create ${arraymode} ${totalsize} ${volcnt} ${ip}
@@ -115,7 +115,7 @@ do
         fi
         sleep 10
 
-        sudo ${rootdir}/script/start_ibofos.sh
+        sudo ${rootdir}/script/start_poseidonos.sh
         sleep 10
         sudo ./setup_ibofos.sh load ${arraymode} ${totalsize} ${volcnt} ${ip}
     fi

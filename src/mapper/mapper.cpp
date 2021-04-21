@@ -540,7 +540,7 @@ Mapper::GetMapLayout(std::string fname)
 
     if (stripeMapManager->GetStripeMapContent() == nullptr)
     {
-        out << "Please create array and mount ibofos to see stripe map mpage info" << std::endl;
+        out << "Please create array and mount poseidonos to see stripe map mpage info" << std::endl;
     }
     else
     {

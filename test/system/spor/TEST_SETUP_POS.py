@@ -25,18 +25,18 @@ import TEST_DEBUGGING
 ARRAYNAME = "POSArray"
 
 ######################################################################################
-isIbofExecuted = False
+isPosExecuted = False
 ######################################################################################
 
 def chldSignal_handler(sig, frame):
-    global isIbofExecuted
-    global ibof_proc
+    global isPosExecuted
+    global pos_proc
 
-    if isIbofExecuted == True:
-        isAllive = ibof_proc.poll()
+    if isPosExecuted == True:
+        isAllive = pos_proc.poll()
         if isAllive != None:
             TEST_LOG.print_err("* POS terminated unexpectedly")
-            isIbofExecuted = False
+            isPosExecuted = False
             kill_process("fio")
             TEST_DEBUGGING.start_core_dump("triggercrash")
             sys.exit(1)
@@ -48,23 +48,23 @@ def quitSignal_handler(sig, frame):
     sys.exit(1)
 
 def start_pos():
-    global ibof_proc
-    global isIbofExecuted
+    global pos_proc
+    global isPosExecuted
 
     TEST_LOG.print_info("* Starting POS")
-    ibof_execution = TEST.ibof_root + "bin/ibofos"
+    pos_execution = TEST.pos_root + "bin/poseidonos"
 
-    with open(TEST.ibof_log_path, "a") as log_file:
-        ibof_proc = subprocess.Popen(ibof_execution, stdout=log_file, stderr=log_file)
+    with open(TEST.pos_log_path, "a") as log_file:
+        pos_proc = subprocess.Popen(pos_execution, stdout=log_file, stderr=log_file)
     signal.signal(signal.SIGCHLD, chldSignal_handler)
     signal.signal(signal.SIGQUIT, quitSignal_handler)
-    isIbofExecuted = True
+    isPosExecuted = True
 
 def shutdown_pos():
-    global isIbofExecuted
-    global ibof_proc
+    global isPosExecuted
+    global pos_proc
 
-    isIbofExecuted = False
+    isPosExecuted = False
     TEST_LOG.print_info("* Exiting POS")
     out = cli.unmount_array(ARRAYNAME)
     ret = json_parser.get_response_code(out)
@@ -78,18 +78,18 @@ def shutdown_pos():
         TEST_LOG.print_err("Failed to exit pos")
         TEST_LOG.print_debug(out)
         sys.exit(1)
-    ibof_proc.wait()
-    if ibof_proc.returncode != 0:
+    pos_proc.wait()
+    if pos_proc.returncode != 0:
         TEST_LOG.print_err("* POS terminated unexpectedly")
         TEST_DEBUGGING.start_core_dump("crashed")
 
 def kill_pos():
-    global isIbofExecuted
-    global ibof_proc
+    global isPosExecuted
+    global pos_proc
 
-    isIbofExecuted = False
-    ibof_proc.kill()
-    ibof_proc.wait()
+    isPosExecuted = False
+    pos_proc.kill()
+    pos_proc.wait()
     TEST_LOG.print_info("* POS killed")
 
 def mbr_reset():
@@ -246,7 +246,7 @@ def delete_volume(volumeId):
     TEST_LOG.print_info("* Volume {} deleted".format(volumeId))
 
 def backup_nvram():
-    backup_execution = TEST.ibof_root + "script/backup_latest_hugepages_for_uram.sh"
+    backup_execution = TEST.pos_root + "script/backup_latest_hugepages_for_uram.sh"
     with open(TEST.output_log_path, "a") as log_file:
         backup_proc = subprocess.Popen([backup_execution], stdout=log_file, stderr=log_file)
 
@@ -275,11 +275,11 @@ def kill_process(procname, sig=9):
 def cleanup_process():
     os.system('rm -rf /dev/shm/ibof_nvmf_trace*')
 
-    global isIbofExecuted
-    isIbofExecuted = False
-    kill_process("ibofos")
+    global isPosExecuted
+    isPosExecuted = False
+    kill_process("poseidonos")
     kill_process("fio")
 
-def cleanup_ibof_logs():
+def cleanup_pos_logs():
     os.system('rm -rf /etc/pos/core/*')
     os.system('rm -rf /var/log/pos/*')

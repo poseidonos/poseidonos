@@ -39,7 +39,7 @@ nvmf configuration : nqn_ibof.conf
 	[Volume]
 	VolumeID 1
 	VolumeSizeInMB 8192
-	VolumeTypeInMemory false  # true = ramdisk, false = forward io to below (ibofos frontend)
+	VolumeTypeInMemory false  # true = ramdisk, false = forward io to below (poseidonos frontend)
 
 	[Ioat]
 	Enable true  # only activated when VolumeTypeInMemory is true, hence ramdisk mode. 

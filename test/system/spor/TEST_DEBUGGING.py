@@ -10,7 +10,7 @@ import json_parser
 
 import TEST
 import TEST_LOG
-import TEST_SETUP_IBOFOS
+import TEST_SETUP_POS
 
 def flush_gcov():
     out = cli.send_request("wbt flush_gcov")
@@ -46,7 +46,7 @@ def dump_vsamap(volid, dump_file):
     if TEST.dump_map == False:
         return
     
-    volname = TEST_SETUP_IBOFOS.get_volname(volid)
+    volname = TEST_SETUP_POS.get_volname(volid)
     out = cli.send_request("wbt read_vsamap --name " + volname + " --output " + dump_file)
     if json_parser.get_response_code(out) != 0:
         return -1
@@ -82,7 +82,7 @@ def get_file_size(fd):
 
 def start_core_dump(trigger_option):
     TEST_LOG.print_err("* Try to dump core file. (option: {})".format(trigger_option))
-    core_dump_cmd = TEST.ibof_root + "/tool/dump/trigger_core_dump.sh"
+    core_dump_cmd = TEST.pos_root + "/tool/dump/trigger_core_dump.sh"
     subprocess.call(core_dump_cmd + " " + trigger_option, shell=True)
 
 def dump_log_buffer(fd, filesize, dumpfile):

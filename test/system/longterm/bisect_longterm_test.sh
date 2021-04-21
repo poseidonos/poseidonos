@@ -66,7 +66,7 @@ do
         fi
         sleep 10
 
-        sudo ${rootdir}/script/start_ibofos.sh
+        sudo ${rootdir}/script/start_poseidonos.sh
         sleep 10
         sudo ./setup_ibofos.sh load ${arraymode} ${totalsize} ${volcnt} ${ip}
     fi

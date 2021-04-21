@@ -16,7 +16,7 @@ namespace pos
         char cmd_str[200];
         pos::Poseidonos _pos;
         int dummy_argc = 1;
-        char *argvPtr[2] = {"ibofos",};
+        char *argvPtr[2] = {"poseidonos",};
         _pos.Init(dummy_argc, argvPtr);
         if(argc == 1)
         {

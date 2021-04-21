@@ -1,7 +1,7 @@
 #
 #!/bin/bash
 #
-# Note: need to run ibofos/script/pkgdep.sh for SPDK/DPDK prerequistes
+# Note: need to run poseidonos/script/pkgdep.sh for SPDK/DPDK prerequistes
 
 SPDK_SOURCE=spdk
 DPDK_SOURCE=dpdk

@@ -210,7 +210,7 @@ start_POS()
     clean=$3
 
     echo "Starting POS" >> ${logfile}
-    texecc test/regression/start_ibofos.sh >> ${logfile}
+    texecc test/regression/start_poseidonos.sh >> ${logfile}
     #POS working condition checked using nvme connect
     #after setup of arrays and volumes
     sleep 10
@@ -228,11 +228,11 @@ exit_POS()
     texecc ./bin/cli request unmount_ibofos >> ${logfile}
     texecc ./bin/cli request exit_ibofos >> ${logfile}
 
-    texecc ps -C ibofos > /dev/null >> ${logfile}
+    texecc ps -C poseidonos > /dev/null >> ${logfile}
     while [[ ${?} == 0 ]]
     do
         texecc sleep 1s
-        texecc ps -C ibofos > /dev/null >> ${logfile}
+        texecc ps -C poseidonos > /dev/null >> ${logfile}
     done
     echo "  POS exited successfully"
 }
@@ -245,11 +245,11 @@ kill_POS()
     echo "  Kill POS"
     texecc ./test/script/kill_ibofos.sh >> ${logfile}
 
-    texecc ps -C ibofos > /dev/null >> ${logfile}
+    texecc ps -C poseidonos > /dev/null >> ${logfile}
     while [[ ${?} == 0 ]]
     do
         texecc sleep 1s
-        texecc ps -C ibofos > /dev/null >> ${logfile}
+        texecc ps -C poseidonos > /dev/null >> ${logfile}
     done
 }
 
@@ -554,7 +554,7 @@ Synopsis
 Prerequisite
     1. please make sure that file below is properly configured according to your env.
         {IBOFOS_ROOT}/test/system/network/network_config.sh
-    2. please make sure that ibofos binary exists on top of {IBOFOS_ROOT}
+    2. please make sure that poseidonos binary exists on top of {IBOFOS_ROOT}
     3. please configure your ip address, volume size, etc. propertly by editing nvme_flush_ci_test.sh
 
 Description

@@ -14,7 +14,7 @@ Synopsis
     ./spor_regression_test.sh [OPTION]
 
 Prerequisite
-    Build ibofos with journaling
+    Build poseidonos with journaling
 
 Description
     -t transport type, rdma or tcp
@@ -112,7 +112,7 @@ print_configuration()
 
 kill_ibofos()
 {
-    # kill ibofos if exists
+    # kill poseidonos if exists
     execc ${ibof_root}/test/script/kill_ibofos.sh
     echo ""
 }

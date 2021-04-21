@@ -54,15 +54,15 @@ processKill()
     echo "Executing Process Kill ..."
     echo ""
 
-    texecc ps -ef | grep ibofos >> $result_file
+    texecc ps -ef | grep poseidonos >> $result_file
     newline
-    texecc pkill -9 ibofos >> $result_file
+    texecc pkill -9 poseidonos >> $result_file
     newline
     texecc pkill -9 trigger_core_dump >> $result_file
     newline
     texecc rm -rf /etc/pos/core/* >> $result_file
     newline
-    texecc ps -ef | grep ibofos >> $result_file
+    texecc ps -ef | grep poseidonos >> $result_file
     newline
 }
 

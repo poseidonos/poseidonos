@@ -67,7 +67,7 @@ int CheckPrevileges(void);
 #if IBOF_CONFIG_LIBRARY_BUILD == 1
 
 int argc = 1;
-char argv[] = {"./bin/ibofos"};
+char argv[] = {"./bin/poseidonos"};
 
 extern "C"
 {

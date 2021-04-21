@@ -68,7 +68,7 @@ ibofos_bringup(){
     done
 
     if [ "$CLEAN_BRINGUP" -eq 1 ]; then
-        echo "ibofos clean bringup"
+        echo "poseidonos clean bringup"
         sudo $ROOT_DIR/bin/cli array reset
         if [ ${PMEM_ENABLED} -eq 1 ]; then
             sudo $ROOT_DIR/bin/cli array create -b pmem0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --name $ARRAYNAME --raidtype RAID5
@@ -83,7 +83,7 @@ ibofos_bringup(){
             sudo $ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME
         done
     else
-        echo "ibofos dirty bringup"
+        echo "poseidonos dirty bringup"
         #TODO : need to backup uram before load_array
         sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME
         for i in `seq 1 $VOLUME_COUNT`

@@ -41,7 +41,7 @@ def remote_execute(ip, id, pw, command):
     return result
 
 def bring_up_ibofos():
-    print ("Try to execute ibofos at target")
+    print ("Try to execute poseidonos at target")
     target_script = args.ibofos_root + "/test/system/filesystem/filebench_test_target.py -f " + args.fabric_ip
     remote_execute(args.target_ip, args.target_id, args.target_pw, target_script)
 
@@ -67,7 +67,7 @@ def parse_argument():
     parser.add_argument('--initiator_id', default=default_initiator_id,\
             help='Set initiator ID, default: ' + default_initiator_id)
     parser.add_argument('-r', '--ibofos_root', default=default_ibofos_root,\
-            help='Set ibofos root path, default: ' + default_ibofos_root)
+            help='Set poseidonos root path, default: ' + default_ibofos_root)
     global args
     args = parser.parse_args()
     print (args)
@@ -77,7 +77,7 @@ def terminate_pos():
     remote_execute(args.target_ip, args.target_id, args.target_pw, unmount_array_command)
     exit_ibofos_command = args.ibofos_root + "/bin/cli system exit"
     remote_execute(args.target_ip, args.target_id, args.target_pw, exit_ibofos_command)
-    check_ibofos_command = "pgrep -c ibofos"
+    check_ibofos_command = "pgrep -c poseidonos"
     result = remote_execute(args.target_ip, args.target_id, args.target_pw, check_ibofos_command)
     while (int(result) == 0):
         print("Wait exit")

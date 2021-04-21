@@ -4,7 +4,7 @@
 VPP is the user level network layer to avoid accesss to kernel. 
 This folder contains scripts for VPP test and operation. 
 some script is located in other folder so it can be easier for a user to explore directories with less depth.
-If the document does not explicit "VPP ONLY", we use this script in normal (ibofos , vanilla spdk). 
+If the document does not explicit "VPP ONLY", we use this script in normal (poseidonos , vanilla spdk). 
 
 ===============================
 1. Build VPP and spdk with vpp

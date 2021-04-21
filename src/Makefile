@@ -67,7 +67,7 @@ SUBDIRS = allocator \
         admin
 .PHONY: $(SUBDIRS)
 
-ibofos: $(SUBDIRS)
+poseidonos: $(SUBDIRS)
 
 sam: $(SUBDIRS)
 

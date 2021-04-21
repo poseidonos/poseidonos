@@ -215,8 +215,8 @@ class IbofosGdbCmd(gdb.Command):
             output_string_list = output_string_list + output_list
             index = index + 1
         print (len(output_string_list))
-        core_dump_lib.internal_parse_dump(output_string_list, "ibofos.inmemory.log")
-        print ('Result file is \"ibofos.inmemory.log\"')
+        core_dump_lib.internal_parse_dump(output_string_list, "poseidonos.inmemory.log")
+        print ('Result file is \"poseidonos.inmemory.log\"')
 
     def invoke(self, args, from_tty):
         # We can pass args here and use Python CLI utilities like argparse
@@ -241,7 +241,7 @@ class IbofosGdbCmd(gdb.Command):
                 callstack_num = int(split_str[0].lstrip("#"))
                 break
         if (thread_num == -1):
-            print ("There are no ibofos stack, could you check this core file is for ibofos?")
+            print ("There are no poseidonos stack, could you check this core file is for poseidonos?")
             exit(1)
 
         print ("We move thread %d frame %d" % (thread_num, callstack_num))

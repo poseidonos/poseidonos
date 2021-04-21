@@ -13,7 +13,7 @@ target_fabric_ip=0
 
 check_stopped()
 {
-    while [ `pgrep ibofos -c` -ne 0 ]
+    while [ `pgrep poseidonos -c` -ne 0 ]
     do
         echo "Waiting for POS stopped"
         sleep 0.5
@@ -22,7 +22,7 @@ check_stopped()
 
 io_test()
 {
-    ${ROOT_DIR}/test/regression/start_ibofos.sh
+    ${ROOT_DIR}/test/regression/start_poseidonos.sh
 
     sudo $ROOT_DIR/test/system/io_path/setup_ibofos_nvmf_volume.sh -c $CLEAN_BRINGUP -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM_COUNT -v $VOLUME_COUNT
 
@@ -51,8 +51,8 @@ do
 done
 
 
-pkill -9 ibofos
+pkill -9 poseidonos
 check_stopped
 io_test
-pkill -9 ibofos
+pkill -9 poseidonos
 check_stopped

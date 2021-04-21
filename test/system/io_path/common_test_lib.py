@@ -7,7 +7,7 @@ import psutil
 def start_pos(log_path, ibof_root):
     global ibof_proc
     print ("\tStarting POS .. (log path: " + log_path+ ")")
-    ibof_execution = ibof_root + "bin/ibofos"
+    ibof_execution = ibof_root + "bin/poseidonos"
     with open(log_path, "w") as output_file:
         ibof_proc = subprocess.Popen(ibof_execution, \
                 stdout=output_file, stderr=output_file)
@@ -99,7 +99,7 @@ def kill_and_wait(process_list):
 
             command_line = proc.cmdline()
             for command in command_line:
-                if "ibofd.py" in command:
+                if "poseidon_daemon.py" in command:
                     proc.kill()
                     proc.wait()
 
@@ -110,7 +110,7 @@ def kill_and_wait(process_list):
 
 def clear_env():
     print ("\tCleanup - kill pos, fio, watchdog process")
-    kill_and_wait(["ibofos", "fio"])
+    kill_and_wait(["poseidonos", "fio"])
     print ("\tCleanup Done")
 
 test_index = 1

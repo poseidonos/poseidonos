@@ -7,7 +7,7 @@ DATA_POSTFIX=uram.data
 
 # |    PID    | Start page # | Page count |
 #
-# PID: latest pid for ibofos
+# PID: latest pid for poseidonos
 # Start page #: latest logical page number in hugepage for uram
 # Page count: # of hugepages to backup for uram
 
@@ -21,7 +21,7 @@ do
     URAM_PAGE_START_OFFSET=${array[2]}
     URAM_PAGE_COUNT=${array[3]}
 
-    echo "Latest PID of ibofos: $PID"
+    echo "Latest PID of poseidonos: $PID"
     echo "Latest Logical page number in hugepage for uram: $URAM_PAGE_START_OFFSET"
     echo "Page counts of uram data: $URAM_PAGE_COUNT"
     echo "Starting to backup URAM contents.."

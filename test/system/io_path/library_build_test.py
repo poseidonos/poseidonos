@@ -44,7 +44,7 @@ def build_and_test(fabric_ip):
             exit(-1)
         test_name = test_path.split('/')[-1]
 
-        common_test_lib.kill_and_wait([test_name, "ibofos", "fio"])
+        common_test_lib.kill_and_wait([test_name, "poseidonos", "fio"])
 
         ret = subprocess.call(["./"+test_name, fabric_ip])
         if (ret != 0 and ret != -9): #Sigkill is correct.

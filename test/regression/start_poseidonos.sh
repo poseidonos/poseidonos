@@ -2,13 +2,14 @@
 
 ROOT_DIR=$(readlink -f $(dirname $0))/../../
 logfile=pos.log
+binary_name=poseidonos
 
 execute_pos()
 {
-    if [ -f ${ROOT_DIR}/bin/ibofos ];
+    if [ -f ${ROOT_DIR}/bin/$binary_name ];
     then
         echo "Execute poseidonOS"
-        nohup ${ROOT_DIR}/bin/ibofos &>> ${ROOT_DIR}/script/${logfile} &
+        nohup ${ROOT_DIR}/bin/$binary_name &>> ${ROOT_DIR}/script/${logfile} &
     else
         echo "No executable poseidonOS file"
         exit -1
@@ -18,7 +19,7 @@ execute_pos()
 check_started()
 {
     result=`${ROOT_DIR}/bin/cli system info --json | jq '.Response.info.version' 2>/dev/null`
-    
+
     if [ -z ${result} ] || [ ${result} == '""' ];
     then
         return 0

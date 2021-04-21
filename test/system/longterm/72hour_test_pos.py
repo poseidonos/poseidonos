@@ -196,7 +196,7 @@ def exit_pos():
 def abort_pos():
     write_log ("abort pos for dump...")
     fio_util.dispose()
-    pos_util.abort_process("ibofos")
+    pos_util.abort_process("poseidonos")
     write_log ("pos has been terminated")
 
 def restart_pos():
@@ -330,7 +330,7 @@ def tick_hour():
     RC = do_event(ELAPSED_HOUR)
 
 def init_test():
-    # pos_util.kill_process("ibofos")
+    # pos_util.kill_process("poseidonos")
     start_pos()
     scan_dev()
     mbr_reset()

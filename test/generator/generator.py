@@ -25,7 +25,7 @@ from cpp import gmock_test
 
 def parse_argument():
   parser = argparse.ArgumentParser()
-  parser.add_argument("--root_directory", dest="root_directory", action="store", required=False, type=str, default="../../", help="ibofos directory")
+  parser.add_argument("--root_directory", dest="root_directory", action="store", required=False, type=str, default="../../", help="poseidonos directory")
   parser.add_argument("file_or_directory", metavar="file_or_directory", type=str, nargs=1, help="file or directory to generate")
   args = parser.parse_args()
   return args

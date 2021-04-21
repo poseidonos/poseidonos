@@ -269,14 +269,14 @@ tc_vol_7()
 ############################
 # tc_vol_8
 # TC from SSIR
-# { [mount] ibofos -> [create/mount/unmount] vol -> [delete] vol -> [unmount] ibofos } x 10
+# { [mount] poseidonos -> [create/mount/unmount] vol -> [delete] vol -> [unmount] poseidonos } x 10
 ############################
 tc_vol_8()
 {
     tcName="tc_vol_8"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
-    print_info "scenario: { [mount] ibofos -> [create/mount/unmount] vol -> [delete] vol -> [unmount] ibofos } x 10"
+    print_info "scenario: { [mount] poseidonos -> [create/mount/unmount] vol -> [delete] vol -> [unmount] poseidonos } x 10"
 
     start_pos;
     EXPECT_PASS "start_pos" $?

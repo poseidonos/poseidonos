@@ -206,8 +206,8 @@ setup_prerequisite()
 
 check_stopped()
 {
-	result=`texecc "pgrep ibofos -c"`
-    while [ `pgrep ibofos -c` -ne 0 ]
+	result=`texecc "pgrep poseidonos -c"`
+    while [ `pgrep poseidonos -c` -ne 0 ]
     do
         echo "Waiting for POS stopped"
         sleep 0.5
@@ -246,8 +246,8 @@ start_pos()
         notice "Please start PoseidonOS application now..."
         wait_any_keyboard_input
     else 
-        notice "Starting poseidonOS..."
-        texecc ${IBOFOS_ROOT}/test/regression/start_ibofos.sh
+        notice "Starting poseidonos..."
+        texecc ${IBOFOS_ROOT}/test/regression/start_poseidonos.sh
     fi
 
     result=`texecc "${IBOFOS_ROOT}/bin/cli system info --json" | jq '.Response.info.version' 2>/dev/null`
@@ -259,7 +259,7 @@ start_pos()
 		sleep 0.5
 	done
 
-    notice "Now poseidonOS is running..."
+    notice "Now poseidonos is running..."
 }
 
 establish_nvmef_target()

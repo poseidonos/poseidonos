@@ -13,10 +13,10 @@ def find_ibofos_coredump_and_renaming():
         test_dir_from_filename = os.path.dirname(os.path.realpath(filename.replace('!','/') + '/..'))
         test_path_from_script = os.path.dirname(os.path.realpath(__file__+'/../..'))
         print ("test dir from core file name : " + test_dir_from_filename + " test dir in this script : " + test_path_from_script)
-        if("!ibofos.core" in filename and test_path_from_script == test_dir_from_filename):
-            if(filename != "ibofos.core"):
+        if("!poseidonos.core" in filename and test_path_from_script == test_dir_from_filename):
+            if(filename != "poseidonos.core"):
                 command = "mv "+core_dir_path+"/"+path\
-                      +" "+core_dir_path+ "/" + "ibofos.core"
+                      +" "+core_dir_path+ "/" + "poseidonos.core"
                 print(command)
                 os.system(command)
                 print ("\t#### Core Naming is Changed #####")
@@ -27,7 +27,7 @@ def kill_wait(flag_kill="nokill"):
 
     for proc in psutil.process_iter():
         try:
-            if "ibofos" in proc.name()[-6:]:
+            if "poseidonos" in proc.name()[-6:]:
                 proc.resume()
                 print ("\t### process name : %s ####" % proc.name())
                 if (flag_kill == "kill"):

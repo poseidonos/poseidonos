@@ -19,7 +19,7 @@ Synopsis
 Prerequisite
     1. please make sure that file below is properly configured according to your env.
         {IBOFOS_ROOT}/test/system/network/network_config.sh
-    2. please make sure that ibofos binary exists on top of ${IBOFOS_ROOT}
+    2. please make sure that poseidonos binary exists on top of ${IBOFOS_ROOT}
     3. please configure your ip address, volume size, etc. propertly by editing fault_tolerance_test.sh
 
 Description
@@ -27,7 +27,7 @@ Description
         Repeat test sequence n times according to the given value
         Default setting value is 10
     -m
-        Manual mode for ibofos start. You should start ibofos application by yourself according to follow the indication.
+        Manual mode for poseidonos start. You should start poseidonos application by yourself according to follow the indication.
         You can use this option for debugging purpose.
     -f [target_fabric_ip]
     -h 
@@ -148,7 +148,7 @@ setup_prerequisite()
 
 kill_ibofos()
 {
-	pkill -9 ibofos
+	pkill -9 poseidonos
     echo ""
 }
 
@@ -172,13 +172,13 @@ start_ibofos()
         notice "Please start PoseidonOS application now..."
         wait_any_keyboard_input
     else 
-        notice "Starting ibofos..."
-        ${root_dir}/test/regression/start_ibofos.sh
+        notice "Starting poseidonos..."
+        ${root_dir}/test/regression/start_poseidonos.sh
 #		nohup ${ibof_cli} &>> ${logfile} & 
     fi
 
-    sleep 15 # takes longer if ibofos accesses actual drives
-    notice "Now ibofos is running..."
+    sleep 15 # takes longer if poseidonos accesses actual drives
+    notice "Now poseidonos is running..."
 }
 
 establish_nvmef_target()
@@ -301,24 +301,24 @@ write_pattern()
 
 shutdown_ibofos()
 {
-    notice "Shutting down ibofos..."
+    notice "Shutting down poseidonos..."
 	${ibof_cli} array unmount --name $array_name
 	${ibof_cli} system exit
     notice "Shutdown has been completed!"
 
     disconnect_nvmf_contollers;
 
-    notice "ibofos killed..."
+    notice "poseidonos killed..."
     wait_ibofos
 }
 
 wait_ibofos()
 {
-    ps -C ibofos > /dev/null
+    ps -C poseidonos > /dev/null
     while [[ ${?} == 0 ]]
     do
         sleep 1s
-        ps -C ibofos > /dev/null
+        ps -C poseidonos > /dev/null
     done
 }
 

@@ -11,7 +11,7 @@ import pos_array_api
 allowed_nodes = ["pm", "vm"]
 
 def kill_pos_safe(root_dir):
-    print("killing ibofos safe")
+    print("killing poseidonos safe")
 
     pos_array_api.unmount_all_arrays()
     cli.exit_pos()
@@ -82,7 +82,7 @@ def load_ssd(device, count, dump_dir):
 def check_ibofos_running():
     for proc in psutil.process_iter(['name']):
         try:
-            if "ibofos" == proc.info['name']:
+            if "poseidonos" == proc.info['name']:
                 return True
         except:
             pass
@@ -93,7 +93,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--node", dest="node", action="store", required=True, type=str, help="node to run this script (pm or vm)")
     parser.add_argument("--dump_directory", dest="dump_directory", action="store", required=True, type=str, help="directory which stores dump files")
-    parser.add_argument("--root_directory", dest="root_directory", action="store", required=True, type=str, help="directory of ibofos")
+    parser.add_argument("--root_directory", dest="root_directory", action="store", required=True, type=str, help="directory of poseidonos")
     parser.add_argument("--device", dest="device", action="store", required=True, type=str, help="comma seperated devices to dump ex) --device nvme0n1,nvme1n1,nvme2n1")
     parser.add_argument("--count", dest="count", action="store", default=0, type=int, help="")
     parser.add_argument("action", metavar="A", type=str, nargs=1, help="dump or load")
@@ -117,9 +117,9 @@ if __name__ == "__main__":
     
     if (args.count == 0):
         if(check_ibofos_running() is False):
-            sys.exit("ibofos is not running. Please run this script while running ibofos or give count info")
-            # or should I run ibofos?
-        # When ibofos is running
+            sys.exit("poseidonos is not running. Please run this script while running poseidonos or give count info")
+            # or should I run poseidonos?
+        # When poseidonos is running
         count = get_meta_size(args.root_directory)
         kill_pos_safe(args.root_directory)
     else:

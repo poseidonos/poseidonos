@@ -13,7 +13,7 @@ import cli
 import json_parser
 
 import TEST_LOG
-import TEST_SETUP_IBOFOS
+import TEST_SETUP_POS
 import TEST
 
 def parse_arguments(args):
@@ -40,7 +40,7 @@ def parse_arguments(args):
     TEST.dump_log_buffer = args.dump_log_buffer
 
 def cleanup():
-    TEST_SETUP_IBOFOS.cleanup_process()
+    TEST_SETUP_POS.cleanup_process()
 
 def set_up(argv, test_name):
     parse_arguments(argv)
@@ -49,7 +49,7 @@ def set_up(argv, test_name):
     cleanup()
 
 def tear_down(test_name):
-    TEST_SETUP_IBOFOS.shutdown_pos()
+    TEST_SETUP_POS.shutdown_pos()
     TEST_LOG.print_notice("[Test {} Completed]".format(test_name))
 
 patterns = []

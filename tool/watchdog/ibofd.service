@@ -1,14 +1,14 @@
 [Unit]
-Description=ibofd, ibofos watchdog daemon
+Description=poseidon_daemon, poseidonos watchdog daemon
 
 [Service]
 User=root
 WorkingDirectory=/root/ibofos/tool/watchdog
 Type=forking
-ExecStart=/root/ibofos/tool/watchdog/ibofd.py -d 2
-ExecStop=/root/ibofos/tool/watchdog/ibofd.py -f 1
+ExecStart=/root/ibofos/tool/watchdog/poseidon_daemon.py -d 2
+ExecStop=/root/ibofos/tool/watchdog/poseidon_daemon.py -f 1
 #Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
-Alias=ibofd.service
+Alias=poseidon_daemon.service

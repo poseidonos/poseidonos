@@ -28,7 +28,7 @@ from collections import defaultdict
 FIO_BENCH_SCRIPT = './fio_bench.py'
 CLI_CMD = '../../../bin/cli'
 POS_ROOT = '../../../'
-IBOFOS_CMD = '../../../bin/ibofos'
+IBOFOS_CMD = '../../../bin/poseidonos'
 SETUP_IBOFOS_PATH = '../../../script/'
 SETUP_IBOFOS_CMD = './setup_ibofos_nvmf_volume.sh'
 SIZE = 2147483648
@@ -403,7 +403,7 @@ def parse_arguments():
             help='Specify Test Name (FLUSH, SEQ_WRITE_UNMAP, RND_WRITE_UNMAP, \
             UNMAP_NPOR, SEQ_WRITE_ZERO, RND_WRITE_ZERO, WRITE_ZERO_NPOR')
     parser.add_argument('-s', '--stop_on_error', action='store_true',
-            help='If Error Failure happens, Stop and do not clear ibofos')
+            help='If Error Failure happens, Stop and do not clear poseidonos')
     parser.add_argument('-f', '--fabric_ip', default = DEFAULT_TR_ADDR,\
             help='Set Fabric IP, default: ' + DEFAULT_TR_ADDR)
     global args

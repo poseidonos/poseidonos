@@ -1,23 +1,23 @@
 #please enter $1 as pid or [corefile name], $2 as gdb script
 if [ "$2" = "enable" ];then
 
-gdb ../../bin/ibofos --batch $1 -ex 'p 'pos::$3'.isEnabled=1'
+gdb ../../bin/poseidonos --batch $1 -ex 'p 'pos::$3'.isEnabled=1'
 
 elif [ "$2" = "disable" ];then
 
-gdb ../../bin/ibofos --batch $1 -ex 'p 'pos::$3'.isEnabled=0'
+gdb ../../bin/poseidonos --batch $1 -ex 'p 'pos::$3'.isEnabled=0'
 
 elif [ "$2" = "object" ];then
 
-gdb ../../bin/ibofos --batch $1 -ex 'p 'pos::$3
+gdb ../../bin/poseidonos --batch $1 -ex 'p 'pos::$3
 
 elif [ "$2" = "buffer" ];then
 
-gdb ../../bin/ibofos --batch $1 -ex 'x/'$4' '$3
+gdb ../../bin/poseidonos --batch $1 -ex 'x/'$4' '$3
 
 elif [ "$2" = "coredump" ];then
 
-gdb ../../bin/ibofos --batch $1 -ex 'generate-core-file'
+gdb ../../bin/poseidonos --batch $1 -ex 'generate-core-file'
 
 else
 

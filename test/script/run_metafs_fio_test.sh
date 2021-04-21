@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Prerequisite:
-#  - build ibofos with WBT option (./configure --with-wbt && make -j32)
+#  - build poseidonos with WBT option (./configure --with-wbt && make -j32)
 #
 # How to use:
 #  1) run ./run_metafs_fio_test.sh param
@@ -23,7 +23,7 @@ volname="bdev"
 NR_VOLUME=2 # right now, max=4
 SUBSYSTEM_NUM=$NR_VOLUME
 
-../../script/start_ibofos.sh
+../../script/start_poseidonos.sh
 sleep 5
 
 if [ "$vm" == "vm" ]; then

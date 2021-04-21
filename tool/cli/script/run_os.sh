@@ -4,13 +4,13 @@
 #
 logfile="pos.log"
 root_dir=/root/workspace/ibofos
-ibofos=${root_dir}/bin/ibofos
+ibofos=${root_dir}/bin/poseidonos
 NR_VOLUME=1
 SPDK_DIR=/root/workspace/ibofos/lib/spdk
 TRANSPORT=TCP
 IP=10.100.11.7
 
-pkill -9 ibofos
+pkill -9 poseidonos
 sleep 2
 
 if [ ! -f "$ibofos" ]; then

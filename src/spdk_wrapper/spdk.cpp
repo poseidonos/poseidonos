@@ -73,7 +73,7 @@ Spdk::_AppStartedCallback(void* arg1)
         startCompletedHandler();
     }
 
-    cout << "ibofos started" << endl;
+    cout << "poseidonos started" << endl;
 }
 
 void

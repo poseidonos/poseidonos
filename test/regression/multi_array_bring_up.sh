@@ -141,17 +141,17 @@ setup_prerequisite()
 
 check_stopped()
 {
-	result=`texecc "pgrep ibofos -c"`
+	result=`texecc "pgrep poseidonos -c"`
 	while [ $result -ne 0 ]
 	do
-		result=`texecc "pgrep ibofos -c"`
+		result=`texecc "pgrep poseidonos -c"`
 		sleep 0.5
 	done
 }
 
 kill_ibofos()
 {
-    # kill ibofos if exists
+    # kill poseidonos if exists
     texecc ${IBOFOS_ROOT}/test/script/kill_ibofos.sh 2>> ${logfile}
 	check_stopped
 
@@ -180,8 +180,8 @@ start_ibofos()
         notice "Please start iBoFOS application now..."
         #wait_any_keyboard_input
     else 
-        notice "Starting ibofos..."
-        texecc ${IBOFOS_ROOT}/test/regression/start_ibofos.sh
+        notice "Starting poseidonos..."
+        texecc ${IBOFOS_ROOT}/test/regression/start_poseidonos.sh
     fi
 
 	result=`texecc "${IBOFOS_ROOT}/bin/cli system info --json" | jq '.Response.data.version' 2>/dev/null`
@@ -193,7 +193,7 @@ start_ibofos()
 		sleep 0.5
 	done
 
-    notice "Now ibofos is running..."
+    notice "Now poseidonos is running..."
 }
 
 establish_nvmef_target()
@@ -253,7 +253,7 @@ check_result_err_from_logfile()
 }
 shutdown_ibofos()
 {
-    notice "Shutting down ibofos..."
+    notice "Shutting down poseidonos..."
     texecc ${IBOFOS_ROOT}/bin/cli array unmount --name ${target_name_0}
     texecc ${IBOFOS_ROOT}/bin/cli array unmount --name ${target_name_1}
     texecc ${IBOFOS_ROOT}/bin/cli system exit
@@ -263,7 +263,7 @@ shutdown_ibofos()
     disconnect_nvmf_contollers;
 
     #kill_ibofos
-    #notice "ibofos killed..."
+    #notice "poseidonos killed..."
     #texecc ./backup_latest_hugepages_for_uram.sh &>> ${logfile}
     #iexecc sleep 3
 }

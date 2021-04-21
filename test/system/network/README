@@ -1,5 +1,5 @@
 - README: network_test.sh performs network transport test between two report nodes, whichs functions initiator and target.
-The test is needed to check connectivity between two nodes prior to ibofos E2E test
+The test is needed to check connectivity between two nodes prior to poseidonos E2E test
 
 - Configuration : network_config.sh
 	TRANSPORT=rdma or tcp (case-sensitive)

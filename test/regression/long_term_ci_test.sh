@@ -51,7 +51,7 @@ shutdown()
 {
 	while :
 	do
-		ps -C ibofos > /dev/null
+		ps -C poseidonos > /dev/null
 		if [[ ${?} != 0 ]]; then
 			break;
 		fi
@@ -102,7 +102,7 @@ print_test_configuration()
 print_test_configuration
 
 sudo ${rootdir}/test/script/kill_ibofos.sh
-sudo ${rootdir}/script/start_ibofos.sh
+sudo ${rootdir}/script/start_poseidonos.sh
 sleep 10
 
 sudo ${rootdir}/test/system/longterm/setup_ibofos.sh create ${arraymode} ${totalsize} ${volcnt} ${ip}
@@ -146,14 +146,14 @@ do
             sleep 5
         fi
         
-        while [ `pgrep "ibofos"` ]
+        while [ `pgrep "poseidonos"` ]
         do
-            echo "wait exit ibofos"
+            echo "wait exit poseidonos"
             sleep 5
-            ibofid=`pgrep "ibofos"`
+            ibofid=`pgrep "poseidonos"`
             echo "process ID : $ibofid "
         done
-        sudo ${rootdir}/script/start_ibofos.sh
+        sudo ${rootdir}/script/start_poseidonos.sh
         sleep 10
         sudo ${rootdir}/test/system/longterm/setup_ibofos.sh load ${arraymode} ${totalsize} ${volcnt} ${ip}
     fi

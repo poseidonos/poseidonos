@@ -1,7 +1,7 @@
 #!/bin/bash
 cd $(dirname $(realpath $0))
 
-IBOFOS=../../bin/ibofos
+IBOFOS=../../bin/poseidonos
 TEMP=collect_binary.tmp
 IBOF_CONF=/etc/pos/pos.conf
 
