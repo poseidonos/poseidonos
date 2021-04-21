@@ -41,7 +41,7 @@ def get_used(arrayinfo):
 
 def is_online(arrayinfo):
     state = get_state(arrayinfo)
-    if state == "NORMAL" or state == "DEGRADED" or state == "REBUILD":
+    if state == "NORMAL" or state == "BUSY":
         return True
     else:
         return False

@@ -15,8 +15,8 @@ import MOUNT_ARRAY_NO_SPARE
 ARRAYNAME = MOUNT_ARRAY_NO_SPARE.ARRAYNAME
 
 def check_result(detail):
-    state = json_parser.get_state(detail)
-    if state == "DEGRADED":
+    situ = json_parser.get_situation(detail)
+    if situ == "DEGRADED":
         return "pass"
     return "fail"
 

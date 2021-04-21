@@ -17,8 +17,8 @@ DETACH_TARGET = CREATE_ARRAY_NO_SPARE.DATA_DEV_1
 ANY_ANOTHER_DATA = CREATE_ARRAY_NO_SPARE.DATA_DEV_2
 
 def check_result(detail):
-    state = json_parser.get_state(detail)
-    if state == "DEGRADED":
+    situ = json_parser.get_situation(detail)
+    if situ == "DEGRADED":
         return "pass"
     return "fail"
 
