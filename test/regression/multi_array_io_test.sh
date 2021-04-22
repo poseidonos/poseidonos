@@ -326,7 +326,7 @@ bringup_ibofos()
 
 io_test()
 {
-	texecc ${IBOFOS_ROOT}/test/system/nvmf/initiator/fio_full_bench.py --iodepth 4 --io_size 100m --file_num 2 --ramp_time 0 --run_time 15 --time_based 1 --bs 128k --trtype tcp --traddr $target_fabric_ip
+	texecc ${IBOFOS_ROOT}/test/system/nvmf/initiator/fio_full_bench.py --iodepth 128 --io_size 2g --file_num 2 --verify=true --readwrite="write,read" --ramp_time 0 --run_time 0 --time_based 0 --bs 4k,128k --trtype tcp --traddr $target_fabric_ip
 }
 
 date=
