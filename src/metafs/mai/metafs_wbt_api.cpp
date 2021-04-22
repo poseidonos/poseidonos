@@ -102,13 +102,14 @@ MetaFsWBTApi::GetMaxFileSizeLimit(void)
 
 // WBT : Get file inode info. for the given meta file.
 MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, MetaFileInodeDumpCxt>
-MetaFsWBTApi::GetMetaFileInode(std::string& fileName)
+MetaFsWBTApi::GetMetaFileInode(std::string& fileName, std::string& arrayName)
 {
     MetaFsReturnCode<POS_EVENT_ID> rcMgmt;
     MetaFsFileControlRequest reqMsg;
 
     reqMsg.reqType = MetaFsFileControlType::GetFileInode;
     reqMsg.fileName = &fileName;
+    reqMsg.arrayName = &arrayName;
 
     rcMgmt = mvm.HandleNewRequest(reqMsg); // MetaVolumeManager::_HandleGetFileInodeReq()
 

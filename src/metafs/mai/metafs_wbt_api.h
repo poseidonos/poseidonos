@@ -55,7 +55,7 @@ class MetaFsWBTApi
 public:
     MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, std::vector<MetaFileInfoDumpCxt>> GetMetaFileList(std::string& arrayName);
     MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, FileSizeType> GetMaxFileSizeLimit(void);
-    MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, MetaFileInodeDumpCxt> GetMetaFileInode(std::string& fileName);
+    MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, MetaFileInodeDumpCxt> GetMetaFileInode(std::string& fileName, std::string& arrayName);
 
 private:
     MetaFsVolumeManager mvm;

@@ -413,12 +413,14 @@ WbtMetafsCmdHandler::DumpInodeInfo(Args argv)
     std::string outJsonFile;
     MetaFileInodeData metaFileInode;
     std::string parsedJson;
+    std::string arrayName;
     JsonElement element("");
     metaFile = argv["name"].get<std::string>();
     outJsonFile = argv["output"].get<std::string>();
+    arrayName = argv["array"].get<std::string>();
 
     MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, MetaFileInodeDumpCxt> rt;
-    rt = metaFs.wbt.GetMetaFileInode(metaFile);
+    rt = metaFs.wbt.GetMetaFileInode(metaFile, arrayName);
 
     if (rt.sc == MetaFsStatusCodeWBTSpcf::Fail)
     {
