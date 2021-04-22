@@ -56,10 +56,10 @@ shutdown()
 			break;
 		fi
 
-		state=$(${rootdir}/bin/cli array info --name ${array_name} --json | jq -r '.Response.info.state' 2>/dev/null)
+		state=$(${rootdir}/bin/cli array info --name ${array_name} --json | jq -r '.Response.result.data.state' 2>/dev/null)
 		if [[ $state = "NORMAL" ]]; then
 			${rootdir}/bin/cli array unmount --name $array_name
-		elif [[ $state = *"EXIST"* ]]; then
+		elif [[ $state = "OFFLINE" ]]; then
 			${rootdir}/bin/cli system exit
 		fi
 
