@@ -75,7 +75,7 @@ public:
     void SetFlushed(uint32_t volumeId);
     bool IsAllFinished(void);
 
-    static const uint32_t GC_WRITE_BUFFER_CONUNT = 1024;
+    static const uint32_t GC_WRITE_BUFFER_CONUNT = 512;
     static const uint32_t GC_VOLUME_COUNT = MAX_VOLUME_COUNT;
 
 private:

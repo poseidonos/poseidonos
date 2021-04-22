@@ -74,7 +74,7 @@ public:
     GcStripeManager* GetGcStripeManager(void);
     std::string GetArrayName(void);
 
-    static const uint32_t GC_BUFFER_COUNT = 1024;
+    static const uint32_t GC_BUFFER_COUNT = 512;
     static const uint32_t GC_CONCURRENT_COUNT = 16;
     static const uint32_t GC_VICTIM_SEGMENT_COUNT = 2;
 

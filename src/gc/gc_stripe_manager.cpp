@@ -60,12 +60,8 @@ GcStripeManager::GcStripeManager(IArrayInfo* array)
     gcWriteBufferPool = new FreeBufferPool(udSize->chunksPerStripe * GC_WRITE_BUFFER_CONUNT, CHUNK_SIZE);
     for (uint32_t volId = 0; volId < GC_VOLUME_COUNT; volId++)
     {
-        bool ret = _CreateActiveWriteBuffer(volId);
-        assert(true == ret);
-
-        _SetActiveStripeTail(volId, 0);
-        _SetActiveStripeRemaining(volId, udSize->blksPerStripe);
-        _CreateBlkInfoList(volId);
+        blkInfoList[volId] = nullptr;
+        gcActiveWriteBuffers[volId] = nullptr;
         flushed[volId] = true;
     }
     flushedStripeCnt = 0;
