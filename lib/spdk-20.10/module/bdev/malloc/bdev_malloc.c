@@ -397,6 +397,74 @@ bdev_malloc_get_buf(void)
 }
 
 int
+backup_disk_info_for_restore(struct malloc_disk* mdisk, const char* name,
+    uint64_t num_blocks, uint64_t block_size)
+{
+    int rc = 0;
+    char* file_name;
+    const char* backup_dir = "/tmp/";
+    const char* backup_file_postfix = ".uram.info";
+    int fd = -1;
+    int pid = getpid();
+    const uint64_t baseAddr = 0x200000000000ULL;
+    const uint32_t bytesPerHugepage = 2 * 1024 * 1024;
+    uint64_t bufAddr = (uint64_t)mdisk->malloc_buf;
+    uint64_t startPage = (bufAddr - baseAddr) / bytesPerHugepage - 1;
+    uint64_t pageCount = (num_blocks * block_size) / bytesPerHugepage;
+    char writeBuf[256] = {
+        0,
+    };
+    uint32_t strLength;
+
+    if (!name)
+    {
+        return -EINVAL;
+    }
+
+    file_name = calloc(strlen(backup_dir) + strlen(name) + strlen(backup_file_postfix) + 1,
+        sizeof(char));
+    if (!file_name)
+    {
+        SPDK_ERRLOG("mdisk calloc() failed\n");
+        return -ENOMEM;
+    }
+    strncat(file_name, backup_dir, strlen(backup_dir));
+    strncat(file_name, name, strlen(name));
+    strncat(file_name, backup_file_postfix, strlen(backup_file_postfix));
+
+    SPDK_INFOLOG(bdev_malloc,
+        "Current PID: %d, buffer v address: %p, size: %lu\n",
+        pid, mdisk->malloc_buf, num_blocks * block_size);
+
+    fd = open(file_name, O_CREAT | O_TRUNC | O_RDWR,
+        S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+    if (0 > fd)
+    {
+        SPDK_ERRLOG("Could not open %s.\n", file_name);
+        malloc_disk_free(mdisk);
+        return -EINVAL;
+    }
+
+    sprintf(writeBuf, "%d %lu %lu %lu", pid, bufAddr, startPage, pageCount);
+    strLength = strlen(writeBuf);
+
+    rc = write(fd, writeBuf, strLength);
+    if (0 > rc)
+    {
+        SPDK_ERRLOG("Could not write on %s: %s\n", file_name, strerror(errno));
+        close(fd);
+        malloc_disk_free(mdisk);
+        return -EINVAL;
+    }
+
+    close(fd);
+    SPDK_INFOLOG(bdev_malloc,
+        "Successfully written to \"%s\" about information of \"%s\"\n",
+        file_name, name);
+    return 0;
+}
+
+int
 create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_uuid *uuid,
 		   uint64_t num_blocks, uint32_t block_size)
 {
@@ -422,52 +490,17 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
 	 */
 	mdisk->malloc_buf = spdk_zmalloc(num_blocks * block_size, 2 * 1024 * 1024, NULL,
 					 SPDK_ENV_LCORE_ID_ANY, SPDK_MALLOC_DMA);
-        malloc_disk_base = mdisk->malloc_buf;
 	if (!mdisk->malloc_buf) {
 		SPDK_ERRLOG("malloc_buf spdk_zmalloc() failed\n");
 		malloc_disk_free(mdisk);
 		return -ENOMEM;
 	}
 
-	if (name && 0 == strncmp(name, "uram", sizeof("uram") - 1)) {
-		const char *file_name = "/tmp/uram_hugepage";
-		int fd = -1;
-		int pid = getpid();
-		const uint64_t baseAddr = 0x200000000000ULL;
-		const uint32_t bytesPerHugepage = 2 * 1024 * 1024;
-		uint64_t bufAddr = (uint64_t)mdisk->malloc_buf;
-		uint64_t startPage = (bufAddr - baseAddr) / bytesPerHugepage - 1;
-		uint64_t pageCount = (num_blocks * block_size) / bytesPerHugepage;
-		char writeBuf[256] = {0, };
-		uint32_t strLength;
-
-		SPDK_INFOLOG(bdev_malloc,
-			     "Current PID: %d, buffer v address: %p, size: %lu\n",
-			     pid,  mdisk->malloc_buf, num_blocks * block_size);
-
-		fd = open(file_name, O_CREAT | O_TRUNC | O_RDWR,
-			  S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
-		if (0 > fd) {
-			SPDK_ERRLOG("Could not open %s.\n", file_name);
-			malloc_disk_free(mdisk);
-			return -EINVAL;
-		}
-
-		sprintf(writeBuf, "%d %lu %lu", pid, startPage, pageCount);
-		strLength = strlen(writeBuf);
-
-		rc = write(fd, writeBuf, strLength);
-		if (0 > rc) {
-			SPDK_ERRLOG("Could not write on %s: %s\n", file_name, strerror(errno));
-			close(fd);
-			malloc_disk_free(mdisk);
-			return -EINVAL;
-		}
-
-		close(fd);
-		SPDK_INFOLOG(bdev_malloc,
-			     "Successfully written to \"%s\" about information of \"%s\"\n",
-			     file_name, name);
+	malloc_disk_base = mdisk->malloc_buf;	
+	rc = backup_disk_info_for_restore(mdisk, name, num_blocks, block_size);
+	if(rc != 0)
+	{
+		return rc;
 	}
 
 	if (name) {

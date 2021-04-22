@@ -42,7 +42,7 @@ port="1158"
 nvme_cli="nvme"
 nss="nqn.2019-04.ibof:subsystem"
 subsystem_num=6
-uram_backup_dir="/etc/uram_backup"
+uram_backup_dir="/tmp"
 log_dir="$(pwd)/spor_log"
 logfile="${log_dir}/spor_test.log"
 test_mode="precommit"
@@ -125,7 +125,7 @@ clean_up()
     done
     notice "Remote NVMe drive has been disconnected..."
 
-    umount ${uram_backup_dir}
+	rm -rf ${uram_backup_dir}/*.uram.dat
     kill_ibofos
 }
 

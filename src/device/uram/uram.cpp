@@ -91,13 +91,13 @@ UramBdev::_RecoverBackup(DeviceContext* deviceContext)
 {
     bool restoreSuccessful = true;
 
-    const char* backupFileName = "/etc/uram_backup/uram_backup.bin";
+    string backupFileName = "/tmp/" + property.name +".uram.data";
     const uint32_t bytesPerHugepage = 2 * SZ_1MB;
     int fd = -1;
 
     try
     {
-        fd = open(backupFileName, O_RDONLY);
+        fd = open(backupFileName.c_str(), O_RDONLY);
         if (0 > fd)
         {
             if (errno == ENOENT)
@@ -178,7 +178,7 @@ UramBdev::_RecoverBackup(DeviceContext* deviceContext)
     if (fd >= 0)
     {
         close(fd);
-        unlink(backupFileName);
+        unlink(backupFileName.c_str());
     }
     return restoreSuccessful;
 }
