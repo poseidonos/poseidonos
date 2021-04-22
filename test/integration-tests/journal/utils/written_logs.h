@@ -23,7 +23,7 @@ public:
     // TODO (cheolho.kang) naming
     void AddToWriteList(VolumeIoSmartPtr volumeIo);
     void AddToWriteList(Stripe* stripe, StripeAddr oldAddr);
-    void AddToWriteList(int volumeId, GcStripeMapUpdateList mapUpdates);
+    void AddToWriteList(GcStripeMapUpdateList mapUpdates);
 
     bool CheckLogInTheList(LogHandlerInterface* log);
 

@@ -416,7 +416,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayGcStripe)
     replayTester->ExpectReturningUnmapStripes();
     replayTester->ExpectReplaySegmentAllocation(stripe.GetUserAddr().stripeId);
     replayTester->ExpectReplayBlockLogsForStripe(testInfo->defaultTestVol, stripe.GetBlockMapList());
-    replayTester->ExpectReplayStripeFlush(stripe, false);
+    replayTester->ExpectReplayStripeFlush(stripe);
 
     EXPECT_CALL(*(testAllocator->GetSegmentCtxMock()), ReplaySsdLsid).Times(1);
 

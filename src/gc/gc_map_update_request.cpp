@@ -125,19 +125,20 @@ GcMapUpdateRequest::Execute(void)
     }
 
     std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
-    EventSmartPtr event(new GcMapUpdate(stripe, arrayName, mapUpdates, invalidSegCnt, iStripeMap, volId));
+    EventSmartPtr event(new GcMapUpdate(stripe, arrayName, mapUpdates, invalidSegCnt, iStripeMap));
     if (journalService->IsEnabled(arrayName))
     {
-        mapUpdates.stripeAddr = {.stripeLoc = IN_USER_AREA,
-                                .stripeId = stripeId};
+        mapUpdates.volumeId = volId;
         mapUpdates.vsid = stripeId;
+        mapUpdates.wbLsid = stripe->GetWbLsid();
+        mapUpdates.userLsid = stripe->GetUserLsid();
 
         MapPageList dirtyMap;
         dirtyMap[volId] = volumeDirtyList;
         dirtyMap[STRIPE_MAP_ID] = iStripeMap->GetDirtyStripeMapPages(stripeId);
 
         IJournalWriter* journal = journalService->GetWriter(arrayName);
-        journal->AddGcStripeFlushedLog((int)volId, mapUpdates, dirtyMap, event);
+        journal->AddGcStripeFlushedLog(mapUpdates, dirtyMap, event);
 
         executionSuccessful = true;
     }

@@ -72,11 +72,11 @@ WrittenLogs::AddToWriteList(Stripe* stripe, StripeAddr oldAddr)
 }
 
 void
-WrittenLogs::AddToWriteList(int volumeId, GcStripeMapUpdateList mapUpdates)
+WrittenLogs::AddToWriteList(GcStripeMapUpdateList mapUpdates)
 {
     numJournalIssued++;
 
-    LogHandlerInterface* entry = new GcStripeFlushedLogHandler(volumeId, mapUpdates);
+    LogHandlerInterface* entry = new GcStripeFlushedLogHandler(mapUpdates);
     _AddToList(entry);
 }
 

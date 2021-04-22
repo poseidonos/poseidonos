@@ -150,17 +150,16 @@ StripeLogWriteStatus::GcBlockLogFound(GcBlockMapUpdate* mapUpdate, uint32_t numB
 void
 StripeLogWriteStatus::GcStripeLogFound(GcStripeFlushedLog dat)
 {
-    assert(dat.stripeAddr.stripeLoc == IN_USER_AREA);
-
     std::lock_guard<std::mutex> lock(statusLock);
 
     stripeFlushed = true;
 
-    finalStripeAddr = dat.stripeAddr;
+    finalStripeAddr.stripeId = dat.userLsid;
+    finalStripeAddr.stripeLoc = IN_USER_AREA;
 
     _UpdateVolumeId(dat.volId);
-    _UpdateWbLsid(UNMAP_STRIPE);
-    _UpdateUserLsid(dat.stripeAddr.stripeId);
+    _UpdateWbLsid(dat.wbLsid);
+    _UpdateUserLsid(dat.userLsid);
 }
 
 // TODO (cheolho.kang) Will be updated after introducing LogWriteStatistics

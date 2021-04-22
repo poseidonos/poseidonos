@@ -93,8 +93,10 @@ TEST_F(LogWriteIntegrationTest, WriteLog_GcStripe)
 
     int volumeId = testInfo->defaultTestVol;
     StripeId vsid = 200;
+    StripeId wbLsid = 3;
+    StripeId userLsid = 200;
 
-    bool writeSuccessful = writeTester->WriteGcStripeLog(volumeId, vsid, vsid);
+    bool writeSuccessful = writeTester->WriteGcStripeLog(volumeId, vsid, wbLsid, userLsid);
     EXPECT_TRUE(writeSuccessful == true);
     writeTester->WaitForAllLogWriteDone();
 

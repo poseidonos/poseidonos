@@ -57,9 +57,9 @@ class GcMapUpdate : public Event
 public:
     GcMapUpdate(void) = delete;
     explicit GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
-                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, EventScheduler* eventScheduler, uint32_t volumeId);
+                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, EventScheduler* eventScheduler);
     GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
-                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, uint32_t volumeId);
+                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap);
     ~GcMapUpdate(void) override;
     bool Execute(void) override;
 
@@ -78,7 +78,6 @@ private:
     uint32_t stripeOffset = 0;
     std::string arrayName;
 
-    uint32_t volumeId;
     GcStripeMapUpdateList mapUpdateInfoList;
 };
 

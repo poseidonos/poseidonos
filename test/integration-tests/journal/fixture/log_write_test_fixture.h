@@ -24,7 +24,7 @@ public:
 
     bool WriteBlockLog(int volId, BlkAddr rba, VirtualBlks blks);
     bool WriteStripeLog(StripeId vsid, StripeAddr oldAddr, StripeAddr newAddr);
-    bool WriteGcStripeLog(int volumeId, StripeId vsid, StripeId lsid);
+    bool WriteGcStripeLog(int volumeId, StripeId vsid, StripeId wbLsid, StripeId userLsid);
     bool WriteGcStripeLog(int volumeId, StripeTestFixture& stripe);
 
     void WriteLogsWithSize(uint64_t sizeToFill);
@@ -45,7 +45,7 @@ public:
 
 private:
     BlockMapList _GenerateBlocksInStripe(StripeId vsid, uint32_t startOffset, int numBlks);
-    void _GenerateGcBlockLogs(int volumeId, GcStripeMapUpdateList& mapUpdates, MapPageList& dirtyMap);
+    void _GenerateGcBlockLogs(GcStripeMapUpdateList& mapUpdates, MapPageList& dirtyMap);
     void _AddToDirtyPageList(int mapId, MpageList dirty);
 
     std::mutex dirtyListLock;

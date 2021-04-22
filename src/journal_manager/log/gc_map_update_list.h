@@ -47,9 +47,11 @@ struct GcBlockMapUpdate
 
 struct GcStripeMapUpdateList
 {
+    int volumeId;
     std::vector<GcBlockMapUpdate> blockMapUpdateList;
     StripeId vsid;
-    StripeAddr stripeAddr;
+    StripeId wbLsid;
+    StripeId userLsid;
 };
 
 } // namespace pos

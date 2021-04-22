@@ -86,18 +86,14 @@ ReplayTestFixture::_GetBlock(VirtualBlks blks, uint32_t offset)
 }
 
 void
-ReplayTestFixture::ExpectReplayStripeFlush(StripeTestFixture stripe, bool wbLsidProvided)
+ReplayTestFixture::ExpectReplayStripeFlush(StripeTestFixture stripe)
 {
     EXPECT_CALL(*(mapper->GetStripeMapMock()), SetLSA(stripe.GetVsid(),
         stripe.GetUserAddr().stripeId, stripe.GetUserAddr().stripeLoc)).Times(1);
 
-    // TODO (huijeong.kim) un-comment this after adding wbLsid to gc stripe flushed log
-    if (wbLsidProvided == true)
-    {
-        EXPECT_CALL(*(allocator->GetWBStripeCtxMock()),
-            ReplayStripeFlushed(stripe.GetWbAddr().stripeId))
-            .Times(1);
-    }
+    EXPECT_CALL(*(allocator->GetWBStripeCtxMock()),
+        ReplayStripeFlushed(stripe.GetWbAddr().stripeId))
+        .Times(1);
 
     EXPECT_CALL(*(allocator->GetSegmentCtxMock()),
         UpdateOccupiedStripeCount(stripe.GetUserAddr().stripeId))

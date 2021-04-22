@@ -68,8 +68,6 @@ GcReplayStripe::AddLog(LogHandlerInterface* log)
         replayEvents.push_back(blockWriteEvent);
     }
 
-    assert(gcLog->stripeAddr.stripeLoc == IN_USER_AREA);
-
     status->GcStripeLogFound(*gcLog);
     _CreateStripeFlushReplayEvent();
 

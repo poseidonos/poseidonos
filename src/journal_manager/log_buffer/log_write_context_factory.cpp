@@ -110,10 +110,10 @@ LogWriteContextFactory::CreateStripeMapLogWriteContext(Stripe* stripe,
 }
 
 LogWriteContext*
-LogWriteContextFactory::CreateGcStripeFlushedLogWriteContext(int volumeId,
+LogWriteContextFactory::CreateGcStripeFlushedLogWriteContext(
     GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent)
 {
-    GcStripeFlushedLogHandler* log = new GcStripeFlushedLogHandler(volumeId, mapUpdates);
+    GcStripeFlushedLogHandler* log = new GcStripeFlushedLogHandler(mapUpdates);
 
     MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
         dirty, callbackEvent, notifier, sequenceController);

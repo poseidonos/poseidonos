@@ -42,7 +42,7 @@ class GcStripeFlushedLogHandler : public LogHandlerInterface
 {
 public:
     GcStripeFlushedLogHandler(void) = default;
-    GcStripeFlushedLogHandler(int volumeId, GcStripeMapUpdateList mapUpdates);
+    explicit GcStripeFlushedLogHandler(GcStripeMapUpdateList mapUpdates);
     explicit GcStripeFlushedLogHandler(void* inputData);
     virtual ~GcStripeFlushedLogHandler(void);
 

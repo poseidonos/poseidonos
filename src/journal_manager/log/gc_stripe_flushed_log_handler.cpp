@@ -36,7 +36,7 @@
 
 namespace pos
 {
-GcStripeFlushedLogHandler::GcStripeFlushedLogHandler(int volumeId, GcStripeMapUpdateList mapUpdates)
+GcStripeFlushedLogHandler::GcStripeFlushedLogHandler(GcStripeMapUpdateList mapUpdates)
 {
     int numBlockMaps = mapUpdates.blockMapUpdateList.size();
     logSize = sizeof(GcStripeFlushedLog) + sizeof(GcBlockMapUpdate) * numBlockMaps;
@@ -47,9 +47,10 @@ GcStripeFlushedLogHandler::GcStripeFlushedLogHandler(int volumeId, GcStripeMapUp
     blockLogPtr = reinterpret_cast<GcBlockMapUpdate*>((char*)dat + sizeof(GcStripeFlushedLog));
 
     logPtr->type = LogType::GC_STRIPE_FLUSHED;
-    logPtr->volId = volumeId;
+    logPtr->volId = mapUpdates.volumeId;
     logPtr->vsid = mapUpdates.vsid;
-    logPtr->stripeAddr = mapUpdates.stripeAddr;
+    logPtr->wbLsid = mapUpdates.wbLsid;
+    logPtr->userLsid = mapUpdates.userLsid;
     logPtr->numBlockMaps = numBlockMaps;
 
     GcBlockMapUpdate* currentPtr = blockLogPtr;
@@ -87,7 +88,8 @@ GcStripeFlushedLogHandler::operator==(GcStripeFlushedLogHandler& log)
 {
     bool isSameStripe = (logPtr->volId == log.logPtr->volId)
                     && (logPtr->vsid == log.logPtr->vsid)
-                    && (logPtr->stripeAddr == log.logPtr->stripeAddr)
+                    && (logPtr->wbLsid == log.logPtr->wbLsid)
+                    && (logPtr->userLsid == log.logPtr->userLsid)
                     && (logPtr->numBlockMaps == log.logPtr->numBlockMaps);
 
     if (isSameStripe == false)

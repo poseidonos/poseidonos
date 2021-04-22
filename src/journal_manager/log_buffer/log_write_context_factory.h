@@ -58,7 +58,7 @@ public:
         MpageList dirty, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateStripeMapLogWriteContext(Stripe* stripe,
         StripeAddr oldAddr, MpageList dirty, EventSmartPtr callbackEvent);
-    virtual LogWriteContext* CreateGcStripeFlushedLogWriteContext(int volumeId,
+    virtual LogWriteContext* CreateGcStripeFlushedLogWriteContext(
         GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
     LogWriteContext* CreateVolumeDeletedLogWriteContext(int volId,
         uint64_t contextVersion, EventSmartPtr callback);

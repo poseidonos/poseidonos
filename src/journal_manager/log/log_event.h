@@ -78,7 +78,8 @@ struct GcStripeFlushedLog : Log
 {
     int volId;
     StripeId vsid;
-    StripeAddr stripeAddr;
+    StripeId wbLsid;
+    StripeId userLsid;
     int numBlockMaps;
     // BlockMap list should be appended
 };

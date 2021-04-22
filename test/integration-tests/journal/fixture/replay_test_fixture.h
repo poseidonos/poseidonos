@@ -21,7 +21,7 @@ public:
     void ExpectReplaySegmentAllocation(StripeId userLsid);
     void ExpectReplayStripeAllocation(StripeId vsid, StripeId wbLsid);
     void ExpectReplayBlockLogsForStripe(int volId, BlockMapList blksToWrite);
-    void ExpectReplayStripeFlush(StripeTestFixture stripe, bool wbLsidProvided = true);
+    void ExpectReplayStripeFlush(StripeTestFixture stripe);
 
     void ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe);
     void ExpectReplayFullStripe(StripeTestFixture stripe);

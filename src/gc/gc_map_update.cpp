@@ -55,20 +55,19 @@
 namespace pos
 {
 GcMapUpdate::GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
-                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, uint32_t volumeId)
+                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap)
 : GcMapUpdate(stripe, arrayName, mapUpdateInfoList, invalidSegCnt, iStripeMap,
-      EventSchedulerSingleton::Instance(), volumeId)
+      EventSchedulerSingleton::Instance())
 {
 }
 
 GcMapUpdate::GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
-                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, EventScheduler* eventScheduler, uint32_t volumeId)
+                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, EventScheduler* eventScheduler)
 : stripe(stripe),
   iStripeMap(iStripeMap),
   eventScheduler(eventScheduler),
   invalidSegCnt(invalidSegCnt),
   arrayName(arrayName),
-  volumeId(volumeId),
   mapUpdateInfoList(mapUpdateInfoList)
 {
     SetFrontEnd(false);
@@ -93,7 +92,7 @@ GcMapUpdate::Execute(void)
     ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx(arrayName);
     StripeId stripeId = stripe->GetVsid();
     BlkAddr rba;
-    uint32_t volId = volumeId;
+    uint32_t volId = mapUpdateInfoList.volumeId;
     VirtualBlkAddr writeVsa;
 
     StripeId currentLsid = stripe->GetUserLsid();

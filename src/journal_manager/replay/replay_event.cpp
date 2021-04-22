@@ -228,10 +228,7 @@ ReplayStripeFlush::~ReplayStripeFlush(void)
 int
 ReplayStripeFlush::Replay(void)
 {
-    if (wbLsid != UNMAP_STRIPE)
-    {
-        wbStripeCtx->ReplayStripeFlushed(wbLsid);
-    }
+    wbStripeCtx->ReplayStripeFlushed(wbLsid);
     segmentCtx->UpdateOccupiedStripeCount(userLsid);
 
     status->StripeFlushed();

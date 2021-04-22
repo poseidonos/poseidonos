@@ -113,11 +113,11 @@ LogWriteContext*
 JournalLogBufferIntegrationTest::_CreateContextForGcStripeFlushedLog(void)
 {
     GcStripeMapUpdateList mapUpdates;
-    mapUpdates.vsid = 0;
-    mapUpdates.stripeAddr = {
-        .stripeLoc = IN_USER_AREA,
-        .stripeId = 100
-    };
+    mapUpdates.volumeId = TEST_VOLUME_ID;
+    mapUpdates.vsid = 100;
+    mapUpdates.wbLsid = 2;
+    mapUpdates.userLsid = 100;
+
     for (int offset = 0; offset < 128; offset++)
     {
         GcBlockMapUpdate mapUpdate;
@@ -131,7 +131,7 @@ JournalLogBufferIntegrationTest::_CreateContextForGcStripeFlushedLog(void)
     MapPageList dummyDirty;
     EventSmartPtr callback(new LogBufferWriteDone());
     LogWriteContext* context =
-        factory.CreateGcStripeFlushedLogWriteContext(TEST_VOLUME_ID, mapUpdates, dummyDirty, callback);
+        factory.CreateGcStripeFlushedLogWriteContext(mapUpdates, dummyDirty, callback);
     context->callback = std::bind(&JournalLogBufferIntegrationTest::WriteDone, this,
         std::placeholders::_1);
 

@@ -300,10 +300,9 @@ TEST_F(JournalManagerTestFixture, AddGcStripeFlushedLog_testIfFailsWithJournalDi
 
     // When: Journal is requested to write gc stripe flushed log
     // Then: Log write should be failed
-    int volumeId = 0;
     GcStripeMapUpdateList dummyMapUpdates;
     MapPageList dummyList;
-    EXPECT_TRUE(journal->AddGcStripeFlushedLog(volumeId, dummyMapUpdates, dummyList, nullptr) < 0);
+    EXPECT_TRUE(journal->AddGcStripeFlushedLog(dummyMapUpdates, dummyList, nullptr) < 0);
 }
 
 TEST_F(JournalManagerTestFixture, AddGcStripeFlushedLog_testIfSuccessWithJournalEnabled)
@@ -320,10 +319,9 @@ TEST_F(JournalManagerTestFixture, AddGcStripeFlushedLog_testIfSuccessWithJournal
 
     // When: Journal is requested to write gc stripe flushed log
     // Then: Log write should be successfully requested
-    int volumeId = 0;
     GcStripeMapUpdateList dummyMapUpdates;
     MapPageList dummyList;
-    EXPECT_TRUE(journal->AddGcStripeFlushedLog(volumeId, dummyMapUpdates, dummyList, nullptr) == 0);
+    EXPECT_TRUE(journal->AddGcStripeFlushedLog(dummyMapUpdates, dummyList, nullptr) == 0);
 }
 
 } // namespace pos
