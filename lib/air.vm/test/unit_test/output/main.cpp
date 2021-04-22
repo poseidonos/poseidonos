@@ -1,7 +1,7 @@
 
-#include <stdio.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <stdio.h>
 
 #include "out_test.h"
 #include "output_manager_test.h"
@@ -45,7 +45,8 @@ TEST_F(OutputManagerTest, HandleMsg)
     EXPECT_EQ(num_req - 5, output_manager->HandleMsg());
 }
 
-int main(int argc, char** argv)
+int
+main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

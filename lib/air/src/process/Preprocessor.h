@@ -2,7 +2,7 @@
 #ifndef AIR_PREPROCESSOR_H
 #define AIR_PREPROCESSOR_H
 
-#include "src/collection/Writer.h"
+#include "src/collection/writer/LatencyWriter.h"
 #include "src/config/ConfigInterface.h"
 #include "src/lib/Data.h"
 #include "src/meta/GlobalMeta.h"

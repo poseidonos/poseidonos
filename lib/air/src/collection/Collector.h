@@ -2,7 +2,7 @@
 #ifndef AIR_COLLECTOR_H
 #define AIR_COLLECTOR_H
 
-#include "src/collection/Writer.h"
+#include "src/collection/writer/Writer.h"
 
 namespace collection
 {

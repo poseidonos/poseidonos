@@ -111,7 +111,7 @@ public:
         size_t node_group_name_pos = node_entry.find("GroupName");
         if (std::string_view::npos == node_group_name_pos)
         {
-            return 0;
+            return -3;
         }
         size_t node_colon_pos = node_entry.find(":", node_group_name_pos + 1);
         size_t node_comma_pos = node_entry.find(",", node_group_name_pos + 1);
@@ -120,7 +120,8 @@ public:
             node_comma_pos = node_entry.size();
         }
         std::string_view node_group_name =
-            node_entry.substr(node_colon_pos + 1, node_comma_pos - node_colon_pos);
+            node_entry.substr(node_colon_pos + 1, node_comma_pos - node_colon_pos - 1);
+
         node_group_name = Strip(node_group_name);
 
         size_t group_name_pos = group_str_arr.find("GroupName");

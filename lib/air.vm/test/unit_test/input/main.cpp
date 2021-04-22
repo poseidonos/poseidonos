@@ -1,7 +1,7 @@
 
-#include <stdio.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <stdio.h>
 
 #include "in_test.h"
 
@@ -15,9 +15,9 @@ TEST_F(InTest, HandleKernelMsg)
     strcpy(command[4], "node-sample-ratio");
     strcpy(command[5], "error");
 
-    for(int range = 1; range <= 4; range++)
+    for (int range = 1; range <= 4; range++)
     {
-        for(int cmd = 0; cmd < 5; cmd++)
+        for (int cmd = 0; cmd < 5; cmd++)
         {
             fake_cli_send->FakeSend(range, command[cmd]);
             EXPECT_EQ(1, in_command->HandleKernelMsg());
@@ -34,7 +34,8 @@ TEST_F(InTest, Subject_Notify)
     EXPECT_EQ(-1, input_subject->Notify(99, 0, 0, 0, 0, 0, 0, 0));
 }
 
-int main(int argc, char** argv)
+int
+main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

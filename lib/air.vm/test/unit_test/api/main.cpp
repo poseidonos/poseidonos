@@ -1,7 +1,7 @@
 
-#include <stdio.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <stdio.h>
 
 #include "air_test.h"
 #include "src/config/ConfigInterface.h"
@@ -38,7 +38,7 @@ TEST_F(TestAPI, UT_AIR_Finalize)
 TEST_F(TestAPI, UT_AIR_LogPerf)
 {
     mock_air->LogData<cfg::GetIndex(config::ConfigType::NODE, "PERF_BENCHMARK")>(0, AIR_READ, 4096);
-    uint64_t value {4096};
+    uint64_t value{4096};
     EXPECT_EQ(value, mock_air->fake_collection_manager->value2);
 
     mock_air->SetNullCollectionManager();
@@ -59,7 +59,7 @@ TEST_F(TestAPI, UT_AIR_LogLat)
 TEST_F(TestAPI, UT_AIR_LogQ)
 {
     mock_air->LogData<cfg::GetIndex(config::ConfigType::NODE, "Q_SUBMISSION")>(0, 128, 256);
-    uint32_t value {128};
+    uint32_t value{128};
     EXPECT_EQ(value, mock_air->fake_collection_manager->value1);
 
     AIR<true, true>::thread_array = nullptr;
@@ -69,7 +69,8 @@ TEST_F(TestAPI, UT_AIR_LogQ)
     mock_air->LogData<cfg::GetIndex(config::ConfigType::NODE, "Q_SUBMISSION")>(0, 128, 256);
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

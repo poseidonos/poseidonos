@@ -4,9 +4,13 @@
 class MockGlobalMetaGetter : public meta::GlobalMetaGetter
 {
 public:
-    virtual ~MockGlobalMetaGetter() {}
+    virtual ~MockGlobalMetaGetter()
+    {
+    }
 
-    inline uint32_t AidSize() const {
+    inline uint32_t
+    AidSize() const
+    {
         return 32;
     }
 

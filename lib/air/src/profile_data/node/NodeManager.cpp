@@ -54,6 +54,8 @@ node::NodeManager::CreateThread(uint32_t tid)
             case (air::ProcessorType::PERFORMANCE):
             case (air::ProcessorType::LATENCY):
             case (air::ProcessorType::QUEUE):
+            case (air::ProcessorType::UTILIZATION):
+            case (air::ProcessorType::COUNT):
                 thread_array.node[i] = new Thread(type, max_aid_size);
                 break;
             default:

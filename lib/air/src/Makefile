@@ -3,6 +3,7 @@ _air:
 	@$(MAKE) -C api
 	@$(MAKE) -C chain
 	@$(MAKE) -C collection
+	@$(MAKE) -C collection/writer
 	@$(MAKE) -C config
 	@$(MAKE) -C input
 	@$(MAKE) -C lib

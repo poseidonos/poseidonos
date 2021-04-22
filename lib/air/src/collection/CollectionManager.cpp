@@ -2,6 +2,12 @@
 
 #include <cassert>
 
+#include "src/collection/writer/CountWriter.h"
+#include "src/collection/writer/LatencyWriter.h"
+#include "src/collection/writer/PerformanceWriter.h"
+#include "src/collection/writer/QueueWriter.h"
+#include "src/collection/writer/UtilizationWriter.h"
+
 int
 collection::Subject::Notify(uint32_t index, uint32_t type1, uint32_t type2,
     uint32_t value1, uint32_t value2, int pid,

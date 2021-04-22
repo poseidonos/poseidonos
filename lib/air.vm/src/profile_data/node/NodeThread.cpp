@@ -35,6 +35,26 @@ node::Thread::Thread(air::ProcessorType new_ptype, uint32_t new_aid_size)
                 acc_data[i] = new lib::AccQueueData;
             }
             break;
+        case (air::ProcessorType::UTILIZATION):
+            air_data = new lib::Data*[max_aid_size];
+            acc_data = new lib::AccData*[max_aid_size];
+            for (uint32_t i = 0; i < max_aid_size; i++)
+            {
+                user_data[i] = new lib::UtilizationData;
+                air_data[i] = new lib::UtilizationData;
+                acc_data[i] = new lib::AccUtilizationData;
+            }
+            break;
+        case (air::ProcessorType::COUNT):
+            air_data = new lib::Data*[max_aid_size];
+            acc_data = new lib::AccData*[max_aid_size];
+            for (uint32_t i = 0; i < max_aid_size; i++)
+            {
+                user_data[i] = new lib::CountData;
+                air_data[i] = new lib::CountData;
+                acc_data[i] = new lib::AccCountData;
+            }
+            break;
         default:
             break;
     }

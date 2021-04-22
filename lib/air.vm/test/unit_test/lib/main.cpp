@@ -1,21 +1,21 @@
 
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <stdio.h>
 
-#include "src/lib/Protocol.h"
-#include "src/config/ConfigParser.cpp"
+#include <fstream>
+#include <iostream>
 
 #include "casting_test.h"
 #include "data_test.h"
 #include "design_test.h"
-#include "lock_test.h"
-#include "msg_test.h"
-#include "type_test.h"
 #include "hash_test.h"
 #include "json_test.h"
+#include "lock_test.h"
+#include "msg_test.h"
+#include "src/config/ConfigParser.cpp"
+#include "src/lib/Protocol.h"
+#include "type_test.h"
 
 using ::testing::HasSubstr;
 
@@ -42,13 +42,13 @@ TEST_F(TypeTest, Node)
 
 TEST(Protocol, ValueCheck)
 {
-    uint32_t value32 {0x00000000};
+    uint32_t value32{0x00000000};
     EXPECT_EQ(to_dtype(pi::Type1::INPUT_TO_POLICY), value32);
 
     value32 = 0x00010012;
     EXPECT_EQ(to_dtype(pi::Type2::INITIALIZE_NODE_WITH_RANGE), value32);
 
-    uint16_t value16 {0x0001};
+    uint16_t value16{0x0001};
     EXPECT_EQ(to_dtype(pi::Type2_Upper::COLLECTION), value16);
 
     value16 = 0x0106;
@@ -57,14 +57,14 @@ TEST(Protocol, ValueCheck)
     value32 = 5;
     EXPECT_EQ(to_dtype(pi::ChainHandler::STREAM), value32);
 
-    const uint32_t max_value {pi::k_max_subject_size};
+    const uint32_t max_value{pi::k_max_subject_size};
     EXPECT_GE(max_value, to_dtype(pi::InSubject::COUNT));
     EXPECT_GE(max_value, to_dtype(pi::PolicySubject::COUNT));
 }
 
 TEST_F(MsgTest, MsgEntry)
 {
-    uint32_t value {1};
+    uint32_t value{1};
     EXPECT_EQ(entry.type1, value);
 
     value = 2;
@@ -106,8 +106,8 @@ TEST_F(DesignTest, Attach_Notify_Update)
 
 TEST_F(DataTest, QueueData)
 {
-    bool b {false};
-    uint64_t value {0xFF00EE00DD00CA00};
+    bool b{false};
+    uint64_t value{0xFF00EE00DD00CA00};
     EXPECT_EQ(b, queue_data->access);
     EXPECT_EQ(value, queue_data->sum_depth);
     EXPECT_LT(3.0f, queue_data->depth_period_avg);
@@ -115,7 +115,7 @@ TEST_F(DataTest, QueueData)
 
 TEST_F(DataTest, LatencyData)
 {
-    uint32_t value {0};
+    uint32_t value{0};
     EXPECT_EQ(value, lat_data->min);
 
     value = 0x0000FEAD;
@@ -124,8 +124,8 @@ TEST_F(DataTest, LatencyData)
 
 TEST_F(DataTest, PerformanceData)
 {
-    bool b {false};
-    uint32_t value {0};
+    bool b{false};
+    uint32_t value{0};
     EXPECT_EQ(b, perf_data->access);
     EXPECT_EQ(value, perf_data->idle_count);
     EXPECT_EQ(value, perf_data->iops_total);
@@ -136,35 +136,35 @@ TEST_F(DataTest, PerformanceData)
 
 TEST_F(CastingTest, to_dtype)
 {
-    uint32_t num_u32 {2};
+    uint32_t num_u32{2};
     EXPECT_EQ(num_u32, to_dtype(TypeUINT32_T::NUM_TWO));
     num_u32 = 0;
     EXPECT_EQ(num_u32, to_dtype(TypeUINT32_T::NUM_ZERO));
     EXPECT_NE(num_u32, to_dtype(TypeUINT32_T::NUM_ONE));
     EXPECT_LT(num_u32, to_dtype(TypeUINT32_T::NUM_ONE));
 
-    uint64_t num_u64 {2};
+    uint64_t num_u64{2};
     EXPECT_EQ(num_u64, to_dtype(TypeUINT64_T::NUM_TWO));
     num_u64 = 0;
     EXPECT_EQ(num_u64, to_dtype(TypeUINT64_T::NUM_ZERO));
     EXPECT_NE(num_u64, to_dtype(TypeUINT64_T::NUM_ONE));
     EXPECT_LT(num_u64, to_dtype(TypeUINT64_T::NUM_ONE));
 
-    int num_i {2};
+    int num_i{2};
     EXPECT_EQ(num_i, to_dtype(TypeINT::NUM_POSITIVE_TWO));
     num_i = -1;
     EXPECT_EQ(num_i, to_dtype(TypeINT::NUM_NEGATIVE_ONE));
     EXPECT_NE(num_i, to_dtype(TypeINT::NUM_POSITIVE_ONE));
     EXPECT_GT(num_i, to_dtype(TypeINT::NUM_NEGATIVE_TWO));
 
-    unsigned int num_ui {2};
+    unsigned int num_ui{2};
     EXPECT_EQ(num_ui, to_dtype(TypeUINT::NUM_TWO));
     num_ui = 0;
     EXPECT_EQ(num_ui, to_dtype(TypeUINT::NUM_ZERO));
     EXPECT_NE(num_ui, to_dtype(TypeUINT::NUM_ONE));
     EXPECT_LT(num_ui, to_dtype(TypeUINT::NUM_ONE));
 
-    bool b {false};
+    bool b{false};
     EXPECT_EQ(b, to_dtype(TypeBOOL::BOOL_FALSE));
     b = true;
     EXPECT_EQ(b, to_dtype(TypeBOOL::BOOL_TRUE));
@@ -192,14 +192,14 @@ TEST_F(HashTest, hash)
     EXPECT_EQ(size, hash_map->GetHashSize());
     EXPECT_NE((uint32_t)0x00A3FC0F, hash_map->GetHashKey(new_index));
 
-    // Delete 
+    // Delete
     EXPECT_EQ(true, hash_map->DeleteHashNode(-3333));
     EXPECT_EQ(true, hash_map->DeleteHashNode(0x00A3FC00));
     EXPECT_EQ(false, hash_map->DeleteHashNode(0x00A3FC0F));
-    EXPECT_EQ(size-2, hash_map->GetHashSize());
+    EXPECT_EQ(size - 2, hash_map->GetHashSize());
     EXPECT_NE((uint32_t)0x00A3FC00, hash_map->GetHashKey(index_0));
     EXPECT_NE((uint32_t)(-3333), hash_map->GetHashKey(index_4));
-    
+
     // Get hash index
     EXPECT_EQ(size, hash_map->GetHashIndex(0x00A3FC00));
     EXPECT_EQ(size, hash_map->GetHashIndex(-3333));
@@ -222,72 +222,81 @@ TEST_F(JsonTest, json_value_type_number)
     obj["int32"] = {int32_value};
     int64_t int64_value = -3;
     obj["int64"] = {int64_value};
-    
+
     uint16_t uint16_value = 1;
     obj["uint16"] = {uint16_value};
     uint32_t uint32_value = 2;
     obj["uint32"] = {uint32_value};
     uint64_t uint64_value = 3;
     obj["uint64"] = {uint64_value};
-    
+
     float float_value = 100.77;
     obj["float"] = {float_value};
     double double_value = 1.23;
     obj["double"] = {double_value};
-    
-    
+
     for (auto i : air::range(obj))
     {
-        switch(i.type) {
-            case air::JSONtype::INT16: {
+        switch (i.type)
+        {
+            case air::JSONtype::INT16:
+            {
                 void* vp = i.value;
                 int16_t value = *((int16_t*)vp);
                 EXPECT_EQ(-1, value);
                 break;
             }
-            case air::JSONtype::INT32: {
+            case air::JSONtype::INT32:
+            {
                 void* vp = i.value;
                 int32_t value = *((int32_t*)vp);
                 EXPECT_EQ(-2, value);
                 break;
             }
-            case air::JSONtype::INT64: {
+            case air::JSONtype::INT64:
+            {
                 void* vp = i.value;
                 int64_t value = *((int64_t*)vp);
                 EXPECT_EQ(-3, value);
                 break;
             }
-            case air::JSONtype::UINT16: {
+            case air::JSONtype::UINT16:
+            {
                 void* vp = i.value;
                 uint16_t value = *((uint16_t*)vp);
                 EXPECT_EQ((uint16_t)1, value);
                 break;
             }
-            case air::JSONtype::UINT32: {
+            case air::JSONtype::UINT32:
+            {
                 void* vp = i.value;
                 uint32_t value = *((uint32_t*)vp);
                 EXPECT_EQ((uint32_t)2, value);
                 break;
             }
-            case air::JSONtype::UINT64: {
+            case air::JSONtype::UINT64:
+            {
                 void* vp = i.value;
                 uint64_t value = *((uint64_t*)vp);
                 EXPECT_EQ((uint64_t)3, value);
                 break;
             }
-            case air::JSONtype::FLOAT: {
+            case air::JSONtype::FLOAT:
+            {
                 void* vp = i.value;
                 float value = *((float*)vp);
                 EXPECT_EQ(true, ((100.7 < value) && (100.8 > value)));
                 break;
             }
-            case air::JSONtype::DOUBLE: {
+            case air::JSONtype::DOUBLE:
+            {
                 void* vp = i.value;
                 double value = *((double*)vp);
                 EXPECT_EQ(true, ((1.22 < value) && (1.24 > value)));
                 break;
             }
-            default : {
+            default:
+            {
                 std::cout << "type:" << (uint32_t)i.type << std::endl;
                 break;
             }
@@ -305,15 +314,20 @@ TEST_F(JsonTest, json_value_type_bool)
 
     for (auto i : air::range(obj))
     {
-        if (0 == i.key.compare("bool_true")) {
+        if (0 == i.key.compare("bool_true"))
+        {
             void* vp = i.value;
             bool value = *((bool*)vp);
             EXPECT_EQ(true, value);
-        } else if (0 == i.key.compare("bool_false")) {
+        }
+        else if (0 == i.key.compare("bool_false"))
+        {
             void* vp = i.value;
             bool value = *((bool*)vp);
             EXPECT_EQ(false, value);
-        } else {
+        }
+        else
+        {
             std::cout << "unexpected value\n";
         }
     }
@@ -329,15 +343,20 @@ TEST_F(JsonTest, json_value_type_string)
 
     for (auto i : air::range(obj))
     {
-        if (0 == i.key.compare("charp")) {
+        if (0 == i.key.compare("charp"))
+        {
             void* vp = i.value;
             std::string value = *((std::string*)vp);
             EXPECT_EQ(0, value.compare("const char p"));
-        } else if (0 == i.key.compare("string")) {
+        }
+        else if (0 == i.key.compare("string"))
+        {
             void* vp = i.value;
             std::string value = *((std::string*)vp);
             EXPECT_EQ(0, value.compare("stringstring"));
-        } else {
+        }
+        else
+        {
             std::cout << "unexpected value\n";
         }
     }
@@ -349,12 +368,15 @@ TEST_F(JsonTest, json_value_type_null)
     auto& obj = air::json("obj");
 
     obj["null"] = {nullptr};
-    
+
     for (auto i : air::range(obj))
     {
-        if (0 == i.key.compare("null")) {
+        if (0 == i.key.compare("null"))
+        {
             EXPECT_EQ(true, air::JSONtype::NULLVAL == i.type);
-        } else {
+        }
+        else
+        {
             std::cout << "unexpected value\n";
         }
     }
@@ -372,7 +394,7 @@ TEST_F(JsonTest, json_export)
     write_file.open("json_export.txt");
     write_file << obj << std::endl;
     write_file.close();
-    
+
     air::json_clear();
 
     std::ifstream read_file;
@@ -400,7 +422,7 @@ TEST_F(JsonTest, json_value_type_array)
     write_file.open("json_value_type_array.txt");
     write_file << obj << std::endl;
     write_file.close();
-    
+
     air::json_clear();
 
     std::ifstream read_file;
@@ -429,7 +451,7 @@ TEST_F(JsonTest, json_value_type_object)
     write_file.open("json_value_type_object.txt");
     write_file << obj << std::endl;
     write_file.close();
-    
+
     air::json_clear();
 
     std::ifstream read_file;
@@ -456,14 +478,14 @@ TEST_F(JsonTest, json_print)
     obj["int32"] = {int32_value};
     int64_t int64_value = -3;
     obj["int64"] = {int64_value};
-    
+
     uint16_t uint16_value = 1;
     obj["uint16"] = {uint16_value};
     uint32_t uint32_value = 2;
     obj["uint32"] = {uint32_value};
     uint64_t uint64_value = 3;
     obj["uint64"] = {uint64_value};
-    
+
     float float_value = 100.77;
     obj["float"] = {float_value};
     double double_value = 1.23;
@@ -490,7 +512,7 @@ TEST_F(JsonTest, json_range)
     {
         std::cout << i.key << " : " << obj[i.key] << std::endl;
     }
-    
+
     air::json_clear();
 }
 
@@ -529,7 +551,7 @@ TEST_F(JsonTest, json_use_case_1)
     write_file.open("json_use_case_1.txt");
     write_file << air << std::endl;
     write_file.close();
-    
+
     air::json_clear();
 
     std::ifstream read_file;
@@ -558,7 +580,7 @@ TEST_F(JsonTest, json_use_case_2)
     write_file.open("json_use_case_2.txt");
     write_file << obj << std::endl;
     write_file.close();
-    
+
     air::json_clear();
 
     std::ifstream read_file;
@@ -587,7 +609,7 @@ TEST_F(JsonTest, json_parse_case_1)
     write_file.open("json_parse_case_1.txt");
     write_file << obj << std::endl;
     write_file.close();
-    
+
     air::json_clear();
 
     std::ifstream read_file;
@@ -631,13 +653,12 @@ TEST_F(JsonTest, json_parse_case_2)
     obj["age"] = {34};
     obj["condition"] = {-3};
     obj["luck"] = {0.77};
-    
 
     std::ofstream write_file;
     write_file.open("json_parse_case_2.txt");
     write_file << obj << std::endl;
     write_file.close();
-    
+
     air::json_clear();
 
     std::ifstream read_file;
@@ -675,13 +696,12 @@ TEST_F(JsonTest, json_parse_case_3)
     obj["arr1"] += {-44};
     sub["bool"] = {false};
     obj["arr1"] += {sub};
-    
 
     std::ofstream write_file;
     write_file.open("json_parse_case_3.txt");
     write_file << obj << std::endl;
     write_file.close();
-    
+
     air::json_clear();
 
     std::ifstream read_file;
@@ -713,34 +733,49 @@ TEST_F(JsonTest, jsondoc_api_exception)
 {
     auto& obj = air::json("obj");
 
-    try {
+    try
+    {
         obj = {"invalid usage"};
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e)
+    {
         std::cout << e.what() << std::endl;
     }
 
-    try {
+    try
+    {
         obj += {1};
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e)
+    {
         std::cout << e.what() << std::endl;
     }
 
-    try {
+    try
+    {
         obj += {"appending const cp"};
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e)
+    {
         std::cout << e.what() << std::endl;
     }
 
-    try {
+    try
+    {
         obj += {air::json("obj2")};
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e)
+    {
         std::cout << e.what() << std::endl;
     }
 
-    try {
-        uint8_t uint8_value {1};
+    try
+    {
+        uint8_t uint8_value{1};
         obj["uint8_t"] += {uint8_value};
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e)
+    {
         std::cout << e.what() << std::endl;
     }
 
@@ -750,9 +785,12 @@ TEST_F(JsonTest, jsondoc_api_exception)
 
     auto& obj_undefined = air::json("obj_undefined");
     obj_undefined.SetType(air::JSONtype::UNDEFINED);
-    try {
+    try
+    {
         std::cout << obj_undefined << std::endl;
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e)
+    {
         std::cout << e.what() << std::endl;
     }
 
@@ -762,26 +800,32 @@ TEST_F(JsonTest, jsondoc_api_exception)
 TEST_F(JsonTest, jsondoc_clear_exception)
 {
     auto& obj = air::json("obj");
-    long long longlong_value {1234};
+    long long longlong_value{1234};
     obj["longlong"] = {longlong_value};
-    unsigned long long ulonglong_value {1234};
+    unsigned long long ulonglong_value{1234};
     obj["ulonglong"] = {ulonglong_value};
     obj = {};
 
-    try {
+    try
+    {
         obj.DeleteValue(air::JSONtype::ARRAY, nullptr);
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e)
+    {
         std::cout << e.what() << std::endl;
     }
-    
+
     air::json_clear();
 }
 
 TEST_F(JsonTest, jsonprint_exception)
 {
-    try {
+    try
+    {
         air::PrintValue(std::cout, air::JSONtype::LONG, nullptr);
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e)
+    {
         std::cout << e.what() << std::endl;
     }
 }
@@ -789,36 +833,39 @@ TEST_F(JsonTest, jsonprint_exception)
 TEST_F(JsonTest, jsonparser_exception)
 {
     auto& obj = air::json("obj");
-    
-    static_cast<JSONparserTest&>(JSONparserTest::GetInstance()).TEST_AddJson(
-        obj, "obj", air::JSONtype::NULLVAL, "null", "null");
+
+    static_cast<JSONparserTest&>(JSONparserTest::GetInstance()).TEST_AddJson(obj, "obj", air::JSONtype::NULLVAL, "null", "null");
     std::cout << obj << std::endl;
 
-    try {
-        static_cast<JSONparserTest&>(JSONparserTest::GetInstance()).TEST_AddJson(
-            obj, "obj", air::JSONtype::LONG, "long", "1234");
-    } catch (std::exception &e) {
+    try
+    {
+        static_cast<JSONparserTest&>(JSONparserTest::GetInstance()).TEST_AddJson(obj, "obj", air::JSONtype::LONG, "long", "1234");
+    }
+    catch (std::exception& e)
+    {
         std::cout << e.what() << std::endl;
     }
 
     auto& arr = air::json("arr");
     arr["int"] += {1, 2, 3};
 
-    static_cast<JSONparserTest&>(JSONparserTest::GetInstance()).TEST_AddJsonArray(
-        arr, "arr", 3, air::JSONtype::INT64, "int", "4");
+    static_cast<JSONparserTest&>(JSONparserTest::GetInstance()).TEST_AddJsonArray(arr, "arr", 3, air::JSONtype::INT64, "int", "4");
     std::cout << arr << std::endl;
 
-    try {
-        static_cast<JSONparserTest&>(JSONparserTest::GetInstance()).TEST_AddJsonArray(
-            arr, "arr", 4, air::JSONtype::LONG, "int", "5");
-    } catch (std::exception &e) {
+    try
+    {
+        static_cast<JSONparserTest&>(JSONparserTest::GetInstance()).TEST_AddJsonArray(arr, "arr", 4, air::JSONtype::LONG, "int", "5");
+    }
+    catch (std::exception& e)
+    {
         std::cout << e.what() << std::endl;
     }
 
     air::json_clear();
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

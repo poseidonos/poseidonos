@@ -3,42 +3,51 @@
 
 #include <map>
 
-#include "src/profile_data/node/NodeManager.h"
 #include "src/profile_data/node/NodeManager.cpp"
+#include "src/profile_data/node/NodeManager.h"
+#include "test/unit_test/process/fake_global_meta_getter.h"
+#include "test/unit_test/process/fake_node_meta_getter.h"
 
 class FakeNodeManager : public node::NodeManager
 {
 public:
-    node::NodeManager* node_manager {nullptr};
-    FakeGlobalMetaGetter* fake_global_meta_getter {nullptr};
-    FakeNodeMetaGetter* fake_node_meta_getter {nullptr};
+    node::NodeManager* node_manager{nullptr};
+    FakeGlobalMetaGetter* fake_global_meta_getter{nullptr};
+    FakeNodeMetaGetter* fake_node_meta_getter{nullptr};
 
-    void ThreadMapLock() {
+    void
+    ThreadMapLock()
+    {
         return;
     }
-    void ThreadMapUnlock() {
+    void
+    ThreadMapUnlock()
+    {
         return;
     }
 
-    lib::AccLatencySeqData* GetAccLatSeqData(uint32_t nid, uint32_t aid, uint32_t sid) {
+    lib::AccLatencySeqData*
+    GetAccLatSeqData(uint32_t nid, uint32_t aid, uint32_t sid)
+    {
         return &(acc_data[aid].seq_data[sid]);
     }
 
-    lib::AccLatencyData* GetAccLatData(uint32_t nid, uint32_t aid) {
+    lib::AccLatencyData*
+    GetAccLatData(uint32_t nid, uint32_t aid)
+    {
         return &(acc_data[aid]);
     }
 
     FakeNodeManager(FakeGlobalMetaGetter* new_global_meta_getter,
-            FakeNodeMetaGetter* new_node_meta_getter) {
-        
+        FakeNodeMetaGetter* new_node_meta_getter)
+    {
         fake_global_meta_getter = new_global_meta_getter;
         fake_node_meta_getter = new_node_meta_getter;
-        
+
         node_manager = new node::NodeManager(fake_global_meta_getter, fake_node_meta_getter);
 
-        
         node::ThreadArray* thread_array = new node::ThreadArray;
-        
+
         thread_array->node[0] = new node::Thread(air::ProcessorType::PERFORMANCE, 32);
         thread_array->node[1] = new node::Thread(air::ProcessorType::LATENCY, 32);
         thread_array->node[2] = new node::Thread(air::ProcessorType::LATENCY, 32);
@@ -56,16 +65,19 @@ public:
         thread_array->node[6]->SetIsLogging(true);
 
         thread_map.insert(std::make_pair(123, *thread_array));
-        
+
         num_aid = 32;
     }
-    ~FakeNodeManager() {
+    ~FakeNodeManager()
+    {
         thread_map.clear();
         if (nullptr != node_manager)
             delete node_manager;
     }
 
-    int GetNumAid() {
+    int
+    GetNumAid()
+    {
         return num_aid;
     }
 

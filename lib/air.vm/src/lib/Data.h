@@ -148,6 +148,51 @@ struct AccQueueData : public AccData
     double depth_total_avg{0.0};
 };
 
+const uint64_t ENUM_SIZE{3};
+
+struct UtilizationData : public Data
+{
+    uint64_t usage[ENUM_SIZE]{
+        0,
+    };
+    float percent[ENUM_SIZE]{
+        0.0,
+    };
+};
+
+struct AccUtilizationData : public AccData
+{
+    uint64_t total_usage[ENUM_SIZE]{
+        0,
+    };
+    float total_percent[ENUM_SIZE]{
+        0.0,
+    };
+};
+
+struct CountData : public Data
+{
+    uint64_t count[ENUM_SIZE]{
+        0,
+    };
+    uint64_t num_req[ENUM_SIZE]{
+        0,
+    };
+};
+
+struct AccCountData : public AccData
+{
+    uint64_t total_count[ENUM_SIZE]{
+        0,
+    };
+    uint64_t total_num_req[ENUM_SIZE]{
+        0,
+    };
+    float total_count_avg[ENUM_SIZE]{
+        0.0,
+    };
+};
+
 } // namespace lib
 
 #endif // AIR_DATA_H

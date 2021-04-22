@@ -1,12 +1,12 @@
 
-#include <stdio.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <stdio.h>
 
 #include "collection_manager_test.h"
-#include "src/collection/CollectionObserver.h"
-#include "src/collection/CollectionObserver.cpp"
 #include "src/collection/CollectionCorHandler.h"
+#include "src/collection/CollectionObserver.cpp"
+#include "src/collection/CollectionObserver.h"
 #include "src/config/ConfigParser.cpp"
 
 TEST_F(WriterTest, PerformanceWriter_LogData)
@@ -45,7 +45,7 @@ TEST_F(WriterTest, PerformanceWriter_InformInit)
     lib::AccData* data_dirty = new lib::AccPerformanceData;
     lib::AccPerformanceData* perf_data = static_cast<lib::AccPerformanceData*>(data_dirty);
 
-    unsigned int value {0};
+    unsigned int value{0};
     EXPECT_EQ(perf_data->need_erase, value);
     value = 1;
     performance_writer->InformInit(data_dirty);
@@ -90,7 +90,7 @@ TEST_F(WriterTest, LatencyWriter_InformInit)
     lib::AccData* data_dirty = new lib::AccLatencyData;
     lib::AccLatencyData* lat_data = static_cast<lib::AccLatencyData*>(data_dirty);
 
-    unsigned int value {0};
+    unsigned int value{0};
     EXPECT_EQ(lat_data->need_erase, value);
     value = 1;
     latency_writer->InformInit(data_dirty);
@@ -118,7 +118,7 @@ TEST_F(WriterTest, QueueWriter_InformInit)
     lib::AccData* data_dirty = new lib::AccQueueData;
     lib::AccQueueData* q_data = static_cast<lib::AccQueueData*>(data_dirty);
 
-    uint64_t value {0};
+    uint64_t value{0};
     EXPECT_EQ(q_data->need_erase, value);
     queue_writer->InformInit(data_dirty);
     value = 1;
@@ -137,7 +137,7 @@ TEST_F(WriterTest, QueueWriter_IsSampling)
 
     queue_writer->SetSamplingRate(9);
     EXPECT_EQ(true, queue_writer->IsSampling(queue_data));
-    for (int i = 0 ; i < 8 ; i++)
+    for (int i = 0; i < 8; i++)
     {
         EXPECT_EQ(false, queue_writer->IsSampling(queue_data));
     }
@@ -145,7 +145,7 @@ TEST_F(WriterTest, QueueWriter_IsSampling)
 
     queue_writer->SetSamplingRate(4);
     EXPECT_EQ(true, queue_writer->IsSampling(queue_data));
-    for (int i = 0 ; i < 3 ; i++)
+    for (int i = 0; i < 3; i++)
     {
         EXPECT_EQ(false, queue_writer->IsSampling(queue_data));
     }
@@ -156,17 +156,16 @@ TEST_F(WriterTest, QueueWriter_IsSampling)
     EXPECT_EQ(true, queue_writer->IsSampling(queue_data));
     EXPECT_EQ(true, queue_writer->IsSampling(queue_data));
 
-
     queue_writer->SetSamplingRate(1000);
     queue_writer->IsSampling(queue_data);
-    for (int i = 0 ; i < 10 ; i++)
+    for (int i = 0; i < 10; i++)
     {
         EXPECT_GT((uint32_t)901, queue_writer->GetLoggingPoint(queue_data));
     }
 
     queue_writer->SetSamplingRate(20);
     queue_writer->IsSampling(queue_data);
-    for (int i = 0 ; i < 10 ; i++)
+    for (int i = 0; i < 10; i++)
     {
         EXPECT_GT((uint32_t)19, queue_writer->GetLoggingPoint(queue_data));
     }
@@ -206,7 +205,7 @@ TEST_F(CollectorTest, PerformanceCollector_InformInit)
 {
     lib::AccData* data_dirty = new lib::AccPerformanceData;
     lib::AccPerformanceData* perf_data = static_cast<lib::AccPerformanceData*>(data_dirty);
-    unsigned int value {0};
+    unsigned int value{0};
 
     EXPECT_EQ(value, perf_data->need_erase);
     performance_collector->InformInit(data_dirty);
@@ -232,7 +231,7 @@ TEST_F(CollectorTest, LeatencyCollector_LogData)
     latency_data->seq_data[0].start_token = 43;
     latency_collector->LogData(data, 0, 1234);
 
-    int value {42};
+    int value{42};
     EXPECT_EQ(value, latency_data->seq_data[0].start_token);
 }
 
@@ -241,7 +240,7 @@ TEST_F(CollectorTest, LatencyCollector_InformInit)
     lib::AccData* data_dirty = new lib::AccLatencyData;
     lib::AccLatencyData* lat_data = static_cast<lib::AccLatencyData*>(data_dirty);
 
-    uint32_t value {0};
+    uint32_t value{0};
     EXPECT_EQ(value, lat_data->need_erase);
     latency_collector->InformInit(data_dirty);
     value = 1;
@@ -270,7 +269,7 @@ TEST_F(CollectorTest, QueueCollector_InformInit)
     lib::AccData* data_dirty = new lib::AccQueueData;
     lib::AccQueueData* q_data = static_cast<lib::AccQueueData*>(data_dirty);
 
-    uint32_t value {0};
+    uint32_t value{0};
     EXPECT_EQ(value, q_data->need_erase);
     queue_collector->InformInit(data_dirty);
     value = 1;
@@ -308,9 +307,9 @@ TEST_F(CollectionManagerTest, LogData)
     collection_manager->CreateThread(0);
     node::ThreadArray* thread_array = collection_manager->GetThread(0);
     node::Thread* thr = thread_array->node[0];
-    
+
     collection_manager->LogData(0, 0, thread_array, AIR_READ, 128);
-    
+
     lib::Data* data = thr->GetUserDataByAidValue(0);
     lib::PerformanceData* perf_data = static_cast<lib::PerformanceData*>(data);
     EXPECT_EQ((unsigned int)1, perf_data->iops_read);
@@ -340,7 +339,7 @@ TEST_F(CollectionManagerTest, UpdateCollection)
     EXPECT_EQ(0, collection_manager->UpdateCollection(0, to_dtype(pi::Type2::ENABLE_AIR), 0, 0));
     EXPECT_EQ(-1, collection_manager->UpdateCollection(0, to_dtype(pi::Type2::ENABLE_AIR), 99, 0));
     EXPECT_EQ(-1, collection_manager->UpdateCollection(0, 99, 0, 0));
-    
+
     collection_manager->Init();
 
     // init node 0 (perf)
@@ -348,21 +347,20 @@ TEST_F(CollectionManagerTest, UpdateCollection)
     node::ThreadArray* thread_array = collection_manager->GetThread(1);
     node::Thread* thr = thread_array->node[0];
     collection_manager->LogData(0, 0, thread_array, AIR_READ, 128);
-    lib::Data *data = thr->GetUserDataByAidValue(0);
+    lib::Data* data = thr->GetUserDataByAidValue(0);
     lib::PerformanceData* perf_data = static_cast<lib::PerformanceData*>(data);
     EXPECT_EQ((unsigned int)1, perf_data->iops_read);
     EXPECT_EQ((unsigned int)128, perf_data->bandwidth_read);
 
-    lib::AccData *acc_data = thr->GetAccData(0);
-    lib::AccPerformanceData* acc_perf_data 
-                    = static_cast<lib::AccPerformanceData*>(acc_data);
+    lib::AccData* acc_data = thr->GetAccData(0);
+    lib::AccPerformanceData* acc_perf_data = static_cast<lib::AccPerformanceData*>(acc_data);
     EXPECT_EQ((unsigned int)0, acc_perf_data->need_erase);
     collection_manager->UpdateCollection(0, to_dtype(pi::Type2::INITIALIZE_NODE), 0, 0);
     EXPECT_EQ((unsigned int)1, acc_perf_data->need_erase);
-    
+
     // init node 1 (latency)
     collection_manager->UpdateCollection(0, to_dtype(pi::Type2::INITIALIZE_NODE), 1, 0);
-    
+
     // init node 0-2
     thr = thread_array->node[0];
     collection_manager->LogData(0, 0, thread_array, AIR_READ, 128);
@@ -370,7 +368,7 @@ TEST_F(CollectionManagerTest, UpdateCollection)
     perf_data = static_cast<lib::PerformanceData*>(data);
     EXPECT_EQ((unsigned int)2, perf_data->iops_read);
     EXPECT_EQ((unsigned int)256, perf_data->bandwidth_read); // not initialized yet
-    
+
     thr = thread_array->node[2];
     collection_manager->LogData(2, 0, thread_array, 10, 128);
     data = thr->GetUserDataByAidValue(0);
@@ -439,11 +437,11 @@ TEST_F(CollectionManagerTest, UpdateCollection)
 
 TEST_F(CollectionManagerTest, Observer)
 {
-    collection::Observer* observer = new collection::Observer { collection_manager };
-    collection::CollectionCoRHandler* collection_cor_handler = new collection::CollectionCoRHandler { observer };
-    MockOutputObserver* mock_output_observer = new MockOutputObserver {};
+    collection::Observer* observer = new collection::Observer{collection_manager};
+    collection::CollectionCoRHandler* collection_cor_handler = new collection::CollectionCoRHandler{observer};
+    MockOutputObserver* mock_output_observer = new MockOutputObserver{};
     collection_subject->Attach(mock_output_observer, 0);
-    
+
     // send init msg
     observer->Update(0, to_dtype(pi::Type2::INITIALIZE_NODE), 0, 0, 0, 0, 0);
 
@@ -452,11 +450,11 @@ TEST_F(CollectionManagerTest, Observer)
     node::ThreadArray* thread_array = collection_manager->GetThread(1);
     node::Thread* thr = thread_array->node[0];
     collection_manager->LogData(0, 0, thread_array, AIR_READ, 128);
-    lib::Data *data = thr->GetUserDataByAidValue(0);
+    lib::Data* data = thr->GetUserDataByAidValue(0);
     lib::PerformanceData* perf_data = static_cast<lib::PerformanceData*>(data);
-    lib::AccData * acc_data = thr->GetAccData(0);
-    lib::AccPerformanceData* acc_perf_data = 
-                            static_cast<lib::AccPerformanceData*>(acc_data);
+    lib::AccData* acc_data = thr->GetAccData(0);
+    lib::AccPerformanceData* acc_perf_data =
+        static_cast<lib::AccPerformanceData*>(acc_data);
     EXPECT_EQ((unsigned int)1, perf_data->iops_read);
     EXPECT_EQ((unsigned int)128, perf_data->bandwidth_read);
     EXPECT_EQ((unsigned int)0, acc_perf_data->need_erase);
@@ -476,7 +474,8 @@ TEST_F(CollectionManagerTest, Observer)
     delete collection_cor_handler;
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
