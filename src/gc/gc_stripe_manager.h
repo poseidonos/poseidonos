@@ -36,6 +36,7 @@
 #include "src/allocator/wb_stripe_manager/stripe.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/gc/victim_stripe.h"
+#include "src/sys_event/volume_event.h"
 
 #include <string>
 #include <utility>
@@ -47,11 +48,19 @@ class IWBStripeAllocator;
 
 using GcWriteBuffer = std::vector<void*>;
 
-class GcStripeManager
+class GcStripeManager : public VolumeEvent
 {
 public:
     explicit GcStripeManager(IArrayInfo* array);
     ~GcStripeManager(void);
+
+    bool VolumeCreated(std::string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
+    bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName) override;
+    bool VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
+    bool VolumeUnmounted(std::string volName, int volID, std::string arrayName) override;
+    bool VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
+    bool VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
+    void VolumeDetached(vector<int> volList, std::string arrayName) override;
 
     bool AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks);
     bool AllocateWriteBuffer(uint32_t volumeId, GcWriteBuffer* buffer);

@@ -40,6 +40,7 @@
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator/i_block_allocator.h"
 #include "src/spdk_wrapper/free_buffer_pool.h"
+#include "src/sys_event/volume_event_publisher.h"
 
 #include "src/include/branch_prediction.h"
 
@@ -50,7 +51,8 @@
 namespace pos
 {
 GcStripeManager::GcStripeManager(IArrayInfo* array)
-: array(array)
+: VolumeEvent("GcStripeManager", array->GetName()),
+  array(array)
 {
     arrayName = array->GetName();
     udSize = array->GetSizeInfo(PartitionType::USER_DATA);
@@ -67,6 +69,7 @@ GcStripeManager::GcStripeManager(IArrayInfo* array)
         flushed[volId] = true;
     }
     flushedStripeCnt = 0;
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName);
 }
 
 GcStripeManager::~GcStripeManager(void)
@@ -88,6 +91,55 @@ GcStripeManager::~GcStripeManager(void)
     }
 
     delete gcWriteBufferPool;
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName);
+}
+
+bool
+GcStripeManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
+{
+    return true;
+}
+
+bool
+GcStripeManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName)
+{
+    if (false == _IsWriteBufferFull(volID))
+    {
+        GcWriteBuffer* writeBuffers = gcActiveWriteBuffers[volID];
+        delete blkInfoList[volID];
+        SetFlushed(volID);
+        SetFinished(writeBuffers);
+    }
+    return true;
+}
+
+bool
+GcStripeManager::VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
+{
+    return true;
+}
+
+bool
+GcStripeManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName)
+{
+    return true;
+}
+
+bool
+GcStripeManager::VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
+{
+    return true;
+}
+
+bool
+GcStripeManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
+{
+    return true;
+}
+
+void
+GcStripeManager::VolumeDetached(vector<int> volList, std::string arrayName)
+{
 }
 
 GcWriteBuffer*

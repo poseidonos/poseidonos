@@ -46,6 +46,7 @@
 #include "src/allocator_service/allocator_service.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator/i_block_allocator.h"
+#include "src/volume/volume_service.h"
 
 namespace pos
 {
@@ -74,7 +75,8 @@ bool
 CopierReadCompletion::_DoSpecificJob(void)
 {
     GcStripeManager* gcStripeManager = meta->GetGcStripeManager();
-
+    IVolumeManager* volumeManager
+        = VolumeServiceSingleton::Instance()->GetVolumeManager(meta->GetArrayName());
     list<BlkInfo> blkInfoList = victimStripe->GetBlkInfoList(listIndex);
 
     uint32_t volId = blkInfoList.begin()->volID;
@@ -110,16 +112,30 @@ CopierReadCompletion::_DoSpecificJob(void)
 
         if (gcStripeManager->DecreaseRemainingAndCheckIsFull(volId, numBlks))
         {
-            EventSmartPtr flushEvent(new GcFlushSubmission(meta->GetArrayName(),
-                        allocatedBlkInfoList,
-                        volId,
-                        dataBuffer,
-                        gcStripeManager));
-            EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
-            gcStripeManager->SetFlushed(volId);
+            if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS)
+                != volumeManager->IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted)))
+            {
+                gcStripeManager->SetFlushed(volId);
+                allocatedBlkInfoList->clear();
+                delete allocatedBlkInfoList;
+                gcStripeManager->SetFinished(dataBuffer);
+                break;
+            }
+            else
+            {
+                EventSmartPtr flushEvent(new GcFlushSubmission(meta->GetArrayName(),
+                            allocatedBlkInfoList,
+                            volId,
+                            dataBuffer,
+                            gcStripeManager));
+                EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
+
+                gcStripeManager->SetFlushed(volId);
+            }
         }
     }
 
+    volumeManager->DecreasePendingIOCount(volId, VolumeStatus::Unmounted, blkCnt);
     meta->ReturnBuffer(stripeId, buffer);
     meta->SetDoneCopyBlks(blkCnt);
     AIRLOG(PERF_COPY, 0, AIR_READ, BLOCK_SIZE * blkCnt);

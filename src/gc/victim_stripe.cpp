@@ -37,6 +37,8 @@
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/include/meta_const.h"
+#include "src/volume/volume_service.h"
+#include "src/include/branch_prediction.h"
 
 namespace pos
 {
@@ -100,6 +102,8 @@ VictimStripe::LoadValidBlock(void)
 
     IVSAMap* iVSAMap = MapperServiceSingleton::Instance()->GetIVSAMap(array->GetName());
     IStripeMap* iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(array->GetName());
+    IVolumeManager* volumeManager
+        = VolumeServiceSingleton::Instance()->GetVolumeManager(array->GetName());
 
     for (; blockOffset < dataBlks; blockOffset++)
     {
@@ -153,6 +157,12 @@ VictimStripe::LoadValidBlock(void)
 
         if ((lsa.stripeId == myLsid) && (blockOffset == blkInfo.vsa.offset))
         {
+            if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS)
+                != volumeManager->IncreasePendingIOCountIfNotZero(blkInfo.volID, VolumeStatus::Unmounted)))
+            {
+                break;
+            }
+
             blkInfoList.push_back(blkInfo);
             validBlockCnt++;
         }

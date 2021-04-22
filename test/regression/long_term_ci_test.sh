@@ -3,7 +3,7 @@
 logfile="pos.log"
 rootdir=$(readlink -f $(dirname $0))/../..
 fiodir=${rootdir}/test/system/io_path
-ip="10.100.11.15"
+ip="10.100.11.24"
 test_iteration=4
 totalsize=100 #pm : 12500
 volcnt=4
@@ -167,7 +167,7 @@ do
         if [ $volcnt == 1 ]; then
             break;
         fi
-        volName=vol$((volcnt-i+1))
+        volName=vol${volcnt}
         echo "vol name : $volName"
         sudo ${rootdir}/bin/cli volume unmount --name $volName --array POSArray
         if [ $volumetest == "vol_delete" ]; then

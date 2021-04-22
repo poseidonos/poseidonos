@@ -94,6 +94,10 @@ GcMapUpdateCompletion::Execute(void)
     std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
     rbaStateManager->ReleaseOwnershipRbaList(volId, rbaList);
 
+    IVolumeManager* volumeManager
+        = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    volumeManager->DecreasePendingIOCount(volId, VolumeStatus::Unmounted);
+
     FlushCompletion event(stripe, iStripeMap, eventScheduler, arrayName);
     bool done = event.Execute();
     bool wrapupSuccessful = true;
