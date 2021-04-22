@@ -325,6 +325,7 @@ SegmentCtx::ReplaySegmentAllocation(StripeId userLsid)
         if (segmentStates[segmentId].Getstate() == SegmentState::FREE)
         {
             segmentStates[segmentId].Setstate(SegmentState::NVRAM);
+            segmentBitmap->SetBit(segmentId);
             POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_REPLAY_STATUS, "SegmentId:{} is allocated", segmentId);
         }
     }

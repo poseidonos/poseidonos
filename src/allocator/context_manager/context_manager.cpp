@@ -110,13 +110,6 @@ void
 ContextManager::ReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
 {
     wbLsidBitmap->SetBit(wbLsid);
-
-    StripeId userLsid = vsid;
-    if (_IsFirstStripeOfSegment(userLsid))
-    {
-        SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
-        segmentCtx->GetSegmentBitmap()->SetBit(segId);
-    }
 }
 
 void
