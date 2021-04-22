@@ -40,7 +40,7 @@ class SegmentInfo
 {
 public:
     SegmentInfo(uint32_t maxSegment);
-    ~SegmentInfo(void);
+    virtual ~SegmentInfo(void);
 
     uint32_t GetNumSegment(void) { return numSegment;}
 
