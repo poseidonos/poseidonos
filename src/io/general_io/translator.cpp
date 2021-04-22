@@ -87,7 +87,6 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
         {
             BlkAddr rba = startRba + blockIndex;
             VirtualBlkAddr vsa = vsaArray[blockIndex];
-
             lsidRefResults[blockIndex] = _GetLsidRefResult(rba, vsa);
         }
     }
@@ -176,17 +175,21 @@ Translator::_GetLsidRefResult(BlkAddr rba, VirtualBlkAddr& vsa)
             }
             else
             {
-                if (IsUnMapStripe(recentVsid) || vsa.stripeId != recentVsid)
-                {
-                    lsidEntry = iStripeMap->GetLSA(vsa.stripeId);
-                    recentVsid = vsa.stripeId;
-                    recentLsid = lsidEntry.stripeId;
-                }
-                else
-                {
-                    lsidEntry.stripeId = Translator::recentLsid;
-                    lsidEntry.stripeLoc = IN_WRITE_BUFFER_AREA;
-                }
+                lsidEntry = iStripeMap->GetLSA(vsa.stripeId);
+
+		// TODO: Need to Consider Multi Array for thread local variable "recentVsid" 
+		// Will apply recentVsid again when it is possible to distinguish array by number for better performanc
+		//if (IsUnMapStripe(recentVsid) || vsa.stripeId != recentVsid)
+		//{
+                //    lsidEntry = iStripeMap->GetLSA(vsa.stripeId);
+                //    recentVsid = vsa.stripeId;
+                //    recentLsid = lsidEntry.stripeId;
+		//}
+                //else
+                //{
+                //    lsidEntry.stripeId = Translator::recentLsid;
+                //    lsidEntry.stripeLoc = IN_WRITE_BUFFER_AREA;
+                //}
             }
         }
         else
