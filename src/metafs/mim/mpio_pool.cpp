@@ -104,10 +104,10 @@ MpioPool::Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn,
 #if RANGE_OVERLAP_CHECK_EN
     Mpio* mpio = nullptr;
 
-  #if MPIO_CACHE_EN
+#if MPIO_CACHE_EN
     if (!((MetaStorageType::NVRAM == storageType) &&
-        (true == partialIO) &&
-        (MpioType::Write == mpioType)))
+            (true == partialIO) &&
+            (MpioType::Write == mpioType)))
     {
         mpio = _AllocMpio(mpioType);
 
@@ -130,9 +130,9 @@ MpioPool::Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn,
         // add new
         return _CacheAlloc(mpioType, lpn);
     }
-  #else
+#else
     mpio = _AllocMpio(mpioType);
-  #endif
+#endif
 #else
     Mpio* mpio = _AllocMpio(mpioType);
 #endif

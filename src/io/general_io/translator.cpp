@@ -177,14 +177,14 @@ Translator::_GetLsidRefResult(BlkAddr rba, VirtualBlkAddr& vsa)
             {
                 lsidEntry = iStripeMap->GetLSA(vsa.stripeId);
 
-		// TODO: Need to Consider Multi Array for thread local variable "recentVsid" 
-		// Will apply recentVsid again when it is possible to distinguish array by number for better performanc
-		//if (IsUnMapStripe(recentVsid) || vsa.stripeId != recentVsid)
-		//{
+                // TODO: Need to Consider Multi Array for thread local variable "recentVsid"
+                // Will apply recentVsid again when it is possible to distinguish array by number for better performanc
+                //if (IsUnMapStripe(recentVsid) || vsa.stripeId != recentVsid)
+                //{
                 //    lsidEntry = iStripeMap->GetLSA(vsa.stripeId);
                 //    recentVsid = vsa.stripeId;
                 //    recentLsid = lsidEntry.stripeId;
-		//}
+                //}
                 //else
                 //{
                 //    lsidEntry.stripeId = Translator::recentLsid;

@@ -34,10 +34,11 @@
 
 #include <tuple>
 #include <vector>
+#include <string>
 
-#include "src/meta_file_intf/async_context.h"
-#include "src/mapper/i_vsamap.h"
 #include "src/mapper/i_stripemap.h"
+#include "src/mapper/i_vsamap.h"
+#include "src/meta_file_intf/async_context.h"
 
 namespace pos
 {
@@ -79,7 +80,8 @@ enum IoDirection
 
 struct RevMapEntry
 {
-    union {
+    union
+    {
         uint8_t byte[REVMAP_ENTRY_SIZE];
 
         struct __attribute__((packed))
@@ -93,7 +95,8 @@ struct RevMapEntry
 
 struct RevMapSector
 {
-    union {
+    union
+    {
         uint8_t byte[REVMAP_SECTOR_SIZE];
 
         struct __attribute__((packed))

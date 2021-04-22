@@ -31,6 +31,7 @@
  */
 
 #include "write_mpio.h"
+
 #include "Air.h"
 
 namespace pos
@@ -96,33 +97,33 @@ WriteMpio::_MakeReady(MpAioState expNextState)
             io.opcode, io.tagId, io.mpioId, currLpn, prevLpn, currBuf, prevBuf);
 
 #if RANGE_OVERLAP_CHECK_EN
-  #if MPIO_CACHE_EN
+#if MPIO_CACHE_EN
         if (MetaStorageType::NVRAM == io.targetMediaType)
         {
             switch (cacheState)
             {
-            case MpioCacheState::FirstRead:
-                // read -> merge data
-                SetNextState(MpAioState::Read);
-                break;
+                case MpioCacheState::FirstRead:
+                    // read -> merge data
+                    SetNextState(MpAioState::Read);
+                    break;
 
-            case MpioCacheState::MergeSingle:
-                // merge data
-                SetNextState(expNextState);
-                break;
+                case MpioCacheState::MergeSingle:
+                    // merge data
+                    SetNextState(expNextState);
+                    break;
 
-            case MpioCacheState::Mergeable:
-                // skip merge data, just write
-                SetNextState(MpAioState::PrepareWrite);
-                break;
+                case MpioCacheState::Mergeable:
+                    // skip merge data, just write
+                    SetNextState(MpAioState::PrepareWrite);
+                    break;
 
-            default:
-                assert(false);
-                break;
+                default:
+                    assert(false);
+                    break;
             }
         }
         else
-  #endif
+#endif
         {
             SetNextState(MpAioState::Read);
         }
