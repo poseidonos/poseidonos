@@ -34,6 +34,7 @@
 
 #include "src/cli/cli_event_code.h"
 #include "src/array/array.h"
+#include "src/array_mgmt/array_manager.h"
 
 namespace pos_cli
 {
@@ -49,8 +50,11 @@ string
 StopRebuildingCommand::Execute(json& doc, string rid)
 {
     JsonFormat jFormat;
-    // ArraySingleton::Instance()->StopRebuilding();
+    string arrayName = doc["param"]["name"].get<std::string>();
+    IArrayRebuilder* rebuilder = ArrayMgr::Instance()->arrayRebuilder;
+    rebuilder->StopRebuild(arrayName);
+    rebuilder->WaitRebuildDone(arrayName);
     return jFormat.MakeResponse("STOPREBUILDING", rid, SUCCESS,
-        "Rebuilding stopped", GetPosInfo());
+        "Rebuilding of '" + arrayName + "' is stopped", GetPosInfo());
 }
 }; // namespace pos_cli

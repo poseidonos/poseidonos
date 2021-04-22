@@ -44,12 +44,10 @@
 #include "src/cli/create_volume_command.h"
 #include "src/cli/delete_array_command.h"
 #include "src/cli/delete_volume_command.h"
-#include "src/cli/device_monitoring_state_command.h"
 #include "src/cli/exit_ibofos_command.h"
 #include "src/cli/get_host_nqn_command.h"
 #include "src/cli/get_ibofos_info_command.h"
 #include "src/cli/get_max_volume_count_command.h"
-#include "src/cli/get_version_command.h"
 #include "src/cli/handle_wbt_command.h"
 #include "src/cli/list_array_command.h"
 #include "src/cli/list_array_device_command.h"
@@ -58,7 +56,6 @@
 #include "src/cli/list_wbt_command.h"
 #include "src/cli/logger_info_command.h"
 #include "src/cli/mount_array_command.h"
-#include "src/cli/mount_ibofos_command.h"
 #include "src/cli/mount_volume_command.h"
 #include "src/cli/rebuild_perf_impact_command.h"
 #include "src/cli/remove_device_command.h"
@@ -68,11 +65,8 @@
 #include "src/cli/scan_device_command.h"
 #include "src/cli/set_log_level_command.h"
 #include "src/cli/smart_command.h"
-#include "src/cli/start_device_monitoring_command.h"
-#include "src/cli/stop_device_monitoring_command.h"
 #include "src/cli/stop_rebuilding_command.h"
 #include "src/cli/unmount_array_command.h"
-#include "src/cli/unmount_ibofos_command.h"
 #include "src/cli/unmount_volume_command.h"
 #include "src/cli/update_volume_qos_command.h"
 #include "src/cli/rename_volume_command.h"
@@ -80,8 +74,6 @@
 #include "src/cli/get_max_volume_count_command.h"
 #include "src/cli/get_host_nqn_command.h"
 #include "src/cli/cond_signal_command.h"
-#include "src/cli/mount_ibofos_command.h"
-#include "src/cli/unmount_ibofos_command.h"
 #include "src/cli/get_ibofos_info_command.h"
 #include "src/cli/exit_ibofos_command.h"
 #include "src/cli/stop_rebuilding_command.h"
@@ -99,7 +91,6 @@ namespace pos_cli
 bool RequestHandler::isExit = false;
 RequestHandler::RequestHandler(void)
 {
-    cmdDictionary["GETVERSION"] = new GetVersionCommand();
     cmdDictionary["SMART"] = new SmartCommand();
     cmdDictionary["LOGGERINFO"] = new LoggerInfoCommand();
     cmdDictionary["SCANDEVICE"] = new ScanDeviceCommand();
@@ -107,9 +98,6 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["ADDDEVICE"] = new AddDeviceCommand();
     cmdDictionary["REMOVEDEVICE"] = new RemoveDeviceCommand();
     cmdDictionary["CREATEDEVICE"] = new CreateDeviceCommand();
-    cmdDictionary["STARTDEVICEMONITORING"] = new StartDeviceMonitoringCommand();
-    cmdDictionary["STOPDEVICEMONITORING"] = new StopDeviceMonitoringCommand();
-    cmdDictionary["DEVICEMONITORINGSTATE"] = new DeviceMonitoringStateCommand();
     cmdDictionary["LISTARRAY"] = new ListArrayCommand();
     cmdDictionary["CREATEARRAY"] = new CreateArrayCommand();
     cmdDictionary["DELETEARRAY"] = new DeleteArrayCommand();
@@ -129,8 +117,6 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["GETMAXVOLUMECOUNT"] = new GetMaxVolumeCountCommand();
     cmdDictionary["GETHOSTNQN"] = new GetHostNqnCommand();
     cmdDictionary["CONDSIGNAL"] = new CondSignalCommand();
-    cmdDictionary["MOUNTIBOFOS"] = new MountIbofosCommand();
-    cmdDictionary["UNMOUNTIBOFOS"] = new UnmountIbofosCommand();
     cmdDictionary["GETIBOFOSINFO"] = new GetPosInfoCommand();
     cmdDictionary["EXITIBOFOS"] = new ExitIbofosCommand();
     cmdDictionary["STOPREBUILDING"] = new StopRebuildingCommand();

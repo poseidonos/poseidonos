@@ -3,22 +3,23 @@
 ROOT_DIR=$(readlink -f $(dirname $0))/../../
 logfile=pos.log
 
-execute_ibofos()
+execute_pos()
 {
     if [ -f ${ROOT_DIR}/bin/ibofos ];
     then
-        echo "Execute ibofos"
+        echo "Execute poseidonOS"
         nohup ${ROOT_DIR}/bin/ibofos &>> ${ROOT_DIR}/script/${logfile} &
     else
-        echo "No executable ibofos file"
+        echo "No executable poseidonOS file"
         exit -1
     fi
 }
 
 check_started()
 {
-    result=`${ROOT_DIR}/bin/cli request info --json | jq '.Response.info.state' 2>/dev/null`
-    if [ -z ${result} ] || [ ${result} != '"NOT_EXIST"' ];
+    result=`${ROOT_DIR}/bin/cli system info --json | jq '.Response.info.version' 2>/dev/null`
+    
+    if [ -z ${result} ] || [ ${result} == '""' ];
     then
         return 0
     else
@@ -31,13 +32,14 @@ wait_started()
     check_started
     while [ $? -eq 0 ];
     do
-        echo "Wait ibofos"
+        echo "Wait poseidonOS"
         sleep 0.5
         check_started
     done
 }
 
-execute_ibofos
+execute_pos
 wait_started
 
-echo "ibofos is running in background...logfile=${logfile}"
+echo "PoseidonOS version =" ${result}
+echo "poseidonOS is running in background...logfile=${logfile}"

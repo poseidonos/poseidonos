@@ -11,7 +11,6 @@ var ArrayCommand = map[string]func(string, interface{}) (model.Request, model.Re
 	"create":      iBoFOS.CreateArray,
 	"delete":      iBoFOS.DeleteArray,
 	"list_device": iBoFOS.ListArrayDevice,
-	"load":        iBoFOS.LoadArray,
 	"info":        iBoFOS.ArrayInfo,
 	"add":         iBoFOS.AddDevice,
 	"remove":      iBoFOS.RemoveDevice,
@@ -34,7 +33,6 @@ array      : create      : Provides device configuration information for configu
 		   : delete      : Delete array.                                                    : not needed
 		   : list 		 : List Array.														: not needed
            : list_device : Show all devices in the Array.                                   : not needed
-           : load        : Load device configuration from mbr data.                         : not needed
            : info        : Show Information about Array.                                    : not needed
            : add         : Add spare device to the Array.                                   : -s [spare devs]
            : remove      : Remove spare device from the Array.                              : -s [spare devs]

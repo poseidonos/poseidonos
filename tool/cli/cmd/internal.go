@@ -8,10 +8,6 @@ import (
 )
 
 var InternalCommand = map[string]func(string, interface{}) (model.Request, model.Response, error){
-    "report_test":      iBoFOS.ReportTest,
-    "start_monitoring": iBoFOS.StartDeviceMonitoring,
-    "stop_monitoring":  iBoFOS.StopDeviceMonitoring,
-    "monitoring_state": iBoFOS.DeviceMonitoringState,
     "stop_rebuilding":  iBoFOS.StopRebuilding,
     "update_event_wrr":  iBoFOS.UpdateEventWrr,
     "reset_event_wrr":  iBoFOS.ResetEventWrr,
@@ -26,11 +22,7 @@ Available msg list :
 
 [Category] : [msg]            : [description]                                                    : [example of flag]
 
-internal   : report_test      : Report from POS                                                  : not needed
-           : start_monitoring : Start monitoring daemon manually.                                : not needed
-           : stop_monitoring  : Stop monitoring daemon manually.                                 : not needed
-           : monitoring_state : Get monitoring state.                                            : not needed
-           : stop_rebuilding  : Stop rebuilding.                                                 : not needed
+internal   : stop_rebuilding  : Stop rebuilding of an array                                      : --name ArrayName
            : update_event_wrr : Set the weights for backend events such as flush, rebuild, etc.  : --name [flush/gc/...] --prio [0/1/2] --weight [1/2/3]
            : reset_event_wrr  : Reset the weights for backend events                             : not needed
 

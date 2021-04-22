@@ -47,6 +47,11 @@
 
 using namespace std;
 
+namespace pos_cli
+{
+class StopRebuildingCommand;
+}
+
 namespace pos
 {
 class AbrManager;
@@ -56,6 +61,7 @@ class ArrayManager : public IArrayMgmt, public IDeviceEvent, public IRebuildNoti
     friend class FlushAllUserDataWbtCommand;
     friend class GcWbtCommand;
     friend class ParityLocationWbtCommand;
+    friend class ::pos_cli::StopRebuildingCommand;
 
 public:
     ArrayManager();

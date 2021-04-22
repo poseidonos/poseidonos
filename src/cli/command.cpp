@@ -31,6 +31,9 @@
  */
 
 #include "src/cli/command.h"
+#include "src/cli/cli_event_code.h"
+
+#include "src/master_context/version_provider.h"
 
 #include "src/sys_info/space_info.h"
 
@@ -48,24 +51,10 @@ Command::~Command(void)
 JsonElement
 GetPosInfo(string name)
 {
+    // TODO(mj): GetPosInfo temporarily executes the same command as GETVERSION command. This should be revised.
     JsonElement data(name);
-
-    PosInfo info;
-    // TODO: what is this??
-    string arrayName = "";
-    IArrayInfo* arrayInfo = ArrayMgr::Instance()->GetArrayInfo(arrayName);
-    if (arrayInfo != nullptr)
-    {
-        info.state = arrayInfo->GetState().ToString();
-        info.rebuildingProgress = arrayInfo->GetRebuildingProgress();
-        info.totalCapacity = SpaceInfo::SystemCapacity(arrayName);
-        info.usedCapacity = SpaceInfo::Used(arrayName);
-    }
-
-    data.SetAttribute(JsonAttribute("state", "\"" + info.state + "\""));
-    data.SetAttribute(JsonAttribute("rebuildingProgress", "\"" + to_string(info.rebuildingProgress) + "\""));
-    data.SetAttribute(JsonAttribute("capacity", to_string(info.totalCapacity)));
-    data.SetAttribute(JsonAttribute("used", to_string(info.usedCapacity)));
+    string version = VersionProviderSingleton::Instance()->GetVersion();
+    data.SetAttribute(JsonAttribute("version", "\"" + version + "\""));
 
     return data;
 }

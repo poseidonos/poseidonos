@@ -11,9 +11,6 @@ var SystemCommand = map[string]func(string, interface{}) (model.Request, model.R
 	"run":     iBoFOS.RuniBoFOS,
 	"exit":    iBoFOS.ExitiBoFOS,
 	"info":    iBoFOS.IBoFOSInfo,
-	"version": iBoFOS.IBoFOSVersion,
-	"mount":   iBoFOS.MountiBoFOS,
-	"unmount": iBoFOS.UnmountiBoFOS,
 }
 
 var systemCmd = &cobra.Command{
@@ -28,9 +25,6 @@ Available msg list :
 system     : run              : Run iBoFOS.                                                      : not needed
            : exit             : Exit iBoFOS.                                                     : not needed
            : info             : Show current state of IbofOS.                                    : not needed
-           : version          : Get current iBoFOS version.                                      : not needed
-           : mount            : Mount iBoFOS.                                                    : not needed
-           : unmount          : Unmount iBoFOS.                                                  : not needed
 
 
 If you want to input multiple flag parameter, you have to seperate with ",". 
