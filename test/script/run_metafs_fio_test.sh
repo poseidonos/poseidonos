@@ -53,8 +53,8 @@ sudo ../../bin/cli system mount
 
 for i in `seq 1 $SUBSYSTEM_NUM`
 do
-    sudo ../../lib/spdk/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem$i -m 256 -a -s IBOF0000000000000$i -d IBOF_VOL_$i
-    sudo ../../lib/spdk/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem$i -t ${trtype} -a ${target_fabric_ip} -s ${port}
+    sudo ../../lib/spdk/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem$i -m 256 -a -s POS0000000000000$i -d POS_VOL_$i
+    sudo ../../lib/spdk/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t ${trtype} -a ${target_fabric_ip} -s ${port}
 done
 
 for i in `seq 1 $NR_VOLUME`
@@ -79,7 +79,7 @@ do
     volIndex=`expr $i - 1`
     sudo ../../bin/cli volume mount --name ${volname}$volIndex --array POSArray
 
-    sudo nvme connect -t tcp -n nqn.2019-04.ibof:subsystem$i -a ${target_fabric_ip} -s 1158
+    sudo nvme connect -t tcp -n nqn.2019-04.pos:subsystem$i -a ${target_fabric_ip} -s 1158
 done
 
 sleep 2s;
@@ -88,7 +88,7 @@ sudo ./fio_meta_bench.py -t ${trtype} -i ${target_fabric_ip} -p ${port} -n ${NR_
 
 for i in `seq 1 $NR_VOLUME`
 do
-    sudo nvme disconnect -n nqn.2019-04.ibof:subsystem$i
+    sudo nvme disconnect -n nqn.2019-04.pos:subsystem$i
 done
 
 sudo ./kill_ibofos.sh

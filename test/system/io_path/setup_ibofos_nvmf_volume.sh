@@ -62,9 +62,9 @@ ibofos_bringup(){
 
     for i in `seq 1 $SUBSYSTEM_COUNT`
     do
-        sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem$i -m 256 -a -s IBOF0000000000000$i -d IBOF_VOLUME_EXTENTION
+        sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem$i -m 256 -a -s POS0000000000000$i -d POS_VOLUME_EXTENTION
         port=`expr $i % $PORT_COUNT + 1158`
-        sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem$i -t $TRANSPORT -a $TARGET_IP -s $port
+        sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP -s $port
     done
 
     if [ "$CLEAN_BRINGUP" -eq 1 ]; then

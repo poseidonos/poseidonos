@@ -38,8 +38,8 @@ ibofos_bringup(){
         sudo $SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -u 131072
     fi
     sudo $SPDK_DIR/scripts/rpc.py bdev_malloc_create -b uram0 1024 512
-    sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem1 -a -s IBOF00000000000001 -d IBOF_VOLUME_EXTENTION -m 256
-    sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem1 -t $TRANSPORT -a $TARGET_IP -s 1158
+    sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem1 -a -s POS00000000000001 -d POS_VOLUME_EXTENTION -m 256
+    sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem1 -t $TRANSPORT -a $TARGET_IP -s 1158
 }
 
 print_help()

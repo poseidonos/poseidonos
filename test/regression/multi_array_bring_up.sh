@@ -46,7 +46,7 @@ volname="Volume0"
 io_size_kb_list=(64 128 256) #KB
 spdk_rpc_script="${IBOFOS_ROOT}/lib/spdk/scripts/rpc.py"
 spdk_nvmf_tgt="../lib/spdk/app/nvmf_tgt/nvmf_tgt"
-nss="nqn.2019-04.ibof:subsystem1"
+nss="nqn.2019-04.pos:subsystem1"
 echo_slient=1
 logfile="/var/log/ibofos/multi_array_bringup.log"
 #---------------------------------
@@ -222,11 +222,11 @@ discover_n_connect_nvme_from_initiator()
     
     notice "Connecting remote NVMe drives..."
     iexecc ${nvme_cli} connect -t ${trtype} -n ${nss} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
-    echo `sudo nvme list | grep -E 'SPDK|IBOF|iBoF'`
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -1`
+    echo `sudo nvme list | grep -E 'SPDK|POS|pos'`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -1`
     echo $target_nvme
-    #echo `sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -n 1`
-    #target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -n 1`
+    #echo `sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -n 1`
+    #target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -n 1`
 
     if [ ${exec_mode} -ne 2 ] && [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         error "NVMe drive is not found..."

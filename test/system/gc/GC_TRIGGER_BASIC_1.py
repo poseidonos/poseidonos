@@ -49,7 +49,7 @@ class FIO():
         ns_id = str(vol_id + 1)
         test_name = key
         file_name = "trtype=tcp adrfam=IPv4 traddr=" + ip_addr + \
-            " trsvcid=1158 subnqn=nqn.2019-04.ibof\:subsystem1 ns= " + ns_id
+            " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem1 ns= " + ns_id
         ioengine_path = POS_ROOT + "lib/spdk/examples/nvme/fio_plugin/fio_plugin"
         fio_proc = subprocess.Popen(["fio",
             "--ioengine=" + ioengine_path,\

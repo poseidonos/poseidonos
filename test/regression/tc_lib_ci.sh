@@ -7,7 +7,7 @@ exec_mode=
 target_nvme=
 manual_ibofos_run_mode=0
 nvme_cli="nvme"
-nss="nqn.2019-04.ibof:subsystem"
+nss="nqn.2019-04.pos:subsystem"
 trtype=""
 port="1158"
 target_dev_list="unvme-ns-0,unvme-ns-1,unvme-ns-2"
@@ -151,7 +151,7 @@ create_subsystem()
     do
         connect_port=${port}
         print_info "Creating subsystem ${nss}$i, ip ${target_fabric_ip}, port ${connect_port}"
-        texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss}$i -a -s IBOF0000000000000$i -d IBOF_VOL_$i #>> ${logfile}
+        texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss}$i -a -s POS0000000000000$i -d POS_VOL_$i #>> ${logfile}
 
         print_info "Adding listener ${nss}$i, ip ${target_fabric_ip}, port ${connect_port}"
         texecc ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss}$i -t TCP -a ${target_fabric_ip} -s ${connect_port} #>> ${logfile}
@@ -502,7 +502,7 @@ discover_n_connect_nvme_from_initiator()
 
     print_info "Connecting ${nssName}"
 
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
     if [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         connect_port=${port}
         iexecc ${nvme_cli} connect -t ${trtype} -n ${nssName} -a ${target_fabric_ip} -s ${connect_port}
@@ -951,7 +951,7 @@ write_data()
     iexecc dd if=/dev/urandom of=${write_file} bs=1024K count=1024 seek=0 skip=0 conv=sparse,notrunc oflag=nocache status=none &
     wait
 
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
     if [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         print_result "NVMe drive is not found..." 1
         return 1
@@ -1005,7 +1005,7 @@ verify_data()
     iexecc rm -rf ${read_file} ${cmp_file}
     sleep 1
 
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
     if [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         print_result "NVMe drive is not found..." 1
         return 1

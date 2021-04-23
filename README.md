@@ -127,7 +127,7 @@ ibof@ibof-target:~$ sudo fdisk -l | grep nvme
 
 ### Step 2. Create Write Buffer within DRAM
 ```bash
-root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py bdev_malloc_create -h
+root@ibof-target:IBOF_HOME/lib/spdk-20.10/scripts# ./rpc.py bdev_malloc_create -h
 usage: rpc.py bdev_malloc_create [-h] [-b NAME] [-u UUID]
                                  total_size block_size
  
@@ -142,7 +142,7 @@ optional arguments:
  
 # This command will create a SPDK block device called "malloc bdev" that is a userspace ramdisk with the total size of 8192 MB, the block size of 512 B, and name as "uram0".
 # Currently, only 512 bytes of block size is supported for the write buffer.
-root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py bdev_malloc_create -b uram0 8192 512
+root@ibof-target:IBOF_HOME/lib/spdk-20.10/scripts# ./rpc.py bdev_malloc_create -b uram0 8192 512
 uram0
 ```
 ```bash
@@ -508,7 +508,7 @@ POS is ready to perform volume management task, but still unable to expose its v
 
 Create NVMe-oF Subsystem
 ```bash
-root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_subsystem -h
+root@ibof-target:IBOF_HOME/lib/spdk-20.10/scripts# ./rpc.py nvmf_create_subsystem -h
 usage: rpc.py nvmf_create_subsystem [-h] [-t TGT_NAME] [-s SERIAL_NUMBER]
                                     [-d MODEL_NUMBER] [-a] [-m MAX_NAMESPACES]
                                     nqn
@@ -529,14 +529,14 @@ optional arguments:
   -m MAX_NAMESPACES, --max-namespaces MAX_NAMESPACES
                         Maximum number of namespaces allowed
   
-root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem1 -a -s IBOF00000000000001 -d IBOF_VOLUME_EXTENSION -m 256
+root@ibof-target:IBOF_HOME/lib/spdk-20.10/scripts# ./rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem1 -a -s POS00000000000001 -d POS_VOLUME_EXTENSION -m 256
 ```
 
 The following command configures TCP transport to use when network connection is established between an initiator and a target. is between initiator and target. 
 
 Create NVMe-oF Transport
 ```bash
-root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_transport -h
+root@ibof-target:IBOF_HOME/lib/spdk-20.10/scripts# ./rpc.py nvmf_create_transport -h
 usage: rpc.py nvmf_create_transport [-h] -t TRTYPE [-g TGT_NAME]
                                     [-q MAX_QUEUE_DEPTH]
                                     [-p MAX_QPAIRS_PER_CTRLR]
@@ -584,14 +584,14 @@ optional arguments:
                         The sock priority of the tcp connection. Relevant only
                         for TCP transport
   
-root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_transport -t tcp -b 64 -n 2048
+root@ibof-target:IBOF_HOME/lib/spdk-20.10/scripts# ./rpc.py nvmf_create_transport -t tcp -b 64 -n 2048
 ```
 
 The following command makes a given NVM subsystem listen on a TCP port and serve incoming NVMe-oF requests. 
 
 Add NVMe-oF Subsystem Listener
 ```bash
-root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_subsystem_add_listener -h
+root@ibof-target:IBOF_HOME/lib/spdk-20.10/scripts# ./rpc.py nvmf_subsystem_add_listener -h
 usage: rpc.py nvmf_subsystem_add_listener [-h] -t TRTYPE -a TRADDR
                                           [-p TGT_NAME] [-f ADRFAM]
                                           [-s TRSVCID]
@@ -615,7 +615,7 @@ optional arguments:
                         NVMe-oF transport service id: e.g., a port number
  
  
-root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ifconfig
+root@ibof-target:IBOF_HOME/lib/spdk-20.10/scripts# ifconfig
 br-ffbb105da0b0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
         inet 172.18.0.1  netmask 255.255.0.0  broadcast 172.18.255.255
         ether 02:42:bc:6d:42:c0  txqueuelen 0  (Ethernet)
@@ -661,15 +661,15 @@ lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
   
   
   
-root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem1 -t tcp -a 10.100.11.20 -s 1158
+root@ibof-target:IBOF_HOME/lib/spdk-20.10/scripts# ./rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem1 -t tcp -a 10.100.11.20 -s 1158
 ```
 
-In the above example, the NVM subsystem called "nqn.2019-04.ibof:subsystem1" has been configured to listen on (10.100.11.20, 1158) and use TCP transport. If you miss this step, POS wouldn't be able to mount POS volumes even though it could create new ones. 
+In the above example, the NVM subsystem called "nqn.2019-04.pos:subsystem1" has been configured to listen on (10.100.11.20, 1158) and use TCP transport. If you miss this step, POS wouldn't be able to mount POS volumes even though it could create new ones. 
 At this point, you should be able to retrieve the configured NVM subsystem like in the following:
 
 Retrieve NVM subsystem information
 ```bash
-root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_get_subsystems
+root@ibof-target:IBOF_HOME/lib/spdk-20.10/scripts# ./rpc.py nvmf_get_subsystems
 [
   {
     "nqn": "nqn.2014-08.org.nvmexpress.discovery",
@@ -679,7 +679,7 @@ root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_get_subsystems
     "hosts": []
   },
   {
-    "nqn": "nqn.2019-04.ibof:subsystem1",
+    "nqn": "nqn.2019-04.pos:subsystem1",
     "subtype": "NVMe",
     "listen_addresses": [
       {
@@ -692,8 +692,8 @@ root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_get_subsystems
     ],
     "allow_any_host": true,
     "hosts": [],
-    "serial_number": "IBOF00000000000001",
-    "model_number": "IBOF_VOLUME_EXTENSION",
+    "serial_number": "POS00000000000001",
+    "model_number": "POS_VOLUME_EXTENSION",
     "max_namespaces": 256,
     "namespaces": []
   }
@@ -820,7 +820,7 @@ Please note that the status of the volume has become Mounted.  If we check the N
 
 Retrieve NVM subsystem information
 ```bash 
-root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_get_subsystems
+root@ibof-target:IBOF_HOME/lib/spdk-20.10/scripts# ./rpc.py nvmf_get_subsystems
 [
   {
     "nqn": "nqn.2014-08.org.nvmexpress.discovery",
@@ -830,7 +830,7 @@ root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_get_subsystems
     "hosts": []
   },
   {
-    "nqn": "nqn.2019-04.ibof:subsystem1",
+    "nqn": "nqn.2019-04.pos:subsystem1",
     "subtype": "NVMe",
     "listen_addresses": [
       {
@@ -843,8 +843,8 @@ root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_get_subsystems
     ],
     "allow_any_host": true,
     "hosts": [],
-    "serial_number": "IBOF00000000000001",
-    "model_number": "IBOF_VOLUME_EXTENSION",
+    "serial_number": "POS00000000000001",
+    "model_number": "POS_VOLUME_EXTENSION",
     "max_namespaces": 256,
     "namespaces": [
       {

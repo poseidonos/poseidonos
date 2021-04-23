@@ -81,7 +81,7 @@ test_option_list=("NPOR test with data verification" "NPOR test with IO" "NPOR t
 io_size_kb_list=(64 128 256) #KB
 spdk_rpc_script="${IBOFOS_ROOT}/lib/spdk/scripts/rpc.py"
 spdk_nvmf_tgt="../lib/spdk/app/nvmf_tgt/nvmf_tgt"
-nss="nqn.2019-04.ibof:subsystem1"
+nss="nqn.2019-04.pos:subsystem1"
 echo_slient=1
 logfile="/var/log/pos/npor_test.log"
 #---------------------------------
@@ -288,7 +288,7 @@ discover_n_connect_nvme_from_initiator()
     
     notice "Connecting remote NVMe drives..."
     iexecc ${nvme_cli} connect -t ${trtype} -n ${nss} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -n 1`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|pos|POS' | awk '{print $1}' | head -n 1`
 
     if [ ${exec_mode} -ne 2 ] && [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         error "NVMe drive is not found..."
@@ -411,7 +411,7 @@ bringup_pos()
 
     start_pos;
 
-    texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss} -a -s IBOF00000000000001  -d IBOF_VOLUME #>> ${logfile}
+    texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss} -a -s POS00000000000001  -d POS_VOLUME #>> ${logfile}
     texecc ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512
 
     texecc ${IBOFOS_ROOT}/bin/cli device scan >> ${logfile}

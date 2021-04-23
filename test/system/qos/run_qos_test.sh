@@ -339,7 +339,7 @@ disconnect_nvmf_controllers() {
     echo "Disconnecting devices" >> ${logfile}
     for i in $(seq 1 $num_subsystems)
     do
-        sudo nvme disconnect -n nqn.2019-04.ibof:subsystem$i #>> ${logfile}
+        sudo nvme disconnect -n nqn.2019-04.pos:subsystem$i #>> ${logfile}
     done
 }
 

@@ -6,7 +6,7 @@
 ROOT_DIR=$(readlink -f $(dirname $0))/../../../
 SPDK_DIR=$ROOT_DIR/lib/spdk
 
-NVMF_TARGET_NQN_PREFIX=nqn.2019-04.ibof:subsystem
+NVMF_TARGET_NQN_PREFIX=nqn.2019-04.pos:subsystem
 NVMF_TARGET_PORT=1158
 NVMF_INITIATOR_APP=nvme
 

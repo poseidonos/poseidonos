@@ -94,7 +94,7 @@ class FIO():
             ns_id = str(vol_id + 1)
             test_name = key
             file_name = "trtype=tcp adrfam=IPv4 traddr=" + ip_addr + \
-                " trsvcid=1158 subnqn=nqn.2019-04.ibof\:subsystem1 ns= " + ns_id
+                " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem1 ns= " + ns_id
             remainig_min = (TESTTIME_IN_HOUR - ELAPSED_HOUR) * MINUTES_PER_HOUR - ELAPSED_MIN + EST_SECONDS_FOR_REBUILD
             runtime_sec = remainig_min * SECONDS_PER_MINUTE 
             write_log ("runtime_in_sec: " + str(runtime_sec))

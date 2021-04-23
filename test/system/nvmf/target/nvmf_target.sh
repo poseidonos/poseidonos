@@ -41,9 +41,9 @@ rpc)
 	for i in `seq 1 $NR_SUBSYSTEM`
 	do
 		$SPDK_DIR/scripts/rpc.py bdev_null_create Null$i 1024 512
-		$SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem$i -a -s IBOF0000000000000$i -d IBOF_VOLUME$i
-		$SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_ns nqn.2019-04.ibof:subsystem$i Null$i
-		$SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem$i -t tcp -a $SERVER_IP -s 1158
+		$SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem$i -a -s POS0000000000000$i -d POS_VOLUME$i
+		$SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_ns nqn.2019-04.pos:subsystem$i Null$i
+		$SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t tcp -a $SERVER_IP -s 1158
 	done
 	$SPDK_DIR/scripts/rpc.py nvmf_get_subsystems
 	;;

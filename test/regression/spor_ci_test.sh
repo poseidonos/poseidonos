@@ -40,7 +40,7 @@ trtype=tcp
 port="1158"
 #---------------------------------------------------
 nvme_cli="nvme"
-nss="nqn.2019-04.ibof:subsystem"
+nss="nqn.2019-04.pos:subsystem"
 subsystem_num=6
 uram_backup_dir="/tmp"
 log_dir="$(pwd)/spor_log"

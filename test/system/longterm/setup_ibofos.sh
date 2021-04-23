@@ -37,9 +37,9 @@ fi
 
 for ((i=1;i<=$numofsubsystem;i++))
 do
-    sudo $spdkdir/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem${i} -a -s IBOF0000000000000${i} -d IBOF_VOLUME_EXTENTION
+    sudo $spdkdir/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem${i} -a -s POS0000000000000${i} -d POS_VOLUME_EXTENTION
     port=`expr $i % $PORT_NUM + 1158`
-    sudo $spdkdir/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem${i} -t tcp -a ${ip} -s ${port}
+    sudo $spdkdir/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem${i} -t tcp -a ${ip} -s ${port}
 done
 
 if [ $create_array -eq 1 ]; then

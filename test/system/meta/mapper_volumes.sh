@@ -35,15 +35,15 @@ common_until_array() {
     sudo $rootdir/bin/cli request scan_dev
 
     # This test uses 4 volumes
-    sudo $spdkdir/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem1 -a -s IBOF00000000000001 -d IBOF_VOLUME_EXTENTION
-    sudo $spdkdir/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem2 -a -s IBOF00000000000002 -d IBOF_VOLUME_EXTENTION
-    sudo $spdkdir/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem3 -a -s IBOF00000000000003 -d IBOF_VOLUME_EXTENTION
-    sudo $spdkdir/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem4 -a -s IBOF00000000000004 -d IBOF_VOLUME_EXTENTION
+    sudo $spdkdir/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem1 -a -s POS00000000000001 -d POS_VOLUME_EXTENTION
+    sudo $spdkdir/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem2 -a -s POS00000000000002 -d POS_VOLUME_EXTENTION
+    sudo $spdkdir/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem3 -a -s POS00000000000003 -d POS_VOLUME_EXTENTION
+    sudo $spdkdir/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem4 -a -s POS00000000000004 -d POS_VOLUME_EXTENTION
 
-    sudo $spdkdir/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem1 -t tcp -a $fablic_ip -s $port
-    sudo $spdkdir/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem2 -t tcp -a $fablic_ip -s $port
-    sudo $spdkdir/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem3 -t tcp -a $fablic_ip -s $port
-    sudo $spdkdir/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem4 -t tcp -a $fablic_ip -s $port
+    sudo $spdkdir/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem1 -t tcp -a $fablic_ip -s $port
+    sudo $spdkdir/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem2 -t tcp -a $fablic_ip -s $port
+    sudo $spdkdir/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem3 -t tcp -a $fablic_ip -s $port
+    sudo $spdkdir/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem4 -t tcp -a $fablic_ip -s $port
 
     sudo $spdkdir/scripts/rpc.py nvmf_get_subsystems
 
@@ -70,15 +70,15 @@ volume_create() {
 }
 
 volume_all_mount() {
-    sudo $rootdir/bin/cli request mount_vol --name vol1 --subnqn nqn.2019-04.ibof:subsystem1
-    sudo $rootdir/bin/cli request mount_vol --name vol2 --subnqn nqn.2019-04.ibof:subsystem2 
-    sudo $rootdir/bin/cli request mount_vol --name vol3 --subnqn nqn.2019-04.ibof:subsystem3 
-    sudo $rootdir/bin/cli request mount_vol --name vol4 --subnqn nqn.2019-04.ibof:subsystem4 
+    sudo $rootdir/bin/cli request mount_vol --name vol1 --subnqn nqn.2019-04.pos:subsystem1
+    sudo $rootdir/bin/cli request mount_vol --name vol2 --subnqn nqn.2019-04.pos:subsystem2 
+    sudo $rootdir/bin/cli request mount_vol --name vol3 --subnqn nqn.2019-04.pos:subsystem3 
+    sudo $rootdir/bin/cli request mount_vol --name vol4 --subnqn nqn.2019-04.pos:subsystem4 
 }
 
 a_volume_mount() {
     sleep $2
-    sudo $rootdir/bin/cli request mount_vol --name vol$1 --subnqn nqn.2019-04.ibof:subsystem$1
+    sudo $rootdir/bin/cli request mount_vol --name vol$1 --subnqn nqn.2019-04.pos:subsystem$1
 }
 
 seqwrite_all_volume()

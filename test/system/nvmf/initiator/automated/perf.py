@@ -95,7 +95,7 @@ def get_qd_and_filename(wk_qd):
         else:
             QD = wk_qd[1]
         address = get_ip_address(i)
-        command += " --name=test" + str(i) + " --iodepth=" + str(QD) + " --filename='trtype=" + str(args.transport) + " adrfam=IPv4 traddr=" + str(address) + " trsvcid=1158 subnqn=nqn.2019-04.ibof\:subsystem" + str(i+1) + " ns=1'"
+        command += " --name=test" + str(i) + " --iodepth=" + str(QD) + " --filename='trtype=" + str(args.transport) + " adrfam=IPv4 traddr=" + str(address) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem" + str(i+1) + " ns=1'"
     return command
             
 def run_fio(workload, fio_command_for_each_test, fio_result_fd):

@@ -207,7 +207,7 @@ parser.add_option("-t", "--transport", dest="transport", help="nvmf transport na
 parser.add_option("-i", "--ip", dest="ip", help="nvmf listen ip", default="10.100.11.1")
 parser.add_option("-p", "--port", dest="port", type='int', help="nvmf listen port", default=1158)
 parser.add_option("-n", "--nsid", dest="nsid", type='int', help="namespace id", default=1)
-parser.add_option("-s", "--subnqn",dest="subnqn", help="nvmf subsystem nqn", default="nqn.2019-04.ibof\:subsystem1")
+parser.add_option("-s", "--subnqn",dest="subnqn", help="nvmf subsystem nqn", default="nqn.2019-04.pos\:subsystem1")
 (options, args) = parser.parse_args()
 filename="trtype=" + options.transport + " adrfam=IPv4" + " traddr=" + options.ip + " trsvcid=" + str(options.port) + " subnqn="  + options.subnqn + " ns=" + str(options.nsid);
 print(filename);

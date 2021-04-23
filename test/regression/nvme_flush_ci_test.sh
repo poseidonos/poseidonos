@@ -168,14 +168,14 @@ connect_devices()
 
     for i in $(seq 1 $num_subsystems)
     do
-        sudo nvme connect -t $TRANSPORT -a $TARGET_FABRIC_IP -s $PORT_NUM -n nqn.2019-04.ibof:subsystem$i >> ${logfile}
+        sudo nvme connect -t $TRANSPORT -a $TARGET_FABRIC_IP -s $PORT_NUM -n nqn.2019-04.pos:subsystem$i >> ${logfile}
         if [[ $? -ne 0 ]]; then
             echo "Failed to connect devices using nvmf. Check ip."
             exit_CItest_on_Failure $num_subsystems
         fi
     done
 
-    target_devices=($(sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}'))
+    target_devices=($(sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}'))
 
     for device in "${target_devices[@]}"
     do
@@ -196,7 +196,7 @@ disconnect_nvmf_controllers()
     echo "  Disconnecting nvmf controllers"
     for i in $(seq 1 $num_subsystems)
     do
-        sudo nvme disconnect -n nqn.2019-04.ibof:subsystem$i >> ${logfile}
+        sudo nvme disconnect -n nqn.2019-04.pos:subsystem$i >> ${logfile}
     done
 }
 

@@ -26,9 +26,9 @@ typedef void (*IBoFNvmfEventDoneCallback_t)(void *cb_arg, int status);
 extern struct spdk_nvmf_tgt *g_spdk_nvmf_tgt;
 static struct NvmfTargetCallbacks nvmfCallbacks;
 
-const char* nqn1 = "nqn.2019-04.ibof:subsystem1";
-const char* nqn2 = "nqn.2019-04.ibof:subsystem2";
-const char* nqn3 = "nqn.2019-04.ibof:subsystem3";
+const char* nqn1 = "nqn.2019-04.pos:subsystem1";
+const char* nqn2 = "nqn.2019-04.pos:subsystem2";
+const char* nqn3 = "nqn.2019-04.pos:subsystem3";
 const char* ibof_bdev1 = "Volume0";
 const char* ibof_bdev2 = "Volume1";
 const char* ibof_bdev3 = "Volume2";
@@ -125,19 +125,19 @@ void testCreateRDMATransport(void* cb_arg, int status){
 
 void testCreateSubsystem1(void* cb_arg, int status){
 	EXPECT_EQ(0, status);
-	bool ret = CreateNvmfSubsystem(nqn1, "IBOF00000000000001", 0, true, testCreateSubsystem2, target);
+	bool ret = CreateNvmfSubsystem(nqn1, "POS00000000000001", 0, true, testCreateSubsystem2, target);
 	EXPECT_EQ(true, ret);
 }
 
 void testCreateSubsystem2(void* cb_arg, int status){
 	EXPECT_EQ(0, status);
-	bool ret = CreateNvmfSubsystem(nqn2, "IBOF00000000000002", 0, true, testCreateSubsystem3, target);
+	bool ret = CreateNvmfSubsystem(nqn2, "POS00000000000002", 0, true, testCreateSubsystem3, target);
 	EXPECT_EQ(true, ret);
 }
 
 void testCreateSubsystem3(void* cb_arg, int status){
 	EXPECT_EQ(0, status);
-	bool ret = CreateNvmfSubsystem(nqn3, "IBOF00000000000003", 0, true, testAttachListener1, target);
+	bool ret = CreateNvmfSubsystem(nqn3, "POS00000000000003", 0, true, testAttachListener1, target);
 	EXPECT_EQ(true, ret);
 }
 

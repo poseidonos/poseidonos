@@ -18,7 +18,7 @@ If the document does not explicit "VPP ONLY", we use this script in normal (pose
       In build_ibof_lib.sh file, please add below. 
       Even if you build with vpp option, spdk will execute with kTCP network without vpp application.
      	#please add --with-vpp if you need to use VPP
-		./configure --with-dpdk=$ROOT_DIR/dpdk/ --with-rdma --with-fio=$ROOT_DIR/${FIO_SOURCE} --with-ibof --without-isal
+		./configure --with-dpdk=$ROOT_DIR/dpdk/ --with-rdma --with-fio=$ROOT_DIR/${FIO_SOURCE} --with-pos --without-isal
 
       rm spdk/mk/config.mk
       ./build_ibof_lib.sh spdk 

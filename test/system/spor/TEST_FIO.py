@@ -67,7 +67,7 @@ def verify_block(volumeId, offset, size, pattern1, pattern2, logger=0):
 
 def run_fio(workload, volumeId, io_size_bytes, io_offset, verify_pattern, ip, port, transport="tcp", runTime=0, logger=0):
     msg = "io={}, pattern={}".format(workload, verify_pattern)
-    filename = "trtype=" + transport + " adrfam=IPv4" + " traddr=" + ip + " trsvcid=" + str(port) + " subnqn=nqn.2019-04.ibof\\:subsystem" + str(volumeId) + " ns=1"
+    filename = "trtype=" + transport + " adrfam=IPv4" + " traddr=" + ip + " trsvcid=" + str(port) + " subnqn=nqn.2019-04.pos\\:subsystem" + str(volumeId) + " ns=1"
     command = "fio --thread=1 --group_reporting=1 --direct=1 " \
             + " --ioengine=" + TEST.ioengine + "" \
             + " --size=" + str(io_size_bytes) + "" \

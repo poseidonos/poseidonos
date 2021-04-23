@@ -53,7 +53,7 @@ cwd="/home/ibof/ibofos/"
 exec_mode=0
 touch $cliOutput
 
-nss="nqn.2019-04.ibof:subsystem1"
+nss="nqn.2019-04.pos:subsystem1"
 
 transport=tcp
 target_ip=10.1.11.254

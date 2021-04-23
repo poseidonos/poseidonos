@@ -11,15 +11,15 @@ cd $(dirname $0)
 print_help()
 {
 cat << EOF
-fault-tolerance test script for ci
+fault-tolerance test script
 
 Synopsis
     ./fault_tolerance_test.sh [OPTION]
 
 Prerequisite
     1. please make sure that file below is properly configured according to your env.
-        {IBOFOS_ROOT}/test/system/network/network_config.sh
-    2. please make sure that poseidonos binary exists on top of ${IBOFOS_ROOT}
+        {POS_ROOT}/test/system/network/network_config.sh
+    2. please make sure that pos binary exists on top of ${POS_ROOT}
     3. please configure your ip address, volume size, etc. propertly by editing fault_tolerance_test.sh
 
 Description
@@ -27,9 +27,8 @@ Description
         Repeat test sequence n times according to the given value
         Default setting value is 10
     -m
-        Manual mode for poseidonos start. You should start poseidonos application by yourself according to follow the indication.
+        Manual mode for pos start. You should start pos application by yourself according to follow the indication.
         You can use this option for debugging purpose.
-    -f [target_fabric_ip]
     -h 
         Show script usage
 
@@ -42,35 +41,33 @@ EOF
 
 #---------------------------------
 # Default configuration (if specific option not given)
-manual_ibofos_run_mode=0
+manual_pos_run_mode=0
 #---------------------------------
 # manual configuration (edit below according to yours)
 ibof_phy_volume_size_mb=102400
 test_volume_size_mb=102400
-max_io_range_mb=512
-dummy_size_mb=$((${max_io_range_mb}*2))
+max_io_range_mb=512 #5GB
+dummy_size_mb=$((${max_io_range_mb}*10))
 cwd=`pwd`
-target_fabric_ip="10.100.1.25"
+target_fabric_ip="10.1.11.6"
 trtype=tcp
 port="1158"
-target_dev_list="unvme-ns-0,unvme-ns-1,unvme-ns-2"
-detach_dev="unvme-ns-0"
+target_dev_list=("unvme-ns-0,unvme-ns-1,unvme-ns-2")
+target_dev="unvme-ns-0"
 target_spare_dev="unvme-ns-3"
 nvme_cli="nvme"
-root_dir="../../"
-ibof_cli="${root_dir}bin/cli "
+root_dir="../../../"
+ibof_cli="${root_dir}bin/cli request --json"
 network_config_file="${root_dir}test/system/network/network_config.sh"
-total_iter=3
-array_name="POSArray"
 #---------------------------------
 # internal configuration
 target_nvme=""
 volname="Volume0"
 file_postfix=".dat"
-write_file="wdata.tmp"
+write_file="write.tmp"
 read_file="read"${file_postfix}
 cmp_file="cmp"${file_postfix}
-device_type_list=("PoseidonOS bdev" "iBOFOS bdev under Mock drive")
+device_type_list=("PoseidonOS bdev" "pos bdev under Mock drive")
 io_size_kb_list=(64 128 256) #KB
 spdk_rpc_script="${root_dir}lib/spdk/scripts/rpc.py"
 spdk_nvmf_tgt="${root_dir}lib/spdk/app/nvmf_tgt/nvmf_tgt"
@@ -96,11 +93,10 @@ print_test_configuration()
     echo "  - Working directory:    ${cwd}"
     echo ""
     echo "> Test configuration:"
-    echo "  - Manual mode:          ${manual_ibofos_run_mode}"
+    echo "  - Manual mode:          ${manual_pos_run_mode}"
     echo "  - iBoF volume size:     ${ibof_phy_volume_size_mb} (MB)"
     echo "  - Test volume range:    ${test_volume_size_mb} (MB)"
     echo "  - Max I/O range:        ${max_io_range_mb} (MB)"
-    echo "  - Test Iteration:       ${total_iter}"
     echo ""
     echo "> Logging:"
     echo "  - File: ${logfile}@initiator, pos.log@target"
@@ -110,11 +106,7 @@ print_test_configuration()
     echo "  - Please make sure that fabric connection before running test..."
     echo "------------------------------------------"
 
-}
-
-network_module_check()
-{
-    ${root_dir}/test/regression/network_module_check.sh
+    wait_any_keyboard_input;
 }
 
 setup_prerequisite()
@@ -130,6 +122,7 @@ setup_prerequisite()
         touch ${logfile};
     fi
     clean_up;
+#    ./setup_env.sh;
 
     if [ ${trtype} == "rdma" ]; then
         echo -n "RDMA configuration for server..."
@@ -147,9 +140,9 @@ setup_prerequisite()
     ifconfig >> ${logfile}
 }
 
-kill_ibofos()
+kill_pos()
 {
-	pkill -9 poseidonos
+	pkill -9 ibofos
     echo ""
 }
 
@@ -157,35 +150,29 @@ clean_up()
 {
     disconnect_nvmf_contollers;
     
-    kill_ibofos;
+    kill_pos;
 
     rm -rf *${file_postfix}
     rm -rf ${logfile}
     rm -rf pos.log
 }
 
-start_ibofos()
+start_pos()
 {
-	rm -rf /dev/shm/ibof_nvmf_trace.pid*
-	echo "PoseidonOS starting..."
+    # clean up obsolete temp files
+    rm -rf /dev/shm/ibof_nvmf_trace.pid*
 
-    if [ ${manual_ibofos_run_mode} -eq 1 ]; then
+    if [ ${manual_pos_run_mode} -eq 1 ]; then
         notice "Please start PoseidonOS application now..."
         wait_any_keyboard_input
     else 
-        notice "Starting poseidonos..."
-        ${root_dir}/test/regression/start_poseidonos.sh
+        notice "Starting pos..."
+        ./start_ibofos.sh
+#		nohup ${ibof_cli} &>> ${logfile} & 
     fi
 
-	result=`${root_dir}/bin/cli system info --json | jq '.Response.info.version' 2>/dev/null`
-	while [ -z ${result} ];
-	do
-		echo "Wait PoseidonOS..."
-		result=`${root_dir}/bin/cli system info --json | jq '.Response.info.version' 2>/dev/null`
-		sleep 0.5
-	done
-
-    notice "Now poseidonos is running..."
+    sleep 15 # takes longer if pos accesses actual drives
+    notice "Now pos is running..."
 }
 
 establish_nvmef_target()
@@ -201,7 +188,6 @@ establish_nvmef_target()
         ${spdk_rpc_script} nvmf_create_transport -t ${create_trtype} -b 64 -n 4096 #>> ${logfile}
     fi
 
-    
     ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss} -t ${trtype} -a ${target_fabric_ip} -s ${port} #>> ${logfile}
 
     notice "New NVMe subsystem accessiable via Fabric has been added successfully to target!"
@@ -303,66 +289,58 @@ write_pattern()
     parallel_dd ${write_file} ${target_nvme} ${blk_unit_size} ${io_blk_cnt} 0 ${blk_offset}
 
     echo 3 > /proc/sys/vm/drop_caches
+    sleep 4
     notice "Data write has been finished!"
 }
 
-shutdown_ibofos()
+shutdown_pos()
 {
-    notice "Shutting down poseidonos..."
-	${ibof_cli} array unmount --name $array_name
-	${ibof_cli} system exit
+    notice "Shutting down pos..."
+	${ibof_cli} unmount_ibofos
+	${ibof_cli} exit_ibofos
     notice "Shutdown has been completed!"
+    sleep 60
 
     disconnect_nvmf_contollers;
 
-    notice "poseidonos is stopped"
-    wait_ibofos
+    ./backup_latest_hugepages_for_uram.sh &>> ${logfile}
+    sleep 3
 }
 
-wait_ibofos()
+bringup_pos()
 {
-    ps -C poseidonos > /dev/null
-    while [[ ${?} == 0 ]]
-    do
-        sleep 0.5
-        ps -C poseidonos > /dev/null
-    done
-}
-
-bringup_ibofos()
-{
-    local ibofos_volume_required=1
+    local pos_volume_required=1
 
     create_array=0
     if [ ! -z $1 ] && [ $1 == "create" ]; then
         create_array=1
     fi
 
-    start_ibofos;
+    start_pos;
 
     ${spdk_rpc_script} nvmf_create_subsystem ${nss} -a -s POS00000000000001  -d POS_VOLUME #>> ${logfile}
     ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512
+    sleep 1
 
-    ${ibof_cli} device scan >> ${logfile}
-    ${ibof_cli} device list >> ${logfile}
+    ${ibof_cli} scan_dev >> ${logfile}
+    ${ibof_cli} list_dev >> ${logfile}
 
 	if [ $create_array -eq 1 ]; then
-        ${root_dir}bin/cli array reset
 		info "Target device list=${target_dev_list}"
-		${ibof_cli} array create -b uram0 -d ${target_dev_list} --name $array_name
-	fi
+        ${root_dir}bin/cli array reset --json
+		${ibof_cli} create_array -b uram0 -d ${target_dev_list}
 	
-	${ibof_cli} array mount --name $array_name
+	${ibof_cli} mount_ibofos
 
-    if [ ${ibofos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
+    if [ ${pos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        ${ibof_cli} volume create --name ${volname} --size ${ibof_phy_volume_size_byte} --array $array_name >> ${logfile};
+        ${ibof_cli} create_vol --name ${volname} --size ${ibof_phy_volume_size_byte} >> ${logfile};
         check_result_err_from_logfile
     fi
 
-    if [ ${ibofos_volume_required} -eq 1 ]; then
+    if [ ${pos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
-        ${ibof_cli} volume mount --name ${volname} --array $array_name >> ${logfile};
+        ${ibof_cli} mount_vol --name ${volname} >> ${logfile};
         check_result_err_from_logfile
     fi
     
@@ -381,6 +359,7 @@ verify_data()
 
     notice "Starting to load written data for data verification..."
     rm -rf ${read_file}
+    sleep 2
     #wait_any_keyboard_input;
 
     notice "Read data: Target block offset=${blk_offset}, IO block cnt=${io_blk_cnt}, Blk size= ${blk_unit_size}(KB)"
@@ -407,17 +386,17 @@ verify_data()
 
 detach_device()
 {
-	local dev_name=${detach_dev}
-    ${root_dir}/test/script/detach_device.sh ${dev_name} 1
+	local dev_name=${target_dev}
+    ${root_dir}/script/detach_device.sh ${dev_name} 1
     sleep 0.1
-    notice "${dev_name} is detached."
+    notice "${dev_name} is detected."
 }
 
 add_spare()
 {
-    notice "add spare device ${dev_name}"
 	local dev_name=${target_spare_dev}
-	${ibof_cli} array add --spare ${dev_name} --array $array_name
+        notice "add spare device ${dev_name}"
+	${ibof_cli} add_dev --spare ${dev_name}
 }
 
 waiting_for_rebuild_complete()
@@ -425,12 +404,10 @@ waiting_for_rebuild_complete()
 	notice "waiting for rebuild complete"
 	while :
 	do
-		state=$(${ibof_cli} array info --name $array_name --json | jq '.Response.result.data.state')
-		if [ $state = "\"NORMAL\"" ]; then
+		${ibof_cli} info | grep "\"state\":\"NORMAL\""
+		if [ $? -eq 0 ]; then
 			break;
 		else
-            rebuild_progress=$(${ibof_cli} array info --name $array_name --json | jq '.Response.result.data.rebuildingProgress')
-            info "Rebuilding Progress [${rebuild_progress}]"
 			sleep 3
 		fi
 	done
@@ -440,7 +417,7 @@ waiting_for_rebuild_complete()
 run_test()
 {
     echo ""
-	echo -e "\n\033[1;32mStarting..................................\033[0m"
+	echo -e "\n\033[1;32mStaring..................................\033[0m"
 
 	local max_idx_num_of_list=$((${#io_size_kb_list[@]} - 1))
 	local idx=`shuf -i 0-${max_idx_num_of_list} -n 1`
@@ -465,13 +442,13 @@ run_test()
 		((iter++))
 	done
 
-	bringup_ibofos create
+	bringup_pos create
 	write_pattern 0 ${dummy_range_blk} ${blk_size_kb} #dummy write
 	write_pattern ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # write #0
 	detach_device
 	write_pattern ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # write #1
-	shutdown_ibofos;
-	bringup_ibofos 0;
+	shutdown_pos;
+	bringup_pos 0;
 	verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
 	verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
 
@@ -525,31 +502,29 @@ check_permission()
     fi
 }
 
-
 run_iter()
 {
+	local total_iter=10
 	local curr_iter=1
 	while [ ${curr_iter} -le ${total_iter} ]; do
-		echo -e "\n\033[1;32mStarting new iteration...[${curr_iter}/${total_iter}]..................................\033[0m"
+		echo -e "\n\033[1;32mStaring new iteration...[${curr_iter}/${total_iter}]..................................\033[0m"
 		run_test
 		disconnect_nvmf_contollers;
-		shutdown_ibofos;
+		${ibof_cli} unmount_ibofos >> ${logfile}
+		${ibof_cli} exit_ibofos >> ${logfile}
+		sleep 1
 		((curr_iter++))
 	done
 }
 
 check_permission
 
-while getopts "t:i:hx:d:m:f:i:" opt
+while getopts "t:i:hx:d:m" opt
 do
     case "$opt" in
-        m) manual_ibofos_run_mode=1
+        m) manual_pos_run_mode=1
             ;;
         h) print_help
-            ;;
-        f) target_fabric_ip="$OPTARG"
-            ;;
-        i) total_iter="$OPTARG"
             ;;
         ?) exit 2
             ;;
@@ -558,7 +533,6 @@ done
 
 #------------------------------------
 print_test_configuration
-network_module_check
 setup_prerequisite
 prepare_write_file
 
@@ -567,3 +541,4 @@ run_iter
 clean_up
 
 echo -e "\n\033[1;32m Fault-Tolerance test has been successfully finished! Congrats! \033[0m"
+    wait_any_keyboard_input;

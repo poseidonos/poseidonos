@@ -35,7 +35,7 @@ dump_map = False
 
 ## nvme setup
 NVME_CLI_CMD = 'nvme'
-NQN = 'nqn.2019-04.ibof:subsystem'
+NQN = 'nqn.2019-04.pos:subsystem'
 
 ## fio setup
 ioengine = pos_root + "/lib/spdk/examples/nvme/fio_plugin/fio_plugin"

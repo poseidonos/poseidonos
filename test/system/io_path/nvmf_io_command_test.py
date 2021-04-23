@@ -41,7 +41,7 @@ IO_ENGINE = 'aio'
 IO_DEPTH = '128'
 SECTOR_SIZE=512
 TEST_INTERNAL_ERR = -1
-NQN = 'nqn.2019-04.ibof:subsystem1'
+NQN = 'nqn.2019-04.pos:subsystem1'
 stopOnError = False
 result = dict()
 retry_limit = 4
@@ -124,7 +124,7 @@ def PowerOn(clean):
         #this error is critical, exit this process.
         exit(1)  
 
-    command = "nvme list | grep IBOF | awk '{print $1; exit}'"
+    command = "nvme list | grep POS | awk '{print $1; exit}'"
     global dev_name
     retry_count = 0
     dev_name = ""

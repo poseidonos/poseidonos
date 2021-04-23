@@ -23,17 +23,17 @@
 
     for i in `seq 1 $SUBSYSTEM_NUM`
     do    
-       $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem$i -a -s IBOF0000000000000$i -d IBOF_VOLUME
+       $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem$i -a -s POS0000000000000$i -d POS_VOLUME
     done
 
     for i in `seq 1 $SUBSYSTEM_NUM`
     do    
-       $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_ns nqn.2019-04.ibof:subsystem$i Null$i
+       $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_ns nqn.2019-04.pos:subsystem$i Null$i
     done       
 
     for i in `seq 1 $SUBSYSTEM_NUM`
     do    
-       $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem$i -t tcp -a 172.16.1.1 -s 1158
+       $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t tcp -a 172.16.1.1 -s 1158
     done
 
 exit 0

@@ -121,7 +121,7 @@ def run_fio(io_size_bytes, block_size, qd, rw_mix, cpus_allowed, run_num, worklo
     command += extra_fio_options
 
     for i in range(0, file_num):
-        command += " --name=test" + str(i) + " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=nqn.2019-04.ibof\:subsystem" + str(i+1) + " ns=1'"
+        command += " --name=test" + str(i) + " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem" + str(i+1) + " ns=1'"
 
     if verbose == True:
         print(command)
@@ -157,7 +157,7 @@ parser.add_option("-t", "--transport", dest="transport", help="nvmf transport na
 parser.add_option("-i", "--ip", dest="ip", help="nvmf listen ip", default="10.100.11.10")
 parser.add_option("-p", "--port", dest="port", type='int', help="nvmf listen port", default=1158)
 parser.add_option("-n", "--number", dest="number", type='int', help="number of volumes", default=1)
-parser.add_option("-s", "--subnqn",dest="subnqn", help="nvmf subsystem nqn", default="nqn.2019-04.ibof\:subsystem")
+parser.add_option("-s", "--subnqn",dest="subnqn", help="nvmf subsystem nqn", default="nqn.2019-04.pos\:subsystem")
 (options, args) = parser.parse_args()
 file_num=options.number
 traddr=options.ip

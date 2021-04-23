@@ -177,7 +177,7 @@ def unmount_array():
 
 def create_subsystem(volumeId):
     out = spdk_rpc.send_request("nvmf_create_subsystem " + TEST.NQN + str(volumeId) \
-        + " -a -s IBOF0000000000000" + str(volumeId) + " -d IBOF_VOLUME_EXTENTION")
+        + " -a -s POS0000000000000" + str(volumeId) + " -d POS_VOLUME_EXTENTION")
     if out != 0:
         TEST_LOG.print_err("Failed to create subsystem")
         sys.exit(1)

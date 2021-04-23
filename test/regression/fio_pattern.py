@@ -212,7 +212,7 @@ parser.add_option("-w", "--workload", dest="readwrite", help="read/write workloa
 parser.add_option("-d", "--verifydata", dest="verifydata", type='int', help="output data for verify", default=0)
 
 (options, args) = parser.parse_args()
-filename="trtype=" + options.transport + " adrfam=IPv4" + " traddr=" + options.ip + " trsvcid=" + str(options.port) + " subnqn=nqn.2019-04.ibof\:subsystem" + str(options.nvol) + " ns=1";
+filename="trtype=" + options.transport + " adrfam=IPv4" + " traddr=" + options.ip + " trsvcid=" + str(options.port) + " subnqn=nqn.2019-04.pos\:subsystem" + str(options.nvol) + " ns=1";
 print(filename);
 if type(options.readwrite) == str:
     readwrite=[options.readwrite]
