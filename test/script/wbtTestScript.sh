@@ -14,6 +14,8 @@ BIN_DIR=${ROOT_DIR}/bin
 VM_IP_RANGE_1="10.1.11."
 VM_IP_RANGE_2="10.100.11."
 
+ARRAYNAME=POSArray
+
 #####################################################################
 fileSize1=4096
 fileSize2=4096
@@ -397,7 +399,7 @@ ${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc2 --offset $fileOffset2 --count 
 ${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --output mfs_read_two.bin
 
 
-${BIN_DIR}/cli request unmount_vol --name ${volname}
+${BIN_DIR}/cli volume unmount --name ${volname} --array $ARRAYNAME
 
 for fidx in `seq 0 ${fileDesc2}`
 do           
