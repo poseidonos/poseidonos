@@ -51,29 +51,27 @@ using GcWriteBuffer = std::vector<void*>;
 class GcStripeManager : public VolumeEvent
 {
 public:
-    explicit GcStripeManager(IArrayInfo* array);
+    explicit GcStripeManager(IArrayInfo* array, FreeBufferPool* gcWriteBufferPool_ = nullptr);
     ~GcStripeManager(void);
 
-    bool VolumeCreated(std::string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
-    bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName) override;
-    bool VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
-    bool VolumeUnmounted(std::string volName, int volID, std::string arrayName) override;
-    bool VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
-    bool VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
-    void VolumeDetached(vector<int> volList, std::string arrayName) override;
+    virtual bool VolumeCreated(std::string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
+    virtual bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName) override;
+    virtual bool VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
+    virtual bool VolumeUnmounted(std::string volName, int volID, std::string arrayName) override;
+    virtual bool VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
+    virtual bool VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
+    virtual void VolumeDetached(vector<int> volList, std::string arrayName) override;
 
-    bool AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks);
-    bool AllocateWriteBuffer(uint32_t volumeId, GcWriteBuffer* buffer);
-    bool IsWriteBufferFull(uint32_t volumeId);
-    void MoveActiveWriteBuffer(uint32_t volumeId, GcWriteBuffer* buffer);
-    std::mutex& GetWriteBufferLock(uint32_t volumeId);
-    void SetFinished(GcWriteBuffer* buffer);
-    GcWriteBuffer* GetWriteBuffer(uint32_t volumeId);
-    bool DecreaseRemainingAndCheckIsFull(uint32_t volumeId, uint32_t cnt);
-    void SetBlkInfo(uint32_t volumeId, uint32_t offset, BlkInfo blkInfo);
-    std::vector<BlkInfo>* GetBlkInfoList(uint32_t volumeId);
-    void SetFlushed(uint32_t volumeId);
-    bool IsAllFinished(void);
+    virtual bool AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks);
+    virtual void MoveActiveWriteBuffer(uint32_t volumeId, GcWriteBuffer* buffer);
+    virtual std::mutex& GetWriteBufferLock(uint32_t volumeId);
+    virtual void SetFinished(GcWriteBuffer* buffer);
+    virtual GcWriteBuffer* GetWriteBuffer(uint32_t volumeId);
+    virtual bool DecreaseRemainingAndCheckIsFull(uint32_t volumeId, uint32_t cnt);
+    virtual void SetBlkInfo(uint32_t volumeId, uint32_t offset, BlkInfo blkInfo);
+    virtual std::vector<BlkInfo>* GetBlkInfoList(uint32_t volumeId);
+    virtual void SetFlushed(uint32_t volumeId);
+    virtual bool IsAllFinished(void);
 
     static const uint32_t GC_WRITE_BUFFER_CONUNT = 512;
     static const uint32_t GC_VOLUME_COUNT = MAX_VOLUME_COUNT;
