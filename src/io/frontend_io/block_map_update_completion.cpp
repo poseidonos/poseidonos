@@ -69,7 +69,8 @@ BlockMapUpdateCompletion::BlockMapUpdateCompletion(VolumeIoSmartPtr inputVolumeI
       new WriteCompletion(inputVolumeIo),
       AllocatorServiceSingleton::Instance()->GetIBlockAllocator(inputVolumeIo->GetArrayName()),
       AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(inputVolumeIo->GetArrayName()),
-      new VsaRangeMaker(inputVolumeIo->GetVolumeId(), ChangeSectorToBlock(inputVolumeIo->GetSectorRba()), DivideUp(inputVolumeIo->GetSize(), BLOCK_SIZE), inputVolumeIo->IsGc()))
+      new VsaRangeMaker(inputVolumeIo->GetVolumeId(), ChangeSectorToBlock(inputVolumeIo->GetSectorRba()),
+        DivideUp(inputVolumeIo->GetSize(), BLOCK_SIZE), inputVolumeIo->IsGc(), inputVolumeIo->GetArrayName()))
 {
 }
 
