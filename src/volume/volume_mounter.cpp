@@ -158,6 +158,7 @@ VolumeMounter::_MountVolume(VolumeBase* vol, string subnqn)
 
         if (done == true)
         {
+            volumeList.InitializePendingIOCount(vol->ID, VolumeStatus::Mounted);
             ret = vol->Mount();
         }
         else

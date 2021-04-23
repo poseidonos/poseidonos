@@ -120,12 +120,6 @@ public:
 
     int ID;
 
-    static bool IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeStatus = VolumeStatus::Mounted, uint32_t ioSubmissionCount = 1);
-    static void DecreasePendingIOCount(int volId, VolumeStatus volumeStatus = VolumeStatus::Mounted, uint32_t ioCompletionCount = 1);
-    static void WaitUntilIdle(int volId, VolumeStatus volumeStatus = VolumeStatus::Mounted);
-    static bool CheckIdleAndSetZero(int volId, VolumeStatus volumeStatus = VolumeStatus::Mounted);
-    static void InitializePendingIOCount(int volId, VolumeStatus volumeStatus);
-
 protected:
     VolumeStatus status;
     std::string name;
@@ -144,9 +138,6 @@ protected:
     const uint64_t MAX_IOPS_LIMIT = UINT64_MAX / KIOPS;
     const uint64_t MAX_BW_LIMIT = UINT64_MAX / MIB_IN_BYTE;
 
-private:
-    static std::atomic<bool> possibleIncreaseIOCount[MAX_VOLUME_COUNT][static_cast<uint32_t>(VolumeStatus::MaxVolumeStatus)];
-    static std::atomic<uint32_t> pendingIOCount[MAX_VOLUME_COUNT][static_cast<uint32_t>(VolumeStatus::MaxVolumeStatus)];
     static const int INVALID_VOL_ID = -1;
 };
 

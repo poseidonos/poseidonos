@@ -75,7 +75,7 @@ VolumeDeleter::Do(string name)
     uint64_t volSize = vol->TotalSize();
     string subNqn = vol->GetSubnqn();
 
-    VolumeBase::WaitUntilIdle(volID, VolumeStatus::Unmounted);
+    volumeList.WaitUntilIdle(volID, VolumeStatus::Unmounted);
 
     vol->SetValid(false); // remove tempo.
     vol->SetSubnqn("");

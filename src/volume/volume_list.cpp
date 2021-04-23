@@ -40,6 +40,7 @@
 
 namespace pos
 {
+
 VolumeList::VolumeList()
 {
     volCnt = 0;
@@ -88,7 +89,7 @@ VolumeList::Add(VolumeBase* volume)
     volume->ID = id;
     items[id] = volume;
     volCnt++;
-    VolumeBase::InitializePendingIOCount(id, VolumeStatus::Unmounted);
+    InitializePendingIOCount(id, VolumeStatus::Unmounted);
     POS_TRACE_DEBUG((int)POS_EVENT_ID::SUCCESS, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
     return (int)POS_EVENT_ID::SUCCESS;
 }
@@ -102,7 +103,7 @@ VolumeList::Add(VolumeBase* volume, int id)
         volume->ID = id;
         items[id] = volume;
         volCnt++;
-        VolumeBase::InitializePendingIOCount(id, VolumeStatus::Unmounted);
+        InitializePendingIOCount(id, VolumeStatus::Unmounted);
         POS_TRACE_DEBUG((int)POS_EVENT_ID::VOL_ADDED, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
         return (int)POS_EVENT_ID::SUCCESS;
     }
@@ -216,5 +217,94 @@ VolumeList::Next(int& index)
 
     return nullptr;
 }
+
+void
+VolumeList::InitializePendingIOCount(int volId, VolumeStatus volumeStatus)
+{
+    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    pendingIOCount[volId][index] = 1;
+    possibleIncreaseIOCount[volId][index] = true;
+}
+
+// This function check possibleIncreaseIOCount before increase pendingIO Count to avoid waiting infinite IO from HOST (or Internal Module)
+// Even if possibleIncreaseIOCount is false, we need to check pendingIOCount == 0 or not
+// because there is a possibility that calls in sequence of "WaitUntilIdle => IncreasePendingIOCountIfoNozero"
+
+bool
+VolumeList::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeStatus, uint32_t ioSubmissionCount)
+{
+    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    if (unlikely (possibleIncreaseIOCount[volId][index] == false))
+    {
+        return false;
+    }
+    uint32_t oldPendingIOCount = pendingIOCount[volId][index].load();
+    do
+    {
+        if (unlikely(oldPendingIOCount == 0))
+        {
+            // already volume base is deleted
+            return false;
+        }
+    } while (!pendingIOCount[volId][index].compare_exchange_weak(oldPendingIOCount, oldPendingIOCount + ioSubmissionCount));
+
+    if (unlikely((UINT32_MAX - oldPendingIOCount) < ioSubmissionCount))
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::VOL_UNEXPECTED_PENDING_IO_COUNT,
+            "PendingIOCount overflow!!: Current PendingIOCount: {}, "
+            "Submission Count: {}",
+            oldPendingIOCount,
+            ioSubmissionCount);
+        return false;
+    }
+    return true;
+}
+
+void
+VolumeList::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint32_t ioCompletionCount)
+{
+    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    uint32_t oldPendingIOCount = pendingIOCount[volId][index].fetch_sub(ioCompletionCount,
+        memory_order_relaxed);
+    if (unlikely(oldPendingIOCount < ioCompletionCount))
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::VOL_UNEXPECTED_PENDING_IO_COUNT,
+            "PendingIOCount underflow!!: Current PendingIOCount: {}, "
+            "Completion Count: {}",
+            oldPendingIOCount,
+            ioCompletionCount);
+    }
+}
+
+bool
+VolumeList::CheckIdleAndSetZero(int volId, VolumeStatus volumeStatus)
+{
+    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    uint32_t oldPendingIOCount = pendingIOCount[volId][index].load();
+    // If oldPendingIOCount is greater than 0
+    // If oldPendingIOCount == 1, decrease and return idle as true.
+    do
+    {
+        if (unlikely(oldPendingIOCount > 1))
+        {
+            return false;
+        }
+    } while (!pendingIOCount[volId][index].compare_exchange_weak(oldPendingIOCount, oldPendingIOCount - 1));
+    assert(oldPendingIOCount == 1);
+    return true;
+}
+
+void
+VolumeList::WaitUntilIdle(int volId, VolumeStatus volumeStatus)
+{
+    possibleIncreaseIOCount[volId][volumeStatus] = false;
+    while (false == CheckIdleAndSetZero(volId, volumeStatus))
+    {
+        usleep(1);
+    }
+}
+
+
+
 
 } // namespace pos

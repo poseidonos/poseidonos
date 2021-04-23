@@ -271,7 +271,7 @@ VolumeManager::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeSta
             "The requested volume does not exist");
         return (int)POS_EVENT_ID::VOL_NOT_EXIST;
     }
-    bool success = VolumeBase::IncreasePendingIOCountIfNotZero(volId, volumeStatus, ioCountToSubmit);
+    bool success = volumes.IncreasePendingIOCountIfNotZero(volId, volumeStatus, ioCountToSubmit);
     if (success)
     {
         return static_cast<int>(POS_EVENT_ID::SUCCESS);
@@ -291,7 +291,7 @@ VolumeManager::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint
             "The requested volume does not exist");
         return (int)POS_EVENT_ID::VOL_NOT_EXIST;
     }
-    VolumeBase::DecreasePendingIOCount(volId, volumeStatus, ioCountCompleted);
+    volumes.DecreasePendingIOCount(volId, volumeStatus, ioCountCompleted);
     return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }
 
