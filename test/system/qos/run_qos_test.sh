@@ -163,7 +163,7 @@ add_spare()
 {
     spare_dev=$1
     print_info "Add Spare device ${spare_dev}"
-    texecc $TARGET_ROOT_DIR/bin/cli request add_dev --spare ${spare_dev}
+    texecc $TARGET_ROOT_DIR/bin/cli array add --spare ${spare_dev}
 }
 
 pci_rescan()
@@ -180,29 +180,6 @@ detach_device()
     print_info "${detach_dev} is detected"
 }
 
-
-
-#**************************************************************************
-# WAIT FOR POS TO LAUNCH
-#**************************************************************************
-ibof_launch_wait(){
-    retval=0
-    n=1
-    while [ $n -le 10 ]
-    do
-        texecc ${ibof_cli} info | grep "\"state\":\"NOT_EXIST\""
-        if [ $? -eq 0 ]; then
-            retval=0
-            break;
-        else
-            texecc sleep 5
-            echo "Waiting for POS Launch"
-            retval=1
-        fi
-        n=$(( n+1 ))
-    done
-    return $retval
-}
 
 #**************************************************************************
 # SETUP_SPDK
@@ -224,7 +201,7 @@ reset_spdk(){
 # EXIT POS
 #**************************************************************************
 exit_pos(){
-    texecc $TARGET_ROOT_DIR/bin/cli request unmount_ibofos
+    texecc $TARGET_ROOT_DIR/bin/cli array unmount --name POSArray
     texecc sleep 10
     waiting_for_unmount_complete
     if [ 1 == ${?} ]; then
@@ -232,7 +209,7 @@ exit_pos(){
         return
     fi
     echo "Unmount is complete" >> result
-    texecc $TARGET_ROOT_DIR/bin/cli request exit_ibofos
+    texecc $TARGET_ROOT_DIR/bin/cli system exit
     texecc ps -C ibofos > /dev/null >> ${logfile}
     n=1
     while [[ ${?} == 0 ]]
@@ -257,14 +234,14 @@ waiting_for_rebuild_complete(){
     n=1
     while [ $n -le 360 ]
     do
-        texecc ${ibof_cli} info | grep "\"state\":\"NORMAL\""
+        texecc $TARGET_ROOT_DIR/bin/cli array info --name POSArray | grep "\"state\":\"NORMAL\""
         if [ $? -eq 0 ]; then
             print_info "Rebuild Completed"
             ret=0
             break;
         else
             texecc sleep 10
-	    rebuild_progress=$(${ibof_cli} --json info | jq '.Response.info.rebuildingProgress')
+	    rebuild_progress=$($TARGET_ROOT_DIR/bin/cli array info --name POSArray --json info | jq '.Response.info.rebuildingProgress')
             info "Rebuilding Progress [${rebuild_progress}]"
             print_info "Waiting for Rebuild to Complete ($n of 360)"
         fi
@@ -423,7 +400,6 @@ setup_test_environment(){
 ###################################################
 start_pos(){
     texecc $TARGET_ROOT_DIR/test/regression/start_ibofos.sh
-    ibof_launch_wait
     EXPECT_PASS "POS OS Launch"  $?
 
     texecc sleep 10
