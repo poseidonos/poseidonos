@@ -55,7 +55,7 @@ public:
     bool IsEmpty(void);
     bool IsEmpty(MpioType type);
 
-#if RANGE_OVERLAP_CHECK_EN
+#if MPIO_CACHE_EN
     void ReleaseCache(void);
 #endif
 
@@ -63,7 +63,7 @@ private:
     void _FreeAllMpioinPool(MpioType type);
     Mpio* _AllocMpio(MpioType mpioType);
 
-#if RANGE_OVERLAP_CHECK_EN
+#if MPIO_CACHE_EN
     void _InitCache(uint32_t poolSize);
     bool _IsFullyCached(void);
     bool _IsEmptyCached(void);
@@ -76,7 +76,7 @@ private:
     std::vector<Mpio*> mpioList[(uint32_t)MpioType::Max];
     size_t poolSize;
 
-#if RANGE_OVERLAP_CHECK_EN
+#if MPIO_CACHE_EN
     size_t maxCacheCount;
     size_t currentCacheCount;
     std::list<MetaLpnType> cachedList;

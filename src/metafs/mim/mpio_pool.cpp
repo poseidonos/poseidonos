@@ -79,14 +79,14 @@ MpioPool::MpioPool(uint32_t poolSize)
         }
     }
 
-#if RANGE_OVERLAP_CHECK_EN
+#if MPIO_CACHE_EN
     _InitCache(poolSize);
 #endif
 }
 
 MpioPool::~MpioPool(void)
 {
-#if RANGE_OVERLAP_CHECK_EN
+#if MPIO_CACHE_EN
     _InitCache(poolSize);
 #endif
 
@@ -145,7 +145,7 @@ MpioPool::Release(Mpio* mpio)
 {
     const uint32_t type = (uint32_t)mpio->GetType();
 
-#if RANGE_OVERLAP_CHECK_EN
+#if MPIO_CACHE_EN
     if (MpioCacheState::Init != mpio->GetCacheState())
     {
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
@@ -222,7 +222,7 @@ MpioPool::_AllocMpio(MpioType mpioType)
     return mpio;
 }
 
-#if RANGE_OVERLAP_CHECK_EN
+#if MPIO_CACHE_EN
 void
 MpioPool::_InitCache(uint32_t poolSize)
 {

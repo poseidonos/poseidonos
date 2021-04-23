@@ -136,7 +136,7 @@ Mpio::IsPartialIO(void)
     return partialIO;
 }
 
-#if RANGE_OVERLAP_CHECK_EN
+#if MPIO_CACHE_EN
 MpioCacheState
 Mpio::GetCacheState(void)
 {

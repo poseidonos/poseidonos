@@ -89,7 +89,7 @@ public:
     bool IsAIOMode(void);
     bool IsPartialIO(void);
 
-#if RANGE_OVERLAP_CHECK_EN
+#if MPIO_CACHE_EN
     MpioCacheState GetCacheState(void);
     void SetCacheState(MpioCacheState state);
 #endif

@@ -304,7 +304,7 @@ Mio::_BuildMpioMap(void)
         mpio->SetPartialDoneNotifier(partialMpioDoneNotifier);
         mpioListCxt.PushMpio(*mpio);
 
-#if RANGE_OVERLAP_CHECK_EN
+#if MPIO_CACHE_EN
         if (MpioCacheState::FirstRead == mpio->GetCacheState())
         {
             // pass, new mpio

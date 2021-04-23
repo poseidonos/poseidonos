@@ -183,12 +183,14 @@ MioHandler::_DiscoverIORangeOverlap(void)
 
         if (!_IsRangeOverlapConflicted(pendingIoReq))
         {
+#if MPIO_CACHE_EN
             if (MetaStorageType::NVRAM == pendingIoReq->targetMediaType)
             {
                 if (!_ExecutePendedIo(pendingIoReq))
                     break;
             }
             else
+#endif
             {
                 Mio* mio = DispatchMio(*pendingIoReq);
                 if (nullptr == mio)
@@ -406,6 +408,7 @@ MioHandler::_HandleMioCompletion(void* data)
     Mio* mio = reinterpret_cast<Mio*>(data);
     assert(mio->IsSyncIO() == false);
 
+#if MPIO_CACHE_EN
     std::vector<MetaFsIoRequest*>* reqList = mio->GetMergedRequestList();
     if (nullptr != reqList)
     {
@@ -421,6 +424,7 @@ MioHandler::_HandleMioCompletion(void* data)
         }
     }
     else
+#endif
     {
         MetaFsAioCbCxt* aiocb = reinterpret_cast<MetaFsAioCbCxt*>(mio->GetClientAioCbCxt());
 
