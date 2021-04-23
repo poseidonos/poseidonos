@@ -203,7 +203,6 @@ reset_spdk(){
 exit_pos(){
     texecc $TARGET_ROOT_DIR/bin/cli array unmount --name POSArray
     texecc sleep 10
-    waiting_for_unmount_complete
     if [ 1 == ${?} ]; then
         kill_pos
         return
@@ -234,41 +233,19 @@ waiting_for_rebuild_complete(){
     n=1
     while [ $n -le 360 ]
     do
-        texecc $TARGET_ROOT_DIR/bin/cli array info --name POSArray | grep "\"state\":\"NORMAL\""
-        if [ $? -eq 0 ]; then
+        state=$($TARGET_ROOT_DIR/bin/cli array info --name POSArray --json | jq '.Response.info.state')
+        echo "current state : "$state
+        if [ $state == "\"NORMAL\"" ]; then
             print_info "Rebuild Completed"
             ret=0
             break;
         else
             texecc sleep 10
-	    rebuild_progress=$($TARGET_ROOT_DIR/bin/cli array info --name POSArray --json info | jq '.Response.info.rebuildingProgress')
+            rebuild_progress=$($TARGET_ROOT_DIR/bin/cli array info --name POSArray --json | jq '.Response.info.rebuildingProgress')
             info "Rebuilding Progress [${rebuild_progress}]"
             print_info "Waiting for Rebuild to Complete ($n of 360)"
         fi
         n=$(( n+1 ))
-    done
-    return $ret
-}
-
-#**************************************************************************
-# WAITING FOR UNMOUNT POS
-#**************************************************************************
-waiting_for_unmount_complete(){
-    print_notice "waiting for unmount complete"
-    ret=1
-    n=1
-    while [ $n -le 30 ]
-    do
-        texecc ${ibof_cli} info | grep "\"state\":\"NOT_EXIST\""
-        if [ $? -eq 0 ]; then
-    	    ret=0
-    	    echo "UnMount is complete"
-            break;
-        else
-            print_info "Waiting for Unmount to Complete ($n of 30)"
-            texecc sleep 3
-        fi
-	n=$(( n+1 ))
     done
     return $ret
 }
