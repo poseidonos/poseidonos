@@ -36,6 +36,9 @@
 
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+
+using namespace std;
+
 namespace pos
 {
 StateList::~StateList()
@@ -46,15 +49,14 @@ StateList::~StateList()
 void
 StateList::Add(StateContext* ctx)
 {
+    unique_lock<mutex> lock(listMutex);
     if (Exists(ctx) == false)
     {
-        listMutex.lock();
         contextList.push_back(ctx);
         POS_TRACE_DEBUG((int)POS_EVENT_ID::STATE_CONTEXT_UPDATED,
             "statecontext added - {}", ctx->GetSituation().ToString());
         sort(contextList.begin(), contextList.end(), _Compare);
         StateContext* next = contextList.front();
-        listMutex.unlock();
         listUpdated(next);
     }
 }
@@ -62,15 +64,14 @@ StateList::Add(StateContext* ctx)
 void
 StateList::Remove(StateContext* ctx)
 {
+    unique_lock<mutex> lock(listMutex);
     auto it = _Find(ctx);
     if (it != contextList.end())
     {
-        listMutex.lock();
         POS_TRACE_DEBUG((int)POS_EVENT_ID::STATE_CONTEXT_UPDATED,
-            "statecontext removed - {}", ctx->GetSituation().ToString());
+            "statecontext removed - {}", (*it)->GetSituation().ToString());
         contextList.erase(it);
         StateContext* next = contextList.front();
-        listMutex.unlock();
         listUpdated(next);
     }
 }
