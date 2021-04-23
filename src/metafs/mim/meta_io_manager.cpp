@@ -119,7 +119,7 @@ MetaIoMgr::Close(void)
 void
 MetaIoMgr::Finalize(void)
 {
-    if (finalized == false)
+    if (IsModuleReady() && (finalized == false))
     {
         ioScheduler->ClearHandlerThread(); // exit mioHandler thread
         ioScheduler->ExitThread();         // exit scheduler thread
