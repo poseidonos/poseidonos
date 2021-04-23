@@ -125,14 +125,15 @@ GcMapUpdateRequest::Execute(void)
     }
 
     std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
+
+    mapUpdates.volumeId = volId;
+    mapUpdates.vsid = stripeId;
+    mapUpdates.wbLsid = stripe->GetWbLsid();
+    mapUpdates.userLsid = stripe->GetUserLsid();
+
     EventSmartPtr event(new GcMapUpdate(stripe, arrayName, mapUpdates, invalidSegCnt, iStripeMap));
     if (journalService->IsEnabled(arrayName))
     {
-        mapUpdates.volumeId = volId;
-        mapUpdates.vsid = stripeId;
-        mapUpdates.wbLsid = stripe->GetWbLsid();
-        mapUpdates.userLsid = stripe->GetUserLsid();
-
         MapPageList dirtyMap;
         dirtyMap[volId] = volumeDirtyList;
         dirtyMap[STRIPE_MAP_ID] = iStripeMap->GetDirtyStripeMapPages(stripeId);
