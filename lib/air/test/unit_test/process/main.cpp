@@ -11,16 +11,6 @@
 #include "src/lib/Protocol.h"
 #include "src/lib/Type.h"
 
-TEST_F(ProcessorTest, IsIdle)
-{
-    lib::Data data;
-    perf_processor->IsIdle(&data);
-    perf_processor->IsIdle(&data);
-    perf_processor->IsIdle(&data);
-    perf_processor->IsIdle(&data);
-    perf_processor->IsIdle(&data);
-}
-
 TEST_F(ProcessorTest, ThreadAwareStreamData)
 {
     int tid = 123;
@@ -35,7 +25,6 @@ TEST_F(ProcessorTest, ThreadAwareStreamData)
     EXPECT_EQ(true, perf_processor->StreamData("PERF_TEST4", tid, "thread0", fake_perf_thread, air::ProcessorType::PERFORMANCE, 1, 32));
     fake_perf_thread->SetEnable();
     EXPECT_EQ(true, perf_processor->StreamData("PERF_TEST5", tid, "thread0", fake_perf_thread, air::ProcessorType::PERFORMANCE, 2, 32));
-    fake_perf_thread->SetIdle();
     fake_perf_thread->SetEnable();
     EXPECT_EQ(true, perf_processor->StreamData("PERF_TEST6", tid, "thread0", fake_perf_thread, air::ProcessorType::PERFORMANCE, 2, 32));
 
@@ -67,7 +56,6 @@ TEST_F(ProcessorTest, ThreadAwareStreamData)
 
     // Queue type
     EXPECT_EQ(true, q_processor->StreamData("Q_TEST1", tid, "thread0", fake_q_thread, air::ProcessorType::QUEUE, 1, 32));
-    fake_q_thread->SetIdle();
     EXPECT_EQ(true, q_processor->StreamData("Q_TEST2", tid, "thread0", fake_q_thread, air::ProcessorType::QUEUE, 1, 32));
 }
 
@@ -91,6 +79,35 @@ TEST_F(ProcessorTest, QueueProcessData)
     q_processor->StreamData("Q_TEST2", 0, "thread0", fake_q_thread,
         air::ProcessorType::QUEUE, 1, 32);
     EXPECT_EQ(true, ((15.1f > acc_q_data->depth_total_avg) && (14.9f < acc_q_data->depth_total_avg)));
+}
+
+TEST_F(ProcessorTest, UtilizationProcessData)
+{
+    lib::UtilizationData* util_data = (lib::UtilizationData*)fake_util_thread->GetAirData(1);
+    lib::AccUtilizationData* util_acc = (lib::AccUtilizationData*)fake_util_thread->GetAccData(1);
+
+    util_processor->StreamData("Util_TEST1", 0, "thread0", fake_util_thread,
+        air::ProcessorType::UTILIZATION, 1, 32);
+
+    EXPECT_EQ(true, 0 == util_data->percent[0]);
+    EXPECT_EQ(true, 0 == util_data->percent[1]);
+    EXPECT_EQ(true, ((73. > util_acc->total_percent[0]) && (72. < util_acc->total_percent[0])));
+    EXPECT_EQ(true, ((28. > util_acc->total_percent[1]) && (27. < util_acc->total_percent[1])));
+}
+
+TEST_F(ProcessorTest, CountProcessData)
+{
+    lib::CountData* count_data = (lib::CountData*)fake_count_thread->GetAirData(1);
+    lib::AccCountData* count_acc = (lib::AccCountData*)fake_count_thread->GetAccData(1);
+
+    count_processor->StreamData("Count_TEST1", 0, "thread0", fake_count_thread,
+        air::ProcessorType::COUNT, 1, 32);
+
+    EXPECT_EQ(true, 0 == count_data->count[0]);
+    EXPECT_EQ(true, 0 == count_data->num_req[0]);
+    EXPECT_EQ(true, 3454 == count_acc->total_count[0]);
+    EXPECT_EQ(true, 12 == count_acc->total_num_req[0]);
+    EXPECT_EQ(true, ((288. > count_acc->total_count_avg[0]) && (287. < count_acc->total_count_avg[0])));
 }
 
 TEST_F(ProcessManagerTest, Init)

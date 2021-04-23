@@ -28,6 +28,7 @@ public:
         }
 
         util_data->usage[enum_index] += usage;
+        util_data->sum += usage;
     }
     int
     SetSamplingRate(uint32_t rate) override

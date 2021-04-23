@@ -19,7 +19,6 @@ struct Data
     virtual ~Data(void)
     {
     }
-    uint32_t idle_count{0};
     uint32_t access{0};
 };
 
@@ -155,9 +154,10 @@ struct UtilizationData : public Data
     uint64_t usage[ENUM_SIZE]{
         0,
     };
-    float percent[ENUM_SIZE]{
+    double percent[ENUM_SIZE]{
         0.0,
     };
+    uint64_t sum{0};
 };
 
 struct AccUtilizationData : public AccData
@@ -165,9 +165,10 @@ struct AccUtilizationData : public AccData
     uint64_t total_usage[ENUM_SIZE]{
         0,
     };
-    float total_percent[ENUM_SIZE]{
+    double total_percent[ENUM_SIZE]{
         0.0,
     };
+    uint64_t total_sum{0};
 };
 
 struct CountData : public Data
@@ -188,7 +189,7 @@ struct AccCountData : public AccData
     uint64_t total_num_req[ENUM_SIZE]{
         0,
     };
-    float total_count_avg[ENUM_SIZE]{
+    double total_count_avg[ENUM_SIZE]{
         0.0,
     };
 };

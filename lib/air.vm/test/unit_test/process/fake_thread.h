@@ -63,6 +63,35 @@ public:
                 ((lib::QueueData*)air_data[1])->depth_period_max = 5;
                 break;
             }
+            case air::ProcessorType::UTILIZATION:
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    air_data[i] = new lib::UtilizationData;
+                    acc_data[i] = new lib::AccUtilizationData;
+                }
+                ((lib::UtilizationData*)air_data[1])->usage[0] = 40;
+                ((lib::UtilizationData*)air_data[1])->usage[1] = 15;
+                ((lib::UtilizationData*)air_data[1])->sum = 55;
+
+                air_data[0]->access = true;
+                air_data[1]->access = true;
+                break;
+            }
+            case air::ProcessorType::COUNT:
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    air_data[i] = new lib::CountData;
+                    acc_data[i] = new lib::AccCountData;
+                }
+                ((lib::CountData*)air_data[1])->count[0] = 3454;
+                ((lib::CountData*)air_data[1])->num_req[0] = 12;
+
+                air_data[0]->access = true;
+                air_data[1]->access = true;
+                break;
+            }
             default:
             {
                 break;
@@ -102,12 +131,6 @@ public:
     SwapBuffer(uint32_t aid_idx)
     {
         return;
-    }
-
-    void
-    SetIdle()
-    {
-        air_data[2]->idle_count = 5;
     }
 
     void

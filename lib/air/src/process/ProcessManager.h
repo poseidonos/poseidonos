@@ -8,8 +8,8 @@
 #include "src/lib/json/Json.h"
 #include "src/meta/GlobalMeta.h"
 #include "src/meta/NodeMeta.h"
-#include "src/process/Processor.h"
 #include "src/process/TimingDistributor.h"
+#include "src/process/processor/Processor.h"
 #include "src/profile_data/node/NodeManager.h"
 
 namespace process

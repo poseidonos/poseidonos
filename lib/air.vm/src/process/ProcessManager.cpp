@@ -3,6 +3,11 @@
 #include <time.h>
 
 #include "src/config/ConfigInterface.h"
+#include "src/process/processor/CountProcessor.h"
+#include "src/process/processor/LatencyProcessor.h"
+#include "src/process/processor/PerformanceProcessor.h"
+#include "src/process/processor/QueueProcessor.h"
+#include "src/process/processor/UtilizationProcessor.h"
 
 process::ProcessManager::~ProcessManager(void)
 {
@@ -33,6 +38,14 @@ process::ProcessManager::Init(void)
 
             case (air::ProcessorType::QUEUE):
                 processor[i] = new QueueProcessor;
+                break;
+
+            case (air::ProcessorType::UTILIZATION):
+                processor[i] = new UtilizationProcessor;
+                break;
+
+            case (air::ProcessorType::COUNT):
+                processor[i] = new CountProcessor;
                 break;
 
             default:
@@ -122,18 +135,33 @@ process::ProcessManager::_AddNodeInfo(std::string& group_name,
             cfg::GetName(config::ConfigType::NODE, nid));
     node_obj["build"] = {node_build};
     node_obj["run"] = {node_meta_getter->NodeEnable(nid)};
-    if (air::ProcessorType::PERFORMANCE == type)
+    switch (type)
     {
-        node_obj["type"] = {"performance"};
+        case (air::ProcessorType::PERFORMANCE):
+            node_obj["type"] = {"performance"};
+            break;
+
+        case (air::ProcessorType::LATENCY):
+            node_obj["type"] = {"latency"};
+            break;
+
+        case (air::ProcessorType::QUEUE):
+            node_obj["type"] = {"queue"};
+            break;
+
+        case (air::ProcessorType::UTILIZATION):
+            node_obj["type"] = {"utilization"};
+            break;
+
+        case (air::ProcessorType::COUNT):
+            node_obj["type"] = {"count"};
+            break;
+
+        default:
+            node_obj["type"] = {"undefined"};
+            break;
     }
-    else if (air::ProcessorType::LATENCY == type)
-    {
-        node_obj["type"] = {"latency"};
-    }
-    else if (air::ProcessorType::QUEUE == type)
-    {
-        node_obj["type"] = {"queue"};
-    }
+
     node_obj["objs"] += {nullptr};
     node_obj["objs"] = {};
 
@@ -148,7 +176,7 @@ process::ProcessManager::_AddNodeInfo(std::string& group_name,
                     node_manager->GetAccLatData(nid, aid), aid);
             }
         }
-        else if (air::ProcessorType::PERFORMANCE == type || air::ProcessorType::QUEUE == type)
+        else if (air::ProcessorType::PROCESSORTYPE_NULL != type)
         {
             for (auto it = node_manager->thread_map.begin(); it != node_manager->thread_map.end(); it++)
             {

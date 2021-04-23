@@ -80,6 +80,7 @@ DummyIO::SubmitIO()
                 AIRLOG(LAT_SUBMIT, 0, 1, i);
                 i++;
             }
+            AIRLOG(UTIL_SUBMIT_THR, 0, 0, 30);
         }
 
         {
@@ -98,6 +99,7 @@ DummyIO::SubmitIO()
                 AIRLOG(LAT_IO_PATH, 0, 1, i);
                 i++;
             }
+            AIRLOG(UTIL_SUBMIT_THR, 0, 1, 12);
         }
 
     }
@@ -167,6 +169,7 @@ DummyIO::CompleteIO()
                 cq[0].pop();
 
                 AIRLOG(PERF_BENCHMARK, 0, AIR_READ, 4096);
+                AIRLOG(CNT_TEST_EVENT, 0, 0, 1);
                 AIRLOG(LAT_IO_PATH, 0, 3, value);
                 AIRLOG(LAT_COMPLETE, 0, 1, value);
             }
@@ -181,6 +184,7 @@ DummyIO::CompleteIO()
                 value = cq[1].front();
                 cq[1].pop();
                 AIRLOG(PERF_BENCHMARK, 1, AIR_READ, 4096);
+                AIRLOG(CNT_TEST_EVENT, 1, 0, 1);
                 
                 AIRLOG(LAT_IO_PATH, 0, 3, value);
             }

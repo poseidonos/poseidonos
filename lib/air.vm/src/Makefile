@@ -12,6 +12,7 @@ _air:
 	@$(MAKE) -C output
 	@$(MAKE) -C policy
 	@$(MAKE) -C process
+	@$(MAKE) -C process/processor
 	@$(MAKE) -C profile_data
 	@$(MAKE) -C stream
 	@$(MAKE) -C target_detector

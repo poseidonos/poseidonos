@@ -127,7 +127,6 @@ TEST_F(DataTest, PerformanceData)
     bool b{false};
     uint32_t value{0};
     EXPECT_EQ(b, perf_data->access);
-    EXPECT_EQ(value, perf_data->idle_count);
     EXPECT_EQ(value, perf_data->iops_total);
 
     value = 100;
