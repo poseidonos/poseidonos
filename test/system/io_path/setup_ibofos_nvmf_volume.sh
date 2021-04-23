@@ -75,7 +75,7 @@ ibofos_bringup(){
         else
             sudo $ROOT_DIR/bin/cli array create -b uram0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --name $ARRAYNAME --raidtype RAID5
         fi
-        sudo $ROOT_DIR/bin/cli system mount
+        sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME
 
         for i in `seq 1 $VOLUME_COUNT`
         do
@@ -85,7 +85,7 @@ ibofos_bringup(){
     else
         echo "ibofos dirty bringup"
         #TODO : need to backup uram before load_array
-        sudo $ROOT_DIR/bin/cli system mount
+        sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME
         for i in `seq 1 $VOLUME_COUNT`
         do
             sudo $ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME
