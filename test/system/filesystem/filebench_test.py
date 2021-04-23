@@ -75,7 +75,7 @@ def parse_argument():
 def terminate_pos():
     unmount_array_command = args.ibofos_root + "/bin/cli array unmount --name POSArray"
     remote_execute(args.target_ip, args.target_id, args.target_pw, unmount_array_command)
-    exit_ibofos_command = args.ibofos_root + "/bin/cli request exit_ibofos"
+    exit_ibofos_command = args.ibofos_root + "/bin/cli system exit"
     remote_execute(args.target_ip, args.target_id, args.target_pw, exit_ibofos_command)
     check_ibofos_command = "pgrep -c ibofos"
     result = remote_execute(args.target_ip, args.target_id, args.target_pw, check_ibofos_command)
