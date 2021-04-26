@@ -23,8 +23,8 @@ execute_ibofos()
 
 check_started()
 {
-    result=`${ROOT_DIR}/bin/cli request info --json | jq '.Response.info.state' 2>/dev/null`
-    if [ -z ${result} ] || [ ${result} != '"NOT_EXIST"' ];
+    result=`${ROOT_DIR}/bin/cli system info --json | jq '.Response.data.version' 2>/dev/null`
+    if [ -z ${result} ] || [ ${result} == '""' ];
     then
         return 0
     else

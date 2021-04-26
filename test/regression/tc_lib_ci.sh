@@ -451,7 +451,7 @@ graceful_shutdown()
         #fi
     fi
 
-    texecc ./bin/cli request exit_ibofos --json > shutdown.txt
+    texecc ./bin/cli system exit --json > shutdown.txt
 
     ps -C ibofos > /dev/null
     while [[ ${?} == 0 ]]

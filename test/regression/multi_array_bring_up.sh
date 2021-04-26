@@ -184,11 +184,11 @@ start_ibofos()
         texecc ${IBOFOS_ROOT}/test/regression/start_ibofos.sh
     fi
 
-	result=`texecc "${IBOFOS_ROOT}/bin/cli request info --json" | jq '.Response.info.state' 2>/dev/null`
-	while [ -z ${result} ] || [ ${result} != '"NOT_EXIST"' ];
+	result=`texecc "${IBOFOS_ROOT}/bin/cli system info --json" | jq '.Response.data.version' 2>/dev/null`
+	while [ -z ${result} ] || [ ${result} == '""' ];
 	do
 		echo "Wait iBoFOS..."
-		result=`texecc "${IBOFOS_ROOT}/bin/cli request info --json" | jq '.Response.info.state' 2>/dev/null`
+		result=`texecc "${IBOFOS_ROOT}/bin/cli system info --json" | jq '.Response.data.version' 2>/dev/null`
 		echo $result
 		sleep 0.5
 	done
@@ -256,7 +256,7 @@ shutdown_ibofos()
     notice "Shutting down ibofos..."
     texecc ${IBOFOS_ROOT}/bin/cli array unmount --name ${target_name_0}
     texecc ${IBOFOS_ROOT}/bin/cli array unmount --name ${target_name_1}
-    texecc ${IBOFOS_ROOT}/bin/cli request exit_ibofos
+    texecc ${IBOFOS_ROOT}/bin/cli system exit
     notice "Shutdown has been completed!"
 	check_stopped
 
