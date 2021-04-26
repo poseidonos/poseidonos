@@ -42,7 +42,7 @@ using namespace std;
 class RebuildProgress
 {
 public:
-    RebuildProgress(void);
+    RebuildProgress(string name);
     void Update(string _id, uint64_t _done);
     void SetTotal(uint64_t _total);
     uint64_t Current(void);
@@ -52,6 +52,7 @@ private:
     uint64_t done = 0;
     uint64_t percent = 0;
     map<string, uint64_t> progress;
+    string arrayName;
 };
 
 } // namespace pos

@@ -37,16 +37,17 @@
 
 namespace pos
 {
-RebuildProgress::RebuildProgress(void)
+RebuildProgress::RebuildProgress(string name)
 {
-    POS_REPORT_TRACE((int)POS_EVENT_ID::REBUILD_PROGRESS, "[0]");
+    arrayName = name;
+    POS_REPORT_TRACE((int)POS_EVENT_ID::REBUILD_PROGRESS, "[0], {}", arrayName);
 }
 
 void
 RebuildProgress::Update(string _id, uint64_t _done)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_PROGRESS_DETAIL,
-        "id:{}, done:{}", _id, _done);
+        "array:{}, id:{}, done:{}", arrayName, _id, _done);
 
     uint64_t delta = 0;
     auto it = progress.find(_id);
@@ -67,7 +68,7 @@ RebuildProgress::Update(string _id, uint64_t _done)
     if (percent != now)
     {
         percent = now;
-        POS_REPORT_TRACE((int)POS_EVENT_ID::REBUILD_PROGRESS, "[{}]", percent);
+        POS_REPORT_TRACE((int)POS_EVENT_ID::REBUILD_PROGRESS, "[{}], {}", percent, arrayName);
     }
 }
 

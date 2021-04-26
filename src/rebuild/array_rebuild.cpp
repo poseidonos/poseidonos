@@ -44,7 +44,7 @@ ArrayRebuild::ArrayRebuild(string array, ArrayDevice* dev, RebuildComplete cb,
             list<RebuildTarget*> tgt):
 arrayName(array), targetDev(dev), rebuildComplete(cb)
 {
-    progress = new RebuildProgress();
+    progress = new RebuildProgress(arrayName);
     uint64_t totalStripes = 0;
     for (RebuildTarget* tar : tgt)
     {
