@@ -46,7 +46,7 @@ StripeReplayStatus::StripeReplayStatus(StripeId vsid)
   numInvalidatedBlocks(0),
   segmentAllocated(false),
   stripeAllocated(false),
-  stripeMapReplayed(true)
+  stripeMapReplayed(false)
 {
 }
 
@@ -123,7 +123,7 @@ StripeReplayStatus::StripeFlushed(void)
     if (stripeMapReplayed == true)
     {
         int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
-        POS_TRACE_DEBUG(eventId, "[Replay] Stripe allocation replayed more than once");
+        POS_TRACE_ERROR(eventId, "[Replay] Stripe flush replayed more than once");
     }
     stripeMapReplayed = true;
 }

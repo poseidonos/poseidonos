@@ -70,6 +70,9 @@ StripeLogWriteStatus::BlockLogFound(BlockWriteDoneLog dat)
     _UpdateOffset(dat.startVsa.offset, dat.numBlks);
     _UpdateRba(dat.startRba, dat.numBlks);
 
+    finalStripeAddr.stripeId = (dat.writeBufferStripeAddress).stripeId;
+    finalStripeAddr.stripeLoc = IN_WRITE_BUFFER_AREA;
+
     BlkOffset curEndOffset = dat.startVsa.offset + dat.numBlks - 1;
     _UpdateLastOffset(curEndOffset);
     _UpdateVolumeId(dat.volId);

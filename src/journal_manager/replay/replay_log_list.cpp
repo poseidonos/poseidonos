@@ -30,46 +30,81 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/journal_manager/log/log_list.h"
+#include "src/journal_manager/replay/replay_log_list.h"
+#include "src/journal_manager/log/log_handler.h"
+#include "src/journal_manager/log/volume_deleted_log_handler.h"
 
 namespace pos
 {
 
-LogList::LogList(void)
+ReplayLogList::ReplayLogList(void)
+: time(0)
 {
 }
 
-LogList::~LogList(void)
+ReplayLogList::~ReplayLogList(void)
 {
-    Reset();
-}
+    groupLogs.clear();
 
-void
-LogList::Reset(void)
-{
-    for (auto log : logs)
+    for (auto replayLog : replayLogs)
     {
-        delete log;
+        delete replayLog.log;
     }
-    logs.clear();
+    replayLogs.clear();
+
+    for (auto replayLog : deletingLogs)
+    {
+        delete replayLog.log;
+    }
+    deletingLogs.clear();
 }
+
 void
-LogList::AddLog(LogHandlerInterface* log)
+ReplayLogList::AddLog(LogHandlerInterface* log)
 {
-    logs.push_back(log);
+    ReplayLog replayLog = {
+        .time = _GetTime(),
+        .log = log
+    };
+
+    if (log->GetType() == LogType::VOLUME_DELETED)
+    {
+        deletingLogs.push_back(replayLog);
+    }
+    else
+    {
+        groupLogs[log->GetSeqNum()].push_back(replayLog);
+    }
+}
+
+uint64_t
+ReplayLogList::_GetTime(void)
+{
+    return time++;
 }
 
 bool
-LogList::IsEmpty(void)
+ReplayLogList::IsEmpty(void)
 {
-    return (logs.size() == 0);
+    return groupLogs.size();
 }
 
-// This is for journal integration test
-std::list<LogHandlerInterface*>
-LogList::GetLogs(void)
+std::vector<ReplayLog>&
+ReplayLogList::GetReplayLogs(void)
 {
-    return logs;
+    for (auto logs : groupLogs)
+    {
+        replayLogs.insert(replayLogs.end(), logs.second.begin(), logs.second.end());
+    }
+    groupLogs.clear();
+
+    return replayLogs;
+}
+
+std::vector<ReplayLog>&
+ReplayLogList::GetDeletingLogs(void)
+{
+    return deletingLogs;
 }
 
 } // namespace pos

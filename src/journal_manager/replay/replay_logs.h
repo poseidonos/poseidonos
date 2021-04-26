@@ -34,10 +34,11 @@
 
 #include <vector>
 
-#include "../log/log_handler.h"
-#include "active_user_stripe_replayer.h"
-#include "active_wb_stripe_replayer.h"
-#include "replay_task.h"
+#include "src/journal_manager/replay/active_user_stripe_replayer.h"
+#include "src/journal_manager/replay/active_wb_stripe_replayer.h"
+#include "src/journal_manager/replay/log_delete_checker.h"
+#include "src/journal_manager/replay/replay_task.h"
+#include "src/journal_manager/replay/replay_log_list.h"
 
 #include "src/mapper/i_vsamap.h"
 #include "src/mapper/i_stripemap.h"
@@ -57,11 +58,12 @@ class IArrayInfo;
 
 class LogReplayer;
 class ReplayStripe;
+class LogHandlerInterface;
 
 class ReplayLogs : public ReplayTask
 {
 public:
-    ReplayLogs(LogList& logList, IVSAMap* vsaMap, IStripeMap* stripeMap,
+    ReplayLogs(ReplayLogList& logList, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
         IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx, IArrayInfo* arrayInfo,
         ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes);
@@ -73,12 +75,15 @@ public:
     virtual int GetNumSubTasks(void) override;
 
 private:
-    void _CreateReplayStripe(void);
-    void _DeleteVolumeLogs(LogHandlerInterface* log);
-    ReplayStripe* _FindStripe(StripeId vsid);
-    int _Replay(void);
+    int _ReplayFinishedStripes(std::vector<ReplayLog>& replayLogs);
+    int _ReplayUnfinishedStripes(void);
 
-    LogList& logList;
+    int _ReplayStripe(ReplayStripe* stripe);
+
+    ReplayStripe* _FindUserStripe(StripeId vsid);
+    void _MoveToReplayedStripe(ReplayStripe* stripe);
+
+    ReplayLogList& logList;
 
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
@@ -88,7 +93,11 @@ private:
     ISegmentCtx* segmentCtx;
     IArrayInfo* arrayInfo;
 
-    std::vector<ReplayStripe*> replayStripeList;
+    std::vector<ReplayStripe*> replayingStripeList;
+    std::vector<ReplayStripe*> replayedStripeList;
+
+    LogDeleteChecker* logDeleteChecker;
+
     ActiveWBStripeReplayer* wbStripeReplayer;
     ActiveUserStripeReplayer* userStripeReplayer;
 };

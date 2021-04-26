@@ -30,46 +30,53 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/journal_manager/log/log_list.h"
+#include "src/journal_manager/log/log_event.h"
+#include "src/journal_manager/replay/log_delete_checker.h"
 
 namespace pos
 {
 
-LogList::LogList(void)
-{
-}
-
-LogList::~LogList(void)
-{
-    Reset();
-}
-
 void
-LogList::Reset(void)
+LogDeleteChecker::Update(std::vector<ReplayLog>& replayLogs)
 {
-    for (auto log : logs)
+    for (auto replayLog : replayLogs)
     {
-        delete log;
+        VolumeDeletedLog* log = reinterpret_cast<VolumeDeletedLog*>((replayLog.log)->GetData());
+        DeletedVolume deletion = {
+            .volumeId = log->volId,
+            .time = replayLog.time
+        };
+        deletedVolumes.push_back(deletion);
     }
-    logs.clear();
 }
+
 void
-LogList::AddLog(LogHandlerInterface* log)
+LogDeleteChecker::ReplayedUntil(uint64_t time)
 {
-    logs.push_back(log);
+    for (auto it = deletedVolumes.begin(); it != deletedVolumes.end();)
+    {
+        if (it->time < time)
+        {
+            it = deletedVolumes.erase(it);
+        }
+        else
+        {
+            it++;
+        }
+    }
 }
 
 bool
-LogList::IsEmpty(void)
+LogDeleteChecker::IsDeleted(int volumeId)
 {
-    return (logs.size() == 0);
-}
-
-// This is for journal integration test
-std::list<LogHandlerInterface*>
-LogList::GetLogs(void)
-{
-    return logs;
+    for (auto volume : deletedVolumes)
+    {
+        if (volume.volumeId == volumeId)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace pos

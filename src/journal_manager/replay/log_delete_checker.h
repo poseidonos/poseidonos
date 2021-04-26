@@ -30,46 +30,32 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/journal_manager/log/log_list.h"
+#pragma once
+
+#include <vector>
+
+#include "src/journal_manager/replay/replay_log_list.h"
 
 namespace pos
 {
 
-LogList::LogList(void)
+class LogDeleteChecker
 {
-}
+public:
+    LogDeleteChecker(void) = default;
+    virtual ~LogDeleteChecker(void) = default;
 
-LogList::~LogList(void)
-{
-    Reset();
-}
+    void Update(std::vector<ReplayLog>& deletingLogs);
+    void ReplayedUntil(uint64_t time);
+    bool IsDeleted(int volumeId);
 
-void
-LogList::Reset(void)
-{
-    for (auto log : logs)
+private:
+    struct DeletedVolume
     {
-        delete log;
-    }
-    logs.clear();
-}
-void
-LogList::AddLog(LogHandlerInterface* log)
-{
-    logs.push_back(log);
-}
-
-bool
-LogList::IsEmpty(void)
-{
-    return (logs.size() == 0);
-}
-
-// This is for journal integration test
-std::list<LogHandlerInterface*>
-LogList::GetLogs(void)
-{
-    return logs;
-}
+        int volumeId;
+        uint64_t time;
+    };
+    std::vector<DeletedVolume> deletedVolumes;
+};
 
 } // namespace pos

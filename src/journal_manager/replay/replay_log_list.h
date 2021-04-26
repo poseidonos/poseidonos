@@ -30,46 +30,43 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#pragma once
+
+#include <vector>
+#include <map>
+
+#include "src/journal_manager/log/log_event.h"
+#include "src/journal_manager/log/log_handler.h"
 #include "src/journal_manager/log/log_list.h"
 
 namespace pos
 {
-
-LogList::LogList(void)
+struct ReplayLog
 {
-}
+    uint64_t time;
+    LogHandlerInterface* log;
+};
 
-LogList::~LogList(void)
+class ReplayLogList : public LogList
 {
-    Reset();
-}
+public:
+    ReplayLogList(void);
+    virtual ~ReplayLogList(void);
 
-void
-LogList::Reset(void)
-{
-    for (auto log : logs)
-    {
-        delete log;
-    }
-    logs.clear();
-}
-void
-LogList::AddLog(LogHandlerInterface* log)
-{
-    logs.push_back(log);
-}
+    virtual void AddLog(LogHandlerInterface* log) override;
+    virtual bool IsEmpty(void) override;
 
-bool
-LogList::IsEmpty(void)
-{
-    return (logs.size() == 0);
-}
+    std::vector<ReplayLog>& GetReplayLogs(void);
+    std::vector<ReplayLog>& GetDeletingLogs(void);
 
-// This is for journal integration test
-std::list<LogHandlerInterface*>
-LogList::GetLogs(void)
-{
-    return logs;
-}
+private:
+    uint64_t _GetTime(void);
 
+    std::map<uint64_t, std::vector<ReplayLog>> groupLogs; // key = sequence number
+
+    std::vector<ReplayLog> deletingLogs;
+    std::vector<ReplayLog> replayLogs;
+
+    uint64_t time;
+};
 } // namespace pos
