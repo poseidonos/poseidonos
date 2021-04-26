@@ -60,61 +60,55 @@ ExitIbofosCommand::Execute(json& doc, string rid)
     std::vector<ArrayBootRecord> abrList;
     ret = ArrayMgr::Instance()->GetAbrList(abrList);
 
-    if (ret == 0)
+    if (ret == 0 &&!abrList.empty())
     {
-        if (!abrList.empty())
+        int eventId = (int)POS_EVENT_ID::MBR_ABR_LIST_SUCCESS;
+        POS_TRACE_DEBUG(eventId, "Found {} arrays from abr list", abrList.size());
+        for (const auto& abr : abrList)
         {
-            int eventId = (int)POS_EVENT_ID::MBR_ABR_LIST_SUCCESS;
-            POS_TRACE_DEBUG(eventId, "Found {} arrays from abr list", abrList.size());
-            for (const auto& abr : abrList)
-            {
-                IArrayInfo* arrayInfo = ArrayMgr::Instance()->GetArrayInfo(abr.arrayName);
+            IArrayInfo* arrayInfo = ArrayMgr::Instance()->GetArrayInfo(abr.arrayName);
 
-                if (arrayInfo == nullptr)
+            if (arrayInfo == nullptr)
+            {
+                eventId = (int)POS_EVENT_ID::ARRAY_NO_ARRAY_INFO;
+                POS_TRACE_ERROR(eventId, "No array info for array '{}'", abr.arrayName);
+            }
+            else
+            {
+                eventId = (int)POS_EVENT_ID::ARRAY_ARRAY_INFO_FOUND;
+                POS_TRACE_DEBUG(eventId, "Found array '{}' in state '{}'",
+                    abr.arrayName, arrayInfo->GetState().ToString());
+
+                if (arrayInfo->GetState() >= ArrayStateEnum::TRY_MOUNT)
                 {
-                    eventId = (int)POS_EVENT_ID::ARRAY_NO_ARRAY_INFO;
-                    POS_TRACE_ERROR(eventId, "No array info for array '{}'", abr.arrayName);
-                }
-                else
-                {
-                    eventId = (int)POS_EVENT_ID::ARRAY_ARRAY_INFO_FOUND;
-                    POS_TRACE_DEBUG(eventId, "Found array '{}' in state '{}'",
+                    eventId = (int)POS_EVENT_ID::MOUNTED_ARRAY_EXISTS;
+                    POS_TRACE_ERROR(eventId,
+                        "Failed to exit system. Array '{}' is still mounted with state '{}'",
                         abr.arrayName, arrayInfo->GetState().ToString());
 
-                    if (arrayInfo->GetState() >= ArrayStateEnum::TRY_MOUNT)
-                    {
-                        eventId = (int)POS_EVENT_ID::MOUNTED_ARRAY_EXISTS;
-                        POS_TRACE_ERROR(eventId,
-                            "Failed to exit system. Array '{}' is still mounted with state '{}'",
-                            abr.arrayName, arrayInfo->GetState().ToString());
-
-                        return jFormat.MakeResponse(
-                            "EXITIBOFOS", rid, eventId,
-                            "failed to terminate POS (code:" + to_string(eventId) + ")",
-                            GetPosInfo());
-                    }
+                    return jFormat.MakeResponse(
+                        "EXITIBOFOS", rid, eventId,
+                        "failed to terminate POS (code:" + to_string(eventId) + ")",
+                        GetPosInfo());
                 }
             }
-        }
-
-        if (requestHandler.IsExit() == false)
-        {
-            requestHandler.SetExit(true);
-            return jFormat.MakeResponse("EXITIBOFOS", rid, SUCCESS,
-                "POS will be terminated soon", GetPosInfo());
-        }
-        else
-        {
-            return jFormat.MakeResponse("EXITIBOFOS", rid, SUCCESS,
-                "POS is now terminating", GetPosInfo());
         }
     }
     else
     {
-        return jFormat.MakeResponse(
-            "EXITIBOFOS", rid, ret,
-            "failed to terminate POS (code:" + to_string(ret) + ")",
-            GetPosInfo());
+        POS_TRACE_DEBUG(ret, "Failed to get abr list, device might be not scanned");
+    }
+
+    if (requestHandler.IsExit() == false)
+    {
+        requestHandler.SetExit(true);
+        return jFormat.MakeResponse("EXITIBOFOS", rid, SUCCESS,
+            "POS will be terminated soon", GetPosInfo());
+    }
+    else
+    {
+        return jFormat.MakeResponse("EXITIBOFOS", rid, SUCCESS,
+            "POS is now terminating", GetPosInfo());
     }
 }
 }; // namespace pos_cli
