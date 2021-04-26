@@ -23,18 +23,14 @@ WrittenLogs::~WrittenLogs(void)
 void
 WrittenLogs::Reset(void)
 {
-    for (auto log : writeLogList)
-    {
-        delete log;
-    }
-    writeLogList.clear();
+    writeLogList.Reset();
 }
 
 void
 WrittenLogs::_AddToList(LogHandlerInterface* entry)
 {
     std::lock_guard<std::mutex> lock(logListLock);
-    writeLogList.push_back(entry);
+    writeLogList.AddLog(entry);
 }
 
 void
@@ -84,7 +80,8 @@ bool
 WrittenLogs::CheckLogInTheList(LogHandlerInterface* log)
 {
     bool exist = false;
-    for (auto it = writeLogList.begin(); it != writeLogList.end(); it++)
+    auto logList = writeLogList.GetLogs();
+    for (auto it = logList.begin(); it != logList.end(); it++)
     {
         if ((*it)->GetType() == log->GetType())
         {

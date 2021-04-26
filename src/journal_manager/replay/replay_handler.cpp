@@ -92,12 +92,6 @@ ReplayHandler::~ReplayHandler(void)
 {
     delete reporter;
 
-    for (auto log : logList)
-    {
-        delete log;
-    }
-    logList.clear();
-
     for (auto task : taskList)
     {
         delete task;

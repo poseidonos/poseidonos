@@ -5,6 +5,7 @@
 
 #include "gtest/gtest.h"
 #include "src/event_scheduler/event.h"
+#include "src/journal_manager/log/log_list.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/journal_write_context.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"

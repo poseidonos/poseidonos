@@ -32,19 +32,20 @@
 
 #pragma once
 
-#include "../log/log_handler.h"
-#include "replay_task.h"
+#include "src/journal_manager/replay/replay_task.h"
 
 namespace pos
 {
 class JournalLogBuffer;
 class LogReplayer;
 class JournalConfiguration;
+class ReplayLogList;
 
 class ReadLogBuffer : public ReplayTask
 {
 public:
-    ReadLogBuffer(JournalConfiguration* journalConfig, JournalLogBuffer* logBuffer, LogList& logList, ReplayProgressReporter* progressReporter);
+    ReadLogBuffer(JournalConfiguration* journalConfig, JournalLogBuffer* logBuffer,
+        ReplayLogList& logList, ReplayProgressReporter* progressReporter);
     virtual ~ReadLogBuffer(void);
 
     virtual int Start(void) override;
@@ -55,7 +56,7 @@ public:
 private:
     JournalConfiguration* config;
     JournalLogBuffer* logBuffer;
-    LogList& logList;
+    ReplayLogList& logList;
 };
 
 } // namespace pos

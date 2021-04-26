@@ -34,11 +34,11 @@
 
 #include <list>
 
-#include "../log/log_handler.h"
-#include "pending_stripe.h"
-#include "replay_progress_reporter.h"
-#include "replay_state_changer.h"
-#include "replay_task.h"
+#include "src/journal_manager/replay/pending_stripe.h"
+#include "src/journal_manager/replay/replay_progress_reporter.h"
+#include "src/journal_manager/replay/replay_state_changer.h"
+#include "src/journal_manager/replay/replay_task.h"
+#include "src/journal_manager/replay/replay_log_list.h"
 
 namespace pos
 {
@@ -85,7 +85,7 @@ private:
 
     ReplayStateChanger replayState;
 
-    LogList logList;
+    ReplayLogList logList;
     PendingStripeList pendingWbStripes;
 
     JournalConfiguration* config;

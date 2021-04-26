@@ -53,6 +53,4 @@ public:
     virtual void SetSeqNum(uint32_t num) = 0;
 };
 
-using LogList = std::list<LogHandlerInterface*>;
-
 } // namespace pos

@@ -34,7 +34,7 @@
 
 #include <cstdint>
 
-#include "src/journal_manager/log/log_handler.h"
+#include "src/journal_manager/log/log_list.h"
 
 namespace pos
 {

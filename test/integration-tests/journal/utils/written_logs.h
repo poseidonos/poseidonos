@@ -4,6 +4,7 @@
 #include <list>
 
 #include "src/journal_manager/log/log_handler.h"
+#include "src/journal_manager/log/log_list.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 
 #include "src/allocator/wb_stripe_manager/stripe.h"

@@ -147,13 +147,11 @@ JournalManagerSpy::_GetLogsFromBuffer(LogList& logList)
             break;
         }
 
-        LogList logs;
-        result = parser.GetLogs(logGroupBuffer, groupSize, logs);
+        result = parser.GetLogs(logGroupBuffer, groupSize, logList);
         if (result != 0)
         {
             break;
         }
-        logList.merge(logs);
     }
     free(logGroupBuffer);
 

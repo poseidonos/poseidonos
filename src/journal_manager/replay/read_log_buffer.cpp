@@ -37,16 +37,17 @@
 #include <iostream>
 #include <iomanip>
 
-#include "../config/journal_configuration.h"
-#include "../log/log_buffer_parser.h"
-#include "../log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/replay/replay_log_list.h"
+#include "src/journal_manager/log/log_buffer_parser.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 namespace pos
 {
 
 ReadLogBuffer::ReadLogBuffer(JournalConfiguration* journalConfig,
-    JournalLogBuffer* logBuffer, LogList& logList, ReplayProgressReporter* reporter)
+    JournalLogBuffer* logBuffer, ReplayLogList& logList, ReplayProgressReporter* reporter)
 : ReplayTask(reporter),
   config(journalConfig),
   logBuffer(logBuffer),
@@ -61,7 +62,7 @@ ReadLogBuffer::~ReadLogBuffer(void)
 int
 ReadLogBuffer::GetNumSubTasks(void)
 {
-    return 2 * config->GetNumLogGroups();
+    return config->GetNumLogGroups();
 }
 
 int
@@ -71,9 +72,6 @@ ReadLogBuffer::Start(void)
     POS_TRACE_DEBUG(eventId, "[ReplayTask] Read log buffer started");
 
     int result = 0;
-
-    auto comp = [](LogList a, LogList b) { return (a.back()->GetSeqNum() > b.back()->GetSeqNum());};
-    std::priority_queue<LogList, std::vector<LogList>, decltype(comp)> logs(comp);
     LogBufferParser parser;
 
     int numLogGroups = config->GetNumLogGroups();
@@ -88,34 +86,17 @@ ReadLogBuffer::Start(void)
             break;
         }
 
-        LogList groupLogs;
-        result = parser.GetLogs(logGroupBuffer, groupSize, groupLogs);
+        result = parser.GetLogs(logGroupBuffer, groupSize, logList);
         if (result != 0)
         {
             break;
-        }
-
-        if (groupLogs.size() != 0)
-        {
-            logs.push(groupLogs);
-            POS_TRACE_DEBUG(eventId, "{} logs are found from log group {}",
-                groupLogs.size(), groupId);
         }
         reporter->SubTaskCompleted(GetId(), 1);
     }
 
     if (result == 0)
     {
-        while (logs.size() != 0)
-        {
-            LogList groupLogs = logs.top();
-            logList.insert(logList.end(), groupLogs.begin(), groupLogs.end());
-            logs.pop();
-
-            reporter->SubTaskCompleted(GetId(), 1);
-        }
-
-        if (logList.size() == 0)
+        if (logList.IsEmpty() == 0)
         {
             int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STOPPED);
             std::ostringstream os;

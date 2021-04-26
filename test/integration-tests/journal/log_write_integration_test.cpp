@@ -49,7 +49,7 @@ TEST_F(LogWriteIntegrationTest, WriteLogWithJournalDisabled)
     int result = journal->GetLogs(readLogs);
 
     EXPECT_TRUE(result == 0);
-    EXPECT_TRUE(readLogs.size() == 0);
+    EXPECT_TRUE(readLogs.IsEmpty() == true);
 }
 
 TEST_F(LogWriteIntegrationTest, WriteLog_UserStripe)

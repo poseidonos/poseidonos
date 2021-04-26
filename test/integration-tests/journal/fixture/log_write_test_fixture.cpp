@@ -343,10 +343,10 @@ LogWriteTestFixture::AreAllLogWritesDone(void)
 void
 LogWriteTestFixture::CompareLogs(void)
 {
-    LogList readLogs;
-    int result = journal->GetLogs(readLogs);
-    EXPECT_TRUE(result == 0);
+    LogList logList;
+    EXPECT_TRUE(journal->GetLogs(logList) == 0);
 
+    std::list<LogHandlerInterface*> readLogs = logList.GetLogs();
     EXPECT_TRUE(testingLogs.GetNumLogsInTesting() == readLogs.size());
 
     while (readLogs.size() != 0)
@@ -354,7 +354,6 @@ LogWriteTestFixture::CompareLogs(void)
         LogHandlerInterface* log = readLogs.front();
         EXPECT_TRUE(testingLogs.CheckLogInTheList(log) == true);
         readLogs.pop_front();
-        delete log;
     }
 
     EXPECT_TRUE(readLogs.size() == 0);

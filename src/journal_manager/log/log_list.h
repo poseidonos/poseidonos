@@ -34,61 +34,25 @@
 
 #include <list>
 
-#include "src/include/address_type.h"
-#include "src/journal_manager/statistics/stripe_replay_status.h"
+#include "src/journal_manager/log/log_handler.h"
 
 namespace pos
 {
-class IVSAMap;
-class IStripeMap;
-class IWBStripeCtx;
-class ISegmentCtx;
-class IBlockAllocator;
-class IArrayInfo;
 
-class LogHandlerInterface;
-class StripeReplayStatus;
-class ReplayEventFactory;
-class ActiveWBStripeReplayer;
-class ActiveUserStripeReplayer;
-class ReplayEvent;
-
-class ReplayStripe
+class LogList
 {
 public:
-    ReplayStripe(void) = delete;
-    ReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
-        IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
-        ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
-    virtual ~ReplayStripe(void);
+    LogList(void);
+    virtual ~LogList(void);
 
-    virtual void AddLog(LogHandlerInterface* log) = 0;
-    virtual int Replay(void);
+    void Reset(void);
 
-    StripeId GetVsid(void) { return status->GetVsid(); }
-    int GetVolumeId(void) { return status->GetVolumeId(); }
-    bool IsFlushed(void) { return status->IsFlushed(); }
+    virtual void AddLog(LogHandlerInterface* log);
+    virtual bool IsEmpty(void);
 
-    void DeleteBlockMapReplayEvents(void);
+    std::list<LogHandlerInterface*> GetLogs(void);
 
-protected:
-    void _CreateSegmentAllocationEvent(void);
-    void _CreateStripeAllocationEvent(void);
-    void _CreateStripeFlushReplayEvent(void);
-
-    int _ReplayEvents(void);
-
-    StripeReplayStatus* status;
-    ReplayEventFactory* replayEventFactory;
-
-    std::list<ReplayEvent*> replayEvents;
-
-    ActiveWBStripeReplayer* wbStripeReplayer;
-    ActiveUserStripeReplayer* userStripeReplayer;
-
-    IVSAMap* vsaMap;
-    IStripeMap* stripeMap;
+private:
+    std::list<LogHandlerInterface*> logs;
 };
-
 } // namespace pos

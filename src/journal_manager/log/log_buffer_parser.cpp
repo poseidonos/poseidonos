@@ -71,7 +71,7 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
             BlockWriteDoneLogHandler* log = new BlockWriteDoneLogHandler(*reinterpret_cast<BlockWriteDoneLog*>(logPtr));
 
             currentOffset += log->GetSize();
-            logs.push_back(log);
+            logs.AddLog(log);
 
             numBlockMapUpdatedLogs++;
         }
@@ -80,7 +80,7 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
             StripeMapUpdatedLogHandler* log = new StripeMapUpdatedLogHandler(*reinterpret_cast<StripeMapUpdatedLog*>(logPtr));
 
             currentOffset += log->GetSize();
-            logs.push_back(log);
+            logs.AddLog(log);
 
             numStripeMapUpdatedLogs++;
         }
@@ -89,7 +89,7 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
             GcStripeFlushedLogHandler* log = new GcStripeFlushedLogHandler(logPtr);
 
             currentOffset += log->GetSize();
-            logs.push_back(log);
+            logs.AddLog(log);
 
             numGcStripeFlushedLogs++;
         }
@@ -98,7 +98,7 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
             VolumeDeletedLogEntry* log = new VolumeDeletedLogEntry(*reinterpret_cast<VolumeDeletedLog*>(logPtr));
 
             currentOffset += log->GetSize();
-            logs.push_back(log);
+            logs.AddLog(log);
 
             numVolumeDeletedLogs++;
         }

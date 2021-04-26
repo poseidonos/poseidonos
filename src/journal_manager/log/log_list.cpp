@@ -30,65 +30,46 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <list>
-
-#include "src/include/address_type.h"
-#include "src/journal_manager/statistics/stripe_replay_status.h"
+#include "src/journal_manager/log/log_list.h"
 
 namespace pos
 {
-class IVSAMap;
-class IStripeMap;
-class IWBStripeCtx;
-class ISegmentCtx;
-class IBlockAllocator;
-class IArrayInfo;
 
-class LogHandlerInterface;
-class StripeReplayStatus;
-class ReplayEventFactory;
-class ActiveWBStripeReplayer;
-class ActiveUserStripeReplayer;
-class ReplayEvent;
-
-class ReplayStripe
+LogList::LogList(void)
 {
-public:
-    ReplayStripe(void) = delete;
-    ReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
-        IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
-        ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
-    virtual ~ReplayStripe(void);
+}
 
-    virtual void AddLog(LogHandlerInterface* log) = 0;
-    virtual int Replay(void);
+LogList::~LogList(void)
+{
+    Reset();   
+}
 
-    StripeId GetVsid(void) { return status->GetVsid(); }
-    int GetVolumeId(void) { return status->GetVolumeId(); }
-    bool IsFlushed(void) { return status->IsFlushed(); }
+void
+LogList::Reset(void)
+{
+    for (auto log : logs)
+    {
+        delete log;
+    }
+    logs.clear();
+}
+void
+LogList::AddLog(LogHandlerInterface* log)
+{
+    logs.push_back(log);
+}
 
-    void DeleteBlockMapReplayEvents(void);
+bool
+LogList::IsEmpty(void)
+{
+    return (logs.size() == 0);
+}
 
-protected:
-    void _CreateSegmentAllocationEvent(void);
-    void _CreateStripeAllocationEvent(void);
-    void _CreateStripeFlushReplayEvent(void);
-
-    int _ReplayEvents(void);
-
-    StripeReplayStatus* status;
-    ReplayEventFactory* replayEventFactory;
-
-    std::list<ReplayEvent*> replayEvents;
-
-    ActiveWBStripeReplayer* wbStripeReplayer;
-    ActiveUserStripeReplayer* userStripeReplayer;
-
-    IVSAMap* vsaMap;
-    IStripeMap* stripeMap;
-};
+// This is for journal integration test
+std::list<LogHandlerInterface*>
+LogList::GetLogs(void)
+{
+    return logs;
+}
 
 } // namespace pos

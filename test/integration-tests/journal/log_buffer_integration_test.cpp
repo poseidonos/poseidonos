@@ -168,8 +168,9 @@ JournalLogBufferIntegrationTest::_WaitForLogWriteDone(int numLogsWaitingFor)
 
 // TODO (huijeong.kim) check if it can be merged with log write tester
 void
-JournalLogBufferIntegrationTest::_CompareWithAdded(LogList& logs)
+JournalLogBufferIntegrationTest::_CompareWithAdded(LogList& logList)
 {
+    std::list<LogHandlerInterface*> logs = logList.GetLogs();
     EXPECT_EQ(logs.size(), addedLogs.size());
 
     auto readIter = logs.begin();
@@ -292,7 +293,7 @@ TEST_F(JournalLogBufferIntegrationTest, WriteInvalidLogType)
 
         LogList groupLogs;
         EXPECT_TRUE(_ParseLogBuffer(0, groupLogs) != 0);
-        EXPECT_TRUE(groupLogs.size() == 0);
+        EXPECT_TRUE(groupLogs.IsEmpty() == true);
     }
     else
     {
@@ -323,7 +324,7 @@ TEST_F(JournalLogBufferIntegrationTest, WriteWithoutMark)
 
         LogList groupLogs;
         EXPECT_TRUE(_ParseLogBuffer(0, groupLogs) == 0);
-        EXPECT_TRUE(groupLogs.size() == 0);
+        EXPECT_TRUE(groupLogs.IsEmpty() == true);
     }
     else
     {

@@ -56,8 +56,10 @@ JournalVolumeIntegrationTest::DeleteVolumes(Volumes &volumesToDelete)
 void
 JournalVolumeIntegrationTest::CheckVolumeDeleteLogsWritten(Volumes &volumesToDelete)
 {
-    LogList logs;
-    EXPECT_TRUE(journal->GetLogs(logs) == 0);
+    LogList logList;
+    EXPECT_TRUE(journal->GetLogs(logList) == 0);
+
+    std::list<LogHandlerInterface*> logs = logList.GetLogs();
 
     int deleteVolumeLogFound = 0;
     while (logs.size() != 0)
@@ -72,7 +74,6 @@ JournalVolumeIntegrationTest::CheckVolumeDeleteLogsWritten(Volumes &volumesToDel
             EXPECT_TRUE(volumesToDelete.find(logData->volId) != volumesToDelete.end());
         }
 
-        delete log;
         logs.pop_front();
     }
 

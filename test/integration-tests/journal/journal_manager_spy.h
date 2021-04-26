@@ -3,7 +3,7 @@
 #include <string>
 
 #include "src/journal_manager/config/journal_configuration.h"
-#include "src/journal_manager/log/log_handler.h"
+#include "src/journal_manager/log/log_list.h"
 #include "src/journal_manager/checkpoint/log_group_releaser.h"
 #include "src/journal_manager/journal_manager.h"
 
