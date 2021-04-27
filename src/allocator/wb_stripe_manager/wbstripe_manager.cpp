@@ -105,7 +105,6 @@ WBStripeManager::AllocateUserDataStripeId(StripeId vsid)
 void
 WBStripeManager::FreeWBStripeId(StripeId lsid)
 {
-    std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
     assert(!IsUnMapStripe(lsid));
     contextManager->GetWbLsidBitmap()->ClearBit(lsid);
     QosManagerSingleton::Instance()->DecreaseUsedStripeCnt();
