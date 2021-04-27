@@ -78,7 +78,7 @@ check_result()
     fi
 }
 
-sudo ${rootdir}/test/script/kill_ibofos.sh
+sudo ${rootdir}/test/script/kill_poseidonos.sh
 sudo ${rootdir}/script/start_poseidonos.sh
 sleep 10
 

@@ -21,7 +21,7 @@ perVolSize=$(expr $perVolSizeinGB \* $GBtoB)
 # Common until array handling
 
 ibofos_forced_kill() {
-    sudo $rootdir/test/script/kill_ibofos.sh
+    sudo $rootdir/test/script/kill_poseidonos.sh
 }
 
 ibofos_bringup() {

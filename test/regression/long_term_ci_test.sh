@@ -71,7 +71,7 @@ check_result()
 {
     if [ $res -ne 0 ];
     then
-        sudo ${rootdir}/test/script/kill_ibofos.sh
+        sudo ${rootdir}/test/script/kill_poseidonos.sh
         banner failed
         exit 1
     else
@@ -101,7 +101,7 @@ print_test_configuration()
 
 print_test_configuration
 
-sudo ${rootdir}/test/script/kill_ibofos.sh
+sudo ${rootdir}/test/script/kill_poseidonos.sh
 sudo ${rootdir}/script/start_poseidonos.sh
 sleep 10
 
@@ -140,7 +140,7 @@ do
 			shutdown
         else
             echo "add spor test"
-            sudo ${rootdir}/test/script/kill_ibofos.sh
+            sudo ${rootdir}/test/script/kill_poseidonos.sh
             sleep 5
             sudo ${rootdir}/script/backup_latest_hugepages_for_uram.sh
             sleep 5
@@ -186,6 +186,6 @@ do
     sudo ${rootdir}/test/system/longterm/mem_check.sh >> mem_history.txt
 done
 
-#sudo ${rootdir}/test/script/kill_ibofos.sh
+#sudo ${rootdir}/test/script/kill_poseidonos.sh
 shutdown
 echo "test end"

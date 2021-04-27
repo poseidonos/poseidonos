@@ -153,7 +153,7 @@ check_stopped()
 kill_ibofos()
 {
     # kill poseidonos if exists
-    texecc ${IBOFOS_ROOT}/test/script/kill_ibofos.sh 2>> ${logfile}
+    texecc ${IBOFOS_ROOT}/test/script/kill_poseidonos.sh 2>> ${logfile}
 	check_stopped
 
     echo "iBoFOS killed"

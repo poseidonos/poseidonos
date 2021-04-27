@@ -153,7 +153,7 @@ done
 
 echo "------------[Kill & Start poseidonos]----------------------------------"
 
-sudo ${ROOT_DIR}/test/script/kill_ibofos.sh
+sudo ${ROOT_DIR}/test/script/kill_poseidonos.sh
 sudo ${ROOT_DIR}/script/start_poseidonos.sh
 sleep 10
 
@@ -421,7 +421,7 @@ rm -rf ${inputFile}
 rm -rf ${cliOutput}
 
 echo "------------[WBT Test End, Kill poseidonos]----------------------------------"
-sudo ${ROOT_DIR}/test/script/kill_ibofos.sh
+sudo ${ROOT_DIR}/test/script/kill_poseidonos.sh
 
 if [ $exit_result -eq 0 ];then
     echo -[ Test Success ] -

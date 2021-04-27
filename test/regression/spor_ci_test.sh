@@ -113,7 +113,7 @@ print_configuration()
 kill_ibofos()
 {
     # kill poseidonos if exists
-    execc ${ibof_root}/test/script/kill_ibofos.sh
+    execc ${ibof_root}/test/script/kill_poseidonos.sh
     echo ""
 }
 

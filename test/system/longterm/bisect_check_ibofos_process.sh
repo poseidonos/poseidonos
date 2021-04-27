@@ -6,7 +6,7 @@ dirpath=`dirname $0`
 rootdir=$(readlink -f ${dirpath})/../../..
 
 sudo rm ${dirpath}/test_done.txt
-sudo ${rootdir}/test/script/kill_ibofos.sh 
+sudo ${rootdir}/test/script/kill_poseidonos.sh 
 
 cd ${rootdir};
 

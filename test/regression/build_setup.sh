@@ -40,7 +40,7 @@ printVariable()
 processKill()
 {
     echo "Killing previously-running poseidonos..."
-    texecc $ibof_root/test/script/kill_ibofos.sh
+    texecc $ibof_root/test/script/kill_poseidonos.sh
 }
 
 repositorySetup()

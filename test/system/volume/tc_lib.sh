@@ -127,7 +127,7 @@ show_tc_info()
 
 kill_pos()
 {
-    texecc ./test/script/kill_ibofos.sh &>> ${logfile}
+    texecc ./test/script/kill_poseidonos.sh &>> ${logfile}
     sleep 2
 }
 

@@ -314,7 +314,7 @@ setup_prerequisite(){
 #Kill POS
 #**************************************************************************
 kill_pos(){
-    texecc $TARGET_ROOT_DIR/test/script/kill_ibofos.sh
+    texecc $TARGET_ROOT_DIR/test/script/kill_poseidonos.sh
     echo ""
     texecc sleep 2
     texecc ps -C poseidonos > /dev/null >> ${logfile}

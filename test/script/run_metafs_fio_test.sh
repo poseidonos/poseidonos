@@ -91,4 +91,4 @@ do
     sudo nvme disconnect -n nqn.2019-04.pos:subsystem$i
 done
 
-sudo ./kill_ibofos.sh
+sudo ./kill_poseidonos.sh

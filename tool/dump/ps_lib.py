@@ -27,7 +27,7 @@ def kill_wait(flag_kill="nokill"):
 
     for proc in psutil.process_iter():
         try:
-            if "poseidonos" in proc.name()[-6:]:
+            if "ibofos" in proc.name()[-6:] or "poseidonos" in proc.name()[-11:]:
                 proc.resume()
                 print ("\t### process name : %s ####" % proc.name())
                 if (flag_kill == "kill"):

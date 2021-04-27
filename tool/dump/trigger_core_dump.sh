@@ -6,6 +6,9 @@ IBOFOS_LOG_PATH=/var/log/pos/
 IBOFOS_COPY=./poseidonos
 
 PROC_PID=`ps -ef | egrep "*/poseidonos$" | awk '{print $2}'`
+if [ -z $PROC_PID ];then
+    PROC_PID=`ps -ef | egrep "*/ibofos$" | awk '{print $2}'`
+fi
 PID="$PROC_PID"
 echo $PID
 DATE=`date "+%Y%m%d_%H%M%S"`

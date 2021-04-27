@@ -243,7 +243,7 @@ exit_POS()
 kill_POS()
 {
     echo "  Kill POS"
-    texecc ./test/script/kill_ibofos.sh >> ${logfile}
+    texecc ./test/script/kill_poseidonos.sh >> ${logfile}
 
     texecc ps -C poseidonos > /dev/null >> ${logfile}
     while [[ ${?} == 0 ]]

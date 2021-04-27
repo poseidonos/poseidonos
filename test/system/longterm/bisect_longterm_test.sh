@@ -82,5 +82,5 @@ do
     sudo ./mem_check.sh >> mem_history.txt
 done
 
-sudo ${rootdir}/test/script/kill_ibofos.sh
+sudo ${rootdir}/test/script/kill_poseidonos.sh
 echo "test end"
