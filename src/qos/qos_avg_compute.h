@@ -30,17 +30,12 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __IBOFOS_QOS_AVG_COMPUTE_H__
-#define __IBOFOS_QOS_AVG_COMPUTE_H__
+#pragma once
 
-#include <iostream>
-#include <list>
 #include <queue>
-#include <thread>
 #include <unordered_map>
 #include <vector>
 
-#include "src/lib/singleton.h"
 #include "src/qos/qos_common.h"
 
 using namespace std;
@@ -52,26 +47,36 @@ namespace pos
  *
  */
 /* --------------------------------------------------------------------------*/
+struct avgData
+{
+    avgData(void)
+    {
+        bw = 0;
+        iops = 0;
+    }
+    uint64_t bw;
+    uint64_t iops;
+};
 class MovingAvgCompute
 {
 public:
     explicit MovingAvgCompute(int len);
     ~MovingAvgCompute(void);
-    bool EnqueueAvgData(int volId, uint64_t data);
-    void ComputeMovingAvg(int volId, uint64_t data);
-    uint64_t DequeueAvgData(int voldId);
-    uint64_t GetMovingAvg(int volId);
-    void ResetMovingAvg(int volId);
+    void Initilize(void);
+    bool EnqueueAvgData(int volId, uint64_t bw, uint64_t iops);
+    uint64_t GetMovingAvgBw(int volId);
+    uint64_t GetMovingAvgIops(int volId);
 
 private:
-    std::queue<uint64_t> avgQueue[MAX_VOLUME_COUNT];
+    void _ComputeMovingAvg(int volId, struct avgData data);
+    avgData _DequeueAvgData(int voldId);
+    bool dataReadyToProcess[MAX_VOLUME_COUNT];
+    std::queue<struct avgData> avgQueue[MAX_VOLUME_COUNT];
     uint64_t buffer[MAX_VOLUME_COUNT];
+    uint64_t bufferIops[MAX_VOLUME_COUNT];
     int count[MAX_VOLUME_COUNT];
     uint64_t averageBW[MAX_VOLUME_COUNT];
+    uint64_t averageIops[MAX_VOLUME_COUNT];
     int movingAvgWindowLength;
-    bool dataReadyToProcess[MAX_VOLUME_COUNT];
 };
-
 } // namespace pos
-
-#endif // __IBOFOS_QOS_AVG_COMPUTE_H__

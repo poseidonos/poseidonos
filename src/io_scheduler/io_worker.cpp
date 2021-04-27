@@ -184,13 +184,19 @@ IOWorker::Run(void)
             _SubmitAsyncIO(ubio);
             _DoPeriodicJob();
             ubio = ioQueue->DequeueUbio();
-            UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
-            currentOutstandingIOCount -=
-                QosManagerSingleton::Instance()->EventQosPoller(id, &ublockDeviceSubmission);
         }
+        _SubmitPendingIO();
         _DoPeriodicJob();
         usleep(1);
     }
+}
+
+void
+IOWorker::_SubmitPendingIO(void)
+{
+    UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
+    currentOutstandingIOCount -=
+        QosManagerSingleton::Instance()->IOWorkerPoller(id, &ublockDeviceSubmission);
 }
 
 void
@@ -268,7 +274,7 @@ IOWorker::_SubmitAsyncIO(UbioSmartPtr ubio)
     currentOutstandingIOCount++;
     UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
     IOWorkerSubmissionNotifier ioWorkerSubmissionNotifier(this);
-    QosManagerSingleton::Instance()->SubmitAsyncIO(&ublockDeviceSubmission,
+    QosManagerSingleton::Instance()->HandleEventUbioSubmission(&ublockDeviceSubmission,
                         &ioWorkerSubmissionNotifier, id, ubio);
 }
 

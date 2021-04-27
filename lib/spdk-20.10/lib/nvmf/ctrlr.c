@@ -62,6 +62,16 @@
 
 #define ANA_TRANSITION_TIME_IN_SEC 10
 
+//This will be Changed to getting info from POS reactor info
+#define M_MAX_REACTOR (128)
+#define M_MAX_SUBSYSTEM (1024)
+#define VALID_ENTRY (1)
+#define INVALID_ENTRY (0)
+#define NVMF_CONNECT (0)
+#define NVMF_DISCONNECT (1)
+
+volatile bool pos_qos_enable = false;
+
 /*
  * Support for custom admin command handlers
  */
@@ -70,15 +80,80 @@ struct spdk_nvmf_custom_admin_cmd {
 	uint32_t nsid; /* nsid to forward */
 };
 
+struct nvmfConnectEntry {
+	uint32_t reactorId;
+	uint32_t subsysId;
+	uint32_t connectType; // 0=Connect 1=Disconnect
+	TAILQ_ENTRY(nvmfConnectEntry) queue;
+};
+
+struct spdkReactor {
+	TAILQ_HEAD(, nvmfConnectEntry) nvmfConnections;
+};
+
 static struct spdk_nvmf_custom_admin_cmd g_nvmf_custom_admin_cmd_hdlrs[SPDK_NVME_MAX_OPC + 1];
 
+static struct spdkReactor spdkReactorConnections[M_MAX_REACTOR] = {NULL};
 static void _nvmf_request_complete(void *ctx);
 
-//This will be Changed to getting info from POS reactor info
-#define M_MAX_REACTOR (100)
-#define M_MAX_SUBSYSTEM (1024)
-
+pthread_mutex_t mutexConnection[M_MAX_REACTOR] = PTHREAD_MUTEX_INITIALIZER;
 uint32_t reactorSubsystemIdMap[M_MAX_REACTOR][M_MAX_SUBSYSTEM] = {M_INVALID_SUBSYSTEM};
+bool connectionChange[M_MAX_REACTOR] = {false};
+
+void spdk_nvmf_connection_push(uint32_t reactorId, uint32_t subSystemId, uint32_t connectType)
+{
+	struct nvmfConnectEntry *connectionEntry = NULL;
+	connectionEntry = (struct nvmfConnectEntry *)malloc(sizeof(struct nvmfConnectEntry));
+	if (!connectionEntry) {
+		SPDK_ERRLOG("Unable to allocate memory for structure nvmfConnectEntry\n");
+		return;
+	}
+	connectionEntry->reactorId = reactorId;
+	connectionEntry->subsysId = subSystemId;
+	connectionEntry->connectType = connectType;
+	pthread_mutex_lock(&mutexConnection[reactorId]);
+	TAILQ_INSERT_TAIL(&spdkReactorConnections[reactorId].nvmfConnections, connectionEntry, queue);
+	pthread_mutex_unlock(&mutexConnection[reactorId]);
+}
+
+bool spdk_nvmf_connection_pop(uint32_t reactorId, void *arg)
+{
+	struct nvmfConnectEntry *entry = (struct nvmfConnectEntry *)arg;
+	struct nvmfConnectEntry *connectionEntry = NULL;
+	pthread_mutex_lock(&mutexConnection[reactorId]);
+	connectionEntry = TAILQ_FIRST(&spdkReactorConnections[reactorId].nvmfConnections);
+	if (NULL == connectionEntry) {
+		pthread_mutex_unlock(&mutexConnection[reactorId]);
+		return false;
+	}
+	TAILQ_REMOVE(&spdkReactorConnections[reactorId].nvmfConnections, connectionEntry, queue);
+	pthread_mutex_unlock(&mutexConnection[reactorId]);
+	entry->reactorId = connectionEntry->reactorId;
+	entry->subsysId = connectionEntry->subsysId;
+	entry->connectType = connectionEntry->connectType;
+	free(connectionEntry);
+	return true;
+}
+
+void spdk_nvmf_configure_pos_qos(bool value)
+{
+	pos_qos_enable = value;
+}
+
+bool spdk_nvmf_connection_changed(uint32_t reactor)
+{
+	pthread_mutex_lock(&mutexConnection[reactor]);
+	bool changed = connectionChange[reactor];
+	pthread_mutex_unlock(&mutexConnection[reactor]);
+	return changed;
+}
+
+void spdk_nvmf_connection_reset(uint32_t reactor)
+{
+	pthread_mutex_lock(&mutexConnection[reactor]);
+	connectionChange[reactor] = false;
+	pthread_mutex_unlock(&mutexConnection[reactor]);
+}
 
 void
 spdk_nvmf_initialize_reactor_subsystem_mapping(void)
@@ -87,6 +162,7 @@ spdk_nvmf_initialize_reactor_subsystem_mapping(void)
 		for (uint32_t subsys = 0; subsys < M_MAX_SUBSYSTEM; subsys++) {
 			reactorSubsystemIdMap[reactor][subsys] = M_INVALID_SUBSYSTEM;
 		}
+		TAILQ_INIT(&spdkReactorConnections[reactor].nvmfConnections);
 	}
 }
 
@@ -99,10 +175,16 @@ spdk_nvmf_get_reactor_subsystem_mapping(uint32_t reactor, uint32_t id)
 void
 spdk_nvmf_set_reactor_subsystem_mapping(uint32_t reactor, uint32_t id, uint32_t value)
 {
+	if (false == pos_qos_enable) {
+		return;
+	}
+	connectionChange[reactor] = true;
 	if (M_VALID_SUBSYSTEM == value) {
 		reactorSubsystemIdMap[reactor][id] += 1;
+		spdk_nvmf_connection_push(reactor, id, NVMF_CONNECT);
 	} else {
 		reactorSubsystemIdMap[reactor][id] -= 1;
+		spdk_nvmf_connection_push(reactor, id, NVMF_DISCONNECT);
 	}
 }
 
@@ -554,16 +636,13 @@ nvmf_ctrlr_add_io_qpair(void *ctx)
 	}
 
 	ctrlr_add_qpair_and_update_rsp(qpair, ctrlr, rsp);
-    if (spdk_likely(qpair->group->thread != spdk_get_thread()))
-    {
-        spdk_thread_send_msg(qpair->group->thread, _nvmf_reactor_subsystem_connection_update, req);
-        return;
-    }
-    else
-    {
-        _nvmf_reactor_subsystem_connection_update(req);
-        return;
-    }
+	if (spdk_likely(qpair->group->thread != spdk_get_thread())) {
+		spdk_thread_send_msg(qpair->group->thread, _nvmf_reactor_subsystem_connection_update, req);
+		return;
+	} else {
+		_nvmf_reactor_subsystem_connection_update(req);
+		return;
+	}
 end:
 	spdk_nvmf_request_complete(req);
 }
@@ -3379,7 +3458,6 @@ _nvmf_request_complete(void *ctx)
 			sgroup->cb_fn(sgroup->cb_arg, 0);
 		}
 	}
-
 	nvmf_qpair_request_cleanup(qpair);
 }
 

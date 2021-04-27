@@ -199,53 +199,5 @@ EventFrameworkApi::_SendEventToSpareQueue(uint32_t core, EventFuncOneParam func,
     std::lock_guard<EventQueueLock> lock(eventQueueLocks[core]);
     eventQueues[core].push(eventArgument);
 }
-
-void
-EventFrameworkApi::SpdkNvmfInitializeReactorSubsystemMapping(void)
-{
-    spdk_nvmf_initialize_reactor_subsystem_mapping();
-}
-
-uint32_t
-EventFrameworkApi::SpdkNvmfGetReactorSubsystemMapping(uint32_t reactor, uint32_t id)
-{
-    return spdk_nvmf_get_reactor_subsystem_mapping(reactor, id);
-}
-
-void
-EventFrameworkApi::SpdkPollerUnregister(void* poller)
-{
-    struct spdk_poller** spdkPoller = static_cast<struct spdk_poller**> (poller);
-    spdk_poller_unregister(spdkPoller);
-}
-
-uint64_t
-EventFrameworkApi::SpdkGetTicksHz(void)
-{
-    return spdk_get_ticks_hz();
-}
-
-uint64_t
-EventFrameworkApi::SpdkGetTicks(void)
-{
-    return spdk_get_ticks();
-}
-
-void*
-EventFrameworkApi::SpdkPollerRegister(SpdkPollerFunction func,
-    void* arg,
-    uint64_t period_microseconds,
-    std::string pollerName)
-{
-    char* name = const_cast<char*>(pollerName.c_str());
-    return spdk_poller_register_named(func, arg, period_microseconds, name);
-}
-
-uint32_t
-EventFrameworkApi::GetAttachedSubsystemId(const char* bdev_name)
-{
-    return get_attached_subsystem_id(bdev_name);
-}
-
 } // namespace pos
 

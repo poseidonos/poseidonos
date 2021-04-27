@@ -46,6 +46,7 @@
 #include "src/allocator/include/allocator_const.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/logger/logger.h"
+#include "src/qos/qos_manager.h"
 
 namespace pos
 {
@@ -243,6 +244,7 @@ CurrentGcMode
 ContextManager::GetCurrentGcMode(void)
 {
     int numFreeSegments = allocatorCtx->GetNumOfFreeUserDataSegment();
+    QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments);
     if (gcCtx.GetUrgentThreshold() >= numFreeSegments)
     {
         return MODE_URGENT_GC;

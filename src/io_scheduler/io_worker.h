@@ -78,6 +78,7 @@ private:
     void _CompleteCommand(void);
     void _DoPeriodicJob(void);
     void _HandleDeviceOperation(void);
+    void _SubmitPendingIO(void);
 
     using DeviceSet = std::unordered_set<UblockSharedPtr>;
     using DeviceSetIter = DeviceSet::iterator;

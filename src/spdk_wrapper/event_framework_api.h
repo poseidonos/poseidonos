@@ -43,7 +43,6 @@ namespace pos
 {
 using EventFuncTwoParams = void (*)(void*, void*);
 using EventFuncOneParam = void (*)(void*);
-using SpdkPollerFunction = int (*)(void*);
 
 struct EventWrapper
 {
@@ -69,13 +68,6 @@ public:
     static bool IsLastReactorNow(void);
     static bool IsSameReactorNow(uint32_t reactor);
     static uint32_t GetMaxReactor(void);
-    static void SpdkNvmfInitializeReactorSubsystemMapping(void);
-    static uint32_t SpdkNvmfGetReactorSubsystemMapping(uint32_t reactor, uint32_t id);
-    static void SpdkPollerUnregister(void* poller);
-    static uint64_t SpdkGetTicksHz(void);
-    static uint64_t SpdkGetTicks(void);
-    static void* SpdkPollerRegister(SpdkPollerFunction func, void* arg, uint64_t period_microseconds, std::string pollerName);
-    static uint32_t GetAttachedSubsystemId(const char* bdev_name);
 
 private:
     static thread_local uint32_t targetReactor;

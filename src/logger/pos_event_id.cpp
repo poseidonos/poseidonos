@@ -247,6 +247,7 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::DEVICE_NULLPTR_IOWORKER, "Overlapped setting for ioworker for single device: {} "},
 
             {POS_EVENT_ID::QOSMGR_REGISTER_POLLER_FAILED, "Failed to register Qos poller on reactor #: {}"},
+            {POS_EVENT_ID::QOSMGR_UNREGISTER_POLLER_FAILED, "Failed to un-register Qos poller on reactor #: {}"},
 
             {POS_EVENT_ID::UNVME_SSD_DEBUG_CREATED, "Create Ublock, Pointer : {}"},
             {POS_EVENT_ID::UNVME_SSD_SCAN_FAILED, "Failed to Scan uNVMe devices"},

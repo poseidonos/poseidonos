@@ -9,8 +9,6 @@ import (
 
 var InternalCommand = map[string]func(string, interface{}) (model.Request, model.Response, error){
     "stop_rebuilding":  iBoFOS.StopRebuilding,
-    "update_event_wrr":  iBoFOS.UpdateEventWrr,
-    "reset_event_wrr":  iBoFOS.ResetEventWrr,
 }
 
 var internalCmd = &cobra.Command{
@@ -23,8 +21,6 @@ Available msg list :
 [Category] : [msg]            : [description]                                                    : [example of flag]
 
 internal   : stop_rebuilding  : Stop rebuilding of an array                                      : --name ArrayName
-           : update_event_wrr : Set the weights for backend events such as flush, rebuild, etc.  : --name [flush/gc/...] --prio [0/1/2] --weight [1/2/3]
-           : reset_event_wrr  : Reset the weights for backend events                             : not needed
 
 If you want to input multiple flag parameter, you have to seperate with ",". 
 For example, "-d dev1,dev2,dev3". seperation by space is not allowed.
@@ -61,7 +57,7 @@ Port : 18716
 func init() {
 
 	rootCmd.AddCommand(internalCmd)
-	internalCmd.PersistentFlags().UintVar(&prio, "prio", 0, "set prio [0/1/2]")
-	internalCmd.PersistentFlags().UintVar(&weight, "weight", 0, "set weight [0/1/2]")
+    internalCmd.PersistentFlags().UintVar(&prio, "prio", 0, "set prio [0/1/2]")
+    internalCmd.PersistentFlags().UintVar(&weight, "weight", 0, "set weight [0/1/2]")
 	internalCmd.PersistentFlags().StringVarP(&name, "name", "n", "", "set name")
 }

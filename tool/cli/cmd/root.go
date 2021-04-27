@@ -40,15 +40,19 @@ var size string
 var maxiops uint64
 var maxbw uint64
 
+var prio uint
+var weight uint
+
 var devType string
 var numBlocks uint
 var blockSize uint
 
-var prio uint
-var weight uint
-
 var GitCommit string
 var BuildTime string
+
+var vol []string
+var minbw uint64
+var miniops uint64
 
 var rootCmd = &cobra.Command{
 	Use:   "cli",
@@ -132,6 +136,7 @@ func Send(cmd *cobra.Command, args []string) (model.Response, error) {
 	_, internalExists := InternalCommand[command]
 	_, loggerExists := LoggerCommand[command]
 	_, rebuildExists := RebuildCommand[command]
+    _, qosExists := QosCommand[command]
 
 	if cmd.Name() == "array" && arrayExists {
 
@@ -285,7 +290,54 @@ func Send(cmd *cobra.Command, args []string) (model.Response, error) {
 		} else {
 			req, res, err = RebuildCommand[command](xrId, nil)
 		}
-	}
+	} else if cmd.Name() == "qos" && qosExists {
+        param :=model.QosParam{}
+
+        for _, v := range vol {
+            volume := model.Volume{}
+            volume.VolumeName = v
+            param.Vol = append(param.Vol, volume)
+        }
+
+        if cmd.PersistentFlags().Changed("minbw") {
+            if (minbw == 0) {
+                param.Minbw = 0xFFFFFFFF
+            } else {
+                param.Minbw = minbw
+            }
+        }
+
+        if cmd.PersistentFlags().Changed("maxbw") {
+            if (maxbw == 0) {
+                param.Maxbw = 0xFFFFFFFF
+            } else {
+                param.Maxbw = maxbw
+            }
+        }
+
+        if cmd.PersistentFlags().Changed("miniops") {
+            if (miniops == 0) {
+                param.Miniops = 0xFFFFFFFF
+            } else {
+                param.Miniops = miniops
+            }
+        }
+
+        if cmd.PersistentFlags().Changed("maxiops") {
+            if (maxiops == 0) {
+                param.Maxiops = 0xFFFFFFFF
+            } else {
+                param.Maxiops = maxiops
+            }
+        }
+
+        if cmd.PersistentFlags().Changed("array") && len(array) > 0 {
+            param.Array = array
+        }
+
+        req, res, err = QosCommand[command](xrId, param)
+    }
+
 
 	if err != nil {
 		fmt.Println(err)

@@ -41,6 +41,7 @@
 #include "src/include/branch_prediction.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/qos/qos_manager.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {

@@ -30,17 +30,19 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __IBOFOS_QOS_COMMON_H__
-#define __IBOFOS_QOS_COMMON_H__
+#pragma once
 
 #include "src/device/base/ublock_device.h"
 #include "src/event_scheduler/event.h"
 #include "src/volume/volume_list.h"
-#define IBOF_QOS_TIMESLICE_IN_USEC (1000)
-#define M_MAX_REACTORS (100)
+#include "src/include/backend_event.h"
+
+#define TIME_1_SEC_IN_USEC (1000 * 1000)
+#define IBOF_QOS_TIMESLICE_IN_USEC (10000)
+#define PARAMETER_COLLECTION_INTERVAL (TIME_1_SEC_IN_USEC / IBOF_QOS_TIMESLICE_IN_USEC)
+#define M_MAX_REACTORS (128)
 #define M_MAX_SUBSYSTEMS (1024)
 #define M_KBYTES (1024ULL)
-#define MAX_QOS_LIMIT (1000000 * M_KBYTES * M_KBYTES / IBOF_QOS_TIMESLICE_IN_USEC)
 #define M_VALID_ENTRY (1)
 #define M_INVALID_ENTRY (0)
 #define M_NOBW_IN_MS (0)
@@ -48,12 +50,24 @@
 #define M_DEFAULT_DEFICIET_WEIGHT (0)
 #define M_RESET_TO_ZERO (0)
 #define M_UINT32MAX (4294967295)
-#define M_EQUAL_WEIGHT (16)
+#define M_DEFAULT_WEIGHT (16)
+#define M_MAX_NEGATIVE_WEIGHT (-1500)
+#define M_WEIGHT_CHANGE_INDEX (1)
 #define M_MAX_NVRAM_STRIPES (1023)
 #define M_PING_PONG_BUFFER (2)
-#define M_QOS_CORRECTION_CYCLE (2000)
+#define M_QOS_CORRECTION_CYCLE (100)
+#define M_QOS_AVERAGE_WINDOW_SIZE (100)
 #define M_STRIPES_CONSUMED_HIGH_THRESHOLD (1000)
 #define MAX_IO_WORKER 8 // Currently this is hardcoded, will be taken from affinity manager in next revision
+
+const int MAX_REACTOR_WORKER = (M_MAX_REACTORS > MAX_IO_WORKER) ? M_MAX_REACTORS : MAX_IO_WORKER;
+const int MAX_VOLUME_EVENT = (MAX_VOLUME_COUNT > pos::BackendEvent_Count) ? MAX_VOLUME_COUNT : pos::BackendEvent_Count;
+
+const uint8_t PRIORITY_HIGH = 1;
+const uint8_t PRIORITY_MEDIUM = 2;
+const uint8_t PRIORITY_LOW = 3;
+const uint8_t PRIORITY_DEFAULT = PRIORITY_MEDIUM;
+
 const int PRIO_CRIT_WT_1 = 16;
 const int PRIO_CRIT_WT_2 = 10;
 const int PRIO_CRIT_WT_3 = 0;
@@ -62,15 +76,239 @@ const int PRIO_HIGH_WT_2 = -20;
 const int PRIO_HIGH_WT_3 = -100;
 const int PRIO_LOW_WT_1 = -200;
 const int PRIO_LOW_WT_2 = -400;
-const int PRIO_LOW_WT_3 = -1000;
+const int PRIO_LOW_WT_3 = -100;
+const int PRIO_WT_H1 = 16;
+const int PRIO_WT_H2 = -10;
+const int PRIO_WT_M1 = -10;
+const int PRIO_WT_M2 = -100;
+const int PRIO_WT_L1 = -100;
+const int PRIO_WT_L2 = -800;
 
-const uint64_t M_DEFAULT_MIN_BW = 100 * 1024 * 1024 / IBOF_QOS_TIMESLICE_IN_USEC;
-const uint32_t M_BW_10_KB = 10 * 1024;
+const uint32_t DEFAULT_MIN_VOL = MAX_VOLUME_COUNT + 1;
+
 const uint16_t M_INVALID_SUBSYSTEM = 0;
 const uint16_t M_VALID_SUBSYSTEM = 1;
 
+const uint32_t PENDING_CPU_THRESHOLD = 20;
+
+const uint32_t DEFAULT_MIN_BW_MBPS = 100;
+const uint32_t DEFAULT_MIN_IOPS = 1000;
+const int64_t DEFAULT_MIN_BW_PCS = DEFAULT_MIN_BW_MBPS * (M_KBYTES * M_KBYTES / (PARAMETER_COLLECTION_INTERVAL));
+const int64_t DEFAULT_MIN_IO_PCS = DEFAULT_MIN_IOPS / PARAMETER_COLLECTION_INTERVAL;
+const int64_t DEFAULT_MAX_BW_IOPS = INT64_MAX / PARAMETER_COLLECTION_INTERVAL;
+const uint32_t M_BW_10_KB = 10 * 1024;
+const uint32_t BW_CORRECTION_UNIT = 5;
+const uint32_t IOPS_CORRECTION_UNIT = 100;
+
+const uint32_t LOWER_THRESHOLD_PERCT_VALUE = 90;
+const uint32_t UPPER_THRESHOLD_PERCT_VALUE = 110;
+const uint32_t PERCENTAGE_VALUE = 100;
+
+const uint32_t TOTAL_NVRAM_STRIPES = 1024;
+const uint32_t UPPER_GC_TH = 30;
+const uint32_t MID_GC_TH = 20;
+const uint32_t LOW_GC_TH = 5;
+
 namespace pos
 {
+/* --------------------------------------------------------------------------*/
+/**
+ * ENUMERATION DEFINITIONS
+ */
+/* --------------------------------------------------------------------------*/
+enum QosGcState
+{
+    QosGcState_Start = 0,
+    QosGcState_Normal = QosGcState_Start,
+    QosGcState_High,
+    QosGcState_Medium,
+    QosGcState_Critical,
+    QosGcState_End,
+    QosGcStateCount = QosGcState_End - QosGcState_Start,
+    QosGcState_Unknown
+};
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+enum QosPriority
+{
+    QosPriority_Start = 0,
+    QosPriority_Low = QosPriority_Start,
+    QosPriority_High,
+    QosPriority_End,
+    QosPriorityCount = QosPriority_End - QosPriority_Start,
+    QosPriority_Unknown
+};
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+enum QosCorrectionType
+{
+    QosCorrection_Start = 0,
+    QosCorrection_VolumeThrottle = QosCorrection_Start,
+    QosCorrection_EventThrottle,
+    QosCorrection_EventWrr,
+    QosCorrection_All,
+    QosCorrection_End,
+    QosCorrectionCount = QosCorrection_End - QosCorrection_Start,
+    QosCorrection_Unknown,
+};
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+enum QosCorrectionDir
+{
+    QosCorrectionDir_Start = 0,
+    QosCorrectionDir_NoChange = QosCorrectionDir_Start,
+    QosCorrectionDir_Increase,
+    QosCorrectionDir_Decrease,
+    QosCorrectionDir_Increase2X,
+    QosCorrectionDir_Decrease2X,
+    QosCorrectionDir_Increase4X,
+    QosCorrectionDir_Decrease4X,
+    QosCorrectionDir_PriorityHigh,
+    QosCorrectionDir_PriorityMedium,
+    QosCorrectionDir_PriorityLow,
+    QosCorrectionDir_Reset,
+    QosCorrectionDir_End,
+    QosCorrectionDirCount = QosCorrectionDir_End - QosCorrectionDir_Start,
+    QosCorrectionDir_Unknown,
+};
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+enum QosInternalManagerType
+{
+    QosInternalManager_Start = 0,
+    QosInternalManager_Monitor,
+    QosInternalManager_Policy,
+    QosInternalManager_Processing,
+    QosInternalManager_Correction,
+    QosInternalManager_End,
+    QosInternalManagerCount = QosInternalManager_End - QosInternalManager_Start,
+    QosInternalManager_Unknown,
+};
+
+/* --------------------------------------------------------------------------*/
+/**
+ * STRUCTURE DEFINITIONS
+ */
+/* --------------------------------------------------------------------------*/
+// ----------------------------------------------------------------------------
+// Parameters collected per millisecond
+// ----------------------------------------------------------------------------
+struct bw_iops_parameter
+{
+    bw_iops_parameter(void)
+    {
+        currentBW = 0;
+        currentIOs = 0;
+        valid = 0;
+        for (uint8_t i = 0; i < 11; i++)
+        {
+            pad[i] = 0;
+        }
+    }
+    uint64_t currentBW;  // per milli second
+    uint64_t currentIOs; // per milli second
+    uint32_t valid;
+    uint32_t pad[11];
+};
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+struct poller_structure
+{
+    poller_structure(void)
+    {
+        nextTimeStamp = 0;
+        qosTimeSlice = 0;
+        id = 0;
+        for (uint8_t i = 0; i < 5; i++)
+        {
+            pad[i] = 0;
+        }
+    }
+    uint64_t nextTimeStamp;
+    uint64_t qosTimeSlice;
+    uint64_t id;
+    uint64_t pad[5];
+};
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+struct qos_vol_policy
+{
+    qos_vol_policy(void)
+    {
+        minBw = 0;
+        maxBw = 0;
+        minIops = 0;
+        maxIops = 0;
+        policyChange = false;
+        minPolicySet = false;
+        minBwGuarantee = false;
+        minIopsGuarantee = false;
+        maxValueChanged = false;
+    }
+    uint64_t minBw;
+    uint64_t maxBw;
+    uint64_t minIops;
+    uint64_t maxIops;
+    bool policyChange;
+    bool minPolicySet;
+    bool minBwGuarantee;
+    bool minIopsGuarantee;
+    bool maxValueChanged;
+};
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+struct qos_rebuild_policy
+{
+    qos_rebuild_policy(void)
+    {
+        rebuildImpact = PRIORITY_DEFAULT;
+        policyChange = false;
+    }
+    uint8_t rebuildImpact;
+    bool policyChange;
+};
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+struct qos_correction_type
+{
+    qos_correction_type(void)
+    {
+        Reset();
+    }
+    void
+    Reset(void)
+    {
+        volumeThrottle = false;
+        eventThrottle = false;
+        eventWrr = false;
+    }
+    bool volumeThrottle;
+    bool eventThrottle;
+    bool eventWrr;
+};
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis 
+ *
+ */
+/* --------------------------------------------------------------------------*/
 class QosReturnCode
 {
 public:
@@ -82,283 +320,11 @@ public:
     static const int MINIMUM_BW_COMPROMISED = 9003;
     static const int INCREASE_BW_THROTTLING = 9004;
     static const int DECREASE_BW_THROTTLING = 9005;
+    static const int VOLUME_NOT_PRESENT = 9006;
+    static const int EVENT_NOT_PRESENT = 9007;
+    static const int ONE_MINIMUM_GUARANTEE_SUPPORTED = 9008;
+    static const int REACTOR_NOT_PRESENT = 9009;
+    static const int MIN_IOPS_OR_MIN_BW_ONLY_ONE = 9010;
 };
 
-// Parameters collected per millisecond
-struct volume_qos_params
-{
-    volume_qos_params(void)
-    {
-        timestamp = 0;
-        pendingIOsTransport = 0;
-        currentIOs = 0;
-        pendingBWTransport = 0;
-        currentBW = 0;
-        pendingIOs = 0;
-        pendingBW = 0;
-        usedBufferStripe = 0;
-        valid = 0;
-        for (int i = 0; i < 7; i++)
-        {
-            pad[i] = 0;
-        }
-    }
-    uint32_t timestamp;
-    uint32_t pendingIOsTransport;
-    uint32_t currentIOs;         // per milli second
-    uint32_t pendingBWTransport; // per milli second
-    uint64_t currentBW;          // per milli second
-    uint32_t pendingIOs;         // per milli second
-    uint32_t pendingBW;          // per milli second
-    uint32_t usedBufferStripe;
-    uint32_t valid;
-    uint32_t pad[7];
-};
-
-struct event_qos_params
-{
-    event_qos_params(void)
-    {
-        timestamp = 0;
-        currentIOs = 0;
-        currentBW = 0;
-        pendingIO = 0;
-        pendingBW = 0;
-        valid = 0;
-        for (int i = 0; i < 10; i++)
-        {
-            pad[i] = 0;
-        }
-    }
-    uint32_t timestamp;
-    uint32_t currentIOs; // per milli second
-    uint64_t currentBW;  // per milli second
-    uint32_t pendingIO;
-    uint32_t pendingBW;
-    uint32_t valid;
-    uint32_t pad[10];
-};
-
-struct poller_structure
-{
-    poller_structure(void)
-    {
-        nextTimeStamp = 0;
-        qosTimeSlice = 0;
-        id = 0;
-        for (int i = 0; i < 5; i++)
-        {
-            pad[i] = 0;
-        }
-    }
-    uint64_t nextTimeStamp;
-    uint64_t qosTimeSlice;
-    uint64_t id;
-    uint64_t pad[5];
-};
-
-enum QosState
-{
-    QosState_Start = 0,
-    QosState_Init = QosState_Start,
-    QosState_IssueDetect,
-    QosState_CauseIdentify,
-    QosState_ApplyCorrection,
-    QosState_ResetThrottling,
-    QosState_IssueResolved,
-    QosState_End,
-    QosStateCount = QosState_End - QosState_Start,
-    QosState_Unknown
-};
-enum QosPriority
-{
-    QosPriority_Start = 0,
-    QosPriority_Low = QosPriority_Start,
-    QosPriority_High,
-    QosPriority_End,
-    QosPriorityCount = QosPriority_End - QosPriority_Start,
-    QosPriority_Unknown
-};
-
-enum QosWorkloadType
-{
-    QosWorkloadType_Start = 0,
-    QosWorkloadType_Read = QosWorkloadType_Start,
-    QosWorkloadType_Write,
-    QosWorkloadType_Mixed,
-    QosWorkloadType_End,
-    QosWorkloadTypeCount = QosWorkloadType_End - QosWorkloadType_Start,
-    QosWorkloadType_Unknown
-};
-
-enum QosWorkloadRatio
-{
-    QosWorkloadRatio_Start = 0,
-    QosWorkloadRatio_FullRead = QosWorkloadRatio_Start,
-    QosWorkloadRatio_75Read,
-    QosWorkloadRatio_50Read,
-    QosWorkloadRatio_25Read,
-    QosWorkloadRation_FullWrite,
-    QosWorkloadRatio_End,
-    QosWorkloadRatioCount = QosWorkloadRatio_End - QosWorkloadRatio_Start,
-    QosWorkloadRatio_Unknown,
-};
-
-struct qos_vol_policy
-{
-    qos_vol_policy(void)
-    : workLoad(QosWorkloadType_Unknown),
-      ioSize(UINT32_MAX),
-      rwRatio(QosWorkloadRatio_Unknown),
-      minBW(UINT32_MAX),
-      priority(QosPriority_Unknown),
-      minGurantee(false)
-    {
-    }
-    QosWorkloadType workLoad;
-    uint32_t ioSize;
-    QosWorkloadRatio rwRatio; // This can be a enum based value 0, 1 ,2 ,3,4
-    uint32_t minBW;
-    QosPriority priority;
-    bool minGurantee;
-};
-enum QosCause
-{
-    QosCause_Start = 0,
-    QosCause_Disk = QosCause_Start,
-    QosCause_CPU,
-    QosCause_NVRAM,
-    QosCause_None,
-    QosCause_End,
-    QosCauseCount = QosCause_End - QosCause_Start,
-    QosCause_Unknown,
-};
-
-struct qos_state_ctx
-{
-    qos_state_ctx(void)
-    {
-        causeType = QosCause_Unknown;
-        previousCauseType = QosCause_Unknown;
-        victimVol = MAX_VOLUME_COUNT + 1;
-        correctionValue = 0;
-        previousAvgBW = 0;
-        correctionEvent = BackendEvent_Unknown;
-        iterationCnt = 0;
-    }
-    QosCause causeType;
-    QosCause previousCauseType;
-    int victimVol;
-    uint64_t correctionValue;
-    uint64_t previousAvgBW;
-    BackendEvent correctionEvent;
-    uint16_t iterationCnt; // This iteration count will increment once the Cause is found.
-};
-
-struct oldVolState
-{
-    oldVolState(void)
-    {
-        currentData = 0;
-        nvramUsage = 0;
-    }
-    uint32_t currentData;
-    uint32_t nvramUsage; // NVRAM usage only for write usecase
-};
-struct volState
-{
-    volState(void)
-    {
-        currentData = 0;
-        pendingData = 0;
-        entries = 0;
-        nvramUsage = 0;
-        minBW = 0;
-        maxBW = 0;
-        priority = QosPriority_Unknown;
-        workload = QosWorkloadType_Unknown;
-    }
-    uint32_t currentData;
-    uint32_t pendingData;
-    uint32_t entries;
-    uint32_t nvramUsage; // NVRAM usage only for write usecase
-    oldVolState pState;
-    uint32_t minBW;
-    uint32_t maxBW;
-    QosPriority priority;
-    QosWorkloadType workload;
-};
-struct flushEventData
-{
-    flushEventData(void)
-    {
-        nvramStripes = 0;
-        reserved = 0;
-    }
-    uint32_t nvramStripes;
-    uint32_t reserved;
-};
-struct gcEventData
-{
-    gcEventData(void)
-    {
-        freeSegment = 0;
-        reserved = 0;
-    }
-    uint32_t freeSegment;
-    uint32_t reserved;
-};
-struct rebuildEventData
-{
-    rebuildEventData(void)
-    {
-        metaRebuildStripe = 0;
-        userRebuidSegment = 0;
-    }
-    uint32_t metaRebuildStripe;
-    uint32_t userRebuidSegment;
-};
-struct metaEventData
-{
-    metaEventData(void)
-    {
-        freeLogBuffer = 0;
-        reserved = 0;
-    }
-    uint32_t freeLogBuffer;
-    uint32_t reserved;
-};
-struct oldEventState
-{
-    oldEventState(void)
-    {
-        currentData = 0;
-        pendingCPUEvents = 0;
-        totalEvents = 0;
-    }
-    uint32_t currentData;
-    uint32_t pendingCPUEvents;
-    uint32_t totalEvents; // No of events in this interval
-};
-struct eventState
-{
-    eventState(void)
-    {
-        currentData = 0;
-        pendingCPUEvents = 0;
-        totalEvents = 0;
-    }
-    uint32_t currentData;
-    uint32_t pendingCPUEvents;
-    uint32_t totalEvents; // No of events in this interval
-    oldEventState pState;
-    union
-    {
-        flushEventData flushData;
-        gcEventData gcData;
-        rebuildEventData rebuildData;
-        metaEventData metaData;
-    };
-};
 } // namespace pos
-#endif // __IBOFOS_QOS_COMMON_H__

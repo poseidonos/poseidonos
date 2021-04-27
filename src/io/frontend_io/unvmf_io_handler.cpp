@@ -98,9 +98,8 @@ UNVMfSubmitHandler(struct pos_io* io)
         QosManager* qosManager = QosManagerSingleton::Instance();
         if (true == qosManager->IsFeQosEnabled())
         {
-            qosManager->LogVolBw(io->volume_id, io->length);
             AioSubmissionAdapter aioSubmission;
-            qosManager->AioSubmitAsyncIO(&aioSubmission, io);
+            qosManager->HandlePosIoSubmission(&aioSubmission, io);
         }
         else
         {

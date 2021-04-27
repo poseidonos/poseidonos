@@ -63,10 +63,10 @@ Poseidonos::Init(int argc, char** argv)
 {
     _LoadConfiguration();
     _LoadVersion();
-    _SetPerfImpact();
     _InitSpdk(argc, argv);
     _InitAffinity();
     _SetupThreadModel();
+    _SetPerfImpact();
     _InitDebugInfo();
     _InitIOInterface();
     _InitMemoryChecker();
@@ -204,25 +204,33 @@ Poseidonos::_LoadVersion(void)
 void
 Poseidonos::_SetPerfImpact(void)
 {
-    {
-        std::string impact = "";
-        std::string event = "gc";
-        int ret = ConfigManagerSingleton::Instance()->GetValue("perf_impact", event,
+    int retVal = -1;
+    std::string impact = "";
+    int ret = ConfigManagerSingleton::Instance()->GetValue("perf_impact", "rebuild",
             &impact, ConfigType::CONFIG_TYPE_STRING);
-        if (ret == (int)POS_EVENT_ID::SUCCESS)
+    if (ret == (int)POS_EVENT_ID::SUCCESS)
+    {
+        qos_rebuild_policy newRebuildPolicy;
+        if (impact.compare("high") == 0)
         {
-            QosManagerSingleton::Instance()->SetEventPolicy(event, impact);
+            newRebuildPolicy.rebuildImpact = PRIORITY_HIGH;
         }
-    }
-
-    {
-        std::string impact = "";
-        std::string event = "rebuild";
-        int ret = ConfigManagerSingleton::Instance()->GetValue("perf_impact", event,
-            &impact, ConfigType::CONFIG_TYPE_STRING);
-        if (ret == (int)POS_EVENT_ID::SUCCESS)
+        else if (impact.compare("low") == 0)
         {
-            QosManagerSingleton::Instance()->SetEventPolicy(event, impact);
+            newRebuildPolicy.rebuildImpact = PRIORITY_LOW;
+        }
+        else
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_LOW;
+            POS_TRACE_INFO(static_cast<uint32_t>(POS_EVENT_ID::QOS_SET_EVENT_POLICY),
+                    "Rebuild Perf Impact not supported, Set to default Low");
+        }
+        newRebuildPolicy.policyChange = true;
+        retVal = QosManagerSingleton::Instance()->UpdateRebuildPolicy(newRebuildPolicy);
+        if (retVal != SUCCESS)
+        {
+            POS_TRACE_INFO(static_cast<uint32_t>(POS_EVENT_ID::QOS_SET_EVENT_POLICY),
+                    "Failed to set Rebuild Policy");
         }
     }
 }

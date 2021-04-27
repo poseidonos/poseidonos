@@ -24,14 +24,6 @@ func StopRebuilding(xrId string, param interface{}) (model.Request, model.Respon
 	return internalSender(xrId, param, "STOPREBUILDING")
 }
 
-func UpdateEventWrr(xrId string, param interface{}) (model.Request, model.Response, error) {
-	return internalSender(xrId, param, "UPDATEEVENTWRRPOLICY")
-}
-
-func ResetEventWrr(xrId string, param interface{}) (model.Request, model.Response, error) {
-	return internalSender(xrId, param, "RESETEVENTWRRPOLICY")
-}
-
 func internalSender(xrId string, param interface{}, command string) (model.Request, model.Response, error) {
 	return Requester{xrId, param, model.InternalParam{}}.Send(command)
 }

@@ -53,13 +53,29 @@ RebuildPerfImpactCommand::Execute(json& doc, string rid)
     if (doc["param"].contains("level"))
     {
         string level = doc["param"]["level"].get<std::string>();
-
-        int ret = QosManagerSingleton::Instance()->SetEventPolicy("rebuild", level);
-
-        return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, ret,
-            "rebuild perf impact is set.", GetPosInfo());
+        qos_rebuild_policy newRebuildPolicy;
+        if (level.compare("high") == 0)
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_HIGH;
+        }
+        else if (level.compare("low") == 0)
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_LOW;
+        }
+        else
+        {
+            return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, BADREQUEST, "Wrong level", GetPosInfo());
+        }
+        newRebuildPolicy.policyChange = true;
+        int retVal = QosManagerSingleton::Instance()->UpdateRebuildPolicy(newRebuildPolicy);
+        if (retVal != SUCCESS)
+        {
+            return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, BADREQUEST, "FAILED", GetPosInfo());
+        }
+        return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, retVal,
+                "rebuild perf impact is set.", GetPosInfo());
     }
     return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, BADREQUEST,
-        "wrong request", GetPosInfo());
+            "wrong request", GetPosInfo());
 }
 }; // namespace pos_cli

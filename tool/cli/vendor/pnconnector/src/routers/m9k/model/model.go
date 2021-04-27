@@ -140,6 +140,19 @@ type BuildInfo struct {
 	BuildTime string `json:"buildTime"`
 }
 
+type QosParam struct {
+    Vol    []Volume `json:"vol,omitempty"`
+    Array   string `json:"array,omitempty"`
+    Minbw   uint64   `json:"minbw,omitempty"`
+    Maxbw   uint64   `json:"maxbw,omitempty"`
+    Miniops uint64   `json:"miniops,omitempty"`
+    Maxiops uint64   `json:"maxiops,omitempty"`
+}
+
+type Volume struct {
+    VolumeName string `json:"volumeName"`
+}
+
 //type SMART struct {
 //	AvailableSpare           string `json:"available_spare,omitempty"`
 //	AvailableSpareSpace      string `json:"available_spare_space,omitempty"`

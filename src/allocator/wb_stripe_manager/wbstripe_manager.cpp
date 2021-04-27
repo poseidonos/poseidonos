@@ -43,6 +43,7 @@
 #include "src/mapper_service/mapper_service.h"
 #include "src/qos/qos_manager.h"
 #include "src/spdk_wrapper/free_buffer_pool.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
