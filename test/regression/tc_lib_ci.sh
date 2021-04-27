@@ -295,7 +295,7 @@ mount_system()
 
     connectList=(0)
 
-    texecc ./bin/cli system mount --json > mount_system.txt
+    texecc ./bin/cli array mount --name POSArray --json > mount_system.txt
 
     iexecc cat mount_system.txt | jq ".Response.result.status.code" > result.txt
     result=$(<result.txt)
@@ -322,7 +322,7 @@ unmount_system()
 
     iexecc rm -rf unmount_system.txt result.txt
 
-    texecc ./bin/cli system unmount --json > unmount_system.txt
+    texecc ./bin/cli array unmount --name POSArray --json > unmount_system.txt
 
     iexecc cat unmount_system.txt | jq '.Response.result.status.code' > result.txt
     result=$(<result.txt)
