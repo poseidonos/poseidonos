@@ -287,58 +287,6 @@ delete_array()
     return 0
 }
 
-mount_system()
-{
-    print_info "mount system"
-
-    iexecc rm -rf mount_system.txt result.txt
-
-    connectList=(0)
-
-    texecc ./bin/cli array mount --name POSArray --json > mount_system.txt
-
-    iexecc cat mount_system.txt | jq ".Response.result.status.code" > result.txt
-    result=$(<result.txt)
-
-    if [ $result -ne 0 ]; then
-        print_result "mount system failed" 1
-        iexecc cat mount_system.txt
-        iexecc rm -rf mount_system.txt result.txt
-        return 1
-    fi
-
-    if [ -z $1 ]; then
-        create_subsystem
-    fi
-
-    iexecc rm -rf mount_system.txt result.txt
-
-    return 0
-}
-
-unmount_system()
-{
-    print_info "unmount system"
-
-    iexecc rm -rf unmount_system.txt result.txt
-
-    texecc ./bin/cli array unmount --name POSArray --json > unmount_system.txt
-
-    iexecc cat unmount_system.txt | jq '.Response.result.status.code' > result.txt
-    result=$(<result.txt)
-
-    if [ ${result} -ne 0 ]; then
-        print_result "unmount system failed" 1
-        iexecc cat result.txt
-        iexecc rm -rf result.txt
-        return 1
-    fi
-
-    iexecc rm -rf unmount_system.txt result.txt
-
-    return 0
-}
-
 create_volume()
 {
     print_info "create volume [vol name: $1, byte size: $2, max iops: $3, max bw: $4]"
@@ -371,21 +319,13 @@ normal_shutdown()
 
     iexecc rm -rf shutdown.txt result.txt
 
-    unmount_system;
+    unmount_array;
     result=$?
 
     if [ $result != 0 ]; then
-        print_result "failed to unmount system." 1
+        print_result "failed to unmount array." 1
         return 1
     fi
-
-    #unmount_array;
-    #result=$?
-
-    #if [ $result != 0 ]; then
-    #    print_result "failed to unmount array." 1
-    #    return 1
-    #fi
 
     texecc ./bin/cli system exit --json > shutdown.txt
     
@@ -434,21 +374,13 @@ graceful_shutdown()
     done
 
     if [ -z $1 ]; then
-        unmount_system;
+        unmount_array;
         result=$?
 
         if [ $result != 0 ]; then
-            print_result "failed to unmount system." 1
+            print_result "failed to unmount array." 1
             return 1
         fi
-
-        #unmount_array;
-        #result=$?
-
-        #if [ $result != 0 ]; then
-        #    print_result "failed to unmount array." 1
-        #    return 1
-        #fi
     fi
 
     texecc ./bin/cli system exit --json > shutdown.txt
@@ -565,21 +497,16 @@ bringup_pos()
         return 1
     fi
 
-    #mount_array;
-    #result=$?
-
-    #if [ $result != 0 ]; then
-    #    print_result "failed to mount array." 1
-    #    return 1
-    #fi
-
-    mount_system;
+    mount_array;
     result=$?
 
     if [ $result != 0 ]; then
-        print_result "failed to mount system." 1
+        print_result "failed to mount array." 1
         return 1
     fi
+
+    connectList=(0)
+    create_subsystem
 
     print_info "Bring-up PoseidonOS done!"
 

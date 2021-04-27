@@ -150,7 +150,6 @@ normal_shutdown()
     texecc ps -ef | grep poseidonos | awk '{print $2}' | head -1 > result.txt
     result=$(<result.txt)
 
-    texecc ./bin/cli system unmount --json > shutdown.txt
     texecc ./bin/cli array unmount --json > shutdown.txt
     texecc ./bin/cli system exit --json > shutdown.txt
     
@@ -317,16 +316,6 @@ bringup_pos()
         return 1
     elif [ $result -ne 0 ];then
         print_result "mount failed" 1
-        iexecc cat bringup.txt
-        iexecc rm -rf bringup.txt result.txt
-
-        return 1
-    fi
-
-    texecc ./bin/cli system mount --json > result.txt
-
-    if [ $result -ne 0 ];then
-        print_result "mount pos failed" 1
         iexecc cat bringup.txt
         iexecc rm -rf bringup.txt result.txt
 
