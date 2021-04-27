@@ -27,8 +27,6 @@ DEFAULT_SUBSYSTEM=31
 DEFAULT_PORT=1158
 TARGET_ROOT_DIR=$(readlink -f $(dirname $0))/../../..
 TARGET_SPDK_DIR=$TARGET_ROOT_DIR/lib/spdk
-ibof_cli="$TARGET_ROOT_DIR/bin/cli request --json"
-
 
 
 #**************************************************************************
@@ -235,7 +233,7 @@ waiting_for_rebuild_complete(){
     n=1
     while [ $n -le 360 ]
     do
-        state=$($TARGET_ROOT_DIR/bin/cli array info --name POSArray --json | jq '.Response.info.state')
+        state=$($TARGET_ROOT_DIR/bin/cli array info --name POSArray --json | jq '.Response.result.data.state')
         echo "current state : "$state
         if [ $state == "\"NORMAL\"" ]; then
             print_info "Rebuild Completed"
@@ -243,7 +241,7 @@ waiting_for_rebuild_complete(){
             break;
         else
             texecc sleep 10
-            rebuild_progress=$($TARGET_ROOT_DIR/bin/cli array info --name POSArray --json | jq '.Response.info.rebuildingProgress')
+            rebuild_progress=$($TARGET_ROOT_DIR/bin/cli array info --name POSArray --json | jq '.Response.result.data.rebuildingProgress')
             info "Rebuilding Progress [${rebuild_progress}]"
             print_info "Waiting for Rebuild to Complete ($n of 360)"
         fi
