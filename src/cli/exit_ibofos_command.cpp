@@ -60,43 +60,58 @@ ExitIbofosCommand::Execute(json& doc, string rid)
     std::vector<ArrayBootRecord> abrList;
     ret = ArrayMgr::Instance()->GetAbrList(abrList);
 
-    if (ret == 0 &&!abrList.empty())
+    if (ret == 0)
     {
-        int eventId = (int)POS_EVENT_ID::MBR_ABR_LIST_SUCCESS;
-        POS_TRACE_DEBUG(eventId, "Found {} arrays from abr list", abrList.size());
-        for (const auto& abr : abrList)
+        if (!abrList.empty())
         {
-            IArrayInfo* arrayInfo = ArrayMgr::Instance()->GetArrayInfo(abr.arrayName);
-
-            if (arrayInfo == nullptr)
+            int eventId = (int)POS_EVENT_ID::MBR_ABR_LIST_SUCCESS;
+            POS_TRACE_DEBUG(eventId, "Found {} arrays from abr list", abrList.size());
+            for (const auto& abr : abrList)
             {
-                eventId = (int)POS_EVENT_ID::ARRAY_NO_ARRAY_INFO;
-                POS_TRACE_ERROR(eventId, "No array info for array '{}'", abr.arrayName);
-            }
-            else
-            {
-                eventId = (int)POS_EVENT_ID::ARRAY_ARRAY_INFO_FOUND;
-                POS_TRACE_DEBUG(eventId, "Found array '{}' in state '{}'",
-                    abr.arrayName, arrayInfo->GetState().ToString());
+                IArrayInfo* arrayInfo = ArrayMgr::Instance()->GetArrayInfo(abr.arrayName);
 
-                if (arrayInfo->GetState() >= ArrayStateEnum::TRY_MOUNT)
+                if (arrayInfo == nullptr)
                 {
-                    eventId = (int)POS_EVENT_ID::MOUNTED_ARRAY_EXISTS;
-                    POS_TRACE_ERROR(eventId,
-                        "Failed to exit system. Array '{}' is still mounted with state '{}'",
+                    eventId = (int)POS_EVENT_ID::ARRAY_NO_ARRAY_INFO;
+                    POS_TRACE_ERROR(eventId, "No array info for array '{}'", abr.arrayName);
+                }
+                else
+                {
+                    eventId = (int)POS_EVENT_ID::ARRAY_ARRAY_INFO_FOUND;
+                    POS_TRACE_DEBUG(eventId, "Found array '{}' in state '{}'",
                         abr.arrayName, arrayInfo->GetState().ToString());
 
-                    return jFormat.MakeResponse(
-                        "EXITIBOFOS", rid, eventId,
-                        "failed to terminate POS (code:" + to_string(eventId) + ")",
-                        GetPosInfo());
+                    if (arrayInfo->GetState() >= ArrayStateEnum::TRY_MOUNT)
+                    {
+                        eventId = (int)POS_EVENT_ID::MOUNTED_ARRAY_EXISTS;
+                        POS_TRACE_ERROR(eventId,
+                            "Failed to exit system. Array '{}' is still mounted with state '{}'",
+                            abr.arrayName, arrayInfo->GetState().ToString());
+
+                        return jFormat.MakeResponse(
+                            "EXITIBOFOS", rid, eventId,
+                            "failed to terminate POS (code:" + to_string(eventId) + ")",
+                            GetPosInfo());
+                    }
                 }
             }
+        }
+        else
+        {
+            int eventId = (int)POS_EVENT_ID::ARRAY_NOT_FOUND;
+            POS_TRACE_DEBUG(eventId, "There is no array to unmount, continue to exit");
         }
     }
     else
     {
-        POS_TRACE_DEBUG(ret, "Failed to get abr list, device might be not scanned");
+        if (ret == (int)POS_EVENT_ID::DEVICEMGR_DEVICE_NOT_FOUND)
+        {
+            POS_TRACE_DEBUG(ret, "Device might be not scanned, continue to exit");
+        }
+        else
+        {
+            POS_TRACE_ERROR(ret, "Failed to get abr list");
+        }
     }
 
     if (requestHandler.IsExit() == false)

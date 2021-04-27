@@ -212,8 +212,13 @@ AbrManager::ResetMbr(void)
 int
 AbrManager::GetAbrList(std::vector<ArrayBootRecord>& abrList)
 {
-    mbrManager->LoadMbr();
-    int result = mbrManager->GetAbrList(abrList);
+    int result = mbrManager->LoadMbr();
+    if (result != 0)
+    {
+        return result;
+    }
+    
+    result = mbrManager->GetAbrList(abrList);
     return result;
 }
 

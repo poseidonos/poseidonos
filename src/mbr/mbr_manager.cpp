@@ -110,7 +110,11 @@ MbrManager::LoadMbr(void)
 {
     int ret = (int)POS_EVENT_ID::SUCCESS;
     pthread_rwlock_wrlock(&mbrLock);
-    _ReadFromDevices();
+    ret = _ReadFromDevices();
+    if (ret != 0)
+    {
+        return ret;
+    }
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_READ_DONE,
         "read mbr data");

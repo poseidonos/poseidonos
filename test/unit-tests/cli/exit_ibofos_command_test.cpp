@@ -6,10 +6,17 @@ namespace pos_cli
 {
 TEST(ExitIbofosCommand, ExitIbofosCommand_)
 {
+    // Given : nothing
+
+    // When
+    ExitIbofosCommand* exit = new ExitIbofosCommand();
+
+    // Then : nothing
 }
 
 TEST(ExitIbofosCommand, Execute_)
 {
+    // Singleton Issue
 }
 
 } // namespace pos_cli
