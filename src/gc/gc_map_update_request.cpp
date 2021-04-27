@@ -93,9 +93,7 @@ GcMapUpdateRequest::Execute(void)
     uint32_t volId;
     VirtualBlkAddr currentVsa;
     bool isValidData = false;
-
     bool executionSuccessful = false;
-    MpageList volumeDirtyList;
 
     for (; stripeOffset < totalBlksPerUserStripe; stripeOffset++)
     {
@@ -119,7 +117,6 @@ GcMapUpdateRequest::Execute(void)
                 _AddBlockMapUpdateLog(rba, writeVsa);
                 _GetDirtyPages(volId, rba);
                 _RegisterInvalidateSegments(currentVsa);
-                numValidate++;
             }
         }
     }
@@ -164,7 +161,6 @@ GcMapUpdateRequest::_AddBlockMapUpdateLog(BlkAddr rba, VirtualBlkAddr writeVsa)
 void
 GcMapUpdateRequest::_GetDirtyPages(uint32_t volId, BlkAddr rba)
 {
-    MpageList volumeDirtyList;
     uint32_t blockCount = 1;
     auto dirty = iVSAMap->GetDirtyVsaMapPages(volId, rba, blockCount);
     volumeDirtyList.insert(dirty.begin(), dirty.end());

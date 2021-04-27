@@ -77,10 +77,10 @@ private:
     uint32_t stripesPerSegment;
     uint32_t stripeOffset;
     IStripeMap* iStripeMap;
-    uint32_t numValidate = 0;
 
     std::map<SegmentId, uint32_t > invalidSegCnt;
 
+    MpageList volumeDirtyList;
     GcStripeMapUpdateList mapUpdates;
 };
 } // namespace pos
