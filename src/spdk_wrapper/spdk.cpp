@@ -48,8 +48,6 @@ SpdkNvmfStartCompletedCallback_t Spdk::startCompletedHandler = nullptr;
 void
 Spdk::_AppStartedCallback(void* arg1)
 {
-    spdkInitialized = true;
-
     if (getenv("MEMZONE_DUMP") != NULL)
     {
         spdk_memzone_dump(stdout);
@@ -72,6 +70,8 @@ Spdk::_AppStartedCallback(void* arg1)
     {
         startCompletedHandler();
     }
+
+    spdkInitialized = true;
 
     cout << "poseidonos started" << endl;
 }
@@ -106,7 +106,7 @@ Spdk::Init(int argc, char** argv)
     }
 
     spdkThread = new std::thread(_InitWorker, argc, argv);
-    while (spdkInitialized == true)
+    while (spdkInitialized == false)
     {
         usleep(1);
     }
