@@ -91,7 +91,7 @@ ReplayLogs::~ReplayLogs(void)
 int
 ReplayLogs::GetNumSubTasks(void)
 {
-    return 4;
+    return 5;
 }
 
 int
@@ -130,6 +130,9 @@ ReplayLogs::Start(void)
     {
         return result;
     }
+    reporter->SubTaskCompleted(GetId(), 1);
+
+    segmentCtx->FreeAllInvalidatedSegment();
     reporter->SubTaskCompleted(GetId(), 1);
 
     std::ostringstream os;
