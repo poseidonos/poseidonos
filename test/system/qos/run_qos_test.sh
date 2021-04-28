@@ -161,7 +161,7 @@ add_spare()
 {
     spare_dev=$1
     print_info "Add Spare device ${spare_dev}"
-    texecc $TARGET_ROOT_DIR/bin/cli array add --spare ${spare_dev}
+    texecc $TARGET_ROOT_DIR/bin/cli array add --name POSArray --spare ${spare_dev}
 }
 
 pci_rescan()
