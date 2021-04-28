@@ -357,7 +357,6 @@ ContextManager::_GetCopiedCtxBuffer(void)
 
     for (int count = 0; count < NUM_ALLOCATOR_META; count++)
     {
-
         if (count == ACTIVE_STRIPE_TAIL)
         {
             // to update wbuf tail seperately with seperated lock
