@@ -88,7 +88,6 @@ private:
     ArrayComponents* _FindArrayWithDevSN(string devName);
     ArrayDevice* _FindDevice(string devSn);
     int _Load(string name);
-    void _Erase(string name);
     map<string, ArrayComponents*> arrayList;
     ArrayRebuilder* arrayRebuilder = nullptr;
     AbrManager* abrManager = nullptr;

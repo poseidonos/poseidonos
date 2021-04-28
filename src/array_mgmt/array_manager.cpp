@@ -95,7 +95,7 @@ ArrayManager::Delete(string name)
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
         delete array;
-//        _Erase(name);
+        arrayList.erase(name);
     }
 
     return ret;
@@ -287,16 +287,20 @@ ArrayManager::ResetMbr(void)
         }
     }
 
-    for (auto iter : arrayList)
+    result = 0;
+    POS_TRACE_DEBUG(9999, "array list size : {}", arrayList.size());
+    for (auto iter = arrayList.begin(); iter != arrayList.end();)
     {
-        deleteResult = Delete(iter.first);
+        deleteResult = iter->second->Delete();
         if (deleteResult == 0)
         {
-            _Erase(iter.first);
+	    delete iter->second;
+            iter = arrayList.erase(iter);
         }
         else
         {
-            POS_TRACE_ERROR(deleteResult, "Failed to delete array " + iter.first);
+            iter++;
+            POS_TRACE_ERROR(deleteResult, "Failed to delete array : {}", iter->first);
             result = deleteResult;
         }
     }
@@ -354,18 +358,4 @@ ArrayManager::_FindDevice(string devSn)
     }
     return nullptr;
 }
-
-void
-ArrayManager::_Erase(string name)
-{
-    if (name == "" && arrayList.size() == 1)
-    {
-        arrayList.clear();
-    }
-    else
-    {
-        arrayList.erase(name);
-    }
-}
-
 } // namespace pos
