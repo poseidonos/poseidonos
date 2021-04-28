@@ -150,7 +150,7 @@ normal_shutdown()
     texecc ps -ef | grep poseidonos | awk '{print $2}' | head -1 > result.txt
     result=$(<result.txt)
 
-    texecc ./bin/cli array unmount --json > shutdown.txt
+    texecc ./bin/cli array unmount --name POSARRAY --json > shutdown.txt
     texecc ./bin/cli system exit --json > shutdown.txt
     
     tail --pid=${result} -f /dev/null
