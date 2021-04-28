@@ -491,6 +491,7 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
 	mdisk->malloc_buf = spdk_zmalloc(num_blocks * block_size, 2 * 1024 * 1024, NULL,
 					 SPDK_ENV_LCORE_ID_ANY, SPDK_MALLOC_DMA);
 	// TODO: Multi Array Optimization is necessary.
+	// malloc_disk_base = mdisk->malloc_buf;	
         malloc_disk_base = NULL;
 	if (!mdisk->malloc_buf) {
 		SPDK_ERRLOG("malloc_buf spdk_zmalloc() failed\n");
@@ -498,7 +499,6 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
 		return -ENOMEM;
 	}
 
-//	malloc_disk_base = mdisk->malloc_buf;	
 	rc = backup_disk_info_for_restore(mdisk, name, num_blocks, block_size);
 	if(rc != 0)
 	{

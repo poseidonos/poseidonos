@@ -288,13 +288,12 @@ ArrayManager::ResetMbr(void)
     }
 
     result = 0;
-    POS_TRACE_DEBUG(9999, "array list size : {}", arrayList.size());
     for (auto iter = arrayList.begin(); iter != arrayList.end();)
     {
         deleteResult = iter->second->Delete();
         if (deleteResult == 0)
         {
-	    delete iter->second;
+            delete iter->second;
             iter = arrayList.erase(iter);
         }
         else
