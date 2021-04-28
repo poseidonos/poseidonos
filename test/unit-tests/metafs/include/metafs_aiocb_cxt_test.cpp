@@ -56,8 +56,4 @@ TEST(MetaFsAioCbCxt, SetCallbackCount_)
 {
 }
 
-TEST(MetaFsAioCbCxt, GetCallbackCount_)
-{
-}
-
 } // namespace pos

@@ -33,6 +33,7 @@
 #pragma once
 
 #include <string>
+#include <atomic>
 #include "os_header.h"
 #include "src/meta_file_intf/meta_file_include.h"
 #include "metafs_return_code.h"
@@ -58,9 +59,9 @@ public:
       callback(func),
       rc(POS_EVENT_ID::MFS_END),
       submitOk(false),
-      tagId(0),
-      callbackCount(0)
+      tagId(0)
     {
+        callbackCount = 0;
     }
 
     MetaFsAioCbCxt(MetaFsIoOpcode opcode, uint32_t fd, std::string arrayName, void* buf, MetaFsAioCallbackPointer func)
@@ -73,8 +74,7 @@ public:
       callback(func),
       rc(POS_EVENT_ID::MFS_END),
       submitOk(false),
-      tagId(0),
-      callbackCount(0)
+      tagId(0)
     {
     }
 
@@ -125,11 +125,10 @@ public:
 
         if (callback)
         {
-            SPIN_LOCK_GUARD_IN_SCOPE(cbLock);
-            callbackCount--;
-            assert(callbackCount >= 0);
+            int remainedCount = callbackCount.fetch_sub(1) - 1;
+            assert(remainedCount >= 0);
 
-            if (0 == callbackCount)
+            if (0 == remainedCount)
                 callback(this);
         }
     }
@@ -176,12 +175,6 @@ public:
         callbackCount = cnt;
     }
 
-    int
-    GetCallbackCount(void)
-    {
-        return callbackCount;
-    }
-
 private:
     friend class MetaFsIoApi;
 
@@ -196,7 +189,6 @@ private:
     POS_EVENT_ID rc;
     bool submitOk;
     uint32_t tagId;
-    int callbackCount;
-    MetaFsSpinLock cbLock;
+    std::atomic<int> callbackCount;
 };
 } // namespace pos
