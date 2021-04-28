@@ -225,8 +225,9 @@ start_POS()
 exit_POS()
 {
     echo "  Unmounting and Exiting POS"
-    texecc ./bin/cli request unmount_ibofos >> ${logfile}
-    texecc ./bin/cli request exit_ibofos >> ${logfile}
+    texecc ./bin/cli array unmount --name POSArray >> ${logfile}
+    texecc ./bin/cli system exit >> ${logfile}
+    
 
     texecc ps -C poseidonos > /dev/null >> ${logfile}
     while [[ ${?} == 0 ]]
