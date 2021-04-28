@@ -95,7 +95,7 @@ ArrayManager::Delete(string name)
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
         delete array;
-        _Erase(name);
+//        _Erase(name);
     }
 
     return ret;

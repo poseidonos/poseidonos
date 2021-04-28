@@ -498,7 +498,7 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
 		return -ENOMEM;
 	}
 
-	malloc_disk_base = mdisk->malloc_buf;	
+//	malloc_disk_base = mdisk->malloc_buf;	
 	rc = backup_disk_info_for_restore(mdisk, name, num_blocks, block_size);
 	if(rc != 0)
 	{
