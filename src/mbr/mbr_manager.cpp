@@ -113,6 +113,7 @@ MbrManager::LoadMbr(void)
     ret = _ReadFromDevices();
     if (ret != 0)
     {
+        pthread_rwlock_unlock(&mbrLock);
         return ret;
     }
 
