@@ -125,6 +125,7 @@ private:
     bool _IsFirstStripeOfSegment(StripeId stripeId) { return (stripeId % addrInfo->GetstripesPerSegment() == 0); }
     char* _GetCopiedCtxBuffer(void);
     void _CopyWbufTail(char* data, int index);
+    void _FillBuffer(char* buffer, int count);
 
     static const uint64_t INVALID_VERSION = UINT64_MAX;
 

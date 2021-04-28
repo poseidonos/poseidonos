@@ -103,9 +103,10 @@ public:
     uint64_t GetNumBitsSet(void);
     uint64_t GetNumBitsSet(uint64_t begin, uint64_t end);
     bool SetBitMap(BitMapMutex& inputBitMapMutex);
+    std::mutex& GetLock(void);
 
 private:
-    std::mutex bitmapMutex;
+    std::mutex bitMapLock;
     // DoCs
     BitMap* bitMap;
 };

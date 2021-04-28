@@ -357,13 +357,21 @@ ContextManager::_GetCopiedCtxBuffer(void)
 
     for (int count = 0; count < NUM_ALLOCATOR_META; count++)
     {
+
         if (count == ACTIVE_STRIPE_TAIL)
         {
-            // Temporal workaround to update wbuf tail seperately with seperated lock
+            // to update wbuf tail seperately with seperated lock
             continue;
         }
-        assert(ctxHeader.totalSize > ctxsList[count].offset);
-        memcpy(data + ctxsList[count].offset, ctxsList[count].addr, ctxsList[count].size);
+        else if (count == WB_LSID_BITMAP)
+        {
+            std::lock_guard<std::mutex> lock(wbLsidBitmap->GetLock());
+            _FillBuffer(data, count);
+        }
+        else
+        {
+            _FillBuffer(data, count);
+        }
     }
 
     return data;
@@ -460,6 +468,13 @@ ContextManager::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
         flushInProgress = false;
         EventSchedulerSingleton::Instance()->EnqueueEvent(flushCallback);
     }
+}
+
+void
+ContextManager::_FillBuffer(char* buffer, int count)
+{
+    assert(ctxHeader.totalSize > ctxsList[count].offset);
+    memcpy(buffer + ctxsList[count].offset, ctxsList[count].addr, ctxsList[count].size);
 }
 
 } // namespace pos
