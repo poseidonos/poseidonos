@@ -36,7 +36,7 @@
 #include <vector>
 #include <string>
 #include "mfs_asynccb_cxt_template.h"
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 #include "mss_disk_place.h"
 #include "src/io_submit_interface/i_io_submit_handler.h"
 #include "src/event_scheduler/callback.h"
@@ -86,52 +86,39 @@ private:
     MssAioCbCxt* cbCxt;
 };
 
-class MssInfo
+class MssOnDisk : public MetaStorageSubsystem
 {
 public:
-    explicit MssInfo(std::string& arrayName);
-    ~MssInfo(void);
+    explicit MssOnDisk(std::string arrayName);
+    virtual ~MssOnDisk(void);
+
+    // Need to remove this function
+    virtual POS_EVENT_ID CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) override;
+    virtual POS_EVENT_ID Open(void) override;
+    virtual POS_EVENT_ID Close(void) override;
+    virtual uint64_t GetCapacity(MetaStorageType mediaType) override;
+    virtual POS_EVENT_ID ReadPage(MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages) override;
+    virtual POS_EVENT_ID WritePage(MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages) override;
+    virtual bool IsAIOSupport(void) override;
+    virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) override;
+    virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) override;
+
+    virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) override;
+
+private:
+    bool _CheckSanityErr(MetaLpnType pageNumber, uint64_t arrayCapacity);
+    POS_EVENT_ID _SendSyncRequest(IODirection direction, MetaStorageType mediaType, MetaLpnType pageNumber, MetaLpnType numPages, void* buffer);
+    POS_EVENT_ID _SendAsyncRequest(IODirection direction, MssAioCbCxt* cb);
+    void _AdjustPageIoToFitTargetPartition(MetaStorageType mediaType, MetaLpnType& targetPage, MetaLpnType& targetNumPages);
+    void _Finalize(void);
 
     std::vector<MssDiskPlace*> mssDiskPlace;
     std::vector<uint64_t> metaCapacity;
     std::vector<uint64_t> totalBlks;
     std::vector<uint32_t> maxPageCntLimitPerIO;
-    std::string arrayName;
-    uint32_t retryIoCnt;
-};
-
-class MssOnDisk : public MetaStorageSubsystem
-{
-public:
-    MssOnDisk(void);
-    virtual ~MssOnDisk(void);
-
-    // Need to remove this function
-    virtual POS_EVENT_ID CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) override;
-    virtual POS_EVENT_ID Open(std::string arrayName) override;
-    virtual POS_EVENT_ID Close(std::string arrayName) override;
-    virtual uint64_t GetCapacity(std::string arrayName, MetaStorageType mediaType) override;
-    virtual POS_EVENT_ID ReadPage(std::string arrayName, MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages) override;
-    virtual POS_EVENT_ID WritePage(std::string arrayName, MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages) override;
-    virtual bool IsAIOSupport(void) override;
-    virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) override;
-    virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) override;
-
-    virtual POS_EVENT_ID TrimFileData(std::string arrayName, MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) override;
-
-private:
-    bool _CheckSanityErr(std::string arrayName, MetaLpnType pageNumber, uint64_t arrayCapacity);
-    POS_EVENT_ID _SendSyncRequest(IODirection direction, std::string arrayName, MetaStorageType mediaType, MetaLpnType pageNumber, MetaLpnType numPages, void* buffer);
-    POS_EVENT_ID _SendAsyncRequest(IODirection direction, MssAioCbCxt* cb);
-    void _AdjustPageIoToFitTargetPartition(MetaStorageType mediaType, MetaLpnType& targetPage, MetaLpnType& targetNumPages);
-    void _Finalize(std::string arrayName);
-    void _FinalizeAll(void);
-
-    BitMap* mssBitmap;
-    std::unordered_map<std::string, uint32_t> mssMap;
-    MssInfo* mssInfo[MetaFsConfig::MAX_ARRAY_CNT];
 
     static const uint32_t MAX_DATA_TRANSFER_BYTE_SIZE = 4 * 1024; // 128 * 1024; temporary changed to 4KB due to FT layer IssueUbio
+    uint32_t retryIoCnt;
 };
 } // namespace pos
 

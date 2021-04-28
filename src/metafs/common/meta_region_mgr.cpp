@@ -39,8 +39,7 @@ namespace pos
 MetaRegionManager::MetaRegionManager(void)
 : mediaType(MetaStorageType::Default),
   baseLpn(MetaFsCommonConst::INVALID_META_LPN),
-  maxLpn(MetaFsCommonConst::INVALID_META_LPN),
-  arrayName("")
+  maxLpn(MetaFsCommonConst::INVALID_META_LPN)
 {
 }
 

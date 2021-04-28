@@ -30,47 +30,21 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mss.h"
-
-#ifdef WITH_PSTORE_STORAGE
-#include "mss_on_disk.h"
-#else
-#include "mss_ramdisk.h"
-#endif
+#include "src/metafs/storage/mss.h"
 
 namespace pos
 {
-#ifdef WITH_PSTORE_STORAGE
-MssOnDisk pstore;
-MetaStorageSubsystem* metaStorage = &pstore;
-#else
-MssRamdisk vstore;
-MetaStorageSubsystem* metaStorage = &vstore;
-#endif
-
-MetaStorageSubsystem::MetaStorageSubsystem(void)
-: state(MetaSsState::Default)
+MetaStorageSubsystem::MetaStorageSubsystem(std::string arrayName)
+: arrayName(arrayName)
 {
 }
 
 MetaStorageSubsystem::~MetaStorageSubsystem(void)
 {
-    state = MetaSsState::Close;
-}
-
-bool
-MetaStorageSubsystem::IsReady(void)
-{
-    return state == MetaSsState::Ready ? true : false;
-}
-void
-MetaStorageSubsystem::_SetState(MetaSsState parmState)
-{
-    state = parmState;
 }
 
 POS_EVENT_ID
-MetaStorageSubsystem::DoPageIO(MssOpcode opcode, std::string arrayName, MetaStorageType mediaType,
+MetaStorageSubsystem::DoPageIO(MssOpcode opcode, MetaStorageType mediaType,
     MetaLpnType metaLpn, void* buffer, MetaLpnType numPages,
     uint32_t mpio_id, uint32_t tagId)
 {
@@ -78,19 +52,19 @@ MetaStorageSubsystem::DoPageIO(MssOpcode opcode, std::string arrayName, MetaStor
     {
         case MssOpcode::Read:
         {
-            return ReadPage(arrayName, mediaType, metaLpn, buffer, numPages);
+            return ReadPage(mediaType, metaLpn, buffer, numPages);
         }
         break;
 
         case MssOpcode::Write:
         {
-            return WritePage(arrayName, mediaType, metaLpn, buffer, numPages);
+            return WritePage(mediaType, metaLpn, buffer, numPages);
         }
         break;
 
         case MssOpcode::Trim:
         {
-            return TrimFileData(arrayName, mediaType, metaLpn, buffer, numPages);
+            return TrimFileData(mediaType, metaLpn, buffer, numPages);
         }
         break;
 

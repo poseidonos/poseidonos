@@ -38,6 +38,7 @@
 #include "metafs_mutex.h"
 #include "metafs_spinlock.h"
 #include "os_header.h"
+#include "src/metafs/include/meta_file_context.h"
 #include "src/bio/volume_io.h"
 
 namespace pos
@@ -77,7 +78,7 @@ enum class MetaIoMode
 };
 
 // basic io req. info. given by caller
-class MetaFsIoRequest
+class MetaFsIoRequest : public MetaFsRequestBase
 {
 public:
     MetaFsIoRequest(void);
@@ -116,6 +117,7 @@ public:
     MetaLpnType baseMetaLpn;
     MetaFsIoRequest* originalMsg;
     int requestCount;
+    MetaFileContext* fileCtx;
 
 private:
     bool retryFlag;

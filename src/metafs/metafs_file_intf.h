@@ -47,10 +47,7 @@ namespace pos
 class MetaFsFileIntf : public MetaFileIntf
 {
 public:
-    explicit MetaFsFileIntf(std::string fname, std::string aname)
-    : MetaFileIntf(fname, aname)
-    {
-    }
+    explicit MetaFsFileIntf(std::string fname, std::string aname);
     virtual ~MetaFsFileIntf(void) override;
 
     virtual int Create(uint64_t fileSize, StorageOpt storageOpt) override;
@@ -69,6 +66,8 @@ private:
         char* buffer) override;
     virtual int _Write(int fd, uint64_t fileOffset, uint64_t length,
         char* buffer) override;
+
+    MetaFs* metaFs;
 };
 
 } // namespace pos

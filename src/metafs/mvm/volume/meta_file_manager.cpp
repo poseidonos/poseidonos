@@ -56,7 +56,11 @@ MetaFileManager::Init(std::string arrayName, MetaVolumeType volumeType, MetaLpnT
     OnVolumeMetaRegionManager::Init(arrayName, volumeType, baseLpn, maxLpn);
     extentMgr.Init(baseLpn, maxLpn);
     isAllocated = false;
+}
 
+void
+MetaFileManager::SetMss(MetaStorageSubsystem* metaStorage)
+{
     mfssIntf = metaStorage;
 }
 
@@ -192,7 +196,7 @@ MetaFileManager::TrimData(MetaStorageType media, MetaLpnType startLpn, MetaLpnTy
     void* buf = nullptr;
 
     POS_EVENT_ID ret = POS_EVENT_ID::SUCCESS;
-    ret = mfssIntf->TrimFileData(arrayName, media, startLpn, buf, numTrimLpns);
+    ret = mfssIntf->TrimFileData(media, startLpn, buf, numTrimLpns);
 
     if (ret != POS_EVENT_ID::SUCCESS)
     {
@@ -206,7 +210,7 @@ MetaFileManager::TrimData(MetaStorageType media, MetaLpnType startLpn, MetaLpnTy
         assert(buf != nullptr);
 
         // write all zeros
-        ret = mfssIntf->WritePage(arrayName, media, startLpn, buf, numTrimLpns); // should be async.
+        ret = mfssIntf->WritePage(media, startLpn, buf, numTrimLpns); // should be async.
 
         if (ret != POS_EVENT_ID::SUCCESS)
         {

@@ -34,7 +34,7 @@
 
 #include "metafs_config.h"
 #include "metafs_log.h"
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 
 #include <string>
 
@@ -88,6 +88,12 @@ VolumeCatalogManager::Finalize(void)
 {
 }
 
+void
+VolumeCatalogManager::SetMss(MetaStorageSubsystem* metaStorage)
+{
+    catalog->SetMss(metaStorage);
+}
+
 MetaLpnType
 VolumeCatalogManager::_GetLpnCnt(void)
 {
@@ -127,7 +133,7 @@ VolumeCatalogManager::LoadVolCatalog(void)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Load volume catalog content...");
-    bool isSuccess = catalog->Load(arrayName);
+    bool isSuccess = catalog->Load();
     if (isSuccess)
     {
         isSuccess = _CheckContentVality();
@@ -147,7 +153,7 @@ VolumeCatalogManager::RestoreContent(MetaVolumeType targetVol, MetaLpnType baseL
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE, "[CatalogContent Restore] vol= {}", targetVol);
 
     MetaStorageType media = MetaFileUtil::ConvertToMediaType(targetVol);
-    bool isSuccess = catalog->Load(arrayName, media, baseLpn, 0 /* idx */, lpnCnts);
+    bool isSuccess = catalog->Load(media, baseLpn, 0 /* idx */, lpnCnts);
     if (isSuccess)
     {
         isSuccess = _CheckContentVality();
@@ -190,7 +196,7 @@ VolumeCatalogManager::SaveContent(void)
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Save volume catalog content...");
 
-    if (true != catalog->Store(arrayName))
+    if (true != catalog->Store())
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
             "Store I/O for MFS catalog content has failed...");
@@ -208,7 +214,7 @@ VolumeCatalogManager::BackupContent(MetaVolumeType targetVol, MetaLpnType baseLp
         targetVol, baseLpn, lpnCnts);
 
     MetaStorageType media = MetaFileUtil::ConvertToMediaType(targetVol);
-    bool isSuccess = catalog->Store(arrayName, media, baseLpn, 0 /*buf idx*/, lpnCnts);
+    bool isSuccess = catalog->Store(media, baseLpn, 0 /*buf idx*/, lpnCnts);
     if (isSuccess != true)
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,

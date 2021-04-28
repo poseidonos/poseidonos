@@ -37,7 +37,6 @@
 #include <cstdint>
 #include <string>
 #include <random>
-#include "metafs_adapter_include.h"
 #include "metafs_config.h"
 #include "mfs_ut_framework.h"
 

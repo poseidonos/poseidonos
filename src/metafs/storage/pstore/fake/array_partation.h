@@ -33,7 +33,7 @@
 #ifndef _INCLUDE_MOCK_ARRAY_PARTATION_H_
 #define _INCLUDE_MOCK_ARRAY_PARTATION_H_
 
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 #include "src/device/base/ublock_device.h"
 #include "src/bio/ubio.h"
 

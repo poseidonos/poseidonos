@@ -36,48 +36,39 @@
  * Meta File System Manager
 */
 
-#include "metafs_system_manager.h"
-#include "metafs_mbr_mgr.h"
-#include "meta_io_manager.h"
-#include "mfs_state_procedure.h"
-
 #include <string>
+#include "metafs_system_manager.h"
+#include "src/metafs/msc/metafs_mbr_mgr.h"
+#include "meta_io_manager.h"
+#include "src/metafs/storage/pstore/mss_on_disk.h"
 
 namespace pos
 {
-MetaFsSystemManager mfsSysMgr;
-MetaFsSystemManager& mscTopMgr = mfsSysMgr;
-
 MetaFsSystemManager::MetaFsSystemManager(void)
-: isMfsUnmounted(false),
-  isTheFirst(true),
-  mbrMap(mfsStateMgr.GetMetaVolumeMbrMap())
+: mbrMgr(nullptr)
 {
+    mbrMgr = new MetaFsMBRManager();
     _InitReqHandler();
 }
 
 MetaFsSystemManager::~MetaFsSystemManager(void)
 {
-}
-
-MetaFsSystemManager&
-MetaFsSystemManager::GetInstance(void)
-{
-    return mfsSysMgr;
+    delete mbrMgr;
 }
 
 const char*
 MetaFsSystemManager::GetModuleName(void)
 {
-    return "MetaFS Manager";
+    return "MetaFs System Manager";
 }
 
 POS_EVENT_ID
-MetaFsSystemManager::CheckReqSanity(MetaFsControlReqMsg& reqMsg)
+MetaFsSystemManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 {
     POS_EVENT_ID sc = POS_EVENT_ID::SUCCESS;
+    MetaFsControlReqMsg* msg = static_cast<MetaFsControlReqMsg*>(&reqMsg);
 
-    if (false == reqMsg.IsValid())
+    if (false == msg->IsValid())
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
             "Given request is incorrect. Please check parameters.");
@@ -90,36 +81,12 @@ MetaFsSystemManager::CheckReqSanity(MetaFsControlReqMsg& reqMsg)
 bool
 MetaFsSystemManager::Init(std::string& arrayName, MetaStorageMediaInfoList& mediaInfoList)
 {
-    if (mbrMap.IsMbrLoaded(arrayName))
-        return false;
-
-    mbrMap.Init(arrayName, MetaStorageType::SSD, MetaFsMBRManager::FILESYSTEM_MBR_BASE_LPN);
+    mbrMgr->Init(arrayName, MetaStorageType::SSD, MetaFsMBRManager::FILESYSTEM_MBR_BASE_LPN);
+    mbrMgr->SetMss(metaStorage);
 
     for (auto& item : mediaInfoList)
     {
-        mbrMap.RegisterVolumeGeometry(arrayName, item);
-    }
-
-    mfsStateMgr.RequestSystemStateChange(MetaFsSystemState::PowerOn, MetaFsSystemState::Init);
-    POS_EVENT_ID sc = mfsStateMgr.ExecuteStateTransition(arrayName);
-    if (sc != POS_EVENT_ID::SUCCESS)
-    {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MODULE_INIT_FAILED,
-            "CoreMgr init failed.");
-        return false;
-    }
-
-    if (!isTheFirst)
-        return true;
-
-    SetModuleInit();
-
-    if (isMfsUnmounted == true)
-    {
-        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-            "Meta filesystem has been re-initialized without power off...");
-
-        isMfsUnmounted = false;
+        mbrMgr->RegisterVolumeGeometry(item);
     }
 
     return true;
@@ -128,11 +95,8 @@ MetaFsSystemManager::Init(std::string& arrayName, MetaStorageMediaInfoList& medi
 void
 MetaFsSystemManager::_InitReqHandler(void)
 {
-    _RegisterReqHandler(MetaFsControlReqType::MountSystem,      &MetaFsSystemManager::_HandleMountReq);
-    _RegisterReqHandler(MetaFsControlReqType::UnmountSystem,    &MetaFsSystemManager::_HandleUnmountReq);
-    _RegisterReqHandler(MetaFsControlReqType::CreateSystem,     &MetaFsSystemManager::_HandleFileSysCreateReq);
-    _RegisterReqHandler(MetaFsControlReqType::AddArray,         &MetaFsSystemManager::_HandleAddArray);
-    _RegisterReqHandler(MetaFsControlReqType::RemoveArray,      &MetaFsSystemManager::_HandleRemoveArray);
+    _RegisterReqHandler(MetaFsControlReqType::InitializeSystem, &MetaFsSystemManager::_HandleInitializeRequest);
+    _RegisterReqHandler(MetaFsControlReqType::CloseSystem,      &MetaFsSystemManager::_HandleCloseRequest);
 }
 
 void
@@ -141,194 +105,102 @@ MetaFsSystemManager::_RegisterReqHandler(MetaFsControlReqType reqType, MetaFsCon
     reqHandler[(uint32_t)reqType] = handler;
 }
 
-bool
-MetaFsSystemManager::Bringup(std::string& arrayName)
-{
-    mfsStateMgr.RequestSystemStateChange(MetaFsSystemState::Ready, MetaFsSystemState::Ready);
-    POS_EVENT_ID sc = mfsStateMgr.ExecuteStateTransition(arrayName);
-    if (sc != POS_EVENT_ID::SUCCESS)
-    {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MODULE_BRINGUP_FAILED,
-            "CoreMgr bringup failed.");
-        return false;
-    }
-
-    if (isTheFirst)
-    {
-        SetModuleReady();
-    }
-
-    return true;
-}
-
 POS_EVENT_ID
-MetaFsSystemManager::ProcessNewReq(MetaFsControlReqMsg& reqMsg)
+MetaFsSystemManager::ProcessNewReq(MetaFsRequestBase& reqMsg)
 {
     POS_EVENT_ID sc;
-    sc = (this->*(reqHandler[(uint32_t)reqMsg.reqType]))(reqMsg);
+    MetaFsControlReqMsg* msg = static_cast<MetaFsControlReqMsg*>(&reqMsg);
+    sc = (this->*(reqHandler[(uint32_t)msg->reqType]))(*msg);
     return sc;
-}
-
-bool
-MetaFsSystemManager::IsMounted(void)
-{
-    return (MetaFsSystemState::Active == mfsStateMgr.GetCurrSystemState());
 }
 
 uint64_t
-MetaFsSystemManager::GetEpochSignature(std::string& arrayName)
+MetaFsSystemManager::GetEpochSignature(void)
 {
-    return mbrMap.GetEpochSignature(arrayName);
+    return mbrMgr->GetEpochSignature();
 }
 
-bool
-MetaFsSystemManager::_IsSiblingModuleReady(void)
+MetaFsStorageIoInfoList&
+MetaFsSystemManager::GetAllStoragePartitionInfo(void)
 {
-    return true;
+    return mbrMgr->GetAllStoragePartitionInfo();
 }
 
-POS_EVENT_ID
-MetaFsSystemManager::_HandleFileSysCreateReq(MetaFsControlReqMsg& reqMsg)
+MetaLpnType
+MetaFsSystemManager::GetRegionSizeInLpn(void)
 {
-    if (mbrMap.IsValidMBRExist(reqMsg.arrayName))
-    {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_WARNING_INIT_AGAIN,
-            "You attempt to create Meta filesystem again. Can't service this request. Ignore it.");
-        return POS_EVENT_ID::SUCCESS;
-    }
-
-    mfsStateMgr.RequestSystemStateChange(MetaFsSystemState::Create, MetaFsSystemState::Create);
-    POS_EVENT_ID sc = mfsStateMgr.ExecuteStateTransition(reqMsg.arrayName);
-    if (sc != POS_EVENT_ID::SUCCESS)
-    {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED,
-            "Meta filesystem creation request has been failed.");
-
-        return sc;
-    }
-
-    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-        "Meta filesystem has been created...");
-
-    return sc;
+    return mbrMgr->GetRegionSizeInLpn();
 }
 
 POS_EVENT_ID
-MetaFsSystemManager::_HandleMountReq(MetaFsControlReqMsg& reqMsg)
+MetaFsSystemManager::LoadMbr(bool& isNPOR)
 {
-    if (MetaFsSystemState::Active != mfsStateMgr.GetCurrSystemState())
+    if (true == mbrMgr->LoadMBR())
     {
-        mfsStateMgr.RequestSystemStateChange(MetaFsSystemState::Open, MetaFsSystemState::Active);
-        POS_EVENT_ID sc = mfsStateMgr.ExecuteStateTransition(reqMsg.arrayName);
-        if (sc != POS_EVENT_ID::SUCCESS)
+        if (false == mbrMgr->IsValidMBRExist())
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MEDIA_MOUNT_FAILED,
-                "Meta filesystem mount request has been failed.");
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_MBR,
+                "Filesystem MBR has been corrupted or Filesystem cannot be found.");
 
-            return sc;
+            return POS_EVENT_ID::MFS_INVALID_MBR;
         }
-        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-            "Meta filesystem has been mounted...");
+
+        isNPOR = mbrMgr->GetPowerStatus();
+        if (true == isNPOR)
+        {
+            MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+                "This open is NPOR case!!!");
+        }
     }
     else
     {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_SYSTEM_MOUNT_AGAIN,
-            "Meta filesystem is already mounted. Ignore it");
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+            "Error occurred while loading filesystem MBR");
+
+        return POS_EVENT_ID::MFS_META_LOAD_FAILED;
     }
 
     return POS_EVENT_ID::SUCCESS;
 }
 
-POS_EVENT_ID
-MetaFsSystemManager::_HandleUnmountReq(MetaFsControlReqMsg& reqMsg)
+bool
+MetaFsSystemManager::CreateMbr(void)
 {
-    POS_EVENT_ID sc = POS_EVENT_ID::SUCCESS;
-    try
-    {
-        if (MetaFsSystemState::Shutdown != mfsStateMgr.GetCurrSystemState())
-        {
-            bool isTheLast = (1 == mbrMap.GetMountedMbrCount()) ? true : false;
+    return mbrMgr->CreateMBR();
+}
 
-            if (!isTheLast)
-            {
-                bool resetCxt = false;
-                if (!mvmTopMgr.Close(resetCxt, reqMsg.arrayName))
-                {
-                    // Reset MetaFS DRAM Context
-                    if (resetCxt == true)
-                        return POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED;
-                    else
-                        return POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED_DUE_TO_ACTIVE_FILE;
-                }
-                mbrMap.SetPowerStatus(reqMsg.arrayName, true /*NPOR status*/);
-                if (true != mbrMap.SaveContent(reqMsg.arrayName))
-                    return POS_EVENT_ID::MFS_META_SAVE_FAILED;
-                if (POS_EVENT_ID::SUCCESS != metaStorage->Close(reqMsg.arrayName))
-                    return POS_EVENT_ID::MFS_META_STORAGE_CLOSE_FAILED;
-                mbrMap.Remove(reqMsg.arrayName);
-
-                return POS_EVENT_ID::SUCCESS;
-            }
-
-            mfsStateMgr.RequestSystemStateChange(MetaFsSystemState::Quiesce, MetaFsSystemState::Shutdown);
-            sc = mfsStateMgr.ExecuteStateTransition(reqMsg.arrayName);
-            if (sc != POS_EVENT_ID::SUCCESS)
-            {
-                // due to both array stop state and active files.
-                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MEDIA_UNMOUNT_FAILED,
-                    "Meta filesystem unmount request has been failed.");
-
-                throw sc;
-            }
-            else
-            {
-                MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-                    "Meta filesystem has been unmounted...");
-
-                throw POS_EVENT_ID::SUCCESS;
-            }
-        }
-        else
-        {
-            MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_SYSTEM_UNMOUNT_AGAIN,
-                "Meta filesystem is already unmounted. Ignore it");
-
-            throw POS_EVENT_ID::SUCCESS;
-        }
-    }
-    catch (POS_EVENT_ID event)
-    {
-        if (sc != POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED_DUE_TO_ACTIVE_FILE)
-        {
-            SetModuleInit();
-            isMfsUnmounted = true;
-        }
-
-        return event;
-    }
+MetaStorageSubsystem*
+MetaFsSystemManager::GetMss(void)
+{
+    return metaStorage;
 }
 
 POS_EVENT_ID
-MetaFsSystemManager::_HandleAddArray(MetaFsControlReqMsg& reqMsg)
+MetaFsSystemManager::_HandleInitializeRequest(MetaFsControlReqMsg& reqMsg)
 {
-    if (true == mimTopMgr.AddArrayInfo(reqMsg.arrayName))
+    metaStorage = new MssOnDisk(reqMsg.arrayName);
+
+    if (true == Init(reqMsg.arrayName, *reqMsg.mediaList))
         return POS_EVENT_ID::SUCCESS;
-    else
-        return POS_EVENT_ID::MFS_ARRAY_ADD_FAILED;
+
+    return POS_EVENT_ID::MFS_ERROR_MOUNTED;
 }
 
 POS_EVENT_ID
-MetaFsSystemManager::_HandleRemoveArray(MetaFsControlReqMsg& reqMsg)
+MetaFsSystemManager::_HandleCloseRequest(MetaFsControlReqMsg& reqMsg)
 {
-    if (true == mimTopMgr.RemoveArrayInfo(reqMsg.arrayName))
-        return POS_EVENT_ID::SUCCESS;
-    else
-        return POS_EVENT_ID::MFS_ARRAY_REMOVE_FAILED;
-}
+    mbrMgr->SetPowerStatus(true /*NPOR status*/);
 
-void
-MetaFsSystemManager::_InitiateSystemRecovery(void)
-{
-    // metaFs recovery manager required
+    if (true != mbrMgr->SaveContent())
+        return POS_EVENT_ID::MFS_META_SAVE_FAILED;
+
+    mbrMgr->InvalidMBR();
+
+    if (POS_EVENT_ID::SUCCESS != metaStorage->Close())
+        return POS_EVENT_ID::MFS_META_STORAGE_CLOSE_FAILED;
+
+    delete metaStorage;
+
+    return POS_EVENT_ID::SUCCESS;
 }
 } // namespace pos

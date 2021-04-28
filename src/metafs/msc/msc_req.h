@@ -33,6 +33,7 @@
 #pragma once
 
 #include <string>
+#include "src/metafs/include/meta_storage_info.h"
 #include "meta_storage_specific.h"
 #include "meta_volume_type.h"
 #include "metafs_type.h"
@@ -42,17 +43,16 @@ namespace pos
 {
 enum class MetaFsControlReqType
 {
-    MountSystem = 0,
-    UnmountSystem = 1,
-    CreateSystem = 2,
+    InitializeSystem,
+    CloseSystem,
 
-    AddArray = 3,
-    RemoveArray = 4,
+    AddArray,
+    RemoveArray,
 
     Max,
 };
 
-class MetaFsControlReqMsg
+class MetaFsControlReqMsg : public MetaFsRequestBase
 {
 public:
     MetaFsControlReqMsg(void);
@@ -61,5 +61,6 @@ public:
 
     MetaFsControlReqType reqType;
     std::string arrayName;
+    MetaStorageMediaInfoList* mediaList = nullptr;
 };
 } // namespace pos

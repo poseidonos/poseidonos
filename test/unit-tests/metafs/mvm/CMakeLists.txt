@@ -1,5 +1,4 @@
 POS_ADD_UNIT_TEST(mvm_const_ut mvm_const_test.cpp)
-POS_ADD_UNIT_TEST(metafs_mvm_adapter_ut metafs_mvm_adapter_test.cpp)
 POS_ADD_UNIT_TEST(file_descriptor_in_use_map_ut file_descriptor_in_use_map_test.cpp)
 POS_ADD_UNIT_TEST(meta_volume_container_ut meta_volume_container_test.cpp)
 POS_ADD_UNIT_TEST(meta_volume_handler_ut meta_volume_handler_test.cpp)

@@ -69,8 +69,9 @@ MountTemp::Unmount2(void)
 #endif
     POS_TRACE_INFO(eventId, "start flush cmd manager reset instance");
     FlushCmdManagerSingleton::ResetInstance();
-    POS_TRACE_INFO(eventId, "start meta file system mgr unmount");
-    metaFs.mgmt.UnmountSystem(arrayName);
+    POS_TRACE_INFO(eventId, "start qos manager reset instance");
+    QosManagerSingleton::ResetInstance();
+
     _ResetNvmf();
 
     return ret;
@@ -81,97 +82,9 @@ MountTemp::Mount1(void)
 {
     debugInfoUpdater->Update();
 
-    int ret = 0;
-    ret = _MountMetaFilesystem();
-    if (0 > ret)
-    {
-        return ret;
-    }
     _InitNvmf();
     QosManagerSingleton::Instance()->Initialize();
-    return ret;
-}
-
-int
-MountTemp::_MountMetaFilesystem(void)
-{
-    bool isInitialized = abrControl->GetMfsInit(arrayName);
-
-    MetaStorageMediaInfoList mediaList;
-    _RegisterMediaInfoIfAvailable(META_NVM, mediaList);
-    _RegisterMediaInfoIfAvailable(META_SSD, mediaList);
-
-    bool isSuccess = metaFs.Init(arrayName, mediaList);
-    if (!isSuccess)
-    {
-        return -1;
-        // FIXME: handle error
-    }
-
-    MetaFsReturnCode<POS_EVENT_ID> sysRC;
-    if (false == isInitialized) // hardly know whether valid filesystem exists or not, if the filesystem has been established once before
-    {
-        sysRC = metaFs.mgmt.CreateSystem(arrayName);
-        if (sysRC.IsSuccess())
-        {
-            int ret = 0;
-            ret = abrControl->SetMfsInit(arrayName, true);
-            if (0 != ret)
-            {
-                return ret;
-            }
-        }
-        else
-        {
-            return -1;
-            // FIXME: need to report filesystem mount error to host
-        }
-    }
-    sysRC = metaFs.mgmt.MountSystem(arrayName);
-    if (!sysRC.IsSuccess())
-    {
-        return -1;
-        // if (sysRC.sc == MetaFsStatusCodeFsControlSpcf::FileSysNotFound)
-        // {
-        // }
-    }
     return 0;
-}
-
-void
-MountTemp::_RegisterMediaInfoIfAvailable(
-    PartitionType ptnType, MetaStorageMediaInfoList& mediaList)
-{
-    MetaStorageInfo media = _MakeMetaStorageMediaInfo(ptnType);
-    mediaList.push_back(media);
-}
-
-MetaStorageInfo
-MountTemp::_MakeMetaStorageMediaInfo(PartitionType ptnType)
-{
-    MetaStorageInfo newInfo;
-    switch (ptnType)
-    {
-        case META_NVM:
-        {
-            newInfo.media = MetaStorageType::NVRAM;
-        }
-        break;
-        case META_SSD:
-        {
-            newInfo.media = MetaStorageType::SSD;
-        }
-        break;
-        default:
-        {
-            assert(false);
-        }
-    }
-
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
-    const PartitionLogicalSize* ptnSize = info->GetSizeInfo(ptnType);
-    newInfo.mediaCapacity = static_cast<uint64_t>(ptnSize->totalStripes) * ptnSize->blksPerStripe * ArrayConfig::BLOCK_SIZE_BYTE;
-    return newInfo;
 }
 
 void

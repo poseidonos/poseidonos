@@ -35,49 +35,25 @@
 namespace pos
 {
 MetaFsManagerBase::MetaFsManagerBase(void)
-: state(MetaFsManagerState::PowerOn)
 {
 }
 
-MetaFsManagerState
-MetaFsManagerBase::GetModuleState(void)
+MetaFsManagerBase::~MetaFsManagerBase(void)
 {
-    return state;
 }
 
-bool
-MetaFsManagerBase::CheckModuleReadiness(void)
+POS_EVENT_ID
+MetaFsManagerBase::HandleNewRequest(MetaFsRequestBase& reqMsg)
 {
-    return (true == IsModuleReady() && true == _IsSiblingModuleReady());
-}
+    POS_EVENT_ID rc = CheckReqSanity(reqMsg);
+    if (rc != POS_EVENT_ID::SUCCESS)
+    {
+        POS_TRACE_ERROR((int)rc, "Command sanity error detected!");
+        return rc;
+    }
 
-void
-MetaFsManagerBase::SetModuleInit(void)
-{
-    state = MetaFsManagerState::Init;
-}
+    rc = ProcessNewReq(reqMsg);
 
-void
-MetaFsManagerBase::SetModuleReady(void)
-{
-    state = MetaFsManagerState::Running;
-}
-
-void
-MetaFsManagerBase::SetModuleHalt(void)
-{
-    state = MetaFsManagerState::Halt;
-}
-
-bool
-MetaFsManagerBase::IsModuleReady(void)
-{
-    return MetaFsManagerState::Running == state;
-}
-
-void
-MetaFsManagerBase::SetModuleInactive(void)
-{
-    state = MetaFsManagerState::Inactive;
+    return rc;
 }
 } // namespace pos

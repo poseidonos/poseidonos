@@ -148,10 +148,6 @@ TEST(Mio, _AllocMpio_)
 {
 }
 
-TEST(Mio, _GetDataChunkSize_)
-{
-}
-
 TEST(Mio, _HandleMpioDone_)
 {
 }

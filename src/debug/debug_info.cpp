@@ -51,7 +51,7 @@
 #include "src/master_context/config_manager.h"
 #include "src/mbr/mbr_manager.h"
 #include "src/master_context/version_provider.h"
-#include "src/metafs/mvm/meta_volume_manager.h"
+#include "src/metafs/include/metafs_service.h"
 #include "src/qos/qos_manager.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/io_scheduler/io_dispatcher.h"
@@ -77,7 +77,7 @@ DebugInfo::DebugInfo(void)
     ioDispatcher(nullptr),
     logger(nullptr),
     mapperService(nullptr),
-    metaVolumeManager(nullptr),
+    metaFsService(nullptr),
     qosManager(nullptr),
     rbaStateService(nullptr),
     reporter(nullptr),
@@ -117,7 +117,7 @@ DebugInfo::Update(void)
     flushCmdManager = FlushCmdManagerSingleton::Instance();
     versionProvider = VersionProviderSingleton::Instance();
     commandTimeoutHandler = CommandTimeoutHandlerSingleton::Instance();
-    metaVolumeManager = &metaVolMgr;
+    metaFsService = MetaFsServiceSingleton::Instance();
     volumeService = VolumeServiceSingleton::Instance();
 }
 } // namespace pos

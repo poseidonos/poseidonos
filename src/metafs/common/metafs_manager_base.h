@@ -32,45 +32,21 @@
 
 #pragma once
 
+#include "src/metafs/common/metafs_common.h"
+
 namespace pos
 {
-// define common states representing a current state of the top module
-enum class MetaFsManagerState
-{
-    // states in normal behavior
-    PowerOn = 0,
-    Init,     // To init. module
-    Inactive, // Temporary inactive state not to servce request
-    Running,  // active and ready state to service request
-
-    // error states
-    Halt, // indicate error condition. Cannot accept any request. Only CoreMgr should be able to handle this situation
-
-    //
-    Max,
-
-    Default = PowerOn
-};
-
 class MetaFsManagerBase
 {
 public:
     MetaFsManagerBase(void);
+    virtual ~MetaFsManagerBase(void);
 
-    MetaFsManagerState GetModuleState(void);
-    void SetModuleInit(void);
-    void SetModuleReady(void);
-    void SetModuleHalt(void);
-    bool IsModuleReady(void);
-    void SetModuleInactive(void);
+    POS_EVENT_ID HandleNewRequest(MetaFsRequestBase& reqMsg);
 
-    bool CheckModuleReadiness(void);
+    virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg) = 0;
+    virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg) = 0;
 
     virtual const char* GetModuleName(void) = 0;
-
-protected:
-    virtual bool _IsSiblingModuleReady(void) = 0;
-
-    MetaFsManagerState state;
 };
 } // namespace pos

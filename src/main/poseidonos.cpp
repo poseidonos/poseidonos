@@ -54,6 +54,7 @@
 #include "src/event_scheduler/io_completer.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/qos/qos_manager.h"
+#include "src/metafs/include/metafs_service.h"
 
 namespace pos
 {
@@ -148,17 +149,23 @@ Poseidonos::_SetupThreadModel(void)
 {
     AffinityManager* affinityManager = pos::AffinityManagerSingleton::Instance();
     POS_TRACE_DEBUG(POS_EVENT_ID::DEVICEMGR_SETUPMODEL, "_SetupThreadModel");
-    uint32_t eventCoreCount =
+    uint32_t coreCount =
         affinityManager->GetCoreCount(CoreType::EVENT_WORKER);
-    uint32_t eventWorkerCount = eventCoreCount * EVENT_THREAD_CORE_RATIO;
+    uint32_t workerCount = coreCount * EVENT_THREAD_CORE_RATIO;
     cpu_set_t schedulerCPUSet =
         affinityManager->GetCpuSet(CoreType::EVENT_SCHEDULER);
-    cpu_set_t eventCPUSet = affinityManager->GetCpuSet(CoreType::EVENT_WORKER);
+    cpu_set_t workerCPUSet = affinityManager->GetCpuSet(CoreType::EVENT_WORKER);
 
-    EventSchedulerSingleton::Instance()->Initialize(eventWorkerCount,
-            schedulerCPUSet, eventCPUSet);
+    EventSchedulerSingleton::Instance()->Initialize(workerCount,
+            schedulerCPUSet, workerCPUSet);
     IIODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
     DeviceManagerSingleton::Instance()->Initialize(ioDispatcher);
+
+    coreCount = affinityManager->GetTotalCore();
+    schedulerCPUSet = affinityManager->GetCpuSet(CoreType::META_SCHEDULER);
+    workerCPUSet = affinityManager->GetCpuSet(CoreType::META_IO);
+    MetaFsServiceSingleton::Instance()->Initialize(coreCount,
+            schedulerCPUSet, workerCPUSet);
 }
 
 void

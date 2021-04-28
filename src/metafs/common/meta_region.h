@@ -36,7 +36,7 @@
 #include "meta_region_content.h"
 #include "metafs_config.h"
 #include "metafs_log.h"
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 
 namespace pos
 {
@@ -53,11 +53,12 @@ public:
     void* GetDataBuf(MetaLpnType pageOffset);
     const MetaLpnType GetLpnCntOfRegion(void);
     void ResetContent(void);
-    bool Load(std::string arrayName);
-    bool Load(std::string arrayName, MetaStorageType targetMedia, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT);
+    void SetMss(MetaStorageSubsystem* mss);
+    bool Load(void);
+    bool Load(MetaStorageType targetMedia, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT);
 
-    bool Store(std::string arrayName);
-    bool Store(std::string arrayName, MetaStorageType targetMedia, MetaLpnType startLPN, uint32_t idx, MetaLpnType pageCNT);
+    bool Store(void);
+    bool Store(MetaStorageType targetMedia, MetaLpnType startLPN, uint32_t idx, MetaLpnType pageCNT);
 
     const MetaLpnType GetLpnCntOfContent(void);
 
@@ -82,7 +83,7 @@ MetaRegion<MetaRegionT, MetaContentT>::MetaRegion(MetaStorageType mediaType, Met
   startLpn(baseLpn),
   totalLpnCnt(GetLpnCntOfContent()),
   mirrorCount(mirrorCount),
-  mssIntf(metaStorage)
+  mssIntf(nullptr)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "MetaRegion(constructed): media={}, region={}, sizeof={}, baseLpn={}, lpn count={}",
@@ -151,58 +152,57 @@ MetaRegion<MetaRegionT, MetaContentT>::ResetContent(void)
 }
 
 template<typename MetaRegionT, typename MetaContentT>
-bool
-MetaRegion<MetaRegionT, MetaContentT>::Load(std::string arrayName)
+void
+MetaRegion<MetaRegionT, MetaContentT>::SetMss(MetaStorageSubsystem* mss)
 {
-    assert(mssIntf->IsReady());
+    mssIntf = mss;
+}
 
+template<typename MetaRegionT, typename MetaContentT>
+bool
+MetaRegion<MetaRegionT, MetaContentT>::Load(void)
+{
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Do meta load <mediaType, startLpn, totalLpn>={}, {}, {}",
         (int)mediaType, startLpn, totalLpnCnt);
 
     // The Data in GetDataBuf() is contents of each regions in the  mediaType.
-    POS_EVENT_ID rc = mssIntf->ReadPage(arrayName, mediaType, startLpn, GetDataBuf(), totalLpnCnt);
+    POS_EVENT_ID rc = mssIntf->ReadPage(mediaType, startLpn, GetDataBuf(), totalLpnCnt);
     return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
 }
 
 template<typename MetaRegionT, typename MetaContentT>
 bool
-MetaRegion<MetaRegionT, MetaContentT>::Load(std::string arrayName, MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
+MetaRegion<MetaRegionT, MetaContentT>::Load(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
 {
-    assert(mssIntf->IsReady());
-
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Do meta load<mediaTyp, startLpn, totalLpn>={}, {}, {},",
         (int)media, baseLPN, pageCNT);
 
-    POS_EVENT_ID rc = mssIntf->ReadPage(arrayName, media, baseLPN + idx, GetDataBuf(idx), pageCNT);
+    POS_EVENT_ID rc = mssIntf->ReadPage(media, baseLPN + idx, GetDataBuf(idx), pageCNT);
     return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
 }
 
 template<typename MetaRegionT, typename MetaContentT>
 bool
-MetaRegion<MetaRegionT, MetaContentT>::Store(std::string arrayName)
+MetaRegion<MetaRegionT, MetaContentT>::Store(void)
 {
-    assert(mssIntf->IsReady());
-
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Do meta store <mediaType, startLpn, totalLpn>={}, {}, {}",
         (int)mediaType, startLpn, totalLpnCnt);
-    POS_EVENT_ID rc = mssIntf->WritePage(arrayName, mediaType, startLpn, GetDataBuf(), totalLpnCnt);
+    POS_EVENT_ID rc = mssIntf->WritePage(mediaType, startLpn, GetDataBuf(), totalLpnCnt);
     return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
 }
 
 template<typename MetaRegionT, typename MetaContentT>
 bool
-MetaRegion<MetaRegionT, MetaContentT>::Store(std::string arrayName, MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
+MetaRegion<MetaRegionT, MetaContentT>::Store(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
 {
-    assert(mssIntf->IsReady());
-
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Do meta store <mediaTyp, startLpn, totalLpn>={}, {}, {},",
         (int)media, baseLPN, pageCNT);
 
-    POS_EVENT_ID rc = mssIntf->WritePage(arrayName, media, baseLPN + idx, GetDataBuf(idx), pageCNT);
+    POS_EVENT_ID rc = mssIntf->WritePage(media, baseLPN + idx, GetDataBuf(idx), pageCNT);
     return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
 }
 

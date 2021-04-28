@@ -36,12 +36,10 @@
 
 namespace pos
 {
-MetaVolumeManager metaVolMgr;
-MetaVolumeManager& mvmTopMgr = metaVolMgr;
-
 MetaVolumeManager::MetaVolumeManager(void)
 : volumeSpcfReqHandler{},
-  globalRequestHandler{}
+  globalRequestHandler{},
+  metaStorage(nullptr)
 {
     _InitRequestHandler();
 }
@@ -65,6 +63,7 @@ MetaVolumeManager::_InitRequestHandler(void)
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::GetTargetMediaType, &MetaVolumeHandler::HandleGetTargetMediaTypeReq);
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::GetFileBaseLpn, &MetaVolumeHandler::HandleGetFileBaseLpnReq);
     _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::GetTheBiggestExtentSize, &MetaVolumeHandler::HandleGetFreeFileRegionSizeReq);
+    _RegisterVolumeSpcfReqHandler(MetaFsFileControlType::GetMaxMetaLpn, &MetaVolumeHandler::HandleGetMaxMetaLpnReq);
 
     _RegisterGlobalMetaReqHandler(MetaFsFileControlType::EstimateDataChunkSize, &MetaVolumeHandler::HandleEstimateDataChunkSizeReq);
     // wbt
@@ -105,22 +104,17 @@ MetaVolumeManager::_RegisterGlobalMetaReqHandler(MetaFsFileControlType reqType, 
     globalRequestHandler[handlerIdx] = handler;
 }
 
-MetaVolumeManager&
-MetaVolumeManager::GetInstance(void)
-{
-    return metaVolMgr;
-}
-
 const char*
 MetaVolumeManager::GetModuleName(void)
 {
-    return "MVM topMgr";
+    return "Meta Volume Manager";
 }
 
 POS_EVENT_ID
-MetaVolumeManager::CheckReqSanity(MetaFsFileControlRequest& reqMsg)
+MetaVolumeManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 {
-    POS_EVENT_ID sc = _CheckSanityBasic(reqMsg);
+    MetaFsFileControlRequest* msg = static_cast<MetaFsFileControlRequest*>(&reqMsg);
+    POS_EVENT_ID sc = _CheckSanityBasic(*msg);
     if (sc != POS_EVENT_ID::SUCCESS)
     {
         return sc;
@@ -142,24 +136,10 @@ MetaVolumeManager::_CheckSanityBasic(MetaFsFileControlRequest& reqMsg)
     return POS_EVENT_ID::SUCCESS;
 }
 
-bool
-MetaVolumeManager::_IsSiblingModuleReady(void)
-{
-    if (!metaStorage->IsReady())
-    {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MODULE_NOT_READY,
-            "Meta storage subsystem is not ready");
-
-        return false;
-    }
-
-    return true;
-}
-
 void
-MetaVolumeManager::Init(MetaVolumeType volumeType, std::string arrayName, MetaLpnType maxVolPageNum)
+MetaVolumeManager::InitVolume(MetaVolumeType volumeType, std::string arrayName, MetaLpnType maxVolPageNum)
 {
-    if (true == volContext.IsGivenVolumeExist(volumeType, arrayName))
+    if (true == volContext.IsGivenVolumeExist(volumeType))
     {
         MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_MODULE_ALREADY_READY,
             "You attempted to init. volumeMgr duplicately for the given volume type={}",
@@ -168,44 +148,34 @@ MetaVolumeManager::Init(MetaVolumeType volumeType, std::string arrayName, MetaLp
         return;
     }
 
-    volContext.InitContext(volumeType, arrayName, maxVolPageNum);
+    volContext.InitContext(volumeType, arrayName, maxVolPageNum, metaStorage);
     volHandler.InitHandler(&volContext);
-
-    SetModuleInit();
 }
 
 bool
-MetaVolumeManager::Bringup(void)
+MetaVolumeManager::CreateVolume(MetaVolumeType volumeType)
 {
-    SetModuleReady();
-
-    return true;
+    return volContext.CreateVolume(volumeType);
 }
 
 bool
-MetaVolumeManager::CreateVolume(MetaVolumeType volumeType, std::string arrayName)
+MetaVolumeManager::OpenVolume(bool isNPOR)
 {
-    return volContext.CreateVolume(volumeType, arrayName);
-}
-
-bool
-MetaVolumeManager::Open(bool isNPOR, std::string arrayName)
-{
-    return volContext.Open(isNPOR, arrayName);
+    return volContext.Open(isNPOR);
 }
 
 #if (1 == COMPACTION_EN) || not defined COMPACTION_EN
 bool
-MetaVolumeManager::Compaction(bool isNPOR, std::string arrayName)
+MetaVolumeManager::Compaction(bool isNPOR)
 {
-    return volContext.Compaction(isNPOR, arrayName);
+    return volContext.Compaction(isNPOR);
 }
 #endif
 
 bool
-MetaVolumeManager::Close(bool& resetCxt, std::string arrayName)
+MetaVolumeManager::CloseVolume(bool& resetCxt)
 {
-    return volContext.Close(resetCxt /* output */, arrayName);
+    return volContext.Close(resetCxt /* output */);
 }
 
 std::pair<MetaVolumeType, POS_EVENT_ID>
@@ -227,7 +197,7 @@ MetaVolumeManager::_LookupTargetMetaVolume(MetaFsFileControlRequest& reqMsg)
             // fall-through
 
         case MetaFsFileControlType::GetTheBiggestExtentSize:
-            rc = volContext.DetermineVolumeToCreateFile(reqMsg.fileByteSize, reqMsg.fileProperty, *reqMsg.arrayName);
+            rc = volContext.DetermineVolumeToCreateFile(reqMsg.fileByteSize, reqMsg.fileProperty);
 
             if (rc.second != POS_EVENT_ID::SUCCESS)
             {
@@ -237,19 +207,19 @@ MetaVolumeManager::_LookupTargetMetaVolume(MetaFsFileControlRequest& reqMsg)
             break;
 
         case MetaFsFileControlType::FileOpen:
-            rc = volContext.LookupMetaVolumeType(*reqMsg.fileName, *reqMsg.arrayName);
+            rc = volContext.LookupMetaVolumeType(*reqMsg.fileName);
 
             if (rc.second != POS_EVENT_ID::SUCCESS)
             {
                 reqMsg.completionData.openfd = -1;
 
                 MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_OPEND,
-                    "Cannot find \'{}\' file in array \'{}\'", *reqMsg.fileName, *reqMsg.arrayName);
+                    "Cannot find \'{}\' file in array \'{}\'", *reqMsg.fileName);
             }
             break;
 
         case MetaFsFileControlType::FileDelete:
-            rc = volContext.LookupMetaVolumeType(*reqMsg.fileName, *reqMsg.arrayName);
+            rc = volContext.LookupMetaVolumeType(*reqMsg.fileName);
 
             if (rc.second != POS_EVENT_ID::SUCCESS)
             {
@@ -259,11 +229,15 @@ MetaVolumeManager::_LookupTargetMetaVolume(MetaFsFileControlRequest& reqMsg)
             break;
 
         case MetaFsFileControlType::CheckFileExist:
-            rc = volContext.LookupMetaVolumeType(*reqMsg.fileName, *reqMsg.arrayName);
+            rc = volContext.LookupMetaVolumeType(*reqMsg.fileName);
+            break;
+
+        case MetaFsFileControlType::GetMaxMetaLpn:
+            rc.first = reqMsg.volType;
             break;
 
         default:
-            rc = volContext.LookupMetaVolumeType(reqMsg.fd, *reqMsg.arrayName);
+            rc = volContext.LookupMetaVolumeType(reqMsg.fd);
 
             if (rc.second != POS_EVENT_ID::SUCCESS)
             {
@@ -295,25 +269,18 @@ MetaVolumeManager::_IsVolumeSpecificRequest(MetaFsFileControlType reqType)
 }
 
 POS_EVENT_ID
-MetaVolumeManager::ProcessNewReq(MetaFsFileControlRequest& reqMsg)
+MetaVolumeManager::ProcessNewReq(MetaFsRequestBase& reqMsg)
 {
-    POS_EVENT_ID rc = CheckReqSanity(reqMsg);
-    if (rc != POS_EVENT_ID::SUCCESS)
-    {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-            "Failed sanity check. request type={}, rc={}",
-            (int)reqMsg.reqType, (int)rc);
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    MetaFsFileControlRequest* msg = static_cast<MetaFsFileControlRequest*>(&reqMsg);
 
-        return rc;
-    }
-
-    if (_IsVolumeSpecificRequest(reqMsg.reqType))
+    if (_IsVolumeSpecificRequest(msg->reqType))
     {
-        rc = _HandleVolumeSpcfRequest(reqMsg);
+        rc = _HandleVolumeSpcfRequest(*msg);
     }
     else
     {
-        rc = _HandleGlobalMetaRequest(reqMsg);
+        rc = _HandleGlobalMetaRequest(*msg);
     }
 
     return rc;
@@ -373,33 +340,25 @@ MetaVolumeManager::_ExecuteGlobalMetaRequest(MetaFsFileControlRequest& reqMsg)
     return (volHandler.*reqHandler)(reqMsg);
 }
 
-MetaLpnType
-MetaVolumeManager::GetMaxMetaLpn(MetaVolumeType mediaType, std::string arrayName)
-{
-    return volContext.GetMaxMetaLpn(mediaType, arrayName);
-}
-
 POS_EVENT_ID
-MetaVolumeManager::CheckFileAccessible(FileDescriptorType fd, std::string arrayName)
+MetaVolumeManager::CheckFileAccessible(FileDescriptorType fd)
 {
     POS_EVENT_ID rc;
 
     MetaFsFileControlRequest req;
     req.reqType = MetaFsFileControlType::CheckFileAccessible;
     req.fd = fd;
-    req.arrayName = &arrayName;
     rc = ProcessNewReq(req);
 
     return rc;
 }
 
 POS_EVENT_ID
-MetaVolumeManager::GetFileSize(FileDescriptorType fd, std::string arrayName, FileSizeType& outFileByteSize)
+MetaVolumeManager::GetFileSize(FileDescriptorType fd, FileSizeType& outFileByteSize)
 {
     MetaFsFileControlRequest req;
     req.reqType = MetaFsFileControlType::GetFileSize;
     req.fd = fd;
-    req.arrayName = &arrayName;
     POS_EVENT_ID ret = ProcessNewReq(req);
     if (ret == POS_EVENT_ID::SUCCESS)
     {
@@ -414,12 +373,11 @@ MetaVolumeManager::GetFileSize(FileDescriptorType fd, std::string arrayName, Fil
 }
 
 POS_EVENT_ID
-MetaVolumeManager::GetDataChunkSize(FileDescriptorType fd, std::string arrayName, FileSizeType& outDataChunkSize)
+MetaVolumeManager::GetDataChunkSize(FileDescriptorType fd, FileSizeType& outDataChunkSize)
 {
     MetaFsFileControlRequest req;
     req.reqType = MetaFsFileControlType::GetDataChunkSize;
     req.fd = fd;
-    req.arrayName = &arrayName;
     POS_EVENT_ID ret = ProcessNewReq(req);
     if (ret == POS_EVENT_ID::SUCCESS)
     {
@@ -429,12 +387,11 @@ MetaVolumeManager::GetDataChunkSize(FileDescriptorType fd, std::string arrayName
 }
 
 POS_EVENT_ID
-MetaVolumeManager::GetTargetMediaType(FileDescriptorType fd, std::string arrayName, MetaStorageType& outTargetMediaType)
+MetaVolumeManager::GetTargetMediaType(FileDescriptorType fd, MetaStorageType& outTargetMediaType)
 {
     MetaFsFileControlRequest req;
     req.reqType = MetaFsFileControlType::GetTargetMediaType;
     req.fd = fd;
-    req.arrayName = &arrayName;
     POS_EVENT_ID ret = ProcessNewReq(req);
     if (ret == POS_EVENT_ID::SUCCESS)
     {
@@ -444,17 +401,22 @@ MetaVolumeManager::GetTargetMediaType(FileDescriptorType fd, std::string arrayNa
 }
 
 POS_EVENT_ID
-MetaVolumeManager::GetFileBaseLpn(FileDescriptorType fd, std::string arrayName, MetaLpnType& outFileBaseLpn)
+MetaVolumeManager::GetFileBaseLpn(FileDescriptorType fd, MetaLpnType& outFileBaseLpn)
 {
     MetaFsFileControlRequest req;
     req.reqType = MetaFsFileControlType::GetFileBaseLpn;
     req.fd = fd;
-    req.arrayName = &arrayName;
     POS_EVENT_ID ret = ProcessNewReq(req);
     if (ret == POS_EVENT_ID::SUCCESS)
     {
         outFileBaseLpn = req.completionData.fileBaseLpn;
     }
     return ret;
+}
+
+void
+MetaVolumeManager::SetMss(MetaStorageSubsystem* metaStorage)
+{
+    this->metaStorage = metaStorage;
 }
 } // namespace pos

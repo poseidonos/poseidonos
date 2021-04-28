@@ -211,6 +211,9 @@ WriteMpio::_CompleteIO(MpAioState expNextState)
 {
     SetNextState(expNextState);
 
+    mssIntf = nullptr;
+    aioModeEnabled = false;
+
     return true;
 }
 } // namespace pos

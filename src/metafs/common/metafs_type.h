@@ -53,4 +53,16 @@ struct EnumTypeHash
         return static_cast<int>(t);
     }
 };
+
+class MetaFsRequestBase
+{
+public:
+    MetaFsRequestBase(void)
+    {
+    }
+
+    ~MetaFsRequestBase(void)
+    {
+    }
+};
 } // namespace pos

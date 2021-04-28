@@ -36,7 +36,8 @@
 #include "src/allocator/allocator.h"
 #include "src/mapper/mapper.h"
 #include "src/state/state_manager.h"
-#include "src/metafs/metafs_client.h"
+#include "src/metafs/metafs.h"
+#include "src/metafs/include/metafs_service.h"
 #include "src/io/general_io/rba_state_manager.h"
 
 namespace pos
@@ -76,7 +77,7 @@ int ArrayComponents::Create(DeviceSet<string> nameSet, string dataRaidType)
         return ret;
     }
 
-    metafs = new MetaFsClient(array, state);
+    metafs = new MetaFs(array, false);
     volMgr = new VolumeManager(array, state);
     gc = new GarbageCollector(array, state);
     mapper = new Mapper(array, state);
@@ -101,7 +102,7 @@ int ArrayComponents::Load(void)
         return ret;
     }
 
-    metafs = new MetaFsClient(array, state);
+    metafs = new MetaFs(array, true);
     journal = new JournalManager(array, state);
     volMgr = new VolumeManager(array, state);
     gc = new GarbageCollector(array, state);

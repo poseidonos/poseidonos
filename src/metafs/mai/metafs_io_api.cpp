@@ -39,13 +39,23 @@ namespace pos
 {
 static InstanceTagIdAllocator aiocbTagIdAllocator;
 
-MetaFsReturnCode<POS_EVENT_ID>
-MetaFsIoApi::Read(FileDescriptorType fd, std::string arrayName, void* buf)
+MetaFsIoApi::MetaFsIoApi(std::string arrayName, MetaFsFileControlApi* ctrl)
+: arrayName(arrayName),
+  ctrlMgr(ctrl)
 {
-    MetaFsReturnCode<POS_EVENT_ID> rc;
-    MetaFsIoRequest reqMsg;
+    ioMgr = new MetaIoManager();
+}
 
-    rc.returnData = 0;
+MetaFsIoApi::~MetaFsIoApi(void)
+{
+    delete ioMgr;
+}
+
+POS_EVENT_ID
+MetaFsIoApi::Read(FileDescriptorType fd, void* buf)
+{
+    POS_EVENT_ID rc;
+    MetaFsIoRequest reqMsg;
 
     reqMsg.reqType = MetaIoRequestType::Read;
     reqMsg.fd = fd;
@@ -55,18 +65,29 @@ MetaFsIoApi::Read(FileDescriptorType fd, std::string arrayName, void* buf)
     reqMsg.ioMode = MetaIoMode::Sync;
     reqMsg.tagId = aiocbTagIdAllocator();
 
-    rc = ioMgr.HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+    if (false == _AddFileInfo(reqMsg))
+    {
+        rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
+        return rc;
+    }
+
+    _AddExtraIoReqInfo(reqMsg);
+
+    rc = _CheckReqSanity(reqMsg);
+    if (POS_EVENT_ID::SUCCESS == rc)
+    {
+        rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+    }
 
     return rc;
 }
-MetaFsReturnCode<POS_EVENT_ID>
-MetaFsIoApi::Read(FileDescriptorType fd, std::string arrayName,
-                FileSizeType byteOffset, FileSizeType byteSize, void* buf)
-{
-    MetaFsReturnCode<POS_EVENT_ID> rc;
-    MetaFsIoRequest reqMsg;
 
-    rc.returnData = 0;
+POS_EVENT_ID
+MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
+                FileSizeType byteSize, void* buf)
+{
+    POS_EVENT_ID rc;
+    MetaFsIoRequest reqMsg;
 
     reqMsg.reqType = MetaIoRequestType::Read;
     reqMsg.fd = fd;
@@ -78,18 +99,28 @@ MetaFsIoApi::Read(FileDescriptorType fd, std::string arrayName,
     reqMsg.byteSize = byteSize;
     reqMsg.tagId = aiocbTagIdAllocator();
 
-    rc = ioMgr.HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+    if (false == _AddFileInfo(reqMsg))
+    {
+        rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
+        return rc;
+    }
+
+    _AddExtraIoReqInfo(reqMsg);
+
+    rc = _CheckReqSanity(reqMsg);
+    if (POS_EVENT_ID::SUCCESS == rc)
+    {
+        rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+    }
 
     return rc;
 }
 
-MetaFsReturnCode<POS_EVENT_ID>
-MetaFsIoApi::Write(FileDescriptorType fd, std::string arrayName, void* buf)
+POS_EVENT_ID
+MetaFsIoApi::Write(FileDescriptorType fd, void* buf)
 {
-    MetaFsReturnCode<POS_EVENT_ID> rc;
+    POS_EVENT_ID rc;
     MetaFsIoRequest reqMsg;
-
-    rc.returnData = 0;
 
     reqMsg.reqType = MetaIoRequestType::Write;
     reqMsg.fd = fd;
@@ -99,19 +130,29 @@ MetaFsIoApi::Write(FileDescriptorType fd, std::string arrayName, void* buf)
     reqMsg.ioMode = MetaIoMode::Sync;
     reqMsg.tagId = aiocbTagIdAllocator();
 
-    rc = ioMgr.HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+    if (false == _AddFileInfo(reqMsg))
+    {
+        rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
+        return rc;
+    }
+
+    _AddExtraIoReqInfo(reqMsg);
+
+    rc = _CheckReqSanity(reqMsg);
+    if (POS_EVENT_ID::SUCCESS == rc)
+    {
+        rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+    }
 
     return rc;
 }
 
-MetaFsReturnCode<POS_EVENT_ID>
-MetaFsIoApi::Write(FileDescriptorType fd, std::string arrayName,
-                FileSizeType byteOffset, FileSizeType byteSize, void* buf)
+POS_EVENT_ID
+MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
+                FileSizeType byteSize, void* buf)
 {
-    MetaFsReturnCode<POS_EVENT_ID> rc;
+    POS_EVENT_ID rc;
     MetaFsIoRequest reqMsg;
-
-    rc.returnData = 0;
 
     reqMsg.reqType = MetaIoRequestType::Write;
     reqMsg.fd = fd;
@@ -123,18 +164,28 @@ MetaFsIoApi::Write(FileDescriptorType fd, std::string arrayName,
     reqMsg.byteSize = byteSize;
     reqMsg.tagId = aiocbTagIdAllocator();
 
-    rc = ioMgr.HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+    if (false == _AddFileInfo(reqMsg))
+    {
+        rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
+        return rc;
+    }
+
+    _AddExtraIoReqInfo(reqMsg);
+
+    rc = _CheckReqSanity(reqMsg);
+    if (POS_EVENT_ID::SUCCESS == rc)
+    {
+        rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+    }
 
     return rc;
 }
 
-MetaFsReturnCode<POS_EVENT_ID>
+POS_EVENT_ID
 MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt)
 {
-    MetaFsReturnCode<POS_EVENT_ID> rc;
+    POS_EVENT_ID rc;
     MetaFsIoRequest reqMsg;
-
-    rc.returnData = 0;
 
     cxt->SetTagId(aiocbTagIdAllocator());
 
@@ -149,11 +200,138 @@ MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt)
     reqMsg.aiocb = cxt;
     reqMsg.tagId = cxt->tagId;
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "[MSG ][SubmitIO   ] type={}, req.tagId={}, fd={}", reqMsg.reqType, reqMsg.tagId, reqMsg.fd);
+    if (false == _AddFileInfo(reqMsg))
+    {
+        rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
+        return rc;
+    }
 
-    rc = ioMgr.HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+    _AddExtraIoReqInfo(reqMsg);
 
+    rc = _CheckReqSanity(reqMsg);
+    if (POS_EVENT_ID::SUCCESS == rc)
+    {
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            "[MSG ][SubmitIO   ] type={}, req.tagId={}, fd={}", reqMsg.reqType, reqMsg.tagId, reqMsg.fd);
+
+        rc = ioMgr->HandleNewRequest(reqMsg); // MetaIoManager::_ProcessNewIoReq()
+    }
+
+    return rc;
+}
+
+bool
+MetaFsIoApi::AddArray(std::string& arrayName)
+{
+    return ioMgr->AddArrayInfo(arrayName);
+}
+
+bool
+MetaFsIoApi::RemoveArray(std::string& arrayName)
+{
+    return ioMgr->RemoveArrayInfo(arrayName);
+}
+
+void
+MetaFsIoApi::SetMss(MetaStorageSubsystem* metaStorage)
+{
+    ioMgr->SetMss(metaStorage);
+}
+
+bool
+MetaFsIoApi::_AddFileInfo(MetaFsIoRequest& reqMsg)
+{
+    MetaFileContext* fileCtx = ctrlMgr->GetFileInfo(reqMsg.fd);
+
+    // the file is not existed.
+    if (fileCtx == nullptr)
+        return false;
+
+    reqMsg.fileCtx = fileCtx;
+
+    return true;
+}
+
+void
+MetaFsIoApi::_AddExtraIoReqInfo(MetaFsIoRequest& reqMsg)
+{
+    if (true == reqMsg.isFullFileIo)
+    {
+        reqMsg.byteOffsetInFile = 0;
+        reqMsg.byteSize = reqMsg.fileCtx->sizeInByte;
+    }
+
+    reqMsg.targetMediaType = reqMsg.fileCtx->storageType;
+}
+
+POS_EVENT_ID
+MetaFsIoApi::_CheckFileIoBoundary(MetaFsIoRequest& reqMsg)
+{
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    FileSizeType fileByteSize = reqMsg.fileCtx->sizeInByte;
+
+    if (reqMsg.isFullFileIo)
+    {
+        if (reqMsg.byteOffsetInFile != 0 ||
+            reqMsg.byteSize != fileByteSize)
+        {
+            rc = POS_EVENT_ID::MFS_INVALID_PARAMETER;
+        }
+    }
+    else
+    {
+        if (reqMsg.byteOffsetInFile >= fileByteSize ||
+            (reqMsg.byteOffsetInFile + reqMsg.byteSize) > fileByteSize)
+        {
+            rc = POS_EVENT_ID::MFS_INVALID_PARAMETER;
+        }
+    }
+    return rc;
+}
+
+POS_EVENT_ID
+MetaFsIoApi::_CheckReqSanity(MetaFsIoRequest& reqMsg)
+{
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+
+    if (false == reqMsg.IsValid())
+    {
+        return POS_EVENT_ID::MFS_INVALID_PARAMETER;
+    }
+
+    rc = _CheckFileIoBoundary(reqMsg);
+    if (POS_EVENT_ID::SUCCESS != rc)
+    {
+        MFS_TRACE_ERROR((int)rc, "File I/O boundary error. rc={}, offset={}, size={}",
+            (int)rc, reqMsg.byteOffsetInFile, reqMsg.byteSize);
+        return rc;
+    }
+
+    if (!reqMsg.fileCtx->isActivated)
+    {
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_FOUND,
+            "File not found...(given fd={})", reqMsg.fd);
+        return POS_EVENT_ID::MFS_FILE_NOT_FOUND;
+    }
+
+    switch (reqMsg.reqType)
+    {
+        case MetaIoRequestType::Read: // go thru
+        case MetaIoRequestType::Write:
+        {
+            if (MetaIoMode::Async == reqMsg.ioMode)
+            {
+                return rc;
+            }
+        }
+        break;
+        default:
+        {
+            MFS_TRACE_CRITICAL((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+                "MetaIoManager::CheckReqSanity - Invalid OPcode");
+            assert(false);
+        }
+    }
     return rc;
 }
 } // namespace pos

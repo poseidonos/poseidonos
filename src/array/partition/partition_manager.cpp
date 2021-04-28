@@ -194,8 +194,6 @@ PartitionManager::_CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf
 {
     PartitionType partType = PartitionType::META_SSD;
 
-    bool isInitialized = abrControl->GetMfsInit(arrayName_);
-
     if (0 != devs.size() % 2)
     {
         devs.pop_back();
@@ -224,10 +222,6 @@ PartitionManager::_CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf
         return eventId;
     }
 
-    if (isInitialized == false)
-    {
-        partition->Format();
-    }
     partitions_[partType] = partition;
     intf->AddTranslator(partType, partition);
     intf->AddRecover(partType, partition);

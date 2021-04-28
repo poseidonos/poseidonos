@@ -30,28 +30,94 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "metafs.h"
-#include "metafs_api_wrapper.h"
-#include "meta_storage_info.h"
-#include "metafs_mem_lib.h"
-#include "metafs_return_code.h"
-#include "mk/ibof_config.h"
-#include "metafs_wbt_api.h"
+#include "src/metafs/log/metafs_log.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/include/array_config.h"
 
 namespace pos
 {
-MetaFs metaFs;
+MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
+: isNpor(false),
+  isLoaded(isLoaded),
+  arrayInfo(arrayInfo),
+  arrayName(""),
+  metaStorage(nullptr)
+{
+    arrayName = arrayInfo->GetName();
 
-#if (0 == MFS_EXT_TESTDOUBLE_EN)
-#include "instance_tagid_allocator.h"
-#include "metafs_system_manager.h"
-static InstanceTagIdAllocator aiocbTagIdAllocator;
-#endif
+    mgmt = new MetaFsManagementApi(arrayName);
+    ctrl = new MetaFsFileControlApi(arrayName);
+    io = new MetaFsIoApi(arrayName, ctrl);
+    wbt = new MetaFsWBTApi(arrayName, ctrl);
+
+    MetaFsServiceSingleton::Instance()->Register(arrayName, this);
+}
+
+MetaFs::~MetaFs(void)
+{
+    MetaFsServiceSingleton::Instance()->Deregister(arrayName);
+
+    delete mgmt;
+    delete io;
+    delete ctrl;
+    delete wbt;
+}
+
+int
+MetaFs::Init(void)
+{
+    if (false == _Initialize())
+        return false;
+
+    if (POS_EVENT_ID::SUCCESS != _OpenMetaVolume())
+        return false;
+
+    return (false == io->AddArray(arrayName));
+}
+
+void
+MetaFs::Dispose(void)
+{
+    POS_EVENT_ID rc = _CloseMetaVolume();
+    if (rc != POS_EVENT_ID::SUCCESS)
+    {
+        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
+            "It's failed to close meta volume, arrayName={}", arrayName);
+    }
+
+    rc = mgmt->CloseSystem(arrayName);
+    if (rc != POS_EVENT_ID::SUCCESS)
+    {
+        MFS_TRACE_WARN((int)rc,
+            "It's failed to unmount system, arrayName={}", arrayName);
+    }
+
+    io->RemoveArray(arrayName);
+
+    MetaFsServiceSingleton::Instance()->Deregister(arrayName);
+}
+
+uint64_t
+MetaFs::GetEpochSignature(void)
+{
+    return mgmt->GetEpochSignature();
+}
+
+MetaStorageSubsystem*
+MetaFs::GetMss(void)
+{
+    return metaStorage;
+}
 
 bool
-MetaFs::Init(std::string arrayName, MetaStorageMediaInfoList& mediaInfoList)
+MetaFs::_Initialize(void)
 {
-#if (0 == MFS_EXT_TESTDOUBLE_EN)
+    MetaStorageMediaInfoList mediaInfoList;
+    _RegisterMediaInfoIfAvailable(META_NVM, mediaInfoList);
+    _RegisterMediaInfoIfAvailable(META_SSD, mediaInfoList);
+
     if (mediaInfoList.empty())
     {
         MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_MODULE_NO_MEDIA,
@@ -60,23 +126,164 @@ MetaFs::Init(std::string arrayName, MetaStorageMediaInfoList& mediaInfoList)
         return false;
     }
 
-    if (!mscTopMgr.Init(arrayName, mediaInfoList))
-    {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_MODULE_INIT_FAILED,
-            "Failed to init. mscTopMgr");
-
+    if (POS_EVENT_ID::SUCCESS != mgmt->InitializeSystem(arrayName, &mediaInfoList))
         return false;
+
+    metaStorage = mgmt->GetMss();
+    io->SetMss(metaStorage);
+    ctrl->SetMss(metaStorage);
+
+    if (POS_EVENT_ID::SUCCESS != _PrepareMetaVolume())
+        return false;
+
+    return true;
+}
+
+POS_EVENT_ID
+MetaFs::_PrepareMetaVolume(void)
+{
+    // MetaFsSystemState::PowerOn
+    // nothing
+
+    // MetaFsSystemState::Init
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    MetaFsStorageIoInfoList& mediaInfoList = mgmt->GetAllStoragePartitionInfo();
+    for (auto& item : mediaInfoList)
+    {
+        if (false == item.valid)
+            continue;
+
+        MetaVolumeType volumeType = MetaFileUtil::ConvertToVolumeType(item.mediaType);
+        MetaLpnType maxVolumeLpn = item.totalCapacity / MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES;
+
+        if (MetaStorageType::SSD == item.mediaType)
+        {
+            maxVolumeLpn -= mgmt->GetRegionSizeInLpn(); // considered due to MBR placement for SSD volume
+        }
+
+        ctrl->InitVolume(volumeType, arrayName, maxVolumeLpn);
+
+        rc = metaStorage->CreateMetaStore(arrayName, item.mediaType, item.totalCapacity, !isLoaded);
+        if (rc != POS_EVENT_ID::SUCCESS)
+        {
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED,
+                "Failed to create meta storage subsystem");
+            return POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED;
+        }
     }
 
-    if (!mscTopMgr.Bringup(arrayName))
+    // MetaFsSystemState::Create
+    if (!isLoaded)
     {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_MODULE_BRINGUP_FAILED,
-            "Failed to bringup mscTopMgr.");
+        for (auto& item : mediaInfoList)
+        {
+            if (false == item.valid)
+                continue;
 
-        return false;
+            MetaVolumeType volumeType = MetaFileUtil::ConvertToVolumeType(item.mediaType);
+
+            if (false == ctrl->CreateVolume(volumeType))
+            {
+                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
+                    "Error occurred to create volume (volume id={})",
+                    (int)volumeType);
+
+                return POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED;
+            }
+        }
+
+        if (true != mgmt->CreateMbr())
+        {
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
+                "Error occurred to create MetaFs MBR");
+
+            return POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED;
+        }
+    }
+
+    return POS_EVENT_ID::SUCCESS;
+}
+
+POS_EVENT_ID
+MetaFs::_OpenMetaVolume(void)
+{
+    // MetaFsSystemState::Open
+    POS_EVENT_ID rc = mgmt->LoadMbr(isNpor);
+    if (rc != POS_EVENT_ID::SUCCESS)
+    {
+        return rc;
+    }
+
+    if (false == ctrl->OpenVolume(isNpor))
+    {
+        return POS_EVENT_ID::MFS_META_VOLUME_OPEN_FAILED;
+    }
+
+#if (1 == COMPACTION_EN) || not defined COMPACTION_EN
+    if (false == ctrl->Compaction(isNpor))
+    {
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            "compaction method returns false");
     }
 #endif
 
-    return true;
+    // MetaFsSystemState::Active
+    // nothing
+
+    return POS_EVENT_ID::SUCCESS;
+}
+
+POS_EVENT_ID
+MetaFs::_CloseMetaVolume(void)
+{
+    // MetaFsSystemState::Quiesce
+    // nothing
+
+    // MetaFsSystemState::Shutdown
+    bool resetCxt = false;
+    if (!ctrl->CloseVolume(resetCxt))
+    {
+        // Reset MetaFS DRAM Context
+        if (resetCxt == true)
+            return POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED;
+        else
+            return POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED_DUE_TO_ACTIVE_FILE;
+    }
+
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        "Meta filesystem has been unmounted...");
+
+    return POS_EVENT_ID::SUCCESS;
+}
+
+void
+MetaFs::_RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageMediaInfoList& mediaList)
+{
+    MetaStorageInfo media = _MakeMetaStorageMediaInfo(ptnType);
+    mediaList.push_back(media);
+}
+
+MetaStorageInfo
+MetaFs::_MakeMetaStorageMediaInfo(PartitionType ptnType)
+{
+    MetaStorageInfo newInfo;
+    switch (ptnType)
+    {
+        case META_NVM:
+            newInfo.media = MetaStorageType::NVRAM;
+            break;
+
+        case META_SSD:
+            newInfo.media = MetaStorageType::SSD;
+            break;
+
+        default:
+            assert(false);
+    }
+
+    const PartitionLogicalSize* ptnSize = arrayInfo->GetSizeInfo(ptnType);
+    newInfo.mediaCapacity = static_cast<uint64_t>(ptnSize->totalStripes) * ptnSize->blksPerStripe * ArrayConfig::BLOCK_SIZE_BYTE;
+
+    return newInfo;
 }
 } // namespace pos

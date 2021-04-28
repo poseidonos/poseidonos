@@ -34,10 +34,10 @@ SRCS += $(wildcard *.cpp) \
 	region.cpp \
 	region_deque.cpp
 
-UT_SRCS +=\
-    mvm_test.cpp \
-    mvm_func_negative_test.cpp \
-    mvm_func_positive_test.cpp 
+#UT_SRCS +=\
+#    mvm_test.cpp \
+#    mvm_func_negative_test.cpp \
+#    mvm_func_positive_test.cpp 
 
 
 SRCS += $(UT_SRCS)

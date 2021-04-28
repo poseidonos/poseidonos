@@ -62,8 +62,8 @@ MetaVolumeHandler::HandleOpenFileReq(MetaVolumeType volType, MetaFsFileControlRe
         return POS_EVENT_ID::MFS_FILE_NOT_FOUND;
     }
 
-    FileDescriptorType fd = volContext->LookupFileDescByName(*reqMsg.fileName, *reqMsg.arrayName);
-    rc = volContext->AddFileInActiveList(volType, fd, *reqMsg.arrayName);
+    FileDescriptorType fd = volContext->LookupFileDescByName(*reqMsg.fileName);
+    rc = volContext->AddFileInActiveList(volType, fd);
 
     if (POS_EVENT_ID::SUCCESS == rc)
     {
@@ -87,7 +87,7 @@ MetaVolumeHandler::HandleOpenFileReq(MetaVolumeType volType, MetaFsFileControlRe
 POS_EVENT_ID
 MetaVolumeHandler::HandleCheckFileExist(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    if (!volContext->IsFileInodeExist(*reqMsg.fileName, *reqMsg.arrayName))
+    if (!volContext->IsFileInodeExist(*reqMsg.fileName))
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_FOUND,
             "Cannot find \'{}\' file, reqType={}, fd={}",
@@ -102,14 +102,14 @@ MetaVolumeHandler::HandleCheckFileExist(MetaVolumeType volType, MetaFsFileContro
 POS_EVENT_ID
 MetaVolumeHandler::HandleCloseFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    if (!volContext->CheckFileInActive(volType, reqMsg.fd, *reqMsg.arrayName))
+    if (!volContext->CheckFileInActive(volType, reqMsg.fd))
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_OPEND,
             "The file is not opened, fd={}", reqMsg.fd);
 
         return POS_EVENT_ID::MFS_FILE_NOT_OPEND;
     }
-    volContext->RemoveFileFromActiveList(volType, reqMsg.fd, *reqMsg.arrayName);
+    volContext->RemoveFileFromActiveList(volType, reqMsg.fd);
 
     MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "Given file has been closed successfully. (fd={})", reqMsg.fd);
@@ -181,7 +181,7 @@ MetaVolumeHandler::HandleDeleteFileReq(MetaVolumeType volType, MetaFsFileControl
 POS_EVENT_ID
 MetaVolumeHandler::HandleCheckFileAccessibleReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    reqMsg.completionData.fileAccessible = volContext->CheckFileInActive(volType, reqMsg.fd, *reqMsg.arrayName);
+    reqMsg.completionData.fileAccessible = volContext->CheckFileInActive(volType, reqMsg.fd);
 
     return POS_EVENT_ID::SUCCESS;
 }
@@ -189,7 +189,7 @@ MetaVolumeHandler::HandleCheckFileAccessibleReq(MetaVolumeType volType, MetaFsFi
 POS_EVENT_ID
 MetaVolumeHandler::HandleGetDataChunkSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    reqMsg.completionData.dataChunkSize = volContext->GetDataChunkSize(volType, reqMsg.fd, *reqMsg.arrayName);
+    reqMsg.completionData.dataChunkSize = volContext->GetDataChunkSize(volType, reqMsg.fd);
 
     return POS_EVENT_ID::SUCCESS;
 }
@@ -197,7 +197,7 @@ MetaVolumeHandler::HandleGetDataChunkSizeReq(MetaVolumeType volType, MetaFsFileC
 POS_EVENT_ID
 MetaVolumeHandler::HandleGetFileSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    reqMsg.completionData.fileSize = volContext->GetFileSize(volType, reqMsg.fd, *reqMsg.arrayName);
+    reqMsg.completionData.fileSize = volContext->GetFileSize(volType, reqMsg.fd);
 
     return POS_EVENT_ID::SUCCESS;
 }
@@ -213,7 +213,7 @@ MetaVolumeHandler::HandleGetTargetMediaTypeReq(MetaVolumeType volType, MetaFsFil
 POS_EVENT_ID
 MetaVolumeHandler::HandleGetFileBaseLpnReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    reqMsg.completionData.fileBaseLpn = volContext->GetFileBaseLpn(volType, reqMsg.fd, *reqMsg.arrayName);
+    reqMsg.completionData.fileBaseLpn = volContext->GetFileBaseLpn(volType, reqMsg.fd);
 
     return POS_EVENT_ID::SUCCESS;
 }
@@ -221,7 +221,7 @@ MetaVolumeHandler::HandleGetFileBaseLpnReq(MetaVolumeType volType, MetaFsFileCon
 POS_EVENT_ID
 MetaVolumeHandler::HandleGetFreeFileRegionSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    reqMsg.completionData.fileSize = volContext->GetTheBiggestExtentSize(volType, *reqMsg.arrayName);
+    reqMsg.completionData.fileSize = volContext->GetTheBiggestExtentSize(volType);
 
     return POS_EVENT_ID::SUCCESS;
 }
@@ -239,6 +239,14 @@ MetaVolumeHandler::HandleDeleteArrayReq(MetaVolumeType volType, MetaFsFileContro
 }
 
 POS_EVENT_ID
+MetaVolumeHandler::HandleGetMaxMetaLpnReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+{
+    reqMsg.completionData.maxLpn = volContext->GetMaxMetaLpn(volType);
+
+    return POS_EVENT_ID::SUCCESS;
+}
+
+POS_EVENT_ID
 MetaVolumeHandler::HandleGetMetaFileInodeListReq(MetaFsFileControlRequest& reqMsg)
 {
     std::vector<MetaFileInfoDumpCxt>* fileInfoList = new std::vector<MetaFileInfoDumpCxt>;
@@ -247,11 +255,11 @@ MetaVolumeHandler::HandleGetMetaFileInodeListReq(MetaFsFileControlRequest& reqMs
     // find all valid files and get the inode entry
     for (auto volumeType : Enum<MetaVolumeType>())
     {
-        if (!volContext->IsGivenVolumeExist(volumeType, *reqMsg.arrayName))
+        if (!volContext->IsGivenVolumeExist(volumeType))
         {
             continue;
         }
-        MetaVolume& volume = volContext->GetMetaVolume(volumeType, *reqMsg.arrayName);
+        MetaVolume& volume = volContext->GetMetaVolume(volumeType);
         MetaFileInodeManager& inodeMgr = volume.GetInodeInstance();
         for (int entryIdx = 0; entryIdx < MetaFsConfig::MAX_META_FILE_NUM_SUPPORT; entryIdx++)
         {
@@ -296,7 +304,7 @@ MetaVolumeHandler::HandleGetMaxFileSizeLimitReq(MetaFsFileControlRequest& reqMsg
 POS_EVENT_ID
 MetaVolumeHandler::HandleGetFileInodeReq(MetaFsFileControlRequest& reqMsg)
 {
-    MetaVolumeType volumeType = volContext->LookupMetaVolumeType(*reqMsg.fileName, *reqMsg.arrayName).first;
+    MetaVolumeType volumeType = volContext->LookupMetaVolumeType(*reqMsg.fileName).first;
     if (volumeType == MetaVolumeType::Invalid)
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_FOUND,
@@ -304,13 +312,13 @@ MetaVolumeHandler::HandleGetFileInodeReq(MetaFsFileControlRequest& reqMsg)
 
         return POS_EVENT_ID::MFS_FILE_NOT_FOUND;
     }
-    MetaVolume& volume = volContext->GetMetaVolume(volumeType, *reqMsg.arrayName);
+    MetaVolume& volume = volContext->GetMetaVolume(volumeType);
 
-    FileDescriptorType fd = volContext->LookupFileDescByName(*reqMsg.fileName, *reqMsg.arrayName);
+    FileDescriptorType fd = volContext->LookupFileDescByName(*reqMsg.fileName);
 
     MetaFileInodeInfo* inodeInfo = new MetaFileInodeInfo();
     MetaFileInodeManager& inodeMgr = volume.GetInodeInstance();
-    MetaFileInode& inode = inodeMgr.GetFileInode(fd, *reqMsg.arrayName);
+    MetaFileInode& inode = inodeMgr.GetFileInode(fd);
     inode.SetMetaFileInfo(MetaFileUtil::ConvertToMediaType(volumeType), *inodeInfo);
 
     reqMsg.completionData.inodeInfoPointer = inodeInfo;
@@ -329,7 +337,7 @@ MetaVolumeHandler::HandleEstimateDataChunkSizeReq(MetaFsFileControlRequest& reqM
 bool
 MetaVolumeHandler::_CheckFileCreateReqSanity(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    if (true == volContext->IsFileInodeExist(*reqMsg.fileName, *reqMsg.arrayName))
+    if (true == volContext->IsFileInodeExist(*reqMsg.fileName))
     {
         MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
             "The given file already exists. fileName={}", *reqMsg.fileName);
@@ -337,7 +345,7 @@ MetaVolumeHandler::_CheckFileCreateReqSanity(MetaVolumeType volType, MetaFsFileC
         return false;
     }
 
-    FileSizeType availableSpaceInVolume = volContext->GetTheBiggestExtentSize(volType, *reqMsg.arrayName);
+    FileSizeType availableSpaceInVolume = volContext->GetTheBiggestExtentSize(volType);
     if (availableSpaceInVolume < reqMsg.fileByteSize)
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE,

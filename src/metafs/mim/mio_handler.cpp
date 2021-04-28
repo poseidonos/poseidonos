@@ -34,12 +34,13 @@
 #include <string>
 #include <utility>
 #include "Air.h"
+#include "src/metafs/include/metafs_service.h"
 #include "metafs_aiocb_cxt.h"
 #include "mfs_async_runnable_template.h"
 #include "metafs_log.h"
 #include "metafs_mutex.h"
 #include "meta_volume_manager.h"
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 #include "src/event_scheduler/event.h"
 
 #if defined(IBOFOS_BACKEND_IO)
@@ -294,12 +295,9 @@ MioHandler::_AllocNewMio(MetaFsIoRequest& reqMsg)
     if (nullptr == mio)
         return nullptr;
 
-    MetaLpnType fileBaseLpn;
-    POS_EVENT_ID sc;
-    sc = mvmTopMgr.GetFileBaseLpn(reqMsg.fd, reqMsg.arrayName, fileBaseLpn);
-    assert(sc == POS_EVENT_ID::SUCCESS);
+    MetaLpnType fileBaseLpn = reqMsg.fileCtx->fileBaseLpn;
 
-    mio->Setup(&reqMsg, fileBaseLpn);
+    mio->Setup(&reqMsg, fileBaseLpn, MetaFsServiceSingleton::Instance()->GetMetaFs(reqMsg.arrayName)->GetMss());
 
     if (false == mio->IsSyncIO())
     {
@@ -310,8 +308,7 @@ MioHandler::_AllocNewMio(MetaFsIoRequest& reqMsg)
     mio->SetMpioDonePoller(mpioDonePoller);
     mio->SetIoCQ(&ioCQ);
 
-    sc = mvmTopMgr.GetTargetMediaType(reqMsg.fd, reqMsg.arrayName, reqMsg.targetMediaType);
-    assert(sc == POS_EVENT_ID::SUCCESS);
+    reqMsg.targetMediaType = reqMsg.fileCtx->storageType;
 
     return mio;
 }
@@ -383,10 +380,14 @@ MioHandler::AddArrayInfo(std::string arrayName)
     checkerBitmap->SetBit(index);
     checkerMap.insert(std::pair<std::string, uint32_t>(arrayName, index));
 
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+
     for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
     {
+        size_t maxLpn = metaFs->ctrl->GetMaxMetaLpn(static_cast<MetaVolumeType>(storage));
+
         ioRangeOverlapChker[index][storage] = new MetaFsIoRangeOverlapChker();
-        ioRangeOverlapChker[index][storage]->Init(mvmTopMgr.GetMaxMetaLpn(static_cast<MetaVolumeType>(storage), arrayName));
+        ioRangeOverlapChker[index][storage]->Init(maxLpn);
     }
 
     return true;

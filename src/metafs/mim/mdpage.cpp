@@ -38,7 +38,7 @@
 #include "metafs_log.h"
 #include "os_header.h"
 #include "src/include/memory.h"
-#include "metafs_system_manager.h"
+#include "src/metafs/include/metafs_service.h"
 
 #include <string>
 
@@ -114,7 +114,7 @@ MDPage::UpdateControlInfo(MetaLpnType srcLpn, FileDescriptorType srcFD, std::str
     memset(ctrlInfo, 0x0, sizeof(MDPageControlInfo));
 
     ctrlInfo->mfsSignature = MDPageControlInfo::MDPAGE_CTRL_INFO_SIG;
-    ctrlInfo->epochSignature = mscTopMgr.GetEpochSignature(arrayName);
+    ctrlInfo->epochSignature = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->GetEpochSignature();
     ctrlInfo->metaLpn = srcLpn;
     ctrlInfo->fd = srcFD;
 }
@@ -125,7 +125,7 @@ MDPage::CheckValid(std::string& arrayName)
     // detect mdpage validity by combining two signatures
     // note that it has to have additional logic to detect signature corruption case later on
     return (ctrlInfo->mfsSignature == MDPageControlInfo::MDPAGE_CTRL_INFO_SIG &&
-        ctrlInfo->epochSignature == mscTopMgr.GetEpochSignature(arrayName));
+        ctrlInfo->epochSignature == MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->GetEpochSignature());
 }
 
 bool

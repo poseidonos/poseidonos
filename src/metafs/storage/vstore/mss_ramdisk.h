@@ -36,7 +36,7 @@
 #include <vector>
 
 #include "metafs_return_code.h"
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 #include "os_header.h"
 
 #define BTOMB(capacity) ((capacity / 1024) / 1024)
@@ -55,24 +55,24 @@ namespace pos
 class MssRamdisk : public MetaStorageSubsystem
 {
 public:
-    MssRamdisk(void);
+    explicit MssRamdisk(std::string arrayName);
     virtual ~MssRamdisk(void);
 
     virtual POS_EVENT_ID CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) override;
-    virtual POS_EVENT_ID Open(std::string arrayName) override;
-    virtual POS_EVENT_ID Close(std::string arrayName) override;
-    virtual POS_EVENT_ID ReadPage(std::string arrayName, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) override;
-    virtual POS_EVENT_ID WritePage(std::string arrayName, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) override;
+    virtual POS_EVENT_ID Open(void) override;
+    virtual POS_EVENT_ID Close(void) override;
+    virtual POS_EVENT_ID ReadPage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) override;
+    virtual POS_EVENT_ID WritePage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) override;
     virtual bool IsAIOSupport(void) override;
     virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) override;
     virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) override;
-    virtual POS_EVENT_ID TrimFileData(std::string arrayName, MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) override;
+    virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) override;
 
-    POS_EVENT_ID EraseAllData(std::string arrayName, MetaStorageType mediaType);
-    uint64_t GetCapacity(std::string arrayName, MetaStorageType mediaType);
+    POS_EVENT_ID EraseAllData(MetaStorageType mediaType);
+    uint64_t GetCapacity(MetaStorageType mediaType);
 
 private:
-    void _Finalize(std::string arrayName);
+    void _Finalize(void);
 
     std::vector<int> fd_; // To store file descriptor, according to mediaType
     std::vector<uint64_t> capacity_;

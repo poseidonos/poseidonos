@@ -53,7 +53,7 @@ Region::Move(Region* target)
 
     for (uint64_t idx = 0; idx < content.GetSize(); idx++)
     {
-        rc = mssIntf->ReadPage(arrayName, regionType, sourceBaseLPN + idx, bufferPage.GetDataBuf(), 1);
+        rc = mssIntf->ReadPage(regionType, sourceBaseLPN + idx, bufferPage.GetDataBuf(), 1);
         if (rc != POS_EVENT_ID::SUCCESS)
         {
             POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
@@ -64,7 +64,7 @@ Region::Move(Region* target)
 
         bufferPage.Make(targetBaseLPN + idx, content.GetInode()->data.basic.field.fd, arrayName);
 
-        rc = mssIntf->WritePage(arrayName, regionType, targetBaseLPN + idx, bufferPage.GetDataBuf(), 1);
+        rc = mssIntf->WritePage(regionType, targetBaseLPN + idx, bufferPage.GetDataBuf(), 1);
         if (rc != POS_EVENT_ID::SUCCESS)
         {
             POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
@@ -93,7 +93,7 @@ Region::Erase(MetaLpnType startLpn, MetaLpnType numTrimLpns)
     void* buf = nullptr;
 
     POS_EVENT_ID ret = POS_EVENT_ID::SUCCESS;
-    ret = mssIntf->TrimFileData(arrayName, regionType, startLpn, buf, numTrimLpns);
+    ret = mssIntf->TrimFileData(regionType, startLpn, buf, numTrimLpns);
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Metadata File] Trim mediaType={}, startLpn={}, count={}",
@@ -111,7 +111,7 @@ Region::Erase(MetaLpnType startLpn, MetaLpnType numTrimLpns)
         assert(buf != nullptr);
 
         // write all zeros
-        ret = mssIntf->WritePage(arrayName, regionType, startLpn, buf, numTrimLpns); // should be async.
+        ret = mssIntf->WritePage(regionType, startLpn, buf, numTrimLpns); // should be async.
 
         if (ret != POS_EVENT_ID::SUCCESS)
         {

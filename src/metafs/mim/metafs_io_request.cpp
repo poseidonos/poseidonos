@@ -55,6 +55,7 @@ MetaFsIoRequest::MetaFsIoRequest(void)
   baseMetaLpn(0),
   originalMsg(nullptr),
   requestCount(0),
+  fileCtx(nullptr),
   retryFlag(false),
   error(0)
 {
@@ -78,6 +79,7 @@ MetaFsIoRequest::CopyUserReqMsg(const MetaFsIoRequest& req)
     this->baseMetaLpn = req.baseMetaLpn;
     this->ioDone = false;
     this->error = false;
+    this->fileCtx = req.fileCtx;
 
     if (MetaIoMode::Sync == req.ioMode)
     {
@@ -112,7 +114,7 @@ MetaFsIoRequest::IsValid(void)
         ioMode >= MetaIoMode::Max ||
         fd == MetaFsCommonConst::INVALID_FD ||
         buf == INVALID_BUF ||
-        targetMediaType < MetaStorageType::Max)
+        targetMediaType >= MetaStorageType::Max)
     {
         return false;
     }

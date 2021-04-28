@@ -34,7 +34,6 @@
 
 #include <string>
 
-#include "metafs.h"
 #include "src/include/partition_type.h"
 #include "src/network/nvmf_volume.hpp"
 #include "src/network/nvmf_volume_pos.hpp"
@@ -51,10 +50,6 @@ public:
     int Unmount2(void);
 
 private:
-    int _MountMetaFilesystem(void);
-    MetaStorageInfo _MakeMetaStorageMediaInfo(PartitionType partitionType);
-    void _RegisterMediaInfoIfAvailable(PartitionType type,
-        MetaStorageMediaInfoList& mediaList);
     void _InitNvmf(void);
     void _ResetNvmf(void);
 

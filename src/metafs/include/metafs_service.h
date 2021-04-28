@@ -30,13 +30,51 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/* 
+ * PoseidonOS - Meta Filesystem Layer
+ * 
+ * Meta Filesystem Manager (metaFsMgr)
+ */
+
+// A Meta Filesystem Layer instance accessible by upper modules
 #pragma once
 
-#include "meta_io_manager.h"
-#include "metafs_manager_adapter.h"
-#include "metafs_io_request.h"
+#include <string>
+#include <unordered_map>
+#include "src/metafs/include/meta_storage_info.h"
+#include "src/metafs/include/metafs_return_code.h"
+#include "src/metafs/metafs.h"
+#include "mk/ibof_config.h"
+#include "src/lib/singleton.h"
 
 namespace pos
 {
-using IoManager = MetaFsManagerAdapter<MetaIoManager, MetaFsIoRequest, POS_EVENT_ID>;
+class ScalableMetaIoWorker;
+class MetaFsIoScheduler;
+class MetaFsIoMultiQ;
+
+class MetaFsService
+{
+public:
+    MetaFsService(void);
+    ~MetaFsService(void);
+    void Initialize(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet);
+    void Register(std::string& arrayName, MetaFs* fileSystem);
+    void Deregister(std::string& arrayName);
+    MetaFs* GetMetaFs(std::string& arrayName);
+    MetaFsIoScheduler* GetScheduler(void)
+    {
+        return ioScheduler;
+    }
+
+private:
+    void _PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet);
+    ScalableMetaIoWorker* _InitiateMioHandler(int handlerId, int coreId, int coreCount);
+
+    std::unordered_map<std::string, MetaFs*> fileSystems;
+    MetaFsIoScheduler* ioScheduler;
+};
+
+using MetaFsServiceSingleton = Singleton<MetaFsService>;
+
 } // namespace pos

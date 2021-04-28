@@ -100,6 +100,10 @@ ReadMpio::_CompleteIO(MpAioState expNextState)
         "[Mpio][RdMpioDone ] ReadMpio Complete...req.tagId={}, mpio_id={}", io.tagId, io.mpioId);
 
     SetNextState(expNextState);
+
+    mssIntf = nullptr;
+    aioModeEnabled = false;
+
     return contd2NextRun;
 }
 

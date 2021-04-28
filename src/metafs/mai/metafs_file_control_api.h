@@ -39,26 +39,62 @@
 #pragma once
 
 #include <string>
-
-#include "metafs_adapter_include.h"
+#include <vector>
+#include <unordered_map>
+#include "src/lib/bitmap.h"
+#include "src/metafs/storage/mss.h"
+#include "src/metafs/util/metafs_spinlock.h"
+#include "src/metafs/mvm/meta_volume_manager.h"
+#include "src/metafs/include/meta_file_context.h"
 
 namespace pos
 {
 class MetaFsFileControlApi
 {
 public:
-    virtual MetaFsReturnCode<POS_EVENT_ID> CreateVolume(std::string& fileName, std::string& arrayName, uint64_t fileByteSize,
+    explicit MetaFsFileControlApi(std::string arrayName);
+    virtual ~MetaFsFileControlApi(void);
+
+    virtual POS_EVENT_ID Create(std::string& fileName, uint64_t fileByteSize,
         MetaFilePropertySet prop = MetaFilePropertySet());
-    virtual MetaFsReturnCode<POS_EVENT_ID> Delete(std::string& fileName, std::string& arrayName);
-    virtual MetaFsReturnCode<POS_EVENT_ID> Open(std::string& fileName, std::string& arrayName);
-    virtual MetaFsReturnCode<POS_EVENT_ID> Close(FileDescriptorType fd, std::string& arrayName);
-    virtual MetaFsReturnCode<POS_EVENT_ID> CheckFileExist(std::string& fileName, std::string& arrayName);
-    virtual size_t GetFileSize(int fd, std::string& arrayName);
-    virtual size_t GetAlignedFileIOSize(int fd, std::string& arrayName);
-    virtual size_t EstimateAlignedFileIOSize(MetaFilePropertySet& prop, std::string& arrayName);
-    virtual size_t GetTheBiggestExtentSize(MetaFilePropertySet& prop, std::string& arrayName);
+    virtual POS_EVENT_ID Delete(std::string& fileName);
+    virtual POS_EVENT_ID Open(std::string& fileName, int& fd);
+    virtual POS_EVENT_ID Close(FileDescriptorType fd);
+    virtual POS_EVENT_ID CheckFileExist(std::string& fileName);
+    virtual size_t GetFileSize(int fd);
+    virtual size_t GetAlignedFileIOSize(int fd);
+    virtual size_t EstimateAlignedFileIOSize(MetaFilePropertySet& prop);
+    virtual size_t GetTheBiggestExtentSize(MetaFilePropertySet& prop);
+    virtual size_t GetMaxMetaLpn(MetaVolumeType type);
+    MetaFileContext* GetFileInfo(FileDescriptorType fd);
+
+    // for wbt commands
+    virtual std::vector<MetaFileInfoDumpCxt> Wbt_GetMetaFileList(void);
+    virtual FileSizeType Wbt_GetMaxFileSizeLimit(void);
+    virtual MetaFileInodeDumpCxt Wbt_GetMetaFileInode(std::string& fileName);
+
+    virtual void SetMss(MetaStorageSubsystem* metaStorage);
+    virtual void InitVolume(MetaVolumeType volType, std::string arrayName, MetaLpnType maxVolPageNum);
+    virtual bool CreateVolume(MetaVolumeType volType);
+    virtual bool OpenVolume(bool isNPOR);
+    virtual bool CloseVolume(bool& isNPOR);
+
+#if (1 == COMPACTION_EN) || not defined COMPACTION_EN
+    virtual bool Compaction(bool isNPOR);
+#endif
 
 private:
-    MetaFsVolumeManager volMgr;
+    MetaFileInodeInfo* _GetFileInode(std::string& fileName);
+    void _AddFileContext(std::string& fileName, FileDescriptorType fd);
+    void _RemoveFileContext(FileDescriptorType fd);
+
+    std::string arrayName = "";
+    MetaVolumeManager* volMgr;
+
+    BitMap* bitmap = nullptr;
+    std::unordered_map<FileDescriptorType, std::string> nameMapByfd;
+    std::unordered_map<std::string, uint32_t> idxMapByName;
+    MetaFileContext cxtList[MetaFsConfig::MAX_VOLUME_CNT];
+    MetaFsSpinLock iLock;
 };
 } // namespace pos

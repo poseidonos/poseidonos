@@ -31,13 +31,15 @@
  */
 
 #include <string>
+#include <vector>
+#include "src/metafs/include/metafs_service.h"
 #include "wbt_metafs_cmd_handler.h"
 #include "src/spdk_wrapper/spdk.hpp"
 #include "src/metafs/tool/fio/meta_scheduler.h"
 #include "src/io/frontend_io/unvmf_io_handler.h"
 
-#define SUCCESS 0
-#define FAILURE -1
+#define RESULT_SUCCESS 0
+#define RESULT_FAILURE -1
 
 namespace pos
 {
@@ -46,40 +48,37 @@ WbtMetafsCmdHandler::DumpFilesList(Args argv)
 {
     if (argv.size() < 1)
     {
-        std::cout << "mfs_dump_files_list Command. Too Few Arguments.\nRequire fileName\n";
-        return FAILURE;
+        std::cout << "mfs_dump_files_list Command. Too Few Arguments." << std::endl;
+        return RESULT_FAILURE;
     }
 
-    int res = SUCCESS;
+    int res = RESULT_SUCCESS;
     std::string parsedJson;
-    std::string arrayName;
-    std::string outFile;
-    MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, std::vector<MetaFileInfoDumpCxt>> rt;
+    std::string arrayName = argv["array"].get<std::string>();
+    std::string outFile = argv["output"].get<std::string>();
+    std::vector<MetaFileInfoDumpCxt> result;
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
 
-    arrayName = argv["array"].get<std::string>();
-    outFile = argv["output"].get<std::string>();
-    rt = metaFs.wbt.GetMetaFileList(arrayName);
-
-    if (rt.sc == MetaFsStatusCodeWBTSpcf::Fail)
+    if ((nullptr == metaFs) || (!metaFs->wbt->GetMetaFileList(result)))
     {
-        return FAILURE;
+        return RESULT_FAILURE;
     }
 
     JsonElement element("");
     JsonArray arrayElement("filesInfoList");
 
-    for (unsigned int i = 0; i < rt.returnData.size(); i++)
+    for (unsigned int i = 0; i < result.size(); i++)
     {
-        _DumpFilesInfoToJsonElement(rt.returnData[i], arrayElement);
+        _DumpFilesInfoToJsonElement(result[i], arrayElement);
     }
 
     element.SetArray(arrayElement);
     parsedJson = element.ToJson();
     parsedJson += "\n";
 
-    if (_WriteBufferInFile(outFile, parsedJson.c_str(), parsedJson.length()) == FAILURE)
+    if (_WriteBufferInFile(outFile, parsedJson.c_str(), parsedJson.length()) == RESULT_FAILURE)
     {
-        return FAILURE;
+        return RESULT_FAILURE;
     }
 
     return res;
@@ -90,11 +89,10 @@ WbtMetafsCmdHandler::CreateFile(Args argv)
 {
     if (argv.size() < 6)
     {
-        std::cout << "mfs_create_file Command. Too Few Arguments.\nRequire fileName and fileSize\n";
-        return FAILURE;
+        std::cout << "mfs_create_file Command. Too Few Arguments." << std::endl;
+        return RESULT_FAILURE;
     }
 
-    bool retVal;
     MetaFilePropertySet fileProperty = MetaFilePropertySet();
 
     std::string fileName = argv["name"].get<std::string>();
@@ -108,12 +106,15 @@ WbtMetafsCmdHandler::CreateFile(Args argv)
     fileProperty.ioAccPattern = static_cast<MetaFileAccessPattern>(ioAccPatternType);
     fileProperty.ioOpType = static_cast<MetaFileDominant>(ioOpType);
 
-    retVal = metaFs.ctrl.CreateVolume(fileName, arrayName, fileSizeBytes, fileProperty).IsSuccess();
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+    if (nullptr == metaFs)
+        return RESULT_FAILURE;
 
-    if (retVal == false)
-        return FAILURE;
+    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSizeBytes, fileProperty);
+    if (rc != POS_EVENT_ID::SUCCESS)
+        return RESULT_FAILURE;
 
-    return SUCCESS;
+    return RESULT_SUCCESS;
 }
 
 int
@@ -121,18 +122,22 @@ WbtMetafsCmdHandler::OpenFile(Args argv)
 {
     if (argv.size() < 2)
     {
-        std::cout << "mfs_open_file Command. Too few Arguments.\nRequire fileDesc.\n";
-        return FAILURE;
+        std::cout << "mfs_open_file Command. Too few Arguments." << std::endl;
+        return RESULT_FAILURE;
     }
 
-    int fd;
+    int fd = 0;
 
     std::string fileName = argv["name"].get<std::string>();
     std::string arrayName = argv["array"].get<std::string>();
-    fd = metaFs.ctrl.Open(fileName, arrayName).returnData;
 
-    if (fd == FAILURE)
-        return FAILURE;
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+    if (nullptr == metaFs)
+        return RESULT_FAILURE;
+
+    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd);
+    if (rc != POS_EVENT_ID::SUCCESS)
+        return RESULT_FAILURE;
 
     return fd;
 }
@@ -142,79 +147,43 @@ WbtMetafsCmdHandler::CloseFile(Args argv)
 {
     if (argv.size() < 2)
     {
-        std::cout << "mfs_close_file Command. Too few Arguments.\nRequire fileDesc.\n";
-        return FAILURE;
+        std::cout << "mfs_close_file Command. Too few Arguments." << std::endl;
+        return RESULT_FAILURE;
     }
 
-    bool retVal;
     int fd = stoi(argv["fd"].get<std::string>());
     std::string arrayName = argv["array"].get<std::string>();
-    retVal = metaFs.ctrl.Close(fd, arrayName).IsSuccess();
 
-    if (retVal == false)
-        return FAILURE;
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+    if (nullptr == metaFs)
+        return RESULT_FAILURE;
 
-    return SUCCESS;
+    POS_EVENT_ID rc = metaFs->ctrl->Close(fd);
+    if (rc != POS_EVENT_ID::SUCCESS)
+        return RESULT_FAILURE;
+
+    return RESULT_SUCCESS;
 }
 
 int
 WbtMetafsCmdHandler::CreateFileSystem(Args argv)
 {
-    if (argv.size() < 1)
-    {
-        std::cout << "\n";
-        return FAILURE;
-    }
-
-    bool retVal;
-    std::string arrayName = argv["array"].get<std::string>();
-
-    retVal = metaFs.mgmt.CreateSystem(arrayName).IsSuccess();
-
-    if (retVal == false)
-        return FAILURE;
-
-    return SUCCESS;
+    // deprecated
+    return RESULT_FAILURE;
 }
 
 int
 WbtMetafsCmdHandler::MountFileSystem(Args argv)
 {
-    if (argv.size() < 1)
-    {
-        std::cout << "\n";
-        return FAILURE;
-    }
-
-    bool retVal;
-    std::string arrayName = argv["array"].get<std::string>();
-
-    retVal = metaFs.mgmt.MountSystem(arrayName).IsSuccess();
-
-    if (retVal == false)
-        return FAILURE;
-
-    return SUCCESS;
+    // deprecated
+    return RESULT_SUCCESS;
 }
 
 int
 WbtMetafsCmdHandler::UmountFileSystem(Args argv)
 {
-    if (argv.size() < 1)
-    {
-        std::cout << "\n";
-        return FAILURE;
-    }
-
-    bool retVal;
-    std::string arrayName = argv["array"].get<std::string>();
-
-    retVal = metaFs.mgmt.UnmountSystem(arrayName).IsSuccess();
-
-    if (retVal == false)
-        return FAILURE;
-
-    return SUCCESS;
+    // deprecated
+    return RESULT_SUCCESS;
 }
 
 int
@@ -222,42 +191,31 @@ WbtMetafsCmdHandler::ReadFile(Args argv)
 {
     if (argv.size() < 5)
     {
-        std::cout << "mfs_read_file Command.Too few Arguments.\nRequire fileDesc fileOffset dataLengthInBytes path/mfsBufferFile.bin.\n";
-        return FAILURE;
+        std::cout << "mfs_read_file Command. Too few Arguments." << std::endl;
+        return RESULT_FAILURE;
     }
 
-    bool retVal = false;
-    int fd;
-    uint32_t byteOffset;
-    uint32_t byteSize;
-    char* buffer = nullptr;
-    std::string outFile;
-    std::string arrayName;
-
-    fd = stoi(argv["fd"].get<std::string>());
-    arrayName = argv["array"].get<std::string>();
-    byteOffset = stoi(argv["offset"].get<std::string>());
-
-    byteSize = stoi(argv["count"].get<std::string>());
-
-    buffer = new char[byteSize];
-    outFile = argv["output"].get<std::string>();
+    bool retVal = true;
+    int fd = stoi(argv["fd"].get<std::string>());
+    uint32_t byteOffset = stoi(argv["offset"].get<std::string>());
+    uint32_t byteSize = stoi(argv["count"].get<std::string>());
+    char* buffer = new char[byteSize];
+    std::string outFile = argv["output"].get<std::string>();
+    std::string arrayName = argv["array"].get<std::string>();
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+    if (nullptr == metaFs)
+        return RESULT_FAILURE;
 
     if (buffer == nullptr)
     {
-        std::cout << "[Error] Buffer allocation Failed.\n";
-        return FAILURE;
+        std::cout << "[Error] Buffer allocation Failed." << std::endl;
+        return RESULT_FAILURE;
     }
 
     memset(buffer, 0, byteSize);
 
-    retVal = metaFs.io.Read(fd, arrayName, byteOffset, byteSize, (void*)buffer).IsSuccess();
-
-    if (retVal == true && _WriteBufferInFile(outFile, buffer, byteSize) == SUCCESS)
-    {
-        // Nothing to do
-    }
-    else
+    POS_EVENT_ID rc = metaFs->io->Read(fd, byteOffset, byteSize, (void*)buffer);
+    if (rc != POS_EVENT_ID::SUCCESS || _WriteBufferInFile(outFile, buffer, byteSize) != RESULT_SUCCESS)
     {
         retVal = false;
     }
@@ -266,9 +224,9 @@ WbtMetafsCmdHandler::ReadFile(Args argv)
         delete[] buffer;
 
     if (retVal == false)
-        return FAILURE;
+        return RESULT_FAILURE;
 
-    return SUCCESS;
+    return RESULT_SUCCESS;
 }
 
 int
@@ -276,42 +234,38 @@ WbtMetafsCmdHandler::WriteFile(Args argv)
 {
     if (argv.size() < 5)
     {
-        std::cout << "mfs_write_file Command.Too few Arguments.\nRequire fileDesc fileOffset dataLengthInBytes path/mfsBufferFile.bin.\n";
-        return FAILURE;
+        std::cout << "mfs_write_file Command.Too few Arguments." << std::endl;
+        return RESULT_FAILURE;
     }
 
-    bool retVal = false;
-    int fd;
-    uint32_t byteOffset;
-    uint32_t byteSize;
-    char* buffer = nullptr;
-    std::string inFile;
-    std::string arrayName;
+    POS_EVENT_ID rc;
+    int fd = stoi(argv["fd"].get<std::string>());
+    uint32_t byteOffset = stoi(argv["offset"].get<std::string>());
+    uint32_t byteSize = stoi(argv["count"].get<std::string>());
+    char* buffer = new char[byteSize];
+    std::string inFile = argv["input"].get<std::string>();
+    std::string arrayName = argv["array"].get<std::string>();
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+    if (nullptr == metaFs)
+        return RESULT_FAILURE;
 
-    fd = stoi(argv["fd"].get<std::string>());
-    arrayName = argv["array"].get<std::string>();
-    byteOffset = stoi(argv["offset"].get<std::string>());
-    byteSize = stoi(argv["count"].get<std::string>());
-    buffer = new char[byteSize];
-    inFile = argv["input"].get<std::string>();
-
-    if (_ReadFileInBuffer(inFile, &buffer, byteSize) == SUCCESS)
+    if (_ReadFileInBuffer(inFile, &buffer, byteSize) == RESULT_SUCCESS)
     {
-        retVal = metaFs.io.Write(fd, arrayName, byteOffset, byteSize, buffer).IsSuccess();
+        rc = metaFs->io->Write(fd, byteOffset, byteSize, buffer);
     }
     else
     {
-        retVal = false;
+        rc = POS_EVENT_ID::MFS_FILE_READ_FAILED;
     }
 
     // MakeSure to delete buffer
     if (buffer != nullptr)
         delete[] buffer;
 
-    if (retVal == false)
-        return FAILURE;
+    if (rc != POS_EVENT_ID::SUCCESS)
+        return RESULT_FAILURE;
 
-    return SUCCESS;
+    return RESULT_SUCCESS;
 }
 
 int
@@ -325,7 +279,7 @@ WbtMetafsCmdHandler::ReadFileAsync(Args argv)
     // metaFsMgr.io.ReadAsync(fd, byteOffset, byteSize, buffer, callback);    
     // As async functionality testing is not enabled yet.
     */
-    return FAILURE;
+    return RESULT_FAILURE;
 }
 
 int
@@ -339,7 +293,7 @@ WbtMetafsCmdHandler::WriteFileAsync(Args argv)
     // metaFsMgr.io.WriteAsync(fd, byteOffset, byteSize, buffer, callback);
     // As async functionality testing is not enabled yet.
     */
-    return FAILURE;
+    return RESULT_FAILURE;
 }
 
 int
@@ -347,20 +301,20 @@ WbtMetafsCmdHandler::GetFileSize(Args argv)
 {
     if (argv.size() < 2)
     {
-        std::cout << "mfs_get_file_size Command. Too few Arguments\nRequire fileDesc.\n";
-        return FAILURE;
+        std::cout << "mfs_get_file_size Command. Too few Arguments." << std::endl;
+        return RESULT_FAILURE;
     }
 
-    int fd;
-    size_t fileSize;
-    std::string arrayName;
+    int fd = stoi(argv["fd"].get<std::string>());
+    std::string arrayName = argv["array"].get<std::string>();
 
-    fd = stoi(argv["fd"].get<std::string>());
-    arrayName = argv["array"].get<std::string>();
-    fileSize = metaFs.ctrl.GetFileSize(fd, arrayName);
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+    if (nullptr == metaFs)
+        return RESULT_FAILURE;
 
+    size_t fileSize = metaFs->ctrl->GetFileSize(fd);
     if (fileSize == 0)
-        return FAILURE;
+        return RESULT_FAILURE;
 
     return fileSize;
 }
@@ -368,22 +322,22 @@ WbtMetafsCmdHandler::GetFileSize(Args argv)
 int
 WbtMetafsCmdHandler::GetAlignedFileIOSize(Args argv)
 {
-    if (argv.size() < 1)
+    if (argv.size() < 2)
     {
-        std::cout << "mfs_get_aligned_file_io_size Command. Too few Arguments\nRequire fileDesc.\n";
-        return FAILURE;
+        std::cout << "mfs_get_aligned_file_io_size Command. Too few Arguments." << std::endl;
+        return RESULT_FAILURE;
     }
 
-    int fd;
-    size_t fileSize;
-    std::string arrayName;
+    int fd = stoi(argv["fd"].get<std::string>());
+    std::string arrayName = argv["array"].get<std::string>();
 
-    fd = stoi(argv["fd"].get<std::string>());
-    arrayName = argv["array"].get<std::string>();
-    fileSize = metaFs.ctrl.GetAlignedFileIOSize(fd, arrayName);
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+    if (nullptr == metaFs)
+        return RESULT_FAILURE;
 
+    size_t fileSize = metaFs->ctrl->GetAlignedFileIOSize(fd);
     if (fileSize == 0)
-        return FAILURE;
+        return RESULT_FAILURE;
 
     return fileSize;
 }
@@ -391,16 +345,24 @@ WbtMetafsCmdHandler::GetAlignedFileIOSize(Args argv)
 int64_t
 WbtMetafsCmdHandler::GetMaxFileSize(Args argv)
 {
-    uint64_t maxFileSize = 0;
-    MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, FileSizeType> rt;
-
-    rt = metaFs.wbt.GetMaxFileSizeLimit();
-
-    if (rt.sc == MetaFsStatusCodeWBTSpcf::Fail)
+    if (argv.size() < 1)
     {
-        return FAILURE;
+        std::cout << "mfs_get_max_file_size Command. Too few Arguments." << std::endl;
+        return RESULT_FAILURE;
     }
-    maxFileSize = rt.returnData;
+
+    uint64_t maxFileSize = 0;
+    std::string arrayName = argv["array"].get<std::string>();
+
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+
+    if (nullptr == metaFs)
+        return RESULT_FAILURE;
+
+    if (false == metaFs->wbt->GetMaxFileSizeLimit(maxFileSize))
+    {
+        return RESULT_FAILURE;
+    }
 
     return maxFileSize;
 }
@@ -408,31 +370,36 @@ WbtMetafsCmdHandler::GetMaxFileSize(Args argv)
 int
 WbtMetafsCmdHandler::DumpInodeInfo(Args argv)
 {
-    int res = SUCCESS;
-    std::string metaFile;
-    std::string outJsonFile;
-    MetaFileInodeData metaFileInode;
-    std::string parsedJson;
-    std::string arrayName;
-    JsonElement element("");
-    metaFile = argv["name"].get<std::string>();
-    outJsonFile = argv["output"].get<std::string>();
-    arrayName = argv["array"].get<std::string>();
-
-    MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, MetaFileInodeDumpCxt> rt;
-    rt = metaFs.wbt.GetMetaFileInode(metaFile, arrayName);
-
-    if (rt.sc == MetaFsStatusCodeWBTSpcf::Fail)
+    if (argv.size() < 3)
     {
-        return FAILURE;
+        std::cout << "mfs_dump_inode_info Command. Too few Arguments." << std::endl;
+        return RESULT_FAILURE;
     }
 
-    _DumpInodeInfoToJson(&rt.returnData, element);
+    int res = RESULT_SUCCESS;
+    MetaFileInodeData metaFileInode;
+    std::string parsedJson;
+    MetaFileInodeDumpCxt result;
+    JsonElement element("");
+    std::string metaFile = argv["name"].get<std::string>();
+    std::string outJsonFile = argv["output"].get<std::string>();
+    std::string arrayName = argv["array"].get<std::string>();
+
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+    if (nullptr == metaFs)
+        return RESULT_FAILURE;
+
+    if (false == metaFs->wbt->GetMetaFileInode(metaFile, result))
+    {
+        return RESULT_FAILURE;
+    }
+
+    _DumpInodeInfoToJson(&result, element);
     parsedJson = element.ToJson();
 
-    if (_WriteBufferInFile(outJsonFile, parsedJson.c_str(), parsedJson.length()) == FAILURE)
+    if (_WriteBufferInFile(outJsonFile, parsedJson.c_str(), parsedJson.length()) == RESULT_FAILURE)
     {
-        res = FAILURE;
+        res = RESULT_FAILURE;
     }
 
     return res;
@@ -442,7 +409,7 @@ int
 WbtMetafsCmdHandler::SetInodeInfo(Args argv)
 {
 #if 0
-    int res = SUCCESS;
+    int res = RESULT_SUCCESS;
     std::string metaFileName = argv["name"].get<std::string>();
     std::string jsonFileName = argv["input"].get<std::string>();
     char* buffer = NULL;
@@ -450,7 +417,7 @@ WbtMetafsCmdHandler::SetInodeInfo(Args argv)
     MetaFileInodeInfo metaFileInode;
 
     // Declare inode
-    if (_ReadFileInBuffer(jsonFileName, &buffer, fileSize) == SUCCESS)
+    if (_ReadFileInBuffer(jsonFileName, &buffer, fileSize) == RESULT_SUCCESS)
     {
         for (uint32_t i = 0; i < fileSize; i++)
         {
@@ -466,7 +433,7 @@ WbtMetafsCmdHandler::SetInodeInfo(Args argv)
             std::cout << jsonDoc.GetParseError() << "\nError Offset ";
             std::cout << jsonDoc.GetErrorOffset() << "\n";
             delete[] buffer;
-            return FAILURE;
+            return RESULT_FAILURE;
         }
         if (jsonDoc["metaInodeInfo"].IsObject())
         {
@@ -475,7 +442,7 @@ WbtMetafsCmdHandler::SetInodeInfo(Args argv)
     }
     else
     {
-        res = FAILURE;
+        res = RESULT_FAILURE;
     }
 
     if (buffer != NULL)
@@ -483,67 +450,67 @@ WbtMetafsCmdHandler::SetInodeInfo(Args argv)
 
     return res;
 #endif
-    return FAILURE;     // not support yet
+    return RESULT_FAILURE;     // not support yet
 }
 
 int
 WbtMetafsCmdHandler::GetFileChecksum(Args argv)
 {
-    return FAILURE;
+    return RESULT_FAILURE;
 }
 
 int
 WbtMetafsCmdHandler::GetCurrentSystemState(void)
 {
-    return FAILURE;
+    return RESULT_FAILURE;
 }
 
 int
 WbtMetafsCmdHandler::GetNextSystemState(void)
 {
-    return FAILURE;
+    return RESULT_FAILURE;
 }
 
 int
 WbtMetafsCmdHandler::CorruptFileSystemMBR(void)
 {
-    return FAILURE;
+    return RESULT_FAILURE;
 }
 
 int
 WbtMetafsCmdHandler::CorruptFileSystemSignature(void)
 {
-    return FAILURE;
+    return RESULT_FAILURE;
 }
 
 int
 WbtMetafsCmdHandler::SetAllBitsInFDInUse(void)
 {
-    return FAILURE;
+    return RESULT_FAILURE;
 }
 
 int
 WbtMetafsCmdHandler::GetAllBitsInFDInUse(Args argv)
 {
-    return FAILURE;
+    return RESULT_FAILURE;
 }
 
 int
 WbtMetafsCmdHandler::GetTotalFreeInodes(void)
 {
-    return FAILURE;
+    return RESULT_FAILURE;
 }
 
 int
 WbtMetafsCmdHandler::SetAllInodeEntryInUseBitmap(void)
 {
-    return FAILURE;
+    return RESULT_FAILURE;
 }
 
 int
 WbtMetafsCmdHandler::GetAllInodeEntryInUseBitmap(Args argv)
 {
-    return FAILURE;
+    return RESULT_FAILURE;
 }
 
 /**
@@ -552,7 +519,7 @@ WbtMetafsCmdHandler::GetAllInodeEntryInUseBitmap(Args argv)
 int
 WbtMetafsCmdHandler::_ReadFileInBuffer(std::string fileName, char** buffer, uint32_t& fileSize)
 {
-    int res = SUCCESS;
+    int res = RESULT_SUCCESS;
     std::ifstream inFileStream;
 
     inFileStream.open(fileName, std::ios::in | std::ios::binary | std::ios::ate); // ate means pointer is at end of file.
@@ -574,8 +541,8 @@ WbtMetafsCmdHandler::_ReadFileInBuffer(std::string fileName, char** buffer, uint
     }
     else
     {
-        std::cout << "[Error] Could not open given file " + fileName + "\n";
-        res = FAILURE;
+        std::cout << "[Error] Could not open given file " + fileName << std::endl;
+        res = RESULT_FAILURE;
     }
 
     // MakeSure to delete buffer in caller
@@ -585,7 +552,7 @@ WbtMetafsCmdHandler::_ReadFileInBuffer(std::string fileName, char** buffer, uint
 int
 WbtMetafsCmdHandler::_WriteBufferInFile(std::string fileName, const char* buffer, int bufferSize)
 {
-    int res = SUCCESS;
+    int res = RESULT_SUCCESS;
     std::ofstream outFileStream;
 
     outFileStream.open(fileName, std::ios_base::out | std::ios::binary);
@@ -598,8 +565,8 @@ WbtMetafsCmdHandler::_WriteBufferInFile(std::string fileName, const char* buffer
     }
     else
     {
-        std::cout << "[Error] Could not open given file " + fileName + "\n";
-        res = FAILURE;
+        std::cout << "[Error] Could not open given file " + fileName << std::endl;
+        res = RESULT_FAILURE;
     }
 
     return res;
@@ -697,7 +664,7 @@ WbtMetafsCmdHandler::SetupMetaFioTest(Args argv)
     {
         cout << "Cannot set handlers more than max count" << endl;
 
-        return FAILURE;
+        return RESULT_FAILURE;
     }
 
     std::string target(argv["name"].get<std::string>());
@@ -709,6 +676,6 @@ WbtMetafsCmdHandler::SetupMetaFioTest(Args argv)
 
     std::cout << "Testing environment for metafs fio has been setup! [target vol]=" << target.c_str() << " [fd]=" << argv["size"].get<std::string>() << std::endl;
 
-    return SUCCESS;
+    return RESULT_SUCCESS;
 }
 } // namespace pos

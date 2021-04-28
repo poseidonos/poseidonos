@@ -33,6 +33,7 @@
 #pragma once
 
 #include <string>
+#include "src/metafs/storage/mss.h"
 #include "meta_region_mgr.h"
 #include "meta_volume_type.h"
 
@@ -46,9 +47,9 @@ public:
 
     virtual void Init(std::string arrayName, MetaVolumeType volType, MetaLpnType baseLpn, MetaLpnType maxLpn);
     virtual void Init(std::string arrayName, MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn) final;
+    virtual void SetMss(MetaStorageSubsystem* metaStorage) = 0;
 
 protected:
     MetaVolumeType volumeType;
-    std::string arrayName;
 };
 } // namespace pos

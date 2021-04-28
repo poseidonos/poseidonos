@@ -192,12 +192,15 @@ MetaVolumeContainer::_CleanUp(void)
 void
 MetaVolumeContainer::RegisterVolumeInstance(MetaVolumeType volType, MetaVolume* metaVol)
 {
-    if (MetaVolumeType::NvRamVolume == volType)
-        nvramMetaVolAvailable = true;
-
     volumeContainer.insert(std::make_pair(volType, metaVol));
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "volType={}", (uint32_t)(volType));
+}
+
+void
+MetaVolumeContainer::SetNvRamVolumeAvailable(void)
+{
+    nvramMetaVolAvailable = true;
 }
 
 bool
@@ -273,13 +276,6 @@ MetaVolumeContainer::IsGivenVolumeExist(MetaVolumeType volumeType)
     return true;
 }
 
-bool
-MetaVolumeContainer::IsGivenFileCreated(std::string fileName)
-{
-    StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
-    return fdManager.IsGivenFileCreated(fileKey);
-}
-
 MetaVolume&
 MetaVolumeContainer::GetMetaVolume(MetaVolumeType volumeType)
 {
@@ -303,71 +299,23 @@ MetaVolumeContainer::_BuildFileKey2VolumeTypeMap(MetaVolume* volume)
 }
 
 void
-MetaVolumeContainer::AddAllFDsInFreeFDMap(void)
-{
-    fdManager.AddAllFDsInFreeFDMap();
-}
-
-void
-MetaVolumeContainer::BuildFreeFDMap(void)
+MetaVolumeContainer::BuildFreeFDMap(std::map<FileDescriptorType, FileDescriptorType>& freeFDMap)
 {
     for (auto& item : volumeContainer)
     {
         MetaVolume* volume = item.second;
-        volume->BuildFreeFDMap(fdManager.GetFreeFDMap());
+        volume->BuildFreeFDMap(freeFDMap);
     }
 }
 
 void
-MetaVolumeContainer::BuildFDLookup(void)
+MetaVolumeContainer::BuildFDLookup(std::unordered_map<StringHashType, FileDescriptorType>& fileKeyLookupMap)
 {
     for (auto& item : volumeContainer)
     {
         MetaVolume* volume = item.second;
-        volume->BuildFDLookupMap(fdManager.GetFDLookupMap());
+        volume->BuildFDLookupMap(fileKeyLookupMap);
     }
-}
-
-void
-MetaVolumeContainer::ResetFileDescriptorManager(void)
-{
-    fdManager.Reset();
-}
-
-void
-MetaVolumeContainer::InsertFileDescLookupHash(std::string& fileName, FileDescriptorType fd)
-{
-    StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
-    fdManager.InsertFileDescLookupHash(fileKey, fd);
-}
-
-void
-MetaVolumeContainer::EraseFileDescLookupHash(std::string& fileName)
-{
-    StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
-    fdManager.EraseFileDescLookupHash(fileKey);
-}
-
-FileDescriptorType
-MetaVolumeContainer::FindFDByName(std::string fileName)
-{
-    StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
-    return fdManager.FindFDByName(fileKey);
-}
-
-FileDescriptorType
-MetaVolumeContainer::AllocFileDescriptor(std::string fileName)
-{
-    FileDescriptorType fd = fdManager.Alloc();
-    InsertFileDescLookupHash(fileName, fd);
-
-    return fd;
-}
-
-void
-MetaVolumeContainer::FreeFileDescriptor(FileDescriptorType fd)
-{
-    fdManager.Free(fd);
 }
 
 std::pair<MetaVolumeType, POS_EVENT_ID>

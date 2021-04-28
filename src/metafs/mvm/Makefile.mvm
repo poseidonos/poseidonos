@@ -35,7 +35,6 @@ MVM_SRCS += \
 	ssd_meta_volume.cpp \
 	nvram_meta_volume.cpp \
 	meta_volume_container.cpp \
-	meta_volume_container_map.cpp \
 	meta_volume_handler.cpp \
 	meta_volume_context.cpp \
 	meta_volume_manager.cpp \
@@ -66,10 +65,10 @@ UT_PATH += \
 endif
 
 ifeq ($(UT_MVM_EN), 1)
-UT_SRCS += \
-	mvm_test.cpp \
-	mvm_func_positive_test.cpp \
-	mvm_func_negative_test.cpp \
+#UT_SRCS += \
+#	mvm_test.cpp \
+#	mvm_func_positive_test.cpp \
+#	mvm_func_negative_test.cpp \
 
 endif
 

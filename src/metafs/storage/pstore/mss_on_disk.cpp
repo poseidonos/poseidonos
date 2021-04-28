@@ -30,8 +30,8 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mss_on_disk.h"
-
+#include "src/metafs/storage/pstore/mss_on_disk.h"
+#include "mss_disk_inplace.h"
 #include "metafs_config.h"
 #include "metafs_log.h"
 #include "mss_disk_inplace.h"
@@ -47,8 +47,11 @@
 
 namespace pos
 {
-MssInfo::MssInfo(std::string& arrayName)
-: arrayName(arrayName),
+/**
+ * Constructor
+ */
+MssOnDisk::MssOnDisk(std::string arrayName)
+: MetaStorageSubsystem(arrayName),
   retryIoCnt(0)
 {
     for (int i = 0; i < static_cast<int>(MetaStorageType::Max); i++)
@@ -60,7 +63,16 @@ MssInfo::MssInfo(std::string& arrayName)
     }
 }
 
-MssInfo::~MssInfo(void)
+/**
+ * Destructor
+ */
+MssOnDisk::~MssOnDisk(void)
+{
+    _Finalize();
+}
+
+void
+MssOnDisk::_Finalize(void)
 {
     for (int i = 0; i < static_cast<int>(MetaStorageType::Max); i++)
     {
@@ -68,60 +80,6 @@ MssInfo::~MssInfo(void)
         {
             delete mssDiskPlace[i];
             mssDiskPlace[i]= nullptr;
-        }
-    }
-}
-
-/**
- * Constructor
- */
-MssOnDisk::MssOnDisk(void)
-: mssBitmap(nullptr)
-{
-    for (uint32_t i = 0; i < MetaFsConfig::MAX_ARRAY_CNT; i++)
-    {
-        mssInfo[i] = nullptr;
-    }
-    mssBitmap = new BitMap(MetaFsConfig::MAX_ARRAY_CNT);
-    mssMap.clear();
-}
-
-/**
- * Destructor
- */
-MssOnDisk::~MssOnDisk(void)
-{
-    _FinalizeAll();
-
-    if (nullptr != mssBitmap)
-        delete mssBitmap;
-
-    _SetState(MetaSsState::Close);
-}
-
-void
-MssOnDisk::_Finalize(std::string arrayName)
-{
-    auto it = mssMap.find(arrayName);
-    assert(it != mssMap.end());
-
-    uint32_t index = it->second;
-    mssBitmap->ClearBit(index);
-
-    mssMap.erase(it);
-    delete mssInfo[index];
-    mssInfo[index]= nullptr;
-}
-
-void
-MssOnDisk::_FinalizeAll(void)
-{
-    for (uint32_t i = 0; i < MetaFsConfig::MAX_ARRAY_CNT; i++)
-    {
-        if (mssInfo[i] != nullptr)
-        {
-            delete mssInfo[i];
-            mssInfo[i]= nullptr;
         }
     }
 }
@@ -137,53 +95,40 @@ MssOnDisk::_FinalizeAll(void)
 POS_EVENT_ID
 MssOnDisk::CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag)
 {
-    uint32_t mssIndex = 0;
-    auto it = mssMap.find(arrayName);
-    if (it == mssMap.end())
-    {
-        mssIndex = mssBitmap->FindFirstZero();
-        mssBitmap->SetBit(mssIndex);
-        mssInfo[mssIndex] = new MssInfo(arrayName);
-    }
-    else
-    {
-        mssIndex = it->second;
-    }
-
     // 4KB aligned
     assert(capacity % MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES == 0);
     int index = static_cast<int>(mediaType);
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Mss pstore CreateMetaStore called...");
-    if (mssInfo[mssIndex]->mssDiskPlace[index] != nullptr)
+    if (mssDiskPlace[index] != nullptr)
     {
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "You attempt to create meta storage again. media type={}",
             (int)mediaType);
-        Open(arrayName);
+        Open();
         return POS_EVENT_ID::SUCCESS; // just return success
     }
 
     // Can also choose update type base on mediaType
     if (INPLACE)
     {
-        mssInfo[mssIndex]->mssDiskPlace[index] = new MssDiskInplace(arrayName, mediaType, capacity);
+        mssDiskPlace[index] = new MssDiskInplace(arrayName, mediaType, capacity);
     }
     else
     {
         // out of place
     }
-    if (mssInfo[mssIndex]->mssDiskPlace[index] == nullptr)
+    if (mssDiskPlace[index] == nullptr)
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MEDIA_NULL,
             "Mss Disk Place is null");
         return POS_EVENT_ID::MFS_MEDIA_NULL;
     }
 
-    mssInfo[mssIndex]->metaCapacity[index] = mssInfo[mssIndex]->mssDiskPlace[index]->GetMetaDiskCapacity();
-    mssInfo[mssIndex]->totalBlks[index] = mssInfo[mssIndex]->metaCapacity[index] / ArrayConfig::BLOCK_SIZE_BYTE;
-    mssInfo[mssIndex]->maxPageCntLimitPerIO[index] = MAX_DATA_TRANSFER_BYTE_SIZE / ArrayConfig::BLOCK_SIZE_BYTE;
+    metaCapacity[index] = mssDiskPlace[index]->GetMetaDiskCapacity();
+    totalBlks[index] = metaCapacity[index] / ArrayConfig::BLOCK_SIZE_BYTE;
+    maxPageCntLimitPerIO[index] = MAX_DATA_TRANSFER_BYTE_SIZE / ArrayConfig::BLOCK_SIZE_BYTE;
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Media type(ssd=0, nvram=1)={}, Total free blocks={}, Capacity={}",
@@ -191,39 +136,33 @@ MssOnDisk::CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uin
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Meta storage mgmt is opened");
-    _SetState(MetaSsState::Ready);
 
     if (formatFlag)
     {
         // Format(mediaType, capacity);
     }
 
-    mssMap.insert(std::pair<std::string, uint32_t>(arrayName, mssIndex));
+    retryIoCnt = 0;
 
     return POS_EVENT_ID::SUCCESS;
 }
 
 POS_EVENT_ID
-MssOnDisk::Open(std::string arrayName)
+MssOnDisk::Open(void)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Meta storage mgmt is ready");
-    _SetState(MetaSsState::Ready);
 
     return POS_EVENT_ID::SUCCESS;
 }
 
 POS_EVENT_ID
-MssOnDisk::Close(std::string arrayName)
+MssOnDisk::Close(void)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Meta storage mgmt is closed");
 
-    _Finalize(arrayName);
-
-    bool isTheLast = (0 == mssMap.size()) ? true : false;
-    if (isTheLast)
-        _SetState(MetaSsState::Close);
+    _Finalize();
 
     return POS_EVENT_ID::SUCCESS;
 }
@@ -237,30 +176,26 @@ MssOnDisk::Close(std::string arrayName)
  */
 
 uint64_t
-MssOnDisk::GetCapacity(std::string arrayName, MetaStorageType mediaType)
+MssOnDisk::GetCapacity(MetaStorageType mediaType)
 {
     int index = static_cast<int>(mediaType);
-    auto it = mssMap.find(arrayName);
-    assert(it != mssMap.end());
-    return mssInfo[it->second]->metaCapacity[index];
+    return metaCapacity[index];
 }
 
 POS_EVENT_ID
-MssOnDisk::_SendSyncRequest(IODirection direction, std::string arrayName, MetaStorageType mediaType, MetaLpnType pageNumber, MetaLpnType numPages, void* buffer)
+MssOnDisk::_SendSyncRequest(IODirection direction, MetaStorageType mediaType, MetaLpnType pageNumber, MetaLpnType numPages, void* buffer)
 {
     POS_EVENT_ID status = POS_EVENT_ID::SUCCESS;
     int index = static_cast<int>(mediaType);
-    auto it = mssMap.find(arrayName);
-    assert(it != mssMap.end());
 
-    if (true == _CheckSanityErr(arrayName, pageNumber, mssInfo[it->second]->totalBlks[index]))
+    if (true == _CheckSanityErr(pageNumber, totalBlks[index]))
     {
         return POS_EVENT_ID::MFS_INVALID_PARAMETER;
     }
 
     _AdjustPageIoToFitTargetPartition(mediaType, pageNumber, numPages);
 
-    MssDiskPlace* storagelld = mssInfo[it->second]->mssDiskPlace[(int)mediaType];
+    MssDiskPlace* storagelld = mssDiskPlace[(int)mediaType];
 
     // per-stripe io
     MetaLpnType currLpn = pageNumber, currLpnCnt = numPages;
@@ -336,9 +271,9 @@ MssOnDisk::_SendSyncRequest(IODirection direction, std::string arrayName, MetaSt
  */
 
 POS_EVENT_ID
-MssOnDisk::ReadPage(std::string arrayName, MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages)
+MssOnDisk::ReadPage(MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages)
 {
-    return _SendSyncRequest(IODirection::READ, arrayName, mediaType, pageNumber, numPages, buffer);
+    return _SendSyncRequest(IODirection::READ, mediaType, pageNumber, numPages, buffer);
 }
 
 /**
@@ -353,9 +288,9 @@ MssOnDisk::ReadPage(std::string arrayName, MetaStorageType mediaType, MetaLpnTyp
  */
 
 POS_EVENT_ID
-MssOnDisk::WritePage(std::string arrayName, MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages)
+MssOnDisk::WritePage(MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages)
 {
-    return _SendSyncRequest(IODirection::WRITE, arrayName, mediaType, pageNumber, numPages, buffer);
+    return _SendSyncRequest(IODirection::WRITE, mediaType, pageNumber, numPages, buffer);
 }
 
 void
@@ -366,7 +301,7 @@ MssOnDisk::_AdjustPageIoToFitTargetPartition(MetaStorageType mediaType, MetaLpnT
 }
 
 bool
-MssOnDisk::_CheckSanityErr(std::string arrayName, MetaLpnType pageNumber, uint64_t arrayCapacity)
+MssOnDisk::_CheckSanityErr(MetaLpnType pageNumber, uint64_t arrayCapacity)
 {
     if (pageNumber >= arrayCapacity)
     {
@@ -375,12 +310,7 @@ MssOnDisk::_CheckSanityErr(std::string arrayName, MetaLpnType pageNumber, uint64
             pageNumber, arrayCapacity);
         return true;
     }
-    if (!IsReady())
-    {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
-            "IO failed. Meta storage subsystem is not ready yet.");
-        return true;
-    }
+
     return false;
 }
 
@@ -396,12 +326,10 @@ MssOnDisk::_SendAsyncRequest(IODirection direction, MssAioCbCxt* cb)
     MetaStorageType mediaType = aioData->media;
     POS_EVENT_ID status = POS_EVENT_ID::SUCCESS;
     int index = static_cast<int>(mediaType);
-    auto it = mssMap.find(cb->GetArrayName());
-    assert(it != mssMap.end());
 
     assert(pos::BLOCK_SIZE == MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
 
-    if (true == _CheckSanityErr(cb->GetArrayName(), pageNumber, mssInfo[it->second]->totalBlks[index]))
+    if (true == _CheckSanityErr(pageNumber, totalBlks[index]))
     {
         return POS_EVENT_ID::MFS_INVALID_PARAMETER;
     }
@@ -411,7 +339,7 @@ MssOnDisk::_SendAsyncRequest(IODirection direction, MssAioCbCxt* cb)
     // FIXME: when async for multi-pages gets supported,
     // code below has to be revisited in order to send aio per stripe basis
 
-    MssDiskPlace* storagelld = mssInfo[it->second]->mssDiskPlace[(int)mediaType];
+    MssDiskPlace* storagelld = mssDiskPlace[(int)mediaType];
 
     CallbackSmartPtr callback(new MssIoCompletion(cb));
 
@@ -427,17 +355,17 @@ MssOnDisk::_SendAsyncRequest(IODirection direction, MssAioCbCxt* cb)
         (int)direction, aioData->tagId, aioData->mpioId,
         blkAddr.stripeId, blkAddr.offset, *(uint32_t*)buffer);
 
-    mssInfo[it->second]->retryIoCnt = 0;
+    retryIoCnt = 0;
     IOSubmitHandlerStatus ioStatus;
     do
     {
         ioStatus = IIOSubmitHandler::GetInstance()->SubmitAsyncIO(direction, bufferList,
             blkAddr, numPages /*4KB*/, storagelld->GetPartitionType(),
-            callback, cb->GetArrayName());
+            callback, arrayName);
         if (ioStatus == IOSubmitHandlerStatus::SUCCESS ||
             ioStatus == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
         {
-            mssInfo[it->second]->retryIoCnt = 0;
+            retryIoCnt = 0;
             break;
         }
 
@@ -447,7 +375,7 @@ MssOnDisk::_SendAsyncRequest(IODirection direction, MssAioCbCxt* cb)
             MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                 "[AsyncReq] Retry I/O Submit Hanlder... Cnt={}",
                 retryIoCnt);
-            mssInfo[it->second]->retryIoCnt++;
+            retryIoCnt++;
         }
     } while (1);
 
@@ -464,7 +392,7 @@ MssOnDisk::_SendAsyncRequest(IODirection direction, MssAioCbCxt* cb)
 }
 
 bool
-MssOnDisk::IsAIOSupport()
+MssOnDisk::IsAIOSupport(void)
 {
     return true;
 }
@@ -505,8 +433,8 @@ MssOnDisk::WritePageAsync(MssAioCbCxt* cb)
 }
 
 POS_EVENT_ID
-MssOnDisk::TrimFileData(std::string arrayName, MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages)
+MssOnDisk::TrimFileData(MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType numPages)
 {
-    return _SendSyncRequest(IODirection::TRIM, arrayName, mediaType, pageNumber, numPages, buffer);
+    return _SendSyncRequest(IODirection::TRIM, mediaType, pageNumber, numPages, buffer);
 }
 } // namespace pos

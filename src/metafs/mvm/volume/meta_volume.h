@@ -61,7 +61,7 @@ public:
     virtual void InitVolumeBaseLpn(void) = 0;
     virtual bool IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop) = 0;
 
-    void Init(void);
+    void Init(MetaStorageSubsystem* metaStorage);
     bool OpenVolume(MetaLpnType* info, bool isNPOR);
     bool CloseVolume(MetaLpnType* info, bool& resetContext /*output*/);
     bool CreateNewVolume(void);
@@ -122,7 +122,7 @@ private:
     void _RegisterRegionMgr(MetaRegionManagerType region, OnVolumeMetaRegionManager& mgr);
     void _BringupMgrs(void);
     void _FinalizeMgrs(void);
-    void _SetupRegionInfoToRegionMgrs(void);
+    void _SetupRegionInfoToRegionMgrs(MetaStorageSubsystem* metaStorage);
     bool _LoadAllVolumeMeta(MetaLpnType* info, bool isNPOR);
     MetaStorageType _GetVolStorageType(void);
 

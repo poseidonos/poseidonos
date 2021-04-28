@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "metafs_mbr_mgr.h"
+#include "src/metafs/msc/metafs_mbr_mgr.h"
 
 #include <utility>
 
@@ -55,6 +55,7 @@ void
 MetaFsMBRManager::Init(std::string arrayName, MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn)
 {
     assert(mediaType == MetaStorageType::SSD);
+    this->arrayName = arrayName;
 
     // note that Meta filesystem's MBR is only available upon SSD meta volume
     SetRegionInfo(mediaType, baseLpn, maxLpn);
@@ -74,30 +75,22 @@ MetaFsMBRManager::IsValidMBRExist(void)
 }
 
 bool
-MetaFsMBRManager::LoadMBR(std::string arrayName)
+MetaFsMBRManager::LoadMBR(void)
 {
     assert(mbr != nullptr);
-    this->arrayName = arrayName;
 
-    if (false == mbr->Load(arrayName))
+    if (false == mbr->Load())
     {
         return false;
     }
-    return true;
-}
 
-void
-MetaFsMBRManager::BuildMBR(void)
-{
-    assert(mbr != nullptr);
-    mbr->BuildMBR();
+    return true;
 }
 
 void
 MetaFsMBRManager::Bringup(void)
 {
     assert(mbr != nullptr);
-    mbr->BuildMBR();
 }
 
 uint64_t
@@ -111,7 +104,7 @@ MetaFsMBRManager::SaveContent(void)
 {
     assert(mbr != nullptr);
 
-    if (true != mbr->Store(arrayName))
+    if (true != mbr->Store())
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
             "Store I/O for MFS MBR content has failed...");
@@ -133,12 +126,17 @@ MetaFsMBRManager::Finalize(void)
 {
 }
 
+void
+MetaFsMBRManager::SetMss(MetaStorageSubsystem* mss)
+{
+    mbr->SetMss(mss);
+}
+
 bool
-MetaFsMBRManager::CreateMBR(std::string arrayName)
+MetaFsMBRManager::CreateMBR(void)
 {
     assert(mbr != nullptr);
     mbr->CreateMBR();
-    this->arrayName = arrayName;
 
     return SaveContent();
 }
@@ -192,173 +190,5 @@ MetaFsMBRManager::InvalidMBR(void)
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "The signature of MFS MBR on DRAM is corrupted during shutdown");
     }
-}
-
-MetaVolumeMbrMap::MetaVolumeMbrMap(void)
-{
-    mbrBitmap = new BitMap(MetaFsConfig::MAX_ARRAY_CNT);
-    mbrBitmap->ResetBitmap();
-    mbrMap.clear();
-
-    for (uint32_t index = 0; index < MetaFsConfig::MAX_ARRAY_CNT; index++)
-    {
-        mbrList[index] = nullptr;
-    }
-}
-
-MetaVolumeMbrMap::~MetaVolumeMbrMap(void)
-{
-    delete mbrBitmap;
-    mbrMap.clear();
-
-    for (uint32_t index = 0; index < MetaFsConfig::MAX_ARRAY_CNT; index++)
-    {
-        if (nullptr != mbrList[index])
-        {
-            delete mbrList[index];
-        }
-    }
-}
-
-void
-MetaVolumeMbrMap::Init(std::string& arrayName, MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn)
-{
-    uint32_t index = mbrBitmap->FindFirstZero();
-    mbrBitmap->SetBit(index);
-    mbrMap.insert(std::pair<std::string, uint32_t>(arrayName, index));
-    mbrList[index] = new MetaFsMBRManager();
-    mbrList[index]->Init(arrayName, mediaType, baseLpn, maxLpn);
-}
-
-void
-MetaVolumeMbrMap::Remove(std::string& arrayName)
-{
-    auto mbr = mbrMap.find(arrayName);
-    if (mbr == mbrMap.end())
-        return;
-
-    uint32_t index = mbr->second;
-    mbrBitmap->ClearBit(index);
-    mbrMap.erase(mbr);
-    delete mbrList[index];
-    mbrList[index] = nullptr;
-}
-
-void
-MetaVolumeMbrMap::RegisterVolumeGeometry(std::string& arrayName, MetaStorageInfo& mediaInfo)
-{
-    auto mbr = mbrMap.find(arrayName);
-    assert(mbr != mbrMap.end());
-
-    mbrList[mbr->second]->RegisterVolumeGeometry(mediaInfo);
-}
-
-bool
-MetaVolumeMbrMap::IsValidMBRExist(std::string& arrayName)
-{
-    auto mbr = mbrMap.find(arrayName);
-    assert(mbr != mbrMap.end());
-
-    return mbrList[mbr->second]->IsValidMBRExist();
-}
-
-MetaFsStorageIoInfoList&
-MetaVolumeMbrMap::GetAllStoragePartitionInfo(std::string& arrayName)
-{
-    auto mbr = mbrMap.find(arrayName);
-    assert(mbr != mbrMap.end());
-
-    return mbrList[mbr->second]->GetAllStoragePartitionInfo();
-}
-
-MetaLpnType
-MetaVolumeMbrMap::GetRegionSizeInLpn(std::string& arrayName)
-{
-    auto mbr = mbrMap.find(arrayName);
-    assert(mbr != mbrMap.end());
-
-    return mbrList[mbr->second]->GetRegionSizeInLpn();
-}
-
-bool
-MetaVolumeMbrMap::CreateMBR(std::string& arrayName)
-{
-    auto mbr = mbrMap.find(arrayName);
-    assert(mbr != mbrMap.end());
-
-    return mbrList[mbr->second]->CreateMBR(arrayName);
-}
-
-bool
-MetaVolumeMbrMap::LoadMBR(std::string& arrayName)
-{
-    auto mbr = mbrMap.find(arrayName);
-    assert(mbr != mbrMap.end());
-
-    return mbrList[mbr->second]->LoadMBR(arrayName);
-}
-
-void
-MetaVolumeMbrMap::InvalidMBR(std::string& arrayName)
-{
-    auto mbr = mbrMap.find(arrayName);
-    assert(mbr != mbrMap.end());
-
-    mbrList[mbr->second]->InvalidMBR();
-}
-
-uint64_t
-MetaVolumeMbrMap::GetEpochSignature(std::string& arrayName)
-{
-    auto mbr = mbrMap.find(arrayName);
-
-    // can be first read
-    if (mbr == mbrMap.end())
-        return 0;
-
-    return mbrList[mbr->second]->GetEpochSignature();
-}
-
-void
-MetaVolumeMbrMap::SetPowerStatus(std::string& arrayName, bool isNPOR)
-{
-    auto mbr = mbrMap.find(arrayName);
-    assert(mbr != mbrMap.end());
-
-    mbrList[mbr->second]->SetPowerStatus(isNPOR);
-}
-
-bool
-MetaVolumeMbrMap::GetPowerStatus(std::string& arrayName)
-{
-    auto mbr = mbrMap.find(arrayName);
-    assert(mbr != mbrMap.end());
-
-    return mbrList[mbr->second]->GetPowerStatus();
-}
-
-bool
-MetaVolumeMbrMap::SaveContent(std::string& arrayName)
-{
-    auto mbr = mbrMap.find(arrayName);
-    assert(mbr != mbrMap.end());
-
-    return mbrList[mbr->second]->SaveContent();
-}
-
-bool
-MetaVolumeMbrMap::IsMbrLoaded(std::string& arrayName)
-{
-    auto mbr = mbrMap.find(arrayName);
-    if (mbr != mbrMap.end())
-        return true;
-    else
-        return false;
-}
-
-uint32_t
-MetaVolumeMbrMap::GetMountedMbrCount(void)
-{
-    return mbrMap.size();
 }
 } // namespace pos

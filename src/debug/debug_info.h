@@ -62,7 +62,7 @@ class UramDrv;
 class VersionProvider;
 class VolumeEventPublisher;
 class VolumeService;
-class MetaVolumeManager;
+class MetaFsService;
 
 extern DebugInfo* debugInfo;
 
@@ -88,7 +88,7 @@ private:
     IODispatcher* ioDispatcher;
     Logger* logger;
     MapperService* mapperService;
-    MetaVolumeManager* metaVolumeManager;
+    MetaFsService* metaFsService;
     QosManager *qosManager;
     RBAStateService* rbaStateService;
     Reporter* reporter;

@@ -37,7 +37,7 @@
 #include "mf_lock_type.h"
 #include "mf_pagemap.h"
 #include "metafs_common.h"
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 #include "on_volume_meta_region_mgr.h"
 
 #include <string>
@@ -58,6 +58,7 @@ public:
     virtual MetaLpnType GetRegionSizeInLpn(void) override;
     virtual void Bringup(void) override;
     virtual void Finalize(void) override;
+    virtual void SetMss(MetaStorageSubsystem* metaStorage);
     virtual bool
     SaveContent(void) override
     { /*do nothing*/

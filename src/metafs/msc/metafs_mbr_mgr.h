@@ -35,7 +35,7 @@
 #include <array>
 #include <string>
 #include "metafs_mbr.h"
-#include "meta_storage_info.h"
+#include "src/metafs/include/meta_storage_info.h"
 #include "msc_req.h"
 #include "meta_region_mgr.h"
 #include "src/lib/bitmap.h"
@@ -53,12 +53,12 @@ public:
     virtual bool SaveContent(void) override;
     virtual MetaLpnType GetRegionSizeInLpn(void) override;
     virtual void Finalize(void) override;
+    virtual void SetMss(MetaStorageSubsystem* mss);
 
     bool IsValidMBRExist(void);
     uint64_t GetEpochSignature(void);
-    bool LoadMBR(std::string arrayName);
-    void BuildMBR(void);
-    bool CreateMBR(std::string arrayName);
+    bool LoadMBR(void);
+    bool CreateMBR(void);
     void RegisterVolumeGeometry(MetaStorageInfo& mediaInfo);
     MetaFsStorageIoInfoList& GetAllStoragePartitionInfo(void);
 
@@ -71,34 +71,4 @@ public:
 private:
     MetaFsMBR* mbr;
 };
-
-class MetaVolumeMbrMap
-{
-public:
-    MetaVolumeMbrMap(void);
-    ~MetaVolumeMbrMap(void);
-
-    void Init(std::string& arrayName, MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn = 0);
-    void Remove(std::string& arrayName);
-    void RegisterVolumeGeometry(std::string& arrayName, MetaStorageInfo& mediaInfo);
-    bool IsValidMBRExist(std::string& arrayName);
-    MetaFsStorageIoInfoList& GetAllStoragePartitionInfo(std::string& arrayName);
-    MetaLpnType GetRegionSizeInLpn(std::string& arrayName);
-    bool CreateMBR(std::string& arrayName);
-    bool LoadMBR(std::string& arrayName);
-    void InvalidMBR(std::string& arrayName);
-    uint64_t GetEpochSignature(std::string& arrayName);
-    void SetPowerStatus(std::string& arrayName, bool isNPOR);
-    bool GetPowerStatus(std::string& arrayName);
-    bool SaveContent(std::string& arrayName);
-    bool IsMbrLoaded(std::string& arrayName);
-    uint32_t GetMountedMbrCount(void);
-
-private:
-    BitMap* mbrBitmap;
-    std::unordered_map<std::string, uint32_t> mbrMap;
-    MetaFsMBRManager* mbrList[MetaFsConfig::MAX_ARRAY_CNT];
-};
-
-// extern MetaFsMBRManager metafsMBRMgr;
 } // namespace pos

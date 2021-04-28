@@ -99,7 +99,7 @@ public:
     virtual ~Mio(void);
 
     virtual void InitStateHandler(void) override;
-    void Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn);
+    void Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* metaStorage);
     void Reset(void);
 
     void SetMpioDoneNotifier(PartialMpioDoneCb& partialMpioDoneHandler);
@@ -138,7 +138,6 @@ private:
     void _FinalizeMpio(Mpio& mpio);
     void _NotifyIoCompletionToClient(void);
     Mpio* _AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO);
-    uint32_t _GetDataChunkSize(void);
     void _HandleMpioDone(void* data);
     MpioType _LookupMpioType(MetaIoRequestType type);
 
@@ -160,6 +159,8 @@ private:
     PartialMpioDoneCb partialMpioDoneNotifier;
     MpioDonePollerCb mpioDonePoller;
     MpioAsyncDoneCb mpioAsyncDoneCallback;
+
+    MetaStorageSubsystem* metaStorage = nullptr;
 };
 
 extern InstanceTagIdAllocator mioTagIdAllocator;

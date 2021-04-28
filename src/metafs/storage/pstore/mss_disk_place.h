@@ -67,9 +67,6 @@ protected:
     MetaStorageType mediaType;
     pos::PartitionType partitionType;
     pos::IArrayInfo* array;
-
-private:
-    bool isActive;
 };
 } // namespace pos
 

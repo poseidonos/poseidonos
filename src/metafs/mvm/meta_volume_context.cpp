@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "meta_volume_context.h"
 #include "metafs_log.h"
 
@@ -46,19 +45,18 @@ MetaVolumeContext::~MetaVolumeContext(void)
 }
 
 void
-MetaVolumeContext::InitContext(MetaVolumeType volumeType, std::string arrayName, MetaLpnType maxVolPageNum)
+MetaVolumeContext::InitContext(MetaVolumeType volumeType, std::string arrayName, MetaLpnType maxVolPageNum, MetaStorageSubsystem* metaStorage)
 {
-    MetaVolume* volume = _InitVolume(volumeType, arrayName, maxVolPageNum);
-    volumeMap.RegisterVolumeInstance(volumeType, arrayName, volume);
+    MetaVolume* volume = _InitVolume(volumeType, arrayName, maxVolPageNum, metaStorage);
+    volumeContainer.RegisterVolumeInstance(volumeType, volume);
 
-    // TODO munseop.lim
     _SetGlobalMaxFileSizeLimit(maxVolPageNum);
 }
 
 bool
-MetaVolumeContext::CreateVolume(MetaVolumeType volumeType, std::string arrayName)
+MetaVolumeContext::CreateVolume(MetaVolumeType volumeType)
 {
-    MetaVolume& volume = volumeMap.GetMetaVolume(volumeType, arrayName);
+    MetaVolume& volume = volumeContainer.GetMetaVolume(volumeType);
 
     if (false == volume.CreateNewVolume())
     {
@@ -76,9 +74,9 @@ MetaVolumeContext::CreateVolume(MetaVolumeType volumeType, std::string arrayName
 }
 
 bool
-MetaVolumeContext::Open(bool isNPOR, std::string arrayName)
+MetaVolumeContext::Open(bool isNPOR)
 {
-    bool isSuccess = volumeMap.OpenAllVolumes(isNPOR, arrayName);
+    bool isSuccess = volumeContainer.OpenAllVolumes(isNPOR);
 
     if (!isSuccess)
     {
@@ -88,8 +86,8 @@ MetaVolumeContext::Open(bool isNPOR, std::string arrayName)
         return false;
     }
 
-    _BuildFreeFDMap(arrayName);
-    _BuildFileNameLookupTable(arrayName);
+    _BuildFreeFDMap();
+    _BuildFileNameLookupTable();
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "All volumes have been opened.");
@@ -98,36 +96,49 @@ MetaVolumeContext::Open(bool isNPOR, std::string arrayName)
 }
 
 bool
-MetaVolumeContext::Close(bool& resetCxt, std::string arrayName)
+MetaVolumeContext::Close(bool& resetCxt)
 {
-    bool isSuccess = volumeMap.CloseAllVolumes(resetCxt /* output */, arrayName);
+    bool ret = false;
+    bool isSuccess = volumeContainer.CloseAllVolumes(resetCxt /* output */);
 
     if (!isSuccess)
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
             "Meta volume close has been failed.");
+
+        if (resetCxt == true)
+        {
+            fdMgr.Reset(); // FDMap, filekey2FDLookupMap
+        }
+
+        return false;
     }
     else
     {
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "Meta volume has been closed successfully.");
+
+        fdMgr.Reset(); // FDMap, filekey2FDLookupMap
+
+        return true;
     }
 
-    return isSuccess;
+    return ret;
 }
 
 #if (1 == COMPACTION_EN) || not defined COMPACTION_EN
 bool
-MetaVolumeContext::Compaction(bool isNPOR, std::string arrayName)
+MetaVolumeContext::Compaction(bool isNPOR)
 {
-    return volumeMap.Compaction(arrayName);
+    return volumeContainer.Compaction();
 }
 #endif
 
 bool
-MetaVolumeContext::IsFileInodeExist(std::string& fileName, std::string& arrayName)
+MetaVolumeContext::IsFileInodeExist(std::string& fileName)
 {
-    bool isExist = volumeMap.IsGivenFileCreated(fileName, arrayName);
+    StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
+    bool isExist = fdMgr.IsGivenFileCreated(fileKey);
 
     return isExist;
 }
@@ -156,83 +167,83 @@ MetaVolumeContext::CalculateDataChunkSizeInPage(MetaFilePropertySet& prop)
 }
 
 std::pair<MetaVolumeType, POS_EVENT_ID>
-MetaVolumeContext::DetermineVolumeToCreateFile(FileSizeType fileByteSize, MetaFilePropertySet& prop, std::string arrayName)
+MetaVolumeContext::DetermineVolumeToCreateFile(FileSizeType fileByteSize, MetaFilePropertySet& prop)
 {
-    return volumeMap.IsPossibleToCreateFile(fileByteSize, prop, arrayName);
+    return volumeContainer.DetermineVolumeToCreateFile(fileByteSize, prop);
 }
 
 std::pair<MetaVolumeType, POS_EVENT_ID>
-MetaVolumeContext::LookupMetaVolumeType(FileDescriptorType fd, std::string arrayName)
+MetaVolumeContext::LookupMetaVolumeType(FileDescriptorType fd)
 {
-    return volumeMap.FindMetaVolumeType(fd, arrayName);
+    return volumeContainer.LookupMetaVolumeType(fd);
 }
 
 std::pair<MetaVolumeType, POS_EVENT_ID>
-MetaVolumeContext::LookupMetaVolumeType(std::string& fileName, std::string arrayName)
+MetaVolumeContext::LookupMetaVolumeType(std::string& fileName)
 {
-    return volumeMap.FindMetaVolumeType(fileName, arrayName);
+    return volumeContainer.LookupMetaVolumeType(fileName);
 }
 
 MetaVolume&
-MetaVolumeContext::GetMetaVolume(MetaVolumeType volType, std::string arrayName)
+MetaVolumeContext::GetMetaVolume(MetaVolumeType volType)
 {
-    return volumeMap.GetMetaVolume(volType, arrayName);
+    return volumeContainer.GetMetaVolume(volType);
 }
 
 bool
-MetaVolumeContext::IsGivenVolumeExist(MetaVolumeType volType, std::string arrayName)
+MetaVolumeContext::IsGivenVolumeExist(MetaVolumeType volType)
 {
-    return volumeMap.IsGivenVolumeExist(volType, arrayName);
+    return volumeContainer.IsGivenVolumeExist(volType);
 }
 
 bool
-MetaVolumeContext::GetVolOpenFlag(std::string arrayName)
+MetaVolumeContext::GetVolOpenFlag(void)
 {
-    return volumeMap.GetVolOpenFlag(arrayName);
+    return volumeContainer.GetVolOpenFlag();
 }
 
 MetaLpnType
-MetaVolumeContext::GetMaxMetaLpn(MetaVolumeType volType, std::string arrayName)
+MetaVolumeContext::GetMaxMetaLpn(MetaVolumeType volType)
 {
-    return volumeMap.GetMaxMetaLpn(volType, arrayName);
+    return volumeContainer.GetMetaVolume(volType).GetMaxLpn();
 }
 
 size_t
-MetaVolumeContext::GetTheBiggestExtentSize(MetaVolumeType volType, std::string arrayName)
+MetaVolumeContext::GetTheBiggestExtentSize(MetaVolumeType volType)
 {
-    MetaFileManager& fileMgr = _GetFileManager(volType, arrayName);
+    MetaFileManager& fileMgr = _GetFileManager(volType);
     return fileMgr.GetTheBiggestExtentSize();
 }
 
 bool
-MetaVolumeContext::CheckFileInActive(MetaVolumeType volType, FileDescriptorType fd, std::string arrayName)
+MetaVolumeContext::CheckFileInActive(MetaVolumeType volType, FileDescriptorType fd)
 {
-    MetaFileManager& fileMgr = _GetFileManager(volType, arrayName);
+    MetaFileManager& fileMgr = _GetFileManager(volType);
     return fileMgr.CheckFileInActive(fd);
 }
 
 POS_EVENT_ID
-MetaVolumeContext::AddFileInActiveList(MetaVolumeType volType, FileDescriptorType fd, std::string arrayName)
+MetaVolumeContext::AddFileInActiveList(MetaVolumeType volType, FileDescriptorType fd)
 {
-    MetaFileManager& fileMgr = _GetFileManager(volType, arrayName);
+    MetaFileManager& fileMgr = _GetFileManager(volType);
     return fileMgr.AddFileInActiveList(fd);
 }
 
 void
-MetaVolumeContext::RemoveFileFromActiveList(MetaVolumeType volType, FileDescriptorType fd, std::string arrayName)
+MetaVolumeContext::RemoveFileFromActiveList(MetaVolumeType volType, FileDescriptorType fd)
 {
-    MetaFileManager& fileMgr = _GetFileManager(volType, arrayName);
+    MetaFileManager& fileMgr = _GetFileManager(volType);
     fileMgr.RemoveFileFromActiveList(fd);
 }
 
 bool
 MetaVolumeContext::TrimData(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    FileDescriptorType fd = LookupFileDescByName(*reqMsg.fileName, *reqMsg.arrayName);
-    MetaFileInodeManager& inodeMgr = _GetInodeManager(volType, *reqMsg.arrayName);
-    MetaFileInode& inode = inodeMgr.GetFileInode(fd, *reqMsg.arrayName);
+    FileDescriptorType fd = LookupFileDescByName(*reqMsg.fileName);
+    MetaFileInodeManager& inodeMgr = _GetInodeManager(volType);
+    MetaFileInode& inode = inodeMgr.GetFileInode(fd);
     MetaFilePageMap pageMap = inode.GetInodePageMap();
-    MetaFileManager& fileMgr = _GetFileManager(volType, *reqMsg.arrayName);
+    MetaFileManager& fileMgr = _GetFileManager(volType);
 
     return fileMgr.TrimData(inode.GetStorageType(), pageMap.baseMetaLpn,
         pageMap.pageCnt);
@@ -241,11 +252,11 @@ MetaVolumeContext::TrimData(MetaVolumeType volType, MetaFsFileControlRequest& re
 bool
 MetaVolumeContext::CreateFileInode(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    MetaFileInodeManager& inodeMgr = _GetInodeManager(volType, *reqMsg.arrayName);
-    FileDescriptorType newFD = _AllocFileDescriptor(*reqMsg.fileName, *reqMsg.arrayName);
-    MetaFilePageMap pageMap = _AllocExtent(volType, reqMsg.fileByteSize, *reqMsg.arrayName);
+    MetaFileInodeManager& inodeMgr = _GetInodeManager(volType);
+    FileDescriptorType newFD = _AllocFileDescriptor(*reqMsg.fileName);
+    MetaFilePageMap pageMap = _AllocExtent(volType, reqMsg.fileByteSize);
     FileSizeType dataChunkSizeInMetaPage = CalculateDataChunkSizeInPage(reqMsg.fileProperty);
-    _CopyExtentContent(volType, *reqMsg.arrayName);
+    _CopyExtentContent(volType);
 
     bool isSuccess = inodeMgr.CreateFileInode(reqMsg, newFD,
         pageMap, dataChunkSizeInMetaPage);
@@ -256,8 +267,8 @@ MetaVolumeContext::CreateFileInode(MetaVolumeType volType, MetaFsFileControlRequ
     }
 
     StringHashType fnameHashKey = MetaFileUtil::GetHashKeyFromFileName(*reqMsg.fileName);
-    _UpdateVolumeLookupInfo(fnameHashKey, newFD, *reqMsg.arrayName, volType);
-    _InsertFileDescLookupHash(*reqMsg.fileName, newFD, *reqMsg.arrayName);
+    _UpdateVolumeLookupInfo(fnameHashKey, newFD, volType);
+    _InsertFileDescLookupHash(*reqMsg.fileName, newFD);
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Metadata File] Create volType={}, fd={}, fileName={}, startLpn={}, count={}",
@@ -270,22 +281,22 @@ bool
 MetaVolumeContext::DeleteFileInode(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
     StringHashType fnameHashKey = MetaFileUtil::GetHashKeyFromFileName(*reqMsg.fileName);
-    FileDescriptorType fd = LookupFileDescByName(*reqMsg.fileName, *reqMsg.arrayName);
+    FileDescriptorType fd = LookupFileDescByName(*reqMsg.fileName);
 
-    MetaLpnType baseLpn = GetFileBaseLpn(volType, fd, *reqMsg.arrayName);
-    MetaLpnType count = GetFileSize(volType, fd, *reqMsg.arrayName) / GetDataChunkSize(volType, fd, *reqMsg.arrayName);
+    MetaLpnType baseLpn = GetFileBaseLpn(volType, fd);
+    MetaLpnType count = GetFileSize(volType, fd) / GetDataChunkSize(volType, fd);
 
-    MetaFileInodeManager& inodeMgr = _GetInodeManager(volType, *reqMsg.arrayName);
+    MetaFileInodeManager& inodeMgr = _GetInodeManager(volType);
 
-    if (true != inodeMgr.DeleteFileInode(fd, *reqMsg.arrayName))
+    if (true != inodeMgr.DeleteFileInode(fd))
     {
         return false;
     }
 
     // delete fd in volumeContainer LookupTable
-    _RemoveVolumeLookupInfo(fnameHashKey, fd, *reqMsg.arrayName);
-    _FreeFileDescriptor(*reqMsg.fileName, fd, *reqMsg.arrayName);
-    _RemoveExtent(volType, baseLpn, count, *reqMsg.arrayName);
+    _RemoveVolumeLookupInfo(fnameHashKey, fd);
+    _FreeFileDescriptor(*reqMsg.fileName, fd);
+    _RemoveExtent(volType, baseLpn, count);
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Metadata File] Delete volType={}, fd={}, fileName={}, startLpn={}, count={}",
@@ -295,34 +306,37 @@ MetaVolumeContext::DeleteFileInode(MetaVolumeType volType, MetaFsFileControlRequ
 }
 
 FileSizeType
-MetaVolumeContext::GetFileSize(MetaVolumeType volType, FileDescriptorType fd, std::string arrayName)
+MetaVolumeContext::GetFileSize(MetaVolumeType volType, FileDescriptorType fd)
 {
-    MetaFileInodeManager& inodeMgr = _GetInodeManager(volType, arrayName);
-    return inodeMgr.GetFileSize(fd, arrayName);
+    MetaFileInodeManager& inodeMgr = _GetInodeManager(volType);
+    return inodeMgr.GetFileSize(fd);
 }
 
 FileSizeType
-MetaVolumeContext::GetDataChunkSize(MetaVolumeType volType, FileDescriptorType fd, std::string arrayName)
+MetaVolumeContext::GetDataChunkSize(MetaVolumeType volType, FileDescriptorType fd)
 {
-    MetaFileInodeManager& inodeMgr = _GetInodeManager(volType, arrayName);
-    return inodeMgr.GetDataChunkSize(fd, arrayName);
+    MetaFileInodeManager& inodeMgr = _GetInodeManager(volType);
+    return inodeMgr.GetDataChunkSize(fd);
 }
 
 MetaLpnType
-MetaVolumeContext::GetFileBaseLpn(MetaVolumeType volType, FileDescriptorType fd, std::string arrayName)
+MetaVolumeContext::GetFileBaseLpn(MetaVolumeType volType, FileDescriptorType fd)
 {
-    MetaFileInodeManager& inodeMgr = _GetInodeManager(volType, arrayName);
-    return inodeMgr.GetFileBaseLpn(fd, arrayName);
+    MetaFileInodeManager& inodeMgr = _GetInodeManager(volType);
+    return inodeMgr.GetFileBaseLpn(fd);
 }
 
 FileDescriptorType
-MetaVolumeContext::LookupFileDescByName(std::string& fileName, std::string arrayName)
+MetaVolumeContext::LookupFileDescByName(std::string& fileName)
 {
-    return volumeMap.FindFDByName(fileName, arrayName);
+    StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
+    FileDescriptorType fd = fdMgr.FindFDByName(fileKey);
+
+    return fd;
 }
 
 MetaVolume*
-MetaVolumeContext::_InitVolume(MetaVolumeType volType, std::string arrayName, MetaLpnType maxLpnNum)
+MetaVolumeContext::_InitVolume(MetaVolumeType volType, std::string arrayName, MetaLpnType maxLpnNum, MetaStorageSubsystem* metaStorage)
 {
     MetaVolume* volume;
     if (MetaVolumeType::SsdVolume == volType)
@@ -332,6 +346,7 @@ MetaVolumeContext::_InitVolume(MetaVolumeType volType, std::string arrayName, Me
     else if (MetaVolumeType::NvRamVolume == volType)
     {
         volume = new NvRamMetaVolume(arrayName, maxLpnNum);
+        volumeContainer.SetNvRamVolumeAvailable();
     }
     else
     {
@@ -340,7 +355,7 @@ MetaVolumeContext::_InitVolume(MetaVolumeType volType, std::string arrayName, Me
         assert(false);
     }
 
-    volume->Init();
+    volume->Init(metaStorage);
 
     return volume;
 }
@@ -355,84 +370,96 @@ MetaVolumeContext::_SetGlobalMaxFileSizeLimit(MetaLpnType maxVolumeLpn)
 }
 
 FileDescriptorType
-MetaVolumeContext::_AllocFileDescriptor(std::string& fileName, std::string& arrayName)
+MetaVolumeContext::_AllocFileDescriptor(std::string& fileName)
 {
-    return volumeMap.AllocFileDescriptor(fileName, arrayName);
+    FileDescriptorType fd = fdMgr.Alloc();
+    StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
+    fdMgr.InsertFileDescLookupHash(fileKey, fd);
+
+    return fd;
 }
 
 void
-MetaVolumeContext::_FreeFileDescriptor(std::string& fileName, FileDescriptorType fd, std::string& arrayName)
+MetaVolumeContext::_FreeFileDescriptor(std::string& fileName, FileDescriptorType fd)
 {
-    volumeMap.FreeFileDescriptor(fileName, fd, arrayName);
+    _RemoveFileDescLookupHash(fileName);
+    fdMgr.Free(fd);
 }
 
 MetaFilePageMap
-MetaVolumeContext::_AllocExtent(MetaVolumeType volType, FileSizeType fileSize, std::string& arrayName)
+MetaVolumeContext::_AllocExtent(MetaVolumeType volType, FileSizeType fileSize)
 {
-    MetaFileManager& fileMgr = _GetFileManager(volType, arrayName);
+    MetaFileManager& fileMgr = _GetFileManager(volType);
     return fileMgr.AllocExtent(fileSize);
 }
 
 void
-MetaVolumeContext::_UpdateVolumeLookupInfo(StringHashType fileHashKey, FileDescriptorType fd,
-                        std::string arrayName, MetaVolumeType volumeType)
+MetaVolumeContext::_UpdateVolumeLookupInfo(StringHashType fileHashKey, FileDescriptorType fd, MetaVolumeType volumeType)
 {
-    volumeMap.UpdateVolumeLookupInfo(fileHashKey, fd, arrayName, volumeType);
+    volumeContainer.UpdateVolumeLookupInfo(fileHashKey, fd, volumeType);
 }
 
 void
-MetaVolumeContext::_RemoveVolumeLookupInfo(StringHashType fileHashKey, FileDescriptorType fd,
-                        std::string arrayName)
+MetaVolumeContext::_RemoveVolumeLookupInfo(StringHashType fileHashKey, FileDescriptorType fd)
 {
-    volumeMap.RemoveVolumeLookupInfo(fileHashKey, fd, arrayName);
+    volumeContainer.RemoveVolumeLookupInfo(fileHashKey, fd);
 }
 
 void
-MetaVolumeContext::_RemoveExtent(MetaVolumeType volType, MetaLpnType baseLpn, FileSizeType fileSize, std::string& arrayName)
+MetaVolumeContext::_RemoveExtent(MetaVolumeType volType, MetaLpnType baseLpn, FileSizeType fileSize)
 {
-    MetaFileManager& fileMgr = _GetFileManager(volType, arrayName);
+    MetaFileManager& fileMgr = _GetFileManager(volType);
     fileMgr.RemoveExtent(baseLpn, fileSize);
 }
 
 void
-MetaVolumeContext::_InsertFileDescLookupHash(std::string& fileName, FileDescriptorType fd, std::string& arrayName)
+MetaVolumeContext::_InsertFileDescLookupHash(std::string& fileName, FileDescriptorType fd)
 {
-    volumeMap.InsertFileDescLookupHash(fileName, fd, arrayName);
+    StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
+    fdMgr.InsertFileDescLookupHash(fileKey, fd);
+}
+
+void
+MetaVolumeContext::_RemoveFileDescLookupHash(std::string& fileName)
+{
+    StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
+    fdMgr.EraseFileDescLookupHash(fileKey);
 }
 
 bool
-MetaVolumeContext::_CopyExtentContent(MetaVolumeType volType, std::string arrayName)
+MetaVolumeContext::_CopyExtentContent(MetaVolumeType volType)
 {
-    MetaVolume& volume = volumeMap.GetMetaVolume(volType, arrayName);
+    MetaVolume& volume = volumeContainer.GetMetaVolume(volType);
     return volume.CopyExtentContent();
 }
 
 void
-MetaVolumeContext::_BuildFreeFDMap(std::string arrayName)
+MetaVolumeContext::_BuildFreeFDMap(void)
 {
-    volumeMap.AddAllFDsInFreeFDMap(arrayName);
-    volumeMap.BuildFreeFDMap(arrayName);
+    fdMgr.AddAllFDsInFreeFDMap();
+    volumeContainer.BuildFreeFDMap(fdMgr.GetFreeFDMap());
 }
 
 void
-MetaVolumeContext::_BuildFileNameLookupTable(std::string arrayName)
+MetaVolumeContext::_BuildFileNameLookupTable(void)
 {
-    volumeMap.BuildFDLookup(arrayName);
+    volumeContainer.BuildFDLookup(fdMgr.GetFDLookupMap());
 }
 
 MetaFileManager&
-MetaVolumeContext::_GetFileManager(MetaVolumeType volType, std::string arrayName)
+MetaVolumeContext::_GetFileManager(MetaVolumeType volType)
 {
-    MetaVolume& volume = volumeMap.GetMetaVolume(volType, arrayName);
+    MetaVolume& volume = volumeContainer.GetMetaVolume(volType);
     MetaFileManager& fileMgr = volume.GetFileInstance();
     return fileMgr;
 }
 
 MetaFileInodeManager&
-MetaVolumeContext::_GetInodeManager(MetaVolumeType volType, std::string arrayName)
+MetaVolumeContext::_GetInodeManager(MetaVolumeType volType)
 {
-    MetaVolume& volume = volumeMap.GetMetaVolume(volType, arrayName);
+    MetaVolume& volume = volumeContainer.GetMetaVolume(volType);
     MetaFileInodeManager& inodeMgr = volume.GetInodeInstance();
     return inodeMgr;
 }
+
 } // namespace pos

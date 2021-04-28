@@ -54,7 +54,6 @@ OnVolumeMetaRegionManager::Init(std::string arrayName, MetaVolumeType volumeType
 void
 OnVolumeMetaRegionManager::Init(std::string arrayName, MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn)
 {
-    this->arrayName = arrayName;
     SetRegionInfo(mediaType, baseLpn, maxLpn);
 }
 } // namespace pos

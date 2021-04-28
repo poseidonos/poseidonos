@@ -36,77 +36,80 @@
 
 namespace pos
 {
-MetaFsReturnCode<POS_EVENT_ID>
-MetaFsManagementApi::MountSystem(std::string& arrayName)
+MetaFsManagementApi::MetaFsManagementApi(std::string arrayName)
+: arrayName(arrayName)
 {
-    MetaFsReturnCode<POS_EVENT_ID> rc;
+    sysMgr = new MetaFsSystemManager();
+}
+
+MetaFsManagementApi::~MetaFsManagementApi(void)
+{
+    delete sysMgr;
+}
+
+POS_EVENT_ID
+MetaFsManagementApi::InitializeSystem(std::string& arrayName,
+                                MetaStorageMediaInfoList* mediaInfoList)
+{
+    POS_EVENT_ID rc;
     MetaFsControlReqMsg reqMsg;
 
-    reqMsg.reqType = MetaFsControlReqType::MountSystem;
+    reqMsg.reqType = MetaFsControlReqType::InitializeSystem;
     reqMsg.arrayName = arrayName;
-    rc.returnData = 0;
-    rc = sysMgr.HandleNewRequest(reqMsg); // MetaFsSystemManager::_HandleMountReq()
+    reqMsg.mediaList = mediaInfoList;
+
+    rc = sysMgr->HandleNewRequest(reqMsg); // MetaFsSystemManager::_HandleInitializeRequest()
 
     return rc;
 }
 
-MetaFsReturnCode<POS_EVENT_ID>
-MetaFsManagementApi::UnmountSystem(std::string& arrayName)
+POS_EVENT_ID
+MetaFsManagementApi::CloseSystem(std::string& arrayName)
 {
-    MetaFsReturnCode<POS_EVENT_ID> rc;
+    POS_EVENT_ID rc;
     MetaFsControlReqMsg reqMsg;
 
-    reqMsg.reqType = MetaFsControlReqType::UnmountSystem;
+    reqMsg.reqType = MetaFsControlReqType::CloseSystem;
     reqMsg.arrayName = arrayName;
-    rc.returnData = 0;
-    rc = sysMgr.HandleNewRequest(reqMsg); // MetaFsSystemManager::_HandleUnmountReq()
+
+    rc = sysMgr->HandleNewRequest(reqMsg); // MetaFsSystemManager::_HandleCloseRequest()
 
     return rc;
 }
 
-MetaFsReturnCode<POS_EVENT_ID>
-MetaFsManagementApi::CreateSystem(std::string& arrayName)
+uint64_t
+MetaFsManagementApi::GetEpochSignature(void)
 {
-    MetaFsReturnCode<POS_EVENT_ID> rc;
-    MetaFsControlReqMsg reqMsg;
+    return sysMgr->GetEpochSignature();
+}
 
-    reqMsg.reqType = MetaFsControlReqType::CreateSystem;
-    reqMsg.arrayName = arrayName;
-    rc.returnData = 0;
-    rc = sysMgr.HandleNewRequest(reqMsg); // MetaFsSystemManager::_HandleFileSysCreateReq()
+MetaFsStorageIoInfoList&
+MetaFsManagementApi::GetAllStoragePartitionInfo(void)
+{
+    return sysMgr->GetAllStoragePartitionInfo();
+}
 
-    return rc;
+MetaLpnType
+MetaFsManagementApi::GetRegionSizeInLpn(void)
+{
+    return sysMgr->GetRegionSizeInLpn();
+}
+
+POS_EVENT_ID
+MetaFsManagementApi::LoadMbr(bool& isNPOR)
+{
+    return sysMgr->LoadMbr(isNPOR);
 }
 
 bool
-MetaFsManagementApi::IsSystemMounted(void)
+MetaFsManagementApi::CreateMbr(void)
 {
-    return sysMgr.IsMounted();
+    return sysMgr->CreateMbr();
 }
 
-bool
-MetaFsManagementApi::AddArray(std::string& arrayName)
+MetaStorageSubsystem*
+MetaFsManagementApi::GetMss(void)
 {
-    MetaFsReturnCode<POS_EVENT_ID> rc;
-    MetaFsControlReqMsg reqMsg;
-
-    reqMsg.reqType = MetaFsControlReqType::AddArray;
-    reqMsg.arrayName = arrayName;
-    rc = sysMgr.HandleNewRequest(reqMsg); // MetaFsSystemManager::_HandleAddArray()
-
-    return rc.IsSuccess();
-}
-
-bool
-MetaFsManagementApi::RemoveArray(std::string& arrayName)
-{
-    MetaFsReturnCode<POS_EVENT_ID> rc;
-    MetaFsControlReqMsg reqMsg;
-
-    reqMsg.reqType = MetaFsControlReqType::RemoveArray;
-    reqMsg.arrayName = arrayName;
-    rc = sysMgr.HandleNewRequest(reqMsg); // MetaFsSystemManager::_HandleRemoveArray()
-
-    return rc.IsSuccess();
+    return sysMgr->GetMss();
 }
 } // namespace pos

@@ -30,38 +30,35 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* 
- * PoseidonOS - Meta Filesystem Layer
- * 
- * Meta Filesystem Manager (metaFsMgr)
- */
-
-// A Meta Filesystem Layer instance accessible by upper modules
 #pragma once
 
-#include <string>
-#include "metafs_api_wrapper.h"
-#include "meta_storage_info.h"
-#include "metafs_mem_lib.h"
-#include "metafs_return_code.h"
-#include "mk/ibof_config.h"
-#include "metafs_wbt_api.h"
+#include "src/metafs/common/metafs_type.h"
+#include "src/metafs/include/meta_storage_specific.h"
 
 namespace pos
 {
-class MetaFs;
-extern MetaFs metaFs;
-
-// An external interface module for meta filesystem access
-class MetaFs
+class MetaFileContext
 {
 public:
-    bool Init(std::string arrayName, MetaStorageMediaInfoList& mediaInfoList);
+    MetaFileContext(void)
+    {
+        Reset();
+    }
 
-    // public interfaces which allows to lead to a set of functionalities
-    MetaFsIoApi io;
-    MetaFsManagementApi mgmt;
-    MetaFsFileControlApi ctrl;
-    MetaFsWBTApi wbt;
+    void Reset(void)
+    {
+        isActivated = false;
+        storageType = MetaStorageType::Default;
+        sizeInByte = 0;
+        fileBaseLpn = 0;
+        chunkSize = 0;
+    }
+
+    // from MetaFileManager::CheckFileInActive()
+    bool isActivated;
+    MetaStorageType storageType;
+    FileSizeType sizeInByte;
+    MetaLpnType fileBaseLpn;
+    FileSizeType chunkSize;
 };
 } // namespace pos

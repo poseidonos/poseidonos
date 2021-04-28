@@ -40,7 +40,7 @@
 #include "mim_state.h"
 #include "mpio_io_info.h"
 #include "mpio_state_execute_entry.h"
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 
 #define AsMpioStateEntryPoint(funcPointer, obj) AsEntryPointParam1(funcPointer, obj)
 
@@ -78,7 +78,7 @@ public:
     Mpio& operator=(const Mpio& mio) = delete;
     void Reset(void);
 
-    void Setup(MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO);
+    void Setup(MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage);
     void SetLocalAioCbCxt(MpioAsyncDoneCb& callback);
     virtual MpioType GetType(void) = 0;
     virtual void InitStateHandler(void) = 0;

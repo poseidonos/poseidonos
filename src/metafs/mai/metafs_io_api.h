@@ -38,26 +38,40 @@
 #pragma once
 
 #include <string>
-#include "metafs_adapter_include.h"
+#include "src/metafs/storage/mss.h"
+#include "src/metafs/mim/meta_io_manager.h"
+#include "src/metafs/mai/metafs_file_control_api.h"
 
 namespace pos
 {
 class MetaFsIoApi
 {
 public:
-    virtual MetaFsReturnCode<POS_EVENT_ID> Read(FileDescriptorType fd,
-                    std::string arrayName, void* buf);
-    virtual MetaFsReturnCode<POS_EVENT_ID> Read(FileDescriptorType fd,
-                    std::string arrayName, FileSizeType byteOffset,
+    MetaFsIoApi(std::string arrayName, MetaFsFileControlApi* ctrl);
+    virtual ~MetaFsIoApi(void);
+
+    virtual POS_EVENT_ID Read(FileDescriptorType fd, void* buf);
+    virtual POS_EVENT_ID Read(FileDescriptorType fd, FileSizeType byteOffset,
                     FileSizeType byteSize, void* buf);
-    virtual MetaFsReturnCode<POS_EVENT_ID> Write(FileDescriptorType fd,
-                    std::string arrayName, void* buf);
-    virtual MetaFsReturnCode<POS_EVENT_ID> Write(FileDescriptorType fd,
-                    std::string arrayName, FileSizeType byteOffset,
+    virtual POS_EVENT_ID Write(FileDescriptorType fd, void* buf);
+    virtual POS_EVENT_ID Write(FileDescriptorType fd, FileSizeType byteOffset,
                     FileSizeType byteSize, void* buf);
-    virtual MetaFsReturnCode<POS_EVENT_ID> SubmitIO(MetaFsAioCbCxt* cxt);
+    virtual POS_EVENT_ID SubmitIO(MetaFsAioCbCxt* cxt);
+
+    virtual bool AddArray(std::string& arrayName);
+    virtual bool RemoveArray(std::string& arrayName);
+
+    void SetMss(MetaStorageSubsystem* metaStorage);
 
 private:
-    IoManager ioMgr;
+    bool _AddFileInfo(MetaFsIoRequest& reqMsg);
+
+    void _AddExtraIoReqInfo(MetaFsIoRequest& reqMsg);
+    POS_EVENT_ID _CheckFileIoBoundary(MetaFsIoRequest& reqMsg);
+    POS_EVENT_ID _CheckReqSanity(MetaFsIoRequest& reqMsg);
+
+    std::string arrayName = "";
+    MetaIoManager* ioMgr;
+    MetaFsFileControlApi* ctrlMgr = nullptr;
 };
 } // namespace pos

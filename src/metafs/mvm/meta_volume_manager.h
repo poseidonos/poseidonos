@@ -39,6 +39,7 @@
 
 #include <string>
 #include <utility>
+#include "src/metafs/storage/mss.h"
 #include "metafs_manager_base.h"
 #include "file_descriptor_manager.h"
 #include "meta_file_manager.h"
@@ -55,8 +56,6 @@
 
 namespace pos
 {
-class MetaVolumeManager;
-extern MetaVolumeManager metaVolMgr;
 using MetaVolSpcfReqHandler = POS_EVENT_ID (MetaVolumeHandler::*)(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
 using GlobalMetaReqHandler = POS_EVENT_ID (MetaVolumeHandler::*)(MetaFsFileControlRequest& reqMsg);
 
@@ -64,38 +63,33 @@ class MetaVolumeManager : public MetaFsManagerBase
 {
 public:
     MetaVolumeManager(void);
-    ~MetaVolumeManager(void);
-    static MetaVolumeManager& GetInstance(void);
+    virtual ~MetaVolumeManager(void);
 
     const char* GetModuleName(void) override;
-    POS_EVENT_ID CheckReqSanity(MetaFsFileControlRequest& reqMsg);
+    POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
 
-    virtual void Init(MetaVolumeType volType, std::string arrayName, MetaLpnType maxVolPageNum);
-    virtual bool Bringup(void);
-    virtual bool Open(bool isNPOR, std::string arrayName);
-    virtual bool Close(bool& resetCxt /*output */, std::string arrayName);
-    virtual bool CreateVolume(MetaVolumeType volType, std::string arrayName);
+    virtual void InitVolume(MetaVolumeType volType, std::string arrayName, MetaLpnType maxVolPageNum);
+    virtual bool OpenVolume(bool isNPOR);
+    virtual bool CloseVolume(bool& resetCxt /*output */);
+    virtual bool CreateVolume(MetaVolumeType volType);
 #if (1 == COMPACTION_EN) || not defined COMPACTION_EN
-    virtual bool Compaction(bool isNPOR, std::string arrayName);
+    virtual bool Compaction(bool isNPOR);
 #endif
-    virtual MetaLpnType GetMaxMetaLpn(MetaVolumeType mediaType, std::string arrayName);
 
     // API for MetaFs MGMT API (File meta operation, Utility API to obtain specific file meta info.)
-    virtual POS_EVENT_ID ProcessNewReq(MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
     virtual bool
     GetVolOpenFlag(std::string arrayName)
     {
-        return volContext.GetVolOpenFlag(arrayName);
+        return volContext.GetVolOpenFlag();
     }
 
-    POS_EVENT_ID CheckFileAccessible(FileDescriptorType fd, std::string arrayName);
-    POS_EVENT_ID GetFileSize(FileDescriptorType fd, std::string arrayName, FileSizeType& outFileByteSize);
-    POS_EVENT_ID GetDataChunkSize(FileDescriptorType fd, std::string arrayName, FileSizeType& outDataChunkSize);
-    POS_EVENT_ID GetTargetMediaType(FileDescriptorType fd, std::string arrayName, MetaStorageType& outTargetMediaType);
-    POS_EVENT_ID GetFileBaseLpn(FileDescriptorType fd, std::string arrayName, MetaLpnType& outFileBaseLpn);
-
-protected:
-    virtual bool _IsSiblingModuleReady(void) override;
+    POS_EVENT_ID CheckFileAccessible(FileDescriptorType fd);
+    POS_EVENT_ID GetFileSize(FileDescriptorType fd, FileSizeType& outFileByteSize);
+    POS_EVENT_ID GetDataChunkSize(FileDescriptorType fd, FileSizeType& outDataChunkSize);
+    POS_EVENT_ID GetTargetMediaType(FileDescriptorType fd, MetaStorageType& outTargetMediaType);
+    POS_EVENT_ID GetFileBaseLpn(FileDescriptorType fd, MetaLpnType& outFileBaseLpn);
+    void SetMss(MetaStorageSubsystem* metaStorage);
 
 private:
     bool _IsVolumeSpecificRequest(MetaFsFileControlType reqType);
@@ -123,7 +117,6 @@ private:
 
     MetaVolumeHandler volHandler;
     MetaVolumeContext volContext;
+    MetaStorageSubsystem* metaStorage;
 };
-
-extern MetaVolumeManager& mvmTopMgr;
 } // namespace pos

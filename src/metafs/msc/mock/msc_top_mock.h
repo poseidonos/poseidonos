@@ -33,7 +33,7 @@
 #pragma once
 
 #include <string>
-#include "meta_storage_info.h"
+#include "src/metafs/include/meta_storage_info.h"
 #include "metafs_system_manager.h"
 #include "metafs_return_code.h"
 

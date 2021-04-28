@@ -36,96 +36,49 @@
 
 namespace pos
 {
-// WBT: Load file inode lists for each volume type
-MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, std::vector<MetaFileInfoDumpCxt>>
-MetaFsWBTApi::GetMetaFileList(std::string& arrayName)
+MetaFsWBTApi::MetaFsWBTApi(std::string arrayName, MetaFsFileControlApi* ctrl)
+: arrayName(arrayName),
+  ctrl(ctrl)
 {
-    MetaFsReturnCode<POS_EVENT_ID> rcMgmt;
-    MetaFsFileControlRequest reqMsg;
+}
 
-    reqMsg.reqType = MetaFsFileControlType::GetMetaFileInfoList;
-    reqMsg.arrayName = &arrayName;
+MetaFsWBTApi::~MetaFsWBTApi(void)
+{
+}
 
-    rcMgmt = mvm.HandleNewRequest(reqMsg); // MetaVolumeManager::_HandleGetMetaFileInodeListReq()
+// WBT: Load file inode lists for each volume type
+bool
+MetaFsWBTApi::GetMetaFileList(std::vector<MetaFileInfoDumpCxt>& result)
+{
+    result = ctrl->Wbt_GetMetaFileList();
 
-    MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, std::vector<MetaFileInfoDumpCxt>> rc;
-    if (rcMgmt.IsSuccess())
-    {
-        std::vector<MetaFileInfoDumpCxt>* fileInfoListPointer = reqMsg.completionData.fileInfoListPointer;
+    if (0 == result.size())
+        return false;
 
-        if (fileInfoListPointer == nullptr)
-        {
-            rc.sc = MetaFsStatusCodeWBTSpcf::Fail;
-            return rc;
-        }
-        for (unsigned int i = 0; i < (*fileInfoListPointer).size(); i++)
-        {
-            rc.returnData.push_back((*fileInfoListPointer)[i]);
-        }
-        delete fileInfoListPointer;
-
-        rc.sc = MetaFsStatusCodeWBTSpcf::Success;
-    }
-    else
-    {
-        rc.sc = MetaFsStatusCodeWBTSpcf::Fail;
-    }
-
-    return rc;
+    return true;
 }
 
 // WBT : Get max file size limit (max volume LPN * 95%)
-MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, FileSizeType>
-MetaFsWBTApi::GetMaxFileSizeLimit(void)
+bool
+MetaFsWBTApi::GetMaxFileSizeLimit(FileSizeType& result)
 {
-    MetaFsReturnCode<POS_EVENT_ID> rcMgmt;
-    MetaFsFileControlRequest reqMsg;
+    result = ctrl->Wbt_GetMaxFileSizeLimit();
 
-    reqMsg.reqType = MetaFsFileControlType::GetMaxFileSizeLimit;
+    if (0 == result)
+        return false;
 
-    rcMgmt = mvm.HandleNewRequest(reqMsg); // MetaVolumeManager::_HandleGetMaxFileSizeLimitReq()
-
-    MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, FileSizeType> rc;
-    rc.returnData = 0;
-    if (rcMgmt.IsSuccess())
-    {
-        rc.returnData = reqMsg.completionData.maxFileSizeByteLimit;
-        rc.sc = MetaFsStatusCodeWBTSpcf::Success;
-    }
-    else
-    {
-        rc.sc = MetaFsStatusCodeWBTSpcf::Fail;
-    }
-
-    return rc;
+    return true;
 }
 
 // WBT : Get file inode info. for the given meta file.
-MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, MetaFileInodeDumpCxt>
-MetaFsWBTApi::GetMetaFileInode(std::string& fileName, std::string& arrayName)
+bool
+MetaFsWBTApi::GetMetaFileInode(std::string& fileName, MetaFileInodeDumpCxt& result)
 {
-    MetaFsReturnCode<POS_EVENT_ID> rcMgmt;
-    MetaFsFileControlRequest reqMsg;
+    result = ctrl->Wbt_GetMetaFileInode(fileName);
 
-    reqMsg.reqType = MetaFsFileControlType::GetFileInode;
-    reqMsg.fileName = &fileName;
-    reqMsg.arrayName = &arrayName;
+    if (!result.inodeInfo.data.field.fileName)
+        return false;
 
-    rcMgmt = mvm.HandleNewRequest(reqMsg); // MetaVolumeManager::_HandleGetFileInodeReq()
-
-    MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, MetaFileInodeDumpCxt> rc;
-    if (rcMgmt.IsSuccess())
-    {
-        MetaFileInodeInfo* fileInodePointer = reqMsg.completionData.inodeInfoPointer;
-
-        rc.returnData.inodeInfo = *fileInodePointer;
-        rc.sc = MetaFsStatusCodeWBTSpcf::Success;
-    }
-    else
-    {
-        rc.sc = MetaFsStatusCodeWBTSpcf::Fail;
-    }
-
-    return rc;
+    return true;
 }
 } // namespace pos

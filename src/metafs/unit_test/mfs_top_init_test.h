@@ -31,7 +31,7 @@
  */
 
 #pragma once
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 #include "rte_eal.h"
 
 namespace pos

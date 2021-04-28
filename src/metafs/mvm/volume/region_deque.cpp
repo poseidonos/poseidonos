@@ -41,7 +41,7 @@ RegionDeque::InsertUsedRange(MetaFileInode* inode, uint64_t baseLpn, uint64_t co
     {
         remainedMetaLpnCount -= count;
     }
-    regionList.push_back(Region(arrayName, regionType, inode, baseLpn, count, inUse));
+    regionList.push_back(Region(arrayName, regionType, inode, baseLpn, count, inUse, metaStorage));
 
     return true;
 }

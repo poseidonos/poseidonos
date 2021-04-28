@@ -31,13 +31,20 @@
  */
 
 #include "metafs_file_intf.h"
-
+#include "src/metafs/include/metafs_service.h"
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 
 namespace pos
 {
+MetaFsFileIntf::MetaFsFileIntf(std::string fname, std::string aname)
+: MetaFileIntf(fname, aname),
+  metaFs(nullptr)
+{
+    metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(aname);
+}
+
 MetaFsFileIntf::~MetaFsFileIntf(void)
 {
 }
@@ -45,18 +52,9 @@ MetaFsFileIntf::~MetaFsFileIntf(void)
 int
 MetaFsFileIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 {
-    MetaFsReturnCode<POS_EVENT_ID> ioRC;
+    POS_EVENT_ID rc = metaFs->io->Read(fd, fileOffset, length, buffer);
 
-    if (!metaFs.mgmt.IsSystemMounted())
-    {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_UNMOUNTED,
-            "MFS is unmounted");
-        return -(int)POS_EVENT_ID::MFS_ERROR_UNMOUNTED;
-    }
-
-    ioRC = metaFs.io.Read(fd, arrayName, fileOffset, length, buffer);
-
-    if (!ioRC.IsSuccess())
+    if (POS_EVENT_ID::SUCCESS != rc)
         return -(int)POS_EVENT_ID::MFS_FILE_READ_FAILED;
 
     return (int)POS_EVENT_ID::SUCCESS;
@@ -65,18 +63,9 @@ MetaFsFileIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer
 int
 MetaFsFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 {
-    MetaFsReturnCode<POS_EVENT_ID> ioRC;
+    POS_EVENT_ID rc = metaFs->io->Write(fd, fileOffset, length, buffer);
 
-    /*if (!metaFs.mgmt.IsSystemMounted())
-    {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_UNMOUNTED,
-            "MFS is unmounted");
-        return -(int)POS_EVENT_ID::MFS_ERROR_UNMOUNTED;
-    }*/
-
-    ioRC = metaFs.io.Write(fd, arrayName, fileOffset, length, buffer);
-
-    if (!ioRC.IsSuccess())
+    if (POS_EVENT_ID::SUCCESS != rc)
         return -(int)POS_EVENT_ID::MFS_FILE_WRITE_FAILED;
 
     return (int)POS_EVENT_ID::SUCCESS;
@@ -85,14 +74,6 @@ MetaFsFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffe
 int
 MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 {
-    MetaFsReturnCode<POS_EVENT_ID> ioRC;
-
-    if (!metaFs.mgmt.IsSystemMounted())
-    {
-        POS_TRACE_ERROR(EID(MFS_ERROR_UNMOUNTED), "MFS is unmounted");
-        return -EID(MFS_ERROR_UNMOUNTED);
-    }
-
     ctx->ioDoneCheckCallback =
         std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
 
@@ -100,10 +81,10 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
         arrayName, ctx->fileOffset, ctx->length, (void*)ctx->buffer,
         AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx));
 
-    ioRC = metaFs.io.SubmitIO(aioCb);
+    POS_EVENT_ID rc = metaFs->io->SubmitIO(aioCb);
 
-    if (!ioRC.IsSuccess())
-        return -(int)ioRC.sc;
+    if (POS_EVENT_ID::SUCCESS != rc)
+        return -(int)rc;
 
     return EID(SUCCESS);
 }
@@ -125,8 +106,6 @@ MetaFsFileIntf::CheckIoDoneStatus(void* data)
 int
 MetaFsFileIntf::Create(uint64_t fileSize, StorageOpt storageOpt)
 {
-    MetaFsReturnCode<POS_EVENT_ID> mgmtRC;
-
     MetaFilePropertySet createProp;
     if (storageOpt == StorageOpt::NVRAM)
     {
@@ -139,8 +118,8 @@ MetaFsFileIntf::Create(uint64_t fileSize, StorageOpt storageOpt)
         // Use default
     }
 
-    mgmtRC = metaFs.ctrl.CreateVolume(fileName, arrayName, fileSize, createProp);
-    if (!mgmtRC.IsSuccess())
+    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, createProp);
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
         return -(int)POS_EVENT_ID::MFS_FILE_CREATE_FAILED;
     }
@@ -153,25 +132,22 @@ MetaFsFileIntf::Create(uint64_t fileSize, StorageOpt storageOpt)
 int
 MetaFsFileIntf::Open(void)
 {
-    MetaFsReturnCode<POS_EVENT_ID> mgmtRC;
-    mgmtRC = metaFs.ctrl.Open(fileName, arrayName);
+    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd);
 
-    if (!mgmtRC.IsSuccess())
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
         return -(int)POS_EVENT_ID::MFS_FILE_OPEN_FAILED;
     }
 
-    fd = mgmtRC.returnData;
     return MetaFileIntf::Open();
 }
 
 int
 MetaFsFileIntf::Close(void)
 {
-    MetaFsReturnCode<POS_EVENT_ID> mgmtRC;
-    mgmtRC = metaFs.ctrl.Close(fd, arrayName);
+    POS_EVENT_ID rc = metaFs->ctrl->Close(fd);
 
-    if (!mgmtRC.IsSuccess())
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
         return -(int)POS_EVENT_ID::MFS_FILE_CLOSE_FAILED;
     }
@@ -182,19 +158,17 @@ MetaFsFileIntf::Close(void)
 bool
 MetaFsFileIntf::DoesFileExist(void)
 {
-    MetaFsReturnCode<POS_EVENT_ID> mgmtRC;
-    mgmtRC = metaFs.ctrl.CheckFileExist(fileName, arrayName);
+    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(fileName);
 
-    return mgmtRC.IsSuccess();
+    return (POS_EVENT_ID::SUCCESS == rc);
 }
 
 int
 MetaFsFileIntf::Delete(void)
 {
-    MetaFsReturnCode<POS_EVENT_ID> mgmtRC;
-    mgmtRC = metaFs.ctrl.Delete(fileName, arrayName);
+    POS_EVENT_ID rc = metaFs->ctrl->Delete(fileName);
 
-    if (!mgmtRC.IsSuccess())
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
         return -(int)POS_EVENT_ID::MFS_FILE_DELETE_FAILED;
     }
@@ -205,7 +179,7 @@ MetaFsFileIntf::Delete(void)
 uint64_t
 MetaFsFileIntf::GetFileSize(void)
 {
-    return metaFs.ctrl.GetFileSize(fd, arrayName);
+    return metaFs->ctrl->GetFileSize(fd);
 }
 
 } // namespace pos

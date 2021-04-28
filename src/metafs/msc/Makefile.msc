@@ -33,16 +33,13 @@ MSC_SRCS += \
 	metafs_system_manager.cpp \
 	metafs_mbr.cpp \
 	metafs_mbr_mgr.cpp \
-	mfs_state_mgr.cpp \
 	mfs_state_machine.cpp \
-	mfs_state_procedure.cpp \
 
 endif
 
 ifeq ($(UT_MSC_EN), 1)
 UT_SRCS += \
 	msc_test.cpp \
-	metafs_system_manager_test.cpp \
 	mfs_mbr_test.cpp \
 	mfs_mbr_mgr_test.cpp \
 

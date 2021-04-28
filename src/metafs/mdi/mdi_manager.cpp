@@ -34,28 +34,13 @@
 
 namespace pos
 {
-MetaIntegrityManager metaDIMgr;
-MetaIntegrityManager* mdiTopMgr = &metaDIMgr;
-
 MetaIntegrityManager::MetaIntegrityManager(void)
 {
-}
-
-MetaIntegrityManager*
-MetaIntegrityManager::GetInstance(void)
-{
-    return &metaDIMgr;
 }
 
 const char*
 MetaIntegrityManager::GetModuleName(void)
 {
     return "Meta Data Integrity Manager";
-}
-
-bool
-MetaIntegrityManager::_IsSiblingModuleReady(void)
-{
-    return true;
 }
 } // namespace pos

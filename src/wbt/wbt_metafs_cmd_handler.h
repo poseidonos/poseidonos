@@ -41,9 +41,9 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
-#include "metafs.h"
 #include "nlohmann/json.hpp"
 #include "src/helper/json_helper.h"
+#include "src/metafs/metafs.h"
 #include "src/metafs/include/metafs_return_code.h"
 #include "src/metafs/include/mf_dataformat.h"
 

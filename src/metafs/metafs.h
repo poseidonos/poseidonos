@@ -32,38 +32,50 @@
 
 #pragma once
 
-#include <map>
 #include <string>
 
-#include "metafs_return_code.h"
-#include "mfs_state.h"
-#include "os_header.h"
-#include "metafs_mbr_mgr.h"
+#include "src/metafs/include/meta_storage_info.h"
+#include "src/metafs/mai/metafs_file_control_api.h"
+#include "src/metafs/mai/metafs_management_api.h"
+#include "src/metafs/mai/metafs_io_api.h"
+#include "src/metafs/mai/metafs_wbt_api.h"
+#include "src/metafs/storage/mss.h"
+
+#include "src/array_models/interface/i_mount_sequence.h"
+#include "src/array_models/interface/i_array_info.h"
 
 namespace pos
 {
-class MfsStateProcedure;
-using MetaFsStateProcedureFuncPointer = POS_EVENT_ID (MfsStateProcedure::*)(std::string& arrayName);
-
-class MfsStateProcedure
+class MetaFs : public IMountSequence
 {
 public:
-    MfsStateProcedure(void);
+    MetaFs(IArrayInfo* arrayInfo, bool isLoaded);
+    virtual ~MetaFs(void);
 
-    MetaFsStateProcedureFuncPointer DispatchProcedure(MetaFsSystemState state);
+    virtual int Init(void) override;
+    virtual void Dispose(void) override;
 
-    MetaVolumeMbrMap mbrMap;
+    uint64_t GetEpochSignature(void);
+    MetaStorageSubsystem* GetMss(void);
+
+    MetaFsManagementApi* mgmt = nullptr;
+    MetaFsIoApi* io = nullptr;
+    MetaFsFileControlApi* ctrl = nullptr;
+    MetaFsWBTApi* wbt = nullptr;
 
 private:
-    POS_EVENT_ID _ProcessSystemState_PowerOn(std::string& arrayName);
-    POS_EVENT_ID _ProcessSystemState_Init(std::string& arrayName);
-    POS_EVENT_ID _ProcessSystemState_Ready(std::string& arrayName);
-    POS_EVENT_ID _ProcessSystemState_Create(std::string& arrayName);
-    POS_EVENT_ID _ProcessSystemState_Open(std::string& arrayName);
-    POS_EVENT_ID _ProcessSystemState_Quiesce(std::string& arrayName);
-    POS_EVENT_ID _ProcessSystemState_Shutdown(std::string& arrayName);
-    POS_EVENT_ID _ProcessSystemState_Active(std::string& arrayName);
+    bool _Initialize(void);
+    POS_EVENT_ID _PrepareMetaVolume(void);
+    POS_EVENT_ID _OpenMetaVolume(void);
+    POS_EVENT_ID _CloseMetaVolume(void);
 
-    std::map<MetaFsSystemState, MetaFsStateProcedureFuncPointer> procLookupTable;
+    void _RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageMediaInfoList& mediaList);
+    MetaStorageInfo _MakeMetaStorageMediaInfo(PartitionType ptnType);
+
+    bool isNpor;
+    bool isLoaded;
+    IArrayInfo* arrayInfo;
+    std::string arrayName = "";
+    MetaStorageSubsystem* metaStorage;
 };
 } // namespace pos

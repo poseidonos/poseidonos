@@ -50,6 +50,7 @@ public:
     virtual void Bringup(void) override;
     virtual bool SaveContent(void) override;
     virtual void Finalize(void) override;
+    virtual void SetMss(MetaStorageSubsystem* metaStorage);
 
     bool LoadVolCatalog(void);
     bool CheckVolumeValidity(void);

@@ -47,14 +47,6 @@ class MetaIntegrityManager : public MetaFsManagerBase
 public:
     MetaIntegrityManager(void);
 
-    static MetaIntegrityManager* GetInstance(void);
     const char* GetModuleName(void);
-
-protected:
-    virtual bool _IsSiblingModuleReady(void) override;
-
-private:
 };
-
-extern MetaIntegrityManager metaDIMgr;
 } // namespace pos

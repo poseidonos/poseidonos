@@ -58,14 +58,14 @@ UT_PATH += \
 
 endif
 
-ifeq ($(UT_MIM_EN), 1)
-UT_SRCS += \
-	mim_func_positive_test.cpp \
-	mim_func_negative_test.cpp \
-    mim_test.cpp \
-	mim_io_range_overlap_chker_test.cpp 
-
-endif
+#ifeq ($(UT_MIM_EN), 1)
+#UT_SRCS += \
+#	mim_func_positive_test.cpp \
+#	mim_func_negative_test.cpp \
+#    mim_test.cpp \
+#	mim_io_range_overlap_chker_test.cpp 
+#
+#endif
 
 SRCS += $(MIM_SRCS)
 VPATH += $(UT_PATH)

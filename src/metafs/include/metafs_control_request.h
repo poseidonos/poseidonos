@@ -35,7 +35,8 @@
 #include <string>
 #include <vector>
 
-#include "meta_storage_specific.h"
+#include "src/metafs/include/meta_storage_specific.h"
+#include "meta_volume_type.h"
 #include "mf_lock_type.h"
 #include "metafs_common.h"
 #include "mf_property.h"
@@ -64,6 +65,7 @@ enum class MetaFsFileControlType
     GetFileSize,
     GetTargetMediaType,
     GetFileBaseLpn,
+    GetMaxMetaLpn,
 
     GetTheBiggestExtentSize,
 
@@ -100,6 +102,7 @@ public:
         FileDescriptorType openfd;
         FileSizeType dataChunkSize;
         FileSizeType fileSize;
+        FileSizeType maxLpn;
         bool fileAccessible;
         MetaStorageType targetMediaType;
         MetaLpnType fileBaseLpn;
@@ -114,7 +117,7 @@ public:
 };
 
 // Meta of Meta Req. Msg
-class MetaFsFileControlRequest
+class MetaFsFileControlRequest : public MetaFsRequestBase
 {
 public:
     MetaFsFileControlRequest(void)
@@ -123,6 +126,7 @@ public:
       fileName(nullptr),
       arrayName(nullptr),
       fileByteSize(MetaFsCommonConst::INVALID_BYTE_SIZE),
+      volType(MetaVolumeType::Max),
       lock(MetaFileLockType::Default)
     {
     }
@@ -142,6 +146,7 @@ public:
     std::string* fileName;
     std::string* arrayName;
     FileSizeType fileByteSize;
+    MetaVolumeType volType;
     MetaFileLockType lock;
 
     MetaFilePropertySet fileProperty; // used to file creation & format/reconfig

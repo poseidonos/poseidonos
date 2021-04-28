@@ -36,6 +36,7 @@
 #include <iomanip>
 #include <string>
 
+#include "src/metafs/include/metafs_service.h"
 #include "mk/ibof_config.h"
 #include "src/include/pos_event_id.h"
 #include "src/include/memory.h"
@@ -209,8 +210,8 @@ JournalConfiguration::_ReadMetaFsConfiguration(void)
     prop.ioOpType = MetaFileDominant::WriteDominant;
     prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
 
-    metaPageSize = metaFs.ctrl.EstimateAlignedFileIOSize(prop, arrayName);
-    maxPartitionSize = metaFs.ctrl.GetTheBiggestExtentSize(prop, arrayName);
+    metaPageSize = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->ctrl->EstimateAlignedFileIOSize(prop);
+    maxPartitionSize = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->ctrl->GetTheBiggestExtentSize(prop);
 #endif
 }
 

@@ -37,7 +37,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "metafs_adapter_include.h"
 #include "mfs_ut_framework.h"
 
 namespace pos

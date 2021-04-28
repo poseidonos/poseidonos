@@ -66,6 +66,7 @@ public:
     POS_EVENT_ID HandleCheckFileExist(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
     POS_EVENT_ID HandleCreateArrayReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
     POS_EVENT_ID HandleDeleteArrayReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    POS_EVENT_ID HandleGetMaxMetaLpnReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
 
     // WBT
     POS_EVENT_ID HandleGetMetaFileInodeListReq(MetaFsFileControlRequest& reqMsg);

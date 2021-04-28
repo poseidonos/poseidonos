@@ -1,6 +1,4 @@
 POS_ADD_UNIT_TEST(meta_file_util_ut meta_file_util_test.cpp)
-POS_ADD_UNIT_TEST(metafs_adapter_include_ut metafs_adapter_include_test.cpp)
-POS_ADD_UNIT_TEST(metafs_manager_adapter_ut metafs_manager_adapter_test.cpp)
 POS_ADD_UNIT_TEST(metafs_manager_base_ut metafs_manager_base_test.cpp)
 POS_ADD_UNIT_TEST(metafs_type_ut metafs_type_test.cpp)
 POS_ADD_UNIT_TEST(metafs_common_ut metafs_common_test.cpp)

@@ -35,30 +35,26 @@
 #include <string>
 #include <vector>
 
-#include "metafs_adapter_include.h"
-#include "mf_dataformat.h"
+#include "src/metafs/include/mf_dataformat.h"
+#include "src/metafs/mai/metafs_file_control_api.h"
+#include "src/metafs/mai/metafs_management_api.h"
 #include "mk/ibof_config.h"
 
 namespace pos
 {
-// WBT specific status code
-enum class MetaFsStatusCodeWBTSpcf
-{
-    Success = 0,
-    Fail,
-
-    MFS_END,
-};
-
 class MetaFsWBTApi
 {
 public:
-    MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, std::vector<MetaFileInfoDumpCxt>> GetMetaFileList(std::string& arrayName);
-    MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, FileSizeType> GetMaxFileSizeLimit(void);
-    MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, MetaFileInodeDumpCxt> GetMetaFileInode(std::string& fileName, std::string& arrayName);
+    MetaFsWBTApi(std::string arrayName, MetaFsFileControlApi* ctrl);
+    virtual ~MetaFsWBTApi(void);
+
+    bool GetMetaFileList(std::vector<MetaFileInfoDumpCxt>& result);
+    bool GetMaxFileSizeLimit(FileSizeType& result);
+    bool GetMetaFileInode(std::string& fileName, MetaFileInodeDumpCxt& result);
 
 private:
-    MetaFsVolumeManager mvm;
-    SystemManager msc;
+    std::string arrayName = "";
+
+    MetaFsFileControlApi* ctrl = nullptr;
 };
 } // namespace pos

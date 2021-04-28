@@ -34,58 +34,47 @@
 
 #include "metafs_manager_base.h"
 #include "metafs_return_code.h"
-#include "mfs_state_mgr.h"
 #include "msc_req.h"
-#include "meta_storage_info.h"
+#include "src/metafs/msc/metafs_mbr_mgr.h"
+#include "src/metafs/include/meta_storage_info.h"
 
 #include <string>
 
 namespace pos
 {
 class MetaFsSystemManager;
-extern MetaFsSystemManager mfsSysMgr;
 using MetaFsControlReqHandlerPointer = POS_EVENT_ID (MetaFsSystemManager::*)(MetaFsControlReqMsg&);
 
 class MetaFsSystemManager : public MetaFsManagerBase
 {
 public:
     MetaFsSystemManager(void);
-    ~MetaFsSystemManager(void);
-    static MetaFsSystemManager& GetInstance(void);
+    virtual ~MetaFsSystemManager(void);
 
     const char* GetModuleName(void) override;
     POS_EVENT_ID CheckReqSanity(MetaFsControlReqMsg& reqMsg);
 
     virtual bool Init(std::string& arrayName, MetaStorageMediaInfoList& mediaInfoList);
-    virtual bool Bringup(std::string& arrayName);
-    virtual POS_EVENT_ID ProcessNewReq(MetaFsControlReqMsg& reqMsg);
+    virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
+    virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
 
-    virtual bool IsMounted(void);
-
-    uint64_t GetEpochSignature(std::string& arrayName);
-
-protected:
-    virtual bool _IsSiblingModuleReady(void) override;
+    uint64_t GetEpochSignature(void);
+    MetaFsStorageIoInfoList& GetAllStoragePartitionInfo(void);
+    MetaLpnType GetRegionSizeInLpn(void);
+    POS_EVENT_ID LoadMbr(bool& isNPOR);
+    bool CreateMbr(void);
+    MetaStorageSubsystem* GetMss(void);
 
 private:
     void _InitReqHandler(void);
     void _RegisterReqHandler(MetaFsControlReqType reqType, MetaFsControlReqHandlerPointer handler);
-    void _InitiateSystemRecovery(void);
 
-    POS_EVENT_ID _HandleFileSysCreateReq(MetaFsControlReqMsg& reqMsg);
-    POS_EVENT_ID _HandleMountReq(MetaFsControlReqMsg& reqMsg);
-    POS_EVENT_ID _HandleUnmountReq(MetaFsControlReqMsg& reqMsg);
-    POS_EVENT_ID _HandleAddArray(MetaFsControlReqMsg& reqMsg);
-    POS_EVENT_ID _HandleRemoveArray(MetaFsControlReqMsg& reqMsg);
+    POS_EVENT_ID _HandleInitializeRequest(MetaFsControlReqMsg& reqMsg);
+    POS_EVENT_ID _HandleCloseRequest(MetaFsControlReqMsg& reqMsg);
 
     MetaFsControlReqHandlerPointer reqHandler[(uint32_t)MetaFsControlReqType::Max];
-    MetaFsStateManager mfsStateMgr; // note that stateMgr shouldn't be called by other modules
 
-    bool isMfsUnmounted;
-    bool isTheFirst;
-
-    MetaVolumeMbrMap& mbrMap;
+    MetaFsMBRManager* mbrMgr;
+    MetaStorageSubsystem* metaStorage;
 };
-
-extern MetaFsSystemManager& mscTopMgr;
 } // namespace pos

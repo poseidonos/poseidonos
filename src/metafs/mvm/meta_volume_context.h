@@ -50,7 +50,6 @@
 #include "metafs_control_request.h"
 #include "nvram_meta_volume.h"
 #include "ssd_meta_volume.h"
-#include "meta_volume_container_map.h"
 
 namespace pos
 {
@@ -60,69 +59,68 @@ public:
     MetaVolumeContext(void);
     ~MetaVolumeContext(void);
 
-    void InitContext(MetaVolumeType volumeType, std::string arrayName, MetaLpnType maxVolPageNum);
+    void InitContext(MetaVolumeType volumeType, std::string arrayName, MetaLpnType maxVolPageNum, MetaStorageSubsystem* metaStorage);
 
-    bool CreateVolume(MetaVolumeType volumeType, std::string arrayName);
-    bool Open(bool isNPOR, std::string arrayName);
-    bool Close(bool& resetCxt /*output*/, std::string arrayName);
+    bool CreateVolume(MetaVolumeType volumeType);
+    bool Open(bool isNPOR);
+    bool Close(bool& resetCxt /*output*/);
 
 #if (1 == COMPACTION_EN) || not defined COMPACTION_EN
-    bool Compaction(bool isNPOR, std::string arrayName);
+    bool Compaction(bool isNPOR);
 #endif
 
-    bool IsFileInodeExist(std::string& fileName, std::string& arrayName);
+    bool IsFileInodeExist(std::string& fileName);
     MetaLpnType GetGlobalMaxFileSizeLimit(void);
     FileSizeType CalculateDataChunkSizeInPage(MetaFilePropertySet& prop);
 
     // volume container
-    std::pair<MetaVolumeType, POS_EVENT_ID> DetermineVolumeToCreateFile(FileSizeType fileByteSize, MetaFilePropertySet& prop, std::string arrayName);
-    std::pair<MetaVolumeType, POS_EVENT_ID> LookupMetaVolumeType(FileDescriptorType fd, std::string arrayName);
-    std::pair<MetaVolumeType, POS_EVENT_ID> LookupMetaVolumeType(std::string& fileName, std::string arrayName);
-    MetaVolume& GetMetaVolume(MetaVolumeType volType, std::string arrayName);
-    bool IsGivenVolumeExist(MetaVolumeType volType, std::string arrayName);
-    bool GetVolOpenFlag(std::string arrayName);
-    MetaLpnType GetMaxMetaLpn(MetaVolumeType volType, std::string arrayName);
+    std::pair<MetaVolumeType, POS_EVENT_ID> DetermineVolumeToCreateFile(FileSizeType fileByteSize, MetaFilePropertySet& prop);
+    std::pair<MetaVolumeType, POS_EVENT_ID> LookupMetaVolumeType(FileDescriptorType fd);
+    std::pair<MetaVolumeType, POS_EVENT_ID> LookupMetaVolumeType(std::string& fileName);
+    MetaVolume& GetMetaVolume(MetaVolumeType volType);
+    bool IsGivenVolumeExist(MetaVolumeType volType);
+    bool GetVolOpenFlag(void);
+    MetaLpnType GetMaxMetaLpn(MetaVolumeType volType);
 
     // file mgr
-    size_t GetTheBiggestExtentSize(MetaVolumeType volType, std::string arrayName);
-    bool CheckFileInActive(MetaVolumeType volType, FileDescriptorType fd, std::string arrayName);
-    POS_EVENT_ID AddFileInActiveList(MetaVolumeType volType, FileDescriptorType fd, std::string arrayName);
-    void RemoveFileFromActiveList(MetaVolumeType volType, FileDescriptorType fd, std::string arrayName);
+    size_t GetTheBiggestExtentSize(MetaVolumeType volType);
+    bool CheckFileInActive(MetaVolumeType volType, FileDescriptorType fd);
+    POS_EVENT_ID AddFileInActiveList(MetaVolumeType volType, FileDescriptorType fd);
+    void RemoveFileFromActiveList(MetaVolumeType volType, FileDescriptorType fd);
     bool TrimData(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
 
     // inode mgr
     bool CreateFileInode(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
     bool DeleteFileInode(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    FileSizeType GetFileSize(MetaVolumeType volType, FileDescriptorType fd, std::string arrayName);
-    FileSizeType GetDataChunkSize(MetaVolumeType volType, FileDescriptorType fd, std::string arrayName);
-    MetaLpnType GetFileBaseLpn(MetaVolumeType volType, FileDescriptorType fd, std::string arrayName);
+    FileSizeType GetFileSize(MetaVolumeType volType, FileDescriptorType fd);
+    FileSizeType GetDataChunkSize(MetaVolumeType volType, FileDescriptorType fd);
+    MetaLpnType GetFileBaseLpn(MetaVolumeType volType, FileDescriptorType fd);
 
     // fd mgr
-    FileDescriptorType LookupFileDescByName(std::string& fileName, std::string arrayName);
+    FileDescriptorType LookupFileDescByName(std::string& fileName);
 
 private:
-    MetaVolume* _InitVolume(MetaVolumeType volType, std::string arrayName, MetaLpnType maxLpnNum);
+    MetaVolume* _InitVolume(MetaVolumeType volType, std::string arrayName, MetaLpnType maxLpnNum, MetaStorageSubsystem* metaStorage);
     void _SetGlobalMaxFileSizeLimit(MetaLpnType maxVolumeLpn);
 
-    FileDescriptorType _AllocFileDescriptor(std::string& fileName, std::string& arrayName);
-    void _FreeFileDescriptor(std::string& fileName, FileDescriptorType fd, std::string& arrayName);
-    MetaFilePageMap _AllocExtent(MetaVolumeType volType, FileSizeType fileSize, std::string& arrayName);
-    void _UpdateVolumeLookupInfo(StringHashType fileHashKey, FileDescriptorType fd,
-                        std::string arrayName, MetaVolumeType volumeType);
-    void _RemoveVolumeLookupInfo(StringHashType fileHashKey, FileDescriptorType fd,
-                        std::string arrayName);
-    void _RemoveExtent(MetaVolumeType volType, MetaLpnType baseLpn, FileSizeType fileSize, std::string& arrayName);
-    void _InsertFileDescLookupHash(std::string& fileName, FileDescriptorType fd, std::string& arrayName);
-    void _RemoveFileDescLookupHash(std::string& fileName, std::string& arrayName);
-    bool _CopyExtentContent(MetaVolumeType volType, std::string arrayName);
+    FileDescriptorType _AllocFileDescriptor(std::string& fileName);
+    void _FreeFileDescriptor(std::string& fileName, FileDescriptorType fd);
+    MetaFilePageMap _AllocExtent(MetaVolumeType volType, FileSizeType fileSize);
+    void _UpdateVolumeLookupInfo(StringHashType fileHashKey, FileDescriptorType fd, MetaVolumeType volumeType);
+    void _RemoveVolumeLookupInfo(StringHashType fileHashKey, FileDescriptorType fd);
+    void _RemoveExtent(MetaVolumeType volType, MetaLpnType baseLpn, FileSizeType fileSize);
+    void _InsertFileDescLookupHash(std::string& fileName, FileDescriptorType fd);
+    void _RemoveFileDescLookupHash(std::string& fileName);
+    bool _CopyExtentContent(MetaVolumeType volType);
 
-    void _BuildFreeFDMap(std::string arrayName);
-    void _BuildFileNameLookupTable(std::string arrayName);
+    void _BuildFreeFDMap(void);
+    void _BuildFileNameLookupTable(void);
 
-    MetaFileManager& _GetFileManager(MetaVolumeType volType, std::string arrayName);
-    MetaFileInodeManager& _GetInodeManager(MetaVolumeType volType, std::string arrayName);
+    MetaFileManager& _GetFileManager(MetaVolumeType volType);
+    MetaFileInodeManager& _GetInodeManager(MetaVolumeType volType);
 
-    MetaVolumeContainerMap volumeMap;
+    MetaVolumeContainer volumeContainer;
+    FileDescriptorManager fdMgr;
     MetaLpnType maxFileSizeLpnLimit;
 };
 } // namespace pos

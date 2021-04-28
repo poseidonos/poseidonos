@@ -113,10 +113,4 @@ MockMetaFsCoreManager::ProcessNewReq(MetaFsControlReqMsg& reqMsg)
     }
     return POS_EVENT_ID::SUCCESS;
 }
-
-bool
-MockMetaFsCoreManager::IsMounted(void)
-{
-    return true;
-}
 } // namespace pos

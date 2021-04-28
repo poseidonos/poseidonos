@@ -68,11 +68,12 @@ Mio::~Mio(void)
 }
 
 void
-Mio::Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn)
+Mio::Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* metaStorage)
 {
     assert(mpioPool != nullptr);
 
     originReq = ioReq;
+    this->metaStorage = metaStorage;
 
     fileDataChunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     opCode = ioOpcodeMap[static_cast<uint32_t>(originReq->reqType)];
@@ -196,7 +197,7 @@ Mio::_AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO)
     if (mpio == nullptr)
         return nullptr;
 
-    mpio->Setup(storageType, mpioIoInfo, partialIO, false /*forceSyncIO*/);
+    mpio->Setup(storageType, mpioIoInfo, partialIO, false /*forceSyncIO*/, metaStorage);
     mpio->SetLocalAioCbCxt(mpioAsyncDoneCallback);
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
@@ -352,17 +353,6 @@ Mio::_BuildMpioMap(void)
     } while (remainingBytes);
 }
 
-uint32_t
-Mio::_GetDataChunkSize(void)
-{
-    MetaFsFileControlRequest req;
-    req.reqType = MetaFsFileControlType::GetDataChunkSize;
-    req.fd = originReq->fd;
-
-    mvmTopMgr.ProcessNewReq(req);
-    return req.completionData.dataChunkSize;
-}
-
 MetaLpnType
 Mio::GetStartLpn(void)
 {
@@ -449,6 +439,8 @@ Mio::Complete(MioState expNextState)
     SetNextState(expNextState);
 
     ioCQ->Enqueue(this);
+
+    metaStorage = nullptr;
 
     return true;
 }

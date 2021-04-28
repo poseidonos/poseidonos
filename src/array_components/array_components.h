@@ -37,7 +37,7 @@
 #include "src/journal_manager/journal_manager.h"
 #include "src/mapper/mapper.h"
 #include "src/volume/volume_manager.h"
-#include "src/metafs/metafs_client.h"
+#include "src/metafs/metafs.h"
 #include "src/io/general_io/rba_state_manager.h"
 #include <vector>
 #include <string>
@@ -81,7 +81,7 @@ private:
     VolumeManager* volMgr = nullptr;
     Mapper* mapper = nullptr;
     Allocator* allocator = nullptr;
-    MetaFsClient* metafs = nullptr;
+    MetaFs* metafs = nullptr;
     RBAStateManager* rbaStateMgr = nullptr;
     vector<IMountSequence*> mountSequence;
 };

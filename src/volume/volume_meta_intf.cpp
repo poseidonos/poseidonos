@@ -34,7 +34,7 @@
 
 #include <rapidjson/document.h>
 #include <string>
-#include "metafs.h"
+#include "src/metafs/include/metafs_service.h"
 #include "src/helper/json_helper.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -47,30 +47,30 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName)
 {
     std::string volFile = "vbr";
     uint32_t fileSize = 256 * 1024; // 256KB
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
 
-    MetaFsReturnCode<POS_EVENT_ID> mgmtRC;
-    mgmtRC = metaFs.ctrl.CheckFileExist(volFile, arrayName);
-    if (!mgmtRC.IsSuccess())
+    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(volFile);
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
         return (int)POS_EVENT_ID::META_OPEN_FAIL;
     }
 
-    mgmtRC = metaFs.ctrl.Open(volFile, arrayName);
-    if (!mgmtRC.IsSuccess())
+    int fd = 0;
+    rc = metaFs->ctrl->Open(volFile, fd);
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::META_OPEN_FAIL, "Fail to open volume meta");
         return (int)POS_EVENT_ID::META_OPEN_FAIL;
     }
 
-    uint32_t fd = mgmtRC.returnData;
     char* rBuf = (char*)malloc(fileSize);
     memset(rBuf, 0, fileSize);
 
-    MetaFsReturnCode<POS_EVENT_ID> ioRC;
-    ioRC = metaFs.io.Read(fd, arrayName, rBuf); // for partial read: metaFsMgr.io.Read(fd, byteOffset, dataChunkSize, rBuf);
-    metaFs.ctrl.Close(fd, arrayName);
+    // for partial read: metaFsMgr.io.Read(fd, byteOffset, dataChunkSize, rBuf);
+    rc = metaFs->io->Read(fd, rBuf);
+    metaFs->ctrl->Close(fd);
 
-    if (!ioRC.IsSuccess())
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::META_READ_FAIL, "Fail to read volume meta");
         free(rBuf);
@@ -115,6 +115,7 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName)
     std::string volFile = "vbr";
     uint32_t fileSize = 256 * 1024; // 256KB
     std::string contents = "";
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
 
     int vol_cnt = volList.Count();
     if (vol_cnt > 0)
@@ -145,20 +146,20 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName)
         contents = root.ToJson();
     }
 
-    MetaFsReturnCode<POS_EVENT_ID> mgmtRC;
-    mgmtRC = metaFs.ctrl.CheckFileExist(volFile, arrayName);
-    if (!mgmtRC.IsSuccess())
+    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(volFile);
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
-        mgmtRC = metaFs.ctrl.CreateVolume(volFile, arrayName, fileSize);
-        if (!mgmtRC.IsSuccess())
+        rc = metaFs->ctrl->Create(volFile, fileSize);
+        if (POS_EVENT_ID::SUCCESS != rc)
         {
             POS_TRACE_ERROR((int)POS_EVENT_ID::META_CREATE_FAIL, "Fail to create meta file");
             return (int)POS_EVENT_ID::META_CREATE_FAIL;
         }
     }
 
-    mgmtRC = metaFs.ctrl.Open(volFile, arrayName);
-    if (!mgmtRC.IsSuccess())
+    int fd = 0;
+    rc = metaFs->ctrl->Open(volFile, fd);
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::META_OPEN_FAIL, "Fail to open meta file");
         return (int)POS_EVENT_ID::META_OPEN_FAIL;
@@ -171,17 +172,16 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName)
         return (int)POS_EVENT_ID::VOL_DATA_SIZE_TOO_BIG;
     }
 
-    uint32_t fd = mgmtRC.returnData;
     char* wBuf = (char*)malloc(fileSize);
     memset(wBuf, 0, fileSize);
     strncpy(wBuf, contents.c_str(), contentsSize);
 
     MetaFsReturnCode<POS_EVENT_ID> ioRC;
-    ioRC = metaFs.io.Write(fd, arrayName, wBuf);
+    ioRC = metaFs->io->Write(fd, wBuf);
 
-    metaFs.ctrl.Close(fd, arrayName);
+    metaFs->ctrl->Close(fd);
 
-    if (!ioRC.IsSuccess())
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
         free(wBuf);
         POS_TRACE_ERROR((int)POS_EVENT_ID::META_WRITE_FAIL, "Fail to write volume meta");

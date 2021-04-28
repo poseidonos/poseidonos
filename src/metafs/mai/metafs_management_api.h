@@ -38,22 +38,29 @@
 #pragma once
 
 #include <string>
-#include "metafs_adapter_include.h"
+#include "src/metafs/msc/metafs_system_manager.h"
 
 namespace pos
 {
 class MetaFsManagementApi
 {
 public:
-    virtual MetaFsReturnCode<POS_EVENT_ID> MountSystem(std::string& arrayName);
-    virtual MetaFsReturnCode<POS_EVENT_ID> UnmountSystem(std::string& arrayName);
-    virtual MetaFsReturnCode<POS_EVENT_ID> CreateSystem(std::string& arrayName);
-    virtual bool IsSystemMounted(void);
+    explicit MetaFsManagementApi(std::string arrayName);
+    virtual ~MetaFsManagementApi(void);
 
-    virtual bool AddArray(std::string& arrayName);
-    virtual bool RemoveArray(std::string& arrayName);
+    virtual POS_EVENT_ID InitializeSystem(std::string& arrayName,
+                                MetaStorageMediaInfoList* mediaInfoList);
+    virtual POS_EVENT_ID CloseSystem(std::string& arrayName);
+
+    virtual uint64_t GetEpochSignature(void);
+    virtual MetaFsStorageIoInfoList& GetAllStoragePartitionInfo(void);
+    virtual MetaLpnType GetRegionSizeInLpn(void);
+    virtual POS_EVENT_ID LoadMbr(bool& isNPOR);
+    virtual bool CreateMbr(void);
+    virtual MetaStorageSubsystem* GetMss(void);
 
 private:
-    SystemManager sysMgr;
+    std::string arrayName = "";
+    MetaFsSystemManager* sysMgr;
 };
 } // namespace pos

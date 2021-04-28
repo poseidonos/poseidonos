@@ -33,7 +33,7 @@
 #ifndef _INCLUDE_MSS_DISK_INPLACE_H
 #define _INCLUDE_MSS_DISK_INPLACE_H
 
-#include "mss_disk_place.h"
+#include "src/metafs/storage/pstore/mss_disk_place.h"
 
 #include <string>
 

@@ -38,6 +38,7 @@
 #pragma once
 
 #include <string>
+#include "src/metafs/storage/mss.h"
 #include "metafs_manager_base.h"
 #include "metafs_io_scheduler.h"
 #include "meta_io_manager.h"
@@ -47,7 +48,6 @@
 namespace pos
 {
 class MetaIoManager;
-extern MetaIoManager metaIoMgr;
 using MetaIoReqHandler = POS_EVENT_ID (MetaIoManager::*)(MetaFsIoRequest& reqMsg);
 
 class MetaIoManager : public MetaFsManagerBase
@@ -55,36 +55,27 @@ class MetaIoManager : public MetaFsManagerBase
 public:
     MetaIoManager(void);
     virtual ~MetaIoManager(void);
-    static MetaIoManager& GetInstance(void);
 
     const char* GetModuleName(void) override;
-    POS_EVENT_ID CheckReqSanity(MetaFsIoRequest& reqMsg);
     bool IsSuccess(POS_EVENT_ID rc);
 
     virtual void Init(void);
-    virtual bool Bringup(void);
     void Close(void);
-    virtual POS_EVENT_ID ProcessNewReq(MetaFsIoRequest& reqMsg);
+    virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
+    virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
+    void SetMss(MetaStorageSubsystem* metaStorage);
     void Finalize(void);
 
     bool AddArrayInfo(std::string arrayName);
     bool RemoveArrayInfo(std::string arrayName);
 
-protected:
-    virtual bool _IsSiblingModuleReady(void) override;
-
 private:
     void _InitReqHandler(void);
-    void _PrepareIoThreads(void);
 
-    ScalableMetaIoWorker* _InitiateMioHandler(int handlerId, int coreId, int coreCount);
     POS_EVENT_ID _ProcessNewIoReq(MetaFsIoRequest& reqMsg);
-    POS_EVENT_ID _CheckFileIoBoundary(MetaFsIoRequest& reqMsg);
-    void _AddExtraIoReqInfo(MetaFsIoRequest& reqMsg);
     void _SetByteRangeForFullFileIo(MetaFsIoRequest& reqMsg);
     void _SetTargetMediaType(MetaFsIoRequest& reqMsg);
     void _WaitForDone(MetaFsIoRequest& reqMsg);
-    POS_EVENT_ID _CheckAIOReqSanity(MetaFsIoRequest& reqMsg);
 
     static const uint32_t NUM_IO_TYPE = static_cast<uint32_t>(MetaIoRequestType::Max);
     MetaIoReqHandler reqHandler[NUM_IO_TYPE];
@@ -93,7 +84,6 @@ private:
     uint32_t totalMetaIoCoreCnt;
     uint32_t mioHandlerCount;
     bool finalized;
+    MetaStorageSubsystem* metaStorage;
 };
-
-extern MetaIoManager& mimTopMgr;
 } // namespace pos

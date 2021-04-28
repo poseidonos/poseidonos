@@ -31,6 +31,7 @@
  */
 
 #include "src/include/memory.h"
+#include "src/metafs/include/metafs_service.h"
 #include "src/mapper/map/map_content.h"
 #include "src/mapper/map/map_flush_handler.h"
 
@@ -293,7 +294,7 @@ MapContent::SetPageSize(std::string aname, StorageOpt storageOpt)
         prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
     }
 
-    header.mpageSize = metaFs.ctrl.EstimateAlignedFileIOSize(prop, aname);
+    header.mpageSize = MetaFsServiceSingleton::Instance()->GetMetaFs(aname)->ctrl->EstimateAlignedFileIOSize(prop);
 #endif
     return 0;
 }

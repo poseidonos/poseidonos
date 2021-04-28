@@ -66,16 +66,16 @@ MetaVolume::~MetaVolume(void)
 }
 
 void
-MetaVolume::Init(void)
+MetaVolume::Init(MetaStorageSubsystem* metaStorage)
 {
     InitVolumeBaseLpn();
-    _SetupRegionInfoToRegionMgrs();
+    _SetupRegionInfoToRegionMgrs(metaStorage);
 
     volumeState = MetaVolumeState::Init;
 }
 
 void
-MetaVolume::_SetupRegionInfoToRegionMgrs(void)
+MetaVolume::_SetupRegionInfoToRegionMgrs(MetaStorageSubsystem* metaStorage)
 {
     MetaLpnType targetBaseLpn = volumeBaseLpn;
 
@@ -88,6 +88,7 @@ MetaVolume::_SetupRegionInfoToRegionMgrs(void)
     {
         OnVolumeMetaRegionManager& regionMgr = _GetRegionMgr(region);
         regionMgr.Init(arrayName, volumeType, targetBaseLpn, maxVolumeLpn);
+        regionMgr.SetMss(metaStorage);
 
         targetBaseLpn += regionMgr.GetRegionSizeInLpn();
     }

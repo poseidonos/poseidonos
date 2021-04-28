@@ -35,7 +35,7 @@
 #include <string>
 #include "mdpage.h"
 #include "mf_inode.h"
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 #include "region_content.h"
 
 namespace pos
@@ -43,7 +43,7 @@ namespace pos
 class Region
 {
 public:
-    Region(std::string arrayName, MetaStorageType type, MetaFileInode* inode, uint64_t baseMetaLpn, uint64_t count, bool inUse)
+    Region(std::string arrayName, MetaStorageType type, MetaFileInode* inode, uint64_t baseMetaLpn, uint64_t count, bool inUse, MetaStorageSubsystem* metaStorage)
     {
         this->arrayName = arrayName;
 

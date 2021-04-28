@@ -58,10 +58,11 @@ public:
     virtual void Bringup(void) override;
     virtual bool SaveContent(void) override;
     virtual void Finalize(void) override;
+    virtual void SetMss(MetaStorageSubsystem* metaStorage);
 
-    FileSizeType GetFileSize(const FileDescriptorType fd, std::string& arrayName);
-    FileSizeType GetDataChunkSize(const FileDescriptorType fd, std::string& arrayName);
-    MetaLpnType GetFileBaseLpn(const FileDescriptorType fd, std::string& arrayName);
+    FileSizeType GetFileSize(const FileDescriptorType fd);
+    FileSizeType GetDataChunkSize(const FileDescriptorType fd);
+    MetaLpnType GetFileBaseLpn(const FileDescriptorType fd);
 
     void CreateInitialInodeContent(uint32_t maxInodeNum);
     bool LoadInodeContent(void);
@@ -73,12 +74,12 @@ public:
     FileDescriptorType Alloc(std::string& fileName);
 
     bool CreateFileInode(MetaFsFileControlRequest& req, FileDescriptorType newFd, MetaFilePageMap& pageMap, FileSizeType dataChunkSizeInMetaPage);
-    bool DeleteFileInode(FileDescriptorType& fd, std::string& arrayName);
+    bool DeleteFileInode(FileDescriptorType& fd);
     bool IsFileInodeExist(std::string& fileName);
     MetaFileExtent* GetInodeHdrExtentMapBase(void);
     size_t GetInodeHdrExtentMapSize(void);
     void RemoveFDsInUse(std::map<FileDescriptorType, FileDescriptorType>& dstFreeFDMap);
-    MetaFileInode& GetFileInode(const FileDescriptorType fd, std::string& arrayName);
+    MetaFileInode& GetFileInode(const FileDescriptorType fd);
     MetaFileInode& GetInodeEntry(const uint32_t entryIdx);
     bool IsFileInodeInUse(const FileDescriptorType fd);
     size_t GetTotalAllocatedInodeCnt(void);
@@ -101,5 +102,6 @@ private:
     InodeTable* inodeTable;
     std::unordered_map<FileDescriptorType, MetaFileInode*> fd2InodeMap;
     std::unordered_map<FileDescriptorType, std::string> fd2ArrayMap;
+    MetaStorageSubsystem* metaStorage = nullptr;
 };
 } // namespace pos

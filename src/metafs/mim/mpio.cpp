@@ -44,8 +44,8 @@ namespace pos
 Mpio::Mpio(void* mdPageBuf)
 : mdpage(nullptr),
   partialIO(false),
-  mssIntf(metaStorage),
-  aioModeEnabled(metaStorage->IsAIOSupport()),
+  mssIntf(nullptr),
+  aioModeEnabled(false),
   error(0),
   errorStopState(false),
   forceSyncIO(false),
@@ -59,8 +59,8 @@ Mpio::Mpio(void* mdPageBuf, MetaStorageType targetMediaType, MpioIoInfo& mpioIoI
 : io(mpioIoInfo),
   mdpage(nullptr),
   partialIO(partialIO),
-  mssIntf(metaStorage),
-  aioModeEnabled(metaStorage->IsAIOSupport()),
+  mssIntf(nullptr),
+  aioModeEnabled(false),
   error(0),
   errorStopState(false),
   forceSyncIO(forceSyncIO),
@@ -85,11 +85,13 @@ Mpio::~Mpio(void)
 }
 
 void
-Mpio::Setup(MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
+Mpio::Setup(MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage)
 {
     this->io = mpioIoInfo;
     this->partialIO = partialIO;
     this->forceSyncIO = forceSyncIO;
+    this->mssIntf = metaStorage;
+    aioModeEnabled = metaStorage->IsAIOSupport();
 }
 
 void
@@ -303,8 +305,6 @@ Mpio::_ConvertToMssOpcode(const MpAioState mpioState)
 bool
 Mpio::DoIO(MpAioState expNextState)
 {
-    assert(mssIntf->IsReady());
-
     bool continueToNextStateRun = true;
     POS_EVENT_ID ret;
     void* buf = GetMDPageDataBuf();
@@ -342,7 +342,7 @@ Mpio::DoIO(MpAioState expNextState)
     }
     else
     {
-        ret = mssIntf->DoPageIO(opcode, io.arrayName, io.targetMediaType, io.metaLpn, buf, io.pageCnt, io.mpioId, io.tagId);
+        ret = mssIntf->DoPageIO(opcode, io.targetMediaType, io.metaLpn, buf, io.pageCnt, io.mpioId, io.tagId);
         if (ret == POS_EVENT_ID::SUCCESS)
         {
             SetNextState(expNextState);

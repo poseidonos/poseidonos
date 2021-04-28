@@ -89,16 +89,11 @@ bool
 MetaFsIoScheduler::IssueRequest(MetaFsIoRequest* reqMsg)
 {
     bool isQueued = true;
-    MetaLpnType fileBaseLpn, startLpn, endLpn;
-    FileSizeType chunkSize;
+    FileSizeType chunkSize = reqMsg->fileCtx->chunkSize;
     uint64_t byteOffset = 0;
-    POS_EVENT_ID ret = mvmTopMgr.GetFileBaseLpn(reqMsg->fd, reqMsg->arrayName, fileBaseLpn);
-    assert(ret == POS_EVENT_ID::SUCCESS);
-
-    mvmTopMgr.GetDataChunkSize(reqMsg->fd, reqMsg->arrayName, chunkSize);
-
-    startLpn = fileBaseLpn + (reqMsg->byteOffsetInFile / chunkSize);
-    endLpn = fileBaseLpn + ((reqMsg->byteOffsetInFile + reqMsg->byteSize - 1) / chunkSize);
+    MetaLpnType fileBaseLpn = reqMsg->fileCtx->fileBaseLpn;
+    MetaLpnType startLpn = fileBaseLpn + (reqMsg->byteOffsetInFile / chunkSize);
+    MetaLpnType endLpn = fileBaseLpn + ((reqMsg->byteOffsetInFile + reqMsg->byteSize - 1) / chunkSize);
 
     // set the request count to process the callback count
     if (MetaIoMode::Async == reqMsg->ioMode)

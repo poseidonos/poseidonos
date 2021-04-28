@@ -30,6 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "src/metafs/include/metafs_service.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/mapper/reversemap/reversemap_manager.h"
 #include "src/meta_file_intf/mock_file_intf.h"
@@ -194,7 +195,7 @@ ReverseMapManager::_SetPageSize(StorageOpt storageOpt)
     }
 
     std::string arrayName = iArrayInfo->GetName();
-    mpageSize = metaFs.ctrl.EstimateAlignedFileIOSize(prop, arrayName);
+    mpageSize = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->ctrl->EstimateAlignedFileIOSize(prop);
     if (mpageSize == 0)
     {
         POS_TRACE_CRITICAL(EID(REVMAP_GET_MFS_ALIGNED_IOSIZE_FAILURE), "MFS returned failure value");

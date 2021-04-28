@@ -48,31 +48,27 @@ namespace pos
 class MetaStorageSubsystem
 {
 public:
-    MetaStorageSubsystem(void);
+    explicit MetaStorageSubsystem(std::string arrayName);
     virtual ~MetaStorageSubsystem(void);
 
     virtual POS_EVENT_ID CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) = 0;
-    virtual POS_EVENT_ID Open(std::string arrayName) = 0;
-    virtual POS_EVENT_ID Close(std::string arrayName) = 0;
-    virtual uint64_t GetCapacity(std::string arrayName, MetaStorageType mediaType) = 0;
-    virtual POS_EVENT_ID ReadPage(std::string arrayName, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) = 0;
-    virtual POS_EVENT_ID WritePage(std::string arrayName, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) = 0;
+    virtual POS_EVENT_ID Open(void) = 0;
+    virtual POS_EVENT_ID Close(void) = 0;
+    virtual uint64_t GetCapacity(MetaStorageType mediaType) = 0;
+    virtual POS_EVENT_ID ReadPage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) = 0;
+    virtual POS_EVENT_ID WritePage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) = 0;
     virtual bool IsAIOSupport(void) = 0; // Asynchronos API's used with pstore
     virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) = 0;
     virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) = 0;
 
-    virtual POS_EVENT_ID TrimFileData(std::string arrayName, MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) = 0;
+    virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) = 0;
 
-    POS_EVENT_ID DoPageIO(MssOpcode opcode, std::string arrayName, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer,
+    POS_EVENT_ID DoPageIO(MssOpcode opcode, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer,
         MetaLpnType numPages, uint32_t mpio_id, uint32_t tagid);
     POS_EVENT_ID DoPageIOAsync(MssOpcode opcode, MssAioCbCxt* cb);
-    bool IsReady(void);
 
 protected:
-    void _SetState(MetaSsState state);
 
-    MetaSsState state;
+    std::string arrayName;
 };
-
-extern MetaStorageSubsystem* metaStorage;
 } // namespace pos
