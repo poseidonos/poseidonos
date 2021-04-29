@@ -16,9 +16,9 @@ An user can install and run poseidon_daemon one of following two ways
 	- Stop : poseidon_daemon.py -f 1
 
 2) Manual as System Service : register poseidon_daemon as system service. Working as system service, poseidon_daemon can be controlled by service daemon
-	- 1. install_ibofd.sh : register poseidon_daemon as system service
+	- 1. install_poseidon_daemon.sh : register poseidon_daemon as system service
 	- 2. service poseidon_daemon start | stop | restart
-	- 3. uninstall_ibofd.sh : unregister poseidon_daemon from system service
+	- 3. uninstall_poseidon_daemon.sh : unregister poseidon_daemon from system service
 	- Note1: poseidon_daemon and poseidonos requires hugememory reservation and using userspace driver, which forces to detach kernel driver. 
 		 As this is debatable, we determained to remain it as an user's choice. 
 		 e.g) register 'service poseidon_daemon start' at bootup script such as rcS, it will make poseidonos run in an autonomous way even after boot up.

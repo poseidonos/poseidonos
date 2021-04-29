@@ -9,71 +9,71 @@ import logging
 import optparse
 import signal
 
-monitor_interval=10
-logfile="/var/log/syslog"
-run_post_process=True
-run_mode=1
+monitor_interval = 10
+logfile = "/var/log/syslog"
+run_post_process = True
+run_mode = 1
 
 cwd = os.path.dirname(os.path.abspath(__file__))
-ibofos_dir= cwd + "/../../"
-process_lock="/var/tmp/spdk.sock.lock"
+pos_dir = cwd + "/../../"
+process_lock = "/var/tmp/spdk.sock.lock"
 
 def run_pre_system():
-    logger.info("prepare ibof system")
-    os.chdir(ibofos_pre_proc['path'])
-    return os.system(ibofos_pre_system['setup_env'])
+    logger.info("prepare poseidon system")
+    os.chdir(pos_pre_proc['path'])
+    return os.system(pos_pre_system['setup_env'])
 
 def run_pre_proc():
     logger.info("check uram recovery")
-    os.chdir(ibofos_pre_proc['path'])
-    os.system(ibofos_pre_proc['urambackup'])
-    return os.system(ibofos_pre_proc['cleanup'])
+    os.chdir(pos_pre_proc['path'])
+    os.system(pos_pre_proc['urambackup'])
+    return os.system(pos_pre_proc['cleanup'])
 
 def run_post_proc(clean_start):
     logger.info("poseidonos bringup script - clean_start:" + str(clean_start))
     time.sleep(3)
-    os.chdir(ibofos_post_proc['path'])
+    os.chdir(pos_post_proc['path'])
     if clean_start:
         logger.error("RUN post process - Clean")
-        ret = os.system(ibofos_post_proc['clean'])
+        ret = os.system(pos_post_proc['clean'])
     else:
         logger.error("RUN post process - Dirty")
-        ret = os.system(ibofos_post_proc['dirty'])
+        ret = os.system(pos_post_proc['dirty'])
     logger.error("RUN post process - ret={}".format(ret))
 
 def run_process(cmd, clean_start):
     run_pre_proc()
     ret = os.system(cmd)
     if ret != 0:
-        logger.error("RUN {} - FAILED ".format(ibofos_proc['name']))
+        logger.error("RUN {} - FAILED ".format(pos_proc['name']))
     else:
-        logger.error("RUN {} - SUCCESS ".format(ibofos_proc['name']))
+        logger.error("RUN {} - SUCCESS ".format(pos_proc['name']))
         if run_post_process:
             run_post_proc(clean_start)
 
 def check_process_exist(name):
-    for p in psutil.process_iter(attrs=['ppid', 'cmdline', 'pid']):
+    for p in psutil.process_iter(attrs = ['ppid', 'cmdline', 'pid']):
         if name in str(p.info['cmdline']) and p.info['ppid'] == 1:
             return int(p.info['pid'])
     return 0
 
 def check_clean_start():
-    #Note - dirty mode poseidonos start vased segfault. temporally blocks
-    #return !os.path.exists(process_lock)
+    # Note - dirty mode poseidonos start vased segfault. temporally blocks
+    # return !os.path.exists(process_lock)
     return True
 
 def check_system_setup_need():
-    #Todo : check hugemem reservation
+    # Todo : check hugemem reservation
     return True
 
 def do_work():
     while True:
-        if check_process_exist(ibofos_proc['name']) == 0:
-            logger.error("DETECT {} is not running".format(ibofos_proc['name']))
+        if check_process_exist(pos_proc['name']) == 0:
+            logger.error("DETECT {} is not running".format(pos_proc['name']))
             clean_start = check_clean_start()
-            run_process(ibofos_proc['cmd'],clean_start)
-        #else:
-            #logger.info("{} is running".format(ibofos_proc['name']))
+            run_process(pos_proc['cmd'],clean_start)
+        # else:
+            # logger.info("{} is running".format(pos_proc['name']))
         time.sleep(monitor_interval)
         pass
 
@@ -115,28 +115,28 @@ def init():
     formatter = logging.Formatter("%(asctime)s-[%(name)s]-[%(levelname)s]-%(message)s")
     handler = logging.FileHandler(logfile)
     handler.setFormatter(formatter)
-    logger.addHandler(handler) 
+    logger.addHandler(handler)
     logger.info("Run poseidon_daemon (logfile={}, monitor_interval={})".format(logfile, monitor_interval))
-    #logger.debug("debug")
-    #logger.warn("warn")
-    #logger.error("error")
+    # logger.debug("debug")
+    # logger.warn("warn")
+    # logger.error("error")
     signal.signal(signal.SIGINT, sigHandler)
 
 def finalize():
-    ibofd_pid = check_process_exist("poseidon_daemon.py")
-    if ibofd_pid:
-        logger.info("Finalize poseidon_daemon({})".format(ibofd_pid))
-        os.kill(ibofd_pid, signal.SIGINT)
-    ibofos_pid = check_process_exist(ibofos_proc['name'])
-    if ibofos_pid:
-        logger.info("Finalize poseidonos({})".format(ibofos_pid))
-        os.kill(ibofos_pid, signal.SIGKILL)
+    posd_pid = check_process_exist("poseidon_daemon.py")
+    if posd_pid:
+        logger.info("Finalize poseidon_daemon({})".format(posd_pid))
+        os.kill(posd_pid, signal.SIGINT)
+    pos_pid = check_process_exist(pos_proc['name'])
+    if pos_pid:
+        logger.info("Finalize poseidonos({})".format(pos_pid))
+        os.kill(pos_pid, signal.SIGKILL)
 
 def sigHandler(sig, frame):
-    ibofos_pid = check_process_exist(ibofos_proc['name'])
-    if ibofos_pid:
-        logger.info("Finalize poseidonos({})".format(ibofos_pid))
-        os.kill(ibofos_pid, signal.SIGKILL)
+    pos_pid = check_process_exist(pos_proc['name'])
+    if pos_pid:
+        logger.info("Finalize poseidonos({})".format(pos_pid))
+        os.kill(pos_pid, signal.SIGKILL)
     sys.exit(0)
 
 parser = optparse.OptionParser()
@@ -144,30 +144,30 @@ parser.add_option("-l", "--log", dest="log", help="set log file", default=logfil
 parser.add_option("-i", "--interval", dest="interval", help="monitoring interval", default=monitor_interval)
 parser.add_option("-d", "--daemon", dest="daemon", help="run poseidon_daemon as process=0, daemon=1, service=2", default=run_mode)
 parser.add_option("-f", "--finish", dest="finish", help="finalize both poseidon_daemon and poseidonos", default=0)
-parser.add_option("-p", "--path", dest="path", help="select poseidonos root directory", default=ibofos_dir)
+parser.add_option("-p", "--path", dest="path", help="select poseidonos root directory", default=pos_dir)
 (options, args) = parser.parse_args()
-logfile=options.log
-run_mode=int(options.daemon)
-finish=int(options.finish)
-monitor_stopinterval=int(options.interval)
+logfile = options.log
+run_mode = int(options.daemon)
+finish = int(options.finish)
+monitor_stopinterval = int(options.interval)
 logger = logging.getLogger("poseidon_daemon")
-ibofos_dir = options.path
+pos_dir = options.path
 
-ibofos_pre_system={
-        'path': ibofos_dir + '/script',
+pos_pre_system={
+        'path': pos_dir + '/script',
         'setup_env':'./setup_env.sh',
         }
-ibofos_pre_proc={
-        'path': ibofos_dir + '/script',
+pos_pre_proc={
+        'path': pos_dir + '/script',
         'urambackup':'./backup_latest_hugepages_for_uram.sh',
         'cleanup':'rm -rf /dev/shm/*'
         }
-ibofos_proc={
+pos_proc={
         'name':'primary',
-        'cmd': ibofos_dir + '/bin/poseidonos primary &'
+        'cmd': pos_dir + '/bin/poseidonos primary &'
         }
-ibofos_post_proc={
-        'path': ibofos_dir + '/script',
+pos_post_proc={
+        'path': pos_dir + '/script',
         'clean':'./setup_ibofos_nvmf_volume.sh 1',
         'dirty':'./setup_ibofos_nvmf_volume.sh 0'
         }
@@ -195,5 +195,4 @@ if __name__ == '__main__':
             daemonize()
         else:
             logger.info("invalid run mode" + run_mode)
-            sys.exit(2);
-
+            sys.exit(2)
