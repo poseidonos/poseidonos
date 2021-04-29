@@ -46,7 +46,7 @@ def build_and_test(fabric_ip):
 
         common_test_lib.kill_and_wait([test_name, "poseidonos", "fio"])
 
-        ret = subprocess.call(["./"+test_name, fabric_ip])
+        ret = subprocess.call(["./" + test_name, "-a", fabric_ip])
         if (ret != 0 and ret != -9): #Sigkill is correct.
             print("\tTest failed for %s, ret : %d" % (test_path, ret))
             exit(-1)

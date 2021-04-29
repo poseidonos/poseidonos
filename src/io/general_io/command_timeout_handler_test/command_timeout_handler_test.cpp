@@ -228,7 +228,7 @@ test2_io_multiple_abort()
 int
 main(int argc, char *argv[])
 {
-    libraryUnitTest.Initialize(argc, argv);
+    libraryUnitTest.Initialize(argc, argv, "../../../../");
     pos::test1_iotimeout_abort();
     pos::test2_io_multiple_abort();
     libraryUnitTest.SuccessAndExit();

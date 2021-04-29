@@ -4,6 +4,7 @@
 
 #include <future>
 #include <thread>
+#include <string>
 
 namespace pos
 {
@@ -11,7 +12,7 @@ namespace pos
     class LibraryUnitTest
     {
         public:
-            void Initialize(int argc, char *argv[]);
+            void Initialize(int argc, char *argv[], std::string rootDir);
             void FailAndExit(void);
             void SuccessAndExit(void);
             void TestStart(int i);

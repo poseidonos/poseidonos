@@ -146,7 +146,7 @@ test2_32mb_with_detaching(void)
 int
 main(int argc, char* argv[])
 {
-    libraryUnitTest.Initialize(argc, argv);
+    libraryUnitTest.Initialize(argc, argv, "../../../../");
     pos::test1_32mb_with_detaching();
     pos::test2_32mb_with_detaching();
     libraryUnitTest.SuccessAndExit();

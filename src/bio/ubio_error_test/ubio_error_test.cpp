@@ -338,7 +338,7 @@ test9_tcmalloc_rte_malloc()
 int
 main(int argc, char* argv[])
 {
-    libraryUnitTest.Initialize(argc, argv);
+    libraryUnitTest.Initialize(argc, argv, "../../../");
 
     pos::test1_success();
     pos::test2_multiple_errors_1();

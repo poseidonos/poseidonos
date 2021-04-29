@@ -53,7 +53,7 @@
 #define M_PING_PONG_BUFFER (2)
 #define M_QOS_CORRECTION_CYCLE (2000)
 #define M_STRIPES_CONSUMED_HIGH_THRESHOLD (1000)
-#define MAX_IO_WORKER 2 // Currently this is hardcoded, will be taken from affinity manager in next revision
+#define MAX_IO_WORKER 8 // Currently this is hardcoded, will be taken from affinity manager in next revision
 const int PRIO_CRIT_WT_1 = 16;
 const int PRIO_CRIT_WT_2 = 10;
 const int PRIO_CRIT_WT_3 = 0;
