@@ -35,7 +35,7 @@ def wait_pos_execution():
 
 def execute_watchdog(deamon=0, log_path="watchdog.log"):
     global watchdog_proc
-    if find_log_file:
+    if find_log_file(log_path):
         os.remove(log_path)
     FNULL = open(os.devnull,'w')
     print ("\tInvoke watchdog process")
