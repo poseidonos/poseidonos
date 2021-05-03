@@ -60,31 +60,34 @@ public:
 
     void LogFilled(void);
 
-    inline LogGroupStatus GetStatus(void)
+    inline LogGroupStatus
+    GetStatus(void)
     {
         return status;
     }
 
-    inline uint64_t GetSeqNum(void)
+    inline uint64_t
+    GetSeqNum(void)
     {
         return seqNum;
     }
 
-    inline uint64_t GetNumLogsAdded(void)
+    inline uint64_t
+    GetNumLogsAdded(void)
     {
-        if (status != LogGroupStatus::INVALID)
-        {
-            return numLogsAdded;
-        }
-        else
-        {
-            return 0;
-        }
+        return numLogsAdded;
     }
 
-    inline uint64_t GetNextOffset(void)
+    inline uint64_t
+    GetNextOffset(void)
     {
         return nextOffset;
+    }
+
+    inline uint32_t
+    GetNumLogsFilled(void)
+    {
+        return numLogsFilled;
     }
 
 private:
