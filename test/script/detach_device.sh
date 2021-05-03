@@ -39,6 +39,7 @@ else
     if [ $2 -eq 1 ]; then
         pci_rescan
     fi
+    sleep 3
 fi
 
 exit 0
