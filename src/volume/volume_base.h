@@ -53,8 +53,8 @@ enum VolumeStatus
 class VolumeBase
 {
 public:
-    VolumeBase(std::string volName, uint64_t volSizeByte);
-    VolumeBase(std::string volName, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw);
+    VolumeBase(std::string arrayName, std::string volName, uint64_t volSizeByte);
+    VolumeBase(std::string arrayName, std::string volName, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw);
     virtual ~VolumeBase(void);
     int Mount(void);
     int Unmount(void);

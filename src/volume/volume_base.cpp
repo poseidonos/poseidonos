@@ -41,8 +41,9 @@
 namespace pos
 {
 
-VolumeBase::VolumeBase(std::string volName, uint64_t volSizeByte)
+VolumeBase::VolumeBase(std::string arrayName, std::string volName, uint64_t volSizeByte)
 {
+    array = arrayName;
     name = volName;
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
@@ -50,8 +51,9 @@ VolumeBase::VolumeBase(std::string volName, uint64_t volSizeByte)
     POS_TRACE_INFO(POS_EVENT_ID::VOL_CREATED, "Volume name:{} size:{} created", name, totalSize);
 }
 
-VolumeBase::VolumeBase(std::string volName, uint64_t volSizeByte, uint64_t _maxiops, uint64_t _maxbw)
+VolumeBase::VolumeBase(std::string arrayName, std::string volName, uint64_t volSizeByte, uint64_t _maxiops, uint64_t _maxbw)
 {
+    array = arrayName;
     name = volName;
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
@@ -165,7 +167,7 @@ VolumeBase::TotalSize(void)
 uint64_t
 VolumeBase::UsedSize(void)
 {
-    IVSAMap* iVSAMap = MapperServiceSingleton::Instance()->GetIVSAMap("");
+    IVSAMap* iVSAMap = MapperServiceSingleton::Instance()->GetIVSAMap(array);
     return iVSAMap->GetNumUsedBlocks(ID) * BLOCK_SIZE;
 }
 

@@ -75,7 +75,7 @@ VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
         return ret;
     }
 
-    VolumeBase* vol = new Volume(name, size);
+    VolumeBase* vol = new Volume(arrayName, name, size);
     if (vol == nullptr)
     {
         POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MEM_ALLOC_FAIL),

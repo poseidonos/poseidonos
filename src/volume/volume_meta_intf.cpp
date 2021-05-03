@@ -93,7 +93,7 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName)
                     uint64_t total = doc["volumes"][i]["total"].GetUint64();
                     uint64_t maxiops = doc["volumes"][i]["maxiops"].GetUint64();
                     uint64_t maxbw = doc["volumes"][i]["maxbw"].GetUint64();
-                    VolumeBase* volume = new Volume(name, total, maxiops, maxbw);
+                    VolumeBase* volume = new Volume(arrayName, name, total, maxiops, maxbw);
                     volList.Add(volume, id);
                 }
             }
