@@ -1,0 +1,3146 @@
+--- spdk-19.10/CONFIG	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/CONFIG	2021-05-03 15:34:54.526876953 +0900
+@@ -159,3 +159,6 @@
+ 
+ # Build with FUSE support
+ CONFIG_FUSE=n
++
++# Build config iBOF
++CONFIG_IBOF=n
+--- spdk-19.10/configure	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/configure	2021-05-03 15:34:54.530876953 +0900
+@@ -371,6 +371,9 @@
+ 		--without-nvme-cuse)
+ 			CONFIG[NVME_CUSE]=n
+ 			;;
++		--with-ibof)
++			CONFIG[IBOF]=y
++			;;
+ 		--)
+ 			break
+ 			;;
+--- spdk-19.10/examples/bdev/hello_world/bdev.conf	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/examples/bdev/hello_world/bdev.conf	2021-05-03 15:34:54.534876953 +0900
+@@ -1,3 +1,5 @@
+ [Malloc]
+   NumberOfLuns 1
+   LunSizeInMB  32
++[Ioat]
++  Enable True
+--- spdk-19.10/examples/nvme/fio_plugin/nvme_simple_config.fio	1970-01-01 09:00:00.000000000 +0900
++++ spdk-19.10/examples/nvme/fio_plugin/nvme_simple_config.fio	2021-05-03 15:34:54.534876953 +0900
+@@ -0,0 +1,18 @@
++[global]
++ioengine=./fio_plugin
++thread=1
++group_reporting=1
++direct=1
++verify=0
++time_based=1
++ramp_time=0
++runtime=2
++iodepth=128
++rw=randrw
++bs=4k
++
++[test]
++numjobs=1
++
++#Note : need to change BDF address of local NVMe SSD
++filename=trtype=PCIe traddr=0000.02.00.0 ns=1
+--- spdk-19.10/examples/nvme/fio_plugin/nvmf_simple_config.fio	1970-01-01 09:00:00.000000000 +0900
++++ spdk-19.10/examples/nvme/fio_plugin/nvmf_simple_config.fio	2021-05-03 15:34:54.534876953 +0900
+@@ -0,0 +1,18 @@
++[global]
++ioengine=./fio_plugin
++thread=1
++group_reporting=1
++direct=1
++verify=0
++time_based=1
++ramp_time=0
++runtime=5
++iodepth=128
++rw=randrw
++bs=4k
++
++[test]
++numjobs=1
++
++#Note : need to change NVMf target information
++filename=trtype=RDMA adrfam=IPv4 traddr=172.16.1.1 trsvcid=1158 ns=1
+Binary files spdk-19.10/fio_plugin/bdev/fio_plugin_31 and spdk-19.10/fio_plugin/bdev/fio_plugin_31 differ
+Binary files spdk-19.10/fio_plugin/bdev/fio_plugin_312 and spdk-19.10/fio_plugin/bdev/fio_plugin_312 differ
+Binary files spdk-19.10/fio_plugin/fio_plugin_bdev and spdk-19.10/fio_plugin/fio_plugin_bdev differ
+Binary files spdk-19.10/fio_plugin/fio_plugin_nvme and spdk-19.10/fio_plugin/fio_plugin_nvme differ
+Binary files spdk-19.10/fio_plugin/nvme/fio_plugin_31 and spdk-19.10/fio_plugin/nvme/fio_plugin_31 differ
+Binary files spdk-19.10/fio_plugin/nvme/fio_plugin_312 and spdk-19.10/fio_plugin/nvme/fio_plugin_312 differ
+--- spdk-19.10/include/spdk/copy_engine.h	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/include/spdk/copy_engine.h	2021-05-03 15:34:54.634876951 +0900
+@@ -140,6 +140,7 @@
+  */
+ size_t spdk_copy_task_size(void);
+ 
++struct spdk_io_channel *ioat_get_io_channel(void);
+ #ifdef __cplusplus
+ }
+ #endif
+--- spdk-19.10/include/spdk/event.h	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/include/spdk/event.h	2021-05-03 15:34:54.638876950 +0900
+@@ -284,6 +284,9 @@
+  */
+ void spdk_event_call(struct spdk_event *event);
+ 
++bool spdk_event_call_try(struct spdk_event *event);
++void spdk_event_put(struct spdk_event *event);
++
+ /**
+  * Enable or disable monitoring of context switches.
+  *
+--- spdk-19.10/include/spdk/ibof.h	1970-01-01 09:00:00.000000000 +0900
++++ spdk-19.10/include/spdk/ibof.h	2021-05-03 15:34:54.638876950 +0900
+@@ -0,0 +1,57 @@
++/*-
++ *   BSD LICENSE
++ *
++ *   Copyright (c) Samsung Corporation.
++ *   All rights reserved.
++ *
++ *   Redistribution and use in source and binary forms, with or without
++ *   modification, are permitted provided that the following conditions
++ *   are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in
++ *       the documentation and/or other materials provided with the
++ *       distribution.
++ *     * Neither the name of Samsung Corporation nor the names of its
++ *       contributors may be used to endorse or promote products derived
++ *       from this software without specific prior written permission.
++ *
++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#ifndef SPDK_IBOF_H_
++#define SPDK_IBOF_H_
++
++#include "spdk/stdinc.h"
++#include "nvmf_spec.h"
++
++struct ibof_io;
++
++#include "ibof_nvmf.h"
++#include "ibof_volume.h"
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#define KB (1024)
++#define MB ((1024)*KB)
++#define GB ((1024)*MB)
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* SPDK_IBOF_H_ */
+--- spdk-19.10/include/spdk/ibof_nvmf.h	1970-01-01 09:00:00.000000000 +0900
++++ spdk-19.10/include/spdk/ibof_nvmf.h	2021-05-03 15:34:54.638876950 +0900
+@@ -0,0 +1,84 @@
++/*-
++ *   BSD LICENSE
++ *
++ *   Copyright (c) Samsung Corporation.
++ *   All rights reserved.
++ *
++ *   Redistribution and use in source and binary forms, with or without
++ *   modification, are permitted provided that the following conditions
++ *   are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in
++ *       the documentation and/or other materials provided with the
++ *       distribution.
++ *     * Neither the name of Samsung Corporation nor the names of its
++ *       contributors may be used to endorse or promote products derived
++ *       from this software without specific prior written permission.
++ *
++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#ifndef SPDK_IBOF_NVMF_H_
++#define SPDK_IBOF_NVMF_H_
++
++#include "spdk/stdinc.h"
++#include "nvmf_spec.h"
++#include "ibof.h"
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#define NR_MAX_NAMESPACE 128
++#define NR_MAX_TRANSPORT 4
++
++typedef void (*ibof_bdev_delete_callback)(void *cb_arg, int bdeverrno);
++
++/* uNVMf composition descriptor */
++struct nvmf_namespace {
++	char name[32];
++	uint16_t nsid;
++};
++
++struct nvmf_transport {
++	char type[16];
++	char adrfam[16];
++	char traddr[SPDK_NVMF_TRADDR_MAX_LEN + 1];
++	char trsvcid[SPDK_NVMF_TRSVCID_MAX_LEN + 1];
++};
++
++struct nvmf_subsystem {
++	char nqn[SPDK_NVMF_NQN_MAX_LEN + 1];
++	uint16_t nr_namespace;
++	struct nvmf_namespace ns[NR_MAX_NAMESPACE];
++	uint16_t nr_transport;
++	struct nvmf_transport tr[NR_MAX_TRANSPORT];
++};
++
++/*
++ * create ibof_bdev disk that will be attached on uNVMf
++ */
++struct spdk_bdev* spdk_bdev_create_ibof_disk(const char *volume_name, uint32_t volume_id, const struct spdk_uuid* bdev_uuid, uint64_t num_blocks, uint32_t block_size, bool volume_type_in_memory);
++
++/*
++ * delete ibof_bdev disk
++ */
++void spdk_bdev_delete_ibof_disk(struct spdk_bdev *bdev, ibof_bdev_delete_callback cb_fn, void *cb_arg);
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* SPDK_IBOF_H_ */
+--- spdk-19.10/include/spdk/ibof_volume.h	1970-01-01 09:00:00.000000000 +0900
++++ spdk-19.10/include/spdk/ibof_volume.h	2021-05-03 15:34:54.638876950 +0900
+@@ -0,0 +1,117 @@
++/*-
++ *   BSD LICENSE
++ *
++ *   Copyright (c) Samsung Corporation.
++ *   All rights reserved.
++ *
++ *   Redistribution and use in source and binary forms, with or without
++ *   modification, are permitted provided that the following conditions
++ *   are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in
++ *       the documentation and/or other materials provided with the
++ *       distribution.
++ *     * Neither the name of Samsung Corporation nor the names of its
++ *       contributors may be used to endorse or promote products derived
++ *       from this software without specific prior written permission.
++ *
++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#ifndef SPDK_IBOF_VOLUME_H_
++#define SPDK_IBOF_VOLUME_H_
++
++#include "spdk/stdinc.h"
++#include "nvmf_spec.h"
++#include "ibof.h"
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#define IBOF_IO_STATUS_SUCCESS (0)
++#define IBOF_IO_STATUS_FAIL (-1)
++
++#define VOLUME_NAME_MAX_LEN (255)
++#define NR_MAX_VOLUME (256)
++
++enum IO_TYPE {
++	READ = 0,
++	WRITE,
++#if defined NVMe_FLUSH_HANDLING
++        FLUSH
++#endif
++};
++
++/*
++ * register the IO submit/compete callback that links uNVMf ibof_bdev and Frontend
++ */
++typedef int (*unvmf_submit_handler)(struct ibof_io* io);
++typedef void (*unvmf_complete_handler)(void);
++typedef struct unvmf_io_handler{
++	unvmf_submit_handler submit;
++	unvmf_complete_handler complete;
++}unvmf_io_handler;
++#if defined QOS_ENABLED_FE
++uint32_t get_attached_subsystem_id(const char* bdev_name);
++void spdk_bdev_ibof_register_io_handler(const char* bdev_name, unvmf_io_handler handler, const char* nqn, uint32_t nqn_id);
++#else
++void spdk_bdev_ibof_register_io_handler(const char* bdev_name, unvmf_io_handler handler, const char* nqn);
++#endif
++void spdk_bdev_ibof_unregister_io_handler(const char* bdev_name, unvmf_io_handler handler);
++const char* get_attached_subsystem_nqn(const char* bdev_name);
++
++/* uNVMf to ibof volume information */
++typedef int (*ibof_bdev_io_handler)(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io);
++struct ibof_volume_info {
++	uint32_t id;
++	char name[VOLUME_NAME_MAX_LEN +1];
++	char nqn[SPDK_NVMF_NQN_MAX_LEN+1];
++#if defined QOS_ENABLED_FE
++        uint32_t nqn_id;
++#endif	
++	uint64_t size_mb;
++	uint64_t iops_limit;
++	uint64_t bw_limit;
++	/* handler between spdk bdev and ibof bdev */
++	ibof_bdev_io_handler ibof_bdev_io;
++#if defined NVMe_FLUSH_HANDLING
++	/* handler between spdk bdev and ibof bdev for NVMe flush command handling */
++	ibof_bdev_io_handler ibof_bdev_flush;
++#endif
++	/* handler between ibof bdev and unvmf */
++	unvmf_io_handler unvmf_io;
++};
++
++/* uNVMf to ibof IO descriptor */
++typedef void (*ibof_bdev_io_complete_callback)(struct ibof_io* io, int status);
++struct ibof_io {
++	int ioType;
++	uint32_t volume_id;
++	struct iovec* iov;
++	int iovcnt;
++	uint64_t length;
++	uint64_t offset;
++	void* context;
++	ibof_bdev_io_complete_callback complete_cb;
++};
++
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* SPDK_IBOF_H_ */
+--- spdk-19.10/include/spdk/ioat.h	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/include/spdk/ioat.h	2021-05-03 15:34:54.638876950 +0900
+@@ -228,6 +228,22 @@
+  */
+ uint32_t spdk_ioat_get_dma_capabilities(struct spdk_ioat_chan *chan);
+ 
++/*
++ * IOAT init API
++ */
++int spdk_ioat_init(void);
++
++/*
++ * IOAT exit API
++ */
++void spdk_ioat_exit(void);
++
++
++/*
++ * Check if IOAT initialized
++ */
++bool spdk_check_ioat_initialized(void);
++
+ #ifdef __cplusplus
+ }
+ #endif
+--- spdk-19.10/include/spdk/nvme.h	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/include/spdk/nvme.h	2021-05-03 15:34:54.638876950 +0900
+@@ -744,6 +744,8 @@
+  */
+ void spdk_nvme_ctrlr_fail(struct spdk_nvme_ctrlr *ctrlr);
+ 
++void spdk_nvme_ctrlr_fail_and_remove(struct spdk_nvme_ctrlr *ctrlr);
++
+ /**
+  * This function returns the failed status of a given controller.
+  *
+--- spdk-19.10/include/spdk/nvmf.h	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/include/spdk/nvmf.h	2021-05-03 15:34:54.638876950 +0900
+@@ -373,6 +373,8 @@
+ typedef void (*spdk_nvmf_subsystem_state_change_done)(struct spdk_nvmf_subsystem *subsystem,
+ 		void *cb_arg, int status);
+ 
++int spdk_nvmf_subsystem_set_pause_state_directly(struct spdk_nvmf_subsystem* subsystem);
++
+ /**
+  * Transition an NVMe-oF subsystem from Inactive to Active state.
+  *
+@@ -827,6 +829,34 @@
+  * \return NQN of the specified subsystem.
+  */
+ const char *spdk_nvmf_subsystem_get_nqn(struct spdk_nvmf_subsystem *subsystem);
++#if defined QOS_ENABLED_FE
++/**
++ * Get the NQN of the specified subsystem.
++ *
++ * \param subsystem Subsystem to query.
++ *
++ * \return NQN of the specified subsystem.
++ */
++uint32_t spdk_nvmf_subsystem_get_id(struct spdk_nvmf_subsystem *subsystem);
++/**
++ * This fn is used by POS QOS for initializing
++ * the subsystem reactor Mapping
++ *
++ */
++void spdk_nvmf_initialize_reactor_subsystem_mapping(void);
++/**
++ * This fn is used by POS QOS for getting
++ * the subsystem reactor Mapping
++ *
++ */
++uint32_t spdk_nvmf_get_reactor_subsystem_mapping(uint32_t reactorId, uint32_t subsystemId);
++/**
++ * This fn is used by POS QOS for setting
++ * the subsystem reactor Mapping
++ *
++ */
++void spdk_nvmf_set_reactor_subsystem_mapping(uint32_t reactorId, uint32_t subsystemId, uint32_t value);
++#endif
+ 
+ /**
+  * Get the type of the specified subsystem.
+@@ -1011,6 +1041,15 @@
+  */
+ void spdk_nvmf_rdma_init_hooks(struct spdk_nvme_rdma_hooks *hooks);
+ 
++struct spdk_nvmf_ctrlr* 
++spdk_nvmf_subsystem_get_first_ctrlr(struct spdk_nvmf_subsystem *subsystem);
++
++struct spdk_nvmf_ctrlr* 
++spdk_nvmf_subsystem_get_next_ctrlr(struct spdk_nvmf_subsystem *subsystem, struct spdk_nvmf_ctrlr *prev_ctrlr);
++
++char* 
++spdk_nvmf_subsystem_get_ctrlr_hostnqn(struct spdk_nvmf_ctrlr *ctrlr);
++
+ #ifdef __cplusplus
+ }
+ #endif
+--- spdk-19.10/include/spdk/thread.h	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/include/spdk/thread.h	2021-05-03 15:34:54.638876950 +0900
+@@ -213,6 +213,14 @@
+  */
+ struct spdk_thread *spdk_thread_create(const char *name, struct spdk_cpuset *cpumask);
+ 
++/*
++   Create a new SPDK thread, without g_new_thread_fn.
++   This function is used in the scenario as below.
++   1) Reactors start in other cpus.
++   2) SPDK thread needs to be created and pinned to the cpu which is not reactor.
++*/
++struct spdk_thread *spdk_thread_create_without_registered_fn(const char *name);
++
+ /**
+  * Force the current system thread to act as if executing the given SPDK thread.
+  *
+--- spdk-19.10/lib/bdev/bdev.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/bdev/bdev.c	2021-05-03 15:34:54.642876950 +0900
+@@ -4883,7 +4883,7 @@
+ 	bool				disable_rate_limit = true;
+ 
+ 	for (i = 0; i < SPDK_BDEV_QOS_NUM_RATE_LIMIT_TYPES; i++) {
+-		if (limits[i] == SPDK_BDEV_QOS_LIMIT_NOT_DEFINED) {
++		if (limits[i] >= SPDK_BDEV_QOS_LIMIT_NOT_DEFINED) {
+ 			continue;
+ 		}
+ 
+@@ -4899,13 +4899,20 @@
+ 			min_limit_per_sec = SPDK_BDEV_QOS_MIN_BYTES_PER_SEC;
+ 		}
+ 
++		if(limits[i] < min_limit_per_sec && limits[i] > 0){
++			limits[i] = 0;
++			disable_rate_limit = true;
++			continue;
++		}		
++	
+ 		limit_set_complement = limits[i] % min_limit_per_sec;
+ 		if (limit_set_complement) {
+-			SPDK_ERRLOG("Requested rate limit %" PRIu64 " is not a multiple of %" PRIu64 "\n",
++			SPDK_NOTICELOG("Requested rate limit %" PRIu64 " is not a multiple of %" PRIu64 "\n",
+ 				    limits[i], min_limit_per_sec);
+ 			limits[i] += min_limit_per_sec - limit_set_complement;
+-			SPDK_ERRLOG("Round up the rate limit to %" PRIu64 "\n", limits[i]);
++			SPDK_NOTICELOG("Round up the rate limit to %" PRIu64 "\n", limits[i]);
+ 		}
++	
+ 	}
+ 
+ 	ctx = calloc(1, sizeof(*ctx));
+--- spdk-19.10/lib/event/app.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/event/app.c	2021-05-03 15:34:54.642876950 +0900
+@@ -54,6 +54,9 @@
+ #define SPDK_APP_DPDK_DEFAULT_MEM_CHANNEL	-1
+ #define SPDK_APP_DPDK_DEFAULT_CORE_MASK		"0x1"
+ #define SPDK_APP_DEFAULT_CORE_LIMIT		0x140000000 /* 5 GiB */
++#define SPDK_APP_DEFAULT_CORE_FILTER_CMD_LENGTH 60
++#define SPDK_APP_DEFAULT_CORE_FILTER 0x73 /*5, 6 bits are hugepage bit*/
++#define SPDK_APP_DEFAULT_MAX_NO_FILE_DESCRIPTOR 65536
+ 
+ struct spdk_app {
+ 	struct spdk_conf		*config;
+@@ -602,12 +605,21 @@
+ 	spdk_log_set_print_level(opts->print_level);
+ 
+ #ifndef SPDK_NO_RLIMIT
+-	if (opts->enable_coredump) {
+-		struct rlimit core_limits;
+-
+-		core_limits.rlim_cur = core_limits.rlim_max = SPDK_APP_DEFAULT_CORE_LIMIT;
+-		setrlimit(RLIMIT_CORE, &core_limits);
+-	}
++	struct rlimit limits;
++	if (opts->enable_coredump) {		
++		limits.rlim_cur = limits.rlim_max = RLIM_INFINITY; /* unlimited */
++		setrlimit(RLIMIT_CORE, &limits);
++		setrlimit(RLIMIT_FSIZE, &limits);
++		int process_id = getpid();
++		char coredump_filter_string[SPDK_APP_DEFAULT_CORE_FILTER_CMD_LENGTH];
++		sprintf(coredump_filter_string, "echo 0x%x > /proc/%d/coredump_filter", \
++		     SPDK_APP_DEFAULT_CORE_FILTER, process_id);
++		system(coredump_filter_string);
++	}
++	// rlimit for number of file descriptors cannot be set as "unlimited" when I tested.
++	// so, we just set temporary value.
++	limits.rlim_cur = limits.rlim_max = SPDK_APP_DEFAULT_MAX_NO_FILE_DESCRIPTOR;
++	setrlimit(RLIMIT_NOFILE, &limits);
+ #endif
+ 
+ 	config = spdk_app_setup_conf(opts->config_file);
+--- spdk-19.10/lib/event/reactor.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/event/reactor.c	2021-05-03 15:34:54.642876950 +0900
+@@ -51,7 +51,7 @@
+ #include <pthread_np.h>
+ #endif
+ 
+-#define SPDK_EVENT_BATCH_SIZE		8
++#define SPDK_EVENT_BATCH_SIZE		64
+ 
+ enum spdk_reactor_state {
+ 	SPDK_REACTOR_STATE_UNINITIALIZED = 0,
+@@ -234,6 +234,35 @@
+ 	}
+ }
+ 
++bool
++spdk_event_call_try(struct spdk_event *event)
++{
++	int enqueue_count;
++	int request_count = 1;
++	struct spdk_reactor *reactor;
++	bool enqueue_success = true;
++
++	reactor = spdk_reactor_get(event->lcore);
++
++	assert(reactor != NULL);
++	assert(reactor->events != NULL);
++
++	enqueue_count = spdk_ring_enqueue(reactor->events, (void **)&event,
++		request_count, NULL);
++	if (enqueue_count != request_count) {
++		enqueue_success = false;
++	}
++
++	return enqueue_success;
++}
++
++void
++spdk_event_put(struct spdk_event *event)
++{
++	assert(event != NULL);
++	spdk_mempool_put_bulk(g_spdk_event_mempool, event, 1);
++}
++
+ static inline uint32_t
+ _spdk_event_queue_run_batch(struct spdk_reactor *reactor)
+ {
+--- spdk-19.10/lib/ioat/ioat.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/ioat/ioat.c	2021-05-03 15:34:54.646876950 +0900
+@@ -587,6 +587,7 @@
+ 	TAILQ_REMOVE(&driver->attached_chans, ioat, tailq);
+ 	pthread_mutex_unlock(&driver->lock);
+ 
++	spdk_pci_device_detach(ioat->device);
+ 	ioat_channel_destruct(ioat);
+ 	free(ioat);
+ }
+--- spdk-19.10/lib/nvme/nvme_ctrlr.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/nvme/nvme_ctrlr.c	2021-05-03 15:34:54.650876950 +0900
+@@ -678,6 +678,15 @@
+  * Any private functions being called from a thread already holding
+  * the ctrlr lock should call nvme_ctrlr_fail directly.
+  */
++
++void
++spdk_nvme_ctrlr_fail_and_remove(struct spdk_nvme_ctrlr *ctrlr)
++{
++	nvme_robust_mutex_lock(&ctrlr->ctrlr_lock);
++	nvme_ctrlr_fail(ctrlr, true);
++	nvme_robust_mutex_unlock(&ctrlr->ctrlr_lock);
++}
++
+ void
+ spdk_nvme_ctrlr_fail(struct spdk_nvme_ctrlr *ctrlr)
+ {
+@@ -714,13 +723,14 @@
+ 	 * The NVMe specification defines RTD3E to be the time between
+ 	 *  setting SHN = 1 until the controller will set SHST = 10b.
+ 	 * If the device doesn't report RTD3 entry latency, or if it
+-	 *  reports RTD3 entry latency less than 10 seconds, pick
+-	 *  10 seconds as a reasonable amount of time to
++	 *  reports RTD3 entry latency less than 5 seconds, pick
++	 *  5 seconds as a reasonable amount of time to
+ 	 *  wait before proceeding.
+ 	 */
++	uint32_t max_shutdown_timeout_max = 5000;
+ 	SPDK_DEBUGLOG(SPDK_LOG_NVME, "RTD3E = %" PRIu32 " us\n", ctrlr->cdata.rtd3e);
+ 	shutdown_timeout_ms = (ctrlr->cdata.rtd3e + 999) / 1000;
+-	shutdown_timeout_ms = spdk_max(shutdown_timeout_ms, 10000);
++	shutdown_timeout_ms = spdk_max(shutdown_timeout_ms, max_shutdown_timeout_max);
+ 	SPDK_DEBUGLOG(SPDK_LOG_NVME, "shutdown timeout = %" PRIu32 " ms\n", shutdown_timeout_ms);
+ 
+ 	do {
+--- spdk-19.10/lib/nvme/nvme_ctrlr_cmd.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/nvme/nvme_ctrlr_cmd.c	2021-05-03 15:34:54.650876950 +0900
+@@ -596,9 +596,12 @@
+ 	cmd->opc = SPDK_NVME_OPC_ABORT;
+ 	cmd->cdw10 = (cid << 16) | sqid;
+ 
+-	if (ctrlr->outstanding_aborts >= ctrlr->cdata.acl) {
+-		STAILQ_INSERT_TAIL(&ctrlr->queued_aborts, req, stailq);
+-		rc = 0;
++	//acl is zero based value, so fix the compare statement.
++	if (ctrlr->outstanding_aborts >= ctrlr->cdata.acl + 1) {
++		// Ibofos will process for excced acl case.
++		// Abort cmd may be completed when spdk_nvme_detach in 20.07
++		// But, that does not sync up with unvme_drv. so, unvme_drv handles the abort retry.
++		rc = -ENOMEM;		
+ 	} else {
+ 		ctrlr->outstanding_aborts++;
+ 		rc = nvme_ctrlr_submit_admin_request(ctrlr, req);
+--- spdk-19.10/lib/nvme/nvme_internal.h	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/nvme/nvme_internal.h	2021-05-03 15:34:54.650876950 +0900
+@@ -226,9 +226,14 @@
+ 
+ 	uint8_t				retries;
+ 
+-	bool				timed_out;
++	uint8_t				timed_out : 1;
+ 
+ 	/**
++	 * True if the request is in the queued_req list. (20.07)
++	 */
++	uint8_t				queued : 1;
++	uint8_t				reserved : 6;
++	/**
+ 	 * Number of children requests still outstanding for this
+ 	 *  request which was split into multiple child requests.
+ 	 */
+@@ -1005,7 +1010,7 @@
+ {
+ 	assert(req != NULL);
+ 	assert(req->num_children == 0);
+-
++	
+ 	STAILQ_INSERT_HEAD(&qpair->free_req, req, stailq);
+ }
+ 
+@@ -1016,8 +1021,9 @@
+ 	assert(child != NULL);
+ 	assert(child->parent == parent);
+ 	assert(parent->num_children != 0);
+-
++	
+ 	parent->num_children--;
++	child->parent = NULL;
+ 	TAILQ_REMOVE(&parent->children, child, child_tailq);
+ }
+ 
+--- spdk-19.10/lib/nvme/nvme_qpair.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/nvme/nvme_qpair.c	2021-05-03 15:34:54.650876950 +0900
+@@ -676,6 +676,7 @@
+ 	}
+ 
+ 	if (spdk_likely(rc == 0)) {
++		req->queued = false;
+ 		return 0;
+ 	}
+ 
+@@ -687,7 +688,17 @@
+ 	if (req->parent != NULL) {
+ 		nvme_request_remove_child(req->parent, req);
+ 	}
+-	nvme_free_request(req);
++
++	/* The request is from queued_req list we should trigger the callback from caller */
++	if (spdk_unlikely(req->queued)) {
++		nvme_qpair_manual_complete_request(qpair, req, SPDK_NVME_SCT_GENERIC,
++			SPDK_NVME_SC_INTERNAL_DEVICE_ERROR, 1, true);
++	}
++	else
++	{
++		nvme_free_request(req);
++	}
++	
+ 
+ 	return rc;
+ }
+@@ -704,6 +715,7 @@
+ 		 * through this path.
+ 		 */
+ 		STAILQ_INSERT_TAIL(&qpair->queued_req, req, stailq);
++		req->queued = true;
+ 		return 0;
+ 	}
+ 
+@@ -714,6 +726,7 @@
+ 	rc = _nvme_qpair_submit_request(qpair, req);
+ 	if (rc == -EAGAIN) {
+ 		STAILQ_INSERT_TAIL(&qpair->queued_req, req, stailq);
++		req->queued = true;
+ 		rc = 0;
+ 	}
+ 
+--- spdk-19.10/lib/nvmf/ctrlr.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/nvmf/ctrlr.c	2021-05-03 15:34:54.650876950 +0900
+@@ -46,11 +46,11 @@
+ #include "spdk/version.h"
+ 
+ #include "spdk_internal/log.h"
+-
+ #define MIN_KEEP_ALIVE_TIMEOUT_IN_MS 10000
+ #define NVMF_DISC_KATO_IN_MS 120000
+ #define KAS_TIME_UNIT_IN_MS 100
+ #define KAS_DEFAULT_VALUE (MIN_KEEP_ALIVE_TIMEOUT_IN_MS / KAS_TIME_UNIT_IN_MS)
++#define ADMIN_QID (0)
+ 
+ /*
+  * Report the SPDK version as the firmware revision.
+@@ -58,6 +58,34 @@
+  */
+ #define FW_VERSION SPDK_VERSION_MAJOR_STRING SPDK_VERSION_MINOR_STRING SPDK_VERSION_PATCH_STRING
+ 
++#if defined QOS_ENABLED_FE
++//This will be Changed to getting info from POS reactor info
++#define M_MAX_REACTOR (100)
++#define M_MAX_SUBSYSTEM (1024)
++
++uint32_t reactorSubsystemIdMap[M_MAX_REACTOR][M_MAX_SUBSYSTEM] = {M_INVALID_SUBSYSTEM};
++
++void spdk_nvmf_initialize_reactor_subsystem_mapping(void) {
++    for (uint32_t reactor = 0; reactor < M_MAX_REACTOR; reactor++) {
++        for (uint32_t subsys = 0; subsys < M_MAX_SUBSYSTEM; subsys++) {
++            reactorSubsystemIdMap[reactor][subsys] = M_INVALID_SUBSYSTEM;
++        }
++    }
++}
++
++uint32_t spdk_nvmf_get_reactor_subsystem_mapping(uint32_t reactor, uint32_t id) {
++	return (reactorSubsystemIdMap[reactor][id]);
++}
++
++void spdk_nvmf_set_reactor_subsystem_mapping(uint32_t reactor, uint32_t id, uint32_t value) {
++    if (M_VALID_SUBSYSTEM == value) {
++	    reactorSubsystemIdMap[reactor][id] += 1;
++    } else {
++	    reactorSubsystemIdMap[reactor][id] -= 1;
++    }
++}
++#endif
++
+ static inline void
+ spdk_nvmf_invalid_connect_response(struct spdk_nvmf_fabric_connect_rsp *rsp,
+ 				   uint8_t iattr, uint16_t ipo)
+@@ -215,7 +243,13 @@
+ _spdk_nvmf_request_complete(void *ctx)
+ {
+ 	struct spdk_nvmf_request *req = ctx;
+-
++#if defined QOS_ENABLED_FE
++        if (req->qpair->ctrlr->subsys != NULL) {
++            if (req->qpair->qid != 0) {
++			    spdk_nvmf_set_reactor_subsystem_mapping(spdk_env_get_current_core(), req->qpair->ctrlr->subsys->id, M_VALID_SUBSYSTEM);
++            }
++        }
++#endif
+ 	spdk_nvmf_request_complete(req);
+ }
+ 
+@@ -397,6 +431,21 @@
+ 	  */
+ 	qpair->ctrlr = NULL;
+ 
++	/* if admin queue is destroyed, we handle same as ctrlr->in_destruct */
++	if (!spdk_bit_array_get(ctrlr->qpair_mask, ADMIN_QID)) {
++		SPDK_ERRLOG("Got I/O connect while admin qpair was being destroyed.\n");
++		SPDK_NVMF_INVALID_CONNECT_CMD(rsp, qid);
++		goto end;
++	}
++
++	/* Make sure the controller is not being destroyed. */
++
++	if (ctrlr->in_destruct) {
++		SPDK_ERRLOG("Got I/O connect while ctrlr was being destroyed.\n");
++		SPDK_NVMF_INVALID_CONNECT_CMD(rsp, qid);
++		goto end;
++	}
++
+ 	if (ctrlr->subsys->subtype == SPDK_NVMF_SUBTYPE_DISCOVERY) {
+ 		SPDK_ERRLOG("I/O connect not allowed on discovery controller\n");
+ 		SPDK_NVMF_INVALID_CONNECT_CMD(rsp, qid);
+@@ -453,6 +502,22 @@
+ 		spdk_thread_send_msg(qpair->group->thread, _spdk_nvmf_request_complete, req);
+ 		return;
+ 	}
++
++        /* if admin queue is destroyed, we handle same as ctrlr->in_destruct */
++	if (!spdk_bit_array_get(ctrlr->qpair_mask, ADMIN_QID)) {
++		SPDK_ERRLOG("Got I/O connect while admin qpair was being destroyed.\n");
++		SPDK_NVMF_INVALID_CONNECT_CMD(rsp, qid);
++		spdk_thread_send_msg(qpair->group->thread, _spdk_nvmf_request_complete, req);
++		return;
++	}
++
++	/* fail before passing a message to the controller thread. */
++	if (ctrlr->in_destruct) {
++		SPDK_ERRLOG("Got I/O connect while ctrlr was being destroyed.\n");
++		SPDK_NVMF_INVALID_CONNECT_CMD(rsp, qid);
++		spdk_thread_send_msg(qpair->group->thread, _spdk_nvmf_request_complete, req);
++		return;
++	}
+ 
+ 	admin_qpair = ctrlr->admin_qpair;
+ 	qpair->ctrlr = ctrlr;
+--- spdk-19.10/lib/nvmf/nvmf.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/nvmf/nvmf.c	2021-05-03 15:34:54.650876950 +0900
+@@ -47,10 +47,11 @@
+ #include "nvmf_internal.h"
+ #include "transport.h"
+ 
++#include "nvmf_internal.h"
++#include "transport.h"
+ SPDK_LOG_REGISTER_COMPONENT("nvmf", SPDK_LOG_NVMF)
+ 
+ #define SPDK_NVMF_DEFAULT_MAX_SUBSYSTEMS 1024
+-
+ static TAILQ_HEAD(, spdk_nvmf_tgt) g_nvmf_tgts = TAILQ_HEAD_INITIALIZER(g_nvmf_tgts);
+ 
+ typedef void (*nvmf_qpair_disconnect_cpl)(void *ctx, int status);
+@@ -187,7 +188,7 @@
+ 	int rc = 0;
+ 
+ 	qpair = TAILQ_FIRST(&group->qpairs);
+-
++	printf("Exit Call 1 \n");
+ 	if (qpair) {
+ 		rc = spdk_nvmf_qpair_disconnect(qpair, _nvmf_tgt_disconnect_next_qpair, ctx);
+ 	}
+@@ -751,6 +752,7 @@
+ 	spdk_bit_array_clear(ctrlr->qpair_mask, qpair_ctx->qid);
+ 	count = spdk_bit_array_count_set(ctrlr->qpair_mask);
+ 	if (count == 0) {
++		ctrlr->in_destruct = true;
+ 		spdk_bit_array_free(&ctrlr->qpair_mask);
+ 
+ 		spdk_thread_send_msg(ctrlr->subsys->thread, _nvmf_ctrlr_destruct, ctrlr);
+@@ -834,6 +836,11 @@
+ 
+ 	/* The queue pair must be disconnected from the thread that owns it */
+ 	assert(qpair->group->thread == spdk_get_thread());
++#if defined QOS_ENABLED_FE
++        if (qpair->qid != 0) {
++		    spdk_nvmf_set_reactor_subsystem_mapping(spdk_env_get_current_core(), qpair->ctrlr->subsys->id, M_INVALID_SUBSYSTEM);
++	}
++#endif
+ 
+ 	if (qpair->state != SPDK_NVMF_QPAIR_ACTIVE) {
+ 		/* This can occur if the connection is killed by the target,
+@@ -1207,7 +1214,7 @@
+ 			break;
+ 		}
+ 	}
+-
++	printf("Exit Call\n");
+ 	if (qpair) {
+ 		rc = spdk_nvmf_qpair_disconnect(qpair, _nvmf_subsystem_disconnect_next_qpair, ctx);
+ 	} else {
+--- spdk-19.10/lib/nvmf/nvmf_internal.h	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/nvmf/nvmf_internal.h	2021-05-03 15:34:54.650876950 +0900
+@@ -44,7 +44,10 @@
+ #include "spdk/queue.h"
+ #include "spdk/util.h"
+ #include "spdk/thread.h"
+-
++#if defined QOS_ENABLED_FE
++#define M_INVALID_SUBSYSTEM (0)
++#define M_VALID_SUBSYSTEM (1)
++#endif
+ #define SPDK_NVMF_MAX_SGL_ENTRIES	16
+ 
+ /* The maximum number of buffers per request */
+@@ -337,6 +340,7 @@
+ 	struct spdk_poller		*keep_alive_poller;
+ 
+ 	bool				dif_insert_or_strip;
++	bool				in_destruct;
+ 
+ 	TAILQ_ENTRY(spdk_nvmf_ctrlr)	link;
+ };
+@@ -482,3 +486,4 @@
+ }
+ 
+ #endif /* __NVMF_INTERNAL_H__ */
++
+--- spdk-19.10/lib/nvmf/rdma.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/nvmf/rdma.c	2021-05-03 15:34:54.650876950 +0900
+@@ -2323,6 +2323,8 @@
+ #define SPDK_NVMF_RDMA_DEFAULT_MAX_QPAIRS_PER_CTRLR 128
+ #define SPDK_NVMF_RDMA_DEFAULT_IN_CAPSULE_DATA_SIZE 4096
+ #define SPDK_NVMF_RDMA_DEFAULT_MAX_IO_SIZE 131072
++/* Note: samsung changed SPDK_NVMF_RDMA_MIN_IO_BUFFER_SIZE: 8K -> 128K */
++//#define SPDK_NVMF_RDMA_MIN_IO_BUFFER_SIZE (SPDK_NVMF_RDMA_DEFAULT_MAX_IO_SIZE / SPDK_NVMF_MAX_SGL_ENTRIES)
+ #define SPDK_NVMF_RDMA_MIN_IO_BUFFER_SIZE (SPDK_NVMF_RDMA_DEFAULT_MAX_IO_SIZE / SPDK_NVMF_MAX_SGL_ENTRIES)
+ #define SPDK_NVMF_RDMA_DEFAULT_NUM_SHARED_BUFFERS 4095
+ #define SPDK_NVMF_RDMA_DEFAULT_BUFFER_CACHE_SIZE 32
+@@ -3727,7 +3729,7 @@
+ spdk_nvmf_rdma_poller_poll(struct spdk_nvmf_rdma_transport *rtransport,
+ 			   struct spdk_nvmf_rdma_poller *rpoller)
+ {
+-	struct ibv_wc wc[32];
++	struct ibv_wc wc[128];
+ 	struct spdk_nvmf_rdma_wr	*rdma_wr;
+ 	struct spdk_nvmf_rdma_request	*rdma_req;
+ 	struct spdk_nvmf_rdma_recv	*rdma_recv;
+@@ -3738,7 +3740,7 @@
+ 	uint64_t poll_tsc = spdk_get_ticks();
+ 
+ 	/* Poll for completing operations. */
+-	reaped = ibv_poll_cq(rpoller->cq, 32, wc);
++	reaped = ibv_poll_cq(rpoller->cq, 128, wc);
+ 	if (reaped < 0) {
+ 		SPDK_ERRLOG("Error polling CQ! (%d): %s\n",
+ 			    errno, spdk_strerror(errno));
+--- spdk-19.10/lib/nvmf/subsystem.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/nvmf/subsystem.c	2021-05-03 15:34:54.654876950 +0900
+@@ -422,7 +422,6 @@
+ 		__atomic_compare_exchange_n(&subsystem->state, &actual_old_state, state, false,
+ 					    __ATOMIC_RELAXED, __ATOMIC_RELAXED);
+ 	}
+-	assert(actual_old_state == expected_old_state);
+ 	return actual_old_state - expected_old_state;
+ }
+ 
+@@ -545,6 +544,12 @@
+ }
+ 
+ int
++spdk_nvmf_subsystem_set_pause_state_directly(struct spdk_nvmf_subsystem* subsystem)
++{
++    return spdk_nvmf_subsystem_set_state(subsystem, SPDK_NVMF_SUBSYSTEM_PAUSED);
++}
++
++int
+ spdk_nvmf_subsystem_start(struct spdk_nvmf_subsystem *subsystem,
+ 			  spdk_nvmf_subsystem_state_change_done cb_fn,
+ 			  void *cb_arg)
+@@ -726,6 +731,25 @@
+ 	return TAILQ_NEXT(prev_host, link);
+ }
+ 
++char*
++spdk_nvmf_subsystem_get_ctrlr_hostnqn(struct spdk_nvmf_ctrlr *ctrlr)
++{
++    return ctrlr->hostnqn;
++}
++
++struct spdk_nvmf_ctrlr*
++spdk_nvmf_subsystem_get_first_ctrlr(struct spdk_nvmf_subsystem *subsystem)
++{
++    return TAILQ_FIRST(&subsystem->ctrlrs); 
++}
++
++struct spdk_nvmf_ctrlr*
++spdk_nvmf_subsystem_get_next_ctrlr(struct spdk_nvmf_subsystem *subsystem,
++                    struct spdk_nvmf_ctrlr *prev_ctrlr)
++{
++    return TAILQ_NEXT(prev_ctrlr, link); 
++}
++
+ const char *
+ spdk_nvmf_host_get_nqn(struct spdk_nvmf_host *host)
+ {
+@@ -1051,7 +1075,8 @@
+ 	int rc;
+ 
+ 	if (!(subsystem->state == SPDK_NVMF_SUBSYSTEM_INACTIVE ||
+-	      subsystem->state == SPDK_NVMF_SUBSYSTEM_PAUSED)) {
++	      subsystem->state == SPDK_NVMF_SUBSYSTEM_PAUSED || subsystem->state == SPDK_NVMF_SUBSYSTEM_PAUSING)) {
++		SPDK_ERRLOG("invalid subsystem state : %d\n", subsystem->state);
+ 		return 0;
+ 	}
+ 
+@@ -1304,6 +1329,14 @@
+ 	return subsystem->subnqn;
+ }
+ 
++#if defined QOS_ENABLED_FE
++uint32_t
++spdk_nvmf_subsystem_get_id(struct spdk_nvmf_subsystem *subsystem)
++{
++	return subsystem->id;
++}
++#endif
++
+ /* Workaround for astyle formatting bug */
+ typedef enum spdk_nvmf_subtype nvmf_subtype_t;
+ 
+--- spdk-19.10/lib/thread/thread.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/lib/thread/thread.c	2021-05-03 15:34:54.654876950 +0900
+@@ -245,8 +245,8 @@
+ 	free(thread);
+ }
+ 
+-struct spdk_thread *
+-spdk_thread_create(const char *name, struct spdk_cpuset *cpumask)
++static struct spdk_thread *
++_spdk_thread_create(const char *name, struct spdk_cpuset *cpumask, bool use_registered_fn)
+ {
+ 	struct spdk_thread *thread;
+ 	struct spdk_msg *msgs[SPDK_MSG_MEMPOOL_CACHE_SIZE];
+@@ -302,8 +302,8 @@
+ 	TAILQ_INSERT_TAIL(&g_threads, thread, tailq);
+ 	g_thread_count++;
+ 	pthread_mutex_unlock(&g_devlist_mutex);
+-
+-	if (g_new_thread_fn) {
++    
++	if (use_registered_fn && g_new_thread_fn) {
+ 		rc = g_new_thread_fn(thread);
+ 		if (rc != 0) {
+ 			_free_thread(thread);
+@@ -314,6 +314,19 @@
+ 	return thread;
+ }
+ 
++struct spdk_thread *
++spdk_thread_create(const char *name, struct spdk_cpuset *cpumask)
++{
++	_spdk_thread_create(name, cpumask, true);
++}
++
++struct spdk_thread *
++spdk_thread_create_without_registered_fn(const char *name)
++{
++	_spdk_thread_create(name, NULL, false);
++}
++
++
+ void
+ spdk_set_thread(struct spdk_thread *thread)
+ {
+--- spdk-19.10/mk/spdk.common.mk	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/mk/spdk.common.mk	2021-05-03 15:34:54.658876950 +0900
+@@ -229,6 +229,17 @@
+ SYS_LIBS += -lfuse3
+ endif
+ 
++ifeq ($(CONFIG_IBOF),y)
++SYS_LIBS += -ltcmalloc
++COMMON_CFLAGS += -DQOS_ENABLED_BE
++#COMMON_CFLAGS += -DQOS_ENABLED_FE
++#COMMON_CFLAGS += -DNVMe_FLUSH_HANDLING
++endif
++
++AIR_ROOT_DIR=$(SPDK_ROOT_DIR)/../air/
++SYS_LIBS += -L$(AIR_ROOT_DIR)/lib/ -lair -lstdc++
++COMMON_CFLAGS += -I$(AIR_ROOT_DIR) -I$(AIR_ROOT_DIR)/include/
++
+ MAKEFLAGS += --no-print-directory
+ 
+ C_SRCS += $(C_SRCS-y)
+--- spdk-19.10/mk/spdk.modules.mk	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/mk/spdk.modules.mk	2021-05-03 15:34:54.658876950 +0900
+@@ -86,6 +86,10 @@
+ SYS_LIBS += -lpmemblk
+ endif
+ 
++ifeq ($(CONFIG_IBOF),y)
++BLOCKDEV_MODULES_LIST += bdev_ibof
++endif
++
+ SOCK_MODULES_LIST = sock_posix
+ 
+ ifeq ($(CONFIG_VPP),y)
+--- spdk-19.10/module/bdev/Makefile	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/module/bdev/Makefile	2021-05-03 15:34:54.658876950 +0900
+@@ -49,6 +49,7 @@
+ DIRS-$(CONFIG_ISCSI_INITIATOR) += iscsi
+ DIRS-$(CONFIG_VIRTIO) += virtio
+ DIRS-$(CONFIG_PMDK) += pmem
++DIRS-$(CONFIG_IBOF) += ibof
+ endif
+ 
+ DIRS-$(CONFIG_RBD) += rbd
+--- spdk-19.10/module/bdev/ibof/Makefile	1970-01-01 09:00:00.000000000 +0900
++++ spdk-19.10/module/bdev/ibof/Makefile	2021-05-03 15:34:54.658876950 +0900
+@@ -0,0 +1,41 @@
++#
++#  BSD LICENSE
++#
++#  Copyright (c) Intel Corporation.
++#  All rights reserved.
++#
++#  Redistribution and use in source and binary forms, with or without
++#  modification, are permitted provided that the following conditions
++#  are met:
++#
++#    * Redistributions of source code must retain the above copyright
++#      notice, this list of conditions and the following disclaimer.
++#    * Redistributions in binary form must reproduce the above copyright
++#      notice, this list of conditions and the following disclaimer in
++#      the documentation and/or other materials provided with the
++#      distribution.
++#    * Neither the name of Intel Corporation nor the names of its
++#      contributors may be used to endorse or promote products derived
++#      from this software without specific prior written permission.
++#
++#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++#  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++#  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++#  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++#  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++#  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++#  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++#
++
++SPDK_ROOT_DIR := $(abspath $(CURDIR)/../../..)
++include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
++
++C_SRCS = bdev_ibof.c bdev_ibof_rpc.c
++LIBNAME = bdev_ibof
++LOCAL_SYS_LIBS = -luuid
++
++include $(SPDK_ROOT_DIR)/mk/spdk.lib.mk
+--- spdk-19.10/module/bdev/ibof/bdev_ibof.c	1970-01-01 09:00:00.000000000 +0900
++++ spdk-19.10/module/bdev/ibof/bdev_ibof.c	2021-05-03 15:34:54.658876950 +0900
+@@ -0,0 +1,1073 @@
++/*-
++ *   BSD LICENSE
++ *
++ *   Copyright (c) Samsung Corporation.
++ *   All rights reserved.
++ *
++ *   Redistribution and use in source and binary forms, with or without
++ *   modification, are permitted provided that the following conditions
++ *   are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in
++ *       the documentation and/or other materials provided with the
++ *       distribution.
++ *     * Neither the name of Samsung Corporation nor the names of its
++ *       contributors may be used to endorse or promote products derived
++ *       from this software without specific prior written permission.
++ *
++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "spdk/stdinc.h"
++
++#include "bdev_ibof.h"
++#include "spdk/bdev.h"
++#include "spdk/conf.h"
++#include "spdk/endian.h"
++#include "spdk/env.h"
++#include "spdk/copy_engine.h"
++#include "spdk/json.h"
++#include "spdk/thread.h"
++#include "spdk/queue.h"
++#include "spdk/string.h"
++#include "spdk/likely.h"
++
++#include "spdk/bdev_module.h"
++#include "spdk_internal/log.h"
++#include "spdk/ibof.h"
++#include "spdk/ibof_volume.h"
++#include "spdk/ibof_nvmf.h"
++#include "spdk/event.h"
++#include "spdk/ioat.h"
++
++#include "Air.h"
++
++struct ibof_disk {
++	struct spdk_bdev		disk;
++	struct ibof_volume_info		volume;
++	void				*ibof_buf;
++	TAILQ_ENTRY(ibof_disk)	link;
++};
++
++struct ibof_task {
++	int				num_outstanding;
++	enum spdk_bdev_io_status	status;
++};
++
++struct ioat_io_channel {
++	struct spdk_ioat_chan	*ioat_ch;
++	struct ioat_device	*ioat_dev;
++	struct spdk_poller	*poller;
++};
++
++struct ibof_io_channel {
++};
++
++__thread __typeof__(struct spdk_poller*) per_lcore_ibof_poller;
++
++__thread __typeof__(unsigned int) per_lcore_poller_ref_count;
++
++static struct ibof_task *
++__ibof_task_from_copy_task(struct spdk_copy_task *ct)
++{
++	return (struct ibof_task *)((uintptr_t)ct - sizeof(struct ibof_task));
++}
++
++static struct spdk_copy_task *
++__copy_task_from_ibof_task(struct ibof_task *mt)
++{
++	return (struct spdk_copy_task *)((uintptr_t)mt + sizeof(struct ibof_task));
++}
++
++static void
++ibof_done(void *ref, int status)
++{
++	struct ibof_task *task = __ibof_task_from_copy_task(ref);
++
++	if (status != 0) {
++		if (status == -ENOMEM) {
++			task->status = SPDK_BDEV_IO_STATUS_NOMEM;
++		} else {
++			task->status = SPDK_BDEV_IO_STATUS_FAILED;
++		}
++	}
++
++	if (--task->num_outstanding == 0) {
++		spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task), task->status);
++	}
++}
++
++static void
++ibof_dma_done(void *ref)
++{
++	ibof_done(ref, 0);
++}
++
++static TAILQ_HEAD(, ibof_disk) g_ibof_disks = TAILQ_HEAD_INITIALIZER(g_ibof_disks);
++
++static uint32_t ibof_disk_count = 0;
++
++static int bdev_ibof_initialize(void);
++static void bdev_ibof_get_spdk_running_config(FILE *fp);
++
++static int
++bdev_ibof_get_ctx_size(void)
++{
++	return sizeof(struct ibof_task) + spdk_copy_task_size();
++}
++
++static struct spdk_bdev_module ibof_if = {
++	.name = "iBoF",
++	.module_init = bdev_ibof_initialize,
++	.config_text = bdev_ibof_get_spdk_running_config,
++	.get_ctx_size = bdev_ibof_get_ctx_size,
++
++};
++
++SPDK_BDEV_MODULE_REGISTER(ibof, &ibof_if)
++
++static bool
++bdev_ibof_io_type_supported(void *ctx, enum spdk_bdev_io_type io_type)
++{
++	switch (io_type) {
++	case SPDK_BDEV_IO_TYPE_READ:
++	case SPDK_BDEV_IO_TYPE_WRITE:
++#if defined NVMe_FLUSH_HANDLING
++	case SPDK_BDEV_IO_TYPE_FLUSH:
++#endif
++		return true;
++	/*
++	case SPDK_BDEV_IO_TYPE_FLUSH:
++	case SPDK_BDEV_IO_TYPE_RESET:
++	case SPDK_BDEV_IO_TYPE_UNMAP:
++	case SPDK_BDEV_IO_TYPE_WRITE_ZEROES:
++		return true;
++	*/
++
++	default:
++		return false;
++	}
++}
++
++
++static void
++bdev_ibof_get_spdk_running_config(FILE *fp)
++{
++	int num_ibof_volume = 0;
++	uint64_t ibof_buffer_size = 0;
++	struct ibof_disk *mdisk;
++
++	/* count number of ibof volumes, get volume buffer size */
++	TAILQ_FOREACH(mdisk, &g_ibof_disks, link) {
++		if (0 == ibof_buffer_size) {
++			/* assume all ibof luns the same size */
++			ibof_buffer_size = (mdisk->disk.blocklen * mdisk->disk.blockcnt) / (1024*1024);
++		}
++		num_ibof_volume++;
++	}
++
++	if (num_ibof_volume > 0) {
++		fprintf(fp,
++			"\n"
++			"# Users may change this section to create a different number or volume size of\n"
++			"# ibof volume.\n"
++			"# This will generate %d Volumes with a ibof-allocated backend. Each Volume\n"
++			"# is mapped with iBOF volume 1:1 and \n"
++			"# will has %" PRIu64 "MB in size buffer and these will be named Volume0 through Volume%d.\n"
++			"# Not all Volumes defined here are necessarily used below.\n"
++			"[Volume]\n"
++			"  NumberOfVolume %d\n"
++			"  VolumeBufferInMB %" PRIu64 "\n",
++			num_ibof_volume, ibof_buffer_size,
++			num_ibof_volume - 1, num_ibof_volume,
++			ibof_buffer_size);
++	}
++}
++
++
++static void
++ibof_disk_free(struct ibof_disk *ibof_disk)
++{
++	if (!ibof_disk) {
++		return;
++	}
++
++	free(ibof_disk->disk.name);
++	spdk_dma_free(ibof_disk->ibof_buf);
++	spdk_dma_free(ibof_disk);
++}
++
++static int
++bdev_ibof_destruct(void *ctx)
++{
++	struct ibof_disk *ibof_disk = ctx;
++
++	TAILQ_REMOVE(&g_ibof_disks, ibof_disk, link);
++	ibof_disk_free(ibof_disk);
++	return 0;
++}
++
++static int
++bdev_ibof_check_iov_len(struct iovec *iovs, int iovcnt, size_t nbytes)
++{
++	int i;
++
++	for (i = 0; i < iovcnt; i++) {
++		if (nbytes < iovs[i].iov_len) {
++			return 0;
++		}
++
++		nbytes -= iovs[i].iov_len;
++	}
++
++	return nbytes != 0;
++}
++
++static void
++bdev_ibof_ramdisk_readv(struct ibof_disk *mdisk, struct spdk_io_channel *ch,
++		  struct ibof_task *task,
++		  struct iovec *iov, int iovcnt, size_t len, uint64_t offset)
++{
++	int64_t res = 0;
++	void *src = mdisk->ibof_buf + offset;
++	int i;
++
++	if (bdev_ibof_check_iov_len(iov, iovcnt, len)) {
++		spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task),
++				      SPDK_BDEV_IO_STATUS_FAILED);
++		return;
++	}
++
++	SPDK_DEBUGLOG(SPDK_LOG_BDEV_IBOF, "read %lu bytes from offset %#lx\n",
++		      len, offset);
++
++	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
++	task->num_outstanding = iovcnt;
++
++	for (i = 0; i < iovcnt; i++) {
++		res = spdk_copy_submit(__copy_task_from_ibof_task(task),
++				       ch, iov[i].iov_base,
++				       src, iov[i].iov_len, ibof_done);
++
++		if (res != 0) {
++			ibof_done(__copy_task_from_ibof_task(task), res);
++		}
++
++		src += iov[i].iov_len;
++		len -= iov[i].iov_len;
++	}
++}
++
++static void
++bdev_ibof_ramdisk_dma_readv(struct ibof_disk *mdisk, struct spdk_io_channel *ch,
++		  struct ibof_task *task,
++		  struct iovec *iov, int iovcnt, size_t len, uint64_t offset)
++{
++	int64_t res = 0;
++	void *src = mdisk->ibof_buf + offset;
++	int i;
++
++	if (bdev_ibof_check_iov_len(iov, iovcnt, len)) {
++		spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task),
++				      SPDK_BDEV_IO_STATUS_FAILED);
++		return;
++	}
++
++	SPDK_DEBUGLOG(SPDK_LOG_BDEV_IBOF, "read %lu bytes from offset %#lx\n",
++		      len, offset);
++
++	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
++	task->num_outstanding += iovcnt;
++
++	struct ioat_io_channel* ioat_ch = spdk_io_channel_get_ctx(ch);
++	for (i = 0; i < iovcnt; i++) {
++		res = spdk_ioat_submit_copy(ioat_ch->ioat_ch,
++			__copy_task_from_ibof_task(task),
++			ibof_dma_done,
++			iov[i].iov_base,
++			src,
++			iov[i].iov_len);
++
++		if (res != 0) {
++			ibof_done(__copy_task_from_ibof_task(task), res);
++		}
++
++		src += iov[i].iov_len;
++		len -= iov[i].iov_len;
++	}
++}
++
++static void
++bdev_ibof_ramdisk_writev(struct ibof_disk *mdisk, struct spdk_io_channel *ch,
++		   struct ibof_task *task,
++		   struct iovec *iov, int iovcnt, size_t len, uint64_t offset)
++{
++	int64_t res = 0;
++	void *dst = mdisk->ibof_buf + offset;
++	int i;
++
++	if (bdev_ibof_check_iov_len(iov, iovcnt, len)) {
++		spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task),
++				      SPDK_BDEV_IO_STATUS_FAILED);
++		return;
++	}
++
++	SPDK_DEBUGLOG(SPDK_LOG_BDEV_IBOF, "wrote %lu bytes to offset %#lx\n",
++		      len, offset);
++
++	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
++	task->num_outstanding = iovcnt;
++
++	for (i = 0; i < iovcnt; i++) {
++		res = spdk_copy_submit(__copy_task_from_ibof_task(task),
++				       ch, dst, iov[i].iov_base,
++				       iov[i].iov_len, ibof_done);
++
++		if (res != 0) {
++			ibof_done(__copy_task_from_ibof_task(task), res);
++		}
++
++		dst += iov[i].iov_len;
++	}
++}
++
++static void
++bdev_ibof_ramdisk_dma_writev(struct ibof_disk *mdisk, struct spdk_io_channel *ch,
++		   struct ibof_task *task,
++		   struct iovec *iov, int iovcnt, size_t len, uint64_t offset)
++{
++	int64_t res = 0;
++	void *dst = mdisk->ibof_buf + offset;
++	int i;
++
++	if (bdev_ibof_check_iov_len(iov, iovcnt, len)) {
++		spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task),
++				      SPDK_BDEV_IO_STATUS_FAILED);
++		return;
++	}
++
++	SPDK_DEBUGLOG(SPDK_LOG_BDEV_IBOF, "wrote %lu bytes to offset %#lx\n",
++		      len, offset);
++
++	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
++	task->num_outstanding += iovcnt;
++
++	struct ioat_io_channel* ioat_ch = spdk_io_channel_get_ctx(ch);
++	for (i = 0; i < iovcnt; i++) {
++		res = spdk_ioat_submit_copy(ioat_ch->ioat_ch,
++			__copy_task_from_ibof_task(task),
++			ibof_dma_done,
++			dst,
++			iov[i].iov_base,
++			iov[i].iov_len);
++
++		if (res != 0) {
++			ibof_done(__copy_task_from_ibof_task(task), res);
++		}
++
++		dst += iov[i].iov_len;
++	}
++}
++
++static int
++bdev_ibof_unmap(struct ibof_disk *mdisk,
++		  struct spdk_io_channel *ch,
++		  struct ibof_task *task,
++		  uint64_t offset,
++		  uint64_t byte_count)
++{
++	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
++	task->num_outstanding += 1;
++
++	return spdk_copy_submit_fill(__copy_task_from_ibof_task(task), ch,
++				     mdisk->ibof_buf + offset, 0, byte_count, ibof_done);
++}
++
++static int64_t
++bdev_ibof_flush(struct ibof_disk *mdisk, struct ibof_task *task,
++		  uint64_t offset, uint64_t nbytes)
++{
++	spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task), SPDK_BDEV_IO_STATUS_SUCCESS);
++
++	return 0;
++}
++
++static int
++bdev_ibof_reset(struct ibof_disk *mdisk, struct ibof_task *task)
++{
++	spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task), SPDK_BDEV_IO_STATUS_SUCCESS);
++
++	return 0;
++}
++
++static int _bdev_ibof_ramdisk_rw(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
++{
++	uint32_t block_size = bdev_io->bdev->blocklen;
++
++	switch (bdev_io->type) {
++	case SPDK_BDEV_IO_TYPE_READ:
++		if (bdev_io->u.bdev.iovs[0].iov_base == NULL) {
++			assert(bdev_io->u.bdev.iovcnt == 1);
++			bdev_io->u.bdev.iovs[0].iov_base =
++				((struct ibof_disk *)bdev_io->bdev->ctxt)->ibof_buf +
++				bdev_io->u.bdev.offset_blocks * block_size;
++			bdev_io->u.bdev.iovs[0].iov_len = bdev_io->u.bdev.num_blocks * block_size;
++			spdk_bdev_io_complete(spdk_bdev_io_from_ctx(bdev_io->driver_ctx),
++					      SPDK_BDEV_IO_STATUS_SUCCESS);
++			return 0;
++		}
++
++		bdev_ibof_ramdisk_readv((struct ibof_disk *)bdev_io->bdev->ctxt,
++				  ch,
++				  (struct ibof_task *)bdev_io->driver_ctx,
++				  bdev_io->u.bdev.iovs,
++				  bdev_io->u.bdev.iovcnt,
++				  bdev_io->u.bdev.num_blocks * block_size,
++				  bdev_io->u.bdev.offset_blocks * block_size);
++		return 0;
++
++	case SPDK_BDEV_IO_TYPE_WRITE:
++		bdev_ibof_ramdisk_writev((struct ibof_disk *)bdev_io->bdev->ctxt,
++				   ch,
++				   (struct ibof_task *)bdev_io->driver_ctx,
++				   bdev_io->u.bdev.iovs,
++				   bdev_io->u.bdev.iovcnt,
++				   bdev_io->u.bdev.num_blocks * block_size,
++				   bdev_io->u.bdev.offset_blocks * block_size);
++		return 0;
++	}
++	return 0;
++}
++
++static int _bdev_ibof_ramdisk_dma_rw(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
++{
++	uint32_t block_size = bdev_io->bdev->blocklen;
++
++	switch (bdev_io->type) {
++	case SPDK_BDEV_IO_TYPE_READ:
++		if (bdev_io->u.bdev.iovs[0].iov_base == NULL) {
++			assert(bdev_io->u.bdev.iovcnt == 1);
++			bdev_io->u.bdev.iovs[0].iov_base =
++				((struct ibof_disk *)bdev_io->bdev->ctxt)->ibof_buf +
++				bdev_io->u.bdev.offset_blocks * block_size;
++			bdev_io->u.bdev.iovs[0].iov_len = bdev_io->u.bdev.num_blocks * block_size;
++			spdk_bdev_io_complete(spdk_bdev_io_from_ctx(bdev_io->driver_ctx),
++					      SPDK_BDEV_IO_STATUS_SUCCESS);
++			return 0;
++		}
++
++		bdev_ibof_ramdisk_dma_readv((struct ibof_disk *)bdev_io->bdev->ctxt,
++				  ch,
++				  (struct ibof_task *)bdev_io->driver_ctx,
++				  bdev_io->u.bdev.iovs,
++				  bdev_io->u.bdev.iovcnt,
++				  bdev_io->u.bdev.num_blocks * block_size,
++				  bdev_io->u.bdev.offset_blocks * block_size);
++		return 0;
++
++	case SPDK_BDEV_IO_TYPE_WRITE:
++		bdev_ibof_ramdisk_dma_writev((struct ibof_disk *)bdev_io->bdev->ctxt,
++				   ch,
++				   (struct ibof_task *)bdev_io->driver_ctx,
++				   bdev_io->u.bdev.iovs,
++				   bdev_io->u.bdev.iovcnt,
++				   bdev_io->u.bdev.num_blocks * block_size,
++				   bdev_io->u.bdev.offset_blocks * block_size);
++		return 0;
++	}
++	return 0;
++}
++
++static void bdev_ibof_io_complete(struct ibof_io* io, int status)
++{
++    if(io->context){
++        struct spdk_bdev_io* bio = (struct spdk_bdev_io*)io->context;
++        int ret = (status == IBOF_IO_STATUS_SUCCESS) ? SPDK_BDEV_IO_STATUS_SUCCESS : SPDK_BDEV_IO_STATUS_FAILED;
++        spdk_bdev_io_complete(bio, ret);
++    }
++
++    if (READ == io->ioType) {
++        AIRLOG(LAT_BDEV_READ, io->volume_id, 1, (uint64_t)io->context);
++    }
++    else if (WRITE == io->ioType) {
++        AIRLOG(LAT_BDEV_WRITE, io->volume_id, 1, (uint64_t)io->context);
++    }
++
++    free(io);
++}
++
++static int bdev_ibof_eventq_readv(struct ibof_disk *ibdev, struct spdk_io_channel *ch,
++		struct spdk_bdev_io *bio,
++		struct iovec *iov, int iovcnt, uint64_t byte_length, uint64_t byte_offset) 
++{
++	SPDK_DEBUGLOG(SPDK_LOG_BDEV_IBOF, "read %lu blocks with offset %#lx (vid=%d)\n",
++		      byte_length, byte_offset, ibdev->volume.id);
++
++
++	unvmf_submit_handler submit = ibdev->volume.unvmf_io.submit;
++	if(submit){
++		struct ibof_io* io = (struct ibof_io*)malloc(sizeof(struct ibof_io));
++		if(io){
++			io->ioType = READ;
++			io->volume_id = ibdev->volume.id;
++			io->iov = iov;
++			io->iovcnt = iovcnt;
++			io->length = byte_length;
++			io->offset = byte_offset;
++			io->context = (void*)bio;
++			io->complete_cb = bdev_ibof_io_complete;			
++			return submit(io);
++		}
++	}
++	else{
++		SPDK_NOTICELOG("READ no submit handler %s\n", ibdev->disk.name);
++	}
++	spdk_bdev_io_complete(bio, SPDK_BDEV_IO_STATUS_FAILED);
++	return 0;
++}
++
++static int bdev_ibof_eventq_writev(struct ibof_disk *ibdev, struct spdk_io_channel *ch,
++		 struct spdk_bdev_io *bio,
++		 struct iovec *iov, int iovcnt, uint64_t byte_length, uint64_t byte_offset) 
++{
++	SPDK_DEBUGLOG(SPDK_LOG_BDEV_IBOF, "write %lu blocks with offset %#lx (vid=%d)\n",
++		      byte_length, byte_offset, ibdev->volume.id);
++
++	unvmf_submit_handler submit = ibdev->volume.unvmf_io.submit;
++	if(submit){
++		struct ibof_io* io = (struct ibof_io*)malloc(sizeof(struct ibof_io));
++		if(io){
++			io->ioType = WRITE;
++			io->volume_id = ibdev->volume.id;
++			io->iov = iov;
++			io->iovcnt = iovcnt;
++			io->length = byte_length;
++			io->offset = byte_offset;
++			io->context = (void*)bio;
++			io->complete_cb = bdev_ibof_io_complete;					
++			return submit(io);
++		}
++	}
++	else{
++		SPDK_NOTICELOG("WRITE no submit handler %s\n", ibdev->disk.name);
++	}
++	spdk_bdev_io_complete(bio, SPDK_BDEV_IO_STATUS_FAILED);
++	return 0;
++}
++
++#if defined NVMe_FLUSH_HANDLING
++static int bdev_ibof_eventq_flush(struct ibof_disk *ibdev, struct spdk_io_channel *ch,
++		 struct spdk_bdev_io *bio) 
++{
++	SPDK_DEBUGLOG(SPDK_LOG_BDEV_IBOF, "flush with (vid=%d)\n", ibdev->volume.id);
++
++	unvmf_submit_handler submit = ibdev->volume.unvmf_io.submit;
++	if(submit){
++		struct ibof_io* io = (struct ibof_io*)malloc(sizeof(struct ibof_io));
++		if(io){
++			io->ioType = FLUSH;
++			io->volume_id = ibdev->volume.id;
++			io->iov = NULL;
++ 			io->iovcnt = 0;
++ 			io->length = 0;
++ 			io->offset = 0;
++			io->context = (void*)bio;
++			io->complete_cb = bdev_ibof_io_complete;
++			return submit(io);
++		}
++	}
++	else{
++		SPDK_NOTICELOG("FLUSH no submit handler %s\n", ibdev->disk.name);
++	}
++	spdk_bdev_io_complete(bio, SPDK_BDEV_IO_STATUS_FAILED);
++	return 0;
++}
++#endif
++
++static void bdev_ibof_get_buf_cb(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io, bool success)
++{
++	if(!success){
++		spdk_bdev_io_complete(bdev_io, SPDK_BDEV_IO_STATUS_FAILED);
++	}
++
++	int ret;
++	uint32_t block_size = bdev_io->bdev->blocklen;
++
++	ret = bdev_ibof_eventq_readv((struct ibof_disk *)bdev_io->bdev->ctxt,
++				   ch,
++				   bdev_io,
++				   bdev_io->u.bdev.iovs,
++				   bdev_io->u.bdev.iovcnt,
++				   bdev_io->u.bdev.num_blocks * block_size,
++				   bdev_io->u.bdev.offset_blocks * block_size);
++	if(spdk_likely(ret == 0)){
++		return;
++	}
++	else if(ret == -ENOMEM){
++		spdk_bdev_io_complete(bdev_io, SPDK_BDEV_IO_STATUS_NOMEM);
++	}
++	else {
++		spdk_bdev_io_complete(bdev_io, SPDK_BDEV_IO_STATUS_FAILED);
++	}
++}
++
++static int _bdev_ibof_eventq_rw(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
++{
++	uint32_t block_size = bdev_io->bdev->blocklen;
++
++    uint32_t vol_id = ((struct ibof_disk*)bdev_io->bdev->ctxt)->volume.id;
++
++	switch (bdev_io->type) {
++	case SPDK_BDEV_IO_TYPE_READ:
++        {
++            AIRLOG(LAT_BDEV_READ, vol_id, 0, (uint64_t)bdev_io);
++            spdk_bdev_io_get_buf(bdev_io, bdev_ibof_get_buf_cb,
++                    bdev_io->u.bdev.num_blocks * block_size);
++            return 0;
++        }
++
++	case SPDK_BDEV_IO_TYPE_WRITE:
++        {
++            AIRLOG(LAT_BDEV_WRITE, vol_id, 0, (uint64_t)bdev_io);
++            return bdev_ibof_eventq_writev((struct ibof_disk *)bdev_io->bdev->ctxt,
++                    ch,
++                    bdev_io,
++                    bdev_io->u.bdev.iovs,
++                    bdev_io->u.bdev.iovcnt,
++                    bdev_io->u.bdev.num_blocks * block_size,
++                    bdev_io->u.bdev.offset_blocks * block_size);
++        }
++	}
++	return -EINVAL;
++}
++
++#if defined NVMe_FLUSH_HANDLING
++static int _bdev_ibof_eventq_flush(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
++{
++	return bdev_ibof_eventq_flush((struct ibof_disk *)bdev_io->bdev->ctxt,
++		ch,
++		bdev_io);
++}
++#endif
++
++static int _bdev_ibof_submit_request(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
++{
++	uint32_t block_size = bdev_io->bdev->blocklen;
++
++	switch (bdev_io->type) {
++	case SPDK_BDEV_IO_TYPE_READ:
++	case SPDK_BDEV_IO_TYPE_WRITE:
++		{
++			struct ibof_disk* disk = (struct ibof_disk *)bdev_io->bdev->ctxt;
++			if(disk->volume.ibof_bdev_io){
++				return disk->volume.ibof_bdev_io(ch, bdev_io);
++			}
++			else{
++				return -1;
++			}
++		}
++	case SPDK_BDEV_IO_TYPE_RESET:
++		return bdev_ibof_reset((struct ibof_disk *)bdev_io->bdev->ctxt,
++					 (struct ibof_task *)bdev_io->driver_ctx);
++	case SPDK_BDEV_IO_TYPE_FLUSH:
++#if defined NVMe_FLUSH_HANDLING
++		{
++			struct ibof_disk* disk = (struct ibof_disk *)bdev_io->bdev->ctxt;
++			if(disk->volume.ibof_bdev_flush){
++				return disk->volume.ibof_bdev_flush(ch, bdev_io);
++			}
++			else{
++				return bdev_ibof_flush((struct ibof_disk *)bdev_io->bdev->ctxt,
++							 (struct ibof_task *)bdev_io->driver_ctx,
++							 bdev_io->u.bdev.offset_blocks * block_size,
++							 bdev_io->u.bdev.num_blocks * block_size);
++			}
++		}
++#else
++		return bdev_ibof_flush((struct ibof_disk *)bdev_io->bdev->ctxt,
++					 (struct ibof_task *)bdev_io->driver_ctx,
++					 bdev_io->u.bdev.offset_blocks * block_size,
++					 bdev_io->u.bdev.num_blocks * block_size);
++#endif
++	case SPDK_BDEV_IO_TYPE_UNMAP:
++		return bdev_ibof_unmap((struct ibof_disk *)bdev_io->bdev->ctxt,
++					 ch,
++					 (struct ibof_task *)bdev_io->driver_ctx,
++					 bdev_io->u.bdev.offset_blocks * block_size,
++					 bdev_io->u.bdev.num_blocks * block_size);
++
++	case SPDK_BDEV_IO_TYPE_WRITE_ZEROES:
++		/* bdev_ibof_unmap is implemented with a call to mem_cpy_fill which zeroes out all of the requested bytes. */
++		return bdev_ibof_unmap((struct ibof_disk *)bdev_io->bdev->ctxt,
++					 ch,
++					 (struct ibof_task *)bdev_io->driver_ctx,
++					 bdev_io->u.bdev.offset_blocks * block_size,
++					 bdev_io->u.bdev.num_blocks * block_size);
++
++	default:
++		return -1;
++	}
++	return 0;
++}
++
++static void bdev_ibof_submit_request(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
++{
++	if (_bdev_ibof_submit_request(ch, bdev_io) != 0) {
++		spdk_bdev_io_complete(bdev_io, SPDK_BDEV_IO_STATUS_FAILED);
++	}
++}
++
++static struct spdk_io_channel *
++bdev_ibof_get_io_channel(void *ctx)
++{
++	return spdk_get_io_channel(&g_ibof_disks);
++}
++
++static void
++bdev_ibof_write_json_config(struct spdk_bdev *bdev, struct spdk_json_write_ctx *w)
++{
++	char uuid_str[SPDK_UUID_STRING_LEN];
++
++	spdk_json_write_object_begin(w);
++
++	spdk_json_write_named_string(w, "method", "construct_ibof_bdev");
++
++	spdk_json_write_named_object_begin(w, "params");
++	spdk_json_write_named_string(w, "name", bdev->name);
++	spdk_json_write_named_uint64(w, "num_blocks", bdev->blockcnt);
++	spdk_json_write_named_uint32(w, "block_size", bdev->blocklen);
++	spdk_uuid_fmt_lower(uuid_str, sizeof(uuid_str), &bdev->uuid);
++	spdk_json_write_named_string(w, "uuid", uuid_str);
++
++	spdk_json_write_object_end(w);
++	spdk_json_write_object_end(w);
++}
++
++static int
++bdev_ibof_poll(void* arg)
++{
++	unvmf_complete_handler complete = (unvmf_complete_handler)arg;
++	if (complete){
++		complete();
++	}
++	else{
++		SPDK_ERRLOG("uNVMf Complete Handler does not exist\n");
++	}
++	return 0;
++}
++
++static const struct spdk_bdev_fn_table ibof_fn_table = {
++	.destruct		= bdev_ibof_destruct,
++	.submit_request		= bdev_ibof_submit_request,
++	.io_type_supported	= bdev_ibof_io_type_supported,
++	.get_io_channel		= bdev_ibof_get_io_channel,
++	.write_config_json	= bdev_ibof_write_json_config,
++};
++
++struct spdk_bdev *create_ibof_disk(const char* volume_name, uint32_t volume_id, const struct spdk_uuid* bdev_uuid, uint64_t num_blocks, uint32_t block_size, bool volume_type_in_memory)
++{
++	struct ibof_disk	*mdisk;
++	int			rc;
++
++	if (num_blocks == 0) {
++		SPDK_ERRLOG("Disk must be more than 0 blocks\n");
++		return NULL;
++	}
++
++	mdisk = spdk_dma_zmalloc(sizeof(*mdisk), 0, NULL);
++	if (!mdisk) {
++		SPDK_ERRLOG("mdisk spdk_dma_zibof() failed\n");
++		return NULL;
++	}
++
++	//NOTE: VolumeTypeInMemory in configuration will make nvmf target work as debug mode.
++	//volume_type_in_memory = true;
++	if(volume_type_in_memory){
++		if(spdk_check_ioat_initialized()){
++			SPDK_NOTICELOG("Initialize ramdisk using DMA engine\n");
++			mdisk->volume.ibof_bdev_io = _bdev_ibof_ramdisk_dma_rw;
++		}
++		else{
++			SPDK_NOTICELOG("Initialize ramdisk using COPY engine\n");
++			mdisk->volume.ibof_bdev_io = _bdev_ibof_ramdisk_rw;
++		}
++		mdisk->ibof_buf = spdk_dma_zmalloc(num_blocks * block_size, 2*MB, NULL);
++	}
++	else{
++		uint64_t volume_buffer_size = 2*MB;
++		mdisk->volume.ibof_bdev_io = _bdev_ibof_eventq_rw;
++#if defined NVMe_FLUSH_HANDLING
++		mdisk->volume.ibof_bdev_flush = _bdev_ibof_eventq_flush;
++#endif
++		mdisk->ibof_buf = spdk_dma_zmalloc(volume_buffer_size, 2*MB , NULL);
++	}
++	if (!mdisk->ibof_buf) {
++		SPDK_ERRLOG("ibof_buf buffer: spdk_dma_zmalloc() failed\n");
++		ibof_disk_free(mdisk);
++		return NULL;
++	}
++
++	if(volume_name){
++		mdisk->disk.name = strdup(volume_name);
++	}
++	else{
++		mdisk->disk.name = spdk_sprintf_alloc("Volume%d", ibof_disk_count);
++	}
++	if (!mdisk->disk.name) {
++		ibof_disk_free(mdisk);
++		return NULL;
++	}
++	mdisk->disk.product_name = "iBoF Volume";
++	strncpy(mdisk->volume.name,mdisk->disk.name,strlen(mdisk->disk.name));
++	mdisk->volume.id = volume_id;
++	mdisk->volume.size_mb = (num_blocks * block_size) / MB;
++	mdisk->disk.write_cache = 1;
++	mdisk->disk.blocklen = block_size;
++	mdisk->disk.blockcnt = num_blocks;
++	if(bdev_uuid) {
++		mdisk->disk.uuid = *bdev_uuid;
++	}
++	else{
++		spdk_uuid_generate(&mdisk->disk.uuid);
++	}
++	mdisk->disk.ctxt = mdisk;
++	mdisk->disk.fn_table = &ibof_fn_table;
++	mdisk->disk.module = &ibof_if;
++	rc = spdk_bdev_register(&mdisk->disk);
++	if (rc) {
++		ibof_disk_free(mdisk);
++		return NULL;
++	}
++	TAILQ_INSERT_TAIL(&g_ibof_disks, mdisk, link);
++	ibof_disk_count++;
++
++	SPDK_NOTICELOG("iBoF_Volume(volume_id=%u, size_mb=%ld) has created. volume_type_in_memory=%d\n",
++			mdisk->volume.id, mdisk->volume.size_mb, volume_type_in_memory);
++	return &mdisk->disk;
++}
++int get_ibof_volume_id(struct spdk_bdev *bdev)
++{
++	return ((struct ibof_disk*)bdev->ctxt)->volume.id;
++}
++
++void
++delete_ibof_disk(struct spdk_bdev *bdev, spdk_delete_ibof_complete cb_fn, void *cb_arg)
++{
++	if (!bdev || bdev->module != &ibof_if) {
++		cb_fn(cb_arg, -ENODEV);
++		return;
++	}
++
++	SPDK_NOTICELOG("ibof_volume(%s) has deleted", spdk_bdev_get_name(bdev));
++	spdk_bdev_unregister(bdev, cb_fn, cb_arg);
++	ibof_disk_count--;
++}
++
++static int
++ibof_bdev_create_cb(void *io_device, void *ctx_buf)
++{
++    return 0;
++}
++
++static void
++ibof_bdev_destroy_cb(void *io_device, void *ctx_buf)
++{
++}
++
++static int bdev_ibof_initialize(void)
++{
++	struct spdk_conf_section *sp = spdk_conf_find_section(NULL, "Volume");
++	int rc = 0;
++	struct spdk_bdev *bdev = NULL;
++	spdk_io_device_register(&g_ibof_disks, ibof_bdev_create_cb, ibof_bdev_destroy_cb,
++            sizeof(struct ibof_io_channel),
++            "ibof_bdev");
++
++	if (sp != NULL) {
++		int block_size = 0;
++		uint32_t volume_id = spdk_conf_section_get_intval(sp, "VolumeID");
++		uint64_t volume_size_mb = spdk_conf_section_get_intval(sp, "VolumeSizeInMB");
++		bool volume_type_in_memory = spdk_conf_section_get_boolval(sp, "VolumeTypeInMemory", false);
++
++		if ((volume_size_mb < 1)) {
++			SPDK_ERRLOG("Volume section present, but no devices specified\n");
++			goto end;
++		}
++		if(volume_id > NR_MAX_VOLUME){
++			volume_id = 0;
++		}
++		volume_size_mb *= MB;
++		block_size = 512;
++		bdev = create_ibof_disk(NULL, volume_id, NULL, volume_size_mb / block_size, block_size, volume_type_in_memory);
++		if (bdev == NULL) {
++			SPDK_ERRLOG("Could not create ibof disk\n");
++			rc = EINVAL;
++			goto end;
++		}
++	}
++
++end:
++	return rc;
++}
++
++static void bdev_ibof_register_poller(void* arg1, void* arg2)
++{
++	SPDK_NOTICELOG("%s: current_core=%d last_core=%d\n", __FUNCTION__,
++		spdk_env_get_current_core(), spdk_env_get_last_core());
++     
++	uint32_t current_core = spdk_env_get_current_core();
++	if (NULL == per_lcore_ibof_poller){
++		per_lcore_ibof_poller = spdk_poller_register(bdev_ibof_poll, arg1, 0);
++		if (spdk_likely(NULL != per_lcore_ibof_poller)){
++			SPDK_NOTICELOG("Registered unvmf bdev_ibof poller to "\
++					"frontend io handler(#%u)\n", current_core);
++		}
++		else{
++			SPDK_ERRLOG("Failed to register unvmf bdev_ibof poller "\
++					"to frontend io handler(#%u)\n", current_core);
++		}
++	}
++
++	if (current_core != spdk_env_get_last_core()){
++		struct spdk_event* e =
++			spdk_event_allocate(spdk_env_get_next_core(current_core),
++					bdev_ibof_register_poller, arg1, NULL);
++		spdk_event_call(e);
++	}
++	per_lcore_poller_ref_count++;
++}
++#if defined QOS_ENABLED_FE
++void spdk_bdev_ibof_register_io_handler(const char* bdev_name,
++	unvmf_io_handler handler, const char* nqn, uint32_t nqn_id)
++#else
++void spdk_bdev_ibof_register_io_handler(const char* bdev_name,
++	unvmf_io_handler handler, const char* nqn)
++#endif
++{
++	struct spdk_bdev* bdev = spdk_bdev_get_by_name(bdev_name);
++	if(bdev){
++		struct ibof_disk* disk = (struct ibof_disk*)bdev->ctxt;
++		if(disk){
++			if(disk->volume.unvmf_io.submit){
++				if (disk->volume.unvmf_io.submit != handler.submit){
++					SPDK_ERRLOG("overwriting io submit handler with "\
++						"0x%lx for bdev=%s\n", 
++						(uint64_t)handler.submit, bdev_name);
++				}
++			}
++			else{
++				disk->volume.unvmf_io.submit = handler.submit;
++			}
++
++			if(disk->volume.unvmf_io.complete){
++				if (disk->volume.unvmf_io.complete != handler.complete){
++					SPDK_ERRLOG("overwriting io complete handler with "\
++						"0x%lx for bdev=%s\n",
++						(uint64_t)handler.complete, bdev_name);
++				}
++			}
++			else{
++				disk->volume.unvmf_io.complete = handler.complete;	
++			}	
++			if(nqn){
++				strncpy(disk->volume.nqn, nqn, sizeof(disk->volume.nqn));
++				disk->volume.nqn[sizeof(disk->volume.nqn)-1] = '\0';
++#if defined QOS_ENABLED_FE
++				disk->volume.nqn_id = nqn_id;
++#endif
++			}
++			struct spdk_event* e = spdk_event_allocate(
++						spdk_env_get_first_core(),
++						bdev_ibof_register_poller, handler.complete, NULL);
++			spdk_event_call(e);
++		}
++	}
++	else{
++		SPDK_ERRLOG("fail to find bdev(%s)\n",bdev_name);
++	}
++}
++
++static void bdev_ibof_unregister_poller(void* arg1, void* arg2)
++{
++	struct ibof_disk* disk = (struct ibof_disk*)arg1;
++	uint32_t current_core = spdk_env_get_current_core();
++
++	if (NULL != per_lcore_ibof_poller){
++		per_lcore_poller_ref_count--;
++		if (0 == per_lcore_poller_ref_count){
++			spdk_poller_unregister(&per_lcore_ibof_poller);
++			SPDK_NOTICELOG("Unregistered unvmf bdev_ibof poller from "\
++				"frontend io handler(#%u)\n", current_core);
++		}
++	}
++	if (current_core != spdk_env_get_last_core()){
++		struct spdk_event* e =
++			spdk_event_allocate(spdk_env_get_next_core(current_core),
++					bdev_ibof_unregister_poller, disk, NULL);
++		spdk_event_call(e);
++	}
++	else if (0 == per_lcore_poller_ref_count){
++		if(disk){
++			disk->volume.unvmf_io.submit = NULL;
++			disk->volume.unvmf_io.complete = NULL;
++			memset(disk->volume.nqn, 0, sizeof(disk->volume.nqn));
++		}
++	}
++}
++
++void spdk_bdev_ibof_unregister_io_handler(const char* bdev_name, unvmf_io_handler handler)
++{
++	struct spdk_bdev* bdev = spdk_bdev_get_by_name(bdev_name);
++	if(bdev){
++		struct ibof_disk* disk = (struct ibof_disk*)bdev->ctxt;
++		struct spdk_event* e = spdk_event_allocate(spdk_env_get_first_core(), bdev_ibof_unregister_poller, disk, NULL);
++		spdk_event_call(e);
++	}
++}
++
++struct spdk_bdev* spdk_bdev_create_ibof_disk(const char* volume_name, uint32_t volume_id, const struct spdk_uuid* bdev_uuid, uint64_t num_blocks, uint32_t block_size, bool volume_type_in_memory)
++{ 
++	return create_ibof_disk(volume_name, volume_id, bdev_uuid, num_blocks, block_size, volume_type_in_memory);
++}
++
++void spdk_bdev_delete_ibof_disk(struct spdk_bdev *bdev, spdk_delete_ibof_complete cb_fn, void *cb_arg)
++{
++	return delete_ibof_disk(bdev, cb_fn, cb_arg);
++}
++
++const char* get_attached_subsystem_nqn(const char* bdev_name)
++{
++	struct spdk_bdev* bdev = spdk_bdev_get_by_name(bdev_name);
++	if(bdev == NULL){
++		SPDK_ERRLOG("Failed to get bdev(%s)'s nqn : bdev does not exist\n", bdev_name);
++		return NULL;
++	}
++	struct ibof_disk* disk = (struct ibof_disk*)bdev->ctxt;
++	return disk->volume.nqn;
++}
++#if defined QOS_ENABLED_FE
++uint32_t get_attached_subsystem_id(const char* bdev_name)
++{
++	struct spdk_bdev* bdev = spdk_bdev_get_by_name(bdev_name);
++	if(bdev == NULL){
++		SPDK_ERRLOG("Failed to get bdev(%s)'s nqn : bdev does not exist\n", bdev_name);
++		return NULL;
++	}
++	struct ibof_disk* disk = (struct ibof_disk*)bdev->ctxt;
++	return disk->volume.nqn_id;
++}
++#endif
++SPDK_LOG_REGISTER_COMPONENT("bdev_ibof", SPDK_LOG_BDEV_IBOF)
+--- spdk-19.10/module/bdev/ibof/bdev_ibof.h	1970-01-01 09:00:00.000000000 +0900
++++ spdk-19.10/module/bdev/ibof/bdev_ibof.h	2021-05-03 15:34:54.658876950 +0900
+@@ -0,0 +1,48 @@
++/*-
++ *   BSD LICENSE
++ *
++ *   Copyright (c) Samsung Corporation.
++ *   All rights reserved.
++ *
++ *   Redistribution and use in source and binary forms, with or without
++ *   modification, are permitted provided that the following conditions
++ *   are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in
++ *       the documentation and/or other materials provided with the
++ *       distribution.
++ *     * Neither the name of Samsung Corporation nor the names of its
++ *       contributors may be used to endorse or promote products derived
++ *       from this software without specific prior written permission.
++ *
++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#ifndef SPDK_BDEV_IBOF_H
++#define SPDK_BDEV_IBOF_H
++
++#include "spdk/stdinc.h"
++
++#include "spdk/bdev.h"
++
++typedef void (*spdk_delete_ibof_complete)(void *cb_arg, int bdeverrno);
++
++struct spdk_bdev *create_ibof_disk(const char *volume_name, uint32_t volume_id, const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size, bool volume_type_in_memory);
++
++void delete_ibof_disk(struct spdk_bdev *bdev, spdk_delete_ibof_complete cb_fn, void *cb_arg);
++int get_ibof_volume_id(struct spdk_bdev *bdev);
++
++#endif /* SPDK_BDEV_IBOF_H */
+--- spdk-19.10/module/bdev/ibof/bdev_ibof_rpc.c	1970-01-01 09:00:00.000000000 +0900
++++ spdk-19.10/module/bdev/ibof/bdev_ibof_rpc.c	2021-05-03 15:34:54.662876950 +0900
+@@ -0,0 +1,182 @@
++/*-
++ *   BSD LICENSE
++ *
++ *   Copyright (c) Samsung Corporation.
++ *   All rights reserved.
++ *
++ *   Redistribution and use in source and binary forms, with or without
++ *   modification, are permitted provided that the following conditions
++ *   are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in
++ *       the documentation and/or other materials provided with the
++ *       distribution.
++ *     * Neither the name of Samsung Corporation nor the names of its
++ *       contributors may be used to endorse or promote products derived
++ *       from this software without specific prior written permission.
++ *
++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "bdev_ibof.h"
++#include "spdk/rpc.h"
++#include "spdk/util.h"
++#include "spdk/uuid.h"
++#include "spdk/string.h"
++#include "spdk_internal/log.h"
++
++struct rpc_construct_ibof {
++	char* name;
++	char* uuid;
++	uint32_t volume_id;
++	uint64_t volume_size_mb;
++	uint32_t volume_type_in_memory;
++};
++
++static void
++free_rpc_construct_ibof(struct rpc_construct_ibof *r)
++{
++	if(r->name) free(r->name);
++	if(r->uuid) free(r->uuid);
++}
++
++static const struct spdk_json_object_decoder rpc_construct_ibof_decoders[] = {
++	{"name", offsetof(struct rpc_construct_ibof, name), spdk_json_decode_string, true},
++	{"volume_id", offsetof(struct rpc_construct_ibof, volume_id), spdk_json_decode_uint32},
++	{"uuid", offsetof(struct rpc_construct_ibof, uuid), spdk_json_decode_string, true},
++	{"volume_size_mb", offsetof(struct rpc_construct_ibof, volume_size_mb), spdk_json_decode_uint64},
++	{"volume_type_in_memory", offsetof(struct rpc_construct_ibof, volume_type_in_memory), spdk_json_decode_uint32},
++};
++
++static void
++spdk_rpc_bdev_ibof_create(struct spdk_jsonrpc_request *request,
++			       const struct spdk_json_val *params)
++{
++	struct rpc_construct_ibof req = {NULL};
++	struct spdk_json_write_ctx *w;
++	struct spdk_uuid* uuid = NULL;
++	struct spdk_uuid decoded_uuid;
++	struct spdk_bdev *bdev;
++	uint32_t block_size = 512;
++	uint32_t volume_id = 0;
++	uint64_t volume_size_mb = (1024*1024);
++	bool volume_type_in_memory = false;
++	
++	if (spdk_json_decode_object(params, rpc_construct_ibof_decoders,
++				    SPDK_COUNTOF(rpc_construct_ibof_decoders),
++				    &req)) {
++		SPDK_DEBUGLOG(SPDK_LOG_BDEV_IBOF, "spdk_json_decode_object failed\n");
++		goto invalid;
++	}
++
++	if(req.uuid) {
++		if (spdk_uuid_parse(&decoded_uuid, req.uuid)) {
++			goto invalid;
++		}
++		uuid = &decoded_uuid;
++	}
++
++	volume_id = req.volume_id;
++	volume_size_mb *= req.volume_size_mb;
++	volume_type_in_memory = (req.volume_type_in_memory == 0) ? false : true;
++	bdev = create_ibof_disk(req.name, volume_id, uuid, volume_size_mb / block_size, block_size, volume_type_in_memory);
++	if (bdev == NULL) {
++		SPDK_ERRLOG("Could not create ibof disk\n");
++		goto invalid;
++	}
++
++	free_rpc_construct_ibof(&req);
++
++	w = spdk_jsonrpc_begin_result(request);
++	if (w == NULL) {
++		goto invalid;
++	}
++
++	spdk_json_write_string(w, spdk_bdev_get_name(bdev));
++	spdk_jsonrpc_end_result(request, w);
++	return;
++
++invalid:
++	free_rpc_construct_ibof(&req);
++	spdk_jsonrpc_send_error_response(request, SPDK_JSONRPC_ERROR_INVALID_PARAMS, "Invalid parameters");
++}
++SPDK_RPC_REGISTER("bdev_ibof_create", spdk_rpc_bdev_ibof_create, SPDK_RPC_RUNTIME)
++SPDK_RPC_REGISTER_ALIAS_DEPRECATED(bdev_ibof_create, construct_ibof_bdev)
++
++struct rpc_delete_ibof {
++	char *name;
++};
++
++static void
++free_rpc_delete_ibof(struct rpc_delete_ibof *r)
++{
++	if(r->name) free(r->name);
++}
++
++static const struct spdk_json_object_decoder rpc_delete_ibof_decoders[] = {
++	{"name", offsetof(struct rpc_delete_ibof, name), spdk_json_decode_string},
++};
++
++static void
++_spdk_rpc_bdev_ibof_delete_cb(void *cb_arg, int bdeverrno)
++{
++	struct spdk_jsonrpc_request *request = cb_arg;
++	struct spdk_json_write_ctx *w;
++
++	w = spdk_jsonrpc_begin_result(request);
++	if (w == NULL) {
++		return;
++	}
++
++	spdk_json_write_bool(w, bdeverrno == 0);
++	spdk_jsonrpc_end_result(request, w);
++}
++
++static void
++spdk_rpc_bdev_ibof_delete(struct spdk_jsonrpc_request *request,
++			    const struct spdk_json_val *params)
++{
++	int rc;
++	struct rpc_delete_ibof req = {NULL};
++	struct spdk_bdev *bdev;
++
++	if (spdk_json_decode_object(params, rpc_delete_ibof_decoders,
++				    SPDK_COUNTOF(rpc_delete_ibof_decoders),
++				    &req)) {
++		SPDK_DEBUGLOG(SPDK_LOG_BDEV_IBOF, "spdk_json_decode_object failed\n");
++		rc = -EINVAL;
++		goto invalid;
++	}
++
++	bdev = spdk_bdev_get_by_name(req.name);
++	if (bdev == NULL) {
++		SPDK_INFOLOG(SPDK_LOG_BDEV_IBOF, "bdev '%s' does not exist\n", req.name);
++		rc = -ENODEV;
++		goto invalid;
++	}
++
++	delete_ibof_disk(bdev, _spdk_rpc_bdev_ibof_delete_cb, request);
++
++	free_rpc_delete_ibof(&req);
++
++	return;
++
++invalid:
++	free_rpc_delete_ibof(&req);
++	spdk_jsonrpc_send_error_response(request, SPDK_JSONRPC_ERROR_INVALID_PARAMS, spdk_strerror(-rc));
++}
++SPDK_RPC_REGISTER("bdev_ibof_delete", spdk_rpc_bdev_ibof_delete, SPDK_RPC_RUNTIME)
++SPDK_RPC_REGISTER_ALIAS_DEPRECATED(bdev_ibof_delete, delete_ibof_bdev)
+--- spdk-19.10/module/bdev/malloc/bdev_malloc.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/module/bdev/malloc/bdev_malloc.c	2021-05-03 15:34:54.662876950 +0900
+@@ -43,6 +43,7 @@
+ #include "spdk/thread.h"
+ #include "spdk/queue.h"
+ #include "spdk/string.h"
++#include "spdk/ioat.h"
+ 
+ #include "spdk/bdev_module.h"
+ #include "spdk_internal/log.h"
+@@ -58,6 +59,12 @@
+ 	enum spdk_bdev_io_status	status;
+ };
+ 
++struct ioat_io_channel {
++	struct spdk_ioat_chan	*ioat_ch;
++	struct ioat_device	*ioat_dev;
++	struct spdk_poller	*poller;
++};
++
+ static struct malloc_task *
+ __malloc_task_from_copy_task(struct spdk_copy_task *ct)
+ {
+@@ -82,12 +89,17 @@
+ 			task->status = SPDK_BDEV_IO_STATUS_FAILED;
+ 		}
+ 	}
+-
+ 	if (--task->num_outstanding == 0) {
+ 		spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task), task->status);
+ 	}
+ }
+ 
++static void
++malloc_done_ioat(void *ref)
++{
++    malloc_done(ref, 0);
++}
++
+ static TAILQ_HEAD(, malloc_disk) g_malloc_disks = TAILQ_HEAD_INITIALIZER(g_malloc_disks);
+ 
+ int malloc_disk_count = 0;
+@@ -168,13 +180,26 @@
+ 		      len, offset);
+ 
+ 	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
+-	task->num_outstanding = iovcnt;
++	
++	task->num_outstanding += iovcnt;
+ 
+ 	for (i = 0; i < iovcnt; i++) {
+-		res = spdk_copy_submit(__copy_task_from_malloc_task(task),
+-				       ch, iov[i].iov_base,
+-				       src, iov[i].iov_len, malloc_done);
+-
++        if (spdk_check_ioat_initialized())
++        {
++            struct ioat_io_channel* ioat_ch = spdk_io_channel_get_ctx(ch);
++            res = spdk_ioat_submit_copy(ioat_ch->ioat_ch,
++                    __copy_task_from_malloc_task(task),
++                    malloc_done_ioat,
++                    iov[i].iov_base,
++                    src,
++                    iov[i].iov_len);
++        }
++        else
++        {
++            res = spdk_copy_submit(__copy_task_from_malloc_task(task),
++                    ch, iov[i].iov_base,
++                    src, iov[i].iov_len, malloc_done);
++        }
+ 		if (res != 0) {
+ 			malloc_done(__copy_task_from_malloc_task(task), res);
+ 		}
+@@ -203,19 +228,31 @@
+ 		      len, offset);
+ 
+ 	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
+-	task->num_outstanding = iovcnt;
++	task->num_outstanding += iovcnt;
+ 
+-	for (i = 0; i < iovcnt; i++) {
+-		res = spdk_copy_submit(__copy_task_from_malloc_task(task),
+-				       ch, dst, iov[i].iov_base,
+-				       iov[i].iov_len, malloc_done);
+-
+-		if (res != 0) {
+-			malloc_done(__copy_task_from_malloc_task(task), res);
+-		}
++    for (i = 0; i < iovcnt; i++) {
++        if (spdk_check_ioat_initialized())
++        {
++            struct ioat_io_channel* ioat_ch = spdk_io_channel_get_ctx(ch);
++            res = spdk_ioat_submit_copy(ioat_ch->ioat_ch,
++                    __copy_task_from_malloc_task(task),
++                    malloc_done_ioat,
++                    dst,
++                    iov[i].iov_base,
++                    iov[i].iov_len);
++        }
++        else
++        {
++            res = spdk_copy_submit(__copy_task_from_malloc_task(task),
++                    ch, dst, iov[i].iov_base,
++                    iov[i].iov_len, malloc_done);
++        }
++        if (res != 0) {
++            malloc_done(__copy_task_from_malloc_task(task), res);
++        }
+ 
+-		dst += iov[i].iov_len;
+-	}
++        dst += iov[i].iov_len;
++    }
+ }
+ 
+ static int
+@@ -226,10 +263,22 @@
+ 		  uint64_t byte_count)
+ {
+ 	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
+-	task->num_outstanding = 1;
+-
+-	return spdk_copy_submit_fill(__copy_task_from_malloc_task(task), ch,
+-				     mdisk->malloc_buf + offset, 0, byte_count, malloc_done);
++	task->num_outstanding += 1;
++    if (spdk_check_ioat_initialized())
++    {
++        struct ioat_io_channel* ioat_ch = spdk_io_channel_get_ctx(ch);
++        return spdk_ioat_submit_fill(ioat_ch->ioat_ch,
++                __copy_task_from_malloc_task(task),
++                malloc_done_ioat,
++                mdisk->malloc_buf + offset,
++                0,
++                byte_count);
++    }
++    else
++    {
++        return spdk_copy_submit_fill(__copy_task_from_malloc_task(task), ch,
++                mdisk->malloc_buf + offset, 0, byte_count, malloc_done);
++    }
+ }
+ 
+ static int64_t
+@@ -332,6 +381,7 @@
+ 
+ static void bdev_malloc_submit_request(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
+ {
++	//SPDK_NOTICELOG("blk offset = %lu, size=%lu\n", bdev_io->u.bdev.offset_blocks, bdev_io->u.bdev.num_blocks);	
+ 	if (_bdev_malloc_submit_request(ch, bdev_io) != 0) {
+ 		spdk_bdev_io_complete(bdev_io, SPDK_BDEV_IO_STATUS_FAILED);
+ 	}
+@@ -358,7 +408,14 @@
+ static struct spdk_io_channel *
+ bdev_malloc_get_io_channel(void *ctx)
+ {
+-	return spdk_copy_engine_get_io_channel();
++    if (spdk_check_ioat_initialized())
++    {
++        return ioat_get_io_channel();
++    }
++    else
++    {
++        return spdk_copy_engine_get_io_channel();
++    }
+ }
+ 
+ static void
+@@ -422,6 +479,48 @@
+ 		return -ENOMEM;
+ 	}
+ 
++    if (name && 0 == strncmp(name, "uram", sizeof("uram") - 1))
++    {
++        const char *file_name = "/tmp/uram_hugepage";
++        int fd = -1;
++        int pid = getpid();
++        const uint64_t baseAddr = 0x200000000000ULL;
++        const uint32_t bytesPerHugepage = 2 * 1024 * 1024;
++        uint64_t bufAddr = (uint64_t)mdisk->malloc_buf;
++        uint64_t startPage = (bufAddr - baseAddr) / bytesPerHugepage - 1;
++        uint64_t pageCount = (num_blocks * block_size) / bytesPerHugepage;
++        char writeBuf[256] = {0, };
++        uint32_t strLength;
++
++        SPDK_INFOLOG(SPDK_LOG_BDEV_MALLOC,
++            "Current PID: %d, buffer v address: %p, size: %lu\n",
++            pid,  mdisk->malloc_buf, num_blocks * block_size);
++
++        fd = open(file_name, O_CREAT | O_TRUNC | O_RDWR,
++                            S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
++        if (0 > fd) {
++            SPDK_ERRLOG("Could not open %s.\n", file_name);
++            malloc_disk_free(mdisk);
++            return -EINVAL;
++        }
++
++        sprintf(writeBuf, "%d %lu %lu", pid, startPage, pageCount);
++        strLength = strlen(writeBuf);
++
++        rc = write(fd, writeBuf, strLength);
++        if (0 > rc) {
++            SPDK_ERRLOG("Could not write on %s: %s\n", file_name, strerror(errno));
++            close(fd);
++            malloc_disk_free(mdisk);
++            return -EINVAL;
++        }
++
++        close(fd);
++        SPDK_INFOLOG(SPDK_LOG_BDEV_MALLOC,
++            "Successfully written to \"%s\" about information of \"%s\"\n",
++            file_name, name);
++    }
++
+ 	if (name) {
+ 		mdisk->disk.name = strdup(name);
+ 	} else {
+--- spdk-19.10/module/copy/ioat/copy_engine_ioat.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/module/copy/ioat/copy_engine_ioat.c	2021-05-03 15:34:54.666876950 +0900
+@@ -35,7 +35,6 @@
+ 
+ #include "spdk/stdinc.h"
+ 
+-#include "spdk_internal/copy_engine.h"
+ #include "spdk_internal/log.h"
+ 
+ #include "spdk/env.h"
+@@ -43,6 +42,7 @@
+ #include "spdk/event.h"
+ #include "spdk/thread.h"
+ #include "spdk/ioat.h"
++#include "spdk_internal/copy_engine.h"
+ 
+ static bool g_ioat_enable = false;
+ 
+@@ -129,31 +129,16 @@
+ 			  copy_engine_ioat_get_ctx_size)
+ 
+ static void
+-copy_engine_ioat_exit(void *ctx)
+-{
+-	struct ioat_device *dev;
+-
+-	while (!TAILQ_EMPTY(&g_devices)) {
+-		dev = TAILQ_FIRST(&g_devices);
+-		TAILQ_REMOVE(&g_devices, dev, tailq);
+-		spdk_ioat_detach(dev->ioat);
+-		ioat_free_device(dev);
+-		free(dev);
+-	}
+-	spdk_copy_engine_module_finish();
+-}
+-
+-static void
+ ioat_done(void *cb_arg)
+ {
+ 	struct spdk_copy_task *copy_req;
+ 	struct ioat_task *ioat_task = cb_arg;
+ 
+-	copy_req = (struct spdk_copy_task *)
+-		   ((uintptr_t)ioat_task -
+-		    offsetof(struct spdk_copy_task, offload_ctx));
++    copy_req = (struct spdk_copy_task *)
++           ((uintptr_t)ioat_task -
++            offsetof(struct spdk_copy_task, offload_ctx));
+ 
+-	ioat_task->cb(copy_req, 0);
++    ioat_task->cb(copy_req,0);
+ }
+ 
+ static int
+@@ -195,14 +180,30 @@
+ 	return -1;
+ }
+ 
+-static struct spdk_io_channel *ioat_get_io_channel(void);
+-
+ static struct spdk_copy_engine ioat_copy_engine = {
+ 	.copy		= ioat_copy_submit,
+ 	.fill		= ioat_copy_submit_fill,
+ 	.get_io_channel	= ioat_get_io_channel,
+ };
+ 
++static void
++copy_engine_ioat_exit(void *ctx)
++{
++	struct ioat_device *dev;
++
++	if(g_ioat_enable){
++		spdk_io_device_unregister(&ioat_copy_engine, NULL);
++	}
++	while (!TAILQ_EMPTY(&g_devices)) {
++		dev = TAILQ_FIRST(&g_devices);
++		TAILQ_REMOVE(&g_devices, dev, tailq);
++		spdk_ioat_detach(dev->ioat);
++		ioat_free_device(dev);
++		free(dev);
++	}
++	spdk_copy_engine_module_finish();
++}
++
+ static int
+ ioat_create_cb(void *io_device, void *ctx_buf)
+ {
+@@ -229,7 +230,7 @@
+ 	spdk_poller_unregister(&ch->poller);
+ }
+ 
+-static struct spdk_io_channel *
++struct spdk_io_channel *
+ ioat_get_io_channel(void)
+ {
+ 	return spdk_get_io_channel(&ioat_copy_engine);
+@@ -383,7 +384,7 @@
+ 		return -1;
+ 	}
+ 
+-	SPDK_INFOLOG(SPDK_LOG_COPY_IOAT, "Ioat Copy Engine Offload Enabled\n");
++	SPDK_NOTICELOG("Ioat Copy Engine Offload Enabled\n");
+ 	spdk_copy_engine_register(&ioat_copy_engine);
+ 	spdk_io_device_register(&ioat_copy_engine, ioat_create_cb, ioat_destroy_cb,
+ 				sizeof(struct ioat_io_channel), "ioat_copy_engine");
+@@ -418,4 +419,30 @@
+ 	}
+ }
+ 
++int spdk_ioat_init(void){
++	if(g_ioat_enable){
++		return 0;
++	}
++	if (spdk_ioat_probe(&g_probe_ctx, probe_cb, attach_cb) != 0) {
++		SPDK_ERRLOG("spdk_ioat_probe() failed\n");
++		return -1;
++	}
++	spdk_io_device_register(&ioat_copy_engine, ioat_create_cb, ioat_destroy_cb,
++				sizeof(struct ioat_io_channel), "ioat_copy_engine");
++
++	struct spdk_io_channel* ioat_chan = ioat_get_io_channel();
++	if(NULL == ioat_chan){
++                spdk_io_device_unregister(&ioat_copy_engine, NULL);
++		return -1;
++	}
++	spdk_copy_engine_register(&ioat_copy_engine);
++	spdk_put_io_channel(ioat_chan);
++	copy_engine_ioat_enable_probe();
++	return 0;
++}
++
++bool spdk_check_ioat_initialized(void){
++	return g_ioat_enable;
++}
++
+ SPDK_LOG_REGISTER_COMPONENT("copy_ioat", SPDK_LOG_COPY_IOAT)
+--- spdk-19.10/module/event/subsystems/nvmf/conf.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/module/event/subsystems/nvmf/conf.c	2021-05-03 15:34:54.666876950 +0900
+@@ -133,7 +133,7 @@
+ 
+ 	} else {
+ 		SPDK_NOTICELOG("The value of ConnectionScheduler is not configured,\n"
+-			       "we will use RoundRobin as the default scheduler\n");
++			       "we will use (%d) as the default scheduler\n", conf->conn_sched);
+ 	}
+ 
+ 	return rc;
+--- spdk-19.10/module/event/subsystems/nvmf/event_nvmf.h	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/module/event/subsystems/nvmf/event_nvmf.h	2021-05-03 15:34:54.666876950 +0900
+@@ -43,6 +43,7 @@
+ #include "spdk_internal/log.h"
+ 
+ #define ACCEPT_TIMEOUT_US	10000 /* 10ms */
++/* Note: ibofos changed nvmf default scheduler from CONNECT_SCHED_ROUND_ROBIN to CONNECT_SCHED_HOST_IP not to cause an issue on multiple initiator session. */
+ #define DEFAULT_CONN_SCHED CONNECT_SCHED_ROUND_ROBIN
+ 
+ enum spdk_nvmf_connect_sched {
+--- spdk-19.10/module/sock/vpp/vpp.c	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/module/sock/vpp/vpp.c	2021-05-03 15:34:54.666876950 +0900
+@@ -623,7 +623,7 @@
+ 		rmp = (session_disconnected_reply_msg_t *) app_evt.evt->data;
+ 		rmp->retval = rv;
+ 		rmp->handle = session->handle;
+-		rmp->context = session->context;
++		rmp->context = g_svm.my_client_index;
+ 		app_send_ctrl_evt_to_vpp(session->app_session.vpp_evt_q, &app_evt);
+ 
+ 		return 0;
+--- spdk-19.10/scripts/pkgdep.sh	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/scripts/pkgdep.sh	2021-05-03 15:34:54.666876950 +0900
+@@ -95,8 +95,6 @@
+ 		"Note: Some SPDK CLI dependencies could not be installed."
+ 	# Additional dependencies for ISA-L used in compression
+ 	apt-get install -y autoconf automake libtool help2man
+-	# Additional dependencies for FUSE and CUSE
+-	apt-get install -y libfuse3-dev
+ 	# Additional dependecies for nvmf performance test script
+ 	apt-get install -y python3-paramiko
+ elif [ -f /etc/SuSE-release ] || [ -f /etc/SUSE-brand ]; then
+--- spdk-19.10/scripts/rpc/bdev.py	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/scripts/rpc/bdev.py	2021-05-03 15:34:54.666876950 +0900
+@@ -224,6 +224,37 @@
+         params['dif_is_head_of_md'] = dif_is_head_of_md
+     return client.call('bdev_null_create', params)
+ 
++@deprecated_alias('construct_ibof_bdev')
++def bdev_ibof_create(client, volume_id, volume_size_mb, volume_type_in_memory, name=None, uuid=None):
++    """Construct a bdev supporting iBoF volume.
++
++    Args:
++        volume_id : volume_id
++        volume_size_mb : volume_size_mb
++        volume_type_in_memory : volume_type_in_memory, 1 is in-memory type for debugging purpose
++        name: name of block device (optional)
++        uuid: UUID of block device (optional)
++
++    Returns:
++        Name of created block device.
++    """
++    params = {'volume_id': volume_id, 'volume_size_mb': volume_size_mb, 'volume_type_in_memory': volume_type_in_memory}
++    if name:
++        params['name'] = name
++    if uuid:
++        params['uuid'] = uuid
++    return client.call('bdev_ibof_create', params)
++
++
++@deprecated_alias('delete_ibof_delete')
++def bdev_ibof_delete(client, name):
++    """Delete an iBoF bdev.
++
++    Args:
++        bdev_name: name of ibof bdev to delete
++    """
++    params = {'name': name}
++    return client.call('bdev_ibof_delete', params)
+ 
+ @deprecated_alias('delete_null_bdev')
+ def bdev_null_delete(client, name):
+--- spdk-19.10/scripts/rpc.py	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/scripts/rpc.py	2021-05-03 15:34:54.666876950 +0900
+@@ -326,6 +326,8 @@
+     p.add_argument('name', help='aio bdev name')
+     p.set_defaults(func=bdev_aio_delete)
+ 
++
++
+     def bdev_uring_create(args):
+         print_json(rpc.bdev.bdev_uring_create(args.client,
+                                               filename=args.filename,
+@@ -344,6 +346,32 @@
+     p.add_argument('name', help='uring bdev name')
+     p.set_defaults(func=bdev_uring_delete)
+ 
++
++    def bdev_ibof_create(args):
++        print(rpc.bdev.bdev_ibof_create(args.client,
++                                             volume_id=int(args.volume_id),
++                                             volume_size_mb=int(args.volume_size_mb),
++                                             volume_type_in_memory=args.volume_type_in_memory,
++                                             name=args.name,
++                                             uuid=args.uuid))
++    p = subparsers.add_parser('bdev_ibof_create',
++                              help='Create a bdev supporting iBoF Volume')
++    p.add_argument('-b', '--name', help="Name of the bdev")
++    p.add_argument('-u', '--uuid', help="UUID of the bdev")
++    p.add_argument(
++        'volume_size_mb', help='iBoF Volume Size in MB (int > 0)', type=int)
++    p.add_argument('volume_id', help='volume id', type=int)
++    p.add_argument('volume_type_in_memory', help='Volume type (1=in-memory or 0=not) for this bdev. This is for debugging purpose', type=int)
++    p.set_defaults(func=bdev_ibof_create)
++
++    def bdev_ibof_delete(args):
++        rpc.bdev.bdev_ibof_delete(args.client,
++                                 name=args.name)
++
++    p = subparsers.add_parser('bdev_ibof_delete', help='Delete a iBoF bdev')
++    p.add_argument('name', help='iBof bdev name')
++    p.set_defaults(func=bdev_ibof_delete)
++
+     def bdev_nvme_set_options(args):
+         rpc.bdev.bdev_nvme_set_options(args.client,
+                                        action_on_timeout=args.action_on_timeout,
+--- spdk-19.10/test/ftl/config/fio/drive-prep.fio	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/test/ftl/config/fio/drive-prep.fio	1970-01-01 09:00:00.000000000 +0900
+@@ -1,15 +0,0 @@
+-[drive_prep]
+-ioengine=spdk_bdev
+-spdk_conf=${FTL_BDEV_CONF}
+-filename=${FTL_BDEV_NAME}
+-thread=1
+-
+-direct=1
+-buffered=0
+-size=100%
+-randrepeat=0
+-norandommap
+-bs=4k
+-iodepth=128
+-numjobs=1
+-rw=write
+--- spdk-19.10/test/ftl/config/fio/randr.fio	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/test/ftl/config/fio/randr.fio	1970-01-01 09:00:00.000000000 +0900
+@@ -1,19 +0,0 @@
+-[global]
+-ioengine=spdk_bdev
+-spdk_conf=${FTL_BDEV_CONF}
+-filename=${FTL_BDEV_NAME}
+-direct=1
+-thread=1
+-buffered=0
+-size=100%
+-randrepeat=0
+-time_based
+-norandommap
+-
+-[test]
+-stonewall
+-bs=4k
+-numjobs=4
+-rw=randread
+-iodepth=128
+-runtime=1200
+--- spdk-19.10/test/ftl/config/fio/randrw.fio	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/test/ftl/config/fio/randrw.fio	1970-01-01 09:00:00.000000000 +0900
+@@ -1,20 +0,0 @@
+-[global]
+-ioengine=spdk_bdev
+-spdk_conf=${FTL_BDEV_CONF}
+-filename=${FTL_BDEV_NAME}
+-direct=1
+-thread=1
+-buffered=0
+-size=100%
+-randrepeat=0
+-time_based
+-norandommap
+-
+-[test]
+-stonewall
+-bs=4k
+-numjobs=4
+-rw=randrw
+-rwmixread=70
+-iodepth=32
+-runtime=1200
+--- spdk-19.10/test/ftl/config/fio/randw-verify-depth128.fio	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/test/ftl/config/fio/randw-verify-depth128.fio	1970-01-01 09:00:00.000000000 +0900
+@@ -1,20 +0,0 @@
+-[global]
+-ioengine=spdk_bdev
+-spdk_conf=${FTL_BDEV_CONF}
+-filename=${FTL_BDEV_NAME}
+-thread=1
+-direct=1
+-iodepth=128
+-rw=randwrite
+-verify=crc32c
+-do_verify=1
+-verify_dump=0
+-verify_state_save=0
+-verify_fatal=1
+-bs=4k
+-random_distribution=normal
+-serialize_overlap=1
+-io_size=256M
+-
+-[test]
+-numjobs=1
+--- spdk-19.10/test/ftl/config/fio/randw-verify-j2.fio	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/test/ftl/config/fio/randw-verify-j2.fio	1970-01-01 09:00:00.000000000 +0900
+@@ -1,25 +0,0 @@
+-[global]
+-ioengine=spdk_bdev
+-spdk_conf=${FTL_BDEV_CONF}
+-filename=${FTL_BDEV_NAME}
+-thread=1
+-direct=1
+-iodepth=128
+-rw=randwrite
+-verify=crc32c
+-do_verify=1
+-verify_dump=0
+-verify_state_save=0
+-verify_backlog=5000
+-verify_fatal=1
+-bs=4k
+-random_distribution=normal
+-serialize_overlap=1
+-io_size=256M
+-
+-[first_half]
+-offset=0%
+-size=50%
+-
+-[second_half]
+-offset=50%
+--- spdk-19.10/test/ftl/config/fio/randw-verify-qd128-ext.fio	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/test/ftl/config/fio/randw-verify-qd128-ext.fio	1970-01-01 09:00:00.000000000 +0900
+@@ -1,20 +0,0 @@
+-[global]
+-ioengine=spdk_bdev
+-spdk_conf=${FTL_BDEV_CONF}
+-filename=${FTL_BDEV_NAME}
+-thread=1
+-direct=1
+-iodepth=128
+-rw=randwrite
+-verify=crc32c
+-do_verify=1
+-verify_dump=0
+-verify_state_save=0
+-verify_fatal=1
+-bs=4k
+-random_distribution=normal
+-serialize_overlap=1
+-
+-[test]
+-io_size=64G
+-numjobs=1
+--- spdk-19.10/test/ftl/config/fio/randw-verify.fio	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/test/ftl/config/fio/randw-verify.fio	1970-01-01 09:00:00.000000000 +0900
+@@ -1,20 +0,0 @@
+-[global]
+-ioengine=spdk_bdev
+-spdk_conf=${FTL_BDEV_CONF}
+-filename=${FTL_BDEV_NAME}
+-thread=1
+-direct=1
+-iodepth=1
+-rw=randwrite
+-size=256M
+-verify=crc32c
+-do_verify=1
+-verify_dump=0
+-verify_state_save=0
+-verify_backlog=16
+-verify_fatal=1
+-bs=68k
+-random_distribution=normal
+-
+-[test]
+-numjobs=1
+--- spdk-19.10/test/ftl/config/fio/randw.fio	2019-11-01 06:33:05.000000000 +0900
++++ spdk-19.10/test/ftl/config/fio/randw.fio	1970-01-01 09:00:00.000000000 +0900
+@@ -1,18 +0,0 @@
+-[global]
+-ioengine=spdk_bdev
+-spdk_conf=${FTL_BDEV_CONF}
+-filename=${FTL_BDEV_NAME}
+-direct=1
+-thread=1
+-buffered=0
+-size=100%
+-randrepeat=0
+-time_based
+-norandommap
+-
+-[test]
+-bs=4k
+-numjobs=1
+-rw=randwrite
+-iodepth=64
+-runtime=1200

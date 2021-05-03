@@ -3,11 +3,15 @@
 #
 # Note: need to run ibofos/script/pkgdep.sh for SPDK/DPDK prerequistes
 
-SPDK_SOURCE=v19.10.tar.gz
 DPDK_SOURCE=dpdk-stable-19.08.2
+GPERF_SOURCE=gperftools-2.7.tar.gz
 AIR_SOURCE=air
-SPDLOG_SOURCE=spdlog-1.4.2
+SPDK_SOURCE=v19.10.tar.gz
 GO_SOURCE=go1.14.4.linux-amd64.tar.gz
+GTEST_SOURCE=release-1.10.0.tar.gz
+GTEST_TARGET_LIB_DIR=/usr/local/lib
+SPDLOG_SOURCE=spdlog-1.4.2
+FILEBENCH_DIR=filebench-master
 
 KERNEL_VER="`uname -r`"
 VM_KERNEL_VER="5.3.0-19-generic" 
@@ -16,20 +20,16 @@ if [ ${KERNEL_VER} = ${VM_KERNEL_VER} ]; then
 	AIR_SOURCE_CI=${AIR_SOURCE}.vm
 	DPDK_SOURCE_CI=${DPDK_SOURCE}.vm
 	SPDLOG_SOURCE_CI=${SPDLOG_SOURCE}.vm
-	FIO_SOURCE=312
+	FIO_SOURCE=fio-fio-3.12
+    FIO_TARBALL=fio-3.12.tar.gz
 	IS_VM=1
 else
 	AIR_SOURCE_CI=${AIR_SOURCE}
 	DPDK_SOURCE_CI=${DPDK_SOURCE}
 	SPDLOG_SOURCE_CI=${SPDLOG_SOURCE}
-	FIO_SOURCE=31
+	FIO_SOURCE=fio-fio-3.1
+    FIO_TARBALL=fio-3.1.tar.gz
 fi
-
-GTEST_SOURCE=googletest-release-1.10.x.tar.gz
-GPERF_SOURCE=gperftools-2.7.tar.gz
-GTEST_TARGET_LIB_DIR=/usr/local/lib
-
-FILEBENCH_DIR=filebench-master
 
 ROOT_DIR=$(readlink -f $(dirname $0))/
 cd $ROOT_DIR
@@ -54,85 +54,112 @@ log_error(){
 }
 
 build_dpdk(){
-	log_normal "[Build $DPDK_SOURCE ]"
+    if [ ! -d "$DPDK_SOURCE" ]; then
+        log_normal "[Download DPDK Source]"
+        wget http://static.dpdk.org/rel/dpdk-19.08.2.tar.gz
+        tar xzvf dpdk-19.08.2.tar.gz
+        patch -p0 < dpdk-19.08.2.patch
+    fi
 
-	cd dpdk-stable-19.08.2
-	make install T=x86_64-native-linuxapp-gcc EXTRA_CFLAGS="-fPIC -Wno-address-of-packed-member" DESTDIR=. -j 4
-	ret=$?
-	cd -
-	if [ $ret = 0 ]; then
-		log_normal "[Build $DPDK_SOURCE ].. Done"
-	else
-		log_error "[Build $DPDK_SOURCE ].. Error"
+    log_normal "[Build DPDK]"
+    cd $DPDK_SOURCE
+    make install T=x86_64-native-linuxapp-gcc EXTRA_CFLAGS="-fPIC -Wno-address-of-packed-member" DESTDIR=. -j
+    ret=$?
+    cd -
+    if [ $ret = 0 ]; then
+        log_normal "[Build DPDK].. Done"
+    else
+        log_error "[Build DPDK].. Error"
+    fi
+}
+
+build_fio(){
+    if [ ! -d "$FIO_SOURCE" ]; then
+        log_normal "[Download FIO Source]"
+        wget https://github.com/axboe/fio/archive/refs/tags/$FIO_TARBALL
+        tar xzvf $FIO_TARBALL
+        patch -p0 < $FIO_SOURCE.patch
+    fi
+
+    log_normal "[Build FIO]"
+    cd ${FIO_SOURCE}
+	if [ ! -f "fio" ]; then
+		make -j
+		ret=$?
+		if [ $ret = 0 ]; then
+			log_normal "[Build FIO].. Done"
+		else
+			log_error "[Build FIO].. Error"
+		fi
 	fi
+	cd -
 }
 
 build_dpdk_ci(){
 	if [ ${IS_VM} -eq 1 ]; then
-		log_normal "[Build $DPDK_SOURCE ]"
+		log_normal "[Build $DPDK_SOURCE]"
 		rm -rf ${DPDK_SOURCE}
 		cp -rf ${DPDK_SOURCE_CI} ${DPDK_SOURCE}
-		log_normal "[Build $DPDK_SOURCE ].. Done"
+		log_normal "[Build $DPDK_SOURCE].. Done"
 	else
 		build_dpdk
 	fi
 }
 
 build_gperf(){
-    log_normal "[Build $GPERF_SOURCE ]"
     if [ ! -d "gperftools-2.7" ]; then
-        log_normal "extract GPERF"
-        tar -xvf $GPERF_SOURCE 1>/dev/null
-        log_normal "extract GPERF.. done"
+        log_normal "[Download GPERF Source]"
+        wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7/gperftools-2.7.tar.gz --no-check-certificate
+        tar xzvf $GPERF_SOURCE
     fi
  
+    log_normal "[Build GPERF]"
     cd gperftools-2.7/
     if [ ! -f "./lib/libtcmalloc.a" ]; then
         ./configure && make -j && make install && ldconfig
         ret=$?
         if [ $ret = 0 ]; then
-            log_normal "[Build $GPERF_SOURCE ].. Done"
+            log_normal "[Build GPERF].. Done"
         else
-            log_error "[Build $GPERF_SOURCE ].. Error"
+            log_error "[Build GPERF].. Error"
         fi
     fi
     cd -
 }
 
 build_spdk(){
-	log_normal "[Build $SPDK_SOURCE ]"
 	if [ ! -d "spdk-19.10" ]; then
-		log_normal "extract SPDK"
-		tar -xvf $SPDK_SOURCE 1>/dev/null
-		log_normal "extract SPDK.. done"
+    log_normal "[Download SPDK Source]"
+        wget https://github.com/spdk/spdk/archive/refs/tags/v19.10.tar.gz --no-check-certificate
+        tar xzvf $SPDK_SOURCE
+        patch -p0 < spdk-19.10.patch
 	fi
 
+	log_normal "[Build SPDK]"
 	cd spdk-19.10
-	SPDK_CONFIG="--enable-debug --with-dpdk=$ROOT_DIR/dpdk-stable-19.08.2/ --with-rdma --with-ibof --without-isal"
+	SPDK_CONFIG="--enable-debug --with-dpdk=$ROOT_DIR/dpdk-stable-19.08.2/ --with-rdma --with-fio=$ROOT_DIR/${FIO_SOURCE} --with-ibof --without-isal"
 	if [ ! -f "mk/config.mk" ]; then
 		./configure ${SPDK_CONFIG}
 	fi
-	make -j 4
+	make -j
 	ret=$?
-	cp fio_plugin/bdev/fio_plugin_${FIO_SOURCE} examples/bdev/fio_plugin/fio_plugin
-        cp fio_plugin/nvme/fio_plugin_${FIO_SOURCE} examples/nvme/fio_plugin/fio_plugin
 	cd -
 	if [ $ret = 0 ]; then
-		log_normal "[Build $SPDK_SOURCE ].. Done"
+		log_normal "[Build SPDK].. Done"
 	else
-		log_error "[Build $SPDK_SOURCE ].. Error"
+		log_error "[Build SPDK].. Error"
 	fi
 }
 
 build_gtest(){
-	log_normal "[Build $GTEST_SOURCE ]"
-	if [ ! -d "googletest-release-1.10.x" ]; then
-		log_normal "extrast gtest-1.10.x"
-		tar -xvf $GTEST_SOURCE 1>/dev/null
-		log_normal "extract gtest.. done"
+	if [ ! -d "googletest-release-1.10.0" ]; then
+        log_normal "[Download GTEST Source]"
+        wget https://github.com/google/googletest/archive/refs/tags/release-1.10.0.tar.gz --no-check-certificate
+        tar xzvf $GTEST_SOURCE
 	fi
 
-	GTEST_SOURCE_DIR=googletest-release-1.10.x
+	log_normal "[Build GTEST]"
+	GTEST_SOURCE_DIR=googletest-release-1.10.0
 	GTEST_DIR=googletest
 	GMOCK_DIR=googlemock
 	GTEST_TARGET_INC_DIR=/usr/local/include
@@ -159,9 +186,9 @@ build_gtest(){
 	ret=$?
 	cd -
 	if [ $ret = 0 ]; then
-		log_normal "[Build $GTEST_SOURCE ].. Done"
+		log_normal "[Build GTEST].. Done"
 	else
-		log_error "[Build $GTEST_SOURCE ].. Error"
+		log_error "[Build GTEST].. Error"
 	fi
 }
 
@@ -209,16 +236,18 @@ build_air_ci(){
 }
 
 build_spdlog(){
-    if [ -d "${SPDLOG_SOURCE}" ]; then
-        cd ${SPDLOG_SOURCE}
-        log_normal "[Build $SPDLOG_SOURCE]"
-		cmake -H. -B_builds -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-
-	cmake --build _builds --target install
-        cd -
-    else
-        log_normal "No dir: $SPDLOG_SOURCE"
+    if [ ! -d "${SPDLOG_SOURCE}" ]; then
+        log_normal "[Download SPDLOG Source]"
+        wget https://github.com/gabime/spdlog/archive/refs/tags/v1.4.2.tar.gz --no-check-certificate
+        tar xzvf v1.4.2.tar.gz
+        patch -p0 < spdlog-1.4.2.patch
     fi
+
+    cd ${SPDLOG_SOURCE}
+    log_normal "[Build SPDLOG]"
+    cmake -H. -B_builds -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+    cmake --build _builds --target install
+    cd -
 }
 
 build_spdlog_ci(){
@@ -234,9 +263,9 @@ build_spdlog_ci(){
 build_go() {
 	log_normal "[SETUP $GO_SOURCE ]"
 	if [ ! -d "go" ]; then
-                log_normal "download GO"
-                wget "https://dl.google.com/go/${GO_SOURCE}"
-                log_normal "download GO.. done"
+        log_normal "download GO"
+        wget "https://dl.google.com/go/${GO_SOURCE}"
+        log_normal "download GO.. done"
 		
 		log_normal "extract GO"
 		tar -xvf $GO_SOURCE 1>/dev/null
@@ -271,6 +300,11 @@ clean_filebench() {
 	log_normal "clean Filebench.. done"
 }
 
+get_nlohmann_json() {
+    mkdir -p nlohmann
+    wget -O nlohmann/json.hpp https://github.com/nlohmann/json/releases/download/v3.7.3/json.hpp --no-check-certificate
+}
+
 clean_nvme()
 {
 	log_normal "clean nvme-cli-1.8.1"
@@ -281,7 +315,6 @@ clean_nvme()
 	fi
 	log_normal "clean nvme-cli.. done"
 }
-
 
 clean_spdk()
 {
@@ -356,38 +389,38 @@ clean_go()
 
 case "$1" in
 all)
-	set -e
-	build_dpdk
-	build_gperf
-	build_air
-	build_spdk
-	#build_nvme_cli
-	build_go
-	build_gtest
-	build_spdlog
-    #build_filebench
-	;;
+    set -e
+    get_nlohmann_json
+    build_dpdk
+    build_fio
+    build_gperf
+    build_air
+    build_spdk
+    build_go
+    build_gtest
+    build_spdlog
+    ;;
 ci)
-	set -e
-	build_dpdk_ci
-	build_gperf
+    set -e
+    get_nlohmann_json
+    build_dpdk_ci
+    build_fio
+    build_gperf
     build_air_ci
-	build_spdk
-	#build_nvme_cli
-	build_spdlog_ci
-	build_go
-    #build_filebench
-	;;
+    build_spdk
+    build_spdlog_ci
+    build_go
+    ;;
 dpdk)
 	set -e
 	build_dpdk
 	;;
 spdk)
 	set -e
+    build_fio
 	build_gperf
 	build_air
 	build_spdk
-	#build_nvme_cli
 	;;
 gtest)
 	set -e
@@ -407,7 +440,6 @@ go)
 	;;
 filebench)
     set -e
-    #build_filebench
     ;;
 clean_ci)
 	clean_nvme
