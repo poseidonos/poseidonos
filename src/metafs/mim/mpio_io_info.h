@@ -53,6 +53,7 @@ public:
       startByteOffset(0),
       byteSize(0),
       pageCnt(1),
+      arrayName(""),
       userBuf(nullptr)
     {
     }

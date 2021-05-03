@@ -38,7 +38,8 @@
 #include "mpio.h"
 #include "os_header.h"
 #include <list>
-#include <unordered_map>
+#include <map>
+#include <string>
 
 namespace pos
 {
@@ -48,7 +49,7 @@ public:
     explicit MpioPool(uint32_t poolSize);
     ~MpioPool(void);
 
-    Mpio* Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn, bool partialIO);
+    Mpio* Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn, bool partialIO, std::string arrayName);
     void Release(Mpio* mpio);
     size_t GetPoolSize(void);
 
@@ -67,8 +68,8 @@ private:
     void _InitCache(uint32_t poolSize);
     bool _IsFullyCached(void);
     bool _IsEmptyCached(void);
-    Mpio* _CacheHit(MpioType mpioType, MetaLpnType lpn);
-    Mpio* _CacheAlloc(MpioType mpioType, MetaLpnType lpn);
+    Mpio* _CacheHit(MpioType mpioType, MetaLpnType lpn, std::string arrayName);
+    Mpio* _CacheAlloc(MpioType mpioType, MetaLpnType lpn, std::string arrayName);
     void _CacheRemove(MpioType mpioType);
 #endif
 
@@ -79,8 +80,8 @@ private:
 #if MPIO_CACHE_EN
     size_t maxCacheCount;
     size_t currentCacheCount;
-    std::list<MetaLpnType> cachedList;
-    std::unordered_map<MetaLpnType, Mpio*> cachedMpio;
+    std::list<Mpio*> cachedList;
+    std::multimap<MetaLpnType, Mpio*> cachedMpio;
 #endif
 };
 } // namespace pos

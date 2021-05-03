@@ -191,7 +191,7 @@ Mio::_AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO)
 {
     MpioType mpioType = _LookupMpioType(originReq->reqType);
     MetaStorageType storageType = originReq->targetMediaType;
-    Mpio* mpio = mpioPool->Alloc(mpioType, storageType, mpioIoInfo.metaLpn, partialIO);
+    Mpio* mpio = mpioPool->Alloc(mpioType, storageType, mpioIoInfo.metaLpn, partialIO, mpioIoInfo.arrayName);
 
     if (mpio == nullptr)
         return nullptr;

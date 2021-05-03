@@ -99,7 +99,7 @@ MpioPool::~MpioPool(void)
 }
 
 Mpio*
-MpioPool::Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn, bool partialIO)
+MpioPool::Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn, bool partialIO, std::string arrayName)
 {
 #if RANGE_OVERLAP_CHECK_EN
     Mpio* mpio = nullptr;
@@ -119,7 +119,7 @@ MpioPool::Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn,
     else
     {
         // find mpio
-        mpio = _CacheHit(mpioType, lpn);
+        mpio = _CacheHit(mpioType, lpn, arrayName);
         if (nullptr != mpio)
             return mpio;
 
@@ -128,7 +128,7 @@ MpioPool::Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn,
             _CacheRemove(mpioType);
 
         // add new
-        return _CacheAlloc(mpioType, lpn);
+        return _CacheAlloc(mpioType, lpn, arrayName);
     }
 #else
     mpio = _AllocMpio(mpioType);
@@ -251,19 +251,22 @@ MpioPool::_IsEmptyCached(void)
 }
 
 Mpio*
-MpioPool::_CacheHit(MpioType mpioType, MetaLpnType lpn)
+MpioPool::_CacheHit(MpioType mpioType, MetaLpnType lpn, std::string arrayName)
 {
-    auto it = cachedMpio.find(lpn);
-    if (it != cachedMpio.end())
+    auto range = cachedMpio.equal_range(lpn);
+    for (multimap<MetaLpnType, Mpio*>::iterator iter = range.first; iter != range.second; ++iter)
     {
-        return cachedMpio[lpn];
+        if (arrayName == iter->second->io.arrayName)
+        {
+            return iter->second;
+        }
     }
 
     return nullptr;
 }
 
 Mpio*
-MpioPool::_CacheAlloc(MpioType mpioType, MetaLpnType lpn)
+MpioPool::_CacheAlloc(MpioType mpioType, MetaLpnType lpn, std::string arrayName)
 {
     uint32_t type = (uint32_t)mpioType;
     if (0 == mpioList[type].size())
@@ -273,7 +276,7 @@ MpioPool::_CacheAlloc(MpioType mpioType, MetaLpnType lpn)
     mpioList[type].pop_back();
     mpio->SetCacheState(MpioCacheState::FirstRead);
     cachedMpio.insert(make_pair(lpn, mpio));
-    cachedList.push_back(lpn);
+    cachedList.push_back(mpio);
     currentCacheCount++;
 
     return mpio;
@@ -285,14 +288,24 @@ MpioPool::_CacheRemove(MpioType mpioType)
     if (0 == cachedList.size())
         return;
 
-    MetaLpnType lpn = cachedList.front();
+    Mpio* mpio = cachedList.front();
     cachedList.pop_front();
-    cachedMpio[lpn]->SetCacheState(MpioCacheState::Init);
-    if (cachedMpio[lpn]->GetCurrState() == MpAioState::First)
+
+    auto range = cachedMpio.equal_range(mpio->io.metaLpn);
+    for (multimap<MetaLpnType, Mpio*>::iterator iter = range.first; iter != range.second; ++iter)
     {
-        Release(cachedMpio[lpn]);
+        if (mpio == iter->second)
+        {
+            cachedMpio.erase(iter);
+        }
     }
-    cachedMpio.erase(lpn);
+
+    mpio->SetCacheState(MpioCacheState::Init);
+    if (mpio->GetCurrState() == MpAioState::First)
+    {
+        Release(mpio);
+    }
+
     currentCacheCount--;
 }
 
