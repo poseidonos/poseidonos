@@ -32,22 +32,66 @@
 
 #pragma once
 
-#include "src/include/address_type.h"
+#include <string>
+
+#include "src/allocator/include/allocator_const.h"
+#include "src/meta_file_intf/async_context.h"
 
 namespace pos
 {
+class AllocatorAddressInfo;
+class MetaFileIntf;
 
-class ISegmentCtx
+class AllocatorFileIoManager
 {
+    class ContextSection
+    {
+    public:
+        void
+        Set(char* addrIn, int sizeIn, int offsetIn)
+        {
+            addr = addrIn, size = sizeIn, offset = offsetIn;
+        }
+
+        char* addr;
+        int size;
+        int offset;
+    };
+
 public:
-    virtual uint32_t GetGcThreshold(void) = 0;
-    virtual uint32_t GetUrgentThreshold(void) = 0;
-    virtual SegmentId GetGCVictimSegment(void) = 0;
-    virtual uint64_t GetNumOfFreeUserDataSegment(void) = 0;
-    virtual void ReplaySsdLsid(StripeId currentSsdLsid) = 0;
-    virtual void ReplaySegmentAllocation(StripeId userLsid) = 0;
-    virtual void UpdateOccupiedStripeCount(StripeId lsid) = 0;
-    virtual void FreeAllInvalidatedSegment(void) = 0;
+    AllocatorFileIoManager(AllocatorAddressInfo* info, std::string arrayName);
+    virtual ~AllocatorFileIoManager(void);
+    void Init(void);
+    void Close(void);
+
+    void UpdateSectionInfo(int owner, int section, char* addr, int size, int offset);
+
+    int LoadSync(int owner, char* buf);
+    int StoreSync(int owner, char* buf);
+    int StoreAsync(int owner, char* buf, MetaIoCbPtr callback);
+
+    void LoadSectionData(int owner, char* buf);
+    void CopySectionData(int owner, char* buf, int startSection, int endSection);
+
+    int GetFileSize(int owner);
+    char* GetSectionAddr(int owner, int section);
+    int GetSectionSize(int owner, int section);
+    int GetSectionOffset(int owner, int section);
+
+private:
+    int _Flush(char* data, EventSmartPtr callback);
+
+    const std::string ctxFileName[NUM_FILES] = {"AllocatorContext", "SegmentContexts"};
+
+    // File
+    MetaFileIntf* ctxFile[NUM_FILES];
+    ContextSection ctxSection[NUM_FILES][NUM_ALLOCATOR_CTX_SECTION];
+    int fileSize[NUM_FILES];
+    int numSections[NUM_FILES];
+
+    // DOCs
+    AllocatorAddressInfo* addrInfo;
+    std::string arrayName;
 };
 
 } // namespace pos

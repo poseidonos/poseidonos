@@ -161,7 +161,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayeSeveralUnflushedStripe)
             .Times(1);
     }
 
-    EXPECT_CALL(*(testAllocator->GetSegmentCtxMock()), ReplaySsdLsid).Times(1);
+    EXPECT_CALL(*(testAllocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);
 
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
@@ -394,7 +394,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayFlush)
     replayTester->ExpectReplayStripeAllocation(stripe.GetVsid(), stripe.GetWbAddr().stripeId);
     replayTester->ExpectReplayStripeFlush(stripe);
 
-    EXPECT_CALL(*(testAllocator->GetSegmentCtxMock()), ReplaySsdLsid).Times(1);
+    EXPECT_CALL(*(testAllocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);
 
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
@@ -418,7 +418,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayGcStripe)
     replayTester->ExpectReplayBlockLogsForStripe(testInfo->defaultTestVol, stripe.GetBlockMapList());
     replayTester->ExpectReplayStripeFlush(stripe);
 
-    EXPECT_CALL(*(testAllocator->GetSegmentCtxMock()), ReplaySsdLsid).Times(1);
+    EXPECT_CALL(*(testAllocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);
 
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }

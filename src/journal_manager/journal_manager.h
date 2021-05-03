@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "src/allocator/i_context_manager.h"
 #include "src/journal_service/journal_service.h"
 #include "src/journal_service/i_journal_writer.h"
 #include "src/array_models/interface/i_mount_sequence.h"
@@ -76,10 +77,8 @@ class IMapFlush;
 
 class IBlockAllocator;
 class IWBStripeAllocator;
-class IWBStripeCtx;
-class ISegmentCtx;
-class IAllocatorCtx;
-
+class IContextManager;
+class IContextReplayer;
 class IArrayInfo;
 class IStateControl;
 
@@ -118,8 +117,7 @@ public:
     int Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
         IWBStripeAllocator* wbStripeAllocator,
-        IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
-        IAllocatorCtx* allocatorCtx);
+        IContextManager* contextManager, IContextReplayer* contextReplayer);
 
     JournalManagerStatus
     GetJournalManagerStatus(void)
@@ -131,8 +129,7 @@ protected:
     void _InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
         IWBStripeAllocator* wbStripeAllocator,
-        IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
-        IAllocatorCtx* allocatorCtx);
+        IContextManager* contextManager, IContextReplayer* contextReplayer);
     int _Init(void);
 
     int _Reset(void);

@@ -32,19 +32,17 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
+#include "src/allocator/block_manager/block_manager.h"
+#include "src/allocator/context_manager/context_manager.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator/i_wbstripe_internal.h"
-#include "src/allocator/context_manager/context_manager.h"
-#include "src/allocator/block_manager/block_manager.h"
 #include "src/mapper/i_stripemap.h"
-
-#include <string>
 
 namespace pos
 {
-
 using StripeVec = std::vector<Stripe*>;
 
 class WBStripeManager : public IWBStripeAllocator, public IWBStripeInternal
@@ -103,6 +101,7 @@ private:
     IStripeMap* iStripeMap;
     AllocatorAddressInfo* addrInfo;
     ContextManager* contextManager;
+    WbStripeCtx* wbStripeCtx;
     BlockManager* blockManager;
     std::string arrayName;
 };

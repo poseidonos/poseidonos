@@ -5,12 +5,11 @@
 
 #include <list>
 
-#include "src/allocator/i_allocator_ctx.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator_service/allocator_service.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/include/meta_const.h"
 #include "src/include/backend_event.h"
+#include "src/include/meta_const.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/logger/logger.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
@@ -25,7 +24,6 @@ using ::testing::Return;
 
 namespace pos
 {
-    
 TEST(FlushSubmission, FlushSubmission_Constructor_OneArgument_Stack)
 {
     // Given

@@ -32,448 +32,437 @@
 
 #include "src/allocator/context_manager/context_manager.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
-#include "src/allocator/context_manager/io_ctx/allocator_context_io_ctx.h"
-#include "src/allocator/context_manager/segment/segment_info.h"
+#include "src/allocator/context_manager/allocator_ctx.h"
+#include "src/allocator/context_manager/context_replayer.h"
+#include "src/allocator/context_manager/file_io_manager.h"
+#include "src/allocator/context_manager/gc_ctx.h"
+#include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
+#include "src/allocator/context_manager/rebuild/rebuild_ctx.h"
+#include "src/allocator/context_manager/segment/segment_ctx.h"
+#include "src/allocator/context_manager/wb_stripe_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/event_scheduler/event_scheduler.h"
-#include "src/meta_file_intf/meta_file_include.h"
-#include "src/metafs/metafs_file_intf.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
 ContextManager::ContextManager(AllocatorAddressInfo* info, std::string arrayName)
-: ctxFile(nullptr),
-  userBlkAllocProhibited(false),
-  ctxStoredVersion(INVALID_VERSION),
-  ctxDirtyVersion(INVALID_VERSION),
-  wbLsidBitmap(nullptr),
+: numAsyncIoIssued(0),
   flushInProgress(false),
   addrInfo(info),
-  numAsyncIoIssued(0),
   arrayName(arrayName)
 {
-    for (int volumeId = 0; volumeId < MAX_VOLUME_COUNT; ++volumeId)
-    {
-        blkAllocProhibited[volumeId] = false;
-    }
-
-    for (ASTailArrayIdx asTailArrayIdx = 0; asTailArrayIdx < ACTIVE_STRIPE_TAIL_ARRAYLEN; ++asTailArrayIdx)
-    {
-        activeStripeTail[asTailArrayIdx] = UNMAP_VSA;
-    }
-
+    allocatorCtx = new AllocatorCtx(info, arrayName);
     segmentCtx = new SegmentCtx(info, arrayName);
-    rebuildCtx = new RebuildCtx(segmentCtx, this, arrayName);
-    segmentCtx->SetIRebuildCtxInternal(rebuildCtx);
+    rebuildCtx = new RebuildCtx(arrayName);
+    wbStripeCtx = new WbStripeCtx(info);
+    fileIoManager = new AllocatorFileIoManager(info, arrayName);
+    contextReplayer = new ContextReplayer(info, allocatorCtx, segmentCtx, wbStripeCtx);
+    fileOwner[SEGMENT_CTX] = segmentCtx;
+    fileOwner[ALLOCATOR_CTX] = allocatorCtx;
 }
 
 ContextManager::~ContextManager(void)
 {
     delete segmentCtx;
     delete rebuildCtx;
+    delete wbStripeCtx;
+    delete allocatorCtx;
+    delete fileIoManager;
+    delete contextReplayer;
 }
 
 void
 ContextManager::Init(void)
 {
+    wbStripeCtx->Init();
+    allocatorCtx->Init();
     segmentCtx->Init();
     rebuildCtx->Init(addrInfo);
+    fileIoManager->Init();
+    _UpdateSectionInfo();
+    _LoadContexts();
+}
 
-    wbLsidBitmap = new BitMapMutex(addrInfo->GetnumWbStripes());
-
-    _UpdateCtxList();
-
-    if (ctxFile == nullptr)
+void
+ContextManager::UpdateOccupiedStripeCount(StripeId lsid)
+{
+    SegmentId segId = lsid / addrInfo->GetstripesPerSegment();
+    std::lock_guard<std::mutex> lock(segmentCtx->GetSegInfoLock(segId));
+    if (segmentCtx->IncreaseOccupiedStripeCount(segId, false) == (int)addrInfo->GetstripesPerSegment())
     {
-        ctxFile = new FILESTORE("AllocatorContexts", arrayName);
-    }
-
-    if (ctxFile->DoesFileExist() == false)
-    {
-        ctxFile->Create(ctxHeader.totalSize);
-        ctxFile->Open();
-        ctxDirtyVersion = 0; // For the first time,
-        StoreAllocatorCtxs();
-    }
-    else
-    {
-        ctxFile->Open();
-        _LoadSync();
-        ctxDirtyVersion = ctxStoredVersion + 1;
+        std::lock_guard<std::mutex> lock(allocatorCtx->GetSegStateLock(segId));
+        if (segmentCtx->GetValidBlockCount(segId, false) == 0)
+        {
+            SegmentState eState = allocatorCtx->GetSegmentState(segId, false);
+            if (eState != SegmentState::FREE)
+            {
+                _FreeSegment(segId);
+            }
+        }
+        else
+        {
+            allocatorCtx->SetSegmentState(segId, SegmentState::SSD, false);
+        }
     }
 }
 
 void
-ContextManager::ReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
+ContextManager::FreeUserDataSegment(SegmentId segId)
 {
-    wbLsidBitmap->SetBit(wbLsid);
-}
-
-void
-ContextManager::ReplayStripeFlushed(StripeId wbLsid)
-{
-    wbLsidBitmap->ClearBit(wbLsid);
-}
-
-std::vector<VirtualBlkAddr>
-ContextManager::GetAllActiveStripeTail(void)
-{
-    std::vector<VirtualBlkAddr> asTails;
-    for (ASTailArrayIdx asTailArrayIdx = 0; asTailArrayIdx < ACTIVE_STRIPE_TAIL_ARRAYLEN; ++asTailArrayIdx)
+    std::lock_guard<std::mutex> lock(allocatorCtx->GetSegStateLock(segId));
+    SegmentState eState = allocatorCtx->GetSegmentState(segId, false);
+    if ((eState == SegmentState::SSD) || (eState == SegmentState::VICTIM))
     {
-        asTails.push_back(GetActiveStripeTail(asTailArrayIdx));
+        std::lock_guard<std::mutex> lock(segmentCtx->GetSegInfoLock(segId));
+        assert(segmentCtx->GetOccupiedStripeCount(segId, false) == (int)addrInfo->GetstripesPerSegment());
+        _FreeSegment(segId);
     }
-    return asTails;
-}
-
-void
-ContextManager::ResetActiveStripeTail(int index)
-{
-    SetActiveStripeTail(index, UNMAP_VSA);
 }
 
 void
 ContextManager::Close(void)
 {
-    if (ctxFile != nullptr)
-    {
-        if (ctxFile->IsOpened() == true)
-        {
-            ctxFile->Close();
-        }
-        delete ctxFile;
-        ctxFile = nullptr;
-    }
-
     segmentCtx->Close();
+    wbStripeCtx->Close();
     rebuildCtx->Close();
-
-    delete wbLsidBitmap;
+    allocatorCtx->Close();
+    fileIoManager->Close();
 }
 
 int
-ContextManager::FlushAllocatorCtxs(EventSmartPtr callback)
+ContextManager::FlushContextsSync(void)
 {
-    char* data;
+    int ret = 0;
+    for (int owner = 0; owner < NUM_FILES; owner++)
     {
-        std::lock_guard<std::mutex> lock(ctxLock);
-        data = _GetCopiedCtxBuffer();
+        ret = _FlushSync(owner);
+        if (ret != 0)
+        {
+            break;
+        }
     }
-
-    for (int index = 0; index < ACTIVE_STRIPE_TAIL_ARRAYLEN; index++)
-    {
-        std::unique_lock<std::mutex> volLock(activeStripeTailLock[index]);
-        _CopyWbufTail(data, index);
-    }
-
-    return _Flush(data, callback);
-}
-
-int
-ContextManager::StoreAllocatorCtxs(void)
-{
-    int ret = segmentCtx->StoreSegmentInfoSync();
-    if (ret != 0)
-    {
-        return ret;
-    }
-
-    char* buffer = new char[ctxHeader.totalSize]();
-    _PrepareCtxsStore(buffer);
-    ret = ctxFile->IssueIO(MetaFsIoOpcode::Write, 0, ctxHeader.totalSize, buffer);
-    if (ret == 0)
-    {
-        ctxStoredVersion = ctxHeader.ctxVersion;
-    }
-    delete[] buffer;
     return ret;
 }
 
-uint64_t
-ContextManager::GetAllocatorCtxsStoredVersion(void)
+int
+ContextManager::FlushContextsAsync(EventSmartPtr callback)
 {
-    return ctxStoredVersion;
-}
-
-void
-ContextManager::ResetAllocatorCtxsDirtyVersion(void)
-{
-    ctxDirtyVersion = 0;
-}
-
-bool
-ContextManager::TurnOffVolumeBlkAllocation(uint32_t volumeId)
-{
-    return (blkAllocProhibited[volumeId].exchange(true) == false);
-}
-
-void
-ContextManager::TurnOnVolumeBlkAllocation(uint32_t volumeId)
-{
-    blkAllocProhibited[volumeId] = false;
-}
-
-void
-ContextManager::TurnOffBlkAllocation(void)
-{
-    for (auto i = 0; i < MAX_VOLUME_COUNT; i++)
+    int ret = 0;
+    for (int owner = 0; owner < NUM_FILES; owner++)
     {
-        while (blkAllocProhibited[i].exchange(true) == true)
+        ret = _FlushAsync(owner, callback);
+        if (ret != 0)
         {
-            // Wait for flag to be reset
+            break;
         }
     }
-}
-
-void
-ContextManager::TurnOnBlkAllocation(void)
-{
-    for (auto i = 0; i < MAX_VOLUME_COUNT; i++)
-    {
-        blkAllocProhibited[i] = false;
-    }
-}
-
-void
-ContextManager::SetActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa)
-{
-    activeStripeTail[asTailArrayIdx] = vsa;
-}
-
-std::mutex&
-ContextManager::GetActiveStripeTailLock(ASTailArrayIdx asTailArrayIdx)
-{
-    return activeStripeTailLock[asTailArrayIdx];
-}
-
-VirtualBlkAddr
-ContextManager::GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx)
-{
-    return activeStripeTail[asTailArrayIdx];
+    return ret;
 }
 
 SegmentId
-ContextManager::AllocateUserDataSegmentId(void)
+ContextManager::AllocateFreeSegment(bool forUser)
 {
-    SegmentId segmentId = segmentCtx->GetSegmentBitmap()->SetNextZeroBit();
-
-    // This 'segmentId' should not be a target of rebuilding
-    while (segmentCtx->GetSegmentBitmap()->IsValidBit(segmentId) && (rebuildCtx->FindRebuildTargetSegment(segmentId) != rebuildCtx->RebuildTargetSegmentsEnd()))
+    SegmentId segmentId = allocatorCtx->AllocateFirstFoundFreeSegment(0);
+    if (forUser == false)
+    {
+        return segmentId;
+    }
+    while ((segmentId != UNMAP_SEGMENT) && (rebuildCtx->FindRebuildTargetSegment(segmentId) != rebuildCtx->RebuildTargetSegmentsEnd()))
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_REBUILDING_SEGMENT), "segmentId:{} is already rebuild target!", segmentId);
-        segmentCtx->GetSegmentBitmap()->ClearBit(segmentId);
+        allocatorCtx->ReleaseSegment(segmentId);
         ++segmentId;
-        segmentId = segmentCtx->GetSegmentBitmap()->SetFirstZeroBit(segmentId);
+        segmentId = allocatorCtx->AllocateFirstFoundFreeSegment(segmentId);
     }
-
-    // In case of all segments are used
-    if (segmentCtx->GetSegmentBitmap()->IsValidBit(segmentId) == false)
+    if (segmentId == UNMAP_SEGMENT)
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "Free segmentId exhausted, segmentId:{}", segmentId);
-        return UNMAP_SEGMENT;
     }
-
-    POS_TRACE_INFO(EID(ALLOCATOR_START), "segmentId:{} @AllocateUserDataSegmentId", segmentId);
+    else
+    {
+        POS_TRACE_INFO(EID(ALLOCATOR_START), "segmentId:{} @AllocateUserDataSegmentId", segmentId);
+    }
     return segmentId;
+}
+
+SegmentId
+ContextManager::AllocateGCVictimSegment(void)
+{
+    uint32_t numUserAreaSegments = addrInfo->GetnumUserAreaSegments();
+    SegmentId victimSegment = UNMAP_SEGMENT;
+    uint32_t minValidCount = numUserAreaSegments;
+    for (SegmentId segId = 0; segId < numUserAreaSegments; ++segId)
+    {
+        uint32_t cnt = segmentCtx->GetValidBlockCount(segId, true);
+
+        std::lock_guard<std::mutex> lock(allocatorCtx->GetSegStateLock(segId));
+        if ((allocatorCtx->GetSegmentState(segId, false) != SegmentState::SSD) || (cnt == 0))
+        {
+            continue;
+        }
+
+        if (cnt < minValidCount)
+        {
+            victimSegment = segId;
+            minValidCount = cnt;
+        }
+    }
+    if (victimSegment != UNMAP_SEGMENT)
+    {
+        allocatorCtx->SetSegmentState(victimSegment, SegmentState::VICTIM, true);
+    }
+    return victimSegment;
+}
+
+CurrentGcMode
+ContextManager::GetCurrentGcMode(void)
+{
+    int numFreeSegments = allocatorCtx->GetNumOfFreeUserDataSegment();
+    if (gcCtx.GetUrgentThreshold() >= numFreeSegments)
+    {
+        return MODE_URGENT_GC;
+    }
+    else if (gcCtx.GetGcThreshold() >= numFreeSegments)
+    {
+        return MODE_NORMAL_GC;
+    }
+    return MODE_NO_GC;
+}
+
+int
+ContextManager::GetGcThreshold(CurrentGcMode mode)
+{
+    return mode == MODE_NORMAL_GC ? gcCtx.GetGcThreshold() : gcCtx.GetUrgentThreshold();
+}
+
+int
+ContextManager::GetNumFreeSegment(void)
+{
+    return allocatorCtx->GetNumOfFreeUserDataSegment();
 }
 
 int
 ContextManager::SetNextSsdLsid(void)
 {
-    std::unique_lock<std::mutex> lock(ctxLock);
+    std::unique_lock<std::mutex> lock(allocatorCtx->GetAllocatorCtxLock());
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@SetNextSsdLsid");
-
-    SegmentId newSegmentId = AllocateUserDataSegmentId();
-    if (newSegmentId == UNMAP_SEGMENT)
+    SegmentId segId = AllocateFreeSegment(true);
+    if (segId == UNMAP_SEGMENT)
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "Free segmentId exhausted");
         return -EID(ALLOCATOR_NO_FREE_SEGMENT);
     }
-
-    segmentCtx->SetPrevSsdLsid(segmentCtx->GetCurrentSsdLsid());
-    segmentCtx->SetCurrentSsdLsid(newSegmentId * addrInfo->GetstripesPerSegment());
-    segmentCtx->UsedSegmentStateChange(newSegmentId, SegmentState::NVRAM);
-
+    allocatorCtx->SetNextSsdLsid(segId);
     return 0;
 }
-//----------------------------------------------------------------------------//
-void
-ContextManager::_LoadSync(void)
+
+uint64_t
+ContextManager::GetStoredContextVersion(int owner)
 {
-    char* buffer = new char[ctxHeader.totalSize]();
-    ctxFile->IssueIO(MetaFsIoOpcode::Read, 0, ctxHeader.totalSize, buffer);
-    _CtxLoaded(buffer);
-    delete[] buffer;
+    return fileOwner[owner]->GetStoredVersion();
 }
 
-void
-ContextManager::_CtxLoaded(char* buffer)
+SegmentId
+ContextManager::AllocateRebuildTargetSegment(void)
 {
-    for (int count = 0; count < NUM_ALLOCATOR_META; count++)
+    std::unique_lock<std::mutex> lock(ctxLock);
+    POS_TRACE_INFO(EID(ALLOCATOR_START), "@GetRebuildTargetSegment");
+
+    if (rebuildCtx->GetTargetSegmentCnt() == 0)
     {
-        memcpy(ctxsList[count].addr, buffer + ctxsList[count].offset, ctxsList[count].size);
+        return UINT32_MAX;
     }
-    segmentCtx->ResetExVictimSegment();
-    _HeaderLoaded();
+
+    SegmentId segmentId = UINT32_MAX;
+    while (rebuildCtx->IsRebuidTargetSegmentsEmpty() == false)
+    {
+        auto iter = rebuildCtx->RebuildTargetSegmentsBegin();
+        segmentId = *iter;
+
+        if (allocatorCtx->GetSegmentState(segmentId, true) == SegmentState::FREE) // This segment had been freed by GC
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "This segmentId:{} was target but seemed to be freed by GC", segmentId);
+            rebuildCtx->EraseRebuildTargetSegments(iter);
+            segmentId = UINT32_MAX;
+            continue;
+        }
+
+        POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "segmentId:{} is going to be rebuilt", segmentId);
+        rebuildCtx->SetUnderRebuildSegmentId(segmentId);
+        break;
+    }
+
+    return segmentId;
 }
 
 int
-ContextManager::_HeaderLoaded(void)
+ContextManager::ReleaseRebuildSegment(SegmentId segmentId)
 {
-    ctxStoredVersion = ctxHeader.ctxVersion;
-    wbLsidBitmap->SetNumBitsSet(ctxHeader.numValidWbLsid);
-    segmentCtx->GetSegmentBitmap()->SetNumBitsSet(ctxHeader.numValidSegment);
-    return 0;
+    std::unique_lock<std::mutex> lock(ctxLock);
+    return rebuildCtx->ReleaseRebuildSegment(segmentId);
 }
 
-int
-ContextManager::_HeaderUpdate(void)
+bool
+ContextManager::NeedRebuildAgain(void)
 {
-    ctxHeader.ctxVersion = ctxDirtyVersion++;
-    ctxHeader.numValidWbLsid = wbLsidBitmap->GetNumBitsSet();
-    ctxHeader.numValidSegment = segmentCtx->GetSegmentBitmap()->GetNumBitsSet();
-    return 0;
-}
-
-void
-ContextManager::_PrepareCtxsStore(char* buffer)
-{
-    _HeaderUpdate();
-    for (int count = 0; count < NUM_ALLOCATOR_META; count++)
-    {
-        assert(ctxHeader.totalSize > ctxsList[count].offset);
-        memcpy(buffer + ctxsList[count].offset, ctxsList[count].addr, ctxsList[count].size);
-    }
+    return rebuildCtx->NeedRebuildAgain();
 }
 
 char*
-ContextManager::_GetCopiedCtxBuffer(void)
+ContextManager::GetContextSectionAddr(int owner, int section)
 {
-    _HeaderUpdate();
-    char* data = new char[ctxHeader.totalSize]();
-
-    for (int count = 0; count < NUM_ALLOCATOR_META; count++)
-    {
-        if (count == ACTIVE_STRIPE_TAIL)
-        {
-            // to update wbuf tail seperately with seperated lock
-            continue;
-        }
-        else if (count == WB_LSID_BITMAP)
-        {
-            std::lock_guard<std::mutex> lock(wbLsidBitmap->GetLock());
-            _FillBuffer(data, count);
-        }
-        else
-        {
-            _FillBuffer(data, count);
-        }
-    }
-
-    return data;
-}
-
-void
-ContextManager::_CopyWbufTail(char* data, int index)
-{
-    int offset = sizeof(VirtualBlkAddr) * index;
-    memcpy(data + ctxsList[ACTIVE_STRIPE_TAIL].offset + offset, ctxsList[ACTIVE_STRIPE_TAIL].addr + offset, sizeof(VirtualBlkAddr));
+    return fileIoManager->GetSectionAddr(owner, section);
 }
 
 int
-ContextManager::_Flush(char* data, EventSmartPtr callbackEvent)
+ContextManager::GetContextSectionSize(int owner, int section)
 {
-    if (flushInProgress.exchange(true) == true)
-    {
-        return (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS;
-    }
-
-    numAsyncIoIssued = 0;
-    flushCallback = callbackEvent;
-    AllocatorContextIoCtx* flushInvCntRequest = segmentCtx->StoreSegmentInfoAsync(
-        std::bind(&ContextManager::_FlushCompletedThenCB, this, std::placeholders::_1));
-    int ret = ctxFile->AsyncIO(flushInvCntRequest);
-    if (ret != 0)
-    {
-        POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO), "Failed to issue AsyncMetaIo(SegmentInfoContext):{}", ret);
-        segmentCtx->ReleaseRequestIo(flushInvCntRequest);
-        return ret;
-    }
-    numAsyncIoIssued++;
-
-    AllocatorContextIoCtx* flushRequest = new AllocatorContextIoCtx(MetaFsIoOpcode::Write,
-        ctxFile->GetFd(), 0, ctxHeader.totalSize, data,
-        std::bind(&ContextManager::_FlushCompletedThenCB, this, std::placeholders::_1));
-    ret = ctxFile->AsyncIO(flushRequest);
-    numAsyncIoIssued++;
-    return ret;
+    return fileIoManager->GetSectionSize(owner, section);
 }
-
+//----------------------------------------------------------------------------//
 void
-ContextManager::_UpdateCtxList(void)
+ContextManager::_FreeSegment(SegmentId segId)
 {
-    int size;
-    ctxsList[HEADER].addr = (char*)&ctxHeader;
-    ctxsList[HEADER].size = sizeof(ctxHeader);
+    segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */, false);
+    allocatorCtx->SetSegmentState(segId, SegmentState::FREE, false);
+    allocatorCtx->ReleaseSegment(segId);
+    POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was freed by allocator", segId);
 
-    ctxsList[WB_LSID_BITMAP].addr = (char*)(wbLsidBitmap->GetMapAddr());
-    ctxsList[WB_LSID_BITMAP].size = wbLsidBitmap->GetNumEntry() * BITMAP_ENTRY_SIZE;
-
-    ctxsList[SEGMENT_BITMAP].addr = (char*)segmentCtx->GetSegmentBitmap()->GetMapAddr();
-    ctxsList[SEGMENT_BITMAP].size = segmentCtx->GetSegmentBitmap()->GetNumEntry() * BITMAP_ENTRY_SIZE;
-
-    ctxsList[ACTIVE_STRIPE_TAIL].addr = (char*)activeStripeTail;
-    ctxsList[ACTIVE_STRIPE_TAIL].size = sizeof(activeStripeTail);
-
-    ctxsList[CURRENT_SSD_LSID].addr = segmentCtx->GetCtxSectionInfo(CURRENT_SSD_LSID, size);
-    ctxsList[CURRENT_SSD_LSID].size = size;
-
-    ctxsList[SEGMENT_STATES].addr = segmentCtx->GetCtxSectionInfo(SEGMENT_STATES, size);
-    ctxsList[SEGMENT_STATES].size = size;
-
-    int currentOffset = 0;
-    ctxHeader.totalSize = 0;
-    for (int count = 0; count < NUM_ALLOCATOR_META; count++)
+    if (rebuildCtx->IsRebuidTargetSegmentsEmpty() == false)
     {
-        ctxsList[count].offset = currentOffset;
-        currentOffset += ctxsList[count].size;
-        ctxHeader.totalSize += ctxsList[count].size;
+        std::unique_lock<std::mutex> lock(ctxLock);
+        rebuildCtx->FreeSegmentInRebuildTarget(segId);
     }
 }
 
 void
 ContextManager::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 {
-    if (segmentCtx->IsSegmentInfoRequestIo(ctx->buffer) == true)
+    if (segmentCtx->IsSegmentCtxIo(ctx->buffer) == true)
     {
-        segmentCtx->ReleaseRequestIo(reinterpret_cast<AllocatorContextIoCtx*>(ctx));
+        segmentCtx->FinalizeIo(reinterpret_cast<AllocatorIoCtx*>(ctx));
     }
     else
     {
-        assert(ctx->length == ctxHeader.totalSize);
-        ctxStoredVersion = ctxHeader.ctxVersion;
-        delete[] ctx->buffer;
-        delete ctx;
+        allocatorCtx->FinalizeIo(reinterpret_cast<AllocatorIoCtx*>(ctx));
     }
-
+    delete[] ctx->buffer;
+    delete ctx;
     assert(numAsyncIoIssued > 0);
     numAsyncIoIssued--;
     if (numAsyncIoIssued == 0)
     {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_STORE, "allocatorCtx meta file Flushed");
+        POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "allocatorCtx meta file Flushed");
         flushInProgress = false;
         EventSchedulerSingleton::Instance()->EnqueueEvent(flushCallback);
     }
 }
 
 void
-ContextManager::_FillBuffer(char* buffer, int count)
+ContextManager::_UpdateSectionInfo()
 {
-    assert(ctxHeader.totalSize > ctxsList[count].offset);
-    memcpy(buffer + ctxsList[count].offset, ctxsList[count].addr, ctxsList[count].size);
+    int currentOffset = 0;
+    for (int section = 0; section < NUM_SEGMENT_CTX_SECTION; section++) // segmentCtx file
+    {
+        int size = segmentCtx->GetSectionSize(section);
+        fileIoManager->UpdateSectionInfo(SEGMENT_CTX, section, segmentCtx->GetSectionAddr(section), size, currentOffset);
+        currentOffset += size;
+    }
+
+    int section = 0;
+    currentOffset = 0;
+    for (; section < NUM_ALLOCATION_INFO; section++) // allocatorCtx file
+    {
+        int size = allocatorCtx->GetSectionSize(section);
+        fileIoManager->UpdateSectionInfo(ALLOCATOR_CTX, section, allocatorCtx->GetSectionAddr(section), size, currentOffset);
+        currentOffset += size;
+    }
+    assert(section == AC_ALLOCATE_WBLSID_BITMAP);
+    for (; section < NUM_ALLOCATOR_CTX_SECTION; section++) // wbstripeCtx in allocatorCtx file
+    {
+        int size = wbStripeCtx->GetSectionSize(section);
+        fileIoManager->UpdateSectionInfo(ALLOCATOR_CTX, section, wbStripeCtx->GetSectionAddr(section), size, currentOffset);
+        currentOffset += size;
+    }
+}
+
+void
+ContextManager::_LoadContexts(void)
+{
+    for (int owner = 0; owner < NUM_FILES; owner++)
+    {
+        int fileSize = fileIoManager->GetFileSize(owner);
+        char* buf = new char[fileSize]();
+        int ret = fileIoManager->LoadSync(owner, buf);
+        if (ret == 0)
+        {
+            _FlushSync(owner);
+        }
+        else
+        {
+            fileIoManager->LoadSectionData(owner, buf);
+            fileOwner[owner]->AfterLoad(buf);
+            if (owner == ALLOCATOR_CTX)
+            {
+                wbStripeCtx->AfterLoad(buf);
+            }
+        }
+        delete[] buf;
+    }
+}
+
+int
+ContextManager::_FlushSync(int owner)
+{
+    int size = fileIoManager->GetFileSize(owner);
+    char* buf = new char[size]();
+    _PrepareBuffer(owner, buf);
+    return fileIoManager->StoreSync(owner, buf);
+}
+
+int
+ContextManager::_FlushAsync(int owner, EventSmartPtr callbackEvent)
+{
+    int size = fileIoManager->GetFileSize(owner);
+    char* buf = new char[size]();
+    _PrepareBuffer(owner, buf);
+    int ret = fileIoManager->StoreAsync(owner, buf, std::bind(&ContextManager::_FlushCompletedThenCB, this, std::placeholders::_1));
+    if (ret != 0)
+    {
+        POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO), "Failed to issue AsyncMetaIo:{} owner:{}", ret, owner);
+        delete[] buf;
+        return ret;
+    }
+    numAsyncIoIssued++;
+    return ret;
+}
+
+void
+ContextManager::_PrepareBuffer(int owner, char* buf)
+{
+    fileOwner[owner]->BeforeFlush(0, nullptr);
+    if (owner == SEGMENT_CTX)
+    {
+        std::lock_guard<std::mutex> lock(segmentCtx->GetSegmentCtxLock());
+        fileIoManager->CopySectionData(owner, buf, 0, NUM_SEGMENT_CTX_SECTION);
+    }
+    else if (owner == ALLOCATOR_CTX)
+    {
+        { // lock boundary
+            std::lock_guard<std::mutex> lock(allocatorCtx->GetAllocatorCtxLock());
+            fileIoManager->CopySectionData(owner, buf, 0, NUM_ALLOCATION_INFO);
+        }
+        { // lock boundary
+            std::lock_guard<std::mutex> lock(wbStripeCtx->GetAllocWbLsidBitmapLock());
+            wbStripeCtx->BeforeFlush(AC_HEADER, buf);
+            wbStripeCtx->BeforeFlush(AC_ALLOCATE_WBLSID_BITMAP, buf + fileIoManager->GetSectionOffset(owner, AC_ALLOCATE_WBLSID_BITMAP));
+        }            
+        wbStripeCtx->BeforeFlush(AC_ACTIVE_STRIPE_TAIL, buf + fileIoManager->GetSectionOffset(owner, AC_ACTIVE_STRIPE_TAIL));
+    }
 }
 
 } // namespace pos

@@ -4,10 +4,6 @@
 
 namespace pos
 {
-} // namespace pos
-
-namespace pos
-{
 TEST(ContextManager, ContextManager_)
 {
 }
@@ -16,39 +12,71 @@ TEST(ContextManager, Init_)
 {
 }
 
-TEST(ContextManager, FlushAllocatorCtxs_)
+TEST(ContextManager, Close_)
 {
 }
 
-TEST(ContextManager, StoreAllocatorCtxs_)
+TEST(ContextManager, FlushContextsSync_)
 {
 }
 
-TEST(ContextManager, GetAllocatorCtxsStoredVersion_)
+TEST(ContextManager, FlushContextsAsync_)
 {
 }
 
-TEST(ContextManager, ResetAllocatorCtxsDirtyVersion_)
+TEST(ContextManager, UpdateOccupiedStripeCount_)
 {
 }
 
-TEST(ContextManager, ReplayStripeAllocation_)
+TEST(ContextManager, AllocateFreeSegment_)
 {
 }
 
-TEST(ContextManager, ReplayStripeFlushed_)
+TEST(ContextManager, AllocateGCVictimSegment_)
 {
 }
 
-TEST(ContextManager, GetAllActiveStripeTail_)
+TEST(ContextManager, AllocateRebuildTargetSegment_)
 {
 }
 
-TEST(ContextManager, ResetActiveStripeTail_)
+TEST(ContextManager, ReleaseRebuildSegment_)
 {
 }
 
-TEST(ContextManager, GetCtxLock_)
+TEST(ContextManager, NeedRebuildAgain_)
+{
+}
+
+TEST(ContextManager, GetNumFreeSegment_)
+{
+}
+
+TEST(ContextManager, GetCurrentGcMode_)
+{
+}
+
+TEST(ContextManager, GetGcThreshold_)
+{
+}
+
+TEST(ContextManager, GetStoredContextVersion_)
+{
+}
+
+TEST(ContextManager, FreeUserDataSegment_)
+{
+}
+
+TEST(ContextManager, SetNextSsdLsid_)
+{
+}
+
+TEST(ContextManager, GetContextSectionAddr_)
+{
+}
+
+TEST(ContextManager, GetContextSectionSize_)
 {
 }
 
@@ -60,103 +88,39 @@ TEST(ContextManager, GetSegmentCtx_)
 {
 }
 
-TEST(ContextManager, GetActiveStripeTail_)
+TEST(ContextManager, GetAllocatorCtx_)
 {
 }
 
-TEST(ContextManager, GetActiveStripeTailLock_)
+TEST(ContextManager, GetWbStripeCtx_)
 {
 }
 
-TEST(ContextManager, SetActiveStripeTail_)
+TEST(ContextManager, GetContextReplayer_)
 {
 }
 
-TEST(ContextManager, SetNextSsdLsid_)
+TEST(ContextManager, GetGcCtx_)
 {
 }
 
-TEST(ContextManager, AllocateUserDataSegmentId_)
+TEST(ContextManager, GetCtxLock_)
 {
 }
 
-TEST(ContextManager, TurnOffVolumeBlkAllocation_)
+TEST(ContextManager, _UpdateSectionInfo_)
 {
 }
 
-TEST(ContextManager, TurnOnVolumeBlkAllocation_)
+TEST(ContextManager, _LoadContexts_)
 {
 }
 
-TEST(ContextManager, TurnOffBlkAllocation_)
+TEST(ContextManager, _FlushAsync_)
 {
 }
 
-TEST(ContextManager, TurnOnBlkAllocation_)
-{
-}
-
-TEST(ContextManager, IsblkAllocProhibited_)
-{
-}
-
-TEST(ContextManager, ProhibitUserBlkAlloc_)
-{
-}
-
-TEST(ContextManager, PermitUserBlkAlloc_)
-{
-}
-
-TEST(ContextManager, IsuserBlkAllocProhibited_)
-{
-}
-
-TEST(ContextManager, Close_)
-{
-}
-
-TEST(ContextManager, GetRawCtxInfo_)
-{
-}
-
-TEST(ContextManager, GetWbLsidBitmap_)
-{
-}
-
-TEST(ContextManager, _UpdateCtxList_)
-{
-}
-
-TEST(ContextManager, _HeaderUpdate_)
-{
-}
-
-TEST(ContextManager, _LoadSync_)
-{
-}
-
-TEST(ContextManager, _CtxLoaded_)
-{
-}
-
-TEST(ContextManager, _HeaderLoaded_)
-{
-}
-
-TEST(ContextManager, _Flush_)
-{
-}
-
-TEST(ContextManager, _FlushAllocatorCtxs_)
-{
-}
-
-TEST(ContextManager, _PrepareCtxsStore_)
-{
-}
-
-TEST(ContextManager, _FlushCompleted_)
+TEST(ContextManager, _FlushSync_)
 {
 }
 
@@ -164,15 +128,15 @@ TEST(ContextManager, _FlushCompletedThenCB_)
 {
 }
 
-TEST(ContextManager, _IsFirstStripeOfSegment_)
+TEST(ContextManager, _PrepareBuffer_)
 {
 }
 
-TEST(ContextManager, _GetCopiedCtxBuffer_)
+TEST(ContextManager, _ResetSegmentStates_)
 {
 }
 
-TEST(ContextManager, _CopyWbufTail_)
+TEST(ContextManager, _FreeSegment_)
 {
 }
 

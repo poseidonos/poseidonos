@@ -37,11 +37,11 @@
 
 namespace pos
 {
-FlushMetadata::FlushMetadata(IMapFlush* mapFlush, IAllocatorCtx* allocatorCtx,
+FlushMetadata::FlushMetadata(IMapFlush* mapFlush, IContextManager* ctxManager,
     ReplayProgressReporter* reporter)
 : ReplayTask(reporter),
   mapFlush(mapFlush),
-  allocatorCtx(allocatorCtx)
+  contextManager(ctxManager)
 {
 }
 
@@ -66,7 +66,7 @@ FlushMetadata::Start(void)
 
     if (result == 0)
     {
-        result = allocatorCtx->StoreAllocatorCtxs();
+        result = contextManager->FlushContextsSync();
         reporter->SubTaskCompleted(GetId(), 1);
     }
 

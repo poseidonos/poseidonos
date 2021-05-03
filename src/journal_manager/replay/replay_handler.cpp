@@ -57,26 +57,24 @@ void
 ReplayHandler::Init(JournalConfiguration* journalConfiguration,
     JournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
-    IWBStripeAllocator* wbStripeAllocator, IWBStripeCtx* wbStripeCtx,
-    ISegmentCtx* segmentCtx, IAllocatorCtx* allocatorCtx, IArrayInfo* arrayInfo)
+    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IContextReplayer* contextReplayer, IArrayInfo* arrayInfo)
 {
     config = journalConfiguration;
     logBuffer = journalLogBuffer;
 
     _InitializeTaskList(vsaMap, stripeMap, mapFlush, blockAllocator,
-        wbStripeAllocator, wbStripeCtx, segmentCtx, allocatorCtx, arrayInfo);
+        wbStripeAllocator, contextManager, contextReplayer, arrayInfo);
 }
 
 void
 ReplayHandler::_InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
-    IWBStripeAllocator* wbStripeAllocator, IWBStripeCtx* wbStripeCtx,
-    ISegmentCtx* segmentCtx, IAllocatorCtx* allocatorCtx, IArrayInfo* arrayInfo)
+    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IContextReplayer* contextReplayer, IArrayInfo* arrayInfo)
 {
     _AddTask(new ReadLogBuffer(config, logBuffer, logList, reporter));
     _AddTask(new ReplayLogs(logList, vsaMap, stripeMap, blockAllocator,
-        wbStripeAllocator, wbStripeCtx, segmentCtx, arrayInfo, reporter, pendingWbStripes));
-    _AddTask(new FlushMetadata(mapFlush, allocatorCtx, reporter));
+        wbStripeAllocator, contextReplayer, arrayInfo, reporter, pendingWbStripes));
+    _AddTask(new FlushMetadata(mapFlush, contextManager, reporter));
     _AddTask(new ResetLogBuffer(logBuffer, reporter));
     _AddTask(new FlushPendingStripes(pendingWbStripes, wbStripeAllocator, reporter));
 }

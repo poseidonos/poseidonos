@@ -16,10 +16,6 @@ TEST(RebuildCtx, Close_)
 {
 }
 
-TEST(RebuildCtx, GetRebuildTargetSegment_)
-{
-}
-
 TEST(RebuildCtx, ReleaseRebuildSegment_)
 {
 }
@@ -28,23 +24,11 @@ TEST(RebuildCtx, NeedRebuildAgain_)
 {
 }
 
-TEST(RebuildCtx, FlushRebuildCtx_)
-{
-}
-
-TEST(RebuildCtx, ClearRebuildTargetSegments_)
-{
-}
-
-TEST(RebuildCtx, EmplaceRebuildTargetSegment_)
+TEST(RebuildCtx, FreeSegmentInRebuildTarget_)
 {
 }
 
 TEST(RebuildCtx, IsRebuidTargetSegmentsEmpty_)
-{
-}
-
-TEST(RebuildCtx, GetTargetSegmentCnt_)
 {
 }
 
@@ -57,6 +41,30 @@ TEST(RebuildCtx, RebuildTargetSegmentsBegin_)
 }
 
 TEST(RebuildCtx, RebuildTargetSegmentsEnd_)
+{
+}
+
+TEST(RebuildCtx, EmplaceRebuildTargetSegment_)
+{
+}
+
+TEST(RebuildCtx, ClearRebuildTargetSegments_)
+{
+}
+
+TEST(RebuildCtx, GetTargetSegmentCnt_)
+{
+}
+
+TEST(RebuildCtx, FlushRebuildCtx_)
+{
+}
+
+TEST(RebuildCtx, SetUnderRebuildSegmentId_)
+{
+}
+
+TEST(RebuildCtx, EraseRebuildTargetSegments_)
 {
 }
 
@@ -76,11 +84,11 @@ TEST(RebuildCtx, _StoreRebuildCtx_)
 {
 }
 
-TEST(RebuildCtx, _EraseRebuildTargetSegments_)
+TEST(RebuildCtx, _FlushRebuildCtxCompleted_)
 {
 }
 
-TEST(RebuildCtx, _FlushRebuildCtxCompleted_)
+TEST(RebuildCtx, _GetUnderRebuildSegmentId_)
 {
 }
 

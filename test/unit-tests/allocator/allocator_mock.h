@@ -23,16 +23,15 @@ public:
     MOCK_METHOD(bool, VolumeUnmounted, (std::string volName, int volID, std::string arrayName), (override));
     MOCK_METHOD(void, SetGcThreshold, (uint32_t inputThreshold), (override));
     MOCK_METHOD(void, SetUrgentThreshold, (uint32_t inputThreshold), (override));
-    MOCK_METHOD(int, GetMeta, (AllocatorCtxType type, std::string fname), (override));
-    MOCK_METHOD(int, SetMeta, (AllocatorCtxType type, std::string fname), (override));
+    MOCK_METHOD(int, GetMeta, (WBTAllocatorMetaType type, std::string fname), (override));
+    MOCK_METHOD(int, SetMeta, (WBTAllocatorMetaType type, std::string fname), (override));
     MOCK_METHOD(int, GetBitmapLayout, (std::string fname), (override));
     MOCK_METHOD(int, GetInstantMetaInfo, (std::string fname), (override));
     MOCK_METHOD(void, FlushAllUserdataWBT, (), (override));
     MOCK_METHOD(IBlockAllocator*, GetIBlockAllocator, (), (override));
     MOCK_METHOD(IWBStripeAllocator*, GetIWBStripeAllocator, (), (override));
-    MOCK_METHOD(IAllocatorCtx*, GetIAllocatorCtx, (), (override));
-    MOCK_METHOD(IWBStripeCtx*, GetIWBStripeCtx, (), (override));
-    MOCK_METHOD(ISegmentCtx*, GetISegmentCtx, (), (override));
+    MOCK_METHOD(IContextManager*, GetIContextManager, (), (override));
+    MOCK_METHOD(IContextReplayer*, GetIContextReplayer, (), (override));
 };
 
 } // namespace pos

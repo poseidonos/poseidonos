@@ -7,32 +7,18 @@ namespace pos
 AllocatorMock::AllocatorMock(IArrayInfo* info)
 : Allocator(info, nullptr)
 {
-    allocatorCtxMock = new StrictMock<AllocatorCtxMock>();
     wbStripeAllocatorMock = new StrictMock<WBStripeAllocatorMock>();
-    segmentCtxMock = new StrictMock<SegmentCtxMock>();
     blockAllocatorMock = new StrictMock<BlockAllocatorMock>();
-    wbStripeCtxMock = new StrictMock<WBStripeCtxMock>();
+    contextManagerMock = new StrictMock<IContextManagerMock>();
+    contextReplayerMock = new StrictMock<IContextReplayerMock>();
 }
 
 AllocatorMock::~AllocatorMock(void)
 {
-    delete wbStripeCtxMock;
     delete blockAllocatorMock;
-    delete segmentCtxMock;
     delete wbStripeAllocatorMock;
-    delete allocatorCtxMock;
-}
-
-IAllocatorCtx*
-AllocatorMock::GetIAllocatorCtx(void)
-{
-    return allocatorCtxMock;
-}
-
-AllocatorCtxMock*
-AllocatorMock::GetAllocatorCtxMock(void)
-{
-    return allocatorCtxMock;
+    delete contextManagerMock;
+    delete contextReplayerMock;
 }
 
 IWBStripeAllocator*
@@ -47,18 +33,6 @@ AllocatorMock::GetWBStripeAllocatorMock(void)
     return wbStripeAllocatorMock;
 }
 
-ISegmentCtx*
-AllocatorMock::GetISegmentCtx(void)
-{
-    return segmentCtxMock;
-}
-
-SegmentCtxMock*
-AllocatorMock::GetSegmentCtxMock(void)
-{
-    return segmentCtxMock;
-}
-
 IBlockAllocator*
 AllocatorMock::GetIBlockAllocator(void)
 {
@@ -71,16 +45,27 @@ AllocatorMock::GetBlockAllocatorMock(void)
     return blockAllocatorMock;
 }
 
-IWBStripeCtx*
-AllocatorMock::GetIWBStripeCtx(void)
+IContextManager*
+AllocatorMock::GetIContextManager(void)
 {
-    return wbStripeCtxMock;
+    return contextManagerMock;
 }
 
-WBStripeCtxMock*
-AllocatorMock::GetWBStripeCtxMock(void)
+IContextManagerMock*
+AllocatorMock::GetIContextManagerMock(void)
 {
-    return wbStripeCtxMock;
+    return contextManagerMock;
 }
 
+IContextReplayer*
+AllocatorMock::GetIContextReplayer(void)
+{
+    return contextReplayerMock;
+}
+
+IContextReplayerMock*
+AllocatorMock::GetIContextReplayerMock(void)
+{
+    return contextReplayerMock;
+}
 } // namespace pos

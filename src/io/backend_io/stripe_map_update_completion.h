@@ -32,7 +32,6 @@
 
 #pragma once
 
-#include "src/allocator/i_segment_ctx.h"
 #include "src/event_scheduler/event.h"
 #include "src/mapper/i_stripemap.h"
 
@@ -44,12 +43,13 @@ class Stripe;
 class Allocator;
 class Mapper;
 class EventScheduler;
+class IContextManager;
 class StripeMapUpdateCompletion : public Event
 {
 public:
     StripeMapUpdateCompletion(Stripe* inputStripe, std::string& arrayName);
     StripeMapUpdateCompletion(Stripe* inputStripe,
-        ISegmentCtx* iSegmentCtx,
+        IContextManager* icontextManager,
         IStripeMap* iStripeMap,
         EventScheduler* eventScheduler,
         std::string& arrayName);
@@ -59,7 +59,7 @@ public:
 
 private:
     Stripe* stripe;
-    ISegmentCtx* iSegmentCtx;
+    IContextManager* iContextManager;
     IStripeMap* iStripeMap;
     EventScheduler* eventScheduler;
     std::string arrayName;

@@ -32,34 +32,28 @@
 
 #pragma once
 
-#include "src/allocator/i_context_internal.h"
-#include "src/allocator/i_rebuild_ctx.h"
-#include "src/allocator/i_rebuild_ctx_internal.h"
-#include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/context_manager/segment/segment_ctx.h"
-#include "src/allocator/include/allocator_const.h"
-#include "src/meta_file_intf/meta_file_intf.h"
-
 #include <set>
 #include <string>
 #include <utility>
 
+#include "src/allocator/address/allocator_address_info.h"
+#include "src/allocator/i_context_manager.h"
+#include "src/allocator/include/allocator_const.h"
+#include "src/meta_file_intf/meta_file_intf.h"
+
 namespace pos
 {
-
-class RebuildCtx : public IRebuildCtx, public IRebuildCtxInternal
+class RebuildCtx
 {
 public:
-    RebuildCtx(SegmentCtx* segCtx, IContextInternal* iCtxInternal, std::string arrayName);
+    RebuildCtx(std::string arrayName);
     virtual ~RebuildCtx(void);
     void Init(AllocatorAddressInfo* info);
     void Close(void);
 
-    SegmentId GetRebuildTargetSegment(void) override;
-    int ReleaseRebuildSegment(SegmentId segmentId) override;
-    bool NeedRebuildAgain(void) override;
-
-    void FreeSegmentInRebuildTarget(SegmentId segId) override;
+    int ReleaseRebuildSegment(SegmentId segmentId);
+    bool NeedRebuildAgain(void);
+    void FreeSegmentInRebuildTarget(SegmentId segId);
 
     bool IsRebuidTargetSegmentsEmpty(void);
     RTSegmentIter FindRebuildTargetSegment(SegmentId segmentId);
@@ -70,13 +64,13 @@ public:
     uint32_t GetTargetSegmentCnt(void);
     void FlushRebuildCtx(void);
     void SetUnderRebuildSegmentId(SegmentId segmentId);
+    void EraseRebuildTargetSegments(RTSegmentIter iter);
 
 private:
     int _PrepareRebuildCtx(void);
     void _LoadRebuildCtxSync(void);
     void _RebuildCtxLoaded(void);
     void _StoreRebuildCtx(void);
-    void _EraseRebuildTargetSegments(RTSegmentIter iter);
     void _FlushRebuildCtxCompleted(AsyncMetaFileIoCtx* ctx);
     SegmentId _GetUnderRebuildSegmentId(void);
 
@@ -87,10 +81,6 @@ private:
     MetaFileIntf* rebuildSegmentsFile;
     char* bufferInObj;
     std::string arrayName;
-
-    // DOCs
-    SegmentCtx* segmentCtx;
-    IContextInternal* iContextInternal;
 };
 
 } // namespace pos

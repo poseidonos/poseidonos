@@ -47,33 +47,21 @@ AllocatorService::RegisterAllocator(std::string arrayName, IWBStripeAllocator* i
 }
 
 void
-AllocatorService::RegisterAllocator(std::string arrayName, IWBStripeCtx* iwbstripeCtx)
-{
-    iWBStripeCtx.Register(arrayName, iwbstripeCtx);
-}
-
-void
-AllocatorService::RegisterAllocator(std::string arrayName, ISegmentCtx* isegmentCtx)
-{
-    iSegmentCtx.Register(arrayName, isegmentCtx);
-}
-
-void
-AllocatorService::RegisterAllocator(std::string arrayName, IRebuildCtx* irebuildCtx)
-{
-    iRebuildCtx.Register(arrayName, irebuildCtx);
-}
-
-void
-AllocatorService::RegisterAllocator(std::string arrayName, IAllocatorCtx* iallocatorCtx)
-{
-    iAllocatorCtx.Register(arrayName, iallocatorCtx);
-}
-
-void
 AllocatorService::RegisterAllocator(std::string arrayName, IAllocatorWbt* iallocatorWbt)
 {
     iAllocatorWbt.Register(arrayName, iallocatorWbt);
+}
+
+void
+AllocatorService::RegisterAllocator(std::string arrayName, IContextManager* icontextManager)
+{
+    iContextManager.Register(arrayName, icontextManager);
+}
+
+void
+AllocatorService::RegisterAllocator(std::string arrayName, IContextReplayer* icontextReplayer)
+{
+    iContextReplayer.Register(arrayName, icontextReplayer);
 }
 
 void
@@ -81,11 +69,9 @@ AllocatorService::UnregisterAllocator(std::string arrayName)
 {
     iBlockAllocator.Unregister(arrayName);
     iWBStripeAllocator.Unregister(arrayName);
-    iWBStripeCtx.Unregister(arrayName);
-    iSegmentCtx.Unregister(arrayName);
-    iRebuildCtx.Unregister(arrayName);
-    iAllocatorCtx.Unregister(arrayName);
     iAllocatorWbt.Unregister(arrayName);
+    iContextManager.Unregister(arrayName);
+    iContextReplayer.Unregister(arrayName);
 }
 
 IBlockAllocator*
@@ -100,34 +86,22 @@ AllocatorService::GetIWBStripeAllocator(std::string arrayName)
     return iWBStripeAllocator.GetInterface(arrayName);
 }
 
-IWBStripeCtx*
-AllocatorService::GetIWBStripeCtx(std::string arrayName)
-{
-    return iWBStripeCtx.GetInterface(arrayName);
-}
-
-ISegmentCtx*
-AllocatorService::GetISegmentCtx(std::string arrayName)
-{
-    return iSegmentCtx.GetInterface(arrayName);
-}
-
-IRebuildCtx*
-AllocatorService::GetIRebuildCtx(std::string arrayName)
-{
-    return iRebuildCtx.GetInterface(arrayName);
-}
-
-IAllocatorCtx*
-AllocatorService::GetIAllocatorCtx(std::string arrayName)
-{
-    return iAllocatorCtx.GetInterface(arrayName);
-}
-
 IAllocatorWbt*
 AllocatorService::GetIAllocatorWbt(std::string arrayName)
 {
     return iAllocatorWbt.GetInterface(arrayName);
+}
+
+IContextManager*
+AllocatorService::GetIContextManager(std::string arrayName)
+{
+    return iContextManager.GetInterface(arrayName);
+}
+
+IContextReplayer*
+AllocatorService::GetIContextReplayer(std::string arrayName)
+{
+    return iContextReplayer.GetInterface(arrayName);
 }
 
 } // namespace pos

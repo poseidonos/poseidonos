@@ -54,9 +54,8 @@ class IStripeMap;
 class IMapFlush;
 class IBlockAllocator;
 class IWBStripeAllocator;
-class IWBStripeCtx;
-class ISegmentCtx;
-class IAllocatorCtx;
+class IContextManager;
+class IContextReplayer;
 class IArrayInfo;
 
 class ReplayHandler
@@ -69,8 +68,7 @@ public:
     virtual void Init(JournalConfiguration* journalConfiguration,
         JournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
-        IWBStripeAllocator* wbStripeAllocator, IWBStripeCtx* wbStripeCtx,
-        ISegmentCtx* segmentCtx, IAllocatorCtx* allocatorCtx, IArrayInfo* arrayInfo);
+        IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IContextReplayer* contextReplayer, IArrayInfo* arrayInfo);
 
     virtual int Start(void);
 
@@ -78,8 +76,7 @@ private:
     void _InitializeExternalModuleReferences(void);
     void _InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
-        IWBStripeAllocator* wbStripeAllocator, IWBStripeCtx* wbStripeCtx,
-        ISegmentCtx* segmentCtx, IAllocatorCtx* allocatorCtx, IArrayInfo* arrayInfo);
+        IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IContextReplayer* contextReplayer, IArrayInfo* arrayInfo);
     void _AddTask(ReplayTask* task);
     int _ExecuteReplayTasks(void);
 

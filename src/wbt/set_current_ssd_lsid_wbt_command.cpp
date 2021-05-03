@@ -51,7 +51,7 @@ int
 SetCurrentSsdLsidWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
     IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt("");
-    return iAllocatorWbt->SetMeta(CURRENT_SSD_LSID, argv["input"].get<std::string>());
+    return iAllocatorWbt->SetMeta(WBT_CURRENT_SSD_LSID, argv["input"].get<std::string>());
 }
 
 } // namespace pos

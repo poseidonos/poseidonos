@@ -41,8 +41,7 @@ namespace pos
 {
 class IVSAMap;
 class IStripeMap;
-class IWBStripeCtx;
-class ISegmentCtx;
+class IContextReplayer;
 class IBlockAllocator;
 class IArrayInfo;
 
@@ -58,7 +57,7 @@ class ReplayStripe
 public:
     ReplayStripe(void) = delete;
     ReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
+        IContextReplayer* ctxReplayer,
         IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
     virtual ~ReplayStripe(void);

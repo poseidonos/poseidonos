@@ -96,8 +96,8 @@ void
 JournalManagerTestFixture::ExpectCheckpointTriggered(void)
 {
     EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
-    EXPECT_CALL(*(testAllocator->GetAllocatorCtxMock()),
-        FlushAllocatorCtxs)
+    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()),
+        FlushContextsAsync)
         .Times(AtLeast(1));
 }
 

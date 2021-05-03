@@ -33,7 +33,7 @@
 #pragma once
 
 #include "replay_task.h"
-#include "src/allocator/i_allocator_ctx.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/mapper/i_map_flush.h"
 
 namespace pos
@@ -42,7 +42,7 @@ namespace pos
 class FlushMetadata : public ReplayTask
 {
 public:
-    FlushMetadata(IMapFlush* mapFlush, IAllocatorCtx* allocatorCtx,
+    FlushMetadata(IMapFlush* mapFlush, IContextManager* ctxManager,
         ReplayProgressReporter* reporter);
     virtual ~FlushMetadata(void);
 
@@ -53,6 +53,6 @@ public:
 
 private:
     IMapFlush* mapFlush;
-    IAllocatorCtx* allocatorCtx;
+    IContextManager* contextManager;
 };
 } // namespace pos

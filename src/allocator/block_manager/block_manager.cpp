@@ -30,29 +30,41 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/active_stripe_index_info.h"
 #include "src/allocator/block_manager/block_manager.h"
-#include "src/allocator/context_manager/segment/segment_ctx.h"
-#include "src/mapper_service/mapper_service.h"
-#include "src/include/branch_prediction.h"
-#include "src/qos/qos_manager.h"
+
 #include <string>
+
+#include "src/allocator/context_manager/active_stripe_index_info.h"
+#include "src/allocator/context_manager/allocator_ctx.h"
+#include "src/allocator/context_manager/segment/segment_ctx.h"
+#include "src/allocator/context_manager/wb_stripe_ctx.h"
+#include "src/include/branch_prediction.h"
+#include "src/mapper_service/mapper_service.h"
+#include "src/qos/qos_manager.h"
 
 namespace pos
 {
-
 BlockManager::BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName)
-: addrInfo(info),
+: userBlkAllocProhibited(false),
+  addrInfo(info),
   contextManager(ctxMgr),
   iWBStripeInternal(nullptr),
   arrayName(arrayName)
 {
+    segCtx = contextManager->GetSegmentCtx();
+    allocCtx = contextManager->GetAllocatorCtx();
+    wbStripeCtx = contextManager->GetWbStripeCtx();
 }
 
 void
 BlockManager::Init(IWBStripeInternal* iwbstripeInternal)
 {
     iWBStripeInternal = iwbstripeInternal;
+
+    for (int volume = 0; volume < MAX_VOLUME_COUNT; volume++)
+    {
+        blkAllocProhibited[volume] = false;
+    }
 }
 
 VirtualBlks
@@ -60,7 +72,7 @@ BlockManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, bool 
 {
     VirtualBlks allocatedBlks;
 
-    if (contextManager->IsblkAllocProhibited(volumeId) || ((forGC == false) && contextManager->IsuserBlkAllocProhibited()))
+    if ((blkAllocProhibited[volumeId] == true) || ((forGC == false) && (userBlkAllocProhibited == true)))
     {
         allocatedBlks.startVsa = UNMAP_VSA;
         allocatedBlks.numBlks = 0;
@@ -76,12 +88,10 @@ void
 BlockManager::InvalidateBlks(VirtualBlks blks)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    SegmentCtx* segCtx = contextManager->GetSegmentCtx();
-
-    uint32_t validCount = segCtx->DecreaseValidBlockCount(segId, blks.numBlks);
+    uint32_t validCount = segCtx->DecreaseValidBlockCount(segId, blks.numBlks, true);
     if (validCount == 0)
     {
-        segCtx->FreeUserDataSegment(segId);
+        contextManager->FreeUserDataSegment(segId);
     }
 }
 
@@ -89,42 +99,60 @@ void
 BlockManager::ValidateBlks(VirtualBlks blks)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    SegmentCtx* segCtx = contextManager->GetSegmentCtx();
-
-    segCtx->IncreaseValidBlockCount(segId, blks.numBlks);
+    segCtx->IncreaseValidBlockCount(segId, blks.numBlks, true);
 }
 
 void
 BlockManager::ProhibitUserBlkAlloc(void)
 {
-    contextManager->ProhibitUserBlkAlloc();
+    userBlkAllocProhibited = true;
 }
 
 void
 BlockManager::PermitUserBlkAlloc(void)
 {
-    contextManager->PermitUserBlkAlloc();
+    userBlkAllocProhibited = false;
 }
 
 bool
 BlockManager::BlockAllocating(uint32_t volumeId)
 {
-    return contextManager->TurnOffVolumeBlkAllocation(volumeId);
+    return (blkAllocProhibited[volumeId].exchange(true) == false);
 }
 
 void
 BlockManager::UnblockAllocating(uint32_t volumeId)
 {
-    contextManager->TurnOnVolumeBlkAllocation(volumeId);
+    blkAllocProhibited[volumeId] = false;
+}
+
+void
+BlockManager::TurnOffBlkAllocation(void)
+{
+    for (auto i = 0; i < MAX_VOLUME_COUNT; i++)
+    {
+        // Wait for flag to be reset
+        while (blkAllocProhibited[i].exchange(true) == true)
+            ;
+    }
+}
+
+void
+BlockManager::TurnOnBlkAllocation(void)
+{
+    for (auto i = 0; i < MAX_VOLUME_COUNT; i++)
+    {
+        blkAllocProhibited[i] = false;
+    }
 }
 //----------------------------------------------------------------------------//
 VirtualBlks
 BlockManager::_AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks)
 {
     assert(numBlks != 0);
-    std::unique_lock<std::mutex> volLock(contextManager->GetActiveStripeTailLock(asTailArrayIdx));
+    std::unique_lock<std::mutex> volLock(wbStripeCtx->GetActiveStripeTailLock(asTailArrayIdx));
     VirtualBlks allocatedBlks;
-    VirtualBlkAddr curVsa = contextManager->GetActiveStripeTail(asTailArrayIdx);
+    VirtualBlkAddr curVsa = wbStripeCtx->GetActiveStripeTail(asTailArrayIdx);
 
     if (_IsStripeFull(curVsa) || IsUnMapStripe(curVsa.stripeId))
     {
@@ -147,7 +175,7 @@ BlockManager::_AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks)
         allocatedBlks.numBlks = addrInfo->GetblksPerStripe() - curVsa.offset;
 
         VirtualBlkAddr vsa = {.stripeId = curVsa.stripeId, .offset = addrInfo->GetblksPerStripe()};
-        contextManager->SetActiveStripeTail(asTailArrayIdx, vsa);
+        wbStripeCtx->SetActiveStripeTail(asTailArrayIdx, vsa);
     }
     else
     {
@@ -155,7 +183,7 @@ BlockManager::_AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks)
         allocatedBlks.numBlks = numBlks;
 
         VirtualBlkAddr vsa = {.stripeId = curVsa.stripeId, .offset = curVsa.offset + numBlks};
-        contextManager->SetActiveStripeTail(asTailArrayIdx, vsa);
+        wbStripeCtx->SetActiveStripeTail(asTailArrayIdx, vsa);
     }
 
     return allocatedBlks;
@@ -181,7 +209,7 @@ BlockManager::_AllocateWriteBufferBlksFromNewStripe(ASTailArrayIdx asTailArrayId
 
     // Temporally no lock required, as AllocateBlks and this function cannot be executed in parallel
     // TODO(jk.man.kim): add or move lock to wbuf tail manager
-    contextManager->SetActiveStripeTail(asTailArrayIdx, curVsa);
+    wbStripeCtx->SetActiveStripeTail(asTailArrayIdx, curVsa);
 
     return allocatedBlks;
 }
@@ -190,11 +218,15 @@ int
 BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
 {
     // 1. WriteBuffer Logical StripeId Allocation
-    StripeId wbLsid = _AllocateWriteBufferStripeId();
+    StripeId wbLsid = wbStripeCtx->AllocWbStripe();
     if (wbLsid == UNMAP_STRIPE)
     {
         return -EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE);
     }
+
+#if defined QOS_ENABLED_BE
+    QosManagerSingleton::Instance()->IncreaseUsedStripeCnt();
+#endif
 
     // 2. SSD Logical StripeId Allocation
     bool isUserStripeAlloc = _IsUserStripeAllocation(asTailArrayIdx);
@@ -209,7 +241,7 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
     if (_IsSegmentFull(arrayLsid))
     {
         SegmentId segId = arrayLsid / addrInfo->GetstripesPerSegment();
-        contextManager->GetSegmentCtx()->UsedSegmentStateChange(segId, SegmentState::NVRAM);
+        allocCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
     }
     StripeId newVsid = arrayLsid;
 
@@ -236,42 +268,25 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
 }
 
 StripeId
-BlockManager::_AllocateWriteBufferStripeId(void)
-{
-    std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
-    StripeId wbLsid = contextManager->GetWbLsidBitmap()->SetNextZeroBit();
-
-    if (contextManager->GetWbLsidBitmap()->IsValidBit(wbLsid) == false)
-    {
-        return UNMAP_STRIPE;
-    }
-    QosManagerSingleton::Instance()->IncreaseUsedStripeCnt();
-    return wbLsid;
-}
-
-StripeId
 BlockManager::_AllocateUserDataStripeIdInternal(bool isUserStripeAlloc)
 {
     std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
-    SegmentCtx* segCtx = contextManager->GetSegmentCtx();
     RebuildCtx* rbCtx = contextManager->GetRebuldCtx();
 
-    segCtx->SetPrevSsdLsid(segCtx->GetCurrentSsdLsid());
-    StripeId ssdLsid = segCtx->GetCurrentSsdLsid() + 1;
+    StripeId ssdLsid = allocCtx->UpdatePrevLsid();
 
     if (_IsSegmentFull(ssdLsid))
     {
-        uint32_t freeSegments = contextManager->GetSegmentCtx()->GetNumOfFreeUserDataSegment();
-        if (contextManager->GetSegmentCtx()->GetUrgentThreshold() >= freeSegments)
+        if (contextManager->GetCurrentGcMode() == MODE_URGENT_GC)
         {
-            contextManager->ProhibitUserBlkAlloc();
+            userBlkAllocProhibited = true;
             if (isUserStripeAlloc)
             {
                 return UNMAP_STRIPE;
             }
         }
 
-        SegmentId segmentId = contextManager->AllocateUserDataSegmentId();
+        SegmentId segmentId = contextManager->AllocateFreeSegment(true);
         if (segmentId == UNMAP_SEGMENT)
         {
             // Under Rebuiling...
@@ -288,7 +303,7 @@ BlockManager::_AllocateUserDataStripeIdInternal(bool isUserStripeAlloc)
         ssdLsid = segmentId * addrInfo->GetstripesPerSegment();
     }
 
-    segCtx->SetCurrentSsdLsid(ssdLsid);
+    allocCtx->SetCurrentSsdLsid(ssdLsid);
 
     return ssdLsid;
 }
@@ -298,19 +313,17 @@ BlockManager::_RollBackStripeIdAllocation(StripeId wbLsid, StripeId arrayLsid)
 {
     if (wbLsid != UINT32_MAX)
     {
-        contextManager->GetWbLsidBitmap()->ClearBit(wbLsid);
+        wbStripeCtx->ReleaseWbStripe(wbLsid);
     }
 
     if (arrayLsid != UINT32_MAX)
     {
-        SegmentCtx* segCtx = contextManager->GetSegmentCtx();
         if (_IsSegmentFull(arrayLsid))
         {
             SegmentId SegmentIdToClear = arrayLsid / addrInfo->GetstripesPerSegment();
-            segCtx->GetSegmentBitmap()->ClearBit(SegmentIdToClear);
-            segCtx->UsedSegmentStateChange(SegmentIdToClear, SegmentState::FREE);
+            contextManager->FreeUserDataSegment(SegmentIdToClear);
         }
-        segCtx->SetCurrentSsdLsid(segCtx->GetPrevSsdLsid());
+        allocCtx->RollbackCurrentSsdLsid();
     }
 }
 

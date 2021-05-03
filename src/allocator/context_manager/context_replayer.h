@@ -32,15 +32,40 @@
 
 #pragma once
 
-#include "src/allocator/include/allocator_const.h"
+#include <string>
+#include <vector>
+
+#include "src/allocator/i_context_replayer.h"
 
 namespace pos
 {
+class AllocatorAddressInfo;
+class AllocatorCtx;
+class SegmentCtx;
+class WbStripeCtx;
 
-class IRebuildCtxInternal
+class ContextReplayer : public IContextReplayer
 {
 public:
-    virtual void FreeSegmentInRebuildTarget(SegmentId segId) = 0;
+    ContextReplayer(AllocatorAddressInfo* info, AllocatorCtx* allocatorCtx, SegmentCtx* segmentCtx, WbStripeCtx* wbStripeCtx);
+    virtual ~ContextReplayer(void);
+
+    virtual void ResetDirtyContextVersion(int owner);
+    virtual void ReplaySsdLsid(StripeId currentSsdLsid);
+    virtual void ReplaySegmentAllocation(StripeId userLsid);
+    virtual void ReplayStripeAllocation(StripeId vsid, StripeId wbLsid);
+    virtual void ReplayStripeFlushed(StripeId wbLsid);
+    virtual void ResetActiveStripeTail(int index);
+    virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
+    virtual void ResetSegmentsStates(void);
+
+private:
+    AllocatorAddressInfo* addrInfo;
+    AllocatorCtx* allocatorCtx;
+    SegmentCtx* segmentCtx;
+    WbStripeCtx* wbStripeCtx;
+
+    std::string arrayName;
 };
 
 } // namespace pos

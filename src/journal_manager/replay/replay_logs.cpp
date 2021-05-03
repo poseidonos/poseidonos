@@ -49,7 +49,7 @@ namespace pos
 {
 ReplayLogs::ReplayLogs(ReplayLogList& logList, IVSAMap* vsaMap, IStripeMap* stripeMap,
     IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-    IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx, IArrayInfo* arrayInfo,
+    IContextReplayer* ctxReplayer, IArrayInfo* arrayInfo,
     ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes)
 : ReplayTask(reporter),
   logList(logList),
@@ -57,15 +57,14 @@ ReplayLogs::ReplayLogs(ReplayLogList& logList, IVSAMap* vsaMap, IStripeMap* stri
   stripeMap(stripeMap),
   blockAllocator(blockAllocator),
   wbStripeAllocator(wbStripeAllocator),
-  wbStripeCtx(wbStripeCtx),
-  segmentCtx(segmentCtx),
+  contextReplayer(ctxReplayer),
   arrayInfo(arrayInfo)
 {
     logDeleteChecker = new LogDeleteChecker();
 
-    wbStripeReplayer = new ActiveWBStripeReplayer(wbStripeCtx,
+    wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer,
         wbStripeAllocator, pendingWbStripes);
-    userStripeReplayer = new ActiveUserStripeReplayer(segmentCtx, arrayInfo);
+    userStripeReplayer = new ActiveUserStripeReplayer(contextReplayer, arrayInfo);
 }
 
 ReplayLogs::~ReplayLogs(void)
@@ -132,7 +131,7 @@ ReplayLogs::Start(void)
     }
     reporter->SubTaskCompleted(GetId(), 1);
 
-    segmentCtx->FreeAllInvalidatedSegment();
+    contextReplayer->ResetSegmentsStates();
     reporter->SubTaskCompleted(GetId(), 1);
 
     std::ostringstream os;
@@ -173,7 +172,7 @@ ReplayLogs::_ReplayFinishedStripes(std::vector<ReplayLog>& replayLogs)
         else if (log->GetType() == LogType::GC_STRIPE_FLUSHED)
         {
             ReplayStripe* stripe = new GcReplayStripe(log->GetVsid(), vsaMap, stripeMap,
-                wbStripeCtx, segmentCtx, blockAllocator, arrayInfo,
+                contextReplayer, blockAllocator, arrayInfo,
                 wbStripeReplayer, userStripeReplayer);
             stripe->AddLog(log);
 
@@ -228,7 +227,7 @@ ReplayLogs::_FindUserStripe(StripeId vsid)
     }
 
     ReplayStripe* stripe = new UserReplayStripe(vsid, vsaMap, stripeMap,
-        wbStripeCtx, segmentCtx, blockAllocator, arrayInfo,
+        contextReplayer, blockAllocator, arrayInfo,
         wbStripeReplayer, userStripeReplayer);
 
     replayingStripeList.push_back(stripe);

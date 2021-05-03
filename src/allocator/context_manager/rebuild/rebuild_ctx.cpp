@@ -30,27 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/io_ctx/allocator_context_io_ctx.h"
 #include "src/allocator/context_manager/rebuild/rebuild_ctx.h"
-#include "src/allocator/context_manager/segment/segment_info.h"
-#include "src/metafs/metafs_file_intf.h"
-#include "src/meta_file_intf/meta_file_include.h"
 
 #include <string>
 #include <utility>
 
+#include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
+#include "src/meta_file_intf/meta_file_include.h"
+#include "src/metafs/metafs_file_intf.h"
+
 namespace pos
 {
-
-RebuildCtx::RebuildCtx(SegmentCtx* segCtx, IContextInternal* iCtxInternal, std::string arrayName)
+RebuildCtx::RebuildCtx(std::string arrayName)
 : needRebuildCont(false),
   targetSegmentCnt(0),
   underRebuildSegmentId(UINT32_MAX),
   rebuildSegmentsFile(nullptr),
   bufferInObj(nullptr),
-  arrayName(arrayName),
-  segmentCtx(segCtx),
-  iContextInternal(iCtxInternal)
+  arrayName(arrayName)
 {
 }
 
@@ -64,7 +61,7 @@ RebuildCtx::Init(AllocatorAddressInfo* info)
     targetSegmentCnt = info->GetnumUserAreaSegments();
     bufferInObj = new char[sizeof(targetSegmentCnt) + targetSegmentCnt * sizeof(SegmentId)];
 
-    rebuildSegmentsFile = new FILESTORE("AllocatorRebuildSegments", arrayName);
+    rebuildSegmentsFile = new FILESTORE("RebuildContext", arrayName);
     if (rebuildSegmentsFile->DoesFileExist() == false)
     {
         rebuildSegmentsFile->Create(sizeof(targetSegmentCnt) + sizeof(SegmentId) * targetSegmentCnt);
@@ -94,46 +91,12 @@ RebuildCtx::Close(void)
         delete rebuildSegmentsFile;
         rebuildSegmentsFile = nullptr;
     }
-    delete [] bufferInObj;
-}
-
-SegmentId
-RebuildCtx::GetRebuildTargetSegment(void)
-{
-    std::unique_lock<std::mutex> lock(iContextInternal->GetCtxLock());
-    POS_TRACE_INFO(EID(ALLOCATOR_START), "@GetRebuildTargetSegment");
-
-    if (GetTargetSegmentCnt() == 0)
-    {
-        return UINT32_MAX;
-    }
-
-    SegmentId segmentId = UINT32_MAX;
-    while (IsRebuidTargetSegmentsEmpty() == false)
-    {
-        auto iter = RebuildTargetSegmentsBegin();
-        segmentId = *iter;
-
-        if (segmentCtx->CheckSegmentState(segmentId, SegmentState::FREE) == true) // This segment had been freed by GC
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "This segmentId:{} was target but seemed to be freed by GC", segmentId);
-            _EraseRebuildTargetSegments(iter);
-            segmentId = UINT32_MAX;
-            continue;
-        }
-
-        POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "segmentId:{} is going to be rebuilt", segmentId);
-        SetUnderRebuildSegmentId(segmentId);
-        break;
-    }
-
-    return segmentId;
+    delete[] bufferInObj;
 }
 
 int
 RebuildCtx::ReleaseRebuildSegment(SegmentId segmentId)
 {
-    std::unique_lock<std::mutex> lock(iContextInternal->GetCtxLock());
     POS_TRACE_INFO(EID(ALLOCATOR_START), "@ReleaseRebuildSegment");
 
     auto iter = FindRebuildTargetSegment(segmentId);
@@ -146,7 +109,7 @@ RebuildCtx::ReleaseRebuildSegment(SegmentId segmentId)
 
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "segmentId:{} Rebuild Done!", segmentId);
     // Delete segmentId in rebuildTargetSegments
-    _EraseRebuildTargetSegments(iter);
+    EraseRebuildTargetSegments(iter);
     FlushRebuildCtx();
     SetUnderRebuildSegmentId(UINT32_MAX);
     return 0;
@@ -169,9 +132,9 @@ RebuildCtx::FlushRebuildCtx(void)
 {
     int lenToWrite = _PrepareRebuildCtx();
 
-    AllocatorContextIoCtx* rebuildStoreRequest = new AllocatorContextIoCtx(MetaFsIoOpcode::Write,
-                                        rebuildSegmentsFile->GetFd(), 0, lenToWrite, bufferInObj,
-                                        std::bind(&RebuildCtx::_FlushRebuildCtxCompleted, this, std::placeholders::_1));
+    AllocatorIoCtx* rebuildStoreRequest = new AllocatorIoCtx(MetaFsIoOpcode::Write,
+        rebuildSegmentsFile->GetFd(), 0, lenToWrite, bufferInObj,
+        std::bind(&RebuildCtx::_FlushRebuildCtxCompleted, this, std::placeholders::_1));
     rebuildStoreRequest->segmentCnt = targetSegmentCnt;
 
     rebuildSegmentsFile->AsyncIO(rebuildStoreRequest);
@@ -216,12 +179,6 @@ RebuildCtx::RebuildTargetSegmentsEnd(void)
 void
 RebuildCtx::FreeSegmentInRebuildTarget(SegmentId segId)
 {
-    if (IsRebuidTargetSegmentsEmpty())  // No need to check below
-    {
-        return;
-    }
-
-    std::unique_lock<std::mutex> lock(iContextInternal->GetCtxLock());
     auto iter = FindRebuildTargetSegment(segId);
     if (iter == RebuildTargetSegmentsEnd())
     {
@@ -234,7 +191,7 @@ RebuildCtx::FreeSegmentInRebuildTarget(SegmentId segId)
         return;
     }
 
-    _EraseRebuildTargetSegments(iter);
+    EraseRebuildTargetSegments(iter);
     POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "segmentId:{} in Rebuild Target has been Freed by GC", segId);
     _StoreRebuildCtx();
 }
@@ -249,6 +206,12 @@ void
 RebuildCtx::SetUnderRebuildSegmentId(SegmentId segmentId)
 {
     underRebuildSegmentId = segmentId;
+}
+
+void
+RebuildCtx::EraseRebuildTargetSegments(RTSegmentIter iter)
+{
+    rebuildTargetSegments.erase(iter);
 }
 //----------------------------------------------------------------------------//
 int
@@ -274,12 +237,6 @@ RebuildCtx::_StoreRebuildCtx(void)
 {
     int lenToWrite = _PrepareRebuildCtx();
     rebuildSegmentsFile->IssueIO(MetaFsIoOpcode::Write, 0, lenToWrite, bufferInObj);
-}
-
-void
-RebuildCtx::_EraseRebuildTargetSegments(RTSegmentIter iter)
-{
-    rebuildTargetSegments.erase(iter);
 }
 
 void
@@ -318,7 +275,7 @@ RebuildCtx::_RebuildCtxLoaded(void)
 void
 RebuildCtx::_FlushRebuildCtxCompleted(AsyncMetaFileIoCtx* ctx)
 {
-    int segmentCount = ((AllocatorContextIoCtx*)ctx)->segmentCnt;
+    int segmentCount = ((AllocatorIoCtx*)ctx)->segmentCnt;
     POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT), "Rebuild Segment File Stored, segmentCount:{}", segmentCount);
     delete ctx;
 }

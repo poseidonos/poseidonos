@@ -33,6 +33,7 @@
 #include "replay_event.h"
 
 #include "src/allocator/allocator.h"
+#include "src/allocator/i_context_replayer.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/include/pos_event_id.h"
 #include "src/journal_manager/statistics/stripe_replay_status.h"
@@ -154,11 +155,11 @@ ReplayStripeMapUpdate::Replay(void)
 }
 
 ReplayStripeAllocation::ReplayStripeAllocation(IStripeMap* stripeMap,
-    IWBStripeCtx* wbStripeCtx, StripeReplayStatus* status,
+    IContextReplayer* ctxReplayer, StripeReplayStatus* status,
     StripeId vsid, StripeId wbLsid)
 : ReplayEvent(status),
   stripeMap(stripeMap),
-  wbStripeCtx(wbStripeCtx),
+  contextReplayer(ctxReplayer),
   vsid(vsid),
   wbLsid(wbLsid)
 {
@@ -180,16 +181,16 @@ ReplayStripeAllocation::Replay(void)
         return result;
     }
 
-    wbStripeCtx->ReplayStripeAllocation(vsid, wbLsid);
+    contextReplayer->ReplayStripeAllocation(vsid, wbLsid);
     status->StripeAllocated();
     return result;
 }
 
-ReplaySegmentAllocation::ReplaySegmentAllocation(ISegmentCtx* isegCtx,
-    IArrayInfo* arrayInfo, StripeReplayStatus* status, StripeId stripeId)
+ReplaySegmentAllocation::ReplaySegmentAllocation(IContextReplayer* ctxReplayer,
+    IArrayInfo* iarrayInfo, StripeReplayStatus* status, StripeId stripeId)
 : ReplayEvent(status),
-  segmentCtx(isegCtx),
-  arrayInfo(arrayInfo),
+  contextReplayer(ctxReplayer),
+  arrayInfo(iarrayInfo),
   userLsid(stripeId)
 {
 }
@@ -205,16 +206,15 @@ ReplaySegmentAllocation::Replay(void)
     SegmentId segmentId = userLsid / numStripesPerSegment;
     StripeId firstStripe = segmentId * numStripesPerSegment;
 
-    segmentCtx->ReplaySegmentAllocation(firstStripe);
+    contextReplayer->ReplaySegmentAllocation(firstStripe);
     status->SegmentAllocated();
     return 0;
 }
 
-ReplayStripeFlush::ReplayStripeFlush(IWBStripeCtx* wbStripeCtx, ISegmentCtx* segCtx,
+ReplayStripeFlush::ReplayStripeFlush(IContextReplayer* ctxReplayer,
     StripeReplayStatus* status, StripeId vsid, StripeId wbLsid, StripeId userLsid)
 : ReplayEvent(status),
-  wbStripeCtx(wbStripeCtx),
-  segmentCtx(segCtx),
+  contextReplayer(ctxReplayer),
   vsid(vsid),
   wbLsid(wbLsid),
   userLsid(userLsid)
@@ -228,9 +228,7 @@ ReplayStripeFlush::~ReplayStripeFlush(void)
 int
 ReplayStripeFlush::Replay(void)
 {
-    wbStripeCtx->ReplayStripeFlushed(wbLsid);
-    segmentCtx->UpdateOccupiedStripeCount(userLsid);
-
+    contextReplayer->ReplayStripeFlushed(wbLsid);
     status->StripeFlushed();
 
     return 0;

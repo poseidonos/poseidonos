@@ -57,6 +57,8 @@ public:
 
     bool BlockAllocating(uint32_t volumeId) override;
     void UnblockAllocating(uint32_t volumeId) override;
+    void TurnOffBlkAllocation(void);
+    void TurnOnBlkAllocation(void);
 
 private:
     VirtualBlks _AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks);
@@ -72,11 +74,18 @@ private:
     bool _IsValidOffset(uint64_t stripeOffset) { return stripeOffset < addrInfo->GetblksPerStripe(); }
     bool _IsUserStripeAllocation(ASTailArrayIdx asTailArrayIdx) { return (asTailArrayIdx < MAX_VOLUME_COUNT); }
 
+    std::atomic<bool> blkAllocProhibited[MAX_VOLUME_COUNT];
+    std::atomic<bool> userBlkAllocProhibited;
+
     // DOCs
     AllocatorAddressInfo* addrInfo;
     ContextManager* contextManager;
     IWBStripeInternal* iWBStripeInternal;
     std::string arrayName;
+
+    SegmentCtx* segCtx;
+    AllocatorCtx* allocCtx;
+    WbStripeCtx* wbStripeCtx;
 };
 
 } // namespace pos

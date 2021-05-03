@@ -30,22 +30,38 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "src/include/address_type.h"
-
-#include <vector>
+#include "src/allocator/context_manager/gc_ctx.h"
 
 namespace pos
 {
-
-class IWBStripeCtx
+GcCtx::GcCtx()
 {
-public:
-    virtual void ReplayStripeAllocation(StripeId vsid, StripeId wbLsid) = 0;
-    virtual void ReplayStripeFlushed(StripeId wbLsid) = 0;
-    virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void) = 0;
-    virtual void ResetActiveStripeTail(int index) = 0;
-};
+    thresholdSegments = DEFAULT_GC_THRESHOLD;
+    urgentSegments = DEFAULT_URGENT_THRESHOLD;
+}
+
+int
+GcCtx::GetGcThreshold(void)
+{
+    return thresholdSegments;
+}
+
+int
+GcCtx::GetUrgentThreshold(void)
+{
+    return urgentSegments;
+}
+
+void
+GcCtx::SetGcThreshold(int inputThreshold)
+{
+    thresholdSegments = inputThreshold;
+}
+
+void
+GcCtx::SetUrgentThreshold(int inputThreshold)
+{
+    urgentSegments = inputThreshold;
+}
 
 } // namespace pos

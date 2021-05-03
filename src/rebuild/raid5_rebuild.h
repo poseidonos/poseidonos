@@ -34,7 +34,7 @@
 
 #include "rebuild_behavior.h"
 #include "src/include/address_type.h"
-#include "src/allocator/i_rebuild_ctx.h"
+#include "src/allocator/i_context_manager.h"
 
 namespace pos
 {
@@ -50,6 +50,6 @@ public:
 
 private:
     SegmentId _NextSegment(void);
-    IRebuildCtx* allocatorSvc = nullptr;
+    IContextManager* allocatorSvc = nullptr;
 };
 } // namespace pos

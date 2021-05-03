@@ -30,20 +30,26 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/io_ctx/allocator_context_io_ctx.h"
+#pragma once
+
+#include <mutex>
+#include <vector>
+
+#include "src/allocator/include/allocator_const.h"
 
 namespace pos
 {
-
-AllocatorContextIoCtx::AllocatorContextIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset, uint64_t len, char* buf, MetaIoCbPtr cb)
-: segmentCnt(-1)
+class IContextReplayer
 {
-    opcode = op;
-    fd = fdesc;
-    fileOffset = fOffset;
-    length = len;
-    buffer = buf;
-    callback = cb;
-}
+public:
+    virtual void ResetDirtyContextVersion(int owner) = 0;
+    virtual void ReplaySsdLsid(StripeId currentSsdLsid) = 0;
+    virtual void ReplaySegmentAllocation(StripeId userLsid) = 0;
+    virtual void ReplayStripeAllocation(StripeId vsid, StripeId wbLsid) = 0;
+    virtual void ReplayStripeFlushed(StripeId wbLsid) = 0;
+    virtual void ResetActiveStripeTail(int index) = 0;
+    virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void) = 0;
+    virtual void ResetSegmentsStates(void) = 0;
+};
 
 } // namespace pos

@@ -41,7 +41,7 @@ class UserReplayStripe : public ReplayStripe
 {
 public:
     UserReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
+        IContextReplayer* contextReplayer,
         IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
     virtual ~UserReplayStripe(void) = default;

@@ -37,8 +37,7 @@ JournalManagerSpy::InitializeForTest(Mapper* mapper, Allocator* allocator)
     _InitModules(mapper->GetIVSAMap(), mapper->GetIStripeMap(),
         mapper->GetIMapFlush(), allocator->GetIBlockAllocator(),
         allocator->GetIWBStripeAllocator(),
-        allocator->GetIWBStripeCtx(), allocator->GetISegmentCtx(),
-        allocator->GetIAllocatorCtx());
+        allocator->GetIContextManager(), allocator->GetIContextReplayer());
 
     int ret = JournalManager::_Init();
     if (ret < 0)

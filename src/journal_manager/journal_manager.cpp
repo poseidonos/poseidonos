@@ -53,6 +53,8 @@
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/allocator_service/allocator_service.h"
+#include "src/allocator/i_context_manager.h"
+#include "src/allocator/i_context_replayer.h"
 
 namespace pos
 {
@@ -158,24 +160,22 @@ JournalManager::Init(void)
         MapperServiceSingleton::Instance()->GetIMapFlush(arrayInfo->GetName()),
         AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayInfo->GetName()),
         AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayInfo->GetName()),
-        AllocatorServiceSingleton::Instance()->GetIWBStripeCtx(arrayInfo->GetName()),
-        AllocatorServiceSingleton::Instance()->GetISegmentCtx(arrayInfo->GetName()),
-        AllocatorServiceSingleton::Instance()->GetIAllocatorCtx(arrayInfo->GetName()));
+        AllocatorServiceSingleton::Instance()->GetIContextManager(arrayInfo->GetName()),
+        AllocatorServiceSingleton::Instance()->GetIContextReplayer(arrayInfo->GetName()));
 }
 
 int
 JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
     IWBStripeAllocator* wbStripeAllocator,
-    IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
-    IAllocatorCtx* allocatorCtx)
+    IContextManager* ctxManager, IContextReplayer* ctxReplayer)
 {
     int result = 0;
 
     if (config->IsEnabled() == true)
     {
         _InitModules(vsaMap, stripeMap, mapFlush, blockAllocator,
-            wbStripeAllocator, wbStripeCtx, segmentCtx, allocatorCtx);
+            wbStripeAllocator, ctxManager, ctxReplayer);
 
         result = _Init();
 
@@ -378,9 +378,7 @@ JournalManager::_Reset(void)
 void
 JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
-    IWBStripeAllocator* wbStripeAllocator,
-    IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
-    IAllocatorCtx* allocatorCtx)
+    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IContextReplayer* contextReplayer)
 {
     config->Init();
 
@@ -396,14 +394,14 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     logFilledNotifier->Register(logWriteHandler);
 
     logGroupReleaser->Init(logFilledNotifier, logBuffer, dirtyMapManager, sequenceController,
-        mapFlush, allocatorCtx);
+        mapFlush, contextManager);
 
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
     volumeEventHandler->Init(logFactory, dirtyMapManager, logWriteHandler, config,
-        allocatorCtx);
+        contextManager);
 
     replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, blockAllocator,
-        wbStripeAllocator, wbStripeCtx, segmentCtx, allocatorCtx, arrayInfo);
+        wbStripeAllocator, contextManager, contextReplayer, arrayInfo);
 
     statusProvider->Init(bufferAllocator, config, logGroupReleaser);
 }

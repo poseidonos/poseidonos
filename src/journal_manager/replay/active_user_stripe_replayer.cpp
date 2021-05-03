@@ -36,13 +36,14 @@
 #include <iomanip>
 
 #include "src/allocator/allocator.h"
+#include "src/allocator/i_context_replayer.h"
 #include "src/include/partition_type.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-ActiveUserStripeReplayer::ActiveUserStripeReplayer(ISegmentCtx* segCtx, IArrayInfo* array)
-: segmentCtx(segCtx),
+ActiveUserStripeReplayer::ActiveUserStripeReplayer(IContextReplayer* ctxReplayer, IArrayInfo* array)
+: contextReplayer(ctxReplayer),
   arrayInfo(array)
 {
     userLsids.clear();
@@ -78,7 +79,7 @@ ActiveUserStripeReplayer::Replay(void)
     _EraseFullSegmentLsid(stripesPerSegment);
 
     StripeId currentSsdLsid = _FindLastLsid(stripesPerSegment);
-    segmentCtx->ReplaySsdLsid(currentSsdLsid);
+    contextReplayer->ReplaySsdLsid(currentSsdLsid);
 
     int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_USER_STRIPE_TAIL);
     std::ostringstream os;

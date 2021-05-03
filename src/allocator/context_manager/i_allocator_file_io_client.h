@@ -32,15 +32,21 @@
 
 #pragma once
 
-#include <mutex>
+#include "src/allocator/include/allocator_const.h"
+#include "src/meta_file_intf/async_context.h"
 
 namespace pos
 {
-
-class IContextInternal
+class IAllocatorFileIoClient
 {
 public:
-    virtual std::mutex& GetCtxLock(void) = 0;
+    virtual void AfterLoad(char* buf) = 0;
+    virtual void BeforeFlush(int section, char* buf) = 0;
+    virtual void FinalizeIo(AsyncMetaFileIoCtx* ctx) = 0;
+    virtual char* GetSectionAddr(int section) = 0;
+    virtual int GetSectionSize(int section) = 0;
+    virtual uint64_t GetStoredVersion(void) = 0;
+    virtual void ResetDirtyVersion(void) = 0;
 };
 
 } // namespace pos

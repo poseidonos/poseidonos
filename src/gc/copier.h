@@ -39,7 +39,7 @@
 
 #include "victim_stripe.h"
 #include "src/allocator/i_block_allocator.h"
-#include "src/allocator/i_segment_ctx.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/gc/copier_meta.h"
 #include "src/gc/gc_status.h"
 #include "src/array_models/interface/i_array_info.h"
@@ -144,7 +144,7 @@ private:
 
     IArrayInfo* array;
     IBlockAllocator* iBlockAllocator;
-    ISegmentCtx* iSegmentCtx;
+    IContextManager* iContextManager;
     GcStatus* gcStatus;
     std::map<uint32_t, BlkInfo> validStripes;
     bool loadedValidBlock;

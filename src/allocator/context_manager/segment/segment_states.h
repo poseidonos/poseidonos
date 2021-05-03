@@ -52,16 +52,12 @@ public:
     SegmentStates(void);
 
     void SetSegmentId(SegmentId segId);
-    SegmentState Getstate(void);
-    void Setstate(SegmentState newState);
-
-    std::mutex& GetSegmentLock(void);
+    SegmentState GetState(void);
+    void SetState(SegmentState newState);
 
 private:
     SegmentId segmentId;
     SegmentState state;
-
-    std::mutex segLock;
 };
 
 } // namespace pos

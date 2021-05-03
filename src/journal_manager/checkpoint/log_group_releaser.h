@@ -48,7 +48,7 @@ class LogBufferWriteDoneNotifier;
 class CallbackSequenceController;
 
 class IMapFlush;
-class IAllocatorCtx;
+class IContextManager;
 
 class LogGroupReleaser : public CheckpointObserver, public ICheckpointStatus
 {
@@ -58,7 +58,7 @@ public:
 
     virtual void Init(LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer,
         DirtyMapManager* dirtyPage, CallbackSequenceController* sequencer,
-        IMapFlush* mapFlush, IAllocatorCtx* allocatorCtx);
+        IMapFlush* mapFlush, IContextManager* contextManager);
     void Reset(void);
 
     virtual void AddToFullLogGroup(int groupId);

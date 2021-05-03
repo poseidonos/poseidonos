@@ -40,11 +40,11 @@ class SegmentInfo
 {
 public:
     SegmentInfo(uint32_t maxSegment);
-    virtual ~SegmentInfo(void);
+    ~SegmentInfo(void);
 
     uint32_t GetNumSegment(void) { return numSegment;}
 
-    virtual uint32_t GetValidBlockCount(SegmentId segId);
+    uint32_t GetValidBlockCount(SegmentId segId);
     uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t inc);
     int32_t DecreaseValidBlockCount(SegmentId segId, uint32_t dec);
 
@@ -55,8 +55,8 @@ public:
     void CopySegmentInfoToBuffer(char* pBuffer);
     void CopySegmentInfoFromBuffer(char* pBuffer);
 
-    uint32_t* GetValidBlockCountPool(void) { return validBlockCount;}
-    uint32_t* GetOccupiedStripeCountPool(void) { return occupiedStripeCount;}
+    char* GetValidBlockCountPool(void) { return (char*)validBlockCount;}
+    char* GetOccupiedStripeCountPool(void) { return (char*)occupiedStripeCount;}
 
 private:
     uint32_t numSegment;

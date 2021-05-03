@@ -46,34 +46,21 @@ AllocatorService::GetIWBStripeAllocator(std::string arrayName)
     return nullptr;
 }
 
-IWBStripeCtx*
-AllocatorService::GetIWBStripeCtx(std::string arrayName)
-{
-    return nullptr;
-}
-
-ISegmentCtx*
-AllocatorService::GetISegmentCtx(std::string arrayName)
-{
-    return nullptr;
-}
-
-IRebuildCtx*
-AllocatorService::GetIRebuildCtx(std::string arrayName)
-{
-    return nullptr;
-}
-
-IAllocatorCtx*
-AllocatorService::GetIAllocatorCtx(std::string arrayName)
-{
-    return nullptr;
-}
-
 IAllocatorWbt*
 AllocatorService::GetIAllocatorWbt(std::string arrayName)
 {
     return nullptr;
 }
 
+IContextManager*
+AllocatorService::GetIContextManager(std::string arrayName)
+{
+    return nullptr;
+}
+
+IContextReplayer*
+AllocatorService::GetIContextReplayer(std::string arrayName)
+{
+    return nullptr;
+}
 } // namespace pos

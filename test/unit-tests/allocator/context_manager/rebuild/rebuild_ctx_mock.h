@@ -12,10 +12,6 @@ class MockRebuildCtx : public RebuildCtx
 {
 public:
     using RebuildCtx::RebuildCtx;
-    MOCK_METHOD(SegmentId, GetRebuildTargetSegment, (), (override));
-    MOCK_METHOD(int, ReleaseRebuildSegment, (SegmentId segmentId), (override));
-    MOCK_METHOD(bool, NeedRebuildAgain, (), (override));
-    MOCK_METHOD(void, FreeSegmentInRebuildTarget, (SegmentId segId), (override));
 };
 
 } // namespace pos

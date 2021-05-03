@@ -35,10 +35,11 @@
 #include <string>
 #include <vector>
 
-#include "src/allocator/i_allocator_wbt.h"
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/block_manager/block_manager.h"
 #include "src/allocator/context_manager/context_manager.h"
+#include "src/allocator/i_allocator_wbt.h"
+#include "src/allocator/i_context_replayer.h"
 #include "src/allocator/wb_stripe_manager/wbstripe_manager.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/include/meta_const.h"
@@ -73,20 +74,17 @@ public:
 
     void SetGcThreshold(uint32_t inputThreshold) override;
     void SetUrgentThreshold(uint32_t inputThreshold) override;
-    int GetMeta(AllocatorCtxType type, std::string fname) override;
-    int SetMeta(AllocatorCtxType type, std::string fname) override;
+    int GetMeta(WBTAllocatorMetaType type, std::string fname) override;
+    int SetMeta(WBTAllocatorMetaType type, std::string fname) override;
     int GetBitmapLayout(std::string fname) override;
     int GetInstantMetaInfo(std::string fname) override;
     void FlushAllUserdataWBT(void) override;
 
     virtual IBlockAllocator* GetIBlockAllocator(void);
     virtual IWBStripeAllocator* GetIWBStripeAllocator(void);
-    virtual IAllocatorCtx* GetIAllocatorCtx(void);
-    virtual IWBStripeCtx* GetIWBStripeCtx(void);
-    virtual ISegmentCtx* GetISegmentCtx(void);
-
-    IRebuildCtx* GetIRebuildCtx(void);
     IAllocatorWbt* GetIAllocatorWbt(void);
+    virtual IContextManager* GetIContextManager(void);
+    virtual IContextReplayer* GetIContextReplayer(void);
 
 private:
     void _CreateSubmodules(void);

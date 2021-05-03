@@ -17,7 +17,7 @@ class ReplayEventFactory
 {
 public:
     ReplayEventFactory(StripeReplayStatus* status, IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
+        IContextReplayer* contextReplayer,
         IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo);
 
     virtual ~ReplayEventFactory(void) = default;
@@ -33,8 +33,7 @@ private:
 
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
-    IWBStripeCtx* wbStripeCtx;
-    ISegmentCtx* segmentCtx;
+    IContextReplayer* contextReplayer;
     IBlockAllocator* blockAllocator;
     IArrayInfo* arrayInfo;
 };

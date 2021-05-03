@@ -3,14 +3,14 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "src/allocator/i_allocator_ctx.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_block_allocator.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/event_scheduler/io_completer.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-#include "test/unit-tests/allocator/i_allocator_ctx_mock.h"
+#include "test/unit-tests/allocator/i_context_manager_mock.h"
 #include "test/unit-tests/allocator/i_block_allocator_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/io/frontend_io/flush_command_manager_mock.h"
@@ -57,10 +57,10 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseBlockAllocation_BlockAllocatin
     NiceMock<MockFlushCmdManager> mockFlushCmdManager;
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockIAllocatorCtx> mockIAllocatorCtx;
+    NiceMock<MockIContextManager> mockIContextManager;
     NiceMock<MockIMapFlush> mockIMapFlush;
     FlushCmdHandler flushCmdHandler(flushIo, &mockFlushCmdManager, &mockIBlockAllocator,
-        &mockIWBStripeAllocator, &mockIAllocatorCtx, &mockIMapFlush);
+        &mockIWBStripeAllocator, &mockIContextManager, &mockIMapFlush);
 
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(false));
@@ -82,10 +82,10 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CasePendingWriteInProgress_WaitPen
     NiceMock<MockFlushCmdManager> mockFlushCmdManager;
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockIAllocatorCtx> mockIAllocatorCtx;
+    NiceMock<MockIContextManager> mockIContextManager;
     NiceMock<MockIMapFlush> mockIMapFlush;
     FlushCmdHandler flushCmdHandler(flushIo, &mockFlushCmdManager, &mockIBlockAllocator,
-        &mockIWBStripeAllocator, &mockIAllocatorCtx, &mockIMapFlush);
+        &mockIWBStripeAllocator, &mockIContextManager, &mockIMapFlush);
 
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
@@ -109,10 +109,10 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseStripeFlushInProgress_WaitStri
     NiceMock<MockFlushCmdManager> mockFlushCmdManager;
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockIAllocatorCtx> mockIAllocatorCtx;
+    NiceMock<MockIContextManager> mockIContextManager;
     NiceMock<MockIMapFlush> mockIMapFlush;
     FlushCmdHandler flushCmdHandler(flushIo, &mockFlushCmdManager, &mockIBlockAllocator,
-        &mockIWBStripeAllocator, &mockIAllocatorCtx, &mockIMapFlush);
+        &mockIWBStripeAllocator, &mockIContextManager, &mockIMapFlush);
 
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
@@ -137,10 +137,10 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseVSAMAP_FlushDirtyMpagesReturnZ
     NiceMock<MockFlushCmdManager> mockFlushCmdManager;
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockIAllocatorCtx> mockIAllocatorCtx;
+    NiceMock<MockIContextManager> mockIContextManager;
     NiceMock<MockIMapFlush> mockIMapFlush;
     FlushCmdHandler flushCmdHandler(flushIo, &mockFlushCmdManager, &mockIBlockAllocator,
-        &mockIWBStripeAllocator, &mockIAllocatorCtx, &mockIMapFlush);
+        &mockIWBStripeAllocator, &mockIContextManager, &mockIMapFlush);
 
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
@@ -168,10 +168,10 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseMetaFlushInProgress_IsStripeMa
     NiceMock<MockFlushCmdManager> mockFlushCmdManager;
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockIAllocatorCtx> mockIAllocatorCtx;
+    NiceMock<MockIContextManager> mockIContextManager;
     NiceMock<MockIMapFlush> mockIMapFlush;
     FlushCmdHandler flushCmdHandler(flushIo, &mockFlushCmdManager, &mockIBlockAllocator,
-        &mockIWBStripeAllocator, &mockIAllocatorCtx, &mockIMapFlush);
+        &mockIWBStripeAllocator, &mockIContextManager, &mockIMapFlush);
 
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
@@ -181,7 +181,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseMetaFlushInProgress_IsStripeMa
     ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _, _)).WillByDefault(Return(0));
     ON_CALL(mockIBlockAllocator, UnblockAllocating(_)).WillByDefault(Return());
     ON_CALL(mockFlushCmdManager, CanFlushMeta(_, _)).WillByDefault(Return(true));
-    ON_CALL(mockIAllocatorCtx, FlushAllocatorCtxs(_)).WillByDefault(Return(0));
+    ON_CALL(mockIContextManager, FlushContextsAsync(_)).WillByDefault(Return(0));
 
     bool actual, expected{false};
 

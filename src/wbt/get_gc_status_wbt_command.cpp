@@ -38,7 +38,7 @@
 #include <string>
 
 #include "src/allocator_service/allocator_service.h"
-#include "src/allocator/i_segment_ctx.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/gc/garbage_collector.h"
@@ -75,10 +75,10 @@ GetGcStatusWbtCommand::Execute(Args &argv, JsonElement &elem)
     }
 
     bool gcRunning = gc->GetGcRunning();
-    ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx(arrayName);
-    uint32_t freeSegments = iSegmentCtx->GetNumOfFreeUserDataSegment();
-    uint32_t numGcThreshold = iSegmentCtx->GetGcThreshold();
-    uint32_t numUrgentThreshold = iSegmentCtx->GetUrgentThreshold();
+    IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
+    uint32_t freeSegments = iContextManager->GetNumFreeSegment();
+    uint32_t numGcThreshold = iContextManager->GetGcThreshold(MODE_NORMAL_GC);
+    uint32_t numUrgentThreshold = iContextManager->GetGcThreshold(MODE_URGENT_GC);
 
     std::string gcActive;
     std::string gcMode;

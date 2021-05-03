@@ -32,32 +32,78 @@
 
 #pragma once
 
-#include "src/include/address_type.h"
-#include "src/volume/volume_list.h"
-
 #include <cstdint>
 #include <set>
 
+#include "src/include/address_type.h"
+#include "src/volume/volume_list.h"
+
 namespace pos
 {
-
 using ASTailArrayIdx = uint32_t;
 using RTSegmentIter = std::set<SegmentId>::iterator;
 
 const int ACTIVE_STRIPE_TAIL_ARRAYLEN = MAX_VOLUME_COUNT * 2;
 
-enum AllocatorCtxType
+enum FileOwner
 {
-    HEADER = 0,
-    WB_LSID_BITMAP,
-    SEGMENT_BITMAP,
-    ACTIVE_STRIPE_TAIL,
-    CURRENT_SSD_LSID,
-    SEGMENT_STATES,
+    SEGMENT_CTX,
+    ALLOCATOR_CTX,
+    NUM_FILES
+};
 
-    NUM_ALLOCATOR_META,
-    SEGMENT_VALID_COUNT,
-    SEGMENT_OCCUPIED_STRIPE,
+enum SegmentCtxSection
+{
+    SC_HEADER = 0,
+    SC_SEGMENT_VALID_COUNT,
+    SC_SEGMENT_OCCUPIED_STRIPE,
+    NUM_SEGMENT_CTX_SECTION
+};
+
+enum AllocatorCtxSection
+{
+    AC_HEADER = 0,
+    AC_ALLOCATE_SEGMENT_BITMAP,
+    AC_CURRENT_SSD_LSID,
+    AC_SEGMENT_STATES,
+    NUM_ALLOCATION_INFO,
+    AC_ALLOCATE_WBLSID_BITMAP = NUM_ALLOCATION_INFO,
+    AC_ACTIVE_STRIPE_TAIL,
+    NUM_ALLOCATOR_CTX_SECTION
+};
+
+enum WBTAllocatorMetaType
+{
+    WBT_SEGMENT_BITMAP,
+    WBT_CURRENT_SSD_LSID,
+    WBT_SEGMENT_STATES,
+    WBT_WBLSID_BITMAP,
+    WBT_ACTIVE_STRIPE_TAIL,
+
+    WBT_SEGMENT_VALID_COUNT,
+    WBT_SEGMENT_OCCUPIED_STRIPE,
+    WBT_NUM_ALLOCATOR_META
+};
+
+struct AllocatorCtxHeader
+{
+    uint32_t sig; // Sum of all allocator meta size (Byte)
+    uint64_t ctxVersion;
+    uint32_t numValidWbLsid;
+    uint32_t numValidSegment;
+};
+
+struct SegmentCtxHeader
+{
+    uint32_t sig;
+    uint64_t ctxVersion;
+};
+
+enum CurrentGcMode
+{
+    MODE_NO_GC = 0,
+    MODE_NORMAL_GC,
+    MODE_URGENT_GC,
 };
 
 } // namespace pos

@@ -42,10 +42,10 @@
 namespace pos
 {
 GcReplayStripe::GcReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
-    IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
+    IContextReplayer* contextReplayer,
     IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
     ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer)
-: ReplayStripe(vsid, vsaMap, stripeMap, wbStripeCtx, segmentCtx, blockAllocator,
+: ReplayStripe(vsid, vsaMap, stripeMap, contextReplayer, blockAllocator,
       arrayInfo, wbReplayer, userReplayer)
 {
 }

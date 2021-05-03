@@ -28,15 +28,27 @@ TEST(SegmentInfo, SetOccupiedStripeCount_)
 {
 }
 
+TEST(SegmentInfo, GetOccupiedStripeCount_)
+{
+}
+
 TEST(SegmentInfo, IncreaseOccupiedStripeCount_)
 {
 }
 
-TEST(SegmentInfo, GetSegmentInfoToBuffer_)
+TEST(SegmentInfo, CopySegmentInfoToBuffer_)
 {
 }
 
-TEST(SegmentInfo, SetSegmentInfoFromBuffer_)
+TEST(SegmentInfo, CopySegmentInfoFromBuffer_)
+{
+}
+
+TEST(SegmentInfo, GetValidBlockCountPool_)
+{
+}
+
+TEST(SegmentInfo, GetOccupiedStripeCountPool_)
 {
 }
 

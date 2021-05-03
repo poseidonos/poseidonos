@@ -51,7 +51,7 @@ int
 GetWbLsidBitmapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
     IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt("");
-    return iAllocatorWbt->GetMeta(WB_LSID_BITMAP, argv["output"].get<std::string>());
+    return iAllocatorWbt->GetMeta(WBT_WBLSID_BITMAP, argv["output"].get<std::string>());
 }
 
 } // namespace pos

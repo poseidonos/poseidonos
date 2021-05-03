@@ -42,13 +42,13 @@
 
 namespace pos
 {
-class ISegmentCtx;
+class IContextReplayer;
 class ReplayStripe;
 
 class ActiveUserStripeReplayer
 {
 public:
-    ActiveUserStripeReplayer(ISegmentCtx* isegCtx, IArrayInfo* array);
+    ActiveUserStripeReplayer(IContextReplayer* ictxReplayer, IArrayInfo* array);
     ~ActiveUserStripeReplayer(void);
 
     int Replay(void);
@@ -69,7 +69,7 @@ private:
     std::list<StripeId> userLsids;
     std::unordered_map<SegmentId, StripeId> lastLsid;
 
-    ISegmentCtx* segmentCtx;
+    IContextReplayer* contextReplayer;
     IArrayInfo* arrayInfo;
 };
 

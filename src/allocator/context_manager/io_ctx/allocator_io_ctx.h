@@ -36,12 +36,11 @@
 
 namespace pos
 {
-
-class AllocatorContextIoCtx : public AsyncMetaFileIoCtx
+class AllocatorIoCtx : public AsyncMetaFileIoCtx
 {
 public:
-    AllocatorContextIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset, uint64_t len, char* buf, MetaIoCbPtr cb);
-    virtual ~AllocatorContextIoCtx(void) = default;
+    AllocatorIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset, uint64_t len, char* buf, MetaIoCbPtr cb);
+    virtual ~AllocatorIoCtx(void) = default;
 
     int segmentCnt;
 };

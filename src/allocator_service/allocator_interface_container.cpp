@@ -32,32 +32,21 @@
 
 #include "src/allocator_service/allocator_interface_container.h"
 
-#include "src/allocator/i_allocator_ctx.h"
 #include "src/allocator/i_allocator_wbt.h"
 #include "src/allocator/i_block_allocator.h"
-#include "src/allocator/i_rebuild_ctx.h"
-#include "src/allocator/i_segment_ctx.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_wbstripe_allocator.h"
-#include "src/allocator/i_wbstripe_ctx.h"
+#include "src/allocator/i_context_manager.h"
+#include "src/allocator/i_context_replayer.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 namespace pos
 {
-class IBlockAllocator;
-class IWBStripeAllocator;
-class IWBStripeCtx;
-class ISegmentCtx;
-class IRebuildCtx;
-class IAllocatorCtx;
-class IAllocatorWbt;
-
 template class AllocatorInterfaceContainer<IBlockAllocator>;
 template class AllocatorInterfaceContainer<IWBStripeAllocator>;
-template class AllocatorInterfaceContainer<IWBStripeCtx>;
-template class AllocatorInterfaceContainer<ISegmentCtx>;
-template class AllocatorInterfaceContainer<IRebuildCtx>;
-template class AllocatorInterfaceContainer<IAllocatorCtx>;
 template class AllocatorInterfaceContainer<IAllocatorWbt>;
+template class AllocatorInterfaceContainer<IContextManager>;
+template class AllocatorInterfaceContainer<IContextReplayer>;
 template<typename T>
 T*
 AllocatorInterfaceContainer<T>::GetInterface(std::string name)

@@ -12,7 +12,6 @@ class MockSegmentInfo : public SegmentInfo
 {
 public:
     using SegmentInfo::SegmentInfo;
-    MOCK_METHOD(uint32_t, GetValidBlockCount, (SegmentId segId), (override));
 };
 
 } // namespace pos

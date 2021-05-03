@@ -38,12 +38,11 @@
 
 namespace pos
 {
+class IArrayInfo;
 class IVSAMap;
 class IStripeMap;
 class IBlockAllocator;
-class IWBStripeCtx;
-class ISegmentCtx;
-class IArrayInfo;
+class IContextReplayer;
 class StripeReplayStatus;
 
 enum class ReplayEventType
@@ -140,7 +139,7 @@ private:
 class ReplayStripeAllocation : public ReplayEvent
 {
 public:
-    ReplayStripeAllocation(IStripeMap* istripeMap, IWBStripeCtx* iwbStripeCtx,
+    ReplayStripeAllocation(IStripeMap* istripeMap, IContextReplayer* ctxReplayer,
         StripeReplayStatus* status, StripeId vsid, StripeId wbLsid);
     virtual ~ReplayStripeAllocation(void);
 
@@ -154,8 +153,7 @@ public:
 
 private:
     IStripeMap* stripeMap;
-    IWBStripeCtx* wbStripeCtx;
-
+    IContextReplayer* contextReplayer;
     StripeId vsid;
     StripeId wbLsid;
 };
@@ -163,7 +161,7 @@ private:
 class ReplaySegmentAllocation : public ReplayEvent
 {
 public:
-    ReplaySegmentAllocation(ISegmentCtx* isegCtx, IArrayInfo* arrayInfo,
+    ReplaySegmentAllocation(IContextReplayer* ctxReplayer, IArrayInfo* arrayInfo,
         StripeReplayStatus* status, StripeId stripeId);
     virtual ~ReplaySegmentAllocation(void);
 
@@ -176,16 +174,15 @@ public:
     }
 
 private:
-    ISegmentCtx* segmentCtx;
+    IContextReplayer* contextReplayer;
     IArrayInfo* arrayInfo;
-
     StripeId userLsid;
 };
 
 class ReplayStripeFlush : public ReplayEvent
 {
 public:
-    ReplayStripeFlush(IWBStripeCtx* iwbStripeCtx, ISegmentCtx* isegCtx,
+    ReplayStripeFlush(IContextReplayer* ctxReplayer,
         StripeReplayStatus* status, StripeId vsid, StripeId wbLsid, StripeId userLsid);
     virtual ~ReplayStripeFlush(void);
 
@@ -216,9 +213,7 @@ public:
     }
 
 private:
-    IWBStripeCtx* wbStripeCtx;
-    ISegmentCtx* segmentCtx;
-
+    IContextReplayer* contextReplayer;
     StripeId vsid;
     StripeId wbLsid;
     StripeId userLsid;

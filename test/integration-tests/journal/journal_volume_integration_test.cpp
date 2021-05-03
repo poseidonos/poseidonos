@@ -44,7 +44,7 @@ JournalVolumeIntegrationTest::WriteStripes(int numVolumes)
 void
 JournalVolumeIntegrationTest::DeleteVolumes(Volumes &volumesToDelete)
 {
-    EXPECT_CALL(*(testAllocator->GetAllocatorCtxMock()), FlushAllocatorCtxs).Times(volumesToDelete.size());
+    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContextsAsync).Times(volumesToDelete.size());
     for (auto volId : volumesToDelete)
     {
         EXPECT_TRUE(journal->VolumeDeleted(volId) == 0);
@@ -107,11 +107,11 @@ JournalVolumeIntegrationTest::ExpectReplayTail(int numVolumesWritten)
 {
     for (int volId = 0; volId < numVolumesWritten; volId++)
     {
-        EXPECT_CALL(*(testAllocator->GetWBStripeCtxMock()),
+        EXPECT_CALL(*(testAllocator->GetIContextReplayerMock()),
             ResetActiveStripeTail(volId))
             .Times(1);
     }
-    EXPECT_CALL(*(testAllocator->GetSegmentCtxMock()), ReplaySsdLsid).Times(1);
+    EXPECT_CALL(*(testAllocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);
 }
 
 TEST_F(JournalVolumeIntegrationTest, DisableJournalAndNotifyVolumeDeleted)

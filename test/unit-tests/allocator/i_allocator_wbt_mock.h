@@ -14,8 +14,8 @@ public:
     using IAllocatorWbt::IAllocatorWbt;
     MOCK_METHOD(void, SetGcThreshold, (uint32_t inputThreshold), (override));
     MOCK_METHOD(void, SetUrgentThreshold, (uint32_t inputThreshold), (override));
-    MOCK_METHOD(int, GetMeta, (AllocatorCtxType type, std::string fname), (override));
-    MOCK_METHOD(int, SetMeta, (AllocatorCtxType type, std::string fname), (override));
+    MOCK_METHOD(int, GetMeta, (WBTAllocatorMetaType type, std::string fname), (override));
+    MOCK_METHOD(int, SetMeta, (WBTAllocatorMetaType type, std::string fname), (override));
     MOCK_METHOD(int, GetBitmapLayout, (std::string fname), (override));
     MOCK_METHOD(int, GetInstantMetaInfo, (std::string fname), (override));
     MOCK_METHOD(void, FlushAllUserdataWBT, (), (override));

@@ -37,7 +37,7 @@ void
 ReplayTestFixture::ExpectReplaySegmentAllocation(StripeId userLsid)
 {
     StripeId firstStripe = userLsid / testInfo->numStripesPerSegment * testInfo->numStripesPerSegment;
-    EXPECT_CALL(*(allocator->GetSegmentCtxMock()),
+    EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
         ReplaySegmentAllocation(firstStripe))
         .Times(AnyNumber());
 }
@@ -48,7 +48,7 @@ ReplayTestFixture::ExpectReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
     EXPECT_CALL(*(mapper->GetStripeMapMock()),
         SetLSA(vsid, wbLsid, IN_WRITE_BUFFER_AREA))
         .Times(1);
-    EXPECT_CALL(*(allocator->GetWBStripeCtxMock()),
+    EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
         ReplayStripeAllocation(vsid, wbLsid))
         .Times(1);
 }
@@ -91,11 +91,11 @@ ReplayTestFixture::ExpectReplayStripeFlush(StripeTestFixture stripe)
     EXPECT_CALL(*(mapper->GetStripeMapMock()), SetLSA(stripe.GetVsid(),
         stripe.GetUserAddr().stripeId, stripe.GetUserAddr().stripeLoc)).Times(1);
 
-    EXPECT_CALL(*(allocator->GetWBStripeCtxMock()),
+    EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
         ReplayStripeFlushed(stripe.GetWbAddr().stripeId))
         .Times(1);
 
-    EXPECT_CALL(*(allocator->GetSegmentCtxMock()),
+    EXPECT_CALL(*(allocator->GetIContextManagerMock()),
         UpdateOccupiedStripeCount(stripe.GetUserAddr().stripeId))
         .Times(1);
 }
@@ -142,16 +142,16 @@ ReplayTestFixture::ExpectReplayUnflushedActiveStripe(VirtualBlkAddr tail, Stripe
     EXPECT_CALL(*(allocator->GetWBStripeAllocatorMock()),
         RestoreActiveStripeTail(testInfo->defaultTestVol, tail, stripe.GetWbAddr().stripeId))
         .Times(1);
-    EXPECT_CALL(*(allocator->GetSegmentCtxMock()), ReplaySsdLsid).Times(1);
+    EXPECT_CALL(*(allocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);
 }
 
 void
 ReplayTestFixture::ExpectReplayFlushedActiveStripe(void)
 {
-    EXPECT_CALL(*(allocator->GetWBStripeCtxMock()),
+    EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
         ResetActiveStripeTail(testInfo->defaultTestVol))
         .Times(1);
-    EXPECT_CALL(*(allocator->GetSegmentCtxMock()), ReplaySsdLsid).Times(1);
+    EXPECT_CALL(*(allocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);
 }
 
 VirtualBlkAddr

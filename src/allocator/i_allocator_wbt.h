@@ -32,20 +32,19 @@
 
 #pragma once
 
-#include "src/allocator/include/allocator_const.h"
-
 #include <string>
+
+#include "src/allocator/include/allocator_const.h"
 
 namespace pos
 {
-
 class IAllocatorWbt
 {
 public:
     virtual void SetGcThreshold(uint32_t inputThreshold) = 0;
     virtual void SetUrgentThreshold(uint32_t inputThreshold) = 0;
-    virtual int GetMeta(AllocatorCtxType type, std::string fname) = 0;
-    virtual int SetMeta(AllocatorCtxType type, std::string fname) = 0;
+    virtual int GetMeta(WBTAllocatorMetaType type, std::string fname) = 0;
+    virtual int SetMeta(WBTAllocatorMetaType type, std::string fname) = 0;
     virtual int GetBitmapLayout(std::string fname) = 0;
     virtual int GetInstantMetaInfo(std::string fname) = 0;
     virtual void FlushAllUserdataWBT(void) = 0;

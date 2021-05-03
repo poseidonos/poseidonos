@@ -35,7 +35,6 @@
 #include <list>
 #include <string>
 
-#include "src/allocator/i_allocator_ctx.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/include/pos_event_id.hpp"

@@ -37,7 +37,7 @@
 #include "Air.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/allocator/i_block_allocator.h"
-#include "src/allocator/i_segment_ctx.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/gc/copier_read_completion.h"
 #include "src/gc/reverse_map_load_completion.h"
 #include "src/gc/stripe_copy_submission.h"
@@ -51,17 +51,17 @@ namespace pos
 
 Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus,
                IArrayInfo* array, const PartitionLogicalSize* udSize, CopierMeta* meta_,
-               IBlockAllocator* iBlockAllocator_, ISegmentCtx* iSegmentCtx_,
+               IBlockAllocator* iBlockAllocator_, IContextManager* iContextManager_,
                CallbackSmartPtr stripeCopySubmissionPtr_, CallbackSmartPtr reverseMapLoadCompletionPtr_)
 : currentStripeOffset(0),
   victimId(victimId),
   targetId(targetId),
   victimStripeId(UNMAP_STRIPE),
   copybackState(COPIER_THRESHOLD_CHECK_STATE),
-  meta(meta_),
+  meta(nullptr),
   array(array),
-  iBlockAllocator(iBlockAllocator_),
-  iSegmentCtx(iSegmentCtx_),
+  iBlockAllocator(AllocatorServiceSingleton::Instance()->GetIBlockAllocator(array->GetName())),
+  iContextManager(AllocatorServiceSingleton::Instance()->GetIContextManager(array->GetName())),
   gcStatus(gcStatus),
   loadedValidBlock(false),
   stripeCopySubmissionPtr(stripeCopySubmissionPtr_),
@@ -83,9 +83,9 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus,
     {
         iBlockAllocator =  AllocatorServiceSingleton::Instance()->GetIBlockAllocator(array->GetName());
     }
-    if (nullptr == iSegmentCtx)
+    if (nullptr == iContextManager)
     {
-        iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx(array->GetName());
+        iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(array->GetName());
     }
     SetEventType(BackendEvent_GC);
 }
@@ -174,11 +174,10 @@ Copier::_InitVariables(void)
 void
 Copier::_CompareThresholdState(void)
 {
-    uint32_t freeSegments = iSegmentCtx->GetNumOfFreeUserDataSegment();
-
-    if ((false == thresholdCheck) || (iSegmentCtx->GetGcThreshold() >= freeSegments))
+    CurrentGcMode gcMode = iContextManager->GetCurrentGcMode();
+    if ((false == thresholdCheck) || (gcMode != MODE_NO_GC))
     {
-        victimId = iSegmentCtx->GetGCVictimSegment();
+        victimId = iContextManager->AllocateGCVictimSegment();
         if (UNMAP_SEGMENT != victimId)
         {
             _InitVariables();
@@ -186,9 +185,9 @@ Copier::_CompareThresholdState(void)
 
             POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_GET_VICTIM_SEGMENT,
                 "trigger start, cnt:{}, victimId:{}",
-                freeSegments, victimId);
+                 iContextManager->GetNumFreeSegment(), victimId);
 
-            if (iSegmentCtx->GetUrgentThreshold() < freeSegments)
+            if (gcMode == MODE_NORMAL_GC)
             {
                 iBlockAllocator->PermitUserBlkAlloc();
             }

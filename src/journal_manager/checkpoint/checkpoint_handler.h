@@ -35,7 +35,7 @@
 #include <atomic>
 #include <mutex>
 
-#include "src/allocator/i_allocator_ctx.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/journal_manager/checkpoint/checkpoint_status.h"
 #include "src/mapper/i_map_flush.h"
 #include "src/mapper/include/mpage_info.h"
@@ -52,7 +52,7 @@ public:
     CheckpointHandler(CheckpointObserver* observer, int numMapsToFlush, int numMapsFlushed);
     virtual ~CheckpointHandler(void) = default;
 
-    void Init(IMapFlush* mapFlush, IAllocatorCtx* allocatorCtx);
+    void Init(IMapFlush* mapFlush, IContextManager* contextManer);
 
     int Start(MapPageList pendingDirtyPages);
     int FlushCompleted(int metaId);
@@ -71,7 +71,7 @@ private:
     static const int ALLOCATOR_META_ID = 1000;
 
     IMapFlush* mapFlush;
-    IAllocatorCtx* allocatorCtx;
+    IContextManager* contextManager;
 
     CheckpointObserver* obs;
 

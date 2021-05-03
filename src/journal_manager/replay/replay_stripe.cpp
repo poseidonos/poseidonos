@@ -39,7 +39,7 @@
 namespace pos
 {
 ReplayStripe::ReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
-    IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
+    IContextReplayer* ctxReplayer,
     IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
     ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer)
 : wbStripeReplayer(wbReplayer),
@@ -49,7 +49,7 @@ ReplayStripe::ReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap
 {
     status = new StripeReplayStatus(vsid);
     replayEventFactory = new ReplayEventFactory(status,
-        vsaMap, stripeMap, wbStripeCtx, segmentCtx, blockAllocator, arrayInfo);
+        vsaMap, stripeMap, ctxReplayer, blockAllocator, arrayInfo);
 }
 
 ReplayStripe::~ReplayStripe(void)

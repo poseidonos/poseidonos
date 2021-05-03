@@ -34,6 +34,7 @@
 
 #include "src/allocator_service/allocator_service.h"
 #include "src/allocator/i_allocator_wbt.h"
+#include "src/allocator/include/allocator_const.h"
 #include "src/gc/garbage_collector.h"
 
 namespace pos
@@ -67,9 +68,9 @@ GetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
         return -1;
     }
 
-    ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx(arrayName);
-    uint32_t numGcThreshold = iSegmentCtx->GetGcThreshold();
-    uint32_t numUrgentThreshold = iSegmentCtx->GetUrgentThreshold();
+    IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
+    uint32_t numGcThreshold = iContextManager->GetGcThreshold(MODE_NORMAL_GC);
+    uint32_t numUrgentThreshold = iContextManager->GetGcThreshold(MODE_URGENT_GC);
 
     JsonElement thresholdElem("gc_threshold");
     thresholdElem.SetAttribute(JsonAttribute("normal", numGcThreshold));

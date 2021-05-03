@@ -1,11 +1,6 @@
 #include "src/allocator/context_manager/segment/segment_ctx.h"
-#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
-#include "test/unit-tests/allocator/context_manager/segment/segment_info_mock.h"
-#include "test/unit-tests/allocator/context_manager/segment/segment_states_mock.h"
 
 #include <gtest/gtest.h>
-
-using namespace ::testing;
 
 namespace pos
 {
@@ -21,123 +16,72 @@ TEST(SegmentCtx, Close_)
 {
 }
 
-TEST(SegmentCtx, GetGcThreshold_)
+TEST(SegmentCtx, AfterLoad_)
 {
 }
 
-TEST(SegmentCtx, GetUrgentThreshold_)
+TEST(SegmentCtx, BeforeFlush_)
 {
 }
 
-TEST(SegmentCtx, GetGCVictimSegment_)
+TEST(SegmentCtx, FinalizeIo_)
 {
 }
 
-TEST(SegmentCtx, GetNumOfFreeUserDataSegment_)
+TEST(SegmentCtx, GetSectionAddr_)
 {
 }
 
-TEST(SegmentCtx, FreeUserDataSegment_)
+TEST(SegmentCtx, GetSectionSize_)
 {
 }
 
-TEST(SegmentCtx, ReplaySsdLsid_)
+TEST(SegmentCtx, GetStoredVersion_)
 {
 }
 
-TEST(SegmentCtx, ReplaySegmentAllocation_)
+TEST(SegmentCtx, ResetDirtyVersion_)
 {
 }
 
-TEST(SegmentCtx, UpdateOccupiedStripeCount_)
+TEST(SegmentCtx, IncreaseValidBlockCount_)
 {
 }
 
-TEST(SegmentCtx, SetGcThreshold_)
+TEST(SegmentCtx, DecreaseValidBlockCount_)
 {
 }
 
-TEST(SegmentCtx, SetUrgentThreshold_)
+TEST(SegmentCtx, GetValidBlockCount_)
 {
 }
 
-TEST(SegmentCtx, GetPrevSsdLsid_)
+TEST(SegmentCtx, SetOccupiedStripeCount_)
 {
 }
 
-TEST(SegmentCtx, SetPrevSsdLsid_)
+TEST(SegmentCtx, GetOccupiedStripeCount_)
 {
 }
 
-TEST(SegmentCtx, GetCurrentSsdLsid_)
+TEST(SegmentCtx, IncreaseOccupiedStripeCount_)
 {
 }
 
-TEST(SegmentCtx, SetCurrentSsdLsid_)
+TEST(SegmentCtx, IsSegmentCtxIo_)
 {
 }
 
-TEST(SegmentCtx, GetSegmentState_)
+TEST(SegmentCtx, GetSegmentInfo_)
 {
 }
 
-TEST(SegmentCtx, UsedSegmentStateChange_)
+TEST(SegmentCtx, GetSegmentCtxLock_)
 {
 }
 
-TEST(SegmentCtx, GetSegmentBitmap_)
+TEST(SegmentCtx, GetSegInfoLock_)
 {
-}
-
-TEST(SegmentCtx, IncreaseInvalidBlockCount_)
-{
-}
-
-TEST(SegmentCtx, GetInvalidBlockCount_)
-{
-}
-
-TEST(SegmentCtx, GetNumSegment_)
-{
-}
-
-TEST(SegmentCtx, StoreSegmentInfoSync_)
-{
-}
-
-TEST(SegmentCtx, StoreSegmentInfoAsync_)
-{
-}
-
-TEST(SegmentCtx, ReleaseRequestIo_)
-{
-}
-
-TEST(SegmentCtx, IsSegmentInfoRequestIo_)
-{
-}
-
-TEST(SegmentCtx, FreeAllInvalidatedSegment_SSDStateAndAllInvalidated)
-{
-    // Given
-    const int NUM_SEGMENT = 1;
-
-    MockAllocatorAddressInfo mockAllocatorAddressInfo;
-    EXPECT_CALL(mockAllocatorAddressInfo, GetnumUserAreaSegments).WillRepeatedly(Return(NUM_SEGMENT));
-
-    MockSegmentStates mockSegmentStates;
-    mockSegmentStates.Setstate(SegmentState::SSD);
-
-    MockSegmentInfo mockSegmentInfo(1);
-    EXPECT_CALL(mockSegmentInfo, GetValidBlockCount).WillOnce(Return(0));
-
-    SegmentCtx segmentCtxSUT(nullptr, 0, 0, &mockSegmentStates, &mockSegmentInfo, 0, 0, 0, 0, 0, "arr0", &mockAllocatorAddressInfo, nullptr, nullptr);
-
-    // When
-    segmentCtxSUT.FreeAllInvalidatedSegment();
-
-    // Then
-    EXPECT_EQ(mockSegmentStates.Getstate(), SegmentState::FREE);
 }
 
 } // namespace pos

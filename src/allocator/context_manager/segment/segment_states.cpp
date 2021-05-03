@@ -47,21 +47,15 @@ SegmentStates::SetSegmentId(SegmentId segId)
 }
 
 SegmentState
-SegmentStates::Getstate(void)
+SegmentStates::GetState(void)
 {
     return state;
 }
 
 void
-SegmentStates::Setstate(SegmentState newState)
+SegmentStates::SetState(SegmentState newState)
 {
     state = newState;
-}
-
-std::mutex&
-SegmentStates::GetSegmentLock(void)
-{
-    return segLock;
 }
 
 } // namespace pos

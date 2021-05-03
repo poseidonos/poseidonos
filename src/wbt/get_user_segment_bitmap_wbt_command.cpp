@@ -52,7 +52,7 @@ int
 GetUserSegmentBitmapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
     IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt("");
-    return iAllocatorWbt->GetMeta(SEGMENT_BITMAP, argv["output"].get<std::string>());
+    return iAllocatorWbt->GetMeta(WBT_SEGMENT_BITMAP, argv["output"].get<std::string>());
 }
 
 } // namespace pos

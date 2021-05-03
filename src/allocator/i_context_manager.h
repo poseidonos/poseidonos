@@ -32,18 +32,30 @@
 
 #pragma once
 
-#include "src/include/smart_ptr_type.h"
+#include <mutex>
+#include <vector>
+
+#include "src/allocator/include/allocator_const.h"
 
 namespace pos
 {
-
-class IAllocatorCtx
+class IContextManager
 {
 public:
-    virtual int FlushAllocatorCtxs(EventSmartPtr callback) = 0;
-    virtual int StoreAllocatorCtxs(void) = 0;
-    virtual uint64_t GetAllocatorCtxsStoredVersion(void) = 0;
-    virtual void ResetAllocatorCtxsDirtyVersion(void) = 0;
+    virtual int FlushContextsSync(void) = 0;
+    virtual int FlushContextsAsync(EventSmartPtr callback) = 0;
+    virtual void UpdateOccupiedStripeCount(StripeId lsid) = 0;
+    virtual uint64_t GetStoredContextVersion(int owner) = 0;
+
+    virtual SegmentId AllocateFreeSegment(bool forUser) = 0;
+    virtual SegmentId AllocateGCVictimSegment(void) = 0;
+    virtual SegmentId AllocateRebuildTargetSegment(void) = 0;
+    virtual int ReleaseRebuildSegment(SegmentId segmentId) = 0;
+    virtual bool NeedRebuildAgain(void) = 0;
+    virtual int GetNumFreeSegment(void) = 0;
+
+    virtual CurrentGcMode GetCurrentGcMode(void) = 0;
+    virtual int GetGcThreshold(CurrentGcMode mode) = 0;
 };
 
 } // namespace pos

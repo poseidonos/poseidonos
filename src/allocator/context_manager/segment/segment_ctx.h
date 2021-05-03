@@ -34,104 +34,63 @@
 
 #include <string>
 
-#include "src/allocator/i_rebuild_ctx_internal.h"
-#include "src/allocator/i_segment_ctx.h"
 #include "src/allocator/address/allocator_address_info.h"
+#include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/context_manager/segment/segment_info.h"
-#include "src/allocator/context_manager/segment/segment_states.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/include/address_type.h"
 #include "src/lib/bitmap.h"
-#include "src/meta_file_intf/async_context.h"
 
 namespace pos
 {
-class MetaFileIntf;
-class AllocatorContextIoCtx;
-
-class SegmentCtx : public ISegmentCtx
+class SegmentLock;
+class SegmentCtx : public IAllocatorFileIoClient
 {
-    struct SegInfoHeader
-    {
-        uint32_t segInfoSig;
-        uint32_t segInfoVersion;
-    };
-
 public:
-    // Ctor for DoCs Injection for UT
-    SegmentCtx(BitMapMutex* segmentBitmap_, StripeId prevSsdLsid_, StripeId currentSsdLsid_,
-               SegmentStates* segmentStates_, SegmentInfo* segmentInfo_, uint32_t versionSegInfo_,
-               uint32_t headerSize_, uint32_t writeBufferSize_, uint32_t thresholdSegments_,
-               uint32_t urgentSegments_, std::string arrayName_, AllocatorAddressInfo* addrInfo_,
-               MetaFileIntf* segInfoFile_, IRebuildCtxInternal* iRebuildCtxInternal_);
-    // Ctor for Production code
-    SegmentCtx(AllocatorAddressInfo* info, std::string arrayName_);
+    SegmentCtx(SegmentInfo* segmentInfo_, std::string arrayName_, AllocatorAddressInfo* addrInfo_);
+    SegmentCtx(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~SegmentCtx(void);
     void Init(void);
     void Close(void);
 
-    uint32_t GetGcThreshold(void) override { return thresholdSegments;}
-    uint32_t GetUrgentThreshold(void) override { return urgentSegments;}
-    SegmentId GetGCVictimSegment(void) override;
-    uint64_t GetNumOfFreeUserDataSegment(void) override;
-    void ReplaySsdLsid(StripeId currentSsdLsid) override;
-    void ReplaySegmentAllocation(StripeId userLsid) override;
-    void UpdateOccupiedStripeCount(StripeId lsid) override;
-    void FreeAllInvalidatedSegment(void) override;
+    virtual void AfterLoad(char* buf);
+    virtual void BeforeFlush(int section, char* buf);
+    virtual void FinalizeIo(AsyncMetaFileIoCtx* ctx);
+    virtual char* GetSectionAddr(int section);
+    virtual int GetSectionSize(int section);
+    virtual uint64_t GetStoredVersion(void);
+    virtual void ResetDirtyVersion(void);
 
-    void SetGcThreshold(uint32_t inputThreshold) { thresholdSegments = inputThreshold;}
-    void SetUrgentThreshold(uint32_t inputThreshold) { urgentSegments = inputThreshold;}
-    StripeId GetPrevSsdLsid(void);
-    void SetPrevSsdLsid(StripeId stripeId);
-    StripeId GetCurrentSsdLsid(void);
-    void SetCurrentSsdLsid(StripeId stripeId);
-    SegmentStates& GetSegmentState(SegmentId segmentId);
-    void UsedSegmentStateChange(SegmentId segmentId, SegmentState state);
-    BitMapMutex* GetSegmentBitmap(void) { return segmentBitmap;}
-    void FreeUserDataSegment(SegmentId segId);
+    uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool needlock);
+    int32_t DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool needlock);
+    uint32_t GetValidBlockCount(SegmentId segId, bool needlock);
+    void SetOccupiedStripeCount(SegmentId segId, int count, bool needlock);
+    int GetOccupiedStripeCount(SegmentId segId, bool needlock);
+    int IncreaseOccupiedStripeCount(SegmentId segId, bool needlock);
 
-    uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    int32_t DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    uint32_t GetValidBlockCount(SegmentId segId);
-
-    uint32_t GetNumSegment(void);
-    int StoreSegmentInfoSync(void);
-    AllocatorContextIoCtx* StoreSegmentInfoAsync(MetaIoCbPtr cb);
-    void ReleaseRequestIo(AsyncMetaFileIoCtx* ctx);
-    bool IsSegmentInfoRequestIo(char* pBuf);
-    bool CheckSegmentState(SegmentId segmentId, SegmentState state);
-
+    bool IsSegmentCtxIo(char* pBuf);
     SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
-    void ResetExVictimSegment(void);
-    char* GetCtxSectionInfo(AllocatorCtxType type, int& sectionSize);
-    void SetIRebuildCtxInternal(IRebuildCtxInternal* irebuildCtxInternal);
+    std::mutex& GetSegmentCtxLock() { return segCtxLock;}
+    std::mutex& GetSegInfoLock(SegmentId segId);
 
 private:
-    int _LoadSegmentInfoSync(void);
-    void _HeaderUpdate(char* pBuf);
-    void _HeaderLoaded(char* pBuf);
-    void _FreeSegment(SegmentId segId);
+    static const uint32_t SIG_SEGMENT_CTX = 0xECECECEC;
 
-    static const int SIG_SEGMENT_INFO = 0x46495347; // "SGIF"
-    // Segment
-    BitMapMutex* segmentBitmap; // Unset:Free, Set:Not-Free
-    StripeId prevSsdLsid;       // allocatorMetaLock
-    StripeId currentSsdLsid;    // allocatorMetaLock
-    SegmentStates* segmentStates;
+    // context file info
+    SegmentCtxHeader ctxHeader;
+    std::atomic<uint64_t> ctxDirtyVersion;
+    std::atomic<uint64_t> ctxStoredVersion;
+
+    // segment info
     SegmentInfo* segmentInfos;
-    // Context file info
-    uint32_t versionSegInfo;
-    uint32_t headerSize;
-    uint32_t writeBufferSize;
-    // GC thresholds
-    uint32_t thresholdSegments;
-    uint32_t urgentSegments;
-    // Multi-Array
-    std::string arrayName;
+
     // DOCs
     AllocatorAddressInfo* addrInfo;
-    MetaFileIntf* segInfoFile;
-    IRebuildCtxInternal* iRebuildCtxInternal;
+    std::string arrayName;
+
+    // Lock
+    std::mutex segCtxLock;
+    SegmentLock* segInfoLocks;
 };
 
 } // namespace pos

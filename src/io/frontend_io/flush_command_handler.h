@@ -46,7 +46,7 @@ public:
     explicit FlushCmdHandler(FlushIoSmartPtr flushIo);
     FlushCmdHandler(FlushIoSmartPtr flushIo, FlushCmdManager* flushCmdManager,
         IBlockAllocator* iBlockAllocator, IWBStripeAllocator* iWBStripeAllocator,
-        IAllocatorCtx* iAllocatorCtx, IMapFlush* iMapFlush);
+        IContextManager* icontextManager, IMapFlush* iMapFlush);
     virtual ~FlushCmdHandler(void);
     virtual bool Execute(void);
 
@@ -54,7 +54,7 @@ private:
     FlushCmdManager* flushCmdManager;
     IWBStripeAllocator* iWBStripeAllocator;
     IBlockAllocator* iBlockAllocator;
-    IAllocatorCtx* iAllocatorCtx;
+    IContextManager* icontextManager;
     IMapFlush* iMapFlush;
     FlushIoSmartPtr flushIo;
     int volumeId;

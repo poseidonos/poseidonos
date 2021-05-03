@@ -54,7 +54,7 @@ Raid5Rebuild::Raid5Rebuild(unique_ptr<RebuildContext> c)
 : RebuildBehavior(move(c))
 {
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid5Rebuild");
-    allocatorSvc = AllocatorServiceSingleton::Instance()->GetIRebuildCtx(ctx->array);
+    allocatorSvc = AllocatorServiceSingleton::Instance()->GetIContextManager(ctx->array);
     assert(allocatorSvc != nullptr);
     uint32_t bufferCnt = ctx->size->stripesPerSegment;
     uint32_t bufferSize = ctx->size->blksPerChunk;
@@ -70,7 +70,7 @@ Raid5Rebuild::~Raid5Rebuild(void)
 SegmentId
 Raid5Rebuild::_NextSegment(void)
 {
-    SegmentId segId = allocatorSvc->GetRebuildTargetSegment();
+    SegmentId segId = allocatorSvc->AllocateRebuildTargetSegment();
 
     if (segId == UINT32_MAX)
     {

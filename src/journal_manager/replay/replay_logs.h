@@ -43,16 +43,13 @@
 #include "src/mapper/i_vsamap.h"
 #include "src/mapper/i_stripemap.h"
 #include "src/allocator/i_wbstripe_allocator.h"
-#include "src/allocator/i_wbstripe_ctx.h"
-#include "src/allocator/i_segment_ctx.h"
 #include "src/array_models/interface/i_array_info.h"
 
 namespace pos
 {
 class IVSAMap;
 class IStripeMap;
-class IWBStripeCtx;
-class ISegmentCtx;
+class IContextReplayer;
 class IBlockAllocator;
 class IArrayInfo;
 
@@ -65,7 +62,7 @@ class ReplayLogs : public ReplayTask
 public:
     ReplayLogs(ReplayLogList& logList, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-        IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx, IArrayInfo* arrayInfo,
+        IContextReplayer* contextReplayer, IArrayInfo* arrayInfo,
         ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes);
     virtual ~ReplayLogs(void);
 
@@ -89,8 +86,7 @@ private:
     IStripeMap* stripeMap;
     IBlockAllocator* blockAllocator;
     IWBStripeAllocator* wbStripeAllocator;
-    IWBStripeCtx* wbStripeCtx;
-    ISegmentCtx* segmentCtx;
+    IContextReplayer* contextReplayer;
     IArrayInfo* arrayInfo;
 
     std::vector<ReplayStripe*> replayingStripeList;

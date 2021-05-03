@@ -2,12 +2,10 @@
 
 #include "gmock/gmock.h"
 #include "src/allocator/allocator.h"
-
-#include "allocator_ctx_mock.h"
+#include "i_context_manager_mock.h"
+#include "i_context_replayer_mock.h"
 #include "wbstripe_allocator_mock.h"
-#include "segment_ctx_mock.h"
 #include "block_allocator_mock.h"
-#include "wbstripe_ctx_mock.h"
 
 namespace pos
 {
@@ -17,27 +15,24 @@ public:
     explicit AllocatorMock(IArrayInfo* info);
     virtual ~AllocatorMock(void);
 
-    virtual IAllocatorCtx* GetIAllocatorCtx(void) override;
-    AllocatorCtxMock* GetAllocatorCtxMock(void);
-
     virtual IWBStripeAllocator* GetIWBStripeAllocator(void) override;
     WBStripeAllocatorMock* GetWBStripeAllocatorMock(void);
-
-    virtual ISegmentCtx* GetISegmentCtx(void) override;
-    SegmentCtxMock* GetSegmentCtxMock(void);
 
     virtual IBlockAllocator* GetIBlockAllocator(void) override;
     BlockAllocatorMock* GetBlockAllocatorMock(void);
 
-    virtual IWBStripeCtx* GetIWBStripeCtx(void) override;
-    WBStripeCtxMock* GetWBStripeCtxMock(void);
+    virtual IContextManager* GetIContextManager(void) override;
+    IContextManagerMock* GetIContextManagerMock(void);
+
+    virtual IContextReplayer* GetIContextReplayer(void) override;
+    IContextReplayerMock* GetIContextReplayerMock(void);
+
 
 private:
-    AllocatorCtxMock* allocatorCtxMock;
     WBStripeAllocatorMock* wbStripeAllocatorMock;
-    SegmentCtxMock* segmentCtxMock;
     BlockAllocatorMock* blockAllocatorMock;
-    WBStripeCtxMock* wbStripeCtxMock;
+    IContextManagerMock* contextManagerMock;
+    IContextReplayerMock* contextReplayerMock;
 };
 
 } // namespace pos

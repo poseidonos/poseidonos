@@ -567,6 +567,12 @@ BitMapMutex::GetNumBitsSet(void)
 }
 
 uint64_t
+BitMapMutex::GetNumBitsSetWoLock(void)
+{
+    return bitMap->GetNumBitsSet();
+}
+
+uint64_t
 BitMapMutex::GetNumBitsSet(uint64_t begin, uint64_t end)
 {
     assert(end <= bitMap->GetNumBits());

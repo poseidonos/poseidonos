@@ -32,7 +32,7 @@
 
 #include "stripe_map_update_completion.h"
 
-#include "src/allocator/i_segment_ctx.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/event_scheduler/event_scheduler.h"
@@ -48,7 +48,7 @@ namespace pos
 {
 StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe, std::string& arrayName)
 : StripeMapUpdateCompletion(inputStripe,
-    AllocatorServiceSingleton::Instance()->GetISegmentCtx(arrayName),
+    AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName),
     MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
     EventSchedulerSingleton::Instance(),
     arrayName)
@@ -56,13 +56,13 @@ StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe, std::s
 }
 
 StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe,
-    ISegmentCtx* iSegmentCtx,
+    IContextManager* ctxManager,
     IStripeMap* iStripeMap,
     EventScheduler* eventScheduler,
     std::string& arrayName)
 : Event(false, BackendEvent_Flush),
   stripe(inputStripe),
-  iSegmentCtx(iSegmentCtx),
+  iContextManager(ctxManager),
   iStripeMap(iStripeMap),
   eventScheduler(eventScheduler),
   arrayName(arrayName)
@@ -80,7 +80,7 @@ StripeMapUpdateCompletion::Execute(void)
     bool wrapupSuccessful = true;
     StripeId currentLsid = stripe->GetUserLsid();
     iStripeMap->SetLSA(stripe->GetVsid(), stripe->GetUserLsid(), IN_USER_AREA);
-    iSegmentCtx->UpdateOccupiedStripeCount(currentLsid);
+    iContextManager->UpdateOccupiedStripeCount(currentLsid);
 
     FlushCompletion event(stripe, iStripeMap, eventScheduler, arrayName);
     bool done = event.Execute();

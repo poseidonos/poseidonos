@@ -39,13 +39,13 @@
 
 namespace pos
 {
-ActiveWBStripeReplayer::ActiveWBStripeReplayer(IWBStripeCtx* wbStripeCtx,
+ActiveWBStripeReplayer::ActiveWBStripeReplayer(IContextReplayer* ctxReplayer,
     IWBStripeAllocator* wbstripeAllocator, PendingStripeList& pendingStripeList)
 : pendingStripes(pendingStripeList),
-  wbStripeCtx(wbStripeCtx),
+  contextReplayer(ctxReplayer),
   wbStripeAllocator(wbstripeAllocator)
 {
-    readTails = wbStripeCtx->GetAllActiveStripeTail();
+    readTails = contextReplayer->GetAllActiveStripeTail();
     foundActiveStripes.resize(readTails.size());
 }
 
@@ -166,7 +166,7 @@ ActiveWBStripeReplayer::Replay(void)
         }
         else
         {
-            wbStripeCtx->ResetActiveStripeTail(index);
+            contextReplayer->ResetActiveStripeTail(index);
 
             std::ostringstream os;
             os << "[Replay] Active stripe tail index " << index << " is reset";

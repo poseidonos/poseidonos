@@ -30,19 +30,20 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/active_stripe_index_info.h"
 #include "src/allocator/wb_stripe_manager/wbstripe_manager.h"
-#include "src/io/backend_io/flush_read_submission.h"
-#include "src/mapper_service/mapper_service.h"
-#include "src/spdk_wrapper/free_buffer_pool.h"
-#include "src/include/branch_prediction.h"
-#include "src/qos/qos_manager.h"
 
 #include <vector>
 
+#include "src/allocator/context_manager/active_stripe_index_info.h"
+#include "src/allocator/context_manager/wb_stripe_ctx.h"
+#include "src/include/branch_prediction.h"
+#include "src/io/backend_io/flush_read_submission.h"
+#include "src/mapper_service/mapper_service.h"
+#include "src/qos/qos_manager.h"
+#include "src/spdk_wrapper/free_buffer_pool.h"
+
 namespace pos
 {
-
 WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName)
 : stripeBufferPool(nullptr),
   pendingFullStripes(nullptr),
@@ -52,6 +53,7 @@ WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctx
   blockManager(blkMgr),
   arrayName(arrayName)
 {
+    wbStripeCtx = ctxMgr->GetWbStripeCtx();
 }
 
 WBStripeManager::~WBStripeManager(void)
@@ -105,8 +107,9 @@ WBStripeManager::AllocateUserDataStripeId(StripeId vsid)
 void
 WBStripeManager::FreeWBStripeId(StripeId lsid)
 {
+    std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
     assert(!IsUnMapStripe(lsid));
-    contextManager->GetWbLsidBitmap()->ClearBit(lsid);
+    wbStripeCtx->ReleaseWbStripe(lsid);
     QosManagerSingleton::Instance()->DecreaseUsedStripeCnt();
 }
 
@@ -130,7 +133,7 @@ WBStripeManager::GetAllActiveStripes(uint32_t volumeId)
 bool
 WBStripeManager::WaitPendingWritesOnStripes(uint32_t volumeId)
 {
-    std::vector<Stripe*> &stripesToFlush = stripesToFlush4FlushCmd[volumeId];
+    std::vector<Stripe*>& stripesToFlush = stripesToFlush4FlushCmd[volumeId];
     auto stripe = stripesToFlush.begin();
     while (stripe != stripesToFlush.end())
     {
@@ -162,7 +165,7 @@ WBStripeManager::WaitStripesFlushCompletion(uint32_t volumeId)
         }
         if ((*it)->GetBlksRemaining() > 0)
         {
-            if ((*it)->GetBlksRemaining() + contextManager->GetActiveStripeTail(volumeId).offset == addrInfo->GetblksPerStripe())
+            if ((*it)->GetBlksRemaining() + wbStripeCtx->GetActiveStripeTail(volumeId).offset == addrInfo->GetblksPerStripe())
             {
                 continue;
             }
@@ -243,7 +246,7 @@ WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, Vir
 int
 WBStripeManager::RestoreActiveStripeTail(int tailarrayidx, VirtualBlkAddr tail, StripeId wbLsid)
 {
-    contextManager->SetActiveStripeTail(tailarrayidx, tail);
+    wbStripeCtx->SetActiveStripeTail(tailarrayidx, tail);
     uint32_t volumeId = ActiveStripeTailArrIdxInfo::GetVolumeId(tailarrayidx);
     return ReconstructActiveStripe(volumeId, wbLsid, tail, tailarrayidx);
 }
@@ -264,7 +267,7 @@ WBStripeManager::FlushPendingActiveStripes(void)
             }
 
             POS_TRACE_DEBUG(EID(ALLOCATOR_TRIGGER_FLUSH), "Request stripe flush, vsid {} lsid {} remaining {}",
-                            stripe->GetVsid(), stripe->GetWbLsid(), stripe->GetBlksRemaining());
+                stripe->GetVsid(), stripe->GetWbLsid(), stripe->GetBlksRemaining());
         }
 
         delete pendingFullStripes;
@@ -281,13 +284,13 @@ WBStripeManager::PrepareRebuild(void)
     std::vector<StripeId> vsidToCheckFlushDone;
 
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Start @PrepareRebuild()");
-    contextManager->TurnOffBlkAllocation();
+    blockManager->TurnOffBlkAllocation();
 
     // Check rebuildTargetSegments data structure
     int ret = _MakeRebuildTarget();
     if (ret <= NO_REBUILD_TARGET_USER_SEGMENT)
     {
-        contextManager->TurnOnBlkAllocation();
+        blockManager->TurnOnBlkAllocation();
         return ret;
     }
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "MakeRebuildTarget Done @PrepareRebuild()");
@@ -296,7 +299,7 @@ WBStripeManager::PrepareRebuild(void)
     ret = contextManager->SetNextSsdLsid();
     if (ret < 0)
     {
-        contextManager->TurnOnBlkAllocation();
+        blockManager->TurnOnBlkAllocation();
         return ret;
     }
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "SetNextSsdLsid Done @PrepareRebuild()");
@@ -305,14 +308,14 @@ WBStripeManager::PrepareRebuild(void)
     ret = _FlushOnlineStripes(vsidToCheckFlushDone);
     if (ret < 0)
     {
-        contextManager->TurnOnBlkAllocation();
+        blockManager->TurnOnBlkAllocation();
         return ret;
     }
     ret = CheckAllActiveStripes(stripesToFlush, vsidToCheckFlushDone);
     FinalizeWriteIO(stripesToFlush, vsidToCheckFlushDone);
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Stripes Flush Done @PrepareRebuild()");
 
-    contextManager->TurnOnBlkAllocation();
+    blockManager->TurnOnBlkAllocation();
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "End @PrepareRebuild()");
 
     return 0;
@@ -351,7 +354,6 @@ WBStripeManager::_MakeRebuildTarget(void)
 {
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@MakeRebuildTarget()");
     RebuildCtx* rbCtx = contextManager->GetRebuldCtx();
-    SegmentCtx* segCtx = contextManager->GetSegmentCtx();
 
     if (rbCtx->IsRebuidTargetSegmentsEmpty() == false)
     {
@@ -367,8 +369,8 @@ WBStripeManager::_MakeRebuildTarget(void)
     SegmentId segmentId = 0;
     while (true)
     {
-        segmentId = segCtx->GetSegmentBitmap()->FindFirstSetBit(segmentId);
-        if (segCtx->GetSegmentBitmap()->IsValidBit(segmentId) == false)
+        segmentId = contextManager->AllocateFreeSegment(false);
+        if (segmentId == UNMAP_SEGMENT)
         {
             break;
         }
@@ -473,12 +475,12 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
         pendingFullStripes->push_back(stripe);
 
         POS_TRACE_DEBUG(EID(ALLOCATOR_REPLAYED_STRIPE_IS_FULL),
-                        "Stripe (vsid {}, wbLsid {}) is waiting to be flushed", vsid, wbLsid);
+            "Stripe (vsid {}, wbLsid {}) is waiting to be flushed", vsid, wbLsid);
     }
 
     POS_TRACE_DEBUG(EID(ALLOCATOR_RECONSTRUCT_STRIPE),
-                    "Stripe (vsid {}, wbLsid {}, blockCount {}, remainingBlks {}) is reconstructed",
-                    vsid, wbLsid, blockCount, remainingBlks);
+        "Stripe (vsid {}, wbLsid {}, blockCount {}, remainingBlks {}) is reconstructed",
+        vsid, wbLsid, blockCount, remainingBlks);
 
     return 0;
 }
@@ -515,11 +517,11 @@ WBStripeManager::_FinishActiveStripe(ASTailArrayIdx index)
 VirtualBlks
 WBStripeManager::_AllocateRemainingBlocks(ASTailArrayIdx index)
 {
-    std::unique_lock<std::mutex> lock(contextManager->GetActiveStripeTailLock(index));
-    VirtualBlkAddr tail = contextManager->GetActiveStripeTail(index);
+    std::unique_lock<std::mutex> lock(wbStripeCtx->GetActiveStripeTailLock(index));
+    VirtualBlkAddr tail = wbStripeCtx->GetActiveStripeTail(index);
 
     VirtualBlks remainingBlocks = _AllocateRemainingBlocks(tail);
-    contextManager->SetActiveStripeTail(index, UNMAP_VSA);
+    wbStripeCtx->SetActiveStripeTail(index, UNMAP_VSA);
 
     return remainingBlocks;
 }

@@ -8,25 +8,22 @@
 
 namespace pos
 {
-class MockCtxHeader : public CtxHeader
-{
-public:
-    using CtxHeader::CtxHeader;
-};
-
 class MockContextManager : public ContextManager
 {
 public:
     using ContextManager::ContextManager;
-    MOCK_METHOD(int, FlushAllocatorCtxs, (EventSmartPtr callback), (override));
-    MOCK_METHOD(int, StoreAllocatorCtxs, (), (override));
-    MOCK_METHOD(uint64_t, GetAllocatorCtxsStoredVersion, (), (override));
-    MOCK_METHOD(void, ResetAllocatorCtxsDirtyVersion, (), (override));
-    MOCK_METHOD(void, ReplayStripeAllocation, (StripeId vsid, StripeId wbLsid), (override));
-    MOCK_METHOD(void, ReplayStripeFlushed, (StripeId wbLsid), (override));
-    MOCK_METHOD(std::vector<VirtualBlkAddr>, GetAllActiveStripeTail, (), (override));
-    MOCK_METHOD(void, ResetActiveStripeTail, (int index), (override));
-    MOCK_METHOD(std::mutex&, GetCtxLock, (), (override));
+    MOCK_METHOD(int, FlushContextsSync, (), (override));
+    MOCK_METHOD(int, FlushContextsAsync, (EventSmartPtr callback), (override));
+    MOCK_METHOD(void, UpdateOccupiedStripeCount, (StripeId lsid), (override));
+    MOCK_METHOD(SegmentId, AllocateFreeSegment, (bool forUser), (override));
+    MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));
+    MOCK_METHOD(SegmentId, AllocateRebuildTargetSegment, (), (override));
+    MOCK_METHOD(int, ReleaseRebuildSegment, (SegmentId segmentId), (override));
+    MOCK_METHOD(bool, NeedRebuildAgain, (), (override));
+    MOCK_METHOD(int, GetNumFreeSegment, (), (override));
+    MOCK_METHOD(CurrentGcMode, GetCurrentGcMode, (), (override));
+    MOCK_METHOD(int, GetGcThreshold, (CurrentGcMode mode), (override));
+    MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));
 };
 
 } // namespace pos

@@ -47,7 +47,7 @@ namespace pos
 {
 JournalVolumeEventHandler::JournalVolumeEventHandler(void)
 : isInitialized(false),
-  allocatorCtx(nullptr),
+  contextManager(nullptr),
   config(nullptr),
   logFactory(nullptr),
   dirtyPageManager(nullptr),
@@ -64,14 +64,14 @@ JournalVolumeEventHandler::~JournalVolumeEventHandler(void)
 void
 JournalVolumeEventHandler::Init(LogWriteContextFactory* factory,
     DirtyMapManager* dirtyPages, LogWriteHandler* writter,
-    JournalConfiguration* journalConfiguration, IAllocatorCtx* allocatorCtxToUse)
+    JournalConfiguration* journalConfiguration, IContextManager* contextManagerToUse)
 {
     config = journalConfiguration;
     logFactory = factory;
     dirtyPageManager = dirtyPages;
     logWriteHandler = writter;
 
-    allocatorCtx = allocatorCtxToUse;
+    contextManager = contextManagerToUse;
 
     isInitialized = true;
 }
@@ -90,7 +90,7 @@ JournalVolumeEventHandler::VolumeDeleted(int volumeId)
 
         POS_TRACE_DEBUG(eventId, "Start volume delete event handler (volume id {})", volumeId);
 
-        ret = _WriteVolumeDeletedLog(volumeId, allocatorCtx->GetAllocatorCtxsStoredVersion());
+        ret = _WriteVolumeDeletedLog(volumeId, contextManager->GetStoredContextVersion(ALLOCATOR_CTX));
         if (ret != 0)
         {
             POS_TRACE_DEBUG(eventId,
@@ -140,7 +140,7 @@ JournalVolumeEventHandler::_FlushAllocatorContext(void)
     EventSmartPtr callback(new AllocatorContextFlushCompleted(this));
 
     flushInProgress = true;
-    return allocatorCtx->FlushAllocatorCtxs(callback);
+    return contextManager->FlushContextsAsync(callback);
 }
 
 void

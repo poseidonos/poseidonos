@@ -51,7 +51,7 @@ int
 SetSegmentInfoWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
     IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt("");
-    return iAllocatorWbt->SetMeta(SEGMENT_VALID_COUNT, argv["input"].get<std::string>());
+    return iAllocatorWbt->SetMeta(WBT_SEGMENT_VALID_COUNT, argv["input"].get<std::string>());
 }
 
 } // namespace pos

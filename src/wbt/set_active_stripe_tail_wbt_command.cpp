@@ -51,7 +51,7 @@ int
 SetActiveStripeTailWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
     IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt("");
-    return iAllocatorWbt->SetMeta(ACTIVE_STRIPE_TAIL, argv["input"].get<std::string>());
+    return iAllocatorWbt->SetMeta(WBT_ACTIVE_STRIPE_TAIL, argv["input"].get<std::string>());
 }
 
 } // namespace pos

@@ -44,7 +44,7 @@ namespace pos
 // Constructor for injecting private member values in product code
 CheckpointHandler::CheckpointHandler(CheckpointObserver* observer, int numMapsToFlush, int numMapsFlushed)
 : mapFlush(nullptr),
-  allocatorCtx(nullptr),
+  contextManager(nullptr),
   obs(observer),
   status(INIT),
   numMapsToFlush(numMapsToFlush),
@@ -61,10 +61,10 @@ CheckpointHandler::CheckpointHandler(CheckpointObserver* observer)
 }
 
 void
-CheckpointHandler::Init(IMapFlush* mapFlushToUse, IAllocatorCtx* allocatorCtxToUse)
+CheckpointHandler::Init(IMapFlush* mapFlushToUse, IContextManager* contextManagerToUse)
 {
     mapFlush = mapFlushToUse;
-    allocatorCtx = allocatorCtxToUse;
+    contextManager = contextManagerToUse;
 }
 
 int
@@ -103,7 +103,7 @@ CheckpointHandler::Start(MapPageList pendingDirtyPages)
 
     EventSmartPtr allocMetaFlushCallback(new CheckpointMetaFlushCompleted(this,
         ALLOCATOR_META_ID));
-    ret = allocatorCtx->FlushAllocatorCtxs(allocMetaFlushCallback);
+    ret = contextManager->FlushContextsAsync(allocMetaFlushCallback);
     if (ret != 0)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,

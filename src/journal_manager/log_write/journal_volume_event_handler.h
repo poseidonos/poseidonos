@@ -39,7 +39,7 @@
 #include <vector>
 
 #include "allocator_context_flush_completed_event.h"
-#include "src/allocator/i_allocator_ctx.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/journal_service/i_volume_event.h"
 
 namespace pos
@@ -57,7 +57,7 @@ public:
 
     virtual void Init(LogWriteContextFactory* logFactory, DirtyMapManager* dirtyPages,
         LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration,
-        IAllocatorCtx* allocatorCtx);
+        IContextManager* contextManager);
 
     virtual int VolumeDeleted(int volID) override;
     virtual void AllocatorContextFlushed(void) override;
@@ -73,7 +73,7 @@ private:
 
     bool isInitialized;
 
-    IAllocatorCtx* allocatorCtx;
+    IContextManager* contextManager;
 
     JournalConfiguration* config;
     LogWriteContextFactory* logFactory;

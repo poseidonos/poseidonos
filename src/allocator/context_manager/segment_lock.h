@@ -32,17 +32,18 @@
 
 #pragma once
 
-#include "src/include/address_type.h"
+#include <mutex>
 
 namespace pos
 {
-
-class IRebuildCtx
+class SegmentLock
 {
 public:
-    virtual SegmentId GetRebuildTargetSegment(void) = 0;
-    virtual int ReleaseRebuildSegment(SegmentId segmentId) = 0;
-    virtual bool NeedRebuildAgain(void) = 0;
+    SegmentLock(void) = default;
+    std::mutex& GetLock(void) { return seglock; }
+
+private:
+    std::mutex seglock;
 };
 
 } // namespace pos

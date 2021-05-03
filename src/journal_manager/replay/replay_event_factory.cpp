@@ -3,13 +3,12 @@
 namespace pos
 {
 ReplayEventFactory::ReplayEventFactory(StripeReplayStatus* status,
-    IVSAMap* vsaMap, IStripeMap* stripeMap, IWBStripeCtx* wbStripeCtx,
-    ISegmentCtx* segmentCtx, IBlockAllocator* blockAllocator, IArrayInfo* info)
+    IVSAMap* vsaMap, IStripeMap* stripeMap, IContextReplayer* ctxReplayer,
+    IBlockAllocator* blockAllocator, IArrayInfo* info)
 : status(status),
   vsaMap(vsaMap),
   stripeMap(stripeMap),
-  wbStripeCtx(wbStripeCtx),
-  segmentCtx(segmentCtx),
+  contextReplayer(ctxReplayer),
   blockAllocator(blockAllocator),
   arrayInfo(info)
 {
@@ -36,7 +35,7 @@ ReplayEventFactory::CreateStripeMapUpdateReplayEvent(StripeId vsid, StripeAddr d
 ReplayEvent*
 ReplayEventFactory::CreateStripeFlushReplayEvent(StripeId vsid, StripeId wbLsid, StripeId userLsid)
 {
-    ReplayEvent* stripeFlush = new ReplayStripeFlush(wbStripeCtx, segmentCtx,
+    ReplayEvent* stripeFlush = new ReplayStripeFlush(contextReplayer,
         status, vsid, wbLsid, userLsid);
     return stripeFlush;
 }
@@ -45,14 +44,14 @@ ReplayEvent*
 ReplayEventFactory::CreateStripeAllocationReplayEvent(StripeId vsid, StripeId wbLsid)
 {
     ReplayEvent* stripeAllocation = new ReplayStripeAllocation(stripeMap,
-        wbStripeCtx, status, vsid, wbLsid);
+        contextReplayer, status, vsid, wbLsid);
     return stripeAllocation;
 }
 
 ReplayEvent*
 ReplayEventFactory::CreateSegmentAllocationReplayEvent(StripeId userLsid)
 {
-    ReplayEvent* segmentAllocation = new ReplaySegmentAllocation(segmentCtx,
+    ReplayEvent* segmentAllocation = new ReplaySegmentAllocation(contextReplayer,
         arrayInfo, status, userLsid);
     return segmentAllocation;
 }

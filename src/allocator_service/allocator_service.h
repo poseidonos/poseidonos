@@ -41,12 +41,10 @@ namespace pos
 {
 class IBlockAllocator;
 class IWBStripeAllocator;
-class IWBStripeCtx;
-class ISegmentCtx;
 class IRebuildCtx;
-class IAllocatorCtx;
 class IAllocatorWbt;
-
+class IContextManager;
+class IContextReplayer;
 class AllocatorService
 {
     friend class Singleton<AllocatorService>;
@@ -57,29 +55,23 @@ public:
 
     void RegisterAllocator(std::string arrayName, IBlockAllocator* iBlockAllocator);
     void RegisterAllocator(std::string arrayName, IWBStripeAllocator* iWBStripeAllocator);
-    void RegisterAllocator(std::string arrayName, IWBStripeCtx* iWBStripeCtx);
-    void RegisterAllocator(std::string arrayName, ISegmentCtx* iSegmentCtx);
-    void RegisterAllocator(std::string arrayName, IRebuildCtx* iRebuildCtx);
-    void RegisterAllocator(std::string arrayName, IAllocatorCtx* iAllocatorCtx);
     void RegisterAllocator(std::string arrayName, IAllocatorWbt* iAllocatorWbt);
+    void RegisterAllocator(std::string arrayName, IContextManager* iContextManager);
+    void RegisterAllocator(std::string arrayName, IContextReplayer* iContextReplayer);
     void UnregisterAllocator(std::string arrayName);
 
     virtual IBlockAllocator* GetIBlockAllocator(std::string arrayName);
     virtual IWBStripeAllocator* GetIWBStripeAllocator(std::string arrayName);
-    IWBStripeCtx* GetIWBStripeCtx(std::string arrayName);
-    ISegmentCtx* GetISegmentCtx(std::string arrayName);
-    IRebuildCtx* GetIRebuildCtx(std::string arrayName);
-    IAllocatorCtx* GetIAllocatorCtx(std::string arrayName);
     IAllocatorWbt* GetIAllocatorWbt(std::string arrayName);
+    IContextManager*GetIContextManager(std::string arrayName);
+    IContextReplayer*GetIContextReplayer(std::string arrayName);
 
 private:
     AllocatorInterfaceContainer<IBlockAllocator> iBlockAllocator;
     AllocatorInterfaceContainer<IWBStripeAllocator> iWBStripeAllocator;
-    AllocatorInterfaceContainer<IWBStripeCtx> iWBStripeCtx;
-    AllocatorInterfaceContainer<ISegmentCtx> iSegmentCtx;
-    AllocatorInterfaceContainer<IRebuildCtx> iRebuildCtx;
-    AllocatorInterfaceContainer<IAllocatorCtx> iAllocatorCtx;
     AllocatorInterfaceContainer<IAllocatorWbt> iAllocatorWbt;
+    AllocatorInterfaceContainer<IContextManager> iContextManager;
+    AllocatorInterfaceContainer<IContextReplayer> iContextReplayer;
 };
 
 using AllocatorServiceSingleton = Singleton<AllocatorService>;

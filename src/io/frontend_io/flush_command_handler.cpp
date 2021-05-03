@@ -32,7 +32,7 @@
 
 #include "src/io/frontend_io/flush_command_handler.h"
 
-#include "src/allocator/i_allocator_ctx.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_block_allocator.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/event_scheduler/io_completer.h"
@@ -46,18 +46,18 @@ FlushCmdHandler::FlushCmdHandler(FlushIoSmartPtr flushIo)
 : FlushCmdHandler(flushIo, FlushCmdManagerSingleton::Instance(),
       AllocatorServiceSingleton::Instance()->GetIBlockAllocator(flushIo->GetArrayName()),
       AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(flushIo->GetArrayName()),
-      AllocatorServiceSingleton::Instance()->GetIAllocatorCtx(flushIo->GetArrayName()),
+      AllocatorServiceSingleton::Instance()->GetIContextManager(flushIo->GetArrayName()),
       MapperServiceSingleton::Instance()->GetIMapFlush(flushIo->GetArrayName()))
 {
 }
 
 FlushCmdHandler::FlushCmdHandler(FlushIoSmartPtr flushIo, FlushCmdManager* flushCmdManager,
     IBlockAllocator* iBlockAllocator, IWBStripeAllocator* iWBStripeAllocator,
-    IAllocatorCtx* iAllocatorCtx, IMapFlush* iMapFlush)
+    IContextManager* ctxManager, IMapFlush* iMapFlush)
 : flushCmdManager(flushCmdManager),
   iWBStripeAllocator(iWBStripeAllocator),
   iBlockAllocator(iBlockAllocator),
-  iAllocatorCtx(iAllocatorCtx),
+  icontextManager(ctxManager),
   iMapFlush(iMapFlush),
   flushIo(flushIo),
   volumeId(flushIo->GetVolumeId()),
@@ -193,7 +193,7 @@ FlushCmdHandler::Execute(void)
             {
                 // Allocator Flush
                 EventSmartPtr callbackAllocator(new AllocatorFlushDoneEvent(flushIo));
-                ret = iAllocatorCtx->FlushAllocatorCtxs(callbackAllocator);
+                ret = icontextManager->FlushContextsAsync(callbackAllocator);
                 if (ret != 0)
                 {
                     if (ret == (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS)

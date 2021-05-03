@@ -62,14 +62,14 @@ void
 LogGroupReleaser::Init(LogBufferWriteDoneNotifier* released,
     JournalLogBuffer* buffer, DirtyMapManager* dirtyPage,
     CallbackSequenceController* sequencer,
-    IMapFlush* mapFlush, IAllocatorCtx* allocatorCtx)
+    IMapFlush* mapFlush, IContextManager* contextManager)
 {
     releaseNotifier = released;
     logBuffer = buffer;
     dirtyPageManager = dirtyPage;
     sequenceController = sequencer;
 
-    checkpointHandler->Init(mapFlush, allocatorCtx);
+    checkpointHandler->Init(mapFlush, contextManager);
 }
 
 void

@@ -33,7 +33,7 @@
 #include "do_gc_wbt_command.h"
 
 #include "src/allocator_service/allocator_service.h"
-#include "src/allocator/i_segment_ctx.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/gc/garbage_collector.h"
 
 namespace pos
@@ -77,8 +77,8 @@ DoGcWbtCommand::Execute(Args &argv, JsonElement &elem)
         return returnValue;
     }
 
-    ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx("");
-    SegmentId victimId = iSegmentCtx->GetGCVictimSegment();
+    IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
+    SegmentId victimId = iContextManager->AllocateGCVictimSegment();
 
     if (UNMAP_SEGMENT == victimId)
     {

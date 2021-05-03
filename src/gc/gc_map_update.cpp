@@ -89,7 +89,7 @@ bool
 GcMapUpdate::Execute(void)
 {
     IVSAMap* iVSAMap = MapperServiceSingleton::Instance()->GetIVSAMap(arrayName);
-    ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx(arrayName);
+    IContextManager* ctxManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
     StripeId stripeId = stripe->GetVsid();
     BlkAddr rba;
     uint32_t volId = mapUpdateInfoList.volumeId;
@@ -97,7 +97,7 @@ GcMapUpdate::Execute(void)
 
     StripeId currentLsid = stripe->GetUserLsid();
     iStripeMap->SetLSA(stripe->GetVsid(), stripe->GetUserLsid(), IN_USER_AREA);
-    iSegmentCtx->UpdateOccupiedStripeCount(currentLsid);
+    ctxManager->UpdateOccupiedStripeCount(currentLsid);
 
     uint32_t validCount = mapUpdateInfoList.blockMapUpdateList.size();
     for (auto it : mapUpdateInfoList.blockMapUpdateList)

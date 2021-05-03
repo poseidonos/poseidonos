@@ -41,7 +41,7 @@
 
 #include "src/allocator/context_manager/active_stripe_index_info.h"
 #include "src/allocator/i_wbstripe_allocator.h"
-#include "src/allocator/i_wbstripe_ctx.h"
+#include "src/allocator/i_context_replayer.h"
 #include "src/include/address_type.h"
 
 namespace pos
@@ -52,7 +52,7 @@ class ReplayStripe;
 class ActiveWBStripeReplayer
 {
 public:
-    ActiveWBStripeReplayer(IWBStripeCtx* iwbStripeCtx, IWBStripeAllocator* iwbstripeAllocator, PendingStripeList& pendingStripeList);
+    ActiveWBStripeReplayer(IContextReplayer* contextReplayer, IWBStripeAllocator* iwbstripeAllocator, PendingStripeList& pendingStripeList);
     virtual ~ActiveWBStripeReplayer(void);
 
     int Replay(void);
@@ -73,7 +73,7 @@ private:
     std::vector<PendingActiveStripeList> foundActiveStripes;
 
     PendingStripeList& pendingStripes;
-    IWBStripeCtx* wbStripeCtx;
+    IContextReplayer* contextReplayer;
     IWBStripeAllocator* wbStripeAllocator;
 };
 
