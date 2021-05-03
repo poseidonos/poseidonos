@@ -339,7 +339,7 @@ ArrayManager::_FindArrayWithDevSN(string devSN)
         POS_TRACE_INFO(eventId, "There is no array that owns device '{}'", devSN);
         return nullptr;
     }
-    ArrayComponents* array = _FindArrayWithDevSN(arrayName);
+    ArrayComponents* array = _FindArray(arrayName);
 
     return array;
 }

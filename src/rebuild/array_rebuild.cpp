@@ -30,19 +30,21 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "partition_rebuild.h"
 #include "array_rebuild.h"
-#include "src/logger/logger.h"
-#include "src/include/pos_event_id.h"
 
 #include <functional>
 
+#include "src/rebuild/partition_rebuild.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+
 namespace pos
 {
-
 ArrayRebuild::ArrayRebuild(string array, ArrayDevice* dev, RebuildComplete cb,
-            list<RebuildTarget*> tgt):
-arrayName(array), targetDev(dev), rebuildComplete(cb)
+    list<RebuildTarget*> tgt)
+: arrayName(array),
+  targetDev(dev),
+  rebuildComplete(cb)
 {
     progress = new RebuildProgress(arrayName);
     uint64_t totalStripes = 0;
@@ -55,7 +57,7 @@ arrayName(array), targetDev(dev), rebuildComplete(cb)
             tasks.push_back(ptnRbd);
             totalStripes += stripes;
             POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-                "partition added for rebuild");
+                "partition added to array {} for rebuild", arrayName);
         }
         else
         {
@@ -66,10 +68,11 @@ arrayName(array), targetDev(dev), rebuildComplete(cb)
     rebuildDoneCb = bind(&ArrayRebuild::_RebuildDone, this, placeholders::_1);
 }
 
-void ArrayRebuild::Start(void)
+void
+ArrayRebuild::Start(void)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "ArrayRebuild::Start() total {} tasks", tasks.size());
+        "ArrayRebuild::Start() array {} with total {} tasks", arrayName, tasks.size());
     if (tasks.empty())
     {
         RebuildResult res;
@@ -84,10 +87,12 @@ void ArrayRebuild::Start(void)
     }
 }
 
-void ArrayRebuild::Discard(void)
+void
+ArrayRebuild::Discard(void)
 {
     POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
-        "Rebuild discarded. Cannot start rebuild due to failure in preparation process");
+        "Array {} Rebuild discarded. Cannot start rebuild due to failure in preparation process",
+        arrayName);
     tasks.clear();
     RebuildResult res;
     res.array = arrayName;
@@ -96,7 +101,8 @@ void ArrayRebuild::Discard(void)
     _RebuildCompleted(res);
 }
 
-void ArrayRebuild::Stop(void)
+void
+ArrayRebuild::Stop(void)
 {
     for (PartitionRebuild* task : tasks)
     {
@@ -106,12 +112,14 @@ void ArrayRebuild::Stop(void)
     _WaitRebuildStop();
 }
 
-RebuildState ArrayRebuild::GetState(void)
+RebuildState
+ArrayRebuild::GetState(void)
 {
     return state;
 }
 
-uint64_t ArrayRebuild::GetProgress(void)
+uint64_t
+ArrayRebuild::GetProgress(void)
 {
     if (progress != nullptr)
     {
@@ -120,10 +128,11 @@ uint64_t ArrayRebuild::GetProgress(void)
     return 0;
 }
 
-void ArrayRebuild::_RebuildNext(void)
+void
+ArrayRebuild::_RebuildNext(void)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "ArrayRebuild::_RebuildNext() remaining {} tasks", tasks.size());
+        "ArrayRebuild::_RebuildNext() array {} has remaining {} tasks", arrayName, tasks.size());
     if (tasks.empty() == false)
     {
         PartitionRebuild* task = tasks.front();
@@ -132,10 +141,11 @@ void ArrayRebuild::_RebuildNext(void)
     }
 }
 
-void ArrayRebuild::_RebuildDone(RebuildResult res)
+void
+ArrayRebuild::_RebuildDone(RebuildResult res)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "ArrayRebuild::_RebuildDone res {} ", res.result);
+        "ArrayRebuild::_RebuildDone array {} rebuild done with result {} ", arrayName, res.result);
     RebuildState taskResult = res.result;
     state = taskResult;
 
@@ -144,7 +154,7 @@ void ArrayRebuild::_RebuildDone(RebuildResult res)
     delete task;
     tasks.pop_front();
     if (taskResult == RebuildState::CANCELLED ||
-        taskResult == RebuildState::FAIL )
+        taskResult == RebuildState::FAIL)
     {
         while (tasks.empty() == false)
         {
@@ -165,27 +175,28 @@ void ArrayRebuild::_RebuildDone(RebuildResult res)
     }
 }
 
-void ArrayRebuild::_RebuildCompleted(RebuildResult res)
+void
+ArrayRebuild::_RebuildCompleted(RebuildResult res)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "ArrayRebuild::_RebuildCompleted res {} ", state);
+        "ArrayRebuild::_RebuildCompleted array {} rebuild completed with result {} ", arrayName, state);
     switch (state)
     {
         case RebuildState::PASS:
             POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_RESULT_PASS,
-                "rebuild complete sucessfully");
+                "array {} rebuild completed sucessfully", arrayName);
             break;
         case RebuildState::FAIL:
             POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
-                "rebuild failure");
+                "array {} rebuild failure", arrayName);
             break;
         case RebuildState::CANCELLED:
             POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_RESULT_CANCELLED,
-                "rebuild cancelled");
+                "array {} rebuild cancelled", arrayName);
             break;
         default:
             POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
-                "unhandled rebuild result");
+                "array {} unhandled rebuild result", arrayName);
             assert(false);
             break;
     }
@@ -194,7 +205,8 @@ void ArrayRebuild::_RebuildCompleted(RebuildResult res)
     cv.notify_one();
 }
 
-void ArrayRebuild::_WaitRebuildStop(void)
+void
+ArrayRebuild::_WaitRebuildStop(void)
 {
     std::unique_lock<std::mutex> lock(mtx);
     while (tasks.empty() != true)
