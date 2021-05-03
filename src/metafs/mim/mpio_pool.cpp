@@ -128,7 +128,7 @@ MpioPool::Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn,
             _CacheRemove(mpioType);
 
         // add new
-        return _CacheAlloc(mpioType, lpn, arrayName);
+        return _CacheAlloc(mpioType, lpn);
     }
 #else
     mpio = _AllocMpio(mpioType);
@@ -266,7 +266,7 @@ MpioPool::_CacheHit(MpioType mpioType, MetaLpnType lpn, std::string arrayName)
 }
 
 Mpio*
-MpioPool::_CacheAlloc(MpioType mpioType, MetaLpnType lpn, std::string arrayName)
+MpioPool::_CacheAlloc(MpioType mpioType, MetaLpnType lpn)
 {
     uint32_t type = (uint32_t)mpioType;
     if (0 == mpioList[type].size())

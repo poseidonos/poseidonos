@@ -69,7 +69,7 @@ private:
     bool _IsFullyCached(void);
     bool _IsEmptyCached(void);
     Mpio* _CacheHit(MpioType mpioType, MetaLpnType lpn, std::string arrayName);
-    Mpio* _CacheAlloc(MpioType mpioType, MetaLpnType lpn, std::string arrayName);
+    Mpio* _CacheAlloc(MpioType mpioType, MetaLpnType lpn);
     void _CacheRemove(MpioType mpioType);
 #endif
 
