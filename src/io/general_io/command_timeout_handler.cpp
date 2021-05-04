@@ -85,13 +85,13 @@ CommandTimeoutHandler::_ResetDevice(UblockSharedPtr dev, void* ctx)
 }
 
 void
-CommandTimeoutHandler::AbortSubmitHandler::DiskIO(UblockSharedPtr dev, void* ctx)
+CommandTimeoutHandler::AbortSubmitHandler::DiskIO(UblockSharedPtr dev, void *ctx)
 {
-    AbortContext* abortContext = static_cast<AbortContext*>(ctx);
     const struct spdk_nvme_ctrlr_data* ctrlrData = spdk_nvme_ctrlr_get_data(abortContext->ctrlr);
     string devSerial = dev->GetSN();
 
-    if (0 == memcmp(ctrlrData->sn, devSerial.c_str(), dev->GetSN().size()))
+    if (abortContext->ctrlr != nullptr
+        && 0 == memcmp(ctrlrData->sn, devSerial.c_str(), dev->GetSN().size()))
     {
         string arrayName("POSArray");
         UbioSmartPtr bio(new Ubio(abortContext, 1, arrayName));
@@ -119,7 +119,7 @@ bool
 CommandTimeoutHandler::AbortSubmitHandler::Execute(void)
 {
     driverFunc = bind(&CommandTimeoutHandler::AbortSubmitHandler::DiskIO, this, _1, _2);
-    DeviceManagerSingleton::Instance()->IterateDevicesAndDoFunc(driverFunc, abortContext);
+    DeviceManagerSingleton::Instance()->IterateDevicesAndDoFunc(driverFunc, nullptr);
     return true;
 }
 
