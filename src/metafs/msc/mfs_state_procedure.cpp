@@ -155,26 +155,20 @@ MfsStateProcedure::_ProcessSystemState_Open(std::string& arrayName)
 {
     bool isNPOR = false;
     bool isTheFirst = (1 == mbrMap.GetMountedMbrCount()) ? true : false;
-    // FIXME:
-    // get media info
-    // Filesystem MBR is only stored in SSD volume
-    if (!metaStorage->IsReady())
+    MetaFsStorageIoInfoList& mediaInfoList = mbrMap.GetAllStoragePartitionInfo(arrayName);
+
+    for (auto& item : mediaInfoList)
     {
-        MetaFsStorageIoInfoList& mediaInfoList = mbrMap.GetAllStoragePartitionInfo(arrayName);
+        if (false == item.valid)
+            continue;
 
-        for (auto& item : mediaInfoList)
+        POS_EVENT_ID rc;
+        rc = metaStorage->CreateMetaStore(arrayName, item.mediaType, item.totalCapacity);
+        if (rc != POS_EVENT_ID::SUCCESS)
         {
-            if (false == item.valid)
-                continue;
-
-            POS_EVENT_ID rc;
-            rc = metaStorage->CreateMetaStore(arrayName, item.mediaType, item.totalCapacity);
-            if (rc != POS_EVENT_ID::SUCCESS)
-            {
-                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED,
-                    "Failed to mount meta storage subsystem");
-                return POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED;
-            }
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED,
+                "Failed to mount meta storage subsystem");
+            return POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED;
         }
     }
 
