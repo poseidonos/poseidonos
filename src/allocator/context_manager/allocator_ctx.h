@@ -70,7 +70,7 @@ public:
 
     void AllocateSegment(SegmentId segId);
     void ReleaseSegment(SegmentId segId);
-    SegmentId AllocateFirstFoundFreeSegment(int startSegId);
+    SegmentId AllocateFreeSegment(int startSegId);
     uint64_t GetNumOfFreeUserDataSegment(void);
     SegmentState GetSegmentState(SegmentId segmentId, bool needlock);
     void SetSegmentState(SegmentId segmentId, SegmentState state, bool needlock);

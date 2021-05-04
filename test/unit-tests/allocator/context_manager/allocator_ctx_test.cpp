@@ -80,7 +80,7 @@ TEST(AllocatorCtx, ReleaseSegment_)
 {
 }
 
-TEST(AllocatorCtx, AllocateFirstFoundFreeSegment_)
+TEST(AllocatorCtx, AllocateFreeSegment_)
 {
 }
 

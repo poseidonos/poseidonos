@@ -166,7 +166,7 @@ ContextManager::FlushContextsAsync(EventSmartPtr callback)
 SegmentId
 ContextManager::AllocateFreeSegment(bool forUser)
 {
-    SegmentId segmentId = allocatorCtx->AllocateFirstFoundFreeSegment(0);
+    SegmentId segmentId = allocatorCtx->AllocateFreeSegment(0);
     if (forUser == false)
     {
         return segmentId;
@@ -176,7 +176,7 @@ ContextManager::AllocateFreeSegment(bool forUser)
         POS_TRACE_DEBUG(EID(ALLOCATOR_REBUILDING_SEGMENT), "segmentId:{} is already rebuild target!", segmentId);
         allocatorCtx->ReleaseSegment(segmentId);
         ++segmentId;
-        segmentId = allocatorCtx->AllocateFirstFoundFreeSegment(segmentId);
+        segmentId = allocatorCtx->AllocateFreeSegment(segmentId);
     }
     if (segmentId == UNMAP_SEGMENT)
     {

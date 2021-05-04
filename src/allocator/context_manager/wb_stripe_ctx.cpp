@@ -77,7 +77,7 @@ WbStripeCtx::AllocWbStripe(StripeId stripeId)
 StripeId
 WbStripeCtx::AllocWbStripe(void)
 {
-    StripeId stripe = allocWbLsidBitmap->SetFirstZeroBit();
+    StripeId stripe = allocWbLsidBitmap->SetNextZeroBit();
     if (allocWbLsidBitmap->IsValidBit(stripe) == false)
     {
         stripe = UNMAP_STRIPE;

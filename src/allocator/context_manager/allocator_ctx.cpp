@@ -97,12 +97,12 @@ AllocatorCtx::ReleaseSegment(SegmentId segId)
 }
 
 SegmentId
-AllocatorCtx::AllocateFirstFoundFreeSegment(int startSegId)
+AllocatorCtx::AllocateFreeSegment(int startSegId)
 {
     SegmentId segId;
     if (startSegId == 0)
     {
-        segId = allocSegBitmap->SetFirstZeroBit();
+        segId = allocSegBitmap->SetNextZeroBit();
     }
     else
     {
