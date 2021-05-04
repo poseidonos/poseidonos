@@ -34,7 +34,7 @@
 
 namespace pos
 {
-GcCtx::GcCtx()
+GcCtx::GcCtx(void)
 {
     thresholdSegments = DEFAULT_GC_THRESHOLD;
     urgentSegments = DEFAULT_URGENT_THRESHOLD;

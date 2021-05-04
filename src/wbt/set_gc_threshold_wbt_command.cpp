@@ -100,7 +100,7 @@ SetGcThresholdWbtCommand::Execute(Args &argv, JsonElement &elem)
         IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt(arrayName);
         iAllocatorWbt->SetGcThreshold(numGcThreshold);
         iAllocatorWbt->SetUrgentThreshold(numUrgentThreshold);
-        IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager("");        
+        IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
         if (iContextManager->GetCurrentGcMode() != MODE_URGENT_GC)
         {
             IBlockAllocator* iBlockAllocator =

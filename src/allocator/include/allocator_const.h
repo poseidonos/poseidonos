@@ -87,7 +87,7 @@ enum WBTAllocatorMetaType
 
 struct AllocatorCtxHeader
 {
-    uint32_t sig; // Sum of all allocator meta size (Byte)
+    uint32_t sig;
     uint64_t ctxVersion;
     uint32_t numValidWbLsid;
     uint32_t numValidSegment;

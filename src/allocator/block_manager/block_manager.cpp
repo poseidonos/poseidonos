@@ -133,7 +133,8 @@ BlockManager::TurnOffBlkAllocation(void)
     {
         // Wait for flag to be reset
         while (blkAllocProhibited[i].exchange(true) == true)
-            ;
+        {
+        }
     }
 }
 

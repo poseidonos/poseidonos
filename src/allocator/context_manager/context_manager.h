@@ -115,7 +115,7 @@ private:
 
     std::string arrayName;
 
-    //Lock
+    // Lock
     std::mutex ctxLock;
 };
 

@@ -80,7 +80,7 @@ public:
     int GetTotalSegmentsCount(void);
 
     std::mutex& GetSegStateLock(SegmentId segId);
-    std::mutex& GetAllocatorCtxLock() { return allocCtxLock; }
+    std::mutex& GetAllocatorCtxLock(void) { return allocCtxLock; }
 
 private:
     static const uint32_t SIG_ALLOCATOR_CTX = 0xACACACAC;

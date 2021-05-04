@@ -77,7 +77,6 @@ WbStripeCtx::AllocWbStripe(StripeId stripeId)
 StripeId
 WbStripeCtx::AllocWbStripe(void)
 {
-    //std::lock_guard<std::mutex> lock( lock!!!!! );
     StripeId stripe = allocWbLsidBitmap->SetFirstZeroBit();
     if (allocWbLsidBitmap->IsValidBit(stripe) == false)
     {
@@ -215,7 +214,6 @@ WbStripeCtx::GetSectionSize(int section)
         case AC_ALLOCATE_WBLSID_BITMAP:
         {
             ret = allocWbLsidBitmap->GetNumEntry() * BITMAP_ENTRY_SIZE;
-            ;
             break;
         }
         case AC_ACTIVE_STRIPE_TAIL:

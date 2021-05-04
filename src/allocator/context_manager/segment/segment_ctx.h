@@ -70,7 +70,7 @@ public:
 
     bool IsSegmentCtxIo(char* pBuf);
     SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
-    std::mutex& GetSegmentCtxLock() { return segCtxLock;}
+    std::mutex& GetSegmentCtxLock(void) { return segCtxLock;}
     std::mutex& GetSegInfoLock(SegmentId segId);
 
 private:

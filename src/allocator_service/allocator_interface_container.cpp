@@ -35,9 +35,8 @@
 #include "src/allocator/i_allocator_wbt.h"
 #include "src/allocator/i_block_allocator.h"
 #include "src/allocator/i_context_manager.h"
-#include "src/allocator/i_wbstripe_allocator.h"
-#include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_context_replayer.h"
+#include "src/allocator/i_wbstripe_allocator.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 namespace pos

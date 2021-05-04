@@ -33,6 +33,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/include/allocator_const.h"

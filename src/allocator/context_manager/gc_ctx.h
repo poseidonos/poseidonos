@@ -37,8 +37,8 @@ namespace pos
 class GcCtx
 {
 public:
-    GcCtx();
-    ~GcCtx() = default;
+    GcCtx(void);
+    ~GcCtx(void) = default;
     int GetGcThreshold(void);
     int GetUrgentThreshold(void);
     void SetGcThreshold(int inputThreshold);
