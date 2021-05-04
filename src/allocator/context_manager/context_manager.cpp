@@ -460,7 +460,7 @@ ContextManager::_PrepareBuffer(int owner, char* buf)
             std::lock_guard<std::mutex> lock(wbStripeCtx->GetAllocWbLsidBitmapLock());
             wbStripeCtx->BeforeFlush(AC_HEADER, buf);
             wbStripeCtx->BeforeFlush(AC_ALLOCATE_WBLSID_BITMAP, buf + fileIoManager->GetSectionOffset(owner, AC_ALLOCATE_WBLSID_BITMAP));
-        }            
+        }
         wbStripeCtx->BeforeFlush(AC_ACTIVE_STRIPE_TAIL, buf + fileIoManager->GetSectionOffset(owner, AC_ACTIVE_STRIPE_TAIL));
     }
 }

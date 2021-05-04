@@ -29,7 +29,7 @@ public:
         ON_CALL(*this, FlushContextsAsync).WillByDefault(::testing::Invoke(this,
         &IContextManagerMock::_FlushContextsAsync));
     }
-    
+
 private:
     int _FlushContextsAsync(EventSmartPtr callback)
     {
