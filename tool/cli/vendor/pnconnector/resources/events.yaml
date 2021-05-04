@@ -685,6 +685,11 @@ modules:
         message: failed to add device
         problem: the requested device is already in the array
         solution:
+      - code: 2538
+        level: ERROR
+        message: buffer device not found
+        problem: the requested device does not exist
+        solution: create the buffer device or check its state
       - code: 2550
         level: INFO
         message: array status updated
