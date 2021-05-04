@@ -160,7 +160,7 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet, uint32_t& missingCnt, 
         if (nullptr == uBlock)
         {
             delete devs;
-            ret = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+            ret = (int)POS_EVENT_ID::ARRAY_DEVICE_NVM_NOT_FOUND;
             return ret;
         }
         devs->SetNvm(new ArrayDevice(uBlock));

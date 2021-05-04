@@ -50,7 +50,7 @@ const int Array::LOCK_ACQUIRE_FAILED = -1;
 
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
 : Array(name, rbdr, abr, new ArrayDeviceManager(DeviceManagerSingleton::Instance()), DeviceManagerSingleton::Instance(),
-    new PartitionManager(name, abr), new ArrayState(iState), new ArrayInterface(), EventSchedulerSingleton::Instance())
+      new PartitionManager(name, abr), new ArrayState(iState), new ArrayInterface(), EventSchedulerSingleton::Instance())
 {
 }
 
@@ -61,8 +61,8 @@ Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
   intf(arrayInterface),
   ptnMgr(ptnMgr),
   name_(name),
-  devMgr_(devMgr)/*initialize with devMgr*/,
-  sysDevMgr(sysDevMgr)/*assign with devMgr*/,
+  devMgr_(devMgr) /*initialize with devMgr*/,
+  sysDevMgr(sysDevMgr) /*assign with devMgr*/,
   rebuilder(rbdr),
   abrControl(abr),
   eventScheduler(eventScheduler)
@@ -86,7 +86,14 @@ Array::Load()
     pthread_rwlock_unlock(&stateLock);
     if (ret != 0)
     {
-        POS_TRACE_ERROR(ret, "Failed to load Array");
+        if (ret == (int)POS_EVENT_ID::ARRAY_DEVICE_NVM_NOT_FOUND)
+        {
+            POS_TRACE_ERROR(ret, "Failed to load Array, check uram creation or pmem state");
+        }
+        else
+        {
+            POS_TRACE_ERROR(ret, "Failed to load Array");
+        }
     }
     else
     {
@@ -596,7 +603,6 @@ Array::_DetachData(ArrayDevice* target)
             return;
         }
     }
-
 
     if (isRebuildingDevice || state->IsBroken())
     {
