@@ -7,8 +7,8 @@
 #include <random>
 #include <vector>
 
+#include "test/unit-tests/allocator/i_context_replayer_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/i_wbstripe_ctx_mock.h"
 
 using testing::NiceMock;
 using ::testing::Return;
@@ -60,12 +60,12 @@ GetTail(StripeInfo stripe)
 TEST(ActiveWBStripeReplayer, Replay_SingleActiveStripe)
 {
     // Given
-    NiceMock<MockIWBStripeCtx>* wbStripeCtx = new NiceMock<MockIWBStripeCtx>;
+    NiceMock<MockIContextReplayer>* contextReplayer = new NiceMock<MockIContextReplayer>;
     NiceMock<MockIWBStripeAllocator>* wbStripeAllocator = new NiceMock<MockIWBStripeAllocator>;
-    EXPECT_CALL(*wbStripeCtx, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
+    EXPECT_CALL(*contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(wbStripeCtx, wbStripeAllocator, pendingStripes);
+    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer, wbStripeAllocator, pendingStripes);
 
     // When : Find a single active stripe that is not full
     StripeInfo activeStripe = GetActiveStripe(defaultTestVol, defaultTestVol);
@@ -80,19 +80,19 @@ TEST(ActiveWBStripeReplayer, Replay_SingleActiveStripe)
 
     wbStripeReplayer->Replay();
 
-    delete wbStripeCtx;
+    delete contextReplayer;
     delete wbStripeAllocator;
 }
 
 TEST(ActiveWBStripeReplayer, Replay_SingleFullActiveStripe)
 {
     // Given
-    NiceMock<MockIWBStripeCtx>* wbStripeCtx = new NiceMock<MockIWBStripeCtx>;
+    NiceMock<MockIContextReplayer>* contextReplayer = new NiceMock<MockIContextReplayer>;
     NiceMock<MockIWBStripeAllocator>* wbStripeAllocator = new NiceMock<MockIWBStripeAllocator>;
-    EXPECT_CALL(*wbStripeCtx, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
+    EXPECT_CALL(*contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(wbStripeCtx, wbStripeAllocator, pendingStripes);
+    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer, wbStripeAllocator, pendingStripes);
 
     // When : Find a single active stripe that saturated
     StripeInfo fullActiveStripe = GetFlushedActiveStripe(defaultTestVol, defaultTestVol);
@@ -100,25 +100,25 @@ TEST(ActiveWBStripeReplayer, Replay_SingleFullActiveStripe)
     wbStripeReplayer->Update(fullActiveStripe);
 
     // Then : Will reset the active stripe tail to unmap_vsa
-    EXPECT_CALL(*(wbStripeCtx),
+    EXPECT_CALL(*(contextReplayer),
         ResetActiveStripeTail(fullActiveStripe.GetWbIndex()))
         .Times(1);
 
     wbStripeReplayer->Replay();
 
-    delete wbStripeCtx;
+    delete contextReplayer;
     delete wbStripeAllocator;
 }
 
 TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleStripe)
 {
     // Given
-    NiceMock<MockIWBStripeCtx>* wbStripeCtx = new NiceMock<MockIWBStripeCtx>;
+    NiceMock<MockIContextReplayer>* contextReplayer = new NiceMock<MockIContextReplayer>;
     NiceMock<MockIWBStripeAllocator>* wbStripeAllocator = new NiceMock<MockIWBStripeAllocator>;
-    EXPECT_CALL(*wbStripeCtx, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
+    EXPECT_CALL(*contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(wbStripeCtx, wbStripeAllocator, pendingStripes);
+    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer, wbStripeAllocator, pendingStripes);
 
     // When : Find several stripes on single volume
     for (int stripe = 0; stripe < 5; stripe++)
@@ -139,19 +139,19 @@ TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleStripe)
 
     wbStripeReplayer->Replay();
 
-    delete wbStripeCtx;
+    delete contextReplayer;
     delete wbStripeAllocator;
 }
 
 TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleStripe)
 {
     // Given
-    NiceMock<MockIWBStripeCtx>* wbStripeCtx = new NiceMock<MockIWBStripeCtx>;
+    NiceMock<MockIContextReplayer>* contextReplayer = new NiceMock<MockIContextReplayer>;
     NiceMock<MockIWBStripeAllocator>* wbStripeAllocator = new NiceMock<MockIWBStripeAllocator>;
-    EXPECT_CALL(*wbStripeCtx, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
+    EXPECT_CALL(*contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(wbStripeCtx, wbStripeAllocator, pendingStripes);
+    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer, wbStripeAllocator, pendingStripes);
 
     // When : Find several stripes on multiple volumes
     std::vector<StripeInfo> stripes;
@@ -187,19 +187,19 @@ TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleStripe)
     }
     wbStripeReplayer->Replay();
 
-    delete wbStripeCtx;
+    delete contextReplayer;
     delete wbStripeAllocator;
 }
 
 TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleActiveStripe)
 {
     // Given
-    NiceMock<MockIWBStripeCtx>* wbStripeCtx = new NiceMock<MockIWBStripeCtx>;
+    NiceMock<MockIContextReplayer>* contextReplayer = new NiceMock<MockIContextReplayer>;
     NiceMock<MockIWBStripeAllocator>* wbStripeAllocator = new NiceMock<MockIWBStripeAllocator>;
-    EXPECT_CALL(*wbStripeCtx, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
+    EXPECT_CALL(*contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(wbStripeCtx, wbStripeAllocator, pendingStripes);
+    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer, wbStripeAllocator, pendingStripes);
 
     // When : Find several unflushed stripes on a single volume
     std::vector<StripeInfo> orphanStripes;
@@ -240,19 +240,19 @@ TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleActiveStripe)
         EXPECT_TRUE(GetTail(orphanStripes[index]) == pendingStripes[index]->tailVsa);
     }
 
-    delete wbStripeCtx;
+    delete contextReplayer;
     delete wbStripeAllocator;
 }
 
 TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleActiveStripe)
 {
     // Given
-    NiceMock<MockIWBStripeCtx>* wbStripeCtx = new NiceMock<MockIWBStripeCtx>;
+    NiceMock<MockIContextReplayer>* contextReplayer = new NiceMock<MockIContextReplayer>;
     NiceMock<MockIWBStripeAllocator>* wbStripeAllocator = new NiceMock<MockIWBStripeAllocator>;
-    EXPECT_CALL(*wbStripeCtx, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
+    EXPECT_CALL(*contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
     PendingStripeList pendingStripes;
 
-    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(wbStripeCtx, wbStripeAllocator, pendingStripes);
+    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer, wbStripeAllocator, pendingStripes);
 
     // When : Find several unflushed stripes on a single volume
     std::vector<StripeInfo> orphanStripes;
@@ -295,7 +295,7 @@ TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleActiveStripe)
         EXPECT_TRUE(GetTail(orphanStripes[index]) == pendingStripes[index]->tailVsa);
     }
 
-    delete wbStripeCtx;
+    delete contextReplayer;
     delete wbStripeAllocator;
 }
 } // namespace pos

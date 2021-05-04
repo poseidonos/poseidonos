@@ -427,9 +427,15 @@ ContextManager::_FlushSync(int owner)
 int
 ContextManager::_FlushAsync(int owner, EventSmartPtr callbackEvent)
 {
+    if (flushInProgress.exchange(true) == true)
+    {
+        return (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS;
+    }
+
     int size = fileIoManager->GetFileSize(owner);
     char* buf = new char[size]();
     _PrepareBuffer(owner, buf);
+    flushCallback = callbackEvent;
     int ret = fileIoManager->StoreAsync(owner, buf, std::bind(&ContextManager::_FlushCompletedThenCB, this, std::placeholders::_1));
     if (ret != 0)
     {

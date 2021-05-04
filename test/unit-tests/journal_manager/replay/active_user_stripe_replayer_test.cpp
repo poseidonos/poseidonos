@@ -7,7 +7,7 @@
 #include <random>
 
 #include "src/logger/logger.h"
-#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
+#include "test/unit-tests/allocator/i_context_replayer_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 
 using ::testing::_;
@@ -50,7 +50,7 @@ UpdateUserStripeRandomly(ActiveUserStripeReplayer* userStripeReplayer, uint32_t 
 }
 
 void
-ReplayUserStripe(ActiveUserStripeReplayer* userStripeReplayer, MockISegmentCtx* allocatorSegmentCtx, MockIArrayInfo* arrayInfo, StripeId expectLSID)
+ReplayUserStripe(ActiveUserStripeReplayer* userStripeReplayer, MockIContextReplayer* contextReplayer, MockIArrayInfo* arrayInfo, StripeId expectLSID)
 {
     PartitionLogicalSize userSizeInfo;
     userSizeInfo.minWriteBlkCnt = 0;
@@ -62,171 +62,171 @@ ReplayUserStripe(ActiveUserStripeReplayer* userStripeReplayer, MockISegmentCtx* 
     userSizeInfo.totalStripes = numUserStripes;
 
     EXPECT_CALL(*arrayInfo, GetSizeInfo(_)).WillOnce(Return(&userSizeInfo));
-    EXPECT_CALL(*allocatorSegmentCtx, ReplaySsdLsid(expectLSID));
+    EXPECT_CALL(*contextReplayer, ReplaySsdLsid(expectLSID));
     userStripeReplayer->Replay();
 }
 
 TEST(ActiveUserStripeReplayer, Replay_ReplaySequentialLsidInOneSegment)
 {
     // Given
-    NiceMock<MockISegmentCtx> allocatorSegmentCtx;
+    NiceMock<MockIContextReplayer> contextReplayer;
     MockIArrayInfo arrayInfo;
 
     {
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find sequential LSIDs from beginning to middle within a segment
         UpdateUserStripeSequentially(&userStripeReplayer, 0, numStripesPerSegment / 2);
 
         // Then : Replay the last LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, numStripesPerSegment / 2);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, numStripesPerSegment / 2);
     }
     {
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find sequential LSIDs from middle to end within a segment
         UpdateUserStripeSequentially(&userStripeReplayer, numStripesPerSegment / 2, numStripesPerSegment - 1);
 
         // Then : Replay the last LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, numStripesPerSegment - 1);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, numStripesPerSegment - 1);
     }
     {
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find sequential LSIDs from beginning to end within a segment
         UpdateUserStripeSequentially(&userStripeReplayer, 0, numStripesPerSegment - 1);
 
         // Then : Replay the last LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, numStripesPerSegment - 1);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, numStripesPerSegment - 1);
     }
 }
 
 TEST(ActiveUserStripeReplayer, Replay_ReplayRandomLsidInOneSegment)
 {
     // Given
-    NiceMock<MockISegmentCtx> allocatorSegmentCtx;
+    NiceMock<MockIContextReplayer> contextReplayer;
     NiceMock<MockIArrayInfo> arrayInfo;
 
     {
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find LSIDs randomly from beginning to middle within a segment
         UpdateUserStripeRandomly(&userStripeReplayer, 0, numStripesPerSegment / 2);
 
         // Then : Replay the last LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, numStripesPerSegment / 2);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, numStripesPerSegment / 2);
     }
     {
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find LSIDs randomly from middle to end within a segment
         UpdateUserStripeRandomly(&userStripeReplayer, numStripesPerSegment / 2, numStripesPerSegment - 1);
 
         // Then : Replay the last LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, numStripesPerSegment - 1);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, numStripesPerSegment - 1);
     }
     {
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find LSIDs randomly from beginning to end within a segment
         UpdateUserStripeRandomly(&userStripeReplayer, 0, numStripesPerSegment - 1);
 
         // Then : Replay the last LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, numStripesPerSegment - 1);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, numStripesPerSegment - 1);
     }
 }
 
 TEST(ActiveUserStripeReplayer, Replay_ReplaySequentialLsidInSeveralSegment)
 {
     // Given
-    NiceMock<MockISegmentCtx> allocatorSegmentCtx;
+    NiceMock<MockIContextReplayer> contextReplayer;
     NiceMock<MockIArrayInfo> arrayInfo;
     uint32_t numSegment = 3;
     uint32_t lastLSID = numStripesPerSegment * numSegment + numStripesPerSegment / 2 - 1;
 
     {
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find sequential LSIDs from beginning to middle within several segment
         UpdateUserStripeSequentially(&userStripeReplayer, 0, lastLSID);
 
         // Then : Replay the last LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, lastLSID);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, lastLSID);
     }
     {
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find sequential LSIDs from middle to middle within several segment
         UpdateUserStripeSequentially(&userStripeReplayer, numStripesPerSegment / 2, lastLSID);
 
         // Then : Replay the last LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, lastLSID);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, lastLSID);
     }
     {
         lastLSID = numStripesPerSegment * (numSegment + 1) - 1;
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find sequential LSIDs from beginning to end within several segment
         UpdateUserStripeSequentially(&userStripeReplayer, 0, lastLSID);
 
         // Then : Replay the last LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, numStripesPerSegment - 1);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, numStripesPerSegment - 1);
     }
     {
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find sequential LSIDs from middle to end within several segment
         UpdateUserStripeSequentially(&userStripeReplayer, numStripesPerSegment / 2, lastLSID);
 
         // Then :
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, numStripesPerSegment - 1);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, numStripesPerSegment - 1);
     }
 }
 
 TEST(ActiveUserStripeReplayer, Replay_ReplayRandomLsidInSeveralSegment)
 {
     // Given
-    NiceMock<MockISegmentCtx> allocatorSegmentCtx;
+    NiceMock<MockIContextReplayer> contextReplayer;
     NiceMock<MockIArrayInfo> arrayInfo;
     uint32_t numSegment = 3;
     uint32_t lastLSID = numStripesPerSegment * numSegment + numStripesPerSegment / 2 - 1;
 
     {
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find LSIDs randomly from beginning to middle within several segment
         UpdateUserStripeRandomly(&userStripeReplayer, 0, lastLSID);
 
         // Then : Replay the last LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, lastLSID);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, lastLSID);
     }
     {
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find LSIDs randomly from middle to middle within several segment
         UpdateUserStripeRandomly(&userStripeReplayer, numStripesPerSegment / 2, lastLSID);
 
         // Then : Replay the last LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, lastLSID);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, lastLSID);
     }
     {
         lastLSID = numStripesPerSegment * (numSegment + 1) - 1;
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find LSIDs randomly from beginning to end within several segment
         UpdateUserStripeRandomly(&userStripeReplayer, 0, lastLSID);
 
         // Then : Replay the last LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, numStripesPerSegment - 1);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, numStripesPerSegment - 1);
     }
     {
-        ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+        ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
         // When : Find LSIDs randomly from middle to end within several segment
         UpdateUserStripeRandomly(&userStripeReplayer, numStripesPerSegment / 2, lastLSID);
 
         // Then : Replay the end LSID to current SSD LSID
-        ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, numStripesPerSegment - 1);
+        ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, numStripesPerSegment - 1);
     }
 }
 
@@ -237,46 +237,46 @@ TEST(ActiveUserStripeReplayer, Replay_ReplayRandomLsidInSeveralSegment)
 TEST(ActiveUserStripeReplayer, DISABLED_Replay_ReplaySequentialLsidAfterGC)
 {
     // Given
-    NiceMock<MockISegmentCtx> allocatorSegmentCtx;
+    NiceMock<MockIContextReplayer> contextReplayer;
     NiceMock<MockIArrayInfo> arrayInfo;
     uint32_t numSegment = 3;
     uint32_t beforeGc = 10;
     uint32_t numTests = numStripesPerSegment * numSegment;
 
-    ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+    ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
     // When : Find sequential LSIDs from beginning to middle within several segment
     UpdateUserStripeSequentially(&userStripeReplayer, beforeGc, numTests - beforeGc);
     UpdateUserStripeSequentially(&userStripeReplayer, 0, beforeGc);
     // Then : Replay the last LSID to current SSD LSID
-    ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, beforeGc);
+    ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, beforeGc);
 
     // When : Find sequential LSIDs from beginning to middle within several segment
     UpdateUserStripeSequentially(&userStripeReplayer, beforeGc, numStripesPerSegment - beforeGc);
     // Then : Replay the last LSID to current SSD LSID
-    ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, numStripesPerSegment - 1);
+    ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, numStripesPerSegment - 1);
 }
 
 TEST(ActiveUserStripeReplayer, DISABLED_Replay_ReplayRandomLsidAfterGC)
 {
     // Given
-    NiceMock<MockISegmentCtx> allocatorSegmentCtx;
+    NiceMock<MockIContextReplayer> contextReplayer;
     NiceMock<MockIArrayInfo> arrayInfo;
     uint32_t numSegment = 3;
     uint32_t beforeGc = 10;
     uint32_t numTests = numStripesPerSegment * numSegment;
 
-    ActiveUserStripeReplayer userStripeReplayer(&allocatorSegmentCtx, &arrayInfo);
+    ActiveUserStripeReplayer userStripeReplayer(&contextReplayer, &arrayInfo);
 
     // When : Find sequential LSIDs from beginning to middle within several segment
     UpdateUserStripeRandomly(&userStripeReplayer, beforeGc, numTests - beforeGc);
     UpdateUserStripeRandomly(&userStripeReplayer, 0, beforeGc);
     // Then : Replay the last LSID to current SSD LSID
-    ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, beforeGc);
+    ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, beforeGc);
 
     // When : Find sequential LSIDs from beginning to middle within several segment
     UpdateUserStripeRandomly(&userStripeReplayer, beforeGc, numStripesPerSegment - beforeGc);
     // Then : Replay the last LSID to current SSD LSID
-    ReplayUserStripe(&userStripeReplayer, &allocatorSegmentCtx, &arrayInfo, numStripesPerSegment - 1);
+    ReplayUserStripe(&userStripeReplayer, &contextReplayer, &arrayInfo, numStripesPerSegment - 1);
 }
 } // namespace pos

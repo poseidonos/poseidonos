@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "src/include/address_type.h"
-#include "test/unit-tests/allocator/i_allocator_ctx_mock.h"
+#include "test/unit-tests/allocator/i_context_manager_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/checkpoint_observer_mock.h"
 #include "test/unit-tests/mapper/i_map_flush_mock.h"
 
@@ -21,7 +21,7 @@ public:
     CheckpointHandlerTestFixture(void)
     : checkpointObserver(nullptr),
       mapFlush(nullptr),
-      allocatorCtx(nullptr),
+      contextManager(nullptr),
       checkpointHandler(nullptr)
     {
     }
@@ -36,7 +36,7 @@ public:
         // Given
         checkpointObserver = new NiceMock<MockCheckpointObserver>;
         mapFlush = new NiceMock<MockIMapFlush>;
-        allocatorCtx = new NiceMock<MockIAllocatorCtx>;
+        contextManager = new NiceMock<MockIContextManager>;
     }
 
     virtual void
@@ -44,7 +44,7 @@ public:
     {
         delete checkpointObserver;
         delete mapFlush;
-        delete allocatorCtx;
+        delete contextManager;
 
         delete checkpointHandler;
     }
@@ -68,7 +68,7 @@ public:
 protected:
     NiceMock<MockCheckpointObserver>* checkpointObserver;
     NiceMock<MockIMapFlush>* mapFlush;
-    NiceMock<MockIAllocatorCtx>* allocatorCtx;
+    NiceMock<MockIContextManager>* contextManager;
 
     CheckpointHandler* checkpointHandler;
 };
@@ -77,12 +77,12 @@ TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointStartSuccessfullywith
 {
     // Given
     checkpointHandler = new CheckpointHandler(checkpointObserver);
-    checkpointHandler->Init(mapFlush, allocatorCtx);
+    checkpointHandler->Init(mapFlush, contextManager);
 
     // When : Succeed flushing dirty map and allocator meta pages
     MapPageList pendingDirtyPages = GenerateDummyDirtyPageList(1);
     EXPECT_CALL(*mapFlush, FlushDirtyMpages).WillOnce(Return(0));
-    EXPECT_CALL(*allocatorCtx, FlushAllocatorCtxs).WillOnce(Return(0));
+    EXPECT_CALL(*contextManager, FlushContextsAsync).WillOnce(Return(0));
 
     // Then : Will restore the active stipre tail to this stripe
     EXPECT_EQ(checkpointHandler->Start(pendingDirtyPages), 0);
@@ -93,14 +93,14 @@ TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointStartSuccessfullywith
 {
     // Given
     checkpointHandler = new CheckpointHandler(checkpointObserver);
-    checkpointHandler->Init(mapFlush, allocatorCtx);
+    checkpointHandler->Init(mapFlush, contextManager);
 
     // When : Succeed flushing dirty map and allocator meta pages
     MapPageList pendingDirtyPages = GenerateDummyDirtyPageList(numDirtyMaps);
     EXPECT_CALL(*mapFlush, FlushDirtyMpages)
         .Times(numDirtyMaps)
         .WillRepeatedly(Return(0));
-    EXPECT_CALL(*allocatorCtx, FlushAllocatorCtxs).WillOnce(Return(0));
+    EXPECT_CALL(*contextManager, FlushContextsAsync).WillOnce(Return(0));
 
     // Then : Will restore the active stipre tail to this stripe
     EXPECT_EQ(checkpointHandler->Start(pendingDirtyPages), 0);
@@ -116,7 +116,7 @@ TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointFailedWhenFlushDirtyM
 {
     // Given
     checkpointHandler = new CheckpointHandler(checkpointObserver);
-    checkpointHandler->Init(mapFlush, allocatorCtx);
+    checkpointHandler->Init(mapFlush, contextManager);
 
     // When : Failed to flushing dirty map pages
     MapPageList pendingDirtyPages = GenerateDummyDirtyPageList(numDirtyMaps);
@@ -127,18 +127,18 @@ TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointFailedWhenFlushDirtyM
     EXPECT_EQ(checkpointHandler->GetStatus(), STARTED);
 }
 
-TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointFailedWhenAllocatorCtxsFlushFailed)
+TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointFailedWhencontextManagersFlushFailed)
 {
     // Given
     checkpointHandler = new CheckpointHandler(checkpointObserver);
-    checkpointHandler->Init(mapFlush, allocatorCtx);
+    checkpointHandler->Init(mapFlush, contextManager);
 
     // When : Succeed to flushing dirty map pages and failed flushing allocator meta pages
     MapPageList pendingDirtyPages = GenerateDummyDirtyPageList(numDirtyMaps);
     EXPECT_CALL(*mapFlush, FlushDirtyMpages)
         .Times(numDirtyMaps)
         .WillRepeatedly(Return(0));
-    EXPECT_CALL(*allocatorCtx, FlushAllocatorCtxs).WillOnce(Return(-1));
+    EXPECT_CALL(*contextManager, FlushContextsAsync).WillOnce(Return(-1));
 
     // Then : Checkpoint should be started
     EXPECT_TRUE(checkpointHandler->Start(pendingDirtyPages) != 0);
