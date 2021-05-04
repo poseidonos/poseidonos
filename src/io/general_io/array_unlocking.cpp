@@ -38,11 +38,12 @@
 namespace pos
 {
 ArrayUnlocking::ArrayUnlocking(PartitionType type, StripeId stripeId,
-    const std::string& arrayName, IIOLocker* locker)
+    const std::string& arrayName, IIOLocker* inputLocker)
 : Callback(false),
   type(type),
   stripeId(stripeId),
-  locker(locker)
+  arrayName(arrayName),
+  locker(inputLocker)
 {
     if (likely(locker == nullptr))
     {
@@ -57,7 +58,7 @@ ArrayUnlocking::~ArrayUnlocking(void)
 bool
 ArrayUnlocking::_DoSpecificJob(void)
 {
-    locker->Unlock("", stripeId);
+    locker->Unlock(arrayName, stripeId);
     return true;
 }
-} // namespace ibofos
+} // namespace pos

@@ -44,7 +44,7 @@ class IIOLocker;
 class ArrayUnlocking : public Callback
 {
 public:
-    ArrayUnlocking(PartitionType type, StripeId stripeId, const std::string& arrayName, IIOLocker* locker = nullptr);
+    ArrayUnlocking(PartitionType type, StripeId stripeId, const std::string& arrayName, IIOLocker* inputLocker = nullptr);
     ~ArrayUnlocking(void) override;
 
 private:

@@ -10,13 +10,19 @@ namespace pos
 {
 TEST(CommandTimeoutHandler, Constructor)
 {
-    CommandTimeoutHandler *commandTimeoutHandler = new CommandTimeoutHandler();
+    // Given : Nothing
+    // When : Constructor and Destructor
+    CommandTimeoutHandler* commandTimeoutHandler = new CommandTimeoutHandler();
     delete commandTimeoutHandler;
+    // Then : Nothing
 }
 
 TEST(CommandTimeoutHandler, IsPendingAbortZero)
 {
-    CommandTimeoutHandler *commandTimeoutHandler = new CommandTimeoutHandler();
+    // Given : Nothing
+    // When : Constructor
+    CommandTimeoutHandler* commandTimeoutHandler = new CommandTimeoutHandler();
+    // Then : Check Pending Abort Zero
     bool actual = commandTimeoutHandler->IsPendingAbortZero();
     bool expected = true;
     ASSERT_EQ(actual, expected);
@@ -25,31 +31,39 @@ TEST(CommandTimeoutHandler, IsPendingAbortZero)
 
 TEST(CommandTimeoutHandler, AbortSubmitHandler_Constructor)
 {
+    // Given : Abort Context Initialize
     AbortContext abortContext(nullptr, nullptr, 0);
-    CommandTimeoutHandler::AbortSubmitHandler *commandAbortEvent 
+    // When : AbortSubmitHandler Constructor, Destructor
+    CommandTimeoutHandler::AbortSubmitHandler *commandAbortEvent
         = new CommandTimeoutHandler::AbortSubmitHandler(&abortContext);
     delete commandAbortEvent;
+    // Then : Nothing
 }
 
 TEST(CommandTimeoutHandler, AbortSubmitHandler_DiskIO)
 {
+    // Given : Abort Context Initialize
     AbortContext abortContext(nullptr, nullptr, 0);
-    CommandTimeoutHandler::AbortSubmitHandler *commandAbortEvent 
+    // When : AbortSubmitHandler Constructor
+    CommandTimeoutHandler::AbortSubmitHandler* commandAbortEvent
         = new CommandTimeoutHandler::AbortSubmitHandler(&abortContext);
     MockUBlockDevice *dev = new MockUBlockDevice("", 0, nullptr);
     UblockSharedPtr devSharedPtr(dev);
     ON_CALL(*dev, GetSN()).WillByDefault(Return("different"));
+    // Then : DiskIO Execute
     commandAbortEvent->DiskIO(devSharedPtr, nullptr);
     delete commandAbortEvent;
 }
 
 TEST(CommandTimeoutHandler, AbortSubmitHandler_Execute)
 {
+    // Given : Abort Context Initialize
     AbortContext abortContext(nullptr, nullptr, 0);
-    CommandTimeoutHandler::AbortSubmitHandler *commandAbortEvent 
+    // When : AbortSubmitHandler Constructor
+    CommandTimeoutHandler::AbortSubmitHandler* commandAbortEvent
         = new CommandTimeoutHandler::AbortSubmitHandler(&abortContext);
     UblockSharedPtr devSharedPtr(new MockUBlockDevice("", 100, nullptr));
-
+    // Then : Execute command Abort Event
     bool actual = commandAbortEvent->Execute();
     bool expected = true;
     ASSERT_EQ(actual, expected);
