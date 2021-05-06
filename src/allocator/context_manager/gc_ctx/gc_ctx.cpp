@@ -64,4 +64,11 @@ GcCtx::SetUrgentThreshold(int inputThreshold)
     urgentSegments = inputThreshold;
 }
 
+<<<<<<< HEAD:src/allocator/context_manager/gc_ctx/gc_ctx.cpp
+=======
+void
+MetaFsClient::Shutdown(void)
+{
+}
+>>>>>>> 89a9e84f3... [AWIBOF-3500] Draft Shutdown sequence for STOP state processing:src/metafs/metafs_client.cpp
 } // namespace pos
