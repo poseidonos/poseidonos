@@ -4,6 +4,7 @@ SPDK_DIR=$ROOT_DIR/lib/spdk/
 SETUP_NVMf_PATH=test/system/io_path/setup_ibofos_nvmf_volume.sh
 network_config_file=test/system/network/network_config.sh
 CONFIG_FILE=/etc/pos/pos.conf
+ORIG_CONFIG_FILE=/etc/pos/pos_orig.conf
 DEVICES=()
 globalLogFile="/var/log/pos/nvme_flush_test.log"
 localLogDirPath=$ROOT_DIR/test/system/nvme_flush/
@@ -78,14 +79,11 @@ cleanup()
     texecc rm -f ${logfile}
     texecc touch ${logfile}
 
-    if [[ -d $localLogDirPath ]]; then
-        for usecase in $(seq 0 $((total_usecases-1)))
-        do
-            rm -f $localLogDirPath/usecase$((usecase+1)).log
-        done
-    else
-        mkdir $localLogDirPath
-    fi
+    mkdir -p $localLogDirPath
+    for usecase in $(seq 0 $((total_usecases-1)))
+    do
+        rm -f $localLogDirPath/usecase$((usecase+1)).log
+    done
 }
 
 #**************************************************************************
@@ -227,7 +225,6 @@ exit_POS()
     echo "  Unmounting and Exiting POS"
     texecc ./bin/cli array unmount --name POSArray >> ${logfile}
     texecc ./bin/cli system exit >> ${logfile}
-    
 
     texecc ps -C poseidonos > /dev/null >> ${logfile}
     while [[ ${?} == 0 ]]
@@ -398,6 +395,7 @@ copy_usecase_logs()
 #****************************************************************************************
 enable_flush()
 {
+    texecc cp $CONFIG_FILE $ORIG_CONFIG_FILE
     echo " Enabling flush command handling in POS"
     texecc -s eval "jq -r '.flush.enable |= true' $CONFIG_FILE > /tmp/temp.json && mv /tmp/temp.json $CONFIG_FILE"
 }
@@ -407,8 +405,8 @@ enable_flush()
 #****************************************************************************************
 disable_flush()
 {
-    echo "  Disabling flush command handling in POS"
-    texecc -s eval "jq -r '.flush.enable |= false' $CONFIG_FILE > /tmp/temp.json && mv /tmp/temp.json $CONFIG_FILE"
+    echo "  Restoring the original config file"
+    texecc mv $ORIG_CONFIG_FILE $CONFIG_FILE
 }
 
 #**************************************************************************
@@ -471,7 +469,7 @@ start_test_cases()
         isBackground=0
         flush_data $isBackground #$num_volumes
 
-        if [[ $totalFlushFaile -ne 0 ]];then
+        if [[ $totalFlushFails -ne 0 ]];then
             exit_CItest_on_Failure $num_subsystems
         fi
 
@@ -489,7 +487,7 @@ start_test_cases()
         write_data $num_subsystems $total_data_to_write $isBackground
         flush_data $isBackground $num_volumes
 
-        if [[ $totalFlushFaile -ne 0 ]];then
+        if [[ $totalFlushFails -ne 0 ]];then
             exit_CItest_on_Failure $num_subsystems
         fi
 
