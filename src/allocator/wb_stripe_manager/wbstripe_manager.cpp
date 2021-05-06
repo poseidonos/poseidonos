@@ -371,7 +371,7 @@ WBStripeManager::_MakeRebuildTarget(void)
     SegmentId segmentId = 0;
     while (true)
     {
-        segmentId = allocCtx->GetUsedSegment(false);
+        segmentId = allocCtx->GetUsedSegment(segmentId);
         if (segmentId == UNMAP_SEGMENT)
         {
             break;

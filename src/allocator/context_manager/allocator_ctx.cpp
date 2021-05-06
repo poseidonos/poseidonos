@@ -39,7 +39,6 @@
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 #include "src/allocator/context_manager/segment/segment_states.h"
 #include "src/allocator/context_manager/segment_lock.h"
-#include "src/allocator/context_manager/wb_stripe_ctx.h"
 #include "src/include/meta_const.h"
 #include "src/lib/bitmap.h"
 #include "src/logger/logger.h"
@@ -234,7 +233,7 @@ AllocatorCtx::AfterLoad(char* buf)
     }
     else
     {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "allocator ctx file Integrity check SUCCESS:{}", ctxHeader.ctxVersion);
+        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "allocator ctx file Integrity check SUCCESS:{}, {}", ctxHeader.ctxVersion, ctxHeader.numValidSegment);
     }
     allocSegBitmap->SetNumBitsSet(ctxHeader.numValidSegment);
 }

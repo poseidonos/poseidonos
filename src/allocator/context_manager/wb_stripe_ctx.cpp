@@ -36,7 +36,6 @@
 #include <vector>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/context_manager/segment/segment_states.h"
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/metafs/metafs_file_intf.h"
 
@@ -159,7 +158,7 @@ WbStripeCtx::BeforeFlush(int section, char* buf)
         case AC_HEADER:
         {
             AllocatorCtxHeader* header = (AllocatorCtxHeader*)buf;
-            header->numValidSegment = allocWbLsidBitmap->GetNumBitsSetWoLock();
+            header->numValidWbLsid = allocWbLsidBitmap->GetNumBitsSetWoLock();
             break;
         }
         case AC_ALLOCATE_WBLSID_BITMAP:
