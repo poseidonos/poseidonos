@@ -64,7 +64,7 @@ TEST_F(VolumeTest, TryToCreateInvalidVolumeNameTest)
     pos::IVolumeManager* volMgr = pos::VolumeServiceSingleton::Instance()->GetVolumeManager(ARRAY_NAME);
     std::string shortvol = "1";
     int res = volMgr->Create(shortvol, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::NAME_TOO_SHORT);
+    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_TOO_SHORT);
 
     std::string longvol = "1111111111111111"
         "1111111111111111"
@@ -83,23 +83,23 @@ TEST_F(VolumeTest, TryToCreateInvalidVolumeNameTest)
         "1111111111111111"
         "1111111111111111";
     res = volMgr->Create(longvol, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::NAME_TOO_LONG);
+    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_TOO_LONG);
 
     std::string blankvol = "        ";
     res = volMgr->Create(blankvol, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
 
     std::string startWithBlank = " 44444";
     res = volMgr->Create(startWithBlank, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
 
     std::string endWithBlank = "44444 ";
     res = volMgr->Create(endWithBlank, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
 
     std::string specialChar = "mySpeci@lVolume";
     res = volMgr->Create(specialChar, SIZE, 0, 0);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
 }
 
 TEST_F(VolumeTest, TryToCreateInvalidSizeVolume)
@@ -189,15 +189,15 @@ TEST_F(VolumeTest, TryToUpdateInvalidVolumeNameTest)
 
     std::string invalidCharVol = "fsdla?";
     int res = volMgr->Rename(oldVolName, invalidCharVol);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
 
     std::string blankVol = "    ";
     res = volMgr->Rename(oldVolName, blankVol);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
 
     std::string shortVol = "a";
     res = volMgr->Rename(oldVolName, shortVol);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::NAME_TOO_SHORT);
+    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_TOO_SHORT);
 
     std::string longVol = "1111111111111111"
         "1111111111111111"
@@ -217,15 +217,15 @@ TEST_F(VolumeTest, TryToUpdateInvalidVolumeNameTest)
         "1111111111111111";
 
     res = volMgr->Rename(oldVolName, longVol);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::NAME_TOO_LONG);
+    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_TOO_LONG);
 
     std::string beginSpace = " avolvol";
     res = volMgr->Rename(oldVolName, beginSpace);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
 
     std::string endSpace = "bvolvol ";
     res = volMgr->Rename(oldVolName, endSpace);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::NAME_NOT_ALLOWED);
+    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED);
 
     volMgr->Delete(oldVolName);
 }
