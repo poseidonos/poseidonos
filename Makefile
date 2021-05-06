@@ -75,10 +75,10 @@ endif
 
 CPPFLAGS = -g -Wall -O2 -std=c++14 -Werror
 ifeq ($(CONFIG_LIBRARY_BUILD), y)
-CPPFLAGS += -fpermissive -fPIC
+CPPFLAGS += -fPIC
 endif
 ifeq ($(CONFIG_FPIC), y)
-CPPFLAGS += -fpermissive -fPIC
+CPPFLAGS += -fPIC
 endif
 
 ifeq ($(CONFIG_GCOV),y)
