@@ -50,14 +50,17 @@
 
 namespace pos
 {
-GcStripeManager::GcStripeManager(IArrayInfo* array)
+GcStripeManager::GcStripeManager(IArrayInfo* array, FreeBufferPool* gcWriteBufferPool_)
 : VolumeEvent("GcStripeManager", array->GetName()),
-  array(array)
+  array(array),
+  gcWriteBufferPool(gcWriteBufferPool_)
 {
     arrayName = array->GetName();
     udSize = array->GetSizeInfo(PartitionType::USER_DATA);
-
-    gcWriteBufferPool = new FreeBufferPool(udSize->chunksPerStripe * GC_WRITE_BUFFER_CONUNT, CHUNK_SIZE);
+    if (nullptr == gcWriteBufferPool)
+    {
+        gcWriteBufferPool = new FreeBufferPool(udSize->chunksPerStripe * GC_WRITE_BUFFER_CONUNT, CHUNK_SIZE);
+    }
     for (uint32_t volId = 0; volId < GC_VOLUME_COUNT; volId++)
     {
         blkInfoList[volId] = nullptr;

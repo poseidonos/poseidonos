@@ -45,45 +45,49 @@
 
 namespace pos
 {
+
 class CopierMeta
 {
 public:
-    explicit CopierMeta(IArrayInfo* array);
-    ~CopierMeta(void);
+    CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize = nullptr,
+               BitMapMutex* inUseBitmap_ = nullptr, GcStripeManager* gcStripeManager_ = nullptr,
+               std::vector<std::vector<VictimStripe*>>* victimStripes_ = nullptr,
+               std::vector<FreeBufferPool*>* gcBufferPool_ = nullptr);
+    virtual ~CopierMeta(void);
 
-    void* GetBuffer(StripeId stripeId);
-    void ReturnBuffer(StripeId stripeId, void* buffer);
+    virtual void* GetBuffer(StripeId stripeId);
+    virtual void ReturnBuffer(StripeId stripeId, void* buffer);
 
-    void SetStartCopyStripes(void);
-    void SetStartCopyBlks(uint32_t blocks);
-    void SetDoneCopyBlks(uint32_t blocks);
-    uint32_t GetStartCopyBlks(void);
-    uint32_t GetDoneCopyBlks(void);
-    void InitProgressCount(void);
+    virtual void SetStartCopyStripes(void);
+    virtual void SetStartCopyBlks(uint32_t blocks);
+    virtual void SetDoneCopyBlks(uint32_t blocks);
+    virtual uint32_t GetStartCopyBlks(void);
+    virtual uint32_t GetDoneCopyBlks(void);
+    virtual void InitProgressCount(void);
 
-    uint32_t SetInUseBitmap(void);
-    bool IsSynchronized(void);
-    bool IsAllVictimSegmentCopyDone(void);
-    bool IsCopyDone(void);
-    bool IsReadytoCopy(uint32_t index);
+    virtual uint32_t SetInUseBitmap(void);
+    virtual bool IsSynchronized(void);
+    virtual bool IsAllVictimSegmentCopyDone(void);
+    virtual bool IsCopyDone(void);
+    virtual bool IsReadytoCopy(uint32_t index);
 
-    uint32_t GetStripePerSegment(void);
-    uint32_t GetBlksPerStripe(void);
-    VictimStripe* GetVictimStripe(uint32_t victimSegmentIndex, uint32_t stripeOffset);
+    virtual uint32_t GetStripePerSegment(void);
+    virtual uint32_t GetBlksPerStripe(void);
+    virtual VictimStripe* GetVictimStripe(uint32_t victimSegmentIndex, uint32_t stripeOffset);
 
-    GcStripeManager* GetGcStripeManager(void);
-    std::string GetArrayName(void);
+    virtual GcStripeManager* GetGcStripeManager(void);
+    virtual std::string GetArrayName(void);
 
     static const uint32_t GC_BUFFER_COUNT = 512;
     static const uint32_t GC_CONCURRENT_COUNT = 16;
     static const uint32_t GC_VICTIM_SEGMENT_COUNT = 2;
-
 private:
     void _CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize);
+    void _CreateVictimStripes(IArrayInfo* array);
+
     std::atomic<uint32_t> requestStripeCount;
     std::atomic<uint32_t> requestBlockCount;
     std::atomic<uint32_t> doneBlockCount;
-    FreeBufferPool* gcBufferPool[GC_BUFFER_COUNT];
 
     BitMapMutex* inUseBitmap;
     GcStripeManager* gcStripeManager;
@@ -92,12 +96,14 @@ private:
     uint32_t blksPerStripe;
 
     uint32_t victimSegmentIndex = 0;
-    std::vector<VictimStripe*> victimStripe[GC_VICTIM_SEGMENT_COUNT];
 
     uint32_t copyIndex = 0;
     bool firstGc = true;
     std::atomic_flag copyLock = ATOMIC_FLAG_INIT;
     std::string arrayName;
+
+    std::vector<std::vector<VictimStripe*>>* victimStripes;
+    std::vector<FreeBufferPool*>* gcBufferPool;
 };
 
 } // namespace pos

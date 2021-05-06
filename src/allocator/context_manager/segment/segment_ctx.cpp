@@ -240,7 +240,7 @@ SegmentCtx::GetGCVictimSegment(void)
 {
     uint32_t numUserAreaSegments = addrInfo->GetnumUserAreaSegments();
     SegmentId victimSegment = UNMAP_SEGMENT;
-    uint32_t minValidCount = UINT32_MAX;
+    uint32_t minValidCount = addrInfo->GetblksPerSegment();
 
     for (SegmentId id = 0; id < numUserAreaSegments; ++id)
     {
