@@ -114,6 +114,7 @@ public:
 
     virtual int Init(void) override;
     virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
 
     int Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush, IBlockAllocator* blockAllocator,

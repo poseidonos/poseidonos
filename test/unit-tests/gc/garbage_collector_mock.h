@@ -15,6 +15,7 @@ public:
     MOCK_METHOD(void, StateChanged, (StateContext* prev, StateContext* next), (override));
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
+    MOCK_METHOD(void, Shutdown, (), (override));
 };
 
 } // namespace pos

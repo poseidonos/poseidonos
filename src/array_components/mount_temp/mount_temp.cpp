@@ -92,6 +92,12 @@ MountTemp::Mount1(void)
     return ret;
 }
 
+void
+MountTemp::Shutdown(void)
+{
+    _ResetNvmf();
+}
+
 int
 MountTemp::_MountMetaFilesystem(void)
 {

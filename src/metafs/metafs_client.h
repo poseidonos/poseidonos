@@ -47,6 +47,7 @@ public:
 
     virtual int Init(void) override;
     virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
 
 private:
     IArrayInfo* arrayInfo;

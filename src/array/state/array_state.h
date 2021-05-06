@@ -34,7 +34,6 @@
 #define ARRAY_STATE_H_
 
 #include "src/include/array_state_type.h"
-#include "array_state_publisher.h"
 #include "src/state/interface/i_state_observer.h"
 #include "src/state/interface/i_state_control.h"
 
@@ -83,7 +82,6 @@ private:
     bool _WaitState(StateContext* goal);
 
     IStateControl* iStateControl;
-    ArrayStatePublisher* publisher = nullptr;
 
     StateContext* degradedState = nullptr;
     StateContext* rebuildingState = nullptr;

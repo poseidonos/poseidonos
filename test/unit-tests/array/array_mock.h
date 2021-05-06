@@ -14,6 +14,7 @@ public:
     using Array::Array;
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
+    MOCK_METHOD(void, Shutdown, (), (override));
     MOCK_METHOD(const PartitionLogicalSize*, GetSizeInfo, (PartitionType type), (override));
     MOCK_METHOD(DeviceSet<string>, GetDevNames, (), (override));
     MOCK_METHOD(string, GetName, (), (override));

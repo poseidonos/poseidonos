@@ -61,13 +61,13 @@ void GarbageCollector::Dispose(void)
     state->Unsubscribe(this);
 }
 
+void GarbageCollector::Shutdown(void)
+{
+    Dispose();
+}
+
 void GarbageCollector::StateChanged(StateContext* prev, StateContext* next)
 {
-    StateEnum currState = next->ToStateType();
-    if (currState == StateEnum::STOP)
-    {
-        End();
-    }
 }
 
 int

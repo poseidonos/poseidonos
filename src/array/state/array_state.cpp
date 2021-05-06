@@ -42,7 +42,6 @@ namespace pos
 ArrayState::ArrayState(IStateControl* iState)
 : iStateControl(iState)
 {
-    publisher = new ArrayStatePublisher();
     string sender = typeid(*this).name();
     degradedState = new StateContext(sender, SituationEnum::DEGRADED);
     rebuildingState = new StateContext(sender, SituationEnum::REBUILDING);
@@ -56,7 +55,6 @@ ArrayState::~ArrayState(void)
     delete stopState;
     delete rebuildingState;
     delete degradedState;
-    delete publisher;
 }
 
 ArrayStateType

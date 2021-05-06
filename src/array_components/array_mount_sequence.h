@@ -55,10 +55,10 @@ public:
     ArrayMountSequence(vector<IMountSequence*> seq, IAbrControl* abr,
                        IStateControl* iState, string name);
     virtual ~ArrayMountSequence(void);
-    int Mount(void);
-    int Unmount(VolumeManager* volMgr);
-
-    void StateChanged(StateContext* prev, StateContext* next) override;
+    virtual int Mount(void);
+    virtual int Unmount(void);
+    virtual void Shutdown(void);
+    virtual void StateChanged(StateContext* prev, StateContext* next) override;
 
 private:
     bool _WaitState(StateContext* goal);
@@ -71,5 +71,7 @@ private:
     StateContext* normalState = nullptr;
     std::mutex mtx;
     std::condition_variable cv;
+
+    string arrayName = "";
 };
 } // namespace pos

@@ -59,4 +59,9 @@ MetaFsClient::Dispose(void)
     std::string arrayName = arrayInfo->GetName();
     metaFs.mgmt.RemoveArray(arrayName);
 }
+
+void
+MetaFsClient::Shutdown(void)
+{
+}
 } // namespace pos

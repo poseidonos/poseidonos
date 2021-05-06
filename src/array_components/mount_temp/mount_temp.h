@@ -49,6 +49,7 @@ public:
     explicit MountTemp(IAbrControl* abr, string name);
     int Mount1(void);
     int Unmount2(void);
+    void Shutdown(void);
 
 private:
     int _MountMetaFilesystem(void);

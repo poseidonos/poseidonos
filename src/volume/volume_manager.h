@@ -64,6 +64,7 @@ public:
 
     int Init(void) override;
     void Dispose(void) override;
+    void Shutdown(void) override;
     int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw) override;
     int Delete(std::string name) override;
     int Mount(std::string name, std::string subnqn) override;

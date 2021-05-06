@@ -96,6 +96,17 @@ Mapper::Dispose(void)
 }
 
 void
+Mapper::Shutdown(void)
+{
+    if (isInitialized == true)
+    {
+        Close();
+        _UnregisterFromMapperService();
+        isInitialized = false;
+    }
+}
+
+void
 Mapper::Close(void)
 {
     vsaMapManager->Close();

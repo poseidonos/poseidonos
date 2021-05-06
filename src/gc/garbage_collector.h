@@ -59,6 +59,7 @@ public:
     void StateChanged(StateContext* prev, StateContext* next) override;
     int Init(void) override;
     void Dispose(void) override;
+    void Shutdown(void) override;
 
     void Pause(void) { copierPtr->Pause(); }
     void Resume(void) { copierPtr->Resume(); }
