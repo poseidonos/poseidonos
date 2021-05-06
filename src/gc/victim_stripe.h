@@ -52,7 +52,7 @@ struct BlkInfo
 class VictimStripe
 {
 public:
-    VictimStripe(IArrayInfo* array);
+    VictimStripe(IArrayInfo* array, ReverseMapPack* revMapPack_ = nullptr);
     virtual ~VictimStripe(void);
     void Load(StripeId _lsid, CallbackSmartPtr callback);
 
@@ -80,7 +80,7 @@ private:
     void _LoadReverseMap(CallbackSmartPtr callback);
 
     StripeId myLsid;
-    vector< list<BlkInfo> > validBlkInfos;
+    vector<list<BlkInfo>> validBlkInfos;
     list<BlkInfo> blkInfoList;
 
     uint32_t dataBlks;
@@ -88,8 +88,9 @@ private:
     uint32_t blockOffset;
     uint32_t validBlockCnt;
     bool isLoaded;
-    ReverseMapPack* revMapPack;
+
     IArrayInfo* array;
+    ReverseMapPack* revMapPack;
 };
 
 } // namespace pos

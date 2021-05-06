@@ -48,35 +48,54 @@
 
 namespace pos
 {
+
 Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus,
-               IArrayInfo* array)
+               IArrayInfo* array, const PartitionLogicalSize* udSize, CopierMeta* meta_,
+               IBlockAllocator* iBlockAllocator_, ISegmentCtx* iSegmentCtx_,
+               CallbackSmartPtr stripeCopySubmissionPtr_, CallbackSmartPtr reverseMapLoadCompletionPtr_)
 : currentStripeOffset(0),
   victimId(victimId),
   targetId(targetId),
   victimStripeId(UNMAP_STRIPE),
   copybackState(COPIER_THRESHOLD_CHECK_STATE),
-  meta(nullptr),
-  iBlockAllocator(AllocatorServiceSingleton::Instance()->GetIBlockAllocator(array->GetName())),
-  iSegmentCtx(AllocatorServiceSingleton::Instance()->GetISegmentCtx(array->GetName())),
+  meta(meta_),
+  array(array),
+  iBlockAllocator(iBlockAllocator_),
+  iSegmentCtx(iSegmentCtx_),
   gcStatus(gcStatus),
-  loadedValidBlock(false)
+  loadedValidBlock(false),
+  stripeCopySubmissionPtr(stripeCopySubmissionPtr_),
+  reverseMapLoadCompletionPtr(reverseMapLoadCompletionPtr_)
 {
-    const PartitionLogicalSize* udSize;
-    udSize = array->GetSizeInfo(PartitionType::USER_DATA);
+    if (nullptr == udSize)
+    {
+        udSize = array->GetSizeInfo(PartitionType::USER_DATA);
+    }
     userDataMaxStripes = udSize->stripesPerSegment;
     userDataMaxBlks = udSize->blksPerStripe * userDataMaxStripes;
     blocksPerChunk = udSize->blksPerChunk;
-
-    meta = new CopierMeta(array);
-
     victimIndex = 0;
-
+    if (nullptr == meta)
+    {
+        meta = new CopierMeta(array);
+    }
+    if (nullptr == iBlockAllocator)
+    {
+        iBlockAllocator =  AllocatorServiceSingleton::Instance()->GetIBlockAllocator(array->GetName());
+    }
+    if (nullptr == iSegmentCtx)
+    {
+        iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx(array->GetName());
+    }
     SetEventType(BackendEvent_GC);
 }
 
 Copier::~Copier(void)
 {
-    delete meta;
+    if (nullptr != meta)
+    {
+        delete meta;
+    }
 }
 
 bool
@@ -187,16 +206,22 @@ Copier::_CopyPrepareState(void)
 
     loadedValidBlock = false;
     validStripes.clear();
-    CallbackSmartPtr callee(
-        new StripeCopySubmission(baseStripe,
-            meta, victimIndex));
+
+    CallbackSmartPtr callee = std::make_shared<StripeCopySubmission>(baseStripe, meta, victimIndex);
     callee->SetWaitingCount(userDataMaxStripes);
 
     for (uint32_t index = 0; index < userDataMaxStripes; index++)
     {
-        CallbackSmartPtr callback(
-                new ReverseMapLoadCompletion());
-        callback->SetCallee(callee);
+        CallbackSmartPtr callback;
+        if (nullptr == reverseMapLoadCompletionPtr)
+        {
+            callback = std::make_shared<ReverseMapLoadCompletion>();
+            callback->SetCallee(callee);
+        }
+        else
+        {
+            callback = reverseMapLoadCompletionPtr;
+        }
         meta->GetVictimStripe(victimIndex, index)->Load(baseStripe + index, callback);
     }
 

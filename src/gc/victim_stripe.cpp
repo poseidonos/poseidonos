@@ -42,25 +42,31 @@
 
 namespace pos
 {
-VictimStripe::VictimStripe(IArrayInfo* array)
+VictimStripe::VictimStripe(IArrayInfo* array, ReverseMapPack* revMapPack_)
 : myLsid(UNMAP_STRIPE),
   dataBlks(0),
   chunkIndex(0),
   blockOffset(0),
   validBlockCnt(0),
   isLoaded(false),
-  array(array)
+  array(array),
+  revMapPack(revMapPack_)
 {
     dataBlks = array->GetSizeInfo(PartitionType::USER_DATA)->blksPerStripe;
-    IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(array->GetName());
-    revMapPack = iReverseMap->AllocReverseMapPack();
+    if (nullptr == revMapPack)
+    {
+        IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(array->GetName());
+        revMapPack = iReverseMap->AllocReverseMapPack();
+    }
 }
 
 VictimStripe::~VictimStripe(void)
 {
     validBlkInfos.clear();
-
-    delete revMapPack;
+    if (nullptr != revMapPack)
+    {
+        delete revMapPack;
+    }
 }
 void
 VictimStripe::Load(StripeId _lsid, CallbackSmartPtr callback)

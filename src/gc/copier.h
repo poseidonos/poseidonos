@@ -55,54 +55,64 @@ enum CopierStateType
     COPIER_READY_TO_END_STATE
 };
 
+class StripeCopySubmission;
+class ReverseMapLoadCompletion;
+
 class Copier : public Event
 {
 public:
     Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus,
-           IArrayInfo* array);
+                IArrayInfo* array, const PartitionLogicalSize* udSize = nullptr, CopierMeta* meta_ = nullptr,
+                IBlockAllocator* iBlockAllocator_ = nullptr, ISegmentCtx* iSegmentCtx_ = nullptr,
+                CallbackSmartPtr stripeCopySubmissionPtr_ = nullptr, CallbackSmartPtr reverseMapLoadCompletionPtr_ = nullptr);
+
     virtual ~Copier(void);
     virtual bool Execute(void);
 
-    void
+    virtual void
     Stop(void)
     {
         isStopped = true;
     }
-    bool
+    virtual bool
     IsStopped(void)
     {
         return isStopped;
     }
-    void
+    virtual void
     ReadyToEnd(void)
     {
         readyToEnd = true;
     }
-
-    void
+    virtual void
     Pause(void)
     {
         isPaused = true;
     }
-    void
+    virtual void
     Resume(void)
     {
         isPaused = false;
     }
-    bool
+    virtual bool
     IsPaused(void)
     {
         return isPaused;
     }
-    void
+    virtual void
     DisableThresholdCheck(void)
     {
         thresholdCheck = false;
     }
-    bool
+    virtual bool
     IsEnableThresholdCheck(void)
     {
         return thresholdCheck;
+    }
+    virtual CopierStateType
+    GetCopybackState(void)
+    {
+        return copybackState;
     }
 
 private:
@@ -130,8 +140,9 @@ private:
     uint32_t victimIndex;
 
     CopierStateType copybackState;
-    CopierMeta* meta = nullptr;
+    CopierMeta* meta;
 
+    IArrayInfo* array;
     IBlockAllocator* iBlockAllocator;
     ISegmentCtx* iSegmentCtx;
     GcStatus* gcStatus;
@@ -142,6 +153,9 @@ private:
     bool isStopped = false;
     bool isPaused = false;
     bool readyToEnd = false;
+
+    CallbackSmartPtr stripeCopySubmissionPtr;
+    CallbackSmartPtr reverseMapLoadCompletionPtr;
 };
 
 } // namespace pos

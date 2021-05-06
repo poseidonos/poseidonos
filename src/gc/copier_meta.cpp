@@ -40,55 +40,83 @@
 namespace pos
 {
 
-CopierMeta::CopierMeta(IArrayInfo* array)
+CopierMeta::CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize,
+                       BitMapMutex* inUseBitmap_, GcStripeManager* gcStripeManager_,
+                       std::vector<std::vector<VictimStripe*>>* victimStripes_,
+                       std::vector<FreeBufferPool*>* gcBufferPool_)
+: inUseBitmap(inUseBitmap_),
+  gcStripeManager(gcStripeManager_),
+  victimStripes(victimStripes_),
+  gcBufferPool(gcBufferPool_)
 {
-    arrayName = array->GetName();
-    const PartitionLogicalSize* udSize;
-    udSize = array->GetSizeInfo(PartitionType::USER_DATA);
+    if (nullptr == udSize)
+    {
+        arrayName = array->GetName();
+        udSize = array->GetSizeInfo(PartitionType::USER_DATA);
+    }
     stripesPerSegment = udSize->stripesPerSegment;
     blksPerStripe = udSize->blksPerStripe;
 
     InitProgressCount();
-    _CreateBufferPool(udSize->chunksPerStripe, CHUNK_SIZE);
 
-    inUseBitmap = new BitMapMutex(GC_VICTIM_SEGMENT_COUNT);
-    gcStripeManager = new GcStripeManager(array);
-    for (uint32_t stripeIndex = 0; stripeIndex < GC_VICTIM_SEGMENT_COUNT; stripeIndex++)
+    if (nullptr == inUseBitmap)
     {
-        for (uint32_t i = 0 ; i < stripesPerSegment; i++)
-        {
-            victimStripe[stripeIndex].push_back(new VictimStripe(array));
-        }
+        inUseBitmap = new BitMapMutex(GC_VICTIM_SEGMENT_COUNT);
+    }
+    if (nullptr == gcStripeManager)
+    {
+        gcStripeManager = new GcStripeManager(array);
+    }
+    if (nullptr == victimStripes)
+    {
+        _CreateVictimStripes(array);
+    }
+    if (nullptr == gcBufferPool)
+    {
+        _CreateBufferPool(udSize->chunksPerStripe, CHUNK_SIZE);
     }
 }
+
 
 CopierMeta::~CopierMeta(void)
 {
     for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
     {
-        delete gcBufferPool[index];
+        if (nullptr != (*gcBufferPool)[index])
+        {
+            delete (*gcBufferPool)[index];
+        }
     }
     for (uint32_t stripeIndex = 0; stripeIndex < GC_VICTIM_SEGMENT_COUNT; stripeIndex++)
     {
         for (uint32_t i = 0 ; i < stripesPerSegment; i++)
         {
-            delete victimStripe[stripeIndex][i];
+            if (nullptr != (*victimStripes)[stripeIndex][i])
+            {
+                delete (*victimStripes)[stripeIndex][i];
+            }
         }
     }
-    delete gcStripeManager;
-    delete inUseBitmap;
+    if (nullptr != gcStripeManager)
+    {
+        delete gcStripeManager;
+    }
+    if (nullptr != inUseBitmap)
+    {
+        delete inUseBitmap;
+    }
 }
 
 void*
 CopierMeta::GetBuffer(StripeId stripeId)
 {
-    return gcBufferPool[stripeId % GC_BUFFER_COUNT]->GetBuffer();
+    return (*gcBufferPool)[stripeId % GC_BUFFER_COUNT]->GetBuffer();
 }
 
 void
 CopierMeta::ReturnBuffer(StripeId stripeId, void* buffer)
 {
-    gcBufferPool[stripeId % GC_BUFFER_COUNT]->ReturnBuffer(buffer);
+    (*gcBufferPool)[stripeId % GC_BUFFER_COUNT]->ReturnBuffer(buffer);
 }
 
 void
@@ -222,7 +250,7 @@ CopierMeta::GetBlksPerStripe(void)
 VictimStripe*
 CopierMeta::GetVictimStripe(uint32_t victimSegmentIndex, uint32_t stripeOffset)
 {
-    return victimStripe[victimSegmentIndex][stripeOffset];
+    return (*victimStripes)[victimSegmentIndex][stripeOffset];
 }
 
 GcStripeManager*
@@ -234,9 +262,24 @@ CopierMeta::GetGcStripeManager(void)
 void
 CopierMeta::_CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize)
 {
+    gcBufferPool = new std::vector<FreeBufferPool*>;
     for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
     {
-        gcBufferPool[index] = new FreeBufferPool(maxBufferCount, bufferSize);
+        gcBufferPool->push_back(new FreeBufferPool(maxBufferCount, bufferSize));
+    }
+}
+
+void
+CopierMeta::_CreateVictimStripes(IArrayInfo* array)
+{
+    victimStripes = new std::vector<std::vector<VictimStripe*>>;
+    victimStripes->resize(GC_VICTIM_SEGMENT_COUNT);
+    for (uint32_t stripeIndex = 0; stripeIndex < GC_VICTIM_SEGMENT_COUNT; stripeIndex++)
+    {
+        for (uint32_t i = 0 ; i < stripesPerSegment; i++)
+        {
+            (*victimStripes)[stripeIndex].push_back(new VictimStripe(array));
+        }
     }
 }
 
