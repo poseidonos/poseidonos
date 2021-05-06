@@ -97,13 +97,11 @@ private:
     void _ResetSegmentStates(void);
     void _FreeSegment(SegmentId segId);
 
-    // file io
     IAllocatorFileIoClient* fileOwner[NUM_FILES];
     int numAsyncIoIssued;
     std::atomic<bool> flushInProgress;
     EventSmartPtr flushCallback;
 
-    // DOCs
     AllocatorFileIoManager* fileIoManager;
     AllocatorAddressInfo* addrInfo;
     AllocatorCtx* allocatorCtx;
@@ -114,8 +112,6 @@ private:
     GcCtx gcCtx;
 
     std::string arrayName;
-
-    // Lock
     std::mutex ctxLock;
 };
 

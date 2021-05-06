@@ -35,6 +35,7 @@
 #include <vector>
 
 #include "src/allocator/context_manager/active_stripe_index_info.h"
+#include "src/allocator/context_manager/allocator_ctx.h"
 #include "src/allocator/context_manager/wb_stripe_ctx.h"
 #include "src/include/branch_prediction.h"
 #include "src/io/backend_io/flush_read_submission.h"
@@ -354,6 +355,7 @@ WBStripeManager::_MakeRebuildTarget(void)
 {
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@MakeRebuildTarget()");
     RebuildCtx* rbCtx = contextManager->GetRebuldCtx();
+    AllocatorCtx* allocCtx = contextManager->GetAllocatorCtx();
 
     if (rbCtx->IsRebuidTargetSegmentsEmpty() == false)
     {
@@ -369,7 +371,7 @@ WBStripeManager::_MakeRebuildTarget(void)
     SegmentId segmentId = 0;
     while (true)
     {
-        segmentId = contextManager->AllocateFreeSegment(false);
+        segmentId = allocCtx->GetUsedSegment(false);
         if (segmentId == UNMAP_SEGMENT)
         {
             break;

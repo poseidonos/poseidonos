@@ -166,7 +166,7 @@ ContextManager::FlushContextsAsync(EventSmartPtr callback)
 SegmentId
 ContextManager::AllocateFreeSegment(bool forUser)
 {
-    SegmentId segmentId = allocatorCtx->AllocateFreeSegment(0);
+    SegmentId segmentId = allocatorCtx->AllocateFreeSegment(UNMAP_SEGMENT/*scan free segment from last allocated segId*/);
     if (forUser == false)
     {
         return segmentId;
@@ -180,11 +180,11 @@ ContextManager::AllocateFreeSegment(bool forUser)
     }
     if (segmentId == UNMAP_SEGMENT)
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "Free segmentId exhausted, segmentId:{}", segmentId);
+        POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "Failed to allocate segment, free segment count:{}", allocatorCtx->GetNumOfFreeUserDataSegment());
     }
     else
     {
-        POS_TRACE_INFO(EID(ALLOCATOR_START), "segmentId:{} @AllocateUserDataSegmentId", segmentId);
+        POS_TRACE_INFO(EID(ALLOCATOR_START), "segmentId:{} @AllocateUserDataSegmentId, free segment count:{}", segmentId, allocatorCtx->GetNumOfFreeUserDataSegment());
     }
     return segmentId;
 }
@@ -398,11 +398,11 @@ ContextManager::_LoadContexts(void)
         int fileSize = fileIoManager->GetFileSize(owner);
         char* buf = new char[fileSize]();
         int ret = fileIoManager->LoadSync(owner, buf);
-        if (ret == 0)
+        if (ret == 0) // case for creating new file
         {
             _FlushSync(owner);
         }
-        else
+        else if (ret == 1)// case for file exists
         {
             fileIoManager->LoadSectionData(owner, buf);
             fileOwner[owner]->AfterLoad(buf);
@@ -410,6 +410,11 @@ ContextManager::_LoadContexts(void)
             {
                 wbStripeCtx->AfterLoad(buf);
             }
+        }
+        else
+        {
+            // ret == -1: error
+            assert(false);
         }
         delete[] buf;
     }
@@ -421,7 +426,9 @@ ContextManager::_FlushSync(int owner)
     int size = fileIoManager->GetFileSize(owner);
     char* buf = new char[size]();
     _PrepareBuffer(owner, buf);
-    return fileIoManager->StoreSync(owner, buf);
+    int ret = fileIoManager->StoreSync(owner, buf);
+    delete[] buf;
+    return ret;
 }
 
 int
@@ -450,7 +457,7 @@ ContextManager::_FlushAsync(int owner, EventSmartPtr callbackEvent)
 void
 ContextManager::_PrepareBuffer(int owner, char* buf)
 {
-    fileOwner[owner]->BeforeFlush(0, nullptr);
+    fileOwner[owner]->BeforeFlush(0/*all Header*/, nullptr);
     if (owner == SEGMENT_CTX)
     {
         std::lock_guard<std::mutex> lock(segmentCtx->GetSegmentCtxLock());

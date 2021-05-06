@@ -97,10 +97,10 @@ AllocatorCtx::ReleaseSegment(SegmentId segId)
 }
 
 SegmentId
-AllocatorCtx::AllocateFreeSegment(int startSegId)
+AllocatorCtx::AllocateFreeSegment(SegmentId startSegId)
 {
     SegmentId segId;
-    if (startSegId == 0)
+    if (startSegId == UNMAP_SEGMENT)
     {
         segId = allocSegBitmap->SetNextZeroBit();
     }
@@ -109,6 +109,17 @@ AllocatorCtx::AllocateFreeSegment(int startSegId)
         segId = allocSegBitmap->SetFirstZeroBit(startSegId);
     }
 
+    if (allocSegBitmap->IsValidBit(segId) == false)
+    {
+        segId = UNMAP_SEGMENT;
+    }
+    return segId;
+}
+
+SegmentId
+AllocatorCtx::GetUsedSegment(SegmentId startSegId)
+{
+    SegmentId segId = allocSegBitmap->FindFirstSetBit(startSegId);
     if (allocSegBitmap->IsValidBit(segId) == false)
     {
         segId = UNMAP_SEGMENT;
@@ -218,12 +229,12 @@ AllocatorCtx::AfterLoad(char* buf)
 {
     if (ctxHeader.sig != SIG_ALLOCATOR_CTX)
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "allocator ctx file signature is not matched:{}", ctxHeader.sig);
+        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "allocator ctx file signature is not matched:{}", ctxHeader.sig);
         assert(false);
     }
     else
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "allocator ctx file Integrity check SUCCESS:{}", ctxHeader.ctxVersion);
+        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "allocator ctx file Integrity check SUCCESS:{}", ctxHeader.ctxVersion);
     }
     allocSegBitmap->SetNumBitsSet(ctxHeader.numValidSegment);
 }

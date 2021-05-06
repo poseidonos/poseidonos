@@ -201,12 +201,12 @@ SegmentCtx::AfterLoad(char* buf)
 {
     if (ctxHeader.sig != SIG_SEGMENT_CTX)
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "segment ctx file signature is not matched:{}", ctxHeader.sig);
+        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "segment ctx file signature is not matched:{}", ctxHeader.sig);
         assert(false);
     }
     else
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "segment ctx file Integrity check SUCCESS:{}", ctxHeader.ctxVersion);
+        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "segment ctx file Integrity check SUCCESS:{}", ctxHeader.ctxVersion);
     }
     ctxStoredVersion = ctxHeader.ctxVersion;
 }

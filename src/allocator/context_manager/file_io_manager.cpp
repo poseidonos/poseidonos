@@ -98,14 +98,23 @@ AllocatorFileIoManager::LoadSync(int owner, char* buf)
 {
     if (ctxFile[owner]->DoesFileExist() == false)
     {
-        ctxFile[owner]->Create(fileSize[owner]);
+        int ret = ctxFile[owner]->Create(fileSize[owner]);
+        if (ret != 0)
+        {
+            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "Failed to create file:{}, size:{}", ctxFileName[owner], fileSize[owner]);
+        }
         ctxFile[owner]->Open();
         return 0;
     }
     else
     {
         ctxFile[owner]->Open();
-        ctxFile[owner]->IssueIO(MetaFsIoOpcode::Read, 0, fileSize[owner], buf);
+        int ret = ctxFile[owner]->IssueIO(MetaFsIoOpcode::Read, 0, fileSize[owner], buf);
+        if (ret != 0)
+        {
+            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "Failed to Load file:{}, size:{}", ctxFileName[owner], fileSize[owner]);
+            return -1;
+        }        
         return 1;
     }
 }
