@@ -166,7 +166,7 @@ ContextManager::FlushContextsAsync(EventSmartPtr callback)
 SegmentId
 ContextManager::AllocateFreeSegment(bool forUser)
 {
-    SegmentId segmentId = allocatorCtx->AllocateFreeSegment(UNMAP_SEGMENT/*scan free segment from last allocated segId*/);
+    SegmentId segmentId = allocatorCtx->AllocateFreeSegment(UNMAP_SEGMENT /*scan free segment from last allocated segId*/);
     if (forUser == false)
     {
         return segmentId;
@@ -402,7 +402,7 @@ ContextManager::_LoadContexts(void)
         {
             _FlushSync(owner);
         }
-        else if (ret == 1)// case for file exists
+        else if (ret == 1) // case for file exists
         {
             fileIoManager->LoadSectionData(owner, buf);
             fileOwner[owner]->AfterLoad(buf);
@@ -457,7 +457,7 @@ ContextManager::_FlushAsync(int owner, EventSmartPtr callbackEvent)
 void
 ContextManager::_PrepareBuffer(int owner, char* buf)
 {
-    fileOwner[owner]->BeforeFlush(0/*all Header*/, nullptr);
+    fileOwner[owner]->BeforeFlush(0 /*all Header*/, nullptr);
     if (owner == SEGMENT_CTX)
     {
         std::lock_guard<std::mutex> lock(segmentCtx->GetSegmentCtxLock());

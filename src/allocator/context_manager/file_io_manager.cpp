@@ -114,7 +114,7 @@ AllocatorFileIoManager::LoadSync(int owner, char* buf)
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "Failed to Load file:{}, size:{}", ctxFileName[owner], fileSize[owner]);
             return -1;
-        }        
+        }
         return 1;
     }
 }
