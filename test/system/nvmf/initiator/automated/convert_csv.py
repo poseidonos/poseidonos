@@ -11,7 +11,7 @@ rr_4k_limit = 10000
 
 sw_128k_test_name = "write_128KiB_QD4_BW"
 sr_128k_test_name = "read_128KiB_QD4_BW"
-rw_4k_test_name = "randwrite_4096B_QD44_BW"
+rw_4k_test_name = "randwrite_4096B_QD128_BW"
 rr_4k_test_name = "randread_4096B_QD128_BW"
 
 ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../../../"
