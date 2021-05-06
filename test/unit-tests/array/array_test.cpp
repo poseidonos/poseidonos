@@ -323,7 +323,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenArrayNameIsInvalid)
     int actual = array.Create(emptyDeviceSet, "doesn't matter");
 
     // Then
-    ASSERT_EQ(EID(NAME_TOO_LONG), actual);
+    ASSERT_EQ(EID(ARRAY_NAME_TOO_LONG), actual);
 }
 
 TEST(Array, Create_testIfErrorIsReturnedWhenRaidTypeIsInvalid)

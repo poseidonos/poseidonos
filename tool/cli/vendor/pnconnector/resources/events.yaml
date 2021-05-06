@@ -204,7 +204,7 @@ modules:
         solution: Enter a volume name between 2 and 255 characters
       - code: 2021
         level: WARN
-        message: Volume name  is too long
+        message: Volume name is too long
         problem: Volume name entered is too long
         solution: Enter a volume name that does not exceed 255 characters
       - code: 2022
@@ -719,6 +719,21 @@ modules:
       - code: 2558
         level: INFO
         message: "Array State : Stop"
+      - code: 2560
+        level: WARN
+        message: Array name is too short
+        problem: The Array name entered is to short
+        solution: Enter a Array name between 2 and 63 characters
+      - code: 2561
+        level: WARN
+        message: Array name is too long
+        problem: Array name entered is too long
+        solution: Enter a Array name that does not exceed 63 characters
+      - code: 2562
+        level: WARN
+        message: Unacceptable Array name
+        problem: Array name entered contains a string that is not allowed
+        solution: Enter the Array name that meets the Array name rules
       - code: 2580
         level: ERROR
         message: failed to mount array
