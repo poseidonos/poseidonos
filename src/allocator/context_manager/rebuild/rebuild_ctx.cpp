@@ -100,11 +100,15 @@ RebuildCtx::Close(void)
 SegmentId
 RebuildCtx::GetRebuildTargetSegment(void)
 {
-    std::unique_lock<std::mutex> lock(iContextInternal->GetCtxLock());
+    if (iContextInternal->GetCtxLock().try_lock() == false)
+    {
+        return UNMAP_SEGMENT;   // Need to retry!
+    }    
     POS_TRACE_INFO(EID(ALLOCATOR_START), "@GetRebuildTargetSegment");
 
     if (GetTargetSegmentCnt() == 0)
     {
+        iContextInternal->GetCtxLock().unlock();
         return UINT32_MAX;
     }
 
@@ -127,13 +131,17 @@ RebuildCtx::GetRebuildTargetSegment(void)
         break;
     }
 
+    iContextInternal->GetCtxLock().unlock();
     return segmentId;
 }
 
 int
 RebuildCtx::ReleaseRebuildSegment(SegmentId segmentId)
 {
-    std::unique_lock<std::mutex> lock(iContextInternal->GetCtxLock());
+    if (iContextInternal->GetCtxLock().try_lock() == false)
+    {
+        return -1;  // Need to retry!
+    }
     POS_TRACE_INFO(EID(ALLOCATOR_START), "@ReleaseRebuildSegment");
 
     auto iter = FindRebuildTargetSegment(segmentId);
@@ -141,6 +149,7 @@ RebuildCtx::ReleaseRebuildSegment(SegmentId segmentId)
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "There is no segmentId:{} in rebuildTargetSegments, seemed to be freed by GC", segmentId);
         SetUnderRebuildSegmentId(UINT32_MAX);
+        iContextInternal->GetCtxLock().unlock();
         return 0;
     }
 
@@ -149,6 +158,7 @@ RebuildCtx::ReleaseRebuildSegment(SegmentId segmentId)
     _EraseRebuildTargetSegments(iter);
     FlushRebuildCtx();
     SetUnderRebuildSegmentId(UINT32_MAX);
+    iContextInternal->GetCtxLock().unlock();
     return 0;
 }
 
