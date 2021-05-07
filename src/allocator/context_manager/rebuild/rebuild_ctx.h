@@ -85,6 +85,7 @@ private:
     std::set<SegmentId> rebuildTargetSegments; // No lock
     SegmentId underRebuildSegmentId;
     MetaFileIntf* rebuildSegmentsFile;
+    std::mutex rebuildLock;
     char* bufferInObj;
     std::string arrayName;
 
