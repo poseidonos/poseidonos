@@ -189,9 +189,13 @@ bool Raid5Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
 
     if (currentTaskCnt == 0)
     {
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid5Rebuild::Complete, target segment:{}", targetId);
+
         result = allocatorSvc->ReleaseRebuildSegment(targetId);
         if (result != 0)
         {
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid5Rebuild::Complete, target segment:{} result : {}", targetId, result);
+            ctx->taskCnt += 1;
             return false;
         }
         EventSmartPtr nextEvent(new Rebuilder(this));
