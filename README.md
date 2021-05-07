@@ -149,7 +149,7 @@ uram0
 The recommended size of uram0 may differ by environment. Please refer to "bdev" section in Learning POS Environment for further details.
 ```
 
-### Step 3. Check POS information and version
+### Step 3. Check POS version
 
 ```bash
 # Root is not necessary in order to run "cli" commands.
@@ -170,30 +170,7 @@ Response from Poseidon OS
     Solution     :
     Data         :
  {
-    "capacity": "0GB (0B)",
-    "rebuildingProgress": "0",
-    "situation": "DEFAULT",
-    "state": "OFFLINE",
-    "used": "0GB (0B)"
-}
-  
-ibof@ibof-target:IBOF_HOME/bin$ ./cli system version
-  
-  
-Request to Poseidon OS
-    xrId        :  3256290e-2f88-11eb-96a6-005056adb61a
-    command     :  GETVERSION
-  
-  
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "version": "pos-0.7.3"
+	"version": "pos-0.8.0"
 }
 ```
 
@@ -405,82 +382,16 @@ Response from Poseidon OS
 }
 ```
 
-### Step 5b. Load existing POS Array
-
-"Load" command is to support a case that POS/host has restarted and lost its in-memory state. The following command will retrieve the array information from MBR partition and import into POS. 
-
-```bash
-ibof@ibof-target:IBOF_HOME/bin$ ./cli array load --name POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  f6fa9d6b-4f16-11eb-b888-005056adb61a
-    command     :  LOADARRAY
-    Param       :
-{
-    "name": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-```
-Please make sure that Step 2 (creating write buffer) and Step 4 (scanning NVMe devices) should run before the LOADARRAY command. After a reboot/restart, the write buffer should be recreated and rescanned. Otherwise, LOADARRAY command would fail. 
-
-
 ### Step 6. Mount POS Array 
-Even though we have POS array provisioned, we can't use it until it is mounted. Let's check out what happens with system state around POS array mount.
+Even though we have POS array provisioned, we can't use it until it is mounted. Let's check out what happens with array state around POS array mount.
 
 ```bash
-ibof@ibof-target:IBOF_HOME/bin$ ./cli system info
- 
- 
-Request to Poseidon OS
-    xrId        :  7d7dcf05-32ab-11eb-b334-005056adb61a
-    command     :  GETIBOFOSINFO
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "capacity": "0GB (0B)",
-    "rebuildingProgress": "0",
-    "situation": "DEFAULT",
-    "state": "OFFLINE",
-    "used": "0GB (0B)"
-}
- 
-ibof@ibof-target:IBOF_HOME/bin$ ./cli system mount
-  
-  
-Request to Poseidon OS
-    xrId        :  31dbc740-2f8c-11eb-ae95-005056adb61a
-    command     :  MOUNTIBOFOS
-  
-  
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-  
-  
-ibof@ibof-target:IBOF_HOME/bin$ ./cli system info
+ibof@ibof-target:IBOF_HOME/bin$ ./cli array info --name POSArray
   
   
 Request to Poseidon OS
     xrId        :  3f30be48-2f8c-11eb-9afa-005056adb61a
-    command     :  GETIBOFOSINFO
+    command     :  ARRAYINFO
   
   
 Response from Poseidon OS
@@ -491,17 +402,104 @@ Response from Poseidon OS
     Solution     :
     Data         :
  {
-    "capacity": "120.31277138GB (120312771380B)",
-    "rebuildingProgress": "0",
-    "situation": "NORMAL",
-    "state": "NORMAL",
-    "used": "0GB (0B)"
+    "name":"POSArray", 
+    "state":"OFFLINE",
+    "situation":"DEFAULT",
+    "rebuilding_progress":0,
+    "capacity":0,
+    "used":0,
+    "devicelist":[
+        {
+            "type":"BUFFER",
+            "name":"uram0"
+        },
+        {
+            "type":"DATA",
+            "name":"unvme-ns-0"
+        },
+        {
+            "type":"DATA",
+            "name":"unvme-ns-1"
+        },
+        {
+            "type":"DATA",
+            "name":"unvme-ns-2"
+        },
+        {
+            "type":"SPARE",
+            "name":"unvme-ns-3"
+        }
+    ]
+}
+
+ibof@ibof-target:IBOF_HOME/bin$ ./cli array mount --name POSArray
+  
+  
+Request to Poseidon OS
+    xrId        :  31dbc740-2f8c-11eb-ae95-005056adb61a
+    command     :  MOUNTARRAY
+  
+  
+Response from Poseidon OS
+    Code         :  0
+    Level        :  INFO
+    Description  :  Success
+    Problem      :
+    Solution     :
+  
+  
+ibof@ibof-target:IBOF_HOME/bin$ ./cli array info --name POSArray
+  
+  
+Request to Poseidon OS
+    xrId        :  3f30be48-2f8c-11eb-9afa-005056adb61a
+    command     :  ARRAYINFO
+  
+  
+Response from Poseidon OS
+    Code         :  0
+    Level        :  INFO
+    Description  :  Success
+    Problem      :
+    Solution     :
+    Data         :
+ {
+    "name":"POSArray", 
+    "state":"BUSY",
+    "situation":"REBUILDING",
+    "rebuilding_progress":10,
+    "capacity":120795955200,
+    "used":107374182400,
+    "devicelist":[
+        {
+            "type":"BUFFER",
+            "name":"uram0"
+        },
+        {
+            "type":"DATA",
+            "name":"unvme-ns-0"
+        },
+        {
+            "type":"DATA",
+            "name":"unvme-ns-1"
+        },
+        {
+            "type":"DATA",
+            "name":"unvme-ns-2"
+        },
+        {
+            "type":"SPARE",
+            "name":"unvme-ns-3"
+        }
+    ]
 }
 ```
-Please note that state field in the output has changed from OFFLINE to NORMAL. Also, "capacity" is now reflecting the size of the NVMe storage pool available to POS. 
+"capacity" is now reflecting the size of the NVMe storage pool of an array. 
 ```bash
 Please note that, as of Nov/30/2020, POS supports a single POS array only, which is why "mount" command belongs to "system" (i.e., it's currently "cli system mount", but not "cli array mount --name POSArray"). Once POS gets a new feature to support multi array, the command will change accordingly. 
 ```
+Please note that "system mount" and "system unmount" commands are not supported from May/7/2020. Instead, please use "array mount" and "array unmount" commands. Additionally, to get the information of an array, please use "array info" command instead of "system info" command.
+
 
 ### Step 7. Configure NVM Subsystems for NVMe Over Fabric Target
 POS is ready to perform volume management task, but still unable to expose its volume over network since we haven't configured an NVM subsystem yet. POS is not ready to expose its volume over network since it does not have NVM subsystem in which NVM namespaces(s) are created. Creating NVM subsystem remains in manual fashion  (vs. running automatically during POS startup) by design. Administrators need to understand its functionality so that they can easily come up with a workaround when needed. Once we have enough understanding about various user environments, this step could be automated in a future release.
@@ -970,12 +968,12 @@ POS volume can be deleted only when it is in Unmounted state.
 ### Step 12. Unmount POS Array
 
 ```bash
-ibof@ibof-target:IBOF_HOME/bin$ ./cli system unmount
+ibof@ibof-target:IBOF_HOME/bin$ ./cli array unmount --name POSArray
   
   
 Request to Poseidon OS
     xrId        :  d32e2fbd-2fb4-11eb-91a3-005056adb61a
-    command     :  UNMOUNTIBOFOS
+    command     :  UNMOUNTARRAY
   
   
 Response from Poseidon OS
@@ -986,12 +984,12 @@ Response from Poseidon OS
     Solution     :
   
   
-ibof@ibof-target:IBOF_HOME/bin$ ./cli system info
+ibof@ibof-target:IBOF_HOME/bin$ ./cli array info --name POSArray
   
   
 Request to Poseidon OS
-    xrId        :  d601d366-2fb4-11eb-874c-005056adb61a
-    command     :  GETIBOFOSINFO
+    xrId        :  3f30be48-2f8c-11eb-9afa-005056adb61a
+    command     :  ARRAYINFO
   
   
 Response from Poseidon OS
@@ -1002,12 +1000,36 @@ Response from Poseidon OS
     Solution     :
     Data         :
  {
-    "capacity": "0GB (0B)",
-    "rebuildingProgress": "0",
-    "situation": "DEFAULT",
-    "state": "OFFLINE",
-    "used": "0GB (0B)"
+    "name":"POSArray", 
+    "state":"OFFLINE",
+    "situation":"DEFAULT",
+    "rebuilding_progress":0,
+    "capacity":0,
+    "used":0,
+    "devicelist":[
+        {
+            "type":"BUFFER",
+            "name":"uram0"
+        },
+        {
+            "type":"DATA",
+            "name":"unvme-ns-0"
+        },
+        {
+            "type":"DATA",
+            "name":"unvme-ns-1"
+        },
+        {
+            "type":"DATA",
+            "name":"unvme-ns-2"
+        },
+        {
+            "type":"SPARE",
+            "name":"unvme-ns-3"
+        }
+    ]
 }
+
 ```
 
 ### Step 13. Delete POS Array
