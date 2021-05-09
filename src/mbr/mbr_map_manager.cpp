@@ -49,6 +49,11 @@ MbrMapManager::~MbrMapManager(void)
 int
 MbrMapManager::InsertDevices(ArrayMeta& meta, unsigned int arrayIndex)
 {
+    for (auto dev : meta.devs.nvm)
+    {
+        arrayDeviceIndexMap.insert(pair<string, unsigned int>(dev.uid, arrayIndex));
+    }
+
     for (auto dev : meta.devs.data)
     {
         arrayDeviceIndexMap.insert(pair<string, unsigned int>(dev.uid, arrayIndex));
@@ -92,6 +97,14 @@ MbrMapManager::DeleteDevices(unsigned int arrayIndex)
 int
 MbrMapManager::CheckDevices(ArrayMeta& meta)
 {
+    for (auto dev : meta.devs.nvm)
+    {
+        if (arrayDeviceIndexMap.find(dev.uid) != arrayDeviceIndexMap.end())
+        {
+            return (int)POS_EVENT_ID::MBR_DEVICE_ALREADY_IN_ARRAY;
+        }
+    }
+
     for (auto dev : meta.devs.data)
     {
         if (arrayDeviceIndexMap.find(dev.uid) != arrayDeviceIndexMap.end())
