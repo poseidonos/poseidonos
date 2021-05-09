@@ -39,6 +39,7 @@
 #include "src/array/device/array_device.h"
 #include "src/array/service/array_service_layer.h"
 #include "src/array/service/io_translator/i_io_translator.h"
+#include "src/array_mgmt/array_manager.h"
 #include "src/device/base/ublock_device.h"
 #include "src/include/address_type.h"
 #include "src/include/partition_type.h"
@@ -46,7 +47,7 @@
 namespace pos
 {
 TranslateDeviceLbaWbtCommand::TranslateDeviceLbaWbtCommand(void)
-:   WbtCommand(TRANSLATE_DEVICE_LBA, "translate_device_lba")
+: WbtCommand(TRANSLATE_DEVICE_LBA, "translate_device_lba")
 {
 }
 
@@ -55,22 +56,42 @@ TranslateDeviceLbaWbtCommand::~TranslateDeviceLbaWbtCommand(void)
 }
 
 int
-TranslateDeviceLbaWbtCommand::Execute(Args &argv, JsonElement &elem)
+TranslateDeviceLbaWbtCommand::Execute(Args& argv, JsonElement& elem)
 {
-    LogicalBlkAddr lsa =
-    {
-        .stripeId = static_cast<uint32_t>(strtoul(argv["lsid"].get<std::string>().c_str(), nullptr, 0)),
-        .offset = strtoul(argv["offset"].get<std::string>().c_str(), nullptr, 0)
-    };
-
     std::string coutfile = "output.txt";
     std::ofstream out(coutfile.c_str(), std::ofstream::app);
+    string arrayName;
+
+    if (!argv.contains("lsid") || !argv.contains("offset") || !argv.contains("name"))
+    {
+        out << "invalid parameter" << endl;
+        out.close();
+        return 0;
+    }
+
+    if (argv.contains("name"))
+    {
+        arrayName = argv["name"].get<std::string>();
+    }
+    else
+    {
+        out << "wrong array name";
+        out.close();
+        return 0;
+    }
+
+    LogicalBlkAddr lsa =
+        {
+            .stripeId = static_cast<uint32_t>(strtoul(argv["lsid"].get<std::string>().c_str(), nullptr, 0)),
+            .offset = strtoul(argv["offset"].get<std::string>().c_str(), nullptr, 0),
+        };
+
     out << "logical stripe : " << lsa.stripeId << std::endl;
     out << "logical offset : " << lsa.offset << std::endl;
 
     PhysicalBlkAddr pba;
     IIOTranslator* trans = ArrayService::Instance()->Getter()->GetTranslator();
-    int ret = trans->Translate("", USER_DATA, pba, lsa);
+    int ret = trans->Translate(arrayName, USER_DATA, pba, lsa);
     if (ret != 0 || pba.arrayDev == nullptr)
     {
         out << "translation failed" << std::endl;

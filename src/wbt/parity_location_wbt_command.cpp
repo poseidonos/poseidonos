@@ -59,30 +59,36 @@ ParityLocationWbtCommand::Execute(Args &argv, JsonElement &elem)
     std::string coutfile = "output.txt";
     std::ofstream out(coutfile.c_str(), std::ofstream::app);
 
-    if (!argv.contains("dev") || !argv.contains("lba"))
+    if (!argv.contains("dev") || !argv.contains("lba") || !argv.contains("name"))
     {
         out << "invalid parameter" << endl;
+        out.close();
         return 0;
     }
 
     string devName = argv["dev"].get<std::string>();
     uint64_t lba = atoi(argv["lba"].get<std::string>().c_str());
+    string arrayName = argv["name"].get<std::string>();
 
-    ArrayComponents* compo = ArrayMgr::Instance()->_FindArray("");
+
+    ArrayComponents* compo = ArrayMgr::Instance()->_FindArray(arrayName);
     if (compo == nullptr)
     {
         out << "array does not exist" << endl;
+        out.close();
         return 0;
     }
     Array* sysArray = compo->GetArray();
     if (sysArray == nullptr)
     {
         out << "array does not exist" << endl;
+        out.close();
         return 0;
     }
     if (sysArray->state->IsMounted() == false)
     {
         out << "array is not mounted" << endl;
+        out.close();
         return 0;
     }
 
