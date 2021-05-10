@@ -102,7 +102,7 @@ RebuildCtx::GetRebuildTargetSegment(void)
 {
     if (rebuildLock.try_lock() == false)
     {
-        return UNMAP_SEGMENT;   // Need to retry!
+        return NEED_TO_RETRY;
     }
     POS_TRACE_INFO(EID(ALLOCATOR_START), "@GetRebuildTargetSegment");
 

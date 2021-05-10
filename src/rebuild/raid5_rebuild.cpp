@@ -87,11 +87,11 @@ Raid5Rebuild::Read(void)
 
     SegmentId segId = _NextSegment();
 
-    if (segId == UNMAP_SEGMENT)
+    if (segId == NEED_TO_RETRY)
     {
         return false;
     }
-
+    
     UpdateProgress(segId * strCnt);
 
     if (segId == ctx->size->totalSegments ||
