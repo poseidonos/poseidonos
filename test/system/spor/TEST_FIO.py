@@ -12,10 +12,7 @@ import TEST_LIB
 # ######################################################################################
 q_depth = 4
 block_size = '4K'
-verify_on = False
 core_mask = '0x40'
-
-extra_fio_options = " --numjobs=1 --ramp_time=0 --norandommap=1 --bs_unaligned=1 "
 # ######################################################################################
 
 def write(volumeId, offset, size, pattern, runTime=0):
@@ -75,14 +72,9 @@ def run_fio(workload, volumeId, io_size_bytes, io_offset, verify_pattern, ip, po
             + " --iodepth=" + str(q_depth) + "" \
             + " --readwrite=" + workload
 
-    if verify_on == True:
-        command += " --verify=md5 "
-    else:
-        command += " --verify=0 "
-
     command += " --offset=" + str(io_offset)
-    command += " --verify=pattern --verify_pattern=" + verify_pattern
-    command += extra_fio_options
+    command += " --verify=pattern --verify_pattern=" + verify_pattern + " --verify_dump=1 --verify_state_save=0"
+    command += " --numjobs=1 --ramp_time=0 --bs_unaligned=1 "
     command += " --name=test --filename='" + filename + "'"
 
     if runTime != 0:

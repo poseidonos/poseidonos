@@ -18,6 +18,7 @@ pos_log_path = ""
 ## Test mode
 quick_mode = False
 print_log_with_color = False
+run_pos_manually = False
 
 ## pos setup
 trtype = "tcp"

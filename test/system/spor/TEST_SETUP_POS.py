@@ -6,10 +6,7 @@ import os
 sys.path.append("../lib/")
 sys.path.append("../io_path/")
 
-from datetime import datetime
 import subprocess
-import psutil
-import signal
 
 import pos
 import pos_constant
@@ -19,52 +16,16 @@ import json_parser
 import spdk_rpc
 
 import TEST
+import TEST_LIB
 import TEST_LOG
 import TEST_DEBUGGING
+import TEST_RUN_POS
 
 ARRAYNAME = "POSArray"
 
-######################################################################################
-isPosExecuted = False
-######################################################################################
-
-def chldSignal_handler(sig, frame):
-    global isPosExecuted
-    global pos_proc
-
-    if isPosExecuted == True:
-        isAllive = pos_proc.poll()
-        if isAllive != None:
-            TEST_LOG.print_err("* POS terminated unexpectedly")
-            isPosExecuted = False
-            kill_process("fio")
-            TEST_DEBUGGING.start_core_dump("triggercrash")
-            sys.exit(1)
-
-def quitSignal_handler(sig, frame):
-    TEST_LOG.print_err("* Test force stop signal received")
-    kill_process("fio")
-    TEST_DEBUGGING.start_core_dump("triggercrash")
-    sys.exit(1)
-
-def start_pos():
-    global pos_proc
-    global isPosExecuted
-
-    TEST_LOG.print_info("* Starting POS")
-    pos_execution = TEST.pos_root + "bin/poseidonos"
-
-    with open(TEST.pos_log_path, "a") as log_file:
-        pos_proc = subprocess.Popen(pos_execution, stdout=log_file, stderr=log_file)
-    signal.signal(signal.SIGCHLD, chldSignal_handler)
-    signal.signal(signal.SIGQUIT, quitSignal_handler)
-    isPosExecuted = True
-
 def shutdown_pos():
-    global isPosExecuted
-    global pos_proc
+    TEST_RUN_POS.block_pos_crash_detection()
 
-    isPosExecuted = False
     TEST_LOG.print_info("* Exiting POS")
     out = cli.unmount_array(ARRAYNAME)
     ret = json_parser.get_response_code(out)
@@ -78,19 +39,8 @@ def shutdown_pos():
         TEST_LOG.print_err("Failed to exit pos")
         TEST_LOG.print_debug(out)
         sys.exit(1)
-    pos_proc.wait()
-    if pos_proc.returncode != 0:
-        TEST_LOG.print_err("* POS terminated unexpectedly")
-        TEST_DEBUGGING.start_core_dump("crashed")
 
-def kill_pos():
-    global isPosExecuted
-    global pos_proc
-
-    isPosExecuted = False
-    pos_proc.kill()
-    pos_proc.wait()
-    TEST_LOG.print_info("* POS killed")
+    TEST_RUN_POS.wait_for_pos_shutdown()
 
 def mbr_reset():
     cli.mbr_reset()
@@ -101,7 +51,7 @@ def clean_bringup():
     if (os.path.isfile(TEST.mockfile)):
         os.remove(TEST.mockfile)
 
-    start_pos()
+    TEST_RUN_POS.start_pos()
     subprocess.call(["sleep", "3"])
 
     setup()
@@ -114,7 +64,7 @@ def clean_bringup():
 def dirty_bringup(dump=0):
     TEST_LOG.print_info("* POS dirty bringup")
 
-    start_pos()
+    TEST_RUN_POS.start_pos()
     subprocess.call(["sleep", "3"])
 
     setup()
@@ -258,27 +208,12 @@ def trigger_spor():
     TEST_DEBUGGING.dump_journal("LogBuffer_BeforeSPO")
     TEST_DEBUGGING.flush_gcov()
 
-    kill_pos()
-    kill_process("fio")
+    TEST_RUN_POS.block_pos_crash_detection()
+    TEST_RUN_POS.kill_pos()
+
+    TEST_LIB.kill_process("fio")
     backup_nvram()
 
-def kill_process(procname, sig=9):
-    for proc in psutil.process_iter():
-        try:
-            if procname in proc.name():
-                proc.send_signal(sig)
-                proc.wait()
-                TEST_LOG.print_info("* " + procname + " killed")
-        except psutil.NoSuchProcess:
-            pass
-
-def cleanup_process():
-    os.system('rm -rf /dev/shm/ibof_nvmf_trace*')
-
-    global isPosExecuted
-    isPosExecuted = False
-    kill_process("poseidonos")
-    kill_process("fio")
 
 def cleanup_pos_logs():
     os.system('rm -rf /etc/pos/core/*')

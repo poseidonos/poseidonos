@@ -12,9 +12,10 @@ sys.path.append("../lib/")
 import cli
 import json_parser
 
+import TEST
 import TEST_LOG
 import TEST_SETUP_POS
-import TEST
+import TEST_RUN_POS
 
 def parse_arguments(args):
     parser = argparse.ArgumentParser(description='Test journal feature with SPO')
@@ -39,14 +40,11 @@ def parse_arguments(args):
     TEST.quick_mode = args.quick_mode
     TEST.dump_log_buffer = args.dump_log_buffer
 
-def cleanup():
-    TEST_SETUP_POS.cleanup_process()
-
 def set_up(argv, test_name):
     parse_arguments(argv)
     TEST_LOG.setup_log(test_name)
     TEST_LOG.print_notice("[{} Started]".format(test_name))
-    cleanup()
+    TEST_RUN_POS.cleanup_process()
 
 def tear_down(test_name):
     TEST_SETUP_POS.shutdown_pos()
@@ -122,3 +120,24 @@ def is_journal_enabled():
     command = "cat /etc/pos/pos.conf | jq .journal.enable"
     out = subprocess.check_output(command, universal_newlines=True, shell=True)
     return out
+
+def kill_process(procname, sig=9):
+    for proc in psutil.process_iter():
+        try:
+            if procname in proc.name():
+                proc.send_signal(sig)
+                proc.wait()
+                TEST_LOG.print_info("* " + procname + " killed")
+        except psutil.NoSuchProcess:
+            pass
+
+def find_process(procname):
+    for proc in psutil.process_iter():
+        try:
+            if procname in proc.name():
+                return True
+        except psutil.NoSuchProcess:
+            pass
+
+    return False
+
