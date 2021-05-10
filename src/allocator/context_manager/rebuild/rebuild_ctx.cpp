@@ -231,20 +231,23 @@ RebuildCtx::FreeSegmentInRebuildTarget(SegmentId segId)
         return;
     }
 
-    std::unique_lock<std::mutex> lock(rebuildLock);
+    rebuildLock.lock();
     auto iter = FindRebuildTargetSegment(segId);
     if (iter == RebuildTargetSegmentsEnd())
     {
+        rebuildLock.unlock();
         return;
     }
 
     if (_GetUnderRebuildSegmentId() == segId)
     {
         POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "segmentId:{} is reclaimed by GC, but still under rebuilding", segId);
+        rebuildLock.unlock();
         return;
     }
 
     _EraseRebuildTargetSegments(iter);
+    rebuildLock.unlock();
     POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "segmentId:{} in Rebuild Target has been Freed by GC", segId);
     _StoreRebuildCtx();
 }
