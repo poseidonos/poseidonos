@@ -35,9 +35,9 @@
 #include <fstream>
 #include <string>
 
-#include "src/array_mgmt/array_manager.h"
 #include "src/array/service/array_service_layer.h"
 #include "src/array/service/io_translator/i_io_translator.h"
+#include "src/array_mgmt/array_manager.h"
 #include "src/include/address_type.h"
 #include "src/include/array_config.h"
 #include "src/include/partition_type.h"
@@ -45,7 +45,7 @@
 namespace pos
 {
 DumpDiskLayoutWbtCommand::DumpDiskLayoutWbtCommand(void)
-:   WbtCommand(DUMP_DISK_LAYOUT, "dump_disk_layout")
+: WbtCommand(DUMP_DISK_LAYOUT, "dump_disk_layout")
 {
 }
 
@@ -54,19 +54,25 @@ DumpDiskLayoutWbtCommand::~DumpDiskLayoutWbtCommand(void)
 }
 
 int
-DumpDiskLayoutWbtCommand::Execute(Args &argv, JsonElement &elem)
+DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
 {
-    IIOTranslator* trans = ArrayService::Instance()->Getter()->GetTranslator();
-    string emptyStringToGetFirstArray = "";
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(emptyStringToGetFirstArray);
-
     std::string coutfile = "output.txt";
     std::ofstream out(coutfile.c_str(), std::ofstream::app);
+
+    IIOTranslator* trans = ArrayService::Instance()->Getter()->GetTranslator();
+    if (!argv.contains("name"))
+    {
+        out << "invalid parameter" << endl;
+        out.close();
+        return 0;
+    }
+    string arrayName = argv["name"].get<std::string>();
+    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
 
     LogicalBlkAddr lsa = {.stripeId = 0, .offset = 0};
 
     PhysicalBlkAddr pba;
-    trans->Translate("", META_SSD, pba, lsa);
+    trans->Translate(arrayName, META_SSD, pba, lsa);
     out << "meta ssd start lba : " << pba.lba << std::endl;
 
     const PartitionLogicalSize* logicalSize = info->GetSizeInfo(META_SSD);
@@ -74,7 +80,7 @@ DumpDiskLayoutWbtCommand::Execute(Args &argv, JsonElement &elem)
         logicalSize->blksPerChunk * ArrayConfig::SECTORS_PER_BLOCK;
     out << "meta ssd end lba : " << pba.lba + blk - 1 << std::endl;
 
-    trans->Translate("", USER_DATA, pba, lsa);
+    trans->Translate(arrayName, USER_DATA, pba, lsa);
     out << "user data start lba : " << pba.lba << std::endl;
 
     logicalSize = info->GetSizeInfo(USER_DATA);
@@ -83,7 +89,7 @@ DumpDiskLayoutWbtCommand::Execute(Args &argv, JsonElement &elem)
 
     if (0 /*useNvm*/)
     {
-        trans->Translate("", WRITE_BUFFER, pba, lsa);
+        trans->Translate(arrayName, WRITE_BUFFER, pba, lsa);
         out << "write buffer start lba : " << pba.lba << std::endl;
 
         logicalSize = info->GetSizeInfo(WRITE_BUFFER);
