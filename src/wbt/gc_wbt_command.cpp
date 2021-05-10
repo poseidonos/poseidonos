@@ -50,7 +50,7 @@ GcWbtCommand::~GcWbtCommand(void)
 GarbageCollector*
 GcWbtCommand::_GetGC(std::string arrayName)
 {
-    ArrayComponents* compo = ArrayMgr::Instance()->_FindArray("");
+    ArrayComponents* compo = ArrayMgr::Instance()->_FindArray(arrayName);
     if (compo == nullptr)
     {
         return nullptr;

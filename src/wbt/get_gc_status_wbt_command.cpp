@@ -57,11 +57,11 @@ GetGcStatusWbtCommand::~GetGcStatusWbtCommand(void)
 int
 GetGcStatusWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
-    if (!argv.contains("name"))
+    if (!argv.contains("array"))
     {
         return -1;
     }
-    std::string arrayName = argv["name"].get<std::string>();
+    std::string arrayName = argv["array"].get<std::string>();
     GarbageCollector* gc = _GetGC(arrayName);
 
     if (gc == nullptr)
