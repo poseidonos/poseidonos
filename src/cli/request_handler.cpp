@@ -64,6 +64,7 @@
 #include "src/cli/resize_volume_command.h"
 #include "src/cli/scan_device_command.h"
 #include "src/cli/set_log_level_command.h"
+#include "src/cli/get_log_level_command.h"
 #include "src/cli/smart_command.h"
 #include "src/cli/stop_rebuilding_command.h"
 #include "src/cli/unmount_array_command.h"
@@ -79,7 +80,6 @@
 #include "src/cli/stop_rebuilding_command.h"
 #include "src/cli/rebuild_perf_impact_command.h"
 #include "src/cli/apply_log_filter_command.h"
-#include "src/cli/set_log_level_command.h"
 #include "src/cli/handle_wbt_command.h"
 #include "src/cli/list_wbt_command.h"
 #include "src/cli/update_event_wrr_policy_command.h"
@@ -123,6 +123,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["REBUILDPERFIMPACT"] = new RebuildPerfImpactCommand();
     cmdDictionary["APPLYLOGFILTER"] = new ApplyLogFilterCommand();
     cmdDictionary["SETLOGLEVEL"] = new SetLogLevelCommand();
+    cmdDictionary["GETLOGLEVEL"] = new GetLogLevelCommand();
     cmdDictionary["LISTWBT"] = new ListWbtCommand();
     cmdDictionary["WBT"] = new HandleWbtCommand();
     cmdDictionary["UPDATEEVENTWRRPOLICY"] = new UpdateEventWrrPolicyCommand();
