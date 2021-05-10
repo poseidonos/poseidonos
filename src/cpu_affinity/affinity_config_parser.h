@@ -35,13 +35,14 @@
 #include <string>
 
 #include "cpu_set_generator.h"
+#include "src/master_context/config_manager.h"
 
 namespace pos
 {
 class AffinityConfigParser
 {
 public:
-    AffinityConfigParser(void);
+    AffinityConfigParser(ConfigManager& configManager_ = *ConfigManagerSingleton::Instance());
     ~AffinityConfigParser(void);
 
     const CoreDescriptionArray& GetDescriptions(void);

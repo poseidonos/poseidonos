@@ -4,8 +4,15 @@
 
 namespace pos
 {
-TEST(AffinityViewer, Print_)
+TEST(AffinityViewer, Print_numaAvailable)
 {
+    // Given
+    AffinityViewer affinityViewer;
+
+    // When : call Print
+    affinityViewer.Print();
+    
+    // Then : Do nothing
 }
 
 } // namespace pos

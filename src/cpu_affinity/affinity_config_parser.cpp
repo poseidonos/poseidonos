@@ -34,7 +34,6 @@
 
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
-#include "src/master_context/config_manager.h"
 
 namespace pos
 {
@@ -70,11 +69,11 @@ const AffinityConfigParser::ConfigKeyAndCoreTypes
             ConfigKeyAndCoreType{CoreType::META_IO, "meta_io"},
 };
 
-AffinityConfigParser::AffinityConfigParser(void)
+AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
 : selectedDescs(DEFAULT_CORE_DESCRIPTIONS),
   isStringDescripted(DEFAULT_IS_STRING_DESCRIPTED)
 {
-    ConfigManager& configManager = *ConfigManagerSingleton::Instance();
+    ConfigManager& configManager = configManager_;
     std::string module("affinity_manager");
 
     bool useConfig = false;
