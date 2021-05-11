@@ -1,5 +1,4 @@
 #include "src/lib/bitmap.h"
-#include "test/unit-tests/lib/bitmap_mock.h"
 
 #include <gtest/gtest.h>
 
@@ -197,7 +196,15 @@ TEST(BitMapMutex, GetNumBitsSet_)
 {
 }
 
+TEST(BitMapMutex, GetNumBitsSetWoLock_)
+{
+}
+
 TEST(BitMapMutex, SetBitMap_)
+{
+}
+
+TEST(BitMapMutex, GetLock_)
 {
 }
 

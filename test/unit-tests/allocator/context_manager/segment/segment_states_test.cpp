@@ -12,15 +12,11 @@ TEST(SegmentStates, SetSegmentId_)
 {
 }
 
-TEST(SegmentStates, Getstate_)
+TEST(SegmentStates, GetState_)
 {
 }
 
-TEST(SegmentStates, Setstate_)
-{
-}
-
-TEST(SegmentStates, GetSegmentLock_)
+TEST(SegmentStates, SetState_)
 {
 }
 
