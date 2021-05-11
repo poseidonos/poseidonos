@@ -74,6 +74,7 @@ private:
 
     bool isNpor;
     bool isLoaded;
+    bool isNormal;
     IArrayInfo* arrayInfo;
     std::string arrayName = "";
     MetaStorageSubsystem* metaStorage;

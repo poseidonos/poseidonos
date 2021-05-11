@@ -66,6 +66,7 @@ public:
     virtual size_t EstimateAlignedFileIOSize(MetaFilePropertySet& prop);
     virtual size_t GetTheBiggestExtentSize(MetaFilePropertySet& prop);
     virtual size_t GetMaxMetaLpn(MetaVolumeType type);
+    virtual void SetStatus(bool isNormal);
     MetaFileContext* GetFileInfo(FileDescriptorType fd);
 
     // for wbt commands
@@ -89,6 +90,7 @@ private:
     void _RemoveFileContext(FileDescriptorType fd);
 
     std::string arrayName = "";
+    bool isNormal = false;
     MetaVolumeManager* volMgr;
 
     BitMap* bitmap = nullptr;

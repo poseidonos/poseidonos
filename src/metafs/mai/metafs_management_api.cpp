@@ -112,4 +112,10 @@ MetaFsManagementApi::GetMss(void)
 {
     return sysMgr->GetMss();
 }
+
+void
+MetaFsManagementApi::SetStatus(bool isNormal)
+{
+    this->isNormal = isNormal;
+}
 } // namespace pos

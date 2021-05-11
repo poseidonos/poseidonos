@@ -50,6 +50,9 @@ MetaFsWBTApi::~MetaFsWBTApi(void)
 bool
 MetaFsWBTApi::GetMetaFileList(std::vector<MetaFileInfoDumpCxt>& result)
 {
+    if (!isNormal)
+        return false;
+
     result = ctrl->Wbt_GetMetaFileList();
 
     if (0 == result.size())
@@ -62,6 +65,9 @@ MetaFsWBTApi::GetMetaFileList(std::vector<MetaFileInfoDumpCxt>& result)
 bool
 MetaFsWBTApi::GetMaxFileSizeLimit(FileSizeType& result)
 {
+    if (!isNormal)
+        return false;
+
     result = ctrl->Wbt_GetMaxFileSizeLimit();
 
     if (0 == result)
@@ -74,11 +80,20 @@ MetaFsWBTApi::GetMaxFileSizeLimit(FileSizeType& result)
 bool
 MetaFsWBTApi::GetMetaFileInode(std::string& fileName, MetaFileInodeDumpCxt& result)
 {
+    if (!isNormal)
+        return false;
+
     result = ctrl->Wbt_GetMetaFileInode(fileName);
 
     if (!result.inodeInfo.data.field.fileName)
         return false;
 
     return true;
+}
+
+void
+MetaFsWBTApi::SetStatus(bool isNormal)
+{
+    this->isNormal = isNormal;
 }
 } // namespace pos

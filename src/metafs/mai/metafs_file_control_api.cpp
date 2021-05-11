@@ -60,6 +60,9 @@ MetaFsFileControlApi::~MetaFsFileControlApi(void)
 POS_EVENT_ID
 MetaFsFileControlApi::Create(std::string& fileName, uint64_t fileByteSize, MetaFilePropertySet prop)
 {
+    if (!isNormal)
+        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaFsFileControlRequest reqMsg;
 
@@ -77,6 +80,9 @@ MetaFsFileControlApi::Create(std::string& fileName, uint64_t fileByteSize, MetaF
 POS_EVENT_ID
 MetaFsFileControlApi::Delete(std::string& fileName)
 {
+    if (!isNormal)
+        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaFsFileControlRequest reqMsg;
 
@@ -91,6 +97,9 @@ MetaFsFileControlApi::Delete(std::string& fileName)
 POS_EVENT_ID
 MetaFsFileControlApi::Open(std::string& fileName, int& fd)
 {
+    if (!isNormal)
+        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaFsFileControlRequest reqMsg;
 
@@ -109,6 +118,9 @@ MetaFsFileControlApi::Open(std::string& fileName, int& fd)
 POS_EVENT_ID
 MetaFsFileControlApi::Close(uint32_t fd)
 {
+    if (!isNormal)
+        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaFsFileControlRequest reqMsg;
 
@@ -125,6 +137,9 @@ MetaFsFileControlApi::Close(uint32_t fd)
 POS_EVENT_ID
 MetaFsFileControlApi::CheckFileExist(std::string& fileName)
 {
+    if (!isNormal)
+        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaFsFileControlRequest reqMsg;
 
@@ -141,6 +156,9 @@ MetaFsFileControlApi::CheckFileExist(std::string& fileName)
 size_t
 MetaFsFileControlApi::GetFileSize(int fd)
 {
+    if (!isNormal)
+        return 0;
+
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaFsFileControlRequest reqMsg;
 
@@ -164,6 +182,9 @@ MetaFsFileControlApi::GetFileSize(int fd)
 size_t
 MetaFsFileControlApi::GetAlignedFileIOSize(int fd)
 {
+    if (!isNormal)
+        return 0;
+
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaFsFileControlRequest reqMsg;
 
@@ -244,6 +265,12 @@ MetaFsFileControlApi::GetMaxMetaLpn(MetaVolumeType type)
     {
         return 0;
     }
+}
+
+void
+MetaFsFileControlApi::SetStatus(bool isNormal)
+{
+    this->isNormal = isNormal;
 }
 
 MetaFileContext*

@@ -51,9 +51,11 @@ public:
     bool GetMetaFileList(std::vector<MetaFileInfoDumpCxt>& result);
     bool GetMaxFileSizeLimit(FileSizeType& result);
     bool GetMetaFileInode(std::string& fileName, MetaFileInodeDumpCxt& result);
+    void SetStatus(bool isNormal);
 
 private:
     std::string arrayName = "";
+    bool isNormal = false;
 
     MetaFsFileControlApi* ctrl = nullptr;
 };

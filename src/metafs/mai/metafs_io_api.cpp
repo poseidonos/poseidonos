@@ -54,6 +54,9 @@ MetaFsIoApi::~MetaFsIoApi(void)
 POS_EVENT_ID
 MetaFsIoApi::Read(FileDescriptorType fd, void* buf)
 {
+    if (!isNormal)
+        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+
     POS_EVENT_ID rc;
     MetaFsIoRequest reqMsg;
 
@@ -86,6 +89,9 @@ POS_EVENT_ID
 MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
                 FileSizeType byteSize, void* buf)
 {
+    if (!isNormal)
+        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+
     POS_EVENT_ID rc;
     MetaFsIoRequest reqMsg;
 
@@ -119,6 +125,9 @@ MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
 POS_EVENT_ID
 MetaFsIoApi::Write(FileDescriptorType fd, void* buf)
 {
+    if (!isNormal)
+        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+
     POS_EVENT_ID rc;
     MetaFsIoRequest reqMsg;
 
@@ -151,6 +160,9 @@ POS_EVENT_ID
 MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
                 FileSizeType byteSize, void* buf)
 {
+    if (!isNormal)
+        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+
     POS_EVENT_ID rc;
     MetaFsIoRequest reqMsg;
 
@@ -184,6 +196,9 @@ MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
 POS_EVENT_ID
 MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt)
 {
+    if (!isNormal)
+        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+
     POS_EVENT_ID rc;
     MetaFsIoRequest reqMsg;
 
@@ -236,6 +251,12 @@ void
 MetaFsIoApi::SetMss(MetaStorageSubsystem* metaStorage)
 {
     ioMgr->SetMss(metaStorage);
+}
+
+void
+MetaFsIoApi::SetStatus(bool isNormal)
+{
+    this->isNormal = isNormal;
 }
 
 bool

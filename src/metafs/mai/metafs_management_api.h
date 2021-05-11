@@ -58,9 +58,11 @@ public:
     virtual POS_EVENT_ID LoadMbr(bool& isNPOR);
     virtual bool CreateMbr(void);
     virtual MetaStorageSubsystem* GetMss(void);
+    virtual void SetStatus(bool isNormal);
 
 private:
     std::string arrayName = "";
+    bool isNormal = false;
     MetaFsSystemManager* sysMgr;
 };
 } // namespace pos

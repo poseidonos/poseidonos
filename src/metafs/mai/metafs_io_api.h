@@ -62,6 +62,7 @@ public:
     virtual bool RemoveArray(std::string& arrayName);
 
     void SetMss(MetaStorageSubsystem* metaStorage);
+    virtual void SetStatus(bool isNormal);
 
 private:
     bool _AddFileInfo(MetaFsIoRequest& reqMsg);
@@ -71,6 +72,7 @@ private:
     POS_EVENT_ID _CheckReqSanity(MetaFsIoRequest& reqMsg);
 
     std::string arrayName = "";
+    bool isNormal = false;
     MetaIoManager* ioMgr;
     MetaFsFileControlApi* ctrlMgr = nullptr;
 };

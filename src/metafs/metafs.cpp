@@ -41,6 +41,7 @@ namespace pos
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
 : isNpor(false),
   isLoaded(isLoaded),
+  isNormal(false),
   arrayInfo(arrayInfo),
   arrayName(""),
   metaStorage(nullptr)
@@ -69,12 +70,21 @@ int
 MetaFs::Init(void)
 {
     if (false == _Initialize())
-        return false;
+        return true;
 
     if (POS_EVENT_ID::SUCCESS != _OpenMetaVolume())
-        return false;
+        return true;
 
-    return (false == io->AddArray(arrayName));
+    if (false == io->AddArray(arrayName))
+        return true;
+
+    isNormal = true;
+    mgmt->SetStatus(isNormal);
+    io->SetStatus(isNormal);
+    ctrl->SetStatus(isNormal);
+    wbt->SetStatus(isNormal);
+
+    return false;
 }
 
 void
