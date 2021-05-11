@@ -32,7 +32,12 @@
 
 #include "src/cli/get_max_volume_count_command.h"
 
+#include <vector>
+#include <algorithm>
+
+#include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_event_code.h"
+#include "src/mbr/mbr_info.h"
 #include "src/volume/volume_list.h"
 
 namespace pos_cli
@@ -51,7 +56,20 @@ GetMaxVolumeCountCommand::Execute(json& doc, string rid)
     JsonFormat jFormat;
     JsonElement data("data");
 
-    data.SetAttribute(JsonAttribute("count", "\"" + to_string(MAX_VOLUME_COUNT) + "\""));
+    std::vector<ArrayBootRecord> abrList;
+    ArrayMgr::Instance()->GetAbrList(abrList);
+    int arrayCnt = 0;
+
+    if (!abrList.empty())
+    {
+        arrayCnt = abrList.size();
+    }
+    
+    int totalvolcnt = arrayCnt * MAX_VOLUME_COUNT;
+
+    data.SetAttribute(JsonAttribute("current array count", "\"" + to_string(arrayCnt) + "\""));
+    data.SetAttribute(JsonAttribute("max volume count per Array", "\"" + to_string(MAX_VOLUME_COUNT) + "\""));
+    data.SetAttribute(JsonAttribute("total max volume count", "\"" + to_string(totalvolcnt) + "\""));
 
     return jFormat.MakeResponse("GETMAXVOLUMECOUNT", rid, SUCCESS, "DONE", data,
         GetPosInfo());
