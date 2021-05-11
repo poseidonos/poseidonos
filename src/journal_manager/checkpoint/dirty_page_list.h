@@ -30,65 +30,29 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dirty_map_manager.h"
+#pragma once
 
-#include "assert.h"
-#include "src/journal_manager/config/journal_configuration.h"
+#include <mutex>
+
+#include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
-DirtyMapManager::~DirtyMapManager(void)
-{
-    for (auto it : pendingDirtyPages)
-    {
-        delete it;
-    }
-    pendingDirtyPages.clear();
-}
+class JournalConfiguration;
 
-void
-DirtyMapManager::Init(JournalConfiguration* journalConfiguration)
+class DirtyPageList
 {
-    int numLogGroups = journalConfiguration->GetNumLogGroups();
-    for (int id = 0; id < numLogGroups; id++)
-    {
-        pendingDirtyPages.push_back(new DirtyPageList());
-    }
-}
+public:
+    DirtyPageList(void);
 
-MapPageList
-DirtyMapManager::GetDirtyList(int logGroupId)
-{
-    assert(logGroupId < static_cast<int>(pendingDirtyPages.size()));
-    return pendingDirtyPages[logGroupId]->GetList();
-}
+    void Add(MapPageList& dirty);
+    MapPageList GetList(void);
+    void Reset(void);
+    void Delete(int volumeId);
 
-void
-DirtyMapManager::DeleteDirtyList(int volumeId)
-{
-    for (auto it = pendingDirtyPages.begin(); it != pendingDirtyPages.end(); ++it)
-    {
-        (*it)->Delete(volumeId);
-    }
-}
-
-void
-DirtyMapManager::LogFilled(int logGroupId, MapPageList& dirty)
-{
-    pendingDirtyPages[logGroupId]->Add(dirty);
-}
-
-void
-DirtyMapManager::LogBufferReseted(int logGroupId)
-{
-    _Reset(logGroupId);
-}
-
-void
-DirtyMapManager::_Reset(int logGroupId)
-{
-    assert(logGroupId < static_cast<int>(pendingDirtyPages.size()));
-    pendingDirtyPages[logGroupId]->Reset();
-}
+private:
+    std::mutex dirtyListLock;
+    MapPageList dirtyPages;
+};
 
 } // namespace pos

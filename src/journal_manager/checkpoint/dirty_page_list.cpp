@@ -30,65 +30,62 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dirty_map_manager.h"
+#include "dirty_page_list.h"
 
 #include "assert.h"
 #include "src/journal_manager/config/journal_configuration.h"
 
 namespace pos
 {
-DirtyMapManager::~DirtyMapManager(void)
+DirtyPageList::DirtyPageList(void)
 {
-    for (auto it : pendingDirtyPages)
-    {
-        delete it;
-    }
-    pendingDirtyPages.clear();
+    dirtyPages.clear();
 }
 
 void
-DirtyMapManager::Init(JournalConfiguration* journalConfiguration)
+DirtyPageList::Add(MapPageList& dirty)
 {
-    int numLogGroups = journalConfiguration->GetNumLogGroups();
-    for (int id = 0; id < numLogGroups; id++)
+    std::unique_lock<std::mutex> lock(dirtyListLock);
+
+    for (auto it = dirty.begin(); it != dirty.end(); it++)
     {
-        pendingDirtyPages.push_back(new DirtyPageList());
+        int mapId = it->first;
+
+        auto mapIt = dirtyPages.find(mapId);
+        if (mapIt != dirtyPages.end())
+        {
+            dirtyPages[mapId].insert((it->second.begin()), it->second.end());
+        }
+        else
+        {
+            dirtyPages.emplace(mapId, it->second);
+        }
     }
 }
 
 MapPageList
-DirtyMapManager::GetDirtyList(int logGroupId)
+DirtyPageList::GetList(void)
 {
-    assert(logGroupId < static_cast<int>(pendingDirtyPages.size()));
-    return pendingDirtyPages[logGroupId]->GetList();
+    return dirtyPages;
 }
 
 void
-DirtyMapManager::DeleteDirtyList(int volumeId)
+DirtyPageList::Reset(void)
 {
-    for (auto it = pendingDirtyPages.begin(); it != pendingDirtyPages.end(); ++it)
+    dirtyPages.clear();
+}
+
+void
+DirtyPageList::Delete(int volumeId)
+{
+    std::unique_lock<std::mutex> lock(dirtyListLock);
+
+    auto mapIt = dirtyPages.find(volumeId);
+    if (mapIt != dirtyPages.end())
     {
-        (*it)->Delete(volumeId);
+        (mapIt->second).clear();
+        dirtyPages.erase(volumeId);
     }
-}
-
-void
-DirtyMapManager::LogFilled(int logGroupId, MapPageList& dirty)
-{
-    pendingDirtyPages[logGroupId]->Add(dirty);
-}
-
-void
-DirtyMapManager::LogBufferReseted(int logGroupId)
-{
-    _Reset(logGroupId);
-}
-
-void
-DirtyMapManager::_Reset(int logGroupId)
-{
-    assert(logGroupId < static_cast<int>(pendingDirtyPages.size()));
-    pendingDirtyPages[logGroupId]->Reset();
 }
 
 } // namespace pos

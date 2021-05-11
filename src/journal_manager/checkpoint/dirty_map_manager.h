@@ -35,28 +35,13 @@
 #include <mutex>
 #include <vector>
 
-#include "../log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/checkpoint/dirty_page_list.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 #include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
 class JournalConfiguration;
-
-class DirtyPageList
-{
-public:
-    DirtyPageList(void);
-
-    void Add(MapPageList& dirty);
-    MapPageList GetList(void);
-    void Reset(void);
-    void Delete(int volumeId);
-
-private:
-    std::mutex dirtyListLock;
-    MapPageList dirtyPages;
-};
-
 class DirtyMapManager : public LogBufferWriteDoneEvent
 {
 public:

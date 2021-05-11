@@ -8,12 +8,6 @@
 
 namespace pos
 {
-class MockDirtyPageList : public DirtyPageList
-{
-public:
-    using DirtyPageList::DirtyPageList;
-};
-
 class MockDirtyMapManager : public DirtyMapManager
 {
 public:
