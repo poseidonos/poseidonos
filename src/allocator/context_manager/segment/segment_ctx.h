@@ -76,19 +76,14 @@ public:
 private:
     static const uint32_t SIG_SEGMENT_CTX = 0xECECECEC;
 
-    // context file info
     SegmentCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxDirtyVersion;
     std::atomic<uint64_t> ctxStoredVersion;
-
-    // segment info
     SegmentInfo* segmentInfos;
 
-    // DOCs
     AllocatorAddressInfo* addrInfo;
     std::string arrayName;
 
-    // Lock
     std::mutex segCtxLock;
     SegmentLock* segInfoLocks;
 };
