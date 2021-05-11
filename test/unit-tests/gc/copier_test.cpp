@@ -1,35 +1,33 @@
 #include "src/gc/copier.h"
 
 #include <gtest/gtest.h>
-
-#include <test/unit-tests/gc/gc_status_mock.h>
+#include <src/include/address_type.h>
+#include <src/include/partition_type.h>
+#include <src/include/smart_ptr_type.h>
+#include <test/unit-tests/allocator/i_block_allocator_mock.h>
+#include <test/unit-tests/allocator/i_context_manager_mock.h>
+#include <test/unit-tests/array_models/dto/partition_logical_size_mock.h>
 #include <test/unit-tests/array_models/interface/i_array_info_mock.h>
 #include <test/unit-tests/gc/copier_meta_mock.h>
-#include <test/unit-tests/gc/victim_stripe_mock.h>
-#include <test/unit-tests/gc/stripe_copy_submission_mock.h>
-#include <test/unit-tests/gc/reverse_map_load_completion_mock.h>
+#include <test/unit-tests/gc/gc_status_mock.h>
 #include <test/unit-tests/gc/gc_stripe_manager_mock.h>
-#include <test/unit-tests/array_models/dto/partition_logical_size_mock.h>
-#include <test/unit-tests/mapper/i_reversemap_mock.h>
-#include <test/unit-tests/allocator/i_block_allocator_mock.h>
-#include <test/unit-tests/allocator/i_segment_ctx_mock.h>
-#include <test/unit-tests/mapper/reversemap/reverse_map_mock.h>
+#include <test/unit-tests/gc/reverse_map_load_completion_mock.h>
+#include <test/unit-tests/gc/stripe_copy_submission_mock.h>
+#include <test/unit-tests/gc/victim_stripe_mock.h>
 #include <test/unit-tests/lib/bitmap_mock.h>
+#include <test/unit-tests/mapper/i_reversemap_mock.h>
+#include <test/unit-tests/mapper/reversemap/reverse_map_mock.h>
 #include <test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h>
 
-#include <src/include/partition_type.h>
-#include <src/include/address_type.h>
-#include <src/include/smart_ptr_type.h>
-
 using ::testing::_;
-using ::testing::Return;
 using ::testing::AnyNumber;
-using ::testing::Test;
 using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::Test;
 
 namespace pos
 {
-PartitionLogicalSize partitionLogicalSize  = {
+PartitionLogicalSize partitionLogicalSize = {
     .blksPerChunk = 64,
     .blksPerStripe = 2048,
     .chunksPerStripe = 32,
@@ -50,7 +48,7 @@ public:
       array(nullptr),
       meta(nullptr),
       iBlockAllocator(nullptr),
-      iSegmentCtx(nullptr),
+      iContextManager(nullptr),
       inUseBitmap(nullptr),
       gcStripeManager(nullptr),
       reverseMapPack(nullptr),
@@ -84,7 +82,7 @@ public:
         victimStripes->resize(GC_VICTIM_SEGMENT_COUNT);
         for (uint32_t stripeIndex = 0; stripeIndex < GC_VICTIM_SEGMENT_COUNT; stripeIndex++)
         {
-            for (uint32_t i = 0 ; i < partitionLogicalSize.stripesPerSegment; i++)
+            for (uint32_t i = 0; i < partitionLogicalSize.stripesPerSegment; i++)
             {
                 reverseMapPack = new NiceMock<MockReverseMapPack>;
                 (*victimStripes)[stripeIndex].push_back(new NiceMock<MockVictimStripe>(array, reverseMapPack));
@@ -99,10 +97,10 @@ public:
 
         meta = new NiceMock<MockCopierMeta>(array, udSize, inUseBitmap, gcStripeManager, victimStripes, gcBufferPool);
         iBlockAllocator = new NiceMock<MockIBlockAllocator>;
-        iSegmentCtx = new NiceMock<MockISegmentCtx>;
+        iContextManager = new NiceMock<MockIContextManager>;
         stripeCopySubmissionPtr = std::make_shared<NiceMock<MockStripeCopySubmission>>(baseStripeId, nullptr, copyIndex);
         reverseMapLoadCompletionPtr = std::make_shared<NiceMock<MockReverseMapLoadCompletion>>();
-        copier = new Copier(victimId, targetId, gcStatus, array, udSize, meta, iBlockAllocator, iSegmentCtx, stripeCopySubmissionPtr, reverseMapLoadCompletionPtr);
+        copier = new Copier(victimId, targetId, gcStatus, array, udSize, meta, iBlockAllocator, iContextManager, stripeCopySubmissionPtr, reverseMapLoadCompletionPtr);
     }
 
     virtual void
@@ -124,7 +122,7 @@ protected:
     NiceMock<MockIArrayInfo>* array;
     NiceMock<MockCopierMeta>* meta;
     NiceMock<MockIBlockAllocator>* iBlockAllocator;
-    NiceMock<MockISegmentCtx>* iSegmentCtx;
+    NiceMock<MockIContextManager>* iContextManager;
     NiceMock<MockBitMapMutex>* inUseBitmap;
     NiceMock<MockGcStripeManager>* gcStripeManager;
     NiceMock<MockReverseMapPack>* reverseMapPack;
@@ -171,6 +169,5 @@ TEST_F(CopierTestFixture, Execute_testWhenCopierPaused)
 {
     copier->Pause();
     EXPECT_FALSE(copier->Execute());
-
 }
 } // namespace pos
