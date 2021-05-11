@@ -33,16 +33,16 @@
 #include "src/cpu_affinity/affinity_manager.h"
 
 #include <numa.h>
+
 #include <iomanip>
 
-#include "affinity_config_parser.h"
 #include "count_descripted_cpu_set_generator.h"
 #include "poverty_cpu_set_generator.h"
-#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/core_const.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 #include "string_descripted_cpu_set_generator.h"
 
 namespace pos
@@ -50,6 +50,19 @@ namespace pos
 const bool AffinityManager::PROHIBIT_CORE_MASK_OVERLAPPED = false;
 
 AffinityManager::AffinityManager(void)
+: AffinityManager::AffinityManager(new AffinityConfigParser())
+{
+}
+
+AffinityManager::AffinityManager(uint32_t totalCount, CpuSetArray& cpuSetArray)
+: NUMA_COUNT(numa_num_configured_nodes()),
+  TOTAL_COUNT(totalCount),
+  cpuSetArray(cpuSetArray),
+  parser(nullptr)
+{
+}
+
+AffinityManager::AffinityManager(AffinityConfigParser* parser_)
 : totalNumaSystemCoreCount{
       0,
   },
@@ -57,13 +70,13 @@ AffinityManager::AffinityManager(void)
       0,
   },
   NUMA_COUNT(numa_num_configured_nodes()),
-  TOTAL_COUNT(numa_num_configured_cpus())
+  TOTAL_COUNT(numa_num_configured_cpus()),
+  parser(parser_)
 {
     assert(NUMA_COUNT <= MAX_NUMA_COUNT);
 
-    AffinityConfigParser parser;
-    const CoreDescriptionArray DESC_ARRAY = parser.GetDescriptions();
-    useStringForParsing = parser.IsStringDescripted();
+    const CoreDescriptionArray DESC_ARRAY = parser->GetDescriptions();
+    useStringForParsing = parser->IsStringDescripted();
 
     _SetNumaInformation(DESC_ARRAY);
 
@@ -96,6 +109,11 @@ AffinityManager::AffinityManager(void)
 
 AffinityManager::~AffinityManager(void)
 {
+    if (nullptr != parser)
+    {
+        delete parser;
+        parser = nullptr;
+    }
 }
 
 void

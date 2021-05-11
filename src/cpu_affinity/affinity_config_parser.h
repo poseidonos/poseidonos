@@ -34,7 +34,7 @@
 
 #include <string>
 
-#include "cpu_set_generator.h"
+#include "src/cpu_affinity/cpu_set_generator.h"
 #include "src/master_context/config_manager.h"
 
 namespace pos
@@ -43,10 +43,10 @@ class AffinityConfigParser
 {
 public:
     AffinityConfigParser(ConfigManager& configManager_ = *ConfigManagerSingleton::Instance());
-    ~AffinityConfigParser(void);
+    virtual ~AffinityConfigParser(void);
 
     const CoreDescriptionArray& GetDescriptions(void);
-    bool IsStringDescripted(void);
+    virtual bool IsStringDescripted(void);
 
 private:
     static const bool DEFAULT_IS_STRING_DESCRIPTED;

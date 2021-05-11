@@ -34,8 +34,9 @@
 
 #include <string>
 
-#include "cpu_set_generator.h"
 #include "rte_config.h"
+#include "src/cpu_affinity/affinity_config_parser.h"
+#include "src/cpu_affinity/cpu_set_generator.h"
 #include "src/lib/singleton.h"
 
 namespace pos
@@ -44,6 +45,8 @@ class AffinityManager
 {
 public:
     AffinityManager(void);
+    AffinityManager(uint32_t totalCount, CpuSetArray& cpuSetArray);
+    explicit AffinityManager(AffinityConfigParser* parser_);
     ~AffinityManager(void);
 
     void SetGeneralAffinitySelf(void);
@@ -64,6 +67,7 @@ private:
     const uint32_t TOTAL_COUNT;
     CpuSetArray cpuSetArray;
     bool useStringForParsing;
+    AffinityConfigParser* parser;
 
     void _SetNumaInformation(const CoreDescriptionArray& descArray);
     bool _IsCoreSufficient(void);
