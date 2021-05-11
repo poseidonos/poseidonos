@@ -56,6 +56,14 @@ DirtyMapManager::Init(JournalConfiguration* journalConfiguration)
     }
 }
 
+// Init function for unit test
+// TODO (huijeong.kim) move initialization to the construcor
+void
+DirtyMapManager::Init(std::vector<DirtyPageList* > dirtyPages)
+{
+    pendingDirtyPages = dirtyPages;
+}
+
 MapPageList
 DirtyMapManager::GetDirtyList(int logGroupId)
 {
@@ -80,12 +88,6 @@ DirtyMapManager::LogFilled(int logGroupId, MapPageList& dirty)
 
 void
 DirtyMapManager::LogBufferReseted(int logGroupId)
-{
-    _Reset(logGroupId);
-}
-
-void
-DirtyMapManager::_Reset(int logGroupId)
 {
     assert(logGroupId < static_cast<int>(pendingDirtyPages.size()));
     pendingDirtyPages[logGroupId]->Reset();

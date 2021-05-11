@@ -44,11 +44,14 @@ class DirtyPageList
 {
 public:
     DirtyPageList(void);
+    virtual ~DirtyPageList(void)
+    {
+    }
 
-    void Add(MapPageList& dirty);
-    MapPageList GetList(void);
-    void Reset(void);
-    void Delete(int volumeId);
+    virtual void Add(MapPageList& dirty);
+    virtual MapPageList GetList(void);
+    virtual void Reset(void);
+    virtual void Delete(int volumeId);
 
 private:
     std::mutex dirtyListLock;

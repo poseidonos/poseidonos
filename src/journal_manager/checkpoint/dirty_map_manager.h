@@ -48,6 +48,7 @@ public:
     virtual ~DirtyMapManager(void);
 
     virtual void Init(JournalConfiguration* journalConfiguration);
+    void Init(std::vector<DirtyPageList* > dirtyPages);
 
     MapPageList GetDirtyList(int logGroupId);
     void DeleteDirtyList(int volumeId);
@@ -56,8 +57,6 @@ public:
     virtual void LogBufferReseted(int logGroupId) override;
 
 private:
-    void _Reset(int logGroupId);
-
     std::vector<DirtyPageList*> pendingDirtyPages;
 };
 

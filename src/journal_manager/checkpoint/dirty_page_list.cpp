@@ -32,7 +32,6 @@
 
 #include "dirty_page_list.h"
 
-#include "assert.h"
 #include "src/journal_manager/config/journal_configuration.h"
 
 namespace pos
