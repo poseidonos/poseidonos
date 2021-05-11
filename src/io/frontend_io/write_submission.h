@@ -52,12 +52,13 @@ class EventArgument;
 class VolumeIo;
 class RBAStateManager;
 class IBlockAllocator;
+class FlowControl;
 
 class WriteSubmission : public IOController, public Event
 {
 public:
     explicit WriteSubmission(VolumeIoSmartPtr volumeIo);
-    WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* rbaStateManager, IBlockAllocator* iBlockAllocator,
+    WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* rbaStateManager, IBlockAllocator* iBlockAllocator, FlowControl* flowControl,
         bool isReactorNow);
     ~WriteSubmission(void) override;
 
@@ -75,6 +76,7 @@ private:
     std::queue<VolumeIoSmartPtr> splitVolumeIoQueue;
     RBAStateManager* rbaStateManager;
     IBlockAllocator* iBlockAllocator;
+    FlowControl* flowControl;
     bool isReactorNow;
 
     void _SendVolumeIo(VolumeIoSmartPtr volumeIo);

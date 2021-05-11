@@ -90,7 +90,7 @@ StripeCopier::Execute(void)
             if (nullptr == buffer)
             {
                 meta->SetStartCopyBlks(requestCount);
-                POS_TRACE_INFO((int)POS_EVENT_ID::GC_GET_BUFFER_FAILED,
+                POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_GET_BUFFER_FAILED,
                     "Get gc buffer failed and retry, victimStripeId:{}",
                     victimStripeId);
                 return false;

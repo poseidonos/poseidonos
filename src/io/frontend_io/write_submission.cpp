@@ -50,24 +50,30 @@
 #include "src/io/frontend_io/read_completion_for_partial_write.h"
 #include "src/io/general_io/rba_state_service.h"
 #include "src/io/general_io/translator.h"
+#include "src/gc/flow_control/flow_control.h"
+#include "src/gc/flow_control/flow_control_service.h"
+#include "src/array/service/array_service_layer.h"
 #include "src/bio/ubio.h"
 #include "src/bio/volume_io.h"
 #include "src/logger/logger.h"
 #include "src/state/state_manager.h"
+#include "Air.h"
 #ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_mgr.h"
 #endif
 
 namespace pos
 {
+
 WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo)
 : WriteSubmission(volumeIo, RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayName()),
     AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayName()),
+    FlowControlServiceSingleton::Instance()->GetFlowControl(volumeIo->GetArrayName()),
     EventFrameworkApiSingleton::Instance()->IsReactorNow())
 {
 }
 
-WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inputRbaStateManager, IBlockAllocator* inputIBlockAllocator,
+WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inputRbaStateManager, IBlockAllocator* inputIBlockAllocator, FlowControl* inputFlowControl,
         bool isReactorNow)
 : Event(isReactorNow),
   volumeIo(volumeIo),
@@ -79,7 +85,8 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inp
   allocatedBlockCount(0),
   processedBlockCount(0),
   rbaStateManager(inputRbaStateManager),
-  iBlockAllocator(inputIBlockAllocator)
+  iBlockAllocator(inputIBlockAllocator),
+  flowControl(inputFlowControl)
 {
 }
 
@@ -92,11 +99,21 @@ WriteSubmission::Execute(void)
 {
     try
     {
+        int token = flowControl->GetToken(FlowControlType::USER, blockCount);
+        if (0 >= token)
+        {
+            return false;
+        }
+
         BlkAddr startRba = blockAlignment.GetHeadBlock();
         bool ownershipAcquired = rbaStateManager->BulkAcquireOwnership(volumeId,
             startRba, blockCount);
         if (false == ownershipAcquired)
         {
+            if (0 < token)
+            {
+                flowControl->ReturnToken(FlowControlType::USER, token);
+            }
             return false;
         }
         bool done = _ProcessOwnedWrite();
