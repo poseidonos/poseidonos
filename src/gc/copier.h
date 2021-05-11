@@ -63,7 +63,7 @@ class Copier : public Event
 public:
     Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus,
                 IArrayInfo* array, const PartitionLogicalSize* udSize = nullptr, CopierMeta* meta_ = nullptr,
-                IBlockAllocator* iBlockAllocator_ = nullptr, ISegmentCtx* iSegmentCtx_ = nullptr,
+                IBlockAllocator* iBlockAllocator_ = nullptr, IContextManager* iContextManager_ = nullptr,
                 CallbackSmartPtr stripeCopySubmissionPtr_ = nullptr, CallbackSmartPtr reverseMapLoadCompletionPtr_ = nullptr);
 
     virtual ~Copier(void);
