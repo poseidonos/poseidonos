@@ -297,6 +297,7 @@ MpioPool::_CacheRemove(MpioType mpioType)
         if (mpio == iter->second)
         {
             cachedMpio.erase(iter);
+            break;
         }
     }
 
