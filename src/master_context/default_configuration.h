@@ -78,6 +78,11 @@ private:
         vector<ConfigKeyValue> keyAndValueList;
     };
     vector<ConfigKeyValue> journalData = {
+        {"enable", "true"},
+        {"buffer_size_in_mb", "0"},
+        {"debug_mode", "false"}
+    };
+    vector<ConfigKeyValue> flushData = {
         {"enable", "false"}
     };
     vector<ConfigKeyValue> loggerData = {
@@ -87,10 +92,11 @@ private:
         {"deduplication_enabled", "true"},
         {"deduplication_sensitivity_in_msec", "20"}
     };
+    vector<ConfigKeyValue> debugData = {
+        {"memory_checker", "false"}
+    };
     vector<ConfigKeyValue> ioatData = {
-        {"enable", "true"},
-        {"ioat_cnt_numa0", "8"},
-        {"ioat_cnt_numa1", "8"}
+        {"enable", "true"}
     };
     vector<ConfigKeyValue> affinityManagerData = {
         {"use_config", "true"},
@@ -114,14 +120,16 @@ private:
         {"rebuild", "\"low\""}
     };
     vector<ConfigKeyValue> feQosData = {
-        {"enable", "true"}
+        {"enable", "false"}
     };
 
     using ConfigList =
         std::vector<ConfigModuleData>;
     ConfigList defaultConfig = {
         {"journal", journalData},
+        {"flush", flushData},
         {"logger", loggerData},
+        {"debug", debugData},
         {"ioat", ioatData},
         {"affinity_manager", affinityManagerData},
         {"user_nvme_driver", userNvmeDriverData},
