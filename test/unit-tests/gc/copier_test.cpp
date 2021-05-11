@@ -51,6 +51,12 @@ public:
       meta(nullptr),
       iBlockAllocator(nullptr),
       iSegmentCtx(nullptr),
+      inUseBitmap(nullptr),
+      gcStripeManager(nullptr),
+      reverseMapPack(nullptr),
+      gcWriteBufferPool(nullptr),
+      victimStripes(nullptr),
+      gcBufferPool(nullptr),
       stripeCopySubmissionPtr(nullptr),
       reverseMapLoadCompletionPtr(nullptr)
     {
