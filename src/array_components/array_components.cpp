@@ -154,6 +154,7 @@ ArrayComponents::Create(DeviceSet<string> nameSet, string dataRaidType)
     }
 
     _InstantiateMetaComponentsAndMountSequenceInOrder(false/* array has not been loaded yet*/);
+
     _SetMountSequence();
 
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Array components for {} have been created.", arrayName);
@@ -171,6 +172,7 @@ ArrayComponents::Load(void)
     }
 
     _InstantiateMetaComponentsAndMountSequenceInOrder(true/* array has been loaded already*/);
+
     _SetMountSequence();
 
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Array components for {} have been loaded.", arrayName);
@@ -234,6 +236,7 @@ ArrayComponents::_SetMountSequence(void)
     mountSequence.push_back(metafs);
     mountSequence.push_back(volMgr);
     mountSequence.push_back(metaMountSequence);
+    mountSequence.push_back(flowControl);
     mountSequence.push_back(gc);
 
     IStateControl* state = stateMgr->GetStateControl(arrayName);
@@ -252,6 +255,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
         || mapper != nullptr
         || allocator != nullptr
         || journal != nullptr
+        || flowControl != nullptr
         || gc != nullptr
         || metaMountSequence != nullptr)
     {
@@ -265,6 +269,8 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     mapper = new Mapper(array, state);
     allocator = new Allocator(array, state);
     journal = new JournalManager(array, state);
+    rbaStateMgr = new RBAStateManager(array->GetName());
+    flowControl = new FlowControl(array);
     gc = new GarbageCollector(array, state);
     metaMountSequence = new MetaMountSequence(arrayName, mapper, allocator, journal); // remember the ref to be able to delete during ~ArrayComponents()
 }
@@ -285,6 +291,13 @@ ArrayComponents::_DestructMetaComponentsInOrder(void)
         delete gc;
         gc = nullptr;
         POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "GarbageCollector for {} has been deleted.", arrayName);
+    }
+
+    if (flowControl != nullptr)
+    {
+        delete flowControl;
+        flowControl = nullptr;
+        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "FlowControl for {} has been deleted.", arrayName);
     }
 
     if (journal != nullptr)

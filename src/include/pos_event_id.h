@@ -429,6 +429,13 @@ enum class POS_EVENT_ID
     GC_COPY_COMPLETE = 3418,
     GC_GET_BUFFER_FAILED = 3419,
 
+    // --------------Flow control (3500)----------------
+    FC_START = 3500,
+    FC_TOKEN_DISTRIBUTED,
+    FC_TOKEN_OVERFLOW,
+    FC_NEGATIVE_TOKEN,
+    FC_WRONG_STRATEGY,
+
     // --------------Meta filesystem (4000)----------------
     // Debug, Info, Warning, Error, Critical
     MFS_START = 4000,

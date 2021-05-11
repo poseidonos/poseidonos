@@ -116,11 +116,21 @@ private:
         {"retry_count_frontend_io", "3"}
     };
     vector<ConfigKeyValue> perfImpactData = {
-        {"gc", "\"high\""},
         {"rebuild", "\"low\""}
     };
     vector<ConfigKeyValue> feQosData = {
         {"enable", "false"}
+    };
+    vector<ConfigKeyValue> flowControlData = {
+        {"enable", "false"},
+        {"use_default", "true"},
+        {"refill_timeout_in_msec", "1000"},
+        {"total_token_in_stripe", "1024"},
+        {"strategy", "\"linear\""},
+        {"flow_control_target_percent", "35"},
+        {"flow_control_urgent_percent", "15"},
+        {"flow_control_target_segment", "10"},
+        {"flow_control_urgent_segment", "5"}
     };
 
     using ConfigList =
@@ -134,7 +144,8 @@ private:
         {"affinity_manager", affinityManagerData},
         {"user_nvme_driver", userNvmeDriverData},
         {"perf_impact", perfImpactData},
-        {"fe_qos", feQosData}
+        {"fe_qos", feQosData},
+        {"flow_control", flowControlData}
     };
 
     const string CONFIGURATION_PATH = "/etc/pos/";

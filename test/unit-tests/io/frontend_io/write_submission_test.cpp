@@ -11,6 +11,7 @@
 #include "test/unit-tests/event_scheduler/callback_mock.h"
 #include "test/unit-tests/io/general_io/rba_state_manager_mock.h"
 #include "test/unit-tests/allocator_service/allocator_service_mock.h"
+#include "test/unit-tests/gc/flow_control/flow_control_mock.h"
 
 using namespace std;
 using ::testing::_;
@@ -50,7 +51,7 @@ TEST(WriteSubmission, WriteSubmission_Constructor_Three)
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
 
     // when
-    WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator);
+    WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator, nullptr, false);
 
     // Then : do noting
 }
@@ -68,9 +69,12 @@ TEST(WriteSubmission, Execute_SingleBlock_ownershipFail)
     NiceMock<MockAllocatorService> mockAllocatorService;
     NiceMock<MockRBAStateManager> mockRBAStateManager("");
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
+    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     // when
-    WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator);
+    WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator, &mockFlowControl, false);
+
+    ON_CALL(mockFlowControl, GetToken(_, _)).WillByDefault(Return((512 >> SECTOR_SIZE_SHIFT) * Ubio::BYTES_PER_UNIT));
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(false));
 
     bool actual, expected{false};
@@ -90,6 +94,7 @@ TEST(WriteSubmission, Execute_SingleBlock)
     NiceMock<MockAllocatorService> mockAllocatorService;
     NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
+    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arr_name));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
@@ -99,8 +104,9 @@ TEST(WriteSubmission, Execute_SingleBlock)
     VirtualBlks vsaRange = {.startVsa = vsa, .numBlks = 1};
 
     // when
-    WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator);
+    WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator, &mockFlowControl, false);
 
+    ON_CALL(mockFlowControl, GetToken(_, _)).WillByDefault(Return((512 >> SECTOR_SIZE_SHIFT) * Ubio::BYTES_PER_UNIT));
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(vsaRange));
 
@@ -121,6 +127,7 @@ TEST(WriteSubmission, Execute_AlgnedMultiBlock)
     NiceMock<MockAllocatorService> mockAllocatorService;
     NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
+    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arr_name));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
@@ -130,8 +137,9 @@ TEST(WriteSubmission, Execute_AlgnedMultiBlock)
     VirtualBlks vsaRange = {.startVsa = vsa, .numBlks = 8};
 
     // when
-    WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator);
+    WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator, &mockFlowControl, false);
 
+    ON_CALL(mockFlowControl, GetToken(_, _)).WillByDefault(Return((512 >> SECTOR_SIZE_SHIFT) * Ubio::BYTES_PER_UNIT));
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(vsaRange));
 
@@ -152,6 +160,7 @@ TEST(WriteSubmission, Execute_MisAlgnedMultiBlock)
     NiceMock<MockAllocatorService> mockAllocatorService;
     NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
+    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arr_name));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
@@ -161,8 +170,9 @@ TEST(WriteSubmission, Execute_MisAlgnedMultiBlock)
     VirtualBlks vsaRange = {.startVsa = vsa, .numBlks = 8};
 
     // when
-    WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator);
+    WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator, &mockFlowControl, false);
 
+    ON_CALL(mockFlowControl, GetToken(_, _)).WillByDefault(Return((512 >> SECTOR_SIZE_SHIFT) * Ubio::BYTES_PER_UNIT));
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(vsaRange));
 
