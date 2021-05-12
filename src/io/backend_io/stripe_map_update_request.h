@@ -55,7 +55,6 @@ private:
     Stripe* stripe;
     IStripeMap* iStripeMap;
     EventScheduler* eventScheduler;
-    bool isGc;
     std::string arrayName;
 };
 
