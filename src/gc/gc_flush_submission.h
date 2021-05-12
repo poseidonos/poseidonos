@@ -56,7 +56,6 @@ public:
     std::pair <VirtualBlks, Stripe*> AllocateBlocks(uint32_t volumeId);
 
 private:
-    Stripe* stripe;
     std::string arrayName;
     std::vector<BlkInfo>* blkInfoList;
     uint32_t volumeId;
