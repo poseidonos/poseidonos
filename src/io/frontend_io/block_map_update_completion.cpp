@@ -46,14 +46,14 @@ namespace pos
 BlockMapUpdateCompletion::BlockMapUpdateCompletion(
     VolumeIoSmartPtr input, CallbackSmartPtr originCallback,
     function<bool(void)> IsReactorNow,
-    IVSAMap* iVSAMap, EventScheduler* eventScheduler, WriteCompletion* writeCompletion,
+    IVSAMap* iVSAMap, EventScheduler* eventScheduler, CallbackSmartPtr writeCompletionEvent,
     IBlockAllocator* iBlockAllocator, IWBStripeAllocator* iWBStripeAllocator, VsaRangeMaker* vsaRangeMaker)
 : Event(IsReactorNow()),
   volumeIo(input),
   originCallback(originCallback),
   iVSAMap(iVSAMap),
   eventScheduler(eventScheduler),
-  writeCompletion(writeCompletion),
+  writeCompletionEvent(writeCompletionEvent),
   iBlockAllocator(iBlockAllocator),
   iWBStripeAllocator(iWBStripeAllocator),
   vsaRangeMaker(vsaRangeMaker)
@@ -66,11 +66,11 @@ BlockMapUpdateCompletion::BlockMapUpdateCompletion(VolumeIoSmartPtr inputVolumeI
       inputVolumeIo, originCallback, EventFrameworkApi::IsReactorNow,
       MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayName()),
       EventSchedulerSingleton::Instance(),
-      new WriteCompletion(inputVolumeIo),
+      std::make_shared<WriteCompletion>(inputVolumeIo),
       AllocatorServiceSingleton::Instance()->GetIBlockAllocator(inputVolumeIo->GetArrayName()),
       AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(inputVolumeIo->GetArrayName()),
       new VsaRangeMaker(inputVolumeIo->GetVolumeId(), ChangeSectorToBlock(inputVolumeIo->GetSectorRba()),
-        DivideUp(inputVolumeIo->GetSize(), BLOCK_SIZE), inputVolumeIo->IsGc(), inputVolumeIo->GetArrayName()))
+          DivideUp(inputVolumeIo->GetSize(), BLOCK_SIZE), inputVolumeIo->IsGc(), inputVolumeIo->GetArrayName()))
 {
 }
 
@@ -105,7 +105,6 @@ BlockMapUpdateCompletion::Execute(void)
 
     iBlockAllocator->ValidateBlks(targetVsaRange);
 
-    CallbackSmartPtr event(writeCompletion);
     CallbackSmartPtr callee;
 
     if (originCallback == nullptr)
@@ -117,13 +116,13 @@ BlockMapUpdateCompletion::Execute(void)
         callee = originCallback;
     }
 
-    event->SetCallee(callee);
-    bool wrapupSuccessful = event->Execute();
+    writeCompletionEvent->SetCallee(callee);
+    bool wrapupSuccessful = writeCompletionEvent->Execute();
 
     if (unlikely(false == wrapupSuccessful))
     {
-        writeCompletion->SetCallee(callee);
-        eventScheduler->EnqueueEvent(event);
+        writeCompletionEvent->SetCallee(callee);
+        eventScheduler->EnqueueEvent(writeCompletionEvent);
     }
     volumeIo = nullptr;
 

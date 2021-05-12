@@ -35,7 +35,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_NineArgument_Stack)
     VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, ""));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIBlockAllocator> iBlockAllocator;
-    MockWriteCompletion* mockWriteCompletion = new NiceMock<MockWriteCompletion>(volumeIo);
+    CallbackSmartPtr mockWriteCompletionEvent = std::make_shared<MockWriteCompletion>(volumeIo);
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &vsaMap));
@@ -43,7 +43,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_NineArgument_Stack)
     // When
     BlockMapUpdateCompletion blockMapUpdateCompletion(
         volumeIo, callback, []() -> bool { return false; }, &vsaMap, &mockEventScheduler,
-        mockWriteCompletion, &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
+        mockWriteCompletionEvent, &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     // Then : Do nothing
 }
 
@@ -56,7 +56,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_NineArgument_Heap)
     VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, ""));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIBlockAllocator> iBlockAllocator;
-    MockWriteCompletion* mockWriteCompletion = new NiceMock<MockWriteCompletion>(volumeIo);
+    CallbackSmartPtr mockWriteCompletionEvent = std::make_shared<MockWriteCompletion>(volumeIo);
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &vsaMap));
@@ -64,7 +64,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_NineArgument_Heap)
     // When
     BlockMapUpdateCompletion* blockMapUpdateCompletion = new BlockMapUpdateCompletion(
         volumeIo, callback, []() -> bool { return false; }, &vsaMap, &mockEventScheduler,
-        mockWriteCompletion, &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
+        mockWriteCompletionEvent, &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     // Then : Do nothing
     delete blockMapUpdateCompletion;
 }
@@ -80,6 +80,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_Execute)
     MockCallback* mockCallback = new NiceMock<MockCallback>(true, 0);
     CallbackSmartPtr callback(mockCallback);
     MockWriteCompletion* mockWriteCompletion = new NiceMock<MockWriteCompletion>(volumeIo);
+    CallbackSmartPtr mockWriteCompletionEvent(mockWriteCompletion);
     NiceMock<MockIBlockAllocator> iBlockAllocator;
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockStripe> mockStripe;
@@ -102,7 +103,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_Execute)
     // When
     BlockMapUpdateCompletion blockMapUpdateCompletion(
         volumeIo, callback, []() -> bool { return false; },
-        &vsaMap, &mockEventScheduler, mockWriteCompletion, &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
+        &vsaMap, &mockEventScheduler, mockWriteCompletionEvent, &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
 
     // Then : Execute
     bool actual = blockMapUpdateCompletion.Execute();
@@ -121,6 +122,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_ExecuteFail)
     MockCallback* mockCallback = new NiceMock<MockCallback>(true, 0);
     CallbackSmartPtr callback(mockCallback);
     MockWriteCompletion* mockWriteCompletionFail = new NiceMock<MockWriteCompletion>(volumeIo);
+    CallbackSmartPtr mockWriteCompletionEvent(mockWriteCompletionFail);
     NiceMock<MockIBlockAllocator> iBlockAllocator;
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockStripe> mockStripe;
@@ -146,7 +148,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_ExecuteFail)
 
     BlockMapUpdateCompletion blockMapUpdateCompletionFail(
         volumeIo, callback, []() -> bool { return false; },
-        &vsaMap, &mockEventScheduler, mockWriteCompletionFail, &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
+        &vsaMap, &mockEventScheduler, mockWriteCompletionEvent, &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
 
     // Then : Execute
     EXPECT_CALL(mockEventScheduler, EnqueueEvent(_)).Times(1);

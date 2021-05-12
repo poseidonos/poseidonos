@@ -54,7 +54,7 @@ public:
     BlockMapUpdateCompletion(VolumeIoSmartPtr input, CallbackSmartPtr originCallback,
         function<bool(void)> IsReactorNow,
         IVSAMap* iVSAMap, EventScheduler* eventScheduler,
-        WriteCompletion* writeCompletion,
+        CallbackSmartPtr writeCompletionEvent,
         IBlockAllocator* iBlockAllocator,
         IWBStripeAllocator* iWBStripeAllocator,
         VsaRangeMaker* VsaRangeMaker);
@@ -70,7 +70,7 @@ private:
     CallbackSmartPtr originCallback;
     IVSAMap* iVSAMap;
     EventScheduler* eventScheduler;
-    WriteCompletion* writeCompletion;
+    CallbackSmartPtr writeCompletionEvent;
     IBlockAllocator* iBlockAllocator;
     IWBStripeAllocator* iWBStripeAllocator;
     VsaRangeMaker* vsaRangeMaker;

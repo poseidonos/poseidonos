@@ -33,37 +33,37 @@
 #include "src/io/frontend_io/block_map_update.h"
 
 #include "src/event_scheduler/event_scheduler.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/include/memory.h"
 #include "src/include/branch_prediction.h"
+#include "src/include/memory.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/block_map_update_completion.h"
 #include "src/journal_service/journal_service.h"
+#include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-#include "src/logger/logger.h"
 
 namespace pos
 {
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback,
- function<bool(void)>IsReactorNow, IVSAMap *iVSAMap, JournalService *journalService, EventScheduler *eventScheduler,
- BlockMapUpdateCompletion *blockMapUpdateCompletion)
+    function<bool(void)> IsReactorNow, IVSAMap* iVSAMap, JournalService* journalService, EventScheduler* eventScheduler,
+    EventSmartPtr blockMapUpdateCompletionEvent)
 : Event(IsReactorNow()),
   volumeIo(inputVolumeIo),
   iVSAMap(iVSAMap),
   originCallback(originCallback),
   journalService(journalService),
   eventScheduler(eventScheduler),
-  blockMapUpdateCompletion(blockMapUpdateCompletion)
+  blockMapUpdateCompletionEvent(blockMapUpdateCompletionEvent)
 {
 }
 
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback)
 : BlockMapUpdate(
-    inputVolumeIo, originCallback, EventFrameworkApi::IsReactorNow,
-    MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayName()),
-    JournalServiceSingleton::Instance(),
-    EventSchedulerSingleton::Instance(),
-    new BlockMapUpdateCompletion(inputVolumeIo, originCallback))
+      inputVolumeIo, originCallback, EventFrameworkApi::IsReactorNow,
+      MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayName()),
+      JournalServiceSingleton::Instance(),
+      EventSchedulerSingleton::Instance(),
+      std::make_shared<BlockMapUpdateCompletion>(inputVolumeIo, originCallback))
 {
 }
 
@@ -77,22 +77,20 @@ BlockMapUpdate::Execute(void)
         IJournalWriter* journal = journalService->GetWriter(volumeIo->GetArrayName());
 
         MpageList dirty = _GetDirtyPages(volumeIo);
-        EventSmartPtr callbackEvent(blockMapUpdateCompletion);
-        int result = journal->AddBlockMapUpdatedLog(volumeIo, dirty, callbackEvent);
+        int result = journal->AddBlockMapUpdatedLog(volumeIo, dirty, blockMapUpdateCompletionEvent);
 
         executionSuccessful = (result == 0);
     }
     else
     {
-        EventSmartPtr event(blockMapUpdateCompletion);
-        executionSuccessful = event->Execute();
+        executionSuccessful = blockMapUpdateCompletionEvent->Execute();
         if (unlikely(false == executionSuccessful))
         {
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::WRCMP_MAP_UPDATE_FAILED;
             POS_TRACE_ERROR(static_cast<int>(eventId),
                 PosEventId::GetString(eventId));
-            eventScheduler->EnqueueEvent(event);
+            eventScheduler->EnqueueEvent(blockMapUpdateCompletionEvent);
             executionSuccessful = true;
         }
     }
