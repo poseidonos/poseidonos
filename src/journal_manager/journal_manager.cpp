@@ -70,6 +70,7 @@ JournalManager::JournalManager(void)
   logGroupReleaser(nullptr),
   dirtyMapManager(nullptr),
   logFilledNotifier(nullptr),
+  sequenceController(nullptr),
   replayHandler(nullptr)
 {
 }

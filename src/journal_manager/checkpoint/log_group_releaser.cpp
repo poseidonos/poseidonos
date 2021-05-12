@@ -47,6 +47,7 @@ LogGroupReleaser::LogGroupReleaser(void)
 : releaseNotifier(nullptr),
   logBuffer(nullptr),
   dirtyPageManager(nullptr),
+  sequenceController(nullptr),
   flushingLogGroupId(-1),
   checkpointTriggerInProgress(false)
 {

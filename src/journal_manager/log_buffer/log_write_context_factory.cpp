@@ -42,7 +42,8 @@
 namespace pos
 {
 LogWriteContextFactory::LogWriteContextFactory(void)
-: notifier(nullptr)
+: notifier(nullptr),
+  sequenceController(nullptr)
 {
 }
 
