@@ -504,6 +504,8 @@ CLIServer()
                         pthread_mutex_unlock(&mutx);
                     }
                 }
+
+				close(cli_fd);
             }
         }
     }
