@@ -16,6 +16,10 @@ TEST(RebuildCtx, Close_)
 {
 }
 
+TEST(RebuildCtx, GetRebuildTargetSegment_)
+{
+}
+
 TEST(RebuildCtx, ReleaseRebuildSegment_)
 {
 }
@@ -64,10 +68,6 @@ TEST(RebuildCtx, SetUnderRebuildSegmentId_)
 {
 }
 
-TEST(RebuildCtx, EraseRebuildTargetSegments_)
-{
-}
-
 TEST(RebuildCtx, _PrepareRebuildCtx_)
 {
 }
@@ -81,6 +81,10 @@ TEST(RebuildCtx, _RebuildCtxLoaded_)
 }
 
 TEST(RebuildCtx, _StoreRebuildCtx_)
+{
+}
+
+TEST(RebuildCtx, _EraseRebuildTargetSegments_)
 {
 }
 

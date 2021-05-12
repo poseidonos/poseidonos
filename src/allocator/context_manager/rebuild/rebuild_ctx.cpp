@@ -41,13 +41,14 @@
 
 namespace pos
 {
-RebuildCtx::RebuildCtx(std::string arrayName)
+RebuildCtx::RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx)
 : needRebuildCont(false),
   targetSegmentCnt(0),
   underRebuildSegmentId(UINT32_MAX),
   rebuildSegmentsFile(nullptr),
   bufferInObj(nullptr),
-  arrayName(arrayName)
+  arrayName(arrayName),
+  allocatorCtx(allocCtx)
 {
 }
 
@@ -91,12 +92,54 @@ RebuildCtx::Close(void)
         delete rebuildSegmentsFile;
         rebuildSegmentsFile = nullptr;
     }
-    delete[] bufferInObj;
+    delete [] bufferInObj;
+}
+
+SegmentId
+RebuildCtx::GetRebuildTargetSegment(void)
+{
+    if (rebuildLock.try_lock() == false)
+    {
+        return NEED_TO_RETRY;
+    }
+    POS_TRACE_INFO(EID(ALLOCATOR_START), "@GetRebuildTargetSegment");
+
+    if (GetTargetSegmentCnt() == 0)
+    {
+        rebuildLock.unlock();
+        return UINT32_MAX;
+    }
+
+    SegmentId segmentId = UINT32_MAX;
+    while (IsRebuidTargetSegmentsEmpty() == false)
+    {
+        auto iter = RebuildTargetSegmentsBegin();
+        segmentId = *iter;
+
+        if (allocatorCtx->GetSegmentState(segmentId, true) == SegmentState::FREE) // This segment had been freed by GC
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "This segmentId:{} was target but seemed to be freed by GC", segmentId);
+            _EraseRebuildTargetSegments(iter);
+            segmentId = UINT32_MAX;
+            continue;
+        }
+
+        POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "segmentId:{} is going to be rebuilt", segmentId);
+        SetUnderRebuildSegmentId(segmentId);
+        break;
+    }
+
+    rebuildLock.unlock();
+    return segmentId;
 }
 
 int
 RebuildCtx::ReleaseRebuildSegment(SegmentId segmentId)
 {
+    if (rebuildLock.try_lock() == false)
+    {
+        return -1;  // Need to retry!
+    }
     POS_TRACE_INFO(EID(ALLOCATOR_START), "@ReleaseRebuildSegment");
 
     auto iter = FindRebuildTargetSegment(segmentId);
@@ -104,14 +147,16 @@ RebuildCtx::ReleaseRebuildSegment(SegmentId segmentId)
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "There is no segmentId:{} in rebuildTargetSegments, seemed to be freed by GC", segmentId);
         SetUnderRebuildSegmentId(UINT32_MAX);
+        rebuildLock.unlock();
         return 0;
     }
 
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "segmentId:{} Rebuild Done!", segmentId);
     // Delete segmentId in rebuildTargetSegments
-    EraseRebuildTargetSegments(iter);
+    _EraseRebuildTargetSegments(iter);
     FlushRebuildCtx();
     SetUnderRebuildSegmentId(UINT32_MAX);
+    rebuildLock.unlock();
     return 0;
 }
 
@@ -179,6 +224,12 @@ RebuildCtx::RebuildTargetSegmentsEnd(void)
 void
 RebuildCtx::FreeSegmentInRebuildTarget(SegmentId segId)
 {
+    if (IsRebuidTargetSegmentsEmpty())  // No need to check below
+    {
+        return;
+    }
+
+    std::unique_lock<std::mutex> lock(rebuildLock);
     auto iter = FindRebuildTargetSegment(segId);
     if (iter == RebuildTargetSegmentsEnd())
     {
@@ -191,9 +242,9 @@ RebuildCtx::FreeSegmentInRebuildTarget(SegmentId segId)
         return;
     }
 
-    EraseRebuildTargetSegments(iter);
+    _EraseRebuildTargetSegments(iter);
     POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "segmentId:{} in Rebuild Target has been Freed by GC", segId);
-    _StoreRebuildCtx();
+    FlushRebuildCtx();
 }
 
 SegmentId
@@ -206,12 +257,6 @@ void
 RebuildCtx::SetUnderRebuildSegmentId(SegmentId segmentId)
 {
     underRebuildSegmentId = segmentId;
-}
-
-void
-RebuildCtx::EraseRebuildTargetSegments(RTSegmentIter iter)
-{
-    rebuildTargetSegments.erase(iter);
 }
 //----------------------------------------------------------------------------//
 int
@@ -237,6 +282,12 @@ RebuildCtx::_StoreRebuildCtx(void)
 {
     int lenToWrite = _PrepareRebuildCtx();
     rebuildSegmentsFile->IssueIO(MetaFsIoOpcode::Write, 0, lenToWrite, bufferInObj);
+}
+
+void
+RebuildCtx::_EraseRebuildTargetSegments(RTSegmentIter iter)
+{
+    rebuildTargetSegments.erase(iter);
 }
 
 void

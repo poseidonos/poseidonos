@@ -57,7 +57,7 @@ ContextManager::ContextManager(AllocatorAddressInfo* info, std::string arrayName
 {
     allocatorCtx = new AllocatorCtx(info, arrayName);
     segmentCtx = new SegmentCtx(info, arrayName);
-    rebuildCtx = new RebuildCtx(arrayName);
+    rebuildCtx = new RebuildCtx(arrayName, allocatorCtx);
     wbStripeCtx = new WbStripeCtx(info);
     fileIoManager = new AllocatorFileIoManager(info, arrayName);
     contextReplayer = new ContextReplayer(info, allocatorCtx, segmentCtx, wbStripeCtx);
@@ -275,40 +275,12 @@ ContextManager::GetStoredContextVersion(int owner)
 SegmentId
 ContextManager::AllocateRebuildTargetSegment(void)
 {
-    std::unique_lock<std::mutex> lock(ctxLock);
-    POS_TRACE_INFO(EID(ALLOCATOR_START), "@GetRebuildTargetSegment");
-
-    if (rebuildCtx->GetTargetSegmentCnt() == 0)
-    {
-        return UINT32_MAX;
-    }
-
-    SegmentId segmentId = UINT32_MAX;
-    while (rebuildCtx->IsRebuidTargetSegmentsEmpty() == false)
-    {
-        auto iter = rebuildCtx->RebuildTargetSegmentsBegin();
-        segmentId = *iter;
-
-        if (allocatorCtx->GetSegmentState(segmentId, true) == SegmentState::FREE) // This segment had been freed by GC
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "This segmentId:{} was target but seemed to be freed by GC", segmentId);
-            rebuildCtx->EraseRebuildTargetSegments(iter);
-            segmentId = UINT32_MAX;
-            continue;
-        }
-
-        POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "segmentId:{} is going to be rebuilt", segmentId);
-        rebuildCtx->SetUnderRebuildSegmentId(segmentId);
-        break;
-    }
-
-    return segmentId;
+    return rebuildCtx->GetRebuildTargetSegment();
 }
 
 int
 ContextManager::ReleaseRebuildSegment(SegmentId segmentId)
 {
-    std::unique_lock<std::mutex> lock(ctxLock);
     return rebuildCtx->ReleaseRebuildSegment(segmentId);
 }
 
@@ -337,12 +309,7 @@ ContextManager::_FreeSegment(SegmentId segId)
     allocatorCtx->SetSegmentState(segId, SegmentState::FREE, false);
     allocatorCtx->ReleaseSegment(segId);
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was freed by allocator", segId);
-
-    if (rebuildCtx->IsRebuidTargetSegmentsEmpty() == false)
-    {
-        std::unique_lock<std::mutex> lock(ctxLock);
-        rebuildCtx->FreeSegmentInRebuildTarget(segId);
-    }
+    rebuildCtx->FreeSegmentInRebuildTarget(segId);
 }
 
 void

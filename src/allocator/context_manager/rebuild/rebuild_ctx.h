@@ -37,7 +37,7 @@
 #include <utility>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/i_context_manager.h"
+#include "src/allocator/context_manager/allocator_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/meta_file_intf/meta_file_intf.h"
 
@@ -46,11 +46,12 @@ namespace pos
 class RebuildCtx
 {
 public:
-    RebuildCtx(std::string arrayName);
+    RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx);
     virtual ~RebuildCtx(void);
     void Init(AllocatorAddressInfo* info);
     void Close(void);
 
+    SegmentId GetRebuildTargetSegment(void);
     int ReleaseRebuildSegment(SegmentId segmentId);
     bool NeedRebuildAgain(void);
     void FreeSegmentInRebuildTarget(SegmentId segId);
@@ -64,13 +65,13 @@ public:
     uint32_t GetTargetSegmentCnt(void);
     void FlushRebuildCtx(void);
     void SetUnderRebuildSegmentId(SegmentId segmentId);
-    void EraseRebuildTargetSegments(RTSegmentIter iter);
 
 private:
     int _PrepareRebuildCtx(void);
     void _LoadRebuildCtxSync(void);
     void _RebuildCtxLoaded(void);
     void _StoreRebuildCtx(void);
+    void _EraseRebuildTargetSegments(RTSegmentIter iter);
     void _FlushRebuildCtxCompleted(AsyncMetaFileIoCtx* ctx);
     SegmentId _GetUnderRebuildSegmentId(void);
 
@@ -79,8 +80,11 @@ private:
     std::set<SegmentId> rebuildTargetSegments; // No lock
     SegmentId underRebuildSegmentId;
     MetaFileIntf* rebuildSegmentsFile;
+    std::mutex rebuildLock;
     char* bufferInObj;
     std::string arrayName;
+
+    AllocatorCtx* allocatorCtx;
 };
 
 } // namespace pos

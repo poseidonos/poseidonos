@@ -86,6 +86,10 @@ Raid5Rebuild::Read(void)
     uint32_t blkCnt = ctx->size->blksPerChunk;
 
     SegmentId segId = _NextSegment();
+    if (segId == NEED_TO_RETRY)
+    {
+        return false;
+    }
     UpdateProgress(segId * strCnt);
 
     if (segId == ctx->size->totalSegments ||
