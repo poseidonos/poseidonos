@@ -19,7 +19,7 @@ JournalManagerSpy::JournalManagerSpy(IArrayInfo* array, IStateControl* stateSub,
 : JournalManager(array, stateSub)
 {
     delete logGroupReleaser;
-    logGroupReleaser = new LogGroupReleaserTester();
+    logGroupReleaser = new LogGroupReleaserSpy();
 
     delete logBuffer;
     std::string arr_name{"arr_name"};
@@ -45,8 +45,8 @@ JournalManagerSpy::InitializeForTest(Mapper* mapper, Allocator* allocator)
         return ret;
     }
 
-    LogGroupReleaserTester* releaserTester =
-        dynamic_cast<LogGroupReleaserTester*>(logGroupReleaser);
+    LogGroupReleaserSpy* releaserTester =
+        dynamic_cast<LogGroupReleaserSpy*>(logGroupReleaser);
     if (releaserTester == nullptr)
     {
         ret = -1;
@@ -77,20 +77,20 @@ JournalManagerSpy::ResetJournalConfiguration(JournalConfiguration* journalConfig
 void
 JournalManagerSpy::StartCheckpoint(void)
 {
-    ((LogGroupReleaserTester*)(logGroupReleaser))->UpdateFlushingLogGroup();
-    ((LogGroupReleaserTester*)(logGroupReleaser))->StartCheckpoint();
+    ((LogGroupReleaserSpy*)(logGroupReleaser))->UpdateFlushingLogGroup();
+    ((LogGroupReleaserSpy*)(logGroupReleaser))->StartCheckpoint();
 }
 
 void
 JournalManagerSpy::SetTriggerCheckpoint(bool val)
 {
-    ((LogGroupReleaserTester*)(logGroupReleaser))->triggerCheckpoint = val;
+    ((LogGroupReleaserSpy*)(logGroupReleaser))->triggerCheckpoint = val;
 }
 
 bool
 JournalManagerSpy::IsCheckpointEnabled(void)
 {
-    return ((LogGroupReleaserTester*)logGroupReleaser)->triggerCheckpoint;
+    return ((LogGroupReleaserSpy*)logGroupReleaser)->triggerCheckpoint;
 }
 
 uint64_t
@@ -175,18 +175,4 @@ JournalManagerSpy::GetNextOffset(void)
     return bufferAllocator->GetNextOffset();
 }
 
-void
-LogGroupReleaserTester::UpdateFlushingLogGroup(void)
-{
-    LogGroupReleaser::_UpdateFlushingLogGroup();
-}
-
-void
-LogGroupReleaserTester::_FlushNextLogGroup(void)
-{
-    if (triggerCheckpoint == true)
-    {
-        LogGroupReleaser::_FlushNextLogGroup();
-    }
-}
 } // namespace pos

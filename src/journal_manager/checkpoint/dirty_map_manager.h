@@ -50,7 +50,7 @@ public:
     virtual void Init(JournalConfiguration* journalConfiguration);
     void Init(std::vector<DirtyPageList* > dirtyPages);
 
-    MapPageList GetDirtyList(int logGroupId);
+    virtual MapPageList GetDirtyList(int logGroupId);
     void DeleteDirtyList(int volumeId);
 
     virtual void LogFilled(int logGroupId, MapPageList& dirty) override;

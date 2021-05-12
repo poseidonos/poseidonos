@@ -54,6 +54,7 @@ class LogGroupReleaser : public CheckpointObserver, public ICheckpointStatus
 {
 public:
     LogGroupReleaser(void);
+    explicit LogGroupReleaser(CheckpointHandler* checkpointHandler);
     virtual ~LogGroupReleaser(void);
 
     virtual void Init(LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer,

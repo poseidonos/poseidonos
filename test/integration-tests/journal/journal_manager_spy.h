@@ -10,6 +10,8 @@
 #include "test/integration-tests/journal/fake/mapper_mock.h"
 #include "test/integration-tests/journal/fake/allocator_mock.h"
 
+#include "test/unit-tests/journal_manager/checkpoint/log_group_releaser_spy.h"
+
 namespace pos
 {
 class JournalManagerSpy : public JournalManager
@@ -45,14 +47,4 @@ private:
     int _GetLogsFromBuffer(LogList& logList);
 };
 
-class LogGroupReleaserTester : public LogGroupReleaser
-{
-public:
-    void UpdateFlushingLogGroup(void);
-
-    bool triggerCheckpoint = true;
-
-protected:
-    virtual void _FlushNextLogGroup(void) override;
-};
 } // namespace pos

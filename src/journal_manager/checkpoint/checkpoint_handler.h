@@ -53,9 +53,9 @@ public:
     CheckpointHandler(CheckpointObserver* observer, int numMapsToFlush, int numMapsFlushed);
     virtual ~CheckpointHandler(void) = default;
 
-    void Init(IMapFlush* mapFlush, IContextManager* contextManer);
+    virtual void Init(IMapFlush* mapFlush, IContextManager* contextManer);
 
-    int Start(MapPageList pendingDirtyPages);
+    virtual int Start(MapPageList pendingDirtyPages);
     virtual int FlushCompleted(int metaId);
 
     CheckpointStatus GetStatus(void);

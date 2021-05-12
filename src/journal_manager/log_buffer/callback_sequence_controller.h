@@ -48,8 +48,8 @@ public:
     void GetCallbackExecutionApproval(void);
     void NotifyCallbackCompleted(void);
 
-    void GetCheckpointExecutionApproval(void);
-    void AllowCallbackExecution(void);
+    virtual void GetCheckpointExecutionApproval(void);
+    virtual void AllowCallbackExecution(void);
 
     // These functions are for unit testing
     int GetNumPendingCallbacks(void);

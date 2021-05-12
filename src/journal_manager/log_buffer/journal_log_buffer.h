@@ -67,7 +67,7 @@ public:
     virtual int WriteLog(LogWriteContext* context, int logGroupID, uint64_t offset);
 
     virtual int SyncResetAll(void);
-    int AsyncReset(int id, JournalInternalEventCallback callbackFunc);
+    virtual int AsyncReset(int id, JournalInternalEventCallback callbackFunc);
     void AsyncResetDone(AsyncMetaFileIoCtx* ctx);
 
     int Delete(void); // TODO(huijeong.kim): move to tester code

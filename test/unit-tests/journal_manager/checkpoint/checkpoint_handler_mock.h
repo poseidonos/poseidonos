@@ -10,6 +10,8 @@ class MockCheckpointHandler : public CheckpointHandler
 {
 public:
     using CheckpointHandler::CheckpointHandler;
+    MOCK_METHOD(void, Init, (IMapFlush* mapFlush, IContextManager* contextManer), (override));
+    MOCK_METHOD(int, Start, (MapPageList pendingDirtyPages), (override));
     MOCK_METHOD(int, FlushCompleted, (int metaId), (override));
 };
 

@@ -43,19 +43,30 @@
 
 namespace pos
 {
+// Constructor for the product code
 LogGroupReleaser::LogGroupReleaser(void)
+: LogGroupReleaser(new CheckpointHandler(this))
+{
+}
+
+// Constructor for unit test
+LogGroupReleaser::LogGroupReleaser(CheckpointHandler* checkpointHandler)
 : releaseNotifier(nullptr),
   logBuffer(nullptr),
   dirtyPageManager(nullptr),
+  sequenceController(nullptr),
   flushingLogGroupId(-1),
-  checkpointTriggerInProgress(false)
+  checkpointTriggerInProgress(false),
+  checkpointHandler(checkpointHandler)
 {
-    checkpointHandler = new CheckpointHandler(this);
 }
 
 LogGroupReleaser::~LogGroupReleaser(void)
 {
-    delete checkpointHandler;
+    if (checkpointHandler != nullptr)
+    {
+        delete checkpointHandler;
+    }
 }
 
 void
