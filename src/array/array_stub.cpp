@@ -47,6 +47,7 @@ Array::Load()
 
 Array::~Array(void)
 {
+    delete devMgr_;
 }
 
 int
