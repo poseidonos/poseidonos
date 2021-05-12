@@ -41,6 +41,13 @@
 
 namespace pos
 {
+
+// Constructor for unit test mocking
+CheckpointHandler::CheckpointHandler(void)
+: CheckpointHandler(nullptr, 0, 0)
+{
+}
+
 // Constructor for injecting private member values in product code
 CheckpointHandler::CheckpointHandler(CheckpointObserver* observer, int numMapsToFlush, int numMapsFlushed)
 : mapFlush(nullptr),

@@ -48,6 +48,7 @@ class CheckpointObserver;
 class CheckpointHandler
 {
 public:
+    CheckpointHandler(void);
     explicit CheckpointHandler(CheckpointObserver* observer);
     CheckpointHandler(CheckpointObserver* observer, int numMapsToFlush, int numMapsFlushed);
     virtual ~CheckpointHandler(void) = default;
@@ -55,7 +56,7 @@ public:
     void Init(IMapFlush* mapFlush, IContextManager* contextManer);
 
     int Start(MapPageList pendingDirtyPages);
-    int FlushCompleted(int metaId);
+    virtual int FlushCompleted(int metaId);
 
     CheckpointStatus GetStatus(void);
 
