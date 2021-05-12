@@ -42,7 +42,6 @@
 #include "io_worker_device_operation_queue.h"
 #include "src/bio/ubio.h"
 
-struct spdk_thread;
 
 namespace pos
 {
@@ -88,7 +87,6 @@ private:
     IOQueue* ioQueue;
     std::thread* thread;
     uint32_t currentOutstandingIOCount;
-    spdk_thread* spdkThread;
 
     DeviceSet deviceList;
     std::atomic<bool> exit;

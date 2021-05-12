@@ -51,7 +51,8 @@ thread_local std::vector<UblockSharedPtr> IODispatcher::threadLocalDeviceList;
 EventFactory* IODispatcher::recoveryEventFactory = nullptr;
 
 IODispatcher::IODispatcher(void)
-: ioWorkerCount(0)
+: ioWorkerCount(0),
+  deviceAllocationTurn(0)
 {
     pthread_rwlock_init(&ioWorkerMapLock, nullptr);
 }
