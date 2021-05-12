@@ -102,14 +102,14 @@ ContextReplayer::ReplayStripeFlushed(StripeId wbLsid)
     wbStripeCtx->ReleaseWbStripe(wbLsid);
     SegmentId segId = wbLsid / addrInfo->GetstripesPerSegment();
 
-    if (segmentCtx->IncreaseOccupiedStripeCount(segId, false) == (int)addrInfo->GetstripesPerSegment())
+    if (segmentCtx->IncreaseOccupiedStripeCount(segId) == (int)addrInfo->GetstripesPerSegment())
     {
-        if (segmentCtx->GetValidBlockCount(segId, false) == 0)
+        if (segmentCtx->GetValidBlockCount(segId) == 0)
         {
             SegmentState eState = allocatorCtx->GetSegmentState(segId, false);
             if (eState != SegmentState::FREE)
             {
-                segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */, false);
+                segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */);
                 allocatorCtx->SetSegmentState(segId, SegmentState::FREE, false);
                 allocatorCtx->ReleaseSegment(segId);
 
@@ -145,9 +145,9 @@ ContextReplayer::ResetSegmentsStates(void)
             allocatorCtx->SetSegmentState(segId, SegmentState::SSD, false);
             POS_TRACE_INFO(EID(SEGMENT_WAS_VICTIM), "segmentId:{} was VICTIM, so changed to SSD", segId);
         }
-        if ((segmentCtx->GetValidBlockCount(segId, false) == 0) && (allocatorCtx->GetSegmentState(segId, false) == SegmentState::SSD))
+        if ((segmentCtx->GetValidBlockCount(segId) == 0) && (allocatorCtx->GetSegmentState(segId, false) == SegmentState::SSD))
         {
-            segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */, false);
+            segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */);
             allocatorCtx->SetSegmentState(segId, SegmentState::FREE, false);
             allocatorCtx->ReleaseSegment(segId);
             POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was All Invalidated, so changed to FREE", segId);

@@ -92,10 +92,10 @@ ContextManager::UpdateOccupiedStripeCount(StripeId lsid)
 {
     SegmentId segId = lsid / addrInfo->GetstripesPerSegment();
     std::lock_guard<std::mutex> lock(segmentCtx->GetSegInfoLock(segId));
-    if (segmentCtx->IncreaseOccupiedStripeCount(segId, false) == (int)addrInfo->GetstripesPerSegment())
+    if (segmentCtx->IncreaseOccupiedStripeCount(segId) == (int)addrInfo->GetstripesPerSegment())
     {
         std::lock_guard<std::mutex> lock(allocatorCtx->GetSegStateLock(segId));
-        if (segmentCtx->GetValidBlockCount(segId, false) == 0)
+        if (segmentCtx->GetValidBlockCount(segId) == 0)
         {
             SegmentState eState = allocatorCtx->GetSegmentState(segId, false);
             if (eState != SegmentState::FREE)
@@ -118,7 +118,7 @@ ContextManager::FreeUserDataSegment(SegmentId segId)
     if ((eState == SegmentState::SSD) || (eState == SegmentState::VICTIM))
     {
         std::lock_guard<std::mutex> lock(segmentCtx->GetSegInfoLock(segId));
-        assert(segmentCtx->GetOccupiedStripeCount(segId, false) == (int)addrInfo->GetstripesPerSegment());
+        assert(segmentCtx->GetOccupiedStripeCount(segId) == (int)addrInfo->GetstripesPerSegment());
         _FreeSegment(segId);
     }
 }
@@ -203,7 +203,7 @@ ContextManager::AllocateGCVictimSegment(void)
     uint32_t minValidCount = numUserAreaSegments;
     for (SegmentId segId = 0; segId < numUserAreaSegments; ++segId)
     {
-        uint32_t cnt = segmentCtx->GetValidBlockCount(segId, true);
+        uint32_t cnt = segmentCtx->GetValidBlockCount(segId);
 
         std::lock_guard<std::mutex> lock(allocatorCtx->GetSegStateLock(segId));
         if ((allocatorCtx->GetSegmentState(segId, false) != SegmentState::SSD) || (cnt == 0))
@@ -333,7 +333,7 @@ ContextManager::GetContextSectionSize(int owner, int section)
 void
 ContextManager::_FreeSegment(SegmentId segId)
 {
-    segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */, false);
+    segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */);
     allocatorCtx->SetSegmentState(segId, SegmentState::FREE, false);
     allocatorCtx->ReleaseSegment(segId);
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was freed by allocator", segId);

@@ -84,4 +84,12 @@ TEST(SegmentCtx, GetSegInfoLock_)
 {
 }
 
+TEST(SegmentCtx, CopySegmentInfoToBufferforWBT_)
+{
+}
+
+TEST(SegmentCtx, CopySegmentInfoFromBufferforWBT_)
+{
+}
+
 } // namespace pos

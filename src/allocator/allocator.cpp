@@ -208,39 +208,22 @@ Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname)
     int ret = dumpFile->Create(0);
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_START), "Failed to open output file {}", fname);
+        POS_TRACE_ERROR(EID(ALLOCATOR_START), "WBT failed to open output file {}", fname);
         return -EID(ALLOCATOR_START);
     }
 
     dumpFile->Open();
     uint64_t curOffset = 0;
-
-    if (WBT_SEGMENT_VALID_COUNT == type)
+    if ((WBT_SEGMENT_VALID_COUNT == type) || (WBT_SEGMENT_OCCUPIED_STRIPE == type))
     {
         uint32_t len = sizeof(uint32_t) * addrInfo->GetnumUserAreaSegments();
         char* buf = new char[len]();
-        char* src = (char*)contextManager->GetContextSectionAddr(SEGMENT_CTX, SC_SEGMENT_VALID_COUNT);
-        memcpy(buf, src, len);
-
+        contextManager->GetSegmentCtx()->CopySegmentInfoToBufferforWBT(type, buf);
         ret = dumpFile->IssueIO(MetaFsIoOpcode::Write, 0, len, buf);
         if (ret < 0)
         {
-            POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "Sync Write to {} Failed, ret:{}", fname, ret);
-            ret = -EID(ALLOCATOR_META_ARCHIVE_STORE);
-        }
-        delete[] buf;
-    }
-    else if (WBT_SEGMENT_OCCUPIED_STRIPE == type)
-    {
-        uint32_t len = sizeof(uint32_t) * addrInfo->GetnumUserAreaSegments();
-        char* buf = new char[len]();
-        char* src = (char*)contextManager->GetContextSectionAddr(SEGMENT_CTX, SC_SEGMENT_OCCUPIED_STRIPE);
-        memcpy(buf, src, len);
-
-        ret = dumpFile->IssueIO(MetaFsIoOpcode::Write, 0, len, buf);
-        if (ret < 0)
-        {
-            POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "Sync Write to {} Failed, ret:{}", fname, ret);
+            POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "WBT Sync Write(SegmentInfo) to {} Failed, ret:{}", fname, ret);
+            delete[] buf;
             ret = -EID(ALLOCATOR_META_ARCHIVE_STORE);
         }
         delete[] buf;
@@ -249,14 +232,14 @@ Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname)
     {
         if (WBT_NUM_ALLOCATOR_META <= type)
         {
-            POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "wrong alloctor meta type, type:{}", type);
+            POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "WBT wrong alloctor meta type, type:{}", type);
             ret = -EID(ALLOCATOR_META_ARCHIVE_STORE);
         }
 
         ret = dumpFile->AppendIO(MetaFsIoOpcode::Write, curOffset, contextManager->GetContextSectionSize(ALLOCATOR_CTX, type + 1), contextManager->GetContextSectionAddr(ALLOCATOR_CTX, type + 1));
         if (ret < 0)
         {
-            POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "Sync Write to {} Failed, ret:{}", fname, ret);
+            POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "WBT Sync Write(allocatorCtx) to {} Failed, ret:{}", fname, ret);
             ret = -EID(ALLOCATOR_META_ARCHIVE_STORE);
         }
     }
@@ -271,33 +254,21 @@ Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname)
 {
     MetaFileIntf* fileProvided = new MockFileIntf(fname, iArrayInfo->GetName());
     int ret = 0;
-
     fileProvided->Open();
     uint64_t curOffset = 0;
-
-    if (WBT_SEGMENT_VALID_COUNT == type)
+    if ((WBT_SEGMENT_VALID_COUNT == type) || (WBT_SEGMENT_OCCUPIED_STRIPE == type))
     {
         uint32_t len = sizeof(uint32_t) * addrInfo->GetnumUserAreaSegments();
-        char* pBuf = (char*)contextManager->GetContextSectionAddr(SEGMENT_CTX, SC_SEGMENT_VALID_COUNT);
-
-        ret = fileProvided->AppendIO(MetaFsIoOpcode::Read, curOffset, len, pBuf);
+        char* buf = new char[len]();
+        ret = fileProvided->AppendIO(MetaFsIoOpcode::Read, curOffset, len, buf);
         if (ret < 0)
         {
-            POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_LOAD), "Sync Read(SegmentValidBlockCount) from {} Failed, ret:{}", fname, ret);
+            POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_LOAD), "WBT Sync Read(SegmentInfo) from {} Failed, ret:{}", fname, ret);
+            delete[] buf;
             ret = -EID(ALLOCATOR_META_ARCHIVE_LOAD);
         }
-    }
-    else if (WBT_SEGMENT_OCCUPIED_STRIPE == type)
-    {
-        uint32_t len = sizeof(uint32_t) * addrInfo->GetnumUserAreaSegments();
-        char* pBuf = (char*)contextManager->GetContextSectionAddr(SEGMENT_CTX, SC_SEGMENT_OCCUPIED_STRIPE);
-
-        ret = fileProvided->AppendIO(MetaFsIoOpcode::Read, curOffset, len, pBuf);
-        if (ret < 0)
-        {
-            POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_LOAD), "Sync Read(SegmentOccupiedStripeCount) from {} Failed, ret:{}", fname, ret);
-            ret = -EID(ALLOCATOR_META_ARCHIVE_LOAD);
-        }
+        contextManager->GetSegmentCtx()->CopySegmentInfoFromBufferforWBT(type, buf);
+        delete[] buf;
     }
     else
     {
@@ -316,7 +287,12 @@ Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname)
         // ACTIVE_STRIPE_TAIL, CURRENT_SSD_LSID, SEGMENT_STATE
         else
         {
-            // do nothing
+            ret = fileProvided->AppendIO(MetaFsIoOpcode::Read, curOffset, contextManager->GetContextSectionSize(ALLOCATOR_CTX, type + 1), contextManager->GetContextSectionAddr(ALLOCATOR_CTX, type + 1));
+            if (ret < 0)
+            {
+                POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_LOAD), "WBT Sync Read(allocatorCtx) from {} Failed, ret:{}", fname, ret);
+                ret = -EID(ALLOCATOR_META_ARCHIVE_LOAD);
+            }
         }
     }
 
@@ -355,7 +331,7 @@ Allocator::GetInstantMetaInfo(std::string fname)
         {
             oss << std::endl;
         }
-        oss << "SegmentId:" << segmentId << " state:" << static_cast<int>(state) << " ValidBlockCnt:" << contextManager->GetSegmentCtx()->GetValidBlockCount(segmentId, false) << "  ";
+        oss << "SegmentId:" << segmentId << " state:" << static_cast<int>(state) << " ValidBlockCnt:" << contextManager->GetSegmentCtx()->GetValidBlockCount(segmentId) << "  ";
     }
     oss << std::endl
         << std::endl;

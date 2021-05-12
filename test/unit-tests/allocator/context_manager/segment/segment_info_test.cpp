@@ -8,11 +8,11 @@ TEST(SegmentInfo, SegmentInfo_)
 {
 }
 
-TEST(SegmentInfo, GetNumSegment_)
+TEST(SegmentInfo, GetValidBlockCount_)
 {
 }
 
-TEST(SegmentInfo, GetValidBlockCount_)
+TEST(SegmentInfo, SetValidBlockCount_)
 {
 }
 
@@ -33,22 +33,6 @@ TEST(SegmentInfo, GetOccupiedStripeCount_)
 }
 
 TEST(SegmentInfo, IncreaseOccupiedStripeCount_)
-{
-}
-
-TEST(SegmentInfo, CopySegmentInfoToBuffer_)
-{
-}
-
-TEST(SegmentInfo, CopySegmentInfoFromBuffer_)
-{
-}
-
-TEST(SegmentInfo, GetValidBlockCountPool_)
-{
-}
-
-TEST(SegmentInfo, GetOccupiedStripeCountPool_)
 {
 }
 

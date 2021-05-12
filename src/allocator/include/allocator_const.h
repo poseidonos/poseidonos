@@ -55,8 +55,7 @@ enum FileOwner
 enum SegmentCtxSection
 {
     SC_HEADER = 0,
-    SC_SEGMENT_VALID_COUNT,
-    SC_SEGMENT_OCCUPIED_STRIPE,
+    SC_SEGMENT_INFO,
     NUM_SEGMENT_CTX_SECTION
 };
 

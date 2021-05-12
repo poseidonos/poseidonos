@@ -61,17 +61,20 @@ public:
     virtual uint64_t GetStoredVersion(void);
     virtual void ResetDirtyVersion(void);
 
-    uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool needlock);
-    int32_t DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool needlock);
-    uint32_t GetValidBlockCount(SegmentId segId, bool needlock);
-    void SetOccupiedStripeCount(SegmentId segId, int count, bool needlock);
-    int GetOccupiedStripeCount(SegmentId segId, bool needlock);
-    int IncreaseOccupiedStripeCount(SegmentId segId, bool needlock);
+    uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
+    int32_t DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
+    uint32_t GetValidBlockCount(SegmentId segId);
+    void SetOccupiedStripeCount(SegmentId segId, int count);
+    int GetOccupiedStripeCount(SegmentId segId);
+    int IncreaseOccupiedStripeCount(SegmentId segId);
 
     bool IsSegmentCtxIo(char* pBuf);
     SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
     std::mutex& GetSegmentCtxLock(void) { return segCtxLock;}
     std::mutex& GetSegInfoLock(SegmentId segId);
+
+    void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
+    void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
 private:
     static const uint32_t SIG_SEGMENT_CTX = 0xECECECEC;
@@ -80,6 +83,7 @@ private:
     std::atomic<uint64_t> ctxDirtyVersion;
     std::atomic<uint64_t> ctxStoredVersion;
     SegmentInfo* segmentInfos;
+    uint32_t numSegments;
 
     AllocatorAddressInfo* addrInfo;
     std::string arrayName;

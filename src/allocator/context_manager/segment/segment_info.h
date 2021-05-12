@@ -33,35 +33,28 @@
 #pragma once
 
 #include "src/include/address_type.h"
+#include <atomic>
 
 namespace pos
 {
 class SegmentInfo
 {
 public:
-    SegmentInfo(uint32_t maxSegment);
+    SegmentInfo(void);
     ~SegmentInfo(void);
 
-    uint32_t GetNumSegment(void) { return numSegment;}
+    uint32_t GetValidBlockCount(void);
+    void SetValidBlockCount(int cnt);
+    uint32_t IncreaseValidBlockCount(uint32_t inc);
+    int32_t DecreaseValidBlockCount(uint32_t dec);
 
-    uint32_t GetValidBlockCount(SegmentId segId);
-    uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t inc);
-    int32_t DecreaseValidBlockCount(SegmentId segId, uint32_t dec);
-
-    void SetOccupiedStripeCount(SegmentId segmentId, uint32_t cnt);
-    uint32_t GetOccupiedStripeCount(SegmentId segmentId);
-    uint32_t IncreaseOccupiedStripeCount(SegmentId segmentId);
-
-    void CopySegmentInfoToBuffer(char* pBuffer);
-    void CopySegmentInfoFromBuffer(char* pBuffer);
-
-    char* GetValidBlockCountPool(void) { return (char*)validBlockCount;}
-    char* GetOccupiedStripeCountPool(void) { return (char*)occupiedStripeCount;}
+    void SetOccupiedStripeCount(uint32_t cnt);
+    uint32_t GetOccupiedStripeCount(void);
+    uint32_t IncreaseOccupiedStripeCount(void);
 
 private:
-    uint32_t numSegment;
-    uint32_t* validBlockCount;
-    uint32_t* occupiedStripeCount;
+    std::atomic<uint32_t> validBlockCount;
+    std::atomic<uint32_t> occupiedStripeCount;
 };
 
 } // namespace pos

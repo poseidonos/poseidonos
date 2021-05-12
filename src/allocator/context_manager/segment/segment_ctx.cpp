@@ -45,6 +45,7 @@ namespace pos
 {
 SegmentCtx::SegmentCtx(SegmentInfo* segmentInfo_, std::string arrayName_, AllocatorAddressInfo* addrInfo_)
 : segmentInfos(segmentInfo_),
+  numSegments(0),
   addrInfo(addrInfo_),
   arrayName(arrayName_)
 {
@@ -52,6 +53,7 @@ SegmentCtx::SegmentCtx(SegmentInfo* segmentInfo_, std::string arrayName_, Alloca
 
 SegmentCtx::SegmentCtx(AllocatorAddressInfo* info, std::string arrayName)
 : segmentInfos(nullptr),
+  numSegments(0),
   addrInfo(info),
   arrayName(arrayName),
   segInfoLocks(nullptr)
@@ -70,33 +72,24 @@ SegmentCtx::Init(void)
     ctxStoredVersion = 0;
     ctxDirtyVersion = 0;
 
-    int numSegments = addrInfo->GetnumUserAreaSegments();
-    segmentInfos = new SegmentInfo(numSegments);
+    numSegments = addrInfo->GetnumUserAreaSegments();
+    segmentInfos = new SegmentInfo[numSegments];
     segInfoLocks = new SegmentLock[numSegments];
 }
 
 void
 SegmentCtx::Close(void)
 {
-    delete segmentInfos;
+    delete[] segmentInfos;
     segmentInfos = nullptr;
     delete[] segInfoLocks;
     segInfoLocks = nullptr;
 }
 
 uint32_t
-SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool needlock)
+SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
-    uint32_t validCount;
-    if (needlock == true)
-    {
-        std::lock_guard<std::mutex> lock(segInfoLocks[segId].GetLock());
-        validCount = segmentInfos->IncreaseValidBlockCount(segId, cnt);
-    }
-    else
-    {
-        validCount = segmentInfos->IncreaseValidBlockCount(segId, cnt);
-    }
+    uint32_t validCount = segmentInfos[segId].IncreaseValidBlockCount(cnt);
     uint32_t blksPerSegment = addrInfo->GetblksPerSegment();
     if (validCount > blksPerSegment)
     {
@@ -107,18 +100,9 @@ SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool needlock
 }
 
 int32_t
-SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool needlock)
+SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
-    int32_t validCount;
-    if (needlock == true)
-    {
-        std::lock_guard<std::mutex> lock(segInfoLocks[segId].GetLock());
-        validCount = segmentInfos->DecreaseValidBlockCount(segId, cnt);
-    }
-    else
-    {
-        validCount = segmentInfos->DecreaseValidBlockCount(segId, cnt);
-    }
+    int32_t validCount = segmentInfos[segId].DecreaseValidBlockCount(cnt);
     if (validCount < 0)
     {
         POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED), "segmentId:{} decreasedCount:{} total validCount:{} : UNDERFLOWED", segId, cnt, validCount);
@@ -128,59 +112,27 @@ SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool needlock
 }
 
 uint32_t
-SegmentCtx::GetValidBlockCount(SegmentId segId, bool needlock)
+SegmentCtx::GetValidBlockCount(SegmentId segId)
 {
-    if (needlock == true)
-    {
-        std::lock_guard<std::mutex> lock(segInfoLocks[segId].GetLock());
-        return segmentInfos->GetValidBlockCount(segId);
-    }
-    else
-    {
-        return segmentInfos->GetValidBlockCount(segId);
-    }
+    return segmentInfos[segId].GetValidBlockCount();
 }
 
 void
-SegmentCtx::SetOccupiedStripeCount(SegmentId segId, int count, bool needlock)
+SegmentCtx::SetOccupiedStripeCount(SegmentId segId, int count)
 {
-    if (needlock == true)
-    {
-        std::lock_guard<std::mutex> lock(segInfoLocks[segId].GetLock());
-        segmentInfos->SetOccupiedStripeCount(segId, count);
-    }
-    else
-    {
-        segmentInfos->SetOccupiedStripeCount(segId, count);
-    }
+    segmentInfos[segId].SetOccupiedStripeCount(count);
 }
 
 int
-SegmentCtx::GetOccupiedStripeCount(SegmentId segId, bool needlock)
+SegmentCtx::GetOccupiedStripeCount(SegmentId segId)
 {
-    if (needlock == true)
-    {
-        std::lock_guard<std::mutex> lock(segInfoLocks[segId].GetLock());
-        return segmentInfos->GetOccupiedStripeCount(segId);
-    }
-    else
-    {
-        return segmentInfos->GetOccupiedStripeCount(segId);
-    }
+    return segmentInfos[segId].GetOccupiedStripeCount();
 }
 
 int
-SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId, bool needlock)
+SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
 {
-    if (needlock == true)
-    {
-        std::lock_guard<std::mutex> lock(segInfoLocks[segId].GetLock());
-        return segmentInfos->IncreaseOccupiedStripeCount(segId);
-    }
-    else
-    {
-        return segmentInfos->IncreaseOccupiedStripeCount(segId);
-    }
+    return segmentInfos[segId].IncreaseOccupiedStripeCount();
 }
 
 std::mutex&
@@ -222,6 +174,7 @@ SegmentCtx::FinalizeIo(AsyncMetaFileIoCtx* ctx)
 {
     ctxStoredVersion = ((SegmentCtxHeader*)ctx->buffer)->ctxVersion;
 }
+
 char*
 SegmentCtx::GetSectionAddr(int section)
 {
@@ -233,14 +186,9 @@ SegmentCtx::GetSectionAddr(int section)
             ret = (char*)&ctxHeader;
             break;
         }
-        case SC_SEGMENT_VALID_COUNT:
+        case SC_SEGMENT_INFO:
         {
-            ret = segmentInfos->GetValidBlockCountPool();
-            break;
-        }
-        case SC_SEGMENT_OCCUPIED_STRIPE:
-        {
-            ret = segmentInfos->GetOccupiedStripeCountPool();
+            ret = (char*)segmentInfos;
             break;
         }
     }
@@ -258,10 +206,9 @@ SegmentCtx::GetSectionSize(int section)
             ret = sizeof(SegmentCtxHeader);
             break;
         }
-        case SC_SEGMENT_VALID_COUNT:
-        case SC_SEGMENT_OCCUPIED_STRIPE:
+        case SC_SEGMENT_INFO:
         {
-            ret = addrInfo->GetnumUserAreaSegments() * sizeof(uint32_t);
+            ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentInfo);
             break;
         }
     }
@@ -278,6 +225,40 @@ void
 SegmentCtx::ResetDirtyVersion(void)
 {
     ctxDirtyVersion = 0;
+}
+
+void
+SegmentCtx::CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf)
+{
+    uint32_t* dst = reinterpret_cast<uint32_t*>(dstBuf);
+    for (uint32_t segId = 0; segId < numSegments; segId++)
+    {
+        if (type == WBT_SEGMENT_VALID_COUNT)
+        {
+            dst[segId] = segmentInfos[segId].GetValidBlockCount();
+        }
+        else
+        {
+            dst[segId] = segmentInfos[segId].GetOccupiedStripeCount();
+        }
+    }
+}
+
+void
+SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* srcBuf)
+{
+    uint32_t* src = reinterpret_cast<uint32_t*>(srcBuf);
+    for (uint32_t segId = 0; segId < numSegments; segId++)
+    {
+        if (type == WBT_SEGMENT_VALID_COUNT)
+        {
+            segmentInfos[segId].SetValidBlockCount(src[segId]);
+        }
+        else
+        {
+            segmentInfos[segId].SetOccupiedStripeCount(src[segId]);
+        }
+    }
 }
 
 } // namespace pos

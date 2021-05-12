@@ -88,7 +88,7 @@ void
 BlockManager::InvalidateBlks(VirtualBlks blks)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    uint32_t validCount = segCtx->DecreaseValidBlockCount(segId, blks.numBlks, true);
+    uint32_t validCount = segCtx->DecreaseValidBlockCount(segId, blks.numBlks);
     if (validCount == 0)
     {
         contextManager->FreeUserDataSegment(segId);
@@ -99,7 +99,7 @@ void
 BlockManager::ValidateBlks(VirtualBlks blks)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    segCtx->IncreaseValidBlockCount(segId, blks.numBlks, true);
+    segCtx->IncreaseValidBlockCount(segId, blks.numBlks);
 }
 
 void

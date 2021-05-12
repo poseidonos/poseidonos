@@ -36,75 +36,59 @@
 
 namespace pos
 {
-SegmentInfo::SegmentInfo(uint32_t maxSegment)
-: numSegment(maxSegment)
+SegmentInfo::SegmentInfo(void)
+: validBlockCount(0),
+  occupiedStripeCount(0)
 {
-    validBlockCount = new uint32_t[maxSegment];
-    memset(validBlockCount, 0, sizeof(uint32_t) * maxSegment);
-    occupiedStripeCount = new uint32_t[maxSegment];
-    memset(occupiedStripeCount, 0, sizeof(uint32_t) * maxSegment);
 }
 
 SegmentInfo::~SegmentInfo(void)
 {
-    delete[] validBlockCount;
-    delete[] occupiedStripeCount;
 }
 
 uint32_t
-SegmentInfo::GetValidBlockCount(SegmentId segId)
+SegmentInfo::GetValidBlockCount(void)
 {
-    return validBlockCount[segId];
+    return validBlockCount;
+}
+
+void
+SegmentInfo::SetValidBlockCount(int cnt)
+{
+    // for wbt
+    validBlockCount = cnt;
 }
 
 uint32_t
-SegmentInfo::IncreaseValidBlockCount(SegmentId segId, uint32_t inc)
+SegmentInfo::IncreaseValidBlockCount(uint32_t inc)
 {
-    validBlockCount[segId] += inc;
-    return validBlockCount[segId];
+    validBlockCount += inc;
+    return validBlockCount;
 }
 
 int32_t
-SegmentInfo::DecreaseValidBlockCount(SegmentId segId, uint32_t dec)
+SegmentInfo::DecreaseValidBlockCount(uint32_t dec)
 {
-    validBlockCount[segId] -= dec;
-    return validBlockCount[segId];
+    validBlockCount -= dec;
+    return validBlockCount;
 }
 
 void
-SegmentInfo::CopySegmentInfoToBuffer(char* pBuffer)
+SegmentInfo::SetOccupiedStripeCount(uint32_t cnt)
 {
-    char* pDstBuf = pBuffer;
-    memcpy(pDstBuf, validBlockCount, sizeof(uint32_t) * numSegment);
-    pDstBuf += (sizeof(uint32_t) * numSegment);
-    memcpy(pDstBuf, occupiedStripeCount, sizeof(uint32_t) * numSegment);
-}
-
-void
-SegmentInfo::CopySegmentInfoFromBuffer(char* pBuffer)
-{
-    char* pSrcBuf = pBuffer;
-    memcpy(validBlockCount, pSrcBuf, sizeof(uint32_t) * numSegment);
-    pSrcBuf += (sizeof(uint32_t) * numSegment);
-    memcpy(occupiedStripeCount, pSrcBuf, sizeof(uint32_t) * numSegment);
-}
-
-void
-SegmentInfo::SetOccupiedStripeCount(SegmentId segmentId, uint32_t cnt)
-{
-    occupiedStripeCount[segmentId] = cnt;
+    occupiedStripeCount = cnt;
 }
 
 uint32_t
-SegmentInfo::GetOccupiedStripeCount(SegmentId segmentId)
+SegmentInfo::GetOccupiedStripeCount(void)
 {
-    return occupiedStripeCount[segmentId];
+    return occupiedStripeCount;
 }
 
 uint32_t
-SegmentInfo::IncreaseOccupiedStripeCount(SegmentId segmentId)
+SegmentInfo::IncreaseOccupiedStripeCount(void)
 {
-    return ++occupiedStripeCount[segmentId];
+    return ++occupiedStripeCount;
 }
 
 } // namespace pos

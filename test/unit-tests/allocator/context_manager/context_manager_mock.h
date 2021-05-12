@@ -12,17 +12,18 @@ class MockContextManager : public ContextManager
 {
 public:
     using ContextManager::ContextManager;
+    MOCK_METHOD(int, FlushContextsSync, (), (override));
     MOCK_METHOD(int, FlushContextsAsync, (EventSmartPtr callback), (override));
+    MOCK_METHOD(void, UpdateOccupiedStripeCount, (StripeId lsid), (override));
+    MOCK_METHOD(SegmentId, AllocateFreeSegment, (bool forUser), (override));
+    MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));
+    MOCK_METHOD(SegmentId, AllocateRebuildTargetSegment, (), (override));
+    MOCK_METHOD(int, ReleaseRebuildSegment, (SegmentId segmentId), (override));
+    MOCK_METHOD(bool, NeedRebuildAgain, (), (override));
+    MOCK_METHOD(int, GetNumFreeSegment, (), (override));
+    MOCK_METHOD(CurrentGcMode, GetCurrentGcMode, (), (override));
+    MOCK_METHOD(int, GetGcThreshold, (CurrentGcMode mode), (override));
+    MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));
+};
 
-    virtual int FlushContextsSync(void) { return 0; }
-    virtual void UpdateOccupiedStripeCount(StripeId lsid) {}
-    virtual SegmentId AllocateFreeSegment(bool forUser) { return 0; }
-    virtual SegmentId AllocateGCVictimSegment(void) { return 0; }
-    virtual SegmentId AllocateRebuildTargetSegment(void) { return 0; }
-    virtual int ReleaseRebuildSegment(SegmentId segmentId) { return 0; }
-    virtual bool NeedRebuildAgain(void) { return true; }
-    virtual int GetNumFreeSegment(void) { return 0; }
-    virtual CurrentGcMode GetCurrentGcMode(void) { return MODE_NO_GC; }
-    virtual int GetGcThreshold(CurrentGcMode mode) { return 0; }
-    virtual uint64_t GetStoredContextVersion(int owner) { return 0; }
 } // namespace pos
