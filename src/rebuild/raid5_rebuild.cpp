@@ -86,12 +86,6 @@ Raid5Rebuild::Read(void)
     uint32_t blkCnt = ctx->size->blksPerChunk;
 
     SegmentId segId = _NextSegment();
-
-    if (segId == NEED_TO_RETRY)
-    {
-        return false;
-    }
-    
     UpdateProgress(segId * strCnt);
 
     if (segId == ctx->size->totalSegments ||
@@ -185,19 +179,10 @@ bool Raid5Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 bool Raid5Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
 {
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
-    int result;
 
     if (currentTaskCnt == 0)
     {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid5Rebuild::Complete, target segment:{}", targetId);
-
-        result = allocatorSvc->ReleaseRebuildSegment(targetId);
-        if (result != 0)
-        {
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid5Rebuild::Complete, target segment:{} result : {}", targetId, result);
-            ctx->taskCnt += 1;
-            return false;
-        }
+        allocatorSvc->ReleaseRebuildSegment(targetId);
         EventSmartPtr nextEvent(new Rebuilder(this));
         nextEvent->SetEventType(BackendEvent_UserdataRebuild);
         EventSchedulerSingleton::Instance()->EnqueueEvent(nextEvent);

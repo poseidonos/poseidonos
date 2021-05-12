@@ -143,7 +143,6 @@ static const SegmentId UNMAP_SEGMENT = ((1UL << SEGMENT_ID_BIT_LEN) - 1);
 static const StripeId UNMAP_STRIPE = ((1UL << STRIPE_ID_BIT_LEN) - 1);
 static const BlkOffset UNMAP_OFFSET = ((1UL << BLOCK_OFFSET_BIT_LEN) - 1);
 static const VirtualBlkAddr UNMAP_VSA = {.stripeId = UNMAP_STRIPE, .offset = UNMAP_OFFSET};
-static const SegmentId NEED_TO_RETRY = UNMAP_SEGMENT - 1;
 
 constexpr bool
 IsUnMapVsa(VirtualBlkAddr vsa)

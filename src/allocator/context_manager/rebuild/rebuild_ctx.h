@@ -76,10 +76,9 @@ private:
 
     bool needRebuildCont;
     uint32_t targetSegmentCnt;
-    std::set<SegmentId> rebuildTargetSegments;
+    std::set<SegmentId> rebuildTargetSegments; // No lock
     SegmentId underRebuildSegmentId;
     MetaFileIntf* rebuildSegmentsFile;
-    std::mutex rebuildLock;
     char* bufferInObj;
     std::string arrayName;
 };
