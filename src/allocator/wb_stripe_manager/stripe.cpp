@@ -50,7 +50,8 @@ Stripe::Stripe(void)
   revMapPack(nullptr),
   finished(true),
   remaining(0),
-  referenceCount(0)
+  referenceCount(0),
+  totalBlksPerUserStripe(0)
 {
 }
 
