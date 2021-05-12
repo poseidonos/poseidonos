@@ -94,7 +94,9 @@ private:
     MetaVolumeManager* volMgr;
 
     BitMap* bitmap = nullptr;
+    // (fd, array)
     std::unordered_map<FileDescriptorType, std::string> nameMapByfd;
+    // (array, file index)
     std::unordered_map<std::string, uint32_t> idxMapByName;
     MetaFileContext cxtList[MetaFsConfig::MAX_VOLUME_CNT];
     MetaFsSpinLock iLock;

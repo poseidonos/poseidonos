@@ -276,6 +276,8 @@ MetaFsFileControlApi::SetStatus(bool isNormal)
 MetaFileContext*
 MetaFsFileControlApi::GetFileInfo(FileDescriptorType fd)
 {
+    SPIN_LOCK_GUARD_IN_SCOPE(iLock);
+
     auto it = nameMapByfd.find(fd);
 
     // the list already has fd's context
@@ -416,18 +418,17 @@ MetaFsFileControlApi::_AddFileContext(std::string& fileName, FileDescriptorType 
 void
 MetaFsFileControlApi::_RemoveFileContext(FileDescriptorType fd)
 {
+    SPIN_LOCK_GUARD_IN_SCOPE(iLock);
+
     auto it1 = nameMapByfd.find(fd);
     std::string fileName = it1->second;
 
     auto it2 = idxMapByName.find(fileName);
     uint32_t index = it2->second;
 
-    {
-        SPIN_LOCK_GUARD_IN_SCOPE(iLock);
-        nameMapByfd.erase(it1);
-        idxMapByName.erase(it2);
-        bitmap->ClearBit(index);
-    }
+    nameMapByfd.erase(it1);
+    idxMapByName.erase(it2);
+    bitmap->ClearBit(index);
 
     cxtList[index].Reset();
 }

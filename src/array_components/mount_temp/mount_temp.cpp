@@ -69,8 +69,6 @@ MountTemp::Unmount2(void)
 #endif
     POS_TRACE_INFO(eventId, "start flush cmd manager reset instance");
     FlushCmdManagerSingleton::ResetInstance();
-    POS_TRACE_INFO(eventId, "start qos manager reset instance");
-    QosManagerSingleton::ResetInstance();
 
     _ResetNvmf();
 

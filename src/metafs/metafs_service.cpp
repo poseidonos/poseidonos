@@ -95,10 +95,9 @@ MetaFsService::_PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_
 {
     uint32_t availableMetaIoCoreCnt = CPU_COUNT(&workSet);
     uint32_t handlerId = 0;
-    uint32_t numCPUsInSystem = std::thread::hardware_concurrency();
 
     // meta io scheduler
-    for (uint32_t coreId = 0; coreId < numCPUsInSystem; ++coreId)
+    for (uint32_t coreId = 0; coreId < totalCount; ++coreId)
     {
         if (CPU_ISSET(coreId, &schedSet))
         {
@@ -109,7 +108,7 @@ MetaFsService::_PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_
     }
 
     // meta io handler
-    for (uint32_t coreId = 0; coreId < numCPUsInSystem; ++coreId)
+    for (uint32_t coreId = 0; coreId < totalCount; ++coreId)
     {
         if (CPU_ISSET(coreId, &workSet))
         {
