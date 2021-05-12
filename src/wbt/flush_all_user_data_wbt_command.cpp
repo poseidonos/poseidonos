@@ -58,7 +58,7 @@ FlushAllUserDataWbtCommand::Execute(Args& argv, JsonElement& elem)
     int res = -1;
     std::string arrayName = _GetParameter(argv, "array");
 
-    if (0 == arrayName.length()) 
+    if (0 == arrayName.length())
     {
         return res;
     }
