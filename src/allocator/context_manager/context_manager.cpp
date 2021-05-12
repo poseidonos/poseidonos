@@ -151,7 +151,13 @@ ContextManager::FlushContextsSync(void)
 int
 ContextManager::FlushContextsAsync(EventSmartPtr callback)
 {
+    if (flushInProgress.exchange(true) == true)
+    {
+        return (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS;
+    }
     int ret = 0;
+    assert(numAsyncIoIssued == 0);
+    numAsyncIoIssued = NUM_FILES; // Issue 2 contexts(segmentctx, allocatorctx)
     for (int owner = 0; owner < NUM_FILES; owner++)
     {
         ret = _FlushAsync(owner, callback);
@@ -434,11 +440,6 @@ ContextManager::_FlushSync(int owner)
 int
 ContextManager::_FlushAsync(int owner, EventSmartPtr callbackEvent)
 {
-    if (flushInProgress.exchange(true) == true)
-    {
-        return (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS;
-    }
-
     int size = fileIoManager->GetFileSize(owner);
     char* buf = new char[size]();
     _PrepareBuffer(owner, buf);
@@ -450,7 +451,6 @@ ContextManager::_FlushAsync(int owner, EventSmartPtr callbackEvent)
         delete[] buf;
         return ret;
     }
-    numAsyncIoIssued++;
     return ret;
 }
 
