@@ -94,10 +94,6 @@ ReplayTestFixture::ExpectReplayStripeFlush(StripeTestFixture stripe)
     EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
         ReplayStripeFlushed(stripe.GetWbAddr().stripeId))
         .Times(1);
-
-    EXPECT_CALL(*(allocator->GetIContextManagerMock()),
-        UpdateOccupiedStripeCount(stripe.GetUserAddr().stripeId))
-        .Times(1);
 }
 
 void
