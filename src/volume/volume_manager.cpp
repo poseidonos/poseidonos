@@ -97,7 +97,6 @@ void
 VolumeManager::Dispose(void)
 {
     initialized = false;
-    DetachVolumes();
     volumes.Clear();
 
     VolumeServiceSingleton::Instance()->Unregister(arrayInfo->GetName());

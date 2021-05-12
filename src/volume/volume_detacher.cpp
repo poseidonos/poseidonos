@@ -73,6 +73,7 @@ VolumeDetacher::DoAll(void)
         {
             if (target.CheckVolumeAttached(vol->ID, arrayName) == true)
             {
+                volumeList.WaitUntilIdle(vol->ID, VolumeStatus::Mounted);
                 mountedVols.push_back(vol->ID);
             }
         }
@@ -85,6 +86,14 @@ VolumeDetacher::DoAll(void)
         int ret = (int)POS_EVENT_ID::VOL_DETACH_FAIL;
         POS_TRACE_ERROR(ret,
             "Detach volume failed due to internal error or unmount timeout. Only some of them might be unmounted");
+        return;
+    }
+
+    for (auto volId : mountedVols)
+    {
+        vol = volumeList.GetVolume(volId);
+        vol->Unmount();
+        vol->SetSubnqn("");
     }
 }
 } // namespace pos

@@ -104,6 +104,7 @@ RebuildCtx::ReleaseRebuildSegment(SegmentId segmentId)
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "There is no segmentId:{} in rebuildTargetSegments, seemed to be freed by GC", segmentId);
         SetUnderRebuildSegmentId(UINT32_MAX);
+        rebuildLock.unlock();
         return 0;
     }
 
@@ -112,6 +113,7 @@ RebuildCtx::ReleaseRebuildSegment(SegmentId segmentId)
     EraseRebuildTargetSegments(iter);
     FlushRebuildCtx();
     SetUnderRebuildSegmentId(UINT32_MAX);
+    rebuildLock.unlock();
     return 0;
 }
 
@@ -182,12 +184,14 @@ RebuildCtx::FreeSegmentInRebuildTarget(SegmentId segId)
     auto iter = FindRebuildTargetSegment(segId);
     if (iter == RebuildTargetSegmentsEnd())
     {
+        rebuildLock.unlock();
         return;
     }
 
     if (_GetUnderRebuildSegmentId() == segId)
     {
         POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "segmentId:{} is reclaimed by GC, but still under rebuilding", segId);
+        rebuildLock.unlock();
         return;
     }
 
