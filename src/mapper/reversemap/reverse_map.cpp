@@ -51,6 +51,17 @@ ReverseMapPack::ReverseMapPack(void)
   ioDirection(0),
   callback(nullptr)
 {
+    wbLsid = UNMAP_STRIPE;
+    mpageSize = 0;
+    numMpagesPerStripe = 0;
+    fileSizePerStripe = 0;
+    revMapfile = nullptr;
+    iVSAMap = nullptr;
+    iStripeMap = nullptr;
+    reconstructStatus.lsid = UNMAP_STRIPE;
+    reconstructStatus.vsid = UNMAP_STRIPE;
+    reconstructStatus.volId = UINT32_MAX;
+    reconstructStatus.totalRbaNum = UINT64_MAX;
 }
 
 ReverseMapPack::~ReverseMapPack(void)
