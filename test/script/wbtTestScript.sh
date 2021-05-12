@@ -341,73 +341,108 @@ done
 
 echo --------------------------------------------------------------------
 
-echo ------------[MFS WBT CMDs]------------------------------------------
+echo ------------[MetaFs WBT CMDs]------------------------------------------
 echo --------------------------------------------------------------------
 
-# In normal case, if the script executed mount array sequence, metafs creation/mount will get failed after 'mount_ibofos' execution
-${BIN_DIR}/cli wbt mfs_create_filesystem
-${BIN_DIR}/cli wbt mfs_mount_filesystem
+echo -[MetaFs : mfs_create_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_create_file --name $fileName1 --size $fileSize1 --integrity 0 --access 2 --operation 2 --array $ARRAYNAME --json > ${cliOutput}
+check_result
 
-${BIN_DIR}/cli wbt mfs_create_file --name $fileName1 --size $fileSize1 --integrity 0 --access 2 --operation 2
-${BIN_DIR}/cli wbt mfs_open_file --name ${fileName1}  --json > ${cliOutput}
+echo -[MetaFs : mfs_open_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_open_file --name ${fileName1} --array $ARRAYNAME --json > ${cliOutput}
 cat ${cliOutput} | jq ".Response.result.data.returnCode" > result.txt
 fileDesc1=$(<result.txt)
+check_result
 
-${BIN_DIR}/cli wbt mfs_create_file --name $fileName2 --size $fileSize2 --integrity 0 --access 2 --operation 2
-${BIN_DIR}/cli wbt mfs_open_file  --name $fileName2 --json >  ${cliOutput}
+echo -[MetaFs : mfs_create_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_create_file --name $fileName2 --size $fileSize2 --integrity 0 --access 2 --operation 2 --array $ARRAYNAME --json > ${cliOutput}
+check_result
+
+echo -[MetaFs : mfs_open_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_open_file  --name $fileName2 --array $ARRAYNAME --json >  ${cliOutput}
 cat ${cliOutput} | jq ".Response.result.data.returnCode" > result.txt
 fileDesc2=$(<result.txt)
+check_result
 
- #make sure you are providing path also to inputFile.
-${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc1 --offset $fileOffset1 --count $dataLength1 --input $inputFile
-${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc1 --offset $fileOffset1 --count $dataLength1 --output mfs_read_one.bin
+echo -[MetaFs : mfs_write_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc1 --offset $fileOffset1 --count $dataLength1 --input $inputFile --array $ARRAYNAME --json > ${cliOutput}
+check_result
 
-${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --input $inputFile
-${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --output mfs_read_two.bin
+echo -[MetaFs : mfs_read_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc1 --offset $fileOffset1 --count $dataLength1 --output mfs_read_one.bin --array $ARRAYNAME --json > ${cliOutput}
+check_result
 
-${BIN_DIR}/cli wbt mfs_get_file_size --fd $fileDesc1 --json > ${cliOutput}
+echo -[MetaFs : mfs_write_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --input $inputFile --array $ARRAYNAME --json > ${cliOutput}
+check_result
+
+echo -[MetaFs : mfs_read_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --output mfs_read_two.bin --array $ARRAYNAME --json > ${cliOutput}
+check_result
+
+echo -[MetaFs : mfs_get_file_size ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_get_file_size --fd $fileDesc1 --array $ARRAYNAME --json > ${cliOutput}
 cat ${cliOutput} | jq ".Response.result.data.returnCode" > result.txt
 fileSize=$(<result.txt)
+check_result
 
-${BIN_DIR}/cli wbt mfs_get_aligned_file_io_size --fd $fileDesc1 --json > ${cliOutput}
+echo -[MetaFs : mfs_get_aligned_file_io_size ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_get_aligned_file_io_size --fd $fileDesc1 --array $ARRAYNAME --json > ${cliOutput}
 cat ${cliOutput} | jq ".Response.result.data.returnCode" > result.txt
 AlignedFileIoSize=$(<result.txt)
+check_result
 
-${BIN_DIR}/cli wbt mfs_get_max_file_size --json > ${cliOutput}
+echo -[MetaFs : mfs_get_max_file_size ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_get_max_file_size --array $ARRAYNAME --json > ${cliOutput}
 cat ${cliOutput} | jq ".Response.result.data.returnCode" > result.txt
 MaxFileSize=$(<result.txt)
+check_result
 
 echo -------------------------------------------------------
 echo fileDesc1 = ${fileDesc1} fileDesc2 = ${fileDesc2}
 echo fileSize = ${fileSize}   AlignedFileIOSize = ${AlignedFileIoSize}   MaxFileSize = ${MaxFileSize}
 echo -------------------------------------------------------
 
-${BIN_DIR}/cli wbt mfs_dump_files_list --output $FilesInfoOutput
+echo -[MetaFs : mfs_dump_files_list ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_dump_files_list --output $FilesInfoOutput --array $ARRAYNAME --json > ${cliOutput}
 echo ------- [opend files] ---------------------------------
 sed 's/},{/\n /g' ../filesInfo.json > result.txt
 cat ${scriptPath}/result.txt
 echo -------------------------------------------------------
+check_result
 
-${BIN_DIR}/cli wbt mfs_dump_inode_info --name $fileName1 --output $InodeOutput
-${BIN_DIR}/cli wbt mfs_dump_inode_info --name $fileName2 --output $InodeOutput
+echo -[MetaFs : mfs_dump_inode_info ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_dump_inode_info --name $fileName1 --output $InodeOutput --array $ARRAYNAME --json > ${cliOutput}
+check_result
 
-# make sure you are providing path also to inputFile.
-${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc1 --offset $fileOffset1 --count $dataLength1 --input $inputFile
-${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc1 --offset $fileOffset1 --count $dataLength1 --output mfs_read_one.bin
+echo -[MetaFs : mfs_dump_inode_info ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_dump_inode_info --name $fileName2 --output $InodeOutput --array $ARRAYNAME --json > ${cliOutput}
+check_result
 
-${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --input $inputFile
-${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --output mfs_read_two.bin
+echo -[MetaFs : mfs_write_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc1 --offset $fileOffset1 --count $dataLength1 --input $inputFile --array $ARRAYNAME --json > ${cliOutput}
+check_result
 
+echo -[MetaFs : mfs_read_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc1 --offset $fileOffset1 --count $dataLength1 --output mfs_read_one.bin --array $ARRAYNAME --json > ${cliOutput}
+check_result
 
-${BIN_DIR}/cli volume unmount --name ${volname} --array $ARRAYNAME
+echo -[MetaFs : mfs_write_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --input $inputFile --array $ARRAYNAME --json > ${cliOutput}
+check_result
 
-for fidx in `seq 0 ${fileDesc2}`
-do           
-${BIN_DIR}/cli wbt mfs_close_file --fd $fidx
+echo -[MetaFs : mfs_read_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --output mfs_read_two.bin --array $ARRAYNAME --json > ${cliOutput}
+check_result
 
-done
+echo -[MetaFs : mfs_close_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_close_file --fd ${fileDesc1} --array $ARRAYNAME --json > ${cliOutput}
+check_result
 
-${BIN_DIR}/cli wbt mfs_unmount_filesystem
+echo -[MetaFs : mfs_close_file ]------------------------------------------
+${BIN_DIR}/cli wbt mfs_close_file --fd ${fileDesc2} --array $ARRAYNAME --json > ${cliOutput}
+check_result
+
 echo ------- [Created files] ------------
 echo fileDesc1 = ${fileDesc1} fileDesc2 = ${fileDesc2} have closed
 
