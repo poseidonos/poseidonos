@@ -56,7 +56,14 @@ int
 FlushAllUserDataWbtCommand::Execute(Args& argv, JsonElement& elem)
 {
     int res = -1;
-    ArrayComponents* compo = ArrayMgr::Instance()->_FindArray("");
+    std::string arrayName = _GetParameter(argv, "array");
+
+    if (0 == arrayName.length()) 
+    {
+        return res;
+    }
+
+    ArrayComponents* compo = ArrayMgr::Instance()->_FindArray(arrayName);
     if (compo == nullptr)
     {
         return res;
