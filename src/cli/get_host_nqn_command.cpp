@@ -90,8 +90,9 @@ GetHostNqnCommand::Execute(json& doc, string rid)
         vector<string> list = nvmfTarget.GetHostNqn(subnqn);
         if (list.size() == 0)
         {
-            return jFormat.MakeResponse("GETHOSTNQN", rid, SUCCESS,
-                "host nqn of " + volName + " does not exist", GetPosInfo());
+            return jFormat.MakeResponse("GETHOSTNQN", rid, FAIL,
+                "There is no hostnqn mapped to this volume: " + volName + \
+                ". Connection to the POS Subsystem is required. ", GetPosInfo());
         }
         else
         {
