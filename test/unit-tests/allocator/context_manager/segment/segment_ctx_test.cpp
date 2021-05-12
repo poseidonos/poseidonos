@@ -80,10 +80,6 @@ TEST(SegmentCtx, GetSegmentCtxLock_)
 {
 }
 
-TEST(SegmentCtx, GetSegInfoLock_)
-{
-}
-
 TEST(SegmentCtx, CopySegmentInfoToBufferforWBT_)
 {
 }

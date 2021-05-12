@@ -55,8 +55,7 @@ SegmentCtx::SegmentCtx(AllocatorAddressInfo* info, std::string arrayName)
 : segmentInfos(nullptr),
   numSegments(0),
   addrInfo(info),
-  arrayName(arrayName),
-  segInfoLocks(nullptr)
+  arrayName(arrayName)
 {
     ctxHeader.sig = SIG_SEGMENT_CTX;
 }
@@ -74,7 +73,6 @@ SegmentCtx::Init(void)
 
     numSegments = addrInfo->GetnumUserAreaSegments();
     segmentInfos = new SegmentInfo[numSegments];
-    segInfoLocks = new SegmentLock[numSegments];
 }
 
 void
@@ -82,8 +80,6 @@ SegmentCtx::Close(void)
 {
     delete[] segmentInfos;
     segmentInfos = nullptr;
-    delete[] segInfoLocks;
-    segInfoLocks = nullptr;
 }
 
 uint32_t
@@ -133,12 +129,6 @@ int
 SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
 {
     return segmentInfos[segId].IncreaseOccupiedStripeCount();
-}
-
-std::mutex&
-SegmentCtx::GetSegInfoLock(SegmentId segId)
-{
-    return segInfoLocks[segId].GetLock();
 }
 
 bool

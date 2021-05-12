@@ -71,7 +71,6 @@ public:
     bool IsSegmentCtxIo(char* pBuf);
     SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
     std::mutex& GetSegmentCtxLock(void) { return segCtxLock;}
-    std::mutex& GetSegInfoLock(SegmentId segId);
 
     void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
@@ -89,7 +88,6 @@ private:
     std::string arrayName;
 
     std::mutex segCtxLock;
-    SegmentLock* segInfoLocks;
 };
 
 } // namespace pos

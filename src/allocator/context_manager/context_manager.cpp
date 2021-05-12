@@ -91,7 +91,6 @@ void
 ContextManager::UpdateOccupiedStripeCount(StripeId lsid)
 {
     SegmentId segId = lsid / addrInfo->GetstripesPerSegment();
-    std::lock_guard<std::mutex> lock(segmentCtx->GetSegInfoLock(segId));
     if (segmentCtx->IncreaseOccupiedStripeCount(segId) == (int)addrInfo->GetstripesPerSegment())
     {
         std::lock_guard<std::mutex> lock(allocatorCtx->GetSegStateLock(segId));
@@ -117,7 +116,6 @@ ContextManager::FreeUserDataSegment(SegmentId segId)
     SegmentState eState = allocatorCtx->GetSegmentState(segId, false);
     if ((eState == SegmentState::SSD) || (eState == SegmentState::VICTIM))
     {
-        std::lock_guard<std::mutex> lock(segmentCtx->GetSegInfoLock(segId));
         assert(segmentCtx->GetOccupiedStripeCount(segId) == (int)addrInfo->GetstripesPerSegment());
         _FreeSegment(segId);
     }
