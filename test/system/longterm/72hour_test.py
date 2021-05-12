@@ -336,19 +336,32 @@ def check_state(state_expected):
     write_log ("current state is " + state + " but we expected " + state_expected)
     return False
 
+def get_situation():
+    out = cli.array_info(ARRAYNAME)
+    situ = json_parser.get_situation(out)
+    return situ
+
+def check_situation(situ_expected):
+    situ = get_situation()
+    if situ == situ_expected:
+        write_log ("current situation is " + situ)
+        return True
+    write_log ("current situation is " + situ + " but we expected " + situ_expected)
+    return False
+
 def do_event(elapsed_hour):
     if elapsed_hour == 0:
         ret = init_test()
         if ret == True:
             if add_new_vol_and_do_io() == True:
-                return check_state("NORMAL")
+                return check_situation("NORMAL")
         return False
 
     elif elapsed_hour >= 1 and elapsed_hour <= 11:
         if (VOL_CNT >= MAX_VOL_CNT // 2):
-            return check_state("NORMAL")
+            return check_situation("NORMAL")
         if add_new_vol_and_do_io() == True:
-            return check_state("NORMAL")
+            return check_situation("NORMAL")
         return False
 
     elif elapsed_hour == 12:
@@ -363,86 +376,86 @@ def do_event(elapsed_hour):
                     fio_util.start_fio(i)
                 for i in range(MAX_VOL_CNT - (MAX_VOL_CNT// 2)):
                     add_new_vol_and_do_io()
-                return check_state("NORMAL")
+                return check_situation("NORMAL")
         return False
         # for i in range(MAX_VOL_CNT - (MAX_VOL_CNT// 2)):
         #     add_new_vol_and_do_io()
-        # return check_state("NORMAL")
+        # return check_situation("NORMAL")
 
     elif elapsed_hour == 13:
-        return check_state("NORMAL")
+        return check_situation("NORMAL")
 
     elif elapsed_hour == 14:
         detach_data(DEV_1)
         time.sleep(60)
-        return check_state("DEGRADED")
+        return check_situation("DEGRADED")
 
     elif elapsed_hour >= 15 and elapsed_hour <= 35:
-        return check_state("DEGRADED")
+        return check_situation("DEGRADED")
 
     elif elapsed_hour == 36:
         ret = add_spare(DEV_4)
         time.sleep(60)
         if ret == True:
-            return check_state("REBUILD")
+            return check_situation("REBUILDING")
         return False
 
     elif elapsed_hour >= 37 and elapsed_hour <= 39:
-        return check_state("NORMAL") or check_state("REBUILD")
+        return check_situation("NORMAL") or check_situation("REBUILDING")
 
     elif elapsed_hour == 40:
         detach_data(DEV_2)
         time.sleep(60)
-        return check_state("DEGRADED")
+        return check_situation("DEGRADED")
 
     elif elapsed_hour >= 41 and elapsed_hour <= 43:
-        return check_state("DEGRADED")
+        return check_situation("DEGRADED")
 
     elif elapsed_hour == 44:
         ret = add_spare(DEV_1_RECYCLED)
         time.sleep(60)
         if ret == True:
-            return check_state("REBUILD")
+            return check_situation("REBUILDING")
         return False
 
     elif elapsed_hour >= 45 and elapsed_hour <= 47:
-        return check_state("NORMAL") or check_state("REBUILD")
+        return check_situation("NORMAL") or check_situation("REBUILDING")
 
     elif elapsed_hour == 48:
         detach_data(DEV_3)
         time.sleep(60)
-        return check_state("DEGRADED")
+        return check_situation("DEGRADED")
 
     elif elapsed_hour >= 49 and elapsed_hour <= 51:
-        return check_state("DEGRADED")
+        return check_situation("DEGRADED")
 
     elif elapsed_hour == 52:
         ret = add_spare(DEV_2_RECYCLED)
         time.sleep(60)
         if ret == True:
-            return check_state("REBUILD")
+            return check_situation("REBUILDING")
         return False
 
     elif elapsed_hour >= 53 and elapsed_hour <= 55:
-        return check_state("NORMAL") or check_state("REBUILD")
+        return check_situation("NORMAL") or check_situation("REBUILDING")
 
     elif elapsed_hour == 56:
         detach_data(DEV_4)
         time.sleep(60)
-        return check_state("DEGRADED")
+        return check_situation("DEGRADED")
 
     elif elapsed_hour >= 57 and elapsed_hour <= 59:
-        return check_state("DEGRADED")
+        return check_situation("DEGRADED")
 
     elif elapsed_hour == 60:
         ret = add_spare(DEV_3_RECYCLED)
         time.sleep(60)
         if ret == True:
-            return check_state("REBUILD")
+            return check_situation("REBUILDING")
         return False
 
     elif elapsed_hour >= 61 and elapsed_hour <= 71:
-        return check_state("NORMAL") or check_state("REBUILD")
+        return check_situation("NORMAL") or check_situation("REBUILDING")
 
     elif elapsed_hour == TESTTIME_IN_HOUR:
         return True
