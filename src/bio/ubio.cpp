@@ -60,6 +60,7 @@ Ubio::Ubio(void* buffer, uint32_t unitCount, std::string arrayName)
   eventIoType(BackendEvent_Unknown),
   dataBuffer(unitCount * BYTES_PER_UNIT, buffer),
   callback(nullptr),
+  syncDone(false),
   retry(false),
   origin(nullptr),
   error(IOErrorType::SUCCESS),
@@ -74,6 +75,7 @@ Ubio::Ubio(void* buffer, uint32_t unitCount, std::string arrayName)
 Ubio::Ubio(const Ubio& ubio)
 : dataBuffer(ubio.dataBuffer),
   callback(nullptr),
+  syncDone(false),
   retry(ubio.retry),
   origin(nullptr),
   error(IOErrorType::SUCCESS),

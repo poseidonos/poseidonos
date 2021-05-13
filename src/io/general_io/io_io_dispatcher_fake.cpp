@@ -40,6 +40,8 @@ namespace pos
 static uint32_t CORE_FOR_IO_WORKER = 3;
 
 IODispatcher::IODispatcher(void)
+: ioWorkerCount(0),
+  deviceAllocationTurn(0)
 {
     cpu_set_t cpuSet;
 
