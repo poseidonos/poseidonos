@@ -30,13 +30,15 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "on_volume_meta_region_mgr.h"
 #include "meta_file_util.h"
 
 namespace pos
 {
-OnVolumeMetaRegionManager::OnVolumeMetaRegionManager(void)
-: volumeType(MetaVolumeType::Invalid)
+OnVolumeMetaRegionManager::OnVolumeMetaRegionManager(std::string arrayName)
+: MetaRegionManager(arrayName),
+  volumeType(MetaVolumeType::Invalid)
 {
 }
 
@@ -45,14 +47,14 @@ OnVolumeMetaRegionManager::~OnVolumeMetaRegionManager(void)
 }
 
 void
-OnVolumeMetaRegionManager::Init(std::string arrayName, MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType maxLpn)
+OnVolumeMetaRegionManager::Init(MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType maxLpn)
 {
     this->volumeType = volumeType;
-    OnVolumeMetaRegionManager::Init(arrayName, MetaFileUtil::ConvertToMediaType(volumeType), baseLpn, maxLpn);
+    SetRegionInfo(MetaFileUtil::ConvertToMediaType(volumeType), baseLpn, maxLpn);
 }
 
 void
-OnVolumeMetaRegionManager::Init(std::string arrayName, MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn)
+OnVolumeMetaRegionManager::Init(MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn)
 {
     SetRegionInfo(mediaType, baseLpn, maxLpn);
 }

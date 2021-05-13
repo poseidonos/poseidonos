@@ -38,8 +38,9 @@
 
 namespace pos
 {
-MetaFileInodeManager::MetaFileInodeManager(void)
-: inodeHdr(nullptr),
+MetaFileInodeManager::MetaFileInodeManager(std::string arrayName)
+: OnVolumeMetaRegionManager(arrayName),
+  inodeHdr(nullptr),
   inodeTable(nullptr)
 {
 }
@@ -51,9 +52,9 @@ MetaFileInodeManager::~MetaFileInodeManager(void)
 }
 
 void
-MetaFileInodeManager::Init(std::string arrayName, MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType maxLpn)
+MetaFileInodeManager::Init(MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType maxLpn)
 {
-    OnVolumeMetaRegionManager::Init(arrayName, volumeType, baseLpn, maxLpn);
+    OnVolumeMetaRegionManager::Init(volumeType, baseLpn, maxLpn);
 
     MetaLpnType targetBaseLpn = baseLpn;
     if (nullptr == inodeHdr)

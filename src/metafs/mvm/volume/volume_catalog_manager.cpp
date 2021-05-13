@@ -40,8 +40,9 @@
 
 namespace pos
 {
-VolumeCatalogManager::VolumeCatalogManager(void)
-: catalog(nullptr)
+VolumeCatalogManager::VolumeCatalogManager(std::string arrayName)
+: OnVolumeMetaRegionManager(arrayName),
+  catalog(nullptr)
 {
 }
 
@@ -51,9 +52,9 @@ VolumeCatalogManager::~VolumeCatalogManager(void)
 }
 
 void
-VolumeCatalogManager::Init(std::string arrayName, MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType maxVolumeLpn)
+VolumeCatalogManager::Init(MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType maxVolumeLpn)
 {
-    OnVolumeMetaRegionManager::Init(arrayName, volumeType, baseLpn, maxVolumeLpn);
+    OnVolumeMetaRegionManager::Init(volumeType, baseLpn, maxVolumeLpn);
 
     if (nullptr == catalog)
     {

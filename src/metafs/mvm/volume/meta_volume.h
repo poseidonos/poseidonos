@@ -95,19 +95,19 @@ public:
     VolumeCatalogManager&
     GetCatalogInstance(void)
     {
-        return catalogMgr;
+        return *catalogMgr;
     }
 
     MetaFileInodeManager&
     GetInodeInstance(void)
     {
-        return inodeMgr;
+        return *inodeMgr;
     }
 
     MetaFileManager&
     GetFileInstance(void)
     {
-        return fileMgr;
+        return *fileMgr;
     }
 
 protected:
@@ -127,9 +127,9 @@ private:
     MetaStorageType _GetVolStorageType(void);
 
     std::unordered_map<MetaRegionManagerType, OnVolumeMetaRegionManager*, EnumTypeHash<MetaRegionManagerType>> regionMgrMap;
-    MetaFileManager fileMgr;
-    MetaFileInodeManager inodeMgr;
-    VolumeCatalogManager catalogMgr;
+    MetaFileManager* fileMgr;
+    MetaFileInodeManager* inodeMgr;
+    VolumeCatalogManager* catalogMgr;
     bool inUse;
 
     MetaLpnType sumOfRegionBaseLpns;

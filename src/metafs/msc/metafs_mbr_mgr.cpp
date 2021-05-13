@@ -31,17 +31,19 @@
  */
 
 #include "src/metafs/msc/metafs_mbr_mgr.h"
-
+#include <string>
 #include <utility>
 
 namespace pos
 {
 // MetaFsMBRManager metafsMBRMgr;
 
-MetaFsMBRManager::MetaFsMBRManager(void)
-: mbr(nullptr)
+MetaFsMBRManager::MetaFsMBRManager(std::string arrayName)
+: MetaRegionManager(arrayName),
+  mbr(nullptr)
 {
 }
+
 MetaFsMBRManager::~MetaFsMBRManager(void)
 {
     if (nullptr != mbr)
@@ -52,10 +54,9 @@ MetaFsMBRManager::~MetaFsMBRManager(void)
 }
 
 void
-MetaFsMBRManager::Init(std::string arrayName, MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn)
+MetaFsMBRManager::Init(MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn)
 {
     assert(mediaType == MetaStorageType::SSD);
-    this->arrayName = arrayName;
 
     // note that Meta filesystem's MBR is only available upon SSD meta volume
     SetRegionInfo(mediaType, baseLpn, maxLpn);

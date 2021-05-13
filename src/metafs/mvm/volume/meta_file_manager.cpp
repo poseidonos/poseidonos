@@ -40,8 +40,9 @@
 
 namespace pos
 {
-MetaFileManager::MetaFileManager(void)
-: isAllocated(false),
+MetaFileManager::MetaFileManager(std::string arrayName)
+: OnVolumeMetaRegionManager(arrayName),
+  isAllocated(false),
   mfssIntf(nullptr)
 {
 }
@@ -51,9 +52,9 @@ MetaFileManager::~MetaFileManager(void)
 }
 
 void
-MetaFileManager::Init(std::string arrayName, MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType maxLpn)
+MetaFileManager::Init(MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType maxLpn)
 {
-    OnVolumeMetaRegionManager::Init(arrayName, volumeType, baseLpn, maxLpn);
+    OnVolumeMetaRegionManager::Init(volumeType, baseLpn, maxLpn);
     extentMgr.Init(baseLpn, maxLpn);
     isAllocated = false;
 }

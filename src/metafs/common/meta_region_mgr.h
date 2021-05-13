@@ -42,11 +42,11 @@ namespace pos
 class MetaRegionManager
 {
 public:
-    MetaRegionManager(void);
+    MetaRegionManager(std::string arrayName);
     virtual ~MetaRegionManager(void);
 
     // Init: used to initialize internal context based on given paramters
-    virtual void Init(std::string arrayName, MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn) = 0;
+    virtual void Init(MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn) = 0;
 
     // Bringup: used to build internal context and prepare internal to handle requests
     virtual void Bringup(void) = 0;

@@ -42,10 +42,10 @@ namespace pos
 class VolumeCatalogManager : public OnVolumeMetaRegionManager
 {
 public:
-    VolumeCatalogManager(void);
+    VolumeCatalogManager(std::string arrayName);
     ~VolumeCatalogManager(void);
 
-    virtual void Init(std::string arrayName, MetaVolumeType volumeType, MetaLpnType regionBaseLpn, MetaLpnType maxVolumeLpn) override;
+    virtual void Init(MetaVolumeType volumeType, MetaLpnType regionBaseLpn, MetaLpnType maxVolumeLpn) override;
     virtual MetaLpnType GetRegionSizeInLpn(void) override;
     virtual void Bringup(void) override;
     virtual bool SaveContent(void) override;

@@ -48,13 +48,13 @@ using MetaFsControlReqHandlerPointer = POS_EVENT_ID (MetaFsSystemManager::*)(Met
 class MetaFsSystemManager : public MetaFsManagerBase
 {
 public:
-    MetaFsSystemManager(void);
+    MetaFsSystemManager(std::string arrayName);
     virtual ~MetaFsSystemManager(void);
 
     const char* GetModuleName(void) override;
     POS_EVENT_ID CheckReqSanity(MetaFsControlReqMsg& reqMsg);
 
-    virtual bool Init(std::string& arrayName, MetaStorageMediaInfoList& mediaInfoList);
+    virtual bool Init(MetaStorageMediaInfoList& mediaInfoList);
     virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
 

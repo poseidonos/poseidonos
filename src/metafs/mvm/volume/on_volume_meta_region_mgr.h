@@ -42,11 +42,11 @@ namespace pos
 class OnVolumeMetaRegionManager : public MetaRegionManager
 {
 public:
-    OnVolumeMetaRegionManager(void);
+    OnVolumeMetaRegionManager(std::string arrayName);
     virtual ~OnVolumeMetaRegionManager(void);
 
-    virtual void Init(std::string arrayName, MetaVolumeType volType, MetaLpnType baseLpn, MetaLpnType maxLpn);
-    virtual void Init(std::string arrayName, MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn) final;
+    virtual void Init(MetaVolumeType volType, MetaLpnType baseLpn, MetaLpnType maxLpn);
+    virtual void Init(MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn) final;
     virtual void SetMss(MetaStorageSubsystem* metaStorage) = 0;
 
 protected:

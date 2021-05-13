@@ -30,8 +30,8 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "metafs_management_api.h"
-
 #include "msc_req.h"
 
 namespace pos
@@ -39,7 +39,7 @@ namespace pos
 MetaFsManagementApi::MetaFsManagementApi(std::string arrayName)
 : arrayName(arrayName)
 {
-    sysMgr = new MetaFsSystemManager();
+    sysMgr = new MetaFsSystemManager(arrayName);
 }
 
 MetaFsManagementApi::~MetaFsManagementApi(void)

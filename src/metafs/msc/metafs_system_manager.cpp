@@ -44,10 +44,10 @@
 
 namespace pos
 {
-MetaFsSystemManager::MetaFsSystemManager(void)
+MetaFsSystemManager::MetaFsSystemManager(std::string arrayName)
 : mbrMgr(nullptr)
 {
-    mbrMgr = new MetaFsMBRManager();
+    mbrMgr = new MetaFsMBRManager(arrayName);
     _InitReqHandler();
 }
 
@@ -79,9 +79,9 @@ MetaFsSystemManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 }
 
 bool
-MetaFsSystemManager::Init(std::string& arrayName, MetaStorageMediaInfoList& mediaInfoList)
+MetaFsSystemManager::Init(MetaStorageMediaInfoList& mediaInfoList)
 {
-    mbrMgr->Init(arrayName, MetaStorageType::SSD, MetaFsMBRManager::FILESYSTEM_MBR_BASE_LPN);
+    mbrMgr->Init(MetaStorageType::SSD, MetaFsMBRManager::FILESYSTEM_MBR_BASE_LPN);
     mbrMgr->SetMss(metaStorage);
 
     for (auto& item : mediaInfoList)
@@ -180,7 +180,7 @@ MetaFsSystemManager::_HandleInitializeRequest(MetaFsControlReqMsg& reqMsg)
 {
     metaStorage = new MssOnDisk(reqMsg.arrayName);
 
-    if (true == Init(reqMsg.arrayName, *reqMsg.mediaList))
+    if (true == Init(*reqMsg.mediaList))
         return POS_EVENT_ID::SUCCESS;
 
     return POS_EVENT_ID::MFS_ERROR_MOUNTED;
