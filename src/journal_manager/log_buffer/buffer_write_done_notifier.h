@@ -53,8 +53,8 @@ public:
 
     virtual void Register(LogBufferWriteDoneEvent* notified);
 
-    void NotifyLogFilled(int logGroupId, MapPageList& dirty);
-    void NotifyLogBufferReseted(int logGroupId);
+    virtual void NotifyLogFilled(int logGroupId, MapPageList& dirty);
+    virtual void NotifyLogBufferReseted(int logGroupId);
 
 private:
     std::vector<LogBufferWriteDoneEvent*> subscribers;

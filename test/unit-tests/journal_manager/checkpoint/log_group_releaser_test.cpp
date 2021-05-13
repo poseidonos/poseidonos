@@ -7,6 +7,7 @@
 #include "test/unit-tests/journal_manager/checkpoint/dirty_map_manager_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
 
 using ::testing::NiceMock;
 using ::testing::_;
@@ -87,44 +88,207 @@ TEST(LogGroupReleaser, CheckpointCompleted_testIfLogBufferReseted)
     releaser.CheckpointCompleted();
 }
 
-TEST(LogGroupReleaser, GetFlushingLogGroupId_)
+TEST(LogGroupReleaser, GetFlushingLogGroupId_testIfExecutedSuccessfully)
 {
+    // Given
+    LogGroupReleaserSpy releaser;
+    int tartgetLogGroupId = 0;
+    releaser.SetFlushingLogGroupId(tartgetLogGroupId);
+
+    // When
+    int actual = releaser.GetFlushingLogGroupId();
+
+    // Then
+    EXPECT_EQ(actual, tartgetLogGroupId);
 }
 
-TEST(LogGroupReleaser, GetFullLogGroups_)
+TEST(LogGroupReleaser, GetFullLogGroups_testIfExecutedSuccessfully)
 {
+    // Given
+    LogGroupReleaserSpy releaser;
+    std::list<int> logGroups;
+    logGroups.push_back(0);
+    releaser.SetFullLogGroups(logGroups);
+
+    // When
+    std::list<int> actual = releaser.GetFullLogGroups();
+
+    // Then
+    EXPECT_EQ(actual, logGroups);
 }
 
-TEST(LogGroupReleaser, GetStatus_)
+TEST(LogGroupReleaser, GetStatus_testIfExecutedSuccessfully)
 {
+    // Given
+    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
+    LogGroupReleaser releaser(checkpointHandler);
+
+    CheckpointStatus status = INIT;
+    EXPECT_CALL(*checkpointHandler, GetStatus).WillOnce(Return(status));
+
+    // When
+    CheckpointStatus actual = releaser.GetStatus();
+
+    // Then
+    EXPECT_EQ(actual, status);
 }
 
-TEST(LogGroupReleaser, _AddToFullLogGroupList_)
+TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointStartedWhenThereIsNoFlushingLogGroup)
 {
+    // Given
+    NiceMock<MockDirtyMapManager> dirtyManager;
+    NiceMock<MockCallbackSequenceController> sequenceController;
+    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
+    LogGroupReleaserSpy releaser(checkpointHandler);
+
+    releaser.Init(nullptr, nullptr, &dirtyManager, &sequenceController,
+        nullptr, nullptr);
+
+    // When: There is only one full log group in the full list,
+    // no flushing log group exist, and checkpoint is not in progress
+    int targetLogGroup = 0;
+    std::list<int> logGroups = {0, 1};
+    releaser.SetFullLogGroups(logGroups);
+
+    releaser.SetFlushingLogGroupId(-1);
+    releaser.SetCheckpointTriggerInProgress(false);
+
+    // Then: Releaser should get dirty list of log group 0 and checkpoint should be started
+    EXPECT_CALL(dirtyManager, GetDirtyList(targetLogGroup)).Times(1);
+    EXPECT_CALL(*checkpointHandler, Start).WillOnce(Return(0));
+
+    // When
+    releaser.FlushNextLogGroup();
+
+    // Then: Full log group list should not include log group 0,
+    // and flushing log group id should be updated
+
+    EXPECT_NE(releaser.GetFullLogGroups().front(), targetLogGroup);
+    EXPECT_EQ(releaser.GetFlushingLogGroupId(), targetLogGroup);
 }
 
-TEST(LogGroupReleaser, _HasFullLogGroup_)
+TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointNotStartedCheckpointIsInProgress)
 {
+    // Given
+    NiceMock<MockDirtyMapManager> dirtyManager;
+    NiceMock<MockCallbackSequenceController> sequenceController;
+    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
+    LogGroupReleaserSpy releaser(checkpointHandler);
+
+    releaser.Init(nullptr, nullptr, &dirtyManager, &sequenceController,
+        nullptr, nullptr);
+
+    // When: There is only one full log group in the full list,
+    // no flushing log group exist, and checkpoint is in progress
+    int fullLogGroup = 0;
+    std::list<int> logGroups = {fullLogGroup};
+    releaser.SetFullLogGroups(logGroups);
+
+    releaser.SetFlushingLogGroupId(-1);
+    releaser.SetCheckpointTriggerInProgress(true);
+
+    // Then: Checkpoint should be started
+    EXPECT_CALL(*checkpointHandler, Start).Times(0);
+
+    // When
+    releaser.FlushNextLogGroup();
 }
 
-TEST(LogGroupReleaser, _FlushNextLogGroup_)
+TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointNotStartedWhenThereIsFlushingLogGroup)
 {
+    // Given
+    NiceMock<MockDirtyMapManager> dirtyManager;
+    NiceMock<MockCallbackSequenceController> sequenceController;
+    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
+    LogGroupReleaserSpy releaser(checkpointHandler);
+
+    releaser.Init(nullptr, nullptr, &dirtyManager, &sequenceController,
+        nullptr, nullptr);
+
+    // When: There is a full log group in the full list, and is flushing log group
+    int flushingLogGroup = 0;
+    releaser.SetFlushingLogGroupId(flushingLogGroup);
+
+    int fullLogGroup = 1;
+    std::list<int> logGroups = {fullLogGroup};
+    releaser.SetFullLogGroups(logGroups);
+
+    // Then: Checkpoint should not be started
+    EXPECT_CALL(*checkpointHandler, Start).Times(0);
+
+    // When
+    releaser.FlushNextLogGroup();
 }
 
-TEST(LogGroupReleaser, _UpdateFlushingLogGroup_)
+TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointNotStartedWhenThereIsNoFullLogGroups)
 {
+    // Given
+    NiceMock<MockDirtyMapManager> dirtyManager;
+    NiceMock<MockCallbackSequenceController> sequenceController;
+    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
+    LogGroupReleaserSpy releaser(checkpointHandler);
+
+    releaser.Init(nullptr, nullptr, &dirtyManager, &sequenceController,
+        nullptr, nullptr);
+
+    // When: There is no full log group in the full list, and flushing log group
+    releaser.SetFlushingLogGroupId(-1);
+
+    std::list<int> logGroups;
+    releaser.SetFullLogGroups(logGroups);
+
+    // Then: Checkpoint should not be started
+    EXPECT_CALL(*checkpointHandler, Start).Times(0);
+
+    // When
+    releaser.FlushNextLogGroup();
 }
 
-TEST(LogGroupReleaser, _PopFullLogGroup_)
+TEST(LogGroupReleaser, _LogGroupResetCompleted_testIfNextCheckpointStarted)
 {
+    // Given
+    NiceMock<MockDirtyMapManager> dirtyManager;
+    NiceMock<MockCallbackSequenceController> sequenceController;
+    NiceMock<MockLogBufferWriteDoneNotifier> notifier;
+    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
+    LogGroupReleaserSpy releaser(checkpointHandler);
+    releaser.Init(&notifier, nullptr, &dirtyManager, &sequenceController, nullptr, nullptr);
+
+    // When: Log group 0 is flushed and log group 1 is in the full log group list
+    int flushedlogGroupId = 0;
+    std::list<int> fullLogGroup = {1};
+    releaser.SetFullLogGroups(fullLogGroup);
+    releaser.SetCheckpointTriggerInProgress(false);
+
+    // Then: Notifier should be notified and checkpoint should be started
+    EXPECT_CALL(notifier, NotifyLogBufferReseted(flushedlogGroupId)).Times(1);
+    EXPECT_CALL(*checkpointHandler, Start).Times(1).WillOnce(Return(0));
+
+    // When
+    releaser.LogGroupResetCompleted(flushedlogGroupId);
 }
 
-TEST(LogGroupReleaser, _LogGroupResetCompleted_)
+TEST(LogGroupReleaser, _LogGroupResetCompleted_testIfNextCheckpointIsNotStartedWhenThereIsNoFullLogGroup)
 {
-}
+    // Given
+    NiceMock<MockDirtyMapManager> dirtyManager;
+    NiceMock<MockCallbackSequenceController> sequenceController;
+    NiceMock<MockLogBufferWriteDoneNotifier> notifier;
+    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
+    LogGroupReleaserSpy releaser(checkpointHandler);
+    releaser.Init(&notifier, nullptr, &dirtyManager, &sequenceController, nullptr, nullptr);
 
-TEST(LogGroupReleaser, _ResetFlushingLogGroup_)
-{
-}
+    // When: Log group 0 is flushed and full log group list is empty
+    int flushedlogGroupId = 0;
+    std::list<int> fullLogGroup;
+    releaser.SetFullLogGroups(fullLogGroup);
+    releaser.SetCheckpointTriggerInProgress(false);
 
+    // Then: Notifier should be notified and checkpoint should not be started
+    EXPECT_CALL(notifier, NotifyLogBufferReseted(flushedlogGroupId)).Times(1);
+    EXPECT_CALL(*checkpointHandler, Start).Times(0);
+
+    // When
+    releaser.LogGroupResetCompleted(flushedlogGroupId);
+}
 } // namespace pos

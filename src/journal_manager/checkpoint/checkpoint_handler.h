@@ -58,7 +58,7 @@ public:
     virtual int Start(MapPageList pendingDirtyPages);
     virtual int FlushCompleted(int metaId);
 
-    CheckpointStatus GetStatus(void);
+    virtual CheckpointStatus GetStatus(void);
 
 private:
     void _InitializeExternalModuleReferences(void);

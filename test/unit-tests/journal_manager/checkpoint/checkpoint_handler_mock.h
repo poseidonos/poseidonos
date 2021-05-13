@@ -13,6 +13,7 @@ public:
     MOCK_METHOD(void, Init, (IMapFlush* mapFlush, IContextManager* contextManer), (override));
     MOCK_METHOD(int, Start, (MapPageList pendingDirtyPages), (override));
     MOCK_METHOD(int, FlushCompleted, (int metaId), (override));
+    MOCK_METHOD(CheckpointStatus, GetStatus, (), (override));
 };
 
 } // namespace pos

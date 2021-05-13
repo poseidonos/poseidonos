@@ -10,7 +10,8 @@ class MockLogGroupReleaser : public LogGroupReleaser
 {
 public:
     using LogGroupReleaser::LogGroupReleaser;
-    MOCK_METHOD(void, Init, (LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer, DirtyMapManager* dirtyPage, CallbackSequenceController* sequencer,
+    MOCK_METHOD(void, Init, (LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer,
+                            DirtyMapManager* dirtyPage, CallbackSequenceController* sequencer,
                             IMapFlush* mapFlush, IContextManager* contextManager), (override));
     MOCK_METHOD(void, AddToFullLogGroup, (int groupId), (override));
     MOCK_METHOD(int, StartCheckpoint, (), (override));
