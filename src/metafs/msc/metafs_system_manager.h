@@ -48,7 +48,7 @@ using MetaFsControlReqHandlerPointer = POS_EVENT_ID (MetaFsSystemManager::*)(Met
 class MetaFsSystemManager : public MetaFsManagerBase
 {
 public:
-    MetaFsSystemManager(std::string arrayName);
+    explicit MetaFsSystemManager(std::string arrayName);
     virtual ~MetaFsSystemManager(void);
 
     const char* GetModuleName(void) override;

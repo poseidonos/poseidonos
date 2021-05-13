@@ -36,11 +36,11 @@
 #include <vector>
 
 #include "src/metafs/include/meta_storage_specific.h"
-#include "meta_volume_type.h"
-#include "mf_lock_type.h"
-#include "metafs_common.h"
-#include "mf_property.h"
-#include "mf_dataformat.h"
+#include "src/metafs/include/meta_volume_type.h"
+#include "src/metafs/include/mf_lock_type.h"
+#include "src/metafs/common/metafs_common.h"
+#include "src/metafs/include/mf_property.h"
+#include "src/metafs/include/mf_dataformat.h"
 
 namespace pos
 {

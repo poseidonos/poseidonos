@@ -31,10 +31,9 @@
  */
 
 #include "src/metafs/storage/pstore/mss_on_disk.h"
-#include "mss_disk_inplace.h"
-#include "metafs_config.h"
-#include "metafs_log.h"
-#include "mss_disk_inplace.h"
+#include "src/metafs/storage/pstore/mss_disk_inplace.h"
+#include "src/metafs/config/metafs_config.h"
+#include "src/metafs/log/metafs_log.h"
 #include "src/include/array_config.h"
 #ifdef LEGACY_IOPATH
 #include "mss_disk_handler.h"

@@ -50,7 +50,7 @@ namespace pos
 class MetaFileInodeManager : public OnVolumeMetaRegionManager
 {
 public:
-    MetaFileInodeManager(std::string arrayName);
+    explicit MetaFileInodeManager(std::string arrayName);
     ~MetaFileInodeManager(void);
 
     virtual void Init(MetaVolumeType volType, MetaLpnType baseLpn, MetaLpnType maxLpn) override;

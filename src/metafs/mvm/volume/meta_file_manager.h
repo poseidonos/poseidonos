@@ -51,7 +51,7 @@ using FileDescriptorSet = std::unordered_set<FileDescriptorType>;
 class MetaFileManager : public OnVolumeMetaRegionManager
 {
 public:
-    MetaFileManager(std::string arrayName);
+    explicit MetaFileManager(std::string arrayName);
     ~MetaFileManager(void);
 
     virtual void Init(MetaVolumeType volumeType, MetaLpnType regionBaseLpn, MetaLpnType maxVolumeLpn) override;

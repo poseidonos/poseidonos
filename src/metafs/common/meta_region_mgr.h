@@ -42,7 +42,7 @@ namespace pos
 class MetaRegionManager
 {
 public:
-    MetaRegionManager(std::string arrayName);
+    explicit MetaRegionManager(std::string arrayName);
     virtual ~MetaRegionManager(void);
 
     // Init: used to initialize internal context based on given paramters
