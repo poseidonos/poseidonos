@@ -198,11 +198,10 @@ ContextManager::AllocateGCVictimSegment(void)
 {
     uint32_t numUserAreaSegments = addrInfo->GetnumUserAreaSegments();
     SegmentId victimSegment = UNMAP_SEGMENT;
-    uint32_t minValidCount = numUserAreaSegments;
+    uint32_t minValidCount = addrInfo->GetblksPerSegment();
     for (SegmentId segId = 0; segId < numUserAreaSegments; ++segId)
     {
         uint32_t cnt = segmentCtx->GetValidBlockCount(segId);
-
         std::lock_guard<std::mutex> lock(allocatorCtx->GetSegStateLock(segId));
         if ((allocatorCtx->GetSegmentState(segId, false) != SegmentState::SSD) || (cnt == 0))
         {
