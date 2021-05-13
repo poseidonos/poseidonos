@@ -39,14 +39,38 @@ namespace pos
 static PhysicalBlkAddr dummyPba;
 
 Ubio::Ubio(void* buffer, uint32_t unitCount, std::string arrayName)
-: dataBuffer(BYTES_PER_UNIT * unitCount, buffer),
+: dir(UbioDir::Read),
+  ubioPrivate(nullptr),
+  eventIoType(BackendEvent_Unknown),
+  dataBuffer(unitCount * BYTES_PER_UNIT, buffer),
+  callback(nullptr),
+  retry(false),
+  origin(nullptr),
+  error(IOErrorType::SUCCESS),
+  lba(0),
+  uBlock(nullptr),
+  arrayDev(nullptr),
   arrayName(arrayName)
 {
+    SetAsyncMode();
 }
 
 Ubio::Ubio(const Ubio& ubio)
-: dataBuffer(ubio.dataBuffer)
+: dataBuffer(ubio.dataBuffer),
+  callback(nullptr),
+  retry(ubio.retry),
+  origin(nullptr),
+  error(IOErrorType::SUCCESS),
+  lba(0),
+  uBlock(nullptr),
+  arrayDev(nullptr),
+  arrayName(ubio.arrayName)
 {
+    dir = ubio.dir;
+    SetAsyncMode();
+    ubioPrivate = ubio.ubioPrivate;
+
+    eventIoType = ubio.eventIoType;
 }
 
 Ubio::~Ubio(void)
