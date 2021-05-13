@@ -47,6 +47,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplaySegmentsWithPatial)
     for (uint32_t index = lengthOfPatialIndex; index < numTests; index++)
     {
         StripeTestFixture stripe(index, testInfo->defaultTestVol);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
         writeTester->WriteLogsForStripe(stripe);
         writtenStripes.push_back(stripe);
     }
@@ -78,6 +79,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplaySegment)
     for (uint32_t index = 0; index < numTests; index++)
     {
         StripeTestFixture stripe(index, testInfo->defaultTestVol);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
         writeTester->WriteLogsForStripe(stripe);
         writtenStripes.push_back(stripe);
     }
@@ -109,6 +111,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplayFullSegment)
     for (uint32_t index = 0; index < numTests; index++)
     {
         StripeTestFixture stripe(index, testInfo->defaultTestVol);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
         writeTester->WriteLogsForStripe(stripe);
         writtenStripes.push_back(stripe);
     }
@@ -140,6 +143,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplayReusedSegment)
     for (uint32_t i = numTestbeforeGC + 1; i < numTestsBeforeSegmentFull; i++)
     {
         StripeTestFixture stripe(i, testInfo->defaultTestVol);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
         writeTester->WriteLogsForStripe(stripe);
         writtenStripes.push_back(stripe);
     }
@@ -147,6 +151,7 @@ TEST_F(ReplaySegmentIntegrationTest, ReplayReusedSegment)
     for (uint32_t i = 0; i <= numTestbeforeGC; i++)
     {
         StripeTestFixture stripe(i, testInfo->defaultTestVol);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
         writeTester->WriteLogsForStripe(stripe);
         writtenStripes.push_back(stripe);
     }

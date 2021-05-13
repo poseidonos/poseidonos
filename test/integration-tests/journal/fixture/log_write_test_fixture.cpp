@@ -238,9 +238,9 @@ LogWriteTestFixture::_AddToDirtyPageList(int mapId, MpageList dirty)
 }
 
 void
-LogWriteTestFixture::GenerateLogsForStripe(StripeTestFixture& stripe)
+LogWriteTestFixture::GenerateLogsForStripe(StripeTestFixture& stripe, uint32_t startOffset, int numBlks)
 {
-    BlockMapList blksToWrite = _GenerateBlocksInStripe(stripe.GetVsid(), 0, testInfo->numBlksPerStripe);
+    BlockMapList blksToWrite = _GenerateBlocksInStripe(stripe.GetVsid(), startOffset, numBlks);
     for (auto blk : blksToWrite)
     {
         BlkAddr rba = std::get<0>(blk);
@@ -253,7 +253,7 @@ LogWriteTestFixture::GenerateLogsForStripe(StripeTestFixture& stripe)
 void
 LogWriteTestFixture::WriteLogsForStripe(StripeTestFixture& stripe)
 {
-    WriteBlockLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
+    WriteBlockLogsForStripe(stripe);
 
     WaitForAllLogWriteDone();
 
@@ -319,18 +319,14 @@ LogWriteTestFixture::WriteOverwrittenBlockLogs(StripeTestFixture& stripe,
 }
 
 void
-LogWriteTestFixture::WriteBlockLogsForStripe(StripeTestFixture& stripe, uint32_t startOffset, int numBlks)
+LogWriteTestFixture::WriteBlockLogsForStripe(StripeTestFixture& stripe)
 {
-    auto blksToWrite = _GenerateBlocksInStripe(stripe.GetVsid(), startOffset, numBlks);
-
-    for (auto blk : blksToWrite)
+    for (auto blk : stripe.GetBlockMapList())
     {
         BlkAddr rba = std::get<0>(blk);
         VirtualBlks vsas = std::get<1>(blk);
         bool writeSuccessful = WriteBlockLog(stripe.GetVolumeId(), rba, vsas);
         EXPECT_TRUE(writeSuccessful == true);
-
-        stripe.AddBlockMap(rba, vsas);
     }
 }
 

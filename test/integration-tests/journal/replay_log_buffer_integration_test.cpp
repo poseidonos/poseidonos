@@ -90,6 +90,8 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayCirculatedLogBuffer)
     while (1)
     {
         StripeTestFixture stripe(currentVsid++, testInfo->defaultTestVol);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
+
         uint32_t logSize = sizeof(BlockWriteDoneLog) * stripe.GetBlockMapList().size()
             + sizeof(StripeMapUpdatedLog);
         if (usedOffset.CanBeWritten(logSize) == true)

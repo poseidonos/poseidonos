@@ -68,6 +68,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayFullStripe)
 
     StripeId vsid = std::rand() % testInfo->numUserStripes;
     StripeTestFixture stripe(vsid, testInfo->defaultTestVol);
+    writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
     writeTester->WriteLogsForStripe(stripe);
 
     writeTester->WaitForAllLogWriteDone();
@@ -93,6 +94,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayFullStripeSeveralTimes)
     while (writtenLogSize < logGroupSize / 1024)
     {
         StripeTestFixture stripe(currentVsid++, testInfo->defaultTestVol);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
         writeTester->WriteLogsForStripe(stripe);
         writtenStripes.push_back(stripe);
 
@@ -122,10 +124,12 @@ TEST_F(ReplayStripeIntegrationTest, ReplayeSeveralUnflushedStripe)
 
     StripeTestFixture partialStripe(0, testInfo->defaultTestVol);
     int startOffset = std::rand() % testInfo->numBlksPerStripe;
-    writeTester->WriteBlockLogsForStripe(partialStripe, startOffset, testInfo->numBlksPerStripe - startOffset);
+    writeTester->GenerateLogsForStripe(partialStripe, startOffset, testInfo->numBlksPerStripe - startOffset);
+    writeTester->WriteBlockLogsForStripe(partialStripe);
 
     StripeTestFixture fullStripe(1, testInfo->defaultTestVol);
-    writeTester->WriteBlockLogsForStripe(fullStripe, 0, testInfo->numBlksPerStripe);
+    writeTester->GenerateLogsForStripe(fullStripe, 0, testInfo->numBlksPerStripe);
+    writeTester->WriteBlockLogsForStripe(fullStripe);
 
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
@@ -174,7 +178,8 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesFromStart)
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
-    writeTester->WriteBlockLogsForStripe(stripe, 0, numBlks);
+    writeTester->GenerateLogsForStripe(stripe, 0, numBlks);
+    writeTester->WriteBlockLogsForStripe(stripe);
 
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
@@ -204,7 +209,8 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWrites)
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
-    writeTester->WriteBlockLogsForStripe(stripe, testInfo->numBlksPerStripe - numBlks, numBlks);
+    writeTester->GenerateLogsForStripe(stripe, testInfo->numBlksPerStripe - numBlks, numBlks);
+    writeTester->WriteBlockLogsForStripe(stripe);
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
 
@@ -229,7 +235,8 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWrites_WhenStripeMapCheckpointed)
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
-    writeTester->WriteBlockLogsForStripe(stripe, testInfo->numBlksPerStripe - numBlks, numBlks);
+    writeTester->GenerateLogsForStripe(stripe, testInfo->numBlksPerStripe - numBlks, numBlks);
+    writeTester->WriteBlockLogsForStripe(stripe);
     writeTester->WaitForAllLogWriteDone();
 
     SimulateSPORWithoutRecovery();
@@ -256,7 +263,8 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesFromStartToEnd)
     InitializeJournal();
 
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
-    writeTester->WriteBlockLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
+    writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
+    writeTester->WriteBlockLogsForStripe(stripe);
 
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();
@@ -288,7 +296,8 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush)
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
     uint32_t startOffset = testInfo->numBlksPerStripe - numBlks;
-    writeTester->WriteBlockLogsForStripe(stripe, startOffset, numBlks);
+    writeTester->GenerateLogsForStripe(stripe, startOffset, numBlks);
+    writeTester->WriteBlockLogsForStripe(stripe);
     bool writeSuccessful = writeTester->WriteStripeLog(stripe.GetVsid(), stripe.GetWbAddr(), stripe.GetUserAddr());
     EXPECT_TRUE(writeSuccessful == true);
 
@@ -320,7 +329,8 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush_WhenStripeMapCheck
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
     uint32_t startOffset = testInfo->numBlksPerStripe - numBlks;
-    writeTester->WriteBlockLogsForStripe(stripe, startOffset, numBlks);
+    writeTester->GenerateLogsForStripe(stripe, startOffset, numBlks);
+    writeTester->WriteBlockLogsForStripe(stripe);
     bool writeSuccessful = writeTester->WriteStripeLog(stripe.GetVsid(), stripe.GetWbAddr(), stripe.GetUserAddr());
     EXPECT_TRUE(writeSuccessful == true);
 
@@ -353,7 +363,8 @@ TEST_F(ReplayStripeIntegrationTest, ReplayBlockWritesAndFlush_WhenStripeMapCheck
     StripeTestFixture stripe(std::rand() % testInfo->numUserStripes, testInfo->defaultTestVol);
     int numBlks = std::rand() % (testInfo->numBlksPerStripe - 1) + 1;
     uint32_t startOffset = testInfo->numBlksPerStripe - numBlks;
-    writeTester->WriteBlockLogsForStripe(stripe, startOffset, numBlks);
+    writeTester->GenerateLogsForStripe(stripe, startOffset, numBlks);
+    writeTester->WriteBlockLogsForStripe(stripe);
     bool writeSuccessful = writeTester->WriteStripeLog(stripe.GetVsid(), stripe.GetWbAddr(), stripe.GetUserAddr());
     EXPECT_TRUE(writeSuccessful == true);
 

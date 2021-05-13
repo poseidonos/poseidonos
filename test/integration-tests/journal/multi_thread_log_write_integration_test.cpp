@@ -51,7 +51,7 @@ MultiThreadLogWriteIntegrationTest::WriteLogsWithSize(uint64_t size)
     while (roughUsedSizeCalculation < size)
     {
         StripeTestFixture stripe(currentVsid++, testInfo->defaultTestVol);
-        writeTester->GenerateLogsForStripe(stripe);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
 
         for (auto blkLog : stripe.GetBlockMapList())
         {

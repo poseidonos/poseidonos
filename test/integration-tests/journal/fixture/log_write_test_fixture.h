@@ -29,10 +29,9 @@ public:
 
     void WriteLogsWithSize(uint64_t sizeToFill);
 
-    void GenerateLogsForStripe(StripeTestFixture& stripe);
+    void GenerateLogsForStripe(StripeTestFixture& stripe, uint32_t startOffset, int numBlks);
     void WriteLogsForStripe(StripeTestFixture& stripe);
-    void WriteBlockLogsForStripe(StripeTestFixture& stripe,
-        uint32_t startOffset, int numBlks);
+    void WriteBlockLogsForStripe(StripeTestFixture& stripe);
 
     void WriteOverwrittenBlockLogs(StripeTestFixture& stripe,
         BlkAddr rba, uint32_t startOffset, uint32_t numOverwrites);

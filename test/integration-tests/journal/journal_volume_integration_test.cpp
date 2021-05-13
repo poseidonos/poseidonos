@@ -32,6 +32,7 @@ JournalVolumeIntegrationTest::WriteStripes(int numVolumes)
     for (int vol = 0; vol < numVolumes; vol++)
     {
         StripeTestFixture stripe(currentVsid++, vol);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
         writeTester->WriteLogsForStripe(stripe);
         writtenStripes[vol] = stripe;
     }
