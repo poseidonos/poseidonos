@@ -35,6 +35,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include "src/array/meta/array_meta.h"
 
@@ -52,11 +53,12 @@ public:
     virtual int InsertDevice(string deviceUid, unsigned int arrayIndex);
     virtual int DeleteDevices(unsigned int arrayIndex);
     virtual int ResetMap(void);
-    virtual int CheckDevices(ArrayMeta& meta);
+    virtual int CheckAllDevices(ArrayMeta& meta);
     virtual int FindArrayIndex(string devSN);
 
 private:
     map<string, unsigned int> arrayDeviceIndexMap;
+    int _CheckDevices(vector<DeviceMeta>& devs);
     using arrayDeviceIndexMapIter = map<string, unsigned int>::iterator;
 };
 

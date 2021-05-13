@@ -248,7 +248,7 @@ TEST(MbrManager, DeleteAbr_testIfArrayIsProperlyDeletedAndVersionIsIncremented)
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillOnce(Return(0));
 
     MockMbrMapManager* mockMbrMapMgr = new MockMbrMapManager;
-    EXPECT_CALL(*mockMbrMapMgr, CheckDevices(_)).WillOnce(Return(0));
+    EXPECT_CALL(*mockMbrMapMgr, CheckAllDevices(_)).WillOnce(Return(0));
     EXPECT_CALL(*mockMbrMapMgr, DeleteDevices(_)).WillOnce(Return(0));
     EXPECT_CALL(*mockMbrMapMgr, InsertDevices(_, _)).WillRepeatedly(Return(0)); // not interesting call.
 
@@ -277,7 +277,7 @@ TEST(MbrManager, DeleteAbr_testIfNonExistentArrayNameHandledProperly)
     MockMbrMapManager* mockMbrMapMgr = new MockMbrMapManager;
     EXPECT_CALL(*mockMbrMapMgr, DeleteDevices(_)).Times(0); // shouldn't be called
     EXPECT_CALL(*mockMbrMapMgr, InsertDevices(_, _)).Times(1);
-    EXPECT_CALL(*mockMbrMapMgr, CheckDevices(_)).Times(1);
+    EXPECT_CALL(*mockMbrMapMgr, CheckAllDevices(_)).Times(1);
 
     MbrManager m(NULL, "", NULL, NULL, NULL, mockMbrMapMgr);
     string mockArrayName = "mockArray";
@@ -441,18 +441,22 @@ TEST(MbrManager, LoadMbr_testIfTheLatestMajorityMbrIsSelected)
     MBR* mbr1 = new MBR;
     mbr1->mbrVersion = 1,
     mbr1->mbrParity = 1234;
+    mbr1->arrayNum = 0;
 
     MBR* mbr2 = new MBR;
     mbr2->mbrVersion = 2;
     mbr2->mbrParity = 2345;
+    mbr2->arrayNum = 0;
 
     MBR* mbr3 = new MBR;
     mbr3->mbrVersion = 2;
     mbr3->mbrParity = 3456;
+    mbr3->arrayNum = 0;
 
     MBR* mbr4 = new MBR;
     mbr4->mbrVersion = 2;
     mbr4->mbrParity = 2345;
+    mbr4->arrayNum = 0;
 
     MockDeviceManager mockDevMgr;
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillOnce([&mbr1, &mbr2, &mbr3, &mbr4](DeviceIterFunc func, void* ctx) {
@@ -611,7 +615,7 @@ TEST(MbrManager, GetAbrList_testIfCreatedAbrsAreRetrieved)
     });
 
     MockMbrMapManager* mockMbrMapMgr = new MockMbrMapManager;
-    EXPECT_CALL(*mockMbrMapMgr, CheckDevices(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockMbrMapMgr, CheckAllDevices(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(*mockMbrMapMgr, InsertDevices(_, _)).WillRepeatedly(Return(0));
     EXPECT_CALL(*mockMbrMapMgr, InsertDevice(_, 0)).WillRepeatedly(Return(0));
     EXPECT_CALL(*mockMbrMapMgr, InsertDevice(_, 1)).WillRepeatedly(Return(0));
@@ -676,12 +680,12 @@ TEST(MbrManager, UpdateDeviceIndexMap_testIfMbrMapManagerRefreshesDeviceMap)
     ArrayMeta newArrayMeta = arrayMeta1;
     newArrayMeta.devs.spares.push_back(DeviceMeta(newSpareDeviceName));
     ASSERT_EQ(0, actual);
-    ASSERT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), mbrMapManager->CheckDevices(newArrayMeta));
+    ASSERT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), mbrMapManager->CheckAllDevices(newArrayMeta));
     ArrayMeta newOtherArrayMeta;
     string newOtherArrayName = "newArray";
     newOtherArrayMeta.arrayName = newOtherArrayName;
     newOtherArrayMeta.devs.spares.push_back(DeviceMeta(newSpareDeviceName));
-    ASSERT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), mbrMapManager->CheckDevices(newOtherArrayMeta));
+    ASSERT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), mbrMapManager->CheckAllDevices(newOtherArrayMeta));
 }
 
 TEST(MbrManager, FindArrayWithDeviceSN_testFindingArraySuccessfully)

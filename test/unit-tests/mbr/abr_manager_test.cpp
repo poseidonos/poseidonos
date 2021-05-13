@@ -49,10 +49,15 @@ TEST(AbrManager, LoadAbr_testIfAbrDataLoadedCorrectly)
     {
         using AbrPtr = struct ArrayBootRecord*;
         AbrPtr newAbr = new struct ArrayBootRecord; // Done with SaveAbr in product code
-        newAbr->totalDevNum = 4;
+        newAbr->totalDevNum = 5;
+        newAbr->nvmDevNum = 1;
         newAbr->dataDevNum = 3;
         newAbr->spareDevNum = 1;
         CopyData(newAbr->devInfo[0].deviceUid, mockDeviceName, DEVICE_UID_SIZE);
+        CopyData(newAbr->devInfo[1].deviceUid, mockDeviceName, DEVICE_UID_SIZE);
+        CopyData(newAbr->devInfo[2].deviceUid, mockDeviceName, DEVICE_UID_SIZE);
+        CopyData(newAbr->devInfo[3].deviceUid, mockDeviceName, DEVICE_UID_SIZE);
+        CopyData(newAbr->devInfo[4].deviceUid, mockDeviceName, DEVICE_UID_SIZE);
         *abr = newAbr;
         return 0;
     });
@@ -61,9 +66,10 @@ TEST(AbrManager, LoadAbr_testIfAbrDataLoadedCorrectly)
     ArrayMeta meta;
     abrMgr->LoadAbr(mockArrayName, meta);
 
-    // Then : meta have array data
+    // // Then : meta have array data
     EXPECT_EQ(mockDeviceName, meta.devs.data.at(0).uid);
-    delete mockMbrManager;
+    delete abrMgr;
+    // delete mockMbrManager;
 }
 
 TEST(AbrManager, SaveAbr_testAbrDataUpdateAndDataCheck)
