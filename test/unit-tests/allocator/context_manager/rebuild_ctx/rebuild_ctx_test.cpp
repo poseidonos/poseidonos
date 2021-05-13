@@ -1,4 +1,4 @@
-#include "src/allocator/context_manager/rebuild/rebuild_ctx.h"
+#include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 
 #include <gtest/gtest.h>
 

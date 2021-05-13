@@ -36,10 +36,10 @@
 #include <sstream>
 #include <string>
 
-#include "src/allocator/context_manager/allocator_ctx.h"
-#include "src/allocator/context_manager/rebuild/rebuild_ctx.h"
-#include "src/allocator/context_manager/segment/segment_ctx.h"
-#include "src/allocator/context_manager/wb_stripe_ctx.h"
+#include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
+#include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_models/interface/i_array_info.h"

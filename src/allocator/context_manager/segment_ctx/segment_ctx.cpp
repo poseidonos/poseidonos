@@ -30,20 +30,19 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/segment/segment_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 
 #include <mutex>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/context_manager/segment/segment_info.h"
-#include "src/allocator/context_manager/segment_lock.h"
+#include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/include/meta_const.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-SegmentCtx::SegmentCtx(SegmentInfo* segmentInfo_, std::string arrayName_, AllocatorAddressInfo* addrInfo_)
+SegmentCtx::SegmentCtx(SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_)
 : segmentInfos(segmentInfo_),
   numSegments(0),
   addrInfo(addrInfo_),

@@ -36,7 +36,7 @@
 #include <vector>
 
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
-#include "src/allocator/context_manager/segment/segment_states.h"
+#include "src/allocator/context_manager/allocator_ctx/segment_states.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/lib/bitmap.h"
 
@@ -49,8 +49,8 @@ class AllocatorCtx : public IAllocatorFileIoClient
 public:
     AllocatorCtx(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~AllocatorCtx(void);
-    void Init(void);
-    void Close(void);
+    virtual void Init(void);
+    virtual void Close(void);
 
     virtual void AfterLoad(char* buf);
     virtual void BeforeFlush(int section, char* buf);
@@ -68,20 +68,20 @@ public:
     void SetPrevSsdLsid(StripeId stripeId);
     void SetNextSsdLsid(SegmentId segId);
 
-    void AllocateSegment(SegmentId segId);
-    void ReleaseSegment(SegmentId segId);
-    SegmentId AllocateFreeSegment(SegmentId startSegId);
-    SegmentId GetUsedSegment(SegmentId startSegId);
-    uint64_t GetNumOfFreeUserDataSegment(void);
-    SegmentState GetSegmentState(SegmentId segmentId, bool needlock);
-    void SetSegmentState(SegmentId segmentId, SegmentState state, bool needlock);
+    virtual void AllocateSegment(SegmentId segId);
+    virtual void ReleaseSegment(SegmentId segId);
+    virtual SegmentId AllocateFreeSegment(SegmentId startSegId);
+    virtual SegmentId GetUsedSegment(SegmentId startSegId);
+    virtual uint64_t GetNumOfFreeUserDataSegment(void);
+    virtual SegmentState GetSegmentState(SegmentId segmentId, bool needlock);
+    virtual void SetSegmentState(SegmentId segmentId, SegmentState state, bool needlock);
 
     void SetAllocatedSegmentCount(int count);
     int GetAllocatedSegmentCount(void);
     int GetTotalSegmentsCount(void);
 
-    std::mutex& GetSegStateLock(SegmentId segId);
-    std::mutex& GetAllocatorCtxLock(void) { return allocCtxLock; }
+    virtual std::mutex& GetSegStateLock(SegmentId segId);
+    virtual std::mutex& GetAllocatorCtxLock(void) { return allocCtxLock; }
 
 private:
     static const uint32_t SIG_ALLOCATOR_CTX = 0xACACACAC;

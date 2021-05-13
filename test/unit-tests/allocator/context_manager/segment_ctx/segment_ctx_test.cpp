@@ -1,4 +1,4 @@
-#include "src/allocator/context_manager/segment/segment_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 
 #include <gtest/gtest.h>
 

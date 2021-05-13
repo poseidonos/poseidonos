@@ -35,20 +35,38 @@
 #include <string>
 #include <vector>
 
-#include "src/allocator/context_manager/allocator_ctx.h"
+#include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/context_manager/context_replayer.h"
 #include "src/allocator/context_manager/file_io_manager.h"
-#include "src/allocator/context_manager/gc_ctx.h"
+#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
-#include "src/allocator/context_manager/rebuild/rebuild_ctx.h"
-#include "src/allocator/context_manager/segment/segment_ctx.h"
-#include "src/allocator/context_manager/wb_stripe_ctx.h"
+#include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
+ContextManager::ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_, 
+                               WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileManager_,
+                               ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, std::string arrayName_)
+: numAsyncIoIssued(0),
+  flushInProgress(false),
+  addrInfo(info_),
+  arrayName(arrayName_)
+{
+    allocatorCtx = allocCtx_;
+    segmentCtx = segCtx_;
+    rebuildCtx = rebuildCtx_;
+    wbStripeCtx = wbstripeCtx_;
+    fileIoManager = fileManager_;
+    contextReplayer = ctxReplayer_;
+    fileOwner[SEGMENT_CTX] = segCtx_;
+    fileOwner[ALLOCATOR_CTX] = allocCtx_;
+}
+
 ContextManager::ContextManager(AllocatorAddressInfo* info, std::string arrayName)
 : numAsyncIoIssued(0),
   flushInProgress(false),
@@ -170,27 +188,27 @@ ContextManager::FlushContextsAsync(EventSmartPtr callback)
 SegmentId
 ContextManager::AllocateFreeSegment(bool forUser)
 {
-    SegmentId segmentId = allocatorCtx->AllocateFreeSegment(UNMAP_SEGMENT /*scan free segment from last allocated segId*/);
+    SegmentId segId = allocatorCtx->AllocateFreeSegment(UNMAP_SEGMENT /*scan free segment from last allocated segId*/);
     if (forUser == false)
     {
-        return segmentId;
+        return segId;
     }
-    while ((segmentId != UNMAP_SEGMENT) && (rebuildCtx->FindRebuildTargetSegment(segmentId) != rebuildCtx->RebuildTargetSegmentsEnd()))
+    while ((segId != UNMAP_SEGMENT) && (rebuildCtx->IsRebuildTargetSegment(segId) == true))
     {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_REBUILDING_SEGMENT), "segmentId:{} is already rebuild target!", segmentId);
-        allocatorCtx->ReleaseSegment(segmentId);
-        ++segmentId;
-        segmentId = allocatorCtx->AllocateFreeSegment(segmentId);
+        POS_TRACE_DEBUG(EID(ALLOCATOR_REBUILDING_SEGMENT), "segmentId:{} is already rebuild target!", segId);
+        allocatorCtx->ReleaseSegment(segId);
+        ++segId;
+        segId = allocatorCtx->AllocateFreeSegment(segId);
     }
-    if (segmentId == UNMAP_SEGMENT)
+    if (segId == UNMAP_SEGMENT)
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "Failed to allocate segment, free segment count:{}", allocatorCtx->GetNumOfFreeUserDataSegment());
     }
     else
     {
-        POS_TRACE_INFO(EID(ALLOCATOR_START), "segmentId:{} @AllocateUserDataSegmentId, free segment count:{}", segmentId, allocatorCtx->GetNumOfFreeUserDataSegment());
+        POS_TRACE_INFO(EID(ALLOCATOR_START), "segmentId:{} @AllocateUserDataSegmentId, free segment count:{}", segId, allocatorCtx->GetNumOfFreeUserDataSegment());
     }
-    return segmentId;
+    return segId;
 }
 
 SegmentId

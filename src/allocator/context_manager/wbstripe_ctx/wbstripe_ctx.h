@@ -32,59 +32,57 @@
 
 #pragma once
 
-#include <set>
 #include <string>
-#include <utility>
+#include <vector>
 
-#include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/context_manager/allocator_ctx.h"
+#include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/include/allocator_const.h"
-#include "src/meta_file_intf/meta_file_intf.h"
 
 namespace pos
 {
-class RebuildCtx
+class AllocatorAddressInfo;
+class WbStripeCtx : public IAllocatorFileIoClient
 {
 public:
-    RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx);
-    virtual ~RebuildCtx(void);
-    void Init(AllocatorAddressInfo* info);
-    void Close(void);
+    WbStripeCtx(AllocatorAddressInfo* info);
+    virtual ~WbStripeCtx(void);
+    virtual void Init(void);
+    virtual void Close(void);
 
-    SegmentId GetRebuildTargetSegment(void);
-    int ReleaseRebuildSegment(SegmentId segmentId);
-    bool NeedRebuildAgain(void);
-    void FreeSegmentInRebuildTarget(SegmentId segId);
+    virtual void AfterLoad(char* buf);
+    virtual void BeforeFlush(int section, char* buf);
+    virtual void FinalizeIo(AsyncMetaFileIoCtx* ctx);
+    virtual char* GetSectionAddr(int section);
+    virtual int GetSectionSize(int section);
+    virtual uint64_t GetStoredVersion(void);
+    virtual void ResetDirtyVersion(void);
 
-    bool IsRebuidTargetSegmentsEmpty(void);
-    RTSegmentIter FindRebuildTargetSegment(SegmentId segmentId);
-    RTSegmentIter RebuildTargetSegmentsBegin(void);
-    RTSegmentIter RebuildTargetSegmentsEnd(void);
-    std::pair<RTSegmentIter, bool> EmplaceRebuildTargetSegment(SegmentId segmentId);
-    void ClearRebuildTargetSegments(void);
-    uint32_t GetTargetSegmentCnt(void);
-    void FlushRebuildCtx(void);
-    void SetUnderRebuildSegmentId(SegmentId segmentId);
+    std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
+    void ResetActiveStripeTail(int index);
+
+    void AllocWbStripe(StripeId stripeId);
+    StripeId AllocWbStripe(void);
+    void ReleaseWbStripe(StripeId stripeId);
+    void SetAllocatedWbStripeCount(int count);
+    uint64_t GetAllocatedWbStripeCount(void);
+    uint64_t GetNumTotalWbStripe(void);
+
+    VirtualBlkAddr GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx);
+    void SetActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa);
+    virtual std::mutex& GetActiveStripeTailLock(ASTailArrayIdx asTailArrayIdx);
+    virtual std::mutex& GetAllocWbLsidBitmapLock(void);
 
 private:
-    int _PrepareRebuildCtx(void);
-    void _LoadRebuildCtxSync(void);
-    void _RebuildCtxLoaded(void);
-    void _StoreRebuildCtx(void);
-    void _EraseRebuildTargetSegments(RTSegmentIter iter);
-    void _FlushRebuildCtxCompleted(AsyncMetaFileIoCtx* ctx);
-    SegmentId _GetUnderRebuildSegmentId(void);
+    // WriteBuffer Allocation
+    //    Description about 'ASTailArrayIdx'
+    //    Index  0  ... 255 are for Userdata IO of volume 0 ... 255
+    //    Index 256 ... 511 are for GC IO of volume 0 ... 255
+    VirtualBlkAddr activeStripeTail[ACTIVE_STRIPE_TAIL_ARRAYLEN];
+    std::mutex activeStripeTailLock[ACTIVE_STRIPE_TAIL_ARRAYLEN];
+    BitMapMutex* allocWbLsidBitmap;
 
-    bool needRebuildCont;
-    uint32_t targetSegmentCnt;
-    std::set<SegmentId> rebuildTargetSegments; // No lock
-    SegmentId underRebuildSegmentId;
-    MetaFileIntf* rebuildSegmentsFile;
-    std::mutex rebuildLock;
-    char* bufferInObj;
-    std::string arrayName;
-
-    AllocatorCtx* allocatorCtx;
+    // DOCs
+    AllocatorAddressInfo* addrInfo;
 };
 
 } // namespace pos

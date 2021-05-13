@@ -36,9 +36,9 @@
 #include <vector>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/context_manager/allocator_ctx.h"
-#include "src/allocator/context_manager/segment/segment_ctx.h"
-#include "src/allocator/context_manager/wb_stripe_ctx.h"
+#include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/logger/logger.h"
 

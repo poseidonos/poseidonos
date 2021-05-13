@@ -61,14 +61,14 @@ class AllocatorFileIoManager
 public:
     AllocatorFileIoManager(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~AllocatorFileIoManager(void);
-    void Init(void);
-    void Close(void);
+    virtual void Init(void);
+    virtual void Close(void);
 
     void UpdateSectionInfo(int owner, int section, char* addr, int size, int offset);
 
-    int LoadSync(int owner, char* buf);
-    int StoreSync(int owner, char* buf);
-    int StoreAsync(int owner, char* buf, MetaIoCbPtr callback);
+    virtual int LoadSync(int owner, char* buf);
+    virtual int StoreSync(int owner, char* buf);
+    virtual int StoreAsync(int owner, char* buf, MetaIoCbPtr callback);
 
     void LoadSectionData(int owner, char* buf);
     void CopySectionData(int owner, char* buf, int startSection, int endSection);

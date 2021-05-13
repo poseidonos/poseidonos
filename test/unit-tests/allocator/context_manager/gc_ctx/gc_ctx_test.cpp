@@ -1,4 +1,4 @@
-#include "src/allocator/context_manager/gc_ctx.h"
+#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 
 #include <gtest/gtest.h>
 

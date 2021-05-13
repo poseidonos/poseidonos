@@ -33,21 +33,24 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
+#include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
+#include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/allocator/include/allocator_const.h"
+#include "src/include/address_type.h"
+#include "src/lib/bitmap.h"
 
 namespace pos
 {
-class AllocatorAddressInfo;
-class WbStripeCtx : public IAllocatorFileIoClient
+class SegmentCtx : public IAllocatorFileIoClient
 {
 public:
-    WbStripeCtx(AllocatorAddressInfo* info);
-    virtual ~WbStripeCtx(void);
-    void Init(void);
-    void Close(void);
+    SegmentCtx(SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_);
+    SegmentCtx(AllocatorAddressInfo* info, std::string arrayName);
+    virtual ~SegmentCtx(void);
+    virtual void Init(void);
+    virtual  void Close(void);
 
     virtual void AfterLoad(char* buf);
     virtual void BeforeFlush(int section, char* buf);
@@ -57,32 +60,33 @@ public:
     virtual uint64_t GetStoredVersion(void);
     virtual void ResetDirtyVersion(void);
 
-    std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
-    void ResetActiveStripeTail(int index);
+    virtual uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
+    virtual int32_t DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
+    virtual uint32_t GetValidBlockCount(SegmentId segId);
+    virtual void SetOccupiedStripeCount(SegmentId segId, int count);
+    virtual int GetOccupiedStripeCount(SegmentId segId);
+    virtual int IncreaseOccupiedStripeCount(SegmentId segId);
 
-    void AllocWbStripe(StripeId stripeId);
-    StripeId AllocWbStripe(void);
-    void ReleaseWbStripe(StripeId stripeId);
-    void SetAllocatedWbStripeCount(int count);
-    uint64_t GetAllocatedWbStripeCount(void);
-    uint64_t GetNumTotalWbStripe(void);
+    bool IsSegmentCtxIo(char* pBuf);
+    SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
+    virtual std::mutex& GetSegmentCtxLock(void) { return segCtxLock;}
 
-    VirtualBlkAddr GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx);
-    void SetActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa);
-    std::mutex& GetActiveStripeTailLock(ASTailArrayIdx asTailArrayIdx);
-    std::mutex& GetAllocWbLsidBitmapLock(void);
+    void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
+    void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
 private:
-    // WriteBuffer Allocation
-    //    Description about 'ASTailArrayIdx'
-    //    Index  0  ... 255 are for Userdata IO of volume 0 ... 255
-    //    Index 256 ... 511 are for GC IO of volume 0 ... 255
-    VirtualBlkAddr activeStripeTail[ACTIVE_STRIPE_TAIL_ARRAYLEN];
-    std::mutex activeStripeTailLock[ACTIVE_STRIPE_TAIL_ARRAYLEN];
-    BitMapMutex* allocWbLsidBitmap;
+    static const uint32_t SIG_SEGMENT_CTX = 0xECECECEC;
 
-    // DOCs
+    SegmentCtxHeader ctxHeader;
+    std::atomic<uint64_t> ctxDirtyVersion;
+    std::atomic<uint64_t> ctxStoredVersion;
+    SegmentInfo* segmentInfos;
+    uint32_t numSegments;
+
     AllocatorAddressInfo* addrInfo;
+    std::string arrayName;
+
+    std::mutex segCtxLock;
 };
 
 } // namespace pos

@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/gc_ctx.h"
+#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 
 namespace pos
 {

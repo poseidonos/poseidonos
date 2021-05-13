@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/rebuild/rebuild_ctx.h"
+#include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 
 #include <string>
 #include <utility>
@@ -183,6 +183,12 @@ RebuildCtx::FlushRebuildCtx(void)
     rebuildStoreRequest->segmentCnt = targetSegmentCnt;
 
     rebuildSegmentsFile->AsyncIO(rebuildStoreRequest);
+}
+
+bool
+RebuildCtx::IsRebuildTargetSegment(SegmentId segId)
+{
+    return (FindRebuildTargetSegment(segId) != RebuildTargetSegmentsEnd());
 }
 
 bool

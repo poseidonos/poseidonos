@@ -36,8 +36,8 @@
 #include <vector>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/context_manager/gc_ctx.h"
-#include "src/allocator/context_manager/rebuild/rebuild_ctx.h"
+#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
+#include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/i_context_replayer.h"
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator/include/allocator_const.h"
@@ -56,6 +56,9 @@ const int NO_REBUILD_TARGET_USER_SEGMENT = 0;
 class ContextManager : public IContextManager
 {
 public:
+    ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_, 
+                               WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileMananager_,
+                               ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, std::string arrayName_);
     ContextManager(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~ContextManager(void);
     void Init(void);

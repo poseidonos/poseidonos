@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/allocator/context_manager/gc_ctx.h"
+#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 
 namespace pos
 {

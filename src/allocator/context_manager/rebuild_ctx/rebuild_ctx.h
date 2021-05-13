@@ -32,62 +32,60 @@
 
 #pragma once
 
+#include <set>
 #include <string>
+#include <utility>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/context_manager/i_allocator_file_io_client.h"
-#include "src/allocator/context_manager/segment/segment_info.h"
+#include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/include/allocator_const.h"
-#include "src/include/address_type.h"
-#include "src/lib/bitmap.h"
+#include "src/meta_file_intf/meta_file_intf.h"
 
 namespace pos
 {
-class SegmentLock;
-class SegmentCtx : public IAllocatorFileIoClient
+class RebuildCtx
 {
 public:
-    SegmentCtx(SegmentInfo* segmentInfo_, std::string arrayName_, AllocatorAddressInfo* addrInfo_);
-    SegmentCtx(AllocatorAddressInfo* info, std::string arrayName);
-    virtual ~SegmentCtx(void);
-    void Init(void);
-    void Close(void);
+    RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx);
+    virtual ~RebuildCtx(void);
+    virtual void Init(AllocatorAddressInfo* info);
+    virtual void Close(void);
 
-    virtual void AfterLoad(char* buf);
-    virtual void BeforeFlush(int section, char* buf);
-    virtual void FinalizeIo(AsyncMetaFileIoCtx* ctx);
-    virtual char* GetSectionAddr(int section);
-    virtual int GetSectionSize(int section);
-    virtual uint64_t GetStoredVersion(void);
-    virtual void ResetDirtyVersion(void);
+    virtual SegmentId GetRebuildTargetSegment(void);
+    int ReleaseRebuildSegment(SegmentId segmentId);
+    bool NeedRebuildAgain(void);
+    void FreeSegmentInRebuildTarget(SegmentId segId);
 
-    uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    int32_t DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    uint32_t GetValidBlockCount(SegmentId segId);
-    void SetOccupiedStripeCount(SegmentId segId, int count);
-    int GetOccupiedStripeCount(SegmentId segId);
-    int IncreaseOccupiedStripeCount(SegmentId segId);
-
-    bool IsSegmentCtxIo(char* pBuf);
-    SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
-    std::mutex& GetSegmentCtxLock(void) { return segCtxLock;}
-
-    void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
-    void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
+    virtual bool IsRebuildTargetSegment(SegmentId segId);
+    bool IsRebuidTargetSegmentsEmpty(void);
+    RTSegmentIter FindRebuildTargetSegment(SegmentId segmentId);
+    RTSegmentIter RebuildTargetSegmentsBegin(void);
+    RTSegmentIter RebuildTargetSegmentsEnd(void);
+    std::pair<RTSegmentIter, bool> EmplaceRebuildTargetSegment(SegmentId segmentId);
+    void ClearRebuildTargetSegments(void);
+    uint32_t GetTargetSegmentCnt(void);
+    void FlushRebuildCtx(void);
+    void SetUnderRebuildSegmentId(SegmentId segmentId);
 
 private:
-    static const uint32_t SIG_SEGMENT_CTX = 0xECECECEC;
+    int _PrepareRebuildCtx(void);
+    void _LoadRebuildCtxSync(void);
+    void _RebuildCtxLoaded(void);
+    void _StoreRebuildCtx(void);
+    void _EraseRebuildTargetSegments(RTSegmentIter iter);
+    void _FlushRebuildCtxCompleted(AsyncMetaFileIoCtx* ctx);
+    SegmentId _GetUnderRebuildSegmentId(void);
 
-    SegmentCtxHeader ctxHeader;
-    std::atomic<uint64_t> ctxDirtyVersion;
-    std::atomic<uint64_t> ctxStoredVersion;
-    SegmentInfo* segmentInfos;
-    uint32_t numSegments;
-
-    AllocatorAddressInfo* addrInfo;
+    bool needRebuildCont;
+    uint32_t targetSegmentCnt;
+    std::set<SegmentId> rebuildTargetSegments; // No lock
+    SegmentId underRebuildSegmentId;
+    MetaFileIntf* rebuildSegmentsFile;
+    std::mutex rebuildLock;
+    char* bufferInObj;
     std::string arrayName;
 
-    std::mutex segCtxLock;
+    AllocatorCtx* allocatorCtx;
 };
 
 } // namespace pos

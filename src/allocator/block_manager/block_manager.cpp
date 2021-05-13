@@ -35,9 +35,9 @@
 #include <string>
 
 #include "src/allocator/context_manager/active_stripe_index_info.h"
-#include "src/allocator/context_manager/allocator_ctx.h"
-#include "src/allocator/context_manager/segment/segment_ctx.h"
-#include "src/allocator/context_manager/wb_stripe_ctx.h"
+#include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/include/branch_prediction.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/qos/qos_manager.h"
