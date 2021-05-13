@@ -30,10 +30,10 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "write_vsa_map_wbt_command.h"
-
+#include "src/array_mgmt/array_manager.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/volume/volume_service.h"
+#include "src/wbt/write_vsa_map_wbt_command.h"
 
 #include <string>
 
@@ -51,9 +51,20 @@ WriteVsaMapWbtCommand::~WriteVsaMapWbtCommand(void)
 int
 WriteVsaMapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
-    int res;
+    int res = -1;
+    std::string arrayName = _GetParameter(argv, "array");
+    if (0 == arrayName.length())
+    {
+        return res;
+    }
 
-    IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager("");
+    bool arrayExist = ArrayMgr::Instance()->ArrayExists(arrayName);
+    if (arrayExist == false)
+    {
+        return res;
+    }
+
+    IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     int volId = volMgr->VolumeID(argv["name"].get<std::string>());
 
     if (volId < 0)
@@ -62,7 +73,7 @@ WriteVsaMapWbtCommand::Execute(Args &argv, JsonElement &elem)
     }
     else
     {
-        IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt("");
+        IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt(arrayName);
         res = iMapperWbt->WriteVsaMap(volId, argv["input"].get<std::string>());
     }
 

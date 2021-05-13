@@ -80,7 +80,7 @@ FlushAllUserDataWbtCommand::Execute(Args& argv, JsonElement& elem)
     {
         std::cout << "Start Flush process..." << std::endl;
         // IO Flush & Quiesce
-        IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt("");
+        IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt(arrayName);
         iAllocatorWbt->FlushAllUserdataWBT();
         std::cout << "Stripes finalized..." << std::endl;
         res = 0;

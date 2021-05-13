@@ -30,12 +30,13 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "get_instant_meta_info_wbt_command.h"
+
+#include "src/allocator/i_allocator_wbt.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/array_mgmt/array_manager.h"
+#include "src/wbt/get_instant_meta_info_wbt_command.h"
 
 #include <string>
-
-#include "src/allocator_service/allocator_service.h"
-#include "src/allocator/i_allocator_wbt.h"
 namespace pos
 {
 GetInstantMetaInfoWbtCommand::GetInstantMetaInfoWbtCommand(void)
@@ -50,9 +51,24 @@ GetInstantMetaInfoWbtCommand::~GetInstantMetaInfoWbtCommand(void)
 int
 GetInstantMetaInfoWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
+    int res = -1;
+    std::string arrayName = _GetParameter(argv, "array");
+    if (0 == arrayName.length())
+    {
+        return res;
+    }
+
+    bool arrayExist = ArrayMgr::Instance()->ArrayExists(arrayName);
+    if (arrayExist == false)
+    {
+        return res;
+    }
+
     std::string coutfile = "output.txt";
-    IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt("");
-    return iAllocatorWbt->GetInstantMetaInfo(coutfile);
+    IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt(arrayName);
+    res = iAllocatorWbt->GetInstantMetaInfo(coutfile);
+
+    return res;
 }
 
 } // namespace pos

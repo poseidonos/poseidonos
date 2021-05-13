@@ -30,9 +30,9 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "write_stripe_map_wbt_command.h"
-
+#include "src/array_mgmt/array_manager.h"
 #include "src/mapper_service/mapper_service.h"
+#include "src/wbt/write_stripe_map_wbt_command.h"
 
 #include <string>
 
@@ -50,8 +50,21 @@ WriteStripeMapWbtCommand::~WriteStripeMapWbtCommand(void)
 int
 WriteStripeMapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
-    IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt("");
-    int res = iMapperWbt->WriteStripeMap(argv["input"].get<std::string>());
+    int res = -1;
+    std::string arrayName = _GetParameter(argv, "array");
+    if (0 == arrayName.length())
+    {
+        return res;
+    }
+
+    bool arrayExist = ArrayMgr::Instance()->ArrayExists(arrayName);
+    if (arrayExist == false)
+    {
+        return res;
+    }
+
+    IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt(arrayName);
+    res = iMapperWbt->WriteStripeMap(argv["input"].get<std::string>());
 
     return res;
 }

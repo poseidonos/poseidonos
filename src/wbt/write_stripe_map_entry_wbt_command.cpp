@@ -30,10 +30,10 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "write_stripe_map_entry_wbt_command.h"
-
+#include "src/array_mgmt/array_manager.h"
 #include "src/include/address_type.h"
 #include "src/mapper_service/mapper_service.h"
+#include "src/wbt/write_stripe_map_entry_wbt_command.h"
 
 #include <string>
 
@@ -51,15 +51,25 @@ WriteStripeMapEntryWbtCommand::~WriteStripeMapEntryWbtCommand(void)
 int
 WriteStripeMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
-    StripeId vsid = static_cast<StripeId>(std::stoul(
-        argv["vsid"].get<std::string>()));
-    StripeLoc loc = static_cast<StripeLoc>(std::stoi(
-        argv["loc"].get<std::string>()));
-    StripeId lsid = static_cast<StripeId>(std::stoul(
-        argv["lsid"].get<std::string>()));
+    int res = -1;
+    std::string arrayName = _GetParameter(argv, "array");
+    if (0 == arrayName.length())
+    {
+        return res;
+    }
 
-    IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt("");
-    int res = iMapperWbt->WriteStripeMapEntry(vsid, loc, lsid);
+    bool arrayExist = ArrayMgr::Instance()->ArrayExists(arrayName);
+    if (arrayExist == false)
+    {
+        return res;
+    }
+
+    StripeId vsid = static_cast<StripeId>(std::stoul(argv["vsid"].get<std::string>()));
+    StripeLoc loc = static_cast<StripeLoc>(std::stoi(argv["loc"].get<std::string>()));
+    StripeId lsid = static_cast<StripeId>(std::stoul(argv["lsid"].get<std::string>()));
+
+    IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt(arrayName);
+    res = iMapperWbt->WriteStripeMapEntry(vsid, loc, lsid);
 
     return res;
 }

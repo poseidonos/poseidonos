@@ -30,10 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "get_wb_lsid_bitmap_wbt_command.h"
-
-#include "src/allocator_service/allocator_service.h"
 #include "src/allocator/i_allocator_wbt.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/array_mgmt/array_manager.h"
+#include "src/wbt/get_wb_lsid_bitmap_wbt_command.h"
+
 #include <string>
 
 namespace pos
@@ -50,8 +51,23 @@ GetWbLsidBitmapWbtCommand::~GetWbLsidBitmapWbtCommand(void)
 int
 GetWbLsidBitmapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
-    IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt("");
-    return iAllocatorWbt->GetMeta(WB_LSID_BITMAP, argv["output"].get<std::string>());
+    int res = -1;
+    std::string arrayName = _GetParameter(argv, "array");
+    if (0 == arrayName.length())
+    {
+        return res;
+    }
+
+    bool arrayExist = ArrayMgr::Instance()->ArrayExists(arrayName);
+    if (arrayExist == false)
+    {
+        return res;
+    }
+
+    IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt(arrayName);
+    res = iAllocatorWbt->GetMeta(WB_LSID_BITMAP, argv["output"].get<std::string>());
+
+    return res;
 }
 
 } // namespace pos
