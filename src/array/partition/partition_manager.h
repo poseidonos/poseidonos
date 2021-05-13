@@ -34,8 +34,8 @@
 #define PARTITION_MANAGER_H_
 
 #include <array>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "partition.h"
 using namespace std;
@@ -57,6 +57,7 @@ public:
     virtual int CreateAll(vector<ArrayDevice*> buf, vector<ArrayDevice*> data,
         ArrayInterface* intf);
     virtual void DeleteAll(ArrayInterface* intf);
+    virtual void FormatMetaPartition(vector<ArrayDevice*> data, ArrayInterface* intf);
 
 private:
     int _CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf);

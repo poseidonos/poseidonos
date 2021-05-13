@@ -39,11 +39,11 @@
 #include "src/array/device/array_device.h"
 #include "src/array/ft/raid1.h"
 #include "src/array/ft/raid5.h"
+#include "src/array/interface/i_abr_control.h"
 #include "src/device/base/ublock_device.h"
 #include "src/include/array_config.h"
 #include "src/logger/logger.h"
 #include "stripe_partition.h"
-#include "src/array/interface/i_abr_control.h"
 
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
 
@@ -310,6 +310,15 @@ PartitionManager::_GetBaseline(const vector<ArrayDevice*>& devs)
     }
 
     return baseline;
+}
+
+void
+PartitionManager::FormatMetaPartition(vector<ArrayDevice*> data, ArrayInterface* intf)
+{
+    _CreateMetaSsd(data, intf);
+    auto partition = partitions_[PartitionType::META_SSD];
+    partition->Format();
+    DeleteAll(intf);
 }
 
 } // namespace pos

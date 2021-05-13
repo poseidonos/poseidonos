@@ -116,6 +116,7 @@ private:
     int _LoadImpl(void);
     int _CreatePartitions(void);
     void _DeletePartitions(void);
+    void _FormatMetaPartition(void);
     int _Flush(void);
     int _ResumeRebuild(ArrayDevice* target);
     void _RebuildDone(RebuildResult result);

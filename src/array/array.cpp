@@ -184,6 +184,8 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType)
     {
         goto error;
     }
+    _FormatMetaPartition();
+
     state->SetCreate();
     pthread_rwlock_unlock(&stateLock);
     POS_TRACE_INFO(ret, "Array was successfully created");
@@ -429,6 +431,13 @@ void
 Array::_DeletePartitions(void)
 {
     ptnMgr->DeleteAll(intf);
+}
+
+void
+Array::_FormatMetaPartition(void)
+{
+    DeviceSet<ArrayDevice*> devs = devMgr_->Export();
+    ptnMgr->FormatMetaPartition(devs.data, intf);
 }
 
 bool
