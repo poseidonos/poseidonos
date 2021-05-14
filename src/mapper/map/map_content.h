@@ -48,6 +48,7 @@ class MapIoHandler;
 class MapContent
 {
 public:
+    MapContent(void);
     explicit MapContent(int mapId);
     virtual ~MapContent(void);
 

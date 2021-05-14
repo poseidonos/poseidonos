@@ -41,17 +41,18 @@ namespace pos
 class VSAMapContent : public MapContent
 {
 public:
-    explicit VSAMapContent(int mapId, std::string arrayName);
+    VSAMapContent(void);
+    VSAMapContent(int mapId, std::string arrayName);
 
     virtual int Prepare(uint64_t size, int64_t opt = 0) override;
     virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries) override;
 
     int InMemoryInit(uint64_t numEntries, uint64_t volid);
-    VirtualBlkAddr GetEntry(BlkAddr rba);
-    int SetEntry(BlkAddr rba, VirtualBlkAddr vsa);
+    virtual VirtualBlkAddr GetEntry(BlkAddr rba);
+    virtual int SetEntry(BlkAddr rba, VirtualBlkAddr vsa);
     void ResetEntries(BlkAddr rba, uint64_t cnt);
 
-    int64_t GetNumUsedBlocks(void);
+    virtual int64_t GetNumUsedBlocks(void);
     int InvalidateAllBlocks(void);
 
 private:

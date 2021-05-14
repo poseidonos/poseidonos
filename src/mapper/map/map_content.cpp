@@ -39,11 +39,16 @@
 
 namespace pos
 {
-MapContent::MapContent(int mapId)
+MapContent::MapContent(void)
 : map(nullptr),
   mapIoHandler(nullptr),
   metaFile(nullptr),
   loaded(false)
+{
+}
+
+MapContent::MapContent(int mapId)
+: MapContent()
 {
     header.mapId = mapId;
 }
@@ -59,11 +64,16 @@ MapContent::~MapContent(void)
         delete metaFile;
         metaFile = nullptr;
     }
-
-    delete map;
-    map = nullptr;
-    delete mapIoHandler;
-    mapIoHandler = nullptr;
+    if (map != nullptr)
+    {
+        delete map;
+        map = nullptr;
+    }
+    if (mapIoHandler != nullptr)
+    {
+        delete mapIoHandler;
+        mapIoHandler = nullptr;
+    }
 }
 
 void

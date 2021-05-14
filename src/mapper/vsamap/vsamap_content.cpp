@@ -40,6 +40,12 @@
 
 namespace pos
 {
+
+VSAMapContent::VSAMapContent(void)
+: MapContent()
+{
+}
+
 VSAMapContent::VSAMapContent(int mapId, std::string arrayName)
 : MapContent(mapId)
 {
