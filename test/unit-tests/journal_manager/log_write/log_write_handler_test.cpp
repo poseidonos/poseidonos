@@ -246,6 +246,26 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfWaitingListIsRestarted)
     delete waitingContext;
 }
 
+TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfExcutionSucessWhenIoFails)
+{
+    // Given: Log write handler is initialized, and log write context is given
+    logWriteHandler->Init(bufferAllocator, logBuffer, config);
+    NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
+
+    // When: The context has an error
+    EXPECT_CALL(*context, GetError).WillOnce(Return(-1));
+
+    // Then: Log write stats should not be updatedm
+    // and the context callback should be called
+    EXPECT_CALL(*logWriteStats, UpdateStatus).Times(0);
+    EXPECT_CALL(*context, LogWriteDone);
+
+    // When: Log write is done
+    logWriteHandler->LogWriteDone(context);
+
+    // Then: The written context should be deleted by LogWriteHandler
+}
+
 TEST_F(LogWriteHandlerTestFixture, LogFilled_testIfExecutionSuccess)
 {
     // Given: Log write handler is initialized

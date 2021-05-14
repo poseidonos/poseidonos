@@ -17,6 +17,7 @@ public:
     MOCK_METHOD(void, SetAllocated, (int groupId, uint32_t seqNum, MetaIoCbPtr cb), (override));
     MOCK_METHOD(void, SetIoRequest, (MetaFsIoOpcode op, int fileDescriptor, uint64_t offset), (override));
     MOCK_METHOD(void, LogWriteDone, (), (override));
+    MOCK_METHOD(int, GetError, (), (override));
 };
 
 class MockMapUpdateLogWriteContext : public MapUpdateLogWriteContext

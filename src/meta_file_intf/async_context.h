@@ -49,7 +49,8 @@ public:
     AsyncMetaFileIoCtx(void);
     virtual ~AsyncMetaFileIoCtx(void) = default;
 
-    void HandleIoComplete(void* data);
+    virtual void HandleIoComplete(void* data);
+    virtual int GetError(void);
 
     MetaFsIoOpcode opcode;
     int fd;

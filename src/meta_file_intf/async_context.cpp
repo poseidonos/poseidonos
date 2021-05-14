@@ -50,4 +50,10 @@ AsyncMetaFileIoCtx::HandleIoComplete(void* data)
     callback(this);
 }
 
+int
+AsyncMetaFileIoCtx::GetError(void)
+{
+    return error;
+}
+
 } // namespace pos
