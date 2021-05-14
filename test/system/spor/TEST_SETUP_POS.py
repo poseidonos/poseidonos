@@ -23,16 +23,14 @@ import TEST_RUN_POS
 
 ARRAYNAME = "POSArray"
 
-def shutdown_pos():
+def shutdown_pos(numArray):
     TEST_RUN_POS.block_pos_crash_detection()
 
     TEST_LOG.print_info("* Exiting POS")
-    out = cli.unmount_array(ARRAYNAME)
-    ret = json_parser.get_response_code(out)
-    if ret != 0:
-        TEST_LOG.print_err("Failed to unmount pos")
-        TEST_LOG.print_debug(out)
-        sys.exit(1)
+
+    for arrayId in range(numArray):
+        unmount_array(arrayId)
+        
     out = cli.exit_pos()
     ret = json_parser.get_response_code(out)
     if ret != 0:
@@ -45,7 +43,7 @@ def shutdown_pos():
 def mbr_reset():
     cli.mbr_reset()
 
-def clean_bringup():
+def clean_bringup(numArray=1):
     TEST_LOG.print_info("* POS clean bringup")
 
     if (os.path.isfile(TEST.mockfile)):
@@ -54,26 +52,34 @@ def clean_bringup():
     TEST_RUN_POS.start_pos()
     subprocess.call(["sleep", "3"])
 
-    setup()
+    setup(numArray)
     mbr_reset()
-    create_array()
-    mount_array()
+    for arrayId in range(numArray):
+        create_array(arrayId)
+        mount_array(arrayId)
 
     TEST_LOG.print_info("* Fininshed bringup")
 
-def dirty_bringup(dump=0):
+def dirty_bringup(numArray=1):
     TEST_LOG.print_info("* POS dirty bringup")
 
     TEST_RUN_POS.start_pos()
     subprocess.call(["sleep", "3"])
 
-    setup()
-    mount_array()
+    setup(numArray)
+    for arrayId in range(numArray):
+        mount_array(arrayId)
+        TEST_DEBUGGING.dump_journal(arrayId, "LogBuffer_AfterSPO")
 
-    TEST_DEBUGGING.dump_journal("LogBuffer_AfterSPO")
     TEST_LOG.print_info("* Fininshed bringup")
 
-def setup():
+# For pmem
+# def create_pram():
+    # spdk_rpc.send_request("bdev_pmem_create_pool /mnt/pmem0/pmem_pool 1024 512")
+    # spdk_rpc.send_request("bdev_pmem_create /mnt/pmem0/pmem_pool -n pmem0")
+
+# TODO(cheolho.kang): Seperate array setup method from setup function
+def setup(numArray):
     command=""
 
     if TEST.trtype == "tcp":
@@ -82,10 +88,9 @@ def setup():
         command += " -u 131072"
 
     spdk_rpc.send_request("nvmf_create_transport -t " + TEST.trtype + command)
-    spdk_rpc.send_request("bdev_malloc_create -b uram0 1024 512")
-#pmem
-#    spdk_rpc.send_request("bdev_pmem_create_pool /mnt/pmem0/pmem_pool 1024 512")
-#    spdk_rpc.send_request("bdev_pmem_create /mnt/pmem0/pmem_pool -n pmem0")
+    for uramId in range(numArray):
+        create_uram(uramId)
+        #create_pram()
 
     out = cli.scan_device()
     ret = json_parser.get_response_code(out)
@@ -96,8 +101,17 @@ def setup():
 
     TEST_LOG.print_info("* Setup POS")
 
-def create_array():
-    out = cli.create_array("uram0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "unvme-ns-3", ARRAYNAME, "")
+def get_uramname(uramId):
+    return "uram"+str(uramId)
+
+def create_uram(uramId):
+    spdk_rpc.send_request("bdev_malloc_create -b " + get_uramname(uramId) + " 1024 512")
+    
+def create_array(arrayId):
+    deviceList = []
+    for index in range(4):
+        deviceList.append("unvme-ns-"+str(index + arrayId*4))
+    out = cli.create_array(get_uramname(arrayId), deviceList[0]+","+deviceList[1]+","+deviceList[2], deviceList[3], get_arrayname(arrayId), "")
 #   pmem
 #    out = cli.create_array("pmem0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "unvme-ns-3", ARRAYNAME, "")
     ret = json_parser.get_response_code(out)
@@ -107,36 +121,40 @@ def create_array():
         sys.exit(1)
     TEST_LOG.print_info("* Array created")
 
-def mount_array():
-    out = cli.mount_array(ARRAYNAME)
+def mount_array(arrayId):
+    out = cli.mount_array(get_arrayname(arrayId))
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to mount pos")
         TEST_LOG.print_debug(out)
         sys.exit(1)
-    TEST_LOG.print_info("* POS mounted")
+    TEST_LOG.print_info("* {} mounted".format(get_arrayname(arrayId)))
 
-def unmount_array():
-    out = cli.unmount_array(ARRAYNAME)
+def unmount_array(arrayId):
+    out = cli.unmount_array(get_arrayname(arrayId))
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to unmount pos")
         TEST_LOG.print_debug(out)
         sys.exit(1)
-    TEST_LOG.print_info("* POS unmounted")
+    TEST_LOG.print_info("* {} unmounted".format(get_arrayname(arrayId)))
 
-def create_subsystem(volumeId):
-    out = spdk_rpc.send_request("nvmf_create_subsystem " + TEST.NQN + str(volumeId) \
-        + " -a -s POS0000000000000" + str(volumeId) + " -d POS_VOLUME_EXTENTION")
+def create_subsystem(arrayId, volumeId):
+    subsystemId = TEST_LIB.get_subsystem_id(arrayId, volumeId)
+    out = spdk_rpc.send_request("nvmf_create_subsystem " + TEST.NQN + str(subsystemId) \
+        + " -a -s POS0000000000000" + str(subsystemId) + " -d POS_VOLUME_EXTENTION")
     if out != 0:
         TEST_LOG.print_err("Failed to create subsystem")
         sys.exit(1)
 
+def get_arrayname(arrayId):
+    return ARRAYNAME+str(arrayId)
+
 def get_volname(volumeId):
     return "vol"+str(volumeId)
 
-def create_volume(volumeId, subnqn=""):
-    out = cli.create_volume(get_volname(volumeId), str(TEST.volSize), "0", "0", ARRAYNAME)
+def create_volume(arrayId, volumeId):
+    out = cli.create_volume(get_volname(volumeId), str(TEST.volSize), "0", "0", get_arrayname(arrayId))
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to create volume")
@@ -144,16 +162,17 @@ def create_volume(volumeId, subnqn=""):
         sys.exit(1)
 
     TEST_LOG.print_info("* Volume {} created".format(volumeId))
-    mount_volume(volumeId)
+    mount_volume(arrayId, volumeId)
 
-def mount_volume(volumeId):
-    out = spdk_rpc.send_request("nvmf_subsystem_add_listener " + TEST.NQN + str(volumeId) \
+def mount_volume(arrayId, volumeId):
+    subsystemId = TEST_LIB.get_subsystem_id(arrayId, volumeId)
+    out = spdk_rpc.send_request("nvmf_subsystem_add_listener " + TEST.NQN + str(subsystemId) \
         + " -t " + TEST.trtype + " -a " + str(TEST.traddr) + " -s " + str(TEST.port))
     if out != 0:
         TEST_LOG.print_err("Failed to create volume")
         sys.exit(1)
 
-    out = cli.mount_volume(get_volname(volumeId), ARRAYNAME, TEST.NQN + str(volumeId))
+    out = cli.mount_volume(get_volname(volumeId), get_arrayname(arrayId), TEST.NQN + str(subsystemId))
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to mount volume")
@@ -162,15 +181,16 @@ def mount_volume(volumeId):
 
     TEST_LOG.print_info("* Volume {} mounted".format(volumeId))
 
-def unmount_volume(volumeId):
-    out = cli.unmount_volume(get_volname(volumeId), ARRAYNAME)
+def unmount_volume(arrayId, volumeId):
+    out = cli.unmount_volume(get_volname(volumeId), get_arrayname(arrayId))
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to unmount volume")
         TEST_LOG.print_debug(out)
         sys.exit(1)
 
-    out = spdk_rpc.send_request("nvmf_subsystem_remove_listener " + TEST.NQN + str(volumeId) \
+    subsystemId = TEST_LIB.get_subsystem_id(arrayId, volumeId)
+    out = spdk_rpc.send_request("nvmf_subsystem_remove_listener " + TEST.NQN + str(subsystemId) \
         + " -t " + TEST.trtype + " -a " + str(TEST.traddr) + " -s " + str(TEST.port))
     if out != 0:
         TEST_LOG.print_err("Failed to unmount volume")
@@ -179,15 +199,16 @@ def unmount_volume(volumeId):
 
     TEST_LOG.print_info("* Volume {} unmounted".format(volumeId))
 
-def delete_volume(volumeId):
-    out = cli.delete_volume(get_volname(volumeId), ARRAYNAME)
+def delete_volume(arrayId, volumeId):
+    out = cli.delete_volume(get_volname(volumeId), get_arrayname(arrayId))
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to delete volume")
         TEST_LOG.print_debug(out)
         sys.exit(1)
 
-    out = spdk_rpc.send_request("nvmf_delete_subsystem " + TEST.NQN + str(volumeId))
+    subsystemId = TEST_LIB.get_subsystem_id(arrayId, volumeId)
+    out = spdk_rpc.send_request("nvmf_delete_subsystem " + TEST.NQN + str(subsystemId))
     if out != 0:
         TEST_LOG.print_err("Failed to delete volume")
         TEST_LOG.print_debug(out)
@@ -204,8 +225,10 @@ def backup_nvram():
         TEST_LOG.print_err("Failed to backup uram")
         sys.exit(1)
 
-def trigger_spor():
-    TEST_DEBUGGING.dump_journal("LogBuffer_BeforeSPO")
+def trigger_spor(numArray=1):
+    for arrayId in range(numArray):
+        TEST_DEBUGGING.dump_journal(arrayId, "LogBuffer_BeforeSPO")
+
     TEST_DEBUGGING.flush_gcov()
 
     TEST_RUN_POS.block_pos_crash_detection()

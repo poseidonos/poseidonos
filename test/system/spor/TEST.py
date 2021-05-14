@@ -41,3 +41,6 @@ NQN = 'nqn.2019-04.pos:subsystem'
 ## fio setup
 ioengine = pos_root + "/lib/spdk/examples/nvme/fio_plugin/fio_plugin"
 EXPECTED_MEMORY_FIO = 0.4
+
+## test setup
+maxNumVolumePerArray = 10

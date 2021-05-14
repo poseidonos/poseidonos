@@ -9,6 +9,7 @@ import TEST_LOG
 import TEST_SETUP_POS
 
 current_test = 0
+arrayId = 0
 volId = 1
 num_write = 10
 
@@ -23,17 +24,17 @@ def test(size):
 
     write_size = TEST_LIB.parse_size(size)
     for index in range(num_write):
-        TEST_LIB.create_new_pattern(volId)
-        TEST_FIO.write(volId, write_size * index, size, TEST_LIB.get_pattern(volId, index))
+        TEST_LIB.create_new_pattern(arrayId, volId)
+        TEST_FIO.write(arrayId, volId, write_size * index, size, TEST_LIB.get_pattern(arrayId, volId, index))
 
     TEST_SETUP_POS.trigger_spor()
     TEST_SETUP_POS.dirty_bringup()
 
-    TEST_SETUP_POS.create_subsystem(volId)
-    TEST_SETUP_POS.mount_volume(volId)
+    TEST_SETUP_POS.create_subsystem(arrayId, volId)
+    TEST_SETUP_POS.mount_volume(arrayId, volId)
 
     for index in range(num_write):
-        TEST_FIO.verify(volId, write_size * index, size, TEST_LIB.get_pattern(volId, index))
+        TEST_FIO.verify(arrayId, volId, write_size * index, size, TEST_LIB.get_pattern(arrayId, volId, index))
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
@@ -47,8 +48,8 @@ if __name__ == "__main__":
 
     TEST_SETUP_POS.clean_bringup()
 
-    TEST_SETUP_POS.create_subsystem(volId)
-    TEST_SETUP_POS.create_volume(volId)
+    TEST_SETUP_POS.create_subsystem(arrayId, volId)
+    TEST_SETUP_POS.create_volume(arrayId, volId)
 
     execute()
 

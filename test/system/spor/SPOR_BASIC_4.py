@@ -14,6 +14,7 @@ import TEST_LIB
 import TEST_LOG
 import TEST_SETUP_POS
 
+arrayId = 0
 volId = 1
 current_test = 0
 run_time = 10
@@ -29,8 +30,8 @@ def test(offset, size):
     current_test = current_test + 1
     TEST_LOG.print_notice("[{} - Test {} Started]".format(filename, current_test))
 
-    TEST_LIB.create_new_pattern(volId)
-    th = Thread(target=TEST_FIO.write, args=(volId, offset, size, TEST_LIB.get_latest_pattern(volId), run_time))
+    TEST_LIB.create_new_pattern(arrayId, volId)
+    th = Thread(target=TEST_FIO.write, args=(arrayId, volId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volId), run_time))
     th.start()
 
     TEST_LOG.print_err("* Write Fail Expected")
@@ -40,14 +41,14 @@ def test(offset, size):
     th.join()
 
     TEST_SETUP_POS.dirty_bringup()
-    TEST_SETUP_POS.create_subsystem(volId)
-    TEST_SETUP_POS.mount_volume(volId)
+    TEST_SETUP_POS.create_subsystem(arrayId, volId)
+    TEST_SETUP_POS.mount_volume(arrayId, volId)
 
-    TEST_FIO.verify(volId, offset, size, TEST_LIB.get_latest_pattern(volId))
+    TEST_FIO.verify(arrayId, volId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volId))
 
-    TEST_LIB.create_new_pattern(volId)
-    TEST_FIO.write(volId, offset, size, TEST_LIB.get_latest_pattern(volId))
-    TEST_FIO.verify(volId, offset, size, TEST_LIB.get_latest_pattern(volId))
+    TEST_LIB.create_new_pattern(arrayId, volId)
+    TEST_FIO.write(arrayId, volId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volId))
+    TEST_FIO.verify(arrayId, volId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volId))
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
@@ -68,10 +69,9 @@ if __name__ == "__main__":
 
     TEST_SETUP_POS.clean_bringup()
 
-    TEST_SETUP_POS.create_subsystem(volId)
-    TEST_SETUP_POS.create_volume(volId)
+    TEST_SETUP_POS.create_subsystem(arrayId, volId)
+    TEST_SETUP_POS.create_volume(arrayId, volId)
 
     execute()
 
     TEST_LIB.tear_down(test_name=filename)
-

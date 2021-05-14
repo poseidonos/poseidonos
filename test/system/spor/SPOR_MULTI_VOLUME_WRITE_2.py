@@ -14,6 +14,7 @@ import TEST_LIB
 import TEST_LOG
 import TEST_SETUP_POS
 
+arrayId = 0
 volumes = [1, 2]
 current_test = 0
 run_time = 10
@@ -31,8 +32,8 @@ def test(offset, size):
 
     thread_list = []
     for volId in volumes:
-        TEST_LIB.create_new_pattern(volId)
-        th = Thread(target=TEST_FIO.write, args=(volId, offset, size, TEST_LIB.get_latest_pattern(volId), run_time))
+        TEST_LIB.create_new_pattern(arrayId, volId)
+        th = Thread(target=TEST_FIO.write, args=(arrayId, volId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volId), run_time))
         thread_list.append(th)
 
     for th in thread_list:
@@ -46,11 +47,11 @@ def test(offset, size):
 
     TEST_SETUP_POS.dirty_bringup()
     for volId in volumes:
-        TEST_SETUP_POS.create_subsystem(volId)
-        TEST_SETUP_POS.mount_volume(volId)
+        TEST_SETUP_POS.create_subsystem(arrayId, volId)
+        TEST_SETUP_POS.mount_volume(arrayId, volId)
 
     for volId in volumes:
-        TEST_FIO.verify(volId, offset, size, TEST_LIB.get_latest_pattern(volId))
+        TEST_FIO.verify(arrayId, volId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volId))
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
@@ -71,8 +72,8 @@ if __name__ == "__main__":
 
     TEST_SETUP_POS.clean_bringup()
     for volId in volumes:
-        TEST_SETUP_POS.create_subsystem(volId)
-        TEST_SETUP_POS.create_volume(volId)
+        TEST_SETUP_POS.create_subsystem(arrayId, volId)
+        TEST_SETUP_POS.create_volume(arrayId, volId)
 
     execute()
 

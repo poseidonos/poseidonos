@@ -11,6 +11,7 @@ import TEST_LIB
 import TEST_LOG
 import TEST_SETUP_POS
 
+arrayId = 0
 volumes = [1, 2]
 current_test = 0
 num_write = 10
@@ -20,10 +21,10 @@ num_write = 10
 ##  write pattern to the specific RBA of a volume several times, to several volumes,
 ##  simulate SPOR and verify the RBA of each volumes with latest pattern
 ############################################################################
-def overwrite(volId, offset, size):
+def overwrite(arrayId, volId, offset, size):
     for index in range(num_write):
-        TEST_LIB.create_new_pattern(volId)
-        TEST_FIO.write(volId, offset, size, TEST_LIB.get_latest_pattern(volId))
+        TEST_LIB.create_new_pattern(arrayId, volId)
+        TEST_FIO.write(arrayId, volId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volId))
 
 def test(offset, size):
     global current_test
@@ -32,7 +33,7 @@ def test(offset, size):
 
     thread_list = []
     for volId in volumes:
-        th = Thread(target=overwrite, args=(volId, offset, size))
+        th = Thread(target=overwrite, args=(arrayId, volId, offset, size))
         thread_list.append(th)
         th.start()
     for th in thread_list:
@@ -41,11 +42,11 @@ def test(offset, size):
     TEST_SETUP_POS.trigger_spor()
     TEST_SETUP_POS.dirty_bringup()
     for volId in volumes:
-        TEST_SETUP_POS.create_subsystem(volId)
-        TEST_SETUP_POS.mount_volume(volId)
+        TEST_SETUP_POS.create_subsystem(arrayId, volId)
+        TEST_SETUP_POS.mount_volume(arrayId, volId)
 
     for volId in volumes:
-        TEST_FIO.verify(volId, offset, size, TEST_LIB.get_latest_pattern(volId))
+        TEST_FIO.verify(arrayId, volId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volId))
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
 def execute():
@@ -65,8 +66,8 @@ if __name__ == "__main__":
 
     TEST_SETUP_POS.clean_bringup()
     for volId in volumes:
-        TEST_SETUP_POS.create_subsystem(volId)
-        TEST_SETUP_POS.create_volume(volId)
+        TEST_SETUP_POS.create_subsystem(arrayId, volId)
+        TEST_SETUP_POS.create_volume(arrayId, volId)
 
     execute()
 

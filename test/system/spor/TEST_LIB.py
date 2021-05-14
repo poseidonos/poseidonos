@@ -46,26 +46,30 @@ def set_up(argv, test_name):
     TEST_LOG.print_notice("[{} Started]".format(test_name))
     TEST_RUN_POS.cleanup_process()
 
-def tear_down(test_name):
-    TEST_SETUP_POS.shutdown_pos()
+# TODO(cheolho.kang): Seperate shutdown method from teardown
+def tear_down(test_name, numArray=1):
+    TEST_SETUP_POS.shutdown_pos(numArray)
     TEST_LOG.print_notice("[Test {} Completed]".format(test_name))
 
 patterns = []
 
-def create_new_pattern(volId):
+def create_new_pattern(arrayId, volId):
     pattern = '\\\"' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16)) + '\\\"'
 
-    while len(patterns) <= volId:
+    while len(patterns) <= arrayId:
         patterns.append([])
 
-    patterns[volId].append(pattern)
-    return patterns[volId].index(pattern)
+    while len(patterns[arrayId]) <= volId:
+        patterns[arrayId].append([])
 
-def get_pattern(volId, index):
-    return patterns[volId][index]
+    patterns[arrayId][volId].append(pattern)
+    return patterns[arrayId][volId].index(pattern)
 
-def get_latest_pattern(volId):
-    return patterns[volId][-1]
+def get_pattern(arrayId, volId, index):
+    return patterns[arrayId][volId][index]
+
+def get_latest_pattern(arrayId, volId):
+    return patterns[arrayId][volId][-1]
 
 units = {"B": 1, "K": 2**10, "M": 2**20, "G": 2**30, "KB": 2**10, "MB": 2**20, "GB": 2**30}
 
@@ -92,16 +96,16 @@ def get_num_thread():
     TEST_LOG.print_debug("Max number of threads will be set to {} (Current available memory: {} GB)".format(num_thread, round(available_memory_gb, 2)))
     return num_thread
 
-def get_checkpoint_status():
-    out = cli.send_request("wbt get_journal_status --array POSArray")
+def get_checkpoint_status(arrayId=0):
+    out = cli.send_request("wbt get_journal_status --array " + TEST_SETUP_POS.get_arrayname(arrayId))
     if json_parser.get_response_code(out) != 0:
         return -1
     else:
         total_info = json_parser.get_data(out)
         return total_info["journalStatus"]["checkpointStatus"]["status"]
 
-def get_log_buffer_size():
-    out = cli.send_request("wbt get_journal_status --array POSArray")
+def get_log_buffer_size(arrayId=0):
+    out = cli.send_request("wbt get_journal_status --array " + TEST_SETUP_POS.get_arrayname(arrayId))
     if json_parser.get_response_code(out) != 0:
         return -1
     else:
@@ -141,3 +145,5 @@ def find_process(procname):
 
     return False
 
+def get_subsystem_id(arrayId, volumeId):
+    return arrayId * TEST.maxNumVolumePerArray + volumeId
