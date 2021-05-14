@@ -59,10 +59,6 @@ public:
     int OpenFile(Args argv);
     int CloseFile(Args argv);
 
-    int CreateFileSystem(Args argv);
-    int MountFileSystem(Args argv);
-    int UmountFileSystem(Args argv);
-
     int ReadFile(Args argv);
     int WriteFile(Args argv);
     int ReadFileAsync(Args argv);

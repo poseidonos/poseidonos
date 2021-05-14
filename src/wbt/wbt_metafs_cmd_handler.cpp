@@ -166,27 +166,6 @@ WbtMetafsCmdHandler::CloseFile(Args argv)
 }
 
 int
-WbtMetafsCmdHandler::CreateFileSystem(Args argv)
-{
-    // deprecated
-    return RESULT_FAILURE;
-}
-
-int
-WbtMetafsCmdHandler::MountFileSystem(Args argv)
-{
-    // deprecated
-    return RESULT_SUCCESS;
-}
-
-int
-WbtMetafsCmdHandler::UmountFileSystem(Args argv)
-{
-    // deprecated
-    return RESULT_SUCCESS;
-}
-
-int
 WbtMetafsCmdHandler::ReadFile(Args argv)
 {
     if (argv.size() < 5)

@@ -36,7 +36,6 @@
 
 #include "admin_pass_through_wbt_command.h"
 #include "close_file_wbt_command.h"
-#include "create_file_system_wbt_command.h"
 #include "create_file_wbt_command.h"
 #include "do_gc_wbt_command.h"
 #include "dump_disk_layout_wbt_command.h"
@@ -60,7 +59,6 @@
 #include "get_segment_valid_block_count_wbt_command.h"
 #include "get_user_segment_bitmap_wbt_command.h"
 #include "get_wb_lsid_bitmap_wbt_command.h"
-#include "mount_file_system_wbt_command.h"
 #include "nvme_cli_command.h"
 #include "open_file_wbt_command.h"
 #include "parity_location_wbt_command.h"
@@ -82,7 +80,6 @@
 #include "set_wb_lsid_bitmap_wbt_command.h"
 #include "setup_meta_fio_test_wbt_command.h"
 #include "translate_device_lba_wbt_command.h"
-#include "unmount_file_system_wbt_command.h"
 #include "write_file_wbt_command.h"
 #include "write_raw_data_wbt_command.h"
 #include "write_reverse_map_entry_wbt_command.h"
@@ -141,9 +138,6 @@ WbtCmdHandler::PrepareWbtCommands(void)
     wbtCommandMap["set_segment_info"] = std::make_unique<SetSegmentInfoWbtCommand>();
     wbtCommandMap["get_segment_valid_count"] = std::make_unique<GetSegmentValidBlockCountWbtCommand>();
 
-    wbtCommandMap["mfs_create_filesystem"] = std::make_unique<CreateFileSystemWbtCommand>();
-    wbtCommandMap["mfs_mount_filesystem"] = std::make_unique<MountFileSystemWbtCommand>();
-    wbtCommandMap["mfs_unmount_filesystem"] = std::make_unique<UnmountFileSystemWbtCommand>();
     wbtCommandMap["mfs_create_file"] = std::make_unique<CreateFileWbtCommand>();
     wbtCommandMap["mfs_open_file"] = std::make_unique<OpenFileWbtCommand>();
     wbtCommandMap["mfs_close_file"] = std::make_unique<CloseFileWbtCommand>();

@@ -20,18 +20,6 @@ TEST(WbtMetafsCmdHandler, CloseFile_)
 {
 }
 
-TEST(WbtMetafsCmdHandler, CreateFileSystem_)
-{
-}
-
-TEST(WbtMetafsCmdHandler, MountFileSystem_)
-{
-}
-
-TEST(WbtMetafsCmdHandler, UmountFileSystem_)
-{
-}
-
 TEST(WbtMetafsCmdHandler, ReadFile_)
 {
 }
