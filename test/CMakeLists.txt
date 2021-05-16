@@ -373,10 +373,16 @@ endif(POS_BUILD_SHARED_LIB)
 
 file(GLOB_RECURSE fixture_src ${POS_TEST_ROOT}/fixtures/*.cpp LIST_DIRECTORIES true)
 file(GLOB_RECURSE utils_src ${POS_TEST_ROOT}/utils/*.cpp LIST_DIRECTORIES true)
+file(GLOB_RECURSE fff_mock_src ${POS_TEST_ROOT}/fff-mocks/*.c LIST_DIRECTORIES true)
 
 # for fixtures and utils
 add_library(
     postestlib STATIC ${fixture_src} ${utils_src}
+)
+
+# for C mocks (using fff)
+add_library(
+    fff_mock STATIC ${fff_mock_src}
 )
 
 link_directories (
@@ -431,15 +437,17 @@ SET(DEP_LIBRARIES
     numa
     dl
     pthread
-	jsoncpp
-	jsonrpccpp-common
-	jsonrpccpp-client
+    jsoncpp
+    jsonrpccpp-common
+    jsonrpccpp-client
+    fff_mock
+    pmem
 )
 
 # For on-demand execution
 add_custom_target(
     gen_ut
-    COMMAND cd ${POS_TEST_ROOT}/generator && ./generator.py ${POS_SRC_ROOT} && ../../script/cpp_formatter.py -d ../unit-tests
+	COMMAND cd ${POS_TEST_ROOT}/generator && ./generator.py ${POS_SRC_ROOT} && ../../script/cpp_formatter.py -d ../unit-tests
 )
 
 # Run code-coverage on-demand (COMMAND mode)
