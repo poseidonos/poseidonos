@@ -76,6 +76,7 @@ private:
     uint32_t volumeId;
     static thread_local StripeId recentVsid;
     static thread_local StripeId recentLsid;
+    static thread_local std::string recentArrayName;
 
     LogicalBlkAddr _GetLsa(uint32_t blockIndex);
     LsidRefResult _GetLsidRefResult(BlkAddr rba, VirtualBlkAddr& vsa);
