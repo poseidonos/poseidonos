@@ -47,6 +47,7 @@ class SegmentLock;
 class AllocatorCtx : public IAllocatorFileIoClient
 {
 public:
+    AllocatorCtx(BitMapMutex* allocSegBitmap, SegmentStates* segmentStates, SegmentLock* segStateLock, AllocatorAddressInfo* info, std::string arrayName);
     AllocatorCtx(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~AllocatorCtx(void);
     virtual void Init(void);
@@ -60,13 +61,13 @@ public:
     virtual uint64_t GetStoredVersion(void);
     virtual void ResetDirtyVersion(void);
 
-    StripeId UpdatePrevLsid(void);
-    void SetCurrentSsdLsid(StripeId stripe);
-    void RollbackCurrentSsdLsid(void);
-    StripeId GetCurrentSsdLsid(void);
-    StripeId GetPrevSsdLsid(void);
-    void SetPrevSsdLsid(StripeId stripeId);
-    void SetNextSsdLsid(SegmentId segId);
+    virtual StripeId UpdatePrevLsid(void);
+    virtual void SetCurrentSsdLsid(StripeId stripe);
+    virtual void RollbackCurrentSsdLsid(void);
+    virtual StripeId GetCurrentSsdLsid(void);
+    virtual StripeId GetPrevSsdLsid(void);
+    virtual void SetPrevSsdLsid(StripeId stripeId);
+    virtual void SetNextSsdLsid(SegmentId segId);
 
     virtual void AllocateSegment(SegmentId segId);
     virtual void ReleaseSegment(SegmentId segId);
@@ -83,9 +84,9 @@ public:
     virtual std::mutex& GetSegStateLock(SegmentId segId);
     virtual std::mutex& GetAllocatorCtxLock(void) { return allocCtxLock; }
 
-private:
     static const uint32_t SIG_ALLOCATOR_CTX = 0xACACACAC;
 
+private:
     // File
     AllocatorCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxStoredVersion;

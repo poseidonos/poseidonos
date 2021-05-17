@@ -82,61 +82,6 @@ MountTemp::Mount1(void)
 
     _InitNvmf();
     QosManagerSingleton::Instance()->Initialize();
-<<<<<<< HEAD
-=======
-    return ret;
-}
-
-void
-MountTemp::Shutdown(void)
-{
-    _ResetNvmf();
-}
-
-int
-MountTemp::_MountMetaFilesystem(void)
-{
-    bool isInitialized = abrControl->GetMfsInit(arrayName);
-
-    MetaStorageMediaInfoList mediaList;
-    _RegisterMediaInfoIfAvailable(META_NVM, mediaList);
-    _RegisterMediaInfoIfAvailable(META_SSD, mediaList);
-
-    bool isSuccess = metaFs.Init(arrayName, mediaList);
-    if (!isSuccess)
-    {
-        return -1;
-        // FIXME: handle error
-    }
-
-    MetaFsReturnCode<POS_EVENT_ID> sysRC;
-    if (false == isInitialized) // hardly know whether valid filesystem exists or not, if the filesystem has been established once before
-    {
-        sysRC = metaFs.mgmt.CreateSystem(arrayName);
-        if (sysRC.IsSuccess())
-        {
-            int ret = 0;
-            ret = abrControl->SetMfsInit(arrayName, true);
-            if (0 != ret)
-            {
-                return ret;
-            }
-        }
-        else
-        {
-            return -1;
-            // FIXME: need to report filesystem mount error to host
-        }
-    }
-    sysRC = metaFs.mgmt.MountSystem(arrayName);
-    if (!sysRC.IsSuccess())
-    {
-        return -1;
-        // if (sysRC.sc == MetaFsStatusCodeFsControlSpcf::FileSysNotFound)
-        // {
-        // }
-    }
->>>>>>> 89a9e84f3... [AWIBOF-3500] Draft Shutdown sequence for STOP state processing
     return 0;
 }
 

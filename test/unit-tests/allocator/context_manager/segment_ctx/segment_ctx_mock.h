@@ -27,9 +27,8 @@ public:
     MOCK_METHOD(void, SetOccupiedStripeCount, (SegmentId segId, int count), (override));
     MOCK_METHOD(int, GetOccupiedStripeCount, (SegmentId segId), (override));
     MOCK_METHOD(int, IncreaseOccupiedStripeCount, (SegmentId segId), (override));
-
-    virtual std::mutex& GetSegmentCtxLock(void) { return segCtxLock; }
-    std::mutex segCtxLock;
+    MOCK_METHOD(bool, IsSegmentCtxIo, (char* pBuf), (override));
+    MOCK_METHOD(std::mutex&, GetSegmentCtxLock, (), (override));
 };
 
 } // namespace pos

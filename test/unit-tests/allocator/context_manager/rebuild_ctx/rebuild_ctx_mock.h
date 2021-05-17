@@ -15,6 +15,8 @@ public:
     MOCK_METHOD(void, Init, (AllocatorAddressInfo * info), (override));
     MOCK_METHOD(void, Close, (), (override));
     MOCK_METHOD(SegmentId, GetRebuildTargetSegment, (), (override));
+    MOCK_METHOD(int, ReleaseRebuildSegment, (SegmentId segmentId), (override));
+    MOCK_METHOD(bool, NeedRebuildAgain, (), (override));
     MOCK_METHOD(bool, IsRebuildTargetSegment, (SegmentId segId), (override));
 };
 

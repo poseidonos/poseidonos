@@ -52,8 +52,8 @@ public:
     virtual void Close(void);
 
     virtual SegmentId GetRebuildTargetSegment(void);
-    int ReleaseRebuildSegment(SegmentId segmentId);
-    bool NeedRebuildAgain(void);
+    virtual int ReleaseRebuildSegment(SegmentId segmentId);
+    virtual bool NeedRebuildAgain(void);
     void FreeSegmentInRebuildTarget(SegmentId segId);
 
     virtual bool IsRebuildTargetSegment(SegmentId segId);

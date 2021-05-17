@@ -21,6 +21,13 @@ public:
     MOCK_METHOD(int, GetSectionSize, (int section), (override));
     MOCK_METHOD(uint64_t, GetStoredVersion, (), (override));
     MOCK_METHOD(void, ResetDirtyVersion, (), (override));
+    MOCK_METHOD(StripeId, UpdatePrevLsid, (), (override));
+    MOCK_METHOD(void, SetCurrentSsdLsid, (StripeId stripe), (override));
+    MOCK_METHOD(void, RollbackCurrentSsdLsid, (), (override));
+    MOCK_METHOD(StripeId, GetCurrentSsdLsid, (), (override));
+    MOCK_METHOD(StripeId, GetPrevSsdLsid, (), (override));
+    MOCK_METHOD(void, SetPrevSsdLsid, (StripeId stripeId), (override));
+    MOCK_METHOD(void, SetNextSsdLsid, (SegmentId segId), (override));
     MOCK_METHOD(void, AllocateSegment, (SegmentId segId), (override));
     MOCK_METHOD(void, ReleaseSegment, (SegmentId segId), (override));
     MOCK_METHOD(SegmentId, AllocateFreeSegment, (SegmentId startSegId), (override));
@@ -28,20 +35,8 @@ public:
     MOCK_METHOD(uint64_t, GetNumOfFreeUserDataSegment, (), (override));
     MOCK_METHOD(SegmentState, GetSegmentState, (SegmentId segmentId, bool needlock), (override));
     MOCK_METHOD(void, SetSegmentState, (SegmentId segmentId, SegmentState state, bool needlock), (override));
-
-    virtual std::mutex&
-    GetSegStateLock(SegmentId segId)
-    {
-        return segLock;
-    }
-    virtual std::mutex&
-    GetAllocatorCtxLock(void)
-    {
-        return allocCtxLock;
-    }
-
-    std::mutex segLock;
-    std::mutex allocCtxLock;
+    MOCK_METHOD(std::mutex&, GetSegStateLock, (SegmentId segId), (override));
+    MOCK_METHOD(std::mutex&, GetAllocatorCtxLock, (), (override));
 };
 
 } // namespace pos

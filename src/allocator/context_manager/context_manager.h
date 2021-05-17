@@ -58,7 +58,7 @@ class ContextManager : public IContextManager
 public:
     ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_, 
                                WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileMananager_,
-                               ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, std::string arrayName_);
+                               ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_);
     ContextManager(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~ContextManager(void);
     void Init(void);
@@ -90,9 +90,12 @@ public:
     GcCtx* GetGcCtx(void) { return &gcCtx; }
     std::mutex& GetCtxLock(void) { return ctxLock; }
 
+    void TestCallbackFunc(AsyncMetaFileIoCtx* ctx, int numIssuedIo);
+    void SetCallbackFunc(EventSmartPtr callback);
+
 private:
     void _UpdateSectionInfo(void);
-    void _LoadContexts(void);
+    int _LoadContexts(void);
     int _FlushAsync(int owner, EventSmartPtr callback);
     int _FlushSync(int owner);
     void _FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);

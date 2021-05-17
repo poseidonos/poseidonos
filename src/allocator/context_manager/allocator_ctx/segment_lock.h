@@ -40,7 +40,7 @@ class SegmentLock
 {
 public:
     SegmentLock(void) = default;
-    std::mutex& GetLock(void) { return seglock; }
+    virtual std::mutex& GetLock(void) { return seglock; }
 
 private:
     std::mutex seglock;

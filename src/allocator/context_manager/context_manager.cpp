@@ -51,12 +51,13 @@ namespace pos
 {
 ContextManager::ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_, 
                                WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileManager_,
-                               ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, std::string arrayName_)
+                               ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_)
 : numAsyncIoIssued(0),
   flushInProgress(false),
   addrInfo(info_),
   arrayName(arrayName_)
 {
+    // for UT
     allocatorCtx = allocCtx_;
     segmentCtx = segCtx_;
     rebuildCtx = rebuildCtx_;
@@ -65,20 +66,18 @@ ContextManager::ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, Reb
     contextReplayer = ctxReplayer_;
     fileOwner[SEGMENT_CTX] = segCtx_;
     fileOwner[ALLOCATOR_CTX] = allocCtx_;
+    flushInProgress = flushProgress;
 }
 
 ContextManager::ContextManager(AllocatorAddressInfo* info, std::string arrayName)
-: numAsyncIoIssued(0),
-  flushInProgress(false),
-  addrInfo(info),
-  arrayName(arrayName)
+: ContextManager(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false, info, arrayName)
 {
     allocatorCtx = new AllocatorCtx(info, arrayName);
     segmentCtx = new SegmentCtx(info, arrayName);
     rebuildCtx = new RebuildCtx(arrayName, allocatorCtx);
     wbStripeCtx = new WbStripeCtx(info);
     fileIoManager = new AllocatorFileIoManager(info, arrayName);
-    contextReplayer = new ContextReplayer(info, allocatorCtx, segmentCtx, wbStripeCtx);
+    contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, wbStripeCtx, info);
     fileOwner[SEGMENT_CTX] = segmentCtx;
     fileOwner[ALLOCATOR_CTX] = allocatorCtx;
 }
@@ -102,7 +101,8 @@ ContextManager::Init(void)
     rebuildCtx->Init(addrInfo);
     fileIoManager->Init();
     _UpdateSectionInfo();
-    _LoadContexts();
+    int ret = _LoadContexts();
+    assert(ret >= 0);
 }
 
 void
@@ -316,6 +316,19 @@ ContextManager::GetContextSectionSize(int owner, int section)
 {
     return fileIoManager->GetSectionSize(owner, section);
 }
+
+void
+ContextManager::TestCallbackFunc(AsyncMetaFileIoCtx* ctx, int numIssuedIo)
+{
+    numAsyncIoIssued = numIssuedIo;
+    _FlushCompletedThenCB(ctx);
+}
+
+void
+ContextManager::SetCallbackFunc(EventSmartPtr callback)
+{
+    flushCallback = callback;
+}
 //----------------------------------------------------------------------------//
 void
 ContextManager::_FreeSegment(SegmentId segId)
@@ -378,17 +391,23 @@ ContextManager::_UpdateSectionInfo()
     }
 }
 
-void
+int
 ContextManager::_LoadContexts(void)
 {
+    int ret = 0;
     for (int owner = 0; owner < NUM_FILES; owner++)
     {
         int fileSize = fileIoManager->GetFileSize(owner);
         char* buf = new char[fileSize]();
-        int ret = fileIoManager->LoadSync(owner, buf);
+        ret = fileIoManager->LoadSync(owner, buf);
         if (ret == 0) // case for creating new file
         {
-            _FlushSync(owner);
+            ret = _FlushSync(owner);
+            if (ret < 0)
+            {
+                delete[] buf;
+                break;
+            }
         }
         else if (ret == 1) // case for file exists
         {
@@ -401,11 +420,12 @@ ContextManager::_LoadContexts(void)
         }
         else
         {
-            // ret == -1: error
-            assert(false);
+            delete[] buf;
+            break;
         }
         delete[] buf;
     }
+    return ret;
 }
 
 int
@@ -415,6 +435,11 @@ ContextManager::_FlushSync(int owner)
     char* buf = new char[size]();
     _PrepareBuffer(owner, buf);
     int ret = fileIoManager->StoreSync(owner, buf);
+    if (ret != 0)
+    {
+        POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO), "Failed to issue AsyncMetaIo:{} owner:{}", ret, owner);
+        ret = -1;
+    }
     delete[] buf;
     return ret;
 }
@@ -431,7 +456,7 @@ ContextManager::_FlushAsync(int owner, EventSmartPtr callbackEvent)
     {
         POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO), "Failed to issue AsyncMetaIo:{} owner:{}", ret, owner);
         delete[] buf;
-        return ret;
+        ret = -1;
     }
     return ret;
 }

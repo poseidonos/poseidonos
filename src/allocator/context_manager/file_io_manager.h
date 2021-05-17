@@ -64,19 +64,19 @@ public:
     virtual void Init(void);
     virtual void Close(void);
 
-    void UpdateSectionInfo(int owner, int section, char* addr, int size, int offset);
+    virtual void UpdateSectionInfo(int owner, int section, char* addr, int size, int offset);
 
     virtual int LoadSync(int owner, char* buf);
     virtual int StoreSync(int owner, char* buf);
     virtual int StoreAsync(int owner, char* buf, MetaIoCbPtr callback);
 
-    void LoadSectionData(int owner, char* buf);
-    void CopySectionData(int owner, char* buf, int startSection, int endSection);
+    virtual void LoadSectionData(int owner, char* buf);
+    virtual void CopySectionData(int owner, char* buf, int startSection, int endSection);
 
-    int GetFileSize(int owner);
-    char* GetSectionAddr(int owner, int section);
-    int GetSectionSize(int owner, int section);
-    int GetSectionOffset(int owner, int section);
+    virtual int GetFileSize(int owner);
+    virtual char* GetSectionAddr(int owner, int section);
+    virtual int GetSectionSize(int owner, int section);
+    virtual int GetSectionOffset(int owner, int section);
 
 private:
     int _Flush(char* data, EventSmartPtr callback);

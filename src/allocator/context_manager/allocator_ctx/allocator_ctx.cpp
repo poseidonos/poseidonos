@@ -44,12 +44,20 @@
 #include "src/logger/logger.h"
 namespace pos
 {
-AllocatorCtx::AllocatorCtx(AllocatorAddressInfo* info, std::string arrayName)
+AllocatorCtx::AllocatorCtx(BitMapMutex* allocSegBitmap_, SegmentStates* segmentStates_, SegmentLock* segStateLocks_, AllocatorAddressInfo* info_, std::string arrayName_)
 : ctxStoredVersion(0),
   ctxDirtyVersion(0),
-  addrInfo(info),
-  arrayName(arrayName),
-  segStateLocks(nullptr)
+  addrInfo(info_),
+  arrayName(arrayName_)
+{
+    // for UT
+    allocSegBitmap = allocSegBitmap_;
+    segmentStates = segmentStates_;
+    segStateLocks = segStateLocks_;
+}
+
+AllocatorCtx::AllocatorCtx(AllocatorAddressInfo* info, std::string arrayName)
+: AllocatorCtx(nullptr, nullptr, nullptr, info, arrayName)
 {
     ctxHeader.sig = SIG_ALLOCATOR_CTX;
 }
@@ -226,7 +234,7 @@ AllocatorCtx::GetTotalSegmentsCount(void)
 void
 AllocatorCtx::AfterLoad(char* buf)
 {
-    if (ctxHeader.sig != SIG_ALLOCATOR_CTX)
+    if (reinterpret_cast<AllocatorCtxHeader*>(buf)->sig != SIG_ALLOCATOR_CTX)
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "allocator ctx file signature is not matched:{}", ctxHeader.sig);
         assert(false);

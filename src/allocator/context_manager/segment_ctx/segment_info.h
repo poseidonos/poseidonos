@@ -43,14 +43,14 @@ public:
     SegmentInfo(void);
     ~SegmentInfo(void);
 
-    uint32_t GetValidBlockCount(void);
-    void SetValidBlockCount(int cnt);
-    uint32_t IncreaseValidBlockCount(uint32_t inc);
-    int32_t DecreaseValidBlockCount(uint32_t dec);
+    virtual uint32_t GetValidBlockCount(void);
+    virtual void SetValidBlockCount(int cnt);
+    virtual uint32_t IncreaseValidBlockCount(uint32_t inc);
+    virtual int32_t DecreaseValidBlockCount(uint32_t dec);
 
-    void SetOccupiedStripeCount(uint32_t cnt);
-    uint32_t GetOccupiedStripeCount(void);
-    uint32_t IncreaseOccupiedStripeCount(void);
+    virtual void SetOccupiedStripeCount(uint32_t cnt);
+    virtual uint32_t GetOccupiedStripeCount(void);
+    virtual uint32_t IncreaseOccupiedStripeCount(void);
 
 private:
     std::atomic<uint32_t> validBlockCount;

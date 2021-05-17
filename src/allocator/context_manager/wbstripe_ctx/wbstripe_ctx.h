@@ -44,6 +44,7 @@ class AllocatorAddressInfo;
 class WbStripeCtx : public IAllocatorFileIoClient
 {
 public:
+    WbStripeCtx(BitMapMutex* allocWbLsidBitmap, AllocatorAddressInfo* info);
     WbStripeCtx(AllocatorAddressInfo* info);
     virtual ~WbStripeCtx(void);
     virtual void Init(void);
@@ -57,18 +58,16 @@ public:
     virtual uint64_t GetStoredVersion(void);
     virtual void ResetDirtyVersion(void);
 
-    std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
-    void ResetActiveStripeTail(int index);
-
-    void AllocWbStripe(StripeId stripeId);
+    virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
+    virtual void AllocWbStripe(StripeId stripeId);
     StripeId AllocWbStripe(void);
-    void ReleaseWbStripe(StripeId stripeId);
-    void SetAllocatedWbStripeCount(int count);
-    uint64_t GetAllocatedWbStripeCount(void);
-    uint64_t GetNumTotalWbStripe(void);
+    virtual void ReleaseWbStripe(StripeId stripeId);
+    virtual void SetAllocatedWbStripeCount(int count);
+    virtual uint64_t GetAllocatedWbStripeCount(void);
+    virtual uint64_t GetNumTotalWbStripe(void);
 
-    VirtualBlkAddr GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx);
-    void SetActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa);
+    virtual VirtualBlkAddr GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx);
+    virtual void SetActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa);
     virtual std::mutex& GetActiveStripeTailLock(ASTailArrayIdx asTailArrayIdx);
     virtual std::mutex& GetAllocWbLsidBitmapLock(void);
 

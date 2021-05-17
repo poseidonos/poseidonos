@@ -67,15 +67,16 @@ public:
     virtual int GetOccupiedStripeCount(SegmentId segId);
     virtual int IncreaseOccupiedStripeCount(SegmentId segId);
 
-    bool IsSegmentCtxIo(char* pBuf);
+    virtual bool IsSegmentCtxIo(char* pBuf);
     SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
     virtual std::mutex& GetSegmentCtxLock(void) { return segCtxLock;}
 
     void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
-private:
     static const uint32_t SIG_SEGMENT_CTX = 0xECECECEC;
+
+private:
 
     SegmentCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxDirtyVersion;

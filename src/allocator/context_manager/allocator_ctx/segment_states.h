@@ -52,8 +52,8 @@ public:
     SegmentStates(void);
 
     void SetSegmentId(SegmentId segId);
-    SegmentState GetState(void);
-    void SetState(SegmentState newState);
+    virtual SegmentState GetState(void);
+    virtual void SetState(SegmentState newState);
 
 private:
     SegmentId segmentId;

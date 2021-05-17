@@ -43,18 +43,16 @@
 namespace pos
 {
 SegmentCtx::SegmentCtx(SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_)
-: segmentInfos(segmentInfo_),
-  numSegments(0),
+: numSegments(0),
   addrInfo(addrInfo_),
   arrayName(arrayName_)
 {
+    // for UT
+    segmentInfos = segmentInfo_; 
 }
 
 SegmentCtx::SegmentCtx(AllocatorAddressInfo* info, std::string arrayName)
-: segmentInfos(nullptr),
-  numSegments(0),
-  addrInfo(info),
-  arrayName(arrayName)
+: SegmentCtx(nullptr, info, arrayName)
 {
     ctxHeader.sig = SIG_SEGMENT_CTX;
 }
@@ -140,7 +138,7 @@ SegmentCtx::IsSegmentCtxIo(char* buf)
 void
 SegmentCtx::AfterLoad(char* buf)
 {
-    if (ctxHeader.sig != SIG_SEGMENT_CTX)
+    if (reinterpret_cast<SegmentCtxHeader*>(buf)->sig != SIG_SEGMENT_CTX)
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "segment ctx file signature is not matched:{}", ctxHeader.sig);
         assert(false);
@@ -219,8 +217,9 @@ SegmentCtx::ResetDirtyVersion(void)
 void
 SegmentCtx::CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf)
 {
+    uint32_t numSegs = addrInfo->GetnumUserAreaSegments(); // for ut
     uint32_t* dst = reinterpret_cast<uint32_t*>(dstBuf);
-    for (uint32_t segId = 0; segId < numSegments; segId++)
+    for (uint32_t segId = 0; segId < numSegs; segId++)
     {
         if (type == WBT_SEGMENT_VALID_COUNT)
         {

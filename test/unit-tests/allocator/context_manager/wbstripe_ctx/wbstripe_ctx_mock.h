@@ -21,19 +21,16 @@ public:
     MOCK_METHOD(int, GetSectionSize, (int section), (override));
     MOCK_METHOD(uint64_t, GetStoredVersion, (), (override));
     MOCK_METHOD(void, ResetDirtyVersion, (), (override));
-    virtual std::mutex&
-    GetActiveStripeTailLock(ASTailArrayIdx asTailArrayIdx)
-    {
-        return asTailLock;
-    }
-    virtual std::mutex&
-    GetAllocWbLsidBitmapLock(void)
-    {
-        return wbstripeLock;
-    }
-
-    std::mutex asTailLock;
-    std::mutex wbstripeLock;
+    MOCK_METHOD(std::vector<VirtualBlkAddr>, GetAllActiveStripeTail, (), (override));
+    MOCK_METHOD(void, AllocWbStripe, (StripeId stripeId), (override));
+    MOCK_METHOD(void, ReleaseWbStripe, (StripeId stripeId), (override));
+    MOCK_METHOD(void, SetAllocatedWbStripeCount, (int count), (override));
+    MOCK_METHOD(uint64_t, GetAllocatedWbStripeCount, (), (override));
+    MOCK_METHOD(uint64_t, GetNumTotalWbStripe, (), (override));
+    MOCK_METHOD(VirtualBlkAddr, GetActiveStripeTail, (ASTailArrayIdx asTailArrayIdx), (override));
+    MOCK_METHOD(void, SetActiveStripeTail, (ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa), (override));
+    MOCK_METHOD(std::mutex&, GetActiveStripeTailLock, (ASTailArrayIdx asTailArrayIdx), (override));
+    MOCK_METHOD(std::mutex&, GetAllocWbLsidBitmapLock, (), (override));
 };
 
 } // namespace pos

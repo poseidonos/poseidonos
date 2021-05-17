@@ -44,11 +44,11 @@
 
 namespace pos
 {
-ContextReplayer::ContextReplayer(AllocatorAddressInfo* info, AllocatorCtx* allocCtx, SegmentCtx* segCtx, WbStripeCtx* wbCtx)
-: addrInfo(info),
-  allocatorCtx(allocCtx),
-  segmentCtx(segCtx),
-  wbStripeCtx(wbCtx)
+ContextReplayer::ContextReplayer(AllocatorCtx* allocatorCtx_, SegmentCtx* segmentCtx_, WbStripeCtx* wbStripeCtx_, AllocatorAddressInfo* info_)
+: allocatorCtx(allocatorCtx_),
+  segmentCtx(segmentCtx_),
+  wbStripeCtx(wbStripeCtx_),
+  addrInfo(info_)
 {
 }
 
@@ -139,12 +139,14 @@ ContextReplayer::ResetSegmentsStates(void)
 {
     for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); ++segId)
     {
-        if (allocatorCtx->GetSegmentState(segId, false) == SegmentState::VICTIM)
+        SegmentState state = allocatorCtx->GetSegmentState(segId, false);
+        if (state == SegmentState::VICTIM)
         {
             allocatorCtx->SetSegmentState(segId, SegmentState::SSD, false);
+            state = SegmentState::SSD;
             POS_TRACE_INFO(EID(SEGMENT_WAS_VICTIM), "segmentId:{} was VICTIM, so changed to SSD", segId);
         }
-        if ((segmentCtx->GetValidBlockCount(segId) == 0) && (allocatorCtx->GetSegmentState(segId, false) == SegmentState::SSD))
+        if ((segmentCtx->GetValidBlockCount(segId) == 0) && (state == SegmentState::SSD))
         {
             segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */);
             allocatorCtx->SetSegmentState(segId, SegmentState::FREE, false);

@@ -47,7 +47,7 @@ class WbStripeCtx;
 class ContextReplayer : public IContextReplayer
 {
 public:
-    ContextReplayer(AllocatorAddressInfo* info, AllocatorCtx* allocatorCtx, SegmentCtx* segmentCtx, WbStripeCtx* wbStripeCtx);
+    ContextReplayer(AllocatorCtx* allocatorCtx, SegmentCtx* segmentCtx, WbStripeCtx* wbStripeCtx, AllocatorAddressInfo* info);
     virtual ~ContextReplayer(void);
 
     virtual void ResetDirtyContextVersion(int owner);
@@ -60,11 +60,11 @@ public:
     virtual void ResetSegmentsStates(void);
 
 private:
-    AllocatorAddressInfo* addrInfo;
     AllocatorCtx* allocatorCtx;
     SegmentCtx* segmentCtx;
     WbStripeCtx* wbStripeCtx;
 
+    AllocatorAddressInfo* addrInfo;
     std::string arrayName;
 };
 
