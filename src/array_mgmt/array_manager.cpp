@@ -52,6 +52,11 @@ ArrayManager::~ArrayManager()
 {
     delete arrayRebuilder;
     delete abrManager;
+    for (auto iter : arrayList)
+    {
+        ArrayComponents* array = _FindArray(iter.first);
+        delete array;
+    }
 }
 
 int

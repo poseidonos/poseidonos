@@ -54,7 +54,7 @@ VOL_SIZE = 5 * pos_constant.SIZE_1GB
 #MAX VOLUME COUNT FOR A TEST
 #DO NOT SET GREATER THAN 24 
 #In the VM environment recommends up to 12 or less
-MAX_VOL_CNT = 6
+MAX_VOL_CNT = 2
 
 VOL_NAME_PREFIX = "vol"
 VOL_CNT = 0
