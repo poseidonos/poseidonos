@@ -14,9 +14,11 @@ arrayId = 0
 volId = 1
 
 ############################################################################
-## Test Description
-##  write pattern to the volume until the checkpoint is triggered, simulate SPOR, and verify the pattern
+# Test Description
+# write pattern to the volume until the checkpoint is triggered, simulate SPOR, and verify the pattern
 ############################################################################
+
+
 def test(offset, size):
     global current_test
     current_test = current_test + 1
@@ -40,9 +42,11 @@ def test(offset, size):
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
+
 def execute():
     size = TEST_LIB.get_log_buffer_size() // 4096 * 4096
     test(offset=0, size=int(size))
+
 
 if __name__ == "__main__":
     global filename

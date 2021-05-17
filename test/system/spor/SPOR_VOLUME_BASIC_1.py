@@ -15,11 +15,13 @@ offset = 4096
 size = '128k'
 
 ############################################################################
-## Test Description
-##  write pattern A to a volume, create one more volume,
-##  write pattern to both volume,
-##  and simulate SPOR and verify each volume with latest pattern
+# Test Description
+# write pattern A to a volume, create one more volume,
+# write pattern to both volume,
+# and simulate SPOR and verify each volume with latest pattern
 ############################################################################
+
+
 def execute():
     global current_test
     current_test = current_test + 1
@@ -49,6 +51,7 @@ def execute():
         TEST_FIO.verify(arrayId, volId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volId))
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
+
 
 if __name__ == "__main__":
     filename = sys.argv[0].split("/")[-1].split(".")[0]

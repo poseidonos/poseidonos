@@ -20,11 +20,13 @@ current_test = 0
 run_time = 10
 
 ############################################################################
-## Test Description
-##  write pattern to the volume for (run_time) secs,
-##  simulate SPOR before all writes are completed (WRITE FAIL EXPECTED),
-##  and verify the pattern of first (size) bytes
+# Test Description
+# write pattern to the volume for (run_time) secs,
+# simulate SPOR before all writes are completed (WRITE FAIL EXPECTED),
+# and verify the pattern of first (size) bytes
 ############################################################################
+
+
 def test(offset, size):
     global current_test
     current_test = current_test + 1
@@ -35,7 +37,7 @@ def test(offset, size):
     th.start()
 
     TEST_LOG.print_err("* Write Fail Expected")
-    time.sleep(run_time/2)
+    time.sleep(run_time / 2)
     TEST_SETUP_POS.trigger_spor()
     th.join()
 
@@ -47,6 +49,7 @@ def test(offset, size):
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
+
 def execute():
     offsets = [0, 4096]
     sizes = ['256k', '512k']
@@ -56,6 +59,7 @@ def execute():
             test(offset=_offset, size=_size)
     else:
         test(offset=offsets[-1], size=sizes[-1])
+
 
 if __name__ == "__main__":
     global filename

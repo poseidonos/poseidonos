@@ -14,12 +14,13 @@ current_test = 0
 offset = 4096
 size = '128k'
 
+############################################################################
+# Test Description
+# write pattern A to several array with one volume,
+# and simulate SPOR and verify each volume with latest pattern
+############################################################################
 
-############################################################################
-## Test Description
-##  write pattern A to several array with one volume,
-##  and simulate SPOR and verify each volume with latest pattern
-############################################################################
+
 def execute():
     global current_test
     current_test = current_test + 1

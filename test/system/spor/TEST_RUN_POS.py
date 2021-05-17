@@ -13,6 +13,7 @@ import TEST_DEBUGGING
 POSBIN = "poseidonos"
 detect_pos_crash = False
 
+
 def chldSignal_handler(sig, frame):
     global pos_proc
     global detect_pos_crash
@@ -33,15 +34,18 @@ def chldSignal_handler(sig, frame):
             TEST_DEBUGGING.start_core_dump("triggercrash")
             sys.exit(1)
 
+
 def quitSignal_handler(sig, frame):
     TEST_LOG.print_err("* Test force stop signal received")
     TEST_LIB.kill_process("fio")
     TEST_DEBUGGING.start_core_dump("triggercrash")
     sys.exit(1)
 
+
 def block_pos_crash_detection():
     global detect_pos_crash
     detect_pos_crash = False
+
 
 def start_pos():
     global pos_proc
@@ -60,6 +64,7 @@ def start_pos():
     signal.signal(signal.SIGCHLD, chldSignal_handler)
     signal.signal(signal.SIGQUIT, quitSignal_handler)
 
+
 def kill_pos():
     if TEST.run_pos_manually == True:
         TEST_LIB.kill_process(POSBIN)
@@ -68,6 +73,7 @@ def kill_pos():
         pos_proc.wait()
 
         TEST_LOG.print_info("* POS killed")
+
 
 def wait_for_pos_shutdown():
     global detect_pos_crash
@@ -80,7 +86,8 @@ def wait_for_pos_shutdown():
         if pos_proc.returncode != 0:
             TEST_LOG.print_err("* POS terminated unexpectedly")
             TEST_DEBUGGING.start_core_dump("crashed")
-            
+
+
 def cleanup_process():
     os.system('rm -rf /dev/shm/ibof_nvmf_trace*')
 

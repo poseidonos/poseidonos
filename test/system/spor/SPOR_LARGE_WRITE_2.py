@@ -10,14 +10,16 @@ import TEST_LOG
 import TEST_SETUP_POS
 
 arrayId = 0
-volumes = list(range(1,11))
+volumes = list(range(1, 11))
 current_test = 0
 num_write = 10
 
 ############################################################################
-## Test Description
-##  write large data to several volumes, simulate SPOR, verify the pattern per each volume
+# Test Description
+# write large data to several volumes, simulate SPOR, verify the pattern per each volume
 ############################################################################
+
+
 def test(size):
     global current_test, num_write
     current_test = current_test + 1
@@ -42,8 +44,10 @@ def test(size):
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
+
 def execute():
     test(size='50M')
+
 
 if __name__ == "__main__":
     global filename

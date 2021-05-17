@@ -15,11 +15,13 @@ arrayId = 0
 volumes = [1, 2, 3, 4]
 
 ############################################################################
-## Test Description
-##  write data to several volumes,
-##  create or delete several volume, and write different pattern to every volumes,
-##  and simulate SPOR and verify each volume with latest pattern
+# Test Description
+# write data to several volumes,
+# create or delete several volume, and write different pattern to every volumes,
+# and simulate SPOR and verify each volume with latest pattern
 ############################################################################
+
+
 def test_create(volume_to_create):
     global current_test
     current_test = current_test + 1
@@ -48,6 +50,7 @@ def test_create(volume_to_create):
         TEST_FIO.verify(arrayId, volId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volId))
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
+
 
 def test_delete(volume_to_delete):
     global current_test
@@ -78,11 +81,13 @@ def test_delete(volume_to_delete):
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
+
 def execute():
     test_delete(volume_to_delete=2)
     test_create(volume_to_create=5)
     test_delete(volume_to_delete=5)
     test_delete(volume_to_delete=4)
+
 
 if __name__ == "__main__":
     global filename

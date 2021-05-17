@@ -15,11 +15,13 @@ arrayId = 0
 volumes = [1, 2, 3, 4]
 
 ############################################################################
-## Test Description
-##  write data to several volumes,
-##  create new volume, and write different pattern to every volumes,
-##  and simulate SPOR and verify each volume with latest pattern
+# Test Description
+# write data to several volumes,
+# create new volume, and write different pattern to every volumes,
+# and simulate SPOR and verify each volume with latest pattern
 ############################################################################
+
+
 def test(volume_to_delete):
     global current_test
     current_test = current_test + 1
@@ -49,11 +51,13 @@ def test(volume_to_delete):
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
+
 def execute():
     test(volume_to_delete=2)
     test(volume_to_delete=3)
     test(volume_to_delete=4)
     test(volume_to_delete=1)
+
 
 if __name__ == "__main__":
     global filename

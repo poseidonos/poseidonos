@@ -15,9 +15,11 @@ arrayId = 0
 volId = 1
 
 ############################################################################
-## Test Description
-##  write pattern to the volume, simulate SPOR, and verify the pattern
+# Test Description
+# write pattern to the volume, simulate SPOR, and verify the pattern
 ############################################################################
+
+
 def test(offset, size):
     global current_test
     current_test = current_test + 1
@@ -36,6 +38,7 @@ def test(offset, size):
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
+
 def execute():
     offsets = [0, 4096]
     sizes = ['128k', '256k']
@@ -45,6 +48,7 @@ def execute():
             test(offset=_offset, size=_size)
     else:
         test(offset=offsets[-1], size=sizes[-1])
+
 
 if __name__ == "__main__":
     global filename

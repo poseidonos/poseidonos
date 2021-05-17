@@ -19,11 +19,13 @@ volumes = [1, 2]
 current_test = 0
 
 ############################################################################
-## Test Description
-##  Multi threads simultaneously write patterns to several volumes,
-##  simulate SPOR,
-##  and verify all patterns per each volume to see pos works properly
+# Test Description
+# Multi threads simultaneously write patterns to several volumes,
+# simulate SPOR,
+# and verify all patterns per each volume to see pos works properly
 ############################################################################
+
+
 def test(size):
     global current_test
     current_test = current_test + 1
@@ -54,10 +56,12 @@ def test(size):
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
+
 def execute():
     sizes = ['1M']
     for _size in sizes:
         test(size=_size)
+
 
 if __name__ == "__main__":
     global filename

@@ -14,9 +14,11 @@ volId = 1
 num_write = 10
 
 ############################################################################
-## Test Description
-##  write large data to the volume, simulate SPOR, and verify the pattern
+# Test Description
+# write large data to the volume, simulate SPOR, and verify the pattern
 ############################################################################
+
+
 def test(size):
     global current_test, num_write
     current_test = current_test + 1
@@ -38,8 +40,10 @@ def test(size):
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
+
 def execute():
     test(size='50M')
+
 
 if __name__ == "__main__":
     global filename

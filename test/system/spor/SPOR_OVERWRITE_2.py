@@ -17,14 +17,17 @@ current_test = 0
 num_write = 10
 
 ############################################################################
-## Test Description
-##  write pattern to the specific RBA of a volume several times, to several volumes,
-##  simulate SPOR and verify the RBA of each volumes with latest pattern
+# Test Description
+# write pattern to the specific RBA of a volume several times, to several volumes,
+# simulate SPOR and verify the RBA of each volumes with latest pattern
 ############################################################################
+
+
 def overwrite(arrayId, volId, offset, size):
     for index in range(num_write):
         TEST_LIB.create_new_pattern(arrayId, volId)
         TEST_FIO.write(arrayId, volId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volId))
+
 
 def test(offset, size):
     global current_test
@@ -49,6 +52,7 @@ def test(offset, size):
         TEST_FIO.verify(arrayId, volId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volId))
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
+
 def execute():
     offsets = [0, 4096]
     sizes = ['128k', '256k']
@@ -58,6 +62,7 @@ def execute():
             test(offset=_offset, size=_size)
     else:
         test(offset=offsets[-1], size=sizes[-1])
+
 
 if __name__ == "__main__":
     global filename

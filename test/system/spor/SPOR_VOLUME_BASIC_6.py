@@ -15,11 +15,13 @@ arrayId = 0
 volumes = [1, 2, 3, 4]
 
 ############################################################################
-## Test Description
-##  write data to several volumes,
-##  delete a volume, and create a new volume with same id, and one more volume,
-##  simulate SPOR and verify each volume with latest pattern
+# Test Description
+# write data to several volumes,
+# delete a volume, and create a new volume with same id, and one more volume,
+# simulate SPOR and verify each volume with latest pattern
 ############################################################################
+
+
 def test(volume_to_delete):
     global current_test
     current_test = current_test + 1
@@ -51,9 +53,11 @@ def test(volume_to_delete):
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
 
+
 def execute():
     for volId in volumes:
         test(volId)
+
 
 if __name__ == "__main__":
     global filename

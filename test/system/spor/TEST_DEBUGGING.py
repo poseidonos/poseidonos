@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+import TEST_SETUP_POS
+import TEST_LOG
+import TEST
 import sys
 import os
 import subprocess
@@ -8,16 +11,13 @@ sys.path.append("../lib/")
 import cli
 import json_parser
 
-import TEST
-import TEST_LOG
-import TEST_SETUP_POS
 
 def flush_gcov():
     out = cli.send_request("wbt flush_gcov")
     if json_parser.get_response_code(out) != 0:
         TEST_LOG.print_err("* Gcov flush failed, check WBT option")
     elif json_parser.get_data_code(out) != 0:
-        TEST_LOG.print_info("* Gcov flush failed, check gcov option") 
+        TEST_LOG.print_info("* Gcov flush failed, check gcov option")
     else:
         TEST_LOG.print_info("* Flush gcov completed")
 
@@ -43,6 +43,7 @@ def dump_journal(arrayId, dump_file):
 
     TEST_LOG.print_info("* Dump log buffer completed")
 
+
 def dump_vsamap(arrayId, volid, dump_file):
     if TEST.dump_map == False:
         return
@@ -52,6 +53,7 @@ def dump_vsamap(arrayId, volid, dump_file):
     if json_parser.get_response_code(out) != 0:
         return -1
 
+
 def dump_stripemap(dump_file):
     if TEST.dump_map == False:
         return
@@ -59,6 +61,7 @@ def dump_stripemap(dump_file):
     out = cli.send_request("wbt read_stripemap --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + dump_file)
     if json_parser.get_response_code(out) != 0:
         return -1
+
 
 def get_fd(arrayId, filename):
     filesInfo = "filesInfo.json"
@@ -74,6 +77,7 @@ def get_fd(arrayId, filename):
                 fd = f['fd']
     return fd
 
+
 def get_file_size(arrayId, fd):
     out = cli.send_request("wbt mfs_get_file_size --fd " + str(fd) + " --array " + TEST_SETUP_POS.get_arrayname(arrayId))
     if json_parser.get_response_code(out) != 0:
@@ -81,10 +85,12 @@ def get_file_size(arrayId, fd):
     else:
         return json_parser.get_data_code(out)
 
+
 def start_core_dump(trigger_option):
     TEST_LOG.print_err("* Try to dump core file. (option: {})".format(trigger_option))
     core_dump_cmd = TEST.pos_root + "/tool/dump/trigger_core_dump.sh"
     subprocess.call(core_dump_cmd + " " + trigger_option, shell=True)
+
 
 def dump_log_buffer(arrayId, fd, filesize, dumpfile):
     out = cli.send_request("wbt mfs_read_file --fd " + str(fd) + " --offset 0 --count " + str(filesize) + " --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + dumpfile)
