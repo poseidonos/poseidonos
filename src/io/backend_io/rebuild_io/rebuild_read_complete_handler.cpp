@@ -82,6 +82,7 @@ end:
 
     IoCompleter ioCompleter(ubio);
     ioCompleter.CompleteOriginUbio();
+    ubio = nullptr;
 
     return true;
 }
