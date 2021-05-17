@@ -36,7 +36,6 @@
 #include <mutex>
 
 #include "log_group_buffer_status.h"
-#include "src/journal_manager/log_buffer/journal_write_context.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 #include "src/journal_manager/status/i_log_buffer_status.h"
 
@@ -44,13 +43,6 @@ namespace pos
 {
 class JournalConfiguration;
 class LogGroupReleaser;
-
-struct OffsetInFile // TODO(huijeong.kim) to be removed
-{
-    int id;
-    uint64_t offset;
-    uint32_t seqNum;
-};
 
 class BufferOffsetAllocator : public LogBufferWriteDoneEvent, public ILogBufferStatus
 {
@@ -61,7 +53,7 @@ public:
     virtual void Init(LogGroupReleaser* releaser, JournalConfiguration* journalConfiguration);
     void Reset(void);
 
-    virtual int AllocateBuffer(uint32_t logSize, OffsetInFile& allocated);
+    virtual int AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffset);
 
     virtual void LogFilled(int logGroupId, MapPageList& dirty) override;
     virtual void LogBufferReseted(int logGroupId) override;
@@ -71,6 +63,8 @@ public:
 
     virtual LogGroupStatus GetBufferStatus(int logGroupId) override;
     virtual uint32_t GetSequenceNumber(int logGroupId) override;
+
+    virtual int GetLogGroupId(uint64_t fileOffset);
 
 private:
     int _GetNewActiveGroup(void);

@@ -49,7 +49,7 @@ public:
     void
     LogGroupResetCompleted(int logGroupId)
     {
-        LogGroupReleaser::_LogGroupResetCompleted(logGroupId);
+        LogGroupReleaser::LogGroupResetCompleted(logGroupId);
     }
 
 protected:

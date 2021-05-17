@@ -34,7 +34,7 @@
 
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
-#include "src/journal_manager/log_buffer/journal_write_context.h"
+#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 
 #include "src/include/address_type.h"

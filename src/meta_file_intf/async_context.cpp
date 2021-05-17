@@ -56,4 +56,10 @@ AsyncMetaFileIoCtx::GetError(void)
     return error;
 }
 
+uint64_t
+AsyncMetaFileIoCtx::GetLength(void)
+{
+    return length;
+}
+
 } // namespace pos

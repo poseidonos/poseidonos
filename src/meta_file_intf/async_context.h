@@ -51,6 +51,7 @@ public:
 
     virtual void HandleIoComplete(void* data);
     virtual int GetError(void);
+    virtual uint64_t GetLength(void);
 
     MetaFsIoOpcode opcode;
     int fd;

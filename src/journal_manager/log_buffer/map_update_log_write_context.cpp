@@ -30,82 +30,13 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "journal_write_context.h"
+#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
 
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-#include "src/event_scheduler/event_scheduler.h"
 
 namespace pos
 {
-LogWriteContext::LogWriteContext(void)
-: log(nullptr),
-  callbackEvent(nullptr),
-  logGroupId(INVALID_LOG_INDEX)
-{
-}
-
-LogWriteContext::LogWriteContext(LogHandlerInterface* log, EventSmartPtr callback)
-: log(log),
-  callbackEvent(callback),
-  logGroupId(INVALID_LOG_INDEX)
-{
-}
-
-LogWriteContext::~LogWriteContext(void)
-{
-    delete log;
-}
-
-LogHandlerInterface*
-LogWriteContext::GetLog(void)
-{
-    return log;
-}
-
-uint32_t
-LogWriteContext::GetLogSize(void)
-{
-    return log->GetSize();
-}
-
-int
-LogWriteContext::GetLogGroupId(void)
-{
-    return logGroupId;
-}
-
-void
-LogWriteContext::SetAllocated(int groupId, uint32_t seqNum, MetaIoCbPtr cb)
-{
-    this->logGroupId = groupId;
-    this->callback = cb;
-    log->SetSeqNum(seqNum);
-}
-
-void
-LogWriteContext::SetIoRequest(MetaFsIoOpcode op, int fileDescriptor, uint64_t offset)
-{
-    this->opcode = op;
-    this->fd = fileDescriptor;
-    this->fileOffset = offset;
-    this->length = log->GetSize();
-    this->buffer = log->GetData();
-}
-
-void
-LogWriteContext::LogWriteDone(void)
-{
-    bool executionSuccessful = callbackEvent->Execute();
-
-    // TODO(huijeong.kim) handle execution fail case
-    assert(executionSuccessful == true);
-
-    callbackEvent = nullptr;
-}
-
 MapUpdateLogWriteContext::MapUpdateLogWriteContext(LogHandlerInterface* log,
     MapPageList dirtyList, EventSmartPtr callback,
     LogBufferWriteDoneNotifier* target,
@@ -124,38 +55,14 @@ MapUpdateLogWriteContext::GetDirtyList(void)
 }
 
 void
-MapUpdateLogWriteContext::LogWriteDone(void)
+MapUpdateLogWriteContext::IoDone(void)
 {
     sequenceController->GetCallbackExecutionApproval();
-    LogWriteContext::LogWriteDone();
+    LogBufferIoContext::IoDone();
     sequenceController->NotifyCallbackCompleted();
 
     // Log filled notify should be after the callback function completed
     logFilledNotifier->NotifyLogFilled(GetLogGroupId(), dirty);
-}
-
-JournalResetContext::JournalResetContext(int id, JournalInternalEventCallback callback)
-: logGroupId(id),
-  resetCallback(callback)
-{
-}
-
-void
-JournalResetContext::ResetDone(void)
-{
-    resetCallback(logGroupId);
-}
-
-void
-JournalResetContext::SetIoRequest(MetaFsIoOpcode op, int fileDescriptor,
-    uint64_t offset, uint64_t len, char* buf, MetaIoCbPtr cb)
-{
-    this->opcode = op;
-    this->fd = fileDescriptor;
-    this->fileOffset = offset;
-    this->length = len;
-    this->buffer = buf;
-    this->callback = cb;
 }
 
 } // namespace pos

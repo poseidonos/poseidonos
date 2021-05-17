@@ -32,6 +32,7 @@
 
 #include "log_group_releaser.h"
 
+#include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
@@ -172,9 +173,8 @@ LogGroupReleaser::CheckpointCompleted(void)
 {
     assert(flushingLogGroupId != -1);
 
-    int ret = logBuffer->AsyncReset(flushingLogGroupId,
-        std::bind(&LogGroupReleaser::_LogGroupResetCompleted,
-            this, std::placeholders::_1));
+    EventSmartPtr callbackEvent(new LogGroupResetCompletedEvent(this, flushingLogGroupId));
+    int ret = logBuffer->AsyncReset(flushingLogGroupId, callbackEvent);
 
     if (ret != 0)
     {
@@ -196,7 +196,7 @@ LogGroupReleaser::GetNumFullLogGroups(void)
 }
 
 void
-LogGroupReleaser::_LogGroupResetCompleted(int logGroupId)
+LogGroupReleaser::LogGroupResetCompleted(int logGroupId)
 {
     releaseNotifier->NotifyLogBufferReseted(logGroupId);
 

@@ -91,7 +91,7 @@ BufferOffsetAllocator::Reset(void)
 }
 
 int
-BufferOffsetAllocator::AllocateBuffer(uint32_t logSize, OffsetInFile& allocated)
+BufferOffsetAllocator::AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffset)
 {
     std::lock_guard<std::mutex> lock(allocateLock);
 
@@ -124,10 +124,7 @@ BufferOffsetAllocator::AllocateBuffer(uint32_t logSize, OffsetInFile& allocated)
         }
     }
 
-    // TODO (huijeong.kim) remove sequence number from buffer allocation for log write
-    allocated.id = currentLogGroupId;
-    allocated.offset = offset;
-    allocated.seqNum = statusList[currentLogGroupId]->GetSeqNum();
+    allocatedOffset = currentLogGroupId * config->GetLogGroupSize() + offset;
 
     return 0;
 }
@@ -215,6 +212,12 @@ uint32_t
 BufferOffsetAllocator::GetSequenceNumber(int logGroupId)
 {
     return statusList[logGroupId]->GetSeqNum();
+}
+
+int
+BufferOffsetAllocator::GetLogGroupId(uint64_t fileOffset)
+{
+    return fileOffset / config->GetLogGroupSize();
 }
 
 } // namespace pos

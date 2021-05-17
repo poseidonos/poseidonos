@@ -1,9 +1,7 @@
 #include <gmock/gmock.h>
-
 #include <string>
 #include <list>
 #include <vector>
-
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 
 namespace pos

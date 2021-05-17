@@ -6,7 +6,7 @@
 #include "test/unit-tests/journal_manager/log/log_handler_mock.h"
 #include "test/unit-tests/journal_manager/log/waiting_log_list_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/journal_write_context_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/log_write_context_mock.h"
 #include "test/unit-tests/journal_manager/log_write/buffer_offset_allocator_mock.h"
 #include "test/unit-tests/journal_manager/log_write/log_write_statistics_mock.h"
 
@@ -43,6 +43,8 @@ public:
         waitingList = new NiceMock<MockWaitingLogList>;
 
         logWriteHandler = new LogWriteHandler(logWriteStats, waitingList);
+
+        ON_CALL(*bufferAllocator, GetLogGroupId).WillByDefault(Return(0));
     }
 
     virtual void
@@ -186,7 +188,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfCallbackExecuted)
 
     // Then: The written context callback should be called    
     NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
-    EXPECT_CALL(*context, LogWriteDone);
+    EXPECT_CALL(*context, IoDone);
 
     // When: Log write is done
     logWriteHandler->LogWriteDone(context);
@@ -209,7 +211,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfLogWriteStatisticsUpdated)
         InSequence s;
 
         EXPECT_CALL(*logWriteStats, UpdateStatus).WillOnce(Return(true));
-        EXPECT_CALL(*context, LogWriteDone);
+        EXPECT_CALL(*context, IoDone);
         EXPECT_CALL(*logWriteStats, AddToList);
     }
 
@@ -232,7 +234,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfWaitingListIsRestarted)
     EXPECT_CALL(*logWriteStats, UpdateStatus).WillOnce(Return(false));
 
     // Then: The context callback should be called
-    EXPECT_CALL(*context, LogWriteDone);
+    EXPECT_CALL(*context, IoDone);
 
     // Then: The waiting log should be started
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(0));
@@ -258,7 +260,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfExcutionSucessWhenIoFails)
     // Then: Log write stats should not be updatedm
     // and the context callback should be called
     EXPECT_CALL(*logWriteStats, UpdateStatus).Times(0);
-    EXPECT_CALL(*context, LogWriteDone);
+    EXPECT_CALL(*context, IoDone);
 
     // When: Log write is done
     logWriteHandler->LogWriteDone(context);

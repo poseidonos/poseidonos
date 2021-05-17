@@ -1,4 +1,5 @@
 #include "src/journal_manager/log_write/buffer_offset_allocator.h"
+#include "src/include/pos_event_id.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -14,7 +15,7 @@ namespace pos
 const std::string ARRAY_NAME = "POSArray";
 const int numLogGroups = 2;
 const uint64_t metaPageSize = 4032;
-const uint64_t logBufferSize = 16 * 1024;
+const uint64_t logBufferSize = 2 * metaPageSize * numLogGroups;
 
 bool
 IsCrossingMetaPages(uint64_t offset, int size)
@@ -34,20 +35,19 @@ AllocateBuffer(BufferOffsetAllocator* allocator, uint64_t totalSizeToAllocate)
         int sizeToAllocate = std::rand() % 70 + 1;
         if (offset + sizeToAllocate < totalSizeToAllocate)
         {
-            OffsetInFile allocatedOffset;
+            uint64_t allocatedOffset;
             int allocationResult = allocator->AllocateBuffer(sizeToAllocate, allocatedOffset);
 
             EXPECT_TRUE(allocationResult >= 0);
 
             if (allocationResult == 0)
             {
-                EXPECT_TRUE(allocatedOffset.id < numLogGroups);
-                EXPECT_TRUE(IsCrossingMetaPages(allocatedOffset.offset, sizeToAllocate) == false);
+                EXPECT_TRUE(IsCrossingMetaPages(allocatedOffset, sizeToAllocate) == false);
 
-                offset = allocatedOffset.offset + sizeToAllocate;
+                offset = allocatedOffset + sizeToAllocate;
 
                 MapPageList dirty; // garbage data
-                allocator->LogFilled(allocatedOffset.id, dirty);
+                allocator->LogFilled(allocator->GetLogGroupId(allocatedOffset), dirty);
             }
             else if (allocationResult == (int)POS_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE)
             {
@@ -69,9 +69,10 @@ TEST(BufferOffsetAllocator, Allocate_AllocateBuffer)
     BufferOffsetAllocator* allocator = new BufferOffsetAllocator();
 
     // When : Request a buffer allocation with in the total size of log buffer
-    EXPECT_CALL(*config, GetNumLogGroups()).WillOnce(Return(numLogGroups));
-    EXPECT_CALL(*config, GetLogBufferSize()).WillOnce(Return(logBufferSize));
-    EXPECT_CALL(*config, GetMetaPageSize()).WillOnce(Return(metaPageSize));
+    ON_CALL(*config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
+    ON_CALL(*config, GetLogBufferSize).WillByDefault(Return(logBufferSize));
+    ON_CALL(*config, GetLogGroupSize).WillByDefault(Return(logBufferSize / numLogGroups));
+    ON_CALL(*config, GetMetaPageSize).WillByDefault(Return(metaPageSize));
     allocator->Init(releaser, config);
 
     uint64_t totalSizeToAllocate = logBufferSize / numLogGroups;
@@ -92,9 +93,10 @@ TEST(BufferOffsetAllocator, Allocate_AllocateBufferWithCheckpoint)
     BufferOffsetAllocator* allocator = new BufferOffsetAllocator();
 
     // When : Request a buffer allocation over the total size of log buffer
-    EXPECT_CALL(*config, GetNumLogGroups()).WillRepeatedly(Return(numLogGroups));
-    EXPECT_CALL(*config, GetLogBufferSize()).WillOnce(Return(logBufferSize));
-    EXPECT_CALL(*config, GetMetaPageSize()).WillOnce(Return(metaPageSize));
+    ON_CALL(*config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
+    ON_CALL(*config, GetLogBufferSize).WillByDefault(Return(logBufferSize));
+    ON_CALL(*config, GetLogGroupSize).WillByDefault(Return(logBufferSize / numLogGroups));
+    ON_CALL(*config, GetMetaPageSize).WillByDefault(Return(metaPageSize));
     allocator->Init(releaser, config);
 
     uint64_t totalSizeToAllocate = logBufferSize * 1.5;

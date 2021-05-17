@@ -13,9 +13,10 @@ public:
     MOCK_METHOD(int, Init, (JournalConfiguration* journalConfiguration), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(bool, IsLoaded, (), (override));
-    MOCK_METHOD(int, WriteLog, (LogWriteContext* context, int logGroupID, uint64_t offset), (override));
+    MOCK_METHOD(int, WriteLog, (LogWriteContext* context), (override));
     MOCK_METHOD(int, SyncResetAll, (), (override));
-    MOCK_METHOD(int, AsyncReset, (int id, JournalInternalEventCallback callbackFunc), (override));
+    MOCK_METHOD(int, AsyncReset, (int id, EventSmartPtr callbackEvent), (override));
+    MOCK_METHOD(void, LogGroupResetCompleted, (int logGroupId), (override));
 };
 
 } // namespace pos

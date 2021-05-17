@@ -33,11 +33,11 @@
 
 #pragma once
 
-#include <vector>
-#include <mutex>
 #include <list>
+#include <mutex>
+#include <vector>
 
-#include "src/journal_manager/log_buffer/journal_write_context.h"
+#include "src/journal_manager/log_buffer/log_write_context.h"
 
 namespace pos
 {

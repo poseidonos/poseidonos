@@ -30,70 +30,49 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-#include <string>
-
-#include "src/journal_manager/config/journal_configuration.h"
-#include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
-#include "src/meta_file_intf/meta_file_intf.h"
+#include "src/journal_manager/log_buffer/log_write_context.h"
 
 namespace pos
 {
-class LogWriteContext;
-class LogGroupResetContext;
-
-class JournalLogBuffer : public ILogGroupResetCompleted
+LogWriteContext::LogWriteContext(void)
+: LogBufferIoContext(INVALID_GROUP_ID, nullptr),
+  log(nullptr)
 {
-public:
-    JournalLogBuffer(void);
-    explicit JournalLogBuffer(std::string arrayName);
-    explicit JournalLogBuffer(MetaFileIntf* metaFile);
-    virtual ~JournalLogBuffer(void);
+}
 
-    virtual int Init(JournalConfiguration* journalConfiguration);
-    virtual void Dispose(void);
+LogWriteContext::LogWriteContext(LogHandlerInterface* log, EventSmartPtr callback)
+: LogBufferIoContext(INVALID_GROUP_ID, callback),
+  log(log)
+{
+    this->opcode = MetaFsIoOpcode::Write;
+    this->length = log->GetSize();
+    this->buffer = log->GetData();
+}
 
-    int ReadLogBuffer(int groupId, void* buffer);
-    int AsyncIO(AsyncMetaFileIoCtx* ctx);
+LogWriteContext::~LogWriteContext(void)
+{
+    delete log;
+}
 
-    inline bool
-    IsInitialized(void)
-    {
-        return numInitializedLogGroup == config->GetNumLogGroups();
-    }
-    virtual bool
-    IsLoaded(void)
-    {
-        return logBufferLoaded;
-    }
+LogHandlerInterface*
+LogWriteContext::GetLog(void)
+{
+    return log;
+}
 
-    virtual int WriteLog(LogWriteContext* context);
+int
+LogWriteContext::GetLogGroupId(void)
+{
+    return logGroupId;
+}
 
-    virtual int SyncResetAll(void);
-    virtual int AsyncReset(int id, EventSmartPtr callbackEvent);
-    void AsyncResetDone(AsyncMetaFileIoCtx* ctx);
+void
+LogWriteContext::SetBufferAllocated(uint64_t offset, int groupId, uint32_t seqNum)
+{
+    this->fileOffset = offset;
+    this->logGroupId = groupId;
 
-    int Delete(void); // TODO(huijeong.kim): move to tester code
+    log->SetSeqNum(seqNum);
+}
 
-    virtual void LogGroupResetCompleted(int logGroupId) override;
-
-private:
-    void _LoadBufferSize(void);
-    int _AsyncReset(LogGroupResetContext* context);
-
-    inline uint64_t
-    _GetFileOffset(int groupId, uint64_t offset)
-    {
-        uint64_t groupSize = config->GetLogGroupSize();
-        return (groupId * groupSize + offset);
-    }
-
-    JournalConfiguration* config;
-
-    std::atomic<int> numInitializedLogGroup;
-    bool logBufferLoaded;
-    MetaFileIntf* logFile;
-
-    char* initializedDataBuffer;
-};
 } // namespace pos

@@ -34,45 +34,18 @@
 
 #include <functional>
 
-#include "../log/log_handler.h"
+#include "src/journal_manager/log_buffer/log_buffer_io_context.h"
+#include "src/journal_manager/log_buffer/log_write_context.h"
+
 #include "src/bio/volume_io.h"
 #include "src/mapper/include/mpage_info.h"
-#include "src/meta_file_intf/async_context.h"
-#include "src/event_scheduler/event.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
-class VolumeIo;
+class LogHandlerInterface;
 class LogBufferWriteDoneNotifier;
 class CallbackSequenceController;
-
-using JournalInternalEventCallback = std::function<void(int)>;
-
-class LogWriteContext : public AsyncMetaFileIoCtx
-{
-public:
-    LogWriteContext(void);
-    LogWriteContext(LogHandlerInterface* log, EventSmartPtr callbackEvent);
-    virtual ~LogWriteContext(void);
-
-    LogHandlerInterface* GetLog(void);
-
-    virtual uint32_t GetLogSize(void);
-    virtual int GetLogGroupId(void);
-
-    virtual void SetAllocated(int groupId, uint32_t seqNum, MetaIoCbPtr cb);
-    virtual void SetIoRequest(MetaFsIoOpcode op, int fileDescriptor, uint64_t offset);
-
-    virtual void LogWriteDone(void);
-
-private:
-    LogHandlerInterface* log;
-    EventSmartPtr callbackEvent;
-
-    int logGroupId;
-
-    static const uint32_t INVALID_LOG_INDEX = UINT32_MAX;
-};
 
 class MapUpdateLogWriteContext : public LogWriteContext
 {
@@ -83,27 +56,12 @@ public:
     virtual ~MapUpdateLogWriteContext(void) = default;
 
     MapPageList& GetDirtyList(void);
-    virtual void LogWriteDone(void) override;
+    virtual void IoDone(void) override;
 
 protected:
     LogBufferWriteDoneNotifier* logFilledNotifier;
     CallbackSequenceController* sequenceController;
     MapPageList dirty;
-};
-
-class JournalResetContext : public AsyncMetaFileIoCtx
-{
-public:
-    JournalResetContext(int logGroupId, JournalInternalEventCallback callback);
-    virtual ~JournalResetContext(void) = default;
-
-    void SetIoRequest(MetaFsIoOpcode op, int fileDescriptor, uint64_t offset,
-        uint64_t len, char* buf, MetaIoCbPtr cb);
-    void ResetDone(void);
-
-private:
-    int logGroupId;
-    JournalInternalEventCallback resetCallback;
 };
 
 } // namespace pos

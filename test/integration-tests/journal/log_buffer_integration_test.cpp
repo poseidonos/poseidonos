@@ -84,8 +84,8 @@ JournalLogBufferIntegrationTest::_CreateContextForBlockWriteDoneLog(void)
 
     LogWriteContext* context =
         factory.CreateBlockMapLogWriteContext(volumeIo, dirty, callback);
-    context->callback = std::bind(&JournalLogBufferIntegrationTest::WriteDone, this,
-        std::placeholders::_1);
+    context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
+        this, std::placeholders::_1));
     return context;
 }
 
@@ -103,8 +103,8 @@ JournalLogBufferIntegrationTest::_CreateContextForStripeMapUpdatedLog(void)
 
     LogWriteContext* context =
         factory.CreateStripeMapLogWriteContext(stripe, oldAddr, dummyDirty, callback);
-    context->callback = std::bind(&JournalLogBufferIntegrationTest::WriteDone, this,
-        std::placeholders::_1);
+    context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
+        this, std::placeholders::_1));
 
     return context;
 }
@@ -132,8 +132,8 @@ JournalLogBufferIntegrationTest::_CreateContextForGcStripeFlushedLog(void)
     EventSmartPtr callback(new LogBufferWriteDone());
     LogWriteContext* context =
         factory.CreateGcStripeFlushedLogWriteContext(mapUpdates, dummyDirty, callback);
-    context->callback = std::bind(&JournalLogBufferIntegrationTest::WriteDone, this,
-        std::placeholders::_1);
+    context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
+        this, std::placeholders::_1));
 
     return context;
 }
@@ -221,23 +221,26 @@ TEST_F(JournalLogBufferIntegrationTest, ParseLogBuffer_testIfAllLogsAreParsed)
 
     // Write block write done log
     LogWriteContext* context = _CreateContextForBlockWriteDoneLog();
-    EXPECT_TRUE(logBuffer->WriteLog(context, 0, offset) == 0);
+    context->SetBufferAllocated(offset, 0, 0);
+    EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
 
-    offset += context->GetLogSize();
+    offset += context->GetLength();
     _AddToList(context);
 
     // Write stripe map updated log
     context = _CreateContextForStripeMapUpdatedLog();
-    EXPECT_TRUE(logBuffer->WriteLog(context, 0, offset) == 0);
+    context->SetBufferAllocated(offset, 0, 0);
+    EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
 
-    offset += context->GetLogSize();
+    offset += context->GetLength();
     _AddToList(context);
 
     // Write gc stripe flushed log
     context = _CreateContextForGcStripeFlushedLog();
-    EXPECT_TRUE(logBuffer->WriteLog(context, 0, offset) == 0);
+    context->SetBufferAllocated(offset, 0, 0);
+    EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
 
-    offset += context->GetLogSize();
+    offset += context->GetLength();
     _AddToList(context);
 
     _WaitForLogWriteDone(addedLogs.size());
@@ -258,9 +261,10 @@ TEST_F(JournalLogBufferIntegrationTest, ParseLogBuffer)
     while (offset + sizeof(BlockWriteDoneLog) < LOG_GROUP_SIZE)
     {
         LogWriteContext* context = _CreateContextForBlockWriteDoneLog();
-        EXPECT_TRUE(logBuffer->WriteLog(context, 0, offset) == 0);
+        context->SetBufferAllocated(offset, 0, 0);
+        EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
 
-        offset += context->GetLogSize();
+        offset += context->GetLength();
         _AddToList(context);
     }
 
@@ -288,7 +292,9 @@ TEST_F(JournalLogBufferIntegrationTest, WriteInvalidLogType)
         int* typePtr = reinterpret_cast<int*>(&(log->type));
         *typePtr = -1;
 
-        EXPECT_TRUE(logBuffer->WriteLog(context, 0, 0) == 0);
+        context->SetBufferAllocated(0, 0, 0);
+        EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
+
         _WaitForLogWriteDone(1);
 
         LogList groupLogs;
@@ -318,7 +324,8 @@ TEST_F(JournalLogBufferIntegrationTest, WriteWithoutMark)
         int* markPtr = reinterpret_cast<int*>(&(log->mark));
         *markPtr = 0;
 
-        EXPECT_TRUE(logBuffer->WriteLog(context, 0, 0) == 0);
+        context->SetBufferAllocated(0, 0, 0);
+        EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
 
         _WaitForLogWriteDone(1);
 

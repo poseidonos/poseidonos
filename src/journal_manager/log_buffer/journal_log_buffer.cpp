@@ -29,21 +29,17 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
 
 #include <memory>
 #include <string>
 
 #include "src/include/pos_event_id.h"
+#include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
+#include "src/journal_manager/log_buffer/log_group_reset_context.h"
+#include "src/journal_manager/log_buffer/log_write_context.h"
 #include "src/logger/logger.h"
-
-#ifdef IBOF_CONFIG_USE_MOCK_FS
-#include "src/meta_file_intf/mock_file_intf.h"
-#else
 #include "src/metafs/metafs_file_intf.h"
-#endif
-// TODO (cheolho.kang) remove ifdef after moving tests
 
 namespace pos
 {
@@ -59,7 +55,7 @@ JournalLogBuffer::JournalLogBuffer(void)
 JournalLogBuffer::JournalLogBuffer(std::string arrayName)
 : JournalLogBuffer()
 {
-    logFile = new FILESTORE("JournalLogBuffer", arrayName);
+    logFile = new MetaFsFileIntf("JournalLogBuffer", arrayName);
 }
 
 JournalLogBuffer::JournalLogBuffer(MetaFileIntf* metaFile)
@@ -178,11 +174,9 @@ JournalLogBuffer::_LoadBufferSize(void)
 }
 
 int
-JournalLogBuffer::WriteLog(LogWriteContext* context, int logGroupID, uint64_t offset)
+JournalLogBuffer::WriteLog(LogWriteContext* context)
 {
-    uint64_t fileOffset = logGroupID * config->GetLogGroupSize() + offset;
-    context->SetIoRequest(MetaFsIoOpcode::Write, logFile->GetFd(), fileOffset);
-
+    context->SetFile(logFile->GetFd());
     int ret = logFile->AsyncIO(context);
 
     if (ret != 0)
@@ -204,7 +198,8 @@ JournalLogBuffer::SyncResetAll(void)
 
     for (int groupId = 0; groupId < numLogGroups; groupId++)
     {
-        ret = AsyncReset(groupId, std::bind(&JournalLogBuffer::_LogBufferResetCompleted, this, std::placeholders::_1));
+        EventSmartPtr callbackEvent(new LogGroupResetCompletedEvent(this, groupId));
+        ret = AsyncReset(groupId, callbackEvent);
         if (ret != 0)
         {
             POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_RESET_FAILED,
@@ -224,22 +219,29 @@ JournalLogBuffer::SyncResetAll(void)
 }
 
 void
-JournalLogBuffer::_LogBufferResetCompleted(int logGroupId)
+JournalLogBuffer::LogGroupResetCompleted(int logGroupId)
 {
     numInitializedLogGroup++;
 }
 
 int
-JournalLogBuffer::AsyncReset(int id, JournalInternalEventCallback callbackFunc)
+JournalLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
 {
     uint64_t groupSize = config->GetLogGroupSize();
+    MetaIoCbPtr callbackFunc = std::bind(&JournalLogBuffer::AsyncResetDone, this, std::placeholders::_1);
 
-    JournalResetContext* resetRequest = new JournalResetContext(id, callbackFunc);
-    resetRequest->SetIoRequest(MetaFsIoOpcode::Write, logFile->GetFd(),
-        _GetFileOffset(id, 0), groupSize, initializedDataBuffer,
-        std::bind(&JournalLogBuffer::AsyncResetDone, this, std::placeholders::_1));
+    LogGroupResetContext* resetRequest = new LogGroupResetContext(id, callbackEvent);
+    resetRequest->SetIoRequest(_GetFileOffset(id, 0), groupSize, initializedDataBuffer);
+    resetRequest->SetInternalCallback(callbackFunc);
 
-    int ret = logFile->AsyncIO(resetRequest);
+    return _AsyncReset(resetRequest);
+}
+
+int
+JournalLogBuffer::_AsyncReset(LogGroupResetContext* context)
+{
+    context->SetFile(logFile->GetFd());
+    int ret = logFile->AsyncIO(context);
     if (ret != 0)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_RESET_FAILED,
@@ -251,8 +253,8 @@ JournalLogBuffer::AsyncReset(int id, JournalInternalEventCallback callbackFunc)
 void
 JournalLogBuffer::AsyncResetDone(AsyncMetaFileIoCtx* ctx)
 {
-    JournalResetContext* context = reinterpret_cast<JournalResetContext*>(ctx);
-    context->ResetDone();
+    LogGroupResetContext* context = reinterpret_cast<LogGroupResetContext*>(ctx);
+    context->IoDone();
     delete context;
 }
 

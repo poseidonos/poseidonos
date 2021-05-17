@@ -97,16 +97,20 @@ LogWriteHandler::AddLog(LogWriteContext* context)
 int
 LogWriteHandler::_AddLogInternal(LogWriteContext* context)
 {
-    OffsetInFile logOffset;
+    uint64_t allocatedOffset = 0;
+
     int allocationResult =
-        bufferAllocator->AllocateBuffer(context->GetLogSize(), logOffset);
+        bufferAllocator->AllocateBuffer(context->GetLength(), allocatedOffset);
 
     if (allocationResult == 0)
     {
-        context->SetAllocated(logOffset.id, logOffset.seqNum,
-            std::bind(&LogWriteHandler::LogWriteDone, this, std::placeholders::_1));
+        int groupId = bufferAllocator->GetLogGroupId(allocatedOffset);
+        uint32_t seqNum = bufferAllocator->GetSequenceNumber(groupId);
 
-        int result = logBuffer->WriteLog(context, logOffset.id, logOffset.offset);
+        context->SetBufferAllocated(allocatedOffset, groupId, seqNum);
+        context->SetInternalCallback(std::bind(&LogWriteHandler::LogWriteDone, this, std::placeholders::_1));
+
+        int result = logBuffer->WriteLog(context);
         if (result != 0)
         {
             delete context;
@@ -146,7 +150,7 @@ LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
         statusUpdatedToStats = logWriteStats->UpdateStatus(context);
     }
 
-    context->LogWriteDone();
+    context->IoDone();
 
     if (statusUpdatedToStats == true)
     {

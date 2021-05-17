@@ -37,6 +37,7 @@
 #include <mutex>
 
 #include "checkpoint_observer.h"
+#include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
 #include "src/journal_manager/status/i_checkpoint_status.h"
 
 namespace pos
@@ -50,7 +51,7 @@ class CallbackSequenceController;
 class IMapFlush;
 class IContextManager;
 
-class LogGroupReleaser : public CheckpointObserver, public ICheckpointStatus
+class LogGroupReleaser : public CheckpointObserver, public ICheckpointStatus, public ILogGroupResetCompleted
 {
 public:
     LogGroupReleaser(void);
@@ -73,6 +74,8 @@ public:
     virtual std::list<int> GetFullLogGroups(void) override;
     virtual CheckpointStatus GetStatus(void) override;
 
+    virtual void LogGroupResetCompleted(int logGroupId) override;
+
 protected:
     void _AddToFullLogGroupList(int groupId);
     bool _HasFullLogGroup(void);
@@ -80,8 +83,6 @@ protected:
     virtual void _FlushNextLogGroup(void);
     void _UpdateFlushingLogGroup(void);
     int _PopFullLogGroup(void);
-
-    void _LogGroupResetCompleted(int logGroupId);
 
     void _ResetFlushingLogGroup(void);
 

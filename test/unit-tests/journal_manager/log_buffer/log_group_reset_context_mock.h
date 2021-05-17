@@ -2,11 +2,11 @@
 #include <string>
 #include <list>
 #include <vector>
-#include "src/journal_manager/log_buffer/journal_write_context.h"
+#include "src/journal_manager/log_buffer/log_group_reset_context.h"
 
 namespace pos
 {
-class MockJournalResetContext : public LogGroupResetContext
+class MockLogGroupResetContext : public LogGroupResetContext
 {
 public:
     using LogGroupResetContext::LogGroupResetContext;

@@ -31,69 +31,22 @@
  */
 
 #pragma once
-#include <string>
 
-#include "src/journal_manager/config/journal_configuration.h"
+#include "src/event_scheduler/event.h"
 #include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
-#include "src/meta_file_intf/meta_file_intf.h"
 
 namespace pos
 {
-class LogWriteContext;
-class LogGroupResetContext;
-
-class JournalLogBuffer : public ILogGroupResetCompleted
+class LogGroupResetCompletedEvent : public Event
 {
 public:
-    JournalLogBuffer(void);
-    explicit JournalLogBuffer(std::string arrayName);
-    explicit JournalLogBuffer(MetaFileIntf* metaFile);
-    virtual ~JournalLogBuffer(void);
+    LogGroupResetCompletedEvent(ILogGroupResetCompleted* target, int logGroupId);
+    virtual ~LogGroupResetCompletedEvent(void) = default;
 
-    virtual int Init(JournalConfiguration* journalConfiguration);
-    virtual void Dispose(void);
-
-    int ReadLogBuffer(int groupId, void* buffer);
-    int AsyncIO(AsyncMetaFileIoCtx* ctx);
-
-    inline bool
-    IsInitialized(void)
-    {
-        return numInitializedLogGroup == config->GetNumLogGroups();
-    }
-    virtual bool
-    IsLoaded(void)
-    {
-        return logBufferLoaded;
-    }
-
-    virtual int WriteLog(LogWriteContext* context);
-
-    virtual int SyncResetAll(void);
-    virtual int AsyncReset(int id, EventSmartPtr callbackEvent);
-    void AsyncResetDone(AsyncMetaFileIoCtx* ctx);
-
-    int Delete(void); // TODO(huijeong.kim): move to tester code
-
-    virtual void LogGroupResetCompleted(int logGroupId) override;
+    virtual bool Execute(void) override;
 
 private:
-    void _LoadBufferSize(void);
-    int _AsyncReset(LogGroupResetContext* context);
-
-    inline uint64_t
-    _GetFileOffset(int groupId, uint64_t offset)
-    {
-        uint64_t groupSize = config->GetLogGroupSize();
-        return (groupId * groupSize + offset);
-    }
-
-    JournalConfiguration* config;
-
-    std::atomic<int> numInitializedLogGroup;
-    bool logBufferLoaded;
-    MetaFileIntf* logFile;
-
-    char* initializedDataBuffer;
+    ILogGroupResetCompleted* target;
+    int logGroupId;
 };
 } // namespace pos
