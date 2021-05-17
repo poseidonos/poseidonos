@@ -44,7 +44,8 @@ namespace pos
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
     IAbrControl* abr, IStateControl* iState, string name)
 : temp(abr, name),
-  state(iState)
+  state(iState),
+  arrayName(name)
 {
     sequence.assign(seq.begin(), seq.end());
     string sender = typeid(*this).name();
@@ -118,7 +119,7 @@ error:
     return ret;
 }
 
-int ArrayMountSequence::Unmount(VolumeManager* volMgr)
+int ArrayMountSequence::Unmount(void)
 {
     StateContext* currState = state->GetState();
     if (currState->ToStateType() < StateEnum::NORMAL)
@@ -136,6 +137,8 @@ int ArrayMountSequence::Unmount(VolumeManager* volMgr)
         return (int)POS_EVENT_ID::ARRAY_UNMOUNT_PRIORITY_ERROR;
     }
 
+    IVolumeManager* volMgr =
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     volMgr->DetachVolumes();
     for (auto it = sequence.rbegin(); it != sequence.rend(); ++it)
     {
@@ -156,10 +159,28 @@ int ArrayMountSequence::Unmount(VolumeManager* volMgr)
     return (int)POS_EVENT_ID::SUCCESS;
 }
 
+void ArrayMountSequence::Shutdown(void)
+{
+    IVolumeManager* volMgr =
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    volMgr->DetachVolumes();
+    for (auto it = sequence.rbegin(); it != sequence.rend(); ++it)
+    {
+        (*it)->Shutdown();
+    }
+
+    temp.Shutdown();
+}
+
 void ArrayMountSequence::StateChanged(StateContext* prev, StateContext* next)
 {
     std::unique_lock<std::mutex> lock(mtx);
     cv.notify_all();
+
+    if (next->ToStateType() == StateEnum::STOP)
+    {
+        Shutdown();
+    }
 }
 
 bool ArrayMountSequence::_WaitState(StateContext* goal)

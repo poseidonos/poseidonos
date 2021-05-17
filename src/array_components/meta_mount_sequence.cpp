@@ -38,13 +38,12 @@
 #include "src/admin/smart_log_mgr.h"
 #endif
 
-#include <string>
-
 namespace pos
 {
-MetaMountSequence::MetaMountSequence(IMountSequence* mapper,
-    IMountSequence* allocator, IMountSequence* journal)
-: mapper(mapper),
+MetaMountSequence::MetaMountSequence(std::string arrayName,
+    IMountSequence* mapper, IMountSequence* allocator, IMountSequence* journal)
+: arrayName(arrayName),
+  mapper(mapper),
   allocator(allocator),
   journal(journal)
 {
@@ -60,7 +59,7 @@ MetaMountSequence::Init(void)
     int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_MOUNTING);
     int result = 0;
 
-    POS_TRACE_INFO(eventId, "Start initializing mapper");
+    POS_TRACE_INFO(eventId, "Start initializing mapper of array {}", arrayName);
     result = mapper->Init();
     if (result != 0)
     {
@@ -68,7 +67,7 @@ MetaMountSequence::Init(void)
         return result;
     }
 
-    POS_TRACE_INFO(eventId, "Start initializing allocator");
+    POS_TRACE_INFO(eventId, "Start initializing allocator of array {}", arrayName);
     result = allocator->Init();
     if (result != 0)
     {
@@ -77,7 +76,7 @@ MetaMountSequence::Init(void)
         return result;
     }
 
-    POS_TRACE_INFO(eventId, "Start initializing journal");
+    POS_TRACE_INFO(eventId, "Start initializing journal of array {}", arrayName);
     result = journal->Init();
     if (result != 0)
     {
@@ -99,14 +98,29 @@ MetaMountSequence::Dispose(void)
 {
     int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_UNMOUNTING);
 
-    POS_TRACE_INFO(eventId, "Start disposing allocator");
+    POS_TRACE_INFO(eventId, "Start disposing allocator of array {}", arrayName);
     allocator->Dispose();
 
-    POS_TRACE_INFO(eventId, "Start disposing mapper");
+    POS_TRACE_INFO(eventId, "Start disposing mapper of array {}", arrayName);
     mapper->Dispose();
 
-    POS_TRACE_INFO(eventId, "Start disposing journal");
+    POS_TRACE_INFO(eventId, "Start disposing journal of array {}", arrayName);
     journal->Dispose();
+}
+
+void
+MetaMountSequence::Shutdown(void)
+{
+    int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_UNMOUNTING);
+
+    POS_TRACE_INFO(eventId, "Start shutdown allocator of array {}", arrayName);
+    allocator->Shutdown();
+
+    POS_TRACE_INFO(eventId, "Start shutdown mapper of array {}", arrayName);
+    mapper->Shutdown();
+
+    POS_TRACE_INFO(eventId, "Start shutdown journal of array {}", arrayName);
+    journal->Shutdown();
 }
 
 } // namespace pos

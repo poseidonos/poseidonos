@@ -1,2 +1,1 @@
 POS_ADD_UNIT_TEST(array_state_ut array_state_test.cpp)
-POS_ADD_UNIT_TEST(array_state_publisher_ut array_state_publisher_test.cpp)

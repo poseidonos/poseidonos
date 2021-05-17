@@ -54,6 +54,7 @@ public:
 
     virtual int Init(void) override;
     virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
 
     uint64_t GetEpochSignature(void);
     MetaStorageSubsystem* GetMss(void);

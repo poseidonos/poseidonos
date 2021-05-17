@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include "src/array_models/interface/i_mount_sequence.h"
@@ -41,14 +42,17 @@ namespace pos
 class MetaMountSequence : public IMountSequence
 {
 public:
-    MetaMountSequence(IMountSequence* mapper, IMountSequence* allocator,
-        IMountSequence* journal);
+    MetaMountSequence(std::string arrayName,
+        IMountSequence* mapper, IMountSequence* allocator, IMountSequence* journal);
     virtual ~MetaMountSequence(void);
 
     virtual int Init(void) override;
     virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
 
 private:
+    std::string arrayName;
+
     IMountSequence* mapper;
     IMountSequence* allocator;
     IMountSequence* journal;

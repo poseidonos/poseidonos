@@ -136,6 +136,20 @@ Allocator::Dispose(void)
 }
 
 void
+Allocator::Shutdown(void)
+{
+    if (isInitialized == true)
+    {
+        int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_UNMOUNTING);
+        POS_TRACE_INFO(eventId, "dispose allocator modules to STOP ARRAY");
+
+        contextManager->Close();
+        _UnregisterFromAllocatorService();
+        isInitialized = false;
+    }
+}
+
+void
 Allocator::_DeleteSubmodules(void)
 {
     delete wbStripeManager;

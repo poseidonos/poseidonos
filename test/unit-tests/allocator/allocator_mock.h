@@ -14,6 +14,7 @@ public:
     using Allocator::Allocator;
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
+    MOCK_METHOD(void, Shutdown, (), (override));
     MOCK_METHOD(bool, VolumeCreated, (std::string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, std::string arrayName), (override));
     MOCK_METHOD(bool, VolumeLoaded, (std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName), (override));
     MOCK_METHOD(bool, VolumeUpdated, (std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName), (override));

@@ -16,6 +16,7 @@ public:
     MOCK_METHOD(int, AddGcStripeFlushedLog, (GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent), (override));
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
+    MOCK_METHOD(void, Shutdown, (), (override));
 };
 
 } // namespace pos

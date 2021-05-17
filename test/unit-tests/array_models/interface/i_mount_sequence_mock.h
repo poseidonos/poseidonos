@@ -14,6 +14,7 @@ public:
     using IMountSequence::IMountSequence;
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
+    MOCK_METHOD(void, Shutdown, (), (override));
 };
 
 } // namespace pos

@@ -102,6 +102,12 @@ VolumeManager::Dispose(void)
     VolumeServiceSingleton::Instance()->Unregister(arrayInfo->GetName());
 }
 
+void
+VolumeManager::Shutdown(void)
+{
+    Dispose();
+}
+
 uint64_t
 VolumeManager::EntireVolumeSize(void)
 {
@@ -341,7 +347,6 @@ VolumeManager::StateChanged(StateContext* prev, StateContext* next)
     if (next->ToStateType() == StateEnum::STOP)
     {
         stopped = true;
-        DetachVolumes();
     }
     else if (initialized == true)
     {

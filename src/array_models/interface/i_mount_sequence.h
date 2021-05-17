@@ -40,6 +40,7 @@ class IMountSequence
 public:
     virtual int Init(void) = 0;
     virtual void Dispose(void) = 0;
+    virtual void Shutdown(void) = 0;
 };
 
 } // namespace pos

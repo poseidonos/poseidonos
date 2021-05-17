@@ -273,6 +273,16 @@ JournalManager::Dispose(void)
 }
 
 void
+JournalManager::Shutdown(void)
+{
+    _UnregisterServices();
+    if (config->IsEnabled() == true)
+    {
+        logBuffer->Dispose();
+    }
+}
+
+void
 JournalManager::_RegisterServices(void)
 {
     std::string arrayName = arrayInfo->GetName();

@@ -75,6 +75,7 @@ public:
     virtual ~Array(void);
     int Init(void) override;
     void Dispose(void) override;
+    void Shutdown(void) override;
     int Load(void);
     int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
     int Delete(void);

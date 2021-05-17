@@ -171,6 +171,39 @@ TEST_F(JournalManagerTestFixture, Dispose_testWithJournalEnabled)
     journal->Dispose();
 }
 
+TEST_F(JournalManagerTestFixture, Shutdown_testWithJournalDisabled)
+{
+    // Given: Journal config manager is configured to be disabled
+    EXPECT_CALL(*config, IsEnabled).WillRepeatedly(Return(false));
+
+    // Then: Journal should be un-registered and
+    // log buffer should not be disposed, nor reset to log buffer
+    EXPECT_CALL(*service, Unregister);
+    EXPECT_CALL(*logBuffer, SyncResetAll).Times(0);
+    EXPECT_CALL(*logBuffer, Dispose).Times(0);
+
+    // When: Journal shutdowns
+    journal->Shutdown();
+}
+
+TEST_F(JournalManagerTestFixture, Shutdown_testWithJournalEnabled)
+{
+    // Given: Journal config manager is configured to be enabled
+    EXPECT_CALL(*config, IsEnabled).WillRepeatedly(Return(true));
+
+    // Then: Journal should be un-registered and log buffer should be disposed after reset
+    EXPECT_CALL(*service, Unregister);
+    {
+        InSequence s;
+
+        EXPECT_CALL(*logBuffer, SyncResetAll).Times(0);
+        EXPECT_CALL(*logBuffer, Dispose);
+    }
+
+    // When: Journal shutdowns
+    journal->Shutdown();
+}
+
 TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferNotExist)
 {
     // Given: Journal config manager is configured to be enabled

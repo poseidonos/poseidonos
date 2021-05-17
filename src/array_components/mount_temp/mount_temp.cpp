@@ -86,6 +86,12 @@ MountTemp::Mount1(void)
 }
 
 void
+MountTemp::Shutdown(void)
+{
+    _ResetNvmf();
+}
+
+void
 MountTemp::_InitNvmf(void)
 {
     nvmfVolume = new pos::NvmfVolumePos();

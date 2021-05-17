@@ -121,7 +121,7 @@ int ArrayComponents::Mount(void)
 
 int ArrayComponents::Unmount(void)
 {
-    return arrayMountSequence->Unmount(volMgr);
+    return arrayMountSequence->Unmount();
 }
 
 int ArrayComponents::Delete(void)
@@ -150,7 +150,7 @@ void ArrayComponents::_SetMountSequence(void)
     mountSequence.push_back(array);
     mountSequence.push_back(metafs);
     mountSequence.push_back(volMgr);
-    mountSequence.push_back(new MetaMountSequence(mapper, allocator, journal));
+    mountSequence.push_back(new MetaMountSequence(arrayName, mapper, allocator, journal));
     mountSequence.push_back(gc);
 
     IStateControl* state = StateManagerSingleton::Instance()->GetStateControl(arrayName);

@@ -109,6 +109,11 @@ MetaFs::Dispose(void)
     MetaFsServiceSingleton::Instance()->Deregister(arrayName);
 }
 
+void
+MetaFs::Shutdown(void)
+{
+}
+
 uint64_t
 MetaFs::GetEpochSignature(void)
 {

@@ -63,6 +63,7 @@ public:
 
     virtual int Init(void) override;
     virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
 
     bool VolumeCreated(std::string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override { return true; }
     bool VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override { return true; }
