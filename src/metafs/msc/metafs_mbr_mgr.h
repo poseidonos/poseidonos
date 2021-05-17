@@ -45,8 +45,8 @@ namespace pos
 class MetaFsMBRManager : public MetaRegionManager
 {
 public:
-    explicit MetaFsMBRManager(std::string arrayName);
-    ~MetaFsMBRManager(void);
+    MetaFsMBRManager(std::string arrayName, MetaFsMBR* metaFsMBR = nullptr);
+    virtual ~MetaFsMBRManager(void);
 
     virtual void Init(MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn = 0) override;
     virtual void Bringup(void) override;

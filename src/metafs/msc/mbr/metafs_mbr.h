@@ -60,16 +60,17 @@ enum class MetaFsAnchorRegionType
 class MetaFsMBR : public MetaRegion<MetaFsAnchorRegionType, MetaFsMBRContent>
 {
 public:
+    MetaFsMBR(void) = default;  // Ctor for UT code
     MetaFsMBR(MetaFsAnchorRegionType regionType, MetaLpnType baseLpn);
-    ~MetaFsMBR(void);
+    virtual ~MetaFsMBR(void);
 
     void CreateMBR(void);
     void BuildMBR(void);
     uint64_t GetEpochSignature(void);
     void MarkValid(void);
     bool IsValidMBRExist(void);
-    bool GetPORStatus(void);
-    void SetPORStatus(bool isShutdownOff);
-    void InvalidMBRSignature(void);
+    virtual bool GetPORStatus(void);
+    virtual void SetPORStatus(bool isShutdownOff);
+    virtual void InvalidMBRSignature(void);
 };
 } // namespace pos

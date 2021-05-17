@@ -44,9 +44,11 @@ template<typename MetaRegionT, typename MetaContentT>
 class MetaRegion
 {
 public:
-    explicit MetaRegion(MetaStorageType mediaType, MetaRegionT regionType, MetaLpnType baseLpn, uint32_t mirrorCount = 0);
+    MetaRegion(void);     // Ctor for UT code
+    MetaRegion(MetaStorageType mediaType, MetaRegionT regionType, MetaLpnType baseLpn, uint32_t mirrorCount = 0);
     virtual ~MetaRegion(void);
-    MetaContentT* GetContent(void);
+    virtual MetaContentT* GetContent(void);
+    virtual void SetContent(MetaContentT* content_);
     const size_t GetSizeOfContent(void);
     const MetaLpnType GetBaseLpn(void);
     void* GetDataBuf(void);
@@ -76,6 +78,12 @@ private:
 };
 
 template<typename MetaRegionT, typename MetaContentT>
+MetaRegion<MetaRegionT, MetaContentT>::MetaRegion(void)
+: content(nullptr)
+{
+}
+
+template<typename MetaRegionT, typename MetaContentT>
 MetaRegion<MetaRegionT, MetaContentT>::MetaRegion(MetaStorageType mediaType, MetaRegionT regionType, MetaLpnType baseLpn, uint32_t mirrorCount)
 : content(new (GetLpnCntOfContent()) MetaContentT),
   regionType(regionType),
@@ -94,6 +102,12 @@ MetaRegion<MetaRegionT, MetaContentT>::MetaRegion(MetaStorageType mediaType, Met
 template<typename MetaRegionT, typename MetaContentT>
 MetaRegion<MetaRegionT, MetaContentT>::~MetaRegion(void)
 {
+    if (content != nullptr)
+    {
+        delete content;
+        content = nullptr;
+    }
+
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "MetaRegion(destructed): media={}, region={}",
         (int)mediaType, (int)regionType);
@@ -104,6 +118,13 @@ MetaContentT*
 MetaRegion<MetaRegionT, MetaContentT>::GetContent(void)
 {
     return content;
+}
+
+template<typename MetaRegionT, typename MetaContentT>
+void
+MetaRegion<MetaRegionT, MetaContentT>::SetContent(MetaContentT* content_)
+{
+    content = content_;
 }
 
 template<typename MetaRegionT, typename MetaContentT>

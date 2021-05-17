@@ -12,7 +12,8 @@ template<typename MetaRegionT, typename MetaContentT>
 class MockMetaRegion : public MetaRegion<MetaRegionT, MetaContentT>
 {
 public:
-    using MetaRegion::MetaRegion;
+    using MetaRegion<MetaRegionT, MetaContentT>::MetaRegion;
+    MOCK_METHOD(MetaContentT*, GetContent, (), (override));
 };
 
 } // namespace pos

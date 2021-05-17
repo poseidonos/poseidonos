@@ -22,7 +22,6 @@ SRCS += $(wildcard *.cpp) \
 	    metafs_mbr.cpp 
 
 UT_SRCS += \
-           metafs_mbr_mgr_test.cpp \
            metafs_mbr_test.cpp \
            msc_test.cpp 
 

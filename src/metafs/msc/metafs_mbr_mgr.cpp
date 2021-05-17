@@ -36,11 +36,9 @@
 
 namespace pos
 {
-// MetaFsMBRManager metafsMBRMgr;
-
-MetaFsMBRManager::MetaFsMBRManager(std::string arrayName)
+MetaFsMBRManager::MetaFsMBRManager(std::string arrayName, MetaFsMBR* metaFsMBR)
 : MetaRegionManager(arrayName),
-  mbr(nullptr)
+  mbr(metaFsMBR)
 {
 }
 

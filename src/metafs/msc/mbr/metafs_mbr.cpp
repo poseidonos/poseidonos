@@ -43,7 +43,6 @@ MetaFsMBR::MetaFsMBR(MetaFsAnchorRegionType regionType, MetaLpnType baseLpn)
 
 MetaFsMBR::~MetaFsMBR(void)
 {
-    delete content;
 }
 
 void

@@ -18,6 +18,9 @@ class MockMetaFsMBR : public MetaFsMBR
 {
 public:
     using MetaFsMBR::MetaFsMBR;
+    MOCK_METHOD(bool, GetPORStatus, (), (override));
+    MOCK_METHOD(void, SetPORStatus, (bool isShutdownOff), (override));
+    MOCK_METHOD(void, InvalidMBRSignature, (), (override));
 };
 
 } // namespace pos
