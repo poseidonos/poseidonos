@@ -95,6 +95,7 @@ MountTemp::Mount1(void)
 void
 MountTemp::Shutdown(void)
 {
+    metaFs.mgmt.UnmountSystem(arrayName);
     _ResetNvmf();
 }
 
