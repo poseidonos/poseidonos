@@ -51,12 +51,12 @@ public:
     virtual void
     SetUp(void)
     {
-        config = new NiceMock<MockJournalConfiguration>("");
+        config = new NiceMock<MockJournalConfiguration>;
         statusProvider = new NiceMock<MockJournalStatusProvider>;
         logWriteHandler = new NiceMock<MockLogWriteHandler>;
         logWriteContextFactory = new NiceMock<MockLogWriteContextFactory>;
         volumeEventHandler = new NiceMock<MockJournalVolumeEventHandler>;
-        logBuffer = new NiceMock<MockJournalLogBuffer>("");
+        logBuffer = new NiceMock<MockJournalLogBuffer>;
         bufferAllocator = new NiceMock<MockBufferOffsetAllocator>;
         logGroupReleaser = new NiceMock<MockLogGroupReleaser>;
         dirtyMapManager = new NiceMock<MockDirtyMapManager>;
