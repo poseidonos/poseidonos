@@ -53,6 +53,7 @@ public:
 protected:
     int _CheckVolumeSize(uint64_t volSize);
     int _SetVolumeQos(VolumeBase* volume, uint64_t maxIops, uint64_t maxBw);
+    void _PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops, uint64_t originalMaxBw);
     int _SaveVolumes(void);
 
     VolumeList& volumeList;

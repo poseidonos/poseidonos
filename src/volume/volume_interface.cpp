@@ -86,9 +86,6 @@ VolumeInterface::_SetVolumeQos(VolumeBase* volume, uint64_t maxIops,
         return (int)POS_EVENT_ID::VOL_NOT_EXIST;
     }
 
-    uint64_t originalMaxIops = volume->MaxIOPS();
-    uint64_t originalMaxBw = volume->MaxBW();
-
     int ret = volume->SetMaxIOPS(maxIops);
     if (ret != (int)POS_EVENT_ID::SUCCESS)
     {
@@ -101,29 +98,28 @@ VolumeInterface::_SetVolumeQos(VolumeBase* volume, uint64_t maxIops,
         return ret;
     }
 
-    ret = _SaveVolumes();
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
-    {
-        volume->SetMaxIOPS(originalMaxIops);
-        volume->SetMaxBW(originalMaxBw);
-        return ret;
-    }
+    return (int)POS_EVENT_ID::SUCCESS;
+}
+
+void
+VolumeInterface::_PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops, uint64_t originalMaxBw)
+{
+    uint64_t maxIops = volume->MaxIOPS();
+    uint64_t maxBw = volume->MaxBW();
 
     if (maxIops != originalMaxIops)
     {
         POS_TRACE_INFO((int)POS_EVENT_ID::SUCCESS,
-                "Max iops is set on volume {} ({}->{})", volume->GetName(),
-                originalMaxIops, maxIops);
+            "Max iops is set on volume {} ({}->{})", volume->GetName(),
+            originalMaxIops, maxIops);
     }
 
     if (maxBw != originalMaxBw)
     {
         POS_TRACE_INFO((int)POS_EVENT_ID::SUCCESS,
-                "Max bandwidth is set on volume {} ({}->{})",
+            "Max bandwidth is set on volume {} ({}->{})",
             volume->GetName(), originalMaxBw, maxBw);
     }
-
-    return (int)POS_EVENT_ID::SUCCESS;
 }
 
 int

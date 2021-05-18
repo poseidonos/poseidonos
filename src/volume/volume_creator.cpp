@@ -97,13 +97,6 @@ VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
         return ret; // error_create_vol_failed;
     }
 
-    ret = _SaveVolumes();
-    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
-    {
-        volumeList.Remove(vol->ID);
-        return ret;
-    }
-
     POS_TRACE_DEBUG(static_cast<int>(POS_EVENT_ID::SUCCESS),
             "Volume meta saved successfully");
 
@@ -114,6 +107,15 @@ VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
     {
         return static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
     }
+
+    ret = _SaveVolumes();
+    if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))
+    {
+        volumeList.Remove(vol->ID);
+        return ret;
+    }
+
+    _PrintLogVolumeQos(vol, 0, 0);
 
     return static_cast<int>(POS_EVENT_ID::SUCCESS);
 }
