@@ -94,6 +94,13 @@ void
 ContextReplayer::ReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
 {
     wbStripeCtx->AllocWbStripe(wbLsid);
+    
+    StripeId userLsid = vsid;
+    if (userLsid % addrInfo->GetstripesPerSegment() == 0)
+    {
+        SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
+        allocatorCtx->AllocateSegment(segId);
+    }
 }
 
 void
