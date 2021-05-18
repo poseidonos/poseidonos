@@ -132,7 +132,7 @@ TEST(BlockMapUpdate, Execute_Journal_Enabled)
 
 TEST(BlockMapUpdate, Execute_Journal_Enabled_Fail)
 {
-   // Given
+    // Given
     const uint32_t unitCount = 8;
     NiceMock<MockMapperService> mockMapperService;
     NiceMock<MockJournalService> mockJournalService;
