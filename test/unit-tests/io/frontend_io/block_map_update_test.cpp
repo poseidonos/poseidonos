@@ -130,6 +130,54 @@ TEST(BlockMapUpdate, Execute_Journal_Enabled)
     ASSERT_EQ(actual, expected);
 }
 
+TEST(BlockMapUpdate, Execute_Journal_Enabled_Fail)
+{
+   // Given
+    const uint32_t unitCount = 8;
+    NiceMock<MockMapperService> mockMapperService;
+    NiceMock<MockJournalService> mockJournalService;
+    NiceMock<MockIJournalWriter> mockJournalWriter;
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, "");
+    VolumeIoSmartPtr volumeIo(mockVolumeIo);
+    CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
+    NiceMock<MockIVSAMap> mockIVSAMap;
+    CallbackSmartPtr mockWriteCompletion = std::make_shared<MockWriteCompletion>(volumeIo);
+    MockIBlockAllocator iBlockAllocator;
+    NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
+    NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &mockIVSAMap));
+    EventSmartPtr mockBlockMapUpdateCompletionEvent = std::make_shared<MockBlockMapUpdateCompletion>(
+        volumeIo, callback, []() -> bool { return false; }, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
+        &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
+    MpageList mPageList;
+
+    NiceMock<MockIVSAMap> vsaMap;
+
+    // When : journal is enabled
+    ON_CALL(mockMapperService, GetIVSAMap(_)).WillByDefault(Return(&vsaMap));
+    ON_CALL(mockJournalService, IsEnabled(_)).WillByDefault(Return(true));
+    ON_CALL(mockJournalService, GetWriter(_)).WillByDefault(Return(&mockJournalWriter));
+    ON_CALL(vsaMap, GetDirtyVsaMapPages(_, _, _)).WillByDefault(Return(mPageList));
+    ON_CALL(mockJournalWriter, AddBlockMapUpdatedLog(_, _, _)).WillByDefault(Return(-1));
+    ON_CALL(*mockVolumeIo, GetSectorRba()).WillByDefault(Return(0));
+    ON_CALL(*mockVolumeIo, GetVolumeId()).WillByDefault(Return(1));
+
+    BlockMapUpdate blockMapUpdate(
+        volumeIo, callback, []() -> bool { return false; },
+        &vsaMap, &mockJournalService, &mockEventScheduler, mockBlockMapUpdateCompletionEvent);
+
+    // Then : Execute
+    bool actual = blockMapUpdate.Execute();
+    bool expected = false;
+    ASSERT_EQ(actual, expected);
+
+    // Then 2 : Execute the failed event again
+    actual = blockMapUpdate.Execute();
+    expected = false;
+    volumeIo = nullptr;
+    ASSERT_EQ(actual, expected);
+}
+
 TEST(BlockMapUpdate, Execute_Journal_Not_Enabled)
 {
     // Given

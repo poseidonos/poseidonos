@@ -95,7 +95,10 @@ BlockMapUpdate::Execute(void)
         }
     }
 
-    volumeIo = nullptr;
+    if (executionSuccessful == true)
+    {
+        volumeIo = nullptr;
+    }
     return executionSuccessful;
 }
 
