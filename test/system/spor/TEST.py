@@ -44,3 +44,4 @@ EXPECTED_MEMORY_FIO = 0.4
 
 # test setup
 maxNumVolumePerArray = 10
+numSSDPerArray = 3 + 1

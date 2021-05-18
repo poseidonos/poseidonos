@@ -8,8 +8,8 @@ import os
 import subprocess
 
 sys.path.append("../lib/")
-import cli
-import json_parser
+import cli  # noqa: E402
+import json_parser  # noqa: E402
 
 
 def flush_gcov():

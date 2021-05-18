@@ -12,11 +12,11 @@ import TEST
 
 sys.path.append("../lib/")
 sys.path.append("../io_path/")
-import spdk_rpc
-import json_parser
-import cli
-import pos_constant
-import pos
+import spdk_rpc  # noqa: E402
+import json_parser  # noqa: E402
+import cli  # noqa: E402
+import pos_constant  # noqa: E402
+import pos  # noqa: E402
 
 ARRAYNAME = "POSArray"
 
@@ -56,7 +56,6 @@ def clean_bringup(numArray=1):
     mbr_reset()
     for arrayId in range(numArray):
         create_array(arrayId)
-        mount_array(arrayId)
 
     TEST_LOG.print_info("* Fininshed bringup")
 
@@ -81,6 +80,15 @@ def dirty_bringup(numArray=1):
     # spdk_rpc.send_request("bdev_pmem_create /mnt/pmem0/pmem_pool -n pmem0")
 
 
+def scan_device():
+    out = cli.scan_device()
+    ret = json_parser.get_response_code(out)
+    if ret != 0:
+        TEST_LOG.print_err("Failed to scan device")
+        TEST_LOG.print_debug(out)
+        sys.exit(1)
+
+
 # TODO(cheolho.kang): Seperate array setup method from setup function
 def setup(numArray):
     command = ""
@@ -95,13 +103,7 @@ def setup(numArray):
         create_uram(uramId)
         # create_pram()
 
-    out = cli.scan_device()
-    ret = json_parser.get_response_code(out)
-    if ret != 0:
-        TEST_LOG.print_err("Failed to scan device")
-        TEST_LOG.print_debug(out)
-        sys.exit(1)
-
+    scan_device()
     TEST_LOG.print_info("* Setup POS")
 
 
@@ -113,11 +115,40 @@ def create_uram(uramId):
     spdk_rpc.send_request("bdev_malloc_create -b " + get_uramname(uramId) + " 1024 512")
 
 
+def get_device_name(arrayId):
+    dataDevice = ""
+    spareDevice = ""
+    for index in range(TEST.numSSDPerArray):
+        deviceName = "unvme-ns-" + str(index + arrayId * 4)
+        if index is TEST.numSSDPerArray - 1:
+            spareDevice = deviceName
+        else:
+            dataDevice += ("," + deviceName)
+    dataDevice = dataDevice[1:]
+    return (dataDevice, spareDevice)
+
+
+def get_num_ssd():
+    out = cli.list_device()
+    numSSD = 0
+    for device in json_parser.get_data(out)['devicelist']:
+        if device['type'] == "SSD":
+            numSSD += 1
+    return numSSD
+
+
+def get_max_num_array():
+    return get_num_ssd() / TEST.numSSDPerArray
+
+
 def create_array(arrayId):
-    deviceList = []
-    for index in range(4):
-        deviceList.append("unvme-ns-" + str(index + arrayId * 4))
-    out = cli.create_array(get_uramname(arrayId), deviceList[0] + "," + deviceList[1] + "," + deviceList[2], deviceList[3], get_arrayname(arrayId), "")
+    if get_max_num_array() < arrayId + 1:
+        TEST_LOG.print_info("Not enough SSD to create array. Therefore this test will be bypassed.")
+        sys.exit(0)
+
+    dataDevice, spareDevice = get_device_name(arrayId)
+    out = cli.create_array(get_uramname(arrayId), dataDevice, spareDevice, get_arrayname(arrayId), "")
+
 #   pmem
 #    out = cli.create_array("pmem0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "unvme-ns-3", ARRAYNAME, "")
     ret = json_parser.get_response_code(out)
@@ -126,6 +157,7 @@ def create_array(arrayId):
         TEST_LOG.print_debug(out)
         sys.exit(1)
     TEST_LOG.print_info("* Array created")
+    mount_array(arrayId)
 
 
 def mount_array(arrayId):

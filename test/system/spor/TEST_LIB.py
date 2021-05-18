@@ -14,8 +14,8 @@ import TEST_LOG
 import TEST
 
 sys.path.append("../lib/")
-import cli
-import json_parser
+import cli  # noqa: E402
+import json_parser  # noqa: E402
 
 patterns = []
 units = {"B": 1, "K": 2**10, "M": 2**20, "G": 2**30, "KB": 2**10, "MB": 2**20, "GB": 2**30}
