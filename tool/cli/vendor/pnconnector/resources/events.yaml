@@ -645,6 +645,11 @@ modules:
         message: need mount first add or remove device
         problem:
         solution:
+      - code : 2527
+        level: WARN
+        message: shutdown process not terminated
+        problem:
+        solution: retry later
       - code: 2530
         level: INFO
         message: the array device has been added

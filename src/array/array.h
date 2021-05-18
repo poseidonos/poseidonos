@@ -140,6 +140,7 @@ private:
     static const int LOCK_ACQUIRE_FAILED;
     IAbrControl* abrControl = nullptr;
     EventScheduler* eventScheduler = nullptr;
+    int shutdownFlag = 0;
 };
 } // namespace pos
 #endif // ARRAY_H_

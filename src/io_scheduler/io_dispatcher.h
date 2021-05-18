@@ -89,6 +89,7 @@ private:
     uint32_t deviceAllocationTurn;
     static thread_local std::vector<UblockSharedPtr> threadLocalDeviceList;
 
+    static const int DEVICE_FAILED = -1;
     static const int PARAM_FAILED = -2;
 
     uint32_t _GetLogicalCore(cpu_set_t cpuSet, uint32_t index);
