@@ -102,12 +102,6 @@ MetaRegion<MetaRegionT, MetaContentT>::MetaRegion(MetaStorageType mediaType, Met
 template<typename MetaRegionT, typename MetaContentT>
 MetaRegion<MetaRegionT, MetaContentT>::~MetaRegion(void)
 {
-    if (content != nullptr)
-    {
-        delete content;
-        content = nullptr;
-    }
-
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "MetaRegion(destructed): media={}, region={}",
         (int)mediaType, (int)regionType);

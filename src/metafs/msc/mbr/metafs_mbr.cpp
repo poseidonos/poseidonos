@@ -43,6 +43,11 @@ MetaFsMBR::MetaFsMBR(MetaFsAnchorRegionType regionType, MetaLpnType baseLpn)
 
 MetaFsMBR::~MetaFsMBR(void)
 {
+    if (content != nullptr)
+    {
+        delete content;
+        content = nullptr;
+    }
 }
 
 void
