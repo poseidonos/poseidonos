@@ -45,17 +45,20 @@ MetaFsService::MetaFsService(void)
 
 MetaFsService::~MetaFsService(void)
 {
-    // exit mioHandler thread
-    ioScheduler->ClearHandlerThread();
+    if (nullptr != ioScheduler)
+    {
+        // exit mioHandler thread
+        ioScheduler->ClearHandlerThread();
 
-    // exit scheduler thread
-    ioScheduler->ExitThread();
+        // exit scheduler thread
+        ioScheduler->ExitThread();
 
-    // clear MultQ
-    ioScheduler->ClearQ();
+        // clear MultQ
+        ioScheduler->ClearQ();
 
-    // delete the scheduler
-    delete ioScheduler;
+        // delete the scheduler
+        delete ioScheduler;
+    }
 }
 
 void
