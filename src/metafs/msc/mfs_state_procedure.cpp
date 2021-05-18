@@ -248,11 +248,6 @@ MfsStateProcedure::_ProcessSystemState_Shutdown(std::string& arrayName)
             throw POS_EVENT_ID::MFS_META_SAVE_FAILED;
         }
 
-        if (POS_EVENT_ID::SUCCESS != metaStorage->Close(arrayName))
-        {
-            throw POS_EVENT_ID::MFS_META_STORAGE_CLOSE_FAILED;
-        }
-
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "Meta filesystem is in shutdown state. Now it's safe to turn mgmt power off..");
         throw POS_EVENT_ID::SUCCESS;
@@ -264,6 +259,7 @@ MfsStateProcedure::_ProcessSystemState_Shutdown(std::string& arrayName)
             mimTopMgr.Close();
             mbrMap.Remove(arrayName);
         }
+        metaStorage->Close(arrayName);
         return event;
     }
 }
