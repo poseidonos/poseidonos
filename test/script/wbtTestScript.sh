@@ -320,7 +320,7 @@ do
     fi
 
     echo -[IO Path : unvme-ns-${count} : wbt flush]------------------------------------------
-    ${BIN_DIR}/cli wbt flush --output segValidCount.bin --json > ${cliOutput}
+    ${BIN_DIR}/cli wbt flush --output segValidCount.bin --json > ${cliOutput} --array $ARRAYNAME
  
     check_result
 
