@@ -245,25 +245,30 @@ TEST(Array, Create_testIfArrayCreatedWhenInputsAreValid)
 {
     // Given: a happy path scenario
     DeviceSet<string> emptyDeviceSet;
-
+    DeviceSet<ArrayDevice*> emptyArrayDeviceSet;
+    string mockArrayName = "POSArray";
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
-    MockIAbrControl mockAbrControl;
+    MockIAbrControl* mockAbrControl = new MockIAbrControl();
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager(mockArrayName, mockAbrControl);
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Import(_)).WillOnce(Return(0));
+    EXPECT_CALL(*mockArrDevMgr, Export()).WillOnce(ReturnRef(emptyArrayDeviceSet));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillRepeatedly(Return(DeviceSet<DeviceMeta>()));
-    EXPECT_CALL(mockAbrControl, CreateAbr).WillOnce(Return(0));
-    EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
+    EXPECT_CALL(*mockAbrControl, CreateAbr).WillOnce(Return(0));
+    EXPECT_CALL(*mockAbrControl, SaveAbr).WillOnce(Return(0));
+    EXPECT_CALL(*mockPtnMgr, FormatMetaPartition).Times(1);
     EXPECT_CALL(*mockState, SetCreate).Times(1);
 
-    Array array("goodmockname", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL);
+    Array array(mockArrayName, NULL, mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, NULL, NULL);
 
     // When
     int actual = array.Create(emptyDeviceSet, "RAID5" /* is the only option at the moment */);
 
     // Then
     ASSERT_EQ(0, actual);
+    delete mockAbrControl;
 }
 
 TEST(Array, Create_testIfErrorIsReturnedWhenArrayStateIsNotCreatable)
