@@ -41,7 +41,7 @@ TEST(UNVMfIOHandler, UNVMfSubmitHandler_posIoNullptr)
     ASSERT_EQ(actual, expected);
 }
 
-TEST(UNVMfIOHandler, DISABLED_UNVMfSubmitHandler_InvalidIOType) // TODO(syeon): please take a look at the UT failure
+TEST(UNVMfIOHandler, UNVMfSubmitHandler_InvalidIOType)
 {
     // Given
     struct pos_io io = {4, 1, nullptr, 1, 0, 0, nullptr, nullptr};

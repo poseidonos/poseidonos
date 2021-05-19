@@ -43,7 +43,7 @@ TEST(FlushReadCompletion, FlushReadCompletion_Constructor_OneArgument_Heap)
     delete flushReadCompletion;
 }
 
-TEST(FlushReadCompletion, DISABLED_FlushReadCompletion_DoSpecificJob_NormalCase)
+TEST(FlushReadCompletion, FlushReadCompletion_DoSpecificJob_NormalCase)
 {
     // Given
     NiceMock<MockStripe> mockStripe;

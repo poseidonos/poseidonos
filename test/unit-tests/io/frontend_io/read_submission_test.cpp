@@ -85,7 +85,7 @@ TEST(ReadSubmission, ReadSubmission_Heap)
     readSubmission = nullptr;
 }
 
-TEST(ReadSubmission, DISABLED_Execute_SingleBlock)
+TEST(ReadSubmission, Execute_SingleBlock)
 {
     // Given
     char buf[1024];
@@ -130,7 +130,7 @@ TEST(ReadSubmission, DISABLED_Execute_SingleBlock)
     ASSERT_EQ(expectedStripeId, actualStripeId);
 }
 
-TEST(ReadSubmission, DISABLED_Execute_MultiBlocks)
+TEST(ReadSubmission, Execute_MultiBlocks)
 {
     // Given
     char buf[1024];
@@ -139,7 +139,7 @@ TEST(ReadSubmission, DISABLED_Execute_MultiBlocks)
     volumeIo->SetSectorRba(2048);
     volumeIo->SetVolumeId(1);
     NiceMock<MockDeviceDriver> mockDeviceDriver;
-    UblockSharedPtr block = std::make_shared<MockUBlockDevice>("test", 4096, &mockDeviceDriver);
+    UblockSharedPtr block = std::make_shared<NiceMock<MockUBlockDevice>>("test", 4096, &mockDeviceDriver);
     volumeIo->SetUblock(block);
     CallbackSmartPtr callback = std::make_shared<ReadCompletion>(volumeIo);
     volumeIo->SetCallback(callback);

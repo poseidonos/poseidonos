@@ -66,7 +66,6 @@ public:
         StateManager* stateMgr,
         IStateControl* state,
         Array* array,
-        MetaFs* metafs,
         VolumeManager* volMgr,
         GarbageCollector* gc,
         Mapper* mapper,
@@ -86,6 +85,8 @@ public:
 
 private:
     void _SetMountSequence(void);
+    void _InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayLoaded);
+    void _DestructMetaComponentsInOrder();
 
     string arrayName = "";
 

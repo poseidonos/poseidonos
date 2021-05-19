@@ -86,6 +86,7 @@ ArrayMountSequence::~ArrayMountSequence(void)
 
 int ArrayMountSequence::Mount(void)
 {
+    POS_TRACE_DEBUG(EID(SUCCESS), "Entering ArrayMountSequence.Mount for {}", arrayName);
     auto it = sequence.begin();
     int ret = (int)POS_EVENT_ID::SUCCESS;
 
@@ -98,28 +99,34 @@ int ArrayMountSequence::Mount(void)
     }
 
     // mount array
+    POS_TRACE_DEBUG(EID(SUCCESS), "Initializing the first mount sequence for {}", arrayName);
     ret = (*it)->Init();
     if (ret != 0)
     {
         goto error;
     }
+    POS_TRACE_DEBUG(EID(SUCCESS), "Initialized the first mount sequence for {}", arrayName);
 
     // mount temp.mount1
+    POS_TRACE_DEBUG(EID(SUCCESS), "Mounting MountTemp for {}", arrayName);
     ret = temp->Mount1();
     if (ret != 0)
     {
         goto error;
     }
+    POS_TRACE_DEBUG(EID(SUCCESS), "Mounted MountTemp for {}", arrayName);
 
     // mount meta, gc
     it++;
     for (; it != sequence.end(); ++it)
     {
+        POS_TRACE_DEBUG(EID(SUCCESS), "Initializing one of the remaining sequences for {}", arrayName);
         ret = (*it)->Init();
         if (ret != (int)POS_EVENT_ID::SUCCESS)
         {
             break;
         }
+        POS_TRACE_DEBUG(EID(SUCCESS), "Initialized the sequence for {}", arrayName);
     }
 
     if (ret != (int)POS_EVENT_ID::SUCCESS)
@@ -128,9 +135,11 @@ int ArrayMountSequence::Mount(void)
     }
     state->Invoke(normalState);
     state->Remove(mountState);
+    POS_TRACE_DEBUG(EID(SUCCESS), "Returning from ArrayMountSequence.Mount for {}", arrayName);
     return ret;
 
 error:
+    POS_TRACE_WARN(ret, "Ran into an error while executing array mount sequence for {}", arrayName);
     for (; it != sequence.begin(); --it) // TODO(srm): the first sequence wouldn't call Dispose(). fix this unless intended.
     {
         (*it)->Dispose();
@@ -141,6 +150,7 @@ error:
 
 int ArrayMountSequence::Unmount(void)
 {
+    POS_TRACE_DEBUG(EID(SUCCESS), "Entering ArrayMountSequence.Unmount for {}", arrayName);
     StateContext* currState = state->GetState();
     if (currState->ToStateType() < StateEnum::NORMAL)
     {

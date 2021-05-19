@@ -52,7 +52,6 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     nullptr /*stateMgr*/,
     nullptr /*state*/,
     nullptr /*array*/,
-    nullptr /*metafs*/,
     nullptr /*volMgr*/,
     nullptr /*gc*/,
     nullptr /*mapper*/,
@@ -67,18 +66,16 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     this->stateMgr = StateManagerSingleton::Instance();
     this->state = stateMgr->CreateStateControl(arrayName);
     this->array = new Array(arrayName, rebuilder, abr, state);
-    this->metafs = new MetaFs(array, state);
-    this->volMgr = new VolumeManager(array, state);
-    this->gc = new GarbageCollector(array, state);
-    this->mapper = new Mapper(array, state);
-    this->allocator = new Allocator(array, state);
-    this->journal = new JournalManager(array, state);
     this->rbaStateMgr = new RBAStateManager(array->GetName());
     this->metaFsFactory = [](Array* arrayPtr, bool isLoaded)
     {
         return new MetaFs(arrayPtr, isLoaded);
     };
     POS_TRACE_DEBUG(SUCCESS, "Instantiated array components for {}", arrayName);
+    // meta components need to be instantiated in a specific order:
+    // metafs -> volume manager -> mapper/allocator -> journal -> gc.
+    // Given that "metafs" object creation depends on runtime information (i.e., array is loaded or not)
+    // I'll move those the objection to Create()/Load() instead.
 }
 
 ArrayComponents::ArrayComponents(string arrayName,
@@ -87,7 +84,6 @@ ArrayComponents::ArrayComponents(string arrayName,
     StateManager* stateMgr,
     IStateControl* state,
     Array* array,
-    MetaFs* metafs,
     VolumeManager* volMgr,
     GarbageCollector* gc,
     Mapper* mapper,
@@ -106,7 +102,6 @@ ArrayComponents::ArrayComponents(string arrayName,
   volMgr(volMgr),
   mapper(mapper),
   allocator(allocator),
-  metafs(metafs),
   rbaStateMgr(rbaStateMgr),
   metaFsFactory(metaFsFactory)
 {
@@ -116,7 +111,8 @@ ArrayComponents::ArrayComponents(string arrayName,
 ArrayComponents::~ArrayComponents(void)
 {
     POS_TRACE_DEBUG(SUCCESS, "Deleting array component for {}", arrayName);
-    // Release the resources in the reversed order of their creation
+
+    _DestructMetaComponentsInOrder();
     if (arrayMountSequence != nullptr)
     {
         delete arrayMountSequence;
@@ -124,60 +120,11 @@ ArrayComponents::~ArrayComponents(void)
         POS_TRACE_DEBUG(SUCCESS, "ArrayMountSequence for {} has been deleted.", arrayName);
     }
 
-    if (metaMountSequence != nullptr)
-    {
-        delete metaMountSequence;
-        metaMountSequence = nullptr;
-        POS_TRACE_DEBUG(SUCCESS, "MetaMountSequence for {} has been deleted.", arrayName);
-    }
-
     if (rbaStateMgr != nullptr)
     {
         delete rbaStateMgr;
         rbaStateMgr = nullptr;
         POS_TRACE_DEBUG(SUCCESS, "RbaStateManager for {} has been deleted.", arrayName);
-    }
-
-    if (journal != nullptr)
-    {
-        delete journal;
-        journal = nullptr;
-        POS_TRACE_DEBUG(SUCCESS, "JournalManager for {} has been deleted.", arrayName);
-    }
-
-    if (allocator != nullptr)
-    {
-        delete allocator;
-        allocator = nullptr;
-        POS_TRACE_DEBUG(SUCCESS, "Allocator for {} has been deleted.", arrayName);
-    }
-
-    if (mapper != nullptr)
-    {
-        delete mapper;
-        mapper = nullptr;
-        POS_TRACE_DEBUG(SUCCESS, "Mapper for {} has been deleted.", arrayName);
-    }
-
-    if (gc != nullptr)
-    {
-        delete gc;
-        gc = nullptr;
-        POS_TRACE_DEBUG(SUCCESS, "GarbageCollector for {} has been deleted.", arrayName);
-    }
-
-    if (volMgr != nullptr)
-    {
-        delete volMgr;
-        volMgr = nullptr;
-        POS_TRACE_DEBUG(SUCCESS, "VolumeManager for {} has been deleted.", arrayName);
-    }
-
-    if (metafs != nullptr)
-    {
-        delete metafs;
-        metafs = nullptr;
-        POS_TRACE_DEBUG(SUCCESS, "MetaFsClient for {} has been deleted.", arrayName);
     }
 
     if (array != nullptr)
@@ -207,10 +154,11 @@ ArrayComponents::Create(DeviceSet<string> nameSet, string dataRaidType)
         stateMgr->RemoveStateControl(arrayName);
         return ret;
     }
-    metafs = metaFsFactory(array, false); // TODO(meta): could we move object instantiation to constructor instead?
-    POS_TRACE_DEBUG(SUCCESS, "Array components for {} have been created.", arrayName);
+
+    _InstantiateMetaComponentsAndMountSequenceInOrder(false/* array has not been loaded yet*/);
     _SetMountSequence();
-    POS_TRACE_DEBUG(SUCCESS, "MountSequence for {} has been set.", arrayName);
+
+    POS_TRACE_DEBUG(SUCCESS, "Array components for {} have been created.", arrayName);
     return 0;
 }
 
@@ -225,9 +173,10 @@ ArrayComponents::Load(void)
         return ret;
     }
 
-    metafs = metaFsFactory(array, true); // TODO(meta): the same comment as above
+    _InstantiateMetaComponentsAndMountSequenceInOrder(true/* array has loaded already*/);
     _SetMountSequence();
-    POS_TRACE_DEBUG(SUCCESS, "MountSequence for {} has been set.", arrayName);
+
+    POS_TRACE_DEBUG(SUCCESS, "Array components for {} have been loaded.", arrayName);
     return 0;
 }
 
@@ -273,11 +222,6 @@ ArrayComponents::_SetMountSequence(void)
     mountSequence.push_back(array);
     mountSequence.push_back(metafs);
     mountSequence.push_back(volMgr);
-    if (metaMountSequence != nullptr)
-    {
-        POS_TRACE_WARN(POS_EVENT_ID::ARRAY_COMPONENTS_LEAK, "Memory leakage found for MetaMountSequence for " + arrayName);
-    }
-    metaMountSequence = new MetaMountSequence(arrayName, mapper, allocator, journal); // remember the ref to be able to delete during ~ArrayComponents()
     mountSequence.push_back(metaMountSequence);
     mountSequence.push_back(gc);
 
@@ -287,6 +231,85 @@ ArrayComponents::_SetMountSequence(void)
         POS_TRACE_WARN(POS_EVENT_ID::ARRAY_COMPONENTS_LEAK, "Memory leakage found for ArrayMountSequence for " + arrayName);
     }
     arrayMountSequence = new ArrayMountSequence(mountSequence, iAbr, state, arrayName);
+}
+
+void
+ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayLoaded)
+{
+    if (metafs != nullptr
+        || volMgr != nullptr 
+        || mapper != nullptr
+        || allocator != nullptr
+        || journal != nullptr
+        || gc != nullptr
+        || metaMountSequence != nullptr)
+    {
+        POS_TRACE_WARN(POS_EVENT_ID::ARRAY_COMPONENTS_LEAK, "Meta Components exist already. Possible memory leak (or is it a mock?). Skipping.");
+        return;
+    }
+    
+    // Please note that the order of creation should be like the following:
+    metafs = metaFsFactory(array, isArrayLoaded);
+    volMgr = new VolumeManager(array, state);
+    mapper = new Mapper(array, state);
+    allocator = new Allocator(array, state);
+    journal = new JournalManager(array, state);
+    gc = new GarbageCollector(array, state);
+    metaMountSequence = new MetaMountSequence(arrayName, mapper, allocator, journal); // remember the ref to be able to delete during ~ArrayComponents()
+}
+
+void
+ArrayComponents::_DestructMetaComponentsInOrder()
+{
+    // Please note that the order of creation should be like the following:
+    if (metaMountSequence != nullptr)
+    {
+        delete metaMountSequence;
+        metaMountSequence = nullptr;
+        POS_TRACE_DEBUG(SUCCESS, "MetaMountSequence for {} has been deleted.", arrayName);
+    }
+
+    if (gc != nullptr)
+    {
+        delete gc;
+        gc = nullptr;
+        POS_TRACE_DEBUG(SUCCESS, "GarbageCollector for {} has been deleted.", arrayName);
+    }
+
+    if (journal != nullptr)
+    {
+        delete journal;
+        journal = nullptr;
+        POS_TRACE_DEBUG(SUCCESS, "JournalManager for {} has been deleted.", arrayName);
+    }
+
+    if (allocator != nullptr)
+    {
+        delete allocator;
+        allocator = nullptr;
+        POS_TRACE_DEBUG(SUCCESS, "Allocator for {} has been deleted.", arrayName);
+    }
+
+    if (mapper != nullptr)
+    {
+        delete mapper;
+        mapper = nullptr;
+        POS_TRACE_DEBUG(SUCCESS, "Mapper for {} has been deleted.", arrayName);
+    }
+
+    if (volMgr != nullptr)
+    {
+        delete volMgr;
+        volMgr = nullptr;
+        POS_TRACE_DEBUG(SUCCESS, "VolumeManager for {} has been deleted.", arrayName);
+    }
+
+    if (metafs != nullptr)
+    {
+        delete metafs;
+        metafs = nullptr;
+        POS_TRACE_DEBUG(SUCCESS, "MetaFs for {} has been deleted.", arrayName);
+    }
 }
 
 } // namespace pos
