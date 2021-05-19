@@ -17,6 +17,7 @@ public:
     MOCK_METHOD(void, Bringup, (), (override));
     MOCK_METHOD(bool, SaveContent, (), (override));
     MOCK_METHOD(void, Finalize, (), (override));
+    MOCK_METHOD(void, SetMss, (MetaStorageSubsystem * metaStorage), (override));
 };
 
 } // namespace pos

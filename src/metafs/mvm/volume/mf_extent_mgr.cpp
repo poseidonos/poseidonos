@@ -98,7 +98,7 @@ MetaFileExtentManager::GetContent(MetaFileExtent* list)
 
     memset(list, 0x0, sizeof(MetaFileExtent) * MetaFsConfig::MAX_VOLUME_CNT);
 
-    MakeAllocatedExtentsList();
+    _MakeAllocatedExtentsList();
 
     for (auto iter = allocatedExtentsList.begin(); iter != allocatedExtentsList.end(); iter++)
     {
@@ -137,7 +137,7 @@ MetaFileExtentManager::SetContent(MetaFileExtent* list)
         AddToAllocatedExtentsList(list[index].GetStartLpn(), list[index].GetCount());
     }
 
-    MakeFreeExtentsList();
+    _MakeFreeExtentsList();
     PrintFreeExtentsList();
 }
 
@@ -185,7 +185,7 @@ MetaFileExtentManager::AddToFreeExtentsList(MetaLpnType requestLpnCount)
             freeExtentsList[index].SetCount(freeExtentsList[index].GetCount() - requestLpnCount);
             availableLpnCount -= requestLpnCount;
 
-            SortFreeExtentsList();
+            _SortFreeExtentsList();
             PrintFreeExtentsList();
 
             return make_pair(true, newStartLpn);
@@ -197,7 +197,7 @@ MetaFileExtentManager::AddToFreeExtentsList(MetaLpnType requestLpnCount)
             freeExtentsList.erase(iter);
             availableLpnCount -= requestLpnCount;
 
-            SortFreeExtentsList();
+            _SortFreeExtentsList();
             PrintFreeExtentsList();
 
             return make_pair(true, newStartLpn);
@@ -224,8 +224,8 @@ MetaFileExtentManager::RemoveFromFreeExtentsList(MetaLpnType startLpn, MetaLpnTy
             freeExtentsList[index].SetStartLpn(freeExtentsList[index].GetStartLpn() - count);
             freeExtentsList[index].SetCount(freeExtentsList[index].GetCount() + count);
             availableLpnCount += count;
-            SortFreeExtentsList();
-            MergeFreeExtents();
+            _SortFreeExtentsList();
+            _MergeFreeExtents();
 
             return true;
         }
@@ -233,8 +233,8 @@ MetaFileExtentManager::RemoveFromFreeExtentsList(MetaLpnType startLpn, MetaLpnTy
         {
             iter->SetCount(iter->GetCount() + count);
             availableLpnCount += count;
-            SortFreeExtentsList();
-            MergeFreeExtents();
+            _SortFreeExtentsList();
+            _MergeFreeExtents();
 
             return true;
         }
@@ -246,14 +246,14 @@ MetaFileExtentManager::RemoveFromFreeExtentsList(MetaLpnType startLpn, MetaLpnTy
 
     freeExtentsList.push_back(MetaFileExtent(startLpn, count));
     availableLpnCount += count;
-    SortFreeExtentsList();
-    MergeFreeExtents();
+    _SortFreeExtentsList();
+    _MergeFreeExtents();
 
     return true;
 }
 
 void
-MetaFileExtentManager::MergeFreeExtents(void)
+MetaFileExtentManager::_MergeFreeExtents(void)
 {
     uint32_t index = 0;
     bool eraseNext = false;
@@ -284,7 +284,7 @@ MetaFileExtentManager::MergeFreeExtents(void)
 }
 
 void
-MetaFileExtentManager::MakeFreeExtentsList(void)
+MetaFileExtentManager::_MakeFreeExtentsList(void)
 {
     uint32_t index = 0;
     MetaLpnType startLpn = 0;
@@ -328,11 +328,11 @@ MetaFileExtentManager::MakeFreeExtentsList(void)
         }
     }
 
-    MergeFreeExtents();
+    _MergeFreeExtents();
 }
 
 void
-MetaFileExtentManager::SortFreeExtentsList(void)
+MetaFileExtentManager::_SortFreeExtentsList(void)
 {
     sort(freeExtentsList.begin(), freeExtentsList.end());
 }
@@ -361,11 +361,11 @@ void
 MetaFileExtentManager::AddToAllocatedExtentsList(MetaLpnType startLpn, MetaLpnType requestLpnCount)
 {
     allocatedExtentsList.push_back(MetaFileExtent(startLpn, requestLpnCount));
-    SortAllocatedExtentsList();
+    _SortAllocatedExtentsList();
 }
 
 void
-MetaFileExtentManager::MakeAllocatedExtentsList(void)
+MetaFileExtentManager::_MakeAllocatedExtentsList(void)
 {
     uint32_t index = 0;
     MetaLpnType startLpn = 0;
@@ -408,17 +408,17 @@ MetaFileExtentManager::MakeAllocatedExtentsList(void)
         }
     }
 
-    PrintAllocatedExtentsList();
+    _PrintAllocatedExtentsList();
 }
 
 void
-MetaFileExtentManager::SortAllocatedExtentsList(void)
+MetaFileExtentManager::_SortAllocatedExtentsList(void)
 {
     sort(allocatedExtentsList.begin(), allocatedExtentsList.end());
 }
 
 void
-MetaFileExtentManager::PrintAllocatedExtentsList(void)
+MetaFileExtentManager::_PrintAllocatedExtentsList(void)
 {
     int totalCount = 0;
 

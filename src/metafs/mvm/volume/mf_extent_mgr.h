@@ -54,7 +54,6 @@ public:
 
     void GetContent(MetaFileExtent* list);
     void SetContent(MetaFileExtent* list);
-    size_t GetContentSize(void);
     void SetFileBaseLpn(MetaLpnType BaseLpn);
     MetaLpnType
     GetFileBaseLpn(void)
@@ -65,17 +64,18 @@ public:
     /* to control free extents */
     pair<bool, MetaLpnType> AddToFreeExtentsList(MetaLpnType requestLpnCount);
     bool RemoveFromFreeExtentsList(MetaLpnType startLpn, MetaLpnType count);
-    void MergeFreeExtents(void);
-    void MakeFreeExtentsList(void);
-    void SortFreeExtentsList(void);
     void PrintFreeExtentsList(void);
 
     void AddToAllocatedExtentsList(MetaLpnType startLpn, MetaLpnType requestLpnCount);
-    void MakeAllocatedExtentsList(void);
-    void SortAllocatedExtentsList(void);
-    void PrintAllocatedExtentsList(void);
 
 private:
+    void _MergeFreeExtents(void);
+    void _MakeFreeExtentsList(void);
+    void _SortFreeExtentsList(void);
+    void _MakeAllocatedExtentsList(void);
+    void _SortAllocatedExtentsList(void);
+    void _PrintAllocatedExtentsList(void);
+
     MetaLpnType fileRegionBaseLpnInVolume;
     MetaLpnType maxFileRegionLpn;
     MetaLpnType availableLpnCount;

@@ -4,84 +4,82 @@
 
 namespace pos
 {
-TEST(MetaFileExtentManager, MetaFileExtentManager_)
+TEST(MetaFileExtentManager, AllocExtent_runCorrectly)
 {
+    // Given
+    MetaFileExtentManager extentMgr;
+
+    // When
+    extentMgr.Init(0, 100); // start lpn:0, last lpn: 100, count: 101
+    MetaLpnType availableLpn = extentMgr.GetAvailableLpnCount();
+    MetaLpnType biggestLpn = extentMgr.GetTheBiggestExtentSize();
+
+    // Then
+    EXPECT_EQ(availableLpn, 101);
+    EXPECT_EQ(biggestLpn, 101);
+
+    // When
+    MetaFilePageMap map = extentMgr.AllocExtent(100);
+
+    // Then
+    EXPECT_EQ(map.baseMetaLpn, 0);
+    EXPECT_EQ(map.pageCnt, 100);
+
+    // When
+    extentMgr.SetFileBaseLpn(1);
+    availableLpn = extentMgr.GetAvailableLpnCount();
+
+    // Then
+    EXPECT_EQ(availableLpn, 100);
+
+    // When
+    MetaLpnType baseLpn = extentMgr.GetFileBaseLpn();
+
+    // Then
+    EXPECT_EQ(baseLpn, 1);
 }
 
-TEST(MetaFileExtentManager, Init_)
+TEST(MetaFileExtentManager, Control_Contents)
 {
-}
+    // Given
+    MetaFileExtentManager extentMgr;
+    extentMgr.Init(0, 100); // start lpn:0, last lpn: 100, count: 101
 
-TEST(MetaFileExtentManager, AllocExtent_)
-{
-}
+    MetaFileExtent list[MetaFsConfig::MAX_VOLUME_CNT];
+    MetaFileExtent list_temp[MetaFsConfig::MAX_VOLUME_CNT];
+    memset(list, 0x0, sizeof(MetaFileExtent) * MetaFsConfig::MAX_VOLUME_CNT);
+    memset(list_temp, 0x0, sizeof(MetaFileExtent) * MetaFsConfig::MAX_VOLUME_CNT);
 
-TEST(MetaFileExtentManager, GetAvailableLpnCount_)
-{
-}
+    // (0, 19) (20, 5) (25, 4) - free count 21 - (50, 9) - free count 42 -
+    list[0].SetStartLpn(0);
+    list[0].SetCount(19);
+    list[1].SetStartLpn(20);
+    list[1].SetCount(5);
+    list[2].SetStartLpn(25);
+    list[2].SetCount(4);
+    list[3].SetStartLpn(50);
+    list[3].SetCount(9);
 
-TEST(MetaFileExtentManager, GetTheBiggestExtentSize_)
-{
-}
+    // When
+    extentMgr.SetContent(list);
+    extentMgr.GetContent(list_temp);
 
-TEST(MetaFileExtentManager, GetContent_)
-{
-}
+    // Then
+    MetaLpnType biggestLpn = extentMgr.GetTheBiggestExtentSize();
+    EXPECT_EQ(biggestLpn, 42);
 
-TEST(MetaFileExtentManager, SetContent_)
-{
-}
+    // Then
+    int usedLpnCount = 0;
+    int usedEntryCount = 0;
 
-TEST(MetaFileExtentManager, GetContentSize_)
-{
-}
-
-TEST(MetaFileExtentManager, SetFileBaseLpn_)
-{
-}
-
-TEST(MetaFileExtentManager, GetFileBaseLpn_)
-{
-}
-
-TEST(MetaFileExtentManager, AddToFreeExtentsList_)
-{
-}
-
-TEST(MetaFileExtentManager, RemoveFromFreeExtentsList_)
-{
-}
-
-TEST(MetaFileExtentManager, MergeFreeExtents_)
-{
-}
-
-TEST(MetaFileExtentManager, MakeFreeExtentsList_)
-{
-}
-
-TEST(MetaFileExtentManager, SortFreeExtentsList_)
-{
-}
-
-TEST(MetaFileExtentManager, PrintFreeExtentsList_)
-{
-}
-
-TEST(MetaFileExtentManager, AddToAllocatedExtentsList_)
-{
-}
-
-TEST(MetaFileExtentManager, MakeAllocatedExtentsList_)
-{
-}
-
-TEST(MetaFileExtentManager, SortAllocatedExtentsList_)
-{
-}
-
-TEST(MetaFileExtentManager, PrintAllocatedExtentsList_)
-{
+    for (int index = 0; index < MetaFsConfig::MAX_VOLUME_CNT; index++)
+    {
+        usedLpnCount += list_temp[index].GetCount();
+        if (list_temp[index].GetCount() != 0)
+            usedEntryCount++;
+    }
+    EXPECT_EQ(usedLpnCount, 37);
+    EXPECT_EQ(usedEntryCount, 3);
 }
 
 } // namespace pos
