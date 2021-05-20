@@ -31,15 +31,15 @@
  */
 
 #include "array_mount_sequence.h"
-#include "src/include/pos_event_id.h"
-#include "src/array_models/interface/i_mount_sequence.h"
-#include "src/array_components/mount_temp/mount_temp.h"
+
 #include "src/array/interface/i_abr_control.h"
+#include "src/array_components/mount_temp/mount_temp.h"
+#include "src/array_models/interface/i_mount_sequence.h"
+#include "src/include/pos_event_id.h"
 #include "src/volume/volume_manager.h"
 
 namespace pos
 {
-
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
     IAbrControl* abr, IStateControl* iState, string name)
 : temp(abr, name),
@@ -63,10 +63,18 @@ ArrayMountSequence::~ArrayMountSequence(void)
     sequence.clear();
 }
 
-int ArrayMountSequence::Mount(void)
+int
+ArrayMountSequence::Mount(void)
 {
     auto it = sequence.begin();
     int ret = (int)POS_EVENT_ID::SUCCESS;
+
+    StateContext* currState = state->GetState();
+    if (currState->ToStateType() >= StateEnum::NORMAL)
+    {
+        ret = (int)POS_EVENT_ID::ARRAY_ALD_MOUNTED;
+        return ret;
+    }
 
     state->Invoke(mountState);
     bool res = _WaitState(mountState);
@@ -118,7 +126,8 @@ error:
     return ret;
 }
 
-int ArrayMountSequence::Unmount(void)
+int
+ArrayMountSequence::Unmount(void)
 {
     StateContext* currState = state->GetState();
     if (currState->ToStateType() < StateEnum::NORMAL)
@@ -158,7 +167,8 @@ int ArrayMountSequence::Unmount(void)
     return (int)POS_EVENT_ID::SUCCESS;
 }
 
-void ArrayMountSequence::Shutdown(void)
+void
+ArrayMountSequence::Shutdown(void)
 {
     IVolumeManager* volMgr =
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
@@ -171,7 +181,8 @@ void ArrayMountSequence::Shutdown(void)
     temp.Shutdown();
 }
 
-void ArrayMountSequence::StateChanged(StateContext* prev, StateContext* next)
+void
+ArrayMountSequence::StateChanged(StateContext* prev, StateContext* next)
 {
     std::unique_lock<std::mutex> lock(mtx);
     cv.notify_all();
@@ -182,7 +193,8 @@ void ArrayMountSequence::StateChanged(StateContext* prev, StateContext* next)
     }
 }
 
-bool ArrayMountSequence::_WaitState(StateContext* goal)
+bool
+ArrayMountSequence::_WaitState(StateContext* goal)
 {
     int timeout_sec = 3;
     std::unique_lock<std::mutex> lock(mtx);

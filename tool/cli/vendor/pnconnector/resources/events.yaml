@@ -754,6 +754,11 @@ modules:
         message: failed to unmount array
         problem: higher priority job such as rebuilding is progressing.
         solution: try again after a while
+      - code: 2586
+        level: WARN
+        message: Failed to mount array
+        problem: Array already mounted
+        solution:
   - name: "Rebuild"
     count: 100
     idStart: 2800
