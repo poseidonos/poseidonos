@@ -33,6 +33,8 @@ JournalManagerTestFixture::~JournalManagerTestFixture(void)
     writeTester->WaitForAllLogWriteDone();
     writeTester->Reset();
 
+    journal->DeleteLogBuffer();
+
     delete replayTester;
     delete testInfo;
     delete journal;

@@ -59,6 +59,7 @@ JournalLogBufferIntegrationTest::TearDown(void)
     }
     addedLogs.clear();
 
+    logBuffer->Delete();
     logBuffer->Dispose();
     delete logBuffer;
 }
