@@ -16,10 +16,19 @@ JournalConfigurationSpy::~JournalConfigurationSpy(void)
 {
 }
 
-void
-JournalConfigurationSpy::Init(void)
+int
+JournalConfigurationSpy::Init(uint64_t loadedBufferSize)
 {
-    _ConfigureLogBufferSize();
+    if (loadedBufferSize == 0)
+    {
+        _SetLogBufferSize(logBufferSizeInConfig);
+    }
+    else
+    {
+        _SetLogBufferSize(loadedBufferSize);
+    }
+
+    return 0;
 }
 
 } // namespace pos

@@ -47,6 +47,9 @@ public:
     explicit JournalLogBuffer(MetaFileIntf* metaFile);
     virtual ~JournalLogBuffer(void);
 
+    virtual int Create(uint64_t logBufferSize);
+    virtual int Open(uint64_t& logBufferSize);
+
     virtual int Init(JournalConfiguration* journalConfiguration);
     virtual void Dispose(void);
 
@@ -58,11 +61,6 @@ public:
     {
         return numInitializedLogGroup == config->GetNumLogGroups();
     }
-    virtual bool
-    IsLoaded(void)
-    {
-        return logBufferLoaded;
-    }
 
     virtual int WriteLog(LogWriteContext* context, int logGroupID, uint64_t offset);
 
@@ -71,6 +69,8 @@ public:
     void AsyncResetDone(AsyncMetaFileIoCtx* ctx);
 
     int Delete(void); // TODO(huijeong.kim): move to tester code
+
+    virtual bool DoesLogFileExist(void);
 
 private:
     void _LoadBufferSize(void);
@@ -86,7 +86,6 @@ private:
     JournalConfiguration* config;
 
     std::atomic<int> numInitializedLogGroup;
-    bool logBufferLoaded;
     MetaFileIntf* logFile;
 
     char* initializedDataBuffer;

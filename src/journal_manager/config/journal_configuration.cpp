@@ -47,29 +47,52 @@
 
 namespace pos
 {
+// Constructor for product code
 JournalConfiguration::JournalConfiguration(std::string arrayName)
+: JournalConfiguration(arrayName, &metaFs.ctrl)
+{
+    _ReadConfiguration();
+}
+
+// Constructor for unit test mock injection
+JournalConfiguration::JournalConfiguration(std::string arrayName, MetaFsFileControlApi* metaFsCtrl)
 : journalEnabled(false),
   logBufferSizeInConfig(UINT64_MAX),
   metaPageSize(UINT64_MAX),
   maxPartitionSize(UINT64_MAX),
+  metaFsCtrl(metaFsCtrl),
   debugEnabled(false),
   numLogGroups(2),
   logBufferSize(UINT64_MAX),
   logGroupSize(UINT64_MAX),
   arrayName(arrayName)
 {
-    _ReadConfiguration();
 }
 
 JournalConfiguration::~JournalConfiguration(void)
 {
 }
 
-void
-JournalConfiguration::Init(void)
+int
+JournalConfiguration::Init(uint64_t loadedLogBufferSize)
 {
-    _ReadMetaFsConfiguration();
-    _ConfigureLogBufferSize();
+    int result = 0;
+    if (loadedLogBufferSize == 0)
+    {
+        _ReadMetaFsConfiguration();
+
+        uint64_t size = 0;
+        result = _ConfigureLogBufferSize(size);
+        if (result == 0)
+        {
+            _SetLogBufferSize(size);
+        }
+    }
+    else
+    {
+        _SetLogBufferSize(loadedLogBufferSize);
+    }
+    return result;
 }
 
 bool
@@ -106,20 +129,6 @@ uint64_t
 JournalConfiguration::GetMetaPageSize(void)
 {
     return metaPageSize;
-}
-
-void
-JournalConfiguration::UpdateLogBufferSize(uint64_t size)
-{
-    logBufferSize = size;
-    logGroupSize = logBufferSize / numLogGroups;
-
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION);
-    std::ostringstream os;
-    os << "Log buffer is loaded, size is " << logBufferSize;
-
-    POS_TRACE_INFO(eventId, os.str());
-    POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
 }
 
 void
@@ -203,42 +212,36 @@ JournalConfiguration::_ReadLogBufferSize(void)
 void
 JournalConfiguration::_ReadMetaFsConfiguration(void)
 {
-#ifndef IBOF_CONFIG_USE_MOCK_FS
     MetaFilePropertySet prop;
     prop.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
     prop.ioOpType = MetaFileDominant::WriteDominant;
     prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
 
-    metaPageSize = metaFs.ctrl.EstimateAlignedFileIOSize(prop, arrayName);
-    maxPartitionSize = metaFs.ctrl.GetTheBiggestExtentSize(prop, arrayName);
-#endif
+    metaPageSize = metaFsCtrl->EstimateAlignedFileIOSize(prop, arrayName);
+    maxPartitionSize = metaFsCtrl->GetTheBiggestExtentSize(prop, arrayName);
 }
 
-void
-JournalConfiguration::_ConfigureLogBufferSize(void)
+int
+JournalConfiguration::_ConfigureLogBufferSize(uint64_t& size)
 {
     int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION);
 
     if (maxPartitionSize <= metaPageSize)
     {
-        logBufferSize = 0;
-
         POS_TRACE_DEBUG(eventId, "No enugh space to create new log buffer");
-        return;
+        return -1 * eventId;
     }
 
     if (logBufferSizeInConfig == 0 || logBufferSizeInConfig > maxPartitionSize)
     {
-        logBufferSize = _GetAlignedSize(maxPartitionSize);
+        size = _GetAlignedSize(maxPartitionSize);
     }
     else
     {
-        logBufferSize = _GetAlignedSize(logBufferSizeInConfig);
+        size = _GetAlignedSize(logBufferSizeInConfig);
     }
 
-    logGroupSize = logBufferSize / numLogGroups;
-
-    POS_TRACE_INFO(eventId, "Log buffer size is configured to {}", logBufferSize);
+    return 0;
 }
 
 uint64_t
@@ -246,5 +249,15 @@ JournalConfiguration::_GetAlignedSize(uint64_t size)
 {
     // Log group size should be aligned with meta page size
     return AlignDown(size - metaPageSize, metaPageSize * numLogGroups);
+}
+
+void
+JournalConfiguration::_SetLogBufferSize(uint64_t size)
+{
+    logBufferSize = size;
+    logGroupSize = logBufferSize / numLogGroups;
+
+    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_CONFIGURATION,
+        "Log buffer size is configured to {}", logBufferSize);
 }
 } // namespace pos

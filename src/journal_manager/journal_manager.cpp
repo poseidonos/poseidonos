@@ -175,14 +175,22 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
 
     if (config->IsEnabled() == true)
     {
+        result = _InitConfigAndPrepareLogBuffer();
+        if (result < 0)
+        {
+            return result;
+        }
+
         _InitModules(vsaMap, stripeMap, mapFlush, blockAllocator,
             wbStripeAllocator, wbStripeCtx, segmentCtx, allocatorCtx);
 
-        result = _Init();
-
-        if (result == 0)
+        if (journalManagerStatus == WAITING_TO_BE_REPLAYED)
         {
             result = _DoRecovery();
+        }
+        else
+        {
+            result = _Reset();
         }
     }
 
@@ -194,36 +202,34 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
 }
 
 int
-JournalManager::_Init(void)
+JournalManager::_InitConfigAndPrepareLogBuffer(void)
 {
-    int result = logBuffer->Init(config);
-    if (result < 0)
-    {
-        return result;
-    }
+    int result = 0;
 
-    journalManagerStatus = JOURNAL_INIT;
-
-    if (logBuffer->IsLoaded() == false)
+    bool logBufferExist = logBuffer->DoesLogFileExist();
+    if (logBufferExist == true)
     {
-        result = _Reset();
+        uint64_t loadedLogBufferSize = 0;
+
+        result = logBuffer->Open(loadedLogBufferSize);
         if (result < 0)
         {
             return result;
         }
-        journalManagerStatus = JOURNALING;
+        config->Init(loadedLogBufferSize);
+
+        journalManagerStatus = WAITING_TO_BE_REPLAYED;
     }
     else
     {
-        journalManagerStatus = WAITING_TO_BE_REPLAYED;
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_LOG_BUFFER_LOADED),
-            "Journal log buffer is loaded");
+        result = config->Init();
+        if (result == 0)
+        {
+            result = logBuffer->Create(config->GetLogBufferSize());
+        }
     }
 
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_MANAGER_INITIALIZED);
-    POS_TRACE_INFO(eventId, "Journal manager is initialized to status {}", journalManagerStatus);
-
-    return 0;
+    return result;
 }
 
 int
@@ -375,15 +381,18 @@ JournalManager::AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates,
 int
 JournalManager::_Reset(void)
 {
-    if (journalManagerStatus != JOURNAL_INVALID)
+    _ResetModules();
+
+    int ret = logBuffer->SyncResetAll();
+    if (ret == 0)
     {
-        _ResetModules();
+        POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_MANAGER_INITIALIZED,
+            "Journal manager is initialized to status {}",
+            journalManagerStatus);
 
-        int ret = logBuffer->SyncResetAll();
-        return ret;
+        journalManagerStatus = JOURNALING;
     }
-
-    return 0;
+    return ret;
 }
 
 void
@@ -393,7 +402,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
     IAllocatorCtx* allocatorCtx)
 {
-    config->Init();
+    logBuffer->Init(config);
 
     bufferAllocator->Init(logGroupReleaser, config);
     dirtyMapManager->Init(config);

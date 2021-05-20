@@ -19,9 +19,11 @@
 #include "test/unit-tests/journal_service/journal_service_mock.h"
 
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::SetArgReferee;
 
 namespace pos
 {
@@ -113,13 +115,57 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalDisabled)
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNAL_INVALID);
 }
 
-TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabled)
+TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferNotExist)
 {
     // Given: Journal config manager is configured to be enabled
-    EXPECT_CALL(*config, IsEnabled()).WillRepeatedly(Return(true));
+    ON_CALL(*config, IsEnabled()).WillByDefault(Return(true));
+    ON_CALL(*logBuffer, DoesLogFileExist).WillByDefault(Return(false));
+    ON_CALL(*logBuffer, Create).WillByDefault(Return(0));
 
     // Then: All sub-modules should be initiailized
     EXPECT_CALL(*config, Init);
+    EXPECT_CALL(*bufferAllocator, Init);
+    EXPECT_CALL(*dirtyMapManager, Init);
+    EXPECT_CALL(*logWriteContextFactory, Init);
+    EXPECT_CALL(*logGroupReleaser, Init);
+    EXPECT_CALL(*logWriteHandler, Init);
+    EXPECT_CALL(*volumeEventHandler, Init);
+    EXPECT_CALL(*replayHandler, Init);
+    EXPECT_CALL(*statusProvider, Init);
+    EXPECT_CALL(*logBuffer, Init);
+
+    // Then: Log buffer should be created
+    EXPECT_CALL(*logBuffer, Create);
+
+    // Then: Log filled subscriber to be added in this sequence
+    {
+        InSequence s;
+        EXPECT_CALL(*logFilledNotifier, Register(dirtyMapManager));
+        EXPECT_CALL(*logFilledNotifier, Register(bufferAllocator));
+        EXPECT_CALL(*logFilledNotifier, Register(logWriteHandler));
+    }
+
+    // When: Journal is initialized
+    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
+                    nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
+
+    // Then: Journal manager should be ready
+    EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNALING);
+}
+
+TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferExist)
+{
+    // Given: Journal config manager is configured to be enabled
+    ON_CALL(*config, IsEnabled()).WillByDefault(Return(true));
+    ON_CALL(*logBuffer, DoesLogFileExist).WillByDefault(Return(true));
+
+    // Then: JournalConfiguration should be initialized with the size of loaded log buffer
+    uint64_t expectedLogBufferSize = 16 * 1024;
+    uint64_t loadedLogBufferSize = 0;
+    EXPECT_CALL(*logBuffer, Open(_)).WillOnce(DoAll(SetArgReferee<0>(expectedLogBufferSize), Return(0)));
+    EXPECT_CALL(*config, Init(expectedLogBufferSize));
+
+    // Then: All sub-modules should be initiailized
     EXPECT_CALL(*bufferAllocator, Init);
     EXPECT_CALL(*dirtyMapManager, Init);
     EXPECT_CALL(*logWriteContextFactory, Init);
@@ -210,10 +256,10 @@ TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferNotExist)
     EXPECT_CALL(*config, IsEnabled).WillRepeatedly(Return(true));
 
     // When: Log buffer is not loaded
-    EXPECT_CALL(*logBuffer, IsLoaded).WillOnce(Return(false));
+    EXPECT_CALL(*logBuffer, DoesLogFileExist).WillOnce(Return(false));
 
     // Then: Expect log buffer to be reset and journal to be registered to the service
-    EXPECT_CALL(*logBuffer, Init).WillOnce(Return(0));
+    EXPECT_CALL(*logBuffer, Create).WillOnce(Return(0));
     EXPECT_CALL(*logBuffer, SyncResetAll).WillOnce(Return(0));
     EXPECT_CALL(*service, Register);
 
@@ -231,10 +277,10 @@ TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferLoaded)
     EXPECT_CALL(*config, IsEnabled).WillRepeatedly(Return(true));
 
     // When: Log buffer is loaded
-    EXPECT_CALL(*logBuffer, IsLoaded).WillOnce(Return(true));
+    EXPECT_CALL(*logBuffer, DoesLogFileExist).WillOnce(Return(true));
 
     // Then: Expect to start replay, and journal to be registered to the service
-    EXPECT_CALL(*logBuffer, Init).WillOnce(Return(0));
+    EXPECT_CALL(*logBuffer, Open).WillOnce(Return(0));
     EXPECT_CALL(*replayHandler, Start).WillOnce(Return(0));
     EXPECT_CALL(*service, Register);
 

@@ -134,13 +134,13 @@ protected:
         IWBStripeAllocator* wbStripeAllocator,
         IWBStripeCtx* wbStripeCtx, ISegmentCtx* segmentCtx,
         IAllocatorCtx* allocatorCtx);
+    void _ResetModules(void);
+
     int _Init(void);
+    int _InitConfigAndPrepareLogBuffer(void);
 
     int _Reset(void);
     int _DoRecovery(void);
-
-    void _InitModules(void);
-    void _ResetModules(void);
 
     int _CanJournalBeWritten(void);
 

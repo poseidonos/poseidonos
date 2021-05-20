@@ -68,7 +68,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayFullLogBuffer)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
-TEST_F(ReplayLogBufferIntegrationTest, ReplayCirculatedLogBuffer)
+TEST_F(ReplayLogBufferIntegrationTest, DISABLED_ReplayCirculatedLogBuffer)
 {
     POS_TRACE_DEBUG(9999, "ReplayLogBufferIntegrationTest::ReplayCirculatedLogBuffer");
 
