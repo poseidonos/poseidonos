@@ -537,7 +537,7 @@ modules:
     info:
       - code: 2500
         level: ERROR
-        message: Array is alreday mounted.
+        message: Array is already mounted.
         problem:
         solution:
       - code: 2501
