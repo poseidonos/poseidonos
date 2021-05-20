@@ -736,9 +736,9 @@ modules:
         solution: Enter the Array name that meets the Array name rules
       - code: 2580
         level: ERROR
-        message: failed to mount array
-        problem: array already has been mounted
-        solution: unmount array first
+        message: Failed to exit poseidonos because of mounted array
+        problem: Some array is not unmounted
+        solution: Unmount array first
       - code: 2581
         level: ERROR
         message: failed to unmount array
