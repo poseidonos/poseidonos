@@ -78,15 +78,12 @@ ContextReplayer::ReplaySsdLsid(StripeId currentSsdLsid)
 void
 ContextReplayer::ReplaySegmentAllocation(StripeId userLsid)
 {
-    if (userLsid % addrInfo->GetstripesPerSegment() == 0)
+    SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
+    if (allocatorCtx->GetSegmentState(segId, false) == SegmentState::FREE)
     {
-        SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
-        if (allocatorCtx->GetSegmentState(segId, false) == SegmentState::FREE)
-        {
-            allocatorCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
-            allocatorCtx->AllocateSegment(segId);
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_REPLAY_STATUS, "SegmentId:{} is allocated", segId);
-        }
+        allocatorCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
+        allocatorCtx->AllocateSegment(segId);
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_REPLAY_STATUS, "SegmentId:{} is allocated", segId);
     }
 }
 
@@ -94,13 +91,6 @@ void
 ContextReplayer::ReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
 {
     wbStripeCtx->AllocWbStripe(wbLsid);
-    
-    StripeId userLsid = vsid;
-    if (userLsid % addrInfo->GetstripesPerSegment() == 0)
-    {
-        SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
-        allocatorCtx->AllocateSegment(segId);
-    }
 }
 
 void
