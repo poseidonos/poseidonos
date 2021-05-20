@@ -77,7 +77,7 @@ DoGcWbtCommand::Execute(Args &argv, JsonElement &elem)
         return returnValue;
     }
 
-    ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx("");
+    ISegmentCtx* iSegmentCtx = AllocatorServiceSingleton::Instance()->GetISegmentCtx(arrayName);
     SegmentId victimId = iSegmentCtx->GetGCVictimSegment();
 
     if (UNMAP_SEGMENT == victimId)
