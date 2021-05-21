@@ -118,9 +118,14 @@ ArrayMountSequence::Mount(void)
     return ret;
 
 error:
-    for (; it == sequence.begin(); --it)
+    while (true)
     {
         (*it)->Dispose();
+        if (it == sequence.begin())
+        {
+            break;
+        }
+        --it;
     }
     state->Remove(mountState);
     return ret;
