@@ -48,6 +48,15 @@ enum class StateEnum
     TYPE_COUNT,
 };
 
+static const string STATE_STR[(int)StateEnum::TYPE_COUNT] 
+{
+    "OFFLINE",
+    "STOP",
+    "NORMAL",
+    "BUSY",
+    "PAUSE",
+};
+
 class StateType
 {
 public:
@@ -62,13 +71,5 @@ public:
 
 private:
     StateEnum val;
-    string STATE_STR[(int)StateEnum::TYPE_COUNT] =
-    {
-        "OFFLINE",
-        "STOP",
-        "NORMAL",
-        "BUSY",
-        "PAUSE",
-    };
 };
 } // namespace pos

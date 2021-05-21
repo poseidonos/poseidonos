@@ -5,6 +5,8 @@
 namespace pos
 {
 IODispatcher::IODispatcher(void)
+: ioWorkerCount(0),
+  deviceAllocationTurn(0)
 {
 
 }

@@ -33,6 +33,7 @@
 #pragma once
 
 #include <functional>
+
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/event.h"
 #include "src/mapper/i_vsamap.h"
@@ -50,8 +51,8 @@ class BlockMapUpdate : public Event
 public:
     BlockMapUpdate(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback);
     BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback,
-       function<bool(void)>IsReactorNow, IVSAMap *iVSAMap, JournalService *journalService,
-        EventScheduler *eventScheduler, BlockMapUpdateCompletion *blockMapUpdateCompletion);
+        function<bool(void)> IsReactorNow, IVSAMap* iVSAMap, JournalService* journalService,
+        EventScheduler* eventScheduler, EventSmartPtr blockMapUpdateCompletionEvent);
     virtual bool Execute(void) override;
 
 private:
@@ -61,8 +62,8 @@ private:
     IVSAMap* iVSAMap;
     CallbackSmartPtr originCallback;
     JournalService* journalService;
-    EventScheduler *eventScheduler;
-    BlockMapUpdateCompletion *blockMapUpdateCompletion;
+    EventScheduler* eventScheduler;
+    EventSmartPtr blockMapUpdateCompletionEvent;
 };
 
 } // namespace pos

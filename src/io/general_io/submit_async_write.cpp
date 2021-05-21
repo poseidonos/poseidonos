@@ -10,6 +10,7 @@
 #include "src/io/general_io/internal_write_completion.h"
 #include "src/logger/logger.h"
 #include "src/state/state_manager.h"
+#include "src/event_scheduler/event_scheduler.h"
 
 namespace pos
 {
@@ -69,7 +70,7 @@ SubmitAsyncWrite::Execute(
         {
             locker->Unlock(arrayName, stripeId);
         }
-        callback->Execute();
+        EventSchedulerSingleton::Instance()->EnqueueEvent(callback);
         return IOSubmitHandlerStatus::SUCCESS;
     }
 

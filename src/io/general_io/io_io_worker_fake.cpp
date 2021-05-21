@@ -113,6 +113,7 @@ IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id)
 IOWorker::~IOWorker(void)
 {
     delete storage;
+    delete ioQueue;
 }
 
 /* --------------------------------------------------------------------------*/

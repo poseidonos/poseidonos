@@ -37,11 +37,11 @@ TEST(BlockMapUpdate, Constructor_Stack)
     VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, ""));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIVSAMap> mockIVSAMap;
-    MockWriteCompletion* mockWriteCompletion = new NiceMock<MockWriteCompletion>(volumeIo);
+    CallbackSmartPtr mockWriteCompletion = std::make_shared<MockWriteCompletion>(volumeIo);
     MockIBlockAllocator iBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &mockIVSAMap));
-    MockBlockMapUpdateCompletion* mockBlockMapUpdateCompletion = new NiceMock<MockBlockMapUpdateCompletion>(
+    EventSmartPtr mockBlockMapUpdateCompletionEvent = std::make_shared<MockBlockMapUpdateCompletion>(
         volumeIo, callback, []() -> bool { return false; }, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     NiceMock<MockIVSAMap> vsaMap;
@@ -51,7 +51,7 @@ TEST(BlockMapUpdate, Constructor_Stack)
     // When
     BlockMapUpdate blockMapUpdate(
         volumeIo, callback, []() -> bool { return false; },
-        &vsaMap, &mockJournalService, &mockEventScheduler, mockBlockMapUpdateCompletion);
+        &vsaMap, &mockJournalService, &mockEventScheduler, mockBlockMapUpdateCompletionEvent);
 
     // Then : Do nothing
 }
@@ -66,11 +66,11 @@ TEST(BlockMapUpdate, Constructor_Heap)
     VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, ""));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIVSAMap> mockIVSAMap;
-    MockWriteCompletion* mockWriteCompletion = new NiceMock<MockWriteCompletion>(volumeIo);
+    CallbackSmartPtr mockWriteCompletion = std::make_shared<MockWriteCompletion>(volumeIo);
     MockIBlockAllocator iBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &mockIVSAMap));
-    MockBlockMapUpdateCompletion* mockBlockMapUpdateCompletion = new NiceMock<MockBlockMapUpdateCompletion>(
+    EventSmartPtr mockBlockMapUpdateCompletionEvent = std::make_shared<MockBlockMapUpdateCompletion>(
         volumeIo, callback, []() -> bool { return false; }, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     NiceMock<MockIVSAMap> vsaMap;
@@ -80,7 +80,7 @@ TEST(BlockMapUpdate, Constructor_Heap)
     // When
     BlockMapUpdate* blockMapUpdate = new BlockMapUpdate(
         volumeIo, callback, []() -> bool { return false; },
-        &vsaMap, &mockJournalService, &mockEventScheduler, mockBlockMapUpdateCompletion);
+        &vsaMap, &mockJournalService, &mockEventScheduler, mockBlockMapUpdateCompletionEvent);
 
     // Then : Do nothing
 
@@ -99,11 +99,11 @@ TEST(BlockMapUpdate, Execute_Journal_Enabled)
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIVSAMap> mockIVSAMap;
-    MockWriteCompletion* mockWriteCompletion = new NiceMock<MockWriteCompletion>(volumeIo);
+    CallbackSmartPtr mockWriteCompletion = std::make_shared<MockWriteCompletion>(volumeIo);
     MockIBlockAllocator iBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &mockIVSAMap));
-    MockBlockMapUpdateCompletion* mockBlockMapUpdateCompletion = new NiceMock<MockBlockMapUpdateCompletion>(
+    EventSmartPtr mockBlockMapUpdateCompletionEvent = std::make_shared<MockBlockMapUpdateCompletion>(
         volumeIo, callback, []() -> bool { return false; }, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     MpageList mPageList;
@@ -121,14 +121,13 @@ TEST(BlockMapUpdate, Execute_Journal_Enabled)
 
     BlockMapUpdate blockMapUpdate(
         volumeIo, callback, []() -> bool { return false; },
-        &vsaMap, &mockJournalService, &mockEventScheduler, mockBlockMapUpdateCompletion);
+        &vsaMap, &mockJournalService, &mockEventScheduler, mockBlockMapUpdateCompletionEvent);
 
     // Then : Execute
     bool actual = blockMapUpdate.Execute();
     bool expected = true;
     volumeIo = nullptr;
     ASSERT_EQ(actual, expected);
-    delete mockVolumeIo;
 }
 
 TEST(BlockMapUpdate, Execute_Journal_Not_Enabled)
@@ -143,13 +142,14 @@ TEST(BlockMapUpdate, Execute_Journal_Not_Enabled)
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIVSAMap> mockIVSAMap;
-    MockWriteCompletion* mockWriteCompletion = new NiceMock<MockWriteCompletion>(volumeIo);
+    CallbackSmartPtr mockWriteCompletion = std::make_shared<MockWriteCompletion>(volumeIo);
     MockIBlockAllocator iBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &mockIVSAMap));
     MockBlockMapUpdateCompletion* mockBlockMapUpdateCompletion = new NiceMock<MockBlockMapUpdateCompletion>(
         volumeIo, callback, []() -> bool { return false; }, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
+    EventSmartPtr mockBlockMapUpdateCompletionEvent(mockBlockMapUpdateCompletion);
 
     // When : journal is not enabled
     ON_CALL(*mockVolumeIo, GetSectorRba()).WillByDefault(Return(0));
@@ -159,14 +159,12 @@ TEST(BlockMapUpdate, Execute_Journal_Not_Enabled)
 
     BlockMapUpdate blockMapUpdate(
         volumeIo, callback, []() -> bool { return false; },
-        &mockIVSAMap, &mockJournalService, &mockEventScheduler, mockBlockMapUpdateCompletion);
+        &mockIVSAMap, &mockJournalService, &mockEventScheduler, mockBlockMapUpdateCompletionEvent);
 
     // Then : Execute
     bool actual = blockMapUpdate.Execute();
     bool expected = true;
     ASSERT_EQ(actual, expected);
-
-    delete mockVolumeIo;
 }
 
 TEST(BlockMapUpdate, Execute_Journal_Not_Enabled_Fail)
@@ -181,22 +179,23 @@ TEST(BlockMapUpdate, Execute_Journal_Not_Enabled_Fail)
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIVSAMap> mockIVSAMap;
-    MockWriteCompletion* mockWriteCompletion = new NiceMock<MockWriteCompletion>(volumeIo);
+    CallbackSmartPtr mockWriteCompletion = std::make_shared<MockWriteCompletion>(volumeIo);
     MockIBlockAllocator iBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &mockIVSAMap));
 
-    MockBlockMapUpdateCompletion* mockBlockMapUpdateCompletionFalse = new NiceMock<MockBlockMapUpdateCompletion>(
+    MockBlockMapUpdateCompletion* mockBlockMapUpdateCompletion = new NiceMock<MockBlockMapUpdateCompletion>(
         volumeIo, callback, []() -> bool { return false; }, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
+    EventSmartPtr mockBlockMapUpdateCompletionEvent(mockBlockMapUpdateCompletion);
 
     ON_CALL(mockJournalService, IsEnabled(_)).WillByDefault(Return(false));
-    ON_CALL(*mockBlockMapUpdateCompletionFalse, Execute()).WillByDefault(Return(false));
+    ON_CALL(*mockBlockMapUpdateCompletion, Execute()).WillByDefault(Return(false));
     ON_CALL(*mockVolumeIo, GetSectorRba()).WillByDefault(Return(0));
     // When
     BlockMapUpdate blockMapUpdateFalse(
         volumeIo, callback, []() -> bool { return false; },
-        &mockIVSAMap, &mockJournalService, &mockEventScheduler, mockBlockMapUpdateCompletionFalse);
+        &mockIVSAMap, &mockJournalService, &mockEventScheduler, mockBlockMapUpdateCompletionEvent);
 
     // Then : Execute When jounal is off
     EXPECT_CALL(mockEventScheduler, EnqueueEvent(_)).Times(1);
@@ -205,8 +204,6 @@ TEST(BlockMapUpdate, Execute_Journal_Not_Enabled_Fail)
     bool expected = true;
     volumeIo = nullptr;
     ASSERT_EQ(actual, expected);
-
-    delete mockVolumeIo;
 }
 
 } // namespace pos

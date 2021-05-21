@@ -67,7 +67,6 @@ IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id)
 : cpuSet(cpuSetInput),
   ioQueue(new IOQueue),
   currentOutstandingIOCount(0),
-  spdkThread(nullptr),
   exit(false),
   id(id)
 {

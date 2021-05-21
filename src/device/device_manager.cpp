@@ -79,7 +79,9 @@ MonitorStart(DeviceMonitor* monitor)
 
 DeviceManager::DeviceManager(void)
 : affinityManager(AffinityManagerSingleton::Instance()),
-  reactorRegistered(false)
+  reactorRegistered(false),
+  deviceEvent(nullptr),
+  ioDispatcher(nullptr)
 {
     _InitDriver();
     _InitMonitor();
