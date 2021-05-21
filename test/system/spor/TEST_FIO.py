@@ -3,8 +3,6 @@
 import subprocess
 import sys
 
-from threading import Thread
-
 import TEST
 import TEST_LOG
 import TEST_LIB

@@ -138,11 +138,11 @@ run_test(){
     info "Start SPOR regression test"
 
     cd ${ibof_root}/test/system/spor
-    
+
     if [ ${test_mode} = "precommit" ] ; then
         python3 run_all_tests.py -f ${target_fabric_ip} -l ${log_dir} -q -s "SPOR_BASIC_4.py, SPOR_MULTI_VOLUME_WRITE_2.py, SPOR_OVERWRITE_2.py, SPOR_CHECK_POINT_3.py"
     elif [ ${test_mode} = "postcommit" ] ; then
-        python3 run_all_tests.py -f ${target_fabric_ip} -l ${log_dir} -q -s "SPOR_BASIC_[4,5].py, SPOR_MULTI_VOLUME_WRITE_2.py, SPOR_OVERWRITE_2.py, SPOR_CHECK_POINT*.py, SPOR_VOLUME_BASIC_[2,5,6].py"
+        python3 run_all_tests.py -f ${target_fabric_ip} -l ${log_dir} -q -s "SPOR_BASIC_[4,5].py, SPOR_MULTI_VOLUME_WRITE_2.py, SPOR_OVERWRITE_2.py, SPOR_CHECK_POINT*.py, SPOR_VOLUME_BASIC_[2,5,6].py, SPOR_MULTI_ARRAY_4.py"
     fi
 
     if [ $? -ne 0 ];then

@@ -15,8 +15,6 @@ sys.path.append("../io_path/")
 import spdk_rpc  # noqa: E402
 import json_parser  # noqa: E402
 import cli  # noqa: E402
-import pos_constant  # noqa: E402
-import pos  # noqa: E402
 
 ARRAYNAME = "POSArray"
 
@@ -50,7 +48,6 @@ def clean_bringup(numArray=1):
         os.remove(TEST.mockfile)
 
     TEST_RUN_POS.start_pos()
-    subprocess.call(["sleep", "3"])
 
     setup(numArray)
     mbr_reset()
@@ -64,7 +61,6 @@ def dirty_bringup(numArray=1):
     TEST_LOG.print_info("* POS dirty bringup")
 
     TEST_RUN_POS.start_pos()
-    subprocess.call(["sleep", "3"])
 
     setup(numArray)
     for arrayId in range(numArray):
