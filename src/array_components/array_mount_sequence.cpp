@@ -118,7 +118,7 @@ ArrayMountSequence::Mount(void)
     return ret;
 
 error:
-    for (; it != sequence.begin(); --it)
+    for (; it == sequence.begin(); --it)
     {
         (*it)->Dispose();
     }
@@ -142,6 +142,7 @@ ArrayMountSequence::Unmount(void)
     bool res = _WaitState(unmountState);
     if (res == false)
     {
+        state->Remove(unmountState);
         return (int)POS_EVENT_ID::ARRAY_UNMOUNT_PRIORITY_ERROR;
     }
 
