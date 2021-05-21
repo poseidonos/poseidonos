@@ -49,7 +49,7 @@ ReplayTestFixture::ExpectReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
         SetLSA(vsid, wbLsid, IN_WRITE_BUFFER_AREA))
         .Times(1);
     EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
-        ReplayStripeAllocation(vsid, wbLsid))
+        ReplayStripeAllocation(wbLsid))
         .Times(1);
 }
 
@@ -92,7 +92,7 @@ ReplayTestFixture::ExpectReplayStripeFlush(StripeTestFixture stripe)
         stripe.GetUserAddr().stripeId, stripe.GetUserAddr().stripeLoc)).Times(1);
 
     EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
-        ReplayStripeFlushed(stripe.GetWbAddr().stripeId))
+        ReplayStripeFlushed(stripe.GetWbAddr().stripeId, stripe.GetUserAddr().stripeId))
         .Times(1);
 }
 

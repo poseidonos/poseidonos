@@ -181,7 +181,7 @@ ReplayStripeAllocation::Replay(void)
         return result;
     }
 
-    contextReplayer->ReplayStripeAllocation(vsid, wbLsid);
+    contextReplayer->ReplayStripeAllocation(wbLsid);
     status->StripeAllocated();
     return result;
 }
@@ -228,7 +228,7 @@ ReplayStripeFlush::~ReplayStripeFlush(void)
 int
 ReplayStripeFlush::Replay(void)
 {
-    contextReplayer->ReplayStripeFlushed(wbLsid);
+    contextReplayer->ReplayStripeFlushed(wbLsid, userLsid);
     status->StripeFlushed();
 
     return 0;

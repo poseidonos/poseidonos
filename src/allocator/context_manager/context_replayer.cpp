@@ -88,17 +88,19 @@ ContextReplayer::ReplaySegmentAllocation(StripeId userLsid)
 }
 
 void
-ContextReplayer::ReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
+ContextReplayer::ReplayStripeAllocation(StripeId wbLsid)
 {
     wbStripeCtx->AllocWbStripe(wbLsid);
 }
 
 void
-ContextReplayer::ReplayStripeFlushed(StripeId wbLsid)
+ContextReplayer::ReplayStripeFlushed(StripeId wbLsid, StripeId userLsid)
 {
+    // flush stripe
     wbStripeCtx->ReleaseWbStripe(wbLsid);
-    SegmentId segId = wbLsid / addrInfo->GetstripesPerSegment();
 
+    // increase occupied stripe count
+    SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
     if (segmentCtx->IncreaseOccupiedStripeCount(segId) == (int)addrInfo->GetstripesPerSegment())
     {
         if (segmentCtx->GetValidBlockCount(segId) == 0)
