@@ -10,15 +10,13 @@ class FakeNodeMetaGetter : public meta::NodeMetaGetter
 public:
     FakeNodeMetaGetter()
     {
-        for (int i = 0; i < MAX_NODE; i++)
-            node_status[i] = true;
     }
     virtual ~FakeNodeMetaGetter()
     {
     }
 
     air::ProcessorType
-    NodeProcessorType(uint32_t i) const
+    ProcessorType(uint32_t i) const
     {
         switch (i)
         {
@@ -37,21 +35,22 @@ public:
                 return air::ProcessorType::PROCESSORTYPE_NULL;
         }
     }
-    bool
-    NodeEnable(uint32_t i) const
+
+    virtual inline uint32_t
+    IndexSize(uint32_t nid) const
     {
-        if (0 <= i && MAX_NODE > i)
-            return node_status[i];
-        else
-            return false;
+        return 32;
     }
 
-    void
-    SetNodeDisable(uint32_t i)
+    virtual inline uint32_t
+    FilterSize(uint32_t nid) const
     {
-        node_status[i] = false;
+        return 32;
     }
 
-private:
-    bool node_status[MAX_NODE];
+    virtual inline bool
+    Run(uint32_t nid) const
+    {
+        return true;
+    }
 };

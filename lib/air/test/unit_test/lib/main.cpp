@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
 
 #include "casting_test.h"
 #include "data_test.h"
@@ -13,31 +14,105 @@
 #include "json_test.h"
 #include "lock_test.h"
 #include "msg_test.h"
-#include "src/config/ConfigParser.cpp"
 #include "src/lib/Protocol.h"
+#include "src/lib/StringView.h"
 #include "type_test.h"
 
 using ::testing::HasSubstr;
 
+TEST(StringView, Size)
+{
+    air::string_view a_str1 = "hello i am a string_view";
+    EXPECT_EQ(24, a_str1.size());
+
+    air::string_view a_str2 = "hello ";
+    EXPECT_EQ(6, a_str2.size());
+}
+
+TEST(StringView, Compare)
+{
+    air::string_view a_str = "hello i am a string_view";
+    EXPECT_EQ(0, a_str.compare("hello i am a string_view"));
+    EXPECT_EQ(-1, a_str.compare("hello i am a string_vie"));
+}
+
+TEST(StringView, OperatorEqual)
+{
+    air::string_view a_str = "hi there";
+    air::string_view a_str2 = "hi there";
+    EXPECT_TRUE(a_str == a_str2);
+}
+
+TEST(StringView, Find)
+{
+    air::string_view a_str = "hello i am a string_view";
+    EXPECT_EQ(0, a_str.find("h"));
+    EXPECT_EQ(0, a_str.find("hello"));
+    EXPECT_EQ(6, a_str.find("i am"));
+    EXPECT_EQ(13, a_str.find("str"));
+    EXPECT_EQ(23, a_str.find("w"));
+}
+
+TEST(StringView, Substr)
+{
+    air::string_view a_str = "hello i am a string_view";
+    EXPECT_EQ(0, a_str.substr(0, 0).compare(""));
+    EXPECT_EQ(0, a_str.substr(0, 1).compare("h"));
+    EXPECT_EQ(0, a_str.substr(0, 5).compare("hello"));
+    EXPECT_EQ(0, a_str.substr(13, 11).compare("string_view"));
+    EXPECT_EQ(0, a_str.substr(23, 1).compare("w"));
+    EXPECT_TRUE(a_str.substr(13, 12) == "string_view");
+    EXPECT_TRUE(a_str.substr(13, 34) == "string_view");
+}
+
+TEST(StringView, OperatorStream)
+{
+    air::string_view a_str = "hi there";
+    std::cout << a_str << "!\n";
+}
+
+TEST(StringView, ToString)
+{
+    air::string_view a_str = "hi there";
+    std::string str = "";
+    str.assign(a_str.data(), a_str.size());
+    EXPECT_TRUE(str == "hi there");
+}
+
+TEST(StringView, ParsingCase1)
+{
+    air::string_view sentence = "StreamingInterval:1, AirBuild  : True, NodeBuild:True, NodeRun:On, NodeSamplingRatio: 1000, NodeIndexSize:32";
+    size_t start_pos = sentence.find("AirBuild");
+    EXPECT_FALSE(air::string_view::npos == start_pos);
+
+    size_t comma_pos = sentence.find(",", start_pos + 1);
+    air::string_view key_value = sentence.substr(start_pos, comma_pos - start_pos);
+    EXPECT_TRUE(key_value == "AirBuild  : True");
+
+    size_t colon_pos = key_value.find(":");
+    air::string_view value = key_value.substr(colon_pos + 1, key_value.size() - colon_pos);
+    EXPECT_TRUE(value == " True");
+}
+
 TEST_F(TypeTest, Node)
 {
-    EXPECT_EQ((uint32_t)cfg::GetIndex(config::ConfigType::NODE, "Q_COMPLETION"), node.nid);
-    EXPECT_EQ(air::ProcessorType::QUEUE, node.processor_type);
-    EXPECT_EQ(true, node.enable);
-    EXPECT_EQ(1000U, node.sample_ratio);
+    EXPECT_EQ((uint32_t)cfg::GetSentenceIndex(config::ParagraphType::NODE, "Q_COMPLETION"), node_meta.nid);
+    EXPECT_EQ(air::ProcessorType::QUEUE, node_meta.processor_type);
+    EXPECT_EQ(true, node_meta.run);
+    EXPECT_EQ(1000, node_meta.sample_ratio);
 
-    node.nid = (uint32_t)cfg::GetIndex(config::ConfigType::NODE, "PERF_BENCHMARK");
-    EXPECT_EQ(0, cfg::GetName(config::ConfigType::NODE, node.nid).compare("PERF_BENCHMARK"));
-    node.nid = (uint32_t)cfg::GetIndex(config::ConfigType::NODE, "LAT_SUBMIT");
-    EXPECT_EQ(0, cfg::GetName(config::ConfigType::NODE, node.nid).compare("LAT_SUBMIT"));
-    node.nid = (uint32_t)cfg::GetIndex(config::ConfigType::NODE, "LAT_PROCESS");
-    EXPECT_EQ(0, cfg::GetName(config::ConfigType::NODE, node.nid).compare("LAT_PROCESS"));
-    node.nid = (uint32_t)cfg::GetIndex(config::ConfigType::NODE, "LAT_COMPLETE");
-    EXPECT_EQ(0, cfg::GetName(config::ConfigType::NODE, node.nid).compare("LAT_COMPLETE"));
-    node.nid = (uint32_t)cfg::GetIndex(config::ConfigType::NODE, "Q_SUBMISSION");
-    EXPECT_EQ(0, cfg::GetName(config::ConfigType::NODE, node.nid).compare("Q_SUBMISSION"));
-    node.nid = (uint32_t)cfg::GetIndex(config::ConfigType::NODE, "Q_COMPLETION");
-    EXPECT_EQ(0, cfg::GetName(config::ConfigType::NODE, node.nid).compare("Q_COMPLETION"));
+    node_meta.nid = (uint32_t)cfg::GetSentenceIndex(config::ParagraphType::NODE, "PERF_BENCHMARK");
+    EXPECT_EQ(0, cfg::GetSentenceName(config::ParagraphType::NODE, node_meta.nid).compare("PERF_BENCHMARK"));
+    node_meta.nid = (uint32_t)cfg::GetSentenceIndex(config::ParagraphType::NODE, "LAT_SUBMIT");
+    EXPECT_EQ(0, cfg::GetSentenceName(config::ParagraphType::NODE, node_meta.nid).compare("LAT_SUBMIT"));
+    node_meta.nid = (uint32_t)cfg::GetSentenceIndex(config::ParagraphType::NODE, "LAT_PROCESS");
+    EXPECT_EQ(0, cfg::GetSentenceName(config::ParagraphType::NODE, node_meta.nid).compare("LAT_PROCESS"));
+    node_meta.nid = (uint32_t)cfg::GetSentenceIndex(config::ParagraphType::NODE, "LAT_COMPLETE");
+    EXPECT_EQ(0, cfg::GetSentenceName(config::ParagraphType::NODE, node_meta.nid).compare("LAT_COMPLETE"));
+    node_meta.nid = (uint32_t)cfg::GetSentenceIndex(config::ParagraphType::NODE, "Q_SUBMISSION");
+    EXPECT_EQ(0, cfg::GetSentenceName(config::ParagraphType::NODE, node_meta.nid).compare("Q_SUBMISSION"));
+    node_meta.nid = (uint32_t)cfg::GetSentenceIndex(config::ParagraphType::NODE, "Q_COMPLETION");
+    EXPECT_EQ(0, cfg::GetSentenceName(config::ParagraphType::NODE, node_meta.nid).compare("Q_COMPLETION"));
 }
 
 TEST(Protocol, ValueCheck)
@@ -124,13 +199,8 @@ TEST_F(DataTest, LatencyData)
 
 TEST_F(DataTest, PerformanceData)
 {
-    bool b{false};
-    uint32_t value{0};
-    EXPECT_EQ(b, perf_data->access);
-    EXPECT_EQ(value, perf_data->iops_total);
-
-    value = 100;
-    EXPECT_EQ(value, perf_data->iops_read);
+    EXPECT_EQ(false, perf_data->access);
+    EXPECT_EQ(100, perf_data->iops);
 }
 
 TEST_F(CastingTest, to_dtype)

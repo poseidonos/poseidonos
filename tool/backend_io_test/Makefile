@@ -1,7 +1,7 @@
 
 ROOT = ../../
 INCLUDE = -I$(ROOT) -I$(ROOT)/lib/ -I$(SPDK_INCLUDE) -I$(SPD_LOG) -I$(ROOT)/src/network -I$(ROOT)/lib/spdk/include -I$(ROOT)/lib/dpdk/include/dpdk/ -I$(ROOT)/tool/library_unit_test/
-INCLUDE += -I$(ROOT)/lib/air/ -I$(ROOT)/lib/air/include/
+INCLUDE += -I$(ROOT)/lib/air/ -I$(ROOT)/lib/air/src/api/
 INCLUDE += -I$(ROOT)/src/metafs/include/ 
 INCLUDE += -I$(ROOT)/src/metafs/mai/
 INCLUDE += -I$(ROOT)/src/metafs/common/

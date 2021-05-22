@@ -20,12 +20,9 @@ public:
         return writer->SetSamplingRate(rate);
     }
     inline void
-    LogData(lib::Data* data, uint64_t value1, uint64_t value2)
+    LogData(lib::Data* data, uint64_t value)
     {
-        if (nullptr != data)
-        {
-            writer->LogData(data, value1, value2);
-        }
+        writer->LogData(data, value);
     }
     void
     InformInit(lib::AccData* data)

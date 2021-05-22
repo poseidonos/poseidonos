@@ -37,22 +37,27 @@ collection::CollectionManager::~CollectionManager(void)
 void
 collection::CollectionManager::Init(void)
 {
-    air_enable = false;
-    if (global_meta_getter->Enable())
+    if (global_meta_getter->AirPlay())
     {
-        air_enable = true;
+        air_run = true;
     }
-    max_aid_size = global_meta_getter->AidSize();
+    else
+    {
+        air_run = false;
+    }
 
     for (uint32_t i = 0; i < MAX_NID_SIZE; i++)
     {
-        node_enable[i] = false;
-        if (node_meta_getter->NodeEnable(i))
+        if (node_meta_getter->Run(i))
         {
-            node_enable[i] = true;
+            node_run[i] = true;
+        }
+        else
+        {
+            node_run[i] = false;
         }
 
-        switch (node_meta_getter->NodeProcessorType(i))
+        switch (node_meta_getter->ProcessorType(i))
         {
             case (air::ProcessorType::PERFORMANCE):
                 collector[i] = new PerformanceCollector{new PerformanceWriter};
@@ -109,11 +114,11 @@ collection::CollectionManager::UpdateCollection(uint32_t type1,
         case (to_dtype(pi::Type2::ENABLE_AIR)):
             if (1 == value1)
             {
-                air_enable = true;
+                air_run = true;
             }
             else if (0 == value1)
             {
-                air_enable = false;
+                air_run = false;
             }
             else
             {
@@ -156,11 +161,11 @@ collection::CollectionManager::_EnableNode(uint32_t node_index,
 {
     if (to_dtype(pi::OnOff::ON) == is_run)
     {
-        node_enable[node_index] = true;
+        node_run[node_index] = true;
     }
     else if (to_dtype(pi::OnOff::OFF) == is_run)
     {
-        node_enable[node_index] = false;
+        node_run[node_index] = false;
     }
     else
     {
@@ -190,9 +195,9 @@ int
 collection::CollectionManager::_EnableGroupNode(uint32_t gid,
     uint32_t is_run)
 {
-    for (uint32_t i = 0; i < cfg::GetArrSize(config::ConfigType::NODE); i++)
+    for (uint32_t i = 0; i < cfg::GetSentenceCount(config::ParagraphType::NODE); i++)
     {
-        if ((uint32_t)node_meta_getter->NodeGroupId(i) == gid)
+        if ((uint32_t)node_meta_getter->GroupId(i) == gid)
         {
             if (0 != _EnableNode(i, is_run))
             {
@@ -237,31 +242,40 @@ collection::CollectionManager::_UpdateEnable(uint32_t type1, uint32_t type2,
 }
 
 void
-collection::CollectionManager::_InitNode(uint32_t node_index)
+collection::CollectionManager::_InitNode(uint32_t nid)
 {
-    if (air::ProcessorType::LATENCY ==
-        node_meta_getter->NodeProcessorType(node_index))
+    uint32_t index_size = node_meta_getter->IndexSize(nid);
+    uint32_t filter_size = node_meta_getter->FilterSize(nid);
+
+    if (nullptr == collector[nid])
     {
-        uint32_t max_aid_size = global_meta_getter->AidSize();
-        for (uint32_t aid = 0; aid < max_aid_size; aid++)
+        return;
+    }
+
+    if (air::ProcessorType::LATENCY ==
+        node_meta_getter->ProcessorType(nid))
+    {
+        for (uint32_t hash_index = 0; hash_index < index_size; hash_index++)
         {
-            collector[node_index]->InformInit(
-                node_manager->GetAccLatData(node_index, aid));
+            for (uint32_t filter_index = 0; filter_index < filter_size; filter_index++)
+            {
+                collector[nid]->InformInit(node_manager->GetAccLatData(nid, hash_index, filter_index));
+            }
         }
     }
     else
     {
-        for (auto j = node_manager->thread_map.begin(); j != node_manager->thread_map.end(); ++j)
+        for (auto iter = node_manager->nda_map.begin(); iter != node_manager->nda_map.end(); ++iter)
         {
-            node::ThreadArray* arr = &(j->second);
-            node::Thread* thread = arr->node[node_index];
-            if (nullptr != thread)
+            node::NodeDataArray* arr = iter->second;
+            node::NodeData* node_data = arr->node[nid];
+            if (nullptr != node_data)
             {
-                for (uint32_t k = 0; k < max_aid_size; k++)
+                for (uint32_t hash_index = 0; hash_index < index_size; hash_index++)
                 {
-                    if (nullptr != collector[node_index])
+                    for (uint32_t filter_index = 0; filter_index < filter_size; filter_index++)
                     {
-                        collector[node_index]->InformInit(thread->GetAccData(k));
+                        collector[nid]->InformInit(node_data->GetAccData(hash_index, filter_index));
                     }
                 }
             }
@@ -291,9 +305,9 @@ collection::CollectionManager::_UpdateInit(uint32_t type1, uint32_t type2,
             break;
 
         case (to_dtype(pi::Type2::INITIALIZE_NODE_WITH_GROUP)):
-            for (uint32_t i = 0; i < cfg::GetArrSize(config::ConfigType::NODE); i++)
+            for (uint32_t i = 0; i < cfg::GetSentenceCount(config::ParagraphType::NODE); i++)
             {
-                if ((uint32_t)node_meta_getter->NodeGroupId(i) == value1)
+                if ((uint32_t)node_meta_getter->GroupId(i) == value1)
                 {
                     _InitNode(i);
                 }
@@ -351,7 +365,7 @@ collection::CollectionManager::_UpdateSamplingRate(uint32_t type1,
             break;
 
         case (to_dtype(pi::Type2::SET_SAMPLING_RATE_WITH_GROUP)):
-            for (uint32_t i = 0; i < cfg::GetArrSize(config::ConfigType::NODE); i++)
+            for (uint32_t i = 0; i < cfg::GetSentenceCount(config::ParagraphType::NODE); i++)
             {
                 result = _UpdateNodeSamplingRate(i, value1);
                 if (result != 0)

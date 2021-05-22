@@ -2,8 +2,8 @@
 #ifndef AIR_DETECTOR_H
 #define AIR_DETECTOR_H
 
+#include "src/data_structure/NodeManager.h"
 #include "src/lib/Design.h"
-#include "src/profile_data/node/NodeManager.h"
 
 namespace detect
 {
@@ -21,8 +21,8 @@ public:
 
 private:
     node::NodeManager* node_manager{nullptr};
-    int _CreateThread(uint32_t tid);
-    int _DeleteThread(void);
+    void _CreateNodeDataArray(uint32_t tid);
+    void _DeleteNodeDataArray(void);
 };
 
 } // namespace detect

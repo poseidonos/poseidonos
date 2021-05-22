@@ -274,11 +274,11 @@ UBlockDevice::ProfilePendingIoCount(uint32_t pendingIOCount)
         if (EventFrameworkApi::IsReactorNow() == true)
         {
             uint32_t aid = EventFrameworkApi::GetCurrentReactor();
-            AIRLOG(Q_NVRAM, aid, pendingIOCount, pendingIOCount);
+            airlog("Q_NVRAM", "AIR_BASE", aid, pendingIOCount);
         }
         else
         {
-            AIRLOG(Q_NVRAM, IO_WORKER_AID, pendingIOCount, pendingIOCount);
+            airlog("Q_NVRAM", "AIR_BASE", IO_WORKER_AID, pendingIOCount);
         }
     }
     else if (GetType() == DeviceType::SSD)
@@ -286,11 +286,11 @@ UBlockDevice::ProfilePendingIoCount(uint32_t pendingIOCount)
         if (EventFrameworkApi::IsReactorNow() == true)
         {
             uint32_t aid = EventFrameworkApi::GetCurrentReactor();
-            AIRLOG(Q_SSD, aid, pendingIOCount, pendingIOCount);
+            airlog("Q_SSD", "AIR_BASE", aid, pendingIOCount);
         }
         else
         {
-            AIRLOG(Q_SSD, IO_WORKER_AID, pendingIOCount, pendingIOCount);
+            airlog("Q_SSD", "AIR_BASE", IO_WORKER_AID, pendingIOCount);
         }
     }
 }

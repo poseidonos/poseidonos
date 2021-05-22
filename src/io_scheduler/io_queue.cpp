@@ -56,7 +56,7 @@ IOQueue::DequeueUbio(void)
     std::unique_lock<std::mutex> uniqueLock(queueLock);
     UbioSmartPtr ubio = nullptr;
     uint32_t qSize = queue.size();
-    AIRLOG(Q_IO, 0, qSize, qSize);
+    airlog("Q_IO", "AIR_BASE", 0, qSize);
     if (false == queue.empty())
     {
         ubio = queue.front();

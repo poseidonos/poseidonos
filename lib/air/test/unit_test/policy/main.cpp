@@ -8,11 +8,10 @@
 #include "mock_output_observer.h"
 #include "policy_cor_handler_test.h"
 #include "src/config/ConfigInterface.h"
-#include "src/config/ConfigParser.cpp"
 
 TEST_F(PolicyTest, RulerCheckRule)
 {
-    int count = cfg::GetArrSize(config::ConfigType::NODE);
+    int count = cfg::GetSentenceCount(config::ParagraphType::NODE);
 
     // enable air
     EXPECT_EQ(0, ruler->CheckRule(0, to_dtype(pi::Type2::ENABLE_AIR), 0, 0));
@@ -71,10 +70,10 @@ TEST_F(PolicyTest, RulerSetRule)
     EXPECT_EQ(true, ruler->SetRule(0, to_dtype(pi::Type2::SET_STREAMING_INTERVAL), 1, 0));
     EXPECT_EQ(true, ruler->SetRule(0, to_dtype(pi::Type2::SET_STREAMING_INTERVAL), 2, 0));
 
-    mock_node_meta->SetNodeGroupId(1, 0);
-    mock_node_meta->SetNodeGroupId(5, 0);
-    mock_node_meta->SetNodeGroupId(3, 1);
-    mock_node_meta->SetNodeGroupId(6, 1);
+    mock_node_meta->SetGroupId(1, 0);
+    mock_node_meta->SetGroupId(5, 0);
+    mock_node_meta->SetGroupId(3, 1);
+    mock_node_meta->SetGroupId(6, 1);
 
     // set enable node
     EXPECT_EQ(true, ruler->SetRule(0, to_dtype(pi::Type2::ENABLE_NODE), false, 0));
@@ -98,15 +97,15 @@ TEST_F(PolicyTest, RulerSetRule)
 TEST_F(PolicyTest, RuleManagerConfig)
 {
     // set node meta config
-    air::Node node[cfg::GetArrSize(config::ConfigType::NODE)];
-    EXPECT_EQ(1, rule_manager->SetNodeMetaConfig(node));
+    air::NodeMetaData node[cfg::GetSentenceCount(config::ParagraphType::NODE)];
+    rule_manager->SetNodeMetaConfig(node);
 
     EXPECT_EQ(air::ProcessorType::PERFORMANCE,
-        node[cfg::GetIndex(config::ConfigType::NODE, "PERF_BENCHMARK")].processor_type);
+        node[cfg::GetSentenceIndex(config::ParagraphType::NODE, "PERF_BENCHMARK")].processor_type);
     EXPECT_EQ(air::ProcessorType::LATENCY,
-        node[cfg::GetIndex(config::ConfigType::NODE, "LAT_SUBMIT")].processor_type);
+        node[cfg::GetSentenceIndex(config::ParagraphType::NODE, "LAT_SUBMIT")].processor_type);
     EXPECT_EQ(air::ProcessorType::QUEUE,
-        node[cfg::GetIndex(config::ConfigType::NODE, "Q_COMPLETION")].processor_type);
+        node[cfg::GetSentenceIndex(config::ParagraphType::NODE, "Q_COMPLETION")].processor_type);
 
     // set global config
     rule_manager->SetGlobalConfig();
@@ -122,7 +121,7 @@ TEST_F(PolicyTest, CollectionCoRHandler)
         to_dtype(pi::PolicySubject::TO_OUTPUT));
 
     EXPECT_EQ((unsigned int)1, mock_global_meta->StreamingInterval());
-    EXPECT_EQ(false, mock_node_meta->NodeEnable(2));
+    EXPECT_EQ(false, mock_node_meta->Run(2));
 
     // send msg
     policy_observer->Update(0, to_dtype(pi::Type2::SET_STREAMING_INTERVAL), 2, 0, 0, 0, 0);
@@ -132,7 +131,7 @@ TEST_F(PolicyTest, CollectionCoRHandler)
     policy_cor_handler->HandleRequest();
 
     EXPECT_EQ((unsigned int)2, mock_global_meta->StreamingInterval());
-    EXPECT_EQ(true, mock_node_meta->NodeEnable(2));
+    EXPECT_EQ(true, mock_node_meta->Run(2));
 }
 
 int

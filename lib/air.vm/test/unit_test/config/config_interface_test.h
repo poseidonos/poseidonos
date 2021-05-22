@@ -1,5 +1,4 @@
 
-#include "src/config/ConfigInterface.cpp"
 #include "src/config/ConfigInterface.h"
 
 class ConfigInterfaceTest : public ::testing::Test

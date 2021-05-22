@@ -285,7 +285,7 @@ AIO::SubmitAsyncIO(pos_io& posIo)
     {
         case UbioDir::Write:
         {
-            AIRLOG(PERF_VOLUME, posIo.volume_id, AIR_WRITE, posIo.length);
+            airlog("PERF_VOLUME", "AIR_WRITE", posIo.volume_id, posIo.length);
             if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volumeIo->GetVolumeId())))
             {
                 IoCompleter ioCompleter(volumeIo);
@@ -300,7 +300,7 @@ AIO::SubmitAsyncIO(pos_io& posIo)
         }
         case UbioDir::Read:
         {
-            AIRLOG(PERF_VOLUME, posIo.volume_id, AIR_READ, posIo.length);
+            airlog("PERF_VOLUME", "AIR_READ", posIo.volume_id, posIo.length);
             if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volumeIo->GetVolumeId())))
             {
                 IoCompleter ioCompleter(volumeIo);
@@ -328,7 +328,7 @@ AIO::CompleteIOs(void)
 {
     uint32_t aid = EventFrameworkApi::GetCurrentReactor();
     uint32_t size = ioContext.cnt;
-    AIRLOG(Q_AIO, aid, size, size);
+    airlog("Q_AIO", "AIR_BASE", aid, size);
     if (ioContext.needPollingCount > 0)
     {
         DeviceManagerSingleton::Instance()->HandleCompletedCommand();

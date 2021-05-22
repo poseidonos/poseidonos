@@ -94,7 +94,7 @@ function f_build_ibofos
 function f_start_ibofos
 {
     cd ${IBOFOS_ROOT_DIR}/script/
-    ./start_poseidonos.sh
+    ./start_ibofos.sh
     sleep 2
     # setup nvmf vol0
     ../lib/spdk-19.10/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem1 -a -s IBOF00000000000001 -d IBOF_VOLUME_EXTENTION

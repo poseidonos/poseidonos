@@ -345,6 +345,7 @@ add_definitions(-DPOS_VERSION="pos-0.8.0-alpha1"
     #-DUNVME_BUILD 
     -DSPDLOG_COMPILED_LIB
     -D_ADMIN_ENABLED
+    -DAIR_CFG=${PROJ_ROOT}/lib/air/config/air.cfg
 )
 remove_definitions(-DAIR_BUILD)
 

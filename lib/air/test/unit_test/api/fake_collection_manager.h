@@ -1,5 +1,5 @@
 
-#include "src/api/AirTemplate.h"
+#include "src/api/Air.h"
 #include "src/collection/CollectionManager.cpp"
 #include "src/collection/CollectionManager.h"
 #include "src/collection/Collector.cpp"
@@ -35,7 +35,7 @@ public:
     bool
     IsLog(uint32_t new_nid) override
     {
-        if (cfg::GetArrSize(config::ConfigType::NODE) >= new_nid)
+        if (cfg::GetSentenceCount(config::ParagraphType::NODE) >= new_nid)
         {
             nid = new_nid;
             return true;
@@ -46,18 +46,18 @@ public:
         }
     }
     void
-    LogData(uint32_t new_nid, uint64_t new_aid,
-        node::ThreadArray* thread_array, uint64_t new_value1,
-        uint64_t new_value2) override
+    LogData(uint32_t new_nid, uint32_t new_filter_index,
+        node::NodeDataArray* node_data_array, uint64_t new_node_index,
+        uint64_t new_value) override
     {
         nid = new_nid;
-        aid = new_aid;
-        value1 = new_value1;
-        value2 = new_value2;
+        filter_index = new_filter_index;
+        node_index = new_node_index;
+        value = new_value;
         return;
     }
     uint32_t nid{0};
-    uint64_t aid{0};
-    uint64_t value1{0};
-    uint64_t value2{0};
+    uint64_t filter_index{0};
+    uint64_t node_index{0};
+    uint64_t value{0};
 };

@@ -32,7 +32,7 @@ public:
         return 1;
     }
     uint32_t
-    AidSize() const
+    NodeIndexSize() const
     {
         return 32;
     }

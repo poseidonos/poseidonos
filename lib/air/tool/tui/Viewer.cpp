@@ -351,10 +351,70 @@ air::Viewer::_DrawNode(ANode& node, std::string name, JSONdoc& doc)
     {
         node_type = NodeType::QUEUE;
     }
+    else if (std::string::npos != str_node_type.find("\"utilization\""))
+    {
+        node_type = NodeType::UTILIZATION;
+    }
+    else if (std::string::npos != str_node_type.find("\"count\""))
+    {
+        node_type = NodeType::COUNT;
+    }
+
+    sum_iops = 0;
+    sum_bw = 0;
+    sum_util_usage = 0;
+    sum_util_total_usage = 0;
+    for (auto obj : air::range(doc["objs"]))
+    {
+        _SumData(doc["objs"][obj.key], node_type);
+    }
+
+    if (NodeType::PERFORMANCE == node_type)
+    {
+        std::cout << "        SUM_Period(iops:" << Double2String((double)sum_iops)
+                  << ", bw:" << Double2StringWithBWFormat((double)sum_bw) << ")\n";
+    }
 
     for (auto obj : air::range(doc["objs"]))
     {
         _DrawObj(doc["objs"][obj.key], node_type);
+    }
+}
+
+void
+air::Viewer::_SumData(JSONdoc& doc, NodeType type)
+{
+    if (NodeType::PERFORMANCE == type)
+    {
+        std::string str;
+        std::stringstream stream;
+        uint64_t value;
+
+        stream.str("");
+        stream << doc["iops"];
+        value = std::stoull(stream.str());
+        sum_iops += value;
+
+        stream.str("");
+        stream << doc["bw"];
+        value = std::stoull(stream.str());
+        sum_bw += value;
+    }
+    else if (NodeType::UTILIZATION == type)
+    {
+        std::string str;
+        std::stringstream stream;
+        uint64_t value;
+
+        stream.str("");
+        stream << doc["usage"];
+        value = std::stoull(stream.str());
+        sum_util_usage += value;
+
+        stream.str("");
+        stream << doc["total_usage"];
+        value = std::stoull(stream.str());
+        sum_util_total_usage += value;
     }
 }
 
@@ -380,6 +440,16 @@ air::Viewer::_DrawObj(JSONdoc& doc, NodeType type)
             _DrawQueue(doc);
             break;
         }
+        case NodeType::UTILIZATION:
+        {
+            _DrawUtilization(doc);
+            break;
+        }
+        case NodeType::COUNT:
+        {
+            _DrawCount(doc);
+            break;
+        }
         default:
         {
             break;
@@ -394,8 +464,9 @@ air::Viewer::_DrawDefault(JSONdoc& doc)
 {
     std::cout << "      ";
     std::cout << doc["target_name"] << "(";
-    std::cout << doc["target_id"] << "), aid:";
-    std::cout << doc["app_id"];
+    std::cout << doc["target_id"] << "), index:";
+    std::cout << doc["index"] << ", filter:";
+    std::cout << doc["filter"];
 }
 
 void
@@ -405,52 +476,43 @@ air::Viewer::_DrawPerf(JSONdoc& doc)
     std::stringstream stream;
     double number;
 
-    str = " WL(r:";
+    str = " Period(iops:";
 
     stream.str("");
-    stream << doc["iops_read"];
+    stream << doc["iops"];
     number = std::stod(stream.str());
     str += Double2String(number);
-    str += "/";
+    str += ", bw:";
 
     stream.str("");
-    stream << doc["bw_read"];
+    stream << doc["bw"];
     number = std::stod(stream.str());
     str += Double2StringWithBWFormat(number);
-    str += ", w:";
+    str += ", ";
+
+    for (uint32_t index = 1; index <= 10; index++)
+    {
+        if (doc.HasKey("cnt_" + std::to_string(index)))
+        {
+            if (1 != index)
+            {
+                str += ", ";
+            }
+            stream.str("");
+            stream << doc["cnt_" + std::to_string(index)];
+            str += stream.str();
+        }
+    }
+    str += "), Total(iops_avg:";
 
     stream.str("");
-    stream << doc["iops_write"];
+    stream << doc["iops_avg"];
     number = std::stod(stream.str());
     str += Double2String(number);
-    str += "/";
+    str += ", bw_avg:";
 
     stream.str("");
-    stream << doc["bw_write"];
-    number = std::stod(stream.str());
-    str += Double2StringWithBWFormat(number);
-    str += "), TotWL(r:";
-
-    stream.str("");
-    stream << doc["iops_read_avg"];
-    number = std::stod(stream.str());
-    str += Double2String(number);
-    str += "/";
-
-    stream.str("");
-    stream << doc["bw_read_avg"];
-    number = std::stod(stream.str());
-    str += Double2StringWithBWFormat(number);
-    str += ", w:";
-
-    stream.str("");
-    stream << doc["iops_write_avg"];
-    number = std::stod(stream.str());
-    str += Double2String(number);
-    str += "/";
-
-    stream.str("");
-    stream << doc["bw_write_avg"];
+    stream << doc["bw_avg"];
     number = std::stod(stream.str());
     str += Double2StringWithBWFormat(number);
     str += ")";
@@ -465,10 +527,16 @@ air::Viewer::_DrawLat(JSONdoc& doc)
     std::stringstream stream;
     uint64_t number;
 
-    str = " Dist(avg:";
+    str = " Period(avg:";
 
     stream.str("");
     stream << doc["mean"];
+    number = std::stoull(stream.str());
+    str += ULL2StringWithLatencyFormat(number);
+    str += ", median:";
+
+    stream.str("");
+    stream << doc["median"];
     number = std::stoull(stream.str());
     str += ULL2StringWithLatencyFormat(number);
     str += ", max:";
@@ -477,10 +545,22 @@ air::Viewer::_DrawLat(JSONdoc& doc)
     stream << doc["max"];
     number = std::stoull(stream.str());
     str += ULL2StringWithLatencyFormat(number);
-    str += "), TotDist(avg:";
+    str += ", sample:";
+
+    stream.str("");
+    stream << doc["sample_cnt"];
+    number = std::stod(stream.str());
+    str += Double2String(number);
+    str += "), Total(avg:";
 
     stream.str("");
     stream << doc["total_mean"];
+    number = std::stoull(stream.str());
+    str += ULL2StringWithLatencyFormat(number);
+    str += ", median:";
+
+    stream.str("");
+    stream << doc["total_median"];
     number = std::stoull(stream.str());
     str += ULL2StringWithLatencyFormat(number);
     str += ", max:";
@@ -489,6 +569,12 @@ air::Viewer::_DrawLat(JSONdoc& doc)
     stream << doc["total_max"];
     number = std::stoull(stream.str());
     str += ULL2StringWithLatencyFormat(number);
+    str += ", sample:";
+
+    stream.str("");
+    stream << doc["total_sample_cnt"];
+    number = std::stod(stream.str());
+    str += Double2String(number);
     str += ")";
 
     std::cout << str;
@@ -501,7 +587,7 @@ air::Viewer::_DrawQueue(JSONdoc& doc)
     std::stringstream stream;
     double number;
 
-    str = " Dist(avg:";
+    str = " Period(avg:";
 
     stream.str("");
     stream << doc["depth_period_avg"];
@@ -513,7 +599,7 @@ air::Viewer::_DrawQueue(JSONdoc& doc)
     stream << doc["depth_period_max"];
     number = std::stod(stream.str());
     str += Double2String(number);
-    str += "), TotDist(avg:";
+    str += "), Total(avg:";
 
     stream.str("");
     stream << doc["depth_total_avg"];
@@ -525,6 +611,72 @@ air::Viewer::_DrawQueue(JSONdoc& doc)
     stream << doc["depth_total_max"];
     number = std::stod(stream.str());
     str += Double2String(number);
+    str += ")";
+
+    std::cout << str;
+}
+
+void
+air::Viewer::_DrawUtilization(JSONdoc& doc)
+{
+    std::string str;
+    std::stringstream stream;
+    uint64_t number;
+
+    str = " Period(usage:";
+
+    stream.str("");
+    stream << doc["usage"];
+    number = std::stoull(stream.str());
+    str += Double2String((double)number);
+    str += ", ";
+
+    stream.str("");
+    stream << std::fixed << std::setprecision(2);
+    if (0 != sum_util_usage)
+    {
+        stream << (((double)number / sum_util_usage) * 100.0f);
+    }
+    str += stream.str();
+    str += "%), Total(usage:";
+
+    stream.str("");
+    stream << doc["total_usage"];
+    number = std::stoull(stream.str());
+    str += Double2String((double)number);
+    str += ", ";
+
+    stream.str("");
+    stream << std::fixed << std::setprecision(2);
+    if (0 != sum_util_total_usage)
+    {
+        stream << (((double)number / sum_util_total_usage) * 100.0f);
+    }
+    str += stream.str();
+    str += "%)";
+
+    std::cout << str;
+}
+
+void
+air::Viewer::_DrawCount(JSONdoc& doc)
+{
+    std::string str;
+    std::stringstream stream;
+    uint64_t number;
+
+    str = " Period(count:";
+
+    stream.str("");
+    stream << doc["count"];
+    number = std::stoll(stream.str());
+    str += LL2String(number);
+    str += "), Total(count:";
+
+    stream.str("");
+    stream << doc["total_count"];
+    number = std::stoll(stream.str());
+    str += LL2String(number);
     str += ")";
 
     std::cout << str;

@@ -8,6 +8,7 @@
 #include "src/collection/CollectionObserver.h"
 #include "src/collection/SwitchGear.h"
 #include "src/collection/SwitchGearCorHandler.h"
+#include "src/data_structure/NodeManager.h"
 #include "src/input/In.h"
 #include "src/input/InCorHandler.h"
 #include "src/meta/GlobalMeta.h"
@@ -23,7 +24,6 @@
 #include "src/process/Preprocessor.h"
 #include "src/process/ProcessCorHandler.h"
 #include "src/process/ProcessManager.h"
-#include "src/profile_data/node/NodeManager.h"
 #include "src/stream/Stream.h"
 #include "src/stream/StreamCorHandler.h"
 #include "src/target_detector/DetectCorHandler.h"
@@ -59,7 +59,7 @@ private:
     void _DeleteMetaModule(void);
     void _DeletePolicyModule(void);
     void _DeleteProcessModule(void);
-    void _DeleteProfileDataModule(void);
+    void _DeleteDataStructureModule(void);
     void _DeleteOutModule(void);
     void _DeleteStreamModule(void);
     void _DeleteCollectionModule(void);

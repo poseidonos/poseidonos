@@ -17,20 +17,8 @@ public:
       global_meta(new_global_meta)
     {
     }
-    int CheckRule(uint32_t type1, uint32_t type2, uint32_t value1,
-        uint32_t value2);
-    bool SetRule(uint32_t type1, uint32_t type2, uint32_t value1,
-        uint32_t value2);
-    bool
-    Update(void)
-    {
-        return node_meta->Update();
-    }
-    void
-    SetUpdate(bool update)
-    {
-        node_meta->SetUpdate(update);
-    }
+    int CheckRule(uint32_t type1, uint32_t type2, uint32_t value1, uint32_t value2);
+    bool SetRule(uint32_t type1, uint32_t type2, uint32_t value1, uint32_t value2);
     void
     SetStreamingInterval(int streaming_interval)
     {
@@ -42,9 +30,9 @@ public:
         global_meta->SetCpuNum(cpu_num);
     }
     void
-    SetAidSize(uint32_t aid_num)
+    SetAirBuild(bool air_build)
     {
-        global_meta->SetAidSize(aid_num);
+        global_meta->SetAirBuild(air_build);
     }
 
 private:
@@ -65,7 +53,7 @@ private:
 
     meta::NodeMeta* node_meta{nullptr};
     meta::GlobalMeta* global_meta{nullptr};
-    const uint32_t MAX_NID_SIZE{cfg::GetArrSize(config::ConfigType::NODE)};
+    const uint32_t MAX_NID_SIZE{cfg::GetSentenceCount(config::ParagraphType::NODE)};
 };
 
 } // namespace policy

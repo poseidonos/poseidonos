@@ -3,9 +3,9 @@
 #include <iostream>
 
 #include "fake_global_meta_getter.h"
+#include "fake_node_data.h"
 #include "fake_node_manager.h"
 #include "fake_node_meta_getter.h"
-#include "fake_thread.h"
 #include "src/lib/Data.h"
 #include "src/lib/Type.h"
 #include "src/process/processor/CountProcessor.cpp"
@@ -29,11 +29,11 @@ public:
     process::Processor* q_processor{nullptr};
     process::Processor* util_processor{nullptr};
     process::Processor* count_processor{nullptr};
-    FakeThread* fake_perf_thread{nullptr};
-    FakeThread* fake_lat_thread{nullptr};
-    FakeThread* fake_q_thread{nullptr};
-    FakeThread* fake_util_thread{nullptr};
-    FakeThread* fake_count_thread{nullptr};
+    FakeNodeData* fake_perf_data{nullptr};
+    FakeNodeData* fake_lat_data{nullptr};
+    FakeNodeData* fake_q_data{nullptr};
+    FakeNodeData* fake_util_data{nullptr};
+    FakeNodeData* fake_count_data{nullptr};
     FakeNodeMetaGetter* fake_node_meta_getter{nullptr};
     FakeGlobalMetaGetter* fake_global_meta_getter{nullptr};
     FakeNodeManager* fake_node_manager{nullptr};
@@ -47,11 +47,11 @@ protected:
         util_processor = new process::UtilizationProcessor;
         count_processor = new process::CountProcessor;
 
-        fake_perf_thread = new FakeThread(air::ProcessorType::PERFORMANCE, 32);
-        fake_lat_thread = new FakeThread(air::ProcessorType::LATENCY, 32);
-        fake_q_thread = new FakeThread(air::ProcessorType::QUEUE, 32);
-        fake_util_thread = new FakeThread(air::ProcessorType::UTILIZATION, 32);
-        fake_count_thread = new FakeThread(air::ProcessorType::COUNT, 32);
+        fake_perf_data = new FakeNodeData(air::ProcessorType::PERFORMANCE, 32, 32);
+        fake_lat_data = new FakeNodeData(air::ProcessorType::LATENCY, 32, 32);
+        fake_q_data = new FakeNodeData(air::ProcessorType::QUEUE, 32, 32);
+        fake_util_data = new FakeNodeData(air::ProcessorType::UTILIZATION, 32, 32);
+        fake_count_data = new FakeNodeData(air::ProcessorType::COUNT, 32, 32);
         fake_node_meta_getter = new FakeNodeMetaGetter;
         fake_global_meta_getter = new FakeGlobalMetaGetter;
         fake_node_manager = new FakeNodeManager{fake_global_meta_getter,
@@ -59,30 +59,30 @@ protected:
     }
     virtual ~ProcessorTest()
     {
-        if (nullptr != fake_perf_thread)
+        if (nullptr != fake_perf_data)
         {
-            delete fake_perf_thread;
-            fake_perf_thread = nullptr;
+            delete fake_perf_data;
+            fake_perf_data = nullptr;
         }
-        if (nullptr != fake_lat_thread)
+        if (nullptr != fake_lat_data)
         {
-            delete fake_lat_thread;
-            fake_lat_thread = nullptr;
+            delete fake_lat_data;
+            fake_lat_data = nullptr;
         }
-        if (nullptr != fake_q_thread)
+        if (nullptr != fake_q_data)
         {
-            delete fake_q_thread;
-            fake_q_thread = nullptr;
+            delete fake_q_data;
+            fake_q_data = nullptr;
         }
-        if (nullptr != fake_util_thread)
+        if (nullptr != fake_util_data)
         {
-            delete fake_util_thread;
-            fake_util_thread = nullptr;
+            delete fake_util_data;
+            fake_util_data = nullptr;
         }
-        if (nullptr != fake_count_thread)
+        if (nullptr != fake_count_data)
         {
-            delete fake_count_thread;
-            fake_count_thread = nullptr;
+            delete fake_count_data;
+            fake_count_data = nullptr;
         }
         if (nullptr != perf_processor)
         {

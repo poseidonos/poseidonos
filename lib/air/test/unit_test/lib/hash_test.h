@@ -5,12 +5,12 @@
 class HashTest : public ::testing::Test
 {
 public:
-    hash::HashMap<uint32_t>* hash_map{nullptr};
+    air::HashMap<uint32_t>* hash_map{nullptr};
 
 protected:
     HashTest()
     {
-        hash_map = new hash::HashMap<uint32_t>{5};
+        hash_map = new air::HashMap<uint32_t>{5};
     }
     ~HashTest() override
     {

@@ -72,7 +72,6 @@ GcMapUpdate::GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpda
 {
     SetFrontEnd(false);
     SetEventType(BackendEvent_GC);
-    AIRLOG(LAT_BDEV_READ, 0, 0, stripe->GetVsid());
 
     IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
     const PartitionLogicalSize* udSize =

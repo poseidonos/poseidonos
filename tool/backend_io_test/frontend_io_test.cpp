@@ -16,7 +16,7 @@ frontend_io_submit(void* arg1, void* arg2)
     uint64_t core = reinterpret_cast<uint64_t>(arg2);
     aio.SubmitAsyncIO(*posIo);
     EventFrameworkApi::SendSpdkEvent(core, dummy_spdk_call, nullptr, nullptr);
-    AIRLOG(PERF_BACKEND_TEST, 0, AIR_WRITE, 4 * 1024);
+    airlog("PERF_BACKEND_TEST", "AIR_WRITE", 0, 4096);
 }
 
 void

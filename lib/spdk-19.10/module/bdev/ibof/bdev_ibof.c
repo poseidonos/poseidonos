@@ -53,7 +53,7 @@
 #include "spdk/event.h"
 #include "spdk/ioat.h"
 
-#include "Air.h"
+#include "Air_c.h"
 
 struct ibof_disk {
 	struct spdk_bdev		disk;
@@ -492,10 +492,10 @@ static void bdev_ibof_io_complete(struct ibof_io* io, int status)
     }
 
     if (READ == io->ioType) {
-        AIRLOG(LAT_BDEV_READ, io->volume_id, 1, (uint64_t)io->context);
+        AIRLOG(LAT_VOLUME_READ, AIR_END, io->volume_id, (uint64_t)io->context);
     }
     else if (WRITE == io->ioType) {
-        AIRLOG(LAT_BDEV_WRITE, io->volume_id, 1, (uint64_t)io->context);
+        AIRLOG(LAT_VOLUME_WRITE, AIR_END, io->volume_id, (uint64_t)io->context);
     }
 
     free(io);
@@ -623,7 +623,7 @@ static int _bdev_ibof_eventq_rw(struct spdk_io_channel *ch, struct spdk_bdev_io 
 	switch (bdev_io->type) {
 	case SPDK_BDEV_IO_TYPE_READ:
         {
-            AIRLOG(LAT_BDEV_READ, vol_id, 0, (uint64_t)bdev_io);
+            AIRLOG(LAT_VOLUME_READ, AIR_BEGIN, vol_id, (uint64_t)bdev_io);
             spdk_bdev_io_get_buf(bdev_io, bdev_ibof_get_buf_cb,
                     bdev_io->u.bdev.num_blocks * block_size);
             return 0;
@@ -631,7 +631,7 @@ static int _bdev_ibof_eventq_rw(struct spdk_io_channel *ch, struct spdk_bdev_io 
 
 	case SPDK_BDEV_IO_TYPE_WRITE:
         {
-            AIRLOG(LAT_BDEV_WRITE, vol_id, 0, (uint64_t)bdev_io);
+            AIRLOG(LAT_VOLUME_WRITE, AIR_BEGIN, vol_id, (uint64_t)bdev_io);
             return bdev_ibof_eventq_writev((struct ibof_disk *)bdev_io->bdev->ctxt,
                     ch,
                     bdev_io,

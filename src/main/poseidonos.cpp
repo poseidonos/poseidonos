@@ -105,8 +105,8 @@ Poseidonos::Terminate(void)
     }
 
 
-    AIR_DEACTIVATE();
-    AIR_FINALIZE();
+    air_deactivate();
+    air_finalize();
 }
 
 void
@@ -123,8 +123,8 @@ Poseidonos::_InitAffinity(void)
         if (1 == CPU_ISSET(i, &general_core))
         {
             std::cout << "CPU ID: " << i << "       Usage: AIR\n";
-            AIR_INITIALIZE((unsigned int)i);
-            AIR_ACTIVATE();
+            air_initialize((unsigned int)i);
+            air_activate();
             break;
         }
     }

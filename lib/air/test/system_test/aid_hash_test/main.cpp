@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
         aid_list_1[i] = new char[array_size];
     }
  
-    AIR_INITIALIZE(0);
-    AIR_ACTIVATE();
+    air_initialize(0);
+    air_activate();
 
     int num_thr = 1;
     int time {15};
@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
     
     sleep(2);
 
-    AIR_DEACTIVATE();
-    AIR_FINALIZE();
+    air_deactivate();
+    air_finalize();
 
     return 0;
 }
@@ -64,7 +64,7 @@ void LogPerf(int thr_num)
         {
             int idx = log_cnt % AID_NUM;
             log_cnt += 1;
-            AIRLOG(PERF_TEST_1, (int64_t)aid_list_1[idx], AIR_WRITE, 4096);
+            airlog("PERF_TEST_1", "AIR_WRITE", (int64_t)aid_list_1[idx], 4096);
             count = 0;
         }
         count++;

@@ -240,6 +240,17 @@ public:
         return os;
     }
 
+    bool
+    HasKey(std::string key)
+    {
+        auto it = map.find(key);
+        if (it != map.end())
+        {
+            return true;
+        }
+        return false;
+    }
+
     void
     Clear(void)
     {

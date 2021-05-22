@@ -16,11 +16,11 @@ OBJDIR_TUI = $(OBJDIR)/tui
 OBJ_FILES_TUI = $(OBJDIR_TUI)/*.o
 
 CXX         = g++
-CXXFLAGS    += -std=c++17 -Wall -O3 -mavx2 -fPIC
+CXXFLAGS    += -std=c++14 -Wall -O3 -mavx2 -fPIC
 C			= gcc
 CFLAGS		+= -lstdc++ -lm
 THREAD      = -lpthread
-INCLUDE     = -I$(TOP) -I$(INCDIR)
+INCLUDE     = -I$(TOP) -I$(TOP)/src/api -I$(INCDIR)
 #DEBUG		= -g
 LDFLAGS     += -L$(LIBDIR) -lair
 
@@ -32,19 +32,18 @@ DEFINE += -DAIR_CFG=config/$(cfg).cfg
 CFG_FILE = $(TOP)/config/$(cfg).cfg
 endif
 
-DEFINE += -DAIR_H_GEN=\"$(TOP)/src/api/Air.h\"
-DEFINE += -DAIR_CPP_GEN=\"$(TOP)/src/api/Air.cpp\"
+DEFINE += -DAIR_H_GEN=\"$(TOP)/src/api/Air_c.h\"
+DEFINE += -DAIR_CPP_GEN=\"$(TOP)/src/api/Air_c.cpp\"
 
 all : release
 
 release : clean lib cli tui
 
-lib : makedir gen_cfg
+lib : makedir gen_c_style_interface
 	@echo [config file]: $(CFG_FILE)
 	$(MAKE) -C src
 	ar rscv libair.a $(OBJ_FILES)
 	mv libair.a $(LIBDIR)
-	cp src/api/Air.h $(INCDIR)
 
 makedir :
 	mkdir -p $(BINDIR)
@@ -52,14 +51,15 @@ makedir :
 	mkdir -p $(LIBDIR)
 	mkdir -p $(INCDIR)
 
-gen_cfg :
+gen_c_style_interface :
 	$(MAKE) -C src/config
-	$(MAKE) -C tool/cfg_gen
+	$(MAKE) -C tool/c_interface_gen
 	$(CXX) $(DEBUG) $(OBJ_FILES) $(CXXFLAGS) $(THREAD) \
-	$(INCLUDE) -o $(BINDIR)/cfg_gen
+	$(INCLUDE) -o $(BINDIR)/c_interface_gen
 	rm -rf $(OBJDIR)/main.o $(OBJDIR)/main.d
-	$(TOP)/bin/cfg_gen
-	rm -rf $(TOP)/bin/cfg_gen
+	$(TOP)/bin/c_interface_gen
+	rm -rf $(TOP)/bin/c_interface_gen
+	cp src/api/Air_c.h $(INCDIR)
 
 cli :
 	mkdir -p $(OBJDIR_CLI)
@@ -124,8 +124,8 @@ clean :
 	rm -rf $(BINDIR)
 	rm -rf $(LIBDIR)
 	rm -rf $(INCDIR)
-	rm -rf $(TOP)/src/api/Air.h
-	rm -rf $(TOP)/src/api/Air.cpp
+	rm -rf $(TOP)/src/api/Air_c.h
+	rm -rf $(TOP)/src/api/Air_c.cpp
 	rm -rf /bin/air_cli
 	rm -rf /bin/air_tui
 

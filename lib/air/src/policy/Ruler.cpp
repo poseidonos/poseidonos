@@ -22,7 +22,7 @@ policy::Ruler::_CheckEnableNodeRule(uint32_t type1, uint32_t type2,
             break;
         case (to_dtype(pi::Type2::ENABLE_NODE_WITH_GROUP)):
             result = 0;
-            if (value2 >= cfg::GetArrSize(config::ConfigType::GROUP))
+            if (value2 >= cfg::GetSentenceCount(config::ParagraphType::GROUP))
             {
                 result = -11;
             }
@@ -72,7 +72,7 @@ policy::Ruler::_CheckInitNodeRule(uint32_t type1, uint32_t type2,
 
         case (to_dtype(pi::Type2::INITIALIZE_NODE_WITH_GROUP)):
             result = 0;
-            if (value1 >= cfg::GetArrSize(config::ConfigType::GROUP))
+            if (value1 >= cfg::GetSentenceCount(config::ParagraphType::GROUP))
             {
                 result = -11;
             }
@@ -131,7 +131,7 @@ policy::Ruler::_CheckSetSamplingRatioRule(uint32_t type1, uint32_t type2,
 
         case (to_dtype(pi::Type2::SET_SAMPLING_RATE_WITH_GROUP)):
             result = 0;
-            if (value2 >= cfg::GetArrSize(config::ConfigType::GROUP))
+            if (value2 >= cfg::GetSentenceCount(config::ParagraphType::GROUP))
             {
                 result = -11;
             }
@@ -232,9 +232,9 @@ policy::Ruler::_SetEnableNodeRule(uint32_t type1, uint32_t type2,
     {
         case (to_dtype(pi::Type2::ENABLE_NODE)):
             data = (bool)value1;
-            if (node_meta->NodeEnable(value2) != data)
+            if (node_meta->Run(value2) != data)
             {
-                node_meta->SetNodeEnable(value2, data);
+                node_meta->SetRun(value2, data);
             }
             result = true;
             break;
@@ -245,9 +245,9 @@ policy::Ruler::_SetEnableNodeRule(uint32_t type1, uint32_t type2,
             lower_bit = value2 & 0x0000FFFF;
             for (i = upper_bit; i <= lower_bit; i++)
             {
-                if (node_meta->NodeEnable(i) != data)
+                if (node_meta->Run(i) != data)
                 {
-                    node_meta->SetNodeEnable(i, data);
+                    node_meta->SetRun(i, data);
                 }
             }
             result = true;
@@ -255,13 +255,13 @@ policy::Ruler::_SetEnableNodeRule(uint32_t type1, uint32_t type2,
 
         case (to_dtype(pi::Type2::ENABLE_NODE_WITH_GROUP)):
             data = (bool)value1;
-            for (i = 0; i < cfg::GetArrSize(config::ConfigType::NODE); i++)
+            for (i = 0; i < cfg::GetSentenceCount(config::ParagraphType::NODE); i++)
             {
-                if ((uint32_t)node_meta->NodeGroupId(i) == value2)
+                if (node_meta->GroupId(i) == value2)
                 {
-                    if (node_meta->NodeEnable(i) != data)
+                    if (node_meta->Run(i) != data)
                     {
-                        node_meta->SetNodeEnable(i, data);
+                        node_meta->SetRun(i, data);
                     }
                 }
             }
@@ -272,9 +272,9 @@ policy::Ruler::_SetEnableNodeRule(uint32_t type1, uint32_t type2,
             data = (bool)value1;
             for (i = 0; i < MAX_NID_SIZE; i++)
             {
-                if (node_meta->NodeEnable(i) != (bool)value1)
+                if (node_meta->Run(i) != (bool)value1)
                 {
-                    node_meta->SetNodeEnable(i, (bool)value1);
+                    node_meta->SetRun(i, (bool)value1);
                 }
             }
             result = true;
@@ -295,9 +295,9 @@ policy::Ruler::_SetSamplingRatioRule(uint32_t type1, uint32_t type2,
     switch (type2)
     {
         case (to_dtype(pi::Type2::SET_SAMPLING_RATE)):
-            if (node_meta->NodeSampleRatio(value2) != value1)
+            if (node_meta->SampleRatio(value2) != value1)
             {
-                node_meta->SetNodeSampleRatio(value2, value1);
+                node_meta->SetSampleRatio(value2, value1);
             }
             result = true;
             break;
@@ -306,21 +306,21 @@ policy::Ruler::_SetSamplingRatioRule(uint32_t type1, uint32_t type2,
             lower_bit = value2 & 0x0000FFFF;
             for (i = upper_bit; i <= lower_bit; i++)
             {
-                if (node_meta->NodeSampleRatio(i) != value1)
+                if (node_meta->SampleRatio(i) != value1)
                 {
-                    node_meta->SetNodeSampleRatio(i, value1);
+                    node_meta->SetSampleRatio(i, value1);
                 }
             }
             result = true;
             break;
         case (to_dtype(pi::Type2::SET_SAMPLING_RATE_WITH_GROUP)):
-            for (i = 0; i < cfg::GetArrSize(config::ConfigType::NODE); i++)
+            for (i = 0; i < cfg::GetSentenceCount(config::ParagraphType::NODE); i++)
             {
-                if ((uint32_t)node_meta->NodeGroupId(i) == value2)
+                if ((uint32_t)node_meta->GroupId(i) == value2)
                 {
-                    if (node_meta->NodeSampleRatio(i) != value1)
+                    if (node_meta->SampleRatio(i) != value1)
                     {
-                        node_meta->SetNodeSampleRatio(i, value1);
+                        node_meta->SetSampleRatio(i, value1);
                     }
                 }
             }
@@ -329,9 +329,9 @@ policy::Ruler::_SetSamplingRatioRule(uint32_t type1, uint32_t type2,
         case (to_dtype(pi::Type2::SET_SAMPLING_RATE_ALL)):
             for (i = 0; i < MAX_NID_SIZE; i++)
             {
-                if (node_meta->NodeSampleRatio(i) != value1)
+                if (node_meta->SampleRatio(i) != value1)
                 {
-                    node_meta->SetNodeSampleRatio(i, value1);
+                    node_meta->SetSampleRatio(i, value1);
                 }
             }
             result = true;
@@ -352,10 +352,9 @@ policy::Ruler::SetRule(uint32_t type1, uint32_t type2, uint32_t value1,
     {
         case (to_dtype(pi::Type2::ENABLE_AIR)):
             data = (bool)value1;
-            if (global_meta->Enable() != data)
+            if (global_meta->AirPlay() != data)
             {
-                global_meta->SetEnable(data);
-                node_meta->SetRun(data);
+                global_meta->SetAirPlay(data);
             }
             result = true;
 

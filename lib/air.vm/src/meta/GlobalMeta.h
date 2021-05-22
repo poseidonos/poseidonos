@@ -4,6 +4,8 @@
 
 #include <cstdint>
 
+#include "src/config/ConfigInterface.h"
+
 namespace meta
 {
 class GlobalMeta
@@ -13,9 +15,14 @@ public:
     {
     }
     inline bool
-    Enable(void) const
+    AirBuild(void) const
     {
-        return enable;
+        return air_build;
+    }
+    inline bool
+    AirPlay(void) const
+    {
+        return air_play;
     }
     virtual inline uint32_t
     StreamingInterval(void) const
@@ -33,9 +40,14 @@ public:
         return streaming_update;
     }
     virtual inline void
-    SetEnable(bool new_enable)
+    SetAirBuild(bool new_air_build)
     {
-        enable = new_enable;
+        air_build = new_air_build;
+    }
+    virtual inline void
+    SetAirPlay(bool new_air_play)
+    {
+        air_play = new_air_play;
     }
     virtual inline void
     SetStreamingInterval(uint32_t new_streaming_interval)
@@ -59,24 +71,14 @@ public:
     {
         return cpu_num;
     }
-    inline void
-    SetAidSize(uint32_t new_aid_size)
-    {
-        aid_size = new_aid_size;
-    }
-    inline uint32_t
-    AidSize(void) const
-    {
-        return aid_size;
-    }
 
 private:
-    bool enable{true};
+    bool air_build{true};
+    bool air_play{true};
     uint32_t streaming_interval{1};
     bool streaming_update{false};
     uint32_t streaming_value{0};
     uint32_t cpu_num{0};
-    uint32_t aid_size{0};
 };
 
 class GlobalMetaGetter
@@ -93,9 +95,14 @@ public:
     {
     }
     virtual inline bool
-    Enable(void) const
+    AirBuild(void) const
     {
-        return global_meta->Enable();
+        return global_meta->AirBuild();
+    }
+    virtual inline bool
+    AirPlay(void) const
+    {
+        return global_meta->AirPlay();
     }
     virtual inline uint32_t
     StreamingInterval(void) const
@@ -116,11 +123,6 @@ public:
     CpuNum(void) const
     {
         return global_meta->CpuNum();
-    }
-    virtual inline uint32_t
-    AidSize(void) const
-    {
-        return global_meta->AidSize();
     }
 
 private:

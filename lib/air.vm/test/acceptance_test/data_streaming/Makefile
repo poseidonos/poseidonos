@@ -3,7 +3,7 @@ TOP := $(abspath $(CURDIR)/../../../)
 DEFINE += -DAIR_CONFIG='"$(TOP)/config/"'
 
 CXX         = g++
-CXXFLAGS    += -std=c++17 -Wall -O2 -fPIC
+CXXFLAGS    += -std=c++14 -Wall -O2 -fPIC
 THREAD      = -lpthread
 INCLUDE     = -I$(TOP) -I$(TOP)/include/
 #DEBUG		= -g

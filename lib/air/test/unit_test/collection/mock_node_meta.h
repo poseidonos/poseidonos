@@ -8,12 +8,12 @@ public:
     {
     }
     virtual inline bool
-    NodeEnable(uint32_t node_index) const
+    Run(uint32_t node_index) const
     {
         return true;
     }
     virtual inline air::ProcessorType
-    NodeProcessorType(uint32_t node_index) const
+    ProcessorType(uint32_t node_index) const
     {
         air::ProcessorType ptype = air::ProcessorType::PROCESSORTYPE_NULL;
 
@@ -25,13 +25,18 @@ public:
             case 1:
                 ptype = air::ProcessorType::LATENCY;
                 break;
-            case 2 ... 5:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
                 ptype = air::ProcessorType::QUEUE;
                 break;
             case 6:
                 ptype = air::ProcessorType::UTILIZATION;
                 break;
-            case 7 ... 8:
+            case 7:
+            case 8:
+            case 9:
                 ptype = air::ProcessorType::COUNT;
                 break;
             default:
@@ -40,13 +45,22 @@ public:
 
         return ptype;
     }
-
-    virtual inline int32_t
-    NodeGroupId(uint32_t node_index) const
+    virtual inline uint32_t
+    GroupId(uint32_t node_index) const
     {
         return group_id[node_index];
     }
+    virtual inline uint32_t
+    IndexSize(uint32_t nid) const
+    {
+        return 10;
+    }
+    virtual inline uint32_t
+    FilterSize(uint32_t nid) const
+    {
+        return 10;
+    }
 
 private:
-    int32_t group_id[7]{-1, 0, -1, 1, -1, 0, 1};
+    uint32_t group_id[7]{1, 0, 1, 3, 2, 0, 1};
 };

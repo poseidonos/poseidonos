@@ -35,7 +35,7 @@ chain::SwitchGearTask::RunChain(
     lib_design::AbstractCoRHandler** cor_handler, meta::GlobalMeta* g_meta,
     int32_t option)
 {
-    if (true == g_meta->Enable())
+    if (true == g_meta->AirPlay())
     {
         cor_handler[to_dtype(pi::ChainHandler::SWITCHGEAR)]->HandleRequest(option);
     }
@@ -46,7 +46,7 @@ chain::PreprocessTask::RunChain(
     lib_design::AbstractCoRHandler** cor_handler, meta::GlobalMeta* g_meta,
     int32_t option)
 {
-    if (true == g_meta->Enable())
+    if (true == g_meta->AirPlay())
     {
         cor_handler[to_dtype(pi::ChainHandler::PREPROCESS)]->HandleRequest(option);
     }
@@ -69,7 +69,7 @@ chain::AnalysisTask::RunChain(lib_design::AbstractCoRHandler** cor_handler,
     cor_handler[to_dtype(pi::ChainHandler::PROCESS)]->HandleRequest(option);
     cor_handler[to_dtype(pi::ChainHandler::STREAM)]->HandleRequest(option);
 
-    if (true == g_meta->Enable())
+    if (true == g_meta->AirPlay())
     {
         cor_handler[to_dtype(pi::ChainHandler::DETECT)]->HandleRequest(option);
     }

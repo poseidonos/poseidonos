@@ -3,7 +3,7 @@ MODULE_DIR = $(AIR_TOP_DIR)/src/meta
 DEFINE += -DAIR_CFG=config/mock_base.cfg
 
 all:
-	$(CXX) $(CXXFLAGS) $(DEFINE) -o $(TEST_SUITE) $(SRCS) $(INCLUDES) $(THREAD) $(TEST) $(LIB_DIRS)
+	$(CXX) $(CXXFLAGS) $(DEFINE) -o $(TEST_SUITE) $(SRCS) $(INCLUDES) $(THREAD) $(TEST)
 	./$(TEST_SUITE) --gtest_output=xml
 	$(GCOV) main.cpp > result.txt
 	./gcov_module_result_parsing.sh $(MODULE_DIR)

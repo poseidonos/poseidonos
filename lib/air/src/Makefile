@@ -5,6 +5,7 @@ _air:
 	@$(MAKE) -C collection
 	@$(MAKE) -C collection/writer
 	@$(MAKE) -C config
+	@$(MAKE) -C data_structure
 	@$(MAKE) -C input
 	@$(MAKE) -C lib
 	@$(MAKE) -C meta
@@ -13,7 +14,6 @@ _air:
 	@$(MAKE) -C policy
 	@$(MAKE) -C process
 	@$(MAKE) -C process/processor
-	@$(MAKE) -C profile_data
 	@$(MAKE) -C stream
 	@$(MAKE) -C target_detector
 	@$(MAKE) -C thread

@@ -110,8 +110,9 @@ INCLUDE += -I$(DPDK_ROOT_DIR)/include/dpdk
 
 $(info $(INCLUDE))
 
-INCLUDE += -I$(TOP)/lib/air/ -I$(TOP)/lib/air/include/
+INCLUDE += -I$(TOP)/lib/air/ -I$(TOP)/lib/air/src/api/
 IBOF_LDFLAGS += -L./lib/air/lib/ -lair
+DEFINE += -DAIR_CFG=$(TOP)/lib/air/config/air.cfg
 
 INCLUDE += -I$(SPDLOG_ROOT_DIR)/include -I$(SPDLOG_ROOT_DIR)/include/spdlog
 IBOF_LDFLAGS += -L./lib/$(SPDLOG_SOURCE)/lib -lspdlog

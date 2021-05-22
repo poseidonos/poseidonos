@@ -138,7 +138,7 @@ CopierReadCompletion::_DoSpecificJob(void)
     volumeManager->DecreasePendingIOCount(volId, VolumeStatus::Unmounted, blkCnt);
     meta->ReturnBuffer(stripeId, buffer);
     meta->SetDoneCopyBlks(blkCnt);
-    AIRLOG(PERF_COPY, 0, AIR_READ, BLOCK_SIZE * blkCnt);
+    airlog("PERF_COPY", "AIR_READ", 0, BLOCK_SIZE * blkCnt);
 
     return true;
 }

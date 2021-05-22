@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 #include "instance_test.h"
-#include "src/config/ConfigParser.cpp"
 
 TEST_F(InstanceTest, Initialize)
 {

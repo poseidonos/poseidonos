@@ -3,7 +3,6 @@
 #define AIR_COLLECTION_PERFORMANCE_WRITER_H
 
 #include "src/collection/writer/Writer.h"
-#include "src/lib/CType.h"
 #include "src/lib/Data.h"
 
 namespace collection
@@ -15,25 +14,13 @@ public:
     {
     }
     inline void
-    LogData(lib::Data* data, uint64_t io_type, uint64_t io_size) override
+    LogData(lib::Data* data, uint64_t io_size) override
     {
         lib::PerformanceData* perf_data = static_cast<lib::PerformanceData*>(data);
-
         perf_data->access = true;
 
-        switch (io_type)
-        {
-            case (AIR_READ):
-                perf_data->iops_read++;
-                perf_data->bandwidth_read += io_size;
-                break;
-            case (AIR_WRITE):
-                perf_data->iops_write++;
-                perf_data->bandwidth_write += io_size;
-                break;
-            default:
-                return;
-        }
+        perf_data->iops++;
+        perf_data->bandwidth += io_size;
 
         auto entry = perf_data->packet_cnt.find(io_size);
         if (entry != perf_data->packet_cnt.end())

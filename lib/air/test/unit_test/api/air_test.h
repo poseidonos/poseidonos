@@ -5,7 +5,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "src/config/ConfigInterface.h"
-#include "src/config/ConfigParser.cpp"
 
 class MockAIR : public AIR<true, true>
 {
@@ -53,7 +52,7 @@ public:
     static FakeCollectionManager* fake_collection_manager;
     static FakeInstanceManager* fake_instance_manager;
     static FakeNodeManager* fake_node_manager;
-    static thread_local node::ThreadArray* thread_array;
+    static thread_local node::NodeDataArray* node_data_array;
 };
 
 class TestAPI : public ::testing::Test

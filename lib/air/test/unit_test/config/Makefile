@@ -1,9 +1,9 @@
 SRCS += $(wildcard *.cpp)
 MODULE_DIR = $(AIR_TOP_DIR)/src/config
-DEFINE += -DAIR_CFG=config/ut_config.cfg
+DEFINE += -DAIR_CFG=config/unit_test.cfg
 
 all:
-	$(CXX) -g $(CXXFLAGS) $(DEFINE) -o $(TEST_SUITE) $(SRCS) $(INCLUDES) $(THREAD) $(TEST) $(LIB_DIRS)
+	$(CXX) -g $(CXXFLAGS) $(DEFINE) -o $(TEST_SUITE) $(SRCS) $(INCLUDES) $(THREAD) $(TEST)
 	./$(TEST_SUITE) --gtest_output=xml
 	$(GCOV) main.cpp > result.txt
 	./gcov_module_result_parsing.sh $(MODULE_DIR)

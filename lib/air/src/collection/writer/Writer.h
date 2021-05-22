@@ -12,7 +12,7 @@ public:
     virtual ~Writer(void)
     {
     }
-    virtual void LogData(lib::Data* data, uint64_t value1, uint64_t value2) = 0;
+    virtual void LogData(lib::Data* data, uint64_t value) = 0;
     virtual void InformInit(lib::AccData* data);
     virtual int SetSamplingRate(uint32_t rate) = 0;
 };

@@ -75,8 +75,8 @@ extern "C"
     int
     intialize_library()
     {
-        AIR_INITIALIZE(0);
-        AIR_ACTIVATE();
+        air_initialize(0);
+        air_activate();
 
         /*optind used in getopt.c of glic needs to be zero, 
       because, system already has used up this value for parsing fio's argument */

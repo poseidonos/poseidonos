@@ -21,7 +21,7 @@ public:
     {
     }
     inline void
-    LogData(lib::Data* data, uint64_t q_depth, uint64_t q_size) override
+    LogData(lib::Data* data, uint64_t q_depth) override
     {
         lib::QueueData* queue_data = static_cast<lib::QueueData*>(data);
         if (false == IsSampling(queue_data))
@@ -30,7 +30,6 @@ public:
         }
         queue_data->access = true;
         queue_data->sum_depth += q_depth;
-        queue_data->q_size = q_size;
         queue_data->num_req++;
         if (queue_data->depth_period_max < q_depth)
         {

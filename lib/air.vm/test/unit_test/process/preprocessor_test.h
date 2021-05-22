@@ -26,7 +26,7 @@ protected:
         fake_node_manager = new FakeNodeManager{fake_global_meta_getter,
             fake_node_meta_getter};
         preprocessor = new process::Preprocessor{fake_node_meta_getter,
-            fake_global_meta_getter, fake_node_manager};
+            fake_node_manager};
     }
     virtual ~PreprocessorTest()
     {

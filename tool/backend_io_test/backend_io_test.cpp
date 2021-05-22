@@ -124,7 +124,7 @@ public:
                 CallbackSmartPtr callback(new DummyCallbackHandler(false, this));
                 bio->SetCallback(callback);
                 int ret = IODispatcherSingleton::Instance()->Submit(bio);
-                AIRLOG(PERF_BACKEND_TEST, 0, AIR_WRITE, blockSize);
+                airlog("PERF_BACKEND_TEST", "AIR_WRITE", 0, blockSize);
             }
         }
         pendingIO--;
@@ -231,11 +231,11 @@ FlushIO(void* mem, bool write, uint32_t lsid, CallbackSmartPtr callback)
         callback, "POSArray");
     if (write)
     {
-        AIRLOG(PERF_BACKEND_TEST, 0, AIR_WRITE, blocksInStripe * ArrayConfig::BLOCK_SIZE_BYTE);
+        airlog("PERF_BACKEND_TEST", "AIR_WRITE", 0, blocksInStripe * ArrayConfig::BLOCK_SIZE_BYTE);
     }
     else
     {
-        AIRLOG(PERF_BACKEND_TEST, 0, AIR_READ, blocksInStripe * ArrayConfig::BLOCK_SIZE_BYTE);
+        airlog("PERF_BACKEND_TEST", "AIR_READ", 0, blocksInStripe * ArrayConfig::BLOCK_SIZE_BYTE);
     }
 }
 

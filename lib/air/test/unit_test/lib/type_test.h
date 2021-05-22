@@ -5,7 +5,7 @@
 class TypeTest : public ::testing::Test
 {
 public:
-    air::Node node{};
+    air::NodeMetaData node_meta{};
 
 protected:
     TypeTest()
@@ -17,9 +17,14 @@ protected:
     void
     SetUp() override
     {
-        node.nid = cfg::GetIndex(config::ConfigType::NODE, "Q_COMPLETION");
-        node.processor_type = air::ProcessorType::QUEUE;
-        node.enable = true;
+        node_meta.nid = cfg::GetSentenceIndex(config::ParagraphType::NODE, "Q_COMPLETION");
+        node_meta.processor_type = air::ProcessorType::QUEUE;
+        node_meta.run = true;
+        node_meta.group_id = 1;
+        node_meta.index_size = 10;
+        ;
+        node_meta.filter_size = 10;
+        node_meta.sample_ratio = 1000;
     }
     void
     TearDown() override

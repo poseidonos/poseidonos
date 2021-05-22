@@ -45,8 +45,8 @@ lib/go
 lib/air/bin
 lib/air/lib
 lib/air/include/
-lib/air/src/api/Air.cpp
-lib/air/src/api/Air.h
+lib/air/src/api/Air_c.cpp
+lib/air/src/api/Air_c.h
 test/regression/*.state
 test/regression/*.csv
 PYTHON_COMMAND

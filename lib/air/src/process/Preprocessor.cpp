@@ -9,40 +9,38 @@
 void
 process::Preprocessor::Run(int option)
 {
-    uint32_t aid_size{global_meta_getter->AidSize()};
-    uint32_t sid_size{lib::SID_SIZE};
-
     struct match_st
     {
         uint32_t run_state_count{0};
-        std::vector<lib::LatencySeqData*> curr_v;
-        std::vector<lib::LatencySeqData*> next_v;
+        std::vector<lib::LatencyData*> curr_v;
+        std::vector<lib::LatencyData*> next_v;
     };
 
-    std::map<uint32_t, struct match_st> match_map;
+    std::map<uint64_t, struct match_st> match_map;
     match_map.clear();
 
-    for (auto& kv : node_manager->thread_map)
+    for (auto& kv : node_manager->nda_map)
     {
-        for (uint32_t nid = 0; nid <= MAX_NID_SIZE - 1; nid++)
+        for (uint32_t nid = 0; nid < MAX_NID_SIZE; nid++)
         {
-            if (air::ProcessorType::LATENCY ==
-                node_meta_getter->NodeProcessorType(nid))
+            if (air::ProcessorType::LATENCY == node_meta_getter->ProcessorType(nid))
             {
-                for (uint32_t aid = 0; aid < aid_size; aid++)
+                uint32_t index_size = node_meta_getter->IndexSize(nid);
+                uint32_t filter_size = node_meta_getter->FilterSize(nid);
+                for (uint32_t hash_index = 0; hash_index < index_size; hash_index++)
                 {
-                    lib::LatencyData* lat_data = static_cast<lib::LatencyData*>(
-                        kv.second.node[nid]->GetUserDataByAidIndex(aid));
-
-                    if (lat_data->access)
+                    for (uint32_t filter_index = 0; filter_index < filter_size - 1; filter_index++)
                     {
-                        for (uint32_t sid = 0; sid < sid_size - 1; sid++)
-                        {
-                            lib::LatencySeqData* sl_data_curr = &lat_data->seq_data[sid];
-                            lib::LatencySeqData* sl_data_next = &lat_data->seq_data[sid + 1];
+                        lib::LatencyData* to = static_cast<lib::LatencyData*>(
+                            kv.second->node[nid]->GetUserDataByHashIndex(hash_index, filter_index + 1));
+                        lib::LatencyData* from = static_cast<lib::LatencyData*>(
+                            kv.second->node[nid]->GetUserDataByHashIndex(hash_index, filter_index));
 
-                            uint32_t key{0};
-                            key = (nid << 8) + (aid << 16) + (sid);
+                        if (from->access || to->access)
+                        {
+                            uint64_t key{0};
+                            key = ((uint64_t)nid << 48) + ((uint64_t)hash_index << 32) +
+                                ((uint64_t)filter_index);
                             struct match_st match_value;
                             match_value.run_state_count = 0;
                             match_value.curr_v.clear();
@@ -54,16 +52,16 @@ process::Preprocessor::Run(int option)
                                 match_map.insert({key, match_value});
                             }
 
-                            switch (sl_data_curr->start_state)
+                            switch (from->start_state)
                             {
                                 case (lib::TimeLogState::RUN):
                                     match_map[key].run_state_count += 1;
                                     break;
                                 case (lib::TimeLogState::STOP):
                                 case (lib::TimeLogState::FULL):
-                                    if (!sl_data_curr->start_v.empty())
+                                    if (!from->start_v.empty())
                                     {
-                                        match_map[key].curr_v.push_back(&lat_data->seq_data[sid]);
+                                        match_map[key].curr_v.push_back(from);
                                     }
                                     break;
                                 case (lib::TimeLogState::DONE):
@@ -72,16 +70,16 @@ process::Preprocessor::Run(int option)
                                     break;
                             }
 
-                            switch (sl_data_next->end_state)
+                            switch (to->end_state)
                             {
                                 case (lib::TimeLogState::RUN):
                                     match_map[key].run_state_count += 1;
                                     break;
                                 case (lib::TimeLogState::STOP):
                                 case (lib::TimeLogState::FULL):
-                                    if (!sl_data_next->end_v.empty())
+                                    if (!to->end_v.empty())
                                     {
-                                        match_map[key].next_v.push_back(&lat_data->seq_data[sid + 1]);
+                                        match_map[key].next_v.push_back(to);
                                     }
                                     break;
                                 case (lib::TimeLogState::DONE):
@@ -102,16 +100,16 @@ process::Preprocessor::Run(int option)
         {
             if ((!kv.second.curr_v.empty()) && (!kv.second.next_v.empty()))
             {
-                uint32_t aid = (kv.first >> 16);
-                uint32_t nid = ((kv.first >> 8) & 0xFF);
-                uint32_t sid = (kv.first & 0xFF);
+                uint32_t nid = ((kv.first >> 48) & 0xFFFF);
+                uint32_t hash_index = (kv.first >> 32 & 0xFFFF);
+                uint32_t filter_index = (kv.first & 0xFFFFFFFF);
 
                 for (auto curr_v : kv.second.curr_v)
                 {
                     for (auto next_v : kv.second.next_v)
                     {
                         _MatchKey(curr_v, next_v,
-                            node_manager->GetAccLatSeqData(nid, aid, sid));
+                            node_manager->GetAccLatData(nid, hash_index, filter_index));
                     }
                 }
 
@@ -129,9 +127,9 @@ process::Preprocessor::Run(int option)
 }
 
 void
-process::Preprocessor::_MatchKey(lib::LatencySeqData* curr_data,
-    lib::LatencySeqData* next_data,
-    lib::AccLatencySeqData* acc_data)
+process::Preprocessor::_MatchKey(lib::LatencyData* curr_data,
+    lib::LatencyData* next_data,
+    lib::AccLatencyData* acc_data)
 {
     curr_data->start_state = lib::TimeLogState::DONE;
     next_data->end_state = lib::TimeLogState::DONE;
@@ -146,7 +144,7 @@ process::Preprocessor::_MatchKey(lib::LatencySeqData* curr_data,
             if (it_start->key == it_end->key)
             {
                 timelag =
-                    NANOS * (it_end->timestamp.tv_sec - it_start->timestamp.tv_sec) +
+                    SEC2NANOS * (it_end->timestamp.tv_sec - it_start->timestamp.tv_sec) +
                     (it_end->timestamp.tv_nsec - it_start->timestamp.tv_nsec);
 
                 if (MAX_TIME > timelag)

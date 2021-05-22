@@ -26,7 +26,7 @@ process::ProcessManager::Init(void)
     int num_nodes = 0;
     for (uint32_t i = 0; i < MAX_NID_SIZE; i++)
     {
-        switch (node_meta_getter->NodeProcessorType(i))
+        switch (node_meta_getter->ProcessorType(i))
         {
             case (air::ProcessorType::PERFORMANCE):
                 processor[i] = new PerformanceProcessor;
@@ -59,8 +59,7 @@ process::ProcessManager::Init(void)
 void
 process::ProcessManager::SetTimeSlot(void)
 {
-    timing_distributor.SetTiming(node_meta_getter, global_meta_getter,
-        node_manager);
+    timing_distributor.SetTiming(node_meta_getter, node_manager);
 }
 
 void
@@ -71,32 +70,21 @@ process::ProcessManager::StreamData(void)
 
     air_json["timestamp"] = {(int64_t)curr_time};
     air_json["interval"] = {global_meta_getter->StreamingInterval()};
-    air_json["play"] = {global_meta_getter->Enable()};
+    air_json["play"] = {global_meta_getter->AirPlay()};
     air_json["group"];
 
     _AddGroupInfo(air_json);
 
     for (uint32_t i = 0; i < MAX_NID_SIZE; i++)
     {
-        air::ProcessorType type = node_meta_getter->NodeProcessorType(i);
+        air::ProcessorType type = node_meta_getter->ProcessorType(i);
         if (air::ProcessorType::PROCESSORTYPE_NULL != type)
         {
-            int32_t group_name_leng =
-                cfg::GetStrValue(config::ConfigType::NODE, "GroupName",
-                    cfg::GetName(config::ConfigType::NODE, i))
-                    .size();
-            std::string_view config_group_name(
-                cfg::GetStrValue(config::ConfigType::NODE, "GroupName",
-                    cfg::GetName(config::ConfigType::NODE, i))
-                    .data(),
-                group_name_leng + 1);
-            std::string group_name(config_group_name.data(), group_name_leng);
+            air::string_view node_name_view = cfg::GetSentenceName(config::ParagraphType::NODE, i);
+            air::string_view group_name_view =
+                cfg::GetStrValue(config::ParagraphType::NODE, "Group", node_name_view);
 
-            int32_t node_name_leng = cfg::GetName(config::ConfigType::NODE, i).size();
-            std::string node_name(cfg::GetName(config::ConfigType::NODE, i).data(),
-                node_name_leng);
-
-            _AddNodeInfo(group_name, node_name, i, type);
+            _AddNodeInfo(group_name_view, node_name_view, i, type);
         }
     }
 }
@@ -104,16 +92,16 @@ process::ProcessManager::StreamData(void)
 void
 process::ProcessManager::_AddGroupInfo(air::JSONdoc& doc)
 {
-    uint32_t group_size = cfg::GetArrSize(config::ConfigType::GROUP);
+    uint32_t group_size = cfg::GetSentenceCount(config::ParagraphType::GROUP);
     for (uint32_t i = 0; i < group_size; i++)
     {
-        int32_t group_name_leng = cfg::GetName(config::ConfigType::GROUP, i).size();
-        std::string group_name(cfg::GetName(config::ConfigType::GROUP, i).data(),
+        int32_t group_name_leng = cfg::GetSentenceName(config::ParagraphType::GROUP, i).size();
+        std::string group_name(cfg::GetSentenceName(config::ParagraphType::GROUP, i).data(),
             group_name_leng);
 
         auto& group_obj = air::json(group_name);
-        int32_t group_id = cfg::GetIndex(
-            config::ConfigType::GROUP, cfg::GetName(config::ConfigType::GROUP, i));
+        int32_t group_id = cfg::GetSentenceIndex(
+            config::ParagraphType::GROUP, cfg::GetSentenceName(config::ParagraphType::GROUP, i));
         group_obj["group_id"] = {group_id};
         group_obj["node"];
         doc["group"][group_name] = {group_obj};
@@ -121,20 +109,24 @@ process::ProcessManager::_AddGroupInfo(air::JSONdoc& doc)
 }
 
 void
-process::ProcessManager::_AddNodeInfo(std::string& group_name,
-    std::string& node_name, uint32_t nid,
-    air::ProcessorType type)
+process::ProcessManager::_AddNodeInfo(air::string_view& group_name_view,
+    air::string_view& node_name_view, uint32_t nid, air::ProcessorType type)
 {
     uint32_t time = global_meta_getter->StreamingInterval();
-    uint32_t max_aid_size = global_meta_getter->AidSize();
+    uint32_t index_size = node_meta_getter->IndexSize(nid);
+    uint32_t filter_size = node_meta_getter->FilterSize(nid);
+    std::string group_name;
+    std::string node_name;
+    group_name.assign(group_name_view.data(), group_name_view.size());
+    node_name.assign(node_name_view.data(), node_name_view.size());
 
     auto& node_obj = air::json(node_name);
     node_obj["node_id"] = {nid};
     bool node_build =
-        (bool)cfg::GetIntValue(config::ConfigType::NODE, "NodeBuild",
-            cfg::GetName(config::ConfigType::NODE, nid));
+        (bool)cfg::GetIntValue(config::ParagraphType::NODE, "Build",
+            cfg::GetSentenceName(config::ParagraphType::NODE, nid));
     node_obj["build"] = {node_build};
-    node_obj["run"] = {node_meta_getter->NodeEnable(nid)};
+    node_obj["run"] = {node_meta_getter->Run(nid)};
     switch (type)
     {
         case (air::ProcessorType::PERFORMANCE):
@@ -166,24 +158,28 @@ process::ProcessManager::_AddNodeInfo(std::string& group_name,
     node_obj["objs"] = {};
 
     // processing here !!!!
-    if (global_meta_getter->Enable() && node_build && node_meta_getter->NodeEnable(nid))
+    if (global_meta_getter->AirPlay() && node_build && node_meta_getter->Run(nid))
     {
         if (air::ProcessorType::LATENCY == type)
         {
-            for (uint32_t aid = 0; aid < max_aid_size; aid++)
+            for (uint32_t hash_index = 0; hash_index < index_size; hash_index++)
             {
-                processor[nid]->StreamData(node_name,
-                    node_manager->GetAccLatData(nid, aid), aid);
+                for (uint32_t filter_index = 0; filter_index < filter_size - 1; filter_index++)
+                {
+                    processor[nid]->StreamData(node_name_view,
+                        node_manager->GetAccLatData(nid, hash_index, filter_index),
+                        hash_index, filter_index);
+                }
             }
         }
         else if (air::ProcessorType::PROCESSORTYPE_NULL != type)
         {
-            for (auto it = node_manager->thread_map.begin(); it != node_manager->thread_map.end(); it++)
+            for (auto it = node_manager->nda_map.begin(); it != node_manager->nda_map.end(); it++)
             {
-                node::ThreadArray* arr = &(it->second);
-                node::Thread* thread = arr->node[nid];
-                processor[nid]->StreamData(node_name, it->first, arr->tname.c_str(),
-                    thread, type, time, max_aid_size);
+                node::NodeDataArray* arr = it->second;
+                node::NodeData* node_data = arr->node[nid];
+                processor[nid]->StreamData(node_name_view, it->first, arr->tname.c_str(),
+                    node_data, type, time, index_size, filter_size);
             }
         }
     }

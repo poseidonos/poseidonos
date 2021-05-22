@@ -17,18 +17,12 @@ public:
     {
     }
     inline void
-    LogData(lib::Data* data, uint64_t enum_index, uint64_t usage) override
+    LogData(lib::Data* data, uint64_t usage) override
     {
         lib::UtilizationData* util_data = static_cast<lib::UtilizationData*>(data);
         util_data->access = true;
 
-        if (lib::ENUM_SIZE <= enum_index)
-        {
-            return;
-        }
-
-        util_data->usage[enum_index] += usage;
-        util_data->sum += usage;
+        util_data->usage += usage;
     }
     int
     SetSamplingRate(uint32_t rate) override

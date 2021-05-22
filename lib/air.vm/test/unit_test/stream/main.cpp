@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 #include <stdio.h>
 
-#include "src/config/ConfigParser.cpp"
 #include "stream_test.h"
 
 TEST_F(StreamTest, SendPacket)

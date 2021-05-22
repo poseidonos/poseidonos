@@ -42,6 +42,40 @@ Double2StringWithBWFormat(double value)
 }
 
 std::string
+Double2String(double value)
+{
+    std::stringstream stream;
+
+    stream << std::fixed << std::setprecision(1);
+
+    if (value < 1000ULL)
+    {
+        stream << value;
+    }
+    else if (value < 1000000ULL)
+    {
+        stream << (value / 1000ULL) << "k";
+    }
+    else if (value < 1000000000ULL)
+    {
+        stream << (value / 1000000ULL) << "m";
+    }
+    else
+    {
+        stream << (value / 1000000000ULL) << "g";
+    }
+
+    size_t padding_count = 6 - stream.str().size();
+    while (0 < padding_count)
+    {
+        stream << " ";
+        padding_count--;
+    }
+
+    return stream.str();
+}
+
+std::string
 ULL2StringWithLatencyFormat(uint64_t value)
 {
     std::stringstream stream;
@@ -74,30 +108,30 @@ ULL2StringWithLatencyFormat(uint64_t value)
 }
 
 std::string
-Double2String(double value)
+LL2String(int64_t value)
 {
     std::stringstream stream;
 
     stream << std::fixed << std::setprecision(1);
 
-    if (value < 1000ULL)
+    if (value < 1000LL && value > -1000LL)
     {
         stream << value;
     }
-    else if (value < 1000000ULL)
+    else if (value < 1000000LL && value > -1000000LL)
     {
-        stream << (value / 1000ULL) << "k";
+        stream << ((double)value / 1000LL) << "k";
     }
-    else if (value < 1000000000ULL)
+    else if (value < 1000000000LL && value > -1000000000LL)
     {
-        stream << (value / 1000000ULL) << "m";
+        stream << ((double)value / 1000000LL) << "m";
     }
     else
     {
-        stream << (value / 1000000000ULL) << "g";
+        stream << ((double)value / 1000000000LL) << "g";
     }
 
-    size_t padding_count = 6 - stream.str().size();
+    size_t padding_count = 7 - stream.str().size();
     while (0 < padding_count)
     {
         stream << " ";

@@ -2,7 +2,7 @@
 #include "src/lib/Hash.h"
 
 template<typename K>
-hash::HashMap<K>::HashMap(uint32_t new_capacity)
+air::HashMap<K>::HashMap(uint32_t new_capacity)
 {
     capacity = new_capacity;
     hash_arr = new HashNode<K>*[capacity];
@@ -13,7 +13,7 @@ hash::HashMap<K>::HashMap(uint32_t new_capacity)
 }
 
 template<typename K>
-hash::HashMap<K>::~HashMap(void)
+air::HashMap<K>::~HashMap(void)
 {
     for (uint32_t i = 0; i < capacity; i++)
     {
@@ -27,4 +27,4 @@ hash::HashMap<K>::~HashMap(void)
 }
 
 // explicit instantiation
-template class hash::HashMap<uint64_t>;
+template class air::HashMap<uint64_t>;

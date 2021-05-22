@@ -9,11 +9,17 @@
 air::InstanceManager* AIR<true, true>::instance_manager = nullptr;
 node::NodeManager* AIR<true, true>::node_manager = nullptr;
 collection::CollectionManager* AIR<true, true>::collection_manager = nullptr;
-thread_local node::ThreadArray* AIR<true, true>::thread_array = nullptr;
+thread_local node::NodeDataArray* AIR<true, true>::node_data_array = nullptr;
 
 FakeCollectionManager* MockAIR::fake_collection_manager = nullptr;
 FakeInstanceManager* MockAIR::fake_instance_manager = nullptr;
 FakeNodeManager* MockAIR::fake_node_manager = nullptr;
+
+enum IOtype
+{
+    AIR_READ,
+    AIR_WRITE,
+};
 
 TEST_F(TestAPI, UT_AIR_Initialize)
 {
@@ -37,36 +43,50 @@ TEST_F(TestAPI, UT_AIR_Finalize)
 
 TEST_F(TestAPI, UT_AIR_LogPerf)
 {
-    mock_air->LogData<cfg::GetIndex(config::ConfigType::NODE, "PERF_BENCHMARK")>(0, AIR_READ, 4096);
-    uint64_t value{4096};
-    EXPECT_EQ(value, mock_air->fake_collection_manager->value2);
+    mock_air->LogData<cfg::GetSentenceIndex(config::ParagraphType::NODE, "PERF_BENCHMARK"),
+        cfg::GetIntValue(config::ParagraphType::FILTER, "Item",
+            cfg::GetStrValue(config::ParagraphType::NODE, "Filter", "PERF_BENCHMARK"), "AIR_READ")>(0, 4096);
 
     mock_air->SetNullCollectionManager();
-    mock_air->LogData<cfg::GetIndex(config::ConfigType::NODE, "PERF_BENCHMARK")>(0, AIR_READ, 4096);
+    mock_air->LogData<cfg::GetSentenceIndex(config::ParagraphType::NODE, "PERF_BENCHMARK"),
+        cfg::GetIntValue(config::ParagraphType::FILTER, "Item",
+            cfg::GetStrValue(config::ParagraphType::NODE, "Filter", "PERF_BENCHMARK"), "AIR_READ")>(0, 4096);
 }
 
 TEST_F(TestAPI, UT_AIR_LogLat)
 {
-    mock_air->LogData<cfg::GetIndex(config::ConfigType::NODE, "LAT_SUBMIT")>(0, 0, 123);
+    mock_air->LogData<cfg::GetSentenceIndex(config::ParagraphType::NODE, "LAT_SUBMIT"),
+        cfg::GetIntValue(config::ParagraphType::FILTER, "Item",
+            cfg::GetStrValue(config::ParagraphType::NODE, "Filter", "LAT_SUBMIT"), "AIR_0")>(0, 123);
 
-    AIR<true, true>::thread_array = nullptr;
-    mock_air->LogData<cfg::GetIndex(config::ConfigType::NODE, "LAT_SUBMIT")>(0, 0, 123);
+    AIR<true, true>::node_data_array = nullptr;
+    mock_air->LogData<cfg::GetSentenceIndex(config::ParagraphType::NODE, "LAT_SUBMIT"),
+        cfg::GetIntValue(config::ParagraphType::FILTER, "Item",
+            cfg::GetStrValue(config::ParagraphType::NODE, "Filter", "LAT_SUBMIT"), "AIR_0")>(0, 123);
 
     mock_air->SetNullCollectionManager();
-    mock_air->LogData<cfg::GetIndex(config::ConfigType::NODE, "LAT_SUBMIT")>(0, 0, 123);
+    mock_air->LogData<cfg::GetSentenceIndex(config::ParagraphType::NODE, "LAT_SUBMIT"),
+        cfg::GetIntValue(config::ParagraphType::FILTER, "Item",
+            cfg::GetStrValue(config::ParagraphType::NODE, "Filter", "LAT_SUBMIT"), "AIR_0")>(0, 123);
 }
 
 TEST_F(TestAPI, UT_AIR_LogQ)
 {
-    mock_air->LogData<cfg::GetIndex(config::ConfigType::NODE, "Q_SUBMISSION")>(0, 128, 256);
+    mock_air->LogData<cfg::GetSentenceIndex(config::ParagraphType::NODE, "Q_SUBMISSION"),
+        cfg::GetIntValue(config::ParagraphType::FILTER, "Item",
+            cfg::GetStrValue(config::ParagraphType::NODE, "Filter", "Q_SUBMISSION"), "AIR_BASE")>(0, 128);
     uint32_t value{128};
-    EXPECT_EQ(value, mock_air->fake_collection_manager->value1);
+    EXPECT_EQ(value, mock_air->fake_collection_manager->value);
 
-    AIR<true, true>::thread_array = nullptr;
-    mock_air->LogData<cfg::GetIndex(config::ConfigType::NODE, "Q_SUBMISSION")>(0, 128, 256);
+    AIR<true, true>::node_data_array = nullptr;
+    mock_air->LogData<cfg::GetSentenceIndex(config::ParagraphType::NODE, "Q_SUBMISSION"),
+        cfg::GetIntValue(config::ParagraphType::FILTER, "Item",
+            cfg::GetStrValue(config::ParagraphType::NODE, "Filter", "Q_SUBMISSION"), "AIR_BASE")>(0, 128);
 
     mock_air->SetNullCollectionManager();
-    mock_air->LogData<cfg::GetIndex(config::ConfigType::NODE, "Q_SUBMISSION")>(0, 128, 256);
+    mock_air->LogData<cfg::GetSentenceIndex(config::ParagraphType::NODE, "Q_SUBMISSION"),
+        cfg::GetIntValue(config::ParagraphType::FILTER, "Item",
+            cfg::GetStrValue(config::ParagraphType::NODE, "Filter", "Q_SUBMISSION"), "AIR_BASE")>(0, 128);
 }
 
 int

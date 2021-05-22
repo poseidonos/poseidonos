@@ -19,62 +19,61 @@ policy::Subject::Notify(uint32_t index, uint32_t type1, uint32_t type2,
     return result;
 }
 
-int
+void
 policy::RuleManager::SetNodeMetaConfig(void* node)
 {
-    int result = 1;
-    air::Node* node_meta;
-    node_meta = (air::Node*)node;
-    uint32_t num_nodes = cfg::GetArrSize(config::ConfigType::NODE);
+    air::NodeMetaData* node_meta;
+    node_meta = (air::NodeMetaData*)node;
+    uint32_t num_nodes = cfg::GetSentenceCount(config::ParagraphType::NODE);
     for (uint32_t i = 0; i < num_nodes; i++)
     {
-        std::string_view node_name = cfg::GetName(config::ConfigType::NODE, i);
-        std::string_view type = cfg::GetStrValue(config::ConfigType::NODE, "Type", node_name);
-        bool enable = cfg::GetIntValue(config::ConfigType::NODE, "NodeRun", node_name);
+        air::string_view node_name = cfg::GetSentenceName(config::ParagraphType::NODE, i);
+        air::string_view type = cfg::GetStrValue(config::ParagraphType::NODE, "Type", node_name);
+        bool run = cfg::GetIntValue(config::ParagraphType::NODE, "Run", node_name);
 
         node_meta[i].nid = i;
-        if (0 == type.compare("PERFORMANCE"))
+        if (0 == type.compare("PERFORMANCE") || 0 == type.compare("Performance"))
         {
             node_meta[i].processor_type = air::ProcessorType::PERFORMANCE;
         }
-        else if (0 == type.compare("LATENCY"))
+        else if (0 == type.compare("LATENCY") || 0 == type.compare("Latency"))
         {
             node_meta[i].processor_type = air::ProcessorType::LATENCY;
         }
-        else if (0 == type.compare("QUEUE"))
+        else if (0 == type.compare("QUEUE") || 0 == type.compare("Queue"))
         {
             node_meta[i].processor_type = air::ProcessorType::QUEUE;
+            node_meta[i].sample_ratio = cfg::GetIntValue(config::ParagraphType::NODE, "SamplingRatio", node_name);
         }
-        else if (0 == type.compare("UTILIZATION"))
+        else if (0 == type.compare("UTILIZATION") || 0 == type.compare("Utilization"))
         {
             node_meta[i].processor_type = air::ProcessorType::UTILIZATION;
         }
-        else if (0 == type.compare("COUNT"))
+        else if (0 == type.compare("COUNT") || 0 == type.compare("Count"))
         {
             node_meta[i].processor_type = air::ProcessorType::COUNT;
         }
-        node_meta[i].enable = enable;
+        node_meta[i].run = run;
 
-        std::string_view group_name = cfg::GetStrValue(config::ConfigType::NODE, "GroupName", node_name);
+        air::string_view group_name = cfg::GetStrValue(config::ParagraphType::NODE, "Group", node_name);
         if (group_name != "")
         {
-            uint32_t gid = cfg::GetIndex(config::ConfigType::GROUP, group_name);
+            uint32_t gid = cfg::GetSentenceIndex(config::ParagraphType::GROUP, group_name);
             node_meta[i].group_id = gid;
         }
-    }
 
-    return result;
+        node_meta[i].index_size = cfg::GetIntValue(config::ParagraphType::NODE, "IndexSize", i, "");
+
+        air::string_view filter_name = cfg::GetStrValue(config::ParagraphType::NODE, "Filter", node_name);
+        node_meta[i].filter_size = cfg::GetItemSizeWithFilterName(filter_name);
+    }
 }
 
-int
+void
 policy::RuleManager::SetGlobalConfig(void)
 {
-    int32_t streaming_interval = cfg::GetIntValue(config::ConfigType::DEFAULT, "StreamingInterval");
-    ruler->SetStreamingInterval(streaming_interval);
-    int32_t aid_size = cfg::GetIntValue(config::ConfigType::DEFAULT, "AidSize");
-    ruler->SetAidSize(aid_size);
-
-    return 1;
+    ruler->SetStreamingInterval(cfg::GetIntValue(config::ParagraphType::DEFAULT, "StreamingInterval"));
+    ruler->SetAirBuild(cfg::GetIntValue(config::ParagraphType::DEFAULT, "AirBuild"));
 }
 
 int
@@ -107,8 +106,6 @@ policy::RuleManager::UpdateRule(uint32_t type1, uint32_t type2,
                     break;
                 }
             }
-
-            ruler->SetUpdate(false);
         }
     }
     return result;
