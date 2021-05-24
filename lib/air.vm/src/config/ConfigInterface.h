@@ -99,11 +99,41 @@ public:
             air::string_view group_name = config_parser.GetStrValueFromSentence(sentence, "Group");
             index = config_parser.GetIndexFromParagraph(ParagraphType::GROUP, group_name);
             sentence = config_parser.GetSentenceFromParagraph(ParagraphType::GROUP, index);
-            ret = config_parser.GetIntValueFromSentence(sentence, key);
-            if (0 > ret)
+            if (key == "Build")
             {
-                sentence = config_parser.GetSentenceFromParagraph(ParagraphType::DEFAULT, 0);
-                ret = config_parser.GetIntValueFromSentence(sentence, key);
+                ret = config_parser.GetIntValueFromSentence(sentence, "NodeBuild");
+                if (0 > ret)
+                {
+                    sentence = config_parser.GetSentenceFromParagraph(ParagraphType::DEFAULT, 0);
+                    ret = config_parser.GetIntValueFromSentence(sentence, "NodeBuild");
+                }
+            }
+            else if (key == "Run")
+            {
+                ret = config_parser.GetIntValueFromSentence(sentence, "NodeRun");
+                if (0 > ret)
+                {
+                    sentence = config_parser.GetSentenceFromParagraph(ParagraphType::DEFAULT, 0);
+                    ret = config_parser.GetIntValueFromSentence(sentence, "NodeRun");
+                }
+            }
+            else if (key == "SamplingRatio")
+            {
+                ret = config_parser.GetIntValueFromSentence(sentence, "NodeSamplingRatio");
+                if (0 > ret)
+                {
+                    sentence = config_parser.GetSentenceFromParagraph(ParagraphType::DEFAULT, 0);
+                    ret = config_parser.GetIntValueFromSentence(sentence, "NodeSamplingRatio");
+                }
+            }
+            else if (key == "IndexSize")
+            {
+                ret = config_parser.GetIntValueFromSentence(sentence, "NodeIndexSize");
+                if (0 > ret)
+                {
+                    sentence = config_parser.GetSentenceFromParagraph(ParagraphType::DEFAULT, 0);
+                    ret = config_parser.GetIntValueFromSentence(sentence, "NodeIndexSize");
+                }
             }
         }
         else if (0 > ret && ParagraphType::GROUP == type)
