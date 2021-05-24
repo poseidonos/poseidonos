@@ -60,7 +60,6 @@ TEST(ArrayComponents, Create_testIfGetStateAndSubscribeIsInvokedWhenCreationSucc
     MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     NiceMock<MockStateControl> mockStateControl;
     MockVolumeManager* mockVolMgr = new MockVolumeManager(nullptr, &mockStateControl);
-    
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, &mockStateControl, mockArray,
         mockVolMgr, nullptr, nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory);
 

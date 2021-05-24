@@ -173,7 +173,7 @@ ArrayComponents::Load(void)
         return ret;
     }
 
-    _InstantiateMetaComponentsAndMountSequenceInOrder(true/* array has loaded already*/);
+    _InstantiateMetaComponentsAndMountSequenceInOrder(true/* array has been loaded already*/);
     _SetMountSequence();
 
     POS_TRACE_DEBUG(SUCCESS, "Array components for {} have been loaded.", arrayName);
@@ -237,7 +237,7 @@ void
 ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayLoaded)
 {
     if (metafs != nullptr
-        || volMgr != nullptr 
+        || volMgr != nullptr
         || mapper != nullptr
         || allocator != nullptr
         || journal != nullptr
@@ -247,7 +247,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
         POS_TRACE_WARN(POS_EVENT_ID::ARRAY_COMPONENTS_LEAK, "Meta Components exist already. Possible memory leak (or is it a mock?). Skipping.");
         return;
     }
-    
+
     // Please note that the order of creation should be like the following:
     metafs = metaFsFactory(array, isArrayLoaded);
     volMgr = new VolumeManager(array, state);
@@ -259,7 +259,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
 }
 
 void
-ArrayComponents::_DestructMetaComponentsInOrder()
+ArrayComponents::_DestructMetaComponentsInOrder(void)
 {
     // Please note that the order of creation should be like the following:
     if (metaMountSequence != nullptr)

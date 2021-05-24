@@ -86,7 +86,7 @@ public:
 private:
     void _SetMountSequence(void);
     void _InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayLoaded);
-    void _DestructMetaComponentsInOrder();
+    void _DestructMetaComponentsInOrder(void);
 
     string arrayName = "";
 
