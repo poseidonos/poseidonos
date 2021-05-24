@@ -112,6 +112,7 @@ MetaFs::Dispose(void)
 void
 MetaFs::Shutdown(void)
 {
+    Dispose();
 }
 
 uint64_t
