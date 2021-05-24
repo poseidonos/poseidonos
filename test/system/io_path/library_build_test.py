@@ -22,7 +22,7 @@ def build_ibofos_library_option():
     subprocess.call(["./configure", \
         "--with-library-build"])
     
-    ret = subprocess.call(["make", "-j8"])
+    ret = subprocess.call(["make", "-j4"])
 
     if(ret != 0):
         print("\tBuild Failed !!")
