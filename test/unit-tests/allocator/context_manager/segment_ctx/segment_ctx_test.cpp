@@ -73,6 +73,8 @@ TEST(SegmentCtx, IncreaseValidBlockCount_TestIncreaseValue)
     int ret = segCtx.IncreaseValidBlockCount(0, 1);
     // then 1.
     EXPECT_EQ(6, ret);
+
+    delete segInfos;
 }
 
 TEST(SegmentCtx, DecreaseValidBlockCount_TestDecreaseValue)

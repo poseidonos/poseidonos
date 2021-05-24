@@ -230,6 +230,8 @@ TEST(AllocatorCtx, GetSegmentState_TestSimpleGetter)
     EXPECT_EQ(SegmentState::FREE, ret);
 
     // given 2.
+    std::mutex segStateLock;
+    EXPECT_CALL(*segLocks, GetLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segStates, GetState).WillOnce(Return(SegmentState::SSD));
     // when 2.
     ret = allocCtx.GetSegmentState(0, true);
@@ -257,6 +259,8 @@ TEST(AllocatorCtx, SetSegmentState_TestSimpleSetter)
     allocCtx.SetSegmentState(0, SegmentState::FREE, false);
 
     // given 2.
+    std::mutex segStateLock;
+    EXPECT_CALL(*segLocks, GetLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segStates, SetState);
     // when 2.
     allocCtx.SetSegmentState(0, SegmentState::SSD, true);

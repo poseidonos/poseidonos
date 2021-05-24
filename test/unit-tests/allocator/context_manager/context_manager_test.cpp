@@ -25,7 +25,7 @@ TEST(ContextManager, ContextManager_)
 {
 }
 
-TEST(ContextManager, Init_)
+TEST(ContextManager, Init_TestCaseFormatFormat)
 {
     // given
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
@@ -37,6 +37,11 @@ TEST(ContextManager, Init_)
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     // given 1. : Format+Format
+    std::mutex segCtxLock, allocCtxLock, wbLsidBitmapLock;
+    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
+    EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillOnce(ReturnRef(wbLsidBitmapLock));
+
     EXPECT_CALL(*allocCtx, Init);
     EXPECT_CALL(*wbStripeCtx, Init);
     EXPECT_CALL(*segCtx, Init);
@@ -46,6 +51,18 @@ TEST(ContextManager, Init_)
     EXPECT_CALL(*fileMan, LoadSync).WillOnce(Return(0)).WillOnce(Return(0));
     // when 1.
     ctxManager.Init();
+}
+
+TEST(ContextManager, Init_TestCaseLoadLoad)
+{
+    // given
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
+    NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+
+    ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     // given 2. : Load+Load
     EXPECT_CALL(*allocCtx, Init);
@@ -57,8 +74,24 @@ TEST(ContextManager, Init_)
     EXPECT_CALL(*fileMan, LoadSync).WillOnce(Return(1)).WillOnce(Return(1));
     // when 2.
     ctxManager.Init();
+}
+
+TEST(ContextManager, Init_TestCaseLoadFormat)
+{
+    // given
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
+    NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+
+    ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     // given 3. : Load+Format
+    std::mutex allocCtxLock, wbLsidBitmapLock;
+    EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillOnce(ReturnRef(wbLsidBitmapLock));
+
     EXPECT_CALL(*allocCtx, Init);
     EXPECT_CALL(*wbStripeCtx, Init);
     EXPECT_CALL(*segCtx, Init);
@@ -86,7 +119,7 @@ TEST(ContextManager, Init_)
     */
 }
 
-TEST(ContextManager, Close_)
+TEST(ContextManager, Close_TestIfAllCalled)
 {
     // given
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
@@ -116,8 +149,10 @@ TEST(ContextManager, FlushContextsSync_IfSuccessAllFile)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
-    std::mutex segCtxLock;
-    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock)).WillOnce(ReturnRef(segCtxLock));
+    std::mutex segCtxLock, allocCtxLock, wbLsidBitmapLock;
+    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
+    EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillOnce(ReturnRef(wbLsidBitmapLock));
     EXPECT_CALL(*fileMan, StoreSync).WillOnce(Return(0)).WillOnce(Return(0));
     // when
     int ret = ctxManager.FlushContextsSync();
@@ -154,8 +189,10 @@ TEST(ContextManager, FlushContextsSync_IfFailSecondFile)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
-    std::mutex segCtxLock;
-    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock)).WillOnce(ReturnRef(segCtxLock));
+    std::mutex segCtxLock, allocCtxLock, wbLsidBitmapLock;
+    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
+    EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillOnce(ReturnRef(wbLsidBitmapLock));
     EXPECT_CALL(*fileMan, StoreSync).WillOnce(Return(0)).WillOnce(Return(-1));
     // when
     int ret = ctxManager.FlushContextsSync();
@@ -189,8 +226,10 @@ TEST(ContextManager, FlushContextsAsync_IfSuccessAllFile)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
-    std::mutex segCtxLock;
-    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock)).WillOnce(ReturnRef(segCtxLock));
+    std::mutex segCtxLock, allocCtxLock, wbLsidBitmapLock;
+    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
+    EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillOnce(ReturnRef(wbLsidBitmapLock));
     EXPECT_CALL(*fileMan, StoreAsync).WillOnce(Return(0)).WillOnce(Return(0));
     // when
     int ret = ctxManager.FlushContextsAsync(nullptr);
@@ -226,8 +265,11 @@ TEST(ContextManager, FlushContextsAsync_IfFailSecondFile)
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
-    std::mutex segCtxLock;
-    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock)).WillOnce(ReturnRef(segCtxLock));
+
+    std::mutex segCtxLock, allocCtxLock, wbLsidBitmapLock;
+    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
+    EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
+    EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillOnce(ReturnRef(wbLsidBitmapLock));
     EXPECT_CALL(*fileMan, StoreAsync).WillOnce(Return(0)).WillOnce(Return(-1));
     // when
     int ret = ctxManager.FlushContextsAsync(nullptr);
@@ -268,6 +310,8 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndVali
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
 
     int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
+    std::mutex segStateLock;
+    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(100));
     // when
@@ -288,6 +332,8 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndVali
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
 
     int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
+    std::mutex segStateLock;
+    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(0));
     EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::FREE));
@@ -307,8 +353,8 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndVali
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
 
-    std::mutex segStateLock;
     int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
+    std::mutex segStateLock;
     EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(0));
@@ -349,21 +395,17 @@ TEST(ContextManager, AllocateFreeSegment_TestFreeSegmentAllocationByState)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
-    // given 1.
-    std::mutex segStateLock;
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
+    // given 1. for rebuild segment allocation
     EXPECT_CALL(*allocCtx, AllocateFreeSegment).WillOnce(Return(5));
     // when 1.
     ctxManager.AllocateFreeSegment(false);
 
-    // given 2.
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
+    // given 2. for user segment allocation
     EXPECT_CALL(*allocCtx, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
     // when 2.
     ctxManager.AllocateFreeSegment(true);
 
-    // given 3.
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
+    // given 3. for user segment allocation, first failed, second success
     EXPECT_CALL(*allocCtx, AllocateFreeSegment).WillOnce(Return(5)).WillOnce(Return(11));
     EXPECT_CALL(*reCtx, IsRebuildTargetSegment).WillOnce(Return(true)).WillOnce(Return(false));
     // when 3.
@@ -397,6 +439,7 @@ TEST(ContextManager, AllocateGCVictimSegment_TestGCVictimAllocationByStateAndVal
     EXPECT_EQ(4, ret);
 
     // given 2.
+    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(20)).WillOnce(Return(0)).WillOnce(Return(20)).WillOnce(Return(20)).WillOnce(Return(20));
     EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD));
 
@@ -415,9 +458,7 @@ TEST(ContextManager, GetNumFreeSegment_TestSimpleGetter)
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
-    std::mutex segStateLock;
 
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*allocCtx, GetNumOfFreeUserDataSegment).WillOnce(Return(50));
     // when
     int ret = ctxManager.GetNumFreeSegment();
@@ -512,26 +553,31 @@ TEST(ContextManager, FreeUserDataSegment_TestWhenSegmentStateChangedHowFreeUserD
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
+    std::mutex segStateLock;
 
-    // given 1.
+    // given 1. release free segment
+    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD));
     EXPECT_CALL(*segCtx, GetOccupiedStripeCount).WillOnce(Return(50));
     // when 1.
     ctxManager.FreeUserDataSegment(5);
 
-    // given 2.
+    // given 2. release victim segment as free
+    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::VICTIM));
     EXPECT_CALL(*segCtx, GetOccupiedStripeCount).WillOnce(Return(50));
     // when 2.
     ctxManager.FreeUserDataSegment(5);
 
-    // given 3.
+    // given 3. release nvram segment as free
+    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::NVRAM));
     EXPECT_CALL(*segCtx, GetOccupiedStripeCount).Times(0);
     // when 3.
     ctxManager.FreeUserDataSegment(5);
 
-    // given 4.
+    // given 4. just exit with free state
+    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::FREE));
     EXPECT_CALL(*segCtx, GetOccupiedStripeCount).Times(0);
     // when 4.
@@ -745,7 +791,7 @@ TEST(ContextManager, SetNextSsdLsid_TestCheckReturnedSegmentId)
     // when 2.
     ret = ctxManager.SetNextSsdLsid();
     // then 2.
-    EXPECT_EQ((int)POS_EVENT_ID::ALLOCATOR_NO_FREE_SEGMENT, ret);
+    EXPECT_EQ((int)-EID(ALLOCATOR_NO_FREE_SEGMENT), ret);
 }
 
 } // namespace pos
