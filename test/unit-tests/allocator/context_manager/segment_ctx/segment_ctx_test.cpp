@@ -32,7 +32,7 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentSignatureIsMatchedOrNot)
     delete buf;
 }
 
-TEST(SegmentCtx, BeforeFlush_)
+TEST(SegmentCtx, BeforeFlush_TestSimpleSetter)
 {
     // given
     SegmentCtxHeader* buf = new SegmentCtxHeader();
@@ -45,7 +45,7 @@ TEST(SegmentCtx, BeforeFlush_)
     delete buf;
 }
 
-TEST(SegmentCtx, FinalizeIo_)
+TEST(SegmentCtx, FinalizeIo_TestSimpleSetter)
 {
     // given
     SegmentCtxHeader* buf = new SegmentCtxHeader();
@@ -59,7 +59,7 @@ TEST(SegmentCtx, FinalizeIo_)
     delete buf;
 }
 
-TEST(SegmentCtx, IncreaseValidBlockCount_)
+TEST(SegmentCtx, IncreaseValidBlockCount_TestIncreaseValue)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -75,7 +75,7 @@ TEST(SegmentCtx, IncreaseValidBlockCount_)
     EXPECT_EQ(6, ret);
 }
 
-TEST(SegmentCtx, DecreaseValidBlockCount_)
+TEST(SegmentCtx, DecreaseValidBlockCount_TestDecreaseValue)
 {
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
@@ -91,7 +91,7 @@ TEST(SegmentCtx, DecreaseValidBlockCount_)
     delete segInfos;
 }
 
-TEST(SegmentCtx, GetValidBlockCount_)
+TEST(SegmentCtx, GetValidBlockCount_TestSimpleGetter)
 {
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
@@ -107,7 +107,7 @@ TEST(SegmentCtx, GetValidBlockCount_)
     delete segInfos;
 }
 
-TEST(SegmentCtx, GetOccupiedStripeCount_)
+TEST(SegmentCtx, GetOccupiedStripeCount_TestSimpleGetter)
 {
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
@@ -139,7 +139,7 @@ TEST(SegmentCtx, IncreaseOccupiedStripeCount)
     delete segInfos;
 }
 
-TEST(SegmentCtx, IsSegmentCtxIo_)
+TEST(SegmentCtx, IsSegmentCtxIo_TestIfSegmentCtxIoOrNot)
 {
     // given
     SegmentCtxHeader* buf = new SegmentCtxHeader();
@@ -162,7 +162,7 @@ TEST(SegmentCtx, IsSegmentCtxIo_)
     delete buf;
 }
 
-TEST(SegmentCtx, CopySegmentInfoToBufferforWBT_)
+TEST(SegmentCtx, CopySegmentInfoToBufferforWBT_CheckCopiedBuffer)
 {
     // given
     AllocatorAddressInfo addrInfo;

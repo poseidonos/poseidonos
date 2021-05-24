@@ -14,7 +14,7 @@ using ::testing::ReturnRef;
 
 namespace pos
 {
-TEST(WbStripeCtx, AfterLoad_)
+TEST(WbStripeCtx, AfterLoad_TestSimpleSetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -29,7 +29,7 @@ TEST(WbStripeCtx, AfterLoad_)
     delete allocBitmap;
 }
 
-TEST(WbStripeCtx, BeforeFlush_)
+TEST(WbStripeCtx, BeforeFlush_TestEachMetaBufferFilled)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -62,7 +62,7 @@ TEST(WbStripeCtx, BeforeFlush_)
     delete allocBitmap;
 }
 
-TEST(WbStripeCtx, GetSectionAddr_)
+TEST(WbStripeCtx, GetSectionAddr_TestSimpleGetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -74,7 +74,7 @@ TEST(WbStripeCtx, GetSectionAddr_)
     delete allocBitmap;
 }
 
-TEST(WbStripeCtx, GetSectionSize_)
+TEST(WbStripeCtx, GetSectionSize_TestSimpleGetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -92,7 +92,7 @@ TEST(WbStripeCtx, GetSectionSize_)
     delete allocBitmap;
 }
 
-TEST(WbStripeCtx, AllocWbStripe_)
+TEST(WbStripeCtx, AllocWbStripe_TestAllocStripeWithConditions)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -117,7 +117,7 @@ TEST(WbStripeCtx, AllocWbStripe_)
     delete allocBitmap;
 }
 
-TEST(WbStripeCtx, ReleaseWbStripe_)
+TEST(WbStripeCtx, ReleaseWbStripe_TestSimpleSetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -131,7 +131,7 @@ TEST(WbStripeCtx, ReleaseWbStripe_)
     delete allocBitmap;
 }
 
-TEST(WbStripeCtx, SetAllocatedWbStripeCount_)
+TEST(WbStripeCtx, SetAllocatedWbStripeCount_TestSimpleSetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -145,7 +145,7 @@ TEST(WbStripeCtx, SetAllocatedWbStripeCount_)
     delete allocBitmap;
 }
 
-TEST(WbStripeCtx, GetAllocatedWbStripeCount_)
+TEST(WbStripeCtx, GetAllocatedWbStripeCount_TestSimpleGetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -162,7 +162,7 @@ TEST(WbStripeCtx, GetAllocatedWbStripeCount_)
     delete allocBitmap;
 }
 
-TEST(WbStripeCtx, GetNumTotalWbStripe_)
+TEST(WbStripeCtx, GetNumTotalWbStripe_TestSimpleGetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -178,7 +178,7 @@ TEST(WbStripeCtx, GetNumTotalWbStripe_)
     delete allocBitmap;
 }
 
-TEST(WbStripeCtx, GetActiveStripeTail_)
+TEST(WbStripeCtx, GetActiveStripeTail_TestGetDataAndCheckData)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -204,7 +204,7 @@ TEST(WbStripeCtx, GetActiveStripeTail_)
     delete allocBitmap;
 }
 
-TEST(WbStripeCtx, SetActiveStripeTail_)
+TEST(WbStripeCtx, SetActiveStripeTail_TestSetDataAndCheckData)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);

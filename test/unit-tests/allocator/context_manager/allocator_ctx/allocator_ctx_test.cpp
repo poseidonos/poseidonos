@@ -15,7 +15,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 namespace pos
 {
-TEST(AllocatorCtx, AfterLoad_)
+TEST(AllocatorCtx, AfterLoad_TestCheckingSignature)
 {
     // given
     AllocatorCtxHeader* buf = new AllocatorCtxHeader();
@@ -41,7 +41,7 @@ TEST(AllocatorCtx, AfterLoad_)
     delete buf;
 }
 
-TEST(AllocatorCtx, GetStoredVersion_)
+TEST(AllocatorCtx, GetStoredVersion_TestSimpleGetter)
 {
     // given
     AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr, "");
@@ -49,7 +49,7 @@ TEST(AllocatorCtx, GetStoredVersion_)
     allocCtx.GetStoredVersion();
 }
 
-TEST(AllocatorCtx, ResetDirtyVersion_)
+TEST(AllocatorCtx, ResetDirtyVersion_TestSimpleSetter)
 {
     // given
     AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr, "");
@@ -57,7 +57,7 @@ TEST(AllocatorCtx, ResetDirtyVersion_)
     allocCtx.ResetDirtyVersion();
 }
 
-TEST(AllocatorCtx, UpdatePrevLsid_)
+TEST(AllocatorCtx, UpdatePrevLsid_TestSimpleSetter)
 {
     // given
     AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr, "");
@@ -65,7 +65,7 @@ TEST(AllocatorCtx, UpdatePrevLsid_)
     allocCtx.UpdatePrevLsid();
 }
 
-TEST(AllocatorCtx, SetCurrentSsdLsid_)
+TEST(AllocatorCtx, SetCurrentSsdLsid_TestSimpleSetter)
 {
     // given
     AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr, "");
@@ -73,7 +73,7 @@ TEST(AllocatorCtx, SetCurrentSsdLsid_)
     allocCtx.SetCurrentSsdLsid(10);
 }
 
-TEST(AllocatorCtx, RollbackCurrentSsdLsid_)
+TEST(AllocatorCtx, RollbackCurrentSsdLsid_TestSimpleSetter)
 {
     // given
     AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr, "");
@@ -81,7 +81,7 @@ TEST(AllocatorCtx, RollbackCurrentSsdLsid_)
     allocCtx.RollbackCurrentSsdLsid();
 }
 
-TEST(AllocatorCtx, SetPrevSsdLsid_)
+TEST(AllocatorCtx, SetPrevSsdLsid_TestSimpleSetter)
 {
     // given
     AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr, "");
@@ -89,7 +89,7 @@ TEST(AllocatorCtx, SetPrevSsdLsid_)
     allocCtx.SetPrevSsdLsid(10);
 }
 
-TEST(AllocatorCtx, SetNextSsdLsid_)
+TEST(AllocatorCtx, SetNextSsdLsid_TestSimpleSetter)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -108,7 +108,7 @@ TEST(AllocatorCtx, SetNextSsdLsid_)
     delete segLocks;
 }
 
-TEST(AllocatorCtx, AllocateSegment_)
+TEST(AllocatorCtx, AllocateSegment_TestSimpleInterfaceFunc)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -126,7 +126,7 @@ TEST(AllocatorCtx, AllocateSegment_)
     delete segLocks;
 }
 
-TEST(AllocatorCtx, ReleaseSegment_)
+TEST(AllocatorCtx, ReleaseSegment_TestSimpleInterfaceFunc)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -144,7 +144,7 @@ TEST(AllocatorCtx, ReleaseSegment_)
     delete segLocks;
 }
 
-TEST(AllocatorCtx, AllocateFreeSegment_)
+TEST(AllocatorCtx, AllocateFreeSegment_TestAllocSegmentWithCheckingConditions)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -194,11 +194,25 @@ TEST(AllocatorCtx, AllocateFreeSegment_)
     delete segLocks;
 }
 
-TEST(AllocatorCtx, GetNumOfFreeUserDataSegment_)
+TEST(AllocatorCtx, GetNumOfFreeUserDataSegment_TestSimpleGetter)
 {
+    // given
+    NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
+    NiceMock<MockSegmentStates>* segStates = new NiceMock<MockSegmentStates>();
+    NiceMock<MockSegmentLock>* segLocks = new NiceMock<MockSegmentLock>();
+    AllocatorCtx allocCtx(allocBitmap, segStates, segLocks, nullptr, "");
+    EXPECT_CALL(*allocBitmap, GetNumBits).WillOnce(Return(10));
+    EXPECT_CALL(*allocBitmap, GetNumBitsSet).WillOnce(Return(3));
+
+    int ret = allocCtx.GetNumOfFreeUserDataSegment();
+    EXPECT_EQ(7, ret);
+
+    delete allocBitmap;
+    delete segStates;
+    delete segLocks;
 }
 
-TEST(AllocatorCtx, GetSegmentState_)
+TEST(AllocatorCtx, GetSegmentState_TestSimpleGetter)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -227,7 +241,7 @@ TEST(AllocatorCtx, GetSegmentState_)
     delete segLocks;
 }
 
-TEST(AllocatorCtx, SetSegmentState_)
+TEST(AllocatorCtx, SetSegmentState_TestSimpleSetter)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -252,7 +266,7 @@ TEST(AllocatorCtx, SetSegmentState_)
     delete segLocks;
 }
 
-TEST(AllocatorCtx, SetAllocatedSegmentCount_)
+TEST(AllocatorCtx, SetAllocatedSegmentCount_TestSimpleSEtter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -269,7 +283,7 @@ TEST(AllocatorCtx, SetAllocatedSegmentCount_)
     delete segLocks;
 }
 
-TEST(AllocatorCtx, GetAllocatedSegmentCount_)
+TEST(AllocatorCtx, GetAllocatedSegmentCount_TestSimpleGetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -287,7 +301,7 @@ TEST(AllocatorCtx, GetAllocatedSegmentCount_)
     delete segLocks;
 }
 
-TEST(AllocatorCtx, GetTotalSegmentsCount_)
+TEST(AllocatorCtx, GetTotalSegmentsCount_TestSimpleGetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
