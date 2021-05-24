@@ -49,7 +49,7 @@ DEV_2_RECYCLED = "unvme-ns-5"
 DEV_3_RECYCLED = "unvme-ns-6"
 DEV_4_RECYCLED = "unvme-ns-7"
 
-VOL_SIZE = 5 * pos_constant.SIZE_1GB
+VOL_SIZE = 10 * pos_constant.SIZE_1GB
 
 #MAX VOLUME COUNT FOR A TEST
 #DO NOT SET GREATER THAN 24 
@@ -387,7 +387,7 @@ def do_event(elapsed_hour):
 
     elif elapsed_hour == 14:
         detach_data(DEV_1)
-        time.sleep(60)
+        time.sleep(10)
         return check_situation("DEGRADED")
 
     elif elapsed_hour >= 15 and elapsed_hour <= 35:
@@ -395,7 +395,7 @@ def do_event(elapsed_hour):
 
     elif elapsed_hour == 36:
         ret = add_spare(DEV_4)
-        time.sleep(60)
+        time.sleep(10)
         if ret == True:
             return check_situation("REBUILDING")
         return False
@@ -405,7 +405,7 @@ def do_event(elapsed_hour):
 
     elif elapsed_hour == 40:
         detach_data(DEV_2)
-        time.sleep(60)
+        time.sleep(10)
         return check_situation("DEGRADED")
 
     elif elapsed_hour >= 41 and elapsed_hour <= 43:
@@ -413,7 +413,7 @@ def do_event(elapsed_hour):
 
     elif elapsed_hour == 44:
         ret = add_spare(DEV_1_RECYCLED)
-        time.sleep(60)
+        time.sleep(10)
         if ret == True:
             return check_situation("REBUILDING")
         return False
@@ -423,7 +423,7 @@ def do_event(elapsed_hour):
 
     elif elapsed_hour == 48:
         detach_data(DEV_3)
-        time.sleep(60)
+        time.sleep(10)
         return check_situation("DEGRADED")
 
     elif elapsed_hour >= 49 and elapsed_hour <= 51:
@@ -431,7 +431,7 @@ def do_event(elapsed_hour):
 
     elif elapsed_hour == 52:
         ret = add_spare(DEV_2_RECYCLED)
-        time.sleep(60)
+        time.sleep(10)
         if ret == True:
             return check_situation("REBUILDING")
         return False
@@ -441,7 +441,7 @@ def do_event(elapsed_hour):
 
     elif elapsed_hour == 56:
         detach_data(DEV_4)
-        time.sleep(60)
+        time.sleep(10)
         return check_situation("DEGRADED")
 
     elif elapsed_hour >= 57 and elapsed_hour <= 59:
@@ -449,7 +449,7 @@ def do_event(elapsed_hour):
 
     elif elapsed_hour == 60:
         ret = add_spare(DEV_3_RECYCLED)
-        time.sleep(60)
+        time.sleep(10)
         if ret == True:
             return check_situation("REBUILDING")
         return False
