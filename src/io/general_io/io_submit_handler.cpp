@@ -78,7 +78,7 @@ IOSubmitHandler::SyncIO(
 
     if (errorCount > 0 && errorToReturn == IOSubmitHandlerStatus::SUCCESS)
     {
-        return IOSubmitHandlerStatus::FAIL;
+        return IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP;
     }
 
     return errorToReturn;
