@@ -116,6 +116,8 @@ TEST(ContextManager, FlushContextsSync_IfSuccessAllFile)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
+    std::mutex segCtxLock;
+    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock)).WillOnce(ReturnRef(segCtxLock));
     EXPECT_CALL(*fileMan, StoreSync).WillOnce(Return(0)).WillOnce(Return(0));
     // when
     int ret = ctxManager.FlushContextsSync();
@@ -133,6 +135,8 @@ TEST(ContextManager, FlushContextsSync_IfFailFirstFile)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
+    std::mutex segCtxLock;
+    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
     EXPECT_CALL(*fileMan, StoreSync).WillOnce(Return(-1));
     // when
     int ret = ctxManager.FlushContextsSync();
@@ -150,6 +154,8 @@ TEST(ContextManager, FlushContextsSync_IfFailSecondFile)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
+    std::mutex segCtxLock;
+    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock)).WillOnce(ReturnRef(segCtxLock));
     EXPECT_CALL(*fileMan, StoreSync).WillOnce(Return(0)).WillOnce(Return(-1));
     // when
     int ret = ctxManager.FlushContextsSync();
@@ -183,6 +189,8 @@ TEST(ContextManager, FlushContextsAsync_IfSuccessAllFile)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
+    std::mutex segCtxLock;
+    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock)).WillOnce(ReturnRef(segCtxLock));
     EXPECT_CALL(*fileMan, StoreAsync).WillOnce(Return(0)).WillOnce(Return(0));
     // when
     int ret = ctxManager.FlushContextsAsync(nullptr);
@@ -200,6 +208,8 @@ TEST(ContextManager, FlushContextsAsync_IfFailFirstFile)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
+    std::mutex segCtxLock;
+    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
     EXPECT_CALL(*fileMan, StoreAsync).WillOnce(Return(-1));
     // when
     int ret = ctxManager.FlushContextsAsync(nullptr);
@@ -216,7 +226,8 @@ TEST(ContextManager, FlushContextsAsync_IfFailSecondFile)
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
-
+    std::mutex segCtxLock;
+    EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock)).WillOnce(ReturnRef(segCtxLock));
     EXPECT_CALL(*fileMan, StoreAsync).WillOnce(Return(0)).WillOnce(Return(-1));
     // when
     int ret = ctxManager.FlushContextsAsync(nullptr);
