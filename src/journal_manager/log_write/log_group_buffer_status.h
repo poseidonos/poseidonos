@@ -50,7 +50,7 @@ enum class LogGroupStatus
 class LogGroupBufferStatus
 {
 public:
-    LogGroupBufferStatus(uint64_t maxOffset, uint64_t metaPageSize);
+    LogGroupBufferStatus(uint64_t startOffset, uint64_t maxOffset, uint64_t metaPageSize);
     void Reset(void);
 
     void SetActive(uint64_t inputSeqNum);
@@ -115,6 +115,7 @@ private:
     std::atomic<uint64_t> numLogsFilled;
 
     uint64_t nextOffset;
+    uint64_t startOffset;
     uint64_t maxOffset;
 
     uint64_t metaPageSize;

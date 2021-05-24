@@ -34,8 +34,9 @@
 
 #include <functional>
 
-#include "../checkpoint/log_group_releaser.h"
-#include "../config/journal_configuration.h"
+#include "src/journal_manager/checkpoint/log_group_releaser.h"
+#include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/config/log_buffer_layout.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
@@ -45,8 +46,7 @@ BufferOffsetAllocator::BufferOffsetAllocator(void)
 : config(nullptr),
   releaser(nullptr),
   nextSeqNumber(UINT32_MAX),
-  currentLogGroupId(INT32_MAX),
-  maxOffsetPerGroup(UINT64_MAX)
+  currentLogGroupId(INT32_MAX)
 {
 }
 
@@ -67,12 +67,14 @@ BufferOffsetAllocator::Init(LogGroupReleaser* logGroupReleaser,
     config = journalConfiguration;
 
     int numLogGroups = config->GetNumLogGroups();
-    maxOffsetPerGroup = config->GetLogBufferSize() / numLogGroups;
-
     uint64_t metaPageSize = config->GetMetaPageSize();
+
     for (int groupId = 0; groupId < numLogGroups; groupId++)
     {
-        statusList.push_back(new LogGroupBufferStatus(maxOffsetPerGroup, metaPageSize));
+        LogGroupLayout groupLayout = config->GetLogBufferLayout(groupId);
+        LogGroupBufferStatus* status = new LogGroupBufferStatus(groupLayout.startOffset,
+            groupLayout.footerStartOffset, metaPageSize);
+        statusList.push_back(status);
     }
 
     Reset();
@@ -124,7 +126,7 @@ BufferOffsetAllocator::AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffse
         }
     }
 
-    allocatedOffset = currentLogGroupId * config->GetLogGroupSize() + offset;
+    allocatedOffset = offset;
 
     return 0;
 }
@@ -198,8 +200,7 @@ BufferOffsetAllocator::GetNumLogsAdded(void)
 uint64_t
 BufferOffsetAllocator::GetNextOffset(void)
 {
-    uint64_t logGroupOffset = statusList[currentLogGroupId]->GetNextOffset();
-    return currentLogGroupId * maxOffsetPerGroup + logGroupOffset;
+    return statusList[currentLogGroupId]->GetNextOffset();
 }
 
 LogGroupStatus

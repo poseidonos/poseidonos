@@ -35,6 +35,8 @@
 #include <cstdint>
 #include <string>
 
+#include "src/journal_manager/config/log_buffer_layout.h"
+
 namespace pos
 {
 class JournalConfiguration
@@ -54,6 +56,8 @@ public:
     virtual uint64_t GetLogBufferSize(void);
     virtual uint64_t GetLogGroupSize(void);
     virtual uint64_t GetMetaPageSize(void);
+
+    virtual LogGroupLayout GetLogBufferLayout(int groupId);
 
     virtual void UpdateLogBufferSize(uint64_t size);
 
@@ -78,7 +82,8 @@ private:
 
     int numLogGroups;
     uint64_t logBufferSize;
-    uint64_t logGroupSize;
+    LogBufferLayout bufferLayout;
+
     std::string arrayName;
 
     const uint64_t SIZE_MB = 1024 * 1024;

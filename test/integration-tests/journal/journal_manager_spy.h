@@ -30,6 +30,7 @@ public:
 
     uint64_t GetLogBufferSize(void);
     uint64_t GetLogGroupSize(void);
+    int GetNumLogGroups(void);
 
     int GetNumFullLogGroups(void);
     int GetNumDirtyMap(int logGroupId);

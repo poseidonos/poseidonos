@@ -56,7 +56,6 @@ JournalConfiguration::JournalConfiguration(std::string arrayName)
   debugEnabled(false),
   numLogGroups(2),
   logBufferSize(UINT64_MAX),
-  logGroupSize(UINT64_MAX),
   arrayName(arrayName)
 {
     _ReadConfiguration();
@@ -100,7 +99,7 @@ JournalConfiguration::GetLogBufferSize(void)
 uint64_t
 JournalConfiguration::GetLogGroupSize(void)
 {
-    return logGroupSize;
+    return logBufferSize / numLogGroups;
 }
 
 uint64_t
@@ -109,11 +108,17 @@ JournalConfiguration::GetMetaPageSize(void)
     return metaPageSize;
 }
 
+LogGroupLayout
+JournalConfiguration::GetLogBufferLayout(int groupId)
+{
+    return bufferLayout.GetLayout(groupId);
+}
+
 void
 JournalConfiguration::UpdateLogBufferSize(uint64_t size)
 {
     logBufferSize = size;
-    logGroupSize = logBufferSize / numLogGroups;
+    bufferLayout.Init(size, numLogGroups);
 
     int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION);
     std::ostringstream os;
@@ -237,7 +242,7 @@ JournalConfiguration::_ConfigureLogBufferSize(void)
         logBufferSize = _GetAlignedSize(logBufferSizeInConfig);
     }
 
-    logGroupSize = logBufferSize / numLogGroups;
+    bufferLayout.Init(logBufferSize, numLogGroups);
 
     POS_TRACE_INFO(eventId, "Log buffer size is configured to {}", logBufferSize);
 }

@@ -36,8 +36,9 @@
 
 namespace pos
 {
-LogGroupBufferStatus::LogGroupBufferStatus(uint64_t maxOffset, uint64_t metaPageSize)
-: maxOffset(maxOffset),
+LogGroupBufferStatus::LogGroupBufferStatus(uint64_t startOffset, uint64_t maxOffset, uint64_t metaPageSize)
+: startOffset(startOffset),
+  maxOffset(maxOffset),
   metaPageSize(metaPageSize)
 {
     Reset();
@@ -50,7 +51,7 @@ LogGroupBufferStatus::Reset(void)
     waitingToBeFilled = false;
     numLogsAdded = 0;
     numLogsFilled = 0;
-    nextOffset = 0;
+    nextOffset = startOffset;
 
     // status update should be at last
     status = LogGroupStatus::INIT;

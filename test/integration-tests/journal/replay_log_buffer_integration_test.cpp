@@ -52,8 +52,12 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayFullLogBuffer)
     StripeId vsid = std::rand() % testInfo->numUserStripes;
     StripeTestFixture stripe(vsid, testInfo->defaultTestVol);
 
-    uint32_t numTests = logGroupSize / sizeof(BlockWriteDoneLog) * numLogGroups;
-    writeTester->WriteOverwrittenBlockLogs(stripe, rba, 0, numTests);
+    UsedOffsetCalculator usedOffset(journal, logBufferSize - sizeof(LogGroupFooter));
+    uint64_t startOffset = 0;
+    while (usedOffset.CanBeWritten(sizeof(BlockWriteDoneLog)) == true)
+    {
+        writeTester->WriteOverwrittenBlockLogs(stripe, rba, startOffset++, 1);
+    }
 
     writeTester->WaitForAllLogWriteDone();
     SimulateSPORWithoutRecovery();

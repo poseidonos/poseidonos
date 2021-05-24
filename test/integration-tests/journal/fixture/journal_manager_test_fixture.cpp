@@ -72,7 +72,7 @@ JournalManagerTestFixture::_GetLogBufferSizeInfo(void)
 {
     logBufferSize = journal->GetLogBufferSize();
     logGroupSize = journal->GetLogGroupSize();
-    numLogGroups = logBufferSize / logGroupSize;
+    numLogGroups = journal->GetNumLogGroups();
 }
 
 void

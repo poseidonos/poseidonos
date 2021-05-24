@@ -73,6 +73,17 @@ TEST(BufferOffsetAllocator, Allocate_AllocateBuffer)
     ON_CALL(*config, GetLogBufferSize).WillByDefault(Return(logBufferSize));
     ON_CALL(*config, GetLogGroupSize).WillByDefault(Return(logBufferSize / numLogGroups));
     ON_CALL(*config, GetMetaPageSize).WillByDefault(Return(metaPageSize));
+
+    uint64_t startOffset = 0;
+    for (int groupId = 0; groupId < numLogGroups; groupId++)
+    {
+        LogGroupLayout groupLayout;
+        groupLayout.startOffset = startOffset;
+        groupLayout.maxOffset = startOffset + (logBufferSize / numLogGroups);
+        groupLayout.footerStartOffset = groupLayout.maxOffset;
+        ON_CALL(*config, GetLogBufferLayout(groupId)).WillByDefault(Return(groupLayout));
+        startOffset = groupLayout.maxOffset;
+    }
     allocator->Init(releaser, config);
 
     uint64_t totalSizeToAllocate = logBufferSize / numLogGroups;
@@ -97,6 +108,17 @@ TEST(BufferOffsetAllocator, Allocate_AllocateBufferWithCheckpoint)
     ON_CALL(*config, GetLogBufferSize).WillByDefault(Return(logBufferSize));
     ON_CALL(*config, GetLogGroupSize).WillByDefault(Return(logBufferSize / numLogGroups));
     ON_CALL(*config, GetMetaPageSize).WillByDefault(Return(metaPageSize));
+
+    uint64_t startOffset = 0;
+    for (int groupId = 0; groupId < numLogGroups; groupId++)
+    {
+        LogGroupLayout groupLayout;
+        groupLayout.startOffset = startOffset;
+        groupLayout.maxOffset = startOffset + (logBufferSize / numLogGroups);
+        groupLayout.footerStartOffset = groupLayout.maxOffset;
+        ON_CALL(*config, GetLogBufferLayout(groupId)).WillByDefault(Return(groupLayout));
+        startOffset = groupLayout.maxOffset;
+    }
     allocator->Init(releaser, config);
 
     uint64_t totalSizeToAllocate = logBufferSize * 1.5;

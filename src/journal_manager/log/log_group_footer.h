@@ -32,52 +32,15 @@
 
 #pragma once
 
-#include <vector>
-#include <mutex>
-
-#include "log_group_buffer_status.h"
-#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
-#include "src/journal_manager/status/i_log_buffer_status.h"
+#include <stdint.h>
 
 namespace pos
 {
-class JournalConfiguration;
-class LogGroupReleaser;
+static const uint32_t LOG_GROUP_FOOTER_VALID_MARK = 0xBEBEBEBE;
 
-class BufferOffsetAllocator : public LogBufferWriteDoneEvent, public ILogBufferStatus
+struct LogGroupFooter
 {
-public:
-    BufferOffsetAllocator(void);
-    virtual ~BufferOffsetAllocator(void);
-
-    virtual void Init(LogGroupReleaser* releaser, JournalConfiguration* journalConfiguration);
-    void Reset(void);
-
-    virtual int AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffset);
-
-    virtual void LogFilled(int logGroupId, MapPageList& dirty) override;
-    virtual void LogBufferReseted(int logGroupId) override;
-
-    uint64_t GetNumLogsAdded(void);
-    uint64_t GetNextOffset(void);
-
-    virtual LogGroupStatus GetBufferStatus(int logGroupId) override;
-    virtual uint32_t GetSequenceNumber(int logGroupId) override;
-
-    virtual int GetLogGroupId(uint64_t fileOffset);
-
-private:
-    int _GetNewActiveGroup(void);
-    uint32_t _GetNextSeqNum(void);
-    void _TryToSetFull(int logGroupId);
-
-    JournalConfiguration* config;
-    LogGroupReleaser* releaser;
-
-    std::mutex allocateLock;
-    std::vector<LogGroupBufferStatus*> statusList;
-
-    uint32_t nextSeqNumber;
-    int currentLogGroupId;
+    uint64_t MARK = LOG_GROUP_FOOTER_VALID_MARK;
+    uint64_t lastCheckpointedSeginfoVersion;
 };
 } // namespace pos

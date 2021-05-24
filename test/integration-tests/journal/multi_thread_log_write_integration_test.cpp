@@ -129,6 +129,8 @@ TEST_F(MultiThreadLogWriteIntegrationTest, WriteLogsToTriggerCheckpoint)
     WriteLogsWithSize(logBufferSize + logGroupSize);
 
     WaitForAllLogWriteDone();
+
+    SetTriggerCheckpoint(false);
     WaitForAllCheckpointDone();
 }
 } // namespace pos

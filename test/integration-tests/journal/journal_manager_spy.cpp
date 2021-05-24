@@ -107,6 +107,12 @@ JournalManagerSpy::GetLogGroupSize(void)
 }
 
 int
+JournalManagerSpy::GetNumLogGroups(void)
+{
+    return config->GetNumLogGroups();
+}
+
+int
 JournalManagerSpy::GetNumFullLogGroups(void)
 {
     return logGroupReleaser->GetNumFullLogGroups();

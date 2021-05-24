@@ -8,19 +8,20 @@ static const uint64_t META_PAGE_SIZE = 4032;
 
 TEST(LogGroupBufferStatus, Reset_testIfAllReset)
 {
-    LogGroupBufferStatus status(0, 0);
+    uint64_t startOffset = 100;
+    LogGroupBufferStatus status(startOffset, 0, 0);
     status.Reset();
 
     EXPECT_EQ(status.GetSeqNum(), 0);
     EXPECT_EQ(status.GetNumLogsAdded(), 0);
     EXPECT_EQ(status.GetNumLogsFilled(), 0);
-    EXPECT_EQ(status.GetNextOffset(), 0);
+    EXPECT_EQ(status.GetNextOffset(), startOffset);
     EXPECT_EQ(status.GetStatus(), LogGroupStatus::INIT);
 }
 
 TEST(LogGroupBufferStatus, SetActive_testIfStatusChangedToActive)
 {
-    LogGroupBufferStatus status(0, 0);
+    LogGroupBufferStatus status(0, 0, 0);
 
     uint64_t seqNum = 1000;
     status.SetActive(1000);
@@ -32,8 +33,9 @@ TEST(LogGroupBufferStatus, SetActive_testIfStatusChangedToActive)
 TEST(LogGroupBufferStatus, TryToAllocate_testIfAllocatedOffsetIsNotCrossingMetaPage)
 {
     // Given: Initialized buffer status
+    uint64_t startOffset = 0;
     uint64_t maxOffset = 1024 * 1024;
-    LogGroupBufferStatus status(maxOffset, META_PAGE_SIZE);
+    LogGroupBufferStatus status(startOffset, maxOffset, META_PAGE_SIZE);
 
     // When: Try to allocate log
     uint64_t logSize = 52;
@@ -54,8 +56,9 @@ TEST(LogGroupBufferStatus, TryToAllocate_testIfAllocatedOffsetIsNotCrossingMetaP
 TEST(LogGroupBufferStatus, TryToAllocate_testIfAllocFailWithSizeLargerThanMetaPage)
 {
     // Given: Initialized buffer status
+    uint64_t startOffset = 0;
     uint64_t maxOffset = 1024 * 1024;
-    LogGroupBufferStatus status(maxOffset, META_PAGE_SIZE);
+    LogGroupBufferStatus status(startOffset, maxOffset, META_PAGE_SIZE);
 
     // When: Try to allocate log size larger than meta page
     uint64_t logSize = META_PAGE_SIZE * 2;
@@ -68,8 +71,9 @@ TEST(LogGroupBufferStatus, TryToAllocate_testIfAllocFailWithSizeLargerThanMetaPa
 TEST(LogGroupBufferStatus, TryToAllocate_testIfAllocFailsWhenFull)
 {
     // Given: Initialized buffer status with small maxOffset
+    uint64_t startOffset = 0;
     uint64_t maxOffset = META_PAGE_SIZE;
-    LogGroupBufferStatus status(maxOffset, META_PAGE_SIZE);
+    LogGroupBufferStatus status(startOffset, maxOffset, META_PAGE_SIZE);
 
     uint64_t logSize = 52;
 
@@ -90,8 +94,9 @@ TEST(LogGroupBufferStatus, TryToAllocate_testIfAllocFailsWhenFull)
 TEST(LogGroupBufferStatus, LogFilled_testIfLogFilled)
 {
     // Given: Initialized buffer status
+    uint64_t startOffset = 0;
     uint64_t maxOffset = 1024 * 1024;
-    LogGroupBufferStatus status(maxOffset, META_PAGE_SIZE);
+    LogGroupBufferStatus status(startOffset, maxOffset, META_PAGE_SIZE);
 
     // When: Allocate logs 10 times, and notify log filled
     uint32_t logSize = 52;
@@ -114,8 +119,9 @@ TEST(LogGroupBufferStatus, LogFilled_testIfLogFilled)
 TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullSuccess)
 {
     // Given: Initialized buffer status with small maxOffset
+    uint64_t startOffset = 0;
     uint64_t maxOffset = META_PAGE_SIZE;
-    LogGroupBufferStatus status(maxOffset, META_PAGE_SIZE);
+    LogGroupBufferStatus status(startOffset, maxOffset, META_PAGE_SIZE);
 
     uint64_t logSize = 52;
 
@@ -142,8 +148,9 @@ TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullSuccess)
 TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullFailWhenNotFullyFilled)
 {
     // Given: Initialized buffer status with small maxOffset
+    uint64_t startOffset = 0;
     uint64_t maxOffset = META_PAGE_SIZE;
-    LogGroupBufferStatus status(maxOffset, META_PAGE_SIZE);
+    LogGroupBufferStatus status(startOffset, maxOffset, META_PAGE_SIZE);
 
     uint64_t logSize = 52;
 
@@ -176,8 +183,9 @@ TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullFailWhenNotFullyFilled)
 TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullFailWhenNotWaitingToBeFilled)
 {
     // Given: Initialized buffer status with small maxOffset
+    uint64_t startOffset = 0;
     uint64_t maxOffset = META_PAGE_SIZE;
-    LogGroupBufferStatus status(maxOffset, META_PAGE_SIZE);
+    LogGroupBufferStatus status(startOffset, maxOffset, META_PAGE_SIZE);
 
     uint64_t logSize = 52;
 
