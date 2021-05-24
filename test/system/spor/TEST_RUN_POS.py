@@ -96,6 +96,7 @@ def wait_for_pos_shutdown():
         if pos_proc.returncode != 0:
             TEST_LOG.print_err("* POS terminated unexpectedly")
             TEST_DEBUGGING.start_core_dump("crashed")
+            sys.exit(1)
 
 
 def cleanup_process():
