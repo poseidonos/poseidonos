@@ -61,7 +61,7 @@ buildTest()
 
     texecc ./configure $config_option
     texecc ./lib/build_ibof_lib.sh clean_ci
-    texecc ./lib/build_ibof_lib.sh ci
+    texecc ./lib/build_ibof_lib.sh perf_ci
     
     sshpass -p bamboo ssh -tt root@${target_ip} [[ -f $ibof_bin/ibofos_${test_rev} ]]
 
