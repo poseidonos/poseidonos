@@ -214,12 +214,19 @@ void
 ArrayMountSequence::Shutdown(void)
 {
     volMgr->DetachVolumes();
-    for (auto it = sequence.rbegin(); it != sequence.rend(); ++it)
+
+    // unmount meta, gc
+    auto it = sequence.rbegin();
+    for (int cnt = 0; cnt < (int)sequence.size() - 1; cnt++, ++it)
     {
         (*it)->Shutdown();
     }
 
+    // unmount metafs
     temp->Shutdown();
+
+    // unmount array
+    (*it)->Shutdown();
 }
 
 void
