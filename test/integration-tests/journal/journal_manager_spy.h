@@ -2,15 +2,13 @@
 
 #include <string>
 
-#include "src/journal_manager/config/journal_configuration.h"
-#include "src/journal_manager/log/log_list.h"
 #include "src/journal_manager/checkpoint/log_group_releaser.h"
+#include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/journal_manager.h"
-
-#include "test/integration-tests/journal/fake/mapper_mock.h"
+#include "src/journal_manager/log/log_list.h"
 #include "test/integration-tests/journal/fake/allocator_mock.h"
-
-#include "test/unit-tests/journal_manager/checkpoint/log_group_releaser_spy.h"
+#include "test/integration-tests/journal/fake/mapper_mock.h"
+#include "test/integration-tests/journal/log_group_releaser_spy.h"
 
 namespace pos
 {

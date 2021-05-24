@@ -30,46 +30,21 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
 
 #include <list>
+#include <string>
+#include <vector>
 
-#include "src/event_scheduler/event_scheduler.h"
 #include "src/journal_manager/checkpoint/checkpoint_submission.h"
-#include "src/journal_manager/checkpoint/log_group_releaser.h"
 
 namespace pos
 {
-class LogGroupReleaserSpy : public LogGroupReleaser
+class MockCheckpointSubmission : public CheckpointSubmission
 {
 public:
-    using LogGroupReleaser::LogGroupReleaser;
-    virtual ~LogGroupReleaserSpy(void) = default;
-
-    // Metohds to inject protected member values for unit testing
-    void
-    SetFlushingLogGroupId(int id)
-    {
-        flushingLogGroupId = id;
-    }
-
-    void
-    SetFullLogGroups(std::list<int> logGroups)
-    {
-        fullLogGroup = logGroups;
-    }
-
-    void
-    SetCheckpointTriggerInProgress(bool value)
-    {
-        checkpointTriggerInProgress = value;
-    }
-
-    // Method to access protected method of LogGroupReleaser for unit testing
-    void
-    FlushNextLogGroup(void)
-    {
-        LogGroupReleaser::_FlushNextLogGroup();
-    }
+    using CheckpointSubmission::CheckpointSubmission;
+    MOCK_METHOD(bool, Execute, (), (override));
 };
+
 } // namespace pos

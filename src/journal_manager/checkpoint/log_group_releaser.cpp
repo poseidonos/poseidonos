@@ -32,14 +32,16 @@
 
 #include "log_group_releaser.h"
 
-#include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
-#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/include/pos_event_id.h"
+#include "src/journal_manager/checkpoint/checkpoint_handler.h"
+#include "src/journal_manager/checkpoint/checkpoint_submission.h"
+#include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
 #include "src/journal_manager/log_write/log_write_handler.h"
-#include "src/journal_manager/checkpoint/checkpoint_handler.h"
-#include "src/journal_manager/checkpoint/dirty_map_manager.h"
-#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -58,7 +60,8 @@ LogGroupReleaser::LogGroupReleaser(CheckpointHandler* checkpointHandler)
   sequenceController(nullptr),
   flushingLogGroupId(-1),
   checkpointTriggerInProgress(false),
-  checkpointHandler(checkpointHandler)
+  checkpointHandler(checkpointHandler),
+  eventScheduler(nullptr)
 {
 }
 
@@ -74,7 +77,7 @@ void
 LogGroupReleaser::Init(LogBufferWriteDoneNotifier* released,
     JournalLogBuffer* buffer, DirtyMapManager* dirtyPage,
     CallbackSequenceController* sequencer,
-    IMapFlush* mapFlush, IContextManager* contextManager)
+    IMapFlush* mapFlush, IContextManager* contextManager, EventScheduler* scheduler)
 {
     releaseNotifier = released;
     logBuffer = buffer;
@@ -82,6 +85,7 @@ LogGroupReleaser::Init(LogBufferWriteDoneNotifier* released,
     sequenceController = sequencer;
 
     checkpointHandler->Init(mapFlush, contextManager);
+    eventScheduler = scheduler;
 }
 
 void
@@ -106,6 +110,14 @@ LogGroupReleaser::_AddToFullLogGroupList(int groupId)
 }
 
 void
+LogGroupReleaser::_TriggerCheckpoint(void)
+{
+    // Insert the checkpoint event to event sheduler to be called in back-end write path
+    EventSmartPtr event(new CheckpointSubmission(dirtyPageManager, checkpointHandler, sequenceController, flushingLogGroupId));
+    eventScheduler->EnqueueEvent(event);
+}
+
+void
 LogGroupReleaser::_FlushNextLogGroup(void)
 {
     if ((flushingLogGroupId == -1) && (_HasFullLogGroup()))
@@ -115,8 +127,7 @@ LogGroupReleaser::_FlushNextLogGroup(void)
             _UpdateFlushingLogGroup();
             assert(flushingLogGroupId != -1);
             checkpointTriggerInProgress = false;
-
-            StartCheckpoint();
+            _TriggerCheckpoint();
         }
     }
 }
@@ -126,26 +137,6 @@ LogGroupReleaser::_HasFullLogGroup(void)
 {
     std::unique_lock<std::mutex> lock(fullLogGroupLock);
     return (fullLogGroup.size() != 0);
-}
-
-int
-LogGroupReleaser::StartCheckpoint(void)
-{
-    // TODO(huijeong.kim) Create event for this job, not to be called in front-end write path
-
-    MapPageList dirtyPages = dirtyPageManager->GetDirtyList(flushingLogGroupId);
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STARTED,
-        "Checkpoint started for log group {}", flushingLogGroupId);
-
-    sequenceController->GetCheckpointExecutionApproval();
-    int ret = checkpointHandler->Start(dirtyPages);
-    sequenceController->AllowCallbackExecution();
-
-    if (ret != 0)
-    {
-        // TODO(huijeong.kim): Go to the fail mode - not to journal any more
-    }
-    return 0;
 }
 
 void
@@ -172,7 +163,6 @@ void
 LogGroupReleaser::CheckpointCompleted(void)
 {
     assert(flushingLogGroupId != -1);
-
     EventSmartPtr callbackEvent(new LogGroupResetCompletedEvent(this, flushingLogGroupId));
     int ret = logBuffer->AsyncReset(flushingLogGroupId, callbackEvent);
 

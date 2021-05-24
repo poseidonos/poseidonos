@@ -1,18 +1,17 @@
 #pragma once
 
-#include "test/integration-tests/journal/fake/mapper_mock.h"
+#include <string>
+
 #include "test/integration-tests/journal/fake/allocator_mock.h"
 #include "test/integration-tests/journal/fake/array_info_mock.h"
+#include "test/integration-tests/journal/fake/mapper_mock.h"
 #include "test/integration-tests/journal/fake/state_subscription_mock.h"
-
-#include "test/integration-tests/journal/journal_manager_spy.h"
-#include "test/integration-tests/journal/utils/test_info.h"
-#include "test/integration-tests/journal/utils/journal_configuration_builder.h"
 #include "test/integration-tests/journal/fixture/log_write_test_fixture.h"
 #include "test/integration-tests/journal/fixture/replay_test_fixture.h"
 #include "test/integration-tests/journal/fixture/stripe_test_fixture.h"
-
-#include <string>
+#include "test/integration-tests/journal/journal_manager_spy.h"
+#include "test/integration-tests/journal/utils/journal_configuration_builder.h"
+#include "test/integration-tests/journal/utils/test_info.h"
 
 namespace pos
 {

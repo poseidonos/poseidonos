@@ -30,46 +30,40 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "checkpoint_submission.h"
 
-#include <list>
-
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/journal_manager/checkpoint/checkpoint_submission.h"
-#include "src/journal_manager/checkpoint/log_group_releaser.h"
+#include "src/include/pos_event_id.h"
+#include "src/journal_manager/checkpoint/checkpoint_handler.h"
+#include "src/journal_manager/checkpoint/dirty_map_manager.h"
+#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class LogGroupReleaserSpy : public LogGroupReleaser
+CheckpointSubmission::CheckpointSubmission(DirtyMapManager* dirtyPageManager, CheckpointHandler* checkpointHandler, CallbackSequenceController* sequenceController, int flushingLogGroupId)
+: dirtyPageManager(dirtyPageManager),
+  checkpointHandler(checkpointHandler),
+  sequenceController(sequenceController),
+  flushingLogGroupId(flushingLogGroupId)
 {
-public:
-    using LogGroupReleaser::LogGroupReleaser;
-    virtual ~LogGroupReleaserSpy(void) = default;
+}
 
-    // Metohds to inject protected member values for unit testing
-    void
-    SetFlushingLogGroupId(int id)
-    {
-        flushingLogGroupId = id;
-    }
+bool
+CheckpointSubmission::Execute(void)
+{
+    MapPageList dirtyPages = dirtyPageManager->GetDirtyList(flushingLogGroupId);
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STARTED,
+        "Checkpoint started for log group {}", flushingLogGroupId);
 
-    void
-    SetFullLogGroups(std::list<int> logGroups)
-    {
-        fullLogGroup = logGroups;
-    }
+    sequenceController->GetCheckpointExecutionApproval();
+    int ret = checkpointHandler->Start(dirtyPages);
+    sequenceController->AllowCallbackExecution();
 
-    void
-    SetCheckpointTriggerInProgress(bool value)
+    if (ret != 0)
     {
-        checkpointTriggerInProgress = value;
+        // TODO(huijeong.kim): Go to the fail mode - not to journal any more
     }
+    return true;
+}
 
-    // Method to access protected method of LogGroupReleaser for unit testing
-    void
-    FlushNextLogGroup(void)
-    {
-        LogGroupReleaser::_FlushNextLogGroup();
-    }
-};
 } // namespace pos

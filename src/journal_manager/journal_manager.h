@@ -116,8 +116,8 @@ public:
     virtual void Shutdown(void) override;
 
     int Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
-        IWBStripeAllocator* wbStripeAllocator,
+        IMapFlush* mapFlush,
+        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer);
 
     JournalManagerStatus
@@ -128,8 +128,8 @@ public:
 
 protected:
     void _InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
-        IWBStripeAllocator* wbStripeAllocator,
+        IMapFlush* mapFlush,
+        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer);
     int _Init(void);
 

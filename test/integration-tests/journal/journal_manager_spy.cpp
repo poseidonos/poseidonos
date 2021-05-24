@@ -1,8 +1,8 @@
+#include "test/integration-tests/journal/journal_manager_spy.h"
+
 #include <thread>
 
-#include "test/integration-tests/journal/journal_manager_spy.h"
-#include "test/integration-tests/journal/journal_configuration_spy.h"
-
+#include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/checkpoint/checkpoint_handler.h"
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/journal_manager/log/log_buffer_parser.h"
@@ -10,8 +10,8 @@
 #include "src/journal_manager/log_write/buffer_offset_allocator.h"
 #include "src/journal_manager/log_write/journal_volume_event_handler.h"
 #include "src/journal_manager/replay/replay_handler.h"
-
 #include "src/meta_file_intf/mock_file_intf.h"
+#include "test/integration-tests/journal/journal_configuration_spy.h"
 
 namespace pos
 {
@@ -35,7 +35,8 @@ int
 JournalManagerSpy::InitializeForTest(Mapper* mapper, Allocator* allocator)
 {
     _InitModules(mapper->GetIVSAMap(), mapper->GetIStripeMap(),
-        mapper->GetIMapFlush(), allocator->GetIBlockAllocator(),
+        mapper->GetIMapFlush(),
+        allocator->GetIBlockAllocator(),
         allocator->GetIWBStripeAllocator(),
         allocator->GetIContextManager(), allocator->GetIContextReplayer());
 
@@ -78,7 +79,7 @@ void
 JournalManagerSpy::StartCheckpoint(void)
 {
     ((LogGroupReleaserSpy*)(logGroupReleaser))->UpdateFlushingLogGroup();
-    ((LogGroupReleaserSpy*)(logGroupReleaser))->StartCheckpoint();
+    ((LogGroupReleaserSpy*)(logGroupReleaser))->TriggerCheckpoint();
 }
 
 void

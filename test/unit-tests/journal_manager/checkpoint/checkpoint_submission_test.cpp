@@ -30,46 +30,49 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <list>
-
-#include "src/event_scheduler/event_scheduler.h"
 #include "src/journal_manager/checkpoint/checkpoint_submission.h"
-#include "src/journal_manager/checkpoint/log_group_releaser.h"
+
+#include <gtest/gtest.h>
+
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
+#include "test/unit-tests/journal_manager/checkpoint/checkpoint_handler_mock.h"
+#include "test/unit-tests/journal_manager/checkpoint/dirty_map_manager_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
+
+using ::testing::_;
+using ::testing::InSequence;
+using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos
 {
-class LogGroupReleaserSpy : public LogGroupReleaser
+TEST(CheckpointSubmission, Execute_testIfCheckpointStartedSuccessfully)
 {
-public:
-    using LogGroupReleaser::LogGroupReleaser;
-    virtual ~LogGroupReleaserSpy(void) = default;
+    // Given
+    NiceMock<MockDirtyMapManager> dirtyMapManager;
+    NiceMock<MockCheckpointHandler> checkpointHandler;
+    NiceMock<MockCallbackSequenceController> sequenceController;
+    NiceMock<MockEventScheduler> eventScheduler;
+    int flushingLogGroupId = 0;
+    CheckpointSubmission submission(&dirtyMapManager, &checkpointHandler, &sequenceController, flushingLogGroupId);
 
-    // Metohds to inject protected member values for unit testing
-    void
-    SetFlushingLogGroupId(int id)
-    {
-        flushingLogGroupId = id;
-    }
+    EXPECT_CALL(dirtyMapManager, GetDirtyList);
 
-    void
-    SetFullLogGroups(std::list<int> logGroups)
+    // Then: Checkpoint should be started after acquiring approval,
+    // and allow callback execution afterwards
     {
-        fullLogGroup = logGroups;
+        InSequence s;
+        EXPECT_CALL(sequenceController, GetCheckpointExecutionApproval);
+        EXPECT_CALL(checkpointHandler, Start).WillOnce(Return(0));
+        EXPECT_CALL(sequenceController, AllowCallbackExecution);
     }
+    // When
+    bool result = submission.Execute();
 
-    void
-    SetCheckpointTriggerInProgress(bool value)
-    {
-        checkpointTriggerInProgress = value;
-    }
+    // Then: Execussion result should be 0
+    EXPECT_EQ(result, true);
+}
 
-    // Method to access protected method of LogGroupReleaser for unit testing
-    void
-    FlushNextLogGroup(void)
-    {
-        LogGroupReleaser::_FlushNextLogGroup();
-    }
-};
 } // namespace pos

@@ -15,6 +15,7 @@ JournalManagerTestFixture::JournalManagerTestFixture(std::string logFileName)
     testInfo = new TestInfo();
     arrayInfo = new ArrayInfoMock(testInfo);
     testMapper = new StrictMock<MockMapper>(testInfo, arrayInfo, nullptr);
+
     testAllocator = new StrictMock<AllocatorMock>(arrayInfo);
     stateSub = new StateSubscriptionMock();
     journal = new JournalManagerSpy(arrayInfo, stateSub, logFileName);

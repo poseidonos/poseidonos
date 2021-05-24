@@ -25,7 +25,7 @@ public:
     virtual CurrentGcMode GetCurrentGcMode(void) { return MODE_NO_GC; }
     virtual int GetGcThreshold(CurrentGcMode mode) { return 0; }
     virtual uint64_t GetStoredContextVersion(int owner) { return 0; }
-    IContextManagerMock::IContextManagerMock(void)
+    IContextManagerMock(void)
     {
         ON_CALL(*this, FlushContextsAsync).WillByDefault(::testing::Invoke(this,
         &IContextManagerMock::_FlushContextsAsync));

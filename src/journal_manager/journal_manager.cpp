@@ -38,23 +38,24 @@
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/journal_manager/checkpoint/log_group_releaser.h"
 #include "src/journal_manager/config/journal_configuration.h"
-#include "src/journal_manager/log_buffer/journal_log_buffer.h"
-#include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/journal_manager/log_write/buffer_offset_allocator.h"
 #include "src/journal_manager/log_write/journal_volume_event_handler.h"
 #include "src/journal_manager/log_write/log_write_handler.h"
 #include "src/journal_manager/replay/replay_handler.h"
 #include "src/journal_manager/status/journal_status_provider.h"
 
+#include "src/allocator/i_context_manager.h"
+#include "src/allocator/i_context_replayer.h"
+#include "src/allocator_service/allocator_service.h"
 #include "src/array_models/interface/i_array_info.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
-#include "src/allocator_service/allocator_service.h"
-#include "src/allocator/i_context_manager.h"
-#include "src/allocator/i_context_replayer.h"
 
 namespace pos
 {
@@ -405,7 +406,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     logFilledNotifier->Register(logWriteHandler);
 
     logGroupReleaser->Init(logFilledNotifier, logBuffer, dirtyMapManager, sequenceController,
-        mapFlush, contextManager);
+        mapFlush, contextManager, EventSchedulerSingleton::Instance());
 
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
     volumeEventHandler->Init(logFactory, dirtyMapManager, logWriteHandler, config,

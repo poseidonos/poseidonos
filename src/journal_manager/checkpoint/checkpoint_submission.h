@@ -32,75 +32,26 @@
 
 #pragma once
 
-#include <atomic>
-#include <list>
-#include <mutex>
-
-#include "checkpoint_observer.h"
-#include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
-#include "src/journal_manager/status/i_checkpoint_status.h"
+#include "src/event_scheduler/event.h"
 
 namespace pos
 {
-class JournalLogBuffer;
 class CheckpointHandler;
 class DirtyMapManager;
-class LogBufferWriteDoneNotifier;
 class CallbackSequenceController;
-class EventScheduler;
 
-class IMapFlush;
-class IContextManager;
-
-class LogGroupReleaser : public CheckpointObserver, public ICheckpointStatus, public ILogGroupResetCompleted
+class CheckpointSubmission : public Event
 {
 public:
-    LogGroupReleaser(void);
-    explicit LogGroupReleaser(CheckpointHandler* checkpointHandler);
-    virtual ~LogGroupReleaser(void);
+    CheckpointSubmission(DirtyMapManager* dirtyPageManager, CheckpointHandler* checkpointHandler, CallbackSequenceController* sequenceController, int flushingLogGroupId);
+    virtual ~CheckpointSubmission(void) = default;
+    bool Execute(void) override;
 
-    virtual void Init(LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer,
-        DirtyMapManager* dirtyPage, CallbackSequenceController* sequencer,
-        IMapFlush* mapFlush, IContextManager* contextManager, EventScheduler* scheduler);
-    void Reset(void);
-
-    virtual void AddToFullLogGroup(int groupId);
-
-    int GetNumFullLogGroups(void);
-
-    virtual void CheckpointCompleted(void);
-
-    virtual int GetFlushingLogGroupId(void) override;
-    virtual std::list<int> GetFullLogGroups(void) override;
-    virtual CheckpointStatus GetStatus(void) override;
-
-    virtual void LogGroupResetCompleted(int logGroupId) override;
-
-protected:
-    void _AddToFullLogGroupList(int groupId);
-    bool _HasFullLogGroup(void);
-
-    virtual void _FlushNextLogGroup(void);
-    void _UpdateFlushingLogGroup(void);
-    int _PopFullLogGroup(void);
-    virtual void _TriggerCheckpoint(void);
-
-    void _ResetFlushingLogGroup(void);
-
-    LogBufferWriteDoneNotifier* releaseNotifier;
-
-    JournalLogBuffer* logBuffer;
+private:
     DirtyMapManager* dirtyPageManager;
-    CallbackSequenceController* sequenceController;
-
-    std::mutex fullLogGroupLock;
-    std::list<int> fullLogGroup;
-
-    std::atomic<int> flushingLogGroupId;
-
-    std::atomic<bool> checkpointTriggerInProgress;
     CheckpointHandler* checkpointHandler;
-    EventScheduler* eventScheduler;
+    CallbackSequenceController* sequenceController;
+    int flushingLogGroupId;
 };
 
 } // namespace pos

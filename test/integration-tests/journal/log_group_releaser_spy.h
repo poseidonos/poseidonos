@@ -34,7 +34,7 @@
 
 #include <list>
 
-#include "src/event_scheduler/event_scheduler.h"
+#include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/checkpoint/checkpoint_submission.h"
 #include "src/journal_manager/checkpoint/log_group_releaser.h"
 
@@ -46,13 +46,21 @@ public:
     using LogGroupReleaser::LogGroupReleaser;
     virtual ~LogGroupReleaserSpy(void) = default;
 
-    // Metohds to inject protected member values for unit testing
+    void
+    UpdateFlushingLogGroup(void)
+    {
+        LogGroupReleaser::_UpdateFlushingLogGroup();
+    }
+
     void
     SetFlushingLogGroupId(int id)
     {
         flushingLogGroupId = id;
     }
 
+    bool triggerCheckpoint = true;
+
+    // Metohds to inject protected member values for unit testing
     void
     SetFullLogGroups(std::list<int> logGroups)
     {
@@ -69,7 +77,30 @@ public:
     void
     FlushNextLogGroup(void)
     {
-        LogGroupReleaser::_FlushNextLogGroup();
+        _FlushNextLogGroup();
+    }
+
+    void
+    TriggerCheckpoint(void)
+    {
+        _TriggerCheckpoint();
+    }
+
+protected:
+    virtual void
+    _FlushNextLogGroup(void) override
+    {
+        if (triggerCheckpoint == true)
+        {
+            LogGroupReleaser::_FlushNextLogGroup();
+        }
+    }
+
+    virtual void
+    _TriggerCheckpoint(void) override
+    {
+        EventSmartPtr event(new CheckpointSubmission(dirtyPageManager, checkpointHandler, sequenceController, flushingLogGroupId));
+        event->Execute();
     }
 };
 } // namespace pos
