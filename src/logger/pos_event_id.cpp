@@ -51,6 +51,8 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::IONVMF_7H, "RDMA Invalid IRD"},
             {POS_EVENT_ID::IONVMF_8H, "RDMA Invalid ORD"},
             {POS_EVENT_ID::IONVMF_NAMESPACE_ATTACH_FAILED, "Fail to attach Namespace "},
+            {POS_EVENT_ID::IONVMF_FAIL_TO_FIND_VOLID, "Fail to parse volume id from bdev name"},
+            {POS_EVENT_ID::IONVMF_FAIL_TO_FIND_ARRAYNAME, "Fail to parse array name from bdev name"},
 };
 
 PosEventId::PosEventIdEntry

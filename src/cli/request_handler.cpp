@@ -43,6 +43,7 @@
 #include "src/cli/create_device_command.h"
 #include "src/cli/create_volume_command.h"
 #include "src/cli/delete_array_command.h"
+#include "src/cli/delete_subsystem_command.h"
 #include "src/cli/delete_volume_command.h"
 #include "src/cli/exit_ibofos_command.h"
 #include "src/cli/get_host_nqn_command.h"
@@ -106,6 +107,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["LISTARRAYDEVICE"] = new ListArrayDeviceCommand();
     cmdDictionary["ARRAYINFO"] = new ArrayInfoCommand();
     cmdDictionary["RESETMBR"] = new ResetMbrCommand();
+    cmdDictionary["DELETESUBSYSTEM"] = new DeleteSubsystemCommand();
     cmdDictionary["CREATEVOLUME"] = new CreateVolumeCommand();
     cmdDictionary["DELETEVOLUME"] = new DeleteVolumeCommand();
     cmdDictionary["MOUNTVOLUME"] = new MountVolumeCommand();

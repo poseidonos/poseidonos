@@ -33,16 +33,19 @@
 #include "src/network/nvmf_target.hpp"
 
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "spdk/pos_volume.h"
-#include "src/spdk_wrapper/event_framework_api.h"
-#include "src/spdk_wrapper/spdk.hpp"
+#include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/logger/logger.h"
 #include "src/network/nvmf_target_spdk.hpp"
 #include "src/network/nvmf_volume_pos.hpp"
-#include "src/sys_event/volume_event_publisher.h"
-#include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/qos/qos_manager.h"
+#include "src/spdk_wrapper/event_framework_api.h"
+#include "src/spdk_wrapper/spdk.hpp"
+#include "src/sys_event/volume_event_publisher.h"
 
 using namespace std;
 
@@ -50,7 +53,7 @@ extern struct spdk_nvmf_tgt* g_spdk_nvmf_tgt;
 namespace pos
 {
 struct NvmfTargetCallbacks NvmfTarget::nvmfCallbacks;
-const char* NvmfTarget::BDEV_NAME_PREFIX = "bdev";
+const char* NvmfTarget::BDEV_NAME_PREFIX = "bdev_";
 std::atomic<int> NvmfTarget::attachedNsid;
 
 NvmfTarget::NvmfTarget(void)
@@ -390,7 +393,7 @@ NvmfTarget::AllocateSubsystem(void)
 string
 NvmfTarget::GetBdevName(uint32_t id, string arrayName)
 {
-    return BDEV_NAME_PREFIX + to_string(id) + arrayName;
+    return BDEV_NAME_PREFIX + to_string(id) + "_" + arrayName;
 }
 
 string
@@ -515,5 +518,42 @@ NvmfTarget::CheckVolumeAttached(int volId, string arrayName)
         return true;
     }
     return false;
+}
+
+vector<pair<int, string>>
+NvmfTarget::GetAttachedVolumeList(string& subnqn)
+{
+    vector<pair<int, string>> volList;
+    struct spdk_nvmf_subsystem* subsystem = FindSubsystem(subnqn);
+    struct spdk_nvmf_ns* ns = spdk_nvmf_subsystem_get_first_ns(subsystem);
+    while (ns != nullptr)
+    {
+        struct spdk_bdev* bdev = spdk_nvmf_ns_get_bdev(ns);
+        string bdevName = spdk_bdev_get_name(bdev);
+        size_t volIdIdx = bdevName.find("_");
+        if (volIdIdx == string::npos)
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::IONVMF_FAIL_TO_FIND_VOLID;
+            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+            continue;
+        }
+        size_t arrayNameIdx = bdevName.find("_", volIdIdx + 1);
+        if (arrayNameIdx == string::npos)
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::IONVMF_FAIL_TO_FIND_ARRAYNAME;
+            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+            continue;
+        }
+        arrayNameIdx += 1;
+        volIdIdx += 1;
+        int volId = stoi(bdevName.substr(volIdIdx, arrayNameIdx - volIdIdx - 1));
+        string arrayName = bdevName.substr(arrayNameIdx, bdevName.length() - arrayNameIdx);
+        volList.push_back(make_pair(volId, arrayName));
+
+        ns = spdk_nvmf_subsystem_get_next_ns(subsystem, ns);
+    }
+    return volList;
 }
 } // namespace pos

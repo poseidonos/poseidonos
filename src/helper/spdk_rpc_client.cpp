@@ -95,3 +95,25 @@ SpdkRpcClient::BdevMallocCreate(string name, uint32_t numBlocks, uint32_t blockS
 
     return make_pair(SUCCESS, "");
 }
+
+pair<int, string>
+SpdkRpcClient::SubsystemDelete(string subnqn)
+{
+    const int SUCCESS = 0;
+    const string method = "nvmf_delete_subsystem";
+
+    Json::Value param;
+    param["nqn"] = subnqn;
+
+    Json::Value ret;
+    try
+    {
+        client->CallMethod(method, param);
+    }
+    catch (jsonrpc::JsonRpcException const& e)
+    {
+        return make_pair(e.GetCode(), e.GetMessage());
+    }
+
+    return make_pair(SUCCESS, "");
+}

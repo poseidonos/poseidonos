@@ -34,6 +34,7 @@
 
 #include <atomic>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "src/network/nvmf_target_spdk.hpp"
@@ -84,6 +85,7 @@ public:
     bool TryToAttachNamespace(const string& nqn, int volId, string& arrayName);
     bool CheckSubsystemExistance(void);
     bool CheckVolumeAttached(int volId, string arrayName);
+    vector<pair<int, string>> GetAttachedVolumeList(string& nqn);
 
 private:
     static struct NvmfTargetCallbacks nvmfCallbacks;
