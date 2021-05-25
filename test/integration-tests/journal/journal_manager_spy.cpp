@@ -32,13 +32,14 @@ JournalManagerSpy::~JournalManagerSpy(void)
 }
 
 int
-JournalManagerSpy::InitializeForTest(Mapper* mapper, Allocator* allocator)
+JournalManagerSpy::InitializeForTest(Mapper* mapper, Allocator* allocator, IVolumeManager* volumeManager)
 {
     _InitModules(mapper->GetIVSAMap(), mapper->GetIStripeMap(),
         mapper->GetIMapFlush(),
         allocator->GetIBlockAllocator(),
         allocator->GetIWBStripeAllocator(),
-        allocator->GetIContextManager(), allocator->GetIContextReplayer());
+        allocator->GetIContextManager(), allocator->GetIContextReplayer(),
+        volumeManager);
 
     int ret = JournalManager::_Init();
     if (ret < 0)

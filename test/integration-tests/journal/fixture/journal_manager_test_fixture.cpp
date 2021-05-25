@@ -2,7 +2,10 @@
 
 #include <string>
 
+#include "test/unit-tests/volume/i_volume_manager_mock.h"
+
 using ::testing::AtLeast;
+using ::testing::NiceMock;
 using ::testing::StrictMock;
 
 namespace pos
@@ -18,6 +21,7 @@ JournalManagerTestFixture::JournalManagerTestFixture(std::string logFileName)
 
     testAllocator = new StrictMock<AllocatorMock>(arrayInfo);
     stateSub = new StateSubscriptionMock();
+    volumeManager = new NiceMock<MockIVolumeManager>();
     journal = new JournalManagerSpy(arrayInfo, stateSub, logFileName);
 
     writeTester = new LogWriteTestFixture(testMapper, arrayInfo, journal, testInfo);
@@ -36,6 +40,7 @@ JournalManagerTestFixture::~JournalManagerTestFixture(void)
 
     journal->DeleteLogBuffer();
 
+    delete volumeManager;
     delete replayTester;
     delete testInfo;
     delete journal;
@@ -60,7 +65,7 @@ JournalManagerTestFixture::InitializeJournal(JournalConfigurationSpy* config)
 
     if (journal->IsEnabled() == true)
     {
-        journal->InitializeForTest(testMapper, testAllocator);
+        journal->InitializeForTest(testMapper, testAllocator, volumeManager);
     }
 
     _GetLogBufferSizeInfo();
@@ -86,7 +91,7 @@ JournalManagerTestFixture::SimulateSPORWithoutRecovery(void)
     journal->ResetJournalConfiguration(configurationBuilder.Build());
     writeTester->UpdateJournal(journal);
 
-    journal->InitializeForTest(testMapper, testAllocator);
+    journal->InitializeForTest(testMapper, testAllocator, volumeManager);
 }
 
 void

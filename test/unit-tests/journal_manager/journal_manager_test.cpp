@@ -107,7 +107,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalDisabled)
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr) == 0);
+                    nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal should be initialized with INVALID state
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNAL_INVALID);
@@ -140,7 +140,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabled)
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr) == 0);
+                    nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal manager should be ready
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNALING);
@@ -219,7 +219,7 @@ TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferNotExist)
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr) == 0);
+                    nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal manager should be ready
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNALING);
@@ -240,7 +240,7 @@ TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferLoaded)
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr) == 0);
+                    nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal manager should be ready
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNALING);
@@ -284,7 +284,7 @@ TEST_F(JournalManagerTestFixture, AddBlockMapUpdatedLog_testIfSuccessWithJournal
 
     // When: Journal is initialized beforehead
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr) == 0);
+                    nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal should request writing logs to write handler
     EXPECT_CALL(*logWriteHandler, AddLog);
@@ -314,7 +314,7 @@ TEST_F(JournalManagerTestFixture, AddStripeMapUpdatedLog_testIfSuccessWithJourna
 
     // When: Journal is initialized beforehead
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr) == 0);
+                    nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal should request writing logs to write handler
     EXPECT_CALL(*logWriteHandler, AddLog);
@@ -345,7 +345,7 @@ TEST_F(JournalManagerTestFixture, AddGcStripeFlushedLog_testIfSuccessWithJournal
 
     // When: Journal is initialized beforehead
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr) == 0);
+                    nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal should request writing logs to write handler
     EXPECT_CALL(*logWriteHandler, AddLog);

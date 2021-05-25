@@ -60,7 +60,8 @@ class LogHandlerInterface;
 class ReplayLogs : public ReplayTask
 {
 public:
-    ReplayLogs(ReplayLogList& logList, IVSAMap* vsaMap, IStripeMap* stripeMap,
+    ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
+        IVSAMap* vsaMap, IStripeMap* stripeMap,
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
         IContextReplayer* contextReplayer, IArrayInfo* arrayInfo,
         ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes);
@@ -81,6 +82,7 @@ private:
     void _MoveToReplayedStripe(ReplayStripe* stripe);
 
     ReplayLogList& logList;
+    LogDeleteChecker* logDeleteChecker;
 
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
@@ -91,8 +93,6 @@ private:
 
     std::vector<ReplayStripe*> replayingStripeList;
     std::vector<ReplayStripe*> replayedStripeList;
-
-    LogDeleteChecker* logDeleteChecker;
 
     ActiveWBStripeReplayer* wbStripeReplayer;
     ActiveUserStripeReplayer* userStripeReplayer;

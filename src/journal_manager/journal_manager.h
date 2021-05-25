@@ -81,6 +81,7 @@ class IContextManager;
 class IContextReplayer;
 class IArrayInfo;
 class IStateControl;
+class IVolumeManager;
 
 class JournalManager : public IMountSequence, public IJournalWriter
 {
@@ -115,10 +116,10 @@ public:
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
 
-    int Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IMapFlush* mapFlush,
+    int Init(IVSAMap* vsaMap, IStripeMap* stripeMap, IMapFlush* mapFlush,
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-        IContextManager* contextManager, IContextReplayer* contextReplayer);
+        IContextManager* contextManager, IContextReplayer* contextReplayer,
+        IVolumeManager* volumeManager);
 
     JournalManagerStatus
     GetJournalManagerStatus(void)
@@ -130,7 +131,8 @@ protected:
     void _InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush,
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-        IContextManager* contextManager, IContextReplayer* contextReplayer);
+        IContextManager* contextManager, IContextReplayer* contextReplayer,
+        IVolumeManager* volumeManager);
     int _Init(void);
 
     int _Reset(void);

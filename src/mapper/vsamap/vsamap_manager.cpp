@@ -399,12 +399,6 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
         return false;
     }
 
-    if (0 != vsaMap->StoreMap())
-    {
-        POS_TRACE_WARN(EID(VSAMAP_UNLOAD_FAILURE), "VSAMap unload(store) failed, volumeID:{} @VolumeDeleted", volID);
-        return false;
-    }
-
     // file close and delete
     if (0 != vsaMap->FileClose())
     {

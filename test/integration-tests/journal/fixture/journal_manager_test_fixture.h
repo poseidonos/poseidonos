@@ -40,6 +40,7 @@ protected:
     AllocatorMock* testAllocator;
     ArrayInfoMock* arrayInfo;
     StateSubscriptionMock* stateSub;
+    IVolumeManager* volumeManager;
 
     LogWriteTestFixture* writeTester;
     ReplayTestFixture* replayTester;

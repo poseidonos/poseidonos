@@ -34,11 +34,12 @@
 
 #include <list>
 
+#include "src/journal_manager/replay/log_delete_checker.h"
 #include "src/journal_manager/replay/pending_stripe.h"
+#include "src/journal_manager/replay/replay_log_list.h"
 #include "src/journal_manager/replay/replay_progress_reporter.h"
 #include "src/journal_manager/replay/replay_state_changer.h"
 #include "src/journal_manager/replay/replay_task.h"
-#include "src/journal_manager/replay/replay_log_list.h"
 
 namespace pos
 {
@@ -57,6 +58,7 @@ class IWBStripeAllocator;
 class IContextManager;
 class IContextReplayer;
 class IArrayInfo;
+class IVolumeManager;
 
 class ReplayHandler
 {
@@ -68,7 +70,8 @@ public:
     virtual void Init(JournalConfiguration* journalConfiguration,
         JournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
-        IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IContextReplayer* contextReplayer, IArrayInfo* arrayInfo);
+        IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
+        IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager);
 
     virtual int Start(void);
 
@@ -76,7 +79,8 @@ private:
     void _InitializeExternalModuleReferences(void);
     void _InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
-        IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IContextReplayer* contextReplayer, IArrayInfo* arrayInfo);
+        IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
+        IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager);
     void _AddTask(ReplayTask* task);
     int _ExecuteReplayTasks(void);
 
@@ -84,6 +88,8 @@ private:
 
     ReplayLogList logList;
     PendingStripeList pendingWbStripes;
+
+    LogDeleteChecker* logDeleteChecker;
 
     JournalConfiguration* config;
     JournalLogBuffer* logBuffer;

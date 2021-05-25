@@ -18,7 +18,7 @@ public:
     JournalManagerSpy(IArrayInfo* array, IStateControl* stateSub, std::string logFileName);
     virtual ~JournalManagerSpy(void);
 
-    int InitializeForTest(Mapper* mapper, Allocator* allocator);
+    int InitializeForTest(Mapper* mapper, Allocator* allocator, IVolumeManager* volumeManager);
     int DoRecoveryForTest(void);
 
     void DeleteLogBuffer(void);

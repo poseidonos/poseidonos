@@ -56,6 +56,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
+#include "src/volume/volume_service.h"
 
 namespace pos
 {
@@ -163,21 +164,23 @@ JournalManager::Init(void)
         AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayInfo->GetName()),
         AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayInfo->GetName()),
         AllocatorServiceSingleton::Instance()->GetIContextManager(arrayInfo->GetName()),
-        AllocatorServiceSingleton::Instance()->GetIContextReplayer(arrayInfo->GetName()));
+        AllocatorServiceSingleton::Instance()->GetIContextReplayer(arrayInfo->GetName()),
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayInfo->GetName()));
 }
 
 int
 JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
     IWBStripeAllocator* wbStripeAllocator,
-    IContextManager* ctxManager, IContextReplayer* ctxReplayer)
+    IContextManager* ctxManager, IContextReplayer* ctxReplayer,
+    IVolumeManager* volumeManager)
 {
     int result = 0;
 
     if (config->IsEnabled() == true)
     {
         _InitModules(vsaMap, stripeMap, mapFlush, blockAllocator,
-            wbStripeAllocator, ctxManager, ctxReplayer);
+            wbStripeAllocator, ctxManager, ctxReplayer, volumeManager);
 
         result = _Init();
 
@@ -390,7 +393,8 @@ JournalManager::_Reset(void)
 void
 JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
-    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IContextReplayer* contextReplayer)
+    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
+    IContextReplayer* contextReplayer, IVolumeManager* volumeManager)
 {
     config->Init();
 
@@ -413,7 +417,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
         contextManager);
 
     replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, blockAllocator,
-        wbStripeAllocator, contextManager, contextReplayer, arrayInfo);
+        wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);
 
     statusProvider->Init(bufferAllocator, config, logGroupReleaser);
 }

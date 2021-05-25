@@ -38,23 +38,32 @@
 
 namespace pos
 {
+struct DeletedVolume
+{
+    int volumeId;
+    uint64_t time;
+    uint64_t prevSegInfoVersion;
+
+    inline bool
+    operator==(DeletedVolume input) const
+    {
+        return (input.volumeId == volumeId && input.time == time && input.prevSegInfoVersion == prevSegInfoVersion);
+    }
+};
 
 class LogDeleteChecker
 {
 public:
     LogDeleteChecker(void) = default;
+    LogDeleteChecker(std::vector<DeletedVolume> input);
     virtual ~LogDeleteChecker(void) = default;
 
     void Update(std::vector<ReplayLog>& deletingLogs);
-    void ReplayedUntil(uint64_t time);
+    void ReplayedUntil(uint64_t time, int volumeId);
     bool IsDeleted(int volumeId);
+    virtual std::vector<DeletedVolume> GetDeletedVolumes(void);
 
 private:
-    struct DeletedVolume
-    {
-        int volumeId;
-        uint64_t time;
-    };
     std::vector<DeletedVolume> deletedVolumes;
 };
 

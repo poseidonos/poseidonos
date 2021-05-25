@@ -47,12 +47,14 @@
 
 namespace pos
 {
-ReplayLogs::ReplayLogs(ReplayLogList& logList, IVSAMap* vsaMap, IStripeMap* stripeMap,
+ReplayLogs::ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
+    IVSAMap* vsaMap, IStripeMap* stripeMap,
     IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
     IContextReplayer* ctxReplayer, IArrayInfo* arrayInfo,
     ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes)
 : ReplayTask(reporter),
   logList(logList),
+  logDeleteChecker(deleteChecker),
   vsaMap(vsaMap),
   stripeMap(stripeMap),
   blockAllocator(blockAllocator),
@@ -60,8 +62,6 @@ ReplayLogs::ReplayLogs(ReplayLogList& logList, IVSAMap* vsaMap, IStripeMap* stri
   contextReplayer(ctxReplayer),
   arrayInfo(arrayInfo)
 {
-    logDeleteChecker = new LogDeleteChecker();
-
     wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer,
         wbStripeAllocator, pendingWbStripes);
     userStripeReplayer = new ActiveUserStripeReplayer(contextReplayer, arrayInfo);
@@ -80,8 +80,6 @@ ReplayLogs::~ReplayLogs(void)
         delete stripe;
     }
     replayedStripeList.clear();
-
-    delete logDeleteChecker;
 
     delete wbStripeReplayer;
     delete userStripeReplayer;
@@ -155,6 +153,9 @@ ReplayLogs::_ReplayFinishedStripes(std::vector<ReplayLog>& replayLogs)
         {
             ReplayStripe* stripe = _FindUserStripe(log->GetVsid());
             stripe->AddLog(log);
+
+            int volumeId = reinterpret_cast<BlockWriteDoneLog*>(log->GetData())->volId;
+            logDeleteChecker->ReplayedUntil(replayLog.time, volumeId);
         }
         else if (log->GetType() == LogType::STRIPE_MAP_UPDATED)
         {
@@ -182,6 +183,9 @@ ReplayLogs::_ReplayFinishedStripes(std::vector<ReplayLog>& replayLogs)
                 return result;
             }
 
+            int volumeId = reinterpret_cast<GcStripeFlushedLog*>(log->GetData())->volId;
+            logDeleteChecker->ReplayedUntil(replayLog.time, volumeId);
+
             replayedStripeList.push_back(stripe);
         }
         else
@@ -189,8 +193,6 @@ ReplayLogs::_ReplayFinishedStripes(std::vector<ReplayLog>& replayLogs)
             POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_STATUS,
                 "Unknwon log type {} found", log->GetType());
         }
-
-        logDeleteChecker->ReplayedUntil(replayLog.time);
     }
     return 0;
 }

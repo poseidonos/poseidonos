@@ -35,6 +35,11 @@
 
 namespace pos
 {
+// Constructor for injecting deletedVolumes for unit test
+LogDeleteChecker::LogDeleteChecker(std::vector<DeletedVolume> input)
+: deletedVolumes(input)
+{
+}
 
 void
 LogDeleteChecker::Update(std::vector<ReplayLog>& replayLogs)
@@ -44,18 +49,18 @@ LogDeleteChecker::Update(std::vector<ReplayLog>& replayLogs)
         VolumeDeletedLog* log = reinterpret_cast<VolumeDeletedLog*>((replayLog.log)->GetData());
         DeletedVolume deletion = {
             .volumeId = log->volId,
-            .time = replayLog.time
-        };
+            .time = replayLog.time,
+            .prevSegInfoVersion = log->allocatorContextVersion};
         deletedVolumes.push_back(deletion);
     }
 }
 
 void
-LogDeleteChecker::ReplayedUntil(uint64_t time)
+LogDeleteChecker::ReplayedUntil(uint64_t time, int volumeId)
 {
     for (auto it = deletedVolumes.begin(); it != deletedVolumes.end();)
     {
-        if (it->time < time)
+        if ((it->time < time) && (volumeId == it->volumeId))
         {
             it = deletedVolumes.erase(it);
         }
@@ -79,4 +84,9 @@ LogDeleteChecker::IsDeleted(int volumeId)
     return false;
 }
 
+std::vector<DeletedVolume>
+LogDeleteChecker::GetDeletedVolumes(void)
+{
+    return deletedVolumes;
+}
 } // namespace pos

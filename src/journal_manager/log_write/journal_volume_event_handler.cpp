@@ -90,7 +90,7 @@ JournalVolumeEventHandler::VolumeDeleted(int volumeId)
 
         POS_TRACE_DEBUG(eventId, "Start volume delete event handler (volume id {})", volumeId);
 
-        ret = _WriteVolumeDeletedLog(volumeId, contextManager->GetStoredContextVersion(ALLOCATOR_CTX));
+        ret = _WriteVolumeDeletedLog(volumeId, contextManager->GetStoredContextVersion(SEGMENT_CTX));
         if (ret != 0)
         {
             POS_TRACE_DEBUG(eventId,
@@ -99,6 +99,7 @@ JournalVolumeEventHandler::VolumeDeleted(int volumeId)
         }
         _WaitForLogWriteDone(volumeId);
 
+        // TODO (huijeong.kim) need to flush map also
         ret = _FlushAllocatorContext();
         if (ret != 0)
         {

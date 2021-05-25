@@ -35,13 +35,14 @@
 #include <functional>
 #include <string>
 
-#include "../config/journal_configuration.h"
-#include "../log_buffer/journal_log_buffer.h"
-#include "flush_metadata.h"
-#include "flush_pending_stripes.h"
-#include "read_log_buffer.h"
-#include "replay_logs.h"
-#include "reset_log_buffer.h"
+#include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/replay/flush_metadata.h"
+#include "src/journal_manager/replay/flush_pending_stripes.h"
+#include "src/journal_manager/replay/read_log_buffer.h"
+#include "src/journal_manager/replay/replay_logs.h"
+#include "src/journal_manager/replay/replay_volume_deletion.h"
+#include "src/journal_manager/replay/reset_log_buffer.h"
 
 namespace pos
 {
@@ -51,29 +52,33 @@ ReplayHandler::ReplayHandler(IStateControl* iState)
   logBuffer(nullptr)
 {
     reporter = new ReplayProgressReporter();
+    logDeleteChecker = new LogDeleteChecker();
 }
 
 void
 ReplayHandler::Init(JournalConfiguration* journalConfiguration,
     JournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
-    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IContextReplayer* contextReplayer, IArrayInfo* arrayInfo)
+    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
+    IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager)
 {
     config = journalConfiguration;
     logBuffer = journalLogBuffer;
 
     _InitializeTaskList(vsaMap, stripeMap, mapFlush, blockAllocator,
-        wbStripeAllocator, contextManager, contextReplayer, arrayInfo);
+        wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);
 }
 
 void
 ReplayHandler::_InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
-    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IContextReplayer* contextReplayer, IArrayInfo* arrayInfo)
+    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
+    IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager)
 {
     _AddTask(new ReadLogBuffer(config, logBuffer, logList, reporter));
-    _AddTask(new ReplayLogs(logList, vsaMap, stripeMap, blockAllocator,
+    _AddTask(new ReplayLogs(logList, logDeleteChecker, vsaMap, stripeMap, blockAllocator,
         wbStripeAllocator, contextReplayer, arrayInfo, reporter, pendingWbStripes));
+    _AddTask(new ReplayVolumeDeletion(logDeleteChecker, contextManager, volumeManager, reporter));
     _AddTask(new FlushMetadata(mapFlush, contextManager, reporter));
     _AddTask(new ResetLogBuffer(logBuffer, reporter));
     _AddTask(new FlushPendingStripes(pendingWbStripes, wbStripeAllocator, reporter));
@@ -88,8 +93,8 @@ ReplayHandler::_AddTask(ReplayTask* task)
 
 ReplayHandler::~ReplayHandler(void)
 {
+    delete logDeleteChecker;
     delete reporter;
-
     for (auto task : taskList)
     {
         delete task;

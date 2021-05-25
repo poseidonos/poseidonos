@@ -139,6 +139,11 @@ ReplayProgressReporter::CompleteAll(void)
 void
 ReplayProgressReporter::_ReportProgress(void)
 {
+    if (totalWeight == 0)
+    {
+        return;
+    }
+
     int percent = (progress + currentTaskProgress) * 100 / totalWeight;
 
     if (percent != reportedProgress)
