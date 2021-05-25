@@ -54,7 +54,7 @@ class ArrayMountSequence : public IStateObserver
 {
 public:
     ArrayMountSequence(vector<IMountSequence*> seq, IAbrControl* abr,
-                        IStateControl* iState, string name);
+                        IStateControl* iState, string name, IVolumeManager* volMgr);
     ArrayMountSequence(vector<IMountSequence*> seq, MountTemp* mntTmp,
                         IStateControl* iState, string name,
                         StateContext* mountState,
