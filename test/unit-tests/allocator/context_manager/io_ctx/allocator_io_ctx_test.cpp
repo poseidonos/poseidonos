@@ -4,8 +4,10 @@
 
 namespace pos
 {
-TEST(AllocatorIoCtx, AllocatorIoCtx_)
+TEST(AllocatorIoCtx, AllocatorIoCtx_TestConstructor)
 {
+    AllocatorIoCtx* IoCtx = new AllocatorIoCtx(MetaFsIoOpcode::Write, 0, 0, 10, nullptr, nullptr);
+    delete IoCtx;
 }
 
 } // namespace pos

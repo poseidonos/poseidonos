@@ -32,8 +32,8 @@
 
 #include "allocator_meta_test.h"
 
-#include "src/lib/bitmap.h"
 #include "src/event_scheduler/event_scheduler.h"
+#include "src/lib/bitmap.h"
 
 FlushDoneEvent::FlushDoneEvent(AllocatorMetaTest* tester)
 : tester(tester)

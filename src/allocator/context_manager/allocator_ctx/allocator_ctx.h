@@ -77,9 +77,9 @@ public:
     virtual SegmentState GetSegmentState(SegmentId segmentId, bool needlock);
     virtual void SetSegmentState(SegmentId segmentId, SegmentState state, bool needlock);
 
-    void SetAllocatedSegmentCount(int count);
-    int GetAllocatedSegmentCount(void);
-    int GetTotalSegmentsCount(void);
+    virtual void SetAllocatedSegmentCount(int count);
+    virtual int GetAllocatedSegmentCount(void);
+    virtual int GetTotalSegmentsCount(void);
 
     virtual std::mutex& GetSegStateLock(SegmentId segId);
     virtual std::mutex& GetAllocatorCtxLock(void) { return allocCtxLock; }

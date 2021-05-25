@@ -32,8 +32,9 @@
 
 #pragma once
 
-#include "src/include/address_type.h"
 #include <atomic>
+
+#include "src/include/address_type.h"
 
 namespace pos
 {

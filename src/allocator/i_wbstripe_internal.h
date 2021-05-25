@@ -36,11 +36,10 @@
 
 namespace pos
 {
-
 class IWBStripeInternal
 {
 public:
     virtual Stripe* GetStripe(StripeId wbLsid) = 0;
 };
 
-}
+} // namespace pos

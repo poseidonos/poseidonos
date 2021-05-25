@@ -50,7 +50,7 @@ public:
     SegmentCtx(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~SegmentCtx(void);
     virtual void Init(void);
-    virtual  void Close(void);
+    virtual void Close(void);
 
     virtual void AfterLoad(char* buf);
     virtual void BeforeFlush(int section, char* buf);
@@ -68,16 +68,15 @@ public:
     virtual int IncreaseOccupiedStripeCount(SegmentId segId);
 
     virtual bool IsSegmentCtxIo(char* pBuf);
-    SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
+    virtual SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
     virtual std::mutex& GetSegmentCtxLock(void) { return segCtxLock;}
 
-    void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
-    void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
+    virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
+    virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
     static const uint32_t SIG_SEGMENT_CTX = 0xECECECEC;
 
 private:
-
     SegmentCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxDirtyVersion;
     std::atomic<uint64_t> ctxStoredVersion;

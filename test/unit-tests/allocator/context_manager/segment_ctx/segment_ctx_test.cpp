@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/allocator/include/allocator_const.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_info_mock.h"
 
@@ -190,6 +191,129 @@ TEST(SegmentCtx, CopySegmentInfoToBufferforWBT_CheckCopiedBuffer)
     EXPECT_EQ(12, result);
 
     delete segInfos;
+}
+
+TEST(SegmentCtx, GetSegmentCtxLock_TestSimpleGetter)
+{
+    // given
+    SegmentCtx segCtx(nullptr, nullptr, "");
+
+    // when
+    std::mutex& m = segCtx.GetSegmentCtxLock();
+}
+
+TEST(SegmentCtx, Init_testInitAndClose)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetnumUserAreaSegments(10);
+    SegmentCtx segCtx(&addrInfo, "");
+
+    // when
+    segCtx.Init();
+
+    // then
+    segCtx.Close();
+}
+
+TEST(SegmentCtx, SetOccupiedStripeCount_TestSimpleSetter)
+{
+    // given
+    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
+    SegmentCtx segCtx(segInfos, nullptr, "");
+
+    EXPECT_CALL(*segInfos, SetOccupiedStripeCount(5));
+    // when
+    segCtx.SetOccupiedStripeCount(0, 5);
+
+    delete segInfos;
+}
+
+TEST(SegmentCtx, GetSectionAddr_TestSimpleGetter)
+{
+    // given
+    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
+    SegmentCtx segCtx(segInfos, nullptr, "");
+
+    // when 1.
+    char* buf = segCtx.GetSectionAddr(SC_HEADER);
+
+    // when 2.
+    buf = segCtx.GetSectionAddr(SC_SEGMENT_INFO);
+    EXPECT_EQ(reinterpret_cast<char*>(segInfos), buf);
+
+    delete segInfos;
+}
+
+TEST(SegmentCtx, GetSectionSize_TestSimpleGetter)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetnumUserAreaSegments(10);
+    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
+    SegmentCtx segCtx(segInfos, &addrInfo, "");
+
+    // when 1.
+    int ret = segCtx.GetSectionSize(SC_HEADER);
+    // then 1.
+    EXPECT_EQ(sizeof(SegmentCtxHeader), ret);
+
+    // when 2.
+    ret = segCtx.GetSectionSize(SC_SEGMENT_INFO);
+    EXPECT_EQ(10 * sizeof(SegmentInfo), ret);
+
+    delete segInfos;
+}
+
+TEST(SegmentCtx, GetStoredVersion_TestSimpleGetter)
+{
+    // given
+    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
+    SegmentCtx segCtx(segInfos, nullptr, "");
+
+    // when 1.
+    int ret = segCtx.GetStoredVersion();
+    delete segInfos;
+}
+
+TEST(SegmentCtx, CopySegmentInfoFromBufferforWBT_TestSimpleSetter)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetnumUserAreaSegments(1);
+    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
+    SegmentCtx segCtx(segInfos, &addrInfo, "");
+    char* buf = new char[1];
+
+    // given 1.
+    EXPECT_CALL(*segInfos, SetValidBlockCount);
+    // when 1.
+    segCtx.CopySegmentInfoFromBufferforWBT(WBT_SEGMENT_VALID_COUNT, buf);
+
+    // given 1.
+    EXPECT_CALL(*segInfos, SetOccupiedStripeCount);
+    // when 1.
+    segCtx.CopySegmentInfoFromBufferforWBT(WBT_SEGMENT_OCCUPIED_STRIPE, buf);
+
+    delete segInfos;
+}
+
+TEST(SegmentCtx, GetSegmentInfo_TestSimpleGetter)
+{
+    // given
+    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
+    SegmentCtx segCtx(segInfos, nullptr, "");
+    // when
+    segCtx.GetSegmentInfo();
+}
+
+TEST(SegmentCtx, ResetDirtyVersion_TestSimpleSetter)
+{
+    // given
+    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
+    SegmentCtx segCtx(segInfos, nullptr, "");
+    // when
+    segCtx.ResetDirtyVersion();
 }
 
 } // namespace pos

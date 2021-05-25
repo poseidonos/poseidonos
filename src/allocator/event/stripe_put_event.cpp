@@ -32,21 +32,27 @@
 
 #include "stripe_put_event.h"
 
-#include "src/allocator_service/allocator_service.h"
-#include "src/allocator/i_wbstripe_allocator.h"
-#include "src/include/backend_event.h"
-
 #include <string>
+
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/include/backend_event.h"
 
 namespace pos
 {
-StripePutEvent::StripePutEvent(Stripe& stripe, StripeId prevLsid, std::string& arrayName)
+StripePutEvent::StripePutEvent(IWBStripeAllocator* wbAllocator, Stripe& stripe, StripeId prevLsid, std::string& arrayName)
 : Event(false, BackendEvent_Flush),
   stripe(stripe),
   prevLsid(prevLsid),
-  iWBStripeAllocator(AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName)),
+  iWBStripeAllocator(wbAllocator),
   arrayName(arrayName)
 {
+}
+
+StripePutEvent::StripePutEvent(Stripe& stripe, StripeId prevLsid, std::string& arrayName)
+: StripePutEvent(nullptr, stripe, prevLsid, arrayName)
+{
+    iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName);
     SetEventType(BackendEvent_Flush);
 }
 

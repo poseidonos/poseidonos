@@ -48,7 +48,7 @@ SegmentCtx::SegmentCtx(SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo
   arrayName(arrayName_)
 {
     // for UT
-    segmentInfos = segmentInfo_; 
+    segmentInfos = segmentInfo_;
 }
 
 SegmentCtx::SegmentCtx(AllocatorAddressInfo* info, std::string arrayName)
@@ -235,8 +235,9 @@ SegmentCtx::CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBu
 void
 SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* srcBuf)
 {
+    uint32_t numSegs = addrInfo->GetnumUserAreaSegments(); // for ut
     uint32_t* src = reinterpret_cast<uint32_t*>(srcBuf);
-    for (uint32_t segId = 0; segId < numSegments; segId++)
+    for (uint32_t segId = 0; segId < numSegs; segId++)
     {
         if (type == WBT_SEGMENT_VALID_COUNT)
         {

@@ -2,70 +2,28 @@
 
 #include <gtest/gtest.h>
 
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
+
+using ::testing::_;
+using ::testing::AtLeast;
+using testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnRef;
+
 namespace pos
 {
-TEST(AllocatorAddressInfo, AllocatorAddressInfo_)
-{
-}
-
 TEST(AllocatorAddressInfo, Init_)
 {
-}
+    // given
+    PartitionLogicalSize ubSize;
+    PartitionLogicalSize wbSize;
+    NiceMock<MockIArrayInfo>* info = new NiceMock<MockIArrayInfo>();
+    AllocatorAddressInfo addrInfo;
 
-TEST(AllocatorAddressInfo, GetblksPerStripe_)
-{
-}
+    EXPECT_CALL(*info, GetSizeInfo).WillOnce(Return((const PartitionLogicalSize*)&ubSize)).WillOnce(Return((const PartitionLogicalSize*)&wbSize));
+    addrInfo.Init("", info);
 
-TEST(AllocatorAddressInfo, GetchunksPerStripe_)
-{
-}
-
-TEST(AllocatorAddressInfo, GetnumWbStripes_)
-{
-}
-
-TEST(AllocatorAddressInfo, GetnumUserAreaStripes_)
-{
-}
-
-TEST(AllocatorAddressInfo, GetblksPerSegment_)
-{
-}
-
-TEST(AllocatorAddressInfo, GetstripesPerSegment_)
-{
-}
-
-TEST(AllocatorAddressInfo, GetnumUserAreaSegments_)
-{
-}
-
-TEST(AllocatorAddressInfo, SetblksPerStripe_)
-{
-}
-
-TEST(AllocatorAddressInfo, SetchunksPerStripe_)
-{
-}
-
-TEST(AllocatorAddressInfo, SetnumWbStripes_)
-{
-}
-
-TEST(AllocatorAddressInfo, SetnumUserAreaStripes_)
-{
-}
-
-TEST(AllocatorAddressInfo, SetblksPerSegment_)
-{
-}
-
-TEST(AllocatorAddressInfo, SetstripesPerSegment_)
-{
-}
-
-TEST(AllocatorAddressInfo, SetnumUserAreaSegments_)
-{
+    delete info;
 }
 
 } // namespace pos

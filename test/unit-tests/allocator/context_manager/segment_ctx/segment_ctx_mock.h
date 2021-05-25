@@ -29,6 +29,8 @@ public:
     MOCK_METHOD(int, IncreaseOccupiedStripeCount, (SegmentId segId), (override));
     MOCK_METHOD(bool, IsSegmentCtxIo, (char* pBuf), (override));
     MOCK_METHOD(std::mutex&, GetSegmentCtxLock, (), (override));
+    MOCK_METHOD(void, CopySegmentInfoToBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
+    MOCK_METHOD(void, CopySegmentInfoFromBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));
 };
 
 } // namespace pos

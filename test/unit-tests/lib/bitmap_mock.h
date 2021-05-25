@@ -47,6 +47,7 @@ public:
     MOCK_METHOD(uint64_t*, GetMapAddr, (), (override));
     MOCK_METHOD(uint64_t, GetNumBitsSet, (), (override));
     MOCK_METHOD(uint64_t, GetNumBitsSetWoLock, (), (override));
+    MOCK_METHOD(std::mutex&, GetLock, (), (override));
 };
 
 } // namespace pos

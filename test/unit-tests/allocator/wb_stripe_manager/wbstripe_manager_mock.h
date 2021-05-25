@@ -12,6 +12,7 @@ class MockWBStripeManager : public WBStripeManager
 {
 public:
     using WBStripeManager::WBStripeManager;
+    MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD(Stripe*, GetStripe, (StripeAddr & lsidEntry), (override));
     MOCK_METHOD(StripeId, AllocateUserDataStripeId, (StripeId vsid), (override));
     MOCK_METHOD(void, FreeWBStripeId, (StripeId lsid), (override));
@@ -28,6 +29,9 @@ public:
     MOCK_METHOD(int, PrepareRebuild, (), (override));
     MOCK_METHOD(int, StopRebuilding, (), (override));
     MOCK_METHOD(Stripe*, GetStripe, (StripeId wbLsid), (override));
+    MOCK_METHOD(void, PickActiveStripe, (uint32_t volumeId, std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone), (override));
+    MOCK_METHOD(void, FinalizeWriteIO, (std::vector<Stripe*> & stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone), (override));
+    MOCK_METHOD(int, CheckAllActiveStripes, (std::vector<Stripe*> & stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone), (override));
 };
 
 } // namespace pos

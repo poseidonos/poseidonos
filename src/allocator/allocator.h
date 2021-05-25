@@ -58,6 +58,8 @@ const int BLOCKS_PER_GROUP = 8;
 class Allocator : public IAllocatorWbt, public VolumeEvent, public IMountSequence
 {
 public:
+    Allocator(AllocatorAddressInfo* addrInfo, ContextManager* contextManager, BlockManager* blockManager,
+              WBStripeManager* wbStripeManager, IArrayInfo* info, IStateControl* iState);
     Allocator(IArrayInfo* info, IStateControl* iState);
     virtual ~Allocator(void);
 
@@ -75,8 +77,8 @@ public:
 
     void SetGcThreshold(uint32_t inputThreshold) override;
     void SetUrgentThreshold(uint32_t inputThreshold) override;
-    int GetMeta(WBTAllocatorMetaType type, std::string fname) override;
-    int SetMeta(WBTAllocatorMetaType type, std::string fname) override;
+    int GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file = nullptr) override;
+    int SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file = nullptr) override;
     int GetBitmapLayout(std::string fname) override;
     int GetInstantMetaInfo(std::string fname) override;
     void FlushAllUserdataWBT(void) override;

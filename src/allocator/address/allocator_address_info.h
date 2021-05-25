@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "src/array_models/interface/i_array_info.h"
 #include <stdint.h>
 #include <string>
 
@@ -42,7 +43,7 @@ class AllocatorAddressInfo
 public:
     AllocatorAddressInfo(void) = default;
     virtual ~AllocatorAddressInfo(void) = default;
-    void Init(std::string arrayName);
+    virtual void Init(std::string arrayName, IArrayInfo* iArrayInfo = nullptr);
 
     uint32_t GetblksPerStripe(void) { return blksPerStripe; }
     uint32_t GetchunksPerStripe(void) { return chunksPerStripe; }

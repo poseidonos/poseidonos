@@ -50,9 +50,9 @@
 
 namespace pos
 {
-ContextManager::ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_, 
-                               WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileManager_,
-                               ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_)
+ContextManager::ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
+    WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileManager_,
+    ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_)
 : numAsyncIoIssued(0),
   flushInProgress(false),
   addrInfo(info_),

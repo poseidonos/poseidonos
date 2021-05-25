@@ -12,6 +12,7 @@ class MockAllocatorAddressInfo : public AllocatorAddressInfo
 {
 public:
     using AllocatorAddressInfo::AllocatorAddressInfo;
+    MOCK_METHOD(void, Init, (std::string arrayName, IArrayInfo* iArrayInfo), (override));
     MOCK_METHOD(uint32_t, GetnumUserAreaSegments, (), (override));
 };
 

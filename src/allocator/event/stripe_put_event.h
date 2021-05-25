@@ -32,10 +32,10 @@
 
 #pragma once
 
-#include "src/include/address_type.h"
-#include "src/event_scheduler/event.h"
-
 #include <string>
+
+#include "src/event_scheduler/event.h"
+#include "src/include/address_type.h"
 
 namespace pos
 {
@@ -45,6 +45,7 @@ class IWBStripeAllocator;
 class StripePutEvent : public Event
 {
 public:
+    StripePutEvent(IWBStripeAllocator* wbAllocator, Stripe& stripe, StripeId prevLsid, std::string& arrayName);
     StripePutEvent(Stripe& stripe, StripeId prevLsid, std::string& arrayName);
     virtual bool Execute(void);
 

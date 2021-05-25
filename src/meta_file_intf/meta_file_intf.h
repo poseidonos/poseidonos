@@ -55,14 +55,14 @@ public:
 
     virtual int Open(void);
     virtual int Close(void);
-    bool IsOpened(void);
+    virtual bool IsOpened(void);
 
-    int GetFd(void) { return fd; }
-    std::string GetFileName(void) { return fileName; }
+    virtual int GetFd(void) { return fd; }
+    virtual std::string GetFileName(void) { return fileName; }
     // SyncIO APIs
-    int IssueIO(MetaFsIoOpcode opType, uint64_t fileOffset, uint64_t length,
+    virtual int IssueIO(MetaFsIoOpcode opType, uint64_t fileOffset, uint64_t length,
         char* buffer);
-    int AppendIO(MetaFsIoOpcode opType, uint64_t& offset, uint64_t length,
+    virtual int AppendIO(MetaFsIoOpcode opType, uint64_t& offset, uint64_t length,
         char* buffer);
 
 protected:

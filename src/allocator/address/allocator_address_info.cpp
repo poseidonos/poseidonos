@@ -31,15 +31,20 @@
  */
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/array_mgmt/array_manager.h"
 
 #include <string>
+
+#include "src/array_mgmt/array_manager.h"
 namespace pos
 {
 void
-AllocatorAddressInfo::Init(std::string arrayName)
+AllocatorAddressInfo::Init(std::string arrayName, IArrayInfo* iArrayInfo)
 {
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    IArrayInfo* info = iArrayInfo; // for UT
+    if (info == nullptr)
+    {
+        info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    }
     const PartitionLogicalSize* udSize = nullptr;
     udSize = info->GetSizeInfo(PartitionType::USER_DATA);
     const PartitionLogicalSize* wbSize = nullptr;

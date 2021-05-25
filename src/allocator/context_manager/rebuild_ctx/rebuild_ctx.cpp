@@ -92,7 +92,7 @@ RebuildCtx::Close(void)
         delete rebuildSegmentsFile;
         rebuildSegmentsFile = nullptr;
     }
-    delete [] bufferInObj;
+    delete[] bufferInObj;
 }
 
 SegmentId
@@ -138,7 +138,7 @@ RebuildCtx::ReleaseRebuildSegment(SegmentId segmentId)
 {
     if (rebuildLock.try_lock() == false)
     {
-        return -1;  // Need to retry!
+        return -1; // Need to retry!
     }
     POS_TRACE_INFO(EID(ALLOCATOR_START), "@ReleaseRebuildSegment");
 
@@ -230,7 +230,7 @@ RebuildCtx::RebuildTargetSegmentsEnd(void)
 void
 RebuildCtx::FreeSegmentInRebuildTarget(SegmentId segId)
 {
-    if (IsRebuidTargetSegmentsEmpty())  // No need to check below
+    if (IsRebuidTargetSegmentsEmpty()) // No need to check below
     {
         return;
     }

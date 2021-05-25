@@ -104,7 +104,7 @@ public:
     virtual uint64_t GetNumBitsSetWoLock(void);
     uint64_t GetNumBitsSet(uint64_t begin, uint64_t end);
     bool SetBitMap(BitMapMutex& inputBitMapMutex);
-    std::mutex& GetLock(void);
+    virtual std::mutex& GetLock(void);
 
 private:
     std::mutex bitMapLock;

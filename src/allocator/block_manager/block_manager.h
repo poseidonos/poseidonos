@@ -32,33 +32,33 @@
 
 #pragma once
 
-#include "src/allocator/i_wbstripe_internal.h"
-#include "src/allocator/i_block_allocator.h"
-#include "src/allocator/context_manager/context_manager.h"
-
 #include <atomic>
 #include <string>
 
+#include "src/allocator/context_manager/context_manager.h"
+#include "src/allocator/i_block_allocator.h"
+#include "src/allocator/i_wbstripe_internal.h"
+
 namespace pos
 {
-
 class BlockManager : public IBlockAllocator
 {
 public:
+    BlockManager(SegmentCtx* segCtx_, AllocatorCtx* alloCtx_, WbStripeCtx* wbCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName);
     BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName);
     virtual ~BlockManager(void) = default;
-    void Init(IWBStripeInternal* iwbstripeInternal);
+    virtual void Init(IWBStripeInternal* iwbstripeInternal);
 
-    VirtualBlks AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, bool forGC) override;
-    void InvalidateBlks(VirtualBlks blks) override;
-    void ValidateBlks(VirtualBlks blks) override;
-    void ProhibitUserBlkAlloc(void) override;
-    void PermitUserBlkAlloc(void) override;
+    virtual VirtualBlks AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, bool forGC) override;
+    virtual void InvalidateBlks(VirtualBlks blks) override;
+    virtual void ValidateBlks(VirtualBlks blks) override;
+    virtual void ProhibitUserBlkAlloc(void) override;
+    virtual void PermitUserBlkAlloc(void) override;
 
-    bool BlockAllocating(uint32_t volumeId) override;
-    void UnblockAllocating(uint32_t volumeId) override;
-    void TurnOffBlkAllocation(void);
-    void TurnOnBlkAllocation(void);
+    virtual bool BlockAllocating(uint32_t volumeId) override;
+    virtual void UnblockAllocating(uint32_t volumeId) override;
+    virtual void TurnOffBlkAllocation(void);
+    virtual void TurnOnBlkAllocation(void);
 
 private:
     VirtualBlks _AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks);
@@ -69,10 +69,26 @@ private:
     void _RollBackStripeIdAllocation(StripeId wbLsid = UINT32_MAX, StripeId arrayLsid = UINT32_MAX);
     void _IncreaseInvCount(SegmentId segId, int count = 1);
 
-    bool _IsSegmentFull(StripeId stripeId) { return stripeId % addrInfo->GetstripesPerSegment() == 0; }
-    bool _IsStripeFull(VirtualBlkAddr addr) { return addr.offset == addrInfo->GetblksPerStripe(); }
-    bool _IsValidOffset(uint64_t stripeOffset) { return stripeOffset < addrInfo->GetblksPerStripe(); }
-    bool _IsUserStripeAllocation(ASTailArrayIdx asTailArrayIdx) { return (asTailArrayIdx < MAX_VOLUME_COUNT); }
+    bool
+    _IsSegmentFull(StripeId stripeId)
+    {
+        return stripeId % addrInfo->GetstripesPerSegment() == 0;
+    }
+    bool
+    _IsStripeFull(VirtualBlkAddr addr)
+    {
+        return addr.offset == addrInfo->GetblksPerStripe();
+    }
+    bool
+    _IsValidOffset(uint64_t stripeOffset)
+    {
+        return stripeOffset < addrInfo->GetblksPerStripe();
+    }
+    bool
+    _IsUserStripeAllocation(ASTailArrayIdx asTailArrayIdx)
+    {
+        return (asTailArrayIdx < MAX_VOLUME_COUNT);
+    }
 
     std::atomic<bool> blkAllocProhibited[MAX_VOLUME_COUNT];
     std::atomic<bool> userBlkAllocProhibited;

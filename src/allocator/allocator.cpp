@@ -50,15 +50,21 @@
 
 namespace pos
 {
-Allocator::Allocator(IArrayInfo* info, IStateControl* iState)
-: VolumeEvent("Allocator", info->GetName()),
-  addrInfo(nullptr),
-  contextManager(nullptr),
-  blockManager(nullptr),
-  wbStripeManager(nullptr),
+Allocator::Allocator(AllocatorAddressInfo* addrInfo_, ContextManager* contextManager_, BlockManager* blockManager_,
+    WBStripeManager* wbStripeManager_, IArrayInfo* info_, IStateControl* iState_)
+: VolumeEvent("Allocator", info_->GetName()),
+  addrInfo(addrInfo_),
+  contextManager(contextManager_),
+  blockManager(blockManager_),
+  wbStripeManager(wbStripeManager_),
   isInitialized(false),
-  iArrayInfo(info),
-  iStateControl(iState)
+  iArrayInfo(info_),
+  iStateControl(iState_)
+{
+}
+
+Allocator::Allocator(IArrayInfo* info, IStateControl* iState)
+: Allocator(nullptr, nullptr, nullptr, nullptr, info, iState)
 {
     VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, info->GetName());
     _CreateSubmodules();
@@ -216,9 +222,15 @@ Allocator::SetUrgentThreshold(uint32_t inputThreshold)
 }
 
 int
-Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname)
+Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file)
 {
     MetaFileIntf* dumpFile = new MockFileIntf(fname, iArrayInfo->GetName());
+    if (file != nullptr)
+    {
+        delete dumpFile;
+        dumpFile = file;
+    }
+
     int ret = dumpFile->Create(0);
     if (ret < 0)
     {
@@ -232,12 +244,12 @@ Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname)
     {
         uint32_t len = sizeof(uint32_t) * addrInfo->GetnumUserAreaSegments();
         char* buf = new char[len]();
-        contextManager->GetSegmentCtx()->CopySegmentInfoToBufferforWBT(type, buf);
+        SegmentCtx* segCtx = contextManager->GetSegmentCtx();
+        segCtx->CopySegmentInfoToBufferforWBT(type, buf);
         ret = dumpFile->IssueIO(MetaFsIoOpcode::Write, 0, len, buf);
         if (ret < 0)
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "WBT Sync Write(SegmentInfo) to {} Failed, ret:{}", fname, ret);
-            delete[] buf;
             ret = -EID(ALLOCATOR_META_ARCHIVE_STORE);
         }
         delete[] buf;
@@ -249,12 +261,14 @@ Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname)
             POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "WBT wrong alloctor meta type, type:{}", type);
             ret = -EID(ALLOCATOR_META_ARCHIVE_STORE);
         }
-
-        ret = dumpFile->AppendIO(MetaFsIoOpcode::Write, curOffset, contextManager->GetContextSectionSize(ALLOCATOR_CTX, type + 1), contextManager->GetContextSectionAddr(ALLOCATOR_CTX, type + 1));
-        if (ret < 0)
+        else
         {
-            POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "WBT Sync Write(allocatorCtx) to {} Failed, ret:{}", fname, ret);
-            ret = -EID(ALLOCATOR_META_ARCHIVE_STORE);
+            ret = dumpFile->AppendIO(MetaFsIoOpcode::Write, curOffset, contextManager->GetContextSectionSize(ALLOCATOR_CTX, type + 1), contextManager->GetContextSectionAddr(ALLOCATOR_CTX, type + 1));
+            if (ret < 0)
+            {
+                POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "WBT Sync Write(allocatorCtx) to {} Failed, ret:{}", fname, ret);
+                ret = -EID(ALLOCATOR_META_ARCHIVE_STORE);
+            }
         }
     }
 
@@ -264,9 +278,15 @@ Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname)
 }
 
 int
-Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname)
+Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file)
 {
     MetaFileIntf* fileProvided = new MockFileIntf(fname, iArrayInfo->GetName());
+    if (file != nullptr)
+    {
+        delete fileProvided;
+        fileProvided = file;
+    }
+
     int ret = 0;
     fileProvided->Open();
     uint64_t curOffset = 0;
@@ -278,10 +298,13 @@ Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname)
         if (ret < 0)
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_LOAD), "WBT Sync Read(SegmentInfo) from {} Failed, ret:{}", fname, ret);
-            delete[] buf;
             ret = -EID(ALLOCATOR_META_ARCHIVE_LOAD);
         }
-        contextManager->GetSegmentCtx()->CopySegmentInfoFromBufferforWBT(type, buf);
+        else
+        {
+            SegmentCtx* segCtx = contextManager->GetSegmentCtx();
+            segCtx->CopySegmentInfoFromBufferforWBT(type, buf);
+        }
         delete[] buf;
     }
     else
@@ -290,13 +313,25 @@ Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname)
         {
             uint32_t numBitsSet = 0;
             ret = fileProvided->AppendIO(MetaFsIoOpcode::Read, curOffset, sizeof(numBitsSet), (char*)&numBitsSet);
-            contextManager->GetWbStripeCtx()->SetAllocatedWbStripeCount(numBitsSet);
+            if (ret < 0)
+            {
+                POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_LOAD), "WBT Sync Read(wblsid bitmap) from {} Failed, ret:{}", fname, ret);
+                ret = -EID(ALLOCATOR_META_ARCHIVE_LOAD);
+            }
+            WbStripeCtx* wbCtx = contextManager->GetWbStripeCtx();
+            wbCtx->SetAllocatedWbStripeCount(numBitsSet);
         }
         else if (WBT_SEGMENT_BITMAP == type)
         {
             uint32_t numBitsSet = 0;
             ret = fileProvided->AppendIO(MetaFsIoOpcode::Read, curOffset, sizeof(numBitsSet), (char*)&numBitsSet);
-            contextManager->GetAllocatorCtx()->SetAllocatedSegmentCount(numBitsSet);
+            if (ret < 0)
+            {
+                POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_LOAD), "WBT Sync Read(segment bitmap) from {} Failed, ret:{}", fname, ret);
+                ret = -EID(ALLOCATOR_META_ARCHIVE_LOAD);
+            }
+            AllocatorCtx* allocCtx = contextManager->GetAllocatorCtx();
+            allocCtx->SetAllocatedSegmentCount(numBitsSet);
         }
         // ACTIVE_STRIPE_TAIL, CURRENT_SSD_LSID, SEGMENT_STATE
         else
@@ -320,15 +355,18 @@ Allocator::GetInstantMetaInfo(std::string fname)
 {
     std::ostringstream oss;
     std::ofstream ofs(fname, std::ofstream::app);
-
+    WbStripeCtx* wbCtx = contextManager->GetWbStripeCtx();
+    AllocatorCtx* allocCtx = contextManager->GetAllocatorCtx();
+    RebuildCtx* rebuildCtx = contextManager->GetRebuildCtx();
+    SegmentCtx* segCtx = contextManager->GetSegmentCtx();
     oss << "<< WriteBuffers >>" << std::endl;
-    oss << "Set:" << std::dec << contextManager->GetWbStripeCtx()->GetAllocatedWbStripeCount() << " / ToTal:" << contextManager->GetWbStripeCtx()->GetNumTotalWbStripe() << std::endl;
+    oss << "Set:" << std::dec << wbCtx->GetAllocatedWbStripeCount() << " / ToTal:" << wbCtx->GetNumTotalWbStripe() << std::endl;
     oss << "activeStripeTail[] Info" << std::endl;
     for (int volumeId = 0; volumeId < MAX_VOLUME_COUNT; ++volumeId)
     {
         for (int idx = volumeId; idx < ACTIVE_STRIPE_TAIL_ARRAYLEN; idx += MAX_VOLUME_COUNT)
         {
-            VirtualBlkAddr asTail = contextManager->GetWbStripeCtx()->GetActiveStripeTail(idx);
+            VirtualBlkAddr asTail = wbCtx->GetActiveStripeTail(idx);
             oss << "Idx:" << std::dec << idx << " stripeId:0x" << std::hex << asTail.stripeId << " offset:0x" << asTail.offset << "  ";
         }
         oss << std::endl;
@@ -336,26 +374,26 @@ Allocator::GetInstantMetaInfo(std::string fname)
     oss << std::endl;
 
     oss << "<< Segments >>" << std::endl;
-    oss << "Set:" << std::dec << contextManager->GetAllocatorCtx()->GetAllocatedSegmentCount() << " / ToTal:" << contextManager->GetAllocatorCtx()->GetTotalSegmentsCount() << std::endl;
-    oss << "currentSsdLsid: " << contextManager->GetAllocatorCtx()->GetCurrentSsdLsid() << std::endl;
+    oss << "Set:" << std::dec << allocCtx->GetAllocatedSegmentCount() << " / ToTal:" << allocCtx->GetTotalSegmentsCount() << std::endl;
+    oss << "currentSsdLsid: " << allocCtx->GetCurrentSsdLsid() << std::endl;
     for (uint32_t segmentId = 0; segmentId < addrInfo->GetnumUserAreaSegments(); ++segmentId)
     {
-        SegmentState state = contextManager->GetAllocatorCtx()->GetSegmentState(segmentId, false);
+        SegmentState state = allocCtx->GetSegmentState(segmentId, false);
         if ((segmentId > 0) && (segmentId % 4 == 0))
         {
             oss << std::endl;
         }
-        oss << "SegmentId:" << segmentId << " state:" << static_cast<int>(state) << " ValidBlockCnt:" << contextManager->GetSegmentCtx()->GetValidBlockCount(segmentId) << "  ";
+        oss << "SegmentId:" << segmentId << " state:" << static_cast<int>(state) << " ValidBlockCnt:" << segCtx->GetValidBlockCount(segmentId) << "  ";
     }
     oss << std::endl
         << std::endl;
 
     oss << "<< Rebuild >>" << std::endl;
     oss << "NeedRebuildCont:" << std::boolalpha << contextManager->NeedRebuildAgain() << std::endl;
-    oss << "TargetSegmentCount:" << contextManager->GetRebuldCtx()->GetTargetSegmentCnt() << std::endl;
+    oss << "TargetSegmentCount:" << rebuildCtx->GetTargetSegmentCnt() << std::endl;
     oss << "TargetSegnent ID" << std::endl;
     int cnt = 0;
-    for (RTSegmentIter iter = contextManager->GetRebuldCtx()->RebuildTargetSegmentsBegin(); iter != contextManager->GetRebuldCtx()->RebuildTargetSegmentsEnd(); ++iter, ++cnt)
+    for (RTSegmentIter iter = rebuildCtx->RebuildTargetSegmentsBegin(); iter != rebuildCtx->RebuildTargetSegmentsEnd(); ++iter, ++cnt)
     {
         if (cnt > 0 && (cnt % 16 == 0))
         {

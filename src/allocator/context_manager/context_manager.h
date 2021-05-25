@@ -61,8 +61,8 @@ public:
                                ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_);
     ContextManager(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~ContextManager(void);
-    void Init(void);
-    void Close(void);
+    virtual void Init(void);
+    virtual void Close(void);
 
     virtual int FlushContextsSync(void);
     virtual int FlushContextsAsync(EventSmartPtr callback);
@@ -77,18 +77,18 @@ public:
     virtual int GetGcThreshold(CurrentGcMode mode);
     virtual uint64_t GetStoredContextVersion(int owner);
 
-    void FreeUserDataSegment(SegmentId segId);
-    int SetNextSsdLsid(void);
-    char* GetContextSectionAddr(int owner, int section);
-    int GetContextSectionSize(int owner, int section);
+    virtual void FreeUserDataSegment(SegmentId segId);
+    virtual int SetNextSsdLsid(void);
+    virtual char* GetContextSectionAddr(int owner, int section);
+    virtual int GetContextSectionSize(int owner, int section);
 
-    RebuildCtx* GetRebuldCtx(void) { return rebuildCtx; }
-    SegmentCtx* GetSegmentCtx(void) { return segmentCtx; }
-    AllocatorCtx* GetAllocatorCtx(void) { return allocatorCtx; }
-    WbStripeCtx* GetWbStripeCtx(void) { return wbStripeCtx; }
-    ContextReplayer* GetContextReplayer(void) { return contextReplayer; }
-    GcCtx* GetGcCtx(void) { return &gcCtx; }
-    std::mutex& GetCtxLock(void) { return ctxLock; }
+    virtual RebuildCtx* GetRebuildCtx(void) { return rebuildCtx; }
+    virtual SegmentCtx* GetSegmentCtx(void) { return segmentCtx; }
+    virtual AllocatorCtx* GetAllocatorCtx(void) { return allocatorCtx; }
+    virtual WbStripeCtx* GetWbStripeCtx(void) { return wbStripeCtx; }
+    virtual ContextReplayer* GetContextReplayer(void) { return contextReplayer; }
+    virtual GcCtx* GetGcCtx(void) { return &gcCtx; }
+    virtual std::mutex& GetCtxLock(void) { return ctxLock; }
 
     void TestCallbackFunc(AsyncMetaFileIoCtx* ctx, int numIssuedIo);
     void SetCallbackFunc(EventSmartPtr callback);

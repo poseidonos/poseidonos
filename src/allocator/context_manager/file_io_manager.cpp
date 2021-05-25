@@ -39,6 +39,17 @@
 
 namespace pos
 {
+AllocatorFileIoManager::AllocatorFileIoManager(MetaFileIntf** fileIntf, AllocatorAddressInfo* info, std::string arrayName)
+: addrInfo(info),
+  arrayName(arrayName)
+{
+    for (int file = 0; file < NUM_FILES; file++)
+    {
+        ctxFile[file] = fileIntf[file]; // for UT
+        fileSize[file] = 0;
+        numSections[file] = 0;
+    }
+}
 AllocatorFileIoManager::AllocatorFileIoManager(AllocatorAddressInfo* info, std::string arrayName)
 : addrInfo(info),
   arrayName(arrayName)
@@ -99,23 +110,30 @@ AllocatorFileIoManager::LoadSync(int owner, char* buf)
     if (ctxFile[owner]->DoesFileExist() == false)
     {
         int ret = ctxFile[owner]->Create(fileSize[owner]);
-        if (ret != 0)
+        if (ret == 0)
+        {
+            ctxFile[owner]->Open();
+            return 0;
+        }
+        else
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "Failed to create file:{}, size:{}", ctxFileName[owner], fileSize[owner]);
+            return -1;
         }
-        ctxFile[owner]->Open();
-        return 0;
     }
     else
     {
         ctxFile[owner]->Open();
         int ret = ctxFile[owner]->IssueIO(MetaFsIoOpcode::Read, 0, fileSize[owner], buf);
-        if (ret != 0)
+        if (ret == 0)
+        {
+            return 1;
+        }
+        else
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "Failed to Load file:{}, size:{}", ctxFileName[owner], fileSize[owner]);
             return -1;
         }
-        return 1;
     }
 }
 

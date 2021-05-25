@@ -40,14 +40,14 @@
 #include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/include/branch_prediction.h"
 #include "src/io/backend_io/flush_read_submission.h"
+#include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/qos/qos_manager.h"
 #include "src/spdk_wrapper/free_buffer_pool.h"
-#include "src/logger/logger.h"
 
 namespace pos
 {
-WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName)
+WBStripeManager::WBStripeManager(WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName)
 : stripeBufferPool(nullptr),
   pendingFullStripes(nullptr),
   iStripeMap(nullptr),
@@ -55,6 +55,12 @@ WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctx
   contextManager(ctxMgr),
   blockManager(blkMgr),
   arrayName(arrayName)
+{
+    wbStripeCtx = wbCtx;
+}
+
+WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName)
+: WBStripeManager(nullptr, info, ctxMgr, blkMgr, arrayName)
 {
     wbStripeCtx = ctxMgr->GetWbStripeCtx();
 }
@@ -330,7 +336,7 @@ WBStripeManager::StopRebuilding(void)
     std::unique_lock<std::mutex> lock(contextManager->GetCtxLock());
     POS_TRACE_INFO(EID(ALLOCATOR_START), "@StopRebuilding");
 
-    RebuildCtx* rbCtx = contextManager->GetRebuldCtx();
+    RebuildCtx* rbCtx = contextManager->GetRebuildCtx();
     if (rbCtx->GetTargetSegmentCnt() == 0)
     {
         POS_TRACE_INFO(EID(ALLOCATOR_REBUILD_TARGET_SET_EMPTY), "Rebuild was already done or not happen");
@@ -356,7 +362,7 @@ int
 WBStripeManager::_MakeRebuildTarget(void)
 {
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@MakeRebuildTarget()");
-    RebuildCtx* rbCtx = contextManager->GetRebuldCtx();
+    RebuildCtx* rbCtx = contextManager->GetRebuildCtx();
     AllocatorCtx* allocCtx = contextManager->GetAllocatorCtx();
 
     if (rbCtx->IsRebuidTargetSegmentsEmpty() == false)
@@ -397,7 +403,7 @@ int
 WBStripeManager::_FlushOnlineStripes(std::vector<StripeId>& vsidToCheckFlushDone)
 {
     // Flush Online Stripes Beyond Target Segment
-    RebuildCtx* rbCtx = contextManager->GetRebuldCtx();
+    RebuildCtx* rbCtx = contextManager->GetRebuildCtx();
 
     for (auto it = rbCtx->RebuildTargetSegmentsBegin(); it != rbCtx->RebuildTargetSegmentsEnd(); ++it)
     {

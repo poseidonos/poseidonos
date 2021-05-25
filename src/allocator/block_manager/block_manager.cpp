@@ -39,18 +39,26 @@
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/include/branch_prediction.h"
+#include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/qos/qos_manager.h"
-#include "src/logger/logger.h"
 
 namespace pos
 {
-BlockManager::BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName)
+BlockManager::BlockManager(SegmentCtx* segCtx_, AllocatorCtx* allocCtx_, WbStripeCtx* wbCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName)
 : userBlkAllocProhibited(false),
   addrInfo(info),
   contextManager(ctxMgr),
   iWBStripeInternal(nullptr),
   arrayName(arrayName)
+{
+    segCtx = segCtx_;
+    allocCtx = allocCtx_;
+    wbStripeCtx = wbCtx_;
+}
+
+BlockManager::BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName)
+: BlockManager(nullptr, nullptr, nullptr, info, contextManager, arrayName)
 {
     segCtx = contextManager->GetSegmentCtx();
     allocCtx = contextManager->GetAllocatorCtx();
@@ -273,7 +281,7 @@ StripeId
 BlockManager::_AllocateUserDataStripeIdInternal(bool isUserStripeAlloc)
 {
     std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
-    RebuildCtx* rbCtx = contextManager->GetRebuldCtx();
+    RebuildCtx* rbCtx = contextManager->GetRebuildCtx();
 
     StripeId ssdLsid = allocCtx->UpdatePrevLsid();
 

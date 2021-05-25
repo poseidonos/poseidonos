@@ -38,13 +38,14 @@
 
 namespace pos
 {
+class MetaFileIntf;
 class IAllocatorWbt
 {
 public:
     virtual void SetGcThreshold(uint32_t inputThreshold) = 0;
     virtual void SetUrgentThreshold(uint32_t inputThreshold) = 0;
-    virtual int GetMeta(WBTAllocatorMetaType type, std::string fname) = 0;
-    virtual int SetMeta(WBTAllocatorMetaType type, std::string fname) = 0;
+    virtual int GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file = nullptr) = 0;
+    virtual int SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file = nullptr) = 0;
     virtual int GetBitmapLayout(std::string fname) = 0;
     virtual int GetInstantMetaInfo(std::string fname) = 0;
     virtual void FlushAllUserdataWBT(void) = 0;

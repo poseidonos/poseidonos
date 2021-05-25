@@ -20,6 +20,11 @@ public:
     MOCK_METHOD(int, CheckIoDoneStatus, (void* data), (override));
     MOCK_METHOD(int, Open, (), (override));
     MOCK_METHOD(int, Close, (), (override));
+    MOCK_METHOD(bool, IsOpened, (), (override));
+    MOCK_METHOD(int, GetFd, (), (override));
+    MOCK_METHOD(std::string, GetFileName, (), (override));
+    MOCK_METHOD(int, IssueIO, (MetaFsIoOpcode opType, uint64_t fileOffset, uint64_t length, char* buffer), (override));
+    MOCK_METHOD(int, AppendIO, (MetaFsIoOpcode opType, uint64_t& offset, uint64_t length, char* buffer), (override));
     MOCK_METHOD(int, _Read, (int fd, uint64_t fileOffset, uint64_t length, char* buffer), (override));
     MOCK_METHOD(int, _Write, (int fd, uint64_t fileOffset, uint64_t length, char* buffer), (override));
 };

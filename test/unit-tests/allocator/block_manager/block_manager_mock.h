@@ -12,6 +12,7 @@ class MockBlockManager : public BlockManager
 {
 public:
     using BlockManager::BlockManager;
+    MOCK_METHOD(void, Init, (IWBStripeInternal * iwbstripeInternal), (override));
     MOCK_METHOD(VirtualBlks, AllocateWriteBufferBlks, (uint32_t volumeId, uint32_t numBlks, bool forGC), (override));
     MOCK_METHOD(void, InvalidateBlks, (VirtualBlks blks), (override));
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
@@ -19,6 +20,8 @@ public:
     MOCK_METHOD(void, PermitUserBlkAlloc, (), (override));
     MOCK_METHOD(bool, BlockAllocating, (uint32_t volumeId), (override));
     MOCK_METHOD(void, UnblockAllocating, (uint32_t volumeId), (override));
+    MOCK_METHOD(void, TurnOffBlkAllocation, (), (override));
+    MOCK_METHOD(void, TurnOnBlkAllocation, (), (override));
 };
 
 } // namespace pos

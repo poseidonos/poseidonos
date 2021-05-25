@@ -1,5 +1,5 @@
 #include "src/allocator_service/allocator_service.h"
-
+#include "test/unit-tests/allocator/i_allocator_wbt_mock.h"
 #include <gtest/gtest.h>
 
 namespace pos
@@ -24,24 +24,16 @@ TEST(AllocatorService, GetIWBStripeAllocator_)
 {
 }
 
-TEST(AllocatorService, GetIWBStripeCtx_)
+TEST(AllocatorService, GetIContextReplayer_TestSimpleGetter)
 {
+    AllocatorService allocService;
+    allocService.GetIContextReplayer("");
 }
 
-TEST(AllocatorService, GetISegmentCtx_)
+TEST(AllocatorService, GetIAllocatorWbt_TestSimpleGetter)
 {
-}
-
-TEST(AllocatorService, GetIRebuildCtx_)
-{
-}
-
-TEST(AllocatorService, GetIAllocatorCtx_)
-{
-}
-
-TEST(AllocatorService, GetIAllocatorWbt_)
-{
+    AllocatorService allocService;
+    allocService.GetIAllocatorWbt("");
 }
 
 } // namespace pos

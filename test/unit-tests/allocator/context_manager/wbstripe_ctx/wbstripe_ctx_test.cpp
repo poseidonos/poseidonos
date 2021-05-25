@@ -68,9 +68,11 @@ TEST(WbStripeCtx, GetSectionAddr_TestSimpleGetter)
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
     WbStripeCtx wbstripeCtx(allocBitmap, nullptr);
 
-    // when
+    // when 1.
     char* ret = wbstripeCtx.GetSectionAddr(AC_ALLOCATE_WBLSID_BITMAP);
 
+    // when 2.
+    ret = wbstripeCtx.GetSectionAddr(AC_ACTIVE_STRIPE_TAIL);
     delete allocBitmap;
 }
 
@@ -150,7 +152,6 @@ TEST(WbStripeCtx, GetAllocatedWbStripeCount_TestSimpleGetter)
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
     WbStripeCtx wbstripeCtx(allocBitmap, nullptr);
-    ;
 
     EXPECT_CALL(*allocBitmap, GetNumBitsSet).WillOnce(Return(50));
 
@@ -227,6 +228,104 @@ TEST(WbStripeCtx, SetActiveStripeTail_TestSetDataAndCheckData)
         EXPECT_EQ(i, vsa.stripeId);
     }
 
+    delete allocBitmap;
+}
+
+TEST(WbStripeCtx, Init_TestInitAndClose)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetnumWbStripes(10);
+    WbStripeCtx wbstripeCtx(&addrInfo);
+
+    // when
+    wbstripeCtx.Init();
+    // then
+    for (int i = 0; i < 10; i++)
+    {
+        VirtualBlkAddr vsa = wbstripeCtx.GetActiveStripeTail(i);
+        EXPECT_EQ(vsa, UNMAP_VSA);
+    }
+    wbstripeCtx.Close();
+}
+
+TEST(WbStripeCtx, GetActiveStripeTailLock_TestSimpleGetter)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetnumWbStripes(10);
+    WbStripeCtx wbstripeCtx(&addrInfo);
+
+    // when
+    std::mutex& m = wbstripeCtx.GetActiveStripeTailLock(0);
+}
+
+TEST(WbStripeCtx, GetAllActiveStripeTail_TestSimpleGetter)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetnumWbStripes(10);
+    WbStripeCtx wbstripeCtx(&addrInfo);
+
+    for (int i = 0; i < 10; i++)
+    {
+        VirtualBlkAddr vsa;
+        vsa.stripeId = i;
+        vsa.offset = i;
+        wbstripeCtx.SetActiveStripeTail(i, vsa);
+    }
+
+    // when
+    int cnt = 0;
+    std::vector<VirtualBlkAddr> ret = wbstripeCtx.GetAllActiveStripeTail();
+    // then
+    for (auto i = ret.begin(); cnt < 10; i++, cnt++)
+    {
+        EXPECT_EQ(cnt, i->stripeId);
+        EXPECT_EQ(cnt, i->offset);
+    }
+}
+
+TEST(WbStripeCtx, GetAllocWbLsidBitmapLock_TestSimpleGetter)
+{
+    // given
+    NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
+    WbStripeCtx wbstripeCtx(allocBitmap, nullptr);
+    std::mutex m;
+    EXPECT_CALL(*allocBitmap, GetLock).WillOnce(ReturnRef(m));
+    // when
+    wbstripeCtx.GetAllocWbLsidBitmapLock();
+    delete allocBitmap;
+}
+
+TEST(WbStripeCtx, FinalizeIo_TestSimpleCall)
+{
+    // given
+    NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
+    WbStripeCtx wbstripeCtx(allocBitmap, nullptr);
+
+    // when
+    wbstripeCtx.FinalizeIo(nullptr);
+    delete allocBitmap;
+}
+
+TEST(WbStripeCtx, GetStoredVersion_TestSimpleGetter)
+{
+    // given
+    NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
+    WbStripeCtx wbstripeCtx(allocBitmap, nullptr);
+    // when
+    wbstripeCtx.GetStoredVersion();
+    delete allocBitmap;
+}
+
+TEST(WbStripeCtx, ResetStoredVersion_TestSimpleCaller)
+{
+    // given
+    NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
+    WbStripeCtx wbstripeCtx(allocBitmap, nullptr);
+    // when
+    wbstripeCtx.ResetDirtyVersion();
     delete allocBitmap;
 }
 

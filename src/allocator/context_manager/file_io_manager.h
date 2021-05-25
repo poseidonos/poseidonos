@@ -59,6 +59,7 @@ class AllocatorFileIoManager
     };
 
 public:
+    AllocatorFileIoManager(MetaFileIntf** file, AllocatorAddressInfo* info, std::string arrayName);
     AllocatorFileIoManager(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~AllocatorFileIoManager(void);
     virtual void Init(void);
