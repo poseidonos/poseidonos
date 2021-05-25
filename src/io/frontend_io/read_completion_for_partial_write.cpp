@@ -47,12 +47,13 @@ namespace pos
 
 ReadCompletionForPartialWrite::ReadCompletionForPartialWrite(
     VolumeIoSmartPtr volumeIo, uint32_t alignmentSize, uint32_t alignmentOffset,
-    IWBStripeAllocator* inputIWBStripeAllocator)
+    IWBStripeAllocator* inputIWBStripeAllocator, bool tested)
 : Callback(true),
   volumeIo(volumeIo),
   alignmentSize(alignmentSize),
   alignmentOffset(alignmentOffset),
-  iWBStripeAllocator(inputIWBStripeAllocator)
+  iWBStripeAllocator(inputIWBStripeAllocator),
+  tested(tested)
 {
     if (likely(iWBStripeAllocator == nullptr))
     {
@@ -146,7 +147,11 @@ ReadCompletionForPartialWrite::_Copy(VolumeIoSmartPtr srcVolumeIo,
 {
     void* src = srcVolumeIo->GetBuffer(0, ChangeByteToSector(srcOffset));
     void* dst = dstVolumeIo->GetBuffer(0, ChangeByteToSector(dstOffset));
-    CopyParameter* copyParam = new CopyParameter(dstVolumeIo, nullptr);
+    CopyParameter* copyParam = nullptr;
+    if (tested == false)
+    {
+        copyParam = new CopyParameter(dstVolumeIo, nullptr);
+    }
     AccelEngineApi::SubmitCopy(dst, src, size, HandleCopyDone, copyParam);
 }
 
