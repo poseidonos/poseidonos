@@ -13,7 +13,7 @@ test_rev=0
 texecc()
 {
     echo "[target]" $@;
-    sshpass -p bamboo ssh -tt root@${target_ip} "cd ${ibof_root}; sudo $@"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${ibof_root}; sudo $@"
 }
 
 printVariable()
@@ -54,14 +54,14 @@ build_setup()
 
 exec_test()
 {
-    sshpass -p bamboo ssh -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo ./${test_name}_ci_test.sh -f ${target_fabric_ip}"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo ./${test_name}_ci_test.sh -f ${target_fabric_ip}"
     if [ $? -eq 0 ];
     then
         echo "$test_name test Success"
-        sshpass -p bamboo ssh -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo echo 0 > ${test_name}test"
+        sshpass -p bamboo ssh -q -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo echo 0 > ${test_name}test"
     else
         echo "\033[1;41m$test_name test Failed\033[0m" 1>&2
-        sshpass -p bamboo ssh -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo echo 1 > ${test_name}test"
+        sshpass -p bamboo ssh -q -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo echo 1 > ${test_name}test"
     fi
 }
 

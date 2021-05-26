@@ -33,7 +33,7 @@ printInfo()
 texecc()
 {
     echo "[target]" $@;
-    sshpass -p bamboo ssh -tt root@${target_ip} "cd ${ibof_root}; sudo $@"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${ibof_root}; sudo $@"
 }
 
 newline()
@@ -86,7 +86,13 @@ cleanServer()
     cat $result_file
 }
 
+network_module_check()
+{
+    texecc /home/ibof/ibofos/test/regression/network_module_check.sh
+}
+
 setup
 printInfo
 processKill
 cleanServer
+network_module_check

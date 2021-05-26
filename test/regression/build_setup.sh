@@ -11,7 +11,7 @@ test_rev=0
 texecc()
 {
     echo "[target]" $@;
-    sshpass -p bamboo ssh -tt root@${target_ip} "cd ${ibof_root}; sudo $@"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${ibof_root}; sudo $@"
 }
 
 printVariable()
@@ -63,11 +63,11 @@ buildTest()
     texecc ./lib/build_ibof_lib.sh clean_ci
     texecc ./lib/build_ibof_lib.sh perf_ci
     
-    sshpass -p bamboo ssh -tt root@${target_ip} [[ -f $ibof_bin/ibofos_${test_rev} ]]
+    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -f $ibof_bin/ibofos_${test_rev} ]]
 
     if [ $? -eq 0 ];
     then
-        sshpass -p bamboo ssh -tt root@${target_ip} "cp $ibof_bin/ibofos_${test_rev} $ibof_root/bin/poseidonos"
+        sshpass -p bamboo ssh -q -tt root@${target_ip} "cp $ibof_bin/ibofos_${test_rev} $ibof_root/bin/poseidonos"
         texecc $ibof_root/tool/cli/script/build_cli.sh
         texecc cp $ibof_root/tool/cli/bin/cli $ibof_root/bin
         echo "Binary Copied"
@@ -93,11 +93,11 @@ buildTest()
     texecc make install
     texecc make udev_install
 
-    sshpass -p bamboo ssh -tt root@${target_ip} [[ -f $ibof_root/bin/poseidonos ]]
+    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -f $ibof_root/bin/poseidonos ]]
     if [ $? -eq 0 ]
     then
         echo "Build Success"
-        sshpass -p bamboo ssh -tt root@${target_ip} [[ ! -d $ibof_bin ]]
+        sshpass -p bamboo ssh -q -tt root@${target_ip} [[ ! -d $ibof_bin ]]
         if [ $? -eq 0 ]
         then
             texecc mkdir -p $ibof_bin

@@ -41,9 +41,6 @@ EOF
 }
 
 #---------------------------------
-# Default configuration (if specific option not given)
-manual_pos_run_mode=0
-#---------------------------------
 # manual configuration (edit below according to yours)
 pos_phy_volume_size_mb=102400
 test_volume_size_mb=102400
@@ -176,16 +173,10 @@ start_pos()
 {
     echo 1 > /sys/bus/pci/rescan
     sleep 1
-	rm -rf /dev/shm/ibof_nvmf_trace.pid*
-	echo "PoseidonOS starting..."
+	rm -rf /dev/shm/pos_nvmf_trace.pid*
 
-    if [ ${manual_pos_run_mode} -eq 1 ]; then
-        notice "Please start PoseidonOS application now..."
-        wait_any_keyboard_input
-    else 
-        notice "Starting poseidonos..."
-        ${root_dir}/test/regression/start_poseidonos.sh
-    fi
+    notice "Starting poseidonos..."
+    ${root_dir}/test/regression/start_poseidonos.sh
 
 	result=`${root_dir}/bin/cli system info --json | jq '.Response.info.version' 2>/dev/null`
 	while [ -z ${result} ] || [ ${result} == '""' ];
@@ -590,8 +581,6 @@ check_permission
 while getopts "t:i:hx:d:m:f:i:" opt
 do
     case "$opt" in
-        m) manual_pos_run_mode=1
-            ;;
         h) print_help
             ;;
         f) target_fabric_ip="$OPTARG"
@@ -621,4 +610,4 @@ prepare_write_file
 run_iter
 clean_up
 
-echo -e "\n\033[1;32m Fault-Tolerance test has been successfully finished! Congrats! \033[0m"
+echo -e "\n\033[1;32m Fault-Tolerance test has been finished! \033[0m"

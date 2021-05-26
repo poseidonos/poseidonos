@@ -257,7 +257,7 @@ texecc(){
      case ${EXEC_MODE} in
      0) # default test
          echo "[target]" $@;
-         sshpass -p $TARGET_PWD ssh -tt -o StrictHostKeyChecking=no $TARGET_USERNAME@$TARGET_SYSTEM_IP "cd ${TARGET_ROOT_DIR}; sudo $@"
+         sshpass -p $TARGET_PWD ssh -q -tt -o StrictHostKeyChecking=no $TARGET_USERNAME@$TARGET_SYSTEM_IP "cd ${TARGET_ROOT_DIR}; sudo $@"
          ;;
      1) # echo command
          echo "[target]" $@;

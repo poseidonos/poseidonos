@@ -6,8 +6,8 @@
 # modified:   ../test/system/network/network_config.sh
 
 # change working directory to where script exists
-IBOFOS_ROOT=$(readlink -f $(dirname $0))/../..
-cd ${IBOFOS_ROOT}
+POS_ROOT=$(readlink -f $(dirname $0))/../..
+cd ${POS_ROOT}
 
 print_help()
 {
@@ -24,7 +24,7 @@ EOF
 
 # manual configuration (edit below according to yours)
 exec_mode=0
-ibof_phy_volume_size_mb=102400
+pos_phy_volume_size_mb=102400
 test_volume_size_mb=102400
 max_io_range_mb=1024 #128
 cwd="/home/ibof/ibofos/script"
@@ -40,15 +40,17 @@ nvme_cli="nvme"
 uram_backup_dir="/etc/uram_backup"
 #---------------------------------
 # internal configuration
-target_nvme=""
+target_nvme_0=""
+target_nvme_1=""
 volname="Volume0"
 #io_size_kb_list=(4 8 16 32 64 128 256) #KB
 io_size_kb_list=(64 128 256) #KB
-spdk_rpc_script="${IBOFOS_ROOT}/lib/spdk/scripts/rpc.py"
+spdk_rpc_script="${POS_ROOT}/lib/spdk/scripts/rpc.py"
 spdk_nvmf_tgt="../lib/spdk/app/nvmf_tgt/nvmf_tgt"
-nss="nqn.2019-04.pos:subsystem1"
+nss1="nqn.2019-04.pos:subsystem1"
+nss2="nqn.2019-04.pos:subsystem2"
 echo_slient=1
-logfile="/var/log/ibofos/multi_array_bringup.log"
+logfile="/var/log/pos/multi_array_bringup.log"
 #---------------------------------
 MBtoB=$((1024*1024))
 GBtoB=$((1024*${MBtoB}))
@@ -60,10 +62,10 @@ texecc()
         $@
         ;;
     1) # over-fabric test
-        sshpass -p seb ssh -tt root@${target_ip} "cd ${cwd}; sudo $@"
+        sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${cwd}; sudo $@"
         ;;
     2) # script verification test
-        info "sshpass -p seb ssh -tt root@${target_ip} \"cd ${cwd}; sudo $@\""
+        info "sshpass -p bamboo ssh -q -tt root@${target_ip} \"cd ${cwd}; sudo $@\""
         ;;
     esac
 }
@@ -84,14 +86,14 @@ iexecc()
     
 }
 
-ibof_phy_volume_size_byte=$((${ibof_phy_volume_size_mb}*${MBtoB}))
+pos_phy_volume_size_byte=$((${pos_phy_volume_size_mb}*${MBtoB}))
 test_volume_size_byte=$((${test_volume_size_mb}*${MBtoB}))
 max_io_range_byte=$((${max_io_range_mb}*${MBtoB}))
 max_io_boundary_byte=$((${test_volume_size_byte} - ${max_io_range_byte}))
 #---------------------------------
 network_module_check()
 {
-    texecc ${IBOFOS_ROOT}/test/regression/network_module_check.sh
+    texecc ${POS_ROOT}/test/regression/network_module_check.sh
 }
 
 check_env()
@@ -149,13 +151,13 @@ check_stopped()
 	done
 }
 
-kill_ibofos()
+kill_poseidonos()
 {
     # kill poseidonos if exists
-    texecc ${IBOFOS_ROOT}/test/script/kill_poseidonos.sh 2>> ${logfile}
+    texecc ${POS_ROOT}/test/script/kill_poseidonos.sh 2>> ${logfile}
 	check_stopped
 
-    echo "iBoFOS killed"
+    echo "poseidonOS killed"
 }
 
 clean_up()
@@ -164,31 +166,25 @@ clean_up()
 
     disconnect_nvmf_contollers;
     
-    kill_ibofos;
+    kill_poseidonos;
     rm -rf ${logfile}
-    rm -rf ibofos.log
+    rm -rf pos.log
 
     umount ${uram_backup_dir}
 }
 
-start_ibofos()
+start_poseidonos()
 {
-	texecc rm -rf /dev/shm/ibof_nvmf_trace.pid*
-	echo "iBoFOS starting..."
+	texecc rm -rf /dev/shm/pos_nvmf_trace.pid*
 
-    if [ ${manual_ibofos_run_mode} -eq 1 ]; then
-        notice "Please start iBoFOS application now..."
-        #wait_any_keyboard_input
-    else 
-        notice "Starting poseidonos..."
-        texecc ${IBOFOS_ROOT}/test/regression/start_poseidonos.sh
-    fi
+    notice "Starting poseidonos..."
+    texecc ${POS_ROOT}/test/regression/start_poseidonos.sh
 
-	result=`texecc "${IBOFOS_ROOT}/bin/cli system info --json" | jq '.Response.data.version' 2>/dev/null`
+	result=`texecc "${POS_ROOT}/bin/cli system info --json" | jq '.Response.data.version' 2>/dev/null`
 	while [ -z ${result} ] || [ ${result} == '""' ];
 	do
 		echo "Wait iBoFOS..."
-		result=`texecc "${IBOFOS_ROOT}/bin/cli system info --json" | jq '.Response.data.version' 2>/dev/null`
+		result=`texecc "${POS_ROOT}/bin/cli system info --json" | jq '.Response.data.version' 2>/dev/null`
 		echo $result
 		sleep 0.5
 	done
@@ -209,7 +205,8 @@ establish_nvmef_target()
         texecc ${spdk_rpc_script} nvmf_create_transport -t ${create_trtype} -b 64 -n 4096 #>> ${logfile}
     fi
 
-    texecc ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss} -t ${trtype} -a ${target_fabric_ip} -s ${port} #>> ${logfile}
+    texecc ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss1} -t ${trtype} -a ${target_fabric_ip} -s ${port} #>> ${logfile}
+    texecc ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss2} -t ${trtype} -a ${target_fabric_ip} -s ${port} #>> ${logfile}
 
     notice "New NVMe subsystem accessiable via Fabric has been added successfully to target!"
 }
@@ -221,19 +218,20 @@ discover_n_connect_nvme_from_initiator()
     notice "Discovery has been finished!"
     
     notice "Connecting remote NVMe drives..."
-    iexecc ${nvme_cli} connect -t ${trtype} -n ${nss} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
-    echo `sudo nvme list | grep -E 'SPDK|POS|pos'`
-    target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -1`
-    echo $target_nvme
-    #echo `sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -n 1`
-    #target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -n 1`
+    iexecc ${nvme_cli} connect -t ${trtype} -n ${nss1} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
+    iexecc ${nvme_cli} connect -t ${trtype} -n ${nss2} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
+    target_nvme_list=`sudo nvme list | grep -E 'SPDK|pos|POS' | awk '{print $1}'`
+    echo $target_nvme_list
+    target_nvme_0=`sudo nvme list | grep -E 'SPDK|pos|POS' | awk '{print $1}' | head -n 1`
+    target_nvme_1=`sudo nvme list | grep -E 'SPDK|pos|POS' | awk '{print $1}' | tail -n 1`
 
-    if [ ${exec_mode} -ne 2 ] && [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
+    if [[ "${target_nvme_0}" == "" ]] || [[ "${target_nvme_1}" == "" ]] ||
+        ! ls ${target_nvme_0} > /dev/null || ! ls ${target_nvme_1} > /dev/null ; then
         error "NVMe drive is not found..."
         exit 2
     fi
 
-    notice "Remote NVMe drive (${target_nvme}) have been connected via NVMe-oF!"
+    notice "Remote NVMe drive (${target_nvme_0}, ${target_nvme_1}) have been connected via NVMe-oF!"
 }
 
 disconnect_nvmf_contollers()
@@ -254,69 +252,70 @@ check_result_err_from_logfile()
 shutdown_ibofos()
 {
     notice "Shutting down poseidonos..."
-    texecc ${IBOFOS_ROOT}/bin/cli array unmount --name ${target_name_0}
-    texecc ${IBOFOS_ROOT}/bin/cli array unmount --name ${target_name_1}
-    texecc ${IBOFOS_ROOT}/bin/cli system exit
+    texecc ${POS_ROOT}/bin/cli array unmount --name ${target_name_0}
+    texecc ${POS_ROOT}/bin/cli array unmount --name ${target_name_1}
+    texecc ${POS_ROOT}/bin/cli system exit
     notice "Shutdown has been completed!"
 	check_stopped
 
     disconnect_nvmf_contollers;
 
-    #kill_ibofos
+    #kill_poseidonos
     #notice "poseidonos killed..."
     #texecc ./backup_latest_hugepages_for_uram.sh &>> ${logfile}
     #iexecc sleep 3
 }
 
-bringup_ibofos()
+bringup_poseidonos()
 {
-    local ibofos_volume_required=1
+     local pos_volume_required=1
 
     create_array=0
     if [ ! -z $1 ] && [ $1 == "create" ]; then
         create_array=1
     fi
 
-    #start_ibofos;
+    #start_poseidonos;
 
-    texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss} -a -s IBOF00000000000001  -d IBOF_VOLUME #>> ${logfile}
+    texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss1} -a -s POS00000000000001  -d POS_VOLUME -m 256 #>> ${logfile}
+    texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss2} -a -s POS00000000000002  -d POS_VOLUME -m 256 #>> ${logfile}
     texecc ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512
     sleep 5
     texecc ${spdk_rpc_script} bdev_malloc_create -b uram1 1024 512
 
-    texecc ${IBOFOS_ROOT}/bin/cli device scan >> ${logfile}
-    texecc ${IBOFOS_ROOT}/bin/cli device list >> ${logfile}
+    texecc ${POS_ROOT}/bin/cli device scan >> ${logfile}
+    texecc ${POS_ROOT}/bin/cli device list >> ${logfile}
 
 	if [ $create_array -eq 1 ]; then
-        texecc ${IBOFOS_ROOT}/bin/cli array reset
+        texecc ${POS_ROOT}/bin/cli array reset
         info "Target device list=${target_dev_list_0} , ${target_dev_list_1}"
-        texecc ${IBOFOS_ROOT}/bin/cli array create -b uram0 -d ${target_dev_list_0}  --name ${target_name_0}
-        texecc ${IBOFOS_ROOT}/bin/cli array create -b uram1 -d ${target_dev_list_1}  --name ${target_name_1}
+        texecc ${POS_ROOT}/bin/cli array create -b uram0 -d ${target_dev_list_0}  --name ${target_name_0}
+        texecc ${POS_ROOT}/bin/cli array create -b uram1 -d ${target_dev_list_1}  --name ${target_name_1}
         #check_result_err_from_logfile
 	fi
 	
-	texecc ${IBOFOS_ROOT}/bin/cli array mount --name ${target_name_0}
-	texecc ${IBOFOS_ROOT}/bin/cli array mount --name ${target_name_1}
+	texecc ${POS_ROOT}/bin/cli array mount --name ${target_name_0}
+	texecc ${POS_ROOT}/bin/cli array mount --name ${target_name_1}
 
 
-    if [ ${ibofos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
+    if [ ${pos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        texecc ${IBOFOS_ROOT}/bin/cli volume create --name ${volname} --size ${ibof_phy_volume_size_byte} --array ${target_name_0} >> ${logfile};
-        texecc ${IBOFOS_ROOT}/bin/cli volume create --name ${volname} --size ${ibof_phy_volume_size_byte} --array ${target_name_1} >> ${logfile};
+        texecc ${POS_ROOT}/bin/cli volume create --name ${volname} --size ${pos_phy_volume_size_byte} --array ${target_name_0} >> ${logfile};
+        texecc ${POS_ROOT}/bin/cli volume create --name ${volname} --size ${pos_phy_volume_size_byte} --array ${target_name_1} >> ${logfile};
         #check_result_err_from_logfile
     fi
 
-    if [ ${ibofos_volume_required} -eq 1 ]; then
+    if [ ${pos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
-        texecc ${IBOFOS_ROOT}/bin/cli volume mount --name ${volname} --array ${target_name_0} >> ${logfile};
-        texecc ${IBOFOS_ROOT}/bin/cli volume mount --name ${volname} --array ${target_name_1} >> ${logfile};
+        texecc ${POS_ROOT}/bin/cli volume mount --name ${volname} --array ${target_name_0} --subnqn ${nss1} >> ${logfile};
+        texecc ${POS_ROOT}/bin/cli volume mount --name ${volname} --array ${target_name_1} --subnqn ${nss2} >> ${logfile};
         #check_result_err_from_logfile
     fi
     
     establish_nvmef_target;
-    discover_n_connect_nvme_from_initiator;
+    #discover_n_connect_nvme_from_initiator;
     
-    notice "Bring-up iBoFOS done!"
+    notice "Bring-up poseidonOS done!"
 }
 
 date=
@@ -372,7 +371,7 @@ done
 #------------------------------------
 network_module_check
 setup_prerequisite
-bringup_ibofos create
+bringup_poseidonos create
 
-echo -e "\n\033[1;32m multi array bring up has been successfully finished! Congrats! \033[0m"
+echo -e "\n\033[1;32m multi array bring up has been finished! \033[0m"
 

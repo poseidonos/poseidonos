@@ -15,7 +15,7 @@ declare -a test_set_0=("volume" "npor" "multi_volume_io" "fault_tolerance" "spor
 texecc()
 {
     echo "[target]" $@;
-    sshpass -p bamboo ssh -tt root@${target_ip} "cd ${ibof_root}; sudo $@"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${ibof_root}; sudo $@"
 }
 
 clear_result()
@@ -42,14 +42,14 @@ execute_test_set_0()
 	for i in "${test_set_0[@]}"
 	do
 		echo "$i"
-		sshpass -p bamboo ssh -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo ./${i}_ci_test.sh -f ${target_fabric_ip}"
+		sshpass -p bamboo ssh -q -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo ./${i}_ci_test.sh -f ${target_fabric_ip}"
 		if [ $? -eq 0 ];
 		then
 			echo "$i test Success"
-			sshpass -p bamboo ssh -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo echo 0 > ${i}test"
+			sshpass -p bamboo ssh -q -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo echo 0 > ${i}test"
 		else
 			echo "\033[1;41m$i test Failed\033[0m" 1>&2
-			sshpass -p bamboo ssh -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo echo 1 > ${i}test"
+			sshpass -p bamboo ssh -q -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo echo 1 > ${i}test"
 		fi
 		sleep 10
 		echo "./clean_backup.sh -i $target_ip -n $i -r $test_rev"
@@ -63,8 +63,8 @@ print_result()
 	echo "*****************************************************************"
 	for i in "${test_set_0[@]}"
 	do
-		echo "sshpass -p bamboo ssh -tt root@${target_ip} cd /home/ibof/ibofos/test/regression/; sudo cat ${i}test"
-		result=`sshpass -p bamboo ssh -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo cat ${i}test"`
+		echo "sshpass -p bamboo ssh -q -tt root@${target_ip} cd /home/ibof/ibofos/test/regression/; sudo cat ${i}test"
+		result=`sshpass -p bamboo ssh -q -tt root@${target_ip} "cd /home/ibof/ibofos/test/regression/; sudo cat ${i}test"`
 		if [ ${result} -eq 0 ];
 		then
 			echo "*****$i test Success"
