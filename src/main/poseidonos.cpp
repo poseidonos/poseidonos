@@ -55,6 +55,7 @@
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/qos/qos_manager.h"
 #include "src/metafs/include/metafs_service.h"
+#include "src/array_mgmt/array_manager.h"
 
 namespace pos
 {
@@ -103,7 +104,7 @@ Poseidonos::Terminate(void)
     {
         delete ioRecoveryEventFactory;
     }
-
+    ArrayMgr::ResetInstance();
 
     air_deactivate();
     air_finalize();
