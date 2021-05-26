@@ -30,12 +30,12 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "get_bitmap_layout_wbt_command.h"
-
-#include <string>
-
 #include "src/allocator_service/allocator_service.h"
 #include "src/allocator/i_allocator_wbt.h"
+#include "src/array_mgmt/array_manager.h"
+#include "src/wbt/get_bitmap_layout_wbt_command.h"
+
+#include <string>
 
 namespace pos
 {
@@ -51,9 +51,24 @@ GetBitmapLayoutWbtCommand::~GetBitmapLayoutWbtCommand(void)
 int
 GetBitmapLayoutWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
+    int res = -1;
+    std::string arrayName = _GetParameter(argv, "array");
+    if (0 == arrayName.length())
+    {
+        return res;
+    }
+
+    bool arrayExist = ArrayMgr::Instance()->ArrayExists(arrayName);
+    if (arrayExist == false)
+    {
+        return res;
+    }
+
     std::string coutfile = "output.txt";
-    IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt("");
-    return iAllocatorWbt->GetBitmapLayout(coutfile);
+    IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt(arrayName);
+    res = iAllocatorWbt->GetBitmapLayout(coutfile);
+
+    return res;
 }
 
 } // namespace pos

@@ -30,12 +30,12 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "read_reverse_map_entry_wbt_command.h"
-
-#include <string>
-
+#include "src/array_mgmt/array_manager.h"
 #include "src/include/address_type.h"
 #include "src/mapper_service/mapper_service.h"
+#include "src/wbt/read_reverse_map_entry_wbt_command.h"
+
+#include <string>
 
 namespace pos
 {
@@ -51,13 +51,25 @@ ReadReverseMapEntryWbtCommand::~ReadReverseMapEntryWbtCommand(void)
 int
 ReadReverseMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
+    int res = -1;
+    std::string arrayName = _GetParameter(argv, "array");
+    if (0 == arrayName.length())
+    {
+        return res;
+    }
+
+    bool arrayExist = ArrayMgr::Instance()->ArrayExists(arrayName);
+    if (arrayExist == false)
+    {
+        return res;
+    }
+
     std::string coutfile = "output.txt";
-    StripeId vsid = static_cast<StripeId>(std::stoul(
-        argv["vsid"].get<std::string>()));
-    BlkOffset offset = static_cast<BlkOffset>(std::stoull(
-        argv["offset"].get<std::string>()));
-    IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt("");
-    int res = iMapperWbt->ReadReverseMapEntry(vsid, offset, coutfile);
+    StripeId vsid = static_cast<StripeId>(std::stoul(argv["vsid"].get<std::string>()));
+    BlkOffset offset = static_cast<BlkOffset>(std::stoull(argv["offset"].get<std::string>()));
+
+    IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt(arrayName);
+    res = iMapperWbt->ReadReverseMapEntry(vsid, offset, coutfile);
 
     return res;
 }

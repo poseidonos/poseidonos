@@ -172,118 +172,115 @@ volname="vol1"
 volsize=21474836480
 
 echo -[Map : get_map_layout ]------------------------------------------
-${BIN_DIR}/cli wbt get_map_layout --json > ${cliOutput}
+${BIN_DIR}/cli wbt get_map_layout --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : read_vsamap ]------------------------------------------
-${BIN_DIR}/cli wbt read_vsamap --name vol1 --output VSAMap_vol1.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt read_vsamap --name vol1 --output VSAMap_vol1.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : write_vsamap ]------------------------------------------
-${BIN_DIR}/cli wbt write_vsamap --name vol1 --input VSAMap_vol1.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt write_vsamap --name vol1 --input VSAMap_vol1.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : read_vsamap_entry ]------------------------------------------
-${BIN_DIR}/cli wbt read_vsamap_entry --name $volname --rba 0 --json > ${cliOutput}
+${BIN_DIR}/cli wbt read_vsamap_entry --name $volname --rba 0 --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : write_vsamap_entry ]------------------------------------------
-${BIN_DIR}/cli wbt write_vsamap_entry --name $volname --rba 0 --vsid 1 --offset 1 --json > ${cliOutput}
+${BIN_DIR}/cli wbt write_vsamap_entry --name $volname --rba 0 --vsid 1 --offset 1 --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : read_stripemap ]------------------------------------------
-${BIN_DIR}/cli wbt read_stripemap --output StripeMap.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt read_stripemap --output StripeMap.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : write_stripemap ]------------------------------------------
-${BIN_DIR}/cli wbt write_stripemap --input StripeMap.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt write_stripemap --input StripeMap.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : read_stripemap_entry ]------------------------------------------
-${BIN_DIR}/cli wbt read_stripemap_entry --vsid 0 --json > ${cliOutput}
+${BIN_DIR}/cli wbt read_stripemap_entry --vsid 0 --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : write_stripemap_entry ]------------------------------------------
-${BIN_DIR}/cli wbt write_stripemap_entry --vsid 0 --loc 1 --lsid 123 --json > ${cliOutput}
+${BIN_DIR}/cli wbt write_stripemap_entry --vsid 0 --loc 1 --lsid 123 --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
-<<'END'
 echo -[Map : read_whole_reverse_map ]------------------------------------------
-${BIN_DIR}/cli wbt read_whole_reverse_map --output ReverseMapWhole.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt read_whole_reverse_map --output ReverseMapWhole.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : write_whole_reverse_map ]------------------------------------------
-${BIN_DIR}/cli wbt write_whole_reverse_map --input ReverseMapWhole.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt write_whole_reverse_map --input ReverseMapWhole.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
-END
 
 echo -[Map : read_reverse_map ]------------------------------------------
-${BIN_DIR}/cli wbt read_reverse_map --vsid 0 --output ReverseMap_vsid0.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt read_reverse_map --vsid 0 --output ReverseMap_vsid0.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : write_reverse_map ]------------------------------------------
-${BIN_DIR}/cli wbt write_reverse_map --vsid 0 --input ReverseMap_vsid0.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt write_reverse_map --vsid 0 --input ReverseMap_vsid0.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
-
 echo -[Map : read_reverse_map_entry ]------------------------------------------
-${BIN_DIR}/cli wbt read_reverse_map_entry --vsid 0 --offset 0 --json > ${cliOutput}
+${BIN_DIR}/cli wbt read_reverse_map_entry --vsid 0 --offset 0 --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : write_reverse_map_entry ]------------------------------------------
-${BIN_DIR}/cli wbt write_reverse_map_entry --vsid 0 --offset 0 --rba 0 --name vol1 --json > ${cliOutput}
+${BIN_DIR}/cli wbt write_reverse_map_entry --vsid 0 --offset 0 --rba 0 --name vol1 --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : get_bitmap_layout ]------------------------------------------
-${BIN_DIR}/cli wbt get_bitmap_layout --json > ${cliOutput}
+${BIN_DIR}/cli wbt get_bitmap_layout --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : get_instant_meta_info ]------------------------------------------
-${BIN_DIR}/cli wbt get_instant_meta_info --json > ${cliOutput}
+${BIN_DIR}/cli wbt get_instant_meta_info --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : get_wb_lsid_bitmap ]------------------------------------------
-${BIN_DIR}/cli wbt get_wb_lsid_bitmap --output wbLsidBitmap.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt get_wb_lsid_bitmap --output wbLsidBitmap.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : set_wb_lsid_bitmap ]------------------------------------------
-${BIN_DIR}/cli wbt set_wb_lsid_bitmap --input wbLsidBitmap.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt set_wb_lsid_bitmap --input wbLsidBitmap.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : get_active_stripe_tail ]------------------------------------------
-${BIN_DIR}/cli wbt get_active_stripe_tail --output activeStripeTail.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt get_active_stripe_tail --output activeStripeTail.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : set_active_stripe_tail ]------------------------------------------
-${BIN_DIR}/cli wbt set_active_stripe_tail --input activeStripeTail.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt set_active_stripe_tail --input activeStripeTail.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : get_current_ssd_lsid ]------------------------------------------
-${BIN_DIR}/cli wbt get_current_ssd_lsid --output currentSsdLsid.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt get_current_ssd_lsid --output currentSsdLsid.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : set_current_ssd_lsid ]------------------------------------------
-${BIN_DIR}/cli wbt set_current_ssd_lsid --input currentSsdLsid.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt set_current_ssd_lsid --input currentSsdLsid.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : get_user_segment_bitmap]------------------------------------------
-${BIN_DIR}/cli wbt get_user_segment_bitmap --output segmentBitmap.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt get_user_segment_bitmap --output segmentBitmap.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : set_user_segment_bitmap]------------------------------------------
-${BIN_DIR}/cli wbt set_user_segment_bitmap --input segmentBitmap.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt set_user_segment_bitmap --input segmentBitmap.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : get_segment_info]------------------------------------------
-${BIN_DIR}/cli wbt get_segment_info --output segmentInfo.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt get_segment_info --output segmentInfo.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : set_segment_info]------------------------------------------
-${BIN_DIR}/cli wbt set_segment_info --input segmentInfo.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt set_segment_info --input segmentInfo.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 echo -[Map : get_segment_valid_count]------------------------------------------
-${BIN_DIR}/cli wbt get_segment_valid_count --output segValidCount.bin --json > ${cliOutput}
+${BIN_DIR}/cli wbt get_segment_valid_count --output segValidCount.bin --array $ARRAYNAME --json > ${cliOutput}
 check_result
 
 

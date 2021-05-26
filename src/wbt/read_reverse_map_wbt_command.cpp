@@ -30,10 +30,10 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "read_reverse_map_wbt_command.h"
-
+#include "src/array_mgmt/array_manager.h"
 #include "src/include/address_type.h"
 #include "src/mapper_service/mapper_service.h"
+#include "src/wbt/read_reverse_map_wbt_command.h"
 
 #include <string>
 
@@ -51,10 +51,22 @@ ReadReverseMapWbtCommand::~ReadReverseMapWbtCommand(void)
 int
 ReadReverseMapWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
-    StripeId vsid = static_cast<StripeId>(std::stoul(
-        argv["vsid"].get<std::string>()));
-    IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt("");
-    int res = iMapperWbt->ReadReverseMap(vsid, argv["output"].get<std::string>());
+    int res = -1;
+    std::string arrayName = _GetParameter(argv, "array");
+    if (0 == arrayName.length())
+    {
+        return res;
+    }
+
+    bool arrayExist = ArrayMgr::Instance()->ArrayExists(arrayName);
+    if (arrayExist == false)
+    {
+        return res;
+    }
+
+    StripeId vsid = static_cast<StripeId>(std::stoul(argv["vsid"].get<std::string>()));
+    IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt(arrayName);
+    res = iMapperWbt->ReadReverseMap(vsid, argv["output"].get<std::string>());
 
     return res;
 }

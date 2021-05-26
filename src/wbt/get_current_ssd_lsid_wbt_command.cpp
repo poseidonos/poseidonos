@@ -30,10 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "get_current_ssd_lsid_wbt_command.h"
 
-#include "src/allocator_service/allocator_service.h"
 #include "src/allocator/i_allocator_wbt.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/array_mgmt/array_manager.h"
+#include "src/wbt/get_current_ssd_lsid_wbt_command.h"
 
 #include <string>
 namespace pos
@@ -50,8 +51,23 @@ GetCurrentSsdLsidWbtCommand::~GetCurrentSsdLsidWbtCommand(void)
 int
 GetCurrentSsdLsidWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
-    IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt("");
-    return iAllocatorWbt->GetMeta(WBT_CURRENT_SSD_LSID, argv["output"].get<std::string>());
+    int res = -1;
+    std::string arrayName = _GetParameter(argv, "array");
+    if (0 == arrayName.length())
+    {
+        return res;
+    }
+
+    bool arrayExist = ArrayMgr::Instance()->ArrayExists(arrayName);
+    if (arrayExist == false)
+    {
+        return res;
+    }
+
+    IAllocatorWbt* iAllocatorWbt = AllocatorServiceSingleton::Instance()->GetIAllocatorWbt(arrayName);
+    res = iAllocatorWbt->GetMeta(WBT_CURRENT_SSD_LSID, argv["output"].get<std::string>());
+
+    return res;
 }
 
 } // namespace pos

@@ -30,11 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "write_reverse_map_entry_wbt_command.h"
-
+#include "src/array_mgmt/array_manager.h"
 #include "src/include/address_type.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/volume/volume_service.h"
+#include "src/wbt/write_reverse_map_entry_wbt_command.h"
 
 #include <string>
 
@@ -52,15 +52,24 @@ WriteReverseMapEntryWbtCommand::~WriteReverseMapEntryWbtCommand(void)
 int
 WriteReverseMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
-    int res = 0;
+    int res = -1;
+    std::string arrayName = _GetParameter(argv, "array");
+    if (0 == arrayName.length())
+    {
+        return res;
+    }
 
-    StripeId vsid = static_cast<StripeId>(std::stoul(
-        argv["vsid"].get<std::string>()));
-    BlkOffset offset = static_cast<BlkOffset>(std::stoull(
-        argv["offset"].get<std::string>()));
+    bool arrayExist = ArrayMgr::Instance()->ArrayExists(arrayName);
+    if (arrayExist == false)
+    {
+        return res;
+    }
+
+    StripeId vsid = static_cast<StripeId>(std::stoul(argv["vsid"].get<std::string>()));
+    BlkOffset offset = static_cast<BlkOffset>(std::stoull(argv["offset"].get<std::string>()));
     BlkAddr rba = static_cast<BlkAddr>(std::stoull(argv["rba"].get<std::string>()));
 
-    IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager("");
+    IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     int volId = volMgr->VolumeID(argv["name"].get<std::string>());
 
     if (volId < 0)
@@ -69,7 +78,7 @@ WriteReverseMapEntryWbtCommand::Execute(Args &argv, JsonElement &elem)
     }
     else
     {
-        IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt("");
+        IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt(arrayName);
         res = iMapperWbt->WriteReverseMapEntry(vsid, offset, rba, volId);
     }
 

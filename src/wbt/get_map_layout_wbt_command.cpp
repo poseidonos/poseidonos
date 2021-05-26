@@ -30,11 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "get_map_layout_wbt_command.h"
+#include "src/array_mgmt/array_manager.h"
+#include "src/mapper_service/mapper_service.h"
+#include "src/wbt/get_map_layout_wbt_command.h"
 
 #include <string>
-
-#include "src/mapper_service/mapper_service.h"
 
 namespace pos
 {
@@ -50,8 +50,21 @@ GetMapLayoutWbtCommand::~GetMapLayoutWbtCommand(void)
 int
 GetMapLayoutWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
+    int res = -1;
+    std::string arrayName = _GetParameter(argv, "array");
+    if (0 == arrayName.length())
+    {
+        return res;
+    }
+
+    bool arrayExist = ArrayMgr::Instance()->ArrayExists(arrayName);
+    if (arrayExist == false)
+    {
+        return res;
+    }
+
     std::string coutfile = "output.txt";
-    IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt("");
+    IMapperWbt* iMapperWbt = MapperServiceSingleton::Instance()->GetIMapperWbt(arrayName);
     return iMapperWbt->GetMapLayout(coutfile);
 }
 
