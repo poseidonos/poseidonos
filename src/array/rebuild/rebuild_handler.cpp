@@ -43,7 +43,15 @@ RebuildHandler::RebuildHandler(Array* array, ArrayDevice* dev)
 bool
 RebuildHandler::Execute(void)
 {
-    bool retry = targetArray->TriggerRebuild(targetDev);
+    bool retry;
+    if (targetDev != nullptr && targetDev->GetState() == ArrayDeviceState::REBUILD)
+    {
+        retry = targetArray->ResumeRebuild(targetDev);
+    }
+    else
+    {
+        retry = targetArray->TriggerRebuild(targetDev);
+    }
     return retry == false;
 }
 

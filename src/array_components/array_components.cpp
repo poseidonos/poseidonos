@@ -38,10 +38,9 @@
 #include "src/io/general_io/rba_state_manager.h"
 #include "src/logger/logger.h"
 #include "src/mapper/mapper.h"
-#include "src/state/state_manager.h"
-#include "src/metafs/metafs.h"
 #include "src/metafs/include/metafs_service.h"
-#include "src/io/general_io/rba_state_manager.h"
+#include "src/metafs/metafs.h"
+#include "src/state/state_manager.h"
 
 namespace pos
 {
@@ -183,7 +182,12 @@ ArrayComponents::Load(void)
 int
 ArrayComponents::Mount(void)
 {
-    return arrayMountSequence->Mount();
+    int ret = arrayMountSequence->Mount();
+    if (ret == 0)
+    {
+        array->MountDone();
+    }
+    return ret;
 }
 
 int
@@ -199,12 +203,21 @@ ArrayComponents::Delete(void)
 }
 
 int
-ArrayComponents::PrepareRebuild(void)
+ArrayComponents::PrepareRebuild(bool& resume)
 {
     IWBStripeAllocator* iWBStripeAllocator = allocator->GetIWBStripeAllocator();
-
+    IContextManager* ctxmgr = allocator->GetIContextManager();
+    int ret = 0;
     gc->Pause();
-    int ret = iWBStripeAllocator->PrepareRebuild();
+
+    if (ctxmgr->NeedRebuildAgain())
+    {
+        resume = true;
+    }
+    else
+    {
+        ret = iWBStripeAllocator->PrepareRebuild();
+    }
     gc->Resume();
     return ret;
 }

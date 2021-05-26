@@ -438,19 +438,19 @@ TEST(MbrManager, LoadMbr_testIfTheLatestMajorityMbrIsSelected)
     // Given: multiple different versions of MBR exist in devices (due to partial failures for example)
     using MBR = struct masterBootRecord;
     // this is freed() within m.LoadMgr(), so should be allocated from heap
-    MBR* mbr1 = new MBR;
+    MBR* mbr1 = new MBR();
     mbr1->mbrVersion = 1,
     mbr1->mbrParity = 1234;
 
-    MBR* mbr2 = new MBR;
+    MBR* mbr2 = new MBR();
     mbr2->mbrVersion = 2;
     mbr2->mbrParity = 2345;
 
-    MBR* mbr3 = new MBR;
+    MBR* mbr3 = new MBR();
     mbr3->mbrVersion = 2;
     mbr3->mbrParity = 3456;
 
-    MBR* mbr4 = new MBR;
+    MBR* mbr4 = new MBR();
     mbr4->mbrVersion = 2;
     mbr4->mbrParity = 2345;
 
@@ -549,7 +549,7 @@ TEST(MbrManager, GetAbrList_testWithOneArray)
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([=](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
         using MBR = struct masterBootRecord;
-        MBR* mbr = new MBR;
+        MBR* mbr = new MBR();
         mbr->mbrVersion = 1;
         mbr->arrayNum = expectedArrayNum;
         mbr->arrayValidFlag[defaultArrayIndex] = 1;
@@ -695,7 +695,7 @@ TEST(MbrManager, FindArrayWithDeviceSN_testFindingArraySuccessfully)
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([=](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
         using MBR = struct masterBootRecord;
-        MBR* mbr = new MBR;
+        MBR* mbr = new MBR();
         mbr->mbrVersion = 1;
         mbr->arrayNum = expectedArrayNum;
         mbr->arrayValidFlag[defaultArrayIndex] = 1;

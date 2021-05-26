@@ -46,9 +46,9 @@
 #include "src/array_models/interface/i_array_info.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/bio/ubio.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/include/address_type.h"
 #include "src/include/array_config.h"
-#include "src/event_scheduler/event_scheduler.h"
 
 #ifdef _ADMIN_ENABLED
 #include "src/array/device/i_array_device_manager.h"
@@ -109,6 +109,7 @@ public:
     bool IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
     IArrayDevice* FindDevice(string devSn) override;
     virtual bool TriggerRebuild(ArrayDevice* target);
+    virtual bool ResumeRebuild(ArrayDevice* target);
 #ifdef _ADMIN_ENABLED
     IArrayDevMgr* GetArrayManager(void);
 #endif
@@ -119,13 +120,13 @@ private:
     void _DeletePartitions(void);
     void _FormatMetaPartition(void);
     int _Flush(void);
-    int _ResumeRebuild(ArrayDevice* target);
+    int _CheckRebuildNecessity(ArrayDevice* target);
     void _RebuildDone(RebuildResult result);
     void _DetachSpare(ArrayDevice* target);
     void _DetachData(ArrayDevice* target);
     void _RegisterService(void);
     void _UnregisterService(void);
-    void _ResumeRebuild(void);
+    void _CheckRebuildNecessity(void);
     void _ResetMeta(void);
 
     ArrayState* state = nullptr;

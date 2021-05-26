@@ -184,6 +184,13 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet, uint32_t& missingCnt, 
                 missingCnt++;
                 meta.state = ArrayDeviceState::FAULT;
             }
+            else if (ArrayDeviceState::REBUILD == meta.state)
+            {
+                brokenCnt++;
+                POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEVICE_REBUILD_STATE,
+                    "Rebuilding device found {}", meta.uid);
+            }
+
             dev = new ArrayDevice(uBlock, meta.state);
         }
 

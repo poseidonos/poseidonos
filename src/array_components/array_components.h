@@ -79,7 +79,7 @@ public:
     virtual int Mount(void);
     virtual int Unmount(void);
     virtual int Delete(void);
-    virtual int PrepareRebuild(void);
+    virtual int PrepareRebuild(bool& resume);
     virtual void RebuildDone(void);
     virtual Array* GetArray(void) { return array; }
 

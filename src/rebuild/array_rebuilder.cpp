@@ -31,32 +31,45 @@
  */
 
 #include "array_rebuilder.h"
+
+#include <thread>
+
 #include "array_rebuild.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-#include <thread>
-
 namespace pos
 {
-ArrayRebuilder::ArrayRebuilder(IRebuildNotification* noti) :
-iRebuildNoti(noti)
+ArrayRebuilder::ArrayRebuilder(IRebuildNotification* noti)
+: iRebuildNoti(noti)
 {
 }
 
-void ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
-                            RebuildComplete cb, list<RebuildTarget*> tgt)
+void
+ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
+    RebuildComplete cb, list<RebuildTarget*> tgt)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "ArrayRebuilder::Rebuild {}", array);
-    ArrayRebuild* job = new ArrayRebuild(array, dev, cb, tgt);
+
     mtxStart.lock();
     StopRebuild(array);
     WaitRebuildDone(array);
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-    "ArrayRebuilder::Rebuild, start job");
+        "ArrayRebuilder::Rebuild, start job");
+
+    bool resume = false;
+    int ret = iRebuildNoti->PrepareRebuild(array, resume);
+
+    if (resume)
+    {
+        // remove meta parttition frome tgt
+        tgt.pop_front();
+    }
+
+    ArrayRebuild* job = new ArrayRebuild(array, dev, cb, tgt);
     jobsInProgress.emplace(array, job);
-    int ret = iRebuildNoti->PrepareRebuild(array);
+
     if (ret == 0)
     {
         mtxStart.unlock();
@@ -68,7 +81,8 @@ void ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
     }
 }
 
-void ArrayRebuilder::StopRebuild(string array)
+void
+ArrayRebuilder::StopRebuild(string array)
 {
     ArrayRebuild* jobInProg = _Find(array);
     if (jobInProg != nullptr)
@@ -83,7 +97,8 @@ void ArrayRebuilder::StopRebuild(string array)
     }
 }
 
-void ArrayRebuilder::RebuildDone(string array)
+void
+ArrayRebuilder::RebuildDone(string array)
 {
     iRebuildNoti->RebuildDone(array);
     unique_lock<mutex> lock(mtxWait);
@@ -99,7 +114,8 @@ void ArrayRebuilder::RebuildDone(string array)
     cv.notify_all();
 }
 
-void ArrayRebuilder::WaitRebuildDone(string array)
+void
+ArrayRebuilder::WaitRebuildDone(string array)
 {
     unique_lock<mutex> lock(mtxWait);
     while (_Find(array) != nullptr)
@@ -108,7 +124,8 @@ void ArrayRebuilder::WaitRebuildDone(string array)
     }
 }
 
-uint32_t ArrayRebuilder::GetRebuildProgress(string array)
+uint32_t
+ArrayRebuilder::GetRebuildProgress(string array)
 {
     ArrayRebuild* jobInProg = _Find(array);
     if (jobInProg != nullptr)
@@ -118,7 +135,8 @@ uint32_t ArrayRebuilder::GetRebuildProgress(string array)
     return 0;
 }
 
-ArrayRebuild* ArrayRebuilder::_Find(string array)
+ArrayRebuild*
+ArrayRebuilder::_Find(string array)
 {
     if (array == "" && jobsInProgress.size() == 1)
     {

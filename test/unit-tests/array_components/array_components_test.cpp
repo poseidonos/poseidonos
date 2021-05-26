@@ -1,9 +1,12 @@
 #include "src/array_components/array_components.h"
 
 #include <gtest/gtest.h>
+
 #include <functional>
+
 #include "src/include/pos_event_id.h"
 #include "test/unit-tests/allocator/allocator_mock.h"
+#include "test/unit-tests/allocator/i_context_manager_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/array/array_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
@@ -18,8 +21,7 @@ using ::testing::Return;
 
 namespace pos
 {
-static auto mockMetaFsFactory = [](Array* array, bool isLoaded)
-{
+static auto mockMetaFsFactory = [](Array* array, bool isLoaded) {
     return nullptr; // returning null MetaFs intentionally
 };
 
@@ -152,6 +154,7 @@ TEST(ArrayComponents, PrepareRebuild_testIfGcIsPausedAndResumedAroundAllocatorPr
     MockAllocator* mockAllocator = new MockAllocator(&mockIArrayInfo, nullptr);
     MockGarbageCollector* mockGc = new MockGarbageCollector(nullptr, nullptr);
     MockIWBStripeAllocator mockIwbStripeAllocator;
+    MockIContextManager mockIContextManager;
 
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr,
         nullptr, nullptr, mockGc, nullptr, mockAllocator, nullptr, nullptr, mockMetaFsFactory);
@@ -159,15 +162,19 @@ TEST(ArrayComponents, PrepareRebuild_testIfGcIsPausedAndResumedAroundAllocatorPr
     std::string ARRAY_NAME = "mock-array";
     EXPECT_CALL(mockIArrayInfo, GetName).WillRepeatedly(Return(ARRAY_NAME));
     EXPECT_CALL(*mockAllocator, GetIWBStripeAllocator).WillOnce(Return(&mockIwbStripeAllocator));
+    EXPECT_CALL(*mockAllocator, GetIContextManager).WillOnce(Return(&mockIContextManager));
     EXPECT_CALL(*mockGc, Pause).Times(1);
     EXPECT_CALL(mockIwbStripeAllocator, PrepareRebuild).WillOnce(Return(PREPARE_RESULT));
+    EXPECT_CALL(mockIContextManager, NeedRebuildAgain).WillOnce(Return(false));
     EXPECT_CALL(*mockGc, Resume).Times(1);
 
     // When
-    int actual = arrayComps.PrepareRebuild();
+    bool resume = false;
+    int actual = arrayComps.PrepareRebuild(resume);
 
     // Then
     ASSERT_EQ(PREPARE_RESULT, actual);
+    ASSERT_EQ(false, resume);
 }
 
 TEST(ArrayComponents, RebuildDone_)

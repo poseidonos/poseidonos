@@ -41,7 +41,7 @@ namespace pos
 class IRebuildNotification
 {
 public:
-    virtual int PrepareRebuild(string array) = 0;
+    virtual int PrepareRebuild(string array, bool& resume) = 0;
     virtual void RebuildDone(string array) = 0;
 };
 } // namespace pos

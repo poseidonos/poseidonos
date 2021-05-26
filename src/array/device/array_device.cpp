@@ -48,6 +48,10 @@ ArrayDevice::ArrayDevice(UblockSharedPtr uBlock,
   state(state)
 {
     this->uBlock = uBlock;
+    if (state == ArrayDeviceState::REBUILD)
+    {
+        SetRebuild(true);
+    }
 };
 
 ArrayDevice::~ArrayDevice(void)

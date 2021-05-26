@@ -79,7 +79,7 @@ int ArrayManager::DeviceDetached(UblockSharedPtr dev)
 }
 
 int
-ArrayManager::PrepareRebuild(string name)
+ArrayManager::PrepareRebuild(string name, bool& resume)
 {
     return 0;
 }

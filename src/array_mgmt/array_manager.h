@@ -74,7 +74,7 @@ public:
     int RemoveDevice(string name, string dev) override;
     int DeviceDetached(UblockSharedPtr dev) override;
 
-    int PrepareRebuild(string name) override;
+    int PrepareRebuild(string name, bool& resume) override;
     void RebuildDone(string name) override;
 
     bool ArrayExists(string name);

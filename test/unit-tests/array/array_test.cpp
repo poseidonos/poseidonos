@@ -664,15 +664,24 @@ TEST(Array, MountDone_testIfResumeRebuildEventIsSent)
 {
     // Given: an array
     MockEventScheduler mockEventScheduler;
+    MockArrayDeviceManager* mockArrayDeviceManager = new MockArrayDeviceManager(NULL);
+    string mockDevName = "mockDevName";
+    MockUBlockDevice* mockUblockDevice = new MockUBlockDevice(mockDevName, 1024, NULL);
+    UblockSharedPtr mockUblockSharedPtr = shared_ptr<UBlockDevice>(mockUblockDevice);
+    MockArrayDevice* mockArrayDevice = new MockArrayDevice(NULL);
 
     EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(1);
+    EXPECT_CALL(*mockArrayDeviceManager, GetRebuilding).WillOnce(Return(mockArrayDevice));
+    EXPECT_CALL(*mockArrayDevice, GetUblock).WillRepeatedly(Return(mockUblockSharedPtr));
+    EXPECT_CALL(*mockUblockDevice, GetSN).WillOnce(Return(mockDevName));
 
-    Array array("mock", NULL, NULL, NULL, NULL, NULL, NULL, NULL, &mockEventScheduler);
+    Array array("mock", NULL, NULL, mockArrayDeviceManager, NULL, NULL, NULL, NULL, &mockEventScheduler);
 
     // When: Mount is done
     array.MountDone();
 
     // Then: EnqueueEvent should be called once
+    delete mockArrayDevice;
 }
 
 TEST(Array, CheckUnmountable_testIfStateIsQueriedOn)

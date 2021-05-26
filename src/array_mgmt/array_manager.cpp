@@ -189,7 +189,7 @@ ArrayManager::GetArrayInfo(string name)
 }
 
 int
-ArrayManager::PrepareRebuild(string name)
+ArrayManager::PrepareRebuild(string name, bool& resume)
 {
     ArrayComponents* array = _FindArray(name);
     if (array == nullptr)
@@ -197,7 +197,7 @@ ArrayManager::PrepareRebuild(string name)
         return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
     }
 
-    return array->PrepareRebuild();
+    return array->PrepareRebuild(resume);
 }
 
 void
