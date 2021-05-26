@@ -16,7 +16,7 @@ public:
     MOCK_METHOD(int, InsertDevice, (string deviceUid, unsigned int arrayIndex), (override));
     MOCK_METHOD(int, DeleteDevices, (unsigned int arrayIndex), (override));
     MOCK_METHOD(int, ResetMap, (), (override));
-    MOCK_METHOD(int, CheckDevices, (ArrayMeta & meta), (override));
+    MOCK_METHOD(int, CheckAllDevices, (ArrayMeta & meta), (override));
     MOCK_METHOD(int, FindArrayIndex, (string devName), (override));
 };
 

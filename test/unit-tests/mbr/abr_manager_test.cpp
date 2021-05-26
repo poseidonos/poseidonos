@@ -60,6 +60,7 @@ TEST(AbrManager, LoadAbr_testIfAbrDataLoadedCorrectly)
         CopyData(newAbr->devInfo[2].deviceUid, mockDeviceName + "1", DEVICE_UID_SIZE);
         CopyData(newAbr->devInfo[3].deviceUid, mockDeviceName + "2", DEVICE_UID_SIZE);
         CopyData(newAbr->devInfo[4].deviceUid, mockSpareDeviceName, DEVICE_UID_SIZE);
+
         *abr = newAbr;
         return 0;
     });

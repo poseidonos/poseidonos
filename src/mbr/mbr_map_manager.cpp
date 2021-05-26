@@ -35,6 +35,7 @@
 #include <utility>
 
 #include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -49,20 +50,33 @@ MbrMapManager::~MbrMapManager(void)
 int
 MbrMapManager::InsertDevices(ArrayMeta& meta, unsigned int arrayIndex)
 {
+    auto insertNum = 0;
     for (auto dev : meta.devs.nvm)
     {
         arrayDeviceIndexMap.insert(pair<string, unsigned int>(dev.uid, arrayIndex));
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_DEBUG_MSG,
+            "Inserted {} to array {}", dev.uid, arrayIndex);
+        insertNum++;
     }
 
     for (auto dev : meta.devs.data)
     {
         arrayDeviceIndexMap.insert(pair<string, unsigned int>(dev.uid, arrayIndex));
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_DEBUG_MSG,
+            "Inserted {} to array {}", dev.uid, arrayIndex);
+        insertNum++;
     }
 
     for (auto dev : meta.devs.spares)
     {
         arrayDeviceIndexMap.insert(pair<string, unsigned int>(dev.uid, arrayIndex));
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_DEBUG_MSG,
+            "Inserted {} to array {}", dev.uid, arrayIndex);
+        insertNum++;
     }
+
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_DEBUG_MSG,
+        "Inserted {} devices to arrayDeviceMap", insertNum);
 
     return 0;
 }
@@ -78,12 +92,16 @@ int
 MbrMapManager::DeleteDevices(unsigned int arrayIndex)
 {
     arrayDeviceIndexMapIter devIter;
+    auto deleteNum = 0;
     for (devIter = arrayDeviceIndexMap.begin(); devIter !=
          arrayDeviceIndexMap.end();)
     {
         if (devIter->second == arrayIndex)
         {
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_DEBUG_MSG,
+                "Deleted {} from array {}", devIter->first, devIter->second);
             arrayDeviceIndexMap.erase(devIter++);
+            deleteNum++;
         }
         else
         {
@@ -91,36 +109,50 @@ MbrMapManager::DeleteDevices(unsigned int arrayIndex)
         }
     }
 
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_DEBUG_MSG,
+        "Deleted {} devices from arrayDeviceMap", deleteNum);
+
     return 0;
 }
 
 int
-MbrMapManager::CheckDevices(ArrayMeta& meta)
+MbrMapManager::CheckAllDevices(ArrayMeta& meta)
 {
-    for (auto dev : meta.devs.nvm)
+    int result;
+    result = _CheckDevices(meta.devs.nvm);
+    if (result != 0)
     {
-        if (arrayDeviceIndexMap.find(dev.uid) != arrayDeviceIndexMap.end())
-        {
-            return (int)POS_EVENT_ID::MBR_DEVICE_ALREADY_IN_ARRAY;
-        }
+        return result;
     }
 
-    for (auto dev : meta.devs.data)
+    result = _CheckDevices(meta.devs.data);
+    if (result != 0)
     {
-        if (arrayDeviceIndexMap.find(dev.uid) != arrayDeviceIndexMap.end())
-        {
-            return (int)POS_EVENT_ID::MBR_DEVICE_ALREADY_IN_ARRAY;
-        }
+        return result;
     }
 
-    for (auto dev : meta.devs.spares)
+    result = _CheckDevices(meta.devs.spares);
+    if (result != 0)
     {
-        if (arrayDeviceIndexMap.find(dev.uid) != arrayDeviceIndexMap.end())
-        {
-            return (int)POS_EVENT_ID::MBR_DEVICE_ALREADY_IN_ARRAY;
-        }
+        return result;
     }
 
+    return 0;
+}
+
+int
+MbrMapManager::_CheckDevices(vector<DeviceMeta>& devs)
+{
+    for (auto dev : devs)
+    {
+        auto iter = arrayDeviceIndexMap.find(dev.uid);
+        if (iter != arrayDeviceIndexMap.end())
+        {
+            int event_id = (int)POS_EVENT_ID::MBR_DEVICE_ALREADY_IN_ARRAY;
+            POS_TRACE_DEBUG(event_id, "Device {} is already in array {}", dev.uid, iter->second);
+            return event_id;
+        }
+    }
     return 0;
 }
 
@@ -135,8 +167,8 @@ int
 MbrMapManager::FindArrayIndex(string devSN)
 {
     arrayDeviceIndexMapIter devIter;
-    for (devIter = arrayDeviceIndexMap.begin(); devIter !=
-         arrayDeviceIndexMap.end();)
+    for (devIter = arrayDeviceIndexMap.begin();
+            devIter != arrayDeviceIndexMap.end();)
     {
         if (devIter->first == devSN)
         {

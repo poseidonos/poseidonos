@@ -277,10 +277,12 @@ TEST(Array, Create_testIfErrorIsReturnedWhenArrayStateIsNotCreatable)
     DeviceSet<string> emptyDeviceSet;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     int STATE_ERROR = EID(ARRAY_STATE_EXIST);
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(STATE_ERROR));
+    EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
 
-    Array array("goodmockname", NULL, NULL, NULL, NULL, NULL, mockState, NULL, NULL);
+    Array array("goodmockname", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL);
 
     // When
     int actual = array.Create(emptyDeviceSet, "doesn't matter");
@@ -300,6 +302,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenDeviceImportFails)
 
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Import(_)).WillOnce(Return(IMPORT_ERROR));
+    EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
 
     Array array("goodmockname", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL);
 
@@ -321,6 +324,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenArrayNameIsInvalid)
 
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Import(_)).WillOnce(Return(0));
+    EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
 
     Array array(BAD_ARRAY_NAME, NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL);
 
@@ -343,6 +347,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenRaidTypeIsInvalid)
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Import(_)).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
+    EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
 
     Array array("goodmockname", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL);
 
@@ -366,6 +371,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeCreated)
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Import(_)).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
+    EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
     EXPECT_CALL(mockAbrControl, CreateAbr).WillOnce(Return(ABR_CREATE_FAILURE));
 
     Array array("goodmockname", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL);
@@ -391,6 +397,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeSaved)
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Import(_)).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillRepeatedly(Return(DeviceSet<DeviceMeta>()));
+    EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
     EXPECT_CALL(mockAbrControl, CreateAbr).WillOnce(Return(0));
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(ABR_SAVE_FAILURE));
 

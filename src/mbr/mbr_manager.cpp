@@ -508,7 +508,7 @@ MbrManager::CreateAbr(string arrayName, ArrayMeta& meta)
         return (int)POS_EVENT_ID::MBR_ABR_ALREADY_EXIST;
     }
 
-    ret = mapMgr->CheckDevices(meta);
+    ret = mapMgr->CheckAllDevices(meta);
     if (ret != 0)
     {
         POS_TRACE_ERROR(ret, "Device is already in other array");

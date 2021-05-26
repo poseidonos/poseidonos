@@ -192,6 +192,7 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType)
     return 0;
 
 error:
+    devMgr_->Clear();
     pthread_rwlock_unlock(&stateLock);
     POS_TRACE_ERROR(ret, "failed to create array {}", name_);
     return ret;

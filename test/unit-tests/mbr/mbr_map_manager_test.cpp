@@ -33,7 +33,7 @@ TEST(MbrMapManager, InsertDevices_testInsertingDeviceInfoAsMeta)
     mmMgr->InsertDevices(meta, mockArrayIndex);
 
     // Then : mockDevice information added to map
-    int result = mmMgr->CheckDevices(meta);
+    int result = mmMgr->CheckAllDevices(meta);
     EXPECT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), result);
 }
 
@@ -50,7 +50,7 @@ TEST(MbrMapManager, InsertDevice_testInsertingDeviceInfo)
     // Then : mockDevice information added to map
     ArrayMeta meta;
     meta.devs.data.push_back(DeviceMeta(mockDeviceUid));
-    int result = mmMgr->CheckDevices(meta);
+    int result = mmMgr->CheckAllDevices(meta);
     EXPECT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), result);
 }
 
@@ -64,12 +64,12 @@ TEST(MbrMapManager, DeleteDevices_testDeletingDeviceInfo)
 
     ArrayMeta meta;
     meta.devs.data.push_back(DeviceMeta(mockDeviceUid));
-    int result = mmMgr->CheckDevices(meta);
+    int result = mmMgr->CheckAllDevices(meta);
     EXPECT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), result);
     // When : Delete mockDevices
     mmMgr->DeleteDevices(mockArrayIndex);
     // Then : mockDevice information added to map
-    result = mmMgr->CheckDevices(meta);
+    result = mmMgr->CheckAllDevices(meta);
     EXPECT_EQ(0, result);
 }
 
@@ -83,16 +83,16 @@ TEST(MbrMapManager, ResetMap_testResettingMap)
 
     ArrayMeta meta;
     meta.devs.data.push_back(DeviceMeta(mockDeviceUid));
-    int result = mmMgr->CheckDevices(meta);
+    int result = mmMgr->CheckAllDevices(meta);
     EXPECT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), result);
     // When : Delete mockDevices
     mmMgr->ResetMap();
     // Then : mockDevice information added to map
-    result = mmMgr->CheckDevices(meta);
+    result = mmMgr->CheckAllDevices(meta);
     EXPECT_EQ(0, result);
 }
 
-TEST(MbrMapManager, CheckDevices_testDeviceInfoWithNoInfoInMap)
+TEST(MbrMapManager, CheckAllDevices_testDeviceInfoWithNoInfoInMap)
 {
     // Given : deviceIndexMap with no device info
     MbrMapManager* mmMgr = new MbrMapManager;
@@ -102,12 +102,12 @@ TEST(MbrMapManager, CheckDevices_testDeviceInfoWithNoInfoInMap)
     ArrayMeta meta;
     meta.devs.data.push_back(DeviceMeta(mockDeviceUid));
     // When : Check mockDevices
-    int result = mmMgr->CheckDevices(meta);
+    int result = mmMgr->CheckAllDevices(meta);
     // Then : Device Not exist
     EXPECT_EQ(0, result);
 }
 
-TEST(MbrMapManager, CheckDevices_testDeviceInfoWithOneInfoInMap)
+TEST(MbrMapManager, CheckAllDevices_testDeviceInfoWithOneInfoInMap)
 {
     // Given : deviceIndexMap with one device info
     MbrMapManager* mmMgr = new MbrMapManager;
@@ -118,7 +118,7 @@ TEST(MbrMapManager, CheckDevices_testDeviceInfoWithOneInfoInMap)
     ArrayMeta meta;
     meta.devs.data.push_back(DeviceMeta(mockDeviceUid));
     // When : Check mockDevices
-    int result = mmMgr->CheckDevices(meta);
+    int result = mmMgr->CheckAllDevices(meta);
     // Then : Device already exist
     EXPECT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), result);
 }
