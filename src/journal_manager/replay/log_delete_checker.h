@@ -55,7 +55,7 @@ class LogDeleteChecker
 {
 public:
     LogDeleteChecker(void) = default;
-    LogDeleteChecker(std::vector<DeletedVolume> input);
+    explicit LogDeleteChecker(std::vector<DeletedVolume> input);
     virtual ~LogDeleteChecker(void) = default;
 
     void Update(std::vector<ReplayLog>& deletingLogs);
