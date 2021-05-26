@@ -49,16 +49,21 @@ MetaVolume::MetaVolume(std::string arrayName, MetaVolumeType metaVolumeType, Met
     fileMgr = new MetaFileManager(arrayName);
     inodeMgr = new MetaFileInodeManager(arrayName);
     catalogMgr = new VolumeCatalogManager(arrayName);
+}
 
-    _RegisterRegionMgr(MetaRegionManagerType::VolCatalogMgr, *catalogMgr);
-    _RegisterRegionMgr(MetaRegionManagerType::InodeMgr, *inodeMgr);
-    _RegisterRegionMgr(MetaRegionManagerType::FileMgr, *fileMgr);
-
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "MetaVolume: {}, constructed: volType={}, <total page num={}>",
-        (uint32_t)volumeType, (uint32_t)metaVolumeType, maxVolumePageNum);
-
-    sumOfRegionBaseLpns = 0;
+MetaVolume::MetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
+        VolumeCatalogManager* catalogMgr, std::string arrayName,
+        MetaVolumeType metaVolumeType, MetaLpnType maxVolumePageNum)
+: volumeBaseLpn(),
+  maxVolumeLpn(maxVolumePageNum),
+  volumeType(metaVolumeType),
+  volumeState(MetaVolumeState::Default),
+  inUse(false),
+  arrayName(arrayName)
+{
+    this->fileMgr = fileMgr;
+    this->inodeMgr = inodeMgr;
+    this->catalogMgr = catalogMgr;
 }
 
 MetaVolume::~MetaVolume(void)
@@ -77,6 +82,16 @@ MetaVolume::~MetaVolume(void)
 void
 MetaVolume::Init(MetaStorageSubsystem* metaStorage)
 {
+    _RegisterRegionMgr(MetaRegionManagerType::VolCatalogMgr, *catalogMgr);
+    _RegisterRegionMgr(MetaRegionManagerType::InodeMgr, *inodeMgr);
+    _RegisterRegionMgr(MetaRegionManagerType::FileMgr, *fileMgr);
+
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "MetaVolume: {}, constructed: volType={}, <total page num={}>",
+        (uint32_t)volumeType, (uint32_t)metaVolumeType, maxVolumePageNum);
+
+    sumOfRegionBaseLpns = 0;
+
     InitVolumeBaseLpn();
     _SetupRegionInfoToRegionMgrs(metaStorage);
 

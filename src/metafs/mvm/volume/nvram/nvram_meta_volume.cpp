@@ -41,6 +41,13 @@ NvRamMetaVolume::NvRamMetaVolume(std::string arrayName, MetaLpnType maxVolumePag
 {
 }
 
+NvRamMetaVolume::NvRamMetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
+        VolumeCatalogManager* catalogMgr, std::string arrayName,
+        MetaLpnType maxVolumePageNum)
+: MetaVolume(fileMgr, inodeMgr, catalogMgr, arrayName, MetaVolumeType::NvRamVolume, maxVolumePageNum)
+{
+}
+
 NvRamMetaVolume::~NvRamMetaVolume(void)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,

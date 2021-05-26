@@ -43,19 +43,21 @@ namespace pos
 MetaFileManager::MetaFileManager(std::string arrayName)
 : OnVolumeMetaRegionManager(arrayName),
   isAllocated(false),
+  extentMgr(new MetaFileExtentManager()),
   mfssIntf(nullptr)
 {
 }
 
 MetaFileManager::~MetaFileManager(void)
 {
+    delete extentMgr;
 }
 
 void
 MetaFileManager::Init(MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType maxLpn)
 {
     OnVolumeMetaRegionManager::Init(volumeType, baseLpn, maxLpn);
-    extentMgr.Init(baseLpn, maxLpn);
+    extentMgr->Init(baseLpn, maxLpn);
     isAllocated = false;
 }
 
@@ -90,7 +92,7 @@ MetaFileManager::AllocExtent(FileSizeType fileSize)
     // lpnCnt => based on Data Chunk Size
     FileSizeType userDataChunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     MetaLpnType lpnCnt = (fileSize + userDataChunkSize - 1) / userDataChunkSize;
-    MetaFilePageMap pagemap = extentMgr.AllocExtent(lpnCnt);
+    MetaFilePageMap pagemap = extentMgr->AllocExtent(lpnCnt);
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "AllocExtent volumeType={}, fileSize={}, lpnCnt={}, startLpn={}",
@@ -108,8 +110,8 @@ MetaFileManager::RemoveExtent(MetaLpnType baseLpn, FileSizeType fileSize)
         "RemoveExtent volumeType={}, baseLpn={}, lpnCnt={}",
         (int)volumeType, baseLpn, fileSize);
 
-    extentMgr.RemoveFromFreeExtentsList(baseLpn, fileSize);
-    extentMgr.PrintFreeExtentsList();
+    extentMgr->RemoveFromFreeExtentsList(baseLpn, fileSize);
+    extentMgr->PrintFreeExtentsList();
 }
 
 POS_EVENT_ID
@@ -158,19 +160,19 @@ MetaFileManager::CheckFileInActive(FileDescriptorType fd)
 void
 MetaFileManager::GetExtentContent(MetaFileExtent* list)
 {
-    extentMgr.GetContent(list);
+    extentMgr->GetContent(list);
 }
 
 void
 MetaFileManager::SetExtentContent(MetaFileExtent* list)
 {
-    extentMgr.SetContent(list);
+    extentMgr->SetContent(list);
 }
 
 uint32_t
 MetaFileManager::GetUtilizationInPercent(void)
 {
-    return ((maxLpn - extentMgr.GetAvailableLpnCount()) * 100) / maxLpn;
+    return ((maxLpn - extentMgr->GetAvailableLpnCount()) * 100) / maxLpn;
 }
 
 const FileDescriptorSet&
@@ -182,7 +184,7 @@ MetaFileManager::GetFDSetOfActiveFiles(void)
 size_t
 MetaFileManager::GetTheBiggestExtentSize(void)
 {
-    return extentMgr.GetTheBiggestExtentSize() * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
+    return extentMgr->GetTheBiggestExtentSize() * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
 }
 
 bool

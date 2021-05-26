@@ -81,12 +81,12 @@ public:
     MetaLpnType
     GetFileBaseLpn(void)
     {
-        return extentMgr.GetFileBaseLpn();
+        return extentMgr->GetFileBaseLpn();
     }
     void
     SetFileBaseLpn(MetaLpnType BaseLpn)
     {
-        extentMgr.SetFileBaseLpn(BaseLpn);
+        extentMgr->SetFileBaseLpn(BaseLpn);
     }
     bool TrimData(MetaStorageType media, MetaLpnType startLpn, MetaLpnType numTrimLpns);
 
@@ -94,7 +94,7 @@ private:
     FileDescriptorSet activeFiles;
     bool isAllocated;
 
-    MetaFileExtentManager extentMgr;
+    MetaFileExtentManager* extentMgr;
     MetaStorageSubsystem* mfssIntf;
 };
 } // namespace pos

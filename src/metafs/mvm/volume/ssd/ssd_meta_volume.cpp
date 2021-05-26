@@ -42,6 +42,13 @@ SsdMetaVolume::SsdMetaVolume(std::string arrayName, MetaLpnType maxVolumePageNum
 {
 }
 
+SsdMetaVolume::SsdMetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
+        VolumeCatalogManager* catalogMgr, std::string arrayName,
+        MetaLpnType maxVolumePageNum)
+: MetaVolume(fileMgr, inodeMgr, catalogMgr, arrayName, MetaVolumeType::SsdVolume, maxVolumePageNum)
+{
+}
+
 SsdMetaVolume::~SsdMetaVolume(void)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,

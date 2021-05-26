@@ -56,6 +56,9 @@ class MetaVolume
 {
 public:
     explicit MetaVolume(std::string arrayName, MetaVolumeType volumeType, MetaLpnType maxVolumePageNum = 0);
+    explicit MetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
+            VolumeCatalogManager* catalogMgr, std::string arrayName,
+            MetaVolumeType volumeType, MetaLpnType maxVolumePageNum = 0);
     virtual ~MetaVolume(void);
 
     virtual void InitVolumeBaseLpn(void) = 0;
