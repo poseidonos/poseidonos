@@ -33,6 +33,7 @@
 #pragma once
 
 #include <mutex>
+#include <utility>
 
 #include "src/include/address_type.h"
 #include "src/include/pos_event_id.h"
@@ -49,7 +50,6 @@ public:
     StripeLogWriteStatus(void) = delete;
     explicit StripeLogWriteStatus(StripeId vsid);
     virtual ~StripeLogWriteStatus(void);
-    void Reset(void);
 
     virtual void BlockLogFound(BlockWriteDoneLog dat);
     virtual void StripeLogFound(StripeMapUpdatedLog dat);
@@ -60,6 +60,12 @@ public:
     virtual void Print(void);
 
     bool IsFlushed(void) { return stripeFlushed == true; }
+
+    // For unit test
+    std::pair<BlkOffset, BlkOffset> GetBlockOffsetRange(void);
+    std::pair<BlkAddr, BlkAddr> GetRbaRange(void);
+    uint32_t GetNumFoundBlocks(void);
+    StripeAddr GetFinalStripeAddr(void);
 
 protected:
     uint32_t numFoundBlockMaps;

@@ -195,4 +195,28 @@ StripeLogWriteStatus::Print(void)
     POS_TRACE_DEBUG(eventId, os.str());
 }
 
+std::pair<BlkOffset, BlkOffset>
+StripeLogWriteStatus::GetBlockOffsetRange(void)
+{
+    return std::make_pair(firstBlockOffset, lastBlockOffset);
+}
+
+std::pair<BlkAddr, BlkAddr>
+StripeLogWriteStatus::GetRbaRange(void)
+{
+    return std::make_pair(smallestRba, largestRba);
+}
+
+uint32_t
+StripeLogWriteStatus::GetNumFoundBlocks(void)
+{
+    return numFoundBlockMaps;
+}
+
+StripeAddr
+StripeLogWriteStatus::GetFinalStripeAddr(void)
+{
+    return finalStripeAddr;
+}
+
 } // namespace pos
