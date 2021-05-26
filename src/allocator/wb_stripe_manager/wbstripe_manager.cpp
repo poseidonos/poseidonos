@@ -56,11 +56,10 @@ WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctx
 
 WBStripeManager::~WBStripeManager(void)
 {
-    for (auto& stripeToClear : wbStripeArray)
+    if ((wbStripeArray.size() != 0) && (stripeBufferPool != nullptr))
     {
-        delete stripeToClear;
+        Dispose();
     }
-    delete stripeBufferPool;
 }
 
 void
@@ -84,6 +83,20 @@ WBStripeManager::Init(void)
         }
         wbStripeArray.push_back(stripe);
     }
+}
+
+void
+WBStripeManager::Dispose(void)
+{
+    for (auto& stripeToClear : wbStripeArray)
+    {
+        delete stripeToClear;
+        stripeToClear = nullptr;
+    }
+    wbStripeArray.clear();
+
+    delete stripeBufferPool;
+    stripeBufferPool = nullptr;
 }
 
 Stripe*
