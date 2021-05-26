@@ -31,7 +31,7 @@ def execute():
         TEST_FIO.write(arrayId, volumeId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volumeId))
 
     TEST_SETUP_POS.trigger_spor()
-    TEST_SETUP_POS.dirty_bringup(len(arrays))
+    TEST_SETUP_POS.dirty_bringup(arrays)
 
     for arrayId in arrays:
         TEST_SETUP_POS.create_subsystem(arrayId, volumeId)
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     filename = sys.argv[0].split("/")[-1].split(".")[0]
     TEST_LIB.set_up(argv=sys.argv, test_name=filename)
 
-    TEST_SETUP_POS.clean_bringup(len(arrays))
+    TEST_SETUP_POS.clean_bringup(arrays)
     for arrayId in arrays:
         TEST_SETUP_POS.create_subsystem(arrayId, volumeId)
         TEST_SETUP_POS.create_volume(arrayId, volumeId)

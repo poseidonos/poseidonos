@@ -17,14 +17,24 @@ size = '128k'
 ############################################################################
 # Test Description
 # write pattern A to several array with multiple volumes,
+# delete one array, and write another patterns to remaining arrays
 # and simulate SPOR and verify each volume with latest pattern
 ############################################################################
 
 
-def execute():
+def test(arrayId_to_delete):
     global current_test
     current_test = current_test + 1
     TEST_LOG.print_notice("[Test {} Started]".format(current_test))
+
+    for arrayId in arrays:
+        for volumeId in volumes:
+            TEST_LIB.create_new_pattern(arrayId, volumeId)
+            TEST_FIO.write(arrayId, volumeId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volumeId))
+
+    TEST_SETUP_POS.unmount_array(arrayId_to_delete)
+    TEST_SETUP_POS.delete_array(arrayId_to_delete)
+    arrays.remove(arrayId_to_delete)
 
     for arrayId in arrays:
         for volumeId in volumes:
@@ -44,6 +54,11 @@ def execute():
             TEST_FIO.verify(arrayId, volumeId, offset, size, TEST_LIB.get_latest_pattern(arrayId, volumeId))
 
     TEST_LOG.print_notice("[Test {} Completed]".format(current_test))
+
+
+def execute():
+    test(arrayId_to_delete=arrays[0])
+    test(arrayId_to_delete=arrays[0])
 
 
 if __name__ == "__main__":

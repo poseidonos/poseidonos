@@ -41,7 +41,7 @@ def mbr_reset():
     cli.mbr_reset()
 
 
-def clean_bringup(numArray=1):
+def clean_bringup(arrays=[0]):
     TEST_LOG.print_info("* POS clean bringup")
 
     if (os.path.isfile(TEST.mockfile)):
@@ -49,21 +49,21 @@ def clean_bringup(numArray=1):
 
     TEST_RUN_POS.start_pos()
 
-    setup(numArray)
+    setup(arrays)
     mbr_reset()
-    for arrayId in range(numArray):
+    for arrayId in arrays:
         create_array(arrayId)
 
     TEST_LOG.print_info("* Fininshed bringup")
 
 
-def dirty_bringup(numArray=1):
+def dirty_bringup(arrays=[0]):
     TEST_LOG.print_info("* POS dirty bringup")
 
     TEST_RUN_POS.start_pos()
 
-    setup(numArray)
-    for arrayId in range(numArray):
+    setup(arrays)
+    for arrayId in arrays:
         mount_array(arrayId)
         TEST_DEBUGGING.dump_journal(arrayId, "LogBuffer_AfterSPO")
 
@@ -86,7 +86,7 @@ def scan_device():
 
 
 # TODO(cheolho.kang): Seperate array setup method from setup function
-def setup(numArray):
+def setup(arrays):
     command = ""
 
     if TEST.trtype == "tcp":
@@ -95,7 +95,7 @@ def setup(numArray):
         command += " -u 131072"
 
     spdk_rpc.send_request("nvmf_create_transport -t " + TEST.trtype + command)
-    for uramId in range(numArray):
+    for uramId in arrays:
         create_uram(uramId)
         # create_pram()
 
@@ -149,7 +149,7 @@ def create_array(arrayId):
 #    out = cli.create_array("pmem0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "unvme-ns-3", ARRAYNAME, "")
     ret = json_parser.get_response_code(out)
     if ret != 0:
-        TEST_LOG.print_err("Failed to create array")
+        TEST_LOG.print_err("Failed to create array{}".format(arrayId))
         TEST_LOG.print_debug(out)
         sys.exit(1)
     TEST_LOG.print_info("* Array created")
@@ -160,7 +160,7 @@ def mount_array(arrayId):
     out = cli.mount_array(get_arrayname(arrayId))
     ret = json_parser.get_response_code(out)
     if ret != 0:
-        TEST_LOG.print_err("Failed to mount pos")
+        TEST_LOG.print_err("Failed to mount array{}".format(arrayId))
         TEST_LOG.print_debug(out)
         sys.exit(1)
     TEST_LOG.print_info("* {} mounted".format(get_arrayname(arrayId)))
@@ -170,10 +170,20 @@ def unmount_array(arrayId):
     out = cli.unmount_array(get_arrayname(arrayId))
     ret = json_parser.get_response_code(out)
     if ret != 0:
-        TEST_LOG.print_err("Failed to unmount pos")
+        TEST_LOG.print_err("Failed to unmount array{}".format(arrayId))
         TEST_LOG.print_debug(out)
         sys.exit(1)
     TEST_LOG.print_info("* {} unmounted".format(get_arrayname(arrayId)))
+
+
+def delete_array(arrayId):
+    out = cli.delete_array(get_arrayname(arrayId))
+    ret = json_parser.get_response_code(out)
+    if ret != 0:
+        TEST_LOG.print_err("Failed to delete array{}".format(arrayId))
+        TEST_LOG.print_debug(out)
+        sys.exit(1)
+    TEST_LOG.print_info("* {} delete".format(get_arrayname(arrayId)))
 
 
 def create_subsystem(arrayId, volumeId):
