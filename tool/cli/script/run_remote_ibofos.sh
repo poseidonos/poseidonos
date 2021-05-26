@@ -8,7 +8,7 @@ then
   $SCRIPT_PATH/run_os.sh
 else
   echo "remoterun"
-  sshpass -p seb ssh -o StrictHostKeyChecking=no root@$1 "bash -s" < $SCRIPT_PATH/run_os.sh
+  sshpass -p bamboo ssh -o StrictHostKeyChecking=no root@$1 "bash -s" < $SCRIPT_PATH/run_os.sh
 fi
 
 exit 0

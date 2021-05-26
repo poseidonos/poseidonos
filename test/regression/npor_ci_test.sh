@@ -95,10 +95,10 @@ texecc()
         $@
         ;;
     1) # over-fabric test
-        sshpass -p seb ssh -tt root@${target_ip} "cd ${cwd}; sudo $@"
+        sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${cwd}; sudo $@"
         ;;
     2) # script verification test
-        info "sshpass -p seb ssh -tt root@${target_ip} \"cd ${cwd}; sudo $@\""
+        info "sshpass -p bamboo ssh -q -tt root@${target_ip} \"cd ${cwd}; sudo $@\""
         ;;
     esac
 }

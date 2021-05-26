@@ -65,7 +65,7 @@ texecc()
     if [[ $exec_mode -eq 0 ]]; then
         sudo $@
     else
-        sshpass -p $TARGET_PASSWORD ssh -tt -o StrictHostKeyChecking=no -q $TARGET_USERNAME@${TARGET_IP} "cd ${TARGET_ROOT_DIR}; sudo $@"
+        sshpass -p $TARGET_PASSWORD ssh -q -tt -o StrictHostKeyChecking=no -q $TARGET_USERNAME@${TARGET_IP} "cd ${TARGET_ROOT_DIR}; sudo $@"
     fi
 }
 
@@ -262,7 +262,7 @@ do_spor()
     if [[ $exec_mode -eq 0 ]]; then
         res_flush_gcov=`./bin/cli --json wbt flush_gcov | tr -d '\n' | sed -e 's/\"/\"/g'`
     else
-        res_flush_gcov=`sshpass -p $TARGET_PASSWORD ssh -tt -o StrictHostKeyChecking=no -q $TARGET_USERNAME@${TARGET_IP} "cd ${TARGET_ROOT_DIR}; sudo ./bin/cli --json wbt flush_gcov | tr -d '\n' | sed -e 's/\"/\"/g'"`
+        res_flush_gcov=`sshpass -p $TARGET_PASSWORD ssh -q -tt -o StrictHostKeyChecking=no -q $TARGET_USERNAME@${TARGET_IP} "cd ${TARGET_ROOT_DIR}; sudo ./bin/cli --json wbt flush_gcov | tr -d '\n' | sed -e 's/\"/\"/g'"`
     fi
     python test/system/nvme_flush/flush_gcov.py "$res_flush_gcov" >> ${logfile}
 

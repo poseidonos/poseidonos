@@ -9,13 +9,13 @@ port=1158
 texecc()
 {
     echo "[target]" $@;
-    sshpass -p bamboo ssh -tt root@${target_ip} "cd ${ibof_root}; sudo $@"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${ibof_root}; sudo $@"
 }
 
 processCheck()
 {
     rm -rf processList_${target_ip}
-    sshpass -p bamboo ssh -tt root@${target_ip} ps -ef | grep poseidonos > processList_${target_ip}
+    sshpass -p bamboo ssh -q -tt root@${target_ip} ps -ef | grep poseidonos > processList_${target_ip}
     cat processList_${target_ip}
     rm -rf processList_${target_ip}
 }
@@ -44,9 +44,9 @@ coreDump()
 {
     echo "Deleting previously-generated core dump files.."
     texecc pkill -11 poseidonos
-    sshpass -p bamboo ssh -tt root@${target_ip} "cd $ibof_root/tool/dump/; sudo ./trigger_core_dump.sh crashed"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd $ibof_root/tool/dump/; sudo ./trigger_core_dump.sh crashed"
 
-    sshpass -p bamboo ssh -tt root@${target_ip} [[ ! -d $ibof_core/$test_name/$test_rev ]]
+    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ ! -d $ibof_core/$test_name/$test_rev ]]
     if [ $? -eq 0 ]
     then
         texecc mkdir -p $ibof_core/$test_name/$test_rev
@@ -60,7 +60,7 @@ coreDump()
 
 backupLog()
 {
-    sshpass -p bamboo ssh -tt root@${target_ip} [[ ! -d $ibof_log/$test_name/$test_rev ]]
+    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ ! -d $ibof_log/$test_name/$test_rev ]]
     if [ $? -eq 0 ]
     then
         texecc mkdir -p $ibof_log/$test_name/$test_rev

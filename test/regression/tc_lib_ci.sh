@@ -88,10 +88,10 @@ texecc()
         cd ${rootTarget}; $@
         ;;
     1) # over-fabric test
-        sshpass -pibof ssh root@${target_ip} "cd ${rootTarget}; sudo $@"
+        sshpass -p bamboo ssh root@${target_ip} "cd ${rootTarget}; sudo $@"
         ;;
     2) # script verification test
-        echo "sshpass -pibof ssh root@${target_ip} \"cd ${rootTarget}; sudo $@\""
+        echo "sshpass -p bamboo ssh root@${target_ip} \"cd ${rootTarget}; sudo $@\""
         ;;
     esac
 }
