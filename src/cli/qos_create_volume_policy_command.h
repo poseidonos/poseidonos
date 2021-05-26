@@ -36,6 +36,7 @@
 #include "src/qos/qos_common.h"
 #include <string>
 #include <vector>
+#include <utility>
 
 namespace pos_cli
 {
@@ -51,7 +52,7 @@ private:
     bool _VerifyMultiVolumeInput(json& doc);
     uint32_t _HandleVolumePolicy(json& doc);
     std::vector<string> volumeNames;
-    std::vector<uint32_t> volumeIds;
+    std::vector<std::pair<string, uint32_t>> validVolumes;
     std::string errorMsg;
     uint64_t minBw;
     uint64_t maxBw;
@@ -59,5 +60,6 @@ private:
     uint64_t maxIops;
     qos_vol_policy prevVolPolicy;
     qos_vol_policy newVolPolicy;
+    string arrayName;
 };
 }; // namespace pos_cli

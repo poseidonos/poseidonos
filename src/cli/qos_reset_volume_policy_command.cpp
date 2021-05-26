@@ -35,6 +35,7 @@
 #include "src/qos/qos_manager.h"
 #include "src/qos/qos_common.h"
 #include "src/volume/volume_manager.h"
+#include <utility>
 
 namespace pos_cli
 {
@@ -56,7 +57,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
     }
     JsonFormat jFormat;
     std::vector<string> volumeNames;
-    std::vector<uint32_t> volumeIds;
+    std::vector<std::pair<string, uint32_t>> validVolumes;
     string errorMsg;
     int validVol = -1;
     int retVal = -1;
@@ -84,18 +85,17 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
     {
         return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, BADREQUEST, "level, Invalid Parameter", GetPosInfo());
     }
+    IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    if (nullptr == volMgr)
+    {
+        return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, BADREQUEST, "Invalid Array Name", GetPosInfo());
+    }
     if (doc["param"].contains("vol"))
     {
         for (unsigned int i = 0; i < doc["param"]["vol"].size(); i++)
         {
             string volName = doc["param"]["vol"][i]["volumeName"];
             volumeNames.push_back(volName);
-        }
-        IVolumeManager* volMgr =
-            VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-        if (nullptr == volMgr)
-        {
-            return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, BADREQUEST, "Invalid Array Name", GetPosInfo());
         }
         for (auto vol = volumeNames.begin(); vol != volumeNames.end(); vol++)
         {
@@ -107,7 +107,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
             }
             else
             {
-                volumeIds.push_back(validVol);
+                validVolumes.push_back(std::make_pair(*vol, validVol));
             }
         }
     }
@@ -117,8 +117,9 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
     }
 
     qos_vol_policy newVolPolicy;
-    for (auto vol = volumeIds.begin(); vol != volumeIds.end(); vol++)
+    for (auto vol = validVolumes.begin(); vol != validVolumes.end(); vol++)
     {
+        std::pair<string, uint32_t> volume = (*vol);
         newVolPolicy.minBwGuarantee = false;
         newVolPolicy.minIopsGuarantee = false;
         newVolPolicy.minBw = 0;
@@ -127,7 +128,12 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
         newVolPolicy.maxIops = 0;
         newVolPolicy.policyChange = true;
         newVolPolicy.maxValueChanged = true;
-        retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(*vol, newVolPolicy);
+        retVal = volMgr->UpdateQoS(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw);
+        if (retVal != SUCCESS)
+        {
+            return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, retVal, "FAILED", GetPosInfo());
+        }
+        retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy);
         if (retVal != SUCCESS)
         {
             return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, retVal, "FAILED", GetPosInfo());

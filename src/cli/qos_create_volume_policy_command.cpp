@@ -37,6 +37,13 @@
 
 namespace pos_cli
 {
+const uint32_t KIOPS = 1000;
+const uint32_t MIB_IN_BYTE = 1024 * 1024;
+const uint64_t MIN_IOPS_LIMIT = 10;
+const uint64_t MIN_BW_LIMIT = 10;
+const uint64_t MAX_IOPS_LIMIT = UINT64_MAX / KIOPS;
+const uint64_t MAX_BW_LIMIT = UINT64_MAX / MIB_IN_BYTE;
+
 QosCreateVolumePolicyCommand::QosCreateVolumePolicyCommand(void)
 {
     minBw = 0;
@@ -94,9 +101,9 @@ bool
 QosCreateVolumePolicyCommand::_HandleInputVolumes(json& doc)
 {
     int validVol = -1;
-    string arrayName = DEFAULT_ARRAY_NAME;
+    arrayName = DEFAULT_ARRAY_NAME;
     volumeNames.clear();
-    volumeIds.clear();
+    validVolumes.clear();
 
     if (doc["param"].contains("array") == true)
     {
@@ -107,8 +114,7 @@ QosCreateVolumePolicyCommand::_HandleInputVolumes(json& doc)
         string volName = doc["param"]["vol"][i]["volumeName"];
         volumeNames.push_back(volName);
     }
-    IVolumeManager* volMgr =
-        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     if (nullptr == volMgr)
     {
         errorMsg = "Invalid Array Name";
@@ -124,7 +130,7 @@ QosCreateVolumePolicyCommand::_HandleInputVolumes(json& doc)
         }
         else
         {
-            volumeIds.push_back(validVol);
+            validVolumes.push_back(std::make_pair(*vol, validVol));
         }
     }
     return true;
@@ -133,7 +139,7 @@ QosCreateVolumePolicyCommand::_HandleInputVolumes(json& doc)
 bool
 QosCreateVolumePolicyCommand::_VerifyMultiVolumeInput(json& doc)
 {
-    if (volumeIds.size() > 1)
+    if (validVolumes.size() > 1)
     {
         if (doc["param"].contains("minbw"))
         {
@@ -153,9 +159,11 @@ uint32_t
 QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
 {
     int retVal = -1;
-    for (auto vol = volumeIds.begin(); vol != volumeIds.end(); vol++)
+    IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    for (auto vol = validVolumes.begin(); vol != validVolumes.end(); vol++)
     {
-        prevVolPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(*vol);
+        std::pair<string, uint32_t> volume = (*vol);
+        prevVolPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volume.second);
         newVolPolicy = prevVolPolicy;
         newVolPolicy.policyChange = false;
         newVolPolicy.maxValueChanged = false;
@@ -185,6 +193,10 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
             if (0xFFFFFFFF == maxBw)
             {
                 maxBw = 0;
+            }
+            else if (maxBw < MIN_BW_LIMIT || maxBw > MAX_BW_LIMIT)
+            {
+                return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
             }
             newVolPolicy.maxBw = maxBw;
             if (newVolPolicy.maxBw != prevVolPolicy.maxBw)
@@ -220,6 +232,10 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
             {
                 maxIops = 0;
             }
+            else if (maxIops < MIN_IOPS_LIMIT || maxIops > MAX_IOPS_LIMIT)
+            {
+                return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+            }
             newVolPolicy.maxIops = maxIops;
             if (newVolPolicy.maxIops != prevVolPolicy.maxIops)
             {
@@ -230,7 +246,19 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
 
         if (true == newVolPolicy.policyChange)
         {
-            retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(*vol, newVolPolicy);
+            if (true == newVolPolicy.minBwGuarantee && true == newVolPolicy.minIopsGuarantee)
+            {
+                return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
+            }
+            if (true == newVolPolicy.maxValueChanged)
+            {
+                retVal = volMgr->UpdateQoS(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw);
+                if (retVal != SUCCESS)
+                {
+                    return retVal;
+                }
+            }
+            retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy);
             if (retVal != SUCCESS)
             {
                 return retVal;
