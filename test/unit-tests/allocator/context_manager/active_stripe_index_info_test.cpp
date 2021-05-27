@@ -17,7 +17,7 @@ TEST(ActiveStripeTailArrIdxInfo, GetActiveStripeTailArrIdx_TestGetDataWithGcTrue
     // when 1.
     int ret = info->GetActiveStripeTailArrIdx();
     // then 1.
-    EXPECT_EQ(MAX_VOLUME_COUNT+1, ret);
+    EXPECT_EQ(MAX_VOLUME_COUNT + 1, ret);
     delete info;
 }
 
@@ -37,7 +37,7 @@ TEST(ActiveStripeTailArrIdxInfo, GetVolumeId_TestGetUserVolId)
     // given 1.
     ActiveStripeTailArrIdxInfo* info = new ActiveStripeTailArrIdxInfo(1, false);
     // when 1.
-    int ret = info->GetVolumeId(MAX_VOLUME_COUNT+1);
+    int ret = info->GetVolumeId(MAX_VOLUME_COUNT + 1);
     // then 1.
     EXPECT_EQ(1, ret);
     delete info;
@@ -59,7 +59,7 @@ TEST(ActiveStripeTailArrIdxInfo, IsGc_TestGcTrue)
     // given 1.
     ActiveStripeTailArrIdxInfo* info = new ActiveStripeTailArrIdxInfo(1, true);
     // when 1.
-    bool ret = info->IsGc(MAX_VOLUME_COUNT+1);
+    bool ret = info->IsGc(MAX_VOLUME_COUNT + 1);
     // then 1.
     EXPECT_EQ(true, ret);
     delete info;

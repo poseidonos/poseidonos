@@ -1,8 +1,10 @@
+#include "src/allocator/context_manager/file_io_manager.h"
+
+#include <gtest/gtest.h>
+
 #include "src/allocator/address/allocator_address_info.h"
 #include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
-#include "src/allocator/context_manager/file_io_manager.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
-#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -140,13 +142,13 @@ TEST(AllocatorFileIoManager, StoreAsync_TestSimpleCaller)
     // given 1.
     EXPECT_CALL(*file[0], GetFd).WillOnce(Return(0));
     EXPECT_CALL(*file[0], AsyncIO).WillOnce(Return(0));
-    // when 1. 
+    // when 1.
     fileManager.StoreAsync(0, buf, nullptr);
 
     // given 2.
     EXPECT_CALL(*file[0], GetFd).WillOnce(Return(0));
     EXPECT_CALL(*file[0], AsyncIO).WillOnce(Return(-2));
-    // when 2. 
+    // when 2.
     fileManager.StoreAsync(0, buf, nullptr);
 
     delete addrInfo;
@@ -189,7 +191,7 @@ TEST(AllocatorFileIoManager, LoadSectionData_)
 }
 
 TEST(AllocatorFileIoManager, CopySectionData_)
-{    // given
+{ // given
     NiceMock<AllocatorAddressInfo>* addrInfo = new NiceMock<AllocatorAddressInfo>();
     NiceMock<MockMetaFileIntf>* file[NUM_FILES];
     for (int i = 0; i < NUM_FILES; i++)

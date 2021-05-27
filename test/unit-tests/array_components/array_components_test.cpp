@@ -151,7 +151,7 @@ TEST(ArrayComponents, PrepareRebuild_testIfGcIsPausedAndResumedAroundAllocatorPr
     // Given
     NiceMock<MockStateManager> mockStateManager;
     NiceMock<MockIArrayInfo> mockIArrayInfo;
-    MockAllocator* mockAllocator = new MockAllocator(&mockIArrayInfo, nullptr);
+    MockAllocator* mockAllocator = new MockAllocator(nullptr, nullptr, nullptr, nullptr, &mockIArrayInfo, nullptr);
     MockGarbageCollector* mockGc = new MockGarbageCollector(nullptr, nullptr);
     MockIWBStripeAllocator mockIwbStripeAllocator;
     MockIContextManager mockIContextManager;
@@ -182,7 +182,7 @@ TEST(ArrayComponents, RebuildDone_)
     // Given
     NiceMock<MockStateManager> mockStateManager;
     NiceMock<MockIArrayInfo> mockIArrayInfo;
-    MockAllocator* mockAllocator = new MockAllocator(&mockIArrayInfo, nullptr);
+    MockAllocator* mockAllocator = new MockAllocator(nullptr, nullptr, nullptr, nullptr, &mockIArrayInfo, nullptr);
     MockIWBStripeAllocator mockIwbStripeAllocator;
 
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr,
@@ -215,3 +215,4 @@ TEST(ArrayComponents, GetArray_testGetter)
 }
 
 } // namespace pos
+

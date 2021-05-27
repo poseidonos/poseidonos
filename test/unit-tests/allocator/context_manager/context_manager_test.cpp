@@ -705,10 +705,8 @@ TEST(ContextManager, GetRebuildCtx_TestSimpleGetter)
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
-
     // when
     MockRebuildCtx* ret = reinterpret_cast<MockRebuildCtx*>(ctxManager.GetRebuildCtx());
-
     // then
     EXPECT_EQ(reCtx, ret);
 }
@@ -723,7 +721,6 @@ TEST(ContextManager, GetContextReplayer_TestSimpleGetter)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     NiceMock<MockContextReplayer>* ctxReplayer = new NiceMock<MockContextReplayer>(nullptr, nullptr, nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, ctxReplayer, false, nullptr, "");
-
     // when
     ContextReplayer* ret = ctxManager.GetContextReplayer();
     // then
@@ -804,7 +801,9 @@ TEST(ContextManager, GetSegmentCtx_TestSimpleGetter)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
     // when
-    ctxManager.GetSegmentCtx();
+    SegmentCtx* ret = ctxManager.GetSegmentCtx();
+    // then
+    EXPECT_EQ(segCtx, ret);
 }
 
 TEST(ContextManager, GetAllocatorCtx_TestSimpleGetter)
@@ -817,7 +816,9 @@ TEST(ContextManager, GetAllocatorCtx_TestSimpleGetter)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
     // when
-    ctxManager.GetAllocatorCtx();
+    AllocatorCtx* ret = ctxManager.GetAllocatorCtx();
+    // then
+    EXPECT_EQ(allocCtx, ret);
 }
 
 TEST(ContextManager, GetWbStripeCtx_TestSimpleGetter)
@@ -830,7 +831,9 @@ TEST(ContextManager, GetWbStripeCtx_TestSimpleGetter)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
     // when
-    ctxManager.GetWbStripeCtx();
+    WbStripeCtx* ret = ctxManager.GetWbStripeCtx();
+    // then
+    EXPECT_EQ(wbStripeCtx, ret);
 }
 
 TEST(ContextManager, GetCtxLock_TestSimpleGetter)

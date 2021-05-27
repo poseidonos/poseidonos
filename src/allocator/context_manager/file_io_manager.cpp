@@ -72,6 +72,7 @@ AllocatorFileIoManager::Init(void)
     for (int file = 0; file < NUM_FILES; file++)
     {
         fileSize[file] = 0;
+        numSections[file] = 0;
         if (ctxFile[file] == nullptr)
         {
             ctxFile[file] = new FILESTORE(ctxFileName[file], arrayName);

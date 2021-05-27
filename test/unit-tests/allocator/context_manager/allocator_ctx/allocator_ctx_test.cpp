@@ -87,6 +87,9 @@ TEST(AllocatorCtx, SetPrevSsdLsid_TestSimpleSetter)
     AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr, "");
     // when
     allocCtx.SetPrevSsdLsid(10);
+    // then
+    int ret = allocCtx.GetPrevSsdLsid();
+    EXPECT_EQ(10, ret);
 }
 
 TEST(AllocatorCtx, SetNextSsdLsid_TestSimpleSetter)
@@ -385,10 +388,11 @@ TEST(AllocatorCtx, GetPrevSsdLsid_TestSimpleGetter)
     NiceMock<MockSegmentStates>* segStates = new NiceMock<MockSegmentStates>();
     NiceMock<MockSegmentLock>* segLocks = new NiceMock<MockSegmentLock>();
     AllocatorCtx allocCtx(allocBitmap, segStates, segLocks, nullptr, "");
-
+    allocCtx.SetPrevSsdLsid(10);
     // when
-    allocCtx.GetPrevSsdLsid();
-
+    int ret = allocCtx.GetPrevSsdLsid();
+    // then
+    EXPECT_EQ(10, ret);
     delete allocBitmap;
     delete segStates;
     delete segLocks;
@@ -421,7 +425,7 @@ TEST(AllocatorCtx, BeforeFlush_TestSimpleSetter)
     EXPECT_CALL(*allocBitmap, GetNumBitsSet);
     // when
     allocCtx.BeforeFlush(0, nullptr);
-    
+
     delete allocBitmap;
     delete segStates;
     delete segLocks;
@@ -437,7 +441,7 @@ TEST(AllocatorCtx, FinalizeIo_TestSimpleSetter)
 
     // when
     allocCtx.FinalizeIo(nullptr);
-    
+
     delete allocBitmap;
     delete segStates;
     delete segLocks;
@@ -465,7 +469,7 @@ TEST(AllocatorCtx, GetSectionAddr_TestGetEachSectionAddr)
     ret = allocCtx.GetSectionAddr(AC_SEGMENT_STATES);
     // then 4.
     EXPECT_EQ(reinterpret_cast<char*>(segStates), ret);
-    
+
     delete allocBitmap;
     delete segStates;
     delete segLocks;
@@ -502,7 +506,7 @@ TEST(AllocatorCtx, GetSectionSize_TestGetEachSectionSize)
     ret = allocCtx.GetSectionSize(AC_SEGMENT_STATES);
     // then 4.
     EXPECT_EQ(sizeof(SegmentStates) * 10, ret);
-    
+
     delete allocBitmap;
     delete segStates;
     delete segLocks;
@@ -520,7 +524,7 @@ TEST(AlloctorCtx, GetSegStateLock_TestSimpleGetter)
     EXPECT_CALL(*segLocks, GetLock).WillOnce(ReturnRef(m));
     // when
     allocCtx.GetSegStateLock(0);
-    
+
     delete allocBitmap;
     delete segStates;
     delete segLocks;

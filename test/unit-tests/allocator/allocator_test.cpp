@@ -6,10 +6,10 @@
 #include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/block_manager/block_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
-#include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
-#include "test/unit-tests/allocator/context_manager/wbstripe_ctx/wbstripe_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
+#include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
+#include "test/unit-tests/allocator/context_manager/wbstripe_ctx/wbstripe_ctx_mock.h"
 #include "test/unit-tests/allocator/wb_stripe_manager/wbstripe_manager_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
@@ -119,7 +119,7 @@ TEST(Allocator, VolumeUnmounted_TestSimpleCall)
     EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
 
     // when
-    alloc.VolumeUnmounted("", 0, "");    
+    alloc.VolumeUnmounted("", 0, "");
 }
 
 TEST(Allocator, SetGcThreshold_TestSimpleSetter)
@@ -231,7 +231,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     EXPECT_CALL(*file, Create).WillOnce(Return(0));
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(0));
-    EXPECT_CALL(*file, Close);    
+    EXPECT_CALL(*file, Close);
     // when 6.
     ret = alloc.GetMeta(WBT_CURRENT_SSD_LSID, "", file);
     // then 6.

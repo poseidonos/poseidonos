@@ -13,8 +13,11 @@ TEST(SegmentInfo, GetValidBlockCount_TestSimpleGetter)
 {
     // given
     SegmentInfo segInfos;
+    segInfos.SetValidBlockCount(5);
     // when
-    segInfos.GetValidBlockCount();
+    int ret = segInfos.GetValidBlockCount();
+    // then
+    EXPECT_EQ(5, ret);
 }
 
 TEST(SegmentInfo, SetValidBlockCount_TestSimpleSetter)
@@ -23,6 +26,9 @@ TEST(SegmentInfo, SetValidBlockCount_TestSimpleSetter)
     SegmentInfo segInfos;
     // when
     segInfos.SetValidBlockCount(5);
+    // then
+    int ret = segInfos.GetValidBlockCount();
+    EXPECT_EQ(5, ret);
 }
 
 TEST(SegmentInfo, IncreaseValidBlockCount_TestIncreaseValue)
