@@ -69,23 +69,19 @@ private:
     void _RollBackStripeIdAllocation(StripeId wbLsid = UINT32_MAX, StripeId arrayLsid = UINT32_MAX);
     void _IncreaseInvCount(SegmentId segId, int count = 1);
 
-    bool
-    _IsSegmentFull(StripeId stripeId)
+    bool _IsSegmentFull(StripeId stripeId)
     {
         return stripeId % addrInfo->GetstripesPerSegment() == 0;
     }
-    bool
-    _IsStripeFull(VirtualBlkAddr addr)
+    bool _IsStripeFull(VirtualBlkAddr addr)
     {
         return addr.offset == addrInfo->GetblksPerStripe();
     }
-    bool
-    _IsValidOffset(uint64_t stripeOffset)
+    bool _IsValidOffset(uint64_t stripeOffset)
     {
         return stripeOffset < addrInfo->GetblksPerStripe();
     }
-    bool
-    _IsUserStripeAllocation(ASTailArrayIdx asTailArrayIdx)
+    bool _IsUserStripeAllocation(ASTailArrayIdx asTailArrayIdx)
     {
         return (asTailArrayIdx < MAX_VOLUME_COUNT);
     }

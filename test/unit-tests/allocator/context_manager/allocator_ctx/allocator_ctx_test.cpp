@@ -421,11 +421,9 @@ TEST(AllocatorCtx, BeforeFlush_TestSimpleSetter)
     NiceMock<MockSegmentStates>* segStates = new NiceMock<MockSegmentStates>();
     NiceMock<MockSegmentLock>* segLocks = new NiceMock<MockSegmentLock>();
     AllocatorCtx allocCtx(allocBitmap, segStates, segLocks, nullptr, "");
-
     EXPECT_CALL(*allocBitmap, GetNumBitsSet);
     // when
     allocCtx.BeforeFlush(0, nullptr);
-
     delete allocBitmap;
     delete segStates;
     delete segLocks;
