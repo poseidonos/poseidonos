@@ -55,8 +55,10 @@ protected:
     bool _CheckLogInTheList(LogHandlerInterface* log);
     void _AddToList(LogWriteContext* context);
 
+    const int NUM_LOG_GROUPS = 2;
     const uint64_t LOG_BUFFER_SIZE = 128 * 1024;
-    const uint64_t LOG_GROUP_SIZE = LOG_BUFFER_SIZE / 2;
+    const uint64_t LOG_GROUP_SIZE = LOG_BUFFER_SIZE / NUM_LOG_GROUPS;
+
     const int TEST_VOLUME_ID = 1;
 
     NiceMock<MockJournalConfiguration> config;
@@ -67,6 +69,8 @@ protected:
     std::list<LogHandlerInterface*> addedLogs;
 
 private:
+    int _PrepareLogBuffer(void);
+
     TestInfo testInfo;
     std::atomic<int> numLogsWritten;
 };

@@ -46,7 +46,6 @@ namespace pos
 JournalLogBuffer::JournalLogBuffer(void)
 : config(nullptr),
   numInitializedLogGroup(0),
-  logBufferLoaded(false),
   logFile(nullptr),
   initializedDataBuffer(nullptr)
 {
@@ -74,55 +73,79 @@ JournalLogBuffer::~JournalLogBuffer(void)
     delete logFile;
 }
 
+bool
+JournalLogBuffer::DoesLogFileExist(void)
+{
+    return logFile->DoesFileExist();
+}
+
+int
+JournalLogBuffer::Create(uint64_t logBufferSize)
+{
+    if (logFile->DoesFileExist() == true)
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED,
+            "Log buffer already exists");
+        return -1 * (int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED;
+    }
+
+    int ret = logFile->Create(logBufferSize, StorageOpt::NVRAM);
+    if (ret != 0)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED,
+            "Failed to create log buffer");
+        return ret;
+    }
+
+    ret = logFile->Open();
+    if (ret != 0)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
+            "Failed to open log buffer");
+        return ret;
+    }
+
+    POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_CREATED), "Log buffer is created");
+    return ret;
+}
+
+int
+JournalLogBuffer::Open(uint64_t& logBufferSize)
+{
+    if (logFile->DoesFileExist() == false)
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
+            "Log buffer does not exist");
+        return (-1 * (int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED);
+    }
+
+    int ret = logFile->Open();
+    if (ret != 0)
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
+            "Failed to open log buffer");
+        return ret;
+    }
+
+    logBufferSize = logFile->GetFileSize();
+
+    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_LOG_BUFFER_LOADED,
+        "Journal log buffer is loaded");
+    return ret;
+}
+
 int
 JournalLogBuffer::Init(JournalConfiguration* journalConfiguration)
 {
-    int ret = 0;
     config = journalConfiguration;
-
-    if (logFile->DoesFileExist() == false)
-    {
-        ret = logFile->Create(config->GetLogBufferSize(), StorageOpt::NVRAM);
-        if (ret != 0)
-        {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED,
-                "Failed to create log buffer");
-            return ret;
-        }
-
-        ret = logFile->Open();
-        if (ret != 0)
-        {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
-                "Failed to open log buffer");
-            return ret;
-        }
-
-        POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_CREATED), "Log buffer is created");
-    }
-    else
-    {
-        int ret = logFile->Open();
-        if (ret != 0)
-        {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
-                "Failed to open log buffer");
-            return ret;
-        }
-        else
-        {
-            _LoadBufferSize();
-            logBufferLoaded = true;
-        }
-        ret = (int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_LOADED;
-    }
 
     assert(initializedDataBuffer == nullptr);
 
     uint64_t groupSize = config->GetLogGroupSize();
     initializedDataBuffer = new char[groupSize];
     memset(initializedDataBuffer, 0xFF, groupSize);
-    return ret;
+
+    return 0;
 }
 
 void
@@ -162,15 +185,6 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
     }
 
     return ret;
-}
-
-void
-JournalLogBuffer::_LoadBufferSize(void)
-{
-    uint64_t bufferSize = logFile->GetFileSize();
-    assert(bufferSize != 0);
-
-    config->UpdateLogBufferSize(bufferSize);
 }
 
 int

@@ -34,6 +34,12 @@ JournalManagerSpy::~JournalManagerSpy(void)
 int
 JournalManagerSpy::InitializeForTest(Mapper* mapper, Allocator* allocator, IVolumeManager* volumeManager)
 {
+    int ret = JournalManager::_InitConfigAndPrepareLogBuffer(nullptr);
+    if (ret < 0)
+    {
+        return ret;
+    }
+
     _InitModules(mapper->GetIVSAMap(), mapper->GetIStripeMap(),
         mapper->GetIMapFlush(),
         allocator->GetIBlockAllocator(),
@@ -41,10 +47,9 @@ JournalManagerSpy::InitializeForTest(Mapper* mapper, Allocator* allocator, IVolu
         allocator->GetIContextManager(), allocator->GetIContextReplayer(),
         volumeManager);
 
-    int ret = JournalManager::_Init();
-    if (ret < 0)
+    if (journalManagerStatus != WAITING_TO_BE_REPLAYED)
     {
-        return ret;
+        ret = JournalManager::_Reset();
     }
 
     LogGroupReleaserSpy* releaserTester =
@@ -132,8 +137,15 @@ JournalManagerSpy::GetLogs(LogList& logList)
     {
         config->Init();
 
-        int ret = logBuffer->Init(config);
-        assert (ret == 0);
+        bool fileExist = logBuffer->DoesLogFileExist();
+        if (fileExist == false)
+        {
+            return 0;
+        }
+        else
+        {
+            return _GetLogsFromBuffer(logList);
+        }
     }
     return _GetLogsFromBuffer(logList);
 }

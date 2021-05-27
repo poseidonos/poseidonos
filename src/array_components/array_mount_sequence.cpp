@@ -32,15 +32,15 @@
 
 #include "src/logger/logger.h"
 #include "array_mount_sequence.h"
-#include "src/include/pos_event_id.h"
-#include "src/array_models/interface/i_mount_sequence.h"
-#include "src/array_components/mount_temp/mount_temp.h"
+
 #include "src/array/interface/i_abr_control.h"
+#include "src/array_components/mount_temp/mount_temp.h"
+#include "src/array_models/interface/i_mount_sequence.h"
+#include "src/include/pos_event_id.h"
 #include "src/volume/volume_manager.h"
 
 namespace pos
 {
-
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
     IAbrControl* abr, IStateControl* iState, string name, IVolumeManager* volMgr)
 : ArrayMountSequence(seq, new MountTemp(abr, name), iState, name,
@@ -87,11 +87,19 @@ ArrayMountSequence::~ArrayMountSequence(void)
     sequence.clear();
 }
 
-int ArrayMountSequence::Mount(void)
+int
+ArrayMountSequence::Mount(void)
 {
     POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Entering ArrayMountSequence.Mount for {}", arrayName);
     auto it = sequence.begin();
     int ret = (int)POS_EVENT_ID::SUCCESS;
+
+    StateContext* currState = state->GetState();
+    if (currState->ToStateType() >= StateEnum::NORMAL)
+    {
+        ret = (int)POS_EVENT_ID::ARRAY_ALD_MOUNTED;
+        return ret;
+    }
 
     state->Invoke(mountState);
     bool res = _WaitState(mountState);
@@ -143,15 +151,21 @@ int ArrayMountSequence::Mount(void)
 
 error:
     POS_TRACE_WARN(ret, "Ran into an error while executing array mount sequence for {}", arrayName);
-    for (; it != sequence.begin(); --it) // TODO(srm): the first sequence wouldn't call Dispose(). fix this unless intended.
+    while (true)
     {
         (*it)->Dispose();
+        if (it == sequence.begin())
+        {
+            break;
+        }
+        --it;
     }
     state->Remove(mountState);
     return ret;
 }
 
-int ArrayMountSequence::Unmount(void)
+int
+ArrayMountSequence::Unmount(void)
 {
     POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Entering ArrayMountSequence.Unmount for {}", arrayName);
     StateContext* currState = state->GetState();
@@ -167,6 +181,7 @@ int ArrayMountSequence::Unmount(void)
     bool res = _WaitState(unmountState);
     if (res == false)
     {
+        state->Remove(unmountState);
         return (int)POS_EVENT_ID::ARRAY_UNMOUNT_PRIORITY_ERROR;
     }
 
@@ -195,7 +210,8 @@ int ArrayMountSequence::Unmount(void)
     return (int)POS_EVENT_ID::SUCCESS;
 }
 
-void ArrayMountSequence::Shutdown(void)
+void
+ArrayMountSequence::Shutdown(void)
 {
     volMgr->DetachVolumes();
     for (auto it = sequence.rbegin(); it != sequence.rend(); ++it)
@@ -206,7 +222,8 @@ void ArrayMountSequence::Shutdown(void)
     temp->Shutdown();
 }
 
-void ArrayMountSequence::StateChanged(StateContext* prev, StateContext* next)
+void
+ArrayMountSequence::StateChanged(StateContext* prev, StateContext* next)
 {
     std::unique_lock<std::mutex> lock(mtx);
     cv.notify_all();
@@ -217,7 +234,8 @@ void ArrayMountSequence::StateChanged(StateContext* prev, StateContext* next)
     }
 }
 
-bool ArrayMountSequence::_WaitState(StateContext* goal)
+bool
+ArrayMountSequence::_WaitState(StateContext* goal)
 {
     int timeout_sec = 3;
     std::unique_lock<std::mutex> lock(mtx);

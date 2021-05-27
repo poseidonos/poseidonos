@@ -34,13 +34,14 @@ TEST(ArrayMountSequence, Mount_testIfEverySequenceIsInitialized)
     vector<IMountSequence*> seqVec = {&mockSeq1, &mockSeq2, &mockSeq3};
     MockStateControl stateControl;
     MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array");
+    StateContext* mockDefaultState = new StateContext("sender", SituationEnum::DEFAULT);
     StateContext* mockMountState = new StateContext("sender", SituationEnum::TRY_MOUNT);
 
     EXPECT_CALL(stateControl, Subscribe).Times(1);
     EXPECT_CALL(stateControl, Unsubscribe).Times(1);
     EXPECT_CALL(stateControl, Invoke).Times(2); // first for mount and second for normal. Ideally, I'd like to capture the param and assert on it, but in a later PR
     EXPECT_CALL(stateControl, GetState)
-        .WillOnce(Return(mockMountState));
+        .WillOnce(Return(mockDefaultState)).WillOnce(Return(mockMountState));
     EXPECT_CALL(mockSeq1, Init).WillOnce(Return(0));
     EXPECT_CALL(*mockMntTmp, Mount1).WillOnce(Return(0));
     EXPECT_CALL(mockSeq2, Init).WillOnce(Return(0));
@@ -63,6 +64,7 @@ TEST(ArrayMountSequence, Mount_testIfPartiallyFailedSequenceLeadsToDisposeOnEver
     vector<IMountSequence*> seqVec = {&mockSeq1, &mockSeq2, &mockSeq3};
     MockStateControl stateControl;
     MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array");
+    StateContext* mockDefaultState = new StateContext("sender", SituationEnum::DEFAULT);
     StateContext* mockMountState = new StateContext("sender", SituationEnum::TRY_MOUNT);
 
     int SEQ3_INIT_FAILURE = 123;
@@ -70,13 +72,13 @@ TEST(ArrayMountSequence, Mount_testIfPartiallyFailedSequenceLeadsToDisposeOnEver
     EXPECT_CALL(stateControl, Unsubscribe).Times(1);
     EXPECT_CALL(stateControl, Invoke).Times(1); // only for mount (unlike all success case)
     EXPECT_CALL(stateControl, GetState)
-        .WillOnce(Return(mockMountState));
+        .WillOnce(Return(mockDefaultState)).WillOnce(Return(mockMountState));
     EXPECT_CALL(mockSeq1, Init).WillOnce(Return(0));
     EXPECT_CALL(*mockMntTmp, Mount1).WillOnce(Return(0));
     EXPECT_CALL(mockSeq2, Init).WillOnce(Return(0));
     EXPECT_CALL(mockSeq3, Init).WillOnce(Return(SEQ3_INIT_FAILURE));
 
-    // EXPECT_CALL(mockSeq1, Dispose).Times(1); // TODO(srm): fix this if not intended. Do we want to skip Dispose() of the first sequence?
+    EXPECT_CALL(mockSeq1, Dispose).Times(1);
     EXPECT_CALL(mockSeq2, Dispose).Times(1);
     EXPECT_CALL(mockSeq3, Dispose).Times(1);
     EXPECT_CALL(stateControl, Remove).Times(1);

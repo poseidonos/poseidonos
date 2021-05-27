@@ -39,14 +39,15 @@
 
 namespace pos
 {
+class MetaFsFileControlApi;
+
 class JournalConfiguration
 {
 public:
-    JournalConfiguration(void) = default;
-    explicit JournalConfiguration(std::string arrayName);
+    JournalConfiguration(void);
     virtual ~JournalConfiguration(void);
 
-    virtual void Init(void);
+    virtual int Init(uint64_t logBufferSize = 0, MetaFsFileControlApi* metaFsCtrl = nullptr);
 
     // Can be called before initialized
     virtual bool IsEnabled(void);
@@ -59,11 +60,10 @@ public:
 
     virtual LogGroupLayout GetLogBufferLayout(int groupId);
 
-    virtual void UpdateLogBufferSize(uint64_t size);
-
 protected:
-    void _ConfigureLogBufferSize(void);
+    int _ConfigureLogBufferSize(uint64_t& size);
     uint64_t _GetAlignedSize(uint64_t size);
+    void _SetLogBufferSize(uint64_t size);
 
     bool journalEnabled;
     uint64_t logBufferSizeInConfig;
@@ -76,15 +76,13 @@ private:
     bool _IsDebugEnabled(void);
     uint64_t _ReadLogBufferSize(void);
 
-    void _ReadMetaFsConfiguration(void);
+    void _ReadMetaFsConfiguration(MetaFsFileControlApi* metaFsCtrl);
 
     bool debugEnabled;
 
     int numLogGroups;
     uint64_t logBufferSize;
     LogBufferLayout bufferLayout;
-
-    std::string arrayName;
 
     const uint64_t SIZE_MB = 1024 * 1024;
 };

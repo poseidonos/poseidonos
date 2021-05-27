@@ -46,6 +46,8 @@ JournalLogBufferIntegrationTest::SetUp(void)
 
     logBuffer = new JournalLogBuffer(new MockFileIntf(GetLogFileName(), "POSArray"));
     logBuffer->Delete();
+
+    _PrepareLogBuffer();
     logBuffer->Init(&config);
     logBuffer->SyncResetAll();
 }
@@ -69,7 +71,31 @@ JournalLogBufferIntegrationTest::SimulateSPOR(void)
 {
     delete logBuffer;
     logBuffer = new JournalLogBuffer(new MockFileIntf(GetLogFileName(), "POSArray"));
+    _PrepareLogBuffer();
     logBuffer->Init(&config);
+}
+
+int
+JournalLogBufferIntegrationTest::_PrepareLogBuffer(void)
+{
+    int result = 0;
+    if (logBuffer->DoesLogFileExist() == true)
+    {
+        uint64_t logBufferSize = 0;
+        result = logBuffer->Open(logBufferSize);
+        if (result < 0)
+        {
+            return result;
+        }
+
+        EXPECT_CALL(config, GetLogBufferSize).WillRepeatedly(Return(logBufferSize));
+        EXPECT_CALL(config, GetLogGroupSize).WillRepeatedly(Return(logBufferSize / NUM_LOG_GROUPS));
+    }
+    else
+    {
+        result = logBuffer->Create(LOG_BUFFER_SIZE);
+    }
+    return result;
 }
 
 LogWriteContext*

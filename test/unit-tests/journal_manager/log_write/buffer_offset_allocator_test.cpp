@@ -65,7 +65,7 @@ TEST(BufferOffsetAllocator, Allocate_AllocateBuffer)
 {
     // Given
     NiceMock<MockLogGroupReleaser>* releaser = new NiceMock<MockLogGroupReleaser>;
-    NiceMock<MockJournalConfiguration>* config = new NiceMock<MockJournalConfiguration>(ARRAY_NAME);
+    NiceMock<MockJournalConfiguration>* config = new NiceMock<MockJournalConfiguration>;
     BufferOffsetAllocator* allocator = new BufferOffsetAllocator();
 
     // When : Request a buffer allocation with in the total size of log buffer
@@ -100,7 +100,7 @@ TEST(BufferOffsetAllocator, Allocate_AllocateBufferWithCheckpoint)
 {
     // Given
     NiceMock<MockLogGroupReleaser>* releaser = new NiceMock<MockLogGroupReleaser>;
-    NiceMock<MockJournalConfiguration>* config = new NiceMock<MockJournalConfiguration>(ARRAY_NAME);
+    NiceMock<MockJournalConfiguration>* config = new NiceMock<MockJournalConfiguration>;
     BufferOffsetAllocator* allocator = new BufferOffsetAllocator();
 
     // When : Request a buffer allocation over the total size of log buffer

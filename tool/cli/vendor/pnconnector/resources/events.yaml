@@ -537,7 +537,7 @@ modules:
     info:
       - code: 2500
         level: ERROR
-        message: Array is alreday mounted.
+        message: Array is already mounted.
         problem:
         solution:
       - code: 2501
@@ -736,9 +736,9 @@ modules:
         solution: Enter the Array name that meets the Array name rules
       - code: 2580
         level: ERROR
-        message: failed to mount array
-        problem: array already has been mounted
-        solution: unmount array first
+        message: Failed to exit poseidonos because of mounted array
+        problem: Some array is not unmounted
+        solution: Unmount array first
       - code: 2581
         level: ERROR
         message: failed to unmount array
@@ -754,6 +754,11 @@ modules:
         message: failed to unmount array
         problem: higher priority job such as rebuilding is progressing.
         solution: try again after a while
+      - code: 2586
+        level: WARN
+        message: Failed to mount array
+        problem: Array already mounted
+        solution:
   - name: "Rebuild"
     count: 100
     idStart: 2800

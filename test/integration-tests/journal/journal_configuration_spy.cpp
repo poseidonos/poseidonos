@@ -3,7 +3,7 @@
 namespace pos
 {
 JournalConfigurationSpy::JournalConfigurationSpy(bool isJournalEnabled, uint64_t logBufferSize, uint64_t pageSize, uint64_t partitionSize)
-: JournalConfiguration("")
+: JournalConfiguration()
 {
     journalEnabled = isJournalEnabled;
     logBufferSizeInConfig = logBufferSize;
@@ -16,10 +16,19 @@ JournalConfigurationSpy::~JournalConfigurationSpy(void)
 {
 }
 
-void
-JournalConfigurationSpy::Init(void)
+int
+JournalConfigurationSpy::Init(uint64_t loadedBufferSize, MetaFsFileControlApi* metaFsCtrl)
 {
-    _ConfigureLogBufferSize();
+    if (loadedBufferSize == 0)
+    {
+        _SetLogBufferSize(logBufferSizeInConfig);
+    }
+    else
+    {
+        _SetLogBufferSize(loadedBufferSize);
+    }
+
+    return 0;
 }
 
 } // namespace pos
