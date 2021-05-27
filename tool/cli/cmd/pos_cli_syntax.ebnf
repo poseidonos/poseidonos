@@ -1,0 +1,62 @@
+Letter = "A" | "B" | "C" | "D" | "E" | "F" | "G"
+       | "H" | "I" | "J" | "K" | "L" | "M" | "N"
+       | "O" | "P" | "Q" | "R" | "S" | "T" | "U"
+       | "V" | "W" | "X" | "Y" | "Z" | "a" | "b"
+       | "c" | "d" | "e" | "f" | "g" | "h" | "i"
+       | "j" | "k" | "l" | "m" | "n" | "o" | "p"
+       | "q" | "r" | "s" | "t" | "u" | "v" | "w"
+       | "x" | "y" | "z" .
+Digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" .
+Symbol = "[" | "]" | "{" | "}" | "(" | ")" | "<" | ">" | "=" | "|" | "." | "," | ";" .
+WhiteSpace = " " .
+ArrayName = Letter {Letter | Digit | "-" | "_"} .
+DeviceName = Letter {Letter | Digit | "-" | "_"} . 
+DeviceType = "uram" | "pram" .
+DeviceNameList = DeviceName [{"," DeviceName}] .
+VolumeName = Letter {Letter | Digit | "-" | "_"} . 
+TargetNVMSubsystemNVMeQualifiedName = Letter {Letter | Digit | "-" | "_"} .
+RaidType = ["RAID5" | "raid5"] .
+
+VolumeSize = {Digit} ("GB" | "gb" | "MB" | "mb" | "KB" | "kb" | "b" | "B") .
+IOPS = {Digit} .
+Bandwidth = {Digit} "MB/s".
+
+ApplicationName = "poseidonos-cli" . 
+Cmd = ApplicationName WhiteSpace (ArrayCmd | VolumeCmd | DeviceCmd | SystemCmd | LoggerCmd | SubsystemCmd) .
+
+ArrayCmd = "array" WhiteSpace (MountArrayCmd | UnmountArrayCmd | ListArrayCmd | AddSpareCmd | RemoveSpareCmd | DeleteArrayCmd | CreateArrayCmd) .
+MountArrayCmd = "mount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
+UnmountArrayCmd = "unmount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
+ListArrayCmd = "list" [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] ["--detail"] .
+AddSpareCmd = "addspare" WhiteSpace "--spare" DeviceName ("--array-name" | "-a") ArrayName .
+RemoveSpareCmd = "rmspare" WhiteSpace "--spare-device" DeviceName ("--array-name" | "-a")  ArrayName .
+CreateArrayCmd = "create" ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace "--buffer" WhiteSpace DeviceName WhiteSpace "--data-devs" WhiteSpace DeviceNameList WhiteSpace "--spare" WhiteSpace DeviceName [WhiteSpace "--raid" WhiteSpace RaidType] .
+DeleteArrayCmd = "delete" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
+
+VolumeCmd = "volume" WhiteSpace (VolumeCreateCmd | VolumeDeleteCmd | VolumeMountCmd | VolumeUnmountCmd | VolumeListCmd | VolumeSetPropertyCmd | VolumeRenameCmd) .
+VolumeCreateCmd = "create" WhiteSpace "--volume-name" WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace "--size" WhiteSpace VolumeSize [WhiteSpace "--maxiops" WhiteSpace IOPS] [WhiteSpace "--maxbw" WhiteSpace Bandwidth] .
+VolumeDeleteCmd = "delete" WhiteSpace "--volume-name" WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
+VolumeMountCmd = "mount" WhiteSpace "--volume-name" WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName [WhiteSpace "--subnqn" WhiteSpace TargetNVMSubsystemNVMeQualifiedName] .
+VolumeUnmountCmd = "unmount" WhiteSpace "--volume-name" WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
+VolumeListCmd = "list" [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] .
+VolumeSetPropertyCmd = "set-property" WhiteSpace "--volume-name" WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName [WhiteSpace "--maxiops" WhiteSpace IOPS] [WhiteSpace "--maxbw" Bandwidth] .
+VolumeRenameCmd = "rename" WhiteSpace "--volume-name" WhiteSpace VolumeName WhiteSpace "--new-volume-name" WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
+
+DeviceCmd = "device" WhiteSpace (CreateDeviceCmd | ScanDeviceCmd | ListDeviceCmd | SMARTCmd) . 
+CreateDeviceCmd = "create" WhiteSpace "--device-name" DeviceName WhiteSpace "--num-blocks" Whitespace {Digit} WhiteSpace "--block-size" WhiteSpace {Digit} WhiteSpace "--device-type" WhiteSpace DeviceType.
+ScanDeviceCmd = "scan" . 
+ListDeviceCmd = "list" . 
+SMARTCmd = "smart" WhiteSpace "--device-name" WhiteSpace DeviceName .
+
+SystemCmd = "system" WhiteSpace (StartSystemCmd | StopSystemCmd | SystemInfoCmd | SetSystemPropertyCmd) .
+StartSystemCmd = "start" .
+StopSystemCmd = "stop" .
+SystemInfoCmd = "info" .
+SetSystemPropertyCmd = "set-property" [WhiteSpace "--rebuild-impact" WhiteSpace ("high" | "medium" | "low")] .
+
+LoggerCmd = "logger" (SetLogLevelCmd | GetLogLeveCmd | ApplyLogFilterCmd | LoggerInfoCmd) .
+SetLogLevelCmd = "set-level" WhiteSpace "--level" LogLevel . 
+LogLevel = "error" | "debug" .
+GetLogLeveCmd = "get-level" .
+ApplyLogFilterCmd = "apply-filter"
+LoggerInfoCmd = "info" .

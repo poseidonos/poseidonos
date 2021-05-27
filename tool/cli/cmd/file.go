@@ -47,7 +47,7 @@ Port : 18716
 
 func init() {
 
-	rootCmd.AddCommand(fileCmd)
+	RootCmd.AddCommand(fileCmd)
 }
 
 func FileInput(cmd *cobra.Command, args []string) {

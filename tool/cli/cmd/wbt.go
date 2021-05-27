@@ -87,7 +87,7 @@ Port : 18716
 
 func init() {
 
-	rootCmd.AddCommand(wbtCmd)
+	RootCmd.AddCommand(wbtCmd)
 
 	for i, _ := range argList {
 		wbtCmd.PersistentFlags().StringVarP(&argList[i].value, argList[i].name, argList[i].short, "", "set "+argList[i].name)
