@@ -36,12 +36,14 @@
 #include <list>
 #include <mutex>
 
-#include "checkpoint_observer.h"
+#include "src/journal_manager/checkpoint/checkpoint_observer.h"
+#include "src/journal_manager/log/log_group_footer.h"
 #include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
 #include "src/journal_manager/status/i_checkpoint_status.h"
 
 namespace pos
 {
+class JournalConfiguration;
 class JournalLogBuffer;
 class CheckpointHandler;
 class DirtyMapManager;
@@ -59,7 +61,8 @@ public:
     explicit LogGroupReleaser(CheckpointHandler* checkpointHandler);
     virtual ~LogGroupReleaser(void);
 
-    virtual void Init(LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer,
+    virtual void Init(JournalConfiguration* config,
+        LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer,
         DirtyMapManager* dirtyPage, CallbackSequenceController* sequencer,
         IMapFlush* mapFlush, IContextManager* contextManager, EventScheduler* scheduler);
     void Reset(void);
@@ -87,6 +90,9 @@ protected:
 
     void _ResetFlushingLogGroup(void);
 
+    void _CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t& footerOffset);
+
+    JournalConfiguration* config;
     LogBufferWriteDoneNotifier* releaseNotifier;
 
     JournalLogBuffer* logBuffer;
@@ -100,6 +106,8 @@ protected:
 
     std::atomic<bool> checkpointTriggerInProgress;
     CheckpointHandler* checkpointHandler;
+
+    IContextManager* contextManager;
     EventScheduler* eventScheduler;
 };
 

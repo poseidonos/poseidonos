@@ -421,8 +421,8 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     logFilledNotifier->Register(bufferAllocator);
     logFilledNotifier->Register(logWriteHandler);
 
-    logGroupReleaser->Init(logFilledNotifier, logBuffer, dirtyMapManager, sequenceController,
-        mapFlush, contextManager, EventSchedulerSingleton::Instance());
+    logGroupReleaser->Init(config, logFilledNotifier, logBuffer, dirtyMapManager,
+        sequenceController, mapFlush, contextManager, EventSchedulerSingleton::Instance());
 
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
     volumeEventHandler->Init(logFactory, dirtyMapManager, logWriteHandler, config,

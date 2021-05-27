@@ -12,8 +12,9 @@ class MockLogGroupReleaser : public LogGroupReleaser
 {
 public:
     using LogGroupReleaser::LogGroupReleaser;
-    MOCK_METHOD(void, Init, (LogBufferWriteDoneNotifier * notified, JournalLogBuffer* logBuffer,
-        DirtyMapManager* dirtyPage, CallbackSequenceController* sequencer, IMapFlush* mapFlush,
+    MOCK_METHOD(void, Init, (JournalConfiguration* config, LogBufferWriteDoneNotifier* notified,
+        JournalLogBuffer* logBuffer, DirtyMapManager* dirtyPage,
+        CallbackSequenceController* sequencer, IMapFlush* mapFlush,
         IContextManager* contextManager, EventScheduler* scheduler), (override));
     MOCK_METHOD(void, AddToFullLogGroup, (int groupId), (override));
     MOCK_METHOD(void, CheckpointCompleted, (), (override));
@@ -22,6 +23,7 @@ public:
     MOCK_METHOD(CheckpointStatus, GetStatus, (), (override));
     MOCK_METHOD(void, LogGroupResetCompleted, (int logGroupId), (override));
     MOCK_METHOD(void, _FlushNextLogGroup, (), (override));
+    MOCK_METHOD(void, _TriggerCheckpoint, (), (override));
 };
 
 } // namespace pos

@@ -18,6 +18,9 @@ public:
     MOCK_METHOD(int, SyncResetAll, (), (override));
     MOCK_METHOD(int, AsyncReset, (int id, EventSmartPtr callbackEvent), (override));
     MOCK_METHOD(bool, DoesLogFileExist, (), (override));
+    MOCK_METHOD(int, InternalIo, (LogBufferIoContext* context), (override));
+    MOCK_METHOD(void, InternalIoDone, (AsyncMetaFileIoCtx* ctx), (override));
+    MOCK_METHOD(void, LogGroupResetCompleted, (int logGroupId), (override));
 };
 
 } // namespace pos

@@ -40,6 +40,8 @@
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
+#include "src/journal_manager/log_buffer/log_group_footer_write_event.h"
 #include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
 #include "src/journal_manager/log_write/log_write_handler.h"
 #include "src/logger/logger.h"
@@ -54,13 +56,15 @@ LogGroupReleaser::LogGroupReleaser(void)
 
 // Constructor for unit test
 LogGroupReleaser::LogGroupReleaser(CheckpointHandler* checkpointHandler)
-: releaseNotifier(nullptr),
+: config(nullptr),
+  releaseNotifier(nullptr),
   logBuffer(nullptr),
   dirtyPageManager(nullptr),
   sequenceController(nullptr),
   flushingLogGroupId(-1),
   checkpointTriggerInProgress(false),
   checkpointHandler(checkpointHandler),
+  contextManager(nullptr),
   eventScheduler(nullptr)
 {
 }
@@ -74,17 +78,21 @@ LogGroupReleaser::~LogGroupReleaser(void)
 }
 
 void
-LogGroupReleaser::Init(LogBufferWriteDoneNotifier* released,
+LogGroupReleaser::Init(JournalConfiguration* journalConfiguration,
+    LogBufferWriteDoneNotifier* released,
     JournalLogBuffer* buffer, DirtyMapManager* dirtyPage,
     CallbackSequenceController* sequencer,
-    IMapFlush* mapFlush, IContextManager* contextManager, EventScheduler* scheduler)
+    IMapFlush* mapFlush, IContextManager* ctxManager, EventScheduler* scheduler)
 {
+    config = journalConfiguration;
     releaseNotifier = released;
     logBuffer = buffer;
     dirtyPageManager = dirtyPage;
     sequenceController = sequencer;
 
-    checkpointHandler->Init(mapFlush, contextManager);
+    checkpointHandler->Init(mapFlush, ctxManager);
+
+    contextManager = ctxManager;
     eventScheduler = scheduler;
 }
 
@@ -110,14 +118,6 @@ LogGroupReleaser::_AddToFullLogGroupList(int groupId)
 }
 
 void
-LogGroupReleaser::_TriggerCheckpoint(void)
-{
-    // Insert the checkpoint event to event sheduler to be called in back-end write path
-    EventSmartPtr event(new CheckpointSubmission(dirtyPageManager, checkpointHandler, sequenceController, flushingLogGroupId));
-    eventScheduler->EnqueueEvent(event);
-}
-
-void
 LogGroupReleaser::_FlushNextLogGroup(void)
 {
     if ((flushingLogGroupId == -1) && (_HasFullLogGroup()))
@@ -127,9 +127,35 @@ LogGroupReleaser::_FlushNextLogGroup(void)
             _UpdateFlushingLogGroup();
             assert(flushingLogGroupId != -1);
             checkpointTriggerInProgress = false;
+
             _TriggerCheckpoint();
         }
     }
+}
+
+void
+LogGroupReleaser::_TriggerCheckpoint(void)
+{
+    LogGroupFooter footer;
+    uint64_t footerOffset;
+
+    _CreateFlushingLogGroupFooter(footer, footerOffset);
+
+    EventSmartPtr callbackEvent(new CheckpointSubmission(dirtyPageManager,
+        checkpointHandler, sequenceController, flushingLogGroupId));
+
+    EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footer, footerOffset, flushingLogGroupId, callbackEvent));
+    eventScheduler->EnqueueEvent(event);
+}
+
+void
+LogGroupReleaser::_CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t& footerOffset)
+{
+    LogGroupLayout layout = config->GetLogBufferLayout(flushingLogGroupId);
+    uint64_t version = contextManager->GetStoredContextVersion(SEGMENT_CTX);
+
+    footer.lastCheckpointedSeginfoVersion = version;
+    footerOffset = layout.footerStartOffset;
 }
 
 bool

@@ -32,21 +32,20 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "src/journal_manager/log/log_group_footer.h"
+#include "src/journal_manager/log_buffer/log_buffer_io_context.h"
 
 namespace pos
 {
-static const uint32_t LOG_GROUP_FOOTER_VALID_MARK = 0xBEBEBEBE;
-
-struct LogGroupFooter
+class LogGroupFooterWriteContext : public LogBufferIoContext
 {
-    uint64_t MARK = LOG_GROUP_FOOTER_VALID_MARK;
-    uint64_t lastCheckpointedSeginfoVersion;
+public:
+    LogGroupFooterWriteContext(int id, EventSmartPtr callback);
+    virtual ~LogGroupFooterWriteContext(void);
 
-    inline bool
-    operator==(LogGroupFooter input) const
-    {
-        return (input.MARK == MARK && input.lastCheckpointedSeginfoVersion == lastCheckpointedSeginfoVersion);
-    }
+    void SetIoRequest(uint64_t offset, LogGroupFooter footer);
+
+private:
+    LogGroupFooter* data;
 };
 } // namespace pos

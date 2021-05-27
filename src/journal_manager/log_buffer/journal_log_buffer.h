@@ -40,7 +40,7 @@
 namespace pos
 {
 class LogWriteContext;
-class LogGroupResetContext;
+class LogBufferIoContext;
 
 class JournalLogBuffer : public ILogGroupResetCompleted
 {
@@ -69,7 +69,9 @@ public:
 
     virtual int SyncResetAll(void);
     virtual int AsyncReset(int id, EventSmartPtr callbackEvent);
-    void AsyncResetDone(AsyncMetaFileIoCtx* ctx);
+
+    virtual int InternalIo(LogBufferIoContext* context);
+    virtual void InternalIoDone(AsyncMetaFileIoCtx* ctx);
 
     int Delete(void); // TODO(huijeong.kim): move to tester code
 
@@ -78,7 +80,6 @@ public:
 
 private:
     void _LoadBufferSize(void);
-    int _AsyncReset(LogGroupResetContext* context);
 
     inline uint64_t
     _GetFileOffset(int groupId, uint64_t offset)

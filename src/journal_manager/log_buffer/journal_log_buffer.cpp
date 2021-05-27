@@ -242,19 +242,19 @@ int
 JournalLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
 {
     uint64_t groupSize = config->GetLogGroupSize();
-    MetaIoCbPtr callbackFunc = std::bind(&JournalLogBuffer::AsyncResetDone, this, std::placeholders::_1);
-
     LogGroupResetContext* resetRequest = new LogGroupResetContext(id, callbackEvent);
     resetRequest->SetIoRequest(_GetFileOffset(id, 0), groupSize, initializedDataBuffer);
-    resetRequest->SetInternalCallback(callbackFunc);
 
-    return _AsyncReset(resetRequest);
+    return InternalIo(resetRequest);
 }
 
 int
-JournalLogBuffer::_AsyncReset(LogGroupResetContext* context)
+JournalLogBuffer::InternalIo(LogBufferIoContext* context)
 {
+    MetaIoCbPtr callbackFunc = std::bind(&JournalLogBuffer::InternalIoDone, this, std::placeholders::_1);
+    context->SetInternalCallback(callbackFunc);
     context->SetFile(logFile->GetFd());
+
     int ret = logFile->AsyncIO(context);
     if (ret != 0)
     {
@@ -265,7 +265,7 @@ JournalLogBuffer::_AsyncReset(LogGroupResetContext* context)
 }
 
 void
-JournalLogBuffer::AsyncResetDone(AsyncMetaFileIoCtx* ctx)
+JournalLogBuffer::InternalIoDone(AsyncMetaFileIoCtx* ctx)
 {
     LogGroupResetContext* context = reinterpret_cast<LogGroupResetContext*>(ctx);
     context->IoDone();

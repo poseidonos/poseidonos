@@ -30,23 +30,29 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <stdint.h>
+#include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
 
 namespace pos
 {
-static const uint32_t LOG_GROUP_FOOTER_VALID_MARK = 0xBEBEBEBE;
-
-struct LogGroupFooter
+LogGroupFooterWriteContext::LogGroupFooterWriteContext(int id, EventSmartPtr callback)
+: LogBufferIoContext(id, callback)
 {
-    uint64_t MARK = LOG_GROUP_FOOTER_VALID_MARK;
-    uint64_t lastCheckpointedSeginfoVersion;
+    data = new LogGroupFooter();
+}
 
-    inline bool
-    operator==(LogGroupFooter input) const
-    {
-        return (input.MARK == MARK && input.lastCheckpointedSeginfoVersion == lastCheckpointedSeginfoVersion);
-    }
-};
+LogGroupFooterWriteContext::~LogGroupFooterWriteContext(void)
+{
+    delete data;
+}
+
+void
+LogGroupFooterWriteContext::SetIoRequest(uint64_t offset, LogGroupFooter footer)
+{
+    *data = footer;
+
+    this->fileOffset = offset;
+    this->length = sizeof(*data);
+    this->buffer = (char*)data;
+}
+
 } // namespace pos
