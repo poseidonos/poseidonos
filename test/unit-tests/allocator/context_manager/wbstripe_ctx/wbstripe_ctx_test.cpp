@@ -141,10 +141,10 @@ TEST(WbStripeCtx, SetAllocatedWbStripeCount_TestSimpleSetter)
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
     WbStripeCtx wbstripeCtx(allocBitmap, nullptr);
 
-    EXPECT_CALL(*allocBitmap, SetBit);
+    EXPECT_CALL(*allocBitmap, SetNumBitsSet);
 
     // when
-    wbstripeCtx.AllocWbStripe(50);
+    wbstripeCtx.SetAllocatedWbStripeCount(50);
 
     delete allocBitmap;
 }

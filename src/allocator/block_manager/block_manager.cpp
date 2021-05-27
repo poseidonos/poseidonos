@@ -58,7 +58,7 @@ BlockManager::BlockManager(SegmentCtx* segCtx_, AllocatorCtx* allocCtx_, WbStrip
 }
 
 BlockManager::BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName)
-: BlockManager(nullptr, nullptr, nullptr, info, contextManager, arrayName)
+: BlockManager(nullptr, nullptr, nullptr, info, ctxMgr, arrayName)
 {
     segCtx = contextManager->GetSegmentCtx();
     allocCtx = contextManager->GetAllocatorCtx();
