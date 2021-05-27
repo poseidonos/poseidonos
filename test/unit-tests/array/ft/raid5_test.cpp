@@ -97,7 +97,7 @@ TEST(Raid5, Convert_testIfParityBufferIsProperlyCalculated)
     Raid5 raid5(&physicalSize, physicalSize.blksPerChunk * 2 /* just to be large enough */);
 
     std::list<BufferEntry> buffers;
-    int NUM_BLOCKS = 2;
+    int NUM_BLOCKS = physicalSize.blksPerChunk;
     BufferEntry be1 = generateRandomBufferEntry(NUM_BLOCKS, false);
     BufferEntry be2 = generateRandomBufferEntry(NUM_BLOCKS, false);
     BufferEntry be3 = generateRandomBufferEntry(NUM_BLOCKS, false);
