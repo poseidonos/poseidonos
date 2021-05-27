@@ -43,17 +43,16 @@ namespace pos
 {
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
     IAbrControl* abr, IStateControl* iState, string name, IVolumeManager* volMgr)
-: ArrayMountSequence(seq, new MountTemp(abr, name), iState, name,
-    new StateContext(typeid(*this).name(), SituationEnum::TRY_MOUNT),
-    new StateContext(typeid(*this).name(), SituationEnum::TRY_UNMOUNT),
-    new StateContext(typeid(*this).name(), SituationEnum::NORMAL),
-    volMgr)
+: ArrayMountSequence(seq, new MountTemp(abr, name), iState, name, nullptr, nullptr, nullptr, volMgr)
 {
     // delegated to other constructor. The other constructor doesn't have IAbrControl in its
     // params because ArrayMountSequence uses IAbrControl just to instantiate MountTemp!
 
     // Please note that "VolumeServiceSingleton::Instance()->GetVolumeManager(name)" cannot be used in this context,
     // because VolumeManager may not have invoked "Init()" yet, leading to nullptr when we query against VolumeServiceSingleton.
+    mountState = new StateContext(typeid(*this).name(), SituationEnum::TRY_MOUNT);
+    unmountState = new StateContext(typeid(*this).name(), SituationEnum::TRY_UNMOUNT);
+    normalState = new StateContext(typeid(*this).name(), SituationEnum::NORMAL);
 }
 
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
