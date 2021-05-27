@@ -15,6 +15,7 @@ public:
     MOCK_METHOD(ArrayDeviceState, GetState, (), (override));
     MOCK_METHOD(void, SetState, (ArrayDeviceState state), (override));
     MOCK_METHOD(UblockSharedPtr, GetUblock, (), (override));
+    MOCK_METHOD(UBlockDevice*, GetUblockPtr, (), (override));
     MOCK_METHOD(void, SetUblock, (UblockSharedPtr uBlock), (override));
     MOCK_METHOD(bool, IsRebuilding, (), (override));
     MOCK_METHOD(void, SetRebuild, (bool rebuild), (override));

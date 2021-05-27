@@ -49,6 +49,7 @@ public:
     void SetState(ArrayDeviceState state) override;
 
     UblockSharedPtr GetUblock(void) override;
+    UBlockDevice* GetUblockPtr(void) override;
     void SetUblock(UblockSharedPtr uBlock) override;
 
     bool IsRebuilding(void) override;

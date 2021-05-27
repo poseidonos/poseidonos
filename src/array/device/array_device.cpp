@@ -64,6 +64,12 @@ ArrayDevice::GetUblock(void)
     return uBlock;
 }
 
+UBlockDevice*
+ArrayDevice::GetUblockPtr(void)
+{
+    return uBlock.get();
+}
+
 void
 ArrayDevice::SetUblock(UblockSharedPtr uBlock)
 {

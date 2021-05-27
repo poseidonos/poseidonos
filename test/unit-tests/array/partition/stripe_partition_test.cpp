@@ -216,7 +216,7 @@ TEST(StripePartition, Format_testIfThereAre4DeallocatesAnd4ReadsWhenThereAre4Nor
     EXPECT_CALL(*ublockDev4Shared.get(), GetName).WillRepeatedly(Return("dev4"));
 
     int cntSubmitIo = 0;
-    EXPECT_CALL(mockIoDispatcher, Submit).WillRepeatedly([&physicalSize, &cntSubmitIo](UbioSmartPtr ubio, bool sync)
+    EXPECT_CALL(mockIoDispatcher, Submit).WillRepeatedly([&physicalSize, &cntSubmitIo](UbioSmartPtr ubio, bool sync, bool ublockSharedPtrCopyNeeded)
     {
         if (cntSubmitIo < 4)
         {

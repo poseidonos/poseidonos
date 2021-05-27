@@ -62,8 +62,8 @@ TEST(IOController, IOController_SendVolumeIo)
     IOControllerChild* ioControllerChild = new IOControllerChild(&mockIODispatcher);
 
     // When: set iodispatcher mock and call _SendVolumeIo
-    ON_CALL(mockIODispatcher, Submit(_, _)).WillByDefault(Return(0));
-    EXPECT_CALL(mockIODispatcher, Submit(_, _)).Times(1);
+    ON_CALL(mockIODispatcher, Submit(_, _, _)).WillByDefault(Return(0));
+    EXPECT_CALL(mockIODispatcher, Submit(_, _, _)).Times(1);
     ioControllerChild->SendVolumeIo(volumeIo);
 
     // Then: release memory

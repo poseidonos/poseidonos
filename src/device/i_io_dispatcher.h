@@ -59,7 +59,7 @@ public:
     virtual void RemoveDeviceForIOWorker(UblockSharedPtr dev) = 0;
 
     virtual void CompleteForThreadLocalDeviceList(void) = 0;
-    virtual int Submit(UbioSmartPtr ubio, bool sync = false) = 0;
+    virtual int Submit(UbioSmartPtr ubio, bool sync = false, bool uBlockSharedPtrCopyNeeded = true) = 0;
 };
 
 } // namespace pos

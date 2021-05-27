@@ -49,6 +49,7 @@ public:
     virtual void SetState(ArrayDeviceState state) = 0;
 
     virtual UblockSharedPtr GetUblock(void) = 0;
+    virtual UBlockDevice* GetUblockPtr(void) = 0;
     virtual void SetUblock(UblockSharedPtr uBlock) = 0;
 
     virtual bool IsRebuilding(void) = 0;

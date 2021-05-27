@@ -35,6 +35,7 @@
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/io_scheduler/io_worker.h"
 #include "src/event_scheduler/io_completer.h"
+#include "src/include/i_array_device.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
@@ -187,10 +188,11 @@ IODispatcher::_SubmitRecovery(UbioSmartPtr ubio)
 }
 
 int
-IODispatcher::Submit(UbioSmartPtr ubio, bool sync)
+IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool uBlockSharedPtrCopyNeeded)
 {
     bool isReactor = EventFrameworkApi::IsReactorNow();
 
+    // sync io for reactor is not allowed. (reactor should not be stuck in any point.)
     if (unlikely(isReactor && sync))
     {
         POS_EVENT_ID eventId =
@@ -202,17 +204,32 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync)
         return PARAM_FAILED;
     }
 
+    // sync operation does not support RAID5 recovery.
+    // If caller assure that device given will not be failed in submit context,
+    // It needs to skip device recovery (uBlockSharedPtrCopyNeeded)
     if (unlikely(sync))
     {
         ubio->SetSyncMode();
     }
-    else if (ubio->NeedRecovery())
+    else if (uBlockSharedPtrCopyNeeded && ubio->NeedRecovery())
     {
         _SubmitRecovery(ubio);
         return DEVICE_FAILED;
     }
 
-    UBlockDevice* ublock = ubio->GetUBlock();
+    UBlockDevice* ublock = nullptr;
+
+    // ublock pointer can be obtained from either weak pointer or shared pointer.
+    // It depends on given flag.
+    if (!uBlockSharedPtrCopyNeeded)
+    {
+        ublock = ubio->GetArrayDev()->GetUblockPtr();
+    }
+    else
+    {
+        ublock = ubio->GetUBlock();
+    }
+
     if (isReactor)
     {
         return ublock->SubmitAsyncIO(ubio);
@@ -225,6 +242,7 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync)
             ioWorker->EnqueueUbio(ubio);
         }
     }
+
     if (unlikely(sync))
     {
         ubio->WaitDone();

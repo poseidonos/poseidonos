@@ -73,6 +73,7 @@ private:
     uint32_t processedBlockCount;
     std::queue<VolumeIoSmartPtr> splitVolumeIoQueue;
 
+    void _SendVolumeIo(VolumeIoSmartPtr volumeIo);
     bool _ProcessOwnedWrite(void);
     void _AllocateFreeWriteBuffer(void);
     void _ReadOldBlock(BlkAddr rba, VirtualBlkAddr& vsa, bool isTail);

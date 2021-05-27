@@ -141,7 +141,7 @@ TEST(MergedIO, Process_success)
     PhysicalBlkAddr physicalBlkAddr{0, &mockIArrayDevice};
 
     //when
-    ON_CALL(*mockIODispatcher, Submit(_, _)).WillByDefault(Return(0));
+    ON_CALL(*mockIODispatcher, Submit(_, _, _)).WillByDefault(Return(0));
 
     MergedIO mergedIO(callback, mockIODispatcher);
     mergedIO.SetNewStart(buffer, physicalBlkAddr);
@@ -171,7 +171,7 @@ TEST(MergedIO, Process_ExistError)
     PhysicalBlkAddr physicalBlkAddr{0, &mockIArrayDevice};
 
     //when
-    ON_CALL(*mockIODispatcher, Submit(_, _)).WillByDefault(Return(0));
+    ON_CALL(*mockIODispatcher, Submit(_, _, _)).WillByDefault(Return(0));
 
     MergedIO mergedIO(callback, mockIODispatcher, StateEnum::STOP);
     mergedIO.SetNewStart(buffer, physicalBlkAddr);

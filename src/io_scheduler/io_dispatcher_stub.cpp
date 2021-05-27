@@ -61,7 +61,7 @@ IODispatcher::RemoveIOWorker(cpu_set_t cpuSet)
 }
 
 int
-IODispatcher::Submit(UbioSmartPtr ubio, bool sync)
+IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool uBlockSharedPtrCopyNeeded)
 {
     return 0;
 }

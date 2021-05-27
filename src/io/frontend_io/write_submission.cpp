@@ -189,6 +189,12 @@ WriteSubmission::_ProcessOwnedWrite(void)
 }
 
 void
+WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
+{
+    ioDispatcher->Submit(volumeIo, false, false);
+}
+
+void
 WriteSubmission::_SubmitVolumeIo(void)
 {
     uint32_t volumeIoCount = splitVolumeIoQueue.size();
