@@ -47,14 +47,13 @@ SegmentCtx::SegmentCtx(SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo
   addrInfo(addrInfo_),
   arrayName(arrayName_)
 {
-    // for UT
-    segmentInfos = segmentInfo_;
+    segmentInfos = segmentInfo_; // for UT
+    ctxHeader.sig = SIG_SEGMENT_CTX;
 }
 
 SegmentCtx::SegmentCtx(AllocatorAddressInfo* info, std::string arrayName)
 : SegmentCtx(nullptr, info, arrayName)
 {
-    ctxHeader.sig = SIG_SEGMENT_CTX;
 }
 
 SegmentCtx::~SegmentCtx(void)

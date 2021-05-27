@@ -50,16 +50,21 @@ AllocatorCtx::AllocatorCtx(BitMapMutex* allocSegBitmap_, SegmentStates* segmentS
   addrInfo(info_),
   arrayName(arrayName_)
 {
-    // for UT
-    allocSegBitmap = allocSegBitmap_;
-    segmentStates = segmentStates_;
-    segStateLocks = segStateLocks_;
+    allocSegBitmap = allocSegBitmap_; // for UT
+    segmentStates = segmentStates_; // for UT
+    segStateLocks = segStateLocks_; // for UT
+
+    ctxHeader.sig = SIG_ALLOCATOR_CTX;
+    ctxHeader.numValidSegment = 0;
+    ctxHeader.numValidWbLsid = 0;
+    ctxHeader.ctxVersion = 0;
+    prevSsdLsid = 0;
+    currentSsdLsid = 0;
 }
 
 AllocatorCtx::AllocatorCtx(AllocatorAddressInfo* info, std::string arrayName)
 : AllocatorCtx(nullptr, nullptr, nullptr, info, arrayName)
 {
-    ctxHeader.sig = SIG_ALLOCATOR_CTX;
 }
 
 AllocatorCtx::~AllocatorCtx(void)
@@ -72,12 +77,14 @@ AllocatorCtx::Init(void)
     uint32_t numSegment = addrInfo->GetnumUserAreaSegments();
     allocSegBitmap = new BitMapMutex(numSegment);
     currentSsdLsid = STRIPES_PER_SEGMENT - 1;
+    prevSsdLsid = STRIPES_PER_SEGMENT - 1;
     segmentStates = new SegmentStates[numSegment];
     for (uint32_t segmentId = 0; segmentId < numSegment; ++segmentId)
     {
         segmentStates[segmentId].SetSegmentId(segmentId);
     }
     segStateLocks = new SegmentLock[numSegment];
+    ctxHeader.ctxVersion = 0;
 }
 
 void
