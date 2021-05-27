@@ -58,6 +58,7 @@ AffinityManager::AffinityManager(uint32_t totalCount, CpuSetArray& cpuSetArray)
 : NUMA_COUNT(numa_num_configured_nodes()),
   TOTAL_COUNT(totalCount),
   cpuSetArray(cpuSetArray),
+  useStringForParsing(false),
   parser(nullptr)
 {
 }
@@ -94,6 +95,13 @@ AffinityManager::AffinityManager(AffinityConfigParser* parser_)
             if (isCoreSufficient)
             {
                 CountDescriptedCpuSetGenerator cpuSetGenerator(DESC_ARRAY);
+                cpuSetArray = cpuSetGenerator.GetCpuSetArray();
+            }
+            else
+            {
+                POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_CORE_NOT_SUFFICIENT;
+                POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
+                PovertyCpuSetGenerator cpuSetGenerator(DESC_ARRAY);
                 cpuSetArray = cpuSetGenerator.GetCpuSetArray();
             }
         }
