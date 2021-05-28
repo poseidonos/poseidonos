@@ -135,11 +135,8 @@ func printResToHumanReadable(command string, resJSON string) {
 		json.Unmarshal([]byte(resJSON), &res)
 		printStatus(res.RESULT.STATUS.CODE)
 
-		log.Print("Percentage used: ")
-		log.Println(res.RESULT.DATA.PERCENTAGEUSED)
-
-		log.Print("Tempurature: ")
-		log.Println(res.RESULT.DATA.TEMPERATURE)
+		log.Print("Percentage used: ", res.RESULT.DATA.PERCENTAGEUSED)
+		log.Print("Tempurature: ", res.RESULT.DATA.TEMPERATURE)
 
 	case "GETLOGLEVEL":
 		res := messages.GetLogLevelResponse{}

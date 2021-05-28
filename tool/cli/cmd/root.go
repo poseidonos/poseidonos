@@ -16,8 +16,10 @@ import (
 	"github.com/zpatrick/go-bytesize"
 
 	"cli/cmd/arraycmds"
+	"cli/cmd/devicecmds"
 	"cli/cmd/globals"
 	"cli/cmd/socketmgr"
+	"cli/cmd/volumecmds"
 )
 
 var isVerbose bool
@@ -88,6 +90,8 @@ func init() {
 
 	// Command categories
 	RootCmd.AddCommand(arraycmds.ArrayCmd)
+	RootCmd.AddCommand(devicecmds.DeviceCmd)
+	RootCmd.AddCommand(volumecmds.VolumeCmd)
 
 }
 
