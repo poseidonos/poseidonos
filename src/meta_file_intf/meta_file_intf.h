@@ -32,17 +32,26 @@
 
 #pragma once
 
-#include <string>
+#include "src/meta_file_intf/async_context.h"
+#include "src/meta_file_intf/meta_file_include.h"
 
-#include "async_context.h"
-#include "meta_file_include.h"
+#include <string>
 
 namespace pos
 {
+
+#ifdef IBOF_CONFIG_USE_MOCK_FS
+class MockFileIntf;
+#define FILESTORE MockFileIntf
+#else
+class MetaFsFileIntf;
+#define FILESTORE MetaFsFileIntf
+#endif
+
 class MetaFileIntf
 {
 public:
-    explicit MetaFileIntf(std::string fname, std::string aname);
+    MetaFileIntf(std::string fname, std::string aname);
     virtual ~MetaFileIntf(void) = default;
 
     virtual int Create(uint64_t size, StorageOpt storageOpt = StorageOpt::DEFAULT) = 0;
@@ -60,16 +69,12 @@ public:
     virtual int GetFd(void) { return fd; }
     virtual std::string GetFileName(void) { return fileName; }
     // SyncIO APIs
-    virtual int IssueIO(MetaFsIoOpcode opType, uint64_t fileOffset, uint64_t length,
-        char* buffer);
-    virtual int AppendIO(MetaFsIoOpcode opType, uint64_t& offset, uint64_t length,
-        char* buffer);
+    virtual int IssueIO(MetaFsIoOpcode opType, uint64_t fileOffset, uint64_t length, char* buffer);
+    virtual int AppendIO(MetaFsIoOpcode opType, uint64_t& offset, uint64_t length, char* buffer);
 
 protected:
-    virtual int _Read(int fd, uint64_t fileOffset, uint64_t length,
-        char* buffer) = 0;
-    virtual int _Write(int fd, uint64_t fileOffset, uint64_t length,
-        char* buffer) = 0;
+    virtual int _Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer) = 0;
+    virtual int _Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer) = 0;
 
     std::string fileName;
     std::string arrayName;
@@ -77,4 +82,5 @@ protected:
     bool isOpened;
     int fd;
 };
+
 } // namespace pos

@@ -49,18 +49,18 @@ bool
 EventMpageAsyncIo::Execute(void)
 {
     int mpageNum = 0;
-    uint64_t numBitsSet = mapHeader_->bitmap->GetNumBitsSet();
+    uint64_t numBitsSet = mapHeader_->GetMpageMap()->GetNumBitsSet();
 
     for (uint32_t cnt = 0; cnt < numBitsSet; ++cnt)
     {
-        mpageNum = mapHeader_->bitmap->FindFirstSet(mpageNum);
+        mpageNum = mapHeader_->GetMpageMap()->FindFirstSet(mpageNum);
         char* mpage = map_->AllocateMpage(mpageNum);
 
         MapFlushIoContext* mPageLoadRequest = new MapFlushIoContext();
         mPageLoadRequest->opcode = MetaFsIoOpcode::Read;
         mPageLoadRequest->fd = file_->GetFd();
-        mPageLoadRequest->fileOffset = mapHeader_->size + (mpageNum * mapHeader_->mpageSize);
-        mPageLoadRequest->length = mapHeader_->mpageSize;
+        mPageLoadRequest->fileOffset = mapHeader_->GetSize() + (mpageNum * mapHeader_->GetMpageSize());
+        mPageLoadRequest->length = mapHeader_->GetMpageSize();
         mPageLoadRequest->buffer = mpage;
         mPageLoadRequest->callback = asyncIoReqCB_;
         mPageLoadRequest->startMpage = mpageNum;

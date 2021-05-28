@@ -30,11 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vsamap_content.h"
 
-#include "src/allocator_service/allocator_service.h"
 #include "src/allocator/i_block_allocator.h"
+#include "src/allocator_service/allocator_service.h"
 #include "src/include/branch_prediction.h"
+#include "src/mapper/vsamap/vsamap_content.h"
 
 #include <string>
 
@@ -42,12 +42,17 @@ namespace pos
 {
 
 VSAMapContent::VSAMapContent(void)
-: MapContent()
+{
+}
+
+VSAMapContent::VSAMapContent(int mapId, IBlockAllocator* iBlockAllocator_)
+: MapContent(mapId),
+  iBlockAllocator(iBlockAllocator_)
 {
 }
 
 VSAMapContent::VSAMapContent(int mapId, std::string arrayName)
-: MapContent(mapId)
+: VSAMapContent(mapId, AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName))
 {
     filename = "VSAMap." + std::to_string(mapId) + ".bin";
     this->arrayName = arrayName;
@@ -60,8 +65,8 @@ VSAMapContent::Prepare(uint64_t blkCnt, int64_t volid)
     totalBlks = blkCnt;
     usedBlks = 0;
 
-    header.entriesPerMpage = header.mpageSize / sizeof(VirtualBlkAddr);
-    uint64_t mpagesNeeded = DivideUp(totalBlks, header.entriesPerMpage);
+    mapHeader->SetEntriesPerMpage(mapHeader->GetMpageSize() / sizeof(VirtualBlkAddr));
+    uint64_t mpagesNeeded = DivideUp(totalBlks, mapHeader->GetEntriesPerMpage());
     InitHeaderInfo(mpagesNeeded);
 
     return 0;
@@ -71,7 +76,7 @@ int
 VSAMapContent::InMemoryInit(uint64_t blkCnt, uint64_t volid)
 {
     totalBlks = blkCnt;
-    uint64_t pages = DivideUp(totalBlks, header.entriesPerMpage);
+    uint64_t pages = DivideUp(totalBlks, mapHeader->GetEntriesPerMpage());
     int ret = Init(pages);
     return ret;
 }
@@ -79,7 +84,7 @@ VSAMapContent::InMemoryInit(uint64_t blkCnt, uint64_t volid)
 VirtualBlkAddr
 VSAMapContent::GetEntry(BlkAddr rba)
 {
-    uint64_t pageNr = rba / header.entriesPerMpage;
+    uint64_t pageNr = rba / mapHeader->GetEntriesPerMpage();
 
     char* mpage = map->GetMpage(pageNr);
 
@@ -89,7 +94,7 @@ VSAMapContent::GetEntry(BlkAddr rba)
     }
     else
     {
-        uint64_t entNr = rba % header.entriesPerMpage;
+        uint64_t entNr = rba % mapHeader->GetEntriesPerMpage();
         return ((VirtualBlkAddr*)mpage)[entNr];
     }
 }
@@ -97,7 +102,7 @@ VSAMapContent::GetEntry(BlkAddr rba)
 int
 VSAMapContent::SetEntry(BlkAddr rba, VirtualBlkAddr vsa)
 {
-    uint64_t pageNr = rba / header.entriesPerMpage;
+    uint64_t pageNr = rba / mapHeader->GetEntriesPerMpage();
 
     map->GetMpageLock(pageNr);
     char* mpage = map->GetMpage(pageNr);
@@ -108,79 +113,30 @@ VSAMapContent::SetEntry(BlkAddr rba, VirtualBlkAddr vsa)
         if (unlikely(mpage == nullptr))
         {
             map->ReleaseMpageLock(pageNr);
-            return -(int)POS_EVENT_ID::VSAMAP_SET_FAILURE;
+            return -EID(VSAMAP_SET_FAILURE);
+            
         }
-        header.SetMapAllocated(pageNr);
+        mapHeader->SetMapAllocated(pageNr);
     }
 
     VirtualBlkAddr* mpageMap = (VirtualBlkAddr*)mpage;
 
-    uint64_t entNr = rba % header.entriesPerMpage;
+    uint64_t entNr = rba % mapHeader->GetEntriesPerMpage();
     mpageMap[entNr] = vsa;
 
-    header.touchedPages->SetBit(pageNr);
+    mapHeader->GetTouchedMpages()->SetBit(pageNr);
 
     map->ReleaseMpageLock(pageNr);
 
     return 0;
 }
 
-void
-VSAMapContent::ResetEntries(BlkAddr rba, uint64_t cnt)
-{
-    // TODO(jk.man.kim) to check length of page offset variables (rba is in 64 bits)
-    uint64_t i;
-    uint64_t startPageNr = rba / header.entriesPerMpage;
-    uint64_t startOffset = rba % header.entriesPerMpage;
-    uint64_t endPageNr = (rba + cnt) / header.entriesPerMpage;
-    uint64_t endOffset = (rba + cnt) % header.entriesPerMpage;
-
-    if (startOffset)
-    {
-        char* mpage = map->GetMpageWithLock(startPageNr);
-        if (mpage == nullptr)
-        {
-            goto next;
-        }
-        for (i = startOffset; i < header.entriesPerMpage; i++)
-        {
-            ((VirtualBlkAddr*)mpage)[i] = UNMAP_VSA;
-        }
-    next:
-        startPageNr++;
-    }
-
-    for (i = startPageNr; i < endPageNr; i++)
-    {
-        char* mpage = map->GetMpageWithLock(i);
-        if (mpage == nullptr)
-            continue;
-
-        memset(mpage, 0xFF, header.mpageSize);
-    }
-
-    if (endOffset)
-    {
-        char* mpage = map->GetMpageWithLock(endPageNr);
-        if (mpage == nullptr)
-        {
-            goto out;
-        }
-        for (i = 0; i < endOffset; i++)
-        {
-            ((VirtualBlkAddr*)mpage)[i] = UNMAP_VSA;
-        }
-    }
-out:
-    return;
-}
-
 MpageList
 VSAMapContent::GetDirtyPages(BlkAddr start, uint64_t numEntries)
 {
-    uint64_t startPageNr = start / header.entriesPerMpage;
-    uint64_t endPageNr = (start + numEntries) / header.entriesPerMpage;
-    uint64_t endOffset = (start + numEntries) % header.entriesPerMpage;
+    uint64_t startPageNr = start / mapHeader->GetEntriesPerMpage();
+    uint64_t endPageNr = (start + numEntries) / mapHeader->GetEntriesPerMpage();
+    uint64_t endOffset = (start + numEntries) % mapHeader->GetEntriesPerMpage();
 
     MpageList dirtyList;
 
@@ -204,7 +160,7 @@ VSAMapContent::GetNumUsedBlocks(void)
     uint32_t mpageId = 0;
 
     usedBlks = 0;
-    while ((mpageId = header.bitmap->FindFirstSet(curMpage)) != header.bitmap->GetNumBits())
+    while ((mpageId = mapHeader->GetMpageMap()->FindFirstSet(curMpage)) != mapHeader->GetMpageMap()->GetNumBits())
     {
         usedBlks += _GetNumValidEntries(map->GetMpageWithLock(mpageId));
         curMpage = mpageId + 1;
@@ -218,7 +174,7 @@ VSAMapContent::_GetNumValidEntries(char* mpage)
 {
     uint64_t numValid = 0;
 
-    for (uint32_t i = 0; i < header.entriesPerMpage; i++)
+    for (uint32_t i = 0; i < mapHeader->GetEntriesPerMpage(); ++i)
     {
         if (!IsUnMapVsa(((VirtualBlkAddr*)mpage)[i]))
         {
@@ -232,15 +188,14 @@ int
 VSAMapContent::InvalidateAllBlocks(void)
 {
     uint32_t mpageId = 0;
-    IBlockAllocator* iBlockAllocator = AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName);
 
-    while ((mpageId = header.bitmap->FindFirstSet(mpageId)) != header.bitmap->GetNumBits())
+    while ((mpageId = mapHeader->GetMpageMap()->FindFirstSet(mpageId)) != mapHeader->GetMpageMap()->GetNumBits())
     {
         map->GetMpageLock(mpageId);
 
         char* mpage = map->GetMpage(mpageId);
 
-        for (uint32_t entryIdx = 0; entryIdx < header.entriesPerMpage; ++entryIdx)
+        for (uint32_t entryIdx = 0; entryIdx < mapHeader->GetEntriesPerMpage(); ++entryIdx)
         {
             VirtualBlkAddr vsa = ((VirtualBlkAddr*)mpage)[entryIdx];
             if (IsUnMapVsa(vsa) == false)

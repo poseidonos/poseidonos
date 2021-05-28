@@ -314,7 +314,7 @@ TEST(VSAMapAPI, GetRandomVSA_Default)
     // Given
     BlkAddr rba = 1024;
 
-    MockMapperAddressInfo* mockMapperAddressInfo = new MockMapperAddressInfo;
+    MockMapperAddressInfo* mockMapperAddressInfo = new MockMapperAddressInfo(nullptr);
     mockMapperAddressInfo->blksPerStripe = 128;
 
     VSAMapAPI sut(nullptr, mockMapperAddressInfo);

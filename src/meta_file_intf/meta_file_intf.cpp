@@ -30,13 +30,13 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "meta_file_intf.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/meta_file_intf/meta_file_intf.h"
 
 #include <fcntl.h>
-#include <unistd.h>
-
 #include <string>
+#include <unistd.h>
 
 namespace pos
 {

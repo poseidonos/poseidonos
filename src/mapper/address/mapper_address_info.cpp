@@ -39,14 +39,16 @@
 
 namespace pos
 {
+MapperAddressInfo::MapperAddressInfo(IArrayInfo* iArrayInfo_)
+: iArrayInfo(iArrayInfo_)
+{
+}
+
 void
 MapperAddressInfo::SetupAddressInfo(std::string arrayName)
 {
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
-    const PartitionLogicalSize* udSize = nullptr;
-    udSize = info->GetSizeInfo(PartitionType::USER_DATA);
-    const PartitionLogicalSize* wbSize = nullptr;
-    wbSize = info->GetSizeInfo(PartitionType::WRITE_BUFFER);
+    const PartitionLogicalSize* udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    const PartitionLogicalSize* wbSize = iArrayInfo->GetSizeInfo(PartitionType::WRITE_BUFFER);
 
     maxVsid = udSize->totalStripes;
     blksPerStripe = udSize->blksPerStripe;

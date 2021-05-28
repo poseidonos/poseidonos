@@ -52,7 +52,7 @@ Mapper::Mapper(IArrayInfo* iarrayInfo, IStateControl* iState)
   iStateControl(iState),
   isInitialized(false)
 {
-    addrInfo = new MapperAddressInfo();
+    addrInfo = new MapperAddressInfo(iarrayInfo);
     vsaMapManager = new VSAMapManager(addrInfo, iarrayInfo->GetName());
     stripeMapManager = new StripeMapManager(addrInfo, iarrayInfo->GetName());
     reverseMapManager = new ReverseMapManager(vsaMapManager->GetIVSAMap(), stripeMapManager, iArrayinfo);

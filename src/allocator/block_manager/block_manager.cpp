@@ -110,7 +110,7 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
     }
 
     StripeId newVsid = arrayLsid;
-    Stripe* stripe = new Stripe(false, arrayName);
+    Stripe* stripe = new Stripe(false, arrayName, addrInfo);
     stripe->Assign(newVsid, UNMAP_STRIPE, 0);
 
     IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);

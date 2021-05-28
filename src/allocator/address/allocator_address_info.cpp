@@ -40,15 +40,8 @@ namespace pos
 void
 AllocatorAddressInfo::Init(std::string arrayName, IArrayInfo* iArrayInfo)
 {
-    IArrayInfo* info = iArrayInfo; // for UT
-    if (info == nullptr)
-    {
-        info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
-    }
-    const PartitionLogicalSize* udSize = nullptr;
-    udSize = info->GetSizeInfo(PartitionType::USER_DATA);
-    const PartitionLogicalSize* wbSize = nullptr;
-    wbSize = info->GetSizeInfo(PartitionType::WRITE_BUFFER);
+    const PartitionLogicalSize* udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    const PartitionLogicalSize* wbSize = iArrayInfo->GetSizeInfo(PartitionType::WRITE_BUFFER);
 
     blksPerStripe = udSize->blksPerStripe;
     chunksPerStripe = udSize->chunksPerStripe;

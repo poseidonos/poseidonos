@@ -44,14 +44,6 @@
 
 namespace pos
 {
-// Header data to be stored in the map header
-class MpageValidInfo
-{
-public:
-    MpageValidInfo(void) : numValidMpages(UINT64_MAX), numTotalMpages(UINT64_MAX) {}
-    uint64_t numValidMpages;
-    uint64_t numTotalMpages;
-};
 
 class Mpage
 {
@@ -65,48 +57,19 @@ public:
     std::mutex lock;
 };
 
-class MapHeader
-{
-public:
-    MapHeader(void);
-    virtual ~MapHeader(void);
-
-    void UpdateNumValidMpages(void);
-    bool ApplyNumValidMpages(void);
-
-    int CopyToBuffer(char* buffer);
-    BitMap* GetBitmapFromTempBuffer(char* buffer);
-
-    int SetSize(void);
-    void SetMapAllocated(int pageNr);
-    void SetMpageValidInfo(uint64_t numPages, uint64_t ValidPages);
-
-    MpageValidInfo mpageData;
-    BitMap* bitmap;
-
-    std::mutex mpageHeaderLock;
-
-    BitMap* touchedPages;
-
-    bool isInitialized;
-    uint32_t size;      // header size(MpageValidInfo + BitMap), aligned by mpageSize
-    uint32_t mpageSize; // by MapContent::SetPageSize()
-    int mapId;          // by MapContent::Ctor()
-    uint32_t entriesPerMpage;
-};
-
 class Map
 {
 public:
+    Map(void);
     Map(int numPages, int pageSize);
     virtual ~Map(void);
 
-    char* GetMpage(int pageNr);
-    char* GetMpageWithLock(int pageNr);
-    char* AllocateMpage(int pageNr);
+    virtual char* GetMpage(int pageNr);
+    virtual char* GetMpageWithLock(int pageNr);
+    virtual char* AllocateMpage(int pageNr);
 
-    void GetMpageLock(int pageNr);
-    void ReleaseMpageLock(int pageNr);
+    virtual void GetMpageLock(int pageNr);
+    virtual void ReleaseMpageLock(int pageNr);
 
     Mpage* mPageArr;
     uint32_t pageSize;

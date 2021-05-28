@@ -1,0 +1,1 @@
+# POS_ADD_INTEGRATION_TEST(vsamap_manager_it_test vsamap_manager_it_test.cpp)

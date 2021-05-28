@@ -32,14 +32,14 @@
 
 #pragma once
 
+#include "src/metafs/metafs.h"
+#include "src/metafs/include/metafs_aiocb_cxt.h"
+#include "src/meta_file_intf/meta_file_include.h"
+#include "src/meta_file_intf/meta_file_intf.h"
+
 #include <cassert>
 #include <cstdint>
 #include <string>
-
-#include "metafs.h"
-#include "metafs_aiocb_cxt.h"
-#include "src/meta_file_intf/meta_file_include.h"
-#include "src/meta_file_intf/meta_file_intf.h"
 
 namespace pos
 {
@@ -62,10 +62,8 @@ public:
     virtual int Close(void) override;
 
 private:
-    virtual int _Read(int fd, uint64_t fileOffset, uint64_t length,
-        char* buffer) override;
-    virtual int _Write(int fd, uint64_t fileOffset, uint64_t length,
-        char* buffer) override;
+    virtual int _Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
+    virtual int _Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
 
     MetaFs* metaFs;
 };

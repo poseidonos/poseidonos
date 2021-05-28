@@ -32,10 +32,12 @@
 
 #pragma once
 
-#include <string>
-
 #include "src/mapper/include/mpage_info.h"
 #include "src/mapper/map/map.h"
+#include "src/mapper/map/map_header.h"
+#include "src/metafs/include/metafs_service.h"
+
+#include <string>
 
 namespace pos
 {
@@ -48,15 +50,16 @@ class MapIoHandler;
 class MapContent
 {
 public:
-    MapContent(void);
-    explicit MapContent(int mapId);
+    MapContent(void);                               // Ctor for UT
+    explicit MapContent(MapHeader* mapHeader_, MetaFsService* metaFsService_);     // Ctor for UT
+    explicit MapContent(int mapId);                 // Ctor for Production
     virtual ~MapContent(void);
 
     virtual int Prepare(uint64_t numEntries, int64_t opt = 0) = 0;
     virtual MpageList GetDirtyPages(BlkAddr start, uint64_t numEntries) = 0;
 
-    int Init(uint64_t numPages);
-    void InitHeaderInfo(uint64_t numPages);
+    int Init(uint64_t numMpages);
+    void InitHeaderInfo(uint64_t numMpages);
 
     int CreateMapFile(void);
     int FileOpen(void);
@@ -83,13 +86,18 @@ public:
     uint32_t GetEntriesPerPage(void);
     std::string GetFileName(void);
 
+    void SetMapHeader(MapHeader* mapHeader_) { mapHeader = mapHeader_; }
+    void SetMap(Map* map_) { map = map_; }
+    void SetMetaFsService(MetaFsService* metaFsService_) { metaFsService = metaFsService_; }
+
 protected:
-    MapHeader header;           // by InitHeaderInfo()
+    MapHeader* mapHeader;       // by InitHeaderInfo()
     Map* map;                   // by Init()
     MapIoHandler* mapIoHandler; // by Init()
     MetaFileIntf* metaFile;     // assigned by CreateMapFile(), LoadSync(), LoadAsync()
     std::string filename;       // by Ctor() of derived class
     std::string arrayName;
+    MetaFsService* metaFsService;
     bool loaded;
 
 private:

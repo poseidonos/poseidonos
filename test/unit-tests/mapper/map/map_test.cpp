@@ -16,42 +16,6 @@ TEST(Mpage, Mpage_)
 
 namespace pos
 {
-TEST(MapHeader, MapHeader_)
-{
-}
-
-TEST(MapHeader, UpdateNumValidMpages_)
-{
-}
-
-TEST(MapHeader, ApplyNumValidMpages_)
-{
-}
-
-TEST(MapHeader, CopyToBuffer_)
-{
-}
-
-TEST(MapHeader, GetBitmapFromTempBuffer_)
-{
-}
-
-TEST(MapHeader, SetSize_)
-{
-}
-
-TEST(MapHeader, SetMapAllocated_)
-{
-}
-
-TEST(MapHeader, SetMpageValidInfo_)
-{
-}
-
-} // namespace pos
-
-namespace pos
-{
 TEST(Map, Map_)
 {
 }

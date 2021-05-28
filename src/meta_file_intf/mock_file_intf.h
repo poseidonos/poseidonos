@@ -32,21 +32,18 @@
 
 #pragma once
 
+#include "src/meta_file_intf/meta_file_intf.h"
+
 #include <cassert>
 #include <cstdint>
 #include <string>
-
-#include "meta_file_intf.h"
 
 namespace pos
 {
 class MockFileIntf : public MetaFileIntf
 {
 public:
-    explicit MockFileIntf(std::string fname, std::string aname)
-    : MetaFileIntf(fname, aname)
-    {
-    }
+    explicit MockFileIntf(std::string fname, std::string aname) : MetaFileIntf(fname, aname) {}
     virtual ~MockFileIntf(void) = default;
 
     virtual int Create(uint64_t fileSize, StorageOpt storageOpt) override;

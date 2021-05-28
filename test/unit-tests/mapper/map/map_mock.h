@@ -8,11 +8,6 @@
 
 namespace pos
 {
-class MockMpageValidInfo : public MpageValidInfo
-{
-public:
-    using MpageValidInfo::MpageValidInfo;
-};
 
 class MockMpage : public Mpage
 {
@@ -20,16 +15,15 @@ public:
     using Mpage::Mpage;
 };
 
-class MockMapHeader : public MapHeader
-{
-public:
-    using MapHeader::MapHeader;
-};
-
 class MockMap : public Map
 {
 public:
     using Map::Map;
+    MOCK_METHOD(char*, GetMpage, (int pageNr), (override));
+    MOCK_METHOD(char*, GetMpageWithLock, (int pageNr), (override));
+    MOCK_METHOD(char*, AllocateMpage, (int pageNr), (override));
+    MOCK_METHOD(void, GetMpageLock, (int pageNr), (override));
+    MOCK_METHOD(void, ReleaseMpageLock, (int pageNr), (override));
 };
 
 } // namespace pos

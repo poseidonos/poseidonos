@@ -32,18 +32,13 @@
 
 #pragma once
 
-#include "mk/ibof_config.h"
-#include "src/bio/volume_io.h"
+// #include "mk/ibof_config.h"
+// #include "src/bio/volume_io.h"
 
-#include <string.h>
+// #include <string.h>
 
 namespace pos
 {
-#ifdef IBOF_CONFIG_USE_MOCK_FS
-#define FILESTORE MockFileIntf
-#else
-#define FILESTORE MetaFsFileIntf
-#endif
 
 enum class StorageOpt
 {

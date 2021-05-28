@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include "src/array_models/interface/i_array_info.h"
+
 #include <cstdint>
 #include <string>
 
@@ -40,11 +42,13 @@ namespace pos
 class MapperAddressInfo
 {
 public:
+    explicit MapperAddressInfo(IArrayInfo* iArrayInfo_);
     void SetupAddressInfo(std::string arrayName);
 
     uint32_t maxVsid;
     uint32_t blksPerStripe;
     uint32_t numWbStripes;
+    IArrayInfo* iArrayInfo;
 };
 
 } // namespace pos

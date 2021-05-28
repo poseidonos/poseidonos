@@ -36,6 +36,7 @@
 #include "src/logger/logger.h"
 #ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_mgr.h"
+#include "src/meta_file_intf/mock_file_intf.h"
 #endif
 
 namespace pos

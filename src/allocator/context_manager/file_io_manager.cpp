@@ -35,6 +35,7 @@
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 #include "src/meta_file_intf/meta_file_include.h"
+#include "src/meta_file_intf/mock_file_intf.h"
 #include "src/metafs/metafs_file_intf.h"
 
 namespace pos

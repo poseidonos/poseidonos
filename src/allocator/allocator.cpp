@@ -81,7 +81,7 @@ Allocator::Init(void)
 {
     if (false == isInitialized)
     {
-        addrInfo->Init(iArrayInfo->GetName());
+        addrInfo->Init(iArrayInfo->GetName(), iArrayInfo);
         contextManager->Init();
         blockManager->Init(wbStripeManager);
         wbStripeManager->Init();

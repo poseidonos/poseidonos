@@ -31,11 +31,14 @@
  */
 
 #pragma once
-#include <string>
 
+#include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
 #include "src/meta_file_intf/meta_file_intf.h"
+
+#include <atomic>
+#include <string>
 
 namespace pos
 {

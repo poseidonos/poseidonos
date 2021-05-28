@@ -32,6 +32,8 @@
 
 #include "src/journal_manager/log_buffer/log_buffer_io_context.h"
 
+#include <cassert>
+
 namespace pos
 {
 LogBufferIoContext::LogBufferIoContext(int logGroupId, EventSmartPtr clientCallback)

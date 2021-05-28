@@ -84,7 +84,7 @@ WBStripeManager::Init(void)
 
     for (uint32_t stripeCnt = 0; stripeCnt < totalNvmStripes; ++stripeCnt)
     {
-        Stripe* stripe = new Stripe(true, arrayName);
+        Stripe* stripe = new Stripe(true, arrayName, addrInfo);
 
         for (uint32_t chunkCnt = 0; chunkCnt < chunksPerStripe; ++chunkCnt)
         {

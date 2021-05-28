@@ -30,9 +30,9 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "stripemap_content.h"
 
 #include "src/include/branch_prediction.h"
+#include "src/mapper/stripemap/stripemap_content.h"
 
 #include <string>
 
@@ -50,9 +50,9 @@ StripeMapContent::Prepare(uint64_t numEntries, int64_t opt)
 {
     SetPageSize(arrayName);
 
-    header.entriesPerMpage = header.mpageSize / sizeof(StripeAddr);
+    mapHeader->SetEntriesPerMpage(mapHeader->GetMpageSize() / sizeof(StripeAddr));
 
-    uint64_t numPages = DivideUp(numEntries, header.entriesPerMpage);
+    uint64_t numPages = DivideUp(numEntries, mapHeader->GetEntriesPerMpage());
     InitHeaderInfo(numPages);
     int ret = Init(numPages);
 
@@ -62,7 +62,7 @@ StripeMapContent::Prepare(uint64_t numEntries, int64_t opt)
 StripeAddr
 StripeMapContent::GetEntry(StripeId vsid)
 {
-    uint32_t pageNr = vsid / header.entriesPerMpage;
+    uint32_t pageNr = vsid / mapHeader->GetEntriesPerMpage();
 
     char* mpage = map->GetMpage(pageNr);
 
@@ -74,7 +74,7 @@ StripeMapContent::GetEntry(StripeId vsid)
     }
     else
     {
-        uint32_t entNr = vsid % header.entriesPerMpage;
+        uint32_t entNr = vsid % mapHeader->GetEntriesPerMpage();
         return ((StripeAddr*)mpage)[entNr];
     }
 }
@@ -82,7 +82,7 @@ StripeMapContent::GetEntry(StripeId vsid)
 int
 StripeMapContent::SetEntry(StripeId vsid, StripeAddr entry)
 {
-    uint32_t pageNr = vsid / header.entriesPerMpage;
+    uint32_t pageNr = vsid / mapHeader->GetEntriesPerMpage();
 
     map->GetMpageLock(pageNr);
     char* mpage = map->GetMpage(pageNr);
@@ -95,14 +95,14 @@ StripeMapContent::SetEntry(StripeId vsid, StripeAddr entry)
             map->ReleaseMpageLock(pageNr);
             return -EID(STRIPEMAP_SET_FAILURE);
         }
-        header.SetMapAllocated(pageNr);
+        mapHeader->SetMapAllocated(pageNr);
     }
 
     StripeAddr* mpageMap = (StripeAddr*)mpage;
-    uint32_t entNr = vsid % header.entriesPerMpage;
+    uint32_t entNr = vsid % mapHeader->GetEntriesPerMpage();
     mpageMap[entNr] = entry;
 
-    header.touchedPages->SetBit(pageNr);
+    mapHeader->GetTouchedMpages()->SetBit(pageNr);
 
     map->ReleaseMpageLock(pageNr);
     return 0;
@@ -114,7 +114,7 @@ StripeMapContent::GetDirtyPages(uint64_t start, uint64_t numEntries)
     assert(numEntries == 1);
 
     MpageList dirtyList;
-    dirtyList.insert(start / header.entriesPerMpage);
+    dirtyList.insert(start / mapHeader->GetEntriesPerMpage());
     return dirtyList;
 }
 

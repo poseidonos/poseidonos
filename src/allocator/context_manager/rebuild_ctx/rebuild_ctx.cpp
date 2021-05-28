@@ -31,11 +31,11 @@
  */
 
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 #include <string>
 #include <utility>
-
-#include "src/logger/logger.h"
 
 namespace pos
 {

@@ -1,8 +1,0 @@
-POS_ADD_UNIT_TEST(sequential_page_finder_test_ut sequential_page_finder_test_test.cpp)
-POS_ADD_UNIT_TEST(random_for_ut_ut random_for_ut_test.cpp)
-POS_ADD_UNIT_TEST(mapper_testfixture_ut mapper_testfixture_test.cpp)
-POS_ADD_UNIT_TEST(mapper_ut_const_ut mapper_ut_const_test.cpp)
-POS_ADD_UNIT_TEST(reverse_map_test_ut reverse_map_test_test.cpp)
-POS_ADD_UNIT_TEST(vsamap_manager_test_ut vsamap_manager_test_test.cpp)
-POS_ADD_UNIT_TEST(map_io_handler_test_ut map_io_handler_test_test.cpp)
-POS_ADD_UNIT_TEST(map_flush_done_event_ut map_flush_done_event_test.cpp)

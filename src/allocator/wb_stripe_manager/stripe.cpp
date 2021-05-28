@@ -61,12 +61,10 @@ Stripe::Stripe(ReverseMapPack* revMap, bool withDataBuffer_)
     }
 }
 
-Stripe::Stripe(bool withDataBuffer_, std::string arrayName)
+Stripe::Stripe(bool withDataBuffer_, std::string arrayName, AllocatorAddressInfo* allocatorAddressInfo)
 : Stripe(nullptr, withDataBuffer_)
 {
-    IArrayInfo* iArrayInfo = (ArrayMgr::Instance()->GetArrayInfo(arrayName));
-    const PartitionLogicalSize* udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-    totalBlksPerUserStripe = udSize->blksPerStripe;
+    totalBlksPerUserStripe = allocatorAddressInfo->GetblksPerStripe();
 }
 
 Stripe::~Stripe(void)

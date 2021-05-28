@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include "src/include/smart_ptr_type.h"
+#include "src/event_scheduler/event.h"
 #include "src/meta_file_intf/async_context.h"
 
 namespace pos

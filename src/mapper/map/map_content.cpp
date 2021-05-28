@@ -40,17 +40,29 @@
 namespace pos
 {
 MapContent::MapContent(void)
-: map(nullptr),
+: mapHeader(nullptr),
+  map(nullptr),
   mapIoHandler(nullptr),
   metaFile(nullptr),
+  metaFsService(nullptr),
+  loaded(false)
+{
+}
+
+MapContent::MapContent(MapHeader* mapHeader_, MetaFsService* metaFsService_)
+: mapHeader(mapHeader_),
+  map(nullptr),
+  mapIoHandler(nullptr),
+  metaFile(nullptr),
+  metaFsService(metaFsService_),
   loaded(false)
 {
 }
 
 MapContent::MapContent(int mapId)
-: MapContent()
+: MapContent(new MapHeader, MetaFsServiceSingleton::Instance())
 {
-    header.mapId = mapId;
+    mapHeader->SetMapId(mapId);
 }
 
 MapContent::~MapContent(void)
@@ -74,28 +86,23 @@ MapContent::~MapContent(void)
         delete mapIoHandler;
         mapIoHandler = nullptr;
     }
+    if (mapHeader != nullptr)
+    {
+        delete mapHeader;
+        mapHeader = nullptr;
+    }
 }
 
 void
 MapContent::InitHeaderInfo(uint64_t numPages)
 {
-    header.SetMpageValidInfo(numPages, 0 /* numValidMpages*/);
-
-    header.bitmap = new BitMap(numPages);
-    header.bitmap->ResetBitmap();
-
-    header.touchedPages = new BitMap(numPages);
-    header.touchedPages->ResetBitmap();
-
-    header.SetSize();
-
-    header.isInitialized = true;
+    mapHeader->Init(numPages);
 }
 
 int
 MapContent::CreateMapFile(void)
 {
-    if (header.isInitialized == false)
+    if (mapHeader->IsInitialized() == false)
     {
         return -EID(MAPCONTENT_HEADER_NOT_INITIALIZED);
     }
@@ -104,7 +111,7 @@ MapContent::CreateMapFile(void)
         metaFile = new FILESTORE(filename, arrayName);
     }
 
-    uint64_t fileSize = header.size + header.mpageSize * header.mpageData.numTotalMpages;
+    uint64_t fileSize = mapHeader->GetSize() + mapHeader->GetMpageSize() * mapHeader->GetNumTotalMpages();
 
     int ret = metaFile->Create(fileSize);
     if (ret < 0)
@@ -159,7 +166,7 @@ MapContent::LoadSync(int opt)
     }
     if (mapIoHandler == nullptr)
     {
-        mapIoHandler = new MapIoHandler(map, &header);
+        mapIoHandler = new MapIoHandler(map, mapHeader);
     }
 
     if (metaFile->DoesFileExist() == false)
@@ -247,15 +254,15 @@ MapContent::StoreMap(void)
 int
 MapContent::_Unload(void)
 {
-    header.UpdateNumValidMpages();
+    mapHeader->UpdateNumValidMpages();
     int ret = mapIoHandler->StoreToMFS();
     if (ret < 0)
     {
-        POS_TRACE_WARN(EID(MFS_SYNCIO_ERROR), "mapId:{} StoreToMFS Failed @Unload", header.mapId);
+        POS_TRACE_WARN(EID(MFS_SYNCIO_ERROR), "mapId:{} StoreToMFS Failed @Unload", mapHeader->GetMapId());
     }
     else
     {
-        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "mapId:{} StoreToMFS Succeeded @Unload", header.mapId);
+        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "mapId:{} StoreToMFS Succeeded @Unload", mapHeader->GetMapId());
     }
 
     return ret;
@@ -287,14 +294,14 @@ MapContent::FlushTouchedPages(EventSmartPtr callback)
 uint32_t
 MapContent::GetPageSize(void)
 {
-    return header.mpageSize;
+    return mapHeader->GetMpageSize();
 }
 
 int
 MapContent::SetPageSize(std::string aname, StorageOpt storageOpt)
 {
 #ifdef IBOF_CONFIG_USE_MOCK_FS
-    header.mpageSize = 4096;
+    mapHeader->SetMpageSize(4096);
 #else
     MetaFilePropertySet prop;
     if (storageOpt == StorageOpt::NVRAM)
@@ -304,7 +311,15 @@ MapContent::SetPageSize(std::string aname, StorageOpt storageOpt)
         prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
     }
 
-    header.mpageSize = MetaFsServiceSingleton::Instance()->GetMetaFs(aname)->ctrl->EstimateAlignedFileIOSize(prop);
+    MetaFs* metaFs = metaFsService->GetMetaFs(aname);
+    if (metaFs == nullptr)
+    {
+        mapHeader->SetMpageSize(4096);
+    }
+    else
+    {
+        mapHeader->SetMpageSize(metaFs->ctrl->EstimateAlignedFileIOSize(prop));
+    }
 #endif
     return 0;
 }
@@ -312,7 +327,7 @@ MapContent::SetPageSize(std::string aname, StorageOpt storageOpt)
 uint32_t
 MapContent::GetEntriesPerPage(void)
 {
-    return header.entriesPerMpage;
+    return mapHeader->GetEntriesPerMpage();
 }
 
 std::string
@@ -322,12 +337,12 @@ MapContent::GetFileName(void)
 }
 
 int
-MapContent::Init(uint64_t numPages)
+MapContent::Init(uint64_t numMpages)
 {
-    map = new Map(numPages, header.mpageSize);
+    map = new Map(numMpages, mapHeader->GetMpageSize());
     if (mapIoHandler == nullptr)
     {
-        mapIoHandler = new MapIoHandler(map, &header);
+        mapIoHandler = new MapIoHandler(map, mapHeader);
     }
 
     return 0;
@@ -370,7 +385,7 @@ MapContent::DumpLoad(std::string fname, std::string aname)
 int
 MapContent::GetId(void)
 {
-    return header.mapId;
+    return mapHeader->GetMapId();
 }
 
 bool

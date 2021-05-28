@@ -12,6 +12,7 @@ class MockBitMap : public BitMap
 {
 public:
     using BitMap::BitMap;
+    MOCK_METHOD(uint64_t, GetNumBits, (), (override));
     MOCK_METHOD(bool, SetBit, (uint64_t bitOffset), (override));
     MOCK_METHOD(bool, ClearBit, (uint64_t bitOffset), (override));
     MOCK_METHOD(bool, ClearBits, (uint64_t begin, uint64_t end), (override));

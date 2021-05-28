@@ -30,18 +30,19 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
-
-#include <string>
-#include <vector>
-
 #include "src/allocator/address/allocator_address_info.h"
+#include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/context_manager/allocator_ctx/segment_lock.h"
 #include "src/allocator/context_manager/allocator_ctx/segment_states.h"
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 #include "src/include/meta_const.h"
+#include "src/include/pos_event_id.h"
 #include "src/lib/bitmap.h"
 #include "src/logger/logger.h"
+
+#include <string>
+#include <vector>
+
 namespace pos
 {
 AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap_, SegmentStates* segmentStates_, SegmentLock* segStateLocks_, AllocatorAddressInfo* info_, std::string arrayName_)

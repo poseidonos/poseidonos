@@ -30,99 +30,15 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "map.h"
-
 #include "src/include/memory.h"
+#include "src/mapper/map/map.h"
 
 namespace pos
 {
-MapHeader::MapHeader(void)
-: bitmap(nullptr),
-  touchedPages(nullptr),
-  isInitialized(false),
-  size(0),
-  mpageSize(0),
-  mapId(-1234),
-  entriesPerMpage(0)
+Map::Map(void)
+: pageSize(0),
+  numPages(0)
 {
-}
-
-MapHeader::~MapHeader(void)
-{
-    delete bitmap;
-    bitmap = nullptr;
-
-    delete touchedPages;
-    touchedPages = nullptr;
-}
-
-int
-MapHeader::SetSize(void)
-{
-    uint32_t curOffset = 0;
-
-    curOffset += sizeof(mpageData);
-    curOffset += (bitmap->GetNumEntry() * BITMAP_ENTRY_SIZE);
-
-    size = Align(curOffset, mpageSize);
-
-    return 0;
-}
-
-void
-MapHeader::SetMpageValidInfo(uint64_t numPages, uint64_t validPages)
-{
-    mpageData.numTotalMpages = numPages;
-    mpageData.numValidMpages = validPages;
-}
-
-int
-MapHeader::CopyToBuffer(char* buffer)
-{
-    int curOffset = 0;
-    std::unique_lock<std::mutex> lock(mpageHeaderLock);
-
-    UpdateNumValidMpages();
-
-    memcpy(buffer, (void*)(&mpageData), sizeof(mpageData));
-    curOffset += sizeof(mpageData);
-
-    memcpy(buffer + curOffset, (void*)bitmap->GetMapAddr(),
-        bitmap->GetNumEntry() * BITMAP_ENTRY_SIZE);
-
-    return 0;
-}
-
-BitMap*
-MapHeader::GetBitmapFromTempBuffer(char* buffer)
-{
-    MpageValidInfo* validInfo = reinterpret_cast<MpageValidInfo*>(buffer);
-    int bitmapOffset = sizeof(mpageData);
-
-    BitMap* copiedBitmap = new BitMap(validInfo->numTotalMpages);
-    copiedBitmap->SetNumBitsSet(validInfo->numValidMpages);
-    memcpy(copiedBitmap->GetMapAddr(), buffer + bitmapOffset, copiedBitmap->GetNumEntry() * BITMAP_ENTRY_SIZE);
-
-    return copiedBitmap;
-}
-
-void
-MapHeader::UpdateNumValidMpages(void)
-{
-    mpageData.numValidMpages = bitmap->GetNumBitsSet();
-}
-
-bool
-MapHeader::ApplyNumValidMpages(void)
-{
-    return bitmap->SetNumBitsSet(mpageData.numValidMpages);
-}
-
-void
-MapHeader::SetMapAllocated(int pageNr)
-{
-    std::unique_lock<std::mutex> lock(mpageHeaderLock);
-    bitmap->SetBit(pageNr);
 }
 
 Map::Map(int numMpages, int mpageSize)

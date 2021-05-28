@@ -1,5 +1,6 @@
+POS_ADD_UNIT_TEST(map_content_ut map_content_test.cpp)
+POS_ADD_UNIT_TEST(sequential_page_finder_ut sequential_page_finder_test.cpp)
 POS_ADD_UNIT_TEST(map_flush_handler_ut map_flush_handler_test.cpp)
 POS_ADD_UNIT_TEST(map_ut map_test.cpp)
-POS_ADD_UNIT_TEST(sequential_page_finder_ut sequential_page_finder_test.cpp)
+POS_ADD_UNIT_TEST(map_header_ut map_header_test.cpp)
 POS_ADD_UNIT_TEST(event_mpage_async_io_ut event_mpage_async_io_test.cpp)
-POS_ADD_UNIT_TEST(map_content_ut map_content_test.cpp)

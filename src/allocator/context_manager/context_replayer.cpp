@@ -30,17 +30,17 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/context_replayer.h"
-
-#include <string>
-#include <vector>
-
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
+#include "src/allocator/context_manager/context_replayer.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/allocator/include/allocator_const.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+
+#include <string>
+#include <vector>
 
 namespace pos
 {

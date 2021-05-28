@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "src/allocator/i_block_allocator.h"
 #include "src/mapper/map/map_content.h"
 
 #include <string>
@@ -41,8 +42,9 @@ namespace pos
 class VSAMapContent : public MapContent
 {
 public:
-    VSAMapContent(void);
-    VSAMapContent(int mapId, std::string arrayName);
+    VSAMapContent(void);    // Ctor for UT
+    VSAMapContent(int mapId, IBlockAllocator* iBlockAllocator_);   // Ctor for UT
+    VSAMapContent(int mapId, std::string arrayName);    // Ctor for Production
 
     virtual int Prepare(uint64_t size, int64_t opt = 0) override;
     virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries) override;
@@ -50,7 +52,6 @@ public:
     int InMemoryInit(uint64_t numEntries, uint64_t volid);
     virtual VirtualBlkAddr GetEntry(BlkAddr rba);
     virtual int SetEntry(BlkAddr rba, VirtualBlkAddr vsa);
-    void ResetEntries(BlkAddr rba, uint64_t cnt);
 
     virtual int64_t GetNumUsedBlocks(void);
     int InvalidateAllBlocks(void);
@@ -60,6 +61,7 @@ private:
 
     int64_t totalBlks = 0;
     int64_t usedBlks = 0;
+    IBlockAllocator* iBlockAllocator;
 };
 
 } // namespace pos
