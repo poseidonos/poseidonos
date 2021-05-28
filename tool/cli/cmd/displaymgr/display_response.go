@@ -64,7 +64,30 @@ func printResToHumanReadable(command string, resJSON string) {
 			}
 			log.Println("")
 		}
-	//case "ARRAYINFO":
+	case "ARRAYINFO":
+		res := messages.ArrayInfoResponse{}
+		json.Unmarshal([]byte(resJSON), &res)
+		printStatus(res.RESULT.STATUS.CODE)
+
+		array := res.RESULT.DATA
+
+		log.Println("Name: " + array.ARRAYNAME)
+		log.Println("---------------------------")
+		log.Println("State: " + array.STATE)
+		log.Println("Situation: " + array.SITUATION)
+		log.Println("Rebuilding Progress: ", array.REBUILDINGPROGRESS)
+		log.Println("Total: ", array.CAPACITY)
+		log.Println("Used: ", array.USED)
+		log.Println("")
+		log.Println("Devices")
+		log.Println("-------------")
+
+		for _, device := range array.DEVICELIST {
+			log.Println("Name: " + device.DEVICENAME)
+			log.Println("Type: " + device.DEVICETYPE)
+			log.Println("")
+		}
+		log.Println("")
 	case "LISTVOLUME":
 		res := messages.ListVolumeResponse{}
 		json.Unmarshal([]byte(resJSON), &res)

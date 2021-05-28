@@ -44,10 +44,7 @@ func Connect() {
 }
 
 func SendReqAndReceiveRes(reqJSON string) string {
-	// what to send?
-	//reader := bufio.NewReader(os.Stdin)
-	//fmt.Print("Text to send: ")
-	// send to server
+
 	fmt.Fprintf(conn, reqJSON)
 	// wait for reply
 	res, _ := bufio.NewReader(conn).ReadString('\n')

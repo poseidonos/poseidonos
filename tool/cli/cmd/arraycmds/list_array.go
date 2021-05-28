@@ -30,11 +30,28 @@ Example 2 (listing a specific array):
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var command = "LISTARRAY"
+		// TODO(mj): Currently, ARRAYLIST command sends ARRAYINFO command to the server
+		// when an array is specified.
+		// Those commands will be merged later.
+		var command = ""
+		var listArrayReq = messages.Request{}
+		if list_array_arrayName == "" {
+			command = "LISTARRAY"
+			listArrayReq = messages.Request{
+				RID:     "fromCLI",
+				COMMAND: command,
+			}
+		} else {
+			command = "ARRAYINFO"
+			listArrayParam := messages.ListArrayParam{
+				ARRAYNAME: list_array_arrayName,
+			}
 
-		listArrayReq := messages.Request{
-			RID:     "fromCLI",
-			COMMAND: command,
+			listArrayReq = messages.Request{
+				RID:     "fromCLI",
+				COMMAND: command,
+				PARAM:   listArrayParam,
+			}
 		}
 
 		reqJSON, err := json.Marshal(listArrayReq)

@@ -22,7 +22,7 @@ type Info struct {
 	VERSION string `json:"version"`
 }
 
-// Response for LISTARRAY Command
+// Response for LISTARRAY & ARRAYINFO commands
 type ListArrayResponse struct {
 	RID     string          `json:"rid"`
 	COMMAND string          `json:"command"`
@@ -39,12 +39,31 @@ type ListArrayResData struct {
 	ARRAYLIST []Array `json:"arrayList"`
 }
 
+type ArrayInfoResponse struct {
+	RID     string          `json:"rid"`
+	COMMAND string          `json:"command"`
+	RESULT  ArrayInfoResult `json:"result,omitempty"`
+	INFO    Info            `json:"info"`
+}
+
+type ArrayInfoResult struct {
+	STATUS Status `json:"status,omitempty"`
+	DATA   Array  `json:"data,omitempty"`
+}
+
+// TODO(mj): use omitempty because LISTARRAY and ARRAYINFO have different array structure.
+// The commands will be merged and this should be revised.
 type Array struct {
-	ARRAYNAME      string   `json:"name"`
-	CREATEDATETIME string   `json:"createDatetime"`
-	STATUS         string   `json:"status"`
-	UPDATEDATETIME string   `json:"updateDatetime"`
-	DEVICELIST     []Device `json:"devicelist"`
+	ARRAYNAME          string   `json:"name"`
+	CREATEDATETIME     string   `json:"createDatetime,omitempty"`
+	STATUS             string   `json:"status,omitempty"`
+	UPDATEDATETIME     string   `json:"updateDatetime,omitempty"`
+	SITUATION          string   `json:situation,omitempty"`
+	STATE              string   `json:state,omitempty"`
+	REBUILDINGPROGRESS int      `json:rebuilding_progress,omitempty"`
+	CAPACITY           int      `json:capacity,omitempty"`
+	USED               int      `json:used,omitempty"`
+	DEVICELIST         []Device `json:"devicelist"`
 }
 
 type Device struct {

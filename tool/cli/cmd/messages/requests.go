@@ -32,6 +32,10 @@ type DeleteArrayParam struct {
 	ARRAYNAME string `json:"name"`
 }
 
+type ListArrayParam struct {
+	ARRAYNAME string `json:"name"`
+}
+
 type MountArrayParam struct {
 	ARRAYNAME string `json:"name"`
 }

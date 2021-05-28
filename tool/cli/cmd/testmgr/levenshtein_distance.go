@@ -1,5 +1,7 @@
 package testmgr
 
+// Note: this function is to calculate the distance between two texts.
+// This is used to test CLI output, which is long.
 func Levenshtein(str1, str2 []rune) int {
 	s1len := len(str1)
 	s2len := len(str2)
