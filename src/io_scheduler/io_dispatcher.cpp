@@ -209,7 +209,7 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync)
     else if (ubio->NeedRecovery())
     {
         _SubmitRecovery(ubio);
-        return 0;
+        return DEVICE_FAILED;
     }
 
     UBlockDevice* ublock = ubio->GetUBlock();

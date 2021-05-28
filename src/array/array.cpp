@@ -259,6 +259,7 @@ Array::Shutdown(void)
     POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Shutdown array {}", name_);
     _UnregisterService();
     _DeletePartitions();
+    shutdownFlag = 1;
 }
 
 int
@@ -269,6 +270,24 @@ Array::Delete(void)
     if (ret != 0)
     {
         goto error;
+    }
+
+    if (state->IsBroken())
+    {
+        int waitcount = 0;
+        while(shutdownFlag == 0) // Broken State automatically triggers Shutdown to all array components
+        {
+            POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG , "Wait for shutdown done");
+            usleep(100000);
+            waitcount++;
+
+            if (waitcount > 50)
+            {
+                ret = (int)POS_EVENT_ID::ARRAY_SHUTDOWN_TAKES_TOO_LONG;
+                goto error;
+            }
+        }
+        shutdownFlag = 0;
     }
 
     devMgr_->Clear();
