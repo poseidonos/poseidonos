@@ -1,17 +1,18 @@
 package cmd
 
 import (
+	_ "encoding/json"
+	"fmt"
 	"pnconnector/src/errors"
 	iBoFOS "pnconnector/src/routers/m9k/api/ibofos"
 	"pnconnector/src/routers/m9k/model"
 	_ "pnconnector/src/setting"
-	_ "encoding/json"
-	"fmt"
+	"reflect"
+	"strings"
+
 	_ "github.com/c2h5oh/datasize"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"reflect"
-	"strings"
 )
 
 type arg struct {
@@ -57,24 +58,23 @@ var argList = []arg{
 	{"array", "", ""},
 }
 
-var wbtCmd = &cobra.Command{
+var WbtCmd = &cobra.Command{
 	Use:   "wbt [testname]",
-	Short: "wbt for Poseidon OS",
+	Short: "White box test (WBT) commands for Poseidon OS",
 	Long: `
 Send WBT name and arguments to Poseidon OS and get a result fommated by JSON.
 
-You can set ip and port number for connent to Poseidon OS using config.yaml or flags.
-Default value is as below.
-
-IP   : 127.0.0.1
-Port : 18716
+You can set IPv4 address and the port number to Poseidon OS confiruing config.yaml file or flags.
+Default values are as below:
+	IP   : 127.0.0.1
+	Port : 18716
 
 
 	  `,
 	Args: func(cmd *cobra.Command, args []string) error {
 
 		if len(args) == 0 {
-			return errors.New("wbt msg need one more argument!!!")
+			return errors.New("WBT commands need at least one argument")
 		}
 
 		return nil
@@ -87,10 +87,8 @@ Port : 18716
 
 func init() {
 
-	RootCmd.AddCommand(wbtCmd)
-
 	for i, _ := range argList {
-		wbtCmd.PersistentFlags().StringVarP(&argList[i].value, argList[i].name, argList[i].short, "", "set "+argList[i].name)
+		WbtCmd.PersistentFlags().StringVarP(&argList[i].value, argList[i].name, argList[i].short, "", "set "+argList[i].name)
 	}
 }
 

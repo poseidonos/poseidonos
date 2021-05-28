@@ -27,6 +27,7 @@ Cmd = ApplicationName WhiteSpace (ArrayCmd | VolumeCmd | DeviceCmd | SystemCmd |
 ArrayCmd = "array" WhiteSpace (MountArrayCmd | UnmountArrayCmd | ListArrayCmd | AddSpareCmd | RemoveSpareCmd | DeleteArrayCmd | CreateArrayCmd) .
 MountArrayCmd = "mount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
 UnmountArrayCmd = "unmount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
+ListArrayDeviceCmd = "list" [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] .
 ListArrayCmd = "list" [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] ["--detail"] .
 AddSpareCmd = "addspare" WhiteSpace "--spare" DeviceName ("--array-name" | "-a") ArrayName .
 RemoveSpareCmd = "rmspare" WhiteSpace "--spare-device" DeviceName ("--array-name" | "-a")  ArrayName .
@@ -56,7 +57,7 @@ SetSystemPropertyCmd = "set-property" [WhiteSpace "--rebuild-impact" WhiteSpace 
 
 LoggerCmd = "logger" (SetLogLevelCmd | GetLogLeveCmd | ApplyLogFilterCmd | LoggerInfoCmd) .
 SetLogLevelCmd = "set-level" WhiteSpace "--level" LogLevel . 
-LogLevel = "error" | "debug" .
+LogLevel = "error" | "debug" | "warn" | "err" | "critical" .
 GetLogLeveCmd = "get-level" .
 ApplyLogFilterCmd = "apply-filter"
 LoggerInfoCmd = "info" .

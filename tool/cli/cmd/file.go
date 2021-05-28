@@ -1,40 +1,38 @@
 package cmd
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"pnconnector/src/errors"
 	"pnconnector/src/log"
 	iBoFOS "pnconnector/src/routers/m9k/api/ibofos"
 	"pnconnector/src/routers/m9k/model"
-	"encoding/json"
-	"fmt"
+
 	"github.com/spf13/cobra"
-	"io/ioutil"
 )
 
-var fileCmd = &cobra.Command{
+var FileCmd = &cobra.Command{
 	Use:   "file [json file]",
-	Short: "json file input for Poseidon OS",
+	Short: "JSON file input for Poseidon OS",
 	Long: `Execute json file for Poseidon OS.
 
 Usage : 
 
-Input json file
+Input JSON file
 Single file is available.
 
-
-
-You can set ip and port number for connent to Poseidon OS using config.yaml or flags.
-Default value is as below.
-
-IP   : 127.0.0.1
-Port : 18716
+You can set IPv4 address and the port number to Poseidon OS confiruing config.yaml file or flags.
+Default values are as below:
+	IP   : 127.0.0.1
+	Port : 18716
 
 
 	  `,
 	Args: func(cmd *cobra.Command, args []string) error {
 
-		if len(args) != 1 {
-			return errors.New("need just one json file!!!")
+		if len(args) < 1 {
+			return errors.New("Please input JSON file to input")
 		}
 
 		return nil
@@ -47,7 +45,6 @@ Port : 18716
 
 func init() {
 
-	RootCmd.AddCommand(fileCmd)
 }
 
 func FileInput(cmd *cobra.Command, args []string) {

@@ -110,5 +110,5 @@ type SetPropertyVolumeParam struct {
 
 // Subsystem request params
 type DeleteSubsystemParam struct {
-	SUBSYSTEMNAME string `json:"name"`
+	SUBNQN string `json:"name"`
 }

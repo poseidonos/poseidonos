@@ -18,7 +18,10 @@ import (
 	"cli/cmd/arraycmds"
 	"cli/cmd/devicecmds"
 	"cli/cmd/globals"
+	"cli/cmd/loggercmds"
 	"cli/cmd/socketmgr"
+	"cli/cmd/subsystemcmds"
+	"cli/cmd/systemcmds"
 	"cli/cmd/volumecmds"
 )
 
@@ -90,9 +93,13 @@ func init() {
 
 	// Command categories
 	RootCmd.AddCommand(arraycmds.ArrayCmd)
-	RootCmd.AddCommand(devicecmds.DeviceCmd)
 	RootCmd.AddCommand(volumecmds.VolumeCmd)
-
+	RootCmd.AddCommand(systemcmds.SystemCmd)
+	RootCmd.AddCommand(devicecmds.DeviceCmd)
+	RootCmd.AddCommand(loggercmds.LoggerCmd)
+	RootCmd.AddCommand(subsystemcmds.SubsystemCmd)
+	RootCmd.AddCommand(FileCmd)
+	RootCmd.AddCommand(WbtCmd)
 }
 
 // TODO(mj): this function remains for wbt and file commands. This needs to be revised.
