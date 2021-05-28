@@ -46,7 +46,7 @@ TEST(ArrayComponents, Create_testIfRemoveStateIsInvokedWhenCreationFails)
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory);
 
     EXPECT_CALL(*mockArray, Create).WillOnce(Return(EID(ARRAY_BROKEN_ERROR)));
-    EXPECT_CALL(mockStateManager, RemoveStateControl).Times(2); // one by Create() and the other by destructor
+    EXPECT_CALL(mockStateManager, RemoveStateControl).Times(1); // one by Create() and the other by destructor
 
     // When
     int actual = arrayComps.Create(DeviceSet<string>(), "mock-raidtype");
@@ -86,7 +86,7 @@ TEST(ArrayComponents, Load_testIfLoadFailureIsPropagated)
 
     int LOAD_FAILURE = 123;
     EXPECT_CALL(*mockArray, Load).WillOnce(Return(LOAD_FAILURE));
-    EXPECT_CALL(mockStateManager, RemoveStateControl).Times(2);
+    EXPECT_CALL(mockStateManager, RemoveStateControl).Times(1);
 
     // When
     int actual = arrayComps.Load();

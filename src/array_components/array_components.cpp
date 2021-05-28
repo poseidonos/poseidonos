@@ -139,8 +139,11 @@ ArrayComponents::~ArrayComponents(void)
         POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "StateControl for {} has been nullified.", arrayName);
     }
 
-    stateMgr->RemoveStateControl(arrayName);
-    POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "StateManager has removed StateControl for {}", arrayName);
+    if (stateMgr != nullptr)
+    {
+        stateMgr->RemoveStateControl(arrayName);
+        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "StateManager has removed StateControl for {}", arrayName);
+    }
 }
 
 int
@@ -150,7 +153,6 @@ ArrayComponents::Create(DeviceSet<string> nameSet, string dataRaidType)
     int ret = array->Create(nameSet, dataRaidType);
     if (ret != 0)
     {
-        stateMgr->RemoveStateControl(arrayName);
         return ret;
     }
 
@@ -168,7 +170,6 @@ ArrayComponents::Load(void)
     int ret = array->Load();
     if (ret != 0)
     {
-        stateMgr->RemoveStateControl(arrayName);
         return ret;
     }
 
