@@ -139,11 +139,8 @@ ArrayComponents::~ArrayComponents(void)
         POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "StateControl for {} has been nullified.", arrayName);
     }
 
-    if (stateMgr != nullptr)
-    {
-        stateMgr->RemoveStateControl(arrayName);
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "StateManager has removed StateControl for {}", arrayName);
-    }
+    stateMgr->RemoveStateControl(arrayName);
+    POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "StateManager has removed StateControl for {}", arrayName);
 }
 
 int
