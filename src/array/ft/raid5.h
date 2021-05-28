@@ -48,7 +48,8 @@ class Raid5 : public Method
     friend class ParityLocationWbtCommand;
 
 public:
-    Raid5(const PartitionPhysicalSize* physicalSize, const uint64_t parityCount);
+    Raid5(const PartitionPhysicalSize* physicalSize, const uint64_t parityCount,
+      AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
     virtual ~Raid5()
     {
     }

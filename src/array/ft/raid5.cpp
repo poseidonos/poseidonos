@@ -42,8 +42,8 @@
 namespace pos
 {
 Raid5::Raid5(const PartitionPhysicalSize* physicalSize,
-    const uint64_t parityCount)
-: freeParityPool(parityCount, CHUNK_SIZE)
+    const uint64_t parityCount, AffinityManager* affinityManager)
+: freeParityPool(parityCount, CHUNK_SIZE, affinityManager)
 {
     raidType = RaidTypeEnum::RAID5;
     ftSize_ = {

@@ -10,6 +10,8 @@
 #include "test/unit-tests/array/device/array_device_mock.h"
 #include "test/unit-tests/array/interface/i_abr_control_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
+#include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
+#include "test/unit-tests/utils/mock_builder.h"
 
 // copied from partition_manager.cpp to calculate expected total segments
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
@@ -18,12 +20,14 @@ using ::testing::_;
 using ::testing::Return;
 namespace pos
 {
+
 TEST(PartitionManager, PartitionManager_testConstructor)
 {
     // Given
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
 
     // When
-    PartitionManager pm("mock-array", nullptr);
+    PartitionManager pm("mock-array", nullptr, &mockAffMgr);
 
     // Then
 }
@@ -31,7 +35,8 @@ TEST(PartitionManager, PartitionManager_testConstructor)
 TEST(PartitionManager, GetSizeInfo_testIfNullIsReturnedForUninitializedPartition)
 {
     // Given
-    PartitionManager pm("mock-array", nullptr);
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    PartitionManager pm("mock-array", nullptr, &mockAffMgr);
 
     // When
     auto actual = pm.GetSizeInfo(PartitionType::META_NVM);
@@ -49,7 +54,8 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
     using MockUblockSharedPtr = std::shared_ptr<MockUBlockDevice>;
 
     MockIAbrControl mockIAbrControl;
-    PartitionManager pm("mock-array", &mockIAbrControl);
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    PartitionManager pm("mock-array", &mockIAbrControl, &mockAffMgr);
 
     MockArrayDevice dataDev1(nullptr), dataDev2(nullptr), dataDev3(nullptr), dataDev4(nullptr);
     vector<ArrayDevice*> data = {&dataDev1, &dataDev2, &dataDev3, &dataDev4};
@@ -62,7 +68,7 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
     EXPECT_CALL(bufDev, GetUblock).WillRepeatedly(Return(ptrMockUblockNvmDev)); // 'cause this would become "baseline"
 
     uint64_t DATA_DEV_SIZE = ArrayConfig::SSD_SEGMENT_SIZE_BYTE * 10; // in bytes
-    uint64_t NVM_DEV_SIZE = ArrayConfig::SSD_SEGMENT_SIZE_BYTE * 20;  // in bytes
+    uint64_t NVM_DEV_SIZE = ArrayConfig::SSD_SEGMENT_SIZE_BYTE * 1;  // in bytes
 
     MockArrayInterface mockInterface;
 

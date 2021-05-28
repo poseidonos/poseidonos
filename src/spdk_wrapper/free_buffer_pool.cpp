@@ -34,18 +34,16 @@
 
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/cpu_affinity/affinity_manager.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
 
-FreeBufferPool::FreeBufferPool(uint64_t maxBufferCount, uint32_t bufferSize)
+FreeBufferPool::FreeBufferPool(uint64_t maxBufferCount, uint32_t bufferSize, AffinityManager* affinityManager)
 {
     uint32_t remainBufferCount = 0;
     uint8_t* buffer = 0;
-    uint32_t socket =
-        AffinityManagerSingleton::Instance()->GetEventWorkerSocket();
+    uint32_t socket = affinityManager->GetEventWorkerSocket();
     for (uint32_t i = 0; i < maxBufferCount; i++)
     {
         if (remainBufferCount == 0)

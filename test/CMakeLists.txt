@@ -372,7 +372,7 @@ else(POS_BUILD_SHARED_LIB)
 endif(POS_BUILD_SHARED_LIB)
 
 file(GLOB_RECURSE fixture_src ${POS_TEST_ROOT}/fixtures/*.cpp LIST_DIRECTORIES true)
-file(GLOB_RECURSE utils_src ${POS_TEST_ROOT}/utils/*.cpp LIST_DIRECTORIES true)
+file(GLOB_RECURSE utils_src ${POS_TEST_ROOT}/unit-tests/utils/*.cpp LIST_DIRECTORIES true)
 file(GLOB_RECURSE fff_mock_src ${POS_TEST_ROOT}/fff-mocks/*.c LIST_DIRECTORIES true)
 
 # for fixtures and utils

@@ -30,29 +30,32 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <vector>
 
-#include <list>
-#include <mutex>
-
-#include "src/include/meta_const.h"
-#include "src/cpu_affinity/affinity_manager.h"
+#include "src/helper/json_helper.h"
+#include "src/volume/volume.h"
+#include "test/unit-tests/utils/test_util.h"
 
 namespace pos
 {
-class FreeBufferPool
+std::string
+VolumeListToString(std::vector<pos::Volume*> volumes)
 {
-public:
-    FreeBufferPool(uint64_t maxBufferCount, uint32_t bufferSize, AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
-    virtual ~FreeBufferPool(void);
-    virtual void* GetBuffer(void);
-    virtual void ReturnBuffer(void*);
+    // refer to VolumeMetaIntf::SaveVolumes() for the full details. possible candidate for refactoring
+    JsonElement root("");
+    JsonArray jsonArray("volumes");
+    for (auto& v : volumes)
+    {
+        JsonElement elem("");
+        elem.SetAttribute(JsonAttribute("name", "\"" + v->GetName() + "\""));
+        elem.SetAttribute(JsonAttribute("id", std::to_string(v->ID)));
+        elem.SetAttribute(JsonAttribute("total", std::to_string(v->TotalSize())));
+        elem.SetAttribute(JsonAttribute("maxiops", std::to_string(v->MaxIOPS())));
+        elem.SetAttribute(JsonAttribute("maxbw", std::to_string(v->MaxBW())));
+        jsonArray.AddElement(elem);
+    }
+    root.SetArray(jsonArray);
+    return root.ToJson();
+}
 
-private:
-    static const uint32_t ALLOCATION_SIZE_BYTE = 2 * 1024 * 1024;
-
-    std::mutex freeListLock;
-    std::list<void*> freeList;
-    std::list<void*> bufferHeadList;
-};
-} // namespace pos
+}  // namespace pos_test

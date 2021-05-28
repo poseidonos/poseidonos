@@ -19,7 +19,9 @@
 #include "test/unit-tests/rebuild/array_rebuilder_mock.h"
 #include "test/unit-tests/state/interface/i_state_control_mock.h"
 #include "test/unit-tests/array/service/array_service_layer_mock.h"
-#include "test/utils/spdk_util.h"
+#include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
+#include "test/unit-tests/utils/spdk_util.h"
+#include "test/unit-tests/utils/mock_builder.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -29,6 +31,7 @@ using ::testing::ReturnRef;
 
 namespace pos
 {
+
 TEST(Array, Array_testIfConstructedProperly)
 {
     // Given: nothing
@@ -105,8 +108,9 @@ TEST(Array, Init_testIfPartitionRegistrationFailureHandledProperly)
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
-    MockPartitionManager* mockPartMgr = new MockPartitionManager("mock-part", NULL);
     MockArrayServiceLayer* mockArrayService = new MockArrayServiceLayer;
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    MockPartitionManager* mockPartMgr = new MockPartitionManager("mock-part", NULL, &mockAffMgr);
 
     EXPECT_CALL(*mockState, Exists).WillOnce(Return(true));
     EXPECT_CALL(*mockState, IsLoadable).WillOnce(Return(0));
@@ -155,8 +159,8 @@ TEST(Array, Init_testIfArrayServiceRegistrationFailureHandledProperly)
     EXPECT_CALL(*mockState, IsLoadable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
     EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrDevMgr, Import(_, _, _)).WillOnce(Return(LOAD_SUCCESS)); // make it return zero
-    EXPECT_CALL(*mockState, SetDelete).Times(0);                                 // failure path should not be invoked!
+    EXPECT_CALL(*mockArrDevMgr, Import(_, _, _)).WillOnce(Return(LOAD_SUCCESS));  // make it return zero
+    EXPECT_CALL(*mockState, SetDelete).Times(0);                                  // failure path should not be invoked!
     EXPECT_CALL(*mockState, SetLoad).Times(1);
     EXPECT_CALL(*mockState, IsMountable).WillOnce(Return(MOUNT_SUCCESS));
     DeviceSet<ArrayDevice*> mockDevs;
@@ -189,7 +193,8 @@ TEST(Array, Init_testIfInitIsDoneSuccessfully)
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
-    MockPartitionManager* mockPartMgr = new MockPartitionManager("mock-part", NULL);
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    MockPartitionManager* mockPartMgr = new MockPartitionManager("mock-part", NULL, &mockAffMgr);
     MockArrayInterface* mockArrayInterface = new MockArrayInterface;
     MockArrayServiceLayer* mockArrayService = new MockArrayServiceLayer;
     EXPECT_CALL(*mockArrayInterface, GetRecover).Times(1);
@@ -228,8 +233,9 @@ TEST(Array, Dispose_testIfDependenciesAreInvoked)
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockPartitionManager* mockPartMgr = new MockPartitionManager("mock-part", NULL);
     MockArrayServiceLayer* mockArrayService = new MockArrayServiceLayer;
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    MockPartitionManager* mockPartMgr = new MockPartitionManager("mock-part", NULL, &mockAffMgr);
     Array array("mock", NULL, NULL, NULL, NULL, mockPartMgr, mockState, NULL, NULL, mockArrayService);
 
     EXPECT_CALL(*mockPartMgr, DeleteAll).Times(1);
@@ -322,7 +328,8 @@ TEST(Array, Create_testIfArrayCreatedWhenInputsAreValid)
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl* mockAbrControl = new MockIAbrControl();
-    MockPartitionManager* mockPtnMgr = new MockPartitionManager(mockArrayName, mockAbrControl);
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager(mockArrayName, mockAbrControl, &mockAffMgr);
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Import(_)).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Export()).WillOnce(ReturnRef(emptyArrayDeviceSet));
@@ -601,7 +608,7 @@ TEST(Array, DetachDevice_testIfSpareDeviceIsSuccessfullyDetachedFromUnmountedArr
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
 
     string spareDevName = "mock-unvme";
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
@@ -634,7 +641,7 @@ TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromUnmountedArra
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
 
     string spareDevName = "mock-unvme";
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
@@ -673,7 +680,7 @@ TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromMountedArray)
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
 
     string spareDevName = "mock-unvme";
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
@@ -713,7 +720,7 @@ TEST(Array, DetachDevice_IntegrationTestIfDataDeviceIsNotDetachedFromMountedArra
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
 
     string spareDevName = "mock-unvme";
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
@@ -822,7 +829,8 @@ TEST(Array, Set_testIfSettersAreInvoked)
 TEST(Array, GetSizeInfo_testIfPartitionManagerIsQueriedOn)
 {
     // Given: an array and a partition manager
-    MockPartitionManager* mockPartMgr = new MockPartitionManager("mock-array", NULL);
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    MockPartitionManager* mockPartMgr = new MockPartitionManager("mock-array", NULL, &mockAffMgr);
     PartitionType partType = PartitionType::USER_DATA;
     PartitionLogicalSize logicalSize;
     EXPECT_CALL(*mockPartMgr, GetSizeInfo(partType)).WillOnce(Return(&logicalSize));
@@ -951,7 +959,7 @@ TEST(Array, IsRecoverable_testIfMountedHealthyArrayDetachesDataDeviceAndIsRecove
     UblockSharedPtr mockUblockSharedPtr = shared_ptr<UBlockDevice>(mockUblockDevPtr);
 
     MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
 

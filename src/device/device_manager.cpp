@@ -77,8 +77,8 @@ MonitorStart(DeviceMonitor* monitor)
     monitor->Start();
 }
 
-DeviceManager::DeviceManager(void)
-: affinityManager(AffinityManagerSingleton::Instance()),
+DeviceManager::DeviceManager(AffinityManager* affinityManager)
+: affinityManager(affinityManager),
   reactorRegistered(false),
   deviceEvent(nullptr),
   ioDispatcher(nullptr)

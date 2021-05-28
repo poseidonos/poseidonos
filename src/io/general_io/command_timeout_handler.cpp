@@ -105,10 +105,13 @@ CommandTimeoutHandler::AbortSubmitHandler::DiskIO(UblockSharedPtr dev, void *ctx
     }
 }
 
-CommandTimeoutHandler::AbortSubmitHandler::AbortSubmitHandler(AbortContext* inputAbortContext)
-: abortContext(inputAbortContext)
+CommandTimeoutHandler::AbortSubmitHandler::AbortSubmitHandler(AbortContext* inputAbortContext, DeviceManager* devMgr)
+: abortContext(inputAbortContext),
+  devMgr(devMgr)
 {
+    // initialization
 }
+
 bool
 CommandTimeoutHandler::IsPendingAbortZero(void)
 {
@@ -119,7 +122,7 @@ bool
 CommandTimeoutHandler::AbortSubmitHandler::Execute(void)
 {
     driverFunc = bind(&CommandTimeoutHandler::AbortSubmitHandler::DiskIO, this, _1, _2);
-    DeviceManagerSingleton::Instance()->IterateDevicesAndDoFunc(driverFunc, nullptr);
+    devMgr->IterateDevicesAndDoFunc(driverFunc, nullptr);
     return true;
 }
 

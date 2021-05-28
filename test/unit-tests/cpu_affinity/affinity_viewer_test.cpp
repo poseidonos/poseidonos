@@ -4,7 +4,8 @@
 
 namespace pos
 {
-TEST(AffinityViewer, Print_numaAvailable)
+// FIXME: Disabled to avoid invoking exit() on a host where the number of CPU cores is smaller than 10 [AWIBOF-3632]
+TEST(AffinityViewer, DISABLED_Print_numaAvailable)
 {
     // Given
     AffinityViewer affinityViewer;

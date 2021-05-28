@@ -4,6 +4,8 @@
 
 #include "src/array_models/dto/partition_physical_size.h"
 #include "src/include/array_config.h"
+#include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
+#include "test/unit-tests/utils/mock_builder.h"
 
 namespace pos
 {
@@ -56,9 +58,10 @@ TEST(Raid5, Raid5_testIfConstructorIsInvoked)
     const PartitionPhysicalSize physicalSize{
         .blksPerChunk = 1234,
         .chunksPerStripe = 4567};
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
 
     // When
-    Raid5 raid5(&physicalSize, 10 /* meaningless in this UT file */);
+    Raid5 raid5(&physicalSize, 10 /* meaningless in this UT file */, &mockAffMgr);
 }
 
 TEST(Raid5, Raid5_testIfTranslateCalculatesDestinationOffsetProperly)
@@ -74,7 +77,8 @@ TEST(Raid5, Raid5_testIfTranslateCalculatesDestinationOffsetProperly)
         .stripeId = STRIPE_ID,
         .offset = OFFSET};
 
-    Raid5 raid5(&physicalSize, 10);
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    Raid5 raid5(&physicalSize, 10, &mockAffMgr);
     FtBlkAddr dest;
 
     // When
@@ -94,7 +98,8 @@ TEST(Raid5, Convert_testIfParityBufferIsProperlyCalculated)
     const PartitionPhysicalSize physicalSize{
         .blksPerChunk = 4,
         .chunksPerStripe = 4};
-    Raid5 raid5(&physicalSize, physicalSize.blksPerChunk * 2 /* just to be large enough */);
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    Raid5 raid5(&physicalSize, physicalSize.blksPerChunk * 2 /* just to be large enough */, &mockAffMgr);
 
     std::list<BufferEntry> buffers;
     int NUM_BLOCKS = physicalSize.blksPerChunk;
@@ -132,7 +137,8 @@ TEST(Raid5, GetRebuildGroup_testIfRebuildGroupDoesNotContainTargetFtBlockAddr)
     const PartitionPhysicalSize physicalSize{
         .blksPerChunk = 27,
         .chunksPerStripe = 100};
-    Raid5 raid5(&physicalSize, 10);
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    Raid5 raid5(&physicalSize, 10, &mockAffMgr);
     StripeId STRIPE_ID = 1234;
     BlkOffset BLK_OFFSET = 400;
 
@@ -155,7 +161,8 @@ TEST(Raid5, Getters_testIfGettersAreInvoked)
     const PartitionPhysicalSize physicalSize{
         .blksPerChunk = 27,
         .chunksPerStripe = 100};
-    Raid5 raid5(&physicalSize, 10);
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    Raid5 raid5(&physicalSize, 10, &mockAffMgr);
 
     // When & Then
     ASSERT_EQ(RaidTypeEnum::RAID5, raid5.GetRaidType());

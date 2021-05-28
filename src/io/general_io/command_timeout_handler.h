@@ -63,12 +63,13 @@ public:
     class AbortSubmitHandler : public Event
     {
     public:
-        AbortSubmitHandler(AbortContext* inputAbortContext);
+        AbortSubmitHandler(AbortContext* inputAbortContext, DeviceManager* devMgr = DeviceManagerSingleton::Instance());
         void DiskIO(UblockSharedPtr dev, void* ctx);
         bool Execute(void) override;
 
     private:
         AbortContext* abortContext;
+        DeviceManager* devMgr;
         DeviceIterFunc driverFunc;
     };
 

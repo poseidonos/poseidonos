@@ -32,27 +32,7 @@
 
 #pragma once
 
-#include <list>
-#include <mutex>
+#include "lib/spdk/lib/nvme/nvme_internal.h"
 
-#include "src/include/meta_const.h"
-#include "src/cpu_affinity/affinity_manager.h"
-
-namespace pos
-{
-class FreeBufferPool
-{
-public:
-    FreeBufferPool(uint64_t maxBufferCount, uint32_t bufferSize, AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
-    virtual ~FreeBufferPool(void);
-    virtual void* GetBuffer(void);
-    virtual void ReturnBuffer(void*);
-
-private:
-    static const uint32_t ALLOCATION_SIZE_BYTE = 2 * 1024 * 1024;
-
-    std::mutex freeListLock;
-    std::list<void*> freeList;
-    std::list<void*> bufferHeadList;
-};
-} // namespace pos
+extern struct spdk_nvme_ns* BuildFakeNvmeNamespace(void);
+extern void DestroyFakeNvmeNamespace(struct spdk_nvme_ns* ns);

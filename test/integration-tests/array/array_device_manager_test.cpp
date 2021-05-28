@@ -45,7 +45,7 @@ MockUblockDevice(const char* devName)
 TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImported)
 {
     // Given
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
 
     ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
     DeviceSet<string> nameSet;
@@ -84,7 +84,7 @@ TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImported)
 TEST(ArrayDeviceManager, Export_testIfArrayDevMgrIsQueriedAgainst)
 {
     // Given
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
     ArrayDeviceManager adm(&mockSysDevMgr);
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     DeviceSet<ArrayDevice*> emptyDevSet;
@@ -174,7 +174,7 @@ TEST(ArrayDeviceManager, Clear_testIfNullPtrIsHandled)
 TEST(ArrayDeviceManager, AddSpare_testIfWrongDevnameIsHandled)
 {
     // Given
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
     ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
     string devName = "spare1";
 
@@ -190,7 +190,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfWrongDevnameIsHandled)
 TEST(ArrayDeviceManager, AddSpare_testIfAddingSpareAgainIsHandled)
 {
     // Given
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
     ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
     string devName = "spare1";
 
@@ -208,7 +208,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfAddingSpareAgainIsHandled)
 TEST(ArrayDeviceManager, AddSpare_testIfNotAliveSpareIsHandled)
 {
     // Given
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
     ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
     string devName = "spare1";
 
@@ -227,7 +227,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfNotAliveSpareIsHandled)
 TEST(ArrayDeviceManager, AddSpare_testIfWrongCapacityIsHandled)
 {
     // Given
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
     ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
     string devName = "spare1";
     int EXPECTED_DEV_SIZE = 121212;
@@ -257,7 +257,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfWrongCapacityIsHandled)
 TEST(ArrayDeviceManager, AddSpare_testIfSpareIsAddedToArrayDeviceList)
 {
     // Given
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
     ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
     string devName = "spare1";
     int EXPECTED_DEV_SIZE = 121212;
@@ -292,7 +292,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfSpareIsAddedToArrayDeviceList)
 TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalFails)
 {
     // Given
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
     ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
@@ -311,7 +311,7 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalFails)
 TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalIsSuccessful)
 {
     // Given
-    MockDeviceManager mockSysDevMgr;
+    MockDeviceManager mockSysDevMgr(nullptr);
     ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
 
     auto spare1 = MockUblockDevice("spare1");

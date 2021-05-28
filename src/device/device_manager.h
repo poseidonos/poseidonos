@@ -42,6 +42,7 @@
 #include "device_identifier.h"
 #include "i_device_event.h"
 #include "spdk/nvme.h"
+#include "src/cpu_affinity/affinity_manager.h"
 #include "src/device/base/device_driver.h"
 #include "src/spdk_wrapper/device_monitor.h"
 #include "src/include/memory.h"
@@ -68,7 +69,7 @@ class DeviceManager
 #endif
 {
 public:
-    DeviceManager(void);
+    DeviceManager(AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
     virtual ~DeviceManager(void);
 
     virtual void Initialize(IIODispatcher* ioDispatcherInterface);

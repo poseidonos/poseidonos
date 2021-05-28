@@ -3,8 +3,13 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/mbr/mbr_manager_mock.h"
+#include "test/unit-tests/mbr/mbr_map_manager_mock.h"
+#include "test/unit-tests/device/device_manager_mock.h"
+
 using ::testing::_;
 using ::testing::NiceMock;
+using ::testing::AtLeast;
+using ::testing::Return;
 namespace pos
 {
 ArrayMeta
@@ -32,9 +37,10 @@ buildArrayMeta(string arrayName, int numDataDevices, int numBufferDevices)
 TEST(AbrManager, AbrManager_testIfAbrManagerCreatedSuccessfully)
 {
     // Given : Nothing
+    MockMbrManager mockMbrMgr(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
 
     // When : Create abrMgr, there is one abr manager for one array manager
-    AbrManager* abrMgr = new AbrManager();
+    AbrManager* abrMgr = new AbrManager(&mockMbrMgr);
 
     // Then : Nothing
 }
@@ -46,7 +52,7 @@ TEST(AbrManager, LoadAbr_testIfAbrDataLoadedCorrectly)
     string mockNvmDeviceName = "unvme-nvm";
     string mockSpareDeviceName = "unvme-spare";
     string mockDeviceName = "unvme-ns-";
-    MockMbrManager* mockMbrManager = new MockMbrManager();
+    MockMbrManager* mockMbrManager = new MockMbrManager(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
     EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr)
     {
         using AbrPtr = struct ArrayBootRecord*;
@@ -84,7 +90,9 @@ TEST(AbrManager, SaveAbr_testAbrDataUpdateAndDataCheck)
     string mockArrayName = "POSArray";
     using AbrPtr = struct ArrayBootRecord*;
     AbrPtr newAbr = new struct ArrayBootRecord;
-    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
+    MockMbrMapManager* mockMapManager = new MockMbrMapManager;
+    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>(nullptr, "uuid", nullptr, nullptr, nullptr, mockMapManager);
+    EXPECT_CALL(*mockMapManager, DeleteDevices).Times(1);
     EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillRepeatedly([&](string targetArrayName, struct ArrayBootRecord** abr)
     {
         *abr = newAbr;
@@ -110,7 +118,7 @@ TEST(AbrManager, GetMfsInit_testGettingMfsInitZero)
     // Given : In mbr, array named with mockArrayname exists
     string mockArrayName = "POSArray";
     int expectedMfsInitVal = 0;
-    MockMbrManager* mockMbrManager = new MockMbrManager();
+    MockMbrManager* mockMbrManager = new MockMbrManager(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
     EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr)
     {
         using AbrPtr = struct ArrayBootRecord*;
@@ -132,7 +140,7 @@ TEST(AbrManager, GetMfsInit_testGettingMfsInitOne)
     // Given : In mbr, array named with mockArrayname exists
     string mockArrayName = "POSArray";
     int expectedMfsInitVal = 1;
-    MockMbrManager* mockMbrManager = new MockMbrManager();
+    MockMbrManager* mockMbrManager = new MockMbrManager(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
     EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillOnce([=](string targetArrayName, struct ArrayBootRecord** abr)
     {
         using AbrPtr = struct ArrayBootRecord*;
@@ -156,7 +164,7 @@ TEST(AbrManager, SetMfsInit_testIfMfsInitValSetToZero)
     int expectedMfsInitVal = 0;
     using AbrPtr = struct ArrayBootRecord*;
     AbrPtr newAbr = new struct ArrayBootRecord;
-    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
+    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
     EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillRepeatedly([&](string targetArrayName, struct ArrayBootRecord** abr)
     {
         *abr = newAbr;
@@ -180,7 +188,7 @@ TEST(AbrManager, SetMfsInit_testIfMfsInitValSetToOne)
     int expectedMfsInitVal = 1;
     using AbrPtr = struct ArrayBootRecord*;
     AbrPtr newAbr = new struct ArrayBootRecord;
-    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
+    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
     EXPECT_CALL(*mockMbrManager, GetAbr(_, _)).WillRepeatedly([&](string targetArrayName, struct ArrayBootRecord** abr)
     {
         *abr = newAbr;
@@ -202,8 +210,13 @@ TEST(AbrManager, CreateAbr_testCommandPassing)
     // Given : AbrManger
     string mockArrayName = "POSArray";
     ArrayMeta arrayMeta;
-    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
+    MockMbrMapManager mockMapManager;
+    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>(nullptr, "uuid", nullptr, nullptr, nullptr, &mockMapManager);
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
+
+    EXPECT_CALL(mockMapManager, CheckAllDevices).WillOnce(Return(0));
+    EXPECT_CALL(mockMapManager, InsertDevices).Times(AtLeast(1));
+
     // When : Call CreateAbr
     abrMgr->CreateAbr(mockArrayName, arrayMeta);
     // Then : Nothing
@@ -214,8 +227,9 @@ TEST(AbrManager, DeleteAbr_testCommandPassing)
     // Given : AbrManger
     string mockArrayName = "POSArray";
     ArrayMeta arrayMeta;
-    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
+    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
+
     // When : Call DeleteAbr
     abrMgr->DeleteAbr(mockArrayName, arrayMeta);
     // Then : Nothing
@@ -226,8 +240,14 @@ TEST(AbrManager, ResetMbr_testCommandPassing)
     // Given : AbrManger
     string mockArrayName = "POSArray";
     ArrayMeta arrayMeta;
-    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
+    MockDeviceManager mockDevManager(nullptr);
+    MockMbrMapManager mockMapManager;
+    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>(nullptr, "uuid", nullptr, nullptr, &mockDevManager, &mockMapManager);
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
+
+    EXPECT_CALL(mockMapManager, ResetMap).Times(1);
+    EXPECT_CALL(mockDevManager, IterateDevicesAndDoFunc).WillOnce(Return(0));
+
     // When : Call ResetMbr
     abrMgr->ResetMbr();
     // Then : Nothing
@@ -238,8 +258,13 @@ TEST(AbrManager, GetAbrList_testCommandPassing)
     // Given : AbrManger
     string mockArrayName = "POSArray";
     ArrayMeta arrayMeta;
-    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
+    MockDeviceManager mockDevManager(nullptr);
+    MockMbrMapManager* mockMapManager = new MockMbrMapManager;
+    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>(nullptr, "uuid", nullptr, nullptr, &mockDevManager, mockMapManager);
     AbrManager* abrMgr = new AbrManager(mockMbrManager);
+
+    EXPECT_CALL(mockDevManager, IterateDevicesAndDoFunc).WillOnce(Return(0));
+
     // When : Call GetAbrList
     vector<ArrayBootRecord> abrList;
     abrMgr->GetAbrList(abrList);
@@ -251,7 +276,7 @@ TEST(AbrManager, FindArrayWithDeviceSN_testCommandPassing)
     // Given : AbrManger
     string mockArrayName = "POSArray";
     string devName = "unvme-ns-0";
-    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>();
+    NiceMock<MockMbrManager>* mockMbrManager = new NiceMock<MockMbrManager>(nullptr, "uuid", nullptr, nullptr, nullptr, nullptr);
     EXPECT_CALL(*mockMbrManager, FindArrayWithDeviceSN(_)).WillOnce([=](string devName)
     {
         return mockArrayName;

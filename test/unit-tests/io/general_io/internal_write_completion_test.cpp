@@ -4,6 +4,8 @@
 #include <gtest/gtest.h>
 #include "src/spdk_wrapper/free_buffer_pool.h"
 #include "test/unit-tests/array/ft/buffer_entry_mock.h"
+#include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
+#include "test/unit-tests/utils/mock_builder.h"
 
 using namespace std;
 using ::testing::_;
@@ -39,7 +41,8 @@ TEST(InternalWriteCompletion, InternalWriteCompletion_OneArgument_Heap)
 TEST(InternalWriteCompletion, _DoSpecificJob_Normal)
 {
     //Given: InternalWriteCompletion is given a valid bufferEntry
-    FreeBufferPool freeBufferPool(1, 2 * 1024 * 1024);
+    MockAffinityManager mockAffinityMgr = BuildDefaultAffinityManagerMock();
+    FreeBufferPool freeBufferPool(1, 2 * 1024 * 1024, &mockAffinityMgr);
     void* orgBuffer = freeBufferPool.GetBuffer();
     ASSERT_NE(nullptr, orgBuffer);
 

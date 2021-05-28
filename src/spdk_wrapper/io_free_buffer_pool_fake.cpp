@@ -34,7 +34,7 @@
 
 namespace pos
 {
-FreeBufferPool::FreeBufferPool(uint64_t maxBufferCount, uint32_t bufferSize)
+FreeBufferPool::FreeBufferPool(uint64_t maxBufferCount, uint32_t bufferSize, AffinityManager* affinityManager)
 {
 }
 

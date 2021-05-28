@@ -31,28 +31,15 @@
  */
 
 #pragma once
-
-#include <list>
-#include <mutex>
-
-#include "src/include/meta_const.h"
-#include "src/cpu_affinity/affinity_manager.h"
+#include <gtest/gtest.h>
 
 namespace pos
 {
-class FreeBufferPool
+class MbrManagerSuccessfulParameterizedCreateAbrTestFixture : public ::testing::TestWithParam<int>
 {
-public:
-    FreeBufferPool(uint64_t maxBufferCount, uint32_t bufferSize, AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
-    virtual ~FreeBufferPool(void);
-    virtual void* GetBuffer(void);
-    virtual void ReturnBuffer(void*);
-
-private:
-    static const uint32_t ALLOCATION_SIZE_BYTE = 2 * 1024 * 1024;
-
-    std::mutex freeListLock;
-    std::list<void*> freeList;
-    std::list<void*> bufferHeadList;
 };
-} // namespace pos
+class MbrManagerFailedParameterizedCreateAbrTestFixture : public ::testing::TestWithParam<int>
+{
+};
+
+}  // namespace pos

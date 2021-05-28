@@ -18,6 +18,8 @@
 #include <test/unit-tests/mapper/i_reversemap_mock.h>
 #include <test/unit-tests/mapper/reversemap/reverse_map_mock.h>
 #include <test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h>
+#include <test/unit-tests/cpu_affinity/affinity_manager_mock.h>
+#include <test/unit-tests/utils/mock_builder.h>
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -75,7 +77,8 @@ public:
         EXPECT_CALL(*array, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
 
         gcStatus = new NiceMock<MockGcStatus>;
-        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0);
+        affinityManager = new NiceMock<MockAffinityManager>(BuildDefaultAffinityManagerMock());
+        gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, affinityManager);
         gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool);
 
         victimStripes = new std::vector<std::vector<VictimStripe*>>;
@@ -92,7 +95,7 @@ public:
         gcBufferPool = new std::vector<FreeBufferPool*>;
         for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
         {
-            gcBufferPool->push_back(new NiceMock<MockFreeBufferPool>(0, 0));
+            gcBufferPool->push_back(new NiceMock<MockFreeBufferPool>(0, 0, affinityManager));
         }
 
         meta = new NiceMock<MockCopierMeta>(array, udSize, inUseBitmap, gcStripeManager, victimStripes, gcBufferPool);
@@ -108,6 +111,7 @@ public:
     {
         delete copier;
         delete array;
+        delete affinityManager;
     }
 
 protected:
@@ -126,10 +130,12 @@ protected:
     NiceMock<MockBitMapMutex>* inUseBitmap;
     NiceMock<MockGcStripeManager>* gcStripeManager;
     NiceMock<MockReverseMapPack>* reverseMapPack;
+    NiceMock<MockAffinityManager>* affinityManager;
     NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
     std::vector<FreeBufferPool*>* gcBufferPool;
+    CpuSetArray cpuSetArray;
 
     const PartitionLogicalSize* udSize = &partitionLogicalSize;
 

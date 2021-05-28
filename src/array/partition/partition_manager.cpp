@@ -49,8 +49,10 @@
 
 namespace pos
 {
-PartitionManager::PartitionManager(string array, IAbrControl* abr)
-: arrayName_(array)
+
+PartitionManager::PartitionManager(string array, IAbrControl* abr, AffinityManager* affinityManager)
+: arrayName_(array),
+  affinityManager(affinityManager)
 {
     for (uint32_t i = 0; i < partitions_.size(); i++)
     {
@@ -263,7 +265,7 @@ PartitionManager::_CreateUserData(const vector<ArrayDevice*> devs,
     uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
     uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
     PartitionType type = PartitionType::USER_DATA;
-    Method* method = new Raid5(&physicalSize, totalNvmStripes);
+    Method* method = new Raid5(&physicalSize, totalNvmStripes, affinityManager);
     StripePartition* partition = new StripePartition(arrayName_, type, physicalSize, devs, method);
     if (nullptr == partition)
     {

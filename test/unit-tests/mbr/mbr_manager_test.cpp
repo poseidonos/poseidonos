@@ -5,7 +5,7 @@
 #include "src/array/device/array_device_list.h"
 #include "src/master_context/version_provider.h"
 #include "src/mbr/mbr_info.h"
-#include "test/fixtures/mbr_manager_test_fixture.h"
+#include "test/unit-tests/mbr/mbr_manager_test_fixture.h"
 #include "test/unit-tests/device/device_manager_mock.h"
 #include "test/unit-tests/master_context/e2e_protect_mock.h"
 #include "test/unit-tests/mbr/mbr_map_manager_mock.h"
@@ -179,7 +179,7 @@ TEST(MbrManager, CreateAbr_testWithExistingAbrName)
     // Given: one arrays' meta
     ArrayMeta arrayMeta1 = buildArrayMeta("array1", 3, 1);
 
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([&arrayMeta1](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
         int i = 0;
@@ -211,7 +211,7 @@ TEST(MbrManager, CreateAbr_testWithExistingDevices)
     // Given: one arrays' meta
     ArrayMeta arrayMeta1 = buildArrayMeta("array1", 3, 1);
 
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([&arrayMeta1](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
         int i = 0;
@@ -244,7 +244,7 @@ TEST(MbrManager, DeleteAbr_testIfArrayIsProperlyDeletedAndVersionIsIncremented)
     ::testing::Mock::AllowLeak(mockDp); // TODO(yyu): instantiated outside and released inside by MbrManager. Wondering if this is intended?
     EXPECT_CALL(*mockDp, MakeParity(_, _)).WillOnce(Return(1234));
 
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillOnce(Return(0));
 
     MockMbrMapManager* mockMbrMapMgr = new MockMbrMapManager;
@@ -305,7 +305,7 @@ TEST(MbrManager, DeleteAbr_testIfDeviceIoFailureHandledProperly)
     EXPECT_CALL(*mockDp, MakeParity(_, _)).WillOnce(Return(randomParity));
 
     int errorCode = !0; // non-zero is the semantics in use
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillOnce(Return(errorCode));
 
     NiceMock<MockMbrMapManager>* mockMbrMapMgr = new NiceMock<MockMbrMapManager>;
@@ -375,7 +375,7 @@ TEST(MbrManager, SaveMbr_testIfPosVersionAndMbrVersionAndSystemUuidAreEncodedInD
 
     string randomUuid = "dbc81f90-7003-11eb-9f41-8f0c6ff52bea";
 
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     NiceMock<MockMbrMapManager>* mockMbrMapMgr = new NiceMock<MockMbrMapManager>;
     MbrManager m(mockDp, randomUuid, NULL, NULL, &mockDevMgr, mockMbrMapMgr);
     string mockArrayName = "mockArray";
@@ -458,7 +458,7 @@ TEST(MbrManager, LoadMbr_testIfTheLatestMajorityMbrIsSelected)
     mbr4->mbrParity = 2345;
     mbr4->arrayNum = 0;
 
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillOnce([&mbr1, &mbr2, &mbr3, &mbr4](DeviceIterFunc func, void* ctx) {
         // type(*ctx) == std::list<void*> mems;
         // we should cast "ctx" to its original type and then fill in with mock MBRs
@@ -494,7 +494,7 @@ TEST(MbrManager, ResetMbr_testIfSuccessfullyResetted)
     MockMbrMapManager* mockMbrMapMgr = new MockMbrMapManager;
     EXPECT_CALL(*mockMbrMapMgr, ResetMap()).Times(1); // this is an interesting call
 
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillOnce([](DeviceIterFunc func, void* ctx) {
         struct FakeDiskIoContext* diskIoCtxt = static_cast<struct FakeDiskIoContext*>(ctx);
         if (UbioDir::Write == (*diskIoCtxt).ubioDir)
@@ -521,7 +521,7 @@ TEST(MbrManager, GetAbrList_testWithNoArray)
 {
     // Given : No array exists
     using MBR = struct masterBootRecord;
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([](DeviceIterFunc func, void* ctx) {
         return 0;
     });
@@ -549,7 +549,7 @@ TEST(MbrManager, GetAbrList_testWithOneArray)
     string mockArrayName = "POSArray";
     string createDatetime = "2021-03-17 15:15:15 +09:00";
 
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([=](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
         using MBR = struct masterBootRecord;
@@ -597,7 +597,7 @@ TEST(MbrManager, GetAbrList_testIfCreatedAbrsAreRetrieved)
     ArrayMeta arrayMeta1 = buildArrayMeta("array1", 3, 1);
     ArrayMeta arrayMeta2 = buildArrayMeta("array2", 3, 1);
 
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([&arrayMeta1, &arrayMeta2](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
         struct masterBootRecord* mbr1 = new struct masterBootRecord;
@@ -645,7 +645,7 @@ TEST(MbrManager, UpdateDeviceIndexMap_testIfMbrMapManagerRefreshesDeviceMap)
     // Given: one arrays' meta
     ArrayMeta arrayMeta1 = buildArrayMeta("array1", 3, 1);
 
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([&arrayMeta1](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
         int i = 0;
@@ -695,7 +695,7 @@ TEST(MbrManager, FindArrayWithDeviceSN_testFindingArraySuccessfully)
     int defaultArrayIndex = 0;
     string mockArrayName = "POSArray";
     string mockDevSN = "unvme-ns-0";
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([=](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
         using MBR = struct masterBootRecord;
@@ -729,7 +729,7 @@ TEST(MbrManager, FindArrayWithDeviceSN_testFindingArrayWithNoArray)
     int expectedArrayNum = 1;
     int defaultArrayIndex = 0;
     string mockDevSN = "unvme-ns-0";
-    MockDeviceManager mockDevMgr;
+    MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([=](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
         return 0;

@@ -30,29 +30,22 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gtest/gtest.h>
+#include "src/cpu_affinity/cpu_set_generator.h"
+#include "test/unit-tests/utils/mock_builder.h"
+#include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
 
-#include <list>
-#include <mutex>
+using ::testing::NiceMock;
 
-#include "src/include/meta_const.h"
-#include "src/cpu_affinity/affinity_manager.h"
+namespace pos {
 
-namespace pos
+MockAffinityManager BuildDefaultAffinityManagerMock(void)
 {
-class FreeBufferPool
-{
-public:
-    FreeBufferPool(uint64_t maxBufferCount, uint32_t bufferSize, AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
-    virtual ~FreeBufferPool(void);
-    virtual void* GetBuffer(void);
-    virtual void ReturnBuffer(void*);
+    // the actual value doesn't matter since the UTs using this mock wouldn't rely on CPU counts anyway.
+    int MOCK_CPU_CORE_COUNT = 8;
+    CpuSetArray cpuSetArray;
+    MockAffinityManager mockAffMgr(MOCK_CPU_CORE_COUNT, cpuSetArray);  // The parent's constructor will copy from "cpuSetArray", so we're okay to use a local CpuSetArray instance.
+    return mockAffMgr;  // we're okay to return the local instance of MockAffinityManager (vs. its pointer) because the caller can use copy-constructor and this mock doesn't point to any heap objects.
+}
 
-private:
-    static const uint32_t ALLOCATION_SIZE_BYTE = 2 * 1024 * 1024;
-
-    std::mutex freeListLock;
-    std::list<void*> freeList;
-    std::list<void*> bufferHeadList;
-};
-} // namespace pos
+}  // namespace pos
