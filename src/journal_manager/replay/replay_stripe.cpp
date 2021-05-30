@@ -45,7 +45,8 @@ ReplayStripe::ReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap
 : wbStripeReplayer(wbReplayer),
   userStripeReplayer(userReplayer),
   vsaMap(vsaMap),
-  stripeMap(stripeMap)
+  stripeMap(stripeMap),
+  replaySegmentInfo(true)
 {
     status = new StripeReplayStatus(vsid);
     replayEventFactory = new ReplayEventFactory(status,
@@ -62,6 +63,17 @@ ReplayStripe::~ReplayStripe(void)
 
     delete status;
     delete replayEventFactory;
+}
+
+void
+ReplayStripe::AddLog(ReplayLog replayLog)
+{
+    if (replayLog.segInfoFlushed == true)
+    {
+        replaySegmentInfo = false;
+    }
+
+    this->AddLog(replayLog.log);
 }
 
 int
@@ -105,10 +117,13 @@ ReplayStripe::_CreateStripeFlushReplayEvent(void)
         replayEventFactory->CreateStripeMapUpdateReplayEvent(status->GetVsid(), dest);
     replayEvents.push_back(stripeMapUpdate);
 
-    ReplayEvent* flushEvent =
-        replayEventFactory->CreateStripeFlushReplayEvent(status->GetVsid(),
-        status->GetWbLsid(), status->GetUserLsid());
-    replayEvents.push_back(flushEvent);
+    if (replaySegmentInfo == true)
+    {
+        ReplayEvent* flushEvent =
+            replayEventFactory->CreateStripeFlushReplayEvent(status->GetVsid(),
+                status->GetWbLsid(), status->GetUserLsid());
+        replayEvents.push_back(flushEvent);
+    }
 }
 
 int

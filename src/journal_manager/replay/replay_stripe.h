@@ -35,6 +35,7 @@
 #include <list>
 
 #include "src/include/address_type.h"
+#include "src/journal_manager/replay/replay_log.h"
 #include "src/journal_manager/statistics/stripe_replay_status.h"
 
 namespace pos
@@ -62,6 +63,7 @@ public:
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
     virtual ~ReplayStripe(void);
 
+    virtual void AddLog(ReplayLog replayLog);
     virtual void AddLog(LogHandlerInterface* log) = 0;
     virtual int Replay(void);
 
@@ -88,6 +90,8 @@ protected:
 
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
+
+    bool replaySegmentInfo;
 };
 
 } // namespace pos

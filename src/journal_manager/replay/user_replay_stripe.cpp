@@ -73,7 +73,7 @@ UserReplayStripe::_CreateBlockWriteReplayEvent(BlockWriteDoneLog dat)
 {
     ReplayEvent* blockWriteEvent =
         replayEventFactory->CreateBlockWriteReplayEvent(dat.volId, dat.startRba,
-            dat.startVsa, dat.numBlks);
+            dat.startVsa, dat.numBlks, replaySegmentInfo);
     replayEvents.push_back(blockWriteEvent);
 }
 

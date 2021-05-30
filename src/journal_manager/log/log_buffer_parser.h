@@ -33,7 +33,10 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
+#include "src/journal_manager/log/log_group_footer.h"
+#include "src/journal_manager/log/log_handler.h"
 #include "src/journal_manager/log/log_list.h"
 
 namespace pos
@@ -46,8 +49,25 @@ public:
     int GetLogs(void* buffer, uint64_t bufferSize, LogList& logs);
 
 private:
-    char* _GetNextValidLogEntry(char* buffer, uint64_t& currentOffset,
-        int& curLogType, uint64_t bufferSize);
+    class ValidMarkFinder
+    {
+    public:
+        ValidMarkFinder(char* bufferPtr, uint64_t maxOffset);
+        virtual ~ValidMarkFinder(void) = default;
+
+        bool GetNextValidMarkOffset(uint64_t startOffset, uint64_t& foundOffset);
+
+    private:
+        char* buffer;
+        uint64_t maxOffset;
+    };
+
+    void _LogFound(LogType type);
+    void _PrintFoundLogTypes(void);
+
+    LogHandlerInterface* _GetLogHandler(char* ptr);
+
+    std::vector<int> logsFound;
 };
 
 } // namespace pos

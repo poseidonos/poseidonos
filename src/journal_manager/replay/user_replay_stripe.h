@@ -45,9 +45,10 @@ public:
         IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
     virtual ~UserReplayStripe(void) = default;
-
-    virtual void AddLog(LogHandlerInterface* log) override;
     virtual int Replay(void) override;
+
+public:
+    virtual void AddLog(LogHandlerInterface* log) override;
 
 private:
     void _CreateBlockWriteReplayEvent(BlockWriteDoneLog dat);

@@ -36,7 +36,7 @@
 
 namespace pos
 {
-static const uint32_t VALID_MARK = 0xCECECECE;
+static const uint32_t LOG_VALID_MARK = 0xCECECECE;
 
 enum class LogType
 {
@@ -44,13 +44,14 @@ enum class LogType
     STRIPE_MAP_UPDATED,
     GC_STRIPE_FLUSHED,
     VOLUME_DELETED,
-    NUM_LOG_TYPE
+    NUM_LOG_TYPE,
+    COUNT
 };
 
 #pragma pack(push, 4)
 struct Log
 {
-    int mark = VALID_MARK;
+    int mark = LOG_VALID_MARK;
     LogType type;
     uint32_t seqNum;
 };

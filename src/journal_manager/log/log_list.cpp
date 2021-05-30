@@ -65,6 +65,12 @@ LogList::IsEmpty(void)
     return (logs.size() == 0);
 }
 
+void
+LogList::SetLogGroupFooter(uint64_t seqNum, LogGroupFooter footer)
+{
+    // do nothing
+}
+
 // This is for journal integration test
 std::list<LogHandlerInterface*>
 LogList::GetLogs(void)

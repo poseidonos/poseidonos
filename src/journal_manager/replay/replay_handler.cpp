@@ -77,7 +77,7 @@ ReplayHandler::_InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
 {
     _AddTask(new ReadLogBuffer(config, logBuffer, logList, reporter));
     _AddTask(new ReplayLogs(logList, logDeleteChecker, vsaMap, stripeMap, blockAllocator,
-        wbStripeAllocator, contextReplayer, arrayInfo, reporter, pendingWbStripes));
+        wbStripeAllocator, contextManager, contextReplayer, arrayInfo, reporter, pendingWbStripes));
     _AddTask(new ReplayVolumeDeletion(logDeleteChecker, contextManager, volumeManager, reporter));
     _AddTask(new FlushMetadata(mapFlush, contextManager, reporter));
     _AddTask(new ResetLogBuffer(logBuffer, reporter));

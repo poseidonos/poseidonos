@@ -14,7 +14,7 @@ CreateVolumeDeletedLog(int volId, uint64_t ver)
 {
     char* data = (char*)malloc(sizeof(VolumeDeletedLog));
     VolumeDeletedLog* logPtr = reinterpret_cast<VolumeDeletedLog*>(data);
-    logPtr->mark = VALID_MARK;
+    logPtr->mark = LOG_VALID_MARK;
     logPtr->volId = volId;
     logPtr->allocatorContextVersion = ver;
 

@@ -32,20 +32,16 @@
 
 #pragma once
 
-#include <vector>
 #include <map>
+#include <vector>
 
 #include "src/journal_manager/log/log_event.h"
 #include "src/journal_manager/log/log_handler.h"
 #include "src/journal_manager/log/log_list.h"
+#include "src/journal_manager/replay/replay_log.h"
 
 namespace pos
 {
-struct ReplayLog
-{
-    uint64_t time;
-    LogHandlerInterface* log;
-};
 
 class ReplayLogList : public LogList
 {
@@ -55,17 +51,16 @@ public:
 
     virtual void AddLog(LogHandlerInterface* log) override;
     virtual bool IsEmpty(void) override;
+    virtual void SetLogGroupFooter(uint64_t seqNum, LogGroupFooter footer) override;
 
-    std::vector<ReplayLog>& GetReplayLogs(void);
+    ReplayLogGroup PopReplayLogGroup(void);
     std::vector<ReplayLog>& GetDeletingLogs(void);
 
 private:
     uint64_t _GetTime(void);
 
-    std::map<uint64_t, std::vector<ReplayLog>> groupLogs; // key = sequence number
-
+    std::map<uint64_t, ReplayLogGroup> logGroups; // key = sequence number
     std::vector<ReplayLog> deletingLogs;
-    std::vector<ReplayLog> replayLogs;
 
     uint64_t time;
 };

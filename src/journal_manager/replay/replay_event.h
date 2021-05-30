@@ -72,7 +72,8 @@ class ReplayBlockMapUpdate : public ReplayEvent
 public:
     ReplayBlockMapUpdate(IVSAMap* ivsaMa, IBlockAllocator* iblkAllocator,
         StripeReplayStatus* status,
-        int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks);
+        int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks,
+        bool replaySegmentInfo);
     virtual ~ReplayBlockMapUpdate(void);
 
     virtual int Replay(void) override;
@@ -112,6 +113,8 @@ private:
     uint64_t numBlks;
 
     std::vector<VirtualBlkAddr> readMap;
+
+    bool replaySegmentInfo;
 };
 
 class ReplayStripeMapUpdate : public ReplayEvent

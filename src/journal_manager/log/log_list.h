@@ -34,6 +34,7 @@
 
 #include <list>
 
+#include "src/journal_manager/log/log_group_footer.h"
 #include "src/journal_manager/log/log_handler.h"
 
 namespace pos
@@ -49,6 +50,7 @@ public:
 
     virtual void AddLog(LogHandlerInterface* log);
     virtual bool IsEmpty(void);
+    virtual void SetLogGroupFooter(uint64_t seqNum, LogGroupFooter footer);
 
     std::list<LogHandlerInterface*> GetLogs(void);
 

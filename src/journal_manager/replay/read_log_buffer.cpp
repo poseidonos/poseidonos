@@ -96,7 +96,7 @@ ReadLogBuffer::Start(void)
 
     if (result == 0)
     {
-        if (logList.IsEmpty() == 0)
+        if (logList.IsEmpty() == true)
         {
             int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STOPPED);
             std::ostringstream os;

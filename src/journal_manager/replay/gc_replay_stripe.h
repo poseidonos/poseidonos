@@ -44,8 +44,9 @@ public:
         IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
     virtual ~GcReplayStripe(void) = default;
-
-    virtual void AddLog(LogHandlerInterface* log) override;
     virtual int Replay(void) override;
+
+protected:
+    virtual void AddLog(LogHandlerInterface* log) override;
 };
 } // namespace pos

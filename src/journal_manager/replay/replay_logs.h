@@ -49,6 +49,7 @@ namespace pos
 {
 class IVSAMap;
 class IStripeMap;
+class IContextManager;
 class IContextReplayer;
 class IBlockAllocator;
 class IArrayInfo;
@@ -63,6 +64,7 @@ public:
     ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
         IVSAMap* vsaMap, IStripeMap* stripeMap,
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+        IContextManager* contextManager,
         IContextReplayer* contextReplayer, IArrayInfo* arrayInfo,
         ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes);
     virtual ~ReplayLogs(void);
@@ -73,7 +75,7 @@ public:
     virtual int GetNumSubTasks(void) override;
 
 private:
-    int _ReplayFinishedStripes(std::vector<ReplayLog>& replayLogs);
+    int _ReplayFinishedStripes(void);
     int _ReplayUnfinishedStripes(void);
 
     int _ReplayStripe(ReplayStripe* stripe);
@@ -88,6 +90,7 @@ private:
     IStripeMap* stripeMap;
     IBlockAllocator* blockAllocator;
     IWBStripeAllocator* wbStripeAllocator;
+    IContextManager* contextManager;
     IContextReplayer* contextReplayer;
     IArrayInfo* arrayInfo;
 

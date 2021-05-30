@@ -45,11 +45,14 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
+#include "src/allocator/i_context_manager.h"
+
 namespace pos
 {
 ReplayLogs::ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
     IVSAMap* vsaMap, IStripeMap* stripeMap,
     IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+    IContextManager* contextManager,
     IContextReplayer* ctxReplayer, IArrayInfo* arrayInfo,
     ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes)
 : ReplayTask(reporter),
@@ -59,6 +62,7 @@ ReplayLogs::ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
   stripeMap(stripeMap),
   blockAllocator(blockAllocator),
   wbStripeAllocator(wbStripeAllocator),
+  contextManager(contextManager),
   contextReplayer(ctxReplayer),
   arrayInfo(arrayInfo)
 {
@@ -101,7 +105,7 @@ ReplayLogs::Start(void)
 
     logDeleteChecker->Update(logList.GetDeletingLogs());
 
-    result = _ReplayFinishedStripes(logList.GetReplayLogs());
+    result = _ReplayFinishedStripes();
     if (result != 0)
     {
         return result;
@@ -143,8 +147,27 @@ ReplayLogs::Start(void)
 }
 
 int
-ReplayLogs::_ReplayFinishedStripes(std::vector<ReplayLog>& replayLogs)
+ReplayLogs::_ReplayFinishedStripes(void)
 {
+    std::vector<ReplayLog> replayLogs;
+
+    while (logList.IsEmpty() == false)
+    {
+        ReplayLogGroup logGroup = logList.PopReplayLogGroup();
+
+        uint64_t currentSegInfoVersion = contextManager->GetStoredContextVersion(SEGMENT_CTX);
+        if (logGroup.footer.lastCheckpointedSeginfoVersion < currentSegInfoVersion)
+        {
+            // Checkpoint started, allocator context is stored, but checkpoint is not completed
+            for (auto it = logGroup.logs.begin(); it != logGroup.logs.end(); it++)
+            {
+                it->segInfoFlushed = true;
+            }
+        }
+
+        replayLogs.insert(replayLogs.end(), logGroup.logs.begin(), logGroup.logs.end());
+    }
+
     for (auto replayLog : replayLogs)
     {
         LogHandlerInterface* log = replayLog.log;
@@ -152,7 +175,7 @@ ReplayLogs::_ReplayFinishedStripes(std::vector<ReplayLog>& replayLogs)
         if (log->GetType() == LogType::BLOCK_WRITE_DONE)
         {
             ReplayStripe* stripe = _FindUserStripe(log->GetVsid());
-            stripe->AddLog(log);
+            stripe->AddLog(replayLog);
 
             int volumeId = reinterpret_cast<BlockWriteDoneLog*>(log->GetData())->volId;
             logDeleteChecker->ReplayedUntil(replayLog.time, volumeId);
@@ -160,7 +183,7 @@ ReplayLogs::_ReplayFinishedStripes(std::vector<ReplayLog>& replayLogs)
         else if (log->GetType() == LogType::STRIPE_MAP_UPDATED)
         {
             ReplayStripe* stripe = _FindUserStripe(log->GetVsid());
-            stripe->AddLog(log);
+            stripe->AddLog(replayLog);
 
             int result = _ReplayStripe(stripe);
             if (result != 0)
@@ -175,7 +198,7 @@ ReplayLogs::_ReplayFinishedStripes(std::vector<ReplayLog>& replayLogs)
             ReplayStripe* stripe = new GcReplayStripe(log->GetVsid(), vsaMap, stripeMap,
                 contextReplayer, blockAllocator, arrayInfo,
                 wbStripeReplayer, userStripeReplayer);
-            stripe->AddLog(log);
+            stripe->AddLog(replayLog);
 
             int result = _ReplayStripe(stripe);
             if (result != 0)

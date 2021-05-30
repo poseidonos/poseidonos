@@ -54,14 +54,16 @@ ReplayEvent::~ReplayEvent(void)
 }
 
 ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, IBlockAllocator* blkAllocator,
-    StripeReplayStatus* status, int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks)
+    StripeReplayStatus* status, int volId, BlkAddr startRba, VirtualBlkAddr startVsa,
+    uint64_t numBlks, bool replaySegmentInfo)
 : ReplayEvent(status),
   vsaMap(vsaMap),
   blockAllocator(blkAllocator),
   volId(volId),
   startRba(startRba),
   startVsa(startVsa),
-  numBlks(numBlks)
+  numBlks(numBlks),
+  replaySegmentInfo(replaySegmentInfo)
 {
 }
 
@@ -95,7 +97,11 @@ ReplayBlockMapUpdate::Replay(void)
 
         if (IsSameVsa(read, currentVsa) == false)
         {
-            _InvalidateOldBlock(offset);
+            if (replaySegmentInfo == true)
+            {
+                _InvalidateOldBlock(offset);
+            }
+
             result = _UpdateMap(offset);
         }
     }
@@ -127,7 +133,11 @@ ReplayBlockMapUpdate::_UpdateMap(uint32_t offset)
         .numBlks = 1};
 
     int result = vsaMap->SetVSAsInternal(volId, rba, virtualBlks);
-    blockAllocator->ValidateBlks(virtualBlks);
+    if (replaySegmentInfo == true)
+    {
+        blockAllocator->ValidateBlks(virtualBlks);
+    }
+
     status->BlockWritten(virtualBlks.startVsa.offset, virtualBlks.numBlks);
 
     return result;

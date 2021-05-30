@@ -22,7 +22,7 @@ public:
 
     virtual ~ReplayEventFactory(void) = default;
 
-    ReplayEvent* CreateBlockWriteReplayEvent(int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks);
+    ReplayEvent* CreateBlockWriteReplayEvent(int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks, bool replaySegmentInfo);
     ReplayEvent* CreateStripeMapUpdateReplayEvent(StripeId vsid, StripeAddr dest);
     ReplayEvent* CreateStripeFlushReplayEvent(StripeId vsid, StripeId wbLsid, StripeId userLsid);
     ReplayEvent* CreateStripeAllocationReplayEvent(StripeId vsid, StripeId wbLsid);

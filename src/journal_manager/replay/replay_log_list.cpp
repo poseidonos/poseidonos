@@ -44,13 +44,11 @@ ReplayLogList::ReplayLogList(void)
 
 ReplayLogList::~ReplayLogList(void)
 {
-    groupLogs.clear();
-
-    for (auto replayLog : replayLogs)
+    for (auto logGroup : logGroups)
     {
-        delete replayLog.log;
+        logGroup.second.logs.clear();
     }
-    replayLogs.clear();
+    logGroups.clear();
 
     for (auto replayLog : deletingLogs)
     {
@@ -73,7 +71,8 @@ ReplayLogList::AddLog(LogHandlerInterface* log)
     }
     else
     {
-        groupLogs[log->GetSeqNum()].push_back(replayLog);
+        logGroups[log->GetSeqNum()].logs.push_back(replayLog);
+        logGroups[log->GetSeqNum()].seqNum = log->GetSeqNum();
     }
 }
 
@@ -86,19 +85,21 @@ ReplayLogList::_GetTime(void)
 bool
 ReplayLogList::IsEmpty(void)
 {
-    return groupLogs.size();
+    return (logGroups.size() == 0);
 }
 
-std::vector<ReplayLog>&
-ReplayLogList::GetReplayLogs(void)
+void
+ReplayLogList::SetLogGroupFooter(uint64_t seqNum, LogGroupFooter footer)
 {
-    for (auto logs : groupLogs)
-    {
-        replayLogs.insert(replayLogs.end(), logs.second.begin(), logs.second.end());
-    }
-    groupLogs.clear();
+    logGroups[seqNum].footer = footer;
+}
 
-    return replayLogs;
+ReplayLogGroup
+ReplayLogList::PopReplayLogGroup(void)
+{
+    ReplayLogGroup logGroup = logGroups.begin()->second;
+    logGroups.erase(logGroups.begin());
+    return logGroup;
 }
 
 std::vector<ReplayLog>&

@@ -69,7 +69,7 @@ GcReplayStripe::AddLog(LogHandlerInterface* log)
     {
         ReplayEvent* blockWriteEvent =
             replayEventFactory->CreateBlockWriteReplayEvent(gcLog->volId,
-                blockLogs[blkCount].rba, blockLogs[blkCount].vsa, 1);
+                blockLogs[blkCount].rba, blockLogs[blkCount].vsa, 1, replaySegmentInfo);
         replayEvents.push_back(blockWriteEvent);
     }
 

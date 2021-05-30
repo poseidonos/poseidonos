@@ -41,8 +41,33 @@
 
 namespace pos
 {
+LogBufferParser::ValidMarkFinder::ValidMarkFinder(char* bufferPtr, uint64_t maxOffset)
+: buffer(bufferPtr),
+  maxOffset(maxOffset)
+{
+}
+
+bool
+LogBufferParser::ValidMarkFinder::GetNextValidMarkOffset(uint64_t startOffset, uint64_t& foundOffset)
+{
+    uint64_t searchOffset = startOffset;
+    while (searchOffset < maxOffset)
+    {
+        char* ptr = (char*)(buffer + searchOffset);
+        uint32_t mark = *(uint32_t*)ptr;
+        if (mark == LOG_VALID_MARK || mark == LOG_GROUP_FOOTER_VALID_MARK)
+        {
+            foundOffset = searchOffset;
+            return true;
+        }
+        searchOffset += sizeof(uint32_t);
+    }
+    return false;
+}
+
 LogBufferParser::LogBufferParser(void)
 {
+    logsFound.resize((int)LogType::COUNT, 0);
 }
 
 LogBufferParser::~LogBufferParser(void)
@@ -52,89 +77,91 @@ LogBufferParser::~LogBufferParser(void)
 int
 LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
 {
-    char* logPtr;
-    uint64_t currentOffset = 0;
-    int currentLogType;
-    int result = 0;
+    ValidMarkFinder finder((char*)buffer, bufferSize);
 
-    uint64_t numBlockMapUpdatedLogs = 0;
-    uint64_t numStripeMapUpdatedLogs = 0;
-    uint64_t numVolumeDeletedLogs = 0;
-    uint64_t numGcStripeFlushedLogs = 0;
+    bool validMarkFound = false;
+    uint64_t searchOffset = 0;
+    uint64_t foundOffset = 0;
+    uint64_t lastSeqNum = UINT64_MAX;
 
-    while ((logPtr = _GetNextValidLogEntry((char*)buffer, currentOffset,
-                currentLogType, bufferSize)) != nullptr)
+    while ((validMarkFound = finder.GetNextValidMarkOffset(searchOffset, foundOffset)) == true)
     {
-        LogType currentLogTypeCast = static_cast<LogType>(currentLogType);
-        if (currentLogTypeCast == LogType::BLOCK_WRITE_DONE)
-        {
-            BlockWriteDoneLogHandler* log = new BlockWriteDoneLogHandler(*reinterpret_cast<BlockWriteDoneLog*>(logPtr));
+        char* dataPtr = (char*)buffer + foundOffset;
+        uint32_t validMark = *(uint32_t*)(dataPtr);
 
-            currentOffset += log->GetSize();
+        if (validMark == LOG_VALID_MARK)
+        {
+            LogHandlerInterface* log = _GetLogHandler(dataPtr);
+            if (log == nullptr)
+            {
+                int event = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND);
+                POS_TRACE_ERROR(event, "Unknown type of log is found");
+                return event * -1;
+            }
+
             logs.AddLog(log);
+            _LogFound(log->GetType());
 
-            numBlockMapUpdatedLogs++;
+            lastSeqNum = log->GetSeqNum();
+            searchOffset = foundOffset + log->GetSize();
         }
-        else if (currentLogTypeCast == LogType::STRIPE_MAP_UPDATED)
+        else if (validMark == LOG_GROUP_FOOTER_VALID_MARK)
         {
-            StripeMapUpdatedLogHandler* log = new StripeMapUpdatedLogHandler(*reinterpret_cast<StripeMapUpdatedLog*>(logPtr));
+            LogGroupFooter footer = *(LogGroupFooter*)(dataPtr);
+            logs.SetLogGroupFooter(lastSeqNum, footer);
 
-            currentOffset += log->GetSize();
-            logs.AddLog(log);
-
-            numStripeMapUpdatedLogs++;
-        }
-        else if (currentLogTypeCast == LogType::GC_STRIPE_FLUSHED)
-        {
-            GcStripeFlushedLogHandler* log = new GcStripeFlushedLogHandler(logPtr);
-
-            currentOffset += log->GetSize();
-            logs.AddLog(log);
-
-            numGcStripeFlushedLogs++;
-        }
-        else if (currentLogTypeCast == LogType::VOLUME_DELETED)
-        {
-            VolumeDeletedLogEntry* log = new VolumeDeletedLogEntry(*reinterpret_cast<VolumeDeletedLog*>(logPtr));
-
-            currentOffset += log->GetSize();
-            logs.AddLog(log);
-
-            numVolumeDeletedLogs++;
-        }
-        else
-        {
-            int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND);
-            result = -1 * eventId;
-            POS_TRACE_ERROR(eventId, "Unknown type of log is found");
-            break;
+            searchOffset = foundOffset + sizeof(LogGroupFooter);
         }
     }
 
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_DEBUG);
-    POS_TRACE_DEBUG(eventId, "Logs found: {} block map, {} stripe map, {} gc stripes, {} volumes deleted",
-        numBlockMapUpdatedLogs, numStripeMapUpdatedLogs, numGcStripeFlushedLogs, numVolumeDeletedLogs);
+    _PrintFoundLogTypes();
 
-    return result;
+    return 0;
 }
 
-char*
-LogBufferParser::_GetNextValidLogEntry(char* buffer, uint64_t& currentOffset,
-    int& curLogType, uint64_t bufferSize)
+LogHandlerInterface*
+LogBufferParser::_GetLogHandler(char* ptr)
 {
-    while (currentOffset < bufferSize)
+    Log* logPtr = reinterpret_cast<Log*>(ptr);
+    LogHandlerInterface* foundLog = nullptr;
+
+    if (logPtr->type == LogType::BLOCK_WRITE_DONE)
     {
-        int* data = (int*)(buffer + currentOffset);
-        if (*(uint32_t*)data == VALID_MARK)
-        {
-            char* logPointer = (char*)(data);
-            curLogType = *(int*)(data + 1);
-            return logPointer;
-        }
-        currentOffset += sizeof(int);
+        foundLog = new BlockWriteDoneLogHandler(*reinterpret_cast<BlockWriteDoneLog*>(ptr));
+    }
+    else if (logPtr->type == LogType::STRIPE_MAP_UPDATED)
+    {
+        foundLog = new StripeMapUpdatedLogHandler(*reinterpret_cast<StripeMapUpdatedLog*>(ptr));
+    }
+    else if (logPtr->type == LogType::GC_STRIPE_FLUSHED)
+    {
+        foundLog = new GcStripeFlushedLogHandler(ptr);
+    }
+    else if (logPtr->type == LogType::VOLUME_DELETED)
+    {
+        foundLog = new VolumeDeletedLogEntry(*reinterpret_cast<VolumeDeletedLog*>(ptr));
     }
 
-    return nullptr;
+    return foundLog;
+}
+
+void
+LogBufferParser::_LogFound(LogType type)
+{
+    logsFound[(int)type]++;
+}
+
+void
+LogBufferParser::_PrintFoundLogTypes(void)
+{
+    int numBlockMapUpdatedLogs = logsFound[(int)LogType::BLOCK_WRITE_DONE];
+    int numStripeMapUpdatedLogs = logsFound[(int)LogType::STRIPE_MAP_UPDATED];
+    int numGcStripeFlushedLogs = logsFound[(int)LogType::GC_STRIPE_FLUSHED];
+    int numVolumeDeletedLogs = logsFound[(int)LogType::VOLUME_DELETED];
+
+    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG,
+        "Logs found: {} block map, {} stripe map, {} gc stripes, {} volumes deleted",
+        numBlockMapUpdatedLogs, numStripeMapUpdatedLogs, numGcStripeFlushedLogs, numVolumeDeletedLogs);
 }
 
 } // namespace pos

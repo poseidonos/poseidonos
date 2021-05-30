@@ -343,7 +343,7 @@ LogWriteTestFixture::CompareLogs(void)
     EXPECT_TRUE(journal->GetLogs(logList) == 0);
 
     std::list<LogHandlerInterface*> readLogs = logList.GetLogs();
-    EXPECT_TRUE(testingLogs.GetNumLogsInTesting() == readLogs.size());
+    EXPECT_EQ(testingLogs.GetNumLogsInTesting(), readLogs.size());
 
     while (readLogs.size() != 0)
     {
