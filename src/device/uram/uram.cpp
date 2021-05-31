@@ -34,6 +34,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <fstream>
 #include <numa.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -71,7 +72,8 @@ UramBdev::UramBdev(std::string name,
     UramDrv* driverToUse,
     bool isPersistent)
 : UBlockDevice(name, size, driverToUse),
-  isPersistent(isPersistent)
+  isPersistent(isPersistent),
+  baseByteAddress(nullptr)
 {
     property.type = DeviceType::NVRAM;
     property.mn = name;
@@ -183,6 +185,34 @@ UramBdev::_RecoverBackup(DeviceContext* deviceContext)
     return restoreSuccessful;
 }
 
+void*
+UramBdev::GetByteAddress(void)
+{
+    return baseByteAddress;
+}
+
+void
+UramBdev::_InitByteAddress(void)
+{
+    std::string backupDir = "/tmp/";
+    std::string backupFilePostfix = ".uram.info";
+    std::string uramName = this->GetName();
+    std::string fileName = backupDir + uramName + backupFilePostfix;
+    std::ifstream readFile;
+    readFile.open(fileName);
+    uint64_t byteAddressInt = 0, tmp1 = 0, tmp2 = 0;
+    if (readFile.good())
+    {
+        readFile >> tmp1 >> byteAddressInt >> tmp2;
+        readFile.close();
+    }
+    else
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::URAM_CONFIG_FILE_OPEN_FAILED,
+            PosEventId::GetString(POS_EVENT_ID::URAM_CONFIG_FILE_OPEN_FAILED));
+    }
+    baseByteAddress = reinterpret_cast<void *>(byteAddressInt);
+}
 bool
 UramBdev::_WrapupOpenDeviceSpecific(DeviceContext* deviceContext)
 {
@@ -200,8 +230,8 @@ UramBdev::_WrapupOpenDeviceSpecific(DeviceContext* deviceContext)
         {
             restoreSuccessful = _RecoverBackup(deviceContext);
         }
+        _InitByteAddress();
     }
-
     return restoreSuccessful;
 }
 

@@ -37,30 +37,35 @@
 
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator_service/allocator_service.h"
+#include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/meta_const.h"
 #include "src/include/backend_event.h"
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/logger/logger.h"
 #include "src/array/service/array_service_layer.h"
+#include "src/include/i_array_device.h"
 #include "src/spdk_wrapper/bdev_api.h"
 #include "src/include/array_config.h"
+#include "src/device/base/ublock_device.h"
 
 namespace pos
 {
 FlushSubmission::FlushSubmission(Stripe* inputStripe, std::string& arrayName)
 : FlushSubmission(inputStripe,
     AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName),
-    IIOSubmitHandler::GetInstance(), arrayName)
+    IIOSubmitHandler::GetInstance(), arrayName, ArrayService::Instance()->Getter()->GetTranslator())
 {
 }
 
-FlushSubmission::FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, std::string& arrayName)
+FlushSubmission::FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, std::string& arrayName,
+    IIOTranslator* translator)
 : Event(false, BackendEvent_Flush),
   stripe(inputStripe),
   iWBStripeAllocator(wbStripeAllocator),
   iIOSubmitHandler(ioSubmitHandler),
-  arrayName(arrayName)
+  arrayName(arrayName),
+  translator(translator)
 {
     SetEventType(BackendEvent_Flush);
 }
@@ -77,35 +82,35 @@ FlushSubmission::Execute(void)
     uint64_t blocksInStripe = 0;
     bufferList.clear();
 
-    if (BdevApi::GetBufferPointer() != nullptr)
-    {
-        StripeId logicalWbStripeId = stripe->GetWbLsid();
-        LogicalBlkAddr startWbLSA = {
-            .stripeId = logicalWbStripeId,
-            .offset = 0};
+    StripeId logicalWbStripeId = stripe->GetWbLsid();
+    LogicalBlkAddr startWbLSA = {
+        .stripeId = logicalWbStripeId,
+        .offset = 0};
 
-        IIOTranslator* translator = ArrayService::Instance()->Getter()->GetTranslator();
-        PhysicalBlkAddr physicalWriteEntry;
-        translator->Translate(
-            arrayName, WRITE_BUFFER, physicalWriteEntry, startWbLSA);
-        char *offset = static_cast<char *>(BdevApi::GetBufferPointer()) + (physicalWriteEntry.lba * ArrayConfig::SECTOR_SIZE_BYTE);
-        for (auto it = stripe->DataBufferBegin(); it != stripe->DataBufferEnd(); ++it)
-        {
-            BufferEntry bufferEntry(offset, BLOCKS_IN_CHUNK);
-            bufferList.push_back(bufferEntry);
-            blocksInStripe += BLOCKS_IN_CHUNK;
-            offset += BLOCKS_IN_CHUNK * ArrayConfig::BLOCK_SIZE_BYTE;
-        }
-    }
-    else
+    PhysicalBlkAddr physicalWriteEntry;
+    void* basePointer = nullptr;
+    if (likely(translator != nullptr))
     {
-        for (auto it = stripe->DataBufferBegin(); it != stripe->DataBufferEnd(); ++it)
+        int ret = translator->Translate(
+            arrayName, WRITE_BUFFER, physicalWriteEntry, startWbLSA);
+        if (unlikely(ret != static_cast<int>(POS_EVENT_ID::SUCCESS)))
         {
-            BufferEntry bufferEntry(*it, BLOCKS_IN_CHUNK);
-            bufferList.push_back(bufferEntry);
-            blocksInStripe += BLOCKS_IN_CHUNK;
+            POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;
+            POS_TRACE_ERROR(eventId, "translator in Flush Submission has error code : {} stripeId : {}", stripe->GetVsid(), logicalStripeId);
+            // No retry
+            return true;
         }
+        basePointer = physicalWriteEntry.arrayDev->GetUblock()->GetByteAddress();
     }
+    char* offset = static_cast<char *>(basePointer) + (physicalWriteEntry.lba * ArrayConfig::SECTOR_SIZE_BYTE);
+    for (auto it = stripe->DataBufferBegin(); it != stripe->DataBufferEnd(); ++it)
+    {
+        BufferEntry bufferEntry(offset, BLOCKS_IN_CHUNK);
+        bufferList.push_back(bufferEntry);
+        blocksInStripe += BLOCKS_IN_CHUNK;
+        offset += BLOCKS_IN_CHUNK * ArrayConfig::BLOCK_SIZE_BYTE;
+    }
+
     LogicalBlkAddr startLSA = {
         .stripeId = logicalStripeId,
         .offset = 0};

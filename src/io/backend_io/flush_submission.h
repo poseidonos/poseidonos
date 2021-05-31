@@ -44,12 +44,14 @@ namespace pos
 class Stripe;
 class IWBStripeAllocator;
 class IIOSubmitHandler;
+class IIOTranslator;
 
 class FlushSubmission : public Event
 {
 public:
     FlushSubmission(Stripe* inputStripe, std::string& arrayName);
-    FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, std::string& arrayName);
+    FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, std::string& arrayName,
+        IIOTranslator* translator);
     ~FlushSubmission() override;
     bool Execute(void) override;
     uint32_t GetBufferListSize(void);
@@ -60,6 +62,7 @@ private:
     IIOSubmitHandler* iIOSubmitHandler;
     std::list<BufferEntry> bufferList;
     std::string arrayName;
+    IIOTranslator* translator;
 };
 
 } // namespace pos

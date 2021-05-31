@@ -39,7 +39,7 @@
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/include/branch_prediction.h"
-#include "src/io/backend_io/flush_read_submission.h"
+#include "src/io/backend_io/flush_submission.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/qos/qos_manager.h"
@@ -610,7 +610,7 @@ WBStripeManager::_FinishRemainingBlocks(VirtualBlks remainingVsaRange)
         {
             POS_TRACE_DEBUG(EID(ALLOCATOR_TRIGGER_FLUSH), "Flush stripe (vsid {})", vsid);
             int ret = 0;
-            EventSmartPtr event(new FlushReadSubmission(activeStripe, arrayName));
+            EventSmartPtr event(new FlushSubmission(activeStripe, arrayName));
             ret = activeStripe->Flush(event);
 
             if (ret != 0)
@@ -650,7 +650,7 @@ WBStripeManager::FinalizeWriteIO(std::vector<Stripe*>& stripesToFlush, std::vect
 int
 WBStripeManager::_RequestStripeFlush(Stripe& stripe)
 {
-    EventSmartPtr event(new FlushReadSubmission(&stripe, arrayName));
+    EventSmartPtr event(new FlushSubmission(&stripe, arrayName));
     return stripe.Flush(event);
 }
 

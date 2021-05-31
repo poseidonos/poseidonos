@@ -62,7 +62,7 @@ TEST(FlushSubmission, FlushSubmission_Constructor_ThreeArguments)
     std::string arr_name = "";
 
     // When : constructor is called
-    FlushSubmission flushSubmission(&mockStripe, &mockIWBStripeAllocator, &mockIIOSubmitHandler, arr_name);
+    FlushSubmission flushSubmission(&mockStripe, &mockIWBStripeAllocator, &mockIIOSubmitHandler, arr_name, nullptr);
 
     // Then : Do nothing
 }
@@ -74,7 +74,7 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckBufferSizeAndReturn)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
     std::string arr_name = "";
-    FlushSubmission flushSubmission(&mockStripe, &mockIWBStripeAllocator, &mockIIOSubmitHandler, arr_name);
+    FlushSubmission flushSubmission(&mockStripe, &mockIWBStripeAllocator, &mockIIOSubmitHandler, arr_name, nullptr);
     const uint32_t BUFFER_SIZE = 4;
     uint32_t testBuffer[BUFFER_SIZE];
     uint32_t actualBufferSize;
@@ -104,7 +104,7 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckReturnValue)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
     std::string arr_name = "";
-    FlushSubmission flushSubmission(&mockStripe, &mockIWBStripeAllocator, &mockIIOSubmitHandler, arr_name);
+    FlushSubmission flushSubmission(&mockStripe, &mockIWBStripeAllocator, &mockIIOSubmitHandler, arr_name, nullptr);
     bool actualReturn;
 
     // When 1: Add SubmitAsumcIO return SUCCESS

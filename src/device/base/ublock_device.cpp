@@ -225,6 +225,12 @@ UBlockDevice::SubmitAsyncIO(UbioSmartPtr bio)
     return completions;
 }
 
+void*
+UBlockDevice::GetByteAddress(void)
+{
+    return nullptr;
+}
+
 int
 UBlockDevice::CompleteIOs(void)
 {

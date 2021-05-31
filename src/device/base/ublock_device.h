@@ -129,6 +129,7 @@ public:
 
     virtual int SubmitAsyncIO(UbioSmartPtr bio);
     virtual int CompleteIOs(void);
+    virtual void* GetByteAddress(void);
     int Empty(void);
 
     virtual const char*

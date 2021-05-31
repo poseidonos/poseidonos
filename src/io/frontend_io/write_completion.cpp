@@ -37,7 +37,7 @@
 #include "src/bio/volume_io.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/io/backend_io/flush_read_submission.h"
+#include "src/io/backend_io/flush_submission.h"
 #include "src/io/general_io/rba_state_service.h"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
@@ -129,7 +129,7 @@ bool
 WriteCompletion::_RequestFlush(Stripe* stripe)
 {
     bool requestFlushSuccessful = true;
-    EventSmartPtr event(new FlushReadSubmission(stripe, volumeIo->GetArrayName()));
+    EventSmartPtr event(new FlushSubmission(stripe, volumeIo->GetArrayName()));
 
     if (unlikely(stripe->Flush(event) < 0))
     {
