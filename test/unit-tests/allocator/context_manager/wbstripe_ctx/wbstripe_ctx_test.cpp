@@ -96,6 +96,16 @@ TEST(WbStripeCtx, GetSectionSize_TestSimpleGetter)
     delete allocBitmap;
 }
 
+TEST(WbStripeCtx, AllocWbStripeWithParam_TestSimpleInterfaceFunc)
+{
+    // given
+    NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
+    WbStripeCtx wbstripeCtx(allocBitmap, nullptr);
+    EXPECT_CALL(*allocBitmap, SetBit(10));
+    // when
+    wbstripeCtx.AllocWbStripe(10);
+}
+
 TEST(WbStripeCtx, AllocWbStripe_TestAllocStripeWithConditions)
 {
     // given
