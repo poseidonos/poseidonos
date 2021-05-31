@@ -220,6 +220,8 @@ MbrManager::_AllocMem(void)
 int
 MbrManager::_WriteToDevices(void)
 {
+    version++;
+    systeminfo.mbrVersion = version;
     _AllocMem();
     memcpy(mbrBuffer, &systeminfo, MBR_SIZE);
     _SetParity(mbrBuffer);
@@ -228,11 +230,12 @@ MbrManager::_WriteToDevices(void)
     int result = devMgr->IterateDevicesAndDoFunc(diskIoFunc, &diskIoCtxt);
     if (result != 0)
     {
+        version--;
+        systeminfo.mbrVersion = version;
         POS_TRACE_WARN((int)POS_EVENT_ID::MBR_DEVICE_NOT_FOUND,
             "device not found");
         return (int)POS_EVENT_ID::MBR_DEVICE_NOT_FOUND;
     }
-    version++;
     POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_WRITE_DONE,
         "write mbr data");
 
