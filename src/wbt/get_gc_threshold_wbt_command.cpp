@@ -30,6 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "get_gc_threshold_wbt_command.h"
 
 #include "src/allocator_service/allocator_service.h"

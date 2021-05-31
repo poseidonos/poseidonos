@@ -87,6 +87,8 @@ CopierMeta::~CopierMeta(void)
             delete (*gcBufferPool)[index];
         }
     }
+    delete gcBufferPool;
+
     for (uint32_t stripeIndex = 0; stripeIndex < GC_VICTIM_SEGMENT_COUNT; stripeIndex++)
     {
         for (uint32_t i = 0 ; i < stripesPerSegment; i++)
@@ -97,6 +99,8 @@ CopierMeta::~CopierMeta(void)
             }
         }
     }
+    delete victimStripes;
+
     if (nullptr != gcStripeManager)
     {
         delete gcStripeManager;
