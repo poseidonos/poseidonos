@@ -369,12 +369,6 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "Starting VolumeDelete: volID:{}  volSizeByte:{}", volID, volSizeByte);
 
     VSAMapContent*& vsaMap = GetVSAMapContent(volID);
-    if (vsaMap->DoesFileExist() == false)
-    {
-        // VolumeDeleted can be notified again when pos crashes during volume deletion
-        POS_TRACE_DEBUG(EID(NO_BLOCKMAP_MFS_FILE), "No MFS filename:{} for volName:{} @VolumeDeleted", vsaMap->GetFileName(), volName);
-        return true;
-    }
 
     // Unloaded case: Load & BG Mount
     if (nullptr == vsaMap)
@@ -385,6 +379,13 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
             POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "VSAMap load failed, volumeID:{} @VolumeDeleted", volID);
             return false;
         }
+    }
+
+    if (vsaMap->DoesFileExist() == false)
+    {
+        // VolumeDeleted can be notified again when pos crashes during volume deletion
+        POS_TRACE_DEBUG(EID(NO_BLOCKMAP_MFS_FILE), "No MFS filename:{} for volName:{} @VolumeDeleted", vsaMap->GetFileName(), volName);
+        return true;
     }
 
     // Mark all blocks in this volume up as Invalidated
