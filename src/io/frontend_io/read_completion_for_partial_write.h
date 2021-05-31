@@ -44,7 +44,7 @@ class ReadCompletionForPartialWrite : public Callback, public IOController
 public:
     ReadCompletionForPartialWrite(VolumeIoSmartPtr volumeIo,
             uint32_t alignmentSize, uint32_t alignmentOffset,
-            IWBStripeAllocator* iWBStripeAllocator = nullptr);
+            IWBStripeAllocator* iWBStripeAllocator = nullptr, bool tested = false);
     ~ReadCompletionForPartialWrite(void) override;
     static void HandleCopyDone(void* argument);
 
@@ -57,6 +57,7 @@ private:
     uint32_t alignmentSize;
     uint32_t alignmentOffset;
     IWBStripeAllocator* iWBStripeAllocator;
+    bool tested;
 };
 
 struct CopyParameter

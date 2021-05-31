@@ -52,6 +52,7 @@ public:
     WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName);
     virtual ~WBStripeManager(void);
     virtual void Init(void);
+    virtual void Dispose(void);
 
     virtual Stripe* GetStripe(StripeAddr& lsidEntry) override;
     virtual StripeId AllocateUserDataStripeId(StripeId vsid) override;

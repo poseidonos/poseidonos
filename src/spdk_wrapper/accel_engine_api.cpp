@@ -273,10 +273,8 @@ AccelEngineApi::SubmitCopy(void* dst, void* src, uint64_t bytes, IoatCb cbFuncti
     }
     else
     {
-        POS_EVENT_ID eventId =
-            POS_EVENT_ID::IOATAPI_FAIL_TO_SUBMIT_COPY;
-        POS_TRACE_ERROR(static_cast<int>(eventId),
-            PosEventId::GetString(eventId));
+        memcpy(dst, src, bytes);
+        cbFunction(cbArgument);
     }
 }
 

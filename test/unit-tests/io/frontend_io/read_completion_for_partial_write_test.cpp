@@ -26,7 +26,7 @@ TEST(ReadCompletionForPartialWrite, ReadCompletionForPartialWrite_Constructor)
     VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, ""));
 
     // When : Test contstructor is properly done.
-    ReadCompletionForPartialWrite readCompletionForPartialWrite(volumeIo, 4096, 0, &mockIWBStripeAllocator);
+    ReadCompletionForPartialWrite readCompletionForPartialWrite(volumeIo, 4096, 0, &mockIWBStripeAllocator, true);
 }
 
 TEST(ReadCompletionForPartialWrite, ReadCompletionForPartialWrite_DoSpecificJob)
@@ -47,14 +47,12 @@ TEST(ReadCompletionForPartialWrite, ReadCompletionForPartialWrite_DoSpecificJob)
     EXPECT_CALL(mockIWBStripeAllocator, DereferLsidCnt);
 
     // When : Execute is properly done and check DereferLsidCnt is called.
-    ReadCompletionForPartialWrite readCompletionForPartialWrite(volumeIo, 4096, 0, &mockIWBStripeAllocator);
+    ReadCompletionForPartialWrite readCompletionForPartialWrite(volumeIo, 4096, 0, &mockIWBStripeAllocator, true);
     bool expected = true;
     bool actual = readCompletionForPartialWrite.Execute();
+    ASSERT_EQ(actual, expected);
     volumeIo = nullptr;
     mockVolumeIoOrigin = nullptr;
-    ASSERT_EQ(actual, expected);
-    delete mockVolumeIo;
-    delete mockVolumeIoOrigin;
 }
 
 TEST(ReadCompletionForPartialWrite, ReadCompletionForPartialWrite_DoSpecificJob_SplitNull)
@@ -73,7 +71,7 @@ TEST(ReadCompletionForPartialWrite, ReadCompletionForPartialWrite_DoSpecificJob_
     ON_CALL(*mockVolumeIo, GetVsa()).WillByDefault(ReturnRef(vsa));
 
     // When : readCompletionForPartialWrite is executed without seg fault error
-    ReadCompletionForPartialWrite readCompletionForPartialWrite(volumeIo, 4096, 0, &mockIWBStripeAllocator);
+    ReadCompletionForPartialWrite readCompletionForPartialWrite(volumeIo, 4096, 0, &mockIWBStripeAllocator, true);
     bool expected = true;
     bool actual = readCompletionForPartialWrite.Execute();
     volumeIo = nullptr;

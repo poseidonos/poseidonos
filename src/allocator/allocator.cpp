@@ -131,6 +131,7 @@ Allocator::Dispose(void)
 
         POS_TRACE_INFO(eventId, "Start flushing all active stripes");
         wbStripeManager->FlushAllActiveStripes();
+        wbStripeManager->Dispose();
 
         POS_TRACE_INFO(eventId, "Start allocator contexts store");
         contextManager->FlushContextsSync();
