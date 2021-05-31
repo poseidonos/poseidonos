@@ -40,21 +40,17 @@
 
 namespace pos
 {
-CheckpointSubmission::CheckpointSubmission(DirtyMapManager* dirtyPageManager, CheckpointHandler* checkpointHandler, CallbackSequenceController* sequenceController, int flushingLogGroupId)
-: dirtyPageManager(dirtyPageManager),
-  checkpointHandler(checkpointHandler),
+CheckpointSubmission::CheckpointSubmission(CheckpointHandler* checkpointHandler,
+    CallbackSequenceController* sequenceController, MapPageList dirtyPages)
+: checkpointHandler(checkpointHandler),
   sequenceController(sequenceController),
-  flushingLogGroupId(flushingLogGroupId)
+  dirtyPages(dirtyPages)
 {
 }
 
 bool
 CheckpointSubmission::Execute(void)
 {
-    MapPageList dirtyPages = dirtyPageManager->GetDirtyList(flushingLogGroupId);
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STARTED,
-        "Checkpoint started for log group {}", flushingLogGroupId);
-
     sequenceController->GetCheckpointExecutionApproval();
     int ret = checkpointHandler->Start(dirtyPages);
     sequenceController->AllowCallbackExecution();

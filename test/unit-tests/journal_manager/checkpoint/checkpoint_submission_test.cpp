@@ -51,14 +51,12 @@ namespace pos
 TEST(CheckpointSubmission, Execute_testIfCheckpointStartedSuccessfully)
 {
     // Given
-    NiceMock<MockDirtyMapManager> dirtyMapManager;
     NiceMock<MockCheckpointHandler> checkpointHandler;
     NiceMock<MockCallbackSequenceController> sequenceController;
     NiceMock<MockEventScheduler> eventScheduler;
-    int flushingLogGroupId = 0;
-    CheckpointSubmission submission(&dirtyMapManager, &checkpointHandler, &sequenceController, flushingLogGroupId);
 
-    EXPECT_CALL(dirtyMapManager, GetDirtyList);
+    MapPageList dirtyPages;
+    CheckpointSubmission submission(&checkpointHandler, &sequenceController, dirtyPages);
 
     // Then: Checkpoint should be started after acquiring approval,
     // and allow callback execution afterwards

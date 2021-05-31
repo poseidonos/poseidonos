@@ -139,10 +139,14 @@ LogGroupReleaser::_TriggerCheckpoint(void)
     LogGroupFooter footer;
     uint64_t footerOffset;
 
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STARTED,
+        "Submit checkpoint start for log group {}", flushingLogGroupId);
+
     _CreateFlushingLogGroupFooter(footer, footerOffset);
 
-    EventSmartPtr callbackEvent(new CheckpointSubmission(dirtyPageManager,
-        checkpointHandler, sequenceController, flushingLogGroupId));
+    MapPageList dirtyPages = dirtyPageManager->GetDirtyList(flushingLogGroupId);
+    EventSmartPtr callbackEvent(new CheckpointSubmission(checkpointHandler,
+        sequenceController, dirtyPages));
 
     EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footer, footerOffset, flushingLogGroupId, callbackEvent));
     eventScheduler->EnqueueEvent(event);

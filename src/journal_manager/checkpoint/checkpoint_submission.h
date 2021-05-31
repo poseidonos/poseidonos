@@ -33,25 +33,25 @@
 #pragma once
 
 #include "src/event_scheduler/event.h"
+#include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
 class CheckpointHandler;
-class DirtyMapManager;
 class CallbackSequenceController;
 
 class CheckpointSubmission : public Event
 {
 public:
-    CheckpointSubmission(DirtyMapManager* dirtyPageManager, CheckpointHandler* checkpointHandler, CallbackSequenceController* sequenceController, int flushingLogGroupId);
+    CheckpointSubmission(CheckpointHandler* checkpointHandler,
+        CallbackSequenceController* sequenceController, MapPageList dirtyPages);
     virtual ~CheckpointSubmission(void) = default;
     bool Execute(void) override;
 
 private:
-    DirtyMapManager* dirtyPageManager;
     CheckpointHandler* checkpointHandler;
     CallbackSequenceController* sequenceController;
-    int flushingLogGroupId;
+    MapPageList dirtyPages;
 };
 
 } // namespace pos
