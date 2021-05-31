@@ -115,6 +115,12 @@ BitMap::SetBit(uint64_t bitOffset)
     {
         return false;
     }
+
+    if (IsSetBit(bitOffset) == true)
+    {
+        return true;
+    }
+
     uint64_t row = bitOffset / BITMAP_ENTRY_BITS;
     uint64_t col = bitOffset % BITMAP_ENTRY_BITS;
     map[row] |= (1ULL << col);
@@ -130,6 +136,12 @@ BitMap::ClearBit(uint64_t bitOffset)
     {
         return false;
     }
+
+    if (IsSetBit(bitOffset) == false)
+    {
+        return true;
+    }
+
     uint64_t row = bitOffset / BITMAP_ENTRY_BITS;
     uint64_t col = bitOffset % BITMAP_ENTRY_BITS;
     map[row] &= (~(1ULL << col));
