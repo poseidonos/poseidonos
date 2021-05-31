@@ -48,8 +48,7 @@ Region::Move(Region* target)
         (int)regionType, sourceBaseLPN, targetBaseLPN, content.GetSize());
 
     void* rBuf = (void*)rte_malloc(nullptr, 4096, 1);
-    MDPage bufferPage(nullptr);
-    bufferPage.Init(rBuf);
+    MDPage bufferPage(rBuf);
 
     for (uint64_t idx = 0; idx < content.GetSize(); idx++)
     {

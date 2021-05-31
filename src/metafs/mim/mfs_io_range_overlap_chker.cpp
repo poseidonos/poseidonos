@@ -39,6 +39,7 @@ MetaFsIoRangeOverlapChker::MetaFsIoRangeOverlapChker(void)
 {
     outstandingIoMap = nullptr;
 }
+
 MetaFsIoRangeOverlapChker::~MetaFsIoRangeOverlapChker(void)
 {
     if (nullptr != outstandingIoMap)
@@ -52,13 +53,6 @@ MetaFsIoRangeOverlapChker::Init(MetaLpnType maxLpn)
 {
     outstandingIoMap = new BitMap(maxLpn + 1);
     outstandingIoMap->ResetBitmap();
-}
-
-void
-MetaFsIoRangeOverlapChker::Reset(void)
-{
-    delete outstandingIoMap;
-    outstandingIoMap = nullptr;
 }
 
 bool

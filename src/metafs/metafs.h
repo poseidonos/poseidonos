@@ -56,7 +56,7 @@ public:
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
 
-    uint64_t GetEpochSignature(void);
+    virtual uint64_t GetEpochSignature(void);
     MetaStorageSubsystem* GetMss(void);
 
     MetaFsManagementApi* mgmt = nullptr;

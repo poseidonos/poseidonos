@@ -46,7 +46,6 @@ public:
     MetaFsIoRangeOverlapChker(void);
     ~MetaFsIoRangeOverlapChker(void);
     void Init(MetaLpnType maxLpn);
-    void Reset(void);
 
     bool IsRangeOverlapConflicted(MetaFsIoRequest* newReq);
     void FreeLockContext(uint64_t startLpn, bool isRead);

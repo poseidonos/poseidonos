@@ -187,19 +187,6 @@ MpioPool::_FreeAllMpioinPool(MpioType type)
 }
 
 bool
-MpioPool::IsEmpty(void)
-{
-    for (auto type : Enum<MpioType>())
-    {
-        if (mpioList[(uint32_t)type].size() == 0)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool
 MpioPool::IsEmpty(MpioType type)
 {
     if (mpioList[(uint32_t)type].size() == 0)

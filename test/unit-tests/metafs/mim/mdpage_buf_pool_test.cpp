@@ -4,20 +4,34 @@
 
 namespace pos
 {
-TEST(MDPageBufPool, MDPageBufPool_)
+TEST(MDPageBufPool, MDPageBufPool_Normal)
 {
-}
+    const uint32_t COUNT = 10;
+    MDPageBufPool* pool = new MDPageBufPool(COUNT);
+    void* bufList[COUNT] = { 0, };
 
-TEST(MDPageBufPool, Init_)
-{
-}
+    pool->Init();
 
-TEST(MDPageBufPool, PopNewBuf_)
-{
-}
+    size_t size = pool->GetCount();
+    EXPECT_EQ(size, COUNT);
 
-TEST(MDPageBufPool, FreeBuf_)
-{
+    for (int i = 0; i < COUNT; i++)
+    {
+        bufList[i] = pool->PopNewBuf();
+    }
+
+    size = pool->GetCount();
+    EXPECT_EQ(size, 0);
+
+    for (int i = 0; i < COUNT; i++)
+    {
+        pool->FreeBuf(bufList[i]);
+    }
+
+    size = pool->GetCount();
+    EXPECT_EQ(size, COUNT);
+
+    delete pool;
 }
 
 } // namespace pos

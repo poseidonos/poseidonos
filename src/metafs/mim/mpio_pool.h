@@ -53,7 +53,6 @@ public:
     void Release(Mpio* mpio);
     size_t GetPoolSize(void);
 
-    bool IsEmpty(void);
     bool IsEmpty(MpioType type);
 
 #if MPIO_CACHE_EN

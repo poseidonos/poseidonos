@@ -46,13 +46,10 @@ public:
     explicit MDPage(void* buf);
     ~MDPage(void);
 
-    void Init(void* buf);
-
     void AttachControlInfo(void);
     size_t GetDefaultDataChunkSize(void);
 
     void Make(MetaLpnType metaLpn, FileDescriptorType fd, std::string& arrayName);
-    void UpdateControlInfo(MetaLpnType srcLpn, FileDescriptorType srcFD, std::string& arrayName);
     uint8_t* GetDataBuf(void);
     bool CheckValid(std::string& arrayName);
     bool CheckFileMismatch(FileDescriptorType fd);
@@ -61,6 +58,8 @@ public:
     void ClearCtrlInfo(void);
 
 private:
+    void _UpdateControlInfo(MetaLpnType srcLpn, FileDescriptorType srcFD, std::string& arrayName);
+
     uint8_t* dataAll;
     MDPageControlInfo* ctrlInfo;
 };

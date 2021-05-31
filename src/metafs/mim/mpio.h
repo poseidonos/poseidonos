@@ -95,7 +95,6 @@ public:
 #endif
 
     const MetaIoOpcode GetOpcode(void);
-    void AllocateMDPage(void* buf);
     void BuildCompositeMDPage(void);
     bool IsValidPage(void);
     bool CheckDataIntegrity(void);

@@ -48,16 +48,11 @@ MDPage::MDPage(void* buf)
 : dataAll(nullptr),
   ctrlInfo(nullptr)
 {
+    dataAll = reinterpret_cast<uint8_t*>(buf);
 }
 
 MDPage::~MDPage(void)
 {
-}
-
-void
-MDPage::Init(void* buf)
-{
-    dataAll = reinterpret_cast<uint8_t*>(buf);
 }
 
 void
@@ -99,7 +94,7 @@ MDPage::Make(MetaLpnType metaLpn, FileDescriptorType fd, std::string& arrayName)
     assert(dataAll != nullptr);
 
     AttachControlInfo();
-    UpdateControlInfo(metaLpn, fd, arrayName);
+    _UpdateControlInfo(metaLpn, fd, arrayName);
 }
 
 uint32_t
@@ -109,7 +104,7 @@ MDPage::GetMfsSignature(void)
 }
 
 void
-MDPage::UpdateControlInfo(MetaLpnType srcLpn, FileDescriptorType srcFD, std::string& arrayName)
+MDPage::_UpdateControlInfo(MetaLpnType srcLpn, FileDescriptorType srcFD, std::string& arrayName)
 {
     memset(ctrlInfo, 0x0, sizeof(MDPageControlInfo));
 

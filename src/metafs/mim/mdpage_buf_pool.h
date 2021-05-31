@@ -54,6 +54,7 @@ public:
         pos::Memory<MDPAGE_BUF_SIZE>::Free(base);
         mdPageBufList.clear();
     }
+
     void
     Init(void)
     {
@@ -64,6 +65,7 @@ public:
             mdPageBufList.push_back((uint8_t*)base + (MDPAGE_BUF_SIZE * bufIdx));
         }
     }
+
     void*
     PopNewBuf(void)
     {
@@ -76,10 +78,23 @@ public:
 
         return newBuf;
     }
+
     void
     FreeBuf(void* buf)
     {
         mdPageBufList.push_back(buf);
+    }
+
+    bool
+    IsEmpty(void)
+    {
+        return mdPageBufList.empty();
+    }
+
+    size_t
+    GetCount(void)
+    {
+        return mdPageBufList.size();
     }
 
 private:

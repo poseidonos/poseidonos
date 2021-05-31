@@ -42,7 +42,7 @@
 namespace pos
 {
 Mpio::Mpio(void* mdPageBuf)
-: mdpage(nullptr),
+: mdpage(mdPageBuf),
   partialIO(false),
   mssIntf(nullptr),
   aioModeEnabled(false),
@@ -51,13 +51,12 @@ Mpio::Mpio(void* mdPageBuf)
   forceSyncIO(false),
   cacheState(MpioCacheState::Init)
 {
-    AllocateMDPage(mdPageBuf);
     mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }
 
 Mpio::Mpio(void* mdPageBuf, MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
 : io(mpioIoInfo),
-  mdpage(nullptr),
+  mdpage(mdPageBuf),
   partialIO(partialIO),
   mssIntf(nullptr),
   aioModeEnabled(false),
@@ -66,7 +65,6 @@ Mpio::Mpio(void* mdPageBuf, MetaStorageType targetMediaType, MpioIoInfo& mpioIoI
   forceSyncIO(forceSyncIO),
   cacheState(MpioCacheState::Init)
 {
-    AllocateMDPage(mdPageBuf);
     mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }
 
@@ -151,12 +149,6 @@ Mpio::SetCacheState(MpioCacheState state)
     cacheState = state;
 }
 #endif
-
-void
-Mpio::AllocateMDPage(void* buf)
-{
-    mdpage.Init(buf);
-}
 
 void
 Mpio::Issue(void)

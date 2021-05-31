@@ -89,7 +89,6 @@ MioHandler::~MioHandler(void)
         {
             if (nullptr != ioRangeOverlapChker[index][storage])
             {
-                ioRangeOverlapChker[index][storage]->Reset();
                 delete ioRangeOverlapChker[index][storage];
             }
         }
