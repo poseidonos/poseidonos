@@ -83,10 +83,12 @@ MetaFsWBTApi::GetMetaFileInode(std::string& fileName, MetaFileInodeDumpCxt& resu
     if (!isNormal)
         return false;
 
-    result = ctrl->Wbt_GetMetaFileInode(fileName);
+    MetaFileInodeInfo* info = ctrl->Wbt_GetMetaFileInode(fileName);
 
-    if (!result.inodeInfo.data.field.fileName)
+    if (nullptr == info)
         return false;
+
+    result.inodeInfo = *info;
 
     return true;
 }

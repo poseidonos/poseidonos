@@ -176,12 +176,11 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName)
     memset(wBuf, 0, fileSize);
     strncpy(wBuf, contents.c_str(), contentsSize);
 
-    MetaFsReturnCode<POS_EVENT_ID> ioRC;
-    ioRC = metaFs->io->Write(fd, wBuf);
+    POS_EVENT_ID ioRC = metaFs->io->Write(fd, wBuf);
 
     metaFs->ctrl->Close(fd);
 
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (POS_EVENT_ID::SUCCESS != ioRC)
     {
         free(wBuf);
         POS_TRACE_ERROR((int)POS_EVENT_ID::META_WRITE_FAIL, "Fail to write volume meta");

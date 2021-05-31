@@ -44,6 +44,7 @@ MetaVolume::MetaVolume(std::string arrayName, MetaVolumeType metaVolumeType, Met
   volumeType(metaVolumeType),
   volumeState(MetaVolumeState::Default),
   inUse(false),
+  sumOfRegionBaseLpns(0),
   arrayName(arrayName)
 {
     fileMgr = new MetaFileManager(arrayName);
@@ -59,6 +60,7 @@ MetaVolume::MetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
   volumeType(metaVolumeType),
   volumeState(MetaVolumeState::Default),
   inUse(false),
+  sumOfRegionBaseLpns(0),
   arrayName(arrayName)
 {
     this->fileMgr = fileMgr;

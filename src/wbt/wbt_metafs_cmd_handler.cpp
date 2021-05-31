@@ -174,16 +174,18 @@ WbtMetafsCmdHandler::ReadFile(Args argv)
         return RESULT_FAILURE;
     }
 
+    std::string arrayName = argv["array"].get<std::string>();
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+
+    if (nullptr == metaFs)
+        return RESULT_FAILURE;
+
     bool retVal = true;
     int fd = stoi(argv["fd"].get<std::string>());
     uint32_t byteOffset = stoi(argv["offset"].get<std::string>());
     uint32_t byteSize = stoi(argv["count"].get<std::string>());
     char* buffer = new char[byteSize];
     std::string outFile = argv["output"].get<std::string>();
-    std::string arrayName = argv["array"].get<std::string>();
-    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
-    if (nullptr == metaFs)
-        return RESULT_FAILURE;
 
     if (buffer == nullptr)
     {
@@ -217,16 +219,18 @@ WbtMetafsCmdHandler::WriteFile(Args argv)
         return RESULT_FAILURE;
     }
 
+    std::string arrayName = argv["array"].get<std::string>();
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+
+    if (nullptr == metaFs)
+        return RESULT_FAILURE;
+
     POS_EVENT_ID rc;
     int fd = stoi(argv["fd"].get<std::string>());
     uint32_t byteOffset = stoi(argv["offset"].get<std::string>());
     uint32_t byteSize = stoi(argv["count"].get<std::string>());
     char* buffer = new char[byteSize];
     std::string inFile = argv["input"].get<std::string>();
-    std::string arrayName = argv["array"].get<std::string>();
-    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
-    if (nullptr == metaFs)
-        return RESULT_FAILURE;
 
     if (_ReadFileInBuffer(inFile, &buffer, byteSize) == RESULT_SUCCESS)
     {

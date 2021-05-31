@@ -45,7 +45,8 @@
 namespace pos
 {
 MetaFsSystemManager::MetaFsSystemManager(std::string arrayName)
-: mbrMgr(nullptr)
+: mbrMgr(nullptr),
+  metaStorage(nullptr)
 {
     mbrMgr = new MetaFsMBRManager(arrayName);
     _InitReqHandler();

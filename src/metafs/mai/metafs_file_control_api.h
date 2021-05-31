@@ -73,7 +73,7 @@ public:
     // for wbt commands
     virtual std::vector<MetaFileInfoDumpCxt> Wbt_GetMetaFileList(void);
     virtual FileSizeType Wbt_GetMaxFileSizeLimit(void);
-    virtual MetaFileInodeDumpCxt Wbt_GetMetaFileInode(std::string& fileName);
+    virtual MetaFileInodeInfo* Wbt_GetMetaFileInode(std::string& fileName);
 
     virtual void SetMss(MetaStorageSubsystem* metaStorage);
     virtual void InitVolume(MetaVolumeType volType, std::string arrayName, MetaLpnType maxVolPageNum);

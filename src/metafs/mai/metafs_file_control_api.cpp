@@ -347,12 +347,11 @@ MetaFsFileControlApi::Wbt_GetMaxFileSizeLimit(void)
     return result;
 }
 
-MetaFileInodeDumpCxt
+MetaFileInodeInfo*
 MetaFsFileControlApi::Wbt_GetMetaFileInode(std::string& fileName)
 {
     POS_EVENT_ID rc;
     MetaFsFileControlRequest reqMsg;
-    MetaFileInodeDumpCxt result;
 
     reqMsg.reqType = MetaFsFileControlType::GetFileInode;
     reqMsg.fileName = &fileName;
@@ -362,10 +361,10 @@ MetaFsFileControlApi::Wbt_GetMetaFileInode(std::string& fileName)
 
     if (rc == POS_EVENT_ID::SUCCESS)
     {
-        result.inodeInfo = *reqMsg.completionData.inodeInfoPointer;
+        return reqMsg.completionData.inodeInfoPointer;
     }
 
-    return result;
+    return nullptr;
 }
 
 MetaFileInodeInfo*
