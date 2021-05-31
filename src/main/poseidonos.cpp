@@ -95,8 +95,9 @@ void
 Poseidonos::Terminate(void)
 {
     MemoryChecker::Enable(false);
-    EventSchedulerSingleton::ResetInstance();
     DeviceManagerSingleton::ResetInstance();
+    IODispatcherSingleton::ResetInstance();
+    EventSchedulerSingleton::ResetInstance();
     delete debugInfo;
     IOSubmitHandler *submitHandler = static_cast<IOSubmitHandler *>(IIOSubmitHandler::GetInstance());
     delete submitHandler;
