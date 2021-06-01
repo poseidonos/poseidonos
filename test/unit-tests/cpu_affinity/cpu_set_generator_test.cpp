@@ -8,40 +8,36 @@ namespace pos
 
 namespace pos
 {
-TEST(CpuSetGenerator, CpuSetGenerator_)
+TEST(CpuSetGenerator, CpuSetGenerator_Stack)
 {
+    // Given
+
+    // When : Create CpuSetGenerator on stack
+    CpuSetGenerator cpuSetGenerator;
+
+    // Then : Do nothing
 }
 
-TEST(CpuSetGenerator, GetCpuSetArray_)
+TEST(CpuSetGenerator, CpuSetGenerator_Heap)
 {
+    // Given
+
+    // When : Create CpuSetGenerator on heap
+    CpuSetGenerator* cpuSetGenerator = new CpuSetGenerator();
+
+    // Then : Release memory
+    delete cpuSetGenerator;
 }
 
-TEST(CpuSetGenerator, _AddCoreSet_)
+TEST(CpuSetGenerator, GetCpuSetArray_ReturnCpuSetArray)
 {
-}
+    // Given
 
-TEST(CpuSetGenerator, _SetCpuSet_)
-{
-}
+    // When : Create CpuSetGenerator on stack
+    CpuSetGenerator cpuSetGenerator;
+    cpuSetGenerator.GetCpuSetArray();
 
-TEST(CpuSetGenerator, _GetFirstCore_)
-{
-}
-
-TEST(CpuSetGenerator, _SetNumaInformation_)
-{
-}
-
-TEST(CpuSetGenerator, _GetNextCpuFromThisNuma_)
-{
-}
-
-TEST(CpuSetGenerator, _CalculateCoreSet_)
-{
-}
-
-TEST(CpuSetGenerator, _GetCpuSet_)
-{
+    // Then : Do nothing
 }
 
 } // namespace pos
