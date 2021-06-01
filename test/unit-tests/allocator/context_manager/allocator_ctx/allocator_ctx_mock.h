@@ -35,11 +35,11 @@ public:
     MOCK_METHOD(uint64_t, GetNumOfFreeUserDataSegment, (), (override));
     MOCK_METHOD(SegmentState, GetSegmentState, (SegmentId segmentId, bool needlock), (override));
     MOCK_METHOD(void, SetSegmentState, (SegmentId segmentId, SegmentState state, bool needlock), (override));
-    MOCK_METHOD(std::mutex&, GetSegStateLock, (SegmentId segId), (override));
-    MOCK_METHOD(std::mutex&, GetAllocatorCtxLock, (), (override));
     MOCK_METHOD(void, SetAllocatedSegmentCount, (int count), (override));
     MOCK_METHOD(int, GetAllocatedSegmentCount, (), (override));
     MOCK_METHOD(int, GetTotalSegmentsCount, (), (override));
+    MOCK_METHOD(std::mutex&, GetSegStateLock, (SegmentId segId), (override));
+    MOCK_METHOD(std::mutex&, GetAllocatorCtxLock, (), (override));
 };
 
 } // namespace pos

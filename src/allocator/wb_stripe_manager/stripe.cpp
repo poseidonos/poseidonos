@@ -43,7 +43,7 @@
 
 namespace pos
 {
-Stripe::Stripe(void)
+Stripe::Stripe(bool withDataBuffer_)
 : asTailArrayIdx(UINT32_MAX),
   vsid(UINT32_MAX),
   wbLsid(UINT32_MAX),
@@ -52,16 +52,33 @@ Stripe::Stripe(void)
   finished(true),
   remaining(0),
   referenceCount(0),
-  totalBlksPerUserStripe(0)
+  totalBlksPerUserStripe(0),
+  withDataBuffer(withDataBuffer_)
 {
+    if (withDataBuffer == false)
+    {
+        POS_TRACE_INFO(EID(GC_STRIPE_ALLOCATED), "Gc stripe is allocated!");
+    }
 }
 
-Stripe::Stripe(std::string arrayName)
-: Stripe()
+Stripe::Stripe(bool withDataBuffer_, std::string arrayName)
+: Stripe(withDataBuffer_)
 {
     IArrayInfo* iArrayInfo = (ArrayMgr::Instance()->GetArrayInfo(arrayName));
     const PartitionLogicalSize* udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
     totalBlksPerUserStripe = udSize->blksPerStripe;
+}
+
+Stripe::~Stripe(void)
+{
+    if (withDataBuffer == false)
+    {
+        if (revMapPack != nullptr)
+        {
+            delete revMapPack;
+            revMapPack = nullptr;
+        }
+    }
 }
 
 void
@@ -93,18 +110,19 @@ Stripe::GetVictimVsa(uint32_t offset)
 }
 
 int
-Stripe::LinkReverseMap(ReverseMapPack* revMapPackToLink)
+Stripe::LinkReverseMap(ReverseMapPack* revMapPackToLink, StripeId wbLsid, StripeId vsid)
 {
     if (unlikely(revMapPack != nullptr))
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::REVMAP_PACK_ALREADY_LINKED,
-            "Stripe object for wbLsid:{} is already linked to ReverseMapPack",
-            wbLsid);
+            "Stripe object for wbLsid:{} is already linked to ReverseMapPack, GcStripe:{}",
+            wbLsid, (!withDataBuffer));
         return -(int)POS_EVENT_ID::REVMAP_PACK_ALREADY_LINKED;
     }
 
     revMapPack = revMapPackToLink;
-    return 0;
+    int ret = revMapPack->LinkVsid(vsid);
+    return ret;
 }
 
 int
@@ -112,15 +130,22 @@ Stripe::UnLinkReverseMap(void)
 {
     if (likely(revMapPack != nullptr))
     {
-        revMapPack->UnLinkVsid();
+        if (withDataBuffer == false)
+        {
+            delete revMapPack;
+        }
+        else
+        {
+            revMapPack->UnLinkVsid();
+        }
         revMapPack = nullptr;
         return 0;
     }
     else
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::ALLOCATOR_STRIPE_WITHOUT_REVERSEMAP,
-            "Stripe object for wbLsid:{} is not linked to reversemap but tried to Unlink",
-            wbLsid);
+            "Stripe object for wbLsid:{} is not linked to reversemap but tried to Unlink, GcStripe:{}",
+            wbLsid, (!withDataBuffer));
         return -(int)POS_EVENT_ID::ALLOCATOR_STRIPE_WITHOUT_REVERSEMAP;
     }
 }
@@ -215,8 +240,8 @@ Stripe::Flush(EventSmartPtr callback)
     else
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_STRIPE_WITHOUT_REVERSEMAP),
-            "Stripe object for wbLsid:{} is not linked to reversemap but tried to Flush",
-            wbLsid);
+            "Stripe object for wbLsid:{} is not linked to reversemap but tried to Flush, GcStripe:{}",
+            wbLsid, (!withDataBuffer));
         return -EID(ALLOCATOR_STRIPE_WITHOUT_REVERSEMAP);
     }
 }
@@ -224,18 +249,21 @@ Stripe::Flush(EventSmartPtr callback)
 DataBufferIter
 Stripe::DataBufferBegin(void)
 {
+    assert(withDataBuffer == true);
     return dataBuffer.begin();
 }
 
 DataBufferIter
 Stripe::DataBufferEnd(void)
 {
+    assert(withDataBuffer == true);
     return dataBuffer.end();
 }
 
 void
 Stripe::AddDataBuffer(void* buf)
 {
+    assert(withDataBuffer == true);
     dataBuffer.push_back(buf);
 }
 
@@ -269,6 +297,12 @@ int
 Stripe::ReconstructReverseMap(uint32_t volumeId, uint64_t blockCount)
 {
     return revMapPack->ReconstructMap(volumeId, vsid, wbLsid, blockCount);
+}
+
+bool
+Stripe::IsGcDestStripe()
+{
+    return (!withDataBuffer);
 }
 
 } // namespace pos

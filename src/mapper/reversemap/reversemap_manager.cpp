@@ -123,34 +123,21 @@ ReverseMapManager::Close(void)
     revMapPacks = nullptr;
 }
 //----------------------------------------------------------------------------//
-int
-ReverseMapManager::LinkReverseMap(Stripe* stripe, StripeId wbLsid, StripeId vsid)
+ReverseMapPack*
+ReverseMapManager::GetReverseMapPack(StripeId wbLsid)
 {
-    int ret = 0;
-
-    // Let Stripe:: know the wbLsid(th) ReverseMapPack:: object
-    ret = stripe->LinkReverseMap(&revMapPacks[wbLsid]);
-    if (ret < 0)
-    {
-        return ret;
-    }
-
-    // Let wbLsid(th) ReverseMapPack:: object point vsid(SSD LSID)
-    ReverseMapPack& revMapPack = revMapPacks[wbLsid];
-    ret = revMapPack.LinkVsid(vsid);
-    if (ret < 0)
-    {
-        return ret;
-    }
-
-    return ret;
+    return &revMapPacks[wbLsid];
 }
 
 ReverseMapPack*
-ReverseMapManager::AllocReverseMapPack(void)
+ReverseMapManager::AllocReverseMapPack(bool gcDest)
 {
     ReverseMapPack* obj = new ReverseMapPack;
     obj->Init(mpageSize, numMpagesPerStripe, revMapWholefile, iArrayInfo->GetName());
+    if (gcDest == true)
+    {
+        obj->Init(UNMAP_STRIPE, iVSAMap, iStripeMap);
+    }
     return obj;
 }
 

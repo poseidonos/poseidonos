@@ -53,7 +53,7 @@ public:
     ~GcFlushSubmission(void) override;
     bool Execute(void) override;
 
-    std::pair <VirtualBlks, Stripe*> AllocateBlocks(uint32_t volumeId);
+    Stripe* AllocateStripe(uint32_t volumeId);
 
 private:
     std::string arrayName;

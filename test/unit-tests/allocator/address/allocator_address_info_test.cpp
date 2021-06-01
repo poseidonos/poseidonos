@@ -37,7 +37,7 @@ TEST(AllocatorAddressInfo, Init_)
     ret = addrInfo.GetnumWbStripes();
     EXPECT_EQ(6, ret);
     ret = addrInfo.GetblksPerSegment();
-    EXPECT_EQ(2*4, ret);
+    EXPECT_EQ(2 * 4, ret);
     ret = addrInfo.GetnumUserAreaSegments();
     EXPECT_EQ(4, ret);
     ret = addrInfo.GetstripesPerSegment();

@@ -71,4 +71,5 @@ StripePutEvent::Execute(void)
         return false;
     }
 }
+
 } // namespace pos

@@ -16,7 +16,8 @@ public:
     MOCK_METHOD(void, ReplaySsdLsid, (StripeId currentSsdLsid), (override));
     MOCK_METHOD(void, ReplaySegmentAllocation, (StripeId userLsid), (override));
     MOCK_METHOD(void, ReplayStripeAllocation, (StripeId wbLsid), (override));
-    MOCK_METHOD(void, ReplayStripeFlushed, (StripeId wbLsid, StripeId userLsid), (override));
+    MOCK_METHOD(void, ReplayStripeRelease, (StripeId wbLsid), (override));
+    MOCK_METHOD(void, ReplayStripeFlushed, (StripeId userLsid), (override));
     MOCK_METHOD(void, ResetActiveStripeTail, (int index), (override));
     virtual void ResetSegmentsStates(void) {}
     virtual std::vector<VirtualBlkAddr>

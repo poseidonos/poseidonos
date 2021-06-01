@@ -20,7 +20,7 @@ TEST(StripePutEvent, Execute_TestIfOkToFree)
 {
     // given
     std::string arrayName = "";
-    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>(true);
     NiceMock<MockIWBStripeAllocator>* wbAllocator = new NiceMock<MockIWBStripeAllocator>();
     StripePutEvent stripePutEvent(wbAllocator, *stripe, 5, arrayName);
 

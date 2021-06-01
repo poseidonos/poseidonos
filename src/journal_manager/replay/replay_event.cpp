@@ -238,7 +238,11 @@ ReplayStripeFlush::~ReplayStripeFlush(void)
 int
 ReplayStripeFlush::Replay(void)
 {
-    contextReplayer->ReplayStripeFlushed(wbLsid, userLsid);
+    if (wbLsid != UNMAP_STRIPE)
+    {
+        contextReplayer->ReplayStripeRelease(wbLsid);
+    }
+    contextReplayer->ReplayStripeFlushed(userLsid);
     status->StripeFlushed();
 
     return 0;

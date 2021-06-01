@@ -14,9 +14,9 @@ public:
 
     MOCK_METHOD(void, InvalidateBlks, (VirtualBlks bks), (override));
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks bks), (override));
-
+    MOCK_METHOD(Stripe*, AllocateGcDestStripe, (uint32_t volumeId), (override));
     virtual VirtualBlks
-    AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, bool forGC = false) override
+    AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks) override
     {
         VirtualBlks blks;
         blks.startVsa = UNMAP_VSA;

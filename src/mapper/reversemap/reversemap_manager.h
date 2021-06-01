@@ -53,8 +53,8 @@ public:
     void SetDoC(IArrayInfo* iarrayInfo);
     void Close(void);
 
-    int LinkReverseMap(Stripe* stripe, StripeId wbLsid, StripeId vsid) override;
-    ReverseMapPack* AllocReverseMapPack(void) override;
+    ReverseMapPack* GetReverseMapPack(StripeId wbLsid) override;
+    ReverseMapPack* AllocReverseMapPack(bool gcDest) override;
 
     uint64_t GetReverseMapPerStripeFileSize(void);
     uint64_t GetWholeReverseMapFileSize(void);

@@ -77,19 +77,18 @@ GcFlushSubmission::~GcFlushSubmission(void)
 bool
 GcFlushSubmission::Execute(void)
 {
-    VirtualBlks vsas;
     Stripe* stripe;
 
-    std::tie(vsas, stripe) = AllocateBlocks(volumeId);
+    stripe = AllocateStripe(volumeId);
 
-    if (IsUnMapVsa(vsas.startVsa))
+    if (stripe == nullptr)
     {
         return false;
     }
 
     StripeId logicalStripeId = iWBStripeAllocator->AllocateUserDataStripeId(stripe->GetVsid());
 
-    for (uint32_t offset = 0; offset < vsas.numBlks; offset++)
+    for (uint32_t offset = 0; offset < blkInfoList->size(); offset++)
     {
         std::vector<BlkInfo>::iterator it = blkInfoList->begin();
         std::advance(it, offset);
@@ -110,7 +109,6 @@ GcFlushSubmission::Execute(void)
         bufferList.push_back(bufferEntry);
         blocksInStripe += BLOCKS_IN_CHUNK;
     }
-    assert(vsas.numBlks == blocksInStripe);
 
     stripe->SetUserLsid(logicalStripeId);
 
@@ -135,23 +133,11 @@ GcFlushSubmission::Execute(void)
     return (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned);
 }
 
-std::pair <VirtualBlks, Stripe*>
-GcFlushSubmission::AllocateBlocks(uint32_t volumeId)
+Stripe*
+GcFlushSubmission::AllocateStripe(uint32_t volumeId)
 {
-    VirtualBlks vsas = iBlockAllocator->AllocateWriteBufferBlks(volumeId,
-                blkInfoList->size(), true);
-
-    Stripe* stripe = nullptr;
-    if (IsUnMapVsa(vsas.startVsa) == false)
-    {
-        assert(vsas.numBlks == blkInfoList->size());
-        Translator translator(vsas.startVsa, arrayName);
-        StripeAddr lsidEntry = translator.GetLsidEntry(0);
-        stripe = iWBStripeAllocator->GetStripe(lsidEntry);
-        stripe->DecreseBlksRemaining(vsas.numBlks);
-    }
-
-    return make_pair(vsas, stripe);
+    Stripe* stripe = iBlockAllocator->AllocateGcDestStripe(volumeId);
+    return stripe;
 }
 
 } // namespace pos

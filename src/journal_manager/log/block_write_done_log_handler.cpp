@@ -36,7 +36,7 @@ namespace pos
 {
 BlockWriteDoneLogHandler::BlockWriteDoneLogHandler(int volId, BlkAddr startRba,
     uint32_t numBlks, VirtualBlkAddr startVsa, int wbIndex,
-    StripeAddr stripeAddr, VirtualBlkAddr oldVsa, bool isGC)
+    StripeAddr stripeAddr)
 {
     dat.type = LogType::BLOCK_WRITE_DONE;
     dat.volId = volId;
@@ -45,8 +45,6 @@ BlockWriteDoneLogHandler::BlockWriteDoneLogHandler(int volId, BlkAddr startRba,
     dat.startVsa = startVsa;
     dat.wbIndex = wbIndex;
     dat.writeBufferStripeAddress = stripeAddr;
-    dat.oldVsa = oldVsa;
-    dat.isGC = isGC;
 }
 
 BlockWriteDoneLogHandler::BlockWriteDoneLogHandler(BlockWriteDoneLog& log)

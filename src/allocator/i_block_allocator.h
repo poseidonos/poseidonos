@@ -36,10 +36,12 @@
 
 namespace pos
 {
+class Stripe;
 class IBlockAllocator
 {
 public:
-    virtual VirtualBlks AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, bool forGC = false) = 0;
+    virtual VirtualBlks AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks) = 0;
+    virtual Stripe* AllocateGcDestStripe(uint32_t volumeId) = 0;
     virtual void InvalidateBlks(VirtualBlks blks) = 0;
     virtual void ValidateBlks(VirtualBlks blks) = 0;
 

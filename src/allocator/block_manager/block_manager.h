@@ -49,7 +49,8 @@ public:
     virtual ~BlockManager(void) = default;
     virtual void Init(IWBStripeInternal* iwbstripeInternal);
 
-    virtual VirtualBlks AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, bool forGC) override;
+    virtual VirtualBlks AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks) override;
+    virtual Stripe* AllocateGcDestStripe(uint32_t volumeId);
     virtual void InvalidateBlks(VirtualBlks blks) override;
     virtual void ValidateBlks(VirtualBlks blks) override;
     virtual void ProhibitUserBlkAlloc(void) override;

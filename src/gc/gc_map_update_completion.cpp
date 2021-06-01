@@ -98,26 +98,8 @@ GcMapUpdateCompletion::Execute(void)
         = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     volumeManager->DecreasePendingIOCount(volId, VolumeStatus::Unmounted);
 
-    FlushCompletion event(stripe, iStripeMap, eventScheduler, arrayName);
-    bool done = event.Execute();
-    bool wrapupSuccessful = true;
-
-    if (unlikely(false == done))
-    {
-        EventSmartPtr event(new FlushCompletion(stripe, arrayName));
-        if (likely(event != nullptr))
-        {
-            eventScheduler->EnqueueEvent(event);
-        }
-        else
-        {
-            POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MAP_UPDATE_HANDLER_EVENT_ALLOCATE_FAIL),
-                "Failed to allocate flush wrapup event");
-            wrapupSuccessful = false;
-        }
-    }
-
-    return wrapupSuccessful;
+    delete stripe;
+    return true;
 }
 
 } // namespace pos

@@ -342,16 +342,8 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
     {
         VirtualBlks targetVsaRange;
 
-        if (volumeIo->IsGc())
-        {
-            targetVsaRange = iBlockAllocator->AllocateWriteBufferBlks(volumeId,
-                remainBlockCount, true);
-        }
-        else
-        {
-            targetVsaRange = iBlockAllocator->AllocateWriteBufferBlks(volumeId,
-                remainBlockCount);
-        }
+        targetVsaRange = iBlockAllocator->AllocateWriteBufferBlks(volumeId,
+            remainBlockCount);
 
         if (IsUnMapVsa(targetVsaRange.startVsa))
         {

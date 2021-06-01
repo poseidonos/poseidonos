@@ -28,7 +28,7 @@ namespace pos
 TEST(StripeMapUpdate, StripeMapUpdate_Constructor_OneArgument_Stack)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     std::string arr_name{"arr_name"};
 
     // When: Try to Create New StripeMapUpdate object with 1 argument
@@ -40,7 +40,7 @@ TEST(StripeMapUpdate, StripeMapUpdate_Constructor_OneArgument_Stack)
 TEST(StripeMapUpdate, StripeMapUpdate_Constructor_OneArgument_Heap)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     std::string arr_name{"arr_name"};
 
     // When: Try to Create New StripeMapUpdate object with 1 argument
@@ -53,7 +53,7 @@ TEST(StripeMapUpdate, StripeMapUpdate_Constructor_OneArgument_Heap)
 TEST(StripeMapUpdate, StripeMapUpdate_Constructor_FourArguments)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockJournalService> mockJournalService;
     NiceMock<MockEventScheduler> mockEventScheduler;
@@ -68,7 +68,7 @@ TEST(StripeMapUpdate, StripeMapUpdate_Constructor_FourArguments)
 TEST(StripeMapUpdate, StripeMapUpdate_Execute_NormalWithJournalOn)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     NiceMock<MockJournalService> mockJournalService;
     NiceMock<MockEventScheduler> mockEventScheduler;
     NiceMock<MockIJournalWriter> mockIJournalWriter;
@@ -98,7 +98,7 @@ TEST(StripeMapUpdate, StripeMapUpdate_Execute_NormalWithJournalOn)
 TEST(StripeMapUpdate, StripeMapUpdate_Execute_AddStripeMapUpdatedLogFailWithJournalOn)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockJournalService> mockJournalService;
     NiceMock<MockEventScheduler> mockEventScheduler;

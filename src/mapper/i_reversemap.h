@@ -40,8 +40,8 @@ namespace pos
 class IReverseMap
 {
 public:
-    virtual int LinkReverseMap(Stripe* stripe, StripeId wbLsid, StripeId vsid) = 0;
-    virtual ReverseMapPack* AllocReverseMapPack(void) = 0;
+    virtual ReverseMapPack* GetReverseMapPack(StripeId wbLsid) = 0;
+    virtual ReverseMapPack* AllocReverseMapPack(bool gcDest) = 0;
 };
 
 } // namespace pos

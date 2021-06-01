@@ -4,7 +4,7 @@
 
 namespace pos
 {
-TEST(IReverseMap, LinkReverseMap_)
+TEST(IReverseMap, GetReverseMapPack_)
 {
 }
 

@@ -42,8 +42,7 @@ class BlockWriteDoneLogHandler : public LogHandlerInterface
 public:
     BlockWriteDoneLogHandler(void) = default;
     BlockWriteDoneLogHandler(int volId, BlkAddr startRba, uint32_t numBlks,
-        VirtualBlkAddr startVsa, int wbIndex, StripeAddr stripeAddr,
-        VirtualBlkAddr oldVsa, bool isGC);
+        VirtualBlkAddr startVsa, int wbIndex, StripeAddr stripeAddr);
     explicit BlockWriteDoneLogHandler(BlockWriteDoneLog& log);
     virtual ~BlockWriteDoneLogHandler(void) = default;
 

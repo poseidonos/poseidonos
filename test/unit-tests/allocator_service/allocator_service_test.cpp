@@ -1,6 +1,8 @@
 #include "src/allocator_service/allocator_service.h"
-#include "test/unit-tests/allocator/i_allocator_wbt_mock.h"
+
 #include <gtest/gtest.h>
+
+#include "test/unit-tests/allocator/i_allocator_wbt_mock.h"
 
 namespace pos
 {

@@ -34,7 +34,6 @@
 
 #include <vector>
 
-#include "src/allocator/context_manager/active_stripe_index_info.h"
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
@@ -85,7 +84,7 @@ WBStripeManager::Init(void)
 
     for (uint32_t stripeCnt = 0; stripeCnt < totalNvmStripes; ++stripeCnt)
     {
-        Stripe* stripe = new Stripe(arrayName);
+        Stripe* stripe = new Stripe(true, arrayName);
 
         for (uint32_t chunkCnt = 0; chunkCnt < chunksPerStripe; ++chunkCnt)
         {
@@ -275,8 +274,7 @@ int
 WBStripeManager::RestoreActiveStripeTail(int tailarrayidx, VirtualBlkAddr tail, StripeId wbLsid)
 {
     wbStripeCtx->SetActiveStripeTail(tailarrayidx, tail);
-    uint32_t volumeId = ActiveStripeTailArrIdxInfo::GetVolumeId(tailarrayidx);
-    return ReconstructActiveStripe(volumeId, wbLsid, tail, tailarrayidx);
+    return ReconstructActiveStripe(tailarrayidx, wbLsid, tail, tailarrayidx);
 }
 
 int
@@ -520,8 +518,8 @@ WBStripeManager::_ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint6
     int ret = 0;
     // TODO (jk.man.kim): Don't forget to insert array name in the future.
     IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
-
-    ret = iReverseMap->LinkReverseMap(stripe, stripe->GetWbLsid(), stripe->GetVsid());
+    StripeId wbLsid = stripe->GetWbLsid();
+    ret = stripe->LinkReverseMap(iReverseMap->GetReverseMapPack(wbLsid), wbLsid, stripe->GetVsid());
     if (unlikely(ret < 0))
     {
         return ret;

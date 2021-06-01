@@ -5,8 +5,6 @@
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
-#include "src/allocator/context_manager/active_stripe_index_info.h"
-
 namespace pos
 {
 WrittenLogs::WrittenLogs(void)
@@ -43,13 +41,8 @@ WrittenLogs::AddToWriteList(VolumeIoSmartPtr volumeIo)
     uint64_t numBlks = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
     VirtualBlkAddr startVsa = volumeIo->GetVsa();
     StripeAddr writeBufferStripe = volumeIo->GetLsidEntry();
-    ActiveStripeTailArrIdxInfo indexFinder = ActiveStripeTailArrIdxInfo(volumeId, false);
-    int index = indexFinder.GetActiveStripeTailArrIdx();
-    VirtualBlkAddr oldVsa = volumeIo->GetOldVsa();
-    bool isGC = volumeIo->IsGc();
-
     LogHandlerInterface* entry = new BlockWriteDoneLogHandler(volumeId,
-        rba, numBlks, startVsa, index, writeBufferStripe, oldVsa, isGC);
+        rba, numBlks, startVsa, volumeId, writeBufferStripe);
 
     _AddToList(entry);
 }

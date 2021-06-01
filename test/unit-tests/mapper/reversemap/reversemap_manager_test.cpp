@@ -20,7 +20,7 @@ TEST(ReverseMapManager, Close_)
 {
 }
 
-TEST(ReverseMapManager, LinkReverseMap_)
+TEST(ReverseMapManager, GetReverseMapPack_)
 {
 }
 

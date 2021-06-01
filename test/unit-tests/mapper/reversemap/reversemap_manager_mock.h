@@ -12,8 +12,8 @@ class MockReverseMapManager : public ReverseMapManager
 {
 public:
     using ReverseMapManager::ReverseMapManager;
-    MOCK_METHOD(int, LinkReverseMap, (Stripe * stripe, StripeId wbLsid, StripeId vsid), (override));
-    MOCK_METHOD(ReverseMapPack*, AllocReverseMapPack, (), (override));
+    MOCK_METHOD(ReverseMapPack*, GetReverseMapPack, (StripeId wbLsid), (override));
+    MOCK_METHOD(ReverseMapPack*, AllocReverseMapPack, (bool gcDest), (override));
 };
 
 } // namespace pos

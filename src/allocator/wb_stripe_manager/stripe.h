@@ -32,25 +32,24 @@
 
 #pragma once
 
-#include "src/allocator/include/allocator_const.h"
-#include "src/mapper/reversemap/reverse_map.h"
-
 #include <atomic>
 #include <string>
 #include <tuple>
 #include <vector>
 
+#include "src/allocator/include/allocator_const.h"
+#include "src/mapper/reversemap/reverse_map.h"
+
 namespace pos
 {
-
 using DataBufferIter = std::vector<void*>::iterator;
 
 class Stripe
 {
 public:
-    Stripe(void);
-    explicit Stripe(std::string arrayName);
-    virtual ~Stripe(void) {}
+    explicit Stripe(bool withDataBuffer);
+    Stripe(bool withDataBuffer, std::string arrayName);
+    virtual ~Stripe(void);
     virtual void Assign(StripeId vsid, StripeId lsid, ASTailArrayIdx tailarrayidx);
 
     virtual uint32_t GetAsTailArrayIdx(void);
@@ -66,7 +65,7 @@ public:
     virtual int Flush(EventSmartPtr callback);
     virtual void UpdateReverseMap(uint32_t offset, BlkAddr rba, uint32_t volumeId);
     virtual int ReconstructReverseMap(uint32_t volumeId, uint64_t blockCount);
-    virtual int LinkReverseMap(ReverseMapPack* revMapPackToLink);
+    virtual int LinkReverseMap(ReverseMapPack* revMapPackToLink, StripeId wbLsid, StripeId vsid);
     virtual int UnLinkReverseMap(void);
     virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint32_t offset);
     virtual void UpdateVictimVsa(uint32_t offset, VirtualBlkAddr vsa);
@@ -85,6 +84,7 @@ public:
     virtual void AddDataBuffer(void* buf);
     virtual DataBufferIter DataBufferBegin(void);
     virtual DataBufferIter DataBufferEnd(void);
+    virtual bool IsGcDestStripe(void);
 
 private:
     ASTailArrayIdx asTailArrayIdx;
@@ -99,6 +99,7 @@ private:
     std::vector<void*> dataBuffer;
     std::vector<VirtualBlkAddr> oldVsaList;
     uint32_t totalBlksPerUserStripe;
+    bool withDataBuffer;
 };
 
 } // namespace pos

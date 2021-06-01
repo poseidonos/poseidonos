@@ -36,7 +36,6 @@
 #include <map>
 #include <unordered_map>
 
-#include "src/allocator/context_manager/active_stripe_index_info.h"
 #include "src/include/address_type.h"
 #include "src/array_models/interface/i_array_info.h"
 

@@ -36,7 +36,6 @@
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
 #include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
-#include "src/allocator/context_manager/active_stripe_index_info.h"
 #include "src/allocator/wb_stripe_manager/stripe.h"
 
 namespace pos
@@ -67,20 +66,11 @@ LogWriteContextFactory::CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
     uint64_t numBlks = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
 
     VirtualBlkAddr startVsa = volumeIo->GetVsa();
-    ActiveStripeTailArrIdxInfo wbIndexFinder(volumeIo->GetVolumeId(), volumeIo->IsGc());
-    int wbIndex = wbIndexFinder.GetActiveStripeTailArrIdx();
+    int wbIndex = volumeIo->GetVolumeId();
     StripeAddr writeBufferStripeAddress = volumeIo->GetLsidEntry(); // TODO(huijeong.kim): to only have wbLsid
 
-    bool isGC = false;
-    VirtualBlkAddr oldVsa = UNMAP_VSA;
-    if (volumeIo->IsGc() == true)
-    {
-        isGC = true;
-        oldVsa = volumeIo->GetOldVsa();
-    }
-
     BlockWriteDoneLogHandler* log = new BlockWriteDoneLogHandler(volId, startRba,
-        numBlks, startVsa, wbIndex, writeBufferStripeAddress, oldVsa, isGC);
+        numBlks, startVsa, wbIndex, writeBufferStripeAddress);
 
     MapPageList dirtyMap;
     dirtyMap.emplace(volId, dirty);

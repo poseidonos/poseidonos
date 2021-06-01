@@ -92,7 +92,11 @@ ReplayTestFixture::ExpectReplayStripeFlush(StripeTestFixture stripe)
         stripe.GetUserAddr().stripeId, stripe.GetUserAddr().stripeLoc)).Times(1);
 
     EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
-        ReplayStripeFlushed(stripe.GetWbAddr().stripeId, stripe.GetUserAddr().stripeId))
+        ReplayStripeRelease(stripe.GetWbAddr().stripeId))
+        .Times(1);
+
+    EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
+        ReplayStripeFlushed(stripe.GetUserAddr().stripeId))
         .Times(1);
 }
 

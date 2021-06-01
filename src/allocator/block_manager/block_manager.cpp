@@ -34,7 +34,6 @@
 
 #include <string>
 
-#include "src/allocator/context_manager/active_stripe_index_info.h"
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
@@ -77,20 +76,50 @@ BlockManager::Init(IWBStripeInternal* iwbstripeInternal)
 }
 
 VirtualBlks
-BlockManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, bool forGC)
+BlockManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks)
 {
     VirtualBlks allocatedBlks;
 
-    if ((blkAllocProhibited[volumeId] == true) || ((forGC == false) && (userBlkAllocProhibited == true)))
+    if (blkAllocProhibited[volumeId] == true)
     {
         allocatedBlks.startVsa = UNMAP_VSA;
         allocatedBlks.numBlks = 0;
         return allocatedBlks;
     }
 
-    ActiveStripeTailArrIdxInfo info = {volumeId, forGC};
-    allocatedBlks = _AllocateBlks(info.GetActiveStripeTailArrIdx(), numBlks);
+    allocatedBlks = _AllocateBlks(volumeId, numBlks);
     return allocatedBlks;
+}
+
+Stripe*
+BlockManager::AllocateGcDestStripe(uint32_t volumeId)
+{
+    if (blkAllocProhibited[volumeId] == true)
+    {
+        return nullptr;
+    }
+
+    QosManagerSingleton::Instance()->IncreaseUsedStripeCnt();
+
+    // 2. SSD Logical StripeId/vsid Allocation
+    StripeId arrayLsid = _AllocateUserDataStripeIdInternal(false /*isUser*/);
+    if (IsUnMapStripe(arrayLsid))
+    {
+        POS_TRACE_ERROR(EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE), "failed to allocate gc stripe!");
+        return nullptr;
+    }
+
+    StripeId newVsid = arrayLsid;
+    Stripe* stripe = new Stripe(false, arrayName);
+    stripe->Assign(newVsid, UNMAP_STRIPE, 0);
+
+    IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
+    if (unlikely(stripe->LinkReverseMap(iReverseMap->AllocReverseMapPack(true /*gcDest*/), UNMAP_STRIPE, newVsid) < 0))
+    {
+        POS_TRACE_ERROR(EID(ALLOCATOR_CANNOT_LINK_REVERSE_MAP), "failed to link ReverseMap to allocate gc stripe!");
+        return nullptr;
+    }
+    return stripe;
 }
 
 void
@@ -261,7 +290,7 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
 
     // TODO (jk.man.kim): Don't forget to insert array name in the future.
     IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
-    if (unlikely(iReverseMap->LinkReverseMap(stripe, wbLsid, newVsid) < 0))
+    if (unlikely(stripe->LinkReverseMap(iReverseMap->GetReverseMapPack(wbLsid), wbLsid, newVsid) < 0))
     {
         std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
         _RollBackStripeIdAllocation(wbLsid, arrayLsid);

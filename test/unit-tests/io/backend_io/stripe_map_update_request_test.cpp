@@ -25,7 +25,7 @@ namespace pos
 TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_OneArgument_Stack)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     std::string arr_name{"arr_name"};
 
     // When: Try to Create New StripeMapUpdateRequest object with 1 argument
@@ -37,7 +37,7 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_OneArgument_Stac
 TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_OneArgument_Heap)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     std::string arr_name{"arr_name"};
 
     // When: Try to Create New StripeMapUpdateRequest object with 1 argument
@@ -50,7 +50,7 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_OneArgument_Heap
 TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_ThreeArguments)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
     std::string arr_name{"arr_name"};
@@ -65,7 +65,7 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_ThreeArguments)
 TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_ExistErrorCount)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
     std::string arr_name{"arr_name"};
@@ -85,7 +85,7 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_ExistErrorCoun
 TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_NonUserArea)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
     std::string arr_name{"arr_name"};

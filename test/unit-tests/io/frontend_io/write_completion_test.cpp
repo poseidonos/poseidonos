@@ -75,7 +75,7 @@ TEST(WriteCompletion, _DoSpecificJob_NullStripe)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("");
     StripeAddr stripeAddr;
-    Stripe stripe;
+    Stripe stripe(true);
     VirtualBlkAddr startVsa;
 
     ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
@@ -100,7 +100,7 @@ TEST(WriteCompletion, _RequestFlush_DummyStripe)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("");
     StripeAddr stripeAddr;
-    Stripe stripe;
+    Stripe stripe(true);
     VirtualBlkAddr startVsa;
 
     ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
@@ -124,7 +124,7 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("");
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     StripeAddr stripeAddr;
     VirtualBlkAddr startVsa;
 
@@ -150,9 +150,9 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("");
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     StripeAddr stripeAddr;
-    Stripe stripe;
+    Stripe stripe(true);
     VirtualBlkAddr startVsa;
 
     ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));

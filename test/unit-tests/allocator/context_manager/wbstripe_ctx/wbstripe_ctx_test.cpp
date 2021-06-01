@@ -104,6 +104,7 @@ TEST(WbStripeCtx, AllocWbStripeWithParam_TestSimpleInterfaceFunc)
     EXPECT_CALL(*allocBitmap, SetBit(10));
     // when
     wbstripeCtx.AllocWbStripe(10);
+    delete allocBitmap;
 }
 
 TEST(WbStripeCtx, AllocWbStripe_TestAllocStripeWithConditions)

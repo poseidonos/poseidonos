@@ -39,7 +39,6 @@
 #include "pending_stripe.h"
 #include "src/journal_manager/statistics/stripe_info.h"
 
-#include "src/allocator/context_manager/active_stripe_index_info.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator/i_context_replayer.h"
 #include "src/include/address_type.h"

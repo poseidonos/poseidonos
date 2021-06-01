@@ -13,6 +13,7 @@ class MockWBStripeManager : public WBStripeManager
 public:
     using WBStripeManager::WBStripeManager;
     MOCK_METHOD(void, Init, (), (override));
+    MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(Stripe*, GetStripe, (StripeAddr & lsidEntry), (override));
     MOCK_METHOD(StripeId, AllocateUserDataStripeId, (StripeId vsid), (override));
     MOCK_METHOD(void, FreeWBStripeId, (StripeId lsid), (override));

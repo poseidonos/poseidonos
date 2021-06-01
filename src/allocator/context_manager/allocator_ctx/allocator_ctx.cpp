@@ -51,8 +51,8 @@ AllocatorCtx::AllocatorCtx(BitMapMutex* allocSegBitmap_, SegmentStates* segmentS
   arrayName(arrayName_)
 {
     allocSegBitmap = allocSegBitmap_; // for UT
-    segmentStates = segmentStates_; // for UT
-    segStateLocks = segStateLocks_; // for UT
+    segmentStates = segmentStates_;   // for UT
+    segStateLocks = segStateLocks_;   // for UT
 
     ctxHeader.sig = SIG_ALLOCATOR_CTX;
     ctxHeader.numValidSegment = 0;

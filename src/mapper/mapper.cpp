@@ -341,7 +341,7 @@ Mapper::WriteStripeMapEntry(StripeId vsid, StripeLoc loc, StripeId lsid)
 int
 Mapper::ReadReverseMap(StripeId vsid, std::string fname)
 {
-    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack();
+    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack(false);
 
     int ret = _LoadReverseMapVsidFromMFS(reverseMapPack, vsid);
     if (ret < 0)
@@ -370,7 +370,7 @@ Mapper::ReadReverseMap(StripeId vsid, std::string fname)
 int
 Mapper::WriteReverseMap(StripeId vsid, std::string fname)
 {
-    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack();
+    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack(false);
     int ret = reverseMapPack->LinkVsid(vsid);
     if (ret < 0)
     {
@@ -451,7 +451,7 @@ Mapper::WriteWholeReverseMap(std::string fname)
 int
 Mapper::ReadReverseMapEntry(StripeId vsid, BlkOffset offset, std::string fname)
 {
-    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack();
+    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack(false);
 
     int ret = _LoadReverseMapVsidFromMFS(reverseMapPack, vsid);
 
@@ -476,7 +476,7 @@ int
 Mapper::WriteReverseMapEntry(StripeId vsid, BlkOffset offset, BlkAddr rba,
     uint32_t volumeId)
 {
-    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack();
+    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack(false);
 
     int ret = _LoadReverseMapVsidFromMFS(reverseMapPack, vsid);
     if (ret < 0)

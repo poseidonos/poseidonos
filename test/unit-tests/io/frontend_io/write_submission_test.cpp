@@ -102,7 +102,7 @@ TEST(WriteSubmission, Execute_SingleBlock)
     WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator);
 
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(true));
-    ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _, _)).WillByDefault(Return(vsaRange));
+    ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(vsaRange));
 
     bool actual, expected{true};
 
@@ -133,7 +133,7 @@ TEST(WriteSubmission, Execute_AlgnedMultiBlock)
     WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator);
 
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(true));
-    ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _, _)).WillByDefault(Return(vsaRange));
+    ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(vsaRange));
 
     bool actual, expected{true};
 
@@ -164,7 +164,7 @@ TEST(WriteSubmission, Execute_MisAlgnedMultiBlock)
     WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator);
 
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(true));
-    ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _, _)).WillByDefault(Return(vsaRange));
+    ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(vsaRange));
 
     bool actual, expected{true};
 

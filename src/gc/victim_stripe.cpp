@@ -56,7 +56,7 @@ VictimStripe::VictimStripe(IArrayInfo* array, ReverseMapPack* revMapPack_)
     if (nullptr == revMapPack)
     {
         IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(array->GetName());
-        revMapPack = iReverseMap->AllocReverseMapPack();
+        revMapPack = iReverseMap->AllocReverseMapPack(false);
     }
 }
 

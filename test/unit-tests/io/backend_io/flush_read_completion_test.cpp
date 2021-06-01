@@ -21,7 +21,7 @@ namespace pos
 TEST(FlushReadCompletion, FlushReadCompletion_Constructor_OneArgument_Stack)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     std::string arr_name{"arr_name"};
 
     // When: Try to Create New FlushReadCompletion object with 1 argument
@@ -33,7 +33,7 @@ TEST(FlushReadCompletion, FlushReadCompletion_Constructor_OneArgument_Stack)
 TEST(FlushReadCompletion, FlushReadCompletion_Constructor_OneArgument_Heap)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     std::string arr_name{"arr_name"};
 
     // When: Try to Create New FlushReadCompletion object with 1 argument
@@ -46,7 +46,7 @@ TEST(FlushReadCompletion, FlushReadCompletion_Constructor_OneArgument_Heap)
 TEST(FlushReadCompletion, FlushReadCompletion_DoSpecificJob_NormalCase)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe> mockStripe(true);
     std::string arr_name{"arr_name"};
     FlushReadCompletion flushReadCompletion(&mockStripe, arr_name);
     bool actual, expected{true};
