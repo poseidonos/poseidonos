@@ -73,6 +73,7 @@ ReplayLogList::AddLog(LogHandlerInterface* log)
     {
         logGroups[log->GetSeqNum()].logs.push_back(replayLog);
         logGroups[log->GetSeqNum()].seqNum = log->GetSeqNum();
+        logGroups[log->GetSeqNum()].isFooterValid = false;
     }
 }
 
@@ -92,6 +93,7 @@ void
 ReplayLogList::SetLogGroupFooter(uint64_t seqNum, LogGroupFooter footer)
 {
     logGroups[seqNum].footer = footer;
+    logGroups[seqNum].isFooterValid = true;
 }
 
 ReplayLogGroup

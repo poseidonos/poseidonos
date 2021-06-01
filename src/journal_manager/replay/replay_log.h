@@ -51,11 +51,6 @@ struct ReplayLogGroup
     uint64_t seqNum;
     std::vector<ReplayLog> logs;
     LogGroupFooter footer;
-
-    bool
-    IsFooterValid(void)
-    {
-        return (footer.MARK == LOG_GROUP_FOOTER_VALID_MARK);
-    }
+    bool isFooterValid;
 };
 } // namespace pos

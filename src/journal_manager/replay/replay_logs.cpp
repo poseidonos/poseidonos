@@ -155,13 +155,20 @@ ReplayLogs::_ReplayFinishedStripes(void)
     {
         ReplayLogGroup logGroup = logList.PopReplayLogGroup();
 
-        uint64_t currentSegInfoVersion = contextManager->GetStoredContextVersion(SEGMENT_CTX);
-        if (logGroup.footer.lastCheckpointedSeginfoVersion < currentSegInfoVersion)
+        if (logGroup.isFooterValid == true)
         {
-            // Checkpoint started, allocator context is stored, but checkpoint is not completed
-            for (auto it = logGroup.logs.begin(); it != logGroup.logs.end(); it++)
+            uint64_t currentSegInfoVersion = contextManager->GetStoredContextVersion(SEGMENT_CTX);
+            if (logGroup.footer.lastCheckpointedSeginfoVersion < currentSegInfoVersion)
             {
-                it->segInfoFlushed = true;
+                // Checkpoint started, allocator context is stored, but checkpoint is not completed
+                for (auto it = logGroup.logs.begin(); it != logGroup.logs.end(); it++)
+                {
+                    it->segInfoFlushed = true;
+                }
+
+                POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_STATUS,
+                    "Segment context is flushed, skip replaying seginfo (last ver in the footer {}, current {}",
+                    logGroup.footer.lastCheckpointedSeginfoVersion, currentSegInfoVersion);
             }
         }
 

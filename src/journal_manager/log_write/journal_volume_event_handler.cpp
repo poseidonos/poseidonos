@@ -85,15 +85,14 @@ JournalVolumeEventHandler::VolumeDeleted(int volumeId)
     }
     else
     {
+        POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+            "Start volume delete event handler (volume id {})", volumeId);
+
         int ret = 0;
-        int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION);
-
-        POS_TRACE_DEBUG(eventId, "Start volume delete event handler (volume id {})", volumeId);
-
         ret = _WriteVolumeDeletedLog(volumeId, contextManager->GetStoredContextVersion(SEGMENT_CTX));
         if (ret != 0)
         {
-            POS_TRACE_DEBUG(eventId,
+            POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
                 "Writing volume deleted log failed (volume id {})", volumeId);
             return ret;
         }
@@ -103,7 +102,8 @@ JournalVolumeEventHandler::VolumeDeleted(int volumeId)
         ret = _FlushAllocatorContext();
         if (ret != 0)
         {
-            POS_TRACE_DEBUG(eventId, "Failed to flush allocator context");
+            POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+                "Failed to flush allocator context");
             return ret;
         }
         _WaitForAllocatorContextFlushCompleted();
@@ -115,12 +115,14 @@ JournalVolumeEventHandler::VolumeDeleted(int volumeId)
 }
 
 int
-JournalVolumeEventHandler::_WriteVolumeDeletedLog(int volumeId, uint64_t allocatorCtxVer)
+JournalVolumeEventHandler::_WriteVolumeDeletedLog(int volumeId, uint64_t segCtxVersion)
 {
+    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+        "Write volume deleted log, segInfo version is {}", segCtxVersion);
     EventSmartPtr callback(new VolumeDeletedLogWriteCallback(this, volumeId));
 
     LogWriteContext* logWriteContext =
-        logFactory->CreateVolumeDeletedLogWriteContext(volumeId, allocatorCtxVer, callback);
+        logFactory->CreateVolumeDeletedLogWriteContext(volumeId, segCtxVersion, callback);
 
     logWriteInProgress = true;
     return logWriteHandler->AddLog(logWriteContext);

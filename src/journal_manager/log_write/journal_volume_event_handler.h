@@ -65,7 +65,7 @@ public:
     virtual void VolumeDeletedLogWriteDone(int volumeId);
 
 private:
-    int _WriteVolumeDeletedLog(int volumeId, uint64_t allocatorCtxVer);
+    int _WriteVolumeDeletedLog(int volumeId, uint64_t segCtxVersion);
     void _WaitForLogWriteDone(int volumeId);
 
     int _FlushAllocatorContext(void);
