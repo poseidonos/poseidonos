@@ -37,9 +37,7 @@ def test(arrayId_to_create="", arrayId_to_delete=""):
     write_pattern()
 
     if arrayId_to_create is not "":
-        TEST_SETUP_POS.create_uram(arrayId_to_create)
-        TEST_SETUP_POS.scan_device()
-        TEST_SETUP_POS.create_array(arrayId_to_create)
+        TEST_SETUP_POS.add_array(arrayId_to_create)
         for volumeId in volumes:
             TEST_SETUP_POS.create_subsystem(arrayId_to_create, volumeId)
             TEST_SETUP_POS.create_volume(arrayId_to_create, volumeId)

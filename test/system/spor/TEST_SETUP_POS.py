@@ -26,6 +26,7 @@ def shutdown_pos(numArray):
 
     for arrayId in range(numArray):
         unmount_array(arrayId)
+        delete_array(arrayId)
 
     out = cli.exit_pos()
     ret = json_parser.get_response_code(out)
@@ -38,6 +39,7 @@ def shutdown_pos(numArray):
 
 
 def mbr_reset():
+    scan_device()
     cli.mbr_reset()
 
 
@@ -49,10 +51,11 @@ def clean_bringup(arrays=[0]):
 
     TEST_RUN_POS.start_pos()
 
-    setup(arrays)
     mbr_reset()
+    create_nvmf()
+
     for arrayId in arrays:
-        create_array(arrayId)
+        add_array(arrayId)
 
     TEST_LOG.print_info("* Fininshed bringup")
 
@@ -62,18 +65,18 @@ def dirty_bringup(arrays=[0]):
 
     TEST_RUN_POS.start_pos()
 
-    setup(arrays)
+    create_nvmf()
+
+    for uramId in arrays:
+        create_uram(uramId)
+        # create_pram()
+    scan_device()
+
     for arrayId in arrays:
         mount_array(arrayId)
         TEST_DEBUGGING.dump_journal(arrayId, "LogBuffer_AfterSPO")
 
     TEST_LOG.print_info("* Fininshed bringup")
-
-
-# For pmem
-# def create_pram():
-    # spdk_rpc.send_request("bdev_pmem_create_pool /mnt/pmem0/pmem_pool 1024 512")
-    # spdk_rpc.send_request("bdev_pmem_create /mnt/pmem0/pmem_pool -n pmem0")
 
 
 def scan_device():
@@ -86,7 +89,7 @@ def scan_device():
 
 
 # TODO(cheolho.kang): Seperate array setup method from setup function
-def setup(arrays):
+def create_nvmf():
     command = ""
 
     if TEST.trtype == "tcp":
@@ -95,16 +98,18 @@ def setup(arrays):
         command += " -u 131072"
 
     spdk_rpc.send_request("nvmf_create_transport -t " + TEST.trtype + command)
-    for uramId in arrays:
-        create_uram(uramId)
-        # create_pram()
 
-    scan_device()
     TEST_LOG.print_info("* Setup POS")
 
 
 def get_uramname(uramId):
     return "uram" + str(uramId)
+
+
+# For pmem
+# def create_pram():
+    # spdk_rpc.send_request("bdev_pmem_create_pool /mnt/pmem0/pmem_pool 1024 512")
+    # spdk_rpc.send_request("bdev_pmem_create /mnt/pmem0/pmem_pool -n pmem0")
 
 
 def create_uram(uramId):
@@ -144,9 +149,8 @@ def create_array(arrayId):
 
     dataDevice, spareDevice = get_device_name(arrayId)
     out = cli.create_array(get_uramname(arrayId), dataDevice, spareDevice, get_arrayname(arrayId), "")
-
 #   pmem
-#    out = cli.create_array("pmem0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "unvme-ns-3", ARRAYNAME, "")
+#   out = cli.create_array("pmem0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "unvme-ns-3", ARRAYNAME, "")
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to create array{}".format(arrayId))
@@ -154,6 +158,14 @@ def create_array(arrayId):
         sys.exit(1)
     TEST_LOG.print_info("* Array created")
     mount_array(arrayId)
+
+
+def add_array(arrayId):
+    create_uram(arrayId)
+    # create_pram()
+    scan_device()
+
+    create_array(arrayId)
 
 
 def mount_array(arrayId):
