@@ -32,8 +32,8 @@
 
 #include "src/cli/list_array_command.h"
 
-#include <vector>
 #include <algorithm>
+#include <vector>
 
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_event_code.h"
@@ -96,8 +96,18 @@ ListArrayCommand::Execute(json& doc, string rid)
             string updateDatetime(abr.updateDatetime);
             string arrayStatus("Unmounted");
             IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
-            if (info != nullptr && info->GetState() >= ArrayStateEnum::NORMAL)
-                arrayStatus = "Mounted";
+            if (info != nullptr)
+            {
+                if (info->GetState() >= ArrayStateEnum::NORMAL)
+                {
+                    arrayStatus = "Mounted";
+                }
+            }
+            else
+            {
+                arrayStatus = "Fault";
+            }
+
             arrayElement.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
             arrayElement.SetAttribute(JsonAttribute("status", "\"" + arrayStatus + "\""));
             arrayElement.SetAttribute(JsonAttribute("createDatetime", "\"" + createDatetime + "\""));

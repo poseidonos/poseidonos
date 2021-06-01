@@ -31,9 +31,11 @@
  */
 
 #include "src/cli/array_info_command.h"
-#include "src/sys_info/space_info.h"
-#include "src/cli/cli_event_code.h"
+
 #include "src/array_mgmt/array_manager.h"
+#include "src/cli/cli_event_code.h"
+#include "src/mbr/mbr_info.h"
+#include "src/sys_info/space_info.h"
 
 namespace pos_cli
 {
@@ -58,6 +60,13 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     IArrayInfo* array = ArrayMgr::Instance()->GetArrayInfo(arrayName);
     if (array == nullptr)
     {
+        int result = ArrayMgr::Instance()->AbrExists(arrayName);
+        if (result)
+        {
+            return jFormat.MakeResponse("ARRAYINFO", rid, (int)POS_EVENT_ID::ARRAY_LOAD_FAIL,
+                "Failed to load" + arrayName, GetPosInfo());
+        }
+
         return jFormat.MakeResponse("ARRAYINFO", rid, (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
             arrayName + " does not exist", GetPosInfo());
     }

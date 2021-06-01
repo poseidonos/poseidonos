@@ -93,6 +93,11 @@ ArrayManager::Delete(string name)
     ArrayComponents* array = _FindArray(name);
     if (array == nullptr)
     {
+        if (AbrExists(name))
+        {
+            int result = _DeleteFaultArray(name);
+            return result;
+        }
         return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
     }
 
@@ -114,6 +119,10 @@ ArrayManager::Mount(string name)
     {
         return array->Mount();
     }
+    else if (AbrExists(name))
+    {
+        return (int)POS_EVENT_ID::ARRAY_LOAD_FAIL;
+    }
 
     return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
 }
@@ -125,6 +134,10 @@ ArrayManager::Unmount(string name)
     if (array != nullptr)
     {
         return array->Unmount();
+    }
+    else if (AbrExists(name))
+    {
+        return (int)POS_EVENT_ID::ARRAY_LOAD_FAIL;
     }
 
     return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
@@ -138,6 +151,10 @@ ArrayManager::AddDevice(string name, string dev)
     {
         return array->GetArray()->AddSpare(dev);
     }
+    else if (AbrExists(name))
+    {
+        return (int)POS_EVENT_ID::ARRAY_LOAD_FAIL;
+    }
 
     return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
 }
@@ -149,6 +166,10 @@ ArrayManager::RemoveDevice(string name, string dev)
     if (array != nullptr)
     {
         return array->GetArray()->RemoveSpare(dev);
+    }
+    else if (AbrExists(name))
+    {
+        return (int)POS_EVENT_ID::ARRAY_LOAD_FAIL;
     }
 
     return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
@@ -320,11 +341,6 @@ ArrayManager::ResetMbr(void)
 ArrayComponents*
 ArrayManager::_FindArray(string name)
 {
-    // TODO_MULTIARRAY : for compatibility
-    if (name == "" && arrayList.size() == 1)
-    {
-        return arrayList.begin()->second;
-    }
     auto it = arrayList.find(name);
     if (it == arrayList.end())
     {
@@ -361,5 +377,39 @@ ArrayManager::_FindDevice(string devSn)
         }
     }
     return nullptr;
+}
+
+bool
+ArrayManager::AbrExists(string arrayName)
+{
+    std::vector<ArrayBootRecord> abrList;
+    int result = GetAbrList(abrList);
+
+    if (result == 0)
+    {
+        for (auto abr : abrList)
+        {
+            if (abr.arrayName == arrayName)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+int
+ArrayManager::_DeleteFaultArray(string arrayName)
+{
+    ArrayMeta meta;
+    int result = abrManager->LoadAbr(arrayName, meta);
+    if (result != 0)
+    {
+        return result;
+    }
+    result = abrManager->DeleteAbr(arrayName, meta);
+
+    return result;
 }
 } // namespace pos

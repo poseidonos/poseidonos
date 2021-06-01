@@ -78,6 +78,7 @@ public:
     void RebuildDone(string name) override;
 
     bool ArrayExists(string name);
+    bool AbrExists(string name);
     virtual int Load(list<string>& failedArrayList);
     int GetAbrList(vector<ArrayBootRecord>& abrList);
     IArrayInfo* GetArrayInfo(string name);
@@ -91,6 +92,7 @@ private:
     map<string, ArrayComponents*> arrayList;
     ArrayRebuilder* arrayRebuilder = nullptr;
     AbrManager* abrManager = nullptr;
+    int _DeleteFaultArray(string arrayName);
 };
 using ArrayMgr = Singleton<ArrayManager>;
 } // namespace pos

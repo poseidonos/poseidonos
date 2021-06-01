@@ -620,6 +620,11 @@ modules:
         message: invalid logical address error
         problem:
         solution:
+      - code: 2517
+        level: ERROR
+        message: Array is broken
+        problem: Device detached more than recoverable counts or Cannot load Array
+        solution: Delete array and create new one
       - code: 2518
         level: ERROR
         message: Wrong type for array device
@@ -650,6 +655,11 @@ modules:
         message: shutdown process not terminated
         problem:
         solution: retry later
+      - code : 2528
+        level: ERROR
+        message: Invalid operation on load failed array
+        problem: Load failed array cannot process requested command
+        solution: Check reason of array load fail or delete array
       - code: 2530
         level: INFO
         message: the array device has been added
