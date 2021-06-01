@@ -107,6 +107,12 @@ MetaFsManagementApi::CreateMbr(void)
     return sysMgr->CreateMbr();
 }
 
+bool
+MetaFsManagementApi::IsMbrClean(void)
+{
+    return sysMgr->IsMbrClean();
+}
+
 MetaStorageSubsystem*
 MetaFsManagementApi::GetMss(void)
 {

@@ -165,6 +165,15 @@ MetaFsSystemManager::LoadMbr(bool& isNPOR)
 }
 
 bool
+MetaFsSystemManager::IsMbrClean(void)
+{
+    if (0 == mbrMgr->GetEpochSignature())
+        return true;
+
+    return false;
+}
+
+bool
 MetaFsSystemManager::CreateMbr(void)
 {
     return mbrMgr->CreateMBR();
@@ -179,7 +188,10 @@ MetaFsSystemManager::GetMss(void)
 POS_EVENT_ID
 MetaFsSystemManager::_HandleInitializeRequest(MetaFsControlReqMsg& reqMsg)
 {
-    metaStorage = new MssOnDisk(reqMsg.arrayName);
+    if (nullptr == metaStorage)
+    {
+        metaStorage = new MssOnDisk(reqMsg.arrayName);
+    }
 
     if (true == Init(*reqMsg.mediaList))
         return POS_EVENT_ID::SUCCESS;

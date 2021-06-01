@@ -57,6 +57,7 @@ public:
     virtual MetaLpnType GetRegionSizeInLpn(void);
     virtual POS_EVENT_ID LoadMbr(bool& isNPOR);
     virtual bool CreateMbr(void);
+    virtual bool IsMbrClean(void);
     virtual MetaStorageSubsystem* GetMss(void);
     virtual void SetStatus(bool isNormal);
 

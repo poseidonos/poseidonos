@@ -67,6 +67,7 @@ public:
 private:
     bool _Initialize(void);
     POS_EVENT_ID _PrepareMetaVolume(void);
+    POS_EVENT_ID _CreateMetaVolume(void);
     POS_EVENT_ID _OpenMetaVolume(void);
     POS_EVENT_ID _CloseMetaVolume(void);
 

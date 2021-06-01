@@ -69,14 +69,29 @@ MetaFs::~MetaFs(void)
 int
 MetaFs::Init(void)
 {
-    if (false == _Initialize())
-        return true;
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
 
-    if (POS_EVENT_ID::SUCCESS != _OpenMetaVolume())
-        return true;
+    if (false == _Initialize())
+        return (int)POS_EVENT_ID::MFS_MODULE_INIT_FAILED;
+
+    rc = _PrepareMetaVolume();
+    if (POS_EVENT_ID::SUCCESS != rc)
+        return (int)rc;
+
+    // MetaFsSystemState::Create
+    if (!isLoaded)
+    {
+        rc = _CreateMetaVolume();
+        if (POS_EVENT_ID::SUCCESS != rc)
+            return (int)rc;
+    }
+
+    rc = _OpenMetaVolume();
+    if (POS_EVENT_ID::SUCCESS != rc)
+        return (int)rc;
 
     if (false == io->AddArray(arrayName))
-        return true;
+        return (int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED;
 
     isNormal = true;
     mgmt->SetStatus(isNormal);
@@ -84,7 +99,7 @@ MetaFs::Init(void)
     ctrl->SetStatus(isNormal);
     wbt->SetStatus(isNormal);
 
-    return false;
+    return (int)POS_EVENT_ID::SUCCESS;
 }
 
 void
@@ -145,12 +160,12 @@ MetaFs::_Initialize(void)
     if (POS_EVENT_ID::SUCCESS != mgmt->InitializeSystem(arrayName, &mediaInfoList))
         return false;
 
-    metaStorage = mgmt->GetMss();
-    io->SetMss(metaStorage);
-    ctrl->SetMss(metaStorage);
-
-    if (POS_EVENT_ID::SUCCESS != _PrepareMetaVolume())
-        return false;
+    if (nullptr == metaStorage)
+    {
+        metaStorage = mgmt->GetMss();
+        io->SetMss(metaStorage);
+        ctrl->SetMss(metaStorage);
+    }
 
     return true;
 }
@@ -188,33 +203,37 @@ MetaFs::_PrepareMetaVolume(void)
         }
     }
 
-    // MetaFsSystemState::Create
-    if (!isLoaded)
+    return rc;
+}
+
+POS_EVENT_ID
+MetaFs::_CreateMetaVolume(void)
+{
+    MetaFsStorageIoInfoList& mediaInfoList = mgmt->GetAllStoragePartitionInfo();
+
+    for (auto& item : mediaInfoList)
     {
-        for (auto& item : mediaInfoList)
-        {
-            if (false == item.valid)
-                continue;
+        if (false == item.valid)
+            continue;
 
-            MetaVolumeType volumeType = MetaFileUtil::ConvertToVolumeType(item.mediaType);
+        MetaVolumeType volumeType = MetaFileUtil::ConvertToVolumeType(item.mediaType);
 
-            if (false == ctrl->CreateVolume(volumeType))
-            {
-                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
-                    "Error occurred to create volume (volume id={})",
-                    (int)volumeType);
-
-                return POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED;
-            }
-        }
-
-        if (true != mgmt->CreateMbr())
+        if (false == ctrl->CreateVolume(volumeType))
         {
             MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
-                "Error occurred to create MetaFs MBR");
+                "Error occurred to create volume (volume id={})",
+                (int)volumeType);
 
             return POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED;
         }
+    }
+
+    if (true != mgmt->CreateMbr())
+    {
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
+            "Error occurred to create MetaFs MBR");
+
+        return POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED;
     }
 
     return POS_EVENT_ID::SUCCESS;
@@ -227,7 +246,25 @@ MetaFs::_OpenMetaVolume(void)
     POS_EVENT_ID rc = mgmt->LoadMbr(isNpor);
     if (rc != POS_EVENT_ID::SUCCESS)
     {
-        return rc;
+        if (true == mgmt->IsMbrClean())
+        {
+            MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+                "Mbr is clean. This array is mounted for the first time");
+
+            if (false == _Initialize())
+                return POS_EVENT_ID::MFS_MODULE_INIT_FAILED;
+
+            rc = _CreateMetaVolume();
+
+            if (rc != POS_EVENT_ID::SUCCESS)
+            {
+                return rc;
+            }
+        }
+        else
+        {
+            return rc;
+        }
     }
 
     if (false == ctrl->OpenVolume(isNpor))

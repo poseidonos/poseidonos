@@ -63,6 +63,7 @@ public:
     MetaLpnType GetRegionSizeInLpn(void);
     POS_EVENT_ID LoadMbr(bool& isNPOR);
     bool CreateMbr(void);
+    bool IsMbrClean(void);
     MetaStorageSubsystem* GetMss(void);
 
 private:
