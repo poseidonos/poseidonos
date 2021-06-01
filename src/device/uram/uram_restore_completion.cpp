@@ -70,8 +70,6 @@ bool UramRestoreCompletion::_DoSpecificJob(void)
 
     POS_EVENT_ID eventId = POS_EVENT_ID::URAM_RESTORING_PAGE_DONE;
 
-    delete ubio->GetArrayDev();
-
     pendingUbio--;
     POS_TRACE_INFO((int)eventId,
         PosEventId::GetString(eventId),
