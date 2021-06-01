@@ -62,6 +62,7 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::AFTMGR_FAIL_TO_ALLOCATE_ALL_CPU, "All core is not assigned for PoseidonOS"},
             {POS_EVENT_ID::AFTMGR_FAIL_TO_OVERLAP_MASK, "Core mask is overlapped"},
             {POS_EVENT_ID::AFTMGR_FAIL_TO_PARSING_ERROR, "Cpu allowed list is wrongly set"},
+            {POS_EVENT_ID::AFTMGR_CORE_NOT_SUFFICIENT, "Cpu is not sufficient"},
             {POS_EVENT_ID::AFTMGR_NO_EVENT_WORKER_ALLOCATED, "Cannot find event worker at any NUMA"},
             {POS_EVENT_ID::AFTMGR_NO_USE_CONFIG, "Use core description from default value"},
             {POS_EVENT_ID::AFTMGR_USE_CONFIG, "Use core description from config file"},
