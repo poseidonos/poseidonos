@@ -393,8 +393,16 @@ Ubio::NeedRecovery(void) // TODO: will be moved. AWIBOF-2751
         return false;
     }
 
+    ArrayDeviceState devState = arrayDev->GetState();
+
     if (dir == UbioDir::Read
-        && arrayDev->IsRebuilding())
+        && devState != ArrayDeviceState::NORMAL)
+    {
+        return true;
+    }
+
+    if (dir == UbioDir::Write
+        && devState == ArrayDeviceState::FAULT)
     {
         return true;
     }
@@ -402,7 +410,10 @@ Ubio::NeedRecovery(void) // TODO: will be moved. AWIBOF-2751
     uBlock = arrayDev->GetUblock();
     if (uBlock == nullptr)
     {
-        return true;
+        POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_INVALID_DEVICE;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
+        assert(0);
     }
 
     return false;

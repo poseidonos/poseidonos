@@ -51,8 +51,5 @@ public:
     virtual UblockSharedPtr GetUblock(void) = 0;
     virtual UBlockDevice* GetUblockPtr(void) = 0;
     virtual void SetUblock(UblockSharedPtr uBlock) = 0;
-
-    virtual bool IsRebuilding(void) = 0;
-    virtual void SetRebuild(bool rebuild) = 0;
 };
 } // namespace pos

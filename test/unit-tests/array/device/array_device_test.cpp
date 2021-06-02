@@ -32,11 +32,6 @@ TEST(ArrayDevice, ArrayDevice_testIfGettersSettersAreProperlyInvoked)
     // Then
     ASSERT_EQ(ArrayDeviceState::REBUILD, arrDev.GetState());
 
-    // When
-    arrDev.SetRebuild(false);
-
-    // Then
-    ASSERT_FALSE(arrDev.IsRebuilding());
 }
 
 } // namespace pos

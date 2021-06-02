@@ -659,7 +659,6 @@ Array::_DetachData(ArrayDevice* target)
 
     if (isRebuildingDevice || state->IsBroken())
     {
-        target->SetRebuild(false);
         rebuilder->StopRebuild(name_);
     }
     else if (isRebuildable)
@@ -729,13 +728,11 @@ Array::TriggerRebuild(ArrayDevice* target)
     }
     // Degraded
     // System State Invoke Rebuilding
-    target->SetRebuild(true);
     int ret = devMgr_->ReplaceWithSpare(target);
     if (ret != 0)
     {
         state->SetRebuildDone(false);
         state->SetDegraded();
-        target->SetRebuild(false);
         POS_TRACE_WARN(POS_EVENT_ID::REBUILD_TRIGGER_FAIL,
             "Failed to trigger rebuild. spare device is not available");
         pthread_rwlock_unlock(&stateLock);
