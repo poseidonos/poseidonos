@@ -70,17 +70,19 @@ EventCpuPolicy::~EventCpuPolicy(void)
 void
 EventCpuPolicy::HandlePolicy(void)
 {
-    QosResource& qosResource = qosContext->GetQosResource();
-    ResourceCpu& cpuState = qosResource.GetResourceCpu();
-    uint32_t rebuildPendingCpu = cpuState.GetEventPendingCpuCount(BackendEvent_UserdataRebuild);
-    if (rebuildPendingCpu > 0)
-    {
-        _RebuildScenario();
-    }
-    else
-    {
-        _NoRebuildScenario();
-    }
+    // This code will be disabled temporary
+
+    // QosResource& qosResource = qosContext->GetQosResource();
+    // ResourceCpu& cpuState = qosResource.GetResourceCpu();
+    // uint32_t rebuildPendingCpu = cpuState.GetEventPendingCpuCount(BackendEvent_UserdataRebuild);
+    // if (rebuildPendingCpu > 0)
+    // {
+    //    _RebuildScenario();
+    // }
+    // else
+    // {
+    //    _NoRebuildScenario();
+    //}
     _StoreContext();
 }
 
