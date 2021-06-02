@@ -22,6 +22,7 @@ type CreateArrayParam struct {
 	RAID      string            `json:"raidtype"`
 	BUFFER    [1]DeviceNameList `json:"buffer"`
 	DATA      []DeviceNameList  `json:"data"`
+	SPARE     [1]DeviceNameList `json:"spare"`
 }
 
 type DeviceNameList struct {

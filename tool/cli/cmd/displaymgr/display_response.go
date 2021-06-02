@@ -181,7 +181,7 @@ func printStatus(code int) {
 	} else {
 		statusInfo, _ := util.GetStatusInfo(code)
 		fmt.Println("A problem occured during process with error code " +
-			strconv.Itoa(code) + " - " + statusInfo.Problem)
+			strconv.Itoa(code) + " - " + statusInfo.Description)
 
 		fmt.Println("Possible solution: " + statusInfo.Solution)
 	}

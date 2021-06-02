@@ -20,12 +20,12 @@ func TestCreateArrayCommandReq(t *testing.T) {
 	log.SetFlags(0)
 
 	// Execute the command to test with argument
-	testmgr.ExecuteCommand(rootCmd, "array", "create", "--buffer", "device0", "--data-devs",
-		"device1,device2,device3", "--spare", "device4", "--array-name", "Array0", "--raid", "RAID5", "--json-req")
+	testmgr.ExecuteCommand(rootCmd, "array", "create", "--buffer", "uram0", "--data-devs",
+		"device1,device2,device3", "--spare", "devspare", "--array-name", "Array0", "--raid", "RAID5", "--json-req")
 
 	output := buff.String()
 	output = output[:len(output)-1] // Remove the last n from output string
-	expected := `{"command":"CREATEARRAY","rid":"fromfakeclient","param":{"name":"Array0","raidtype":"RAID5","buffer":[{"deviceName":"device0"}],"data":[{"deviceName":"device1"},{"deviceName":"device2"},{"deviceName":"device3"}]}}`
+	expected := `{"command":"CREATEARRAY","rid":"fromfakeclient","param":{"name":"Array0","raidtype":"RAID5","buffer":[{"deviceName":"uram0"}],"data":[{"deviceName":"device1"},{"deviceName":"device2"},{"deviceName":"device3"}],"spare":[{"deviceName":"devspare"}]}}`
 
 	if expected != output {
 		t.Errorf("Expected: %q Output: %q", expected, output)

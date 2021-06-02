@@ -64,11 +64,15 @@ func buildCreateArrayReq() messages.Request {
 	var buffer [1]messages.DeviceNameList
 	buffer[0].DEVICENAME = create_array_buffer
 
+	var spare [1]messages.DeviceNameList
+	spare[0].DEVICENAME = create_array_spare
+
 	createArrayParam := messages.CreateArrayParam{
 		ARRAYNAME: create_array_arrayName,
 		RAID:      create_array_raid,
 		BUFFER:    buffer,
 		DATA:      dataDevs,
+		SPARE:     spare,
 	}
 
 	req := messages.Request{

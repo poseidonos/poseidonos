@@ -10,7 +10,7 @@ var SystemCmd = &cobra.Command{
 	Long: `System commands for PoseidonOS.
 
 Syntax: 
-  poseidonos-cli system [start|stop|info]
+  poseidonos-cli system [start|stop|info|set-property]
 
 Example (to start PoseidonOS):
   poseidonos-cli system start
