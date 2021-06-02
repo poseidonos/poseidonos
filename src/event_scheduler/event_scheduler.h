@@ -33,6 +33,7 @@
 #pragma once
 
 #include <sched.h>
+#include <rte_config.h>
 
 #include <atomic>
 #include <cstdint>
@@ -65,7 +66,7 @@ public:
     virtual ~EventScheduler(void);
 
     void Initialize(void);
-    uint32_t GetWorkerIDMinimumJobs(void);
+    uint32_t GetWorkerIDMinimumJobs(uint32_t numa);
     virtual void EnqueueEvent(EventSmartPtr input);
     std::mutex queueLock[BackendEvent_Count];
     std::queue<EventSmartPtr> DequeueEvents(void);
@@ -82,9 +83,14 @@ private:
     std::thread* schedulerThread;
     cpu_set_t schedulerCPUSet;
     std::vector<cpu_set_t> cpuSetVector;
+    static const uint32_t MAX_NUMA = RTE_MAX_NUMA_NODES;
+    std::vector<uint32_t> workerIDPerNumaVector[MAX_NUMA];
+    std::vector<uint32_t> totalWorkerIDVector;
+
     SchedulerQueue* eventQueue[BackendEvent_Count];
     int32_t oldWeight[BackendEvent_Count] = {0};
     int32_t runningWeight[BackendEvent_Count] = {0};
+    bool numaDedicatedSchedulingPolicy;
 };
 
 using EventSchedulerSingleton = Singleton<EventScheduler>;

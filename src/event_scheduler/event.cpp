@@ -31,11 +31,14 @@
  */
 
 #include "src/event_scheduler/event.h"
+#include "src/cpu_affinity/affinity_manager.h"
+#include "src/include/core_const.h"
 namespace pos
 {
 Event::Event(bool isFrontEndEvent, BackendEvent eventType)
 : frontEndEvent(isFrontEndEvent),
-  event(eventType)
+  event(eventType),
+  numa(AffinityManagerSingleton::Instance()->GetNumaIdFromCurrentThread())
 {
 }
 Event::~Event(void)
@@ -58,6 +61,17 @@ Event::SetFrontEnd(bool state)
 {
     frontEndEvent = state;
 }
+
+uint32_t Event::GetNumaId(void)
+{
+    if (numa != INVALID_NUMA)
+    {
+        return numa;
+    }
+    // If it cannot be get numa Id, just set 0.
+    return 0;
+}
+
 void
 Event::SetEventType(BackendEvent eventType)
 {

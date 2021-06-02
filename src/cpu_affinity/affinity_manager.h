@@ -55,6 +55,8 @@ public:
     uint32_t GetMasterReactorCore(void);
     uint32_t GetEventWorkerSocket(void);
     uint32_t GetTotalCore(void);
+    uint32_t GetNumaIdFromCurrentThread(void);
+    uint32_t GetNumaIdFromCoreId(uint32_t coreId);
     uint32_t GetCoreCount(CoreType type);
 
 private:
@@ -72,6 +74,7 @@ private:
     void _SetNumaInformation(const CoreDescriptionArray& descArray);
     bool _IsCoreSufficient(void);
     std::string _GetCPUSetString(cpu_set_t cpuSet);
+    static thread_local uint32_t numaId;
 };
 
 using AffinityManagerSingleton = Singleton<AffinityManager>;

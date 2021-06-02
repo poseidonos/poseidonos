@@ -35,15 +35,16 @@
 #include <assert.h>
 #include <unistd.h>
 
+#include "src/cpu_affinity/affinity_manager.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/cpu_affinity/affinity_manager.h"
 #include "src/logger/logger.h"
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_queue.h"
 #include "src/event_scheduler/event_worker.h"
 #include "src/event_scheduler/minimum_job_policy.h"
 #include "src/event_scheduler/scheduler_queue.h"
+#include "src/master_context/config_manager.h"
 #include "src/qos/qos_manager.h"
 
 namespace pos
@@ -52,25 +53,47 @@ EventScheduler::EventScheduler(void)
 : policy(nullptr),
   exit(false),
   workerCount(UINT32_MAX),
-  schedulerThread(nullptr)
+  schedulerThread(nullptr),
+  numaDedicatedSchedulingPolicy(false)
 {
     CPU_ZERO(&schedulerCPUSet);
+    bool enable = false;
+    int ret = ConfigManagerSingleton::Instance()->GetValue("event_scheduler",
+        "numa_dedicated", &enable, CONFIG_TYPE_BOOL);
+    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+    {
+        numaDedicatedSchedulingPolicy = enable;
+    }
+
     for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count;
             event++)
     {
         eventQueue[event] = new SchedulerQueue;
     }
+    for (uint32_t numa = 0; numa < MAX_NUMA; numa++)
+    {
+        workerIDPerNumaVector[numa].clear();
+    }
+    totalWorkerIDVector.clear();
 }
 
 
-uint32_t EventScheduler::GetWorkerIDMinimumJobs(void)
+uint32_t EventScheduler::GetWorkerIDMinimumJobs(uint32_t numa)
 {
     const uint32_t MAX_VALUE = UINT32_MAX;
     uint32_t minimumJobs = MAX_VALUE, minimumWorkerID = 0;
-    // In this case, we just trys linear search.
-    // The number of Event Worker is not so huge, so linear search is comparatively well.
-    // If Performance Issue is triggered, we can change to "heap tree" or another effective algorithm.
-    for (uint32_t workerID = 0; workerID < workerCount; workerID++)
+    std::vector<uint32_t>& workerIDVector = workerIDPerNumaVector[numa];
+
+    if (!numaDedicatedSchedulingPolicy || workerIDPerNumaVector[numa].size() == 0)
+    {
+        workerIDVector = totalWorkerIDVector;
+    }
+
+    // In this case, we just try linear search.
+    // The number of Event Worker is not so huge, so linear search does not have performance impact comparatively.
+    // If performance Issue happens, we can change to "heap tree" or another effective algorithm.
+
+    for (auto workerID : workerIDVector)
     {
         uint32_t size = workerArray[workerID]->GetQueueSize();
         if (minimumJobs > size)
@@ -153,6 +176,11 @@ EventScheduler::_BuildCpuSet(cpu_set_t& cpuSet)
         CPU_ZERO(&tempCpuSet);
         CPU_SET(cpuIndex, &tempCpuSet);
         cpuSetVector.push_back(tempCpuSet);
+
+        uint32_t numa = AffinityManagerSingleton::Instance()->GetNumaIdFromCoreId(cpuIndex);
+        workerIDPerNumaVector[numa].push_back(workerID);
+        totalWorkerIDVector.push_back(workerID);
+
         cpuIndex = cpuIndex + 1;
     }
 }
@@ -185,7 +213,7 @@ EventScheduler::Run(void)
         while (!eventList.empty())
         {
             event = eventList.front();
-            workerID = policy->GetProperWorkerID();
+            workerID = policy->GetProperWorkerID(event->GetNumaId());
             if (unlikely(workerID >= workerCount))
             {
                 PosEventId::Print(POS_EVENT_ID::EVTSCHDLR_INVALID_WORKER_ID,

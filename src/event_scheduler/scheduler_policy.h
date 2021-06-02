@@ -33,6 +33,7 @@
 #ifndef SCHEDULER_ISCHEDULERPOLICY_H
 #define SCHEDULER_ISCHEDULERPOLICY_H
 
+#include <cstdint>
 namespace pos
 {
 /* --------------------------------------------------------------------------*/
@@ -52,7 +53,7 @@ public:
     {
     }
 
-    virtual unsigned int GetProperWorkerID(void) = 0;
+    virtual unsigned int GetProperWorkerID(uint32_t numa) = 0;
 };
 
 } // namespace pos

@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include "src/include/backend_event.h"
 #include "src/include/event_priority.h"
 
@@ -51,6 +52,7 @@ public:
     BackendEvent GetEventType(void);
     void SetFrontEnd(bool state);
     void SetEventType(BackendEvent event);
+    uint32_t GetNumaId(void);
     virtual ~Event(void);
     virtual bool Execute(void) = 0;
     bool IsFrontEnd(void);
@@ -58,6 +60,7 @@ public:
 private:
     bool frontEndEvent;
     BackendEvent event;
+    uint32_t numa;
 };
 
 } // namespace pos

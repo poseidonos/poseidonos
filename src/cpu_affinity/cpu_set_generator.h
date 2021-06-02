@@ -40,6 +40,7 @@
 #include <vector>
 
 #include "rte_config.h"
+#include "src/include/core_const.h"
 
 namespace pos
 {
@@ -68,8 +69,6 @@ struct CoreDescription
     CoreCountArray countArray;
     std::string coreRange;
 };
-
-static const int32_t INVALID_NUMA = -1;
 
 using CoreDescriptionArray =
     std::array<CoreDescription, static_cast<uint32_t>(CoreType::COUNT)>;

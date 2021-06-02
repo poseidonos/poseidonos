@@ -65,9 +65,9 @@ MinimumJobPolicy::~MinimumJobPolicy(void)
  */
 /* --------------------------------------------------------------------------*/
 unsigned int
-MinimumJobPolicy::GetProperWorkerID(void)
+MinimumJobPolicy::GetProperWorkerID(uint32_t numa)
 {
-    uint32_t workerID = EventSchedulerSingleton::Instance()->GetWorkerIDMinimumJobs();
+    uint32_t workerID = EventSchedulerSingleton::Instance()->GetWorkerIDMinimumJobs(numa);
     return workerID;
 }
 } // namespace pos

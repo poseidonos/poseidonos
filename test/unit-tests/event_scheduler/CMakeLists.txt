@@ -1,4 +1,3 @@
-POS_ADD_UNIT_TEST(round_robin_policy_ut round_robin_policy_test.cpp)
 POS_ADD_UNIT_TEST(event_ut event_test.cpp)
 POS_ADD_UNIT_TEST(event_scheduler_ut event_scheduler_test.cpp)
 POS_ADD_UNIT_TEST(scheduler_queue_ut scheduler_queue_test.cpp)

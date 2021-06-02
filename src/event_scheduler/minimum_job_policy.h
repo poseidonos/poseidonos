@@ -48,7 +48,7 @@ public:
     explicit MinimumJobPolicy(unsigned int workerCountInput);
     virtual ~MinimumJobPolicy(void);
 
-    virtual unsigned int GetProperWorkerID(void) final;
+    virtual unsigned int GetProperWorkerID(uint32_t numa) final;
 
 private:
     unsigned int workerCount;
