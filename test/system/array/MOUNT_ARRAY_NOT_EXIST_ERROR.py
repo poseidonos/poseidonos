@@ -19,6 +19,7 @@ def set_result(detail):
 
 def execute():
     SCAN_DEV_BASIC.execute()
+    cli.mbr_reset()
     out = cli.mount_array("POSArray")
     return out
 

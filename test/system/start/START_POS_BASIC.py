@@ -18,7 +18,6 @@ def set_result():
         result_file.write(result + " (" + str(code) + ")" + "\n" + out)
 
 def execute():
-    pos.mbr_reset()
     pos.start_pos()
 
 if __name__ == "__main__":

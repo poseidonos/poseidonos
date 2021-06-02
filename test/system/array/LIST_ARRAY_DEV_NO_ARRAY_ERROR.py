@@ -23,6 +23,7 @@ def set_result(detail):
 
 def execute():
     SCAN_DEV_BASIC.execute()
+    cli.mbr_reset()
     out = cli.list_array_device("TEMPARRAY")
     return out
 

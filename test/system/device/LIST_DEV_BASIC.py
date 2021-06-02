@@ -20,6 +20,7 @@ def set_result(detail):
 
 def execute():
     SCAN_DEV_BASIC.execute()
+    cli.mbr_reset()
     out = cli.list_device()
     return out
 

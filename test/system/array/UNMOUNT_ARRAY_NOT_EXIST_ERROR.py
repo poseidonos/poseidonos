@@ -3,13 +3,13 @@ import subprocess
 import os
 import sys
 sys.path.append("../lib/")
-sys.path.append("../start/")
+sys.path.append("../device/")
 
 import json_parser
 import pos
 import cli
 import test_result
-import START_POS_BASIC
+import SCAN_DEV_BASIC
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)
@@ -18,7 +18,8 @@ def set_result(detail):
         result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
 def execute():
-    START_POS_BASIC.execute()
+    SCAN_DEV_BASIC.execute()
+    cli.mbr_reset()
     out = cli.unmount_array("POSArray")
     return out
 

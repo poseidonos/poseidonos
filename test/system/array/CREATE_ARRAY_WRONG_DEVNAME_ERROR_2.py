@@ -19,6 +19,7 @@ def set_result(detail):
 
 def execute():
     SCAN_DEV_BASIC.execute()
+    cli.mbr_reset()
     out = cli.create_array("uram0", "wrong-0,unvme-ns-1,unvme-ns-2", "unvme-ns-3", "POSArray", "RAID5")
     return out
 

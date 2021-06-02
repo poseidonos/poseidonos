@@ -24,6 +24,7 @@ def set_result(detail):
 
 def execute():
     SCAN_DEV_BASIC.execute()
+    cli.mbr_reset()
     out = cli.create_array(WRONG_BUFFER, DATA, "", "POSArray", "RAID5")
     return out
 

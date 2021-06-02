@@ -20,6 +20,7 @@ def set_result(detail):
 
 def execute():
     SCAN_DEV_BASIC.execute()
+    cli.mbr_reset()
     out = cli.add_device("unmve-ns-3", "NOARRAY")
     return out
 
