@@ -27,7 +27,7 @@ namespace pos
 TEST(FlushSubmission, FlushSubmission_Constructor_OneArgument_Stack)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     std::string arr_name = "";
 
     // When : Creat flushSubmission
@@ -41,7 +41,7 @@ TEST(FlushSubmission, FlushSubmission_Constructor_OneArgument_Stack)
 TEST(FlushSubmission, FlushSubmission_Constructor_OneArgument_Heap)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     std::string arr_name = "";
 
     // When : Creat flushSubmission
@@ -56,7 +56,7 @@ TEST(FlushSubmission, FlushSubmission_Constructor_OneArgument_Heap)
 TEST(FlushSubmission, FlushSubmission_Constructor_ThreeArguments)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
     std::string arr_name = "";
@@ -70,7 +70,7 @@ TEST(FlushSubmission, FlushSubmission_Constructor_ThreeArguments)
 TEST(FlushSubmission, FlushSubmission_Execute_CheckBufferSizeAndReturn)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
     std::string arr_name = "";
@@ -100,7 +100,7 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckBufferSizeAndReturn)
 TEST(FlushSubmission, FlushSubmission_Execute_CheckReturnValue)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
     std::string arr_name = "";
@@ -139,7 +139,7 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckReturnValue)
 TEST(FlushSubmission, FlushSubmission_GetBufferListSize_EmptyArgument)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     uint32_t bufferSize;
     std::string arr_name = "";
 

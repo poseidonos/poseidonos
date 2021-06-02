@@ -23,9 +23,9 @@ public:
     MOCK_METHOD(bool, ReferLsidCnt, (StripeAddr & lsa), (override));
     MOCK_METHOD(void, DereferLsidCnt, (StripeAddr & lsa, uint32_t blockCount), (override));
     MOCK_METHOD(void, FlushAllActiveStripes, (), (override));
-    MOCK_METHOD(int, ReconstructActiveStripe, (uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, ASTailArrayIdx idx), (override));
+    MOCK_METHOD(int, ReconstructActiveStripe, (uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa), (override));
     MOCK_METHOD(Stripe*, FinishReconstructedStripe, (StripeId wbLsid, VirtualBlkAddr tail), (override));
-    MOCK_METHOD(int, RestoreActiveStripeTail, (int index, VirtualBlkAddr tail, StripeId wbLsid), (override));
+    MOCK_METHOD(int, RestoreActiveStripeTail, (uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid), (override));
     MOCK_METHOD(int, FlushPendingActiveStripes, (), (override));
     MOCK_METHOD(int, PrepareRebuild, (), (override));
     MOCK_METHOD(int, StopRebuilding, (), (override));

@@ -124,7 +124,7 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("");
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     StripeAddr stripeAddr;
     VirtualBlkAddr startVsa;
 
@@ -150,7 +150,7 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("");
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     StripeAddr stripeAddr;
     Stripe stripe(true);
     VirtualBlkAddr startVsa;

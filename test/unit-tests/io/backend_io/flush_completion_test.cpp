@@ -25,7 +25,7 @@ namespace pos
 TEST(FlushCompletion, FlushCompletion_Constructor_OneArgument_Stack)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     std::string arr_name{"arr_name"};
 
     // When: Try to Create New FlushCompletion object with 1 argument
@@ -37,7 +37,7 @@ TEST(FlushCompletion, FlushCompletion_Constructor_OneArgument_Stack)
 TEST(FlushCompletion, FlushCompletion_Constructor_OneArgument_Heap)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     std::string arr_name{"arr_name"};
 
     // When: Try to Create New FlushCompletion object with 1 argument
@@ -50,7 +50,7 @@ TEST(FlushCompletion, FlushCompletion_Constructor_OneArgument_Heap)
 TEST(FlushCompletion, FlushCompletion_Constructor_ThreeArguments)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
     std::string arr_name{"arr_name"};
@@ -64,7 +64,7 @@ TEST(FlushCompletion, FlushCompletion_Constructor_ThreeArguments)
 TEST(FlushCompletion, FlushCompletion_Execute_UserArea)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
     std::string arr_name{"arr_name"};
@@ -85,7 +85,7 @@ TEST(FlushCompletion, FlushCompletion_Execute_UserArea)
 TEST(FlushCompletion, FlushCompletion_Execute_NonUserArea)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
     std::string arr_name{"arr_name"};

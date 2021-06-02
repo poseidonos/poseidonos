@@ -110,7 +110,7 @@ Stripe::GetVictimVsa(uint32_t offset)
 }
 
 int
-Stripe::LinkReverseMap(ReverseMapPack* revMapPackToLink, StripeId wbLsid, StripeId vsid)
+Stripe::LinkReverseMap(ReverseMapPack* revMapPackToLink)
 {
     if (unlikely(revMapPack != nullptr))
     {

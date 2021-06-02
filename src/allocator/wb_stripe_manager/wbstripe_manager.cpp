@@ -257,10 +257,10 @@ WBStripeManager::FlushAllActiveStripes(void)
 }
 
 int
-WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, ASTailArrayIdx tailarrayidx)
+WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa)
 {
     Stripe* stripe;
-    int ret = _ReconstructAS(tailVsa.stripeId, wbLsid, tailVsa.offset, tailarrayidx, stripe);
+    int ret = _ReconstructAS(tailVsa.stripeId, wbLsid, tailVsa.offset, volumeId, stripe);
     if (ret < 0)
     {
         return ret;
@@ -271,10 +271,10 @@ WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, Vir
 }
 
 int
-WBStripeManager::RestoreActiveStripeTail(int tailarrayidx, VirtualBlkAddr tail, StripeId wbLsid)
+WBStripeManager::RestoreActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid)
 {
-    wbStripeCtx->SetActiveStripeTail(tailarrayidx, tail);
-    return ReconstructActiveStripe(tailarrayidx, wbLsid, tail, tailarrayidx);
+    wbStripeCtx->SetActiveStripeTail(volumeId, tail);
+    return ReconstructActiveStripe(volumeId, wbLsid, tail);
 }
 
 int
@@ -519,7 +519,7 @@ WBStripeManager::_ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint6
     // TODO (jk.man.kim): Don't forget to insert array name in the future.
     IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
     StripeId wbLsid = stripe->GetWbLsid();
-    ret = stripe->LinkReverseMap(iReverseMap->GetReverseMapPack(wbLsid), wbLsid, stripe->GetVsid());
+    ret = stripe->LinkReverseMap(iReverseMap->GetReverseMapPack(wbLsid));
     if (unlikely(ret < 0))
     {
         return ret;

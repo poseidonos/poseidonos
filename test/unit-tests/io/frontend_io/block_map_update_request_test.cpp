@@ -109,7 +109,7 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_NormalCase)
     NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, ""));
     NiceMock<MockCallback>* mockCallback(new NiceMock<MockCallback>(true, 0));
 
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     VolumeIoSmartPtr mockVolumeIoPtr(mockVolumeIo);
     CallbackSmartPtr mockCallbackPtr(mockCallback);
     NiceMock<MockIVSAMap> mockIVSAMap;
@@ -157,7 +157,7 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_BlockMapUpdateEx
     NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, ""));
     NiceMock<MockCallback>* mockCallback(new NiceMock<MockCallback>(true, 0));
 
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     VolumeIoSmartPtr mockVolumeIoPtr(mockVolumeIo);
     CallbackSmartPtr mockCallbackPtr(mockCallback);
     NiceMock<MockIVSAMap> mockIVSAMap;
@@ -210,7 +210,7 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_BlockMapUpdateEv
     VolumeIoSmartPtr mockVolumeIoPtr(mockVolumeIo);
     CallbackSmartPtr mockCallbackPtr(mockCallback);
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     NiceMock<MockIVSAMap> mockIVSAMap;
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
 

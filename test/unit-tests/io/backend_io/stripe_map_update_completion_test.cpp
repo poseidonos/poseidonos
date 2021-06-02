@@ -27,7 +27,7 @@ namespace pos
 TEST(StripeMapUpdateCompletion, StripeMapUpdateCompletion_Constructor_OneArgument_Stack)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     std::string arr_name{"arr_name"};
 
     // When : Create StripeMapUpdateCompletion with single argument
@@ -39,7 +39,7 @@ TEST(StripeMapUpdateCompletion, StripeMapUpdateCompletion_Constructor_OneArgumen
 TEST(StripeMapUpdateCompletion, StripeMapUpdateCompletion_Constructor_OneArgument_Heap)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     std::string arr_name{"arr_name"};
 
     // When : Create StripeMapUpdateCompletion with single argument
@@ -53,7 +53,7 @@ TEST(StripeMapUpdateCompletion, StripeMapUpdateCompletion_Constructor_OneArgumen
 TEST(StripeMapUpdateCompletion, StripeMapUpdateCompletion_Constructor_FourArguments)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     NiceMock<MockIContextManager> mockIContextManager;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
@@ -74,7 +74,7 @@ TEST(StripeMapUpdateCompletion, StripeMapUpdateCompletion_Constructor_FourArgume
 TEST(StripeMapUpdateCompletion, StripeMapUpdateCompletion_Execute_NormalCase)
 {
     // Given
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     NiceMock<MockIContextManager> mockIContextManager;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;

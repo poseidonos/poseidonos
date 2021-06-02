@@ -80,7 +80,7 @@ BlockManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks)
 {
     VirtualBlks allocatedBlks;
 
-    if (blkAllocProhibited[volumeId] == true)
+    if ((blkAllocProhibited[volumeId] == true) || (userBlkAllocProhibited == true))
     {
         allocatedBlks.startVsa = UNMAP_VSA;
         allocatedBlks.numBlks = 0;
@@ -114,7 +114,7 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
     stripe->Assign(newVsid, UNMAP_STRIPE, 0);
 
     IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
-    if (unlikely(stripe->LinkReverseMap(iReverseMap->AllocReverseMapPack(true /*gcDest*/), UNMAP_STRIPE, newVsid) < 0))
+    if (unlikely(stripe->LinkReverseMap(iReverseMap->AllocReverseMapPack(true /*gcDest*/)) < 0))
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_CANNOT_LINK_REVERSE_MAP), "failed to link ReverseMap to allocate gc stripe!");
         return nullptr;
@@ -263,9 +263,7 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
         return -EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE);
     }
 
-#if defined QOS_ENABLED_BE
     QosManagerSingleton::Instance()->IncreaseUsedStripeCnt();
-#endif
 
     // 2. SSD Logical StripeId Allocation
     bool isUserStripeAlloc = _IsUserStripeAllocation(asTailArrayIdx);
@@ -290,7 +288,7 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
 
     // TODO (jk.man.kim): Don't forget to insert array name in the future.
     IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
-    if (unlikely(stripe->LinkReverseMap(iReverseMap->GetReverseMapPack(wbLsid), wbLsid, newVsid) < 0))
+    if (unlikely(stripe->LinkReverseMap(iReverseMap->GetReverseMapPack(wbLsid)) < 0))
     {
         std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
         _RollBackStripeIdAllocation(wbLsid, arrayLsid);

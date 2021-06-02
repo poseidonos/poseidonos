@@ -77,7 +77,7 @@ FlushPendingStripes::Start(void)
     for (auto pStripe : pendingStripes)
     {
         ret = wbStripeAllocator->ReconstructActiveStripe(pStripe->volumeId,
-            pStripe->wbLsid, pStripe->tailVsa, UINT32_MAX/*ASTailArrayIdx*/);
+            pStripe->wbLsid, pStripe->tailVsa);
         if (ret < 0)
         {
             int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH_FAILED);

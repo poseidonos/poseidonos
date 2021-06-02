@@ -66,9 +66,9 @@ public:
     virtual void DereferLsidCnt(StripeAddr& lsa, uint32_t blockCount) override;
     virtual void FlushAllActiveStripes(void) override;
 
-    virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, ASTailArrayIdx idx) override;
+    virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa) override;
     virtual Stripe* FinishReconstructedStripe(StripeId wbLsid, VirtualBlkAddr tail) override;
-    virtual int RestoreActiveStripeTail(int index, VirtualBlkAddr tail, StripeId wbLsid) override;
+    virtual int RestoreActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid) override;
     virtual int FlushPendingActiveStripes(void) override;
 
     virtual int PrepareRebuild(void) override;

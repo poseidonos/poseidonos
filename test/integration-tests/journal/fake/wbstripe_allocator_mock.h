@@ -12,9 +12,9 @@ public:
     virtual ~WBStripeAllocatorMock(void) {}
 
     MOCK_METHOD(int, RestoreActiveStripeTail,
-        (int index, VirtualBlkAddr tail, StripeId wbLsid), (override));
+        (uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid), (override));
     MOCK_METHOD(int, ReconstructActiveStripe,
-        (uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, ASTailArrayIdx tailarrayidx), (override));
+        (uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa), (override));
     MOCK_METHOD(Stripe*, FinishReconstructedStripe,
         (StripeId wbLsid, VirtualBlkAddr tail), (override));
 
