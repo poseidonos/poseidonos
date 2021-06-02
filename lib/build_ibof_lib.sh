@@ -14,13 +14,11 @@ KERNEL_VER="`uname -r`"
 VM_KERNEL_VER="5.3.0-19-generic" 
 IS_VM=0
 if [ ${KERNEL_VER} = ${VM_KERNEL_VER} ]; then
-	AIR_SOURCE_CI=${AIR_SOURCE}.vm
 	DPDK_SOURCE_CI=${DPDK_SOURCE}.vm
 	SPDLOG_SOURCE_CI=${SPDLOG_SOURCE}.vm
 	FIO_SOURCE=fio-fio-3.12
 	IS_VM=1
 else
-	AIR_SOURCE_CI=${AIR_SOURCE}
 	DPDK_SOURCE_CI=${DPDK_SOURCE}
 	SPDLOG_SOURCE_CI=${SPDLOG_SOURCE}
 	FIO_SOURCE=fio-fio-3.1
@@ -193,7 +191,8 @@ build_air(){
     if [ -d "${AIR_SOURCE}" ]; then
         cd ${AIR_SOURCE}
         log_normal "[Build $AIR_SOURCE]"
-        make release
+		make clean
+        make -j4 release
         ret=$?
         if [ $ret = 0 ]; then
             log_normal "[Build $AIR_SOURCE].. Done"
@@ -204,17 +203,6 @@ build_air(){
     else
         log_normal "No dir: $AIR_SOURCE"
     fi
-}
-
-build_air_ci(){
-	if [ ${IS_VM} -eq 1 ]; then
-		log_normal "[Build $AIR_SOURCE]"
-		rm -rf ${AIR_SOURCE}
-		cp -rf ${AIR_SOURCE_CI} ${AIR_SOURCE}
-		log_normal "[Build $AIR_SOURCE].. Done"
-	else
-		build_air
-	fi
 }
 
 build_spdlog(){
@@ -377,7 +365,7 @@ ci)
 	build_dpdk_ci
 	build_fio
 	build_gperf
-    build_air_ci
+    build_air
 	build_spdk
 	build_spdlog_ci
 	build_go
@@ -389,7 +377,7 @@ perf_ci)
 	build_dpdk_ci
 	build_fio
 	build_gperf
-	build_air_ci
+	build_air
 	build_spdk
 	build_spdlog_ci
 	build_go
