@@ -61,6 +61,7 @@ root_dir="../../"
 ibof_cli="${root_dir}bin/cli "
 network_config_file="${root_dir}test/system/network/network_config.sh"
 total_iter=3
+array_name="POSArray"
 #---------------------------------
 # internal configuration
 target_nvme=""
@@ -422,11 +423,11 @@ waiting_for_rebuild_complete()
 	notice "waiting for rebuild complete"
 	while :
 	do
-		state=$(${ibof_cli} system info --json | jq '.Response.info.state')
+		state=$(${ibof_cli} array info --name $array_name --json | jq '.Response.result.data.state')
 		if [ $state = "\"NORMAL\"" ]; then
 			break;
 		else
-            rebuild_progress=$(${ibof_cli} system info --json | jq '.Response.info.rebuildingProgress')
+            rebuild_progress=$(${ibof_cli} array info --name $array_name --json | jq '.Response.result.data.rebuildingProgress')
             info "Rebuilding Progress [${rebuild_progress}]"
 			sleep 3
 		fi
