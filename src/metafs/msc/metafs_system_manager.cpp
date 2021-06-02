@@ -54,7 +54,11 @@ MetaFsSystemManager::MetaFsSystemManager(std::string arrayName)
 
 MetaFsSystemManager::~MetaFsSystemManager(void)
 {
-    delete mbrMgr;
+    if (nullptr != mbrMgr)
+        delete mbrMgr;
+
+    if (nullptr != metaStorage)
+        delete metaStorage;
 }
 
 const char*
@@ -202,18 +206,34 @@ MetaFsSystemManager::_HandleInitializeRequest(MetaFsControlReqMsg& reqMsg)
 POS_EVENT_ID
 MetaFsSystemManager::_HandleCloseRequest(MetaFsControlReqMsg& reqMsg)
 {
-    mbrMgr->SetPowerStatus(true /*NPOR status*/);
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
 
-    if (true != mbrMgr->SaveContent())
-        return POS_EVENT_ID::MFS_META_SAVE_FAILED;
+    do
+    {
+        mbrMgr->SetPowerStatus(true /*NPOR status*/);
 
-    mbrMgr->InvalidMBR();
+        if (true != mbrMgr->SaveContent())
+        {
+            rc = POS_EVENT_ID::MFS_META_SAVE_FAILED;
+            break;
+        }
 
-    if (POS_EVENT_ID::SUCCESS != metaStorage->Close())
-        return POS_EVENT_ID::MFS_META_STORAGE_CLOSE_FAILED;
+        mbrMgr->InvalidMBR();
 
-    delete metaStorage;
+        rc = metaStorage->Close();
+        if (POS_EVENT_ID::SUCCESS != rc)
+        {
+            rc = POS_EVENT_ID::MFS_META_STORAGE_CLOSE_FAILED;
+            break;
+        }
+    } while (0);
 
-    return POS_EVENT_ID::SUCCESS;
+    if (nullptr != metaStorage)
+    {
+        delete metaStorage;
+        metaStorage = nullptr;
+    }
+
+    return rc;
 }
 } // namespace pos

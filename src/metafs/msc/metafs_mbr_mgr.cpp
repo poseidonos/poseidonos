@@ -70,6 +70,13 @@ MetaFsMBRManager::Init(MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnTy
 bool
 MetaFsMBRManager::IsValidMBRExist(void)
 {
+    if (nullptr == mbr)
+    {
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INVALID_MBR,
+                "Mbr is not initialized");
+        return false;
+    }
+
     return mbr->IsValidMBRExist();
 }
 
@@ -101,7 +108,12 @@ MetaFsMBRManager::GetEpochSignature(void)
 bool
 MetaFsMBRManager::SaveContent(void)
 {
-    assert(mbr != nullptr);
+    if (nullptr == mbr)
+    {
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INVALID_MBR,
+                "Mbr is not initialized");
+        return false;
+    }
 
     if (true != mbr->Store())
     {
@@ -170,12 +182,26 @@ MetaFsMBRManager::GetAllStoragePartitionInfo(void)
 void
 MetaFsMBRManager::SetPowerStatus(bool isShutDownOff)
 {
+    if (nullptr == mbr)
+    {
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INVALID_MBR,
+                "Mbr is not initialized");
+        return;
+    }
+
     mbr->SetPORStatus(isShutDownOff);
 }
 
 bool
 MetaFsMBRManager::GetPowerStatus(void)
 {
+    if (nullptr == mbr)
+    {
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INVALID_MBR,
+                "Mbr is not initialized");
+        return false;
+    }
+
     return mbr->GetPORStatus();
 }
 
