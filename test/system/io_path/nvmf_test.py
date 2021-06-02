@@ -93,9 +93,9 @@ def subsystem_namespace_mapping_test(trtype, traddr, subsystem_cnt, volume_cnt):
     common_test_lib.bringup_multiple_volume(**bringup_argument)
 
     map = nvmf.get_subsystem_ns_map()
-    ret = nvmf.check_subsystem_ns_mapping(map, "subsystem1", "bdev3")
+    ret = nvmf.check_subsystem_ns_mapping(map, "subsystem1", "bdev_3")
     success = (ret == True)
-    ret = nvmf.check_subsystem_ns_mapping(map, "subsystem3", "bdev3")
+    ret = nvmf.check_subsystem_ns_mapping(map, "subsystem3", "bdev_3")
     success &= (ret == False)
 
     common_test_lib.terminate_pos(ibof_root, stdout_type)
