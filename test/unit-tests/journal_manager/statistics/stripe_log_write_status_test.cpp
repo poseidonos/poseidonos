@@ -190,6 +190,50 @@ TEST(StripeLogWriteStatus, StripeLogFound_testIfStatusUpdatedWhenBlockLogsAndStr
 
 TEST(StripeLogWriteStatus, GcBlockLogFound_testIfStatusUpdatedWhenGcBlocksAndGcStripeFound)
 {
+    // Given
+    int volId = 5;
+    StripeId vsid = 100U;
+    StripeId wbLsid = 1U;
+    StripeId userLsid = 100U;
+    int numBlockMaps = 10;
+    BlkAddr startRba = 200;
+
+    StripeAddr userAddr = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = vsid};
+
+    GcBlockMapUpdate gcBlockLog[numBlockMaps];
+    for (uint64_t offset = 0; offset < numBlockMaps; offset++)
+    {
+        gcBlockLog[offset].rba = startRba + offset;
+        gcBlockLog[offset].vsa = {
+            .stripeId = vsid,
+            .offset = offset};
+    }
+
+    GcStripeFlushedLog gcStripeLog;
+    gcStripeLog.volId = volId;
+    gcStripeLog.vsid = vsid;
+    gcStripeLog.wbLsid = wbLsid;
+    gcStripeLog.userLsid = userLsid;
+    gcStripeLog.numBlockMaps = numBlockMaps;
+
+    StripeLogWriteStatus status(vsid);
+
+    // When
+    status.GcBlockLogFound(gcBlockLog, numBlockMaps);
+    status.GcStripeLogFound(gcStripeLog);
+
+    // Then
+    EXPECT_EQ(status.IsFlushed(), true);
+    EXPECT_EQ(status.GetUserLsid(), vsid);
+    EXPECT_EQ(status.GetFinalStripeAddr(), userAddr);
+
+    BlkOffset startOffset = 0;
+    EXPECT_EQ(status.GetBlockOffsetRange(), std::make_pair(startOffset, startOffset + numBlockMaps - 1));
+    EXPECT_EQ(status.GetRbaRange(), std::make_pair(startRba, startRba + numBlockMaps - 1));
+    EXPECT_EQ(status.GetNumFoundBlocks(), numBlockMaps);
+    EXPECT_EQ(status.GetVolumeId(), volId);
 }
 
 } // namespace pos

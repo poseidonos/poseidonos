@@ -136,11 +136,6 @@ StripeLogWriteStatus::GcBlockLogFound(GcBlockMapUpdate* mapUpdate, uint32_t numB
 
     numFoundBlockMaps += numBlks;
 
-    if (numBlks == 0)
-    {
-        return;
-    }
-
     for (uint32_t count = 0; count < numBlks; count++)
     {
         _UpdateOffset(mapUpdate[count].vsa.offset, 1);
