@@ -44,7 +44,6 @@ public:
     MetaFsIoMultiQ(void);
     ~MetaFsIoMultiQ(void);
 
-    void Init(void);
     void Clear(void);
     bool IsEmpty(int coreId);
 

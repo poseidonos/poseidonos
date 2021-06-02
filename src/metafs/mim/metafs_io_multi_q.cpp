@@ -49,11 +49,6 @@ MetaFsIoMultiQ::~MetaFsIoMultiQ(void)
 }
 
 void
-MetaFsIoMultiQ::Init(void)
-{
-}
-
-void
 MetaFsIoMultiQ::Clear(void)
 {
     for (uint32_t index = 0; index < MetaFsConfig::DEFAULT_MAX_CORE_COUNT; index++)

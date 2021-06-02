@@ -47,8 +47,6 @@ MetaFsIoScheduler::MetaFsIoScheduler(int threadId, int coreId, int coreCount)
 {
     currentCoreId = 0;
     maxCoreCount = MetaFsConfig::DEFAULT_MAX_CORE_COUNT;
-
-    ioMultiQ.Init();
 }
 
 MetaFsIoScheduler::~MetaFsIoScheduler(void)
