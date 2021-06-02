@@ -82,7 +82,7 @@ def check_request_volume_mounted(result):
     output = result.splitlines()
     cnt = 0
     for line in output:
-        name = "\"bdev_name\": \"bdev" + str(cnt)
+        name = "\"bdev_name\": \"bdev_" + str(cnt)
         if name in line:
             cnt += 1
     if cnt is not int(args.volume_count):
