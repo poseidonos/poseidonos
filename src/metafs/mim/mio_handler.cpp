@@ -53,7 +53,7 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount)
 : cpuStallCnt(0)
 {
     std::string cqName("IoCQ-" + std::to_string(coreId));
-    ioCQ.Init(cqName.c_str(), MAX_CONCURRENT_MIO_PROC_THRESHOLD);
+    ioCQ->Init(cqName.c_str(), MAX_CONCURRENT_MIO_PROC_THRESHOLD);
 
     mpioPool = new MpioPool(MAX_CONCURRENT_MIO_PROC_THRESHOLD);
     mioPool = new MioPool(mpioPool, MAX_CONCURRENT_MIO_PROC_THRESHOLD);
@@ -68,14 +68,26 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount)
     checkerBitmap = new BitMap(MetaFsConfig::MAX_ARRAY_CNT);
     checkerBitmap->ResetBitmap();
     checkerMap.clear();
+}
 
-    for (uint32_t index = 0; index < MetaFsConfig::MAX_ARRAY_CNT; index++)
-    {
-        for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
-        {
-            ioRangeOverlapChker[index][storage] = nullptr;
-        }
-    }
+MioHandler::MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* ioSQ,
+        MetaFsIoQ<Mio*>* ioCQ, MpioPool* mpioPool, MioPool* mioPool)
+: ioSQ(ioSQ),
+  ioCQ(ioCQ),
+  mioPool(mioPool),
+  mpioPool(mpioPool),
+  cpuStallCnt(0)
+{
+    std::string cqName("IoCQ-" + std::to_string(coreId));
+    ioCQ->Init(cqName.c_str(), MAX_CONCURRENT_MIO_PROC_THRESHOLD);
+
+    mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
+
+    this->bottomhalfHandler = nullptr;
+
+    checkerBitmap = new BitMap(MetaFsConfig::MAX_ARRAY_CNT);
+    checkerBitmap->ResetBitmap();
+    checkerMap.clear();
 }
 
 MioHandler::~MioHandler(void)
@@ -119,7 +131,7 @@ MioHandler::_HandleIoSQ(void)
         return;
     }
 
-    MetaFsIoRequest* reqMsg = ioSQ.Dequeue();
+    MetaFsIoRequest* reqMsg = ioSQ->Dequeue();
     if (nullptr == reqMsg)
     {
         if (cpuStallCnt++ > 1000)
@@ -155,7 +167,7 @@ MioHandler::_HandleIoSQ(void)
 void
 MioHandler::_HandleIoCQ(void)
 {
-    Mio* mio = ioCQ.Dequeue();
+    Mio* mio = ioCQ->Dequeue();
     if (mio)
     {
         while (mio->IsCompleted() != true)
@@ -273,7 +285,7 @@ MioHandler::TophalfMioProcessing(void)
 bool
 MioHandler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
-    if (false == ioSQ.Enqueue(reqMsg))
+    if (false == ioSQ->Enqueue(reqMsg))
     {
         return false;
     }
@@ -305,7 +317,7 @@ MioHandler::_AllocNewMio(MetaFsIoRequest& reqMsg)
 
     mio->SetMpioDoneNotifier(partialMpioDoneNotifier);
     mio->SetMpioDonePoller(mpioDonePoller);
-    mio->SetIoCQ(&ioCQ);
+    mio->SetIoCQ(ioCQ);
 
     reqMsg.targetMediaType = reqMsg.fileCtx->storageType;
 

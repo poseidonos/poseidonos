@@ -1,87 +1,152 @@
 #include "src/metafs/mim/mio_handler.h"
-
+#include "src/metafs/mim/mpio_handler.h"
+#include "test/unit-tests/metafs/mim/metafs_io_q_mock.h"
+#include "test/unit-tests/metafs/mim/mio_pool_mock.h"
+#include "test/unit-tests/metafs/mim/mpio_pool_mock.h"
+#include "test/unit-tests/metafs/mim/mpio_handler_mock.h"
+#include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
+#include "test/unit-tests/metafs/include/metafs_mock.h"
+#include "test/unit-tests/metafs/mai/metafs_file_control_api_mock.h"
+#include "test/unit-tests/metafs/mai/metafs_io_api_mock.h"
+#include "test/unit-tests/metafs/mai/metafs_management_api_mock.h"
+#include "test/unit-tests/metafs/mai/metafs_wbt_api_mock.h"
 #include <gtest/gtest.h>
+
+using ::testing::_;
+using ::testing::DoAll;
+using ::testing::InSequence;
+using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos
 {
-TEST(MioHandler, MioHandler_)
+class MioHandlerTestFixture : public ::testing::Test
 {
+public:
+    MioHandlerTestFixture(void)
+    : ioSQ(nullptr),
+      ioCQ(nullptr),
+      doneQ(nullptr),
+      bottomhalfHandler(nullptr),
+      mioPool(nullptr),
+      mpioPool(nullptr),
+      arrayInfo(nullptr),
+      mgmt(nullptr),
+      ctrl(nullptr),
+      wbt(nullptr),
+      io(nullptr),
+      metaFs(nullptr)
+    {
+    }
+
+    virtual ~MioHandlerTestFixture()
+    {
+    }
+
+    virtual void
+    SetUp(void)
+    {
+        const uint32_t POOL_SIZE = 1024;
+
+        ioSQ = new NiceMock<MockMetaFsIoQ<MetaFsIoRequest*>>;
+        ioCQ = new NiceMock<MockMetaFsIoQ<Mio*>>;
+        doneQ = new MockMetaFsIoQ<Mpio*>();
+        bottomhalfHandler = new NiceMock<MockMpioHandler>(0, 0, doneQ);
+        mpioPool = new NiceMock<MockMpioPool>(POOL_SIZE);
+        mioPool = new NiceMock<MockMioPool>(mpioPool, POOL_SIZE);
+        arrayInfo = new MockIArrayInfo();
+        EXPECT_CALL(*arrayInfo, GetName).WillRepeatedly(Return("TESTARRAY"));
+
+        mgmt = new MockMetaFsManagementApi(arrayInfo->GetName());
+        ctrl = new MockMetaFsFileControlApi();
+        wbt = new MockMetaFsWBTApi(arrayInfo->GetName(), ctrl);
+        io = new MockMetaFsIoApi(arrayInfo->GetName(), ctrl);
+        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt);
+
+        handler = new MioHandler(0, 0, ioSQ, ioCQ, mpioPool, mioPool);
+    }
+
+    virtual void
+    TearDown(void)
+    {
+        delete handler;
+        delete metaFs;
+        delete arrayInfo;
+        delete bottomhalfHandler;
+        delete doneQ;
+        delete ioCQ;
+        delete ioSQ;
+    }
+
+protected:
+    MioHandler* handler;
+
+    NiceMock<MockMetaFsIoQ<MetaFsIoRequest*>>* ioSQ;
+    NiceMock<MockMetaFsIoQ<Mio*>>* ioCQ;
+    MockMetaFsIoQ<Mpio*>* doneQ;
+    NiceMock<MockMpioHandler>* bottomhalfHandler;
+    NiceMock<MockMioPool>* mioPool;
+    NiceMock<MockMpioPool>* mpioPool;
+
+    MockIArrayInfo* arrayInfo;
+    MockMetaFsManagementApi* mgmt;
+    MockMetaFsFileControlApi* ctrl;
+    MockMetaFsWBTApi* wbt;
+    MockMetaFsIoApi* io;
+
+    MockMetaFs* metaFs;
+};
+
+TEST_F(MioHandlerTestFixture, Normal)
+{
+    const int MAX_COUNT = 200;
+
+    bool result = false;
+
+    EXPECT_CALL(*ioSQ, Enqueue).WillRepeatedly(Return(true));
+    EXPECT_CALL(*doneQ, Init);
+    EXPECT_CALL(*ctrl, GetMaxMetaLpn).WillRepeatedly(Return(100));
+
+    handler->BindPartialMpioHandler(bottomhalfHandler);
+    result = handler->AddArrayInfo(arrayInfo->GetName());
+    EXPECT_TRUE(result);
+
+    MockMetaFsIoRequest* msg = new MockMetaFsIoRequest();
+
+    for (int i = 0; i < MAX_COUNT; i++)
+    {
+        result = handler->EnqueueNewReq(msg);
+        EXPECT_TRUE(result);
+    }
+
+    for (int i = 0; i < MAX_COUNT; i++)
+    {
+        handler->TophalfMioProcessing();
+    }
+
+    result = handler->RemoveArrayInfo(arrayInfo->GetName());
+    EXPECT_TRUE(result);
+
+    delete msg;
 }
 
-TEST(MioHandler, TophalfMioProcessing_)
+TEST_F(MioHandlerTestFixture, Repeat_AddAndRemoveArray)
 {
-}
+    const int MAX_COUNT = 200;
+    bool result = false;
 
-TEST(MioHandler, BindPartialMpioHandler_)
-{
-}
+    EXPECT_CALL(*arrayInfo, GetName).WillRepeatedly(Return("TESTARRAY"));
+    EXPECT_CALL(*ctrl, GetMaxMetaLpn).WillRepeatedly(Return(100));
 
-TEST(MioHandler, EnqueueNewReq_)
-{
-}
+    result = handler->AddArrayInfo(arrayInfo->GetName());
+    EXPECT_TRUE(result);
 
-TEST(MioHandler, DispatchMio_)
-{
-}
+    result = handler->RemoveArrayInfo(arrayInfo->GetName());
+    EXPECT_TRUE(result);
 
-TEST(MioHandler, ExecuteMio_)
-{
-}
-
-TEST(MioHandler, _HandleIoSQ_)
-{
-}
-
-TEST(MioHandler, _PushToRetry_)
-{
-}
-
-TEST(MioHandler, _HandleIoCQ_)
-{
-}
-
-TEST(MioHandler, _AllocNewMio_)
-{
-}
-
-TEST(MioHandler, _FinalizeMio_)
-{
-}
-
-TEST(MioHandler, _HandleMioCompletion_)
-{
-}
-
-TEST(MioHandler, _SendAioDoneEvent_)
-{
-}
-
-TEST(MioHandler, _IsRangeOverlapConflicted_)
-{
-}
-
-TEST(MioHandler, _RegisterRangeLockInfo_)
-{
-}
-
-TEST(MioHandler, _FreeLockContext_)
-{
-}
-
-TEST(MioHandler, _HandleRetryQDeferred_)
-{
-}
-
-TEST(MioHandler, _DiscoverIORangeOverlap_)
-{
-}
-
-TEST(MioHandler, _IsPendedRange_)
-{
-}
-
-TEST(MioHandler, _ExecutePendedIo_)
-{
+    result = handler->RemoveArrayInfo(arrayInfo->GetName());
+    EXPECT_FALSE(result);
 }
 
 } // namespace pos

@@ -56,6 +56,25 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
     MetaFsServiceSingleton::Instance()->Register(arrayName, this);
 }
 
+MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
+        MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt)
+: isNpor(false),
+  isLoaded(isLoaded),
+  isNormal(false),
+  arrayInfo(arrayInfo),
+  arrayName(""),
+  metaStorage(nullptr)
+{
+    arrayName = arrayInfo->GetName();
+
+    this->mgmt = mgmt;
+    this->ctrl = ctrl;
+    this->io = io;
+    this->wbt = wbt;
+
+    MetaFsServiceSingleton::Instance()->Register(arrayName, this);
+}
+
 MetaFs::~MetaFs(void)
 {
     MetaFsServiceSingleton::Instance()->Deregister(arrayName);

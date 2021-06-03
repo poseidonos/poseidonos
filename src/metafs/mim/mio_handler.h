@@ -48,7 +48,10 @@ namespace pos
 class MioHandler
 {
 public:
-    explicit MioHandler(int threadId, int coreId, int coreCount);
+    MioHandler(int threadId, int coreId, int coreCount);
+    // for test
+    MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* ioSQ,
+        MetaFsIoQ<Mio*>* ioCQ, MpioPool* mpioPool, MioPool* mioPool);
     ~MioHandler(void);
 
     void TophalfMioProcessing(void);
@@ -77,8 +80,8 @@ private:
     bool _IsPendedRange(MetaFsIoRequest* reqMsg);
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
 
-    MetaFsIoQ<MetaFsIoRequest*> ioSQ;
-    MetaFsIoQ<Mio*> ioCQ;
+    MetaFsIoQ<MetaFsIoRequest*>* ioSQ;
+    MetaFsIoQ<Mio*>* ioCQ;
 
     MpioHandler* bottomhalfHandler;
     MioPool* mioPool;
@@ -93,7 +96,7 @@ private:
 
     BitMap* checkerBitmap;
     std::unordered_map<std::string, uint32_t> checkerMap;
-    MetaFsIoRangeOverlapChker* ioRangeOverlapChker[MetaFsConfig::MAX_ARRAY_CNT][NUM_STORAGE];
+    MetaFsIoRangeOverlapChker* ioRangeOverlapChker[MetaFsConfig::MAX_ARRAY_CNT][NUM_STORAGE] = { 0 };
 
     static const uint32_t MAX_CONCURRENT_MIO_PROC_THRESHOLD = MetaFsConfig::MAX_CONCURRENT_IO_CNT;
 };

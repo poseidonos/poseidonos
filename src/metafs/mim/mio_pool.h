@@ -44,11 +44,11 @@ class MioPool
 {
 public:
     explicit MioPool(MpioPool* mpioPool, uint32_t poolSize);
-    ~MioPool(void);
+    virtual ~MioPool(void);
 
-    Mio* Alloc(void);
-    void Release(Mio* mio);
-    bool IsEmpty(void);
+    virtual Mio* Alloc(void);
+    virtual void Release(Mio* mio);
+    virtual bool IsEmpty(void);
 
 private:
     void _FreeAllMioinPool(void);

@@ -50,6 +50,8 @@ class MetaFs : public IMountSequence
 {
 public:
     MetaFs(IArrayInfo* arrayInfo, bool isLoaded);
+    MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
+            MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt);
     virtual ~MetaFs(void);
 
     virtual int Init(void) override;
