@@ -62,7 +62,7 @@ $ sudo service nginx reload
 Upon RUNIBOFOS http call, m9k executes `~/m9k/dagent/script/run_os.sh` to start up POS. The bash command has a hard-coded path to the application binary, which is` /root/workspace/ibofos` by default. You could replace `root_dir` variable with the actual path if it differs from the default value.  
 
 ## Integrating with External Application
-POS management tool provides REST APIs to help workflow automation. The whole set of the APIs is documented at [REST API](http://globalwiki.itplatform.sec.samsung.net:8099/display/ibof/REST+API) with sample inputs/outputs captured at the following:
+POS management tool provides REST APIs to help workflow automation. The whole set of the APIs is documented at [REST API](https://github.com/poseidonos/poseidonos/tree/main/doc/guides/rest_api) with sample inputs/outputs captured at the following:
 
 - ```$IBOF_MGMT_HOME/m9k/dagent/postman/D-Agent.postman_collection.json```
 - ```$IBOF_MGMT_HOME/m9k/dagent/postman/D-Agent.postman_environment.json```
