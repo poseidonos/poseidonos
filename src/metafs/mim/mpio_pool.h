@@ -47,16 +47,16 @@ class MpioPool
 {
 public:
     explicit MpioPool(uint32_t poolSize);
-    ~MpioPool(void);
+    virtual ~MpioPool(void);
 
     Mpio* Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn, bool partialIO, std::string arrayName);
-    void Release(Mpio* mpio);
-    size_t GetPoolSize(void);
+    virtual void Release(Mpio* mpio);
+    virtual size_t GetPoolSize(void);
 
     bool IsEmpty(MpioType type);
 
 #if MPIO_CACHE_EN
-    void ReleaseCache(void);
+    virtual void ReleaseCache(void);
 #endif
 
 private:

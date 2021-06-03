@@ -12,6 +12,9 @@ class MockMpioPool : public MpioPool
 {
 public:
     using MpioPool::MpioPool;
+    MOCK_METHOD(size_t, GetPoolSize, (), (override));
+    MOCK_METHOD(void, Release, (Mpio* mpio), (override));
+    MOCK_METHOD(void, ReleaseCache, (), (override));
 };
 
 } // namespace pos

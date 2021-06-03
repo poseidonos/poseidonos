@@ -45,11 +45,11 @@ public:
     virtual ~MetaAsyncRunnable(void);
     virtual void InitStateHandler(void) = 0;
 
-    void Init(void);
-    void RegisterStateHandler(AsyncStateT state, AsyncStateExecutionEntry* entry);
-    void ExecuteAsyncState(void* cxt = nullptr);
-    void InvokeClientCallback(void);
-    void SetAsyncCbCxt(CallbackCxtT* cxt, bool deleteRequired = true);
+    virtual void Init(void);
+    virtual void RegisterStateHandler(AsyncStateT state, AsyncStateExecutionEntry* entry);
+    virtual void ExecuteAsyncState(void* cxt = nullptr);
+    virtual void InvokeClientCallback(void);
+    virtual void SetAsyncCbCxt(CallbackCxtT* cxt, bool deleteRequired = true);
     CallbackCxtT* GetAsycCbCxt(void);
     AsyncStateT GetPrevState(void);
     AsyncStateT GetCurrState(void);

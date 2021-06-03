@@ -12,8 +12,13 @@ template<typename CallbackCxtT, typename AsyncStateExecutionEntry, typename Asyn
 class MockMetaAsyncRunnable : public MetaAsyncRunnable<CallbackCxtT, AsyncStateExecutionEntry, AsyncStateT>
 {
 public:
-    using MetaAsyncRunnable::MetaAsyncRunnable;
+    using MetaAsyncRunnable<CallbackCxtT, AsyncStateExecutionEntry, AsyncStateT>::MetaAsyncRunnable;
     MOCK_METHOD(void, InitStateHandler, (), (override));
+    MOCK_METHOD(void, Init, (), (override));
+    MOCK_METHOD(void, RegisterStateHandler, (AsyncStateT state, AsyncStateExecutionEntry* entry), (override));
+    MOCK_METHOD(void, ExecuteAsyncState, (void* cxt = nullptr), (override));
+    MOCK_METHOD(void, InvokeClientCallback, (), (override));
+    MOCK_METHOD(void, SetAsyncCbCxt, (CallbackCxtT* cxt, bool deleteRequired = true), (override));
 };
 
 } // namespace pos

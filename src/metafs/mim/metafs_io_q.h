@@ -54,17 +54,17 @@ class MetaFsIoQ
 public:
     MetaFsIoQ(void);
     explicit MetaFsIoQ(uint32_t weight);
-    ~MetaFsIoQ(void);
+    virtual ~MetaFsIoQ(void);
 
-    void Init(const char* qName, uint32_t numEntries);
-    bool IsAllQEmpty(void);
-    bool IsEmpty(void);
-    uint32_t GetItemCnt(void);
-    void SetWeightFactor(uint32_t weight);
-    uint32_t GetWeightFactor(void);
-    bool Enqueue(T obj);
-    T Dequeue(void);
-    void CleanQEntry(void);
+    virtual void Init(const char* qName, uint32_t numEntries);
+    virtual bool IsAllQEmpty(void);
+    virtual bool IsEmpty(void);
+    virtual uint32_t GetItemCnt(void);
+    virtual void SetWeightFactor(uint32_t weight);
+    virtual uint32_t GetWeightFactor(void);
+    virtual bool Enqueue(T obj);
+    virtual T Dequeue(void);
+    virtual void CleanQEntry(void);
 
 private:
 #if (1 == RTE_LOCKLESS_Q)

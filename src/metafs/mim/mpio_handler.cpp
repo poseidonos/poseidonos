@@ -36,24 +36,28 @@
 
 namespace pos
 {
-MpioHandler::MpioHandler(int threadId, int coreId)
-: mpioPool(nullptr),
+MpioHandler::MpioHandler(int threadId, int coreId, MetaFsIoQ<Mpio*>* doneQ)
+: partialMpioDoneQ(doneQ),
+  mpioPool(nullptr),
   coreId(coreId)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "threadId={}, coreId={}",
-        threadId, coreId);
+        "threadId={}, coreId={}", threadId, coreId);
+
+    if (nullptr == doneQ)
+        partialMpioDoneQ = new MetaFsIoQ<Mpio*>();
 }
 
 MpioHandler::~MpioHandler(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE, "MpioHandler is desctructed");
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "MpioHandler is desctructed");
 }
 
 void
 MpioHandler::EnqueuePartialMpio(Mpio* mpio)
 {
-    partialMpioDoneQ.Enqueue(mpio);
+    partialMpioDoneQ->Enqueue(mpio);
 }
 
 void
@@ -65,23 +69,17 @@ MpioHandler::BindMpioPool(MpioPool* mpioPool)
     _InitPartialMpioDoneQ(mpioPool->GetPoolSize());
 }
 
-MetaFsIoQ<Mpio*>*
-MpioHandler::GetPartialMpioDoneQ(void)
-{
-    return &partialMpioDoneQ;
-}
-
 void
 MpioHandler::_InitPartialMpioDoneQ(size_t mpioDoneQSize)
 {
     std::string partialqName("PartialMpioDQ = " + std::to_string(coreId));
-    partialMpioDoneQ.Init(partialqName.c_str(), mpioDoneQSize);
+    partialMpioDoneQ->Init(partialqName.c_str(), mpioDoneQSize);
 }
 
 void
 MpioHandler::BottomhalfMioProcessing(void)
 {
-    Mpio* mpio = partialMpioDoneQ.Dequeue();
+    Mpio* mpio = partialMpioDoneQ->Dequeue();
     if (mpio)
     {
         mpio->ExecuteAsyncState();

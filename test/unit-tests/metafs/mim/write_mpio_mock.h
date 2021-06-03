@@ -14,6 +14,7 @@ public:
     using WriteMpio::WriteMpio;
     MOCK_METHOD(MpioType, GetType, (), (override));
     MOCK_METHOD(void, InitStateHandler, (), (override));
+    MOCK_METHOD(void, ExecuteAsyncState, (void* cxt), (override));
 };
 
 } // namespace pos

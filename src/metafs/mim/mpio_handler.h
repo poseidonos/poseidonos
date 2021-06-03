@@ -41,7 +41,8 @@ namespace pos
 class MpioHandler
 {
 public:
-    explicit MpioHandler(int threadId, int coreId);
+    explicit MpioHandler(int threadId, int coreId,
+                    MetaFsIoQ<Mpio*>* doneQ = nullptr);
     ~MpioHandler(void);
 
     void EnqueuePartialMpio(Mpio* mpio);
@@ -49,10 +50,9 @@ public:
     void BottomhalfMioProcessing(void);
 
 private:
-    MetaFsIoQ<Mpio*>* GetPartialMpioDoneQ(void);
     void _InitPartialMpioDoneQ(size_t mpioDoneQSize);
 
-    MetaFsIoQ<Mpio*> partialMpioDoneQ;
+    MetaFsIoQ<Mpio*>* partialMpioDoneQ;
     MpioPool* mpioPool;
     int coreId;
 };
