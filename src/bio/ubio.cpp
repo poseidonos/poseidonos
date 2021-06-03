@@ -401,7 +401,7 @@ Ubio::NeedRecovery(void) // TODO: will be moved. AWIBOF-2751
         return true;
     }
 
-    if(dir == UbioDir::Write
+    if (dir == UbioDir::Write
         && devState == ArrayDeviceState::FAULT)
     {
         return true;
