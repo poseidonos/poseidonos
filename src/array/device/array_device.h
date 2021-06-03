@@ -52,11 +52,7 @@ public:
     UBlockDevice* GetUblockPtr(void) override;
     void SetUblock(UblockSharedPtr uBlock) override;
 
-    bool IsRebuilding(void) override;
-    void SetRebuild(bool rebuild) override;
-
 private:
-    std::atomic<bool> rebuild;
     UblockSharedPtr uBlock;
     ArrayDeviceState state;
 };

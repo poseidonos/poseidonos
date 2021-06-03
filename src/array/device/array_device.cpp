@@ -44,15 +44,10 @@ namespace pos
 {
 ArrayDevice::ArrayDevice(UblockSharedPtr uBlock,
     ArrayDeviceState state)
-: rebuild(false),
+: uBlock(uBlock),
   state(state)
 {
-    this->uBlock = uBlock;
-    if (state == ArrayDeviceState::REBUILD)
-    {
-        SetRebuild(true);
-    }
-};
+}
 
 ArrayDevice::~ArrayDevice(void)
 {
@@ -87,16 +82,6 @@ void
 ArrayDevice::SetState(ArrayDeviceState input)
 {
     state = input;
-}
-
-bool ArrayDevice::IsRebuilding(void)
-{
-    return rebuild;
-}
-
-void ArrayDevice::SetRebuild(bool rebuild)
-{
-    this->rebuild = rebuild;
 }
 
 } // namespace pos
