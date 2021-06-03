@@ -993,11 +993,9 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotRetryRebuildDueToReplac
     EXPECT_CALL(*mockArrDev, GetState).WillOnce(Return(ArrayDeviceState::FAULT));
     EXPECT_CALL(*mockArrDev, GetUblock).WillOnce(Return(nullptr));
     EXPECT_CALL(*mockState, SetRebuild).WillOnce(Return(true));
-    EXPECT_CALL(*mockArrDev, SetRebuild(true)).Times(1);
     EXPECT_CALL(*mockArrDevMgr, ReplaceWithSpare).WillOnce(Return(REPLACE_FAILURE));
     EXPECT_CALL(*mockState, SetRebuildDone(false)).Times(1);
     EXPECT_CALL(*mockState, SetDegraded).Times(1);
-    EXPECT_CALL(*mockArrDev, SetRebuild(false)).Times(1);
 
     Array array("mock-array", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL);
 
@@ -1025,7 +1023,6 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotNeedToRetryAfterTrigger
     EXPECT_CALL(*mockArrDev, GetState).WillOnce(Return(ArrayDeviceState::FAULT));
     EXPECT_CALL(*mockArrDev, GetUblock).WillOnce(Return(nullptr));
     EXPECT_CALL(*mockState, SetRebuild).WillOnce(Return(true));
-    EXPECT_CALL(*mockArrDev, SetRebuild(true)).Times(1);
     EXPECT_CALL(*mockArrDevMgr, ReplaceWithSpare).WillOnce(Return(REPLACE_SUCCESS));
     EXPECT_CALL(*mockArrDev, SetState(ArrayDeviceState::REBUILD)).Times(1);
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));

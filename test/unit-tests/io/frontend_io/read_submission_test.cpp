@@ -107,7 +107,10 @@ TEST(ReadSubmission, Execute_SingleBlock)
     IODispatcher::RegisterRecoveryEventFactory(new IoRecoveryEventFactory());
 
     ON_CALL(*mockBlockAlignment, GetBlockCount()).WillByDefault(Return(1));
-    NiceMock<MockIArrayDevice> mockIArrayDevice;
+    MockIArrayDevice mockIArrayDevice;
+    NiceMock<MockDeviceDriver> mockDeviceDriver;
+    UblockSharedPtr mockUblock = std::make_shared<NiceMock<MockUBlockDevice>>("test", 4096, &mockDeviceDriver);
+    ON_CALL(mockIArrayDevice, GetUblock).WillByDefault(Return(mockUblock));
     PhysicalBlkAddr physicalBlkAddr{0, &mockIArrayDevice};
     ON_CALL(*mockTranslator, GetPba()).WillByDefault(Return(physicalBlkAddr));
     EXPECT_CALL(*mockTranslator, GetPba()).Times(1);

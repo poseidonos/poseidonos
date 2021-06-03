@@ -17,8 +17,6 @@ public:
     MOCK_METHOD(UblockSharedPtr, GetUblock, (), (override));
     MOCK_METHOD(UBlockDevice*, GetUblockPtr, (), (override));
     MOCK_METHOD(void, SetUblock, (UblockSharedPtr uBlock), (override));
-    MOCK_METHOD(bool, IsRebuilding, (), (override));
-    MOCK_METHOD(void, SetRebuild, (bool rebuild), (override));
 };
 
 } // namespace pos
