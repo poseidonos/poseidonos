@@ -32,6 +32,7 @@
 
 #include "src/io/frontend_io/aio.h"
 
+#include <string.h>
 #include <unistd.h>
 
 #include <memory>
@@ -281,11 +282,16 @@ AIO::SubmitAsyncIO(pos_io& posIo)
         = VolumeServiceSingleton::Instance()->GetVolumeManager(volumeIo->GetArrayName());
 
     uint32_t core = volumeIo->GetOriginCore();
+    uint32_t volume_id = posIo.volume_id;
+    if (0 != strncmp("POSArray", posIo.arrayName, 9))
+    {
+        volume_id += 0x100;
+    }
     switch (volumeIo->dir)
     {
         case UbioDir::Write:
         {
-            airlog("PERF_VOLUME", "AIR_WRITE", posIo.volume_id, posIo.length);
+            airlog("PERF_ARR_VOL", "AIR_WRITE", volume_id, posIo.length);
             if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volumeIo->GetVolumeId())))
             {
                 IoCompleter ioCompleter(volumeIo);
@@ -300,7 +306,7 @@ AIO::SubmitAsyncIO(pos_io& posIo)
         }
         case UbioDir::Read:
         {
-            airlog("PERF_VOLUME", "AIR_READ", posIo.volume_id, posIo.length);
+            airlog("PERF_ARR_VOL", "AIR_READ", volume_id, posIo.length);
             if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volumeIo->GetVolumeId())))
             {
                 IoCompleter ioCompleter(volumeIo);
