@@ -12,7 +12,7 @@ POS offers REST APIs to be on a par with CLI commands to ease integration effort
 ## Request Body
 All API has common request scheme except GET method.
 
-REST Request schema
+### REST request schema
 ```
 {
   "param":{
@@ -30,6 +30,8 @@ REST Request schema
 
 ## Response Body
 All API has common response scheme.
+
+### REST response schema
 ```
 {
    "result":{
