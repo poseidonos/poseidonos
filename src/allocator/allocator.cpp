@@ -397,10 +397,10 @@ Allocator::GetInstantMetaInfo(std::string fname)
 
     oss << "<< Rebuild >>" << std::endl;
     oss << "NeedRebuildCont:" << std::boolalpha << contextManager->NeedRebuildAgain() << std::endl;
-    oss << "TargetSegmentCount:" << rebuildCtx->GetTargetSegmentCnt() << std::endl;
+    oss << "TargetSegmentCount:" << rebuildCtx->GetRebuildTargetSegmentsCount() << std::endl;
     oss << "TargetSegnent ID" << std::endl;
     int cnt = 0;
-    for (RTSegmentIter iter = rebuildCtx->RebuildTargetSegmentsBegin(); iter != rebuildCtx->RebuildTargetSegmentsEnd(); ++iter, ++cnt)
+    for (RTSegmentIter iter = rebuildCtx->GetRebuildTargetSegmentsBegin(); iter != rebuildCtx->GetRebuildTargetSegmentsEnd(); ++iter, ++cnt)
     {
         if (cnt > 0 && (cnt % 16 == 0))
         {

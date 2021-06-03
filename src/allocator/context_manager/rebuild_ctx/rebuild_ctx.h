@@ -38,51 +38,55 @@
 
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
+#include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/include/allocator_const.h"
-#include "src/meta_file_intf/meta_file_intf.h"
 
 namespace pos
 {
-class RebuildCtx
+class RebuildCtx : public IAllocatorFileIoClient
 {
 public:
-    RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx);
+    RebuildCtx(void) = default;
+    RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, std::string arrayName); // for UT
+    RebuildCtx(AllocatorCtx* allocCtx, AllocatorAddressInfo* info, std::string arrayName);
     virtual ~RebuildCtx(void);
-    virtual void Init(AllocatorAddressInfo* info);
+    virtual void Init(void);
     virtual void Close(void);
+
+    virtual void AfterLoad(char* buf);
+    virtual void BeforeFlush(int section, char* buf);
+    virtual void FinalizeIo(AsyncMetaFileIoCtx* ctx);
+    virtual char* GetSectionAddr(int section);
+    virtual int GetSectionSize(int section);
+    virtual uint64_t GetStoredVersion(void);
+    virtual void ResetDirtyVersion(void);
 
     virtual SegmentId GetRebuildTargetSegment(void);
     virtual int ReleaseRebuildSegment(SegmentId segmentId);
     virtual bool NeedRebuildAgain(void);
-    void FreeSegmentInRebuildTarget(SegmentId segId);
-
+    virtual int FreeSegmentInRebuildTarget(SegmentId segId);
+    virtual bool IsRebuidTargetSegmentsEmpty(void);
     virtual bool IsRebuildTargetSegment(SegmentId segId);
-    bool IsRebuidTargetSegmentsEmpty(void);
-    RTSegmentIter FindRebuildTargetSegment(SegmentId segmentId);
-    RTSegmentIter RebuildTargetSegmentsBegin(void);
-    RTSegmentIter RebuildTargetSegmentsEnd(void);
-    std::pair<RTSegmentIter, bool> EmplaceRebuildTargetSegment(SegmentId segmentId);
-    void ClearRebuildTargetSegments(void);
-    uint32_t GetTargetSegmentCnt(void);
-    void FlushRebuildCtx(void);
-    void SetUnderRebuildSegmentId(SegmentId segmentId);
+    virtual uint32_t GetRebuildTargetSegmentsCount(void);
+    virtual RTSegmentIter GetRebuildTargetSegmentsBegin(void);
+    virtual RTSegmentIter GetRebuildTargetSegmentsEnd(void);
+    virtual int MakeRebuildTarget(void);
+    virtual int StopRebuilding(void);
+
+     virtual std::mutex& GetLock(void) { return rebuildLock; } // for UT
+
+    static const uint32_t SIG_REBUILD_CTX = 0xCFCFCFCF;
 
 private:
-    int _PrepareRebuildCtx(void);
-    void _LoadRebuildCtxSync(void);
-    void _RebuildCtxLoaded(void);
-    void _StoreRebuildCtx(void);
-    void _EraseRebuildTargetSegments(RTSegmentIter iter);
-    void _FlushRebuildCtxCompleted(AsyncMetaFileIoCtx* ctx);
-    SegmentId _GetUnderRebuildSegmentId(void);
-
-    bool needRebuildCont;
-    uint32_t targetSegmentCnt;
-    std::set<SegmentId> rebuildTargetSegments; // No lock
-    SegmentId underRebuildSegmentId;
-    MetaFileIntf* rebuildSegmentsFile;
+    AllocatorAddressInfo* addrInfo;
+    std::atomic<uint64_t> ctxStoredVersion;
+    std::atomic<uint64_t> ctxDirtyVersion;
+    RebuildCtxHeader ctxHeader;
+    bool needContinue;
+    uint32_t targetSegmentCount;           // for monitor
+    std::set<SegmentId> targetSegmentList; // No lock
+    SegmentId currentTarget;
     std::mutex rebuildLock;
-    char* bufferInObj;
     std::string arrayName;
 
     AllocatorCtx* allocatorCtx;

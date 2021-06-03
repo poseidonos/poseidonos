@@ -119,7 +119,7 @@ JournalLogBufferIntegrationTest::_CreateContextForBlockWriteDoneLog(void)
 LogWriteContext*
 JournalLogBufferIntegrationTest::_CreateContextForStripeMapUpdatedLog(void)
 {
-    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>(true);
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     StripeAddr oldAddr =
     {
         .stripeLoc = IN_WRITE_BUFFER_AREA,

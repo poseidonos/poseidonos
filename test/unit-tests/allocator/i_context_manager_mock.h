@@ -20,6 +20,8 @@ public:
     MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));
     MOCK_METHOD(SegmentId, AllocateRebuildTargetSegment, (), (override));
     MOCK_METHOD(int, ReleaseRebuildSegment, (SegmentId segmentId), (override));
+    MOCK_METHOD(int, MakeRebuildTarget, (), (override));
+    MOCK_METHOD(int, StopRebuilding, (), (override));
     MOCK_METHOD(bool, NeedRebuildAgain, (), (override));
     MOCK_METHOD(int, GetNumFreeSegment, (), (override));
     MOCK_METHOD(CurrentGcMode, GetCurrentGcMode, (), (override));

@@ -33,7 +33,6 @@ public:
     virtual int FlushPendingActiveStripes(void) { return 0; }
 
     virtual int PrepareRebuild(void) override { return 0; }
-    virtual int StopRebuilding(void) override { return 0; }
 };
 
 } // namespace pos

@@ -35,8 +35,8 @@
 #include <string>
 #include <vector>
 
-#include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/context_manager/allocator_ctx/segment_states.h"
+#include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/lib/bitmap.h"
 
@@ -47,7 +47,8 @@ class SegmentLock;
 class AllocatorCtx : public IAllocatorFileIoClient
 {
 public:
-    AllocatorCtx(BitMapMutex* allocSegBitmap, SegmentStates* segmentStates, SegmentLock* segStateLock, AllocatorAddressInfo* info, std::string arrayName);
+    AllocatorCtx(void) = default;
+    AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap, SegmentStates* segmentStates, SegmentLock* segStateLock, AllocatorAddressInfo* info, std::string arrayName);
     AllocatorCtx(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~AllocatorCtx(void);
     virtual void Init(void);
@@ -84,7 +85,7 @@ public:
     virtual std::mutex& GetSegStateLock(SegmentId segId);
     virtual std::mutex& GetAllocatorCtxLock(void) { return allocCtxLock; }
 
-    static const uint32_t SIG_ALLOCATOR_CTX = 0xACACACAC;
+    static const uint32_t SIG_ALLOCATOR_CTX = 0xBFBFBFBF;
 
 private:
     // File

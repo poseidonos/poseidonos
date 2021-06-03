@@ -48,7 +48,7 @@ class Stripe
 {
 public:
     Stripe(void) = default;
-    explicit Stripe(bool withDataBuffer);
+    Stripe(ReverseMapPack* revMap, bool withDataBuffer);
     Stripe(bool withDataBuffer, std::string arrayName);
     virtual ~Stripe(void);
     virtual void Assign(StripeId vsid, StripeId lsid, ASTailArrayIdx tailarrayidx);

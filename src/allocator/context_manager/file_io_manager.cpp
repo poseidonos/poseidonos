@@ -39,26 +39,33 @@
 
 namespace pos
 {
-AllocatorFileIoManager::AllocatorFileIoManager(MetaFileIntf** fileIntf, AllocatorAddressInfo* info, std::string arrayName)
-: addrInfo(info),
-  arrayName(arrayName)
+AllocatorFileIoManager::AllocatorFileIoManager(MetaFileIntf** fileIntf, AllocatorAddressInfo* info)
+: addrInfo(info)
 {
-    for (int file = 0; file < NUM_FILES; file++)
+    // This constructor is only for UT !!
+    arrayName = "";
+    for (int owner = 0; owner < NUM_FILES; owner++)
     {
-        ctxFile[file] = fileIntf[file]; // for UT
-        fileSize[file] = 0;
-        numSections[file] = 0;
+        fileInfo[owner].fileName = "";
+        fileInfo[owner].size = 0;
+        fileInfo[owner].numSections = 0;
+        if (fileIntf != nullptr)
+        {
+            fileInfo[owner].file = fileIntf[owner];
+        }
     }
 }
-AllocatorFileIoManager::AllocatorFileIoManager(AllocatorAddressInfo* info, std::string arrayName)
+
+AllocatorFileIoManager::AllocatorFileIoManager(std::string* fileNames, AllocatorAddressInfo* info, std::string arrayName)
 : addrInfo(info),
   arrayName(arrayName)
 {
-    for (int file = 0; file < NUM_FILES; file++)
+    for (int owner = 0; owner < NUM_FILES; owner++)
     {
-        ctxFile[file] = nullptr;
-        fileSize[file] = 0;
-        numSections[file] = 0;
+        fileInfo[owner].fileName = fileNames[owner];
+        fileInfo[owner].size = 0;
+        fileInfo[owner].numSections = 0;
+        fileInfo[owner].file = nullptr;
     }
 }
 
@@ -69,13 +76,13 @@ AllocatorFileIoManager::~AllocatorFileIoManager(void)
 void
 AllocatorFileIoManager::Init(void)
 {
-    for (int file = 0; file < NUM_FILES; file++)
+    for (int owner = 0; owner < NUM_FILES; owner++)
     {
-        fileSize[file] = 0;
-        numSections[file] = 0;
-        if (ctxFile[file] == nullptr)
+        fileInfo[owner].size = 0;
+        fileInfo[owner].numSections = 0;
+        if (fileInfo[owner].file == nullptr)
         {
-            ctxFile[file] = new FILESTORE(ctxFileName[file], arrayName);
+            fileInfo[owner].file = new FILESTORE(fileInfo[owner].fileName, arrayName);
         }
     }
 }
@@ -83,24 +90,24 @@ AllocatorFileIoManager::Init(void)
 void
 AllocatorFileIoManager::UpdateSectionInfo(int owner, int section, char* addr, int size, int offset)
 {
-    ctxSection[owner][section].Set(addr, size, offset);
-    fileSize[owner] += size;
-    numSections[owner]++;
+    fileInfo[owner].section[section].Set(addr, size, offset);
+    fileInfo[owner].size += size;
+    fileInfo[owner].numSections++;
 }
 
 void
 AllocatorFileIoManager::Close(void)
 {
-    for (int file = 0; file < NUM_FILES; file++)
+    for (int owner = 0; owner < NUM_FILES; owner++)
     {
-        if (ctxFile[file] != nullptr)
+        if (fileInfo[owner].file != nullptr)
         {
-            if (ctxFile[file]->IsOpened() == true)
+            if (fileInfo[owner].file->IsOpened() == true)
             {
-                ctxFile[file]->Close();
+                fileInfo[owner].file->Close();
             }
-            delete ctxFile[file];
-            ctxFile[file] = nullptr;
+            delete fileInfo[owner].file;
+            fileInfo[owner].file = nullptr;
         }
     }
 }
@@ -108,31 +115,31 @@ AllocatorFileIoManager::Close(void)
 int
 AllocatorFileIoManager::LoadSync(int owner, char* buf)
 {
-    if (ctxFile[owner]->DoesFileExist() == false)
+    if (fileInfo[owner].file->DoesFileExist() == false)
     {
-        int ret = ctxFile[owner]->Create(fileSize[owner]);
+        int ret = fileInfo[owner].file->Create(fileInfo[owner].size);
         if (ret == 0)
         {
-            ctxFile[owner]->Open();
+            fileInfo[owner].file->Open();
             return 0;
         }
         else
         {
-            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "Failed to create file:{}, size:{}", ctxFileName[owner], fileSize[owner]);
+            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "Failed to create file:{}, size:{}", fileInfo[owner].fileName, fileInfo[owner].size);
             return -1;
         }
     }
     else
     {
-        ctxFile[owner]->Open();
-        int ret = ctxFile[owner]->IssueIO(MetaFsIoOpcode::Read, 0, fileSize[owner], buf);
+        fileInfo[owner].file->Open();
+        int ret = fileInfo[owner].file->IssueIO(MetaFsIoOpcode::Read, 0, fileInfo[owner].size, buf);
         if (ret == 0)
         {
             return 1;
         }
         else
         {
-            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "Failed to Load file:{}, size:{}", ctxFileName[owner], fileSize[owner]);
+            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "Failed to load file:{}, size:{}", fileInfo[owner].fileName, fileInfo[owner].size);
             return -1;
         }
     }
@@ -141,19 +148,19 @@ AllocatorFileIoManager::LoadSync(int owner, char* buf)
 int
 AllocatorFileIoManager::StoreSync(int owner, char* buf)
 {
-    return ctxFile[owner]->IssueIO(MetaFsIoOpcode::Write, 0, fileSize[owner], buf);
+    return fileInfo[owner].file->IssueIO(MetaFsIoOpcode::Write, 0, fileInfo[owner].size, buf);
 }
 
 int
 AllocatorFileIoManager::StoreAsync(int owner, char* buf, MetaIoCbPtr callback)
 {
     AllocatorIoCtx* request = new AllocatorIoCtx(MetaFsIoOpcode::Write,
-        ctxFile[owner]->GetFd(), 0, fileSize[owner], buf, callback);
-    int ret = ctxFile[owner]->AsyncIO(request);
+        fileInfo[owner].file->GetFd(), 0, fileInfo[owner].size, buf, callback);
+    int ret = fileInfo[owner].file->AsyncIO(request);
     if (ret != 0)
     {
         delete request;
-        POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO), "Failed to issue AsyncMetaIo:{}, fname:{}", ret, ctxFileName[owner]);
+        POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO), "Failed to issue AsyncMetaIo:{}, fname:{}", ret, fileInfo[owner].fileName);
     }
     return ret;
 }
@@ -161,9 +168,12 @@ AllocatorFileIoManager::StoreAsync(int owner, char* buf, MetaIoCbPtr callback)
 void
 AllocatorFileIoManager::LoadSectionData(int owner, char* buf)
 {
-    for (int section = 0; section < numSections[owner]; section++)
+    for (int section = 0; section < fileInfo[owner].numSections; section++)
     {
-        memcpy(ctxSection[owner][section].addr, (buf + ctxSection[owner][section].offset), ctxSection[owner][section].size);
+        if (fileInfo[owner].section[section].addr != nullptr)
+        {
+            memcpy(fileInfo[owner].section[section].addr, (buf + fileInfo[owner].section[section].offset), fileInfo[owner].section[section].size);
+        }
     }
 }
 
@@ -172,32 +182,35 @@ AllocatorFileIoManager::CopySectionData(int owner, char* buf, int startSection, 
 {
     for (int section = startSection; section < endSection; section++)
     {
-        memcpy((buf + ctxSection[owner][section].offset), ctxSection[owner][section].addr, ctxSection[owner][section].size);
+        if (fileInfo[owner].section[section].addr != nullptr)
+        {
+            memcpy((buf + fileInfo[owner].section[section].offset), fileInfo[owner].section[section].addr, fileInfo[owner].section[section].size);
+        }
     }
 }
 
 int
 AllocatorFileIoManager::GetFileSize(int owner)
 {
-    return fileSize[owner];
+    return fileInfo[owner].size;
 }
 
 char*
 AllocatorFileIoManager::GetSectionAddr(int owner, int section)
 {
-    return ctxSection[owner][section].addr;
+    return fileInfo[owner].section[section].addr;
 }
 
 int
 AllocatorFileIoManager::GetSectionSize(int owner, int section)
 {
-    return ctxSection[owner][section].size;
+    return fileInfo[owner].section[section].size;
 }
 
 int
 AllocatorFileIoManager::GetSectionOffset(int owner, int section)
 {
-    return ctxSection[owner][section].offset;
+    return fileInfo[owner].section[section].offset;
 }
 //----------------------------------------------------------------------------//
 } // namespace pos

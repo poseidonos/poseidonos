@@ -8,16 +8,22 @@
 
 namespace pos
 {
+class MockCtxHeader : public CtxHeader
+{
+public:
+    using CtxHeader::CtxHeader;
+};
+
 class MockAllocatorCtxHeader : public AllocatorCtxHeader
 {
 public:
     using AllocatorCtxHeader::AllocatorCtxHeader;
 };
 
-class MockSegmentCtxHeader : public SegmentCtxHeader
+class MockRebuildCtxHeader : public RebuildCtxHeader
 {
 public:
-    using SegmentCtxHeader::SegmentCtxHeader;
+    using RebuildCtxHeader::RebuildCtxHeader;
 };
 
 } // namespace pos

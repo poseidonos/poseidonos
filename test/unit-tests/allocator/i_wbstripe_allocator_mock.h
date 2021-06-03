@@ -26,7 +26,6 @@ public:
     MOCK_METHOD(int, RestoreActiveStripeTail, (uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid), (override));
     MOCK_METHOD(int, FlushPendingActiveStripes, (), (override));
     MOCK_METHOD(int, PrepareRebuild, (), (override));
-    MOCK_METHOD(int, StopRebuilding, (), (override));
 };
 
 } // namespace pos

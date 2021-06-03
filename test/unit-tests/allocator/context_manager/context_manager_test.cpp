@@ -31,8 +31,8 @@ TEST(ContextManager, Init_TestCaseFormatFormat)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
 
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
@@ -48,7 +48,7 @@ TEST(ContextManager, Init_TestCaseFormatFormat)
     EXPECT_CALL(*fileMan, Init);
     EXPECT_CALL(*reCtx, Init);
 
-    EXPECT_CALL(*fileMan, LoadSync).WillOnce(Return(0)).WillOnce(Return(0));
+    EXPECT_CALL(*fileMan, LoadSync).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0));
     // when 1.
     ctxManager.Init();
 }
@@ -59,8 +59,8 @@ TEST(ContextManager, Init_TestCaseLoadLoad)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
 
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
@@ -71,7 +71,7 @@ TEST(ContextManager, Init_TestCaseLoadLoad)
     EXPECT_CALL(*fileMan, Init);
     EXPECT_CALL(*reCtx, Init);
 
-    EXPECT_CALL(*fileMan, LoadSync).WillOnce(Return(1)).WillOnce(Return(1));
+    EXPECT_CALL(*fileMan, LoadSync).WillOnce(Return(1)).WillOnce(Return(1)).WillOnce(Return(1));
     // when 2.
     ctxManager.Init();
 }
@@ -82,8 +82,8 @@ TEST(ContextManager, Init_TestCaseLoadFormat)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
 
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
@@ -98,7 +98,7 @@ TEST(ContextManager, Init_TestCaseLoadFormat)
     EXPECT_CALL(*fileMan, Init);
     EXPECT_CALL(*reCtx, Init);
 
-    EXPECT_CALL(*fileMan, LoadSync).WillOnce(Return(1)).WillOnce(Return(0));
+    EXPECT_CALL(*fileMan, LoadSync).WillOnce(Return(1)).WillOnce(Return(0)).WillOnce(Return(0));
     // when 3.
     ctxManager.Init();
     /*
@@ -125,8 +125,8 @@ TEST(ContextManager, Close_TestIfAllCalled)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     EXPECT_CALL(*allocCtx, Close);
@@ -145,8 +145,8 @@ TEST(ContextManager, FlushContextsSync_IfSuccessAllFile)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     std::mutex segCtxLock, allocCtxLock, wbLsidBitmapLock;
@@ -166,8 +166,8 @@ TEST(ContextManager, FlushContextsSync_IfFailFirstFile)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     std::mutex segCtxLock;
@@ -185,8 +185,8 @@ TEST(ContextManager, FlushContextsSync_IfFailSecondFile)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     std::mutex segCtxLock, allocCtxLock, wbLsidBitmapLock;
@@ -206,8 +206,8 @@ TEST(ContextManager, FlushContextsAsync_IfAlreadyFlushing)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, true, nullptr, "");
 
     // when
@@ -222,8 +222,8 @@ TEST(ContextManager, FlushContextsAsync_IfSuccessAllFile)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     std::mutex segCtxLock, allocCtxLock, wbLsidBitmapLock;
@@ -243,8 +243,8 @@ TEST(ContextManager, FlushContextsAsync_IfFailFirstFile)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     std::mutex segCtxLock;
@@ -262,8 +262,8 @@ TEST(ContextManager, FlushContextsAsync_IfFailSecondFile)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     std::mutex segCtxLock, allocCtxLock, wbLsidBitmapLock;
@@ -286,8 +286,8 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountSmallerThanM
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
 
     int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
@@ -305,8 +305,8 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndVali
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
 
     int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
@@ -327,8 +327,8 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndVali
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
 
     int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
@@ -349,8 +349,8 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndVali
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
 
     int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
@@ -372,8 +372,8 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndVali
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
     std::mutex segStateLock;
     int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
@@ -391,8 +391,8 @@ TEST(ContextManager, AllocateFreeSegment_TestFreeSegmentAllocationByState)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     // given 1. for rebuild segment allocation
@@ -424,8 +424,8 @@ TEST(ContextManager, AllocateGCVictimSegment_TestGCVictimAllocationByStateAndVal
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
 
     // given 1.
@@ -455,8 +455,8 @@ TEST(ContextManager, GetNumFreeSegment_TestSimpleGetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     EXPECT_CALL(*allocCtx, GetNumOfFreeUserDataSegment).WillOnce(Return(50));
@@ -472,8 +472,8 @@ TEST(ContextManager, GetCurrentGcMode_TestGetGcModeByNumberOfFreeSegment)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     ctxManager.GetGcCtx()->SetGcThreshold(10);
@@ -521,8 +521,8 @@ TEST(ContextManager, GetGcThreshold_TestSimpleGetterByMode)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     ctxManager.GetGcCtx()->SetGcThreshold(10);
@@ -550,8 +550,8 @@ TEST(ContextManager, FreeUserDataSegment_TestWhenSegmentStateChangedHowFreeUserD
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
     std::mutex segStateLock;
 
@@ -590,8 +590,8 @@ TEST(ContextManager, GetStoredContextVersion_TestSimpleGetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     // when 1.
@@ -607,8 +607,8 @@ TEST(ContextManager, AllocateRebuildTargetSegment_TestSimpleByPassFunc)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     EXPECT_CALL(*reCtx, GetRebuildTargetSegment).WillOnce(Return(5));
@@ -626,16 +626,30 @@ TEST(ContextManager, ReleaseRebuildSegment__TestSimpleByPassFunc)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
+    // given 1.
     EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(0));
-
-    // when
+    // when 1.
     int ret = ctxManager.ReleaseRebuildSegment(5);
+    // then 1.
+    EXPECT_EQ(0, ret);
 
-    // then
+    // given 2.
+    EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(-1));
+    // when 2.
+    ret = ctxManager.ReleaseRebuildSegment(5);
+    // then 2.
+    EXPECT_EQ(-1, ret);
+
+    // given 3.
+    EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(1));
+    EXPECT_CALL(*fileMan, StoreAsync).WillOnce(Return(0));
+    // when 3.
+    ret = ctxManager.ReleaseRebuildSegment(5);
+    // then 3.
     EXPECT_EQ(0, ret);
 }
 
@@ -645,14 +659,14 @@ TEST(ContextManager, NeedRebuildAgain_TestSimpleByPassFunc)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
-    EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(true));
+    EXPECT_CALL(*reCtx, NeedRebuildAgain).WillOnce(Return(true));
 
     // when
-    bool ret = ctxManager.ReleaseRebuildSegment(5);
+    bool ret = ctxManager.NeedRebuildAgain();
 
     // then
     EXPECT_EQ(true, ret);
@@ -664,8 +678,8 @@ TEST(ContextManager, GetContextSectionAddr_TestSimpleGetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     EXPECT_CALL(*fileMan, GetSectionAddr).WillOnce(Return((char*)100));
@@ -683,8 +697,8 @@ TEST(ContextManager, GetContextSectionSize_TestSimpleGetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     EXPECT_CALL(*fileMan, GetSectionSize).WillOnce(Return(1000));
@@ -702,8 +716,8 @@ TEST(ContextManager, GetRebuildCtx_TestSimpleGetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
     // when
     MockRebuildCtx* ret = reinterpret_cast<MockRebuildCtx*>(ctxManager.GetRebuildCtx());
@@ -717,8 +731,8 @@ TEST(ContextManager, GetContextReplayer_TestSimpleGetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     NiceMock<MockContextReplayer>* ctxReplayer = new NiceMock<MockContextReplayer>(nullptr, nullptr, nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, ctxReplayer, false, nullptr, "");
     // when
@@ -733,8 +747,8 @@ TEST(ContextManager, TestCallbackFunc)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     EventSmartPtr flushCallback(new MockCheckpointMetaFlushCompleted((CheckpointHandler*)this, 0));
@@ -745,7 +759,8 @@ TEST(ContextManager, TestCallbackFunc)
     AsyncMetaFileIoCtx* ctx = new AsyncMetaFileIoCtx();
     ctx->buffer = buf;
 
-    EXPECT_CALL(*segCtx, IsSegmentCtxIo).WillOnce(Return(true));
+    // given 1.
+    reinterpret_cast<CtxHeader*>(buf)->sig = SegmentCtx::SIG_SEGMENT_CTX;
     EXPECT_CALL(*segCtx, FinalizeIo);
     // when 1.
     ctxManager.TestCallbackFunc(ctx, 2);
@@ -754,10 +769,18 @@ TEST(ContextManager, TestCallbackFunc)
     buf = new char[100];
     ctx = new AsyncMetaFileIoCtx();
     ctx->buffer = buf;
-
-    EXPECT_CALL(*segCtx, IsSegmentCtxIo).WillOnce(Return(false));
+    reinterpret_cast<CtxHeader*>(buf)->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
     EXPECT_CALL(*allocCtx, FinalizeIo);
-    // when 1.
+    // when 2.
+    ctxManager.TestCallbackFunc(ctx, 1);
+
+    // given 3.
+    buf = new char[100];
+    ctx = new AsyncMetaFileIoCtx();
+    ctx->buffer = buf;
+    reinterpret_cast<CtxHeader*>(buf)->sig = RebuildCtx::SIG_REBUILD_CTX;
+    EXPECT_CALL(*reCtx, FinalizeIo);
+    // when 3.
     ctxManager.TestCallbackFunc(ctx, 1);
 }
 
@@ -767,8 +790,8 @@ TEST(ContextManager, SetNextSsdLsid_TestCheckReturnedSegmentId)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
     // given 1.
@@ -797,8 +820,8 @@ TEST(ContextManager, GetSegmentCtx_TestSimpleGetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
     // when
     SegmentCtx* ret = ctxManager.GetSegmentCtx();
@@ -812,8 +835,8 @@ TEST(ContextManager, GetAllocatorCtx_TestSimpleGetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
     // when
     AllocatorCtx* ret = ctxManager.GetAllocatorCtx();
@@ -827,8 +850,8 @@ TEST(ContextManager, GetWbStripeCtx_TestSimpleGetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
     // when
     WbStripeCtx* ret = ctxManager.GetWbStripeCtx();
@@ -842,8 +865,8 @@ TEST(ContextManager, GetCtxLock_TestSimpleGetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
     // when
     ctxManager.GetCtxLock();
@@ -855,11 +878,64 @@ TEST(ContextManager, NeedRebuildAgain_TestSimpleGetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
-    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
     // when
     ctxManager.NeedRebuildAgain();
+}
+
+TEST(ContextManager, MakeRebuildTarget_TestwithFlushOrwithoutFlush)
+{
+    // given
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
+    NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
+    ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
+
+    // given 1.
+    EXPECT_CALL(*reCtx, MakeRebuildTarget).WillOnce(Return(-1));
+    // when 1.
+    int ret = ctxManager.MakeRebuildTarget();
+    // then 1.
+    EXPECT_EQ(-1, ret);
+
+    // given 2.
+    EXPECT_CALL(*reCtx, MakeRebuildTarget).WillOnce(Return(1));
+    EXPECT_CALL(*fileMan, StoreAsync).WillOnce(Return(0));
+    EXPECT_CALL(*reCtx, GetRebuildTargetSegmentsCount).WillOnce(Return(7));
+    // when 1.
+    ret = ctxManager.MakeRebuildTarget();
+    // then 1.
+    EXPECT_EQ(7, ret);
+}
+
+TEST(ContextManager, StopRebuilding_TestwithFlushOrwithoutFlush)
+{
+    // given
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
+    NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
+    ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
+
+    // given 1.
+    EXPECT_CALL(*reCtx, StopRebuilding).WillOnce(Return(-1));
+    // when 1.
+    int ret = ctxManager.StopRebuilding();
+    // then 1.
+    EXPECT_EQ(-1, ret);
+
+    // given 2.
+    EXPECT_CALL(*reCtx, StopRebuilding).WillOnce(Return(1));
+    EXPECT_CALL(*fileMan, StoreAsync).WillOnce(Return(0));
+    // when 1.
+    ret = ctxManager.StopRebuilding();
+    // then 1.
+    EXPECT_EQ(0, ret);
 }
 
 } // namespace pos

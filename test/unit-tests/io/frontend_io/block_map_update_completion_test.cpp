@@ -83,7 +83,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_Execute)
     CallbackSmartPtr mockWriteCompletionEvent(mockWriteCompletion);
     NiceMock<MockIBlockAllocator> iBlockAllocator;
     NiceMock<MockIVSAMap> vsaMap;
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     MockVsaRangeMaker* mockVsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &vsaMap);
     StripeAddr addr = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 1};
@@ -125,7 +125,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_ExecuteFail)
     CallbackSmartPtr mockWriteCompletionEvent(mockWriteCompletionFail);
     NiceMock<MockIBlockAllocator> iBlockAllocator;
     NiceMock<MockIVSAMap> vsaMap;
-    NiceMock<MockStripe> mockStripe(true);
+    NiceMock<MockStripe> mockStripe;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     MockVsaRangeMaker* mockVsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &vsaMap);
     StripeAddr addr = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 1};

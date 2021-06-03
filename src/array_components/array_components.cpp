@@ -223,8 +223,8 @@ ArrayComponents::PrepareRebuild(bool& resume)
 void
 ArrayComponents::RebuildDone(void)
 {
-    IWBStripeAllocator* iWBStripeAllocator = allocator->GetIWBStripeAllocator();
-    iWBStripeAllocator->StopRebuilding();
+    IContextManager* iContextManager = allocator->GetIContextManager();
+    iContextManager->StopRebuilding();
 }
 
 void

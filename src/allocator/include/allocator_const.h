@@ -49,6 +49,8 @@ enum FileOwner
 {
     SEGMENT_CTX,
     ALLOCATOR_CTX,
+    NUM_ALLOCATOR_FILES,
+    REBUILD_CTX = NUM_ALLOCATOR_FILES,
     NUM_FILES
 };
 
@@ -71,6 +73,13 @@ enum AllocatorCtxSection
     NUM_ALLOCATOR_CTX_SECTION
 };
 
+enum RebuildCtxSection
+{
+    RC_HEADER = 0,
+    RC_REBUILD_SEGMENT_LIST,
+    NUM_REBUILD_CTX_SECTION
+};
+
 enum WBTAllocatorMetaType
 {
     WBT_SEGMENT_BITMAP,
@@ -84,18 +93,29 @@ enum WBTAllocatorMetaType
     WBT_NUM_ALLOCATOR_META
 };
 
-struct AllocatorCtxHeader
+class CtxHeader
 {
+public:
     uint32_t sig;
     uint64_t ctxVersion;
+};
+
+class AllocatorCtxHeader : public CtxHeader
+{
+public:
     uint32_t numValidWbLsid;
     uint32_t numValidSegment;
 };
 
-struct SegmentCtxHeader
+class SegmentCtxHeader : public CtxHeader
 {
-    uint32_t sig;
-    uint64_t ctxVersion;
+public:
+};
+
+class RebuildCtxHeader : public CtxHeader
+{
+public:
+    uint32_t numTargetSegments;
 };
 
 enum CurrentGcMode

@@ -70,10 +70,7 @@ public:
     virtual Stripe* FinishReconstructedStripe(StripeId wbLsid, VirtualBlkAddr tail) override;
     virtual int RestoreActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid) override;
     virtual int FlushPendingActiveStripes(void) override;
-
     virtual int PrepareRebuild(void) override;
-    virtual int StopRebuilding(void) override;
-
     virtual Stripe* GetStripe(StripeId wbLsid) override;
 
     virtual void PickActiveStripe(uint32_t volumeId, std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone);
@@ -81,7 +78,6 @@ public:
     virtual int CheckAllActiveStripes(std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone);
 
 private:
-    int _MakeRebuildTarget(void);
     int _FlushOnlineStripes(std::vector<StripeId>& vsidToCheckFlushDone);
     Stripe* _FinishActiveStripe(ASTailArrayIdx index);
     VirtualBlks _AllocateRemainingBlocks(ASTailArrayIdx index);

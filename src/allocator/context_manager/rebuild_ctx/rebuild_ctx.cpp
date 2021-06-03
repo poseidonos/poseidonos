@@ -35,20 +35,34 @@
 #include <string>
 #include <utility>
 
-#include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
-#include "src/meta_file_intf/meta_file_include.h"
-#include "src/metafs/metafs_file_intf.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-RebuildCtx::RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx)
-: needRebuildCont(false),
-  targetSegmentCnt(0),
-  underRebuildSegmentId(UINT32_MAX),
-  rebuildSegmentsFile(nullptr),
-  bufferInObj(nullptr),
+RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, std::string arrayName)
+: addrInfo(info),
+  ctxStoredVersion(0),
+  ctxDirtyVersion(0),
+  needContinue(false),
+  targetSegmentCount(0),
+  currentTarget(UINT32_MAX),
   arrayName(arrayName),
   allocatorCtx(allocCtx)
+{
+    if (header != nullptr)
+    {
+        ctxHeader.sig = header->sig;
+        ctxHeader.ctxVersion = header->ctxVersion;
+        ctxHeader.numTargetSegments = header->numTargetSegments;
+    }
+    else
+    {
+        ctxHeader.sig = SIG_REBUILD_CTX;
+        ctxHeader.ctxVersion = 0;
+    }
+}
+RebuildCtx::RebuildCtx(AllocatorCtx* allocCtx, AllocatorAddressInfo* info, std::string arrayName)
+: RebuildCtx(nullptr, allocCtx, info, arrayName)
 {
 }
 
@@ -57,42 +71,128 @@ RebuildCtx::~RebuildCtx(void)
 }
 
 void
-RebuildCtx::Init(AllocatorAddressInfo* info)
+RebuildCtx::Init(void)
 {
-    targetSegmentCnt = info->GetnumUserAreaSegments();
-    bufferInObj = new char[sizeof(targetSegmentCnt) + targetSegmentCnt * sizeof(SegmentId)];
-
-    rebuildSegmentsFile = new FILESTORE("RebuildContext", arrayName);
-    if (rebuildSegmentsFile->DoesFileExist() == false)
-    {
-        rebuildSegmentsFile->Create(sizeof(targetSegmentCnt) + sizeof(SegmentId) * targetSegmentCnt);
-        rebuildSegmentsFile->Open();
-        _StoreRebuildCtx();
-    }
-    else
-    {
-        rebuildSegmentsFile->Open();
-        _LoadRebuildCtxSync();
-        if (targetSegmentCnt != 0)
-        {
-            needRebuildCont = true;
-        }
-    }
+    targetSegmentCount = 0;
+    ctxHeader.ctxVersion = 0;
+    ctxStoredVersion = 0;
+    ctxDirtyVersion = 0;
 }
 
 void
 RebuildCtx::Close(void)
 {
-    if (rebuildSegmentsFile != nullptr)
+}
+
+void
+RebuildCtx::AfterLoad(char* buf)
+{
+    if (ctxHeader.sig != SIG_REBUILD_CTX)
     {
-        if (rebuildSegmentsFile->IsOpened() == true)
-        {
-            rebuildSegmentsFile->Close();
-        }
-        delete rebuildSegmentsFile;
-        rebuildSegmentsFile = nullptr;
+        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "RebuildCtx file signature is not matched:{}", ctxHeader.sig);
+        assert(false);
     }
-    delete[] bufferInObj;
+    else
+    {
+        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "RebuildCtx file Integrity check SUCCESS:{}", ctxHeader.ctxVersion);
+    }
+    ctxDirtyVersion = ctxHeader.ctxVersion + 1;
+    targetSegmentCount = ctxHeader.numTargetSegments;
+
+    SegmentId* segmentList = reinterpret_cast<SegmentId*>(buf + sizeof(RebuildCtxHeader));
+    for (uint32_t cnt = 0; cnt < targetSegmentCount; ++cnt)
+    {
+        auto pr = targetSegmentList.emplace(segmentList[cnt]);
+        if (pr.second == false)
+        {
+            POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "Failed to load RebuildCtx, segmentId:{} is already in set", segmentList[cnt]);
+            assert(false);
+        }
+    }
+    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_LOAD_REBUILD_SEGMENT), "RebuildCtx file loaded, segmentCount:{}", targetSegmentCount);
+    if (targetSegmentCount != 0)
+    {
+        assert(targetSegmentCount == targetSegmentList.size());
+        needContinue = true;
+    }
+}
+
+void
+RebuildCtx::BeforeFlush(int section, char* buf)
+{
+    assert(section == RC_HEADER);
+    targetSegmentCount = targetSegmentList.size();
+    ctxHeader.numTargetSegments = targetSegmentCount;
+    ctxHeader.ctxVersion = ctxDirtyVersion++;
+    memcpy(buf, &ctxHeader, sizeof(RebuildCtxHeader));
+
+    int idx = 0;
+    SegmentId* segmentList = reinterpret_cast<SegmentId*>(buf + sizeof(RebuildCtxHeader));
+    for (const auto targetSegment : targetSegmentList)
+    {
+        segmentList[idx++] = targetSegment;
+    }
+    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT), "Ready to flush RebuildCtx file:{}, numTargetSegments:{}", ctxHeader.ctxVersion, ctxHeader.numTargetSegments);
+}
+
+void
+RebuildCtx::FinalizeIo(AsyncMetaFileIoCtx* ctx)
+{
+    RebuildCtxHeader* header = reinterpret_cast<RebuildCtxHeader*>(ctx->buffer);
+    ctxStoredVersion = header->ctxVersion;
+    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT), "RebuildCtx file stored, version:{}, segmentCount:{}", header->ctxVersion, header->numTargetSegments);
+}
+
+char*
+RebuildCtx::GetSectionAddr(int section)
+{
+    char* ret = nullptr;
+    switch (section)
+    {
+        case RC_HEADER:
+        {
+            ret = (char*)&ctxHeader;
+            break;
+        }
+        case RC_REBUILD_SEGMENT_LIST:
+        {
+            ret = nullptr;
+            break;
+        }
+    }
+    return ret;
+}
+
+int
+RebuildCtx::GetSectionSize(int section)
+{
+    int ret = 0;
+    switch (section)
+    {
+        case RC_HEADER:
+        {
+            ret = sizeof(RebuildCtxHeader);
+            break;
+        }
+        case RC_REBUILD_SEGMENT_LIST:
+        {
+            ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentId);
+            break;
+        }
+    }
+    return ret;
+}
+
+uint64_t
+RebuildCtx::GetStoredVersion(void)
+{
+    return ctxStoredVersion;
+}
+
+void
+RebuildCtx::ResetDirtyVersion(void)
+{
+    ctxDirtyVersion = 0;
 }
 
 SegmentId
@@ -103,29 +203,29 @@ RebuildCtx::GetRebuildTargetSegment(void)
         return NEED_TO_RETRY;
     }
     POS_TRACE_INFO(EID(ALLOCATOR_START), "@GetRebuildTargetSegment");
-
-    if (GetTargetSegmentCnt() == 0)
+    if (targetSegmentList.empty() == true)
     {
+        POS_TRACE_INFO(EID(ALLOCATOR_START), "No segment to rebuild: Exit");
         rebuildLock.unlock();
         return UINT32_MAX;
     }
 
     SegmentId segmentId = UINT32_MAX;
-    while (IsRebuidTargetSegmentsEmpty() == false)
+    while (targetSegmentList.empty() == false)
     {
-        auto iter = RebuildTargetSegmentsBegin();
+        auto iter = targetSegmentList.begin();
         segmentId = *iter;
-
         if (allocatorCtx->GetSegmentState(segmentId, true) == SegmentState::FREE) // This segment had been freed by GC
         {
-            POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "This segmentId:{} was target but seemed to be freed by GC", segmentId);
-            _EraseRebuildTargetSegments(iter);
+            POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "Skip Rebuilding segmentId:{}, Already Freed", segmentId);
+            targetSegmentList.erase(iter);
+            targetSegmentCount--;
             segmentId = UINT32_MAX;
             continue;
         }
 
-        POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "segmentId:{} is going to be rebuilt", segmentId);
-        SetUnderRebuildSegmentId(segmentId);
+        POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Start to rebuild segmentId:{}", segmentId);
+        currentTarget = segmentId;
         break;
     }
 
@@ -142,199 +242,139 @@ RebuildCtx::ReleaseRebuildSegment(SegmentId segmentId)
     }
     POS_TRACE_INFO(EID(ALLOCATOR_START), "@ReleaseRebuildSegment");
 
-    auto iter = FindRebuildTargetSegment(segmentId);
-    if (iter == RebuildTargetSegmentsEnd())
+    auto iter = targetSegmentList.find(segmentId);
+    if (iter == targetSegmentList.end())
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "There is no segmentId:{} in rebuildTargetSegments, seemed to be freed by GC", segmentId);
-        SetUnderRebuildSegmentId(UINT32_MAX);
+        POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "There is no segmentId:{} in rebuild target list, seemed to be freed by GC", segmentId);
+        currentTarget = UINT32_MAX;
         rebuildLock.unlock();
         return 0;
     }
 
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "segmentId:{} Rebuild Done!", segmentId);
     // Delete segmentId in rebuildTargetSegments
-    _EraseRebuildTargetSegments(iter);
-    FlushRebuildCtx();
-    SetUnderRebuildSegmentId(UINT32_MAX);
+    targetSegmentList.erase(iter);
+    targetSegmentCount--;
+    currentTarget = UINT32_MAX;
     rebuildLock.unlock();
-    return 0;
+    return 1;
 }
 
 bool
 RebuildCtx::NeedRebuildAgain(void)
 {
-    return needRebuildCont;
+    return needContinue;
 }
 
-void
-RebuildCtx::ClearRebuildTargetSegments(void)
+int
+RebuildCtx::FreeSegmentInRebuildTarget(SegmentId segId)
 {
-    rebuildTargetSegments.clear();
-}
+    if (targetSegmentList.empty() == true) // No need to check below
+    {
+        return 0;
+    }
 
-void
-RebuildCtx::FlushRebuildCtx(void)
-{
-    int lenToWrite = _PrepareRebuildCtx();
+    std::unique_lock<std::mutex> lock(rebuildLock);
+    auto iter = targetSegmentList.find(segId);
+    if (iter == targetSegmentList.end())
+    {
+        return 0;
+    }
 
-    AllocatorIoCtx* rebuildStoreRequest = new AllocatorIoCtx(MetaFsIoOpcode::Write,
-        rebuildSegmentsFile->GetFd(), 0, lenToWrite, bufferInObj,
-        std::bind(&RebuildCtx::_FlushRebuildCtxCompleted, this, std::placeholders::_1));
-    rebuildStoreRequest->segmentCnt = targetSegmentCnt;
+    if (currentTarget == segId)
+    {
+        POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "segmentId:{} is reclaimed by GC, but still under rebuilding", segId);
+        return 0;
+    }
 
-    rebuildSegmentsFile->AsyncIO(rebuildStoreRequest);
-}
-
-bool
-RebuildCtx::IsRebuildTargetSegment(SegmentId segId)
-{
-    return (FindRebuildTargetSegment(segId) != RebuildTargetSegmentsEnd());
+    targetSegmentList.erase(iter);
+    targetSegmentCount--;
+    POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "segmentId:{} in Rebuild Target has been Freed by GC", segId);
+    return 1;
 }
 
 bool
 RebuildCtx::IsRebuidTargetSegmentsEmpty(void)
 {
-    return rebuildTargetSegments.empty();
+    return targetSegmentList.empty();
 }
 
-RTSegmentIter
-RebuildCtx::RebuildTargetSegmentsBegin(void)
+bool
+RebuildCtx::IsRebuildTargetSegment(SegmentId segId)
 {
-    return rebuildTargetSegments.begin();
-}
-
-std::pair<RTSegmentIter, bool>
-RebuildCtx::EmplaceRebuildTargetSegment(SegmentId segmentId)
-{
-    return rebuildTargetSegments.emplace(segmentId);
+    return (targetSegmentList.find(segId) != targetSegmentList.end());
 }
 
 uint32_t
-RebuildCtx::GetTargetSegmentCnt(void)
+RebuildCtx::GetRebuildTargetSegmentsCount(void)
 {
-    return targetSegmentCnt;
+    return targetSegmentCount;
 }
 
 RTSegmentIter
-RebuildCtx::FindRebuildTargetSegment(SegmentId segmentId)
+RebuildCtx::GetRebuildTargetSegmentsBegin(void)
 {
-    return rebuildTargetSegments.find(segmentId);
+    return targetSegmentList.begin();
 }
 
 RTSegmentIter
-RebuildCtx::RebuildTargetSegmentsEnd(void)
+RebuildCtx::GetRebuildTargetSegmentsEnd(void)
 {
-    return rebuildTargetSegments.end();
+    return targetSegmentList.end();
 }
 
-void
-RebuildCtx::FreeSegmentInRebuildTarget(SegmentId segId)
-{
-    if (IsRebuidTargetSegmentsEmpty()) // No need to check below
-    {
-        return;
-    }
-
-    std::unique_lock<std::mutex> lock(rebuildLock);
-    auto iter = FindRebuildTargetSegment(segId);
-    if (iter == RebuildTargetSegmentsEnd())
-    {
-        return;
-    }
-
-    if (_GetUnderRebuildSegmentId() == segId)
-    {
-        POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "segmentId:{} is reclaimed by GC, but still under rebuilding", segId);
-        return;
-    }
-
-    _EraseRebuildTargetSegments(iter);
-    POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "segmentId:{} in Rebuild Target has been Freed by GC", segId);
-    FlushRebuildCtx();
-}
-
-SegmentId
-RebuildCtx::_GetUnderRebuildSegmentId(void)
-{
-    return underRebuildSegmentId;
-}
-
-void
-RebuildCtx::SetUnderRebuildSegmentId(SegmentId segmentId)
-{
-    underRebuildSegmentId = segmentId;
-}
-//----------------------------------------------------------------------------//
 int
-RebuildCtx::_PrepareRebuildCtx(void)
+RebuildCtx::MakeRebuildTarget(void)
 {
-    targetSegmentCnt = rebuildTargetSegments.size();
-    int lenToWrite = sizeof(targetSegmentCnt) + sizeof(SegmentId) * targetSegmentCnt;
-    int buffer_offset = 0;
+    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@MakeRebuildTarget()");
 
-    memcpy(bufferInObj, &targetSegmentCnt, sizeof(targetSegmentCnt));
-    buffer_offset += sizeof(targetSegmentCnt);
-
-    for (const auto targetSegment : rebuildTargetSegments)
+    if (targetSegmentList.empty() == false)
     {
-        memcpy(bufferInObj + buffer_offset, &targetSegment, sizeof(SegmentId));
-        buffer_offset += sizeof(SegmentId);
+        POS_TRACE_WARN(EID(ALLOCATOR_REBUILD_TARGET_SET_NOT_EMPTY), "targetSegmentList is NOT empty!");
+        for (auto it = targetSegmentList.begin(); it != targetSegmentList.end(); ++it)
+        {
+            POS_TRACE_WARN(EID(ALLOCATOR_REBUILD_TARGET_SET_NOT_EMPTY), "residue was segmentId:{}", *it);
+        }
+        targetSegmentList.clear();
+        targetSegmentCount = 0;
     }
-    return lenToWrite;
-}
 
-void
-RebuildCtx::_StoreRebuildCtx(void)
-{
-    int lenToWrite = _PrepareRebuildCtx();
-    rebuildSegmentsFile->IssueIO(MetaFsIoOpcode::Write, 0, lenToWrite, bufferInObj);
-}
-
-void
-RebuildCtx::_EraseRebuildTargetSegments(RTSegmentIter iter)
-{
-    rebuildTargetSegments.erase(iter);
-}
-
-void
-RebuildCtx::_LoadRebuildCtxSync(void)
-{
-    int lenToRead = sizeof(targetSegmentCnt) + sizeof(SegmentId) * targetSegmentCnt;
-    rebuildSegmentsFile->IssueIO(MetaFsIoOpcode::Read, 0, lenToRead, bufferInObj);
-    _RebuildCtxLoaded();
-}
-
-void
-RebuildCtx::_RebuildCtxLoaded(void)
-{
-    int buffer_offset = 0;
-
-    memcpy(&targetSegmentCnt, bufferInObj, sizeof(targetSegmentCnt));
-    buffer_offset += sizeof(targetSegmentCnt);
-
-    for (uint32_t cnt = 0; cnt < targetSegmentCnt; ++cnt)
+    // Pick non-free segments and make rebuildTargetSegments
+    SegmentId segmentId = 0;
+    while (true)
     {
-        SegmentId segmentId;
-        memcpy(&segmentId, bufferInObj + buffer_offset, sizeof(SegmentId));
-        buffer_offset += sizeof(SegmentId);
+        segmentId = allocatorCtx->GetUsedSegment(segmentId);
+        if (segmentId == UNMAP_SEGMENT)
+        {
+            break;
+        }
 
-        auto pr = rebuildTargetSegments.emplace(segmentId);
+        auto pr = targetSegmentList.emplace(segmentId);
+        POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "segmentId:{} is inserted as target to rebuild", segmentId);
         if (pr.second == false)
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "segmentId:{} is already in set", segmentId);
-            assert(false);
+            return -EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE);
         }
+        ++segmentId;
     }
-
-    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_LOAD_REBUILD_SEGMENT), "Rebuild segment file loaded, segmentCount:{}", targetSegmentCnt);
+    targetSegmentCount = targetSegmentList.size();
+    return 1;
 }
 
-void
-RebuildCtx::_FlushRebuildCtxCompleted(AsyncMetaFileIoCtx* ctx)
+int
+RebuildCtx::StopRebuilding(void)
 {
-    int segmentCount = ((AllocatorIoCtx*)ctx)->segmentCnt;
-    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT), "Rebuild Segment File Stored, segmentCount:{}", segmentCount);
-    delete ctx;
+    if (targetSegmentList.empty() == true)
+    {
+        POS_TRACE_INFO(EID(ALLOCATOR_REBUILD_TARGET_SET_EMPTY), "Rebuild was already done or not happen");
+        return -EID(ALLOCATOR_REBUILD_TARGET_SET_EMPTY);
+    }
+
+    targetSegmentList.clear();
+    currentTarget = UINT32_MAX;
+    targetSegmentCount = 0;
+    return 1;
 }
 
 } // namespace pos

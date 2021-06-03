@@ -42,17 +42,28 @@
 
 namespace pos
 {
-SegmentCtx::SegmentCtx(SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_)
-: numSegments(0),
+SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_)
+: ctxDirtyVersion(0),
+  ctxStoredVersion(0),
+  numSegments(0),
   addrInfo(addrInfo_),
   arrayName(arrayName_)
 {
-    segmentInfos = segmentInfo_; // for UT
-    ctxHeader.sig = SIG_SEGMENT_CTX;
+    if (header != nullptr)
+    {
+        ctxHeader.sig = header->sig;
+        ctxHeader.ctxVersion = header->ctxVersion;
+    }
+    else
+    {
+        segmentInfos = segmentInfo_; // for UT
+        ctxHeader.sig = SIG_SEGMENT_CTX;
+        ctxHeader.ctxVersion = 0;
+    }
 }
 
 SegmentCtx::SegmentCtx(AllocatorAddressInfo* info, std::string arrayName)
-: SegmentCtx(nullptr, info, arrayName)
+: SegmentCtx(nullptr, nullptr, info, arrayName)
 {
 }
 
@@ -127,26 +138,19 @@ SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
     return segmentInfos[segId].IncreaseOccupiedStripeCount();
 }
 
-bool
-SegmentCtx::IsSegmentCtxIo(char* buf)
-{
-    SegmentCtxHeader* header = reinterpret_cast<SegmentCtxHeader*>(buf);
-    return (header->sig == (uint32_t)SIG_SEGMENT_CTX);
-}
-
 void
 SegmentCtx::AfterLoad(char* buf)
 {
-    if (reinterpret_cast<SegmentCtxHeader*>(buf)->sig != SIG_SEGMENT_CTX)
+    if (ctxHeader.sig != SIG_SEGMENT_CTX)
     {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "segment ctx file signature is not matched:{}", ctxHeader.sig);
+        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "SegmentCtx file signature is not matched:{}", ctxHeader.sig);
         assert(false);
     }
     else
     {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "segment ctx file Integrity check SUCCESS:{}", ctxHeader.ctxVersion);
+        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "SegmentCtx file Integrity check SUCCESS:{}", ctxHeader.ctxVersion);
     }
-    ctxStoredVersion = ctxHeader.ctxVersion;
+    ctxDirtyVersion = ctxHeader.ctxVersion + 1;
 }
 
 void

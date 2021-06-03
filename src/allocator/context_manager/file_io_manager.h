@@ -57,10 +57,18 @@ class AllocatorFileIoManager
         int size;
         int offset;
     };
+    struct FileInfo
+    {
+        std::string fileName;
+        MetaFileIntf* file;
+        ContextSection section[NUM_ALLOCATOR_CTX_SECTION];
+        int size;
+        int numSections;
+    };
 
 public:
-    AllocatorFileIoManager(MetaFileIntf** file, AllocatorAddressInfo* info, std::string arrayName);
-    AllocatorFileIoManager(AllocatorAddressInfo* info, std::string arrayName);
+    AllocatorFileIoManager(MetaFileIntf** file, AllocatorAddressInfo* info); // only for UT
+    AllocatorFileIoManager(std::string* fileNames, AllocatorAddressInfo* info, std::string arrayName);
     virtual ~AllocatorFileIoManager(void);
     virtual void Init(void);
     virtual void Close(void);
@@ -82,15 +90,7 @@ public:
 private:
     int _Flush(char* data, EventSmartPtr callback);
 
-    const std::string ctxFileName[NUM_FILES] = {"AllocatorContext", "SegmentContexts"};
-
-    // File
-    MetaFileIntf* ctxFile[NUM_FILES];
-    ContextSection ctxSection[NUM_FILES][NUM_ALLOCATOR_CTX_SECTION];
-    int fileSize[NUM_FILES];
-    int numSections[NUM_FILES];
-
-    // DOCs
+    FileInfo fileInfo[NUM_FILES];
     AllocatorAddressInfo* addrInfo;
     std::string arrayName;
 };

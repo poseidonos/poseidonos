@@ -20,6 +20,8 @@ public:
     virtual SegmentId AllocateGCVictimSegment(void) { return 0; }
     virtual SegmentId AllocateRebuildTargetSegment(void) { return 0; }
     virtual int ReleaseRebuildSegment(SegmentId segmentId) { return 0; }
+    virtual int MakeRebuildTarget(void) { return 0; }
+    virtual int StopRebuilding(void) { return 0; }
     virtual bool NeedRebuildAgain(void) { return true; }
     virtual int GetNumFreeSegment(void) { return 0; }
     virtual CurrentGcMode GetCurrentGcMode(void) { return MODE_NO_GC; }

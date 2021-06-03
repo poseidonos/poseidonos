@@ -68,10 +68,6 @@ TEST(WBStripeManager, PrepareRebuild_)
 {
 }
 
-TEST(WBStripeManager, StopRebuilding_)
-{
-}
-
 TEST(WBStripeManager, PickActiveStripe_)
 {
 }

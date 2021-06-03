@@ -67,6 +67,7 @@ ContextManager::ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, Reb
     contextReplayer = ctxReplayer_;
     fileOwner[SEGMENT_CTX] = segCtx_;
     fileOwner[ALLOCATOR_CTX] = allocCtx_;
+    fileOwner[REBUILD_CTX] = rebuildCtx_;
     flushInProgress = flushProgress;
 }
 
@@ -75,12 +76,13 @@ ContextManager::ContextManager(AllocatorAddressInfo* info, std::string arrayName
 {
     allocatorCtx = new AllocatorCtx(info, arrayName);
     segmentCtx = new SegmentCtx(info, arrayName);
-    rebuildCtx = new RebuildCtx(arrayName, allocatorCtx);
+    rebuildCtx = new RebuildCtx(allocatorCtx, info, arrayName);
     wbStripeCtx = new WbStripeCtx(info);
-    fileIoManager = new AllocatorFileIoManager(info, arrayName);
+    fileIoManager = new AllocatorFileIoManager(fileNames, info, arrayName);
     contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, wbStripeCtx, info);
     fileOwner[SEGMENT_CTX] = segmentCtx;
     fileOwner[ALLOCATOR_CTX] = allocatorCtx;
+    fileOwner[REBUILD_CTX] = rebuildCtx;
 }
 
 ContextManager::~ContextManager(void)
@@ -99,7 +101,7 @@ ContextManager::Init(void)
     wbStripeCtx->Init();
     allocatorCtx->Init();
     segmentCtx->Init();
-    rebuildCtx->Init(addrInfo);
+    rebuildCtx->Init();
     fileIoManager->Init();
     _UpdateSectionInfo();
     int ret = _LoadContexts();
@@ -154,7 +156,7 @@ int
 ContextManager::FlushContextsSync(void)
 {
     int ret = 0;
-    for (int owner = 0; owner < NUM_FILES; owner++)
+    for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
         ret = _FlushSync(owner);
         if (ret != 0)
@@ -174,8 +176,8 @@ ContextManager::FlushContextsAsync(EventSmartPtr callback)
     }
     int ret = 0;
     assert(numAsyncIoIssued == 0);
-    numAsyncIoIssued = NUM_FILES; // Issue 2 contexts(segmentctx, allocatorctx)
-    for (int owner = 0; owner < NUM_FILES; owner++)
+    numAsyncIoIssued = NUM_ALLOCATOR_FILES; // Issue 2 contexts(segmentctx, allocatorctx)
+    for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
         ret = _FlushAsync(owner, callback);
         if (ret != 0)
@@ -295,16 +297,48 @@ ContextManager::AllocateRebuildTargetSegment(void)
     return rebuildCtx->GetRebuildTargetSegment();
 }
 
-int
-ContextManager::ReleaseRebuildSegment(SegmentId segmentId)
-{
-    return rebuildCtx->ReleaseRebuildSegment(segmentId);
-}
-
 bool
 ContextManager::NeedRebuildAgain(void)
 {
     return rebuildCtx->NeedRebuildAgain();
+}
+
+int
+ContextManager::ReleaseRebuildSegment(SegmentId segmentId)
+{
+    int ret = rebuildCtx->ReleaseRebuildSegment(segmentId);
+    if (ret == 1) // need to flush
+    {
+        _FlushAsync(REBUILD_CTX, nullptr);
+        ret = 0;
+    }
+    return ret;
+}
+
+int
+ContextManager::MakeRebuildTarget(void)
+{
+    int ret = rebuildCtx->MakeRebuildTarget();
+    if (ret == 1) // need to flush
+    {
+        _FlushAsync(REBUILD_CTX, nullptr);
+        ret = rebuildCtx->GetRebuildTargetSegmentsCount();
+    }
+    return ret;
+}
+
+int
+ContextManager::StopRebuilding(void)
+{
+    std::unique_lock<std::mutex> lock(ctxLock);
+    POS_TRACE_INFO(EID(ALLOCATOR_START), "@StopRebuilding");
+    int ret = rebuildCtx->StopRebuilding();
+    if (ret == 1) // need to flush
+    {
+        _FlushAsync(REBUILD_CTX, nullptr);
+        ret = 0;
+    }
+    return ret;
 }
 
 char*
@@ -339,27 +373,44 @@ ContextManager::_FreeSegment(SegmentId segId)
     allocatorCtx->SetSegmentState(segId, SegmentState::FREE, false);
     allocatorCtx->ReleaseSegment(segId);
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was freed by allocator", segId);
-    rebuildCtx->FreeSegmentInRebuildTarget(segId);
+    int ret = rebuildCtx->FreeSegmentInRebuildTarget(segId);
+    if (ret == 1)
+    {
+        _FlushAsync(REBUILD_CTX, nullptr);
+    }
 }
 
 void
 ContextManager::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 {
-    if (segmentCtx->IsSegmentCtxIo(ctx->buffer) == true)
+    CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
+    if (header->sig == RebuildCtx::SIG_REBUILD_CTX)
+    {
+        rebuildCtx->FinalizeIo(ctx);
+        POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "Complete to store rebuildCtx file, pendingMetaIo:{}", numAsyncIoIssued);
+        delete[] ctx->buffer;
+        delete ctx;
+        return;
+    }
+
+    if (header->sig == SegmentCtx::SIG_SEGMENT_CTX)
     {
         segmentCtx->FinalizeIo(reinterpret_cast<AllocatorIoCtx*>(ctx));
+        POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "SegmentCtx file stored, version:{}, pendingMetaIo:{}", header->ctxVersion, numAsyncIoIssued);
     }
     else
     {
         allocatorCtx->FinalizeIo(reinterpret_cast<AllocatorIoCtx*>(ctx));
+        POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "AllocatorCtx file stored, version:{}, pendingMetaIo:{}", header->ctxVersion, numAsyncIoIssued);
     }
+
     delete[] ctx->buffer;
     delete ctx;
     assert(numAsyncIoIssued > 0);
     numAsyncIoIssued--;
     if (numAsyncIoIssued == 0)
     {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "allocatorCtx meta file Flushed");
+        POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "Complete to flush allocator files");
         flushInProgress = false;
         EventSchedulerSingleton::Instance()->EnqueueEvent(flushCallback);
     }
@@ -369,16 +420,16 @@ void
 ContextManager::_UpdateSectionInfo()
 {
     int currentOffset = 0;
-    for (int section = 0; section < NUM_SEGMENT_CTX_SECTION; section++) // segmentCtx file
+    int section = 0;
+    for (section = 0; section < NUM_SEGMENT_CTX_SECTION; section++) // segmentCtx file
     {
         int size = segmentCtx->GetSectionSize(section);
         fileIoManager->UpdateSectionInfo(SEGMENT_CTX, section, segmentCtx->GetSectionAddr(section), size, currentOffset);
         currentOffset += size;
     }
 
-    int section = 0;
     currentOffset = 0;
-    for (; section < NUM_ALLOCATION_INFO; section++) // allocatorCtx file
+    for (section = 0; section < NUM_ALLOCATION_INFO; section++) // allocatorCtx file
     {
         int size = allocatorCtx->GetSectionSize(section);
         fileIoManager->UpdateSectionInfo(ALLOCATOR_CTX, section, allocatorCtx->GetSectionAddr(section), size, currentOffset);
@@ -389,6 +440,14 @@ ContextManager::_UpdateSectionInfo()
     {
         int size = wbStripeCtx->GetSectionSize(section);
         fileIoManager->UpdateSectionInfo(ALLOCATOR_CTX, section, wbStripeCtx->GetSectionAddr(section), size, currentOffset);
+        currentOffset += size;
+    }
+
+    currentOffset = 0;
+    for (section = 0; section < NUM_REBUILD_CTX_SECTION; section++) // rebuildCtx file
+    {
+        int size = rebuildCtx->GetSectionSize(section);
+        fileIoManager->UpdateSectionInfo(REBUILD_CTX, section, rebuildCtx->GetSectionAddr(section), size, currentOffset);
         currentOffset += size;
     }
 }
@@ -452,7 +511,10 @@ ContextManager::_FlushAsync(int owner, EventSmartPtr callbackEvent)
     int size = fileIoManager->GetFileSize(owner);
     char* buf = new char[size]();
     _PrepareBuffer(owner, buf);
-    flushCallback = callbackEvent;
+    if (callbackEvent != nullptr)
+    {
+        flushCallback = callbackEvent;
+    }
     int ret = fileIoManager->StoreAsync(owner, buf, std::bind(&ContextManager::_FlushCompletedThenCB, this, std::placeholders::_1));
     if (ret != 0)
     {
@@ -466,7 +528,7 @@ ContextManager::_FlushAsync(int owner, EventSmartPtr callbackEvent)
 void
 ContextManager::_PrepareBuffer(int owner, char* buf)
 {
-    fileOwner[owner]->BeforeFlush(0 /*all Header*/, nullptr);
+    fileOwner[owner]->BeforeFlush(0 /*all Header*/, buf); // segmentCtx, allocatorCtx, rebuildCtx
     if (owner == SEGMENT_CTX)
     {
         std::lock_guard<std::mutex> lock(segmentCtx->GetSegmentCtxLock());

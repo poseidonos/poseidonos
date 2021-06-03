@@ -43,12 +43,12 @@
 
 namespace pos
 {
-Stripe::Stripe(bool withDataBuffer_)
+Stripe::Stripe(ReverseMapPack* revMap, bool withDataBuffer_)
 : asTailArrayIdx(UINT32_MAX),
   vsid(UINT32_MAX),
   wbLsid(UINT32_MAX),
   userLsid(UINT32_MAX),
-  revMapPack(nullptr),
+  revMapPack(revMap),
   finished(true),
   remaining(0),
   referenceCount(0),
@@ -62,7 +62,7 @@ Stripe::Stripe(bool withDataBuffer_)
 }
 
 Stripe::Stripe(bool withDataBuffer_, std::string arrayName)
-: Stripe(withDataBuffer_)
+: Stripe(nullptr, withDataBuffer_)
 {
     IArrayInfo* iArrayInfo = (ArrayMgr::Instance()->GetArrayInfo(arrayName));
     const PartitionLogicalSize* udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);

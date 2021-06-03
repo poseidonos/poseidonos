@@ -26,7 +26,7 @@ TEST(AllocatorFileIoManager, Init_TestInitAndClose)
     {
         file[i] = new NiceMock<MockMetaFileIntf>("aa", "bb");
     }
-    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo, "");
+    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo);
     // when 1.
     fileManager.Init();
     // given 1.
@@ -47,7 +47,7 @@ TEST(AllocatorFileIoManager, UpdateSectionInfo_TestSimpleSetter)
     {
         file[i] = new NiceMock<MockMetaFileIntf>("aa", "bb");
     }
-    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo, "");
+    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo);
     // when
     fileManager.UpdateSectionInfo(0, 0, nullptr, 0, 0);
     for (int i = 0; i < NUM_FILES; i++)
@@ -65,7 +65,7 @@ TEST(AllocatorFileIoManager, LoadSync_TestFileLoadWhenFileExistOrNot)
     {
         file[i] = new NiceMock<MockMetaFileIntf>("aa", "bb");
     }
-    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo, "");
+    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo);
     char* buf = new char[100];
     // given 1.
     EXPECT_CALL(*file[0], DoesFileExist).WillOnce(Return(false));
@@ -115,7 +115,7 @@ TEST(AllocatorFileIoManager, StoreSync_TestSimpleCaller)
     {
         file[i] = new NiceMock<MockMetaFileIntf>("aa", "bb");
     }
-    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo, "");
+    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo);
     char* buf = new char[100];
     EXPECT_CALL(*file[0], IssueIO);
     // when
@@ -137,7 +137,7 @@ TEST(AllocatorFileIoManager, StoreAsync_TestSimpleCaller)
     {
         file[i] = new NiceMock<MockMetaFileIntf>("aa", "bb");
     }
-    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo, "");
+    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo);
     char* buf = new char[100];
     // given 1.
     EXPECT_CALL(*file[0], GetFd).WillOnce(Return(0));
@@ -168,7 +168,7 @@ TEST(AllocatorFileIoManager, LoadSectionData_)
     {
         file[i] = new NiceMock<MockMetaFileIntf>("aa", "bb");
     }
-    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo, "");
+    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo);
     char bufSrc[100];
     char bufDst[100];
     bufSrc[0] = 'a';
@@ -198,7 +198,7 @@ TEST(AllocatorFileIoManager, CopySectionData_)
     {
         file[i] = new NiceMock<MockMetaFileIntf>("aa", "bb");
     }
-    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo, "");
+    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo);
     char bufSrc[100];
     char bufDst[100];
     bufSrc[0] = 'a';
@@ -229,7 +229,7 @@ TEST(AllocatorFileIoManager, GetFileSize_TestSimpleGetter)
     {
         file[i] = new NiceMock<MockMetaFileIntf>("aa", "bb");
     }
-    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo, "");
+    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo);
     // when
     int ret = fileManager.GetFileSize(0);
     delete addrInfo;
@@ -248,7 +248,7 @@ TEST(AllocatorFileIoManager, GetSectionAddr_TestSimpleGetter)
     {
         file[i] = new NiceMock<MockMetaFileIntf>("aa", "bb");
     }
-    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo, "");
+    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo);
     fileManager.UpdateSectionInfo(0, 0, (char*)100, 10, 0);
     // when
     char* ret = fileManager.GetSectionAddr(0, 0);
@@ -270,7 +270,7 @@ TEST(AllocatorFileIoManager, GetSectionSize_)
     {
         file[i] = new NiceMock<MockMetaFileIntf>("aa", "bb");
     }
-    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo, "");
+    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo);
     fileManager.UpdateSectionInfo(0, 0, (char*)100, 10, 0);
     // when
     int ret = fileManager.GetSectionSize(0, 0);
@@ -292,7 +292,7 @@ TEST(AllocatorFileIoManager, GetSectionOffset_)
     {
         file[i] = new NiceMock<MockMetaFileIntf>("aa", "bb");
     }
-    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo, "");
+    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo);
     fileManager.UpdateSectionInfo(0, 0, (char*)100, 10, 20);
     // when
     int ret = fileManager.GetSectionOffset(0, 0);

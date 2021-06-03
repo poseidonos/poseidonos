@@ -58,7 +58,6 @@ public:
     virtual int FlushPendingActiveStripes(void) = 0;
 
     virtual int PrepareRebuild(void) = 0;
-    virtual int StopRebuilding(void) = 0;
 };
 
 } // namespace pos

@@ -35,7 +35,6 @@
 namespace pos
 {
 AllocatorIoCtx::AllocatorIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset, uint64_t len, char* buf, MetaIoCbPtr cb)
-: segmentCnt(-1)
 {
     opcode = op;
     fd = fdesc;

@@ -183,15 +183,15 @@ TEST(ArrayComponents, RebuildDone_)
     NiceMock<MockStateManager> mockStateManager;
     NiceMock<MockIArrayInfo> mockIArrayInfo;
     MockAllocator* mockAllocator = new MockAllocator(nullptr, nullptr, nullptr, nullptr, &mockIArrayInfo, nullptr);
-    MockIWBStripeAllocator mockIwbStripeAllocator;
+    MockIContextManager mockIContextManager;
 
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr,
         nullptr, nullptr, nullptr, nullptr, mockAllocator, nullptr, nullptr, mockMetaFsFactory);
 
     std::string ARRAY_NAME = "mock-array";
     EXPECT_CALL(mockIArrayInfo, GetName).WillRepeatedly(Return(ARRAY_NAME));
-    EXPECT_CALL(*mockAllocator, GetIWBStripeAllocator).WillOnce(Return(&mockIwbStripeAllocator));
-    EXPECT_CALL(mockIwbStripeAllocator, StopRebuilding).Times(1);
+    EXPECT_CALL(*mockAllocator, GetIContextManager).WillOnce(Return(&mockIContextManager));
+    EXPECT_CALL(mockIContextManager, StopRebuilding).Times(1);
 
     // When
     arrayComps.RebuildDone();

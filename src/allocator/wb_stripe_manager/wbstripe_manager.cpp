@@ -313,7 +313,7 @@ WBStripeManager::PrepareRebuild(void)
     blockManager->TurnOffBlkAllocation();
 
     // Check rebuildTargetSegments data structure
-    int ret = _MakeRebuildTarget();
+    int ret = contextManager->MakeRebuildTarget();
     if (ret <= NO_REBUILD_TARGET_USER_SEGMENT)
     {
         blockManager->TurnOnBlkAllocation();
@@ -347,26 +347,6 @@ WBStripeManager::PrepareRebuild(void)
     return 0;
 }
 
-int
-WBStripeManager::StopRebuilding(void)
-{
-    std::unique_lock<std::mutex> lock(contextManager->GetCtxLock());
-    POS_TRACE_INFO(EID(ALLOCATOR_START), "@StopRebuilding");
-
-    RebuildCtx* rbCtx = contextManager->GetRebuildCtx();
-    if (rbCtx->GetTargetSegmentCnt() == 0)
-    {
-        POS_TRACE_INFO(EID(ALLOCATOR_REBUILD_TARGET_SET_EMPTY), "Rebuild was already done or not happen");
-        return -EID(ALLOCATOR_REBUILD_TARGET_SET_EMPTY);
-    }
-
-    // Clear rebuildTargetSegments
-    rbCtx->ClearRebuildTargetSegments();
-    rbCtx->FlushRebuildCtx();
-    rbCtx->SetUnderRebuildSegmentId(UINT32_MAX);
-    return 0;
-}
-
 Stripe*
 WBStripeManager::GetStripe(StripeId wbLsid)
 {
@@ -374,55 +354,13 @@ WBStripeManager::GetStripe(StripeId wbLsid)
 }
 
 //------------------------------------------------------------------------------
-
-int
-WBStripeManager::_MakeRebuildTarget(void)
-{
-    POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@MakeRebuildTarget()");
-    RebuildCtx* rbCtx = contextManager->GetRebuildCtx();
-    AllocatorCtx* allocCtx = contextManager->GetAllocatorCtx();
-
-    if (rbCtx->IsRebuidTargetSegmentsEmpty() == false)
-    {
-        POS_TRACE_WARN(EID(ALLOCATOR_REBUILD_TARGET_SET_NOT_EMPTY), "rebuildTargetSegments is NOT empty!");
-        for (auto it = rbCtx->RebuildTargetSegmentsBegin(); it != rbCtx->RebuildTargetSegmentsEnd(); ++it)
-        {
-            POS_TRACE_WARN(EID(ALLOCATOR_REBUILD_TARGET_SET_NOT_EMPTY), "residue was segmentId:{}", *it);
-        }
-        rbCtx->ClearRebuildTargetSegments();
-    }
-
-    // Pick non-free segments and make rebuildTargetSegments
-    SegmentId segmentId = 0;
-    while (true)
-    {
-        segmentId = allocCtx->GetUsedSegment(segmentId);
-        if (segmentId == UNMAP_SEGMENT)
-        {
-            break;
-        }
-
-        auto pr = rbCtx->EmplaceRebuildTargetSegment(segmentId);
-        POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "segmentId:{} is inserted as target to rebuild", segmentId);
-        if (pr.second == false)
-        {
-            POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "segmentId:{} is already in set", segmentId);
-            return -EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE);
-        }
-        ++segmentId;
-    }
-
-    rbCtx->FlushRebuildCtx(); // Store target segments info to MFS
-    return rbCtx->GetTargetSegmentCnt();
-}
-
 int
 WBStripeManager::_FlushOnlineStripes(std::vector<StripeId>& vsidToCheckFlushDone)
 {
     // Flush Online Stripes Beyond Target Segment
     RebuildCtx* rbCtx = contextManager->GetRebuildCtx();
 
-    for (auto it = rbCtx->RebuildTargetSegmentsBegin(); it != rbCtx->RebuildTargetSegmentsEnd(); ++it)
+    for (auto it = rbCtx->GetRebuildTargetSegmentsBegin(); it != rbCtx->GetRebuildTargetSegmentsEnd(); ++it)
     {
         StripeId startVsid = *it * addrInfo->GetstripesPerSegment();
         StripeId endVsid = startVsid + addrInfo->GetstripesPerSegment();

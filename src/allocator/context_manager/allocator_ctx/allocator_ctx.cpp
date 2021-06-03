@@ -44,7 +44,7 @@
 #include "src/logger/logger.h"
 namespace pos
 {
-AllocatorCtx::AllocatorCtx(BitMapMutex* allocSegBitmap_, SegmentStates* segmentStates_, SegmentLock* segStateLocks_, AllocatorAddressInfo* info_, std::string arrayName_)
+AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap_, SegmentStates* segmentStates_, SegmentLock* segStateLocks_, AllocatorAddressInfo* info_, std::string arrayName_)
 : ctxStoredVersion(0),
   ctxDirtyVersion(0),
   addrInfo(info_),
@@ -60,10 +60,18 @@ AllocatorCtx::AllocatorCtx(BitMapMutex* allocSegBitmap_, SegmentStates* segmentS
     ctxHeader.ctxVersion = 0;
     prevSsdLsid = 0;
     currentSsdLsid = 0;
+
+    if (header != nullptr)
+    {
+        ctxHeader.sig = header->sig;
+        ctxHeader.numValidSegment = header->numValidSegment;
+        ctxHeader.numValidWbLsid = header->numValidWbLsid;
+        ctxHeader.ctxVersion = header->ctxVersion;
+    }
 }
 
 AllocatorCtx::AllocatorCtx(AllocatorAddressInfo* info, std::string arrayName)
-: AllocatorCtx(nullptr, nullptr, nullptr, info, arrayName)
+: AllocatorCtx(nullptr, nullptr, nullptr, nullptr, info, arrayName)
 {
 }
 
@@ -85,6 +93,8 @@ AllocatorCtx::Init(void)
     }
     segStateLocks = new SegmentLock[numSegment];
     ctxHeader.ctxVersion = 0;
+    ctxStoredVersion = 0;
+    ctxDirtyVersion = 0;
 }
 
 void
@@ -241,16 +251,17 @@ AllocatorCtx::GetTotalSegmentsCount(void)
 void
 AllocatorCtx::AfterLoad(char* buf)
 {
-    if (reinterpret_cast<AllocatorCtxHeader*>(buf)->sig != SIG_ALLOCATOR_CTX)
+    if (ctxHeader.sig != SIG_ALLOCATOR_CTX)
     {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "allocator ctx file signature is not matched:{}", ctxHeader.sig);
+        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "AllocatorCtx file signature is not matched:{}", ctxHeader.sig);
         assert(false);
     }
     else
     {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "allocator ctx file Integrity check SUCCESS:{}, {}", ctxHeader.ctxVersion, ctxHeader.numValidSegment);
+        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "AllocatorCtx file Integrity check SUCCESS:{}, {}", ctxHeader.ctxVersion, ctxHeader.numValidSegment);
     }
     allocSegBitmap->SetNumBitsSet(ctxHeader.numValidSegment);
+    ctxDirtyVersion = ctxHeader.ctxVersion + 1;
 }
 
 void
@@ -263,7 +274,7 @@ AllocatorCtx::BeforeFlush(int section, char* buf)
 void
 AllocatorCtx::FinalizeIo(AsyncMetaFileIoCtx* ctx)
 {
-    ctxStoredVersion = ctxHeader.ctxVersion;
+    ctxStoredVersion = ((AllocatorCtxHeader*)ctx->buffer)->ctxVersion;
 }
 
 char*

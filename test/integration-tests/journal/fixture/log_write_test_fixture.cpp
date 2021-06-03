@@ -117,7 +117,7 @@ LogWriteTestFixture::WriteStripeLog(StripeId vsid, StripeAddr oldAddr, StripeAdd
 
     MpageList dirty = (mapper->GetStripeMapMock())->GetDirtyStripeMapPages(vsid);
 
-    Stripe* stripe = new Stripe(true);
+    Stripe* stripe = new Stripe(nullptr, true);
     stripe->SetVsid(vsid);
     stripe->SetUserLsid(newAddr.stripeId);
 

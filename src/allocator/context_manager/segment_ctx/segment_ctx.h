@@ -46,7 +46,8 @@ namespace pos
 class SegmentCtx : public IAllocatorFileIoClient
 {
 public:
-    SegmentCtx(SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_);
+    SegmentCtx(void) = default;
+    SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_);
     SegmentCtx(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~SegmentCtx(void);
     virtual void Init(void);
@@ -67,14 +68,13 @@ public:
     virtual int GetOccupiedStripeCount(SegmentId segId);
     virtual int IncreaseOccupiedStripeCount(SegmentId segId);
 
-    virtual bool IsSegmentCtxIo(char* pBuf);
     virtual SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
     virtual std::mutex& GetSegmentCtxLock(void) { return segCtxLock;}
 
     virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
-    static const uint32_t SIG_SEGMENT_CTX = 0xECECECEC;
+    static const uint32_t SIG_SEGMENT_CTX = 0xAFAFAFAF;
 
 private:
     SegmentCtxHeader ctxHeader;
