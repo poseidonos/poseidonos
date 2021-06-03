@@ -58,6 +58,37 @@ public:
     void SegmentAllocated(void);
     void StripeAllocated(void);
 
+    // For unit test
+    inline uint32_t
+    GetNumUpdatedBlockMaps(void)
+    {
+        return numUpdatedBlockMaps;
+    }
+
+    inline bool
+    GetStripeMapReplayed(void)
+    {
+        return stripeMapReplayed;
+    }
+
+    inline uint32_t
+    GetNumInvalidatedBlocks(void)
+    {
+        return numInvalidatedBlocks;
+    }
+
+    inline bool
+    GetSegmentAllocated(void)
+    {
+        return segmentAllocated;
+    }
+
+    inline bool
+    GetStripeAllocated(void)
+    {
+        return stripeAllocated;
+    }
+
 private:
     static const BlkOffset INVALID_OFFSET = UINT64_MAX;
     uint32_t numUpdatedBlockMaps;

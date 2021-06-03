@@ -190,6 +190,19 @@ StripeLogWriteStatus::Print(void)
     POS_TRACE_DEBUG(eventId, os.str());
 }
 
+// For unit test
+void
+StripeLogWriteStatus::SetFirstBlockOffset(BlkOffset offset)
+{
+    firstBlockOffset = offset;
+}
+
+void
+StripeLogWriteStatus::SetLastBlockOffset(BlkOffset offset)
+{
+    lastBlockOffset = offset;
+}
+
 std::pair<BlkOffset, BlkOffset>
 StripeLogWriteStatus::GetBlockOffsetRange(void)
 {

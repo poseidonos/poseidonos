@@ -62,6 +62,9 @@ public:
     bool IsFlushed(void) { return stripeFlushed == true; }
 
     // For unit test
+    void SetFirstBlockOffset(BlkOffset offset);
+    void SetLastBlockOffset(BlkOffset offset);
+
     std::pair<BlkOffset, BlkOffset> GetBlockOffsetRange(void);
     std::pair<BlkAddr, BlkAddr> GetRbaRange(void);
     uint32_t GetNumFoundBlocks(void);
