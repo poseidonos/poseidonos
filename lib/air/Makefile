@@ -35,9 +35,7 @@ endif
 DEFINE += -DAIR_H_GEN=\"$(TOP)/src/api/Air_c.h\"
 DEFINE += -DAIR_CPP_GEN=\"$(TOP)/src/api/Air_c.cpp\"
 
-all : release
-
-release : clean lib cli tui
+all : lib
 
 lib : makedir gen_c_style_interface
 	@echo [config file]: $(CFG_FILE)

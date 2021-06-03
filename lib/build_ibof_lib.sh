@@ -191,8 +191,10 @@ build_air(){
     if [ -d "${AIR_SOURCE}" ]; then
         cd ${AIR_SOURCE}
         log_normal "[Build $AIR_SOURCE]"
-		make clean
-        make -j4 release
+	make clean
+	make -j4 lib
+	make -j4 cli
+	make -j4 tui
         ret=$?
         if [ $ret = 0 ]; then
             log_normal "[Build $AIR_SOURCE].. Done"
