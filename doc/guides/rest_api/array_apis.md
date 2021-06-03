@@ -58,7 +58,7 @@
     }
 }
 ```
-### REST response - failed by even 2504
+### REST response - failed by event 2504
 ```
 {
     "rid": "3cfc6d1e-6595-4aad-829a-bfca0d831069",
