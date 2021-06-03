@@ -36,7 +36,7 @@
     }
 }
 ```
-### REST response - success
+### REST response - successful
 ```
 {
     "rid": "cc3eed56-3478-4180-af0b-eac6b88f264f",
@@ -89,7 +89,7 @@
 | URL          | http://{{host}}/api/ibofos/v1/array/{{arrayName}} |
 
 
-### REST response - success
+### REST response - successful
 ```
 {
     "rid": "f0755583-73c9-436c-9e10-c53d36418fa9",
@@ -141,7 +141,7 @@
 | Type         | RAW                                                       |
 | URL          | http://{{host}}/api/ibofos/v1/array/{{arrayName}}/devices |
 
-### REST response - success
+### REST response - successful
 ```
 {
     "rid": "6e787e27-1964-44da-bcdf-b5f44ffbd1a3",
@@ -224,7 +224,7 @@
 | Type         | RAW                                                                      |
 | URL          | http://{{host}}/api/ibofos/v1/array/{{arrayName}}/devices/{{deviceName}} |
 
-### REST response - success
+### REST response - successful
 ```
 {
     "rid": "2e7818c7-34e4-4668-9663-b5670a4678a1",
