@@ -58,7 +58,7 @@
     }
 }
 ```
-REST response - failed by even 2504
+### REST response - failed by even 2504
 ```
 {
     "rid": "3cfc6d1e-6595-4aad-829a-bfca0d831069",
@@ -89,7 +89,7 @@ REST response - failed by even 2504
 | URL          | http://{{host}}/api/ibofos/v1/array/{{arrayName}} |
 
 
-REST response - success
+### REST response - success
 ```
 {
     "rid": "f0755583-73c9-436c-9e10-c53d36418fa9",
@@ -111,7 +111,7 @@ REST response - success
     }
 }
 ```
-REST response - failed
+### REST response - failed
 ```
 {
     "rid": "6426aca5-2d99-496a-9341-7e1e962dcceb",
@@ -141,7 +141,7 @@ REST response - failed
 | Type         | RAW                                                       |
 | URL          | http://{{host}}/api/ibofos/v1/array/{{arrayName}}/devices |
 
-REST response - success
+### REST response - success
 ```
 {
     "rid": "6e787e27-1964-44da-bcdf-b5f44ffbd1a3",
@@ -194,7 +194,7 @@ REST response - success
 | Type         | RAW                                                       |
 | URL          | http://{{host}}/api/ibofos/v1/{{arrayName}}/POSArray/load |
 
-REST response - failed
+### REST response - failed
 ```
 {
     "rid": "c6c54c1f-13ef-46f6-9e0c-3d1a4a1b2ee8",
@@ -224,7 +224,8 @@ REST response - failed
 | Type         | RAW                                                                      |
 | URL          | http://{{host}}/api/ibofos/v1/array/{{arrayName}}/devices/{{deviceName}} |
 
-REST response - success
+### REST response - success
+```
 {
     "rid": "2e7818c7-34e4-4668-9663-b5670a4678a1",
     "lastSuccessTime": 1597910417,
@@ -245,7 +246,7 @@ REST response - success
     }
 }
 ```
-REST response - failed
+### REST response - failed
 ```
 {
     "rid": "6827ac78-40e2-47f6-a3b9-1a10224e694c",
