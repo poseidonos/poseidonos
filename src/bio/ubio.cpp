@@ -410,6 +410,9 @@ Ubio::NeedRecovery(void) // TODO: will be moved. AWIBOF-2751
     uBlock = arrayDev->GetUblock();
     if (uBlock == nullptr)
     {
+        POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_INVALID_DEVICE;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
         assert(0);
     }
 

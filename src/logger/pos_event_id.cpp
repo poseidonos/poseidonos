@@ -170,6 +170,7 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::UBIO_INVALID_VOLUME_ID, "Invalid volume ID for Ubio"},
             {POS_EVENT_ID::UBIO_INVALID_VSA, "Invalid VSA for Ubio"},
             {POS_EVENT_ID::UBIO_INVALID_ARRAY_NAME, "Invalid Array Name for Ubio"},
+            {POS_EVENT_ID::UBIO_INVALID_DEVICE, "Invalid UblockDevice for Ubio"},
             {POS_EVENT_ID::UBIO_NO_COMPLETION_FOR_FRONT_END_EVENT, "No explicit implementation for front-end complete type"},
             {POS_EVENT_ID::UBIO_REMAINING_COUNT_ERROR, "Completion count exceeds remaining count"},
             {POS_EVENT_ID::UBIO_REQUEST_NULL_BUFFER, "Requested buffer of Ubio is null"},
