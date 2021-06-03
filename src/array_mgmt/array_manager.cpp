@@ -387,7 +387,7 @@ ArrayManager::AbrExists(string arrayName)
 
     if (result == 0)
     {
-        for (auto abr : abrList)
+        for (auto const &abr : abrList)
         {
             if (abr.arrayName == arrayName)
             {
