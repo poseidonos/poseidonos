@@ -64,14 +64,28 @@ ArrayServiceLayer::Setter(void)
     return this;
 }
 
-void
+bool
 ArrayServiceLayer::Register(string array, ArrayTranslator trans,
     ArrayRecover recover, IDeviceChecker* checker)
 {
-    ioTranslator->Register(array, trans);
-    ioRecover->Register(array, recover);
-    ioLocker->Register(array);
-    deviceChecker->Register(array, checker);
+    bool ret = true;
+    ret = ioTranslator->Register(array, trans);
+    if (!ret)
+    {
+        return ret;
+    }
+    ret = ioRecover->Register(array, recover);
+    if (!ret)
+    {
+        return ret;
+    }
+    ret = ioLocker->Register(array);
+    if (!ret)
+    {
+        return ret;
+    }
+    ret = deviceChecker->Register(array, checker);
+    return ret;
 }
 
 void

@@ -41,7 +41,7 @@ IOTranslator::~IOTranslator(void)
 {
 }
 
-void
+bool
 IOTranslator::Register(string array, ArrayTranslator trans)
 {
     if (translators.find(array) == translators.end())
@@ -49,8 +49,10 @@ IOTranslator::Register(string array, ArrayTranslator trans)
         POS_TRACE_INFO((int)POS_EVENT_ID::TRANSLATOR_DEBUG_MSG,
             "IOTranslator::Register, array:{} size:{}",
             array, trans.size());
-        translators.emplace(array, trans);
+        auto ret = translators.emplace(array, trans);
+        return ret.second;
     }
+    return true;
 }
 
 void

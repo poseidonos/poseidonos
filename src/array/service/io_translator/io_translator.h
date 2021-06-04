@@ -52,7 +52,7 @@ public:
         PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
     int Convert(string array, PartitionType part,
         list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
-    void Register(string array, ArrayTranslator trans);
+    bool Register(string array, ArrayTranslator trans);
     void Unregister(string array);
 
 private:

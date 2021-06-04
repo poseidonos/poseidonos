@@ -22,7 +22,7 @@ TEST(RebuildHandler, RebuildHandler_testConstructor)
 TEST(RebuildHandler, Execute_testIfTrueIsReturnedWhenTriggerRebuildFails)
 {
     // Given
-    MockArray mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    MockArray mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     MockArrayDevice mockArrayDevice(nullptr);
     RebuildHandler rh(&mockArray, &mockArrayDevice);
 
@@ -38,7 +38,7 @@ TEST(RebuildHandler, Execute_testIfTrueIsReturnedWhenTriggerRebuildFails)
 TEST(RebuildHandler, Execute_testIfFalseIsReturnedWhenTriggerRebuildSucceeds)
 {
     // Given
-    MockArray mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    MockArray mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     MockArrayDevice mockArrayDevice(nullptr);
     RebuildHandler rh(&mockArray, &mockArrayDevice);
 

@@ -50,7 +50,7 @@ class IORecover : public IIORecover
 public:
     virtual ~IORecover(void);
     int GetRecoverMethod(string array, UbioSmartPtr ubio, RecoverMethod& out) override;
-    void Register(string array, ArrayRecover recover);
+    bool Register(string array, ArrayRecover recover);
     void Unregister(string array);
 
 private:

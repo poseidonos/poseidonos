@@ -37,15 +37,17 @@
 
 namespace pos
 {
-void
+bool
 IODeviceChecker::Register(string array, IDeviceChecker* checker)
 {
     if (_Find(array) == nullptr)
     {
         POS_TRACE_INFO((int)POS_EVENT_ID::DEV_CHECKER_DEBUG_MSG,
             "IODeviceChecker::Register, array:{}", array);
-        devCheckers.emplace(array, checker);
+        auto ret = devCheckers.emplace(array, checker);
+        return ret.second;
     }
+    return true;
 }
 
 void

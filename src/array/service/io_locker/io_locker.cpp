@@ -36,14 +36,16 @@
 
 namespace pos
 {
-void
+bool
 IOLocker::Register(string array)
 {
     if (_Find(array) == nullptr)
     {
         StripeLocker* locker = new StripeLocker();
-        lockers.emplace(array, locker);
+        auto ret = lockers.emplace(array, locker);
+        return ret.second;
     }
+    return true;
 }
 
 void

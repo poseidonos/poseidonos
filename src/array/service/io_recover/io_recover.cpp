@@ -41,15 +41,17 @@ IORecover::~IORecover(void)
 {
 }
 
-void
+bool
 IORecover::Register(string array, ArrayRecover recov)
 {
     if (recoveries.find(array) == recoveries.end())
     {
         POS_TRACE_INFO((int)POS_EVENT_ID::RECOVER_DEBUG_MSG,
             "IORecover::Register, array:{} size:{}", array, recov.size());
-        recoveries.emplace(array, recov);
+        auto ret = recoveries.emplace(array, recov);
+        return ret.second;
     }
+    return true;
 }
 
 void

@@ -49,14 +49,15 @@ namespace pos
 const int Array::LOCK_ACQUIRE_FAILED = -1;
 
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
-: Array(name, rbdr, abr, new ArrayDeviceManager(DeviceManagerSingleton::Instance()), DeviceManagerSingleton::Instance(),
-      new PartitionManager(name, abr), new ArrayState(iState), new ArrayInterface(), EventSchedulerSingleton::Instance())
+: Array(name, rbdr, abr, new ArrayDeviceManager(DeviceManagerSingleton::Instance()),
+      DeviceManagerSingleton::Instance(), new PartitionManager(name, abr), new ArrayState(iState),
+      new ArrayInterface(), EventSchedulerSingleton::Instance(), ArrayService::Instance())
 {
 }
 
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
     ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr, PartitionManager* ptnMgr, ArrayState* arrayState,
-    ArrayInterface* arrayInterface, EventScheduler* eventScheduler)
+    ArrayInterface* arrayInterface, EventScheduler* eventScheduler, ArrayServiceLayer* arrayService)
 : state(arrayState),
   intf(arrayInterface),
   ptnMgr(ptnMgr),
@@ -65,7 +66,8 @@ Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
   sysDevMgr(sysDevMgr) /*assign with devMgr*/,
   rebuilder(rbdr),
   abrControl(abr),
-  eventScheduler(eventScheduler)
+  eventScheduler(eventScheduler),
+  arrayService(arrayService)
 {
     pthread_rwlock_init(&stateLock, nullptr);
 }
@@ -229,7 +231,13 @@ Array::Init(void)
     {
         goto error;
     }
-    _RegisterService();
+
+    ret = _RegisterService();
+    if (ret != 0)
+    {
+        goto error;
+    }
+
     state->SetMount();
     // pthread_rwlock_unlock(&stateLock);
     POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} was successfully mounted", name_);
@@ -275,9 +283,9 @@ Array::Delete(void)
     if (state->IsBroken())
     {
         int waitcount = 0;
-        while(shutdownFlag == 0) // Broken State automatically triggers Shutdown to all array components
+        while (shutdownFlag == 0) // Broken State automatically triggers Shutdown to all array components
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG , "Wait for shutdown done");
+            POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Wait for shutdown done");
             usleep(100000);
             waitcount++;
 
@@ -797,17 +805,23 @@ Array::ResumeRebuild(ArrayDevice* target)
     return true;
 }
 
-void
+int
 Array::_RegisterService(void)
 {
-    ArrayService::Instance()->Setter()->Register(name_, intf->GetTranslator(),
+    auto ret = arrayService->Setter()->Register(name_, intf->GetTranslator(),
         intf->GetRecover(), this);
+    if (ret)
+    {
+        return 0;
+    }
+
+    return (int)POS_EVENT_ID::ARRAY_SERVICE_REGISTRATION_FAIL;
 }
 
 void
 Array::_UnregisterService(void)
 {
-    ArrayService::Instance()->Setter()->Unregister(name_);
+    arrayService->Setter()->Unregister(name_);
 }
 
 void

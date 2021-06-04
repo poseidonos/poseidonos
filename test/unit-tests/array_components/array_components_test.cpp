@@ -41,7 +41,7 @@ TEST(ArrayComponents, Create_testIfRemoveStateIsInvokedWhenCreationFails)
 {
     // Given
     MockStateManager mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory);
 
@@ -59,7 +59,7 @@ TEST(ArrayComponents, Create_testIfGetStateAndSubscribeIsInvokedWhenCreationSucc
 {
     // Given
     MockStateManager mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     NiceMock<MockStateControl> mockStateControl;
     MockVolumeManager* mockVolMgr = new MockVolumeManager(nullptr, &mockStateControl);
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, &mockStateControl, mockArray,
@@ -80,7 +80,7 @@ TEST(ArrayComponents, Load_testIfLoadFailureIsPropagated)
 {
     // Given
     MockStateManager mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory);
 
@@ -99,7 +99,7 @@ TEST(ArrayComponents, Load_testIfSuccessfulLoadSetsMountSequence)
 {
     // Given
     MockStateManager mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     NiceMock<MockStateControl> mockStateControl;
     MockVolumeManager* mockVolMgr = new MockVolumeManager(nullptr, &mockStateControl);
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, &mockStateControl, mockArray,
@@ -132,7 +132,7 @@ TEST(ArrayComponents, Delete_testIfDeleteResultIsPropagated)
 {
     // Given
     NiceMock<MockStateManager> mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory);
 
@@ -203,7 +203,7 @@ TEST(ArrayComponents, GetArray_testGetter)
 {
     // Given
     NiceMock<MockStateManager> mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory);
 
@@ -215,4 +215,3 @@ TEST(ArrayComponents, GetArray_testGetter)
 }
 
 } // namespace pos
-

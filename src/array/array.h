@@ -49,6 +49,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/address_type.h"
 #include "src/include/array_config.h"
+#include "src/array/service/array_service_layer.h"
 
 #ifdef _ADMIN_ENABLED
 #include "src/array/device/i_array_device_manager.h"
@@ -71,7 +72,8 @@ class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker
 public:
     Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState);
     Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr,
-        PartitionManager* ptnMgr, ArrayState* arrayState, ArrayInterface* arrayInterface, EventScheduler* eventScheduler);
+        PartitionManager* ptnMgr, ArrayState* arrayState, ArrayInterface* arrayInterface, EventScheduler* eventScheduler,
+        ArrayServiceLayer* arrayservice);
     virtual ~Array(void);
     virtual int Init(void) override;
     virtual void Dispose(void) override;
@@ -124,7 +126,7 @@ private:
     void _RebuildDone(RebuildResult result);
     void _DetachSpare(ArrayDevice* target);
     void _DetachData(ArrayDevice* target);
-    void _RegisterService(void);
+    int _RegisterService(void);
     void _UnregisterService(void);
     void _CheckRebuildNecessity(void);
     void _ResetMeta(void);
@@ -143,6 +145,7 @@ private:
     IAbrControl* abrControl = nullptr;
     EventScheduler* eventScheduler = nullptr;
     int shutdownFlag = 0;
+    ArrayServiceLayer* arrayService;
 };
 } // namespace pos
 #endif // ARRAY_H_

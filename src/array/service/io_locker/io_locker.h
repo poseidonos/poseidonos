@@ -45,7 +45,7 @@ class IOLocker : public IIOLocker
 {
 public:
     virtual ~IOLocker(void) {}
-    void Register(string array);
+    bool Register(string array);
     void Unregister(string array);
     bool TryLock(string array, StripeId val) override;
     void Unlock(string array, StripeId val) override;
