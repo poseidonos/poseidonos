@@ -73,7 +73,7 @@ public:
     virtual int MakeRebuildTarget(void);
     virtual int StopRebuilding(void);
 
-     virtual std::mutex& GetLock(void) { return rebuildLock; } // for UT
+    virtual std::mutex& GetLock(void) { return rebuildLock; } // for UT
 
     static const uint32_t SIG_REBUILD_CTX = 0xCFCFCFCF;
 
