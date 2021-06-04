@@ -31,38 +31,35 @@
  */
 
 #pragma once
+
 #include <string>
 #include <vector>
 
-#include "src/network/nvmf_volume.hpp"
-#include "src/sys_event/volume_event.h"
+#include "spdk/pos_volume.h"
+
 using namespace std;
-
-class NvmfVolume;
-
 namespace pos
 {
-class NvmfTargetEventSubscriber : public VolumeEvent
+/*
+ * NvmfVolume : NvmfVolume abstraction
+ * */
+class NvmfVolume
 {
 public:
-    NvmfTargetEventSubscriber(NvmfVolume* vol, std::string arrayName);
-    ~NvmfTargetEventSubscriber(void);
+    NvmfVolume(void);
+    virtual ~NvmfVolume(void);
+    void SetuNVMfIOHandler(unvmf_io_handler handler);
+    unvmf_io_handler GetuNVMfIOHandler(void);
 
-    bool VolumeCreated(string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName) override;
-    bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte, string arrayName) override;
-    bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName) override;
-    bool VolumeUnmounted(string volName, int volID, string arrayName) override;
-    bool VolumeLoaded(string volName, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, string arrayName) override;
-    bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw, string arrayName) override;
-    void VolumeDetached(vector<int> volList, string arrayName) override;
-
-    void CopyVolumeInfo(char* destInfo, const char* srcInfo, int len);
+    virtual void VolumeCreated(struct pos_volume_info* info) = 0;
+    virtual void VolumeDeleted(struct pos_volume_info* info) = 0;
+    virtual void VolumeMounted(struct pos_volume_info* info) = 0;
+    virtual void VolumeUnmounted(struct pos_volume_info* info) = 0;
+    virtual void VolumeUpdated(struct pos_volume_info* info) = 0;
+    virtual void VolumeDetached(vector<int>& volList, std::string arrayName) = 0;
 
 private:
-    NvmfVolume* volume;
-    std::string arrayName;
-    const uint32_t MIB_IN_BYTE = 1024 * 1024;
-    const uint32_t KIOPS = 1000;
+    unvmf_io_handler ioHandler = {nullptr, nullptr};
 };
 
 } // namespace pos

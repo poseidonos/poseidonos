@@ -35,7 +35,7 @@
 #include <string>
 
 #include "src/volume/volume_interface.h"
-#include "src/network/nvmf_target.hpp"
+#include "src/network/nvmf_target.h"
 
 namespace pos
 {

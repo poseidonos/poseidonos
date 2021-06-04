@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "nvmf_volume.hpp"
+#include "src/network/nvmf_volume.h"
 
 #include <iostream>
 

@@ -35,9 +35,9 @@
 #include <string>
 
 #include "src/include/partition_type.h"
-#include "src/network/nvmf_volume.hpp"
-#include "src/network/nvmf_volume_pos.hpp"
-#include "src/network/nvmf_target_event_subscriber.hpp"
+#include "src/network/nvmf_volume.h"
+#include "src/network/nvmf_volume_pos.h"
+#include "src/network/nvmf_target_event_subscriber.h"
 
 namespace pos
 {

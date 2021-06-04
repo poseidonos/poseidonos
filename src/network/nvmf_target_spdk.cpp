@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "nvmf_target_spdk.hpp"
+#include "src/network/nvmf_target_spdk.h"
 
 #include <unistd.h>
 
@@ -41,11 +41,11 @@
 #include "spdk/nvme.h"
 #include "spdk/nvmf.h"
 #include "spdk/stdinc.h"
+#include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/network/nvmf_target.h"
+#include "src/network/nvmf_volume_pos.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/spdk.hpp"
-#include "src/event_scheduler/spdk_event_scheduler.h"
-#include "src/network/nvmf_target.hpp"
-#include "src/network/nvmf_volume_pos.hpp"
 
 extern struct spdk_nvmf_tgt* g_spdk_nvmf_tgt;
 
@@ -350,7 +350,7 @@ TargetListenDone(void* arg, int status)
     if (status == NvmfCallbackStatus::SUCCESS)
     {
         spdk_nvmf_subsystem_add_listener(subsystem, trid,
-                     ListenDoneCallback, nullptr);
+            ListenDoneCallback, nullptr);
     }
     else
     {

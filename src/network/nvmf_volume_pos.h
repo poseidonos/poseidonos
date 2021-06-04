@@ -31,35 +31,53 @@
  */
 
 #pragma once
-
-#include <vector>
+#include <atomic>
 #include <string>
+#include <vector>
 
-#include "spdk/pos_volume.h"
+#include "src/network/nvmf_target.h"
+#include "src/network/nvmf_volume.h"
 
 using namespace std;
 namespace pos
 {
-/*
- * NvmfVolume : NvmfVolume abstraction
- * */
-class NvmfVolume
+struct volumeListInfo
+{
+    string arrayName;
+    string subnqn;
+    vector<int> vols;
+};
+
+class NvmfVolumePos final : public NvmfVolume
 {
 public:
-    NvmfVolume(void);
-    virtual ~NvmfVolume(void);
-    void SetuNVMfIOHandler(unvmf_io_handler handler);
-    unvmf_io_handler GetuNVMfIOHandler(void);
+    NvmfVolumePos(void);
+    ~NvmfVolumePos(void);
 
-    virtual void VolumeCreated(struct pos_volume_info* info) = 0;
-    virtual void VolumeDeleted(struct pos_volume_info* info) = 0;
-    virtual void VolumeMounted(struct pos_volume_info* info) = 0;
-    virtual void VolumeUnmounted(struct pos_volume_info* info) = 0;
-    virtual void VolumeUpdated(struct pos_volume_info* info) = 0;
-    virtual void VolumeDetached(vector<int>& volList, std::string arrayName) = 0;
+    void VolumeCreated(struct pos_volume_info* info) override;
+    void VolumeDeleted(struct pos_volume_info* info) override;
+    void VolumeMounted(struct pos_volume_info* info) override;
+    void VolumeUnmounted(struct pos_volume_info* info) override;
+    void VolumeUpdated(struct pos_volume_info* info) override;
+    void VolumeDetached(vector<int>& volList, string arrayName) override;
+
+    static uint32_t VolumeDetachCompleted(void);
+    static bool WaitRequestedVolumesDetached(uint32_t volCnt);
 
 private:
-    unvmf_io_handler ioHandler = {nullptr, nullptr};
+    static NvmfTarget target;
+    static atomic<bool> detachFailed;
+    static atomic<uint32_t> volumeDetachedCnt;
+
+    static void _VolumeCreateHandler(void* arg1, void* arg2);
+    static void _VolumeMountHandler(void* arg1, void* arg2);
+    static void _VolumeUnmountHandler(void* arg1, void* arg2);
+    static void _VolumeDeleteHandler(void* arg1, void* arg2);
+    static void _VolumeUpdateHandler(void* arg1, void* arg2);
+    static void _VolumeDetachHandler(void* arg1, void* arg2);
+    static void _NamespaceDetachedHandler(void* cbArg, int status);
+    static void _NamespaceDetachedAllHandler(void* cbArg, int status);
+    static void _CompleteVolumeUnmount(struct pos_volume_info* vInfo);
 };
 
 } // namespace pos

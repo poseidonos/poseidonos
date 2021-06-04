@@ -44,7 +44,7 @@
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 #include "src/master_context/version_provider.h"
-#include "src/network/nvmf_target_event_subscriber.hpp"
+#include "src/network/nvmf_target_event_subscriber.h"
 #include "src/event_scheduler/event.h"
 #include "src/io/frontend_io/unvmf_io_handler.h"
 #include "src/io_submit_interface/i_io_submit_handler.h"

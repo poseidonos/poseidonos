@@ -44,7 +44,7 @@
 #include "src/io_scheduler/io_worker.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
-#include "src/network/nvmf_volume_pos.hpp"
+#include "src/network/nvmf_volume_pos.h"
 #include "src/qos/qos_context.h"
 #include "src/qos/context_factory.h"
 #include "src/qos/internal_manager.h"
