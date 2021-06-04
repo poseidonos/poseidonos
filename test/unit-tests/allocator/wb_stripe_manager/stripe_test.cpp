@@ -80,7 +80,6 @@ TEST(Stripe, GetUserLsid_TestSimpleGetter)
     Stripe stripe(revMap, false);
     // when
     stripe.GetUserLsid();
-
 }
 
 TEST(Stripe, SetUserLsid_TestSimpleSetter)
