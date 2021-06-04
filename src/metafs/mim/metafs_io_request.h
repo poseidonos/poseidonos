@@ -82,21 +82,18 @@ class MetaFsIoRequest : public MetaFsRequestBase
 {
 public:
     MetaFsIoRequest(void);
+    virtual ~MetaFsIoRequest(void);
 
-    ~MetaFsIoRequest(void);
-
-    void CopyUserReqMsg(const MetaFsIoRequest& req);
-    void SetValidForIoExecution(void);
-    bool IsValid(void);
-    void SetFileIoRange(void);
-    bool IsSyncIO(void);
-    bool IsIoCompleted(void);
-    bool GetError(void);
-    void SuspendUntilIoCompletion(void);
-    void NotifyIoCompletionToClient(void);
-    void SetError(bool err);
-    void SetRetryFlag(void);
-    bool
+    virtual void CopyUserReqMsg(const MetaFsIoRequest& req);
+    virtual bool IsValid(void);
+    virtual bool IsSyncIO(void);
+    virtual bool IsIoCompleted(void);
+    virtual bool GetError(void);
+    virtual void SuspendUntilIoCompletion(void);
+    virtual void NotifyIoCompletionToClient(void);
+    virtual void SetError(bool err);
+    virtual void SetRetryFlag(void);
+    virtual bool
     GetRetryFlag(void)
     {
         return retryFlag;
