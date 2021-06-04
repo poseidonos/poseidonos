@@ -25,6 +25,7 @@ public:
     MOCK_METHOD(uint64_t, FindNextZero, (), (override));
     MOCK_METHOD(bool, IsValidBit, (uint64_t bitOffset), (override));
     MOCK_METHOD(bool, Set, (BitMap & inputBitMap), (override));
+    MOCK_METHOD(uint64_t, GetNumBitsSet, (), (override));
 };
 
 class MockBitMapMutex : public BitMapMutex

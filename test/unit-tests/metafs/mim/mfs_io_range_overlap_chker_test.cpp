@@ -1,6 +1,9 @@
+#include "test/unit-tests/lib/bitmap_mock.h"
 #include "src/metafs/mim/mfs_io_range_overlap_chker.h"
 #include "src/metafs/mim/metafs_io_request.h"
 #include <gtest/gtest.h>
+
+using ::testing::Return;
 
 namespace pos
 {
@@ -76,6 +79,25 @@ TEST(MetaFsIoRangeOverlapChker, MetaFsIoRangeOverlapChker_NormalWrite)
 
     result = checker->IsRangeOverlapConflicted(&req);
     EXPECT_EQ(result, false);
+
+    delete checker;
+}
+
+TEST(MetaFsIoRangeOverlapChker, OutstandingCount_Positive)
+{
+    const MetaLpnType maxLpn = 100;
+
+    MockBitMap* bitmap = new MockBitMap(maxLpn);
+    MetaFsIoRangeOverlapChker* checker = new MetaFsIoRangeOverlapChker(bitmap);
+
+    EXPECT_CALL(*bitmap, GetNumBitsSet).WillOnce(Return(0));
+    EXPECT_EQ(checker->GetOutstandingMioCount(), 0);
+
+    EXPECT_CALL(*bitmap, GetNumBitsSet).WillOnce(Return(1));
+    EXPECT_EQ(checker->GetOutstandingMioCount(), 1);
+
+    EXPECT_CALL(*bitmap, GetNumBitsSet).WillOnce(Return(2));
+    EXPECT_EQ(checker->GetOutstandingMioCount(), 2);
 
     delete checker;
 }

@@ -36,8 +36,13 @@
 namespace pos
 {
 MetaFsIoRangeOverlapChker::MetaFsIoRangeOverlapChker(void)
+: outstandingIoMap(nullptr)
 {
-    outstandingIoMap = nullptr;
+}
+
+MetaFsIoRangeOverlapChker::MetaFsIoRangeOverlapChker(BitMap* outstandingIoMap)
+: outstandingIoMap(outstandingIoMap)
+{
 }
 
 MetaFsIoRangeOverlapChker::~MetaFsIoRangeOverlapChker(void)

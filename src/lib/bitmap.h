@@ -46,7 +46,7 @@ public:
     virtual ~BitMap(void);
 
     uint64_t GetNumBits(void);
-    uint64_t GetNumBitsSet(void);
+    virtual uint64_t GetNumBitsSet(void);
     bool SetNumBitsSet(uint64_t numBits);
     uint64_t GetNumEntry(void);
     uint64_t* GetMapAddr(void);

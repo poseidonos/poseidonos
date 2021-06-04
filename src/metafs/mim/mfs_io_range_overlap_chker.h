@@ -44,6 +44,7 @@ class MetaFsIoRangeOverlapChker
 {
 public:
     MetaFsIoRangeOverlapChker(void);
+    MetaFsIoRangeOverlapChker(BitMap* outstandingIoMap);
     ~MetaFsIoRangeOverlapChker(void);
     void Init(MetaLpnType maxLpn);
 
