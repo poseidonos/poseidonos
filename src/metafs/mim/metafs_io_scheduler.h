@@ -50,7 +50,7 @@ public:
 
     void RegisterMioHandler(ScalableMetaIoWorker* mioHandler);
     bool IssueRequest(MetaFsIoRequest* reqMsg);
-    bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
+    virtual bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
     int GetMioHandlerCount(void);
 
     virtual bool AddArrayInfo(std::string arrayName);

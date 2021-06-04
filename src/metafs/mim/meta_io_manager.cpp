@@ -60,6 +60,15 @@ MetaIoManager::MetaIoManager(void)
     ioScheduler = MetaFsServiceSingleton::Instance()->GetScheduler();
 }
 
+MetaIoManager::MetaIoManager(MetaFsIoScheduler* ioScheduler)
+: ioScheduler(ioScheduler),
+  totalMetaIoCoreCnt(0),
+  mioHandlerCount(0),
+  metaStorage(nullptr)
+{
+    _InitReqHandler();
+}
+
 MetaIoManager::~MetaIoManager(void)
 {
     Finalize();
@@ -152,6 +161,12 @@ void
 MetaIoManager::SetMss(MetaStorageSubsystem* metaStorage)
 {
     this->metaStorage = metaStorage;
+}
+
+MetaStorageSubsystem*
+MetaIoManager::GetMss(void)
+{
+    return metaStorage;
 }
 
 POS_EVENT_ID

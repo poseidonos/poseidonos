@@ -54,6 +54,7 @@ class MetaIoManager : public MetaFsManagerBase
 {
 public:
     MetaIoManager(void);
+    MetaIoManager(MetaFsIoScheduler* ioScheduler);
     virtual ~MetaIoManager(void);
 
     const char* GetModuleName(void) override;
@@ -64,6 +65,7 @@ public:
     virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
     void SetMss(MetaStorageSubsystem* metaStorage);
+    MetaStorageSubsystem* GetMss(void);
     void Finalize(void);
 
     bool AddArrayInfo(std::string arrayName);
