@@ -45,3 +45,52 @@ def is_online(arrayinfo):
         return True
     else:
         return False
+
+def is_data_device(arrayinfo, devicename):
+    data = json.loads(arrayinfo)
+    for item in data['Response']['result']['data']['devicelist']:
+        if item['name'] == devicename and item['type'] == "DATA":
+            return True
+    return False
+
+def is_spare_device(arrayinfo, devicename):
+    data = json.loads(arrayinfo)
+    for item in data['Response']['result']['data']['devicelist']:
+        if item['name'] == devicename and item['type'] == "SPARE":
+            return True
+    return False
+
+def is_buffer_device(arrayinfo, devicename):
+    data = json.loads(arrayinfo)
+    for item in data['Response']['result']['data']['devicelist']:
+        if item['name'] == devicename and item['type'] == "BUFFER":
+            return True
+    return False
+
+def is_array_device(arrayinfo, devicename):
+    data = json.loads(arrayinfo)
+    for item in data['Response']['result']['data']['devicelist']:
+        if item['name'] == devicename :
+            return True
+    return False
+
+def is_system_device(listdev, devicename):
+    data = json.loads(listdev)
+    for item in data['Response']['result']['data']['devicelist']:
+        if item['name'] == devicename and item['class'] == "SYSTEM":
+            return True
+    return False
+
+def is_device_exists(listdev, devicename):
+    data = json.loads(listdev)
+    for item in data['Response']['result']['data']['devicelist']:
+        if item['name'] == devicename:
+            return True
+    return False
+
+def is_ssd(listdev, devicename):
+    data = json.loads(listdev)
+    for item in data['Response']['result']['data']['devicelist']:
+        if item['name'] == devicename and item['type'] == "SSD":
+            return True
+    return False
