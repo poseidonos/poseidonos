@@ -60,6 +60,8 @@ public:
 
     virtual void PrintStats(int groupId);
 
+    bool IsEnabled(void);
+
 private:
     void _Reset(int groupId);
 

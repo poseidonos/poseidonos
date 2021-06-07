@@ -47,7 +47,7 @@ public:
     virtual ~LogWriteContext(void);
 
     // This two methods are for log write statistics
-    LogHandlerInterface* GetLog(void);
+    virtual LogHandlerInterface* GetLog(void);
     virtual int GetLogGroupId(void);
 
     virtual void SetBufferAllocated(uint64_t offset, int groupId, uint32_t seqNum);

@@ -162,4 +162,10 @@ LogWriteStatistics::_FindStripeLogs(int groupId, StripeId vsid)
     return stripeStats;
 }
 
+bool
+LogWriteStatistics::IsEnabled(void)
+{
+    return enabled;
+}
+
 } // namespace pos

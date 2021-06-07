@@ -50,6 +50,7 @@ class CallbackSequenceController;
 class MapUpdateLogWriteContext : public LogWriteContext
 {
 public:
+    MapUpdateLogWriteContext(void) = default;
     MapUpdateLogWriteContext(LogHandlerInterface* log, MapPageList dirtyList,
         EventSmartPtr callback, LogBufferWriteDoneNotifier* target,
         CallbackSequenceController* sequencer);
