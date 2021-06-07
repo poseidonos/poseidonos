@@ -1,0 +1,32 @@
+
+posgdb
+
+PLEASE EXECUTE IN FOS CALLSTACK (NOT IN SPDK or ANOTHER LIB STACK)
+custom gdb command for utilizing debugging.
+
+source posgdb.py
+posgdb [command] [subcommand]
+
+1) posgdb debuginfo
+   show debug info and simple report 
+
+2) posgdb pending io
+   show pending ios for every thread and devices
+
+3) posgdb pending ubio
+   show pending ubio when debug option is on.
+
+4) posgdb pending iocontext
+   show pending io context when debug option is on.
+
+5) posgdb callback [address]
+   show callback and its callee recursively
+
+6) posgdb pending callback
+   show pending callback when debug option is on.
+
+7) posgdb dumpbuffer [address]
+   show object buffer queue obtained by dump module
+
+8) posgdb log memory
+   in memory (dump) log

@@ -38,6 +38,9 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/lib/system_timeout_checker.h"
 #include "src/logger/logger.h"
+#include "src/dump/dump_module.h"
+#include "src/dump/dump_module.hpp"
+#include "src/dump/dump_buffer.h"
 
 namespace pos
 {
@@ -45,6 +48,12 @@ namespace pos
 const uint32_t Callback::CALLER_FRAME = 0;
 // 30 sec, default timeout
 const uint64_t Callback::DEFAULT_TIMEOUT_NS = 30ULL * 1000 * 1000 * 1000;
+static const char* DUMP_NAME = "Callback_Error";
+static const bool DEFAULT_DUMP_ON = true;
+
+DumpModule<DumpBuffer> dumpCallbackError(DUMP_NAME,
+    DumpModule<DumpBuffer>::MAX_ENTRIES_FOR_CALLBACK_ERROR,
+    DEFAULT_DUMP_ON);
 
 Callback::Callback(bool isFrontEnd, uint32_t weight)
 : Event(isFrontEnd),
@@ -55,7 +64,8 @@ Callback::Callback(bool isFrontEnd, uint32_t weight)
   weight(weight),
   callee(nullptr),
   timeoutChecker(nullptr),
-  returnAddress(nullptr)
+  returnAddress(nullptr),
+  executed(false)
 {
     if (DumpSharedModuleInstanceEnable::debugLevelEnable)
     {
@@ -67,6 +77,28 @@ Callback::Callback(bool isFrontEnd, uint32_t weight)
 
 Callback::~Callback(void)
 {
+    if (unlikely(executed == false))
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_DESTROY_WITHOUT_EXECUTED;
+        POS_TRACE_WARN(
+            eventId,
+            PosEventId::GetString(eventId),
+            static_cast<uint32_t>(GetEventType()));
+        DumpBuffer buffer(this, sizeof(Callback), &dumpCallbackError);
+        dumpCallbackError.AddDump(buffer, 0);
+    }
+
+    if (unlikely(errorCount > 0))
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_DESTROY_WITH_ERROR;
+        POS_TRACE_WARN(
+            eventId,
+            PosEventId::GetString(eventId),
+            static_cast<uint32_t>(GetEventType()),
+            static_cast<uint32_t>(_GetMostCriticalError()));
+        DumpBuffer buffer(this, sizeof(Callback), &dumpCallbackError);
+        dumpCallbackError.AddDump(buffer, 0);
+    }
     if (DumpSharedModuleInstanceEnable::debugLevelEnable && timeoutChecker != nullptr)
     {
         if (timeoutChecker->CheckTimeout())
@@ -76,6 +108,10 @@ Callback::~Callback(void)
                 POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_TIMEOUT;
                 POS_TRACE_DEBUG_IN_MEMORY(
                     ModuleInDebugLogDump::CALLBACK_TIMEOUT,
+                    eventId,
+                    PosEventId::GetString(eventId),
+                    returnAddress);
+                POS_TRACE_DEBUG(
                     eventId,
                     PosEventId::GetString(eventId),
                     returnAddress);
@@ -96,6 +132,7 @@ Callback::Execute(void)
     if (done)
     {
         _InvokeCallee();
+        executed = true;
     }
 
     return done;

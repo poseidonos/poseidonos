@@ -52,6 +52,7 @@ enum class DumpSharedPtrType
 {
     UBIO,
     IO_CONTEXT,
+    CALLBACK,
     MAX_DUMP_PTR
 };
 

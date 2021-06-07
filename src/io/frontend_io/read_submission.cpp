@@ -47,12 +47,6 @@
 
 namespace pos
 {
-static const char* DUMP_NAME = "ReadSubmission_Constructor_VolumeIo";
-static const bool DEFAULT_DUMP_ON = false;
-
-DumpModule<VolumeIo> dumpReadVolumeIo(DUMP_NAME,
-    DumpModule<VolumeIo>::MAX_ENTRIES_FOR_READHANDLER_CONSTRUCTOR_UBIO,
-    DEFAULT_DUMP_ON);
 
 ReadSubmission::ReadSubmission(VolumeIoSmartPtr volumeIo, BlockAlignment* blockAlignment_, Merger* merger_, Translator* translator_)
 : Event(true),
@@ -73,7 +67,6 @@ ReadSubmission::ReadSubmission(VolumeIoSmartPtr volumeIo, BlockAlignment* blockA
     {
         translator = new Translator{volumeIo->GetVolumeId(), blockAlignment->GetHeadBlock(), blockAlignment->GetBlockCount(), volumeIo->GetArrayName(), true};
     }
-    dumpReadVolumeIo.AddDump(*volumeIo, volumeIo->GetSectorRba());
 }
 
 ReadSubmission::~ReadSubmission()

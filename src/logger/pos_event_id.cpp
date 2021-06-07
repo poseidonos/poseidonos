@@ -90,6 +90,8 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::CALLBACK_INVALID_CALLEE, "Invalid callee for callback"},
             {POS_EVENT_ID::CALLBACK_INVALID_COUNT, "CompletionCount exceeds WaitingCount"},
             {POS_EVENT_ID::CALLBACK_TIMEOUT, "Callback Timeout. Caller : {}"},
+            {POS_EVENT_ID::CALLBACK_DESTROY_WITHOUT_EXECUTED, "Callback destroy without executed : {}"},
+            {POS_EVENT_ID::CALLBACK_DESTROY_WITH_ERROR, "Callback Error : {}"},
 
             {POS_EVENT_ID::EVENTFRAMEWORK_FAIL_TO_ALLOCATE_EVENT, "Fail to allocate spdk event"},
             {POS_EVENT_ID::EVENTFRAMEWORK_INVALID_EVENT, "Invalid Event to send"},

@@ -81,10 +81,7 @@ public:
     virtual bool IsEnable();
     virtual uint32_t GetPoolSize();
 
-    static const int MAX_ENTRIES_FOR_READHANDLER_CONSTRUCTOR_UBIO = 10;
-    static const int MAX_ENTRIES_FOR_WRITEHANDLER_CONSTRUCTOR_UBIO = 10;
-    static const int MAX_ENTRIES_FOR_AIO_ENDIO_MEMDUMP = 10;
-    static const int MAX_ENTRIES_FOR_WRITEHANDLER_CONSTRUCTOR_MEMDUMP = 10;
+    static const int MAX_ENTRIES_FOR_CALLBACK_ERROR = 10000; // temporary value
 
 protected:
     bool isEnabled;

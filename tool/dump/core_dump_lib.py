@@ -88,6 +88,11 @@ def check_time_zone(binary_info_file):
     except:
         return st
 
+def printout_timestamp(tv_sec, tv_usec, time_zone):
+    date = datetime.fromtimestamp(tv_sec, pytz.timezone(time_zone))
+    fmt = '%Y-%m-%d %H:%M:%S'
+    return (str(date.strftime(fmt)) + "." +\
+        ("%06ld" % tv_usec))
 
 def internal_parse_dump(gdb_input_str_vector, gdb_output_file):
     current_path = os.path.dirname(os.path.realpath(__file__))
@@ -107,22 +112,20 @@ def internal_parse_dump(gdb_input_str_vector, gdb_output_file):
                 first_number = int(line.split("$")[1].split(" ")[0])
                 module_index = 0
             else:
-                module_index = int(line.split("$")[1].split(" ")[0])-first_number
-        if ( "get() = " in line):
+                module_index = int(line.split("$")[1].split(" ")[0]) - first_number
+        if ("get() = " in line):
             laststr = line.split("\"")[1]
             printoutCount = printoutCount + 1
-        if ( "tv_sec = " in line):
+        if ("tv_sec = " in line):
             tv_sec = int(line.split()[2].rstrip(","))
             printoutCount = printoutCount + 1
-        if ( "tv_usec = " in line):
+        if ("tv_usec = " in line):
             tv_usec = int(line.split()[2].rstrip(","))
             printoutCount = printoutCount + 1
         if (printoutCount == 3):
-            date = datetime.fromtimestamp(tv_sec, pytz.timezone(time_zone))
             absolute_timestamp = tv_sec * 1000000 + tv_usec
-            fmt = '%Y-%m-%d %H:%M:%S'
-            f_out_str[absolute_timestamp] = (str(date.strftime(fmt))+ "."+\
-                ("%06ld" % tv_usec) + ("[%s]" % (logger_list[module_index])) + laststr + '\n')
+            f_out_str[absolute_timestamp] = printout_timestamp(tv_sec, tv_usec, time_zone) \
+                + ("[%s]" % (logger_list[module_index])) + laststr + '\n'
             printoutCount = 0
 
     for key, value in sorted(f_out_str.items()):

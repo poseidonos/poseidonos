@@ -34,17 +34,20 @@
 
 #include <atomic>
 #include <cstdint>
+#include <memory>
 
 #include "event.h"
 #include "src/include/io_error_type.h"
 #include "src/include/smart_ptr_type.h"
+#include "src/dump/dump_shared_ptr.h"
+#include "src/dump/dump_shared_ptr.hpp"
 #include "src/lib/bitmap.h"
 
 namespace pos
 {
 class SystemTimeoutChecker;
 
-class Callback : public Event
+class Callback : public Event, public DumpSharedPtr<Callback*, static_cast<int>(DumpSharedPtrType::CALLBACK)>
 {
 public:
     Callback(bool isFrontEnd, uint32_t weight = 1);
@@ -75,6 +78,7 @@ private:
     CallbackSmartPtr callee;
     SystemTimeoutChecker* timeoutChecker;
     void* returnAddress;
+    bool executed;
 
     static const uint32_t CALLER_FRAME;
     static const uint64_t DEFAULT_TIMEOUT_NS;
