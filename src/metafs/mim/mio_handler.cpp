@@ -115,6 +115,12 @@ MioHandler::~MioHandler(void)
     delete checkerBitmap;
 
     checkerMap.clear();
+
+    if (nullptr != ioCQ)
+        delete ioCQ;
+
+    if (nullptr != ioSQ)
+        delete ioSQ;
 }
 
 void

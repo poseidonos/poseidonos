@@ -75,8 +75,6 @@ public:
         delete arrayInfo;
         delete bottomhalfHandler;
         delete doneQ;
-        delete ioCQ;
-        delete ioSQ;
     }
 
 protected:
