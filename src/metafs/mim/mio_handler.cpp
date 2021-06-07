@@ -395,10 +395,22 @@ MioHandler::AddArrayInfo(std::string arrayName)
 bool
 MioHandler::RemoveArrayInfo(std::string arrayName)
 {
-    if (0 == checkerMap.erase(arrayName))
+    auto it = checkerMap.find(arrayName);
+    if (it == checkerMap.end())
         return false;
     else
+    {
+        uint32_t index = it->second;
+        checkerBitmap->ClearBit(index);
+        checkerMap.erase(arrayName);
+
+        for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
+        {
+            delete ioRangeOverlapChker[index][storage];
+            ioRangeOverlapChker[index][storage] = nullptr;
+        }
         return true;
+    }
 }
 
 void
