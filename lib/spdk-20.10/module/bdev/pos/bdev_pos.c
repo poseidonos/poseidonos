@@ -239,8 +239,8 @@ bdev_pos_check_iov_len(struct iovec *iovs, int iovcnt, size_t nbytes)
 
 static void
 bdev_pos_ramdisk_readv(struct pos_disk *mdisk, struct spdk_io_channel *ch,
-			struct pos_task *task,
-			struct iovec *iov, int iovcnt, size_t len, uint64_t offset)
+		       struct pos_task *task,
+		       struct iovec *iov, int iovcnt, size_t len, uint64_t offset)
 {
 	int64_t res = 0;
 	void *src = mdisk->pos_buf + offset;
@@ -273,8 +273,8 @@ bdev_pos_ramdisk_readv(struct pos_disk *mdisk, struct spdk_io_channel *ch,
 
 static void
 bdev_pos_ramdisk_writev(struct pos_disk *mdisk, struct spdk_io_channel *ch,
-			 struct pos_task *task,
-			 struct iovec *iov, int iovcnt, size_t len, uint64_t offset)
+			struct pos_task *task,
+			struct iovec *iov, int iovcnt, size_t len, uint64_t offset)
 {
 
 	int64_t res = 0;
@@ -307,10 +307,10 @@ bdev_pos_ramdisk_writev(struct pos_disk *mdisk, struct spdk_io_channel *ch,
 
 static int
 bdev_pos_unmap(struct pos_disk *mdisk,
-		struct spdk_io_channel *ch,
-		struct pos_task *task,
-		uint64_t offset,
-		uint64_t byte_count)
+	       struct spdk_io_channel *ch,
+	       struct pos_task *task,
+	       uint64_t offset,
+	       uint64_t byte_count)
 {
 	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
 	task->num_outstanding = 1;
@@ -321,7 +321,7 @@ bdev_pos_unmap(struct pos_disk *mdisk,
 
 static int64_t
 bdev_pos_flush(struct pos_disk *mdisk, struct pos_task *task,
-		uint64_t offset, uint64_t nbytes)
+	       uint64_t offset, uint64_t nbytes)
 {
 	spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task), SPDK_BDEV_IO_STATUS_SUCCESS);
 
@@ -354,22 +354,22 @@ static int _bdev_pos_ramdisk_rw(struct spdk_io_channel *ch, struct spdk_bdev_io 
 		}
 
 		bdev_pos_ramdisk_readv((struct pos_disk *)bdev_io->bdev->ctxt,
+				       ch,
+				       (struct pos_task *)bdev_io->driver_ctx,
+				       bdev_io->u.bdev.iovs,
+				       bdev_io->u.bdev.iovcnt,
+				       bdev_io->u.bdev.num_blocks * block_size,
+				       bdev_io->u.bdev.offset_blocks * block_size);
+		return 0;
+
+	case SPDK_BDEV_IO_TYPE_WRITE:
+		bdev_pos_ramdisk_writev((struct pos_disk *)bdev_io->bdev->ctxt,
 					ch,
 					(struct pos_task *)bdev_io->driver_ctx,
 					bdev_io->u.bdev.iovs,
 					bdev_io->u.bdev.iovcnt,
 					bdev_io->u.bdev.num_blocks * block_size,
 					bdev_io->u.bdev.offset_blocks * block_size);
-		return 0;
-
-	case SPDK_BDEV_IO_TYPE_WRITE:
-		bdev_pos_ramdisk_writev((struct pos_disk *)bdev_io->bdev->ctxt,
-					 ch,
-					 (struct pos_task *)bdev_io->driver_ctx,
-					 bdev_io->u.bdev.iovs,
-					 bdev_io->u.bdev.iovcnt,
-					 bdev_io->u.bdev.num_blocks * block_size,
-					 bdev_io->u.bdev.offset_blocks * block_size);
 		return 0;
 	}
 	return 0;
@@ -385,8 +385,7 @@ static void bdev_pos_io_complete(struct pos_io *io, int status)
 	}
 
 	uint32_t volume_id = io->volume_id;
-	if (0 != strncmp("POSArray", io->arrayName, 9))
-	{
+	if (0 != strncmp("POSArray", io->arrayName, 9)) {
 		volume_id += 0x100;
 	}
 	if (READ == io->ioType) {
@@ -399,8 +398,8 @@ static void bdev_pos_io_complete(struct pos_io *io, int status)
 }
 
 static int bdev_pos_eventq_readv(struct pos_disk *ibdev, struct spdk_io_channel *ch,
-				  struct spdk_bdev_io *bio,
-				  struct iovec *iov, int iovcnt, uint64_t byte_length, uint64_t byte_offset)
+				 struct spdk_bdev_io *bio,
+				 struct iovec *iov, int iovcnt, uint64_t byte_length, uint64_t byte_offset)
 {
 	SPDK_DEBUGLOG(bdev_pos, "read %lu blocks with offset %#lx (vid=%d)\n",
 		      byte_length, byte_offset, ibdev->volume.id);
@@ -418,6 +417,7 @@ static int bdev_pos_eventq_readv(struct pos_disk *ibdev, struct spdk_io_channel 
 			io->offset = byte_offset;
 			io->context = (void *)bio;
 			io->arrayName = ibdev->volume.array_name;
+			io->array_id = ibdev->volume.array_id;
 			io->complete_cb = bdev_pos_io_complete;
 			struct spdk_bdev_io *bdev_io = (struct spdk_bdev_io *)io->context;
 			assert(spdk_get_thread() == spdk_bdev_io_get_thread(bdev_io));
@@ -431,8 +431,8 @@ static int bdev_pos_eventq_readv(struct pos_disk *ibdev, struct spdk_io_channel 
 }
 
 static int bdev_pos_eventq_writev(struct pos_disk *ibdev, struct spdk_io_channel *ch,
-				   struct spdk_bdev_io *bio,
-				   struct iovec *iov, int iovcnt, uint64_t byte_length, uint64_t byte_offset)
+				  struct spdk_bdev_io *bio,
+				  struct iovec *iov, int iovcnt, uint64_t byte_length, uint64_t byte_offset)
 {
 	SPDK_DEBUGLOG(bdev_pos, "write %lu blocks with offset %#lx (vid=%d)\n",
 		      byte_length, byte_offset, ibdev->volume.id);
@@ -449,6 +449,7 @@ static int bdev_pos_eventq_writev(struct pos_disk *ibdev, struct spdk_io_channel
 			io->offset = byte_offset;
 			io->context = (void *)bio;
 			io->arrayName = ibdev->volume.array_name;
+			io->array_id = ibdev->volume.array_id;
 			io->complete_cb = bdev_pos_io_complete;
 			struct spdk_bdev_io *bdev_io = (struct spdk_bdev_io *)io->context;
 			assert(spdk_get_thread() == spdk_bdev_io_get_thread(bdev_io));
@@ -462,7 +463,7 @@ static int bdev_pos_eventq_writev(struct pos_disk *ibdev, struct spdk_io_channel
 }
 
 static int bdev_pos_eventq_flush(struct pos_disk *ibdev, struct spdk_io_channel *ch,
-				  struct spdk_bdev_io *bio)
+				 struct spdk_bdev_io *bio)
 {
 	SPDK_DEBUGLOG(bdev_pos, "flush with (vid=%d)\n", ibdev->volume.id);
 
@@ -478,6 +479,7 @@ static int bdev_pos_eventq_flush(struct pos_disk *ibdev, struct spdk_io_channel 
 			io->offset = 0;
 			io->context = (void *)bio;
 			io->arrayName = ibdev->volume.array_name;
+			io->array_id = ibdev->volume.array_id;
 			io->complete_cb = bdev_pos_io_complete;
 			return submit(io);
 		}
@@ -508,7 +510,7 @@ static int bdev_pos_eventq_get_smart_log_page(struct pos_disk *ibdev, struct spd
 	return 0;
 }
 static int bdev_pos_eventq_get_log_page(struct pos_disk *ibdev, struct spdk_io_channel *ch,
-		struct spdk_nvme_cmd *cmd, struct spdk_bdev_io *bio)
+					struct spdk_nvme_cmd *cmd, struct spdk_bdev_io *bio)
 {
 	uint8_t lid;
 	lid = cmd->cdw10 & 0xFF;
@@ -523,7 +525,7 @@ static int bdev_pos_eventq_get_log_page(struct pos_disk *ibdev, struct spdk_io_c
 	return -EINVAL;
 }
 static int bdev_pos_eventq_admin(struct pos_disk *ibdev, struct spdk_io_channel *ch,
-				  struct spdk_bdev_io *bio)
+				 struct spdk_bdev_io *bio)
 {
 	SPDK_DEBUGLOG(bdev_pos, "admin command handling (vid=%d)\n",
 		      ibdev->volume.id);
@@ -544,7 +546,7 @@ static int bdev_pos_eventq_admin(struct pos_disk *ibdev, struct spdk_io_channel 
 #endif
 
 static void bdev_pos_get_buf_cb(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io,
-				 bool success)
+				bool success)
 {
 	if (!success) {
 		spdk_bdev_io_complete(bdev_io, SPDK_BDEV_IO_STATUS_FAILED);
@@ -554,12 +556,12 @@ static void bdev_pos_get_buf_cb(struct spdk_io_channel *ch, struct spdk_bdev_io 
 	uint32_t block_size = bdev_io->bdev->blocklen;
 
 	ret = bdev_pos_eventq_readv((struct pos_disk *)bdev_io->bdev->ctxt,
-				     ch,
-				     bdev_io,
-				     bdev_io->u.bdev.iovs,
-				     bdev_io->u.bdev.iovcnt,
-				     bdev_io->u.bdev.num_blocks * block_size,
-				     bdev_io->u.bdev.offset_blocks * block_size);
+				    ch,
+				    bdev_io,
+				    bdev_io->u.bdev.iovs,
+				    bdev_io->u.bdev.iovcnt,
+				    bdev_io->u.bdev.num_blocks * block_size,
+				    bdev_io->u.bdev.offset_blocks * block_size);
 	if (spdk_likely(ret == 0)) {
 		return;
 	} else if (ret == -ENOMEM) {
@@ -573,10 +575,9 @@ static int _bdev_pos_eventq_rw(struct spdk_io_channel *ch, struct spdk_bdev_io *
 {
 	uint32_t block_size = bdev_io->bdev->blocklen;
 
-	struct pos_disk* disk = (struct pos_disk *)bdev_io->bdev->ctxt;
+	struct pos_disk *disk = (struct pos_disk *)bdev_io->bdev->ctxt;
 	uint32_t vol_id = disk->volume.id;
-	if (0 != strncmp("POSArray", disk->volume.array_name, 9))
-	{
+	if (0 != strncmp("POSArray", disk->volume.array_name, 9)) {
 		vol_id += 0x100;
 	}
 
@@ -591,12 +592,12 @@ static int _bdev_pos_eventq_rw(struct spdk_io_channel *ch, struct spdk_bdev_io *
 	case SPDK_BDEV_IO_TYPE_WRITE: {
 		AIRLOG(LAT_ARR_VOL_WRITE, AIR_BEGIN, vol_id, (uint64_t)bdev_io);
 		return bdev_pos_eventq_writev(disk,
-					       ch,
-					       bdev_io,
-					       bdev_io->u.bdev.iovs,
-					       bdev_io->u.bdev.iovcnt,
-					       bdev_io->u.bdev.num_blocks * block_size,
-					       bdev_io->u.bdev.offset_blocks * block_size);
+					      ch,
+					      bdev_io,
+					      bdev_io->u.bdev.iovs,
+					      bdev_io->u.bdev.iovcnt,
+					      bdev_io->u.bdev.num_blocks * block_size,
+					      bdev_io->u.bdev.offset_blocks * block_size);
 	}
 	}
 	return -EINVAL;
@@ -605,15 +606,15 @@ static int _bdev_pos_eventq_rw(struct spdk_io_channel *ch, struct spdk_bdev_io *
 static int _bdev_pos_eventq_flush(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
 {
 	return bdev_pos_eventq_flush((struct pos_disk *)bdev_io->bdev->ctxt,
-				      ch,
-				      bdev_io);
+				     ch,
+				     bdev_io);
 }
 #ifdef _ADMIN_ENABLED
 static int _bdev_pos_eventq_admin(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
 {
 	return bdev_pos_eventq_admin((struct pos_disk *)bdev_io->bdev->ctxt,
-				      ch,
-				      bdev_io);
+				     ch,
+				     bdev_io);
 }
 #endif
 
@@ -633,32 +634,32 @@ static int _bdev_pos_submit_request(struct spdk_io_channel *ch, struct spdk_bdev
 	}
 	case SPDK_BDEV_IO_TYPE_RESET:
 		return bdev_pos_reset((struct pos_disk *)bdev_io->bdev->ctxt,
-				       (struct pos_task *)bdev_io->driver_ctx);
+				      (struct pos_task *)bdev_io->driver_ctx);
 	case SPDK_BDEV_IO_TYPE_FLUSH: {
 		struct pos_disk *disk = (struct pos_disk *)bdev_io->bdev->ctxt;
 		if (disk->volume.pos_bdev_flush) {
 			return disk->volume.pos_bdev_flush(ch, bdev_io);
 		} else {
 			return bdev_pos_flush((struct pos_disk *)bdev_io->bdev->ctxt,
-					       (struct pos_task *)bdev_io->driver_ctx,
-					       bdev_io->u.bdev.offset_blocks * block_size,
-					       bdev_io->u.bdev.num_blocks * block_size);
+					      (struct pos_task *)bdev_io->driver_ctx,
+					      bdev_io->u.bdev.offset_blocks * block_size,
+					      bdev_io->u.bdev.num_blocks * block_size);
 		}
 	}
 	case SPDK_BDEV_IO_TYPE_UNMAP:
 		return bdev_pos_unmap((struct pos_disk *)bdev_io->bdev->ctxt,
-				       ch,
-				       (struct pos_task *)bdev_io->driver_ctx,
-				       bdev_io->u.bdev.offset_blocks * block_size,
-				       bdev_io->u.bdev.num_blocks * block_size);
+				      ch,
+				      (struct pos_task *)bdev_io->driver_ctx,
+				      bdev_io->u.bdev.offset_blocks * block_size,
+				      bdev_io->u.bdev.num_blocks * block_size);
 
 	case SPDK_BDEV_IO_TYPE_WRITE_ZEROES:
 		/* bdev_pos_unmap is implemented with a call to mem_cpy_fill which zeroes out all of the requested bytes. */
 		return bdev_pos_unmap((struct pos_disk *)bdev_io->bdev->ctxt,
-				       ch,
-				       (struct pos_task *)bdev_io->driver_ctx,
-				       bdev_io->u.bdev.offset_blocks * block_size,
-				       bdev_io->u.bdev.num_blocks * block_size);
+				      ch,
+				      (struct pos_task *)bdev_io->driver_ctx,
+				      bdev_io->u.bdev.offset_blocks * block_size,
+				      bdev_io->u.bdev.num_blocks * block_size);
 #ifdef _ADMIN_ENABLED
 	case SPDK_BDEV_IO_TYPE_NVME_ADMIN: {
 		struct pos_disk *disk = (struct pos_disk *)bdev_io->bdev->ctxt;
@@ -733,8 +734,8 @@ static int pos_bdev_create_cb(void *io_device, void *ctx_buf);
 static void pos_bdev_destroy_cb(void *io_device, void *ctx_buf);
 
 struct spdk_bdev *create_pos_disk(const char *volume_name, uint32_t volume_id,
-				   const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size,
-				   bool volume_type_in_memory, const char* array_name)
+				  const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size,
+				  bool volume_type_in_memory, const char *array_name, const uint32_t array_id)
 {
 	struct pos_disk	*mdisk;
 	int			rc;
@@ -784,6 +785,7 @@ struct spdk_bdev *create_pos_disk(const char *volume_name, uint32_t volume_id,
 	uint32_t array_length = strlen(array_name);
 	strncpy(mdisk->volume.array_name, array_name, array_length);
 	mdisk->volume.array_name[array_length] = '\0';
+	mdisk->volume.array_id = array_id;
 	mdisk->volume.id = volume_id;
 	mdisk->volume.size_mb = (num_blocks * block_size) / MB;
 	mdisk->disk.write_cache = 1;
@@ -869,7 +871,7 @@ static int bdev_pos_initialize(void)
 		volume_size_mb *= MB;
 		block_size = 512;
 		bdev = create_pos_disk(NULL, volume_id, NULL, volume_size_mb / block_size, block_size,
-					volume_type_in_memory, NULL);
+				       volume_type_in_memory, NULL, 0);
 		if (bdev == NULL) {
 			SPDK_ERRLOG("Could not create pos disk\n");
 			rc = EINVAL;
@@ -904,7 +906,7 @@ static void bdev_pos_register_poller(void *arg1)
 }
 
 void spdk_bdev_pos_register_io_handler(const char *bdev_name,
-					unvmf_io_handler handler)
+				       unvmf_io_handler handler)
 {
 	struct spdk_bdev *bdev = spdk_bdev_get_by_name(bdev_name);
 	if (bdev) {
@@ -999,14 +1001,14 @@ void reset_pos_volume_info(const char *bdev_name)
 
 struct spdk_bdev *spdk_bdev_create_pos_disk(const char *volume_name, uint32_t volume_id,
 		const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size,
-		bool volume_type_in_memory, const char *array_name)
+		bool volume_type_in_memory, const char *array_name, const uint32_t array_id)
 {
 	return create_pos_disk(volume_name, volume_id, bdev_uuid, num_blocks, block_size,
-				volume_type_in_memory, array_name);
+			       volume_type_in_memory, array_name, array_id);
 }
 
 void spdk_bdev_delete_pos_disk(struct spdk_bdev *bdev, spdk_delete_pos_complete cb_fn,
-				void *cb_arg)
+			       void *cb_arg)
 {
 	return delete_pos_disk(bdev, cb_fn, cb_arg);
 }

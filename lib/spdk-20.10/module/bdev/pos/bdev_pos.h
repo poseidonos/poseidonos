@@ -41,8 +41,8 @@
 typedef void (*spdk_delete_pos_complete)(void *cb_arg, int bdeverrno);
 
 struct spdk_bdev *create_pos_disk(const char *volume_name, uint32_t volume_id,
-				   const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size,
-				   bool volume_type_in_memory, const char *array_name);
+				  const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size,
+				  bool volume_type_in_memory, const char *array_name, const uint32_t array_id);
 
 void delete_pos_disk(struct spdk_bdev *bdev, spdk_delete_pos_complete cb_fn, void *cb_arg);
 int get_pos_volume_id(struct spdk_bdev *bdev);

@@ -66,7 +66,7 @@ VolumeQosUpdater::Do(string name, uint64_t maxiops, uint64_t maxbw)
     }
 
     bool res = VolumeEventPublisherSingleton::Instance()->NotifyVolumeUpdated(
-            vol->GetName(), vol->ID, vol->MaxIOPS(), vol->MaxBW(), arrayName);
+            vol->GetName(), vol->ID, vol->MaxIOPS(), vol->MaxBW(), arrayName, arrayID);
 
     if (res == false)
     {

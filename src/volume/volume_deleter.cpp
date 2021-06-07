@@ -80,7 +80,7 @@ VolumeDeleter::Do(string name)
     vol->SetValid(false); // remove tempo.
     vol->SetSubnqn("");
 
-    bool res = eventPublisher->NotifyVolumeDeleted(name, volID, volSize, arrayName);
+    bool res = eventPublisher->NotifyVolumeDeleted(name, volID, volSize, arrayName, arrayID);
 
     if (res == false)
     {

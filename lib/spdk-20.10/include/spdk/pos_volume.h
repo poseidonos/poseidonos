@@ -83,6 +83,7 @@ const char *get_attached_subsystem_nqn(const char *bdev_name);
 typedef int (*pos_bdev_io_handler)(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io);
 struct pos_volume_info {
 	uint32_t id;
+	uint32_t array_id;
 	char name[VOLUME_NAME_MAX_LEN + 1];
 	char nqn[SPDK_NVMF_NQN_MAX_LEN + 1];
 	char array_name[ARRAY_NAME_MAX_LEN + 1];
@@ -108,6 +109,7 @@ typedef void (*pos_bdev_io_complete_callback)(struct pos_io *io, int status);
 struct pos_io {
 	int ioType;
 	uint32_t volume_id;
+	uint32_t array_id;
 	struct iovec *iov;
 	int iovcnt;
 	uint64_t length;

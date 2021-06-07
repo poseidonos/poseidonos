@@ -38,25 +38,25 @@ namespace pos
 {
 VolumeEvent::~VolumeEvent(void)
 {
-    RemoveFromPublisher(arrayName);
+    RemoveFromPublisher(arrayName, arrayID);
 }
 
 void
-VolumeEvent::RegisterToPublisher(std::string arrayName)
+VolumeEvent::RegisterToPublisher(std::string arrayName, int arrayID)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName);
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayID);
 }
 
 void
-VolumeEvent::RegisterNvmfTargetToPublisher(std::string arrayName)
+VolumeEvent::RegisterNvmfTargetToPublisher(std::string arrayName, int arrayID)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterNvmfTargetSubscriber(this, arrayName);
+    VolumeEventPublisherSingleton::Instance()->RegisterNvmfTargetSubscriber(this, arrayName, arrayID);
 }
 
 void
-VolumeEvent::RemoveFromPublisher(std::string arrayName)
+VolumeEvent::RemoveFromPublisher(std::string arrayName, int arrayID)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName);
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayID);
 }
 
 } // namespace pos

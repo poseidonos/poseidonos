@@ -73,7 +73,7 @@ TEST(WriteCompletion, _DoSpecificJob_NullStripe)
     auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, "");
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockRBAStateManager> mockRBAStateManager("");
+    NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     StripeAddr stripeAddr;
     Stripe stripe(nullptr, true);
     VirtualBlkAddr startVsa;
@@ -98,7 +98,7 @@ TEST(WriteCompletion, _RequestFlush_DummyStripe)
     auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, "");
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockRBAStateManager> mockRBAStateManager("");
+    NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     StripeAddr stripeAddr;
     Stripe stripe(nullptr, true);
     VirtualBlkAddr startVsa;
@@ -123,7 +123,7 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
     auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, "");
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockRBAStateManager> mockRBAStateManager("");
+    NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     NiceMock<MockStripe> mockStripe;
     StripeAddr stripeAddr;
     VirtualBlkAddr startVsa;
@@ -149,7 +149,7 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
     auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, "");
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockRBAStateManager> mockRBAStateManager("");
+    NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     NiceMock<MockStripe> mockStripe;
     StripeAddr stripeAddr;
     Stripe stripe(nullptr, true);

@@ -73,13 +73,13 @@ struct nvmf_subsystem {
  */
 struct spdk_bdev *spdk_bdev_create_pos_disk(const char *volume_name, uint32_t volume_id,
 		const struct spdk_uuid *bdev_uuid, uint64_t num_blocks, uint32_t block_size,
-		bool volume_type_in_memory, const char *array_name);
+		bool volume_type_in_memory, const char *array_name, uint32_t array_id);
 
 /*
  * delete pos_bdev disk
  */
 void spdk_bdev_delete_pos_disk(struct spdk_bdev *bdev, pos_bdev_delete_callback cb_fn,
-				void *cb_arg);
+			       void *cb_arg);
 #ifdef __cplusplus
 }
 #endif

@@ -70,7 +70,7 @@ VolumeUnmounter::Do(string name)
     {
         volumeList.WaitUntilIdle(vol->ID, VolumeStatus::Mounted);
         res = VolumeEventPublisherSingleton::Instance()->NotifyVolumeUnmounted(
-            name, vol->ID, arrayName);
+            name, vol->ID, arrayName, arrayID);
 
 
         bool volumeUnmounted = NvmfVolumePos::WaitRequestedVolumesDetached(1);

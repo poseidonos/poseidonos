@@ -46,7 +46,7 @@ TEST(WriteSubmission, WriteSubmission_Constructor_Three)
     volumeIo->SetVolumeId(0);
     
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name);
+    NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name, 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
 
     // when
@@ -66,7 +66,7 @@ TEST(WriteSubmission, Execute_SingleBlock_ownershipFail)
     volumeIo->SetVolumeId(0);
 
     NiceMock<MockAllocatorService> mockAllocatorService;
-    NiceMock<MockRBAStateManager> mockRBAStateManager("");
+    NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
 
     // when
@@ -88,7 +88,7 @@ TEST(WriteSubmission, Execute_SingleBlock)
     std::string arr_name = "";
 
     NiceMock<MockAllocatorService> mockAllocatorService;
-    NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name);
+    NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name, 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
 
     VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arr_name));
@@ -119,7 +119,7 @@ TEST(WriteSubmission, Execute_AlgnedMultiBlock)
     std::string arr_name = "";
 
     NiceMock<MockAllocatorService> mockAllocatorService;
-    NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name);
+    NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name, 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
 
     VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arr_name));
@@ -150,7 +150,7 @@ TEST(WriteSubmission, Execute_MisAlgnedMultiBlock)
     std::string arr_name = "";
 
     NiceMock<MockAllocatorService> mockAllocatorService;
-    NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name);
+    NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name, 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
 
     VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arr_name));

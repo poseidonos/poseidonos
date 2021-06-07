@@ -19,7 +19,7 @@ TEST(NvmfTargetEventSubscriber, NvmfTargetEventSubscriber_Constructor_Stack)
     std::string arrayName("array");
 
     // When: Try to Create New NvmfTargetEventSubscriber object with 2 argument
-    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName);
+    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName, 0);
 
     // Then: Do Nothing
 }
@@ -31,7 +31,7 @@ TEST(NvmfTargetEventSubscriber, NvmfTargetEventSubscriber_Constructor_Heap)
     std::string arrayName("array");
 
     // When: Try to Create New NvmfTargetEventSubscriber object with 2 argument
-    NvmfTargetEventSubscriber* nvmfTargetEventSubscriber = new NvmfTargetEventSubscriber(&mockNvmfVolume, arrayName);
+    NvmfTargetEventSubscriber* nvmfTargetEventSubscriber = new NvmfTargetEventSubscriber(&mockNvmfVolume, arrayName, 0);
 
     // Then: Release Memory
     delete nvmfTargetEventSubscriber;
@@ -46,12 +46,12 @@ TEST(NvmfTargetEventSubscriber, VolumeCreated_Success)
     uint64_t maxIops = 0;
     uint64_t maxBw = 0;
     std::string arrayName("array");
-    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName);
+    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName, 0);
     bool actual, expected{true};
 
     // When: Call VolumeCreated
     ON_CALL(mockNvmfVolume, VolumeCreated(_)).WillByDefault(Return());
-    actual = nvmfTargetEventSubscriber.VolumeCreated(volName, volId, volSizeByte, maxIops, maxBw, arrayName);
+    actual = nvmfTargetEventSubscriber.VolumeCreated(volName, volId, volSizeByte, maxIops, maxBw, arrayName, 0);
 
     // Then: Expect result as true
     ASSERT_EQ(actual, expected);
@@ -65,12 +65,12 @@ TEST(NvmfTargetEventSubscriber, VolumeDeleted_Success)
     int volId = 0;
     uint64_t volSizeByte = 1073741824;
     std::string arrayName("array");
-    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName);
+    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName, 0);
     bool actual, expected{true};
 
     // When: Call VolumeDeleted
     ON_CALL(mockNvmfVolume, VolumeDeleted(_)).WillByDefault(Return());
-    actual = nvmfTargetEventSubscriber.VolumeDeleted(volName, volId, volSizeByte, arrayName);
+    actual = nvmfTargetEventSubscriber.VolumeDeleted(volName, volId, volSizeByte, arrayName, 0);
 
     // Then: Expect result as true
     ASSERT_EQ(actual, expected);
@@ -87,12 +87,12 @@ TEST(NvmfTargetEventSubscriber, VolumeMounted_Success)
     uint64_t maxIops = 0;
     uint64_t maxBw = 0;
     std::string arrayName("array");
-    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName);
+    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName, 0);
     bool actual, expected{true};
 
     // When: CAll VolumeMounted
     ON_CALL(mockNvmfVolume, VolumeMounted(_)).WillByDefault(Return());
-    actual = nvmfTargetEventSubscriber.VolumeMounted(volName, subNqn, volId, volSizeByte, maxIops, maxBw, arrayName);
+    actual = nvmfTargetEventSubscriber.VolumeMounted(volName, subNqn, volId, volSizeByte, maxIops, maxBw, arrayName, 0);
 
     // Then: Expect result as true
     ASSERT_EQ(actual, expected);
@@ -105,12 +105,12 @@ TEST(NvmfTargetEventSubscriber, VolumeUnmounted_Success)
     std::string volName("volume");
     int volId = 0;
     std::string arrayName("array");
-    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName);
+    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName, 0);
     bool actual, expected{true};
 
     // When: CAll VolumeUnmounted
     ON_CALL(mockNvmfVolume, VolumeUnmounted(_)).WillByDefault(Return());
-    actual = nvmfTargetEventSubscriber.VolumeUnmounted(volName, volId, arrayName);
+    actual = nvmfTargetEventSubscriber.VolumeUnmounted(volName, volId, arrayName, 0);
 
     // Then: Expect result as true
     ASSERT_EQ(actual, expected);
@@ -126,12 +126,12 @@ TEST(NvmfTargetEventSubscriber, VolumeLoaded_Success)
     uint64_t maxIops = 0;
     uint64_t maxBw = 0;
     std::string arrayName("array");
-    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName);
+    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName, 0);
     bool actual, expected{true};
 
     // When: CAll VolumeLoaded
     ON_CALL(mockNvmfVolume, VolumeCreated(_)).WillByDefault(Return());
-    actual = nvmfTargetEventSubscriber.VolumeLoaded(volName, volId, totalSize, maxIops, maxBw, arrayName);
+    actual = nvmfTargetEventSubscriber.VolumeLoaded(volName, volId, totalSize, maxIops, maxBw, arrayName, 0);
 
     // Then: Expect result as true
     ASSERT_EQ(actual, expected);
@@ -146,12 +146,12 @@ TEST(NvmfTargetEventSubscriber, VolumeUpdated_Success)
     uint64_t maxIops = 0;
     uint64_t maxBw = 0;
     std::string arrayName("array");
-    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName);
+    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName, 0);
     bool actual, expected{true};
 
     // When: Call VolumeUpdated
     ON_CALL(mockNvmfVolume, VolumeUpdated(_)).WillByDefault(Return());
-    actual = nvmfTargetEventSubscriber.VolumeUpdated(volName, volId, maxIops, maxBw, arrayName);
+    actual = nvmfTargetEventSubscriber.VolumeUpdated(volName, volId, maxIops, maxBw, arrayName, 0);
 
     // Then: Expect result as true
     ASSERT_EQ(actual, expected);
@@ -163,11 +163,11 @@ TEST(NvmfTargetEventSubscriber, VolumeDetached_Success)
     NiceMock<MockNvmfVolume> mockNvmfVolume;
     vector<int> volList{0,1,2};
     std::string arrayName("array");
-    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName);
+    NvmfTargetEventSubscriber nvmfTargetEventSubscriber(&mockNvmfVolume, arrayName, 0);
 
     // When: Call VolumeDetached
     ON_CALL(mockNvmfVolume, VolumeDetached(volList, arrayName)).WillByDefault(Return());
-    nvmfTargetEventSubscriber.VolumeDetached(volList, arrayName);
+    nvmfTargetEventSubscriber.VolumeDetached(volList, arrayName, 0);
 
     // Then: Do Nothing
 }

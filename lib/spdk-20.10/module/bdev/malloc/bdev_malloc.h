@@ -41,7 +41,7 @@
 typedef void (*spdk_delete_malloc_complete)(void *cb_arg, int bdeverrno);
 
 
-void* bdev_malloc_get_buf(void);
+void *bdev_malloc_get_buf(void);
 
 int create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_uuid *uuid,
 		       uint64_t num_blocks, uint32_t block_size);

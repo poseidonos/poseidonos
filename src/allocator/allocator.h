@@ -67,13 +67,36 @@ public:
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
 
-    bool VolumeCreated(std::string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override { return true; }
-    bool VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override { return true; }
-    bool VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override { return true; }
-    bool VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override { return true; }
-    void VolumeDetached(vector<int> volList, std::string arrayName) override {}
-    bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName) override { return true; }
-    bool VolumeUnmounted(std::string volName, int volID, std::string arrayName) override;
+    bool
+    VolumeCreated(std::string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override
+    {
+        return true;
+    }
+    bool
+    VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override
+    {
+        return true;
+    }
+    bool
+    VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override
+    {
+        return true;
+    }
+    bool
+    VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override
+    {
+        return true;
+    }
+    void
+    VolumeDetached(vector<int> volList, std::string arrayName, int arrayID) override
+    {
+    }
+    bool
+    VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayID) override
+    {
+        return true;
+    }
+    bool VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID) override;
 
     void SetGcThreshold(uint32_t inputThreshold) override;
     void SetUrgentThreshold(uint32_t inputThreshold) override;

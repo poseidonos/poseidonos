@@ -119,7 +119,7 @@ TEST(Allocator, VolumeUnmounted_TestSimpleCall)
     EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
 
     // when
-    alloc.VolumeUnmounted("", 0, "");
+    alloc.VolumeUnmounted("", 0, "", 0);
 }
 
 TEST(Allocator, SetGcThreshold_TestSimpleSetter)
@@ -496,7 +496,7 @@ TEST(allocator, VolumeCreated_TestSimpleCallEmptyFunc)
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
     // when
-    alloc.VolumeCreated("", 0, 0, 0, 0, "");
+    alloc.VolumeCreated("", 0, 0, 0, 0, "", 0);
 }
 
 TEST(allocator, VolumeLoaded_TestSimpleCallEmptyFunc)
@@ -511,7 +511,7 @@ TEST(allocator, VolumeLoaded_TestSimpleCallEmptyFunc)
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
     // when
-    alloc.VolumeLoaded("", 0, 0, 0, 0, "");
+    alloc.VolumeLoaded("", 0, 0, 0, 0, "", 0);
 }
 
 TEST(allocator, VolumeUpdated_TestSimpleCallEmptyFunc)
@@ -526,7 +526,7 @@ TEST(allocator, VolumeUpdated_TestSimpleCallEmptyFunc)
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
     // when
-    alloc.VolumeUpdated("", 0, 0, 0, "");
+    alloc.VolumeUpdated("", 0, 0, 0, "", 0);
 }
 
 TEST(allocator, VolumeMounted_TestSimpleCallEmptyFunc)
@@ -541,7 +541,7 @@ TEST(allocator, VolumeMounted_TestSimpleCallEmptyFunc)
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
     // when
-    alloc.VolumeMounted("", "", 0, 0, 0, 0, "");
+    alloc.VolumeMounted("", "", 0, 0, 0, 0, "", 0);
 }
 
 TEST(allocator, VolumeDetached_TestSimpleCallEmptyFunc)
@@ -557,7 +557,7 @@ TEST(allocator, VolumeDetached_TestSimpleCallEmptyFunc)
 
     // when
     std::vector<int> param;
-    alloc.VolumeDetached(param, "");
+    alloc.VolumeDetached(param, "", 0);
 }
 
 TEST(allocator, VolumeDeleted_TestSimpleCallEmptyFunc)
@@ -572,6 +572,6 @@ TEST(allocator, VolumeDeleted_TestSimpleCallEmptyFunc)
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
     // when
-    alloc.VolumeDeleted("", 0, 0, "");
+    alloc.VolumeDeleted("", 0, 0, "", 0);
 }
 } // namespace pos

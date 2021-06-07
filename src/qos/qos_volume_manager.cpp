@@ -66,7 +66,8 @@ QosVolumeManager::QosVolumeManager(bool feQos)
             pendingIO[reactor][volId] = 0;
         }
     }
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, "");
+    int arrayID = 0;
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, "", arrayID);
     try
     {
         bwIopsRateLimit = new BwIopsRateLimit;
@@ -88,7 +89,8 @@ QosVolumeManager::QosVolumeManager(bool feQos)
 /* --------------------------------------------------------------------------*/
 QosVolumeManager::~QosVolumeManager(void)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, "");
+    int arrayID = 0;
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, "", arrayID);
     delete bwIopsRateLimit;
     delete parameterQueue;
     delete ioQueue;
@@ -279,7 +281,7 @@ QosVolumeManager::_UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxb
 /* --------------------------------------------------------------------------*/
 bool
 QosVolumeManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByte,
-    uint64_t maxiops, uint64_t maxbw, std::string arrayName)
+    uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
 {
     _UpdateVolumeMaxQos(volID, maxiops, maxbw);
     return true;
@@ -293,7 +295,7 @@ QosVolumeManager::VolumeCreated(std::string volName, int volID, uint64_t volSize
  */
 /* --------------------------------------------------------------------------*/
 bool
-QosVolumeManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName)
+QosVolumeManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayID)
 {
     qos_vol_policy volumePolicy;
     volumePolicy.policyChange = true;
@@ -310,7 +312,7 @@ QosVolumeManager::VolumeDeleted(std::string volName, int volID, uint64_t volSize
 /* --------------------------------------------------------------------------*/
 bool
 QosVolumeManager::VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte,
-    uint64_t maxiops, uint64_t maxbw, std::string arrayName)
+    uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
 {
     _UpdateVolumeMaxQos(volID, maxiops, maxbw);
     return true;
@@ -324,7 +326,7 @@ QosVolumeManager::VolumeMounted(std::string volName, std::string subnqn, int vol
  */
 /* --------------------------------------------------------------------------*/
 bool
-QosVolumeManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName)
+QosVolumeManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID)
 {
     if (false == feQosEnabled)
     {
@@ -351,7 +353,7 @@ QosVolumeManager::VolumeUnmounted(std::string volName, int volID, std::string ar
 /* --------------------------------------------------------------------------*/
 bool
 QosVolumeManager::VolumeLoaded(std::string volName, int id, uint64_t totalSize,
-    uint64_t maxiops, uint64_t maxbw, std::string arrayName)
+    uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
 {
     return true;
 }
@@ -365,7 +367,7 @@ QosVolumeManager::VolumeLoaded(std::string volName, int id, uint64_t totalSize,
 /* --------------------------------------------------------------------------*/
 bool
 QosVolumeManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops,
-    uint64_t maxbw, std::string arrayName)
+    uint64_t maxbw, std::string arrayName, int arrayID)
 {
     qos_vol_policy volumePolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volID);
     if ((volumePolicy.maxBw == maxbw) && (volumePolicy.maxIops == maxiops))
@@ -384,7 +386,7 @@ QosVolumeManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops
  */
 /* --------------------------------------------------------------------------*/
 void
-QosVolumeManager::VolumeDetached(vector<int> volList, std::string arrayName)
+QosVolumeManager::VolumeDetached(vector<int> volList, std::string arrayName, int arrayID)
 {
 }
 

@@ -66,13 +66,13 @@ Allocator::Allocator(AllocatorAddressInfo* addrInfo_, ContextManager* contextMan
 Allocator::Allocator(IArrayInfo* info, IStateControl* iState)
 : Allocator(nullptr, nullptr, nullptr, nullptr, info, iState)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, info->GetName());
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, info->GetName(), 0);
     _CreateSubmodules();
 }
 
 Allocator::~Allocator(void)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, iArrayInfo->GetName());
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, iArrayInfo->GetName(), 0);
     _DeleteSubmodules();
 }
 
@@ -196,7 +196,7 @@ Allocator::GetIContextReplayer(void)
 }
 //----------------------------------------------------------------------------//
 bool
-Allocator::VolumeUnmounted(std::string volName, int volID, std::string arrayName)
+Allocator::VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID)
 {
     std::vector<Stripe*> stripesToFlush;
     std::vector<StripeId> vsidToCheckFlushDone;

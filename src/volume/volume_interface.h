@@ -58,6 +58,7 @@ protected:
 
     VolumeList& volumeList;
     std::string arrayName;
+    int arrayID;
     VolumeEventPublisher* eventPublisher;
 };
 

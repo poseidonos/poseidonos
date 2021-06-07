@@ -65,7 +65,6 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     this->stateMgr = StateManagerSingleton::Instance();
     this->state = stateMgr->CreateStateControl(arrayName);
     this->array = new Array(arrayName, rebuilder, abr, state);
-    this->rbaStateMgr = new RBAStateManager(array->GetName());
     this->metaFsFactory = [](Array* arrayPtr, bool isLoaded)
     {
         return new MetaFs(arrayPtr, isLoaded);
@@ -265,6 +264,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     mapper = new Mapper(array, state);
     allocator = new Allocator(array, state);
     journal = new JournalManager(array, state);
+    rbaStateMgr = new RBAStateManager(array->GetName(), 0);
     gc = new GarbageCollector(array, state);
     metaMountSequence = new MetaMountSequence(arrayName, mapper, allocator, journal); // remember the ref to be able to delete during ~ArrayComponents()
 }

@@ -44,7 +44,7 @@ TEST(UNVMfIOHandler, UNVMfSubmitHandler_posIoNullptr)
 TEST(UNVMfIOHandler, UNVMfSubmitHandler_InvalidIOType)
 {
     // Given
-    struct pos_io io = {4, 1, nullptr, 1, 0, 0, nullptr, nullptr};
+    struct pos_io io = {4, 1, 0, nullptr, 1, 0, 0, nullptr, nullptr};
     int actual, expected;
 
     // When
@@ -58,7 +58,7 @@ TEST(UNVMfIOHandler, UNVMfSubmitHandler_InvalidIOType)
 TEST(UNVMfIOHandler, UNVMfSubmitHandler_WrongBuffer)
 {
     // Given
-    struct pos_io io = {IO_TYPE::READ, 1, nullptr, 0, 0, 0, nullptr, nullptr};
+    struct pos_io io = {IO_TYPE::READ, 1, 0, nullptr, 0, 0, 0, nullptr, nullptr};
     int actual, expected;
 
     // When

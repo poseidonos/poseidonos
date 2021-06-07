@@ -43,6 +43,7 @@ struct rpc_construct_pos {
 	char *uuid;
 	char *array_name;
 	uint32_t volume_id;
+	uint32_t array_id;
 	uint64_t volume_size_mb;
 	uint32_t volume_type_in_memory;
 };
@@ -62,11 +63,12 @@ static const struct spdk_json_object_decoder rpc_construct_pos_decoders[] = {
 	{"volume_size_mb", offsetof(struct rpc_construct_pos, volume_size_mb), spdk_json_decode_uint64},
 	{"volume_type_in_memory", offsetof(struct rpc_construct_pos, volume_type_in_memory), spdk_json_decode_uint32},
 	{"array_name", offsetof(struct rpc_construct_pos, array_name), spdk_json_decode_string, true},
+	{"array_id", offsetof(struct rpc_construct_pos, array_id), spdk_json_decode_uint32},
 };
 
 static void
 spdk_rpc_bdev_pos_create(struct spdk_jsonrpc_request *request,
-			  const struct spdk_json_val *params)
+			 const struct spdk_json_val *params)
 {
 	struct rpc_construct_pos req = {NULL};
 	struct spdk_json_write_ctx *w;
@@ -96,7 +98,7 @@ spdk_rpc_bdev_pos_create(struct spdk_jsonrpc_request *request,
 	volume_size_mb *= req.volume_size_mb;
 	volume_type_in_memory = (req.volume_type_in_memory == 0) ? false : true;
 	bdev = create_pos_disk(req.name, volume_id, uuid, volume_size_mb / block_size, block_size,
-				volume_type_in_memory, req.array_name);
+			       volume_type_in_memory, req.array_name, req.array_id);
 	if (bdev == NULL) {
 		SPDK_ERRLOG("Could not create pos disk\n");
 		goto invalid;
@@ -151,7 +153,7 @@ _spdk_rpc_bdev_pos_delete_cb(void *cb_arg, int bdeverrno)
 
 static void
 spdk_rpc_bdev_pos_delete(struct spdk_jsonrpc_request *request,
-			  const struct spdk_json_val *params)
+			 const struct spdk_json_val *params)
 {
 	int rc;
 	struct rpc_delete_pos req = {NULL};

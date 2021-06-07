@@ -101,7 +101,7 @@ VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
             "Volume meta saved successfully");
 
     bool res = eventPublisher->NotifyVolumeCreated(name, vol->ID, size,
-            vol->MaxIOPS(), vol->MaxBW(), arrayName);
+            vol->MaxIOPS(), vol->MaxBW(), arrayName, arrayID);
 
     if (res == false)
     {

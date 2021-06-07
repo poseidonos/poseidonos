@@ -94,11 +94,12 @@ MountTemp::Shutdown(void)
 void
 MountTemp::_InitNvmf(void)
 {
+    int arrayIdx = 0;
     nvmfVolume = new pos::NvmfVolumePos();
     unvmf_io_handler handler = {.submit = UNVMfSubmitHandler,
         .complete = UNVMfCompleteHandler};
     nvmfVolume->SetuNVMfIOHandler(handler);
-    nvmfTargetEventSubscriber = new pos::NvmfTargetEventSubscriber(nvmfVolume, arrayName);
+    nvmfTargetEventSubscriber = new pos::NvmfTargetEventSubscriber(nvmfVolume, arrayName, arrayIdx);
 }
 
 void

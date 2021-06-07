@@ -71,7 +71,7 @@ NvmfTarget::CreatePosBdev(const string& bdevName, uint32_t id,
 {
     uint64_t volumeSizeInByte = volumeSizeInMb * MB;
     struct spdk_bdev* bdev = spdk_bdev_create_pos_disk(bdevName.c_str(), id, nullptr,
-        volumeSizeInByte / blockSize, blockSize, volumeTypeInMem, arrayName.c_str());
+        volumeSizeInByte / blockSize, blockSize, volumeTypeInMem, arrayName.c_str(), 0);
     if (bdev == nullptr)
     {
         SPDK_ERRLOG("bdev %s does not exist\n", bdevName.c_str());

@@ -42,7 +42,7 @@ protected:
     virtual void
     SetUp(void)
     {
-        RBAStateManager rbaStateManager("");
+        RBAStateManager rbaStateManager("", 0);
         target = RBAStateServiceSingleton::Instance()->GetRBAStateManager("");
     }
 

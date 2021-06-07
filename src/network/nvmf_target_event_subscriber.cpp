@@ -37,16 +37,16 @@
 
 namespace pos
 {
-NvmfTargetEventSubscriber::NvmfTargetEventSubscriber(NvmfVolume* vol, std::string arrayName)
-: VolumeEvent("NvmfTarget", arrayName),
+NvmfTargetEventSubscriber::NvmfTargetEventSubscriber(NvmfVolume* vol, std::string arrayName, int arrayID)
+: VolumeEvent("NvmfTarget", arrayName, arrayID),
   volume(vol)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterNvmfTargetSubscriber(this, arrayName);
+    VolumeEventPublisherSingleton::Instance()->RegisterNvmfTargetSubscriber(this, arrayName, arrayID);
 }
 
 NvmfTargetEventSubscriber::~NvmfTargetEventSubscriber(void)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName);
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayID);
 }
 
 void
@@ -59,7 +59,7 @@ NvmfTargetEventSubscriber::_CopyVolumeInfo(char* destInfo,
 
 bool
 NvmfTargetEventSubscriber::VolumeCreated(string volName, int volId,
-    uint64_t volSizeByte, uint64_t maxIops, uint64_t maxBw, string arrayName)
+    uint64_t volSizeByte, uint64_t maxIops, uint64_t maxBw, string arrayName, int arrayID)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
@@ -78,7 +78,7 @@ NvmfTargetEventSubscriber::VolumeCreated(string volName, int volId,
 
 bool
 NvmfTargetEventSubscriber::VolumeDeleted(string volName, int volId,
-    uint64_t volSizeByte, string arrayName)
+    uint64_t volSizeByte, string arrayName, int arrayID)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
@@ -94,7 +94,7 @@ NvmfTargetEventSubscriber::VolumeDeleted(string volName, int volId,
 
 bool
 NvmfTargetEventSubscriber::VolumeMounted(string volName, string subNqn, int volId,
-    uint64_t volSizeByte, uint64_t maxIops, uint64_t maxBw, string arrayName)
+    uint64_t volSizeByte, uint64_t maxIops, uint64_t maxBw, string arrayName, int arrayID)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
@@ -113,7 +113,7 @@ NvmfTargetEventSubscriber::VolumeMounted(string volName, string subNqn, int volI
 }
 
 bool
-NvmfTargetEventSubscriber::VolumeUnmounted(string volName, int volId, string arrayName)
+NvmfTargetEventSubscriber::VolumeUnmounted(string volName, int volId, string arrayName, int arrayID)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
@@ -129,14 +129,14 @@ NvmfTargetEventSubscriber::VolumeUnmounted(string volName, int volId, string arr
 
 bool
 NvmfTargetEventSubscriber::VolumeLoaded(string volName, int id,
-    uint64_t totalSize, uint64_t maxIops, uint64_t maxBw, string arrayName)
+    uint64_t totalSize, uint64_t maxIops, uint64_t maxBw, string arrayName, int arrayID)
 {
-    return VolumeCreated(volName, id, totalSize, maxIops, maxBw, arrayName);
+    return VolumeCreated(volName, id, totalSize, maxIops, maxBw, arrayName, arrayID);
 }
 
 bool
 NvmfTargetEventSubscriber::VolumeUpdated(string volName, int volId,
-    uint64_t maxIops, uint64_t maxBw, string arrayName)
+    uint64_t maxIops, uint64_t maxBw, string arrayName, int arrayID)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
@@ -153,7 +153,7 @@ NvmfTargetEventSubscriber::VolumeUpdated(string volName, int volId,
 }
 
 void
-NvmfTargetEventSubscriber::VolumeDetached(vector<int> volList, string arrayName)
+NvmfTargetEventSubscriber::VolumeDetached(vector<int> volList, string arrayName, int arrayID)
 {
     if (!volList.empty())
     {

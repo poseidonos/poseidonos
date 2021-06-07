@@ -79,7 +79,7 @@ VolumeDetacher::DoAll(void)
         }
         vol = volumeList.Next(idx);
     }
-    eventPublisher->NotifyVolumeDetached(mountedVols, arrayName);
+    eventPublisher->NotifyVolumeDetached(mountedVols, arrayName, arrayID);
     bool res = NvmfVolumePos::WaitRequestedVolumesDetached(mountedVols.size());
     if (res == false)
     {

@@ -45,7 +45,7 @@ VSAMapManager::VSAMapManager(MapperAddressInfo* info, std::string arrayName)
 : VolumeEvent("Mapper", arrayName),
   volumeManager(nullptr)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName);
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, 0);
 
     vsaMapAPI = new VSAMapAPI(this, info);
 
@@ -61,7 +61,7 @@ VSAMapManager::VSAMapManager(MapperAddressInfo* info, std::string arrayName)
 
 VSAMapManager::~VSAMapManager(void)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName);
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, 0);
 
     delete vsaMapAPI;
 }
@@ -184,7 +184,7 @@ VSAMapManager::EnableInternalAccess(int volID, int caller)
         }
 
         // In case of internal-loading, we don't know the volume size
-        if (VolumeMounted(volName, "", volID, UNKNOWN_SIZE_BECAUSEOF_INTERNAL_LOAD, 0, 0, ""))
+        if (VolumeMounted(volName, "", volID, UNKNOWN_SIZE_BECAUSEOF_INTERNAL_LOAD, 0, 0, "", 0))
         {
             POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} Internal Mount Request Succeeded", volID);
         }
@@ -268,7 +268,7 @@ VSAMapManager::MapAsyncFlushDone(int mapId)
 }
 
 bool
-VSAMapManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
+VSAMapManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
 {
     do
     {
@@ -303,14 +303,14 @@ VSAMapManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByt
 }
 
 bool
-VSAMapManager::VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayNAme)
+VSAMapManager::VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayNAme, int arrayID)
 {
     bool isUnknownSize = (volSizeByte == UNKNOWN_SIZE_BECAUSEOF_INTERNAL_LOAD);
     return _LoadVolumeMeta(volName, volID, volSizeByte, isUnknownSize);
 }
 
 bool
-VSAMapManager::VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
+VSAMapManager::VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
 {
     std::unique_lock<std::recursive_mutex> lock(volMountStateLock[id]);
     volumeMountState.emplace(id, VolState::EXIST_UNLOADED);
@@ -319,13 +319,13 @@ VSAMapManager::VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64
 }
 
 bool
-VSAMapManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
+VSAMapManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
 {
     return true;
 }
 
 bool
-VSAMapManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName)
+VSAMapManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID)
 {
     vsaMapAPI->DisableVsaMapAccess(volID);
 
@@ -363,7 +363,7 @@ VSAMapManager::VolumeUnmounted(std::string volName, int volID, std::string array
 }
 
 bool
-VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName)
+VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayID)
 {
     std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "Starting VolumeDelete: volID:{}  volSizeByte:{}", volID, volSizeByte);
@@ -422,7 +422,7 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
 }
 
 void
-VSAMapManager::VolumeDetached(vector<int> volList, std::string arrayName)
+VSAMapManager::VolumeDetached(vector<int> volList, std::string arrayName, int arrayID)
 {
     for (int volumeId : volList)
     {

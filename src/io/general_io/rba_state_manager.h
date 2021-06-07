@@ -50,7 +50,7 @@ namespace pos
 class RBAStateManager : public VolumeEvent
 {
 public:
-    explicit RBAStateManager(std::string arrayName);
+    explicit RBAStateManager(std::string arrayName, int arrayID);
     virtual ~RBAStateManager();
 
     void CreateRBAState(uint32_t volumeID, uint64_t totalRBACount);
@@ -66,13 +66,13 @@ public:
         BlkAddr startRba,
         uint32_t count);
 
-    bool VolumeCreated(std::string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
-    bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName) override;
-    bool VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
-    bool VolumeUnmounted(std::string volName, int volID, std::string arrayName) override;
-    bool VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
-    bool VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
-    void VolumeDetached(vector<int> volList, std::string arrayName) override;
+    bool VolumeCreated(std::string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override;
+    bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayID) override;
+    bool VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override;
+    bool VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID) override;
+    bool VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override;
+    bool VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override;
+    void VolumeDetached(vector<int> volList, std::string arrayName, int arrayID) override;
 
 private:
     class RBAState
@@ -105,7 +105,6 @@ private:
 
     bool _AcquireOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count);
     void _ReleaseOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count);
-    std::string arrayName;
 };
 
 } // namespace pos

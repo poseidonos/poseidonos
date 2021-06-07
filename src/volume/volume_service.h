@@ -50,6 +50,7 @@ public:
     void Register(std::string arrayName, IVolumeManager* writer);
     void Unregister(std::string arrayName);
     virtual IVolumeManager* GetVolumeManager(std::string arrayName);
+    int GetID(std::string arrayName);
 
 private:
     IVolumeManager* _Find(std::string arrayName);

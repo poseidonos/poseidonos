@@ -41,6 +41,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/qos/qos_manager.h"
+#include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume_creator.h"
 #include "src/volume/volume_base.h"
 #include "src/volume/volume_deleter.h"
@@ -100,6 +101,7 @@ VolumeManager::Dispose(void)
     volumes.Clear();
 
     VolumeServiceSingleton::Instance()->Unregister(arrayInfo->GetName());
+    VolumeEventPublisherSingleton::Instance()->RemoveArrayIdx(arrayInfo->GetName());
 }
 
 void
