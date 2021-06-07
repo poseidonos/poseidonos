@@ -87,7 +87,9 @@ FlushSubmission::Execute(void)
         .stripeId = logicalWbStripeId,
         .offset = 0};
 
-    PhysicalBlkAddr physicalWriteEntry;
+    PhysicalBlkAddr physicalWriteEntry = {
+        .lba = 0,
+        .arrayDev = nullptr};
     void* basePointer = nullptr;
     if (likely(translator != nullptr))
     {
@@ -100,7 +102,10 @@ FlushSubmission::Execute(void)
             // No retry
             return true;
         }
-        basePointer = physicalWriteEntry.arrayDev->GetUblock()->GetByteAddress();
+        if (likely(physicalWriteEntry.arrayDev != nullptr))
+        {
+            basePointer = physicalWriteEntry.arrayDev->GetUblock()->GetByteAddress();
+        }
     }
     char* offset = static_cast<char *>(basePointer) + (physicalWriteEntry.lba * ArrayConfig::SECTOR_SIZE_BYTE);
     for (auto it = stripe->DataBufferBegin(); it != stripe->DataBufferEnd(); ++it)
