@@ -191,10 +191,12 @@ build_air(){
     if [ -d "${AIR_SOURCE}" ]; then
         cd ${AIR_SOURCE}
         log_normal "[Build $AIR_SOURCE]"
-	make clean
-	make -j4 lib cfg=../../config/air.cfg
-	make -j4 cli
-	make -j4 tui
+        git submodule init
+        git submodule update
+        make clean
+        make -j4 lib cfg=../../config/air.cfg
+        make -j4 cli
+        make -j4 tui
         ret=$?
         if [ $ret = 0 ]; then
             log_normal "[Build $AIR_SOURCE].. Done"
