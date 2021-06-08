@@ -130,20 +130,6 @@ MetaFs::Shutdown(void)
     MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
             "Shutdown metafs, arrayName={}", arrayName);
 
-    POS_EVENT_ID rc = _CloseMetaVolume();
-    if (rc != POS_EVENT_ID::SUCCESS)
-    {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
-            "It's failed to close meta volume but expected, arrayName={}", arrayName);
-    }
-
-    rc = mgmt->CloseSystem(arrayName);
-    if (rc != POS_EVENT_ID::SUCCESS)
-    {
-        MFS_TRACE_DEBUG((int)rc,
-            "It's failed to close system but expected, arrayName={}", arrayName);
-    }
-
     io->RemoveArray(arrayName);
 
     MetaFsServiceSingleton::Instance()->Deregister(arrayName);
