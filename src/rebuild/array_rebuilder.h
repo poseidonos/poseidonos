@@ -63,7 +63,6 @@ private:
     map<string, ArrayRebuild*> jobsInProgress;
     IRebuildNotification* iRebuildNoti = nullptr;
     std::mutex mtxStart;
-    std::mutex mtxWait;
     std::condition_variable cv;
 };
 } // namespace pos
