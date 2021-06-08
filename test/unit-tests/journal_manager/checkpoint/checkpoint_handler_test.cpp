@@ -149,18 +149,17 @@ TEST_F(CheckpointHandlerTestFixture, FlushCompleted_testIfCheckpointCompleted)
     int numMapsFlushed = 0;
 
     MockEventScheduler eventScheduler;
-    ON_CALL(eventScheduler, EnqueueEvent).WillByDefault([this](EventSmartPtr event) {
+    ON_CALL(eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event)
+    {
         event->Execute();
     });
+
     EventSmartPtr checkpointCompletion(new MockEvent());
     checkpointHandler = new CheckpointHandler(numMapsToFlush, numMapsFlushed, checkpointCompletion);
     checkpointHandler->Init(nullptr, nullptr, &eventScheduler);
 
     // Then: Callback event should be executed
-    EXPECT_CALL(eventScheduler, EnqueueEvent).WillOnce([&](EventSmartPtr event) {
-        EXPECT_EQ(event, checkpointCompletion);
-        event->Execute();
-    });
+    EXPECT_CALL(*(MockEvent*)(checkpointCompletion.get()), Execute);
 
     // When: All dirty maps and allocator meta are flushed
     EXPECT_TRUE(checkpointHandler->FlushCompleted(0) == 0);
