@@ -604,6 +604,11 @@ Array::_CheckRebuildNecessity(void)
             POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Resume Rebuild without rebuildDevice");
         }
     }
+    else
+    {
+        EventSmartPtr event(new RebuildHandler(this, nullptr));
+        eventScheduler->EnqueueEvent(event);
+    }
 }
 
 void
@@ -686,6 +691,7 @@ Array::_RebuildDone(RebuildResult result)
     {
         state->SetRebuildDone(false);
         pthread_rwlock_unlock(&stateLock);
+        rebuilder->RebuildDone(name_);
         return;
     }
 
@@ -709,8 +715,6 @@ Array::TriggerRebuild(ArrayDevice* target)
     pthread_rwlock_wrlock(&stateLock);
     if (target == nullptr)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "TryRebuild::rebuild target device is not existed");
         target = devMgr_->GetFaulty();
         if (target == nullptr)
         {

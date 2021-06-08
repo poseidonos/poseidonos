@@ -108,8 +108,6 @@ ArrayRebuild::Stop(void)
     {
         task->Stop();
     }
-
-    _WaitRebuildStop();
 }
 
 RebuildState
@@ -202,16 +200,5 @@ ArrayRebuild::_RebuildCompleted(RebuildResult res)
     }
 
     rebuildComplete(res);
-    cv.notify_one();
-}
-
-void
-ArrayRebuild::_WaitRebuildStop(void)
-{
-    std::unique_lock<std::mutex> lock(mtx);
-    while (tasks.empty() != true)
-    {
-        cv.wait(lock);
-    }
 }
 } // namespace pos

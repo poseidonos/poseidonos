@@ -39,7 +39,6 @@
 #include <list>
 #include <mutex>
 #include <string>
-#include <condition_variable>
 
 using namespace std;
 
@@ -64,7 +63,6 @@ private:
     void _RebuildNext(void);
     void _RebuildDone(RebuildResult res);
     void _RebuildCompleted(RebuildResult res);
-    void _WaitRebuildStop(void);
     string arrayName = "";
     ArrayDevice* targetDev = nullptr;
     RebuildState state = RebuildState::READY;
@@ -73,6 +71,5 @@ private:
     RebuildComplete rebuildDoneCb;
     list<PartitionRebuild*> tasks;
     mutex mtx;
-    condition_variable cv;
 };
 } // namespace pos

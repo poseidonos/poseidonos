@@ -31,9 +31,6 @@
  */
 
 #include "array_rebuilder.h"
-
-#include <thread>
-
 #include "array_rebuild.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -89,11 +86,7 @@ ArrayRebuilder::StopRebuild(string array)
     {
         POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
             "ArrayRebuilder::StopRebuild, {}", array);
-        thread t([jobInProg]()
-        {
-            jobInProg->Stop();
-        });
-        t.detach();
+        jobInProg->Stop();
     }
 }
 
