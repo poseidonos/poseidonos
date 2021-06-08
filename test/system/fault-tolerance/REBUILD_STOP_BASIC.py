@@ -17,21 +17,7 @@ import fio
 import time
 DETACH_TARGET_DEV = MOUNT_VOL_BASIC_1.ANY_DATA
 SECOND_DETACH_TARGET_DEV = MOUNT_VOL_BASIC_1.SPARE
-REMAINING_DEV = "unvme-ns-4"
 ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
-
-def check_result():
-    out = cli.array_info(ARRAYNAME)
-    situ = json_parser.get_situation(out)
-    if situ == "DEGRADED":
-        return "pass", out
-    return "fail", out
-
-def set_result():
-    result, out = check_result()
-
-    with open(__file__ + ".result", "w") as result_file:
-        result_file.write(result + " (" + str(code) + ")" + "\n" + out)
 
 def execute():
     MOUNT_VOL_BASIC_1.execute()

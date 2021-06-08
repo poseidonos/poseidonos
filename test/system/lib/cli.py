@@ -132,3 +132,8 @@ def device_monitoring_state():
 
 def wbt_request(event_name, argument):
     return send_request("wbt " + event_name + argument)
+
+
+def stop_rebuilding(array):
+    param_str = "--name " + array
+    return send_request("internal stop_rebuilding " + param_str)
