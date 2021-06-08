@@ -16,7 +16,7 @@ class MockVolumeIo : public VolumeIo
 {
 public:
     using VolumeIo::VolumeIo;
-    MOCK_METHOD(VolumeIoSmartPtr, Split,(uint32_t sectors, bool removalFromTail), (override));
+    MOCK_METHOD(VolumeIoSmartPtr, Split, (uint32_t sectors, bool removalFromTail), (override));
     MOCK_METHOD(VolumeIoSmartPtr, GetOriginVolumeIo, (), (override));
     MOCK_METHOD(uint32_t, GetVolumeId, (), (override));
     MOCK_METHOD(uint32_t, GetOriginCore, (), (override));
