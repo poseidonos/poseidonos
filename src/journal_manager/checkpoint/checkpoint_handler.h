@@ -42,20 +42,18 @@
 
 namespace pos
 {
-
-class CheckpointObserver;
+class EventScheduler;
 
 class CheckpointHandler
 {
 public:
     CheckpointHandler(void);
-    explicit CheckpointHandler(CheckpointObserver* observer);
-    CheckpointHandler(CheckpointObserver* observer, int numMapsToFlush, int numMapsFlushed);
+    CheckpointHandler(int numMapsToFlush, int numMapsFlushed, EventSmartPtr callback);
     virtual ~CheckpointHandler(void) = default;
 
-    virtual void Init(IMapFlush* mapFlush, IContextManager* contextManer);
+    virtual void Init(IMapFlush* mapFlush, IContextManager* contextManer, EventScheduler* scheduler);
 
-    virtual int Start(MapPageList pendingDirtyPages);
+    virtual int Start(MapPageList pendingDirtyPages, EventSmartPtr callback);
     virtual int FlushCompleted(int metaId);
 
     virtual CheckpointStatus GetStatus(void);
@@ -73,8 +71,7 @@ private:
 
     IMapFlush* mapFlush;
     IContextManager* contextManager;
-
-    CheckpointObserver* obs;
+    EventScheduler* scheduler;
 
     std::atomic<CheckpointStatus> status;
     std::atomic<int> numMapsToFlush;
@@ -84,6 +81,7 @@ private:
     std::atomic<bool> mapFlushCompleted;
 
     std::mutex completionLock;
+    EventSmartPtr checkpointCompletionCallback;
 };
 
 } // namespace pos

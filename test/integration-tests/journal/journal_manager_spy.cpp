@@ -12,6 +12,9 @@
 #include "src/journal_manager/replay/replay_handler.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "test/integration-tests/journal/journal_configuration_spy.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
+
+using ::testing::NiceMock;
 
 namespace pos
 {
@@ -24,11 +27,18 @@ JournalManagerSpy::JournalManagerSpy(IArrayInfo* array, IStateControl* stateSub,
     delete logBuffer;
     std::string arr_name{"arr_name"};
     logBuffer = new JournalLogBuffer(new MockFileIntf(logFileName, arr_name));
+
+    eventScheduler = new NiceMock<MockEventScheduler>;
+    ON_CALL(*eventScheduler, EnqueueEvent).WillByDefault([this](EventSmartPtr event) {
+        event->Execute();
+    });
 }
 
 JournalManagerSpy::~JournalManagerSpy(void)
 {
     logBuffer->Dispose();
+
+    delete eventScheduler;
 }
 
 int
@@ -45,7 +55,7 @@ JournalManagerSpy::InitializeForTest(Mapper* mapper, Allocator* allocator, IVolu
         allocator->GetIBlockAllocator(),
         allocator->GetIWBStripeAllocator(),
         allocator->GetIContextManager(), allocator->GetIContextReplayer(),
-        volumeManager);
+        volumeManager, eventScheduler);
 
     if (journalManagerStatus != WAITING_TO_BE_REPLAYED)
     {

@@ -36,7 +36,7 @@
 #include <list>
 #include <mutex>
 
-#include "src/journal_manager/checkpoint/checkpoint_observer.h"
+#include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/log/log_group_footer.h"
 #include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
 #include "src/journal_manager/status/i_checkpoint_status.h"
@@ -54,7 +54,7 @@ class EventScheduler;
 class IMapFlush;
 class IContextManager;
 
-class LogGroupReleaser : public CheckpointObserver, public ICheckpointStatus, public ILogGroupResetCompleted
+class LogGroupReleaser : public ICheckpointStatus, public ILogGroupResetCompleted
 {
 public:
     LogGroupReleaser(void);
@@ -70,8 +70,6 @@ public:
     virtual void AddToFullLogGroup(int groupId);
 
     int GetNumFullLogGroups(void);
-
-    virtual void CheckpointCompleted(void);
 
     virtual int GetFlushingLogGroupId(void) override;
     virtual std::list<int> GetFullLogGroups(void) override;
@@ -91,6 +89,8 @@ protected:
     void _ResetFlushingLogGroup(void);
 
     void _CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t& footerOffset);
+
+    EventSmartPtr _CreateCheckpointSubmissionEvent(void);
 
     JournalConfiguration* config;
     LogBufferWriteDoneNotifier* releaseNotifier;

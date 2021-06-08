@@ -37,7 +37,6 @@
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/checkpoint/checkpoint_submission.h"
 #include "src/journal_manager/checkpoint/log_group_releaser.h"
-#include "src/journal_manager/checkpoint/dirty_map_manager.h"
 
 namespace pos
 {
@@ -100,7 +99,7 @@ protected:
     virtual void
     _TriggerCheckpoint(void) override
     {
-        EventSmartPtr event(new CheckpointSubmission(checkpointHandler, sequenceController, dirtyPageManager->GetDirtyList(flushingLogGroupId)));
+        EventSmartPtr event = _CreateCheckpointSubmissionEvent();
         event->Execute();
     }
 };

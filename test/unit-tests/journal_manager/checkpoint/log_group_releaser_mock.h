@@ -17,7 +17,6 @@ public:
         CallbackSequenceController* sequencer, IMapFlush* mapFlush,
         IContextManager* contextManager, EventScheduler* scheduler), (override));
     MOCK_METHOD(void, AddToFullLogGroup, (int groupId), (override));
-    MOCK_METHOD(void, CheckpointCompleted, (), (override));
     MOCK_METHOD(int, GetFlushingLogGroupId, (), (override));
     MOCK_METHOD(std::list<int>, GetFullLogGroups, (), (override));
     MOCK_METHOD(CheckpointStatus, GetStatus, (), (override));

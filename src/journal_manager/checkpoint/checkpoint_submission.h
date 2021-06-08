@@ -33,6 +33,7 @@
 #pragma once
 
 #include "src/event_scheduler/event.h"
+#include "src/include/smart_ptr_type.h"
 #include "src/mapper/include/mpage_info.h"
 
 namespace pos
@@ -44,7 +45,8 @@ class CheckpointSubmission : public Event
 {
 public:
     CheckpointSubmission(CheckpointHandler* checkpointHandler,
-        CallbackSequenceController* sequenceController, MapPageList dirtyPages);
+        CallbackSequenceController* sequenceController, MapPageList dirtyPages,
+        EventSmartPtr callback);
     virtual ~CheckpointSubmission(void) = default;
     bool Execute(void) override;
 
@@ -52,6 +54,7 @@ private:
     CheckpointHandler* checkpointHandler;
     CallbackSequenceController* sequenceController;
     MapPageList dirtyPages;
+    EventSmartPtr callback;
 };
 
 } // namespace pos

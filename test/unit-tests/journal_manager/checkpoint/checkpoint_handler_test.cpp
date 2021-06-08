@@ -5,7 +5,8 @@
 
 #include "src/include/address_type.h"
 #include "test/unit-tests/allocator/i_context_manager_mock.h"
-#include "test/unit-tests/journal_manager/checkpoint/checkpoint_observer_mock.h"
+#include "test/unit-tests/event_scheduler/event_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/mapper/i_map_flush_mock.h"
 
 using testing::NiceMock;
@@ -19,8 +20,7 @@ class CheckpointHandlerTestFixture : public ::testing::Test
 {
 public:
     CheckpointHandlerTestFixture(void)
-    : checkpointObserver(nullptr),
-      mapFlush(nullptr),
+    : mapFlush(nullptr),
       contextManager(nullptr),
       checkpointHandler(nullptr)
     {
@@ -34,7 +34,6 @@ public:
     SetUp(void)
     {
         // Given
-        checkpointObserver = new NiceMock<MockCheckpointObserver>;
         mapFlush = new NiceMock<MockIMapFlush>;
         contextManager = new NiceMock<MockIContextManager>;
     }
@@ -42,7 +41,6 @@ public:
     virtual void
     TearDown(void)
     {
-        delete checkpointObserver;
         delete mapFlush;
         delete contextManager;
 
@@ -66,7 +64,6 @@ public:
     }
 
 protected:
-    NiceMock<MockCheckpointObserver>* checkpointObserver;
     NiceMock<MockIMapFlush>* mapFlush;
     NiceMock<MockIContextManager>* contextManager;
 
@@ -76,8 +73,8 @@ protected:
 TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointStartSuccessfullywithSingleDirtMapList)
 {
     // Given
-    checkpointHandler = new CheckpointHandler(checkpointObserver);
-    checkpointHandler->Init(mapFlush, contextManager);
+    checkpointHandler = new CheckpointHandler();
+    checkpointHandler->Init(mapFlush, contextManager, nullptr);
 
     // When : Succeed flushing dirty map and allocator meta pages
     MapPageList pendingDirtyPages = GenerateDummyDirtyPageList(1);
@@ -85,15 +82,15 @@ TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointStartSuccessfullywith
     EXPECT_CALL(*contextManager, FlushContextsAsync).WillOnce(Return(0));
 
     // Then : Will restore the active stipre tail to this stripe
-    EXPECT_EQ(checkpointHandler->Start(pendingDirtyPages), 0);
+    EXPECT_EQ(checkpointHandler->Start(pendingDirtyPages, nullptr), 0);
     EXPECT_EQ(checkpointHandler->GetStatus(), WAITING_FOR_FLUSH_DONE);
 }
 
 TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointStartSuccessfullywithSeveralDirtMapList)
 {
     // Given
-    checkpointHandler = new CheckpointHandler(checkpointObserver);
-    checkpointHandler->Init(mapFlush, contextManager);
+    checkpointHandler = new CheckpointHandler();
+    checkpointHandler->Init(mapFlush, contextManager, nullptr);
 
     // When : Succeed flushing dirty map and allocator meta pages
     MapPageList pendingDirtyPages = GenerateDummyDirtyPageList(numDirtyMaps);
@@ -103,7 +100,7 @@ TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointStartSuccessfullywith
     EXPECT_CALL(*contextManager, FlushContextsAsync).WillOnce(Return(0));
 
     // Then : Will restore the active stipre tail to this stripe
-    EXPECT_EQ(checkpointHandler->Start(pendingDirtyPages), 0);
+    EXPECT_EQ(checkpointHandler->Start(pendingDirtyPages, nullptr), 0);
     EXPECT_EQ(checkpointHandler->GetStatus(), WAITING_FOR_FLUSH_DONE);
 }
 
@@ -115,23 +112,23 @@ TEST_F(CheckpointHandlerTestFixture, Start_testIfFlushCompletedImmediatelyDuring
 TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointFailedWhenFlushDirtyMpagesFailed)
 {
     // Given
-    checkpointHandler = new CheckpointHandler(checkpointObserver);
-    checkpointHandler->Init(mapFlush, contextManager);
+    checkpointHandler = new CheckpointHandler();
+    checkpointHandler->Init(mapFlush, contextManager, nullptr);
 
     // When : Failed to flushing dirty map pages
     MapPageList pendingDirtyPages = GenerateDummyDirtyPageList(numDirtyMaps);
     EXPECT_CALL(*mapFlush, FlushDirtyMpages).WillOnce(Return(-1));
 
     // Then : Checkpoint should be started
-    EXPECT_TRUE(checkpointHandler->Start(pendingDirtyPages) != 0);
+    EXPECT_TRUE(checkpointHandler->Start(pendingDirtyPages, nullptr) != 0);
     EXPECT_EQ(checkpointHandler->GetStatus(), STARTED);
 }
 
 TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointFailedWhencontextManagersFlushFailed)
 {
     // Given
-    checkpointHandler = new CheckpointHandler(checkpointObserver);
-    checkpointHandler->Init(mapFlush, contextManager);
+    checkpointHandler = new CheckpointHandler();
+    checkpointHandler->Init(mapFlush, contextManager, nullptr);
 
     // When : Succeed to flushing dirty map pages and failed flushing allocator meta pages
     MapPageList pendingDirtyPages = GenerateDummyDirtyPageList(numDirtyMaps);
@@ -141,46 +138,52 @@ TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointFailedWhencontextMana
     EXPECT_CALL(*contextManager, FlushContextsAsync).WillOnce(Return(-1));
 
     // Then : Checkpoint should be started
-    EXPECT_TRUE(checkpointHandler->Start(pendingDirtyPages) != 0);
+    EXPECT_TRUE(checkpointHandler->Start(pendingDirtyPages, nullptr) != 0);
     EXPECT_EQ(checkpointHandler->GetStatus(), WAITING_FOR_FLUSH_DONE);
 }
 
-TEST_F(CheckpointHandlerTestFixture, FlushCompleted_testIfCheckpointCompletely)
+TEST_F(CheckpointHandlerTestFixture, FlushCompleted_testIfCheckpointCompleted)
 {
     // Given
-    checkpointHandler = new CheckpointHandler(checkpointObserver);
-
-    // When : All dirty mapss are flushed
     int numMapsToFlush = 1;
     int numMapsFlushed = 0;
-    checkpointHandler = new CheckpointHandler(checkpointObserver, numMapsToFlush, numMapsFlushed);
+
+    MockEventScheduler eventScheduler;
+    ON_CALL(eventScheduler, EnqueueEvent).WillByDefault([this](EventSmartPtr event) {
+        event->Execute();
+    });
+    EventSmartPtr checkpointCompletion(new MockEvent());
+    checkpointHandler = new CheckpointHandler(numMapsToFlush, numMapsFlushed, checkpointCompletion);
+    checkpointHandler->Init(nullptr, nullptr, &eventScheduler);
+
+    // Then: Callback event should be executed
+    EXPECT_CALL(eventScheduler, EnqueueEvent).WillOnce([&](EventSmartPtr event) {
+        EXPECT_EQ(event, checkpointCompletion);
+        event->Execute();
+    });
+
+    // When: All dirty maps and allocator meta are flushed
     EXPECT_TRUE(checkpointHandler->FlushCompleted(0) == 0);
-
-    // Then : Checkpoint status is not completed yet
-    EXPECT_TRUE(checkpointHandler->GetStatus() != COMPLETED);
-
-    // When : Allocatator meta and map flsuh are completed
     EXPECT_TRUE(checkpointHandler->FlushCompleted(ALLOCATOR_META_ID) == 0);
 
-    // Then : Checkpoint status should be completed
+    // Then: Checkpoint status should be changed to COMPLETED
     EXPECT_TRUE(checkpointHandler->GetStatus() == COMPLETED);
 }
 
 TEST_F(CheckpointHandlerTestFixture, FlushCompleted_testIfCheckpointFailedWhenMapFlushUncompleted)
 {
-    // When : Flushing dirty map pages is not completed fully yet
+    // Given: Map is not flushed yet
     int numMapsToFlush = 2;
     int numMapsFlushed = 0;
-    checkpointHandler = new CheckpointHandler(checkpointObserver, numMapsToFlush, numMapsFlushed);
-    EXPECT_TRUE(checkpointHandler->FlushCompleted(0) == 0);
+    checkpointHandler = new CheckpointHandler(numMapsToFlush, numMapsFlushed, nullptr);
 
-    // Then : Checkpoint status is not completed
+    // Then: Checkpoint status should not be COMPLETED
     EXPECT_TRUE(checkpointHandler->GetStatus() != COMPLETED);
 
-    // When : Allocatator meta flsuh are completed when dirty map page is not yet flushed
+    // When: Allocatator meta flush is completed
     EXPECT_TRUE(checkpointHandler->FlushCompleted(ALLOCATOR_META_ID) == 0);
 
-    // Then : Checkpoint status is not completed
+    // Then: Checkpoint status should not be changed to COMPLETED
     EXPECT_TRUE(checkpointHandler->GetStatus() != COMPLETED);
 }
 } // namespace pos

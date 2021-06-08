@@ -41,10 +41,11 @@
 namespace pos
 {
 CheckpointSubmission::CheckpointSubmission(CheckpointHandler* checkpointHandler,
-    CallbackSequenceController* sequenceController, MapPageList dirtyPages)
+    CallbackSequenceController* sequenceController, MapPageList dirtyPages, EventSmartPtr callback)
 : checkpointHandler(checkpointHandler),
   sequenceController(sequenceController),
-  dirtyPages(dirtyPages)
+  dirtyPages(dirtyPages),
+  callback(callback)
 {
 }
 
@@ -52,7 +53,7 @@ bool
 CheckpointSubmission::Execute(void)
 {
     sequenceController->GetCheckpointExecutionApproval();
-    int ret = checkpointHandler->Start(dirtyPages);
+    int ret = checkpointHandler->Start(dirtyPages, callback);
     sequenceController->AllowCallbackExecution();
 
     if (ret != 0)

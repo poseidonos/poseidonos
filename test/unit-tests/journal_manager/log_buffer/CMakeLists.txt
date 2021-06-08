@@ -1,4 +1,5 @@
 POS_ADD_UNIT_TEST(log_group_footer_write_event_ut log_group_footer_write_event_test.cpp)
+POS_ADD_UNIT_TEST(reset_log_group_ut reset_log_group_test.cpp)
 POS_ADD_UNIT_TEST(log_write_context_factory_ut log_write_context_factory_test.cpp)
 POS_ADD_UNIT_TEST(journal_log_buffer_ut journal_log_buffer_test.cpp)
 POS_ADD_UNIT_TEST(log_write_context_ut log_write_context_test.cpp)

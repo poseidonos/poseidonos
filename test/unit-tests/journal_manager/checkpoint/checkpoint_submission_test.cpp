@@ -56,14 +56,14 @@ TEST(CheckpointSubmission, Execute_testIfCheckpointStartedSuccessfully)
     NiceMock<MockEventScheduler> eventScheduler;
 
     MapPageList dirtyPages;
-    CheckpointSubmission submission(&checkpointHandler, &sequenceController, dirtyPages);
+    CheckpointSubmission submission(&checkpointHandler, &sequenceController, dirtyPages, nullptr);
 
     // Then: Checkpoint should be started after acquiring approval,
     // and allow callback execution afterwards
     {
         InSequence s;
         EXPECT_CALL(sequenceController, GetCheckpointExecutionApproval);
-        EXPECT_CALL(checkpointHandler, Start).WillOnce(Return(0));
+        EXPECT_CALL(checkpointHandler, Start(dirtyPages, _)).WillOnce(Return(0));
         EXPECT_CALL(sequenceController, AllowCallbackExecution);
     }
     // When

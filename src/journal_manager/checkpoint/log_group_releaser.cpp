@@ -43,6 +43,7 @@
 #include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
 #include "src/journal_manager/log_buffer/log_group_footer_write_event.h"
 #include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
+#include "src/journal_manager/log_buffer/reset_log_group.h"
 #include "src/journal_manager/log_write/log_write_handler.h"
 #include "src/logger/logger.h"
 
@@ -50,7 +51,7 @@ namespace pos
 {
 // Constructor for the product code
 LogGroupReleaser::LogGroupReleaser(void)
-: LogGroupReleaser(new CheckpointHandler(this))
+: LogGroupReleaser(new CheckpointHandler())
 {
 }
 
@@ -90,7 +91,7 @@ LogGroupReleaser::Init(JournalConfiguration* journalConfiguration,
     dirtyPageManager = dirtyPage;
     sequenceController = sequencer;
 
-    checkpointHandler->Init(mapFlush, ctxManager);
+    checkpointHandler->Init(mapFlush, ctxManager, scheduler);
 
     contextManager = ctxManager;
     eventScheduler = scheduler;
@@ -144,12 +145,26 @@ LogGroupReleaser::_TriggerCheckpoint(void)
 
     _CreateFlushingLogGroupFooter(footer, footerOffset);
 
-    MapPageList dirtyPages = dirtyPageManager->GetDirtyList(flushingLogGroupId);
-    EventSmartPtr callbackEvent(new CheckpointSubmission(checkpointHandler,
-        sequenceController, dirtyPages));
+    EventSmartPtr checkpointSubmission = _CreateCheckpointSubmissionEvent();
 
-    EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footer, footerOffset, flushingLogGroupId, callbackEvent));
+    EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footer, footerOffset, flushingLogGroupId, checkpointSubmission));
     eventScheduler->EnqueueEvent(event);
+}
+
+EventSmartPtr
+LogGroupReleaser::_CreateCheckpointSubmissionEvent(void)
+{
+    // Checkpoint will be in this sequence:
+    // LogGroupFooterWriteEvent -> CheckpointSubmission -> ResetLogGroup -> LogGroupResetCompletion
+    // TODO (huijeong.kim) to use Callback class instead of Event
+
+    EventSmartPtr resetLogGroupCompletion(new LogGroupResetCompletedEvent(this, flushingLogGroupId));
+    EventSmartPtr resetLogGroup(new ResetLogGroup(logBuffer, flushingLogGroupId, resetLogGroupCompletion));
+    MapPageList dirtyPages = dirtyPageManager->GetDirtyList(flushingLogGroupId);
+    EventSmartPtr checkpointSubmission(new CheckpointSubmission(checkpointHandler,
+        sequenceController, dirtyPages, resetLogGroup));
+
+    return checkpointSubmission;
 }
 
 void
@@ -187,19 +202,6 @@ LogGroupReleaser::_PopFullLogGroup(void)
     fullLogGroup.pop_front();
 
     return retLogGroup;
-}
-
-void
-LogGroupReleaser::CheckpointCompleted(void)
-{
-    assert(flushingLogGroupId != -1);
-    EventSmartPtr callbackEvent(new LogGroupResetCompletedEvent(this, flushingLogGroupId));
-    int ret = logBuffer->AsyncReset(flushingLogGroupId, callbackEvent);
-
-    if (ret != 0)
-    {
-        // TODO(huijeong.kim) add log
-    }
 }
 
 int

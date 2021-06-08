@@ -1,7 +1,6 @@
 POS_ADD_UNIT_TEST(checkpoint_meta_flush_completed_ut checkpoint_meta_flush_completed_test.cpp)
 POS_ADD_UNIT_TEST(log_group_releaser_ut log_group_releaser_test.cpp)
 POS_ADD_UNIT_TEST(checkpoint_handler_ut checkpoint_handler_test.cpp)
-POS_ADD_UNIT_TEST(checkpoint_observer_ut checkpoint_observer_test.cpp)
 POS_ADD_UNIT_TEST(checkpoint_submission_ut checkpoint_submission_test.cpp)
 POS_ADD_UNIT_TEST(dirty_page_list_ut dirty_page_list_test.cpp)
 POS_ADD_UNIT_TEST(dirty_map_manager_ut dirty_map_manager_test.cpp)

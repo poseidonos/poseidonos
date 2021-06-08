@@ -49,22 +49,6 @@ TEST(LogGroupReleaser, AddToFullLogGroup_)
 {
 }
 
-TEST(LogGroupReleaser, CheckpointCompleted_testIfLogBufferReseted)
-{
-    // Given
-    NiceMock<MockJournalLogBuffer> logBuffer;
-    LogGroupReleaserSpy releaser;
-    releaser.Init(nullptr, nullptr, &logBuffer, nullptr, nullptr, nullptr, nullptr, nullptr);
-
-    // Then
-    int logGroupId = 0;
-    releaser.SetFlushingLogGroupId(logGroupId);
-    EXPECT_CALL(logBuffer, AsyncReset(logGroupId, _));
-
-    // When
-    releaser.CheckpointCompleted();
-}
-
 TEST(LogGroupReleaser, GetFlushingLogGroupId_testIfExecutedSuccessfully)
 {
     // Given

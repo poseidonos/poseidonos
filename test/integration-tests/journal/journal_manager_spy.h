@@ -12,6 +12,8 @@
 
 namespace pos
 {
+class MockEventScheduler;
+
 class JournalManagerSpy : public JournalManager
 {
 public:
@@ -44,6 +46,8 @@ public:
 
 private:
     int _GetLogsFromBuffer(LogList& logList);
+
+    MockEventScheduler* eventScheduler;
 };
 
 } // namespace pos

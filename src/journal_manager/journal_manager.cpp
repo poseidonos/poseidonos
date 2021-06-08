@@ -168,7 +168,8 @@ JournalManager::Init(void)
         AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName),
         AllocatorServiceSingleton::Instance()->GetIContextReplayer(arrayName),
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName),
-        MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->ctrl);
+        MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->ctrl,
+        EventSchedulerSingleton::Instance());
 }
 
 int
@@ -176,7 +177,8 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
     IWBStripeAllocator* wbStripeAllocator,
     IContextManager* ctxManager, IContextReplayer* ctxReplayer,
-    IVolumeManager* volumeManager, MetaFsFileControlApi* metaFsCtrl)
+    IVolumeManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
+    EventScheduler* eventScheduler)
 {
     int result = 0;
 
@@ -189,7 +191,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         }
 
         _InitModules(vsaMap, stripeMap, mapFlush, blockAllocator,
-            wbStripeAllocator, ctxManager, ctxReplayer, volumeManager);
+            wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler);
 
         if (journalManagerStatus == WAITING_TO_BE_REPLAYED)
         {
@@ -406,7 +408,8 @@ void
 JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
     IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
-    IContextReplayer* contextReplayer, IVolumeManager* volumeManager)
+    IContextReplayer* contextReplayer, IVolumeManager* volumeManager,
+    EventScheduler* eventScheduler)
 {
     logBuffer->Init(config);
 
@@ -422,7 +425,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     logFilledNotifier->Register(logWriteHandler);
 
     logGroupReleaser->Init(config, logFilledNotifier, logBuffer, dirtyMapManager,
-        sequenceController, mapFlush, contextManager, EventSchedulerSingleton::Instance());
+        sequenceController, mapFlush, contextManager, eventScheduler);
 
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
     volumeEventHandler->Init(logFactory, dirtyMapManager, logWriteHandler, config,

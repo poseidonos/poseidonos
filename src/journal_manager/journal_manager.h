@@ -83,6 +83,7 @@ class IArrayInfo;
 class IStateControl;
 class IVolumeManager;
 class MetaFsFileControlApi;
+class EventScheduler;
 
 class JournalManager : public IMountSequence, public IJournalWriter
 {
@@ -120,7 +121,8 @@ public:
     int Init(IVSAMap* vsaMap, IStripeMap* stripeMap, IMapFlush* mapFlush,
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer,
-        IVolumeManager* volumeManager, MetaFsFileControlApi* metaFsCtrl);
+        IVolumeManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
+        EventScheduler* eventScheduler);
 
     JournalManagerStatus
     GetJournalManagerStatus(void)
@@ -133,7 +135,7 @@ protected:
         IMapFlush* mapFlush,
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer,
-        IVolumeManager* volumeManager);
+        IVolumeManager* volumeManager, EventScheduler* eventScheduler);
     void _ResetModules(void);
 
     int _Init(void);

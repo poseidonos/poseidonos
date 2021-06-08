@@ -35,7 +35,7 @@
 #include <thread>
 
 #include "checkpoint_meta_flush_completed.h"
-#include "checkpoint_observer.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
@@ -44,41 +44,38 @@ namespace pos
 
 // Constructor for unit test mocking
 CheckpointHandler::CheckpointHandler(void)
-: CheckpointHandler(nullptr, 0, 0)
-{
-}
-
-// Constructor for injecting private member values in product code
-CheckpointHandler::CheckpointHandler(CheckpointObserver* observer, int numMapsToFlush, int numMapsFlushed)
-: mapFlush(nullptr),
-  contextManager(nullptr),
-  obs(observer),
-  status(INIT),
-  numMapsToFlush(numMapsToFlush),
-  numMapsFlushed(numMapsFlushed),
-  allocatorMetaFlushCompleted(false),
-  mapFlushCompleted(false)
-{
-}
-
-CheckpointHandler::CheckpointHandler(CheckpointObserver* observer)
-: CheckpointHandler(observer, 0, 0)
+: CheckpointHandler(0, 0, nullptr)
 {
     _Reset();
 }
 
+// Constructor for injecting private member values in unit test
+CheckpointHandler::CheckpointHandler(int numMapsToFlush, int numMapsFlushed, EventSmartPtr callback)
+: mapFlush(nullptr),
+  contextManager(nullptr),
+  status(INIT),
+  numMapsToFlush(numMapsToFlush),
+  numMapsFlushed(numMapsFlushed),
+  allocatorMetaFlushCompleted(false),
+  mapFlushCompleted(false),
+  checkpointCompletionCallback(callback)
+{
+}
+
 void
-CheckpointHandler::Init(IMapFlush* mapFlushToUse, IContextManager* contextManagerToUse)
+CheckpointHandler::Init(IMapFlush* mapFlushToUse, IContextManager* contextManagerToUse, EventScheduler* eventScheduler)
 {
     mapFlush = mapFlushToUse;
     contextManager = contextManagerToUse;
+    scheduler = eventScheduler;
 }
 
 int
-CheckpointHandler::Start(MapPageList pendingDirtyPages)
+CheckpointHandler::Start(MapPageList pendingDirtyPages, EventSmartPtr callback)
 {
     int ret = 0;
 
+    checkpointCompletionCallback = callback;
     _SetStatus(STARTED);
 
     assert(numMapsToFlush == 0);
@@ -167,7 +164,8 @@ CheckpointHandler::_TryToComplete(void)
     {
         // check status to complete checkpoint only once
         _SetStatus(COMPLETED);
-        obs->CheckpointCompleted();
+
+        scheduler->EnqueueEvent(checkpointCompletionCallback);
         POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "Checkpoint completed");
 
         _Reset();
@@ -182,6 +180,8 @@ CheckpointHandler::_Reset(void)
 
     numMapsToFlush = 0;
     numMapsFlushed = 0;
+
+    checkpointCompletionCallback = nullptr;
 }
 
 void
