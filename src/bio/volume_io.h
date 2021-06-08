@@ -68,7 +68,7 @@ public:
     VolumeIo(const VolumeIo& volumeIo);
     ~VolumeIo(void) override;
 
-    VolumeIoSmartPtr Split(uint32_t sectors, bool removalFromTail);
+    virtual VolumeIoSmartPtr Split(uint32_t sectors, bool removalFromTail);
     virtual VolumeIoSmartPtr GetOriginVolumeIo(void);
     virtual uint32_t GetVolumeId(void);
     void SetVolumeId(uint32_t inputVolumeId);
