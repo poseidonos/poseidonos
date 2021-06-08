@@ -21,8 +21,9 @@ ARRAYNAME = MOUNT_VOL_NO_SPARE.ARRAYNAME
 
 def execute():
     MOUNT_VOL_NO_SPARE.execute()
-    fio_proc = fio.start_fio(0, 60)
+    fio_proc = fio.start_fio(0, 30)
     fio.wait_fio(fio_proc)
+    fio_proc = fio.start_fio(0, 30)
     api.detach_ssd_and_attach(DETACH_TARGET_DEV)
     code = -1
     while code != 0:
@@ -30,14 +31,14 @@ def execute():
             code = json_parser.get_response_code(out)
             print ("add spare response: " + str(code))
     print("spare added")
+    cli.add_device(SECOND_SPARE, ARRAYNAME)
 
-    #cli.add_device(SECOND_SPARE, ARRAYNAME)
-    
     if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
+        print("1st rebuilding")
         api.detach_ssd(FIRST_SPARE)
         timeout = 80000 #80s
         if api.wait_situation(ARRAYNAME, "DEGRADED", timeout) == True:
-            print("degraded")
+            print("1st rebuilding stopped")
             if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) == True:
                 print("2nd rebuilding")
                 return "pass"

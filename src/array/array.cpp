@@ -692,8 +692,15 @@ Array::_RebuildDone(RebuildResult result)
         state->SetRebuildDone(false);
         pthread_rwlock_unlock(&stateLock);
         rebuilder->RebuildDone(name_);
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+            "Array {} rebuild done. but result:{} . Retry ", name_, result.result);
+        EventSmartPtr event(new RebuildHandler(this, nullptr));
+        eventScheduler->EnqueueEvent(event);
         return;
     }
+
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+            "Array {} rebuild done. as success.", name_, result.result);
 
     result.target->SetState(ArrayDeviceState::NORMAL);
     state->SetRebuildDone(true);

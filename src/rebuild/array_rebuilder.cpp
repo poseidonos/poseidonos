@@ -49,12 +49,12 @@ ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "ArrayRebuilder::Rebuild {}", array);
 
-    mtxStart.lock();
     StopRebuild(array);
     WaitRebuildDone(array);
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "ArrayRebuilder::Rebuild, start job");
 
+    mtxStart.lock();
     bool resume = false;
     int ret = iRebuildNoti->PrepareRebuild(array, resume);
 
@@ -67,9 +67,9 @@ ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
     ArrayRebuild* job = new ArrayRebuild(array, dev, cb, tgt);
     jobsInProgress.emplace(array, job);
 
+    mtxStart.unlock();
     if (ret == 0)
     {
-        mtxStart.unlock();
         job->Start();
     }
     else
@@ -81,20 +81,24 @@ ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
 void
 ArrayRebuilder::StopRebuild(string array)
 {
+    mtxStart.lock();
+    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+        "ArrayRebuilder::StopRebuild, Try");
     ArrayRebuild* jobInProg = _Find(array);
     if (jobInProg != nullptr)
     {
+        jobInProg->Stop();
         POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
             "ArrayRebuilder::StopRebuild, {}", array);
-        jobInProg->Stop();
     }
+    mtxStart.unlock();
 }
 
 void
 ArrayRebuilder::RebuildDone(string array)
 {
     iRebuildNoti->RebuildDone(array);
-    unique_lock<mutex> lock(mtxWait);
+    unique_lock<mutex> lock(mtxStart);
     ArrayRebuild* job = _Find(array);
     if (job != nullptr)
     {
@@ -110,7 +114,7 @@ ArrayRebuilder::RebuildDone(string array)
 void
 ArrayRebuilder::WaitRebuildDone(string array)
 {
-    unique_lock<mutex> lock(mtxWait);
+    unique_lock<mutex> lock(mtxStart);
     while (_Find(array) != nullptr)
     {
         cv.wait(lock);
