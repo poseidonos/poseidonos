@@ -70,8 +70,11 @@ WbStripeCtx::Init(void)
 void
 WbStripeCtx::Close(void)
 {
-    delete allocWbLsidBitmap;
-    allocWbLsidBitmap = nullptr;
+    if (allocWbLsidBitmap != nullptr)
+    {
+        delete allocWbLsidBitmap;
+        allocWbLsidBitmap = nullptr;
+    }
 }
 
 void

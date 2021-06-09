@@ -92,7 +92,11 @@ RebuildCtx::Close(void)
         delete rebuildSegmentsFile;
         rebuildSegmentsFile = nullptr;
     }
-    delete[] bufferInObj;
+    if (bufferInObj != nullptr)
+    {
+        delete[] bufferInObj;
+        bufferInObj = nullptr;
+    }
 }
 
 SegmentId
