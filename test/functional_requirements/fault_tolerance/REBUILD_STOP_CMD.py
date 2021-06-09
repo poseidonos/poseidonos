@@ -21,19 +21,21 @@ SECOND_DETACH_TARGET_DEV = MOUNT_VOL_BASIC_1.SPARE
 REMAINING_DEV = "unvme-ns-4"
 ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
+
 def execute():
     MOUNT_VOL_BASIC_1.execute()
     fio_proc = fio.start_fio(0, 20)
     fio.wait_fio(fio_proc)
     api.detach_ssd(DETACH_TARGET_DEV)
 
-    if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
+    if api.wait_situation(ARRAYNAME, "REBUILDING") is True:
         time.sleep(1)
         cli.stop_rebuilding(ARRAYNAME)
         timout = 30000 #30s
-        if api.wait_situation(ARRAYNAME, "DEGRADED", timout) == True:
+        if api.wait_situation(ARRAYNAME, "DEGRADED", timout) is True:
             return "pass"
     return "fail"
+
 
 if __name__ == "__main__":
     api.clear_result(__file__)

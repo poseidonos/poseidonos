@@ -20,18 +20,20 @@ DETACH_TARGET_DEV = MOUNT_VOL_BASIC_1.ANY_DATA
 SECOND_DETACH_TARGET_DEV = MOUNT_VOL_BASIC_1.SPARE
 ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
+
 def execute():
     MOUNT_VOL_BASIC_1.execute()
     fio_proc = fio.start_fio(0, 60)
     fio.wait_fio(fio_proc)
     api.detach_ssd(DETACH_TARGET_DEV)
 
-    if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
+    if api.wait_situation(ARRAYNAME, "REBUILDING") is True:
         api.detach_ssd(SECOND_DETACH_TARGET_DEV)
         timeout = 80000 #80s
-        if api.wait_situation(ARRAYNAME, "DEGRADED", timeout) == True:
+        if api.wait_situation(ARRAYNAME, "DEGRADED", timeout) is True:
             return "pass"
     return "fail"
+
 
 if __name__ == "__main__":
     api.clear_result(__file__)

@@ -19,6 +19,7 @@ FIRST_SPARE = "unvme-ns-4"
 SECOND_SPARE = MOUNT_VOL_NO_SPARE.REMAINING_DEV
 ARRAYNAME = MOUNT_VOL_NO_SPARE.ARRAYNAME
 
+
 def execute():
     MOUNT_VOL_NO_SPARE.execute()
     fio_proc = fio.start_fio(0, 30)
@@ -33,16 +34,17 @@ def execute():
     print("spare added")
     cli.add_device(SECOND_SPARE, ARRAYNAME)
 
-    if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
+    if api.wait_situation(ARRAYNAME, "REBUILDING") is True:
         print("1st rebuilding")
         api.detach_ssd(FIRST_SPARE)
         timeout = 80000 #80s
-        if api.wait_situation(ARRAYNAME, "DEGRADED", timeout) == True:
+        if api.wait_situation(ARRAYNAME, "DEGRADED", timeout) is True:
             print("1st rebuilding stopped")
-            if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) == True:
+            if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) is True:
                 print("2nd rebuilding")
                 return "pass"
     return "fail"
+
 
 if __name__ == "__main__":
     api.clear_result(__file__)
