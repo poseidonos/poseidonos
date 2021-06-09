@@ -84,7 +84,7 @@ protected:
     void _FlushDirtyPagesGiven(int mapId, MpageList& dirtyPages);
     void _FlushTouchedPages(int mapId);
 
-    static std::map<int, uint64_t> createdVolumeInfo; // [volId, volSizeByte]
+    static std::map<int, uint64_t> createdVolumeInfo;   // [volId, volSizeByte]
     static std::vector<uint32_t> rbas0, vsids0, offsets0;
     static std::vector<uint32_t> rbas1, vsids1, offsets1;
 
@@ -103,4 +103,4 @@ protected:
     EventScheduler* mockEventScheduler;
 };
 
-} // namespace pos
+}   // namespace pos

@@ -44,7 +44,7 @@ const uint64_t SZ_1M = (1 << 20);
 const bool RET_BOOL_SUCCESS = true;
 const int RET_INT_SUCCESS = 0;
 const int TEST_VOL_ID = 0;
-const uint64_t TEST_VOL_SIZE = 0x40000000; // 1GB;
+const uint64_t TEST_VOL_SIZE = 0x40000000;  // 1GB;
 const int NUM_MAP_ENTRY = 128;
 
 const BlkAddr TEST_RBA_MAX = (TEST_VOL_SIZE / PAGE_SIZE_IT) - 1;
@@ -52,4 +52,4 @@ const StripeId TEST_VSID_MAX = 1024 * 1024 - 1;
 const BlkOffset TEST_OFFSET_MAX = 1024 * 1024 - 1;
 const StripeId TEST_LSID_MAX = 1024 - 1;
 
-} // namespace pos
+}   // namespace pos

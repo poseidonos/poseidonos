@@ -62,4 +62,4 @@ EventScheduler::EnqueueEvent(EventSmartPtr input)
     input->Execute();
 }
 
-} // namespace pos
+}   // namespace pos

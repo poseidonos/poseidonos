@@ -88,11 +88,11 @@ private:
     BitMap* mPageMap;
     BitMap* touchedMpages;
 
-    int mapId;          // by MapContent::Ctor()
-    uint32_t size;      // header size(MpageValidInfo + BitMap), aligned by mpageSize
-    uint32_t mpageSize; // by MapContent::SetPageSize()
+    int mapId;              // by MapContent::Ctor()
+    uint32_t size;          // header size(MpageValidInfo + BitMap), aligned by mpageSize
+    uint32_t mpageSize;     // by MapContent::SetPageSize()
     uint32_t entriesPerMpage;
     bool isInitialized;
 };
 
-} // namespace pos
+}   // namespace pos

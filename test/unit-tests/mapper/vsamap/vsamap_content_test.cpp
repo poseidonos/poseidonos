@@ -53,7 +53,7 @@ TEST(VSAMapContent, GetDirtyPages_Default)
 
     // When
     MpageList mpageList = sut.GetDirtyPages(RBA_TEST, rbaCnt);
-    
+
     // Then
     EXPECT_EQ(mpageList.size(), 2);
 }
@@ -106,7 +106,7 @@ TEST(VSAMapContent, GetEntry_ValidMpage)
     const int VOLID = 0;
     const uint64_t BLKCNT = 1024 * 1024;    // 4K * 1M == 4GB
     const BlkAddr RBA_TEST = 0;
-    const VirtualBlkAddr VSA = {.stripeId = 1, .offset = 2};
+    const VirtualBlkAddr VSA = { .stripeId = 1, .offset = 2 };
 
     MockMapHeader* mockMapHeader = new MockMapHeader;
     EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(508));
@@ -126,15 +126,14 @@ TEST(VSAMapContent, GetEntry_ValidMpage)
     VirtualBlkAddr rvsa = sut.GetEntry(RBA_TEST);
 
     // Then
-    EXPECT_EQ(rvsa, VSA);
-    
+    EXPECT_EQ(rvsa, VSA);   
 }
 
 TEST(VSAMapContent, SetEntry_VsaMapSetFailure)
 {
     // Given
     const BlkAddr RBA_TEST = 0;
-    const VirtualBlkAddr VSA = {.stripeId = 1, .offset = 2};
+    const VirtualBlkAddr VSA = { .stripeId = 1, .offset = 2 };
 
     MockMap* mockMap = new MockMap;
     EXPECT_CALL(*mockMap, GetMpageLock);
@@ -160,7 +159,7 @@ TEST(VSAMapContent, SetEntry_AllocAndSet)
 {
     // Given
     const BlkAddr RBA_TEST = 0;
-    const VirtualBlkAddr VSA = {.stripeId = 1, .offset = 2};
+    const VirtualBlkAddr VSA = { .stripeId = 1, .offset = 2 };
 
     MockMap* mockMap = new MockMap;
     EXPECT_CALL(*mockMap, GetMpageLock);
@@ -189,12 +188,11 @@ TEST(VSAMapContent, SetEntry_AllocAndSet)
     delete mockBitMap;
 }
 
-
 TEST(VSAMapContent, GetNumUsedBlocks_CountOnePage)
 {
     // Given
     const BlkAddr RBA_TEST = 0;
-    const VirtualBlkAddr VSA = {.stripeId = 1, .offset = 2};
+    const VirtualBlkAddr VSA = { .stripeId = 1, .offset = 2 };
 
     MockMap* mockMap = new MockMap;
     char* buf = new char[4032]();

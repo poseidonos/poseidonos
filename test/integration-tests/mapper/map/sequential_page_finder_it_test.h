@@ -48,4 +48,4 @@ protected:
     void _AddPages(MpageSet set, MpageList& dest);
 };
 
-} // namespace pos
+}   // namespace pos

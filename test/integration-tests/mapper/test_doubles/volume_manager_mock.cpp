@@ -34,13 +34,13 @@
 
 namespace pos
 {
-MockVolumeManager::MockVolumeManager()
+MockVolumeManager::MockVolumeManager(void)
 : VolumeManager(nullptr, nullptr)
 {
 }
 
-MockVolumeManager::~MockVolumeManager()
+MockVolumeManager::~MockVolumeManager(void)
 {
 }
 
-} // namespace pos
+}   // namespace pos

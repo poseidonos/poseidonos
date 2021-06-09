@@ -50,4 +50,4 @@ public:
     void CLIThreadFunc(IVSAMap* iVSAMap, BlkAddr rba);
 };
 
-} // namespace pos
+}   // namespace pos

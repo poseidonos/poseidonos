@@ -48,4 +48,4 @@ protected:
     void _PrintData(std::string name, std::vector<uint32_t>& data);
 };
 
-} // namespace pos
+}   // namespace pos

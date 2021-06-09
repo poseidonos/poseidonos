@@ -136,7 +136,7 @@ TEST_F(MapIoHandlerTest, StoreVSAMap)
         _SetVSAs(TEST_VOL_ID, rba, (StripeId)(test / 128), (BlkOffset)(test % 128));
     }
 
-    mapperSUT->StoreAllMaps(); // store stripMap & vsamap[vol]
+    mapperSUT->StoreAllMaps();  // store stripMap & vsamap[vol]
 
     _SimulateSPOR();
 
@@ -368,4 +368,4 @@ TEST_F(MapIoHandlerTest, AsnyFlushMapSeveralMpages)
     }
 }
 
-} // namespace pos
+}   // namespace pos

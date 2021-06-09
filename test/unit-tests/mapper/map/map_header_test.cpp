@@ -8,7 +8,7 @@ TEST(MpageValidInfo, MpageValidInfo_)
 {
 }
 
-} // namespace pos
+}   // namespace pos
 
 namespace pos
 {
@@ -104,4 +104,4 @@ TEST(MapHeader, IsInitialized_)
 {
 }
 
-} // namespace pos
+}   // namespace pos

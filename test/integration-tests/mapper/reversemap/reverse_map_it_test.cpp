@@ -132,4 +132,4 @@ TEST_F(ReverseMapTest, LoadAndGet)
     EXPECT_EQ(ret, RET_INT_SUCCESS);
 }
 
-} // namespace pos
+}   // namespace pos

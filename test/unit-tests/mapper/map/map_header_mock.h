@@ -27,4 +27,4 @@ public:
     MOCK_METHOD(void, SetEntriesPerMpage, (uint32_t entriesPerMpage_), (override));
 };
 
-} // namespace pos
+}   // namespace pos

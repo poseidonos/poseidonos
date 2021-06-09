@@ -54,4 +54,4 @@ protected:
     static const int NUM_PAGES_IN_MAP = MPAGE_SIZE / 8;
 };
 
-} // namespace pos
+}   // namespace pos

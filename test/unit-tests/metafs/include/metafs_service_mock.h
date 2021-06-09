@@ -14,4 +14,4 @@ public:
     using MetaFsService::MetaFsService;
 };
 
-} // namespace pos
+}   // namespace pos

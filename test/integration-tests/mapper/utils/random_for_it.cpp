@@ -78,4 +78,4 @@ RandomForUT::_PrintData(std::string name, std::vector<uint32_t>& data)
     std::cout << std::endl;
 }
 
-} // namespace pos
+}   // namespace pos

@@ -162,4 +162,4 @@ TEST_F(SequentialPageFinderTest, SeveralSequentialPages)
     EXPECT_TRUE(sets.size() == 0);
 }
 
-} // namespace pos
+}   // namespace pos

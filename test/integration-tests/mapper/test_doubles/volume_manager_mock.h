@@ -43,8 +43,8 @@ namespace pos
 class MockVolumeManager : public VolumeManager
 {
 public:
-    MockVolumeManager();
-    virtual ~MockVolumeManager();
+    MockVolumeManager(void);
+    virtual ~MockVolumeManager(void);
 
     MOCK_METHOD(int, GetVolumeSize, (int volId, uint64_t& volSize), (override));
 };

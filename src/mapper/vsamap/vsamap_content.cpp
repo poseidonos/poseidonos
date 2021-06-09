@@ -114,7 +114,6 @@ VSAMapContent::SetEntry(BlkAddr rba, VirtualBlkAddr vsa)
         {
             map->ReleaseMpageLock(pageNr);
             return -EID(VSAMAP_SET_FAILURE);
-            
         }
         mapHeader->SetMapAllocated(pageNr);
     }

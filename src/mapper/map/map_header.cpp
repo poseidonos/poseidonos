@@ -142,4 +142,4 @@ MapHeader::SetMapAllocated(int pageNr)
     mPageMap->SetBit(pageNr);
 }
 
-}
+}   // namespace pos

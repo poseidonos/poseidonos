@@ -53,4 +53,4 @@ MapFlushDoneEvent::Execute(void)
     return true;
 }
 
-} // namespace pos
+}   // namespace pos

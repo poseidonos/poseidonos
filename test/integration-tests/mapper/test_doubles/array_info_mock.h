@@ -57,10 +57,10 @@ public:
     uint32_t GetRebuildingProgress(void) override;
 #ifdef _ADMIN_ENABLED
     IArrayDevMgr* GetArrayManager(void) override { return nullptr; }
-#endif    
+#endif
 
 private:
     PartitionLogicalSize* pls;
 };
 
-} // namespace pos
+}   // namespace pos

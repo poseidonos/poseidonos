@@ -151,8 +151,8 @@ MapperTestFixture::_GetRbaMax(int volId)
 void
 MapperTestFixture::_SetVSAs(int volumeId, BlkAddr rba, StripeId vsidOrig, BlkOffset offsetOrig)
 {
-    VirtualBlkAddr vsaOrig = {.stripeId = vsidOrig, .offset = offsetOrig};
-    VirtualBlks vb = {.startVsa = vsaOrig, .numBlks = 1};
+    VirtualBlkAddr vsaOrig = { .stripeId = vsidOrig, .offset = offsetOrig };
+    VirtualBlks vb = { .startVsa = vsaOrig, .numBlks = 1 };
     IVSAMap* iVSAMap = mapperSUT->GetIVSAMap();
     int reti = iVSAMap->SetVSAs(volumeId, rba, vb);
     EXPECT_EQ(reti, RET_INT_SUCCESS);
@@ -166,7 +166,7 @@ MapperTestFixture::_GetAndCompareVSA(int volumeId, BlkAddr rba, StripeId vsidOri
     int reti = iVSAMap->GetVSAs(volumeId, rba, 1, va);
     EXPECT_EQ(reti, RET_INT_SUCCESS);
 
-    VirtualBlkAddr vsaOrig = {.stripeId = vsidOrig, .offset = offsetOrig};
+    VirtualBlkAddr vsaOrig = { .stripeId = vsidOrig, .offset = offsetOrig };
     EXPECT_EQ(va[0], vsaOrig);
 }
 
@@ -181,7 +181,7 @@ MapperTestFixture::_SetLSA(StripeId vsid, StripeId lsid, StripeLoc loc)
 void
 MapperTestFixture::_GetAndCompareLSA(StripeId vsid, StripeId lsidOrig, StripeLoc locOrig)
 {
-    StripeAddr lsaOrig = {.stripeLoc = locOrig, .stripeId = lsidOrig};
+    StripeAddr lsaOrig = { .stripeLoc = locOrig, .stripeId = lsidOrig };
     IStripeMap* iStripeMap = mapperSUT->GetIStripeMap();
     StripeAddr lsa = iStripeMap->GetLSA(vsid);
     EXPECT_EQ(lsa, lsaOrig);
@@ -271,4 +271,4 @@ MapperTestFixture::FlushDoneCallback(int mapId)
     }
 }
 
-} // namespace pos
+}   // namespace pos

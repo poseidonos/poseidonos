@@ -36,4 +36,4 @@ TEST(MetaFsService, _InitiateMioHandler_)
 {
 }
 
-} // namespace pos
+}   // namespace pos

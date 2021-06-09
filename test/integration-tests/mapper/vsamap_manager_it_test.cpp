@@ -165,7 +165,7 @@ TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_1)
         caller = CALLER_EVENT;
         vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
     } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
-    VirtualBlkAddr vsaOrig = {.stripeId = vsids0[0], .offset = offsets0[0]};
+    VirtualBlkAddr vsaOrig = { .stripeId = vsids0[0], .offset = offsets0[0] };
     EXPECT_EQ(vsa, vsaOrig);
 
     do
@@ -175,7 +175,7 @@ TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_1)
         caller = CALLER_NOT_EVENT;
         vsa = iVSAMap->GetVSAInternal(1, rbas1[0], caller);
     } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
-    vsaOrig = {.stripeId = vsids1[0], .offset = offsets1[0]};
+    vsaOrig = { .stripeId = vsids1[0], .offset = offsets1[0] };
     EXPECT_EQ(vsa, vsaOrig);
 
     // Pre-setting for next test
@@ -203,7 +203,7 @@ TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_2)
         caller = CALLER_EVENT;
         vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
     } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
-    VirtualBlkAddr vsaOrig = {.stripeId = vsids0[0], .offset = offsets0[0]};
+    VirtualBlkAddr vsaOrig = { .stripeId = vsids0[0], .offset = offsets0[0] };
     EXPECT_EQ(vsa, vsaOrig);
 
     // Pre-setting for next test
@@ -228,7 +228,7 @@ TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_3)
     caller = CALLER_NOT_EVENT;
     vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
 
-    VirtualBlkAddr vsaOrig = {.stripeId = vsids0[0], .offset = offsets0[0]};
+    VirtualBlkAddr vsaOrig = { .stripeId = vsids0[0], .offset = offsets0[0] };
     EXPECT_EQ(vsa, vsaOrig);
 
     // Pre-setting for next test
@@ -253,7 +253,7 @@ TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_4)
     caller = CALLER_NOT_EVENT;
     vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
     POS_TRACE_INFO(9999, "Let's check");
-    VirtualBlkAddr vsaOrig = {.stripeId = vsids0[0], .offset = offsets0[0]};
+    VirtualBlkAddr vsaOrig = { .stripeId = vsids0[0], .offset = offsets0[0] };
     EXPECT_EQ(vsa, vsaOrig);
 
     t.join();
@@ -284,4 +284,4 @@ TEST_F(VSAMapManagerTest, InternalLoadingAndFGMount)
     _DeleteMockVolumeManager();
 }
 
-} // namespace pos
+}   // namespace pos

@@ -49,4 +49,4 @@ private:
     MapperTestFixture* tester;
 };
 
-} // namespace pos
+}   // namespace pos

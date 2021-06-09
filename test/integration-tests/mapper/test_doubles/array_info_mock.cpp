@@ -105,4 +105,4 @@ MockArrayInfo::GetRebuildingProgress(void)
     return 0;
 }
 
-} // namespace pos
+}   // namespace pos
