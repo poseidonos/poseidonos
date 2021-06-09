@@ -49,8 +49,8 @@ class Stripe
 {
 public:
     Stripe(void) = default;
-    Stripe(ReverseMapPack* revMap, bool withDataBuffer);
-    Stripe(bool withDataBuffer, std::string arrayName, AllocatorAddressInfo* allocatorAddressInfo);
+    Stripe(ReverseMapPack* revMap, bool withDataBuffer);    // Ctor for UT & IT
+    Stripe(bool withDataBuffer, std::string arrayName, AllocatorAddressInfo* allocatorAddressInfo);     // Ctor for Production
     virtual ~Stripe(void);
     virtual void Assign(StripeId vsid, StripeId lsid, ASTailArrayIdx tailarrayidx);
 

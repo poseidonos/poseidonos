@@ -51,7 +51,7 @@ class MapContent
 {
 public:
     MapContent(void);                               // Ctor for UT
-    explicit MapContent(MapHeader* mapHeader_, MetaFsService* metaFsService_);     // Ctor for UT
+    MapContent(MapHeader* mapHeader_, MetaFsService* metaFsService_);     // Ctor for UT
     explicit MapContent(int mapId);                 // Ctor for Production
     virtual ~MapContent(void);
 

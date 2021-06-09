@@ -32,11 +32,6 @@
 
 #pragma once
 
-// #include "mk/ibof_config.h"
-// #include "src/bio/volume_io.h"
-
-// #include <string.h>
-
 namespace pos
 {
 
@@ -53,4 +48,4 @@ enum class MetaFsIoOpcode
     Read,
 };
 
-} // namespace pos
+}   // namespace pos
