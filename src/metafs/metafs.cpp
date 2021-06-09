@@ -84,6 +84,8 @@ MetaFs::Init(void)
         rc = _CreateMetaVolume();
         if (POS_EVENT_ID::SUCCESS != rc)
             return (int)rc;
+
+        isLoaded = true;
     }
 
     rc = _OpenMetaVolume();
@@ -121,7 +123,7 @@ MetaFs::Dispose(void)
 
     io->RemoveArray(arrayName);
 
-    MetaFsServiceSingleton::Instance()->Deregister(arrayName);
+    _ClearMss();
 }
 
 void
@@ -132,7 +134,14 @@ MetaFs::Shutdown(void)
 
     io->RemoveArray(arrayName);
 
-    MetaFsServiceSingleton::Instance()->Deregister(arrayName);
+    // TODO(munseop.lim): refactoring requires
+    if (nullptr != metaStorage)
+    {
+        metaStorage->Close();
+        delete metaStorage;
+    }
+
+    _ClearMss();
 }
 
 uint64_t
@@ -167,9 +176,7 @@ MetaFs::_Initialize(void)
 
     if (nullptr == metaStorage)
     {
-        metaStorage = mgmt->GetMss();
-        io->SetMss(metaStorage);
-        ctrl->SetMss(metaStorage);
+        _SetMss();
     }
 
     return true;
@@ -343,5 +350,21 @@ MetaFs::_MakeMetaStorageMediaInfo(PartitionType ptnType)
     newInfo.mediaCapacity = static_cast<uint64_t>(ptnSize->totalStripes) * ptnSize->blksPerStripe * ArrayConfig::BLOCK_SIZE_BYTE;
 
     return newInfo;
+}
+
+void
+MetaFs::_SetMss(void)
+{
+    metaStorage = mgmt->GetMss();
+    io->SetMss(metaStorage);
+    ctrl->SetMss(metaStorage);
+}
+
+void
+MetaFs::_ClearMss(void)
+{
+    metaStorage = nullptr;
+    io->SetMss(metaStorage);
+    ctrl->SetMss(metaStorage);
 }
 } // namespace pos

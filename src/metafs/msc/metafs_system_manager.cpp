@@ -56,9 +56,6 @@ MetaFsSystemManager::~MetaFsSystemManager(void)
 {
     if (nullptr != mbrMgr)
         delete mbrMgr;
-
-    if (nullptr != metaStorage)
-        delete metaStorage;
 }
 
 const char*
@@ -230,6 +227,9 @@ MetaFsSystemManager::_HandleCloseRequest(MetaFsControlReqMsg& reqMsg)
 
     if (nullptr != metaStorage)
     {
+        // TODO(munseop.lim): refactoring requires
+        // in unmount case : mss is removed here
+        // in shutdown case: mss will be removed by metafs
         delete metaStorage;
         metaStorage = nullptr;
     }
