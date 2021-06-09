@@ -58,4 +58,4 @@ VolumeListToString(std::vector<pos::Volume*> volumes)
     return root.ToJson();
 }
 
-}  // namespace pos_test
+}  // namespace pos
