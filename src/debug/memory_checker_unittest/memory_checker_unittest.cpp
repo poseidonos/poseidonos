@@ -48,10 +48,16 @@ test_fail_memory_corruption(void)
 }
 
 void
+test_fail_single_another_stack(Dummy* ptr)
+{
+    delete ptr;
+}
+
+void
 test_fail_single_double_free(void)
 {
     Dummy* ptr = new Dummy;
-    delete ptr;
+    test_fail_single_another_stack(ptr);
     delete ptr;
 }
 
@@ -119,9 +125,11 @@ test_erase_list_multiple(void)
     delete (ptr[1]);
     delete (ptr[2]);
     pos::MemoryChecker::Enable(false);
+    printf("%ld %ld \n", (uint64_t)ptr[0], sizeof(Dummy));
+    printf("%ld %ld \n", (uint64_t)ptr[1], sizeof(Dummy));
     printf("%ld %ld \n", (uint64_t)ptr[2], sizeof(Dummy));
     // You need to expermentally choose the size (96+64)
-    pos::MemoryChecker::EraseFromFreeList((uint64_t)((char*)ptr[0] + 1), 96 + 64);
+    pos::MemoryChecker::EraseFromFreeList((uint64_t)((char*)ptr[0] + 1), 96 + 2);
     while (1)
     {
         // Do nothing

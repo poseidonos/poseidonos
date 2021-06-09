@@ -177,7 +177,18 @@ Poseidonos::_InitMemoryChecker(void)
     ConfigManager& configManager = *ConfigManagerSingleton::Instance();
     std::string module("debug");
     bool enabled = false;
-    int ret = configManager.GetValue(module, "memory_checker", &enabled,
+    int ret = configManager.GetValue(module, "stack_trace_for_previous_owner", &enabled,
+        CONFIG_TYPE_BOOL);
+    if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
+    {
+        MemoryChecker::EnableStackTrace(enabled);
+    }
+    else
+    {
+        // default true
+        MemoryChecker::EnableStackTrace(true);
+    }
+    ret = configManager.GetValue(module, "memory_checker", &enabled,
         CONFIG_TYPE_BOOL);
     if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
     {
