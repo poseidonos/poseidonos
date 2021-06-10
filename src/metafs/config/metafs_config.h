@@ -47,7 +47,9 @@ public:
     static const uint32_t DEFAULT_MAX_CORE_COUNT = 128;
     static const uint32_t DEFAULT_MAX_MPIO_CACHE_COUNT = 32; // MAX_CONCURRENT_IO_CNT has to be greater than this count
     static const uint32_t MAX_ARRAY_CNT = ArrayMgmtPolicy::MAX_ARRAY_CNT;
-    static const uint32_t MAX_VOLUME_CNT = 256;
+
+    // 256 volume files per a array, 18 alternative files
+    static const uint32_t MAX_VOLUME_CNT = 256 + 18;
 };
 
 class MetaFsIoConfig
