@@ -134,7 +134,7 @@ NvmfVolumePos::_VolumeCreateHandler(void* arg1, void* arg2)
     if (vInfo)
     {
         string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
-        target.CreatePosBdev(bdevName, vInfo->id, vInfo->size_mb, 512, false, vInfo->array_name);
+        target.CreatePosBdev(bdevName, vInfo->id, vInfo->size_mb, 512, false, vInfo->array_name, vInfo->array_id);
         delete vInfo;
     }
 }

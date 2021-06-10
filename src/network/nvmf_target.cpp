@@ -36,7 +36,6 @@
 #include <sstream>
 #include <string>
 
-#include "spdk/pos_volume.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
@@ -56,8 +55,12 @@ struct NvmfTargetCallbacks NvmfTarget::nvmfCallbacks;
 const char* NvmfTarget::BDEV_NAME_PREFIX = "bdev_";
 std::atomic<int> NvmfTarget::attachedNsid;
 
-NvmfTarget::NvmfTarget(void)
+NvmfTarget::NvmfTarget(SpdkCaller* spdkCaller)
 {
+    if (nullptr == spdkCaller)
+    {
+        spdkCaller = SpdkCallerSingleton::Instance();
+    }
     InitNvmfCallbacks(&nvmfCallbacks);
 }
 
@@ -67,11 +70,11 @@ NvmfTarget::~NvmfTarget(void)
 
 bool
 NvmfTarget::CreatePosBdev(const string& bdevName, uint32_t id,
-    uint64_t volumeSizeInMb, uint32_t blockSize, bool volumeTypeInMem, const string& arrayName)
+    uint64_t volumeSizeInMb, uint32_t blockSize, bool volumeTypeInMem, const string& arrayName, uint64_t arrayId)
 {
     uint64_t volumeSizeInByte = volumeSizeInMb * MB;
-    struct spdk_bdev* bdev = spdk_bdev_create_pos_disk(bdevName.c_str(), id, nullptr,
-        volumeSizeInByte / blockSize, blockSize, volumeTypeInMem, arrayName.c_str(), 0);
+    struct spdk_bdev* bdev = spdkCaller->SpdkBdevCreatePosDisk(bdevName.c_str(), id, nullptr,
+        volumeSizeInByte / blockSize, blockSize, volumeTypeInMem, arrayName.c_str(), arrayId);
     if (bdev == nullptr)
     {
         SPDK_ERRLOG("bdev %s does not exist\n", bdevName.c_str());
@@ -90,7 +93,7 @@ NvmfTarget::CreatePosBdev(const string& bdevName, uint32_t id,
 bool
 NvmfTarget::DeletePosBdev(const string& bdevName)
 {
-    struct spdk_bdev* bdev = spdk_bdev_get_by_name(bdevName.c_str());
+    struct spdk_bdev* bdev = spdkCaller->SpdkBdevGetByName(bdevName.c_str());
     if (bdev == nullptr)
     {
         SPDK_ERRLOG("bdev %s does not exist\n", bdevName.c_str());
@@ -103,7 +106,7 @@ NvmfTarget::DeletePosBdev(const string& bdevName)
     {
         return false;
     }
-    spdk_bdev_delete_pos_disk(bdev, nvmfCallbacks.deletePosBdevDone, ctx);
+    spdkCaller->SpdkBdevDeletePosDisk(bdev, nvmfCallbacks.deletePosBdevDone, ctx);
     return true;
 }
 
@@ -119,8 +122,7 @@ NvmfTarget::_TryAttachHandler(void* arg1, void* arg2)
     string subnqn = *static_cast<string*>(arg1);
     string bdevName = *static_cast<string*>(arg2);
 
-    NvmfTarget nvmfTarget;
-    int ret = nvmfTarget.AttachNamespace(subnqn, bdevName.c_str(), 0, _AttachDone, nullptr);
+    int ret = _AttachNamespaceWithNsid(subnqn, bdevName.c_str(), 0, _AttachDone, nullptr);
     if (ret == false)
     {
         SPDK_ERRLOG("failed to try attach namespace(bdev: %s) to %s\n", bdevName.c_str(), subnqn.c_str());
@@ -155,14 +157,14 @@ NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName
 }
 
 bool
-NvmfTarget::AttachNamespace(const string& nqn, const string& bdevName,
+NvmfTarget::_AttachNamespace(const string& nqn, const string& bdevName,
     PosNvmfEventDoneCallback_t callback, void* arg)
 {
-    return AttachNamespace(nqn, bdevName, 0, callback, arg);
+    return _AttachNamespaceWithNsid(nqn, bdevName, 0, callback, arg);
 }
 
 bool
-NvmfTarget::AttachNamespace(const string& nqn, const string& bdevName,
+NvmfTarget::_AttachNamespaceWithNsid(const string& nqn, const string& bdevName,
     uint32_t nsid, PosNvmfEventDoneCallback_t callback, void* arg)
 {
     if (!IsTargetExist())
@@ -170,9 +172,11 @@ NvmfTarget::AttachNamespace(const string& nqn, const string& bdevName,
         SPDK_ERRLOG("fail to attach namespace: target does not exist\n");
         return false;
     }
-    struct spdk_nvmf_subsystem* subsystem = FindSubsystem(nqn);
+    struct spdk_nvmf_subsystem* subsystem =
+        SpdkCallerSingleton::Instance()->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, nqn.c_str());
     if (subsystem == nullptr)
     {
+        SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", nqn.c_str());
         return false;
     }
 
@@ -182,7 +186,12 @@ NvmfTarget::AttachNamespace(const string& nqn, const string& bdevName,
     {
         return false;
     }
-    _AttachNamespaceWithPause(subsystem, ctx);
+
+    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem, nvmfCallbacks.attachNamespacePauseDone, ctx);
+    if (ret != 0)
+    {
+        _AttachNamespaceWithPause(subsystem, ctx);
+    }
 
     return true;
 }
@@ -191,8 +200,7 @@ void
 NvmfTarget::_AttachNamespaceWithPause(void* arg1, void* arg2)
 {
     struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
-
-    int ret = spdk_nvmf_subsystem_pause(subsystem, nvmfCallbacks.attachNamespacePauseDone, (void*)arg2);
+    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem, nvmfCallbacks.attachNamespacePauseDone, (void*)arg2);
     if (ret != 0)
     {
         SPDK_NOTICELOG("failed to pause subsystem during attaching namespace : retrying \n");
@@ -205,21 +213,21 @@ NvmfTarget::GetNamespace(
     struct spdk_nvmf_subsystem* subsystem, const string& bdevName)
 {
     struct spdk_bdev* bdev = nullptr;
-    struct spdk_bdev* targetBdev = spdk_bdev_get_by_name(bdevName.c_str());
+    struct spdk_bdev* targetBdev = spdkCaller->SpdkBdevGetByName(bdevName.c_str());
     if (targetBdev == nullptr)
     {
         SPDK_ERRLOG("failed to get namespace : bdev(%s) does not exist\n", bdevName.c_str());
         return nullptr;
     }
-    struct spdk_nvmf_ns* ns = spdk_nvmf_subsystem_get_first_ns(subsystem);
+    struct spdk_nvmf_ns* ns = spdkCaller->SpdkNvmfSubsystemGetFirstNs(subsystem);
     while (ns != nullptr)
     {
-        bdev = spdk_nvmf_ns_get_bdev(ns);
+        bdev = spdkCaller->SpdkNvmfNsGetBdev(ns);
         if (bdev == targetBdev)
         {
             return ns;
         }
-        ns = spdk_nvmf_subsystem_get_next_ns(subsystem, ns);
+        ns = spdkCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
     }
     return nullptr;
 }
@@ -238,9 +246,11 @@ NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
         SPDK_ERRLOG("fail to detache namespace: nqn does not exist\n");
         return false;
     }
-    struct spdk_nvmf_subsystem* subsystem = FindSubsystem(nqn);
+    struct spdk_nvmf_subsystem* subsystem =
+        spdkCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, nqn.c_str());
     if (subsystem == nullptr)
     {
+        SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", nqn.c_str());
         return false;
     }
 
@@ -255,7 +265,7 @@ NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
             SPDK_ERRLOG("failed to detach namespace : could not get namespace\n");
             return false;
         }
-        nsid = spdk_nvmf_ns_get_id(ns);
+        nsid = spdkCaller->SpdkNvmfNsGetId(ns);
     }
 
     struct EventContext* ctx = _CreateEventContext(callback, arg,
@@ -264,7 +274,12 @@ NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
     {
         return false;
     }
-    _DetachNamespaceWithPause(subsystem, ctx);
+
+    int ret = spdkCaller->SpdkNvmfSubsystemPause(subsystem, nvmfCallbacks.detachNamespacePauseDone, ctx);
+    if (ret != 0)
+    {
+        _DetachNamespaceWithPause(subsystem, ctx);
+    }
 
     return true;
 }
@@ -274,15 +289,15 @@ NvmfTarget::CheckSubsystemExistance(void)
 {
     struct spdk_nvmf_tgt* nvmf_tgt;
     struct spdk_nvmf_subsystem* subsystem;
-    nvmf_tgt = spdk_nvmf_get_tgt("nvmf_tgt");
-    subsystem = spdk_nvmf_subsystem_get_first(nvmf_tgt);
+    nvmf_tgt = spdkCaller->SpdkNvmfGetTgt("nvmf_tgt");
+    subsystem = spdkCaller->SpdkNvmfSubsystemGetFirst(nvmf_tgt);
     while (subsystem != NULL)
     {
-        if (spdk_nvmf_subsystem_get_type(subsystem) == SPDK_NVMF_SUBTYPE_NVME)
+        if (spdkCaller->SpdkNvmfSubsystemGetType(subsystem) == SPDK_NVMF_SUBTYPE_NVME)
         {
             return true;
         }
-        subsystem = spdk_nvmf_subsystem_get_next(subsystem);
+        subsystem = spdkCaller->SpdkNvmfSubsystemGetNext(subsystem);
     }
     return false;
 }
@@ -292,7 +307,7 @@ NvmfTarget::_DetachNamespaceWithPause(void* arg1, void* arg2)
 {
     struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
 
-    int ret = spdk_nvmf_subsystem_pause(subsystem,
+    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem,
         nvmfCallbacks.detachNamespacePauseDone, (void*)arg2);
     if (ret != 0)
     {
@@ -311,9 +326,11 @@ NvmfTarget::DetachNamespaceAll(const string& nqn,
         return false;
     }
 
-    struct spdk_nvmf_subsystem* subsystem = FindSubsystem(nqn);
+    struct spdk_nvmf_subsystem* subsystem =
+        spdkCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, nqn.c_str());
     if (subsystem == nullptr)
     {
+        SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", nqn.c_str());
         return false;
     }
 
@@ -323,7 +340,11 @@ NvmfTarget::DetachNamespaceAll(const string& nqn,
         return false;
     }
 
-    _DetachNamespaceAllWithPause(subsystem, ctx);
+    int ret = spdkCaller->SpdkNvmfSubsystemPause(subsystem, nvmfCallbacks.detachNamespaceAllPauseDone, ctx);
+    if (ret != 0)
+    {
+        _DetachNamespaceAllWithPause(subsystem, ctx);
+    }
 
     return true;
 }
@@ -333,7 +354,7 @@ NvmfTarget::_DetachNamespaceAllWithPause(void* arg1, void* arg2)
 {
     struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
 
-    int ret = spdk_nvmf_subsystem_pause(subsystem,
+    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem,
         nvmfCallbacks.detachNamespaceAllPauseDone, (void*)arg2);
 
     if (ret != 0)
@@ -349,11 +370,11 @@ uint32_t
 NvmfTarget::GetSubsystemNsCnt(struct spdk_nvmf_subsystem* subsystem)
 {
     uint32_t nsCnt = 0;
-    struct spdk_nvmf_ns* ns = spdk_nvmf_subsystem_get_first_ns(subsystem);
+    struct spdk_nvmf_ns* ns = spdkCaller->SpdkNvmfSubsystemGetFirstNs(subsystem);
     while (ns != nullptr)
     {
         nsCnt++;
-        ns = spdk_nvmf_subsystem_get_next_ns(subsystem, ns);
+        ns = spdkCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
     }
     return nsCnt;
 }
@@ -363,10 +384,10 @@ NvmfTarget::AllocateSubsystem(void)
 {
     static uint32_t allowedNsCnt = nrVolumePerSubsystem;
 
-    struct spdk_nvmf_subsystem* subsystem = spdk_nvmf_subsystem_get_first(g_spdk_nvmf_tgt);
+    struct spdk_nvmf_subsystem* subsystem = spdkCaller->SpdkNvmfSubsystemGetFirst(g_spdk_nvmf_tgt);
     while (subsystem != nullptr)
     {
-        if (spdk_nvmf_subsystem_get_type(subsystem) == SPDK_NVMF_SUBTYPE_NVME)
+        if (spdkCaller->SpdkNvmfSubsystemGetType(subsystem) == SPDK_NVMF_SUBTYPE_NVME)
         {
             uint32_t nsCnt = GetSubsystemNsCnt(subsystem);
             if (nsCnt < allowedNsCnt)
@@ -374,11 +395,11 @@ NvmfTarget::AllocateSubsystem(void)
                 return subsystem;
             }
         }
-        struct spdk_nvmf_subsystem* nextSubsystem = spdk_nvmf_subsystem_get_next(subsystem);
+        struct spdk_nvmf_subsystem* nextSubsystem = spdkCaller->SpdkNvmfSubsystemGetNext(subsystem);
         if (nextSubsystem == nullptr)
         {
-            nextSubsystem = spdk_nvmf_subsystem_get_first(g_spdk_nvmf_tgt);
-            if (!nextSubsystem || spdk_nvmf_subsystem_get_next(nextSubsystem) == nullptr)
+            nextSubsystem = spdkCaller->SpdkNvmfSubsystemGetFirst(g_spdk_nvmf_tgt);
+            if (!nextSubsystem || spdkCaller->SpdkNvmfSubsystemGetNext(nextSubsystem) == nullptr)
             {
                 SPDK_ERRLOG("failed to allocate subsystem : next subsystem does not exist\n");
                 return nullptr;
@@ -399,18 +420,32 @@ NvmfTarget::GetBdevName(uint32_t id, string arrayName)
 string
 NvmfTarget::GetVolumeNqn(struct spdk_nvmf_subsystem* subsystem)
 {
-    return spdk_nvmf_subsystem_get_nqn(subsystem);
+    return spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem);
 }
 
 uint32_t
-NvmfTarget::GetVolumeNqnId(const string& subnqn)
+NvmfTarget::GetVolumeNqnId(const string& nqn)
 {
-    spdk_nvmf_subsystem* subsystem = FindSubsystem(subnqn);
+    struct spdk_nvmf_subsystem* subsystem =
+        spdkCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, nqn.c_str());
     if (nullptr == subsystem)
     {
+        SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", nqn.c_str());
         return -1;
     }
-    return spdk_nvmf_subsystem_get_id(subsystem);
+    return spdkCaller->SpdkNvmfSubsystemGetId(subsystem);
+}
+
+struct spdk_nvmf_subsystem*
+NvmfTarget::FindSubsystem(const string& subnqn)
+{
+    struct spdk_nvmf_subsystem* subsystem =
+        spdkCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, subnqn.c_str());
+    if (nullptr == subsystem)
+    {
+        SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", subnqn.c_str());
+    }
+    return subsystem;
 }
 
 void
@@ -426,7 +461,7 @@ NvmfTarget::SetVolumeQos(const string& bdevName, uint64_t maxIops, uint64_t maxB
         return;
     }
     uint64_t limits[SPDK_BDEV_QOS_NUM_RATE_LIMIT_TYPES];
-    struct spdk_bdev* bdev = spdk_bdev_get_by_name(bdevName.c_str());
+    struct spdk_bdev* bdev = spdkCaller->SpdkBdevGetByName(bdevName.c_str());
     if (bdev == nullptr)
     {
         SPDK_ERRLOG("Could not find the bdev: %s\n", bdevName.c_str());
@@ -438,7 +473,7 @@ NvmfTarget::SetVolumeQos(const string& bdevName, uint64_t maxIops, uint64_t maxB
     limits[SPDK_BDEV_QOS_RW_BPS_RATE_LIMIT] = maxBw;
     limits[SPDK_BDEV_QOS_R_BPS_RATE_LIMIT] = 0;
     limits[SPDK_BDEV_QOS_W_BPS_RATE_LIMIT] = 0;
-    spdk_bdev_set_qos_rate_limits(bdev, limits, QosEnableDone, nullptr);
+    spdkCaller->SpdkBdevSetQosRateLimits(bdev, limits, QosEnableDone, nullptr);
 }
 
 bool
@@ -449,18 +484,6 @@ NvmfTarget::IsTargetExist(void)
         return false;
     }
     return true;
-}
-
-spdk_nvmf_subsystem*
-NvmfTarget::FindSubsystem(const string& nqn)
-{
-    spdk_nvmf_subsystem* subsystem = spdk_nvmf_tgt_find_subsystem(g_spdk_nvmf_tgt, nqn.c_str());
-    if (subsystem == nullptr)
-    {
-        SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", nqn.c_str());
-        return nullptr;
-    }
-    return subsystem;
 }
 
 struct EventContext*
@@ -483,16 +506,16 @@ NvmfTarget::GetHostNqn(string subnqn)
 {
     vector<string> hostNqns;
     struct spdk_nvmf_subsystem* subsystem =
-        spdk_nvmf_tgt_find_subsystem(g_spdk_nvmf_tgt, subnqn.c_str());
-    struct spdk_nvmf_ctrlr* ctrlr = spdk_nvmf_subsystem_get_first_ctrlr(subsystem);
+        spdkCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, subnqn.c_str());
+    struct spdk_nvmf_ctrlr* ctrlr = spdkCaller->SpdkNvmfSubsystemGetFirstCtrlr(subsystem);
     while (ctrlr != NULL)
     {
-        string hostNqn = spdk_nvmf_subsystem_get_ctrlr_hostnqn(ctrlr);
+        string hostNqn = spdkCaller->SpdkNvmfSubsystemGetCtrlrHostnqn(ctrlr);
         if (!hostNqn.empty())
         {
             hostNqns.push_back(hostNqn);
         }
-        ctrlr = spdk_nvmf_subsystem_get_next_ctrlr(subsystem, ctrlr);
+        ctrlr = spdkCaller->SpdkNvmfSubsystemGetNextCtrlr(subsystem, ctrlr);
     }
     return hostNqns;
 }
@@ -511,7 +534,13 @@ NvmfTarget::CheckVolumeAttached(int volId, string arrayName)
     {
         return false;
     }
-    struct spdk_nvmf_subsystem* subsystem = FindSubsystem(subnqn);
+    struct spdk_nvmf_subsystem* subsystem =
+        spdkCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, nqn);
+    if (nullptr == subsystem)
+    {
+        SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", nqn);
+        return false;
+    }
     struct spdk_nvmf_ns* ns = GetNamespace(subsystem, bdevName);
     if (ns != nullptr)
     {
@@ -524,12 +553,18 @@ vector<pair<int, string>>
 NvmfTarget::GetAttachedVolumeList(string& subnqn)
 {
     vector<pair<int, string>> volList;
-    struct spdk_nvmf_subsystem* subsystem = FindSubsystem(subnqn);
-    struct spdk_nvmf_ns* ns = spdk_nvmf_subsystem_get_first_ns(subsystem);
+    struct spdk_nvmf_subsystem* subsystem =
+        spdkCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, subnqn.c_str());
+    if (nullptr == subsystem)
+    {
+        SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", subnqn.c_str());
+        return volList;
+    }
+    struct spdk_nvmf_ns* ns = spdkCaller->SpdkNvmfSubsystemGetFirstNs(subsystem);
     while (ns != nullptr)
     {
-        struct spdk_bdev* bdev = spdk_nvmf_ns_get_bdev(ns);
-        string bdevName = spdk_bdev_get_name(bdev);
+        struct spdk_bdev* bdev = spdkCaller->SpdkNvmfNsGetBdev(ns);
+        string bdevName = spdkCaller->SpdkBdevGetName(bdev);
         size_t volIdIdx = bdevName.find("_");
         if (volIdIdx == string::npos)
         {
@@ -552,7 +587,7 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
         string arrayName = bdevName.substr(arrayNameIdx, bdevName.length() - arrayNameIdx);
         volList.push_back(make_pair(volId, arrayName));
 
-        ns = spdk_nvmf_subsystem_get_next_ns(subsystem, ns);
+        ns = spdkCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
     }
     return volList;
 }

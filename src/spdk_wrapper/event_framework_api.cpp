@@ -34,28 +34,32 @@
 
 #include "spdk/env.h"
 #include "spdk/event.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/include/branch_prediction.h"
-#include "src/include/core_const.h"
-#include "src/cpu_affinity/affinity_manager.h"
-#include "src/logger/logger.h"
+#include "spdk/nvmf.h"
 #include "spdk/pos.h"
 #include "spdk/pos_volume.h"
 #include "spdk/thread.h"
-#include "spdk/nvmf.h"
+#include "src/cpu_affinity/affinity_manager.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/core_const.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/logger/logger.h"
 
 namespace pos
 {
 thread_local uint32_t EventFrameworkApi::targetReactor = UINT32_MAX;
+const uint32_t EventFrameworkApi::MAX_REACTOR_COUNT;
 const uint32_t EventFrameworkApi::MAX_PROCESSABLE_EVENTS = 16;
 std::array<EventFrameworkApi::EventQueue,
-    EventFrameworkApi::MAX_REACTOR_COUNT> EventFrameworkApi::eventQueues;
+    EventFrameworkApi::MAX_REACTOR_COUNT>
+    EventFrameworkApi::eventQueues;
 std::array<EventFrameworkApi::EventQueueLock,
-    EventFrameworkApi::MAX_REACTOR_COUNT> EventFrameworkApi::eventQueueLocks;
+    EventFrameworkApi::MAX_REACTOR_COUNT>
+    EventFrameworkApi::eventQueueLocks;
 
-static inline void EventFuncWrapper(void *ctx)
+static inline void
+EventFuncWrapper(void* ctx)
 {
-    EventWrapper *eventWrapper = static_cast<EventWrapper *>(ctx);
+    EventWrapper* eventWrapper = static_cast<EventWrapper*>(ctx);
     eventWrapper->func(eventWrapper->arg1, eventWrapper->arg2);
     delete eventWrapper;
 }
@@ -72,7 +76,7 @@ bool
 EventFrameworkApi::SendSpdkEvent(uint32_t core, EventFuncTwoParams func, void* arg1,
     void* arg2)
 {
-    EventWrapper *eventWrapper = new EventWrapper;
+    EventWrapper* eventWrapper = new EventWrapper;
     eventWrapper->func = func;
     eventWrapper->arg1 = arg1;
     eventWrapper->arg2 = arg2;
@@ -201,11 +205,10 @@ EventFrameworkApi::IsSameReactorNow(uint32_t reactor)
 
 void
 EventFrameworkApi::_SendEventToSpareQueue(uint32_t core, EventFuncOneParam func,
-        void* arg1)
+    void* arg1)
 {
     EventArgument eventArgument = std::make_tuple(func, arg1);
     std::lock_guard<EventQueueLock> lock(eventQueueLocks[core]);
     eventQueues[core].push(eventArgument);
 }
 } // namespace pos
-
