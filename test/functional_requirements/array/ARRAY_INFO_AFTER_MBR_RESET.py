@@ -35,3 +35,4 @@ if __name__ == "__main__":
     ret = api.set_result_by_code_ne(out, 0, __file__)
     pos.kill_pos()
     exit(ret)
+    

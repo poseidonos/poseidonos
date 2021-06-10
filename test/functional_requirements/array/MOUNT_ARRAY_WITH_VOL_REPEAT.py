@@ -19,14 +19,14 @@ def execute():
     code = 0
     repeat = 30
     for i in range(0, repeat):
-        print ("TEST(" + str(i+1) + ")")
+        print("TEST(" + str(i + 1) + ")")
         out = cli.mount_array(ARRAYNAME)
-        print ("mount: " + out)
+        print("mount: " + out)
         code = json_parser.get_response_code(out)
         if code != 0:
             return out
         out = cli.unmount_array(ARRAYNAME)
-        print ("unmount: " + out)
+        print("unmount: " + out)
         code = json_parser.get_response_code(out)
         if code != 0:
             return out
@@ -39,3 +39,4 @@ if __name__ == "__main__":
     ret = api.set_result_by_code_eq(out, 0, __file__)
     pos.kill_pos()
     exit(ret)
+    

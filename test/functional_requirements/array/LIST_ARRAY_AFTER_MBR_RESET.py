@@ -40,3 +40,4 @@ if __name__ == "__main__":
     ret = api.set_result_manually(out, result, __file__)
     pos.kill_pos()
     exit(ret)
+    

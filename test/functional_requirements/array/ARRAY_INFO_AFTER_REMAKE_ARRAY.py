@@ -18,10 +18,12 @@ ARRAYNAME = DELETE_ARRAY_WITH_VOL.ARRAYNAME
 DATA = "unvme-ns-0,unvme-ns-1,unvme-ns-2"
 SPARE = "unvme-ns-3"
 
+
 def check_result():
     if api.get_used_size(ARRAYNAME) == 0:
         return "pass"
     return "fail"
+
 
 def execute():
     DELETE_ARRAY_WITH_VOL.execute()
@@ -29,6 +31,7 @@ def execute():
     cli.mount_array(ARRAYNAME)
     out = cli.array_info(ARRAYNAME)
     return out
+
 
 if __name__ == "__main__":
     api.clear_result(__file__)
