@@ -111,7 +111,8 @@ MetaFsFileControlApi::Open(std::string& fileName, int& fd)
 
     fd = reqMsg.completionData.openfd;
 
-    _AddFileContext(fileName, fd);
+    if (POS_EVENT_ID::SUCCESS == rc)
+        _AddFileContext(fileName, fd);
 
     return rc;
 }
@@ -407,12 +408,6 @@ MetaFsFileControlApi::_AddFileContext(std::string& fileName, FileDescriptorType 
 
         // get the inode
         info = _GetFileInode(fileName);
-        if (nullptr == info)
-        {
-            MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-                "The inode is not existed, filename={}", fileName);
-            return;
-        }
 
         // get the position
         index = bitmap->FindFirstZero();
