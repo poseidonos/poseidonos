@@ -53,7 +53,7 @@ MpioHandler::~MpioHandler(void)
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "MpioHandler is desctructed");
 
-    if (nullptr == partialMpioDoneQ)
+    if (nullptr != partialMpioDoneQ)
         delete partialMpioDoneQ;
 }
 
