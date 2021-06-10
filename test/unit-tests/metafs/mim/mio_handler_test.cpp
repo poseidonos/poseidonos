@@ -74,7 +74,6 @@ public:
         delete metaFs;
         delete arrayInfo;
         delete bottomhalfHandler;
-        delete doneQ;
     }
 
 protected:

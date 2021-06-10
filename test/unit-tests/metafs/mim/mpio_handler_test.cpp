@@ -19,12 +19,12 @@ TEST(MpioHandler, Normal)
     MockWriteMpio* mpio = new MockWriteMpio(this);
     EXPECT_CALL(*mpio, ExecuteAsyncState).WillRepeatedly(Return());
 
-    MockMetaFsIoQ<Mpio*> doneQ;
-    EXPECT_CALL(doneQ, Init);
-    EXPECT_CALL(doneQ, Enqueue).WillRepeatedly(Return(true));
-    EXPECT_CALL(doneQ, Dequeue).WillRepeatedly(Return(mpio));
+    MockMetaFsIoQ<Mpio*>* doneQ = new MockMetaFsIoQ<Mpio*>();
+    EXPECT_CALL(*doneQ, Init);
+    EXPECT_CALL(*doneQ, Enqueue).WillRepeatedly(Return(true));
+    EXPECT_CALL(*doneQ, Dequeue).WillRepeatedly(Return(mpio));
 
-    MpioHandler* handler = new MpioHandler(0, 0, &doneQ);
+    MpioHandler* handler = new MpioHandler(0, 0, doneQ);
     handler->BindMpioPool(pool);
 
     for (int i = 0; i < MAX_COUNT; i++)
