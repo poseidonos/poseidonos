@@ -33,7 +33,7 @@
 #pragma once
 
 #include <map>
-
+#include <unordered_map>
 #include "file_descriptor_in_use_map.h"
 #include "metafs_common.h"
 
@@ -43,7 +43,10 @@ namespace pos
 class FileDescriptorManager
 {
 public:
-    FileDescriptorManager(void);
+    FileDescriptorManager(
+        std::unordered_map<StringHashType, FileDescriptorType>* lookupMap = nullptr,
+        std::map<FileDescriptorType, FileDescriptorType>* freeMap = nullptr);
+
     ~FileDescriptorManager(void);
 
     FileDescriptorType Alloc(void);
@@ -62,7 +65,7 @@ public:
 private:
     bool _IsFDValid(FileDescriptorType fd);
 
-    std::unordered_map<StringHashType, FileDescriptorType> fileKey2FDLookupMap;
-    std::map<FileDescriptorType, FileDescriptorType> freeFDMap;
+    std::unordered_map<StringHashType, FileDescriptorType>* fileKey2FDLookupMap = nullptr;
+    std::map<FileDescriptorType, FileDescriptorType>* freeFDMap = nullptr;
 };
 } // namespace pos

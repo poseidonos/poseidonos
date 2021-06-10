@@ -38,20 +38,43 @@
 
 namespace pos
 {
-FileDescriptorManager::FileDescriptorManager(void)
+FileDescriptorManager::FileDescriptorManager(
+        std::unordered_map<StringHashType, FileDescriptorType>* lookupMap,
+        std::map<FileDescriptorType, FileDescriptorType>* freeMap)
+: fileKey2FDLookupMap(lookupMap),
+  freeFDMap(freeMap)
 {
+    if (nullptr == lookupMap)
+    {
+        fileKey2FDLookupMap = new std::unordered_map<StringHashType, FileDescriptorType>();
+    }
+
+    if (nullptr == freeMap)
+    {
+        freeFDMap = new std::map<FileDescriptorType, FileDescriptorType>();
+    }
 }
+
 FileDescriptorManager::~FileDescriptorManager(void)
 {
-    freeFDMap.clear();
-    fileKey2FDLookupMap.clear();
+    if (nullptr != freeFDMap)
+    {
+        freeFDMap->clear();
+        delete freeFDMap;
+    }
+
+    if (nullptr != fileKey2FDLookupMap)
+    {
+        fileKey2FDLookupMap->clear();
+        delete fileKey2FDLookupMap;
+    }
 }
 
 FileDescriptorType
 FileDescriptorManager::Alloc(void)
 {
-    FileDescriptorType fd = freeFDMap.begin()->second;
-    freeFDMap.erase(fd);
+    FileDescriptorType fd = freeFDMap->begin()->second;
+    freeFDMap->erase(fd);
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "New FD allocated = {}", fd);
@@ -62,7 +85,7 @@ FileDescriptorManager::Alloc(void)
 void
 FileDescriptorManager::Free(FileDescriptorType fd)
 {
-    freeFDMap.insert(std::make_pair(fd, fd));
+    freeFDMap->insert(std::make_pair(fd, fd));
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Free FD = {}", fd);
 }
@@ -70,21 +93,21 @@ FileDescriptorManager::Free(FileDescriptorType fd)
 void
 FileDescriptorManager::InsertFileDescLookupHash(StringHashType fileKey, FileDescriptorType fd)
 {
-    fileKey2FDLookupMap.insert(std::make_pair(fileKey, fd));
+    fileKey2FDLookupMap->insert(std::make_pair(fileKey, fd));
 }
 
 void
 FileDescriptorManager::EraseFileDescLookupHash(StringHashType fileKey)
 {
-    fileKey2FDLookupMap.erase(fileKey);
+    fileKey2FDLookupMap->erase(fileKey);
 }
 
 FileDescriptorType
 FileDescriptorManager::FindFDByName(StringHashType fileKey)
 {
-    auto item = fileKey2FDLookupMap.find(fileKey);
+    auto item = fileKey2FDLookupMap->find(fileKey);
 
-    if (item == fileKey2FDLookupMap.end())
+    if (item == fileKey2FDLookupMap->end())
     {
         return MetaFsCommonConst::INVALID_FD;
     }
@@ -118,26 +141,26 @@ FileDescriptorManager::AddAllFDsInFreeFDMap(void)
 {
     for (FileDescriptorType fd = 0; fd < MetaFsConfig::MAX_META_FILE_NUM_SUPPORT; fd++)
     {
-        freeFDMap.insert(std::make_pair(fd, fd));
+        freeFDMap->insert(std::make_pair(fd, fd));
     }
 }
 
 std::map<FileDescriptorType, FileDescriptorType>&
 FileDescriptorManager::GetFreeFDMap(void)
 {
-    return freeFDMap;
+    return *freeFDMap;
 }
 
 std::unordered_map<StringHashType, FileDescriptorType>&
 FileDescriptorManager::GetFDLookupMap(void)
 {
-    return fileKey2FDLookupMap;
+    return *fileKey2FDLookupMap;
 }
 
 void
 FileDescriptorManager::Reset(void)
 {
-    freeFDMap.clear();
-    fileKey2FDLookupMap.clear();
+    freeFDMap->clear();
+    fileKey2FDLookupMap->clear();
 }
 } // namespace pos
