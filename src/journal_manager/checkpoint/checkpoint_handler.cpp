@@ -53,6 +53,7 @@ CheckpointHandler::CheckpointHandler(void)
 CheckpointHandler::CheckpointHandler(int numMapsToFlush, int numMapsFlushed, EventSmartPtr callback)
 : mapFlush(nullptr),
   contextManager(nullptr),
+  scheduler(nullptr),
   status(INIT),
   numMapsToFlush(numMapsToFlush),
   numMapsFlushed(numMapsFlushed),
