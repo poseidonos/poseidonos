@@ -65,7 +65,11 @@ TEST(ArrayComponents, Create_testIfGetStateAndSubscribeIsInvokedWhenCreationSucc
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, &mockStateControl, mockArray,
         mockVolMgr, nullptr, nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory);
 
-    EXPECT_CALL(*mockArray, Create).WillOnce(Return(0));
+    EXPECT_CALL(*mockArray, Create).WillOnce([=](DeviceSet<string> nameSet, string dataRaidType, unsigned int& arrayIndex)
+    {
+        arrayIndex = 0;
+        return 0;
+    });
     EXPECT_CALL(mockStateManager, GetStateControl).WillOnce(Return(&mockStateControl));
     EXPECT_CALL(mockStateManager, RemoveStateControl).Times(1);
 
@@ -105,7 +109,11 @@ TEST(ArrayComponents, Load_testIfSuccessfulLoadSetsMountSequence)
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, &mockStateControl, mockArray,
         mockVolMgr, nullptr, nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory);
 
-    EXPECT_CALL(*mockArray, Load).WillOnce(Return(0));
+    EXPECT_CALL(*mockArray, Load).WillOnce([=](unsigned int& arrayIndex)
+    {
+        arrayIndex = 0;
+        return 0;
+    });
     EXPECT_CALL(mockStateManager, GetStateControl).WillOnce(Return(&mockStateControl));
     EXPECT_CALL(mockStateManager, RemoveStateControl).Times(1);
 

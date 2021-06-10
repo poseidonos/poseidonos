@@ -52,11 +52,11 @@ public:
     explicit AbrManager(MbrManager* mbrMgr);
     ~AbrManager(void) override;
 
-    int LoadAbr(string arrayName, ArrayMeta& meta) override;
+    int LoadAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) override;
     int SaveAbr(string arrayName, ArrayMeta& meta) override;
     bool GetMfsInit(string arrayName) override;
     int SetMfsInit(string arrayName, bool value) override;
-    virtual int CreateAbr(string arrayName, ArrayMeta& meta) override;
+    virtual int CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) override;
     virtual int DeleteAbr(string arrayName, ArrayMeta& meta) override;
     virtual int ResetMbr(void) override;
     int GetAbrList(std::vector<ArrayBootRecord>& abrList);

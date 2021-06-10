@@ -60,10 +60,10 @@ AbrManager::~AbrManager(void)
 }
 
 int
-AbrManager::LoadAbr(string arrayName, ArrayMeta& meta)
+AbrManager::LoadAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex)
 {
     struct ArrayBootRecord* abr = nullptr;
-    mbrManager->GetAbr(arrayName, &abr);
+    mbrManager->GetAbr(arrayName, &abr, arrayIndex);
     if (abr == nullptr)
     {
         int result = (int)POS_EVENT_ID::MBR_ABR_NOT_FOUND;
@@ -110,7 +110,8 @@ int
 AbrManager::SaveAbr(string arrayName, ArrayMeta& meta)
 {
     struct ArrayBootRecord* abr = nullptr;
-    mbrManager->GetAbr(arrayName, &abr);
+    unsigned int arrayIndex;
+    mbrManager->GetAbr(arrayName, &abr, arrayIndex);
     if (abr == nullptr)
     {
         int ret = (int)POS_EVENT_ID::MBR_ABR_NOT_FOUND;
@@ -175,7 +176,8 @@ bool
 AbrManager::GetMfsInit(string arrayName)
 {
     struct ArrayBootRecord* abr = nullptr;
-    mbrManager->GetAbr(arrayName, &abr);
+    unsigned int arrayIndex;
+    mbrManager->GetAbr(arrayName, &abr, arrayIndex);
     int value = abr->mfsInit;
     return value ? true : false;
 }
@@ -184,7 +186,8 @@ int
 AbrManager::SetMfsInit(string arrayName, bool value)
 {
     struct ArrayBootRecord* abr = nullptr;
-    mbrManager->GetAbr(arrayName, &abr);
+    unsigned int arrayIndex;
+    mbrManager->GetAbr(arrayName, &abr, arrayIndex);
     int mfsInit = value == true ? 1 : 0;
     abr->mfsInit = mfsInit;
     mbrManager->SaveMbr();
@@ -192,9 +195,9 @@ AbrManager::SetMfsInit(string arrayName, bool value)
 }
 
 int
-AbrManager::CreateAbr(string arrayName, ArrayMeta& meta)
+AbrManager::CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex)
 {
-    return mbrManager->CreateAbr(arrayName, meta);
+    return mbrManager->CreateAbr(arrayName, meta, arrayIndex);
 }
 
 int

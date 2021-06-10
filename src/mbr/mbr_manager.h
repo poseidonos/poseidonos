@@ -63,9 +63,9 @@ public:
         DeviceIterFunc iterForRead, DeviceManager* devMgr, MbrMapManager* mapMgr);
     virtual ~MbrManager(void);
 
-    int CreateAbr(string arrayName, ArrayMeta& meta);
+    int CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex);
     int DeleteAbr(string arrayName, ArrayMeta& meta);
-    virtual void GetAbr(string targetArrayName, struct ArrayBootRecord** abr);
+    virtual void GetAbr(string targetArrayName, struct ArrayBootRecord** abr, unsigned int& arrayIndex);
     virtual int SaveMbr(void);
     int LoadMbr(void);
     int ResetMbr(void);

@@ -78,8 +78,8 @@ public:
     virtual int Init(void) override;
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
-    virtual int Load(void);
-    virtual int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
+    virtual int Load(unsigned int& arrayIndex);
+    virtual int Create(DeviceSet<string> nameSet, string dataRaidType , unsigned int& arrayIndex);
     virtual int Delete(void);
     virtual int AddSpare(string devName);
     virtual int RemoveSpare(string devName);
@@ -101,6 +101,7 @@ public:
     const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
     DeviceSet<string> GetDevNames(void) override;
     string GetName(void) override;
+    unsigned int GetIndex(void) override;
     string GetMetaRaidType(void) override;
     string GetDataRaidType(void) override;
     string GetCreateDatetime(void) override;
@@ -117,7 +118,7 @@ public:
 #endif
 
 private:
-    int _LoadImpl(void);
+    int _LoadImpl(unsigned int& arrayIndex);
     int _CreatePartitions(void);
     void _DeletePartitions(void);
     void _FormatMetaPartition(void);
@@ -130,6 +131,7 @@ private:
     void _UnregisterService(void);
     void _CheckRebuildNecessity(void);
     void _ResetMeta(void);
+    bool _CheckIndexIsValid(void);
 
     ArrayState* state = nullptr;
     ArrayInterface* intf = nullptr;
@@ -137,6 +139,7 @@ private:
 
     ArrayMeta meta_;
     string name_;
+    unsigned int index_;
     pthread_rwlock_t stateLock;
     ArrayDeviceManager* devMgr_;
     DeviceManager* sysDevMgr = nullptr;

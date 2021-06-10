@@ -38,6 +38,7 @@
 #include "src/array/interface/i_abr_control.h"
 #include "src/array/rebuild/rebuild_handler.h"
 #include "src/array/service/array_service_layer.h"
+#include "src/include/array_mgmt_policy.h"
 #include "src/device/device_manager.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/i_array_device.h"
@@ -81,10 +82,10 @@ Array::~Array(void)
 }
 
 int
-Array::Load()
+Array::Load(unsigned int& arrayIndex)
 {
     pthread_rwlock_wrlock(&stateLock);
-    int ret = _LoadImpl();
+    int ret = _LoadImpl(arrayIndex);
     pthread_rwlock_unlock(&stateLock);
     if (ret != 0)
     {
@@ -105,7 +106,7 @@ Array::Load()
 }
 
 int
-Array::_LoadImpl()
+Array::_LoadImpl(unsigned int& arrayIndex)
 {
     int ret = state->IsLoadable();
     if (ret != 0)
@@ -115,11 +116,21 @@ Array::_LoadImpl()
 
     devMgr_->Clear();
     _ResetMeta();
-    ret = abrControl->LoadAbr(name_, meta_);
+    ret = abrControl->LoadAbr(name_, meta_, arrayIndex);
     if (ret != 0)
     {
         return ret;
     }
+    else
+    {
+        index_ = arrayIndex;
+        if (!_CheckIndexIsValid())
+        {
+            ret = (int)POS_EVENT_ID::ARRAY_INVALID_INDEX;
+            return ret;
+        }
+    }
+    
 
     uint32_t missingCnt = 0;
     uint32_t brokenCnt = 0;
@@ -140,7 +151,7 @@ Array::GetArrayManager(void)
 }
 #endif
 int
-Array::Create(DeviceSet<string> nameSet, string dataRaidType)
+Array::Create(DeviceSet<string> nameSet, string dataRaidType, unsigned int& arrayIndex)
 {
     int ret = 0;
     pthread_rwlock_wrlock(&stateLock);
@@ -175,10 +186,19 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType)
     SetMetaRaidType("RAID1");
     SetDataRaidType(dataRaidType);
 
-    ret = abrControl->CreateAbr(name_, meta_);
+    ret = abrControl->CreateAbr(name_, meta_, arrayIndex);
     if (ret != 0)
     {
         goto error;
+    }
+    else
+    {
+        index_ = arrayIndex;
+        if (!_CheckIndexIsValid())
+        {
+            ret = (int)POS_EVENT_ID::ARRAY_INVALID_INDEX;
+            return ret;
+        }
     }
 
     ret = _Flush();
@@ -207,18 +227,20 @@ Array::Init(void)
     // pthread_rwlock_wrlock(&stateLock);
     POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} Init", name_);
     int ret = 0;
+    unsigned int arrayIndex = -1;
+
     if (state->Exists() == false)
     {
         ret = (int)POS_EVENT_ID::ARRAY_STATE_NOT_EXIST;
         POS_TRACE_WARN(ret, "Array {} is not exist", name_);
         goto error;
     }
-
-    ret = _LoadImpl();
+    ret = _LoadImpl(arrayIndex);
     if (ret != 0)
     {
         goto error;
     }
+    index_ = arrayIndex;
 
     ret = state->IsMountable();
     if (ret != 0)
@@ -240,7 +262,7 @@ Array::Init(void)
 
     state->SetMount();
     // pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} was successfully mounted", name_);
+    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} was successfully mounted with index {}", name_, index_);
     return ret;
 
 error:
@@ -403,6 +425,12 @@ string
 Array::GetName(void)
 {
     return name_;
+}
+
+unsigned int
+Array::GetIndex(void)
+{
+    return index_;
 }
 
 string
@@ -844,6 +872,16 @@ Array::_ResetMeta(void)
     meta_.devs.nvm.clear();
     meta_.devs.data.clear();
     meta_.devs.spares.clear();
+}
+
+bool
+Array::_CheckIndexIsValid(void)
+{
+    if (index_ < ArrayMgmtPolicy::MAX_ARRAY_CNT)
+    {
+        return true;
+    }
+    return false;
 }
 
 } // namespace pos

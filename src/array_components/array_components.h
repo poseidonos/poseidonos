@@ -85,7 +85,7 @@ public:
     virtual Array* GetArray(void) { return array; }
 
 private:
-    void _SetMountSequence(void);
+    void _SetMountSequence(unsigned int arrayIndex);
     void _InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayLoaded);
     void _DestructMetaComponentsInOrder(void);
 

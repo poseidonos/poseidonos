@@ -45,7 +45,7 @@ class IAbrControl;
 class MountTemp
 {
 public:
-    explicit MountTemp(IAbrControl* abr, string name);
+    explicit MountTemp(IAbrControl* abr, string name, unsigned int arrIndex);
     virtual ~MountTemp(void) = default;
     virtual int Mount1(void);
     virtual int Unmount2(void);
@@ -56,6 +56,7 @@ private:
     void _ResetNvmf(void);
 
     string arrayName = "";
+    unsigned int arrayIndex = -1;
     NvmfVolume* nvmfVolume = nullptr;
     NvmfTargetEventSubscriber* nvmfTargetEventSubscriber = nullptr;
     IAbrControl* abrControl = nullptr;

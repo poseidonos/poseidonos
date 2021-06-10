@@ -21,6 +21,7 @@ public:
     // Below are stub functions
     virtual DeviceSet<string> GetDevNames(void);
     virtual string GetName(void);
+    virtual unsigned int GetIndex(void);
     virtual string GetMetaRaidType(void);
     virtual string GetDataRaidType(void);
     virtual ArrayStateType GetState(void);

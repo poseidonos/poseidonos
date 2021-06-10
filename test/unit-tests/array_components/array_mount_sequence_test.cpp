@@ -33,7 +33,8 @@ TEST(ArrayMountSequence, Mount_testIfEverySequenceIsInitialized)
     MockIMountSequence mockSeq1, mockSeq2, mockSeq3;
     vector<IMountSequence*> seqVec = {&mockSeq1, &mockSeq2, &mockSeq3};
     MockStateControl stateControl;
-    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array");
+    unsigned int arrayIndex;
+    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array", arrayIndex);
     StateContext* mockDefaultState = new StateContext("sender", SituationEnum::DEFAULT);
     StateContext* mockMountState = new StateContext("sender", SituationEnum::TRY_MOUNT);
 
@@ -63,7 +64,8 @@ TEST(ArrayMountSequence, Mount_testIfPartiallyFailedSequenceLeadsToDisposeOnEver
     MockIMountSequence mockSeq1, mockSeq2, mockSeq3;
     vector<IMountSequence*> seqVec = {&mockSeq1, &mockSeq2, &mockSeq3};
     MockStateControl stateControl;
-    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array");
+    unsigned int arrayIndex;
+    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array", arrayIndex);
     StateContext* mockDefaultState = new StateContext("sender", SituationEnum::DEFAULT);
     StateContext* mockMountState = new StateContext("sender", SituationEnum::TRY_MOUNT);
 
@@ -118,7 +120,8 @@ TEST(ArrayMountSequence, Unmount_testIfEverySequenceIsDisposed)
     vector<IMountSequence*> seqVec = {&mockSeq1, &mockSeq2, &mockSeq3};
 
     NiceMock<MockStateControl> stateControl;
-    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array");
+    unsigned int arrayIndex;
+    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array", arrayIndex);
     StateContext* mockUnmountState = new StateContext("sender", SituationEnum::TRY_UNMOUNT);
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
     StateContext mockInitialState("sender", SituationEnum::NORMAL);
@@ -150,7 +153,8 @@ TEST(ArrayMountSequence, StateChanged_testIfShutdownIsInvokedWhenNextStateIsStop
     vector<IMountSequence*> arrayMntSeq{&mockSeq1, &mockSeq2, &mockSeq3};
     NiceMock<MockStateControl> stateControl;
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
-    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array");
+    unsigned int arrayIndex;
+    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array", arrayIndex);
 
     ArrayMountSequence mntSeq(arrayMntSeq, mockMntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr);
 

@@ -44,9 +44,9 @@ public:
     virtual ~IAbrControl(void)
     {
     }
-    virtual int LoadAbr(string arrayName, ArrayMeta& meta) = 0;
+    virtual int LoadAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) = 0;
     virtual int SaveAbr(string arrayName, ArrayMeta& meta) = 0;
-    virtual int CreateAbr(string arrayName, ArrayMeta& meta) = 0;
+    virtual int CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) = 0;
     virtual int DeleteAbr(string arrayName, ArrayMeta& meta) = 0;
     virtual bool GetMfsInit(string arrayName) = 0;
     virtual int SetMfsInit(string arrayName, bool value) = 0;

@@ -26,6 +26,7 @@ TEST(RebuildHandler, Execute_testIfTrueIsReturnedWhenTriggerRebuildFails)
     MockArrayDevice mockArrayDevice(nullptr);
     RebuildHandler rh(&mockArray, &mockArrayDevice);
 
+    EXPECT_CALL(mockArrayDevice, GetState).WillOnce(Return(ArrayDeviceState::NORMAL));
     EXPECT_CALL(mockArray, TriggerRebuild).WillOnce(Return(false));
 
     // When
@@ -42,6 +43,7 @@ TEST(RebuildHandler, Execute_testIfFalseIsReturnedWhenTriggerRebuildSucceeds)
     MockArrayDevice mockArrayDevice(nullptr);
     RebuildHandler rh(&mockArray, &mockArrayDevice);
 
+    EXPECT_CALL(mockArrayDevice, GetState).WillOnce(Return(ArrayDeviceState::NORMAL));
     EXPECT_CALL(mockArray, TriggerRebuild).WillOnce(Return(true));
 
     // When

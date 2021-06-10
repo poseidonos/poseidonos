@@ -49,10 +49,11 @@
 #endif
 namespace pos
 {
-MountTemp::MountTemp(IAbrControl* abr, string name)
+MountTemp::MountTemp(IAbrControl* abr, string name, unsigned int arrIndex)
 {
     abrControl = abr;
     arrayName = name;
+    arrayIndex = arrIndex;
 }
 
 int

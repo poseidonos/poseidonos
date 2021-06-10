@@ -488,9 +488,10 @@ MbrManager::_GetSystemUuid(void)
 }
 
 int
-MbrManager::CreateAbr(string arrayName, ArrayMeta& meta)
+MbrManager::CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex)
 {
     int ret;
+    arrayIndex = -1;
     ArrayNamePolicy arrayNamePolicy;
     ret = arrayNamePolicy.CheckArrayName(arrayName);
     if (ret != (int)POS_EVENT_ID::SUCCESS)
@@ -519,31 +520,32 @@ MbrManager::CreateAbr(string arrayName, ArrayMeta& meta)
         return ret;
     }
 
-    unsigned int arrayIndex;
-    for (arrayIndex = 0; arrayIndex < MAX_ARRAY_CNT; arrayIndex++)
+    unsigned int tempArrayIndex;
+    for (tempArrayIndex = 0; tempArrayIndex < MAX_ARRAY_CNT; tempArrayIndex++)
     {
-        if (systeminfo.arrayValidFlag[arrayIndex] == 0)
+        if (systeminfo.arrayValidFlag[tempArrayIndex] == 0)
         {
             pair<map<string, unsigned int>::iterator, bool> ret;
-            ret = arrayIndexMap.insert(pair<string, unsigned int>(arrayName, arrayIndex));
+            ret = arrayIndexMap.insert(pair<string, unsigned int>(arrayName, tempArrayIndex));
             if (ret.second == false)
             {
                 POS_TRACE_ERROR((int)POS_EVENT_ID::MBR_WRONG_ARRAY_INDEX_MAP,
                     "Array index map doesn't match with previous condition");
             }
 
-            mapMgr->InsertDevices(meta, arrayIndex);
+            mapMgr->InsertDevices(meta, tempArrayIndex);
 
-            systeminfo.arrayValidFlag[arrayIndex] = 1;
+            systeminfo.arrayValidFlag[tempArrayIndex] = 1;
             systeminfo.arrayNum++;
-            memset(&systeminfo.arrayInfo[arrayIndex], '\0', sizeof(ArrayBootRecord));
-            CopyData(systeminfo.arrayInfo[arrayIndex].arrayName,
+            memset(&systeminfo.arrayInfo[tempArrayIndex], '\0', sizeof(ArrayBootRecord));
+            CopyData(systeminfo.arrayInfo[tempArrayIndex].arrayName,
                 arrayName, ARRAY_NAME_SIZE);
-            CopyData(systeminfo.arrayInfo[arrayIndex].createDatetime,
+            CopyData(systeminfo.arrayInfo[tempArrayIndex].createDatetime,
                 GetCurrentTimeStr("%Y-%m-%d %X %z", DATE_SIZE), DATE_SIZE);
-            CopyData(systeminfo.arrayInfo[arrayIndex].updateDatetime,
+            CopyData(systeminfo.arrayInfo[tempArrayIndex].updateDatetime,
                 GetCurrentTimeStr("%Y-%m-%d %X %z", DATE_SIZE), DATE_SIZE);
             pthread_rwlock_unlock(&mbrLock);
+            arrayIndex = tempArrayIndex;
             return 0;
         }
     }
@@ -605,22 +607,22 @@ MbrManager::DeleteAbr(string arrayName, ArrayMeta& meta)
 }
 
 void
-MbrManager::GetAbr(string targetArrayName, struct ArrayBootRecord** abr)
+MbrManager::GetAbr(string targetArrayName, struct ArrayBootRecord** abr, unsigned int& arrayIndex)
 {
     pthread_rwlock_wrlock(&mbrLock);
-    unsigned int arrayIndex;
+    unsigned int tempArrayIndex = -1;
     *abr = nullptr;
     arrayIndexMapIter iter;
     iter = arrayIndexMap.find(targetArrayName);
 
     if (iter != arrayIndexMap.end())
     {
-        arrayIndex = iter->second;
-        string arrayName(systeminfo.arrayInfo[arrayIndex].arrayName);
-        if (systeminfo.arrayValidFlag[arrayIndex] == 1 &&
-            targetArrayName == arrayName)
+        tempArrayIndex = iter->second;
+        string arrayName(systeminfo.arrayInfo[tempArrayIndex].arrayName);
+        if (targetArrayName == arrayName)
         {
-            *abr = &(systeminfo.arrayInfo)[arrayIndex];
+            *abr = &(systeminfo.arrayInfo)[tempArrayIndex];
+            arrayIndex = tempArrayIndex;
         }
         else
         {

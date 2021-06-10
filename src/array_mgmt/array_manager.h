@@ -37,7 +37,7 @@
 #include <string>
 #include <vector>
 
-#include "array_mgmt_policy.h"
+#include "src/include/array_mgmt_policy.h"
 #include "src/array_components/array_components.h"
 #include "src/array_mgmt/interface/i_array_mgmt.h"
 #include "src/device/i_device_event.h"

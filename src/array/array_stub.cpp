@@ -40,7 +40,7 @@ Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl
 }
 
 int
-Array::Load()
+Array::Load(unsigned int& arrayIndex)
 {
     return 0;
 }
@@ -51,7 +51,7 @@ Array::~Array(void)
 }
 
 int
-Array::Create(DeviceSet<string> nameSet, string dataRaidType)
+Array::Create(DeviceSet<string> nameSet, string dataRaidType, unsigned int& arrayIndex)
 {
     return 0;
 }

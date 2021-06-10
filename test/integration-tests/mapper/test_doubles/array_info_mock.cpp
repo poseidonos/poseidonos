@@ -72,6 +72,13 @@ MockArrayInfo::GetName(void)
     return str;
 }
 
+unsigned int
+MockArrayInfo::GetIndex(void)
+{
+    unsigned int idx = 0;
+    return idx;
+}
+
 string
 MockArrayInfo::GetMetaRaidType(void)
 {

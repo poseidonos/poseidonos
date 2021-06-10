@@ -42,8 +42,8 @@
 namespace pos
 {
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
-    IAbrControl* abr, IStateControl* iState, string name, IVolumeManager* volMgr)
-: ArrayMountSequence(seq, new MountTemp(abr, name), iState, name, nullptr, nullptr, nullptr, volMgr)
+    IAbrControl* abr, IStateControl* iState, string name, IVolumeManager* volMgr, unsigned int arrIndex)
+: ArrayMountSequence(seq, new MountTemp(abr, name, arrIndex), iState, name, nullptr, nullptr, nullptr, volMgr)
 {
     // delegated to other constructor. The other constructor doesn't have IAbrControl in its
     // params because ArrayMountSequence uses IAbrControl just to instantiate MountTemp!

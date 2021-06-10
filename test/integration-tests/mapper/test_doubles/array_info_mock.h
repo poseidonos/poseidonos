@@ -48,6 +48,7 @@ public:
     const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
     DeviceSet<string> GetDevNames(void) override;
     string GetName(void) override;
+    unsigned int GetIndex(void) override;
     string GetMetaRaidType(void) override;
     string GetDataRaidType(void) override;
     string GetCreateDatetime(void) override { return ""; }

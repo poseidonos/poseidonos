@@ -403,7 +403,8 @@ int
 ArrayManager::_DeleteFaultArray(string arrayName)
 {
     ArrayMeta meta;
-    int result = abrManager->LoadAbr(arrayName, meta);
+    unsigned int arrayIndex = -1;
+    int result = abrManager->LoadAbr(arrayName, meta, arrayIndex);
     if (result != 0)
     {
         return result;

@@ -122,6 +122,7 @@ TEST_P(MbrManagerSuccessfulParameterizedCreateAbrTestFixture, testIfValidArrayNa
 
     ArrayMeta arrayMeta;
     arrayMeta.arrayName = mockArrayName;
+    unsigned int arrayIndex;
 
     for (int i = 0; i < arrayNameLength; i += 1)
     {
@@ -129,7 +130,7 @@ TEST_P(MbrManagerSuccessfulParameterizedCreateAbrTestFixture, testIfValidArrayNa
     }
 
     // When: the manager creates Array Boot Record
-    int res = m.CreateAbr(mockArrayName, arrayMeta);
+    int res = m.CreateAbr(mockArrayName, arrayMeta, arrayIndex);
 
     // Then: the default array index should point to mockArrayName
     ASSERT_EQ(0, res);
@@ -155,10 +156,11 @@ TEST_P(MbrManagerFailedParameterizedCreateAbrTestFixture, CreateAbr_testIfInvali
         mockArrayName.append("a");
     }
     ArrayMeta arrayMeta;
+    unsigned int arrayIndex;
 
     // When: the manager creates Array Boot Record
     arrayMeta.arrayName = mockArrayName;
-    int res = m.CreateAbr(mockArrayName, arrayMeta);
+    int res = m.CreateAbr(mockArrayName, arrayMeta, arrayIndex);
 
     // Then: the manager shouldn't update the metadata. It shouldn't copy array name either.
     // FIXME: I'd like to change the expected state after CreateAbr(). If the length of array name is invalid, we shouldn't even update any metadata.
@@ -195,6 +197,7 @@ TEST(MbrManager, CreateAbr_testWithExistingAbrName)
     });
     MbrMapManager* mbrMapManager = new MbrMapManager; // let's inject real object
     MbrManager m(NULL, "", NULL, NULL, &mockDevMgr, mbrMapManager);
+    unsigned int arrayIndex;
 
     // When: load abr with arrayMeta1
     int tempResult;
@@ -202,7 +205,7 @@ TEST(MbrManager, CreateAbr_testWithExistingAbrName)
     ASSERT_EQ(0, tempResult);
 
     // Then: creating abr with existing abr name fails
-    tempResult = m.CreateAbr(arrayMeta1.arrayName, arrayMeta1);
+    tempResult = m.CreateAbr(arrayMeta1.arrayName, arrayMeta1, arrayIndex);
     ASSERT_EQ(EID(MBR_ABR_ALREADY_EXIST), tempResult);
 }
 
@@ -210,6 +213,7 @@ TEST(MbrManager, CreateAbr_testWithExistingDevices)
 {
     // Given: one arrays' meta
     ArrayMeta arrayMeta1 = buildArrayMeta("array1", 3, 1);
+    unsigned int arrayIndex;
 
     MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([&arrayMeta1](DeviceIterFunc func, void* ctx) {
@@ -234,9 +238,10 @@ TEST(MbrManager, CreateAbr_testWithExistingDevices)
 
     // Then: creating abr with existing devices fails
     string anotherArrayName = "newArray";
-    tempResult = m.CreateAbr(anotherArrayName, arrayMeta1);
+    tempResult = m.CreateAbr(anotherArrayName, arrayMeta1, arrayIndex);
     ASSERT_EQ(EID(MBR_DEVICE_ALREADY_IN_ARRAY), tempResult);
 }
+
 TEST(MbrManager, DeleteAbr_testIfArrayIsProperlyDeletedAndVersionIsIncremented)
 {
     // Given
@@ -256,7 +261,9 @@ TEST(MbrManager, DeleteAbr_testIfArrayIsProperlyDeletedAndVersionIsIncremented)
     string mockArrayName = "mockArray";
     ArrayMeta arrayMeta;
     arrayMeta.arrayName = mockArrayName;
-    int createRes = m.CreateAbr(mockArrayName, arrayMeta); // TODO(yyu): this doesn't increment "version" in memory. Wondering if this is intended?
+    unsigned int arrayIndex;
+
+    int createRes = m.CreateAbr(mockArrayName, arrayMeta, arrayIndex); // TODO(yyu): this doesn't increment "version" in memory. Wondering if this is intended?
     ASSERT_EQ(0, createRes);
     int currMbrVersion = m.GetMbrVersionInMemory();
 
@@ -283,7 +290,8 @@ TEST(MbrManager, DeleteAbr_testIfNonExistentArrayNameHandledProperly)
     string mockArrayName = "mockArray";
     ArrayMeta arrayMeta;
     arrayMeta.arrayName = mockArrayName;
-    int createRes = m.CreateAbr(mockArrayName, arrayMeta);
+    unsigned int arrayIndex;
+    int createRes = m.CreateAbr(mockArrayName, arrayMeta, arrayIndex);
     ASSERT_EQ(0, createRes);
     int currMbrVersion = m.GetMbrVersionInMemory();
 
@@ -314,7 +322,9 @@ TEST(MbrManager, DeleteAbr_testIfDeviceIoFailureHandledProperly)
     string mockArrayName = "mockArray";
     ArrayMeta arrayMeta;
     arrayMeta.arrayName = mockArrayName;
-    int createRes = m.CreateAbr(mockArrayName, arrayMeta);
+    unsigned int arrayIndex;
+
+    int createRes = m.CreateAbr(mockArrayName, arrayMeta, arrayIndex);
     ASSERT_EQ(0, createRes);
 
     int currMbrVersion = m.GetMbrVersionInMemory();
@@ -339,18 +349,19 @@ TEST(MbrManager, GetAbr_testIfInvalidAndValidArrayNamesAreHandledProperly)
     string mockArrayName = "mockArray";
     ArrayMeta arrayMeta;
     arrayMeta.arrayName = mockArrayName;
-    int createRes = m.CreateAbr(mockArrayName, arrayMeta);
+    unsigned int arrayIndex;
+    int createRes = m.CreateAbr(mockArrayName, arrayMeta, arrayIndex);
     ASSERT_EQ(0, createRes);
 
     // When 1: we provide a wrong array name
     struct ArrayBootRecord* pAbr = nullptr;
-    m.GetAbr("wrongArray", &pAbr);
+    m.GetAbr("wrongArray", &pAbr, arrayIndex);
 
     // Then 1: we should get null from the second param
     ASSERT_EQ(nullptr, pAbr);
 
     // When 2: we provide a correct array name
-    m.GetAbr(mockArrayName, &pAbr);
+    m.GetAbr(mockArrayName, &pAbr, arrayIndex);
 
     // Then 2: we should get the valid array boot record
     string expected = mockArrayName;
@@ -381,7 +392,8 @@ TEST(MbrManager, SaveMbr_testIfPosVersionAndMbrVersionAndSystemUuidAreEncodedInD
     string mockArrayName = "mockArray";
     ArrayMeta arrayMeta;
     arrayMeta.arrayName = mockArrayName;
-    int createRes = m.CreateAbr(mockArrayName, arrayMeta);
+    unsigned int arrayIndex;
+    int createRes = m.CreateAbr(mockArrayName, arrayMeta, arrayIndex);
     ASSERT_EQ(0, createRes);
 
     string posVersion = VersionProviderSingleton::Instance()->GetVersion();
@@ -596,7 +608,7 @@ TEST(MbrManager, GetAbrList_testIfCreatedAbrsAreRetrieved)
     string randomUuid = "dbc81f90-7003-11eb-9f41-8f0c6ff52bea";
     ArrayMeta arrayMeta1 = buildArrayMeta("array1", 3, 1);
     ArrayMeta arrayMeta2 = buildArrayMeta("array2", 3, 1);
-
+    unsigned int arrayIndex;
     MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([&arrayMeta1, &arrayMeta2](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
@@ -627,9 +639,9 @@ TEST(MbrManager, GetAbrList_testIfCreatedAbrsAreRetrieved)
 
     // When
     int tempResult;
-    tempResult = m.CreateAbr(arrayMeta1.arrayName, arrayMeta1);
+    tempResult = m.CreateAbr(arrayMeta1.arrayName, arrayMeta1, arrayIndex);
     ASSERT_EQ(0, tempResult);
-    tempResult = m.CreateAbr(arrayMeta2.arrayName, arrayMeta2);
+    tempResult = m.CreateAbr(arrayMeta2.arrayName, arrayMeta2, arrayIndex);
     ASSERT_EQ(0, tempResult);
     tempResult = m.LoadMbr(); // loadMbr() is required for this UT to be able to get abr list
     ASSERT_EQ(0, tempResult);
@@ -644,7 +656,7 @@ TEST(MbrManager, UpdateDeviceIndexMap_testIfMbrMapManagerRefreshesDeviceMap)
 {
     // Given: one arrays' meta
     ArrayMeta arrayMeta1 = buildArrayMeta("array1", 3, 1);
-
+    unsigned int arrayIndex;
     MockDeviceManager mockDevMgr(nullptr);
     EXPECT_CALL(mockDevMgr, IterateDevicesAndDoFunc(_, _)).WillRepeatedly([&arrayMeta1](DeviceIterFunc func, void* ctx) {
         std::list<void*>* pMBRs = static_cast<std::list<void*>*>(ctx);
@@ -668,7 +680,7 @@ TEST(MbrManager, UpdateDeviceIndexMap_testIfMbrMapManagerRefreshesDeviceMap)
     ASSERT_EQ(0, tempResult);
     struct ArrayBootRecord* abr = nullptr;
     string newSpareDeviceName = "array1_spare_dev_0";
-    m.GetAbr(arrayMeta1.arrayName, &abr);
+    m.GetAbr(arrayMeta1.arrayName, &abr, arrayIndex);
     abr->spareDevNum = 1;
     abr->totalDevNum += 1;
     CopyData(abr->devInfo[abr->totalDevNum - 1].deviceUid, newSpareDeviceName, ARRAY_NAME_SIZE);

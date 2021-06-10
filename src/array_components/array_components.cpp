@@ -34,6 +34,7 @@
 
 #include "src/array_components/array_mount_sequence.h"
 #include "src/array_components/meta_mount_sequence.h"
+#include "src/include/array_mgmt_policy.h"
 #include "src/allocator/allocator.h"
 #include "src/io/general_io/rba_state_manager.h"
 #include "src/logger/logger.h"
@@ -146,15 +147,15 @@ int
 ArrayComponents::Create(DeviceSet<string> nameSet, string dataRaidType)
 {
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Creating array component for {}", arrayName);
-    int ret = array->Create(nameSet, dataRaidType);
-    if (ret != 0)
+    unsigned int arrayIndex = -1;
+    int ret = array->Create(nameSet, dataRaidType, arrayIndex);
+    if (ret != 0 || arrayIndex >= ArrayMgmtPolicy::MAX_ARRAY_CNT)
     {
         return ret;
     }
 
     _InstantiateMetaComponentsAndMountSequenceInOrder(false/* array has not been loaded yet*/);
-
-    _SetMountSequence();
+    _SetMountSequence(arrayIndex);
 
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Array components for {} have been created.", arrayName);
     return 0;
@@ -164,15 +165,15 @@ int
 ArrayComponents::Load(void)
 {
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Loading array components for " + arrayName);
-    int ret = array->Load();
-    if (ret != 0)
+    unsigned int arrayIndex = -1;
+    int ret = array->Load(arrayIndex);
+    if (ret != 0 || arrayIndex >= ArrayMgmtPolicy::MAX_ARRAY_CNT)
     {
         return ret;
     }
 
     _InstantiateMetaComponentsAndMountSequenceInOrder(true/* array has been loaded already*/);
-
-    _SetMountSequence();
+    _SetMountSequence(arrayIndex);
 
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Array components for {} have been loaded.", arrayName);
     return 0;
@@ -229,7 +230,7 @@ ArrayComponents::RebuildDone(void)
 }
 
 void
-ArrayComponents::_SetMountSequence(void)
+ArrayComponents::_SetMountSequence(unsigned int arrayIndex)
 {
     mountSequence.push_back(array);
     mountSequence.push_back(metafs);
@@ -243,7 +244,7 @@ ArrayComponents::_SetMountSequence(void)
     {
         POS_TRACE_WARN(EID(ARRAY_COMPONENTS_LEAK), "Memory leakage found for ArrayMountSequence for " + arrayName);
     }
-    arrayMountSequence = new ArrayMountSequence(mountSequence, iAbr, state, arrayName, volMgr);
+    arrayMountSequence = new ArrayMountSequence(mountSequence, iAbr, state, arrayName, volMgr, arrayIndex);
 }
 
 void

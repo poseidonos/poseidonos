@@ -15,6 +15,7 @@ public:
     MOCK_METHOD(const PartitionLogicalSize*, GetSizeInfo, (PartitionType type), (override));
     MOCK_METHOD(DeviceSet<string>, GetDevNames, (), (override));
     MOCK_METHOD(string, GetName, (), (override));
+    MOCK_METHOD(unsigned int, GetIndex, (), (override));
     MOCK_METHOD(string, GetMetaRaidType, (), (override));
     MOCK_METHOD(string, GetDataRaidType, (), (override));
     MOCK_METHOD(string, GetCreateDatetime, (), (override));

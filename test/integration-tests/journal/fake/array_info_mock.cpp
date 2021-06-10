@@ -49,6 +49,12 @@ ArrayInfoMock::GetName(void)
     return "";
 }
 
+unsigned int
+ArrayInfoMock::GetIndex(void)
+{
+    return 0;
+}
+
 string
 ArrayInfoMock::GetMetaRaidType(void)
 {

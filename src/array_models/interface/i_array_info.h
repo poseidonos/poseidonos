@@ -53,6 +53,7 @@ public:
     virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type) = 0;
     virtual DeviceSet<string> GetDevNames(void) = 0;
     virtual string GetName(void) = 0;
+    virtual unsigned int GetIndex(void) = 0;
     virtual string GetMetaRaidType(void) = 0;
     virtual string GetDataRaidType(void) = 0;
     virtual string GetCreateDatetime(void) = 0;

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/array_mgmt/array_mgmt_policy.h"
+#include "src/include/array_mgmt_policy.h"
 
 namespace pos
 {
