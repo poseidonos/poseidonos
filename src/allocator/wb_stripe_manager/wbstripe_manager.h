@@ -44,11 +44,13 @@
 namespace pos
 {
 using StripeVec = std::vector<Stripe*>;
-
+class IVolumeManager;
+class IReverseMap;
 class WBStripeManager : public IWBStripeAllocator, public IWBStripeInternal
 {
 public:
-    WBStripeManager(WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName);
+    WBStripeManager(void) = default;
+    WBStripeManager(int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, IStripeMap* iStripeMap, WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName);
     WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName);
     virtual ~WBStripeManager(void);
     virtual void Init(void);
@@ -77,13 +79,15 @@ public:
     virtual void FinalizeWriteIO(std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone);
     virtual int CheckAllActiveStripes(std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone);
 
-private:
+    virtual void PushStripeToStripeArray(Stripe* stripe); // for UT
+    
+protected: // for UT
     int _FlushOnlineStripes(std::vector<StripeId>& vsidToCheckFlushDone);
     Stripe* _FinishActiveStripe(ASTailArrayIdx index);
     VirtualBlks _AllocateRemainingBlocks(ASTailArrayIdx index);
     VirtualBlks _AllocateRemainingBlocks(VirtualBlkAddr tail);
     Stripe* _FinishRemainingBlocks(VirtualBlks remainingVsaRange);
-    int _RequestStripeFlush(Stripe& stripe);
+    int _RequestStripeFlush(Stripe* stripe);
     int _ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCount, ASTailArrayIdx idx, Stripe*& stripe);
     int _ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount);
 
@@ -102,6 +106,9 @@ private:
     WbStripeCtx* wbStripeCtx;
     BlockManager* blockManager;
     std::string arrayName;
+    IVolumeManager* volumeManager;
+    IReverseMap* iReverseMap;
+    uint32_t numVolumes;
 };
 
 } // namespace pos

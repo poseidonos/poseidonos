@@ -107,7 +107,7 @@ TEST(WbStripeCtx, AllocWbStripeWithParam_TestSimpleInterfaceFunc)
     delete allocBitmap;
 }
 
-TEST(WbStripeCtx, AllocWbStripe_TestAllocStripeWithConditions)
+TEST(WbStripeCtx, AllocFreeWbStripe_TestAllocStripeWithConditions)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -117,7 +117,7 @@ TEST(WbStripeCtx, AllocWbStripe_TestAllocStripeWithConditions)
     EXPECT_CALL(*allocBitmap, SetNextZeroBit).WillOnce(Return(10));
     EXPECT_CALL(*allocBitmap, IsValidBit).WillOnce(Return(true));
     // when 1.
-    int ret = wbstripeCtx.AllocWbStripe();
+    int ret = wbstripeCtx.AllocFreeWbStripe();
     // then 1.
     EXPECT_EQ(10, ret);
 
@@ -125,7 +125,7 @@ TEST(WbStripeCtx, AllocWbStripe_TestAllocStripeWithConditions)
     EXPECT_CALL(*allocBitmap, SetNextZeroBit).WillOnce(Return(10));
     EXPECT_CALL(*allocBitmap, IsValidBit).WillOnce(Return(false));
     // when 2.
-    ret = wbstripeCtx.AllocWbStripe();
+    ret = wbstripeCtx.AllocFreeWbStripe();
     // then 2.
     EXPECT_EQ(UNMAP_STRIPE, ret);
 

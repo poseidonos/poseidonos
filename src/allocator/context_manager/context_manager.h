@@ -56,6 +56,7 @@ const int NO_REBUILD_TARGET_USER_SEGMENT = 0;
 class ContextManager : public IContextManager
 {
 public:
+    ContextManager(void) = default;
     ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
         WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileMananager_,
         ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_);

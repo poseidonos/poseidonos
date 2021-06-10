@@ -142,20 +142,20 @@ public:
     ReverseMapPack(void);
     virtual ~ReverseMapPack(void);
 
-    void Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file, std::string arrName);
-    void Init(StripeId wblsid, IVSAMap* ivsaMap, IStripeMap* istripeMap);
-    int LinkVsid(StripeId vsid); // vsid == SSD LSID
-    int UnLinkVsid(void);
+    virtual void Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file, std::string arrName);
+    virtual void Init(StripeId wblsid, IVSAMap* ivsaMap, IStripeMap* istripeMap);
+    virtual int LinkVsid(StripeId vsid); // vsid == SSD LSID
+    virtual int UnLinkVsid(void);
 
-    int Load(EventSmartPtr callback);
-    int Flush(Stripe* stripe, EventSmartPtr callback);
+    virtual int Load(EventSmartPtr callback);
+    virtual int Flush(Stripe* stripe, EventSmartPtr callback);
 
-    int SetReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId);
-    int ReconstructMap(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t blockCount);
-    std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint32_t offset);
-    int IsAsyncIoDone(void);
-    int GetIoError(void);
-    int WbtFileSyncIo(MetaFileIntf* fileLinux, MetaFsIoOpcode IoDirection);
+    virtual int SetReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId);
+    virtual int ReconstructMap(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t blockCount);
+    virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint32_t offset);
+    virtual int IsAsyncIoDone(void);
+    virtual int GetIoError(void);
+    virtual int WbtFileSyncIo(MetaFileIntf* fileLinux, MetaFsIoOpcode IoDirection);
 
 private:
     void _HeaderInit(StripeId wblsid);

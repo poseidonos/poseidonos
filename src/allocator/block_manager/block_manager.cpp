@@ -44,7 +44,7 @@
 
 namespace pos
 {
-BlockManager::BlockManager(SegmentCtx* segCtx_, AllocatorCtx* allocCtx_, WbStripeCtx* wbCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName)
+BlockManager::BlockManager(IStripeMap* stripeMap_, IReverseMap* iReverseMap_, SegmentCtx* segCtx_, AllocatorCtx* allocCtx_, WbStripeCtx* wbCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName)
 : userBlkAllocProhibited(false),
   addrInfo(info),
   contextManager(ctxMgr),
@@ -54,14 +54,18 @@ BlockManager::BlockManager(SegmentCtx* segCtx_, AllocatorCtx* allocCtx_, WbStrip
     segCtx = segCtx_;
     allocCtx = allocCtx_;
     wbStripeCtx = wbCtx_;
+    iReverseMap = iReverseMap_;
+    iStripeMap = stripeMap_;
 }
 
 BlockManager::BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName)
-: BlockManager(nullptr, nullptr, nullptr, info, ctxMgr, arrayName)
+: BlockManager(nullptr, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, arrayName)
 {
     segCtx = contextManager->GetSegmentCtx();
     allocCtx = contextManager->GetAllocatorCtx();
     wbStripeCtx = contextManager->GetWbStripeCtx();
+    iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
+    iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayName);
 }
 
 void
@@ -112,8 +116,7 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
     StripeId newVsid = arrayLsid;
     Stripe* stripe = new Stripe(false, arrayName, addrInfo);
     stripe->Assign(newVsid, UNMAP_STRIPE, 0);
-
-    IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
+    
     if (unlikely(stripe->LinkReverseMap(iReverseMap->AllocReverseMapPack(true /*gcDest*/)) < 0))
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_CANNOT_LINK_REVERSE_MAP), "failed to link ReverseMap to allocate gc stripe!");
@@ -257,7 +260,7 @@ int
 BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
 {
     // 1. WriteBuffer Logical StripeId Allocation
-    StripeId wbLsid = wbStripeCtx->AllocWbStripe();
+    StripeId wbLsid = wbStripeCtx->AllocFreeWbStripe();
     if (wbLsid == UNMAP_STRIPE)
     {
         return -EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE);
@@ -286,8 +289,6 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
     Stripe* stripe = iWBStripeInternal->GetStripe(wbLsid);
     stripe->Assign(newVsid, wbLsid, asTailArrayIdx);
 
-    // TODO (jk.man.kim): Don't forget to insert array name in the future.
-    IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
     if (unlikely(stripe->LinkReverseMap(iReverseMap->GetReverseMapPack(wbLsid)) < 0))
     {
         std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
@@ -296,8 +297,6 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
     }
 
     // 4. Update the stripe map
-    // TODO (jk.man.kim): Don't forget to insert array name in the future.
-    IStripeMap* iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayName);
     iStripeMap->SetLSA(newVsid, wbLsid, IN_WRITE_BUFFER_AREA);
 
     vsid = newVsid;

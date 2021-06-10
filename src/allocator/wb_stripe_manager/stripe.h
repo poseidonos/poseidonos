@@ -88,7 +88,7 @@ public:
     virtual DataBufferIter DataBufferEnd(void);
     virtual bool IsGcDestStripe(void);
 
-private:
+protected: // for UT
     ASTailArrayIdx asTailArrayIdx;
     StripeId vsid; // SSD LSID, Actually User Area LSID
     StripeId wbLsid;

@@ -32,51 +32,49 @@
 
 #pragma once
 
-#include "src/array_models/interface/i_array_info.h"
-#include "src/mapper/i_reversemap.h"
-#include "src/mapper/i_stripemap.h"
-#include "src/mapper/i_vsamap.h"
-#include "src/mapper/address/mapper_address_info.h"
-#include "src/mapper/reversemap/reverse_map.h"
-#include "src/meta_file_intf/meta_file_include.h"
+#include <string>
+#include <vector>
+
+#include "src/allocator/wb_stripe_manager/wbstripe_manager.h"
+#include "src/io/backend_io/flush_submission.h"
 
 namespace pos
 {
-
-class ReverseMapManager : public IReverseMap
+using StripeVec = std::vector<Stripe*>;
+class IVolumeManager;
+class WBStripeManagerSpy : public WBStripeManager
 {
 public:
-    ReverseMapManager(void) = default;
-    ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, IArrayInfo* iarrayInfo);
-    virtual ~ReverseMapManager(void);
+    using WBStripeManager::WBStripeManager;
+    virtual ~WBStripeManagerSpy(void) = default;
 
-    void Init(MapperAddressInfo& info);
-    void SetDoC(IArrayInfo* iarrayInfo);
-    void Close(void);
-
-    ReverseMapPack* GetReverseMapPack(StripeId wbLsid) override;
-    ReverseMapPack* AllocReverseMapPack(bool gcDest) override;
-
-    uint64_t GetReverseMapPerStripeFileSize(void);
-    uint64_t GetWholeReverseMapFileSize(void);
-    int LoadWholeReverseMap(char* pBuffer);
-    int StoreWholeReverseMap(char* pBuffer);
-
-private:
-    int _SetPageSize(StorageOpt storageOpt = StorageOpt::DEFAULT);
-    int _SetNumMpages(void);
-
-    uint64_t mpageSize;          // Optimal page size for each FS (MFS, legacy)
-    uint64_t numMpagesPerStripe; // It depends on block count per a stripe
-    uint64_t fileSizePerStripe;
-    uint64_t fileSizeWholeRevermap;
-
-    ReverseMapPack* revMapPacks;
-    MetaFileIntf* revMapWholefile;
-
-    IVSAMap* iVSAMap;
-    IStripeMap* iStripeMap;
-    IArrayInfo* iArrayInfo;
+    int
+    _RequestStripeFlush(Stripe& stripe)
+    {
+        return 0;
+    }
+    Stripe*
+    GetStripe(StripeAddr& lsidEntry)
+    {
+        return nullptr;
+    }
+    int
+    _ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount)
+    {
+        return WBStripeManager::_ReconstructReverseMap(volumeId, stripe, blockCount);
+    }
+    int
+    _ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCount, ASTailArrayIdx tailarrayidx, Stripe*& stripe)
+    {
+        WBStripeManager::_ReconstructAS(vsid, wbLsid, blockCount, tailarrayidx, stripe);
+        return 0;
+    }
+    int
+    _FlushOnlineStripes(std::vector<StripeId>& vsidToCheckFlushDone)
+    {
+        WBStripeManager::_FlushOnlineStripes(vsidToCheckFlushDone);
+        return 0;
+    }
 };
 
 } // namespace pos

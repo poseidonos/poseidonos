@@ -32,51 +32,40 @@
 
 #pragma once
 
-#include "src/array_models/interface/i_array_info.h"
-#include "src/mapper/i_reversemap.h"
-#include "src/mapper/i_stripemap.h"
-#include "src/mapper/i_vsamap.h"
-#include "src/mapper/address/mapper_address_info.h"
-#include "src/mapper/reversemap/reverse_map.h"
-#include "src/meta_file_intf/meta_file_include.h"
+#include <atomic>
+#include <string>
+#include <tuple>
+#include <vector>
 
+#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/logger/logger.h"
 namespace pos
 {
-
-class ReverseMapManager : public IReverseMap
+class StripeSpy : public Stripe
 {
 public:
-    ReverseMapManager(void) = default;
-    ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, IArrayInfo* iarrayInfo);
-    virtual ~ReverseMapManager(void);
-
-    void Init(MapperAddressInfo& info);
-    void SetDoC(IArrayInfo* iarrayInfo);
-    void Close(void);
-
-    ReverseMapPack* GetReverseMapPack(StripeId wbLsid) override;
-    ReverseMapPack* AllocReverseMapPack(bool gcDest) override;
-
-    uint64_t GetReverseMapPerStripeFileSize(void);
-    uint64_t GetWholeReverseMapFileSize(void);
-    int LoadWholeReverseMap(char* pBuffer);
-    int StoreWholeReverseMap(char* pBuffer);
-
-private:
-    int _SetPageSize(StorageOpt storageOpt = StorageOpt::DEFAULT);
-    int _SetNumMpages(void);
-
-    uint64_t mpageSize;          // Optimal page size for each FS (MFS, legacy)
-    uint64_t numMpagesPerStripe; // It depends on block count per a stripe
-    uint64_t fileSizePerStripe;
-    uint64_t fileSizeWholeRevermap;
-
-    ReverseMapPack* revMapPacks;
-    MetaFileIntf* revMapWholefile;
-
-    IVSAMap* iVSAMap;
-    IStripeMap* iStripeMap;
-    IArrayInfo* iArrayInfo;
+    using Stripe::Stripe;
+    virtual ~StripeSpy(void) = default;
+    uint32_t
+    GetBlksRemaining(void)
+    {
+        return 0;
+    }
+    int
+    Flush(EventSmartPtr callback)
+    {
+        return 0;
+    }
+    void
+    UpdateReverseMap(uint32_t offset, BlkAddr rba, uint32_t volumeId)
+    {
+        ;
+    }
+    uint32_t
+    DecreseBlksRemaining(uint32_t amount)
+    {
+        return 0;
+    }
 };
 
 } // namespace pos

@@ -41,10 +41,12 @@
 
 namespace pos
 {
+class IReverseMap;
 class BlockManager : public IBlockAllocator
 {
 public:
-    BlockManager(SegmentCtx* segCtx_, AllocatorCtx* alloCtx_, WbStripeCtx* wbCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName);
+    BlockManager(void) = default;
+    BlockManager(IStripeMap* stripeMap, IReverseMap* iReverseMap_, SegmentCtx* segCtx_, AllocatorCtx* alloCtx_, WbStripeCtx* wbCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName);
     BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName);
     virtual ~BlockManager(void) = default;
     virtual void Init(IWBStripeInternal* iwbstripeInternal);
@@ -61,7 +63,7 @@ public:
     virtual void TurnOffBlkAllocation(void);
     virtual void TurnOnBlkAllocation(void);
 
-private:
+protected: // for UT
     VirtualBlks _AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks);
     VirtualBlks _AllocateWriteBufferBlksFromNewStripe(ASTailArrayIdx asTailArrayIdx, StripeId vsid, int numBlks);
     int _AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid);
@@ -99,6 +101,8 @@ private:
     SegmentCtx* segCtx;
     AllocatorCtx* allocCtx;
     WbStripeCtx* wbStripeCtx;
+    IReverseMap* iReverseMap;
+    IStripeMap* iStripeMap;
 };
 
 } // namespace pos

@@ -52,7 +52,7 @@ Stripe::Stripe(ReverseMapPack* revMap, bool withDataBuffer_)
   finished(true),
   remaining(0),
   referenceCount(0),
-  totalBlksPerUserStripe(0),
+  totalBlksPerUserStripe(1),
   withDataBuffer(withDataBuffer_)
 {
     if (withDataBuffer == false)

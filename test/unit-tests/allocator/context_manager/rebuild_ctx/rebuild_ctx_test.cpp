@@ -349,4 +349,15 @@ TEST(RebuildCtx, AfterLoad_testIfSegmentSignatureFail)
     delete allocCtx;
 }
 
+TEST(RebuildCtx, GetLock_TestSimpleGetter)
+{
+    // given
+    RebuildCtxHeader header;
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
+    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    // when
+    rebuildCtx.GetLock();
+    delete allocCtx;
+}
+
 } // namespace pos

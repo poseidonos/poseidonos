@@ -32,51 +32,38 @@
 
 #pragma once
 
-#include "src/array_models/interface/i_array_info.h"
-#include "src/mapper/i_reversemap.h"
-#include "src/mapper/i_stripemap.h"
-#include "src/mapper/i_vsamap.h"
-#include "src/mapper/address/mapper_address_info.h"
-#include "src/mapper/reversemap/reverse_map.h"
-#include "src/meta_file_intf/meta_file_include.h"
+#include <atomic>
+#include <string>
+
+#include "src/allocator/block_manager/block_manager.h"
 
 namespace pos
 {
-
-class ReverseMapManager : public IReverseMap
+class BlockManagerSpy : public BlockManager
 {
 public:
-    ReverseMapManager(void) = default;
-    ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, IArrayInfo* iarrayInfo);
-    virtual ~ReverseMapManager(void);
-
-    void Init(MapperAddressInfo& info);
-    void SetDoC(IArrayInfo* iarrayInfo);
-    void Close(void);
-
-    ReverseMapPack* GetReverseMapPack(StripeId wbLsid) override;
-    ReverseMapPack* AllocReverseMapPack(bool gcDest) override;
-
-    uint64_t GetReverseMapPerStripeFileSize(void);
-    uint64_t GetWholeReverseMapFileSize(void);
-    int LoadWholeReverseMap(char* pBuffer);
-    int StoreWholeReverseMap(char* pBuffer);
-
-private:
-    int _SetPageSize(StorageOpt storageOpt = StorageOpt::DEFAULT);
-    int _SetNumMpages(void);
-
-    uint64_t mpageSize;          // Optimal page size for each FS (MFS, legacy)
-    uint64_t numMpagesPerStripe; // It depends on block count per a stripe
-    uint64_t fileSizePerStripe;
-    uint64_t fileSizeWholeRevermap;
-
-    ReverseMapPack* revMapPacks;
-    MetaFileIntf* revMapWholefile;
-
-    IVSAMap* iVSAMap;
-    IStripeMap* iStripeMap;
-    IArrayInfo* iArrayInfo;
+    using BlockManager::BlockManager;
+    ~BlockManagerSpy(void) = default;
+    VirtualBlks
+    _AllocateBlks(ASTailArrayIdx asTailArrayIdx, int numBlks)
+    {
+        return BlockManager::_AllocateBlks(asTailArrayIdx, numBlks);
+    }
+    VirtualBlks
+    _AllocateWriteBufferBlksFromNewStripe(ASTailArrayIdx asTailArrayIdx, StripeId vsid, int numBlks)
+    {
+        return BlockManager::_AllocateWriteBufferBlksFromNewStripe(asTailArrayIdx, vsid, numBlks);
+    }
+    int
+    _AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
+    {
+        return BlockManager::_AllocateStripe(asTailArrayIdx, vsid);
+    }
+    void
+    _RollBackStripeIdAllocation(StripeId wbLsid = UINT32_MAX, StripeId arrayLsid = UINT32_MAX)
+    {
+        return BlockManager::_RollBackStripeIdAllocation(wbLsid, arrayLsid);
+    }
 };
 
 } // namespace pos

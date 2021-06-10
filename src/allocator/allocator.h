@@ -126,6 +126,7 @@ private:
 
     IArrayInfo* iArrayInfo;
     IStateControl* iStateControl;
+    std::string arrayName;
 };
 
 } // namespace pos

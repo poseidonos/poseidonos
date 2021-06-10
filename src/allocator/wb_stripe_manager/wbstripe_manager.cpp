@@ -46,22 +46,27 @@
 
 namespace pos
 {
-WBStripeManager::WBStripeManager(WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName)
+WBStripeManager::WBStripeManager(int numVolumes_, IReverseMap* iReverseMap_, IVolumeManager* volManager, IStripeMap* istripeMap_, WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName)
 : stripeBufferPool(nullptr),
   pendingFullStripes(nullptr),
-  iStripeMap(nullptr),
+  iStripeMap(istripeMap_),
   addrInfo(info),
   contextManager(ctxMgr),
   blockManager(blkMgr),
   arrayName(arrayName)
 {
     wbStripeCtx = wbCtx;
+    volumeManager = volManager;
+    numVolumes = numVolumes_;
+    iReverseMap = iReverseMap_;
 }
 
 WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName)
-: WBStripeManager(nullptr, info, ctxMgr, blkMgr, arrayName)
+: WBStripeManager(MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, blkMgr, arrayName)
 {
     wbStripeCtx = ctxMgr->GetWbStripeCtx();
+    volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
 }
 
 WBStripeManager::~WBStripeManager(void)
@@ -75,8 +80,10 @@ WBStripeManager::~WBStripeManager(void)
 void
 WBStripeManager::Init(void)
 {
-    iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayName);
-
+    if (iStripeMap == nullptr) // for UT
+    {
+        iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayName);
+    }
     uint32_t totalNvmStripes = addrInfo->GetnumWbStripes();
     uint32_t chunksPerStripe = addrInfo->GetchunksPerStripe();
 
@@ -143,12 +150,7 @@ WBStripeManager::FreeWBStripeId(StripeId lsid)
 void
 WBStripeManager::GetAllActiveStripes(uint32_t volumeId)
 {
-    IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-    if (volMgr == nullptr)
-    {
-        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
-    }
-    else if (volMgr->GetVolumeStatus(volumeId) == Mounted)
+    if (volumeManager->GetVolumeStatus(volumeId) == Mounted)
     {
         PickActiveStripe(volumeId, stripesToFlush4FlushCmd[volumeId], vsidToCheckFlushDone4FlushCmd[volumeId]);
     }
@@ -286,7 +288,7 @@ WBStripeManager::FlushPendingActiveStripes(void)
     {
         for (Stripe* stripe : *pendingFullStripes)
         {
-            ret = _RequestStripeFlush(*stripe);
+            ret = _RequestStripeFlush(stripe);
             if (ret < 0)
             {
                 return ret;
@@ -337,6 +339,7 @@ WBStripeManager::PrepareRebuild(void)
         blockManager->TurnOnBlkAllocation();
         return ret;
     }
+
     ret = CheckAllActiveStripes(stripesToFlush, vsidToCheckFlushDone);
     FinalizeWriteIO(stripesToFlush, vsidToCheckFlushDone);
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "Stripes Flush Done @PrepareRebuild()");
@@ -359,7 +362,6 @@ WBStripeManager::_FlushOnlineStripes(std::vector<StripeId>& vsidToCheckFlushDone
 {
     // Flush Online Stripes Beyond Target Segment
     RebuildCtx* rbCtx = contextManager->GetRebuildCtx();
-
     for (auto it = rbCtx->GetRebuildTargetSegmentsBegin(); it != rbCtx->GetRebuildTargetSegmentsEnd(); ++it)
     {
         StripeId startVsid = *it * addrInfo->GetstripesPerSegment();
@@ -384,11 +386,10 @@ WBStripeManager::_FlushOnlineStripes(std::vector<StripeId>& vsidToCheckFlushDone
 int
 WBStripeManager::CheckAllActiveStripes(std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone)
 {
-    for (uint32_t volumeId = 0; volumeId < MAX_VOLUME_COUNT; ++volumeId)
+    for (uint32_t volumeId = 0; volumeId < numVolumes; ++volumeId)
     {
         PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
     }
-
     return 0;
 }
 
@@ -415,6 +416,13 @@ WBStripeManager::FinishReconstructedStripe(StripeId wbLsid, VirtualBlkAddr tail)
 {
     VirtualBlks remainingVsaRange = _AllocateRemainingBlocks(tail);
     return _FinishRemainingBlocks(remainingVsaRange);
+}
+
+void
+WBStripeManager::PushStripeToStripeArray(Stripe* stripe)
+{
+    // for UT
+    wbStripeArray.push_back(stripe);
 }
 
 int
@@ -455,7 +463,6 @@ WBStripeManager::_ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint6
 {
     int ret = 0;
     // TODO (jk.man.kim): Don't forget to insert array name in the future.
-    IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
     StripeId wbLsid = stripe->GetWbLsid();
     ret = stripe->LinkReverseMap(iReverseMap->GetReverseMapPack(wbLsid));
     if (unlikely(ret < 0))
@@ -484,7 +491,6 @@ WBStripeManager::_AllocateRemainingBlocks(ASTailArrayIdx index)
 {
     std::unique_lock<std::mutex> lock(wbStripeCtx->GetActiveStripeTailLock(index));
     VirtualBlkAddr tail = wbStripeCtx->GetActiveStripeTail(index);
-
     VirtualBlks remainingBlocks = _AllocateRemainingBlocks(tail);
     wbStripeCtx->SetActiveStripeTail(index, UNMAP_VSA);
 
@@ -540,22 +546,17 @@ WBStripeManager::_FinishRemainingBlocks(VirtualBlks remainingVsaRange)
         {
             activeStripe->UpdateReverseMap(block, INVALID_RBA, UINT32_MAX);
         }
-
         uint32_t remain = activeStripe->DecreseBlksRemaining(remainingVsaRange.numBlks);
         if (remain == 0)
         {
             POS_TRACE_DEBUG(EID(ALLOCATOR_TRIGGER_FLUSH), "Flush stripe (vsid {})", vsid);
-            int ret = 0;
-            EventSmartPtr event(new FlushSubmission(activeStripe, arrayName));
-            ret = activeStripe->Flush(event);
-
+            int ret = _RequestStripeFlush(activeStripe);
             if (ret != 0)
             {
                 POS_TRACE_DEBUG(EID(ALLOCATOR_TRIGGER_FLUSH), "request stripe flush failed");
             }
         }
     }
-
     return activeStripe;
 }
 
@@ -570,7 +571,6 @@ WBStripeManager::FinalizeWriteIO(std::vector<Stripe*>& stripesToFlush, std::vect
             usleep(1);
         }
     }
-
     // Check if flushing has been completed
     for (auto vsid : vsidToCheckFlushDone)
     {
@@ -584,10 +584,10 @@ WBStripeManager::FinalizeWriteIO(std::vector<Stripe*>& stripesToFlush, std::vect
 }
 
 int
-WBStripeManager::_RequestStripeFlush(Stripe& stripe)
+WBStripeManager::_RequestStripeFlush(Stripe* stripe)
 {
-    EventSmartPtr event(new FlushSubmission(&stripe, arrayName));
-    return stripe.Flush(event);
+    EventSmartPtr event(new FlushSubmission(stripe, arrayName));
+    return stripe->Flush(event);
 }
 
 } // namespace pos

@@ -45,6 +45,7 @@ class AllocatorAddressInfo;
 class WbStripeCtx : public IAllocatorFileIoClient
 {
 public:
+    WbStripeCtx(void) = default;
     WbStripeCtx(BitMapMutex* allocWbLsidBitmap, AllocatorAddressInfo* info);
     WbStripeCtx(AllocatorAddressInfo* info);
     virtual ~WbStripeCtx(void);
@@ -61,7 +62,7 @@ public:
 
     virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
     virtual void AllocWbStripe(StripeId stripeId);
-    StripeId AllocWbStripe(void);
+    virtual StripeId AllocFreeWbStripe(void);
     virtual void ReleaseWbStripe(StripeId stripeId);
     virtual void SetAllocatedWbStripeCount(int count);
     virtual uint64_t GetAllocatedWbStripeCount(void);

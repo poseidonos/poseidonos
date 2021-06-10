@@ -81,7 +81,7 @@ WbStripeCtx::AllocWbStripe(StripeId stripeId)
 }
 
 StripeId
-WbStripeCtx::AllocWbStripe(void)
+WbStripeCtx::AllocFreeWbStripe(void)
 {
     StripeId stripe = allocWbLsidBitmap->SetNextZeroBit();
     if (allocWbLsidBitmap->IsValidBit(stripe) == false)

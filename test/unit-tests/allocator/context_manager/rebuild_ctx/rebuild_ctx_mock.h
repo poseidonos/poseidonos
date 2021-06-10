@@ -32,6 +32,7 @@ public:
     MOCK_METHOD(RTSegmentIter, GetRebuildTargetSegmentsEnd, (), (override));
     MOCK_METHOD(int, MakeRebuildTarget, (), (override));
     MOCK_METHOD(int, StopRebuilding, (), (override));
+    MOCK_METHOD(std::mutex&, GetLock, (), (override));
 };
 
 } // namespace pos
