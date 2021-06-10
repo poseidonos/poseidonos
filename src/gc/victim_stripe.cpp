@@ -40,6 +40,8 @@
 #include "src/volume/volume_service.h"
 #include "src/include/branch_prediction.h"
 
+#include "Air.h"
+
 namespace pos
 {
 VictimStripe::VictimStripe(IArrayInfo* array, ReverseMapPack* revMapPack_)
@@ -71,6 +73,8 @@ VictimStripe::~VictimStripe(void)
 void
 VictimStripe::Load(StripeId _lsid, CallbackSmartPtr callback)
 {
+    uint64_t objAddr = reinterpret_cast<uint64_t>(callback.get());
+    airlog("LAT_VictimLoad", "AIR_BEGIN", 0, objAddr);
     _InitValue(_lsid);
     _LoadReverseMap(callback);
 }

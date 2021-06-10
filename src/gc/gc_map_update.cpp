@@ -36,7 +36,6 @@
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/include/backend_event.h"
-#include "Air.h"
 #include "src/allocator/allocator.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_mgmt/array_manager.h"

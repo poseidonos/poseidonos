@@ -46,6 +46,8 @@
 
 #include "src/logger/logger.h"
 
+#include "Air.h"
+
 #include <utility>
 
 namespace pos
@@ -158,6 +160,7 @@ GcStripeManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, ui
         ret = _CreateActiveWriteBuffer(volumeId);
         if (unlikely(false == ret))
         {
+            airlog("CNT_GcSM_AllocWriteBuf", "AIR_FALSE", 0, 1);
             return false;
         }
         flushed[volumeId] = false;
@@ -169,8 +172,10 @@ GcStripeManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, ui
     ret =  _AllocateBlks(volumeId, numBlks, offset, allocatedBlks);
     if (false == ret)
     {
+        airlog("CNT_GcSM_AllocWriteBuf", "AIR_FALSE", 0, 1);
         return false;
     }
+    airlog("CNT_GcSM_AllocWriteBuf", "AIR_TRUE", 0, 1);
     return true;
 }
 

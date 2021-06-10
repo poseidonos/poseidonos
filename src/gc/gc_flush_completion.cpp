@@ -106,7 +106,7 @@ GcFlushCompletion::_DoSpecificJob(void)
         return false;
     }
 
-    airlog("PERF_COPY", "AIR_WRITE", 0, totalBlksPerUserStripe * BLOCK_SIZE);
+    airlog("PERF_GcFlush", "AIR_WRITE", 0, totalBlksPerUserStripe * BLOCK_SIZE);
 
     EventSmartPtr event(new GcMapUpdateRequest(stripe, arrayName));
     stripe->Flush(event);

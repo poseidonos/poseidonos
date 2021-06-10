@@ -48,6 +48,8 @@
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/io/backend_io/rebuild_io/rebuild_read.h"
 
+#include "Air.h"
+
 namespace pos
 {
 Raid5Rebuild::Raid5Rebuild(unique_ptr<RebuildContext> c)
@@ -84,10 +86,13 @@ Raid5Rebuild::Read(void)
 {
     uint32_t strCnt = ctx->size->stripesPerSegment;
     uint32_t blkCnt = ctx->size->blksPerChunk;
+    uint64_t key = (((uint64_t)strCnt) << 32) + blkCnt;
+    airlog("LAT_Raid5RebuildRead", "AIR_BEGIN", 0, key);
 
     SegmentId segId = _NextSegment();
     if (segId == NEED_TO_RETRY)
     {
+        airlog("LAT_Raid5RebuildRead", "AIR_END", 0, key);
         return false;
     }
     UpdateProgress(segId * strCnt);
@@ -119,6 +124,7 @@ Raid5Rebuild::Read(void)
         complete->SetEventType(BackendEvent_UserdataRebuild);
         EventSchedulerSingleton::Instance()->EnqueueEvent(complete);
 
+        airlog("LAT_Raid5RebuildRead", "AIR_END", 0, key);
         return true;
     }
 
@@ -152,11 +158,15 @@ Raid5Rebuild::Read(void)
         }
     }
 
+    airlog("LAT_Raid5RebuildRead", "AIR_END", 0, key);
     return true;
 }
 
 bool Raid5Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 {
+    uint64_t objAddr = reinterpret_cast<uint64_t>(ubio.get());
+    airlog("LAT_Raid5RebuildWrite", "AIR_BEGIN", 0, objAddr);
+
     POS_TRACE_DEBUG(2831, "Raid5Rebuild::Write, target segment:{}", targetId);
     CallbackSmartPtr event(
         new UpdateDataCompleteHandler(targetId, ubio, this));
@@ -176,6 +186,7 @@ bool Raid5Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
         ioCompleter.CompleteUbio(IOErrorType::GENERIC_ERROR, true);
     }
 
+    airlog("LAT_Raid5RebuildWrite", "AIR_END", 0, objAddr);
     ubio = nullptr;
     return true;
 }
