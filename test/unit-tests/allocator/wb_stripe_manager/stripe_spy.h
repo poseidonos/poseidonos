@@ -59,7 +59,6 @@ public:
     void
     UpdateReverseMap(uint32_t offset, BlkAddr rba, uint32_t volumeId)
     {
-        ;
     }
     uint32_t
     DecreseBlksRemaining(uint32_t amount)

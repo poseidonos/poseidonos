@@ -47,10 +47,13 @@ class WBStripeManagerSpy : public WBStripeManager
 public:
     using WBStripeManager::WBStripeManager;
     virtual ~WBStripeManagerSpy(void) = default;
-
     int
-    _RequestStripeFlush(Stripe& stripe)
+    _RequestStripeFlush(Stripe* stripe) override
     {
+        if (stripe->GetWbLsid() == 77)
+        {
+            return -1;
+        }
         return 0;
     }
     Stripe*
@@ -74,6 +77,15 @@ public:
     {
         WBStripeManager::_FlushOnlineStripes(vsidToCheckFlushDone);
         return 0;
+    }
+    void
+    PickActiveStripe(uint32_t volumeId, std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone)
+    {
+        if (volumeId == 77)
+        {
+            return;
+        }
+        WBStripeManager::PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
     }
 };
 

@@ -50,7 +50,7 @@ class WBStripeManager : public IWBStripeAllocator, public IWBStripeInternal
 {
 public:
     WBStripeManager(void) = default;
-    WBStripeManager(int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, IStripeMap* iStripeMap, WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName);
+    WBStripeManager(StripeVec* stripeVec, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, IStripeMap* iStripeMap, WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName);
     WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName);
     virtual ~WBStripeManager(void);
     virtual void Init(void);
@@ -80,14 +80,14 @@ public:
     virtual int CheckAllActiveStripes(std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone);
 
     virtual void PushStripeToStripeArray(Stripe* stripe); // for UT
-    
+
 protected: // for UT
     int _FlushOnlineStripes(std::vector<StripeId>& vsidToCheckFlushDone);
     Stripe* _FinishActiveStripe(ASTailArrayIdx index);
     VirtualBlks _AllocateRemainingBlocks(ASTailArrayIdx index);
     VirtualBlks _AllocateRemainingBlocks(VirtualBlkAddr tail);
     Stripe* _FinishRemainingBlocks(VirtualBlks remainingVsaRange);
-    int _RequestStripeFlush(Stripe* stripe);
+    virtual int _RequestStripeFlush(Stripe* stripe);
     int _ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCount, ASTailArrayIdx idx, Stripe*& stripe);
     int _ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount);
 

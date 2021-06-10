@@ -110,13 +110,12 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
     if (IsUnMapStripe(arrayLsid))
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE), "failed to allocate gc stripe!");
-        return nullptr;
+    return nullptr;
     }
 
     StripeId newVsid = arrayLsid;
     Stripe* stripe = new Stripe(false, arrayName, addrInfo);
     stripe->Assign(newVsid, UNMAP_STRIPE, 0);
-    
     if (unlikely(stripe->LinkReverseMap(iReverseMap->AllocReverseMapPack(true /*gcDest*/)) < 0))
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_CANNOT_LINK_REVERSE_MAP), "failed to link ReverseMap to allocate gc stripe!");

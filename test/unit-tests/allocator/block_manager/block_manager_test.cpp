@@ -222,6 +222,7 @@ TEST(BlockManager, _AllocateBlks_TestCase1)
     delete ctxManager;
     delete reverseMap;
     delete iStripeMap;
+    delete reCtx;
 }
 
 TEST(BlockManager, _AllocateBlks_TestCase2)
@@ -246,7 +247,7 @@ TEST(BlockManager, _AllocateBlks_TestCase2)
     EXPECT_CALL(*wbCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
     EXPECT_CALL(*wbCtx, GetActiveStripeTail).WillOnce(Return(vsa));
     EXPECT_CALL(*wbCtx, AllocFreeWbStripe).WillOnce(Return(0));
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
     EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
     EXPECT_CALL(*ctxManager, GetCurrentGcMode).WillOnce(Return(MODE_URGENT_GC));
@@ -261,6 +262,7 @@ TEST(BlockManager, _AllocateBlks_TestCase2)
     delete ctxManager;
     delete reverseMap;
     delete iStripeMap;
+    delete reCtx;
 }
 
 TEST(BlockManager, _AllocateBlks_TestCase3)
@@ -285,7 +287,7 @@ TEST(BlockManager, _AllocateBlks_TestCase3)
     EXPECT_CALL(*wbCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
     EXPECT_CALL(*wbCtx, GetActiveStripeTail).WillOnce(Return(vsa));
     EXPECT_CALL(*wbCtx, AllocFreeWbStripe).WillOnce(Return(0));
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
     EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
     EXPECT_CALL(*ctxManager, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
@@ -303,6 +305,7 @@ TEST(BlockManager, _AllocateBlks_TestCase3)
     delete ctxManager;
     delete reverseMap;
     delete iStripeMap;
+    delete reCtx;
 }
 
 TEST(BlockManager, _AllocateBlks_TestCase4)
@@ -330,7 +333,7 @@ TEST(BlockManager, _AllocateBlks_TestCase4)
     EXPECT_CALL(*wbCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
     EXPECT_CALL(*wbCtx, GetActiveStripeTail).WillOnce(Return(vsa));
     EXPECT_CALL(*wbCtx, AllocFreeWbStripe).WillOnce(Return(0));
-    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
     EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
     EXPECT_CALL(*ctxManager, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
@@ -355,6 +358,7 @@ TEST(BlockManager, _AllocateBlks_TestCase4)
     delete revMapPack;
     delete iStripeMap;
     delete stripe;
+    delete reCtx;
 }
 
 TEST(BlockManager, _AllocateBlks_TestCase5)
@@ -406,6 +410,7 @@ TEST(BlockManager, _AllocateBlks_TestCase5)
     delete revMapPack;
     delete iStripeMap;
     delete stripe;
+    delete reCtx;
 }
 
 TEST(BlockManager, _AllocateBlks_TestCase6)
@@ -438,6 +443,7 @@ TEST(BlockManager, _AllocateBlks_TestCase6)
     delete ctxManager;
     delete reverseMap;
     delete iStripeMap;
+    delete reCtx;
 }
 
 TEST(BlockManager, _AllocateBlks_TestCase7)
@@ -472,6 +478,7 @@ TEST(BlockManager, _AllocateBlks_TestCase7)
     delete ctxManager;
     delete reverseMap;
     delete iStripeMap;
+    delete reCtx;
 }
 
 TEST(BlockManager, _AllocateBlks_TestCase8)
@@ -505,6 +512,7 @@ TEST(BlockManager, _AllocateBlks_TestCase8)
     delete ctxManager;
     delete reverseMap;
     delete iStripeMap;
+    delete reCtx;
 }
 
 TEST(BlockManager, _AllocateWriteBufferBlksFromNewStripe_TestInternalFunc)
