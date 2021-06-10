@@ -21,10 +21,6 @@ VPATH += $(MFS_INCLUDE_PATH)
 SRCS += $(wildcard *.cpp) \
 	    metafs_mbr.cpp 
 
-UT_SRCS += \
-           metafs_mbr_test.cpp \
-           msc_test.cpp 
-
 SRCS += $(UT_SRCS)
     
 ###############################################################

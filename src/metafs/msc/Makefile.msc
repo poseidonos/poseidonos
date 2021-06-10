@@ -38,14 +38,6 @@ MSC_SRCS += \
 endif
 
 ifeq ($(UT_MSC_EN), 1)
-UT_SRCS += \
-	msc_test.cpp \
-	mfs_mbr_test.cpp \
-	mfs_mbr_mgr_test.cpp \
-
-endif
-
-ifeq ($(UT_MSC_EN), 1)
 UT_PATH += \
 	msc/unit_test \
 

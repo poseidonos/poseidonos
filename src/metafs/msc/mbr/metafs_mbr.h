@@ -67,10 +67,12 @@ public:
     void CreateMBR(void);
     void BuildMBR(void);
     uint64_t GetEpochSignature(void);
-    void MarkValid(void);
     bool IsValidMBRExist(void);
     virtual bool GetPORStatus(void);
     virtual void SetPORStatus(bool isShutdownOff);
     virtual void InvalidMBRSignature(void);
+
+protected:
+    void _MarkValid(void);
 };
 } // namespace pos

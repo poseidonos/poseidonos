@@ -59,7 +59,7 @@ MetaFsMBR::CreateMBR(void)
         "Meta filesystem MBR has been created. Epoch timestamp={}",
         content->mfsEpochSignature);
 
-    MarkValid();
+    _MarkValid();
     SetPORStatus(false /* SPO */);
 }
 
@@ -76,7 +76,7 @@ MetaFsMBR::BuildMBR(void)
 }
 
 void
-MetaFsMBR::MarkValid(void)
+MetaFsMBR::_MarkValid(void)
 {
     content->mbrSignature = MetaFsMBRContent::MBR_SIGNATURE;
 }

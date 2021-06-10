@@ -8,40 +8,69 @@ namespace pos
 
 namespace pos
 {
-TEST(MetaFsMBR, MetaFsMBR_)
+TEST(MetaFsMBR, CheckSignature)
 {
+    MetaFsAnchorRegionType regionType = MetaFsAnchorRegionType::MasterBootRecord;
+    MetaLpnType baseLpn = 0;
+    MetaFsMBR* mbr = new MetaFsMBR(regionType, baseLpn);
+
+    mbr->CreateMBR();
+
+    // empty method
+    mbr->BuildMBR();
+
+    EXPECT_NE(mbr->GetEpochSignature(), 0);
+
+    delete mbr;
 }
 
-TEST(MetaFsMBR, CreateMBR_)
+TEST(MetaFsMBR, CheckValidity)
 {
+    MetaFsAnchorRegionType regionType = MetaFsAnchorRegionType::MasterBootRecord;
+    MetaLpnType baseLpn = 0;
+    MetaFsMBR* mbr = new MetaFsMBR(regionType, baseLpn);
+
+    mbr->CreateMBR();
+
+    EXPECT_TRUE(mbr->IsValidMBRExist());
+
+    delete mbr;
 }
 
-TEST(MetaFsMBR, BuildMBR_)
+TEST(MetaFsMBR, CheckSpor)
 {
+    MetaFsAnchorRegionType regionType = MetaFsAnchorRegionType::MasterBootRecord;
+    MetaLpnType baseLpn = 0;
+    MetaFsMBR* mbr = new MetaFsMBR(regionType, baseLpn);
+
+    mbr->CreateMBR();
+
+    mbr->SetPORStatus(true);
+
+    EXPECT_TRUE(mbr->GetPORStatus());
+
+    mbr->SetPORStatus(false);
+
+    EXPECT_FALSE(mbr->GetPORStatus());
+
+    delete mbr;
 }
 
-TEST(MetaFsMBR, GetEpochSignature_)
+TEST(MetaFsMBR, Invalidation)
 {
-}
+    MetaFsAnchorRegionType regionType = MetaFsAnchorRegionType::MasterBootRecord;
+    MetaLpnType baseLpn = 0;
+    MetaFsMBR* mbr = new MetaFsMBR(regionType, baseLpn);
 
-TEST(MetaFsMBR, MarkValid_)
-{
-}
+    mbr->CreateMBR();
 
-TEST(MetaFsMBR, IsValidMBRExist_)
-{
-}
+    EXPECT_TRUE(mbr->IsValidMBRExist());
 
-TEST(MetaFsMBR, GetPORStatus_)
-{
-}
+    mbr->InvalidMBRSignature();
 
-TEST(MetaFsMBR, SetPORStatus_)
-{
-}
+    EXPECT_FALSE(mbr->IsValidMBRExist());
 
-TEST(MetaFsMBR, InvalidMBRSignature_)
-{
+    delete mbr;
 }
 
 } // namespace pos

@@ -1,2 +1,0 @@
-POS_ADD_UNIT_TEST(metafs_mbr_test_ut metafs_mbr_test_test.cpp)
-POS_ADD_UNIT_TEST(msc_test_ut msc_test_test.cpp)
