@@ -7,16 +7,21 @@ sys.path.append("../")
 sys.path.append("../../system/lib/")
 sys.path.append("../system_overall/")
 
-import json_parser
 import pos
 import cli
-import time
 import api
 import EXIT_POS_AFTER_UNMOUNT_VOL
 
 POS_ROOT = '../../../'
 
-ARRAYNAME = EXIT_POS_AFTER_UNMOUNT_VOL.ARRAYNAME
+
+def check_result(out):
+    data = json.loads(out)
+    description = data['Response']['result']['status']['description']
+    if "There is no array" in description:
+        return "pass"
+    return "fail"
+
 
 def execute():
     EXIT_POS_AFTER_UNMOUNT_VOL.execute()
@@ -24,12 +29,14 @@ def execute():
     subprocess.call([ibofos_mbr_reset])
     pos.start_pos()
     cli.scan_device()
-    out = cli.array_info(ARRAYNAME)
+    out = cli.list_array()
     return out
+
 
 if __name__ == "__main__":
     api.clear_result(__file__)
     out = execute()
-    ret = api.set_result_by_code_ne(out, 0, __file__)
+    result = check_result(out)
+    ret = api.set_result_manually(out, result, __file__)
     pos.kill_pos()
     exit(ret)

@@ -15,9 +15,10 @@ import pos_constant
 import CREATE_VOL_BASIC_1
 
 ARRAYNAME = CREATE_VOL_BASIC_1.ARRAYNAME
+EXPECTED_USED_SIZE = CREATE_VOL_BASIC_1.VOL_SIZE
 
 def check_result():
-    if api.get_used_size(ARRAYNAME) > 0:
+    if api.get_used_size(ARRAYNAME) == EXPECTED_USED_SIZE:
         return "pass"
     return "fail"
 

@@ -5,24 +5,29 @@ import sys
 import json
 sys.path.append("../")
 sys.path.append("../../system/lib/")
+sys.path.append("../system_overall/")
 
 import json_parser
 import pos
 import cli
+import time
 import api
-import CREATE_ARRAY_BASIC
-import array_device
+import EXIT_POS_AFTER_UNMOUNT_VOL
 
-def set_result(detail):
-    code = json_parser.get_response_code(detail)
-    result = test_result.expect_false(code)
-    with open(__file__ + ".result", "w") as result_file:
-        result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
+POS_ROOT = '../../../'
+
+ARRAYNAME = EXIT_POS_AFTER_UNMOUNT_VOL.ARRAYNAME
+
 
 def execute():
-    CREATE_ARRAY_BASIC.execute()
-    out = cli.list_array_device("wrong_array_name")
+    EXIT_POS_AFTER_UNMOUNT_VOL.execute()
+    ibofos_mbr_reset = POS_ROOT + "/test/script/mbr_reset.sh"
+    subprocess.call([ibofos_mbr_reset])
+    pos.start_pos()
+    cli.scan_device()
+    out = cli.array_info(ARRAYNAME)
     return out
+
 
 if __name__ == "__main__":
     api.clear_result(__file__)
