@@ -47,7 +47,7 @@ TEST(WriteCompletion, WriteCompletion_TwoArgument_Stack)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
 
     //When: Create new WriteCompletion with 2 arguments
-    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator);
+    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false);
 
     //Then: Do nothing
 }
@@ -59,7 +59,7 @@ TEST(WriteCompletion, WriteCompletion_TwoArgument_Heap)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
 
     //When: Create new WriteCompletion with 2 arguments
-    WriteCompletion* writeCompletion = new WriteCompletion(volIo, &mockIWBStripeAllocator);
+    WriteCompletion* writeCompletion = new WriteCompletion(volIo, &mockIWBStripeAllocator, false);
 
     delete writeCompletion;
 
@@ -84,7 +84,7 @@ TEST(WriteCompletion, _DoSpecificJob_NullStripe)
     //When: Execute WriteCompletion with null stripe
     ON_CALL(mockIWBStripeAllocator, GetStripe(_)).WillByDefault(Return(nullptr));
 
-    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator);
+    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false);
     actual = writeCompletion.Execute();
 
     //Then: WriteCompletion should return success
@@ -109,7 +109,7 @@ TEST(WriteCompletion, _RequestFlush_DummyStripe)
     //When: Execute WriteCompletion with dummy stripe
     ON_CALL(mockIWBStripeAllocator, GetStripe(_)).WillByDefault(Return(&stripe));
 
-    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator);
+    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false);
     actual = writeCompletion.Execute();
 
     //Then: WriteCompletion should return success
@@ -135,7 +135,7 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
     ON_CALL(mockStripe, DecreseBlksRemaining(_)).WillByDefault(Return(0));
     ON_CALL(mockStripe, Flush(_)).WillByDefault(Return(0));
     ON_CALL(mockIWBStripeAllocator, GetStripe(_)).WillByDefault(Return(&mockStripe));
-    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator);
+    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false);
     actual = writeCompletion.Execute();
 
     //Then: WriteCompletion should return success
@@ -162,7 +162,7 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
     ON_CALL(mockStripe, DecreseBlksRemaining(_)).WillByDefault(Return(0));
     ON_CALL(mockStripe, Flush(_)).WillByDefault(Return(-1));
     ON_CALL(mockIWBStripeAllocator, GetStripe(_)).WillByDefault(Return(&mockStripe));
-    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator);
+    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false);
     actual = writeCompletion.Execute();
 
     //Then: WriteCompletion should return success

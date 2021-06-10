@@ -190,7 +190,7 @@ IODispatcher::_SubmitRecovery(UbioSmartPtr ubio)
 int
 IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool uBlockSharedPtrCopyNeeded)
 {
-    bool isReactor = EventFrameworkApi::IsReactorNow();
+    bool isReactor = EventFrameworkApiSingleton::Instance()->IsReactorNow();
 
     // sync io for reactor is not allowed. (reactor should not be stuck in any point.)
     if (unlikely(isReactor && sync))
@@ -287,16 +287,16 @@ IODispatcher::_CallForFrontend(UblockSharedPtr dev)
     UblockSharedPtr* devArg = new UblockSharedPtr(dev);
     frontendDone = false;
 
-    uint32_t firstReactorCore = EventFrameworkApi::GetFirstReactor();
+    uint32_t firstReactorCore = EventFrameworkApiSingleton::Instance()->GetFirstReactor();
     bool succeeded = true;
 
-    if (firstReactorCore == EventFrameworkApi::GetCurrentReactor())
+    if (firstReactorCore == EventFrameworkApiSingleton::Instance()->GetCurrentReactor())
     {
         _ProcessFrontend(devArg);
     }
     else
     {
-        succeeded = EventFrameworkApi::SendSpdkEvent(firstReactorCore,
+        succeeded = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(firstReactorCore,
             _ProcessFrontend, devArg);
     }
     if (unlikely(false == succeeded))
@@ -330,15 +330,15 @@ IODispatcher::_ProcessFrontend(void* ublockDevice)
         _RemoveDeviceFromThreadLocalList(dev);
     }
 
-    if (EventFrameworkApi::IsLastReactorNow())
+    if (EventFrameworkApiSingleton::Instance()->IsLastReactorNow())
     {
         frontendDone = true;
     }
     else
     {
-        uint32_t nextCore = EventFrameworkApi::GetNextReactor();
+        uint32_t nextCore = EventFrameworkApiSingleton::Instance()->GetNextReactor();
         UblockSharedPtr* devArg = new UblockSharedPtr(dev);
-        bool success = EventFrameworkApi::SendSpdkEvent(nextCore,
+        bool success = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(nextCore,
             _ProcessFrontend, devArg);
         if (unlikely(false == success))
         {

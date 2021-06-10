@@ -84,36 +84,34 @@ VolumeService& AioCompletion::volumeService =
     *VolumeServiceSingleton::Instance();
 
 AioCompletion::AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo, IOCtx& ioContext)
-: AioCompletion(flushIo, posIo, ioContext,
-      EventFrameworkApi::IsSameReactorNow)
+: AioCompletion(flushIo, posIo, ioContext, EventFrameworkApiSingleton::Instance())
 {
 }
 
 AioCompletion::AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo,
-    IOCtx& ioContext, std::function<bool(uint32_t)> isSameReactorNowFunc)
+    IOCtx& ioContext, EventFrameworkApi* eventFrameworkApi)
 : Callback(true),
   flushIo(flushIo),
   volumeIo(nullptr),
   posIo(posIo),
   ioContext(ioContext),
-  isSameReactorNowFunc(isSameReactorNowFunc)
+  eventFrameworkApi(eventFrameworkApi)
 {
 }
 
 AioCompletion::AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo, IOCtx& ioContext)
-: AioCompletion(volumeIo, posIo, ioContext,
-      EventFrameworkApi::IsSameReactorNow)
+: AioCompletion(volumeIo, posIo, ioContext, EventFrameworkApiSingleton::Instance())
 {
 }
 
 AioCompletion::AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo,
-    IOCtx& ioContext, std::function<bool(uint32_t)> isSameReactorNowFunc)
+    IOCtx& ioContext, EventFrameworkApi* eventFrameworkApi)
 : Callback(true),
   flushIo(nullptr),
   volumeIo(volumeIo),
   posIo(posIo),
   ioContext(ioContext),
-  isSameReactorNowFunc(isSameReactorNowFunc)
+  eventFrameworkApi(eventFrameworkApi)
 {
 }
 
@@ -135,7 +133,7 @@ AioCompletion::_DoSpecificJob(void)
         originCore = volumeIo->GetOriginCore();
     }
 
-    bool keepCurrentReactor = isSameReactorNowFunc(originCore);
+    bool keepCurrentReactor = eventFrameworkApi->IsSameReactorNow(originCore);
 
     if (likely(keepCurrentReactor))
     {
@@ -332,7 +330,7 @@ AIO::SubmitAsyncIO(pos_io& posIo)
 void
 AIO::CompleteIOs(void)
 {
-    uint32_t aid = EventFrameworkApi::GetCurrentReactor();
+    uint32_t aid = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
     uint32_t size = ioContext.cnt;
     airlog("Q_AIO", "AIR_BASE", aid, size);
     if (ioContext.needPollingCount > 0)
@@ -360,7 +358,7 @@ AIO::SubmitAsyncAdmin(pos_io& io)
         }
     }
     CallbackSmartPtr adminCompletion(new AdminCompletion(&io, ioContext));
-    uint32_t originCore = EventFrameworkApi::GetCurrentReactor();
+    uint32_t originCore = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
     string arrayName = "POSArray";
     IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
     IDevInfo* devmgr = DeviceManagerSingleton::Instance();

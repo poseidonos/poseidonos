@@ -146,7 +146,7 @@ ActivateSubsystem(void* arg1)
     {
         SPDK_NOTICELOG("Failed to pause subsystem(%s) during activating subsystem : Retrying\n",
             spdk_nvmf_subsystem_get_nqn(subsystem));
-        EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(),
+        EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
             ActivateSubsystem, subsystem);
     }
     ret = spdk_nvmf_subsystem_resume(subsystem, nullptr, nullptr);

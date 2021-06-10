@@ -4,13 +4,12 @@
 #include <gtest/gtest.h>
 
 #include "src/bio/volume_io.h"
-
-#include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/allocator/i_block_allocator_mock.h"
+#include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
+#include "test/unit-tests/allocator_service/allocator_service_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/event_scheduler/callback_mock.h"
 #include "test/unit-tests/io/general_io/rba_state_manager_mock.h"
-#include "test/unit-tests/allocator_service/allocator_service_mock.h"
 
 using namespace std;
 using ::testing::_;
@@ -44,13 +43,13 @@ TEST(WriteSubmission, WriteSubmission_Constructor_Three)
     VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 512 >> SECTOR_SIZE_SHIFT, arr_name);
     volumeIo->SetSectorRba(0);
     volumeIo->SetVolumeId(0);
-    
+
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name, 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
 
     // when
-    WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator);
+    WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator, false);
 
     // Then : do noting
 }
@@ -70,7 +69,7 @@ TEST(WriteSubmission, Execute_SingleBlock_ownershipFail)
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
 
     // when
-    WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator);
+    WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator, false);
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(false));
 
     bool actual, expected{false};
@@ -99,7 +98,7 @@ TEST(WriteSubmission, Execute_SingleBlock)
     VirtualBlks vsaRange = {.startVsa = vsa, .numBlks = 1};
 
     // when
-    WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator);
+    WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator, false);
 
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(vsaRange));
@@ -130,7 +129,7 @@ TEST(WriteSubmission, Execute_AlgnedMultiBlock)
     VirtualBlks vsaRange = {.startVsa = vsa, .numBlks = 8};
 
     // when
-    WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator);
+    WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator, false);
 
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(vsaRange));
@@ -161,7 +160,7 @@ TEST(WriteSubmission, Execute_MisAlgnedMultiBlock)
     VirtualBlks vsaRange = {.startVsa = vsa, .numBlks = 8};
 
     // when
-    WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator);
+    WriteSubmission writeSubmission(mockVolumeIo, &mockRBAStateManager, &mockIBlockAllocator, false);
 
     ON_CALL(mockRBAStateManager, BulkAcquireOwnership(_, _, _)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, AllocateWriteBufferBlks(_, _)).WillByDefault(Return(vsaRange));

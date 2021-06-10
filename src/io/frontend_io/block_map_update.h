@@ -51,7 +51,7 @@ class BlockMapUpdate : public Event
 public:
     BlockMapUpdate(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback);
     BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback,
-        function<bool(void)> IsReactorNow, IVSAMap* iVSAMap, JournalService* journalService,
+        bool isReactorNow, IVSAMap* iVSAMap, JournalService* journalService,
         EventScheduler* eventScheduler, EventSmartPtr blockMapUpdateCompletionEvent);
     virtual bool Execute(void) override;
 

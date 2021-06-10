@@ -40,6 +40,7 @@
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/callback.h"
 #include "src/volume/volume_service.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 namespace pos
 {
 struct IOCtx
@@ -61,9 +62,9 @@ class AioCompletion : public Callback,
 {
 public:
     AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo, IOCtx& ioContext);
-    AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo, IOCtx& ioContext, std::function<bool(uint32_t)> isSameReactorNowFunc);
+    AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo, IOCtx& ioContext, EventFrameworkApi* eventFrameworkApi);
     AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo, IOCtx& ioContext);
-    AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo, IOCtx& ioContext, std::function<bool(uint32_t)> isSameReactorNowFunc);
+    AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo, IOCtx& ioContext, EventFrameworkApi* eventFrameworkApi);
     ~AioCompletion(void) override;
 
 private:
@@ -75,7 +76,7 @@ private:
     pos_io& posIo;
     IOCtx& ioContext;
     static VolumeService& volumeService;
-    std::function<bool(uint32_t)> isSameReactorNowFunc;
+    EventFrameworkApi* eventFrameworkApi;
 };
 
 class AIO

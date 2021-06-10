@@ -35,15 +35,16 @@
 #include <array>
 #include <list>
 #include <queue>
+#include <string>
 #include <utility>
 #include <vector>
-#include <string>
 
-#include "src/include/pos_event_id.hpp"
-#include "src/lib/block_alignment.h"
-#include "src/io/general_io/io_controller.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/event.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/io/general_io/io_controller.h"
+#include "src/lib/block_alignment.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {
@@ -55,14 +56,14 @@ class IBlockAllocator;
 class WriteSubmission : public IOController, public Event
 {
 public:
-    WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* rbaStateManager = nullptr, IBlockAllocator* iBlockAllocator = nullptr);
+    explicit WriteSubmission(VolumeIoSmartPtr volumeIo);
+    WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* rbaStateManager, IBlockAllocator* iBlockAllocator,
+        bool isReactorNow);
     ~WriteSubmission(void) override;
 
     bool Execute(void) override;
 
 private:
-    RBAStateManager* rbaStateManager;
-    IBlockAllocator* iBlockAllocator;
     VolumeIoSmartPtr volumeIo;
     uint32_t volumeId;
     std::string arrayName;
@@ -72,6 +73,9 @@ private:
     std::list<VirtualBlks> allocatedVirtualBlks;
     uint32_t processedBlockCount;
     std::queue<VolumeIoSmartPtr> splitVolumeIoQueue;
+    RBAStateManager* rbaStateManager;
+    IBlockAllocator* iBlockAllocator;
+    bool isReactorNow;
 
     void _SendVolumeIo(VolumeIoSmartPtr volumeIo);
     bool _ProcessOwnedWrite(void);
@@ -90,6 +94,6 @@ private:
     VirtualBlkAddr _PopHeadVsa(void);
     VirtualBlkAddr _PopTailVsa(void);
     void _SetupVolumeIo(VolumeIoSmartPtr newVolumeIo, VirtualBlks& vsaRange,
-            CallbackSmartPtr callback);
+        CallbackSmartPtr callback);
 };
 } // namespace pos

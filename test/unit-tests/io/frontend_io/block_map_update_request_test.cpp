@@ -62,15 +62,15 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_Constructor_FourArgument_Stack
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &mockIVSAMap));
     EventSmartPtr mockBlockMapUpdateCompletionEvent = std::make_shared<MockBlockMapUpdateCompletion>(
-        mockVolumeIo, mockCallback, []() -> bool { return false; }, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
+        mockVolumeIo, mockCallback, false, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     EventSmartPtr mockBlockMapUpdateEvent = std::make_shared<MockBlockMapUpdate>(
-        mockVolumeIo, mockCallback, []() -> bool { return false; }, &mockIVSAMap, &mockJournalService,
+        mockVolumeIo, mockCallback, false, &mockIVSAMap, &mockJournalService,
         &mockEventScheduler, mockBlockMapUpdateCompletionEvent);
 
     // When: Create New BlockMapUpdateReqeust Object with 4 argument
     BlockMapUpdateRequest blockMapUpdateRequest(mockVolumeIo, mockCallback,
-        mockBlockMapUpdateEvent, &mockEventScheduler);
+        mockBlockMapUpdateEvent, &mockEventScheduler, false);
 
     // Then: Do nothing
 }
@@ -88,15 +88,15 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_Constructor_FourArgument_Heap)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &mockIVSAMap));
     EventSmartPtr mockBlockMapUpdateCompletionEvent = std::make_shared<MockBlockMapUpdateCompletion>(
-        mockVolumeIo, mockCallback, []() -> bool { return false; }, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
+        mockVolumeIo, mockCallback, false, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     EventSmartPtr mockBlockMapUpdateEvent = std::make_shared<MockBlockMapUpdate>(
-        mockVolumeIo, mockCallback, []() -> bool { return false; }, &mockIVSAMap, &mockJournalService,
+        mockVolumeIo, mockCallback, false, &mockIVSAMap, &mockJournalService,
         &mockEventScheduler, mockBlockMapUpdateCompletionEvent);
 
     // When: Create New BlockMapUpdateReqeust Object with 4 argument
     BlockMapUpdateRequest* blockMapUpdateRequest = new BlockMapUpdateRequest(mockVolumeIo, mockCallback,
-        mockBlockMapUpdateEvent, &mockEventScheduler);
+        mockBlockMapUpdateEvent, &mockEventScheduler, false);
 
     // Then: Do nothing
     delete blockMapUpdateRequest;
@@ -120,17 +120,17 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_NormalCase)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &mockIVSAMap));
     EventSmartPtr mockBlockMapUpdateCompletionEvent = std::make_shared<MockBlockMapUpdateCompletion>(
-        mockVolumeIoPtr, mockCallbackPtr, []() -> bool { return false; }, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
+        mockVolumeIoPtr, mockCallbackPtr, false, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
 
     NiceMock<MockBlockMapUpdate>* mockBlockMapUpdate = new NiceMock<MockBlockMapUpdate>(
-        mockVolumeIoPtr, mockCallbackPtr, []() -> bool { return false; }, &mockIVSAMap, &mockJournalService,
+        mockVolumeIoPtr, mockCallbackPtr, false, &mockIVSAMap, &mockJournalService,
         &mockEventScheduler, mockBlockMapUpdateCompletionEvent);
     EventSmartPtr mockBlockMapUpdateEvent(mockBlockMapUpdate);
 
     // When: BlockMapUpdate act as normal
     BlockMapUpdateRequest blockMapUpdateRequest(mockVolumeIoPtr, mockCallbackPtr,
-        mockBlockMapUpdateEvent, &mockEventScheduler);
+        mockBlockMapUpdateEvent, &mockEventScheduler, false);
 
     bool actual, expected;
     ON_CALL(*mockVolumeIo, GetLsidEntry()).WillByDefault(ReturnRef(addr));
@@ -168,17 +168,17 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_BlockMapUpdateEx
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &mockIVSAMap));
     EventSmartPtr mockBlockMapUpdateCompletionEvent = std::make_shared<MockBlockMapUpdateCompletion>(
-        mockVolumeIoPtr, mockCallbackPtr, []() -> bool { return false; }, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
+        mockVolumeIoPtr, mockCallbackPtr, false, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
 
     NiceMock<MockBlockMapUpdate>* mockBlockMapUpdate = new NiceMock<MockBlockMapUpdate>(
-        mockVolumeIoPtr, mockCallbackPtr, []() -> bool { return false; }, &mockIVSAMap, &mockJournalService,
+        mockVolumeIoPtr, mockCallbackPtr, false, &mockIVSAMap, &mockJournalService,
         &mockEventScheduler, mockBlockMapUpdateCompletionEvent);
     EventSmartPtr mockBlockMapUpdateEvent(mockBlockMapUpdate);
 
     // When: BlockMapUpdate Event is not nullptr, but failed to execute.
     BlockMapUpdateRequest blockMapUpdateRequest(mockVolumeIoPtr, mockCallbackPtr,
-        mockBlockMapUpdateEvent, &mockEventScheduler);
+        mockBlockMapUpdateEvent, &mockEventScheduler, false);
 
     bool actual, expected;
     ON_CALL(*mockVolumeIo, GetLsidEntry()).WillByDefault(ReturnRef(addr));
@@ -216,7 +216,7 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_BlockMapUpdateEv
 
     // When: BlockMapUpdate event is nullptr.
     BlockMapUpdateRequest blockMapUpdateRequest(mockVolumeIoPtr, mockCallbackPtr,
-        nullptr, &mockEventScheduler);
+        nullptr, &mockEventScheduler, false);
 
     bool actual, expected;
     ON_CALL(*mockVolumeIo, GetLsidEntry()).WillByDefault(ReturnRef(addr));

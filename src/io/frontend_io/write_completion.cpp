@@ -46,13 +46,14 @@ namespace pos
 {
 WriteCompletion::WriteCompletion(VolumeIoSmartPtr input)
 : WriteCompletion(input,
-      AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(input.get()->GetArrayName()))
+      AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(input.get()->GetArrayName()),
+      EventFrameworkApiSingleton::Instance()->IsReactorNow())
 {
 }
 
 WriteCompletion::WriteCompletion(VolumeIoSmartPtr input,
-    IWBStripeAllocator* iWBStripeAllocator)
-: Callback(EventFrameworkApi::IsReactorNow()),
+    IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow)
+: Callback(isReactorNow),
   volumeIo(input),
   iWBStripeAllocator(iWBStripeAllocator)
 {

@@ -39,7 +39,7 @@ namespace pos
 FlushIo::FlushIo(std::string& arrayName)
 : Ubio(nullptr, 0, arrayName),
   volumeId(MAX_VOLUME_COUNT),
-  originCore(EventFrameworkApi::GetCurrentReactor()),
+  originCore(EventFrameworkApiSingleton::Instance()->GetCurrentReactor()),
   state(FLUSH__BLOCK_ALLOCATION),
   vsaMapFlushComplete(false),
   stripeMapFlushComplete(false),

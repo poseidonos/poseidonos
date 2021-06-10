@@ -59,8 +59,16 @@
 
 namespace pos
 {
-WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inputRbaStateManager, IBlockAllocator* inputIBlockAllocator)
-: Event(EventFrameworkApi::IsReactorNow()),
+WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo)
+: WriteSubmission(volumeIo, RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayName()),
+    AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayName()),
+    EventFrameworkApiSingleton::Instance()->IsReactorNow())
+{
+}
+
+WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inputRbaStateManager, IBlockAllocator* inputIBlockAllocator,
+        bool isReactorNow)
+: Event(isReactorNow),
   volumeIo(volumeIo),
   volumeId(volumeIo->GetVolumeId()),
   arrayName(volumeIo->GetArrayName()),
@@ -68,25 +76,10 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inp
       volumeIo->GetSize()),
   blockCount(blockAlignment.GetBlockCount()),
   allocatedBlockCount(0),
-  processedBlockCount(0)
+  processedBlockCount(0),
+  rbaStateManager(inputRbaStateManager),
+  iBlockAllocator(inputIBlockAllocator)
 {
-    if (nullptr == inputRbaStateManager)
-    {
-        rbaStateManager = RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayName());
-    }
-    else
-    {
-        rbaStateManager = inputRbaStateManager;
-    }
-
-    if (nullptr == inputIBlockAllocator)
-    {
-        iBlockAllocator = AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayName());
-    }
-    else
-    {
-        iBlockAllocator = inputIBlockAllocator;
-    }
 }
 
 WriteSubmission::~WriteSubmission(void)

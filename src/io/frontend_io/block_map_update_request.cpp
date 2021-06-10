@@ -50,13 +50,13 @@ namespace pos
 {
 BlockMapUpdateRequest::BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback)
 : BlockMapUpdateRequest(volumeIo, originCallback, std::make_shared<BlockMapUpdate>(volumeIo, originCallback),
-      EventSchedulerSingleton::Instance())
+      EventSchedulerSingleton::Instance(), EventFrameworkApiSingleton::Instance()->IsReactorNow())
 {
 }
 
 BlockMapUpdateRequest::BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback,
-    EventSmartPtr blockMapUpdateEvent, EventScheduler* eventScheduler)
-: Callback(EventFrameworkApi::IsReactorNow()),
+    EventSmartPtr blockMapUpdateEvent, EventScheduler* eventScheduler, bool isReactorNow)
+: Callback(isReactorNow),
   volumeIo(volumeIo),
   originCallback(originCallback),
   blockMapUpdateEvent(blockMapUpdateEvent),

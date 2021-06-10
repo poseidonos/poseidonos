@@ -53,7 +53,7 @@ class BlockMapUpdateRequest : public Callback
 public:
     BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback = nullptr);
     BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback,
-        EventSmartPtr blockMapUpdateEvent, EventScheduler* eventScheduler);
+        EventSmartPtr blockMapUpdateEvent, EventScheduler* eventScheduler, bool isReactorNow);
     virtual ~BlockMapUpdateRequest(void) override;
 
 private:

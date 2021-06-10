@@ -42,7 +42,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_NineArgument_Stack)
 
     // When
     BlockMapUpdateCompletion blockMapUpdateCompletion(
-        volumeIo, callback, []() -> bool { return false; }, &vsaMap, &mockEventScheduler,
+        volumeIo, callback, false, &vsaMap, &mockEventScheduler,
         mockWriteCompletionEvent, &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     // Then : Do nothing
 }
@@ -63,7 +63,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_NineArgument_Heap)
 
     // When
     BlockMapUpdateCompletion* blockMapUpdateCompletion = new BlockMapUpdateCompletion(
-        volumeIo, callback, []() -> bool { return false; }, &vsaMap, &mockEventScheduler,
+        volumeIo, callback, false, &vsaMap, &mockEventScheduler,
         mockWriteCompletionEvent, &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     // Then : Do nothing
     delete blockMapUpdateCompletion;
@@ -102,7 +102,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_Execute)
 
     // When
     BlockMapUpdateCompletion blockMapUpdateCompletion(
-        volumeIo, callback, []() -> bool { return false; },
+        volumeIo, callback, false,
         &vsaMap, &mockEventScheduler, mockWriteCompletionEvent, &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
 
     // Then : Execute
@@ -147,7 +147,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_ExecuteFail)
     ON_CALL(*mockWriteCompletionFail, _DoSpecificJob()).WillByDefault(Return(false));
 
     BlockMapUpdateCompletion blockMapUpdateCompletionFail(
-        volumeIo, callback, []() -> bool { return false; },
+        volumeIo, callback, false,
         &vsaMap, &mockEventScheduler, mockWriteCompletionEvent, &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
 
     // Then : Execute

@@ -106,6 +106,7 @@ Poseidonos::Terminate(void)
         delete ioRecoveryEventFactory;
     }
     ArrayMgr::ResetInstance();
+    EventFrameworkApiSingleton::ResetInstance();
 
     air_deactivate();
     air_finalize();

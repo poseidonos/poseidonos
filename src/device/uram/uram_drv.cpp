@@ -165,7 +165,7 @@ UramDrv::ScanDevs(std::vector<UblockSharedPtr>* devs)
 bool
 UramDrv::_OpenBdev(UramDeviceContext* devCtx)
 {
-    if (false == EventFrameworkApi::IsReactorNow())
+    if (false == EventFrameworkApiSingleton::Instance()->IsReactorNow())
     {
         return true;
     }
@@ -231,7 +231,7 @@ UramDrv::Open(DeviceContext* deviceContext)
 
         if (devCtx->opened == false)
         {
-            if (EventFrameworkApi::IsReactorNow())
+            if (EventFrameworkApiSingleton::Instance()->IsReactorNow())
             {
                 openSuccessful = _OpenBdev(devCtx);
             }

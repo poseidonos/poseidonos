@@ -50,7 +50,7 @@ const uint64_t VolumeIo::INVALID_RBA = UINT64_MAX;
 VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, std::string arrayName)
 : Ubio(buffer, unitCount, arrayName),
   volumeId(MAX_VOLUME_COUNT),
-  originCore(EventFrameworkApi::GetCurrentReactor()),
+  originCore(EventFrameworkApiSingleton::Instance()->GetCurrentReactor()),
   lsidEntry(INVALID_LSID_ENTRY),
   oldLsidEntry(INVALID_LSID_ENTRY),
   vsa(INVALID_VSA),

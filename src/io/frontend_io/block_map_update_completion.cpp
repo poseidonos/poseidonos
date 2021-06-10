@@ -45,10 +45,9 @@ namespace pos
 {
 BlockMapUpdateCompletion::BlockMapUpdateCompletion(
     VolumeIoSmartPtr input, CallbackSmartPtr originCallback,
-    function<bool(void)> IsReactorNow,
-    IVSAMap* iVSAMap, EventScheduler* eventScheduler, CallbackSmartPtr writeCompletionEvent,
+    bool isReactorNow, IVSAMap* iVSAMap, EventScheduler* eventScheduler, CallbackSmartPtr writeCompletionEvent,
     IBlockAllocator* iBlockAllocator, IWBStripeAllocator* iWBStripeAllocator, VsaRangeMaker* vsaRangeMaker)
-: Event(IsReactorNow()),
+: Event(isReactorNow),
   volumeIo(input),
   originCallback(originCallback),
   iVSAMap(iVSAMap),
@@ -63,14 +62,14 @@ BlockMapUpdateCompletion::BlockMapUpdateCompletion(
 BlockMapUpdateCompletion::BlockMapUpdateCompletion(VolumeIoSmartPtr inputVolumeIo,
     CallbackSmartPtr originCallback)
 : BlockMapUpdateCompletion(
-      inputVolumeIo, originCallback, EventFrameworkApi::IsReactorNow,
-      MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayName()),
-      EventSchedulerSingleton::Instance(),
-      std::make_shared<WriteCompletion>(inputVolumeIo),
-      AllocatorServiceSingleton::Instance()->GetIBlockAllocator(inputVolumeIo->GetArrayName()),
-      AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(inputVolumeIo->GetArrayName()),
-      new VsaRangeMaker(inputVolumeIo->GetVolumeId(), ChangeSectorToBlock(inputVolumeIo->GetSectorRba()),
-          DivideUp(inputVolumeIo->GetSize(), BLOCK_SIZE), inputVolumeIo->IsGc(), inputVolumeIo->GetArrayName()))
+    inputVolumeIo, originCallback, EventFrameworkApiSingleton::Instance()->IsReactorNow(),
+    MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayName()),
+    EventSchedulerSingleton::Instance(),
+    std::make_shared<WriteCompletion>(inputVolumeIo),
+    AllocatorServiceSingleton::Instance()->GetIBlockAllocator(inputVolumeIo->GetArrayName()),
+    AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(inputVolumeIo->GetArrayName()),
+    new VsaRangeMaker(inputVolumeIo->GetVolumeId(), ChangeSectorToBlock(inputVolumeIo->GetSectorRba()),
+        DivideUp(inputVolumeIo->GetSize(), BLOCK_SIZE), inputVolumeIo->IsGc(), inputVolumeIo->GetArrayName()))
 {
 }
 

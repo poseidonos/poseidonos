@@ -93,8 +93,8 @@ AccelEngineApi::Initialize(void)
         POS_TRACE_INFO((int)POS_EVENT_ID::IOATAPI_DISABLED,
             "Ioat Copy Engine Offload Enabled");
     }
-    uint32_t nextCore = EventFrameworkApi::GetFirstReactor();
-    bool success = EventFrameworkApi::SendSpdkEvent(nextCore,
+    uint32_t nextCore = EventFrameworkApiSingleton::Instance()->GetFirstReactor();
+    bool success = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(nextCore,
         _HandleInitialize, nullptr);
     if (success == false)
     {
@@ -125,7 +125,7 @@ AccelEngineApi::_SetChannel(void)
         assert(0);
     }
 
-    uint32_t currentReactor = EventFrameworkApi::GetCurrentReactor();
+    uint32_t currentReactor = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
     if (ioatChannelExist)
     {
         ioatReactorArray[ioatReactorCount] = currentReactor;
@@ -191,14 +191,14 @@ AccelEngineApi::_HandleInitialize(void* arg1)
 {
     _SetChannel();
 
-    if (EventFrameworkApi::IsLastReactorNow())
+    if (EventFrameworkApiSingleton::Instance()->IsLastReactorNow())
     {
         initialized = true;
     }
     else
     {
-        uint32_t nextCore = EventFrameworkApi::GetNextReactor();
-        bool success = EventFrameworkApi::SendSpdkEvent(nextCore,
+        uint32_t nextCore = EventFrameworkApiSingleton::Instance()->GetNextReactor();
+        bool success = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(nextCore,
             _HandleInitialize, nullptr);
         if (unlikely(false == success))
         {
@@ -294,14 +294,14 @@ AccelEngineApi::_HandleFinalize(void* arg1)
         _PutChannel();
     }
 
-    if (EventFrameworkApi::IsLastReactorNow())
+    if (EventFrameworkApiSingleton::Instance()->IsLastReactorNow())
     {
         finalized = true;
     }
     else
     {
-        uint32_t nextCore = EventFrameworkApi::GetNextReactor();
-        bool success = EventFrameworkApi::SendSpdkEvent(nextCore,
+        uint32_t nextCore = EventFrameworkApiSingleton::Instance()->GetNextReactor();
+        bool success = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(nextCore,
             _HandleFinalize, nullptr);
         if (unlikely(false == success))
         {
@@ -316,8 +316,8 @@ void
 AccelEngineApi::Finalize(void)
 {
     finalized = false;
-    uint32_t firstReactor = EventFrameworkApi::GetFirstReactor();
-    bool success = EventFrameworkApi::SendSpdkEvent(firstReactor,
+    uint32_t firstReactor = EventFrameworkApiSingleton::Instance()->GetFirstReactor();
+    bool success = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(firstReactor,
         _HandleFinalize, nullptr);
 
     if (unlikely(false == success))

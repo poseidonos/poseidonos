@@ -52,7 +52,7 @@ class BlockMapUpdateCompletion : public Event
 public:
     BlockMapUpdateCompletion(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback);
     BlockMapUpdateCompletion(VolumeIoSmartPtr input, CallbackSmartPtr originCallback,
-        function<bool(void)> IsReactorNow,
+        bool isReactorNow,
         IVSAMap* iVSAMap, EventScheduler* eventScheduler,
         CallbackSmartPtr writeCompletionEvent,
         IBlockAllocator* iBlockAllocator,

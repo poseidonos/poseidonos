@@ -57,7 +57,7 @@ AdminCommandCompleteHandler::~AdminCommandCompleteHandler(void)
 bool
 AdminCommandCompleteHandler::_DoSpecificJob(void)
 {
-    bool keepCurrentReactor = EventFrameworkApi::IsSameReactorNow(originCore);
+    bool keepCurrentReactor = EventFrameworkApiSingleton::Instance()->IsSameReactorNow(originCore);
     assert(keepCurrentReactor == true);
     callback->Execute();
     return true;

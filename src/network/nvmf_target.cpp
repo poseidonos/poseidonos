@@ -140,7 +140,7 @@ NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName
     string* bdevName = new string(GetBdevName(volId, arrayName));
     string* subnqn = new string(nqn);
 
-    EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(),
+    EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
         _TryAttachHandler, static_cast<void*>(subnqn), static_cast<void*>(bdevName));
     while (attachedNsid == yetAttached)
     {
@@ -196,7 +196,7 @@ NvmfTarget::_AttachNamespaceWithPause(void* arg1, void* arg2)
     if (ret != 0)
     {
         SPDK_NOTICELOG("failed to pause subsystem during attaching namespace : retrying \n");
-        EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(), _AttachNamespaceWithPause, subsystem, arg2);
+        EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(), _AttachNamespaceWithPause, subsystem, arg2);
     }
 }
 
@@ -297,7 +297,7 @@ NvmfTarget::_DetachNamespaceWithPause(void* arg1, void* arg2)
     if (ret != 0)
     {
         SPDK_NOTICELOG("failed to pause subsystem during detaching namespace : retrying \n");
-        EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(), _DetachNamespaceWithPause, subsystem, arg2);
+        EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(), _DetachNamespaceWithPause, subsystem, arg2);
     }
 }
 
@@ -340,7 +340,7 @@ NvmfTarget::_DetachNamespaceAllWithPause(void* arg1, void* arg2)
     {
         SPDK_NOTICELOG("failed to pause subsystem(%s) during detaching ns :retrying \n",
             spdk_nvmf_subsystem_get_nqn(subsystem));
-        EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(),
+        EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
             _DetachNamespaceAllWithPause, subsystem, arg2);
     }
 }

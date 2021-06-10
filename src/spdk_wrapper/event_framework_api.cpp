@@ -60,6 +60,14 @@ static inline void EventFuncWrapper(void *ctx)
     delete eventWrapper;
 }
 
+EventFrameworkApi::EventFrameworkApi(void)
+{
+}
+
+EventFrameworkApi::~EventFrameworkApi(void)
+{
+}
+
 bool
 EventFrameworkApi::SendSpdkEvent(uint32_t core, EventFuncTwoParams func, void* arg1,
     void* arg2)
@@ -108,12 +116,12 @@ EventFrameworkApi::SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* ar
 void
 EventFrameworkApi::CompleteEvents(void)
 {
-    if (EventFrameworkApi::IsReactorNow() == false)
+    if (IsReactorNow() == false)
     {
         return;
     }
 
-    uint32_t core = EventFrameworkApi::GetCurrentReactor();
+    uint32_t core = GetCurrentReactor();
     std::lock_guard<EventQueueLock> lock(eventQueueLocks[core]);
     EventQueue& eventQueue = eventQueues[core];
     uint32_t processedEvents = 0;

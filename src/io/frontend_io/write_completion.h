@@ -46,7 +46,7 @@ class WriteCompletion : public Callback
 public:
     WriteCompletion(VolumeIoSmartPtr inputVolumeIo);
     WriteCompletion(VolumeIoSmartPtr inputVolumeIo,
-        IWBStripeAllocator* iWBStripeAllocator);
+        IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow);
     ~WriteCompletion(void) override;
 
 private:

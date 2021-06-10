@@ -102,7 +102,7 @@ IoCompleter::CompleteUbioWithoutRecovery(IOErrorType errorType, bool executeCall
         if (originCore != INVALID_CORE)
         {
             bool keepCurrentReactor =
-                EventFrameworkApi::IsSameReactorNow(originCore);
+                EventFrameworkApiSingleton::Instance()->IsSameReactorNow(originCore);
             if (keepCurrentReactor)
             {
                 done = callback->Execute();

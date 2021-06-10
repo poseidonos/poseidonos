@@ -220,7 +220,7 @@ UramBdev::_WrapupOpenDeviceSpecific(DeviceContext* deviceContext)
 
     // Reactor cannot handle Async operation for Uram in current implementation.
     // ioat poll cannot be called in Empty(), so, we restore the contents by IO worker.
-    if (!EventFrameworkApi::IsReactorNow())
+    if (!EventFrameworkApiSingleton::Instance()->IsReactorNow())
     {
         if (isPersistent == true)
         {
@@ -275,7 +275,7 @@ UramBdev::SubmitAsyncIO(UbioSmartPtr ubio)
         }
 
         UbioSmartPtr* ubioArgument = new UbioSmartPtr(ubio);
-        EventFrameworkApi::SendSpdkEvent(
+        EventFrameworkApiSingleton::Instance()->SendSpdkEvent(
             core, _RequestAsyncIo, ubioArgument);
 
         requestCount++;

@@ -162,7 +162,7 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
     {
         return;
     }
-    uint32_t reactorId = EventFrameworkApi::GetCurrentReactor();
+    uint32_t reactorId = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
     uint32_t volId = volIo->volume_id;
     uint64_t currentBw = 0;
     uint64_t currentIO = 0;

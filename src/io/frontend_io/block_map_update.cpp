@@ -45,9 +45,9 @@
 namespace pos
 {
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback,
-    function<bool(void)> IsReactorNow, IVSAMap* iVSAMap, JournalService* journalService, EventScheduler* eventScheduler,
+    bool isReactorNow, IVSAMap* iVSAMap, JournalService* journalService, EventScheduler* eventScheduler,
     EventSmartPtr blockMapUpdateCompletionEvent)
-: Event(IsReactorNow()),
+: Event(isReactorNow),
   volumeIo(inputVolumeIo),
   iVSAMap(iVSAMap),
   originCallback(originCallback),
@@ -59,11 +59,11 @@ BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr 
 
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback)
 : BlockMapUpdate(
-      inputVolumeIo, originCallback, EventFrameworkApi::IsReactorNow,
-      MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayName()),
-      JournalServiceSingleton::Instance(),
-      EventSchedulerSingleton::Instance(),
-      std::make_shared<BlockMapUpdateCompletion>(inputVolumeIo, originCallback))
+    inputVolumeIo, originCallback, EventFrameworkApiSingleton::Instance()->IsReactorNow(),
+    MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayName()),
+    JournalServiceSingleton::Instance(),
+    EventSchedulerSingleton::Instance(),
+    std::make_shared<BlockMapUpdateCompletion>(inputVolumeIo, originCallback))
 {
 }
 

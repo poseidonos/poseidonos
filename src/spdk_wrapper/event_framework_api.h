@@ -39,6 +39,7 @@
 #include <tuple>
 #include <string>
 
+#include "src/lib/singleton.h"
 namespace pos
 {
 using EventFuncTwoParams = void (*)(void*, void*);
@@ -54,20 +55,21 @@ struct EventWrapper
 class EventFrameworkApi
 {
 public:
-    static bool SendSpdkEvent(uint32_t core, EventFuncTwoParams func, void* arg1,
+    EventFrameworkApi(void);
+    virtual ~EventFrameworkApi(void);
+    virtual bool SendSpdkEvent(uint32_t core, EventFuncTwoParams func, void* arg1,
             void* arg2);
-    static bool SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* arg1);
-    static void CompleteEvents(void);
+    virtual bool SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* arg1);
+    void CompleteEvents(void);
 
-    static uint32_t GetTargetReactor(void);
-    static uint32_t GetNextTargetReactor(uint32_t prevReactor);
-    static uint32_t GetFirstReactor(void);
-    static uint32_t GetCurrentReactor(void);
-    static uint32_t GetNextReactor(void);
-    static bool IsReactorNow(void);
-    static bool IsLastReactorNow(void);
-    static bool IsSameReactorNow(uint32_t reactor);
-    static uint32_t GetMaxReactor(void);
+    virtual uint32_t GetTargetReactor(void);
+    virtual uint32_t GetNextTargetReactor(uint32_t prevReactor);
+    virtual uint32_t GetFirstReactor(void);
+    virtual uint32_t GetCurrentReactor(void);
+    virtual uint32_t GetNextReactor(void);
+    virtual bool IsReactorNow(void);
+    virtual bool IsLastReactorNow(void);
+    virtual bool IsSameReactorNow(uint32_t reactor);
 
 private:
     static thread_local uint32_t targetReactor;
@@ -82,6 +84,9 @@ private:
     static std::array<EventQueue, MAX_REACTOR_COUNT> eventQueues;
     static std::array<EventQueueLock, MAX_REACTOR_COUNT> eventQueueLocks;
 
-    static void _SendEventToSpareQueue(uint32_t core, EventFuncOneParam func, void* arg1);
+    void _SendEventToSpareQueue(uint32_t core, EventFuncOneParam func, void* arg1);
 };
+
+using EventFrameworkApiSingleton = Singleton<EventFrameworkApi>;
+
 } // namespace pos

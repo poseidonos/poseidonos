@@ -55,7 +55,7 @@ UNVMfCompleteHandler(void)
     {
         AIO aio;
         aio.CompleteIOs();
-        EventFrameworkApi::CompleteEvents();
+        EventFrameworkApiSingleton::Instance()->CompleteEvents();
     }
     catch (...)
     {

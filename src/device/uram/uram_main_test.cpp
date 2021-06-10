@@ -120,7 +120,7 @@ UramDrvTest::UramDrvTest(DeviceDriver* inputDeviceDriver)
 : NVMeTest(inputDeviceDriver)
 {
     UramDeviceContext* devCtx = new UramDeviceContext(_bdev_name);
-    devCtx->reactorCore = EventFrameworkApi::GetFirstReactor();
+    devCtx->reactorCore = EventFrameworkApiSingleton::Instance()->GetFirstReactor();
     deviceContext = devCtx;
 }
 UramDrvTest::~UramDrvTest(void)
@@ -175,7 +175,7 @@ UramDrvTest::_SubmitIO(UbioSmartPtr ioToSubmit)
 {
     UramTestIOEvent eventParam(deviceDriver, deviceContext, ioToSubmit);
     struct spdk_event* event = spdk_event_allocate(
-        EventFrameworkApi::GetFirstReactor(),
+        EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
         &_SubmitIOHandler, &eventParam, nullptr);
     spdk_event_call(event);
 
@@ -188,7 +188,7 @@ UramDrvTest::_CheckIOCompletion(void)
 {
     UramTestIOEvent eventParam(deviceDriver, deviceContext, nullptr);
     struct spdk_event* event = spdk_event_allocate(
-        EventFrameworkApi::GetFirstReactor(),
+        EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
         &_CheckIOCompletionHandler, &eventParam, nullptr);
     spdk_event_call(event);
 
