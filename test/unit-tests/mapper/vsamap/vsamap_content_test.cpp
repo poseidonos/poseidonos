@@ -43,10 +43,10 @@ TEST(VSAMapContent, GetDirtyPages_Default)
 {
     // Given
     const BlkAddr RBA_TEST = 0;
-    uint64_t rbaCnt = 508 + 1;
+    uint64_t rbaCnt = 504 + 1;
 
     MockMapHeader* mockMapHeader = new MockMapHeader;
-    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(508));
+    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(504));
 
     VSAMapContent sut;
     sut.SetMapHeader(mockMapHeader);
@@ -65,7 +65,7 @@ TEST(VSAMapContent, InMemoryInit_Default)
     const uint64_t BLKCNT = 1024 * 1024;    // 4K * 1M == 4GB
 
     MockMapHeader* mockMapHeader = new MockMapHeader;
-    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(508));
+    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(504));
     EXPECT_CALL(*mockMapHeader, GetMpageSize).WillRepeatedly(Return(4032));
 
     VSAMapContent sut;
@@ -86,12 +86,12 @@ TEST(VSAMapContent, GetEntry_NoMpage)
     const BlkAddr RBA_TEST = 0;
 
     MockMapHeader* mockMapHeader = new MockMapHeader;
-    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(508));
+    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(504));
     EXPECT_CALL(*mockMapHeader, GetMpageSize).WillRepeatedly(Return(4032));
 
     VSAMapContent sut;
     sut.SetMapHeader(mockMapHeader);
-    sut.Init(BLKCNT / 508);
+    sut.Init(BLKCNT / 504);
 
     // When
     VirtualBlkAddr rvsa = sut.GetEntry(RBA_TEST);
@@ -109,13 +109,13 @@ TEST(VSAMapContent, GetEntry_ValidMpage)
     const VirtualBlkAddr VSA = { .stripeId = 1, .offset = 2 };
 
     MockMapHeader* mockMapHeader = new MockMapHeader;
-    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(508));
+    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(504));
     EXPECT_CALL(*mockMapHeader, GetMpageSize).WillRepeatedly(Return(4032));
 
     MockMap* mockMap = new MockMap;
     char* buf = new char[4032]();
     VirtualBlkAddr* mpageMap = (VirtualBlkAddr*)buf;
-    mpageMap[RBA_TEST % 508] = VSA;
+    mpageMap[RBA_TEST % 504] = VSA;
     EXPECT_CALL(*mockMap, GetMpage).WillRepeatedly(ReturnPointee(&buf));
 
     VSAMapContent sut;
@@ -142,7 +142,7 @@ TEST(VSAMapContent, SetEntry_VsaMapSetFailure)
     EXPECT_CALL(*mockMap, ReleaseMpageLock);
 
     MockMapHeader* mockMapHeader = new MockMapHeader;
-    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(508));
+    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(504));
 
     VSAMapContent sut;
     sut.SetMapHeader(mockMapHeader);
@@ -169,7 +169,7 @@ TEST(VSAMapContent, SetEntry_AllocAndSet)
     EXPECT_CALL(*mockMap, ReleaseMpageLock);
 
     MockMapHeader* mockMapHeader = new MockMapHeader;
-    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(508));
+    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(504));
     EXPECT_CALL(*mockMapHeader, SetMapAllocated);
 
     MockBitMap* mockBitMap = new MockBitMap(1024);
@@ -201,7 +201,7 @@ TEST(VSAMapContent, GetNumUsedBlocks_CountOnePage)
 
     MockMapHeader* mockMapHeader = new MockMapHeader;
     EXPECT_CALL(*mockMapHeader, GetMpageMap).WillRepeatedly(ReturnPointee(&mockBitMap));
-    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(508));
+    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(504));
 
     VSAMapContent sut;
     sut.SetMapHeader(mockMapHeader);
@@ -211,7 +211,7 @@ TEST(VSAMapContent, GetNumUsedBlocks_CountOnePage)
     int64_t reti = sut.GetNumUsedBlocks();
 
     // Then
-    // EXPECT_EQ(reti, 508);
+    EXPECT_EQ(reti, 504);
     delete mockBitMap;
 }
 
@@ -233,7 +233,7 @@ TEST(VSAMapContent, InvalidateAllBlocks_Default)
 
     MockMapHeader* mockMapHeader = new MockMapHeader;
     EXPECT_CALL(*mockMapHeader, GetMpageMap).WillRepeatedly(ReturnPointee(&mockBitMap));
-    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(508));
+    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(504));
 
     VSAMapContent sut(0, mockIBlockAllocator);
     sut.SetMapHeader(mockMapHeader);
