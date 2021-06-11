@@ -88,10 +88,6 @@ MetaVolume::Init(MetaStorageSubsystem* metaStorage)
     _RegisterRegionMgr(MetaRegionManagerType::InodeMgr, *inodeMgr);
     _RegisterRegionMgr(MetaRegionManagerType::FileMgr, *fileMgr);
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "MetaVolume: {}, constructed: volType={}, <total page num={}>",
-        (uint32_t)volumeType, (uint32_t)metaVolumeType, maxVolumePageNum);
-
     sumOfRegionBaseLpns = 0;
 
     InitVolumeBaseLpn();

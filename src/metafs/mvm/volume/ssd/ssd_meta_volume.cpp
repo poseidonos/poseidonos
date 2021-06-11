@@ -64,7 +64,7 @@ SsdMetaVolume::InitVolumeBaseLpn(void)
 bool
 SsdMetaVolume::IsFreeSpaceEnough(FileSizeType fileByteSize)
 {
-    if (GetTheBiggestExtentSize() > fileByteSize)
+    if (GetTheBiggestExtentSize() >= fileByteSize)
     {
         return true;
     }

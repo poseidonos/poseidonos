@@ -64,7 +64,7 @@ NvRamMetaVolume::IsFreeSpaceEnough(FileSizeType fileByteSize)
     {
         return true;
     }
-    if (GetTheBiggestExtentSize() > fileByteSize)
+    if (GetTheBiggestExtentSize() >= fileByteSize)
     {
         return true;
     }
