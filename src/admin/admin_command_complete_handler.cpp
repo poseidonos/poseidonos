@@ -44,10 +44,10 @@ using namespace std;
 namespace pos
 {
 AdminCommandCompleteHandler::AdminCommandCompleteHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback)
-: Callback(false),
+: Callback(false, CallbackType_AdminCommandCompleteHandler),
   io(posIo),
   originCore(originCore),
-  callback(callback, CallbackType_AdminCommandCompleteHandler)
+  callback(callback)
 {
 }
 AdminCommandCompleteHandler::~AdminCommandCompleteHandler(void)
