@@ -191,7 +191,9 @@ WriteSubmission::_ProcessOwnedWrite(void)
 void
 WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
 {
-    ioDispatcher->Submit(volumeIo, false, false);
+    bool isRead = (volumeIo->dir == UbioDir::Read);
+    // If Read for partial write case, handling device failure is necessary.
+    ioDispatcher->Submit(volumeIo, false, isRead);
 }
 
 void

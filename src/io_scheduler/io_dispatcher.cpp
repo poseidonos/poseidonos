@@ -188,7 +188,7 @@ IODispatcher::_SubmitRecovery(UbioSmartPtr ubio)
 }
 
 int
-IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool uBlockSharedPtrCopyNeeded)
+IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded)
 {
     bool isReactor = EventFrameworkApi::IsReactorNow();
 
@@ -206,12 +206,12 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool uBlockSharedPtrCopyNeede
 
     // sync operation does not support RAID5 recovery.
     // If caller assure that device given will not be failed in submit context,
-    // It needs to skip device recovery (uBlockSharedPtrCopyNeeded)
+    // It needs to skip device recovery (ioRecoveryNeeded)
     if (unlikely(sync))
     {
         ubio->SetSyncMode();
     }
-    else if (uBlockSharedPtrCopyNeeded && ubio->NeedRecovery())
+    else if (ioRecoveryNeeded && ubio->NeedRecovery())
     {
         _SubmitRecovery(ubio);
         return DEVICE_FAILED;
@@ -221,7 +221,7 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool uBlockSharedPtrCopyNeede
 
     // ublock pointer can be obtained from either weak pointer or shared pointer.
     // It depends on given flag.
-    if (!uBlockSharedPtrCopyNeeded)
+    if (!ioRecoveryNeeded)
     {
         ublock = ubio->GetArrayDev()->GetUblockPtr();
     }
