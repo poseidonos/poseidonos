@@ -175,12 +175,13 @@ void
 Copier::_CompareThresholdState(void)
 {
     uint64_t objAddr = reinterpret_cast<uint64_t>(this);
-    airlog("LAT_GetVictimSegment", "AIR_BEGIN", 0, objAddr);
 
     CurrentGcMode gcMode = iContextManager->GetCurrentGcMode();
     if ((false == thresholdCheck) || (gcMode != MODE_NO_GC))
     {
+        airlog("LAT_GetVictimSegment", "AIR_BEGIN", 0, objAddr);
         victimId = iContextManager->AllocateGCVictimSegment();
+        airlog("LAT_GetVictimSegment", "AIR_END", 0, objAddr);
         if (UNMAP_SEGMENT != victimId)
         {
             _InitVariables();
@@ -196,8 +197,6 @@ Copier::_CompareThresholdState(void)
             }
         }
     }
-
-    airlog("LAT_GetVictimSegment", "AIR_END", 0, objAddr);
 }
 
 void
