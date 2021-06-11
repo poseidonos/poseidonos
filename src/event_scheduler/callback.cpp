@@ -32,6 +32,7 @@
 
 #include "callback.h"
 
+#include "Air.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/dump/dump_shared_ptr.h"
 #include "src/include/branch_prediction.h"
@@ -55,7 +56,7 @@ DumpModule<DumpBuffer> dumpCallbackError(DUMP_NAME,
     DumpModule<DumpBuffer>::MAX_ENTRIES_FOR_CALLBACK_ERROR,
     DEFAULT_DUMP_ON);
 
-Callback::Callback(bool isFrontEnd, uint32_t weight)
+Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight)
 : Event(isFrontEnd),
   errorCount(0),
   errorBitMap((int)IOErrorType::CALLBACK_ERROR_MAX_COUNT),
@@ -65,8 +66,11 @@ Callback::Callback(bool isFrontEnd, uint32_t weight)
   callee(nullptr),
   timeoutChecker(nullptr),
   returnAddress(nullptr),
-  executed(false)
+  executed(false),
+  type(type)
 {
+    objectAddress = reinterpret_cast<uint64_t>(this);
+    airlog("LAT_Callback", "AIR_NEW", type, objectAddress);
     if (DumpSharedModuleInstanceEnable::debugLevelEnable)
     {
         returnAddress = __builtin_return_address(Callback::CALLER_FRAME);
@@ -77,6 +81,7 @@ Callback::Callback(bool isFrontEnd, uint32_t weight)
 
 Callback::~Callback(void)
 {
+    airlog("LAT_Callback", "AIR_FREE", type, objectAddress);
     if (unlikely(executed == false))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_DESTROY_WITHOUT_EXECUTED;
@@ -127,6 +132,7 @@ Callback::~Callback(void)
 bool
 Callback::Execute(void)
 {
+    airlog("LAT_Callback", "AIR_EXE_BEGIN", type, objectAddress);
     bool done = _DoSpecificJob();
 
     if (done)
@@ -135,6 +141,7 @@ Callback::Execute(void)
         executed = true;
     }
 
+    airlog("LAT_Callback", "AIR_EXE_END", type, objectAddress);
     return done;
 }
 

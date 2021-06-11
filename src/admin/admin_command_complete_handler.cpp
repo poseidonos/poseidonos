@@ -47,7 +47,7 @@ AdminCommandCompleteHandler::AdminCommandCompleteHandler(pos_io* posIo, uint32_t
 : Callback(false),
   io(posIo),
   originCore(originCore),
-  callback(callback)
+  callback(callback, CallbackType_AdminCommandCompleteHandler)
 {
 }
 AdminCommandCompleteHandler::~AdminCommandCompleteHandler(void)

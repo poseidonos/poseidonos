@@ -36,7 +36,7 @@ namespace pos
 {
 InternalReadCompletion::InternalReadCompletion(
     uint32_t weight)
-: Callback(false, weight)
+: Callback(false, CallbackType_InternalReadCompletion, weight)
 {
 }
 

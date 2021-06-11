@@ -35,7 +35,7 @@
 namespace pos
 {
 InternalWriteCompletion::InternalWriteCompletion(BufferEntry& bufferEntry)
-: Callback(false),
+: Callback(false, CallbackType_InternalWriteCompletion),
   bufferEntry(bufferEntry)
 {
 }

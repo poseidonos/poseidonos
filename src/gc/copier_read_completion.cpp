@@ -55,7 +55,7 @@ CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe,
     void* buffer,
     CopierMeta* meta,
     StripeId stripeId)
-: Callback(false),
+: Callback(false, CallbackType_CopierReadCompletion),
   victimStripe(victimStripe),
   listIndex(listIndex),
   buffer(buffer),

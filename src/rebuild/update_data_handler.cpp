@@ -36,7 +36,7 @@ namespace pos
 {
 UpdateDataHandler::UpdateDataHandler(uint32_t _t, UbioSmartPtr _u,
     RebuildBehavior* _b)
-: Callback(false),
+: Callback(false, CallbackType_UpdateDataHandler),
   targetId(_t),
   ubio(_u),
   behavior(_b)

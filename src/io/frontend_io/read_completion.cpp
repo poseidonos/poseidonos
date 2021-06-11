@@ -46,7 +46,7 @@ ReadCompletion::ReadCompletion(VolumeIoSmartPtr input)
 }
 
 ReadCompletion::ReadCompletion(VolumeIoSmartPtr input, AllocatorService* allocatorService)
-: Callback(true),
+: Callback(true, CallbackType_ReadCompletion),
   volumeIo(input),
   allocatorService(allocatorService)
 {

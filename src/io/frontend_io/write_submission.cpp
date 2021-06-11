@@ -34,6 +34,7 @@
 
 #include <mutex>
 
+#include "Air.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator/i_block_allocator.h"
@@ -337,8 +338,11 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
     {
         VirtualBlks targetVsaRange;
 
+        uint64_t key = reinterpret_cast<uint64_t>(this) + allocatedBlockCount;
+        airlog("LAT_WrSb_AllocWriteBuf", "AIR_BEGIN", 0, key);
         targetVsaRange = iBlockAllocator->AllocateWriteBufferBlks(volumeId,
             remainBlockCount);
+        airlog("LAT_WrSb_AllocWriteBuf", "AIR_END", 0, key);
 
         if (IsUnMapVsa(targetVsaRange.startVsa))
         {

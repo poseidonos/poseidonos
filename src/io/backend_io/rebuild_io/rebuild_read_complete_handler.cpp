@@ -42,7 +42,7 @@ namespace pos
 {
 RebuildReadCompleteHandler::RebuildReadCompleteHandler(
     UbioSmartPtr input, RecoverFunc func, uint64_t readSize)
-: Callback(false),
+: Callback(false, CallbackType_RebuildReadCompleteHandler),
   ubio(input),
   recoverFunc(func),
   readSize(readSize)

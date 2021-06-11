@@ -41,7 +41,7 @@
 namespace pos
 {
 SmartLogUpdateRequest::SmartLogUpdateRequest(struct spdk_nvme_health_information_page* resultPage, struct spdk_nvme_health_information_page* page, pos_io* io, uint32_t originCore)
-: Callback(false),
+: Callback(false, CallbackType_SmartLogUpdateRequest),
   resultPage(resultPage),
   page(page),
   io(io),

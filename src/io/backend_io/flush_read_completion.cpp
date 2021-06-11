@@ -42,7 +42,7 @@
 namespace pos
 {
 FlushReadCompletion::FlushReadCompletion(Stripe* stripe, std::string& arrayName)
-: Callback(false),
+: Callback(false, CallbackType_FlushReadCompletion),
   stripe(stripe),
   arrayName(arrayName)
 {

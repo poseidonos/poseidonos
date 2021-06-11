@@ -34,6 +34,7 @@
 
 #include <utility>
 
+#include "Air.h"
 #include "spdk/thread.h"
 #include "src/spdk_wrapper/nvme.hpp"
 #include "src/event_scheduler/callback.h"
@@ -112,6 +113,18 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
         }
         else
         {
+            auto dir = ioCtx->GetOpcode();
+            uint64_t size = ioCtx->GetByteCount();
+            uint64_t ssd_id = reinterpret_cast<uint64_t>(ioCtx->GetDeviceContext());
+            if (UbioDir::Read == dir)
+            {
+                airlog("PERF_SSD", "AIR_READ", ssd_id, size);
+            }
+            else if (UbioDir::Write == dir)
+            {
+                airlog("PERF_SSD", "AIR_WRITE", ssd_id, size);
+            }
+
             devCtx->ioCompletionCount++;
             ioCtx->CompleteIo(IOErrorType::SUCCESS);
             delete ioCtx;

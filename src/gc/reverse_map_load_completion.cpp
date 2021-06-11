@@ -37,7 +37,7 @@
 namespace pos
 {
 ReverseMapLoadCompletion::ReverseMapLoadCompletion(void)
-: Callback(false)
+: Callback(false, CallbackType_ReverseMapLoadCompletion)
 {
 }
 

@@ -41,7 +41,7 @@ namespace pos
 {
 RebuildReadIntermediateCompleteHandler::
     RebuildReadIntermediateCompleteHandler(UbioSmartPtr input)
-: Callback(false),
+: Callback(false, CallbackType_RebuildReadIntermediateCompleteHandler),
   ubio(input)
 {
 }

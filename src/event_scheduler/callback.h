@@ -47,10 +47,41 @@ namespace pos
 {
 class SystemTimeoutChecker;
 
+enum CallbackType
+{
+    CallbackType_Unknown = 0,
+    CallbackType_AdminCommandCompleteHandler,
+    CallbackType_DiskSmartCompleteHandler,
+    CallbackType_SmartLogUpdateRequest,
+    CallbackType_UramRestoreCompletion,
+    CallbackType_CopierReadCompletion,
+    CallbackType_GcFlushCompletion,
+    CallbackType_ReverseMapLoadCompletion,
+    CallbackType_StripeCopySubmission,
+    CallbackType_FlushReadCompletion,
+    CallbackType_StripeMapUpdateRequest = 10,
+    CallbackType_RebuildReadCompleteHandler,
+    CallbackType_RebuildReadIntermediateCompleteHandler,
+    CallbackType_AioCompletion,
+    CallbackType_AdminCompletion,
+    CallbackType_BlockMapUpdateRequest,
+    CallbackType_ReadCompletionForPartialWrite,
+    CallbackType_ReadCompletion,
+    CallbackType_WriteCompletion,
+    CallbackType_ArrayUnlocking,
+    CallbackType_AbortCompletionHandler = 20,
+    CallbackType_InternalReadCompletion,
+    CallbackType_InternalWriteCompletion,
+    CallbackType_SyncIoCompletion,
+    CallbackType_MssIoCompletion,
+    CallbackType_UpdateDataCompleteHandler,
+    CallbackType_UpdateDataHandler,
+};
+
 class Callback : public Event, public DumpSharedPtr<Callback*, static_cast<int>(DumpSharedPtrType::CALLBACK)>
 {
 public:
-    Callback(bool isFrontEnd, uint32_t weight = 1);
+    Callback(bool isFrontEnd, CallbackType type = CallbackType_Unknown, uint32_t weight = 1);
     ~Callback(void) override;
 
     bool Execute(void) final;
@@ -79,6 +110,8 @@ private:
     SystemTimeoutChecker* timeoutChecker;
     void* returnAddress;
     bool executed;
+    CallbackType type;
+    uint64_t objectAddress;
 
     static const uint32_t CALLER_FRAME;
     static const uint64_t DEFAULT_TIMEOUT_NS;

@@ -75,7 +75,7 @@ EventQueue::DequeueEvent(void)
 
     EventSmartPtr event = nullptr;
     uint32_t q_size = queue.size();
-    airlog("Q_EVENT", "AIR_BASE", 0, q_size);
+    airlog("Q_EventQueue", "AIR_BASE", 0, q_size);
 
     if (queue.empty() == false)
     {

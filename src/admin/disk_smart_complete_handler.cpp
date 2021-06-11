@@ -39,7 +39,7 @@
 namespace pos
 {
 DiskSmartCompleteHandler::DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t originCore, pos_io* io, CallbackSmartPtr callback)
-: Callback(false),
+: Callback(false, CallbackType_DiskSmartCompleteHandler),
   resultPage(resultPage),
   volId(volId),
   originCore(originCore),

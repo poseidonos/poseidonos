@@ -55,7 +55,7 @@ StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, std::string& arra
 
 StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap,
     EventScheduler* eventScheduler, std::string& arrayName)
-: Callback(false),
+: Callback(false, CallbackType_StripeMapUpdateRequest),
   stripe(stripe),
   iStripeMap(stripeMap),
   eventScheduler(eventScheduler),

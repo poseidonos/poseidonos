@@ -40,7 +40,7 @@ namespace pos
 std::atomic<uint32_t> UramRestoreCompletion::pendingUbio;
 
 UramRestoreCompletion::UramRestoreCompletion(UbioSmartPtr ubio)
-: Callback(false),
+: Callback(false, CallbackType_UramRestoreCompletion),
     ubio(ubio)
 {
 }

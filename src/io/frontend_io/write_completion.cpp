@@ -53,7 +53,7 @@ WriteCompletion::WriteCompletion(VolumeIoSmartPtr input)
 
 WriteCompletion::WriteCompletion(VolumeIoSmartPtr input,
     IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow)
-: Callback(isReactorNow),
+: Callback(isReactorNow, CallbackType_WriteCompletion),
   volumeIo(input),
   iWBStripeAllocator(iWBStripeAllocator)
 {

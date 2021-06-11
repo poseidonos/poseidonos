@@ -58,7 +58,7 @@ class MssIoCompletion : public Callback
 {
 public:
     explicit MssIoCompletion(MssAioCbCxt* cb)
-    : Callback(false),
+    : Callback(false, CallbackType_MssIoCompletion),
       cbCxt(cb)
     {
         SetEventType(BackendEvent_MetaIO);

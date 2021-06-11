@@ -56,7 +56,7 @@ BlockMapUpdateRequest::BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, Callback
 
 BlockMapUpdateRequest::BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback,
     EventSmartPtr blockMapUpdateEvent, EventScheduler* eventScheduler, bool isReactorNow)
-: Callback(isReactorNow),
+: Callback(isReactorNow, CallbackType_BlockMapUpdateRequest),
   volumeIo(volumeIo),
   originCallback(originCallback),
   blockMapUpdateEvent(blockMapUpdateEvent),

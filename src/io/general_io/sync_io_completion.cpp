@@ -36,7 +36,7 @@ namespace pos
 {
 SyncIoCompletion::SyncIoCompletion(
     std::atomic<bool>& inputNeedToWait, uint32_t& inputErrorCount)
-: Callback(false),
+: Callback(false, CallbackType_SyncIoCompletion),
   needToWait(inputNeedToWait),
   errorCount(inputErrorCount)
 {

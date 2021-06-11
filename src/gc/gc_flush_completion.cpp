@@ -55,7 +55,7 @@
 namespace pos
 {
 GcFlushCompletion::GcFlushCompletion(Stripe* stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer)
-: Callback(false),
+: Callback(false, CallbackType_GcFlushCompletion),
   stripe(stripe),
   arrayName(arrayName),
   gcStripeManager(gcStripeManager),

@@ -39,7 +39,7 @@ namespace pos
 {
 ArrayUnlocking::ArrayUnlocking(PartitionType type, StripeId stripeId,
     const std::string& arrayName, IIOLocker* inputLocker)
-: Callback(false),
+: Callback(false, CallbackType_ArrayUnlocking),
   type(type),
   stripeId(stripeId),
   arrayName(arrayName),

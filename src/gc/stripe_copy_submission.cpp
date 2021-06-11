@@ -44,7 +44,7 @@ namespace pos
 {
 StripeCopySubmission::StripeCopySubmission(StripeId baseStripeId,
                                         CopierMeta* meta, uint32_t copyIndex)
-: Callback(false),
+: Callback(false, CallbackType_StripeCopySubmission),
   baseStripeId(baseStripeId),
   meta(meta),
   copyIndex(copyIndex),

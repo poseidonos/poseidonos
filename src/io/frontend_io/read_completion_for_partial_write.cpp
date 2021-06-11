@@ -48,7 +48,7 @@ namespace pos
 ReadCompletionForPartialWrite::ReadCompletionForPartialWrite(
     VolumeIoSmartPtr volumeIo, uint32_t alignmentSize, uint32_t alignmentOffset,
     IWBStripeAllocator* inputIWBStripeAllocator, bool tested)
-: Callback(true),
+: Callback(true, CallbackType_ReadCompletionForPartialWrite),
   volumeIo(volumeIo),
   alignmentSize(alignmentSize),
   alignmentOffset(alignmentOffset),

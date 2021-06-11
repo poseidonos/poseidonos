@@ -127,7 +127,7 @@ CommandTimeoutHandler::AbortSubmitHandler::Execute(void)
 }
 
 CommandTimeoutHandler::AbortCompletionHandler::AbortCompletionHandler(AbortContext* inputAbortContext)
-: Callback(false),
+: Callback(false, CallbackType_AbortCompletionHandler),
   abortContext(inputAbortContext)
 {
 }

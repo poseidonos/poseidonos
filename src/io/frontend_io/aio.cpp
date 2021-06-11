@@ -90,7 +90,7 @@ AioCompletion::AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo, IOCtx& ioCo
 
 AioCompletion::AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo,
     IOCtx& ioContext, EventFrameworkApi* eventFrameworkApi)
-: Callback(true),
+: Callback(true, CallbackType_AioCompletion),
   flushIo(flushIo),
   volumeIo(nullptr),
   posIo(posIo),
@@ -106,7 +106,7 @@ AioCompletion::AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo, IOCtx& io
 
 AioCompletion::AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo,
     IOCtx& ioContext, EventFrameworkApi* eventFrameworkApi)
-: Callback(true),
+: Callback(true, CallbackType_AioCompletion),
   flushIo(nullptr),
   volumeIo(volumeIo),
   posIo(posIo),
@@ -330,9 +330,9 @@ AIO::SubmitAsyncIO(pos_io& posIo)
 void
 AIO::CompleteIOs(void)
 {
-    uint32_t aid = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
-    uint32_t size = ioContext.cnt;
-    airlog("Q_AIO", "AIR_BASE", aid, size);
+    uint32_t reactor_id = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
+    int cnt = ioContext.cnt;
+    airlog("CNT_AIO_CompleteIOs", "AIR_BASE", reactor_id, cnt);
     if (ioContext.needPollingCount > 0)
     {
         DeviceManagerSingleton::Instance()->HandleCompletedCommand();
@@ -370,7 +370,7 @@ AIO::SubmitAsyncAdmin(pos_io& io)
 }
 
 AdminCompletion::AdminCompletion(pos_io* posIo, IOCtx& ioContext)
-: Callback(false),
+: Callback(false, CallbackType_AdminCompletion),
   io(posIo),
   ioContext(ioContext)
 {
