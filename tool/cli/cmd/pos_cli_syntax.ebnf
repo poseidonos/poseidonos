@@ -14,6 +14,7 @@ DeviceName = Letter {Letter | Digit | "-" | "_"} .
 DeviceType = "uram" | "pram" .
 DeviceNameList = DeviceName [{"," DeviceName}] .
 VolumeName = Letter {Letter | Digit | "-" | "_"} . 
+VolumeNameList = VolumeName [{"," VolumeName}] . 
 TargetNVMSubsystemNVMeQualifiedName = Letter {Letter | Digit | "-" | "_"} .
 RaidType = ["RAID5" | "raid5"] .
 
@@ -22,7 +23,7 @@ IOPS = {Digit} .
 Bandwidth = {Digit} "MB/s".
 
 ApplicationName = "poseidonos-cli" . 
-Cmd = ApplicationName WhiteSpace (ArrayCmd | VolumeCmd | DeviceCmd | SystemCmd | LoggerCmd | SubsystemCmd) .
+Cmd = ApplicationName WhiteSpace (ArrayCmd | VolumeCmd | DeviceCmd | SystemCmd | LoggerCmd | SubsystemCmd | QosCmd) .
 
 ArrayCmd = "array" WhiteSpace (MountArrayCmd | UnmountArrayCmd | ListArrayCmd | AddSpareCmd | RemoveSpareCmd | DeleteArrayCmd | CreateArrayCmd) .
 MountArrayCmd = "mount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
@@ -40,7 +41,6 @@ VolumeDeleteCmd = "delete" WhiteSpace "--volume-name" WhiteSpace VolumeName Whit
 VolumeMountCmd = "mount" WhiteSpace "--volume-name" WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName [WhiteSpace "--subnqn" WhiteSpace TargetNVMSubsystemNVMeQualifiedName] .
 VolumeUnmountCmd = "unmount" WhiteSpace "--volume-name" WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
 VolumeListCmd = "list" [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] .
-VolumeSetPropertyCmd = "set-property" WhiteSpace "--volume-name" WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName [WhiteSpace "--maxiops" WhiteSpace IOPS] [WhiteSpace "--maxbw" Bandwidth] .
 VolumeRenameCmd = "rename" WhiteSpace "--volume-name" WhiteSpace VolumeName WhiteSpace "--new-volume-name" WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
 
 DeviceCmd = "device" WhiteSpace (CreateDeviceCmd | ScanDeviceCmd | ListDeviceCmd | SMARTCmd) . 
@@ -61,3 +61,8 @@ LogLevel = "error" | "debug" | "warn" | "err" | "critical" .
 GetLogLeveCmd = "get-level" .
 ApplyLogFilterCmd = "apply-filter"
 LoggerInfoCmd = "info" .
+
+QosCmd = "qos" WhiteSpace (QosVolumePolicyCmd | QosVolumeResetCmd | QosListCmd) .
+QosVolumePolicyCmd = "create" WhiteSpace "--volume-name" WhiteSpace VolumeNameList WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName [WhiteSpace "--miniops" WhiteSpace IOPS] [WhiteSpace "--maxiops" WhiteSpace IOPS] [WhiteSpace "--minbw" WhiteSpace Bandwidth] [WhiteSpace "--maxbw" WhiteSpace Bandwidth] .
+QosVolumeResetCmd = "reset" WhiteSpace "--volume-name" WhiteSpace VolumeNameList WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
+QosListCmd = "list" [WhiteSpace "--volume-name" WhiteSpace VolumeNameList] [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] .

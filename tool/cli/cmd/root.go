@@ -23,6 +23,7 @@ import (
 	"cli/cmd/subsystemcmds"
 	"cli/cmd/systemcmds"
 	"cli/cmd/volumecmds"
+    "cli/cmd/qoscmds"
 )
 
 var isVerbose bool
@@ -47,6 +48,10 @@ var fttype int
 var size string
 var maxiops uint64
 var maxbw uint64
+
+var vol []string
+var miniops uint64
+var minbw uint64
 
 var prio uint
 var weight uint
@@ -100,6 +105,7 @@ func init() {
 	RootCmd.AddCommand(subsystemcmds.SubsystemCmd)
 	RootCmd.AddCommand(FileCmd)
 	RootCmd.AddCommand(WbtCmd)
+	RootCmd.AddCommand(qoscmds.QosCmd)
 }
 
 // TODO(mj): this function remains for wbt and file commands. This needs to be revised.

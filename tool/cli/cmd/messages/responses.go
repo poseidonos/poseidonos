@@ -190,3 +190,46 @@ type ListDeviceInfo struct {
 	STATE              string `json:"NOT_EXIST"`
 	USED               int    `"json:used"`
 }
+
+type ListQosResponse struct {
+	RID     string          `json:"rid"`
+	COMMAND string          `json:"command"`
+	RESULT  QosResult       `json:"result"`
+	INFO    Info            `json:"info"`
+}
+
+type QosResult struct {
+    STATUS QosStatus      `json:"status"`
+    DATA   ListQosResult   `json:"data,omitempty"`
+}
+
+type QosStatus struct {
+    CODE        int    `json:"code"`
+    DESCRIPTION string `json:"description"`
+}
+
+type ListQosResult struct {
+	QOSARRAYNAME  []ArrayNameQos `json:"arrayName"`
+	REBUILDPOLICY []Rebuild      `json:"rebuildPolicy,omitempty"`
+	VOLUMEQOSLIST []VolumeQos    `json:"volumePolicies"`
+}
+
+type Rebuild struct {
+    IMPACT   string  `json:"rebuild,omitempty"`
+}
+
+type ArrayNameQos struct {
+    ARRNAME   string  `json:"ArrayName"`
+}
+
+type VolumeQos struct {
+	VOLUMENAME         string `json:"name"`
+	VOLUMEID           int    `json:"id"`
+	MINIOPS            int    `json:"miniops"`
+	MAXIOPS            int    `json:"maxiops"`
+	MINBW              int    `json:"minbw"`
+	MAXBW              int    `json:"maxbw"`
+	MINBWGUARANTEE     string `json:"min_bw_guarantee"`
+	MINIOPSGUARANTEE   string `json:"min_iops_guarantee"`
+}
+

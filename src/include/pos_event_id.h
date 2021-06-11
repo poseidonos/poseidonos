@@ -517,8 +517,12 @@ enum class POS_EVENT_ID
     LOGGER_FILTER_POLICY_FILE_NOT_FOUND = 4581,
     LOGGER_SET_LEVEL_FAILED = 4582,
 
-    // --------------QOS Manager (4600)----------------
-    QOS_SET_EVENT_POLICY = 4600,
+    // --------------QOS Related (4600)----------------
+    // QOS CLI Commands Related
+    QOS_CLI_WRONG_MISSING_PARAMETER = 4600,
+    QOS_CLI_FE_QOS_DISABLED,
+    // QOS Manager Related
+    QOS_SET_EVENT_POLICY = 4650,
     QOS_NOT_SUPPORTED,
     // --------------IO Path nvmf (5000)----------------
     IONVMF_START = 5000,

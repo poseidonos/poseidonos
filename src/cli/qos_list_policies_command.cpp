@@ -31,10 +31,11 @@
  */
 
 #include "src/cli/qos_list_policies_command.h"
-#include "src/cli/cli_event_code.h"
-#include "src/qos/qos_manager.h"
-#include "src/qos/qos_common.h"
+
 #include "src/array/array.h"
+#include "src/cli/cli_event_code.h"
+#include "src/qos/qos_common.h"
+#include "src/qos/qos_manager.h"
 #include "src/volume/volume_manager.h"
 
 namespace pos_cli
@@ -59,48 +60,31 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
     qos_rebuild_policy rebuildPolicy;
     qos_vol_policy volPolicy;
 
-    if (doc["param"].contains("minbw"))
-    {
-        return jFormat.MakeResponse("QOSLISTPOLICIES", rid, BADREQUEST, "minbw, Invalid Parameter", GetPosInfo());
-    }
-    if (doc["param"].contains("maxbw"))
-    {
-        return jFormat.MakeResponse("QOSLISTPOLICIES", rid, BADREQUEST, "maxbw, Invalid Parameter", GetPosInfo());
-    }
-    if (doc["param"].contains("miniops"))
-    {
-        return jFormat.MakeResponse("QOSLISTPOLICIES", rid, BADREQUEST, "miniops, Invalid Parameter", GetPosInfo());
-    }
-    if (doc["param"].contains("maxiops"))
-    {
-        return jFormat.MakeResponse("QOSLISTPOLICIES", rid, BADREQUEST, "maxiops, Invalid Parameter", GetPosInfo());
-    }
-    if (doc["param"].contains("policy"))
-    {
-        return jFormat.MakeResponse("QOSLISTPOLICIES", rid, BADREQUEST, "policy, Invalid Parameter", GetPosInfo());
-    }
-    if (doc["param"].contains("event"))
-    {
-        return jFormat.MakeResponse("QOSLISTPOLICIES", rid, BADREQUEST, "event, Invalid Parameter", GetPosInfo());
-    }
-    if (doc["param"].contains("prio"))
-    {
-        return jFormat.MakeResponse("QOSLISTPOLICIES", rid, BADREQUEST, "prio, Invalid Parameter", GetPosInfo());
-    }
-    string arrayName = DEFAULT_ARRAY_NAME;
+    string arrayName = "";
     if (doc["param"].contains("array") == true)
     {
         arrayName = doc["param"]["array"].get<std::string>();
+        if (0 == arrayName.compare(""))
+        {
+            return jFormat.MakeResponse("QOSLISTPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Array Name Missing", GetPosInfo());
+        }
     }
     JsonElement data("data");
+
     JsonArray rebuildImpact("rebuildPolicy");
     JsonArray volPolicies("volumePolicies");
+    JsonArray arrayJson("arrayName");
+
+    JsonElement array("");
+    array.SetAttribute(JsonAttribute("ArrayName", "\"" + arrayName + "\""));
+    arrayJson.AddElement(array);
+    data.SetArray(arrayJson);
 
     rebuildPolicy = QosManagerSingleton::Instance()->GetRebuildPolicy();
     string impact = GetRebuildImpactString(rebuildPolicy.rebuildImpact);
 
     JsonElement rebuild("");
-    rebuild.SetAttribute(JsonAttribute("rebuild impact", "\"" + impact + "\""));
+    rebuild.SetAttribute(JsonAttribute("rebuild", "\"" + impact + "\""));
     rebuildImpact.AddElement(rebuild);
     data.SetArray(rebuildImpact);
 
@@ -108,7 +92,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     if (nullptr == volMgr)
     {
-        return jFormat.MakeResponse("QOSLISTPOLICIES", rid, BADREQUEST, "Invalid Array Name", GetPosInfo());
+        return jFormat.MakeResponse("QOSLISTPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Invalid Array Name", GetPosInfo());
     }
     if (doc["param"].contains("vol"))
     {
@@ -123,7 +107,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
             if (-1 == validVol)
             {
                 errorMsg = "Invalid Volume Name " + (*vol);
-                return jFormat.MakeResponse("QOSLISTPOLICIES", rid, BADREQUEST, errorMsg, GetPosInfo());
+                return jFormat.MakeResponse("QOSLISTPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
             }
             else
             {
@@ -141,41 +125,11 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
             volume.SetAttribute(JsonAttribute("miniops", to_string(volPolicy.minIops)));
             volume.SetAttribute(JsonAttribute("maxbw", to_string(volPolicy.maxBw)));
             volume.SetAttribute(JsonAttribute("maxiops", to_string(volPolicy.maxIops)));
-            volume.SetAttribute(JsonAttribute("min bw guarantee", ((true == volPolicy.minBwGuarantee)? "\"Yes\"" : "\"No\"")));
-            volume.SetAttribute(JsonAttribute("min iops guarantee", ((true == volPolicy.minIopsGuarantee)? "\"Yes\"" : "\"No\"")));
+            volume.SetAttribute(JsonAttribute("min_bw_guarantee", ((true == volPolicy.minBwGuarantee) ? "\"Yes\"" : "\"No\"")));
+            volume.SetAttribute(JsonAttribute("min_iops_guarantee", ((true == volPolicy.minIopsGuarantee) ? "\"Yes\"" : "\"No\"")));
             volPolicies.AddElement(volume);
         }
         data.SetArray(volPolicies);
-    }
-    else
-    {
-        int vol_cnt = volMgr->GetVolumeCount();
-        if (vol_cnt > 0)
-        {
-            VolumeList *volList = volMgr->GetVolumeList();
-            int idx = -1;
-            while (true)
-            {
-                VolumeBase *vol = volList->Next(idx);
-                if (vol == nullptr)
-                {
-                    break;
-                }
-                volPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(idx);
-
-                JsonElement volume("");
-                volume.SetAttribute(JsonAttribute("name", "\"" + vol->GetName() + "\""));
-                volume.SetAttribute(JsonAttribute("id", to_string(idx)));
-                volume.SetAttribute(JsonAttribute("minbw", to_string(volPolicy.minBw)));
-                volume.SetAttribute(JsonAttribute("maxbw", to_string(volPolicy.maxBw)));
-                volume.SetAttribute(JsonAttribute("miniops", to_string(volPolicy.minIops)));
-                volume.SetAttribute(JsonAttribute("maxiops", to_string(volPolicy.maxIops)));
-                volume.SetAttribute(JsonAttribute("min bw guarantee", ((true == volPolicy.minBwGuarantee)? "\"Yes\"" : "\"No\"")));
-                volume.SetAttribute(JsonAttribute("min iops guarantee", ((true == volPolicy.minIopsGuarantee)? "\"Yes\"" : "\"No\"")));
-                volPolicies.AddElement(volume);
-            }
-            data.SetArray(volPolicies);
-        }
     }
     return jFormat.MakeResponse("QOSLISTPOLICIES", rid, SUCCESS, "List of Volume Policies in " + arrayName, data, GetPosInfo());
 }

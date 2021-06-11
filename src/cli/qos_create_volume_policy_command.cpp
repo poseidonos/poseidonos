@@ -31,6 +31,7 @@
  */
 
 #include "src/cli/qos_create_volume_policy_command.h"
+
 #include "src/cli/cli_event_code.h"
 #include "src/qos/qos_manager.h"
 #include "src/volume/volume_manager.h"
@@ -39,10 +40,10 @@ namespace pos_cli
 {
 const uint32_t KIOPS = 1000;
 const uint32_t MIB_IN_BYTE = 1024 * 1024;
-const uint64_t MIN_IOPS_LIMIT = 10;
-const uint64_t MIN_BW_LIMIT = 10;
-const uint64_t MAX_IOPS_LIMIT = UINT64_MAX / KIOPS;
-const uint64_t MAX_BW_LIMIT = UINT64_MAX / MIB_IN_BYTE;
+const int64_t MIN_IOPS_LIMIT = 10;
+const int64_t MIN_BW_LIMIT = 10;
+const int64_t MAX_IOPS_LIMIT = INT64_MAX / KIOPS;
+const int64_t MAX_BW_LIMIT = INT64_MAX / MIB_IN_BYTE;
 
 QosCreateVolumePolicyCommand::QosCreateVolumePolicyCommand(void)
 {
@@ -50,6 +51,7 @@ QosCreateVolumePolicyCommand::QosCreateVolumePolicyCommand(void)
     maxBw = 0;
     minIops = 0;
     maxIops = 0;
+    arrayName = "";
 }
 
 QosCreateVolumePolicyCommand::~QosCreateVolumePolicyCommand(void)
@@ -65,34 +67,29 @@ QosCreateVolumePolicyCommand::Execute(json& doc, string rid)
     string ioType;
     if (false == QosManagerSingleton::Instance()->IsFeQosEnabled())
     {
-        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, BADREQUEST, "FE QOS Disabled", GetPosInfo());
+        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, SUCCESS, "QOS Settings Skipped", GetPosInfo());
     }
-    if (doc["param"].contains("level"))
-    {
-        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, BADREQUEST, "level, Invalid Parameter", GetPosInfo());
-    }
-
     if (doc["param"].contains("vol"))
     {
         validInput = _HandleInputVolumes(doc);
         if (false == validInput)
         {
-            return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, BADREQUEST, errorMsg, GetPosInfo());
+            return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
         }
     }
     else
     {
-        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, BADREQUEST, "vol, Parameter Missing", GetPosInfo());
+        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "vol, Parameter Missing", GetPosInfo());
     }
     validInput = _VerifyMultiVolumeInput(doc);
     if (false == validInput)
     {
-        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, BADREQUEST, errorMsg, GetPosInfo());
+        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
     }
     retVal = _HandleVolumePolicy(doc);
     if (SUCCESS != retVal)
     {
-        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, retVal, "FAILED", GetPosInfo());
+        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, retVal, errorMsg, GetPosInfo());
     }
     return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, SUCCESS, "Volume Qos Policy Create", GetPosInfo());
 }
@@ -101,13 +98,17 @@ bool
 QosCreateVolumePolicyCommand::_HandleInputVolumes(json& doc)
 {
     int validVol = -1;
-    arrayName = DEFAULT_ARRAY_NAME;
     volumeNames.clear();
     validVolumes.clear();
 
     if (doc["param"].contains("array") == true)
     {
         arrayName = doc["param"]["array"].get<std::string>();
+    }
+    if (0 == arrayName.compare(""))
+    {
+        errorMsg = "Array Name Missing";
+        return false;
     }
     for (unsigned int i = 0; i < doc["param"]["vol"].size(); i++)
     {
@@ -139,17 +140,26 @@ QosCreateVolumePolicyCommand::_HandleInputVolumes(json& doc)
 bool
 QosCreateVolumePolicyCommand::_VerifyMultiVolumeInput(json& doc)
 {
+    int64_t minVal = 0;
     if (validVolumes.size() > 1)
     {
         if (doc["param"].contains("minbw"))
         {
-            errorMsg = "Multiple Volume Minimim Bw Not Supported";
-            return false;
+            minVal = doc["param"]["minbw"].get<int64_t>();
+            if (-1 != minVal)
+            {
+                errorMsg = "Multiple Volume Minimim Bw Not Supported";
+                return false;
+            }
         }
         if (doc["param"].contains("miniops"))
         {
-            errorMsg = "Multiple Volume Minimim Iops Not Supported";
-            return false;
+            minVal = doc["param"]["miniops"].get<int64_t>();
+            if (-1 != minVal)
+            {
+                errorMsg = "Multiple Volume Minimim Iops Not Supported";
+                return false;
+            }
         }
     }
     return true;
@@ -170,77 +180,91 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
 
         if (doc["param"].contains("minbw"))
         {
-            minBw = doc["param"]["minbw"].get<uint64_t>();
-            if (0xFFFFFFFF == minBw)
+            minBw = doc["param"]["minbw"].get<int64_t>();
+            if (-1 != minBw)
             {
-                newVolPolicy.minBwGuarantee = false;
-                minBw = 0;
-            }
-            else
-            {
-                newVolPolicy.minBwGuarantee = true;
-            }
-            newVolPolicy.minBw = minBw;
-            if (newVolPolicy.minBw != prevVolPolicy.minBw)
-            {
-                newVolPolicy.policyChange = true;
+                if (0xFFFFFFFF == minBw)
+                {
+                    newVolPolicy.minBwGuarantee = false;
+                    minBw = 0;
+                }
+                else
+                {
+                    newVolPolicy.minBwGuarantee = true;
+                }
+                newVolPolicy.minBw = minBw;
+                if (newVolPolicy.minBw != prevVolPolicy.minBw)
+                {
+                    newVolPolicy.policyChange = true;
+                }
             }
         }
 
         if (doc["param"].contains("maxbw"))
         {
-            maxBw = doc["param"]["maxbw"].get<uint64_t>();
-            if (0xFFFFFFFF == maxBw)
+            maxBw = doc["param"]["maxbw"].get<int64_t>();
+            if (-1 != maxBw)
             {
-                maxBw = 0;
-            }
-            else if (maxBw < MIN_BW_LIMIT || maxBw > MAX_BW_LIMIT)
-            {
-                return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
-            }
-            newVolPolicy.maxBw = maxBw;
-            if (newVolPolicy.maxBw != prevVolPolicy.maxBw)
-            {
-                newVolPolicy.policyChange = true;
-                newVolPolicy.maxValueChanged = true;
+                if (0xFFFFFFFF == maxBw)
+                {
+                    maxBw = 0;
+                }
+                else if (maxBw < MIN_BW_LIMIT || maxBw > MAX_BW_LIMIT)
+                {
+                    errorMsg = "Max Bandwidth value outside allowed range";
+                    return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                }
+                newVolPolicy.maxBw = maxBw;
+                if (newVolPolicy.maxBw != prevVolPolicy.maxBw)
+                {
+                    newVolPolicy.policyChange = true;
+                    newVolPolicy.maxValueChanged = true;
+                }
             }
         }
 
         if (doc["param"].contains("miniops"))
         {
-            minIops = doc["param"]["miniops"].get<uint64_t>();
-            if (0xFFFFFFFF == minIops)
+            minIops = doc["param"]["miniops"].get<int64_t>();
+            if (-1 != minIops)
             {
-                newVolPolicy.minIopsGuarantee = false;
-                minIops = 0;
-            }
-            else
-            {
-                newVolPolicy.minIopsGuarantee = true;
-            }
-            newVolPolicy.minIops = minIops;
-            if (newVolPolicy.minIops != prevVolPolicy.minIops)
-            {
-                newVolPolicy.policyChange = true;
+                if (0xFFFFFFFF == minIops)
+                {
+                    newVolPolicy.minIopsGuarantee = false;
+                    minIops = 0;
+                }
+                else
+                {
+                    newVolPolicy.minIopsGuarantee = true;
+                }
+                newVolPolicy.minIops = minIops;
+                if (newVolPolicy.minIops != prevVolPolicy.minIops)
+                {
+                    newVolPolicy.policyChange = true;
+                }
             }
         }
 
         if (doc["param"].contains("maxiops"))
         {
-            maxIops = doc["param"]["maxiops"].get<uint64_t>();
-            if (0xFFFFFFFF == maxIops)
+            maxIops = doc["param"]["maxiops"].get<int64_t>();
+            if (-1 != maxIops)
             {
-                maxIops = 0;
-            }
-            else if (maxIops < MIN_IOPS_LIMIT || maxIops > MAX_IOPS_LIMIT)
-            {
-                return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
-            }
-            newVolPolicy.maxIops = maxIops;
-            if (newVolPolicy.maxIops != prevVolPolicy.maxIops)
-            {
-                newVolPolicy.policyChange = true;
-                newVolPolicy.maxValueChanged = true;
+                if (0xFFFFFFFF == maxIops)
+                {
+                    maxIops = 0;
+                }
+                else if (maxIops < MIN_IOPS_LIMIT || maxIops > MAX_IOPS_LIMIT)
+                {
+                    errorMsg = "Max IOPS Value outside allowed range";
+                    return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
+                }
+                newVolPolicy.maxIops = maxIops;
+                if (newVolPolicy.maxIops != prevVolPolicy.maxIops)
+                {
+                    newVolPolicy.policyChange = true;
+                    newVolPolicy.maxValueChanged = true;
+                }
             }
         }
 
@@ -248,6 +272,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
         {
             if (true == newVolPolicy.minBwGuarantee && true == newVolPolicy.minIopsGuarantee)
             {
+                errorMsg = "Either Min IOPS or Min BW Allowed";
                 return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
             }
             if (true == newVolPolicy.maxValueChanged)
@@ -255,12 +280,14 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 retVal = volMgr->UpdateQoS(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw);
                 if (retVal != SUCCESS)
                 {
+                    errorMsg = "QoS update in Volume Manager failed";
                     return retVal;
                 }
             }
             retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy);
             if (retVal != SUCCESS)
             {
+                errorMsg = "Qos Volume Policy Updated in QosManager failed";
                 return retVal;
             }
         }

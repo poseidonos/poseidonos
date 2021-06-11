@@ -70,7 +70,6 @@
 #include "src/cli/stop_rebuilding_command.h"
 #include "src/cli/unmount_array_command.h"
 #include "src/cli/unmount_volume_command.h"
-#include "src/cli/update_volume_qos_command.h"
 #include "src/cli/rename_volume_command.h"
 #include "src/cli/resize_volume_command.h"
 #include "src/cli/get_max_volume_count_command.h"
@@ -113,7 +112,6 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["MOUNTVOLUME"] = new MountVolumeCommand();
     cmdDictionary["UNMOUNTVOLUME"] = new UnmountVolumeCommand();
     cmdDictionary["LISTVOLUME"] = new ListVolumeCommand();
-    cmdDictionary["UPDATEVOLUMEQOS"] = new UpdateVolumeQosCommand();
     cmdDictionary["RENAMEVOLUME"] = new RenameVolumeCommand();
     cmdDictionary["RESIZEVOLUME"] = new ResizeVolumeCommand();
     cmdDictionary["GETMAXVOLUMECOUNT"] = new GetMaxVolumeCountCommand();
