@@ -50,6 +50,7 @@ public:
 
     virtual void Add(MapPageList& dirty);
     virtual MapPageList GetList(void);
+    virtual MapPageList PopDirtyList(void);
     virtual void Reset(void);
     virtual void Delete(int volumeId);
 

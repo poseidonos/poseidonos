@@ -30,42 +30,18 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/journal_manager/checkpoint/meta_flush_completed.h"
 
-#include "src/journal_manager/log/gc_map_update_list.h"
-#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
-#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
-#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
-
-#include "src/include/address_type.h"
-#include "src/bio/volume_io.h"
-#include "src/mapper/include/mpage_info.h"
-#include "src/event_scheduler/event.h"
+#include <gtest/gtest.h>
 
 namespace pos
 {
-
-class LogWriteContextFactory
+TEST(MetaFlushCompleted, MetaFlushCompleted_)
 {
-public:
-    LogWriteContextFactory(void);
-    virtual ~LogWriteContextFactory(void);
+}
 
-    virtual void Init(LogBufferWriteDoneNotifier* target,
-        CallbackSequenceController* sequencer);
-
-    virtual LogWriteContext* CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
-        MpageList dirty, EventSmartPtr callbackEvent);
-    virtual LogWriteContext* CreateStripeMapLogWriteContext(Stripe* stripe,
-        StripeAddr oldAddr, MpageList dirty, EventSmartPtr callbackEvent);
-    virtual LogWriteContext* CreateGcStripeFlushedLogWriteContext(
-        GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
-    virtual LogWriteContext* CreateVolumeDeletedLogWriteContext(int volId,
-        uint64_t contextVersion, EventSmartPtr callback);
-
-private:
-    LogBufferWriteDoneNotifier* notifier;
-    CallbackSequenceController* sequenceController;
-};
+TEST(MetaFlushCompleted, Execute_)
+{
+}
 
 } // namespace pos

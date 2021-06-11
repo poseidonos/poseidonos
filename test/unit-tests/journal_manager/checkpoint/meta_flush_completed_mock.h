@@ -32,27 +32,28 @@
 
 #pragma once
 
-#include "src/event_scheduler/event.h"
+#include <gmock/gmock.h>
+
+#include <list>
+#include <string>
+#include <vector>
+
+#include "src/journal_manager/checkpoint/meta_flush_completed.h"
 
 namespace pos
 {
-class IAllocatorContextFlushed
+class MockIMetaFlushCompleted : public IMetaFlushCompleted
 {
 public:
-    virtual void AllocatorContextFlushed(void) = 0;
+    using IMetaFlushCompleted::IMetaFlushCompleted;
+    MOCK_METHOD(void, MetaFlushed, (), (override));
 };
 
-// TODO (huijeong.kim) integrate with CheckpointMetaFlushCompleted
-class AllocatorContextFlushCompleted : public Event
+class MockMetaFlushCompleted : public MetaFlushCompleted
 {
 public:
-    explicit AllocatorContextFlushCompleted(IAllocatorContextFlushed* notified);
-    virtual ~AllocatorContextFlushCompleted(void);
-
-    virtual bool Execute(void) override;
-
-private:
-    IAllocatorContextFlushed* notified;
+    using MetaFlushCompleted::MetaFlushCompleted;
+    MOCK_METHOD(bool, Execute, (), (override));
 };
 
 } // namespace pos

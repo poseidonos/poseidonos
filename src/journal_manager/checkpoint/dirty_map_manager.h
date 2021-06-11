@@ -51,6 +51,7 @@ public:
     void Init(std::vector<DirtyPageList* > dirtyPages);
 
     virtual MapPageList GetDirtyList(int logGroupId);
+    virtual MapPageList GetTotalDirtyList(void);
     void DeleteDirtyList(int volumeId);
 
     virtual void LogFilled(int logGroupId, MapPageList& dirty) override;

@@ -14,6 +14,7 @@ public:
     using DirtyPageList::DirtyPageList;
     MOCK_METHOD(void, Add, (MapPageList& dirty), (override));
     MOCK_METHOD(MapPageList, GetList, (), (override));
+    MOCK_METHOD(MapPageList, PopDirtyList, (), (override));
     MOCK_METHOD(void, Reset, (), (override));
     MOCK_METHOD(void, Delete, (int volumeId), (override));
 };

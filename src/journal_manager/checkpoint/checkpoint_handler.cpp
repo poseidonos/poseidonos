@@ -80,29 +80,34 @@ CheckpointHandler::Start(MapPageList pendingDirtyPages, EventSmartPtr callback)
     _SetStatus(STARTED);
 
     assert(numMapsToFlush == 0);
-    assert(pendingDirtyPages.size() != 0);
 
     numMapsToFlush = pendingDirtyPages.size();
     numMapsFlushed = 0;
 
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_CHECKPOINT_STARTED);
-    POS_TRACE_INFO(eventId, "Checkpoint started with {} maps to flush", numMapsToFlush);
-
-    for (auto mapIt = pendingDirtyPages.begin();
-        mapIt != pendingDirtyPages.end(); mapIt++)
+    if (numMapsToFlush == numMapsFlushed)
     {
-        eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_DEBUG);
-        POS_TRACE_DEBUG(eventId, "Request to flush map {}, {} pages",
-            mapIt->first, (mapIt->second).size());
+        mapFlushCompleted = true;
+    }
+    else
+    {
+        int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_CHECKPOINT_STARTED);
+        POS_TRACE_INFO(eventId, "Checkpoint started with {} maps to flush", numMapsToFlush);
 
-        EventSmartPtr mapFlushCallback(new CheckpointMetaFlushCompleted(this, mapIt->first));
-        ret = mapFlush->FlushDirtyMpages(mapIt->first, mapFlushCallback, mapIt->second);
-        if (ret != 0)
+        for (auto mapIt = pendingDirtyPages.begin(); mapIt != pendingDirtyPages.end(); mapIt++)
         {
-            // TODO(Cheolho.kang): Add status that can additionally indicate checkpoint status
-            POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,
-                "Failed to start flushing dirty map pages");
-            return ret;
+            eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_DEBUG);
+            POS_TRACE_DEBUG(eventId, "Request to flush map {}, {} pages",
+                mapIt->first, (mapIt->second).size());
+
+            EventSmartPtr mapFlushCallback(new CheckpointMetaFlushCompleted(this, mapIt->first));
+            ret = mapFlush->FlushDirtyMpages(mapIt->first, mapFlushCallback, mapIt->second);
+            if (ret != 0)
+            {
+                // TODO(Cheolho.kang): Add status that can additionally indicate checkpoint status
+                POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,
+                    "Failed to start flushing dirty map pages");
+                return ret;
+            }
         }
     }
 

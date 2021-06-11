@@ -63,6 +63,36 @@ TEST_F(DirtyMapManagerTestFixture, GetDirtyList_testIfReturnsDirtyList)
     EXPECT_EQ(expected, actual);
 }
 
+TEST_F(DirtyMapManagerTestFixture, GetTotalDirtyList_testIfReturnsDirtyList)
+{
+    // Given: Dirty map manager with 2 page lists is given
+    DirtyMapManager dirtyMapManager;
+    dirtyMapManager.Init(dirtyPageList);
+
+    // Given: Log group 0, 1 list with dirty pages is given
+    MapPageList expected;
+    for (int targetLogGroupId = 0; targetLogGroupId < numLogGroups; targetLogGroupId++)
+    {
+        MapPageList dirtyPages;
+        dirtyPages[10 + targetLogGroupId].insert(5 + targetLogGroupId);
+        expected.insert(dirtyPages.begin(), dirtyPages.end());
+
+        dirtyPages[5].insert(5);
+        expected.insert(dirtyPages.begin(), dirtyPages.end());
+
+        EXPECT_CALL(*dynamic_cast<MockDirtyPageList*>(dirtyPageList[targetLogGroupId]),
+            PopDirtyList)
+            .WillOnce(Return(dirtyPages));
+    }
+
+    // When: Get dirty page of log group 0
+    MapPageList actual;
+    actual = dirtyMapManager.GetTotalDirtyList();
+
+    // Then: Dirty map manager should return the list mock returns
+    EXPECT_EQ(expected, actual);
+}
+
 TEST_F(DirtyMapManagerTestFixture, DeleteDirtyList_testIfDeletedMapDirtyListIsRemoved)
 {
     // Given: Dirty map manager with 2 page lists is given

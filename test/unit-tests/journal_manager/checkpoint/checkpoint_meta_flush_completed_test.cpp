@@ -9,7 +9,6 @@ using ::testing::Return;
 
 namespace pos
 {
-
 TEST(CheckpointMetaFlushCompleted, Execute_testIfExecuteSuccessfully)
 {
     // Given: Map flush completed event with mapId

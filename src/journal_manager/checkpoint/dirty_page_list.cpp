@@ -68,6 +68,16 @@ DirtyPageList::GetList(void)
     return dirtyPages;
 }
 
+MapPageList
+DirtyPageList::PopDirtyList(void)
+{
+    std::unique_lock<std::mutex> lock(dirtyListLock);
+    MapPageList dirtyPageToReturn = dirtyPages;
+    dirtyPages.clear();
+
+    return dirtyPageToReturn;
+}
+
 void
 DirtyPageList::Reset(void)
 {

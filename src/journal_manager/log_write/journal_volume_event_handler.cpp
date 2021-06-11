@@ -35,7 +35,8 @@
 #include <functional>
 
 #include "src/include/pos_event_id.h"
-#include "src/journal_manager/checkpoint/dirty_map_manager.h"
+#include "src/journal_manager/checkpoint/log_group_releaser.h"
+#include "src/journal_manager/checkpoint/meta_flush_completed.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
@@ -50,7 +51,7 @@ JournalVolumeEventHandler::JournalVolumeEventHandler(void)
   contextManager(nullptr),
   config(nullptr),
   logFactory(nullptr),
-  dirtyPageManager(nullptr),
+  logGroupReleaser(nullptr),
   logWriteHandler(nullptr),
   logWriteInProgress(false),
   flushInProgress(false)
@@ -63,12 +64,12 @@ JournalVolumeEventHandler::~JournalVolumeEventHandler(void)
 
 void
 JournalVolumeEventHandler::Init(LogWriteContextFactory* factory,
-    DirtyMapManager* dirtyPages, LogWriteHandler* writter,
+    LogGroupReleaser* releaser, LogWriteHandler* writter,
     JournalConfiguration* journalConfiguration, IContextManager* contextManagerToUse)
 {
     config = journalConfiguration;
     logFactory = factory;
-    dirtyPageManager = dirtyPages;
+    logGroupReleaser = releaser;
     logWriteHandler = writter;
 
     contextManager = contextManagerToUse;
@@ -98,18 +99,11 @@ JournalVolumeEventHandler::VolumeDeleted(int volumeId)
         }
         _WaitForLogWriteDone(volumeId);
 
-        // TODO (huijeong.kim) need to flush map also
-        ret = _FlushAllocatorContext();
-        if (ret != 0)
-        {
-            POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
-                "Failed to flush allocator context");
-            return ret;
-        }
+        EventSmartPtr callback(new MetaFlushCompleted(this));
+        flushInProgress = true;
+        logGroupReleaser->TriggerMetadataFlush(callback);
+
         _WaitForAllocatorContextFlushCompleted();
-
-        dirtyPageManager->DeleteDirtyList(volumeId);
-
         return 0;
     }
 }
@@ -137,15 +131,6 @@ JournalVolumeEventHandler::_WaitForLogWriteDone(int volumeId)
     });
 }
 
-int
-JournalVolumeEventHandler::_FlushAllocatorContext(void)
-{
-    EventSmartPtr callback(new AllocatorContextFlushCompleted(this));
-
-    flushInProgress = true;
-    return contextManager->FlushContextsAsync(callback);
-}
-
 void
 JournalVolumeEventHandler::_WaitForAllocatorContextFlushCompleted(void)
 {
@@ -164,7 +149,7 @@ JournalVolumeEventHandler::VolumeDeletedLogWriteDone(int volumeId)
 }
 
 void
-JournalVolumeEventHandler::AllocatorContextFlushed(void)
+JournalVolumeEventHandler::MetaFlushed(void)
 {
     std::unique_lock<std::mutex> lock(flushMutex);
     flushInProgress = false;

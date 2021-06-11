@@ -71,6 +71,18 @@ DirtyMapManager::GetDirtyList(int logGroupId)
     return pendingDirtyPages[logGroupId]->GetList();
 }
 
+MapPageList
+DirtyMapManager::GetTotalDirtyList(void)
+{
+    MapPageList dirtyList;
+    for (auto it : pendingDirtyPages)
+    {
+        MapPageList dirtyPage = it->PopDirtyList();
+        dirtyList.insert(dirtyPage.begin(), dirtyPage.end());
+    }
+    return dirtyList;
+}
+
 void
 DirtyMapManager::DeleteDirtyList(int volumeId)
 {

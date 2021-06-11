@@ -112,6 +112,17 @@ LogGroupReleaser::AddToFullLogGroup(int groupId)
 }
 
 void
+LogGroupReleaser::TriggerMetadataFlush(EventSmartPtr callback)
+{
+    MapPageList dirtyPages = dirtyPageManager->GetTotalDirtyList();
+
+    EventSmartPtr checkpointSubmission(new CheckpointSubmission(checkpointHandler,
+        sequenceController, dirtyPages, callback));
+
+    eventScheduler->EnqueueEvent(checkpointSubmission);
+}
+
+void
 LogGroupReleaser::_AddToFullLogGroupList(int groupId)
 {
     std::unique_lock<std::mutex> lock(fullLogGroupLock);

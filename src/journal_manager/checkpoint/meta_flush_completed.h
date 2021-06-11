@@ -32,40 +32,27 @@
 
 #pragma once
 
-#include "src/journal_manager/log/gc_map_update_list.h"
-#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
-#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
-#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
-
-#include "src/include/address_type.h"
-#include "src/bio/volume_io.h"
-#include "src/mapper/include/mpage_info.h"
 #include "src/event_scheduler/event.h"
 
 namespace pos
 {
-
-class LogWriteContextFactory
+class IMetaFlushCompleted
 {
 public:
-    LogWriteContextFactory(void);
-    virtual ~LogWriteContextFactory(void);
+    virtual void MetaFlushed(void) = 0;
+};
 
-    virtual void Init(LogBufferWriteDoneNotifier* target,
-        CallbackSequenceController* sequencer);
+// TODO (huijeong.kim) integrate with CheckpointMetaFlushCompleted
+class MetaFlushCompleted : public Event
+{
+public:
+    explicit MetaFlushCompleted(IMetaFlushCompleted* notified);
+    virtual ~MetaFlushCompleted(void);
 
-    virtual LogWriteContext* CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
-        MpageList dirty, EventSmartPtr callbackEvent);
-    virtual LogWriteContext* CreateStripeMapLogWriteContext(Stripe* stripe,
-        StripeAddr oldAddr, MpageList dirty, EventSmartPtr callbackEvent);
-    virtual LogWriteContext* CreateGcStripeFlushedLogWriteContext(
-        GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
-    virtual LogWriteContext* CreateVolumeDeletedLogWriteContext(int volId,
-        uint64_t contextVersion, EventSmartPtr callback);
+    virtual bool Execute(void) override;
 
 private:
-    LogBufferWriteDoneNotifier* notifier;
-    CallbackSequenceController* sequenceController;
+    IMetaFlushCompleted* notified;
 };
 
 } // namespace pos

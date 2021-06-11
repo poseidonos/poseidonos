@@ -1,3 +1,4 @@
+POS_ADD_UNIT_TEST(meta_flush_completed_ut meta_flush_completed_test.cpp)
 POS_ADD_UNIT_TEST(checkpoint_meta_flush_completed_ut checkpoint_meta_flush_completed_test.cpp)
 POS_ADD_UNIT_TEST(log_group_releaser_ut log_group_releaser_test.cpp)
 POS_ADD_UNIT_TEST(checkpoint_handler_ut checkpoint_handler_test.cpp)

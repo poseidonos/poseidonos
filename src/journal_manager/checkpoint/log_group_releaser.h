@@ -77,6 +77,8 @@ public:
 
     virtual void LogGroupResetCompleted(int logGroupId) override;
 
+    virtual void TriggerMetadataFlush(EventSmartPtr callback);
+
 protected:
     void _AddToFullLogGroupList(int groupId);
     bool _HasFullLogGroup(void);

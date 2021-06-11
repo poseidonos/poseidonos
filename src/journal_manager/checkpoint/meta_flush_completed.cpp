@@ -30,23 +30,23 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "allocator_context_flush_completed_event.h"
+#include "src/journal_manager/checkpoint/meta_flush_completed.h"
 
 namespace pos
 {
-AllocatorContextFlushCompleted::AllocatorContextFlushCompleted(IAllocatorContextFlushed* notified)
+MetaFlushCompleted::MetaFlushCompleted(IMetaFlushCompleted* notified)
 : notified(notified)
 {
 }
 
-AllocatorContextFlushCompleted::~AllocatorContextFlushCompleted(void)
+MetaFlushCompleted::~MetaFlushCompleted(void)
 {
 }
 
 bool
-AllocatorContextFlushCompleted::Execute(void)
+MetaFlushCompleted::Execute(void)
 {
-    notified->AllocatorContextFlushed();
+    notified->MetaFlushed();
     return true;
 }
 

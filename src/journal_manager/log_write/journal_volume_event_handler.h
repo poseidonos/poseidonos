@@ -38,29 +38,29 @@
 #include <string>
 #include <vector>
 
-#include "allocator_context_flush_completed_event.h"
+#include "src/journal_manager/checkpoint/meta_flush_completed.h"
 #include "src/allocator/i_context_manager.h"
 #include "src/journal_service/i_volume_event.h"
 
 namespace pos
 {
 class LogWriteContextFactory;
-class DirtyMapManager;
+class LogGroupReleaser;
 class LogWriteHandler;
 class JournalConfiguration;
 
-class JournalVolumeEventHandler : public IVolumeEventHandler, public IAllocatorContextFlushed
+class JournalVolumeEventHandler : public IVolumeEventHandler, public IMetaFlushCompleted
 {
 public:
     JournalVolumeEventHandler(void);
     virtual ~JournalVolumeEventHandler(void);
 
-    virtual void Init(LogWriteContextFactory* logFactory, DirtyMapManager* dirtyPages,
+    virtual void Init(LogWriteContextFactory* logFactory, LogGroupReleaser* releaser,
         LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration,
         IContextManager* contextManager);
 
     virtual int VolumeDeleted(int volID) override;
-    virtual void AllocatorContextFlushed(void) override;
+    virtual void MetaFlushed(void) override;
 
     virtual void VolumeDeletedLogWriteDone(int volumeId);
 
@@ -77,7 +77,7 @@ private:
 
     JournalConfiguration* config;
     LogWriteContextFactory* logFactory;
-    DirtyMapManager* dirtyPageManager;
+    LogGroupReleaser* logGroupReleaser;
     LogWriteHandler* logWriteHandler;
 
     std::mutex logWriteMutex;

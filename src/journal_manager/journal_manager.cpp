@@ -428,7 +428,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
         sequenceController, mapFlush, contextManager, eventScheduler);
 
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
-    volumeEventHandler->Init(logFactory, dirtyMapManager, logWriteHandler, config,
+    volumeEventHandler->Init(logFactory, logGroupReleaser, logWriteHandler, config,
         contextManager);
 
     replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, blockAllocator,

@@ -3,6 +3,7 @@
 using ::testing::_;
 using ::testing::InSequence;
 using ::testing::Return;
+using ::testing::AtLeast;
 
 namespace pos
 {
@@ -45,6 +46,7 @@ JournalVolumeIntegrationTest::WriteStripes(int numVolumes)
 void
 JournalVolumeIntegrationTest::DeleteVolumes(Volumes &volumesToDelete)
 {
+    EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
     EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContextsAsync).Times(volumesToDelete.size());
     for (auto volId : volumesToDelete)
     {
