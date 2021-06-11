@@ -64,14 +64,20 @@ BlockManager::BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, s
     segCtx = contextManager->GetSegmentCtx();
     allocCtx = contextManager->GetAllocatorCtx();
     wbStripeCtx = contextManager->GetWbStripeCtx();
-    iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
-    iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayName);
 }
 
 void
 BlockManager::Init(IWBStripeInternal* iwbstripeInternal)
 {
     iWBStripeInternal = iwbstripeInternal;
+    if (iReverseMap == nullptr)
+    {
+        iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
+    }
+    if (iStripeMap == nullptr)
+    {
+        iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayName);
+    }
 
     for (int volume = 0; volume < MAX_VOLUME_COUNT; volume++)
     {

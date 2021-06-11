@@ -66,8 +66,6 @@ WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctx
 : WBStripeManager(nullptr, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, blkMgr, arrayName)
 {
     wbStripeCtx = ctxMgr->GetWbStripeCtx();
-    volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-    iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
 }
 
 WBStripeManager::~WBStripeManager(void)
@@ -84,6 +82,14 @@ WBStripeManager::Init(void)
     if (iStripeMap == nullptr) // for UT
     {
         iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayName);
+    }
+    if (volumeManager == nullptr) // for UT
+    {
+        volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    }
+    if (iReverseMap == nullptr)
+    {
+        iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
     }
     uint32_t totalNvmStripes = addrInfo->GetnumWbStripes();
     uint32_t chunksPerStripe = addrInfo->GetchunksPerStripe();
