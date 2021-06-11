@@ -260,6 +260,8 @@ Array::Shutdown(void)
     _UnregisterService();
     _DeletePartitions();
     shutdownFlag = 1;
+
+    _Flush();
 }
 
 int
