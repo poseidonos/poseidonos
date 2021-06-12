@@ -63,7 +63,7 @@ TEST_F(SsdMetaVolumeTestFixture, SSD_Meta_Volume_Normal)
     // the maximum size
     EXPECT_TRUE(volume->IsOkayToStore(4089 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
     // expected count of the free lpn: 4090
-    EXPECT_FALSE(volume->IsOkayToStore(4090 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(4090 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
     // more than possible
     EXPECT_FALSE(volume->IsOkayToStore(4091 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
 }

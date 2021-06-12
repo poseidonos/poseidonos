@@ -72,21 +72,21 @@ TEST_F(NvRamMetaVolumeTestFixture, NVRAM_Meta_Volume_Normal)
     prop.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
     EXPECT_TRUE(volume->IsOkayToStore(6141 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
     // expected count of the free lpn: 6142
-    EXPECT_FALSE(volume->IsOkayToStore(6142 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(6142 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
     // more than possible
     EXPECT_FALSE(volume->IsOkayToStore(6143 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
 
     prop.ioAccPattern = MetaFileAccessPattern::SmallSizeBlockIO;
     EXPECT_TRUE(volume->IsOkayToStore(6141 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
     // expected count of the free lpn: 6142
-    EXPECT_FALSE(volume->IsOkayToStore(6142 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(6142 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
     // more than possible
     EXPECT_FALSE(volume->IsOkayToStore(6143 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
 
     prop.ioOpType = MetaFileDominant::WriteDominant;
     EXPECT_TRUE(volume->IsOkayToStore(6141 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
     // expected count of the free lpn: 6142
-    EXPECT_FALSE(volume->IsOkayToStore(6142 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(6142 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
     // more than possible
     EXPECT_FALSE(volume->IsOkayToStore(6143 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
 }
