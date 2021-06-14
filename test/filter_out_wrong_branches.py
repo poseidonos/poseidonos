@@ -3,6 +3,7 @@
 import sys
 import re
 
+
 def filter(input_file):
     input_fd = open(input_file, "r")
     last_content = None
@@ -44,10 +45,11 @@ def filter(input_file):
             pass
         elif int(branch_count) > 0:
             count_BRH += 1
-        count_BRF += 1        
+        count_BRF += 1
         output_fd.write(line)
     print "\nNew coverage data has been written to", output_fd.name
     output_fd.close()
+
 
 def should_filter_out(src_line, pos_src_line, branch_intervals):
     # filter out wrong branches not in if-else-while expr
@@ -59,22 +61,24 @@ def should_filter_out(src_line, pos_src_line, branch_intervals):
         else:
             continue
     return True
-        
+
+
 def get_if_else_while_expr_sorted_intervals(src_content):
     intervals = []
     if_pattern = re.compile(r"\sif\s*?[\s\S]+?{")
     else_pattern = re.compile(r"\selse\s*?[\s\S]+?{")
     while_pattern = re.compile(r"\swhile\s*?[\s\S]+?{")
-    
+
     for pat in [if_pattern, else_pattern, while_pattern]:
         for matched in pat.finditer(src_content):
             pos_start, pos_end = matched.span()
             branch_line_start = src_content[:pos_start].count("\n")
             branch_line_end = branch_line_start + src_content[pos_start:pos_end].count("\n")
-            intervals.append( (branch_line_start, branch_line_end) )
+            intervals.append((branch_line_start, branch_line_end))
     intervals.sort(key=lambda x: x[0])
     print "[(branch_start, branch_end)] = ", intervals
     return intervals
+
 
 def main():
     if len(sys.argv) != 2:
