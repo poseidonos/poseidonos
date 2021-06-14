@@ -17,7 +17,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsZero)
 {
     // Given
     NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
-    JournalConfiguration config;
+    JournalConfiguration config(0); // Initialize logBufferSizeInConfig to zero temporally
 
     uint64_t metaPageSize = 4032;
     uint64_t logBufferSize = 16 * 1024 * 1024;
@@ -38,7 +38,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsNotZe
 {
     // Given
     NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
-    JournalConfiguration config;
+    JournalConfiguration config(0);
 
     uint64_t metaPageSize = 4032;
     uint64_t logBufferSize = 16 * 1024 * 1024;

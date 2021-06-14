@@ -49,15 +49,21 @@
 namespace pos
 {
 JournalConfiguration::JournalConfiguration(void)
+: JournalConfiguration(UINT64_MAX)
+{
+    _ReadConfiguration();
+}
+
+// Constructor for unit test
+JournalConfiguration::JournalConfiguration(uint64_t logBufferSizeConfigInput)
 : journalEnabled(false),
-  logBufferSizeInConfig(UINT64_MAX),
+  logBufferSizeInConfig(logBufferSizeConfigInput),
   metaPageSize(UINT64_MAX),
   maxPartitionSize(UINT64_MAX),
   debugEnabled(false),
   numLogGroups(2),
   logBufferSize(UINT64_MAX)
 {
-    _ReadConfiguration();
 }
 
 JournalConfiguration::~JournalConfiguration(void)

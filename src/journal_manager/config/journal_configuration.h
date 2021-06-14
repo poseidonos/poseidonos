@@ -45,6 +45,7 @@ class JournalConfiguration
 {
 public:
     JournalConfiguration(void);
+    explicit JournalConfiguration(uint64_t logBufferSizeInConfig);
     virtual ~JournalConfiguration(void);
 
     virtual int Init(uint64_t logBufferSize = 0, MetaFsFileControlApi* metaFsCtrl = nullptr);
