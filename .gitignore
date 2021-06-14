@@ -18,8 +18,10 @@ test/Testing/
 test/build/
 test/**/Makefile
 test/**/test_detail.xml
+aaa
 coverage.info
 coverage_filtered.lcov
+coverage_filtered_pos.lcov
 mkcscope.sh
 tags
 cscope.out
