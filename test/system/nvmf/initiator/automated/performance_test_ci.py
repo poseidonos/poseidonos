@@ -30,6 +30,10 @@ default_qd_4k="128"
 default_time_based="1"
 default_transport="tcp"
 
+default_sw_128k_limit="9500"
+default_sr_128k_limit="11000"
+default_rw_4k_limit="5000"
+default_rr_4k_limit="8300"
 default_test_revision="temp"
 default_test_name="POS_devel"
 #----------------------------------------------------------------------------------------------------------------------
@@ -37,10 +41,6 @@ irq_dedication_enable="true"
 write_buffer_size_in_mb="4096"
 spare_device_list="none"
 num_jobs="1"
-sw_128k_limit="9500"
-sr_128k_limit="11000"
-rw_4k_limit="5000"
-rr_4k_limit="8300"
 test_dir="./test/system/nvmf/initiator/automated/"
 array_name="POSArray"
 spdk_version="spdk-20.10"
@@ -187,6 +187,14 @@ def parse_argument():
             help='Set test revision, default: ' + default_test_revision)
     parser.add_argument('-tn', '--test_name', default=default_test_name,\
             help='Set test name, default: ' + default_test_name)
+    parser.add_argument('-sw', '--sw_limit', default=default_sw_128k_limit,\
+            help='Set sw 128k limit, default: ' + default_sw_128k_limit)
+    parser.add_argument('-sr', '--sr_limit', default=default_sr_128k_limit,\
+            help='Set sr 128k limit, default: ' + default_sr_128k_limit)
+    parser.add_argument('-rw', '--rw_limit', default=default_rw_4k_limit,\
+            help='Set rw 4k limit, default: ' + default_rw_4k_limit)
+    parser.add_argument('-rr', '--rr_limit', default=default_rr_4k_limit,\
+            help='Set rr 4k limit, default: ' + default_rr_4k_limit)
 
     global args
     args = parser.parse_args()
