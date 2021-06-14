@@ -423,8 +423,12 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
                 }
                 else
                 {
-                    changeDetected = true;
                     subsystemVolList = qosManager->GetVolumeFromActiveSubsystem(connectEntry.subsysId);
+                    if (0 == subsystemVolList.size())
+                    {
+                        break;
+                    }
+                    changeDetected = true;
                     uint32_t volId = subsystemVolList[0]; // Currently Qos can handle only 1 NSID in subsystem
                     if (connectEntry.connectType == NVMF_CONNECT)
                     {
