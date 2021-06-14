@@ -73,12 +73,12 @@ FlushPendingStripes::Start(void)
     POS_TRACE_DEBUG(loggingEventId, os.str());
     POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, loggingEventId, os.str());
 
-    int ret = 0;
+    int result = 0;
     for (auto pStripe : pendingStripes)
     {
-        ret = wbStripeAllocator->ReconstructActiveStripe(pStripe->volumeId,
+        int reconstructResult = wbStripeAllocator->ReconstructActiveStripe(pStripe->volumeId,
             pStripe->wbLsid, pStripe->tailVsa);
-        if (ret < 0)
+        if (reconstructResult < 0)
         {
             int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH_FAILED);
             std::ostringstream os;
@@ -87,6 +87,11 @@ FlushPendingStripes::Start(void)
 
             POS_TRACE_DEBUG(eventId, os.str());
             POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
+
+            if (result == 0)
+            {
+                result = reconstructResult;
+            }
         }
         else
         {
@@ -105,7 +110,7 @@ FlushPendingStripes::Start(void)
 
     wbStripeAllocator->FlushPendingActiveStripes();
     reporter->SubTaskCompleted(GetId(), 1);
-    return ret;
+    return result;
 }
 
 ReplayTaskId

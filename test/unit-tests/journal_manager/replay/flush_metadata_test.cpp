@@ -29,7 +29,7 @@ TEST(FlushMetadata, Start_testIfTaskCompletedSuccessfullyWhenAllFlushSuccess)
     EXPECT_EQ(result, 0);
 }
 
-TEST(FlushMetadata, Start_testIfTaskCompletedWithNonZeroWhenMapFlushFails)
+TEST(FlushMetadata, Start_testIfTaskCompletedWithNegativeValueWhenMapFlushFails)
 {
     // Given
     NiceMock<MockIMapFlush> mapFlush;
@@ -39,7 +39,7 @@ TEST(FlushMetadata, Start_testIfTaskCompletedWithNonZeroWhenMapFlushFails)
     FlushMetadata flushMetadataTask(&mapFlush, &contextManager, &reporter);
 
     // Then
-    int retCode = 1000;
+    int retCode = -1000;
     EXPECT_CALL(mapFlush, StoreAllMaps).WillOnce(Return(retCode));
     EXPECT_CALL(contextManager, FlushContextsSync).Times(0);
 
@@ -48,7 +48,7 @@ TEST(FlushMetadata, Start_testIfTaskCompletedWithNonZeroWhenMapFlushFails)
     EXPECT_EQ(result, retCode);
 }
 
-TEST(FlushMetadata, Start_testIfTaskCompletedWithNonZeroWhenAllocatorContextFlushFails)
+TEST(FlushMetadata, Start_testIfTaskCompletedWithNegativeValueWhenAllocatorContextFlushFails)
 {
     // Given
     NiceMock<MockIMapFlush> mapFlush;
@@ -58,7 +58,7 @@ TEST(FlushMetadata, Start_testIfTaskCompletedWithNonZeroWhenAllocatorContextFlus
     FlushMetadata flushMetadataTask(&mapFlush, &contextManager, &reporter);
 
     // Then
-    int retCode = 2000;
+    int retCode = -2000;
     EXPECT_CALL(mapFlush, StoreAllMaps).WillOnce(Return(0));
     EXPECT_CALL(contextManager, FlushContextsSync).WillOnce(Return(retCode));
 

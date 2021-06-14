@@ -44,6 +44,7 @@ struct PendingStripe
     StripeId wbLsid;
     VirtualBlkAddr tailVsa;
 
+    PendingStripe(void) = default;
     PendingStripe(int volId, StripeId lsid, VirtualBlkAddr tail)
     {
         volumeId = volId;
