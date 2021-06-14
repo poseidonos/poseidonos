@@ -35,6 +35,7 @@
 #include <string>
 
 #include "src/allocator/i_wbstripe_allocator.h"
+#include "src/array/service/io_translator/io_translator.h"
 #include "src/include/address_type.h"
 #include "src/include/partition_type.h"
 
@@ -45,7 +46,8 @@ class Translator
 public:
     Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
         std::string& arrayName, bool isRead = false, IVSAMap* iVSAMap = nullptr,
-        IStripeMap* iStripeMap = nullptr, IWBStripeAllocator* iWBStripeAllocator = nullptr);
+        IStripeMap* iStripeMap = nullptr, IWBStripeAllocator* iWBStripeAllocator = nullptr,
+        IIOTranslator* iTranslator = nullptr);
     Translator(uint32_t volumeId, BlkAddr rba, std::string& arrayName, bool isRead);
     Translator(const VirtualBlkAddr& vsa, std::string& arrayName);
     virtual ~Translator(void)
@@ -66,6 +68,7 @@ private:
     IVSAMap* iVSAMap{nullptr};
     IStripeMap* iStripeMap{nullptr};
     IWBStripeAllocator* iWBStripeAllocator{nullptr};
+    IIOTranslator* iTranslator{nullptr};
     BlkAddr startRba;
     uint32_t blockCount;
     VsaArray vsaArray;

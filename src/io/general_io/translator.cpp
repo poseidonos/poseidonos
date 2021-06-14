@@ -50,10 +50,12 @@ thread_local StripeId Translator::recentLsid = UNMAP_STRIPE;
 thread_local std::string Translator::recentArrayName = "";
 
 Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
-    std::string& arrayName, bool isRead, IVSAMap* iVSAMap_, IStripeMap* iStripeMap_, IWBStripeAllocator* iWBStripeAllocator_)
+    std::string& arrayName, bool isRead, IVSAMap* iVSAMap_, IStripeMap* iStripeMap_, IWBStripeAllocator* iWBStripeAllocator_,
+    IIOTranslator* iTranslator_)
 : iVSAMap(iVSAMap_),
   iStripeMap(iStripeMap_),
   iWBStripeAllocator(iWBStripeAllocator_),
+  iTranslator(iTranslator_),
   startRba(startRba),
   blockCount(blockCount),
   lastVsa(UNMAP_VSA),
@@ -74,6 +76,11 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
     {
         iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName);
     }
+    if (nullptr == iTranslator)
+    {
+        iTranslator = ArrayService::Instance()->Getter()->GetTranslator();
+    }
+
     if (unlikely(volumeId >= MAX_VOLUME_COUNT))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_VOLUME_ID;
@@ -81,7 +88,12 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
             PosEventId::GetString(eventId));
         throw eventId;
     }
-    iVSAMap->GetVSAs(volumeId, startRba, blockCount, vsaArray);
+
+    if (likely(iVSAMap != nullptr))
+    {
+        iVSAMap->GetVSAs(volumeId, startRba, blockCount, vsaArray);
+    }
+
     if (likely(iStripeMap != nullptr))
     {
         for (uint32_t blockIndex = 0; blockIndex < blockCount; blockIndex++)
@@ -178,8 +190,7 @@ Translator::_GetLsidRefResult(BlkAddr rba, VirtualBlkAddr& vsa)
             {
                 lsidEntry = iStripeMap->GetLSA(vsa.stripeId);
 
-                if (IsUnMapStripe(recentVsid) || vsa.stripeId != recentVsid
-                    || recentArrayName != arrayName)
+                if (IsUnMapStripe(recentVsid) || vsa.stripeId != recentVsid || recentArrayName != arrayName)
                 {
                     lsidEntry = iStripeMap->GetLSA(vsa.stripeId);
                     recentVsid = vsa.stripeId;
@@ -227,8 +238,7 @@ Translator::GetPba(uint32_t blockIndex)
     LogicalBlkAddr lsa = _GetLsa(blockIndex);
     PartitionType partitionType = _GetPartitionType(blockIndex);
     PhysicalBlkAddr pba;
-    IIOTranslator* translator = ArrayService::Instance()->Getter()->GetTranslator();
-    int ret = translator->Translate(arrayName, partitionType, pba, lsa);
+    int ret = iTranslator->Translate(arrayName, partitionType, pba, lsa);
     if (unlikely(ret != 0))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::TRANSLATE_CONVERT_FAIL;
@@ -276,8 +286,7 @@ Translator::GetPhysicalEntries(void* mem, uint32_t blockCount)
     logicalEntry.buffers->push_back(buffer);
 
     PhysicalEntries entries;
-    IIOTranslator* translator = ArrayService::Instance()->Getter()->GetTranslator();
-    int ret = translator->Convert(
+    int ret = iTranslator->Convert(
         arrayName, partitionType, entries, logicalEntry);
     if (unlikely(ret != 0))
     {
