@@ -31,7 +31,7 @@ if(group_report == 1):
     job_pos=0
 else:
     job_pos=volId
-    
+
 fio_output_file = str(file_path) + "/fio_output.json"
 
 with open(str(fio_output_file)) as jsonFile:

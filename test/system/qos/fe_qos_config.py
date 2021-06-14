@@ -11,8 +11,8 @@ rebuildImpact = "low"
 
 def config_change(feEnable, impact):
     with open("/etc/pos/pos.conf", "r") as jsonFile:
-        data = json.load(jsonFile) 
- 
+        data = json.load(jsonFile)
+
     with open("default_ibofos.conf", "w") as jsonFile:
         json.dump(data, jsonFile, indent=4)
 
@@ -51,7 +51,7 @@ def main(argv):
         help()
         sys.exit(2)
     try:
-        opts, args = getopt.getopt(argv, "hs:f:i:",["set", "fe=", "impact="])
+        opts, args = getopt.getopt(argv, "hs:f:i:", ["set", "fe=", "impact="])
     except getopt.GetoptError:
         help()
         sys.exit(2)
