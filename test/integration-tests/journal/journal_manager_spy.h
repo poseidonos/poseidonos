@@ -34,7 +34,7 @@ public:
     uint64_t GetLogGroupSize(void);
     int GetNumLogGroups(void);
 
-    int GetNumFullLogGroups(void);
+    bool IsCheckpointCompleted(void);
     int GetNumDirtyMap(int logGroupId);
 
     int GetLogs(LogList& logList);

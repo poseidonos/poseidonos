@@ -24,9 +24,9 @@ VSAMapMock::~VSAMapMock(void)
 {
     for (int idx = 0; idx < testInfo->maxNumVolume; idx++)
     {
-        delete map[idx];
+        delete [] map[idx];
     }
-    delete map;
+    delete [] map;
 }
 
 VirtualBlkAddr

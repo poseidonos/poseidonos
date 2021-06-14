@@ -129,10 +129,12 @@ JournalManagerSpy::GetNumLogGroups(void)
     return config->GetNumLogGroups();
 }
 
-int
-JournalManagerSpy::GetNumFullLogGroups(void)
+bool
+JournalManagerSpy::IsCheckpointCompleted(void)
 {
-    return logGroupReleaser->GetNumFullLogGroups();
+    CheckpointStatus status = logGroupReleaser->GetStatus();
+
+    return ((status == CheckpointStatus::INIT) || (status == CheckpointStatus::COMPLETED));
 }
 
 int

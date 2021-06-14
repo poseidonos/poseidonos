@@ -69,8 +69,6 @@ public:
 
     virtual void AddToFullLogGroup(int groupId);
 
-    int GetNumFullLogGroups(void);
-
     virtual int GetFlushingLogGroupId(void) override;
     virtual std::list<int> GetFullLogGroups(void) override;
     virtual CheckpointStatus GetStatus(void) override;

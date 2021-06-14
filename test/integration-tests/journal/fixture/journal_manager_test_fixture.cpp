@@ -17,10 +17,10 @@ JournalManagerTestFixture::JournalManagerTestFixture(std::string logFileName)
 {
     testInfo = new TestInfo();
     arrayInfo = new ArrayInfoMock(testInfo);
-    testMapper = new StrictMock<MockMapper>(testInfo, arrayInfo, nullptr);
-
-    testAllocator = new StrictMock<AllocatorMock>(arrayInfo);
     stateSub = new StateSubscriptionMock();
+
+    testMapper = new StrictMock<MockMapper>(testInfo, arrayInfo, nullptr);
+    testAllocator = new StrictMock<AllocatorMock>(arrayInfo);
     volumeManager = new NiceMock<MockIVolumeManager>();
     journal = new JournalManagerSpy(arrayInfo, stateSub, logFileName);
 
@@ -40,14 +40,17 @@ JournalManagerTestFixture::~JournalManagerTestFixture(void)
 
     journal->DeleteLogBuffer();
 
-    delete volumeManager;
     delete replayTester;
-    delete testInfo;
-    delete journal;
-    delete testMapper;
-    delete testAllocator;
-    delete arrayInfo;
     delete writeTester;
+
+    delete journal;
+    delete volumeManager;
+    delete testAllocator;
+    delete testMapper;
+
+    delete stateSub;
+    delete arrayInfo;
+    delete testInfo;
 }
 
 void
@@ -112,7 +115,7 @@ JournalManagerTestFixture::ExpectCheckpointTriggered(void)
 void
 JournalManagerTestFixture::WaitForAllCheckpointDone(void)
 {
-    while (journal->GetNumFullLogGroups() != 0)
+    while (journal->IsCheckpointCompleted() == false)
     {
     }
 }

@@ -40,6 +40,8 @@ void
 MultiThreadLogWriteIntegrationTest::TearDown(void)
 {
     WaitForThreads();
+
+    std::this_thread::sleep_for(500ms);
 }
 
 void

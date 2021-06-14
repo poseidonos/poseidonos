@@ -215,19 +215,6 @@ LogGroupReleaser::_PopFullLogGroup(void)
     return retLogGroup;
 }
 
-int
-LogGroupReleaser::GetNumFullLogGroups(void)
-{
-    if (flushingLogGroupId != -1)
-    {
-        return fullLogGroup.size() + 1;
-    }
-    else
-    {
-        return fullLogGroup.size();
-    }
-}
-
 void
 LogGroupReleaser::LogGroupResetCompleted(int logGroupId)
 {
