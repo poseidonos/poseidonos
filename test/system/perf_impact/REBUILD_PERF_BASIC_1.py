@@ -371,7 +371,6 @@ def execute(ip_addr, perf_impact):
     print_time()
     pos_util.kill_process("poseidonos")
     start_pos()
-    write_log(cli.update_event_qos("rebuild", perf_impact))
     ret = do_event(0)
     if ret == True:
         t = TestTimer(SECONDS_PER_MINUTE, timer_tick)

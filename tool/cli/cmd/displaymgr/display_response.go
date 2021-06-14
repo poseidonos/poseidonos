@@ -166,7 +166,7 @@ func printResToHumanReadable(command string, resJSON string) {
 
 		log.Println("")
 
-    case "QOSCREATEVOLUMEPOLICY":
+	case "QOSCREATEVOLUMEPOLICY":
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)
         if (0 != res.RESULT.STATUS.CODE) {
@@ -174,7 +174,7 @@ func printResToHumanReadable(command string, resJSON string) {
             fmt.Println("Description: ",res.RESULT.STATUS.DESCRIPTION)
         }
 
-    case "QOSRESETVOLUMEPOLICY":
+	case "QOSRESETVOLUMEPOLICY":
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)
         if (0 != res.RESULT.STATUS.CODE) {

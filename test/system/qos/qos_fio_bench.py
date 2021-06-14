@@ -18,6 +18,8 @@ import argparse
 
 #######################################################################################
 # edit test parameters into these lists to run different workloads
+
+file_path = os.path.dirname(os.path.abspath(__file__))
 ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
 
 #select fio plugin for nvmf/e or bdev
@@ -30,9 +32,9 @@ file_num=8
 setup="ssir"
 
 if setup == "ssir":
-    traddr='133.133.100.10'
+    traddr = '111.100.13.175'
 else:
-    traddr='10.100.11.1'
+    traddr = '10.100.11.1'
 
 # could be either nvme or nvmf or bdev
 #filename='trtype=pcie traddr=0000.02.00.0 ns=1'
@@ -121,14 +123,15 @@ def run_fio(io_size_bytes, block_size, qd, rw_mix, cpus_allowed, run_num, worklo
         blocksize=['128k', '128k', '128k', '128k', '128k', '128k', '128k', '128k']
 
     command = "fio "  \
-            + " --ioengine=" + str(ioengine) + "" \
-            + " --runtime=" + str(run_time_sec) + "" \
-            + " --io_size=" + str(io_size_bytes) + "" \
-            + " --bs=" + str(block_size) + "" \
-            + " --iodepth=" + str(qd) + "" \
-            + " --readwrite=" + str(workload) + "" \
-            + " --offset=" + str(offset) + ""\
-            + " --output=./fio_output.json --output-format=json" + ""\
+              + " --ioengine=" + str(ioengine) + "" \
+              + " --runtime=" + str(run_time_sec) + "" \
+              + " --io_size=" + str(io_size_bytes) + "" \
+              + " --bs=" + str(block_size) + "" \
+              + " --iodepth=" + str(qd) + "" \
+              + " --readwrite=" + str(workload) + "" \
+              + " --offset=" + str(offset) + "" \
+              + " --output=" + str(file_path) + "/fio_output.json" + "" \
+              + " --output-format=json" + "" \
 
     if fio_plugin == "bdev":
         command += " --spdk_conf=" + str(spdk_conf) + ""

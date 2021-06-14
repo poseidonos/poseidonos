@@ -102,14 +102,14 @@ def list_volume(array):
     return send_request("volume list " + param_str)
 
 def update_volume_qos(vol_name, iops, bw, array):
-    param_str = "--name " + vol_name
+    param_str = "--volume-name " + vol_name
     if iops != "":
         param_str += " --maxiops " + iops
     if bw != "":
         param_str += " --maxbw " + bw
-    param_str += " --array " + array
+    param_str += " --array-name " + array
 
-    return send_request("volume update_qos " + param_str)
+    return send_request("qos create " + param_str)
 
 def rename_volume(vol_name, new_name, array):
     param_str = "--name " + vol_name + " --newname " + new_name
@@ -129,22 +129,6 @@ def list_device():
 
 def device_monitoring_state():
     return send_request("request monitoring_state")
-
-def update_event_qos(event_name, perf_impact):
-    prio = -1
-    weight = -1
-    if perf_impact == "high":
-        prio = 0
-        weight = 1
-    elif perf_impact == "medium":
-        prio = 1
-        weight = 2
-    elif  perf_impact == "low":
-        prio = 2
-        weight = 3
-
-    return send_request("internal update_event_wrr --name " + event_name + 
-        " --prio " + str(prio) + " --weight " + str(weight))
 
 def wbt_request(event_name, argument):
     return send_request("wbt " + event_name + argument)

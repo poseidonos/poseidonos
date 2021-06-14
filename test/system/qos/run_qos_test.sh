@@ -5,7 +5,6 @@
 #**************************************************************************
 logfile="/var/log/pos/qos_test.log"
 INITIATOR_ROOT_DIR=$(readlink -f $(dirname $0))/../../../
-
 INITIATOR_SPDK_DIR=$INITIATOR_ROOT_DIR/lib/spdk
 CONFIG_FILE=/etc/pos/pos.conf
 
@@ -14,12 +13,8 @@ network_config_file=test/system/network/network_config.sh
 # Note: In case of tcp transport, network io irq can be manually controlled for better performance by changing SET_IRQ_AFFINITY=TRUE with given TARGET_NIC and NET_IRQ_CPULIST
 
 CLEAN_BRINGUP=1
-detach_dev1="unvme-ns-0"
-detach_dev2="unvme-ns-1"
-spare_dev1="unvme-ns-3"
-spare_dev2="unvme-ns-4"
-
-
+detach_dev="unvme-ns-0"
+spare_dev="unvme-ns-3"
 VOLUME_SIZE=2147483648
 NUM_REACTORS=31
 DEFAULT_NR_VOLUME=31
@@ -27,6 +22,10 @@ DEFAULT_SUBSYSTEM=31
 DEFAULT_PORT=1158
 TARGET_ROOT_DIR=$(readlink -f $(dirname $0))/../../..
 TARGET_SPDK_DIR=$TARGET_ROOT_DIR/lib/spdk
+ibof_cli_old="$TARGET_ROOT_DIR/bin/cli"
+ibof_cli="$TARGET_ROOT_DIR/bin/poseidonos-cli"
+ARRAYNAME=POSArray
+MINVALUEBWIOPS=10
 
 
 #**************************************************************************
@@ -161,7 +160,8 @@ add_spare()
 {
     spare_dev=$1
     print_info "Add Spare device ${spare_dev}"
-    texecc $TARGET_ROOT_DIR/bin/cli array add --name POSArray --spare ${spare_dev}
+    #texecc ${ibof_cli} array add --spare ${spare_dev} --array ${ARRAYNAME}
+    texecc ${ibof_cli} array addspare --spare ${spare_dev} --array ${ARRAYNAME}
 }
 
 pci_rescan()
@@ -178,6 +178,30 @@ detach_device()
     print_info "${detach_dev} is detected"
 }
 
+
+
+#**************************************************************************
+# WAIT FOR POS TO LAUNCH
+#**************************************************************************
+ibof_launch_wait(){
+    retval=0
+    n=1
+    while [ $n -le 10 ]
+    do
+        texecc ${ibof_cli} system info --json-res | grep "\"description\":\"DONE\""
+        texecc sleep 10s
+        if [ $? -eq 0 ]; then
+            retval=0
+            break;
+        else
+            texecc sleep 5
+            echo "Waiting for POS Launch"
+            retval=1
+        fi
+        n=$(( n+1 ))
+    done
+    return $retval
+}
 
 #**************************************************************************
 # SETUP_SPDK
@@ -198,18 +222,18 @@ reset_spdk(){
 #**************************************************************************
 # EXIT POS
 #**************************************************************************
-exit_pos(){
-    texecc $TARGET_ROOT_DIR/bin/cli array unmount --name POSArray
+exit_ibofos(){
+    #texecc $TARGET_ROOT_DIR/bin/cli request unmount_ibofos
+    
+    #texecc ${ibof_cli} array unmount --name ${ARRAYNAME}
+    texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME}
     texecc sleep 10
-    if [ 1 == ${?} ]; then
-        kill_pos
-        return
-    fi
-    echo "Unmount is complete" >> result
-
-    texecc $TARGET_ROOT_DIR/bin/cli system exit
+    echo "Array successfully unmounted"
+    #texecc ${ibof_cli} system exit
+    texecc ${ibof_cli} system stop
+    texecc sleep 10
+    
     texecc ps -C poseidonos > /dev/null >> ${logfile}
-
     n=1
     while [[ ${?} == 0 ]]
     do
@@ -223,31 +247,6 @@ exit_pos(){
         texecc ps -C poseidonos > /dev/null >> ${logfile}
     done
     print_info "POS Instance Exited"
-}
-
-#**************************************************************************
-# WAITING FOR REBUILD COMPLETION
-#**************************************************************************
-waiting_for_rebuild_complete(){
-    ret=1
-    n=1
-    while [ $n -le 360 ]
-    do
-        state=$($TARGET_ROOT_DIR/bin/cli array info --name POSArray --json | jq '.Response.result.data.state')
-        echo "current state : "$state
-        if [ $state == "\"NORMAL\"" ]; then
-            print_info "Rebuild Completed"
-            ret=0
-            break;
-        else
-            texecc sleep 10
-            rebuild_progress=$($TARGET_ROOT_DIR/bin/cli array info --name POSArray --json | jq '.Response.result.data.rebuildingProgress')
-            info "Rebuilding Progress [${rebuild_progress}]"
-            print_info "Waiting for Rebuild to Complete ($n of 360)"
-        fi
-        n=$(( n+1 ))
-    done
-    return $ret
 }
 
 ###################################################
@@ -375,13 +374,31 @@ setup_test_environment(){
 ###################################################
 # START POS
 ###################################################
-start_pos(){
+start_ibofos(){
     texecc $TARGET_ROOT_DIR/test/regression/start_poseidonos.sh
+    ibof_launch_wait
     EXPECT_PASS "POS OS Launch"  $?
 
     texecc sleep 10
-    texecc $TARGET_ROOT_DIR/test/system/io_path/setup_ibofos_nvmf_volume.sh -c 1 -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM -v $NR_VOLUME -u "unvme-ns-0,unvme-ns-1,unvme-ns-2" -p "none"
+    texecc $TARGET_ROOT_DIR/test/system/io_path/setup_ibofos_nvmf_volume.sh -c 1 -t $TRANSPORT -a $TARGET_IP -s $SUBSYSTEM -v $NR_VOLUME -u "unvme-ns-0,unvme-ns-1,unvme-ns-2" -p "unvme-ns-3"
     EXPECT_PASS "setup_ibofos_nvmf_volume.sh" $?
+}
+###################################################
+# PRINT FIO RESULTS
+###################################################
+print_fio_result()
+{
+    volId=$1
+    readwrite=$2
+    group=$3
+    echo ""
+    echo ""
+
+    array=()
+    while read line ; do
+        array+=($line)
+    done < <($INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py --volId="${volId}" --ioType="${readwrite}" --groupReport="${group}")
+    echo ${array[@]}
 }
 
 ###################################################
@@ -389,8 +406,8 @@ start_pos(){
 ###################################################
 launch_fio()
 {
-    if [ $# -ne 9 ];then
-        echo "Insufficient  Parameters, ex. launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background"
+    if [ $# -ne 11 ];then
+        echo "Insufficient  Parameters, ex. launch_fio file_num num_job io_depth bs readwrite runtime group workload run_background printValue volData"
         return 1
     fi
 
@@ -404,6 +421,8 @@ launch_fio()
     group=$7
     workload=$8
     run_background=$9
+    printValue=${10}
+    volData=${11}
 
     echo -e "============================================================"
     echo -e "=================  FIO CONFIGURATION  ======================"
@@ -427,6 +446,11 @@ launch_fio()
     else
         $INITIATOR_ROOT_DIR/test/system/qos/qos_fio_bench.py --file_num="${file_num}" --numjobs="${num_job}" --iodepth="${io_depth}" --bs="${bs}" --readwrite="${readwrite}" --run_time="${runtime}" --group_reporting="${group}" --workload_type="${workload}" --traddr="$TARGET_IP" --trtype="$TRANSPORT" --port="$PORT" >> $INITIATOR_ROOT_DIR/test/system/qos/qos_fio.log
     fi
+
+    EXPECT_PASS "FIO Launch" $?
+    if [ $printValue -eq 1 ]; then
+        print_fio_result $volData $readwrite $group
+    fi
 }
 
 ###################################################
@@ -440,10 +464,7 @@ tc_1v_31job_write()
     fio_tc_name="Type: Perfromance, Volumes:1, Jobs:31, Details: QD(4), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 1 31 4 128k write 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 1 --group_report 1`
-    print_info "Bandwidth $bw"
+    launch_fio 1 31 4 128k write 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -456,10 +477,7 @@ tc_1v_31job_read()
     fio_tc_name="Type: Perfromance, Volumes:1, Jobs:31, Details: QD(4), BS(128k), Sequential Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 1 31 4 128k read 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 0 --group_report 1`
-    print_info "Bandwidth $bw"
+    launch_fio 1 31 4 128k read 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -472,10 +490,7 @@ tc_1v_31job_randwrite()
     fio_tc_name="Type: Perfromance, Volumes:1, Jobs:31, Details: QD(128), BS(4k), Random Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 1 31 128 4k randwrite 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 1 --group_report 1`
-    print_info "Bandwidth $bw"
+    launch_fio 1 31 128 4k randwrite 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -488,10 +503,7 @@ tc_1v_31job_randread()
     fio_tc_name="Type: Perfromance, Volumes:1, Jobs:31, Details: QD(128), BS(4k), Random Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 1 31 128 4k randread 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 0 --group_report 1`
-    print_info "Bandwidth $bw"
+    launch_fio 1 31 128 4k randread 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -507,10 +519,7 @@ tc_8v_3job_write()
     fio_tc_name="Type: Perfromance, Volumes:8, Jobs:3, Details: QD(4), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 8 3 4 128k write 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 1 --group_report 1`
-    print_info "Bandwidth $bw"
+    launch_fio 8 3 4 128k write 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -523,10 +532,7 @@ tc_8v_3job_read()
     fio_tc_name="Type: Perfromance, Volumes:8, Jobs:3, Details: QD(4), BS(128k), Sequential Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 8 3 4 128k read 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 0 --group_report 1`
-    print_info "Bandwidth $bw"
+    launch_fio 8 3 4 128k read 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -539,10 +545,7 @@ tc_8v_3job_randwrite()
     fio_tc_name="Type: Perfromance, Volumes:8, Jobs:3, Details: QD(128), BS(4k), Random Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 8 3 128 4k randwrite 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 1 --group_report 1`
-    print_info "Bandwidth $bw"
+    launch_fio 8 3 128 4k randwrite 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -555,10 +558,7 @@ tc_8v_3job_randread()
     fio_tc_name="Type: Perfromance, Volumes:8, Jobs:3, Details: QD(128), BS(4k), Random Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 8 3 128 4k randread 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 0 --group_report 1`
-    print_info "Bandwidth $bw"
+    launch_fio 8 3 128 4k randread 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -574,10 +574,7 @@ tc_31v_1job_write()
     fio_tc_name="Type: Perfromance, Volumes:31, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 31 1 4 128k write 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 1 --group_report 1`
-    print_info "Bandwidth $bw"
+    launch_fio 31 1 4 128k write 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -590,10 +587,7 @@ tc_31v_1job_read()
     fio_tc_name="Type: Perfromance, Volumes:31, Jobs:1, Details: QD(4), BS(128k), Sequential Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 31 1 4 128k read 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 0 --group_report 1`
-    print_info "Bandwidth $bw"
+    launch_fio 31 1 4 128k read 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -606,10 +600,7 @@ tc_31v_1job_randwrite()
     fio_tc_name="Type: Perfromance, Volumes:31, Jobs:1, Details: QD(128), BS(4k), Random Write"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 31 1 128 4k randwrite 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 1 --group_report 1`
-    print_info "Bandwidth $bw"
+    launch_fio 31 1 128 4k randwrite 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
@@ -622,69 +613,236 @@ tc_31v_1job_randread()
     fio_tc_name="Type: Perfromance, Volumes:31, Jobs:1, Details: QD(128), BS(4k), Random Read"
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 31 1 128 4k randread 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 0 --group_report 1`
-    print_info "Bandwidth $bw"
+    launch_fio 31 1 128 4k randread 30 1 4 0 1 257
+    EXPECT_PASS "${fio_tc_name}" $?
+    end_tc "${fio_tc_name}"
+}
+
+#=========================================================
+# Calculate Throttle Bandwidth in Mbps
+#=========================================================
+convertBwMbps()
+{
+    bwKBytes=$1
+    mbpsFactor=1024
+    bwMbps=`expr $bwKBytes / $mbpsFactor`
+    return $bwMbps
+}
+
+#=========================================================
+# Calculate Throttle Bandwidth in Mbps
+#=========================================================
+throttleBwMpbs()
+{
+    bwKBytes=$1
+    convertBwMbps $bwKBytes
+    bwMbps=$?
+    divFactor=$2
+    throttleMbps=`expr $bwMbps / $divFactor`
+    if [ $throttleMbps == 0 ]; then
+        throttleMbps=1
+    fi
+    return $throttleMbps
+}
+
+
+###################################################
+# QOS READ WRITE WITH FE ENABLED
+###################################################
+tc_readwrite_fe()
+{
+    fio_tc_name="Type: Read Write FE, Volumes:8, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
+    volCnt=8
+    show_tc_info "${fio_tc_name}"
+    start_tc "${fio_tc_name}"
+    print_info "FIO Results without IOPS Throttling"
+    launch_fio $volCnt 1 128 128k read 30 1 4 0 1 257
+    array=()
+    while read line ; do
+        array+=($line)
+    done < <($INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py --volId=257 --ioType="read" --groupReport=1)
+    
+    readBw=${array[1]}
+    readIops=${array[3]}
+    throttleFactor=`expr $volCnt \* 2`
+    throttleBwMpbs $readBw $throttleFactor
+    throttleBw=$?
+    throttleIops=`expr ${readIops%.*} / $throttleFactor`
+
+    #minimum iops suuported by Qos Cli is 10
+    if [[ $throttleIops -le $MINVALUEBWIOPS ]]; then
+        throttleIops=10
+    fi
+
+    if [[ $throttleBw -le $MINVALUEBWIOPS ]]; then
+        throttleBw=10
+    fi
+
+    print_info "Throttling all the volumes, Bandwith at ${throttleBw}, IOPS at ${throttleIops}"
+    volIdx=1
+    while [ $volIdx -le $volCnt ]
+    do
+        #texecc $TARGET_ROOT_DIR/bin/cli qos vol_policy --vol vol$volIdx --maxbw $throttleBw --maxiops $throttleIops
+        texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos create --volume-name vol$volIdx --maxbw $throttleBw --maxiops $throttleIops --array-name ${ARRAYNAME}
+        volIdx=`expr $volIdx + 1`
+    done
+    launch_fio $volCnt 1 4 128k write 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
 
 ###################################################
-# QOS WRR CONFIGURATION: FLUSH
+# QOS BANDWIDTH THROTTLE
 ###################################################
-tc_flush_wrr()
+tc_bw_throttle()
 {
-    fio_tc_name="Type: EventWRR, Volumes:8, Jobs:1, Event: Flush"
+    fio_tc_name="Type: BW Throttle, Volumes:8, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
+    volCnt=8
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    print_info "Default Event WRR settings applied"
-    launch_fio 8 1 4 128k read 30 1 2 0
-    EXPECT_PASS "FIO Launch" $?
-    before_read_bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 0 --group_report 1`
-    before_write_bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 1 --group_report 1`
-    print_info "Event WRR changes, Flush (Priority:2, Weight:3)"
-    texecc $TARGET_ROOT_DIR/bin/cli internal update_event_wrr --name flush --prio 2 --weight 3
-    launch_fio 8 1 4 128k read 30 1 2 0
-    EXPECT_PASS "FIO Launch" $?
-    after_read_bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 0 --group_report 1`
-    after_write_bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 1 --group_report 1`
-    print_info "Before Event WRR, Read BW = $before_read_bw"
-    print_info "After Event WRR change, Read BW = $after_read_bw"
+    print_info "FIO Results without BW Throttling"
+    launch_fio $vol7
+    array=()
+    while read line ; do
+        array+=($line)
+    done < <($INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py --volId=257 --ioType="write" --groupReport=1)
+    
+    writeBw=${array[1]}
+    throttleFactor=`expr $volCnt \* 2`
+    throttleBwMpbs $writeBw $throttleFactor
+    throttleBw=$?
+    if [[ $throttleBw -le $MINVALUEBWIOPS ]]; then
+        throttleBw=10
+    fi
+
+    print_info "Throttling all the volumes set at ${throttleBw}"
+    volIdx=1
+    while [ $volIdx -le $volCnt ]
+    do
+        #texecc $TARGET_ROOT_DIR/bin/cli qos vol_policy --vol vol$volIdx --maxbw $throttleBw
+        texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos create --volume-name vol$volIdx --maxbw $throttleBw --array-name ${ARRAYNAME}
+        volIdx=`expr $volIdx + 1`
+    done
+    launch_fio $volCnt 1 4 128k write 30 1 4 0 1 257
     EXPECT_PASS "${fio_tc_name}" $?
     end_tc "${fio_tc_name}"
 }
 
 ###################################################
-# QOS WRR CONFIGURATION: READ REBUILD
+# QOS IOPS THROTTLE
 ###################################################
-tc_readwrite_rebuild_wrr()
+tc_iops_throttle()
 {
-    fio_tc_name="Type: EventWRR, Volumes:8, Jobs:1, Event: Read Write Rebuild"
+    fio_tc_name="Type: IOPS Throttle, Volumes:8, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
+    volCnt=8
     show_tc_info "${fio_tc_name}"
     start_tc "${fio_tc_name}"
-    launch_fio 8 3 4 128k write 30 1 4 0
-    EXPECT_PASS "FIO Launch" $?
-    print_info "Initiate Rebuild, detach device unvme-ns-0"
-    print_info "Event WRR changes, Flush (Priority:0, Weight:1)"
-    texecc $TARGET_ROOT_DIR/bin/cli internal update_event_wrr --name flush --prio 0 --weight 1
-    texecc $TARGET_ROOT_DIR/bin/cli internal update_event_wrr --name fe_rebuild --prio 0 --weight 1
-    texecc $TARGET_ROOT_DIR/bin/cli internal update_event_wrr --name rebuild --prio 2 --weight 3
-    detach_device $detach_dev1
-    add_spare $spare_dev1
-    texecc sleep 5s
-    launch_fio 8 1 4 128k read 30 1 2 0
-    before_read_bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 0 --group_report 1`
-    before_write_bw=`$INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py -v 7 -io 1 --group_report 1`
-    texecc $TARGET_ROOT_DIR/bin/cli internal update_event_wrr --name rebuild --prio 0 --weight 1
-    print_info "Read BW = $before_read_bw"
-    print_info "Write BW = $before_write_bw"
-    waiting_for_rebuild_complete
-    EXPECT_PASS "Rebuild1 Complete" $?
-    texecc $TARGET_ROOT_DIR/bin/cli internal reset_event_wrr
+    print_info "FIO Results without IOPS Throttling"
+    launch_fio $volCnt 1 4 128k write 30 1 4 0 1 257
+    array=()
+    while read line ; do
+        array+=($line)
+    done < <($INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py --volId=257 --ioType="write" --groupReport=1)
+    
+    writeIops=${array[3]}
+    throttleFactor=`expr $volCnt \* 2`
+    throttleIops=`expr ${writeIops%.*} / $throttleFactor`
+    
+    #minimum iops supported by qos is 10
+    if [[ $throttleIops -le $MINVALUEBWIOPS ]]; then
+        throttleIops=10
+    fi
+    print_info "Throttling all the volumes set at ${throttleIops}"
+    volIdx=1
+    while [ $volIdx -le $volCnt ]
+    do
+        #texecc $TARGET_ROOT_DIR/bin/cli qos vol_policy --vol vol$volIdx --maxiops $throttleIops
+        texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos create --volume-name vol$volIdx --maxiops $throttleIops --array-name ${ARRAYNAME}
+        volIdx=`expr $volIdx + 1`
+    done
+    launch_fio $volCnt 1 4 128k write 30 1 4 0 1 257
+    EXPECT_PASS "${fio_tc_name}" $?
+    end_tc "${fio_tc_name}"
 }
 
+###################################################
+# QOS 1 VOLUME MINIMUM BANDWIDTH
+###################################################
+tc_1v_min_bw_guarantee()
+{
+    fio_tc_name="Type: BW Guarantee, Volumes:8, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
+    volCnt=8
+    show_tc_info "${fio_tc_name}"
+    start_tc "${fio_tc_name}"
+    launch_fio $volCnt 1 4 128k write 30 0 1 0 1 7
+    array=()
+    while read line ; do
+        array+=($line)
+    done < <($INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py --volId=7 --ioType="write" --groupReport=0)
+    convertBwMbps ${array[1]}
+    writeBw=$?
+    minBw=`expr $writeBw \* 2`
+     if [[ $minBw -le $MINVALUEBWIOPS ]]; then
+        minBw=10
+    fi
 
+    print_info "Minimum BW Guarantee set for Volume8 as ${minBw}"
+    #texecc $TARGET_ROOT_DIR/bin/cli qos vol_policy --vol vol8 --minbw $minBw
+    texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos create --volume-name vol8 --minbw $minBw --array-name ${ARRAYNAME}
+    launch_fio $volCnt 1 4 128k write 180 0 1 0 1 7
+    EXPECT_PASS "${fio_tc_name}" $?
+    #texecc $TARGET_ROOT_DIR/bin/cli qos vol_reset --vol vol8
+    texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos reset --volume-name vol8 --array-name ${ARRAYNAME}
+    end_tc "${fio_tc_name}"
+}
+
+###################################################
+# QOS 1 VOLUME MINIMUM IOPS
+###################################################
+tc_1v_min_iops_guarantee()
+{
+    fio_tc_name="Type: IOPS Guarantee, Volumes:8, Jobs:1, Details: QD(4), BS(128k), Sequential Write"
+    volCnt=8
+    show_tc_info "${fio_tc_name}"
+    start_tc "${fio_tc_name}"
+    print_info "FIO Results without IOPS Throttling"
+    launch_fio $volCnt 1 4 128k write 30 0 1 0 1 7
+    array=()
+    while read line ; do
+        array+=($line)
+    done < <($INITIATOR_ROOT_DIR/test/system/qos/fio_output_parser.py --volId=7 --ioType="write" --groupReport=0)
+    
+    writeIops=${array[3]}
+
+    minIops=`expr ${writeIops%.*} \* 2`
+     if [[ $minIops -le $MINVALUEBWIOPS ]]; then
+        minIops=10
+    fi
+
+    print_info "Minimum IOPS Guarantee set for Volume8 as ${minIops}"
+    texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos create --volume-name vol8 --miniops $minIops --array-name ${ARRAYNAME}
+    launch_fio $volCnt 1 4 128k write 180 0 1 0 1 7
+    EXPECT_PASS "${fio_tc_name}" $?
+    texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos reset --volume-name vol8 --array-name ${ARRAYNAME}
+    end_tc "${fio_tc_name}"
+}
+
+###################################################
+# QOS 1 VOLUME MINIMUM IOPS
+###################################################
+tc_list_qos_policies()
+{
+    tc_name="List QoS Policies"
+    show_tc_info "${tc_name}"
+    start_tc "${tc_name}"
+    volIdx=1
+    while [ $volIdx -le $volCnt ]
+    do
+        texecc $TARGET_ROOT_DIR/bin/poseidonos-cli qos list --volume-name vol$volIdx --array-name ${ARRAYNAME}
+        volIdx=`expr $volIdx + 1`
+    done
+    end_tc "${fio_tc_name}"
+}
 ###################################################
 # RUN FIO TEST CASES
 ###################################################
@@ -693,11 +851,18 @@ run_fio_tests(){
     base_tc=$2
     if [ $mode == "be_qos" ]; then
         print_info "BE QOS TEST CASES"
+
         tc_array=(tc_1v_31job_write tc_1v_31job_read tc_1v_31job_randwrite tc_1v_31job_randread
                     tc_8v_3job_write tc_8v_3job_read tc_8v_3job_randwrite tc_8v_3job_randread
-                    tc_31v_1job_write tc_31v_1job_read tc_31v_1job_randwrite tc_31v_1job_randread
-                    tc_flush_wrr tc_readwrite_rebuild_wrr)
+                    tc_31v_1job_write tc_31v_1job_read tc_31v_1job_randwrite tc_31v_1job_randread)
+    
+    else
+        print_info "FE QOS TEST CASES"
+        tc_array=(tc_readwrite_fe tc_bw_throttle tc_iops_throttle tc_1v_min_bw_guarantee 
+                    tc_1v_min_iops_guarantee tc_list_qos_policies)
+         
     fi
+    
     local fio_tc_list=""
     for fidx1 in "${!tc_array[@]}"
     do
@@ -711,62 +876,95 @@ run_fio_tests(){
     done
 }
 
+###################################################
+# ENABLE FE QOS
+###################################################
+enable_fe_qos(){
+    texecc $TARGET_ROOT_DIR/test/system/qos/fe_qos_config.py -s true -f true -i low
+    texecc sleep 10s
+}
 
+###################################################
+# DISABLE FE QOS
+###################################################
+disable_fe_qos(){
+    texecc $TARGET_ROOT_DIR/test/system/qos/fe_qos_config.py -s true -f false -i low
+    texecc sleep 10s
+}
 
 ###################################################
 # CODE COMPILATION
 ###################################################
 compile_pos(){
-    compile_flag=$1
-    compile_option=$2
-    texecc $TARGET_ROOT_DIR/configure $compile_flag
-    if [ $compile_option == "pos" ]; then
-        texecc make clean
-	    texecc make -j$(nproc)
-        echo "compilation starts"
-    else
-        texecc $TARGET_ROOT_DIR/script/build_ibofos.sh
-    fi
+    #commented this as compile is never called with an argument
+    #compile_option=$1
+    #if [ $compile_option -eq  "pos" ]; then
+        #texecc make clean
+	    #texecc make -j$(nproc)
+        #echo "compilation starts"
+    #else
+    texecc $TARGET_ROOT_DIR/script/build_ibofos.sh
+    #fi
 }
 
 ###################################################
-# CODE COMPILATION TEST CASES
+# TEST CASES
 ###################################################
-compile_with_be_qos(){
-    compile_tc_name="Compile POS Code, BE QoS Enabled"
-    show_tc_info "${compile_tc_name}"
-    start_tc "${compile_tc_name}"
-#    compile_pos --with-be-qos pos
-    EXPECT_PASS "${compile_tc_name}" $?
-    end_tc "${compile_tc_name}"
-    start_pos
+with_be_qos(){
+    tc_name="POS Code, BE Enabled, FE Disabled"
+    show_tc_info "${tc_name}"
+    start_tc "${tc_name}"
+    compile_pos
+    disable_fe_qos
+    start_ibofos
     EXPECT_PASS "Successful POS Launch & Configuration" $?
-    run_fio_tests be_qos compile_with_be_qos
+    run_fio_tests be_qos with_be_qos
     EXPECT_PASS "Successful Completion of FIO test cases" $?
     texecc sleep 10
-    exit_pos
+    EXPECT_PASS "${tc_name}" $?
+    end_tc "${tc_name}"
+    exit_ibofos
 }
 
+with_fe_qos(){
+    tc_name="POS Code, BE Enabled, FE Enabled"
+    echo ""
+    echo ""
+    echo $tc_name
+    show_tc_info "${tc_name}"
+    start_tc "${tc_name}"
+    enable_fe_qos
+    start_ibofos
+    EXPECT_PASS "Successful POS Launch & Configuration" $?
+    run_fio_tests fe_qos with_fe_qos
+    EXPECT_PASS "Successful Completion of FIO test cases" $?
+    texecc sleep 10
+    EXPECT_PASS "${tc_name}" $?
+    disable_fe_qos
+    end_tc "${tc_name}"
+    exit_ibofos
+}
 ###################################################
-# CODE COMPILATION SANITY TESTS
+# SANITY TESTS
 ###################################################
 run_qos_test_cases(){
     echo "----------------------------------------------------------------"
-    echo "Test Cases To Compile POS Code with/ without QoS"
+    echo "Test Cases To Run POS Code with BE/ FE QoS"
     echo "----------------------------------------------------------------"
-    compile_tc_array=(compile_with_be_qos)
-    compile_total_tc=${compile_tc_array[@]}
-    local compile_tc_list=""
+    tc_array_one=(with_be_qos with_fe_qos)
+    total_tc=${compile_tc_array[@]}
+    local tc_list=""
 
-    for fidx in "${!compile_tc_array[@]}"
+    for fidx in "${!tc_array_one[@]}"
     do
-         ${compile_tc_array[fidx]}
-         compile_tc_list+="   $((fidx+1)): ${compile_tc_array[fidx]}\n"
+         echo ${tc_array_one[fidx]}
+         ${tc_array_one[fidx]}
+         tc_list+="   $((fidx+1)): ${tc_array_one[fidx]}\n"
     done
-    print_notice "All COMPILATION (${compile_total_tc} TCs) have PASSED"
-    for fidx1 in "${!compile_tc_array[@]}"
+    print_notice "All QOS (${total_tc} TCs) have PASSED"
+    for fidx1 in "${!tc_array_one[@]}"
     do
-        echo "    ${compile_tc_array[fidx1]}"
+        echo "    ${tc_array_one[fidx1]}"
     done
 }
 
@@ -782,8 +980,8 @@ Synopsis
 
 Prerequisite
     1. please make sure that file below is properly configured according to your env.
-        {POS_ROOT}/test/system/network/network_config.sh
-    2. please make sure that pos binary exists on top of ${POS_ROOT}
+        {IBOFOS_ROOT}/test/system/network/network_config.sh
+    2. please make sure that ibofos binary exists on top of ${IBOFOS_ROOT}
     3. please configure your ip address, volume size, etc. propertly by editing nvme_fush_ci_test.sh
 
 Description
@@ -836,18 +1034,18 @@ done
 shift $(($OPTIND - 1))
 
 if [ -z $LOC ]; then
-LOC=HQ
+LOC=SSIR
 fi
 
 if [ ${LOC} == "SSIR" ];then
     DEFAULT_TRANSPORT=tcp
-    DEFAULT_FABRIC_IP=133.133.133.25
+    TARGET_FABRIC_IP=111.100.13.175
     TARGET_SYSTEM_IP=107.109.113.29
     TARGET_USERNAME=root
     TARGET_PWD=siso@123
 else
     DEFAULT_TRANSPORT=tcp
-    DEFAULT_FABRIC_IP=10.100.11.5   # CI Server VM IP
+    TARGET_FABRIC_IP=10.100.11.5   # CI Server VM IP
     TARGET_SYSTEM_IP=10.1.11.5 #Set KHQ Target System IP
     TARGET_USERNAME=root
     TARGET_PWD=ibof
@@ -864,7 +1062,7 @@ TRANSPORT=$DEFAULT_TRANSPORT
 fi
 
 if [ -z $TARGET_IP ]; then
-TARGET_IP=$DEFAULT_FABRIC_IP
+TARGET_IP=$TARGET_FABRIC_IP
 fi
 
 if [ -z $SUBSYSTEM ]; then
@@ -874,6 +1072,7 @@ fi
 if [ -z $PORT ]; then
 PORT=$DEFAULT_PORT
 fi
+
 if [ -z $EXEC_MODE ]; then
 EXEC_MODE=1
 fi
