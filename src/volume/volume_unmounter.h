@@ -43,7 +43,7 @@ namespace pos
 class VolumeUnmounter : public VolumeInterface
 {
 public:
-    explicit VolumeUnmounter(VolumeList& volumeList, std::string arrayName);
+    explicit VolumeUnmounter(VolumeList& volumeList, std::string arrayName, int arrayID);
     ~VolumeUnmounter(void) override;
 
     int Do(string name);

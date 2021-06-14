@@ -42,7 +42,7 @@ namespace pos
 class VolumeDetacher : public VolumeInterface
 {
 public:
-    explicit VolumeDetacher(VolumeList& volumeList, std::string arrayName);
+    explicit VolumeDetacher(VolumeList& volumeList, std::string arrayName, int arrayID);
     ~VolumeDetacher(void) override;
 
     void DoAll(void);

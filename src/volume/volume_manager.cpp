@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 
+#include "src/array_mgmt/array_mgmt_policy.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.h"
@@ -59,7 +60,8 @@ namespace pos
 
 VolumeManager::VolumeManager(IArrayInfo* i, IStateControl* s)
 :arrayInfo(i),
-state(s)
+state(s),
+volumeMangerIdx(ArrayMgmtPolicy::MAX_ARRAY_CNT)
 {
     state->Subscribe(this, typeid(*this).name());
 }
@@ -77,7 +79,13 @@ VolumeManager::Init(void)
     initialized = true;
     _LoadVolumes();
 
-    VolumeServiceSingleton::Instance()->Register(arrayInfo->GetName(), this);
+    int arrayIdx = VolumeEventPublisherSingleton::Instance()->GetArrayIdx(arrayInfo->GetName());
+    volumeMangerIdx = VolumeServiceSingleton::Instance()->Register(arrayIdx, this);
+
+    if (volumeMangerIdx < 0)
+    {
+        result = -1;
+    }
 
     return result;
 }
@@ -100,7 +108,7 @@ VolumeManager::Dispose(void)
     initialized = false;
     volumes.Clear();
 
-    VolumeServiceSingleton::Instance()->Unregister(arrayInfo->GetName());
+    VolumeServiceSingleton::Instance()->Unregister(volumeMangerIdx);
     VolumeEventPublisherSingleton::Instance()->RemoveArrayIdx(arrayInfo->GetName());
 }
 
@@ -164,7 +172,7 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
         return ret;
     }
 
-    VolumeCreator volumeCreator(volumes, arrayInfo->GetName());
+    VolumeCreator volumeCreator(volumes, arrayInfo->GetName(), volumeMangerIdx);
     return volumeCreator.Do(name, size, maxIops, maxBw);
 }
 
@@ -177,7 +185,7 @@ VolumeManager::Delete(std::string name)
         return ret;
     }
 
-    VolumeDeleter volumeDeleter(volumes, arrayInfo->GetName());
+    VolumeDeleter volumeDeleter(volumes, arrayInfo->GetName(), volumeMangerIdx);
     return volumeDeleter.Do(name);
 }
 
@@ -190,7 +198,7 @@ VolumeManager::Mount(std::string name, std::string subnqn)
         return ret;
     }
 
-    VolumeMounter volumeMounter(volumes, arrayInfo->GetName());
+    VolumeMounter volumeMounter(volumes, arrayInfo->GetName(), volumeMangerIdx);
     return volumeMounter.Do(name, subnqn);
 }
 
@@ -203,7 +211,7 @@ VolumeManager::Unmount(std::string name)
         return ret;
     }
 
-    VolumeUnmounter volumeUnmounter(volumes, arrayInfo->GetName());
+    VolumeUnmounter volumeUnmounter(volumes, arrayInfo->GetName(), volumeMangerIdx);
     return volumeUnmounter.Do(name);
 }
 
@@ -216,7 +224,7 @@ VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw)
         return ret;
     }
 
-    VolumeQosUpdater volumeQosUpdater(volumes, arrayInfo->GetName());
+    VolumeQosUpdater volumeQosUpdater(volumes, arrayInfo->GetName(), volumeMangerIdx);
     return volumeQosUpdater.Do(name, maxIops, maxBw);
 }
 
@@ -229,7 +237,7 @@ VolumeManager::Rename(std::string oldName, std::string newName)
         return ret;
     }
 
-    VolumeRenamer volumeRenamer(volumes, arrayInfo->GetName());
+    VolumeRenamer volumeRenamer(volumes, arrayInfo->GetName(), volumeMangerIdx);
     return volumeRenamer.Do(oldName, newName);
 }
 
@@ -242,7 +250,7 @@ VolumeManager::Resize(std::string name, uint64_t newSize)
         return ret;
     }
 
-    VolumeResizer volumeResizer(volumes, arrayInfo->GetName());
+    VolumeResizer volumeResizer(volumes, arrayInfo->GetName(), volumeMangerIdx);
     return volumeResizer.Do(name, newSize);
 }
 
@@ -264,7 +272,7 @@ VolumeManager::GetVolumeStatus(int volId)
 int
 VolumeManager::_LoadVolumes(void)
 {
-    VolumeLoader volumeLoader(volumes, arrayInfo->GetName());
+    VolumeLoader volumeLoader(volumes, arrayInfo->GetName(), volumeMangerIdx);
     return volumeLoader.Do();
 }
 
@@ -305,7 +313,7 @@ VolumeManager::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint
 void
 VolumeManager::DetachVolumes(void)
 {
-    VolumeDetacher volumeDetacher(volumes, arrayInfo->GetName());
+    VolumeDetacher volumeDetacher(volumes, arrayInfo->GetName(), volumeMangerIdx);
     volumeDetacher.DoAll();
 }
 
@@ -395,6 +403,12 @@ VolumeManager::_CheckPrerequisite(void)
     }
 
     return (int)POS_EVENT_ID::SUCCESS;
+}
+
+std::string
+VolumeManager::GetArrayName(void)
+{
+    return arrayInfo->GetName();
 }
 
 } // namespace pos

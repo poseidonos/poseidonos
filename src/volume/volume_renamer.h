@@ -41,7 +41,7 @@ namespace pos
 class VolumeRenamer : public VolumeInterface
 {
 public:
-    explicit VolumeRenamer(VolumeList& volumeList, std::string arrayName);
+    explicit VolumeRenamer(VolumeList& volumeList, std::string arrayName, int arrayID);
     ~VolumeRenamer(void) override;
 
     int Do(string oldName, string newName);

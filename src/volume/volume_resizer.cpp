@@ -41,8 +41,8 @@
 namespace pos
 {
 
-VolumeResizer::VolumeResizer(VolumeList& volumeList, std::string arrayName)
-: VolumeInterface(volumeList, arrayName)
+VolumeResizer::VolumeResizer(VolumeList& volumeList, std::string arrayName, int arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID)
 {
 }
 

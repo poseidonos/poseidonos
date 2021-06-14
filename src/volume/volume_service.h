@@ -36,6 +36,8 @@
 #include <unordered_map>
 
 #include "i_volume_manager.h"
+
+#include "src/array_mgmt/array_mgmt_policy.h"
 #include "src/lib/singleton.h"
 
 namespace pos
@@ -47,14 +49,21 @@ class VolumeService
 public:
     VolumeService(void);
     virtual ~VolumeService(void);
-    void Register(std::string arrayName, IVolumeManager* writer);
-    void Unregister(std::string arrayName);
-    virtual IVolumeManager* GetVolumeManager(std::string arrayName);
-    int GetID(std::string arrayName);
+
+    void Clear(void);
+    int Register(int arrayId, IVolumeManager* volumeManager);
+    void Unregister(int arrayId);
+    IVolumeManager* GetVolumeManager(int arrayId);
+    IVolumeManager* GetVolumeManager(std::string arrayName);
+    int GetVolumeManagerCount(void)
+    {
+        return volumeManagerCnt;
+    }
 
 private:
-    IVolumeManager* _Find(std::string arrayName);
-    std::unordered_map<std::string, IVolumeManager*> volumeManager;
+    int volumeManagerCnt;
+    IVolumeManager* items[ArrayMgmtPolicy::MAX_ARRAY_CNT];
+    std::mutex listMutex;
 };
 
 using VolumeServiceSingleton = Singleton<VolumeService>;

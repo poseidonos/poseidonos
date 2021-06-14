@@ -44,8 +44,8 @@
 namespace pos
 {
 
-VolumeDeleter::VolumeDeleter(VolumeList& volumeList, std::string arrayName)
-: VolumeInterface(volumeList, arrayName)
+VolumeDeleter::VolumeDeleter(VolumeList& volumeList, std::string arrayName, int arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID)
 {
 }
 

@@ -42,7 +42,7 @@ namespace pos
 class VolumeResizer : public VolumeInterface
 {
 public:
-    explicit VolumeResizer(VolumeList& volumeList, std::string arrayName);
+    explicit VolumeResizer(VolumeList& volumeList, std::string arrayName, int arrayID);
     ~VolumeResizer(void) override;
 
     int Do(string name, uint64_t newSize);

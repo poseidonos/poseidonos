@@ -47,8 +47,8 @@
 namespace pos
 {
 
-VolumeDetacher::VolumeDetacher(VolumeList& volumeList, std::string arrayName)
-: VolumeInterface(volumeList, arrayName)
+VolumeDetacher::VolumeDetacher(VolumeList& volumeList, std::string arrayName, int arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID)
 {
 }
 

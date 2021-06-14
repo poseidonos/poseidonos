@@ -42,8 +42,8 @@
 namespace pos
 {
 
-VolumeRenamer::VolumeRenamer(VolumeList& volumeList, std::string arrayName)
-: VolumeInterface(volumeList, arrayName)
+VolumeRenamer::VolumeRenamer(VolumeList& volumeList, std::string arrayName, int arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID)
 {
 }
 

@@ -33,6 +33,7 @@ public:
     MOCK_METHOD(int, IncreasePendingIOCountIfNotZero, (int volId, VolumeStatus mounted, uint32_t ioCountToSubmit), (override));
     MOCK_METHOD(int, DecreasePendingIOCount, (int volId, VolumeStatus mounted, uint32_t ioCountCompleted), (override));
     MOCK_METHOD(VolumeBase*, GetVolume, (int volId), (override));
+    MOCK_METHOD(std::string, GetArrayName, (), (override));
 };
 
 } // namespace pos

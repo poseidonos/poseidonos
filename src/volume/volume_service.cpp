@@ -32,77 +32,115 @@
 
 #include "i_volume_manager.h"
 
+#include <string>
+
+#include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume_service.h"
 
 namespace pos
 {
 VolumeService::VolumeService(void)
 {
+    volumeManagerCnt = 0;
+
+    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
+    {
+        items[i] = nullptr;
+    }
 }
 
 VolumeService::~VolumeService(void)
 {
+    Clear();
+}
+
+void
+VolumeService::Clear(void)
+{
+    std::unique_lock<std::mutex> lock(listMutex);
+    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
+    {
+        if (items[i] != nullptr)
+        {
+            items[i] = nullptr;
+        }
+    }
+    volumeManagerCnt = 0;
+}
+
+int
+VolumeService::Register(int arrayId, IVolumeManager* volumeManager)
+{
+    if (arrayId < 0)
+    {
+        POS_TRACE_ERROR(9999, "Fail to Register Volume Manager for Array {}", volumeManager->GetArrayName());
+        return arrayId;
+    }
+
+    std::unique_lock<std::mutex> lock(listMutex);
+
+    if (items[arrayId] != nullptr)
+    {
+        POS_TRACE_ERROR(9999, "Volume manager for array {} already exists", volumeManager->GetArrayName());
+        return -1;
+    }
+
+    items[arrayId] = volumeManager;
+    volumeManagerCnt++;
+    POS_TRACE_DEBUG(9999, "Volume manager for array {} is registered", volumeManager->GetArrayName());
+
+    return arrayId;
+}
+
+void
+VolumeService::Unregister(int arrayId)
+{
+    if (arrayId < 0 || arrayId >= ArrayMgmtPolicy::MAX_ARRAY_CNT)
+    {
+        POS_TRACE_ERROR(9999, "Volume manager for array {} does not exist", arrayId);
+        return;
+    }
+
+    std::unique_lock<std::mutex> lock(listMutex);
+    IVolumeManager* target = items[arrayId];
+    if (target == nullptr)
+    {
+        POS_TRACE_ERROR(9999, "Volume manager for array {} does not exist", arrayId);
+        return;
+    }
+
+    items[arrayId] = nullptr;
+    volumeManagerCnt--;
+
+    POS_TRACE_DEBUG(9999, "Volume manager for array {} is unregistered", arrayId);
 }
 
 IVolumeManager*
-VolumeService::_Find(std::string arrayName)
+VolumeService::GetVolumeManager(int arrayId)
 {
-    // TODO (huijeong.kim) This's temporal workaround for current single array
-    // Current Write handler in single array uses "" for arrayName
-    if (arrayName == "" && volumeManager.size() == 1)
+    IVolumeManager* volumeManager = nullptr;
+
+    if (likely((0 <= arrayId) && (arrayId < ArrayMgmtPolicy::MAX_ARRAY_CNT)))
     {
-        return volumeManager.begin()->second;
+        volumeManager = items[arrayId];
     }
 
-    auto found = volumeManager.find(arrayName);
-    if (found == volumeManager.end())
-    {
-        return nullptr;
-    }
-    else
-    {
-        return found->second;
-    }
+    return volumeManager;
 }
 
-void
-VolumeService::Register(std::string arrayName, IVolumeManager* writer)
-{
-    if (volumeManager.find(arrayName) == volumeManager.end())
-    {
-        volumeManager.emplace(arrayName, writer);
-        POS_TRACE_DEBUG(9999,
-            "Volume manager for array {} is registered", arrayName);
-    }
-    else
-    {
-        POS_TRACE_ERROR(9999,
-            "Volume manager for array {} already exists", arrayName);
-    }
-}
-
-void
-VolumeService::Unregister(std::string arrayName)
-{
-    if (volumeManager.find(arrayName) != volumeManager.end())
-    {
-        volumeManager.erase(arrayName);
-        POS_TRACE_DEBUG(9999,
-            "Volume manager for array {} is unregistered", arrayName);
-    }
-    else
-    {
-        POS_TRACE_ERROR(9999,
-            "Volume manager for array {} does not exist", arrayName);
-    }
-}
 
 IVolumeManager*
 VolumeService::GetVolumeManager(std::string arrayName)
 {
-    return _Find(arrayName);
+    int arrayId = VolumeEventPublisherSingleton::Instance()->GetArrayIdx(arrayName);
+    if (arrayId >= 0)
+    {
+        return items[arrayId];
+    }
+    return nullptr;
 }
 
 } // namespace pos

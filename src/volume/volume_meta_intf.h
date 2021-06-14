@@ -42,8 +42,8 @@ namespace pos
 class VolumeMetaIntf
 {
 public:
-    static int LoadVolumes(VolumeList& volList, std::string arrayName);
-    static int SaveVolumes(VolumeList& volList, std::string arrayName);
+    static int LoadVolumes(VolumeList& volList, std::string arrayName, int arrayID);
+    static int SaveVolumes(VolumeList& volList, std::string arrayName, int arrayID);
 };
 } // namespace pos
 

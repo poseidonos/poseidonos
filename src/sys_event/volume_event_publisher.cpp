@@ -55,8 +55,14 @@ VolumeEventPublisher::~VolumeEventPublisher()
 
 
 int
-VolumeEventPublisher::_GetArrayIdx(std::string arrayName)
+VolumeEventPublisher::GetArrayIdx(std::string arrayName)
 {
+    if (arrayName == "")
+    {
+        // for QoS Mananger : Need to modify
+        return ArrayMgmtPolicy::MAX_ARRAY_CNT;
+    }
+
     for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
     {
         if (arrayNameList[i] == arrayName)
@@ -75,6 +81,7 @@ VolumeEventPublisher::_SetArrayIdx(std::string arrayName)
         if (arrayNameList[i] == "  ")
         {
             arrayNameList[i] = arrayName;
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT, "Array {} is allocated Array Idx {}", arrayName, i);
             return i;
         }
     }
@@ -104,8 +111,13 @@ VolumeEventPublisher::RemoveArrayIdx(std::string arrayName)
 void
 VolumeEventPublisher::RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayID)
 {
-    int arrayIdx = _GetArrayIdx(arrayName);
+    int arrayIdx = GetArrayIdx(arrayName);
 
+    if (arrayIdx == ArrayMgmtPolicy::MAX_ARRAY_CNT)
+    {
+        qosManagerVolumeEvent = subscriber;
+        return;
+    }
     subscribers.push_back(std::pair<int, VolumeEvent*>(arrayIdx, subscriber));
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "VolumeEvent subscriber {} is registered", subscriber->Tag());
@@ -114,7 +126,7 @@ VolumeEventPublisher::RegisterSubscriber(VolumeEvent* subscriber, std::string ar
 void
 VolumeEventPublisher::RegisterNvmfTargetSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayID)
 {
-    int arrayIdx = _GetArrayIdx(arrayName);
+    int arrayIdx = GetArrayIdx(arrayName);
 
     subscribers.insert(subscribers.begin(), std::pair<int, VolumeEvent*>(arrayIdx, subscriber));
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
@@ -124,7 +136,13 @@ VolumeEventPublisher::RegisterNvmfTargetSubscriber(VolumeEvent* subscriber, std:
 void
 VolumeEventPublisher::RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayID)
 {
-    int arrayIdx = _GetArrayIdx(arrayName);
+    int arrayIdx = GetArrayIdx(arrayName);
+
+    if (arrayIdx == ArrayMgmtPolicy::MAX_ARRAY_CNT)
+    {
+        qosManagerVolumeEvent = nullptr;
+        return;
+    }
 
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
@@ -149,7 +167,7 @@ VolumeEventPublisher::NotifyVolumeCreated(std::string volName, int volID,
         "NotifyVolumeCreated, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
-    int arrayIdx = _GetArrayIdx(arrayName);
+    int arrayIdx = GetArrayIdx(arrayName);
     for (auto it = subscribers.rbegin(); it != subscribers.rend(); ++it)
     {
         if (it->first == arrayIdx)
@@ -168,6 +186,8 @@ VolumeEventPublisher::NotifyVolumeCreated(std::string volName, int volID,
                 it->second->Tag(), res);
         }
     }
+
+    qosManagerVolumeEvent->VolumeCreated(volName, volID, volSizeByte, maxiops, maxbw, arrayName, arrayID);
     return ret;
 }
 
@@ -179,7 +199,7 @@ VolumeEventPublisher::NotifyVolumeUpdated(std::string volName, int volID, uint64
         "NotifyVolumeUpdated, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
-    int arrayIdx = _GetArrayIdx(arrayName);
+    int arrayIdx = GetArrayIdx(arrayName);
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
         if (it->first == arrayIdx)
@@ -198,6 +218,8 @@ VolumeEventPublisher::NotifyVolumeUpdated(std::string volName, int volID, uint64
                 it->second->Tag(), res);
         }
     }
+
+    qosManagerVolumeEvent->VolumeUpdated(volName, volID, maxiops, maxbw, arrayName, arrayID);
     return ret;
 }
 
@@ -209,7 +231,7 @@ VolumeEventPublisher::NotifyVolumeDeleted(std::string volName, int volID, uint64
         "NotifyVolumeDeleted, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
-    int arrayIdx = _GetArrayIdx(arrayName);
+    int arrayIdx = GetArrayIdx(arrayName);
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
         if (it->first == arrayIdx)
@@ -228,6 +250,8 @@ VolumeEventPublisher::NotifyVolumeDeleted(std::string volName, int volID, uint64
                 it->second->Tag(), res);
         }
     }
+
+    qosManagerVolumeEvent->VolumeDeleted(volName, volID, volSizeByte, arrayName, arrayID);
     return ret;
 }
 
@@ -239,7 +263,7 @@ VolumeEventPublisher::NotifyVolumeMounted(std::string volName, std::string subnq
         "NotifyVolumeMounted, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
-    int arrayIdx = _GetArrayIdx(arrayName);
+    int arrayIdx = GetArrayIdx(arrayName);
     for (auto it = subscribers.rbegin(); it != subscribers.rend(); ++it)
     {
         if (it->first == arrayIdx)
@@ -257,6 +281,8 @@ VolumeEventPublisher::NotifyVolumeMounted(std::string volName, std::string subnq
                 it->second->Tag(), res);
         }
     }
+
+    qosManagerVolumeEvent->VolumeMounted(volName, subnqn, volID, volSizeByte, maxiops, maxbw, arrayName, arrayID);
     return ret;
 }
 
@@ -267,7 +293,7 @@ VolumeEventPublisher::NotifyVolumeUnmounted(std::string volName, int volID, std:
         "NotifyVolumeUnmounted, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
-    int arrayIdx = _GetArrayIdx(arrayName);
+    int arrayIdx = GetArrayIdx(arrayName);
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
         if (it->first == arrayIdx)
@@ -286,6 +312,8 @@ VolumeEventPublisher::NotifyVolumeUnmounted(std::string volName, int volID, std:
                 it->second->Tag(), res);
         }
     }
+
+    qosManagerVolumeEvent->VolumeUnmounted(volName, volID, arrayName, arrayID);
     return ret;
 }
 
@@ -297,7 +325,7 @@ VolumeEventPublisher::NotifyVolumeLoaded(std::string name, int id,
         "NotifyVolumeLoaded, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
-    int arrayIdx = _GetArrayIdx(arrayName);
+    int arrayIdx = GetArrayIdx(arrayName);
     for (auto it = subscribers.rbegin(); it != subscribers.rend(); ++it)
     {
         if (it->first == arrayIdx)
@@ -316,6 +344,8 @@ VolumeEventPublisher::NotifyVolumeLoaded(std::string name, int id,
                 it->second->Tag(), res);
         }
     }
+
+    qosManagerVolumeEvent->VolumeLoaded(name, id, totalSize, maxiops, maxbw, arrayName, arrayID);
     return ret;
 }
 
@@ -325,7 +355,7 @@ VolumeEventPublisher::NotifyVolumeDetached(vector<int> volList, std::string arra
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeDetached, # of subscribers: {}", subscribers.size());
 
-    int arrayIdx = _GetArrayIdx(arrayName);
+    int arrayIdx = GetArrayIdx(arrayName);
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
         if (it->first == arrayIdx)
@@ -340,6 +370,8 @@ VolumeEventPublisher::NotifyVolumeDetached(vector<int> volList, std::string arra
                 it->second->Tag());
         }
     }
+
+    qosManagerVolumeEvent->VolumeDetached(volList, arrayName, arrayID);
 }
 
 } // namespace pos

@@ -53,8 +53,8 @@ enum VolumeStatus
 class VolumeBase
 {
 public:
-    VolumeBase(std::string arrayName, std::string volName, uint64_t volSizeByte);
-    VolumeBase(std::string arrayName, std::string volName, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw);
+    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte);
+    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw);
     virtual ~VolumeBase(void);
     int Mount(void);
     int Unmount(void);
@@ -69,10 +69,10 @@ public:
     {
         return name;
     }
-    std::string
+    int
     GetArray(void)
     {
-        return array;
+        return arrayId;
     }
     std::string
     GetSubnqn(void)
@@ -123,7 +123,8 @@ public:
 protected:
     VolumeStatus status;
     std::string name;
-    std::string array = "";
+    std::string array;
+    int arrayId;
     std::string subNqn = "";
     uint64_t maxiops = 0; // 0 == unlimited
     uint64_t maxbw = 0;   // 0 == unlimited

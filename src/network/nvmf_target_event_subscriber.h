@@ -45,16 +45,16 @@ namespace pos
 class NvmfTargetEventSubscriber : public VolumeEvent
 {
 public:
-    NvmfTargetEventSubscriber(NvmfVolume* vol, std::string arrayName, int arrayID);
+    NvmfTargetEventSubscriber(NvmfVolume* vol, std::string arrayName, int arrayId);
     ~NvmfTargetEventSubscriber(void);
 
-    virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayID) override;
-    bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte, string arrayName, int arrayID) override;
-    bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayID) override;
-    bool VolumeUnmounted(string volName, int volID, string arrayName, int arrayID) override;
-    bool VolumeLoaded(string volName, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayID) override;
-    bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayID) override;
-    void VolumeDetached(vector<int> volList, string arrayName, int arrayID) override;
+    virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;
+    bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte, string arrayName, int arrayId) override;
+    bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;
+    bool VolumeUnmounted(string volName, int volID, string arrayName, int arrayId) override;
+    bool VolumeLoaded(string volName, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;
+    bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;
+    void VolumeDetached(vector<int> volList, string arrayName, int arrayId) override;
 
 private:
     NvmfVolume* volume;

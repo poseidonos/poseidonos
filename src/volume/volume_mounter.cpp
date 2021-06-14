@@ -43,8 +43,8 @@
 namespace pos
 {
 
-VolumeMounter::VolumeMounter(VolumeList& volumeList, std::string arrayName)
-: VolumeInterface(volumeList, arrayName)
+VolumeMounter::VolumeMounter(VolumeList& volumeList, std::string arrayName, int arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID)
 {
 }
 

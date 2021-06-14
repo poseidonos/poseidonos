@@ -41,8 +41,8 @@
 
 namespace pos
 {
-VolumeQosUpdater::VolumeQosUpdater(VolumeList& volumeList, std::string arrayName)
-: VolumeInterface(volumeList, arrayName)
+VolumeQosUpdater::VolumeQosUpdater(VolumeList& volumeList, std::string arrayName, int arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID)
 {
 }
 

@@ -43,7 +43,7 @@
 namespace pos
 {
 int
-VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName)
+VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName, int arrayID)
 {
     std::string volFile = "vbr";
     uint32_t fileSize = 256 * 1024; // 256KB
@@ -93,7 +93,7 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName)
                     uint64_t total = doc["volumes"][i]["total"].GetUint64();
                     uint64_t maxiops = doc["volumes"][i]["maxiops"].GetUint64();
                     uint64_t maxbw = doc["volumes"][i]["maxbw"].GetUint64();
-                    VolumeBase* volume = new Volume(arrayName, name, total, maxiops, maxbw);
+                    VolumeBase* volume = new Volume(arrayName, arrayID, name, total, maxiops, maxbw);
                     volList.Add(volume, id);
                 }
             }
@@ -110,7 +110,7 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName)
 }
 
 int
-VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName)
+VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName, int arrayID)
 {
     std::string volFile = "vbr";
     uint32_t fileSize = 256 * 1024; // 256KB

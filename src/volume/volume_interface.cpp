@@ -43,9 +43,10 @@
 namespace pos
 {
 
-VolumeInterface::VolumeInterface(VolumeList& volumeList, std::string arrayName)
+VolumeInterface::VolumeInterface(VolumeList& volumeList, std::string arrayName, int arrayID)
 : volumeList(volumeList),
   arrayName(arrayName),
+  arrayID(arrayID),
   eventPublisher(VolumeEventPublisherSingleton::Instance())
 {
 }
@@ -125,7 +126,7 @@ VolumeInterface::_PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops
 int
 VolumeInterface::_SaveVolumes(void)
 {
-    return VolumeMetaIntf::SaveVolumes(volumeList, arrayName);
+    return VolumeMetaIntf::SaveVolumes(volumeList, arrayName, arrayID);
 }
 
 } // namespace pos

@@ -67,13 +67,14 @@ public:
     void NotifyVolumeDetached(vector<int> volList, std::string arrayName, int arrayID);
 
     int RemoveArrayIdx(std::string arrayName);
+    int GetArrayIdx(std::string arrayName);
 
 private:
-    int _GetArrayIdx(std::string arrayName);
     int _SetArrayIdx(std::string arrayName);
 
     vector<std::pair<int, VolumeEvent*>> subscribers;
     std::string arrayNameList[ArrayMgmtPolicy::MAX_ARRAY_CNT];
+    VolumeEvent* qosManagerVolumeEvent;
 };
 
 using VolumeEventPublisherSingleton = Singleton<VolumeEventPublisher>;

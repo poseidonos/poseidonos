@@ -41,7 +41,7 @@ namespace pos
 class VolumeDeleter : public VolumeInterface
 {
 public:
-    explicit VolumeDeleter(VolumeList& volumeList, std::string arrayName);
+    explicit VolumeDeleter(VolumeList& volumeList, std::string arrayName, int arrayID);
     ~VolumeDeleter(void) override;
 
     int Do(string name);

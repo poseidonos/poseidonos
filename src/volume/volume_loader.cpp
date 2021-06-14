@@ -43,8 +43,8 @@
 
 namespace pos
 {
-VolumeLoader::VolumeLoader(VolumeList& volumeList, std::string arrayName)
-: VolumeInterface(volumeList, arrayName)
+VolumeLoader::VolumeLoader(VolumeList& volumeList, std::string arrayName, int arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID)
 {
 }
 
@@ -57,7 +57,7 @@ VolumeLoader::Do(void)
 {
     volumeList.Clear();
 
-    int ret = VolumeMetaIntf::LoadVolumes(volumeList, arrayName);
+    int ret = VolumeMetaIntf::LoadVolumes(volumeList, arrayName, arrayID);
     if (ret != (int)POS_EVENT_ID::SUCCESS)
     {
         return ret;
