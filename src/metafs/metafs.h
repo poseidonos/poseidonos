@@ -72,6 +72,8 @@ private:
     POS_EVENT_ID _CreateMetaVolume(void);
     POS_EVENT_ID _OpenMetaVolume(void);
     POS_EVENT_ID _CloseMetaVolume(void);
+    void _SetMss(void);
+    void _ClearMss(void);
 
     void _RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageMediaInfoList& mediaList);
     MetaStorageInfo _MakeMetaStorageMediaInfo(PartitionType ptnType);

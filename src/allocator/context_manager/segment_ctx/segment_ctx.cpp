@@ -85,8 +85,11 @@ SegmentCtx::Init(void)
 void
 SegmentCtx::Close(void)
 {
-    delete[] segmentInfos;
-    segmentInfos = nullptr;
+    if (segmentInfos != nullptr)
+    {
+        delete[] segmentInfos;
+        segmentInfos = nullptr;
+    }
 }
 
 uint32_t

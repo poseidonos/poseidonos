@@ -31,6 +31,7 @@
  */
 
 #include "metafs_file_control_api.h"
+#include "src/metafs/log/metafs_log.h"
 
 namespace pos
 {
@@ -110,7 +111,8 @@ MetaFsFileControlApi::Open(std::string& fileName, int& fd)
 
     fd = reqMsg.completionData.openfd;
 
-    _AddFileContext(fileName, fd);
+    if (POS_EVENT_ID::SUCCESS == rc)
+        _AddFileContext(fileName, fd);
 
     return rc;
 }
@@ -392,14 +394,33 @@ MetaFsFileControlApi::_GetFileInode(std::string& fileName)
 void
 MetaFsFileControlApi::_AddFileContext(std::string& fileName, FileDescriptorType fd)
 {
-    // get the inode
-    MetaFileInodeInfo* info = _GetFileInode(fileName);
-
-    // get the position
     uint32_t index = 0;
+    MetaFileInodeInfo* info = nullptr;
+
     {
         SPIN_LOCK_GUARD_IN_SCOPE(iLock);
+
+        // find first
+        if (nameMapByfd.find(fd) != nameMapByfd.end())
+        {
+            return;
+        }
+
+        // get the inode
+        info = _GetFileInode(fileName);
+
+        // get the position
         index = bitmap->FindFirstZero();
+        if (index >= MetaFsConfig::MAX_VOLUME_CNT)
+        {
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_NEED_MORE_CONTEXT_SLOT,
+                "Metafile count={}", index);
+            return;
+        }
+
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+                "FileContext is allocated index={}, array={}", index, arrayName);
+
         bitmap->SetBit(index);
         nameMapByfd.insert(std::pair<FileDescriptorType, std::string>(fd, fileName));
         idxMapByName.insert(std::pair<std::string, uint32_t>(fileName, index));
@@ -420,16 +441,22 @@ MetaFsFileControlApi::_RemoveFileContext(FileDescriptorType fd)
     SPIN_LOCK_GUARD_IN_SCOPE(iLock);
 
     auto it1 = nameMapByfd.find(fd);
-    std::string fileName = it1->second;
+    if (it1 != nameMapByfd.end())
+    {
+        std::string fileName = it1->second;
 
-    auto it2 = idxMapByName.find(fileName);
-    uint32_t index = it2->second;
+        auto it2 = idxMapByName.find(fileName);
+        uint32_t index = it2->second;
 
-    nameMapByfd.erase(it1);
-    idxMapByName.erase(it2);
-    bitmap->ClearBit(index);
+        nameMapByfd.erase(it1);
+        idxMapByName.erase(it2);
+        bitmap->ClearBit(index);
 
-    cxtList[index].Reset();
+        cxtList[index].Reset();
+
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "FileContext is deallocated index={}, array={}", index, arrayName);
+    }
 }
 
 void

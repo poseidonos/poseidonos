@@ -103,6 +103,8 @@ MetaFs::Init(void)
         rc = _CreateMetaVolume();
         if (POS_EVENT_ID::SUCCESS != rc)
             return (int)rc;
+
+        isLoaded = true;
     }
 
     rc = _OpenMetaVolume();
@@ -140,7 +142,7 @@ MetaFs::Dispose(void)
 
     io->RemoveArray(arrayName);
 
-    MetaFsServiceSingleton::Instance()->Deregister(arrayName);
+    _ClearMss();
 }
 
 void
@@ -149,23 +151,16 @@ MetaFs::Shutdown(void)
     MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
             "Shutdown metafs, arrayName={}", arrayName);
 
-    POS_EVENT_ID rc = _CloseMetaVolume();
-    if (rc != POS_EVENT_ID::SUCCESS)
-    {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
-            "It's failed to close meta volume but expected, arrayName={}", arrayName);
-    }
-
-    rc = mgmt->CloseSystem(arrayName);
-    if (rc != POS_EVENT_ID::SUCCESS)
-    {
-        MFS_TRACE_DEBUG((int)rc,
-            "It's failed to close system but expected, arrayName={}", arrayName);
-    }
-
     io->RemoveArray(arrayName);
 
-    MetaFsServiceSingleton::Instance()->Deregister(arrayName);
+    // TODO(munseop.lim): refactoring requires
+    if (nullptr != metaStorage)
+    {
+        metaStorage->Close();
+        delete metaStorage;
+    }
+
+    _ClearMss();
 }
 
 uint64_t
@@ -200,9 +195,7 @@ MetaFs::_Initialize(void)
 
     if (nullptr == metaStorage)
     {
-        metaStorage = mgmt->GetMss();
-        io->SetMss(metaStorage);
-        ctrl->SetMss(metaStorage);
+        _SetMss();
     }
 
     return true;
@@ -376,5 +369,21 @@ MetaFs::_MakeMetaStorageMediaInfo(PartitionType ptnType)
     newInfo.mediaCapacity = static_cast<uint64_t>(ptnSize->totalStripes) * ptnSize->blksPerStripe * ArrayConfig::BLOCK_SIZE_BYTE;
 
     return newInfo;
+}
+
+void
+MetaFs::_SetMss(void)
+{
+    metaStorage = mgmt->GetMss();
+    io->SetMss(metaStorage);
+    ctrl->SetMss(metaStorage);
+}
+
+void
+MetaFs::_ClearMss(void)
+{
+    metaStorage = nullptr;
+    io->SetMss(metaStorage);
+    ctrl->SetMss(metaStorage);
 }
 } // namespace pos

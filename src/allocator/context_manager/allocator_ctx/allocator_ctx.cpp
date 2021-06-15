@@ -101,12 +101,21 @@ AllocatorCtx::Init(void)
 void
 AllocatorCtx::Close(void)
 {
-    delete[] segmentStates;
-    segmentStates = nullptr;
-    delete[] segStateLocks;
-    segStateLocks = nullptr;
-    delete allocSegBitmap;
-    allocSegBitmap = nullptr;
+    if (segmentStates != nullptr)
+    {
+        delete[] segmentStates;
+        segmentStates = nullptr;
+    }
+    if (segStateLocks != nullptr)
+    {
+        delete[] segStateLocks;
+        segStateLocks = nullptr;
+    }
+    if (allocSegBitmap != nullptr)
+    {
+        delete allocSegBitmap;
+        allocSegBitmap = nullptr;
+    }
 }
 
 void

@@ -63,7 +63,7 @@ public:
     void RemoveDeviceForIOWorker(UblockSharedPtr dev) override;
 
     void CompleteForThreadLocalDeviceList(void) override;
-    int Submit(UbioSmartPtr ubio, bool sync = false, bool uBlockSharedPtrCopyNeeded = true) override;
+    int Submit(UbioSmartPtr ubio, bool sync = false, bool ioRecoveryNeeded = true) override;
 
     static void RegisterRecoveryEventFactory(EventFactory* recoveryEventFactory);
 

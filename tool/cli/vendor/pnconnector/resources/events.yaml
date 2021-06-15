@@ -642,7 +642,7 @@ modules:
         solution:
       - code: 2522
         level: WARN
-        message: no array exist
+        message: Array does not exist. Please check the array name in the command line or type the array name. 
         problem:
         solution:
       - code: 2523

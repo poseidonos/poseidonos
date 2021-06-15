@@ -16,7 +16,7 @@ import pos_util
 #######################################################################################
 # edit test parameters into these lists to run different workloads
 transport = "tcp"
-target_ip = "172.16.1.1"
+target_ip = "10.100.11.11"
 ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
 script_path = ibof_root + "script/"
 ibof_cli = ibof_root + "/bin/cli"
@@ -38,12 +38,12 @@ def execute_fio_pipe(readwrite, offset, verify="1"):
     print("\tExecute FIO")
     fio_bench = ibof_root + "test/system/io_path/fio_bench.py"
     process = subprocess.Popen([fio_bench,
-                "--bs", "4k", \
+                "--bs", "512B-128K", \
                 "--readwrite", readwrite, \
                 "-t", transport, \
                 "-i", target_ip, \
                 "--offset", str(offset), \
-                "--io_size", str(volume_size), \
+                "--io_size", str(100*1024*1024), \
                 "--run_time", str("20"), \
                 "--time_based", str("1"), \
                 "--verify", verify, \
@@ -181,6 +181,7 @@ if __name__ == "__main__":
     if (args.volume == False):
         detaching_device_during_io("read")
         detaching_device_during_io("write")
+        detaching_device_during_io("randwrite")
         stop_during_io("write")
         stop_during_io("read")
     else:
