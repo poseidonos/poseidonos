@@ -90,6 +90,11 @@ public:
     {
         return reducedLpnCount;
     }
+    uint64_t
+    GetRemainedMetLpnCount(void)
+    {
+        return remainedMetaLpnCount;
+    }
 
 private:
     deque<Region> regionList;

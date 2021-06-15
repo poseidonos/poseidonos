@@ -1,55 +1,69 @@
 #include "src/metafs/mvm/volume/region_content.h"
+#include "src/metafs/mvm/volume/mf_inode.h"
 
 #include <gtest/gtest.h>
 
 namespace pos
 {
-TEST(RegionContent, RegionContent_)
+TEST(RegionContent, Create)
 {
+    RegionContent content;
+
+    EXPECT_EQ(content.GetInode(), nullptr);
+    EXPECT_FALSE(content.GetInUse());
 }
 
-TEST(RegionContent, GetInode_)
+TEST(RegionContent, CheckInode)
 {
+    RegionContent content;
+    MetaFileInode* inode = new MetaFileInode();
+
+    content.SetInode(inode);
+
+    EXPECT_EQ(content.GetInode(), inode);
+
+    delete inode;
 }
 
-TEST(RegionContent, SetInode_)
+TEST(RegionContent, CheckBaseMetaLpn)
 {
+    RegionContent content;
+    MetaLpnType lpn = 100;
+
+    content.SetBaseMetaLpn(lpn);
+
+    EXPECT_EQ(content.GetBaseMetaLpn(), lpn);
 }
 
-TEST(RegionContent, GetBaseMetaLpn_)
+TEST(RegionContent, CheckFileSize)
 {
+    RegionContent content;
+    MetaLpnType lpn = 100;
+
+    content.SetSize(lpn);
+
+    EXPECT_EQ(content.GetSize(), lpn);
 }
 
-TEST(RegionContent, SetBaseMetaLpn_)
+TEST(RegionContent, CheckInodeTableIndex)
 {
+    RegionContent content;
+    uint32_t index = 100;
+
+    content.SetIndexInInodeTable(index);
+
+    EXPECT_EQ(content.GetIndexInInodeTable(), index);
 }
 
-TEST(RegionContent, GetLastMetaLpn_)
+TEST(RegionContent, CheckInUseFlag)
 {
-}
+    RegionContent content;
 
-TEST(RegionContent, GetSize_)
-{
-}
+    content.SetInUse(true);
+    EXPECT_TRUE(content.GetInUse());
 
-TEST(RegionContent, SetSize_)
-{
-}
-
-TEST(RegionContent, GetIndexInInodeTable_)
-{
-}
-
-TEST(RegionContent, SetIndexInInodeTable_)
-{
-}
-
-TEST(RegionContent, GetInUse_)
-{
-}
-
-TEST(RegionContent, SetInUse_)
-{
+    content.SetInUse(false);
+    EXPECT_FALSE(content.GetInUse());
 }
 
 } // namespace pos

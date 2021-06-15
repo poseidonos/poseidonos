@@ -67,18 +67,6 @@ public:
         return content.GetBaseMetaLpn() < a.content.GetBaseMetaLpn();
     }
 
-    Region*
-    operator=(const Region& a)
-    {
-        regionType = a.regionType;
-        content.SetInode(a.content.GetInode());
-        content.SetBaseMetaLpn(a.content.GetBaseMetaLpn());
-        content.SetSize(a.content.GetSize());
-        content.SetInUse(a.content.GetInUse());
-
-        return this;
-    }
-
     RegionContent*
     GetContent(void)
     {
