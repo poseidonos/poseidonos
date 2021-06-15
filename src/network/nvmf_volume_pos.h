@@ -35,8 +35,9 @@
 #include <string>
 #include <vector>
 
+#include "spdk/pos.h"
 #include "src/network/nvmf_target.h"
-#include "src/network/nvmf_volume.h"
+#include "src/network/nvmf.h"
 
 using namespace std;
 namespace pos
@@ -48,18 +49,18 @@ struct volumeListInfo
     vector<int> vols;
 };
 
-class NvmfVolumePos final : public NvmfVolume
+class NvmfVolumePos
 {
 public:
-    NvmfVolumePos(void);
-    ~NvmfVolumePos(void);
+    explicit NvmfVolumePos(unvmf_io_handler ioHandler);
+    virtual ~NvmfVolumePos(void);
 
-    void VolumeCreated(struct pos_volume_info* info) override;
-    void VolumeDeleted(struct pos_volume_info* info) override;
-    void VolumeMounted(struct pos_volume_info* info) override;
-    void VolumeUnmounted(struct pos_volume_info* info) override;
-    void VolumeUpdated(struct pos_volume_info* info) override;
-    void VolumeDetached(vector<int>& volList, string arrayName) override;
+    virtual void VolumeCreated(struct pos_volume_info* info);
+    virtual void VolumeDeleted(struct pos_volume_info* info);
+    virtual void VolumeMounted(struct pos_volume_info* info);
+    virtual void VolumeUnmounted(struct pos_volume_info* info);
+    virtual void VolumeUpdated(struct pos_volume_info* info);
+    virtual void VolumeDetached(vector<int>& volList, string arrayName);
 
     static uint32_t VolumeDetachCompleted(void);
     static bool WaitRequestedVolumesDetached(uint32_t volCnt);
@@ -68,6 +69,7 @@ private:
     static NvmfTarget target;
     static atomic<bool> detachFailed;
     static atomic<uint32_t> volumeDetachedCnt;
+    unvmf_io_handler ioHandler;
 
     static void _VolumeCreateHandler(void* arg1, void* arg2);
     static void _VolumeMountHandler(void* arg1, void* arg2);

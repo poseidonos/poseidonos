@@ -52,7 +52,6 @@ public:
     VolumeEventPublisher(void);
     virtual ~VolumeEventPublisher(void);
     void RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayID);
-    void RegisterNvmfTargetSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayID);
     void RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayID);
     bool NotifyVolumeCreated(std::string volName, int volID,
         uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID);

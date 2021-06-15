@@ -163,7 +163,6 @@ TEST(ArrayMountSequence, StateChanged_testIfShutdownIsInvokedWhenNextStateIsStop
     EXPECT_CALL(mockSeq3, Shutdown).Times(1);
     EXPECT_CALL(mockSeq2, Shutdown).Times(1);
     EXPECT_CALL(mockSeq1, Shutdown).Times(1);
-    EXPECT_CALL(*mockMntTmp, Shutdown).Times(1);
 
     // When & Then: trivial. as long as there's no exception, I'm good
     mntSeq.StateChanged(nullptr, &stopContext);

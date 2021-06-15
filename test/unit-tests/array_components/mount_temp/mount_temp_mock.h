@@ -14,7 +14,6 @@ public:
     using MountTemp::MountTemp;
     MOCK_METHOD(int, Mount1, (), (override));
     MOCK_METHOD(int, Unmount2, (), (override));
-    MOCK_METHOD(void, Shutdown, (), (override));
 };
 
 } // namespace pos

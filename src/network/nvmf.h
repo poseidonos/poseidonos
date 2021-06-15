@@ -31,35 +31,48 @@
  */
 
 #pragma once
-
 #include <string>
 #include <vector>
 
-#include "spdk/pos_volume.h"
-
+#include "spdk/pos.h"
+#include "src/array_models/interface/i_mount_sequence.h"
+#include "src/network/nvmf_volume_pos.h"
+#include "src/sys_event/volume_event.h"
+#include "src/sys_event/volume_event_publisher.h"
 using namespace std;
+
+class NvmfVolumePos;
+
 namespace pos
 {
-/*
- * NvmfVolume : NvmfVolume abstraction
- * */
-class NvmfVolume
+class Nvmf : public VolumeEvent, public IMountSequence
 {
 public:
-    NvmfVolume(void);
-    virtual ~NvmfVolume(void);
-    void SetuNVMfIOHandler(unvmf_io_handler handler);
-    unvmf_io_handler GetuNVMfIOHandler(void);
+    Nvmf(std::string arrayName, int arrayId);
+    Nvmf(std::string arrayName, int arrayId, VolumeEventPublisher* volumeEventPublisher, NvmfVolumePos* inputNvmfVolume);
+    virtual ~Nvmf(void);
 
-    virtual void VolumeCreated(struct pos_volume_info* info) = 0;
-    virtual void VolumeDeleted(struct pos_volume_info* info) = 0;
-    virtual void VolumeMounted(struct pos_volume_info* info) = 0;
-    virtual void VolumeUnmounted(struct pos_volume_info* info) = 0;
-    virtual void VolumeUpdated(struct pos_volume_info* info) = 0;
-    virtual void VolumeDetached(vector<int>& volList, std::string arrayName) = 0;
+    int Init(void) override;
+    void Dispose(void) override;
+    void Shutdown(void) override;
+    void SetuNVMfIOHandler(unvmf_io_handler handler);
+
+    virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;
+    bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte, string arrayName, int arrayId) override;
+    bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;
+    bool VolumeUnmounted(string volName, int volID, string arrayName, int arrayId) override;
+    bool VolumeLoaded(string volName, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;
+    bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;
+    void VolumeDetached(vector<int> volList, string arrayName, int arrayId) override;
 
 private:
+    NvmfVolumePos* volume;
+    VolumeEventPublisher* volumeEventPublisher;
+    const uint32_t MIB_IN_BYTE = 1024 * 1024;
+    const uint32_t KIOPS = 1000;
     unvmf_io_handler ioHandler = {nullptr, nullptr};
+
+    void _CopyVolumeInfo(char* destInfo, const char* srcInfo, int len);
 };
 
 } // namespace pos

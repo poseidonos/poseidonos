@@ -221,9 +221,6 @@ ArrayMountSequence::Shutdown(void)
         (*it)->Shutdown();
     }
 
-    // unmount metafs
-    temp->Shutdown();
-
     // unmount array
     (*it)->Shutdown();
 }

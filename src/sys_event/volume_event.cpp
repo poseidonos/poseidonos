@@ -30,33 +30,25 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "volume_event.h"
-
-#include "volume_event_publisher.h"
+#include "src/sys_event/volume_event.h"
 
 namespace pos
 {
+VolumeEvent::VolumeEvent(std::string _tag, std::string _arrayName, int _arrayID)
+: arrayName(_arrayName),
+  arrayID(_arrayID),
+  tag(_tag)
+{
+}
+
 VolumeEvent::~VolumeEvent(void)
 {
-    RemoveFromPublisher(arrayName, arrayID);
 }
 
-void
-VolumeEvent::RegisterToPublisher(std::string arrayName, int arrayID)
+std::string
+VolumeEvent::Tag(void)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayID);
-}
-
-void
-VolumeEvent::RegisterNvmfTargetToPublisher(std::string arrayName, int arrayID)
-{
-    VolumeEventPublisherSingleton::Instance()->RegisterNvmfTargetSubscriber(this, arrayName, arrayID);
-}
-
-void
-VolumeEvent::RemoveFromPublisher(std::string arrayName, int arrayID)
-{
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayID);
+    return tag;
 }
 
 } // namespace pos

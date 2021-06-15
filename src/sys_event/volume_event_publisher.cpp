@@ -124,16 +124,6 @@ VolumeEventPublisher::RegisterSubscriber(VolumeEvent* subscriber, std::string ar
 }
 
 void
-VolumeEventPublisher::RegisterNvmfTargetSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayID)
-{
-    int arrayIdx = GetArrayIdx(arrayName);
-
-    subscribers.insert(subscribers.begin(), std::pair<int, VolumeEvent*>(arrayIdx, subscriber));
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
-        "VolumeEvent subscriber {} is registered", subscriber->Tag());
-}
-
-void
 VolumeEventPublisher::RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayID)
 {
     int arrayIdx = GetArrayIdx(arrayName);

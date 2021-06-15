@@ -40,6 +40,7 @@
 #include "src/mapper/mapper.h"
 #include "src/volume/volume_manager.h"
 #include "src/metafs/metafs.h"
+#include "src/network/nvmf.h"
 #include "src/io/general_io/rba_state_manager.h"
 #include <vector>
 #include <string>
@@ -73,7 +74,8 @@ public:
         Allocator* allocator,
         JournalManager* journal,
         RBAStateManager* rbaStateMgr,
-        function<MetaFs* (Array*, bool)> metaFsFactory);
+        function<MetaFs* (Array*, bool)> metaFsFactory,
+        Nvmf* nvmf);
     virtual ~ArrayComponents(void);
     virtual int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
     virtual int Load(void);
@@ -105,6 +107,7 @@ private:
     Allocator* allocator = nullptr;
     MetaFs* metafs = nullptr;
     RBAStateManager* rbaStateMgr = nullptr;
+    Nvmf* nvmf = nullptr;
 
     // instantiated internally
     vector<IMountSequence*> mountSequence;

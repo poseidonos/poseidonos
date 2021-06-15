@@ -35,10 +35,8 @@
 #include <string>
 
 #include "src/include/partition_type.h"
-#include "src/network/nvmf_volume.h"
-#include "src/network/nvmf_volume_pos.h"
-#include "src/network/nvmf_target_event_subscriber.h"
 
+using namespace std;
 namespace pos
 {
 class IAbrControl;
@@ -49,16 +47,9 @@ public:
     virtual ~MountTemp(void) = default;
     virtual int Mount1(void);
     virtual int Unmount2(void);
-    virtual void Shutdown(void);
 
 private:
-    void _InitNvmf(void);
-    void _ResetNvmf(void);
-
     string arrayName = "";
-    unsigned int arrayIndex = -1;
-    NvmfVolume* nvmfVolume = nullptr;
-    NvmfTargetEventSubscriber* nvmfTargetEventSubscriber = nullptr;
     IAbrControl* abrControl = nullptr;
 };
 

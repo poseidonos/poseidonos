@@ -53,7 +53,6 @@ MountTemp::MountTemp(IAbrControl* abr, string name, unsigned int arrIndex)
 {
     abrControl = abr;
     arrayName = name;
-    arrayIndex = arrIndex;
 }
 
 int
@@ -70,53 +69,13 @@ MountTemp::Unmount2(void)
 #endif
     POS_TRACE_INFO(eventId, "start flush cmd manager reset instance");
     FlushCmdManagerSingleton::ResetInstance();
-
-    _ResetNvmf();
-
     return ret;
 }
 
 int
 MountTemp::Mount1(void)
 {
-    debugInfoUpdater->Update();
-
-    _InitNvmf();
     QosManagerSingleton::Instance()->Initialize();
     return 0;
 }
-
-void
-MountTemp::Shutdown(void)
-{
-    _ResetNvmf();
-}
-
-void
-MountTemp::_InitNvmf(void)
-{
-    int arrayIdx = 0;
-    nvmfVolume = new pos::NvmfVolumePos();
-    unvmf_io_handler handler = {.submit = UNVMfSubmitHandler,
-        .complete = UNVMfCompleteHandler};
-    nvmfVolume->SetuNVMfIOHandler(handler);
-    nvmfTargetEventSubscriber = new pos::NvmfTargetEventSubscriber(nvmfVolume, arrayName, arrayIdx);
-}
-
-void
-MountTemp::_ResetNvmf(void)
-{
-    if (nvmfTargetEventSubscriber != nullptr)
-    {
-        delete nvmfTargetEventSubscriber;
-        nvmfTargetEventSubscriber = nullptr;
-    }
-
-    if (nvmfVolume != nullptr)
-    {
-        delete nvmfVolume;
-        nvmfVolume = nullptr;
-    }
-}
-
 } // namespace pos

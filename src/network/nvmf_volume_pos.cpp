@@ -50,7 +50,8 @@ NvmfTarget NvmfVolumePos::target;
 std::atomic<bool> NvmfVolumePos::detachFailed;
 std::atomic<uint32_t> NvmfVolumePos::volumeDetachedCnt;
 
-NvmfVolumePos::NvmfVolumePos(void)
+NvmfVolumePos::NvmfVolumePos(unvmf_io_handler ioHandler)
+: ioHandler(ioHandler)
 {
 }
 
@@ -185,7 +186,7 @@ NvmfVolumePos::_VolumeMountHandler(void* arg1, void* arg2)
 void
 NvmfVolumePos::VolumeMounted(struct pos_volume_info* vInfo)
 {
-    vInfo->unvmf_io = GetuNVMfIOHandler();
+    vInfo->unvmf_io = ioHandler;
     EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
         _VolumeMountHandler, vInfo, nullptr);
 }
