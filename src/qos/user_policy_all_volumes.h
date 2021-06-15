@@ -53,7 +53,7 @@ public:
     void Reset(void);
     bool operator==(AllVolumeUserPolicy allVolPolicy);
     void InsertVolumeUserPolicy(uint32_t vol, const VolumeUserPolicy& userPolicy);
-    VolumeUserPolicy& GetVolumeUserPolicy(uint32_t vol);
+    VolumeUserPolicy* GetVolumeUserPolicy(uint32_t vol);
     void SetMinimumGuaranteeVolume(uint32_t volId);
     uint32_t GetMinimumGuaranteeVolume(void);
     void SetMinimumPolicyInEffect(bool value);

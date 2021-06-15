@@ -64,6 +64,7 @@ QosSpdkManager::QosSpdkManager(QosContext* qosCtx, bool feQos)
     {
         spdkPollers[i] = nullptr;
     }
+    SpdkConnection::SpdkNvmfInitializeReactorSubsystemMapping();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -229,7 +230,6 @@ QosSpdkManager::_SetupQosReactorPoller(void)
     {
         return;
     }
-    SpdkConnection::SpdkNvmfInitializeReactorSubsystemMapping();
     registerQosPollerDone = false;
     reactorId = EventFrameworkApi::GetFirstReactor();
     bool succeeded = EventFrameworkApi::SendSpdkEvent(reactorId, RegisterQosPoller, this, nullptr);
