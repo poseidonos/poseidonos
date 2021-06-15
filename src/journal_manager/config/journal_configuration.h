@@ -40,12 +40,13 @@
 namespace pos
 {
 class MetaFsFileControlApi;
+class ConfigManager;
 
 class JournalConfiguration
 {
 public:
     JournalConfiguration(void);
-    explicit JournalConfiguration(uint64_t logBufferSizeInConfig);
+    explicit JournalConfiguration(ConfigManager* configManager);
     virtual ~JournalConfiguration(void);
 
     virtual int Init(uint64_t logBufferSize = 0, MetaFsFileControlApi* metaFsCtrl = nullptr);
@@ -60,6 +61,13 @@ public:
     virtual uint64_t GetMetaPageSize(void);
 
     virtual LogGroupLayout GetLogBufferLayout(int groupId);
+
+    // For UT
+    inline uint64_t
+    GetLogBufferSizeInConfig(void)
+    {
+        return logBufferSizeInConfig;
+    }
 
 protected:
     int _ConfigureLogBufferSize(uint64_t& size);
@@ -81,8 +89,11 @@ private:
 
     bool debugEnabled;
 
+    ConfigManager* configManager;
     int numLogGroups;
     uint64_t logBufferSize;
+
+    // TODO(cheolho.kang) Need to change for injecting mock
     LogBufferLayout bufferLayout;
 
     const uint64_t SIZE_MB = 1024 * 1024;

@@ -10,10 +10,10 @@ TEST(LogBufferLayout, LogBufferLayout_testIfExecutedSuccessfully)
 {
     // Given
 
-    // When
-    LogBufferLayout layout;
+    // When, Then
+    LogBufferLayout *layout = new LogBufferLayout;
 
-    // Then
+    delete layout;
 }
 
 TEST(LogBufferLayout, Init_testIfLogGroupLayoutIsAdded)

@@ -36,6 +36,7 @@
 #include <iomanip>
 #include <string>
 
+#include "src/master_context/config_manager.h"
 #include "src/metafs/include/metafs_service.h"
 #include "mk/ibof_config.h"
 #include "src/include/pos_event_id.h"
@@ -49,21 +50,22 @@
 namespace pos
 {
 JournalConfiguration::JournalConfiguration(void)
-: JournalConfiguration(UINT64_MAX)
+: JournalConfiguration(ConfigManagerSingleton::Instance())
 {
-    _ReadConfiguration();
 }
 
 // Constructor for unit test
-JournalConfiguration::JournalConfiguration(uint64_t logBufferSizeConfigInput)
+JournalConfiguration::JournalConfiguration(ConfigManager* configManager)
 : journalEnabled(false),
-  logBufferSizeInConfig(logBufferSizeConfigInput),
+  logBufferSizeInConfig(UINT64_MAX),
   metaPageSize(UINT64_MAX),
   maxPartitionSize(UINT64_MAX),
   debugEnabled(false),
+  configManager(configManager),
   numLogGroups(2),
   logBufferSize(UINT64_MAX)
 {
+    _ReadConfiguration();
 }
 
 JournalConfiguration::~JournalConfiguration(void)
@@ -164,7 +166,7 @@ bool
 JournalConfiguration::_IsJournalEnabled(void)
 {
     bool enabled = false;
-    int ret = ConfigManagerSingleton::Instance()->GetValue("journal", "enable",
+    int ret = configManager->GetValue("journal", "enable",
         static_cast<void*>(&enabled), CONFIG_TYPE_BOOL);
     if (ret != 0)
     {
@@ -179,7 +181,7 @@ bool
 JournalConfiguration::_IsDebugEnabled(void)
 {
     bool enabled = false;
-    int ret = ConfigManagerSingleton::Instance()->GetValue("journal", "debug_mode",
+    int ret = configManager->GetValue("journal", "debug_mode",
         &enabled, ConfigType::CONFIG_TYPE_BOOL);
 
     if (ret == 0)
@@ -199,7 +201,7 @@ uint64_t
 JournalConfiguration::_ReadLogBufferSize(void)
 {
     uint64_t size = 0;
-    int ret = ConfigManagerSingleton::Instance()->GetValue("journal", "buffer_size_in_mb",
+    int ret = configManager->GetValue("journal", "buffer_size_in_mb",
         static_cast<void*>(&size), ConfigType::CONFIG_TYPE_UINT64);
     if (ret == 0)
     {
