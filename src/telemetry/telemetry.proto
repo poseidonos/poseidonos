@@ -1,0 +1,158 @@
+syntax="proto2";
+ 
+// GRPC service definition
+service TelemetryManager {
+  // POS -> TelemetryManager
+  rpc configure(ConfigureMetadataRequest) returns (ConfigureMetadataResponse) {}
+  // POS -> TelemetryManager
+  rpc publish(PublishRequest) returns (PublishResponse) {}
+  // Collector -> TelemetryManager
+  rpc collect(CollectRequest) returns (CollectResponse) {}
+  // CLI -> TelemetryManager
+  rpc enable(EnableRequest) returns (EnableResponse) {}
+  // CLI -> TelemetryManager
+  rpc disable(DisableRequest) returns (DisableResponse) {}
+}
+ 
+message PublishRequest
+{
+  // raw data structure for flexibility
+  optional InfluxStorageProto influx = 2;
+ 
+  // metric data structures
+  optional CounterProto counters = 3;
+  optional GaugeProto gauges = 4;
+  optional HistogramProto histograms = 5;
+  optional LatencyProto latencies = 6;
+ 
+  // strong-typed data structures for usability
+  optional SegmentInfoProto segmentInfo = 7;
+  optional WbtProto wbtProto = 8;
+}
+ 
+message PublishResponse
+{
+  required bool successful = 1;
+  optional string reason = 2;
+}
+ 
+message CollectRequest
+{
+  // simply, collect everything (fine-grained collection may come later)
+}
+ 
+message CollectResponse
+{
+ 
+  // metadata for tagging/visualization
+  required ConfigureMetadataRequest metadata = 1;
+ 
+  // raw data structure for flexibility
+  repeated InfluxStorageProto influx = 2;
+ 
+  // metric data structures
+  repeated CounterProto counters = 3;
+  repeated GaugeProto gauges = 4;
+  repeated HistogramProto histograms = 5;
+  repeated LatencyProto latencies = 6;
+ 
+  // strong-typed data structures for usability
+  optional SegmentInfoProto segmentInfo = 7;
+  optional WbtProto wbtProto = 8;
+}
+
+message EnableRequest
+{
+
+}
+
+message EnableResponse
+{
+  required bool successful = 1;
+  optional string reason = 2;
+}
+
+message DisableRequest
+{
+
+}
+
+message DisableResponse
+{
+  required bool successful = 1;
+  optional string reason = 2;
+}
+ 
+message ConfigureMetadataRequest
+{
+  required string git_hash = 1;
+  required string host_name = 2;
+  required string host_type = 3; // vm or pm or something else
+  required string ip_addr = 4;
+  required string application_name = 5; // poseidon or something else
+}
+ 
+message ConfigureMetadataResponse
+{
+  required bool successful = 1;
+  required int32 collect_latency_ms = 2; // how long does this operation take?
+  optional string reason = 3;
+}
+ 
+message InfluxStorageProto
+{
+  required string measurement = 1;
+  repeated Tag tags = 2;
+  repeated Field fields = 3;
+  optional int64 timestamp = 4;
+  message Tag
+  {
+    required string tag_name = 1;
+    required string tag_value = 2;
+  }
+  message Field
+  {
+    required string field_name = 1;
+    required string field_value = 2;
+  }
+}
+ 
+message CounterProto
+{
+  required string key = 1;
+  required int64 value = 2;
+}
+ 
+// The format is same to CounterProto's, but the request will be handled differently by TelemetryManager.
+message GaugeProto
+{
+  required string key = 1;
+  required int64 value = 2;
+}
+ 
+message HistogramProto
+{
+  required string key = 1;
+  required int64 num_buckets = 2;
+  repeated int64 buckets = 3; // the size of the list (e..g, buckets.size() must match with "num_buckets")
+}
+ 
+message LatencyProto
+{
+  required string key = 1; // e.g., array1_vol1_read, array1_vol1_write, array2_rebuild_read, ...
+  required int64 num_stages = 2; // e.g., when we would like to split the I/O latency into smaller parts. AIR supports this.
+  repeated int64 latencies = 3;
+}
+ 
+message SegmentInfoProto
+{
+  required int32 totalSegments = 1;
+  required int32 activeSegment = 2;
+  required int32 occupiedStripes = 3;
+  required int32 numInvalid = 4;
+}
+ 
+message WbtProto
+{
+  // TBD
+}

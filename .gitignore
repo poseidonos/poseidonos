@@ -57,6 +57,8 @@ PYTHON_COMMAND
 *.suo
 *.json
 *.sqlite
+*.pb.h
+*.pb.cpp
 ubio_error_test
 mdts_detach_test
 lib/dpdk-20.08/*
