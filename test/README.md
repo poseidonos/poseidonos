@@ -216,6 +216,13 @@ Test project /home/ibof/projects/ibofos-20210421/test
 # As in the output, test case 23, 24, 25, and 26 started (almost) at the same time and finished out of order.
 ```
 
+### Build and Test TelemetryManager (experimental)
+```bash
+# Pre-requisite: grpc + its dependencies (https://grpc.io/docs/languages/cpp/quickstart/)
+$ cmake . -DPOS_BUILD_WITH_TELEMETRY=ON -DPOS_GRPC_HOME=/home/ibof/grpc-bin
+$ make -j 4
+$ build/pos_it --gtest_filter="TelemetryManager.*"
+```
 
 ### Caveats
 Please note that cmake options are re-used from the previous executions. For example, the following two commands are exactly the same:

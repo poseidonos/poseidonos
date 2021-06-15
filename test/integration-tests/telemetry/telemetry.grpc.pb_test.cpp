@@ -51,6 +51,7 @@ public:
         ::EnableResponse* response) override
     {
         POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG), "enable has been called");
+        
         return ::grpc::Status::OK;
     }
 
