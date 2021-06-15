@@ -261,7 +261,11 @@ Array::Shutdown(void)
     _DeletePartitions();
     shutdownFlag = 1;
 
-    _Flush();
+    int ret = _Flush();
+    if (0 != ret)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Flush after Shutdown Failed");
+    }
 }
 
 int
