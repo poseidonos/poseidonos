@@ -306,4 +306,10 @@ AffinityManager::SetGeneralAffinitySelf(void)
     sched_setaffinity(0, sizeof(cpu_set_t), &generalCPUSet);
 }
 
+uint32_t
+AffinityManager::GetNumaCount(void)
+{
+    return NUMA_COUNT;
+}
+
 } // namespace pos

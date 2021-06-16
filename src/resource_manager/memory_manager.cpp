@@ -32,60 +32,118 @@
 
 #include "memory_manager.h"
 
-#include "src/cpu_affinity/affinity_manager.h"
-#include "src/dpdk_wrapper/hugepage_allocator.h"
+#include "buffer_pool.h"
+#include "buffer_pool_factory.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/logger/logger.h"
 
 using namespace pos;
+using namespace std;
 
-MemoryManager::MemoryManager(
+MemoryManager::MemoryManager(BufferPoolFactory* bufferPoolFactory,
     AffinityManager* affinityManager,
     HugepageAllocator* hugepageAllocator)
-:  affinityManager(affinityManager),
-   hugepageAllocator(hugepageAllocator)
+: bufferPoolFactory(bufferPoolFactory),
+  affinityManager(affinityManager),
+  hugepageAllocator(hugepageAllocator)
 {
+    if (this->bufferPoolFactory == nullptr)
+    {
+        bufferPoolFactory = new BufferPoolFactory();
+    }
+}
+
+MemoryManager::~MemoryManager(void)
+{
+    for (BufferPool* pool : bufferPools)
+    {
+        delete pool;
+    }
+    bufferPools.clear();
+
+    if (bufferPoolFactory != nullptr)
+    {
+        delete bufferPoolFactory;
+    }
 }
 
 BufferPool*
-MemoryManager::CreateBufferPool(BufferInfo& info)
+MemoryManager::CreateBufferPool(BufferInfo& info, uint32_t socket)
 {
-    if (_CheckBufferPolicy(info) == false)
+    if (_CheckBufferPolicy(info, socket) == false)
     {
         return nullptr;
     }
 
-    info.socket = _GetDefaultSocket();
+    BufferPool* pool = bufferPoolFactory->Create(info, socket);
+    if (pool != nullptr)
+    {
+        unique_lock<mutex> lock(bufferPoolsLock);
+        bufferPools.push_back(pool);
+    }
 
-    BufferPool* pool = new BufferPool(info, hugepageAllocator);
-    bufferPools.push_back(pool);
     return pool;
 }
 
 bool
-MemoryManager::_CheckBufferPolicy(const BufferInfo& info)
+MemoryManager::DeleteBufferPool(BufferPool* poolToDelete)
 {
-    const uint32_t MEMORY_ALIGN_SIZE_BYTE = 4096;
-
-    if (info.owner == "")
+    unique_lock<mutex> lock(bufferPoolsLock);
+    uint32_t sizeAfterRemove = bufferPools.size() - 1;
+    bufferPools.remove(poolToDelete);
+    if (sizeAfterRemove != bufferPools.size())
     {
         return false;
     }
 
-    if (info.bufferSize % MEMORY_ALIGN_SIZE_BYTE != 0)
+    delete poolToDelete;
+    return true;
+}
+
+bool
+MemoryManager::_CheckBufferPolicy(const BufferInfo& info, uint32_t& socket)
+{
+    if (info.owner == "")
     {
+        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "Illegal buffer policy. Owner is empty");
+        return false;
+    }
+
+    if (info.size == 0)
+    {
+        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "Illegal buffer policy. Buffer size is zero");
+        return false;
+    }
+
+    const uint32_t MAX_ALLOCATION_BUFFER_SIZE_BYTE =
+        hugepageAllocator->GetDefaultPageSize();
+    if (info.size > MAX_ALLOCATION_BUFFER_SIZE_BYTE)
+    {
+        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "Illegal buffer policy. Buffer size is too large");
+        return false;
+    }
+
+    const uint32_t MEMORY_ALIGN_SIZE_BYTE = 4096;
+    if (info.size % MEMORY_ALIGN_SIZE_BYTE != 0)
+    {
+        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "Illegal buffer policy. Buffer size is not aligned");
+        return false;
+    }
+
+    if (socket == USE_DEFAULT_SOCKET)
+    {
+        socket = affinityManager->GetNumaIdFromCurrentThread();
+    }
+    else if (socket > affinityManager->GetNumaCount())
+    {
+        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "Illegal buffer policy. Invalid socket");
         return false;
     }
 
     return true;
-}
-
-int
-MemoryManager::_GetDefaultSocket(void)
-{
-    if (affinityManager == nullptr)
-    {
-        affinityManager = AffinityManagerSingleton::Instance();
-    }
-
-    int socket = affinityManager->GetEventWorkerSocket();
-    return socket;
 }

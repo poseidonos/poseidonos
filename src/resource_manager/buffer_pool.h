@@ -35,42 +35,42 @@
 
 #include <list>
 #include <mutex>
-#include <string>
+
+#include "buffer_info.h"
+#include "src/dpdk_wrapper/hugepage_allocator.h"
 
 namespace pos
 {
 
 class HugepageAllocator;
 
-struct BufferInfo
-{
-    std::string owner = "";
-    int socket = -1;
-    uint64_t bufferSize = 0;
-    uint64_t bufferCount = 0;
-};
-
 class BufferPool
 {
 public:
     BufferPool(const BufferInfo info,
-        HugepageAllocator* hugepageAllocator);
+        const uint32_t socket,
+        HugepageAllocator* hugepageAllocator =
+            HugepageAllocatorSingleton::Instance());
     virtual ~BufferPool(void);
 
-    virtual void* GetBuffer(void);
+    virtual void* TryGetBuffer(void);
     virtual void ReturnBuffer(void*);
 
 private:
     bool _Alloc(void);
     void _Clear(void);
 
+    const BufferInfo BUFFER_INFO;
+    const uint32_t SOCKET;
+
     std::mutex freeBufferLock;
     std::list<void*> freeBuffers;
     std::list<void*> totalBuffers;
-    std::list<void*> allocatedMemories;
+    std::list<void*> allocatedHugepages;
 
-    const BufferInfo BUFFER_INFO;
     HugepageAllocator* hugepageAllocator;
+
+    const uint32_t HUGEPAGE_ALLOCATION_SIZE_BYTE = 2 * 1024 * 1024; // 2MB
 };
 
 } // namespace pos

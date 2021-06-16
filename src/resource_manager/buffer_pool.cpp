@@ -40,10 +40,17 @@ using namespace pos;
 using namespace std;
 
 BufferPool::BufferPool(const BufferInfo info,
+    uint32_t socket,
     HugepageAllocator* hugepageAllocator)
 : BUFFER_INFO(info),
+  SOCKET(socket),
   hugepageAllocator(hugepageAllocator)
 {
+    if (hugepageAllocator == nullptr)
+    {
+        return;
+    }
+
     if (_Alloc() == false)
     {
         _Clear();
@@ -58,7 +65,7 @@ BufferPool::~BufferPool(void)
 void
 BufferPool::_Clear()
 {
-    for (void* mem : allocatedMemories)
+    for (void* mem : allocatedHugepages)
     {
         hugepageAllocator->Free(mem);
     }
@@ -67,19 +74,17 @@ BufferPool::_Clear()
 bool
 BufferPool::_Alloc(void)
 {
-    const uint32_t ALLOCATION_SIZE_BYTE = 2 * 1024 * 1024; // 2MB
-
     uint32_t remainBufferCount = 0;
     uint8_t* buffer = 0;
-    for (uint32_t i = 0; i < BUFFER_INFO.bufferCount; i++)
+    for (uint32_t i = 0; i < BUFFER_INFO.count; i++)
     {
         if (remainBufferCount == 0)
         {
             // 2MB allocation for avoiding buddy allocation overhead
-            buffer = static_cast<uint8_t*>(hugepageAllocator->AllocFromSocket(
-                ALLOCATION_SIZE_BYTE,
-                1,
-                BUFFER_INFO.socket));
+            uint32_t allocSize = hugepageAllocator->GetDefaultPageSize();
+            buffer = static_cast<uint8_t*>(
+                hugepageAllocator->AllocFromSocket(allocSize, 1, this->SOCKET));
+
             if (buffer == nullptr)
             {
                 POS_EVENT_ID eventId =
@@ -88,13 +93,13 @@ BufferPool::_Alloc(void)
                     PosEventId::GetString(eventId));
                 return false;
             }
-            remainBufferCount = ALLOCATION_SIZE_BYTE / BUFFER_INFO.bufferSize;
-            allocatedMemories.push_back(buffer);
+            remainBufferCount = HUGEPAGE_ALLOCATION_SIZE_BYTE / BUFFER_INFO.size;
+            allocatedHugepages.push_back(buffer);
         }
 
         freeBuffers.push_back(buffer);
         totalBuffers.push_back(buffer);
-        buffer += BUFFER_INFO.bufferSize;
+        buffer += BUFFER_INFO.size;
         remainBufferCount--;
     }
 
@@ -102,7 +107,7 @@ BufferPool::_Alloc(void)
 }
 
 void*
-BufferPool::GetBuffer(void)
+BufferPool::TryGetBuffer(void)
 {
     unique_lock<mutex> lock(freeBufferLock);
 
@@ -123,6 +128,8 @@ BufferPool::ReturnBuffer(void* buffer)
 {
     if (buffer == nullptr)
     {
+        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "Failed to return buffer. Buffer is Null");
         return;
     }
 

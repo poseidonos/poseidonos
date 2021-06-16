@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(memory_manager_ut memory_manager_test.cpp)
+POS_ADD_UNIT_TEST(buffer_pool_ut buffer_pool_test.cpp)
+POS_ADD_UNIT_TEST(buffer_pool_factory_ut buffer_pool_factory_test.cpp)

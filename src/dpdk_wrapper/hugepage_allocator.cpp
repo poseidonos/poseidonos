@@ -37,24 +37,11 @@
 using namespace pos;
 
 void*
-HugepageAllocator::Alloc(const uint32_t size, const uint32_t count)
-{
-    void* ret = nullptr;
-    ret = rte_malloc(nullptr, size * count, size);
-    return ret;
-}
-
-void*
 HugepageAllocator::AllocFromSocket(const uint32_t size,
     const uint32_t count,
     const uint32_t socket)
 {
     void* ret = rte_malloc_socket(nullptr, size * count, size, socket);
-    // best effort for another socket id to avoid memory allocation fail
-    if (ret == nullptr)
-    {
-        ret = Alloc(size, count);
-    }
     return ret;
 }
 
@@ -62,4 +49,14 @@ void
 HugepageAllocator::Free(void* addr)
 {
     rte_free(addr);
+}
+
+uint32_t
+HugepageAllocator::GetDefaultPageSize(void)
+{
+    return DEFAULT_PAGE_SIZE;
+}
+
+HugepageAllocator::~HugepageAllocator(void)
+{
 }

@@ -30,48 +30,22 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MEMORY_MANAGER_H_
-#define MEMORY_MANAGER_H_
+#ifndef MOCK_BUFFER_POOL_FACTORY_H_
+#define MOCK_BUFFER_POOL_FACTORY_H_
 
-#include <list>
-#include <mutex>
+#include <gmock/gmock.h>
 
-#include "buffer_info.h"
-#include "src/lib/singleton.h"
-#include "src/cpu_affinity/affinity_manager.h"
-#include "src/dpdk_wrapper/hugepage_allocator.h"
+#include "src/resource_manager/buffer_pool_factory.h"
 
 namespace pos
 {
-class BufferPool;
-class BufferPoolFactory;
-
-const uint32_t USE_DEFAULT_SOCKET = -1;
-class MemoryManager
+class MockBufferPoolFactory : public BufferPoolFactory
 {
 public:
-    MemoryManager(BufferPoolFactory* bufferPoolFactory = nullptr,
-        AffinityManager* affinityManager = AffinityManagerSingleton::Instance(),
-        HugepageAllocator* hugepageAllocator =
-            HugepageAllocatorSingleton::Instance());
-    virtual ~MemoryManager(void);
-    virtual BufferPool* CreateBufferPool(BufferInfo& info,
-        uint32_t socket = USE_DEFAULT_SOCKET);
-    virtual bool DeleteBufferPool(BufferPool* pool);
-
-private:
-    bool _CheckBufferPolicy(const BufferInfo& info, uint32_t& socket);
-
-    std::mutex bufferPoolsLock;
-    std::list<BufferPool*> bufferPools;
-
-    BufferPoolFactory* bufferPoolFactory;
-    AffinityManager* affinityManager;
-    HugepageAllocator* hugepageAllocator;
+    using BufferPoolFactory::BufferPoolFactory;
+    MOCK_METHOD(BufferPool*, Create, (BufferInfo& info, uint32_t socket), (override));
 };
-
-using MemoryManagerSingleton = Singleton<MemoryManager>;
 
 } // namespace pos
 
-#endif // MEMORY_MANAGER_H_
+#endif // MOCK_BUFFER_POOL_FACTORY_H_

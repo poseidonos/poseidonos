@@ -30,48 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MEMORY_MANAGER_H_
-#define MEMORY_MANAGER_H_
+#include "buffer_pool_factory.h"
 
-#include <list>
-#include <mutex>
-
-#include "buffer_info.h"
-#include "src/lib/singleton.h"
-#include "src/cpu_affinity/affinity_manager.h"
+#include "buffer_pool.h"
 #include "src/dpdk_wrapper/hugepage_allocator.h"
 
-namespace pos
+using namespace pos;
+
+BufferPoolFactory::BufferPoolFactory(void)
 {
-class BufferPool;
-class BufferPoolFactory;
+}
 
-const uint32_t USE_DEFAULT_SOCKET = -1;
-class MemoryManager
+BufferPoolFactory::~BufferPoolFactory(void)
 {
-public:
-    MemoryManager(BufferPoolFactory* bufferPoolFactory = nullptr,
-        AffinityManager* affinityManager = AffinityManagerSingleton::Instance(),
-        HugepageAllocator* hugepageAllocator =
-            HugepageAllocatorSingleton::Instance());
-    virtual ~MemoryManager(void);
-    virtual BufferPool* CreateBufferPool(BufferInfo& info,
-        uint32_t socket = USE_DEFAULT_SOCKET);
-    virtual bool DeleteBufferPool(BufferPool* pool);
+}
 
-private:
-    bool _CheckBufferPolicy(const BufferInfo& info, uint32_t& socket);
-
-    std::mutex bufferPoolsLock;
-    std::list<BufferPool*> bufferPools;
-
-    BufferPoolFactory* bufferPoolFactory;
-    AffinityManager* affinityManager;
-    HugepageAllocator* hugepageAllocator;
-};
-
-using MemoryManagerSingleton = Singleton<MemoryManager>;
-
-} // namespace pos
-
-#endif // MEMORY_MANAGER_H_
+BufferPool*
+BufferPoolFactory::Create(BufferInfo& info, uint32_t socket)
+{
+    BufferPool* pool = new BufferPool(info, socket);
+    return pool;
+}

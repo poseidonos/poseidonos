@@ -33,7 +33,7 @@
 #ifndef HUGEPAGE_ALLOCATOR_H_
 #define HUGEPAGE_ALLOCATOR_H_
 
-#include <cstdint>
+#include "src/lib/singleton.h"
 
 namespace pos
 {
@@ -41,12 +41,18 @@ namespace pos
 class HugepageAllocator
 {
 public:
-    void* Alloc(const uint32_t size, const uint32_t count);
-    void* AllocFromSocket(const uint32_t size,
+    virtual ~HugepageAllocator(void);
+    virtual void* AllocFromSocket(const uint32_t size,
         const uint32_t count,
         const uint32_t socket);
-    void Free(void* addr);
+    virtual void Free(void* addr);
+    virtual uint32_t GetDefaultPageSize(void);
+
+private:
+    const uint32_t DEFAULT_PAGE_SIZE = 2 * 1024 * 1024;
 };
+
+using HugepageAllocatorSingleton = Singleton<HugepageAllocator>;
 
 } // namespace pos
 
