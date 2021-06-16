@@ -31,11 +31,12 @@
  */
 
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
 
 #include <string>
 #include <utility>
+
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -51,6 +52,7 @@ RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, Allocat
 {
     if (header != nullptr)
     {
+        // for UT
         ctxHeader.sig = header->sig;
         ctxHeader.ctxVersion = header->ctxVersion;
         ctxHeader.numTargetSegments = header->numTargetSegments;
@@ -59,6 +61,7 @@ RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, Allocat
     {
         ctxHeader.sig = SIG_REBUILD_CTX;
         ctxHeader.ctxVersion = 0;
+        ctxHeader.numTargetSegments = 0;
     }
 }
 RebuildCtx::RebuildCtx(AllocatorCtx* allocCtx, AllocatorAddressInfo* info, std::string arrayName)
@@ -90,37 +93,42 @@ RebuildCtx::AfterLoad(char* buf)
     if (ctxHeader.sig != SIG_REBUILD_CTX)
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "RebuildCtx file signature is not matched:{}", ctxHeader.sig);
-        assert(false);
+        while (addrInfo->IsUT() != true)
+        {
+            usleep(1); // assert(false);
+        }
     }
     else
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "RebuildCtx file Integrity check SUCCESS:{}", ctxHeader.ctxVersion);
-    }
-    ctxDirtyVersion = ctxHeader.ctxVersion + 1;
-    targetSegmentCount = ctxHeader.numTargetSegments;
+        ctxDirtyVersion = ctxHeader.ctxVersion + 1;
+        targetSegmentCount = ctxHeader.numTargetSegments;
 
-    SegmentId* segmentList = reinterpret_cast<SegmentId*>(buf + sizeof(RebuildCtxHeader));
-    for (uint32_t cnt = 0; cnt < targetSegmentCount; ++cnt)
-    {
-        auto pr = targetSegmentList.emplace(segmentList[cnt]);
-        if (pr.second == false)
+        SegmentId* segmentList = reinterpret_cast<SegmentId*>(buf + sizeof(RebuildCtxHeader));
+        for (uint32_t cnt = 0; cnt < targetSegmentCount; ++cnt)
         {
-            POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "Failed to load RebuildCtx, segmentId:{} is already in set", segmentList[cnt]);
-            assert(false);
+            auto pr = targetSegmentList.emplace(segmentList[cnt]);
+            if (pr.second == false)
+            {
+                POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "Failed to load RebuildCtx, segmentId:{} is already in set", segmentList[cnt]);
+                while (addrInfo->IsUT() != true)
+                {
+                    usleep(1); // assert(false);
+                }
+            }
         }
-    }
-    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_LOAD_REBUILD_SEGMENT), "RebuildCtx file loaded, segmentCount:{}", targetSegmentCount);
-    if (targetSegmentCount != 0)
-    {
-        assert(targetSegmentCount == targetSegmentList.size());
-        needContinue = true;
+        POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_LOAD_REBUILD_SEGMENT), "RebuildCtx file loaded, segmentCount:{}", targetSegmentCount);
+        if (targetSegmentCount != 0)
+        {
+            assert(targetSegmentCount == targetSegmentList.size());
+            needContinue = true;
+        }
     }
 }
 
 void
 RebuildCtx::BeforeFlush(int section, char* buf)
 {
-    assert(section == RC_HEADER);
     targetSegmentCount = targetSegmentList.size();
     ctxHeader.numTargetSegments = targetSegmentCount;
     ctxHeader.ctxVersion = ctxDirtyVersion++;

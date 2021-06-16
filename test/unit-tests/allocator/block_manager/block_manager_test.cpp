@@ -4,6 +4,7 @@
 
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/include/address_type.h"
+#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/block_manager/block_manager_spy.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
@@ -265,7 +266,52 @@ TEST(BlockManager, _AllocateBlks_TestCase2)
     delete reCtx;
 }
 
-TEST(BlockManager, _AllocateBlks_TestCase3)
+TEST(BlockManager, _AllocateBlks_TestCase3_1)
+{
+    // given
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
+    NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
+    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, addrInfo, ctxManager, "");
+    blkManager.Init(iWbstripe);
+    std::mutex wbLock, ctxLock;
+    VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
+    // given 2.
+    EXPECT_CALL(*wbCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbLock));
+    EXPECT_CALL(*wbCtx, GetActiveStripeTail).WillOnce(Return(vsa));
+    EXPECT_CALL(*wbCtx, AllocFreeWbStripe).WillOnce(Return(0));
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
+    EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
+    EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
+    EXPECT_CALL(*ctxManager, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
+    EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
+    EXPECT_CALL(*reCtx, IsRebuidTargetSegmentsEmpty).WillOnce(Return(true));
+    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
+    EXPECT_CALL(*addrInfo, GetstripesPerSegment).WillOnce(Return(10));
+    EXPECT_CALL(*addrInfo, GetblksPerStripe).WillOnce(Return(5));
+    // when
+    VirtualBlks ret = blkManager._AllocateBlks(0, 1);
+    // then
+    EXPECT_EQ(UNMAP_VSA, ret.startVsa);
+
+    delete iWbstripe;
+    delete allocCtx;
+    delete wbCtx;
+    delete segCtx;
+    delete ctxManager;
+    delete reverseMap;
+    delete iStripeMap;
+    delete reCtx;
+    delete addrInfo;
+}
+
+TEST(BlockManager, _AllocateBlks_TestCase3_2)
 {
     // given
     AllocatorAddressInfo addrInfo;

@@ -32,12 +32,16 @@
 
 #include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+
 namespace pos
 {
 GcCtx::GcCtx(void)
 {
     thresholdSegments = DEFAULT_GC_THRESHOLD;
     urgentSegments = DEFAULT_URGENT_THRESHOLD;
+    curGcMode = MODE_NO_GC;
 }
 
 int
@@ -62,6 +66,36 @@ void
 GcCtx::SetUrgentThreshold(int inputThreshold)
 {
     urgentSegments = inputThreshold;
+}
+
+CurrentGcMode
+GcCtx::GetCurrentGcMode(int numFreeSegments)
+{
+    if (urgentSegments >= numFreeSegments)
+    {
+        if (curGcMode != MODE_URGENT_GC)
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to URGENT GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
+        }
+        curGcMode = MODE_URGENT_GC;
+    }
+    else if (thresholdSegments >= numFreeSegments)
+    {
+        if (curGcMode != MODE_URGENT_GC)
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NORMAL GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
+        }
+        curGcMode = MODE_NORMAL_GC;
+    }
+    else
+    {
+        if (curGcMode != MODE_NO_GC)
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NO GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
+        }
+        curGcMode = MODE_NO_GC;
+    }
+    return curGcMode;
 }
 
 } // namespace pos

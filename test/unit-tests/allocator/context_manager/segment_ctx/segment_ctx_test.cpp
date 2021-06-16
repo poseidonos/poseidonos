@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "src/allocator/include/allocator_const.h"
+#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_info_mock.h"
 
@@ -29,9 +30,12 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentSignatureFail)
     // given
     SegmentCtxHeader header;
     header.sig = 0;
-    SegmentCtx segCtx(&header, nullptr, nullptr, "");
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
+    SegmentCtx segCtx(&header, nullptr, addrInfo, "");
+    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     // when
-    EXPECT_DEATH(segCtx.AfterLoad(nullptr), "");
+    segCtx.AfterLoad(nullptr);
+    delete addrInfo;
 }
 
 TEST(SegmentCtx, BeforeFlush_TestSimpleSetter)
@@ -64,26 +68,34 @@ TEST(SegmentCtx, FinalizeIo_TestSimpleSetter)
 TEST(SegmentCtx, IncreaseValidBlockCount_TestIncreaseValue)
 {
     // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetblksPerSegment(100);
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>;
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, &addrInfo, "");
+    SegmentCtx segCtx(nullptr, segInfos, addrInfo, "");
 
     // given 1.
-    EXPECT_CALL(*segInfos, IncreaseValidBlockCount).WillOnce(Return(6));
+    EXPECT_CALL(*segInfos, IncreaseValidBlockCount).WillOnce(Return(3));
+    EXPECT_CALL(*addrInfo, GetblksPerSegment).WillOnce(Return(5));
     // when 1.
     int ret = segCtx.IncreaseValidBlockCount(0, 1);
     // then 1.
-    EXPECT_EQ(6, ret);
+    EXPECT_EQ(3, ret);
+    // given 2.
+    EXPECT_CALL(*segInfos, IncreaseValidBlockCount).WillOnce(Return(6));
+    EXPECT_CALL(*addrInfo, GetblksPerSegment).WillOnce(Return(5));
+    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
+    // when 2.
+    ret = segCtx.IncreaseValidBlockCount(0, 1);
 
     delete segInfos;
+    delete addrInfo;
 }
 
 TEST(SegmentCtx, DecreaseValidBlockCount_TestDecreaseValue)
 {
     // given
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>;
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, nullptr, "");
+    SegmentCtx segCtx(nullptr, segInfos, addrInfo, "");
 
     // given 1.
     EXPECT_CALL(*segInfos, DecreaseValidBlockCount).WillOnce(Return(4));
@@ -91,8 +103,14 @@ TEST(SegmentCtx, DecreaseValidBlockCount_TestDecreaseValue)
     int ret = segCtx.DecreaseValidBlockCount(0, 1);
     // then 1.
     EXPECT_EQ(4, ret);
+    // given 2.
+    EXPECT_CALL(*segInfos, DecreaseValidBlockCount).WillOnce(Return(-1));
+    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
+    // when 2.
+    ret = segCtx.DecreaseValidBlockCount(0, 1);
 
     delete segInfos;
+    delete addrInfo;
 }
 
 TEST(SegmentCtx, GetValidBlockCount_TestSimpleGetter)

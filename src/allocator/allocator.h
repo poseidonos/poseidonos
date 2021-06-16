@@ -59,7 +59,7 @@ class Allocator : public IAllocatorWbt, public VolumeEvent, public IMountSequenc
 {
 public:
     Allocator(AllocatorAddressInfo* addrInfo, ContextManager* contextManager, BlockManager* blockManager,
-              WBStripeManager* wbStripeManager, IArrayInfo* info, IStateControl* iState);
+        WBStripeManager* wbStripeManager, IArrayInfo* info, IStateControl* iState);
     Allocator(IArrayInfo* info, IStateControl* iState);
     virtual ~Allocator(void);
 

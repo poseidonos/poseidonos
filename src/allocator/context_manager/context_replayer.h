@@ -47,6 +47,7 @@ class WbStripeCtx;
 class ContextReplayer : public IContextReplayer
 {
 public:
+    ContextReplayer(void) = default;
     ContextReplayer(AllocatorCtx* allocatorCtx, SegmentCtx* segmentCtx, WbStripeCtx* wbStripeCtx, AllocatorAddressInfo* info);
     virtual ~ContextReplayer(void);
 

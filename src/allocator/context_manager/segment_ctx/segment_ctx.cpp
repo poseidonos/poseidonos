@@ -49,14 +49,15 @@ SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, Allo
   addrInfo(addrInfo_),
   arrayName(arrayName_)
 {
+    segmentInfos = segmentInfo_;
     if (header != nullptr)
     {
+        // for UT
         ctxHeader.sig = header->sig;
         ctxHeader.ctxVersion = header->ctxVersion;
     }
     else
     {
-        segmentInfos = segmentInfo_; // for UT
         ctxHeader.sig = SIG_SEGMENT_CTX;
         ctxHeader.ctxVersion = 0;
     }
@@ -100,7 +101,10 @@ SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
     if (validCount > blksPerSegment)
     {
         POS_TRACE_ERROR(EID(VALID_COUNT_OVERFLOWED), "segmentId:{} increasedCount:{} total validCount:{} : OVERFLOWED", segId, cnt, validCount);
-        assert(false);
+        while (addrInfo->IsUT() != true)
+        {
+            usleep(1); // assert(false);
+        }
     }
     return validCount;
 }
@@ -112,7 +116,10 @@ SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
     if (validCount < 0)
     {
         POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED), "segmentId:{} decreasedCount:{} total validCount:{} : UNDERFLOWED", segId, cnt, validCount);
-        assert(false);
+        while (addrInfo->IsUT() != true)
+        {
+            usleep(1); // assert(false);
+        }
     }
     return validCount;
 }
@@ -147,13 +154,16 @@ SegmentCtx::AfterLoad(char* buf)
     if (ctxHeader.sig != SIG_SEGMENT_CTX)
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "SegmentCtx file signature is not matched:{}", ctxHeader.sig);
-        assert(false);
+        while (addrInfo->IsUT() != true)
+        {
+            usleep(1); // assert(false);
+        }
     }
     else
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "SegmentCtx file Integrity check SUCCESS:{}", ctxHeader.ctxVersion);
+        ctxDirtyVersion = ctxHeader.ctxVersion + 1;
     }
-    ctxDirtyVersion = ctxHeader.ctxVersion + 1;
 }
 
 void

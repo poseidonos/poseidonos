@@ -239,6 +239,7 @@ ContextManager::AllocateGCVictimSegment(void)
     {
         allocatorCtx->SetSegmentState(victimSegment, SegmentState::VICTIM, true);
     }
+    POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "segmentId:{} @AllocateGCVictim, free segment count:{}", victimSegment, allocatorCtx->GetNumOfFreeUserDataSegment());
     return victimSegment;
 }
 
@@ -247,15 +248,7 @@ ContextManager::GetCurrentGcMode(void)
 {
     int numFreeSegments = allocatorCtx->GetNumOfFreeUserDataSegment();
     QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments);
-    if (gcCtx.GetUrgentThreshold() >= numFreeSegments)
-    {
-        return MODE_URGENT_GC;
-    }
-    else if (gcCtx.GetGcThreshold() >= numFreeSegments)
-    {
-        return MODE_NORMAL_GC;
-    }
-    return MODE_NO_GC;
+    return gcCtx.GetCurrentGcMode(numFreeSegments);
 }
 
 int
@@ -372,7 +365,7 @@ ContextManager::_FreeSegment(SegmentId segId)
     segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */);
     allocatorCtx->SetSegmentState(segId, SegmentState::FREE, false);
     allocatorCtx->ReleaseSegment(segId);
-    POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was freed by allocator", segId);
+    POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was freed by allocator, free segment count:{}", segId, allocatorCtx->GetNumOfFreeUserDataSegment());
     int ret = rebuildCtx->FreeSegmentInRebuildTarget(segId);
     if (ret == 1)
     {

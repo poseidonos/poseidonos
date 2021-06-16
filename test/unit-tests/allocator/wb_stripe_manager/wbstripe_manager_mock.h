@@ -32,6 +32,8 @@ public:
     MOCK_METHOD(void, PickActiveStripe, (uint32_t volumeId, std::vector<Stripe*>& stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone), (override));
     MOCK_METHOD(void, FinalizeWriteIO, (std::vector<Stripe*> & stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone), (override));
     MOCK_METHOD(int, CheckAllActiveStripes, (std::vector<Stripe*> & stripesToFlush, std::vector<StripeId>& vsidToCheckFlushDone), (override));
+    MOCK_METHOD(void, PushStripeToStripeArray, (Stripe * stripe), (override));
+    MOCK_METHOD(int, _RequestStripeFlush, (Stripe * stripe), (override));
 };
 
 } // namespace pos

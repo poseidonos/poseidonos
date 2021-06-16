@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include "src/allocator/include/allocator_const.h"
+
 namespace pos
 {
 class GcCtx
@@ -43,6 +45,7 @@ public:
     int GetUrgentThreshold(void);
     void SetGcThreshold(int inputThreshold);
     void SetUrgentThreshold(int inputThreshold);
+    CurrentGcMode GetCurrentGcMode(int numFreeSegments);
 
     static const int DEFAULT_GC_THRESHOLD = 20;
     static const int DEFAULT_URGENT_THRESHOLD = 5;
@@ -50,6 +53,7 @@ public:
 private:
     int thresholdSegments;
     int urgentSegments;
+    CurrentGcMode curGcMode;
 };
 
 } // namespace pos

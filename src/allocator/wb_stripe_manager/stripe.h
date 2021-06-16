@@ -32,14 +32,14 @@
 
 #pragma once
 
-#include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/include/allocator_const.h"
-#include "src/mapper/reversemap/reverse_map.h"
-
 #include <atomic>
 #include <string>
 #include <tuple>
 #include <vector>
+
+#include "src/allocator/address/allocator_address_info.h"
+#include "src/allocator/include/allocator_const.h"
+#include "src/mapper/reversemap/reverse_map.h"
 
 namespace pos
 {
@@ -49,8 +49,8 @@ class Stripe
 {
 public:
     Stripe(void) = default;
-    Stripe(ReverseMapPack* revMap, bool withDataBuffer);    // Ctor for UT & IT
-    Stripe(bool withDataBuffer, std::string arrayName, AllocatorAddressInfo* allocatorAddressInfo);     // Ctor for Production
+    Stripe(ReverseMapPack* revMap, bool withDataBuffer);                                            // Ctor for UT & IT
+    Stripe(bool withDataBuffer, std::string arrayName, AllocatorAddressInfo* allocatorAddressInfo); // Ctor for Production
     virtual ~Stripe(void);
     virtual void Assign(StripeId vsid, StripeId lsid, ASTailArrayIdx tailarrayidx);
 

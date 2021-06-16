@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "src/allocator/address/allocator_address_info.h"
+#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
 
 using ::testing::_;
@@ -68,6 +69,12 @@ TEST(RebuildCtx, ReleaseRebuildSegment_TestIfSuccessOrNot)
     ret = rebuildCtx.ReleaseRebuildSegment(0);
     // then 2.
     EXPECT_EQ(1, ret);
+    // given 3.
+    rebuildCtx.GetLock().try_lock();
+    // when 3.
+    ret = rebuildCtx.ReleaseRebuildSegment(0);
+    // then 3.
+    EXPECT_EQ(-1, ret);
     delete allocCtx;
 }
 
@@ -330,23 +337,37 @@ TEST(RebuildCtx, AfterLoad_testIfSegmentSignatureSuccess)
     delete allocCtx;
 }
 
-TEST(RebuildCtx, AfterLoad_testIfSegmentSignatureFail)
+TEST(RebuildCtx, AfterLoad_testIfSegmentSignatureSuccessAndSetBuf)
 {
     // given
     RebuildCtxHeader header;
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     header.sig = RebuildCtx::SIG_REBUILD_CTX;
     header.numTargetSegments = 3;
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
-    char buf[100];
-    int* segId = reinterpret_cast<int*>(buf + sizeof(RebuildCtxHeader));
+    int buf[3];
     for (int i = 0; i < 3; i++)
     {
-        segId[i] = i;
+        buf[i] = i;
     }
-    // when
-    EXPECT_DEATH(rebuildCtx.AfterLoad(buf), "");
+    RebuildCtx rebuildCtx(&header, allocCtx, nullptr, "");
+    // when 1.
+    rebuildCtx.AfterLoad((char*)buf);
     delete allocCtx;
+}
+
+TEST(RebuildCtx, AfterLoad_testIfSegmentSignatureFail)
+{
+    // given
+    RebuildCtxHeader header;
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(addrInfo, "");
+    header.sig = 0;
+    RebuildCtx rebuildCtx(&header, allocCtx, addrInfo, "");
+    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
+    // when
+    rebuildCtx.AfterLoad(nullptr);
+    delete allocCtx;
+    delete addrInfo;
 }
 
 TEST(RebuildCtx, GetLock_TestSimpleGetter)

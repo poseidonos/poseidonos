@@ -137,6 +137,11 @@ VSAMapManager::EnableInternalAccess(int volID, int caller)
         return -EID(VSAMAP_LOAD_FAILURE);
     }
 
+    if (_GetVolumeState(volID) == VolState::VOLUME_DELETING)
+    {
+        return -EID(VSAMAP_LOAD_FAILURE);
+    }
+
     // Unloaded volume case: Load & BG Mount
     if (iter->second == VolState::EXIST_UNLOADED)
     {
@@ -224,7 +229,7 @@ VSAMapManager::GetVSAMapContent(int volID)
 }
 
 bool
-VSAMapManager::AllMapsAsyncFlushed()
+VSAMapManager::AllMapsAsyncFlushed(void)
 {
     bool allFlushed = true;
 
@@ -305,6 +310,11 @@ VSAMapManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByt
 bool
 VSAMapManager::VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayNAme, int arrayID)
 {
+    if (_GetVolumeState(volID) == VolState::VOLUME_DELETING)
+    {
+        return false;
+    }
+
     bool isUnknownSize = (volSizeByte == UNKNOWN_SIZE_BECAUSEOF_INTERNAL_LOAD);
     return _LoadVolumeMeta(volName, volID, volSizeByte, isUnknownSize);
 }
@@ -312,6 +322,11 @@ VSAMapManager::VolumeMounted(std::string volName, std::string subnqn, int volID,
 bool
 VSAMapManager::VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
 {
+    if (_GetVolumeState(id) == VolState::VOLUME_DELETING)
+    {
+        return false;
+    }
+
     std::unique_lock<std::recursive_mutex> lock(volMountStateLock[id]);
     volumeMountState.emplace(id, VolState::EXIST_UNLOADED);
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} is inserted to volumeMountState as EXIST_UNLOADED @VolumeLoaded", id);
@@ -327,6 +342,11 @@ VSAMapManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, u
 bool
 VSAMapManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID)
 {
+    if (_GetVolumeState(volID) == VolState::VOLUME_DELETING)
+    {
+        return false;
+    }
+
     vsaMapAPI->DisableVsaMapAccess(volID);
 
     do
@@ -365,7 +385,7 @@ VSAMapManager::VolumeUnmounted(std::string volName, int volID, std::string array
 bool
 VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayID)
 {
-    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
+    // std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "Starting VolumeDelete: volID:{}  volSizeByte:{}", volID, volSizeByte);
 
     VSAMapContent*& vsaMap = GetVSAMapContent(volID);
@@ -379,6 +399,12 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
             POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "VSAMap load failed, volumeID:{} @VolumeDeleted", volID);
             return false;
         }
+    }
+
+    if (_ChangeVolumeStateDeleting(volID) == false)
+    {
+        POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "Another thread started to delete volumeID:{} @VolumeDeleted", volID);
+        return true;
     }
 
     if (vsaMap->DoesFileExist() == false)
@@ -427,6 +453,10 @@ VSAMapManager::VolumeDetached(vector<int> volList, std::string arrayName, int ar
     for (int volumeId : volList)
     {
         vsaMapAPI->DisableVsaMapAccess(volumeId);
+        if (_GetVolumeState(volumeId) == VolState::VOLUME_DELETING)
+        {
+            continue;
+        }
 
         std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volumeId]);
 
@@ -444,6 +474,27 @@ VSAMapManager::VolumeDetached(vector<int> volList, std::string arrayName, int ar
             }
         }
     }
+}
+
+bool
+VSAMapManager::_ChangeVolumeStateDeleting(uint32_t volumeId)
+{
+    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volumeId]);
+    VolMountStateIter it = volumeMountState.find(volumeId);
+    if (volumeMountState[it->first] == VolState::VOLUME_DELETING)
+    {
+        return false;
+    }
+    volumeMountState[it->first] = VolState::VOLUME_DELETING;
+    return true;
+}
+
+VolState
+VSAMapManager::_GetVolumeState(uint32_t volumeId)
+{
+    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volumeId]);
+    VolMountStateIter it = volumeMountState.find(volumeId);
+    return volumeMountState[it->first];
 }
 
 bool

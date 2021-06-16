@@ -250,7 +250,7 @@ TEST(WbStripeCtx, Init_TestInitAndClose)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumWbStripes(10);
     WbStripeCtx wbstripeCtx(&addrInfo);
-
+    wbstripeCtx.Close();
     // when
     wbstripeCtx.Init();
     // then

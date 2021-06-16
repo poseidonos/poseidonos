@@ -30,14 +30,15 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
-#include "src/meta_file_intf/meta_file_include.h"
-#include "src/metafs/metafs_file_intf.h"
-#include "src/lib/bitmap.h"
 
 #include <string>
 #include <vector>
+
+#include "src/allocator/address/allocator_address_info.h"
+#include "src/lib/bitmap.h"
+#include "src/meta_file_intf/meta_file_include.h"
+#include "src/metafs/metafs_file_intf.h"
 
 namespace pos
 {

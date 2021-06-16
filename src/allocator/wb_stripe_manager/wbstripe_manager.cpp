@@ -60,6 +60,14 @@ WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IRevers
     numVolumes = numVolumes_;
     iReverseMap = iReverseMap_;
     pendingFullStripes = stripeVec_;
+    if (stripeVec_ != nullptr)
+    {
+        // only for UT
+        for (auto stripe : *stripeVec_)
+        {
+            stripesToFlush4FlushCmd[0].push_back(stripe);
+        }
+    }
 }
 
 WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName)
@@ -519,7 +527,10 @@ WBStripeManager::_AllocateRemainingBlocks(VirtualBlkAddr tail)
     else if (tail.offset > addrInfo->GetblksPerStripe())
     {
         POS_TRACE_ERROR(EID(PICKUP_ACTIVE_STRIPE), "offsetInTail:{} > blksPerStirpe:{}", tail.offset, addrInfo->GetblksPerStripe());
-        assert(false);
+        while (addrInfo->IsUT() != true)
+        {
+            usleep(1); // assert(false);
+        }
     }
 
     remainingBlks.numBlks = addrInfo->GetblksPerStripe() - tail.offset;

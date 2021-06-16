@@ -52,7 +52,7 @@ Stripe::Stripe(ReverseMapPack* revMap, bool withDataBuffer_)
   finished(true),
   remaining(0),
   referenceCount(0),
-  totalBlksPerUserStripe(1),
+  totalBlksPerUserStripe(1), // for UT
   withDataBuffer(withDataBuffer_)
 {
     if (withDataBuffer == false)
@@ -199,7 +199,7 @@ Stripe::SetWbLsid(StripeId wbAreaLsid)
 }
 
 StripeId
-Stripe::GetUserLsid()
+Stripe::GetUserLsid(void)
 {
     return userLsid;
 }
@@ -211,7 +211,7 @@ Stripe::SetUserLsid(StripeId userAreaLsid)
 }
 
 StripeId
-Stripe::GetVsid()
+Stripe::GetVsid(void)
 {
     return vsid;
 }
@@ -298,7 +298,7 @@ Stripe::ReconstructReverseMap(uint32_t volumeId, uint64_t blockCount)
 }
 
 bool
-Stripe::IsGcDestStripe()
+Stripe::IsGcDestStripe(void)
 {
     return (!withDataBuffer);
 }

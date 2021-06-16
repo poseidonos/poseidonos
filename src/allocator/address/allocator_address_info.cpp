@@ -50,6 +50,7 @@ AllocatorAddressInfo::Init(std::string arrayName, IArrayInfo* iArrayInfo)
     blksPerSegment = blksPerStripe * udSize->stripesPerSegment;
     stripesPerSegment = udSize->stripesPerSegment;
     numUserAreaSegments = udSize->totalSegments;
+    isUT = false;
 }
 
 } // namespace pos

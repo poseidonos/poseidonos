@@ -30,8 +30,12 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
+
+#include <string>
+#include <vector>
+
+#include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/allocator_ctx/segment_lock.h"
 #include "src/allocator/context_manager/allocator_ctx/segment_states.h"
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
@@ -39,9 +43,6 @@
 #include "src/include/pos_event_id.h"
 #include "src/lib/bitmap.h"
 #include "src/logger/logger.h"
-
-#include <string>
-#include <vector>
 
 namespace pos
 {
@@ -264,14 +265,17 @@ AllocatorCtx::AfterLoad(char* buf)
     if (ctxHeader.sig != SIG_ALLOCATOR_CTX)
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "AllocatorCtx file signature is not matched:{}", ctxHeader.sig);
-        assert(false);
+        while (addrInfo->IsUT() != true)
+        {
+            usleep(1); // assert(false);
+        }
     }
     else
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "AllocatorCtx file Integrity check SUCCESS:{}, {}", ctxHeader.ctxVersion, ctxHeader.numValidSegment);
+        allocSegBitmap->SetNumBitsSet(ctxHeader.numValidSegment);
+        ctxDirtyVersion = ctxHeader.ctxVersion + 1;
     }
-    allocSegBitmap->SetNumBitsSet(ctxHeader.numValidSegment);
-    ctxDirtyVersion = ctxHeader.ctxVersion + 1;
 }
 
 void

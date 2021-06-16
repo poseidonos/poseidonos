@@ -57,6 +57,8 @@ enum class VolState
     JUST_CREATED,       // Loaded
     BACKGROUND_MOUNTED, // Loaded
     FOREGROUND_MOUNTED, // Loaded
+    VOLUME_DELETING, // Deleting
+    MAX_STATE
 };
 
 using VolMountStateIter = std::map<int, VolState>::iterator;
@@ -103,6 +105,9 @@ private:
     bool _IsVolumeExist(int volID, VolMountStateIter& iter);
     bool _LoadVolumeMeta(std::string volName, int volID, uint64_t volSizeByte, bool isUnknownVolSize);
     void _WaitForMapAsyncFlushed(int volId);
+
+    bool _ChangeVolumeStateDeleting(uint32_t volumeId);
+    VolState _GetVolumeState(uint32_t volumeId);
 
     std::map<int, VolState> volumeMountState;
     std::recursive_mutex volMountStateLock[MAX_VOLUME_COUNT];

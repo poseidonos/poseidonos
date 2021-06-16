@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "src/allocator/address/allocator_address_info.h"
+#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/segment_lock_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/segment_states_mock.h"
@@ -38,17 +39,20 @@ TEST(AllocatorCtx, AfterLoad_TestCheckingSignatureFail)
 {
     // given
     AllocatorCtxHeader header;
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
     NiceMock<MockSegmentStates>* segStates = new NiceMock<MockSegmentStates>();
     NiceMock<MockSegmentLock>* segLocks = new NiceMock<MockSegmentLock>();
     header.sig = 0;
-    AllocatorCtx allocCtx(&header, allocBitmap, segStates, segLocks, nullptr, "");
+    AllocatorCtx allocCtx(&header, allocBitmap, segStates, segLocks, addrInfo, "");
+    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     // when
-    EXPECT_DEATH(allocCtx.AfterLoad(nullptr), "");
+    allocCtx.AfterLoad(nullptr);
 
     delete allocBitmap;
     delete segStates;
     delete segLocks;
+    delete addrInfo;
 }
 
 TEST(AllocatorCtx, GetStoredVersion_TestSimpleGetter)
