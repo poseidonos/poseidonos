@@ -32,33 +32,25 @@
 
 #include "checkpoint_submission.h"
 
-#include "src/include/pos_event_id.h"
-#include "src/journal_manager/checkpoint/checkpoint_handler.h"
-#include "src/journal_manager/checkpoint/dirty_map_manager.h"
-#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
-#include "src/logger/logger.h"
+#include "src/journal_manager/checkpoint/checkpoint_manager.h"
 
 namespace pos
 {
-CheckpointSubmission::CheckpointSubmission(CheckpointHandler* checkpointHandler,
-    CallbackSequenceController* sequenceController, MapPageList dirtyPages, EventSmartPtr callback)
-: checkpointHandler(checkpointHandler),
-  sequenceController(sequenceController),
-  dirtyPages(dirtyPages),
-  callback(callback)
+CheckpointSubmission::CheckpointSubmission(CheckpointManager* cpManager, EventSmartPtr callback, int logGroupId)
+: checkpointManager(cpManager),
+  callback(callback),
+  flushingLogGroupId(logGroupId)
 {
 }
 
 bool
 CheckpointSubmission::Execute(void)
 {
-    sequenceController->GetCheckpointExecutionApproval();
-    int ret = checkpointHandler->Start(dirtyPages, callback);
-    sequenceController->AllowCallbackExecution();
-
+    int ret = checkpointManager->RequestCheckpoint(flushingLogGroupId, callback);
     if (ret != 0)
     {
-        // TODO(huijeong.kim): Go to the fail mode - not to journal any more
+        // TODO(huijeong.kim): Go to the fail mode if fail repeated
+        return false;
     }
     return true;
 }

@@ -44,8 +44,9 @@
 
 namespace pos
 {
+class EventScheduler;
 class LogWriteContextFactory;
-class LogGroupReleaser;
+class CheckpointManager;
 class LogWriteHandler;
 class JournalConfiguration;
 
@@ -55,9 +56,10 @@ public:
     JournalVolumeEventHandler(void);
     virtual ~JournalVolumeEventHandler(void);
 
-    virtual void Init(LogWriteContextFactory* logFactory, LogGroupReleaser* releaser,
+    virtual void Init(LogWriteContextFactory* logFactory,
+        CheckpointManager* cpManager,
         LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration,
-        IContextManager* contextManager);
+        IContextManager* contextManager, EventScheduler* scheduler);
 
     virtual int VolumeDeleted(int volID) override;
     virtual void MetaFlushed(void) override;
@@ -74,10 +76,11 @@ private:
     bool isInitialized;
 
     IContextManager* contextManager;
+    EventScheduler* eventScheduler;
 
     JournalConfiguration* config;
     LogWriteContextFactory* logFactory;
-    LogGroupReleaser* logGroupReleaser;
+    CheckpointManager* checkpointManager;
     LogWriteHandler* logWriteHandler;
 
     std::mutex logWriteMutex;

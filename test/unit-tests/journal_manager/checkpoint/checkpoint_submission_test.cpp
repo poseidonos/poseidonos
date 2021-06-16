@@ -34,12 +34,7 @@
 
 #include <gtest/gtest.h>
 
-#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
-#include "test/unit-tests/journal_manager/checkpoint/checkpoint_handler_mock.h"
-#include "test/unit-tests/journal_manager/checkpoint/dirty_map_manager_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
+#include "test/unit-tests/journal_manager/checkpoint/checkpoint_manager_mock.h"
 
 using ::testing::_;
 using ::testing::InSequence;
@@ -48,29 +43,33 @@ using ::testing::Return;
 
 namespace pos
 {
-TEST(CheckpointSubmission, Execute_testIfCheckpointStartedSuccessfully)
+TEST(CheckpointSubmission, Execute_testIfCheckpointStartedSuccessfullyWhenLogGroupSpecified)
 {
     // Given
-    NiceMock<MockCheckpointHandler> checkpointHandler;
-    NiceMock<MockCallbackSequenceController> sequenceController;
-    NiceMock<MockEventScheduler> eventScheduler;
+    NiceMock<MockCheckpointManager> checkpointManager;
 
-    MapPageList dirtyPages;
-    CheckpointSubmission submission(&checkpointHandler, &sequenceController, dirtyPages, nullptr);
+    int logGroupId = 1;
+    CheckpointSubmission submission(&checkpointManager, nullptr, logGroupId);
 
-    // Then: Checkpoint should be started after acquiring approval,
-    // and allow callback execution afterwards
-    {
-        InSequence s;
-        EXPECT_CALL(sequenceController, GetCheckpointExecutionApproval);
-        EXPECT_CALL(checkpointHandler, Start(dirtyPages, _)).WillOnce(Return(0));
-        EXPECT_CALL(sequenceController, AllowCallbackExecution);
-    }
     // When
+    EXPECT_CALL(checkpointManager, RequestCheckpoint(logGroupId, _)).WillOnce(Return(0));
     bool result = submission.Execute();
 
     // Then: Execussion result should be 0
     EXPECT_EQ(result, true);
 }
 
+TEST(CheckpointSubmission, Execute_testIfCheckpointStartedSuccessfullyWhenLogGroupNotSpecified)
+{
+    // Given
+    NiceMock<MockCheckpointManager> checkpointManager;
+    CheckpointSubmission submission(&checkpointManager, nullptr);
+
+    // When
+    EXPECT_CALL(checkpointManager, RequestCheckpoint(-1, _)).WillOnce(Return(0));
+    bool result = submission.Execute();
+
+    // Then: Execussion result should be 0
+    EXPECT_EQ(result, true);
+}
 } // namespace pos

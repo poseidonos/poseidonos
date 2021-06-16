@@ -4,12 +4,10 @@
 
 #include "test/unit-tests/allocator/i_context_manager_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
-#include "test/unit-tests/journal_manager/checkpoint/checkpoint_handler_mock.h"
-#include "test/unit-tests/journal_manager/checkpoint/dirty_map_manager_mock.h"
+#include "test/unit-tests/journal_manager/checkpoint/checkpoint_manager_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/log_group_releaser_spy.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
 
 using ::testing::_;
@@ -22,20 +20,18 @@ namespace pos
 TEST(LogGroupReleaser, Init_testIfExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
-    LogGroupReleaser releaser(checkpointHandler);
-
-    // Then: Checkpoint handler should be initialized
-    EXPECT_CALL(*checkpointHandler, Init).Times(1);
+    LogGroupReleaser releaser;
 
     // When
-    releaser.Init(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    releaser.Init(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+
+    // Then
 }
 
 TEST(LogGroupReleaser, Reset_testIfResetSuccessfully)
 {
     // Given
-    LogGroupReleaser releaser(nullptr);
+    LogGroupReleaser releaser;
 
     // When
     releaser.Reset();
@@ -81,13 +77,14 @@ TEST(LogGroupReleaser, GetFullLogGroups_testIfExecutedSuccessfully)
 TEST(LogGroupReleaser, GetStatus_testIfExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
-    LogGroupReleaser releaser(checkpointHandler);
-
-    CheckpointStatus status = INIT;
-    EXPECT_CALL(*checkpointHandler, GetStatus).WillOnce(Return(status));
+    NiceMock<MockCheckpointManager> checkpointManager;
+    LogGroupReleaser releaser;
+    releaser.Init(nullptr, nullptr, nullptr, &checkpointManager, nullptr, nullptr, nullptr);
 
     // When
+    CheckpointStatus status = INIT;
+    EXPECT_CALL(checkpointManager, GetStatus).WillOnce(Return(status));
+
     CheckpointStatus actual = releaser.GetStatus();
 
     // Then
@@ -99,14 +96,11 @@ TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointStartedWhenThereIsNoFl
     // Given
     NiceMock<MockJournalConfiguration> config;
     NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockDirtyMapManager> dirtyManager;
-    NiceMock<MockCallbackSequenceController> sequenceController;
-
-    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
+    NiceMock<MockCheckpointManager> checkpointManager;
     NiceMock<MockEventScheduler> eventScheduler;
-    LogGroupReleaserSpy releaser(checkpointHandler);
+    LogGroupReleaserSpy releaser;
 
-    releaser.Init(&config, nullptr, nullptr, &dirtyManager, &sequenceController,
+    releaser.Init(&config, nullptr, nullptr, &checkpointManager,
         nullptr, &contextManager, &eventScheduler);
 
     // When: There is only one full log group in the full list,
@@ -135,13 +129,11 @@ TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointNotStartedCheckpointIs
     // Given
     NiceMock<MockJournalConfiguration> config;
     NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockDirtyMapManager> dirtyManager;
-    NiceMock<MockCallbackSequenceController> sequenceController;
-    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
+    NiceMock<MockCheckpointManager> checkpointManager;
     NiceMock<MockEventScheduler> eventScheduler;
-    LogGroupReleaserSpy releaser(checkpointHandler);
+    LogGroupReleaserSpy releaser;
 
-    releaser.Init(&config, nullptr, nullptr, &dirtyManager, &sequenceController,
+    releaser.Init(&config, nullptr, nullptr, &checkpointManager,
         nullptr, &contextManager, &eventScheduler);
 
     // When: There is only one full log group in the full list,
@@ -163,13 +155,11 @@ TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointNotStartedCheckpointIs
 TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointNotStartedWhenThereIsFlushingLogGroup)
 {
     // Given
-    NiceMock<MockDirtyMapManager> dirtyManager;
-    NiceMock<MockCallbackSequenceController> sequenceController;
-    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
+    NiceMock<MockCheckpointManager> checkpointManager;
     NiceMock<MockEventScheduler> eventScheduler;
-    LogGroupReleaserSpy releaser(checkpointHandler);
+    LogGroupReleaserSpy releaser;
 
-    releaser.Init(nullptr, nullptr, nullptr, &dirtyManager, &sequenceController,
+    releaser.Init(nullptr, nullptr, nullptr, &checkpointManager,
         nullptr, nullptr, nullptr);
 
     // When: There is a full log group in the full list, and is flushing log group
@@ -190,13 +180,11 @@ TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointNotStartedWhenThereIsF
 TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointNotStartedWhenThereIsNoFullLogGroups)
 {
     // Given
-    NiceMock<MockDirtyMapManager> dirtyManager;
-    NiceMock<MockCallbackSequenceController> sequenceController;
-    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
+    NiceMock<MockCheckpointManager> checkpointManager;
     NiceMock<MockEventScheduler> eventScheduler;
-    LogGroupReleaserSpy releaser(checkpointHandler);
+    LogGroupReleaserSpy releaser;
 
-    releaser.Init(nullptr, nullptr, nullptr, &dirtyManager, &sequenceController,
+    releaser.Init(nullptr, nullptr, nullptr, &checkpointManager,
         nullptr, nullptr, &eventScheduler);
 
     // When: There is no full log group in the full list, and flushing log group
@@ -217,15 +205,12 @@ TEST(LogGroupReleaser, LogGroupResetCompleted_testIfNextCheckpointStarted)
     // Given
     NiceMock<MockJournalConfiguration> config;
     NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockDirtyMapManager> dirtyManager;
-    NiceMock<MockCallbackSequenceController> sequenceController;
+    NiceMock<MockCheckpointManager> checkpointManager;
     NiceMock<MockLogBufferWriteDoneNotifier> notifier;
     NiceMock<MockEventScheduler> eventScheduler;
 
-    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
-
-    LogGroupReleaserSpy releaser(checkpointHandler);
-    releaser.Init(&config, &notifier, nullptr, &dirtyManager, &sequenceController,
+    LogGroupReleaserSpy releaser;
+    releaser.Init(&config, &notifier, nullptr, &checkpointManager,
         nullptr, &contextManager, &eventScheduler);
 
     // When: Log group 0 is flushed and log group 1 is in the full log group list
@@ -245,15 +230,12 @@ TEST(LogGroupReleaser, LogGroupResetCompleted_testIfNextCheckpointStarted)
 TEST(LogGroupReleaser, LogGroupResetCompleted_testIfNextCheckpointIsNotStartedWhenThereIsNoFullLogGroup)
 {
     // Given
-    NiceMock<MockDirtyMapManager> dirtyManager;
-    NiceMock<MockCallbackSequenceController> sequenceController;
+    NiceMock<MockCheckpointManager> checkpointManager;
     NiceMock<MockLogBufferWriteDoneNotifier> notifier;
     NiceMock<MockEventScheduler> eventScheduler;
 
-    NiceMock<MockCheckpointHandler>* checkpointHandler = new NiceMock<MockCheckpointHandler>;
-
-    LogGroupReleaserSpy releaser(checkpointHandler);
-    releaser.Init(nullptr, &notifier, nullptr, &dirtyManager, &sequenceController, nullptr, nullptr, nullptr);
+    LogGroupReleaserSpy releaser;
+    releaser.Init(nullptr, &notifier, nullptr, &checkpointManager, nullptr, nullptr, nullptr);
 
     // When: Log group 0 is flushed and full log group list is empty
     int flushedlogGroupId = 0;

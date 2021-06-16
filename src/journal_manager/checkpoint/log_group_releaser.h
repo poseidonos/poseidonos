@@ -45,10 +45,8 @@ namespace pos
 {
 class JournalConfiguration;
 class JournalLogBuffer;
-class CheckpointHandler;
-class DirtyMapManager;
+class CheckpointManager;
 class LogBufferWriteDoneNotifier;
-class CallbackSequenceController;
 class EventScheduler;
 
 class IMapFlush;
@@ -58,12 +56,10 @@ class LogGroupReleaser : public ICheckpointStatus, public ILogGroupResetComplete
 {
 public:
     LogGroupReleaser(void);
-    explicit LogGroupReleaser(CheckpointHandler* checkpointHandler);
     virtual ~LogGroupReleaser(void);
 
     virtual void Init(JournalConfiguration* config,
-        LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer,
-        DirtyMapManager* dirtyPage, CallbackSequenceController* sequencer,
+        LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer, CheckpointManager* cpManager,
         IMapFlush* mapFlush, IContextManager* contextManager, EventScheduler* scheduler);
     void Reset(void);
 
@@ -74,8 +70,6 @@ public:
     virtual CheckpointStatus GetStatus(void) override;
 
     virtual void LogGroupResetCompleted(int logGroupId) override;
-
-    virtual void TriggerMetadataFlush(EventSmartPtr callback);
 
 protected:
     void _AddToFullLogGroupList(int groupId);
@@ -94,10 +88,7 @@ protected:
 
     JournalConfiguration* config;
     LogBufferWriteDoneNotifier* releaseNotifier;
-
     JournalLogBuffer* logBuffer;
-    DirtyMapManager* dirtyPageManager;
-    CallbackSequenceController* sequenceController;
 
     std::mutex fullLogGroupLock;
     std::list<int> fullLogGroup;
@@ -105,7 +96,7 @@ protected:
     std::atomic<int> flushingLogGroupId;
 
     std::atomic<bool> checkpointTriggerInProgress;
-    CheckpointHandler* checkpointHandler;
+    CheckpointManager* checkpointManager;
 
     IContextManager* contextManager;
     EventScheduler* eventScheduler;

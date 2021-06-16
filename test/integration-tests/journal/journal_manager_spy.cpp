@@ -200,7 +200,14 @@ JournalManagerSpy::GetNumLogsAdded(void)
 int
 JournalManagerSpy::VolumeDeleted(int volId)
 {
-    return volumeEventHandler->VolumeDeleted(volId);
+    int ret = 0;
+    ret = volumeEventHandler->WriteVolumeDeletedLog(volId);
+    if (ret == 0)
+    {
+        volumeEventHandler->MetaFlushed();
+    }
+
+    return ret;
 }
 
 uint64_t

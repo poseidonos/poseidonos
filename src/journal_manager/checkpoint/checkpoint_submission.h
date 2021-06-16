@@ -34,27 +34,24 @@
 
 #include "src/event_scheduler/event.h"
 #include "src/include/smart_ptr_type.h"
-#include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
-class CheckpointHandler;
+class CheckpointManager;
 class CallbackSequenceController;
 
 class CheckpointSubmission : public Event
 {
 public:
-    CheckpointSubmission(CheckpointHandler* checkpointHandler,
-        CallbackSequenceController* sequenceController, MapPageList dirtyPages,
-        EventSmartPtr callback);
+    CheckpointSubmission(CheckpointManager* checkpointManager,
+        EventSmartPtr callback, int logGroupId = -1);
     virtual ~CheckpointSubmission(void) = default;
     bool Execute(void) override;
 
 private:
-    CheckpointHandler* checkpointHandler;
-    CallbackSequenceController* sequenceController;
-    MapPageList dirtyPages;
+    CheckpointManager* checkpointManager;
     EventSmartPtr callback;
+    int flushingLogGroupId;
 };
 
 } // namespace pos

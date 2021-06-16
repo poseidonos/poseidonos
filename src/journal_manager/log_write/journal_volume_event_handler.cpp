@@ -34,8 +34,10 @@
 
 #include <functional>
 
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.h"
-#include "src/journal_manager/checkpoint/log_group_releaser.h"
+#include "src/journal_manager/checkpoint/checkpoint_manager.h"
+#include "src/journal_manager/checkpoint/checkpoint_submission.h"
 #include "src/journal_manager/checkpoint/meta_flush_completed.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
@@ -49,9 +51,10 @@ namespace pos
 JournalVolumeEventHandler::JournalVolumeEventHandler(void)
 : isInitialized(false),
   contextManager(nullptr),
+  eventScheduler(nullptr),
   config(nullptr),
   logFactory(nullptr),
-  logGroupReleaser(nullptr),
+  checkpointManager(nullptr),
   logWriteHandler(nullptr),
   logWriteInProgress(false),
   flushInProgress(false)
@@ -64,15 +67,17 @@ JournalVolumeEventHandler::~JournalVolumeEventHandler(void)
 
 void
 JournalVolumeEventHandler::Init(LogWriteContextFactory* factory,
-    LogGroupReleaser* releaser, LogWriteHandler* writter,
-    JournalConfiguration* journalConfiguration, IContextManager* contextManagerToUse)
+    CheckpointManager* cpManager, LogWriteHandler* writter,
+    JournalConfiguration* journalConfiguration,
+    IContextManager* contextManagerToUse, EventScheduler* scheduler)
 {
     config = journalConfiguration;
     logFactory = factory;
-    logGroupReleaser = releaser;
+    checkpointManager = cpManager;
     logWriteHandler = writter;
 
     contextManager = contextManagerToUse;
+    eventScheduler = scheduler;
 
     isInitialized = true;
 }
@@ -100,10 +105,13 @@ JournalVolumeEventHandler::VolumeDeleted(int volumeId)
         _WaitForLogWriteDone(volumeId);
 
         EventSmartPtr callback(new MetaFlushCompleted(this));
+        EventSmartPtr cpSubmission(new CheckpointSubmission(checkpointManager, callback));
+
         flushInProgress = true;
-        logGroupReleaser->TriggerMetadataFlush(callback);
+        eventScheduler->EnqueueEvent(cpSubmission);
 
         _WaitForAllocatorContextFlushCompleted();
+
         return 0;
     }
 }

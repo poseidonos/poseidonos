@@ -34,11 +34,9 @@
 
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.h"
-#include "src/journal_manager/checkpoint/checkpoint_handler.h"
+#include "src/journal_manager/checkpoint/checkpoint_manager.h"
 #include "src/journal_manager/checkpoint/checkpoint_submission.h"
-#include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
-#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
 #include "src/journal_manager/log_buffer/log_group_footer_write_event.h"
@@ -49,22 +47,13 @@
 
 namespace pos
 {
-// Constructor for the product code
 LogGroupReleaser::LogGroupReleaser(void)
-: LogGroupReleaser(new CheckpointHandler())
-{
-}
-
-// Constructor for unit test
-LogGroupReleaser::LogGroupReleaser(CheckpointHandler* checkpointHandler)
 : config(nullptr),
   releaseNotifier(nullptr),
   logBuffer(nullptr),
-  dirtyPageManager(nullptr),
-  sequenceController(nullptr),
   flushingLogGroupId(-1),
   checkpointTriggerInProgress(false),
-  checkpointHandler(checkpointHandler),
+  checkpointManager(nullptr),
   contextManager(nullptr),
   eventScheduler(nullptr)
 {
@@ -72,27 +61,17 @@ LogGroupReleaser::LogGroupReleaser(CheckpointHandler* checkpointHandler)
 
 LogGroupReleaser::~LogGroupReleaser(void)
 {
-    if (checkpointHandler != nullptr)
-    {
-        delete checkpointHandler;
-    }
 }
 
 void
 LogGroupReleaser::Init(JournalConfiguration* journalConfiguration,
-    LogBufferWriteDoneNotifier* released,
-    JournalLogBuffer* buffer, DirtyMapManager* dirtyPage,
-    CallbackSequenceController* sequencer,
+    LogBufferWriteDoneNotifier* released, JournalLogBuffer* buffer, CheckpointManager* cpManager,
     IMapFlush* mapFlush, IContextManager* ctxManager, EventScheduler* scheduler)
 {
     config = journalConfiguration;
     releaseNotifier = released;
     logBuffer = buffer;
-    dirtyPageManager = dirtyPage;
-    sequenceController = sequencer;
-
-    checkpointHandler->Init(mapFlush, ctxManager, scheduler);
-
+    checkpointManager = cpManager;
     contextManager = ctxManager;
     eventScheduler = scheduler;
 }
@@ -109,17 +88,6 @@ LogGroupReleaser::AddToFullLogGroup(int groupId)
 {
     _AddToFullLogGroupList(groupId);
     _FlushNextLogGroup();
-}
-
-void
-LogGroupReleaser::TriggerMetadataFlush(EventSmartPtr callback)
-{
-    MapPageList dirtyPages = dirtyPageManager->GetTotalDirtyList();
-
-    EventSmartPtr checkpointSubmission(new CheckpointSubmission(checkpointHandler,
-        sequenceController, dirtyPages, callback));
-
-    eventScheduler->EnqueueEvent(checkpointSubmission);
 }
 
 void
@@ -171,9 +139,7 @@ LogGroupReleaser::_CreateCheckpointSubmissionEvent(void)
 
     EventSmartPtr resetLogGroupCompletion(new LogGroupResetCompletedEvent(this, flushingLogGroupId));
     EventSmartPtr resetLogGroup(new ResetLogGroup(logBuffer, flushingLogGroupId, resetLogGroupCompletion));
-    MapPageList dirtyPages = dirtyPageManager->GetDirtyList(flushingLogGroupId);
-    EventSmartPtr checkpointSubmission(new CheckpointSubmission(checkpointHandler,
-        sequenceController, dirtyPages, resetLogGroup));
+    EventSmartPtr checkpointSubmission(new CheckpointSubmission(checkpointManager, resetLogGroup, flushingLogGroupId));
 
     return checkpointSubmission;
 }
@@ -245,7 +211,7 @@ LogGroupReleaser::GetFullLogGroups(void)
 CheckpointStatus
 LogGroupReleaser::GetStatus(void)
 {
-    return checkpointHandler->GetStatus();
+    return checkpointManager->GetStatus();
 }
 
 } // namespace pos

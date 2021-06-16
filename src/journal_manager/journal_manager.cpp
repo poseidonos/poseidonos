@@ -35,6 +35,13 @@
 #include <iostream>
 #include <string>
 
+#include "src/allocator/i_context_manager.h"
+#include "src/allocator/i_context_replayer.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/include/pos_event_id.h"
+#include "src/journal_manager/checkpoint/checkpoint_manager.h"
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/journal_manager/checkpoint/log_group_releaser.h"
 #include "src/journal_manager/config/journal_configuration.h"
@@ -47,17 +54,10 @@
 #include "src/journal_manager/log_write/log_write_handler.h"
 #include "src/journal_manager/replay/replay_handler.h"
 #include "src/journal_manager/status/journal_status_provider.h"
-
-#include "src/allocator/i_context_manager.h"
-#include "src/allocator/i_context_replayer.h"
-#include "src/allocator_service/allocator_service.h"
-#include "src/array_models/interface/i_array_info.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
-#include "src/volume/volume_service.h"
 #include "src/metafs/include/metafs_service.h"
+#include "src/volume/volume_service.h"
 
 namespace pos
 {
@@ -73,6 +73,7 @@ JournalManager::JournalManager(void)
   volumeEventHandler(nullptr),
   bufferAllocator(nullptr),
   logGroupReleaser(nullptr),
+  checkpointManager(nullptr),
   dirtyMapManager(nullptr),
   logFilledNotifier(nullptr),
   sequenceController(nullptr),
@@ -89,6 +90,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     JournalLogBuffer* journalLogBuffer,
     BufferOffsetAllocator* bufferOffsetAllocator,
     LogGroupReleaser* groupReleaser,
+    CheckpointManager* cpManager,
     DirtyMapManager* dirtyManager,
     LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
     CallbackSequenceController* callbackSequenceController,
@@ -107,6 +109,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     bufferAllocator = bufferOffsetAllocator;
     logGroupReleaser = groupReleaser;
 
+    checkpointManager = cpManager;
     dirtyMapManager = dirtyManager;
     logFilledNotifier = logBufferWriteDoneNotifier;
     sequenceController = callbackSequenceController;
@@ -120,18 +123,19 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
 // Constructor for injecting mock module dependencies in product code
 JournalManager::JournalManager(IArrayInfo* info, IStateControl* state)
 : JournalManager(new JournalConfiguration(),
-    new JournalStatusProvider(),
-    new LogWriteContextFactory(),
-    new LogWriteHandler(),
-    new JournalVolumeEventHandler(),
-    new JournalLogBuffer(info->GetName()),
-    new BufferOffsetAllocator(),
-    new LogGroupReleaser(),
-    new DirtyMapManager(),
-    new LogBufferWriteDoneNotifier(),
-    new CallbackSequenceController(),
-    new ReplayHandler(state),
-    info, JournalServiceSingleton::Instance())
+      new JournalStatusProvider(),
+      new LogWriteContextFactory(),
+      new LogWriteHandler(),
+      new JournalVolumeEventHandler(),
+      new JournalLogBuffer(info->GetName()),
+      new BufferOffsetAllocator(),
+      new LogGroupReleaser(),
+      new CheckpointManager(),
+      new DirtyMapManager(),
+      new LogBufferWriteDoneNotifier(),
+      new CallbackSequenceController(),
+      new ReplayHandler(state),
+      info, JournalServiceSingleton::Instance())
 {
 }
 
@@ -414,6 +418,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
 
     bufferAllocator->Init(logGroupReleaser, config);
     dirtyMapManager->Init(config);
+    checkpointManager->Init(mapFlush, contextManager, eventScheduler, sequenceController, dirtyMapManager);
 
     logFactory->Init(logFilledNotifier, sequenceController);
 
@@ -423,12 +428,12 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     logFilledNotifier->Register(bufferAllocator);
     logFilledNotifier->Register(logWriteHandler);
 
-    logGroupReleaser->Init(config, logFilledNotifier, logBuffer, dirtyMapManager,
-        sequenceController, mapFlush, contextManager, eventScheduler);
+    logGroupReleaser->Init(config, logFilledNotifier, logBuffer,
+        checkpointManager, mapFlush, contextManager, eventScheduler);
 
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
-    volumeEventHandler->Init(logFactory, logGroupReleaser, logWriteHandler, config,
-        contextManager);
+    volumeEventHandler->Init(logFactory, checkpointManager, logWriteHandler, config,
+        contextManager, eventScheduler);
 
     replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, blockAllocator,
         wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);

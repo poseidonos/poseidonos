@@ -4,6 +4,7 @@
 
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
+#include "test/unit-tests/journal_manager/checkpoint/checkpoint_manager_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/dirty_map_manager_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/log_group_releaser_mock.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
@@ -61,6 +62,7 @@ public:
         logBuffer = new NiceMock<MockJournalLogBuffer>;
         bufferAllocator = new NiceMock<MockBufferOffsetAllocator>;
         logGroupReleaser = new NiceMock<MockLogGroupReleaser>;
+        checkpointManager = new NiceMock<MockCheckpointManager>;
         dirtyMapManager = new NiceMock<MockDirtyMapManager>;
         logFilledNotifier = new NiceMock<MockLogBufferWriteDoneNotifier>;
         callbackSequenceController = new NiceMock<MockCallbackSequenceController>;
@@ -70,7 +72,7 @@ public:
 
         journal = new JournalManager(config, statusProvider,
             logWriteContextFactory, logWriteHandler, volumeEventHandler, logBuffer,
-            bufferAllocator, logGroupReleaser, dirtyMapManager, logFilledNotifier,
+            bufferAllocator, logGroupReleaser, checkpointManager, dirtyMapManager, logFilledNotifier,
             callbackSequenceController, replayHandler, arrayInfo, service);
     }
 
@@ -94,6 +96,7 @@ protected:
     NiceMock<MockJournalLogBuffer>* logBuffer;
     NiceMock<MockBufferOffsetAllocator>* bufferAllocator;
     NiceMock<MockLogGroupReleaser>* logGroupReleaser;
+    NiceMock<MockCheckpointManager>* checkpointManager;
     NiceMock<MockDirtyMapManager>* dirtyMapManager;
     NiceMock<MockLogBufferWriteDoneNotifier>* logFilledNotifier;
     NiceMock<MockCallbackSequenceController>* callbackSequenceController;

@@ -65,6 +65,7 @@ class ReplayHandler;
 
 class JournalStatusProvider;
 
+class CheckpointManager;
 class DirtyMapManager;
 class LogBufferWriteDoneNotifier;
 class CallbackSequenceController;
@@ -98,6 +99,7 @@ public:
         JournalLogBuffer* journalLogBuffer,
         BufferOffsetAllocator* bufferOffsetAllocator,
         LogGroupReleaser* groupReleaser,
+        CheckpointManager* checkpointManager,
         DirtyMapManager* dirtyManager,
         LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
         CallbackSequenceController* sequenceController,
@@ -164,6 +166,8 @@ protected:
 
     BufferOffsetAllocator* bufferAllocator;
     LogGroupReleaser* logGroupReleaser;
+
+    CheckpointManager* checkpointManager;
     DirtyMapManager* dirtyMapManager;
     LogBufferWriteDoneNotifier* logFilledNotifier;
     CallbackSequenceController* sequenceController;
