@@ -33,6 +33,7 @@
 #include "io_locker.h"
 
 #include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -86,7 +87,9 @@ IOLocker::TryChange(string array, LockerMode mode)
     StripeLocker* locker = _Find(array);
     if (locker == nullptr)
     {
-        return false;
+        POS_TRACE_ERROR((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+            "Locker not found, fatal error if array is not broken");
+        return true;
     }
 
     return locker->TryModeChanging(mode);
