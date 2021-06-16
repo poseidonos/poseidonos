@@ -30,20 +30,22 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include "src/dpdk_wrapper/hugepage_allocator.h"
 
-#include "src/cpu_affinity/affinity_manager.h"
+#include <gtest/gtest.h>
 
 namespace pos
 {
-class MockAffinityManager : public AffinityManager
+TEST(HugepageAllocator, Alloc_)
 {
-public:
-    using AffinityManager::AffinityManager;
-    MockAffinityManager(const MockAffinityManager& mockAffinityManager)
-    : AffinityManager(mockAffinityManager) {}
-    MOCK_METHOD(uint32_t, GetNumaIdFromCurrentThread, (), (override));
-    MOCK_METHOD(uint32_t, GetNumaCount, (), (override));
-};
+}
+
+TEST(HugepageAllocator, AllocFromSocket_)
+{
+}
+
+TEST(HugepageAllocator, Free_)
+{
+}
 
 } // namespace pos

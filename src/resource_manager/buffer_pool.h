@@ -30,20 +30,47 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#ifndef BUFFER_POOL_H_
+#define BUFFER_POOL_H_
 
-#include "src/cpu_affinity/affinity_manager.h"
+#include <list>
+#include <mutex>
+
+#include "buffer_info.h"
+#include "src/dpdk_wrapper/hugepage_allocator.h"
 
 namespace pos
 {
-class MockAffinityManager : public AffinityManager
+
+class HugepageAllocator;
+
+class BufferPool
 {
 public:
-    using AffinityManager::AffinityManager;
-    MockAffinityManager(const MockAffinityManager& mockAffinityManager)
-    : AffinityManager(mockAffinityManager) {}
-    MOCK_METHOD(uint32_t, GetNumaIdFromCurrentThread, (), (override));
-    MOCK_METHOD(uint32_t, GetNumaCount, (), (override));
+    BufferPool(const BufferInfo info,
+        const uint32_t socket,
+        HugepageAllocator* hugepageAllocator =
+            HugepageAllocatorSingleton::Instance());
+    virtual ~BufferPool(void);
+
+    virtual void* TryGetBuffer(void);
+    virtual void ReturnBuffer(void*);
+
+private:
+    bool _Alloc(void);
+    void _Clear(void);
+
+    const BufferInfo BUFFER_INFO;
+    const uint32_t SOCKET;
+
+    std::mutex freeBufferLock;
+    std::list<void*> freeBuffers;
+    std::list<void*> totalBuffers;
+    std::list<void*> allocatedHugepages;
+
+    HugepageAllocator* hugepageAllocator;
 };
 
 } // namespace pos
+
+#endif // BUFFER_POOL_H_

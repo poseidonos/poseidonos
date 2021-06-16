@@ -30,20 +30,20 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#ifndef BUFFER_INFO_H_
+#define BUFFER_INFO_H_
 
-#include "src/cpu_affinity/affinity_manager.h"
+#include <string>
 
 namespace pos
 {
-class MockAffinityManager : public AffinityManager
+struct BufferInfo
 {
-public:
-    using AffinityManager::AffinityManager;
-    MockAffinityManager(const MockAffinityManager& mockAffinityManager)
-    : AffinityManager(mockAffinityManager) {}
-    MOCK_METHOD(uint32_t, GetNumaIdFromCurrentThread, (), (override));
-    MOCK_METHOD(uint32_t, GetNumaCount, (), (override));
+    std::string owner = "";
+    uint64_t size = 0;
+    uint64_t count = 0;
 };
 
 } // namespace pos
+
+#endif // BUFFER_INFO_H_

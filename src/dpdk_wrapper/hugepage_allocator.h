@@ -30,20 +30,30 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#ifndef HUGEPAGE_ALLOCATOR_H_
+#define HUGEPAGE_ALLOCATOR_H_
 
-#include "src/cpu_affinity/affinity_manager.h"
+#include "src/lib/singleton.h"
 
 namespace pos
 {
-class MockAffinityManager : public AffinityManager
+
+class HugepageAllocator
 {
 public:
-    using AffinityManager::AffinityManager;
-    MockAffinityManager(const MockAffinityManager& mockAffinityManager)
-    : AffinityManager(mockAffinityManager) {}
-    MOCK_METHOD(uint32_t, GetNumaIdFromCurrentThread, (), (override));
-    MOCK_METHOD(uint32_t, GetNumaCount, (), (override));
+    virtual ~HugepageAllocator(void);
+    virtual void* AllocFromSocket(const uint32_t size,
+        const uint32_t count,
+        const uint32_t socket);
+    virtual void Free(void* addr);
+    virtual uint32_t GetDefaultPageSize(void);
+
+private:
+    const uint32_t DEFAULT_PAGE_SIZE = 2 * 1024 * 1024;
 };
 
+using HugepageAllocatorSingleton = Singleton<HugepageAllocator>;
+
 } // namespace pos
+
+#endif // HUGEPAGE_ALLOCATOR_H_

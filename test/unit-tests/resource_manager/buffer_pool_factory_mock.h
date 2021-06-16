@@ -30,20 +30,22 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef MOCK_BUFFER_POOL_FACTORY_H_
+#define MOCK_BUFFER_POOL_FACTORY_H_
+
 #include <gmock/gmock.h>
 
-#include "src/cpu_affinity/affinity_manager.h"
+#include "src/resource_manager/buffer_pool_factory.h"
 
 namespace pos
 {
-class MockAffinityManager : public AffinityManager
+class MockBufferPoolFactory : public BufferPoolFactory
 {
 public:
-    using AffinityManager::AffinityManager;
-    MockAffinityManager(const MockAffinityManager& mockAffinityManager)
-    : AffinityManager(mockAffinityManager) {}
-    MOCK_METHOD(uint32_t, GetNumaIdFromCurrentThread, (), (override));
-    MOCK_METHOD(uint32_t, GetNumaCount, (), (override));
+    using BufferPoolFactory::BufferPoolFactory;
+    MOCK_METHOD(BufferPool*, Create, (BufferInfo& info, uint32_t socket), (override));
 };
 
 } // namespace pos
+
+#endif // MOCK_BUFFER_POOL_FACTORY_H_

@@ -30,20 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef MOCK_MEMORY_MANAGER_H_
+#define MOCK_MEMORY_MANAGER_H_
+
 #include <gmock/gmock.h>
 
-#include "src/cpu_affinity/affinity_manager.h"
+#include "src/resource_manager/memory_manager.h"
 
 namespace pos
 {
-class MockAffinityManager : public AffinityManager
+class MockMemoryManager : public MemoryManager
 {
 public:
-    using AffinityManager::AffinityManager;
-    MockAffinityManager(const MockAffinityManager& mockAffinityManager)
-    : AffinityManager(mockAffinityManager) {}
-    MOCK_METHOD(uint32_t, GetNumaIdFromCurrentThread, (), (override));
-    MOCK_METHOD(uint32_t, GetNumaCount, (), (override));
+    using MemoryManager::MemoryManager;
+    MOCK_METHOD(BufferPool*, CreateBufferPool, (BufferInfo & info), (override));
+    MOCK_METHOD(void, DeleteBufferPool, (BufferPool * pool), (override));
 };
 
 } // namespace pos
+
+#endif // MOCK_MEMORY_MANAGER_H_
+

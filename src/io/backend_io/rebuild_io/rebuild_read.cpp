@@ -43,10 +43,11 @@
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/lib/block_alignment.h"
 #include "src/logger/logger.h"
+#include "src/resource_manager/buffer_pool.h"
 namespace pos
 {
 int
-RebuildRead::Recover(UbioSmartPtr ubio)
+RebuildRead::Recover(UbioSmartPtr ubio, BufferPool* bufferPool)
 {
     if (true == ubio->IsRetry())
     {
@@ -75,15 +76,21 @@ RebuildRead::Recover(UbioSmartPtr ubio)
 
     uint32_t readSize = blockAlignment.GetBlockCount() * blockSize;
     uint32_t sectorCnt = rm.srcAddr.size() * readSize / sectorSize;
-    uint32_t memSize = sectorSize * sectorCnt;
-    void* mem = Memory<sectorSize>::Alloc(sectorCnt);
-    memset(mem, 0, memSize);
+    void* mem = nullptr;
+    if (bufferPool == nullptr) // Degraded Or Timeout case
+    {
+        mem = Memory<sectorSize>::Alloc(sectorCnt);
+    }
+    else // Total Rebuild Case
+    {
+        mem = bufferPool->TryGetBuffer();
+    }
 
     UbioSmartPtr rebuildUbio(new Ubio(mem, sectorCnt, ubio->GetArrayName()));
     rebuildUbio->SetRetry(true);
 
     CallbackSmartPtr rebuildCompletion(
-        new RebuildReadCompleteHandler(rebuildUbio, rm.recoverFunc, readSize));
+        new RebuildReadCompleteHandler(rebuildUbio, rm.recoverFunc, readSize, bufferPool));
 
     rebuildUbio->SetCallback(rebuildCompletion);
     rebuildUbio->SetOriginUbio(ubio);

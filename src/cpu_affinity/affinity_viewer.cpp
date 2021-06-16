@@ -173,7 +173,7 @@ void
 AffinityViewer::Numa::_RegisterCpuRole(int cpuId, Role role)
 {
     int socketId = numa_node_of_cpu(cpuId);
-    if (socketId == INVALID_NUMA)
+    if (static_cast<uint32_t>(socketId) == INVALID_NUMA)
     {
         return;
     }

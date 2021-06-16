@@ -30,20 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#ifndef BUFFER_POOL_FACTORY_H_
+#define BUFFER_POOL_FACTORY_H_
 
-#include "src/cpu_affinity/affinity_manager.h"
+#include "buffer_info.h"
 
 namespace pos
 {
-class MockAffinityManager : public AffinityManager
+class BufferPool;
+class HugepageAllocator;
+
+class BufferPoolFactory
 {
 public:
-    using AffinityManager::AffinityManager;
-    MockAffinityManager(const MockAffinityManager& mockAffinityManager)
-    : AffinityManager(mockAffinityManager) {}
-    MOCK_METHOD(uint32_t, GetNumaIdFromCurrentThread, (), (override));
-    MOCK_METHOD(uint32_t, GetNumaCount, (), (override));
+    BufferPoolFactory(void);
+    virtual ~BufferPoolFactory(void);
+    virtual BufferPool* Create(BufferInfo& info, uint32_t socket);
 };
 
 } // namespace pos
+
+#endif // BUFFER_POOL_FACTORY_H_

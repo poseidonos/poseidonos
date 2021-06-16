@@ -42,13 +42,15 @@ namespace pos
 {
 class EventArgument;
 class Ubio;
+class BufferPool;
 
 class RebuildReadCompleteHandler : public Callback
 {
 public:
     RebuildReadCompleteHandler(UbioSmartPtr input,
         RecoverFunc func,
-        uint64_t readSize);
+        uint64_t readSize,
+        BufferPool* bufferPool);
     ~RebuildReadCompleteHandler(void) override;
 
 private:
@@ -56,5 +58,6 @@ private:
     UbioSmartPtr ubio = nullptr;
     RecoverFunc recoverFunc = nullptr;
     uint64_t readSize;
+    BufferPool* bufferPool;
 };
 } // namespace pos

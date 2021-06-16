@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(hugepage_allocator_ut hugepage_allocator_test.cpp)

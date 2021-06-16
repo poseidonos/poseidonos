@@ -30,20 +30,18 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include "src/resource_manager/buffer_pool_factory.h"
 
-#include "src/cpu_affinity/affinity_manager.h"
+#include <gtest/gtest.h>
 
 namespace pos
 {
-class MockAffinityManager : public AffinityManager
+TEST(BufferPoolFactory, BufferPoolFactory_)
 {
-public:
-    using AffinityManager::AffinityManager;
-    MockAffinityManager(const MockAffinityManager& mockAffinityManager)
-    : AffinityManager(mockAffinityManager) {}
-    MOCK_METHOD(uint32_t, GetNumaIdFromCurrentThread, (), (override));
-    MOCK_METHOD(uint32_t, GetNumaCount, (), (override));
-};
+}
+
+TEST(BufferPoolFactory, Create_)
+{
+}
 
 } // namespace pos

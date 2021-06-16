@@ -65,7 +65,9 @@ SUBDIRS = allocator \
         qos \
         debug \
         wbt \
-        admin
+        admin \
+        resource_manager \
+        dpdk_wrapper
 .PHONY: $(SUBDIRS)
 
 poseidonos: $(SUBDIRS)

@@ -30,20 +30,45 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#ifndef MEMORY_MANAGER_H_
+#define MEMORY_MANAGER_H_
 
+#include <list>
+#include <mutex>
+
+#include "buffer_info.h"
+#include "src/lib/singleton.h"
 #include "src/cpu_affinity/affinity_manager.h"
+#include "src/dpdk_wrapper/hugepage_allocator.h"
 
 namespace pos
 {
-class MockAffinityManager : public AffinityManager
+class BufferPool;
+class BufferPoolFactory;
+
+const uint32_t USE_DEFAULT_SOCKET = -1;
+class MemoryManager
 {
 public:
-    using AffinityManager::AffinityManager;
-    MockAffinityManager(const MockAffinityManager& mockAffinityManager)
-    : AffinityManager(mockAffinityManager) {}
-    MOCK_METHOD(uint32_t, GetNumaIdFromCurrentThread, (), (override));
-    MOCK_METHOD(uint32_t, GetNumaCount, (), (override));
+    MemoryManager(BufferPoolFactory* bufferPoolFactory = nullptr,
+        AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
+    virtual ~MemoryManager(void);
+    virtual BufferPool* CreateBufferPool(BufferInfo& info,
+        uint32_t socket = USE_DEFAULT_SOCKET);
+    virtual bool DeleteBufferPool(BufferPool* pool);
+
+private:
+    bool _CheckBufferPolicy(const BufferInfo& info, uint32_t& socket);
+
+    std::mutex bufferPoolsLock;
+    std::list<BufferPool*> bufferPools;
+
+    BufferPoolFactory* bufferPoolFactory;
+    AffinityManager* affinityManager;
 };
 
+using MemoryManagerSingleton = Singleton<MemoryManager>;
+
 } // namespace pos
+
+#endif // MEMORY_MANAGER_H_

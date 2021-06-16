@@ -30,20 +30,48 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include "hugepage_allocator.h"
 
-#include "src/cpu_affinity/affinity_manager.h"
+#include <rte_malloc.h>
 
-namespace pos
+#include "src/logger/logger.h"
+#include "src/include/pos_event_id.hpp"
+
+using namespace pos;
+
+void*
+HugepageAllocator::AllocFromSocket(const uint32_t size,
+    const uint32_t count,
+    const uint32_t socket)
 {
-class MockAffinityManager : public AffinityManager
-{
-public:
-    using AffinityManager::AffinityManager;
-    MockAffinityManager(const MockAffinityManager& mockAffinityManager)
-    : AffinityManager(mockAffinityManager) {}
-    MOCK_METHOD(uint32_t, GetNumaIdFromCurrentThread, (), (override));
-    MOCK_METHOD(uint32_t, GetNumaCount, (), (override));
-};
+    void* ret = rte_malloc_socket(nullptr, size * count, size, socket);
+    // best effort for another socket id to avoid memory allocation fail
+    if (ret == nullptr)
+    {
+        POS_TRACE_WARN(POS_EVENT_ID::HUGEPAGE_ALLOCATION_FAIL,
+            "Failed to allocate Hugepages in socket {}. Try to another socket.", socket);
+        ret = rte_malloc(nullptr, size * count, size);
+    }
+    if (ret == nullptr)
+    {
+        POS_TRACE_WARN(POS_EVENT_ID::HUGEPAGE_ALLOCATION_FAIL,
+            "Failed to allocate Hugepages");
+    }
+    return ret;
+}
 
-} // namespace pos
+void
+HugepageAllocator::Free(void* addr)
+{
+    rte_free(addr);
+}
+
+uint32_t
+HugepageAllocator::GetDefaultPageSize(void)
+{
+    return DEFAULT_PAGE_SIZE;
+}
+
+HugepageAllocator::~HugepageAllocator(void)
+{
+}
