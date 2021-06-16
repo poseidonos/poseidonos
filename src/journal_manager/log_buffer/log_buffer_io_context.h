@@ -34,9 +34,12 @@
 
 #include "src/meta_file_intf/async_context.h"
 
+#include "src/dump/dump_shared_ptr.h"
+#include "src/dump/dump_shared_ptr.hpp"
+
 namespace pos
 {
-class LogBufferIoContext : public AsyncMetaFileIoCtx
+class LogBufferIoContext : public AsyncMetaFileIoCtx, public DumpSharedPtr<LogBufferIoContext*, static_cast<int>(DumpSharedPtrType::JOURNAL_IO_CONTEXT)>
 {
 public:
     LogBufferIoContext(int logGroupId, EventSmartPtr clientCallback);

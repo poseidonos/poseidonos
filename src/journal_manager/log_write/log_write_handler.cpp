@@ -55,6 +55,8 @@ LogWriteHandler::LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList*
   logWriteStats(statistics),
   waitingList(waitingList)
 {
+    numIosRequested = 0;
+    numIosCompleted = 0;
 }
 
 LogWriteHandler::~LogWriteHandler(void)
@@ -108,7 +110,11 @@ LogWriteHandler::_AddLogInternal(LogWriteContext* context)
         context->SetInternalCallback(std::bind(&LogWriteHandler::LogWriteDone, this, std::placeholders::_1));
 
         int result = logBuffer->WriteLog(context);
-        if (result != 0)
+        if (result == 0)
+        {
+            numIosRequested++;
+        }
+        else
         {
             delete context;
 
@@ -132,6 +138,8 @@ LogWriteHandler::_AddLogInternal(LogWriteContext* context)
 void
 LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
 {
+    numIosCompleted++;
+
     LogWriteContext* context = dynamic_cast<LogWriteContext*>(ctx);
 
     bool statusUpdatedToStats = false;

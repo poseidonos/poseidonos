@@ -69,6 +69,9 @@ private:
 
     LogWriteStatistics* logWriteStats;
     WaitingLogList* waitingList;
+
+    std::atomic<uint64_t> numIosRequested;
+    std::atomic<uint64_t> numIosCompleted;
 };
 
 } // namespace pos
