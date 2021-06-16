@@ -395,14 +395,12 @@ Ubio::NeedRecovery(void) // TODO: will be moved. AWIBOF-2751
 
     ArrayDeviceState devState = arrayDev->GetState();
 
-    if (dir == UbioDir::Read
-        && devState != ArrayDeviceState::NORMAL)
+    if (devState == ArrayDeviceState::FAULT)
     {
         return true;
     }
-
-    if (dir == UbioDir::Write
-        && devState == ArrayDeviceState::FAULT)
+    else if (devState == ArrayDeviceState::REBUILD
+        && dir == UbioDir::Read)
     {
         return true;
     }
