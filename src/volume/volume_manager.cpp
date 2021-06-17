@@ -36,7 +36,7 @@
 #include <string>
 #include <vector>
 
-#include "src/array_mgmt/array_mgmt_policy.h"
+#include "src/include/array_mgmt_policy.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.h"

@@ -37,7 +37,7 @@
 
 #include "i_volume_manager.h"
 
-#include "src/array_mgmt/array_mgmt_policy.h"
+#include "src/include/array_mgmt_policy.h"
 #include "src/lib/singleton.h"
 
 namespace pos

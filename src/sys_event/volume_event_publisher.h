@@ -33,7 +33,7 @@
 #pragma once
 
 
-#include "src/array_mgmt/array_mgmt_policy.h"
+#include "src/include/array_mgmt_policy.h"
 #include "src/lib/singleton.h"
 #include "src/sys_event/volume_event.h"
 
