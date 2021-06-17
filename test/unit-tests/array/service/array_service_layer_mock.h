@@ -12,8 +12,8 @@ class MockArrayServiceLayer : public ArrayServiceLayer
 {
 public:
     using ArrayServiceLayer::ArrayServiceLayer;
-    MOCK_METHOD(bool, Register, (string array, ArrayTranslator trans, ArrayRecover recover, IDeviceChecker* checker), (override));
-    MOCK_METHOD(void, Unregister, (string array), (override));
+    MOCK_METHOD(bool, Register, (string array, unsigned int arrayIndex, ArrayTranslator trans, ArrayRecover recover, IDeviceChecker* checker), (override));
+    MOCK_METHOD(void, Unregister, (string array, unsigned int arrayIndex), (override));
     MOCK_METHOD(IIOTranslator*, GetTranslator, (), (override));
     MOCK_METHOD(IIORecover*, GetRecover, (), (override));
     MOCK_METHOD(IIOLocker*, GetLocker, (), (override));

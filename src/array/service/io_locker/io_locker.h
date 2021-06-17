@@ -44,16 +44,23 @@ namespace pos
 class IOLocker : public IIOLocker
 {
 public:
-    virtual ~IOLocker(void) {}
+    IOLocker(void);
+    virtual ~IOLocker(void);
     bool Register(string array);
     void Unregister(string array);
     bool TryLock(string array, StripeId val) override;
     void Unlock(string array, StripeId val) override;
     bool TryChange(string array, LockerMode mode) override;
+    bool Register(unsigned int arrayIndex);
+    void Unregister(unsigned int arrayIndex);
+    bool TryLock(unsigned int arrayIndex, StripeId val) override;
+    void Unlock(unsigned int arrayIndex, StripeId val) override;
+    bool TryChange(unsigned int arrayIndex, LockerMode mode) override;
 
 private:
     StripeLocker* _Find(string array);
     void _Erase(string array);
-    map<string, StripeLocker*> lockers;
+    map<string, StripeLocker*> tempLockers;
+    StripeLocker** lockers;
 };
 } // namespace pos

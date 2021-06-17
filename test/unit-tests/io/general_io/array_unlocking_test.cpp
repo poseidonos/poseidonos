@@ -1,7 +1,8 @@
 #include "src/io/general_io/array_unlocking.h"
-#include "test/unit-tests/array/service/io_locker/i_io_locker_mock.h"
 
 #include <gtest/gtest.h>
+
+#include "test/unit-tests/array/service/io_locker/i_io_locker_mock.h"
 
 using ::testing::_;
 namespace pos
@@ -26,9 +27,9 @@ TEST(ArrayUnlocking, ArrayUnlocking_DoSpecificJob)
     MockIIOLocker mockIIOLocker;
     // When : Constructor
     ArrayUnlocking arrayUnlocking(partitionType, stripeId, str, &mockIIOLocker);
-    Callback *callback = &arrayUnlocking;
+    Callback* callback = &arrayUnlocking;
     // Then : Execute and check result
-    EXPECT_CALL(mockIIOLocker, Unlock(_, _));
+    EXPECT_CALL(mockIIOLocker, Unlock(str, _));
     bool actual = callback->Execute();
     ASSERT_EQ(actual, true);
 }

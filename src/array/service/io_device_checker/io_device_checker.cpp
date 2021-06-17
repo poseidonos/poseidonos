@@ -32,11 +32,35 @@
 
 #include "io_device_checker.h"
 
+#include "src/include/array_mgmt_policy.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
+IODeviceChecker::IODeviceChecker(void)
+{
+    devCheckers = new IDeviceChecker*[ArrayMgmtPolicy::MAX_ARRAY_CNT];
+    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
+    {
+        devCheckers[i] = nullptr;
+    }
+}
+
+IODeviceChecker::~IODeviceChecker(void)
+{
+    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
+    {
+        if (devCheckers[i] != nullptr)
+        {
+            delete devCheckers[i];
+            devCheckers[i] = nullptr;
+        }
+    }
+    delete devCheckers;
+    devCheckers = nullptr;
+}
+
 bool
 IODeviceChecker::Register(string array, IDeviceChecker* checker)
 {
@@ -44,7 +68,7 @@ IODeviceChecker::Register(string array, IDeviceChecker* checker)
     {
         POS_TRACE_INFO((int)POS_EVENT_ID::DEV_CHECKER_DEBUG_MSG,
             "IODeviceChecker::Register, array:{}", array);
-        auto ret = devCheckers.emplace(array, checker);
+        auto ret = tempDevCheckers.emplace(array, checker);
         return ret.second;
     }
     return true;
@@ -92,12 +116,8 @@ IODeviceChecker::FindDevice(string array, string devSn)
 IDeviceChecker*
 IODeviceChecker::_Find(string array)
 {
-    if (array == "" && devCheckers.size() == 1)
-    {
-        return devCheckers.begin()->second;
-    }
-    auto it = devCheckers.find(array);
-    if (it == devCheckers.end())
+    auto it = tempDevCheckers.find(array);
+    if (it == tempDevCheckers.end())
     {
         return nullptr;
     }
@@ -108,18 +128,63 @@ IODeviceChecker::_Find(string array)
 void
 IODeviceChecker::_Erase(string array)
 {
-    if (array == "" && devCheckers.size() == 1)
-    {
-        devCheckers.clear();
-    }
-    else
-    {
-        devCheckers.erase(array);
-    }
+        tempDevCheckers.erase(array);
 
     POS_TRACE_INFO((int)POS_EVENT_ID::DEV_CHECKER_DEBUG_MSG,
         "IODeviceChecker::_Erase, array:{}, remaining:{}",
-        array, devCheckers.size());
+        array, tempDevCheckers.size());
 }
 
+// new device checker with array index
+
+bool
+IODeviceChecker::Register(unsigned int arrayIndex, IDeviceChecker* checker)
+{
+    if (devCheckers[arrayIndex] == nullptr)
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::DEV_CHECKER_DEBUG_MSG,
+            "IODeviceChecker::Register, array:{}", arrayIndex);
+        devCheckers[arrayIndex] = checker;
+        return true;
+    }
+    return false;
+}
+
+void
+IODeviceChecker::Unregister(unsigned int arrayIndex)
+{
+    POS_TRACE_INFO((int)POS_EVENT_ID::DEV_CHECKER_DEBUG_MSG,
+        "IODeviceChecker::Unregister, array:{}", arrayIndex);
+    delete devCheckers[arrayIndex];
+    devCheckers[arrayIndex] = nullptr;
+}
+
+bool
+IODeviceChecker::IsRecoverable(unsigned int arrayIndex, IArrayDevice* target, UBlockDevice* uBlock)
+{
+    if (devCheckers[arrayIndex] == nullptr)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::DEV_CHECKER_DEBUG_MSG,
+            "IsRecoverableDevice, array {} does not exist", arrayIndex);
+        return false;
+    }
+
+    bool ret = devCheckers[arrayIndex]->IsRecoverable(target, uBlock);
+    POS_TRACE_INFO((int)POS_EVENT_ID::DEV_CHECKER_DEBUG_MSG,
+        "IsRecoverableDevice, {}", ret);
+    return ret;
+}
+
+IArrayDevice*
+IODeviceChecker::FindDevice(unsigned int arrayIndex, string devSn)
+{
+    if (devCheckers[arrayIndex] == nullptr)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::DEV_CHECKER_DEBUG_MSG,
+            "FindDevice, array {} does not exist", arrayIndex);
+        return nullptr;
+    }
+
+    return devCheckers[arrayIndex]->FindDevice(devSn);
+}
 } // namespace pos

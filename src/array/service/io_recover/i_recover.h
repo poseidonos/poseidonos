@@ -42,6 +42,9 @@ namespace pos
 class IRecover
 {
 public:
+    virtual ~IRecover(void)
+    {
+    }
     virtual int GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out) = 0;
 };
 } // namespace pos

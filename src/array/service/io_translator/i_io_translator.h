@@ -49,5 +49,9 @@ public:
         PhysicalBlkAddr& dst, const LogicalBlkAddr& src) = 0;
     virtual int Convert(string array, PartitionType part,
         list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) = 0;
+    virtual int Translate(unsigned int arrayIndex, PartitionType part,
+        PhysicalBlkAddr& dst, const LogicalBlkAddr& src) = 0;
+    virtual int Convert(unsigned int arrayIndex, PartitionType part,
+        list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) = 0;
 };
 } // namespace pos

@@ -46,6 +46,9 @@ enum class ArrayDeviceState;
 class IDeviceChecker
 {
 public:
+    virtual ~IDeviceChecker()
+    {
+    }
     virtual bool IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) = 0;
     virtual IArrayDevice* FindDevice(string devSn) = 0;
 };

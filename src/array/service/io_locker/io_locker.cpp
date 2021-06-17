@@ -32,17 +32,42 @@
 
 #include "io_locker.h"
 
+#include "src/include/array_mgmt_policy.h"
 #include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
+IOLocker::IOLocker(void)
+{
+    lockers = new StripeLocker*[ArrayMgmtPolicy::MAX_ARRAY_CNT];
+    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
+    {
+        lockers[i] = nullptr;
+    }
+}
+
+IOLocker::~IOLocker(void)
+{
+    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
+    {
+        if (lockers[i] != nullptr)
+        {
+            delete lockers[i];
+            lockers[i] = nullptr;
+        }
+    }
+    delete lockers;
+    lockers = nullptr;
+}
+
 bool
 IOLocker::Register(string array)
 {
     if (_Find(array) == nullptr)
     {
         StripeLocker* locker = new StripeLocker();
-        auto ret = lockers.emplace(array, locker);
+        auto ret = tempLockers.emplace(array, locker);
         return ret.second;
     }
     return true;
@@ -97,12 +122,8 @@ IOLocker::TryChange(string array, LockerMode mode)
 StripeLocker*
 IOLocker::_Find(string array)
 {
-    if (array == "" && lockers.size() == 1)
-    {
-        return lockers.begin()->second;
-    }
-    auto it = lockers.find(array);
-    if (it == lockers.end())
+    auto it = tempLockers.find(array);
+    if (it == tempLockers.end())
     {
         return nullptr;
     }
@@ -113,13 +134,65 @@ IOLocker::_Find(string array)
 void
 IOLocker::_Erase(string array)
 {
-    if (array == "" && lockers.size() == 1)
+        tempLockers.erase(array);
+}
+
+// new iolocker with array index
+
+bool
+IOLocker::Register(unsigned int arrayIndex)
+{
+    if (lockers[arrayIndex] == nullptr)
     {
-        lockers.clear();
+        StripeLocker* locker = new StripeLocker();
+        lockers[arrayIndex] = locker;
+        POS_TRACE_INFO((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+            "StripeLocker::Register, array:{}", arrayIndex);
+        return true;
     }
-    else
+    return false;
+}
+
+void
+IOLocker::Unregister(unsigned int arrayIndex)
+{
+    if (lockers[arrayIndex] != nullptr)
     {
-        lockers.erase(array);
+        delete lockers[arrayIndex];
+        lockers[arrayIndex] = nullptr;
+        POS_TRACE_INFO((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+            "StripeLocker::Unregister, array:{}", arrayIndex);
     }
+}
+
+bool
+IOLocker::TryLock(unsigned int arrayIndex, StripeId val)
+{
+    if (lockers[arrayIndex] == nullptr)
+    {
+        return false;
+    }
+
+    return lockers[arrayIndex]->TryLock(val);
+}
+
+void
+IOLocker::Unlock(unsigned int arrayIndex, StripeId val)
+{
+    if (lockers[arrayIndex] != nullptr)
+    {
+        lockers[arrayIndex]->Unlock(val);
+    }
+}
+
+bool
+IOLocker::TryChange(unsigned int arrayIndex, LockerMode mode)
+{
+    if (lockers[arrayIndex] == nullptr)
+    {
+        return false;
+    }
+
+    return lockers[arrayIndex]->TryModeChanging(mode);
 }
 } // namespace pos

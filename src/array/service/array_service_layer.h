@@ -54,9 +54,9 @@ public:
     IArrayServiceConsumer* Getter(void);
     IArrayServiceProducer* Setter(void);
 
-    bool Register(string array, ArrayTranslator trans,
-        ArrayRecover recover, IDeviceChecker* checker) override;
-    void Unregister(string array) override;
+    bool Register(string array, unsigned int arrayIndex,
+        ArrayTranslator trans, ArrayRecover recover, IDeviceChecker* checker) override;
+    void Unregister(string array, unsigned int arrayIndex) override;
     IIOTranslator* GetTranslator(void) override;
     IIORecover* GetRecover(void) override;
     IIOLocker* GetLocker(void) override;

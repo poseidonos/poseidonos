@@ -65,8 +65,8 @@ ArrayServiceLayer::Setter(void)
 }
 
 bool
-ArrayServiceLayer::Register(string array, ArrayTranslator trans,
-    ArrayRecover recover, IDeviceChecker* checker)
+ArrayServiceLayer::Register(string array, unsigned int arrayIndex,
+    ArrayTranslator trans, ArrayRecover recover, IDeviceChecker* checker)
 {
     bool ret = true;
     ret = ioTranslator->Register(array, trans);
@@ -85,11 +85,32 @@ ArrayServiceLayer::Register(string array, ArrayTranslator trans,
         return ret;
     }
     ret = deviceChecker->Register(array, checker);
+    if (!ret)
+    {
+        return ret;
+    }
+    // new register method with array index
+    // ret = ioTranslator->Register(arrayIndex, trans);
+    // if (!ret)
+    // {
+    //     return ret;
+    // }
+    // ret = ioRecover->Register(arrayIndex, recover);
+    // if (!ret)
+    // {
+    //     return ret;
+    // }
+    // ret = ioLocker->Register(arrayIndex);
+    // if (!ret)
+    // {
+    //     return ret;
+    // }
+    // ret = deviceChecker->Register(arrayIndex, checker);
     return ret;
 }
 
 void
-ArrayServiceLayer::Unregister(string array)
+ArrayServiceLayer::Unregister(string array, unsigned int arrayIndex)
 {
     deviceChecker->Unregister(array);
     ioLocker->Unregister(array);

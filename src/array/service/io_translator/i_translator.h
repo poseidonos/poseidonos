@@ -42,6 +42,9 @@ namespace pos
 class ITranslator
 {
 public:
+    virtual ~ITranslator(void)
+    {
+    }
     virtual int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) = 0;
     virtual int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) = 0;
 };

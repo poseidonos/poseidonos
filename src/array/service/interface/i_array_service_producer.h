@@ -46,9 +46,9 @@ namespace pos
 class IArrayServiceProducer
 {
 public:
-    virtual bool Register(string array, ArrayTranslator trans,
-        ArrayRecover recover, IDeviceChecker* checker) = 0;
-    virtual void Unregister(string array) = 0;
+    virtual bool Register(string array, unsigned int arrayIndex,
+        ArrayTranslator trans, ArrayRecover recover, IDeviceChecker* checker) = 0;
+    virtual void Unregister(string array, unsigned int arrayIndex) = 0;
 };
 
 } // namespace pos

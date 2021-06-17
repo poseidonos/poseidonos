@@ -47,6 +47,7 @@ using ArrayTranslator = map<PartitionType, ITranslator*>;
 class IOTranslator : public IIOTranslator
 {
 public:
+    IOTranslator(void);
     virtual ~IOTranslator(void);
     int Translate(string array, PartitionType part,
         PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
@@ -54,10 +55,17 @@ public:
         list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
     bool Register(string array, ArrayTranslator trans);
     void Unregister(string array);
+    int Translate(unsigned int arrayIndex, PartitionType part,
+        PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
+    int Convert(unsigned int arrayIndex, PartitionType part,
+        list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
+    bool Register(unsigned int arrayIndex, ArrayTranslator trans);
+    void Unregister(unsigned int arrayIndex);
 
 private:
     ITranslator* _Find(string array, PartitionType part);
     void _Erase(string array);
-    map<string, ArrayTranslator> translators;
+    map<string, ArrayTranslator> tempTranslators;
+    ArrayTranslator* translators;
 };
 } // namespace pos

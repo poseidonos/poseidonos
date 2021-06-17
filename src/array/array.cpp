@@ -38,9 +38,9 @@
 #include "src/array/interface/i_abr_control.h"
 #include "src/array/rebuild/rebuild_handler.h"
 #include "src/array/service/array_service_layer.h"
-#include "src/include/array_mgmt_policy.h"
 #include "src/device/device_manager.h"
 #include "src/event_scheduler/event_scheduler.h"
+#include "src/include/array_mgmt_policy.h"
 #include "src/include/i_array_device.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -130,7 +130,6 @@ Array::_LoadImpl(unsigned int& arrayIndex)
             return ret;
         }
     }
-    
 
     uint32_t missingCnt = 0;
     uint32_t brokenCnt = 0;
@@ -728,7 +727,7 @@ Array::_RebuildDone(RebuildResult result)
     }
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "Array {} rebuild done. as success.", name_, result.result);
+        "Array {} rebuild done. as success.", name_, result.result);
 
     result.target->SetState(ArrayDeviceState::NORMAL);
     state->SetRebuildDone(true);
@@ -802,7 +801,8 @@ Array::TriggerRebuild(ArrayDevice* target)
     string arrName = name_;
     RebuildComplete cb = std::bind(&Array::_RebuildDone, this, placeholders::_1);
     list<RebuildTarget*> tasks = intf->GetRebuildTargets();
-    thread t([arrRebuilder, arrName, target, cb, tasks]() {
+    thread t([arrRebuilder, arrName, target, cb, tasks]()
+    {
         arrRebuilder->Rebuild(arrName, target, cb, tasks);
     });
 
@@ -847,8 +847,8 @@ Array::ResumeRebuild(ArrayDevice* target)
 int
 Array::_RegisterService(void)
 {
-    auto ret = arrayService->Setter()->Register(name_, intf->GetTranslator(),
-        intf->GetRecover(), this);
+    auto ret = arrayService->Setter()->Register(name_, index_,
+        intf->GetTranslator(), intf->GetRecover(), this);
     if (ret)
     {
         return 0;
@@ -860,7 +860,7 @@ Array::_RegisterService(void)
 void
 Array::_UnregisterService(void)
 {
-    arrayService->Setter()->Unregister(name_);
+    arrayService->Setter()->Unregister(name_, index_);
 }
 
 void

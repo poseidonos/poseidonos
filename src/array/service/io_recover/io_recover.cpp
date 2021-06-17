@@ -31,24 +31,39 @@
  */
 
 #include "io_recover.h"
+
 #include "src/bio/ubio.h"
+#include "src/include/array_mgmt_policy.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
+IORecover::IORecover(void)
+{
+    recoveries = new ArrayRecover[ArrayMgmtPolicy::MAX_ARRAY_CNT];
+}
+
 IORecover::~IORecover(void)
 {
+    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
+    {
+        for (auto recover : recoveries[i])
+        {
+            delete recover.second;
+        }
+        recoveries[i].clear();
+    }
 }
 
 bool
 IORecover::Register(string array, ArrayRecover recov)
 {
-    if (recoveries.find(array) == recoveries.end())
+    if (tempRecoveries.find(array) == tempRecoveries.end())
     {
         POS_TRACE_INFO((int)POS_EVENT_ID::RECOVER_DEBUG_MSG,
             "IORecover::Register, array:{} size:{}", array, recov.size());
-        auto ret = recoveries.emplace(array, recov);
+        auto ret = tempRecoveries.emplace(array, recov);
         return ret.second;
     }
     return true;
@@ -58,7 +73,7 @@ void
 IORecover::Unregister(string array)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::RECOVER_DEBUG_MSG,
-        "IORecover::Unregister, array:{}, size:{}", array, recoveries.size());
+        "IORecover::Unregister, array:{}, size:{}", array, tempRecoveries.size());
     _Erase(array);
 }
 
@@ -88,13 +103,8 @@ IORecover::GetRecoverMethod(string array, UbioSmartPtr ubio, RecoverMethod& out)
 ArrayRecover*
 IORecover::_Find(string array)
 {
-    if (array == "" && recoveries.size() == 1)
-    {
-        return &(recoveries.begin()->second);
-    }
-
-    auto it = recoveries.find(array);
-    if (it == recoveries.end())
+    auto it = tempRecoveries.find(array);
+    if (it == tempRecoveries.end())
     {
         return nullptr;
     }
@@ -104,17 +114,55 @@ IORecover::_Find(string array)
 void
 IORecover::_Erase(string array)
 {
-    if (array == "" && recoveries.size() == 1)
-    {
-        recoveries.clear();
-    }
-    else
-    {
-        recoveries.erase(array);
-    }
+    tempRecoveries.erase(array);
 
     POS_TRACE_INFO((int)POS_EVENT_ID::RECOVER_DEBUG_MSG,
-        "IORecover::_Erase, array:{}, remaining:{}", array, recoveries.size());
+        "IORecover::_Erase, array:{}, remaining:{}", array, tempRecoveries.size());
+}
+
+// new iorecover with array Index
+bool
+IORecover::Register(unsigned int arrayIndex, ArrayRecover recov)
+{
+    if (recoveries[arrayIndex].empty())
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::RECOVER_DEBUG_MSG,
+            "IORecover::Register, array:{} size:{}", arrayIndex, recov.size());
+        recoveries[arrayIndex] = recov;
+        return true;
+    }
+    return false;
+}
+
+void
+IORecover::Unregister(unsigned int arrayIndex)
+{
+    POS_TRACE_INFO((int)POS_EVENT_ID::RECOVER_DEBUG_MSG,
+        "IORecover::Unregister, array:{}", arrayIndex);
+    recoveries[arrayIndex].clear();
+}
+
+int
+IORecover::GetRecoverMethod(unsigned int arrayIndex, UbioSmartPtr ubio, RecoverMethod& out)
+{
+    ArrayRecover* recover = &recoveries[arrayIndex];
+    if (recover->empty())
+    {
+        return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
+    }
+
+    int ret = 0;
+    for (auto it = recover->begin(); it != recover->end(); ++it)
+    {
+        ret = it->second->GetRecoverMethod(ubio, out);
+        if (ret == 0)
+        {
+            return ret;
+        }
+    }
+
+    POS_TRACE_ERROR(ret, "IORecover::GetRecoverMethod Recover failed");
+    return ret;
 }
 
 } // namespace pos
