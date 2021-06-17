@@ -123,7 +123,7 @@ def execute_performance_test():
 def convert_result_to_csv():
     print("convert performance result to csv file")
     convert_csv_script = "cd " + args.pos_root + "; sudo " + test_dir + "convert_csv.py -r " + args.test_revision +\
-            " -sw " + sw_128k_limit + " -sr " + sr_128k_limit + " -rw " + rw_4k_limit + " -rr " + rr_4k_limit +\
+            " -sw " + arg.sw_limit + " -sr " + args.sr_limit + " -rw " + args.rw_limit + " -rr " + args.rr_limit +\
             " -t " + args.test_name
     print(convert_csv_script)
     remote_execute(args.initiator_ip, args.initiator_id, args.initiator_pw, convert_csv_script)
