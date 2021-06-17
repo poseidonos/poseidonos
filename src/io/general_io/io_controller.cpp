@@ -42,7 +42,10 @@ IOController::IOController(void)
 
 IOController::IOController(IODispatcher* _ioDispatcher)
 {
-    ioDispatcher = _ioDispatcher;
+    if (nullptr != _ioDispatcher)
+    {
+        ioDispatcher = _ioDispatcher;
+    }
 }
 
 IOController::~IOController(void)

@@ -23,6 +23,7 @@
 #include "test/unit-tests/include/i_array_device_mock.h"
 #include "test/unit-tests/io/general_io/merger_mock.h"
 #include "test/unit-tests/io/general_io/translator_mock.h"
+#include "test/unit-tests/io_scheduler/io_dispatcher_mock.h"
 #include "test/unit-tests/lib/block_alignment_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
@@ -103,8 +104,8 @@ TEST(ReadSubmission, Execute_SingleBlock)
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, arr_name, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator);
-    ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator};
-    IODispatcher::RegisterRecoveryEventFactory(new IoRecoveryEventFactory());
+    NiceMock<MockIODispatcher> mockIODispatcher;
+    ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator, &mockIODispatcher};
 
     ON_CALL(*mockBlockAlignment, GetBlockCount()).WillByDefault(Return(1));
     MockIArrayDevice mockIArrayDevice;
@@ -154,7 +155,8 @@ TEST(ReadSubmission, Execute_MultiBlocks)
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, arr_name, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator);
-    ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator};
+    NiceMock<MockIODispatcher> mockIODispatcher;
+    ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator, &mockIODispatcher};
 
     ON_CALL(*mockBlockAlignment, GetBlockCount()).WillByDefault(Return(2));
     EXPECT_CALL(*mockTranslator, GetPba(_)).Times(2);
