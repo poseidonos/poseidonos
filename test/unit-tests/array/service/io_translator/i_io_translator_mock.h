@@ -14,6 +14,8 @@ public:
     using IIOTranslator::IIOTranslator;
     MOCK_METHOD(int, Translate, (string array, PartitionType part, PhysicalBlkAddr& dst, const LogicalBlkAddr& src), (override));
     MOCK_METHOD(int, Convert, (string array, PartitionType part, list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src), (override));
+    MOCK_METHOD(int, Translate, (unsigned int arrayIndex, PartitionType part, PhysicalBlkAddr& dst, const LogicalBlkAddr& src), (override));
+    MOCK_METHOD(int, Convert, (unsigned int arrayIndex, PartitionType part, list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src), (override));
 };
 
 } // namespace pos

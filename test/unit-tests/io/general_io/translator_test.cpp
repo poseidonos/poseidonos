@@ -56,7 +56,7 @@ public:
 
         mockITranslator = new NiceMock<MockIIOTranslator>;
         PhysicalBlkAddr tmpPba = {.lba = 0, .arrayDev = nullptr};
-        ON_CALL(*mockITranslator, Translate(_, _, _, _)).WillByDefault([tmpPba](string arrayName, PartitionType part, PhysicalBlkAddr& dst, const LogicalBlkAddr src) {
+        ON_CALL(*mockITranslator, Translate(arrayName, _, _, _)).WillByDefault([tmpPba](string arrayName, PartitionType part, PhysicalBlkAddr& dst, const LogicalBlkAddr src) {
             dst = tmpPba;
             return 0;
         });
@@ -64,7 +64,7 @@ public:
         PhysicalWriteEntry tmpPWE = {.addr = tmpPba, .blkCnt = 1};
         PhysicalEntries tmpPWEs;
         tmpPWEs.push_back(tmpPWE);
-        ON_CALL(*mockITranslator, Convert(_, _, _, _)).WillByDefault([tmpPWEs](string arrayName, PartitionType part, list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) {
+        ON_CALL(*mockITranslator, Convert(arrayName, _, _, _)).WillByDefault([tmpPWEs](string arrayName, PartitionType part, list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) {
             dst = tmpPWEs;
             return 0;
         });
@@ -219,7 +219,7 @@ TEST_F(TranslatorTestFixture, GetPba)
     EXPECT_EQ(pba.arrayDev, nullptr);
 
     //Given: make the translate return fail
-    ON_CALL(*mockITranslator, Translate(_, _, _, _)).WillByDefault(Return(-1));
+    ON_CALL(*mockITranslator, Translate(arrayName, _, _, _)).WillByDefault(Return(-1));
 
     //When: get a pba of valid range
     //Then: exception is thrown
@@ -236,7 +236,7 @@ TEST_F(TranslatorTestFixture, GetPhysicalEntries)
     EXPECT_EQ(actual.size(), 1);
 
     //Given: make the conversion return fail
-    ON_CALL(*mockITranslator, Convert(_, _, _, _)).WillByDefault(Return(-1));
+    ON_CALL(*mockITranslator, Convert(arrayName, _, _, _)).WillByDefault(Return(-1));
 
     //When: get physical entries
     //Then: exception is thrown
