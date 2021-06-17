@@ -300,6 +300,7 @@ VSAMapManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByt
 
         std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
         volumeMountState.emplace(volID, VolState::JUST_CREATED);
+        vsaMapAPI->EnableVsaMapInternalAccess(volID);
         POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} JUST_CREATED", volID);
         return true;
     }
@@ -477,23 +478,24 @@ VSAMapManager::VolumeDetached(vector<int> volList, std::string arrayName, int ar
 }
 
 bool
-VSAMapManager::_ChangeVolumeStateDeleting(uint32_t volumeId)
+VSAMapManager::_ChangeVolumeStateDeleting(uint32_t volID)
 {
-    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volumeId]);
-    VolMountStateIter it = volumeMountState.find(volumeId);
+    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
+    VolMountStateIter it = volumeMountState.find(volID);
     if (volumeMountState[it->first] == VolState::VOLUME_DELETING)
     {
         return false;
     }
     volumeMountState[it->first] = VolState::VOLUME_DELETING;
+    vsaMapAPI->DisableVsaMapInternalAccess(volID);
     return true;
 }
 
 VolState
-VSAMapManager::_GetVolumeState(uint32_t volumeId)
+VSAMapManager::_GetVolumeState(uint32_t volID)
 {
-    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volumeId]);
-    VolMountStateIter it = volumeMountState.find(volumeId);
+    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
+    VolMountStateIter it = volumeMountState.find(volID);
     return volumeMountState[it->first];
 }
 

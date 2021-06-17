@@ -39,39 +39,39 @@ namespace pos
 {
 GcCtx::GcCtx(void)
 {
-    thresholdSegments = DEFAULT_GC_THRESHOLD;
-    urgentSegments = DEFAULT_URGENT_THRESHOLD;
+    normalGcthreshold = DEFAULT_GC_THRESHOLD;
+    urgentGcthreshold = DEFAULT_URGENT_THRESHOLD;
     curGcMode = MODE_NO_GC;
 }
 
 int
-GcCtx::GetGcThreshold(void)
+GcCtx::GetNormalGcThreshold(void)
 {
-    return thresholdSegments;
+    return normalGcthreshold;
 }
 
 int
 GcCtx::GetUrgentThreshold(void)
 {
-    return urgentSegments;
+    return urgentGcthreshold;
 }
 
 void
-GcCtx::SetGcThreshold(int inputThreshold)
+GcCtx::SetNormalGcThreshold(int inputThreshold)
 {
-    thresholdSegments = inputThreshold;
+    normalGcthreshold = inputThreshold;
 }
 
 void
 GcCtx::SetUrgentThreshold(int inputThreshold)
 {
-    urgentSegments = inputThreshold;
+    urgentGcthreshold = inputThreshold;
 }
 
 CurrentGcMode
 GcCtx::GetCurrentGcMode(int numFreeSegments)
 {
-    if (urgentSegments >= numFreeSegments)
+    if (urgentGcthreshold >= numFreeSegments)
     {
         if (curGcMode != MODE_URGENT_GC)
         {
@@ -79,9 +79,9 @@ GcCtx::GetCurrentGcMode(int numFreeSegments)
         }
         curGcMode = MODE_URGENT_GC;
     }
-    else if (thresholdSegments >= numFreeSegments)
+    else if (normalGcthreshold >= numFreeSegments)
     {
-        if (curGcMode != MODE_URGENT_GC)
+        if (curGcMode != MODE_NORMAL_GC )
         {
             POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NORMAL GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
         }

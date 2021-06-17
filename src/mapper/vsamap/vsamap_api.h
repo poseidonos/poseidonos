@@ -59,6 +59,9 @@ public:
     MpageList GetDirtyVsaMapPages(int volumeId, BlkAddr startRba, uint64_t numBlks) override;
     int64_t GetNumUsedBlocks(int volId) override;
 
+    void EnableVsaMapInternalAccess(int volId);
+    void DisableVsaMapInternalAccess(int volId);
+
 private:
     int _UpdateVsaMap(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks);
     VirtualBlkAddr _ReadVSA(int volumeId, BlkAddr rba);
@@ -68,6 +71,7 @@ private:
 
     VSAMapContent* vsaMaps[MAX_VOLUME_COUNT];
     std::atomic<bool> isVsaMapAccessable[MAX_VOLUME_COUNT];
+    std::atomic<bool> isVsaMapInternalAccessable[MAX_VOLUME_COUNT];
 
     IVSAMapInternal* iVSAMapInternal;
     MapperAddressInfo* addrInfo;

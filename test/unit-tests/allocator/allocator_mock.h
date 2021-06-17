@@ -22,7 +22,7 @@ public:
     MOCK_METHOD(void, VolumeDetached, (vector<int> volList, std::string arrayName, int arrayID), (override));
     MOCK_METHOD(bool, VolumeDeleted, (std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayID), (override));
     MOCK_METHOD(bool, VolumeUnmounted, (std::string volName, int volID, std::string arrayName, int arrayID), (override));
-    MOCK_METHOD(void, SetGcThreshold, (uint32_t inputThreshold), (override));
+    MOCK_METHOD(void, SetNormalGcThreshold, (uint32_t inputThreshold), (override));
     MOCK_METHOD(void, SetUrgentThreshold, (uint32_t inputThreshold), (override));
     MOCK_METHOD(int, GetMeta, (WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file), (override));
     MOCK_METHOD(int, SetMeta, (WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file), (override));

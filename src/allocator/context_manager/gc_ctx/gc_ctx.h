@@ -41,9 +41,9 @@ class GcCtx
 public:
     GcCtx(void);
     ~GcCtx(void) = default;
-    int GetGcThreshold(void);
+    int GetNormalGcThreshold(void);
     int GetUrgentThreshold(void);
-    void SetGcThreshold(int inputThreshold);
+    void SetNormalGcThreshold(int inputThreshold);
     void SetUrgentThreshold(int inputThreshold);
     CurrentGcMode GetCurrentGcMode(int numFreeSegments);
 
@@ -51,8 +51,8 @@ public:
     static const int DEFAULT_URGENT_THRESHOLD = 5;
 
 private:
-    int thresholdSegments;
-    int urgentSegments;
+    int normalGcthreshold;
+    int urgentGcthreshold;
     CurrentGcMode curGcMode;
 };
 

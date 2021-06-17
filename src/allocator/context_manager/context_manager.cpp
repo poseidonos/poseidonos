@@ -254,7 +254,7 @@ ContextManager::GetCurrentGcMode(void)
 int
 ContextManager::GetGcThreshold(CurrentGcMode mode)
 {
-    return mode == MODE_NORMAL_GC ? gcCtx.GetGcThreshold() : gcCtx.GetUrgentThreshold();
+    return mode == MODE_NORMAL_GC ? gcCtx.GetNormalGcThreshold() : gcCtx.GetUrgentThreshold();
 }
 
 int

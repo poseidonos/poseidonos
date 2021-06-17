@@ -44,6 +44,7 @@ VSAMapAPI::VSAMapAPI(IVSAMapInternal* vsaMapInt, MapperAddressInfo* info)
     {
         vsaMaps[volumeId] = nullptr;
         isVsaMapAccessable[volumeId] = false;
+        isVsaMapInternalAccessable[volumeId] = true;
     }
 }
 
@@ -109,6 +110,12 @@ VSAMapAPI::GetVSAInternal(int volumeId, BlkAddr rba, int& caller)
     int ret = iVSAMapInternal->EnableInternalAccess(volumeId, caller);
     if (CALLER_EVENT == caller)
     {
+        if (isVsaMapInternalAccessable[volumeId] == false)
+        {
+            caller = NEED_RETRY;
+            return UNMAP_VSA;
+        }
+
         if (_IsVSAMapLoaded(volumeId) == false)
         {
             // [Exist Volume Case]
@@ -233,6 +240,18 @@ void
 VSAMapAPI::DisableVsaMapAccess(int volID)
 {
     isVsaMapAccessable[volID] = false;
+}
+
+void
+VSAMapAPI::EnableVsaMapInternalAccess(int volID)
+{
+    isVsaMapInternalAccessable[volID] = true;
+}
+
+void
+VSAMapAPI::DisableVsaMapInternalAccess(int volID)
+{
+    isVsaMapInternalAccessable[volID] = false;
 }
 
 } // namespace pos

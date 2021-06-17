@@ -129,7 +129,7 @@ TEST(Allocator, VolumeUnmounted_TestSimpleCall)
     alloc.VolumeUnmounted("", 0, "", 0);
 }
 
-TEST(Allocator, SetGcThreshold_TestSimpleSetter)
+TEST(Allocator, SetNormalGcThreshold_TestSimpleSetter)
 {
     // given
     NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
@@ -143,7 +143,7 @@ TEST(Allocator, SetGcThreshold_TestSimpleSetter)
 
     EXPECT_CALL(*ctxManager, GetGcCtx).WillOnce(Return(gc));
     // when
-    alloc.SetGcThreshold(10);
+    alloc.SetNormalGcThreshold(10);
     delete gc;
 }
 

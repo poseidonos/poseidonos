@@ -98,7 +98,7 @@ public:
     }
     bool VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID) override;
 
-    void SetGcThreshold(uint32_t inputThreshold) override;
+    void SetNormalGcThreshold(uint32_t inputThreshold) override;
     void SetUrgentThreshold(uint32_t inputThreshold) override;
     int GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file = nullptr) override;
     int SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file = nullptr) override;

@@ -210,9 +210,9 @@ Allocator::VolumeUnmounted(std::string volName, int volID, std::string arrayName
 }
 
 void
-Allocator::SetGcThreshold(uint32_t inputThreshold)
+Allocator::SetNormalGcThreshold(uint32_t inputThreshold)
 {
-    contextManager->GetGcCtx()->SetGcThreshold(inputThreshold);
+    contextManager->GetGcCtx()->SetNormalGcThreshold(inputThreshold);
 }
 
 void

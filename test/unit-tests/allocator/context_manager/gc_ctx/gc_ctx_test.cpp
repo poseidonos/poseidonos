@@ -8,7 +8,7 @@ TEST(GcCtx, GcCtx_)
 {
 }
 
-TEST(GcCtx, GetGcThreshold_)
+TEST(GcCtx, GetNormalGcThreshold_)
 {
 }
 
@@ -16,7 +16,7 @@ TEST(GcCtx, GetUrgentThreshold_)
 {
 }
 
-TEST(GcCtx, SetGcThreshold_)
+TEST(GcCtx, SetNormalGcThreshold_)
 {
 }
 

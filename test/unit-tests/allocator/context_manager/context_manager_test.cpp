@@ -476,7 +476,7 @@ TEST(ContextManager, GetCurrentGcMode_TestGetGcModeByNumberOfFreeSegment)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
-    ctxManager.GetGcCtx()->SetGcThreshold(10);
+    ctxManager.GetGcCtx()->SetNormalGcThreshold(10);
     ctxManager.GetGcCtx()->SetUrgentThreshold(5);
 
     // given 1.
@@ -525,7 +525,7 @@ TEST(ContextManager, GetGcThreshold_TestSimpleGetterByMode)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, nullptr);
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
-    ctxManager.GetGcCtx()->SetGcThreshold(10);
+    ctxManager.GetGcCtx()->SetNormalGcThreshold(10);
     ctxManager.GetGcCtx()->SetUrgentThreshold(5);
 
     // when 1.
