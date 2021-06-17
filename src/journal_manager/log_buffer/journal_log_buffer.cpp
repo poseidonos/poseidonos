@@ -267,7 +267,7 @@ JournalLogBuffer::InternalIo(LogBufferIoContext* context)
 void
 JournalLogBuffer::InternalIoDone(AsyncMetaFileIoCtx* ctx)
 {
-    LogGroupResetContext* context = reinterpret_cast<LogGroupResetContext*>(ctx);
+    LogBufferIoContext* context = dynamic_cast<LogBufferIoContext*>(ctx);
     context->IoDone();
     delete context;
 }

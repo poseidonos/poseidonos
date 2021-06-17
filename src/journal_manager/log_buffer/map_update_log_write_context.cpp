@@ -39,10 +39,9 @@ namespace pos
 {
 MapUpdateLogWriteContext::MapUpdateLogWriteContext(LogHandlerInterface* log,
     MapPageList dirtyList, EventSmartPtr callback,
-    LogBufferWriteDoneNotifier* target,
+    LogBufferWriteDoneNotifier* logFilledNotifier,
     CallbackSequenceController* sequencer)
-: LogWriteContext(log, callback),
-  logFilledNotifier(target),
+: LogWriteContext(log, callback, logFilledNotifier),
   sequenceController(sequencer),
   dirty(dirtyList)
 {

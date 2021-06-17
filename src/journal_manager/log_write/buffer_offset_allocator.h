@@ -54,6 +54,7 @@ public:
     void Reset(void);
 
     virtual int AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffset);
+    virtual void LogWriteCanceled(int logGroupId);
 
     virtual void LogFilled(int logGroupId, MapPageList& dirty) override;
     virtual void LogBufferReseted(int logGroupId) override;

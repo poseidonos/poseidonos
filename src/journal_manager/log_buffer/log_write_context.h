@@ -39,11 +39,13 @@
 
 namespace pos
 {
+class LogBufferWriteDoneNotifier;
+
 class LogWriteContext : public LogBufferIoContext
 {
 public:
     LogWriteContext(void);
-    LogWriteContext(LogHandlerInterface* log, EventSmartPtr callbackEvent);
+    LogWriteContext(LogHandlerInterface* log, EventSmartPtr callbackEvent, LogBufferWriteDoneNotifier* notifier);
     virtual ~LogWriteContext(void);
 
     // This two methods are for log write statistics
@@ -51,6 +53,11 @@ public:
     virtual int GetLogGroupId(void);
 
     virtual void SetBufferAllocated(uint64_t offset, int groupId, uint32_t seqNum);
+
+    virtual void IoDone(void) override;
+
+protected:
+    LogBufferWriteDoneNotifier* logFilledNotifier;
 
 private:
     LogHandlerInterface* log;

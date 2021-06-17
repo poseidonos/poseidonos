@@ -172,6 +172,13 @@ BufferOffsetAllocator::_TryToSetFull(int id)
 }
 
 void
+BufferOffsetAllocator::LogWriteCanceled(int id)
+{
+    statusList[id]->LogFilled();
+    _TryToSetFull(id);
+}
+
+void
 BufferOffsetAllocator::LogFilled(int id, MapPageList& dirty)
 {
     statusList[id]->LogFilled();

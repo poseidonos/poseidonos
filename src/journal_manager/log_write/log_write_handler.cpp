@@ -44,10 +44,7 @@ namespace pos
 {
 // Constructor for product code
 LogWriteHandler::LogWriteHandler(void)
-: logBuffer(nullptr),
-  bufferAllocator(nullptr),
-  logWriteStats(new LogWriteStatistics()),
-  waitingList(new WaitingLogList())
+: LogWriteHandler(new LogWriteStatistics(), new WaitingLogList())
 {
 }
 
@@ -114,6 +111,9 @@ LogWriteHandler::_AddLogInternal(LogWriteContext* context)
         if (result != 0)
         {
             delete context;
+
+            // This is to cancel the buffer allocation
+            bufferAllocator->LogWriteCanceled(groupId);
         }
         // TODO(huijeong.kim) move to no-journal mode, if failed
         return result;
@@ -132,7 +132,7 @@ LogWriteHandler::_AddLogInternal(LogWriteContext* context)
 void
 LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
 {
-    LogWriteContext* context = reinterpret_cast<LogWriteContext*>(ctx);
+    LogWriteContext* context = dynamic_cast<LogWriteContext*>(ctx);
 
     bool statusUpdatedToStats = false;
 

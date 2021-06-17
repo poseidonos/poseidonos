@@ -31,17 +31,21 @@
  */
 
 #include "src/journal_manager/log_buffer/log_write_context.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 
 namespace pos
 {
 LogWriteContext::LogWriteContext(void)
 : LogBufferIoContext(INVALID_GROUP_ID, nullptr),
+  logFilledNotifier(nullptr),
   log(nullptr)
 {
 }
 
-LogWriteContext::LogWriteContext(LogHandlerInterface* log, EventSmartPtr callback)
+LogWriteContext::LogWriteContext(LogHandlerInterface* log, EventSmartPtr callback,
+    LogBufferWriteDoneNotifier* notifier)
 : LogBufferIoContext(INVALID_GROUP_ID, callback),
+  logFilledNotifier(notifier),
   log(log)
 {
     this->opcode = MetaFsIoOpcode::Write;
@@ -73,6 +77,15 @@ LogWriteContext::SetBufferAllocated(uint64_t offset, int groupId, uint32_t seqNu
     this->logGroupId = groupId;
 
     log->SetSeqNum(seqNum);
+}
+
+void
+LogWriteContext::IoDone(void)
+{
+    MapPageList emptyDirtyList;
+    logFilledNotifier->NotifyLogFilled(GetLogGroupId(), emptyDirtyList);
+
+    LogBufferIoContext::IoDone();
 }
 
 } // namespace pos
