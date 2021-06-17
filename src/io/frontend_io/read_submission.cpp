@@ -49,8 +49,8 @@ namespace pos
 {
 
 ReadSubmission::ReadSubmission(VolumeIoSmartPtr volumeIo, BlockAlignment* blockAlignment_, Merger* merger_, Translator* translator_, IODispatcher* ioDispatcher_)
-: Event(true),
-  IOController(ioDispatcher_),
+: IOController(ioDispatcher_),
+  Event(true),
   blockAlignment(blockAlignment_),
   merger(merger_),
   translator(translator_),
