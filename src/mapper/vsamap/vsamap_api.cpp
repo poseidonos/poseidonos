@@ -245,12 +245,14 @@ VSAMapAPI::DisableVsaMapAccess(int volID)
 void
 VSAMapAPI::EnableVsaMapInternalAccess(int volID)
 {
+    POS_TRACE_INFO(EID(DELETE_VOLUME), "Enable Internal VsaMap Access volumeId:{}", volID);
     isVsaMapInternalAccessable[volID] = true;
 }
 
 void
 VSAMapAPI::DisableVsaMapInternalAccess(int volID)
 {
+    POS_TRACE_INFO(EID(DELETE_VOLUME), "Disable Internal VsaMap Access volumeId:{} @VolumeDelete", volID);
     isVsaMapInternalAccessable[volID] = false;
 }
 
