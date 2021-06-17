@@ -12,3 +12,4 @@ POS_ADD_UNIT_TEST(read_completion_for_partial_write_ut read_completion_for_parti
 POS_ADD_UNIT_TEST(unvmf_io_handler_ut unvmf_io_handler_test.cpp)
 POS_ADD_UNIT_TEST(block_map_update_completion_ut block_map_update_completion_test.cpp)
 POS_ADD_UNIT_TEST(block_map_update_request_ut block_map_update_request_test.cpp)
+POS_ADD_UNIT_TEST(aio_ut aio_test.cpp)

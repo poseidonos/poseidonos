@@ -21,7 +21,6 @@ using ::testing::NiceMock;
 using ::testing::Return;
 namespace pos
 {
-    
 TEST(ReadCompletion, ReadCompletion_Constructor_OneArgument_Stack)
 {
     // Given
@@ -81,15 +80,14 @@ TEST(ReadCompletion, ReadCompletion_DoSpecificJob_ExistErrorCount)
     uint64_t sectorSize = 1;
     std::string arr_name = "";
 
-    NiceMock<MockVolumeIo>* mockIovolumeIo = new NiceMock<MockVolumeIo>(buffer, sectorSize, arr_name);
-    VolumeIoSmartPtr volumeIo(mockIovolumeIo);
+    VolumeIoSmartPtr volumeIo(new VolumeIo(buffer, sectorSize, arr_name));
     StripeAddr returnLsidEntry;
     returnLsidEntry.stripeId = 0;
 
     volumeIo->SetLsidEntry(returnLsidEntry);
     bool actual, expected;
 
-    // When: Try to existed error    
+    // When: Try to existed error
     ReadCompletion readCompletion(volumeIo);
     expected = true;
 
@@ -108,8 +106,7 @@ TEST(ReadCompletion, ReadCompletion_DoSpecificJob_Success)
     uint64_t sectorSize = 1;
     std::string arr_name = "";
 
-    NiceMock<MockVolumeIo>* mockIovolumeIo = new NiceMock<MockVolumeIo>(buffer, sectorSize, arr_name);
-    VolumeIoSmartPtr volumeIo(mockIovolumeIo);    
+    VolumeIoSmartPtr volumeIo(new VolumeIo(buffer, sectorSize, arr_name));
     StripeAddr returnLsidEntry;
     returnLsidEntry.stripeId = 0;
 
@@ -120,7 +117,7 @@ TEST(ReadCompletion, ReadCompletion_DoSpecificJob_Success)
 
     // When: Try to input volumeio null
     expected = true;
-    ReadCompletion readCompletion(volumeIo);    
+    ReadCompletion readCompletion(volumeIo);
 
     volumeIo->SetLsidEntry(returnLsidEntry);
 

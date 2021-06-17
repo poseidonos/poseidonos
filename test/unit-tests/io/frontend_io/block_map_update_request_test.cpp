@@ -150,6 +150,55 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_NormalCase)
     ASSERT_EQ(actual, expected);
 }
 
+TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_GetErrorCount)
+{
+    // Given
+    StripeAddr addr = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 1};
+    NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, ""));
+    NiceMock<MockCallback>* mockCallback(new NiceMock<MockCallback>(true, 0));
+
+    NiceMock<MockStripe> mockStripe;
+    VolumeIoSmartPtr mockVolumeIoPtr(mockVolumeIo);
+    CallbackSmartPtr mockCallbackPtr(mockCallback);
+    NiceMock<MockIVSAMap> mockIVSAMap;
+    NiceMock<MockJournalService> mockJournalService;
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    MockIBlockAllocator iBlockAllocator;
+    CallbackSmartPtr mockWriteCompletion = std::make_shared<MockWriteCompletion>(mockVolumeIoPtr);
+    NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
+    NiceMock<MockVsaRangeMaker>* mockVsaRangeMaker(new NiceMock<MockVsaRangeMaker>(0, 0, 0, false, &mockIVSAMap));
+    EventSmartPtr mockBlockMapUpdateCompletionEvent = std::make_shared<MockBlockMapUpdateCompletion>(
+        mockVolumeIoPtr, mockCallbackPtr, []() -> bool { return false; }, &mockIVSAMap, &mockEventScheduler, mockWriteCompletion,
+        &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
+
+    NiceMock<MockBlockMapUpdate>* mockBlockMapUpdate = new NiceMock<MockBlockMapUpdate>(
+        mockVolumeIoPtr, mockCallbackPtr, []() -> bool { return false; }, &mockIVSAMap, &mockJournalService,
+        &mockEventScheduler, mockBlockMapUpdateCompletionEvent);
+    EventSmartPtr mockBlockMapUpdateEvent(mockBlockMapUpdate);
+
+    // When: BlockMapUpdate act as normal
+    BlockMapUpdateRequest blockMapUpdateRequest(mockVolumeIoPtr, mockCallbackPtr,
+        mockBlockMapUpdateEvent, &mockEventScheduler, false);
+
+    bool actual, expected;
+    ON_CALL(*mockVolumeIo, GetLsidEntry()).WillByDefault(ReturnRef(addr));
+    VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
+    ON_CALL(*mockVolumeIo, GetVsa()).WillByDefault(ReturnRef(vsa));
+    ON_CALL(*mockVolumeIo, GetSectorRba()).WillByDefault(Return(0));
+    ON_CALL(*mockVolumeIo, GetVolumeId()).WillByDefault(Return(0));
+    ON_CALL(*mockVolumeIo, IsGc()).WillByDefault(Return(false));
+
+    ON_CALL(mockStripe, UpdateReverseMap(_, _, _)).WillByDefault(Return());
+    ON_CALL(*mockBlockMapUpdate, Execute()).WillByDefault(Return(true));
+
+    blockMapUpdateRequest.InformError(IOErrorType::DEVICE_ERROR);
+    actual = blockMapUpdateRequest.Execute();
+
+    // Then: BlockMapUpdateRequest should success.
+    expected = true;
+    ASSERT_EQ(actual, expected);
+}
+
 TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_BlockMapUpdateExecuteFail)
 {
     // Given

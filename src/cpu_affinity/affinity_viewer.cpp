@@ -143,11 +143,15 @@ AffinityViewer::Numa::Print(void)
 }
 
 AffinityViewer::Numa::Numa(void)
+: AffinityViewer::Numa::Numa(AffinityManagerSingleton::Instance())
+{
+}
+
+AffinityViewer::Numa::Numa(AffinityManager* affinityManager)
 : socketCount(numa_num_configured_nodes()),
   totalCpuCount(numa_num_configured_cpus()),
   sockets(socketCount),
-  affinityManager(*AffinityManagerSingleton::Instance())
-
+  affinityManager(*affinityManager)
 {
     for (int socketId = 0; socketId < socketCount; socketId++)
     {
@@ -253,10 +257,16 @@ AffinityViewer::Numa::RegisterEveryCpuRole(void)
 void
 AffinityViewer::Print(void)
 {
+    Print(AffinityManagerSingleton::Instance());
+}
+
+void
+AffinityViewer::Print(AffinityManager* affinityManager)
+{
     bool numaAvailable = (numa_available() != -1);
     if (numaAvailable)
     {
-        Numa numa;
+        Numa numa(affinityManager);
         numa.RegisterEveryCpuRole();
         numa.Print();
     }

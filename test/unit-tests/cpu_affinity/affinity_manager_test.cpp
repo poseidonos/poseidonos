@@ -15,11 +15,24 @@ using ::testing::ReturnRef;
 
 namespace pos
 {
+const CoreDescriptionArray TEST_CORE_DESCRIPTIONS =
+    {
+        CoreDescription{CoreType::REACTOR, {1, 0}, "0"},
+        CoreDescription{CoreType::UDD_IO_WORKER, {1, 0}, "1"},
+        CoreDescription{CoreType::EVENT_SCHEDULER, {1, 0}, "2"},
+        CoreDescription{CoreType::EVENT_WORKER, {3, 0}, "3-5"},
+        CoreDescription{CoreType::GENERAL_USAGE, {1, 0}, "6"},
+        CoreDescription{CoreType::QOS, {1, 0}, "7"},
+        CoreDescription{CoreType::META_SCHEDULER, {1, 0}, "8"},
+        CoreDescription{CoreType::META_IO, {2, 0}, "9-10"},
+};
+
 TEST(AffinityManager, AffinityManager_Stack_UseString)
 {
     // Given : AffinityConfigParser::IsStringDescripted returns true
     NiceMock<MockAffinityConfigParser>* mockAffinityConfigParser = new NiceMock<MockAffinityConfigParser>();
-    ON_CALL(*mockAffinityConfigParser, IsStringDescripted()).WillByDefault(Return(false));  // true -> false. workaround to avoid invoking exit(1) call on a host not having enough cpu cores.
+    ON_CALL(*mockAffinityConfigParser, IsStringDescripted()).WillByDefault(Return(false)); // true -> false. workaround to avoid invoking exit(1) call on a host not having enough cpu cores.
+    ON_CALL(*mockAffinityConfigParser, GetDescriptions()).WillByDefault(ReturnRef(TEST_CORE_DESCRIPTIONS));
     testing::Mock::AllowLeak(mockAffinityConfigParser);
 
     // Wnen : Create affinity Manager on stack
@@ -33,6 +46,7 @@ TEST(AffinityManager, AffinityManager_Heap_NotUseString)
     // Given : AffinityConfigParser::IsStringDescripted returns false
     NiceMock<MockAffinityConfigParser>* mockAffinityConfigParser = new NiceMock<MockAffinityConfigParser>();
     ON_CALL(*mockAffinityConfigParser, IsStringDescripted()).WillByDefault(Return(false));
+    ON_CALL(*mockAffinityConfigParser, GetDescriptions()).WillByDefault(ReturnRef(TEST_CORE_DESCRIPTIONS));
     testing::Mock::AllowLeak(mockAffinityConfigParser);
 
     // Wnen : Create affinity Manager on heap
@@ -46,7 +60,8 @@ TEST(AffinityManager, SetGeneralAffinitySelf_Call)
 {
     // Given :
     NiceMock<MockAffinityConfigParser>* mockAffinityConfigParser = new NiceMock<MockAffinityConfigParser>();
-    ON_CALL(*mockAffinityConfigParser, IsStringDescripted()).WillByDefault(Return(false));  // true -> false. workaround to avoid invoking exit(1) call on a host not having enough cpu cores.
+    ON_CALL(*mockAffinityConfigParser, IsStringDescripted()).WillByDefault(Return(false)); // true -> false. workaround to avoid invoking exit(1) call on a host not having enough cpu cores.
+    ON_CALL(*mockAffinityConfigParser, GetDescriptions()).WillByDefault(ReturnRef(TEST_CORE_DESCRIPTIONS));
     testing::Mock::AllowLeak(mockAffinityConfigParser);
 
     // Wnen : Create affinity Manager on stack

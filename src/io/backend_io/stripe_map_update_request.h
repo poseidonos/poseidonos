@@ -35,6 +35,7 @@
 #include <string>
 
 #include "src/event_scheduler/callback.h"
+#include "src/io/backend_io/stripe_map_update.h"
 #include "src/io/general_io/io_submit_handler.h"
 
 namespace pos
@@ -47,7 +48,7 @@ class StripeMapUpdateRequest : public Callback
 {
 public:
     explicit StripeMapUpdateRequest(Stripe* stripe, std::string& arrayName);
-    StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* eventScheduler, std::string& arrayName);
+    StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* eventScheduler, EventSmartPtr event, std::string& arrayName);
     ~StripeMapUpdateRequest(void) override;
 
 private:
@@ -55,6 +56,7 @@ private:
     Stripe* stripe;
     IStripeMap* iStripeMap;
     EventScheduler* eventScheduler;
+    EventSmartPtr event;
     std::string arrayName;
 };
 

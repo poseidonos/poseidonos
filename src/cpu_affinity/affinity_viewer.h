@@ -34,6 +34,7 @@
 #include <map>
 #include <string>
 #include <vector>
+
 #include "src/include/core_const.h"
 
 namespace pos
@@ -44,6 +45,7 @@ class AffinityViewer
 {
 public:
     static void Print(void);
+    static void Print(AffinityManager* affinityManager);
 
 private:
     enum Role
@@ -95,6 +97,7 @@ private:
     {
     public:
         Numa(void);
+        explicit Numa(AffinityManager* affinityManager);
         void Print(void);
         void RegisterEveryCpuRole(void);
 

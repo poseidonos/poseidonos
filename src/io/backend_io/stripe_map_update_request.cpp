@@ -36,29 +36,29 @@
 
 #include "flush_completion.h"
 #include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/include/backend_event.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/include/backend_event.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/io/backend_io/stripe_map_update.h"
-#include "src/mapper_service/mapper_service.h"
 #include "src/logger/logger.h"
+#include "src/mapper_service/mapper_service.h"
 
 namespace pos
 {
 StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, std::string& arrayName)
 : StripeMapUpdateRequest(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
-      EventSchedulerSingleton::Instance(), arrayName)
+      EventSchedulerSingleton::Instance(), EventSmartPtr(new StripeMapUpdate(stripe, arrayName)), arrayName)
 {
     SetEventType(BackendEvent_Flush);
 }
 
 StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap,
-    EventScheduler* eventScheduler, std::string& arrayName)
-: Callback(false, CallbackType_StripeMapUpdateRequest),
+    EventScheduler* eventScheduler, EventSmartPtr event, std::string& arrayName)
+: Callback(false),
   stripe(stripe),
   iStripeMap(stripeMap),
   eventScheduler(eventScheduler),
+  event(event),
   arrayName(arrayName)
 {
 }
@@ -96,7 +96,6 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         return true;
     }
 
-    EventSmartPtr event(new StripeMapUpdate(stripe, arrayName));
     if (unlikely(nullptr == event))
     {
         POS_EVENT_ID eventId =

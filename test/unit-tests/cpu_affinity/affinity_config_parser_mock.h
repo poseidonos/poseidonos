@@ -13,6 +13,7 @@ class MockAffinityConfigParser : public AffinityConfigParser
 public:
     using AffinityConfigParser::AffinityConfigParser;
     MOCK_METHOD(bool, IsStringDescripted, (), (override));
+    MOCK_METHOD(const CoreDescriptionArray&, GetDescriptions, (), (override));
 };
 
 } // namespace pos

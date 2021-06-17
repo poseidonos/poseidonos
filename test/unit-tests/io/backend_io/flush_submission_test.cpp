@@ -14,6 +14,7 @@
 #include "src/logger/logger.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
+#include "test/unit-tests/array/service/io_translator/i_io_translator_mock.h"
 #include "test/unit-tests/io_submit_interface/i_io_submit_handler_mock.h"
 
 using namespace pos;
@@ -134,6 +135,25 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckReturnValue)
 
     // Then 4: Return false
     ASSERT_EQ(actualReturn, false);
+}
+
+TEST(FlushSubmission, FlushSubmission_Execute_TranslatorNotNull)
+{
+    // Given
+    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
+    NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
+    NiceMock<MockIIOTranslator> mockIIOTranslator;
+    std::string arr_name = "";
+    FlushSubmission flushSubmission(&mockStripe, &mockIWBStripeAllocator, &mockIIOSubmitHandler, arr_name, &mockIIOTranslator);
+    bool actualReturn;
+
+    // When : Translate returns value except SUCCESS(0)
+    ON_CALL(mockIIOTranslator, Translate(_, _, _, _)).WillByDefault(Return(-1));
+    actualReturn = flushSubmission.Execute();
+
+    // Then : Return true
+    ASSERT_EQ(actualReturn, true);
 }
 
 TEST(FlushSubmission, FlushSubmission_GetBufferListSize_EmptyArgument)

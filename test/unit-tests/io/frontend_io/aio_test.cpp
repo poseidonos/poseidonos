@@ -50,12 +50,13 @@ namespace pos
 TEST(AioCompletion, AioCompletion_Constructor_ThreeArgumentWithFlushIo_Stack)
 {
     // Given
-    pos_io ibofIo;
+    pos_io posIo;
     IOCtx ioContext;
-    FlushIoSmartPtr flushIo(new NiceMock<MockFlushIo>());
+    string arrayName = "";
+    FlushIoSmartPtr flushIo(new NiceMock<MockFlushIo>(arrayName));
 
     // When : Create new object in stack
-    AioCompletion aioCompletion(flushIo, ibofIo, ioContext);
+    AioCompletion aioCompletion(flushIo, posIo, ioContext);
 
     // Then : Do nothing
 }
@@ -63,12 +64,13 @@ TEST(AioCompletion, AioCompletion_Constructor_ThreeArgumentWithFlushIo_Stack)
 TEST(AioCompletion, AioCompletion_Constructor_ThreeArgumentWithFlushIo_Heap)
 {
     // Given
-    pos_io ibofIo;
+    pos_io posIo;
     IOCtx ioContext;
-    FlushIoSmartPtr flushIo(new NiceMock<MockFlushIo>());
+    string arrayName = "";
+    FlushIoSmartPtr flushIo(new NiceMock<MockFlushIo>(arrayName));
 
     // When : Create new object in heap
-    AioCompletion* aioCompletion = new AioCompletion(flushIo, ibofIo, ioContext);
+    AioCompletion* aioCompletion = new AioCompletion(flushIo, posIo, ioContext);
 
     // Then : Release memory
     delete aioCompletion;
@@ -77,12 +79,15 @@ TEST(AioCompletion, AioCompletion_Constructor_ThreeArgumentWithFlushIo_Heap)
 TEST(AioCompletion, AioCompletion_Constructor_FourArgumentWithFlushIo_Stack)
 {
     // Given
-    pos_io ibofIo;
+    pos_io posIo;
     IOCtx ioContext;
-    FlushIoSmartPtr flushIo(new NiceMock<MockFlushIo>());
+    string arrayName = "";
+    FlushIoSmartPtr flushIo(new NiceMock<MockFlushIo>(arrayName));
     MockEventFrameworkApi mockEventFrameworkApi;
+    ON_CALL(mockEventFrameworkApi, IsSameReactorNow(_)).WillByDefault(Return(true));
+
     // When : Create new object in stack
-    AioCompletion aioCompletion(flushIo, ibofIo, ioContext, &mockEventFrameworkApi);
+    AioCompletion aioCompletion(flushIo, posIo, ioContext, &mockEventFrameworkApi);
 
     // Then : Do nothing
 }
@@ -90,12 +95,13 @@ TEST(AioCompletion, AioCompletion_Constructor_FourArgumentWithFlushIo_Stack)
 TEST(AioCompletion, AioCompletion_Constructor_ThreeArgumentWithVolumeIo_Stack)
 {
     // Given
-    pos_io ibofIo;
+    pos_io posIo;
     IOCtx ioContext;
-    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0));
+    string arrayName = "";
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arrayName));
 
     // When : Create new object in stack
-    AioCompletion aioCompletion(volumeIo, ibofIo, ioContext);
+    AioCompletion aioCompletion(volumeIo, posIo, ioContext);
 
     // Then : Do nothing
 }
@@ -103,13 +109,15 @@ TEST(AioCompletion, AioCompletion_Constructor_ThreeArgumentWithVolumeIo_Stack)
 TEST(AioCompletion, AioCompletion_Constructor_FourArgumentWithVolumeIo_Stack)
 {
     // Given
-    pos_io ibofIo;
+    pos_io posIo;
     IOCtx ioContext;
-    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0));
+    string arrayName = "";
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arrayName));
     MockEventFrameworkApi mockEventFrameworkApi;
+    ON_CALL(mockEventFrameworkApi, IsSameReactorNow(_)).WillByDefault(Return(true));
 
     // When : Create new object in stack
-    AioCompletion aioCompletion(volumeIo, ibofIo, ioContext, &mockEventFrameworkApi);
+    AioCompletion aioCompletion(volumeIo, posIo, ioContext, &mockEventFrameworkApi);
 
     // Then : Do nothing
 }
@@ -117,19 +125,20 @@ TEST(AioCompletion, AioCompletion_Constructor_FourArgumentWithVolumeIo_Stack)
 TEST(AioCompletion, AioCompletion_DoSpecificJob_IoTypeFlush)
 {
     // Given
-    pos_io ibofIo;
+    pos_io posIo;
     IOCtx ioContext;
-    NiceMock<MockFlushIo>* mockFlushIo = new NiceMock<MockFlushIo>();
-    MockEventFrameworkApi mockEventFrameworkApi;
+    string arrayName = "";
+    NiceMock<MockFlushIo>* mockFlushIo = new NiceMock<MockFlushIo>(arrayName);
     FlushIoSmartPtr flushIo(mockFlushIo);
+    MockEventFrameworkApi mockEventFrameworkApi;
     bool expect, actual;
 
     // When IO type is Flush and SameReactorNow
-    ibofIo.ioType = IO_TYPE::FLUSH;
-    ibofIo.complete_cb = nullptr;
+    posIo.ioType = IO_TYPE::FLUSH;
+    posIo.complete_cb = nullptr;
     ON_CALL(*mockFlushIo, GetOriginCore()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, IsSameReactorNow(_)).WillByDefault(Return(true));
-    AioCompletion aioCompletion(flushIo, ibofIo, ioContext, &mockEventFrameworkApi);
+    AioCompletion aioCompletion(flushIo, posIo, ioContext, &mockEventFrameworkApi);
     aioCompletion.SetCallee(nullptr);
 
     // Then call _SendUserCompletion and return true
@@ -166,27 +175,27 @@ TEST(AIO, AIO_Constructor_Heap)
 TEST(AIO, AIO_SubmitAsyncIO_IoTypeInvalidThrow)
 {
     // Given
-    pos_io ibofIo;
+    pos_io posIo;
     AIO aio;
 
     // When : ioType is not write or read or flush
-    ibofIo.ioType = IO_TYPE::FLUSH + 1;
+    posIo.ioType = IO_TYPE::FLUSH + 1;
 
     // Then : Expect throw exception
-    EXPECT_THROW(aio.SubmitAsyncIO(ibofIo), POS_EVENT_ID);
+    EXPECT_THROW(aio.SubmitAsyncIO(posIo), POS_EVENT_ID);
 }
 
 TEST(AIO, AIO_SubmitAsyncIO_IoTypeFlush)
 {
     // Given
-    pos_io ibofIo;
+    pos_io posIo;
 
     // When : ioType is flush
-    ibofIo.ioType = IO_TYPE::FLUSH;
+    posIo.ioType = IO_TYPE::FLUSH;
     AIO aio;
 
     // Then : SubmitAsyncIo done
-    aio.SubmitAsyncIO(ibofIo);
+    aio.SubmitAsyncIO(posIo);
 }
 
 TEST(AIO, AIO_CompleteIOs_CompleteIOs)

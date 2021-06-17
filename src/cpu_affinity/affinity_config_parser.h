@@ -45,7 +45,7 @@ public:
     AffinityConfigParser(ConfigManager& configManager_ = *ConfigManagerSingleton::Instance());
     virtual ~AffinityConfigParser(void);
 
-    const CoreDescriptionArray& GetDescriptions(void);
+    virtual const CoreDescriptionArray& GetDescriptions(void);
     virtual bool IsStringDescripted(void);
 
 private:
