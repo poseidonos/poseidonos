@@ -238,8 +238,8 @@ ContextManager::AllocateGCVictimSegment(void)
     if (victimSegment != UNMAP_SEGMENT)
     {
         allocatorCtx->SetSegmentState(victimSegment, SegmentState::VICTIM, true);
+        POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "segmentId:{} @AllocateGCVictim, free segment count:{}", victimSegment, allocatorCtx->GetNumOfFreeUserDataSegment());
     }
-    POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "segmentId:{} @AllocateGCVictim, free segment count:{}", victimSegment, allocatorCtx->GetNumOfFreeUserDataSegment());
     return victimSegment;
 }
 
