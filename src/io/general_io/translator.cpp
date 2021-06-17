@@ -109,6 +109,7 @@ Translator::Translator(const VirtualBlkAddr& vsa, std::string& arrayName)
 : iVSAMap(MapperServiceSingleton::Instance()->GetIVSAMap(arrayName)),
   iStripeMap(MapperServiceSingleton::Instance()->GetIStripeMap(arrayName)),
   iWBStripeAllocator(AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName)),
+  iTranslator(ArrayService::Instance()->Getter()->GetTranslator()),
   startRba(0),
   blockCount(ONLY_ONE),
   lastVsa(UNMAP_VSA),
