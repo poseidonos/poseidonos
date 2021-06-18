@@ -542,17 +542,17 @@ modules:
         solution:
       - code: 2501
         level: ERROR
-        message: Array is already umounted.
+        message: Array is already unmounted.
         problem:
         solution:
       - code: 2502
         level: ERROR
-        message: Array already exists
+        message: Array already exists.
         problem:
         solution:
       - code: 2503
         level: ERROR
-        message: Array does not exists
+        message: Array does not exist.
         problem:
         solution:
       - code: 2504
@@ -1259,26 +1259,14 @@ modules:
         message: requested log-level to set is invalid
         problem:
         solution:
-  - name: "Qos"
-    count: 100
+  - name: "QoSManager"
+    count: 20
     idStart: 4600
     idEnd:   4699
     info:
       - code: 4600
-        level: WARN
-        message: Invalid or Missing Parameter
-        problem: One or many parameter passed invalid or missing
-        solution: Verify the cli parameters passed
-      - code: 4601
         level: INFO
-        message: Frontend Qos Disabled
-        problem: fe_qos enable flag in config file set false
-        solution: Set fe_qos enable flag to true
-      - code: 4660
-        level: WARN
-        message: One Minimum Type Allowed
-        problem: Trying to set both Minimum BW and Minimum IOPS
-        solution: Either Minimum BW or MInimum IOPS can be set
+        message: set event policy
   - name: "IOPath-nvmf"
     count: 100
     idStart: 5000
@@ -1301,7 +1289,7 @@ modules:
     info:
       - code: 5525
         level: ERROR
-        message: device not found
+        message: Device not found
         problem: Devices not found
         solution: Scan device and try again
   - name: "system"
@@ -1424,3 +1412,17 @@ modules:
         level: ERROR
         message: Completion error
         problem: Can't process completions
+  - name: "NVME Admin"
+    count: 100
+    idStart: 30000
+    idEnd:   30099
+    info:
+      - code: 30000
+        level: ERROR
+        message: Can't get nvme ctrlr
+      - code: 30001
+        level: ERROR
+        message: Can't get log page
+      - code: 30002
+        level: ERROR
+        message: Can't process completions
