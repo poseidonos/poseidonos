@@ -260,6 +260,12 @@ Array::Shutdown(void)
     _UnregisterService();
     _DeletePartitions();
     shutdownFlag = 1;
+
+    int ret = _Flush();
+    if (0 != ret)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Flush after Shutdown Failed");
+    }
 }
 
 int
@@ -646,6 +652,7 @@ Array::_DetachData(ArrayDevice* target)
         isRebuildingDevice = true;
     }
 
+    state->DataRemoved(isRebuildingDevice);
     target->SetState(ArrayDeviceState::FAULT);
     sysDevMgr->RemoveDevice(target->GetUblock());
     target->SetUblock(nullptr);
@@ -660,8 +667,6 @@ Array::_DetachData(ArrayDevice* target)
             return;
         }
     }
-
-    state->DataRemoved(isRebuildingDevice);
 
     if (isRebuildingDevice || state->IsBroken())
     {
