@@ -11,17 +11,19 @@ import signal
 
 monitor_interval = 10
 logfile = "/var/log/syslog"
-run_post_process = True
+run_post_process = False
 run_mode = 1
 
 cwd = os.path.dirname(os.path.abspath(__file__))
 pos_dir = cwd + "/../../"
 process_lock = "/var/tmp/spdk.sock.lock"
 
+
 def run_pre_system():
     logger.info("prepare poseidon system")
     os.chdir(pos_pre_proc['path'])
     return os.system(pos_pre_system['setup_env'])
+
 
 def run_pre_proc():
     logger.info("check uram recovery")
@@ -29,19 +31,16 @@ def run_pre_proc():
     os.system(pos_pre_proc['urambackup'])
     return os.system(pos_pre_proc['cleanup'])
 
-def run_post_proc(clean_start):
-    logger.info("poseidonos bringup script - clean_start:" + str(clean_start))
+
+def run_post_proc():
     time.sleep(3)
     os.chdir(pos_post_proc['path'])
-    if clean_start:
-        logger.error("RUN post process - Clean")
-        ret = os.system(pos_post_proc['clean'])
-    else:
-        logger.error("RUN post process - Dirty")
-        ret = os.system(pos_post_proc['dirty'])
+    logger.error("RUN post process")
+    ret = os.system(pos_post_proc['cmd'])
     logger.error("RUN post process - ret={}".format(ret))
 
-def run_process(cmd, clean_start):
+
+def run_process(cmd):
     run_pre_proc()
     ret = os.system(cmd)
     if ret != 0:
@@ -49,33 +48,34 @@ def run_process(cmd, clean_start):
     else:
         logger.error("RUN {} - SUCCESS ".format(pos_proc['name']))
         if run_post_process:
-            run_post_proc(clean_start)
+            run_post_proc()
+
 
 def check_process_exist(name):
-    for p in psutil.process_iter(attrs = ['ppid', 'cmdline', 'pid']):
+    for p in psutil.process_iter(attrs=['ppid', 'cmdline', 'pid']):
         if name in str(p.info['cmdline']) and p.info['ppid'] == 1:
             return int(p.info['pid'])
     return 0
 
-def check_clean_start():
-    # Note - dirty mode poseidonos start vased segfault. temporally blocks
-    # return !os.path.exists(process_lock)
-    return True
 
 def check_system_setup_need():
-    # Todo : check hugemem reservation
-    return True
+    ret = check_process_exist("poseidonos")
+    if ret == 0:
+        return True
+    else:
+        return False
+
 
 def do_work():
     while True:
         if check_process_exist(pos_proc['name']) == 0:
             logger.error("DETECT {} is not running".format(pos_proc['name']))
-            clean_start = check_clean_start()
-            run_process(pos_proc['cmd'],clean_start)
+            run_process(pos_proc['cmd'])
         # else:
             # logger.info("{} is running".format(pos_proc['name']))
         time.sleep(monitor_interval)
         pass
+
 
 def daemonize():
     try:
@@ -110,6 +110,7 @@ def daemonize():
 
     do_work()
 
+
 def init():
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter("%(asctime)s-[%(name)s]-[%(levelname)s]-%(message)s")
@@ -122,6 +123,7 @@ def init():
     # logger.error("error")
     signal.signal(signal.SIGINT, sigHandler)
 
+
 def finalize():
     posd_pid = check_process_exist("poseidon_daemon.py")
     if posd_pid:
@@ -132,12 +134,14 @@ def finalize():
         logger.info("Finalize poseidonos({})".format(pos_pid))
         os.kill(pos_pid, signal.SIGKILL)
 
+
 def sigHandler(sig, frame):
     pos_pid = check_process_exist(pos_proc['name'])
     if pos_pid:
         logger.info("Finalize poseidonos({})".format(pos_pid))
         os.kill(pos_pid, signal.SIGKILL)
     sys.exit(0)
+
 
 parser = optparse.OptionParser()
 parser.add_option("-l", "--log", dest="log", help="set log file", default=logfile)
@@ -153,23 +157,22 @@ monitor_stopinterval = int(options.interval)
 logger = logging.getLogger("poseidon_daemon")
 pos_dir = options.path
 
-pos_pre_system={
+pos_pre_system = {
         'path': pos_dir + '/script',
-        'setup_env':'./setup_env.sh',
+        'setup_env': './setup_env.sh',
         }
-pos_pre_proc={
+pos_pre_proc = {
         'path': pos_dir + '/script',
-        'urambackup':'./backup_latest_hugepages_for_uram.sh',
-        'cleanup':'rm -rf /dev/shm/*'
+        'urambackup': './backup_latest_hugepages_for_uram.sh',
+        'cleanup': 'rm -rf /dev/shm/*'
         }
-pos_proc={
-        'name':'primary',
-        'cmd': pos_dir + '/bin/poseidonos primary &'
+pos_proc = {
+        'name': 'poseidonos',
+        'cmd': pos_dir + '/bin/poseidonos &'
         }
-pos_post_proc={
+pos_post_proc = {
         'path': pos_dir + '/script',
-        'clean':'./setup_ibofos_nvmf_volume.sh 1',
-        'dirty':'./setup_ibofos_nvmf_volume.sh 0'
+        'cmd': './post_process'
         }
 
 if __name__ == '__main__':
