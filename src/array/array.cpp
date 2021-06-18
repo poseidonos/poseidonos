@@ -660,7 +660,7 @@ Array::_DetachData(ArrayDevice* target)
             return;
         }
     }
-    
+
     state->DataRemoved(isRebuildingDevice);
 
     if (isRebuildingDevice || state->IsBroken())
