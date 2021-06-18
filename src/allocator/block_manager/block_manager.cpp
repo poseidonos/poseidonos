@@ -37,6 +37,7 @@
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/include/branch_prediction.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
@@ -120,7 +121,7 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
     }
 
     StripeId newVsid = arrayLsid;
-    Stripe* stripe = new Stripe(false, arrayName, addrInfo);
+    Stripe* stripe = new Stripe(false, addrInfo, arrayName);
     stripe->Assign(newVsid, UNMAP_STRIPE, 0);
     if (unlikely(stripe->LinkReverseMap(iReverseMap->AllocReverseMapPack(true /*gcDest*/)) < 0))
     {

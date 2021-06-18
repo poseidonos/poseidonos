@@ -45,7 +45,7 @@ $(IBOF_DIR)/src/mapper/mapper_stub.cpp \
 $(IBOF_DIR)/src/mapper_service/mapper_service_stub.cpp \
 $(IBOF_DIR)/src/allocator/allocator_stub.cpp \
 $(IBOF_DIR)/src/allocator/block_manager/block_allocator_stub.cpp \
-$(IBOF_DIR)/src/allocator/wb_stripe_manager/stripe_stub.cpp \
+$(IBOF_DIR)/src/allocator/wbstripe_manager/stripe_stub.cpp \
 $(IBOF_DIR)/src/allocator_service/allocator_service_stub.cpp \
 $(IBOF_DIR)/src/bio/ubio_stub.cpp \
 $(IBOF_DIR)/src/bio/data_buffer_stub.cpp \

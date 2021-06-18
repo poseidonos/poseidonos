@@ -12,7 +12,7 @@
 #include "src/mapper_service/mapper_service.h"
 #include "test/unit-tests/allocator/i_context_manager_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 

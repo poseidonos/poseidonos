@@ -36,7 +36,7 @@
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
 #include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 
 namespace pos
 {

@@ -35,7 +35,7 @@
 #include <list>
 #include <mutex>
 
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/bio/flush_io.h"
 #include "src/io/frontend_io/flush_configuration.h"
 #include "src/lib/singleton.h"

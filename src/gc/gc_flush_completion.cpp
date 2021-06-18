@@ -36,7 +36,7 @@
 #include "src/logger/logger.h"
 #include "src/include/backend_event.h"
 #include "src/allocator/allocator.h"
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/mapper/mapper.h"

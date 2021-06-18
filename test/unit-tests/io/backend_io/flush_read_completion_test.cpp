@@ -8,7 +8,7 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/io/backend_io/flush_submission.h"
 #include "src/logger/logger.h"
-#include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe/stripe_mock.h"
 
 using namespace pos;
 using namespace std;

@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/io/general_io/rba_state_manager_mock.h"
 

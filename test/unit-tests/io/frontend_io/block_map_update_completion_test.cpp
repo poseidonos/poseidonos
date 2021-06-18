@@ -6,7 +6,7 @@
 #include "src/event_scheduler/callback.h"
 #include "test/unit-tests/allocator/i_block_allocator_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/event_scheduler/callback_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"

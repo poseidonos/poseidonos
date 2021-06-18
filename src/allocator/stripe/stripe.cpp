@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 
 #include <string>
 
@@ -61,7 +61,7 @@ Stripe::Stripe(ReverseMapPack* revMap, bool withDataBuffer_)
     }
 }
 
-Stripe::Stripe(bool withDataBuffer_, std::string arrayName, AllocatorAddressInfo* allocatorAddressInfo)
+Stripe::Stripe(bool withDataBuffer_, AllocatorAddressInfo* allocatorAddressInfo, std::string arrayName)
 : Stripe(nullptr, withDataBuffer_)
 {
     totalBlksPerUserStripe = allocatorAddressInfo->GetblksPerStripe();

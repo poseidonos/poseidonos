@@ -13,7 +13,7 @@
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/logger/logger.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/array/service/io_translator/i_io_translator_mock.h"
 #include "test/unit-tests/io_submit_interface/i_io_submit_handler_mock.h"
 

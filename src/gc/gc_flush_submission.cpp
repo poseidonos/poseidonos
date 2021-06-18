@@ -36,7 +36,7 @@
 #include <string>
 
 #include "src/allocator/allocator.h"
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/backend_event.h"
 #include "src/logger/logger.h"

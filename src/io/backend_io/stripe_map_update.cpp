@@ -32,7 +32,7 @@
 
 #include "stripe_map_update.h"
 
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io/backend_io/stripe_map_update_completion.h"

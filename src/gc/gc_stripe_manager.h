@@ -33,7 +33,7 @@
 #pragma once
 #include <vector>
 
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/gc/victim_stripe.h"
 #include "src/sys_event/volume_event.h"

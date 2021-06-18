@@ -13,7 +13,7 @@
 
 #include "test/integration-tests/journal/utils/test_info.h"
 
-#include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe/stripe_mock.h"
 
 #include <string>
 

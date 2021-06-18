@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe/stripe_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;

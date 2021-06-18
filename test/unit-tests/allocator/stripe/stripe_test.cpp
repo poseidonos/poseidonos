@@ -1,4 +1,4 @@
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 
 #include <gtest/gtest.h>
 

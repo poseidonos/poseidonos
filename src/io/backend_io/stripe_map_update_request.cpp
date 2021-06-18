@@ -35,7 +35,7 @@
 #include <sstream>
 
 #include "flush_completion.h"
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/backend_event.h"
 #include "src/include/branch_prediction.h"

@@ -5,7 +5,7 @@
 
 #include "src/mapper_service/mapper_service.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/array/service/io_translator/i_io_translator_mock.h"
 #include "test/unit-tests/include/i_array_device_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"

@@ -30,13 +30,14 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/wb_stripe_manager/wbstripe_manager.h"
+#include "src/allocator/wbstripe_manager/wbstripe_manager.h"
 
 #include <vector>
 
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/include/branch_prediction.h"
 #include "src/io/backend_io/flush_submission.h"
 #include "src/logger/logger.h"
@@ -106,7 +107,7 @@ WBStripeManager::Init(void)
 
     for (uint32_t stripeCnt = 0; stripeCnt < totalNvmStripes; ++stripeCnt)
     {
-        Stripe* stripe = new Stripe(true, arrayName, addrInfo);
+        Stripe* stripe = new Stripe(true, addrInfo, arrayName);
 
         for (uint32_t chunkCnt = 0; chunkCnt < chunksPerStripe; ++chunkCnt)
         {

@@ -33,7 +33,7 @@
 #pragma once
 
 #include <string>
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/event_scheduler/callback.h"
 #include "src/io/general_io/io_submit_handler.h"
 

@@ -33,7 +33,7 @@
 #include "flush_completion.h"
 
 #include "src/allocator/event/stripe_put_event.h"
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"

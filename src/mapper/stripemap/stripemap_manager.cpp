@@ -31,7 +31,7 @@
  */
 
 #include "src/allocator_service/allocator_service.h"
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/mapper/map_flushed_event.h"
 #include "src/mapper/address/mapper_address_info.h"
 #include "src/mapper/stripemap/stripemap_manager.h"

@@ -22,7 +22,7 @@
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "test/unit-tests/allocator/i_block_allocator_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/allocator_service/allocator_service_mock.h"
 #include "test/unit-tests/array/array_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"

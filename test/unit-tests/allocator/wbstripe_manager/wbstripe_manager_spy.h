@@ -35,7 +35,7 @@
 #include <string>
 #include <vector>
 
-#include "src/allocator/wb_stripe_manager/wbstripe_manager.h"
+#include "src/allocator/wbstripe_manager/wbstripe_manager.h"
 #include "src/io/backend_io/flush_submission.h"
 
 namespace pos

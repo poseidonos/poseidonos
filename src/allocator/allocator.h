@@ -40,7 +40,7 @@
 #include "src/allocator/context_manager/context_manager.h"
 #include "src/allocator/i_allocator_wbt.h"
 #include "src/allocator/i_context_replayer.h"
-#include "src/allocator/wb_stripe_manager/wbstripe_manager.h"
+#include "src/allocator/wbstripe_manager/wbstripe_manager.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/include/meta_const.h"
 #include "src/lib/singleton.h"

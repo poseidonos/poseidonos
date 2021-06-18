@@ -1,4 +1,4 @@
-#include "src/allocator/wb_stripe_manager/wbstripe_manager.h"
+#include "src/allocator/wbstripe_manager/wbstripe_manager.h"
 
 #include <gtest/gtest.h>
 
@@ -9,9 +9,9 @@
 #include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/wbstripe_ctx/wbstripe_ctx_mock.h"
-#include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
-#include "test/unit-tests/allocator/wb_stripe_manager/stripe_spy.h"
-#include "test/unit-tests/allocator/wb_stripe_manager/wbstripe_manager_spy.h"
+#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe/stripe_spy.h"
+#include "test/unit-tests/allocator/wbstripe_manager/wbstripe_manager_spy.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/reversemap/reverse_map_mock.h"
 #include "test/unit-tests/mapper/reversemap/reversemap_manager_mock.h"
@@ -239,8 +239,9 @@ TEST(WBStripeManager, FinalizeWriteIO_TestAddFlushStripe)
     delete stripeVec;
 }
 
-TEST(WBStripeManager, WaitStripesFlushCompletion_TestCase1)    // given
+TEST(WBStripeManager, WaitStripesFlushCompletion_TestCase1)
 {
+    // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumWbStripes(5);
     addrInfo.SetblksPerStripe(5);

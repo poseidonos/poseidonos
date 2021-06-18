@@ -37,7 +37,7 @@
 #include <tuple>
 #include <vector>
 
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/logger/logger.h"
 namespace pos
 {

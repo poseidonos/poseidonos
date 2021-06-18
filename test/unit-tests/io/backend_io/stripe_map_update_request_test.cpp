@@ -3,14 +3,14 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/allocator/stripe/stripe.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "test/unit-tests/allocator/event/stripe_put_event_mock.h"
-#include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/io/backend_io/stripe_map_update_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
