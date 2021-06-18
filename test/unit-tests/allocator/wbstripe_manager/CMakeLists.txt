@@ -1,2 +1,1 @@
-POS_ADD_UNIT_TEST(stripe_ut stripe_test.cpp)
 POS_ADD_UNIT_TEST(wbstripe_manager_ut wbstripe_manager_test.cpp)
