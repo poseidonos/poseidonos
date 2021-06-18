@@ -51,15 +51,6 @@ MountTemp::Unmount2(void)
 {
     // after array component dispose
     int ret = 0;
-    int eventId = 9999;
-
-#ifdef _ADMIN_ENABLED
-    POS_TRACE_INFO(eventId, "start smart log store");
-    SmartLogMgrSingleton::Instance()->StoreLogData();
-    SmartLogMgrSingleton::ResetInstance();
-#endif
-    POS_TRACE_INFO(eventId, "start flush cmd manager reset instance");
-    FlushCmdManagerSingleton::ResetInstance();
     return ret;
 }
 

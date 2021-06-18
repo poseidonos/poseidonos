@@ -44,6 +44,7 @@
 #include "src/master_context/version_provider.h"
 #include "src/device/device_manager.h"
 #include "src/event_scheduler/event.h"
+#include "src/io/frontend_io/flush_command_manager.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/io_completer.h"
 #include "src/include/pos_event_id.h"
@@ -56,6 +57,9 @@
 #include "src/network/nvmf_target.h"
 #include "src/qos/qos_manager.h"
 #include "src/spdk_wrapper/spdk.hpp"
+#ifdef _ADMIN_ENABLED
+#include "src/admin/smart_log_mgr.h"
+#endif
 
 namespace pos
 {
@@ -100,6 +104,10 @@ Poseidonos::Terminate(void)
     IODispatcherSingleton::ResetInstance();
     EventSchedulerSingleton::ResetInstance();
     QosManagerSingleton::ResetInstance();
+#ifdef _ADMIN_ENABLED
+    SmartLogMgrSingleton::ResetInstance();
+#endif
+    FlushCmdManagerSingleton::ResetInstance();
     delete debugInfo;
     IOSubmitHandler* submitHandler = static_cast<IOSubmitHandler*>(IIOSubmitHandler::GetInstance());
     delete submitHandler;
@@ -109,7 +117,6 @@ Poseidonos::Terminate(void)
     }
     ArrayManagerSingleton::ResetInstance();
     EventFrameworkApiSingleton::ResetInstance();
-
     air_deactivate();
     air_finalize();
 }
@@ -185,6 +192,7 @@ Poseidonos::_SetupThreadModel(void)
     workerCPUSet = affinityManager->GetCpuSet(CoreType::META_IO);
     MetaFsServiceSingleton::Instance()->Initialize(coreCount,
         schedulerCPUSet, workerCPUSet);
+    FlushCmdManagerSingleton::Instance();
 }
 
 void
