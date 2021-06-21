@@ -32,76 +32,159 @@
 
 #include "src/allocator_service/allocator_service.h"
 
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+
 namespace pos
 {
-void
-AllocatorService::RegisterAllocator(std::string arrayName, IBlockAllocator* iblockAllocator)
+AllocatorService::AllocatorService(void)
 {
-    iBlockAllocator.Register(arrayName, iblockAllocator);
+    iBlockAllocator.fill(nullptr);
+    iWBStripeAllocator.fill(nullptr);
+    iAllocatorWbt.fill(nullptr);
+    iContextManager.fill(nullptr);
+    iContextReplayer.fill(nullptr);
 }
 
 void
-AllocatorService::RegisterAllocator(std::string arrayName, IWBStripeAllocator* iwbstripeAllocator)
+AllocatorService::RegisterAllocator(std::string arrayName, int arrayId,
+    IBlockAllocator* iblockAllocator, IWBStripeAllocator* iwbstripeAllocator,
+    IAllocatorWbt* iallocatorWbt, IContextManager* icontextManager, IContextReplayer* icontextReplayer)
 {
-    iWBStripeAllocator.Register(arrayName, iwbstripeAllocator);
-}
+    if (arrayNameToId.find(arrayName) == arrayNameToId.end())
+    {
+        arrayNameToId.emplace(arrayName, arrayId);
 
-void
-AllocatorService::RegisterAllocator(std::string arrayName, IAllocatorWbt* iallocatorWbt)
-{
-    iAllocatorWbt.Register(arrayName, iallocatorWbt);
-}
-
-void
-AllocatorService::RegisterAllocator(std::string arrayName, IContextManager* icontextManager)
-{
-    iContextManager.Register(arrayName, icontextManager);
-}
-
-void
-AllocatorService::RegisterAllocator(std::string arrayName, IContextReplayer* icontextReplayer)
-{
-    iContextReplayer.Register(arrayName, icontextReplayer);
+        iBlockAllocator[arrayId] = iblockAllocator;
+        iWBStripeAllocator[arrayId] = iwbstripeAllocator;
+        iAllocatorWbt[arrayId] = iallocatorWbt;
+        iContextManager[arrayId] = icontextManager;
+        iContextReplayer[arrayId] = icontextReplayer;
+    }
+    else
+    {
+        POS_TRACE_ERROR(EID(MAPPER_ALREADY_EXIST), "Allocator for array {} is already registered", arrayName);
+    }
 }
 
 void
 AllocatorService::UnregisterAllocator(std::string arrayName)
 {
-    iBlockAllocator.Unregister(arrayName);
-    iWBStripeAllocator.Unregister(arrayName);
-    iAllocatorWbt.Unregister(arrayName);
-    iContextManager.Unregister(arrayName);
-    iContextReplayer.Unregister(arrayName);
+    if (arrayNameToId.find(arrayName) != arrayNameToId.end())
+    {
+        int arrayId = arrayNameToId[arrayName];
+        arrayNameToId.erase(arrayName);
+
+        iBlockAllocator[arrayId] = nullptr;
+        iWBStripeAllocator[arrayId] = nullptr;
+        iAllocatorWbt[arrayId] = nullptr;
+        iContextManager[arrayId] = nullptr;
+        iContextReplayer[arrayId] = nullptr;
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(MAPPER_ALREADY_EXIST), "Allocator for array {} already unregistered", arrayName);
+    }
 }
 
 IBlockAllocator*
 AllocatorService::GetIBlockAllocator(std::string arrayName)
 {
-    return iBlockAllocator.GetInterface(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return iBlockAllocator[arrayId->second];
+    }
 }
 
 IWBStripeAllocator*
 AllocatorService::GetIWBStripeAllocator(std::string arrayName)
 {
-    return iWBStripeAllocator.GetInterface(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return iWBStripeAllocator[arrayId->second];
+    }
 }
 
 IAllocatorWbt*
 AllocatorService::GetIAllocatorWbt(std::string arrayName)
 {
-    return iAllocatorWbt.GetInterface(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return iAllocatorWbt[arrayId->second];
+    }
 }
 
 IContextManager*
 AllocatorService::GetIContextManager(std::string arrayName)
 {
-    return iContextManager.GetInterface(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return iContextManager[arrayId->second];
+    }
 }
 
 IContextReplayer*
 AllocatorService::GetIContextReplayer(std::string arrayName)
 {
-    return iContextReplayer.GetInterface(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return iContextReplayer[arrayId->second];
+    }
+}
+
+IBlockAllocator*
+AllocatorService::GetIBlockAllocator(int arrayId)
+{
+    return iBlockAllocator[arrayId];
+}
+
+IWBStripeAllocator*
+AllocatorService::GetIWBStripeAllocator(int arrayId)
+{
+    return iWBStripeAllocator[arrayId];
+}
+
+IAllocatorWbt*
+AllocatorService::GetIAllocatorWbt(int arrayId)
+{
+    return iAllocatorWbt[arrayId];
+}
+
+IContextManager*
+AllocatorService::GetIContextManager(int arrayId)
+{
+    return iContextManager[arrayId];
+}
+
+IContextReplayer*
+AllocatorService::GetIContextReplayer(int arrayId)
+{
+    return iContextReplayer[arrayId];
 }
 
 } // namespace pos

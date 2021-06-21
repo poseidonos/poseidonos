@@ -25,8 +25,9 @@ TEST(AllocatorService, RegisterAllocator_)
     NiceMock<MockContextReplayer>* ctxReplayer = new NiceMock<MockContextReplayer>();
     AllocatorService allocService;
     // when
-    allocService.RegisterAllocator("aaa", ctxReplayer);
-    allocService.RegisterAllocator("bbb", ctxReplayer);
+    allocService.RegisterAllocator("aaa", 0, nullptr, nullptr, nullptr, nullptr, ctxReplayer);
+    allocService.RegisterAllocator("bbb", 1, nullptr, nullptr, nullptr, nullptr, ctxReplayer);
+
     // then
     IContextReplayer* ret = allocService.GetIContextReplayer("aaa");
     EXPECT_EQ(ctxReplayer, ret);
@@ -41,12 +42,11 @@ TEST(AllocatorService, UnregisterAllocator_)
     // given
     NiceMock<MockContextReplayer>* ctxReplayer = new NiceMock<MockContextReplayer>();
     AllocatorService allocService;
-    allocService.RegisterAllocator("aaa", ctxReplayer);
-    allocService.RegisterAllocator("bbb", ctxReplayer);
+    allocService.RegisterAllocator("aaa", 0, nullptr, nullptr, nullptr, nullptr, ctxReplayer);
+    allocService.RegisterAllocator("bbb", 1, nullptr, nullptr, nullptr, nullptr, ctxReplayer);
     // when
     allocService.UnregisterAllocator("aaa");
     allocService.UnregisterAllocator("bbb");
-    allocService.UnregisterAllocator("aaa");
     // then
     IContextReplayer* ret = allocService.GetIContextReplayer("aaa");
     EXPECT_EQ(nullptr, ret);
@@ -59,7 +59,7 @@ TEST(AllocatorService, GetIContextReplayer_TestSimpleGetter)
     // given
     NiceMock<MockContextReplayer>* ctxReplayer = new NiceMock<MockContextReplayer>();
     AllocatorService allocService;
-    allocService.RegisterAllocator("", ctxReplayer);
+    allocService.RegisterAllocator("", 0, nullptr, nullptr, nullptr, nullptr, ctxReplayer);
     // when
     allocService.GetIContextReplayer("");
     delete ctxReplayer;

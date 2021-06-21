@@ -50,8 +50,8 @@ class WBStripeManager : public IWBStripeAllocator, public IWBStripeInternal
 {
 public:
     WBStripeManager(void) = default;
-    WBStripeManager(StripeVec* stripeVec, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, IStripeMap* iStripeMap, WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName);
-    WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName);
+    WBStripeManager(StripeVec* stripeVec, int numVolumes_, IReverseMap* iReverseMap, IVolumeManager* VolManager, IStripeMap* iStripeMap, WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId);
+    WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId);
     virtual ~WBStripeManager(void);
     virtual void Init(void);
     virtual void Dispose(void);
@@ -106,6 +106,7 @@ protected: // for UT
     WbStripeCtx* wbStripeCtx;
     BlockManager* blockManager;
     std::string arrayName;
+    int arrayId;
     IVolumeManager* volumeManager;
     IReverseMap* iReverseMap;
     uint32_t numVolumes;

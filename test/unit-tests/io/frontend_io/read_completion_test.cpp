@@ -17,6 +17,7 @@
 using namespace pos;
 using namespace std;
 using ::testing::_;
+using ::testing::Matcher;
 using ::testing::NiceMock;
 using ::testing::Return;
 namespace pos
@@ -121,7 +122,7 @@ TEST(ReadCompletion, ReadCompletion_DoSpecificJob_Success)
 
     volumeIo->SetLsidEntry(returnLsidEntry);
 
-    ON_CALL(mockAllocatorService, GetIWBStripeAllocator(_)).WillByDefault(Return(&mockIWBStripeAllocator));
+    ON_CALL(mockAllocatorService, GetIWBStripeAllocator(Matcher<std::string>(_))).WillByDefault(Return(&mockIWBStripeAllocator));
 
     actual = readCompletion.Execute();
 

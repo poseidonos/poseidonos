@@ -100,18 +100,15 @@ Allocator::_CreateSubmodules(void)
     addrInfo = new AllocatorAddressInfo();
     contextManager = new ContextManager(addrInfo, arrayName);
     blockManager = new BlockManager(addrInfo, contextManager, arrayName);
-    wbStripeManager = new WBStripeManager(addrInfo, contextManager, blockManager, arrayName);
+    wbStripeManager = new WBStripeManager(addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());
 }
 
 void
 Allocator::_RegisterToAllocatorService(void)
 {
     AllocatorService* allocatorService = AllocatorServiceSingleton::Instance();
-    allocatorService->RegisterAllocator(arrayName, GetIBlockAllocator());
-    allocatorService->RegisterAllocator(arrayName, GetIWBStripeAllocator());
-    allocatorService->RegisterAllocator(arrayName, GetIAllocatorWbt());
-    allocatorService->RegisterAllocator(arrayName, GetIContextManager());
-    allocatorService->RegisterAllocator(arrayName, GetIContextReplayer());
+    allocatorService->RegisterAllocator(arrayName, iArrayInfo->GetIndex(), GetIBlockAllocator(),
+        GetIWBStripeAllocator(), GetIAllocatorWbt(), GetIContextManager(), GetIContextReplayer());
 }
 
 void

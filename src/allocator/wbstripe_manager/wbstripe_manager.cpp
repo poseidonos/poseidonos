@@ -47,14 +47,15 @@
 
 namespace pos
 {
-WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IReverseMap* iReverseMap_, IVolumeManager* volManager, IStripeMap* istripeMap_, WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName)
+WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IReverseMap* iReverseMap_, IVolumeManager* volManager, IStripeMap* istripeMap_, WbStripeCtx* wbCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId)
 : stripeBufferPool(nullptr),
   pendingFullStripes(nullptr),
   iStripeMap(istripeMap_),
   addrInfo(info),
   contextManager(ctxMgr),
   blockManager(blkMgr),
-  arrayName(arrayName)
+  arrayName(arrayName),
+  arrayId(arrayId)
 {
     wbStripeCtx = wbCtx;
     volumeManager = volManager;
@@ -71,8 +72,8 @@ WBStripeManager::WBStripeManager(StripeVec* stripeVec_, int numVolumes_, IRevers
     }
 }
 
-WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName)
-: WBStripeManager(nullptr, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, blkMgr, arrayName)
+WBStripeManager::WBStripeManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId)
+: WBStripeManager(nullptr, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, blkMgr, arrayName, arrayId)
 {
     wbStripeCtx = ctxMgr->GetWbStripeCtx();
 }

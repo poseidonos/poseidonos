@@ -32,10 +32,12 @@
 
 #pragma once
 
-#include "src/lib/singleton.h"
-#include "src/allocator_service/allocator_interface_container.h"
-
+#include <array>
 #include <string>
+#include <unordered_map>
+
+#include "src/include/array_mgmt_policy.h"
+#include "src/lib/singleton.h"
 
 namespace pos
 {
@@ -50,28 +52,35 @@ class AllocatorService
     friend class Singleton<AllocatorService>;
 
 public:
-    AllocatorService(void) = default;
+    AllocatorService(void);
     virtual ~AllocatorService(void) = default;
 
-    void RegisterAllocator(std::string arrayName, IBlockAllocator* iBlockAllocator);
-    void RegisterAllocator(std::string arrayName, IWBStripeAllocator* iWBStripeAllocator);
-    void RegisterAllocator(std::string arrayName, IAllocatorWbt* iAllocatorWbt);
-    void RegisterAllocator(std::string arrayName, IContextManager* iContextManager);
-    void RegisterAllocator(std::string arrayName, IContextReplayer* iContextReplayer);
+    void RegisterAllocator(std::string arrayName, int arrayId,
+        IBlockAllocator* iBlockAllocator, IWBStripeAllocator* iWBStripeAllocator,
+        IAllocatorWbt* iAllocatorWbt, IContextManager* iContextManager,
+        IContextReplayer* iContextReplayer);
     void UnregisterAllocator(std::string arrayName);
 
     virtual IBlockAllocator* GetIBlockAllocator(std::string arrayName);
     virtual IWBStripeAllocator* GetIWBStripeAllocator(std::string arrayName);
     IAllocatorWbt* GetIAllocatorWbt(std::string arrayName);
-    IContextManager*GetIContextManager(std::string arrayName);
-    IContextReplayer*GetIContextReplayer(std::string arrayName);
+    IContextManager* GetIContextManager(std::string arrayName);
+    IContextReplayer* GetIContextReplayer(std::string arrayName);
+
+    virtual IBlockAllocator* GetIBlockAllocator(int arrayId);
+    virtual IWBStripeAllocator* GetIWBStripeAllocator(int arrayId);
+    IAllocatorWbt* GetIAllocatorWbt(int arrayId);
+    IContextManager* GetIContextManager(int arrayId);
+    IContextReplayer* GetIContextReplayer(int arrayId);
 
 private:
-    AllocatorInterfaceContainer<IBlockAllocator> iBlockAllocator;
-    AllocatorInterfaceContainer<IWBStripeAllocator> iWBStripeAllocator;
-    AllocatorInterfaceContainer<IAllocatorWbt> iAllocatorWbt;
-    AllocatorInterfaceContainer<IContextManager> iContextManager;
-    AllocatorInterfaceContainer<IContextReplayer> iContextReplayer;
+    std::unordered_map<std::string, int> arrayNameToId;
+
+    std::array<IBlockAllocator*, ArrayMgmtPolicy::MAX_ARRAY_CNT> iBlockAllocator;
+    std::array<IWBStripeAllocator*, ArrayMgmtPolicy::MAX_ARRAY_CNT> iWBStripeAllocator;
+    std::array<IAllocatorWbt*, ArrayMgmtPolicy::MAX_ARRAY_CNT> iAllocatorWbt;
+    std::array<IContextManager*, ArrayMgmtPolicy::MAX_ARRAY_CNT> iContextManager;
+    std::array<IContextReplayer*, ArrayMgmtPolicy::MAX_ARRAY_CNT> iContextReplayer;
 };
 
 using AllocatorServiceSingleton = Singleton<AllocatorService>;
