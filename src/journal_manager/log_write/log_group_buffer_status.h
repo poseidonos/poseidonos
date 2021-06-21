@@ -95,7 +95,6 @@ public:
 private:
     inline bool _IsFullyFilled(void)
     {
-        // TODO (huijeong.kim) check if memory order needed?
         return (numLogsAdded == numLogsFilled);
     }
 
