@@ -39,6 +39,9 @@ namespace pos
 {
 JournalService::JournalService(void)
 {
+    journalWriters.fill(nullptr);
+    volEventHandlers.fill(nullptr);
+    statusProviders.fill(nullptr);
 }
 
 JournalService::~JournalService(void)
@@ -48,59 +51,125 @@ JournalService::~JournalService(void)
 bool
 JournalService::IsEnabled(std::string arrayName)
 {
-    IJournalWriter* journal = journalWriters.Find(arrayName);
-    if (journal == nullptr)
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
     {
         return false;
     }
     else
     {
-        return journal->IsEnabled();
+        return journalWriters[arrayId->second]->IsEnabled();
     }
 }
 
 void
-JournalService::Register(std::string arrayName, IJournalWriter* writer)
+JournalService::Register(std::string arrayName, int arrayId,
+    IJournalWriter* writer, IVolumeEventHandler* handler, IJournalStatusProvider* provider)
 {
-    journalWriters.Register(arrayName, writer);
-}
+    if (arrayNameToId.find(arrayName) == arrayNameToId.end())
+    {
+        arrayNameToId.emplace(arrayName, arrayId);
 
-void
-JournalService::Register(std::string arrayName, IVolumeEventHandler* handler)
-{
-    volEventHandlers.Register(arrayName, handler);
-}
-
-void
-JournalService::Register(std::string arrayName, IJournalStatusProvider* provider)
-{
-    statusProvider.Register(arrayName, provider);
+        journalWriters[arrayId] = writer;
+        volEventHandlers[arrayId] = handler;
+        statusProviders[arrayId] = provider;
+    }
+    else
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::JOURNAL_ALREADY_EXIST,
+            "Journal service for array {} is already registered", arrayName);
+    }
 }
 
 void
 JournalService::Unregister(std::string arrayName)
 {
-    journalWriters.Unregister(arrayName);
-    volEventHandlers.Unregister(arrayName);
-    statusProvider.Unregister(arrayName);
+    if (arrayNameToId.find(arrayName) != arrayNameToId.end())
+    {
+        int arrayId = arrayNameToId[arrayName];
+        arrayNameToId.erase(arrayName);
+
+        journalWriters[arrayId] = nullptr;
+        volEventHandlers[arrayId] = nullptr;
+        statusProviders[arrayId] = nullptr;
+    }
+    else
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::JOURNAL_ALREADY_EXIST,
+            "Journal service for array {} already unregistered", arrayName);
+    }
 }
 
 IJournalWriter*
 JournalService::GetWriter(std::string arrayName)
 {
-    return journalWriters.Find(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return journalWriters[arrayId->second];
+    }
 }
 
 IVolumeEventHandler*
 JournalService::GetVolumeEventHandler(std::string arrayName)
 {
-    return volEventHandlers.Find(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return volEventHandlers[arrayId->second];
+    }
 }
 
 IJournalStatusProvider*
 JournalService::GetStatusProvider(std::string arrayName)
 {
-    return statusProvider.Find(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return statusProviders[arrayId->second];
+    }
 }
 
+bool
+JournalService::IsEnabled(int arrayId)
+{
+    if (journalWriters[arrayId] == nullptr)
+    {
+        return false;
+    }
+    else
+    {
+        return journalWriters[arrayId]->IsEnabled();
+    }
+}
+
+IJournalWriter*
+JournalService::GetWriter(int arrayId)
+{
+    return journalWriters[arrayId];
+}
+
+IVolumeEventHandler*
+JournalService::GetVolumeEventHandler(int arrayId)
+{
+    return volEventHandlers[arrayId];
+}
+
+IJournalStatusProvider*
+JournalService::GetStatusProvider(int arrayId)
+{
+    return statusProviders[arrayId];
+}
 } // namespace pos

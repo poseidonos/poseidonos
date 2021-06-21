@@ -32,13 +32,14 @@
 
 #pragma once
 
+#include <array>
 #include <string>
+#include <unordered_map>
 
-#include "i_journal_writer.h"
-#include "i_volume_event.h"
-#include "i_journal_status_provider.h"
-
-#include "journal_service_list.h"
+#include "src/include/array_mgmt_policy.h"
+#include "src/journal_service/i_journal_status_provider.h"
+#include "src/journal_service/i_journal_writer.h"
+#include "src/journal_service/i_volume_event.h"
 #include "src/lib/singleton.h"
 
 namespace pos
@@ -49,24 +50,30 @@ class JournalService
 
 public:
     virtual bool IsEnabled(std::string arrayName);
+    virtual bool IsEnabled(int arrayId);
 
-    virtual void Register(std::string arrayName, IJournalWriter* writer);
-    void Register(std::string arrayName, IVolumeEventHandler* handler);
-    void Register(std::string arrayName, IJournalStatusProvider* provider);
+    virtual void Register(std::string arrayName, int arrayId,
+        IJournalWriter* writer, IVolumeEventHandler* handler, IJournalStatusProvider* provider);
     virtual void Unregister(std::string arrayName);
 
     virtual IJournalWriter* GetWriter(std::string arrayName);
     IVolumeEventHandler* GetVolumeEventHandler(std::string arrayName);
     IJournalStatusProvider* GetStatusProvider(std::string arrayName);
 
+    virtual IJournalWriter* GetWriter(int arrayId);
+    IVolumeEventHandler* GetVolumeEventHandler(int arrayId);
+    IJournalStatusProvider* GetStatusProvider(int arrayId);
+
 protected:
     JournalService(void);
     virtual ~JournalService(void);
 
 private:
-    JournalServiceList<IJournalWriter> journalWriters;
-    JournalServiceList<IVolumeEventHandler> volEventHandlers;
-    JournalServiceList<IJournalStatusProvider> statusProvider;
+    std::array<IJournalWriter*, ArrayMgmtPolicy::MAX_ARRAY_CNT> journalWriters;
+    std::array<IVolumeEventHandler*, ArrayMgmtPolicy::MAX_ARRAY_CNT> volEventHandlers;
+    std::array<IJournalStatusProvider*, ArrayMgmtPolicy::MAX_ARRAY_CNT> statusProviders;
+
+    std::unordered_map<std::string, int> arrayNameToId;
 };
 
 using JournalServiceSingleton = Singleton<JournalService>;

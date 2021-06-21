@@ -10,7 +10,7 @@ namespace pos
 class JournalServiceIntegrationTest : public ::testing::Test
 {
 public:
-    void InitializeAndRegisterJournal(std::string arrayName, JournalConfigurationSpy* config);
+    void InitializeAndRegisterJournal(std::string arrayName, int arrayId, JournalConfigurationSpy* config);
     void ResetAndUnregisterJournal(std::string arrayName);
 
     void TestJournalEnabled(int id);
@@ -35,13 +35,16 @@ JournalServiceIntegrationTest::TearDown(void)
 }
 
 void
-JournalServiceIntegrationTest::InitializeAndRegisterJournal(std::string arrayName, JournalConfigurationSpy* config)
+JournalServiceIntegrationTest::InitializeAndRegisterJournal(std::string arrayName, int arrayId, JournalConfigurationSpy* config)
 {
-    JournalManagerTestFixture* testFixture = new JournalManagerTestFixture(GetLogFileName());
+    std::string logFileName = arrayName + "_" + GetLogFileName();
+    JournalManagerTestFixture* testFixture = new JournalManagerTestFixture(logFileName);
     testFixture->InitializeJournal(config);
     fixtures[arrayName] = testFixture;
 
-    JournalServiceSingleton::Instance()->Register(arrayName, fixtures[arrayName]->GetJournal());
+    JournalManagerSpy* journal = fixtures[arrayName]->GetJournal();
+    JournalServiceSingleton::Instance()->Register(arrayName, arrayId,
+        journal->GetJournalWriter(), journal->GetVolumeEventHandler(), journal->GetStatusProvider());
 }
 
 void
@@ -60,12 +63,13 @@ JournalServiceIntegrationTest::ResetAndUnregisterJournal(std::string arrayName)
 TEST_F(JournalServiceIntegrationTest, RegisterEnabledJournal)
 {
     std::string arrayName = "POSArray";
+    int arrayId = 0;
     JournalConfigurationBuilder builder(&testInfo);
     builder.SetJournalEnable(true);
 
-    InitializeAndRegisterJournal(arrayName, builder.Build());
+    InitializeAndRegisterJournal(arrayName, arrayId, builder.Build());
 
-    IJournalWriter* journal = JournalServiceSingleton::Instance()->GetWriter("");
+    IJournalWriter* journal = JournalServiceSingleton::Instance()->GetWriter(arrayName);
     EXPECT_TRUE(journal->IsEnabled() == true);
 
     int logWriteResult = fixtures[arrayName]->AddDummyLog();
@@ -77,13 +81,14 @@ TEST_F(JournalServiceIntegrationTest, RegisterEnabledJournal)
 TEST_F(JournalServiceIntegrationTest, RegisterDisabledJournal)
 {
     std::string arrayName = "POSArray";
+    int arrayId = 0;
 
     JournalConfigurationBuilder builder(&testInfo);
     builder.SetJournalEnable(false);
 
-    InitializeAndRegisterJournal(arrayName, builder.Build());
+    InitializeAndRegisterJournal(arrayName, arrayId, builder.Build());
 
-    IJournalWriter* journal = JournalServiceSingleton::Instance()->GetWriter("");
+    IJournalWriter* journal = JournalServiceSingleton::Instance()->GetWriter(arrayName);
     EXPECT_TRUE(journal->IsEnabled() == false);
 
     int logWriteResult = fixtures[arrayName]->AddDummyLog();
@@ -97,11 +102,11 @@ TEST_F(JournalServiceIntegrationTest, RegisterEnabledJournals)
     JournalConfigurationBuilder builder(&testInfo);
     builder.SetJournalEnable(true);
 
-    int numArrays = 10;
+    int numArrays = ArrayMgmtPolicy::MAX_ARRAY_CNT;
     for (int id = 0; id < numArrays; id++)
     {
         std::string arrayName = "array" + std::to_string(id);
-        InitializeAndRegisterJournal(arrayName, builder.Build());
+        InitializeAndRegisterJournal(arrayName, id, builder.Build());
     }
 
     for (int id = 0; id < numArrays; id++)
@@ -127,11 +132,11 @@ TEST_F(JournalServiceIntegrationTest, RegisterDisabledJournals)
     JournalConfigurationBuilder builder(&testInfo);
     builder.SetJournalEnable(false);
 
-    int numArrays = 10;
+    int numArrays = ArrayMgmtPolicy::MAX_ARRAY_CNT;
     for (int id = 0; id < numArrays; id++)
     {
         std::string arrayName = "array" + std::to_string(id);
-        InitializeAndRegisterJournal(arrayName, builder.Build());
+        InitializeAndRegisterJournal(arrayName, id, builder.Build());
     }
 
     for (int id = 0; id < numArrays; id++)
@@ -143,6 +148,35 @@ TEST_F(JournalServiceIntegrationTest, RegisterDisabledJournals)
 
         int logWriteResult = fixtures[arrayName]->AddDummyLog();
         EXPECT_TRUE(logWriteResult < 0);
+    }
+
+    for (int id = 0; id < numArrays; id++)
+    {
+        std::string arrayName = "array" + std::to_string(id);
+        ResetAndUnregisterJournal(arrayName);
+    }
+}
+
+TEST_F(JournalServiceIntegrationTest, GetServiceById)
+{
+    JournalConfigurationBuilder builder(&testInfo);
+    builder.SetJournalEnable(true);
+
+    int numArrays = ArrayMgmtPolicy::MAX_ARRAY_CNT;
+    for (int id = 0; id < numArrays; id++)
+    {
+        std::string arrayName = "array" + std::to_string(id);
+        InitializeAndRegisterJournal(arrayName, id, builder.Build());
+    }
+
+    for (int id = 0; id < numArrays; id++)
+    {
+        std::string arrayName = "array" + std::to_string(id);
+
+        IJournalWriter* journalByName = JournalServiceSingleton::Instance()->GetWriter(arrayName);
+        IJournalWriter* journalById = JournalServiceSingleton::Instance()->GetWriter(id);
+
+        EXPECT_EQ(journalByName, journalById);
     }
 
     for (int id = 0; id < numArrays; id++)

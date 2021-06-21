@@ -301,11 +301,8 @@ JournalManager::Shutdown(void)
 void
 JournalManager::_RegisterServices(void)
 {
-    std::string arrayName = arrayInfo->GetName();
-
-    journalService->Register(arrayName, this);
-    journalService->Register(arrayName, volumeEventHandler);
-    journalService->Register(arrayName, statusProvider);
+    journalService->Register(arrayInfo->GetName(), arrayInfo->GetIndex(),
+        this, volumeEventHandler, statusProvider);
 }
 
 void

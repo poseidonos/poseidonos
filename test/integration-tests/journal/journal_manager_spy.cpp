@@ -10,6 +10,7 @@
 #include "src/journal_manager/log_write/buffer_offset_allocator.h"
 #include "src/journal_manager/log_write/journal_volume_event_handler.h"
 #include "src/journal_manager/replay/replay_handler.h"
+#include "src/journal_manager/status/journal_status_provider.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "test/integration-tests/journal/journal_configuration_spy.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
@@ -206,6 +207,24 @@ uint64_t
 JournalManagerSpy::GetNextOffset(void)
 {
     return bufferAllocator->GetNextOffset();
+}
+
+IJournalWriter*
+JournalManagerSpy::GetJournalWriter(void)
+{
+    return this;
+}
+
+IVolumeEventHandler*
+JournalManagerSpy::GetVolumeEventHandler(void)
+{
+    return volumeEventHandler;
+}
+
+IJournalStatusProvider*
+JournalManagerSpy::GetStatusProvider(void)
+{
+    return statusProvider;
 }
 
 } // namespace pos

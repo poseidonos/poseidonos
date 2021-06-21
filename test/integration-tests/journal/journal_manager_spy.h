@@ -14,6 +14,10 @@ namespace pos
 {
 class MockEventScheduler;
 
+class IJournalWriter;
+class IVolumeEventHandler;
+class IJournalStatusProvider;
+
 class JournalManagerSpy : public JournalManager
 {
 public:
@@ -43,6 +47,10 @@ public:
     int VolumeDeleted(int volId);
 
     uint64_t GetNextOffset(void);
+
+    IJournalWriter* GetJournalWriter(void);
+    IVolumeEventHandler* GetVolumeEventHandler(void);
+    IJournalStatusProvider* GetStatusProvider(void);
 
 private:
     int _GetLogsFromBuffer(LogList& logList);

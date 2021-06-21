@@ -20,6 +20,7 @@
 using namespace pos;
 using namespace std;
 using ::testing::_;
+using ::testing::Matcher;
 using ::testing::NiceMock;
 using ::testing::Return;
 
@@ -79,8 +80,8 @@ TEST(StripeMapUpdate, StripeMapUpdate_Execute_NormalWithJournalOn)
 
     MpageList dirty;
     StripeAddr stripeAddr;
-    ON_CALL(mockJournalService, IsEnabled(_)).WillByDefault(Return(true));
-    ON_CALL(mockJournalService, GetWriter(_)).WillByDefault(Return(&mockIJournalWriter));
+    ON_CALL(mockJournalService, IsEnabled(Matcher<std::string>(_))).WillByDefault(Return(true));
+    ON_CALL(mockJournalService, GetWriter(Matcher<std::string>(_))).WillByDefault(Return(&mockIJournalWriter));
     ON_CALL(mockStripe, GetVsid()).WillByDefault(Return(0));
     ON_CALL(mockIStripeMap, GetDirtyStripeMapPages(_)).WillByDefault(Return(dirty));
     ON_CALL(mockIStripeMap, GetLSA(_)).WillByDefault(Return(stripeAddr));
@@ -108,8 +109,8 @@ TEST(StripeMapUpdate, StripeMapUpdate_Execute_AddStripeMapUpdatedLogFailWithJour
     StripeMapUpdate stripeMapUpdate(&mockStripe, &mockIStripeMap, &mockJournalService, &mockEventScheduler, arr_name);
     MpageList dirty;
     StripeAddr stripeAddr;
-    ON_CALL(mockJournalService, IsEnabled(_)).WillByDefault(Return(true));
-    ON_CALL(mockJournalService, GetWriter(_)).WillByDefault(Return(&mockIJournalWriter));
+    ON_CALL(mockJournalService, IsEnabled(Matcher<std::string>(_))).WillByDefault(Return(true));
+    ON_CALL(mockJournalService, GetWriter(Matcher<std::string>(_))).WillByDefault(Return(&mockIJournalWriter));
     ON_CALL(mockStripe, GetVsid()).WillByDefault(Return(0));
     ON_CALL(mockIStripeMap, GetDirtyStripeMapPages(_)).WillByDefault(Return(dirty));
     ON_CALL(mockIStripeMap, GetLSA(_)).WillByDefault(Return(stripeAddr));
