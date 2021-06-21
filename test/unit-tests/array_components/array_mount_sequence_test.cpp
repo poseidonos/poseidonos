@@ -143,7 +143,7 @@ TEST(ArrayMountSequence, Unmount_testIfEverySequenceIsDisposed)
     ASSERT_EQ(0, actual);
 }
 
-TEST(ArrayMountSequence, StateChanged_testIfShutdownIsInvokedWhenNextStateIsStop)
+TEST(ArrayMountSequence, StateChanged_testIfShutdownIsInvokedWhenNextStateIsStopAndPreviousStateIsOnline)
 {
     // Given
     MockIMountSequence mockSeq1, mockSeq2, mockSeq3;
@@ -155,6 +155,7 @@ TEST(ArrayMountSequence, StateChanged_testIfShutdownIsInvokedWhenNextStateIsStop
     ArrayMountSequence mntSeq(arrayMntSeq, mockMntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr);
 
     StateContext stopContext("sender", SituationEnum::FAULT);
+    StateContext normalContext("sender", SituationEnum::NORMAL);
     EXPECT_CALL(mockVolMgr, DetachVolumes).Times(1);
     EXPECT_CALL(mockSeq3, Shutdown).Times(1);
     EXPECT_CALL(mockSeq2, Shutdown).Times(1);
@@ -162,7 +163,30 @@ TEST(ArrayMountSequence, StateChanged_testIfShutdownIsInvokedWhenNextStateIsStop
     EXPECT_CALL(*mockMntTmp, Shutdown).Times(1);
 
     // When & Then: trivial. as long as there's no exception, I'm good
-    mntSeq.StateChanged(nullptr, &stopContext);
+    mntSeq.StateChanged(&normalContext, &stopContext);
+}
+
+TEST(ArrayMountSequence, StateChanged_testIfShutdownIsNotInvokedWhenNextStateIsStopAndPreviousStateIsOffline)
+{
+    // Given
+    MockIMountSequence mockSeq1, mockSeq2, mockSeq3;
+    vector<IMountSequence*> arrayMntSeq{&mockSeq1, &mockSeq2, &mockSeq3};
+    NiceMock<MockStateControl> stateControl;
+    MockVolumeManager mockVolMgr(nullptr, &stateControl);
+    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array");
+
+    ArrayMountSequence mntSeq(arrayMntSeq, mockMntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr);
+
+    StateContext stopContext("sender", SituationEnum::FAULT);
+    StateContext offlineContext("sender", SituationEnum::DEFAULT);
+    EXPECT_CALL(mockVolMgr, DetachVolumes).Times(0);
+    EXPECT_CALL(mockSeq3, Shutdown).Times(0);
+    EXPECT_CALL(mockSeq2, Shutdown).Times(0);
+    EXPECT_CALL(mockSeq1, Shutdown).Times(0);
+    EXPECT_CALL(*mockMntTmp, Shutdown).Times(0);
+
+    // When & Then: trivial. as long as there's no exception, I'm good
+    mntSeq.StateChanged(&offlineContext, &stopContext);
 }
 
 } // namespace pos
