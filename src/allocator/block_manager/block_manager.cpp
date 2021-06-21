@@ -45,12 +45,12 @@
 
 namespace pos
 {
-BlockManager::BlockManager(IStripeMap* stripeMap_, IReverseMap* iReverseMap_, SegmentCtx* segCtx_, AllocatorCtx* allocCtx_, WbStripeCtx* wbCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName)
+BlockManager::BlockManager(IStripeMap* stripeMap_, IReverseMap* iReverseMap_, SegmentCtx* segCtx_, AllocatorCtx* allocCtx_, WbStripeCtx* wbCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
 : userBlkAllocProhibited(false),
   addrInfo(info),
   contextManager(ctxMgr),
   iWBStripeInternal(nullptr),
-  arrayName(arrayName)
+  arrayId(arrayId)
 {
     segCtx = segCtx_;
     allocCtx = allocCtx_;
@@ -59,8 +59,8 @@ BlockManager::BlockManager(IStripeMap* stripeMap_, IReverseMap* iReverseMap_, Se
     iStripeMap = stripeMap_;
 }
 
-BlockManager::BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName)
-: BlockManager(nullptr, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, arrayName)
+BlockManager::BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
+: BlockManager(nullptr, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, arrayId)
 {
     segCtx = contextManager->GetSegmentCtx();
     allocCtx = contextManager->GetAllocatorCtx();
@@ -73,11 +73,11 @@ BlockManager::Init(IWBStripeInternal* iwbstripeInternal)
     iWBStripeInternal = iwbstripeInternal;
     if (iReverseMap == nullptr)
     {
-        iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
+        iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayId);
     }
     if (iStripeMap == nullptr)
     {
-        iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayName);
+        iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayId);
     }
 
     for (int volume = 0; volume < MAX_VOLUME_COUNT; volume++)
@@ -121,7 +121,7 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
     }
 
     StripeId newVsid = arrayLsid;
-    Stripe* stripe = new Stripe(false, addrInfo, arrayName);
+    Stripe* stripe = new Stripe(false, addrInfo);
     stripe->Assign(newVsid, UNMAP_STRIPE, 0);
     if (unlikely(stripe->LinkReverseMap(iReverseMap->AllocReverseMapPack(true /*gcDest*/)) < 0))
     {

@@ -42,11 +42,11 @@
 
 namespace pos
 {
-
-StripeMapManager::StripeMapManager(MapperAddressInfo* info, std::string arrayName)
+StripeMapManager::StripeMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId)
 : stripeMap(nullptr),
   addrInfo(info),
-  arrayName(arrayName)
+  arrayName(arrayName),
+  arrayId(arrayId)
 {
     pthread_rwlock_init(&stripeMapLock, nullptr);
 }
@@ -134,7 +134,7 @@ StripeMapManager::GetLSAandReferLsid(StripeId vsid)
 {
     pthread_rwlock_rdlock(&stripeMapLock);
     StripeAddr stripeAddr = stripeMap->GetEntry(vsid);
-    IWBStripeAllocator* iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName);
+    IWBStripeAllocator* iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayId);
     bool referenced = iWBStripeAllocator->ReferLsidCnt(stripeAddr);
     pthread_rwlock_unlock(&stripeMapLock);
 

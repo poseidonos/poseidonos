@@ -66,7 +66,7 @@ using VolMountStateIter = std::map<int, VolState>::iterator;
 class VSAMapManager : public IMapManagerInternal, public IVSAMapInternal, public VolumeEvent
 {
 public:
-    VSAMapManager(MapperAddressInfo* info, std::string arrayName);
+    VSAMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId);
     virtual ~VSAMapManager(void);
 
     void Init(void);

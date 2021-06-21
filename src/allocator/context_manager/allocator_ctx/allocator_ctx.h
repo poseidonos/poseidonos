@@ -48,8 +48,8 @@ class AllocatorCtx : public IAllocatorFileIoClient
 {
 public:
     AllocatorCtx(void) = default;
-    AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap, SegmentStates* segmentStates, SegmentLock* segStateLock, AllocatorAddressInfo* info, std::string arrayName);
-    AllocatorCtx(AllocatorAddressInfo* info, std::string arrayName);
+    AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap, SegmentStates* segmentStates, SegmentLock* segStateLock, AllocatorAddressInfo* info);
+    explicit AllocatorCtx(AllocatorAddressInfo* info);
     virtual ~AllocatorCtx(void);
     virtual void Init(void);
     virtual void Close(void);
@@ -101,7 +101,6 @@ private:
 
     // DOCs
     AllocatorAddressInfo* addrInfo;
-    std::string arrayName;
 
     // Lock
     std::mutex allocCtxLock;

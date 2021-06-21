@@ -40,14 +40,13 @@
 
 namespace pos
 {
-RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, std::string arrayName)
+RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info)
 : addrInfo(info),
   ctxStoredVersion(0),
   ctxDirtyVersion(0),
   needContinue(false),
   targetSegmentCount(0),
   currentTarget(UINT32_MAX),
-  arrayName(arrayName),
   allocatorCtx(allocCtx)
 {
     if (header != nullptr)
@@ -64,8 +63,8 @@ RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, Allocat
         ctxHeader.numTargetSegments = 0;
     }
 }
-RebuildCtx::RebuildCtx(AllocatorCtx* allocCtx, AllocatorAddressInfo* info, std::string arrayName)
-: RebuildCtx(nullptr, allocCtx, info, arrayName)
+RebuildCtx::RebuildCtx(AllocatorCtx* allocCtx, AllocatorAddressInfo* info)
+: RebuildCtx(nullptr, allocCtx, info)
 {
 }
 

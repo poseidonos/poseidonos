@@ -47,8 +47,8 @@ class RebuildCtx : public IAllocatorFileIoClient
 {
 public:
     RebuildCtx(void) = default;
-    RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, std::string arrayName); // for UT
-    RebuildCtx(AllocatorCtx* allocCtx, AllocatorAddressInfo* info, std::string arrayName);
+    RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info); // for UT
+    RebuildCtx(AllocatorCtx* allocCtx, AllocatorAddressInfo* info);
     virtual ~RebuildCtx(void);
     virtual void Init(void);
     virtual void Close(void);
@@ -87,7 +87,6 @@ private:
     std::set<SegmentId> targetSegmentList; // No lock
     SegmentId currentTarget;
     std::mutex rebuildLock;
-    std::string arrayName;
 
     AllocatorCtx* allocatorCtx;
 };

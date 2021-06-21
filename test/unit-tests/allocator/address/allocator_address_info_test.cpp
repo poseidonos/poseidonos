@@ -28,7 +28,7 @@ TEST(AllocatorAddressInfo, Init_)
     wbSize.totalStripes = 6;
     EXPECT_CALL(*info, GetSizeInfo).WillOnce(Return((const PartitionLogicalSize*)&ubSize)).WillOnce(Return((const PartitionLogicalSize*)&wbSize));
     // when
-    addrInfo.Init("", info);
+    addrInfo.Init(info);
     // then
     int ret = addrInfo.GetblksPerStripe();
     EXPECT_EQ(2, ret);

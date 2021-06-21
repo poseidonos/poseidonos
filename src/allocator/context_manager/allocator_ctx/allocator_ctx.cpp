@@ -46,11 +46,10 @@
 
 namespace pos
 {
-AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap_, SegmentStates* segmentStates_, SegmentLock* segStateLocks_, AllocatorAddressInfo* info_, std::string arrayName_)
+AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap_, SegmentStates* segmentStates_, SegmentLock* segStateLocks_, AllocatorAddressInfo* info_)
 : ctxStoredVersion(0),
   ctxDirtyVersion(0),
-  addrInfo(info_),
-  arrayName(arrayName_)
+  addrInfo(info_)
 {
     allocSegBitmap = allocSegBitmap_; // for UT
     segmentStates = segmentStates_;   // for UT
@@ -72,8 +71,8 @@ AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitm
     }
 }
 
-AllocatorCtx::AllocatorCtx(AllocatorAddressInfo* info, std::string arrayName)
-: AllocatorCtx(nullptr, nullptr, nullptr, nullptr, info, arrayName)
+AllocatorCtx::AllocatorCtx(AllocatorAddressInfo* info)
+: AllocatorCtx(nullptr, nullptr, nullptr, nullptr, info)
 {
 }
 

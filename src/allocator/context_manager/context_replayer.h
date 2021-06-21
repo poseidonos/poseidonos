@@ -67,7 +67,6 @@ private:
     WbStripeCtx* wbStripeCtx;
 
     AllocatorAddressInfo* addrInfo;
-    std::string arrayName;
 };
 
 } // namespace pos

@@ -17,8 +17,8 @@ TEST(RebuildCtx, Init_TestSimpleSetter)
 {
     // given
     AllocatorAddressInfo addrInfo;
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, &addrInfo, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, &addrInfo);
     // when
     rebuildCtx.Init();
     delete allocCtx;
@@ -27,8 +27,8 @@ TEST(RebuildCtx, Init_TestSimpleSetter)
 TEST(RebuildCtx, Close_TestCallEmptyFunc)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
     // when
     rebuildCtx.Close();
     delete allocCtx;
@@ -37,8 +37,8 @@ TEST(RebuildCtx, Close_TestCallEmptyFunc)
 TEST(RebuildCtx, GetRebuildTargetSegment_TestFailtoGetLockCase)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
     // given 1.
     rebuildCtx.GetLock().lock();
     // when 1.
@@ -57,8 +57,8 @@ TEST(RebuildCtx, GetRebuildTargetSegment_TestFailtoGetLockCase)
 TEST(RebuildCtx, ReleaseRebuildSegment_TestIfSuccessOrNot)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
     EXPECT_CALL(*allocCtx, GetUsedSegment).WillOnce(Return(0)).WillOnce(Return(1)).WillOnce(Return(2)).WillOnce(Return(UNMAP_SEGMENT));
     rebuildCtx.MakeRebuildTarget();
     // when 1.
@@ -81,8 +81,8 @@ TEST(RebuildCtx, ReleaseRebuildSegment_TestIfSuccessOrNot)
 TEST(RebuildCtx, NeedRebuildAgain_TestSimpleGetter)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
     // when
     rebuildCtx.NeedRebuildAgain();
     delete allocCtx;
@@ -91,8 +91,8 @@ TEST(RebuildCtx, NeedRebuildAgain_TestSimpleGetter)
 TEST(RebuildCtx, FreeSegmentInRebuildTarget_TestWithSegmentState)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
     // when 1.
     int ret = rebuildCtx.FreeSegmentInRebuildTarget(0);
     // then 1.
@@ -121,8 +121,8 @@ TEST(RebuildCtx, FreeSegmentInRebuildTarget_TestWithSegmentState)
 TEST(RebuildCtx, IsRebuidTargetSegmentsEmpty_TODO)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
 
     EXPECT_CALL(*allocCtx, GetUsedSegment).WillOnce(Return(0)).WillOnce(Return(1)).WillOnce(Return(2)).WillOnce(Return(UNMAP_SEGMENT));
     rebuildCtx.MakeRebuildTarget();
@@ -142,8 +142,8 @@ TEST(RebuildCtx, IsRebuidTargetSegmentsEmpty_TODO)
 TEST(RebuildCtx, GetRebuildTargetSegmentsBegin_TestSimpleGetter)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
 
     EXPECT_CALL(*allocCtx, GetUsedSegment).WillOnce(Return(0)).WillOnce(Return(1)).WillOnce(Return(2)).WillOnce(Return(UNMAP_SEGMENT));
     rebuildCtx.MakeRebuildTarget();
@@ -155,8 +155,8 @@ TEST(RebuildCtx, GetRebuildTargetSegmentsBegin_TestSimpleGetter)
 TEST(RebuildCtx, RebuildTargetSegmentsEnd_TestSimpleGetter)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
 
     EXPECT_CALL(*allocCtx, GetUsedSegment).WillOnce(Return(0)).WillOnce(Return(1)).WillOnce(Return(2)).WillOnce(Return(UNMAP_SEGMENT));
     rebuildCtx.MakeRebuildTarget();
@@ -168,8 +168,8 @@ TEST(RebuildCtx, RebuildTargetSegmentsEnd_TestSimpleGetter)
 TEST(RebuildCtx, GetRebuildTargetSegmentsCount_TestSimpleGetter)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
 
     EXPECT_CALL(*allocCtx, GetUsedSegment).WillOnce(Return(0)).WillOnce(Return(1)).WillOnce(Return(2)).WillOnce(Return(UNMAP_SEGMENT));
     rebuildCtx.MakeRebuildTarget();
@@ -183,8 +183,8 @@ TEST(RebuildCtx, GetRebuildTargetSegmentsCount_TestSimpleGetter)
 TEST(RebuildCtx, MakeRebuildTarget_TestRetry)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
 
     EXPECT_CALL(*allocCtx, GetUsedSegment).WillOnce(Return(0)).WillOnce(Return(1)).WillOnce(Return(2)).WillOnce(Return(UNMAP_SEGMENT));
     // when 1.
@@ -203,8 +203,8 @@ TEST(RebuildCtx, MakeRebuildTarget_TestRetry)
 TEST(RebuildCtx, StopRebuilding_TestRetry)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
 
     EXPECT_CALL(*allocCtx, GetUsedSegment).WillOnce(Return(0)).WillOnce(Return(1)).WillOnce(Return(2)).WillOnce(Return(UNMAP_SEGMENT));
     rebuildCtx.MakeRebuildTarget();
@@ -224,8 +224,8 @@ TEST(RebuildCtx, GetSectionSize_TestSimpleGetter)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumUserAreaSegments(10);
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, &addrInfo, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, &addrInfo);
     // when 1.
     int ret = rebuildCtx.GetSectionSize(RC_HEADER);
     // then 1.
@@ -242,8 +242,8 @@ TEST(RebuildCtx, GetSectionAddr_TestSimpleGetter)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumUserAreaSegments(10);
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, &addrInfo, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, &addrInfo);
     // when 1.
     char* ret = rebuildCtx.GetSectionAddr(RC_HEADER);
     // when 2.
@@ -254,8 +254,8 @@ TEST(RebuildCtx, GetSectionAddr_TestSimpleGetter)
 TEST(RebuildCtx, GetStoredVersion_TestSimpleGetter)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
     // when
     int ret = rebuildCtx.GetStoredVersion();
     delete allocCtx;
@@ -264,8 +264,8 @@ TEST(RebuildCtx, GetStoredVersion_TestSimpleGetter)
 TEST(RebuildCtx, ResetDirtyVersion_TestSimpleSetter)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
     // when
     rebuildCtx.ResetDirtyVersion();
     delete allocCtx;
@@ -274,8 +274,8 @@ TEST(RebuildCtx, ResetDirtyVersion_TestSimpleSetter)
 TEST(RebuildCtx, IsRebuildTargetSegment_TestSimpleSetter)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
     EXPECT_CALL(*allocCtx, GetUsedSegment).WillOnce(Return(0)).WillOnce(Return(1)).WillOnce(Return(2)).WillOnce(Return(UNMAP_SEGMENT));
     rebuildCtx.MakeRebuildTarget();
     // when 1.
@@ -293,8 +293,8 @@ TEST(RebuildCtx, IsRebuildTargetSegment_TestSimpleSetter)
 TEST(RebuildCtx, FinalizeIo_TestSimpleSetter)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
     AsyncMetaFileIoCtx ctx;
     char buf[100];
     ctx.buffer = buf;
@@ -306,8 +306,8 @@ TEST(RebuildCtx, FinalizeIo_TestSimpleSetter)
 TEST(RebuildCtx, BeforeFlush_TestSimpleSetter)
 {
     // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
     EXPECT_CALL(*allocCtx, GetUsedSegment).WillOnce(Return(0)).WillOnce(Return(1)).WillOnce(Return(2)).WillOnce(Return(UNMAP_SEGMENT));
     rebuildCtx.MakeRebuildTarget();
     char buf[100];
@@ -328,10 +328,10 @@ TEST(RebuildCtx, AfterLoad_testIfSegmentSignatureSuccess)
 {
     // given
     RebuildCtxHeader header;
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     header.sig = RebuildCtx::SIG_REBUILD_CTX;
     header.numTargetSegments = 0;
-    RebuildCtx rebuildCtx(&header, allocCtx, nullptr, "");
+    RebuildCtx rebuildCtx(&header, allocCtx, nullptr);
     // when 1.
     rebuildCtx.AfterLoad(nullptr);
     delete allocCtx;
@@ -341,17 +341,18 @@ TEST(RebuildCtx, AfterLoad_testIfSegmentSignatureSuccessAndSetBuf)
 {
     // given
     RebuildCtxHeader header;
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     header.sig = RebuildCtx::SIG_REBUILD_CTX;
     header.numTargetSegments = 3;
-    int buf[3];
+    char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
+    char* buf2 = buf + sizeof(RebuildCtxHeader);
     for (int i = 0; i < 3; i++)
     {
-        buf[i] = i;
+        buf2[i] = i;
     }
-    RebuildCtx rebuildCtx(&header, allocCtx, nullptr, "");
+    RebuildCtx rebuildCtx(&header, allocCtx, nullptr);
     // when 1.
-    rebuildCtx.AfterLoad((char*)buf);
+    rebuildCtx.AfterLoad(buf);
     delete allocCtx;
 }
 
@@ -360,9 +361,9 @@ TEST(RebuildCtx, AfterLoad_testIfSegmentSignatureFail)
     // given
     RebuildCtxHeader header;
     NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(addrInfo, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(addrInfo);
     header.sig = 0;
-    RebuildCtx rebuildCtx(&header, allocCtx, addrInfo, "");
+    RebuildCtx rebuildCtx(&header, allocCtx, addrInfo);
     EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     // when
     rebuildCtx.AfterLoad(nullptr);
@@ -374,8 +375,8 @@ TEST(RebuildCtx, GetLock_TestSimpleGetter)
 {
     // given
     RebuildCtxHeader header;
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    RebuildCtx rebuildCtx(allocCtx, nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    RebuildCtx rebuildCtx(allocCtx, nullptr);
     // when
     rebuildCtx.GetLock();
     delete allocCtx;

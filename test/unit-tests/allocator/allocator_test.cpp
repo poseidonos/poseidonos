@@ -371,7 +371,7 @@ TEST(Allocator, GetInstantMetaInfo_TestSimplePrinter)
     AllocatorAddressInfo* addrInfo = new AllocatorAddressInfo();
     NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
     NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
-    NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>(nullptr, nullptr, "");
+    NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();

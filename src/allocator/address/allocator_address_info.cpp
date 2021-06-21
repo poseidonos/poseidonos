@@ -38,7 +38,7 @@
 namespace pos
 {
 void
-AllocatorAddressInfo::Init(std::string arrayName, IArrayInfo* iArrayInfo)
+AllocatorAddressInfo::Init(IArrayInfo* iArrayInfo)
 {
     const PartitionLogicalSize* udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
     const PartitionLogicalSize* wbSize = iArrayInfo->GetSizeInfo(PartitionType::WRITE_BUFFER);

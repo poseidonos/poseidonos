@@ -43,7 +43,7 @@ class AllocatorAddressInfo
 public:
     AllocatorAddressInfo(void) = default;
     virtual ~AllocatorAddressInfo(void) = default;
-    virtual void Init(std::string arrayName, IArrayInfo* iArrayInfo = nullptr);
+    virtual void Init(IArrayInfo* iArrayInfo = nullptr);
 
     virtual uint32_t GetblksPerStripe(void) { return blksPerStripe; }
     virtual uint32_t GetchunksPerStripe(void) { return chunksPerStripe; }

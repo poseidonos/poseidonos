@@ -82,7 +82,7 @@ Allocator::Init(void)
 {
     if (false == isInitialized)
     {
-        addrInfo->Init(arrayName, iArrayInfo);
+        addrInfo->Init(iArrayInfo);
         contextManager->Init();
         blockManager->Init(wbStripeManager);
         wbStripeManager->Init();
@@ -99,7 +99,7 @@ Allocator::_CreateSubmodules(void)
 {
     addrInfo = new AllocatorAddressInfo();
     contextManager = new ContextManager(addrInfo, arrayName);
-    blockManager = new BlockManager(addrInfo, contextManager, arrayName);
+    blockManager = new BlockManager(addrInfo, contextManager, iArrayInfo->GetIndex());
     wbStripeManager = new WBStripeManager(addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());
 }
 

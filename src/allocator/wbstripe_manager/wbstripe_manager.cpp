@@ -91,15 +91,15 @@ WBStripeManager::Init(void)
 {
     if (iStripeMap == nullptr) // for UT
     {
-        iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayName);
+        iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayId);
     }
     if (volumeManager == nullptr) // for UT
     {
-        volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+        volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
     }
     if (iReverseMap == nullptr)
     {
-        iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayName);
+        iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(arrayId);
     }
     uint32_t totalNvmStripes = addrInfo->GetnumWbStripes();
     uint32_t chunksPerStripe = addrInfo->GetchunksPerStripe();
@@ -108,7 +108,7 @@ WBStripeManager::Init(void)
 
     for (uint32_t stripeCnt = 0; stripeCnt < totalNvmStripes; ++stripeCnt)
     {
-        Stripe* stripe = new Stripe(true, addrInfo, arrayName);
+        Stripe* stripe = new Stripe(true, addrInfo);
 
         for (uint32_t chunkCnt = 0; chunkCnt < chunksPerStripe; ++chunkCnt)
         {

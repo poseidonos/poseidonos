@@ -41,12 +41,12 @@ TEST(BlockManager, AllocateWriteBufferBlks_TestFunc)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetstripesPerSegment(10);
     NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>(nullptr);
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
-    BlockManager blkManager(nullptr, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, "");
+    BlockManager blkManager(nullptr, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     std::mutex wbCtxLock;
     EXPECT_CALL(*wbCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbCtxLock));
@@ -74,12 +74,12 @@ TEST(BlockManager, AllocateGcDestStripe_TestFunc)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetstripesPerSegment(10);
     NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>(nullptr);
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
-    BlockManager blkManager(nullptr, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, "");
+    BlockManager blkManager(nullptr, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
     std::mutex Lock;
@@ -109,7 +109,7 @@ TEST(BlockManager, InvalidateBlks_TestSimpleSetter)
     addrInfo.SetstripesPerSegment(10);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    BlockManager blkManager(nullptr, nullptr, segCtx, nullptr, nullptr, &addrInfo, ctxManager, "");
+    BlockManager blkManager(nullptr, nullptr, segCtx, nullptr, nullptr, &addrInfo, ctxManager, 0);
     VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
     VirtualBlks blks = {.startVsa = vsa, .numBlks = 1};
     // given 1.
@@ -131,7 +131,7 @@ TEST(BlockManager, ValidateBlks_TestSimpleSetter)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetstripesPerSegment(10);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    BlockManager blkManager(nullptr, nullptr, segCtx, nullptr, nullptr, &addrInfo, nullptr, "");
+    BlockManager blkManager(nullptr, nullptr, segCtx, nullptr, nullptr, &addrInfo, nullptr, 0);
     // given
     VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
     VirtualBlks blks = {.startVsa = vsa, .numBlks = 1};
@@ -197,14 +197,14 @@ TEST(BlockManager, _AllocateBlks_TestCase1)
     addrInfo.SetstripesPerSegment(10);
     addrInfo.SetblksPerStripe(5);
     NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
-    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>(nullptr);
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, "");
+    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     std::mutex wbLock, ctxLock;
     VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
@@ -240,7 +240,7 @@ TEST(BlockManager, _AllocateBlks_TestCase2)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, "");
+    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     std::mutex wbLock, ctxLock;
     VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
@@ -278,7 +278,7 @@ TEST(BlockManager, _AllocateBlks_TestCase3_1)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, addrInfo, ctxManager, "");
+    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     std::mutex wbLock, ctxLock;
     VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
@@ -325,7 +325,7 @@ TEST(BlockManager, _AllocateBlks_TestCase3_2)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, "");
+    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     std::mutex wbLock, ctxLock;
     VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
@@ -368,7 +368,7 @@ TEST(BlockManager, _AllocateBlks_TestCase4)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, "");
+    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     std::mutex wbLock, ctxLock;
     VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
@@ -421,7 +421,7 @@ TEST(BlockManager, _AllocateBlks_TestCase5)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, "");
+    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     std::mutex wbLock, ctxLock;
     VirtualBlkAddr vsa = {.stripeId = 10, .offset = 5};
@@ -473,7 +473,7 @@ TEST(BlockManager, _AllocateBlks_TestCase6)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, "");
+    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     std::mutex wbLock, ctxLock;
     VirtualBlkAddr vsa = {.stripeId = 10, .offset = 3};
@@ -506,7 +506,7 @@ TEST(BlockManager, _AllocateBlks_TestCase7)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, "");
+    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     VirtualBlkAddr vsa = {.stripeId = 10, .offset = 3};
     std::mutex wbLock, ctxLock;
@@ -541,7 +541,7 @@ TEST(BlockManager, _AllocateBlks_TestCase8)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
     NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, "");
+    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     VirtualBlkAddr vsa = {.stripeId = 10, .offset = 3};
     std::mutex wbLock, ctxLock;

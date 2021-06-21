@@ -50,7 +50,7 @@ namespace pos
 class StripeMapManager : public IMapManagerInternal, public IStripeMap
 {
 public:
-    StripeMapManager(MapperAddressInfo* info, std::string arrayName);
+    StripeMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId);
     virtual ~StripeMapManager(void);
 
     void Init(MapperAddressInfo& info);
@@ -78,6 +78,7 @@ private:
 
     MapperAddressInfo* addrInfo;
     std::string arrayName;
+    int arrayId;
 };
 
 } // namespace pos

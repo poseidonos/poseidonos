@@ -20,7 +20,7 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentSignatureSuccess)
     // given
     SegmentCtxHeader header;
     header.sig = SegmentCtx::SIG_SEGMENT_CTX;
-    SegmentCtx segCtx(&header, nullptr, nullptr, "");
+    SegmentCtx segCtx(&header, nullptr, nullptr);
     // when
     segCtx.AfterLoad(nullptr);
 }
@@ -31,7 +31,7 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentSignatureFail)
     SegmentCtxHeader header;
     header.sig = 0;
     NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    SegmentCtx segCtx(&header, nullptr, addrInfo, "");
+    SegmentCtx segCtx(&header, nullptr, addrInfo);
     EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     // when
     segCtx.AfterLoad(nullptr);
@@ -42,7 +42,7 @@ TEST(SegmentCtx, BeforeFlush_TestSimpleSetter)
 {
     // given
     SegmentCtxHeader* buf = new SegmentCtxHeader();
-    SegmentCtx segCtx(nullptr, nullptr, nullptr, "");
+    SegmentCtx segCtx(nullptr, nullptr, nullptr);
     buf->sig = SegmentCtx::SIG_SEGMENT_CTX;
 
     // when
@@ -54,7 +54,7 @@ TEST(SegmentCtx, BeforeFlush_TestSimpleSetter)
 TEST(SegmentCtx, FinalizeIo_TestSimpleSetter)
 {
     // given
-    SegmentCtx segCtx(nullptr, nullptr, nullptr, "");
+    SegmentCtx segCtx(nullptr, nullptr, nullptr);
     SegmentCtxHeader* buf = new SegmentCtxHeader();
     buf->sig = SegmentCtx::SIG_SEGMENT_CTX;
     AsyncMetaFileIoCtx ctx;
@@ -70,7 +70,7 @@ TEST(SegmentCtx, IncreaseValidBlockCount_TestIncreaseValue)
     // given
     NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>;
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, addrInfo, "");
+    SegmentCtx segCtx(nullptr, segInfos, addrInfo);
 
     // given 1.
     EXPECT_CALL(*segInfos, IncreaseValidBlockCount).WillOnce(Return(3));
@@ -95,7 +95,7 @@ TEST(SegmentCtx, DecreaseValidBlockCount_TestDecreaseValue)
     // given
     NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>;
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, addrInfo, "");
+    SegmentCtx segCtx(nullptr, segInfos, addrInfo);
 
     // given 1.
     EXPECT_CALL(*segInfos, DecreaseValidBlockCount).WillOnce(Return(4));
@@ -117,7 +117,7 @@ TEST(SegmentCtx, GetValidBlockCount_TestSimpleGetter)
 {
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, nullptr, "");
+    SegmentCtx segCtx(nullptr, segInfos, nullptr);
 
     // given 1.
     EXPECT_CALL(*segInfos, GetValidBlockCount).WillOnce(Return(10));
@@ -133,7 +133,7 @@ TEST(SegmentCtx, GetOccupiedStripeCount_TestSimpleGetter)
 {
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, nullptr, "");
+    SegmentCtx segCtx(nullptr, segInfos, nullptr);
 
     // given 1.
     EXPECT_CALL(*segInfos, GetOccupiedStripeCount).WillOnce(Return(5));
@@ -149,7 +149,7 @@ TEST(SegmentCtx, IncreaseOccupiedStripeCount)
 {
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, nullptr, "");
+    SegmentCtx segCtx(nullptr, segInfos, nullptr);
 
     // given 1.
     EXPECT_CALL(*segInfos, IncreaseOccupiedStripeCount).WillOnce(Return(6));
@@ -167,7 +167,7 @@ TEST(SegmentCtx, CopySegmentInfoToBufferforWBT_CheckCopiedBuffer)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumUserAreaSegments(1);
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, &addrInfo, "");
+    SegmentCtx segCtx(nullptr, segInfos, &addrInfo);
 
     uint32_t result = 0;
     // given 1.
@@ -192,7 +192,7 @@ TEST(SegmentCtx, CopySegmentInfoToBufferforWBT_CheckCopiedBuffer)
 TEST(SegmentCtx, GetSegmentCtxLock_TestSimpleGetter)
 {
     // given
-    SegmentCtx segCtx(nullptr, nullptr, nullptr, "");
+    SegmentCtx segCtx(nullptr, nullptr, nullptr);
 
     // when
     std::mutex& m = segCtx.GetSegmentCtxLock();
@@ -203,7 +203,7 @@ TEST(SegmentCtx, Init_testInitAndClose)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumUserAreaSegments(10);
-    SegmentCtx segCtx(&addrInfo, "");
+    SegmentCtx segCtx(&addrInfo);
 
     // when
     segCtx.Init();
@@ -216,7 +216,7 @@ TEST(SegmentCtx, SetOccupiedStripeCount_TestSimpleSetter)
 {
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, nullptr, "");
+    SegmentCtx segCtx(nullptr, segInfos, nullptr);
 
     EXPECT_CALL(*segInfos, SetOccupiedStripeCount(5));
     // when
@@ -229,7 +229,7 @@ TEST(SegmentCtx, GetSectionAddr_TestSimpleGetter)
 {
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, nullptr, "");
+    SegmentCtx segCtx(nullptr, segInfos, nullptr);
 
     // when 1.
     char* buf = segCtx.GetSectionAddr(SC_HEADER);
@@ -247,7 +247,7 @@ TEST(SegmentCtx, GetSectionSize_TestSimpleGetter)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumUserAreaSegments(10);
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, &addrInfo, "");
+    SegmentCtx segCtx(nullptr, segInfos, &addrInfo);
 
     // when 1.
     int ret = segCtx.GetSectionSize(SC_HEADER);
@@ -265,7 +265,7 @@ TEST(SegmentCtx, GetStoredVersion_TestSimpleGetter)
 {
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, nullptr, "");
+    SegmentCtx segCtx(nullptr, segInfos, nullptr);
 
     // when 1.
     int ret = segCtx.GetStoredVersion();
@@ -278,7 +278,7 @@ TEST(SegmentCtx, CopySegmentInfoFromBufferforWBT_TestSimpleSetter)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumUserAreaSegments(1);
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, &addrInfo, "");
+    SegmentCtx segCtx(nullptr, segInfos, &addrInfo);
     char* buf = new char[1];
 
     // given 1.
@@ -298,7 +298,7 @@ TEST(SegmentCtx, GetSegmentInfo_TestSimpleGetter)
 {
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, nullptr, "");
+    SegmentCtx segCtx(nullptr, segInfos, nullptr);
     // when
     segCtx.GetSegmentInfo();
 }
@@ -307,7 +307,7 @@ TEST(SegmentCtx, ResetDirtyVersion_TestSimpleSetter)
 {
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, nullptr, "");
+    SegmentCtx segCtx(nullptr, segInfos, nullptr);
     // when
     segCtx.ResetDirtyVersion();
 }

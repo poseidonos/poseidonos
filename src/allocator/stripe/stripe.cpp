@@ -61,7 +61,7 @@ Stripe::Stripe(ReverseMapPack* revMap, bool withDataBuffer_)
     }
 }
 
-Stripe::Stripe(bool withDataBuffer_, AllocatorAddressInfo* allocatorAddressInfo, std::string arrayName)
+Stripe::Stripe(bool withDataBuffer_, AllocatorAddressInfo* allocatorAddressInfo)
 : Stripe(nullptr, withDataBuffer_)
 {
     totalBlksPerUserStripe = allocatorAddressInfo->GetblksPerStripe();

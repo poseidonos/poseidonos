@@ -74,9 +74,9 @@ ContextManager::ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, Reb
 ContextManager::ContextManager(AllocatorAddressInfo* info, std::string arrayName)
 : ContextManager(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false, info, arrayName)
 {
-    allocatorCtx = new AllocatorCtx(info, arrayName);
-    segmentCtx = new SegmentCtx(info, arrayName);
-    rebuildCtx = new RebuildCtx(allocatorCtx, info, arrayName);
+    allocatorCtx = new AllocatorCtx(info);
+    segmentCtx = new SegmentCtx(info);
+    rebuildCtx = new RebuildCtx(allocatorCtx, info);
     wbStripeCtx = new WbStripeCtx(info);
     fileIoManager = new AllocatorFileIoManager(fileNames, info, arrayName);
     contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, wbStripeCtx, info);

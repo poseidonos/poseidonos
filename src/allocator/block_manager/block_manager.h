@@ -46,8 +46,8 @@ class BlockManager : public IBlockAllocator
 {
 public:
     BlockManager(void) = default;
-    BlockManager(IStripeMap* stripeMap, IReverseMap* iReverseMap_, SegmentCtx* segCtx_, AllocatorCtx* alloCtx_, WbStripeCtx* wbCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName);
-    BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, std::string arrayName);
+    BlockManager(IStripeMap* stripeMap, IReverseMap* iReverseMap_, SegmentCtx* segCtx_, AllocatorCtx* alloCtx_, WbStripeCtx* wbCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
+    BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
     virtual ~BlockManager(void) = default;
     virtual void Init(IWBStripeInternal* iwbstripeInternal);
 
@@ -96,7 +96,7 @@ protected: // for UT
     AllocatorAddressInfo* addrInfo;
     ContextManager* contextManager;
     IWBStripeInternal* iWBStripeInternal;
-    std::string arrayName;
+    int arrayId;
 
     SegmentCtx* segCtx;
     AllocatorCtx* allocCtx;

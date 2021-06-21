@@ -42,12 +42,11 @@
 
 namespace pos
 {
-SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_)
+SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_)
 : ctxDirtyVersion(0),
   ctxStoredVersion(0),
   numSegments(0),
-  addrInfo(addrInfo_),
-  arrayName(arrayName_)
+  addrInfo(addrInfo_)
 {
     segmentInfos = segmentInfo_;
     if (header != nullptr)
@@ -63,8 +62,8 @@ SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, Allo
     }
 }
 
-SegmentCtx::SegmentCtx(AllocatorAddressInfo* info, std::string arrayName)
-: SegmentCtx(nullptr, nullptr, info, arrayName)
+SegmentCtx::SegmentCtx(AllocatorAddressInfo* info)
+: SegmentCtx(nullptr, nullptr, info)
 {
 }
 

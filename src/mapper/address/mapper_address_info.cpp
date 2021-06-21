@@ -45,7 +45,7 @@ MapperAddressInfo::MapperAddressInfo(IArrayInfo* iArrayInfo_)
 }
 
 void
-MapperAddressInfo::SetupAddressInfo(std::string arrayName)
+MapperAddressInfo::SetupAddressInfo(void)
 {
     const PartitionLogicalSize* udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
     const PartitionLogicalSize* wbSize = iArrayInfo->GetSizeInfo(PartitionType::WRITE_BUFFER);

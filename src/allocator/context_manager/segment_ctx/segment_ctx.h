@@ -47,8 +47,8 @@ class SegmentCtx : public IAllocatorFileIoClient
 {
 public:
     SegmentCtx(void) = default;
-    SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_);
-    SegmentCtx(AllocatorAddressInfo* info, std::string arrayName);
+    SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_);
+    explicit SegmentCtx(AllocatorAddressInfo* info);
     virtual ~SegmentCtx(void);
     virtual void Init(void);
     virtual void Close(void);
@@ -84,7 +84,6 @@ private:
     uint32_t numSegments;
 
     AllocatorAddressInfo* addrInfo;
-    std::string arrayName;
 
     std::mutex segCtxLock;
 };

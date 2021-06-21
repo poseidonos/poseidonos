@@ -43,7 +43,7 @@ class MapperAddressInfo
 {
 public:
     explicit MapperAddressInfo(IArrayInfo* iArrayInfo_);
-    void SetupAddressInfo(std::string arrayName);
+    void SetupAddressInfo(void);
 
     uint32_t maxVsid;
     uint32_t blksPerStripe;

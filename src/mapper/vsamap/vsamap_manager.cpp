@@ -41,7 +41,7 @@
 
 namespace pos
 {
-VSAMapManager::VSAMapManager(MapperAddressInfo* info, std::string arrayName)
+VSAMapManager::VSAMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId)
 : VolumeEvent("Mapper", arrayName),
   volumeManager(nullptr)
 {

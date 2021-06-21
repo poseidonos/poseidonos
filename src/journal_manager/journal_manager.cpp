@@ -159,14 +159,16 @@ int
 JournalManager::Init(void)
 {
     std::string arrayName = arrayInfo->GetName();
+    int arrayId = arrayInfo->GetIndex();
+
     // TODO (huijeong.kim) Dependency injection should be moved to the constructor
-    return Init(MapperServiceSingleton::Instance()->GetIVSAMap(arrayName),
-        MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
-        MapperServiceSingleton::Instance()->GetIMapFlush(arrayName),
-        AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName),
-        AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName),
-        AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName),
-        AllocatorServiceSingleton::Instance()->GetIContextReplayer(arrayName),
+    return Init(MapperServiceSingleton::Instance()->GetIVSAMap(arrayId),
+        MapperServiceSingleton::Instance()->GetIStripeMap(arrayId),
+        MapperServiceSingleton::Instance()->GetIMapFlush(arrayId),
+        AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayId),
+        AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayId),
+        AllocatorServiceSingleton::Instance()->GetIContextManager(arrayId),
+        AllocatorServiceSingleton::Instance()->GetIContextReplayer(arrayId),
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName),
         MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->ctrl,
         EventSchedulerSingleton::Instance());
