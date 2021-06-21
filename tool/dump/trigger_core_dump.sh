@@ -36,6 +36,10 @@ log_error(){
     echo -e "\033[31m"$1"\033[0m"
 }
 
+check_free_space(){
+    python3 -c 'import ps_lib; ps_lib.check_free_space()'
+}
+
 get_first_core_information(){
     rm -rf poseidonos.inmemory.log call_stack.info pending_io.info
     #If we cannot get information within 5 minutes, we just skip first core information.
@@ -121,7 +125,7 @@ else
     exit
 fi
 
-
+check_free_space
 
 if [ $CRASH -ne 0 ];then
     if [ $CRASH -eq 1 ];then
@@ -157,7 +161,7 @@ if [ $CRASH -ne 0 ];then
     done
 
     if [ $DUMP_CREATED -eq 1 ];then
-        cp --preserve=timestamps $DUMP_PATH"/"$CORE_CRASHED ./$CORE_FILE
+        mv $DUMP_PATH"/"$CORE_CRASHED ./$CORE_FILE
     else
         log_error "#### Dump File is not created, please check DUMP_PATH or IBOFOS running######"
         exit
@@ -165,7 +169,7 @@ if [ $CRASH -ne 0 ];then
 
 else
     if [ $LOG_ONLY -eq 0 ];then
-        echo "####### Trriger Gcore dump #######"
+        echo "####### Trigger Gcore dump #######"
         gcore -o $CORE_PREFIX $PID
     fi
 fi
@@ -216,7 +220,7 @@ if [ $? -ne 0 ];then
     exit
 fi
 
-rm $CORE_FILE -rf
+mv ./$CORE_FILE $DUMP_PATH"/"$CORE_CRASHED
 rm $LOG_DIR -rf
 
 echo "####### Tar split compression is finished #######"
