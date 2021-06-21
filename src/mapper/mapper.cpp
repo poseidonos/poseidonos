@@ -226,12 +226,10 @@ void
 Mapper::_RegisterToMapperService(void)
 {
     std::string arrayName = iArrayinfo->GetName();
+
     MapperService* mapperService = MapperServiceSingleton::Instance();
-    mapperService->RegisterMapper(arrayName, GetIVSAMap());
-    mapperService->RegisterMapper(arrayName, GetIStripeMap());
-    mapperService->RegisterMapper(arrayName, GetIReverseMap());
-    mapperService->RegisterMapper(arrayName, GetIMapFlush());
-    mapperService->RegisterMapper(arrayName, GetIMapperWbt());
+    mapperService->RegisterMapper(iArrayinfo->GetName(), iArrayinfo->GetIndex(),
+        GetIVSAMap(), GetIStripeMap(), GetIReverseMap(), GetIMapFlush(), GetIMapperWbt());
 }
 
 void

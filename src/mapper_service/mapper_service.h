@@ -32,15 +32,17 @@
 
 #pragma once
 
+#include <array>
+#include <string>
+#include <unordered_map>
+
+#include "src/include/array_mgmt_policy.h"
 #include "src/lib/singleton.h"
 #include "src/mapper/i_map_flush.h"
 #include "src/mapper/i_mapper_wbt.h"
 #include "src/mapper/i_reversemap.h"
 #include "src/mapper/i_stripemap.h"
 #include "src/mapper/i_vsamap.h"
-#include "src/mapper_service/mapper_interface_container.h"
-
-#include <string>
 
 namespace pos
 {
@@ -50,14 +52,12 @@ class MapperService
     friend class Singleton<MapperService>;
 
 public:
-    MapperService(void) = default;
+    MapperService(void);
     virtual ~MapperService(void) = default;
 
-    void RegisterMapper(std::string arrayName, IVSAMap* iVSAMap);
-    void RegisterMapper(std::string arrayName, IStripeMap* iStripeMap);
-    void RegisterMapper(std::string arrayName, IReverseMap* iReverseMap);
-    void RegisterMapper(std::string arrayName, IMapFlush* iMapFlush);
-    void RegisterMapper(std::string arrayName, IMapperWbt* iMapperWbt);
+    void RegisterMapper(std::string arrayName, int arrayId,
+        IVSAMap* iVSAMap, IStripeMap* iStripeMap, IReverseMap* iReverseMap,
+        IMapFlush* iMapFlush, IMapperWbt* iMapperWbt);
     void UnregisterMapper(std::string arrayName);
 
     virtual IVSAMap* GetIVSAMap(std::string arrayName);
@@ -66,12 +66,20 @@ public:
     IMapFlush* GetIMapFlush(std::string arrayName);
     IMapperWbt* GetIMapperWbt(std::string arrayName);
 
+    virtual IVSAMap* GetIVSAMap(int arrayId);
+    IStripeMap* GetIStripeMap(int arrayId);
+    IReverseMap* GetIReverseMap(int arrayId);
+    IMapFlush* GetIMapFlush(int arrayId);
+    IMapperWbt* GetIMapperWbt(int arrayId);
+
 private:
-    MapperInterfaceContainer<IVSAMap> iVSAMaps;
-    MapperInterfaceContainer<IStripeMap> iStripeMaps;
-    MapperInterfaceContainer<IReverseMap> iReverseMaps;
-    MapperInterfaceContainer<IMapFlush> iMapFlushes;
-    MapperInterfaceContainer<IMapperWbt> iMapperWbts;
+    std::unordered_map<std::string, int> arrayNameToId;
+
+    std::array<IVSAMap*, ArrayMgmtPolicy::MAX_ARRAY_CNT> iVSAMaps;
+    std::array<IStripeMap*, ArrayMgmtPolicy::MAX_ARRAY_CNT> iStripeMaps;
+    std::array<IReverseMap*, ArrayMgmtPolicy::MAX_ARRAY_CNT> iReverseMaps;
+    std::array<IMapFlush*, ArrayMgmtPolicy::MAX_ARRAY_CNT> iMapFlushes;
+    std::array<IMapperWbt*, ArrayMgmtPolicy::MAX_ARRAY_CNT> iMapperWbts;
 };
 
 using MapperServiceSingleton = Singleton<MapperService>;

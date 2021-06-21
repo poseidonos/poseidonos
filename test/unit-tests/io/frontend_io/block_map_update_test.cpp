@@ -49,7 +49,7 @@ TEST(BlockMapUpdate, Constructor_Stack)
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     NiceMock<MockIVSAMap> vsaMap;
 
-    ON_CALL(mockMapperService, GetIVSAMap(_)).WillByDefault(Return(&vsaMap));
+    ON_CALL(mockMapperService, GetIVSAMap(Matcher<std::string>(_))).WillByDefault(Return(&vsaMap));
     // When
     BlockMapUpdate blockMapUpdate(
         volumeIo, callback, isReactorNow,
@@ -78,7 +78,7 @@ TEST(BlockMapUpdate, Constructor_Heap)
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     NiceMock<MockIVSAMap> vsaMap;
 
-    ON_CALL(mockMapperService, GetIVSAMap(_)).WillByDefault(Return(&vsaMap));
+    ON_CALL(mockMapperService, GetIVSAMap(Matcher<std::string>(_))).WillByDefault(Return(&vsaMap));
 
     // When
     BlockMapUpdate* blockMapUpdate = new BlockMapUpdate(
@@ -115,7 +115,7 @@ TEST(BlockMapUpdate, Execute_Journal_Enabled)
     NiceMock<MockIVSAMap> vsaMap;
 
     // When : journal is enabled
-    ON_CALL(mockMapperService, GetIVSAMap(_)).WillByDefault(Return(&vsaMap));
+    ON_CALL(mockMapperService, GetIVSAMap(Matcher<std::string>(_))).WillByDefault(Return(&vsaMap));
     ON_CALL(mockJournalService, IsEnabled(Matcher<std::string>(_))).WillByDefault(Return(true));
     ON_CALL(mockJournalService, GetWriter(Matcher<std::string>(_))).WillByDefault(Return(&mockJournalWriter));
     ON_CALL(vsaMap, GetDirtyVsaMapPages(_, _, _)).WillByDefault(Return(mPageList));
@@ -159,7 +159,7 @@ TEST(BlockMapUpdate, Execute_Journal_Enabled_Fail)
     NiceMock<MockIVSAMap> vsaMap;
 
     // When : journal is enabled
-    ON_CALL(mockMapperService, GetIVSAMap(_)).WillByDefault(Return(&vsaMap));
+    ON_CALL(mockMapperService, GetIVSAMap(Matcher<std::string>(_))).WillByDefault(Return(&vsaMap));
     ON_CALL(mockJournalService, IsEnabled(Matcher<std::string>(_))).WillByDefault(Return(true));
     ON_CALL(mockJournalService, GetWriter(Matcher<std::string>(_))).WillByDefault(Return(&mockJournalWriter));
     ON_CALL(vsaMap, GetDirtyVsaMapPages(_, _, _)).WillByDefault(Return(mPageList));
@@ -207,7 +207,7 @@ TEST(BlockMapUpdate, Execute_Journal_Not_Enabled)
 
     // When : journal is not enabled
     ON_CALL(*mockVolumeIo, GetSectorRba()).WillByDefault(Return(0));
-    ON_CALL(mockMapperService, GetIVSAMap(_)).WillByDefault(Return(&mockIVSAMap));
+    ON_CALL(mockMapperService, GetIVSAMap(Matcher<std::string>(_))).WillByDefault(Return(&mockIVSAMap));
     ON_CALL(mockJournalService, IsEnabled(Matcher<std::string>(_))).WillByDefault(Return(false));
     ON_CALL(*mockBlockMapUpdateCompletion, Execute()).WillByDefault(Return(true));
 

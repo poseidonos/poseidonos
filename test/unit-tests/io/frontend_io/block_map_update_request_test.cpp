@@ -17,8 +17,6 @@
 #include "src/io/general_io/rba_state_manager.h"
 #include "src/io/general_io/vsa_range_maker.h"
 #include "src/logger/logger.h"
-#include "src/mapper_service/mapper_interface_container.h"
-#include "src/mapper_service/mapper_service.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "test/unit-tests/allocator/i_block_allocator_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"

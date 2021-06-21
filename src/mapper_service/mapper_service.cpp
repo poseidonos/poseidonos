@@ -32,77 +32,159 @@
 
 #include "src/mapper_service/mapper_service.h"
 
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+
 namespace pos
 {
-
-void
-MapperService::RegisterMapper(std::string arrayName, IVSAMap* iVSAMap)
+MapperService::MapperService(void)
 {
-    iVSAMaps.Register(arrayName, iVSAMap);
+    iVSAMaps.fill(nullptr);
+    iStripeMaps.fill(nullptr);
+    iReverseMaps.fill(nullptr);
+    iMapFlushes.fill(nullptr);
+    iMapperWbts.fill(nullptr);
 }
 
 void
-MapperService::RegisterMapper(std::string arrayName, IStripeMap* iStripeMap)
+MapperService::RegisterMapper(std::string arrayName, int arrayId,
+    IVSAMap* iVSAMap, IStripeMap* iStripeMap, IReverseMap* iReverseMap,
+    IMapFlush* iMapFlush, IMapperWbt* iMapperWbt)
 {
-    iStripeMaps.Register(arrayName, iStripeMap);
-}
+    if (arrayNameToId.find(arrayName) == arrayNameToId.end())
+    {
+        arrayNameToId.emplace(arrayName, arrayId);
 
-void
-MapperService::RegisterMapper(std::string arrayName, IReverseMap* iReverseMap)
-{
-    iReverseMaps.Register(arrayName, iReverseMap);
-}
-
-void
-MapperService::RegisterMapper(std::string arrayName, IMapFlush* iMapFlush)
-{
-    iMapFlushes.Register(arrayName, iMapFlush);
-}
-
-void
-MapperService::RegisterMapper(std::string arrayName, IMapperWbt* iMapperWbt)
-{
-    iMapperWbts.Register(arrayName, iMapperWbt);
+        iVSAMaps[arrayId] = iVSAMap;
+        iStripeMaps[arrayId] = iStripeMap;
+        iReverseMaps[arrayId] = iReverseMap;
+        iMapFlushes[arrayId] = iMapFlush;
+        iMapperWbts[arrayId] = iMapperWbt;
+    }
+    else
+    {
+        POS_TRACE_ERROR(EID(MAPPER_ALREADY_EXIST), "Mapper for array {} is already registered", arrayName);
+    }
 }
 
 void
 MapperService::UnregisterMapper(std::string arrayName)
 {
-    iMapperWbts.Unregister(arrayName);
-    iMapFlushes.Unregister(arrayName);
-    iReverseMaps.Unregister(arrayName);
-    iStripeMaps.Unregister(arrayName);
-    iVSAMaps.Unregister(arrayName);
+    if (arrayNameToId.find(arrayName) != arrayNameToId.end())
+    {
+        int arrayId = arrayNameToId[arrayName];
+        arrayNameToId.erase(arrayName);
+
+        iVSAMaps[arrayId] = nullptr;
+        iStripeMaps[arrayId] = nullptr;
+        iReverseMaps[arrayId] = nullptr;
+        iMapFlushes[arrayId] = nullptr;
+        iMapperWbts[arrayId] = nullptr;
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(MAPPER_ALREADY_EXIST), "Mapper for array {} already unregistered", arrayName);
+    }
 }
 
 IVSAMap*
 MapperService::GetIVSAMap(std::string arrayName)
 {
-    return iVSAMaps.GetInterface(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return iVSAMaps[arrayId->second];
+    }
 }
 
 IStripeMap*
 MapperService::GetIStripeMap(std::string arrayName)
 {
-    return iStripeMaps.GetInterface(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return iStripeMaps[arrayId->second];
+    }
 }
 
 IReverseMap*
 MapperService::GetIReverseMap(std::string arrayName)
 {
-    return iReverseMaps.GetInterface(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return iReverseMaps[arrayId->second];
+    }
 }
 
 IMapFlush*
 MapperService::GetIMapFlush(std::string arrayName)
 {
-    return iMapFlushes.GetInterface(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return iMapFlushes[arrayId->second];
+    }
 }
 
 IMapperWbt*
 MapperService::GetIMapperWbt(std::string arrayName)
 {
-    return iMapperWbts.GetInterface(arrayName);
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return iMapperWbts[arrayId->second];
+    }
+}
+
+IVSAMap*
+MapperService::GetIVSAMap(int arrayId)
+{
+    return iVSAMaps[arrayId];
+}
+
+IStripeMap*
+MapperService::GetIStripeMap(int arrayId)
+{
+    return iStripeMaps[arrayId];
+}
+
+IReverseMap*
+MapperService::GetIReverseMap(int arrayId)
+{
+    return iReverseMaps[arrayId];
+}
+
+IMapFlush*
+MapperService::GetIMapFlush(int arrayId)
+{
+    return iMapFlushes[arrayId];
+}
+
+IMapperWbt*
+MapperService::GetIMapperWbt(int arrayId)
+{
+    return iMapperWbts[arrayId];
 }
 
 } // namespace pos

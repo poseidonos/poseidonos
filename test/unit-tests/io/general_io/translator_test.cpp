@@ -81,6 +81,7 @@ public:
 
 protected:
     std::string arrayName = "POSArray1";
+    int arrayId = 1;
     VirtualBlkAddr vsa{.stripeId = 0, .offset = 0};
     StripeAddr stripeAddr;
     NiceMock<MockIVSAMap>* mockIVSAMap;
@@ -114,7 +115,7 @@ TEST_F(TranslatorTestFixture, Translator_Constructor_TwoArguments)
     //Then: do nothing
 
     //Given: register IStripeMap
-    MapperServiceSingleton::Instance()->RegisterMapper(arrayName, mockIStripeMap);
+    MapperServiceSingleton::Instance()->RegisterMapper(arrayName, arrayId, nullptr, mockIStripeMap, nullptr, nullptr, nullptr);
 
     //When: create translator (heap)
     Translator* pTranslator = new Translator(vsa, arrayName);
