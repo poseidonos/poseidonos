@@ -539,7 +539,7 @@ TEST(Array, Delete_testIfArrayDeletedSuccessfullyWhenInputsAreValid)
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
     EXPECT_CALL(mockAbrControl, DeleteAbr).WillOnce(Return(0));
     EXPECT_CALL(*mockState, SetDelete).Times(1);
-    EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(0));
+    EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false));
 
     Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
@@ -584,7 +584,7 @@ TEST(Array, Delete_testIfArrayNotDeletedWhenArrayBootRecordFailsToBeUpdated)
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
     EXPECT_CALL(mockAbrControl, DeleteAbr).WillOnce(Return(ABR_FAILURE));
     EXPECT_CALL(*mockState, SetDelete).Times(0); // this should never be called
-    EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(0));
+    EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false));
 
     Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
@@ -1160,6 +1160,29 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotNeedToRetryAfterTrigger
     delete mockArrDev;
 
     usleep(10000); // intentionally put some jitter to avoid signal propagated from internally-spawned thread
+}
+
+TEST(Array, Shutdown_testIfFlushWorksProperlyWhenShutdownOccur)
+{
+    // Given
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockIAbrControl* mockAbrControl = new MockIAbrControl();
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager("mock-array", mockAbrControl);
+    MockArrayServiceLayer* mockArrayService = new MockArrayServiceLayer;
+
+    Array array("mock-array", NULL, mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, NULL, NULL, NULL, mockArrayService);
+
+    EXPECT_CALL(*mockArrDevMgr, ExportToMeta).Times(1);
+    EXPECT_CALL(*mockAbrControl, SaveAbr).Times(1);
+    EXPECT_CALL(*mockPtnMgr, DeleteAll).Times(1);
+    EXPECT_CALL(*mockArrayService, Unregister).Times(1);
+    // When
+    array.Shutdown();
+    // Then
+
+    // Cleanup
+    delete mockAbrControl;
+    delete mockArrayService;
 }
 
 } // namespace pos

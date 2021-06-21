@@ -34,6 +34,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <sys/time.h>
 
 namespace pos
 {
@@ -44,7 +45,8 @@ enum class LogGroupStatus
     INVALID = -1,
     INIT = 0,
     ACTIVE,
-    FULL
+    FULL,
+    COUNT
 };
 
 class LogGroupBufferStatus
@@ -105,6 +107,8 @@ private:
 
     bool _AllocateIfNotFull(uint32_t logSize, uint64_t& offset);
 
+    void _SetStatus(LogGroupStatus toStatus);
+
     std::mutex fullTriggerLock;
     uint32_t seqNum;
 
@@ -119,6 +123,8 @@ private:
     uint64_t maxOffset;
 
     uint64_t metaPageSize;
+
+    struct timeval statusChangedTime[(int)LogGroupStatus::COUNT]; // for debugging, 8 bytes each for debugging
 };
 
 } // namespace pos

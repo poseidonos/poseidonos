@@ -54,10 +54,10 @@ private:
     std::vector<string> volumeNames;
     std::vector<std::pair<string, uint32_t>> validVolumes;
     std::string errorMsg;
-    uint64_t minBw;
-    uint64_t maxBw;
-    uint64_t minIops;
-    uint64_t maxIops;
+    int64_t minBw;
+    int64_t maxBw;
+    int64_t minIops;
+    int64_t maxIops;
     qos_vol_policy prevVolPolicy;
     qos_vol_policy newVolPolicy;
     string arrayName;

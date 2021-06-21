@@ -166,6 +166,51 @@ func printResToHumanReadable(command string, resJSON string) {
 
 		log.Println("")
 
+	case "QOSCREATEVOLUMEPOLICY":
+		res := messages.Response{}
+		json.Unmarshal([]byte(resJSON), &res)
+        if (0 != res.RESULT.STATUS.CODE) {
+		    printStatus(res.RESULT.STATUS.CODE)
+            fmt.Println("Description: ",res.RESULT.STATUS.DESCRIPTION)
+        }
+
+	case "QOSRESETVOLUMEPOLICY":
+		res := messages.Response{}
+		json.Unmarshal([]byte(resJSON), &res)
+        if (0 != res.RESULT.STATUS.CODE) {
+		    printStatus(res.RESULT.STATUS.CODE)
+            fmt.Println("Description: ",res.RESULT.STATUS.DESCRIPTION)
+        }
+
+	case "QOSLISTPOLICIES":
+	    res := messages.ListQosResponse{}
+	    json.Unmarshal([]byte(resJSON), &res)
+        if (0 != res.RESULT.STATUS.CODE) {
+            printStatus(res.RESULT.STATUS.CODE)
+            fmt.Println("Description: ",res.RESULT.STATUS.DESCRIPTION)
+        } else {
+            for _, array := range res.RESULT.DATA.QOSARRAYNAME {
+                log.Println("Array Name: " + array.ARRNAME)
+                log.Println("")
+            }
+            for _, rebuild := range res.RESULT.DATA.REBUILDPOLICY {
+                log.Println("Rebuild Impact: " + rebuild.IMPACT)
+            }
+            for _, volume := range res.RESULT.DATA.VOLUMEQOSLIST {
+
+                log.Println("Name: " + volume.VOLUMENAME)
+                log.Println("ID: ",  volume.VOLUMEID)
+                log.Println("Minimim Iops: ", volume.MINIOPS)
+                log.Println("Maximum Iops: ", volume.MAXIOPS)
+                log.Println("Minimum Bw: ",  volume.MINBW)
+                log.Println("Maximum Bw: ", volume.MAXBW)
+                log.Println("Minimum Bw Guarantee: "  + volume.MINBWGUARANTEE)
+                log.Println("Minimum IOPS Guarantee: " +  volume.MINIOPSGUARANTEE)
+
+                log.Println("")
+            }
+            log.Println("")
+        }
 	default:
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)

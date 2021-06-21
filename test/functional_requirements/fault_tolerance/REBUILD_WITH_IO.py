@@ -17,38 +17,23 @@ import MOUNT_VOL_BASIC_1
 import fio
 import time
 DETACH_TARGET_DEV = MOUNT_VOL_BASIC_1.ANY_DATA
+SECOND_DETACH_TARGET_DEV = MOUNT_VOL_BASIC_1.SPARE
 ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
-def check_result():
-    out = cli.array_info(ARRAYNAME)
-    state = json_parser.get_state(out)
-    if state == "NORMAL":
-        data = json.loads(out)
-        for item in data['Response']['result']['data']['devicelist']:
-            if item['name'] == DETACH_TARGET_DEV :
-                return "fail", out
-        return "pass", out
-    return "fail", out
-
-def set_result():
-    result, out = check_result()
-
-    with open(__file__ + ".result", "w") as result_file:
-        result_file.write(result + " (" + str(code) + ")" + "\n" + out)
 
 def execute():
     MOUNT_VOL_BASIC_1.execute()
-    fio_proc = fio.start_fio(0, 20)
+    fio_proc = fio.start_fio(0, 60)
     fio.wait_fio(fio_proc)
     api.detach_ssd(DETACH_TARGET_DEV)
-    
-    if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
-        fio_proc2 = fio.start_fio(0, 120)
-        if api.wait_situation(ARRAYNAME, "NORMAL") == True:
-                fio.stop_fio(fio_proc2)
-                return "pass"
-        fio.stop_fio(fio_proc2)
+
+    if api.wait_situation(ARRAYNAME, "REBUILDING") is True:
+        api.detach_ssd(SECOND_DETACH_TARGET_DEV)
+        timeout = 80000 #80s
+        if api.wait_situation(ARRAYNAME, "DEGRADED", timeout) is True:
+            return "pass"
     return "fail"
+
 
 if __name__ == "__main__":
     api.clear_result(__file__)

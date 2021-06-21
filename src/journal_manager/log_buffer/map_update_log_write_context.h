@@ -52,7 +52,7 @@ class MapUpdateLogWriteContext : public LogWriteContext
 public:
     MapUpdateLogWriteContext(void) = default;
     MapUpdateLogWriteContext(LogHandlerInterface* log, MapPageList dirtyList,
-        EventSmartPtr callback, LogBufferWriteDoneNotifier* target,
+        EventSmartPtr callback, LogBufferWriteDoneNotifier* notifier,
         CallbackSequenceController* sequencer);
     virtual ~MapUpdateLogWriteContext(void) = default;
 
@@ -60,7 +60,6 @@ public:
     virtual void IoDone(void) override;
 
 protected:
-    LogBufferWriteDoneNotifier* logFilledNotifier;
     CallbackSequenceController* sequenceController;
     MapPageList dirty;
 };

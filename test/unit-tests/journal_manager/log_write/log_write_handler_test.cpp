@@ -171,6 +171,8 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testIfContextCleanedUpWhenWriteLogFail
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(0));
     EXPECT_CALL(*logBuffer, WriteLog).WillOnce(Return(-1));
 
+    EXPECT_CALL(*bufferAllocator, LogWriteCanceled).Times(1);
+
     // When: Log is added
     NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
     EXPECT_TRUE(logWriteHandler->AddLog(context) < 0);

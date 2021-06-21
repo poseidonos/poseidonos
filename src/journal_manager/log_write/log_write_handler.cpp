@@ -44,10 +44,7 @@ namespace pos
 {
 // Constructor for product code
 LogWriteHandler::LogWriteHandler(void)
-: logBuffer(nullptr),
-  bufferAllocator(nullptr),
-  logWriteStats(new LogWriteStatistics()),
-  waitingList(new WaitingLogList())
+: LogWriteHandler(new LogWriteStatistics(), new WaitingLogList())
 {
 }
 
@@ -58,6 +55,8 @@ LogWriteHandler::LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList*
   logWriteStats(statistics),
   waitingList(waitingList)
 {
+    numIosRequested = 0;
+    numIosCompleted = 0;
 }
 
 LogWriteHandler::~LogWriteHandler(void)
@@ -111,9 +110,16 @@ LogWriteHandler::_AddLogInternal(LogWriteContext* context)
         context->SetInternalCallback(std::bind(&LogWriteHandler::LogWriteDone, this, std::placeholders::_1));
 
         int result = logBuffer->WriteLog(context);
-        if (result != 0)
+        if (result == 0)
+        {
+            numIosRequested++;
+        }
+        else
         {
             delete context;
+
+            // This is to cancel the buffer allocation
+            bufferAllocator->LogWriteCanceled(groupId);
         }
         // TODO(huijeong.kim) move to no-journal mode, if failed
         return result;
@@ -132,7 +138,9 @@ LogWriteHandler::_AddLogInternal(LogWriteContext* context)
 void
 LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
 {
-    LogWriteContext* context = reinterpret_cast<LogWriteContext*>(ctx);
+    numIosCompleted++;
+
+    LogWriteContext* context = dynamic_cast<LogWriteContext*>(ctx);
 
     bool statusUpdatedToStats = false;
 

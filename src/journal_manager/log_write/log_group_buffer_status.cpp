@@ -53,15 +53,17 @@ LogGroupBufferStatus::Reset(void)
     numLogsFilled = 0;
     nextOffset = startOffset;
 
+    memset(&statusChangedTime, 0x00, sizeof(statusChangedTime));
+
     // status update should be at last
-    status = LogGroupStatus::INIT;
+    _SetStatus(LogGroupStatus::INIT);
 }
 
 void
 LogGroupBufferStatus::SetActive(uint64_t inputSeqNum)
 {
     seqNum = inputSeqNum;
-    status = LogGroupStatus::ACTIVE;
+    _SetStatus(LogGroupStatus::ACTIVE);
 }
 
 bool
@@ -117,8 +119,8 @@ LogGroupBufferStatus::TryToSetFull(void)
     if (waitingToBeFilled.load(std::memory_order_seq_cst) == true
         && _IsFullyFilled() == true)
     {
-        status = LogGroupStatus::FULL;
         waitingToBeFilled = false;
+        _SetStatus(LogGroupStatus::FULL);
 
         POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL,
             "Log group is fully filled, added {} filled {}",
@@ -136,6 +138,13 @@ LogGroupBufferStatus::LogFilled(void)
 
     assert(numLogsAdded.load(std::memory_order_seq_cst)
         >= numLogsFilled.load(std::memory_order_seq_cst));
+}
+
+void
+LogGroupBufferStatus::_SetStatus(LogGroupStatus toStatus)
+{
+    status = toStatus;
+    gettimeofday(&statusChangedTime[(int)toStatus], NULL);
 }
 
 } // namespace pos

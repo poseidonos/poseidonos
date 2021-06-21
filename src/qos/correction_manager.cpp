@@ -163,9 +163,13 @@ QosCorrectionManager::_HandleMinThrottling(uint32_t minVolId)
         uint64_t newBwWeight = 0;
         uint64_t newIopsWeight = 0;
         uint32_t totalConnection = qosContext->GetTotalConnection(volId);
-        VolumeUserPolicy& volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(volId);
-        uint64_t userSetMaxBw = volumeUserPolicy.GetMaxBandwidth();
-        uint64_t userSetMaxIops = volumeUserPolicy.GetMaxIops();
+        VolumeUserPolicy* volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(volId);
+        if (volumeUserPolicy == nullptr)
+        {
+            continue;
+        }
+        uint64_t userSetMaxBw = volumeUserPolicy->GetMaxBandwidth();
+        uint64_t userSetMaxIops = volumeUserPolicy->GetMaxIops();
 
         if ((minVolId == it->first))
         {
@@ -199,13 +203,13 @@ QosCorrectionManager::_HandleMinThrottling(uint32_t minVolId)
         for (map<uint32_t, uint32_t>::iterator it = volReactorMap[volId].begin(); it != volReactorMap[volId].end(); ++it)
         {
             VolumeParameter& volParameter = allVolumeParameters.GetVolumeParameter(volId);
-            newBwWeight = _InitialValueCheck(currentBwWeight, false, volParameter, volumeUserPolicy);
+            newBwWeight = _InitialValueCheck(currentBwWeight, false, volParameter, *volumeUserPolicy);
             newBwWeight = newBwWeight + bwCorrection;
             if (newBwWeight > userSetMaxBw)
             {
                 newBwWeight = userSetMaxBw;
             }
-            newIopsWeight = _InitialValueCheck(currentIopsWeight, true, volParameter, volumeUserPolicy);
+            newIopsWeight = _InitialValueCheck(currentIopsWeight, true, volParameter, *volumeUserPolicy);
             newIopsWeight = newIopsWeight + iopsCorrection;
             if (newIopsWeight > userSetMaxIops)
             {
@@ -299,15 +303,19 @@ QosCorrectionManager::_HandleMaxThrottling(void)
         uint64_t currentIopsWeight = 0;
         uint32_t volId = it->first;
         uint32_t totalConnection = qosContext->GetTotalConnection(volId);
-        VolumeUserPolicy& volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(volId);
+        VolumeUserPolicy* volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(volId);
+        if (volumeUserPolicy == nullptr)
+        {
+            continue;
+        }
         for (map<uint32_t, uint32_t>::iterator it = volReactorMap[volId].begin(); it != volReactorMap[volId].end(); ++it)
         {
             currentBwWeight += qosManager->GetVolumeLimit(it->first, volId, false);
             currentIopsWeight += qosManager->GetVolumeLimit(it->first, volId, true);
         }
 
-        uint64_t userSetBwWeight = volumeUserPolicy.GetMaxBandwidth();
-        uint64_t userSetIopsWeight = volumeUserPolicy.GetMaxIops();
+        uint64_t userSetBwWeight = volumeUserPolicy->GetMaxBandwidth();
+        uint64_t userSetIopsWeight = volumeUserPolicy->GetMaxIops();
         for (map<uint32_t, uint32_t>::iterator it = volReactorMap[volId].begin(); it != volReactorMap[volId].end(); ++it)
         {
             if (minVolId != DEFAULT_MIN_VOL)

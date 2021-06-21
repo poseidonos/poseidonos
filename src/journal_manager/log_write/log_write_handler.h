@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include "../log/waiting_log_list.h"
 #include "../log_buffer/buffer_write_done_notifier.h"
 #include "src/meta_file_intf/async_context.h"
@@ -69,6 +71,9 @@ private:
 
     LogWriteStatistics* logWriteStats;
     WaitingLogList* waitingList;
+
+    std::atomic<uint64_t> numIosRequested;
+    std::atomic<uint64_t> numIosCompleted;
 };
 
 } // namespace pos

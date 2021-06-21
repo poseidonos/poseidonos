@@ -10,7 +10,7 @@ var VolumeCmd = &cobra.Command{
 	Long: `Volume commands for PoseidonOS.
 
 Syntax: 
-  poseidonos-cli volume [create|delete|mount|unmount|list|set-property|rename] [flags]
+  poseidonos-cli volume [create|delete|mount|unmount|list|rename] [flags]
 
 Example (to create a volume):
   poseidonos-cli volume create --volume-name Volume0 --array-name Array0 --size 1024GB --maxiops 1000 --maxbw 100GB/s
@@ -26,6 +26,5 @@ func init() {
 	VolumeCmd.AddCommand(ListVolumeCmd)
 	VolumeCmd.AddCommand(MountVolumeCmd)
 	VolumeCmd.AddCommand(UnmountVolumeCmd)
-	VolumeCmd.AddCommand(SetPropertyVolumeCmd)
 	VolumeCmd.AddCommand(RenameVolumeCmd)
 }

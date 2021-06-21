@@ -181,6 +181,12 @@ VolumePolicy::_HandleBandwidthIopsUpdate(void)
     uint32_t currMinVolId = currAllVolumePolicy.GetMinimumGuaranteeVolume();
     bool minBwPolicy = currAllVolumePolicy.IsMinBwPolicyInEffect();
 
+    VolumeUserPolicy* volPolicy = currAllVolumePolicy.GetVolumeUserPolicy(currMinVolId);
+    if (volPolicy == nullptr)
+    {
+        return;
+    }
+
     if (false == allVolumeParam.VolumeExists(currMinVolId))
     {
         return;
@@ -208,9 +214,9 @@ VolumePolicy::_HandleBandwidthIopsUpdate(void)
             minVolAverageBw = averageBandwidth;
         }
     }
-    VolumeUserPolicy& volPolicy = currAllVolumePolicy.GetVolumeUserPolicy(currMinVolId);
-    uint64_t minIops = volPolicy.GetMinIops();
-    uint64_t minBandwidth = volPolicy.GetMinBandwidth();
+
+    uint64_t minIops = volPolicy->GetMinIops();
+    uint64_t minBandwidth = volPolicy->GetMinBandwidth();
 
     if (true == minBwPolicy)
     {

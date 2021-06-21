@@ -117,7 +117,7 @@ LogWriteContextFactory::CreateVolumeDeletedLogWriteContext(int volId,
     uint64_t contextVersion, EventSmartPtr callback)
 {
     LogHandlerInterface* log = new VolumeDeletedLogEntry(volId, contextVersion);
-    LogWriteContext* logWriteContext = new LogWriteContext(log, callback);
+    LogWriteContext* logWriteContext = new LogWriteContext(log, callback, notifier);
 
     return logWriteContext;
 }

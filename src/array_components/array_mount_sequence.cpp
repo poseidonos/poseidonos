@@ -231,8 +231,10 @@ ArrayMountSequence::StateChanged(StateContext* prev, StateContext* next)
     std::unique_lock<std::mutex> lock(mtx);
     cv.notify_all();
 
-    if (next->ToStateType() == StateEnum::STOP)
+    if (next->ToStateType() == StateEnum::STOP &&
+        prev != nullptr && prev->ToStateType() >= StateEnum::NORMAL)
     {
+        POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Shutdown for {}", arrayName);
         Shutdown();
     }
 }

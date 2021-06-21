@@ -139,15 +139,15 @@ AllVolumeUserPolicy::InsertVolumeUserPolicy(uint32_t vol, const VolumeUserPolicy
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-VolumeUserPolicy&
+VolumeUserPolicy*
 AllVolumeUserPolicy::GetVolumeUserPolicy(uint32_t vol)
 {
     auto search = volumeUserPolicyMap.find(vol);
     if (search != volumeUserPolicyMap.end())
     {
-        return search->second;
+        return &(search->second);
     }
-    throw QosReturnCode::VOLUME_NOT_PRESENT;
+    return nullptr;
 }
 
 /* --------------------------------------------------------------------------*/

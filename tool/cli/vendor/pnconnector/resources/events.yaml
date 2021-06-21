@@ -542,17 +542,17 @@ modules:
         solution:
       - code: 2501
         level: ERROR
-        message: Array is already umounted.
+        message: Array is already unmounted.
         problem:
         solution:
       - code: 2502
         level: ERROR
-        message: Array already exists
+        message: Array already exists.
         problem:
         solution:
       - code: 2503
         level: ERROR
-        message: Array does not exists
+        message: Array does not exist.
         problem:
         solution:
       - code: 2504
@@ -1289,7 +1289,7 @@ modules:
     info:
       - code: 5525
         level: ERROR
-        message: device not found
+        message: Device not found
         problem: Devices not found
         solution: Scan device and try again
   - name: "system"
