@@ -103,7 +103,7 @@ DiskQueryManager::SendSmartCommandtoDisk(void)
         struct spdk_nvme_health_information_page* payload = new struct spdk_nvme_health_information_page();
         uint16_t lid = SPDK_NVME_LOG_HEALTH_INFORMATION;
         GetLogPageContext* smartLogPageContext = new GetLogPageContext(payload, lid);
-        UbioSmartPtr ubio(new Ubio((void*)smartLogPageContext, sizeof(struct spdk_nvme_health_information_page), arrayInfo->GetName()));
+        UbioSmartPtr ubio(new Ubio((void*)smartLogPageContext, sizeof(struct spdk_nvme_health_information_page), arrayInfo->GetIndex()));
         ubio->dir = UbioDir::GetLogPage;
         ubio->SetPba(addr);
 

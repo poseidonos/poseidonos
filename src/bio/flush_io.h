@@ -42,7 +42,7 @@ namespace pos
 class FlushIo : public Ubio
 {
 public:
-    FlushIo(std::string& arrayName);
+    explicit FlushIo(int arrayId);
     ~FlushIo(void) override;
 
     uint32_t GetVolumeId(void);

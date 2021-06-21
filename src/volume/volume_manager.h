@@ -91,6 +91,7 @@ public:
     VolumeBase* GetVolume(int volId) override;
     void StateChanged(StateContext* prev, StateContext* next) override;
     std::string GetArrayName(void) override;
+    int GetArrayId(void) override;
 
 private:
     int _LoadVolumes(void);
@@ -105,7 +106,6 @@ private:
 
     IArrayInfo* arrayInfo;
     IStateControl* state;
-    int volumeMangerIdx; /*[TO DO] remove after update arrayInfo class*/
 };
 
 } // namespace pos

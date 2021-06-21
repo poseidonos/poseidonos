@@ -35,12 +35,16 @@
 #include <list>
 #include <string>
 
+
 #include "src/include/branch_prediction.h"
-#include "src/include/pos_event_id.hpp"
+#include "src/include/pos_event_id.h"
 #include "src/io/general_io/submit_async_read.h"
 #include "src/io/general_io/submit_async_write.h"
 #include "src/io/general_io/sync_io_completion.h"
 #include "src/logger/logger.h"
+
+/*To do Remove after adding array Idx by Array*/
+#include "src/array_mgmt/array_manager.h"
 
 namespace pos
 {
@@ -59,13 +63,25 @@ IOSubmitHandler::SyncIO(
     LogicalBlkAddr& startLSA, uint64_t blockCount,
     PartitionType partitionToIO, std::string arrayName)
 {
+    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+
+    return SyncIO(direction, bufferList, startLSA, blockCount, partitionToIO, info->GetIndex());
+}
+
+IOSubmitHandlerStatus
+IOSubmitHandler::SyncIO(
+    IODirection direction,
+    std::list<BufferEntry>& bufferList,
+    LogicalBlkAddr& startLSA, uint64_t blockCount,
+    PartitionType partitionToIO, int arrayId)
+{
     std::atomic<bool> needToWait(true);
     uint32_t errorCount = 0;
 
     CallbackSmartPtr callback(new SyncIoCompletion(needToWait, errorCount));
 
     IOSubmitHandlerStatus errorToReturn = SubmitAsyncIO(direction, bufferList,
-        startLSA, blockCount, partitionToIO, callback, arrayName);
+        startLSA, blockCount, partitionToIO, callback, arrayId);
 
     if (IOSubmitHandlerStatus::SUCCESS == errorToReturn ||
         IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorToReturn)
@@ -93,27 +109,40 @@ IOSubmitHandler::SubmitAsyncIO(
     CallbackSmartPtr callback,
     std::string arrayName)
 {
+    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    return SubmitAsyncIO(direction, bufferList, startLSA, blockCount, partitionToIO, callback, info->GetIndex());
+}
+
+IOSubmitHandlerStatus
+IOSubmitHandler::SubmitAsyncIO(
+    IODirection direction,
+    std::list<BufferEntry>& bufferList,
+    LogicalBlkAddr& startLSA, uint64_t blockCount,
+    PartitionType partitionToIO,
+    CallbackSmartPtr callback,
+    int arrayId)
+{
     IOSubmitHandlerStatus errorToReturn = IOSubmitHandlerStatus::FAIL;
     do
     {
         if (IODirection::READ == direction)
         {
             SubmitAsyncRead asyncRead(callback);
-            errorToReturn = asyncRead.Execute(bufferList, startLSA, blockCount, partitionToIO, callback, arrayName);
+            errorToReturn = asyncRead.Execute(bufferList, startLSA, blockCount, partitionToIO, callback, arrayId);
         }
         else if (IODirection::WRITE == direction)
         {
             SubmitAsyncWrite asyncWrite;
             bool needTrim = false;
             errorToReturn = asyncWrite.Execute(bufferList, startLSA, blockCount,
-                partitionToIO, callback, arrayName, needTrim);
+                partitionToIO, callback, arrayId, needTrim);
         }
         else if (IODirection::TRIM == direction)
         {
             SubmitAsyncWrite asyncWrite;
             bool needTrim = true;
             errorToReturn = asyncWrite.Execute(bufferList, startLSA, blockCount,
-                partitionToIO, callback, arrayName, needTrim);
+                partitionToIO, callback, arrayId, needTrim);
         }
         else
         {

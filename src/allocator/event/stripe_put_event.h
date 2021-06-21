@@ -45,14 +45,13 @@ class IWBStripeAllocator;
 class StripePutEvent : public Event
 {
 public:
-    StripePutEvent(IWBStripeAllocator* wbAllocator, Stripe& stripe, StripeId prevLsid, std::string& arrayName);
-    StripePutEvent(Stripe& stripe, StripeId prevLsid, std::string& arrayName);
+    StripePutEvent(IWBStripeAllocator* wbAllocator, Stripe& stripe, StripeId prevLsid);
+    StripePutEvent(Stripe& stripe, StripeId prevLsid, int arrayId);
     virtual bool Execute(void);
 
 private:
     Stripe& stripe;
     StripeId prevLsid;
     IWBStripeAllocator* iWBStripeAllocator;
-    std::string arrayName;
 };
 } // namespace pos

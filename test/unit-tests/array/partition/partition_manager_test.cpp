@@ -97,7 +97,7 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
     EXPECT_CALL(mockInterface, AddRebuildTarget).Times(2); // one for nvm and the other for userdata
 
     // When 1: PartitionManager creates all partitions
-    int actual = pm.CreateAll(buf, data, &mockInterface);
+    int actual = pm.CreateAll(buf, data, &mockInterface, 0);
 
     // Then 1: validate against expected number of segments of each partition type.
     ASSERT_EQ(0, actual);

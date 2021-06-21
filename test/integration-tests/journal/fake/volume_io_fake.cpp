@@ -3,8 +3,8 @@
 
 namespace pos
 {
-VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, std::string arrayName)
-: Ubio(buffer, unitCount, arrayName),
+VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId)
+: Ubio(buffer, unitCount, arrayId),
   volumeId(UINT32_MAX),
   originCore(INVALID_CORE),
   isGc(false)

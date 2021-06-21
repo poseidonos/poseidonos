@@ -45,6 +45,7 @@ class NvmPartition : public Partition
 {
 public:
     NvmPartition(string array,
+                 uint32_t arrayIndex,
                  PartitionType type,
                  PartitionPhysicalSize physicalSize,
                  vector<ArrayDevice*> devs);

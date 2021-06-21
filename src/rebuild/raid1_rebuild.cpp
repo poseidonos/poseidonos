@@ -171,7 +171,9 @@ Raid1Rebuild::Read(void)
         uint32_t stripeId = baseStripe + offset;
         void* buffer = recoverBuffers->TryGetBuffer();
         assert(buffer != nullptr);
-        UbioSmartPtr ubio(new Ubio(buffer, blkCnt * Ubio::UNITS_PER_BLOCK, ctx->array));
+
+
+        UbioSmartPtr ubio(new Ubio(buffer, blkCnt * Ubio::UNITS_PER_BLOCK, ctx->arrayIndex));
         ubio->dir = UbioDir::Write;
         FtBlkAddr fta = {.stripeId = stripeId,
             .offset = ctx->faultIdx * blkCnt};

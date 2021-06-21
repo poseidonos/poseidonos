@@ -51,9 +51,9 @@ TEST(AioCompletion, AioCompletion_Constructor_ThreeArgumentWithFlushIo_Stack)
 {
     // Given
     pos_io posIo;
+    posIo.array_id = 0;
     IOCtx ioContext;
-    string arrayName = "";
-    FlushIoSmartPtr flushIo(new NiceMock<MockFlushIo>(arrayName));
+    FlushIoSmartPtr flushIo(new NiceMock<MockFlushIo>(0));
 
     // When : Create new object in stack
     AioCompletion aioCompletion(flushIo, posIo, ioContext);
@@ -65,9 +65,9 @@ TEST(AioCompletion, AioCompletion_Constructor_ThreeArgumentWithFlushIo_Heap)
 {
     // Given
     pos_io posIo;
+    posIo.array_id = 0;
     IOCtx ioContext;
-    string arrayName = "";
-    FlushIoSmartPtr flushIo(new NiceMock<MockFlushIo>(arrayName));
+    FlushIoSmartPtr flushIo(new NiceMock<MockFlushIo>(0));
 
     // When : Create new object in heap
     AioCompletion* aioCompletion = new AioCompletion(flushIo, posIo, ioContext);
@@ -80,9 +80,9 @@ TEST(AioCompletion, AioCompletion_Constructor_FourArgumentWithFlushIo_Stack)
 {
     // Given
     pos_io posIo;
+    posIo.array_id = 0;
     IOCtx ioContext;
-    string arrayName = "";
-    FlushIoSmartPtr flushIo(new NiceMock<MockFlushIo>(arrayName));
+    FlushIoSmartPtr flushIo(new NiceMock<MockFlushIo>(0));
     MockEventFrameworkApi mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, IsSameReactorNow(_)).WillByDefault(Return(true));
 
@@ -96,9 +96,9 @@ TEST(AioCompletion, AioCompletion_Constructor_ThreeArgumentWithVolumeIo_Stack)
 {
     // Given
     pos_io posIo;
+    posIo.array_id = 0;
     IOCtx ioContext;
-    string arrayName = "";
-    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arrayName));
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
 
     // When : Create new object in stack
     AioCompletion aioCompletion(volumeIo, posIo, ioContext);
@@ -110,9 +110,9 @@ TEST(AioCompletion, AioCompletion_Constructor_FourArgumentWithVolumeIo_Stack)
 {
     // Given
     pos_io posIo;
+    posIo.array_id = 0;
     IOCtx ioContext;
-    string arrayName = "";
-    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arrayName));
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     MockEventFrameworkApi mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, IsSameReactorNow(_)).WillByDefault(Return(true));
 
@@ -126,9 +126,9 @@ TEST(AioCompletion, AioCompletion_DoSpecificJob_IoTypeFlush)
 {
     // Given
     pos_io posIo;
+    posIo.array_id = 0;
     IOCtx ioContext;
-    string arrayName = "";
-    NiceMock<MockFlushIo>* mockFlushIo = new NiceMock<MockFlushIo>(arrayName);
+    NiceMock<MockFlushIo>* mockFlushIo = new NiceMock<MockFlushIo>(0);
     FlushIoSmartPtr flushIo(mockFlushIo);
     MockEventFrameworkApi mockEventFrameworkApi;
     bool expect, actual;
@@ -176,6 +176,7 @@ TEST(AIO, AIO_SubmitAsyncIO_IoTypeInvalidThrow)
 {
     // Given
     pos_io posIo;
+    posIo.array_id = 0;
     AIO aio;
 
     // When : ioType is not write or read or flush
@@ -189,6 +190,7 @@ TEST(AIO, AIO_SubmitAsyncIO_IoTypeFlush)
 {
     // Given
     pos_io posIo;
+    posIo.array_id = 0;
 
     // When : ioType is flush
     posIo.ioType = IO_TYPE::FLUSH;

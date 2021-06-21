@@ -47,9 +47,9 @@ class JournalService;
 class StripeMapUpdate : public Event
 {
 public:
-    explicit StripeMapUpdate(Stripe* stripe, std::string& arrayName);
+    explicit StripeMapUpdate(Stripe* stripe, int arrayId);
     StripeMapUpdate(Stripe* stripe, IStripeMap* iStripeMap, JournalService* journalService,
-        EventScheduler* scheduler, std::string& arrayName);
+        EventScheduler* scheduler, int arrayId);
     virtual ~StripeMapUpdate(void) override;
     virtual bool Execute(void) override;
 
@@ -58,7 +58,7 @@ private:
     IStripeMap* iStripeMap;
     JournalService* journalService;
     EventScheduler* eventScheduler;
-    std::string arrayName;
+    int arrayId;
 };
 
 } // namespace pos

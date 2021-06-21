@@ -83,6 +83,7 @@ public:
     virtual int Load(list<string>& failedArrayList);
     int GetAbrList(vector<ArrayBootRecord>& abrList);
     IArrayInfo* GetArrayInfo(string name);
+    IArrayInfo* GetArrayInfo(uint32_t arrayIdx);
     virtual int ResetMbr(void);
 
 private:

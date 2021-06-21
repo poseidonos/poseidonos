@@ -31,6 +31,7 @@ TEST(AioSubmissionAdapter, Do_SubmitAsyncIO)
 {
     // Given
     pos_io posIo;
+    posIo.array_id = 0;
     posIo.ioType = IO_TYPE::FLUSH;
 
     // When

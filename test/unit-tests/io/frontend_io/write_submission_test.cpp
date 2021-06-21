@@ -3,6 +3,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "src/array_mgmt/array_manager.h"
 #include "src/bio/volume_io.h"
 #include "test/unit-tests/allocator/i_block_allocator_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
@@ -11,6 +12,7 @@
 #include "test/unit-tests/event_scheduler/callback_mock.h"
 #include "test/unit-tests/io/general_io/rba_state_manager_mock.h"
 #include "test/unit-tests/gc/flow_control/flow_control_mock.h"
+
 
 using namespace std;
 using ::testing::_;
@@ -25,12 +27,12 @@ TEST(WriteSubmission, WriteSubmission_Constructor_One)
     char buf[1024];
     std::string arr_name = "";
 
-    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 512 >> SECTOR_SIZE_SHIFT, arr_name);
+    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 512 >> SECTOR_SIZE_SHIFT, 0);
     volumeIo->SetSectorRba(2048);
     volumeIo->SetVolumeId(1);
 
     // when
-    WriteSubmission writeSubmission(volumeIo);
+    //WriteSubmission writeSubmission(volumeIo);
 
     // Then : do noting
 }
@@ -41,16 +43,17 @@ TEST(WriteSubmission, WriteSubmission_Constructor_Three)
     char buf[1024];
     std::string arr_name = "";
 
-    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 512 >> SECTOR_SIZE_SHIFT, arr_name);
+    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 512 >> SECTOR_SIZE_SHIFT, 0);
     volumeIo->SetSectorRba(0);
     volumeIo->SetVolumeId(0);
 
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name, 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
+    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     // when
-    WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator, nullptr, false);
+    WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator, &mockFlowControl, false);
 
     // Then : do noting
 }
@@ -61,7 +64,7 @@ TEST(WriteSubmission, Execute_SingleBlock_ownershipFail)
     char buf[1024];
     std::string arr_name = "";
 
-    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 512 >> SECTOR_SIZE_SHIFT, arr_name);
+    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 512 >> SECTOR_SIZE_SHIFT, 0);
     volumeIo->SetSectorRba(0);
     volumeIo->SetVolumeId(0);
 
@@ -91,11 +94,11 @@ TEST(WriteSubmission, Execute_SingleBlock)
     std::string arr_name = "";
 
     NiceMock<MockAllocatorService> mockAllocatorService;
-    NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name, 0);
+    NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
-    VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arr_name));
+    VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     mockVolumeIo->SetCallback(callback);
 
@@ -128,7 +131,7 @@ TEST(WriteSubmission, Execute_AlgnedMultiBlock)
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
-    VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arr_name));
+    VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     mockVolumeIo->SetCallback(callback);
 
@@ -161,7 +164,7 @@ TEST(WriteSubmission, Execute_MisAlgnedMultiBlock)
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
-    VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, arr_name));
+    VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     mockVolumeIo->SetCallback(callback);
 

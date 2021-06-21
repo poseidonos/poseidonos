@@ -110,9 +110,8 @@ WriteTestCompletion::_DoSpecificJob(void)
 
     std::cout << "5. AsyncIOTest:: Verifying pattern #" << bufferIndex << " start ..." << std::endl;
 
-    std::string arr_name = "arr_name";
     IIOSubmitHandler::GetInstance()->SubmitAsyncIO(IODirection::READ, bufferList,
-        startLSA, readBufferEntry->GetBlkCnt(), USER_DATA, callback, arr_name);
+        startLSA, readBufferEntry->GetBlkCnt(), USER_DATA, callback, 0);
 
     return true;
 }
@@ -200,9 +199,8 @@ IOSubmitHandlerTest::TestSyncIO(void)
             .offset = 0,
         };
 
-        std::string arr_name = "arr_name";
         IIOSubmitHandler::GetInstance()->SyncIO(IODirection::WRITE, bufferList,
-            startLSA, writeBufferEntry[bufferIndex]->GetBlkCnt(), USER_DATA, arr_name);
+            startLSA, writeBufferEntry[bufferIndex]->GetBlkCnt(), USER_DATA, 0);
     }
     std::cout << "3. SyncIOTest:: " << BUFFER_COUNT << " Patterns have been Written ..." << std::endl;
 
@@ -218,9 +216,8 @@ IOSubmitHandlerTest::TestSyncIO(void)
             .offset = 0,
         };
 
-        std::string arr_name = "arr_name";
         IIOSubmitHandler::GetInstance()->SyncIO(IODirection::READ, bufferList,
-            startLSA, readBufferEntry[bufferIndex]->GetBlkCnt(), USER_DATA, arr_name);
+            startLSA, readBufferEntry[bufferIndex]->GetBlkCnt(), USER_DATA, 0);
 
         successful = VerifyPattern(readBufferEntry[bufferIndex]->GetBufferPtr(),
             writeBufferEntry[bufferIndex]->GetBufferPtr(),
@@ -292,10 +289,9 @@ IOSubmitHandlerTest::TestAsyncIO(void)
                 writeBufferEntry[bufferIndex], readBufferEntry[bufferIndex]));
 
         std::cout << "3. AsyncIOTest:: Writing pattern #" << bufferIndex << " start ..." << std::endl;
-        std::string arr_name = "arr_name";
         IIOSubmitHandler::GetInstance()->SubmitAsyncIO(IODirection::WRITE, bufferList,
             startLSA, writeBufferEntry[bufferIndex]->GetBlkCnt(), USER_DATA,
-            callback, arr_name);
+            callback, 0);
     }
 
     // wait until all done.

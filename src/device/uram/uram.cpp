@@ -134,7 +134,7 @@ UramBdev::_RecoverBackup(DeviceContext* deviceContext)
         for (uint64_t pageIndex = 0; pageIndex < pageCountBackup; pageIndex++)
         {
             UbioSmartPtr ubio(new Ubio(nullptr,
-                DivideUp(bytesPerHugepage, Ubio::BYTES_PER_UNIT), ""));
+                DivideUp(bytesPerHugepage, Ubio::BYTES_PER_UNIT), 0));
             ubio->dir = UbioDir::Write;
             ubio->SetLba(pageIndex * unitsPerHugepage);
             ubio->SetUblock(shared_from_this());

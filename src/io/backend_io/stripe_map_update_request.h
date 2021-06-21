@@ -47,8 +47,8 @@ class EventScheduler;
 class StripeMapUpdateRequest : public Callback
 {
 public:
-    explicit StripeMapUpdateRequest(Stripe* stripe, std::string& arrayName);
-    StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* eventScheduler, EventSmartPtr event, std::string& arrayName);
+    explicit StripeMapUpdateRequest(Stripe* stripe, int arrayId);
+    StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* eventScheduler, EventSmartPtr event, int arrayId);
     ~StripeMapUpdateRequest(void) override;
 
 private:
@@ -57,7 +57,6 @@ private:
     IStripeMap* iStripeMap;
     EventScheduler* eventScheduler;
     EventSmartPtr event;
-    std::string arrayName;
 };
 
 } // namespace pos

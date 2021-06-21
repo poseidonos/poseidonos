@@ -40,10 +40,11 @@
 namespace pos
 {
 NvmPartition::NvmPartition(string array,
+    uint32_t arrayIndex,
     PartitionType type,
     PartitionPhysicalSize physicalSize,
     vector<ArrayDevice*> devs)
-: Partition(array, type, physicalSize, devs, nullptr)
+: Partition(array, arrayIndex, type, physicalSize, devs, nullptr)
 {
     logicalSize_.minWriteBlkCnt = 1;
     logicalSize_.blksPerChunk = physicalSize.blksPerChunk;

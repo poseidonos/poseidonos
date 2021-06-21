@@ -63,13 +63,13 @@ BlockMapUpdateCompletion::BlockMapUpdateCompletion(VolumeIoSmartPtr inputVolumeI
     CallbackSmartPtr originCallback)
 : BlockMapUpdateCompletion(
     inputVolumeIo, originCallback, EventFrameworkApiSingleton::Instance()->IsReactorNow(),
-    MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayName()),
+    MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayId()),
     EventSchedulerSingleton::Instance(),
     std::make_shared<WriteCompletion>(inputVolumeIo),
-    AllocatorServiceSingleton::Instance()->GetIBlockAllocator(inputVolumeIo->GetArrayName()),
-    AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(inputVolumeIo->GetArrayName()),
+    AllocatorServiceSingleton::Instance()->GetIBlockAllocator(inputVolumeIo->GetArrayId()),
+    AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(inputVolumeIo->GetArrayId()),
     new VsaRangeMaker(inputVolumeIo->GetVolumeId(), ChangeSectorToBlock(inputVolumeIo->GetSectorRba()),
-        DivideUp(inputVolumeIo->GetSize(), BLOCK_SIZE), inputVolumeIo->IsGc(), inputVolumeIo->GetArrayName()))
+        DivideUp(inputVolumeIo->GetSize(), BLOCK_SIZE), inputVolumeIo->IsGc(), inputVolumeIo->GetArrayId()))
 {
 }
 

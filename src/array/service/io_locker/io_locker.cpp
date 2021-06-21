@@ -160,7 +160,9 @@ IOLocker::Unregister(unsigned int arrayIndex)
 {
     if (lockers[arrayIndex] != nullptr)
     {
-        delete lockers[arrayIndex];
+        /* new register method with array index : need enable after using array Idx
+        delete lockers[arrayIndex];*/
+
         lockers[arrayIndex] = nullptr;
         POS_TRACE_INFO((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
             "StripeLocker::Unregister, array:{}", arrayIndex);

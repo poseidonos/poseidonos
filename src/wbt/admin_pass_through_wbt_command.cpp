@@ -73,7 +73,7 @@ AdminPassThrough::Execute(Args& argv, JsonElement& elem)
 
         if (nullptr != targetDevice)
         {
-            UbioSmartPtr ubio(new Ubio(nullptr, unitCount, arrayName));
+            UbioSmartPtr ubio(new Ubio(nullptr, unitCount, 0));
             ubio->dir = UbioDir::AdminPassTh;
             ubio->SetLba(0);
             ubio->SetUblock(targetDevice);

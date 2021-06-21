@@ -71,7 +71,7 @@ TEST(NvmPartition, NvmPartition_testIfConstructorInitializesLogicalSizeProperly)
     vector<ArrayDevice*> devs;
 
     // When
-    NvmPartition nvmPart("mock-array", PartitionType::META_NVM, partPhySize, devs);
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
 
     // Then
     const PartitionLogicalSize* pLogicalSize = nvmPart.GetLogicalSize();
@@ -96,7 +96,7 @@ TEST(NvmPartition, Translate_testIfInvalidAddressReturnsError)
     LogicalBlkAddr invalidAddr = buildInvalidLogicalBlkAddr(totalStripes);
     vector<ArrayDevice*> devs;
 
-    NvmPartition nvmPart("mock-array", PartitionType::META_NVM, partPhySize, devs);
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     PhysicalBlkAddr ignored;
 
     // When
@@ -121,7 +121,7 @@ TEST(NvmPartition, Translate_testIfValidAddressIsFilledIn)
     vector<ArrayDevice*> devs;
     devs.push_back(nullptr); // putting dummy 'cause I'm not interested
 
-    NvmPartition nvmPart("mock-array", PartitionType::META_NVM, partPhySize, devs);
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     PhysicalBlkAddr dest;
 
     // When
@@ -147,7 +147,7 @@ TEST(NvmPartition, Convert_testIfInvalidEntryReturnsError)
     uint32_t blksPerStripe = partPhySize.blksPerChunk * partPhySize.chunksPerStripe;
     LogicalWriteEntry invalidEntry = buildInvalidLogicalWriteEntry(totalStripes, blksPerStripe);
     vector<ArrayDevice*> devs;
-    NvmPartition nvmPart("mock-array", PartitionType::META_NVM, partPhySize, devs);
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     std::list<PhysicalWriteEntry> ignored;
 
     // When
@@ -171,7 +171,7 @@ TEST(NvmPartition, Convert_testIfValidEntryIsFilledIn)
     LogicalWriteEntry validEntry = buildValidLogicalWriteEntry(totalStripes, blksPerStripe);
     vector<ArrayDevice*> devs;
     devs.push_back(nullptr); // 'cause I'm not interested
-    NvmPartition nvmPart("mock-array", PartitionType::META_NVM, partPhySize, devs);
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     std::list<PhysicalWriteEntry> dest;
 
     // When

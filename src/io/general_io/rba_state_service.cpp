@@ -45,61 +45,50 @@ RBAStateService::~RBAStateService(void)
 {
 }
 
-RBAStateManager*
-RBAStateService::_Find(std::string arrayName)
+void
+RBAStateService::Register(int arrayId, RBAStateManager* mgr)
 {
-    if (arrayName == "" && rbaStateManagers.size() == 1)
+    if (items[arrayId] != nullptr)
     {
-        return rbaStateManagers.begin()->second;
+        POS_TRACE_ERROR(9999,
+            "RBA State manager for array {} already exists", arrayId);
     }
 
-    auto found = rbaStateManagers.find(arrayName);
-    if (found == rbaStateManagers.end())
-    {
-        return nullptr;
-    }
-    else
-    {
-        return found->second;
-    }
+    items[arrayId] = mgr;
+    POS_TRACE_DEBUG(9999, "RBA State manager for array {} is registered", arrayId);
 }
 
 void
-RBAStateService::Register(std::string arrayName, RBAStateManager* mgr)
+RBAStateService::Unregister(int arrayId)
 {
-    if (rbaStateManagers.find(arrayName) == rbaStateManagers.end())
-    {
-        rbaStateManagers.emplace(arrayName, mgr);
-        POS_TRACE_DEBUG(9999,
-            "RBA State manager for array {} is registered", arrayName);
-    }
-    else
+    if (items[arrayId] == nullptr)
     {
         POS_TRACE_ERROR(9999,
-            "RBA State manager for array {} already exists", arrayName);
+            "RBA State manager for array {} does not exist", arrayId);
     }
-}
 
-void
-RBAStateService::Unregister(std::string arrayName)
-{
-    if (rbaStateManagers.find(arrayName) != rbaStateManagers.end())
-    {
-        rbaStateManagers.erase(arrayName);
-        POS_TRACE_DEBUG(9999,
-            "RBA State manager for array {} is unregistered", arrayName);
-    }
-    else
-    {
-        POS_TRACE_ERROR(9999,
-            "RBA State manager for array {} does not exist", arrayName);
-    }
+    items[arrayId] = nullptr;
+
+    POS_TRACE_DEBUG(9999, "RBA State manager for array {} is unregistered", arrayId);
 }
 
 RBAStateManager*
 RBAStateService::GetRBAStateManager(std::string arrayName)
 {
-    return _Find(arrayName);
+    for (int arrayId = 0 ; arrayId < ArrayMgmtPolicy::MAX_ARRAY_CNT; arrayId++)
+    {
+        if (items[arrayId]->GetArrayName() == arrayName)
+        {
+            return items[arrayId];
+        }
+    }
+    return nullptr;
+}
+
+RBAStateManager*
+RBAStateService::GetRBAStateManager(int arrayId)
+{
+    return items[arrayId];
 }
 
 } // namespace pos

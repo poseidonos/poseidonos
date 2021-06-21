@@ -169,7 +169,7 @@ NvmeCliCommand::_NvmeGetLogPage(UblockSharedPtr* targetDevice, Args& argv, void*
     int returnValue = -1;
     std::string arrayName = _GetParameter(argv, "array");
 
-    UbioSmartPtr ubio(new Ubio(buffer, unitCount, arrayName));
+    UbioSmartPtr ubio(new Ubio(buffer, unitCount, 0));
 
     struct spdk_nvme_cmd cmd;
     {

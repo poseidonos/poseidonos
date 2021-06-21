@@ -49,8 +49,8 @@ class IIOTranslator;
 class FlushSubmission : public Event
 {
 public:
-    FlushSubmission(Stripe* inputStripe, std::string& arrayName);
-    FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, std::string& arrayName,
+    FlushSubmission(Stripe* inputStripe, int arrayId);
+    FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, int arrayId,
         IIOTranslator* translator);
     ~FlushSubmission() override;
     bool Execute(void) override;
@@ -61,7 +61,7 @@ private:
     IWBStripeAllocator* iWBStripeAllocator;
     IIOSubmitHandler* iIOSubmitHandler;
     std::list<BufferEntry> bufferList;
-    std::string arrayName;
+    int arrayId;
     IIOTranslator* translator;
 };
 

@@ -336,7 +336,7 @@ void
 MbrManager::_DiskIo(UblockSharedPtr dev, void* ctx)
 {
     struct DiskIoContext* ctxt = static_cast<struct DiskIoContext*>(ctx);
-    UbioSmartPtr bio(new Ubio(ctxt->mem, MBR_BLOCKS * Ubio::UNITS_PER_BLOCK, ""));
+    UbioSmartPtr bio(new Ubio(ctxt->mem, MBR_BLOCKS * Ubio::UNITS_PER_BLOCK, 0));
 
     bio->dir = ctxt->ubioDir;
     bio->SetLba(MBR_ADDRESS);

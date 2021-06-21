@@ -60,7 +60,7 @@ BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr 
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback)
 : BlockMapUpdate(
     inputVolumeIo, originCallback, EventFrameworkApiSingleton::Instance()->IsReactorNow(),
-    MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayName()),
+    MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayId()),
     JournalServiceSingleton::Instance(),
     EventSchedulerSingleton::Instance(),
     std::make_shared<BlockMapUpdateCompletion>(inputVolumeIo, originCallback))
@@ -72,9 +72,9 @@ BlockMapUpdate::Execute(void)
 {
     bool executionSuccessful = false;
 
-    if (journalService->IsEnabled(volumeIo->GetArrayName()))
+    if (journalService->IsEnabled(volumeIo->GetArrayId()))
     {
-        IJournalWriter* journal = journalService->GetWriter(volumeIo->GetArrayName());
+        IJournalWriter* journal = journalService->GetWriter(volumeIo->GetArrayId());
 
         MpageList dirty = _GetDirtyPages(volumeIo);
         int result = journal->AddBlockMapUpdatedLog(volumeIo, dirty, blockMapUpdateCompletionEvent);

@@ -604,7 +604,7 @@ WBStripeManager::FinalizeWriteIO(std::vector<Stripe*>& stripesToFlush, std::vect
 int
 WBStripeManager::_RequestStripeFlush(Stripe* stripe)
 {
-    EventSmartPtr event(new FlushSubmission(stripe, arrayName));
+    EventSmartPtr event(new FlushSubmission(stripe, arrayId));
     return stripe->Flush(event);
 }
 

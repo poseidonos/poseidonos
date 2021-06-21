@@ -36,6 +36,7 @@
 #include <unordered_map>
 
 #include "rba_state_manager.h"
+#include "src/include/array_mgmt_policy.h"
 #include "src/lib/singleton.h"
 
 namespace pos
@@ -45,13 +46,14 @@ class RBAStateService
 public:
     RBAStateService(void);
     virtual ~RBAStateService(void);
-    void Register(std::string arrayName, RBAStateManager* writer);
-    void Unregister(std::string arrayName);
+    void Register(int arrayId, RBAStateManager* writer);
+    void Unregister(int arrayId);
     RBAStateManager* GetRBAStateManager(std::string arrayName);
+    RBAStateManager* GetRBAStateManager(int arrayId);
 
 private:
-    RBAStateManager* _Find(std::string arrayName);
-    std::unordered_map<std::string, RBAStateManager*> rbaStateManagers;
+    int volumeManagerCnt;
+    RBAStateManager* items[ArrayMgmtPolicy::MAX_ARRAY_CNT];
 };
 
 using RBAStateServiceSingleton = Singleton<RBAStateService>;

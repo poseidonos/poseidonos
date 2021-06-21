@@ -39,6 +39,8 @@
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
 #include "src/state/state_manager.h"
+/*To do Remove after adding array Idx by Array*/
+#include "src/array_mgmt/array_manager.h"
 
 #include <string>
 
@@ -103,7 +105,7 @@ MergedIO::IsContiguous(PhysicalBlkAddr& targetPba)
 }
 
 IOSubmitHandlerStatus
-MergedIO::Process(std::string& arrayName)
+MergedIO::Process(int arrayId)
 {
     IOSubmitHandlerStatus status = IOSubmitHandlerStatus::SUCCESS;
 
@@ -111,7 +113,7 @@ MergedIO::Process(std::string& arrayName)
     {
         uint32_t blockCount = bufferEntry->GetBlkCnt();
         UbioSmartPtr ubio(new Ubio(bufferEntry->GetBufferPtr(),
-            blockCount * Ubio::UNITS_PER_BLOCK, arrayName));
+            blockCount * Ubio::UNITS_PER_BLOCK, arrayId));
         ubio->SetPba(startPba);
 
         CallbackSmartPtr event(new InternalReadCompletion(blockCount));
@@ -123,7 +125,7 @@ MergedIO::Process(std::string& arrayName)
         if (ioDispatcher->Submit(ubio) < 0)
         {
             IOSubmitHandlerStatus status =
-                _CheckAsyncReadError(POS_EVENT_ID::REF_COUNT_RAISE_FAIL, arrayName);
+                _CheckAsyncReadError(POS_EVENT_ID::REF_COUNT_RAISE_FAIL, arrayId);
             return status;
         }
     }
@@ -132,11 +134,14 @@ MergedIO::Process(std::string& arrayName)
 }
 
 IOSubmitHandlerStatus
-MergedIO::_CheckAsyncReadError(POS_EVENT_ID eventId, const std::string& arrayName)
+MergedIO::_CheckAsyncReadError(POS_EVENT_ID eventId, int arrayId)
 {
     if (StateEnum::TYPE_COUNT == stateType)
     {
-        IStateControl* stateControl = StateManagerSingleton::Instance()->GetStateControl(arrayName);
+        /*To do Remove after adding array Idx by Array*/
+        IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayId);
+
+        IStateControl* stateControl = StateManagerSingleton::Instance()->GetStateControl(info->GetName());
         stateType = stateControl->GetState()->ToStateType();
     }
 

@@ -54,21 +54,23 @@ const char* PARTITION_TYPE_STR[4] = {
 
 StripePartition::StripePartition(
     string array,
+    uint32_t arrayIndex,
     PartitionType type,
     PartitionPhysicalSize physicalSize,
     vector<ArrayDevice*> devs,
     Method* method)
-: StripePartition(array, type, physicalSize, devs, method, IODispatcherSingleton::Instance())
+: StripePartition(array, arrayIndex, type, physicalSize, devs, method, IODispatcherSingleton::Instance())
 {}
 
 StripePartition::StripePartition(
     string array,
+    uint32_t arrayIndex,
     PartitionType type,
     PartitionPhysicalSize physicalSize,
     vector<ArrayDevice*> devs,
     Method* method,
     IODispatcher* ioDispatcher)
-: Partition(array, type, physicalSize, devs, method),
+: Partition(array, arrayIndex, type, physicalSize, devs, method),
   ioDispatcher_(ioDispatcher)
 {
     _SetLogicalSize();
@@ -306,6 +308,7 @@ StripePartition::GetRebuildCtx(ArrayDevice* fault)
         unique_ptr<RebuildContext> ctx(new RebuildContext());
         ctx->raidType = method_->GetRaidType();
         ctx->array = arrayName_;
+        ctx->arrayIndex = arrayIndex_;
         ctx->part = PARTITION_TYPE_STR[type_];
         ctx->faultIdx = index;
         ctx->stripeCnt = logicalSize_.totalStripes;
@@ -352,7 +355,7 @@ StripePartition::_Trim(void)
             unitCount = totalUnitCount % ubioUnit;
         }
 
-        UbioSmartPtr ubio(new Ubio(dummyBuffer, unitCount, arrayName_));
+        UbioSmartPtr ubio(new Ubio(dummyBuffer, unitCount, arrayIndex_));
         ubio->dir = UbioDir::Deallocate;
 
         for (uint32_t i = 0; i < devs_.size(); i++)
@@ -418,7 +421,7 @@ StripePartition::_CheckTrimValue(void)
     int result = 0;
     int nonZeroResult = 0;
 
-    UbioSmartPtr readUbio(new Ubio(readbuffer, readUnitCount, arrayName_));
+    UbioSmartPtr readUbio(new Ubio(readbuffer, readUnitCount, arrayIndex_));
     for (uint32_t i = 0; i < devs_.size(); i++)
     {
         PhysicalBlkAddr pba = {

@@ -160,7 +160,7 @@ TEST(Ubio, SetUblock_)
 TEST(Ubio, NeedRecovery_testIfIODoesNotGoToRecoveryWhenArrayDeviceIsNullptr)
 {
     // Given
-    Ubio ubio(nullptr, 0, "mock-array");
+    Ubio ubio(nullptr, 0, 0);
     PhysicalBlkAddr pba;
     pba.lba = 0;
     pba.arrayDev = nullptr;
@@ -174,7 +174,7 @@ TEST(Ubio, NeedRecovery_testIfIODoesNotGoToRecoveryWhenArrayDeviceIsNullptr)
 TEST(Ubio, NeedRecovery_testIfIODoesNotGoToRecoveryWhenIOIsSyncMode)
 {
     // Given
-    Ubio ubio(nullptr, 0, "mock-array");
+    Ubio ubio(nullptr, 0, 0);
     PhysicalBlkAddr pba;
     MockArrayDevice* dev = new MockArrayDevice(nullptr);
     pba.lba = 0;
@@ -194,7 +194,7 @@ TEST(Ubio, NeedRecovery_testIfIODoesNotGoToRecoveryWhenIOIsSyncMode)
 TEST(Ubio, NeedRecovery_testIfIOGoesToRecoveryWhenArrayDeviceIsFault)
 {
     // Given
-    Ubio ubio(nullptr, 0, "mock-array");
+    Ubio ubio(nullptr, 0, 0);
     MockArrayDevice* dev = new MockArrayDevice(nullptr);
     PhysicalBlkAddr pba;
     pba.lba = 0;
@@ -213,7 +213,7 @@ TEST(Ubio, NeedRecovery_testIfIOGoesToRecoveryWhenArrayDeviceIsFault)
 TEST(Ubio, NeedRecovery_testIfIOGoesToRecoveryWhenReadingOnRebuildingDevice)
 {
     // Given
-    Ubio ubio(nullptr, 0, "mock-array");
+    Ubio ubio(nullptr, 0, 0);
     MockArrayDevice* dev = new MockArrayDevice(nullptr);
     PhysicalBlkAddr pba;
     pba.lba = 0;
@@ -232,7 +232,7 @@ TEST(Ubio, NeedRecovery_testIfIOGoesToRecoveryWhenReadingOnRebuildingDevice)
 TEST(Ubio, NeedRecovery_testIfIODoesNotGoToRecoveryWhenWritingOnRebuildingDevice)
 {
     // Given
-    Ubio ubio(nullptr, 0, "mock-array");
+    Ubio ubio(nullptr, 0, 0);
     MockUBlockDevice *ublock = new MockUBlockDevice("", 0, nullptr);
     UblockSharedPtr devSharedPtr(ublock);
     MockArrayDevice* dev = new MockArrayDevice(nullptr);
@@ -255,7 +255,7 @@ TEST(Ubio, NeedRecovery_testIfIODoesNotGoToRecoveryWhenWritingOnRebuildingDevice
 TEST(Ubio, NeedRecovery_testIfIODoesNotGoToRecoveryWhenTrimming)
 {
     // Given
-    Ubio ubio(nullptr, 0, "mock-array");
+    Ubio ubio(nullptr, 0, 0);
     MockUBlockDevice *ublock = new MockUBlockDevice("", 0, nullptr);
     UblockSharedPtr devSharedPtr(ublock);
     MockArrayDevice* dev = new MockArrayDevice(nullptr);
@@ -278,7 +278,7 @@ TEST(Ubio, NeedRecovery_testIfIODoesNotGoToRecoveryWhenTrimming)
 TEST(Ubio, NeedRecovery_testIfIODoesNotGoToRecoveryWhenReadingOnNormalDevice)
 {
     // Given
-    Ubio ubio(nullptr, 0, "mock-array");
+    Ubio ubio(nullptr, 0, 0);
     MockUBlockDevice *ublock = new MockUBlockDevice("", 0, nullptr);
     UblockSharedPtr devSharedPtr(ublock);
     MockArrayDevice* dev = new MockArrayDevice(nullptr);

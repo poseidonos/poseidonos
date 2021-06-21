@@ -84,7 +84,7 @@ ReadCompletion::_DoSpecificJob(void)
         StripeAddr lsidEntry = volumeIo->GetLsidEntry();
         if (false == IsUnMapStripe(lsidEntry.stripeId))
         {
-            IWBStripeAllocator* iWBStripeAllocator = allocatorService->GetIWBStripeAllocator(volumeIo->GetArrayName());
+            IWBStripeAllocator* iWBStripeAllocator = allocatorService->GetIWBStripeAllocator(volumeIo->GetArrayId());
             uint64_t byteRba = ChangeSectorToByte(volumeIo->GetSectorRba());
             BlockAlignment blockAlignment(byteRba, volumeIo->GetSize());
             uint32_t blockCount = blockAlignment.GetBlockCount();

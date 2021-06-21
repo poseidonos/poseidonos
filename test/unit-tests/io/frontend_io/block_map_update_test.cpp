@@ -36,7 +36,7 @@ TEST(BlockMapUpdate, Constructor_Stack)
     NiceMock<MockMapperService> mockMapperService;
     NiceMock<MockJournalService> mockJournalService;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, ""));
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, 0));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIVSAMap> mockIVSAMap;
     CallbackSmartPtr mockWriteCompletion = std::make_shared<MockWriteCompletion>(volumeIo);
@@ -49,7 +49,7 @@ TEST(BlockMapUpdate, Constructor_Stack)
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     NiceMock<MockIVSAMap> vsaMap;
 
-    ON_CALL(mockMapperService, GetIVSAMap(Matcher<std::string>(_))).WillByDefault(Return(&vsaMap));
+    ON_CALL(mockMapperService, GetIVSAMap(Matcher<int>(_))).WillByDefault(Return(&vsaMap));
     // When
     BlockMapUpdate blockMapUpdate(
         volumeIo, callback, isReactorNow,
@@ -65,7 +65,7 @@ TEST(BlockMapUpdate, Constructor_Heap)
     NiceMock<MockMapperService> mockMapperService;
     NiceMock<MockJournalService> mockJournalService;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, ""));
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, 0));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIVSAMap> mockIVSAMap;
     CallbackSmartPtr mockWriteCompletion = std::make_shared<MockWriteCompletion>(volumeIo);
@@ -78,7 +78,7 @@ TEST(BlockMapUpdate, Constructor_Heap)
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     NiceMock<MockIVSAMap> vsaMap;
 
-    ON_CALL(mockMapperService, GetIVSAMap(Matcher<std::string>(_))).WillByDefault(Return(&vsaMap));
+    ON_CALL(mockMapperService, GetIVSAMap(Matcher<int>(_))).WillByDefault(Return(&vsaMap));
 
     // When
     BlockMapUpdate* blockMapUpdate = new BlockMapUpdate(
@@ -98,7 +98,7 @@ TEST(BlockMapUpdate, Execute_Journal_Enabled)
     NiceMock<MockJournalService> mockJournalService;
     NiceMock<MockIJournalWriter> mockJournalWriter;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, "");
+    NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIVSAMap> mockIVSAMap;
@@ -115,9 +115,9 @@ TEST(BlockMapUpdate, Execute_Journal_Enabled)
     NiceMock<MockIVSAMap> vsaMap;
 
     // When : journal is enabled
-    ON_CALL(mockMapperService, GetIVSAMap(Matcher<std::string>(_))).WillByDefault(Return(&vsaMap));
-    ON_CALL(mockJournalService, IsEnabled(Matcher<std::string>(_))).WillByDefault(Return(true));
-    ON_CALL(mockJournalService, GetWriter(Matcher<std::string>(_))).WillByDefault(Return(&mockJournalWriter));
+    ON_CALL(mockMapperService, GetIVSAMap(Matcher<int>(_))).WillByDefault(Return(&vsaMap));
+    ON_CALL(mockJournalService, IsEnabled(Matcher<int>(_))).WillByDefault(Return(true));
+    ON_CALL(mockJournalService, GetWriter(Matcher<int>(_))).WillByDefault(Return(&mockJournalWriter));
     ON_CALL(vsaMap, GetDirtyVsaMapPages(_, _, _)).WillByDefault(Return(mPageList));
     ON_CALL(mockJournalWriter, AddBlockMapUpdatedLog(_, _, _)).WillByDefault(Return(0));
     ON_CALL(*mockVolumeIo, GetSectorRba()).WillByDefault(Return(0));
@@ -142,7 +142,7 @@ TEST(BlockMapUpdate, Execute_Journal_Enabled_Fail)
     NiceMock<MockJournalService> mockJournalService;
     NiceMock<MockIJournalWriter> mockJournalWriter;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, "");
+    NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIVSAMap> mockIVSAMap;
@@ -159,9 +159,9 @@ TEST(BlockMapUpdate, Execute_Journal_Enabled_Fail)
     NiceMock<MockIVSAMap> vsaMap;
 
     // When : journal is enabled
-    ON_CALL(mockMapperService, GetIVSAMap(Matcher<std::string>(_))).WillByDefault(Return(&vsaMap));
-    ON_CALL(mockJournalService, IsEnabled(Matcher<std::string>(_))).WillByDefault(Return(true));
-    ON_CALL(mockJournalService, GetWriter(Matcher<std::string>(_))).WillByDefault(Return(&mockJournalWriter));
+    ON_CALL(mockMapperService, GetIVSAMap(Matcher<int>(_))).WillByDefault(Return(&vsaMap));
+    ON_CALL(mockJournalService, IsEnabled(Matcher<int>(_))).WillByDefault(Return(true));
+    ON_CALL(mockJournalService, GetWriter(Matcher<int>(_))).WillByDefault(Return(&mockJournalWriter));
     ON_CALL(vsaMap, GetDirtyVsaMapPages(_, _, _)).WillByDefault(Return(mPageList));
     ON_CALL(mockJournalWriter, AddBlockMapUpdatedLog(_, _, _)).WillByDefault(Return(-1));
     ON_CALL(*mockVolumeIo, GetSectorRba()).WillByDefault(Return(0));
@@ -191,7 +191,7 @@ TEST(BlockMapUpdate, Execute_Journal_Not_Enabled)
     NiceMock<MockJournalService> mockJournalService;
     NiceMock<MockIJournalWriter> mockJournalWriter;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, "");
+    NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIVSAMap> mockIVSAMap;
@@ -207,8 +207,8 @@ TEST(BlockMapUpdate, Execute_Journal_Not_Enabled)
 
     // When : journal is not enabled
     ON_CALL(*mockVolumeIo, GetSectorRba()).WillByDefault(Return(0));
-    ON_CALL(mockMapperService, GetIVSAMap(Matcher<std::string>(_))).WillByDefault(Return(&mockIVSAMap));
-    ON_CALL(mockJournalService, IsEnabled(Matcher<std::string>(_))).WillByDefault(Return(false));
+    ON_CALL(mockMapperService, GetIVSAMap(Matcher<int>(_))).WillByDefault(Return(&mockIVSAMap));
+    ON_CALL(mockJournalService, IsEnabled(Matcher<int>(_))).WillByDefault(Return(false));
     ON_CALL(*mockBlockMapUpdateCompletion, Execute()).WillByDefault(Return(true));
 
     BlockMapUpdate blockMapUpdate(
@@ -229,7 +229,7 @@ TEST(BlockMapUpdate, Execute_Journal_Not_Enabled_Fail)
     NiceMock<MockJournalService> mockJournalService;
     NiceMock<MockIJournalWriter> mockJournalWriter;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, "");
+    NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIVSAMap> mockIVSAMap;
@@ -244,7 +244,7 @@ TEST(BlockMapUpdate, Execute_Journal_Not_Enabled_Fail)
         &iBlockAllocator, &mockIWBStripeAllocator, mockVsaRangeMaker);
     EventSmartPtr mockBlockMapUpdateCompletionEvent(mockBlockMapUpdateCompletion);
 
-    ON_CALL(mockJournalService, IsEnabled(Matcher<std::string>(_))).WillByDefault(Return(false));
+    ON_CALL(mockJournalService, IsEnabled(Matcher<int>(_))).WillByDefault(Return(false));
     ON_CALL(*mockBlockMapUpdateCompletion, Execute()).WillByDefault(Return(false));
     ON_CALL(*mockVolumeIo, GetSectorRba()).WillByDefault(Return(0));
     // When

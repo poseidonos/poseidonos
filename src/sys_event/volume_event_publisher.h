@@ -51,28 +51,22 @@ class VolumeEventPublisher
 public:
     VolumeEventPublisher(void);
     virtual ~VolumeEventPublisher(void);
-    void RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayID);
-    void RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayID);
+    void RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayId);
+    void RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayId);
     bool NotifyVolumeCreated(std::string volName, int volID,
-        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID);
+        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId);
     bool NotifyVolumeUpdated(std::string volName, int volID,
-        uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID);
-    bool NotifyVolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayID);
+        uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId);
+    bool NotifyVolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayId);
     bool NotifyVolumeMounted(std::string volName, std::string subnqn, int volID,
-        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID);
-    bool NotifyVolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID);
+        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId);
+    bool NotifyVolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayId);
     bool NotifyVolumeLoaded(std::string name, int id,
-        uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID);
-    void NotifyVolumeDetached(vector<int> volList, std::string arrayName, int arrayID);
-
-    int RemoveArrayIdx(std::string arrayName);
-    int GetArrayIdx(std::string arrayName);
+        uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId);
+    void NotifyVolumeDetached(vector<int> volList, std::string arrayName, int arrayId);
 
 private:
-    int _SetArrayIdx(std::string arrayName);
-
     vector<std::pair<int, VolumeEvent*>> subscribers;
-    std::string arrayNameList[ArrayMgmtPolicy::MAX_ARRAY_CNT];
     VolumeEvent* qosManagerVolumeEvent;
 };
 

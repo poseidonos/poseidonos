@@ -23,7 +23,7 @@ TEST(IoRecoveryEvent, IoRecoveryEvent_Stack)
 {
     // Given: Minimum ubio setting for IoRecoveryEvent's parameter
     int buf[10];
-    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, "arr");
+    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, 0);
 
     // When: Try to create a local IoRecoveryEvent object with 1 argument
     IoRecoveryEvent ioRecoveryEvent{ubio};
@@ -35,7 +35,7 @@ TEST(IoRecoveryEvent, IoRecoveryEvent_Heap)
 {
     // Given: Minimum ubio setting for IoRecoveryEvent's parameter
     int buf[10];
-    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, "arr");
+    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, 0);
 
     // When: Try to create a dynamic IoRecoveryEvent object with 1 argument
     IoRecoveryEvent* ioRecoveryEvent = new IoRecoveryEvent{ubio};
@@ -48,7 +48,7 @@ TEST(IoRecoveryEvent, Execute_ReadWithoutRecovery)
 {
     // Given: ubio setting for read type testing & IoCompleter mocking
     int buf[10];
-    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, "arr");
+    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, 0);
     ubio->dir = UbioDir::Read;
     ubio->SetError(IOErrorType::GENERIC_ERROR);
     NiceMock<MockIoCompleter> mockIoCompleter{ubio};
@@ -70,7 +70,7 @@ TEST(IoRecoveryEvent, Execute_WriteWithoutRecovery)
 {
     // Given: ubio setting for write type testing & IoCompleter mocking
     int buf[10];
-    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, "arr");
+    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, 0);
     ubio->dir = UbioDir::Write;
     ubio->SetError(IOErrorType::TRANSPORT_FAIL);
     NiceMock<MockIoCompleter> mockIoCompleter{ubio};
@@ -92,7 +92,7 @@ TEST(IoRecoveryEvent, Execute_WriteUncorWithoutRecovery)
 {
     // Given: ubio setting for write uncor type testing & IoCompleter mocking
     int buf[10];
-    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, "arr");
+    UbioSmartPtr ubio = std::make_shared<Ubio>((void*)buf, 10, 0);
     ubio->dir = UbioDir::WriteUncor;
     ubio->SetError(IOErrorType::DEVICE_ERROR);
     NiceMock<MockIoCompleter> mockIoCompleter{ubio};

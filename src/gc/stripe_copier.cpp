@@ -161,7 +161,7 @@ StripeCopier::CopyEvent::Execute(void)
             buffer, meta,
             stripeId));
     callback->SetEventType(BackendEvent_GC);
-    IIOSubmitHandler::GetInstance()->SubmitAsyncIO(IODirection::READ,
+        IIOSubmitHandler::GetInstance()->SubmitAsyncIO(IODirection::READ,
         bufferList, lsa, numPage,
         partitionType, callback, arrayName);
     return true;

@@ -217,6 +217,20 @@ ArrayManager::GetArrayInfo(string name)
     }
 }
 
+IArrayInfo*
+ArrayManager::GetArrayInfo(uint32_t arrayIdx)
+{
+    for (auto iter = arrayList.begin(); iter != arrayList.end(); iter++)
+    {
+        if (iter->second->GetArray()->GetIndex() == arrayIdx)
+        {
+            return iter->second->GetArray();
+        }
+    }
+
+    return nullptr;
+}
+
 int
 ArrayManager::PrepareRebuild(string name, bool& resume)
 {

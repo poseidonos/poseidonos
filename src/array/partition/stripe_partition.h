@@ -53,11 +53,13 @@ class StripePartition : public Partition, public IRecover, public RebuildTarget
 
 public:
     StripePartition(string array,
+                    uint32_t arrayIndex,
                     PartitionType type,
                     PartitionPhysicalSize physicalSize,
                     vector<ArrayDevice *> devs,
                     Method *method);
     StripePartition(string array,
+                    uint32_t arrayIndex,
                     PartitionType type,
                     PartitionPhysicalSize physicalSize,
                     vector<ArrayDevice *> devs,

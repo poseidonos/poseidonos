@@ -495,7 +495,7 @@ int
 Array::_CreatePartitions(void)
 {
     DeviceSet<ArrayDevice*> devs = devMgr_->Export();
-    return ptnMgr->CreateAll(devs.nvm, devs.data, intf);
+    return ptnMgr->CreateAll(devs.nvm, devs.data, intf, index_);
 }
 
 void
@@ -508,7 +508,7 @@ void
 Array::_FormatMetaPartition(void)
 {
     DeviceSet<ArrayDevice*> devs = devMgr_->Export();
-    ptnMgr->FormatMetaPartition(devs.data, intf);
+    ptnMgr->FormatMetaPartition(devs.data, intf, index_);
 }
 
 bool

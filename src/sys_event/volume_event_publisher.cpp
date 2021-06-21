@@ -42,10 +42,6 @@ namespace pos
 {
 VolumeEventPublisher::VolumeEventPublisher()
 {
-    for (int i =0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
-    {
-        arrayNameList[i] = "  ";
-    }
 }
 
 VolumeEventPublisher::~VolumeEventPublisher()
@@ -53,82 +49,23 @@ VolumeEventPublisher::~VolumeEventPublisher()
     subscribers.clear();
 }
 
-
-int
-VolumeEventPublisher::GetArrayIdx(std::string arrayName)
-{
-    if (arrayName == "")
-    {
-        // for QoS Mananger : Need to modify
-        return ArrayMgmtPolicy::MAX_ARRAY_CNT;
-    }
-
-    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
-    {
-        if (arrayNameList[i] == arrayName)
-        {
-            return i;
-        }
-    }
-    return _SetArrayIdx(arrayName);
-}
-
-int
-VolumeEventPublisher::_SetArrayIdx(std::string arrayName)
-{
-    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
-    {
-        if (arrayNameList[i] == "  ")
-        {
-            arrayNameList[i] = arrayName;
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT, "Array {} is allocated Array Idx {}", arrayName, i);
-            return i;
-        }
-    }
-
-    POS_TRACE_ERROR(EID(ARRAY_STATE_NOT_EXIST), "Not exist Array Name : {}", arrayName);
-    return -1;
-}
-
-int
-VolumeEventPublisher::RemoveArrayIdx(std::string arrayName)
-{
-    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
-    {
-        if (arrayNameList[i] == arrayName)
-        {
-            arrayNameList[i] = "  ";
-            return i;
-        }
-    }
-
-    POS_TRACE_ERROR(EID(ARRAY_STATE_NOT_EXIST), "Not exist Array Name : {}", arrayName);
-    return -1;
-}
-
-
-
 void
-VolumeEventPublisher::RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayID)
+VolumeEventPublisher::RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayId)
 {
-    int arrayIdx = GetArrayIdx(arrayName);
-
-    if (arrayIdx == ArrayMgmtPolicy::MAX_ARRAY_CNT)
+    if (arrayId == ArrayMgmtPolicy::MAX_ARRAY_CNT)
     {
         qosManagerVolumeEvent = subscriber;
         return;
     }
-    subscribers.push_back(std::pair<int, VolumeEvent*>(arrayIdx, subscriber));
+    subscribers.push_back(std::pair<int, VolumeEvent*>(arrayId, subscriber));
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "VolumeEvent subscriber {} is registered", subscriber->Tag());
 }
 
 void
-VolumeEventPublisher::RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayID)
+VolumeEventPublisher::RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayId)
 {
-    int arrayIdx = GetArrayIdx(arrayName);
-
-    if (arrayIdx == ArrayMgmtPolicy::MAX_ARRAY_CNT)
+    if (arrayId == ArrayMgmtPolicy::MAX_ARRAY_CNT)
     {
         qosManagerVolumeEvent = nullptr;
         return;
@@ -136,7 +73,7 @@ VolumeEventPublisher::RemoveSubscriber(VolumeEvent* subscriber, std::string arra
 
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
-        if (it->first == arrayIdx)
+        if (it->first == arrayId)
         {
             if (it->second == subscriber)
             {
@@ -151,21 +88,21 @@ VolumeEventPublisher::RemoveSubscriber(VolumeEvent* subscriber, std::string arra
 
 bool
 VolumeEventPublisher::NotifyVolumeCreated(std::string volName, int volID,
-    uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
+    uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeCreated, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
-    int arrayIdx = GetArrayIdx(arrayName);
+
     for (auto it = subscribers.rbegin(); it != subscribers.rend(); ++it)
     {
-        if (it->first == arrayIdx)
+        if (it->first == arrayId)
         {
             POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
                 "NotifyVolumeCreated to {} : {} {} {} {} {}",
                 it->second->Tag(), volName, volID, volSizeByte, maxiops, maxbw);
-            bool res = it->second->VolumeCreated(volName, volID, volSizeByte, maxiops, maxbw, arrayName, arrayID);
+            bool res = it->second->VolumeCreated(volName, volID, volSizeByte, maxiops, maxbw, arrayName, arrayId);
             if (res == false)
             {
                 ret = false;
@@ -177,27 +114,27 @@ VolumeEventPublisher::NotifyVolumeCreated(std::string volName, int volID,
         }
     }
 
-    qosManagerVolumeEvent->VolumeCreated(volName, volID, volSizeByte, maxiops, maxbw, arrayName, arrayID);
+    qosManagerVolumeEvent->VolumeCreated(volName, volID, volSizeByte, maxiops, maxbw, arrayName, arrayId);
     return ret;
 }
 
 bool
 VolumeEventPublisher::NotifyVolumeUpdated(std::string volName, int volID, uint64_t maxiops,
-    uint64_t maxbw, std::string arrayName, int arrayID)
+    uint64_t maxbw, std::string arrayName, int arrayId)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeUpdated, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
-    int arrayIdx = GetArrayIdx(arrayName);
+
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
-        if (it->first == arrayIdx)
+        if (it->first == arrayId)
         {
             POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
                 "NotifyVolumeUpdated to {} : {} {} {} {}",
                 it->second->Tag(), volName, volID, maxiops, maxbw);
-            bool res = it->second->VolumeUpdated(volName, volID, maxiops, maxbw, arrayName, arrayID);
+            bool res = it->second->VolumeUpdated(volName, volID, maxiops, maxbw, arrayName, arrayId);
             if (res == false)
             {
                 ret = false;
@@ -209,27 +146,27 @@ VolumeEventPublisher::NotifyVolumeUpdated(std::string volName, int volID, uint64
         }
     }
 
-    qosManagerVolumeEvent->VolumeUpdated(volName, volID, maxiops, maxbw, arrayName, arrayID);
+    qosManagerVolumeEvent->VolumeUpdated(volName, volID, maxiops, maxbw, arrayName, arrayId);
     return ret;
 }
 
 bool
 VolumeEventPublisher::NotifyVolumeDeleted(std::string volName, int volID, uint64_t volSizeByte,
-    std::string arrayName, int arrayID)
+    std::string arrayName, int arrayId)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeDeleted, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
-    int arrayIdx = GetArrayIdx(arrayName);
+
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
-        if (it->first == arrayIdx)
+        if (it->first == arrayId)
         {
             POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
                 "NotifyVolumeDeleted to {} : {} {} {}",
                 it->second->Tag(), volName, volID, volSizeByte);
-            bool res = it->second->VolumeDeleted(volName, volID, volSizeByte, arrayName, arrayID);
+            bool res = it->second->VolumeDeleted(volName, volID, volSizeByte, arrayName, arrayId);
             if (res == false)
             {
                 ret = false;
@@ -241,27 +178,27 @@ VolumeEventPublisher::NotifyVolumeDeleted(std::string volName, int volID, uint64
         }
     }
 
-    qosManagerVolumeEvent->VolumeDeleted(volName, volID, volSizeByte, arrayName, arrayID);
+    qosManagerVolumeEvent->VolumeDeleted(volName, volID, volSizeByte, arrayName, arrayId);
     return ret;
 }
 
 bool
 VolumeEventPublisher::NotifyVolumeMounted(std::string volName, std::string subnqn,
-    int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
+    int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeMounted, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
-    int arrayIdx = GetArrayIdx(arrayName);
+
     for (auto it = subscribers.rbegin(); it != subscribers.rend(); ++it)
     {
-        if (it->first == arrayIdx)
+        if (it->first == arrayId)
         {
             POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
                 "NotifyVolumeMounted to {} : {} {} {} {} {} {}",
                 it->second->Tag(), volName, subnqn, volID, volSizeByte, maxiops, maxbw);
-            bool res = it->second->VolumeMounted(volName, subnqn, volID, volSizeByte, maxiops, maxbw, arrayName, arrayID);
+            bool res = it->second->VolumeMounted(volName, subnqn, volID, volSizeByte, maxiops, maxbw, arrayName, arrayId);
             if (res == false)
             {
                 ret = false;
@@ -272,26 +209,26 @@ VolumeEventPublisher::NotifyVolumeMounted(std::string volName, std::string subnq
         }
     }
 
-    qosManagerVolumeEvent->VolumeMounted(volName, subnqn, volID, volSizeByte, maxiops, maxbw, arrayName, arrayID);
+    qosManagerVolumeEvent->VolumeMounted(volName, subnqn, volID, volSizeByte, maxiops, maxbw, arrayName, arrayId);
     return ret;
 }
 
 bool
-VolumeEventPublisher::NotifyVolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID)
+VolumeEventPublisher::NotifyVolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayId)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeUnmounted, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
-    int arrayIdx = GetArrayIdx(arrayName);
+
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
-        if (it->first == arrayIdx)
+        if (it->first == arrayId)
         {
             POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
                 "NotifyVolumeUnmounted to {} : {} {}",
                 it->second->Tag(), volName, volID);
-            bool res = it->second->VolumeUnmounted(volName, volID, arrayName, arrayID);
+            bool res = it->second->VolumeUnmounted(volName, volID, arrayName, arrayId);
             if (res == false)
             {
                 ret = false;
@@ -303,27 +240,27 @@ VolumeEventPublisher::NotifyVolumeUnmounted(std::string volName, int volID, std:
         }
     }
 
-    qosManagerVolumeEvent->VolumeUnmounted(volName, volID, arrayName, arrayID);
+    qosManagerVolumeEvent->VolumeUnmounted(volName, volID, arrayName, arrayId);
     return ret;
 }
 
 bool
 VolumeEventPublisher::NotifyVolumeLoaded(std::string name, int id,
-    uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
+    uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeLoaded, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
-    int arrayIdx = GetArrayIdx(arrayName);
+
     for (auto it = subscribers.rbegin(); it != subscribers.rend(); ++it)
     {
-        if (it->first == arrayIdx)
+        if (it->first == arrayId)
         {
             POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
                 "NotifyVolumeLoaded to {} : {} {} {} {} {}",
                 it->second->Tag(), name, id, totalSize, maxiops, maxbw);
-            bool res = it->second->VolumeLoaded(name, id, totalSize, maxiops, maxbw, arrayName, arrayID);
+            bool res = it->second->VolumeLoaded(name, id, totalSize, maxiops, maxbw, arrayName, arrayId);
             if (res == false)
             {
                 ret = false;
@@ -335,25 +272,25 @@ VolumeEventPublisher::NotifyVolumeLoaded(std::string name, int id,
         }
     }
 
-    qosManagerVolumeEvent->VolumeLoaded(name, id, totalSize, maxiops, maxbw, arrayName, arrayID);
+    qosManagerVolumeEvent->VolumeLoaded(name, id, totalSize, maxiops, maxbw, arrayName, arrayId);
     return ret;
 }
 
 void
-VolumeEventPublisher::NotifyVolumeDetached(vector<int> volList, std::string arrayName, int arrayID)
+VolumeEventPublisher::NotifyVolumeDetached(vector<int> volList, std::string arrayName, int arrayId)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeDetached, # of subscribers: {}", subscribers.size());
 
-    int arrayIdx = GetArrayIdx(arrayName);
+
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
-        if (it->first == arrayIdx)
+        if (it->first == arrayId)
         {
             POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
                 "NotifyVolumeDetached to {}",
                 it->second->Tag());
-            it->second->VolumeDetached(volList, arrayName, arrayID);
+            it->second->VolumeDetached(volList, arrayName, arrayId);
 
             POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
                 "NotifyVolumeDetached to {} done",
@@ -361,7 +298,7 @@ VolumeEventPublisher::NotifyVolumeDetached(vector<int> volList, std::string arra
         }
     }
 
-    qosManagerVolumeEvent->VolumeDetached(volList, arrayName, arrayID);
+    qosManagerVolumeEvent->VolumeDetached(volList, arrayName, arrayId);
 }
 
 } // namespace pos

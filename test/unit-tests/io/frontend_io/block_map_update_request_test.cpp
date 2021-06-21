@@ -50,7 +50,7 @@ namespace pos
 TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_Constructor_FourArgument_Stack)
 {
     // Given
-    VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, ""));
+    VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     CallbackSmartPtr mockCallback(new NiceMock<MockCallback>(true, 0));
     NiceMock<MockIVSAMap> mockIVSAMap;
     NiceMock<MockJournalService> mockJournalService;
@@ -76,7 +76,7 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_Constructor_FourArgument_Stack
 TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_Constructor_FourArgument_Heap)
 {
     // Given
-    VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, ""));
+    VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     CallbackSmartPtr mockCallback(new NiceMock<MockCallback>(true, 0));
     NiceMock<MockIVSAMap> mockIVSAMap;
     NiceMock<MockJournalService> mockJournalService;
@@ -104,7 +104,7 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_NormalCase)
 {
     // Given
     StripeAddr addr = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 1};
-    NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, ""));
+    NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     NiceMock<MockCallback>* mockCallback(new NiceMock<MockCallback>(true, 0));
 
     NiceMock<MockStripe> mockStripe;
@@ -152,7 +152,7 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_GetErrorCount)
 {
     // Given
     StripeAddr addr = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 1};
-    NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, ""));
+    NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     NiceMock<MockCallback>* mockCallback(new NiceMock<MockCallback>(true, 0));
 
     NiceMock<MockStripe> mockStripe;
@@ -201,7 +201,7 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_BlockMapUpdateEx
 {
     // Given
     StripeAddr addr = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 1};
-    NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, ""));
+    NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     NiceMock<MockCallback>* mockCallback(new NiceMock<MockCallback>(true, 0));
 
     NiceMock<MockStripe> mockStripe;
@@ -251,7 +251,7 @@ TEST(BlockMapUpdateRequest, BlockMapUpdateRequest_DoSpecificJob_BlockMapUpdateEv
 {
     // Given
     StripeAddr addr = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 1};
-    NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, ""));
+    NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     NiceMock<MockCallback>* mockCallback(new NiceMock<MockCallback>(true, 0));
 
     VolumeIoSmartPtr mockVolumeIoPtr(mockVolumeIo);

@@ -55,6 +55,7 @@ class Partition : public ITranslator
 public:
     Partition(
         string array,
+        uint32_t arrayIndex,
         PartitionType type,
         PartitionPhysicalSize physicalSize,
         vector<ArrayDevice*> devs,
@@ -73,6 +74,7 @@ protected:
     bool _IsValidAddress(const LogicalBlkAddr& lsa);
     bool _IsValidEntry(const LogicalWriteEntry& entry);
     string arrayName_;
+    uint32_t arrayIndex_;
     PartitionType type_;
     PartitionLogicalSize logicalSize_;
     PartitionPhysicalSize physicalSize_;

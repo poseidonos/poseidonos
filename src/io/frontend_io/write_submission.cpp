@@ -62,13 +62,16 @@
 #include "src/admin/smart_log_mgr.h"
 #endif
 
+/*To do Remove after adding array Idx by Array*/
+#include "src/array_mgmt/array_manager.h"
+
 namespace pos
 {
 
 WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo)
-: WriteSubmission(volumeIo, RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayName()),
-    AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayName()),
-    FlowControlServiceSingleton::Instance()->GetFlowControl(volumeIo->GetArrayName()),
+: WriteSubmission(volumeIo, RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayId()),
+    AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayId()),
+    nullptr,
     EventFrameworkApiSingleton::Instance()->IsReactorNow())
 {
 }
@@ -78,16 +81,25 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inp
 : Event(isReactorNow),
   volumeIo(volumeIo),
   volumeId(volumeIo->GetVolumeId()),
-  arrayName(volumeIo->GetArrayName()),
   blockAlignment(ChangeSectorToByte(volumeIo->GetSectorRba()),
-      volumeIo->GetSize()),
+  volumeIo->GetSize()),
   blockCount(blockAlignment.GetBlockCount()),
   allocatedBlockCount(0),
   processedBlockCount(0),
   rbaStateManager(inputRbaStateManager),
-  iBlockAllocator(inputIBlockAllocator),
-  flowControl(inputFlowControl)
+  iBlockAllocator(inputIBlockAllocator)
 {
+    if (nullptr == inputFlowControl)
+    {
+        /*To do Remove after adding array Idx by Array*/
+        IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(volumeIo->GetArrayId());
+
+        flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(info->GetName());
+    }
+    else
+    {
+        flowControl = inputFlowControl;
+    }
 }
 
 WriteSubmission::~WriteSubmission(void)
@@ -318,7 +330,7 @@ WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddr& vsa, bool isTail)
     CallbackSmartPtr callback(new BlockMapUpdateRequest(split));
     split->SetCallback(callback);
 
-    VolumeIoSmartPtr newVolumeIo(new VolumeIo(nullptr, Ubio::UNITS_PER_BLOCK, arrayName));
+    VolumeIoSmartPtr newVolumeIo(new VolumeIo(nullptr, Ubio::UNITS_PER_BLOCK, volumeIo->GetArrayId()));
 
     newVolumeIo->SetVolumeId(volumeId);
     newVolumeIo->SetOriginUbio(split);
@@ -330,7 +342,7 @@ WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddr& vsa, bool isTail)
     newVolumeIo->SetVsa(vsa);
 
     const bool isRead = true;
-    Translator oldDataTranslator(volumeId, rba, arrayName, isRead);
+    Translator oldDataTranslator(volumeId, rba, volumeIo->GetArrayId(), isRead);
     StripeAddr oldLsidEntry = oldDataTranslator.GetLsidEntry(0);
 
     newVolumeIo->SetOldLsidEntry(oldLsidEntry);
@@ -366,8 +378,11 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
             POS_EVENT_ID eventId = POS_EVENT_ID::WRHDLR_NO_FREE_SPACE;
             POS_TRACE_DEBUG(eventId, PosEventId::GetString(eventId));
 
+            /*To do Remove after adding array Idx by Array*/
+            IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(volumeIo->GetArrayId());
+
             IStateControl* stateControl =
-                StateManagerSingleton::Instance()->GetStateControl(volumeIo->GetArrayName());
+                StateManagerSingleton::Instance()->GetStateControl(info->GetName());
             if (unlikely(stateControl->GetState()->ToStateType() == StateEnum::STOP))
             {
                 POS_EVENT_ID eventId =
@@ -405,7 +420,7 @@ WriteSubmission::_SetupVolumeIo(VolumeIoSmartPtr newVolumeIo,
     VirtualBlks& vsaRange, CallbackSmartPtr callback)
 {
     VirtualBlkAddr startVsa = vsaRange.startVsa;
-    Translator translator(startVsa, arrayName);
+    Translator translator(startVsa, volumeIo->GetArrayId());
     void* mem = newVolumeIo->GetBuffer();
     PhysicalEntries physicalEntries =
         translator.GetPhysicalEntries(mem, vsaRange.numBlks);

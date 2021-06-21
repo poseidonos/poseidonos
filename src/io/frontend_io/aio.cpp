@@ -181,7 +181,7 @@ AioCompletion::_SendUserCompletion(void)
     }
     else
     {
-        IVolumeManager* volumeManager = volumeService.GetVolumeManager(volumeIo->GetArrayName());
+        IVolumeManager* volumeManager = volumeService.GetVolumeManager(volumeIo->GetArrayId());
         if (likely(_GetMostCriticalError() != IOErrorType::VOLUME_UMOUNTED))
         {
             volumeManager->DecreasePendingIOCount(volumeIo->GetVolumeId());
@@ -202,8 +202,8 @@ AIO::_CreateVolumeIo(pos_io& posIo)
         buffer = posIo.iov->iov_base;
     }
 
-    std::string arrayName(posIo.arrayName);
-    VolumeIoSmartPtr volumeIo(new VolumeIo(buffer, sectorSize, arrayName));
+    int arrayId(posIo.array_id);
+    VolumeIoSmartPtr volumeIo(new VolumeIo(buffer, sectorSize, arrayId));
 
     switch (posIo.ioType)
     {
@@ -240,8 +240,8 @@ AIO::_CreateVolumeIo(pos_io& posIo)
 FlushIoSmartPtr
 AIO::_CreateFlushIo(pos_io& posIo)
 {
-    std::string arrayName(posIo.arrayName);
-    FlushIoSmartPtr flushIo(new FlushIo(arrayName));
+    int arrayId(posIo.array_id);
+    FlushIoSmartPtr flushIo(new FlushIo(arrayId));
     flushIo->SetVolumeId(posIo.volume_id);
 
     POS_EVENT_ID eventId = POS_EVENT_ID::AIO_FLUSH_START;
@@ -277,7 +277,7 @@ AIO::SubmitAsyncIO(pos_io& posIo)
     }
 
     IVolumeManager* volumeManager
-        = VolumeServiceSingleton::Instance()->GetVolumeManager(volumeIo->GetArrayName());
+        = VolumeServiceSingleton::Instance()->GetVolumeManager(volumeIo->GetArrayId());
 
     uint32_t core = volumeIo->GetOriginCore();
     uint32_t volume_id = posIo.volume_id;

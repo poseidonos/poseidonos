@@ -19,10 +19,9 @@ TEST(StripePutEvent, StripePutEvent_)
 TEST(StripePutEvent, Execute_TestIfOkToFree)
 {
     // given
-    std::string arrayName = "";
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     NiceMock<MockIWBStripeAllocator>* wbAllocator = new NiceMock<MockIWBStripeAllocator>();
-    StripePutEvent stripePutEvent(wbAllocator, *stripe, 5, arrayName);
+    StripePutEvent stripePutEvent(wbAllocator, *stripe, 5);
 
     // given 1.
     EXPECT_CALL(*stripe, IsOkToFree).WillOnce(Return(true));

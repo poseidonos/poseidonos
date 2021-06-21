@@ -44,14 +44,14 @@ class Stripe;
 class FlushReadCompletion : public Callback
 {
 public:
-    explicit FlushReadCompletion(Stripe* stripe, std::string& arrayName);
+    explicit FlushReadCompletion(Stripe* stripe, int arrayId);
     ~FlushReadCompletion(void);
 
 private:
     bool _DoSpecificJob(void) override;
 
     Stripe* stripe;
-    std::string arrayName;
+    int arrayId;
 };
 
 } // namespace pos

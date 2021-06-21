@@ -19,7 +19,7 @@ namespace pos
 TEST(Merger, Merger_Constructor_Stack_TwoArguments)
 {
     //Given
-    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, ""));
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     ReadCompletionFactory readCompletionFactory;
 
     //When: create Nerger (in stack)
@@ -31,7 +31,7 @@ TEST(Merger, Merger_Constructor_Stack_TwoArguments)
 TEST(Merger, Merger_Constructor_Heap)
 {
     //Given
-    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, ""));
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     ReadCompletionFactory readCompletionFactory;
 
     //When: create merger (in heap)
@@ -44,7 +44,7 @@ TEST(Merger, Merger_Constructor_Heap)
 TEST(Merger, Merger_Add_ContiguousPba)
 {
     //Given
-    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, ""));
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     ReadCompletionFactory readCompletionFactory;
 
     PhysicalBlkAddr pba{0, nullptr};
@@ -69,9 +69,9 @@ TEST(Merger, Merger_Add_DiscretePba)
 {
     //Given
     ReadCompletionFactory readCompletionFactory;
-    MockVolumeIo* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, 2, "");
+    MockVolumeIo* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, 2, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
-    MockVolumeIo* mockVolumeIoSplit = new NiceMock<MockVolumeIo>((void*)0xff00, 2, "");
+    MockVolumeIo* mockVolumeIoSplit = new NiceMock<MockVolumeIo>((void*)0xff00, 2, 0);
     VolumeIoSmartPtr volumeIoSplit(mockVolumeIoSplit);
 
     PhysicalBlkAddr pba{0, nullptr};
@@ -98,9 +98,9 @@ TEST(Merger, Merger_Add_DiscretePba)
 TEST(Merger, Merger_Cut_)
 {
     //Given
-    MockVolumeIo* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, 2, "");
+    MockVolumeIo* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, 2, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
-    MockVolumeIo* mockVolumeIoSplit = new NiceMock<MockVolumeIo>((void*)0xff00, 2, "");
+    MockVolumeIo* mockVolumeIoSplit = new NiceMock<MockVolumeIo>((void*)0xff00, 2, 0);
     VolumeIoSmartPtr volumeIoSplit(mockVolumeIoSplit);
     ReadCompletionFactory readCompletionFactory;
     PhysicalBlkAddr pba{0, nullptr};

@@ -45,7 +45,7 @@ class VsaRangeMaker
 {
 public:
     VsaRangeMaker(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
-        bool isGc, std::string arrayName);
+        bool isGc, int arrayId);
     VsaRangeMaker(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
         bool isGc, IVSAMap* iVSAMap);
     virtual ~VsaRangeMaker(void);

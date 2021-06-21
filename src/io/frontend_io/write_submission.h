@@ -67,7 +67,6 @@ public:
 private:
     VolumeIoSmartPtr volumeIo;
     uint32_t volumeId;
-    std::string arrayName;
     BlockAlignment blockAlignment;
     uint32_t blockCount;
     uint32_t allocatedBlockCount;

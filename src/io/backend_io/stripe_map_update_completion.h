@@ -47,12 +47,12 @@ class IContextManager;
 class StripeMapUpdateCompletion : public Event
 {
 public:
-    StripeMapUpdateCompletion(Stripe* inputStripe, std::string& arrayName);
+    StripeMapUpdateCompletion(Stripe* inputStripe, int arrayId);
     StripeMapUpdateCompletion(Stripe* inputStripe,
         IContextManager* icontextManager,
         IStripeMap* iStripeMap,
         EventScheduler* eventScheduler,
-        std::string& arrayName);
+        int arrayId);
     virtual ~StripeMapUpdateCompletion(void);
 
     virtual bool Execute(void) override;
@@ -62,7 +62,7 @@ private:
     IContextManager* iContextManager;
     IStripeMap* iStripeMap;
     EventScheduler* eventScheduler;
-    std::string arrayName;
+    int arrayId;
 };
 
 }; // namespace pos

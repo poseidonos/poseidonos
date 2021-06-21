@@ -46,12 +46,12 @@
 
 namespace pos
 {
-StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe, std::string& arrayName)
+StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe, int arrayId)
 : StripeMapUpdateCompletion(inputStripe,
-    AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName),
-    MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
+    AllocatorServiceSingleton::Instance()->GetIContextManager(arrayId),
+    MapperServiceSingleton::Instance()->GetIStripeMap(arrayId),
     EventSchedulerSingleton::Instance(),
-    arrayName)
+    arrayId)
 {
 }
 
@@ -59,13 +59,13 @@ StripeMapUpdateCompletion::StripeMapUpdateCompletion(Stripe* inputStripe,
     IContextManager* ctxManager,
     IStripeMap* iStripeMap,
     EventScheduler* eventScheduler,
-    std::string& arrayName)
+    int arrayId)
 : Event(false, BackendEvent_Flush),
   stripe(inputStripe),
   iContextManager(ctxManager),
   iStripeMap(iStripeMap),
   eventScheduler(eventScheduler),
-  arrayName(arrayName)
+  arrayId(arrayId)
 {
     SetEventType(BackendEvent_Flush);
 }
@@ -82,12 +82,12 @@ StripeMapUpdateCompletion::Execute(void)
     iStripeMap->SetLSA(stripe->GetVsid(), stripe->GetUserLsid(), IN_USER_AREA);
     iContextManager->UpdateOccupiedStripeCount(currentLsid);
 
-    FlushCompletion event(stripe, iStripeMap, eventScheduler, arrayName);
+    FlushCompletion event(stripe, iStripeMap, eventScheduler, arrayId);
     bool done = event.Execute();
 
     if (unlikely(false == done))
     {
-        EventSmartPtr eventForSchedule(new FlushCompletion(stripe, arrayName));
+        EventSmartPtr eventForSchedule(new FlushCompletion(stripe, arrayId));
         if (likely(eventForSchedule != nullptr))
         {
             eventScheduler->EnqueueEvent(eventForSchedule);

@@ -19,7 +19,7 @@ namespace pos
 TEST(WriteCompletion, WriteCompletion_OneArgument_Stack)
 {
     //Given
-    VolumeIoSmartPtr volIo = VolumeIoSmartPtr(new NiceMock<MockVolumeIo>(nullptr, 1, ""));
+    VolumeIoSmartPtr volIo = VolumeIoSmartPtr(new NiceMock<MockVolumeIo>(nullptr, 1, 0));
 
     //When: Create new WriteCompletion with single argument
     WriteCompletion writeCompletion(volIo);
@@ -30,7 +30,7 @@ TEST(WriteCompletion, WriteCompletion_OneArgument_Stack)
 TEST(WriteCompletion, WriteCompletion_OneArgument_Heap)
 {
     //Given
-    VolumeIoSmartPtr volIo = VolumeIoSmartPtr(new NiceMock<MockVolumeIo>(nullptr, 1, ""));
+    VolumeIoSmartPtr volIo = VolumeIoSmartPtr(new NiceMock<MockVolumeIo>(nullptr, 1, 0));
 
     //When: Create new WriteCompletion with single argument
     WriteCompletion* writeCompletion = new WriteCompletion(volIo);
@@ -43,7 +43,7 @@ TEST(WriteCompletion, WriteCompletion_OneArgument_Heap)
 TEST(WriteCompletion, WriteCompletion_TwoArgument_Stack)
 {
     //Given
-    VolumeIoSmartPtr volIo = VolumeIoSmartPtr(new NiceMock<MockVolumeIo>(nullptr, 1, ""));
+    VolumeIoSmartPtr volIo = VolumeIoSmartPtr(new NiceMock<MockVolumeIo>(nullptr, 1, 0));
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
 
     //When: Create new WriteCompletion with 2 arguments
@@ -55,7 +55,7 @@ TEST(WriteCompletion, WriteCompletion_TwoArgument_Stack)
 TEST(WriteCompletion, WriteCompletion_TwoArgument_Heap)
 {
     //Given
-    VolumeIoSmartPtr volIo = VolumeIoSmartPtr(new NiceMock<MockVolumeIo>(nullptr, 1, ""));
+    VolumeIoSmartPtr volIo = VolumeIoSmartPtr(new NiceMock<MockVolumeIo>(nullptr, 1, 0));
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
 
     //When: Create new WriteCompletion with 2 arguments
@@ -70,7 +70,7 @@ TEST(WriteCompletion, _DoSpecificJob_NullStripe)
 {
     //Given
     bool actual;
-    auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, "");
+    auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, 0);
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
@@ -95,7 +95,7 @@ TEST(WriteCompletion, _RequestFlush_DummyStripe)
 {
     //Given
     bool actual;
-    auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, "");
+    auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, 0);
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
@@ -120,7 +120,7 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
 {
     //Given
     bool actual;
-    auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, "");
+    auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, 0);
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
@@ -146,7 +146,7 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
 {
     //Given
     bool actual;
-    auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, "");
+    auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, 0);
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);

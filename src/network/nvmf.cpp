@@ -56,7 +56,7 @@ Nvmf::Nvmf(std::string arrayName, int arrayId, VolumeEventPublisher* volumeEvent
 
 Nvmf::~Nvmf(void)
 {
-    volumeEventPublisher->RemoveSubscriber(this, arrayName, arrayID);
+    volumeEventPublisher->RemoveSubscriber(this, arrayName, arrayId);
 }
 
 int

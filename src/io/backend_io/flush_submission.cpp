@@ -51,20 +51,20 @@
 
 namespace pos
 {
-FlushSubmission::FlushSubmission(Stripe* inputStripe, std::string& arrayName)
+FlushSubmission::FlushSubmission(Stripe* inputStripe, int arrayId)
 : FlushSubmission(inputStripe,
-    AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName),
-    IIOSubmitHandler::GetInstance(), arrayName, ArrayService::Instance()->Getter()->GetTranslator())
+    AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayId),
+    IIOSubmitHandler::GetInstance(), arrayId, ArrayService::Instance()->Getter()->GetTranslator())
 {
 }
 
-FlushSubmission::FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, std::string& arrayName,
+FlushSubmission::FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, int arrayId,
     IIOTranslator* translator)
 : Event(false, BackendEvent_Flush),
   stripe(inputStripe),
   iWBStripeAllocator(wbStripeAllocator),
   iIOSubmitHandler(ioSubmitHandler),
-  arrayName(arrayName),
+  arrayId(arrayId),
   translator(translator)
 {
     SetEventType(BackendEvent_Flush);
@@ -94,7 +94,7 @@ FlushSubmission::Execute(void)
     if (likely(translator != nullptr))
     {
         int ret = translator->Translate(
-            arrayName, WRITE_BUFFER, physicalWriteEntry, startWbLSA);
+            arrayId, WRITE_BUFFER, physicalWriteEntry, startWbLSA);
         if (unlikely(ret != static_cast<int>(POS_EVENT_ID::SUCCESS)))
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;
@@ -121,7 +121,7 @@ FlushSubmission::Execute(void)
         .offset = 0};
 
     stripe->SetUserLsid(logicalStripeId);
-    CallbackSmartPtr callback(new StripeMapUpdateRequest(stripe, arrayName));
+    CallbackSmartPtr callback(new StripeMapUpdateRequest(stripe, arrayId));
 
     POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;
 
@@ -132,7 +132,7 @@ FlushSubmission::Execute(void)
         bufferList,
         startLSA, blocksInStripe,
         USER_DATA,
-        callback, arrayName);
+        callback, arrayId);
 
     return (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned);
 }

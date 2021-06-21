@@ -89,7 +89,7 @@ LogWriteTestFixture::WriteBlockLog(int volId, BlkAddr rba, VirtualBlks blks)
         .stripeLoc = IN_WRITE_BUFFER_AREA,
         .stripeId = StripeTestFixture::GetWbLsid(blks.startVsa.stripeId)};
 
-    VolumeIoSmartPtr volumeIo(new VolumeIo(nullptr, numBlksInSector, array->GetName()));
+    VolumeIoSmartPtr volumeIo(new VolumeIo(nullptr, numBlksInSector, array->GetIndex()));
     volumeIo->SetSectorRba(ChangeBlockToSector(rba));
     volumeIo->SetVolumeId(volId);
     volumeIo->SetVsa(blks.startVsa);

@@ -93,8 +93,7 @@ CommandTimeoutHandler::AbortSubmitHandler::DiskIO(UblockSharedPtr dev, void *ctx
     if (abortContext->ctrlr != nullptr
         && 0 == memcmp(ctrlrData->sn, devSerial.c_str(), dev->GetSN().size()))
     {
-        string arrayName("POSArray");
-        UbioSmartPtr bio(new Ubio(abortContext, 1, arrayName));
+        UbioSmartPtr bio(new Ubio(abortContext, 1, 0));
         bio->dir = UbioDir::Abort;
         CallbackSmartPtr callback(new AbortCompletionHandler(abortContext));
         bio->SetLba(0);

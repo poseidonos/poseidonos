@@ -32,7 +32,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_NineArgument_Stack)
     const uint32_t unitCount = 8;
 
     NiceMock<MockEventScheduler> mockEventScheduler;
-    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, ""));
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, 0));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIBlockAllocator> iBlockAllocator;
     CallbackSmartPtr mockWriteCompletionEvent = std::make_shared<MockWriteCompletion>(volumeIo);
@@ -53,7 +53,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_NineArgument_Heap)
     const uint32_t unitCount = 8;
 
     NiceMock<MockEventScheduler> mockEventScheduler;
-    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, ""));
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, 0));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIBlockAllocator> iBlockAllocator;
     CallbackSmartPtr mockWriteCompletionEvent = std::make_shared<MockWriteCompletion>(volumeIo);
@@ -75,7 +75,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_Execute)
     const uint32_t unitCount = 8;
 
     NiceMock<MockEventScheduler> mockEventScheduler;
-    MockVolumeIo* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, "");
+    MockVolumeIo* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     MockCallback* mockCallback = new NiceMock<MockCallback>(true, 0);
     CallbackSmartPtr callback(mockCallback);
@@ -117,7 +117,7 @@ TEST(BlockMapUpdateCompletion, BlockMapUpdateCompletion_ExecuteFail)
     const uint32_t unitCount = 8;
 
     NiceMock<MockEventScheduler> mockEventScheduler;
-    MockVolumeIo* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, "");
+    MockVolumeIo* mockVolumeIo = new NiceMock<MockVolumeIo>((void*)0xff00, unitCount, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     MockCallback* mockCallback = new NiceMock<MockCallback>(true, 0);
     CallbackSmartPtr callback(mockCallback);

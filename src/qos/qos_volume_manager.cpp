@@ -32,6 +32,7 @@
 
 #include "src/qos/qos_volume_manager.h"
 
+#include "src/include/array_mgmt_policy.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/aio_submission_adapter.h"
 #include "src/logger/logger.h"
@@ -66,7 +67,7 @@ QosVolumeManager::QosVolumeManager(bool feQos)
             pendingIO[reactor][volId] = 0;
         }
     }
-    int arrayID = 0;
+    int arrayID = ArrayMgmtPolicy::MAX_ARRAY_CNT;
     VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, "", arrayID);
     try
     {

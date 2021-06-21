@@ -45,11 +45,11 @@ class Translator
 {
 public:
     Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
-        std::string& arrayName, bool isRead = false, IVSAMap* iVSAMap = nullptr,
+        int arrayId, bool isRead = false, IVSAMap* iVSAMap = nullptr,
         IStripeMap* iStripeMap = nullptr, IWBStripeAllocator* iWBStripeAllocator = nullptr,
         IIOTranslator* iTranslator = nullptr);
-    Translator(uint32_t volumeId, BlkAddr rba, std::string& arrayName, bool isRead);
-    Translator(const VirtualBlkAddr& vsa, std::string& arrayName);
+    Translator(uint32_t volumeId, BlkAddr rba, int arrayId, bool isRead);
+    Translator(const VirtualBlkAddr& vsa, int arrayId);
     virtual ~Translator(void)
     {
     }
@@ -79,13 +79,13 @@ private:
     uint32_t volumeId;
     static thread_local StripeId recentVsid;
     static thread_local StripeId recentLsid;
-    static thread_local std::string recentArrayName;
+    static thread_local int recentArrayId;
 
     LogicalBlkAddr _GetLsa(uint32_t blockIndex);
     LsidRefResult _GetLsidRefResult(BlkAddr rba, VirtualBlkAddr& vsa);
     void _CheckSingleBlock(void);
     PartitionType _GetPartitionType(uint32_t blockIndex);
-    std::string arrayName;
+    int arrayId;
 };
 
 } // namespace pos

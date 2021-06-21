@@ -36,8 +36,8 @@
 
 namespace pos
 {
-FlushIo::FlushIo(std::string& arrayName)
-: Ubio(nullptr, 0, arrayName),
+FlushIo::FlushIo(int arrayId)
+: Ubio(nullptr, 0, arrayId),
   volumeId(MAX_VOLUME_COUNT),
   originCore(EventFrameworkApiSingleton::Instance()->GetCurrentReactor()),
   state(FLUSH__BLOCK_ALLOCATION),

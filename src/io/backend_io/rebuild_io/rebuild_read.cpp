@@ -60,7 +60,7 @@ RebuildRead::Recover(UbioSmartPtr ubio, BufferPool* bufferPool)
 
     IIORecover* recover = ArrayService::Instance()->Getter()->GetRecover();
     RecoverMethod rm;
-    int ret = recover->GetRecoverMethod(ubio->GetArrayName(), ubio, rm);
+    int ret = recover->GetRecoverMethod(ubio->GetArrayId(), ubio, rm);
     if (ret != 0)
     {
         return ret;
@@ -86,7 +86,7 @@ RebuildRead::Recover(UbioSmartPtr ubio, BufferPool* bufferPool)
         mem = bufferPool->TryGetBuffer();
     }
 
-    UbioSmartPtr rebuildUbio(new Ubio(mem, sectorCnt, ubio->GetArrayName()));
+    UbioSmartPtr rebuildUbio(new Ubio(mem, sectorCnt, ubio->GetArrayId()));
     rebuildUbio->SetRetry(true);
 
     CallbackSmartPtr rebuildCompletion(

@@ -57,7 +57,7 @@ ReadCompletionForPartialWrite::ReadCompletionForPartialWrite(
 {
     if (likely(iWBStripeAllocator == nullptr))
     {
-        iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(volumeIo->GetArrayName());
+        iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(volumeIo->GetArrayId());
     }
 }
 
@@ -84,7 +84,7 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
 
         // If UT is executed, translator will be input.
         // otherwise, translator will be nullptr
-        Translator translatorLocal(volumeIo->GetVsa(), volumeIo->GetArrayName());
+        Translator translatorLocal(volumeIo->GetVsa(), volumeIo->GetArrayId());
         if (likely(translator == nullptr))
         {
             translator = &translatorLocal;

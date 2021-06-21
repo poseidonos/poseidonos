@@ -73,7 +73,7 @@ WriteRawDataCommand::Execute(Args &argv, JsonElement &elem)
             {
                 unitCount = std::stoul(numLogicalBlockCount) + 1;
 
-                UbioSmartPtr ubio(new Ubio(nullptr, unitCount, ""));
+                UbioSmartPtr ubio(new Ubio(nullptr, unitCount, 0));
                 ubio->dir = UbioDir::Write;
 
                 std::string startOffset = _GetParameter(argv, "lba");

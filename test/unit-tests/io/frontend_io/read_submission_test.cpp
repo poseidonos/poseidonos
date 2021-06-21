@@ -42,7 +42,7 @@ TEST(ReadSubmission, ReadSubmission_Stack)
     char buf[1024];
 
     std::string arr_name = "";
-    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 1024 >> SECTOR_SIZE_SHIFT, arr_name);
+    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 1024 >> SECTOR_SIZE_SHIFT, 0);
     volumeIo->SetSectorRba(2048);
     volumeIo->SetVolumeId(1);
     NiceMock<MockBlockAlignment>* mockBlockAlignment = new NiceMock<MockBlockAlignment>{0, 0};
@@ -53,7 +53,7 @@ TEST(ReadSubmission, ReadSubmission_Stack)
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
 
-    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, arr_name, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator);
+    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator);
 
     // When: Try to create new ReadSubmission object with 4 arguments
     ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator};
@@ -66,7 +66,7 @@ TEST(ReadSubmission, ReadSubmission_Heap)
     // Given
     char buf[1024];
     std::string arr_name = "";
-    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 1024 >> SECTOR_SIZE_SHIFT, arr_name);
+    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 1024 >> SECTOR_SIZE_SHIFT, 0);
     volumeIo->SetSectorRba(2048);
     volumeIo->SetVolumeId(1);
     NiceMock<MockBlockAlignment>* mockBlockAlignment = new NiceMock<MockBlockAlignment>{0, 0};
@@ -76,7 +76,7 @@ TEST(ReadSubmission, ReadSubmission_Heap)
     NiceMock<MockIVSAMap> mockIVSAMap;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, arr_name, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator);
+    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator);
 
     // When: Try to create new ReadSubmission object with 4 arguments
     ReadSubmission* readSubmission = new ReadSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator};
@@ -91,7 +91,7 @@ TEST(ReadSubmission, Execute_SingleBlock)
     // Given
     char buf[1024];
     std::string arr_name = "";
-    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 1024 >> SECTOR_SIZE_SHIFT, arr_name);
+    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 1024 >> SECTOR_SIZE_SHIFT, 0);
     volumeIo->SetSectorRba(2048);
     volumeIo->SetVolumeId(1);
     CallbackSmartPtr callback = std::make_shared<ReadCompletion>(volumeIo);
@@ -103,7 +103,7 @@ TEST(ReadSubmission, Execute_SingleBlock)
     NiceMock<MockIVSAMap> mockIVSAMap;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, arr_name, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator);
+    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator);
     NiceMock<MockIODispatcher> mockIODispatcher;
     ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator, &mockIODispatcher};
 
@@ -139,7 +139,7 @@ TEST(ReadSubmission, Execute_MultiBlocks)
     // Given
     char buf[1024];
     std::string arr_name = "";
-    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 1024 >> SECTOR_SIZE_SHIFT, arr_name);
+    VolumeIoSmartPtr volumeIo = std::make_shared<VolumeIo>((void*)buf, 1024 >> SECTOR_SIZE_SHIFT, 0);
     volumeIo->SetSectorRba(2048);
     volumeIo->SetVolumeId(1);
     NiceMock<MockDeviceDriver> mockDeviceDriver;
@@ -154,7 +154,7 @@ TEST(ReadSubmission, Execute_MultiBlocks)
     NiceMock<MockIVSAMap> mockIVSAMap;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, arr_name, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator);
+    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator);
     NiceMock<MockIODispatcher> mockIODispatcher;
     ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator, &mockIODispatcher};
 

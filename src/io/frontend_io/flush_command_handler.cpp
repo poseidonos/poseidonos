@@ -44,10 +44,10 @@ namespace pos
 {
 FlushCmdHandler::FlushCmdHandler(FlushIoSmartPtr flushIo)
 : FlushCmdHandler(flushIo, FlushCmdManagerSingleton::Instance(),
-      AllocatorServiceSingleton::Instance()->GetIBlockAllocator(flushIo->GetArrayName()),
-      AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(flushIo->GetArrayName()),
-      AllocatorServiceSingleton::Instance()->GetIContextManager(flushIo->GetArrayName()),
-      MapperServiceSingleton::Instance()->GetIMapFlush(flushIo->GetArrayName()))
+      AllocatorServiceSingleton::Instance()->GetIBlockAllocator(flushIo->GetArrayId()),
+      AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(flushIo->GetArrayId()),
+      AllocatorServiceSingleton::Instance()->GetIContextManager(flushIo->GetArrayId()),
+      MapperServiceSingleton::Instance()->GetIMapFlush(flushIo->GetArrayId()))
 {
 }
 

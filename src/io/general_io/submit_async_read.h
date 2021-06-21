@@ -23,7 +23,7 @@ public:
     IOSubmitHandlerStatus Execute(std::list<BufferEntry>& bufferList,
         LogicalBlkAddr& startLSA, uint64_t blockCount,
         PartitionType partitionToIO, CallbackSmartPtr callback,
-        std::string& arrayName);
+        int arrayId);
 
 private:
     MergedIO* mergedIO;

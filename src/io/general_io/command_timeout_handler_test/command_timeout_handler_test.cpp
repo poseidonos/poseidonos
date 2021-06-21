@@ -139,7 +139,7 @@ test1_iotimeout_abort()
 
             void* mem = pos::Memory<512>::Alloc(size);
 
-            UbioSmartPtr bio(new Ubio(mem, size, ""));
+            UbioSmartPtr bio(new Ubio(mem, size, 0));
             CallbackSmartPtr callback(new DummyCallbackHandler(false));
             bio->dir = UbioDir::Write;
 
@@ -190,7 +190,7 @@ DiskIo(UblockSharedPtr dev, void* ctx)
 
             void* mem = pos::Memory<512>::Alloc(size);
 
-            UbioSmartPtr bio(new Ubio(mem, size, ""));
+            UbioSmartPtr bio(new Ubio(mem, size, 0));
             CallbackSmartPtr callback(new DummyCallbackHandler(false));
             bio->dir = UbioDir::Write;
 

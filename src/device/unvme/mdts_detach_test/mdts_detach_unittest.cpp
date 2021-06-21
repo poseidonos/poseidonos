@@ -75,7 +75,7 @@ DiskIo(UblockSharedPtr dev, void* ctx)
 
     void* mem = pos::Memory<512>::Alloc(size);
 
-    UbioSmartPtr bio(new Ubio(mem, size, ""));
+    UbioSmartPtr bio(new Ubio(mem, size, 0));
 
     bio->dir = UbioDir::Write;
     bio->SetLba(512 * 1024 * 1024 / 512);

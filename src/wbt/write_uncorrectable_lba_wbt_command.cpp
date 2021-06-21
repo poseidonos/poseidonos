@@ -66,7 +66,7 @@ WriteUncorrectableLbaWbtCommand::Execute(Args &argv, JsonElement &elem)
         {
             uint8_t dummyBuffer[Ubio::BYTES_PER_UNIT];
             uint32_t unitCount = 1;
-            UbioSmartPtr ubio(new Ubio(dummyBuffer, unitCount, ""));
+            UbioSmartPtr ubio(new Ubio(dummyBuffer, unitCount, 0));
             ubio->dir = UbioDir::WriteUncor;
             ubio->SetLba(std::stoull(argv["lba"].get<std::string>()));
             ubio->SetUblock(targetDevice);

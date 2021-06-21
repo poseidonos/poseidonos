@@ -76,7 +76,7 @@ ReadRawDataCommand::Execute(Args &argv, JsonElement &elem)
                 std::string startOffset = _GetParameter(argv, "lba");
                 unitCount = std::stoul(numLogicalBlockCount) + 1;
 
-                UbioSmartPtr ubio(new Ubio(nullptr, unitCount, ""));
+                UbioSmartPtr ubio(new Ubio(nullptr, unitCount, 0));
                 ubio->dir = UbioDir::Read;
                 ubio->SetLba(std::stoull(startOffset));
                 ubio->SetUblock(targetDevice);

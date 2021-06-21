@@ -59,6 +59,7 @@ public:
     string array;
     string part;
     RaidType raidType;
+    uint32_t arrayIndex;
     uint32_t faultIdx = 0;
     uint64_t stripeCnt = 0;
     atomic<uint32_t> taskCnt;

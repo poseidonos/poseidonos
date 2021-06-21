@@ -23,7 +23,7 @@ TEST(ReadCompletionFactory, ReadCompletionFactory_Create_)
     uint64_t sectorSize = 1;
     std::string arr_name = "";
 
-    NiceMock<MockVolumeIo>* mockIovolumeIo = new NiceMock<MockVolumeIo>(buffer, sectorSize, arr_name);
+    NiceMock<MockVolumeIo>* mockIovolumeIo = new NiceMock<MockVolumeIo>(buffer, sectorSize, 0);
     VolumeIoSmartPtr volumeIo(mockIovolumeIo);
     ReadCompletionFactory readCompletionFactory;
     bool actual, expected;

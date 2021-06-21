@@ -181,7 +181,7 @@ test5_ubio_simple_1()
     libraryUnitTest.TestStart(5);
     void* mem = pos::Memory<512>::Alloc(8);
     CallbackSmartPtr callback1(new DummyCallbackHandler(true));
-    UbioSmartPtr ubio(new Ubio(mem, 8, ""));
+    UbioSmartPtr ubio(new Ubio(mem, 8, 0));
     ubio->SetCallback(callback1);
     IoCompleter ioCompleter(ubio);
     ioCompleter.CompleteUbio(IOErrorType::ABORTED, true);
@@ -204,7 +204,7 @@ test6_ubio_simple_2()
     void* mem = pos::Memory<512>::Alloc(8);
     CallbackSmartPtr callback1(new DummyCallbackHandler(true));
     CallbackSmartPtr callback2(new DummyCallbackHandler(true));
-    UbioSmartPtr ubio(new Ubio(mem, 8, ""));
+    UbioSmartPtr ubio(new Ubio(mem, 8, 0));
     ubio->SetCallback(callback1);
     callback1->SetCallee(callback2);
     IoCompleter ioCompleter(ubio);
@@ -226,8 +226,8 @@ test7_ubio_split_1()
     libraryUnitTest.TestStart(7);
     void* mem1 = pos::Memory<512>::Alloc(8);
     void* mem2 = pos::Memory<512>::Alloc(8);
-    UbioSmartPtr ubio(new Ubio(mem1, 8, ""));
-    UbioSmartPtr ubio2(new Ubio(mem2, 8, ""));
+    UbioSmartPtr ubio(new Ubio(mem1, 8, 0));
+    UbioSmartPtr ubio2(new Ubio(mem2, 8, 0));
 
     CallbackSmartPtr callback1(new DummyCallbackHandler(true));
     CallbackSmartPtr callback2(new DummyCallbackHandler(true));
@@ -276,8 +276,8 @@ test8_ubio_split_2()
     libraryUnitTest.TestStart(8);
     void* mem1 = pos::Memory<512>::Alloc(8);
     void* mem2 = pos::Memory<512>::Alloc(8);
-    UbioSmartPtr ubio(new Ubio(mem1, 8, ""));
-    UbioSmartPtr ubio2(new Ubio(mem2, 8, ""));
+    UbioSmartPtr ubio(new Ubio(mem1, 8, 0));
+    UbioSmartPtr ubio2(new Ubio(mem2, 8, 0));
 
     CallbackSmartPtr callback1(new DummyCallbackHandler(true));
     CallbackSmartPtr callback2(new DummyCallbackHandler(true));

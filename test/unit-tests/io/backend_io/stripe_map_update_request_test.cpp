@@ -27,10 +27,9 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_OneArgument_Stac
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    std::string arr_name{"arr_name"};
 
     // When: Try to Create New StripeMapUpdateRequest object with 1 argument
-    StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, arr_name);
+    StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, 0);
 
     // Then: Do nothing
 }
@@ -39,10 +38,9 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_OneArgument_Heap
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    std::string arr_name{"arr_name"};
 
     // When: Try to Create New StripeMapUpdateRequest object with 1 argument
-    StripeMapUpdateRequest* stripeMapUpdateRequest = new StripeMapUpdateRequest(&mockStripe, arr_name);
+    StripeMapUpdateRequest* stripeMapUpdateRequest = new StripeMapUpdateRequest(&mockStripe, 0);
 
     // Then: Release memory
     delete stripeMapUpdateRequest;
@@ -51,16 +49,15 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_OneArgument_Heap
 TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_ThreeArguments)
 {
     // Given
-    std::string arr_name{"arr_name"};
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockStripeMapUpdate>* mockStripeMapUpdate = new NiceMock<MockStripeMapUpdate>(&mockStripe, arr_name);
+    NiceMock<MockStripeMapUpdate>* mockStripeMapUpdate = new NiceMock<MockStripeMapUpdate>(&mockStripe, 0);
     EventSmartPtr event(mockStripeMapUpdate);
 
     // When: Try to Create New StripeMapUpdateRequest object with 3 arguments
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockEventScheduler, event, arr_name);
+        &mockEventScheduler, event, 0);
 
     // Then: Do nothing
 }
@@ -68,15 +65,14 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_ThreeArguments)
 TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_ExistErrorCount)
 {
     // Given
-    std::string arr_name{"arr_name"};
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockStripeMapUpdate>* mockStripeMapUpdate = new NiceMock<MockStripeMapUpdate>(&mockStripe, arr_name);
+    NiceMock<MockStripeMapUpdate>* mockStripeMapUpdate = new NiceMock<MockStripeMapUpdate>(&mockStripe, 0);
     EventSmartPtr event(mockStripeMapUpdate);
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockEventScheduler, event, arr_name);
+        &mockEventScheduler, event, 0);
     stripeMapUpdateRequest.InformError(IOErrorType::GENERIC_ERROR);
     bool actual, expected{true};
 
@@ -90,15 +86,14 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_ExistErrorCoun
 TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_NonUserArea)
 {
     // Given
-    std::string arr_name{"arr_name"};
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockStripeMapUpdate>* mockStripeMapUpdate = new NiceMock<MockStripeMapUpdate>(&mockStripe, arr_name);
+    NiceMock<MockStripeMapUpdate>* mockStripeMapUpdate = new NiceMock<MockStripeMapUpdate>(&mockStripe, 0);
     EventSmartPtr event(mockStripeMapUpdate);
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockEventScheduler, event, arr_name);
+        &mockEventScheduler, event, 0);
     bool actual, expected{true};
 
     stripeMapUpdateRequest.InformError(IOErrorType::SUCCESS);
@@ -117,7 +112,6 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_NonUserArea)
 TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_StripeMapUpdateNull)
 {
     // Given
-    std::string arr_name{"arr_name"};
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
@@ -125,7 +119,7 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_StripeMapUpdat
     EventSmartPtr event(mockStripeMapUpdate);
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockEventScheduler, event, arr_name);
+        &mockEventScheduler, event, 0);
     bool actual, expected{true};
 
     stripeMapUpdateRequest.InformError(IOErrorType::SUCCESS);
@@ -144,15 +138,14 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_StripeMapUpdat
 TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_MapUpdateFail)
 {
     // Given
-    std::string arr_name{"arr_name"};
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockStripeMapUpdate>* mockStripeMapUpdate = new NiceMock<MockStripeMapUpdate>(&mockStripe, arr_name);
+    NiceMock<MockStripeMapUpdate>* mockStripeMapUpdate = new NiceMock<MockStripeMapUpdate>(&mockStripe, 0);
     EventSmartPtr event(mockStripeMapUpdate);
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockEventScheduler, event, arr_name);
+        &mockEventScheduler, event, 0);
     bool actual, expected{true};
 
     stripeMapUpdateRequest.InformError(IOErrorType::SUCCESS);

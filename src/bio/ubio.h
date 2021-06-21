@@ -88,7 +88,7 @@ class Ubio : public DumpSharedPtr<Ubio*, static_cast<int>(DumpSharedPtrType::UBI
 public:
     Ubio(void) = delete;
     Ubio(const Ubio& ubio);
-    Ubio(void* buffer, uint32_t unitCount, std::string arrayName);
+    Ubio(void* buffer, uint32_t unitCount, int arrayID);
     virtual ~Ubio(void);
 
     static const uint32_t BYTES_PER_UNIT = SECTOR_SIZE;
@@ -141,7 +141,7 @@ public:
     void SetUblock(UblockSharedPtr uBlock);
     bool NeedRecovery(void);
 
-    std::string& GetArrayName(void);
+    int GetArrayId(void);
     void SetEventType(BackendEvent event);
     BackendEvent GetEventType(void);
 
@@ -163,6 +163,7 @@ private:
     uint64_t lba;
     UblockSharedPtr uBlock;
     IArrayDevice* arrayDev;
+    int arrayId;
     std::string arrayName;
 
     bool CheckOriginUbioSet(void);

@@ -42,20 +42,20 @@ namespace pos
 class VolumeEvent
 {
 public:
-    VolumeEvent(string _tag, string _arrayName, int _arrayID = 0);
+    VolumeEvent(string _tag, string _arrayName, int _arrayId = 0);
     virtual ~VolumeEvent(void);
     string Tag(void);
-    virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayID) = 0;
-    virtual bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayID) = 0;
-    virtual bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte, string arrayName, int arrayID) = 0;
-    virtual bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayID) = 0;
-    virtual bool VolumeUnmounted(string volName, int volID, string arrayName, int arrayID) = 0;
-    virtual bool VolumeLoaded(string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayID) = 0;
-    virtual void VolumeDetached(vector<int> volList, string arrayName, int arrayID) = 0;
+    virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) = 0;
+    virtual bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) = 0;
+    virtual bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte, string arrayName, int arrayId) = 0;
+    virtual bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) = 0;
+    virtual bool VolumeUnmounted(string volName, int volID, string arrayName, int arrayId) = 0;
+    virtual bool VolumeLoaded(string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) = 0;
+    virtual void VolumeDetached(vector<int> volList, string arrayName, int arrayId) = 0;
 
 protected:
     string arrayName = "";
-    int arrayID;
+    int arrayId;
 
 private:
     string tag = "";

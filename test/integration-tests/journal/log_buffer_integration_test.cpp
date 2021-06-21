@@ -101,7 +101,7 @@ JournalLogBufferIntegrationTest::_PrepareLogBuffer(void)
 LogWriteContext*
 JournalLogBufferIntegrationTest::_CreateContextForBlockWriteDoneLog(void)
 {
-    VolumeIoSmartPtr volumeIo(new VolumeIo(nullptr, 0, ""));
+    VolumeIoSmartPtr volumeIo(new VolumeIo(nullptr, 0, 0));
     volumeIo->SetSectorRba(0);
     volumeIo->SetVolumeId(TEST_VOLUME_ID);
 

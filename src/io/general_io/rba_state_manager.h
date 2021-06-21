@@ -74,6 +74,8 @@ public:
     bool VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override;
     void VolumeDetached(vector<int> volList, std::string arrayName, int arrayID) override;
 
+    std::string GetArrayName(void);
+
 private:
     class RBAState
     {

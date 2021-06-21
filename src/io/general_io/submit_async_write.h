@@ -24,14 +24,13 @@ public:
     IOSubmitHandlerStatus Execute(std::list<BufferEntry>& bufferList,
         LogicalBlkAddr& startLSA, uint64_t blockCount,
         PartitionType partitionToIO, CallbackSmartPtr callback,
-        std::string& arrayName, bool needTrim);
+        int arrayId, bool needTrim);
 
 private:
     IIOLocker* locker;
     IIOTranslator* translator;
     IODispatcher* ioDispatcher;
 
-    IOSubmitHandlerStatus _CheckAsyncWriteError(POS_EVENT_ID eventId,
-        const std::string& arrayName);
+    IOSubmitHandlerStatus _CheckAsyncWriteError(POS_EVENT_ID eventId, int arrayId);
 };
 } // namespace pos

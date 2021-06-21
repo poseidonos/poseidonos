@@ -44,11 +44,11 @@
 
 namespace pos
 {
-RBAStateManager::RBAStateManager(std::string arrayName, int arrayID)
-: VolumeEvent("RBAStateManager", arrayName, arrayID)
+RBAStateManager::RBAStateManager(std::string arrayName, int arrayId)
+: VolumeEvent("RBAStateManager", arrayName, arrayId)
 {
-    RBAStateServiceSingleton::Instance()->Register(arrayName, this);
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayID);
+    RBAStateServiceSingleton::Instance()->Register(arrayId, this);
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayId);
 }
 
 RBAStateManager::~RBAStateManager()
@@ -57,8 +57,8 @@ RBAStateManager::~RBAStateManager()
     {
         vol.SetSize(0);
     }
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayID);
-    RBAStateServiceSingleton::Instance()->Unregister(arrayName);
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayId);
+    RBAStateServiceSingleton::Instance()->Unregister(arrayId);
 }
 
 void
@@ -250,14 +250,14 @@ RBAStateManager::RBAStatesInVolume::_IsAccessibleRba(BlkAddr endRba)
 
 bool
 RBAStateManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByte,
-    uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
+    uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId)
 {
     CreateRBAState(volID, ChangeByteToBlock(volSizeByte));
     return true;
 }
 
 bool
-RBAStateManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayID)
+RBAStateManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayId)
 {
     DeleteRBAState(volID);
     return true;
@@ -265,34 +265,40 @@ RBAStateManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeB
 
 bool
 RBAStateManager::VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte,
-    uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
+    uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId)
 {
     return true;
 }
 
 bool
-RBAStateManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID)
+RBAStateManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayId)
 {
     return true;
 }
 
 bool
 RBAStateManager::VolumeLoaded(std::string name, int id, uint64_t totalSize,
-    uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
+    uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId)
 {
     CreateRBAState(id, ChangeByteToBlock(totalSize));
     return true;
 }
 
 bool
-RBAStateManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
+RBAStateManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId)
 {
     return true;
 }
 
 void
-RBAStateManager::VolumeDetached(vector<int> volList, std::string arrayName, int arrayID)
+RBAStateManager::VolumeDetached(vector<int> volList, std::string arrayName, int arrayId)
 {
+}
+
+std::string
+RBAStateManager::GetArrayName(void)
+{
+    return arrayName;
 }
 
 } // namespace pos

@@ -64,7 +64,7 @@ public:
     using RbaListIter = RbaList::iterator;
 
     VolumeIo(void) = delete;
-    VolumeIo(void* buffer, uint32_t unitCount, std::string arrayName);
+    VolumeIo(void* buffer, uint32_t unitCount, int arrayId);
     VolumeIo(const VolumeIo& volumeIo);
     ~VolumeIo(void) override;
 

@@ -23,7 +23,7 @@ TEST(ReadCompletionForPartialWrite, ReadCompletionForPartialWrite_Constructor)
     // Given
     const uint32_t unitCount = 8;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, ""));
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, 0));
 
     // When : Test contstructor is properly done.
     ReadCompletionForPartialWrite readCompletionForPartialWrite(volumeIo, 4096, 0, &mockIWBStripeAllocator, true);
@@ -34,9 +34,9 @@ TEST(ReadCompletionForPartialWrite, ReadCompletionForPartialWrite_DoSpecificJob)
     // Given : Normal case.
     const uint32_t unitCount = 8;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    MockVolumeIo *mockVolumeIo = new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, "");
+    MockVolumeIo *mockVolumeIo = new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
-    MockVolumeIo *mockVolumeIoOrigin = new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, "");
+    MockVolumeIo *mockVolumeIoOrigin = new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, 0);
     VolumeIoSmartPtr volumeIoOrigin(mockVolumeIoOrigin);
     StripeAddr stripeAddr = { .stripeLoc = IN_USER_AREA, .stripeId = 0};
     VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
@@ -60,7 +60,7 @@ TEST(ReadCompletionForPartialWrite, ReadCompletionForPartialWrite_DoSpecificJob_
     // Given : If origin of volume IO is nullptr
     const uint32_t unitCount = 8;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    MockVolumeIo *mockVolumeIo = new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, "");
+    MockVolumeIo *mockVolumeIo = new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     StripeAddr stripeAddr = { .stripeLoc = IN_USER_AREA, .stripeId = 0};
@@ -83,13 +83,13 @@ TEST(ReadCompletionForPartialWrite, ReadCompletionForPartialWrite_HandleCopyDone
     // Given : Buffer Entry / Old
     const uint32_t unitCount = 8;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    MockVolumeIo *mockVolumeIo = new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, "");
+    MockVolumeIo *mockVolumeIo = new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, 0);
     VolumeIoSmartPtr volumeIo(mockVolumeIo);
-    MockVolumeIo *mockVolumeIoOrigin = new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, "");
+    MockVolumeIo *mockVolumeIoOrigin = new NiceMock<MockVolumeIo>((void *)0xff00, unitCount, 0);
     VolumeIoSmartPtr volumeIoOrigin(mockVolumeIoOrigin);
     StripeAddr stripeAddr = {.stripeLoc = IN_USER_AREA, .stripeId = 0};
     VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
-    MockTranslator* translator = new NiceMock<MockTranslator>(vsa, volumeIo->GetArrayName());
+    MockTranslator* translator = new NiceMock<MockTranslator>(vsa, volumeIo->GetArrayId());
     CopyParameter* copyParameter = new CopyParameter(volumeIo, translator, true);
     BufferEntry bufferEntry((void *)0xff00, 1);
     PhysicalWriteEntry physicalWriteEntry;

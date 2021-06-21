@@ -28,7 +28,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Constructor_WithOneArgument_Stack)
 {
     // Given
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
 
     // When: Try to Create New FlushCmdHandler object with 1 argument
     FlushCmdHandler flushCmdHandler(flushIo);
@@ -40,7 +40,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Constructor_WithOneArgument_Heap)
 {
     // Given
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
 
     // When: Try to Create New FlushCmdHandler object with 1 argument
     FlushCmdHandler* flushCmdHandler = new FlushCmdHandler(flushIo);
@@ -53,7 +53,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseBlockAllocation_BlockAllocatin
 {
     // Given: case FLUSH__BLOCK_ALLOCATION, iBlockAllocator->BlockAllocating(volumeId) == false
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
     NiceMock<MockFlushCmdManager> mockFlushCmdManager;
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
@@ -78,7 +78,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CasePendingWriteInProgress_WaitPen
 {
     // Given: case FLUSH__PENDING_WRITE_IN_PROGRESS, iWBStripeAllocator->WaitPendingWritesOnStripes(volumeId) == false
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
     NiceMock<MockFlushCmdManager> mockFlushCmdManager;
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
@@ -105,7 +105,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseStripeFlushInProgress_WaitStri
 {
     // Given : case FLUSH__STRIPE_FLUSH_IN_PROGRESS, iWBStripeAllocator->WaitStripesFlushCompletion(volumeId) == false
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
     NiceMock<MockFlushCmdManager> mockFlushCmdManager;
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
@@ -133,7 +133,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseVSAMAP_FlushDirtyMpagesReturnZ
 {
     // Given: case FLUSH__VSAMAP, flushCmdManager->CanFlushMeta(flushIo->GetOriginCore(), flushIo) == false
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
     NiceMock<MockFlushCmdManager> mockFlushCmdManager;
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
@@ -164,7 +164,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseMetaFlushInProgress_IsStripeMa
 {
     // Given: case FLUSH__META_FLUSH_IN_PROGRESS, flushIo->IsStripeMapAllocatorFlushComplete() == false
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
     NiceMock<MockFlushCmdManager> mockFlushCmdManager;
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
@@ -200,7 +200,7 @@ TEST(MapFlushCompleteEvent, MapFlushCompleteEvent_Constructor_WithTwoArguments_S
 {
     // Given
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
     int mapId{0};
 
     // When: Try to Create New MapFlushCompleteEvent object with 2 arguments
@@ -213,7 +213,7 @@ TEST(MapFlushCompleteEvent, MapFlushCompleteEvent_Constructor_WithTwoArguments_H
 {
     // Given
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
     int mapId{0};
 
     // When: Try to Create New MapFlushCompleteEvent object with 2 arguments
@@ -227,7 +227,7 @@ TEST(MapFlushCompleteEvent, MapFlushCompleteEvent_Execute_MapIdIsStripeMapId)
 {
     // Given
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
     int mapId{STRIPE_MAP_ID};
     MapFlushCompleteEvent mapFlushCompleteEvent(mapId, flushIo);
     bool actual, expected{true};
@@ -247,7 +247,7 @@ TEST(MapFlushCompleteEvent, MapFlushCompleteEvent_Execute_MapIdIsNotStripeMapId)
 {
     // Given
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
     int mapId{123}; // != STRIPE_MAP_ID
     MapFlushCompleteEvent mapFlushCompleteEvent(mapId, flushIo);
     bool actual, expected{true};
@@ -271,7 +271,7 @@ TEST(AllocatorFlushDoneEvent, AllocatorFlushDoneEvent_Constructor_WithOneArgumen
 {
     // Given
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
 
     // When: Try to Create New AllocatorFlushDoneEvent object with 1 argument
     AllocatorFlushDoneEvent allocatorFlushDoneEvent(flushIo);
@@ -283,7 +283,7 @@ TEST(AllocatorFlushDoneEvent, AllocatorFlushDoneEvent_Constructor_WithOneArgumen
 {
     // Given
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
 
     // When: Try to Create New AllocatorFlushDoneEvent object with 1 argument
     AllocatorFlushDoneEvent* allocatorFlushDoneEvent = new AllocatorFlushDoneEvent(flushIo);
@@ -296,7 +296,7 @@ TEST(AllocatorFlushDoneEvent, AllocatorFlushDoneEvent_Execute_NormalCase)
 {
     // Given
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
     AllocatorFlushDoneEvent allocatorFlushDoneEvent(flushIo);
     bool actual, expected{true};
 

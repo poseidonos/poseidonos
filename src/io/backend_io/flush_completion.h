@@ -47,11 +47,11 @@ class FlushCompletion : public Event
 {
 public:
     FlushCompletion(void) = delete;
-    explicit FlushCompletion(Stripe* stripe, std::string& arrayName);
+    explicit FlushCompletion(Stripe* stripe, int arrayId);
     FlushCompletion(Stripe* stripe,
         IStripeMap* stripeMap,
         EventScheduler* eventScheduler,
-        std::string& arrayName);
+        int arrayId);
     virtual ~FlushCompletion(void);
 
     virtual bool Execute(void) override;
@@ -60,6 +60,6 @@ private:
     Stripe* stripe;
     IStripeMap* iStripeMap;
     EventScheduler* eventScheduler;
-    std::string arrayName;
+    int arrayId;
 };
 } // namespace pos

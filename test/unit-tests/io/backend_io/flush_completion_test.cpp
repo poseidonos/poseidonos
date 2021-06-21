@@ -26,10 +26,9 @@ TEST(FlushCompletion, FlushCompletion_Constructor_OneArgument_Stack)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    std::string arr_name{"arr_name"};
 
     // When: Try to Create New FlushCompletion object with 1 argument
-    FlushCompletion flushCompletion(&mockStripe, arr_name);
+    FlushCompletion flushCompletion(&mockStripe, 0);
 
     // Then: Do nothing
 }
@@ -38,10 +37,9 @@ TEST(FlushCompletion, FlushCompletion_Constructor_OneArgument_Heap)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    std::string arr_name{"arr_name"};
 
     // When: Try to Create New FlushCompletion object with 1 argument
-    FlushCompletion* flushCompletion = new FlushCompletion(&mockStripe, arr_name);
+    FlushCompletion* flushCompletion = new FlushCompletion(&mockStripe, 0);
 
     // Then: Release memory
     delete flushCompletion;
@@ -53,10 +51,9 @@ TEST(FlushCompletion, FlushCompletion_Constructor_ThreeArguments)
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    std::string arr_name{"arr_name"};
 
     // When: Try to Create New FlushCompletion object with 3 arguments
-    FlushCompletion flushCompletion(&mockStripe, &mockIStripeMap, &mockEventScheduler, arr_name);
+    FlushCompletion flushCompletion(&mockStripe, &mockIStripeMap, &mockEventScheduler, 0);
 
     // Then: Do nothing
 }
@@ -67,8 +64,7 @@ TEST(FlushCompletion, FlushCompletion_Execute_UserArea)
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    std::string arr_name{"arr_name"};
-    FlushCompletion flushCompletion(&mockStripe, &mockIStripeMap, &mockEventScheduler, arr_name);
+    FlushCompletion flushCompletion(&mockStripe, &mockIStripeMap, &mockEventScheduler, 0);
     bool actual, expected{true};
     StripeAddr stripeAddr;
     ON_CALL(mockStripe, GetVsid()).WillByDefault(Return(0));
@@ -88,8 +84,7 @@ TEST(FlushCompletion, FlushCompletion_Execute_NonUserArea)
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    std::string arr_name{"arr_name"};
-    FlushCompletion flushCompletion(&mockStripe, &mockIStripeMap, &mockEventScheduler, arr_name);
+    FlushCompletion flushCompletion(&mockStripe, &mockIStripeMap, &mockEventScheduler, 0);
     bool actual, expected{false};
     StripeAddr stripeAddr;
     ON_CALL(mockStripe, GetVsid()).WillByDefault(Return(0));

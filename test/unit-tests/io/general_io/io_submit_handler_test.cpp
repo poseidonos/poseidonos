@@ -42,13 +42,12 @@ TEST(IOSubmitHandler, IOSubmitHander_SyncIO)
     uint64_t blockCount = 0;
     PartitionType partitionToIO = PartitionType::USER_DATA;
     CallbackSmartPtr callback = nullptr;
-    std::string arrayName = "POSArray1";
     IODirection direction;
 
     // When: SyncIO 
     IOSubmitHandlerStatus errorToReturn;
     errorToReturn = ioSubmitHandler.SyncIO(direction, bufferList, startLSA, blockCount,
-        partitionToIO, arrayName);
+        partitionToIO, 0);
     
     // Then: fail return
     EXPECT_EQ(errorToReturn, IOSubmitHandlerStatus::FAIL);
@@ -63,13 +62,12 @@ TEST(IOSubmitHandler, IOSubmitHandler_SubmitAsyncIO_InvalidIoDirection)
     uint64_t blockCount = 1;
     PartitionType partitionToIO = PartitionType::USER_DATA;
     CallbackSmartPtr callback = nullptr;
-    std::string arrayName = "POSArray1";
     IODirection direction;
 
     // When: IODirection is invalid    
     IOSubmitHandlerStatus errorToReturn;
     errorToReturn = ioSubmitHandler.SubmitAsyncIO(direction, bufferList, startLSA, blockCount,
-        partitionToIO, callback, arrayName);
+        partitionToIO, callback, 0);
     
     // Then: fail return
     EXPECT_EQ(errorToReturn, IOSubmitHandlerStatus::FAIL);
@@ -83,13 +81,12 @@ TEST(IOSubmitHandler, IOSubmitHandler_AsyncRead)
     uint64_t blockCount = 0;
     PartitionType partitionToIO = PartitionType::USER_DATA;
     CallbackSmartPtr callback = nullptr;
-    std::string arrayName = "POSArray1";
     IODirection direction = IODirection::READ;
 
     // When: IODirection is Read
     IOSubmitHandlerStatus errorToReturn;
     errorToReturn = ioSubmitHandler.SubmitAsyncIO(direction, bufferList, startLSA, blockCount,
-        partitionToIO, callback, arrayName);
+        partitionToIO, callback, 0);
 
     // Then: fail return
     EXPECT_EQ(errorToReturn, IOSubmitHandlerStatus::FAIL);
@@ -103,13 +100,12 @@ TEST(IOSubmitHandler, IOSubmitHandler_AsyncWrite)
     uint64_t blockCount = 0;
     PartitionType partitionToIO = PartitionType::USER_DATA;
     CallbackSmartPtr callback = nullptr;
-    std::string arrayName = "POSArray1";
     IODirection direction = IODirection::WRITE;
 
     // When: IODirection is Write
     IOSubmitHandlerStatus errorToReturn;
     errorToReturn = ioSubmitHandler.SubmitAsyncIO(direction, bufferList, startLSA, blockCount,
-        partitionToIO, callback, arrayName);
+        partitionToIO, callback, 0);
     
     // Then: fail return
     EXPECT_EQ(errorToReturn, IOSubmitHandlerStatus::FAIL);
@@ -123,13 +119,12 @@ TEST(IOSubmitHandler, IOSubmitHandler_TrimData)
     uint64_t blockCount = 0;
     PartitionType partitionToIO = PartitionType::USER_DATA;
     CallbackSmartPtr callback = nullptr;
-    std::string arrayName = "POSArray1";
     IODirection direction = IODirection::TRIM;
 
     // When: IODirection is trim
     IOSubmitHandlerStatus errorToReturn;
     errorToReturn = ioSubmitHandler.SubmitAsyncIO(direction, bufferList, startLSA, blockCount,
-        partitionToIO, callback, arrayName);
+        partitionToIO, callback, 0);
     
     // Then: fail return
     EXPECT_EQ(errorToReturn, IOSubmitHandlerStatus::FAIL);

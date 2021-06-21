@@ -45,21 +45,20 @@
 
 namespace pos
 {
-StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, std::string& arrayName)
-: StripeMapUpdateRequest(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
-      EventSchedulerSingleton::Instance(), EventSmartPtr(new StripeMapUpdate(stripe, arrayName)), arrayName)
+StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, int arrayId)
+: StripeMapUpdateRequest(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayId),
+      EventSchedulerSingleton::Instance(), EventSmartPtr(new StripeMapUpdate(stripe, arrayId)), arrayId)
 {
     SetEventType(BackendEvent_Flush);
 }
 
 StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap,
-    EventScheduler* eventScheduler, EventSmartPtr event, std::string& arrayName)
+    EventScheduler* eventScheduler, EventSmartPtr event, int arrayId)
 : Callback(false),
   stripe(stripe),
   iStripeMap(stripeMap),
   eventScheduler(eventScheduler),
-  event(event),
-  arrayName(arrayName)
+  event(event)
 {
 }
 

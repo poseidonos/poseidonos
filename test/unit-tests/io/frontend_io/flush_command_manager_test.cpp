@@ -51,7 +51,7 @@ TEST(FlushCmdManager, FlushCmdManager_CanFlushMeta_CheckTrueFalse)
     FlushCmdManager flushCmdManager;
 
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
 
     // When : CanFlushMeta is called first time
     bool actual = flushCmdManager.CanFlushMeta(0, flushIo);
@@ -70,7 +70,7 @@ TEST(FlushCmdManager, FlushCmdManager_FinishMetaFlush_CheckWithCanFlushMeta)
 {
     // Given
     std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(arr_name);
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
 
     // When : FinishMetaFlush is called where flushEvents are empty
     FlushCmdManager flushCmdManager;

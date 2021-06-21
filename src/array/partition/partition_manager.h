@@ -56,15 +56,15 @@ public:
     virtual ~PartitionManager();
     virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type);
     virtual int CreateAll(vector<ArrayDevice*> buf, vector<ArrayDevice*> data,
-        ArrayInterface* intf);
+        ArrayInterface* intf, uint32_t arrayIndex);
     virtual void DeleteAll(ArrayInterface* intf);
-    virtual void FormatMetaPartition(vector<ArrayDevice*> data, ArrayInterface* intf);
+    virtual void FormatMetaPartition(vector<ArrayDevice*> data, ArrayInterface* intf, uint32_t arrayIndex);
 
 private:
-    int _CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf);
-    int _CreateUserData(const vector<ArrayDevice*> devs, ArrayDevice* nvm, ArrayInterface* intf);
-    int _CreateMetaNvm(ArrayDevice* dev, ArrayInterface* intf);
-    int _CreateWriteBuffer(ArrayDevice* dev, ArrayInterface* intf);
+    int _CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf, uint32_t arrayIndex);
+    int _CreateUserData(const vector<ArrayDevice*> devs, ArrayDevice* nvm, ArrayInterface* intf, uint32_t arrayIndex);
+    int _CreateMetaNvm(ArrayDevice* dev, ArrayInterface* intf, uint32_t arrayIndex);
+    int _CreateWriteBuffer(ArrayDevice* dev, ArrayInterface* intf, uint32_t arrayIndex);
     ArrayDevice* _GetBaseline(const vector<ArrayDevice*>& devs);
 
     string arrayName_ = "";

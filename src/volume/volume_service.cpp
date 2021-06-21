@@ -77,7 +77,7 @@ VolumeService::Register(int arrayId, IVolumeManager* volumeManager)
     if (arrayId < 0)
     {
         POS_TRACE_ERROR(9999, "Fail to Register Volume Manager for Array {}", volumeManager->GetArrayName());
-        return arrayId;
+        return -1;
     }
 
     std::unique_lock<std::mutex> lock(listMutex);
@@ -92,7 +92,7 @@ VolumeService::Register(int arrayId, IVolumeManager* volumeManager)
     volumeManagerCnt++;
     POS_TRACE_DEBUG(9999, "Volume manager for array {} is registered", volumeManager->GetArrayName());
 
-    return arrayId;
+    return 0;
 }
 
 void
@@ -135,11 +135,19 @@ VolumeService::GetVolumeManager(int arrayId)
 IVolumeManager*
 VolumeService::GetVolumeManager(std::string arrayName)
 {
-    int arrayId = VolumeEventPublisherSingleton::Instance()->GetArrayIdx(arrayName);
-    if (arrayId >= 0)
+    if (0 == volumeManagerCnt)
     {
-        return items[arrayId];
+        return nullptr;
     }
+
+    for (int arrayId = 0 ; arrayId < ArrayMgmtPolicy::MAX_ARRAY_CNT; arrayId++)
+    {
+        if (items[arrayId]->GetArrayName() == arrayName)
+        {
+            return items[arrayId];
+        }
+    }
+
     return nullptr;
 }
 

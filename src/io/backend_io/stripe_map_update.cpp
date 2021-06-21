@@ -42,21 +42,21 @@
 
 namespace pos
 {
-StripeMapUpdate::StripeMapUpdate(Stripe* stripe, std::string& arrayName)
+StripeMapUpdate::StripeMapUpdate(Stripe* stripe, int arrayId)
 : StripeMapUpdate(stripe,
-    MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
+    MapperServiceSingleton::Instance()->GetIStripeMap(arrayId),
     JournalServiceSingleton::Instance(), EventSchedulerSingleton::Instance(),
-    arrayName)
+    arrayId)
 {
 }
 
 StripeMapUpdate::StripeMapUpdate(Stripe* stripe, IStripeMap* iStripeMap,
-    JournalService* journalService, EventScheduler* scheduler, std::string& arrayName)
+    JournalService* journalService, EventScheduler* scheduler, int arrayId)
 : stripe(stripe),
   iStripeMap(iStripeMap),
   journalService(journalService),
   eventScheduler(scheduler),
-  arrayName(arrayName)
+  arrayId(arrayId)
 {
 }
 
@@ -69,13 +69,13 @@ StripeMapUpdate::Execute(void)
 {
     bool executionSuccessful = false;
 
-    if (journalService->IsEnabled(arrayName))
+    if (journalService->IsEnabled(arrayId))
     {
-        IJournalWriter* journal = journalService->GetWriter(arrayName);
+        IJournalWriter* journal = journalService->GetWriter(arrayId);
 
         MpageList dirty = iStripeMap->GetDirtyStripeMapPages(stripe->GetVsid());
         StripeAddr oldAddr = iStripeMap->GetLSA(stripe->GetVsid());
-        EventSmartPtr callbackEvent(new StripeMapUpdateCompletion(stripe, arrayName));
+        EventSmartPtr callbackEvent(new StripeMapUpdateCompletion(stripe, arrayId));
 
         int result = journal->AddStripeMapUpdatedLog(stripe, oldAddr,
             dirty, callbackEvent);
@@ -84,7 +84,7 @@ StripeMapUpdate::Execute(void)
     }
     else
     {
-        StripeMapUpdateCompletion event(stripe, arrayName);
+        StripeMapUpdateCompletion event(stripe, arrayId);
         executionSuccessful = event.Execute();
         if (unlikely(false == executionSuccessful))
         {
@@ -93,7 +93,7 @@ StripeMapUpdate::Execute(void)
             POS_TRACE_ERROR(static_cast<int>(eventId),
                 PosEventId::GetString(eventId));
 
-            EventSmartPtr event(new StripeMapUpdateCompletion(stripe, arrayName));
+            EventSmartPtr event(new StripeMapUpdateCompletion(stripe, arrayId));
             eventScheduler->EnqueueEvent(event);
 
             executionSuccessful = true;

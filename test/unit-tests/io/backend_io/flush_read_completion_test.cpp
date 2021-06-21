@@ -22,10 +22,9 @@ TEST(FlushReadCompletion, FlushReadCompletion_Constructor_OneArgument_Stack)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    std::string arr_name{"arr_name"};
 
     // When: Try to Create New FlushReadCompletion object with 1 argument
-    FlushReadCompletion flushReadCompletion(&mockStripe, arr_name);
+    FlushReadCompletion flushReadCompletion(&mockStripe, 0);
 
     // Then: Do nothing
 }
@@ -34,10 +33,9 @@ TEST(FlushReadCompletion, FlushReadCompletion_Constructor_OneArgument_Heap)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    std::string arr_name{"arr_name"};
 
     // When: Try to Create New FlushReadCompletion object with 1 argument
-    FlushReadCompletion* flushReadCompletion = new FlushReadCompletion(&mockStripe, arr_name);
+    FlushReadCompletion* flushReadCompletion = new FlushReadCompletion(&mockStripe, 0);
 
     // Then: Release memory
     delete flushReadCompletion;
@@ -47,8 +45,7 @@ TEST(FlushReadCompletion, FlushReadCompletion_DoSpecificJob_NormalCase)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    std::string arr_name{"arr_name"};
-    FlushReadCompletion flushReadCompletion(&mockStripe, arr_name);
+    FlushReadCompletion flushReadCompletion(&mockStripe, 0);
     bool actual, expected{true};
 
     // When: call by base class(Callback)' Execute()

@@ -42,21 +42,21 @@
 
 namespace pos
 {
-FlushCompletion::FlushCompletion(Stripe* stripe, std::string& arrayName)
-: FlushCompletion(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
-      EventSchedulerSingleton::Instance(), arrayName)
+FlushCompletion::FlushCompletion(Stripe* stripe, int arrayId)
+: FlushCompletion(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayId),
+      EventSchedulerSingleton::Instance(), arrayId)
 {
 }
 
 FlushCompletion::FlushCompletion(Stripe* stripe,
     IStripeMap* stripeMap,
     EventScheduler* eventScheduler,
-    std::string& arrayName)
+    int arrayId)
 : Event(true),
   stripe(stripe),
   iStripeMap(stripeMap),
   eventScheduler(eventScheduler),
-  arrayName(arrayName)
+  arrayId(arrayId)
 {
 }
 
@@ -82,13 +82,13 @@ FlushCompletion::Execute()
     if (likely(true == userArea))
     {
         StripeId nvmStripeId = stripe->GetWbLsid();
-        StripePutEvent event(*stripe, nvmStripeId, arrayName);
+        StripePutEvent event(*stripe, nvmStripeId, arrayId);
 
         bool done = event.Execute();
 
         if (false == done)
         {
-            EventSmartPtr eventForSchedule(new StripePutEvent(*stripe, nvmStripeId, arrayName));
+            EventSmartPtr eventForSchedule(new StripePutEvent(*stripe, nvmStripeId, arrayId));
             eventScheduler->EnqueueEvent(eventForSchedule);
         }
     }

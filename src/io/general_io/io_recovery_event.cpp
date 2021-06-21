@@ -86,7 +86,7 @@ IoRecoveryEvent::Execute(void)
         {
             bool isRecoverable = false;
             IIODeviceChecker* checker = ArrayService::Instance()->Getter()->GetDeviceChecker();
-            isRecoverable = checker->IsRecoverable(ubio->GetArrayName(),
+            isRecoverable = checker->IsRecoverable(ubio->GetArrayId(),
                 ubio->GetArrayDev(), ubio->GetUBlock());
             if (isRecoverable)
             {

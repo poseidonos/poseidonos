@@ -41,10 +41,10 @@
 
 namespace pos
 {
-FlushReadCompletion::FlushReadCompletion(Stripe* stripe, std::string& arrayName)
+FlushReadCompletion::FlushReadCompletion(Stripe* stripe, int arrayId)
 : Callback(false, CallbackType_FlushReadCompletion),
   stripe(stripe),
-  arrayName(arrayName)
+  arrayId(arrayId)
 {
     SetEventType(BackendEvent_Flush);
 }
@@ -56,7 +56,7 @@ FlushReadCompletion::~FlushReadCompletion(void)
 bool
 FlushReadCompletion::_DoSpecificJob(void)
 {
-    EventSmartPtr flushEvent(new FlushSubmission(stripe, arrayName));
+    EventSmartPtr flushEvent(new FlushSubmission(stripe, arrayId));
     if (unlikely(nullptr == flushEvent))
     {
         POS_EVENT_ID eventId =

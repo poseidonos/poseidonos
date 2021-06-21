@@ -28,7 +28,7 @@ TEST(StripePartition, StripePartition_testIfConstructorSetsLogicalSizeProperly)
     vector<ArrayDevice*> devs;
 
     // When
-    StripePartition sPartition("mock-array", PartitionType::USER_DATA, physicalSize, devs, mockRaid1);
+    StripePartition sPartition("mock-array", 0, PartitionType::USER_DATA, physicalSize, devs, mockRaid1);
 
     // Then
     const PartitionLogicalSize* pLogicalSize = sPartition.GetLogicalSize();
@@ -59,7 +59,7 @@ TEST(StripePartition, Translate_testIfFtBlkAddrIsMappedToPhysicalBlkAddr)
         .stripeId = TOTAL_STRIPES - 1,
         .offset = MAX_BLK_OFFSET / 2};
     PhysicalBlkAddr dest;
-    StripePartition sPartition("mock-array", PartitionType::USER_DATA, physicalSize, devs, mockRaid1);
+    StripePartition sPartition("mock-array", 0, PartitionType::USER_DATA, physicalSize, devs, mockRaid1);
 
     EXPECT_CALL(*mockRaid1, Translate).WillOnce([](FtBlkAddr& fba, const LogicalBlkAddr& src)
     {
@@ -95,7 +95,7 @@ TEST(StripePartition, Convert_testIfConvertWithRaid1FillsDestIn)
     {
         devs.push_back(new ArrayDevice(nullptr));
     }
-    StripePartition sPartition("mock-array", PartitionType::USER_DATA, physicalSize, devs, raid1);
+    StripePartition sPartition("mock-array", 0, PartitionType::USER_DATA, physicalSize, devs, raid1);
     std::list<BufferEntry> buffers;
     LogicalBlkAddr lBlkAddr{
         .stripeId = 5,
@@ -129,7 +129,7 @@ TEST(StripePartition, GetRecoverMethod_testIfValidUbioCanRetrieveRecoverMethodSu
     Raid1* raid1 = new Raid1(&physicalSize);
     ArrayDevice arrayDevice1(nullptr), arrayDevice2(nullptr), arrayDevice3(nullptr), arrayDevice4(nullptr);
     vector<ArrayDevice*> devs = {&arrayDevice1, &arrayDevice2, &arrayDevice3, &arrayDevice4};
-    StripePartition sPartition("mock-array", PartitionType::USER_DATA, physicalSize, devs, raid1);
+    StripePartition sPartition("mock-array", 0, PartitionType::USER_DATA, physicalSize, devs, raid1);
 
     int DATA_BUFFER_UNIT = 13; // just picked up randomly
     UbioSmartPtr ubio = make_shared<Ubio>(nullptr, DATA_BUFFER_UNIT, "mock-array");
@@ -171,7 +171,7 @@ TEST(StripePartition, GetRebuildCtx_testIfRebuildContextIsFilledInWithFaultyDevi
     vector<ArrayDevice*> devs = {&arrayDevice1, &arrayDevice2, &arrayDevice3, &arrayDevice4};
     PartitionType PART_TYPE = PartitionType::USER_DATA;
     string ARRAY_NAME = "mock-array";
-    StripePartition sPartition(ARRAY_NAME, PART_TYPE, physicalSize, devs, raid1);
+    StripePartition sPartition(ARRAY_NAME, 0, PART_TYPE, physicalSize, devs, raid1);
 
     // When
     auto rebuildCtx = sPartition.GetRebuildCtx(&arrayDevice4);
@@ -208,7 +208,7 @@ TEST(StripePartition, Format_testIfThereAre4DeallocatesAnd4ReadsWhenThereAre4Nor
     PartitionType PART_TYPE = PartitionType::USER_DATA;
     string ARRAY_NAME = "mock-array";
     MockIODispatcher mockIoDispatcher;
-    StripePartition sPartition(ARRAY_NAME, PART_TYPE, physicalSize, devs, raid1, &mockIoDispatcher);
+    StripePartition sPartition(ARRAY_NAME, 0, PART_TYPE, physicalSize, devs, raid1, &mockIoDispatcher);
 
     EXPECT_CALL(*ublockDev1Shared.get(), GetName).WillRepeatedly(Return("dev1"));
     EXPECT_CALL(*ublockDev2Shared.get(), GetName).WillRepeatedly(Return("dev2"));

@@ -34,9 +34,9 @@
 
 namespace pos
 {
-VolumeEvent::VolumeEvent(std::string _tag, std::string _arrayName, int _arrayID)
+VolumeEvent::VolumeEvent(std::string _tag, std::string _arrayName, int _arrayId)
 : arrayName(_arrayName),
-  arrayID(_arrayID),
+  arrayId(_arrayId),
   tag(_tag)
 {
 }
@@ -50,5 +50,7 @@ VolumeEvent::Tag(void)
 {
     return tag;
 }
+
+
 
 } // namespace pos

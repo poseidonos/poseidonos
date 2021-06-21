@@ -155,7 +155,6 @@ IODeviceChecker::Unregister(unsigned int arrayIndex)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::DEV_CHECKER_DEBUG_MSG,
         "IODeviceChecker::Unregister, array:{}", arrayIndex);
-    delete devCheckers[arrayIndex];
     devCheckers[arrayIndex] = nullptr;
 }
 

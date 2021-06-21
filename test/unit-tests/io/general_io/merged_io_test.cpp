@@ -130,7 +130,6 @@ TEST(MergedIO, IsContiguous_false)
 TEST(MergedIO, Process_success)
 {
     // Given
-    std::string arr_name = "";
     void* buffer = Memory<SECTOR_SIZE>::Alloc(512 / SECTOR_SIZE);
 
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));    
@@ -148,7 +147,7 @@ TEST(MergedIO, Process_success)
     IOSubmitHandlerStatus actual, expected{IOSubmitHandlerStatus::SUCCESS};
 
     //then
-    actual = mergedIO.Process(arr_name);
+    actual = mergedIO.Process(0);
 
     //ASSERT_EQ(expected, actual);
 
@@ -160,7 +159,6 @@ TEST(MergedIO, Process_success)
 TEST(MergedIO, Process_ExistError)
 {
     // Given
-    std::string arr_name = "";
     void* buffer = Memory<SECTOR_SIZE>::Alloc(512 / SECTOR_SIZE);
 
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));    
@@ -178,7 +176,7 @@ TEST(MergedIO, Process_ExistError)
     IOSubmitHandlerStatus actual, expected{IOSubmitHandlerStatus::SUCCESS};
 
     //then
-    actual = mergedIO.Process(arr_name);
+    actual = mergedIO.Process(0);
 
     //ASSERT_EQ(expected, actual);
 

@@ -60,8 +60,7 @@ namespace pos
 
 VolumeManager::VolumeManager(IArrayInfo* i, IStateControl* s)
 :arrayInfo(i),
-state(s),
-volumeMangerIdx(ArrayMgmtPolicy::MAX_ARRAY_CNT)
+state(s)
 {
     state->Subscribe(this, typeid(*this).name());
 }
@@ -79,13 +78,7 @@ VolumeManager::Init(void)
     initialized = true;
     _LoadVolumes();
 
-    int arrayIdx = VolumeEventPublisherSingleton::Instance()->GetArrayIdx(arrayInfo->GetName());
-    volumeMangerIdx = VolumeServiceSingleton::Instance()->Register(arrayIdx, this);
-
-    if (volumeMangerIdx < 0)
-    {
-        result = -1;
-    }
+    result = VolumeServiceSingleton::Instance()->Register(arrayInfo->GetIndex(), this);
 
     return result;
 }
@@ -108,8 +101,7 @@ VolumeManager::Dispose(void)
     initialized = false;
     volumes.Clear();
 
-    VolumeServiceSingleton::Instance()->Unregister(volumeMangerIdx);
-    VolumeEventPublisherSingleton::Instance()->RemoveArrayIdx(arrayInfo->GetName());
+    VolumeServiceSingleton::Instance()->Unregister(arrayInfo->GetIndex());
 }
 
 void
@@ -172,7 +164,7 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
         return ret;
     }
 
-    VolumeCreator volumeCreator(volumes, arrayInfo->GetName(), volumeMangerIdx);
+    VolumeCreator volumeCreator(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeCreator.Do(name, size, maxIops, maxBw);
 }
 
@@ -185,7 +177,7 @@ VolumeManager::Delete(std::string name)
         return ret;
     }
 
-    VolumeDeleter volumeDeleter(volumes, arrayInfo->GetName(), volumeMangerIdx);
+    VolumeDeleter volumeDeleter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeDeleter.Do(name);
 }
 
@@ -198,7 +190,7 @@ VolumeManager::Mount(std::string name, std::string subnqn)
         return ret;
     }
 
-    VolumeMounter volumeMounter(volumes, arrayInfo->GetName(), volumeMangerIdx);
+    VolumeMounter volumeMounter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeMounter.Do(name, subnqn);
 }
 
@@ -211,7 +203,7 @@ VolumeManager::Unmount(std::string name)
         return ret;
     }
 
-    VolumeUnmounter volumeUnmounter(volumes, arrayInfo->GetName(), volumeMangerIdx);
+    VolumeUnmounter volumeUnmounter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeUnmounter.Do(name);
 }
 
@@ -224,7 +216,7 @@ VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw)
         return ret;
     }
 
-    VolumeQosUpdater volumeQosUpdater(volumes, arrayInfo->GetName(), volumeMangerIdx);
+    VolumeQosUpdater volumeQosUpdater(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeQosUpdater.Do(name, maxIops, maxBw);
 }
 
@@ -237,7 +229,7 @@ VolumeManager::Rename(std::string oldName, std::string newName)
         return ret;
     }
 
-    VolumeRenamer volumeRenamer(volumes, arrayInfo->GetName(), volumeMangerIdx);
+    VolumeRenamer volumeRenamer(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeRenamer.Do(oldName, newName);
 }
 
@@ -250,7 +242,7 @@ VolumeManager::Resize(std::string name, uint64_t newSize)
         return ret;
     }
 
-    VolumeResizer volumeResizer(volumes, arrayInfo->GetName(), volumeMangerIdx);
+    VolumeResizer volumeResizer(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeResizer.Do(name, newSize);
 }
 
@@ -272,7 +264,7 @@ VolumeManager::GetVolumeStatus(int volId)
 int
 VolumeManager::_LoadVolumes(void)
 {
-    VolumeLoader volumeLoader(volumes, arrayInfo->GetName(), volumeMangerIdx);
+    VolumeLoader volumeLoader(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeLoader.Do();
 }
 
@@ -313,7 +305,7 @@ VolumeManager::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint
 void
 VolumeManager::DetachVolumes(void)
 {
-    VolumeDetacher volumeDetacher(volumes, arrayInfo->GetName(), volumeMangerIdx);
+    VolumeDetacher volumeDetacher(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     volumeDetacher.DoAll();
 }
 
@@ -409,6 +401,12 @@ std::string
 VolumeManager::GetArrayName(void)
 {
     return arrayInfo->GetName();
+}
+
+int
+VolumeManager::GetArrayId(void)
+{
+    return arrayInfo->GetIndex();
 }
 
 } // namespace pos

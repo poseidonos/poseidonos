@@ -15,7 +15,7 @@ TEST(ArrayUnlocking, ArrayUnlocking_Constructor)
     const std::string str = "array";
     MockIIOLocker mockIIOLocker;
     // When : Constructor
-    ArrayUnlocking arrayUnlocking(partitionType, stripeId, str, &mockIIOLocker);
+    ArrayUnlocking arrayUnlocking(partitionType, stripeId, 0, &mockIIOLocker);
 }
 
 TEST(ArrayUnlocking, ArrayUnlocking_DoSpecificJob)
@@ -24,12 +24,13 @@ TEST(ArrayUnlocking, ArrayUnlocking_DoSpecificJob)
     PartitionType partitionType = PartitionType::USER_DATA;
     StripeId stripeId = 0;
     const std::string str = "array";
+    unsigned int arrayId = 0;
     MockIIOLocker mockIIOLocker;
     // When : Constructor
-    ArrayUnlocking arrayUnlocking(partitionType, stripeId, str, &mockIIOLocker);
+    ArrayUnlocking arrayUnlocking(partitionType, stripeId, 0, &mockIIOLocker);
     Callback* callback = &arrayUnlocking;
     // Then : Execute and check result
-    EXPECT_CALL(mockIIOLocker, Unlock(str, _));
+    EXPECT_CALL(mockIIOLocker, Unlock(arrayId, _));
     bool actual = callback->Execute();
     ASSERT_EQ(actual, true);
 }

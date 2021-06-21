@@ -30,10 +30,9 @@ TEST(StripeMapUpdate, StripeMapUpdate_Constructor_OneArgument_Stack)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    std::string arr_name{"arr_name"};
 
     // When: Try to Create New StripeMapUpdate object with 1 argument
-    StripeMapUpdate stripeMapUpdate(&mockStripe, arr_name);
+    StripeMapUpdate stripeMapUpdate(&mockStripe, 0);
 
     // Then: Do nothing
 }
@@ -42,10 +41,9 @@ TEST(StripeMapUpdate, StripeMapUpdate_Constructor_OneArgument_Heap)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    std::string arr_name{"arr_name"};
 
     // When: Try to Create New StripeMapUpdate object with 1 argument
-    StripeMapUpdate* stripeMapUpdate = new StripeMapUpdate(&mockStripe, arr_name);
+    StripeMapUpdate* stripeMapUpdate = new StripeMapUpdate(&mockStripe, 0);
 
     // Then: Release memory
     delete stripeMapUpdate;
@@ -58,10 +56,9 @@ TEST(StripeMapUpdate, StripeMapUpdate_Constructor_FourArguments)
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockJournalService> mockJournalService;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    std::string arr_name{"arr_name"};
 
     // When: Try to Create New StripeMapUpdate object with 4 argument
-    StripeMapUpdate stripeMapUpdate(&mockStripe, &mockIStripeMap, &mockJournalService, &mockEventScheduler, arr_name);
+    StripeMapUpdate stripeMapUpdate(&mockStripe, &mockIStripeMap, &mockJournalService, &mockEventScheduler, 0);
 
     // Then: Do nothing
 }
@@ -74,17 +71,18 @@ TEST(StripeMapUpdate, StripeMapUpdate_Execute_NormalWithJournalOn)
     NiceMock<MockEventScheduler> mockEventScheduler;
     NiceMock<MockIJournalWriter> mockIJournalWriter;
     NiceMock<MockIStripeMap> mockIStripeMap;
-    std::string arr_name{"arr_name"};
 
-    StripeMapUpdate stripeMapUpdate(&mockStripe, &mockIStripeMap, &mockJournalService, &mockEventScheduler, arr_name);
+    StripeMapUpdate stripeMapUpdate(&mockStripe, &mockIStripeMap, &mockJournalService, &mockEventScheduler, 0);
 
     MpageList dirty;
-    StripeAddr stripeAddr;
-    ON_CALL(mockJournalService, IsEnabled(Matcher<std::string>(_))).WillByDefault(Return(true));
-    ON_CALL(mockJournalService, GetWriter(Matcher<std::string>(_))).WillByDefault(Return(&mockIJournalWriter));
+    StripeAddr stripeAddr = { .stripeLoc = IN_USER_AREA, .stripeId = 0};
+    ON_CALL(mockJournalService, IsEnabled(Matcher<int>(_))).WillByDefault(Return(true));
+    ON_CALL(mockJournalService, GetWriter(Matcher<int>(_))).WillByDefault(Return(&mockIJournalWriter));
+    ON_CALL(mockStripe, GetUserLsid()).WillByDefault(Return(0));
     ON_CALL(mockStripe, GetVsid()).WillByDefault(Return(0));
     ON_CALL(mockIStripeMap, GetDirtyStripeMapPages(_)).WillByDefault(Return(dirty));
     ON_CALL(mockIStripeMap, GetLSA(_)).WillByDefault(Return(stripeAddr));
+    ON_CALL(mockIStripeMap, SetLSA(_,_,_)).WillByDefault(Return(0));
     ON_CALL(mockIJournalWriter, AddStripeMapUpdatedLog(_, _, _, _)).WillByDefault(Return(0));
 
     bool actual, expected{true};
@@ -104,13 +102,12 @@ TEST(StripeMapUpdate, StripeMapUpdate_Execute_AddStripeMapUpdatedLogFailWithJour
     NiceMock<MockJournalService> mockJournalService;
     NiceMock<MockEventScheduler> mockEventScheduler;
     NiceMock<MockIJournalWriter> mockIJournalWriter;
-    std::string arr_name{"arr_name"};
 
-    StripeMapUpdate stripeMapUpdate(&mockStripe, &mockIStripeMap, &mockJournalService, &mockEventScheduler, arr_name);
+    StripeMapUpdate stripeMapUpdate(&mockStripe, &mockIStripeMap, &mockJournalService, &mockEventScheduler, 0);
     MpageList dirty;
     StripeAddr stripeAddr;
-    ON_CALL(mockJournalService, IsEnabled(Matcher<std::string>(_))).WillByDefault(Return(true));
-    ON_CALL(mockJournalService, GetWriter(Matcher<std::string>(_))).WillByDefault(Return(&mockIJournalWriter));
+    ON_CALL(mockJournalService, IsEnabled(Matcher<int>(_))).WillByDefault(Return(true));
+    ON_CALL(mockJournalService, GetWriter(Matcher<int>(_))).WillByDefault(Return(&mockIJournalWriter));
     ON_CALL(mockStripe, GetVsid()).WillByDefault(Return(0));
     ON_CALL(mockIStripeMap, GetDirtyStripeMapPages(_)).WillByDefault(Return(dirty));
     ON_CALL(mockIStripeMap, GetLSA(_)).WillByDefault(Return(stripeAddr));

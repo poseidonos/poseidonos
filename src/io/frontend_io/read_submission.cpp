@@ -66,7 +66,7 @@ ReadSubmission::ReadSubmission(VolumeIoSmartPtr volumeIo, BlockAlignment* blockA
     }
     if (nullptr == translator)
     {
-        translator = new Translator{volumeIo->GetVolumeId(), blockAlignment->GetHeadBlock(), blockAlignment->GetBlockCount(), volumeIo->GetArrayName(), true};
+        translator = new Translator{volumeIo->GetVolumeId(), blockAlignment->GetHeadBlock(), blockAlignment->GetBlockCount(), volumeIo->GetArrayId(), true};
     }
 }
 

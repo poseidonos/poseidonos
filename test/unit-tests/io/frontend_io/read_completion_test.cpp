@@ -27,9 +27,8 @@ TEST(ReadCompletion, ReadCompletion_Constructor_OneArgument_Stack)
     // Given
     void* buffer = nullptr;
     uint64_t sectorSize = 1;
-    std::string arr_name = "";
 
-    NiceMock<MockVolumeIo>* mockIovolumeIo = new NiceMock<MockVolumeIo>(buffer, sectorSize, arr_name);
+    NiceMock<MockVolumeIo>* mockIovolumeIo = new NiceMock<MockVolumeIo>(buffer, sectorSize, 0);
     VolumeIoSmartPtr volumeIo(mockIovolumeIo);
 
     // When: Try to Create New FlushReadCompletion object with 1 argument
@@ -43,9 +42,8 @@ TEST(ReadCompletion, ReadCompletion_Constructor_OneArgument_Heap)
     // Given
     void* buffer = nullptr;
     uint64_t sectorSize = 1;
-    std::string arr_name = "";
 
-    NiceMock<MockVolumeIo>* mockIovolumeIo = new NiceMock<MockVolumeIo>(buffer, sectorSize, arr_name);
+    NiceMock<MockVolumeIo>* mockIovolumeIo = new NiceMock<MockVolumeIo>(buffer, sectorSize, 0);
     VolumeIoSmartPtr volumeIo(mockIovolumeIo);
 
     // When: Try to Create New FlushReadCompletion object with 1 argument
@@ -79,9 +77,8 @@ TEST(ReadCompletion, ReadCompletion_DoSpecificJob_ExistErrorCount)
     // Given
     void* buffer = nullptr;
     uint64_t sectorSize = 1;
-    std::string arr_name = "";
 
-    VolumeIoSmartPtr volumeIo(new VolumeIo(buffer, sectorSize, arr_name));
+    VolumeIoSmartPtr volumeIo(new VolumeIo(buffer, sectorSize, 0));
     StripeAddr returnLsidEntry;
     returnLsidEntry.stripeId = 0;
 
@@ -105,9 +102,8 @@ TEST(ReadCompletion, ReadCompletion_DoSpecificJob_Success)
     // Given
     void* buffer = nullptr;
     uint64_t sectorSize = 1;
-    std::string arr_name = "";
 
-    VolumeIoSmartPtr volumeIo(new VolumeIo(buffer, sectorSize, arr_name));
+    VolumeIoSmartPtr volumeIo(new VolumeIo(buffer, sectorSize, 0));
     StripeAddr returnLsidEntry;
     returnLsidEntry.stripeId = 0;
 
@@ -122,7 +118,7 @@ TEST(ReadCompletion, ReadCompletion_DoSpecificJob_Success)
 
     volumeIo->SetLsidEntry(returnLsidEntry);
 
-    ON_CALL(mockAllocatorService, GetIWBStripeAllocator(Matcher<std::string>(_))).WillByDefault(Return(&mockIWBStripeAllocator));
+    ON_CALL(mockAllocatorService, GetIWBStripeAllocator(Matcher<int>(_))).WillByDefault(Return(&mockIWBStripeAllocator));
 
     actual = readCompletion.Execute();
 

@@ -40,19 +40,18 @@
 
 namespace pos
 {
-StripePutEvent::StripePutEvent(IWBStripeAllocator* wbAllocator, Stripe& stripe, StripeId prevLsid, std::string& arrayName)
+StripePutEvent::StripePutEvent(IWBStripeAllocator* wbAllocator, Stripe& stripe, StripeId prevLsid)
 : Event(false, BackendEvent_Flush),
   stripe(stripe),
   prevLsid(prevLsid),
-  iWBStripeAllocator(wbAllocator),
-  arrayName(arrayName)
+  iWBStripeAllocator(wbAllocator)
 {
 }
 
-StripePutEvent::StripePutEvent(Stripe& stripe, StripeId prevLsid, std::string& arrayName)
-: StripePutEvent(nullptr, stripe, prevLsid, arrayName)
+StripePutEvent::StripePutEvent(Stripe& stripe, StripeId prevLsid, int arrayId)
+: StripePutEvent(nullptr, stripe, prevLsid)
 {
-    iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName);
+    iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayId);
     SetEventType(BackendEvent_Flush);
 }
 

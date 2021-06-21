@@ -28,10 +28,9 @@ TEST(StripeMapUpdateCompletion, StripeMapUpdateCompletion_Constructor_OneArgumen
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    std::string arr_name{"arr_name"};
 
     // When : Create StripeMapUpdateCompletion with single argument
-    StripeMapUpdateCompletion stripeMapUpdateCompletion(&mockStripe, arr_name);
+    StripeMapUpdateCompletion stripeMapUpdateCompletion(&mockStripe, 0);
 
     // Then : Do nothing
 }
@@ -40,11 +39,10 @@ TEST(StripeMapUpdateCompletion, StripeMapUpdateCompletion_Constructor_OneArgumen
 {
     // Given
     NiceMock<MockStripe> mockStripe;
-    std::string arr_name{"arr_name"};
 
     // When : Create StripeMapUpdateCompletion with single argument
     StripeMapUpdateCompletion* stripeMapUpdateCompletion =
-        new StripeMapUpdateCompletion(&mockStripe, arr_name);
+        new StripeMapUpdateCompletion(&mockStripe, 0);
 
     // Then : Release memory
     delete stripeMapUpdateCompletion;
@@ -57,7 +55,6 @@ TEST(StripeMapUpdateCompletion, StripeMapUpdateCompletion_Constructor_FourArgume
     NiceMock<MockIContextManager> mockIContextManager;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    std::string arr_name{"arr_name"};
 
     // When : Create StripeMapUpdateCompletion with four arguments
     StripeMapUpdateCompletion* stripeMapUpdateCompletion =
@@ -65,7 +62,7 @@ TEST(StripeMapUpdateCompletion, StripeMapUpdateCompletion_Constructor_FourArgume
             &mockIContextManager,
             &mockIStripeMap,
             &mockEventScheduler,
-            arr_name);
+            0);
 
     // Then : Release memory
     delete stripeMapUpdateCompletion;
@@ -78,12 +75,11 @@ TEST(StripeMapUpdateCompletion, StripeMapUpdateCompletion_Execute_NormalCase)
     NiceMock<MockIContextManager> mockIContextManager;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    std::string arr_name{"arr_name"};
     StripeMapUpdateCompletion stripeMapUpdateCompletion(&mockStripe,
         &mockIContextManager,
         &mockIStripeMap,
         &mockEventScheduler,
-        arr_name);
+        0);
     StripeAddr stripeAddr;
     ON_CALL(mockStripe, GetUserLsid()).WillByDefault(Return(0));
     ON_CALL(mockStripe, GetVsid()).WillByDefault(Return(0));

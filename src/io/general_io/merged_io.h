@@ -53,7 +53,7 @@ public:
     ~MergedIO(void);
 
     void Reset(void);
-    IOSubmitHandlerStatus Process(std::string& arrayName);
+    IOSubmitHandlerStatus Process(int arrayId);
     void AddContiguousBlock(void);
     void SetNewStart(void* newBuffer, PhysicalBlkAddr& newPba);
     bool IsContiguous(PhysicalBlkAddr& targetPba);
@@ -66,6 +66,6 @@ private:
     IODispatcher* ioDispatcher;
     StateType stateType;
 
-    IOSubmitHandlerStatus _CheckAsyncReadError(POS_EVENT_ID eventId, const std::string& arrayName);
+    IOSubmitHandlerStatus _CheckAsyncReadError(POS_EVENT_ID eventId, int arrayId);
 };
 } // namespace pos

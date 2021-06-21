@@ -33,7 +33,7 @@ SubmitAsyncRead::Execute(
     std::list<BufferEntry>& bufferList,
     LogicalBlkAddr& startLSA, uint64_t blockCount,
     PartitionType partitionToIO,
-    CallbackSmartPtr callback, std::string& arrayName)
+    CallbackSmartPtr callback, int arrayId)
 {
     IOSubmitHandlerStatus errorToReturn = IOSubmitHandlerStatus::FAIL;
 
@@ -79,7 +79,7 @@ SubmitAsyncRead::Execute(
 
             // Ignore handling the return status.
             translator->Translate(
-                arrayName, partitionToIO, physicalBlkAddr, currentLSA);
+                arrayId, partitionToIO, physicalBlkAddr, currentLSA);
 
             if (mergedIO->IsContiguous(physicalBlkAddr))
             {
@@ -88,7 +88,7 @@ SubmitAsyncRead::Execute(
             else
             {
                 // Ignore handling the return status.
-                mergedIO->Process(arrayName);
+                mergedIO->Process(arrayId);
 
                 void* newBuffer = currentBufferEntry.GetBlock(bufferIndex);
                 mergedIO->SetNewStart(newBuffer, physicalBlkAddr);
@@ -97,7 +97,7 @@ SubmitAsyncRead::Execute(
             currentLSA.offset++;
         }
         // Net status of the upper operations is gathered from here.
-        errorToReturn = mergedIO->Process(arrayName);
+        errorToReturn = mergedIO->Process(arrayId);
         mergedIO->Reset();
 
         blockIndex += (bufferCount - 1);

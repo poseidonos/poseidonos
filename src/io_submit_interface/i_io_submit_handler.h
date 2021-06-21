@@ -69,6 +69,19 @@ public:
         PartitionType partitionToIO, std::string arrayName) = 0;
 
     virtual IOSubmitHandlerStatus
+    SyncIO(IODirection direction,
+        std::list<BufferEntry>& bufferList,
+        LogicalBlkAddr& startLSA, uint64_t blockCount,
+        PartitionType partitionToIO, int arrayId) = 0;
+
+    virtual IOSubmitHandlerStatus
+    SubmitAsyncIO(IODirection direction,
+        std::list<BufferEntry>& bufferList,
+        LogicalBlkAddr& startLSA, uint64_t blockCount,
+        PartitionType partitionToIO,
+        CallbackSmartPtr callback, int arrayId) = 0;
+
+    virtual IOSubmitHandlerStatus
     SubmitAsyncIO(IODirection direction,
         std::list<BufferEntry>& bufferList,
         LogicalBlkAddr& startLSA, uint64_t blockCount,

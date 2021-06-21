@@ -47,8 +47,8 @@ const VirtualBlkAddr VolumeIo::INVALID_VSA = {.stripeId = UNMAP_STRIPE,
     .offset = 0};
 const uint64_t VolumeIo::INVALID_RBA = UINT64_MAX;
 
-VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, std::string arrayName)
-: Ubio(buffer, unitCount, arrayName),
+VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId)
+: Ubio(buffer, unitCount, arrayId),
   volumeId(MAX_VOLUME_COUNT),
   originCore(EventFrameworkApiSingleton::Instance()->GetCurrentReactor()),
   lsidEntry(INVALID_LSID_ENTRY),

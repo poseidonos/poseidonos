@@ -54,7 +54,7 @@
 
 namespace pos
 {
-Ubio::Ubio(void* buffer, uint32_t unitCount, std::string arrayName)
+Ubio::Ubio(void* buffer, uint32_t unitCount, int arrayID)
 : dir(UbioDir::Read),
   ubioPrivate(nullptr),
   eventIoType(BackendEvent_Unknown),
@@ -67,7 +67,7 @@ Ubio::Ubio(void* buffer, uint32_t unitCount, std::string arrayName)
   lba(0),
   uBlock(nullptr),
   arrayDev(nullptr),
-  arrayName(arrayName)
+  arrayId(arrayID)
 {
     SetAsyncMode();
 }
@@ -82,7 +82,7 @@ Ubio::Ubio(const Ubio& ubio)
   lba(0),
   uBlock(nullptr),
   arrayDev(nullptr),
-  arrayName(ubio.arrayName)
+  arrayId(ubio.arrayId)
 {
     dir = ubio.dir;
     SetAsyncMode();
@@ -417,10 +417,16 @@ Ubio::NeedRecovery(void) // TODO: will be moved. AWIBOF-2751
     return false;
 }
 
-std::string&
+/*std::string&
 Ubio::GetArrayName(void)
 {
     return arrayName;
+}*/
+
+int
+Ubio::GetArrayId(void)
+{
+    return arrayId;
 }
 
 } // namespace pos

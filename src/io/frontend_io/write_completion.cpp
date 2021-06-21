@@ -46,7 +46,7 @@ namespace pos
 {
 WriteCompletion::WriteCompletion(VolumeIoSmartPtr input)
 : WriteCompletion(input,
-      AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(input.get()->GetArrayName()),
+      AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(input.get()->GetArrayId()),
       EventFrameworkApiSingleton::Instance()->IsReactorNow())
 {
 }
@@ -73,7 +73,7 @@ WriteCompletion::_DoSpecificJob()
     uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
 
     RBAStateManager& rbaStateManager =
-        *RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayName());
+        *RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayId());
     rbaStateManager.BulkReleaseOwnership(volumeId, startRba, blockCount);
 
     Stripe* stripeToFlush = nullptr;
@@ -130,7 +130,7 @@ bool
 WriteCompletion::_RequestFlush(Stripe* stripe)
 {
     bool requestFlushSuccessful = true;
-    EventSmartPtr event(new FlushSubmission(stripe, volumeIo->GetArrayName()));
+    EventSmartPtr event(new FlushSubmission(stripe, volumeIo->GetArrayId()));
 
     if (unlikely(stripe->Flush(event) < 0))
     {

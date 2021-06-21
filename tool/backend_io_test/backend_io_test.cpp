@@ -117,7 +117,7 @@ public:
             if (dev->GetType() == DeviceType::SSD)
             {
                 pendingIO++;
-                UbioSmartPtr bio(new Ubio(mem, memSize, "POSArray"));
+                UbioSmartPtr bio(new Ubio(mem, memSize, 0));
                 bio->dir = UbioDir::Write;
                 bio->SetLba(lba);
                 bio->SetUblock(dev);

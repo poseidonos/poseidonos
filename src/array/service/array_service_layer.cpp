@@ -89,29 +89,36 @@ ArrayServiceLayer::Register(string array, unsigned int arrayIndex,
     {
         return ret;
     }
+
     // new register method with array index
-    // ret = ioTranslator->Register(arrayIndex, trans);
-    // if (!ret)
-    // {
-    //     return ret;
-    // }
-    // ret = ioRecover->Register(arrayIndex, recover);
-    // if (!ret)
-    // {
-    //     return ret;
-    // }
-    // ret = ioLocker->Register(arrayIndex);
-    // if (!ret)
-    // {
-    //     return ret;
-    // }
-    // ret = deviceChecker->Register(arrayIndex, checker);
+
+    ret = ioTranslator->Register(arrayIndex, trans);
+    if (!ret)
+    {
+        return ret;
+    }
+    ret = ioRecover->Register(arrayIndex, recover);
+    if (!ret)
+    {
+        return ret;
+    }
+    ret = ioLocker->Register(arrayIndex);
+    if (!ret)
+    {
+        return ret;
+    }
+    ret = deviceChecker->Register(arrayIndex, checker);
     return ret;
 }
 
 void
 ArrayServiceLayer::Unregister(string array, unsigned int arrayIndex)
 {
+    deviceChecker->Unregister(arrayIndex);
+    ioLocker->Unregister(arrayIndex);
+    ioRecover->Unregister(arrayIndex);
+    ioTranslator->Unregister(arrayIndex);
+
     deviceChecker->Unregister(array);
     ioLocker->Unregister(array);
     ioRecover->Unregister(array);

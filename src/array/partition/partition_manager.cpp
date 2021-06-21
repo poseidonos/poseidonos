@@ -80,24 +80,24 @@ PartitionManager::GetSizeInfo(PartitionType type)
 
 int
 PartitionManager::CreateAll(vector<ArrayDevice*> buf,
-    vector<ArrayDevice*> data, ArrayInterface* intf)
+    vector<ArrayDevice*> data, ArrayInterface* intf, uint32_t arrayIndex)
 {
-    int ret = _CreateMetaSsd(data, intf);
+    int ret = _CreateMetaSsd(data, intf, arrayIndex);
     if (ret != 0)
     {
         goto error;
     }
-    ret = _CreateUserData(data, buf.front(), intf);
+    ret = _CreateUserData(data, buf.front(), intf, arrayIndex);
     if (ret != 0)
     {
         goto error;
     }
-    ret = _CreateMetaNvm(buf.front(), intf);
+    ret = _CreateMetaNvm(buf.front(), intf, arrayIndex);
     if (ret != 0)
     {
         goto error;
     }
-    ret = _CreateWriteBuffer(buf.front(), intf);
+    ret = _CreateWriteBuffer(buf.front(), intf, arrayIndex);
     if (ret != 0)
     {
         goto error;
@@ -111,7 +111,7 @@ error:
 }
 
 int
-PartitionManager::_CreateMetaNvm(ArrayDevice* dev, ArrayInterface* intf)
+PartitionManager::_CreateMetaNvm(ArrayDevice* dev, ArrayInterface* intf, uint32_t arrayIndex)
 {
     const PartitionLogicalSize* metaSsdSize = nullptr;
     PartitionType partType = PartitionType::META_NVM;
@@ -134,7 +134,7 @@ PartitionManager::_CreateMetaNvm(ArrayDevice* dev, ArrayInterface* intf)
     vector<ArrayDevice*> nvm;
     nvm.push_back(dev);
 
-    Partition* partition = new NvmPartition(arrayName_,
+    Partition* partition = new NvmPartition(arrayName_, arrayIndex,
         partType, physicalSize, nvm);
     if (nullptr == partition)
     {
@@ -148,7 +148,7 @@ PartitionManager::_CreateMetaNvm(ArrayDevice* dev, ArrayInterface* intf)
 }
 
 int
-PartitionManager::_CreateWriteBuffer(ArrayDevice* dev, ArrayInterface* intf)
+PartitionManager::_CreateWriteBuffer(ArrayDevice* dev, ArrayInterface* intf, uint32_t arrayIndex)
 {
     const PartitionLogicalSize* userDataSize = nullptr;
     PartitionType partType = PartitionType::WRITE_BUFFER;
@@ -178,7 +178,7 @@ PartitionManager::_CreateWriteBuffer(ArrayDevice* dev, ArrayInterface* intf)
 
     vector<ArrayDevice*> nvm;
     nvm.push_back(dev);
-    Partition* partition = new NvmPartition(arrayName_,
+    Partition* partition = new NvmPartition(arrayName_, arrayIndex,
         partType, physicalSize, nvm);
     if (nullptr == partition)
     {
@@ -192,7 +192,7 @@ PartitionManager::_CreateWriteBuffer(ArrayDevice* dev, ArrayInterface* intf)
 }
 
 int
-PartitionManager::_CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf)
+PartitionManager::_CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf, uint32_t arrayIndex)
 {
     PartitionType partType = PartitionType::META_SSD;
 
@@ -214,7 +214,7 @@ PartitionManager::_CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf
         DIV_ROUND_UP(ssdTotalSegments * ArrayConfig::META_SSD_SIZE_RATIO, 100);
 
     Method* method = new Raid1(&physicalSize);
-    StripePartition* partition = new StripePartition(arrayName_,
+    StripePartition* partition = new StripePartition(arrayName_, arrayIndex,
         partType, physicalSize, devs, method);
 
     if (nullptr == partition)
@@ -233,7 +233,7 @@ PartitionManager::_CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf
 
 int
 PartitionManager::_CreateUserData(const vector<ArrayDevice*> devs,
-    ArrayDevice* nvm, ArrayInterface* intf)
+    ArrayDevice* nvm, ArrayInterface* intf, uint32_t arrayIndex)
 {
     PartitionType partType = PartitionType::USER_DATA;
     Partition* metaSsd = nullptr;
@@ -266,7 +266,7 @@ PartitionManager::_CreateUserData(const vector<ArrayDevice*> devs,
     uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
     PartitionType type = PartitionType::USER_DATA;
     Method* method = new Raid5(&physicalSize, totalNvmStripes, affinityManager);
-    StripePartition* partition = new StripePartition(arrayName_, type, physicalSize, devs, method);
+    StripePartition* partition = new StripePartition(arrayName_, arrayIndex, type, physicalSize, devs, method);
     if (nullptr == partition)
     {
         int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_LOAD_ERROR;
@@ -315,9 +315,9 @@ PartitionManager::_GetBaseline(const vector<ArrayDevice*>& devs)
 }
 
 void
-PartitionManager::FormatMetaPartition(vector<ArrayDevice*> data, ArrayInterface* intf)
+PartitionManager::FormatMetaPartition(vector<ArrayDevice*> data, ArrayInterface* intf, uint32_t arrayIndex)
 {
-    _CreateMetaSsd(data, intf);
+    _CreateMetaSsd(data, intf, arrayIndex);
     auto partition = partitions_[PartitionType::META_SSD];
     partition->Format();
     DeleteAll(intf);
