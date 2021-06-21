@@ -128,9 +128,8 @@ CheckpointHandler::Start(MapPageList pendingDirtyPages)
 bool
 CheckpointHandler::_IncreaseNumMapsFlushed(void)
 {
-    numMapsFlushed++;
-    return (numMapsFlushed.load(memory_order_seq_cst)
-        == numMapsToFlush.load(memory_order_seq_cst));
+    int flushResult = numMapsFlushed.fetch_add(1) + 1;
+    return (numMapsToFlush == flushResult);
 }
 
 int
