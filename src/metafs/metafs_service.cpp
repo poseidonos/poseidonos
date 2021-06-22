@@ -41,6 +41,7 @@ namespace pos
 MetaFsService::MetaFsService(void)
 : ioScheduler(nullptr)
 {
+    fileSystems.fill(nullptr);
 }
 
 MetaFsService::~MetaFsService(void)
@@ -68,28 +69,32 @@ MetaFsService::Initialize(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t wor
 }
 
 void
-MetaFsService::Register(std::string& arrayName, MetaFs* fileSystem)
+MetaFsService::Register(std::string& arrayName, int arrayId, MetaFs* fileSystem)
 {
-    fileSystems.insert(std::pair<std::string, MetaFs*>(arrayName, fileSystem));
+    arrayNameToId.insert(std::pair<std::string, int>(arrayName, arrayId));
+    fileSystems[arrayId] = fileSystem;
 }
 
 void
 MetaFsService::Deregister(std::string& arrayName)
 {
-    fileSystems.erase(arrayName);
+    int arrayId = arrayNameToId[arrayName];
+    arrayNameToId.erase(arrayName);
+
+    fileSystems[arrayId] = nullptr;
 }
 
 MetaFs*
 MetaFsService::GetMetaFs(std::string& arrayName)
 {
-    auto iter = fileSystems.find(arrayName);
-    if (iter == fileSystems.end())
+    auto iter = arrayNameToId.find(arrayName);
+    if (iter == arrayNameToId.end())
     {
         return nullptr;
     }
     else
     {
-        return iter->second;
+        return fileSystems[iter->second];
     }
 }
 

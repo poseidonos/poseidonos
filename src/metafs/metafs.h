@@ -83,6 +83,7 @@ private:
     bool isNormal;
     IArrayInfo* arrayInfo;
     std::string arrayName = "";
+    int arrayId;
     MetaStorageSubsystem* metaStorage;
 };
 } // namespace pos

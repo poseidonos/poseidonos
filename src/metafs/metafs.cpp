@@ -44,16 +44,18 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
   isNormal(false),
   arrayInfo(arrayInfo),
   arrayName(""),
+  arrayId(INT32_MAX),
   metaStorage(nullptr)
 {
     arrayName = arrayInfo->GetName();
+    arrayId = arrayInfo->GetIndex();
 
     mgmt = new MetaFsManagementApi(arrayName);
     ctrl = new MetaFsFileControlApi(arrayName);
     io = new MetaFsIoApi(arrayName, ctrl);
     wbt = new MetaFsWBTApi(arrayName, ctrl);
 
-    MetaFsServiceSingleton::Instance()->Register(arrayName, this);
+    MetaFsServiceSingleton::Instance()->Register(arrayName, arrayId, this);
 }
 
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
@@ -63,16 +65,18 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
   isNormal(false),
   arrayInfo(arrayInfo),
   arrayName(""),
+  arrayId(INT32_MAX),
   metaStorage(nullptr)
 {
     arrayName = arrayInfo->GetName();
+    arrayId = arrayInfo->GetIndex();
 
     this->mgmt = mgmt;
     this->ctrl = ctrl;
     this->io = io;
     this->wbt = wbt;
 
-    MetaFsServiceSingleton::Instance()->Register(arrayName, this);
+    MetaFsServiceSingleton::Instance()->Register(arrayName, arrayId, this);
 }
 
 MetaFs::~MetaFs(void)

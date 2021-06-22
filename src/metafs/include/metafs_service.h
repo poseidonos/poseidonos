@@ -39,6 +39,7 @@
 // A Meta Filesystem Layer instance accessible by upper modules
 #pragma once
 
+#include <array>
 #include <string>
 #include <unordered_map>
 #include "src/metafs/include/meta_storage_info.h"
@@ -46,6 +47,7 @@
 #include "src/metafs/metafs.h"
 #include "mk/ibof_config.h"
 #include "src/lib/singleton.h"
+#include "src/include/array_mgmt_policy.h"
 
 namespace pos
 {
@@ -59,9 +61,10 @@ public:
     MetaFsService(void);
     ~MetaFsService(void);
     void Initialize(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet);
-    void Register(std::string& arrayName, MetaFs* fileSystem);
+    void Register(std::string& arrayName, int arrayId, MetaFs* fileSystem);
     void Deregister(std::string& arrayName);
     MetaFs* GetMetaFs(std::string& arrayName);
+    MetaFs* GetMetaFs(int arrayId);
     MetaFsIoScheduler* GetScheduler(void)
     {
         return ioScheduler;
@@ -71,7 +74,8 @@ private:
     void _PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet);
     ScalableMetaIoWorker* _InitiateMioHandler(int handlerId, int coreId, int coreCount);
 
-    std::unordered_map<std::string, MetaFs*> fileSystems;
+    std::unordered_map<std::string, int> arrayNameToId;
+    std::array<MetaFs*, ArrayMgmtPolicy::MAX_ARRAY_CNT> fileSystems;
     MetaFsIoScheduler* ioScheduler;
 };
 

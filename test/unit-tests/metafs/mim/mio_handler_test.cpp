@@ -57,6 +57,7 @@ public:
         mioPool = new NiceMock<MockMioPool>(mpioPool, POOL_SIZE);
         arrayInfo = new MockIArrayInfo();
         EXPECT_CALL(*arrayInfo, GetName).WillRepeatedly(Return("TESTARRAY"));
+        EXPECT_CALL(*arrayInfo, GetIndex).WillRepeatedly(Return(0));
 
         mgmt = new MockMetaFsManagementApi(arrayInfo->GetName());
         ctrl = new MockMetaFsFileControlApi();
