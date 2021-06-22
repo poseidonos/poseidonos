@@ -525,6 +525,10 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
 {
     vector<pair<int, string>> volList;
     struct spdk_nvmf_subsystem* subsystem = FindSubsystem(subnqn);
+    if (nullptr == subsystem)
+    {
+        return volList;
+    }
     struct spdk_nvmf_ns* ns = spdk_nvmf_subsystem_get_first_ns(subsystem);
     while (ns != nullptr)
     {
