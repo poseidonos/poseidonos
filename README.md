@@ -584,7 +584,7 @@ optional arguments:
                         The sock priority of the tcp connection. Relevant only
                         for TCP transport
   
-root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_transport -t tcp -b 64 -n 2048
+root@ibof-target:IBOF_HOME/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_transport -t tcp -b 64 -n 4096
 ```
 
 The following command makes a given NVM subsystem listen on a TCP port and serve incoming NVMe-oF requests. 
