@@ -74,6 +74,7 @@ ReplayStripe::AddLog(ReplayLog replayLog)
     }
 
     this->AddLog(replayLog.log);
+    status->RecordLogFoundTime(replayLog.time);
 }
 
 int

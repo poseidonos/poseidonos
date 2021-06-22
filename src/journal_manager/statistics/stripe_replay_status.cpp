@@ -46,7 +46,9 @@ StripeReplayStatus::StripeReplayStatus(StripeId vsid)
   numInvalidatedBlocks(0),
   segmentAllocated(false),
   stripeAllocated(false),
-  stripeMapReplayed(false)
+  stripeMapReplayed(false),
+  minTime(UINT64_MAX),
+  maxTime(0)
 {
 }
 
@@ -146,4 +148,17 @@ StripeReplayStatus::StripeAllocated(void)
     stripeAllocated = true;
 }
 
+void
+StripeReplayStatus::RecordLogFoundTime(uint64_t time)
+{
+    if (time < minTime)
+    {
+        minTime = time;
+    }
+
+    if (time > maxTime)
+    {
+        maxTime = time;
+    }
+}
 } // namespace pos

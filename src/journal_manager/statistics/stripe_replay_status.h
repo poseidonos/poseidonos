@@ -58,6 +58,8 @@ public:
     void SegmentAllocated(void);
     void StripeAllocated(void);
 
+    void RecordLogFoundTime(uint64_t time);
+
 private:
     static const BlkOffset INVALID_OFFSET = UINT64_MAX;
     uint32_t numUpdatedBlockMaps;
@@ -66,6 +68,9 @@ private:
     bool segmentAllocated;
     bool stripeAllocated;
     bool stripeMapReplayed;
+
+    uint64_t minTime;
+    uint64_t maxTime;
 };
 
 } // namespace pos
