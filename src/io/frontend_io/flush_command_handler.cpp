@@ -94,18 +94,7 @@ FlushCmdHandler::Execute(void)
             flushIo->SetState(FLUSH__FINISH_ACTIVE_STRIPES);
         case FLUSH__FINISH_ACTIVE_STRIPES:
             // Get all active stripes for flush
-            iWBStripeAllocator->GetAllActiveStripes(volumeId);
-
-            flushIo->SetState(FLUSH__PENDING_WRITE_IN_PROGRESS);
-        case FLUSH__PENDING_WRITE_IN_PROGRESS:
-            // Check if all writes on partial stripes are complete
-            if (iWBStripeAllocator->WaitPendingWritesOnStripes(volumeId) == false)
-            {
-                // Pending Write IO(s) on active stripes not complete.
-                return false;
-            }
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
-                "Writes on partial stripes completed");
+            iWBStripeAllocator->FlushActiveStripes(volumeId);
 
             flushIo->SetState(FLUSH__STRIPE_FLUSH_IN_PROGRESS);
         case FLUSH__STRIPE_FLUSH_IN_PROGRESS:

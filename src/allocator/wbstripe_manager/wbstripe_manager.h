@@ -60,8 +60,7 @@ public:
     virtual StripeId AllocateUserDataStripeId(StripeId vsid) override;
     virtual void FreeWBStripeId(StripeId lsid) override;
 
-    virtual void GetAllActiveStripes(uint32_t volumeId) override;
-    virtual bool WaitPendingWritesOnStripes(uint32_t volumeId) override;
+    virtual void FlushActiveStripes(uint32_t volumeId) override;
     virtual bool WaitStripesFlushCompletion(uint32_t volumeId) override;
 
     virtual bool ReferLsidCnt(StripeAddr& lsa) override;

@@ -100,7 +100,7 @@ TEST(WBStripeManager, FreeWBStripeId_TestSimpleCaller)
     delete iStripeMap;
 }
 
-TEST(WBStripeManager, GetAllActiveStripes_TestVolumeMounted)
+TEST(WBStripeManager, FlushActiveStripes_TestVolumeMounted)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -119,7 +119,7 @@ TEST(WBStripeManager, GetAllActiveStripes_TestVolumeMounted)
     // given 1.
     EXPECT_CALL(*volManager, GetVolumeStatus).WillOnce(Return(Mounted));
     // when
-    wbStripeManager.GetAllActiveStripes(77);
+    wbStripeManager.FlushActiveStripes(77);
 
     delete blkManager;
     delete ctxManager;
@@ -133,7 +133,7 @@ TEST(WBStripeManager, GetAllActiveStripes_TestVolumeMounted)
     }
 }
 
-TEST(WBStripeManager, GetAllActiveStripes_TestVolumeUnmounted)
+TEST(WBStripeManager, FlushActiveStripes_TestVolumeUnmounted)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -146,7 +146,7 @@ TEST(WBStripeManager, GetAllActiveStripes_TestVolumeUnmounted)
     WBStripeManager wbStripeManager(nullptr, 1, nullptr, volManager, iStripeMap, wbCtx, &addrInfo, ctxManager, blkManager, "", 0);
     EXPECT_CALL(*volManager, GetVolumeStatus).WillOnce(Return(Unmounted));
     // when
-    wbStripeManager.GetAllActiveStripes(0);
+    wbStripeManager.FlushActiveStripes(0);
 
     delete blkManager;
     delete ctxManager;
@@ -191,72 +191,6 @@ TEST(WBStripeManager, FinalizeWriteIO_TestAddFlushStripe)
     delete wbCtx;
     delete iStripeMap;
     delete stripe;
-}
-
-TEST(WBStripeManager, WaitPendingWritesOnStripes_TestSimpleCaller)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetnumWbStripes(5);
-    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    NiceMock<MockStripe>* stripetoFlush = new NiceMock<MockStripe>();
-    NiceMock<MockStripe>* stripetoFlush2 = new NiceMock<MockStripe>();
-    StripeVec* stripeVec = new StripeVec();
-    stripeVec->push_back(stripetoFlush);
-    stripeVec->push_back(stripetoFlush2);
-    WBStripeManager wbStripeManager(stripeVec, 1, nullptr, nullptr, iStripeMap, wbCtx, &addrInfo, ctxManager, blkManager, "", 0);
-    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
-    NiceMock<MockStripe>* stripe2 = new NiceMock<MockStripe>();
-    wbStripeManager.PushStripeToStripeArray(stripe);
-    wbStripeManager.PushStripeToStripeArray(stripe2);
-    EXPECT_CALL(*stripetoFlush, GetBlksRemaining).WillOnce(Return(0));
-    EXPECT_CALL(*stripetoFlush2, GetBlksRemaining).WillOnce(Return(1));
-    // when
-    wbStripeManager.WaitPendingWritesOnStripes(0);
-
-    delete blkManager;
-    delete ctxManager;
-    delete wbCtx;
-    delete iStripeMap;
-    delete stripetoFlush;
-    delete stripetoFlush2;
-}
-
-TEST(WBStripeManager, WaitPendingWritesOnStripes_TestAddFlushStripe)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetnumWbStripes(5);
-    addrInfo.SetblksPerStripe(1);
-    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
-    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    NiceMock<MockStripe>* stripetoFlush = new NiceMock<MockStripe>();
-    NiceMock<MockStripe>* stripetoFlush2 = new NiceMock<MockStripe>();
-    StripeVec* stripeVec = new StripeVec();
-    stripeVec->push_back(stripetoFlush);
-    stripeVec->push_back(stripetoFlush2);
-    WBStripeManager wbStripeManager(stripeVec, 1, nullptr, nullptr, iStripeMap, wbCtx, &addrInfo, ctxManager, blkManager, "", 0);
-    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
-    NiceMock<MockStripe>* stripe2 = new NiceMock<MockStripe>();
-    wbStripeManager.PushStripeToStripeArray(stripe);
-    wbStripeManager.PushStripeToStripeArray(stripe2);
-    EXPECT_CALL(*stripetoFlush, GetBlksRemaining).WillOnce(Return(0));
-    EXPECT_CALL(*stripetoFlush2, GetBlksRemaining).WillOnce(Return(1));
-    // when
-    wbStripeManager.WaitPendingWritesOnStripes(0);
-
-    delete blkManager;
-    delete ctxManager;
-    delete wbCtx;
-    delete iStripeMap;
-    delete stripetoFlush;
-    delete stripetoFlush2;
-    delete stripeVec;
 }
 
 TEST(WBStripeManager, WaitStripesFlushCompletion_TestCase2)

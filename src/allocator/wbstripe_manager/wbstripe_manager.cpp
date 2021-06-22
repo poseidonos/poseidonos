@@ -165,7 +165,7 @@ WBStripeManager::FreeWBStripeId(StripeId lsid)
 }
 
 void
-WBStripeManager::GetAllActiveStripes(uint32_t volumeId)
+WBStripeManager::FlushActiveStripes(uint32_t volumeId)
 {
     if (volumeManager->GetVolumeStatus(volumeId) == Mounted)
     {
@@ -173,28 +173,6 @@ WBStripeManager::GetAllActiveStripes(uint32_t volumeId)
     }
     // This variable is not used.
     vsidToCheckFlushDone4FlushCmd[volumeId].clear();
-}
-
-// Wait for pending writes on the closed stripes
-bool
-WBStripeManager::WaitPendingWritesOnStripes(uint32_t volumeId)
-{
-    std::vector<Stripe*>& stripesToFlush = stripesToFlush4FlushCmd[volumeId];
-    auto stripe = stripesToFlush.begin();
-    while (stripe != stripesToFlush.end())
-    {
-        if ((*stripe)->GetBlksRemaining() == 0)
-        {
-            stripe = stripesToFlush.erase(stripe);
-        }
-        else
-        {
-            // Writes on closed stripe still in progress
-            stripe = stripesToFlush.erase(stripe);
-        }
-    }
-
-    return stripesToFlush.size() == 0;
 }
 
 bool

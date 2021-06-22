@@ -24,11 +24,7 @@ TEST(IWBStripeAllocator, DereferLsidCnt_)
 {
 }
 
-TEST(IWBStripeAllocator, GetAllActiveStripes_)
-{
-}
-
-TEST(IWBStripeAllocator, WaitPendingWritesOnStripes_)
+TEST(IWBStripeAllocator, FlushActiveStripes_)
 {
 }
 

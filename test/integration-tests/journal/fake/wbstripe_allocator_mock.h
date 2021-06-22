@@ -25,8 +25,7 @@ public:
     virtual bool ReferLsidCnt(StripeAddr& lsa) override { return true; }
     virtual void DereferLsidCnt(StripeAddr& lsa, uint32_t blockCount) override {}
 
-    virtual void GetAllActiveStripes(uint32_t volumeId) {}
-    virtual bool WaitPendingWritesOnStripes(uint32_t volumeId) { return true; }
+    virtual void FlushActiveStripes(uint32_t volumeId) {}
     virtual bool WaitStripesFlushCompletion(uint32_t volumeId) { return true; }
 
     virtual void FlushAllActiveStripes(void) override {}

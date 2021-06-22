@@ -74,33 +74,6 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseBlockAllocation_BlockAllocatin
     ASSERT_EQ(expected, actual);
 }
 
-TEST(FlushCmdHandler, FlushCmdHandler_Execute_CasePendingWriteInProgress_WaitPendingWritesOnStripesReturnFalse)
-{
-    // Given: case FLUSH__PENDING_WRITE_IN_PROGRESS, iWBStripeAllocator->WaitPendingWritesOnStripes(volumeId) == false
-    std::string arr_name = "arr_name";
-    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
-    NiceMock<MockFlushCmdManager> mockFlushCmdManager;
-    NiceMock<MockIBlockAllocator> mockIBlockAllocator;
-    NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockIContextManager> mockIContextManager;
-    NiceMock<MockIMapFlush> mockIMapFlush;
-    FlushCmdHandler flushCmdHandler(flushIo, &mockFlushCmdManager, &mockIBlockAllocator,
-        &mockIWBStripeAllocator, &mockIContextManager, &mockIMapFlush);
-
-    ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
-    ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
-    ON_CALL(mockIWBStripeAllocator, GetAllActiveStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIWBStripeAllocator, WaitPendingWritesOnStripes(_)).WillByDefault(Return(false));
-
-    bool actual, expected{false};
-
-    // When: Execute
-    actual = flushCmdHandler.Execute();
-
-    // Then: return false
-    ASSERT_EQ(expected, actual);
-}
-
 TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseStripeFlushInProgress_WaitStripesFlushCompletionReturnFalse)
 {
     // Given : case FLUSH__STRIPE_FLUSH_IN_PROGRESS, iWBStripeAllocator->WaitStripesFlushCompletion(volumeId) == false
@@ -116,8 +89,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseStripeFlushInProgress_WaitStri
 
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
-    ON_CALL(mockIWBStripeAllocator, GetAllActiveStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIWBStripeAllocator, WaitPendingWritesOnStripes(_)).WillByDefault(Return(true));
+    ON_CALL(mockIWBStripeAllocator, FlushActiveStripes(_)).WillByDefault(Return());
     ON_CALL(mockIWBStripeAllocator, WaitStripesFlushCompletion(_)).WillByDefault(Return(false));
 
     bool actual, expected{false};
@@ -144,8 +116,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseVSAMAP_FlushDirtyMpagesReturnZ
 
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
-    ON_CALL(mockIWBStripeAllocator, GetAllActiveStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIWBStripeAllocator, WaitPendingWritesOnStripes(_)).WillByDefault(Return(true));
+    ON_CALL(mockIWBStripeAllocator, FlushActiveStripes(_)).WillByDefault(Return());
     ON_CALL(mockIWBStripeAllocator, WaitStripesFlushCompletion(_)).WillByDefault(Return(true));
     ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _, _)).WillByDefault(Return(0));
     ON_CALL(mockIBlockAllocator, UnblockAllocating(_)).WillByDefault(Return());
@@ -175,8 +146,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseMetaFlushInProgress_IsStripeMa
 
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
-    ON_CALL(mockIWBStripeAllocator, GetAllActiveStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIWBStripeAllocator, WaitPendingWritesOnStripes(_)).WillByDefault(Return(true));
+    ON_CALL(mockIWBStripeAllocator, FlushActiveStripes(_)).WillByDefault(Return());
     ON_CALL(mockIWBStripeAllocator, WaitStripesFlushCompletion(_)).WillByDefault(Return(true));
     ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _, _)).WillByDefault(Return(0));
     ON_CALL(mockIBlockAllocator, UnblockAllocating(_)).WillByDefault(Return());
