@@ -130,8 +130,8 @@ ListArrayCommand::Execute(json& doc, string rid)
                         elem.SetAttribute(JsonAttribute("type", "\"SPARE\""));
                         break;
                 }
-                string deviceName(abr.devInfo[i].deviceUid);
-                elem.SetAttribute(JsonAttribute("name", "\"" + deviceName + "\""));
+                string deviceSn(abr.devInfo[i].deviceUid);
+                elem.SetAttribute(JsonAttribute("sn", "\"" + deviceSn + "\""));
                 jsonDeviceList.AddElement(elem);
             }
 

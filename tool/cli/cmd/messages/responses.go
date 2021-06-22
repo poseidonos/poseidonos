@@ -67,7 +67,7 @@ type Array struct {
 }
 
 type Device struct {
-	DEVICENAME string `json:"name"`
+	DEVICENAME string `json:"name,omitempty"`
 	DEVICETYPE string `json:"type"`
 	ADDRESS    string `json:"addr,omitempty"`
 	CLASS      string `json:"class,omitempty"`

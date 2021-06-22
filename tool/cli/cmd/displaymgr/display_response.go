@@ -58,7 +58,7 @@ func printResToHumanReadable(command string, resJSON string) {
 			log.Println("Devices")
 			log.Println("-------------")
 			for _, device := range array.DEVICELIST {
-				log.Println("Name: " + device.DEVICENAME)
+				log.Println("SN: " + device.SERIAL)
 				log.Println("Type: " + device.DEVICETYPE)
 				log.Println("")
 			}
