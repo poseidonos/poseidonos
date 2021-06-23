@@ -125,7 +125,6 @@ EventScheduler::~EventScheduler(void)
     {
         delete policy;
     }
-    QosManagerSingleton::ResetInstance();
 }
 
 void

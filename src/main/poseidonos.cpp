@@ -98,6 +98,7 @@ Poseidonos::Terminate(void)
     DeviceManagerSingleton::ResetInstance();
     IODispatcherSingleton::ResetInstance();
     EventSchedulerSingleton::ResetInstance();
+    QosManagerSingleton::ResetInstance();
     delete debugInfo;
     IOSubmitHandler *submitHandler = static_cast<IOSubmitHandler *>(IIOSubmitHandler::GetInstance());
     delete submitHandler;
@@ -171,6 +172,7 @@ Poseidonos::_SetupThreadModel(void)
         affinityManager->GetCpuSet(CoreType::EVENT_SCHEDULER);
     cpu_set_t workerCPUSet = affinityManager->GetCpuSet(CoreType::EVENT_WORKER);
 
+    QosManagerSingleton::Instance()->Initialize();
     EventSchedulerSingleton::Instance()->Initialize(workerCount,
             schedulerCPUSet, workerCPUSet);
     IIODispatcher* ioDispatcher = IODispatcherSingleton::Instance();

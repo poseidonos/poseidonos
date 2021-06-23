@@ -42,7 +42,6 @@
 #include "src/io/frontend_io/unvmf_io_handler.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/array/interface/i_abr_control.h"
-#include "src/qos/qos_manager.h"
 #include "src/sys_info/space_info.h"
 #ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_mgr.h"
@@ -81,7 +80,6 @@ MountTemp::Mount1(void)
     debugInfoUpdater->Update();
 
     _InitNvmf();
-    QosManagerSingleton::Instance()->Initialize();
     return 0;
 }
 
