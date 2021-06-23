@@ -289,11 +289,19 @@ Array::Shutdown(void)
     _UnregisterService();
     _DeletePartitions();
     shutdownFlag = 1;
+}
 
+void
+Array::Flush(void)
+{
     int ret = _Flush();
     if (0 != ret)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Flush after Shutdown Failed");
+        POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array Flush Failed");
+    }
+    else
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array Flush Succeeded");
     }
 }
 

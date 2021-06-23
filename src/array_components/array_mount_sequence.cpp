@@ -226,16 +226,31 @@ ArrayMountSequence::Shutdown(void)
 }
 
 void
+ArrayMountSequence::_FlushMountSequence(void)
+{
+    // The order of flush is the same to the shutdown order just to be safe
+    for(auto it = sequence.rbegin(); it != sequence.rend(); it++)
+    {
+        (*it)->Flush();
+    }
+}
+
+void
 ArrayMountSequence::StateChanged(StateContext* prev, StateContext* next)
 {
     std::unique_lock<std::mutex> lock(mtx);
     cv.notify_all();
 
-    if (next->ToStateType() == StateEnum::STOP &&
-        prev != nullptr && prev->ToStateType() >= StateEnum::NORMAL)
+    if (next->ToStateType() == StateEnum::STOP)
     {
+        // Regardless of the prev state, we'd like to invoke Shutdown() of the array when the next state is STOP.
         POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Shutdown for {}", arrayName);
         Shutdown();
+        if (prev != nullptr && prev->ToStateType() >= StateEnum::NORMAL)
+        {
+            // When the previous state was ONLINE, we should do the flush to update MBR
+            _FlushMountSequence();
+        }
     }
 }
 

@@ -80,6 +80,7 @@ public:
     virtual void Shutdown(void) override;
     virtual int Load(unsigned int& arrayIndex);
     virtual int Create(DeviceSet<string> nameSet, string dataRaidType , unsigned int& arrayIndex);
+    virtual void Flush(void) override;
     virtual int Delete(void);
     virtual int AddSpare(string devName);
     virtual int RemoveSpare(string devName);

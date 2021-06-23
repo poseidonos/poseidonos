@@ -70,6 +70,7 @@ public:
 
 private:
     bool _WaitState(StateContext* goal);
+    void _FlushMountSequence(void);
 
     MountTemp* temp = nullptr;
     IStateControl* state = nullptr;

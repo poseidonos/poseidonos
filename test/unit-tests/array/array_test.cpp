@@ -1162,7 +1162,7 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotNeedToRetryAfterTrigger
     usleep(10000); // intentionally put some jitter to avoid signal propagated from internally-spawned thread
 }
 
-TEST(Array, Shutdown_testIfFlushWorksProperlyWhenShutdownOccur)
+TEST(Array, Shutdown_testIfPartitionManagerCleansUp)
 {
     // Given
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
@@ -1170,12 +1170,14 @@ TEST(Array, Shutdown_testIfFlushWorksProperlyWhenShutdownOccur)
     MockPartitionManager* mockPtnMgr = new MockPartitionManager("mock-array", mockAbrControl);
     MockArrayServiceLayer* mockArrayService = new MockArrayServiceLayer;
 
-    Array array("mock-array", NULL, mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, NULL, NULL, NULL, mockArrayService);
+    NiceMock<MockIStateControl> mockStateControl;
+    MockArrayState* mockArrayState = new MockArrayState(&mockStateControl);
 
-    EXPECT_CALL(*mockArrDevMgr, ExportToMeta).Times(1);
-    EXPECT_CALL(*mockAbrControl, SaveAbr).Times(1);
+    Array array("mock-array", NULL, mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockArrayState, NULL, NULL, mockArrayService);
+
     EXPECT_CALL(*mockPtnMgr, DeleteAll).Times(1);
     EXPECT_CALL(*mockArrayService, Unregister).Times(1);
+
     // When
     array.Shutdown();
     // Then
@@ -1183,6 +1185,27 @@ TEST(Array, Shutdown_testIfFlushWorksProperlyWhenShutdownOccur)
     // Cleanup
     delete mockAbrControl;
     delete mockArrayService;
+}
+
+TEST(Array, Flush_testIfAbrRecordIsSaved)
+{
+    // Given
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockIAbrControl* mockAbrControl = new MockIAbrControl();
+    MockPartitionManager* mockPtnMgr = new MockPartitionManager("mock-array", mockAbrControl);
+    NiceMock<MockIStateControl> mockStateControl;
+    MockArrayState* mockArrayState = new MockArrayState(&mockStateControl);
+
+    Array array("mock-array", NULL, mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockArrayState, NULL, NULL);
+
+    EXPECT_CALL(*mockArrDevMgr, ExportToMeta).Times(1);
+    EXPECT_CALL(*mockAbrControl, SaveAbr).Times(1);
+
+    // When
+    array.Flush();
+
+    // Cleanup
+    delete mockAbrControl;
 }
 
 } // namespace pos
