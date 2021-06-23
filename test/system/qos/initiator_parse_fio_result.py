@@ -24,9 +24,9 @@ for line in f:
     elif ("G" in parsed_str):
         performance = float(parsed_str.split("G")[0]) * 1024
     else:
-        print ("So low performance !!!!!!")
+        print("So low performance !!!!!!")
         assert(0)
     count = count + 1
     total = total + performance
 
-print (int((float(total)/count)))
+print(int((float(total) / count)))
