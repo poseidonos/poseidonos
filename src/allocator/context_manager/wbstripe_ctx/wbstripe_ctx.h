@@ -74,15 +74,9 @@ public:
     virtual std::mutex& GetAllocWbLsidBitmapLock(void);
 
 private:
-    // WriteBuffer Allocation
-    //    Description about 'ASTailArrayIdx'
-    //    Index  0  ... 255 are for Userdata IO of volume 0 ... 255
-    //    Index 256 ... 511 are for GC IO of volume 0 ... 255
     VirtualBlkAddr activeStripeTail[ACTIVE_STRIPE_TAIL_ARRAYLEN];
     std::mutex activeStripeTailLock[ACTIVE_STRIPE_TAIL_ARRAYLEN];
     BitMapMutex* allocWbLsidBitmap;
-
-    // DOCs
     AllocatorAddressInfo* addrInfo;
 };
 

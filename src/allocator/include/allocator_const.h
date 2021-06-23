@@ -43,7 +43,7 @@ namespace pos
 using ASTailArrayIdx = uint32_t;
 using RTSegmentIter = std::set<SegmentId>::iterator;
 
-const int ACTIVE_STRIPE_TAIL_ARRAYLEN = MAX_VOLUME_COUNT * 2;
+const int ACTIVE_STRIPE_TAIL_ARRAYLEN = MAX_VOLUME_COUNT;
 
 enum FileOwner
 {
