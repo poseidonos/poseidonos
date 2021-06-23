@@ -143,7 +143,7 @@ TEST(ArrayMountSequence, Unmount_testIfEverySequenceIsDisposed)
     ASSERT_EQ(0, actual);
 }
 
-TEST(ArrayMountSequence, StateChanged_testIfShutdownIsInvokedWhenNextStateIsStopAndPreviousStateIsOnline)
+TEST(ArrayMountSequence, StateChanged_testIfShutdownAndFlushAreInvokedWhenStateChangesFromNormalToStop)
 {
     // Given
     MockIMountSequence mockSeq1, mockSeq2, mockSeq3;
@@ -162,11 +162,46 @@ TEST(ArrayMountSequence, StateChanged_testIfShutdownIsInvokedWhenNextStateIsStop
     EXPECT_CALL(mockSeq1, Shutdown).Times(1);
     EXPECT_CALL(*mockMntTmp, Shutdown).Times(1);
 
+    EXPECT_CALL(mockSeq3, Flush).Times(1);
+    EXPECT_CALL(mockSeq2, Flush).Times(1);
+    EXPECT_CALL(mockSeq1, Flush).Times(1);
+
     // When & Then: trivial. as long as there's no exception, I'm good
     mntSeq.StateChanged(&normalContext, &stopContext);
 }
 
-TEST(ArrayMountSequence, StateChanged_testIfShutdownIsNotInvokedWhenNextStateIsStopAndPreviousStateIsOffline)
+TEST(ArrayMountSequence, StateChanged_testIfFlushIsntInvokedWhenStateChangesFromOfflineToStop)
+{
+    // Given
+    MockIMountSequence mockSeq1, mockSeq2, mockSeq3;
+    vector<IMountSequence*> arrayMntSeq{&mockSeq1, &mockSeq2, &mockSeq3};
+    NiceMock<MockStateControl> stateControl;
+    MockVolumeManager mockVolMgr(nullptr, &stateControl);
+    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array");
+
+    ArrayMountSequence mntSeq(arrayMntSeq, mockMntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr);
+
+    StateContext stopContext("sender", SituationEnum::FAULT);
+    StateContext offlineContext("sender", SituationEnum::DEFAULT);
+    EXPECT_CALL(mockVolMgr, DetachVolumes).Times(1);
+    EXPECT_CALL(mockSeq3, Shutdown).Times(1);
+    EXPECT_CALL(mockSeq2, Shutdown).Times(1);
+    EXPECT_CALL(mockSeq1, Shutdown).Times(1);
+    EXPECT_CALL(*mockMntTmp, Shutdown).Times(1);
+
+    // flush shouldn't be invoked
+    EXPECT_CALL(mockSeq3, Flush).Times(0);
+    EXPECT_CALL(mockSeq2, Flush).Times(0);
+    EXPECT_CALL(mockSeq1, Flush).Times(0);
+
+    // When & Then: trivial. as long as there's no exception, I'm good
+    mntSeq.StateChanged(&offlineContext, &stopContext);
+}
+
+// Disabled because Array.Shutdown() is still necessary even in OFFLINE state so that the array could be
+// deleted by an admin through CLI. Without Shutdown() call, the array delete command would get timed out
+// because 'shutdownFlag' wouldn't be set to 1.
+TEST(ArrayMountSequence, DISABLED_StateChanged_testIfShutdownIsNotInvokedWhenNextStateIsStopAndPreviousStateIsOffline)
 {
     // Given
     MockIMountSequence mockSeq1, mockSeq2, mockSeq3;

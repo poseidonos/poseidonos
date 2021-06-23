@@ -76,6 +76,7 @@ public:
     virtual int Init(void) override;
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
+    virtual void Flush(void) override;
     virtual int Load(void);
     virtual int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
     virtual int Delete(void);
