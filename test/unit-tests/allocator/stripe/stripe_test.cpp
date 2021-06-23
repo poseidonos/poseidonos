@@ -314,7 +314,8 @@ TEST(Stripe, UpdateReverseMap_Test)
     // given 3.
     rba = 10;
     // when 3.
-    try {
+    try
+    {
         stripe.UpdateReverseMap(0, rba, MAX_VOLUME_COUNT+1);
         ASSERT_FALSE(true); // shouldn't reach here
     } catch(...)

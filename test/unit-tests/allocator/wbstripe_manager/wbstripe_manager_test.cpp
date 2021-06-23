@@ -175,8 +175,14 @@ TEST(WBStripeManager, FinalizeWriteIO_TestAddFlushStripe)
     std::vector<StripeId> stripeIdVec;
     StripeId stripeId = 0;
     stripeIdVec.push_back(stripeId);
-    StripeAddr wblsa = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 0};
-    StripeAddr userlsa = {.stripeLoc = IN_USER_AREA, .stripeId = 0};
+    StripeAddr wblsa = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
+        .stripeId = 0
+    };
+    StripeAddr userlsa = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = 0
+    };
     EXPECT_CALL(*stripe, GetBlksRemaining).WillOnce(Return(1)).WillOnce(Return(0));
     EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(wblsa)).WillOnce(Return(userlsa));
     EXPECT_CALL(*iStripeMap, IsInUserDataArea).WillOnce(Return(false)).WillOnce(Return(true));
@@ -244,7 +250,7 @@ TEST(WBStripeManager, WaitPendingWritesOnStripes_TestAddFlushStripe)
     wbStripeManager.PushStripeToStripeArray(stripe2);
     EXPECT_CALL(*stripetoFlush, GetBlksRemaining).WillOnce(Return(0));
     EXPECT_CALL(*stripetoFlush2, GetBlksRemaining).WillOnce(Return(1));
-    // when
+        // when
     wbStripeManager.WaitPendingWritesOnStripes(0);
 
     delete blkManager;
@@ -330,7 +336,10 @@ TEST(WBStripeManager, WaitStripesFlushCompletion_TestCase4)
         .stripeLoc = StripeLoc::IN_USER_AREA,
         .stripeId = 0,
     };
-    VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
+    VirtualBlkAddr vsa = {
+        .stripeId = 0,
+        .offset = 0
+    };
     wbStripeManager.Init();
     Stripe* stripe = wbStripeManager.GetStripe(lsa);
     stripe->Assign(0, 0, 0);
@@ -338,8 +347,6 @@ TEST(WBStripeManager, WaitStripesFlushCompletion_TestCase4)
     Stripe* stripe2 = wbStripeManager.GetStripe(lsa);
     stripe2->Assign(0, 0, 1);
     EXPECT_CALL(*wbCtx, GetActiveStripeTail).WillOnce(Return(vsa));
-    EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa));
-    EXPECT_CALL(*iStripeMap, IsInUserDataArea).WillOnce(Return(true));
     // when
     wbStripeManager.WaitStripesFlushCompletion(0);
 
@@ -393,7 +400,10 @@ TEST(WBStripeManager, DereferLsidCnt_TestwithAllConditions)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     WBStripeManager wbStripeManager(nullptr, 1, nullptr, nullptr, iStripeMap, wbCtx, &addrInfo, ctxManager, blkManager, "", 0);
-    StripeAddr lsa = {.stripeLoc = StripeLoc::IN_USER_AREA, .stripeId = 0};
+    StripeAddr lsa = {
+        .stripeLoc = StripeLoc::IN_USER_AREA,
+        .stripeId = 0
+    };
     wbStripeManager.Init();
     // given 1.
     EXPECT_CALL(*iStripeMap, IsInUserDataArea).WillOnce(Return(true));
@@ -426,7 +436,10 @@ TEST(WBStripeManager, FlushAllActiveStripes_TestwithAllConditions)
     VirtualBlkAddr tail = {.stripeId = 0, .offset = 0};
     EXPECT_CALL(*wbCtx, GetActiveStripeTail).WillOnce(Return(tail));
     EXPECT_CALL(*wbCtx, SetActiveStripeTail);
-    StripeAddr lsa = {.stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA, .stripeId = 0};
+    StripeAddr lsa = {
+        .stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA,
+        .stripeId = 0
+    };
     // when
     wbStripeManager.FlushAllActiveStripes();
 
@@ -455,7 +468,10 @@ TEST(WBStripeManager, FlushAllActiveStripes_TestwithOtherCondition)
     VirtualBlkAddr tail = {.stripeId = 0, .offset = 0};
     EXPECT_CALL(*wbCtx, GetActiveStripeTail).WillOnce(Return(tail));
     EXPECT_CALL(*wbCtx, SetActiveStripeTail);
-    StripeAddr lsa = {.stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA, .stripeId = 0};
+    StripeAddr lsa = {
+        .stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA,
+        .stripeId = 0
+    };
     EXPECT_CALL(*stripe, GetBlksRemaining).WillOnce(Return(1)).WillOnce(Return(0));
     EXPECT_CALL(*stripe, IsFinished).WillOnce(Return(false)).WillOnce(Return(true));
     // when
@@ -485,7 +501,10 @@ TEST(WBStripeManager, FinishReconstructedStripe_TestwithAllConditions)
     }
     // given 1.
     VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
-    StripeAddr lsa = {.stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA, .stripeId = 0};
+    StripeAddr lsa = {
+        .stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA,
+        .stripeId = 0
+    };
     // when 1.
     wbStripeManager.FinishReconstructedStripe(0, vsa);
     // given 2.
@@ -660,7 +679,10 @@ TEST(WBStripeManager, PrepareRebuild_TestwithAllConditions)
     EXPECT_CALL(*reCtx, GetRebuildTargetSegmentsBegin).WillOnce(Return(begin));
     EXPECT_CALL(*reCtx, GetRebuildTargetSegmentsEnd).WillOnce(Return(end));
     EXPECT_CALL(*blkManager, TurnOnBlkAllocation).Times(1);
-    StripeAddr lsa = {.stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA, .stripeId = 0};
+    StripeAddr lsa = {
+        .stripeLoc = StripeLoc::IN_WRITE_BUFFER_AREA,
+        .stripeId = 0
+    };
     // when 3.
     ret = wbStripeManager.PrepareRebuild();
     // then 3.
@@ -830,10 +852,15 @@ TEST(WBStripeManager, _FlushOnlineStripes_TestFuncSuccess)
         buf2[i] = i;
     }
     reCtx->AfterLoad(buf);
-    
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
-    StripeAddr lsa = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 0};
-    StripeAddr lsa2 = {.stripeLoc = IN_USER_AREA, .stripeId = 1};
+    StripeAddr lsa = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA, 
+        .stripeId = 0
+    };
+    StripeAddr lsa2 = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = 1
+    };
     EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa)).WillOnce(Return(lsa2));
     // when
     int ret = wbStripeManager._FlushOnlineStripes(vecStripeId);
@@ -874,8 +901,14 @@ TEST(WBStripeManager, _FlushOnlineStripes_TestFuncFailCase1)
     StripeId stId = 0;
     vecStripeId.push_back(stId);    
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
-    StripeAddr lsa = {.stripeLoc = IN_USER_AREA, .stripeId = 0};
-    StripeAddr lsa2 = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 1};
+    StripeAddr lsa = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = 0
+    };
+    StripeAddr lsa2 = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
+        .stripeId = 1
+    };
     EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa)).WillOnce(Return(lsa2));
 
     // when
@@ -918,8 +951,14 @@ TEST(WBStripeManager, _FlushOnlineStripes_TestFuncFailCase2)
     vecStripeId.push_back(stId);
     
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
-    StripeAddr lsa = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = UNMAP_STRIPE};
-    StripeAddr lsa2 = {.stripeLoc = IN_USER_AREA, .stripeId = UNMAP_STRIPE};
+    StripeAddr lsa = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
+        .stripeId = UNMAP_STRIPE
+    };
+    StripeAddr lsa2 = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = UNMAP_STRIPE
+    };
     EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa)).WillOnce(Return(lsa2));
 
     // when
@@ -962,7 +1001,10 @@ TEST(WBStripeManager, _FlushOnlineStripes_TestFuncFailCase3)
     vecStripeId.push_back(stId);
     
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
-    StripeAddr lsa = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 0};
+    StripeAddr lsa = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
+        .stripeId = 0
+    };
     EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa));
     // when
     int ret = wbStripeManager._FlushOnlineStripes(vecStripeId);
@@ -1004,7 +1046,10 @@ TEST(WBStripeManager, _FlushOnlineStripes_TestFuncFailCase4)
     vecStripeId.push_back(stId);
     
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
-    StripeAddr lsa = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 0};
+    StripeAddr lsa = {
+        .stripeLoc = IN_WRITE_BUFFER_AREA,
+        .stripeId = 0
+    };
     EXPECT_CALL(*iStripeMap, GetLSA).WillOnce(Return(lsa));
     // when
     int ret = wbStripeManager._FlushOnlineStripes(vecStripeId);

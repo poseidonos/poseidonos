@@ -162,7 +162,7 @@ TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase2)
     EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(Lock));
     EXPECT_CALL(*reverseMap, AllocReverseMapPack).WillOnce(Return(revMapPack));
     EXPECT_CALL(*revMapPack, LinkVsid).WillOnce(Return(-1));
-    // when 
+    // when
     blkManager.AllocateGcDestStripe(0);
 
     delete iWbstripe;
