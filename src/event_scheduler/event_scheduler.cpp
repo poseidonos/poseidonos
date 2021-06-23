@@ -35,15 +35,15 @@
 #include <assert.h>
 #include <unistd.h>
 
-#include "src/include/branch_prediction.h"
-#include "src/include/pos_event_id.hpp"
 #include "src/cpu_affinity/affinity_manager.h"
-#include "src/logger/logger.h"
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_queue.h"
 #include "src/event_scheduler/event_worker.h"
 #include "src/event_scheduler/minimum_job_policy.h"
 #include "src/event_scheduler/scheduler_queue.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/logger/logger.h"
 #include "src/qos/qos_manager.h"
 
 namespace pos
@@ -56,14 +56,14 @@ EventScheduler::EventScheduler(void)
 {
     CPU_ZERO(&schedulerCPUSet);
     for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count;
-            event++)
+         event++)
     {
         eventQueue[event] = new SchedulerQueue;
     }
 }
 
-
-uint32_t EventScheduler::GetWorkerIDMinimumJobs(void)
+uint32_t
+EventScheduler::GetWorkerIDMinimumJobs(void)
 {
     const uint32_t MAX_VALUE = UINT32_MAX;
     uint32_t minimumJobs = MAX_VALUE, minimumWorkerID = 0;
@@ -84,7 +84,7 @@ uint32_t EventScheduler::GetWorkerIDMinimumJobs(void)
 
 void
 EventScheduler::Initialize(uint32_t workerCountInput,
-        cpu_set_t schedulerCPUInput, cpu_set_t eventCPUSetInput)
+    cpu_set_t schedulerCPUInput, cpu_set_t eventCPUSetInput)
 {
     policy = new MinimumJobPolicy(workerCountInput);
     workerCount = workerCountInput;
@@ -108,7 +108,7 @@ EventScheduler::~EventScheduler(void)
         schedulerThread->join();
     }
     for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count;
-            event++)
+         event++)
     {
         delete eventQueue[event];
     }
