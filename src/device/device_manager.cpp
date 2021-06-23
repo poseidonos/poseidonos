@@ -484,6 +484,10 @@ DeviceManager::AttachDevice(UblockSharedPtr dev)
     if (_CheckDuplication(dev) == true)
     {
         _PrepareDevice(dev);
+        if (deviceEvent->DeviceAttach(dev) != 0)
+        {
+            dev->SetClass(DeviceClass::ARRAY);
+        }
         devices.push_back(dev);
         POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_ATTACH,
             "AttachDevice - add a new device to the system: {}",

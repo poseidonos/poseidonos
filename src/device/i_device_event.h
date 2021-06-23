@@ -39,5 +39,6 @@ class IDeviceEvent
 {
 public:
     virtual int DeviceDetached(UblockSharedPtr dev) = 0;
+    virtual int DeviceAttach(UblockSharedPtr dev) = 0;
 };
 } // namespace pos

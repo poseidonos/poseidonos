@@ -225,6 +225,18 @@ ArrayManager::DeviceDetached(UblockSharedPtr dev)
     return 0; // this function will be void type when device lock is removed
 }
 
+int
+ArrayManager::DeviceAttach(UblockSharedPtr dev)
+{
+    ArrayComponents* array = _FindArrayWithDevSN(dev->GetSN());
+    if (array != nullptr)
+    {
+        return (int)POS_EVENT_ID::MBR_DEVICE_ALREADY_IN_ARRAY;
+    }
+
+    return 0;
+}
+
 bool
 ArrayManager::ArrayExists(string name)
 {
