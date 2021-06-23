@@ -449,11 +449,13 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
         std::vector<int> volumeList = volList[reactor][subsystem->first];
         for (uint32_t i = 0; i < volumeList.size(); i++)
         {
-            uint32_t volId = volumeList[i];
-            volumeQosParam[reactor][volId].valid = M_VALID_ENTRY;
-            volumeQosParam[reactor][volId].currentBW = volumeQosParam[reactor][volId].currentBW / offset;
-            volumeQosParam[reactor][volId].currentIOs = volumeQosParam[reactor][volId].currentIOs / offset;
-            _EnqueueParams(reactor, volId, volumeQosParam[reactor][volId]);
+            int volId = volumeList[i];
+            // Currently Qos supports just 1 Volume per subsystem, so default considers only 1st volume of subsystem list
+            // Fix for memory leak issue SHPOS-410
+            if (volId == volumeList[0])
+            {
+                _EnqueueVolumeParameter(reactor, volId, offset);
+            }
             currentBW = 0;
             currentIO = 0;
             _ResetRateLimit(reactor, volId, offset);
@@ -480,6 +482,23 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
     }
     return retVal;
 }
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::_EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, double offset)
+{
+    volumeQosParam[reactor][volId].valid = M_VALID_ENTRY;
+    volumeQosParam[reactor][volId].currentBW = volumeQosParam[reactor][volId].currentBW / offset;
+    volumeQosParam[reactor][volId].currentIOs = volumeQosParam[reactor][volId].currentIOs / offset;
+    _EnqueueParams(reactor, volId, volumeQosParam[reactor][volId]);
+}
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
