@@ -1163,7 +1163,7 @@ optional arguments:
  
  
 # If successful, the following doesn't print out any response
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_transport -t tcp -b 64 -n 2048
+root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_transport -t tcp -b 64 -n 4096
 ```
 
 The following command makes a given NVM subsystem listen on a TCP port and serve incoming NVMe-oF requests. 
