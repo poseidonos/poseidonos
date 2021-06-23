@@ -1078,7 +1078,7 @@ Please note that, as of Nov/30/2020, POS supports a single POS array only, which
 ### Step 7. Configure NVM Subsystems for NVMe Over Fabric Target
 POS is ready to perform volume management task, but still unable to expose its volume over network since we haven't configured an NVM subsystem yet. POS is not ready to expose its volume over network since it does not have NVM subsystem in which NVM namespaces(s) are created. Creating NVM subsystem remains in manual fashion  (vs. running automatically during POS startup) by design. Administrators need to understand its functionality so that they can easily come up with a workaround when needed. Once we have enough understanding about various user environments, this step could be automated in a future release.
 
-Create NVMe-oF Subsystem
+#### Create NVMe-oF Subsystem
 ```bash
 ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ su -
 Password:
@@ -1111,7 +1111,7 @@ root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_cre
 
 The following command configures TCP transport to use when network connection is established between an initiator and a target. is between initiator and target. 
 
-Create NVMe-oF Transport
+#### Create NVMe-oF Transport
 ```bash
 root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_transport -h
 usage: rpc.py nvmf_create_transport [-h] -t TRTYPE [-g TGT_NAME]
@@ -1168,7 +1168,7 @@ root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_cre
 
 The following command makes a given NVM subsystem listen on a TCP port and serve incoming NVMe-oF requests. 
 
-Add NVMe-oF Subsystem Listener
+#### Add NVMe-oF Subsystem Listener
 ```bash
 root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_subsystem_add_listener -h
 usage: rpc.py nvmf_subsystem_add_listener [-h] -t TRTYPE -a TRADDR
@@ -1242,7 +1242,7 @@ root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_sub
 In the above example, the NVM subsystem called "nqn.2019-04.ibof:subsystem1" has been configured to listen on (10.100.11.20, 1158) and use TCP transport. If you miss this step, POS wouldn't be able to mount POS volumes even though it could create new ones. 
 At this point, you should be able to retrieve the configured NVM subsystem like in the following:
 
-Retrieve NVM subsystem information
+#### Retrieve NVM subsystem information
 ```bash
 root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_get_subsystems
 [
@@ -1279,7 +1279,7 @@ root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_get
 
 This step is to create a logical entry point of the target side IO which will be shown as a namespace in an NVM subsystem. POS volume is wrapped as a "bdev" and can be attached to a particular NVM subsystem. "bdev" is a block device abstraction offered by SPDK library. 
 
-Create a volume
+#### Create a volume
 ```bash
 # Create a 50-TB volume
 root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# logout
@@ -1305,7 +1305,7 @@ Response from Poseidon OS
     Solution     :
 ```
 
-Retrieve volume information
+#### Retrieve volume information
 ```bash
 ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli volume create --name vol1 --size 54975581388800 --maxiops 0 --maxbw 0 --array POSArray
  
@@ -1413,7 +1413,7 @@ Response from Poseidon OS
 
 Please note that the status of the volume has become Mounted.  If we check the NVM subsystem again, we can notice an NVM namespace has been added to an NVM subsystem with its bdev_name as follows.
 
-Retrieve NVM subsystem information
+#### Retrieve NVM subsystem information
 ```bash
 root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_get_subsystems
 [
