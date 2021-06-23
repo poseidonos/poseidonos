@@ -200,24 +200,22 @@ WBStripeManager::WaitPendingWritesOnStripes(uint32_t volumeId)
 bool
 WBStripeManager::WaitStripesFlushCompletion(uint32_t volumeId)
 {
-    // Need to check for stripes belonging to requested volumes stipes only including GC stripe of that volume
-    uint32_t volumeIdGC = volumeId + MAX_VOLUME_COUNT;
-
     for (auto it = wbStripeArray.begin(); it != wbStripeArray.end(); ++it)
     {
-        if (volumeId != (*it)->GetAsTailArrayIdx() || volumeIdGC != (*it)->GetAsTailArrayIdx())
+        Stripe* arrStripe = *it;
+        if (volumeId != arrStripe->GetAsTailArrayIdx())
         {
             continue;
         }
-        if ((*it)->GetBlksRemaining() > 0)
+        if (arrStripe->GetBlksRemaining() > 0)
         {
-            if ((*it)->GetBlksRemaining() + wbStripeCtx->GetActiveStripeTail(volumeId).offset == addrInfo->GetblksPerStripe())
+            if (arrStripe->GetBlksRemaining() + wbStripeCtx->GetActiveStripeTail(volumeId).offset == addrInfo->GetblksPerStripe())
             {
                 continue;
             }
         }
 
-        StripeAddr lsa = iStripeMap->GetLSA((*it)->GetVsid());
+        StripeAddr lsa = iStripeMap->GetLSA(arrStripe->GetVsid());
         Stripe* stripe = GetStripe(lsa);
 
         if (stripe != nullptr)

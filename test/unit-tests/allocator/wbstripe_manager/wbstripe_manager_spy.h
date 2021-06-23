@@ -87,6 +87,11 @@ public:
         }
         WBStripeManager::PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
     }
+    VirtualBlks
+    _AllocateRemainingBlocks(VirtualBlkAddr tail)
+    {
+        return WBStripeManager::_AllocateRemainingBlocks(tail);
+    }
 };
 
 } // namespace pos

@@ -60,12 +60,17 @@ TEST(BlockManager, AllocateWriteBufferBlks_TestFunc)
     ret = blkManager.AllocateWriteBufferBlks(0, 1);
     // then 2.
     EXPECT_EQ(UNMAP_VSA, ret.startVsa);
+    // given 3.
+    blkManager.BlockAllocating(0);
+    // when 3.
+    ret = blkManager.AllocateWriteBufferBlks(0, 1);
+    // then 3.
+    EXPECT_EQ(UNMAP_VSA, ret.startVsa);
     delete iWbstripe;
     delete allocCtx;
     delete wbCtx;
     delete segCtx;
     delete ctxManager;
-    delete reverseMap;
 }
 
 TEST(BlockManager, AllocateGcDestStripe_TestFunc)
@@ -91,6 +96,73 @@ TEST(BlockManager, AllocateGcDestStripe_TestFunc)
     // given 2.
     blkManager.BlockAllocating(0);
     // when 2.
+    blkManager.AllocateGcDestStripe(0);
+
+    delete iWbstripe;
+    delete allocCtx;
+    delete wbCtx;
+    delete segCtx;
+    delete ctxManager;
+    delete reverseMap;
+    delete revMapPack;
+}
+
+TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase1)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetstripesPerSegment(10);
+    NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
+    BlockManager blkManager(nullptr, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
+    blkManager.Init(iWbstripe);
+    NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
+    std::mutex Lock;
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(Lock));
+    EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
+    EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(20));
+    EXPECT_CALL(*ctxManager, GetCurrentGcMode).WillOnce(Return(MODE_URGENT_GC));
+    EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
+    EXPECT_CALL(*reCtx, IsRebuidTargetSegmentsEmpty).WillOnce(Return(false));
+    // when
+    Stripe* ret = blkManager.AllocateGcDestStripe(0);
+    // then
+    EXPECT_EQ(nullptr, ret);
+
+    delete iWbstripe;
+    delete allocCtx;
+    delete wbCtx;
+    delete segCtx;
+    delete ctxManager;
+    delete reverseMap;
+    delete revMapPack;
+    delete reCtx;
+}
+
+TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase2)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetstripesPerSegment(10);
+    NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
+    BlockManager blkManager(nullptr, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
+    blkManager.Init(iWbstripe);
+    NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>();
+    std::mutex Lock;
+    EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(Lock));
+    EXPECT_CALL(*reverseMap, AllocReverseMapPack).WillOnce(Return(revMapPack));
+    EXPECT_CALL(*revMapPack, LinkVsid).WillOnce(Return(-1));
+    // when 
     blkManager.AllocateGcDestStripe(0);
 
     delete iWbstripe;
@@ -563,6 +635,35 @@ TEST(BlockManager, _AllocateBlks_TestCase8)
 
 TEST(BlockManager, _AllocateWriteBufferBlksFromNewStripe_TestInternalFunc)
 {
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetstripesPerSegment(10);
+    addrInfo.SetblksPerStripe(5);
+    NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
+    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
+    NiceMock<MockIStripeMap>* iStripeMap = new NiceMock<MockIStripeMap>();
+    BlockManagerSpy blkManager(iStripeMap, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
+    blkManager.Init(iWbstripe);
+    VirtualBlkAddr vsa = {.stripeId = 10, .offset = 3};
+    std::mutex wbLock, ctxLock;
+    // when
+    VirtualBlks ret = blkManager._AllocateWriteBufferBlksFromNewStripe(0, 0, 11);
+    // then
+    EXPECT_EQ(5, ret.numBlks);
+
+    delete iWbstripe;
+    delete allocCtx;
+    delete wbCtx;
+    delete segCtx;
+    delete ctxManager;
+    delete reverseMap;
+    delete iStripeMap;
+    delete reCtx;
 }
 
 TEST(BlockManager, _AllocateStripe_TestInternalFunc)

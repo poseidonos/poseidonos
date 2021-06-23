@@ -112,10 +112,6 @@ TEST(Stripe, Flush_TestwithoutRevMapPack)
     EXPECT_EQ((int)-EID(ALLOCATOR_STRIPE_WITHOUT_REVERSEMAP), ret);
 }
 
-TEST(Stripe, UpdateReverseMap_)
-{
-}
-
 TEST(Stripe, ReconstructReverseMap_TestSimpleInterfaceFunc)
 {
     // given
@@ -315,7 +311,16 @@ TEST(Stripe, UpdateReverseMap_Test)
     EXPECT_CALL(*revMap, SetReverseMapEntry).Times(1);
     // when 2.
     stripe.UpdateReverseMap(0, rba, volId);
-    delete revMap;
+    // given 3.
+    rba = 10;
+    // when 3.
+    try {
+        stripe.UpdateReverseMap(0, rba, MAX_VOLUME_COUNT+1);
+        ASSERT_FALSE(true); // shouldn't reach here
+    } catch(...)
+    {
+        delete revMap;
+    }
 }
 
 TEST(Stripe, GetReverseMapEntry_TestSimpleGetter)
@@ -338,6 +343,20 @@ TEST(Stripe, UpdateVictimVsa_TestSimpleSetter)
     stripe.Assign(0, 0, 0);
     // when
     stripe.UpdateVictimVsa(0, vsa);
+}
+
+TEST(Stripe, GetVictimVsa_TestSimpleGetter)
+{
+    // given
+    NiceMock<MockReverseMapPack>* revMap = new NiceMock<MockReverseMapPack>();
+    Stripe stripe(revMap, true);
+    VirtualBlkAddr vsa = {.stripeId = 0, .offset = 5};
+    stripe.Assign(0, 0, 0);
+    stripe.UpdateVictimVsa(0, vsa);
+    // when
+    VirtualBlkAddr ret = stripe.GetVictimVsa(0);
+    // then
+    EXPECT_EQ(5, ret.offset);
 }
 
 } // namespace pos
