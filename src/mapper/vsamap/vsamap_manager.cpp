@@ -415,6 +415,13 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
         return true;
     }
 
+    IVolumeEventHandler* journalVolumeHandler = JournalServiceSingleton::Instance()->GetVolumeEventHandler(arrayName);
+    // Write log for deleted volume
+    if (0 != journalVolumeHandler->WriteVolumeDeletedLog(volID))
+    {
+        return false;
+    }
+
     // Mark all blocks in this volume up as Invalidated
     if (0 != vsaMap->InvalidateAllBlocks())
     {
@@ -422,8 +429,8 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
         return false;
     }
 
-    // Write log for deleted volume
-    if (0 != JournalServiceSingleton::Instance()->GetVolumeEventHandler(arrayName)->VolumeDeleted(volID))
+    // Flush metadata
+    if (0 != journalVolumeHandler->TriggerMetadataFlush())
     {
         return false;
     }

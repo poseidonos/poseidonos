@@ -61,7 +61,9 @@ public:
         LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration,
         IContextManager* contextManager, EventScheduler* scheduler);
 
-    virtual int VolumeDeleted(int volID) override;
+    virtual int WriteVolumeDeletedLog(int volId) override;
+    virtual int TriggerMetadataFlush(void) override;
+
     virtual void MetaFlushed(void) override;
 
     virtual void VolumeDeletedLogWriteDone(int volumeId);

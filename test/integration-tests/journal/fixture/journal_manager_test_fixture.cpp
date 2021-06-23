@@ -30,7 +30,7 @@ JournalManagerTestFixture::JournalManagerTestFixture(std::string logFileName)
 
 JournalManagerTestFixture::~JournalManagerTestFixture(void)
 {
-    if (journal->IsCheckpointEnabled() == true)
+    if (journal->IsEnabled() == true && journal->IsCheckpointEnabled() == true)
     {
         WaitForAllCheckpointDone();
     }

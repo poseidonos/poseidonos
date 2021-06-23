@@ -83,37 +83,30 @@ JournalVolumeEventHandler::Init(LogWriteContextFactory* factory,
 }
 
 int
-JournalVolumeEventHandler::VolumeDeleted(int volumeId)
+JournalVolumeEventHandler::WriteVolumeDeletedLog(int volumeId)
 {
     if (isInitialized == false || config->IsEnabled() == false)
     {
         return 0;
     }
-    else
+
+    // 1. Checkpoint blocking
+
+    // 2. write log
+    uint64_t segCtxVersion = contextManager->GetStoredContextVersion(SEGMENT_CTX);
+    int ret = _WriteVolumeDeletedLog(volumeId, segCtxVersion);
+    if (ret != 0)
     {
         POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
-            "Start volume delete event handler (volume id {})", volumeId);
-
-        int ret = 0;
-        ret = _WriteVolumeDeletedLog(volumeId, contextManager->GetStoredContextVersion(SEGMENT_CTX));
-        if (ret != 0)
-        {
-            POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
-                "Writing volume deleted log failed (volume id {})", volumeId);
-            return ret;
-        }
-        _WaitForLogWriteDone(volumeId);
-
-        EventSmartPtr callback(new MetaFlushCompleted(this));
-        EventSmartPtr cpSubmission(new CheckpointSubmission(checkpointManager, callback));
-
-        flushInProgress = true;
-        eventScheduler->EnqueueEvent(cpSubmission);
-
-        _WaitForAllocatorContextFlushCompleted();
-
-        return 0;
+            "Writing volume deleted log failed (volume id {})", volumeId);
+        return ret;
     }
+
+    _WaitForLogWriteDone(volumeId);
+    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+        "Write volume deleted log done, segInfo version is {}", segCtxVersion);
+
+    return 0;
 }
 
 int
@@ -128,6 +121,26 @@ JournalVolumeEventHandler::_WriteVolumeDeletedLog(int volumeId, uint64_t segCtxV
 
     logWriteInProgress = true;
     return logWriteHandler->AddLog(logWriteContext);
+}
+
+int
+JournalVolumeEventHandler::TriggerMetadataFlush(void)
+{
+    if (isInitialized == false || config->IsEnabled() == false)
+    {
+        return 0;
+    }
+    
+    EventSmartPtr callback(new MetaFlushCompleted(this));
+    EventSmartPtr cpSubmission(new CheckpointSubmission(checkpointManager, callback));
+
+    flushInProgress = true;
+    eventScheduler->EnqueueEvent(cpSubmission);
+
+    _WaitForAllocatorContextFlushCompleted();
+
+    // Unblock checkpoint
+    return 0;
 }
 
 void

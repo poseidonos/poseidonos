@@ -37,7 +37,8 @@ namespace pos
 class IVolumeEventHandler
 {
 public:
-    virtual int VolumeDeleted(int volId) = 0;
+    virtual int WriteVolumeDeletedLog(int volId) = 0;
+    virtual int TriggerMetadataFlush(void) = 0;
 };
 
 } // namespace pos

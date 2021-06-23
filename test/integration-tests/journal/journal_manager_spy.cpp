@@ -204,7 +204,7 @@ JournalManagerSpy::VolumeDeleted(int volId)
     ret = volumeEventHandler->WriteVolumeDeletedLog(volId);
     if (ret == 0)
     {
-        volumeEventHandler->MetaFlushed();
+        volumeEventHandler->TriggerMetadataFlush();
     }
 
     return ret;
