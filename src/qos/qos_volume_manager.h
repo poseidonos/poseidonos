@@ -77,6 +77,7 @@ private:
     void _EnqueueVolumeUbio(uint32_t rectorId, uint32_t volId, pos_io* io);
     void _UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxbw);
     pos_io* _DequeueVolumeUbio(uint32_t reactorId, uint32_t volId);
+    void _EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, double offset);
     std::unordered_map<int32_t, std::vector<int>> nqnVolumeMap;
     std::map<uint32_t, vector<int>> volList[M_MAX_REACTORS];
     bw_iops_parameter volumeQosParam[M_MAX_REACTORS][MAX_VOLUME_COUNT];

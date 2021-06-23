@@ -401,8 +401,8 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
     qosParameter.Reset();
     std::vector<int> subsystemVolList;
     uint32_t activeConnectionCtr = 0;
-    map<uint32_t, uint32_t> volCount;
-    map<uint32_t, uint32_t> reactorCount;
+    map<uint32_t, uint32_t> volConnectionMap;
+    map<uint32_t, uint32_t> reactorConnectionMap;
     bool changeDetected = false;
     std::vector<uint32_t> reactorCoreList = qosContext->GetReactorCoreList();
 
@@ -430,32 +430,46 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
                     }
                     changeDetected = true;
                     uint32_t volId = subsystemVolList[0]; // Currently Qos can handle only 1 NSID in subsystem
+                    int count = 0;
                     if (connectEntry.connectType == NVMF_CONNECT)
                     {
-                        reactorCount = volReactorMap[volId];
-                        reactorCount[reactor] += 1;
-                        volReactorMap[volId] = reactorCount;
-                        volCount = reactorVolMap[reactor];
-                        volCount[volId] += 1;
-                        reactorVolMap[reactor] = volCount;
+                        reactorConnectionMap = volReactorMap[volId];
+                        count = reactorConnectionMap[reactor];
+                        count++;
+                        reactorConnectionMap[reactor] = count;
+                        volReactorMap[volId] = reactorConnectionMap;
+                        volConnectionMap = reactorVolMap[reactor];
+                        count = volConnectionMap[volId];
+                        count++;
+                        volConnectionMap[volId] = count;
+                        reactorVolMap[reactor] = volConnectionMap;
                     }
                     else
                     {
-                        reactorCount = volReactorMap[volId];
-                        reactorCount[reactor] -= 1;
-                        if (reactorCount[reactor] == 0)
+                        reactorConnectionMap = volReactorMap[volId];
+                        count = reactorConnectionMap[reactor];
+                        if (count <= 1)
                         {
-                            reactorCount.erase(reactor);
+                            reactorConnectionMap.erase(reactor);
                         }
-                        volReactorMap[volId] = reactorCount;
-
-                        volCount = reactorVolMap[reactor];
-                        volCount[volId] -= 1;
-                        if (volCount[volId] == 0)
+                        else
                         {
-                            volCount.erase(volId);
+                            count--;
+                            reactorConnectionMap[reactor] = count;
                         }
-                        reactorVolMap[reactor] = volCount;
+                        volReactorMap[volId] = reactorConnectionMap;
+                        volConnectionMap = reactorVolMap[reactor];
+                        count = volConnectionMap[volId];
+                        if (count <= 1)
+                        {
+                            volConnectionMap.erase(volId);
+                        }
+                        else
+                        {
+                            count--;
+                            volConnectionMap[volId] = count;
+                        }
+                        reactorVolMap[reactor] = volConnectionMap;
                     }
                 }
             }
