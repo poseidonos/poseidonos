@@ -229,7 +229,7 @@ void
 ArrayMountSequence::_FlushMountSequence(void)
 {
     // The order of flush is the same to the shutdown order just to be safe
-    for(auto it = sequence.rbegin(); it != sequence.rend(); it++)
+    for (auto it = sequence.rbegin(); it != sequence.rend(); it++)
     {
         (*it)->Flush();
     }
