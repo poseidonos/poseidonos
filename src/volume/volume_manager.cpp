@@ -110,6 +110,12 @@ VolumeManager::Shutdown(void)
     Dispose();
 }
 
+void
+VolumeManager::Flush(void)
+{
+    // no-op for IMountSequence
+}
+
 uint64_t
 VolumeManager::EntireVolumeSize(void)
 {

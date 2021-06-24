@@ -172,6 +172,12 @@ MetaFs::Shutdown(void)
     _ClearMss();
 }
 
+void
+MetaFs::Flush(void)
+{
+    // no-op for IMountSequence
+}
+
 uint64_t
 MetaFs::GetEpochSignature(void)
 {

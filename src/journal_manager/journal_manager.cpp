@@ -305,6 +305,12 @@ JournalManager::Shutdown(void)
 }
 
 void
+JournalManager::Flush(void)
+{
+    // no-op for IMountSequence
+}
+
+void
 JournalManager::_RegisterServices(void)
 {
     journalService->Register(arrayInfo->GetName(), arrayInfo->GetIndex(),
