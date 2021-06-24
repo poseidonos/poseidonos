@@ -73,7 +73,7 @@ public:
     int AddDevice(string name, string dev) override;
     int RemoveDevice(string name, string dev) override;
     int DeviceDetached(UblockSharedPtr dev) override;
-    int DeviceAttach(UblockSharedPtr dev) override;
+    void DeviceAttached(UblockSharedPtr dev) override;
 
     int PrepareRebuild(string name, bool& resume) override;
     void RebuildDone(string name) override;
