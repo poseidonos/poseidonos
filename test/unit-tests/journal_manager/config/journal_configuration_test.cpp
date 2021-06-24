@@ -32,6 +32,8 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsZero)
     // Then
     uint64_t expectedSize = (logBufferSize - metaPageSize) / (metaPageSize * numLogGroups) * (metaPageSize * numLogGroups);
     EXPECT_EQ(config.GetLogBufferSize(), expectedSize);
+    EXPECT_EQ(config.GetLogGroupSize(), expectedSize / numLogGroups);
+    EXPECT_EQ(config.GetMetaPageSize(), metaPageSize);
 }
 
 TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsNotZero)
@@ -42,6 +44,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsNotZe
 
     uint64_t metaPageSize = 4032;
     uint64_t logBufferSize = 16 * 1024 * 1024;
+    int numLogGroups = 2;
 
     ON_CALL(metaFsCtrl, EstimateAlignedFileIOSize).WillByDefault(Return(metaPageSize));
     ON_CALL(metaFsCtrl, GetTheBiggestExtentSize).WillByDefault(Return(logBufferSize));
@@ -52,6 +55,8 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsNotZe
 
     // Then
     EXPECT_EQ(config.GetLogBufferSize(), loadedLogBufferSize);
+    EXPECT_EQ(config.GetLogGroupSize(), loadedLogBufferSize / numLogGroups);
+    EXPECT_EQ(config.GetMetaPageSize(), metaPageSize);
 }
 
 TEST(JournalConfiguration, IsEnabled_)

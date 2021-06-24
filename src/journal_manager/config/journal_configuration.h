@@ -47,7 +47,7 @@ public:
     JournalConfiguration(void);
     virtual ~JournalConfiguration(void);
 
-    virtual int Init(uint64_t logBufferSize = 0, MetaFsFileControlApi* metaFsCtrl = nullptr);
+    virtual int Init(uint64_t logBufferSize, MetaFsFileControlApi* metaFsCtrl);
 
     // Can be called before initialized
     virtual bool IsEnabled(void);

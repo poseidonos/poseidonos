@@ -68,10 +68,10 @@ int
 JournalConfiguration::Init(uint64_t loadedLogBufferSize, MetaFsFileControlApi* metaFsCtrl)
 {
     int result = 0;
+    _ReadMetaFsConfiguration(metaFsCtrl);
+
     if (loadedLogBufferSize == 0)
     {
-        _ReadMetaFsConfiguration(metaFsCtrl);
-
         uint64_t size = 0;
         result = _ConfigureLogBufferSize(size);
         if (result == 0)
