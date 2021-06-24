@@ -141,34 +141,35 @@ LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
     numIosCompleted++;
 
     LogWriteContext* context = dynamic_cast<LogWriteContext*>(ctx);
-
-    bool statusUpdatedToStats = false;
-
-    if (context->GetError() != 0)
+    if (context != nullptr)
     {
-        // When log write fails due to error, should log the error and complete write
-        POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_WRITE_FAILED,
-            "Log write failed due to io error");
+        bool statusUpdatedToStats = false;
 
-        statusUpdatedToStats = false;
-    }
-    else
-    {
-        // Status update should be followed by LogWriteDone callback
-        statusUpdatedToStats = logWriteStats->UpdateStatus(context);
-    }
+        if (context->GetError() != 0)
+        {
+            // When log write fails due to error, should log the error and complete write
+            POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_WRITE_FAILED,
+                "Log write failed due to io error");
 
-    context->IoDone();
+            statusUpdatedToStats = false;
+        }
+        else
+        {
+            // Status update should be followed by LogWriteDone callback
+            statusUpdatedToStats = logWriteStats->UpdateStatus(context);
+        }
 
-    if (statusUpdatedToStats == true)
-    {
-        logWriteStats->AddToList(context);
-    }
-    else
-    {
-        delete context;
-    }
+        context->IoDone();
 
+        if (statusUpdatedToStats == true)
+        {
+            logWriteStats->AddToList(context);
+        }
+        else
+        {
+            delete context;
+        }
+    }
     _StartWaitingIos();
 }
 
