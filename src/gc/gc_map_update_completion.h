@@ -51,11 +51,13 @@ namespace pos
 class Stripe;
 class IStripeMap;
 class EventScheduler;
+class GcStripeManager;
 
 class GcMapUpdateCompletion : public Event
 {
 public:
-    GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap, EventScheduler* eventScheduler);
+    GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
+                        EventScheduler* eventScheduler, GcStripeManager* gcStripeManager);
     ~GcMapUpdateCompletion(void) override;
     bool Execute(void) override;
 
@@ -64,6 +66,7 @@ private:
     std::string arrayName;
     IStripeMap* iStripeMap;
     EventScheduler* eventScheduler;
+    GcStripeManager* gcStripeManager;
 
     uint32_t totalBlksPerUserStripe;
 };

@@ -42,6 +42,7 @@
 #include "src/array_mgmt/array_manager.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/gc/copier_meta.h"
+#include "src/gc/gc_stripe_manager.h"
 #include "src/io/backend_io/flush_completion.h"
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/io/general_io/rba_state_manager.h"
@@ -54,15 +55,17 @@
 
 namespace pos
 {
-GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
+GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager, IStripeMap* iStripeMap,
                 IVSAMap *iVSAMap, JournalService *journalService, EventScheduler *eventScheduler)
 : Event(false),
-  arrayName(arrayName),
-  iVSAMap(iVSAMap),
   stripe(stripe),
+  arrayName(arrayName),
+  gcStripeManager(gcStripeManager),
+  iStripeMap(iStripeMap),
+  iVSAMap(iVSAMap),
   journalService(journalService),
-  eventScheduler(eventScheduler),
-  iStripeMap(iStripeMap)
+  eventScheduler(eventScheduler)
+  
 {
     IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
     const PartitionLogicalSize* udSize =
@@ -74,10 +77,11 @@ GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName, IS
 }
 
 
-GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName)
+GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager)
 : GcMapUpdateRequest(
     stripe,
     arrayName,
+    gcStripeManager,
     MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
     MapperServiceSingleton::Instance()->GetIVSAMap(arrayName),
     JournalServiceSingleton::Instance(),
@@ -128,7 +132,7 @@ GcMapUpdateRequest::Execute(void)
     mapUpdates.wbLsid = stripe->GetWbLsid();
     mapUpdates.userLsid = stripe->GetUserLsid();
 
-    EventSmartPtr event(new GcMapUpdate(stripe, arrayName, mapUpdates, invalidSegCnt, iStripeMap));
+    EventSmartPtr event(new GcMapUpdate(stripe, arrayName, mapUpdates, invalidSegCnt, iStripeMap, gcStripeManager));
     if (journalService->IsEnabled(arrayName))
     {
         MapPageList dirtyMap;

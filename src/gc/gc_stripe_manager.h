@@ -65,7 +65,8 @@ public:
     virtual bool AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks);
     virtual void MoveActiveWriteBuffer(uint32_t volumeId, GcWriteBuffer* buffer);
     virtual std::mutex& GetWriteBufferLock(uint32_t volumeId);
-    virtual void SetFinished(GcWriteBuffer* buffer);
+    virtual void SetFinished(void);
+    virtual void ReturnBuffer(GcWriteBuffer* buffer);
     virtual GcWriteBuffer* GetWriteBuffer(uint32_t volumeId);
     virtual bool DecreaseRemainingAndCheckIsFull(uint32_t volumeId, uint32_t cnt);
     virtual void SetBlkInfo(uint32_t volumeId, uint32_t offset, BlkInfo blkInfo);

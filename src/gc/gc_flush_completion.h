@@ -42,6 +42,8 @@
 
 namespace pos
 {
+class GcStripeManager;
+
 class GcFlushCompletion : public Callback
 {
 public:
