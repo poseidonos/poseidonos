@@ -2,8 +2,8 @@ package qoscmds
 
 import (
 	"encoding/json"
-	"strings"
 	"pnconnector/src/log"
+	"strings"
 
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
@@ -19,7 +19,7 @@ var VolumePolicyCmd = &cobra.Command{
 	Long: `Create qos policy for a volume of PoseidonOS.
 
 Syntax: 
-	poseidonos-cli qos create --volume-name VolumeName (--array-name | -a) ArrayName [--maxiops" IOPS] [--maxbw Bandwidth] .
+	poseidonos-cli qos create (--volume-name | -v) VolumeName (--array-name | -a) ArrayName [--maxiops" IOPS] [--maxbw Bandwidth] .
 
 Example: 
 	poseidonos-cli qos create --volume-name Volume0 --array-name Array0 --maxiops 500 --maxbw 50GB/s
@@ -52,16 +52,16 @@ func formVolumePolicyReq() messages.Request {
 		volumeNameList.VOLUMENAME = str
 		volumeNames = append(volumeNames, volumeNameList)
 	}
-	if (0 == volumePolicy_minIOPS) {
+	if 0 == volumePolicy_minIOPS {
 		volumePolicy_minIOPS = 0xFFFFFFFF
 	}
-	if (0 == volumePolicy_maxIOPS) {
+	if 0 == volumePolicy_maxIOPS {
 		volumePolicy_maxIOPS = 0xFFFFFFFF
 	}
-	if (0 == volumePolicy_minBandwidth) {
+	if 0 == volumePolicy_minBandwidth {
 		volumePolicy_minBandwidth = 0xFFFFFFFF
 	}
-	if (0 == volumePolicy_maxBandwidth) {
+	if 0 == volumePolicy_maxBandwidth {
 		volumePolicy_maxBandwidth = 0xFFFFFFFF
 	}
 	volumePolicyParam := messages.VolumePolicyParam{
@@ -93,7 +93,7 @@ var volumePolicy_minBandwidth = -1
 var volumePolicy_maxBandwidth = -1
 
 func init() {
-	VolumePolicyCmd.Flags().StringVarP(&volumePolicy_volumeNameList, "volume-name", "", "", "A comma-seperated names of volumes to set qos policy for")
+	VolumePolicyCmd.Flags().StringVarP(&volumePolicy_volumeNameList, "volume-name", "v", "", "A comma-seperated names of volumes to set qos policy for")
 	VolumePolicyCmd.Flags().StringVarP(&volumePolicy_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
 	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_minIOPS, "miniops", "", -1, "The minimum IOPS for the volume")
 	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_maxIOPS, "maxiops", "", -1, "The maximum IOPS for the volume")

@@ -18,7 +18,7 @@ var CreateDeviceCmd = &cobra.Command{
 	Long: `Create a buffer device.
 
 Syntax:
-	poseidonos-cli device create --device-name DeviceName --num-blocks NumBlocks --block-size BlockSize --device-type ["uram"|"pram"].
+	poseidonos-cli device create (--device-name | -d) DeviceName --num-blocks NumBlocks --block-size BlockSize --device-type ["uram"|"pram"].
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -61,7 +61,7 @@ var create_device_blockSize = 4096
 var create_device_deviceType = ""
 
 func init() {
-	CreateDeviceCmd.Flags().StringVarP(&create_device_deviceName, "device-name", "", "", "The name of device to create")
+	CreateDeviceCmd.Flags().StringVarP(&create_device_deviceName, "device-name", "d", "", "The name of device to create")
 	CreateDeviceCmd.Flags().StringVarP(&create_device_deviceType, "device-type", "", "", "The type of device to create")
 	CreateDeviceCmd.Flags().IntVarP(&create_device_numBlocks, "num-blocks", "", 512, "The number of blocks in the device")
 	CreateDeviceCmd.Flags().IntVarP(&create_device_blockSize, "block-size", "", 4096, "The block size of the device")

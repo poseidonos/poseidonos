@@ -2,8 +2,8 @@ package qoscmds
 
 import (
 	"encoding/json"
-    "strings"
 	"pnconnector/src/log"
+	"strings"
 
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
@@ -19,7 +19,7 @@ var VolumeResetCmd = &cobra.Command{
 	Long: `Reset qos policy for a volume of PoseidonOS.
 
 Syntax: 
-	poseidonos-cli qos reset --volume-name VolumeName (--array-name | -a) ArrayName .
+	poseidonos-cli qos reset (--volume-name | -v) VolumeName (--array-name | -a) ArrayName .
 
 Example: 
 	poseidonos-cli qos reset --volume-name Volume0 --array-name Array0
@@ -47,17 +47,17 @@ Example:
 
 func formVolumeResetReq() messages.Request {
 
-    volumeNameListSlice := strings.Split(volumeReset_volumeNameList, ",")
-    var volumeNames []messages.VolumeNameList
-    for _, str := range volumeNameListSlice {
-        var volumeNameList messages.VolumeNameList // Single device name that is splitted
-        volumeNameList.VOLUMENAME = str
-        volumeNames = append(volumeNames, volumeNameList)
-    }
+	volumeNameListSlice := strings.Split(volumeReset_volumeNameList, ",")
+	var volumeNames []messages.VolumeNameList
+	for _, str := range volumeNameListSlice {
+		var volumeNameList messages.VolumeNameList // Single device name that is splitted
+		volumeNameList.VOLUMENAME = str
+		volumeNames = append(volumeNames, volumeNameList)
+	}
 
 	volumeResetParam := messages.VolumePolicyParam{
-		VOLUMENAME:   volumeNames,
-	ARRAYNAME:    volumeReset_arrayName,
+		VOLUMENAME: volumeNames,
+		ARRAYNAME:  volumeReset_arrayName,
 	}
 
 	volumeResetReq := messages.Request{
@@ -76,6 +76,6 @@ var volumeReset_volumeNameList = ""
 var volumeReset_arrayName = ""
 
 func init() {
-	VolumeResetCmd.Flags().StringVarP(&volumeReset_volumeNameList, "volume-name", "", "", "A comma-seperated names of volumes to set qos policy for")
+	VolumeResetCmd.Flags().StringVarP(&volumeReset_volumeNameList, "volume-name", "v", "", "A comma-seperated names of volumes to set qos policy for")
 	VolumeResetCmd.Flags().StringVarP(&volumeReset_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
 }

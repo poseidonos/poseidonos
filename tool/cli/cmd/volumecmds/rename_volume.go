@@ -19,7 +19,7 @@ var RenameVolumeCmd = &cobra.Command{
 	Long: `Rename a volume of PoseidonOS.
 
 Syntax:
-	poseidonos-cli volume rename --volume-name VolumeName --array-name ArrayName --new-volume-name VolumeName .
+	poseidonos-cli volume rename (--volume-name | -v) VolumeName --array-name ArrayName (--new-volume-name | -n) VolumeName .
 
 Example (renaming a volume): 
 	poseidonos-cli volume rename --volume-name OldVolumeName --array-name Array0 --new-volume-name NewVolumeName
@@ -64,6 +64,6 @@ var rename_volume_newVolumeName = ""
 
 func init() {
 	RenameVolumeCmd.Flags().StringVarP(&rename_volume_arrayName, "array-name", "a", "", "The Name of the array of volumes to list")
-	RenameVolumeCmd.Flags().StringVarP(&rename_volume_volumeName, "volume-name", "", "", "The Name of the array of volumes to list")
-	RenameVolumeCmd.Flags().StringVarP(&rename_volume_newVolumeName, "new-volume-name", "", "", "The Name of the array of volumes to list")
+	RenameVolumeCmd.Flags().StringVarP(&rename_volume_volumeName, "volume-name", "v", "", "The Name of the array of volumes to list")
+	RenameVolumeCmd.Flags().StringVarP(&rename_volume_newVolumeName, "new-volume-name", "n", "", "The Name of the array of volumes to list")
 }

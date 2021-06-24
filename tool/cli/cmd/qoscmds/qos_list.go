@@ -2,9 +2,9 @@ package qoscmds
 
 import (
 	"encoding/json"
-    "strings"
-    "fmt"
+	"fmt"
 	"pnconnector/src/log"
+	"strings"
 
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
@@ -20,7 +20,7 @@ var ListQosCmd = &cobra.Command{
 	Long: `List qos policy for a volume of PoseidonOS.
 
 Syntax: 
-	poseidonos-cli qos list [--volume-name VolumeName] [(--array-name | -a) ArrayName] .
+	poseidonos-cli qos list [(--volume-name | -v) VolumeName] [(--array-name | -a) ArrayName] .
 
 Example: 
 	poseidonos-cli qos create --volume-name Volume0 --array-name Array0
@@ -48,17 +48,17 @@ Example:
 
 func formListQosReq() messages.Request {
 
-    volumeNameListSlice := strings.Split(listQos_volumeNameList, ",")
-    var volumeNames []messages.VolumeNameList
-    for _, str := range volumeNameListSlice {
-        var volumeNameList messages.VolumeNameList // Single device name that is splitted
-        volumeNameList.VOLUMENAME = str
-        volumeNames = append(volumeNames, volumeNameList)
-    }
+	volumeNameListSlice := strings.Split(listQos_volumeNameList, ",")
+	var volumeNames []messages.VolumeNameList
+	for _, str := range volumeNameListSlice {
+		var volumeNameList messages.VolumeNameList // Single device name that is splitted
+		volumeNameList.VOLUMENAME = str
+		volumeNames = append(volumeNames, volumeNameList)
+	}
 
 	listQosParam := messages.VolumePolicyParam{
-		VOLUMENAME:   volumeNames,
-		ARRAYNAME:    listQos_arrayName,
+		VOLUMENAME: volumeNames,
+		ARRAYNAME:  listQos_arrayName,
 	}
 
 	qosListReq := messages.Request{
@@ -77,10 +77,10 @@ var listQos_volumeNameList = ""
 var listQos_arrayName = ""
 
 func init() {
-	ListQosCmd.Flags().StringVarP(&listQos_volumeNameList, "volume-name", "", "", "A comma-seperated names of volumes to set qos policy for")
+	ListQosCmd.Flags().StringVarP(&listQos_volumeNameList, "volume-name", "v", "", "A comma-seperated names of volumes to set qos policy for")
 	ListQosCmd.Flags().StringVarP(&listQos_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
 }
 
 func PrintResponse(response string) {
-    fmt.Println(response)
+	fmt.Println(response)
 }

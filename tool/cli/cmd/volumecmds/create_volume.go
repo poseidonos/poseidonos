@@ -18,7 +18,7 @@ var CreateVolumeCmd = &cobra.Command{
 	Long: `Create a volume from an Array for PoseidonOS.
 
 Syntax: 
-	poseidonos-cli volume create --volume-name VolumeName (--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth] .
+	poseidonos-cli volume create (--volume-name | -v) VolumeName (--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth] .
 
 Example: 
 	poseidonos-cli volume create --volume-name Volume0 --array-name volume0 --size 1024GB --maxiops 1000 --maxbw 100GB/s
@@ -73,7 +73,7 @@ var create_volume_maxIOPS = 0
 var create_volume_maxBandwidth = 0
 
 func init() {
-	CreateVolumeCmd.Flags().StringVarP(&create_volume_volumeName, "volume-name", "", "", "Name of the volume to create")
+	CreateVolumeCmd.Flags().StringVarP(&create_volume_volumeName, "volume-name", "v", "", "Name of the volume to create")
 	CreateVolumeCmd.Flags().StringVarP(&create_volume_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
 	CreateVolumeCmd.Flags().IntVarP(&create_volume_volumeSize, "size", "", 0, "The size of the volume in MB")
 	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxIOPS, "maxiops", "", 0, "The maximum IOPS for the volume in Kilo")

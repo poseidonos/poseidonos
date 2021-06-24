@@ -18,7 +18,7 @@ var AddSpareCmd = &cobra.Command{
 	Long: `Add a device as spare to an array.
 
 Syntax:
-	poseidonos-cli array addspare --spare SpareDeviceName (--array-name | -a) ArrayName
+	poseidonos-cli array addspare (--spare | -s) SpareDeviceName (--array-name | -a) ArrayName
 
 Example: 
 	poseidonos-cli array addspare --spare nvme5 --array-name Array0
@@ -65,5 +65,5 @@ var add_spare_spareDev = ""
 
 func init() {
 	AddSpareCmd.Flags().StringVarP(&add_spare_arrayName, "array-name", "a", "", "Name of the array to add a spare device")
-	AddSpareCmd.Flags().StringVarP(&add_spare_spareDev, "spare", "", "", "Name of the device to add to an array")
+	AddSpareCmd.Flags().StringVarP(&add_spare_spareDev, "spare", "s", "", "Name of the device to add to an array")
 }
