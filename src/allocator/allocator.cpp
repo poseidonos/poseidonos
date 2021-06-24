@@ -157,6 +157,12 @@ Allocator::Shutdown(void)
 }
 
 void
+Allocator::Flush(void)
+{
+    // no-op for IMountSequence
+}
+
+void
 Allocator::_DeleteSubmodules(void)
 {
     delete wbStripeManager;

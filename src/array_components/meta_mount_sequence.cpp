@@ -123,4 +123,10 @@ MetaMountSequence::Shutdown(void)
     journal->Shutdown();
 }
 
+void
+MetaMountSequence::Flush(void)
+{
+    // no-op for IMountSequence
+}
+
 } // namespace pos

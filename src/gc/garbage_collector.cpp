@@ -66,6 +66,11 @@ void GarbageCollector::Shutdown(void)
     Dispose();
 }
 
+void GarbageCollector::Flush(void)
+{
+    // no-op for IMountSequence
+}
+
 void GarbageCollector::StateChanged(StateContext* prev, StateContext* next)
 {
 }

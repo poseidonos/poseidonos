@@ -41,7 +41,7 @@ public:
     virtual int Init(void) = 0;
     virtual void Dispose(void) = 0;
     virtual void Shutdown(void) = 0;
-    virtual void Flush(void) {}
+    virtual void Flush(void) = 0;
 };
 
 } // namespace pos

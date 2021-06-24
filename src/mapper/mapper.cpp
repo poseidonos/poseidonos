@@ -107,6 +107,12 @@ Mapper::Shutdown(void)
 }
 
 void
+Mapper::Flush(void)
+{
+    // no-op for IMountSequence
+}
+
+void
 Mapper::Close(void)
 {
     vsaMapManager->Close();

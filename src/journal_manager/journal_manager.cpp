@@ -297,6 +297,12 @@ JournalManager::Shutdown(void)
 }
 
 void
+JournalManager::Flush(void)
+{
+    // no-op for IMountSequence
+}
+
+void
 JournalManager::_RegisterServices(void)
 {
     std::string arrayName = arrayInfo->GetName();
