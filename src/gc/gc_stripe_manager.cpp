@@ -107,7 +107,8 @@ GcStripeManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeB
         GcWriteBuffer* writeBuffers = gcActiveWriteBuffers[volID];
         delete blkInfoList[volID];
         SetFlushed(volID);
-        SetFinished(writeBuffers);
+        ReturnBuffer(writeBuffers);
+        SetFinished();
     }
     return true;
 }
@@ -191,11 +192,16 @@ GcStripeManager::_ReturnBuffer(GcWriteBuffer* buffer)
 }
 
 void
-GcStripeManager::SetFinished(GcWriteBuffer* buffer)
+GcStripeManager::SetFinished(void)
+{
+    flushedStripeCnt--;
+}
+
+void
+GcStripeManager::ReturnBuffer(GcWriteBuffer* buffer)
 {
     _ReturnBuffer(buffer);
     delete buffer;
-    flushedStripeCnt--;
 }
 
 bool

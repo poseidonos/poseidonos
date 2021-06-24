@@ -1,9 +1,7 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
 #include "src/gc/gc_stripe_manager.h"
 
 namespace pos
@@ -22,7 +20,8 @@ public:
     MOCK_METHOD(bool, AllocateWriteBufferBlks, (uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks), (override));
     MOCK_METHOD(void, MoveActiveWriteBuffer, (uint32_t volumeId, GcWriteBuffer* buffer), (override));
     MOCK_METHOD(std::mutex&, GetWriteBufferLock, (uint32_t volumeId), (override));
-    MOCK_METHOD(void, SetFinished, (GcWriteBuffer* buffer), (override));
+    MOCK_METHOD(void, SetFinished, (), (override));
+    MOCK_METHOD(void, ReturnBuffer, (GcWriteBuffer* buffer), (override));
     MOCK_METHOD(GcWriteBuffer*, GetWriteBuffer, (uint32_t volumeId), (override));
     MOCK_METHOD(bool, DecreaseRemainingAndCheckIsFull, (uint32_t volumeId, uint32_t cnt), (override));
     MOCK_METHOD(void, SetBlkInfo, (uint32_t volumeId, uint32_t offset, BlkInfo blkInfo), (override));

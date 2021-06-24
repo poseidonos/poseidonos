@@ -45,6 +45,7 @@
 #include "src/io/general_io/rba_state_service.h"
 #include "src/io/backend_io/flush_completion.h"
 #include "src/gc/copier_meta.h"
+#include "src/gc/gc_stripe_manager.h"
 #include "src/gc/gc_map_update_request.h"
 #include "src/gc/flow_control/flow_control.h"
 #include "src/gc/flow_control/flow_control_service.h"
@@ -75,7 +76,7 @@ GcFlushCompletion::_DoSpecificJob(void)
 {
     if (nullptr != dataBuffer)
     {
-        gcStripeManager->SetFinished(dataBuffer);
+        gcStripeManager->ReturnBuffer(dataBuffer);
         dataBuffer = nullptr;
     }
 
@@ -125,7 +126,7 @@ GcFlushCompletion::_DoSpecificJob(void)
 
     airlog("PERF_COPY", "AIR_WRITE", 0, totalBlksPerUserStripe * BLOCK_SIZE);
 
-    EventSmartPtr event(new GcMapUpdateRequest(stripe, arrayName));
+    EventSmartPtr event(new GcMapUpdateRequest(stripe, arrayName, gcStripeManager));
     stripe->Flush(event);
 
     return true;

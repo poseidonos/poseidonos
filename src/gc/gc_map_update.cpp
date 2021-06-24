@@ -42,6 +42,7 @@
 #include "src/array_mgmt/array_manager.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/gc/copier_meta.h"
+#include "src/gc/gc_stripe_manager.h"
 #include "src/io/backend_io/flush_completion.h"
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/io/general_io/rba_state_manager.h"
@@ -55,16 +56,18 @@
 namespace pos
 {
 GcMapUpdate::GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
-                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap)
-: GcMapUpdate(stripe, arrayName, mapUpdateInfoList, invalidSegCnt, iStripeMap,
+                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, GcStripeManager* gcStripeManager)
+: GcMapUpdate(stripe, arrayName, mapUpdateInfoList, invalidSegCnt, iStripeMap, gcStripeManager,
       EventSchedulerSingleton::Instance())
 {
 }
 
 GcMapUpdate::GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
-                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, EventScheduler* eventScheduler)
+                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, GcStripeManager* gcStripeManager,
+                        EventScheduler* eventScheduler)
 : stripe(stripe),
   iStripeMap(iStripeMap),
+  gcStripeManager(gcStripeManager),
   eventScheduler(eventScheduler),
   invalidSegCnt(invalidSegCnt),
   arrayName(arrayName),
@@ -109,7 +112,7 @@ GcMapUpdate::Execute(void)
     _InvalidateBlock();
     _ValidateBlock(stripeId, validCount);
 
-    EventSmartPtr event(new GcMapUpdateCompletion(stripe, arrayName, iStripeMap, eventScheduler));
+    EventSmartPtr event(new GcMapUpdateCompletion(stripe, arrayName, iStripeMap, eventScheduler, gcStripeManager));
     if (likely(event != nullptr))
     {
         eventScheduler->EnqueueEvent(event);

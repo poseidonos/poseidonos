@@ -1,9 +1,7 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
 #include "src/gc/victim_stripe.h"
 
 namespace pos
