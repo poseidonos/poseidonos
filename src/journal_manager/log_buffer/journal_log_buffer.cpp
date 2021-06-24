@@ -268,8 +268,11 @@ void
 JournalLogBuffer::InternalIoDone(AsyncMetaFileIoCtx* ctx)
 {
     LogBufferIoContext* context = dynamic_cast<LogBufferIoContext*>(ctx);
-    context->IoDone();
-    delete context;
+    if (context != nullptr)
+    {
+        context->IoDone();
+        delete context;
+    }
 }
 
 int
