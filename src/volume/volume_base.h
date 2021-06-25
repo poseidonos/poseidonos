@@ -50,6 +50,13 @@ enum VolumeStatus
     MaxVolumeStatus
 };
 
+const uint32_t KIOPS = 1000;
+const uint32_t MIB_IN_BYTE = 1024 * 1024;
+const uint64_t MIN_IOPS_LIMIT = 10;
+const uint64_t MIN_BW_LIMIT = 10;
+const uint64_t MAX_IOPS_LIMIT = UINT64_MAX / KIOPS;
+const uint64_t MAX_BW_LIMIT = UINT64_MAX / MIB_IN_BYTE;
+
 class VolumeBase
 {
 public:
@@ -131,13 +138,6 @@ protected:
     bool isValid = true;
     uint64_t totalSize;
     std::mutex statusMutex;
-    const uint32_t KIOPS = 1000;
-    const uint32_t MIB_IN_BYTE = 1024 * 1024;
-    const uint64_t MIN_IOPS_LIMIT = 10;
-    const uint64_t MIN_BW_LIMIT = 10;
-    const uint64_t MAX_IOPS_LIMIT = UINT64_MAX / KIOPS;
-    const uint64_t MAX_BW_LIMIT = UINT64_MAX / MIB_IN_BYTE;
-
     static const int INVALID_VOL_ID = -1;
 };
 

@@ -33,8 +33,8 @@
 #include "src/cli/create_volume_command.h"
 
 #include "src/cli/cli_event_code.h"
+#include "src/qos/qos_manager.h"
 #include "src/volume/volume_service.h"
-
 namespace pos_cli
 {
 CreateVolumeCommand::CreateVolumeCommand(void)
@@ -49,6 +49,8 @@ string
 CreateVolumeCommand::Execute(json& doc, string rid)
 {
     string arrayName = DEFAULT_ARRAY_NAME;
+    string qosMsg = "Qos Parameters set.";
+
     if (doc["param"].contains("array") == true)
     {
         arrayName = doc["param"]["array"].get<std::string>();
@@ -74,6 +76,13 @@ CreateVolumeCommand::Execute(json& doc, string rid)
             maxbw = doc["param"]["maxbw"].get<uint64_t>();
         }
 
+        if (false == QosManagerSingleton::Instance()->IsFeQosEnabled())
+        {
+            maxiops = 0;
+            maxbw = 0;
+            qosMsg = "Parameter setting skipped. Fe_qos is disabled.";
+        }
+
         int ret = FAIL;
         IVolumeManager* volMgr =
             VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
@@ -86,7 +95,7 @@ CreateVolumeCommand::Execute(json& doc, string rid)
         if (ret == SUCCESS)
         {
             return jFormat.MakeResponse("CREATEVOLUME", rid, ret,
-                volName + "is created successfully", GetPosInfo());
+                volName + "is created successfully." + qosMsg, GetPosInfo());
         }
         else
         {

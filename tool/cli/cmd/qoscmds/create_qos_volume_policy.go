@@ -22,15 +22,15 @@ Syntax:
 	poseidonos-cli qos create --volume-name VolumeName (--array-name | -a) ArrayName [--maxiops" IOPS] [--maxbw Bandwidth] .
 
 Example: 
-	poseidonos-cli qos create --volume-name Volume0 --array-name Array0 --maxiops 500 --maxbw 50GB/s
+	poseidonos-cli qos create --volume-name vol1 --array-name Array0 --maxiops 500 --maxbw 100
 
 NOTE!!!!
-    Current design of Qos supports just 1 Volume per Subsystem, so if many configured Qos in effect only for 1st Volume in Subsystem!!!
+    Current design of Qos supports only 1 Volume per Subsystem. If throttling values are set for more than one volume in a single subsystem, the throttling will be take effect only for the first mounted volume in the subsystem.
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var command = "QOSCREATEVOLUMEPOLICY"
+		var command = "CREATEQOSVOLUMEPOLICY"
 
 		volumePolicyReq := formVolumePolicyReq()
 		reqJSON, err := json.Marshal(volumePolicyReq)
@@ -55,18 +55,6 @@ func formVolumePolicyReq() messages.Request {
 		volumeNameList.VOLUMENAME = str
 		volumeNames = append(volumeNames, volumeNameList)
 	}
-	if (0 == volumePolicy_minIOPS) {
-		volumePolicy_minIOPS = 0xFFFFFFFF
-	}
-	if (0 == volumePolicy_maxIOPS) {
-		volumePolicy_maxIOPS = 0xFFFFFFFF
-	}
-	if (0 == volumePolicy_minBandwidth) {
-		volumePolicy_minBandwidth = 0xFFFFFFFF
-	}
-	if (0 == volumePolicy_maxBandwidth) {
-		volumePolicy_maxBandwidth = 0xFFFFFFFF
-	}
 	volumePolicyParam := messages.VolumePolicyParam{
 		VOLUMENAME:   volumeNames,
 		MINIOPS:      volumePolicy_minIOPS,
@@ -78,7 +66,7 @@ func formVolumePolicyReq() messages.Request {
 
 	volumePolicyReq := messages.Request{
 		RID:     "fromCLI",
-		COMMAND: "QOSCREATEVOLUMEPOLICY",
+		COMMAND: "CREATEQOSVOLUMEPOLICY",
 		PARAM:   volumePolicyParam,
 	}
 
@@ -90,16 +78,19 @@ func formVolumePolicyReq() messages.Request {
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
 var volumePolicy_volumeNameList = ""
 var volumePolicy_arrayName = ""
+// -1 is the default value for the parameters. It means that the user has not set // any value for that parameter. This is done so that user doesnt need to pass all// parameter value for cli commands. Keeping 0 as the default value doesnt work,
+// as the value comes as 0 even when user doesnt pass the parameter. When POS cli // server receives the value as -1 for a paramater, it doesnt process that 
+// parameter further.
+
 var volumePolicy_minIOPS = -1
 var volumePolicy_maxIOPS = -1
 var volumePolicy_minBandwidth = -1
 var volumePolicy_maxBandwidth = -1
-
 func init() {
 	VolumePolicyCmd.Flags().StringVarP(&volumePolicy_volumeNameList, "volume-name", "", "", "A comma-seperated names of volumes to set qos policy for")
 	VolumePolicyCmd.Flags().StringVarP(&volumePolicy_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
-	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_minIOPS, "miniops", "", -1, "The minimum IOPS for the volume")
-	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_maxIOPS, "maxiops", "", -1, "The maximum IOPS for the volume")
-	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_minBandwidth, "minbw", "", -1, "The minimum bandwidth for the volume")
-	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_maxBandwidth, "maxbw", "", -1, "The maximum bandwidth for the volume")
+	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_minIOPS, "miniops", "", -1, "The minimum IOPS for the volume in KIOPS")
+	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_maxIOPS, "maxiops", "", -1, "The maximum IOPS for the volume in KIOPS")
+	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_minBandwidth, "minbw", "", -1, "The minimum bandwidth for the volume in MiB/s")
+	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_maxBandwidth, "maxbw", "", -1, "The maximum bandwidth for the volume in MiB/s")
 }

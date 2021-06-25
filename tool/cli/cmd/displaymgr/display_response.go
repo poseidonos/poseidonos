@@ -166,7 +166,7 @@ func printResToHumanReadable(command string, resJSON string) {
 
 		log.Println("")
 
-	case "QOSCREATEVOLUMEPOLICY":
+	case "CREATEQOSVOLUMEPOLICY":
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)
         if (0 != res.RESULT.STATUS.CODE) {
@@ -174,7 +174,7 @@ func printResToHumanReadable(command string, resJSON string) {
             fmt.Println("Description: ",res.RESULT.STATUS.DESCRIPTION)
         }
 
-	case "QOSRESETVOLUMEPOLICY":
+	case "RESETQOSVOLUMEPOLICY":
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)
         if (0 != res.RESULT.STATUS.CODE) {
@@ -182,7 +182,7 @@ func printResToHumanReadable(command string, resJSON string) {
             fmt.Println("Description: ",res.RESULT.STATUS.DESCRIPTION)
         }
 
-	case "QOSLISTPOLICIES":
+	case "LISTQOSPOLICIES":
 	    res := messages.ListQosResponse{}
 	    json.Unmarshal([]byte(resJSON), &res)
         if (0 != res.RESULT.STATUS.CODE) {

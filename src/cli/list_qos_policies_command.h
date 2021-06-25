@@ -32,8 +32,9 @@
 
 #pragma once
 
-#include "src/cli/command.h"
 #include <string>
+
+#include "src/cli/command.h"
 
 namespace pos_cli
 {
@@ -45,6 +46,6 @@ public:
     string Execute(json& doc, string rid) override;
 
 private:
-    string GetRebuildImpactString(uint8_t impact);
+    string _GetRebuildImpactString(uint8_t impact);
 };
 }; // namespace pos_cli

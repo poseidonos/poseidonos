@@ -27,7 +27,7 @@ Example:
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var command = "QOSRESETVOLUMEPOLICY"
+		var command = "RESETQOSVOLUMEPOLICY"
 
 		volumeResetReq := formVolumeResetReq()
 		reqJSON, err := json.Marshal(volumeResetReq)
@@ -62,7 +62,7 @@ func formVolumeResetReq() messages.Request {
 
 	volumeResetReq := messages.Request{
 		RID:     "fromCLI",
-		COMMAND: "QOSRESETVOLUMEPOLICY",
+		COMMAND: "RESETQOSVOLUMEPOLICY",
 		PARAM:   volumeResetParam,
 	}
 

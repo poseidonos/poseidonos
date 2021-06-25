@@ -108,10 +108,10 @@ type VolumeNameList struct {
 
 type VolumePolicyParam struct {
 	VOLUMENAME   []VolumeNameList `json:"vol"`
-	MINIOPS      int    `json:"miniops,omitempty"`
-	MAXIOPS      int    `json:"maxiops,omitempty"`
-	MINBANDWIDTH int    `json:"minbw,omitempty"`
-	MAXBANDWIDTH int    `json:"maxbw,omitempty"`
+	MINIOPS      int    `json:"miniops"`
+	MAXIOPS      int    `json:"maxiops"`
+	MINBANDWIDTH int    `json:"minbw"`
+	MAXBANDWIDTH int    `json:"maxbw"`
 	ARRAYNAME    string `json:"array"`
 }
 
