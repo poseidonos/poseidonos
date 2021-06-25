@@ -32,8 +32,14 @@
 
 #include "src/journal_manager/checkpoint/checkpoint_manager.h"
 
+#include <cassert>
+
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/include/pos_event_id.h"
+#include "src/journal_manager/checkpoint/checkpoint_completion.h"
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -43,8 +49,13 @@ CheckpointManager::CheckpointManager(void)
 }
 
 CheckpointManager::CheckpointManager(CheckpointHandler* cpHandler)
-: sequenceController(nullptr),
-  checkpointHandler(cpHandler)
+: eventScheduler(nullptr),
+  sequenceController(nullptr),
+  dirtyMapManager(nullptr),
+  checkpointHandler(cpHandler),
+  checkpointInProgress(false),
+  checkpointBlocked(false),
+  clientCallback(nullptr)
 {
 }
 
@@ -60,6 +71,8 @@ void
 CheckpointManager::Init(IMapFlush* mapFlush, IContextManager* ctxManager,
     EventScheduler* scheduler, CallbackSequenceController* seqController, DirtyMapManager* dMapManager)
 {
+    eventScheduler = scheduler;
+
     sequenceController = seqController;
     dirtyMapManager = dMapManager;
 
@@ -67,28 +80,175 @@ CheckpointManager::Init(IMapFlush* mapFlush, IContextManager* ctxManager,
 }
 
 int
-CheckpointManager::RequestCheckpoint(int logGroupId, EventSmartPtr callback)
+CheckpointManager::RequestCheckpoint(int logGroupId, EventSmartPtr cb)
 {
-    // TODO (huijeong.kim) Add checkpoint sequence controller here
+    CheckpointRequest request = {
+        .groupId = logGroupId,
+        .callback = cb};
+
+    std::lock_guard<std::mutex> lock(checkpointTriggerLock);
+    int ret = 0;
+    if ((_HasPendingRequests() == false) &&
+        (checkpointBlocked == false))
+    {
+        ret = _TryToStartCheckpoint(request);
+    }
+    else
+    {
+        _AddToPendingRequestList(request);
+    }
+    return ret;
+}
+
+int
+CheckpointManager::StartCheckpoint(EventSmartPtr cb)
+{
+    if (checkpointInProgress == true || checkpointBlocked != true)
+    {
+        POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_CHECKPOINT_IN_PROGRESS,
+            "Checkpoint cannot start right away, inProgress {} blocked {}",
+            checkpointInProgress, checkpointBlocked);
+        return -1 * static_cast<int>(POS_EVENT_ID::JOURNAL_CHECKPOINT_IN_PROGRESS);
+    }
+
+    checkpointInProgress = true;
+    CheckpointRequest request = {.groupId = -1, .callback = cb};
+    return _StartCheckpoint(request);
+}
+
+bool
+CheckpointManager::_HasPendingRequests(void)
+{
+    return (checkpointRequests.size() != 0);
+}
+
+void
+CheckpointManager::_AddToPendingRequestList(CheckpointRequest request)
+{
+    checkpointRequests.push(request);
+}
+
+void
+CheckpointManager::CheckpointCompleted(void)
+{
+    _CompleteCheckpoint();
+    _StartPendingRequests();
+}
+
+void
+CheckpointManager::BlockCheckpointAndWaitToBeIdle(void)
+{
+    checkpointBlocked = true;
+
+    while (checkpointInProgress == true)
+    {
+        std::this_thread::sleep_for(10ms);
+    }
+}
+
+void
+CheckpointManager::UnblockCheckpoint(void)
+{
+    checkpointBlocked = false;
+
+    _StartPendingRequests();
+}
+
+bool
+CheckpointManager::IsCheckpointInProgress(void)
+{
+    return checkpointInProgress;
+}
+
+bool
+CheckpointManager::IsCheckpointBlocked(void)
+{
+    return checkpointBlocked;
+}
+
+int
+CheckpointManager::GetNumPendingCheckpointRequests(void)
+{
+    std::lock_guard<std::mutex> lock(checkpointTriggerLock);
+    return checkpointRequests.size();
+}
+
+void
+CheckpointManager::_CompleteCheckpoint(void)
+{
+    eventScheduler->EnqueueEvent(clientCallback);
+    clientCallback = nullptr;
+
+    checkpointInProgress = false;
+}
+
+void
+CheckpointManager::_StartPendingRequests(void)
+{
+    std::lock_guard<std::mutex> lock(checkpointTriggerLock);
+    CheckpointRequest request;
+    bool found = _GetNextRequest(request);
+    if (found == true)
+    {
+        _TryToStartCheckpoint(request);
+    }
+}
+
+bool
+CheckpointManager::_GetNextRequest(CheckpointRequest& request)
+{
+    if (checkpointRequests.size() != 0)
+    {
+        auto nextRequest = checkpointRequests.front();
+        checkpointRequests.pop();
+
+        request = nextRequest;
+        return true;
+    }
+    return false;
+}
+
+int
+CheckpointManager::_TryToStartCheckpoint(CheckpointRequest request)
+{
+    int ret = 0;
+    if (checkpointInProgress.exchange(true) == false)
+    {
+        ret = _StartCheckpoint(request);
+    }
+    else
+    {
+        _AddToPendingRequestList(request);
+    }
+    return ret;
+}
+
+int
+CheckpointManager::_StartCheckpoint(CheckpointRequest request)
+{
+    assert(clientCallback == nullptr);
+
+    clientCallback = request.callback;
+    EventSmartPtr completionEvent(new CheckpointCompletion(this));
 
     MapPageList dirtyPages;
-    if (logGroupId == -1)
+    if (request.groupId == -1)
     {
         dirtyPages = dirtyMapManager->GetTotalDirtyList();
     }
     else
     {
-        dirtyPages = dirtyMapManager->GetDirtyList(logGroupId);
+        dirtyPages = dirtyMapManager->GetDirtyList(request.groupId);
     }
 
     sequenceController->GetCheckpointExecutionApproval();
-    int ret = checkpointHandler->Start(dirtyPages, callback);
+    int ret = checkpointHandler->Start(dirtyPages, completionEvent);
     sequenceController->AllowCallbackExecution();
     if (ret != 0)
     {
         // TODO(huijeong.kim): Go to the fail mode - not to journal any more
     }
-        return ret;
+    return ret;
 }
 
 CheckpointStatus

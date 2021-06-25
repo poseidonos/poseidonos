@@ -43,7 +43,7 @@ using ::testing::Return;
 
 namespace pos
 {
-TEST(CheckpointSubmission, Execute_testIfCheckpointStartedSuccessfullyWhenLogGroupSpecified)
+TEST(CheckpointSubmission, Execute_testIfCheckpointStartedSuccessfully)
 {
     // Given
     NiceMock<MockCheckpointManager> checkpointManager;
@@ -55,21 +55,23 @@ TEST(CheckpointSubmission, Execute_testIfCheckpointStartedSuccessfullyWhenLogGro
     EXPECT_CALL(checkpointManager, RequestCheckpoint(logGroupId, _)).WillOnce(Return(0));
     bool result = submission.Execute();
 
-    // Then: Execussion result should be 0
+    // Then: Execussion result should be true
     EXPECT_EQ(result, true);
 }
 
-TEST(CheckpointSubmission, Execute_testIfCheckpointStartedSuccessfullyWhenLogGroupNotSpecified)
+TEST(CheckpointSubmission, Execute_testIfCheckpointSubmissionFailsWhenRequestFails)
 {
     // Given
     NiceMock<MockCheckpointManager> checkpointManager;
-    CheckpointSubmission submission(&checkpointManager, nullptr);
+
+    int logGroupId = 1;
+    CheckpointSubmission submission(&checkpointManager, nullptr, logGroupId);
 
     // When
-    EXPECT_CALL(checkpointManager, RequestCheckpoint(-1, _)).WillOnce(Return(0));
+    EXPECT_CALL(checkpointManager, RequestCheckpoint(logGroupId, _)).WillOnce(Return(-1));
     bool result = submission.Execute();
 
-    // Then: Execussion result should be 0
-    EXPECT_EQ(result, true);
+    // Then: Execussion result should be false
+    EXPECT_EQ(result, false);
 }
 } // namespace pos

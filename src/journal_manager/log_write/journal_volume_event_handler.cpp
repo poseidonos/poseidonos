@@ -91,20 +91,28 @@ JournalVolumeEventHandler::WriteVolumeDeletedLog(int volumeId)
     }
 
     // 1. Checkpoint blocking
+    checkpointManager->BlockCheckpointAndWaitToBeIdle();
 
     // 2. write log
     uint64_t segCtxVersion = contextManager->GetStoredContextVersion(SEGMENT_CTX);
+
+    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+        "Write volume deleted log, volume id {} segInfo version is {}", volumeId, segCtxVersion);
+
     int ret = _WriteVolumeDeletedLog(volumeId, segCtxVersion);
     if (ret != 0)
     {
         POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
             "Writing volume deleted log failed (volume id {})", volumeId);
+
+        checkpointManager->UnblockCheckpoint();
         return ret;
     }
 
     _WaitForLogWriteDone(volumeId);
-    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
-        "Write volume deleted log done, segInfo version is {}", segCtxVersion);
+
+    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+        "Write volume deleted log done, volume id {} segInfo version is {}", volumeId, segCtxVersion);
 
     return 0;
 }
@@ -112,8 +120,6 @@ JournalVolumeEventHandler::WriteVolumeDeletedLog(int volumeId)
 int
 JournalVolumeEventHandler::_WriteVolumeDeletedLog(int volumeId, uint64_t segCtxVersion)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
-        "Write volume deleted log, segInfo version is {}", segCtxVersion);
     EventSmartPtr callback(new VolumeDeletedLogWriteCallback(this, volumeId));
 
     LogWriteContext* logWriteContext =
@@ -130,17 +136,25 @@ JournalVolumeEventHandler::TriggerMetadataFlush(void)
     {
         return 0;
     }
-    
-    EventSmartPtr callback(new MetaFlushCompleted(this));
-    EventSmartPtr cpSubmission(new CheckpointSubmission(checkpointManager, callback));
 
     flushInProgress = true;
-    eventScheduler->EnqueueEvent(cpSubmission);
 
-    _WaitForAllocatorContextFlushCompleted();
+    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+        "Start checkpoint, triggered by volume deletion");
 
-    // Unblock checkpoint
-    return 0;
+    EventSmartPtr callback(new MetaFlushCompleted(this));
+    int ret = checkpointManager->StartCheckpoint(callback);
+    if (ret == 0)
+    {
+        _WaitForAllocatorContextFlushCompleted();
+        flushInProgress = false;
+    }
+
+    checkpointManager->UnblockCheckpoint();
+
+    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+        "Completed checkpoint, triggered by volume deletion");
+    return ret;
 }
 
 void

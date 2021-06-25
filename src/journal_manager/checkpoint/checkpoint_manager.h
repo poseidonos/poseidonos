@@ -32,6 +32,10 @@
 
 #pragma once
 
+#include <atomic>
+#include <mutex>
+#include <queue>
+
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/checkpoint/checkpoint_handler.h"
 #include "src/mapper/include/mpage_info.h"
@@ -56,12 +60,48 @@ public:
     virtual void Init(IMapFlush* mapFlush, IContextManager* ctxManager,
         EventScheduler* scheduler, CallbackSequenceController* seqController, DirtyMapManager* dMapManager);
     virtual int RequestCheckpoint(int logGroupId, EventSmartPtr callback);
+    virtual int StartCheckpoint(EventSmartPtr callback);
+
     virtual CheckpointStatus GetStatus(void);
 
+    virtual void CheckpointCompleted(void);
+
+    virtual void BlockCheckpointAndWaitToBeIdle(void);
+    virtual void UnblockCheckpoint(void);
+
+    bool IsCheckpointInProgress(void);
+    bool IsCheckpointBlocked(void);
+    int GetNumPendingCheckpointRequests(void);
+
 private:
+    struct CheckpointRequest
+    {
+        int groupId;
+        EventSmartPtr callback;
+    };
+    CheckpointRequest invalid{INT32_MAX, nullptr};
+
+    int _TryToStartCheckpoint(CheckpointRequest request);
+    int _StartCheckpoint(CheckpointRequest request);
+    void _AddToPendingRequestList(CheckpointRequest request);
+    void _CompleteCheckpoint(void);
+
+    bool _HasPendingRequests(void);
+    void _StartPendingRequests(void);
+
+    bool _GetNextRequest(CheckpointRequest& request);
+
+    EventScheduler* eventScheduler;
+
     CallbackSequenceController* sequenceController;
     DirtyMapManager* dirtyMapManager;
     CheckpointHandler* checkpointHandler;
+
+    std::mutex checkpointTriggerLock;
+    std::atomic<bool> checkpointInProgress;
+    std::atomic<bool> checkpointBlocked;
+    EventSmartPtr clientCallback;
+    std::queue<CheckpointRequest> checkpointRequests;
 };
 
 } // namespace pos

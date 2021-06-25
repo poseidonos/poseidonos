@@ -44,7 +44,7 @@ class CheckpointSubmission : public Event
 {
 public:
     CheckpointSubmission(CheckpointManager* checkpointManager,
-        EventSmartPtr callback, int logGroupId = -1);
+        EventSmartPtr callback, int logGroupId);
     virtual ~CheckpointSubmission(void) = default;
     bool Execute(void) override;
 
