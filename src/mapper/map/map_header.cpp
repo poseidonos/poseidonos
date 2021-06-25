@@ -54,11 +54,17 @@ MapHeader::MapHeader(void)
 
 MapHeader::~MapHeader(void)
 {
-    delete mPageMap;
-    mPageMap = nullptr;
+    if (mPageMap != nullptr)
+    {
+        delete mPageMap;
+        mPageMap = nullptr;
+    }
 
-    delete touchedMpages;
-    touchedMpages = nullptr;
+    if (touchedMpages != nullptr)
+    {
+        delete touchedMpages;
+        touchedMpages = nullptr;
+    }
 }
 
 void

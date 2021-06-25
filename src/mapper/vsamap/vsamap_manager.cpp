@@ -63,7 +63,11 @@ VSAMapManager::~VSAMapManager(void)
 {
     VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, 0);
 
-    delete vsaMapAPI;
+    if (vsaMapAPI != nullptr)
+    {
+        delete vsaMapAPI;
+        vsaMapAPI = nullptr;
+    }
 }
 
 void

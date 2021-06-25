@@ -56,6 +56,7 @@ StripeMapManager::~StripeMapManager(void)
     if (stripeMap != nullptr)
     {
         delete stripeMap;
+        stripeMap = nullptr;
     }
 }
 

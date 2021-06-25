@@ -62,11 +62,13 @@ ReverseMapManager::~ReverseMapManager(void)
     {
         revMapWholefile->Close();
         delete revMapWholefile;
+        revMapWholefile = nullptr;
     }
 
     if (revMapPacks != nullptr)
     {
         delete [] revMapPacks;
+        revMapPacks = nullptr;
     }
 }
 
