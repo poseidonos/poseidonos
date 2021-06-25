@@ -46,6 +46,7 @@ ArrayManager::ArrayManager()
     arrayRebuilder = new ArrayRebuilder(this);
     DeviceManagerSingleton::Instance()->SetDeviceEventCallback(this);
     abrManager = new AbrManager();
+    telManager = TeletryClientMgr::Instance();
 }
 
 ArrayManager::~ArrayManager()
@@ -117,7 +118,12 @@ ArrayManager::Mount(string name)
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
     {
-        return array->Mount();
+        int ret = array->Mount();
+        if (ret == 0)
+        {
+            telManager->RegisterClient(name, array->GetTelemetryClient());
+        }
+        return ret;
     }
     else if (AbrExists(name))
     {
@@ -133,6 +139,7 @@ ArrayManager::Unmount(string name)
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
     {
+        telManager->DeregisterClient(name);
         return array->Unmount();
     }
     else if (AbrExists(name))

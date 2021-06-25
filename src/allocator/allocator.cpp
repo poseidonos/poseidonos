@@ -47,6 +47,7 @@
 #include "src/logger/logger.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "src/sys_event/volume_event_publisher.h"
+#include "src/telemetry/telemetry_client_manager/telemetry_client.h"
 
 namespace pos
 {
@@ -64,11 +65,11 @@ Allocator::Allocator(AllocatorAddressInfo* addrInfo_, ContextManager* contextMan
     arrayName = info_->GetName();
 }
 
-Allocator::Allocator(IArrayInfo* info, IStateControl* iState)
+Allocator::Allocator(TelemetryClient* tc, IArrayInfo* info, IStateControl* iState)
 : Allocator(nullptr, nullptr, nullptr, nullptr, info, iState)
 {
     VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, 0);
-    _CreateSubmodules();
+    _CreateSubmodules(tc);
 }
 
 Allocator::~Allocator(void)
@@ -95,10 +96,10 @@ Allocator::Init(void)
 }
 
 void
-Allocator::_CreateSubmodules(void)
+Allocator::_CreateSubmodules(TelemetryClient* tc)
 {
     addrInfo = new AllocatorAddressInfo();
-    contextManager = new ContextManager(addrInfo, arrayName);
+    contextManager = new ContextManager(tc, addrInfo, arrayName);
     blockManager = new BlockManager(addrInfo, contextManager, iArrayInfo->GetIndex());
     wbStripeManager = new WBStripeManager(addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());
 }

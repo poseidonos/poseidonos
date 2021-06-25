@@ -30,72 +30,51 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
+#pragma once
 
+#include <map>
+#include <chrono>
+#include <iomanip>
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/telemetry/telemetry_client_manager/telemetry_data_pool.h"
+#include <sstream>
+#include <string>
 
 namespace pos
 {
-GcCtx::GcCtx(void)
+class TelemetryLogEntry
 {
-    normalGcthreshold = DEFAULT_GC_THRESHOLD;
-    urgentGcthreshold = DEFAULT_URGENT_THRESHOLD;
-    curGcMode = MODE_NO_GC;
-}
-
-int
-GcCtx::GetNormalGcThreshold(void)
-{
-    return normalGcthreshold;
-}
-
-int
-GcCtx::GetUrgentThreshold(void)
-{
-    return urgentGcthreshold;
-}
-
-void
-GcCtx::SetNormalGcThreshold(int inputThreshold)
-{
-    normalGcthreshold = inputThreshold;
-}
-
-void
-GcCtx::SetUrgentThreshold(int inputThreshold)
-{
-    urgentGcthreshold = inputThreshold;
-}
-
-GcMode
-GcCtx::GetCurrentGcMode(int numFreeSegments)
-{
-    if (urgentGcthreshold >= numFreeSegments)
+public:
+    TelemetryLogEntry(void) {}
+    ~TelemetryLogEntry(void) {}
+    TelemetryLogEntry(std::string t, uint32_t v)
     {
-        if (curGcMode != MODE_URGENT_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to URGENT GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_URGENT_GC;
+        loggedTime = t;
+        value = v;
     }
-    else if (normalGcthreshold >= numFreeSegments)
-    {
-        if (curGcMode != MODE_NORMAL_GC )
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NORMAL GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NORMAL_GC;
-    }
-    else
-    {
-        if (curGcMode != MODE_NO_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NO GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NO_GC;
-    }
-    return curGcMode;
-}
+    std::string GetTime() { return loggedTime; }
+    uint32_t GetValue() { return value; }
+    void Set(std::string t, uint32_t v) { loggedTime = t; value = v; }
+
+private:
+    std::string loggedTime;
+    uint32_t value;
+};
+
+class TelemetryDataPool
+{
+public:
+    TelemetryDataPool(void);
+    ~TelemetryDataPool(void);
+    void SetLog(std::string id, uint32_t value);
+    int GetLog(std::string id, TelemetryLogEntry& outLog);
+    int GetNumLogEntries(void);
+
+private:
+    const std::string _GetCurTime(void);
+
+    std::map<std::string, TelemetryLogEntry> pool;
+};
 
 } // namespace pos

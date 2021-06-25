@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(telemetry_client_manager_ut telemetry_client_manager_test.cpp)
+POS_ADD_UNIT_TEST(telemetry_data_pool_ut telemetry_data_pool_test.cpp)
+POS_ADD_UNIT_TEST(telemetry_client_ut telemetry_client_test.cpp)

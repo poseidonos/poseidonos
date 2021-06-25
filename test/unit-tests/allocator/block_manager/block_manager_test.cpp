@@ -322,7 +322,7 @@ TEST(BlockManager, _AllocateBlks_TestCase2)
     EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
     EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
-    EXPECT_CALL(*ctxManager, GetCurrentGcMode).WillOnce(Return(MODE_URGENT_GC));
+    EXPECT_CALL(*ctxManager, GetCurrentGcMode()).WillOnce(Return(MODE_URGENT_GC));
     // when
     VirtualBlks ret = blkManager._AllocateBlks(0, 1);
     // then
@@ -360,7 +360,7 @@ TEST(BlockManager, _AllocateBlks_TestCase3_1)
     EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
     EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
-    EXPECT_CALL(*ctxManager, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
+    EXPECT_CALL(*ctxManager, GetCurrentGcMode()).WillOnce(Return(MODE_NO_GC));
     EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
     EXPECT_CALL(*reCtx, IsRebuidTargetSegmentsEmpty).WillOnce(Return(true));
     EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
@@ -407,7 +407,7 @@ TEST(BlockManager, _AllocateBlks_TestCase3_2)
     EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
     EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
-    EXPECT_CALL(*ctxManager, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
+    EXPECT_CALL(*ctxManager, GetCurrentGcMode()).WillOnce(Return(MODE_NO_GC));
     EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
     EXPECT_CALL(*reCtx, IsRebuidTargetSegmentsEmpty).WillOnce(Return(false));
     // when
@@ -453,7 +453,7 @@ TEST(BlockManager, _AllocateBlks_TestCase4)
     EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock)).WillOnce(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
     EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
-    EXPECT_CALL(*ctxManager, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
+    EXPECT_CALL(*ctxManager, GetCurrentGcMode()).WillOnce(Return(MODE_NO_GC));
     EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(0));
 
     EXPECT_CALL(*allocCtx, SetSegmentState).Times(1);
@@ -505,7 +505,7 @@ TEST(BlockManager, _AllocateBlks_TestCase5)
     EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
     EXPECT_CALL(*ctxManager, GetRebuildCtx).WillOnce(Return(reCtx));
     EXPECT_CALL(*allocCtx, UpdatePrevLsid).WillOnce(Return(10));
-    EXPECT_CALL(*ctxManager, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
+    EXPECT_CALL(*ctxManager, GetCurrentGcMode()).WillOnce(Return(MODE_NO_GC));
     EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(0));
 
     EXPECT_CALL(*allocCtx, SetSegmentState).Times(1);

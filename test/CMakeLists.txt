@@ -431,7 +431,7 @@ link_directories (
     /usr/lib/x86_64-linux-gnu
 
     # for telemetry manager protobuf & grpc (FIXME later)
-    /home/ibof/grpc-bin/lib
+    ${POS_GRPC_HOME}/lib
 
     /usr/local/lib
 )

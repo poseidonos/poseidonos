@@ -42,6 +42,7 @@
 #include "src/metafs/metafs.h"
 #include "src/network/nvmf.h"
 #include "src/io/general_io/rba_state_manager.h"
+#include "src/telemetry/telemetry_client_manager/telemetry_client.h"
 #include <vector>
 #include <string>
 #include <functional>
@@ -85,6 +86,7 @@ public:
     virtual int PrepareRebuild(bool& resume);
     virtual void RebuildDone(void);
     virtual Array* GetArray(void) { return array; }
+    virtual TelemetryClient* GetTelemetryClient(void) { return telClient; }
 
 private:
     void _SetMountSequence(unsigned int arrayIndex);
@@ -116,5 +118,8 @@ private:
 
     // MetaFs factory: MetaFs creation is not determined during ArrayComponents construction. Hence, we need a lambda.
     function<MetaFs* (Array*, bool)> metaFsFactory = nullptr;
+
+    // telemetry
+    TelemetryClient* telClient = nullptr;
 };
 } // namespace pos

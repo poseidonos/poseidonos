@@ -30,72 +30,33 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
+#pragma once
 
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
+#include "src/telemetry/telemetry_client_manager/telemetry_client.h"
+#include <map>
+#include <string>
+#include <vector>
 
 namespace pos
 {
-GcCtx::GcCtx(void)
+class TelemetryClientManager
 {
-    normalGcthreshold = DEFAULT_GC_THRESHOLD;
-    urgentGcthreshold = DEFAULT_URGENT_THRESHOLD;
-    curGcMode = MODE_NO_GC;
-}
+public:
+    TelemetryClientManager(void);
+    virtual ~TelemetryClientManager(void);
+    virtual int RegisterClient(std::string name, TelemetryClient* client);
+    virtual int DeregisterClient(std::string name);
+    virtual void StartTelemetryClient(std::string name);
+    virtual void StopTelemetryClient(std::string name);
+    virtual bool IsTelemetryClientRunning(std::string name);
+    virtual void StartTelemetryClientAll(void);
+    virtual void StopTelemetryClientAll(void);
 
-int
-GcCtx::GetNormalGcThreshold(void)
-{
-    return normalGcthreshold;
-}
+    virtual int CollectData(std::string name, std::string id, TelemetryLogEntry& outLog);
 
-int
-GcCtx::GetUrgentThreshold(void)
-{
-    return urgentGcthreshold;
-}
-
-void
-GcCtx::SetNormalGcThreshold(int inputThreshold)
-{
-    normalGcthreshold = inputThreshold;
-}
-
-void
-GcCtx::SetUrgentThreshold(int inputThreshold)
-{
-    urgentGcthreshold = inputThreshold;
-}
-
-GcMode
-GcCtx::GetCurrentGcMode(int numFreeSegments)
-{
-    if (urgentGcthreshold >= numFreeSegments)
-    {
-        if (curGcMode != MODE_URGENT_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to URGENT GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_URGENT_GC;
-    }
-    else if (normalGcthreshold >= numFreeSegments)
-    {
-        if (curGcMode != MODE_NORMAL_GC )
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NORMAL GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NORMAL_GC;
-    }
-    else
-    {
-        if (curGcMode != MODE_NO_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NO GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NO_GC;
-    }
-    return curGcMode;
-}
-
+private:
+    std::map<std::string, TelemetryClient*> clientList;
+    int numClients;
+};
+using TeletryClientMgr = Singleton<TelemetryClientManager>;
 } // namespace pos

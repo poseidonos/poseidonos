@@ -29,73 +29,57 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
-
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
+#include "src/telemetry/telemetry_client_manager/telemetry_client.h"
 
 namespace pos
 {
-GcCtx::GcCtx(void)
+TelemetryClient::TelemetryClient(void)
+: turnOn(true) // todo: change default true
 {
-    normalGcthreshold = DEFAULT_GC_THRESHOLD;
-    urgentGcthreshold = DEFAULT_URGENT_THRESHOLD;
-    curGcMode = MODE_NO_GC;
+    // TODO:: ID = "modulename_itemname"
 }
 
-int
-GcCtx::GetNormalGcThreshold(void)
+TelemetryClient::~TelemetryClient(void)
 {
-    return normalGcthreshold;
-}
-
-int
-GcCtx::GetUrgentThreshold(void)
-{
-    return urgentGcthreshold;
 }
 
 void
-GcCtx::SetNormalGcThreshold(int inputThreshold)
+TelemetryClient::StartLogging(void)
 {
-    normalGcthreshold = inputThreshold;
+    turnOn = true;
 }
 
 void
-GcCtx::SetUrgentThreshold(int inputThreshold)
+TelemetryClient::StopLogging(void)
 {
-    urgentGcthreshold = inputThreshold;
+    turnOn = false;
 }
 
-GcMode
-GcCtx::GetCurrentGcMode(int numFreeSegments)
+bool
+TelemetryClient::IsRunning(void)
 {
-    if (urgentGcthreshold >= numFreeSegments)
+    return turnOn;
+}
+
+int
+TelemetryClient::PublishData(std::string id, uint32_t value)
+{
+    if (turnOn == false)
     {
-        if (curGcMode != MODE_URGENT_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to URGENT GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_URGENT_GC;
-    }
-    else if (normalGcthreshold >= numFreeSegments)
+        return -1;
+    }    
+    dataPool.SetLog(id, value);
+    return 0;
+}
+
+int
+TelemetryClient::CollectData(std::string id, TelemetryLogEntry& outLog)
+{
+    if (turnOn == false)
     {
-        if (curGcMode != MODE_NORMAL_GC )
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NORMAL GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NORMAL_GC;
+        return -1;
     }
-    else
-    {
-        if (curGcMode != MODE_NO_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NO GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NO_GC;
-    }
-    return curGcMode;
+    return dataPool.GetLog(id, outLog);
 }
 
 } // namespace pos

@@ -45,7 +45,7 @@ public:
     int GetUrgentThreshold(void);
     void SetNormalGcThreshold(int inputThreshold);
     void SetUrgentThreshold(int inputThreshold);
-    CurrentGcMode GetCurrentGcMode(int numFreeSegments);
+    GcMode GetCurrentGcMode(int numFreeSegments);
 
     static const int DEFAULT_GC_THRESHOLD = 20;
     static const int DEFAULT_URGENT_THRESHOLD = 5;
@@ -53,7 +53,7 @@ public:
 private:
     int normalGcthreshold;
     int urgentGcthreshold;
-    CurrentGcMode curGcMode;
+    GcMode curGcMode;
 };
 
 } // namespace pos

@@ -30,72 +30,27 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
+#pragma once
 
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
+#include "src/telemetry/telemetry_client_manager/telemetry_data_pool.h"
+#include "src/telemetry/telemetry_id.h"
 
 namespace pos
 {
-GcCtx::GcCtx(void)
+class TelemetryClient
 {
-    normalGcthreshold = DEFAULT_GC_THRESHOLD;
-    urgentGcthreshold = DEFAULT_URGENT_THRESHOLD;
-    curGcMode = MODE_NO_GC;
-}
+public:
+    TelemetryClient(void);
+    virtual ~TelemetryClient(void);
+    virtual void StartLogging(void);
+    virtual void StopLogging(void);
+    virtual bool IsRunning(void);
+    virtual int PublishData(std::string id, uint32_t value);
+    virtual int CollectData(std::string id, TelemetryLogEntry& outLog);
 
-int
-GcCtx::GetNormalGcThreshold(void)
-{
-    return normalGcthreshold;
-}
-
-int
-GcCtx::GetUrgentThreshold(void)
-{
-    return urgentGcthreshold;
-}
-
-void
-GcCtx::SetNormalGcThreshold(int inputThreshold)
-{
-    normalGcthreshold = inputThreshold;
-}
-
-void
-GcCtx::SetUrgentThreshold(int inputThreshold)
-{
-    urgentGcthreshold = inputThreshold;
-}
-
-GcMode
-GcCtx::GetCurrentGcMode(int numFreeSegments)
-{
-    if (urgentGcthreshold >= numFreeSegments)
-    {
-        if (curGcMode != MODE_URGENT_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to URGENT GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_URGENT_GC;
-    }
-    else if (normalGcthreshold >= numFreeSegments)
-    {
-        if (curGcMode != MODE_NORMAL_GC )
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NORMAL GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NORMAL_GC;
-    }
-    else
-    {
-        if (curGcMode != MODE_NO_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NO GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NO_GC;
-    }
-    return curGcMode;
-}
+private:
+    TelemetryDataPool dataPool;
+    bool turnOn;
+};
 
 } // namespace pos

@@ -29,73 +29,14 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#pragma once
 
-#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
-
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-
+#include <string>
 namespace pos
 {
-GcCtx::GcCtx(void)
-{
-    normalGcthreshold = DEFAULT_GC_THRESHOLD;
-    urgentGcthreshold = DEFAULT_URGENT_THRESHOLD;
-    curGcMode = MODE_NO_GC;
-}
-
-int
-GcCtx::GetNormalGcThreshold(void)
-{
-    return normalGcthreshold;
-}
-
-int
-GcCtx::GetUrgentThreshold(void)
-{
-    return urgentGcthreshold;
-}
-
-void
-GcCtx::SetNormalGcThreshold(int inputThreshold)
-{
-    normalGcthreshold = inputThreshold;
-}
-
-void
-GcCtx::SetUrgentThreshold(int inputThreshold)
-{
-    urgentGcthreshold = inputThreshold;
-}
-
-GcMode
-GcCtx::GetCurrentGcMode(int numFreeSegments)
-{
-    if (urgentGcthreshold >= numFreeSegments)
-    {
-        if (curGcMode != MODE_URGENT_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to URGENT GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_URGENT_GC;
-    }
-    else if (normalGcthreshold >= numFreeSegments)
-    {
-        if (curGcMode != MODE_NORMAL_GC )
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NORMAL GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NORMAL_GC;
-    }
-    else
-    {
-        if (curGcMode != MODE_NO_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NO GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NO_GC;
-    }
-    return curGcMode;
-}
-
+    static const std::string TEL_ALLOCATOR_FREE_SEGMENT_COUNT = "alct_freesegment_count";
+    static const std::string TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT = "alct_allocctx_pendio_count";
+    static const std::string TEL_ALLOCATOR_GCVICTIM_SEGMENT_HISTORY = "alct_gcvictim_seg_history";
+    static const std::string TEL_ALLOCATOR_GCMODE_CHANGE_HISTORY = "alct_gcmode_history";
 } // namespace pos
+

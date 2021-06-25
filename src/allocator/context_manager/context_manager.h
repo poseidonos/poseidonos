@@ -50,6 +50,7 @@ class AllocatorCtx;
 class SegmentCtx;
 class WbStripeCtx;
 class ContextReplayer;
+class TelemetryClient;
 
 const int NO_REBUILD_TARGET_USER_SEGMENT = 0;
 
@@ -57,10 +58,10 @@ class ContextManager : public IContextManager
 {
 public:
     ContextManager(void) = default;
-    ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
+    ContextManager(TelemetryClient* tc, AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
         WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileMananager_,
         ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_);
-    ContextManager(AllocatorAddressInfo* info, std::string arrayName);
+    ContextManager(TelemetryClient* tc, AllocatorAddressInfo* info, std::string arrayName);
     virtual ~ContextManager(void);
     virtual void Init(void);
     virtual void Close(void);
@@ -76,8 +77,8 @@ public:
     virtual int MakeRebuildTarget(void);
     virtual int StopRebuilding(void);
     virtual int GetNumFreeSegment(void);
-    virtual CurrentGcMode GetCurrentGcMode(void);
-    virtual int GetGcThreshold(CurrentGcMode mode);
+    virtual GcMode GetCurrentGcMode(void);
+    virtual int GetGcThreshold(GcMode mode);
     virtual uint64_t GetStoredContextVersion(int owner);
 
     virtual void FreeUserDataSegment(SegmentId segId);
@@ -121,9 +122,13 @@ private:
     RebuildCtx* rebuildCtx;
     ContextReplayer* contextReplayer;
     GcCtx gcCtx;
+    GcMode curGcMode;
+    GcMode prevGcMode;
 
     std::string arrayName;
     std::mutex ctxLock;
+
+    TelemetryClient* telClient;
 };
 
 } // namespace pos

@@ -44,6 +44,7 @@
 #include "src/lib/singleton.h"
 #include "src/rebuild/array_rebuilder.h"
 #include "src/rebuild/interface/i_rebuild_notification.h"
+#include "src/telemetry/telemetry_client_manager/telemetry_client_manager.h"
 
 using namespace std;
 
@@ -93,6 +94,7 @@ private:
     ArrayRebuilder* arrayRebuilder = nullptr;
     AbrManager* abrManager = nullptr;
     int _DeleteFaultArray(string arrayName);
+    TelemetryClientManager* telManager = nullptr;
 };
 using ArrayMgr = Singleton<ArrayManager>;
 } // namespace pos

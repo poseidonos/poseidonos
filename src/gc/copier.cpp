@@ -176,7 +176,7 @@ Copier::_CompareThresholdState(void)
 {
     uint64_t objAddr = reinterpret_cast<uint64_t>(this);
 
-    CurrentGcMode gcMode = iContextManager->GetCurrentGcMode();
+    GcMode gcMode = iContextManager->GetCurrentGcMode();
     if ((false == thresholdCheck) || (gcMode != MODE_NO_GC))
     {
         airlog("LAT_GetVictimSegment", "AIR_BEGIN", 0, objAddr);

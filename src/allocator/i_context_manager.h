@@ -56,8 +56,8 @@ public:
     virtual bool NeedRebuildAgain(void) = 0;
     virtual int GetNumFreeSegment(void) = 0;
 
-    virtual CurrentGcMode GetCurrentGcMode(void) = 0;
-    virtual int GetGcThreshold(CurrentGcMode mode) = 0;
+    virtual GcMode GetCurrentGcMode(void) = 0;
+    virtual int GetGcThreshold(GcMode mode) = 0;
 };
 
 } // namespace pos

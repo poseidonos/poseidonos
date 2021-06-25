@@ -118,7 +118,7 @@ public:
     uint32_t numTargetSegments;
 };
 
-enum CurrentGcMode
+enum GcMode
 {
     MODE_NO_GC = 0,
     MODE_NORMAL_GC,

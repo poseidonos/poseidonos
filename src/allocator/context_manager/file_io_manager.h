@@ -67,6 +67,7 @@ class AllocatorFileIoManager
     };
 
 public:
+    AllocatorFileIoManager(void) = default;
     AllocatorFileIoManager(MetaFileIntf** file, AllocatorAddressInfo* info); // only for UT
     AllocatorFileIoManager(std::string* fileNames, AllocatorAddressInfo* info, std::string arrayName);
     virtual ~AllocatorFileIoManager(void);

@@ -46,16 +46,19 @@
 #include "src/allocator/include/allocator_const.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/logger/logger.h"
+#include "src/telemetry/telemetry_client_manager/telemetry_client.h"
 #include "src/qos/qos_manager.h"
 
 namespace pos
 {
-ContextManager::ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
+ContextManager::ContextManager(TelemetryClient* tc, AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
     WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileManager_,
     ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_)
 : numAsyncIoIssued(0),
   flushInProgress(false),
   addrInfo(info_),
+  curGcMode(MODE_NO_GC),
+  prevGcMode(MODE_NO_GC),
   arrayName(arrayName_)
 {
     // for UT
@@ -69,10 +72,11 @@ ContextManager::ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, Reb
     fileOwner[ALLOCATOR_CTX] = allocCtx_;
     fileOwner[REBUILD_CTX] = rebuildCtx_;
     flushInProgress = flushProgress;
+    telClient = tc;
 }
 
-ContextManager::ContextManager(AllocatorAddressInfo* info, std::string arrayName)
-: ContextManager(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false, info, arrayName)
+ContextManager::ContextManager(TelemetryClient* tc, AllocatorAddressInfo* info, std::string arrayName)
+: ContextManager(tc, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false, info, arrayName)
 {
     allocatorCtx = new AllocatorCtx(info);
     segmentCtx = new SegmentCtx(info);
@@ -177,6 +181,7 @@ ContextManager::FlushContextsAsync(EventSmartPtr callback)
     int ret = 0;
     assert(numAsyncIoIssued == 0);
     numAsyncIoIssued = NUM_ALLOCATOR_FILES; // Issue 2 contexts(segmentctx, allocatorctx)
+    telClient->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numAsyncIoIssued);
     for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
         ret = _FlushAsync(owner, callback);
@@ -192,25 +197,26 @@ SegmentId
 ContextManager::AllocateFreeSegment(bool forUser)
 {
     SegmentId segId = allocatorCtx->AllocateFreeSegment(UNMAP_SEGMENT /*scan free segment from last allocated segId*/);
-    if (forUser == false)
+    if (forUser == true)
     {
-        return segId;
+        while ((segId != UNMAP_SEGMENT) && (rebuildCtx->IsRebuildTargetSegment(segId) == true))
+        {
+            POS_TRACE_DEBUG(EID(ALLOCATOR_REBUILDING_SEGMENT), "segmentId:{} is already rebuild target!", segId);
+            allocatorCtx->ReleaseSegment(segId);
+            ++segId;
+            segId = allocatorCtx->AllocateFreeSegment(segId);
+        }
     }
-    while ((segId != UNMAP_SEGMENT) && (rebuildCtx->IsRebuildTargetSegment(segId) == true))
-    {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_REBUILDING_SEGMENT), "segmentId:{} is already rebuild target!", segId);
-        allocatorCtx->ReleaseSegment(segId);
-        ++segId;
-        segId = allocatorCtx->AllocateFreeSegment(segId);
-    }
+    int freeSegCount = allocatorCtx->GetNumOfFreeUserDataSegment();
     if (segId == UNMAP_SEGMENT)
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "Failed to allocate segment, free segment count:{}", allocatorCtx->GetNumOfFreeUserDataSegment());
+        POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "Failed to allocate segment, free segment count:{}", freeSegCount);
     }
     else
     {
-        POS_TRACE_INFO(EID(ALLOCATOR_START), "segmentId:{} @AllocateUserDataSegmentId, free segment count:{}", segId, allocatorCtx->GetNumOfFreeUserDataSegment());
+        POS_TRACE_INFO(EID(ALLOCATOR_START), "segmentId:{} @AllocateUserDataSegmentId, free segment count:{}", segId, freeSegCount);
     }
+    telClient->PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, freeSegCount);
     return segId;
 }
 
@@ -239,20 +245,27 @@ ContextManager::AllocateGCVictimSegment(void)
     {
         allocatorCtx->SetSegmentState(victimSegment, SegmentState::VICTIM, true);
         POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "segmentId:{} @AllocateGCVictim, free segment count:{}", victimSegment, allocatorCtx->GetNumOfFreeUserDataSegment());
+        telClient->PublishData(TEL_ALLOCATOR_GCVICTIM_SEGMENT_HISTORY, victimSegment);
     }
     return victimSegment;
 }
 
-CurrentGcMode
+GcMode
 ContextManager::GetCurrentGcMode(void)
 {
     int numFreeSegments = allocatorCtx->GetNumOfFreeUserDataSegment();
     QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments);
-    return gcCtx.GetCurrentGcMode(numFreeSegments);
+    prevGcMode = curGcMode;
+    curGcMode = gcCtx.GetCurrentGcMode(numFreeSegments);
+    if (prevGcMode != curGcMode)
+    {
+        telClient->PublishData(TEL_ALLOCATOR_GCMODE_CHANGE_HISTORY, curGcMode);
+    }
+    return curGcMode;
 }
 
 int
-ContextManager::GetGcThreshold(CurrentGcMode mode)
+ContextManager::GetGcThreshold(GcMode mode)
 {
     return mode == MODE_NORMAL_GC ? gcCtx.GetNormalGcThreshold() : gcCtx.GetUrgentThreshold();
 }
@@ -349,6 +362,7 @@ ContextManager::GetContextSectionSize(int owner, int section)
 void
 ContextManager::TestCallbackFunc(AsyncMetaFileIoCtx* ctx, int numIssuedIo)
 {
+    // only for UT
     numAsyncIoIssued = numIssuedIo;
     _FlushCompletedThenCB(ctx);
 }
@@ -365,7 +379,9 @@ ContextManager::_FreeSegment(SegmentId segId)
     segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */);
     allocatorCtx->SetSegmentState(segId, SegmentState::FREE, false);
     allocatorCtx->ReleaseSegment(segId);
-    POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was freed by allocator, free segment count:{}", segId, allocatorCtx->GetNumOfFreeUserDataSegment());
+    int freeSegCount = allocatorCtx->GetNumOfFreeUserDataSegment();
+    telClient->PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, freeSegCount);
+    POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was freed by allocator, free segment count:{}", segId, freeSegCount);
     int ret = rebuildCtx->FreeSegmentInRebuildTarget(segId);
     if (ret == 1)
     {
@@ -401,6 +417,7 @@ ContextManager::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
     delete ctx;
     assert(numAsyncIoIssued > 0);
     numAsyncIoIssued--;
+    telClient->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numAsyncIoIssued);
     if (numAsyncIoIssued == 0)
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "Complete to flush allocator files");

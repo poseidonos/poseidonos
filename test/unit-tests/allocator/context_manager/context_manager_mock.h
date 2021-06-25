@@ -25,8 +25,8 @@ public:
     MOCK_METHOD(int, MakeRebuildTarget, (), (override));
     MOCK_METHOD(int, StopRebuilding, (), (override));
     MOCK_METHOD(int, GetNumFreeSegment, (), (override));
-    MOCK_METHOD(CurrentGcMode, GetCurrentGcMode, (), (override));
-    MOCK_METHOD(int, GetGcThreshold, (CurrentGcMode mode), (override));
+    MOCK_METHOD(GcMode, GetCurrentGcMode, (), (override));
+    MOCK_METHOD(int, GetGcThreshold, (GcMode mode), (override));
     MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));
     MOCK_METHOD(void, FreeUserDataSegment, (SegmentId segId), (override));
     MOCK_METHOD(int, SetNextSsdLsid, (), (override));

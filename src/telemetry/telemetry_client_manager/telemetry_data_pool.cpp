@@ -29,73 +29,67 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
-
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
+#include "src/telemetry/telemetry_client_manager/telemetry_data_pool.h"
 
 namespace pos
 {
-GcCtx::GcCtx(void)
+TelemetryDataPool::TelemetryDataPool(void)
 {
-    normalGcthreshold = DEFAULT_GC_THRESHOLD;
-    urgentGcthreshold = DEFAULT_URGENT_THRESHOLD;
-    curGcMode = MODE_NO_GC;
 }
-
-int
-GcCtx::GetNormalGcThreshold(void)
+TelemetryDataPool::~TelemetryDataPool(void)
 {
-    return normalGcthreshold;
-}
-
-int
-GcCtx::GetUrgentThreshold(void)
-{
-    return urgentGcthreshold;
 }
 
 void
-GcCtx::SetNormalGcThreshold(int inputThreshold)
+TelemetryDataPool::SetLog(std::string id, uint32_t value)
 {
-    normalGcthreshold = inputThreshold;
+    std::string curTime = _GetCurTime();
+   TelemetryLogEntry entry(curTime, value);
+   pool[id] = entry;
+///////////////////// for test, will be removed
+   TelemetryLogEntry tempRet;
+   int ret = GetLog(id, tempRet);
+   if (ret == -1)
+   {
+        POS_TRACE_ERROR(EID(TELEMETRY_), "[Telemetry Log] ERROR!!! Failed to GetLog, id:{}", id);
+   }
+   else
+   {
+       POS_TRACE_ERROR(EID(TELEMETRY_), "[Telemetry Log] id:{}, time:{}, value:{}", id, tempRet.GetTime(), tempRet.GetValue());
+   }
+//////////////////////
 }
 
-void
-GcCtx::SetUrgentThreshold(int inputThreshold)
+int
+TelemetryDataPool::GetLog(std::string id, TelemetryLogEntry& outLog)
 {
-    urgentGcthreshold = inputThreshold;
-}
-
-GcMode
-GcCtx::GetCurrentGcMode(int numFreeSegments)
-{
-    if (urgentGcthreshold >= numFreeSegments)
+    auto entry = pool.find(id);
+    if (entry == pool.end())
     {
-        if (curGcMode != MODE_URGENT_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to URGENT GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_URGENT_GC;
-    }
-    else if (normalGcthreshold >= numFreeSegments)
-    {
-        if (curGcMode != MODE_NORMAL_GC )
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NORMAL GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NORMAL_GC;
+        POS_TRACE_ERROR(EID(TELEMETRY_), "[Telemetry] error!! can not find telemetry Item:{}", id);
+        return -1;
     }
     else
     {
-        if (curGcMode != MODE_NO_GC)
-        {
-            POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE), "Change GC STATE from GCState:{} to NO GC MODE, free segment count:{}", (int)curGcMode, numFreeSegments);
-        }
-        curGcMode = MODE_NO_GC;
+        outLog = (*entry).second;
+        return 0;
     }
-    return curGcMode;
+}
+
+const std::string
+TelemetryDataPool::_GetCurTime(void)
+{
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+    return oss.str();
+}
+
+int
+TelemetryDataPool::GetNumLogEntries(void)
+{
+    return pool.size();
 }
 
 } // namespace pos

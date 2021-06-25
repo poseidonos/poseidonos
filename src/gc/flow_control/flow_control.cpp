@@ -90,8 +90,8 @@ FlowControl::Init(void)
     totalSegments = sizeInfo->totalSegments;
     totalTokenInStripe = stripesPerSegment;
     totalToken = totalTokenInStripe * blksPerStripe;
-    gcThreshold = iContextManager->GetGcThreshold(CurrentGcMode::MODE_NORMAL_GC);
-    gcUrgentThreshold = iContextManager->GetGcThreshold(CurrentGcMode::MODE_URGENT_GC);
+    gcThreshold = iContextManager->GetGcThreshold(GcMode::MODE_NORMAL_GC);
+    gcUrgentThreshold = iContextManager->GetGcThreshold(GcMode::MODE_URGENT_GC);
 
     _ReadConfig();
 

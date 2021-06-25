@@ -24,8 +24,8 @@ public:
     virtual int StopRebuilding(void) { return 0; }
     virtual bool NeedRebuildAgain(void) { return true; }
     virtual int GetNumFreeSegment(void) { return 0; }
-    virtual CurrentGcMode GetCurrentGcMode(void) { return MODE_NO_GC; }
-    virtual int GetGcThreshold(CurrentGcMode mode) { return 0; }
+    virtual GcMode GetCurrentGcMode(void) { return MODE_NO_GC; }
+    virtual int GetGcThreshold(GcMode mode) { return 0; }
     virtual uint64_t GetStoredContextVersion(int owner) { return 0; }
     IContextManagerMock(void)
     {
