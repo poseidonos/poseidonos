@@ -4,24 +4,15 @@
 
 namespace pos
 {
-TEST(GcCtx, GcCtx_)
+TEST(GcCtx, GetCurrentGcMode_TestModeNoGC)
 {
-}
-
-TEST(GcCtx, GetNormalGcThreshold_)
-{
-}
-
-TEST(GcCtx, GetUrgentThreshold_)
-{
-}
-
-TEST(GcCtx, SetNormalGcThreshold_)
-{
-}
-
-TEST(GcCtx, SetUrgentThreshold_)
-{
+    // given
+    GcCtx gcCtx;
+    gcCtx.SetNormalGcThreshold(10);
+    gcCtx.SetUrgentThreshold(5);
+    gcCtx.GetCurrentGcMode(8);
+    // when
+    gcCtx.GetCurrentGcMode(13);
 }
 
 } // namespace pos

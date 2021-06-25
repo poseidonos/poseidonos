@@ -109,7 +109,7 @@ private:
 
     std::string fileNames[NUM_FILES] = {"SegmentContext", "AllocatorContexts", "RebuildContext"};
     IAllocatorFileIoClient* fileOwner[NUM_FILES];
-    int numAsyncIoIssued;
+    std::atomic<int> numAsyncIoIssued;
     std::atomic<bool> flushInProgress;
     EventSmartPtr flushCallback;
 

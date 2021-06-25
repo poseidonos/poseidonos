@@ -6,6 +6,9 @@
 #include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_replayer_mock.h"
 #include "test/unit-tests/allocator/i_allocator_wbt_mock.h"
+#include "test/unit-tests/allocator/i_block_allocator_mock.h"
+#include "test/unit-tests/allocator/i_context_manager_mock.h"
+#include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -15,11 +18,7 @@ using ::testing::ReturnRef;
 
 namespace pos
 {
-TEST(AllocatorService, AllocatorService_)
-{
-}
-
-TEST(AllocatorService, RegisterAllocator_)
+TEST(AllocatorService, RegisterAllocator_TestFunc)
 {
     // given
     NiceMock<MockContextReplayer>* ctxReplayer = new NiceMock<MockContextReplayer>();
@@ -37,7 +36,7 @@ TEST(AllocatorService, RegisterAllocator_)
     delete ctxReplayer;
 }
 
-TEST(AllocatorService, UnregisterAllocator_)
+TEST(AllocatorService, UnregisterAllocator_TestSuccess)
 {
     // given
     NiceMock<MockContextReplayer>* ctxReplayer = new NiceMock<MockContextReplayer>();
@@ -54,21 +53,39 @@ TEST(AllocatorService, UnregisterAllocator_)
     delete ctxReplayer;
 }
 
-TEST(AllocatorService, GetIContextReplayer_TestSimpleGetter)
+TEST(AllocatorService, UnregisterAllocator_TestFail)
 {
-    // given
-    NiceMock<MockContextReplayer>* ctxReplayer = new NiceMock<MockContextReplayer>();
     AllocatorService allocService;
-    allocService.RegisterAllocator("", 0, nullptr, nullptr, nullptr, nullptr, ctxReplayer);
-    // when
-    allocService.GetIContextReplayer("");
-    delete ctxReplayer;
+    allocService.UnregisterAllocator("abc");
 }
 
-TEST(AllocatorService, GetIAllocatorWbt_TestSimpleGetter)
+TEST(AllocatorService, GetInterfaceFunc_TestSimpleGetter)
 {
+    // given
+    NiceMock<MockIAllocatorWbt>* allWbt = new NiceMock<MockIAllocatorWbt>();
+    NiceMock<MockIBlockAllocator>* blkAlloc = new NiceMock<MockIBlockAllocator>();
+    NiceMock<MockIWBStripeAllocator>* wbAlloc = new NiceMock<MockIWBStripeAllocator>();
+    NiceMock<MockIContextManager>* ctxMan = new NiceMock<MockIContextManager>();
+    NiceMock<MockContextReplayer>* ctxRep = new NiceMock<MockContextReplayer>();
     AllocatorService allocService;
+    allocService.RegisterAllocator("", 0, blkAlloc, wbAlloc, allWbt, ctxMan, ctxRep);
+    // when
+    allocService.GetIContextReplayer("");
+    allocService.GetIContextManager("");
+    allocService.GetIWBStripeAllocator("");
+    allocService.GetIBlockAllocator("");
     allocService.GetIAllocatorWbt("");
+
+    allocService.GetIContextReplayer(0);
+    allocService.GetIContextManager(0);
+    allocService.GetIWBStripeAllocator(0);
+    allocService.GetIBlockAllocator(0);
+    allocService.GetIAllocatorWbt(0);
+    delete allWbt;
+    delete blkAlloc;
+    delete wbAlloc;
+    delete ctxMan;
+    delete ctxRep;
 }
 
 } // namespace pos

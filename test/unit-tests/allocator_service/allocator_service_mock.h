@@ -1,7 +1,9 @@
 #include <gmock/gmock.h>
-#include <string>
+
 #include <list>
+#include <string>
 #include <vector>
+
 #include "src/allocator_service/allocator_service.h"
 
 namespace pos

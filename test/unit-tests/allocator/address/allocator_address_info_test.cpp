@@ -42,6 +42,7 @@ TEST(AllocatorAddressInfo, Init_)
     EXPECT_EQ(4, ret);
     ret = addrInfo.GetstripesPerSegment();
     EXPECT_EQ(4, ret);
+    addrInfo.IsUT();
     delete info;
 }
 

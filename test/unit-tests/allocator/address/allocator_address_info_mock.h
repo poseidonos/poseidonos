@@ -12,7 +12,7 @@ class MockAllocatorAddressInfo : public AllocatorAddressInfo
 {
 public:
     using AllocatorAddressInfo::AllocatorAddressInfo;
-    MOCK_METHOD(void, Init, (IArrayInfo* iArrayInfo), (override));
+    MOCK_METHOD(void, Init, (IArrayInfo * iArrayInfo), (override));
     MOCK_METHOD(uint32_t, GetblksPerStripe, (), (override));
     MOCK_METHOD(uint32_t, GetchunksPerStripe, (), (override));
     MOCK_METHOD(uint32_t, GetnumWbStripes, (), (override));

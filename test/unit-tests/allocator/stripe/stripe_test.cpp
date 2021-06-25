@@ -316,9 +316,10 @@ TEST(Stripe, UpdateReverseMap_Test)
     // when 3.
     try
     {
-        stripe.UpdateReverseMap(0, rba, MAX_VOLUME_COUNT+1);
+        stripe.UpdateReverseMap(0, rba, MAX_VOLUME_COUNT + 1);
         ASSERT_FALSE(true); // shouldn't reach here
-    } catch(...)
+    }
+    catch (...)
     {
         delete revMap;
     }

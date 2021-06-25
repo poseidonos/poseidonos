@@ -45,8 +45,7 @@ TEST(BlockManager, AllocateWriteBufferBlks_TestFunc)
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockReverseMapManager>* reverseMap = new NiceMock<MockReverseMapManager>();
-    BlockManager blkManager(nullptr, reverseMap, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
+    BlockManager blkManager(nullptr, nullptr, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
     std::mutex wbCtxLock;
     EXPECT_CALL(*wbCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbCtxLock));

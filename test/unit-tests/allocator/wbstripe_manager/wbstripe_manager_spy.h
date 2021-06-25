@@ -47,19 +47,26 @@ class WBStripeManagerSpy : public WBStripeManager
 public:
     using WBStripeManager::WBStripeManager;
     virtual ~WBStripeManagerSpy(void) = default;
+    Stripe*
+    GetStripe(StripeId wbLsid)
+    {
+        if (wbLsid == 33)
+        {
+            return nullptr;
+        }
+        else
+        {
+            return WBStripeManager::GetStripe(wbLsid);
+        }
+    }
     int
-    _RequestStripeFlush(Stripe* stripe) override
+    _RequestStripeFlush(Stripe* stripe)
     {
         if (stripe->GetWbLsid() == 77)
         {
             return -1;
         }
         return 0;
-    }
-    Stripe*
-    GetStripe(StripeAddr& lsidEntry)
-    {
-        return nullptr;
     }
     int
     _ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount)
