@@ -36,6 +36,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "src/include/array_mgmt_policy.h"
 #include "src/array_components/array_components.h"
@@ -66,6 +67,9 @@ class ArrayManager : public IArrayMgmt, public IDeviceEvent, public IRebuildNoti
 
 public:
     ArrayManager();
+    ArrayManager(ArrayRebuilder* arrayRebuilder, AbrManager* abrManager,
+        DeviceManager* deviceManager, TelemetryClient* telClient,
+        function<ArrayComponents*(string, IArrayRebuilder*, IAbrControl*)> arrayComponentsFactory);
     virtual ~ArrayManager();
     int Create(string name, DeviceSet<string> devs, string raidtype) override;
     int Delete(string name) override;
@@ -86,16 +90,23 @@ public:
     IArrayInfo* GetArrayInfo(uint32_t arrayIdx);
     virtual int ResetMbr(void);
 
+    // UT helper funcs, not meant for Prod usage
+    void SetArrayComponentMap(const map<string, ArrayComponents*>& arrayCompMap);
+    const map<string, ArrayComponents*>& GetArrayComponentMap(void);
+    ////
+
 private:
     ArrayComponents* _FindArray(string name);
     ArrayComponents* _FindArrayWithDevSN(string devName);
-    ArrayDevice* _FindDevice(string devSn);
     int _Load(string name);
+    int _ExecuteOrHandleErrors(std::function<int(ArrayComponents* array)> f, string name);
+    int _DeleteFaultArray(string arrayName);
     map<string, ArrayComponents*> arrayList;
     ArrayRebuilder* arrayRebuilder = nullptr;
     AbrManager* abrManager = nullptr;
-    int _DeleteFaultArray(string arrayName);
+    DeviceManager* deviceManager = nullptr;
     TelemetryClient* telClient = nullptr;
+    function<ArrayComponents*(string, IArrayRebuilder*, IAbrControl*)> arrayComponentsFactory = nullptr;
 };
 using ArrayMgr = Singleton<ArrayManager>;
 } // namespace pos

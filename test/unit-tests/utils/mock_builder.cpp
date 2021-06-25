@@ -32,20 +32,99 @@
 
 #include <gtest/gtest.h>
 #include "src/cpu_affinity/cpu_set_generator.h"
+#include "src/array_components/array_components.h"
 #include "test/unit-tests/utils/mock_builder.h"
 #include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
+#include "test/unit-tests/device/base/ublock_device_mock.h"
+#include "test/unit-tests/array_components/array_components_mock.h"
+#include "test/unit-tests/mbr/abr_manager_mock.h"
+#include "test/unit-tests/array/array_mock.h"
+#include "test/unit-tests/state/state_manager_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
+
 
 using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos {
 
-MockAffinityManager BuildDefaultAffinityManagerMock(void)
+MockAffinityManager
+BuildDefaultAffinityManagerMock(void)
 {
     // the actual value doesn't matter since the UTs using this mock wouldn't rely on CPU counts anyway.
     int MOCK_CPU_CORE_COUNT = 8;
     CpuSetArray cpuSetArray;
     MockAffinityManager mockAffMgr(MOCK_CPU_CORE_COUNT, cpuSetArray);  // The parent's constructor will copy from "cpuSetArray", so we're okay to use a local CpuSetArray instance.
     return mockAffMgr;  // we're okay to return the local instance of MockAffinityManager (vs. its pointer) because the caller can use copy-constructor and this mock doesn't point to any heap objects.
+}
+
+// the return type equals UblockSharedPtr
+std::shared_ptr<UBlockDevice>
+BuildMockUBlockDevice(const char* devName, const std::string& SN)
+{
+    MockUBlockDevice* rawPtr = new MockUBlockDevice(devName, 1024, nullptr);
+    EXPECT_CALL(*rawPtr, GetName).WillRepeatedly(Return(devName));
+    EXPECT_CALL(*rawPtr, GetSN).WillRepeatedly(Return(SN));
+    return shared_ptr<UBlockDevice>(rawPtr);
+}
+
+std::shared_ptr<MockArray>
+BuildMockArray(std::string arrayName)
+{
+    return std::make_shared<MockArray>(arrayName, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr);
+}
+
+std::shared_ptr<MockArrayComponents>
+BuildMockArrayComponents(std::string arrayName, StateManager* stateManager)
+{
+    return std::make_shared<MockArrayComponents>(arrayName, nullptr, nullptr,
+        stateManager, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr);
+}
+
+std::shared_ptr<MockArrayComponents>
+BuildMockArrayComponents(std::string arrayName)
+{
+    NiceMock<MockStateManager>* mockStateMgr = new NiceMock<MockStateManager>();
+    return std::make_shared<MockArrayComponents>(arrayName, nullptr, nullptr,
+        mockStateMgr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr);
+}
+
+MockArrayComponents*
+NewMockArrayComponents(std::string arrayName)
+{
+    NiceMock<MockStateManager>* mockStateMgr = new NiceMock<MockStateManager>();
+    return new MockArrayComponents(arrayName, nullptr, nullptr,
+        mockStateMgr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr);
+}
+
+std::map<std::string, ArrayComponents*>
+BuildArrayComponentsMap(std::string arrayName, ArrayComponents* arrayComponents)
+{
+    auto arrayCompMap = BuildArrayComponentsMap();
+    arrayCompMap.emplace(arrayName, arrayComponents);
+    return arrayCompMap;
+}
+
+std::map<std::string, ArrayComponents*>
+BuildArrayComponentsMap(void)
+{
+    return map<std::string, ArrayComponents*>();
+}
+
+std::shared_ptr<MockAbrManager>
+BuildMockAbrManager(void)
+{
+    return std::make_shared<MockAbrManager>(nullptr);
+}
+
+std::shared_ptr<MockTelemetryClient>
+BuildMockTelemetryClient(void)
+{
+    return std::make_shared<MockTelemetryClient>();
 }
 
 }  // namespace pos

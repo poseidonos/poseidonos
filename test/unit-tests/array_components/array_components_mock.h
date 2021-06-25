@@ -17,7 +17,7 @@ public:
     MOCK_METHOD(int, Mount, (), (override));
     MOCK_METHOD(int, Unmount, (), (override));
     MOCK_METHOD(int, Delete, (), (override));
-    MOCK_METHOD(int, PrepareRebuild, (), (override));
+    MOCK_METHOD(int, PrepareRebuild, (bool& resume), (override));
     MOCK_METHOD(void, RebuildDone, (), (override));
     MOCK_METHOD(Array*, GetArray, (), (override));
 };

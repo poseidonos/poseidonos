@@ -8,7 +8,7 @@
 
 namespace pos
 {
-class MockTelemetryPublisher : public TelemetryClient
+class MockTelemetryClient : public TelemetryClient
 {
 public:
     using TelemetryClient::TelemetryClient;
@@ -20,7 +20,7 @@ public:
     MOCK_METHOD(void, StartAllPublisher, (), (override));
     MOCK_METHOD(void, StopAllPublisher, (), (override));
     MOCK_METHOD(int, CollectValue, (std::string name, std::string id, TelemetryGeneralMetric& outLog), (override));
-    MOCK_METHOD(list<TelemetryGeneralMetric>, CollectList, (), (override));
+    MOCK_METHOD(list<TelemetryGeneralMetric>, CollectList, (std::string name), (override));
 };
 
 } // namespace pos

@@ -59,7 +59,7 @@ public:
     virtual int CreateAbr(string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) override;
     virtual int DeleteAbr(string arrayName, ArrayMeta& meta) override;
     virtual int ResetMbr(void) override;
-    int GetAbrList(std::vector<ArrayBootRecord>& abrList);
+    virtual int GetAbrList(std::vector<ArrayBootRecord>& abrList);
     virtual string FindArrayWithDeviceSN(string devSN);
 
 private:

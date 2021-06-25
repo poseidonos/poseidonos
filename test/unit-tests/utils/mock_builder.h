@@ -30,11 +30,36 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <memory>
+#include <map>
+#include <string>
+
 #pragma once
 namespace pos
 {
 class MockAffinityManager;
+class MockUBlockDevice;
+class MockArray;
+class MockArrayComponents;
+class MockAbrManager;
+class MockStateManager;
+class MockTelemetryClient;
+class UBlockDevice;
+class StateManager;
+class ArrayComponents;
 
+// Mock Builders
 MockAffinityManager BuildDefaultAffinityManagerMock(void);
+std::shared_ptr<UBlockDevice> BuildMockUBlockDevice(const char* devName, const std::string& SN);
+std::shared_ptr<MockArray> BuildMockArray(std::string arrayName);
+std::shared_ptr<MockArrayComponents> BuildMockArrayComponents(std::string arrayName);
+std::shared_ptr<MockArrayComponents> BuildMockArrayComponents(std::string arrayName, StateManager* stateManager);
+MockArrayComponents* NewMockArrayComponents(std::string arrayName);
+std::shared_ptr<MockAbrManager> BuildMockAbrManager(void);
+std::shared_ptr<MockTelemetryClient> BuildMockTelemetryClient(void);
+
+// Helpers
+std::map<std::string, ArrayComponents*> BuildArrayComponentsMap(std::string arrayName, ArrayComponents* arrayComponents);
+std::map<std::string, ArrayComponents*> BuildArrayComponentsMap(void);
 
 }

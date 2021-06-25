@@ -42,21 +42,61 @@
 namespace pos
 {
 ArrayManager::ArrayManager()
+: ArrayManager(new ArrayRebuilder(this), new AbrManager(), DeviceManagerSingleton::Instance(),
+    TeletryClientSgt::Instance(),
+    [](string name, IArrayRebuilder* arrayRebuilder, IAbrControl* iAbrControl)
+    {
+        return new ArrayComponents(name, arrayRebuilder, iAbrControl);
+    })
 {
-    arrayRebuilder = new ArrayRebuilder(this);
-    DeviceManagerSingleton::Instance()->SetDeviceEventCallback(this);
-    abrManager = new AbrManager();
-    telClient = TeletryClientSgt::Instance();
+    // delegated to other constructor
+}
+
+ArrayManager::ArrayManager(ArrayRebuilder* arrayRebuilder, AbrManager* abrManager,
+    DeviceManager* deviceManager, TelemetryClient* telClient,
+    function<ArrayComponents*(string, IArrayRebuilder*, IAbrControl*)> arrayComponentsFactory)
+: arrayRebuilder(arrayRebuilder),
+  abrManager(abrManager),
+  deviceManager(deviceManager),
+  telClient(telClient),
+  arrayComponentsFactory(arrayComponentsFactory)
+{
+    if (deviceManager != nullptr)
+    {
+        deviceManager->SetDeviceEventCallback(this);
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(ARRAY_MANAGER_DEBUG_MSG), "Ignoring DeviceManager's subscription to DeviceEvent. It's not okay if it's for prod code (not unit test)");
+    }
 }
 
 ArrayManager::~ArrayManager()
 {
-    delete arrayRebuilder;
-    delete abrManager;
+    if (arrayRebuilder != nullptr)
+    {
+        POS_TRACE_INFO(EID(ARRAY_MANAGER_DEBUG_MSG), "Deleting ArrayRebuilder");
+        delete arrayRebuilder;
+    }
+
+    if (abrManager != nullptr)
+    {
+        POS_TRACE_INFO(EID(ARRAY_MANAGER_DEBUG_MSG), "Deleting AbrManager");
+        delete abrManager;
+    }
+
     for (auto iter : arrayList)
     {
         ArrayComponents* array = _FindArray(iter.first);
-        delete array;
+        if (array != nullptr)
+        {
+            POS_TRACE_INFO(EID(ARRAY_MANAGER_DEBUG_MSG), "Deleting ArrayComponents for {}", iter.first);
+            delete array;
+        }
+        else
+        {
+            POS_TRACE_WARN(EID(ARRAY_MANAGER_DEBUG_MSG), "Couldn't find ArrayComponents for {}", iter.first);
+        }
     }
 }
 
@@ -75,7 +115,7 @@ ArrayManager::Create(string name, DeviceSet<string> devs, string raidtype)
         return (int)POS_EVENT_ID::ARRAY_CNT_EXCEEDED;
     }
 
-    ArrayComponents* array = new ArrayComponents(name, arrayRebuilder, abrManager);
+    ArrayComponents* array = arrayComponentsFactory(name, arrayRebuilder, abrManager);
     int ret = array->Create(devs, raidtype);
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
@@ -84,6 +124,7 @@ ArrayManager::Create(string name, DeviceSet<string> devs, string raidtype)
     }
     else
     {
+        POS_TRACE_WARN(ret, "ArrayManager is cleaning up ArrayComponents of {} because of array creation failure", name);
         delete array;
     }
     return ret;
@@ -117,65 +158,55 @@ ArrayManager::Delete(string name)
 int
 ArrayManager::Mount(string name)
 {
-    ArrayComponents* array = _FindArray(name);
-    if (array != nullptr)
+    return _ExecuteOrHandleErrors([](ArrayComponents* array)
     {
         return array->Mount();
-    }
-    else if (AbrExists(name))
-    {
-        return (int)POS_EVENT_ID::ARRAY_LOAD_FAIL;
-    }
-
-    return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
+    }, name);
 }
 
 int
 ArrayManager::Unmount(string name)
 {
-    ArrayComponents* array = _FindArray(name);
-    if (array != nullptr)
+    return _ExecuteOrHandleErrors([](ArrayComponents* array)
     {
         return array->Unmount();
-    }
-    else if (AbrExists(name))
-    {
-        return (int)POS_EVENT_ID::ARRAY_LOAD_FAIL;
-    }
-
-    return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
+    }, name);
 }
 
 int
 ArrayManager::AddDevice(string name, string dev)
 {
-    ArrayComponents* array = _FindArray(name);
-    if (array != nullptr)
+    return _ExecuteOrHandleErrors([&dev](ArrayComponents* array)
     {
         return array->GetArray()->AddSpare(dev);
-    }
-    else if (AbrExists(name))
-    {
-        return (int)POS_EVENT_ID::ARRAY_LOAD_FAIL;
-    }
-
-    return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
+    }, name);
 }
 
 int
 ArrayManager::RemoveDevice(string name, string dev)
 {
+    return _ExecuteOrHandleErrors([&dev](ArrayComponents* array)
+    {
+        return array->GetArray()->RemoveSpare(dev);
+    }, name);
+}
+
+int
+ArrayManager::_ExecuteOrHandleErrors(std::function<int(ArrayComponents*)> f, string name)
+{
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
     {
-        return array->GetArray()->RemoveSpare(dev);
+        return f(array);
     }
     else if (AbrExists(name))
     {
         return (int)POS_EVENT_ID::ARRAY_LOAD_FAIL;
     }
-
-    return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
+    else
+    {
+        return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
+    }
 }
 
 int
@@ -185,6 +216,10 @@ ArrayManager::DeviceDetached(UblockSharedPtr dev)
     if (array != nullptr)
     {
         return array->GetArray()->DetachDevice(dev);
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(ARRAY_NOT_FOUND), "No array found for device serial number {}. DeviceDetached event will be ignored.", dev->GetSN());
     }
 
     return 0; // this function will be void type when device lock is removed
@@ -213,6 +248,7 @@ ArrayManager::GetArrayInfo(string name)
     }
     else
     {
+        POS_TRACE_WARN(EID(ARRAY_COMPONENTS_DEBUG_MSG), "No ArrayComponents found for {}. Returning null IArrayInfo.", name);
         return nullptr;
     }
 }
@@ -250,6 +286,10 @@ ArrayManager::RebuildDone(string name)
     if (array != nullptr)
     {
         array->RebuildDone();
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(ARRAY_NOT_FOUND), "Cannot invoke RebuildDone because the array {} isn't found", name);
     }
 }
 
@@ -291,7 +331,7 @@ ArrayManager::_Load(string name)
         return (int)POS_EVENT_ID::ARRAY_ALREADY_EXIST;
     }
 
-    array = new ArrayComponents(name, arrayRebuilder, abrManager);
+    array = arrayComponentsFactory(name, arrayRebuilder, abrManager);
     int ret = array->Load();
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
@@ -382,20 +422,6 @@ ArrayManager::_FindArrayWithDevSN(string devSN)
     return array;
 }
 
-ArrayDevice*
-ArrayManager::_FindDevice(string devSn)
-{
-    for (auto iter : arrayList)
-    {
-        IArrayDevice* dev = iter.second->GetArray()->FindDevice(devSn);
-        if (dev != nullptr)
-        {
-            return static_cast<ArrayDevice*>(dev);
-        }
-    }
-    return nullptr;
-}
-
 bool
 ArrayManager::AbrExists(string arrayName)
 {
@@ -430,4 +456,18 @@ ArrayManager::_DeleteFaultArray(string arrayName)
 
     return result;
 }
+
+void
+ArrayManager::SetArrayComponentMap(const map<string, ArrayComponents*>& arrayCompMap)
+{
+    // The member variable says it's array"List", but it's actually a map.
+    this->arrayList = arrayCompMap;
+}
+
+const map<string, ArrayComponents*>&
+ArrayManager::GetArrayComponentMap(void)
+{
+    return arrayList;
+}
+
 } // namespace pos
