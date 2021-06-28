@@ -47,10 +47,13 @@ ArrayRebuild::ArrayRebuild(string array, ArrayDevice* dev, RebuildComplete cb,
   rebuildComplete(cb)
 {
     progress = new RebuildProgress(arrayName);
+    rebuildLogger = new RebuildLogger(arrayName);
+    rebuildLogger->SetArrayRebuildStart();
     uint64_t totalStripes = 0;
+
     for (RebuildTarget* tar : tgt)
     {
-        PartitionRebuild* ptnRbd = new PartitionRebuild(tar, dev, progress);
+        PartitionRebuild* ptnRbd = new PartitionRebuild(tar, dev, progress, rebuildLogger);
         uint64_t stripes = ptnRbd->TotalStripes();
         if (stripes > 0)
         {
@@ -68,11 +71,18 @@ ArrayRebuild::ArrayRebuild(string array, ArrayDevice* dev, RebuildComplete cb,
     rebuildDoneCb = bind(&ArrayRebuild::_RebuildDone, this, placeholders::_1);
 }
 
+ArrayRebuild::~ArrayRebuild(void)
+{
+    delete progress;
+    delete rebuildLogger;
+}
+
 void
 ArrayRebuild::Start(void)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "ArrayRebuild::Start() array {} with total {} tasks", arrayName, tasks.size());
+
     if (tasks.empty())
     {
         RebuildResult res;
@@ -183,14 +193,17 @@ ArrayRebuild::_RebuildCompleted(RebuildResult res)
         case RebuildState::PASS:
             POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_RESULT_PASS,
                 "array {} rebuild completed sucessfully", arrayName);
+            rebuildLogger->SetResult("PASS");
             break;
         case RebuildState::FAIL:
             POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
                 "array {} rebuild failure", arrayName);
+            rebuildLogger->SetResult("FAIL");
             break;
         case RebuildState::CANCELLED:
             POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_RESULT_CANCELLED,
                 "array {} rebuild cancelled", arrayName);
+            rebuildLogger->SetResult("CANCELLED");
             break;
         default:
             POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
@@ -198,7 +211,7 @@ ArrayRebuild::_RebuildCompleted(RebuildResult res)
             assert(false);
             break;
     }
-
+    rebuildLogger->WriteLog();
     rebuildComplete(res);
 }
 } // namespace pos

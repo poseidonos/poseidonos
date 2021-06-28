@@ -105,6 +105,12 @@ public:
         return preferences.ToJson();
     }
 
+    string
+    GetLogDir()
+    {
+        return preferences.LogDir();
+    }
+
 private:
     bool _ShouldLog(spdlog::level::level_enum lvl, int id, spdlog::string_view_t fmt);
     void _InitDeduplicator();

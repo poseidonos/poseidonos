@@ -38,6 +38,7 @@
 
 #include "rebuild_result.h"
 #include "rebuild_progress.h"
+#include "rebuild_logger.h"
 #include "src/include/rebuild_state.h"
 #include "src/include/address_type.h"
 #include "src/include/raid_type.h"
@@ -64,6 +65,7 @@ public:
     const PartitionPhysicalSize* size = nullptr;
     RebuildState result = RebuildState::READY;
     RebuildProgress* prog = nullptr;
+    RebuildLogger* logger = nullptr;
     F2PTranslator translate;
     RebuildComplete rebuildComplete;
 };
