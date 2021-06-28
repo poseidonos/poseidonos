@@ -43,7 +43,7 @@ namespace pos
 class PartitionRebuild
 {
 public:
-    PartitionRebuild(RebuildTarget* t, ArrayDevice* d, RebuildProgress* p);
+    PartitionRebuild(RebuildTarget* t, ArrayDevice* d, RebuildProgress* p, RebuildLogger* l);
     virtual ~PartitionRebuild();
     void Start(RebuildComplete cb);
     void Stop();

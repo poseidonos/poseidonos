@@ -78,6 +78,7 @@ Raid5Rebuild::_NextSegment(void)
     {
         return ctx->size->totalSegments;
     }
+    ctx->logger->rebuiltSegCnt++;
     return segId;
 }
 

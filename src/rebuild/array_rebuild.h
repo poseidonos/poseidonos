@@ -53,6 +53,7 @@ class ArrayRebuild
 public:
     ArrayRebuild(string array, ArrayDevice* dev, RebuildComplete cb,
             list<RebuildTarget*> tgt);
+    virtual ~ArrayRebuild();
     void Start(void);
     void Discard(void);
     void Stop(void);
@@ -67,6 +68,7 @@ private:
     ArrayDevice* targetDev = nullptr;
     RebuildState state = RebuildState::READY;
     RebuildProgress* progress = nullptr;
+    RebuildLogger* rebuildLogger = nullptr;
     RebuildComplete rebuildComplete;
     RebuildComplete rebuildDoneCb;
     list<PartitionRebuild*> tasks;
