@@ -118,8 +118,6 @@ public:
     virtual IArrayDevice* GetArrayDev(void);
     uint64_t GetLba(void);
     const PhysicalBlkAddr GetPba(void);
-    void SetRba(uint64_t inputSectorRba);
-    uint64_t GetRba(void);
     bool IsRetry(void);
     void SetRetry(bool retry);
     uint32_t GetMemSize(void);

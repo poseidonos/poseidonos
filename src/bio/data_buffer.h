@@ -40,6 +40,7 @@ class DataBuffer
 {
 public:
     DataBuffer(uint64_t size, void* buffer = nullptr);
+    DataBuffer(const DataBuffer& dataBuffer);
     ~DataBuffer(void);
 
     void Free(void);

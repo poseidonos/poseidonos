@@ -59,6 +59,17 @@ DataBuffer::DataBuffer(uint64_t size, void* buffer)
     }
 }
 
+// When dataBuffer is copied, ownership should not be copied.
+// to avoid double free for base address.
+DataBuffer::DataBuffer(const DataBuffer& dataBuffer)
+: baseAddress(dataBuffer.baseAddress),
+  currentAddress(currentAddress),
+  size(size),
+  originalSize(size),
+  ownership(false)
+{
+}
+
 DataBuffer::~DataBuffer(void)
 {
     if (ownership)
