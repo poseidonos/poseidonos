@@ -48,7 +48,7 @@ public:
     void SetPartitionRebuildStart(string partName);
     void SetResult(string result);
     void WriteLog(void);
-    uint32_t rebuiltSegCnt = 0;
+    uint64_t rebuiltSegCnt = 0;
 
 private:
     string array;

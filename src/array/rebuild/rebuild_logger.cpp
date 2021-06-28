@@ -31,6 +31,8 @@
  */
 
 #include "rebuild_logger.h"
+#include "src/include/array_config.h"
+#include "src/logger/logger.h"
 
 #include <fstream>
 #include <iostream>
@@ -65,12 +67,13 @@ void RebuildLogger::WriteLog(void)
     chrono::duration<double> duration = end - start;
     auto t_start = std::chrono::system_clock::to_time_t(start);
     auto t_end = std::chrono::system_clock::to_time_t(end);
-    uint32_t restoredSizeMB = rebuiltSegCnt * 256;
-    string logDir = "/var/log/pos/";
+    uint64_t mb = 1024 * 1024;
+    uint64_t restoredSizeMB = rebuiltSegCnt * ArrayConfig::SSD_SEGMENT_SIZE_BYTE / mb;
+    string logDir = LoggerSingleton::Instance()->GetLogDir();
     string fileName = "rebuild_log";
     ofstream ofile;
     ofile.open(logDir + fileName, std::ios_base::app);
-    if (ofile.is_open()) 
+    if (ofile.is_open())
     {
         ofile << "=======Rebuild Result=======" << endl;
         ofile << "array: " << array <<endl;
