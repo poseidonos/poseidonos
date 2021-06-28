@@ -53,7 +53,7 @@ class ArrayRebuild
 public:
     ArrayRebuild(string array, ArrayDevice* dev, RebuildComplete cb,
             list<RebuildTarget*> tgt);
-    virtual ~ArrayRebuild();
+    virtual ~ArrayRebuild(void);
     void Start(void);
     void Discard(void);
     void Stop(void);

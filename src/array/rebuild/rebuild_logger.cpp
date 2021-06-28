@@ -44,7 +44,7 @@ RebuildLogger::RebuildLogger(string arrayName)
     array = arrayName;
 }
 
-void RebuildLogger::SetArrayRebuildStart()
+void RebuildLogger::SetArrayRebuildStart(void)
 {
     start = chrono::system_clock::now();
 }
@@ -65,12 +65,13 @@ void RebuildLogger::WriteLog(void)
     chrono::duration<double> duration = end - start;
     auto t_start = std::chrono::system_clock::to_time_t(start);
     auto t_end = std::chrono::system_clock::to_time_t(end);
-    uint32_t restoredSizeMB = rebuiltSegCnt * 256 ;
+    uint32_t restoredSizeMB = rebuiltSegCnt * 256;
     string logDir = "/var/log/pos/";
     string fileName = "rebuild_log";
     ofstream ofile;
     ofile.open(logDir + fileName, std::ios_base::app);
-    if (ofile.is_open()) {
+    if (ofile.is_open()) 
+    {
         ofile << "=======Rebuild Result=======" << endl;
         ofile << "array: " << array <<endl;
         ofile << "start: " << put_time(localtime(&t_start), "%F %T")  <<endl;

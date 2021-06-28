@@ -71,7 +71,7 @@ ArrayRebuild::ArrayRebuild(string array, ArrayDevice* dev, RebuildComplete cb,
     rebuildDoneCb = bind(&ArrayRebuild::_RebuildDone, this, placeholders::_1);
 }
 
-ArrayRebuild::~ArrayRebuild()
+ArrayRebuild::~ArrayRebuild(void)
 {
     delete progress;
     delete rebuildLogger;

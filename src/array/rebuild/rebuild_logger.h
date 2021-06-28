@@ -43,8 +43,8 @@ namespace pos
 class RebuildLogger
 {
 public:
-    RebuildLogger(string arrayName);
-    void SetArrayRebuildStart();
+    explicit RebuildLogger(string arrayName);
+    void SetArrayRebuildStart(void);
     void SetPartitionRebuildStart(string partName);
     void SetResult(string result);
     void WriteLog(void);
