@@ -44,6 +44,7 @@
 
 namespace pos
 {
+class LogGroupResetContext;
 
 class LogWriteContextFactory
 {
@@ -62,6 +63,8 @@ public:
         GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateVolumeDeletedLogWriteContext(int volId,
         uint64_t contextVersion, EventSmartPtr callback);
+    virtual LogGroupResetContext* CreateLogGroupResetContext(uint64_t offset, int id,
+        uint64_t groupSize, EventSmartPtr callbackEvent, char* dataBuffer);
 
 private:
     LogBufferWriteDoneNotifier* notifier;

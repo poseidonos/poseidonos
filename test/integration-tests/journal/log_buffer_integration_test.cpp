@@ -48,7 +48,7 @@ JournalLogBufferIntegrationTest::SetUp(void)
     logBuffer->Delete();
 
     _PrepareLogBuffer();
-    logBuffer->Init(&config);
+    logBuffer->Init(&config, &factory);
     logBuffer->SyncResetAll();
 }
 
@@ -72,7 +72,7 @@ JournalLogBufferIntegrationTest::SimulateSPOR(void)
     delete logBuffer;
     logBuffer = new JournalLogBuffer(new MockFileIntf(GetLogFileName(), "POSArray"));
     _PrepareLogBuffer();
-    logBuffer->Init(&config);
+    logBuffer->Init(&config, &factory);
 }
 
 int

@@ -32,12 +32,12 @@
 
 #include "log_write_context_factory.h"
 
+#include "src/allocator/stripe/stripe.h"
 #include "src/journal_manager/log/block_write_done_log_handler.h"
+#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
-#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
-#include "src/allocator/stripe/stripe.h"
-
+#include "src/journal_manager/log_buffer/log_group_reset_context.h"
 namespace pos
 {
 LogWriteContextFactory::LogWriteContextFactory(void)
@@ -122,4 +122,11 @@ LogWriteContextFactory::CreateVolumeDeletedLogWriteContext(int volId,
     return logWriteContext;
 }
 
+LogGroupResetContext*
+LogWriteContextFactory::CreateLogGroupResetContext(uint64_t offset, int id, uint64_t groupSize, EventSmartPtr callbackEvent, char* dataBuffer)
+{
+    LogGroupResetContext* resetRequest = new LogGroupResetContext(id, callbackEvent);
+    resetRequest->SetIoRequest(offset, groupSize, dataBuffer);
+    return resetRequest;
+}
 } // namespace pos

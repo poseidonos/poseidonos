@@ -10,6 +10,9 @@ class MockLogGroupResetContext : public LogGroupResetContext
 {
 public:
     using LogGroupResetContext::LogGroupResetContext;
+    MOCK_METHOD(void, SetInternalCallback, (MetaIoCbPtr cb), (override));
+    MOCK_METHOD(void, SetFile, (int fileDescriptor), (override));
+    MOCK_METHOD(void, IoDone, (), (override));
 };
 
 } // namespace pos

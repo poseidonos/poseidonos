@@ -56,6 +56,13 @@ public:
     virtual void NotifyLogFilled(int logGroupId, MapPageList& dirty);
     virtual void NotifyLogBufferReseted(int logGroupId);
 
+    // For UT
+    inline std::vector<LogBufferWriteDoneEvent*>
+    GetSubscribers(void)
+    {
+        return subscribers;
+    }
+
 private:
     std::vector<LogBufferWriteDoneEvent*> subscribers;
 };

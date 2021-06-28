@@ -38,6 +38,7 @@
 #include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
 #include "src/journal_manager/log_buffer/log_group_reset_context.h"
 #include "src/journal_manager/log_buffer/log_write_context.h"
+#include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/logger/logger.h"
 #include "src/metafs/metafs_file_intf.h"
 
@@ -45,6 +46,7 @@ namespace pos
 {
 JournalLogBuffer::JournalLogBuffer(void)
 : config(nullptr),
+  logFactory(nullptr),
   numInitializedLogGroup(0),
   logFile(nullptr),
   initializedDataBuffer(nullptr)
@@ -69,14 +71,41 @@ JournalLogBuffer::~JournalLogBuffer(void)
     {
         delete [] initializedDataBuffer;
     }
-
     delete logFile;
 }
 
-bool
-JournalLogBuffer::DoesLogFileExist(void)
+int
+JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory)
 {
-    return logFile->DoesFileExist();
+    config = journalConfiguration;
+    logFactory = logWriteContextFactory;
+
+    assert(initializedDataBuffer == nullptr);
+
+    uint64_t groupSize = config->GetLogGroupSize();
+    initializedDataBuffer = new char[groupSize];
+    memset(initializedDataBuffer, 0xFF, groupSize);
+    return 0;
+}
+
+void
+JournalLogBuffer::Dispose(void)
+{
+    if (logFile->IsOpened() == true)
+    {
+        int ret = logFile->Close();
+        if (ret != 0)
+        {
+            POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CLOSE_FAILED,
+                "Failed to close journal log buffer");
+        }
+    }
+
+    if (initializedDataBuffer != nullptr)
+    {
+        delete[] initializedDataBuffer;
+        initializedDataBuffer = nullptr;
+    }
 }
 
 int
@@ -132,40 +161,6 @@ JournalLogBuffer::Open(uint64_t& logBufferSize)
     POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_LOG_BUFFER_LOADED,
         "Journal log buffer is loaded");
     return ret;
-}
-
-int
-JournalLogBuffer::Init(JournalConfiguration* journalConfiguration)
-{
-    config = journalConfiguration;
-
-    assert(initializedDataBuffer == nullptr);
-
-    uint64_t groupSize = config->GetLogGroupSize();
-    initializedDataBuffer = new char[groupSize];
-    memset(initializedDataBuffer, 0xFF, groupSize);
-
-    return 0;
-}
-
-void
-JournalLogBuffer::Dispose(void)
-{
-    if (logFile->IsOpened() == true)
-    {
-        int ret = logFile->Close();
-        if (ret != 0)
-        {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CLOSE_FAILED,
-                "Failed to close journal log buffer");
-        }
-    }
-
-    if (initializedDataBuffer != nullptr)
-    {
-        delete [] initializedDataBuffer;
-        initializedDataBuffer = nullptr;
-    }
 }
 
 int
@@ -232,18 +227,12 @@ JournalLogBuffer::SyncResetAll(void)
     return ret;
 }
 
-void
-JournalLogBuffer::LogGroupResetCompleted(int logGroupId)
-{
-    numInitializedLogGroup++;
-}
-
 int
 JournalLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
 {
+    uint64_t offset = _GetFileOffset(id, 0);
     uint64_t groupSize = config->GetLogGroupSize();
-    LogGroupResetContext* resetRequest = new LogGroupResetContext(id, callbackEvent);
-    resetRequest->SetIoRequest(_GetFileOffset(id, 0), groupSize, initializedDataBuffer);
+    LogGroupResetContext* resetRequest = logFactory->CreateLogGroupResetContext(offset, id, groupSize, callbackEvent, initializedDataBuffer);
 
     return InternalIo(resetRequest);
 }
@@ -287,6 +276,18 @@ JournalLogBuffer::Delete(void)
             "Journal log buffer is deleted");
     }
     return ret;
+}
+
+void
+JournalLogBuffer::LogGroupResetCompleted(int logGroupId)
+{
+    numInitializedLogGroup++;
+}
+
+bool
+JournalLogBuffer::DoesLogFileExist(void)
+{
+    return logFile->DoesFileExist();
 }
 
 } // namespace pos

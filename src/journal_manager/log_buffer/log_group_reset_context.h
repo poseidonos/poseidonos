@@ -42,7 +42,7 @@ namespace pos
 class LogGroupResetContext : public LogBufferIoContext
 {
 public:
-    LogGroupResetContext(int logGroupId, EventSmartPtr callbackEvent);
+    explicit LogGroupResetContext(int logGroupId, EventSmartPtr callbackEvent);
     virtual ~LogGroupResetContext(void) = default;
 
     void SetIoRequest(uint64_t offset, uint64_t len, char* buf);

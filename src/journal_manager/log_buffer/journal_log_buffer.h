@@ -44,6 +44,8 @@ namespace pos
 {
 class LogWriteContext;
 class LogBufferIoContext;
+class LogGroupResetContext;
+class LogWriteContextFactory;
 
 class JournalLogBuffer : public ILogGroupResetCompleted
 {
@@ -53,21 +55,13 @@ public:
     explicit JournalLogBuffer(MetaFileIntf* metaFile);
     virtual ~JournalLogBuffer(void);
 
+    virtual int Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory);
+    virtual void Dispose(void);
+
     virtual int Create(uint64_t logBufferSize);
     virtual int Open(uint64_t& logBufferSize);
 
-    virtual int Init(JournalConfiguration* journalConfiguration);
-    virtual void Dispose(void);
-
     int ReadLogBuffer(int groupId, void* buffer);
-    int AsyncIO(AsyncMetaFileIoCtx* ctx);
-
-    inline bool
-    IsInitialized(void)
-    {
-        return numInitializedLogGroup == config->GetNumLogGroups();
-    }
-
     virtual int WriteLog(LogWriteContext* context);
 
     virtual int SyncResetAll(void);
@@ -79,7 +73,20 @@ public:
     int Delete(void); // TODO(huijeong.kim): move to tester code
 
     virtual void LogGroupResetCompleted(int logGroupId) override;
+
     virtual bool DoesLogFileExist(void);
+    inline bool
+    IsInitialized(void)
+    {
+        return numInitializedLogGroup == config->GetNumLogGroups();
+    }
+
+    // For UT
+    inline char*
+    GetInitializedDataBuffer(void)
+    {
+        return initializedDataBuffer;
+    }
 
 private:
     void _LoadBufferSize(void);
@@ -92,7 +99,7 @@ private:
     }
 
     JournalConfiguration* config;
-
+    LogWriteContextFactory* logFactory;
     std::atomic<int> numInitializedLogGroup;
     MetaFileIntf* logFile;
 

@@ -414,7 +414,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IContextReplayer* contextReplayer, IVolumeManager* volumeManager,
     EventScheduler* eventScheduler)
 {
-    logBuffer->Init(config);
+    logBuffer->Init(config, logFactory);
 
     bufferAllocator->Init(logGroupReleaser, config);
     dirtyMapManager->Init(config);
