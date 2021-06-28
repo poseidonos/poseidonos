@@ -496,7 +496,14 @@ VSAMapManager::_GetVolumeState(uint32_t volID)
 {
     std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
     VolMountStateIter it = volumeMountState.find(volID);
-    return volumeMountState[it->first];
+    if (it == volumeMountState.end())
+    {
+        return VolState::NOT_EXIST;
+    }
+    else
+    {
+        return volumeMountState[it->first];
+    }
 }
 
 bool

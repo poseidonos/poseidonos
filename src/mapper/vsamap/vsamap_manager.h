@@ -53,6 +53,7 @@ const uint64_t UNKNOWN_SIZE_BECAUSEOF_INTERNAL_LOAD = 0;
 
 enum class VolState
 {
+    NOT_EXIST,          // Not exist
     EXIST_UNLOADED,     // Unloaded
     JUST_CREATED,       // Loaded
     BACKGROUND_MOUNTED, // Loaded
