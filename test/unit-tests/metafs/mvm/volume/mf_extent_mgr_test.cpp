@@ -4,6 +4,38 @@
 
 namespace pos
 {
+class MetaFileExtentManagerTester : public MetaFileExtentManager
+{
+public:
+    MetaFileExtentManagerTester(void)
+    {
+    }
+
+    virtual ~MetaFileExtentManagerTester(void)
+    {
+    }
+
+    void MergeFreeExtents(void)
+    {
+        _MergeFreeExtents();
+    }
+
+    std::deque<MetaFileExtent>& GetFreeExtentsList(void)
+    {
+        return freeExtentsList;
+    }
+
+    void PrintFreeExtentList(void)
+    {
+        std::cout << "count of freeExtentsList: " << freeExtentsList.size() << std::endl;
+
+        for (auto it : freeExtentsList)
+        {
+            std::cout << "{" << it.GetStartLpn() << ", " << it.GetCount() << "}" << std::endl;
+        }
+    }
+};
+
 TEST(MetaFileExtentManager, AllocExtent_runCorrectly)
 {
     // Given
@@ -80,6 +112,28 @@ TEST(MetaFileExtentManager, Control_Contents)
     }
     EXPECT_EQ(usedLpnCount, 37);
     EXPECT_EQ(usedEntryCount, 3);
+}
+
+TEST(MetaFileExtentManager, MergeFreeExtents)
+{
+    // Given
+    MetaFileExtentManagerTester extentMgr;
+
+    // When
+    std::deque<MetaFileExtent>& freeList = extentMgr.GetFreeExtentsList();
+    freeList.emplace_back(MetaFileExtent {0, 4});
+    freeList.emplace_back(MetaFileExtent {5, 5});
+    freeList.emplace_back(MetaFileExtent {10, 4});
+    freeList.emplace_back(MetaFileExtent {15, 4});
+    freeList.emplace_back(MetaFileExtent {20, 4});
+
+    extentMgr.PrintFreeExtentList();
+    EXPECT_EQ(freeList.size(), 5);
+
+    extentMgr.MergeFreeExtents();
+
+    extentMgr.PrintFreeExtentList();
+    EXPECT_EQ(freeList.size(), 4);
 }
 
 } // namespace pos

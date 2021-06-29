@@ -8,12 +8,6 @@
 
 namespace pos
 {
-class MockMetaFileName : public MetaFileName
-{
-public:
-    using MetaFileName::MetaFileName;
-};
-
 class MockMetaStorageIoProperty : public MetaStorageIoProperty
 {
 public:

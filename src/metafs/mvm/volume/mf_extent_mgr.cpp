@@ -258,11 +258,11 @@ MetaFileExtentManager::_MergeFreeExtents(void)
     uint32_t index = 0;
     bool eraseNext = false;
 
-    for (auto iter = freeExtentsList.begin(); iter != freeExtentsList.end(); iter++, index++)
+    for (auto iter = freeExtentsList.begin(); iter != freeExtentsList.end(); index++)
     {
         if (eraseNext == true)
         {
-            freeExtentsList.erase(iter);
+            iter = freeExtentsList.erase(iter);
             eraseNext = false;
 
             if (freeExtentsList.size() <= index)
@@ -280,6 +280,8 @@ MetaFileExtentManager::_MergeFreeExtents(void)
                 eraseNext = true;
             }
         }
+
+        ++iter;
     }
 }
 

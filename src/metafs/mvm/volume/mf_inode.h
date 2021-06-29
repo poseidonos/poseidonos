@@ -34,38 +34,13 @@
 
 #include <string>
 
+#include "src/metafs/common/meta_file_name.h"
 #include "mf_inode_req.h"
 #include "mf_pagemap.h"
 #include "metafs_common.h"
 
 namespace pos
 {
-class MetaFileName
-{
-public:
-    MetaFileName&
-    operator=(const std::string* fileName)
-    {
-        assert(fileName->size() < MAX_FILE_NAME_LENGTH);
-        memcpy(str.data(), fileName->data(), fileName->length());
-        return *this;
-    }
-    std::string
-    ToString(void)
-    {
-        std::string fileName(std::begin(str), std::end(str));
-        fileName.erase(std::find(fileName.begin(), fileName.end(), '\0'), fileName.end());
-        return fileName;
-    }
-    const char*
-    ToChar(void)
-    {
-        return reinterpret_cast<const char*>(&str);
-    }
-    static const uint32_t MAX_FILE_NAME_LENGTH = 128;
-    std::array<char, MAX_FILE_NAME_LENGTH> str;
-};
-
 class MetaStorageIoProperty
 {
 public:

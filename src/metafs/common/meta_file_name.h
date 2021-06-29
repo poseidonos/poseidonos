@@ -32,55 +32,35 @@
 
 #pragma once
 
-#include <algorithm>
-#include <deque>
-#include <utility>
+#include "metafs_common.h"
+#include <string>
+#include <array>
 
-#include "mf_extent.h"
-#include "mf_pagemap.h"
-
-namespace pos
-{
-class MetaFileExtentManager
+class MetaFileName
 {
 public:
-    MetaFileExtentManager(void);
-    ~MetaFileExtentManager(void);
-
-    void Init(MetaLpnType baseLpn, MetaLpnType maxFileRegionLpn);
-    MetaFilePageMap AllocExtent(MetaLpnType lpnCnt);
-    MetaLpnType GetAvailableLpnCount(void);
-    MetaLpnType GetTheBiggestExtentSize(void);
-
-    void GetContent(MetaFileExtent* list);
-    void SetContent(MetaFileExtent* list);
-    void SetFileBaseLpn(MetaLpnType BaseLpn);
-    MetaLpnType
-    GetFileBaseLpn(void)
+    MetaFileName&
+    operator=(const std::string* fileName)
     {
-        return fileRegionBaseLpnInVolume;
+        assert(fileName->size() < MAX_FILE_NAME_LENGTH);
+        memcpy(str.data(), fileName->data(), fileName->length());
+        return *this;
     }
 
-    /* to control free extents */
-    pair<bool, MetaLpnType> AddToFreeExtentsList(MetaLpnType requestLpnCount);
-    bool RemoveFromFreeExtentsList(MetaLpnType startLpn, MetaLpnType count);
-    void PrintFreeExtentsList(void);
+    std::string
+    ToString(void)
+    {
+        std::string fileName(std::begin(str), std::end(str));
+        fileName.erase(std::find(fileName.begin(), fileName.end(), '\0'), fileName.end());
+        return fileName;
+    }
 
-    void AddToAllocatedExtentsList(MetaLpnType startLpn, MetaLpnType requestLpnCount);
+    const char*
+    ToChar(void)
+    {
+        return reinterpret_cast<const char*>(&str);
+    }
 
-protected:
-    void _MergeFreeExtents(void);
-    void _MakeFreeExtentsList(void);
-    void _SortFreeExtentsList(void);
-    void _MakeAllocatedExtentsList(void);
-    void _SortAllocatedExtentsList(void);
-    void _PrintAllocatedExtentsList(void);
-
-    MetaLpnType fileRegionBaseLpnInVolume;
-    MetaLpnType maxFileRegionLpn;
-    MetaLpnType availableLpnCount;
-
-    std::deque<MetaFileExtent> freeExtentsList;
-    std::deque<MetaFileExtent> allocatedExtentsList;
+    static const uint32_t MAX_FILE_NAME_LENGTH = 128;
+    std::array<char, MAX_FILE_NAME_LENGTH> str = { 0, };
 };
-} // namespace pos
