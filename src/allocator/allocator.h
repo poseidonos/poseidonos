@@ -50,7 +50,7 @@ namespace pos
 {
 class IArrayInfo;
 class IStateControl;
-class TelemetryClient;
+class TelemetryPublisher;
 
 const uint32_t BUFFER_ALLOCATION_SIZE = 2 * 1024 * 1024;
 const uint32_t CHUNK_PER_BUFFER_ALLOCATION = BUFFER_ALLOCATION_SIZE / CHUNK_SIZE;
@@ -61,7 +61,7 @@ class Allocator : public IAllocatorWbt, public VolumeEvent, public IMountSequenc
 public:
     Allocator(AllocatorAddressInfo* addrInfo, ContextManager* contextManager, BlockManager* blockManager,
         WBStripeManager* wbStripeManager, IArrayInfo* info, IStateControl* iState);
-    Allocator(TelemetryClient* telClient, IArrayInfo* info, IStateControl* iState);
+    Allocator(TelemetryPublisher* telPublisher, IArrayInfo* info, IStateControl* iState);
     virtual ~Allocator(void);
 
     virtual int Init(void) override;
@@ -114,7 +114,7 @@ public:
     virtual IContextReplayer* GetIContextReplayer(void);
 
 private:
-    void _CreateSubmodules(TelemetryClient* tc);
+    void _CreateSubmodules(TelemetryPublisher* tp);
     void _DeleteSubmodules(void);
     void _RegisterToAllocatorService(void);
     void _UnregisterFromAllocatorService(void);

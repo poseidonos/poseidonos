@@ -1,4 +1,4 @@
-TOP := $(abspath $(CURDIR)/../..)
+TOP := $(abspath $(CURDIR)/../../..)
 SRCS += $(wildcard *.cpp)
 include $(TOP)/Makefile.rules
 

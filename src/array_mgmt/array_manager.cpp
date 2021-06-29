@@ -46,7 +46,7 @@ ArrayManager::ArrayManager()
     arrayRebuilder = new ArrayRebuilder(this);
     DeviceManagerSingleton::Instance()->SetDeviceEventCallback(this);
     abrManager = new AbrManager();
-    telManager = TeletryClientMgr::Instance();
+    telClient = TeletryClientSgt::Instance();
 }
 
 ArrayManager::~ArrayManager()
@@ -80,6 +80,7 @@ ArrayManager::Create(string name, DeviceSet<string> devs, string raidtype)
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
         arrayList.emplace(name, array);
+        ret = telClient->RegisterPublisher(name, array->GetTelemetryPublisher());
     }
     else
     {
@@ -105,6 +106,7 @@ ArrayManager::Delete(string name)
     int ret = array->Delete();
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
+        telClient->DeregisterPublisher(name);
         delete array;
         arrayList.erase(name);
     }
@@ -118,12 +120,7 @@ ArrayManager::Mount(string name)
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
     {
-        int ret = array->Mount();
-        if (ret == 0)
-        {
-            telManager->RegisterClient(name, array->GetTelemetryClient());
-        }
-        return ret;
+        return array->Mount();
     }
     else if (AbrExists(name))
     {
@@ -139,7 +136,6 @@ ArrayManager::Unmount(string name)
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
     {
-        telManager->DeregisterClient(name);
         return array->Unmount();
     }
     else if (AbrExists(name))

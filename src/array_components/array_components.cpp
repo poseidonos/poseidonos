@@ -76,7 +76,7 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     // metafs -> volume manager -> mapper/allocator -> journal -> gc.
     // Given that "metafs" object creation depends on runtime information (i.e., array is loaded or not)
     // I'll move those the objection to Create()/Load() instead.
-    this->telClient = new TelemetryClient();
+    this->telPublisher = new TelemetryPublisher();
 }
 
 ArrayComponents::ArrayComponents(string arrayName,
@@ -143,11 +143,11 @@ ArrayComponents::~ArrayComponents(void)
         POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "StateControl for {} has been nullified.", arrayName);
     }
 
-    if (telClient != nullptr)
+    if (telPublisher != nullptr)
     {
-        delete telClient;
-        telClient = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "telemetryClient for {} has been nullified.", arrayName);
+        delete telPublisher;
+        telPublisher = nullptr;
+        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "telemetryPublisher for {} has been nullified.", arrayName);
     }
 
     stateMgr->RemoveStateControl(arrayName);
@@ -281,7 +281,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     volMgr = new VolumeManager(array, state);
     nvmf = new Nvmf(array->GetName(), 0);
     mapper = new Mapper(array, state);
-    allocator = new Allocator(telClient, array, state);
+    allocator = new Allocator(telPublisher, array, state);
     journal = new JournalManager(array, state);
     rbaStateMgr = new RBAStateManager(array->GetName(), 0);
     flowControl = new FlowControl(array);

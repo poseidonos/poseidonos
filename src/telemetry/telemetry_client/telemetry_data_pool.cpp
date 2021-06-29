@@ -29,56 +29,65 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "src/telemetry/telemetry_client_manager/telemetry_client.h"
+#include "src/telemetry/telemetry_client/telemetry_data_pool.h"
 
 namespace pos
 {
-TelemetryClient::TelemetryClient(void)
-: turnOn(true) // todo: change default false
+TelemetryDataPool::TelemetryDataPool(void)
 {
 }
 
-TelemetryClient::~TelemetryClient(void)
+TelemetryDataPool::~TelemetryDataPool(void)
 {
-}
-
-void
-TelemetryClient::StartLogging(void)
-{
-    turnOn = true;
 }
 
 void
-TelemetryClient::StopLogging(void)
+TelemetryDataPool::SetLog(std::string id, uint32_t value)
 {
-    turnOn = false;
-}
-
-bool
-TelemetryClient::IsRunning(void)
-{
-    return turnOn;
+    tm curTime = _GetCurTime();
+    TelemetryGeneralMetric entry(curTime, value);
+    pool[id] = entry;
 }
 
 int
-TelemetryClient::PublishData(std::string id, uint32_t value)
+TelemetryDataPool::GetLog(std::string id, TelemetryGeneralMetric& outLog)
 {
-    if (turnOn == false)
+    auto entry = pool.find(id);
+    if (entry == pool.end())
     {
-        return -1;
-    }    
-    dataPool.SetLog(id, value);
-    return 0;
-}
-
-int
-TelemetryClient::CollectData(std::string id, TelemetryLogEntry& outLog)
-{
-    if (turnOn == false)
-    {
+        POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] error!! can not find telemetry Item:{}", id);
         return -1;
     }
-    return dataPool.GetLog(id, outLog);
+    else
+    {
+        outLog = (*entry).second;
+        return 0;
+    }
+}
+
+list<TelemetryGeneralMetric>
+TelemetryDataPool::GetAll(void)
+{
+    list<TelemetryGeneralMetric> retList;
+    for (auto &p : pool)
+    {
+        retList.push_back(p.second);
+    }
+    return retList;
+}
+
+tm
+TelemetryDataPool::_GetCurTime(void)
+{
+    auto t = std::time(nullptr);
+    tm ret = *std::localtime(&t);
+    return ret;
+}
+
+int
+TelemetryDataPool::GetNumEntries(void)
+{
+    return pool.size();
 }
 
 } // namespace pos

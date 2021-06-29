@@ -16,7 +16,7 @@ public:
 
     virtual int FlushContextsSync(void) { return 0; }
     virtual void UpdateOccupiedStripeCount(StripeId lsid) {}
-    virtual SegmentId AllocateFreeSegment(bool forUser) { return 0; }
+    virtual SegmentId AllocateFreeSegment(void) { return 0; }
     virtual SegmentId AllocateGCVictimSegment(void) { return 0; }
     virtual SegmentId AllocateRebuildTargetSegment(void) { return 0; }
     virtual int ReleaseRebuildSegment(SegmentId segmentId) { return 0; }

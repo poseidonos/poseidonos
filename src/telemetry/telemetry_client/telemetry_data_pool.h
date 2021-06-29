@@ -32,25 +32,58 @@
 
 #pragma once
 
-#include "src/telemetry/telemetry_client_manager/telemetry_data_pool.h"
-#include "src/telemetry/telemetry_id.h"
+#include <map>
+#include <chrono>
+#include <iomanip>
+#include <list>
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+#include "src/telemetry/telemetry_client/telemetry_data_pool.h"
+#include <sstream>
+#include <string>
 
 namespace pos
 {
-class TelemetryClient
+class TelemetryGeneralMetric
 {
 public:
-    TelemetryClient(void);
-    virtual ~TelemetryClient(void);
-    virtual void StartLogging(void);
-    virtual void StopLogging(void);
-    virtual bool IsRunning(void);
-    virtual int PublishData(std::string id, uint32_t value);
-    virtual int CollectData(std::string id, TelemetryLogEntry& outLog);
+    TelemetryGeneralMetric(void) {}
+    ~TelemetryGeneralMetric(void) {}
+    TelemetryGeneralMetric(tm t, uint32_t v)
+    {
+        loggedTime = t;
+        std::ostringstream oss;
+        oss << std::put_time(&loggedTime, "%Y-%m-%d %H:%M:%S");
+        loggedStrTime = oss.str();
+        value = v;
+    }
+    std::string GetTimeString(void) { return loggedStrTime; }
+    tm GetTime(void) { return loggedTime; }
+    uint32_t GetValue(void) { return value; }
+    std::string GetId(void) { return id; }
+    void Set(tm t, uint32_t v) { loggedTime = t; value = v; }
 
 private:
-    TelemetryDataPool dataPool;
-    bool turnOn;
+    uint32_t value;
+    tm loggedTime;
+    std::string loggedStrTime;
+    std::string id;
+};
+
+class TelemetryDataPool
+{
+public:
+    TelemetryDataPool(void);
+    ~TelemetryDataPool(void);
+    void SetLog(std::string id, uint32_t value);
+    int GetLog(std::string id, TelemetryGeneralMetric& outLog);
+    list<TelemetryGeneralMetric> GetAll(void);
+    int GetNumEntries(void);
+
+private:
+    tm _GetCurTime(void);
+
+    std::map<std::string, TelemetryGeneralMetric> pool;
 };
 
 } // namespace pos

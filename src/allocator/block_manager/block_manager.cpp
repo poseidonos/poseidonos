@@ -328,7 +328,7 @@ BlockManager::_AllocateUserDataStripeIdInternal(bool isUserStripeAlloc)
             }
         }
 
-        SegmentId segmentId = contextManager->AllocateFreeSegment(true);
+        SegmentId segmentId = contextManager->AllocateFreeSegment();
         if (segmentId == UNMAP_SEGMENT)
         {
             // Under Rebuiling...

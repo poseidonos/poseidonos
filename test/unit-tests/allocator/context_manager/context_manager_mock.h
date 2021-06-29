@@ -17,7 +17,7 @@ public:
     MOCK_METHOD(int, FlushContextsSync, (), (override));
     MOCK_METHOD(int, FlushContextsAsync, (EventSmartPtr callback), (override));
     MOCK_METHOD(void, UpdateOccupiedStripeCount, (StripeId lsid), (override));
-    MOCK_METHOD(SegmentId, AllocateFreeSegment, (bool forUser), (override));
+    MOCK_METHOD(SegmentId, AllocateFreeSegment, (), (override));
     MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));
     MOCK_METHOD(SegmentId, AllocateRebuildTargetSegment, (), (override));
     MOCK_METHOD(int, ReleaseRebuildSegment, (SegmentId segmentId), (override));

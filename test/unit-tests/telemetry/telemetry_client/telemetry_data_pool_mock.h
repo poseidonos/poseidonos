@@ -4,14 +4,14 @@
 #include <string>
 #include <vector>
 
-#include "src/telemetry/telemetry_client_manager/telemetry_data_pool.h"
+#include "src/telemetry/telemetry_client/telemetry_data_pool.h"
 
 namespace pos
 {
-class MockTelemetryLogEntry : public TelemetryLogEntry
+class MockTelemetryGeneralMetric : public TelemetryGeneralMetric
 {
 public:
-    using TelemetryLogEntry::TelemetryLogEntry;
+    using TelemetryGeneralMetric::TelemetryGeneralMetric;
 };
 
 class MockTelemetryDataPool : public TelemetryDataPool

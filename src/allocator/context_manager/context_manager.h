@@ -50,7 +50,7 @@ class AllocatorCtx;
 class SegmentCtx;
 class WbStripeCtx;
 class ContextReplayer;
-class TelemetryClient;
+class TelemetryPublisher;
 
 const int NO_REBUILD_TARGET_USER_SEGMENT = 0;
 
@@ -58,10 +58,10 @@ class ContextManager : public IContextManager
 {
 public:
     ContextManager(void) = default;
-    ContextManager(TelemetryClient* tc, AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
+    ContextManager(TelemetryPublisher* tp, AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
         WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileMananager_,
         ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_);
-    ContextManager(TelemetryClient* tc, AllocatorAddressInfo* info, std::string arrayName);
+    ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, std::string arrayName);
     virtual ~ContextManager(void);
     virtual void Init(void);
     virtual void Close(void);
@@ -69,7 +69,7 @@ public:
     virtual int FlushContextsSync(void);
     virtual int FlushContextsAsync(EventSmartPtr callback);
     virtual void UpdateOccupiedStripeCount(StripeId lsid);
-    virtual SegmentId AllocateFreeSegment(bool forUser);
+    virtual SegmentId AllocateFreeSegment(void);
     virtual SegmentId AllocateGCVictimSegment(void);
     virtual SegmentId AllocateRebuildTargetSegment(void);
     virtual int ReleaseRebuildSegment(SegmentId segmentId);
@@ -128,7 +128,7 @@ private:
     std::string arrayName;
     std::mutex ctxLock;
 
-    TelemetryClient* telClient;
+    TelemetryPublisher* telPublisher;
 };
 
 } // namespace pos

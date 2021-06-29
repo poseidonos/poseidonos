@@ -32,49 +32,32 @@
 
 #pragma once
 
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include <list>
 #include <map>
-#include <chrono>
-#include <iomanip>
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-#include "src/telemetry/telemetry_client_manager/telemetry_data_pool.h"
-#include <sstream>
 #include <string>
+#include <vector>
 
 namespace pos
 {
-class TelemetryLogEntry
+class TelemetryClient
 {
 public:
-    TelemetryLogEntry(void) {}
-    ~TelemetryLogEntry(void) {}
-    TelemetryLogEntry(std::string t, uint32_t v)
-    {
-        loggedTime = t;
-        value = v;
-    }
-    std::string GetTime() { return loggedTime; }
-    uint32_t GetValue() { return value; }
-    void Set(std::string t, uint32_t v) { loggedTime = t; value = v; }
+    TelemetryClient(void);
+    virtual ~TelemetryClient(void);
+    virtual int RegisterPublisher(std::string name, TelemetryPublisher* client);
+    virtual int DeregisterPublisher(std::string name);
+    virtual void StartPublisher(std::string name);
+    virtual void StopPublisher(std::string name);
+    virtual bool IsPublisherRunning(std::string name);
+    virtual void StartAllPublisher(void);
+    virtual void StopAllPublisher(void);
+
+    virtual int CollectValue(std::string name, std::string id, TelemetryGeneralMetric& outLog);
+    virtual list<TelemetryGeneralMetric> CollectList(std::string name);
 
 private:
-    std::string loggedTime;
-    uint32_t value;
+    std::map<std::string, TelemetryPublisher*> publisherList;
 };
-
-class TelemetryDataPool
-{
-public:
-    TelemetryDataPool(void);
-    ~TelemetryDataPool(void);
-    void SetLog(std::string id, uint32_t value);
-    int GetLog(std::string id, TelemetryLogEntry& outLog);
-    int GetNumLogEntries(void);
-
-private:
-    const std::string _GetCurTime(void);
-
-    std::map<std::string, TelemetryLogEntry> pool;
-};
-
+using TeletryClientSgt = Singleton<TelemetryClient>;
 } // namespace pos

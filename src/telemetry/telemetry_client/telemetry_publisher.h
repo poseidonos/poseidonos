@@ -32,31 +32,28 @@
 
 #pragma once
 
-#include "src/telemetry/telemetry_client_manager/telemetry_client.h"
-#include <map>
+#include <list>
+#include "src/telemetry/telemetry_client/telemetry_data_pool.h"
+#include "src/telemetry/telemetry_id.h"
 #include <string>
-#include <vector>
 
 namespace pos
 {
-class TelemetryClientManager
+class TelemetryPublisher
 {
 public:
-    TelemetryClientManager(void);
-    virtual ~TelemetryClientManager(void);
-    virtual int RegisterClient(std::string name, TelemetryClient* client);
-    virtual int DeregisterClient(std::string name);
-    virtual void StartTelemetryClient(std::string name);
-    virtual void StopTelemetryClient(std::string name);
-    virtual bool IsTelemetryClientRunning(std::string name);
-    virtual void StartTelemetryClientAll(void);
-    virtual void StopTelemetryClientAll(void);
-
-    virtual int CollectData(std::string name, std::string id, TelemetryLogEntry& outLog);
+    TelemetryPublisher(void);
+    virtual ~TelemetryPublisher(void);
+    virtual void StartPublishing(void);
+    virtual void StopPublishing(void);
+    virtual bool IsRunning(void);
+    virtual int PublishData(std::string id, uint32_t value);
+    virtual int CollectData(std::string id, TelemetryGeneralMetric& outLog);
+    virtual list<TelemetryGeneralMetric> CollectAll(void);
 
 private:
-    std::map<std::string, TelemetryClient*> clientList;
-    int numClients;
+    TelemetryDataPool dataPool;
+    bool turnOn;
 };
-using TeletryClientMgr = Singleton<TelemetryClientManager>;
+
 } // namespace pos

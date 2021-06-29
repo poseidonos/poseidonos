@@ -67,7 +67,7 @@ SUBDIRS = allocator \
         wbt \
         admin \
         resource_manager \
-        telemetry/telemetry_client_manager \
+        telemetry/telemetry_client \
         dpdk_wrapper
 .PHONY: $(SUBDIRS)
 

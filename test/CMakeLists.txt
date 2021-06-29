@@ -370,7 +370,7 @@ list(FILTER dep_src EXCLUDE REGEX ".+/fake/.+")
 list(FILTER dep_src EXCLUDE REGEX ".+/mock/.+")
 
 if(NOT POS_BUILD_WITH_TELEMETRY)
-    list(FILTER dep_src EXCLUDE REGEX ".+/telemetry/.+.cpp")
+    list(FILTER dep_src EXCLUDE REGEX ".+/telemetry/grpc/.+.cpp")
 endif(NOT POS_BUILD_WITH_TELEMETRY)
 
 foreach(f ${dep_src})

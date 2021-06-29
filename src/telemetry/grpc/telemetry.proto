@@ -26,7 +26,7 @@ message PublishRequest
   optional LatencyProto latencies = 6;
  
   // strong-typed data structures for usability
-  optional SegmentInfoProto segmentInfo = 7;
+  optional TelemetryGeneralMetric generalMetric = 7;
   optional WbtProto wbtProto = 8;
 }
  
@@ -57,7 +57,7 @@ message CollectResponse
   repeated LatencyProto latencies = 6;
  
   // strong-typed data structures for usability
-  optional SegmentInfoProto segmentInfo = 7;
+  optional TelemetryGeneralMetric generalMetric = 7;
   optional WbtProto wbtProto = 8;
 }
 
@@ -144,12 +144,11 @@ message LatencyProto
   repeated int64 latencies = 3;
 }
  
-message SegmentInfoProto
+message TelemetryGeneralMetric
 {
-  required int32 totalSegments = 1;
-  required int32 activeSegment = 2;
-  required int32 occupiedStripes = 3;
-  required int32 numInvalid = 4;
+  required string id = 1; // e.g., alct_freesegment_count
+  required string time = 2; // logged time
+  required int32 value = 3; // monitoring value
 }
  
 message WbtProto

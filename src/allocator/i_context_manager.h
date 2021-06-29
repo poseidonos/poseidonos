@@ -47,7 +47,7 @@ public:
     virtual void UpdateOccupiedStripeCount(StripeId lsid) = 0;
     virtual uint64_t GetStoredContextVersion(int owner) = 0;
 
-    virtual SegmentId AllocateFreeSegment(bool forUser) = 0;
+    virtual SegmentId AllocateFreeSegment(void) = 0;
     virtual SegmentId AllocateGCVictimSegment(void) = 0;
     virtual SegmentId AllocateRebuildTargetSegment(void) = 0;
     virtual int ReleaseRebuildSegment(SegmentId segmentId) = 0;
