@@ -34,6 +34,7 @@
 #include <string>
 namespace pos
 {
+    // ID = "modulecode_itemname_collectiontype(count/history)"
     static const std::string TEL_ALLOCATOR_FREE_SEGMENT_COUNT = "alct_freesegment_count";
     static const std::string TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT = "alct_allocctx_pendio_count";
     static const std::string TEL_ALLOCATOR_GCVICTIM_SEGMENT_HISTORY = "alct_gcvictim_seg_history";

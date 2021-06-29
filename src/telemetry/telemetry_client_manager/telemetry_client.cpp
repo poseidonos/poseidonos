@@ -34,9 +34,8 @@
 namespace pos
 {
 TelemetryClient::TelemetryClient(void)
-: turnOn(true) // todo: change default true
+: turnOn(true) // todo: change default false
 {
-    // TODO:: ID = "modulename_itemname"
 }
 
 TelemetryClient::~TelemetryClient(void)
