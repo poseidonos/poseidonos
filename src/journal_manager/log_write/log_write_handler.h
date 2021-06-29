@@ -53,6 +53,7 @@ public:
 
     virtual void Init(BufferOffsetAllocator* allocator, JournalLogBuffer* buffer,
         JournalConfiguration* config);
+    virtual void Dispose(void);
 
     virtual int AddLog(LogWriteContext* context);
     void LogWriteDone(AsyncMetaFileIoCtx* ctx);

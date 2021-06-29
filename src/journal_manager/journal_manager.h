@@ -135,6 +135,7 @@ protected:
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer,
         IVolumeManager* volumeManager);
+    void _DisposeModules(void);
     void _ResetModules(void);
 
     int _Init(void);

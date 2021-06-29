@@ -78,6 +78,12 @@ LogWriteHandler::Init(BufferOffsetAllocator* allocator, JournalLogBuffer* buffer
     }
 }
 
+void
+LogWriteHandler::Dispose(void)
+{
+    logWriteStats->Dispose();
+}
+
 int
 LogWriteHandler::AddLog(LogWriteContext* context)
 {

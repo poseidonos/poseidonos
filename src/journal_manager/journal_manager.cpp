@@ -282,8 +282,18 @@ JournalManager::Dispose(void)
     if (config->IsEnabled() == true)
     {
         _Reset();
-        logBuffer->Dispose();
+        _DisposeModules();
     }
+}
+
+void
+JournalManager::_DisposeModules(void)
+{
+    logBuffer->Dispose();
+    bufferAllocator->Dispose();
+    dirtyMapManager->Dispose();
+    logFilledNotifier->Dispose();
+    logWriteHandler->Dispose();
 }
 
 void

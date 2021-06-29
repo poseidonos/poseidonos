@@ -64,6 +64,16 @@ DirtyMapManager::Init(std::vector<DirtyPageList* > dirtyPages)
     pendingDirtyPages = dirtyPages;
 }
 
+void
+DirtyMapManager::Dispose(void)
+{
+    for (auto it : pendingDirtyPages)
+    {
+        delete it;
+    }
+    pendingDirtyPages.clear();
+}
+
 MapPageList
 DirtyMapManager::GetDirtyList(int logGroupId)
 {
