@@ -34,70 +34,87 @@
 
 #include <list>
 
-#include "src/array/array.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/array/service/array_service_layer.h"
 #include "src/include/address_type.h"
-#include "src/include/ibof_event_id.hpp"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
+#include "src/mapper_service/mapper_service.h"
 #include "src/volume/volume_list.h"
 
-namespace ibofos
+namespace pos
 {
 thread_local StripeId Translator::recentVsid = UNMAP_STRIPE;
 thread_local StripeId Translator::recentLsid = UNMAP_STRIPE;
+thread_local std::string Translator::recentArrayName = "";
 
 Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
-    bool isRead)
-: mapper(MapperSingleton::Instance()),
+    std::string& arrayName, bool isRead, IVSAMap* iVSAMap_, IStripeMap* iStripeMap_, IWBStripeAllocator* iWBStripeAllocator_)
+: iVSAMap(iVSAMap_),
+  iStripeMap(iStripeMap_),
+  iWBStripeAllocator(iWBStripeAllocator_),
   startRba(startRba),
   blockCount(blockCount),
   lastVsa(UNMAP_VSA),
   lastLsidEntry{IN_USER_AREA, UNMAP_STRIPE},
-  arrayManager(ArraySingleton::Instance()),
   isRead(isRead),
-  volumeId(volumeId)
+  volumeId(volumeId),
+  arrayName(arrayName)
 {
+    if (nullptr == iVSAMap)
+    {
+        iVSAMap = MapperServiceSingleton::Instance()->GetIVSAMap(arrayName);
+    }
+    if (nullptr == iStripeMap)
+    {
+        iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayName);
+    }
+    if (nullptr == iWBStripeAllocator)
+    {
+        iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName);
+    }
     if (unlikely(volumeId >= MAX_VOLUME_COUNT))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::TRSLTR_WRONG_VOLUME_ID;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId));
+        POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_VOLUME_ID;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
         throw eventId;
     }
-    mapper->GetVSAs(volumeId, startRba, blockCount, vsaArray);
-
-    for (uint32_t blockIndex = 0; blockIndex < blockCount; blockIndex++)
+    iVSAMap->GetVSAs(volumeId, startRba, blockCount, vsaArray);
+    if (likely(iStripeMap != nullptr))
     {
-        BlkAddr rba = startRba + blockIndex;
-        VirtualBlkAddr vsa = vsaArray[blockIndex];
-
-        lsidRefResults[blockIndex] = _GetLsidRefResult(rba, vsa);
+        for (uint32_t blockIndex = 0; blockIndex < blockCount; blockIndex++)
+        {
+            BlkAddr rba = startRba + blockIndex;
+            VirtualBlkAddr vsa = vsaArray[blockIndex];
+            lsidRefResults[blockIndex] = _GetLsidRefResult(rba, vsa);
+        }
     }
 }
 
-Translator::Translator(const VirtualBlkAddr& vsa)
-: mapper(MapperSingleton::Instance()),
+Translator::Translator(const VirtualBlkAddr& vsa, std::string& arrayName)
+: iVSAMap(MapperServiceSingleton::Instance()->GetIVSAMap(arrayName)),
+  iStripeMap(MapperServiceSingleton::Instance()->GetIStripeMap(arrayName)),
+  iWBStripeAllocator(AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName)),
   startRba(0),
   blockCount(ONLY_ONE),
   lastVsa(UNMAP_VSA),
   lastLsidEntry{IN_USER_AREA, UNMAP_STRIPE},
-  arrayManager(ArraySingleton::Instance()),
   isRead(false),
-  volumeId(UINT32_MAX)
+  volumeId(UINT32_MAX),
+  arrayName(arrayName)
 {
     vsaArray[0] = vsa;
-    lsidRefResults[0] = _GetLsidRefResult(startRba, vsaArray[0]);
+    if (likely(iStripeMap != nullptr))
+    {
+        lsidRefResults[0] = _GetLsidRefResult(startRba, vsaArray[0]);
+    }
 }
 
-Translator::Translator(uint32_t volumeId, BlkAddr rba, bool isRead)
-: Translator(volumeId, rba, ONLY_ONE, isRead)
+Translator::Translator(uint32_t volumeId, BlkAddr rba, std::string& arrayName, bool isRead)
+: Translator(volumeId, rba, ONLY_ONE, arrayName, isRead)
 {
-}
-
-VirtualBlkAddr
-Translator::GetVsa(void)
-{
-    _CheckSingleBlock();
-    return GetVsa(0);
 }
 
 VirtualBlkAddr
@@ -105,9 +122,9 @@ Translator::GetVsa(uint32_t blockIndex)
 {
     if (unlikely(blockIndex >= blockCount))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::TRSLTR_WRONG_ACCESS;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId));
+        POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_ACCESS;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
         return UNMAP_VSA;
     }
 
@@ -125,9 +142,9 @@ Translator::GetLsidRefResult(uint32_t blockIndex)
 {
     if (unlikely(blockIndex >= blockCount))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::TRSLTR_WRONG_ACCESS;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId));
+        POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_ACCESS;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
         StripeAddr unmapLsid;
         unmapLsid.stripeId = UNMAP_STRIPE;
         unmapLsid.stripeLoc = IN_USER_AREA;
@@ -145,8 +162,8 @@ Translator::_GetLsidRefResult(BlkAddr rba, VirtualBlkAddr& vsa)
 
     if (IsUnMapVsa(vsa))
     {
-        vsa = mapper->GetRandomVSA(rba);
-        lsidEntry.stripeId = mapper->GetRandomLsid(vsa.stripeId);
+        vsa = iVSAMap->GetRandomVSA(rba);
+        lsidEntry.stripeId = iStripeMap->GetRandomLsid(vsa.stripeId);
         lsidEntry.stripeLoc = IN_USER_AREA;
     }
     else
@@ -155,15 +172,19 @@ Translator::_GetLsidRefResult(BlkAddr rba, VirtualBlkAddr& vsa)
         {
             if (isRead)
             {
-                std::tie(lsidEntry, referenced) = mapper->GetAndReferLsid(vsa.stripeId);
+                std::tie(lsidEntry, referenced) = iStripeMap->GetLSAandReferLsid(vsa.stripeId);
             }
             else
             {
-                if (IsUnMapStripe(recentVsid) || vsa.stripeId != recentVsid)
+                lsidEntry = iStripeMap->GetLSA(vsa.stripeId);
+
+                if (IsUnMapStripe(recentVsid) || vsa.stripeId != recentVsid
+                    || recentArrayName != arrayName)
                 {
-                    lsidEntry = mapper->GetLSA(vsa.stripeId);
+                    lsidEntry = iStripeMap->GetLSA(vsa.stripeId);
                     recentVsid = vsa.stripeId;
                     recentLsid = lsidEntry.stripeId;
+                    recentArrayName = arrayName;
                 }
                 else
                 {
@@ -177,7 +198,7 @@ Translator::_GetLsidRefResult(BlkAddr rba, VirtualBlkAddr& vsa)
             lsidEntry = lastLsidEntry;
             if (isRead)
             {
-                mapper->ReferLsid(lsidEntry);
+                iWBStripeAllocator->ReferLsidCnt(lsidEntry);
             }
         }
     }
@@ -206,12 +227,13 @@ Translator::GetPba(uint32_t blockIndex)
     LogicalBlkAddr lsa = _GetLsa(blockIndex);
     PartitionType partitionType = _GetPartitionType(blockIndex);
     PhysicalBlkAddr pba;
-    int ret = arrayManager->Translate(partitionType, pba, lsa);
+    IIOTranslator* translator = ArrayService::Instance()->Getter()->GetTranslator();
+    int ret = translator->Translate(arrayName, partitionType, pba, lsa);
     if (unlikely(ret != 0))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::TRANSLATE_CONVERT_FAIL;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId));
+        POS_EVENT_ID eventId = POS_EVENT_ID::TRANSLATE_CONVERT_FAIL;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
         throw eventId;
     }
 
@@ -223,9 +245,9 @@ Translator::_GetLsa(uint32_t blockIndex)
 {
     if (unlikely(blockIndex >= blockCount))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::TRSLTR_INVALID_BLOCK_INDEX;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId));
+        POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_INVALID_BLOCK_INDEX;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
         throw eventId;
     }
 
@@ -233,7 +255,7 @@ Translator::_GetLsa(uint32_t blockIndex)
     VirtualBlkAddr& vsa = vsaArray[blockIndex];
     if (IsUnMapVsa(vsa))
     {
-        vsa = mapper->GetRandomVSA(startRba + blockIndex);
+        vsa = iVSAMap->GetRandomVSA(startRba + blockIndex);
     }
     LogicalBlkAddr lsa = {.stripeId = lsidEntry.stripeId, .offset = vsa.offset};
 
@@ -254,12 +276,14 @@ Translator::GetPhysicalEntries(void* mem, uint32_t blockCount)
     logicalEntry.buffers->push_back(buffer);
 
     PhysicalEntries entries;
-    int ret = arrayManager->Convert(partitionType, entries, logicalEntry);
+    IIOTranslator* translator = ArrayService::Instance()->Getter()->GetTranslator();
+    int ret = translator->Convert(
+        arrayName, partitionType, entries, logicalEntry);
     if (unlikely(ret != 0))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::TRANSLATE_CONVERT_FAIL;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId));
+        POS_EVENT_ID eventId = POS_EVENT_ID::TRANSLATE_CONVERT_FAIL;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
         throw eventId;
     }
     return entries;
@@ -275,7 +299,7 @@ Translator::GetPba(void)
 PartitionType
 Translator::_GetPartitionType(uint32_t blockIndex)
 {
-    if (mapper->IsInUserDataArea(GetLsidEntry(blockIndex)))
+    if (iStripeMap->IsInUserDataArea(GetLsidEntry(blockIndex)))
     {
         return USER_DATA;
     }
@@ -290,11 +314,11 @@ Translator::_CheckSingleBlock(void)
 {
     if (unlikely(ONLY_ONE != blockCount))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::TRSLTR_WRONG_ACCESS;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId));
+        POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_ACCESS;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
         throw eventId;
     }
 }
 
-} // namespace ibofos
+} // namespace pos

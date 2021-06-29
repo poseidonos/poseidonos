@@ -32,14 +32,17 @@
 
 #include "log_write_context_factory.h"
 
-#include "../log/log_handler.h"
-#include "src/allocator/active_stripe_index_info.h"
-#include "src/allocator/stripe.h"
+#include "src/journal_manager/log/block_write_done_log_handler.h"
+#include "src/journal_manager/log/stripe_map_updated_log_handler.h"
+#include "src/journal_manager/log/volume_deleted_log_handler.h"
+#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
+#include "src/allocator/wb_stripe_manager/stripe.h"
 
-namespace ibofos
+namespace pos
 {
 LogWriteContextFactory::LogWriteContextFactory(void)
-: notifier(nullptr)
+: notifier(nullptr),
+  sequenceController(nullptr)
 {
 }
 
@@ -48,9 +51,10 @@ LogWriteContextFactory::~LogWriteContextFactory(void)
 }
 
 void
-LogWriteContextFactory::Init(LogBufferWriteDoneNotifier* target)
+LogWriteContextFactory::Init(LogBufferWriteDoneNotifier* target, CallbackSequenceController* sequencer)
 {
     notifier = target;
+    sequenceController = sequencer;
 }
 
 LogWriteContext*
@@ -58,30 +62,21 @@ LogWriteContextFactory::CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
     MpageList dirty, EventSmartPtr callbackEvent)
 {
     uint32_t volId = volumeIo->GetVolumeId();
-    BlkAddr startRba = ChangeSectorToBlock(volumeIo->GetRba());
+    BlkAddr startRba = ChangeSectorToBlock(volumeIo->GetSectorRba());
     uint64_t numBlks = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
 
     VirtualBlkAddr startVsa = volumeIo->GetVsa();
-    ActiveStripeTailArrIdxInfo wbIndexFinder(volumeIo->GetVolumeId(), volumeIo->IsGc());
-    int wbIndex = wbIndexFinder.GetActiveStripeTailArrIdx();
+    int wbIndex = volumeIo->GetVolumeId();
     StripeAddr writeBufferStripeAddress = volumeIo->GetLsidEntry(); // TODO(huijeong.kim): to only have wbLsid
 
-    bool isGC = false;
-    VirtualBlkAddr oldVsa = UNMAP_VSA;
-    if (volumeIo->IsGc() == true)
-    {
-        isGC = true;
-        oldVsa = volumeIo->GetOldVsa();
-    }
-
     BlockWriteDoneLogHandler* log = new BlockWriteDoneLogHandler(volId, startRba,
-        numBlks, startVsa, wbIndex, writeBufferStripeAddress, oldVsa, isGC);
+        numBlks, startVsa, wbIndex, writeBufferStripeAddress);
 
     MapPageList dirtyMap;
     dirtyMap.emplace(volId, dirty);
 
-    MapUpdateLogWriteContext* logWriteContext = new BlockMapUpdatedLogWriteContext(volumeIo, log, dirtyMap,
-        callbackEvent, notifier);
+    MapUpdateLogWriteContext* logWriteContext
+        = new MapUpdateLogWriteContext(log, dirtyMap, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }
@@ -99,20 +94,32 @@ LogWriteContextFactory::CreateStripeMapLogWriteContext(Stripe* stripe,
     MapPageList dirtyMap;
     dirtyMap.emplace(STRIPE_MAP_ID, dirty);
 
-    MapUpdateLogWriteContext* logWriteContext = new StripeMapUpdatedLogWriteContext(log, dirtyMap, callbackEvent,
-        notifier);
+    MapUpdateLogWriteContext* logWriteContext
+        = new MapUpdateLogWriteContext(log, dirtyMap, callbackEvent, notifier, sequenceController);
+
+    return logWriteContext;
+}
+
+LogWriteContext*
+LogWriteContextFactory::CreateGcStripeFlushedLogWriteContext(
+    GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent)
+{
+    GcStripeFlushedLogHandler* log = new GcStripeFlushedLogHandler(mapUpdates);
+
+    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
+        dirty, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }
 
 LogWriteContext*
 LogWriteContextFactory::CreateVolumeDeletedLogWriteContext(int volId,
-    JournalInternalEventCallback callback)
+    uint64_t contextVersion, EventSmartPtr callback)
 {
-    LogHandlerInterface* log = new VolumeDeletedLogEntry(volId);
-    LogWriteContext* logWriteContext = new VolumeDeletedLogWriteContext(volId, log, callback);
+    LogHandlerInterface* log = new VolumeDeletedLogEntry(volId, contextVersion);
+    LogWriteContext* logWriteContext = new LogWriteContext(log, callback, notifier);
 
     return logWriteContext;
 }
 
-} // namespace ibofos
+} // namespace pos

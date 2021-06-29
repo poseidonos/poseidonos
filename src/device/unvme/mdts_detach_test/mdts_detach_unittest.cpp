@@ -30,10 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 #include "tool/library_unit_test/library_unit_test.h"
-ibofos::LibraryUnitTest libraryUnitTest;
 
 #include <cstdio>
 #include <future>
@@ -44,19 +41,20 @@ ibofos::LibraryUnitTest libraryUnitTest;
 #include "spdk/nvme_spec.h"
 #include "src/array/array.h"
 #include "src/device/device_manager.h"
-#include "src/device/spdk/nvme.hpp"
+#include "src/spdk_wrapper/nvme.hpp"
 #include "src/device/unvme/unvme_drv.h"
 #include "src/device/unvme/unvme_ssd.h"
-#include "src/main/ibofos.h"
-#include "src/scheduler/event_argument.h"
-#include "src/scheduler/io_dispatcher.h"
+#include "src/main/poseidonos.h"
+#include "src/io_scheduler/io_dispatcher.h"
+
+pos::LibraryUnitTest libraryUnitTest;
 
 struct spdk_nvme_ns;
 
-namespace ibofos
+namespace pos
 {
 void
-DiskIo(UBlockDevice* dev, void* ctx)
+DiskIo(UblockSharedPtr dev, void* ctx)
 {
     uint64_t size = 32 * 1024 * 1024 / 512;
     static int test_count = 0;
@@ -75,22 +73,20 @@ DiskIo(UBlockDevice* dev, void* ctx)
         }
     }
 
-    void* mem = ibofos::Memory<512>::Alloc(size);
+    void* mem = pos::Memory<512>::Alloc(size);
 
-    UbioSmartPtr bio(new Ubio(mem, size));
+    UbioSmartPtr bio(new Ubio(mem, size, ""));
 
     bio->dir = UbioDir::Write;
-    ArrayDevice* arrayDev = new ArrayDevice(dev, ArrayDeviceState::NORMAL);
-    PhysicalBlkAddr pba = {.dev = arrayDev, .lba = 512 * 1024 * 1024 / 512};
+    bio->SetLba(512 * 1024 * 1024 / 512);
+    bio->SetUblock(dev);
 
-    bio->SetPba(pba);
+    IODispatcher& ioDispatcher = *IODispatcherSingleton::Instance();
 
-    IODispatcher& ioDispatcher = *EventArgument::GetIODispatcher();
-
-    std::vector<UBlockDevice*> devs = DeviceManagerSingleton::Instance()->GetDevs();
+    std::vector<UblockSharedPtr> devs = DeviceManagerSingleton::Instance()->GetDevs();
     struct spdk_nvme_ctrlr* ctrlr = nullptr;
-    UBlockDevice* targetDevice = nullptr;
-    UnvmeSsd* ssd = nullptr;
+    UblockSharedPtr targetDevice = nullptr;
+    UnvmeSsdSharedPtr ssd = nullptr;
     struct spdk_nvme_ns* ns;
     string sn;
 
@@ -101,7 +97,7 @@ DiskIo(UBlockDevice* dev, void* ctx)
             if (iter->GetType() == DeviceType::SSD)
             {
                 printf("%s will be resetted \n", iter->GetName());
-                ssd = dynamic_cast<UnvmeSsd*>(iter);
+                ssd = dynamic_pointer_cast<UnvmeSsd>(iter);
                 ns = ssd->GetNs();
                 sn = iter->GetSN();
                 ctrlr = spdk_nvme_ns_get_ctrlr(ns);
@@ -114,8 +110,7 @@ DiskIo(UBlockDevice* dev, void* ctx)
 
     int ret = ioDispatcher.Submit(bio, true);
 
-    ibofos::Memory<512>::Free(mem);
-    delete arrayDev;
+    pos::Memory<512>::Free(mem);
 }
 
 // 32MB -> detach -> 4K IO
@@ -146,14 +141,14 @@ test2_32mb_with_detaching(void)
     libraryUnitTest.TestResult(2, true);
 }
 
-} // namespace ibofos
+} // namespace pos
 
 int
 main(int argc, char* argv[])
 {
-    libraryUnitTest.Initialize(argc, argv);
-    ibofos::test1_32mb_with_detaching();
-    ibofos::test2_32mb_with_detaching();
+    libraryUnitTest.Initialize(argc, argv, "../../../../");
+    pos::test1_32mb_with_detaching();
+    pos::test2_32mb_with_detaching();
     libraryUnitTest.SuccessAndExit();
     return 0;
 }

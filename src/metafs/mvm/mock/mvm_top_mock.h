@@ -31,21 +31,22 @@
  */
 
 /* 
- * iBoFOS - Meta Filesystem Layer
+ * PoseidonOS - Meta Filesystem Layer
  * 
  * Mocking Meta Volume Manager
 */
 #pragma once
 
-#include "meta_vol_type.h"
-#include "mfs_mvm_top.h"
-#include "mvm_req.h"
+#include "meta_volume_type.h"
+#include "metafs_control_request.h"
 
-class MockMetaVolMgrClass : public MetaFsMVMTopMgrClass
+namespace pos
+{
+class MockMetaVolManager : public MetaFsMVMTopManager
 {
 public:
-    MockMetaVolMgrClass(void);
-    static MockMetaVolMgrClass& GetInstance(void);
+    MockMetaVolManager(void);
+    static MockMetaVolManager& GetInstance(void);
 
     virtual void Init(MetaVolumeType volType, MetaLpnType maxVolPageNum) final;
     virtual bool Bringup(void) final;
@@ -53,14 +54,15 @@ public:
     virtual bool Close(bool& resetCxt /*output*/) final;
     virtual bool CreateVolume(MetaVolumeType volType) final;
 
-    virtual IBOF_EVENT_ID ProcessNewReq(MetaFsMoMReqMsg& reqMsg) override;
+    virtual POS_EVENT_ID ProcessNewReq(MetaFsFileControlRequest& reqMsg) override;
 
 protected:
     uint32_t _GetDefaultDataChunkSize(void);
 
 private:
-    IBOF_EVENT_ID _CreateDummyFile(FileSizeType fileByteSize);
-    void _CreateFileInode(FileFDType fd, FileSizeType fileByteSize);
+    POS_EVENT_ID _CreateDummyFile(FileSizeType fileByteSize);
+    void _CreateFileInode(FileDescriptorType fd, FileSizeType fileByteSize);
 
     MetaFileInode dummyInode;
 };
+} // namespace pos

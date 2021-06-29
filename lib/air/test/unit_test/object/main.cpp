@@ -1,10 +1,9 @@
 
-#include <stdio.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <stdio.h>
 
 #include "instance_test.h"
-#include "src/config/ConfigParser.cpp"
 
 TEST_F(InstanceTest, Initialize)
 {
@@ -41,7 +40,8 @@ TEST_F(InstanceTest, GetCollectionManager)
     EXPECT_NE(nullptr, instance_manager->GetCollectionManager());
 }
 
-int main(int argc, char** argv)
+int
+main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

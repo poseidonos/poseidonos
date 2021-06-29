@@ -36,6 +36,8 @@
 #include <string>
 #include <thread>
 
+namespace pos
+{
 class MetaFsIoHandlerBase
 {
 public:
@@ -44,8 +46,9 @@ public:
 
     virtual void StartThread(void) = 0;
     virtual void ExitThread(void);
-    virtual void SuspendThread(void);
-    virtual void ResumeThread(void);
+
+    virtual bool AddArrayInfo(std::string arrayName) = 0;
+    virtual bool RemoveArrayInfo(std::string arrayName) = 0;
 
     void PrepareThread(const char* name);
 
@@ -60,3 +63,4 @@ private:
     void _UpdateThreadName(std::string* name);
     void _UpdateThreadCPUAffinity(uint32_t coreId);
 };
+} // namespace pos

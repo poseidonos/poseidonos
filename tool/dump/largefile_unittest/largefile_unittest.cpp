@@ -1,6 +1,6 @@
 #include "src/io/general_io/ubio.h"
-#include "src/scheduler/callback.h"
-#include "src/io/general_io/error_type.h"
+#include "src/event_scheduler/callback.h"
+#include "src/include/io_error_type.h"
 #include <iostream>
 #include <cstdio>
 #include <future>
@@ -10,7 +10,7 @@ int initialize_ibofos(int argc, char **argv);
 extern int argc;
 extern char *argv;
 
-namespace ibofos
+namespace pos
 {
 
 volatile int testCount = 0;
@@ -57,7 +57,7 @@ int main()
     std::future<int> f = std::async(std::launch::async, initialize_ibofos, argc, &argvPtr);
     printf("Please use ./setup_ibofos_nvmf_volume.sh command before pressing any key. If you ready please press Any key");
     std::cin.get();
-    ibofos::test1_success();
+    pos::test1_success();
 
     assert(0);
     return 0;

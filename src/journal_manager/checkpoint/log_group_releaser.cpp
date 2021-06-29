@@ -32,41 +32,68 @@
 
 #include "log_group_releaser.h"
 
-#include "../log_buffer/journal_log_buffer.h"
-#include "../log_write/buffer_write_done_notifier.h"
-#include "../log_write/log_write_handler.h"
-#include "checkpoint_handler.h"
-#include "dirty_map_manager.h"
-#include "src/include/ibof_event_id.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/include/pos_event_id.h"
+#include "src/journal_manager/checkpoint/checkpoint_handler.h"
+#include "src/journal_manager/checkpoint/checkpoint_submission.h"
+#include "src/journal_manager/checkpoint/dirty_map_manager.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
+#include "src/journal_manager/log_buffer/log_group_footer_write_event.h"
+#include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
+#include "src/journal_manager/log_write/log_write_handler.h"
 #include "src/logger/logger.h"
-#include "src/mapper/mapper.h"
-#include "src/scheduler/event_argument.h"
 
-namespace ibofos
+namespace pos
 {
+// Constructor for the product code
 LogGroupReleaser::LogGroupReleaser(void)
-: releaseNotifier(nullptr),
-  logBuffer(nullptr),
-  logWriteHandler(nullptr),
-  dirtyPageManager(nullptr),
-  flushingLogGroupId(-1)
+: LogGroupReleaser(new CheckpointHandler(this))
 {
-    checkpointHandler = new CheckpointHandler(this);
+}
+
+// Constructor for unit test
+LogGroupReleaser::LogGroupReleaser(CheckpointHandler* checkpointHandler)
+: config(nullptr),
+  releaseNotifier(nullptr),
+  logBuffer(nullptr),
+  dirtyPageManager(nullptr),
+  sequenceController(nullptr),
+  flushingLogGroupId(-1),
+  checkpointTriggerInProgress(false),
+  checkpointHandler(checkpointHandler),
+  contextManager(nullptr),
+  eventScheduler(nullptr)
+{
 }
 
 LogGroupReleaser::~LogGroupReleaser(void)
 {
-    delete checkpointHandler;
+    if (checkpointHandler != nullptr)
+    {
+        delete checkpointHandler;
+    }
 }
 
 void
-LogGroupReleaser::Init(LogBufferWriteDoneNotifier* released, JournalLogBuffer* buffer,
-    LogWriteHandler* writeHandler, DirtyMapManager* dirtyPage)
+LogGroupReleaser::Init(JournalConfiguration* journalConfiguration,
+    LogBufferWriteDoneNotifier* released,
+    JournalLogBuffer* buffer, DirtyMapManager* dirtyPage,
+    CallbackSequenceController* sequencer,
+    IMapFlush* mapFlush, IContextManager* ctxManager, EventScheduler* scheduler)
 {
+    config = journalConfiguration;
     releaseNotifier = released;
     logBuffer = buffer;
-    logWriteHandler = writeHandler;
     dirtyPageManager = dirtyPage;
+    sequenceController = sequencer;
+
+    checkpointHandler->Init(mapFlush, ctxManager);
+
+    contextManager = ctxManager;
+    eventScheduler = scheduler;
 }
 
 void
@@ -77,9 +104,9 @@ LogGroupReleaser::Reset(void)
 }
 
 void
-LogGroupReleaser::AddToFullLogGroup(int gorupId)
+LogGroupReleaser::AddToFullLogGroup(int groupId)
 {
-    _AddToFullLogGroupList(gorupId);
+    _AddToFullLogGroupList(groupId);
     _FlushNextLogGroup();
 }
 
@@ -95,42 +122,55 @@ LogGroupReleaser::_FlushNextLogGroup(void)
 {
     if ((flushingLogGroupId == -1) && (_HasFullLogGroup()))
     {
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_FLUSH_LOG_GROUP,
-            "Flush next log group");
+        if (checkpointTriggerInProgress.exchange(true) == false)
+        {
+            _UpdateFlushingLogGroup();
+            assert(flushingLogGroupId != -1);
+            checkpointTriggerInProgress = false;
 
-        StartCheckpoint();
+            _TriggerCheckpoint();
+        }
     }
+}
+
+void
+LogGroupReleaser::_TriggerCheckpoint(void)
+{
+    LogGroupFooter footer;
+    uint64_t footerOffset;
+
+    _CreateFlushingLogGroupFooter(footer, footerOffset);
+
+    EventSmartPtr callbackEvent(new CheckpointSubmission(dirtyPageManager,
+        checkpointHandler, sequenceController, flushingLogGroupId));
+
+    EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footer, footerOffset, flushingLogGroupId, callbackEvent));
+    eventScheduler->EnqueueEvent(event);
+}
+
+void
+LogGroupReleaser::_CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t& footerOffset)
+{
+    LogGroupLayout layout = config->GetLogBufferLayout(flushingLogGroupId);
+    uint64_t version = contextManager->GetStoredContextVersion(SEGMENT_CTX);
+
+    footer.lastCheckpointedSeginfoVersion = version;
+    footerOffset = layout.footerStartOffset;
 }
 
 bool
 LogGroupReleaser::_HasFullLogGroup(void)
 {
-    std::unique_lock<std::mutex> lock(flushLock);
+    std::unique_lock<std::mutex> lock(fullLogGroupLock);
     return (fullLogGroup.size() != 0);
-}
-
-int
-LogGroupReleaser::StartCheckpoint(void)
-{
-    _UpdateFlushingLogGroup();
-    assert(flushingLogGroupId != -1);
-
-    MapPageList dirtyPages = dirtyPageManager->GetDirtyList(flushingLogGroupId);
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_CHECKPOINT_STARTED,
-        "Checkpoint started for log group {}", flushingLogGroupId);
-    int ret = checkpointHandler->Start(dirtyPages);
-    if (ret != 0)
-    {
-        // TODO(huijeong.kim): Go to the fail mode - not to journal any more
-    }
-    return 0;
 }
 
 void
 LogGroupReleaser::_UpdateFlushingLogGroup(void)
 {
-    std::unique_lock<std::mutex> lock(flushLock);
     flushingLogGroupId = _PopFullLogGroup();
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_FLUSH_LOG_GROUP,
+        "Flush next log group {}", flushingLogGroupId);
 }
 
 int
@@ -149,9 +189,8 @@ void
 LogGroupReleaser::CheckpointCompleted(void)
 {
     assert(flushingLogGroupId != -1);
-    int ret = logBuffer->AsyncReset(flushingLogGroupId,
-        std::bind(&LogGroupReleaser::_LogGroupResetCompleted,
-            this, std::placeholders::_1));
+    EventSmartPtr callbackEvent(new LogGroupResetCompletedEvent(this, flushingLogGroupId));
+    int ret = logBuffer->AsyncReset(flushingLogGroupId, callbackEvent);
 
     if (ret != 0)
     {
@@ -172,29 +211,37 @@ LogGroupReleaser::GetNumFullLogGroups(void)
     }
 }
 
-int
-LogGroupReleaser::GetFlushingLogGroupId(void)
-{
-    std::unique_lock<std::mutex> lock(flushLock);
-    return flushingLogGroupId;
-}
-
 void
-LogGroupReleaser::_LogGroupResetCompleted(int logGroupId)
+LogGroupReleaser::LogGroupResetCompleted(int logGroupId)
 {
     releaseNotifier->NotifyLogBufferReseted(logGroupId);
 
     _ResetFlushingLogGroup();
     _FlushNextLogGroup();
-
-    logWriteHandler->StartWaitingIos();
 }
 
 void
 LogGroupReleaser::_ResetFlushingLogGroup(void)
 {
-    std::unique_lock<std::mutex> lock(flushLock);
     flushingLogGroupId = -1;
 }
 
-} // namespace ibofos
+int
+LogGroupReleaser::GetFlushingLogGroupId(void)
+{
+    return flushingLogGroupId;
+}
+
+std::list<int>
+LogGroupReleaser::GetFullLogGroups(void)
+{
+    return fullLogGroup;
+}
+
+CheckpointStatus
+LogGroupReleaser::GetStatus(void)
+{
+    return checkpointHandler->GetStatus();
+}
+
+} // namespace pos

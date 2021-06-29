@@ -32,19 +32,11 @@
 
 #include "state_context.h"
 
-namespace ibofos
+namespace pos
 {
-StateContext::StateContext(string _sender)
+
+StateContext::StateContext(string sender, SituationEnum situ)
 {
 }
 
-StateContext::StateContext(string _sender, Situation _s)
-{
-}
-
-void
-StateContext::_MakeUuid()
-{
-}
-
-} // namespace ibofos
+} // namespace pos

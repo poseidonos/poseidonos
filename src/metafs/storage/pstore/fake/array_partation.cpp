@@ -30,10 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mfs_io_config.h"
+#include "metafs_config.h"
 #include "src/array/array_partition.h"
 
-using namespace ibofos;
+namespace pos
+{
 /**
  * Constructor
  *
@@ -63,3 +64,4 @@ ArrayPartition::TranslateToDeviceLBA(LogicalBlkAddr lsa)
     deviceLba.lba = lsa.stripeId * sizeInfo.blkSizeByte + lsa.offset; // set random value between 0 and maxSize.
     return deviceLba;
 }
+} // namespace pos

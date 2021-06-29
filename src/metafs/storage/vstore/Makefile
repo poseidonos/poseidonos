@@ -22,7 +22,7 @@ ramdisk: $(OBJECT_FILES)
 ./obj/mss_utils.o : ./../mss_utils.cpp
 	g++ $(INCLUDES) $(CPPFLAGS) -c -o $@ $^
 
-./obj/mfs_log.o : ./../../log/mfs_log.cpp
+./obj/metafs_log.o : ./../../log/metafs_log.cpp
 	g++ $(INCLUDES) $(CPPFLAGS) -c -o $@ $^
 
 ./obj/mss_ramdisk.o : mss_ramdisk.cpp

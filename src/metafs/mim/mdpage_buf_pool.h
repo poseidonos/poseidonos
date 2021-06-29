@@ -34,10 +34,12 @@
 
 #include <vector>
 
-#include "mfs_io_config.h"
-#include "mfs_type.h"
+#include "metafs_config.h"
+#include "metafs_type.h"
 #include "src/include/memory.h"
 
+namespace pos
+{
 class MDPageBufPool
 {
 public:
@@ -49,19 +51,21 @@ public:
 
     ~MDPageBufPool(void)
     {
-        ibofos::Memory<MDPAGE_BUF_SIZE>::Free(base);
+        pos::Memory<MDPAGE_BUF_SIZE>::Free(base);
         mdPageBufList.clear();
     }
+
     void
     Init(void)
     {
-        base = ibofos::Memory<MDPAGE_BUF_SIZE>::Alloc(totalNumBuf);
+        base = pos::Memory<MDPAGE_BUF_SIZE>::Alloc(totalNumBuf);
         assert(base != nullptr); // please check hugepage preallocation
         for (uint32_t bufIdx = 0; bufIdx < totalNumBuf; ++bufIdx)
         {
             mdPageBufList.push_back((uint8_t*)base + (MDPAGE_BUF_SIZE * bufIdx));
         }
     }
+
     void*
     PopNewBuf(void)
     {
@@ -74,10 +78,23 @@ public:
 
         return newBuf;
     }
+
     void
     FreeBuf(void* buf)
     {
         mdPageBufList.push_back(buf);
+    }
+
+    bool
+    IsEmpty(void)
+    {
+        return mdPageBufList.empty();
+    }
+
+    size_t
+    GetCount(void)
+    {
+        return mdPageBufList.size();
     }
 
 private:
@@ -86,3 +103,4 @@ private:
     void* base;
     std::vector<void*> mdPageBufList;
 };
+} // namespace pos

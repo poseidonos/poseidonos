@@ -32,7 +32,7 @@
 
 #include "src/io/general_io/internal_write_completion.h"
 
-namespace ibofos
+namespace pos
 {
 InternalWriteCompletion::InternalWriteCompletion(BufferEntry& bufferEntry)
 : Callback(false),
@@ -50,4 +50,4 @@ InternalWriteCompletion::_DoSpecificJob(void)
     bufferEntry.ReturnBuffer();
     return true;
 }
-} // namespace ibofos
+} // namespace pos

@@ -32,18 +32,24 @@
 
 #pragma once
 
+#include <string>
+#include "src/metafs/storage/mss.h"
 #include "meta_region_mgr.h"
-#include "meta_vol_type.h"
+#include "meta_volume_type.h"
 
-class OnVolumeMetaRegionMgr : public MetaRegionMgr
+namespace pos
+{
+class OnVolumeMetaRegionManager : public MetaRegionManager
 {
 public:
-    OnVolumeMetaRegionMgr(void);
-    virtual ~OnVolumeMetaRegionMgr(void);
+    explicit OnVolumeMetaRegionManager(std::string arrayName);
+    virtual ~OnVolumeMetaRegionManager(void);
 
     virtual void Init(MetaVolumeType volType, MetaLpnType baseLpn, MetaLpnType maxLpn);
     virtual void Init(MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn) final;
+    virtual void SetMss(MetaStorageSubsystem* metaStorage) = 0;
 
 protected:
     MetaVolumeType volumeType;
 };
+} // namespace pos

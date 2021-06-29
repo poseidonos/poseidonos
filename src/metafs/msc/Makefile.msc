@@ -17,7 +17,6 @@ endif
 endif # MFS_INTEGRATION_TEST_EN
 ########################################
 MSC_SRCS += \
-	mfs_msc_top.cpp \
 	msc_req.cpp \
 
 ifeq ($(MOCK_MSC_EN),1)
@@ -31,19 +30,16 @@ MSC_SRCS += \
 else
 
 MSC_SRCS += \
-	mfs_core_mgr.cpp \
-	mfs_mbr.cpp \
-	mfs_mbr_mgr.cpp \
-	mfs_state_mgr.cpp \
+	metafs_system_manager.cpp \
+	metafs_mbr.cpp \
+	metafs_mbr_mgr.cpp \
 	mfs_state_machine.cpp \
-	mfs_state_procedure.cpp \
 
 endif
 
 ifeq ($(UT_MSC_EN), 1)
 UT_SRCS += \
 	msc_test.cpp \
-	mfs_core_mgr_test.cpp \
 	mfs_mbr_test.cpp \
 	mfs_mbr_mgr_test.cpp \
 

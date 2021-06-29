@@ -34,56 +34,79 @@
 
 #include <list>
 
-#include "src/array/array.h"
+#include "Air.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/allocator/i_block_allocator.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/gc/copier_read_completion.h"
 #include "src/gc/reverse_map_load_completion.h"
 #include "src/gc/stripe_copy_submission.h"
 #include "src/io/general_io/io_submit_handler.h"
+#include "src/include/backend_event.h"
 #include "src/logger/logger.h"
+#include "src/event_scheduler/event_scheduler.h"
 
-namespace ibofos
+namespace pos
 {
-Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus)
+
+Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus,
+               IArrayInfo* array, const PartitionLogicalSize* udSize, CopierMeta* meta_,
+               IBlockAllocator* iBlockAllocator_, IContextManager* iContextManager_,
+               CallbackSmartPtr stripeCopySubmissionPtr_, CallbackSmartPtr reverseMapLoadCompletionPtr_)
 : currentStripeOffset(0),
   victimId(victimId),
   targetId(targetId),
   victimStripeId(UNMAP_STRIPE),
   copybackState(COPIER_THRESHOLD_CHECK_STATE),
-  meta(nullptr),
-  allocator(AllocatorSingleton::Instance()),
+  meta(meta_),
+  array(array),
+  iBlockAllocator(iBlockAllocator_),
+  iContextManager(iContextManager_),
   gcStatus(gcStatus),
-  loadedValidBlock(false)
+  loadedValidBlock(false),
+  stripeCopySubmissionPtr(stripeCopySubmissionPtr_),
+  reverseMapLoadCompletionPtr(reverseMapLoadCompletionPtr_)
 {
-    const PartitionLogicalSize* udSize;
-    udSize = ArraySingleton::Instance()->GetSizeInfo(PartitionType::USER_DATA);
+    if (nullptr == udSize)
+    {
+        udSize = array->GetSizeInfo(PartitionType::USER_DATA);
+    }
     userDataMaxStripes = udSize->stripesPerSegment;
     userDataMaxBlks = udSize->blksPerStripe * userDataMaxStripes;
     blocksPerChunk = udSize->blksPerChunk;
-
-    meta = new CopierMeta(udSize->chunksPerStripe, CHUNK_SIZE);
-
-    victimStripe = new VictimStripe[userDataMaxStripes];
-
-#if defined QOS_ENABLED_BE
+    victimIndex = 0;
+    if (nullptr == meta)
+    {
+        meta = new CopierMeta(array);
+    }
+    if (nullptr == iBlockAllocator)
+    {
+        iBlockAllocator =  AllocatorServiceSingleton::Instance()->GetIBlockAllocator(array->GetName());
+    }
+    if (nullptr == iContextManager)
+    {
+        iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(array->GetName());
+    }
     SetEventType(BackendEvent_GC);
-#endif
 }
 
 Copier::~Copier(void)
 {
-    delete meta;
-    delete[] victimStripe;
+    if (nullptr != meta)
+    {
+        delete meta;
+    }
 }
 
 bool
 Copier::Execute(void)
 {
-    if (true == isStop)
+    if (true == isStopped)
     {
         bool ret = _Stop();
         return ret;
     }
-    else if (true == isPause)
+    else if (true == isPaused)
     {
         return false;
     }
@@ -121,21 +144,19 @@ Copier::_Stop(void)
 {
     if (copybackState > CopierStateType::COPIER_COPY_PREPARE_STATE)
     {
-        for (uint32_t index = 0; index < userDataMaxStripes; index++)
-        {
-            if (0 != victimStripe[index].IsAsyncIoDone())
-            {
-                return false;
-            }
-        }
-
-        if (false == _Sync())
+        if (false == _IsAllVictimSegmentCopyDone())
         {
             return false;
         }
     }
 
-    isStop = false;
+    GcStripeManager* gcStripeManager = meta->GetGcStripeManager();
+    if (false == gcStripeManager->IsAllFinished())
+    {
+        return false;
+    }
+
+    isStopped = false;
     _ChangeEventState(CopierStateType::COPIER_READY_TO_END_STATE);
 
     return false;
@@ -144,12 +165,8 @@ Copier::_Stop(void)
 void
 Copier::_InitVariables(void)
 {
-    meta->InitProgressCount();
-
     currentStripeOffset = 0;
-
     loadedValidBlock = false;
-
     gcStatus->SetCopyInfo(false /*started*/, victimId,
         0 /*invalid cnt*/, 0 /*copy cnt*/);
 }
@@ -157,23 +174,22 @@ Copier::_InitVariables(void)
 void
 Copier::_CompareThresholdState(void)
 {
-    uint32_t freeSegments = allocator->GetNumOfFreeUserDataSegment();
-
-    if ((false == thresholdCheck) || (allocator->GetGcThreshold() >= freeSegments))
+    CurrentGcMode gcMode = iContextManager->GetCurrentGcMode();
+    if ((false == thresholdCheck) || (gcMode != MODE_NO_GC))
     {
-        victimId = allocator->GetMostInvalidatedSegment();
+        victimId = iContextManager->AllocateGCVictimSegment();
         if (UNMAP_SEGMENT != victimId)
         {
             _InitVariables();
             _ChangeEventState(CopierStateType::COPIER_COPY_PREPARE_STATE);
 
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::GC_GET_VICTIM_SEGMENT,
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_GET_VICTIM_SEGMENT,
                 "trigger start, cnt:{}, victimId:{}",
-                freeSegments, victimId);
+                 iContextManager->GetNumFreeSegment(), victimId);
 
-            if (allocator->GetUrgentThreshold() < freeSegments)
+            if (gcMode == MODE_NORMAL_GC)
             {
-                allocator->SetBlockingSegmentAllocation(false);
+                iBlockAllocator->PermitUserBlkAlloc();
             }
         }
     }
@@ -182,22 +198,30 @@ Copier::_CompareThresholdState(void)
 void
 Copier::_CopyPrepareState(void)
 {
+    uint32_t victimSegmentIndex = meta->SetInUseBitmap();
+    victimIndex = victimSegmentIndex;
+
     StripeId baseStripe = victimId * userDataMaxStripes;
 
     loadedValidBlock = false;
     validStripes.clear();
-    CallbackSmartPtr callee(
-        new StripeCopySubmission(baseStripe,
-            victimStripe,
-            meta));
+
+    CallbackSmartPtr callee = std::make_shared<StripeCopySubmission>(baseStripe, meta, victimIndex);
     callee->SetWaitingCount(userDataMaxStripes);
 
     for (uint32_t index = 0; index < userDataMaxStripes; index++)
     {
-        CallbackSmartPtr callback(new ReverseMapLoadCompletion());
-        callback->SetCallee(callee);
-
-        victimStripe[index].Load(baseStripe + index, callback);
+        CallbackSmartPtr callback;
+        if (nullptr == reverseMapLoadCompletionPtr)
+        {
+            callback = std::make_shared<ReverseMapLoadCompletion>();
+            callback->SetCallee(callee);
+        }
+        else
+        {
+            callback = reverseMapLoadCompletionPtr;
+        }
+        meta->GetVictimStripe(victimIndex, index)->Load(baseStripe + index, callback);
     }
 
     _ChangeEventState(CopierStateType::COPIER_COPY_COMPLETE_STATE);
@@ -206,13 +230,16 @@ Copier::_CopyPrepareState(void)
 bool
 Copier::_CopyCompleteState(void)
 {
-    bool ret = _Sync();
+    bool ret = meta->IsSynchronized();
     if (false == ret)
     {
-        return false;
+        if (meta->IsCopyDone() == false)
+        {
+            return false;
+        }
     }
 
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::GC_COPY_COMPLETE,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_COPY_COMPLETE,
         "copy complete, id:{}", victimId);
 
     uint32_t invalidBlkCnt = userDataMaxBlks - meta->GetDoneCopyBlks();
@@ -220,7 +247,6 @@ Copier::_CopyCompleteState(void)
     gcStatus->SetCopyInfo(true /*started*/, victimId,
         invalidBlkCnt /*invalid cnt*/, meta->GetDoneCopyBlks() /*copy cnt*/);
 
-    _ReleaseSegment();
     _ChangeEventState(CopierStateType::COPIER_THRESHOLD_CHECK_STATE);
 
     if (false == thresholdCheck)
@@ -232,18 +258,19 @@ Copier::_CopyCompleteState(void)
 }
 
 bool
-Copier::_Sync(void)
+Copier::_IsSynchronized(void)
 {
-    bool ret = meta->IsSync();
+    bool ret = meta->IsSynchronized();
 
     return ret;
 }
 
-int
-Copier::_ReleaseSegment(void)
+bool
+Copier::_IsAllVictimSegmentCopyDone(void)
 {
-    allocator->FreeUserDataSegmentId(victimId);
-    return 0;
+    bool ret = meta->IsAllVictimSegmentCopyDone();
+
+    return ret;
 }
 
-} // namespace ibofos
+} // namespace pos

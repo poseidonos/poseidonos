@@ -40,47 +40,58 @@
 #include <vector>
 
 #include "device_identifier.h"
+#include "i_device_event.h"
 #include "spdk/nvme.h"
-#include "src/device/device_driver.h"
-#include "src/device/device_monitor.h"
+#include "src/device/base/device_driver.h"
+#include "src/spdk_wrapper/device_monitor.h"
 #include "src/include/memory.h"
 #include "src/lib/singleton.h"
+#ifdef _ADMIN_ENABLED
+#include "src/device/i_dev_info.h"
+#endif
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 class AffinityManager;
 class DeviceProperty;
 class EventScheduler;
 class UBlockDevice;
+class IIODispatcher;
 
-using DeviceIterFunc = function<void(UBlockDevice*, void*)>;
+using DeviceIterFunc = function<void(UblockSharedPtr, void*)>;
 
 class DeviceManager
+#ifdef _ADMIN_ENABLED
+: public IDevInfo
+#endif
 {
 public:
     DeviceManager(void);
-    ~DeviceManager();
+    virtual ~DeviceManager(void);
 
-    void ScanDevs(void);
-    UBlockDevice* GetDev(DeviceIdentifier& devID);
-    vector<UBlockDevice*> GetDevs();
-    vector<DeviceProperty> ListDevs();
-    void AttachDevice(UBlockDevice* dev);
-    int DetachDevice(DevUid sn);
-    int RemoveDevice(UBlockDevice* dev);
-    struct spdk_nvme_ctrlr* GetNvmeCtrlr(std::string& deviceName);
-    int PassThroughNvmeAdminCommand(std::string& deviceName,
+    virtual void Initialize(IIODispatcher* ioDispatcherInterface);
+
+    virtual void ScanDevs(void);
+    virtual UblockSharedPtr GetDev(DeviceIdentifier& devID);
+    virtual vector<UblockSharedPtr> GetDevs(void);
+    virtual vector<DeviceProperty> ListDevs(void);
+    virtual void AttachDevice(UblockSharedPtr dev);
+    virtual int DetachDevice(DevUid sn);
+    virtual int RemoveDevice(UblockSharedPtr dev);
+    virtual struct spdk_nvme_ctrlr* GetNvmeCtrlr(std::string& deviceName);
+    virtual int PassThroughNvmeAdminCommand(std::string& deviceName,
         struct spdk_nvme_cmd* cmd, void* buffer, uint32_t bufferSizeInBytes);
 
-    void StartMonitoring();
-    void StopMonitoring();
-    vector<pair<string, string>> MonitoringState();
+    virtual void StartMonitoring(void);
+    virtual void StopMonitoring(void);
+    virtual vector<pair<string, string>> MonitoringState(void);
 
-    void HandleCompletedCommand(void);
+    virtual void HandleCompletedCommand(void);
 
-    int IterateDevicesAndDoFunc(DeviceIterFunc func, void* ctx);
+    virtual int IterateDevicesAndDoFunc(DeviceIterFunc func, void* ctx);
+    virtual void SetDeviceEventCallback(IDeviceEvent* event);
 
 private:
     void _InitDriver();
@@ -89,41 +100,38 @@ private:
     void _Rescan();
     void _ClearDevices();
     void _ClearMonitors();
-    void _ClearWorkers();
-    int _DetachDeviceImpl(UBlockDevice* dev);
+    int _DetachDeviceImpl(UblockSharedPtr dev);
     void _DetachDone(string devName);
     void _PrepareIOWorker(void);
     void _PrepareDevices(void);
-    void _PrepareDevice(UBlockDevice* dev);
-    void _PrepareMockDevice(UBlockDevice* dev);
-    void _ReleaseDevice(UBlockDevice* dev);
-    bool _CheckDuplication(UBlockDevice* dev);
+    void _PrepareDevice(UblockSharedPtr dev);
+    void _PrepareMockDevice(UblockSharedPtr dev);
+    void _ReleaseDevice(UblockSharedPtr dev);
+    bool _CheckDuplication(UblockSharedPtr dev);
 
-    void _SetupThreadModel(void);
     void _WaitRegistration(void);
     void _RegisterThread(void);
     static void _RegisterToAllDevices(void* arg1, void* arg2);
     static void _RegisterToDevice(void* arg1, void* arg2);
 
-    void _RegisterThread(UBlockDevice* dev);
-    void _RegisterThreadToDevice(UBlockDevice* dev);
+    void _RegisterThread(UblockSharedPtr dev);
+    void _RegisterThreadToDevice(UblockSharedPtr dev);
 
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
-    static const int NO_DEVICE_ERROR = -1;
     static const int LOCK_ACQUIRE_FAILED = -1;
 
-    vector<UBlockDevice*> devices;
+    vector<UblockSharedPtr> devices;
     std::recursive_mutex deviceManagerMutex;
     vector<DeviceDriver*> drivers;
     vector<DeviceMonitor*> monitors;
     vector<future<void>> monitorFutures;
 
-    EventScheduler* eventScheduler;
     AffinityManager* affinityManager;
     std::atomic<bool> reactorRegistered;
+    IDeviceEvent* deviceEvent = nullptr;
+    IIODispatcher* ioDispatcher;
 };
 
 using DeviceManagerSingleton = Singleton<DeviceManager>;
 
-} // namespace ibofos
+} // namespace pos
 #endif // DEVICE_MANAGER_H_

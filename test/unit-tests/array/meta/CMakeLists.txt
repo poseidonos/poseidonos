@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(array_meta_ut array_meta_test.cpp)
+POS_ADD_UNIT_TEST(device_meta_ut device_meta_test.cpp)

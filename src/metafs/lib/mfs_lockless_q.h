@@ -32,11 +32,13 @@
 
 #pragma once
 
-#include "mfs_log.h"
+#include "metafs_log.h"
 #include "rte_ring.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
+namespace pos
+{
 enum class LockLessQType
 {
     MPMC = 0, // Multi-producer, Multi-consumer
@@ -75,7 +77,7 @@ public:
                 flags = 0;
                 break;
             default:
-                MFS_TRACE_CRITICAL((int)IBOF_EVENT_ID::MFS_INVALID_PARAMETER,
+                MFS_TRACE_CRITICAL((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
                     "Given QType is wrong...(type={})", (int)type);
                 assert(false);
         }
@@ -83,7 +85,7 @@ public:
         ring = rte_ring_create(qName, numEntries, coreId, flags);
         assert(ring != NULL);
 
-        MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "RTE Ring has been created. name={}, numEntries={}, cpu_id={}, flags={}",
             qName, numEntries, coreId, flags);
     }
@@ -101,7 +103,7 @@ public:
 
         if (ret)
         {
-            MFS_TRACE_CRITICAL((int)IBOF_EVENT_ID::MFS_QUEUE_PUSH_FAILED,
+            MFS_TRACE_CRITICAL((int)POS_EVENT_ID::MFS_QUEUE_PUSH_FAILED,
                 "Item push failed. rc={}", ret);
             assert(false);
             return false;
@@ -118,7 +120,7 @@ public:
 
         if (ret)
         {
-            MFS_TRACE_CRITICAL((int)IBOF_EVENT_ID::MFS_QUEUE_POP_FAILED,
+            MFS_TRACE_CRITICAL((int)POS_EVENT_ID::MFS_QUEUE_POP_FAILED,
                 "Item pop failed. rc={}", ret);
             assert(false);
             return item;
@@ -143,3 +145,4 @@ private:
     rte_ring* ring;
     uint32_t qSize;
 };
+} // namespace pos

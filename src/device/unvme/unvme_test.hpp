@@ -35,7 +35,7 @@
 
 #include "nvme_test.hpp"
 
-namespace ibofos
+namespace pos
 {
 class DeviceDriver;
 class Nvme;
@@ -54,5 +54,5 @@ private:
 
     Nvme* spdkNVMe;
 };
-} // namespace ibofos
+} // namespace pos
 #endif // UNVME_TEST_HPP_

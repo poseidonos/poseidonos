@@ -31,7 +31,9 @@
  */
 
 #include "src/qos/qos_avg_compute.h"
-namespace ibofos
+
+#include <cmath>
+namespace pos
 {
 /* --------------------------------------------------------------------------*/
 /**
@@ -40,19 +42,9 @@ namespace ibofos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-
-void
-MovingAvgCompute::ResetMovingAvg(int volId)
+MovingAvgCompute::MovingAvgCompute(int len)
+: movingAvgWindowLength(len)
 {
-    uint64_t value = 0;
-    dataReadyToProcess[volId] = false;
-    buffer[volId] = 0;
-    count[volId] = 0;
-    averageBW[volId] = 0;
-    do
-    {
-        value = DequeueAvgData(volId);
-    } while (value != 0);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -62,20 +54,61 @@ MovingAvgCompute::ResetMovingAvg(int volId)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-
-void
-MovingAvgCompute::ComputeMovingAvg(int volId, uint64_t data)
+MovingAvgCompute::~MovingAvgCompute(void)
 {
-    uint64_t oldData = 0;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+MovingAvgCompute::Initilize(void)
+{
+    std::queue<struct avgData> emptyQueue;
+    for (uint32_t volId = 0; volId < MAX_VOLUME_COUNT; volId++)
+    {
+        buffer[volId] = 0;
+        count[volId] = 0;
+        averageBW[volId] = 0;
+        bufferIops[volId] = 0;
+        averageIops[volId] = 0;
+        dataReadyToProcess[volId] = false;
+        std::swap(avgQueue[volId], emptyQueue);
+    }
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+// Store the Max value for other volumes, only do Avg for min Gurantee Vol
+void
+MovingAvgCompute::_ComputeMovingAvg(int volId, avgData data)
+{
+    avgData oldData;
     if (dataReadyToProcess[volId] == false)
     {
-        averageBW[volId] = (buffer[volId] + data) / movingAvgWindowLength;
+        averageBW[volId] = (buffer[volId] + data.bw) / movingAvgWindowLength;
+        averageIops[volId] = (bufferIops[volId] + data.iops) / movingAvgWindowLength;
         dataReadyToProcess[volId] = true;
     }
     else
     {
-        oldData = DequeueAvgData(volId);
-        averageBW[volId] = ((averageBW[volId] * (movingAvgWindowLength)) - oldData + data) / movingAvgWindowLength;
+        oldData = _DequeueAvgData(volId);
+        double value = ((averageBW[volId] * (movingAvgWindowLength)) - oldData.bw + data.bw);
+        value = round(value / movingAvgWindowLength);
+        averageBW[volId] = value;
+
+        value = ((averageIops[volId] * (movingAvgWindowLength)) - oldData.iops + data.iops);
+        value = round(value / movingAvgWindowLength);
+        averageIops[volId] = value;
     }
 }
 
@@ -86,9 +119,8 @@ MovingAvgCompute::ComputeMovingAvg(int volId, uint64_t data)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-
 uint64_t
-MovingAvgCompute::GetMovingAvg(int volId)
+MovingAvgCompute::GetMovingAvgBw(int volId)
 {
     return averageBW[volId];
 }
@@ -100,19 +132,35 @@ MovingAvgCompute::GetMovingAvg(int volId)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-
-bool
-MovingAvgCompute::EnqueueAvgData(int volId, uint64_t data)
+uint64_t
+MovingAvgCompute::GetMovingAvgIops(int volId)
 {
+    return averageIops[volId];
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+MovingAvgCompute::EnqueueAvgData(int volId, uint64_t bw, uint64_t iops)
+{
+    avgData data;
+    data.bw = bw;
+    data.iops = iops;
     avgQueue[volId].push(data);
     count[volId]++;
     if (count[volId] < (movingAvgWindowLength))
     {
-        buffer[volId] += data;
+        buffer[volId] += bw;
+        bufferIops[volId] += iops;
     }
     else
     {
-        ComputeMovingAvg(volId, data);
+        _ComputeMovingAvg(volId, data);
         count[volId]--;
     }
     return (dataReadyToProcess[volId]);
@@ -125,11 +173,10 @@ MovingAvgCompute::EnqueueAvgData(int volId, uint64_t data)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-
-uint64_t
-MovingAvgCompute::DequeueAvgData(int volId)
+avgData
+MovingAvgCompute::_DequeueAvgData(int volId)
 {
-    uint64_t ret = 0;
+    avgData ret;
     if (avgQueue[volId].size() != 0)
     {
         ret = avgQueue[volId].front();
@@ -137,5 +184,4 @@ MovingAvgCompute::DequeueAvgData(int volId)
     }
     return ret;
 }
-
-}; // namespace ibofos
+}; // namespace pos

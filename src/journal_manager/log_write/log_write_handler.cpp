@@ -32,37 +32,59 @@
 
 #include "log_write_handler.h"
 
-#include "../log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_write/log_write_statistics.h"
+#include "src/journal_manager/replay/replay_stripe.h"
 #include "buffer_offset_allocator.h"
-#include "src/include/ibof_event_id.hpp"
+
+#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
+// Constructor for product code
 LogWriteHandler::LogWriteHandler(void)
-: logBuffer(nullptr),
-  bufferAllocator(nullptr)
+: LogWriteHandler(new LogWriteStatistics(), new WaitingLogList())
 {
+}
+
+// Constructor for injecting dependencies in unit tests
+LogWriteHandler::LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList* waitingList)
+: logBuffer(nullptr),
+  bufferAllocator(nullptr),
+  logWriteStats(statistics),
+  waitingList(waitingList)
+{
+    numIosRequested = 0;
+    numIosCompleted = 0;
 }
 
 LogWriteHandler::~LogWriteHandler(void)
 {
+    delete logWriteStats;
+    delete waitingList;
 }
 
 void
-LogWriteHandler::Init(BufferOffsetAllocator* allocator, JournalLogBuffer* buffer)
+LogWriteHandler::Init(BufferOffsetAllocator* allocator, JournalLogBuffer* buffer,
+    JournalConfiguration* journalConfig)
 {
     bufferAllocator = allocator;
     logBuffer = buffer;
+
+    if (journalConfig->IsDebugEnabled() == true)
+    {
+        logWriteStats->Init(journalConfig->GetNumLogGroups());
+    }
 }
 
 int
 LogWriteHandler::AddLog(LogWriteContext* context)
 {
     int ret = 0;
-    if (waitingList.IsEmpty() == false)
+    if (waitingList->IsEmpty() == false)
     {
-        waitingList.AddToList(context);
+        waitingList->AddToList(context);
     }
     else
     {
@@ -74,54 +96,105 @@ LogWriteHandler::AddLog(LogWriteContext* context)
 int
 LogWriteHandler::_AddLogInternal(LogWriteContext* context)
 {
-    OffsetInFile logOffset
-        = bufferAllocator->AllocateBuffer(context->GetLog()->GetSize());
+    uint64_t allocatedOffset = 0;
 
-    int ret = 0;
+    int allocationResult =
+        bufferAllocator->AllocateBuffer(context->GetLength(), allocatedOffset);
 
-    if (logOffset.offset < 0)
+    if (allocationResult == 0)
     {
-        waitingList.AddToList(context);
+        int groupId = bufferAllocator->GetLogGroupId(allocatedOffset);
+        uint32_t seqNum = bufferAllocator->GetSequenceNumber(groupId);
+
+        context->SetBufferAllocated(allocatedOffset, groupId, seqNum);
+        context->SetInternalCallback(std::bind(&LogWriteHandler::LogWriteDone, this, std::placeholders::_1));
+
+        int result = logBuffer->WriteLog(context);
+        if (result == 0)
+        {
+            numIosRequested++;
+        }
+        else
+        {
+            delete context;
+
+            // This is to cancel the buffer allocation
+            bufferAllocator->LogWriteCanceled(groupId);
+        }
+        // TODO(huijeong.kim) move to no-journal mode, if failed
+        return result;
+    }
+    else if (allocationResult > 0)
+    {
+        waitingList->AddToList(context);
+        return 0;
     }
     else
     {
-        context->GetLog()->SetSeqNum(logOffset.seqNum);
-        context->SetLogGroupId(logOffset.id);
-        context->callback = std::bind(&LogWriteHandler::LogWriteDone, this,
-            std::placeholders::_1);
-
-        ret = logBuffer->WriteLog(context, logOffset.id, logOffset.offset);
-        if (ret != 0)
-        {
-            // write log
-            IBOF_TRACE_INFO(EID(ADD_TO_JOURNAL_WAITING_LIST),
-                "Add journal write request to waiting list");
-            // TODO(huijeong.kim) move to no-journal mode
-        }
+        return allocationResult;
     }
-
-    return ret;
 }
 
 void
 LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
 {
-    LogWriteContext* context = reinterpret_cast<LogWriteContext*>(ctx);
+    numIosCompleted++;
 
-    context->LogWriteDone();
-    delete context;
+    LogWriteContext* context = dynamic_cast<LogWriteContext*>(ctx);
+    if (context != nullptr)
+    {
+        bool statusUpdatedToStats = false;
 
-    StartWaitingIos();
+        if (context->GetError() != 0)
+        {
+            // When log write fails due to error, should log the error and complete write
+            POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_WRITE_FAILED,
+                "Log write failed due to io error");
+
+            statusUpdatedToStats = false;
+        }
+        else
+        {
+            // Status update should be followed by LogWriteDone callback
+            statusUpdatedToStats = logWriteStats->UpdateStatus(context);
+        }
+
+        context->IoDone();
+
+        if (statusUpdatedToStats == true)
+        {
+            logWriteStats->AddToList(context);
+        }
+        else
+        {
+            delete context;
+        }
+    }
+    _StartWaitingIos();
 }
 
 void
-LogWriteHandler::StartWaitingIos(void)
+LogWriteHandler::_StartWaitingIos(void)
 {
-    if (waitingList.IsEmpty() == false)
+    auto log = waitingList->GetWaitingIo();
+    if (log != nullptr)
     {
-        auto log = waitingList.GetWaitingIo();
         _AddLogInternal(log);
     }
 }
 
-} // namespace ibofos
+void
+LogWriteHandler::LogFilled(int logGroupId, MapPageList& dirty)
+{
+    // Nothing to do
+}
+
+void
+LogWriteHandler::LogBufferReseted(int logGroupId)
+{
+    logWriteStats->PrintStats(logGroupId);
+
+    _StartWaitingIos();
+}
+
+} // namespace pos

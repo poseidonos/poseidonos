@@ -32,6 +32,8 @@
 
 #pragma once
 
+namespace pos
+{
 enum class NvramMediaTypeEnum
 {
     ByteStore,
@@ -39,3 +41,4 @@ enum class NvramMediaTypeEnum
 
     Max,
 };
+} // namespace pos

@@ -31,16 +31,18 @@
  */
 
 #pragma once
-
+#include "src/metafs/util/enum_iterator.h"
+namespace pos
+{
 // MetaFS AIO functionality: client <-> metafs <-> mss.pstore
 // client <-> metafs: aioable mio
 // metafs <-> mss.pstore: aioable mpio
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
-class MetaAsyncRunnableClass
+class MetaAsyncRunnable
 {
 public:
-    MetaAsyncRunnableClass(void);
-    virtual ~MetaAsyncRunnableClass(void);
+    MetaAsyncRunnable(void);
+    virtual ~MetaAsyncRunnable(void);
     virtual void InitStateHandler(void) = 0;
 
     void Init(void);
@@ -69,14 +71,14 @@ private:
 };
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::MetaAsyncRunnableClass(void)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::MetaAsyncRunnable(void)
 {
     Init();
     memset(stateHandler, 0, sizeof(AsyncStateExecutionEntry*) * ((int)AsyncStateT::Max));
 }
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::~MetaAsyncRunnableClass(void)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::~MetaAsyncRunnable(void)
 {
     for (auto state : Enum<AsyncStateT>())
     {
@@ -92,7 +94,7 @@ MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::~Me
 }
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 void
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::Init(void)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::Init(void)
 {
     cxt = nullptr;
     prevState = AsyncStateT::Init;
@@ -105,7 +107,7 @@ MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::Ini
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 void
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::RegisterStateHandler(AsyncStateT state, AsyncStateExecutionEntry* entry)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::RegisterStateHandler(AsyncStateT state, AsyncStateExecutionEntry* entry)
 {
     assert(state < AsyncStateT::Max);
     this->stateHandler[(int)state] = entry;
@@ -113,7 +115,7 @@ MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::Reg
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 CallbackCxtT*
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::GetAsycCbCxt(void)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::GetAsycCbCxt(void)
 {
     assert(this->cxt != nullptr);
     return this->cxt;
@@ -121,7 +123,7 @@ MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::Get
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 void
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::SetAsyncCbCxt(CallbackCxtT* cxt, bool deleteRequired)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::SetAsyncCbCxt(CallbackCxtT* cxt, bool deleteRequired)
 {
     assert(this->cxt == nullptr); // check whether user sets duplicate aiocb due to incorrect programming
     this->cxt = cxt;
@@ -130,7 +132,7 @@ MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::Set
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 void
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::ExecuteAsyncState(void* _not_used)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::ExecuteAsyncState(void* _not_used)
 {
     bool continueToRun;
 
@@ -163,7 +165,7 @@ MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::Exe
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 void
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::InvokeClientCallback(void)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::InvokeClientCallback(void)
 {
     if (nullptr != cxt)
     {
@@ -173,49 +175,50 @@ MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::Inv
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 AsyncStateT
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::GetPrevState(void)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::GetPrevState(void)
 {
     return prevState;
 }
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 AsyncStateT
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::GetCurrState(void)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::GetCurrState(void)
 {
     return currState;
 }
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 AsyncStateT
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::GetStateInExecution(void)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::GetStateInExecution(void)
 {
     return stateInExec;
 }
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 void
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::SetCurrState(AsyncStateT state)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::SetCurrState(AsyncStateT state)
 {
     currState = state;
 }
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 AsyncStateT
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::GetNextState(void)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::GetNextState(void)
 {
     return nextState;
 }
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 void
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::SetNextState(AsyncStateT state)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::SetNextState(AsyncStateT state)
 {
     nextState = state;
 }
 
 template<class CallbackCxtT, class AsyncStateT, class AsyncStateExecutionEntry>
 bool
-MetaAsyncRunnableClass<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::IsCompleted(void)
+MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::IsCompleted(void)
 {
     return completed;
 }
+} // namespace pos

@@ -39,20 +39,21 @@
 #include "mf_extent.h"
 #include "mf_pagemap.h"
 
-class MetaFileExtentMgrClass
+namespace pos
+{
+class MetaFileExtentManager
 {
 public:
-    MetaFileExtentMgrClass(void);
-    ~MetaFileExtentMgrClass(void);
+    MetaFileExtentManager(void);
+    ~MetaFileExtentManager(void);
 
     void Init(MetaLpnType baseLpn, MetaLpnType maxFileRegionLpn);
     MetaFilePageMap AllocExtent(MetaLpnType lpnCnt);
     MetaLpnType GetAvailableLpnCount(void);
     MetaLpnType GetTheBiggestExtentSize(void);
 
-    void GetContent(MetaFileExtentContent* list);
-    void SetContent(MetaFileExtentContent* list);
-    size_t GetContentSize(void);
+    void GetContent(MetaFileExtent* list);
+    void SetContent(MetaFileExtent* list);
     void SetFileBaseLpn(MetaLpnType BaseLpn);
     MetaLpnType
     GetFileBaseLpn(void)
@@ -63,21 +64,23 @@ public:
     /* to control free extents */
     pair<bool, MetaLpnType> AddToFreeExtentsList(MetaLpnType requestLpnCount);
     bool RemoveFromFreeExtentsList(MetaLpnType startLpn, MetaLpnType count);
-    void MergeFreeExtents(void);
-    void MakeFreeExtentsList(void);
-    void SortFreeExtentsList(void);
     void PrintFreeExtentsList(void);
 
     void AddToAllocatedExtentsList(MetaLpnType startLpn, MetaLpnType requestLpnCount);
-    void MakeAllocatedExtentsList(void);
-    void SortAllocatedExtentsList(void);
-    void PrintAllocatedExtentsList(void);
 
 private:
+    void _MergeFreeExtents(void);
+    void _MakeFreeExtentsList(void);
+    void _SortFreeExtentsList(void);
+    void _MakeAllocatedExtentsList(void);
+    void _SortAllocatedExtentsList(void);
+    void _PrintAllocatedExtentsList(void);
+
     MetaLpnType fileRegionBaseLpnInVolume;
     MetaLpnType maxFileRegionLpn;
     MetaLpnType availableLpnCount;
 
-    deque<MetaFileExtentContent> freeExtentsList;
-    deque<MetaFileExtentContent> allocatedExtentsList;
+    std::deque<MetaFileExtent> freeExtentsList;
+    std::deque<MetaFileExtent> allocatedExtentsList;
 };
+} // namespace pos

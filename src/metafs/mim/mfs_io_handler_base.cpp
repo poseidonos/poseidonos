@@ -31,9 +31,10 @@
  */
 
 #include "mfs_io_handler_base.h"
+#include "metafs_common.h"
 
-#include "mfs_common.h"
-
+namespace pos
+{
 MetaFsIoHandlerBase::MetaFsIoHandlerBase(int threadId, int coreId)
 : threadId(threadId),
   coreId(coreId),
@@ -63,18 +64,6 @@ MetaFsIoHandlerBase::ExitThread(void)
 }
 
 void
-MetaFsIoHandlerBase::SuspendThread(void)
-{
-    assert(false);
-}
-
-void
-MetaFsIoHandlerBase::ResumeThread(void)
-{
-    assert(false);
-}
-
-void
 MetaFsIoHandlerBase::PrepareThread(const char* name)
 {
     threadName = new std::string(name);
@@ -100,3 +89,4 @@ MetaFsIoHandlerBase::_UpdateThreadCPUAffinity(uint32_t coreId)
     CPU_SET(coreId, &cpus);
     sched_setaffinity(0, sizeof(cpu_set_t), &cpus);
 }
+} // namespace pos

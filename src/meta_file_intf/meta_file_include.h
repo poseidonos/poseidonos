@@ -33,15 +33,16 @@
 #pragma once
 
 #include "mk/ibof_config.h"
-#include "src/io/general_io/volume_io.h"
+#include "src/bio/volume_io.h"
+
 #include <string.h>
 
-namespace ibofos
+namespace pos
 {
 #ifdef IBOF_CONFIG_USE_MOCK_FS
 #define FILESTORE MockFileIntf
 #else
-#define FILESTORE MfsFileIntf
+#define FILESTORE MetaFsFileIntf
 #endif
 
 enum class StorageOpt
@@ -55,7 +56,6 @@ enum class MetaFsIoOpcode
 {
     Write = 0,
     Read,
-
-    // Delete,
 };
-} // namespace ibofos
+
+} // namespace pos

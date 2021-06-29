@@ -25,8 +25,7 @@ air::InstanceManager::InstanceManager(void)
     process_manager = new process::ProcessManager{global_meta_getter,
         node_meta_getter, node_manager};
     process_cor_handler = new process::ProcessCoRHandler{process_manager};
-    preprocessor = new process::Preprocessor{node_meta_getter, global_meta_getter,
-        node_manager};
+    preprocessor = new process::Preprocessor{node_meta_getter, node_manager};
     preprocess_cor_handler = new process::PreprocessCoRHandler{preprocessor};
 
     out_command = new output::OutCommand{};
@@ -43,8 +42,7 @@ air::InstanceManager::InstanceManager(void)
     collection_observer = new collection::Observer{collection_manager};
     collection_cor_handler =
         new collection::CollectionCoRHandler{collection_observer};
-    switch_gear = new collection::SwitchGear{node_meta_getter, global_meta_getter,
-        node_manager};
+    switch_gear = new collection::SwitchGear{node_meta_getter, node_manager};
     switch_gear_cor_handler = new collection::SwitchGearCoRHandler{switch_gear};
 
     chain_manager = new chain::ChainManager{global_meta};
@@ -155,7 +153,7 @@ air::InstanceManager::_DeleteProcessModule(void)
 }
 
 void
-air::InstanceManager::_DeleteProfileDataModule(void)
+air::InstanceManager::_DeleteDataStructureModule(void)
 {
     if (nullptr != node_manager)
     {
@@ -277,7 +275,7 @@ air::InstanceManager::_DeleteDetectorModule(void)
 air::InstanceManager::~InstanceManager(void)
 {
     _DeleteProcessModule();
-    _DeleteProfileDataModule();
+    _DeleteDataStructureModule();
     _DeleteOutModule();
     _DeleteStreamModule();
     _DeleteCollectionModule();

@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(mapper_const_ut mapper_const_test.cpp)
+POS_ADD_UNIT_TEST(mpage_info_ut mpage_info_test.cpp)

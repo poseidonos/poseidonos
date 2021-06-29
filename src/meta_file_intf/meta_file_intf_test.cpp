@@ -121,7 +121,7 @@ MetaFileTest::_FileReadWriteAppend(void)
     memset(data, 0xAA, TEST_SIZE / 2);
     memset(data + TEST_SIZE / 2, 0xBB, TEST_SIZE / 2);
 
-    uint32_t offset = 0;
+    uint64_t offset = 0;
     metaFileStore->AppendIO(MetaFsIoOpcode::Write, offset, TEST_SIZE / 2, data);
     metaFileStore->AppendIO(MetaFsIoOpcode::Write, offset, TEST_SIZE / 2, data + TEST_SIZE / 2);
 
@@ -220,7 +220,7 @@ MetaFileTest::_AsyncFileWrite(void)
 void
 MockFileTest::SetUp(void)
 {
-    metaFileStore = new MockFileIntf(filename);
+    metaFileStore = new MockFileIntf(filename, arrayname);
     MetaFileTest::SetUp();
 }
 

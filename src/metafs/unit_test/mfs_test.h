@@ -31,15 +31,15 @@
  */
 
 /* 
- * iBoFOS - Meta Filesystem Layer
+ * PoseidonOS - Meta Filesystem Layer
  * 
  * Meta Filesystem - Unit Tests
 */
-#ifndef __UT_MFS_H__
-#define __UT_MFS_H__
+#ifndef __UT_METAFS_h__
+#define __UT_METAFS_h__
 
 #include "mfs_functional_test.h"
 
 int main(int argc, char* argv[]);
 
-#endif // __UT_MFS_H__
+#endif // __UT_METAFS_h__

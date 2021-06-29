@@ -32,12 +32,13 @@
 
 #include "volume_event_publisher.h"
 
-#include <iostream>
-
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+#include <iostream>
+#include <utility>
+
+namespace pos
 {
 VolumeEventPublisher::VolumeEventPublisher()
 {
@@ -49,197 +50,229 @@ VolumeEventPublisher::~VolumeEventPublisher()
 }
 
 void
-VolumeEventPublisher::RegisterSubscriber(VolumeEvent* subscriber)
+VolumeEventPublisher::RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName)
 {
-    subscribers.push_back(subscriber);
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
+    subscribers.push_back(std::pair<std::string, VolumeEvent*>(arrayName, subscriber));
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "VolumeEvent subscriber {} is registered", subscriber->Tag());
 }
 
 void
-VolumeEventPublisher::RemoveSubscriber(VolumeEvent* subscriber)
+VolumeEventPublisher::RegisterNvmfTargetSubscriber(VolumeEvent* subscriber, std::string arrayName)
+{
+    subscribers.insert(subscribers.begin(), std::pair<std::string, VolumeEvent*>(arrayName, subscriber));
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+        "VolumeEvent subscriber {} is registered", subscriber->Tag());
+}
+
+void
+VolumeEventPublisher::RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName)
 {
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
-        if (*it == subscriber)
+        if ((it->first == arrayName) || (it->first == ""))
         {
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-                "VolumeEvent subscriber {} is removed", (*it)->Tag());
-            subscribers.erase(it);
-            break;
+            if (it->second == subscriber)
+            {
+                POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                    "VolumeEvent subscriber {} is removed", it->second->Tag());
+                subscribers.erase(it);
+                break;
+            }
         }
     }
 }
 
 bool
 VolumeEventPublisher::NotifyVolumeCreated(std::string volName, int volID,
-    uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw)
+    uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeCreated, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
     for (auto it = subscribers.rbegin(); it != subscribers.rend(); ++it)
     {
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeCreated to {} : {} {} {} {} {}",
-            (*it)->Tag(), volName, volID, volSizeByte, maxiops, maxbw);
-        bool res = (*it)->VolumeCreated(volName, volID, volSizeByte, maxiops, maxbw);
-        if (res == false)
+        if ((it->first == arrayName) || (it->first == ""))
         {
-            ret = false;
-        }
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeCreated to {} : {} {} {} {} {}",
+                it->second->Tag(), volName, volID, volSizeByte, maxiops, maxbw);
+            bool res = it->second->VolumeCreated(volName, volID, volSizeByte, maxiops, maxbw, arrayName);
+            if (res == false)
+            {
+                ret = false;
+            }
 
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeCreated to {} done, res: {}",
-            (*it)->Tag(), res);
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeCreated to {} done, res: {}",
+                it->second->Tag(), res);
+        }
     }
     return ret;
 }
 
 bool
-VolumeEventPublisher::NotifyVolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw)
+VolumeEventPublisher::NotifyVolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeUpdated, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeUpdated to {} : {} {} {} {}",
-            (*it)->Tag(), volName, volID, maxiops, maxbw);
-        bool res = (*it)->VolumeUpdated(volName, volID, maxiops, maxbw);
-        if (res == false)
+        if ((it->first == arrayName) || (it->first == ""))
         {
-            ret = false;
-        }
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeUpdated to {} : {} {} {} {}",
+                it->second->Tag(), volName, volID, maxiops, maxbw);
+            bool res = it->second->VolumeUpdated(volName, volID, maxiops, maxbw, arrayName);
+            if (res == false)
+            {
+                ret = false;
+            }
 
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeUpdated to {} done, res: {}",
-            (*it)->Tag(), res);
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeUpdated to {} done, res: {}",
+                it->second->Tag(), res);
+        }
     }
     return ret;
 }
 
 bool
-VolumeEventPublisher::NotifyVolumeDeleted(std::string volName, int volID, uint64_t volSizeByte)
+VolumeEventPublisher::NotifyVolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName)
 {
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeDeleted, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeDeleted to {} : {} {} {}",
-            (*it)->Tag(), volName, volID, volSizeByte);
-        bool res = (*it)->VolumeDeleted(volName, volID, volSizeByte);
-        if (res == false)
+        if ((it->first == arrayName) || (it->first == ""))
         {
-            ret = false;
-        }
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeDeleted to {} : {} {} {}",
+                it->second->Tag(), volName, volID, volSizeByte);
+            bool res = it->second->VolumeDeleted(volName, volID, volSizeByte, arrayName);
+            if (res == false)
+            {
+                ret = false;
+            }
 
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeDeleted to {} done, res: {}",
-            (*it)->Tag(), res);
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeDeleted to {} done, res: {}",
+                it->second->Tag(), res);
+        }
     }
     return ret;
 }
 
 bool
 VolumeEventPublisher::NotifyVolumeMounted(std::string volName, std::string subnqn,
-    int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw)
+    int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeMounted, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
     for (auto it = subscribers.rbegin(); it != subscribers.rend(); ++it)
     {
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeMounted to {} : {} {} {} {} {} {}",
-            (*it)->Tag(), volName, subnqn, volID, volSizeByte, maxiops, maxbw);
-        bool res = (*it)->VolumeMounted(volName, subnqn, volID, volSizeByte, maxiops, maxbw);
-        if (res == false)
+        if ((it->first == arrayName) || (it->first == ""))
         {
-            ret = false;
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeMounted to {} : {} {} {} {} {} {}",
+                it->second->Tag(), volName, subnqn, volID, volSizeByte, maxiops, maxbw);
+            bool res = it->second->VolumeMounted(volName, subnqn, volID, volSizeByte, maxiops, maxbw, arrayName);
+            if (res == false)
+            {
+                ret = false;
+            }
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeMounted to {} done, res: {}",
+                it->second->Tag(), res);
         }
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeMounted to {} done, res: {}",
-            (*it)->Tag(), res);
     }
     return ret;
 }
 
 bool
-VolumeEventPublisher::NotifyVolumeUnmounted(std::string volName, int volID)
+VolumeEventPublisher::NotifyVolumeUnmounted(std::string volName, int volID, std::string arrayName)
 {
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeUnmounted, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeUnmounted to {} : {} {}",
-            (*it)->Tag(), volName, volID);
-        bool res = (*it)->VolumeUnmounted(volName, volID);
-        if (res == false)
+        if ((it->first == arrayName) || (it->first == ""))
         {
-            ret = false;
-        }
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeUnmounted to {} : {} {}",
+                it->second->Tag(), volName, volID);
+            bool res = it->second->VolumeUnmounted(volName, volID, arrayName);
+            if (res == false)
+            {
+                ret = false;
+            }
 
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeUnmounted to {} done, res: {}",
-            (*it)->Tag(), res);
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeUnmounted to {} done, res: {}",
+                it->second->Tag(), res);
+        }
     }
     return ret;
 }
 
 bool
 VolumeEventPublisher::NotifyVolumeLoaded(std::string name, int id,
-    uint64_t totalSize, uint64_t maxiops, uint64_t maxbw)
+    uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeLoaded, # of subscribers: {}", subscribers.size());
 
     bool ret = true;
     for (auto it = subscribers.rbegin(); it != subscribers.rend(); ++it)
     {
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeLoaded to {} : {} {} {} {} {}",
-            (*it)->Tag(), name, id, totalSize, maxiops, maxbw);
-        bool res = (*it)->VolumeLoaded(name, id, totalSize, maxiops, maxbw);
-        if (res == false)
+        if ((it->first == arrayName) || (it->first == ""))
         {
-            ret = false;
-        }
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeLoaded to {} : {} {} {} {} {}",
+                it->second->Tag(), name, id, totalSize, maxiops, maxbw);
+            bool res = it->second->VolumeLoaded(name, id, totalSize, maxiops, maxbw, arrayName);
+            if (res == false)
+            {
+                ret = false;
+            }
 
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeLoaded to {} done, res: {}",
-            (*it)->Tag(), res);
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeLoaded to {} done, res: {}",
+                it->second->Tag(), res);
+        }
     }
     return ret;
 }
 
 void
-VolumeEventPublisher::NotifyVolumeDetached(vector<int> volList)
+VolumeEventPublisher::NotifyVolumeDetached(vector<int> volList, std::string arrayName)
 {
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "NotifyVolumeDetached, # of subscribers: {}", subscribers.size());
 
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeDetached to {}",
-            (*it)->Tag());
-        (*it)->VolumeDetached(volList);
+        if ((it->first == arrayName) || (it->first == ""))
+        {
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeDetached to {}",
+                it->second->Tag());
+            it->second->VolumeDetached(volList, arrayName);
 
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOLUME_EVENT,
-            "NotifyVolumeDetached to {} done",
-            (*it)->Tag());
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
+                "NotifyVolumeDetached to {} done",
+                it->second->Tag());
+        }
     }
 }
 
-} // namespace ibofos
+} // namespace pos

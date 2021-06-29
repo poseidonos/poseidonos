@@ -34,6 +34,8 @@
 
 #include "mfs_top_base_test.h"
 
+namespace pos
+{
 class MetaFSNonFuncDataConsistency : public UtMetaFsTop
 {
 public:
@@ -58,3 +60,4 @@ public:
 private:
     void _Cleanup(void);
 };
+} // namespace pos

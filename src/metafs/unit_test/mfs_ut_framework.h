@@ -36,8 +36,8 @@
 #include <iostream>
 #include <string>
 
-#include "mfs_log.h"
-#include "src/include/ibof_event_id.h"
+#include "metafs_log.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 #undef Max
@@ -54,6 +54,8 @@
         std::cout << "\033[1;32m" << "TC Passed: " << __func__ << "\033[0m" << std::endl; \
     } while (0)
 
+namespace pos
+{
 enum MetaFsUTFailType
 {
     GenericFuncionTestFailed = 0,
@@ -77,7 +79,7 @@ class MetaFsUTException : public std::exception
 public:
     MetaFsUTException(MetaFsUTFailType type, const char* func, std::string msg = nullptr)
     {
-        IBOF_TRACE_CRITICAL((int)IBOF_EVENT_ID::MFS_TEST_FAILED,
+        POS_TRACE_CRITICAL((int)POS_EVENT_ID::MFS_TEST_FAILED,
             "Unit test stopped with failure.\n{} {} {}",
             metaFsUtFailTable[type].failMsg,
             std::string(func), std::string(msg));
@@ -85,7 +87,7 @@ public:
     void
     ExitUT(void) const throw()
     {
-        MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
             "Unit test program exit.");
         exit(-1);
     }
@@ -100,10 +102,10 @@ public:
     virtual void
     NotifyTCFailAndExit(void)
     {
-        MFS_TRACE_CRITICAL((int)IBOF_EVENT_ID::MFS_TEST_FAILED,
+        MFS_TRACE_CRITICAL((int)POS_EVENT_ID::MFS_TEST_FAILED,
             "Unit test stopped with failure.");
         exit(-1);
     }
 };
-
+} // namespace pos
 #endif // __MFS_UT_FRAMEWORK_H__

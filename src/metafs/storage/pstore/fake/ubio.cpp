@@ -30,12 +30,13 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/io/general_io/ubio.h"
+#include "src/bio/ubio.h"
 
 #include "src/include/memory.h"
 #include "src/include/meta_const.h"
 
-using namespace ibofos;
+namespace pos
+{
 /**
  * Only need constructor and destructos of Ubio and UbioVector
  */
@@ -49,20 +50,20 @@ UbioVector::UbioVector(void* mem, uint32_t page_cnt)
     if (mem == nullptr)
     {
         ownership = true;
-        mem = ibofos::Memory<ibofos::SectorSize>::Alloc(page_cnt * SectorsPerPage());
+        mem = pos::Memory<pos::SectorSize>::Alloc(page_cnt * SectorsPerPage());
     }
 
     char* addr = reinterpret_cast<char*>(mem);
     for (uint32_t i = 0; i < page_cnt; i++)
     {
-        vec_.push_back(addr + i * ibofos::PageSize);
+        vec_.push_back(addr + i * pos::PageSize);
     }
 }
 
 UbioVector::~UbioVector(void)
 {
     if (ownership)
-        ibofos::Memory<>::Free(vec_[0]);
+        pos::Memory<>::Free(vec_[0]);
 }
 
 void
@@ -74,7 +75,7 @@ UbioVector::AddPage(void* addr)
 uint64_t
 UbioVector::Byte(void)
 {
-    return ibofos::PageSize * vec_.size();
+    return pos::PageSize * vec_.size();
 }
 
 void*
@@ -142,3 +143,4 @@ Ubio::~Ubio(void)
     if (iov_pages)
         free(iov_pages);
 }
+} // namespace pos

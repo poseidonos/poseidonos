@@ -19,12 +19,10 @@ VPATH += $(MFS_INCLUDE_PATH)
 ###############################################################
 
 SRCS += $(wildcard *.cpp) \
-	    mfs_mbr.cpp 
+	    metafs_mbr.cpp 
 
 UT_SRCS += \
-           mfs_core_mgr_test.cpp \
-           mfs_mbr_mgr_test.cpp \
-           mfs_mbr_test.cpp \
+           metafs_mbr_test.cpp \
            msc_test.cpp 
 
 SRCS += $(UT_SRCS)

@@ -32,22 +32,26 @@
 
 #pragma once
 
+#include <string>
+#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/event_scheduler/callback.h"
 #include "src/io/general_io/io_submit_handler.h"
 
-namespace ibofos
+namespace pos
 {
 class Stripe;
 
 class FlushReadCompletion : public Callback
 {
 public:
-    FlushReadCompletion(Stripe* stripe);
+    explicit FlushReadCompletion(Stripe* stripe, std::string& arrayName);
     ~FlushReadCompletion(void);
 
 private:
     bool _DoSpecificJob(void) override;
 
     Stripe* stripe;
+    std::string arrayName;
 };
 
-} // namespace ibofos
+} // namespace pos

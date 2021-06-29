@@ -7,7 +7,7 @@ static const uint64_t MOCK_DEVICE_SIZE = 2 * 1024 * 1024;
 static const std::string MOCK_DEVICE_NAME = "mock";
 static const uint64_t BLOCK_SIZE = 4096;
 
-using namespace ibofos;
+using namespace pos;
 using namespace std;
 MockDevice*
 CreateMockDevice(void)

@@ -1,21 +1,29 @@
 
-#include "src/api/AirTemplate.h"
+#include "src/api/Air.h"
 
-air::InstanceManager::InstanceManager() {}
-air::InstanceManager::~InstanceManager() {}
-int air::InstanceManager::Initialize(uint32_t cpu_num)
+air::InstanceManager::InstanceManager()
+{
+}
+air::InstanceManager::~InstanceManager()
+{
+}
+int
+air::InstanceManager::Initialize(uint32_t cpu_num)
 {
     return 0;
 }
-int air::InstanceManager::Finalize()
+int
+air::InstanceManager::Finalize()
 {
     return 0;
 }
-int air::InstanceManager::Activate()
+int
+air::InstanceManager::Activate()
 {
     return 0;
 }
-int air::InstanceManager::Deactivate()
+int
+air::InstanceManager::Deactivate()
 {
     return 0;
 }
@@ -23,25 +31,39 @@ int air::InstanceManager::Deactivate()
 class FakeInstanceManager : public air::InstanceManager
 {
 public:
-    FakeInstanceManager() : air::InstanceManager() {}
+    FakeInstanceManager()
+    : air::InstanceManager()
+    {
+    }
 
-    int Initialize(uint32_t cpu_num) override {
+    int
+    Initialize(uint32_t cpu_num) override
+    {
         return 0;
     }
-    int Finalize() override {
+    int
+    Finalize() override
+    {
         return 0;
     }
-    int Activate() override {
+    int
+    Activate() override
+    {
         return 0;
     }
-    int Deactivate() override {
+    int
+    Deactivate() override
+    {
         return 0;
     }
-    node::NodeManager* GetNodeManager() override {
+    node::NodeManager*
+    GetNodeManager() override
+    {
         return nullptr;
     }
-    collection::CollectionManager* GetCollectionManager() override {
+    collection::CollectionManager*
+    GetCollectionManager() override
+    {
         return nullptr;
     }
 };
-

@@ -41,12 +41,14 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
-#include "mfs.h"
 #include "nlohmann/json.hpp"
 #include "src/helper/json_helper.h"
-#include "src/metafs/include/mfs_ret_code.h"
-#include "src/metafs/include/mfs_wbt_ret_dataformat.h"
+#include "src/metafs/metafs.h"
+#include "src/metafs/include/metafs_return_code.h"
+#include "src/metafs/include/mf_dataformat.h"
 
+namespace pos
+{
 using Args = nlohmann::json;
 
 class WbtMetafsCmdHandler
@@ -56,10 +58,6 @@ public:
     int CreateFile(Args argv);
     int OpenFile(Args argv);
     int CloseFile(Args argv);
-
-    int CreateFileSystem(void);
-    int MountFileSystem(void);
-    int UmountFileSystem(void);
 
     int ReadFile(Args argv);
     int WriteFile(Args argv);
@@ -92,3 +90,4 @@ private:
     void _DumpInodeInfoToJson(MetaFileInodeDumpCxt *data, JsonElement& element);
     void _SetValuesInMetaFileInode(MetaFileInodeInfo& metaFileInode, rapidjson::Value& inodeData);
 };
+} // namespace pos

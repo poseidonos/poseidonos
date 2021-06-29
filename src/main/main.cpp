@@ -41,12 +41,12 @@
 #include <cstring>
 #include <iostream>
 
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/main/ibofos.h"
+#include "src/main/poseidonos.h"
 
 #if defined UNVME_BUILD
-#include "src/device/spdk/spdk.hpp"
+#include "src/spdk_wrapper/spdk.hpp"
 #endif
 
 #include "Air.h"
@@ -67,7 +67,7 @@ int CheckPrevileges(void);
 #if IBOF_CONFIG_LIBRARY_BUILD == 1
 
 int argc = 1;
-char argv[] = {"./bin/ibofos"};
+char argv[] = {"./bin/poseidonos"};
 
 extern "C"
 {
@@ -75,8 +75,8 @@ extern "C"
     int
     intialize_library()
     {
-        AIR_INITIALIZE(0);
-        AIR_ACTIVATE();
+        air_initialize(0);
+        air_activate();
 
         /*optind used in getopt.c of glic needs to be zero, 
       because, system already has used up this value for parsing fio's argument */
@@ -84,10 +84,10 @@ extern "C"
         char* argvPtr = argv;
         signal(SIGINT, INThandler);
 
-        ibofos::Ibofos _ibofos;
-        _ibofos.Init(argc, &argvPtr);
-        _ibofos.Run();
-        _ibofos.Terminate();
+        pos::Poseidonos _pos;
+        _pos.Init(argc, &argvPtr);
+        _pos.Run();
+        _pos.Terminate();
 
         return 0;
     }
@@ -104,10 +104,10 @@ main(int argc, char* argv[])
     }
     signal(SIGINT, INThandler);
 
-    ibofos::Ibofos _ibofos;
-    _ibofos.Init(argc, argv);
-    _ibofos.Run();
-    _ibofos.Terminate();
+    pos::Poseidonos _pos;
+    _pos.Init(argc, argv);
+    _pos.Run();
+    _pos.Terminate();
 
     return 0;
 }

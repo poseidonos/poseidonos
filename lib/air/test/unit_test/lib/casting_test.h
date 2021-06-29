@@ -41,8 +41,18 @@ public:
     };
 
 protected:
-    CastingTest() {}
-    ~CastingTest() override {}
-    void SetUp() override {}
-    void TearDown() override {}
+    CastingTest()
+    {
+    }
+    ~CastingTest() override
+    {
+    }
+    void
+    SetUp() override
+    {
+    }
+    void
+    TearDown() override
+    {
+    }
 };

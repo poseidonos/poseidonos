@@ -1,18 +1,21 @@
 #!/bin/bash
 cd $(dirname $(realpath $0))
-IBOFOS=../../bin/ibofos
-DUMP_PATH=/etc/ibofos/core
-IBOFOS_LOG_PATH=/var/log/ibofos/
-IBOFOS_COPY=./ibofos
+IBOFOS=../../bin/poseidonos
+DUMP_PATH=/etc/pos/core
+IBOFOS_LOG_PATH=/var/log/pos/
+IBOFOS_COPY=./poseidonos
 
-PROC_PID=`ps -ef | egrep "*/ibofos$" | awk '{print $2}'`
+PROC_PID=`ps -ef | egrep "*/poseidonos$" | awk '{print $2}'`
+if [ -z $PROC_PID ];then
+    PROC_PID=`ps -ef | egrep "*/ibofos$" | awk '{print $2}'`
+fi
 PID="$PROC_PID"
 echo $PID
 DATE=`date "+%Y%m%d_%H%M%S"`
 
-CORE_PREFIX=ibofos.core.$DATE
-CORE_FILE=ibofos.core.$DATE.$PID
-CORE_CRASHED=ibofos.core
+CORE_PREFIX=poseidonos.core.$DATE
+CORE_FILE=poseidonos.core.$DATE.$PID
+CORE_CRASHED=poseidonos.core
 LIBRARY_FILE=library.tar.gz
 
 BINARY_INFO=binary.info
@@ -33,15 +36,19 @@ log_error(){
     echo -e "\033[31m"$1"\033[0m"
 }
 
+check_free_space(){
+    python3 -c 'import ps_lib; ps_lib.check_free_space()'
+}
+
 get_first_core_information(){
-    rm -rf ibofos.inmemory.log call_stack.info pending_io.info
+    rm -rf poseidonos.inmemory.log call_stack.info pending_io.info
     #If we cannot get information within 5 minutes, we just skip first core information.
     timeout 300s ./get_first_info_from_dump.sh 1>$TRIGGER_LOG 2>$TRIGGER_LOG
     if [ ${?} -ne 0 ];then
         log_error "Timeout happend during get_first_info_from_dump.sh"
     fi
-    if [ -f "ibofos.inmemory.log" ];then
-        IN_MEMORY_LOG_FILE="ibofos.inmemory.log"
+    if [ -f "poseidonos.inmemory.log" ];then
+        IN_MEMORY_LOG_FILE="poseidonos.inmemory.log"
         log_normal "dump log (in memory log) successfully retrived"
     else
         echo "dump log cannot be retrieved in this phase (please use dumplog option in load_dump.sh)"
@@ -75,7 +82,7 @@ if [ "$#" -gt 0 ]; then
     if [ $FLAG_CRASH == "crashed" ];then
         CRASH=2
         PID="crashed"
-        CORE_FILE=ibofos.core.$DATE.$PID
+        CORE_FILE=poseidonos.core.$DATE.$PID
     fi
 
     if [ $FLAG_CRASH == "gcore" ];then
@@ -86,7 +93,7 @@ if [ "$#" -gt 0 ]; then
         CRASH=0
         PID="logonly"
         LOG_ONLY=1
-        CORE_FILE=ibofos.core.$DATE.$PID
+        CORE_FILE=poseidonos.core.$DATE.$PID
     fi
 fi
 
@@ -98,7 +105,7 @@ if [ $CRASH -eq -1 ];then
     exit
 fi
 
-# if flag indicates not crashed, try to gather the ibofos in memory log with best effort
+# if flag indicates not crashed, try to gather the poseidonos in memory log with best effort
 
 if [ ! -z $PROC_PID ]; then
     get_first_core_information
@@ -111,14 +118,14 @@ if [ "$#" -gt 2 ]; then
 fi
 
 if [ -f $IBOFOS ];then
-    echo "ibofos binary check"
+    echo "poseidonos binary check"
     cp --preserve=timestamps $IBOFOS $IBOFOS_COPY
 else
     log_error "set IBOFOS path correctly"
     exit
 fi
 
-
+check_free_space
 
 if [ $CRASH -ne 0 ];then
     if [ $CRASH -eq 1 ];then
@@ -154,7 +161,7 @@ if [ $CRASH -ne 0 ];then
     done
 
     if [ $DUMP_CREATED -eq 1 ];then
-        cp --preserve=timestamps $DUMP_PATH"/"$CORE_CRASHED ./$CORE_FILE
+        mv $DUMP_PATH"/"$CORE_CRASHED ./$CORE_FILE
     else
         log_error "#### Dump File is not created, please check DUMP_PATH or IBOFOS running######"
         exit
@@ -162,7 +169,7 @@ if [ $CRASH -ne 0 ];then
 
 else
     if [ $LOG_ONLY -eq 0 ];then
-        echo "####### Trriger Gcore dump #######"
+        echo "####### Trigger Gcore dump #######"
         gcore -o $CORE_PREFIX $PID
     fi
 fi
@@ -170,7 +177,7 @@ fi
 
 if [ -z $PID ];then
     if [ $CRASH -le 1 ];then
-        log_error "Please Check if Ibofos is running"
+        log_error "Please Check if Poseidonos is running"
         exit
     fi
 fi
@@ -213,7 +220,7 @@ if [ $? -ne 0 ];then
     exit
 fi
 
-rm $CORE_FILE -rf
+mv ./$CORE_FILE $DUMP_PATH"/"$CORE_CRASHED
 rm $LOG_DIR -rf
 
 echo "####### Tar split compression is finished #######"

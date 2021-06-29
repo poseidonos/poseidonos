@@ -32,11 +32,19 @@
 
 #include <thread>
 
-#include "mapper.h"
+#include "src/mapper/mapper.h"
+#include "src/event_scheduler/event.h"
 
-namespace ibofos
+namespace pos
 {
-Mapper::Mapper(void)
+Mapper::Mapper(IArrayInfo* info, IStateControl* iState)
+: addrInfo(nullptr),
+  vsaMapManager(nullptr),
+  stripeMapManager(nullptr),
+  reverseMapManager(nullptr),
+  iArrayinfo(info),
+  iStateControl(iState),
+  isInitialized(false)
 {
 }
 
@@ -44,18 +52,30 @@ Mapper::~Mapper(void)
 {
 }
 
-void
+int
 Mapper::Init(void)
+{
+    return 0;
+}
+
+int
+Mapper::FlushAllMaps(void)
+{
+    return 0;
+}
+
+void
+Mapper::WaitForFlushAllMapsDone(void)
 {
 }
 
 void
-Mapper::_InitMetadata(const MapperAddressInfo& info)
+Mapper::Dispose(void)
 {
 }
 
 int
-Mapper::SyncStore(void)
+Mapper::StoreAllMaps(void)
 {
     return 0;
 }
@@ -65,123 +85,8 @@ Mapper::Close(void)
 {
 }
 
-void
-Mapper::RegisterToPublisher(void)
-{
-}
-
-void
-Mapper::RemoveFromPublisher(void)
-{
-}
-
-VirtualBlkAddr
-Mapper::GetVSA(int volumeId, BlkAddr rba)
-{
-    VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
-    return vsa;
-}
-
-VirtualBlkAddr
-Mapper::GetVSAInternal(int volumeId, BlkAddr rba, int& caller)
-{
-    caller = OK_READY;
-    return UNMAP_VSA;
-}
-
-VirtualBlkAddr
-Mapper::_ReadVSA(int volumeId, BlkAddr rba)
-{
-    VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
-    return vsa;
-}
-
 int
-Mapper::GetVSAs(int volumeId, BlkAddr startRba, uint32_t numBlks,
-    VsaArray& vsaArray)
-{
-    return 0;
-}
-
-int
-Mapper::SetVsaMap(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks)
-{
-    return 0;
-}
-
-int
-Mapper::SetVsaMapInternal(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks)
-{
-    return 0;
-}
-
-int
-Mapper::_UpdateVsaMap(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks)
-{
-    return 0;
-}
-
-MpageList
-Mapper::GetDirtyVsaMapPages(int volumeId, BlkAddr startRba, uint64_t numBlks)
-{
-    MpageList list;
-    return list;
-}
-
-int
-Mapper::LinkReverseMap(Stripe* stripe, StripeId wbLsid, StripeId vsid)
-{
-    return 0;
-}
-
-int
-Mapper::ResetVSARange(int volumeId, BlkAddr rba, uint64_t cnt)
-{
-    return 0;
-}
-
-VirtualBlkAddr
-Mapper::GetRandomVSA(BlkAddr rba)
-{
-    VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
-    return vsa;
-}
-
-StripeId
-Mapper::GetRandomLsid(StripeId vsid)
-{
-    return 0;
-}
-
-StripeAddr
-Mapper::GetLSA(StripeId vsid)
-{
-    StripeAddr entry = {.stripeLoc = IN_WRITE_BUFFER_AREA, .stripeId = 0};
-    return entry;
-}
-
-int
-Mapper::UpdateStripeMap(StripeId vsid, StripeId lsid, StripeLoc loc)
-{
-    return 0;
-}
-
-MpageList
-Mapper::GetDirtyStripeMapPages(int vsid)
-{
-    MpageList list;
-    return list;
-}
-
-int
-Mapper::StartDirtyPageFlush(int mapId, MpageList dirtyPages, EventSmartPtr callbackEvent)
-{
-    int result = callbackEvent->Execute();
-    return (result == 0);
-}
-
-int
-Mapper::FlushMap(int mapId, EventSmartPtr callback)
+Mapper::FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages)
 {
     return 0;
 }
@@ -190,25 +95,6 @@ MapContent*
 Mapper::_GetMapContent(int mapId)
 {
     return nullptr;
-}
-
-std::tuple<StripeAddr, bool>
-Mapper::GetAndReferLsid(StripeId vsid)
-{
-    StripeAddr stripeAddr;
-    bool referenced = false;
-    return std::make_tuple(stripeAddr, referenced);
-}
-
-bool
-Mapper::ReferLsid(StripeAddr& lsidEntry)
-{
-    return true;
-}
-
-void
-Mapper::DereferLsid(StripeAddr& lsidEntry, uint32_t blockCount)
-{
 }
 
 int
@@ -320,16 +206,22 @@ Mapper::_GetFirstValidVolume(void)
     return nullptr;
 }
 
-int64_t
-Mapper::GetNumUsedBlocks(int volId)
-{
-    return 0;
-}
-
-MetaFileIntf*
-Mapper::GetRevMapWholeFile(void)
+IVSAMap*
+Mapper::GetIVSAMap(void)
 {
     return nullptr;
 }
 
-} // namespace ibofos
+IStripeMap*
+Mapper::GetIStripeMap(void)
+{
+    return nullptr;
+}
+
+IMapFlush*
+Mapper::GetIMapFlush(void)
+{
+    return nullptr;
+}
+
+} // namespace pos

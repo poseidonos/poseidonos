@@ -10,7 +10,8 @@ ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../../../"
 cur_dir = ibof_root + "/test/system/nvmf/initiator/automated"
 TEST_NR=3
 
-IOENGINE = ibof_root + "/lib/spdk-19.10/examples/nvme/fio_plugin/fio_plugin"
+IOENGINE = ibof_root + "/lib/spdk/build/fio/spdk_nvme"
+
 RUNTIME = "10"
 IO_SIZE = "8g"
 BLOCKSIZE = "4k"
@@ -55,8 +56,7 @@ def parse_input_cpulist():
 
     return total_cpu
 
-def getIpAddress(num):
-    address =""
+def get_ip_address(num):
     address = args.address
     if num % 2 == 1 and args.address2 != "":
         address = args.address2
@@ -94,8 +94,8 @@ def get_qd_and_filename(wk_qd):
             QD = wk_qd[0]
         else:
             QD = wk_qd[1]
-        address = getIpAddress(i)
-        command += " --name=test" + str(i) + " --iodepth=" + str(QD) + " --filename='trtype=" + str(args.transport) + " adrfam=IPv4 traddr=" + str(address) + " trsvcid=1158 subnqn=nqn.2019-04.ibof\:subsystem" + str(i+1) + " ns=1'"
+        address = get_ip_address(i)
+        command += " --name=test" + str(i) + " --iodepth=" + str(QD) + " --filename='trtype=" + str(args.transport) + " adrfam=IPv4 traddr=" + str(address) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem" + str(i+1) + " ns=1'"
     return command
             
 def run_fio(workload, fio_command_for_each_test, fio_result_fd):
@@ -117,6 +117,7 @@ def run_fio(workload, fio_command_for_each_test, fio_result_fd):
             + " --time_based=" + str(args.time_based) + "" \
             + fio_command_for_each_test + "" \
 
+    print (command)
     process = subprocess.Popen(command, shell=True,stdout=subprocess.PIPE, stderr=fio_result_fd)
     
     while process.poll() == None:

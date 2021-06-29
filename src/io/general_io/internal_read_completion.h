@@ -32,9 +32,9 @@
 
 #pragma once
 
-#include "src/scheduler/callback.h"
+#include "src/event_scheduler/callback.h"
 
-namespace ibofos
+namespace pos
 {
 class InternalReadCompletion : public Callback
 {
@@ -45,4 +45,4 @@ public:
 private:
     bool _DoSpecificJob(void) final;
 };
-} // namespace ibofos
+} // namespace pos

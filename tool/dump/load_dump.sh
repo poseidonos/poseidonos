@@ -1,3 +1,4 @@
+#!/bin/bash
 #please enter $1 as pid or [corefile name], $2 as gdb script
 
 #decompress dump file
@@ -14,7 +15,7 @@ log_error(){
 ROOT_PATH="$(cd "$(dirname "$0")" && pwd)"
 cd $ROOT_PATH
 
-PID=`ps -ef | egrep "*/ibofos$" | awk '{print $2}'`
+PID=`ps -ef | egrep "*/poseidonos$" | awk '{print $2}'`
 
 if [ $# -eq 0 ];then
     echo "Please indicate dump file name as parameter.."
@@ -61,13 +62,13 @@ else
         echo "core ""$DUMP_EXTRACT_PATH" >> load.gdb
         cat ../get_first_info_from_dump.gdb >> load.gdb
         sed -i 's/ibof_gdb.py/..\/ibof_gdb.py/g' load.gdb
-        gdb ./ibofos -x load.gdb -batch
+        gdb ./poseidonos -x load.gdb -batch
         rm -rf load.gdb
     fi
 
     echo "set solib-absolute-prefix ""../""$DUMP_EXTRACT_PATH" > load.gdb
     echo "core ""$DUMP_EXTRACT_PATH" >> load.gdb
-    gdb ./ibofos -x load.gdb
+    gdb ./poseidonos -x load.gdb
 fi
 
 

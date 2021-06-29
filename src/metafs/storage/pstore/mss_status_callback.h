@@ -32,14 +32,17 @@
 
 #pragma once
 
+#include <string>
 #include "instance_tagid_allocator.h"
 #include "meta_storage_specific.h"
 #include "mfs_asynccb_cxt_template.h"
-#include "mfs_common.h"
-#include "mfs_type.h"
+#include "metafs_common.h"
+#include "metafs_type.h"
 #include "os_header.h"
 #include "src/logger/logger.h"
 
+namespace pos
+{
 /**
  * Consumer of MssOnDisk will provide callback function
  * using "callbackPtr" function pointer only for aysnchronous operations
@@ -64,8 +67,9 @@ public:
     }
 
     void
-    Init(MetaStorageType media, MetaLpnType metaLpn, MetaLpnType lpnCnt, void* buf, uint32_t id, uint32_t tagId, FileSizeType offset)
+    Init(std::string arrayName, MetaStorageType media, MetaLpnType metaLpn, MetaLpnType lpnCnt, void* buf, uint32_t id, uint32_t tagId, FileSizeType offset)
     {
+        this->arrayName = arrayName;
         this->media = media;
         this->metaLpn = metaLpn;
         this->lpnCnt = lpnCnt;
@@ -77,6 +81,7 @@ public:
         this->offset = offset;
     }
 
+    std::string arrayName;
     MetaStorageType media;
     MetaLpnType metaLpn;
     MetaLpnType lpnCnt;
@@ -98,8 +103,12 @@ public:
     void Init(MssAioData* cxt, MssCallbackPointer& callback);
     virtual ~MssAioCbCxt(void);
     void SaveIOStatus(int error);
-    MssAioData* GetAioCbCxt(void);
+    std::string& GetArrayName(void)
+    {
+        return cxt->arrayName;
+    }
 
 private:
     MssAioData* cxt;
 };
+} // namespace pos

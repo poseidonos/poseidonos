@@ -8,7 +8,7 @@ exec_mode=
 target_nvme=
 manual_ibofos_run_mode=0
 nvme_cli="nvme"
-nss="nqn.2019-04.ibof:subsystem"
+nss="nqn.2019-04.pos:subsystem"
 trtype=""
 port="1158"
 target_dev_list=("unvme-ns-0,unvme-ns-1,unvme-ns-2")
@@ -125,9 +125,9 @@ show_tc_info()
     echo -e "  - Root dir (target): ${rootTarget}"
 }
 
-kill_ibofos()
+kill_pos()
 {
-    texecc ./test/script/kill_ibofos.sh &>> ${logfile}
+    texecc ./test/script/kill_poseidonos.sh &>> ${logfile}
     sleep 2
 }
 
@@ -145,17 +145,17 @@ normal_shutdown()
 {
     print_info "Shutting down normally in about 30s..."
 
-    texecc rm -rf shutdown.txt result.txt
+    iexecc rm -rf shutdown.txt result.txt
 
-    texecc ps -ef | grep ibofos | awk '{print $2}' | head -1 > result.txt
+    texecc ps -ef | grep poseidonos | awk '{print $2}' | head -1 > result.txt
     result=$(<result.txt)
 
-    texecc ./bin/cli system unmount --json > shutdown.txt
+    texecc ./bin/cli array unmount --name POSARRAY --json > shutdown.txt
     texecc ./bin/cli system exit --json > shutdown.txt
     
     tail --pid=${result} -f /dev/null
 
-    texecc cat shutdown.txt | jq ".Response.result.status.code" > result.txt
+    iexecc cat shutdown.txt | jq ".Response.result.status.code" > result.txt
     result=$(<result.txt)
 
     if [ "$result" == "" ];then
@@ -165,7 +165,7 @@ normal_shutdown()
         return 1
     elif [ ${result} != 0 ];then
         print_result "Failed to shutdown" 1
-        texecc rm -rf shutdown.txt result.txt
+        iexecc rm -rf shutdown.txt result.txt
         return 1
     fi
 
@@ -176,7 +176,7 @@ normal_shutdown()
 
     print_info "Shutdown has been completed!"
 
-    texecc rm -rf shutdown.txt result.txt
+    iexecc rm -rf shutdown.txt result.txt
 
     return 0
 }
@@ -187,7 +187,7 @@ abrupt_shutdown()
 
     print_info "Shutting down suddenly in few seconds..."
 
-    kill_ibofos
+    kill_pos
 
     if [ "${withBackup}" != "" ]; then
         texecc ./script/backup_latest_hugepages_for_uram.sh
@@ -218,7 +218,7 @@ discover_n_connect_nvme_from_initiator()
 
     print_info "Connecting ${nssName}"
 
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
     if [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         connect_port=${port}
         iexecc ${nvme_cli} connect -t ${trtype} -n ${nssName} -a ${target_fabric_ip} -s ${connect_port}
@@ -232,29 +232,29 @@ discover_n_connect_nvme_from_initiator()
     return 0
 }
 
-start_ibofos()
+start_pos()
 {
     texecc rm -rf /dev/shm/ibof_nvmf_trace.pid*
 
-    print_info "Starting ibofos..."
-    texecc ./script/start_ibofos.sh
+    print_info "Starting pos..."
+    texecc ./script/start_poseidonos.sh
 
-    sleep 5 # takes longer if ibofos accesses actual drives
-    print_info "Now ibofos is running..."
+    sleep 5 # takes longer if pos accesses actual drives
+    print_info "Now pos is running..."
 }
 
 update_config()
 {
     # path
     logfile="${rootInit}/script/ft_test.log"
-    spdk_rpc_script="${rootInit}/lib/spdk-19.10/scripts/rpc.py"
+    spdk_rpc_script="${rootInit}/lib/spdk/scripts/rpc.py"
 }
 
 #######################################################################
 # Section B
 #######################################################################
 
-bringup_ibofos()
+bringup_pos()
 {
     iexecc rm -rf bringup.txt result.txt
 
@@ -263,22 +263,23 @@ bringup_ibofos()
         create_array=1
     fi
 
-    start_ibofos;
+    start_pos;
 
     connectList=(0)
 
-    iexecc ${spdk_rpc_script} nvmf_create_transport -t TCP -u 131072 -p 4 -c 0 #>> ${logfile}
+    texecc ${spdk_rpc_script} nvmf_create_transport -t TCP -b 64 -n 4096 #>> ${logfile}
 
     print_info "Creating bdev for nvram"
-    iexecc ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512 #>> ${logfile}
+    texecc ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512 #>> ${logfile}
 
     texecc ./bin/cli device scan #>> ${logfile}
 
     if [ $create_array -eq 1 ]; then
         print_info "Target device list=${target_dev_list}"
+        texecc ./bin/cli array reset
         texecc ./bin/cli array create -b uram0 -d ${target_dev_list} --name POSARRAY --json > bringup.txt
     else
-        texecc ./bin/cli array load --name POSARRAY --json > bringup.txt
+        texecc echo "{\"Response\":{\"result\":{\"status\":{\"code\":0}}}}" > bringup.txt
     fi
 
     iexecc cat bringup.txt | jq ".Response.result.status.code" > result.txt
@@ -299,10 +300,22 @@ bringup_ibofos()
         return 1
     fi
 
-    texecc ./bin/cli system mount --json > result.txt
+    iexecc rm -rf bringup.txt result.txt
 
-    if [ $result -ne 0 ];then
-        print_result "mount pos failed" 1
+    texecc ./bin/cli array mount --name POSARRAY --json > bringup.txt
+
+    iexecc cat bringup.txt | jq ".Response.result.status.code" > result.txt
+
+    result=$(<result.txt)
+
+    if [ "$result" == "" ];then
+        print_result "there is a problem" 1
+        iexecc cat bringup.txt
+        iexecc rm -rf bringup.txt result.txt
+
+        return 1
+    elif [ $result -ne 0 ];then
+        print_result "mount failed" 1
         iexecc cat bringup.txt
         iexecc rm -rf bringup.txt result.txt
 
@@ -313,7 +326,7 @@ bringup_ibofos()
     do
         connect_port=${port}
         print_info "Creating subsystem ${nss}$i, ip ${target_fabric_ip}, port ${connect_port}"
-        texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss}$i -a -s IBOF0000000000000$i -d IBOF_VOL_$i #>> ${logfile}
+        texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss}$i -a -s POS0000000000000$i -d POS_VOL_$i #>> ${logfile}
 
         print_info "Adding listener ${nss}$i, ip ${target_fabric_ip}, port ${connect_port}"
         texecc ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss}$i -t TCP -a ${target_fabric_ip} -s ${connect_port} #>> ${logfile}
@@ -323,7 +336,7 @@ bringup_ibofos()
 
     iexecc rm -rf bringup.txt result.txt
 
-    print_info "Bring-up iBoFOS done!"
+    print_info "Bring-up PoseidonOS done!"
 
     return 0
 }
@@ -346,7 +359,7 @@ npor_and_check_volumes()
         return 1
     fi
 
-    bringup_ibofos 0;
+    bringup_pos 0;
     result=$?
 
     if [ $result != 0 ];then
@@ -389,7 +402,7 @@ spor_and_check_volumes()
     result0=$(<result0.txt)
 
     abrupt_shutdown 1;
-    bringup_ibofos 0;
+    bringup_pos 0;
     result=$?
 
     if [ $result != 0 ];then
@@ -658,7 +671,7 @@ write_data()
     iexecc dd if=/dev/urandom of=${write_file} bs=1024K count=1024 seek=0 skip=0 conv=sparse,notrunc oflag=nocache status=none &
     wait
 
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
     if [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         print_result "NVMe drive is not found..." 1
         return 1
@@ -712,7 +725,7 @@ verify_data()
     iexecc rm -rf ${read_file} ${cmp_file}
     sleep 1
 
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
     if [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         print_result "NVMe drive is not found..." 1
         return 1

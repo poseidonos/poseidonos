@@ -32,6 +32,8 @@
 
 #pragma once
 
+namespace pos
+{
 enum class MssOpcode
 {
     Write = 0,
@@ -39,3 +41,4 @@ enum class MssOpcode
 
     Trim,
 };
+} // namespace pos

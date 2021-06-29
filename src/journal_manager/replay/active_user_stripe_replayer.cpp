@@ -32,17 +32,19 @@
 
 #include "active_user_stripe_replayer.h"
 
+#include <iostream>
+#include <iomanip>
+
 #include "src/allocator/allocator.h"
-#include "src/array/array.h"
-#include "src/array/partition/partition.h"
-#include "src/array/partition/partition_size_info.h"
+#include "src/allocator/i_context_replayer.h"
+#include "src/include/partition_type.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
-ActiveUserStripeReplayer::ActiveUserStripeReplayer(Allocator* allocator, Array* array)
-: allocator(allocator),
-  array(array)
+ActiveUserStripeReplayer::ActiveUserStripeReplayer(IContextReplayer* ctxReplayer, IArrayInfo* array)
+: contextReplayer(ctxReplayer),
+  arrayInfo(array)
 {
     userLsids.clear();
     lastLsid.clear();
@@ -70,21 +72,26 @@ int
 ActiveUserStripeReplayer::Replay(void)
 {
     const PartitionLogicalSize* userDataSize =
-        array->GetSizeInfo(PartitionType::USER_DATA);
+        arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
     StripeId stripesPerSegment = userDataSize->stripesPerSegment;
-    _FindLastStripeOfSegment(stripesPerSegment);
+
+    _UpdateLastLsidOfSegment(stripesPerSegment);
     _EraseFullSegmentLsid(stripesPerSegment);
 
     StripeId currentSsdLsid = _FindLastLsid(stripesPerSegment);
-    allocator->ReplaySsdLsid(currentSsdLsid);
+    contextReplayer->ReplaySsdLsid(currentSsdLsid);
 
-    IBOF_TRACE_INFO(EID(JOURNAL_REPLAY_SSD_LSID),
-        "[Replay] SSD LSID is updated to {}", currentSsdLsid);
+    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_USER_STRIPE_TAIL);
+    std::ostringstream os;
+    os << "[Replay] SSD LSID is updated to " << currentSsdLsid;
+
+    POS_TRACE_DEBUG(eventId, os.str());
+    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
     return 0;
 }
 
 void
-ActiveUserStripeReplayer::_FindLastStripeOfSegment(uint32_t stripesPerSegment)
+ActiveUserStripeReplayer::_UpdateLastLsidOfSegment(uint32_t stripesPerSegment)
 {
     for (StripeId ssdLsid : userLsids)
     {
@@ -93,18 +100,12 @@ ActiveUserStripeReplayer::_FindLastStripeOfSegment(uint32_t stripesPerSegment)
         if (lastLsid.find(segId) == lastLsid.end())
         {
             lastLsid.emplace(segId, ssdLsid);
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_DEBUG,
-                "currentSsdLsid new candiate inserted : lsid {}",
-                ssdLsid);
         }
         else
         {
             if (lastLsid[segId] < ssdLsid)
             {
                 lastLsid[segId] = ssdLsid;
-                IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_DEBUG,
-                    "currentSsdLsid candiate updated : lsid {}",
-                    ssdLsid);
             }
         }
     }
@@ -136,12 +137,12 @@ ActiveUserStripeReplayer::_FindLastLsid(uint32_t stripesPerSegment)
     }
     else if (lastLsid.size() > 1)
     {
-        IBOF_TRACE_ERROR(
-            EID(JOURNAL_REPLAY_SSD_LSID),
-            "Cannot find latest LSID - number of active segment found is {}",
-            lastLsid.size());
-
         lsid = lastLsid.begin()->second;
+
+        int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_USER_STRIPE_TAIL);
+        POS_TRACE_DEBUG(eventId,
+            "[Replay] {} active segments are found, picked {} for currentLsid",
+            lastLsid.size(), lsid);
     }
     else
     {
@@ -150,4 +151,4 @@ ActiveUserStripeReplayer::_FindLastLsid(uint32_t stripesPerSegment)
 
     return lsid;
 }
-} // namespace ibofos
+} // namespace pos

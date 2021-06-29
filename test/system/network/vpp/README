@@ -4,7 +4,7 @@
 VPP is the user level network layer to avoid accesss to kernel. 
 This folder contains scripts for VPP test and operation. 
 some script is located in other folder so it can be easier for a user to explore directories with less depth.
-If the document does not explicit "VPP ONLY", we use this script in normal (ibofos , vanilla spdk). 
+If the document does not explicit "VPP ONLY", we use this script in normal (poseidonos , vanilla spdk). 
 
 ===============================
 1. Build VPP and spdk with vpp
@@ -18,9 +18,9 @@ If the document does not explicit "VPP ONLY", we use this script in normal (ibof
       In build_ibof_lib.sh file, please add below. 
       Even if you build with vpp option, spdk will execute with kTCP network without vpp application.
      	#please add --with-vpp if you need to use VPP
-		./configure --with-dpdk=$ROOT_DIR/dpdk-stable-19.08.2/ --with-rdma --with-fio=$ROOT_DIR/${FIO_SOURCE} --with-ibof --without-isal
+		./configure --with-dpdk=$ROOT_DIR/dpdk/ --with-rdma --with-fio=$ROOT_DIR/${FIO_SOURCE} --with-pos --without-isal
 
-      rm spdk-19.10/mk/config.mk
+      rm spdk/mk/config.mk
       ./build_ibof_lib.sh spdk 
 
 
@@ -67,7 +67,7 @@ If the document does not explicit "VPP ONLY", we use this script in normal (ibof
 
 
 2) clear_vpp.sh   (VPP_ONLY)
-   kill vpp and return settings for normal ibofos.
+   kill vpp and return settings for normal POS.
 
 
 ======================================

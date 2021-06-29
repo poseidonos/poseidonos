@@ -38,7 +38,7 @@
 
 using namespace ::testing;
 
-namespace ibofos
+namespace pos
 {
 class MockVolumeManager : public VolumeManager
 {
@@ -49,4 +49,4 @@ public:
     MOCK_METHOD(int, GetVolumeSize, (int volId, uint64_t& volSize), (override));
 };
 
-} // namespace ibofos
+} // namespace pos

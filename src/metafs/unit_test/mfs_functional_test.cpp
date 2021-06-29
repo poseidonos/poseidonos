@@ -33,50 +33,56 @@
 #include "mfs_functional_test.h"
 
 #include <algorithm>
+#include <fstream>
+#include <string>
+#include "metafs.h"
+#include "metafs_common.h"
+#include "metafs_common_const.h"
+#include "metafs_config.h"
+#include "metafs_log.h"
+#include "metafs_time.h"
 
-#include "mfs.h"
-#include "mfs_common.h"
-#include "mfs_common_const.h"
-#include "mfs_io_config.h"
-#include "mfs_log.h"
-#include "mfs_time.h"
-
+namespace pos
+{
 TEST_F(UtMetaFsTopFunctionalPositive, MetaFilesystemEstablish)
 {
     EstablishFilesystem();
 }
 
-FileFDType
-UtMetaFsTopFunctionalPositive::CreateFileAndOpen(std::string& fileName, FileSizeType fileSize)
+FileDescriptorType
+UtMetaFsTopFunctionalPositive::CreateFileAndOpen(string& fileName, string& arrayName, FileSizeType fileSize)
 {
-    FileFDType fd;
-    const FileFDType INVALID_FD = MetaFsCommonConst::INVALID_FD;
+    FileDescriptorType fd;
+    const FileDescriptorType INVALID_FD = MetaFsCommonConst::INVALID_FD;
 
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
     // MetaFilePropertySet prop;
-    // prop.ioAccPattern = MDFilePropIoAccessPattern::ByteIntensive;
-    // prop.ioOpType = MDFilePropIoOpType::WriteDominant;
-    rc_mgmt = metaFsMgr.mgmt.Create(fileName, fileSize);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    // prop.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
+    // prop.ioOpType = MetaFileDominant::WriteDominant;
+    rc_mgmt = metaFs.ctrl.CreateVolume(fileName, arrayName, fileSize);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
 
-    rc_mgmt = metaFsMgr.mgmt.Open(fileName);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    bool result = metaFs.mgmt.AddArray(arrayName);
+    EXPECT_EQ(result, true);
+
+    rc_mgmt = metaFs.ctrl.Open(fileName, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
     fd = rc_mgmt.returnData;
     EXPECT_NE(fd, INVALID_FD);
 
-    size_t fileByteSize = metaFsMgr.util.GetFileSize(fd);
+    size_t fileByteSize = metaFs.ctrl.GetFileSize(fd, arrayName);
     EXPECT_EQ(fileSize, fileByteSize);
 
     return fd;
 }
 
 void
-UtMetaFsTopFunctionalPositive::UnmountFilesystem(void)
+UtMetaFsTopFunctionalPositive::UnmountFilesystem(string& arrayName)
 {
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_sys;
+    MetaFsReturnCode<POS_EVENT_ID> rc_sys;
 
-    rc_sys = metaFsMgr.sys.Unmount();
-    EXPECT_EQ(rc_sys.sc, IBOF_EVENT_ID::SUCCESS);
+    rc_sys = metaFs.mgmt.UnmountSystem(arrayName);
+    EXPECT_EQ(rc_sys.sc, POS_EVENT_ID::SUCCESS);
 }
 
 int
@@ -87,51 +93,50 @@ Sequential_data_pattern_gen(void)
 }
 
 void
-WriteDataAndClose(FileFDType fd, FileSizeType startOffset, FileSizeType byteSize, void* wBuf)
+WriteDataAndClose(FileDescriptorType fd, string arrayName, FileSizeType startOffset, FileSizeType byteSize, void* wBuf)
 {
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    MetaFsReturnCode<POS_EVENT_ID> rc_io;
 
-    rc_io = metaFsMgr.io.Write(fd, startOffset, byteSize, wBuf);
-    EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+    rc_io = metaFs.io.Write(fd, arrayName, startOffset, byteSize, wBuf);
+    EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
 
-    rc_mgmt = metaFsMgr.mgmt.Close(fd);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    rc_mgmt = metaFs.ctrl.Close(fd, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
 }
 
-#include <fstream>
 void
 DumpMetaBuffer(const char* fileName, const void* buf, size_t byteSize)
 {
-    std::string targetFile(std::string("/tmp/metaStorage/") + fileName);
-    std::ofstream ofile(targetFile, std::ios::binary);
+    string targetFile(string("/tmp/metaStorage/") + fileName);
+    ofstream ofile(targetFile, ios::binary);
     ofile.write((char*)buf, byteSize);
     ofile.close();
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "Dump finished..file={}", targetFile.c_str());
 }
 
 bool
-CheckDataPersistency(std::string fileName, FileSizeType ioOffset, FileSizeType ioByteSize, const void* wBuf)
+CheckDataPersistency(string fileName, string arrayName, FileSizeType ioOffset, FileSizeType ioByteSize, const void* wBuf)
 {
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
-    const FileFDType INVALID_FD = MetaFsCommonConst::INVALID_FD;
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    MetaFsReturnCode<POS_EVENT_ID> rc_io;
+    const FileDescriptorType INVALID_FD = MetaFsCommonConst::INVALID_FD;
     int fd;
 
-    rc_mgmt = metaFsMgr.mgmt.Open(fileName);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    rc_mgmt = metaFs.ctrl.Open(fileName, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
     fd = rc_mgmt.returnData;
     EXPECT_NE(fd, INVALID_FD);
 
     uint8_t* rBuf = (uint8_t*)calloc(1, ioByteSize);
     memset(rBuf, 0, ioByteSize);
 
-    rc_io = metaFsMgr.io.Read(fd, ioOffset, ioByteSize, rBuf);
-    EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+    rc_io = metaFs.io.Read(fd, arrayName, ioOffset, ioByteSize, rBuf);
+    EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
 
-    rc_mgmt = metaFsMgr.mgmt.Close(fd);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    rc_mgmt = metaFs.ctrl.Close(fd, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
 
     bool isSuccess = VerifyData(wBuf, rBuf, ioByteSize);
     EXPECT_EQ(isSuccess, true);
@@ -147,18 +152,18 @@ VerifyData(const void* wBuf, const void* rBuf, FileSizeType byteSize)
     int ret = memcmp(wBuf, rBuf, byteSize);
     EXPECT_EQ(ret, 0);
 
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "Verifying data...");
     if (ret != 0)
     {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_ERROR_MESSAGE,
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
             "Data miscompare detected!");
         DumpMetaBuffer("wBuf.bin", wBuf, byteSize);
         DumpMetaBuffer("rBuf.bin", rBuf, byteSize);
 
         return false;
     }
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "Done");
 
     return true;
@@ -168,37 +173,40 @@ TEST_F(UtMetaFsTopFunctionalPositive, TestLargeFile)
 {
     EstablishFilesystem();
 
-    const FileFDType INVALID_FD = MetaFsCommonConst::INVALID_FD;
-    std::string fileName = std::string("test/0");
+    const FileDescriptorType INVALID_FD = MetaFsCommonConst::INVALID_FD;
+    string fileName = string("test/0");
+    string arrayName = "POSArray";
     size_t fileByteSize = ((size_t)100 * 1024 * 1024); // 100MB
     MetaFilePropertySet newprop;
 
     uint32_t fd;
     {
-        MetaFsReturnCode<IBOF_EVENT_ID> rc;
-        rc = metaFsMgr.mgmt.Create(fileName, fileByteSize, newprop);
-        EXPECT_EQ(rc.sc, IBOF_EVENT_ID::SUCCESS);
-        rc = metaFsMgr.mgmt.Open(fileName);
-        EXPECT_EQ(rc.sc, IBOF_EVENT_ID::SUCCESS);
+        MetaFsReturnCode<POS_EVENT_ID> rc;
+        rc = metaFs.ctrl.CreateVolume(fileName, arrayName, fileByteSize, newprop);
+        EXPECT_EQ(rc.sc, POS_EVENT_ID::SUCCESS);
+        bool result = metaFs.mgmt.AddArray(arrayName);
+        EXPECT_EQ(result, true);
+        rc = metaFs.ctrl.Open(fileName, arrayName);
+        EXPECT_EQ(rc.sc, POS_EVENT_ID::SUCCESS);
         fd = rc.returnData;
         EXPECT_NE(fd, INVALID_FD);
     }
     {
-        MetaFsReturnCode<IBOF_EVENT_ID> mgmtRC;
-        uint32_t dataChunk = metaFsMgr.util.GetAlignedFileIOSize(fd);
+        MetaFsReturnCode<POS_EVENT_ID> mgmtRC;
+        uint32_t dataChunk = metaFs.ctrl.GetAlignedFileIOSize(fd, arrayName);
         uint32_t ioSize = dataChunk * 50;
         uint32_t byteOffset = dataChunk * 10;
         void* wBuf = calloc(1, fileByteSize);
-        std::generate_n((uint8_t*)wBuf, fileByteSize, Sequential_data_pattern_gen);
-        MetaFsReturnCode<IBOF_EVENT_ID> ioRC;
+        generate_n((uint8_t*)wBuf, fileByteSize, Sequential_data_pattern_gen);
+        MetaFsReturnCode<POS_EVENT_ID> ioRC;
 
-        ioRC = metaFsMgr.io.Write(fd, wBuf); // full file write
-        EXPECT_EQ(ioRC.sc, IBOF_EVENT_ID::SUCCESS);
-        mgmtRC = metaFsMgr.mgmt.Close(fd);
-        EXPECT_EQ(mgmtRC.sc, IBOF_EVENT_ID::SUCCESS);
+        ioRC = metaFs.io.Write(fd, arrayName, wBuf); // full file write
+        EXPECT_EQ(ioRC.sc, POS_EVENT_ID::SUCCESS);
+        mgmtRC = metaFs.ctrl.Close(fd, arrayName);
+        EXPECT_EQ(mgmtRC.sc, POS_EVENT_ID::SUCCESS);
 
         // read some portion of file and verify
-        CheckDataPersistency(fileName, byteOffset, ioSize, (uint8_t*)wBuf + byteOffset);
+        CheckDataPersistency(fileName, arrayName, byteOffset, ioSize, (uint8_t*)wBuf + byteOffset);
 
         free(wBuf);
     }
@@ -206,57 +214,59 @@ TEST_F(UtMetaFsTopFunctionalPositive, TestLargeFile)
 
 TEST_F(UtMetaFsTopFunctionalPositive, MetaFileCreateAndRemountAsWellAsSomeIOs)
 {
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_sys;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
+    MetaFsReturnCode<POS_EVENT_ID> rc_sys;
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    MetaFsReturnCode<POS_EVENT_ID> rc_io;
 
     EstablishFilesystem();
 
-    std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
+    string fileName = string("testfile" + to_string(GetTimestampUs()));
+    string arrayName = "POSArray";
     size_t fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 50;
     int fd;
-    fd = CreateFileAndOpen(fileName, fileSize);
+    fd = CreateFileAndOpen(fileName, arrayName, fileSize);
 
-    uint32_t dataChunkSize = metaFsMgr.util.GetAlignedFileIOSize(fd);
+    uint32_t dataChunkSize = metaFs.ctrl.GetAlignedFileIOSize(fd, arrayName);
     EXPECT_NE(dataChunkSize, 0);
     FileSizeType targetOffset = dataChunkSize * 3;
     FileSizeType targetByteSize = dataChunkSize * 2;
     uint8_t* wBuf = (uint8_t*)calloc(1, targetByteSize);
-    std::generate_n(wBuf, targetByteSize, Sequential_data_pattern_gen);
+    generate_n(wBuf, targetByteSize, Sequential_data_pattern_gen);
 
-    WriteDataAndClose(fd, targetOffset, targetByteSize, wBuf);
-    CheckDataPersistency(fileName, targetOffset, targetByteSize, wBuf);
+    WriteDataAndClose(fd, arrayName, targetOffset, targetByteSize, wBuf);
+    CheckDataPersistency(fileName, arrayName, targetOffset, targetByteSize, wBuf);
 
     free(wBuf);
 }
 
 TEST_F(UtMetaFsTopFunctionalPositive, MetaFileCreateAndDoUnAlignedIO)
 {
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_sys;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
+    MetaFsReturnCode<POS_EVENT_ID> rc_sys;
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    MetaFsReturnCode<POS_EVENT_ID> rc_io;
 
     EstablishFilesystem();
 
-    std::string fileName = std::string("testfileX" + std::to_string(GetTimestampUs()));
+    string fileName = string("testfileX" + to_string(GetTimestampUs()));
+    string arrayName = "POSArray";
     size_t fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100;
-    int fd = CreateFileAndOpen(fileName, fileSize);
+    int fd = CreateFileAndOpen(fileName, arrayName, fileSize);
     uint8_t* wBuf = (uint8_t*)calloc(1, fileSize);
-    std::generate_n(wBuf, fileSize, Sequential_data_pattern_gen);
+    generate_n(wBuf, fileSize, Sequential_data_pattern_gen);
 
     // TEST1 - full multi-page io
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "Test - Full multi-page io");
     {
-        uint32_t dataChunkSize = metaFsMgr.util.GetAlignedFileIOSize(fd);
+        uint32_t dataChunkSize = metaFs.ctrl.GetAlignedFileIOSize(fd, arrayName);
         EXPECT_NE(dataChunkSize, 0);
 
         uint32_t targetOffset = 140;
         uint32_t targetByteSize = dataChunkSize * 2;
 
-        WriteDataAndClose(fd, targetOffset, targetByteSize, wBuf + targetOffset);
+        WriteDataAndClose(fd, arrayName, targetOffset, targetByteSize, wBuf + targetOffset);
 
-        bool isSuccess = CheckDataPersistency(fileName, targetOffset, targetByteSize, wBuf + targetOffset);
+        bool isSuccess = CheckDataPersistency(fileName, arrayName, targetOffset, targetByteSize, wBuf + targetOffset);
 
         if (!isSuccess)
         {
@@ -265,35 +275,35 @@ TEST_F(UtMetaFsTopFunctionalPositive, MetaFileCreateAndDoUnAlignedIO)
     }
 
     // TEST2 - partial page io
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "Test - Partial  page io");
     {
         int fd;
-        const FileFDType INVALID_FD = MetaFsCommonConst::INVALID_FD;
-        rc_mgmt = metaFsMgr.mgmt.Open(fileName);
-        EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+        const FileDescriptorType INVALID_FD = MetaFsCommonConst::INVALID_FD;
+        rc_mgmt = metaFs.ctrl.Open(fileName, arrayName);
+        EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
         fd = rc_mgmt.returnData;
 
         EXPECT_NE(fd, INVALID_FD);
 
-        rc_io = metaFsMgr.io.Write(fd, 0, 4, wBuf);
-        EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
-        rc_io = metaFsMgr.io.Write(fd, 4, 128, wBuf + 4);
-        EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
-        rc_io = metaFsMgr.io.Write(fd, 132, 8, wBuf + 132);
-        EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
-        rc_io = metaFsMgr.io.Write(fd, 140, 147456, wBuf + 140);
-        EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+        rc_io = metaFs.io.Write(fd, arrayName, 0, 4, wBuf);
+        EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
+        rc_io = metaFs.io.Write(fd, arrayName, 4, 128, wBuf + 4);
+        EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
+        rc_io = metaFs.io.Write(fd, arrayName, 132, 8, wBuf + 132);
+        EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
+        rc_io = metaFs.io.Write(fd, arrayName, 140, 147456, wBuf + 140);
+        EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
 
         uint8_t* rBuf = (uint8_t*)calloc(1, fileSize);
-        rc_io = metaFsMgr.io.Read(fd, 0, 4, rBuf);
-        EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
-        rc_io = metaFsMgr.io.Read(fd, 4, 128, rBuf + 4);
-        EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
-        rc_io = metaFsMgr.io.Read(fd, 132, 8, rBuf + 132);
-        EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
-        rc_io = metaFsMgr.io.Read(fd, 140, 147456, rBuf + 140);
-        EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+        rc_io = metaFs.io.Read(fd, arrayName, 0, 4, rBuf);
+        EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
+        rc_io = metaFs.io.Read(fd, arrayName, 4, 128, rBuf + 4);
+        EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
+        rc_io = metaFs.io.Read(fd, arrayName, 132, 8, rBuf + 132);
+        EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
+        rc_io = metaFs.io.Read(fd, arrayName, 140, 147456, rBuf + 140);
+        EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
 
         bool isSuccess = VerifyData(wBuf, rBuf, 4 + 128 + 8 + 147456);
         free(rBuf);
@@ -306,116 +316,118 @@ TEST_F(UtMetaFsTopFunctionalPositive, MetaFileCreateAndDoUnAlignedIO)
 FINALIZE:
     free(wBuf);
 
-    rc_mgmt = metaFsMgr.mgmt.Close(fd);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    rc_mgmt = metaFs.ctrl.Close(fd, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
 }
 
 // MFS unmount case
 // 1. MFS Unmount even though there are open files.
 TEST_F(UtMetaFsTopFunctionalPositive, MFSUnmountCases)
 {
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_sys;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
+    MetaFsReturnCode<POS_EVENT_ID> rc_sys;
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    MetaFsReturnCode<POS_EVENT_ID> rc_io;
 
     EstablishFilesystem();
 
     size_t fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100;
 
     // 1st file create
-    std::string fileName1 = std::string("testfileX" + std::to_string(GetTimestampUs()));
-    int fd1 = CreateFileAndOpen(fileName1, fileSize);
+    string fileName1 = string("testfileX" + to_string(GetTimestampUs()));
+    string arrayName = "POSArray";
+    int fd1 = CreateFileAndOpen(fileName1, arrayName, fileSize);
 
     // 2nd file create
-    std::string fileName2 = std::string("testfileX" + std::to_string(GetTimestampUs()));
-    int fd2 = CreateFileAndOpen(fileName2, fileSize);
+    string fileName2 = string("testfileX" + to_string(GetTimestampUs()));
+    int fd2 = CreateFileAndOpen(fileName2, arrayName, fileSize);
 
     // File Write
     uint8_t* wBuf = (uint8_t*)calloc(1, fileSize);
-    std::generate_n(wBuf, fileSize, Sequential_data_pattern_gen);
+    generate_n(wBuf, fileSize, Sequential_data_pattern_gen);
 
-    MetaFsReturnCode<IBOF_EVENT_ID> ioRC;
-    ioRC = metaFsMgr.io.Write(fd1, wBuf); // full file write
+    MetaFsReturnCode<POS_EVENT_ID> ioRC;
+    ioRC = metaFs.io.Write(fd1, arrayName, wBuf); // full file write
 
-    ioRC = metaFsMgr.io.Write(fd2, wBuf); // full file write
+    ioRC = metaFs.io.Write(fd2, arrayName, wBuf); // full file write
 
     // try MFS unmout enen though there are 2 active files
-    ioRC = metaFsMgr.sys.Unmount();
-    EXPECT_NE(ioRC.sc, IBOF_EVENT_ID::SUCCESS);
+    ioRC = metaFs.mgmt.UnmountSystem(arrayName);
+    EXPECT_NE(ioRC.sc, POS_EVENT_ID::SUCCESS);
 
     free(wBuf);
 
     // try MFS unmout enen though there are 1 active files
-    rc_mgmt = metaFsMgr.mgmt.Close(fd1);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    rc_mgmt = metaFs.ctrl.Close(fd1, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
 
-    ioRC = metaFsMgr.sys.Unmount();
-    EXPECT_NE(ioRC.sc, IBOF_EVENT_ID::SUCCESS);
+    ioRC = metaFs.mgmt.UnmountSystem(arrayName);
+    EXPECT_NE(ioRC.sc, POS_EVENT_ID::SUCCESS);
 
     // try MFS unmout enen though there are 0 active files
-    rc_mgmt = metaFsMgr.mgmt.Close(fd2);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    rc_mgmt = metaFs.ctrl.Close(fd2, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
 
-    ioRC = metaFsMgr.sys.Unmount();
-    EXPECT_EQ(ioRC.sc, IBOF_EVENT_ID::SUCCESS);
+    ioRC = metaFs.mgmt.UnmountSystem(arrayName);
+    EXPECT_EQ(ioRC.sc, POS_EVENT_ID::SUCCESS);
 }
 
 // MFS unmount -> Trim meta space(virtually) -> mount (need to init/create)
 TEST_F(UtMetaFsTopFunctionalPositive, MFSUnmountandCleanInit)
 {
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_sys;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
+    MetaFsReturnCode<POS_EVENT_ID> rc_sys;
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    MetaFsReturnCode<POS_EVENT_ID> rc_io;
 
     EstablishFilesystem();
 
     size_t fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100;
 
     // 1st file create
-    std::string fileName1 = std::string("testfileX" + std::to_string(GetTimestampUs()));
-    int fd1 = CreateFileAndOpen(fileName1, fileSize);
+    string fileName1 = string("testfileX" + to_string(GetTimestampUs()));
+    string arrayName = "POSArray";
+    int fd1 = CreateFileAndOpen(fileName1, arrayName, fileSize);
 
     // File Write
     uint8_t* wBuf = (uint8_t*)calloc(1, fileSize);
-    std::generate_n(wBuf, fileSize, Sequential_data_pattern_gen);
+    generate_n(wBuf, fileSize, Sequential_data_pattern_gen);
 
-    MetaFsReturnCode<IBOF_EVENT_ID> ioRC;
-    ioRC = metaFsMgr.io.Write(fd1, wBuf); // full file write
+    MetaFsReturnCode<POS_EVENT_ID> ioRC;
+    ioRC = metaFs.io.Write(fd1, arrayName, wBuf); // full file write
     free(wBuf);
 
     // try MFS unmout enen though there are 1 active files
-    rc_mgmt = metaFsMgr.mgmt.Close(fd1);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    rc_mgmt = metaFs.ctrl.Close(fd1, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
 
-    ioRC = metaFsMgr.sys.Unmount();
-    EXPECT_EQ(ioRC.sc, IBOF_EVENT_ID::SUCCESS);
+    ioRC = metaFs.mgmt.UnmountSystem(arrayName);
+    EXPECT_EQ(ioRC.sc, POS_EVENT_ID::SUCCESS);
 
-    // Since the meta space was virtually trimmed, the meta file system should be initialized and created.
+    // Since the meta space was virtually trimmed, the meta file mgmt should be initialized and created.
     bool isInitialized = false;
 
     UtMetaFsTop::SetUp();
 
     if (false == isInitialized)
     {
-        rc_sys = metaFsMgr.sys.Create();
-        EXPECT_EQ(rc_sys.sc, IBOF_EVENT_ID::SUCCESS);
+        rc_sys = metaFs.mgmt.CreateSystem(arrayName);
+        EXPECT_EQ(rc_sys.sc, POS_EVENT_ID::SUCCESS);
 
-        rc_sys = metaFsMgr.sys.Mount();
-        EXPECT_EQ(rc_sys.sc, IBOF_EVENT_ID::SUCCESS);
+        rc_sys = metaFs.mgmt.MountSystem(arrayName);
+        EXPECT_EQ(rc_sys.sc, POS_EVENT_ID::SUCCESS);
     }
 
-    UnmountFilesystem();
+    UnmountFilesystem(arrayName);
 }
 
-// {MetaFS system mount -> file create -> file close -> MetaFS system unmount } x 50
+// {MetaFS mgmt mount -> file create -> file close -> MetaFS mgmt unmount } x 50
 TEST_F(UtMetaFsTopFunctionalPositive, MFSMountUnmountRepeat)
 {
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    MetaFsReturnCode<IBOF_EVENT_ID> ioRC;
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    MetaFsReturnCode<POS_EVENT_ID> ioRC;
 
     size_t fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100;
     uint8_t* wBuf = (uint8_t*)calloc(1, fileSize);
-    std::generate_n(wBuf, fileSize, Sequential_data_pattern_gen);
+    generate_n(wBuf, fileSize, Sequential_data_pattern_gen);
 
     int test_cnt = 50;
 
@@ -428,20 +440,22 @@ TEST_F(UtMetaFsTopFunctionalPositive, MFSMountUnmountRepeat)
         EstablishFilesystem();
 
         // 1st file create
-        std::string fileName1 = std::string("testfileX" + std::to_string(GetTimestampUs()));
-        int fd1 = CreateFileAndOpen(fileName1, fileSize);
+        string fileName1 = string("testfileX" + to_string(GetTimestampUs()));
+        string arrayName = "POSArray";
+        int fd1 = CreateFileAndOpen(fileName1, arrayName, fileSize);
 
         // File Write
-        ioRC = metaFsMgr.io.Write(fd1, wBuf); // full file write
+        ioRC = metaFs.io.Write(fd1, arrayName, wBuf); // full file write
 
         // file close
-        rc_mgmt = metaFsMgr.mgmt.Close(fd1);
-        EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+        rc_mgmt = metaFs.ctrl.Close(fd1, arrayName);
+        EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
 
         // mfs unmount
-        ioRC = metaFsMgr.sys.Unmount();
-        EXPECT_EQ(ioRC.sc, IBOF_EVENT_ID::SUCCESS);
+        ioRC = metaFs.mgmt.UnmountSystem(arrayName);
+        EXPECT_EQ(ioRC.sc, POS_EVENT_ID::SUCCESS);
     }
 
     free(wBuf);
 }
+} // namespace pos

@@ -54,7 +54,7 @@ void UtMIMFunctionalNegative::TC001_ProcessInvalidNewReq(void)
 
     Setup();
 
-    MetaFsIoReqMsg req;
+    MetaFsIoRequest req;
 
     MetaFsStatusCodeIoSpcf sc;
     sc = metaIoMgr.ProcessNewReq(&req);

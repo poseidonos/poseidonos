@@ -36,72 +36,52 @@
 
 #include "src/gc/copier.h"
 #include "src/gc/gc_status.h"
-#include "src/lib/singleton.h"
-#include "src/state/state_manager.h"
+#include "src/gc/interface/i_gc_control.h"
+#include "src/array_models/interface/i_mount_sequence.h"
+#include "src/state/interface/i_state_control.h"
+#include "src/state/interface/i_state_observer.h"
 
 using namespace std;
-
-namespace ibofos
+namespace pos
 {
 class Copier;
 using CopierSmartPtr = std::shared_ptr<Copier>;
 
-class GarbageCollector : StateEvent
+class GarbageCollector : public IGCControl, public IMountSequence,
+                         public IStateObserver
 {
 public:
-    GarbageCollector(void);
-    ~GarbageCollector(void)
-    {
-        StateManagerSingleton::Instance()->Dispose(this);
-    }
+    GarbageCollector(IArrayInfo* i, IStateControl* s);
+    virtual ~GarbageCollector(void) {}
+    virtual int Start(void) override;
+    virtual void End(void) override;
 
-    int Start(void);
-    void End(void);
-    void
-    Pause(void)
-    {
-        copierPtr->Pause();
-    }
-    void
-    Resume(void)
-    {
-        copierPtr->Resume();
-    }
-    bool
-    IsPause(void)
-    {
-        return copierPtr->IsPause();
-    }
+    virtual void StateChanged(StateContext* prev, StateContext* next) override;
+    virtual int Init(void) override;
+    virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
+    virtual void Flush(void) override;
 
-    int DisableThreshold(void);
-    int IsGcPossible(void);
+    virtual void Pause(void) { copierPtr->Pause(); }
+    virtual void Resume(void) { copierPtr->Resume(); }
+    virtual bool IsPaused(void) { return copierPtr->IsPaused(); }
 
-    bool
-    GetGcRunning(void)
-    {
-        return gcStatus.GetGcRunning();
-    }
-    struct timeval
-    GetStartTime(void)
-    {
-        return gcStatus.GetStartTime();
-    }
-    struct timeval
-    GetEndTime(void)
-    {
-        return gcStatus.GetEndTime();
-    }
-    void StateChanged(StateContext prev, StateContext next);
+    virtual int DisableThresholdCheck(void);
+    virtual int IsEnabled(void);
+
+    virtual bool GetGcRunning(void) { return gcStatus.GetGcRunning(); }
+    virtual struct timeval GetStartTime(void) { return gcStatus.GetStartTime(); }
+    virtual struct timeval GetEndTime(void) { return gcStatus.GetEndTime(); }
 
 private:
     void _DoGC(void);
     void _GCdone(void);
-    StateContext currState{"garbage_collector"};
     bool isRunning = false;
 
+    IArrayInfo* arrayInfo;
+    IStateControl* state;
     GcStatus gcStatus;
     CopierSmartPtr copierPtr;
 };
 
-using GarbageCollectorSingleton = Singleton<GarbageCollector>;
-} // namespace ibofos
+} // namespace pos

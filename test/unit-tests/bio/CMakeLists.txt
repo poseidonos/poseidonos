@@ -1,0 +1,5 @@
+POS_ADD_UNIT_TEST(data_buffer_ut data_buffer_test.cpp)
+POS_ADD_UNIT_TEST(ubio_ut ubio_test.cpp)
+POS_ADD_UNIT_TEST(flush_io_ut flush_io_test.cpp)
+POS_ADD_UNIT_TEST(volume_io_ut volume_io_test.cpp)
+POS_ADD_UNIT_TEST(flush_states_ut flush_states_test.cpp)

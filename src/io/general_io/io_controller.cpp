@@ -32,13 +32,17 @@
 
 #include "src/io/general_io/io_controller.h"
 
-#include "src/scheduler/event_argument.h"
-#include "src/scheduler/io_dispatcher.h"
-
-namespace ibofos
+namespace pos
 {
+IODispatcher* IOController::ioDispatcher = IODispatcherSingleton::Instance();
+
 IOController::IOController(void)
 {
+}
+
+IOController::IOController(IODispatcher* _ioDispatcher)
+{
+    ioDispatcher = _ioDispatcher;
 }
 
 IOController::~IOController(void)
@@ -48,7 +52,6 @@ IOController::~IOController(void)
 void
 IOController::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
 {
-    IODispatcher* ioDispatcher = EventArgument::GetIODispatcher();
     ioDispatcher->Submit(volumeIo);
 }
-} // namespace ibofos
+} // namespace pos

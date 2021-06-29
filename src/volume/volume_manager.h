@@ -30,95 +30,82 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VOLUME_MANAGER_H_
-#define VOLUME_MANAGER_H_
+#pragma once
 
 #include <string>
 
+#include "src/volume/i_volume_manager.h"
+
+#include "mk/ibof_config.h"
 #include "src/lib/singleton.h"
-#include "src/state/state_manager.h"
-#include "volume.h"
-#include "volume_list.h"
-#include "volume_meta_intf.h"
-#if defined QOS_ENABLED_FE
+#include "src/array_models/interface/i_array_info.h"
+#include "src/array_models/interface/i_mount_sequence.h"
+#include "src/state/interface/i_state_control.h"
+#include "src/state/interface/i_state_observer.h"
 #include "src/qos/qos_common.h"
-#endif
+#include "src/state/state_manager.h"
+#include "src/volume/volume_service.h"
+#include "src/volume/volume_list.h"
+
 
 #define VOLUME_UNIT_TEST 0
 #define NO_QOS_LIMIT 0
 
-namespace ibofos
+namespace pos
 {
-class VolumeManager : public StateEvent
+
+class VolumeBase;
+
+class VolumeManager : public IVolumeManager, public IMountSequence, public IStateObserver
 {
 public:
-    VolumeManager(void)
-    : StateEvent("VolumeManager")
-    {
-        StateManagerSingleton::Instance()->Subscribe(this);
-    }
+    VolumeManager(IArrayInfo* i, IStateControl* s);
+    virtual ~VolumeManager(void);
 
-    ~VolumeManager(void) override
-    {
-        StateManagerSingleton::Instance()->Dispose(this);
-    }
-    void Initialize(void);
-    void Dispose(void);
-    int Create(string name, uint64_t size, string array, uint64_t maxiops, uint64_t maxbw);
-    int Delete(string name, string array);
-    int Mount(string name, string array, string subnqn);
-    int Unmount(string name, string array);
-    int UpdateQoS(string name, string array, uint64_t maxiops, uint64_t maxbw);
-    int Rename(string oldname, string newname, string array);
-    int Resize(string name, string array, uint64_t newsize);
-#if defined QOS_ENABLED_FE
-    int UpdateVolumePolicy(std::string volName, qos_vol_policy volPolicy);
-    qos_vol_policy GetVolumePolicy(std::string volName);
-#endif
-    void DetachVolumes(void);
-    int MountAll(void);
-    int SaveVolumes(void);
-    bool CheckVolumeIdle(int volId);
-    void WaitUntilVolumeIdle(int volId);
+    int Init(void) override;
+    void Dispose(void) override;
+    void Shutdown(void) override;
+    void Flush(void) override;
+    int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw) override;
+    int Delete(std::string name) override;
+    int Mount(std::string name, std::string subnqn) override;
+    int Unmount(std::string name) override;
+    int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw) override;
+    int Rename(std::string oldname, std::string newname) override;
+    int Resize(std::string name, uint64_t newsize) override;
+    int UpdateVolumePolicy(std::string volName, qos_vol_policy volPolicy) override;
+    qos_vol_policy GetVolumePolicy(std::string volName) override;
 
-    int VolumeName(int volId, string& volName);
-    int VolumeID(string volName);
-    int GetVolumeCount(void);
-    int GetVolumeStatus(int volId);
-    uint64_t EntireVolumeSize(void);
-    int GetVolumeSize(int volId, uint64_t& volSize);
-    VolumeList*
-    GetVolumeList(void)
-    {
-        return &volumes;
-    }
-    string
-    GetStatusStr(VolumeStatus status)
-    {
-        return VOLUME_STATUS_STR[status];
-    }
+    void DetachVolumes(void) override;
 
-    int IncreasePendingIOCount(int volId, uint32_t ioCountToSubmit = 1);
-    int DecreasePendingIOCount(int volId, uint32_t ioCountCompleted = 1);
-    VolumeBase* GetVolume(int volId);
-    void StateChanged(StateContext prev, StateContext next) override;
+    int VolumeName(int volId, std::string& volName) override;
+    int VolumeID(std::string volName) override;
+    int GetVolumeCount(void) override;
+    int GetVolumeStatus(int volId) override;
+    uint64_t EntireVolumeSize(void) override;
+    int GetVolumeSize(int volId, uint64_t& volSize) override;
+    VolumeList* GetVolumeList(void) override;
+    std::string GetStatusStr(VolumeStatus status) override;
+
+    int IncreasePendingIOCountIfNotZero(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountToSubmit = 1) override;
+    int DecreasePendingIOCount(int volId, VolumeStatus mounted = VolumeStatus::Mounted, uint32_t ioCountCompleted = 1) override;
+    VolumeBase* GetVolume(int volId) override;
+    void StateChanged(StateContext* prev, StateContext* next) override;
+
 
 private:
-    int _LoadVolumes(string array);
-    int _SetVolumeQoS(VolumeBase* vol, uint64_t maxiops, uint64_t maxbw);
-    int _CheckVolumeSize(uint64_t volSize);
-    bool _SubsystemExists(void);
+    int _LoadVolumes(void);
+    int _CheckPrerequisite(void);
     bool initialized = false;
     bool stopped = false;
 
     VolumeList volumes;
-    const string VOLUME_STATUS_STR[2] = {
+    const std::string VOLUME_STATUS_STR[2] = {
         "Unmounted",
         "Mounted"};
+
+    IArrayInfo* arrayInfo;
+    IStateControl* state;
 };
 
-using VolumeManagerSingleton = Singleton<VolumeManager>;
-
-} // namespace ibofos
-
-#endif // VOLUME_MANAGER_H_
+} // namespace pos

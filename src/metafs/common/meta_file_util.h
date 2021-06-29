@@ -37,24 +37,26 @@
 #include <string>
 
 #include "meta_storage_specific.h"
-#include "meta_vol_type.h"
-#include "mfs_type.h"
+#include "meta_volume_type.h"
+#include "metafs_type.h"
 
-class MetaFsMEDIA2VOLUME
+namespace pos
+{
+class MfsMediaToVolume
 {
 public:
     MetaStorageType media;
     MetaVolumeType volumeType;
 };
 
-class MetaFsVOLUME2MEDIA
+class MfsVolumeToMedia
 {
 public:
     MetaVolumeType volumeType;
     MetaStorageType media;
 };
 
-class MetaFsUtilLib
+class MetaFileUtil
 {
 public:
     static StringHashType GetHashKeyFromFileName(const std::string& fileName);
@@ -63,7 +65,10 @@ public:
 
     static MetaVolumeType ConvertToVolumeType(MetaStorageType media);
 
+    static uint64_t GetEpochSignature(void);
+
 private:
-    static const MetaFsMEDIA2VOLUME MEDIA2VOLUME[(uint32_t)MetaStorageType::Max];
-    static const MetaFsVOLUME2MEDIA VOLUME2MEDIA[(uint32_t)MetaVolumeType::Max];
+    static const MfsMediaToVolume MEDIA_TO_VOLUME[(uint32_t)MetaStorageType::Max];
+    static const MfsVolumeToMedia VOLUME_TO_MEDIA[(uint32_t)MetaVolumeType::Max];
 };
+} // namespace pos

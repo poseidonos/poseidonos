@@ -36,18 +36,24 @@
 #include "io_submit_handler_test.h"
 #include "src/array/array.h"
 #include "src/array/device/array_device.h"
-#include "src/array/partition/partition.h"
-#include "src/array/partition/partition_size_info.h"
+#include "src/include/partition_type.h"
+#include "src/array_models/dto/partition_logical_size.h"
 
-namespace ibofos
+namespace pos
 {
 static PartitionLogicalSize userDataPartitionLogicalSize;
 
 static ArrayDevice* arrayDevice[IOSubmitHandlerTest::SSD_COUNT];
 
-Array::Array()
-: metaMgr_(nullptr),
-  devMgr_(nullptr)
+const int Array::LOCK_ACQUIRE_FAILED = -1;
+
+Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
+:   state(nullptr),
+    intf(nullptr),
+    ptnMgr(nullptr),
+    devMgr_(nullptr),
+    sysDevMgr(nullptr),
+    rebuilder(nullptr)
 {
     userDataPartitionLogicalSize.blksPerChunk = BLOCKS_IN_CHUNK;
     userDataPartitionLogicalSize.blksPerStripe =
@@ -73,71 +79,9 @@ Array::GetSizeInfo(PartitionType type)
 }
 
 int
-Array::Translate(const PartitionType type, PhysicalBlkAddr& dst,
-    const LogicalBlkAddr& src)
-{
-    uint32_t deviceIndex = src.offset / BLOCKS_IN_CHUNK;
-
-    if (nullptr == arrayDevice[deviceIndex])
-    {
-        arrayDevice[deviceIndex] = new ArrayDevice(
-            reinterpret_cast<UBlockDevice*>(deviceIndex));
-    }
-    arrayDevice[deviceIndex]->uBlock =
-        reinterpret_cast<UBlockDevice*>(deviceIndex);
-
-    dst =
-        {
-            .dev = arrayDevice[deviceIndex],
-            .lba = ChangeBlockToSector(
-                src.stripeId * userDataPartitionLogicalSize.blksPerStripe),
-        };
-    dst.lba += ChangeBlockToSector(src.offset);
-
-    return 0;
-}
-
-int
-Array::Convert(const PartitionType type, list<PhysicalWriteEntry>& dst,
-    const LogicalWriteEntry& src)
-{
-    LogicalBlkAddr startLSA = src.addr;
-    for (BufferEntry buffer : *src.buffers)
-    {
-        PhysicalWriteEntry physicalWriteEntry;
-        Translate(type, physicalWriteEntry.addr, startLSA);
-
-        physicalWriteEntry.blkCnt = buffer.GetBlkCnt();
-        physicalWriteEntry.buffers.push_back(buffer);
-        dst.push_back(physicalWriteEntry);
-
-        startLSA.offset += buffer.GetBlkCnt();
-    }
-
-    return 0;
-}
-
-int
-Array::DetachDevice(UBlockDevice* uBlock)
+Array::DetachDevice(UblockSharedPtr uBlock)
 {
     return 0;
 }
 
-int
-Array::RebuildRead(UbioSmartPtr ubio)
-{
-    return 0;
-}
-
-bool
-Array::TryLock(PartitionType type, StripeId stripeId)
-{
-    return true;
-}
-
-void
-Array::Unlock(PartitionType type, StripeId stripeId)
-{
-}
-
-} // namespace ibofos
+} // namespace pos

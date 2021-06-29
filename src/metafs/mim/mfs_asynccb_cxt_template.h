@@ -35,8 +35,10 @@
 #include <functional>
 #include <cassert>
 
-#include "mfs_def.h"
+#include "metafs_def.h"
 
+namespace pos
+{
 using AsyncCallback = std::function<void(void*)>;
 
 class MetaAsyncCbCxt
@@ -59,14 +61,17 @@ public:
         this->data = data;
         this->callback = callback;
     }
+
     virtual ~MetaAsyncCbCxt(void)
     {
     }
+
     void*
     GetAsycCbCxt(void)
     {
         return data;
     }
+
     void
     InvokeCallback(void)
     {
@@ -78,3 +83,4 @@ protected:
     void* data;
     AsyncCallback callback;
 };
+} // namespace pos

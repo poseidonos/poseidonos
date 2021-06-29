@@ -39,7 +39,8 @@
 /**
  * utility functions
  */
-
+namespace pos
+{
 bool
 CheckFileExists(std::string path)
 {
@@ -69,3 +70,4 @@ DeleteFile(std::string path)
 
     return true;
 }
+} // namespace pos

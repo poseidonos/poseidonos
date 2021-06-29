@@ -27,8 +27,8 @@ CONFIG_BE_QOS=y
 # for fe qos
 CONFIG_FE_QOS=n
 
-#Build Ibofos as library
+#Build PoseidonOS as library
 CONFIG_LIBRARY_BUILD=n
 
-# Enable nvme flush functionality
-CONFIG_NVME_FLUSH=n
+#Build PoseidonOS with -FPIC option
+CONFIG_FPIC=n

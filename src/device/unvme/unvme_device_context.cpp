@@ -32,7 +32,7 @@
 
 #include "unvme_device_context.h"
 
-namespace ibofos
+namespace pos
 {
 UnvmeDeviceContext::UnvmeDeviceContext(spdk_nvme_ns* ns)
 : ns(ns),
@@ -59,4 +59,4 @@ UnvmeDeviceContext::IsAdminCommandPendingZero()
     return (adminCommandPending == 0);
 }
 
-} // namespace ibofos
+} // namespace pos

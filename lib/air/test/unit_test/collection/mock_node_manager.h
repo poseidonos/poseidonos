@@ -1,49 +1,57 @@
 
-#include "src/profile_data/node/NodeManager.h"
-#include "src/profile_data/node/NodeManager.cpp"
-#include "src/profile_data/node/NodeThread.cpp"
+#include "src/data_structure/NodeData.cpp"
+#include "src/data_structure/NodeManager.cpp"
+#include "src/data_structure/NodeManager.h"
 #include "src/lib/Hash.cpp"
 
 class MockNodeManager : public node::NodeManager
 {
 public:
-    virtual ~MockNodeManager() {
-        thread_map.clear();
+    virtual ~MockNodeManager()
+    {
+        nda_map.clear();
     }
-    node::ThreadArray* GetThread(uint32_t tid) {
-        std::map<uint32_t, node::ThreadArray>::iterator tid_iter;
-
-        tid_iter = thread_map.find(tid);
-        if (tid_iter != thread_map.end())
+    MockNodeManager(meta::GlobalMetaGetter* new_global_meta_getter,
+        meta::NodeMetaGetter* new_node_meta_getter)
+    : node::NodeManager(new_global_meta_getter, new_node_meta_getter)
+    {
+    }
+    node::NodeDataArray*
+    GetNodeDataArray(uint32_t tid)
+    {
+        auto nda_iter = nda_map.find(tid);
+        if (nda_iter != nda_map.end())
         {
-            return &(tid_iter->second);
+            return nda_iter->second;
         }
 
         return nullptr;
     }
 
-    lib::AccLatencyData* GetAccLatData(uint32_t nid, uint32_t aid) {
+    lib::AccLatencyData*
+    GetAccLatData(uint32_t nid, uint32_t aid)
+    {
         return &(mock_acc_lat_data[aid]);
     }
 
-    int CreateThread(uint32_t tid) {
-        node::ThreadArray* thread = GetThread(tid);
-        if (nullptr != thread)
+    void
+    CreateNodeDataArray(uint32_t tid)
+    {
+        node::NodeDataArray* node_data_array = GetNodeDataArray(tid);
+        if (nullptr != node_data_array)
         {
-            return 0; // already create
+            return; // already create
         }
 
-        node::ThreadArray thread_array;
-        thread_array.node[0] = new node::Thread(air::ProcessorType::PERFORMANCE, 3);
-        thread_array.node[1] = new node::Thread(air::ProcessorType::LATENCY, 3);
-        thread_array.node[2] = new node::Thread(air::ProcessorType::QUEUE, 3);
-        thread_array.node[3] = nullptr;
-        thread_array.node[4] = nullptr;
-        thread_array.node[5] = new node::Thread(air::ProcessorType::QUEUE, 3);
+        node::NodeDataArray* nda = new node::NodeDataArray;
+        nda->node[0] = new node::NodeData(air::ProcessorType::PERFORMANCE, 3, 3);
+        nda->node[1] = new node::NodeData(air::ProcessorType::LATENCY, 3, 3);
+        nda->node[2] = new node::NodeData(air::ProcessorType::QUEUE, 3, 3);
+        nda->node[3] = nullptr;
+        nda->node[4] = nullptr;
+        nda->node[5] = new node::NodeData(air::ProcessorType::QUEUE, 3, 3);
 
-        thread_map.insert( std::make_pair(tid, thread_array) );
-
-        return 1;
+        nda_map.insert(std::make_pair(tid, nda));
     }
 
 private:

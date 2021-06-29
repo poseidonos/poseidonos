@@ -1,0 +1,5 @@
+POS_ADD_UNIT_TEST(io_context_ut io_context_test.cpp)
+POS_ADD_UNIT_TEST(device_context_ut device_context_test.cpp)
+POS_ADD_UNIT_TEST(ublock_device_submission_adapter_ut ublock_device_submission_adapter_test.cpp)
+POS_ADD_UNIT_TEST(device_driver_ut device_driver_test.cpp)
+POS_ADD_UNIT_TEST(ublock_device_ut ublock_device_test.cpp)

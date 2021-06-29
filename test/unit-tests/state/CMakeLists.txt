@@ -1,0 +1,4 @@
+POS_ADD_UNIT_TEST(state_manager_ut state_manager_test.cpp)
+POS_ADD_UNIT_TEST(state_control_ut state_control_test.cpp)
+POS_ADD_UNIT_TEST(state_list_ut state_list_test.cpp)
+POS_ADD_UNIT_TEST(state_publisher_ut state_publisher_test.cpp)

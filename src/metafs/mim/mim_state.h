@@ -32,6 +32,8 @@
 
 #pragma once
 
+namespace pos
+{
 enum class MioState
 {
     First = 0,
@@ -65,3 +67,4 @@ enum class MpAioState
     Last = Complete,
     Max,
 };
+} // namespace pos

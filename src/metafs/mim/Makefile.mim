@@ -19,8 +19,7 @@ endif # MFS_INTEGRATION_TEST_EN
 ########################################################
 
 MIM_SRCS += \
-	mfs_mim_top.cpp \
-	mim_req.cpp \
+	metafs_io_request.cpp \
 
 ifeq ($(MOCK_MIM_EN), 1)
 
@@ -32,9 +31,9 @@ MIM_SRCS += \
 
 else
 MIM_SRCS += \
-	meta_io_req_q.cpp \
+	metafs_io_multi_q.cpp \
 	meta_io_manager.cpp \
-	mfs_io_scheduler.cpp \
+	metafs_io_scheduler.cpp \
 	mio.cpp \
 	mio_pool.cpp \
 	mpio.cpp \
@@ -47,9 +46,8 @@ MIM_SRCS += \
 	mio_handler.cpp \
 	scalable_meta_io_worker.cpp \
 	mpio_handler.cpp \
-	comp_mdpage_gen.cpp \
 	mfs_io_range_overlap_chker.cpp \
-	mfs_aio_completer.cpp \
+	metafs_aio_completer.cpp \
 	mdpage_buf_pool.cpp
 
 endif
@@ -60,14 +58,14 @@ UT_PATH += \
 
 endif
 
-ifeq ($(UT_MIM_EN), 1)
-UT_SRCS += \
-	mim_func_positive_test.cpp \
-	mim_func_negative_test.cpp \
-    mim_test.cpp \
-	mim_io_range_overlap_chker_test.cpp 
-
-endif
+#ifeq ($(UT_MIM_EN), 1)
+#UT_SRCS += \
+#	mim_func_positive_test.cpp \
+#	mim_func_negative_test.cpp \
+#    mim_test.cpp \
+#	mim_io_range_overlap_chker_test.cpp 
+#
+#endif
 
 SRCS += $(MIM_SRCS)
 VPATH += $(UT_PATH)

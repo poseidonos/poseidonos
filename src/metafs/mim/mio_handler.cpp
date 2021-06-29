@@ -31,25 +31,24 @@
  */
 
 #include "mio_handler.h"
-
 #include <string>
 #include <utility>
-
-#include "mfs_aiocb_cxt.h"
+#include "Air.h"
+#include "src/metafs/include/metafs_service.h"
+#include "metafs_aiocb_cxt.h"
 #include "mfs_async_runnable_template.h"
-#include "mfs_log.h"
-#include "mfs_mutex.h"
-#include "mfs_mvm_top.h"
-#include "mss.h"
-#include "src/scheduler/event.h"
-#include "src/scheduler/event_argument.h"
+#include "metafs_log.h"
+#include "metafs_mutex.h"
+#include "meta_volume_manager.h"
+#include "src/metafs/storage/mss.h"
+#include "src/event_scheduler/event.h"
 
 #if defined(IBOFOS_BACKEND_IO)
-#include "mfs_aio_completer.h"
+#include "metafs_aio_completer.h"
 #endif
 
-#define RANGE_OVERLAP_CHECK_EN 1
-
+namespace pos
+{
 MioHandler::MioHandler(int threadId, int coreId, int coreCount)
 : cpuStallCnt(0)
 {
@@ -62,13 +61,20 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount)
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
 
     this->bottomhalfHandler = nullptr;
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "mio handler constructed. threadId={}, coreId={}",
         threadId, coreId);
 
-    for (int idx = 0; idx < (int)MetaStorageType::Max; idx++)
+    checkerBitmap = new BitMap(MetaFsConfig::MAX_ARRAY_CNT);
+    checkerBitmap->ResetBitmap();
+    checkerMap.clear();
+
+    for (uint32_t index = 0; index < MetaFsConfig::MAX_ARRAY_CNT; index++)
     {
-        ioRangeOverlapChker[idx].Init(mvmTopMgr.GetMaxMetaLpn(static_cast<MetaVolumeType>(idx)));
+        for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
+        {
+            ioRangeOverlapChker[index][storage] = nullptr;
+        }
     }
 }
 
@@ -76,10 +82,22 @@ MioHandler::~MioHandler(void)
 {
     delete mpioPool;
     delete mioPool;
-    for (int idx = 0; idx < (int)MetaStorageType::Max; idx++)
+
+    for (uint32_t index = 0; index < MetaFsConfig::MAX_ARRAY_CNT; index++)
     {
-        ioRangeOverlapChker[idx].Reset();
+        for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
+        {
+            if (nullptr != ioRangeOverlapChker[index][storage])
+            {
+                delete ioRangeOverlapChker[index][storage];
+            }
+        }
     }
+
+    checkerBitmap->ResetBitmap();
+    delete checkerBitmap;
+
+    checkerMap.clear();
 }
 
 void
@@ -101,7 +119,7 @@ MioHandler::_HandleIoSQ(void)
         return;
     }
 
-    MetaFsIoReqMsg* reqMsg = ioSQ.Dequeue();
+    MetaFsIoRequest* reqMsg = ioSQ.Dequeue();
     if (nullptr == reqMsg)
     {
         if (cpuStallCnt++ > 1000)
@@ -114,20 +132,23 @@ MioHandler::_HandleIoSQ(void)
     cpuStallCnt = 0;
 
 #if RANGE_OVERLAP_CHECK_EN // range overlap enable
-    if (_IsRangeOverlapConflicted(reqMsg))
+    if (_IsRangeOverlapConflicted(reqMsg) || _IsPendedRange(reqMsg))
     {
         _PushToRetry(reqMsg);
         return;
     }
 #endif
+
     Mio* mio = DispatchMio(*reqMsg);
     if (nullptr == mio)
     {
-        _PushToRetry(reqMsg);
+        EnqueueNewReq(reqMsg);
         return;
     }
 
+#if RANGE_OVERLAP_CHECK_EN // range overlap enable
     _RegisterRangeLockInfo(reqMsg);
+#endif
     ExecuteMio(*mio);
 }
 
@@ -158,28 +179,88 @@ MioHandler::_DiscoverIORangeOverlap(void)
 {
     for (auto it = pendingIoRetryQ.begin(); it != pendingIoRetryQ.end();)
     {
-        MetaFsIoReqMsg* pendingIoReq = it->second;
+        MetaFsIoRequest* pendingIoReq = it->second;
 
         if (!_IsRangeOverlapConflicted(pendingIoReq))
         {
-            Mio* mio = DispatchMio(*pendingIoReq);
-            if (nullptr == mio)
-                return;
+#if MPIO_CACHE_EN
+            if (MetaStorageType::NVRAM == pendingIoReq->targetMediaType)
+            {
+                if (!_ExecutePendedIo(pendingIoReq))
+                    break;
+            }
+            else
+#endif
+            {
+                Mio* mio = DispatchMio(*pendingIoReq);
+                if (nullptr == mio)
+                    return;
 
-            pendingIoRetryQ.erase(it);
+                pendingIoRetryQ.erase(it);
 
-            MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
-                "[Msg ][EraseRetryQ] type={}, req.tagId={}, fileOffset={}, Lpn={}, numPending={}",
-                pendingIoReq->reqType, pendingIoReq->tagId, pendingIoReq->byteOffsetInFile,
-                pendingIoReq->byteOffsetInFile / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE,
-                pendingIoRetryQ.size());
+                MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                    "[Msg ][EraseRetryQ] type={}, req.tagId={}, fileOffset={}, Lpn={}, numPending={}",
+                    pendingIoReq->reqType, pendingIoReq->tagId, pendingIoReq->byteOffsetInFile,
+                    pendingIoReq->byteOffsetInFile / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE,
+                    pendingIoRetryQ.size());
 
-            _RegisterRangeLockInfo(pendingIoReq);
-            ExecuteMio(*mio);
+                _RegisterRangeLockInfo(pendingIoReq);
+                ExecuteMio(*mio);
+            }
         }
 
         it = pendingIoRetryQ.upper_bound(pendingIoReq->baseMetaLpn);
     }
+}
+
+bool
+MioHandler::_ExecutePendedIo(MetaFsIoRequest* reqMsg)
+{
+    Mio* mio = DispatchMio(*reqMsg);
+    if (nullptr == mio)
+        return false;
+
+    _RegisterRangeLockInfo(reqMsg);
+
+
+    std::vector<MetaFsIoRequest*>* reqList = new std::vector<MetaFsIoRequest*>();
+    auto range = pendingIoRetryQ.equal_range(reqMsg->baseMetaLpn);
+
+    for (auto it = range.first; it != range.second;)
+    {
+        MetaFsIoRequest* msg = it->second;
+        reqList->push_back(msg);
+        pendingIoRetryQ.erase(it++);
+    }
+
+    mio->SetMergedRequestList(reqList);
+
+    ExecuteMio(*mio);
+
+    return true;
+}
+
+bool
+MioHandler::_IsPendedRange(MetaFsIoRequest* reqMsg)
+{
+    auto it = pendingIoRetryQ.find(reqMsg->baseMetaLpn);
+
+    if (it == pendingIoRetryQ.end())
+    {
+        return false;
+    }
+    else
+    {
+        for (; it != pendingIoRetryQ.end(); ++it)
+        {
+            if (reqMsg->targetMediaType == it->second->targetMediaType)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 void
@@ -190,9 +271,9 @@ MioHandler::TophalfMioProcessing(void)
 }
 
 bool
-MioHandler::EnqueueNewReq(MetaFsIoReqMsg& reqMsg)
+MioHandler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
-    if (false == ioSQ.Enqueue(&reqMsg))
+    if (false == ioSQ.Enqueue(reqMsg))
     {
         return false;
     }
@@ -206,19 +287,16 @@ MioHandler::_FinalizeMio(Mio* mio)
 }
 
 Mio*
-MioHandler::_AllocNewMio(MetaFsIoReqMsg& reqMsg)
+MioHandler::_AllocNewMio(MetaFsIoRequest& reqMsg)
 {
     Mio* mio = mioPool->Alloc();
 
     if (nullptr == mio)
         return nullptr;
 
-    MetaLpnType fileBaseLpn;
-    IBOF_EVENT_ID sc;
-    sc = mvmTopMgr.GetFileBaseLpn(reqMsg.fd, fileBaseLpn);
-    assert(sc == IBOF_EVENT_ID::SUCCESS);
+    MetaLpnType fileBaseLpn = reqMsg.fileCtx->fileBaseLpn;
 
-    mio->Setup(&reqMsg, fileBaseLpn);
+    mio->Setup(&reqMsg, fileBaseLpn, MetaFsServiceSingleton::Instance()->GetMetaFs(reqMsg.arrayName)->GetMss());
 
     if (false == mio->IsSyncIO())
     {
@@ -229,14 +307,13 @@ MioHandler::_AllocNewMio(MetaFsIoReqMsg& reqMsg)
     mio->SetMpioDonePoller(mpioDonePoller);
     mio->SetIoCQ(&ioCQ);
 
-    sc = mvmTopMgr.GetTargetMediaType(reqMsg.fd, reqMsg.targetMediaType);
-    assert(sc == IBOF_EVENT_ID::SUCCESS);
+    reqMsg.targetMediaType = reqMsg.fileCtx->storageType;
 
     return mio;
 }
 
 Mio*
-MioHandler::DispatchMio(MetaFsIoReqMsg& reqMsg)
+MioHandler::DispatchMio(MetaFsIoRequest& reqMsg)
 {
     Mio* mio = _AllocNewMio(reqMsg);
 
@@ -244,12 +321,12 @@ MioHandler::DispatchMio(MetaFsIoReqMsg& reqMsg)
 }
 
 void
-MioHandler::_PushToRetry(MetaFsIoReqMsg* reqMsg)
+MioHandler::_PushToRetry(MetaFsIoRequest* reqMsg)
 {
     reqMsg->SetRetryFlag();
-    pendingIoRetryQ.insert(pair<MetaLpnType, MetaFsIoReqMsg*>(reqMsg->baseMetaLpn, reqMsg));
+    pendingIoRetryQ.insert(pair<MetaLpnType, MetaFsIoRequest*>(reqMsg->baseMetaLpn, reqMsg));
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Msg ][_PushToRetry] type={}, req.tagId={}, ByteOffset={}, Lpn={}, numPending={}",
         reqMsg->reqType, reqMsg->tagId, reqMsg->byteOffsetInFile,
         reqMsg->byteOffsetInFile / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE,
@@ -257,33 +334,83 @@ MioHandler::_PushToRetry(MetaFsIoReqMsg* reqMsg)
 }
 
 bool
-MioHandler::_IsRangeOverlapConflicted(MetaFsIoReqMsg* reqMsg)
+MioHandler::_IsRangeOverlapConflicted(MetaFsIoRequest* reqMsg)
 {
-    if (reqMsg->reqType == MetaIoReqTypeEnum::Read)
+    if (reqMsg->reqType == MetaIoRequestType::Read)
     {
         return false;
     }
 
-    return ioRangeOverlapChker[(int)reqMsg->targetMediaType].IsRangeOverlapConflicted(reqMsg);
+    auto it = checkerMap.find(reqMsg->arrayName);
+    assert(it != checkerMap.end());
+
+    return ioRangeOverlapChker[it->second][(int)reqMsg->targetMediaType]->IsRangeOverlapConflicted(reqMsg);
 }
 
 void
-MioHandler::_RegisterRangeLockInfo(MetaFsIoReqMsg* reqMsg)
+MioHandler::_RegisterRangeLockInfo(MetaFsIoRequest* reqMsg)
 {
-    ioRangeOverlapChker[(int)reqMsg->targetMediaType].PushReqToRangeLockMap(reqMsg);
+    auto it = checkerMap.find(reqMsg->arrayName);
+    assert(it != checkerMap.end());
+
+    ioRangeOverlapChker[it->second][(int)reqMsg->targetMediaType]->PushReqToRangeLockMap(reqMsg);
 }
 
 void
 MioHandler::_FreeLockContext(Mio* mio)
 {
+    auto it = checkerMap.find(mio->GetArrayName());
+    assert(it != checkerMap.end());
+
     int storage = mio->IsTargetStorageSSD() ? (int)MetaStorageType::SSD : (int)MetaStorageType::NVRAM;
-    ioRangeOverlapChker[storage].FreeLockContext(mio->GetStartLpn(), mio->IsRead());
+    ioRangeOverlapChker[it->second][storage]->FreeLockContext(mio->GetStartLpn(), mio->IsRead());
 }
 
 void
 MioHandler::ExecuteMio(Mio& mio)
 {
     mio.ExecuteAsyncState();
+}
+
+bool
+MioHandler::AddArrayInfo(std::string arrayName)
+{
+    uint32_t index = checkerBitmap->FindFirstZero();
+    checkerBitmap->SetBit(index);
+    checkerMap.insert(std::pair<std::string, uint32_t>(arrayName, index));
+
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+
+    for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
+    {
+        size_t maxLpn = metaFs->ctrl->GetMaxMetaLpn(static_cast<MetaVolumeType>(storage));
+
+        ioRangeOverlapChker[index][storage] = new MetaFsIoRangeOverlapChker();
+        ioRangeOverlapChker[index][storage]->Init(maxLpn);
+    }
+
+    return true;
+}
+
+bool
+MioHandler::RemoveArrayInfo(std::string arrayName)
+{
+    auto it = checkerMap.find(arrayName);
+    if (it == checkerMap.end())
+        return false;
+    else
+    {
+        uint32_t index = it->second;
+        checkerBitmap->ClearBit(index);
+        checkerMap.erase(arrayName);
+
+        for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
+        {
+            delete ioRangeOverlapChker[index][storage];
+            ioRangeOverlapChker[index][storage] = nullptr;
+        }
+        return true;
+    }
 }
 
 void
@@ -293,13 +420,31 @@ MioHandler::_HandleMioCompletion(void* data)
     Mio* mio = reinterpret_cast<Mio*>(data);
     assert(mio->IsSyncIO() == false);
 
-    MetaFsAioCbCxt* aiocb = reinterpret_cast<MetaFsAioCbCxt*>(mio->GetClientAioCbCxt());
-
-    if (aiocb)
+#if MPIO_CACHE_EN
+    std::vector<MetaFsIoRequest*>* reqList = mio->GetMergedRequestList();
+    if (nullptr != reqList)
     {
-        aiocb->SetErrorStatus(mio->GetError());
+        for (auto it : *reqList)
+        {
+            MetaFsAioCbCxt* aiocb = reinterpret_cast<MetaFsAioCbCxt*>(it->aiocb);
 
-        _SendAioDoneEvent(aiocb);
+            if (aiocb)
+            {
+                aiocb->SetErrorStatus(mio->GetError());
+                _SendAioDoneEvent(aiocb);
+            }
+        }
+    }
+    else
+#endif
+    {
+        MetaFsAioCbCxt* aiocb = reinterpret_cast<MetaFsAioCbCxt*>(mio->GetClientAioCbCxt());
+
+        if (aiocb)
+        {
+            aiocb->SetErrorStatus(mio->GetError());
+            _SendAioDoneEvent(aiocb);
+        }
     }
 }
 
@@ -310,8 +455,9 @@ MioHandler::_SendAioDoneEvent(void* aiocb)
 #if defined(IBOFOS_BACKEND_IO)
     MetaFsAioCompleter* event =
         new MetaFsAioCompleter(static_cast<MetaFsAioCbCxt*>(aiocb));
-    ibofos::EventArgument::GetEventScheduler()->EnqueueEvent(event);
+    pos::EventSchedulerSingleton::Instance()->EnqueueEvent(event);
 #else
     (reinterpret_cast<MetaFsAioCbCxt*>(aiocb))->InvokeCallback();
 #endif
 }
+} // namespace pos

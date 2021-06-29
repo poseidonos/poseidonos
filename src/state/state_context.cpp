@@ -31,110 +31,49 @@
  */
 
 #include "state_context.h"
-
-#include "src/helper/time_helper.h"
 #include "src/logger/logger.h"
+#include "src/state/include/state_converter.h"
+#include "src/state/include/state_priority.h"
 
-namespace ibofos
+namespace pos
 {
-StateContext::StateContext(string _sender)
+
+static StateConverter stateConverter;
+static StatePriority statePriority;
+
+StateContext::StateContext(string sender, SituationEnum situ)
 {
-    StateContext(_sender, Situation::DEFAULT);
+    owner = sender;
+    situation = situ;
 }
 
-StateContext::StateContext(string _sender, Situation _s)
+StateType
+StateContext::ToStateType(void)
 {
-    sender = _sender;
-    situation = _s;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    _MakeUuid();
+    return stateConverter.Convert(situation);
 }
 
-void
-StateContext::_MakeUuid(void)
-{
-    uuid = sender + "-" + StatePolicySingleton::Instance()->ToString(situation) + "-" + to_string(ts.tv_nsec);
-}
-
-State
-StateContext::GetState(void)
-{
-    return StatePolicySingleton::Instance()->GetState(situation);
-}
-
-Situation
+SituationType
 StateContext::GetSituation(void)
 {
     return situation;
 }
 
 string
-StateContext::GetStateStr(void)
+StateContext::Owner(void)
 {
-    return StatePolicySingleton::Instance()->ToString(GetState());
-}
-
-string
-StateContext::GetSituationStr(void)
-{
-    return StatePolicySingleton::Instance()->ToString(situation);
-}
-
-string
-StateContext::GetUuid(void)
-{
-    return uuid;
-}
-
-bool
-StateContext::IsOnline(void)
-{
-    return GetState() >= State::NORMAL;
-}
-
-int
-StateContext::GetPriority(void) const
-{
-    return StatePolicySingleton::Instance()->GetPriority(situation);
-}
-
-string
-StateContext::Sender(void)
-{
-    return sender;
-}
-
-bool
-StateContext::operator==(const StateContext& ctx) const
-{
-    return (ctx.uuid == uuid);
-}
-
-bool
-StateContext::operator!=(const StateContext& ctx) const
-{
-    return !operator==(ctx);
+    return owner;
 }
 
 bool
 StateContext::operator<=(const StateContext& ctx) const
 {
-    if (GetPriority() == ctx.GetPriority())
-    {
-        return issued_time > ctx.issued_time;
-    }
-
     return GetPriority() <= ctx.GetPriority();
 }
 
 bool
 StateContext::operator>=(const StateContext& ctx) const
 {
-    if (GetPriority() == ctx.GetPriority())
-    {
-        return issued_time < ctx.issued_time;
-    }
-
     return GetPriority() >= ctx.GetPriority();
 }
 
@@ -150,4 +89,10 @@ StateContext::operator>(const StateContext& ctx) const
     return !operator>=(ctx);
 }
 
-} // namespace ibofos
+int
+StateContext::GetPriority(void) const
+{
+    return statePriority.GetPriority(situation);
+}
+
+} // namespace pos

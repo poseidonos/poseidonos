@@ -34,10 +34,10 @@
 
 #include "configuration.h"
 #include "src/dump/dump_shared_ptr.h"
-#include "src/include/ibof_event_id.h"
-#include "src/scheduler/callback.h"
+#include "src/include/pos_event_id.h"
+#include "src/event_scheduler/callback.h"
 
-namespace ibofos_logger
+namespace pos_logger
 {
 Preferences::Preferences()
 {
@@ -84,15 +84,15 @@ Preferences::SetLogLevel(shared_ptr<spdlog::logger> logger, string value)
         logLevel = logger->level();
     }
 
-    ibofos::DumpSharedModuleInstanceEnable::debugLevelEnable = (logLevel == SPDLOG_LEVEL_DEBUG);
+    pos::DumpSharedModuleInstanceEnable::debugLevelEnable = (logLevel == SPDLOG_LEVEL_DEBUG);
 
     if (value == LogLevelToString(logLevel))
     {
-        return (int)IBOF_EVENT_ID::SUCCESS;
+        return (int)POS_EVENT_ID::SUCCESS;
     }
     else
     {
-        return (int)IBOF_EVENT_ID::LOGGER_SET_LEVEL_FAILED;
+        return (int)POS_EVENT_ID::LOGGER_SET_LEVEL_FAILED;
     }
 }
 
@@ -139,14 +139,14 @@ Preferences::EnableDeduplication(uint32_t sensitivity)
 {
     deduplicator.Enable();
     deduplicator.UpdateSensitivity(sensitivity);
-    return (int)IBOF_EVENT_ID::SUCCESS;
+    return (int)POS_EVENT_ID::SUCCESS;
 }
 
 int
 Preferences::DisableDeduplication()
 {
     deduplicator.Disable();
-    return (int)IBOF_EVENT_ID::SUCCESS;
+    return (int)POS_EVENT_ID::SUCCESS;
 }
 
 int
@@ -179,4 +179,4 @@ Preferences::StringToLogLevel(string lvl)
     }
     return spdlog::level::off;
 }
-} // namespace ibofos_logger
+} // namespace pos_logger

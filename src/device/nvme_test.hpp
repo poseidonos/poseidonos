@@ -32,9 +32,9 @@
 
 #pragma once
 
-#include "src/io/general_io/ubio.h"
+#include "src/bio/ubio.h"
 
-namespace ibofos
+namespace pos
 {
 class DeviceContext;
 class DeviceDriver;
@@ -75,4 +75,4 @@ private:
     bool _VerifyPattern(
         const void* dst, const void* src, unsigned int sizeInBytes);
 };
-} // namespace ibofos
+} // namespace pos

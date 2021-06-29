@@ -36,23 +36,18 @@
 #include <map>
 #include <unordered_map>
 
-#include "src/allocator/active_stripe_index_info.h"
 #include "src/include/address_type.h"
+#include "src/array_models/interface/i_array_info.h"
 
-class ActiveUserStripeReplayerTest;
-
-namespace ibofos
+namespace pos
 {
-class Allocator;
-class Array;
+class IContextReplayer;
 class ReplayStripe;
 
 class ActiveUserStripeReplayer
 {
-    friend class ::ActiveUserStripeReplayerTest;
-
 public:
-    ActiveUserStripeReplayer(Allocator* allocator, Array* array);
+    ActiveUserStripeReplayer(IContextReplayer* ictxReplayer, IArrayInfo* array);
     ~ActiveUserStripeReplayer(void);
 
     int Replay(void);
@@ -60,7 +55,7 @@ public:
 
 private:
     void _Reset(void);
-    void _FindLastStripeOfSegment(uint32_t stripesPerSegment);
+    void _UpdateLastLsidOfSegment(uint32_t stripesPerSegment);
     void _EraseFullSegmentLsid(uint32_t stripesPerSegment);
 
     inline bool
@@ -73,8 +68,8 @@ private:
     std::list<StripeId> userLsids;
     std::unordered_map<SegmentId, StripeId> lastLsid;
 
-    Allocator* allocator;
-    Array* array;
+    IContextReplayer* contextReplayer;
+    IArrayInfo* arrayInfo;
 };
 
-} // namespace ibofos
+} // namespace pos

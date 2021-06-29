@@ -36,35 +36,42 @@
 
 #include "checkpoint_meta_flush_completed.h"
 #include "checkpoint_observer.h"
-#include "src/allocator/allocator.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/mapper/mapper.h"
-#include "src/scheduler/event_argument.h"
 
-namespace ibofos
+namespace pos
 {
-CheckpointHandler::CheckpointHandler(CheckpointObserver* observer)
-: mapper(MapperSingleton::Instance()),
-  allocator(AllocatorSingleton::Instance()),
+
+// Constructor for unit test mocking
+CheckpointHandler::CheckpointHandler(void)
+: CheckpointHandler(nullptr, 0, 0)
+{
+}
+
+// Constructor for injecting private member values in product code
+CheckpointHandler::CheckpointHandler(CheckpointObserver* observer, int numMapsToFlush, int numMapsFlushed)
+: mapFlush(nullptr),
+  contextManager(nullptr),
   obs(observer),
   status(INIT),
-  numMapsToFlush(0),
-  numMapsFlushed(0)
+  numMapsToFlush(numMapsToFlush),
+  numMapsFlushed(numMapsFlushed),
+  allocatorMetaFlushCompleted(false),
+  mapFlushCompleted(false)
+{
+}
+
+CheckpointHandler::CheckpointHandler(CheckpointObserver* observer)
+: CheckpointHandler(observer, 0, 0)
 {
     _Reset();
 }
 
 void
-CheckpointHandler::SetMapperToUse(Mapper* mapperToUse)
+CheckpointHandler::Init(IMapFlush* mapFlushToUse, IContextManager* contextManagerToUse)
 {
-    mapper = mapperToUse;
-}
-
-void
-CheckpointHandler::SetAllocatorToUse(Allocator* allocatorToUse)
-{
-    allocator = allocatorToUse;
+    mapFlush = mapFlushToUse;
+    contextManager = contextManagerToUse;
 }
 
 int
@@ -77,32 +84,36 @@ CheckpointHandler::Start(MapPageList pendingDirtyPages)
     assert(numMapsToFlush == 0);
     assert(pendingDirtyPages.size() != 0);
 
-    numMapsToFlush = pendingDirtyPages.size(); // # of flushing pages
+    numMapsToFlush = pendingDirtyPages.size();
     numMapsFlushed = 0;
 
-    IBOF_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STARTED),
-        "Checkpoint started with {} maps to flush", numMapsToFlush);
+    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_CHECKPOINT_STARTED);
+    POS_TRACE_INFO(eventId, "Checkpoint started with {} maps to flush", numMapsToFlush);
 
     for (auto mapIt = pendingDirtyPages.begin();
-         mapIt != pendingDirtyPages.end(); mapIt++)
+        mapIt != pendingDirtyPages.end(); mapIt++)
     {
-        EventSmartPtr mapFlushCallback(new CheckpointMetaFlushCompleted(this, mapIt->first));
-        ret = mapper->StartDirtyPageFlush(mapIt->first,
-            mapIt->second, mapFlushCallback);
+        eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_DEBUG);
+        POS_TRACE_DEBUG(eventId, "Request to flush map {}, {} pages",
+            mapIt->first, (mapIt->second).size());
 
+        EventSmartPtr mapFlushCallback(new CheckpointMetaFlushCompleted(this, mapIt->first));
+        ret = mapFlush->FlushDirtyMpages(mapIt->first, mapFlushCallback, mapIt->second);
         if (ret != 0)
         {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,
+            // TODO(Cheolho.kang): Add status that can additionally indicate checkpoint status
+            POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,
                 "Failed to start flushing dirty map pages");
             return ret;
         }
     }
 
-    EventSmartPtr allocMetaFlushCallback(new CheckpointMetaFlushCompleted(this, ALLOCATOR_META_ID));
-    ret = allocator->FlushMetadata(allocMetaFlushCallback);
+    EventSmartPtr allocMetaFlushCallback(new CheckpointMetaFlushCompleted(this,
+        ALLOCATOR_META_ID));
+    ret = contextManager->FlushContextsAsync(allocMetaFlushCallback);
     if (ret != 0)
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,
             "Failed to start flushing allocator meta pages");
     }
 
@@ -117,10 +128,8 @@ CheckpointHandler::Start(MapPageList pendingDirtyPages)
 bool
 CheckpointHandler::_IncreaseNumMapsFlushed(void)
 {
-    std::unique_lock<std::mutex> lock(mapFlushCountLock);
-    numMapsFlushed++;
-
-    return (numMapsFlushed == numMapsToFlush);
+    int flushResult = numMapsFlushed.fetch_add(1) + 1;
+    return (numMapsToFlush == flushResult);
 }
 
 int
@@ -128,14 +137,14 @@ CheckpointHandler::FlushCompleted(int metaId)
 {
     if (metaId == ALLOCATOR_META_ID)
     {
-        IBOF_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STATUS),
+        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STATUS),
             "Allocator meta flush completed");
         assert(allocatorMetaFlushCompleted == false);
         allocatorMetaFlushCompleted = true;
     }
     else
     {
-        IBOF_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STATUS),
+        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STATUS),
             "Map {} flush completed", metaId);
         mapFlushCompleted = _IncreaseNumMapsFlushed();
     }
@@ -147,17 +156,18 @@ CheckpointHandler::FlushCompleted(int metaId)
 void
 CheckpointHandler::_TryToComplete(void)
 {
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_CHECKPOINT_STATUS,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STATUS,
         "Try to complete CP, mapCompleted {} allocatorCompleted {}",
         mapFlushCompleted, allocatorMetaFlushCompleted);
 
     std::unique_lock<std::mutex> lock(completionLock);
-    if ((mapFlushCompleted == true) && (allocatorMetaFlushCompleted == true) && (status != COMPLETED))
+    if ((mapFlushCompleted == true) && (allocatorMetaFlushCompleted == true)
+        && (status != COMPLETED))
     {
         // check status to complete checkpoint only once
         _SetStatus(COMPLETED);
         obs->CheckpointCompleted();
-        IBOF_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "Checkpoint completed");
+        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "Checkpoint completed");
 
         _Reset();
     }
@@ -176,10 +186,16 @@ CheckpointHandler::_Reset(void)
 void
 CheckpointHandler::_SetStatus(CheckpointStatus to)
 {
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_CHECKPOINT_STATUS,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STATUS,
         "Checkpoint status changed from {} to {}", status, to);
 
     status = to;
 }
 
-} // namespace ibofos
+CheckpointStatus
+CheckpointHandler::GetStatus(void)
+{
+    return status;
+}
+
+} // namespace pos

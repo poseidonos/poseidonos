@@ -32,21 +32,22 @@
 
 #pragma once
 
-#include "src/scheduler/event.h"
-#include "vsamap_manager.h"
+#include "src/mapper/i_map_manager.h"
+#include "src/mapper/map_flushed_event.h"
+#include "src/event_scheduler/event.h"
 
-namespace ibofos
+namespace pos
 {
 class MapFlushedEvent : public Event
 {
 public:
-    MapFlushedEvent(int mapId, VSAMapManager* vsaMapMgr);
+    MapFlushedEvent(int mapId, IMapManagerInternal* mapMgr);
     virtual ~MapFlushedEvent(void);
     bool Execute(void) override;
 
 private:
     int mapId;
-    VSAMapManager* vsaMapManager;
+    IMapManagerInternal* mapManager;
 };
 
-} // namespace ibofos
+} // namespace pos

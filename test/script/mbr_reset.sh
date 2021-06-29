@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-rootdir=$(readlink -f $(dirname $0))/..
+rootdir=$(readlink -f $(dirname $0))/../..
 spdkdir=$rootdir/lib/spdk-19.10/scripts/
 
 function pci_can_use() {
@@ -133,10 +133,7 @@ for bdf in $(iter_all_pci_class_code 01 08 02); do
 		done
 done
 
-totalmem_kb=$(cat /proc/meminfo | grep MemTotal | awk '{print $2}')
-let hugemem_kb=${totalmem_kb}/2
-let hugemem_nr=${hugemem_kb}/2/1024;
-sudo NRHUGE=${hugemem_nr} $spdkdir/setup.sh; 
+sudo $rootdir/script/setup_env.sh
 
 cd $rootdir
 make udev_install

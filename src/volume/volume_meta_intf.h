@@ -37,16 +37,14 @@
 
 #include "src/volume/volume_list.h"
 
-namespace ibofos
+namespace pos
 {
 class VolumeMetaIntf
 {
 public:
-    static int LoadVolumes(VolumeList& volList);
-    static int SaveVolumes(VolumeList& volList);
-    static int UpdateVolumeName(std::string oldName, std::string newName);
-    static int UpdateVolumeSize(std::string volName, uint64_t size);
+    static int LoadVolumes(VolumeList& volList, std::string arrayName);
+    static int SaveVolumes(VolumeList& volList, std::string arrayName);
 };
-} // namespace ibofos
+} // namespace pos
 
 #endif // VOLUME_META_INTF_H_

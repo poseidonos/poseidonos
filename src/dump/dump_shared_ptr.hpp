@@ -38,10 +38,10 @@
 
 #include "src/dump/dump_manager.h"
 #include "src/dump/dump_shared_ptr.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/debug/memory_checker.h"
 
-namespace ibofos
+namespace pos
 {
 template<typename T, int moduleNumber>
 void*
@@ -211,6 +211,6 @@ DumpSharedModule<T, moduleNumber>::Delete(T t, bool lock_enable)
     return -1;
 }
 
-} // namespace ibofos
+} // namespace pos
 
 #endif // DUMP_SHARED_PTR_HPP_

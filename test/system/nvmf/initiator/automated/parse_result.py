@@ -43,7 +43,7 @@ THOUSAND = 1000
 # We use separate vector array to sort as shonw below.         
 configReadWrite = ['write', 'read', 'randwrite', 'randread', 'randrw']
 configBlockSize = ['512B', '4096B', '16KiB', '128KiB']
-configIoDepth   = ['1', '4', '15','20','32', '44', '64', '128', '256']
+configIoDepth   = ['1', '4', '32', '44', '64', '128', '256']
 
 #If there is no config, skip print. 
 dictReadWrite = dict()

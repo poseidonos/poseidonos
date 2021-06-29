@@ -35,14 +35,14 @@
 #include <iostream>
 
 #include "spdlog/spdlog.h"
-#include "src/include/ibof_event_id.h"
-using namespace ibofos;
-namespace ibofos_logger
+#include "src/include/pos_event_id.h"
+using namespace pos;
+namespace pos_logger
 {
 uint32_t
 Configuration::LogSizePerFileInMB()
 {
-    int SUCCESS = (int)IBOF_EVENT_ID::SUCCESS;
+    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
     uint32_t size_mb = SIZE_MB;
     int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "logfile_size_in_mb",
         &size_mb, ConfigType::CONFIG_TYPE_UINT32);
@@ -59,7 +59,7 @@ Configuration::LogSizePerFileInMB()
 uint32_t
 Configuration::NumOfLogFilesForRotation()
 {
-    int SUCCESS = (int)IBOF_EVENT_ID::SUCCESS;
+    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
     uint32_t rotation = ROTATION;
     int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "logfile_rotation_count",
         &rotation, ConfigType::CONFIG_TYPE_UINT32);
@@ -76,7 +76,7 @@ Configuration::NumOfLogFilesForRotation()
 bool
 Configuration::IsDeduplicationEnabled()
 {
-    int SUCCESS = (int)IBOF_EVENT_ID::SUCCESS;
+    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
     bool dedup = DEDUPLICATION_ENABLED;
     int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "deduplication_enabled",
         &dedup, ConfigType::CONFIG_TYPE_BOOL);
@@ -91,7 +91,7 @@ Configuration::IsDeduplicationEnabled()
 uint32_t
 Configuration::DeduplicationSensitivity()
 {
-    int SUCCESS = (int)IBOF_EVENT_ID::SUCCESS;
+    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
     uint32_t sensitivity = DEDUPLICATION_SENSITIVITY_MS;
     int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "deduplication_sensitivity_in_msec",
         &sensitivity, ConfigType::CONFIG_TYPE_UINT32);
@@ -106,7 +106,7 @@ Configuration::DeduplicationSensitivity()
 string
 Configuration::LogLevel()
 {
-    int SUCCESS = (int)IBOF_EVENT_ID::SUCCESS;
+    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
     string loglvl = "";
     int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "min_allowable_log_level",
         &loglvl, ConfigType::CONFIG_TYPE_STRING);
@@ -116,4 +116,4 @@ Configuration::LogLevel()
     }
     return LOG_LEVEL;
 }
-} // namespace ibofos_logger
+} // namespace pos_logger

@@ -32,25 +32,26 @@
 
 #pragma once
 
-#include "src/allocator/active_stripe_index_info.h"
 #include "src/include/address_type.h"
 
-namespace ibofos
+namespace pos
 {
-static const uint32_t VALID_MARK = 0xCECECECE;
+static const uint32_t LOG_VALID_MARK = 0xCECECECE;
 
-#pragma pack(push, 4)
 enum class LogType
 {
     BLOCK_WRITE_DONE,
     STRIPE_MAP_UPDATED,
+    GC_STRIPE_FLUSHED,
     VOLUME_DELETED,
-    NUM_LOG_TYPE
+    NUM_LOG_TYPE,
+    COUNT
 };
 
+#pragma pack(push, 4)
 struct Log
 {
-    int mark = VALID_MARK;
+    int mark = LOG_VALID_MARK;
     LogType type;
     uint32_t seqNum;
 };
@@ -74,11 +75,22 @@ struct StripeMapUpdatedLog : Log
     StripeAddr newMap;
 };
 
+struct GcStripeFlushedLog : Log
+{
+    int volId;
+    StripeId vsid;
+    StripeId wbLsid;
+    StripeId userLsid;
+    int numBlockMaps;
+    // BlockMap list should be appended
+};
+
 struct VolumeDeletedLog : Log
 {
     int volId;
+    uint64_t allocatorContextVersion;
 };
 
 #pragma pack(pop)
 
-} // namespace ibofos
+} // namespace pos

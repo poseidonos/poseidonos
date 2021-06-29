@@ -32,23 +32,26 @@
 
 #pragma once
 
-#include <vector>
-
 #include "src/include/address_type.h"
-#include "src/mapper/mapper.h"
 
-namespace ibofos
+#include <vector>
+#include <string>
+namespace pos
 {
 class Allocator;
+class IVSAMap;
 
 class VsaRangeMaker
 {
 public:
     VsaRangeMaker(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
-        bool isGc);
-    uint32_t GetCount(void);
-    VirtualBlks& GetVsaRange(uint32_t index);
-    bool CheckRetry(void);
+        bool isGc, std::string arrayName);
+    VsaRangeMaker(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
+        bool isGc, IVSAMap* iVSAMap);
+    virtual ~VsaRangeMaker(void);
+    virtual uint32_t GetCount(void);
+    virtual VirtualBlks& GetVsaRange(uint32_t index);
+    virtual bool CheckRetry(void);
 
 private:
     void _Add(void);
@@ -59,6 +62,7 @@ private:
     std::vector<VirtualBlks> vsaRangeVector;
     VirtualBlks vsaRange;
     bool retry;
+    IVSAMap* iVSAMap;
 };
 
-} // namespace ibofos
+} // namespace pos

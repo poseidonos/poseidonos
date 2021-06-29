@@ -34,7 +34,7 @@
 
 #include "replay_task.h"
 
-namespace ibofos
+namespace pos
 {
 class JournalLogBuffer;
 
@@ -53,4 +53,4 @@ private:
     JournalLogBuffer* logBuffer;
 };
 
-} // namespace ibofos
+} // namespace pos

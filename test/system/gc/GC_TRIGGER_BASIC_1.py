@@ -8,13 +8,13 @@ import sys
 sys.path.append("../lib/")
 import json
 import json_parser
-import ibofos
-import ibofos_util
+import pos
+import pos_util
 import cli
-import ibofos_constant
+import pos_constant
 import time
 
-IBOFOS_ROOT = '../../../'
+POS_ROOT = '../../../'
 #TEST_TIME = 60
 TEST_SIZE = 256 * 1024 * 1024
 
@@ -27,7 +27,7 @@ DEV_2 = "unvme-ns-1"
 DEV_3 = "unvme-ns-2"
 DEV_4 = "unvme-ns-3"
 
-VOL_SIZE = 5 * ibofos_constant.SIZE_1GB
+VOL_SIZE = 5 * pos_constant.SIZE_1GB
 
 MAX_VOL_CNT = 1
 
@@ -37,18 +37,20 @@ VOL_CNT = 0
 PREVIOUS_TIME = "0"
 START_GC = False
 
+ARRAYNAME = "POSArray"
+
 class FIO():
     def __init__(self):
         self._list = {}
         
     def start_fio(self, vol_id, workload, io_size_bytes):
         key = VOL_NAME_PREFIX + str(vol_id)
-        ip_addr = ibofos.TR_ADDR
+        ip_addr = pos.TR_ADDR
         ns_id = str(vol_id + 1)
         test_name = key
         file_name = "trtype=tcp adrfam=IPv4 traddr=" + ip_addr + \
-            " trsvcid=1158 subnqn=nqn.2019-04.ibof\:subsystem1 ns= " + ns_id
-        ioengine_path = IBOFOS_ROOT + "lib/spdk-19.10/examples/nvme/fio_plugin/fio_plugin"
+            " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem1 ns= " + ns_id
+        ioengine_path = POS_ROOT + "lib/spdk/examples/nvme/fio_plugin/fio_plugin"
         fio_proc = subprocess.Popen(["fio",
             "--ioengine=" + ioengine_path,\
             "--bs=4096", \
@@ -96,40 +98,41 @@ def write_log(_log):
     with open("gc_trigger_basic_test_log", "a") as result_file:
         result_file.write(_log+"\n")
 
-def start_ibofos():
-    write_log ("starting ibofos...")
-    ibofos.start_ibofos()
-    write_log ("ibofos is running")
+def start_pos():
+    write_log ("starting pos...")
+    pos.start_pos()
+    write_log ("pos is running")
 
-def exit_ibofos():
-    write_log ("exiting ibofos...")
-    if get_state() != "OFFLINE":
-        ret = unmount_ibofos()
+def exit_pos():
+    write_log ("exiting pos...")
+    state = get_state();
+    if state == "NORMAL" or state == "BUSY":
+        ret = unmount_pos()
         if ret == False:
-            write_log("ibofos unmounting failed")
+            write_log("pos unmounting failed")
             return False
     fio_util.dispose()
-    ibofos.exit_ibofos()
-    write_log ("ibofos has been terminated")
+    pos.exit_pos()
+    write_log ("pos has been terminated")
     return True
 
-def kill_ibofos():
-    write_log ("killing ibofos...")
-    ibofos.kill_ibofos()
-    write_log ("ibofos has been killed")
+def kill_pos():
+    write_log ("killing pos...")
+    pos.kill_pos()
+    write_log ("pos has been killed")
 
-def restart_ibofos():
-    ret = exit_ibofos()
+def restart_pos():
+    ret = exit_pos()
     if ret == False:
-        write_log("ibofos restarting failed while exiting")
+        write_log("pos restarting failed while exiting")
         return False
-    start_ibofos()
-    write_log("ibofos has been restarted")
+    start_pos()
+    write_log("pos has been restarted")
     return True
 
 def scan_dev():
     write_log ("scan_dev begin")
-    ibofos_util.pci_rescan()
+    pos_util.pci_rescan()
     time.sleep(2)
     cli.scan_device()
     cli.list_device()
@@ -137,7 +140,7 @@ def scan_dev():
 
 def create_array():
     DATA = DEV_1 + "," + DEV_2 + "," + DEV_3
-    out = cli.create_array("uram0", DATA, "", "", "")
+    out = cli.create_array("uram0", DATA, "", ARRAYNAME, "")
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array created successfully")
@@ -146,20 +149,8 @@ def create_array():
         write_log ("array creation failed, code: " + str(code))
         return False
 
-def load_array():
-    out = cli.load_array("")
-    code = json_parser.get_response_code(out)
-    cli.list_device()
-    cli.list_volume("")
-    if code == 0:
-        write_log ("array loaded successfully")
-        return True
-    else:
-        write_log ("array loading failed, code: " + str(code))
-        return False
-
-def mount_ibofos():
-    out = cli.mount_ibofos()
+def mount_pos():
+    out = cli.mount_array(ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array mounted successfully")
@@ -168,8 +159,8 @@ def mount_ibofos():
         write_log ("array mounting failed code: " + str(code))
         return False
 
-def unmount_ibofos():
-    out = cli.unmount_ibofos()
+def unmount_pos():
+    out = cli.unmount_array(ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array unmounted successfully")
@@ -182,7 +173,7 @@ def create_and_mount_vol():
     global VOL_CNT
     vol_name = VOL_NAME_PREFIX + str(VOL_CNT)
     write_log ("try to create volume, name: " + vol_name + ", size: " + str(VOL_SIZE))
-    out = cli.create_volume(vol_name, str(VOL_SIZE), "", "", "")
+    out = cli.create_volume(vol_name, str(VOL_SIZE), "", "", ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         VOL_CNT = VOL_CNT + 1
@@ -193,7 +184,7 @@ def create_and_mount_vol():
         return False
 
 def mount_vol(vol_name):
-    out = cli.mount_volume(vol_name, "", "")
+    out = cli.mount_volume(vol_name, ARRAYNAME, "")
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("volume: " + vol_name + " mounted successfully")
@@ -202,12 +193,15 @@ def mount_vol(vol_name):
         write_log ("volume: " + vol_name + " mounting failed, code: " + str(code))
         return False
 
+def mbr_reset():
+    cli.mbr_reset()
+
 def init_test():
-    #ibofos_util.kill_process("ibofos")
-    start_ibofos()
+    start_pos()
     scan_dev()
+    mbr_reset()
     create_array()
-    ret = mount_ibofos()
+    ret = mount_pos()
     return ret
 
 def add_new_vol(cnt = 1):
@@ -258,24 +252,9 @@ def check_gc_done():
     write_log ("gc start but wait gc done, current status is " + gc_status)
     return False
 
-def get_situation():
-    out = cli.get_ibofos_info()
-    data = json.loads(out)
-    situ = data['Response']['info']['situation']
-    return situ
-
-def check_situation(situ_expected):
-    situ = get_situation()
-    if situ == situ_expected:
-        write_log ("current situation is " + situ)
-        return True
-    write_log ("current situation is " + situ + " but we expected " + situ_expected)
-    return False
-
 def get_state():
-    out = cli.get_ibofos_info()
-    data = json.loads(out)
-    state = data['Response']['info']['state']
+    out = cli.array_info(ARRAYNAME)
+    state = json_parser.get_state(out)
     return state
 
 def check_state(state_expected):
@@ -291,7 +270,7 @@ def do_event(request_event):
         write_log ("init test")
         ret = init_test()
         if ret == False:
-            write_log ("failed to initiate ibofos")
+            write_log ("failed to initiate pos")
             return False
         write_log ("add new vol")
         if add_new_vol(MAX_VOL_CNT) == True:
@@ -318,15 +297,15 @@ def do_event(request_event):
         ret = check_gc_done()
         return ret
     elif request_event == "EXIT_TEST":
-        exit_ibofos()
+        exit_pos()
         return True
     else:
         write_log ("unaddressed timing")
         return False
 
 def main(ip_addr):
-    ibofos.set_addr(ip_addr)
-    write_log("IPADDRESS: " + ibofos.TR_ADDR)
+    pos.set_addr(ip_addr)
+    write_log("IPADDRESS: " + pos.TR_ADDR)
     write_log ("init start")
     ret = do_event("INIT")
     if ret == False:

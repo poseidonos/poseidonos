@@ -33,9 +33,11 @@
 #pragma once
 
 #ifdef LEGACY_IOPATH
-#include "mss_on_disk.h"
-#include "src/scheduler/event.h"
+#include "src/metafs/storage/pstore/mss_on_disk.h"
+#include "src/event_scheduler/event.h"
 
+namespace pos
+{
 class MssCompleteHandler : public Event
 {
 public:
@@ -46,4 +48,5 @@ public:
 private:
     UbioSmartPtr ubio;
 };
+} // namespace pos
 #endif

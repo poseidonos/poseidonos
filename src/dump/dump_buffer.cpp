@@ -34,7 +34,7 @@
 
 #include "dump_module.h"
 
-namespace ibofos
+namespace pos
 {
 DumpBuffer::DumpBuffer()
 : ptr(nullptr),
@@ -59,4 +59,4 @@ DumpBuffer::~DumpBuffer()
 {
 }
 
-} // namespace ibofos
+} // namespace pos

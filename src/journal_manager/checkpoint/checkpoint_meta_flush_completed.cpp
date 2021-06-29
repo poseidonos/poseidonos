@@ -34,7 +34,7 @@
 
 #include "checkpoint_handler.h"
 
-namespace ibofos
+namespace pos
 {
 CheckpointMetaFlushCompleted::CheckpointMetaFlushCompleted(CheckpointHandler* cpHandler, int mapId)
 : cpHandler(cpHandler),
@@ -53,4 +53,4 @@ CheckpointMetaFlushCompleted::Execute(void)
     return (result == 0);
 }
 
-} // namespace ibofos
+} // namespace pos

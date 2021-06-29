@@ -32,9 +32,9 @@
 
 #pragma once
 
-#include "src/device/io_context.h"
+#include "src/device/base/io_context.h"
 
-namespace ibofos
+namespace pos
 {
 class Ubio;
 class UnvmeDeviceContext;
@@ -61,4 +61,4 @@ private:
     bool frontEnd;
     bool adminCommand;
 };
-} // namespace ibofos
+} // namespace pos

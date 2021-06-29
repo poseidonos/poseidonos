@@ -20,7 +20,7 @@ Synopsis
 Prerequisite
     1. please make sure that file below is properly configured according to your env.
         {IBOFOS_ROOT}/test/system/network/network_config.sh
-    2. please make sure that ibofos binary exists on top of ${IBOFOS_ROOT}
+    2. please make sure that pos binary exists on top of ${IBOFOS_ROOT}
     3. please configure your ip address, volume size, etc. propertly by editing npor_quick_test.sh
 
 Description
@@ -36,7 +36,7 @@ Description
         Repeat test sequence n times according to the given value
         Default setting value is 10
     -m
-        Manual mode for ibofos start. You should start ibofos application by yourself according to follow the indication.
+        Manual mode for pos start. You should start pos application by yourself according to follow the indication.
         You can use this option for debugging purpose.
     -h 
         Show script usage
@@ -53,7 +53,7 @@ EOF
 exec_mode=0
 test_option=0
 test_iter_cnt=3
-manual_ibofos_run_mode=0
+manual_pos_run_mode=0
 #---------------------------------
 # manual configuration (edit below according to yours)
 ibof_phy_volume_size_mb=102400
@@ -79,11 +79,11 @@ exec_mode_list=("Loop-back test" "Normal test over fabric" "Script verification 
 test_option_list=("NPOR test with data verification" "NPOR test with IO" "NPOR test only")
 #io_size_kb_list=(4 8 16 32 64 128 256) #KB
 io_size_kb_list=(64 128 256) #KB
-spdk_rpc_script="${IBOFOS_ROOT}/lib/spdk-19.10/scripts/rpc.py"
-spdk_nvmf_tgt="../lib/spdk-19.10/app/nvmf_tgt/nvmf_tgt"
-nss="nqn.2019-04.ibof:subsystem1"
+spdk_rpc_script="${IBOFOS_ROOT}/lib/spdk/scripts/rpc.py"
+spdk_nvmf_tgt="../lib/spdk/app/nvmf_tgt/nvmf_tgt"
+nss="nqn.2019-04.pos:subsystem1"
 echo_slient=1
-logfile="/var/log/ibofos/npor_test.log"
+logfile="/var/log/pos/npor_test.log"
 #---------------------------------
 MBtoB=$((1024*1024))
 GBtoB=$((1024*${MBtoB}))
@@ -136,7 +136,7 @@ print_test_configuration()
     echo ""
     echo "> Test configuration:"
     echo "  - Execution mode:       ${exec_mode_list[${exec_mode}]}"
-    echo "  - Manual mode:          ${manual_ibofos_run_mode}"
+    echo "  - Manual mode:          ${manual_pos_run_mode}"
     echo "  - Test option:          ${test_option_list[${test_option}]}"
     echo "  - Test iteration:       ${test_iter_cnt} loop(s)"
     echo "  - iBoF volume size:     ${ibof_phy_volume_size_mb} (MB)"
@@ -144,7 +144,7 @@ print_test_configuration()
     echo "  - Max I/O range:        ${max_io_range_mb} (MB)"
     echo ""
     echo "> Logging:"
-    echo "  - File: ${logfile}@initiator, ibofos.log@target"
+    echo "  - File: ${logfile}@initiator, pos.log@target"
     echo ""
     echo "NOTE:"
     echo "  - Please make sure that manual configuration in this script has been properly edited"
@@ -206,21 +206,21 @@ setup_prerequisite()
 
 check_stopped()
 {
-	result=`texecc "pgrep ibofos -c"`
-	while [ $result -ne 0 ]
-	do
-		result=`texecc "pgrep ibofos -c"`
-		sleep 0.5
-	done
+	result=`texecc "pgrep poseidonos -c"`
+    while [ `pgrep poseidonos -c` -ne 0 ]
+    do
+        echo "Waiting for POS stopped"
+        sleep 0.5
+    done
 }
 
-kill_ibofos()
+kill_pos()
 {
-    # kill ibofos if exists
-    texecc ${IBOFOS_ROOT}/test/script/kill_ibofos.sh 2>> ${logfile}
+    # kill pos if exists
+    texecc ${IBOFOS_ROOT}/test/script/kill_poseidonos.sh 2>> ${logfile}
 	check_stopped
 
-    echo "iBoFOS killed"
+    echo "PoseidonOS killed"
 }
 
 clean_up()
@@ -229,37 +229,37 @@ clean_up()
 
     disconnect_nvmf_contollers;
     
-    kill_ibofos;
+    kill_pos;
     rm -rf *${file_postfix}
     rm -rf ${logfile}
-    rm -rf ibofos.log
+    rm -rf pos.log
 
     umount ${uram_backup_dir}
 }
 
-start_ibofos()
+start_pos()
 {
 	texecc rm -rf /dev/shm/ibof_nvmf_trace.pid*
-	echo "iBoFOS starting..."
+	echo "PoseidonOS starting..."
 
-    if [ ${manual_ibofos_run_mode} -eq 1 ]; then
-        notice "Please start iBoFOS application now..."
+    if [ ${manual_pos_run_mode} -eq 1 ]; then
+        notice "Please start PoseidonOS application now..."
         wait_any_keyboard_input
     else 
-        notice "Starting ibofos..."
-        texecc ${IBOFOS_ROOT}/test/regression/start_ibofos.sh
+        notice "Starting poseidonos..."
+        texecc ${IBOFOS_ROOT}/test/regression/start_poseidonos.sh
     fi
 
-	result=`texecc "${IBOFOS_ROOT}/bin/cli request info --json" | jq '.Response.info.state' 2>/dev/null`
-	while [ -z ${result} ] || [ ${result} != '"OFFLINE"' ];
+    result=`texecc "${IBOFOS_ROOT}/bin/cli system info --json" | jq '.Response.info.version' 2>/dev/null`
+	while [ -z ${result} ] || [ ${result} == '""' ];
 	do
-		echo "Wait iBoFOS..."
-		result=`texecc "${IBOFOS_ROOT}/bin/cli request info --json" | jq '.Response.info.state' 2>/dev/null`
+		echo "Wait PoseidonOS..."
+		result=`texecc "${IBOFOS_ROOT}/bin/cli system info --json" | jq '.Response.info.version' 2>/dev/null`
 		echo $result
 		sleep 0.5
 	done
 
-    notice "Now ibofos is running..."
+    notice "Now poseidonos is running..."
 }
 
 establish_nvmef_target()
@@ -288,7 +288,7 @@ discover_n_connect_nvme_from_initiator()
     
     notice "Connecting remote NVMe drives..."
     iexecc ${nvme_cli} connect -t ${trtype} -n ${nss} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -n 1`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|pos|POS' | awk '{print $1}' | head -n 1`
 
     if [ ${exec_mode} -ne 2 ] && [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         error "NVMe drive is not found..."
@@ -384,65 +384,63 @@ write_pattern()
     notice "Data write has been finished!"
 }
 
-shutdown_ibofos()
+shutdown_pos()
 {
-    notice "Shutting down ibofos..."
-    texecc ${IBOFOS_ROOT}/bin/cli request unmount_ibofos
-    texecc ${IBOFOS_ROOT}/bin/cli request exit_ibofos
+    notice "Shutting down PoseidonOS..."
+    texecc ${IBOFOS_ROOT}/bin/cli array unmount --name POSArray
+    texecc ${IBOFOS_ROOT}/bin/cli system exit
     notice "Shutdown has been completed!"
 	check_stopped
 
     disconnect_nvmf_contollers;
 
-    #kill_ibofos
-    #notice "ibofos killed..."
+    #kill_pos
+    #notice "pos killed..."
     #texecc ./backup_latest_hugepages_for_uram.sh &>> ${logfile}
     #iexecc sleep 3
 }
 
-bringup_ibofos()
+bringup_pos()
 {
-    local ibofos_volume_required=1
+    local pos_volume_required=1
 
     create_array=0
     if [ ! -z $1 ] && [ $1 == "create" ]; then
         create_array=1
     fi
 
-    start_ibofos;
+    start_pos;
 
-    texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss} -a -s IBOF00000000000001  -d IBOF_VOLUME #>> ${logfile}
+    texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss} -a -s POS00000000000001  -d POS_VOLUME #>> ${logfile}
     texecc ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512
 
-    texecc ${IBOFOS_ROOT}/bin/cli request scan_dev >> ${logfile}
-    texecc ${IBOFOS_ROOT}/bin/cli request list_dev >> ${logfile}
+    texecc ${IBOFOS_ROOT}/bin/cli device scan >> ${logfile}
+    texecc ${IBOFOS_ROOT}/bin/cli device list >> ${logfile}
 
 	if [ $create_array -eq 1 ]; then
-        info "Target device list=${target_dev_list}"
-        texecc ${IBOFOS_ROOT}/bin/cli request create_array -b uram0 -d ${target_dev_list} -s ${target_spare_dev} #>> ${logfile}
-        #check_result_err_from_logfile
-	else
-		texecc ${IBOFOS_ROOT}/bin/cli request load_array
+        texecc ${IBOFOS_ROOT}/bin/cli array reset
+        info "Target device list=${target_dev_list}"        
+        texecc ${IBOFOS_ROOT}/bin/cli array create -b uram0 -d ${target_dev_list} -s ${target_spare_dev} --name POSArray #>> ${logfile}
 	fi
 	
-	texecc ${IBOFOS_ROOT}/bin/cli request mount_ibofos
+	texecc ${IBOFOS_ROOT}/bin/cli array mount --name POSArray
 
-    if [ ${ibofos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
+    if [ ${pos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        texecc ${IBOFOS_ROOT}/bin/cli request create_vol --name ${volname} --size ${ibof_phy_volume_size_byte} >> ${logfile};
+        texecc ${IBOFOS_ROOT}/bin/cli volume create --name ${volname} --size ${ibof_phy_volume_size_byte} >> ${logfile};
         check_result_err_from_logfile
     fi
 
-    if [ ${ibofos_volume_required} -eq 1 ]; then
+    if [ ${pos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
-        texecc ${IBOFOS_ROOT}/bin/cli request mount_vol --name ${volname} >> ${logfile};
+        texecc ${IBOFOS_ROOT}/bin/cli volume mount --name ${volname} >> ${logfile};
         check_result_err_from_logfile
     fi
     
     establish_nvmef_target;
     discover_n_connect_nvme_from_initiator;
     
-    notice "Bring-up iBoFOS done!"
+    notice "Bring-up PoseidonOS done!"
 }
 
 verify_data()
@@ -501,8 +499,8 @@ run_iteration()
         local io_blk_cnt=`shuf -i 1-$((${curr_max_io_range_blk}-2)) -n 1`
 
         write_pattern ${blk_offset} ${io_blk_cnt} ${blk_size_kb}
-        shutdown_ibofos;
-        bringup_ibofos 0;
+        shutdown_pos;
+        bringup_pos 0;
         verify_data ${blk_offset} ${io_blk_cnt} ${blk_size_kb}
 
         ((curr_iter++))
@@ -569,12 +567,12 @@ done
 print_test_configuration
 network_module_check
 setup_prerequisite
-bringup_ibofos create
+bringup_pos create
 
 prepare_write_file
 
 run_iteration
-shutdown_ibofos;
+shutdown_pos;
 
 clean_up
 

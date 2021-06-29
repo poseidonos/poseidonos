@@ -4,11 +4,11 @@
 #
 
 rootdir=$(readlink -f $(dirname $0))/../../../../
-spdk_dir=$rootdir/lib/spdk-19.10
+spdk_dir=$rootdir/lib/spdk
 
-NVMF_TARGET_NQN=nqn.2019-04.ibof:subsystem1
+NVMF_TARGET_NQN=nqn.2019-04.pos:subsystem1
 NVMF_TRANSPORT=TCP
-#NVMF_TARGET_NQN=nqn.2019-04.ibof:subsystem1
+#NVMF_TARGET_NQN=nqn.2019-04.pos:subsystem1
 #NVMF_TRANSPORT=RDMA
 NVMF_TARGET_PORT=1158
 

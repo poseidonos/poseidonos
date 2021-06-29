@@ -36,49 +36,52 @@
 #include <string>
 
 #include "mf_inode.h"
-#include "mf_inode_hdr.h"
+#include "inode_table_header.h"
 #include "mf_inode_req.h"
-#include "mf_inode_table.h"
-#include "mfs_file_property.h"
-#include "mvm_req.h"
+#include "inode_table.h"
+#include "mf_property.h"
+#include "metafs_control_request.h"
 #include "on_volume_meta_region_mgr.h"
 #include "os_header.h"
 
+namespace pos
+{
 // handle all operations required to meta file inode and its header
-class MetaFileInodeMgrClass : public OnVolumeMetaRegionMgr
+class MetaFileInodeManager : public OnVolumeMetaRegionManager
 {
 public:
-    MetaFileInodeMgrClass(void);
-    ~MetaFileInodeMgrClass(void);
+    explicit MetaFileInodeManager(std::string arrayName);
+    ~MetaFileInodeManager(void);
 
     virtual void Init(MetaVolumeType volType, MetaLpnType baseLpn, MetaLpnType maxLpn) override;
     virtual MetaLpnType GetRegionSizeInLpn(void) override;
     virtual void Bringup(void) override;
     virtual bool SaveContent(void) override;
     virtual void Finalize(void) override;
+    virtual void SetMss(MetaStorageSubsystem* metaStorage);
 
-    FileSizeType GetFileSize(const FileFDType fd);
-    FileSizeType GetDataChunkSize(const FileFDType fd);
-    MetaLpnType GetFileBaseLpn(const FileFDType fd);
+    FileSizeType GetFileSize(const FileDescriptorType fd);
+    FileSizeType GetDataChunkSize(const FileDescriptorType fd);
+    MetaLpnType GetFileBaseLpn(const FileDescriptorType fd);
 
     void CreateInitialInodeContent(uint32_t maxInodeNum);
     bool LoadInodeContent(void);
     MetaLpnType GetRegionBaseLpn(MetaRegionType regionType);
     MetaLpnType GetRegionSizeInLpn(MetaRegionType regionType);
-    void PopulateFDMapWithVolumeType(std::unordered_map<FileFDType, MetaVolumeType>& dest);
+    void PopulateFDMapWithVolumeType(std::unordered_map<FileDescriptorType, MetaVolumeType>& dest);
     void PopulateFileNameWithVolumeType(std::unordered_map<StringHashType, MetaVolumeType>& dest);
-    void PopulateFileKeyWithFD(std::unordered_map<StringHashType, FileFDType>& dest);
-    FileFDType AllocNewFD(std::string& fileName);
+    void PopulateFileKeyWithFD(std::unordered_map<StringHashType, FileDescriptorType>& dest);
+    FileDescriptorType Alloc(std::string& fileName);
 
-    bool CreateFileInode(MetaFsMoMReqMsg& req, FileFDType newFd, MetaFilePageMap& pageMap, FileSizeType dataChunkSizeInMetaPage);
-    bool DeleteFileInode(FileFDType& fd);
+    bool CreateFileInode(MetaFsFileControlRequest& req, FileDescriptorType newFd, MetaFilePageMap& pageMap, FileSizeType dataChunkSizeInMetaPage);
+    bool DeleteFileInode(FileDescriptorType& fd);
     bool IsFileInodeExist(std::string& fileName);
-    MetaFileExtentContent* GetInodeHdrExtentMapBase(void);
+    MetaFileExtent* GetInodeHdrExtentMapBase(void);
     size_t GetInodeHdrExtentMapSize(void);
-    void RemoveFDsInUse(std::map<FileFDType, FileFDType>& dstFreeFDMap);
-    MetaFileInode& GetFileInode(const FileFDType fd);
+    void RemoveFDsInUse(std::map<FileDescriptorType, FileDescriptorType>& dstFreeFDMap);
+    MetaFileInode& GetFileInode(const FileDescriptorType fd);
     MetaFileInode& GetInodeEntry(const uint32_t entryIdx);
-    bool IsFileInodeInUse(const FileFDType fd);
+    bool IsFileInodeInUse(const FileDescriptorType fd);
     size_t GetTotalAllocatedInodeCnt(void);
 
 #if (1 == COMPACTION_EN) || not defined COMPACTION_EN
@@ -89,13 +92,16 @@ public:
     bool RestoreContent(MetaVolumeType tgtVol, MetaLpnType BaseLpn, MetaLpnType iNodeHdrLpnCnts, MetaLpnType iNodeTableLpnCnts);
 
 private:
-    MetaFileInode& _AllocNewInodeEntry(FileFDType& newFd);
-    void _UpdateFd2InodeMap(FileFDType fd, MetaFileInode& inode);
+    MetaFileInode& _AllocNewInodeEntry(FileDescriptorType& newFd);
+    void _UpdateFd2InodeMap(FileDescriptorType fd, MetaFileInode& inode);
     void _BuildF2InodeMap(void);
     bool _LoadInodeFromMedia(MetaStorageType media, MetaLpnType baseLpn);
     bool _StoreInodeToMedia(MetaStorageType media, MetaLpnType baseLpn);
 
-    MetaFileInodeTableHdr* inodeHdr;
-    MetaFileInodeTable* inodeTable;
-    std::unordered_map<FileFDType, MetaFileInode*> fd2InodeMap;
+    InodeTableHeader* inodeHdr;
+    InodeTable* inodeTable;
+    std::unordered_map<FileDescriptorType, MetaFileInode*> fd2InodeMap;
+    std::unordered_map<FileDescriptorType, std::string> fd2ArrayMap;
+    MetaStorageSubsystem* metaStorage = nullptr;
 };
+} // namespace pos

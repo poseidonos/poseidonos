@@ -35,10 +35,12 @@
 #include "gtest/gtest.h"
 #include "mfs_top_init_test.h"
 
+namespace pos
+{
 int
 Main(int argc, char** argv)
 {
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "You entered Unit tests for MSC function block");
 
     std::srand(0);
@@ -50,3 +52,4 @@ Main(int argc, char** argv)
 
     return status;
 }
+} // namespace pos

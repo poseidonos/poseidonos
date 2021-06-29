@@ -5,8 +5,8 @@
 #include "src/io/affinity_manager.h"
 #include "src/device/spdk/spdk.hpp"
 
-using namespace ibofos;
-namespace ibofos
+using namespace pos;
+namespace pos
 {
 
 void* IoatTest::src;
@@ -32,7 +32,7 @@ IoatTest::~IoatTest(void)
 TEST_F(IoatTest,MemcpyNormalThread)
 {
     InitializeBuffer();
-    IoatApi::SubmitCopy(dst, src, BUFFER_SIZE, Verify, nullptr);
+    AccelEngineApi::SubmitCopy(dst, src, BUFFER_SIZE, Verify, nullptr);
     while (done == false);
     EXPECT_EQ(verifyResult, true);
 
@@ -51,7 +51,7 @@ TEST_F(IoatTest,MemcpyIoReactorThread)
 void
 IoatTest::HandleSubmitCopy(void* arg1, void* arg2)
 {
-    IoatApi::SubmitCopy(dst, src, BUFFER_SIZE, Verify, nullptr);
+    AccelEngineApi::SubmitCopy(dst, src, BUFFER_SIZE, Verify, nullptr);
 }
 
 void

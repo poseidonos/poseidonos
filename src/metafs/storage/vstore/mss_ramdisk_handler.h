@@ -34,14 +34,14 @@
 
 #ifdef LEGACY_IOPATH
 
-#include "mfs_io_config.h"
-#include "mfs_log.h"
+#include "metafs_config.h"
+#include "metafs_log.h"
 #include "mss_status_callback.h"
 #include "mss_utils.h"
 #include "os_header.h"
-#include "src/scheduler/event_argument.h"
 
-using namespace ibofos;
+namespace pos
+{
 struct MssCompleteHandler
 {
 public:
@@ -66,5 +66,5 @@ MssCompleteHandler::operator()(EventArgument* eventArgument)
     delete ubio;
     return true;
 }
-
+} // namespace pos
 #endif // LEGACY_IOPATH

@@ -30,70 +30,58 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/allocator.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/bio/flush_io.h"
+#include "src/event_scheduler/event.h"
 #include "src/io/frontend_io/flush_command_manager.h"
-#include "src/io/general_io/io_controller.h"
-#include "src/io/general_io/volume_io.h"
-#include "src/mapper/mapper.h"
-#include "src/scheduler/event.h"
-#include "src/volume/volume_manager.h"
 
-namespace ibofos
+namespace pos
 {
-#if defined NVMe_FLUSH_HANDLING
 class Allocator;
-class VolumeIo;
-class VolumeManager;
-class IOController;
-class Mapper;
+class IMapFlush;
 
 class FlushCmdHandler : public Event
 {
 public:
-    FlushCmdHandler(VolumeIoSmartPtr volumeIo);
+    explicit FlushCmdHandler(FlushIoSmartPtr flushIo);
+    FlushCmdHandler(FlushIoSmartPtr flushIo, FlushCmdManager* flushCmdManager,
+        IBlockAllocator* iBlockAllocator, IWBStripeAllocator* iWBStripeAllocator,
+        IContextManager* icontextManager, IMapFlush* iMapFlush);
     virtual ~FlushCmdHandler(void);
     virtual bool Execute(void);
-    void MapFlushCompleted(int mapId);
-    void AllocatorMetaFlushCompleted();
 
 private:
-    Allocator* allocator;
-    Mapper* mapper;
-    VolumeIoSmartPtr volumeIo;
-    int volumeId;
     FlushCmdManager* flushCmdManager;
-    bool hasLock;
-    std::atomic<int> totalMapsCompleted;
-    int totalMapsToFlush;
-    std::atomic<bool> mapperFlushComplete;
-    std::atomic<bool> allocaterFlushComplete;
-    std::mutex mapCountUpdateLock;
-    int numVSAMapsForFlushing;
-    int numStripeMapsForFlushing;
+    IWBStripeAllocator* iWBStripeAllocator;
+    IBlockAllocator* iBlockAllocator;
+    IContextManager* icontextManager;
+    IMapFlush* iMapFlush;
+    FlushIoSmartPtr flushIo;
+    int volumeId;
+    bool stripeMapFlushIssued;
 };
 
 class MapFlushCompleteEvent : public Event
 {
 public:
-    MapFlushCompleteEvent(int mapId, FlushCmdHandler* flushCmdHandler);
+    MapFlushCompleteEvent(int mapId, FlushIoSmartPtr flushIo);
     virtual ~MapFlushCompleteEvent(void);
     virtual bool Execute(void);
 
 private:
     int mapId;
-    FlushCmdHandler* flushCmdHandler;
+    FlushIoSmartPtr flushIo;
 };
 
 class AllocatorFlushDoneEvent : public Event
 {
 public:
-    AllocatorFlushDoneEvent(FlushCmdHandler* flushCmdHandler);
+    explicit AllocatorFlushDoneEvent(FlushIoSmartPtr flushIo);
     virtual ~AllocatorFlushDoneEvent(void);
     virtual bool Execute(void);
 
 private:
-    FlushCmdHandler* flushCmdHandler;
+    FlushIoSmartPtr flushIo;
 };
 
-#endif
-} // namespace ibofos
+} // namespace pos

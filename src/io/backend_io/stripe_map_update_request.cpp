@@ -35,22 +35,32 @@
 #include <sstream>
 
 #include "flush_completion.h"
-#include "src/allocator/stripe.h"
-#include "src/include/ibof_event_id.hpp"
+#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/include/backend_event.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/io/backend_io/stripe_map_update.h"
-#include "src/mapper/mapper.h"
-#include "src/scheduler/event_argument.h"
-#include "src/scheduler/event_scheduler.h"
+#include "src/mapper_service/mapper_service.h"
+#include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
-StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe)
-: Callback(false),
-  stripe(stripe)
+StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, std::string& arrayName)
+: StripeMapUpdateRequest(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
+      EventSchedulerSingleton::Instance(), arrayName)
 {
-#if defined QOS_ENABLED_BE
     SetEventType(BackendEvent_Flush);
-#endif
+}
+
+StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap,
+    EventScheduler* eventScheduler, std::string& arrayName)
+: Callback(false),
+  stripe(stripe),
+  iStripeMap(stripeMap),
+  eventScheduler(eventScheduler),
+  arrayName(arrayName)
+{
 }
 
 StripeMapUpdateRequest::~StripeMapUpdateRequest(void)
@@ -60,41 +70,41 @@ StripeMapUpdateRequest::~StripeMapUpdateRequest(void)
 bool
 StripeMapUpdateRequest::_DoSpecificJob(void)
 {
-    Mapper& mapper = *MapperSingleton::Instance();
-    StripeAddr wbStripeAddr = mapper.GetLSA(stripe->GetVsid());
-    bool writeBufferArea = mapper.IsInWriteBufferArea(wbStripeAddr);
+    StripeAddr wbStripeAddr = iStripeMap->GetLSA(stripe->GetVsid());
+    bool writeBufferArea = iStripeMap->IsInWriteBufferArea(wbStripeAddr);
 
-    IBOF_EVENT_ID eventId = IBOF_EVENT_ID::NFLSH_STRIPE_DEBUG;
-    IBOF_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, IbofEventId::GetString(eventId),
+    POS_EVENT_ID eventId = POS_EVENT_ID::NFLSH_STRIPE_DEBUG;
+    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, PosEventId::GetString(eventId),
         stripe->GetVsid(),
         static_cast<uint32_t>(writeBufferArea),
         wbStripeAddr.stripeId);
+
     if (_GetErrorCount() > 0)
     {
-        IBOF_EVENT_ID eventId =
-            IBOF_EVENT_ID::NFLSH_ERROR_DETECT;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId), _GetErrorCount());
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::NFLSH_ERROR_DETECT;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId), _GetErrorCount());
         return true;
     }
 
     if (unlikely(false == writeBufferArea))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::NFLSH_STRIPE_NOT_IN_WRITE_BUFFER;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId), stripe->GetVsid());
+        POS_EVENT_ID eventId = POS_EVENT_ID::NFLSH_STRIPE_NOT_IN_WRITE_BUFFER;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId), stripe->GetVsid());
         return true;
     }
 
-    EventSmartPtr event(new StripeMapUpdate(stripe));
+    EventSmartPtr event(new StripeMapUpdate(stripe, arrayName));
     if (unlikely(nullptr == event))
     {
-        IBOF_EVENT_ID eventId =
-            IBOF_EVENT_ID::NFLSH_EVENT_ALLOCATION_FAILED;
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::NFLSH_EVENT_ALLOCATION_FAILED;
         std::stringstream message;
         message << "FlushCompletion for vsid: " << stripe->GetVsid() << ", wbLsid: " << stripe->GetWbLsid() << ", userAreaLsid: " << stripe->GetUserLsid();
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId), message.str());
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId), message.str());
         return true;
     }
 
@@ -102,15 +112,16 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
 
     if (unlikely(false == mapUpdateSuccessful))
     {
-        IBOF_EVENT_ID eventId =
-            IBOF_EVENT_ID::NFLSH_EVENT_MAP_UPDATE_FAILED;
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::NFLSH_EVENT_MAP_UPDATE_FAILED;
         std::stringstream message;
         message << "FlushCompletion for vsid: " << stripe->GetVsid() << ", wbLsid: " << stripe->GetWbLsid() << ", userAreaLsid: " << stripe->GetUserLsid();
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId), message.str());
-        EventArgument::GetEventScheduler()->EnqueueEvent(event);
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId), message.str());
+
+        eventScheduler->EnqueueEvent(event);
     }
 
     return true;
 }
-} // namespace ibofos
+} // namespace pos

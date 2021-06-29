@@ -37,12 +37,12 @@
 #include <vector>
 
 #include "array_device.h"
-#include "device_set.h"
 #include "src/array/meta/array_meta.h"
+#include "src/array_models/dto/device_set.h"
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 using ArrayDeviceSet = DeviceSet<ArrayDevice*>;
 
@@ -59,15 +59,15 @@ class ArrayDeviceList
 public:
     ArrayDeviceList();
     virtual ~ArrayDeviceList();
-    ArrayDeviceType Exists(string devName);
-    int SetNvm(ArrayDevice* nvm);
-    int AddData(ArrayDevice* dev);
-    int AddSpare(ArrayDevice* dev);
-    int RemoveSpare(ArrayDevice* target);
-    int SpareToData(ArrayDevice* target);
-    void Clear();
-    DeviceSet<ArrayDevice*>& GetDevs();
-    DeviceSet<string> ExportNames();
+    virtual ArrayDeviceType Exists(string devName);
+    virtual int SetNvm(ArrayDevice* nvm);
+    virtual int AddData(ArrayDevice* dev);
+    virtual int AddSpare(ArrayDevice* dev);
+    virtual int RemoveSpare(ArrayDevice* target);
+    virtual int SpareToData(ArrayDevice* target);
+    virtual void Clear(void);
+    virtual DeviceSet<ArrayDevice*>& GetDevs(void);
+    virtual DeviceSet<string> ExportNames(void);
 
 private:
     vector<ArrayDevice*>::iterator FindNvm(string devName);
@@ -78,4 +78,4 @@ private:
     mutex* mtx = nullptr;
     ArrayDeviceSet devSet_;
 };
-} // namespace ibofos
+} // namespace pos

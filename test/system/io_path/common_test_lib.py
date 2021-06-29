@@ -4,24 +4,24 @@ import subprocess
 import sys
 import psutil
 
-def start_ibofos(log_path, ibof_root):
+def start_pos(log_path, ibof_root):
     global ibof_proc
     print ("\tStarting POS .. (log path: " + log_path+ ")")
-    ibof_execution = ibof_root + "bin/ibofos"
+    ibof_execution = ibof_root + "bin/poseidonos"
     with open(log_path, "w") as output_file:
         ibof_proc = subprocess.Popen(ibof_execution, \
                 stdout=output_file, stderr=output_file)
     subprocess.call(["sleep", "3"])
     print ("\tPOS Started!")
 
-def bringup_ibofos(**args):
+def bringup_pos(**args):
     args['volume_cnt'] = 1
     args['subsystem_cnt'] = 1
     bringup_multiple_volume(**args)
 
 def bringup_multiple_volume(**args):
-    start_ibofos(args['log_path'], args['ibof_root'])
-    ibofos_bringup = args['ibof_root'] + \
+    start_pos(args['log_path'], args['ibof_root'])
+    pos_bringup = args['ibof_root'] + \
             "/test/system/io_path/setup_ibofos_nvmf_volume.sh"
     print("\tBringup POS")
     if 'clean' not in args:
@@ -29,7 +29,7 @@ def bringup_multiple_volume(**args):
     if 'volume_size' not in args:
         args['volume_size'] = 2147483648
      
-    subprocess.call([ibofos_bringup, \
+    subprocess.call([pos_bringup, \
             "-t", args['transport'], \
             "-a", args['target_ip'], \
             "-v", str(args['volume_cnt']), \
@@ -39,18 +39,18 @@ def bringup_multiple_volume(**args):
             stdout=args['stdout_type'], stderr=subprocess.STDOUT)
     print("\tBringup Done")
 
-def terminate_ibofos(ibof_root, stdout_type):
+def terminate_pos(ibof_root, stdout_type):
     print("\tTerminate POS")
     if 'ibof_proc' in globals():
         ibof_cli = ibof_root + "bin/cli"
-        subprocess.call([ibof_cli, "request", "unmount_ibofos"],\
+        subprocess.call([ibof_cli, "array", "unmount", "--name", "POSArray"],\
             stdout=stdout_type, stderr=subprocess.STDOUT)
-        subprocess.call([ibof_cli, "request", "exit_ibofos"],\
+        subprocess.call([ibof_cli, "system", "exit"],\
             stdout=stdout_type, stderr=subprocess.STDOUT)
         ibof_proc.wait()
     print("\tTerminate POS done")
 
-def kill_ibofos():
+def kill_pos():
     print ("\tTerminating POS..")
     ibof_proc.kill()
     ibof_proc.wait()
@@ -99,7 +99,7 @@ def kill_and_wait(process_list):
 
             command_line = proc.cmdline()
             for command in command_line:
-                if "ibofd.py" in command:
+                if "poseidon_daemon.py" in command:
                     proc.kill()
                     proc.wait()
 
@@ -109,8 +109,8 @@ def kill_and_wait(process_list):
 
 
 def clear_env():
-    print ("\tCleanup - kill ibofos, fio, watchdog process")
-    kill_and_wait(["ibofos", "fio"])
+    print ("\tCleanup - kill pos, fio, watchdog process")
+    kill_and_wait(["poseidonos", "fio"])
     print ("\tCleanup Done")
 
 test_index = 1

@@ -33,11 +33,14 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 
-#include "src/io/general_io/volume_io.h"
-#include "src/scheduler/callback.h"
-
-namespace ibofos
+#include "spdk/pos.h"
+#include "src/bio/flush_io.h"
+#include "src/bio/volume_io.h"
+#include "src/event_scheduler/callback.h"
+#include "src/volume/volume_service.h"
+namespace pos
 {
 struct IOCtx
 {
@@ -48,33 +51,61 @@ struct IOCtx
 };
 
 class VolumeManager;
-
+#ifdef _ADMIN_ENABLED
+class IArrayInfo;
+class IDevInfo;
+class IIODispatcher;
+#endif
 class AioCompletion : public Callback,
                       public std::enable_shared_from_this<AioCompletion>
 {
 public:
-    AioCompletion(VolumeIoSmartPtr volumeIo, ibof_io& ibofIo, IOCtx& ioContext);
+    AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo, IOCtx& ioContext);
+    AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo, IOCtx& ioContext, std::function<bool(uint32_t)> isSameReactorNowFunc);
+    AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo, IOCtx& ioContext);
+    AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo, IOCtx& ioContext, std::function<bool(uint32_t)> isSameReactorNowFunc);
     ~AioCompletion(void) override;
 
 private:
     void _SendUserCompletion(void);
     bool _DoSpecificJob(void) override;
 
+    FlushIoSmartPtr flushIo;
     VolumeIoSmartPtr volumeIo;
-    ibof_io& ibofIo;
+    pos_io& posIo;
     IOCtx& ioContext;
-    static VolumeManager& volumeManager;
+    static VolumeService& volumeService;
+    std::function<bool(uint32_t)> isSameReactorNowFunc;
 };
 
 class AIO
 {
 public:
     AIO(void);
-    void SubmitAsyncIO(ibof_io& ibofIo);
+    void SubmitAsyncIO(pos_io& posIo);
     void CompleteIOs(void);
+#ifdef _ADMIN_ENABLED
+    void SubmitAsyncAdmin(pos_io& io);
+#endif
 
 private:
     static thread_local IOCtx ioContext;
-    VolumeIoSmartPtr _CreateVolumeIo(ibof_io& ibofIo);
+    VolumeIoSmartPtr _CreateVolumeIo(pos_io& posIo);
+    FlushIoSmartPtr _CreateFlushIo(pos_io& posIo);
 };
-} // namespace ibofos
+#ifdef _ADMIN_ENABLED
+class AdminCompletion : public Callback,
+                        public std::enable_shared_from_this<AdminCompletion>
+
+{
+public:
+    AdminCompletion(pos_io* posIo, IOCtx& ioContext);
+    ~AdminCompletion(void) override;
+
+private:
+    bool _DoSpecificJob(void) override;
+    pos_io* io;
+    IOCtx& ioContext;
+};
+#endif
+} // namespace pos

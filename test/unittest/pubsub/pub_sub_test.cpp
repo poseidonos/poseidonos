@@ -1,7 +1,7 @@
 #include "publisher.hpp"
 #include "subscriber.hpp"
 
-using namespace ibofos;
+using namespace pos;
 using namespace std;
 
 

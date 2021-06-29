@@ -18,11 +18,13 @@ import argparse
 
 #######################################################################################
 # edit test parameters into these lists to run different workloads
+
+file_path = os.path.dirname(os.path.abspath(__file__))
 ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
 
 #select fio plugin for nvmf/e or bdev
 fio_plugin='nvme'
-ioengine = ibof_root + "lib/spdk-19.10/examples/" + str(fio_plugin) + "/fio_plugin/fio_plugin"
+ioengine = ibof_root + "lib/spdk/examples/" + str(fio_plugin) + "/fio_plugin/fio_plugin"
 #ioengine = ibof_root + "/bin/ibof_bdev_fio_plugin"
 spdk_conf= ibof_root + "test/system/nvmf/initiator/spdk_tcp_fio/BDEV.conf"
 
@@ -30,15 +32,15 @@ file_num=8
 setup="ssir"
 
 if setup == "ssir":
-    traddr='133.133.100.10'
+    traddr = '111.100.13.175'
 else:
-    traddr='10.100.11.1'
+    traddr = '10.100.11.1'
 
 # could be either nvme or nvmf or bdev
 #filename='trtype=pcie traddr=0000.02.00.0 ns=1'
 #filename="Nvme1n1"
 trtype="tcp"
-filename="trtype=tcp adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=nqn.2019-04.ibof\:subsystem1 ns=1"
+filename="trtype=tcp adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem1 ns=1"
 #filename='vol=vol1 setup_path='+ibof_root+'tool/ibof_bdev_fio_plugin/'
 
 # the configuration below runs QD 1 & 128.
@@ -121,14 +123,15 @@ def run_fio(io_size_bytes, block_size, qd, rw_mix, cpus_allowed, run_num, worklo
         blocksize=['128k', '128k', '128k', '128k', '128k', '128k', '128k', '128k']
 
     command = "fio "  \
-            + " --ioengine=" + str(ioengine) + "" \
-            + " --runtime=" + str(run_time_sec) + "" \
-            + " --io_size=" + str(io_size_bytes) + "" \
-            + " --bs=" + str(block_size) + "" \
-            + " --iodepth=" + str(qd) + "" \
-            + " --readwrite=" + str(workload) + "" \
-            + " --offset=" + str(offset) + ""\
-            + " --output=./fio_output.json --output-format=json" + ""\
+              + " --ioengine=" + str(ioengine) + "" \
+              + " --runtime=" + str(run_time_sec) + "" \
+              + " --io_size=" + str(io_size_bytes) + "" \
+              + " --bs=" + str(block_size) + "" \
+              + " --iodepth=" + str(qd) + "" \
+              + " --readwrite=" + str(workload) + "" \
+              + " --offset=" + str(offset) + "" \
+              + " --output=" + str(file_path) + "/fio_output.json" + "" \
+              + " --output-format=json" + "" \
 
     if fio_plugin == "bdev":
         command += " --spdk_conf=" + str(spdk_conf) + ""
@@ -174,13 +177,13 @@ def run_fio(io_size_bytes, block_size, qd, rw_mix, cpus_allowed, run_num, worklo
         for i in range(0, file_num):
             if fio_plugin == "nvme":
                 if workload_type <= 3:
-                    command += " --name=test" + str(i) + " --readwrite=" +str(readwrite[i]) + " --bs=" + str(blocksize[i]) + " --bs_unaligned=0 " " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) +  " trsvcid=1158" " subnqn=nqn.2019-04.ibof\:subsystem" + str(i+1) + " ns=1'"
+                    command += " --name=test" + str(i) + " --readwrite=" +str(readwrite[i]) + " --bs=" + str(blocksize[i]) + " --bs_unaligned=0 " " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) +  " trsvcid=1158" " subnqn=nqn.2019-04.pos\:subsystem" + str(i+1) + " ns=1'"
                 else:
-                    command += " --name=test" + str(i) + " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 " "subnqn=nqn.2019-04.ibof\:subsystem" + str(i+1) + " ns=1'"
+                    command += " --name=test" + str(i) + " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 " "subnqn=nqn.2019-04.pos\:subsystem" + str(i+1) + " ns=1'"
             else:
                 command += " --name=test" + str(i) + "" + " --filename='Nvme" + str(i+1) + "n1'"
     else:
-        command += " --name=test1" + " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 " "subnqn=nqn.2019-04.ibof\:subsystem1" + " ns=1'"
+        command += " --name=test1" + " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 " "subnqn=nqn.2019-04.pos\:subsystem1" + " ns=1'"
 
     if verbose == True:
         print(command)

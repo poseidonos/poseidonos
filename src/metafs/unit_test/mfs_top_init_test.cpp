@@ -32,18 +32,20 @@
 
 #include "mfs_top_init_test.h"
 
-#include "mfs_log.h"
+#include "metafs_log.h"
 #include "os_header.h"
 
 #define DPDK_RTE_LIB_USE 0
 
+namespace pos
+{
 void
 SetupTestEnv(int argc, char** argv)
 {
     std::srand(0);
 
     // rte_eal_init is necessary to use DPDK RTE Ring library
-    // In metafs, when you use RTE lockless Q(find mfs_lockless_q.h, mfs_io_q.h), you need to have code below.
+    // In metafs, when you use RTE lockless Q(find mfs_lockless_q.h, metafs_q.h), you need to have code below.
     // However, you will get trouble during below execution when you try to run the unit test with valgrind.
     //  (please note that you have to patch valgrind tool in order to work with DPDK properly. https://github.com/bluca/valgrind-dpdk)
     // Because valgrind tool captures all the executions behind RTE EAL library and it will take so long.
@@ -62,13 +64,14 @@ MountMetaStorage(void)
     // test purpose...this code will be moved to meta filesystem service core soon...
     uint64_t metaStorageSizeInByte;
     metaStorageSizeInByte = (uint64_t)2 * (1024 * 1024 * 1024); // 5GB
-    metaStorage->CreateMetaStore(MetaStorageType::SSD, metaStorageSizeInByte, true);
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    metaStorage->CreateMetaStore("POSArray", MetaStorageType::SSD, metaStorageSizeInByte, true);
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "SSD Meta storage subsystem mounted..size={}GB",
         metaStorageSizeInByte / (1024 * 1024 * 1024));
     metaStorageSizeInByte = (uint64_t)512 * (1024 * 1024); // 1GB
-    metaStorage->CreateMetaStore(MetaStorageType::NVRAM, metaStorageSizeInByte, true);
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    metaStorage->CreateMetaStore("POSArray", MetaStorageType::NVRAM, metaStorageSizeInByte, true);
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "NVRAM Meta storage subsystem mounted..size={}GB",
         metaStorageSizeInByte / (1024 * 1024 * 1024));
 }
+} // namespace pos

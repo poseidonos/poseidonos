@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <string>
 
-namespace hash
+namespace air
 {
 template<typename K>
 class HashNode
@@ -105,7 +105,7 @@ private:
     uint32_t
     _HashCode(K key)
     {
-        uint32_t x = (uint32_t)key;
+        uint64_t x = (uint64_t)key;
         if (x < capacity)
         {
             return x;
@@ -121,6 +121,6 @@ private:
     uint32_t size{0};
 };
 
-} // namespace hash
+} // namespace air
 
 #endif // AIR_HASH_H

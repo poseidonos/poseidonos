@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "src/scheduler/io_worker.h"
-namespace ibofos
+#include "src/io_scheduler/io_worker.h"
+namespace pos
 {
 class IOWorkerTest : public testing::Test
 {

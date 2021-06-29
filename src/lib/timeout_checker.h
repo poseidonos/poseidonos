@@ -35,7 +35,7 @@
 
 #include <cstdint>
 
-namespace ibofos
+namespace pos
 {
 class TimeoutChecker
 {
@@ -47,5 +47,5 @@ public:
     virtual bool CheckTimeout(void) = 0;
 };
 
-} // namespace ibofos
+} // namespace pos
 #endif // TIMEOUT_CHECKER_H_

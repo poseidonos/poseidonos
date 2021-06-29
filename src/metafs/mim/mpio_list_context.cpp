@@ -32,7 +32,7 @@
 
 #include "mpio_list_context.h"
 
-#include "mfs_common.h"
+#include "metafs_common.h"
 
 #if (1 == MFS_DEBUG)
 #define OUTSTANDING_MPIO_LIST_TRACKING 1
@@ -40,6 +40,8 @@
 #define OUTSTANDING_MPIO_LIST_TRACKING 0
 #endif
 
+namespace pos
+{
 MpioListContext::MpioListContext(void)
 : totalIssuedMpio(0),
   remainingMpioToComplete(0)
@@ -106,3 +108,4 @@ MpioListContext::IsAllMpioDone(void)
 {
     return remainingMpioToComplete == 0;
 }
+} // namespace pos

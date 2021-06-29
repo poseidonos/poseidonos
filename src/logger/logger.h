@@ -45,7 +45,7 @@
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 enum class ModuleInDebugLogDump
 {
@@ -53,6 +53,7 @@ enum class ModuleInDebugLogDump
     IO_GENERAL,
     CALLBACK_TIMEOUT,
     FLUSH_CMD,
+    JOURNAL,
     MAX_SIZE,
 };
 
@@ -81,7 +82,7 @@ public:
 
     template<typename... Args>
     void
-    Iboflog(spdlog::source_loc loc, spdlog::level::level_enum lvl,
+    Poslog(spdlog::source_loc loc, spdlog::level::level_enum lvl,
         int id, spdlog::string_view_t fmt, const Args&... args)
     {
         if (_ShouldLog(lvl, id, fmt))
@@ -111,10 +112,10 @@ private:
     const uint32_t AVG_LINE = 80;
     DumpModule<DumpBuffer>* dumpModule[static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE)];
     shared_ptr<spdlog::logger> logger;
-    ibofos_logger::Preferences preferences;
+    pos_logger::Preferences preferences;
 };
 
-using LoggerSingleton = ibofos::Singleton<Logger>;
+using LoggerSingleton = pos::Singleton<Logger>;
 
 class Reporter
 {
@@ -122,7 +123,7 @@ public:
     Reporter();
     template<typename... Args>
     void
-    Iboflog(spdlog::source_loc loc, spdlog::level::level_enum lvl,
+    Poslog(spdlog::source_loc loc, spdlog::level::level_enum lvl,
         int id, spdlog::string_view_t fmt, const Args&... args)
     {
         reporter->iboflog_sink(loc, lvl, id, fmt, args...);
@@ -132,80 +133,80 @@ private:
     shared_ptr<spdlog::logger> reporter;
     const uint32_t SIZE_MB = 50;
     const uint32_t ROTATION = 20;
-    const string REPORT_PATH = "/var/log/ibofos/";
+    const string REPORT_PATH = "/var/log/pos/";
     const string REPORT_NAME = "report.log";
 };
 
-using ReporterSingleton = ibofos::Singleton<Reporter>;
-} // namespace ibofos
+using ReporterSingleton = pos::Singleton<Reporter>;
+} // namespace pos
 
-inline ibofos::Logger*
+inline pos::Logger*
 logger()
 {
-    return ibofos::LoggerSingleton::Instance();
+    return pos::LoggerSingleton::Instance();
 }
 
-inline ibofos::Reporter*
+inline pos::Reporter*
 reporter()
 {
-    return ibofos::ReporterSingleton::Instance();
+    return pos::ReporterSingleton::Instance();
 }
 
-#define IBOF_TRACE_DEBUG_IN_MEMORY(dumpmodule, eventid, ...) \
+#define POS_TRACE_DEBUG_IN_MEMORY(dumpmodule, eventid, ...) \
     logger()->IboflogWithDump(dumpmodule, spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::debug, static_cast<int>(eventid), __VA_ARGS__)
 
-#define IBOF_TRACE_INFO_IN_MEMORY(dumpmodule, eventid, ...) \
+#define POS_TRACE_INFO_IN_MEMORY(dumpmodule, eventid, ...) \
     logger()->IboflogWithDump(dumpmodule, spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::info, static_cast<int>(eventid), __VA_ARGS__)
 
-#define IBOF_TRACE_WARN_IN_MEMORY(dumpmodule, eventid, ...) \
+#define POS_TRACE_WARN_IN_MEMORY(dumpmodule, eventid, ...) \
     logger()->IboflogWithDump(dumpmodule, spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::warn, static_cast<int>(eventid), __VA_ARGS__)
 
-#define IBOF_TRACE_ERROR_IN_MEMORY(dumpmodule, eventid, ...) \
+#define POS_TRACE_ERROR_IN_MEMORY(dumpmodule, eventid, ...) \
     logger()->IboflogWithDump(dumpmodule, spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::err, static_cast<int>(eventid), __VA_ARGS__)
 
-#define IBOF_TRACE_CRITICAL_IN_MEMORY(dumpmodule, eventid, ...) \
+#define POS_TRACE_CRITICAL_IN_MEMORY(dumpmodule, eventid, ...) \
     logger()->IboflogWithDump(dumpmodule, spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::critical, static_cast<int>(eventid), __VA_ARGS__)
 
-#define IBOF_TRACE_DEBUG(eventid, ...) \
-    logger()->Iboflog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::debug, static_cast<int>(eventid), __VA_ARGS__)
+#define POS_TRACE_DEBUG(eventid, ...) \
+    logger()->Poslog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::debug, static_cast<int>(eventid), __VA_ARGS__)
 
-#define IBOF_TRACE_INFO(eventid, ...) \
-    logger()->Iboflog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::info, static_cast<int>(eventid), __VA_ARGS__)
+#define POS_TRACE_INFO(eventid, ...) \
+    logger()->Poslog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::info, static_cast<int>(eventid), __VA_ARGS__)
 
-#define IBOF_TRACE_WARN(eventid, ...) \
-    logger()->Iboflog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::warn, static_cast<int>(eventid), __VA_ARGS__)
+#define POS_TRACE_WARN(eventid, ...) \
+    logger()->Poslog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::warn, static_cast<int>(eventid), __VA_ARGS__)
 
-#define IBOF_TRACE_ERROR(eventid, ...) \
-    logger()->Iboflog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::err, static_cast<int>(eventid), __VA_ARGS__)
+#define POS_TRACE_ERROR(eventid, ...) \
+    logger()->Poslog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::err, static_cast<int>(eventid), __VA_ARGS__)
 
-#define IBOF_TRACE_CRITICAL(eventid, ...) \
-    logger()->Iboflog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::critical, static_cast<int>(eventid), __VA_ARGS__)
+#define POS_TRACE_CRITICAL(eventid, ...) \
+    logger()->Poslog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::critical, static_cast<int>(eventid), __VA_ARGS__)
 
-#define IBOF_REPORT_TRACE(eventid, ...)                                                                        \
+#define POS_REPORT_TRACE(eventid, ...)                                                                        \
     {                                                                                                          \
-        logger()->Iboflog(spdlog::source_loc{}, spdlog::level::trace, static_cast<int>(eventid), __VA_ARGS__); \
+        logger()->Poslog(spdlog::source_loc{}, spdlog::level::trace, static_cast<int>(eventid), __VA_ARGS__); \
         reporter()                                                                                             \
-            ->Iboflog(spdlog::source_loc{}, spdlog::level::trace, static_cast<int>(eventid), __VA_ARGS__);     \
+            ->Poslog(spdlog::source_loc{}, spdlog::level::trace, static_cast<int>(eventid), __VA_ARGS__);     \
     }
 
-#define IBOF_REPORT_WARN(eventid, ...)                                                                        \
+#define POS_REPORT_WARN(eventid, ...)                                                                        \
     {                                                                                                         \
-        logger()->Iboflog(spdlog::source_loc{}, spdlog::level::warn, static_cast<int>(eventid), __VA_ARGS__); \
+        logger()->Poslog(spdlog::source_loc{}, spdlog::level::warn, static_cast<int>(eventid), __VA_ARGS__); \
         reporter()                                                                                            \
-            ->Iboflog(spdlog::source_loc{}, spdlog::level::warn, static_cast<int>(eventid), __VA_ARGS__);     \
+            ->Poslog(spdlog::source_loc{}, spdlog::level::warn, static_cast<int>(eventid), __VA_ARGS__);     \
     }
 
-#define IBOF_REPORT_ERROR(eventid, ...)                                                                      \
+#define POS_REPORT_ERROR(eventid, ...)                                                                      \
     {                                                                                                        \
-        logger()->Iboflog(spdlog::source_loc{}, spdlog::level::err, static_cast<int>(eventid), __VA_ARGS__); \
+        logger()->Poslog(spdlog::source_loc{}, spdlog::level::err, static_cast<int>(eventid), __VA_ARGS__); \
         reporter()                                                                                           \
-            ->Iboflog(spdlog::source_loc{}, spdlog::level::err, static_cast<int>(eventid), __VA_ARGS__);     \
+            ->Poslog(spdlog::source_loc{}, spdlog::level::err, static_cast<int>(eventid), __VA_ARGS__);     \
     }
 
-#define IBOF_REPORT_CRITICAL(eventid, ...)                                                                        \
+#define POS_REPORT_CRITICAL(eventid, ...)                                                                        \
     {                                                                                                             \
-        logger()->Iboflog(spdlog::source_loc{}, spdlog::level::critical, static_cast<int>(eventid), __VA_ARGS__); \
+        logger()->Poslog(spdlog::source_loc{}, spdlog::level::critical, static_cast<int>(eventid), __VA_ARGS__); \
         reporter()                                                                                                \
-            ->Iboflog(spdlog::source_loc{}, spdlog::level::critical, static_cast<int>(eventid), __VA_ARGS__);     \
+            ->Poslog(spdlog::source_loc{}, spdlog::level::critical, static_cast<int>(eventid), __VA_ARGS__);     \
     }
 #endif // LOGGER_H_

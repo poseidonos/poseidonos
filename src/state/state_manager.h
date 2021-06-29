@@ -32,64 +32,33 @@
 
 #pragma once
 
-#include <future>
+#include "state_control.h"
+#include "src/lib/singleton.h"
+
 #include <map>
 #include <string>
-
-#include "src/lib/singleton.h"
-#include "state_list.h"
-#include "state_policy.h"
-#include "state_publisher.h"
+#include <mutex>
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
-class StateEvent;
 
 class StateManager
 {
 public:
-    StateManager();
-    ~StateManager();
-    void Subscribe(StateEvent* sub);
-    void Dispose(StateEvent* sub);
-
-    StateContext Invoke(string _sender, Situation s);
-    void Invoke(StateContext ctx);
-    StateContext InvokeAndRemove(StateContext remove, string _sender, Situation s);
-    void Remove(StateContext ctx);
-    bool Exist(StateContext ctx);
-    bool ExistRebuild(void);
-    void ListUpdated(StateContext front);
-    State
-    GetState()
-    {
-        return curr.GetState();
-    }
-    string
-    GetStateStr()
-    {
-        return curr.GetStateStr();
-    }
-    string
-    GetSituationStr()
-    {
-        return curr.GetSituationStr();
-    }
+    StateManager(void);
+    virtual ~StateManager(void);
+    virtual IStateControl* CreateStateControl(string array);
+    virtual IStateControl* GetStateControl(string array);
+    virtual void RemoveStateControl(string array);
 
 private:
-    void _UpdateState();
-    void _ChangeState(StateContext next);
-    void _NotifyState(StateContext& prev, StateContext& next);
-
-    string sender = "StateManager";
-    StateContext curr{sender, Situation::DEFAULT};
-
-    StatePublisher publisher;
-    StateList* stateList;
-    future<void> async_future;
+    StateControl* _Find(string array);
+    map<string, StateControl*> stateMap;
+    mutex stateMapMtx;
 };
 
 using StateManagerSingleton = Singleton<StateManager>;
-} // namespace ibofos
+
+} // namespace pos

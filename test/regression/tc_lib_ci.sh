@@ -7,7 +7,7 @@ exec_mode=
 target_nvme=
 manual_ibofos_run_mode=0
 nvme_cli="nvme"
-nss="nqn.2019-04.ibof:subsystem"
+nss="nqn.2019-04.pos:subsystem"
 trtype=""
 port="1158"
 target_dev_list="unvme-ns-0,unvme-ns-1,unvme-ns-2"
@@ -52,7 +52,7 @@ print_result()
     local result=$1
     local expectedResult=$2
 
-    if [ $expectedResult -eq 0 ];then
+    if [ $expectedResult -eq 0 ]; then
         echo -e "\033[1;34m${date} [result] ${result} \033[0m" 1>&2;
     else
         echo -e "\033[1;41m${date} [TC failed] ${result} \033[0m" 1>&2;
@@ -124,12 +124,6 @@ show_tc_info()
     echo -e "  - Root dir (target): ${rootTarget}"
 }
 
-kill_ibofos()
-{
-    texecc ./test/script/kill_ibofos.sh &>> ${logfile}
-    sleep 2
-}
-
 disconnect_nvmf_contollers()
 {
     local volNum=$1
@@ -140,33 +134,219 @@ disconnect_nvmf_contollers()
     iexecc ${nvme_cli} disconnect -n ${nss}${volNum}
 }
 
+kill_pos()
+{
+    texecc ./test/script/kill_poseidonos.sh &>> ${logfile}
+    sleep 2
+
+    for i in `seq 1 ${support_max_subsystem}`
+    do
+        disconnect_nvmf_contollers ${i}
+    done
+}
+
+create_subsystem()
+{
+    for i in `seq 1 ${support_max_subsystem}`
+    do
+        connect_port=${port}
+        print_info "Creating subsystem ${nss}$i, ip ${target_fabric_ip}, port ${connect_port}"
+        texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss}$i -a -s POS0000000000000$i -d POS_VOL_$i #>> ${logfile}
+
+        print_info "Adding listener ${nss}$i, ip ${target_fabric_ip}, port ${connect_port}"
+        texecc ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss}$i -t TCP -a ${target_fabric_ip} -s ${connect_port} #>> ${logfile}
+
+        connectList+=(0)
+    done
+}
+
+create_array()
+{
+    print_info "create array"
+
+    iexecc rm -rf create_array.txt result.txt
+
+    create_array=0
+    # if [ ! -z $1 ] && [ $1 == "create" ]; then
+    if [ $1 == "create" ]; then
+        create_array=1
+    fi
+
+    texecc ./bin/cli device scan
+
+    if [ $create_array -eq 1 ]; then
+        print_info "Target device list=${target_dev_list}"
+        texecc ./bin/cli array reset
+        texecc ./bin/cli array create -b uram0 -d ${target_dev_list} --name POSArray --json > create_array.txt
+    else
+        texecc echo "{\"Response\":{\"result\":{\"status\":{\"code\":0}}}}" > create_array.txt
+    fi
+
+    iexecc cat create_array.txt | jq ".Response.result.status.code" > result.txt
+    result=$(<result.txt)
+
+    if [ "$result" == "" ]; then
+        print_result "there is a problem" 1
+        iexecc cat create_array.txt
+        iexecc rm -rf create_array.txt result.txt
+        return 1
+    elif [ $result -ne 0 ]; then
+        print_result "failed to create/load array" 1
+        iexecc cat create_array.txt
+        iexecc rm -rf create_array.txt result.txt
+        return 1
+    fi
+
+    iexecc rm -rf create_array.txt result.txt
+
+    return 0
+}
+
+mount_array()
+{
+    print_info "mount array"
+
+    iexecc rm -rf mount_array.txt result.txt
+
+    texecc ./bin/cli array mount --name POSArray --json > mount_array.txt
+
+    iexecc cat mount_array.txt | jq ".Response.result.status.code" > result.txt
+    result=$(<result.txt)
+
+    if [ "$result" == "" ]; then
+        print_result "there is a problem" 1
+        iexecc cat mount_array.txt
+        iexecc rm -rf mount_array.txt result.txt
+        return 1
+    elif [ $result -ne 0 ]; then
+        print_result "failed to mount array" 1
+        iexecc cat mount_array.txt
+        iexecc rm -rf mount_array.txt result.txt
+        return 1
+    fi
+
+    iexecc rm -rf mount_array.txt result.txt
+
+    return 0
+}
+
+unmount_array()
+{
+    print_info "unmount array"
+
+    iexecc rm -rf unmount_array.txt result.txt
+
+    texecc ./bin/cli array unmount --name POSArray --json > unmount_array.txt
+
+    iexecc cat unmount_array.txt | jq ".Response.result.status.code" > result.txt
+    result=$(<result.txt)
+
+    if [ "$result" == "" ]; then
+        print_result "there is a problem" 1
+        iexecc cat unmount_array.txt
+        iexecc rm -rf unmount_array.txt result.txt
+        return 1
+    elif [ $result -ne 0 ]; then
+        print_result "failed to unmount array" 1
+        iexecc cat unmount_array.txt
+        iexecc rm -rf unmount_array.txt result.txt
+        return 1
+    fi
+
+    iexecc rm -rf unmount_array.txt result.txt
+
+    return 0
+}
+
+delete_array()
+{
+    print_info "delete array"
+
+    iexecc rm -rf delete_array.txt result.txt
+
+    texecc ./bin/cli array delete --name POSArray --json > delete_array.txt
+
+    iexecc cat delete_array.txt | jq ".Response.result.status.code" > result.txt
+
+    result=$(<result.txt)
+
+    if [ "$result" == "" ]; then
+        print_result "there is a problem" 1
+        iexecc cat delete_array.txt
+        iexecc rm -rf delete_array.txt result.txt
+        return 1
+    elif [ $result -ne 0 ]; then
+        print_result "failed to delete array" 1
+        iexecc cat delete_array.txt
+        iexecc rm -rf delete_array.txt result.txt
+        return 1
+    fi
+
+    iexecc rm -rf delete_array.txt result.txt
+
+    return 0
+}
+
+create_volume()
+{
+    print_info "create volume [vol name: $1, byte size: $2, max iops: $3, max bw: $4]"
+
+    iexecc rm -rf create_volume.txt result.txt
+
+    #issue
+    texecc ./bin/cli volume create --name $1 --size $2 --maxiops $3 --maxbw $4 --array POSArray --json > create_volume.txt
+
+    # check response
+    iexecc cat create_volume.txt | jq '.Response.result.status.code' > result.txt
+    result=$(<result.txt)
+
+    #check
+    if [ ${result} -ne 0 ]; then
+        print_result "failed to create a volume" 1
+        iexecc cat create_volume.txt
+        iexecc rm -rf create_volume.txt result.txt
+        return 1
+    fi
+
+    iexecc rm -rf create_volume.txt result.txt
+
+    return 0
+}
+
 normal_shutdown()
 {
     print_info "Shutting down normally"
 
-    texecc rm -rf shutdown.txt result.txt
+    iexecc rm -rf shutdown.txt result.txt
 
-    texecc ./bin/cli request unmount_ibofos --json > shutdown.txt
-    texecc ./bin/cli request exit_ibofos --json > shutdown.txt
+    unmount_array;
+    result=$?
+
+    if [ $result != 0 ]; then
+        print_result "failed to unmount array." 1
+        return 1
+    fi
+
+    texecc ./bin/cli system exit --json > shutdown.txt
     
-    ps -C ibofos > /dev/null
+    ps -C poseidonos > /dev/null
     while [[ ${?} == 0 ]]
     do
         sleep 1s
-        ps -C ibofos > /dev/null
+        ps -C poseidonos > /dev/null
     done
 
-    texecc cat shutdown.txt | jq ".Response.result.status.code" > result.txt
+    iexecc cat shutdown.txt | jq ".Response.result.status.code" > result.txt
     result=$(<result.txt)
 
-    if [ "$result" == "" ];then
+    if [ "$result" == "" ]; then
         print_result "there is a problem" 1
         iexecc cat shutdown.txt
         iexecc rm -rf shutdown.txt result.txt
         return 1
-    elif [ ${result} != 0 ];then
+    elif [ ${result} != 0 ]; then
         print_result "Failed to shutdown" 1
-        texecc rm -rf shutdown.txt result.txt
+        iexecc rm -rf shutdown.txt result.txt
         return 1
     fi
 
@@ -177,7 +357,7 @@ normal_shutdown()
 
     print_info "Shutdown has been completed!"
 
-    texecc rm -rf shutdown.txt result.txt
+    iexecc rm -rf shutdown.txt result.txt
 
     return 0
 }
@@ -186,20 +366,33 @@ graceful_shutdown()
 {
     print_info "Shutting down gracefully in few seconds..."
 
+    iexecc rm -rf shutdown.txt
+
     for i in `seq 1 ${support_max_subsystem}`
     do
         disconnect_nvmf_contollers ${i}
     done
-	
-    texecc ./bin/cli request unmount_ibofos --json > shutdown.txt
-    texecc ./bin/cli request exit_ibofos --json > shutdown.txt
 
-    ps -C ibofos > /dev/null
+    if [ -z $1 ]; then
+        unmount_array;
+        result=$?
+
+        if [ $result != 0 ]; then
+            print_result "failed to unmount array." 1
+            return 1
+        fi
+    fi
+
+    texecc ./bin/cli system exit --json > shutdown.txt
+
+    ps -C poseidonos > /dev/null
     while [[ ${?} == 0 ]]
     do
         sleep 1s
-        ps -C ibofos > /dev/null
+        ps -C poseidonos > /dev/null
     done
+
+    iexecc rm -rf shutdown.txt
 
     print_info "Shutdown has been completed!"
 }
@@ -210,7 +403,7 @@ abrupt_shutdown()
 
     print_info "Shutting down suddenly in few seconds..."
 
-    kill_ibofos
+    kill_pos
 
     if [ "${withBackup}" != "" ]; then
         texecc ./script/backup_latest_hugepages_for_uram.sh
@@ -241,7 +434,7 @@ discover_n_connect_nvme_from_initiator()
 
     print_info "Connecting ${nssName}"
 
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
     if [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         connect_port=${port}
         iexecc ${nvme_cli} connect -t ${trtype} -n ${nssName} -a ${target_fabric_ip} -s ${connect_port}
@@ -255,98 +448,69 @@ discover_n_connect_nvme_from_initiator()
     return 0
 }
 
-start_ibofos()
+create_base()
+{
+    print_info "Creating nvmf transport"
+    texecc ${spdk_rpc_script} nvmf_create_transport -t TCP -b 64 -n 4096 #>> ${logfile}
+
+    print_info "Creating bdev for nvram"
+    texecc ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512 #>> ${logfile}
+
+    return 0
+}
+
+start_pos()
 {
     texecc rm -rf /dev/shm/ibof_nvmf_trace.pid*
 
-    print_info "Starting ibofos..."
-    texecc ./test/regression/start_ibofos.sh
+    print_info "Starting pos..."
+    texecc ./test/regression/start_poseidonos.sh
 
-    sleep 5 # takes longer if ibofos accesses actual drives
-    print_info "Now ibofos is running..."
+    sleep 5 # takes longer if pos accesses actual drives
+    print_info "Now pos is running..."
+
+    return 0
 }
 
 update_config()
 {
     # path
     logfile="${rootInit}/script/ft_test.log"
-    spdk_rpc_script="${rootInit}/lib/spdk-19.10/scripts/rpc.py"
+    spdk_rpc_script="${rootInit}/lib/spdk/scripts/rpc.py"
 }
 
 #######################################################################
 # Section B
 #######################################################################
 
-bringup_ibofos()
+bringup_pos()
 {
-    iexecc rm -rf bringup.txt result.txt
+    start_pos;
 
-    create_array=0
-    if [ ! -z $1 ] && [ $1 == "create" ]; then
-        create_array=1
+    create_base;
+
+    create_array $1
+    result=$?
+
+    if [ $result != 0 ]; then
+        print_result "failed to create/load array." 1
+        return 1
     fi
 
-    start_ibofos;
+    mount_array;
+    result=$?
+
+    if [ $result != 0 ]; then
+        print_result "failed to mount array." 1
+        return 1
+    fi
 
     connectList=(0)
+    create_subsystem
 
-    iexecc ${spdk_rpc_script} nvmf_create_transport -t TCP -b 64 -n 4096 #>> ${logfile}
+    print_info "Bring-up PoseidonOS done!"
 
-    print_info "Creating bdev for nvram"
-    iexecc ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512 #>> ${logfile}
-
-    texecc ./bin/cli request scan_dev #>> ${logfile}
-
-    if [ $create_array -eq 1 ]; then
-        print_info "Target device list=${target_dev_list}"
-        texecc ./bin/cli request create_array -b uram0 -d ${target_dev_list} --json > bringup.txt
-    else
-        texecc ./bin/cli request load_array --json > bringup.txt
-    fi
-
-    iexecc cat bringup.txt | jq ".Response.result.status.code" > result.txt
-
-    result=$(<result.txt)
-
-    if [ "$result" == "" ];then
-        print_result "there is a problem" 1
-        iexecc cat bringup.txt
-        iexecc rm -rf bringup.txt result.txt
-
-        return 1
-    elif [ $result -ne 0 ];then
-        print_result "create/load failed" 1
-        iexecc cat bringup.txt
-        iexecc rm -rf bringup.txt result.txt
-
-        return 1
-    fi
-
-    texecc ./bin/cli request mount_ibofos --json > result.txt
-
-    if [ $result -ne 0 ];then
-        print_result "mount pos failed" 1
-        iexecc cat bringup.txt
-        iexecc rm -rf bringup.txt result.txt
-
-        return 1
-    fi
-
-    for i in `seq 1 ${support_max_subsystem}`
-    do
-        connect_port=${port}
-        print_info "Creating subsystem ${nss}$i, ip ${target_fabric_ip}, port ${connect_port}"
-        texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss}$i -a -s IBOF0000000000000$i -d IBOF_VOL_$i #>> ${logfile}
-
-        print_info "Adding listener ${nss}$i, ip ${target_fabric_ip}, port ${connect_port}"
-        texecc ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss}$i -t TCP -a ${target_fabric_ip} -s ${connect_port} #>> ${logfile}
-
-        connectList+=(0)
-    done
-
-    iexecc rm -rf bringup.txt result.txt
-
-    print_info "Bring-up iBoFOS done!"
+    return 0
 }
 
 npor_and_check_volumes()
@@ -356,33 +520,33 @@ npor_and_check_volumes()
     print_info "npor and check volumes"
 
     #get status
-    texecc ./bin/cli request --json list_vol > npor_and_check_volumes0.txt
+    texecc ./bin/cli volume list --array POSArray --json > npor_and_check_volumes0.txt
     iexecc cat npor_and_check_volumes0.txt | jq '.Response.result.data.volumes | length' > result0.txt
     result0=$(<result0.txt)
 
     normal_shutdown;
     result=$?
 
-    if [ $result -ne 0 ];then
+    if [ $result -ne 0 ]; then
         return 1
     fi
 
-    bringup_ibofos 0;
+    bringup_pos 0;
     result=$?
 
-    if [ $result != 0 ];then
+    if [ $result != 0 ]; then
         iexecc cat npor_and_check_volumes0.txt
         iexecc rm -rf npor_and_check_volumes0.txt npor_and_check_volumes1.txt result0.txt result1.txt
         return 1
     fi
 
     #get status
-    texecc ./bin/cli request --json list_vol > npor_and_check_volumes1.txt
+    texecc ./bin/cli volume list --array POSArray --json > npor_and_check_volumes1.txt
     iexecc cat npor_and_check_volumes1.txt | jq '.Response.result.data.volumes | length' > result1.txt
     result1=$(<result1.txt)
 
     #check
-    if [ ${result0} -eq ${result1} ];then
+    if [ ${result0} -eq ${result1} ]; then
         print_result "passed." 0
         iexecc rm -rf npor_and_check_volumes0.txt npor_and_check_volumes1.txt result0.txt result1.txt
         return 0
@@ -400,34 +564,42 @@ npor_and_check_volumes()
 
 spor_and_check_volumes()
 {
-    iexecc rm -rf npor_and_check_volumes0.txt npor_and_check_volumes1.txt result0.txt result1.txt
+    iexecc rm -rf spor_and_check_volumes0.txt spor_and_check_volumes1.txt result0.txt result1.txt
 
     print_info "npor and check volumes"
 
     #get status
-    texecc ./bin/cli request --json list_vol > npor_and_check_volumes0.txt
-    iexecc cat npor_and_check_volumes0.txt | jq '.Response.result.data.volumes | length' > result0.txt
+    texecc ./bin/cli volume list --array POSArray --json > spor_and_check_volumes0.txt
+    iexecc cat spor_and_check_volumes0.txt | jq '.Response.result.data.volumes | length' > result0.txt
     result0=$(<result0.txt)
 
     abrupt_shutdown 1;
-    bringup_ibofos 0;
+    bringup_pos 0;
+    result=$?
+
+    if [ $result != 0 ]; then
+        iexecc cat spor_and_check_volumes0.txt
+        iexecc rm -rf spor_and_check_volumes0.txt spor_and_check_volumes1.txt result0.txt result1.txt
+        return 1
+    fi
 
     #get status
-    texecc ./bin/cli request --json list_vol > npor_and_check_volumes1.txt
-    iexecc cat npor_and_check_volumes1.txt | jq '.Response.result.data.volumes | length' > result1.txt
+    texecc ./bin/cli volume list --array POSArray --json > spor_and_check_volumes1.txt
+    iexecc cat spor_and_check_volumes1.txt | jq '.Response.result.data.volumes | length' > result1.txt
     result1=$(<result1.txt)
 
     #check
-    if [ ${result0} -eq ${result1} ];then
+    if [ ${result0} -eq ${result1} ]; then
         print_result "passed." 0
-        iexecc rm -rf npor_and_check_volumes0.txt npor_and_check_volumes1.txt result0.txt result1.txt
+        iexecc rm -rf npor_and_check_volumes0.txt spor_and_check_volumes1.txt result0.txt result1.txt
         return 0
     else
         print_result "failed - # of volumes" 1
         echo -e "before **"
         iexecc cat npor_and_check_volumes0.txt
         echo -e "after **"
-        iexecc cat npor_and_check_volumes1.txt
+        iexecc cat spor_and_check_volumes1.txt
+        iexecc rm -rf spor_and_check_volumes0.txt spor_and_check_volumes1.txt result0.txt result1.txt
     fi
 
     return 1
@@ -444,35 +616,40 @@ mount_and_check()
     print_info "mount and check [vol name: ${volName}]"
 
     #issue
-    texecc ./bin/cli request mount_vol --name ${volName}
+    texecc ./bin/cli volume mount --array POSArray --name ${volName}
 
     #get status
-    texecc ./bin/cli request --json list_vol > mount_and_check.txt
+    texecc ./bin/cli volume list --array POSArray --json > mount_and_check.txt
     iexecc cat mount_and_check.txt | jq -c --arg vol ${volName} '.Response.result.data.volumes[] | select(.name == $vol) | .status' > result.txt
     result=$(<result.txt)
 
     #check
-    if [ "$result" == "" ];then
+    if [ "$result" == "" ]; then
         print_result "volume is not existed" 1
         echo -e "result **"
         iexecc cat mount_and_check.txt
-        return 1
-    elif [ "$result" == "\"Mounted\"" ];then
         iexecc rm -rf mount_and_check.txt result.txt
+        return 1
+    elif [ "$result" == "\"Mounted\"" ]; then
         print_result "volume mounted" 0
     else
         print_result "failed" 1
         echo -e "result **"
         iexecc cat mount_and_check.txt
+        iexecc rm -rf mount_and_check.txt result.txt
         return 1
     fi
 
-    discover_n_connect_nvme_from_initiator ${volNum}
+    if [ -z $2 ]; then
+        discover_n_connect_nvme_from_initiator ${volNum}
+    fi
 
     res=$?
     if [ ${res} -ne 0 ]; then
         return 1
     fi
+
+    iexecc rm -rf mount_and_check.txt result.txt
 
     return 0
 }
@@ -490,28 +667,32 @@ unmount_and_check()
     disconnect_nvmf_contollers ${volNum}
 
     #issue
-    texecc ./bin/cli request unmount_vol --name ${volName}
+    texecc ./bin/cli volume unmount --name ${volName} --array POSArray
 
     #get status
-    texecc ./bin/cli request --json list_vol > unmount_and_check.txt
+    texecc ./bin/cli volume list --array POSArray --json > unmount_and_check.txt
     iexecc cat unmount_and_check.txt | jq -c --arg vol ${volName} '.Response.result.data.volumes[] | select(.name == $vol) | .status' > result.txt
     result=$(<result.txt)
 
     #check
-    if [ "$result" == "" ];then
+    if [ "$result" == "" ]; then
         print_result "volume is not existed" 1
         echo -e "result **"
         iexecc cat unmount_and_check.txt
+        rm -rf unmount_and_check.txt result.txt
         return 1
-    elif [ "$result" == "\"Unmounted\"" ];then
+    elif [ "$result" == "\"Unmounted\"" ]; then
         rm -rf unmount_and_check.txt result.txt
         print_result "volume unmounted" 0
     else
         print_result "failed" 1
         echo -e "result **"
         iexecc cat unmount_and_check.txt
+        rm -rf unmount_and_check.txt result.txt
         return 1
     fi
+
+    rm -rf unmount_and_check.txt result.txt
 
     return 0
 }
@@ -529,41 +710,38 @@ create_and_check()
     print_info "create and check [vol name: ${volName}, byte size: ${byteSize}, max iops: ${maxIops}, max bw: ${maxBw}]"
 
     # get pre-condition
-    texecc ./bin/cli request --json list_vol > create_and_check0.txt
+    texecc ./bin/cli volume list --array POSArray --json > create_and_check0.txt
     iexecc cat create_and_check0.txt | jq '.Response.result.data.volumes | length' > result0.txt
     result0=$(<result0.txt)
 
     #issue
-    texecc ./bin/cli request create_vol --name ${volName} --size ${byteSize} --maxiops ${maxIops} --maxbw ${maxBw} --json > create_and_check1.txt
+    create_volume $volName $byteSize $maxIops $maxBw
+    result=$?
 
-    # check response
-    iexecc cat create_and_check1.txt | jq '.Response.result.status.code' > result1.txt
-    result1=$(<result1.txt)
-
-    #check
-    if [ ${result1} -ne 0 ];then
-        print_result "failed - creation" 1
-        iexecc cat create_and_check1.txt
+    if [ $result != 0 ]; then
+        iexecc rm -rf create_and_check0.txt create_and_check1.txt result0.txt result1.txt
         return 1
     fi
 
     #get status
-    texecc ./bin/cli request --json list_vol > create_and_check1.txt
+    texecc ./bin/cli volume list --array POSArray --json > create_and_check1.txt
     iexecc cat create_and_check1.txt | jq '.Response.result.data.volumes | length' > result1.txt
     result1=$(<result1.txt)
 
     #check
-    if [ ${result0} -lt ${result1} ];then
+    if [ ${result0} -lt ${result1} ]; then
         print_result "passed." 0
-        iexecc rm -rf create_and_check0.txt create_and_check1.txt result0.txt result1.txt
     else
         print_result "failed - creation" 1
         echo -e "before **"
         iexecc cat create_and_check0.txt
         echo -e "after **"
         iexecc cat create_and_check1.txt
+        iexecc rm -rf create_and_check0.txt create_and_check1.txt result0.txt result1.txt
         return 1
     fi
+
+    iexecc rm -rf create_and_check0.txt create_and_check1.txt result0.txt result1.txt
 
     return 0
 }
@@ -578,41 +756,70 @@ delete_and_check()
     print_info "delete and check [vol name: ${volName}]"
 
     # get pre-condition
-    texecc ./bin/cli request --json list_vol > delete_and_check0.txt
+    texecc ./bin/cli volume list --array POSArray --json > delete_and_check0.txt
     iexecc cat delete_and_check0.txt | jq '.Response.result.data.volumes | length' > result0.txt
     result0=$(<result0.txt)
 
     #issue
-    texecc ./bin/cli request delete_vol --name ${volName} --json > delete_and_check1.txt
+    texecc ./bin/cli volume delete --name ${volName} --array POSArray --json > delete_and_check1.txt
 
     # check response
     iexecc cat delete_and_check1.txt | jq '.Response.result.status.code' > result1.txt
     result1=$(<result1.txt)
 
     #check
-    if [ ${result1} -ne 0 ];then
+    if [ ${result1} -ne 0 ]; then
         print_result "failed - deletion" 1
         iexecc cat delete_and_check1.txt
         return 1
     fi
 
     #get status
-    texecc ./bin/cli request --json list_vol > delete_and_check1.txt
+    texecc ./bin/cli volume list --array POSArray --json > delete_and_check1.txt
     iexecc cat delete_and_check1.txt | jq '.Response.result.data.volumes | length' > result1.txt
     result1=$(<result1.txt)
 
     #check
-    if [ ${result0} -gt ${result1} ];then
+    if [ ${result0} -gt ${result1} ]; then
         print_result "passed." 0
-        iexecc rm -rf delete_and_check0.txt delete_and_check1.txt result0.txt result1.txt
     else
         print_result "failed - deletion" 1
         echo -e "before **"
         iexecc cat delete_and_check0.txt
         echo -e "after **"
         iexecc cat delete_and_check1.txt
+        iexecc rm -rf delete_and_check0.txt delete_and_check1.txt result0.txt result1.txt
         return 1
     fi
+
+    iexecc rm -rf delete_and_check0.txt delete_and_check1.txt result0.txt result1.txt
+
+    return 0
+}
+
+change_volume_name_and_check()
+{
+    local volName=$1
+    local newVolName=$2
+
+    iexecc rm -rf change_volume_name_and_check.txt result.txt
+
+    print_info "change volume name [vol name: ${volName} to ${newVolName}]"
+
+    texecc ./bin/cli volume rename --name ${volName} --newname ${newVolName} --array POSArray --json > change_volume_name_and_check.txt
+    iexecc cat change_volume_name_and_check.txt | jq '.Response.result.status.code' > result.txt
+    result=$(<result.txt)
+
+        #check
+    if [ ${result} != 0 ]; then
+        print_result "failed to change the volume name." 1
+        iexecc cat change_volume_name_and_check.txt
+        iexecc rm -rf change_volume_name_and_check.txt result.txt
+
+        return 1
+    fi
+
+    iexecc rm -rf change_volume_name_and_check.txt result.txt
 
     return 0
 }
@@ -671,7 +878,7 @@ write_data()
     iexecc dd if=/dev/urandom of=${write_file} bs=1024K count=1024 seek=0 skip=0 conv=sparse,notrunc oflag=nocache status=none &
     wait
 
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
     if [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         print_result "NVMe drive is not found..." 1
         return 1
@@ -725,7 +932,7 @@ verify_data()
     iexecc rm -rf ${read_file} ${cmp_file}
     sleep 1
 
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -16 | sed -n ''${volNum}',1p'`
     if [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         print_result "NVMe drive is not found..." 1
         return 1
@@ -790,11 +997,12 @@ EXPECT_PASS()
     local name=$1
     local result=$2
 
-    if [ $result -eq 0 ];then
+    if [ $result -eq 0 ]; then
         print_result "\"${name}\" passed as expected" 0
     else
         print_result "\"${name}\" failed as unexpected" 1
-        kill_ibofos
+        pause
+        kill_pos
         exit 1
     fi
 }
@@ -804,11 +1012,11 @@ EXPECT_FAIL()
     local name=$1
     local result=$2
 
-    if [ $result -ne 0 ];then
+    if [ $result -ne 0 ]; then
         print_result "\"${name}\" failed as expected" 0
     else
         print_result "\"${name}\" passed as unexpected" 1
-        kill_ibofos
+        kill_pos
         exit 1
     fi
 }

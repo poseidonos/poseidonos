@@ -31,9 +31,10 @@
  */
 
 #include "msc_req.h"
+#include "metafs_common.h"
 
-#include "mfs_common.h"
-
+namespace pos
+{
 MetaFsControlReqMsg::MetaFsControlReqMsg(void)
 : reqType(MetaFsControlReqType::Max)
 {
@@ -44,3 +45,4 @@ MetaFsControlReqMsg::IsValid(void)
 {
     return true;
 }
+} // namespace pos

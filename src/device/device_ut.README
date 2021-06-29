@@ -29,14 +29,14 @@
   - Tests UnvmeDrv and UnvmeSsd using nvme driver library supported by
     intel spdk library.
 
- d. unvram_test, unvram_block_device_test
-  - Tests UnvramDrv and Unvram using userspace ramdisk(malloc bdev) supported by
+ d. uram_test, uram_block_device_test
+  - Tests UramDrv and Uram using userspace ramdisk(malloc bdev) supported by
     intel spdk library.
 
 3. Build
   - $ make
-  - six executables(nvme_test, unvme_test, unvram_test, nvme_block_device_test, 
-    unvme_block_device_test, unvram_block_device_test) will be generated if
+  - six executables(nvme_test, unvme_test, uram_test, nvme_block_device_test, 
+    unvme_block_device_test, uram_block_device_test) will be generated if
     the build process has been successfully done.
 
 4. Usage
@@ -53,8 +53,8 @@
   - No parameters are needed since there is no case that we could select
     the main OS drive if the PCI_WHITELIST is securely defined.
 
- c. unvram_test
-  - # unvram_test
+ c. uram_test
+  - # uram_test
   - A test target is selected as malloc bdev(userspace ramdisk) inside the test
     made by spdk API.
   - No parameters are needed since there is no case that we could select
@@ -76,5 +76,5 @@
   - No parameters are needed since there is no case that we could select
     the main OS drive if the PCI_WHITELIST is securely defined.
 
- f. unvram_block_device_test
-  - # unvram_block_device_test [IO_CONTEXT_COUNT]
+ f. uram_block_device_test
+  - # uram_block_device_test [IO_CONTEXT_COUNT]

@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(rebuild_read_ut rebuild_read_test.cpp)
+POS_ADD_UNIT_TEST(rebuild_read_complete_handler_ut rebuild_read_complete_handler_test.cpp)
+POS_ADD_UNIT_TEST(rebuild_read_intermediate_complete_handler_ut rebuild_read_intermediate_complete_handler_test.cpp)

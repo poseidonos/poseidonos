@@ -32,10 +32,14 @@
 
 #include "src/array/device/array_device_manager.h"
 
-namespace ibofos
+namespace pos
 {
 ArrayDeviceManager::ArrayDeviceManager(DeviceManager* sysDevMgr)
-: sysDevMgr_(sysDevMgr)
+:
+#if defined _ADMIN_ENABLED
+  IArrayDevMgr(sysDevMgr),
+#endif
+  sysDevMgr_(sysDevMgr)
 {
 }
-} // namespace ibofos
+} // namespace pos

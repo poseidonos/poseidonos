@@ -43,33 +43,36 @@
 #include "src/lib/singleton.h"
 #include "src/sys_event/volume_event.h"
 #include "src/volume/volume_list.h"
+#include "src/bio/volume_io.h"
 
-namespace ibofos
+namespace pos
 {
 class RBAStateManager : public VolumeEvent
 {
 public:
-    RBAStateManager();
+    explicit RBAStateManager(std::string arrayName);
     virtual ~RBAStateManager();
 
     void CreateRBAState(uint32_t volumeID, uint64_t totalRBACount);
     void DeleteRBAState(uint32_t volumeID);
-    bool AcquireOwnership(uint32_t volumeID, BlkAddr rba);
-    void ReleaseOwnership(uint32_t volumeID, BlkAddr rba);
-    bool BulkAcquireOwnership(uint32_t volumeID,
+    bool AcquireOwnershipRbaList(uint32_t volumeId,
+        const VolumeIo::RbaList& sectorRbaList);
+    void ReleaseOwnershipRbaList(uint32_t volumeId,
+        const VolumeIo::RbaList& sectorRbaList);
+    virtual bool BulkAcquireOwnership(uint32_t volumeID,
         BlkAddr startRba,
         uint32_t count);
-    void BulkReleaseOwnership(uint32_t volumeID,
+    virtual void BulkReleaseOwnership(uint32_t volumeID,
         BlkAddr startRba,
         uint32_t count);
 
-    bool VolumeCreated(std::string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw) override;
-    bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte) override;
-    bool VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw) override;
-    bool VolumeUnmounted(std::string volName, int volID) override;
-    bool VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw) override;
-    bool VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw) override;
-    void VolumeDetached(vector<int> volList) override;
+    bool VolumeCreated(std::string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
+    bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName) override;
+    bool VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
+    bool VolumeUnmounted(std::string volName, int volID, std::string arrayName) override;
+    bool VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
+    bool VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName) override;
+    void VolumeDetached(vector<int> volList, std::string arrayName) override;
 
 private:
     class RBAState
@@ -99,7 +102,10 @@ private:
     using RBAStatesInArray = std::array<RBAStatesInVolume, MAX_VOLUME_COUNT>;
 
     RBAStatesInArray rbaStatesInArray;
+
+    bool _AcquireOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count);
+    void _ReleaseOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count);
+    std::string arrayName;
 };
 
-using RbaStateManagerSingleton = Singleton<RBAStateManager>;
-} // namespace ibofos
+} // namespace pos

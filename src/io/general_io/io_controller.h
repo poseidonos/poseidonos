@@ -32,21 +32,21 @@
 
 #pragma once
 
-#include "src/io/general_io/volume_io.h"
+#include "src/bio/volume_io.h"
+#include "src/io_scheduler/io_dispatcher.h"
 
-namespace ibofos
+namespace pos
 {
 class IOController
 {
-public:
-
 protected:
     IOController(void);
+    explicit IOController(IODispatcher* ioDispatcher);
     ~IOController(void);
 
     static void _SendVolumeIo(VolumeIoSmartPtr volumeIo);
+    static IODispatcher* ioDispatcher;
 
 private:
 };
-
-} // namespace ibofos
+} // namespace pos

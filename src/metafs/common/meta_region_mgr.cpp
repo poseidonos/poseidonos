@@ -30,25 +30,29 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "meta_region_mgr.h"
-
 #include "meta_storage_specific.h"
 
-MetaRegionMgr::MetaRegionMgr(void)
+namespace pos
+{
+MetaRegionManager::MetaRegionManager(std::string arrayName)
 : mediaType(MetaStorageType::Default),
   baseLpn(MetaFsCommonConst::INVALID_META_LPN),
-  maxLpn(MetaFsCommonConst::INVALID_META_LPN)
+  maxLpn(MetaFsCommonConst::INVALID_META_LPN),
+  arrayName(arrayName)
 {
 }
 
-MetaRegionMgr::~MetaRegionMgr(void)
+MetaRegionManager::~MetaRegionManager(void)
 {
 }
 
 void
-MetaRegionMgr::SetRegionInfo(MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn)
+MetaRegionManager::SetRegionInfo(MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn)
 {
     this->mediaType = mediaType;
     this->baseLpn = baseLpn;
     this->maxLpn = maxLpn;
 }
+} // namespace pos

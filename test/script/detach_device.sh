@@ -6,7 +6,7 @@ ROOTDIR=../../
 DEVBDF=0
 
 get_bdf(){
-    ${ROOTDIR}/bin/cli request list_dev | grep $1  -B 3 | grep addr | awk -F'"' '{print $4}'
+    ${ROOTDIR}/bin/cli device list | grep $1  -B 3 | grep addr | awk -F'"' '{print $4}'
     echo $?
 }
 
@@ -39,6 +39,7 @@ else
     if [ $2 -eq 1 ]; then
         pci_rescan
     fi
+    sleep 3
 fi
 
 exit 0

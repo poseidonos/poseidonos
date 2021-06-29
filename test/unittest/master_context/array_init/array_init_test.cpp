@@ -5,7 +5,7 @@
 #include "src/array/array.h"
 #include <gtest/gtest.h>
 
-using namespace ibofos;
+using namespace pos;
 using namespace std;
 
 namespace

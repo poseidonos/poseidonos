@@ -40,15 +40,16 @@
 #include "src/meta_file_intf/mock_file_intf.h"
 
 #ifdef MFS_TEST
-#include "mfs.h"
+#include "metafs.h"
 #include "src/array/partition/partition.h"
-#include "src/metafs/mfs_file_intf.h"
+#include "src/metafs/metafs_file_intf.h"
 #endif
 
 using namespace std;
-using namespace ibofos;
+using namespace pos;
 
 const char* filename = "TestData";
+const char* arrayname = "POSArray";
 
 class MetaFileTest : public ::testing::Test
 {
@@ -66,8 +67,8 @@ protected:
     void _AsyncIoCallback(AsyncMetaFileIoCtx* data);
 
     MetaFileIntf* metaFileStore;
-    const uint32_t TEST_SIZE = 1024;
-    const uint32_t TEST_FILE_SIZE = 65 * 1024;
+    const uint64_t TEST_SIZE = 1024;
+    const uint64_t TEST_FILE_SIZE = 65 * 1024;
 
     char* data;
     char* data2;

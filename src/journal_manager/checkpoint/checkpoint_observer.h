@@ -32,7 +32,7 @@
 
 #pragma once
 
-namespace ibofos
+namespace pos
 {
 class CheckpointObserver
 {
@@ -43,4 +43,4 @@ public:
     virtual void CheckpointCompleted(void) = 0;
 };
 
-} // namespace ibofos
+} // namespace pos

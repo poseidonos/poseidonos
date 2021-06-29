@@ -32,19 +32,20 @@
 
 #include "partition.h"
 
-#include "../config/array_config.h"
+#include "src/include/array_config.h"
 #include "../device/array_device.h"
 #include "src/array/ft/method.h"
-#include "src/array/ft/stripe_locker.h"
-#include "src/device/ublock_device.h"
 
-namespace ibofos
+namespace pos
 {
-Partition::Partition(PartitionType type,
+Partition::Partition(
+    string array,
+    PartitionType type,
     PartitionPhysicalSize physicalSize,
     vector<ArrayDevice*> devs,
     Method* method)
-: type_(type),
+: arrayName_(array),
+  type_(type),
   physicalSize_(physicalSize),
   devs_(devs),
   method_(method)
@@ -59,9 +60,14 @@ Partition::Partition(PartitionType type,
         .totalStripes =
             physicalSize_.stripesPerSegment * physicalSize_.totalSegments,
         .totalSegments = physicalSize_.totalSegments};
+
+    lastLba_ = physicalSize_.startLba +
+        static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
+        physicalSize_.blksPerChunk * physicalSize_.stripesPerSegment *
+        physicalSize_.totalSegments;
 }
 
-Partition::~Partition()
+Partition::~Partition(void)
 {
     delete method_;
     method_ = nullptr;
@@ -83,14 +89,20 @@ Partition::FindDevice(ArrayDevice* target)
     return -1;
 }
 
+Method*
+Partition::GetMethod(void)
+{
+    return method_;
+}
+
 const PartitionLogicalSize*
-Partition::GetLogicalSize()
+Partition::GetLogicalSize(void)
 {
     return &logicalSize_;
 }
 
 const PartitionPhysicalSize*
-Partition::GetPhysicalSize()
+Partition::GetPhysicalSize(void)
 {
     return &physicalSize_;
 }
@@ -98,10 +110,7 @@ Partition::GetPhysicalSize()
 bool
 Partition::IsValidLba(uint64_t lba)
 {
-    uint64_t endLba = 0;
-    endLba = physicalSize_.startLba + static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) * physicalSize_.blksPerChunk * physicalSize_.stripesPerSegment * physicalSize_.totalSegments;
-
-    if (physicalSize_.startLba > lba || endLba <= lba)
+    if (physicalSize_.startLba > lba || lastLba_ <= lba)
     {
         return false;
     }
@@ -137,34 +146,4 @@ Partition::_IsValidEntry(const LogicalWriteEntry& entry)
     }
 }
 
-bool
-Partition::TryLock(StripeId stripeId)
-{
-    if (method_ != nullptr)
-    {
-        StripeLocker* locker = method_->GetStripeLocker();
-
-        if (locker != nullptr)
-        {
-            return locker->TryLock(stripeId);
-        }
-    }
-
-    return true;
-}
-
-void
-Partition::Unlock(StripeId stripeId)
-{
-    if (method_ != nullptr)
-    {
-        StripeLocker* locker = method_->GetStripeLocker();
-
-        if (locker != nullptr)
-        {
-            locker->Unlock(stripeId);
-        }
-    }
-}
-
-} // namespace ibofos
+} // namespace pos

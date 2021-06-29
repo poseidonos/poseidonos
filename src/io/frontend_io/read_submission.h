@@ -32,15 +32,15 @@
 
 #pragma once
 
+#include "src/event_scheduler/event.h"
 #include "src/include/address_type.h"
-#include "src/io/frontend_io/read_completion.h"
-#include "src/io/general_io/block_alignment.h"
+#include "src/io/frontend_io/read_completion_factory.h"
 #include "src/io/general_io/io_controller.h"
-#include "src/io/general_io/merger.hpp"
+#include "src/io/general_io/merger.h"
 #include "src/io/general_io/translator.h"
-#include "src/scheduler/event.h"
+#include "src/lib/block_alignment.h"
 
-namespace ibofos
+namespace pos
 {
 class EventArgument;
 class VolumeIo;
@@ -48,7 +48,8 @@ class VolumeIo;
 class ReadSubmission : public IOController, public Event
 {
 public:
-    ReadSubmission(VolumeIoSmartPtr volumeIo);
+    ReadSubmission(VolumeIoSmartPtr volumeIo, BlockAlignment* blockAlignment = nullptr,
+        Merger* merger = nullptr, Translator* translator = nullptr);
     ~ReadSubmission(void) override;
     bool Execute(void) override;
 
@@ -59,10 +60,11 @@ private:
     void _ProcessMergedIo(void);
     void _ProcessVolumeIo(uint32_t volumeIoIndex);
 
-    BlockAlignment blockAlignment;
-    Merger<ReadCompletion> merger;
-    Translator translator;
+    ReadCompletionFactory readCompletionFactory;
+    BlockAlignment* blockAlignment{nullptr};
+    Merger* merger{nullptr};
+    Translator* translator{nullptr};
     VolumeIoSmartPtr volumeIo;
 };
 
-} // namespace ibofos
+} // namespace pos

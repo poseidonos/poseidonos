@@ -2,7 +2,7 @@
 #ifndef AIR_COLLECTOR_H
 #define AIR_COLLECTOR_H
 
-#include "src/collection/Writer.h"
+#include "src/collection/writer/Writer.h"
 
 namespace collection
 {
@@ -20,12 +20,9 @@ public:
         return writer->SetSamplingRate(rate);
     }
     inline void
-    LogData(lib::Data* data, uint32_t value1, uint64_t value2)
+    LogData(lib::Data* data, uint64_t value)
     {
-        if (nullptr != data)
-        {
-            writer->LogData(data, value1, value2);
-        }
+        writer->LogData(data, value);
     }
     void
     InformInit(lib::AccData* data)
@@ -72,6 +69,30 @@ public:
     {
     }
     virtual ~QueueCollector(void)
+    {
+    }
+};
+
+class UtilizationCollector : public Collector
+{
+public:
+    explicit UtilizationCollector(Writer* new_writer)
+    : Collector(new_writer)
+    {
+    }
+    virtual ~UtilizationCollector(void)
+    {
+    }
+};
+
+class CountCollector : public Collector
+{
+public:
+    explicit CountCollector(Writer* new_writer)
+    : Collector(new_writer)
+    {
+    }
+    virtual ~CountCollector(void)
     {
     }
 };

@@ -35,35 +35,35 @@
 #include <map>
 #include <string>
 
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 
-namespace ibofos_cli
+namespace pos_cli
 {
 static const int FAIL = -1;
-static const int SUCCESS = (int)IBOF_EVENT_ID::SUCCESS;
+static const int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
 static const int BADREQUEST = 400000;
 static const int INTERNAL_ERROR = 500000;
 
 static const std::map<int, std::string> cliEventDic =
     {
-        {(int)IBOF_EVENT_ID::SERVER_READY, "CLI server initialized successfully."},
-        {(int)IBOF_EVENT_ID::CLIENT_CONNECTED, "new client {} is connected"},
-        {(int)IBOF_EVENT_ID::CLIENT_DISCONNECTED, "client {} is disconnected"},
-        {(int)IBOF_EVENT_ID::MSG_RECEIVED, "msg received:{}"},
-        {(int)IBOF_EVENT_ID::MSG_SENT, "msg sent:{}"},
-        {(int)IBOF_EVENT_ID::SERVER_TRY_EXIT, "server try to exit"},
-        {(int)IBOF_EVENT_ID::SERVER_THREAD_JOINED, "server thread joined"},
-        {(int)IBOF_EVENT_ID::REUSE_ADDR_ENABLED, "socket opt - reuseaddr enabled"},
-        {(int)IBOF_EVENT_ID::SOCK_CREATE_FAILED, "socket creation failed"},
-        {(int)IBOF_EVENT_ID::SOCK_BIND_FAILED, "socket biding failed"},
-        {(int)IBOF_EVENT_ID::SOCK_LISTEN_FAILED, "socket listen failed"},
-        {(int)IBOF_EVENT_ID::REUSE_ADDR_FAILED, "failed to enable reuse addr"},
-        {(int)IBOF_EVENT_ID::EPOLL_CREATE_FAILED, "failed to create epoll"},
-        {(int)IBOF_EVENT_ID::SOCK_ACCEPT_FAILED, "failed to accept socket"},
-        {(int)IBOF_EVENT_ID::MAX_CLIENT_ERROR, "max client exceed"},
-        {(int)IBOF_EVENT_ID::MSG_SEND_FAILED, "failed to send msg:{}"},
-        {(int)IBOF_EVENT_ID::MSG_RECEIVE_EXCEPTION, "exception on msg receiving:{}"},
-        {(int)IBOF_EVENT_ID::TIMED_OUT, "take too much time to do a job so send a timed out msg"},
-        {(int)IBOF_EVENT_ID::POS_BUSY, "pos is doing other job"},
+        {(int)POS_EVENT_ID::SERVER_READY, "CLI server initialized successfully."},
+        {(int)POS_EVENT_ID::CLIENT_CONNECTED, "new client {} is connected"},
+        {(int)POS_EVENT_ID::CLIENT_DISCONNECTED, "client {} is disconnected"},
+        {(int)POS_EVENT_ID::MSG_RECEIVED, "msg received:{}"},
+        {(int)POS_EVENT_ID::MSG_SENT, "msg sent:{}"},
+        {(int)POS_EVENT_ID::SERVER_TRY_EXIT, "server try to exit"},
+        {(int)POS_EVENT_ID::SERVER_THREAD_JOINED, "server thread joined"},
+        {(int)POS_EVENT_ID::REUSE_ADDR_ENABLED, "socket opt - reuseaddr enabled"},
+        {(int)POS_EVENT_ID::SOCK_CREATE_FAILED, "socket creation failed"},
+        {(int)POS_EVENT_ID::SOCK_BIND_FAILED, "socket biding failed"},
+        {(int)POS_EVENT_ID::SOCK_LISTEN_FAILED, "socket listen failed"},
+        {(int)POS_EVENT_ID::REUSE_ADDR_FAILED, "failed to enable reuse addr"},
+        {(int)POS_EVENT_ID::EPOLL_CREATE_FAILED, "failed to create epoll"},
+        {(int)POS_EVENT_ID::SOCK_ACCEPT_FAILED, "failed to accept socket"},
+        {(int)POS_EVENT_ID::MAX_CLIENT_ERROR, "max client exceed"},
+        {(int)POS_EVENT_ID::MSG_SEND_FAILED, "failed to send msg:{}"},
+        {(int)POS_EVENT_ID::MSG_RECEIVE_EXCEPTION, "exception on msg receiving:{}"},
+        {(int)POS_EVENT_ID::TIMED_OUT, "take too much time to do a job so send a timed out msg"},
+        {(int)POS_EVENT_ID::POS_BUSY, "pos is doing other job"},
 };
-}; // namespace ibofos_cli
+}; // namespace pos_cli

@@ -33,24 +33,26 @@
 #include "src/gc/stripe_copier.h"
 
 #include "Air.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/gc/copier_read_completion.h"
-#include "src/io/general_io/io_submit_handler.h"
+#include "src/io_submit_interface/i_io_submit_handler.h"
 #include "src/logger/logger.h"
+#include "src/include/backend_event.h"
 
-namespace ibofos
+#include <string>
+
+namespace pos
 {
 StripeCopier::StripeCopier(StripeId victimStripeId,
-    VictimStripe* victimStripe,
-    CopierMeta* meta)
+    CopierMeta* meta, uint32_t copyIndex)
 : victimStripeId(victimStripeId),
   meta(meta),
-  victimStripe(victimStripe),
   loadedValidBlock(false),
-  listIndex(0)
+  listIndex(0),
+  stripeOffset(victimStripeId % STRIPES_PER_SEGMENT),
+  copyIndex(copyIndex)
 {
-#if defined QOS_ENABLED_BE
     SetEventType(BackendEvent_GC);
-#endif
 }
 
 StripeCopier::~StripeCopier(void)
@@ -62,7 +64,7 @@ StripeCopier::Execute(void)
 {
     if (false == loadedValidBlock)
     {
-        bool isLoaded = victimStripe->LoadValidBlock();
+        bool isLoaded = meta->GetVictimStripe(copyIndex, stripeOffset)->LoadValidBlock();
 
         if (false == isLoaded)
         {
@@ -70,12 +72,12 @@ StripeCopier::Execute(void)
         }
 
         loadedValidBlock = true;
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::GC_GET_VALID_BLOCKS,
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_GET_VALID_BLOCKS,
             "Get valid blocks, (victimStripeId:{})",
             victimStripeId);
     }
 
-    uint32_t listSize = victimStripe->GetBlkInfoListSize();
+    uint32_t listSize = meta->GetVictimStripe(copyIndex, stripeOffset)->GetBlkInfoListSize();
     if (0 != listSize)
     {
         uint32_t requestCount = 0;
@@ -88,13 +90,13 @@ StripeCopier::Execute(void)
             if (nullptr == buffer)
             {
                 meta->SetStartCopyBlks(requestCount);
-                IBOF_TRACE_INFO((int)IBOF_EVENT_ID::GC_GET_BUFFER_FAILED,
+                POS_TRACE_INFO((int)POS_EVENT_ID::GC_GET_BUFFER_FAILED,
                     "Get gc buffer failed and retry, victimStripeId:{}",
                     victimStripeId);
                 return false;
             }
 
-            std::list<BlkInfo> blkInfoList = victimStripe->GetBlkInfoList(listIndex);
+            std::list<BlkInfo> blkInfoList = meta->GetVictimStripe(copyIndex, stripeOffset)->GetBlkInfoList(listIndex);
             LogicalBlkAddr lsa;
             auto startBlkInfo = blkInfoList.begin();
 
@@ -103,7 +105,8 @@ StripeCopier::Execute(void)
             uint32_t offset = (startOffset / BLOCKS_IN_CHUNK) * BLOCKS_IN_CHUNK;
             lsa = {victimStripeId, offset};
 
-            _Copy(buffer, lsa, listIndex);
+            EventSmartPtr copyEvent(new CopyEvent(buffer, lsa, listIndex, meta, victimStripeId, copyIndex));
+            EventSchedulerSingleton::Instance()->EnqueueEvent(copyEvent);
             requestCount += blkInfoList.size();
             listIndex++;
         }
@@ -111,15 +114,38 @@ StripeCopier::Execute(void)
     }
     meta->SetStartCopyStripes();
 
+    victimStripeId += CopierMeta::GC_CONCURRENT_COUNT;
+    if ((victimStripeId % meta->GetStripePerSegment() /*STRIPES_PER_SEGMENT*/) >= CopierMeta::GC_CONCURRENT_COUNT)
+    {
+        EventSmartPtr stripeCopier(new StripeCopier(victimStripeId, meta, copyIndex));
+        EventSchedulerSingleton::Instance()->EnqueueEvent(stripeCopier);
+    }
+
     return true;
 }
 
-int
-StripeCopier::_Copy(void* buffer,
+StripeCopier::CopyEvent::CopyEvent(void* buffer,
     LogicalBlkAddr lsa,
-    uint32_t listIndex)
+    uint32_t listIndex,
+    CopierMeta* meta,
+    uint32_t stripeId,
+    uint32_t copyIndex)
+: buffer(buffer),
+  lsa(lsa),
+  listIndex(listIndex),
+  meta(meta),
+  stripeId(stripeId),
+  copyIndex(copyIndex)
+{
+}
+StripeCopier::CopyEvent::~CopyEvent(void)
+{
+}
+bool
+StripeCopier::CopyEvent::Execute(void)
 {
     uint64_t numPage;
+    const string& arrayName = meta->GetArrayName();
 
     numPage = BLOCKS_IN_CHUNK;
 
@@ -130,19 +156,15 @@ StripeCopier::_Copy(void* buffer,
     PartitionType partitionType = PartitionType::USER_DATA;
 
     CallbackSmartPtr callback(
-        new CopierReadCompletion(victimStripe,
+        new CopierReadCompletion(meta->GetVictimStripe(copyIndex, stripeId % meta->GetStripePerSegment()),
             listIndex,
             buffer, meta,
-            victimStripeId));
-#if defined QOS_ENABLED_BE
+            stripeId));
     callback->SetEventType(BackendEvent_GC);
-#endif
-    AIRLOG(PERF_COPY, 0, AIR_READ, BLOCK_SIZE * numPage);
-    IOSubmitHandler::SubmitAsyncIO(IODirection::READ,
+    IIOSubmitHandler::GetInstance()->SubmitAsyncIO(IODirection::READ,
         bufferList, lsa, numPage,
-        partitionType, callback);
-
-    return 0;
+        partitionType, callback, arrayName);
+    return true;
 }
 
-} // namespace ibofos
+} // namespace pos

@@ -35,30 +35,35 @@
 #include <algorithm>
 #include <deque>
 #include <utility>
+#include <string>
 
 #include "mdpage.h"
-#include "mf_inode_table.h"
+#include "inode_table.h"
 #include "region.h"
 #include "mf_extent.h"
 
+namespace pos
+{
 class RegionDeque
 {
 public:
-    RegionDeque(MetaStorageType type, MetaFileInodeTableContent* content, uint64_t maxLpnCount)
+    RegionDeque(std::string arrayName, MetaStorageType type, InodeTableContent* content, uint64_t maxLpnCount, MetaStorageSubsystem* metaStorage)
     {
+        this->arrayName = arrayName;
         regionType = type;
         maxMetaLpn = maxLpnCount - 1;
         remainedMetaLpnCount = maxMetaLpn + 1;
         tableContent = content;
         needCompaction = false;
         reducedLpnCount = 0;
+        this->metaStorage = metaStorage;
     }
 
     bool InsertUsedRange(MetaFileInode* inode, uint64_t baseLpn, uint64_t count, bool inUse = true);
     bool InsertDone(void);
     pair<bool, uint64_t> GetTargetRegion(uint64_t baseLpn, uint64_t count);
     bool Compaction(void);
-    void UpdateExtentsList(MetaFileExtentContent* allocExtentsList);
+    void UpdateExtentsList(MetaFileExtent* allocExtentsList);
     void
     SetCompactionRequired(bool flag)
     {
@@ -92,6 +97,9 @@ private:
     uint64_t maxMetaLpn;
     uint64_t remainedMetaLpnCount;
     bool needCompaction;
-    MetaFileInodeTableContent* tableContent;
+    InodeTableContent* tableContent;
     uint64_t reducedLpnCount;
+    std::string arrayName;
+    MetaStorageSubsystem* metaStorage;
 };
+} // namespace pos

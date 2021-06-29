@@ -36,10 +36,10 @@
 #include <cstring>
 
 #include "src/include/branch_prediction.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
 std::atomic<bool> MemoryChecker::enable;
 thread_local bool inMemoryCheckerContext = false;
@@ -127,7 +127,7 @@ MemoryChecker::_CheckDoubleFree(uint64_t baseAddress)
     // We first check base address is completely equal to base addresses in free list.
     if (freeListMap.find(baseAddress) != freeListMap.end())
     {
-        IBOF_TRACE_ERROR(IBOF_EVENT_ID::DEBUG_MEMORY_CHECK_DOUBLE_FREE,
+        POS_TRACE_ERROR(POS_EVENT_ID::DEBUG_MEMORY_CHECK_DOUBLE_FREE,
             "double free {}", baseAddress);
         assert(0);
     }
@@ -143,7 +143,7 @@ MemoryChecker::_CheckDoubleFree(uint64_t baseAddress)
 
     if (iterator->first + iterator->second > baseAddress)
     {
-        IBOF_TRACE_ERROR(IBOF_EVENT_ID::DEBUG_MEMORY_CHECK_DOUBLE_FREE,
+        POS_TRACE_ERROR(POS_EVENT_ID::DEBUG_MEMORY_CHECK_DOUBLE_FREE,
             "double free {} {} {}", iterator->first, iterator->second, baseAddress);
         assert(0);
     }
@@ -192,7 +192,7 @@ MemoryChecker::_TrackDelete(void* ptr)
             uint64_t patternSuffix = *reinterpret_cast<uint64_t*>(static_cast<uint8_t*>(ptr) + size - PADDING_BYTE);
             if (patternSuffix != key)
             {
-                IBOF_TRACE_ERROR(IBOF_EVENT_ID::DEBUG_MEMORY_CHECK_INVALID_ACCESS,
+                POS_TRACE_ERROR(POS_EVENT_ID::DEBUG_MEMORY_CHECK_INVALID_ACCESS,
                     "invalid access base : {} size : {}", key, (size - PADDING_BYTE));
                 assert(0);
             }
@@ -227,14 +227,14 @@ MemoryChecker::Delete(void* ptr)
 }
 
 void
-ibofos::MemoryChecker::Enable(bool flag)
+pos::MemoryChecker::Enable(bool flag)
 {
     enable = flag;
 }
 
-}; // namespace ibofos
+}; // namespace pos
 
-using namespace ibofos;
+using namespace pos;
 void*
 operator new(std::size_t size)
 {

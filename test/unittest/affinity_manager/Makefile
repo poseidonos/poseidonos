@@ -1,7 +1,7 @@
 
 ROOT = ../../../
 INCLUDE = -I$(ROOT) -I$(ROOT)/lib/
-DPDK_ROOT_DIR := $(abspath $(ROOT)/lib/dpdk-stable-19.08.2)
+DPDK_ROOT_DIR := $(abspath $(ROOT)/lib/dpdk)
 INCLUDE += -I$(DPDK_ROOT_DIR)/include/dpdk
 TARGET_FILE = $(ROOT)/src/io/general_io/affinity_manager.cpp\
 			  $(ROOT)/src/logger/logger.cpp\

@@ -31,13 +31,15 @@
  */
 
 #include "mfs_io_range_overlap_chker.h"
-
 #include "src/include/branch_prediction.h"
 
+namespace pos
+{
 MetaFsIoRangeOverlapChker::MetaFsIoRangeOverlapChker(void)
 {
     outstandingIoMap = nullptr;
 }
+
 MetaFsIoRangeOverlapChker::~MetaFsIoRangeOverlapChker(void)
 {
     if (nullptr != outstandingIoMap)
@@ -53,15 +55,8 @@ MetaFsIoRangeOverlapChker::Init(MetaLpnType maxLpn)
     outstandingIoMap->ResetBitmap();
 }
 
-void
-MetaFsIoRangeOverlapChker::Reset(void)
-{
-    delete outstandingIoMap;
-    outstandingIoMap = nullptr;
-}
-
 bool
-MetaFsIoRangeOverlapChker::IsRangeOverlapConflicted(MetaFsIoReqMsg* newReq)
+MetaFsIoRangeOverlapChker::IsRangeOverlapConflicted(MetaFsIoRequest* newReq)
 {
     if (unlikely(outstandingIoMap == nullptr))
         return false;
@@ -82,11 +77,11 @@ MetaFsIoRangeOverlapChker::FreeLockContext(uint64_t startLpn, bool isRead)
 }
 
 void
-MetaFsIoRangeOverlapChker::PushReqToRangeLockMap(MetaFsIoReqMsg* newReq)
+MetaFsIoRangeOverlapChker::PushReqToRangeLockMap(MetaFsIoRequest* newReq)
 {
     if (likely(outstandingIoMap != nullptr))
     {
-        if (newReq->reqType == MetaIoReqTypeEnum::Write)
+        if (newReq->reqType == MetaIoRequestType::Write)
         {
             outstandingIoMap->SetBit(newReq->baseMetaLpn);
         }
@@ -104,3 +99,4 @@ MetaFsIoRangeOverlapChker::GetOutstandingMioCount(void)
 {
     return outstandingIoMap->GetNumBitsSet();
 }
+} // namespace pos

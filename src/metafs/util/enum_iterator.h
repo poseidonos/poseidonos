@@ -33,6 +33,9 @@
 #pragma once
 
 // https://stackoverflow.com/questions/8498300/allow-for-range-based-for-with-enum-classes
+
+namespace pos
+{
 template<typename T>
 class Enum
 {
@@ -58,7 +61,7 @@ Enum<T>::Iterator::Iterator(int _value)
 
 template<typename T>
 T
-    Enum<T>::Iterator::operator*(void)const
+Enum<T>::Iterator::operator*(void)const
 {
     return (T)value;
 }
@@ -90,3 +93,4 @@ end(Enum<T> p)
 {
     return typename Enum<T>::Iterator(((int)T::Last) + 1);
 }
+} // namespace pos

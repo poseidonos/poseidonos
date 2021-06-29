@@ -4,6 +4,10 @@ import (
 	"pnconnector/src/routers/m9k/model"
 )
 
+func ListArray(xrId string, param interface{}) (model.Request, model.Response, error) {
+	return arraySender(xrId, param, "LISTARRAY")
+}
+
 func ListArrayDevice(xrId string, param interface{}) (model.Request, model.Response, error) {
 	return arraySender(xrId, param, "LISTARRAYDEVICE")
 }
@@ -42,4 +46,8 @@ func MountArray(xrId string, param interface{}) (model.Request, model.Response, 
 
 func UnmountArray(xrId string, param interface{}) (model.Request, model.Response, error) {
 	return systemSender(xrId, param, "UNMOUNTARRAY")
+}
+
+func ResetMbr(xrId string, param interface{}) (model.Request, model.Response, error) {
+	return arraySender(xrId, param, "RESETMBR")
 }

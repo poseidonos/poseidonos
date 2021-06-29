@@ -7,7 +7,7 @@ sys.path.append("../lib/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
 import CREATE_VOL_BASIC_1
@@ -38,4 +38,4 @@ def execute():
 if __name__ == "__main__":
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

@@ -1,0 +1,5 @@
+POS_ADD_UNIT_TEST(preferences_ut preferences_test.cpp)
+POS_ADD_UNIT_TEST(filter_ut filter_test.cpp)
+POS_ADD_UNIT_TEST(logger_ut logger_test.cpp)
+POS_ADD_UNIT_TEST(configuration_ut configuration_test.cpp)
+POS_ADD_UNIT_TEST(deduplicator_ut deduplicator_test.cpp)

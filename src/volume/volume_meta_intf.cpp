@@ -33,48 +33,48 @@
 #include "src/volume/volume_meta_intf.h"
 
 #include <rapidjson/document.h>
-
-#include "mfs.h"
+#include <string>
+#include "src/metafs/include/metafs_service.h"
 #include "src/helper/json_helper.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/volume/volume.h"
 
-namespace ibofos
+namespace pos
 {
 int
-VolumeMetaIntf::LoadVolumes(VolumeList& volList)
+VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName)
 {
     std::string volFile = "vbr";
     uint32_t fileSize = 256 * 1024; // 256KB
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
 
-    MetaFsReturnCode<IBOF_EVENT_ID> mgmtRC;
-    mgmtRC = metaFsMgr.mgmt.CheckFileExist(volFile);
-    if (!mgmtRC.IsSuccess())
+    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(volFile);
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
-        return (int)IBOF_EVENT_ID::META_OPEN_FAIL;
+        return (int)POS_EVENT_ID::META_OPEN_FAIL;
     }
 
-    mgmtRC = metaFsMgr.mgmt.Open(volFile);
-    if (!mgmtRC.IsSuccess())
+    int fd = 0;
+    rc = metaFs->ctrl->Open(volFile, fd);
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::META_OPEN_FAIL, "Fail to open volume meta");
-        return (int)IBOF_EVENT_ID::META_OPEN_FAIL;
+        POS_TRACE_ERROR((int)POS_EVENT_ID::META_OPEN_FAIL, "Fail to open volume meta");
+        return (int)POS_EVENT_ID::META_OPEN_FAIL;
     }
 
-    uint32_t fd = mgmtRC.returnData;
     char* rBuf = (char*)malloc(fileSize);
     memset(rBuf, 0, fileSize);
 
-    MetaFsReturnCode<IBOF_EVENT_ID> ioRC;
-    ioRC = metaFsMgr.io.Read(fd, rBuf); // for partial read: metaFsMgr.io.Read(fd, byteOffset, dataChunkSize, rBuf);
-    metaFsMgr.mgmt.Close(fd);
+    // for partial read: metaFsMgr.io.Read(fd, byteOffset, dataChunkSize, rBuf);
+    rc = metaFs->io->Read(fd, rBuf);
+    metaFs->ctrl->Close(fd);
 
-    if (!ioRC.IsSuccess())
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::META_READ_FAIL, "Fail to read volume meta");
+        POS_TRACE_ERROR((int)POS_EVENT_ID::META_READ_FAIL, "Fail to read volume meta");
         free(rBuf);
-        return (int)IBOF_EVENT_ID::META_READ_FAIL;
+        return (int)POS_EVENT_ID::META_READ_FAIL;
     }
 
     std::string contents = rBuf;
@@ -93,28 +93,29 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList)
                     uint64_t total = doc["volumes"][i]["total"].GetUint64();
                     uint64_t maxiops = doc["volumes"][i]["maxiops"].GetUint64();
                     uint64_t maxbw = doc["volumes"][i]["maxbw"].GetUint64();
-                    VolumeBase* volume = new Volume(name, total, maxiops, maxbw);
+                    VolumeBase* volume = new Volume(arrayName, name, total, maxiops, maxbw);
                     volList.Add(volume, id);
                 }
             }
         }
         catch (const std::exception& e)
         {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::META_CONTENT_BROKEN, "Volume meta broken {}", e.what());
-            return (int)IBOF_EVENT_ID::META_CONTENT_BROKEN;
+            POS_TRACE_ERROR((int)POS_EVENT_ID::META_CONTENT_BROKEN, "Volume meta broken {}", e.what());
+            return (int)POS_EVENT_ID::META_CONTENT_BROKEN;
         }
     }
 
     free(rBuf);
-    return (int)IBOF_EVENT_ID::SUCCESS;
+    return (int)POS_EVENT_ID::SUCCESS;
 }
 
 int
-VolumeMetaIntf::SaveVolumes(VolumeList& volList)
+VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName)
 {
     std::string volFile = "vbr";
     uint32_t fileSize = 256 * 1024; // 256KB
     std::string contents = "";
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
 
     int vol_cnt = volList.Count();
     if (vol_cnt > 0)
@@ -145,67 +146,50 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList)
         contents = root.ToJson();
     }
 
-    MetaFsReturnCode<IBOF_EVENT_ID> mgmtRC;
-    mgmtRC = metaFsMgr.mgmt.CheckFileExist(volFile);
-    if (!mgmtRC.IsSuccess())
+    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(volFile);
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
-        mgmtRC = metaFsMgr.mgmt.Create(volFile, fileSize);
-        if (!mgmtRC.IsSuccess())
+        rc = metaFs->ctrl->Create(volFile, fileSize);
+        if (POS_EVENT_ID::SUCCESS != rc)
         {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::META_CREATE_FAIL, "Fail to create meta file");
-            return (int)IBOF_EVENT_ID::META_CREATE_FAIL;
+            POS_TRACE_ERROR((int)POS_EVENT_ID::META_CREATE_FAIL, "Fail to create meta file");
+            return (int)POS_EVENT_ID::META_CREATE_FAIL;
         }
     }
 
-    mgmtRC = metaFsMgr.mgmt.Open(volFile);
-    if (!mgmtRC.IsSuccess())
+    int fd = 0;
+    rc = metaFs->ctrl->Open(volFile, fd);
+    if (POS_EVENT_ID::SUCCESS != rc)
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::META_OPEN_FAIL, "Fail to open meta file");
-        return (int)IBOF_EVENT_ID::META_OPEN_FAIL;
+        POS_TRACE_ERROR((int)POS_EVENT_ID::META_OPEN_FAIL, "Fail to open meta file");
+        return (int)POS_EVENT_ID::META_OPEN_FAIL;
     }
-
-    uint32_t fd = mgmtRC.returnData;
-    char* wBuf = (char*)malloc(fileSize);
-    memset(wBuf, 0, fileSize);
 
     uint32_t contentsSize = contents.size();
-
     if (contentsSize >= fileSize)
     {
-        free(wBuf);
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::SIZE_TOO_BIG, "Volume meta write buffer overflows");
-        return (int)IBOF_EVENT_ID::SIZE_TOO_BIG;
+        POS_TRACE_ERROR((int)POS_EVENT_ID::VOL_DATA_SIZE_TOO_BIG, "Volume meta write buffer overflows");
+        return (int)POS_EVENT_ID::VOL_DATA_SIZE_TOO_BIG;
     }
 
+    char* wBuf = (char*)malloc(fileSize);
+    memset(wBuf, 0, fileSize);
     strncpy(wBuf, contents.c_str(), contentsSize);
 
-    MetaFsReturnCode<IBOF_EVENT_ID> ioRC;
-    ioRC = metaFsMgr.io.Write(fd, wBuf);
+    POS_EVENT_ID ioRC = metaFs->io->Write(fd, wBuf);
 
-    metaFsMgr.mgmt.Close(fd);
+    metaFs->ctrl->Close(fd);
 
-    if (!ioRC.IsSuccess())
+    if (POS_EVENT_ID::SUCCESS != ioRC)
     {
         free(wBuf);
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::META_WRITE_FAIL, "Fail to write volume meta");
-        return (int)IBOF_EVENT_ID::META_WRITE_FAIL;
+        POS_TRACE_ERROR((int)POS_EVENT_ID::META_WRITE_FAIL, "Fail to write volume meta");
+        return (int)POS_EVENT_ID::META_WRITE_FAIL;
     }
 
     free(wBuf);
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::SUCCESS, "SaveVolumes succeed");
-    return (int)IBOF_EVENT_ID::SUCCESS;
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::SUCCESS, "SaveVolumes succeed");
+    return (int)POS_EVENT_ID::SUCCESS;
 }
 
-int
-VolumeMetaIntf::UpdateVolumeName(std::string oldName, std::string newName)
-{
-    return (int)IBOF_EVENT_ID::SUCCESS;
-}
-
-int
-VolumeMetaIntf::UpdateVolumeSize(std::string volName, uint64_t newVolSize)
-{
-    return (int)IBOF_EVENT_ID::SUCCESS;
-}
-
-} // namespace ibofos
+} // namespace pos

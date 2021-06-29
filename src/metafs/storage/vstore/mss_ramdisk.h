@@ -35,13 +35,15 @@
 #include <string>
 #include <vector>
 
-#include "mfs_ret_code.h"
-#include "mss.h"
+#include "metafs_return_code.h"
+#include "src/metafs/storage/mss.h"
 #include "os_header.h"
 
 #define BTOMB(capacity) ((capacity / 1024) / 1024)
 #define BTOGB(capacity) (((capacity / 1024) / 1024) / 1024)
 
+namespace pos
+{
 /**
  * Meta Storage Subsystem Ramdisk Implementaion
  *
@@ -50,25 +52,23 @@
  * for Ramdisk.
  *
  */
-
-
 class MssRamdisk : public MetaStorageSubsystem
 {
 public:
-    MssRamdisk(void);
+    explicit MssRamdisk(std::string arrayName);
     virtual ~MssRamdisk(void);
 
-    virtual IBOF_EVENT_ID CreateMetaStore(MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) override;
-    virtual IBOF_EVENT_ID Open(void) override;
-    virtual IBOF_EVENT_ID Close(void) override;
-    virtual IBOF_EVENT_ID ReadPage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) override;
-    virtual IBOF_EVENT_ID WritePage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) override;
+    virtual POS_EVENT_ID CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) override;
+    virtual POS_EVENT_ID Open(void) override;
+    virtual POS_EVENT_ID Close(void) override;
+    virtual POS_EVENT_ID ReadPage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) override;
+    virtual POS_EVENT_ID WritePage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) override;
     virtual bool IsAIOSupport(void) override;
-    virtual IBOF_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) override;
-    virtual IBOF_EVENT_ID WritePageAsync(MssAioCbCxt* cb) override;
-    virtual IBOF_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) override;
+    virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) override;
+    virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) override;
+    virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) override;
 
-    IBOF_EVENT_ID EraseAllData(MetaStorageType mediaType);
+    POS_EVENT_ID EraseAllData(MetaStorageType mediaType);
     uint64_t GetCapacity(MetaStorageType mediaType);
 
 private:
@@ -82,3 +82,4 @@ private:
     const std::string FILE_NAME = "metaStorage.image";
     std::mutex lock_io;
 };
+} // namespace pos

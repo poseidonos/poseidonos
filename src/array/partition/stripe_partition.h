@@ -34,30 +34,41 @@
 #define STRIPE_PARTITION_H_
 
 #include <list>
+#include <string>
 #include <vector>
 
 #include "partition.h"
+#include "src/array/rebuild/rebuild_target.h"
+#include "src/array/service/io_recover/i_recover.h"
+#include "src/io_scheduler/io_dispatcher.h"
 
-namespace ibofos
+using namespace std;
+
+namespace pos
 {
-class StripePartition : public Partition
+
+class StripePartition : public Partition, public IRecover, public RebuildTarget
 {
-    friend class WbtCmdHandler;
+    friend class ParityLocationWbtCommand;
 
 public:
-    StripePartition(PartitionType type,
-        PartitionPhysicalSize physicalSize,
-        vector<ArrayDevice*> devs,
-        Method* method);
-
+    StripePartition(string array,
+                    PartitionType type,
+                    PartitionPhysicalSize physicalSize,
+                    vector<ArrayDevice *> devs,
+                    Method *method);
+    StripePartition(string array,
+                    PartitionType type,
+                    PartitionPhysicalSize physicalSize,
+                    vector<ArrayDevice *> devs,
+                    Method *method,
+                    IODispatcher* ioDispatcher);
     virtual ~StripePartition();
-
     int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
     int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
-
-    int Rebuild(RebuildBehavior* behavior) override;
-    int RebuildRead(UbioSmartPtr ubio) override;
-    void Format() override;
+    int GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out) override;
+    unique_ptr<RebuildContext> GetRebuildCtx(ArrayDevice* fault) override;
+    void Format(void) override;
 
 private:
     FtBlkAddr _P2FTranslate(const PhysicalBlkAddr& pba);
@@ -65,12 +76,12 @@ private:
     int _ConvertToPhysical(list<PhysicalWriteEntry>& dst, FtWriteEntry& src);
     list<BufferEntry> _SpliceBuffer(
         list<BufferEntry>& src, uint32_t start, uint32_t remain);
-
-    int _SetLogicalSize();
+    int _SetLogicalSize(void);
     list<PhysicalBlkAddr> _GetRebuildGroup(FtBlkAddr fba);
-    void _Trim();
-    int _CheckTrimValue();
+    void _Trim(void);
+    int _CheckTrimValue(void);
+    IODispatcher* ioDispatcher_;
 };
 
-} // namespace ibofos
+} // namespace pos
 #endif // STRIPE_PARTITION_H_

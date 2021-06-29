@@ -30,32 +30,23 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <map>
+#pragma once
 
-#include "../vsamap_manager.h"
-#undef Max
-#include "gtest/gtest.h"
-#include "lib_test.h"
-#include "volume_manager_mock.h"
-
-namespace ibofos
+#include "src/mapper/unit_test/mapper_testfixture.h"
+namespace pos
 {
-const uint64_t SZ_1G = (1 << 30);
 
-class VSAMapManagerTest : public LibForTest, public ::testing::Test
+class VSAMapManagerTest : public MapperTestFixture
 {
-public:
-    int GetSavedVolumeSize(int volId, uint64_t& volSize);
-
 protected:
     void SetUp(void) override;
     void TearDown(void) override;
-
-    void _CreateRandVolume(int volId);
-    void _LoadVolume(int volId);
-
-    VSAMapManager* vsaMapManagerSUT;
-    static std::map<int, uint64_t> volumeInfo;
 };
 
-} // namespace ibofos
+class AccessRequest
+{
+public:
+    void CLIThreadFunc(IVSAMap* iVSAMap, BlkAddr rba);
+};
+
+} // namespace pos

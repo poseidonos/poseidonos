@@ -1,32 +1,30 @@
-# AIR User Guide 0.5.5-beta
-
+# AIR User Guide
 
 ## 1. Overview
 
 ### 1.1. Objectives
 
-**The Analytics In Real-time (AIR)** provides a set of APIs for profiling performance, latency, resource, and so on. It achieves run-time manipulation by designing all of the modules into event-driven and operating in a single dynamic chain, which optimizes collected data processing and minimizes profiling overhead.
-The AIR currently supports:
+**The Analytics In Real-time (AIR)** provides a set of APIs for profiling performance, latency, resource, and so on. It achieves run-time manipulation by designing all of the modules into event-driven and operating in a single dynamic chain, which optimizes collected data processing and minimizes profiling overhead. The AIR currently supports:
 
 - Performance Profiling
 - Latency Profiling
 - Queue Profiling
-
-
+- Count Profiling
+- Utilization Profiling
 
 ### 1.2. Terminology & Acronyms
 
-| Terms   | Terminology & Acronyms                    |
-| ------- | ----------------------------------------- |
-| POS     | Poseidon OS                               |
-| AIR     | POS Profiler, Analytics In Real-time      |
-| CLI     | Command Line Interface                    |
-| TUI     | Text-based User Interface                 |
-| GUI     | Graphical User Interface                  |
+| Terms      | Terminology & Acronyms                    |
+| :--------- | :---------------------------------------- |
+| PoseidonOS | Samsung proprietary Storage Management OS |
+| AIR        | System Profiler, Analytics In Real-time   |
+| CLI        | Command Line Interface                    |
+| TUI        | Text-based User Interface                 |
+| GUI        | Graphical User Interface                  |
 
-<br>
 
-## 2. Build 
+
+## 2. Build
 
 ### 2.1. AIR Static Library (Stand Alone)
 
@@ -34,413 +32,572 @@ The AIR currently supports:
 
 Before build the AIR, configuration setting should be the first.
 
-* **Set Configuration**
+- **Set Configuration**
 
-``` bash
-# From POS root directory
-$ cd lib/air/config
+```
+# From AIR root directory
+$ cd config
 $ vim air.cfg
 ```
 
-|         | Mandatory                    | Optaional |
-| ------- | ----------------------------------------- | ----------- |
-| DEFAULT    | StreamingInterval, AirBuild, NodeBuild, NodeRun, SamplingRatio, AidSize | - |
-| GROUP | GroupName	 | NodeBuild, NodeRun, SamplingRatio |
-| NODE     | NodeName, Type, GroupName    | NodeBuild, NodeRun, SamplingRatio |
+|         | Mandatory                                                    | Optaional                                            |
+| :------ | :----------------------------------------------------------- | :--------------------------------------------------- |
+| DEFAULT | StreamingInterval, AirBuild, NodeBuild, NodeRun, NodeSamplingRatio, NodeIndexSize | -                                                    |
+| GROUP   | Group                                                        | NodeBuild, NodeRun, NodeSamplingRatio, NodeIndexSize |
+| FILTER  | Filter, Item                                                 | -                                                    |
+| NODE    | Node, Filter, Type, Group                                    | Build, Run, SamplingRatio, IndexSize                 |
 
-**[DEFAULT]**  <br>
-&nbsp;&nbsp;The global configurations such as StreamingInterval, AirBuild, and AidSize and the default value of node configurations such as NodeBuild, NodeRun, and SamplingRatio are set here. <br>
+```
+R"AIR(
 
-**[GROUP]** <br> 
-&nbsp;&nbsp;Set of Nodes. More than one node can be included. There is no limitation of the number of nodes.
+This configuration file is used as an AIR fundamental setting.
+All of setting data would be interpreted at compile-time.
+If this configuration syntax is invalid, it means build error may occur.
 
-**[NODE]** <br> 
-&nbsp;&nbsp;Each config entry indicates each log point's name, type, and availability. Each entry has to start and end with double quotation marks(""). 
-
-&nbsp;&nbsp;`StreamingInterval:` StreamingInterval configuration indicates how frequently write profiling data to the json file. The default value is set to 1. It means profiling data is written at the tail of the air_result.json in every second. The basic unit of the streaming_interval is in seconds.
-
-&nbsp;&nbsp;`AirBuild:` AirBuild configuration determines whether the application will be built with AIR or not.
-
-&nbsp;&nbsp;`AidSize:` AidSize configuration determines allowable maximum aid size.
-
-&nbsp;&nbsp;`NodeName:` NodeName means the designated logging id.
-<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;※ The length of the name value must not exceed 18 characters.
-
-&nbsp;&nbsp;`Type:` Type configuration means the data type(PERFORMANCE, LATENCY, and QUEUE) to be profiled
-
-&nbsp;&nbsp;`NodeRun:` NodeRun configuration means that node can collect data initially or not. <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Run -> On, Do not run -> Off)
-
-&nbsp;&nbsp;`SamplingRatio:` SamplingRatio determines how often to collect stochastic type(Queue) data.
-
-&nbsp;&nbsp;`GroupName:`  GroupName in NODE refers to the group containing the corresponding node. 
-
-&nbsp;&nbsp;`GroupName:` GroupName configuration indicates the name of set of nodes.
+Paragraphs are organized within sqaure brackets at the beginning and end.
+Sentences must be enclosed in double quotation marks.
+In paragraph, several sentences could be exist. Here is an example.
+[Paragraph1] "Sentence1" "Sentence2" "Sentence3" [/Paragraph2]
+User should not change paragraphs.
+User could change or add/remove sentences.
 
 
+- DEFAULT paragraph contains default behavior.
+  This paragraph must have only one sentence which has key:value pairs below.
 
-``` bash
-R"AIR(    // do not change this format!!
+  * AirBuild              {Mandatory key, Valid value: True/False}
+  : False value means all AIR API do nothing and all the other options below is useless.
+  So that target application might be built without AIR library at compile-time(depending on optimization).
+  User can not control this option at run-time.
+  
+  * StreamingInterval     {Mandatory key, Valid value: 1~99 (seconds)}
+  : AIR internally collects raw sampled data and calculates it to make statistics result.
+  StreamingInterval key means periodic base time for calculating & saving the result.
+  For example, when this value is set to 3, every 3 seconds, sampled data during 3 seconds will be calculated
+  and the statistics result will be sent to the file(/tmp/air_yyyymmdd_pid.json).
+  User can control this option by air_cli, air_tui at run-time.
 
-[DEFAULT]    // default setting for Mandatory
-        "StreamingInterval:1, AirBuild:True, NodeBuild:True, NodeRun:On, SamplingRatio: 1000, AidSize : 32"
+  * NodeBuild             {Mandatory key, Valid value: True/False}
+  : False value means airlog(...) API do nothing but other AIR business logic works.
+  If a sentence has not this option in GROUP and NODE paragraph, that follows DEFAULT paragraph's rule.
+  User can not control this option at run-time.
+  
+  * NodeRun               {Mandatory, Valid value: On/Off}
+  : Off value means airlog(...) API stop logging. On value means airlog(...) API keep logging.
+  If a sentence has not this option in GROUP and NODE paragraph, that follows DEFAULT paragraph's rule.
+  User can control this option by air_cli, air_tui at run-time.
+
+  * NodeSamplingRatio     {Mandatory, Valid value: 1~99999 (probability = 1/N)}
+  : Queue type of NODE sentences may effect this sampling rule. For example, when this value is set to 1000,
+  airlog(...) API actually collect raw data once a thousand.
+  User can control this option by air_cli, air_tui at run-time.
+  
+  * NodeIndexSize         {Mandatory, Valid value: 1~999}
+  : NodeIndex could be used to profiling numerical separation for the same NODE sentence.
+  For example, when NodeIndexSize value is set to 10, user can distinguish 10 maximum different(hashed)
+  statistics data for the same NODE sentence. The range of the NodeIndex is the same as the range of uint64_t.
+  When AIR build, NodeIndexSize is one of the factor to decide memory pool size.
+  User can not control this option at run-time.
+
+[DEFAULT]
+    "AirBuild: True, StreamingInterval: 3,
+    NodeBuild: False, NodeRun: Off, NodeSamplingRatio: 1000, NodeIndexSize : 10"
 [/DEFAULT]
 
-[GROUP]    // group setting for Mandatory & Optional
 
+- GROUP paragraph defines group behavior.
+  GROUP sentences may have node related behavior(NodeBuild, NodeRun, ...) such as DEFAULT sentence.
+  However, it's not necessary but optional.
+  If a GROUP sentence has a different value of NodeRun, group rule has more higher priority than default rule.
+  So that, it follows GROUP sentence's NodeRun value. If not defined NodeRun, it follows default behavior.
+  This paragraph could have several sentences which have key:value pairs below.
+  
+  * Group               {Mandatory, Valid value: unique string in GROUP paragraph}
+  : Name of group, this value has to be unique in GROUP paragraph without space.
+  User can not control this option at run-time.
+
+  * NodeBuild           {Optional, Valid value: True/False}
+  : Same as default rule
+
+  * NodeRun             {Optional, Valid value: On/Off}
+  : Same as default rule
+
+  * NodeSamplingRatio   {Optional, Valid value: 1~99999 (probability = 1/N)}
+  : Same as default rule
+
+  * NodeIndexSize       {Optional, Valid value: 1~999}
+  : Same as default rule
+
+[GROUP]
+    "Group: Mgmt, NodeBuild: True, NodeRun: On"
+    "Group: MFS"
+    "Group: POS_Q"
+    "Group: GC"
 [/GROUP]
 
-[NODE]    // node setting for Mandatory & Optional
-        "NodeName: PERF_BENCHMARK, Type: PERFORMANCE"
-        "NodeName: LAT_SUBMIT, Type: LATENCY"
-        "NodeName: LAT_PROCESS, Type: LATENCY"
-        "NodeName: LAT_COMPLETE, Type: LATENCY"
-        "NodeName: LAT_IO_PATH, Type: LATENCY"
-        "NodeName: Q_SUBMISSION, Type: QUEUE"
-        "NodeName: Q_COMPLETION, Type: QUEUE"
-[/NODE]
 
-[WEB]
-        "NodeType: PERFORMANCE,  Type: GRAPH,  Mode: GENERAL,  Graph: LINE,  Item: [iops_read]"
-        "NodeType: LATENCY,      Type: GRAPH,  Mode: GENERAL,  Graph: LINE,  Item: [mean]"
-        "NodeType: QUEUE,        Type: GRAPH,  Mode: GENERAL,  Graph: LINE,  Item: [depth_period_avg]"
-[/WEB]
+- FILTER paragraph defines semantic separation for the NODE sentence.
+  This paragraph could have several sentences which have key:value pairs below.
+  
+  * Filter              {Mandatory, Valid value: unique enum name in target application}
+  : Name of filter, this value is used as enum name in target application cause of C-style API extension.
+  
+  * Item                {Mandatory, Valid value: unique enumerator in target application}
+  : This value is used as enumerator in target application. It's organized within round bracket.
+  In round bracket, number of enumerators could be exist. Here is an example.
+  (TYPE_A, TYPE_B, TYPE_C)
+  Also, range expression with suffix(_#number) is possible. Here is an example.
+  (TYPE_1 ... TYPE_30)
+
+[FILTER]
+    "Filter: AIR_Basic,     Item: (AIR_BASE)"
+    "Filter: AIR_IOtype,    Item: (AIR_READ, AIR_WRITE)"
+    "Filter: AIR_Range,     Item: (AIR_0 ... AIR_5)"
+[/FILTER]
+
+
+- NODE paragraph defines NODE sentences that tracing point of code with specific data type.
+  This paragraph could have several sentences which have key:value pairs below.
+  
+  * Node                {Mandatory, Valid value: unique enumerator in target application}
+  : Name of node, this value is used as first parameter of airlog(...) API.
+  For example, C++ style --> airlog("NodeA", ...), C style --> AIRLOG(NodeA, ...) 
+  
+  * Filter              {Mandatory, Valid value: Filter name}
+  : Second parameter value of airlog(...) API has to be one of the Item from this Filter.
+  
+  * Type                {Mandatory, Valid value: Count/Latency/Performance/Queue/Utilization}
+  : Forth parameter value of airlog(...) API is calculated differently according to the type value.
+  Count       --> +/- value
+  Latency     --> unique key for matching between start point and end point
+  Performance --> io size
+  Queue       --> queue depth
+  Utilization --> usage(tick, size, ...)
+  
+  * Group               {Mandatory, Valid value: Group name}
+  : If a NODE sentence doesn't have optional key/value pairs below, those rules follow this group behavior.
+  If a NODE sentence has a different value of Run, node rule has more higher priority than group rule.
+  
+  * Build               {Optional, Valid value: True/False}
+  : Same as DEFAULT rule
+  
+  * Run                 {Optional, Valid value: On/Off}
+  : Same as DEFAULT rule
+  
+  * SamplingRatio       {Optional, Valid value: 1~99999 (probability = 1/N)}
+  : Same as DEFAULT rule
+
+  * IndexSize           {Optional, Valid value: 1~999}
+  : Same as DEFAULT rule
+
+[NODE]
+    "Node: PERF_VOLUME,         Filter: AIR_IOtype, Type: PERFORMANCE,  Group: Mgmt"
+    "Node: LAT_BDEV_READ,       Filter: AIR_Range,  Type: LATENCY,      Group: Mgmt"
+    "Node: LAT_BDEV_WRITE,      Filter: AIR_Range,  Type: LATENCY,      Group: Mgmt"
+    "Node: PERF_METAFS_IO,      Filter: AIR_IOtype, Type: PERFORMANCE,  Group: MFS"
+    "Node: Q_AIO,               Filter: AIR_Basic,  Type: QUEUE,        Group: POS_Q"
+    "Node: Q_NVRAM,             Filter: AIR_Basic,  Type: QUEUE,        Group: POS_Q"
+    "Node: Q_SSD,               Filter: AIR_Basic,  Type: QUEUE,        Group: POS_Q"
+    "Node: Q_EVENT,             Filter: AIR_Basic,  Type: QUEUE,        Group: POS_Q"
+    "Node: Q_IO,                Filter: AIR_Basic,  Type: QUEUE,        Group: POS_Q"
+    "Node: PERF_COPY,           Filter: AIR_IOtype, Type: PERFORMANCE,  Group: GC"
+[/NODE]
 
 )AIR"
 
 ```
 
-<br>
+#### 2.1.2. Build
 
-#### 2.1.2. Build (Stand Alone)
-
-``` bash
-# From AIR main directory
+```
+# From AIR root directory
 $ make (optional target) (optional cfg=config_file_name)
-Just make includes default target(release) and default config file(config/air.cfg)
-When build AIR, user can select one of the air config file in config folder with cfg option.
+# default target is "release" and default config file is "config/air.cfg"
 ```
 
-<br>
+#### 2.1.3. Library
 
-#### 2.1.3. Library (Stand Alone)
-
-``` bash
-# From AIR main directory
-$ cd lib
-$ libair.a
+```
+# From AIR root directory
+$ lib/libair.a
 ```
 
-<br>
-
-### 2.3. AIR with POS
+### 2.2. AIR with POS
 
 The build sequence is as follows:
 
-1. build AIR 
+1. build AIR
 2. build SPDK
-3. build POS
+3. build PoseidonOS
 
-The build shell is in the file `"root_dir/lib/build_ibof_lib.sh"`. When you try to run like this `"./build_ibof_lib.sh all"`, 1 & 2 build sequence will be done. After it succeed, you can build POS as usual. The usecase AIR with POS is handled in AIR Tutorial.
+The build shell is in the file `"pos_root_dir/lib/build_pos_lib.sh"`. When you try to run like this `"./build_pos_lib.sh all"`, 1 & 2 build sequence will be done. After it succeed, you can build PoseidonOS as usual. The usecase AIR with PoseidonOS is handled in AIR Tutorial.
 
-<br>
+
 
 ## 3. API
 
-There are two types of APIs, the one is functions for preparing the profiling and the other is data collecting functions. To use the AIR APIs it is needed that including `"Air.h"`.
+There are two types of APIs, the one is functions for preparing the profiling and the other is data collecting functions. To use the AIR APIs it is needed that including `"Air.h"` for C++ style or `"Air_c.h"` for C style.
 
 ### 3.1. Preparing Functions
 
-| API                                  | Description                             |
-| ------------------------------------ | --------------------------------------- |
-| AIR_INITIALIZE(uint32_t cpu_num = 0) | Initialize the AIR instances            |
-| AIR_ACTIVATE()                       | The AIR starts profiling                |
-| AIR_DEACTIVE()                       | Join the AIR thread to the applications |
-| AIR_FINALIZE()                       | Destroy the AIR instances               |
+| API                                  | Description                           |
+| :----------------------------------- | :------------------------------------ |
+| air_initialize(uint32_t cpu_num = 0) | Create & Initialize the AIR instances |
+| air_activate()                       | The AIR starts profiling              |
+| air_deactivate()                     | The AIR stops profiling               |
+| air_finalize()                       | Destroy the AIR instances             |
 
-**Example** 
+**Example**
 
-``` cpp file
+```
 ...
 #include "Air.h"
 ...
 int main(void)
 {
-	...
-    AIR_INITIALIZE(0);
-    // AIR_INITIALIZE();
-    // This also can be used and air is running on cpu 0. 
-    AIR_ACTIVATE();
+    ...
+    air_initialize(0);
+    air_activate();
     
     /*  do work  */
     
-    AIR_DEACTIVATE();
-    AIR_FINALIZE();
+    air_deactivate();
+    air_finalize();
     
     return 0;
 }
 ```
 
-<br>
-
 ### 3.2. Data Collecting Functions
 
- Each log point has target and logger type. To use AIR, you have to specify target and logger type in code directly. After then, you can insert user APIs in your codes to profile your application. 
+Each log point has target and logger type. To use AIR, you have to specify target and logger type in code directly. After then, you can insert user APIs in your codes to profile your application.
 
 #### 3.2.1. Target & Logger Type
 
-**[Performance Target]**  <br>Performance target measures read and write of IOPS and bandwidth.
+**[Performance Target]**
+Performance target measures IOPS and bandwidth.
 
-+ Read IOPS / Bandwidth
-+ Write IOPS / Bandwidth
-+ Total IOPS / Bandwidth
-+ Average IOPS / Bandwidth
+- IOPS / Bandwidth
+- Average IOPS / Average Bandwidth
 
+**[Latency Target]**
+Latency target measures for getting latency of specific sections between function calls.
 
+- Mean latency
+- Min latency
+- Max latency
+- Quartile latency
+- Tail latencies
+- Standard deviation
 
-**[Latency Target]** <br>Latency target measures for getting latency of specific sections between function calls.
+**[Queue Target]**
+Queue target measures queue depth.
 
-+ Mean latency
-+ Min latency
-+ Max latency
-+ Quartile latency
-+ Tail latencies
-+ Standard deviation
+- Queue depth average
+- Queue depth max
 
+**[Utilization Target]**
+Utilization target measures appending + number such as tick, size and so on.
 
+- Usage
 
-**[Queue Target]** <br>Queue target measures queue size and depth.
+**[Count Target]**
+Count target measures +/- count number.
 
-+ Queue size
-+ Queue depth average
-+ Queue depth partial max (interval)
-+ Queue depth total max
-
-
-
-**[Repetitive Logger]** <br>Repetitive logger is full logger. It collects all logging data. This includes performance and latency type.
-
-<br>
-
-**[Stochastic Logger]** <br>Stochastic logger samples target data probabilistically. You can adjust sampling rate by cli command within the range of 1 to 10000. Default sampling rate is 1000 and it means that it collects one logging data every a thousand logging data (Sampling rate 1000 means sampling with a probability of 1/1000).this includes queue type.
-
-<br>
+- Count
 
 #### 3.2.2. API
 
 The API logs the information at the current time. Add API where you want to measure the data at that time.
 
-<br>
+#### 3.2.2.1. Performance Log
 
-#### 3.2.2.1. Performance Log Point
+Add performance log point in your application code area where I/O occurs.
 
-Add performance log point in your application code area where I/O occurs. 
+**[Definition]**
 
-**[Prototype]**
-
-``` c++
-AIRLOG(string node_name, uint32_t aid, uint32_t io_type, uint32_t io_size)
+```
+airlog(string_literal node_name, string_literal filter_item, uint64_t index, uint64_t io_size)
 ```
 
-**[Prameter]**
+**[Parameter]**
 
-| Parameter | Description                                                  |
-| --------- | ------------------------------------------------------------ |
-| node_name | String type value called node_name. It indicates the log point. |
-| aid       | unsigned integer. user defined identifier. (e.g. volume_id)  |
-| io_type   | This value indicates following io_size is read IO size or write. The value of the io_type is unsigned int type. It is predefined inside AIR library. |
-| io_size   | Integer. It indicates I/O size of log point and its unit is byte. AIR counts only the aligned I/O size and its sizes are 512B, 1KB, 2KB, 4KB, …, 128KB and 256KB. For the remaining I/O, it is counted as I/O greater than 256KB or no aligned I/O. |
+| Parameter   | Description                                                  |
+| :---------- | :----------------------------------------------------------- |
+| node_name   | String literal type value called node_name. It indicates the log point. This value is converted integer value at compile-time. |
+| filter_item | String literal type value called node_name. It indicates the semantic separation. This value is converted integer value at compile-time. (e.g. AIR_WRITE, AIR_READ) |
+| index       | Unsigned integer. user defined numerical separation. (e.g. volume_id) |
+| io_size     | Unsigned Integer. It indicates I/O size of log point and its unit is byte. AIR calculates IOPS and bandwidth through io_size value. Also AIR can count 10 different size of I/Os. |
 
-**[Example]**
+**[API Use Case]**
 
-``` c++
-AIRLOG("PERF_IOWorker", 0, air::WRITE, ubio->size);
-/* Do Write */
+```
+airlog("PERF_Volume", "AIR_WRITE" ubio->volume_id, ubio->size);
+/* Done Write */
      …
-AIRLOG("PERF_IOWorker", 0, air::READ, ubio->size);
-/* Do Read */
+airlog("PERF_Volume", "AIR_READ" ubio->volume_id, ubio->size);
+/* Done Read */
 ```
 
-<br>
+**[TUI result]**
 
-#### 3.2.2.3. Latency Log Point
+```
+( )[O]++Node:PERF_Volume("performance")
+        SUM_Period(iops:2.0m  , bw:8.1GB  )
+      "Thread_01"(22239), index:3, filter:"AIR_READ" Period(iops:1.0m  , bw:4.2GB  , "4096(sz)-3081587(cnt)"), Total(iops_avg:943.0k, bw_avg:3.9GB  )
+      "Thread_05"(22243), index:1, filter:"AIR_READ" Period(iops:958.7k, bw:3.9GB  , "4096(sz)-2876159(cnt)"), Total(iops_avg:901.3k, bw_avg:3.7GB  )
+```
+
+#### 3.2.2.2. Latency Log
 
 This API gets latency information between logging points of the specific path. Insert the API on code where you measure the latency breakdown. Note that this API can be inserted inter-threads or inter-functions.
 
-**[Prototype]**
+**[Definition]**
 
-``` c++
-AIRLOG(String node_name, uint32_t aid, uint32_t seq_index, uint32_t key)
+```
+airlog(string_literal node_name, string_literal filter_item, uint64_t index, uint64_t key)
 ```
 
 **[Parameter]**
 
-| Parameter | Description                                                  |
-| --------- | ------------------------------------------------------------ |
-| node_name | String type value called node_name. It indicates the log point. |
-| aid       | unsigned integer. user defined identifier. (e.g. volume_id)  |
-| seq_index | Index of logging point.                                      |
-| key       | Unsigned integer. Unique key. AIR can tell logging sequence refer to this value. |
+| Parameter   | Description                                                  |
+| :---------- | :----------------------------------------------------------- |
+| node_name   | String literal type value called node_name. It indicates the log point. This value is converted integer value at compile-time. |
+| filter_item | String literal type value called node_name. It indicates the semantic separation. This value is converted integer value at compile-time. (e.g. BDEV_SUBMIT, BDEV_COPY, BDEV_COMPLETE) |
+| index       | Unsigned integer. user defined numerical separation. (e.g. volume_id) |
+| key         | Unsigned integer. Unique key. This value is used to match between start time-stamp and end time-stamp. |
 
-**[Example]**
+**[API Use Case]**
 
-``` c++
-AIRLOG("AsyncIO_Read", 0, 0, ubio->address);
-AIRLOG("AsyncIO_Write", 0, 0, ubio->address);
+```
+airlog("AsyncIO_Read", "BDEV_SUBMIT", 0, ubio->address);
 …
 If (READ)
 {
-AIRLOG("AsyncIO_Read", 0, 1, ubio->address); 
+airlog("AsyncIO_Read", "BDEV_COPY", 0, ubio->address); 
 /* Do Read */
 }
-else
-{
-AIRLOG("AsyncIO_Write", 0, 1, ubio->address);
-/* Do Write */
-}
 …
-AIRLOG("AsyncIO_Read", 0, 2, ubio->address);
-AIRLOG("AsyncIO_Write", 0, 2, ubio->address);
+airlog("AsyncIO_Read", 0, "BDEV_COMPLETE", ubio->address);
 
 /*
-    2 Paths of latency break down
-    read:  0 -> 1 -> 2
-    write: 0 -> 1 -> 2
+    latency break down
+    read:  BDEV_SUBMIT -> BDEV_COPY -> BDEV_COMPLETE
 */
 ```
 
-<br>
+**[TUI result]**
 
-#### 3.2.2.4. Queue Log Point
+```
+( )[O]++Node:AsyncIO_Read("latency")
+      ""(0), index:0, filter:"BDEV_SUBMIT~BDEV_COPY" Period(avg:308ns, median:158ns, max:1us  , sample:100.0 ), Total(avg:373ns, median:172ns, max:10us , sample:300.0 )
+      ""(0), index:0, filter:"BDEV_COPY~BDEV_COMPLETE" Period(avg:6us  , median:6us  , max:14us , sample:100.0 ), Total(avg:110us, median:110us, max:259us, sample:180.0 )
+```
 
- Add queue log point in your application code area where you measure queue.
+#### 3.2.2.3. Queue Log
 
-**[Prototype]**
+Add queue log point in your application code area where you measure queue.
 
-``` c++
-AIRLOG(String node_name, uint32_t aid, uint32_t q_depth, uint32_t q_size)
+**[Definition]**
+
+```
+airlog(string_literal node_name, string_literal filter_item, uint64_t index, uint64_t q_depth)
 ```
 
 **[Parameter]**
 
-| Parameter | Description                                                  |
-| --------- | ------------------------------------------------------------ |
-| node_name | String type value called node_name. It indicates the log point. |
-| aid       | Unsigned integer. User defined identifier. (e.g. volume_id)  |
-| q_depth   | Unsigned integer. Depth of queue to be sampled.              |
-| q_size    | Unsigned integer. Size of queue to be sampled.               |
+| Parameter   | Description                                                  |
+| :---------- | :----------------------------------------------------------- |
+| node_name   | String literal type value called node_name. It indicates the log point. This value is converted integer value at compile-time. |
+| filter_item | String literal type value called node_name. It indicates the semantic separation. This value is converted integer value at compile-time. (e.g. EventScheduler, IOScheduler) |
+| index       | Unsigned integer. user defined numerical separation. (e.g. queue_id) |
+| q_depth     | Unsigned integer. Depth of queue to be sampled.              |
 
-**[Example]**
+**[API Use Case]**
 
-``` c++
-AIRLOG("Q_IOWorker", 1, queue.depth(), queue.size());
+```
+airlog("Q_Scheduler", "IOScheduler", 3, queue.size());
 /* Do Enqueue or Dequeue */
 ```
 
-<br>
+**[TUI result]**
 
-### 3.3. SPDK Support
+```
+( )[O]++Node:Q_Scheduler("queue")
+      "IOScheduler"(3528), index:3, filter:"IOScheduler" Period(avg:209.7 , max:256.0 ), Total(avg:192.1 , max:256.0 )
+```
 
-From AIR 0.2.0-alpha, AIR can profile SPDK source code. Since SPDK is based on C, the C wrapping APIs operating only in C based code are used. The usage is same as described above. The one thing difference is the API function name, just attach _C behind API like AIRLOG_PERF_C(). And these APIs are declared in header file `"air.h"`. 
+#### 3.2.2.4. Utilization Log
 
-| C Wrapping APIs                         |
-| --------------------------------------- |
-| AIR_INITIALIZE(cfg_file, cpu_num)     |
-| AIR_ACTIVATE()                        |
-| AIR_DEACTIVATE()                      |
-| AIR_FINALIZE()                        |
-| AIRLOG(nid, aid, type, size)     |
+Add utilization log point in your application code area where you measure usage.
 
-<br>
+**[Definition]**
+
+```
+airlog(string_literal node_name, string_literal filter_item, uint64_t index, uint64_t usage)
+```
+
+**[Parameter]**
+
+| Parameter   | Description                                                  |
+| :---------- | :----------------------------------------------------------- |
+| node_name   | String literal type value called node_name. It indicates the log point. This value is converted integer value at compile-time. |
+| filter_item | String literal type value called node_name. It indicates the semantic separation. This value is converted integer value at compile-time. (e.g. IDLE, BUSY) |
+| index       | Unsigned integer. user defined numerical separation. (e.g. function_id) |
+| usage       | Unsigned integer. Tick, size and so on                       |
+
+**[API Use Case]**
+
+```
+airlog("UTIL_reactor", "BUSY", function_id, tick);
+...
+airlog("UTIL_reactor", "IDLE", function_id, tick);
+```
+
+**[TUI result]**
+
+```
+( )[O]++Node:UTIL_reactor("utilization")
+      "Reactor_01"(22236), index:0, filter:"BUSY" Period(usage:33.9m , 20.47%), Total(usage:96.5m , 20.59%)
+      "Reactor_01"(22236), index:1, filter:"BUSY" Period(usage:33.9m , 20.47%), Total(usage:96.5m , 20.59%)
+      "Reactor_02"(22237), index:0, filter:"IDLE" Period(usage:30.9m , 18.69%), Total(usage:86.2m , 18.39%)
+      "Reactor_02"(22238), index:1, filter:"BUSY" Period(usage:28.8m , 17.40%), Total(usage:82.7m , 17.67%)
+      "Reactor_03"(22239), index:0, filter:"BUSY" Period(usage:9.2m  , 5.59%), Total(usage:25.5m , 5.44%)
+      "Reactor_03"(22239), index:1, filter:"IDLE" Period(usage:28.8m , 17.38%), Total(usage:81.1m , 17.32%)
+```
+
+#### 3.2.2.5. Count Log
+
+Add count log point in your application code area where you measure count.
+
+**[Definition]**
+
+```
+airlog(string_literal node_name, string_literal filter_item, uint64_t index, uint64_t count)
+```
+
+**[Parameter]**
+
+| Parameter   | Description                                                  |
+| :---------- | :----------------------------------------------------------- |
+| node_name   | String literal type value called node_name. It indicates the log point. This value is converted integer value at compile-time. |
+| filter_item | String literal type value called node_name. It indicates the semantic separation. This value is converted integer value at compile-time. |
+| index       | Unsigned integer. user defined numerical separation.         |
+| count       | Signed integer. Count to be sampled.                         |
+
+**[API Use Case]**
+
+```
+airlog("COUNT_FlowControl", "FreeBlock", 0, 1);
+...
+airlog("COUNT_FlowControl", "FreeBlock", 0, -1);
+```
+
+**[TUI result]**
+
+```
+( )[O]++Node:COUNT_FlowControl("count")
+      "IOWorker"(7343), index:0, filter:"FreeBlock" Period(count:12 ), Total(count:30.3 )
+      "IOWorker"(7347), index:0, filter:"FreeBlock" Period(count:3  ), Total(count:6.2  )
+```
+
+### 3.3. C Support
+
+From AIR 0.2.0-alpha, AIR can profile SPDK source code. Since SPDK is based on C, the C wrapping APIs operating only in C based code are used. The usage is same as described above. The differences are the API function name(C++ style: small letter, C style: capital letter), 1st & 2nd parameters(C++ style: string literal, C style: enum). And these APIs are declared in header file `"Air_c.h"`.
+
+| C Wrapping APIs                                              |
+| :----------------------------------------------------------- |
+| AIR_INITIALIZE(uint32_t cpu_num)                             |
+| AIR_ACTIVATE()                                               |
+| AIR_DEACTIVATE()                                             |
+| AIR_FINALIZE()                                               |
+| AIRLOG(uint32_t node_id, uint32_t filter_id, uint64_t index, uint64_t value) |
+
+
 
 ## 4. TUI
 
-The AIR TUI(Text User Interface) is the visualization tool shows profiling results in text. The profiling results are shown according to the type of node in real-time. In every dump interval(default is 1 second), profiling result is updated. The profiling result of each node is thread-aware, also each thread breaks down to a specified user named AID. The detailed description is below.
-
-``` bash
-$ air_tui
+The AIR TUI(Text User Interface) is the visualization tool shows profiling results in text. The profiling results are shown according to the type of node in real-time. In every dump interval, profiling result is updated. The profiling result of each node is thread-aware, also each thread breaks down. Resource profiling results are shown bottom of the normal data and detailed data page. This keys are basic commands of TUI. The detailed description is below.
 
 ```
+$ air_tui
+```
 
-| key  | Description                                                          |
-| ---- | -------------------------------------------------------------------- |
-| 1-9  | air_cli --air-stream-interval                                        |
-| i    | air_cli --node-init (option value depends on cursor position)        |
-| o    | air_cli --node-run=true_x (option value depends on cursor position)  |
-| x    | air_cli --node-run=false_x (option value depends on cursor position) |
-| q    | quit TUI                                                             |
-| ↑,↓  | move cursor position                                                 |
-| ←,→  | Fold or spread group/node data                                       |
+| key    | Description                                                  |
+| :----- | :----------------------------------------------------------- |
+| 1-9    | air_cli --air-stream-interval                                |
+| i      | air_cli --node-init (option value depends on cursor position) |
+| o      | air_cli --node-run=true_x (option value depends on cursor position) |
+| x      | air_cli --node-run=false_x (option value depends on cursor position) |
+| q, esc | quit TUI                                                     |
+| ↑,↓    | move cursor position                                         |
+| ←,→    | Fold or spread group/node data                               |
 
-![tui](../image/readme/tui.png)
+
 
 ## 5. CLI
 
 The AIR command-line interface (CLI) is the software interface used to access your AIR profiler. The CLI provides a set of commands that you can use to monitor its operations and adjust the configuration as needed in run-time.
 
-``` bash
+```
 $ air_cli --pid=<target_pid> [options] ...
-
 ```
 
-### 6.1. Options
+### 5.1. Options
 
-* ***--air-run=bool***
+- ***--air-run=bool***
 
   Enable/Disable the air. Default is true.
 
   ex) ./air_cli --pid=<target_pid> --run=<true/false>
 
-<br>
 
-* ***--air-stream-interval=int***
 
-  **`second`**                   Integer. Set interval second of dumping the logged data. Allow value range to be given, such as 1-30. Default is 3. 
+- ***--air-stream-interval=int***
 
-<br>
+  **`second`** Integer. Set interval second of dumping the logged data. Allow value range to be given, such as 1-30. Default is 3.
 
-* ***--node-run=bool_str:[int],[int]***
 
-  By configuration, air will run according to the each trace point's specific option. User can enable one to multiple trace point by matching following options. 
 
-  **`node:int`** 	           trace enum id 
+- ***--node-run=bool_str:[int],[int]***
 
-  **`range:int,int`** 	trace enum id (first to last)
+  By configuration, air will run according to the each trace point's specific option. User can enable one to multiple trace point by matching following options.
 
-  **`group:int `**         	trace point's group id (if trace points are comprised of group)
+  **`node:int`** trace enum id
 
-  **`all`**		                  all trace point 
+  **`range:int,int`** trace enum id (first to last)
 
-<br>
+  **`group:int`** trace point's group id
 
-* ***--node-init=str:[int],[int]***
+  **`all`** all trace point
 
-  By configuration, air will run according to the each trace point's specific option. User can initialize one to multiple trace point by matching following options. 
 
-  **`node:int`** 	            trace enum id
 
-  **`range:int,int`** 	 trace enum id (first to last)
+- ***--node-init=str:[int],[int]***
 
-  **`group:int`**	           trace point's group id (if trace points are comprised of group)
+  By configuration, air will run according to the each trace point's specific option. User can initialize one to multiple trace point by matching following options.
 
-  **`all`**		                   all trace point
+  **`node:int`** trace enum id
 
-  <br>
+  **`range:int,int`** trace enum id (first to last)
 
-* ***--node-sample-ratio=int_str:[int],[int]*** 
+  **`group:int`** trace point's group id
 
-  **`ratio`**                       Integer. The following integer is 1/probability of sampling. Allow value range to be given, such as 1-10,000. Default is 1000.
+  **`all`** all trace point
+
+- ***--node-sample-ratio=int_str:[int],[int]***
+
+  **`ratio`** Integer. The following integer is 1/probability of sampling. Allow value range to be given, such as 1-10,000. Default is 1000.
 
   By configuration, air will run according to the each trace point's specific option. User can set sampling ratio one to multiple trace point by matching following options.
 
-  **`node:int`** 	          trace enum id
+  **`node:int`** trace enum id
 
-  **`range:int,int`** 	 trace enum id (first to last)
+  **`range:int,int`** trace enum id (first to last)
 
-  **`group:int`**	          trace point's group id (if trace points are comprised of group)
+  **`group:int`** trace point's group id
 
-  **`all`**		                   all trace point
+  **`all`** all trace point
 
   ※ Only stochastic logger type tracer will be affected.
-
-  <br>
+  

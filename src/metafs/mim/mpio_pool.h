@@ -37,24 +37,50 @@
 #include "mdpage_buf_pool.h"
 #include "mpio.h"
 #include "os_header.h"
+#include <list>
+#include <map>
+#include <string>
 
+namespace pos
+{
 class MpioPool
 {
 public:
     explicit MpioPool(uint32_t poolSize);
     ~MpioPool(void);
 
-    Mpio* Alloc(MpioType mpioType);
+    Mpio* Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn, bool partialIO, std::string arrayName);
     void Release(Mpio* mpio);
     size_t GetPoolSize(void);
 
-    bool IsEmpty(void);
     bool IsEmpty(MpioType type);
+
+#if MPIO_CACHE_EN
+    void ReleaseCache(void);
+#endif
 
 private:
     void _FreeAllMpioinPool(MpioType type);
+    Mpio* _AllocMpio(MpioType mpioType);
+
+#if MPIO_CACHE_EN
+    void _InitCache(uint32_t poolSize);
+    bool _IsFullyCached(void);
+    bool _IsEmptyCached(void);
+    Mpio* _CacheHit(MpioType mpioType, MetaLpnType lpn, std::string arrayName);
+    Mpio* _CacheAlloc(MpioType mpioType, MetaLpnType lpn);
+    void _CacheRemove(MpioType mpioType);
+#endif
 
     MDPageBufPool* mdPageBufPool;
     std::vector<Mpio*> mpioList[(uint32_t)MpioType::Max];
     size_t poolSize;
+
+#if MPIO_CACHE_EN
+    size_t maxCacheCount;
+    size_t currentCacheCount;
+    std::list<Mpio*> cachedList;
+    std::multimap<MetaLpnType, Mpio*> cachedMpio;
+#endif
 };
+} // namespace pos

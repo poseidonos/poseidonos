@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(i_log_buffer_status_ut i_log_buffer_status_test.cpp)
+POS_ADD_UNIT_TEST(journal_status_provider_ut journal_status_provider_test.cpp)

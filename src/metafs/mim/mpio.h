@@ -32,19 +32,20 @@
 
 #pragma once
 
-#include "comp_mdpage_gen.h"
 #include "mdpage.h"
 #include "mfs_async_runnable_template.h"
 #include "mfs_asynccb_cxt_template.h"
-#include "mfs_def.h"
-#include "mim_req.h"
+#include "metafs_def.h"
+#include "metafs_io_request.h"
 #include "mim_state.h"
 #include "mpio_io_info.h"
 #include "mpio_state_execute_entry.h"
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 
 #define AsMpioStateEntryPoint(funcPointer, obj) AsEntryPointParam1(funcPointer, obj)
 
+namespace pos
+{
 enum class MpioType
 {
     First,
@@ -54,12 +55,20 @@ enum class MpioType
     Max,
 };
 
+enum class MpioCacheState
+{
+    Init,
+    FirstRead,
+    MergeSingle,
+    Mergeable,
+};
+
 class Mpio;
 using PartialMpioDoneCb = std::function<void(Mpio*)>;
 using MpioAsyncDoneCb = AsyncCallback;
 
 // meta page io class
-class Mpio : public MetaAsyncRunnableClass<MetaAsyncCbCxt, MpAioState, MpioStateExecuteEntry>
+class Mpio : public MetaAsyncRunnable<MetaAsyncCbCxt, MpAioState, MpioStateExecuteEntry>
 {
 public:
     explicit Mpio(void* mdPageBuf);
@@ -69,7 +78,7 @@ public:
     Mpio& operator=(const Mpio& mio) = delete;
     void Reset(void);
 
-    void Setup(MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO);
+    void Setup(MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage);
     void SetLocalAioCbCxt(MpioAsyncDoneCb& callback);
     virtual MpioType GetType(void) = 0;
     virtual void InitStateHandler(void) = 0;
@@ -79,9 +88,14 @@ public:
     void SetId(uint32_t id);
     bool IsAIOMode(void);
     bool IsPartialIO(void);
+
+#if MPIO_CACHE_EN
+    MpioCacheState GetCacheState(void);
+    void SetCacheState(MpioCacheState state);
+#endif
+
     const MetaIoOpcode GetOpcode(void);
-    void AllocateMDPage(void* buf);
-    void BuildCompositeMDPage(CompMDPageGenClass* compMdPageGenHelper);
+    void BuildCompositeMDPage(void);
     bool IsValidPage(void);
     bool CheckDataIntegrity(void);
     void* GetMDPageDataBuf(void);
@@ -107,6 +121,8 @@ protected:
     bool forceSyncIO;
     MetaAsyncCbCxt aioCbCxt;
 
+    MpioCacheState cacheState;
+
     bool _DoMemCpy(void* dst, void* src, size_t nbytes);
     bool _DoMemSetZero(void* addr, size_t nbytes);
 
@@ -126,3 +142,4 @@ private:
 };
 
 extern InstanceTagIdAllocator mpioTagIdAllocator;
+} // namespace pos

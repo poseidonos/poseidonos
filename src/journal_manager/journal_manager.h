@@ -32,15 +32,15 @@
 
 #pragma once
 
-#include "journal_configuration.h"
-#include "log_buffer/journal_write_context.h"
-#include "src/io/general_io/volume_io.h"
-#include "src/lib/singleton.h"
-#include "src/scheduler/event.h"
+#include "src/allocator/i_context_manager.h"
+#include "src/journal_service/journal_service.h"
+#include "src/journal_service/i_journal_writer.h"
+#include "src/array_models/interface/i_mount_sequence.h"
+#include "src/include/smart_ptr_type.h"
 
-namespace ibofos
+namespace pos
 {
-enum JournalStatus
+enum JournalManagerStatus
 {
     JOURNAL_INVALID,
     JOURNAL_INIT,
@@ -50,6 +50,7 @@ enum JournalStatus
     JOURNAL_BROKEN
 };
 
+class JournalConfiguration;
 class JournalLogBuffer;
 
 class LogWriteContextFactory;
@@ -62,38 +63,101 @@ class LogGroupReleaser;
 
 class ReplayHandler;
 
+class JournalStatusProvider;
+
 class DirtyMapManager;
 class LogBufferWriteDoneNotifier;
+class CallbackSequenceController;
 
-class VolumeIo;
 class Stripe;
 
-class JournalManager
-{
-    friend class Singleton<JournalManager>;
+class IVSAMap;
+class IStripeMap;
+class IMapFlush;
 
+class IBlockAllocator;
+class IWBStripeAllocator;
+class IContextManager;
+class IContextReplayer;
+class IArrayInfo;
+class IStateControl;
+class IVolumeManager;
+class MetaFsFileControlApi;
+
+class JournalManager : public IMountSequence, public IJournalWriter
+{
 public:
     JournalManager(void);
+    JournalManager(IArrayInfo* info, IStateControl* iState);
+    JournalManager(JournalConfiguration* config,
+        JournalStatusProvider* journalStatusProvider,
+        LogWriteContextFactory* logWriteContextFactory,
+        LogWriteHandler* writeHandler,
+        JournalVolumeEventHandler* journalVolumeEventHandler,
+        JournalLogBuffer* journalLogBuffer,
+        BufferOffsetAllocator* bufferOffsetAllocator,
+        LogGroupReleaser* groupReleaser,
+        DirtyMapManager* dirtyManager,
+        LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
+        CallbackSequenceController* sequenceController,
+        ReplayHandler* replayHandler,
+        IArrayInfo* arrayInfo, JournalService* service);
     virtual ~JournalManager(void);
 
-    virtual int Init(void);
-    int Reset(void);
+    virtual bool IsEnabled(void);
+    virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo, MpageList dirty,
+        EventSmartPtr callbackEvent) override;
+    virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
+        MpageList dirty, EventSmartPtr callbackEvent) override;
 
-    bool AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo, MpageList dirty,
-        EventSmartPtr callbackEvent);
-    bool AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
-        MpageList dirty, EventSmartPtr callbackEvent);
+    virtual int AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates,
+        MapPageList dirty, EventSmartPtr callbackEvent) override;
 
-    int DoRecovery(void);
+    virtual int Init(void) override;
+    virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
+    virtual void Flush(void) override;
+
+    int Init(IVSAMap* vsaMap, IStripeMap* stripeMap, IMapFlush* mapFlush,
+        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+        IContextManager* contextManager, IContextReplayer* contextReplayer,
+        IVolumeManager* volumeManager, MetaFsFileControlApi* metaFsCtrl);
+
+    JournalManagerStatus
+    GetJournalManagerStatus(void)
+    {
+        return journalManagerStatus;
+    }
 
 protected:
-    void _InitModules(void);
+    void _InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
+        IMapFlush* mapFlush,
+        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+        IContextManager* contextManager, IContextReplayer* contextReplayer,
+        IVolumeManager* volumeManager);
     void _ResetModules(void);
+
+    int _Init(void);
+    int _InitConfigAndPrepareLogBuffer(MetaFsFileControlApi* metaFsCtrl);
+
+    int _Reset(void);
+    int _DoRecovery(void);
+
+    int _CanJournalBeWritten(void);
+
+    void _RegisterServices(void);
+    void _UnregisterServices(void);
+
+    IArrayInfo* arrayInfo;
+    JournalService* journalService;
+
+    JournalConfiguration* config;
+    JournalStatusProvider* statusProvider;
+    JournalManagerStatus journalManagerStatus;
 
     JournalLogBuffer* logBuffer;
 
     LogWriteContextFactory* logFactory;
-
     LogWriteHandler* logWriteHandler;
     JournalVolumeEventHandler* volumeEventHandler;
 
@@ -101,13 +165,9 @@ protected:
     LogGroupReleaser* logGroupReleaser;
     DirtyMapManager* dirtyMapManager;
     LogBufferWriteDoneNotifier* logFilledNotifier;
+    CallbackSequenceController* sequenceController;
 
     ReplayHandler* replayHandler;
-
-    JournalConfiguration* config;
-    JournalStatus journalStatus;
 };
 
-using JournalManagerSingleton = Singleton<JournalManager>;
-
-} // namespace ibofos
+} // namespace pos

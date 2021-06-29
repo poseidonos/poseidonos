@@ -2,7 +2,7 @@
 # Note : increase VOLUME_COUNT & SUBSYSTEM_COUNT will make multiple volumes and namespace (1:1)
 
 ROOT_DIR=$(readlink -f $(dirname $0))/../../../
-SPDK_DIR=$ROOT_DIR/lib/spdk-19.10
+SPDK_DIR=$ROOT_DIR/lib/spdk
 
 PORT_COUNT=1
 # Note: In case of tcp transport, network io irq can be manually controlled for better performance by issueing an option, "-i true" with given TARGET_NIC and NET_IRQ_CPULIST 
@@ -10,7 +10,7 @@ DEFAULT_TARGET_NIC=enp59s0
 DEFAULT_NET_IRQ_CPULIST=46-55
 DEFAULT_CLEAN_BRINGUP=1
 DEFAULT_TRANSPORT=TCP
-DEFAULT_TARGET_IP=10.100.11.4   # CI Server VM IP
+DEFAULT_TARGET_IP=127.0.0.1  # CI Server VM IP
 DEFAULT_SUBSYSTEM_COUNT=1
 DEFAULT_WRITE_BUFFER_SIZE_IN_MB=1024
 DEFAULT_NUM_SHARED_BUFFER=4096
@@ -19,6 +19,7 @@ DEFAULT_VOLUME_SIZE=2147483648
 DEFAULT_IRQ_DEDICATION=FALSE
 DEFAULT_USER_DEVICE_LIST="-d unvme-ns-0,unvme-ns-1,unvme-ns-2"
 DEFAULT_SPARE_DEVICE_LIST="-s unvme-ns-3"
+PMEM_ENABLED=0
 ARRAYNAME=POSArray
 ############## ^^^ USER CONFIGURABLES ^^^ #################
 
@@ -38,28 +39,43 @@ ibofos_bringup(){
 
     if [ "$TRANSPORT" == "TCP" ] || [ "$TRANSPORT" == "tcp" ]; then 
         sudo $ROOT_DIR/test/system/network/tcp_tune.sh max
-    	if [ "$IRQ_DEDICATION" == "TRUE" ] || [ "$IRQ_DEDICATION" == "true" ];then
+        if [ "$IRQ_DEDICATION" == "TRUE" ] || [ "$IRQ_DEDICATION" == "true" ];then
             sudo systemctl stop irqbalance.service
             sudo $ROOT_DIR/test/script/set_irq_affinity_cpulist.sh ${NET_IRQ_CPULIST} ${TARGET_NIC}
-    	fi
+        fi
         sudo $SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -b 64 -n ${NUM_SHARED_BUFFER}
     else
         sudo $SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -u 131072
     fi
-    sudo $SPDK_DIR/scripts/rpc.py bdev_malloc_create -b uram0 $WRITE_BUFFER_SIZE_IN_MB 512
+
+    if [ ${PMEM_ENABLED} -eq 1 ]; then
+        PMEM_POOL=/mnt/pmem0/pmem_pool
+        if [ ! -e $PMEM_POOL ]; then
+            sudo $SPDK_DIR/scripts/rpc.py bdev_pmem_create_pool ${PMEM_POOL} $WRITE_BUFFER_SIZE_IN_MB 512
+        fi
+        sudo $SPDK_DIR/scripts/rpc.py bdev_pmem_create ${PMEM_POOL} -n pmem0
+    else
+        sudo $SPDK_DIR/scripts/rpc.py bdev_malloc_create -b uram0 $WRITE_BUFFER_SIZE_IN_MB 512
+    fi
+	
     sudo $ROOT_DIR/bin/cli device scan
 
     for i in `seq 1 $SUBSYSTEM_COUNT`
     do
-        sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem$i -m 256 -a -s IBOF0000000000000$i -d IBOF_VOLUME_EXTENTION
+        sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem$i -m 256 -a -s POS0000000000000$i -d POS_VOLUME_EXTENTION
         port=`expr $i % $PORT_COUNT + 1158`
-        sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem$i -t $TRANSPORT -a $TARGET_IP -s $port
+        sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP -s $port
     done
 
     if [ "$CLEAN_BRINGUP" -eq 1 ]; then
-        echo "ibofos clean bringup"
-        sudo $ROOT_DIR/bin/cli array create -b uram0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --name $ARRAYNAME --raidtype RAID5
-        sudo $ROOT_DIR/bin/cli system mount
+        echo "poseidonos clean bringup"
+        sudo $ROOT_DIR/bin/cli array reset
+        if [ ${PMEM_ENABLED} -eq 1 ]; then
+            sudo $ROOT_DIR/bin/cli array create -b pmem0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --name $ARRAYNAME --raidtype RAID5
+        else
+            sudo $ROOT_DIR/bin/cli array create -b uram0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --name $ARRAYNAME --raidtype RAID5
+        fi
+        sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME
 
         for i in `seq 1 $VOLUME_COUNT`
         do
@@ -67,10 +83,9 @@ ibofos_bringup(){
             sudo $ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME
         done
     else
-        echo "ibofos dirty bringup"
+        echo "poseidonos dirty bringup"
         #TODO : need to backup uram before load_array
-        sudo $ROOT_DIR/bin/cli array load --name $ARRAYNAME
-        sudo $ROOT_DIR/bin/cli system mount
+        sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME
         for i in `seq 1 $VOLUME_COUNT`
         do
             sudo $ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME
@@ -108,11 +123,12 @@ print_help()
     -n: Target NIC Name, Defalut: $TARGET_NIC
     -q: IRQ Cpu List, Default: $NET_IRQ_CPULIST
     -b: Num Shared Buffer for Transport, Default: $NUM_SHARED_BUFFER
+    -m: Using pmem_bdev instead of malloc bdev
 
 END_OF_HELP
 }
 
-while getopts c:t:a:s:w:v:S:i:u:p:q:n:b:h: ARG ; do
+while getopts c:t:a:s:w:v:S:i:u:p:q:n:b:m:h: ARG ; do
     case $ARG in
         c )
             CLEAN_BRINGUP=$OPTARG
@@ -150,8 +166,11 @@ while getopts c:t:a:s:w:v:S:i:u:p:q:n:b:h: ARG ; do
         n ) 
             TARGET_NIC=$OPTARG
             ;;
-        b ) 
+        b )
             NUM_SHARED_BUFFER=$OPTARG
+            ;;
+        m )
+            PMEM_ENABLED=1
             ;;
         h )
             print_help ;

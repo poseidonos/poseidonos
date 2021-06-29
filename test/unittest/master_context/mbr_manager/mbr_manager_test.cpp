@@ -4,7 +4,7 @@
 #include "src/device/device_manager.h"
 #include <gtest/gtest.h>
 
-using namespace ibofos;
+using namespace pos;
 using namespace std;
 
 namespace

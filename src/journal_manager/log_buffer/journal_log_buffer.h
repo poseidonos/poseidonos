@@ -31,24 +31,30 @@
  */
 
 #pragma once
+#include <string>
+
+#include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
 #include "src/meta_file_intf/meta_file_intf.h"
-#ifdef IBOF_CONFIG_USE_MOCK_FS
-#include "src/meta_file_intf/mock_file_intf.h"
-#else
-#include "src/metafs/mfs_file_intf.h"
-#endif
 
-#include "../log_buffer/journal_write_context.h"
-
-namespace ibofos
+namespace pos
 {
-class JournalLogBuffer
+class LogWriteContext;
+class LogBufferIoContext;
+
+class JournalLogBuffer : public ILogGroupResetCompleted
 {
 public:
     JournalLogBuffer(void);
+    explicit JournalLogBuffer(std::string arrayName);
+    explicit JournalLogBuffer(MetaFileIntf* metaFile);
     virtual ~JournalLogBuffer(void);
 
-    int Setup(void);
+    virtual int Create(uint64_t logBufferSize);
+    virtual int Open(uint64_t& logBufferSize);
+
+    virtual int Init(JournalConfiguration* journalConfiguration);
+    virtual void Dispose(void);
 
     int ReadLogBuffer(int groupId, void* buffer);
     int AsyncIO(AsyncMetaFileIoCtx* ctx);
@@ -56,64 +62,37 @@ public:
     inline bool
     IsInitialized(void)
     {
-        return numInitializedLogGroup == numLogGroups;
-    }
-    inline bool
-    IsLoaded(void)
-    {
-        return logBufferLoaded;
-    }
-    inline uint32_t
-    GetLogGroupSize(void)
-    {
-        return groupSize;
-    }
-    inline uint32_t
-    GetLogBufferSize(void)
-    {
-        return bufferSize;
-    }
-    inline int
-    GetNumLogGroups(void)
-    {
-        return numLogGroups;
+        return numInitializedLogGroup == config->GetNumLogGroups();
     }
 
-    int WriteLog(LogWriteContext* context, int logGroupID, int offset);
+    virtual int WriteLog(LogWriteContext* context);
 
-    int SyncResetAll(void);
-    int AsyncReset(int id, JournalInternalEventCallback callbackFunc);
-    void AsyncResetDone(AsyncMetaFileIoCtx* ctx);
+    virtual int SyncResetAll(void);
+    virtual int AsyncReset(int id, EventSmartPtr callbackEvent);
+
+    virtual int InternalIo(LogBufferIoContext* context);
+    virtual void InternalIoDone(AsyncMetaFileIoCtx* ctx);
 
     int Delete(void); // TODO(huijeong.kim): move to tester code
 
-    void SetSize(uint32_t size);
+    virtual void LogGroupResetCompleted(int logGroupId) override;
+    virtual bool DoesLogFileExist(void);
 
 private:
-    void _SetupBufferSize(void);
     void _LoadBufferSize(void);
 
-    uint32_t _DetermineLogBufferSize(void);
-
-    inline uint32_t
-    _GetFileOffset(int groupId, uint32_t offset)
+    inline uint64_t
+    _GetFileOffset(int groupId, uint64_t offset)
     {
-        return groupId * groupSize + offset;
+        uint64_t groupSize = config->GetLogGroupSize();
+        return (groupId * groupSize + offset);
     }
 
-    void _LogBufferResetCompleted(int logGroupId);
-
-    const uint32_t INVALID_BUFFER_SIZE = UINT32_MAX;
-    const uint32_t DEFAULT_BUFFER_SIZE = 16 * 1024 * 1024;
-
-    uint32_t bufferSize;
-    uint32_t groupSize;
-    int numLogGroups;
+    JournalConfiguration* config;
 
     std::atomic<int> numInitializedLogGroup;
-    bool logBufferLoaded = false;
-    MetaFileIntf* logFile = nullptr;
+    MetaFileIntf* logFile;
 
     char* initializedDataBuffer;
 };
-} // namespace ibofos
+} // namespace pos

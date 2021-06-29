@@ -32,120 +32,85 @@
 
 #pragma once
 
-#include <array>
+#include "src/array_models/interface/i_mount_sequence.h"
+
+#include "src/mapper/i_map_flush.h"
+#include "src/mapper/i_mapper_wbt.h"
+#include "src/mapper/address/mapper_address_info.h"
+
+#include "src/mapper/reversemap/reverse_map.h"
+#include "src/mapper/reversemap/reversemap_manager.h"
+#include "src/mapper/stripemap/stripemap_content.h"
+#include "src/mapper/stripemap/stripemap_manager.h"
+#include "src/mapper/vsamap/vsamap_content.h"
+#include "src/mapper/vsamap/vsamap_manager.h"
+
+#include "src/state/interface/i_state_control.h"
+
 #include <string>
-#include <tuple>
 
-#include "mapper_address_info.h"
-#include "reverse_map.h"
-#include "src/lib/singleton.h"
-#include "stripemap_content.h"
-#include "vsamap_content.h"
-#include "vsamap_manager.h"
-
-class MapperTest;
-
-namespace ibofos
+namespace pos
 {
-using VsaArray = std::array<VirtualBlkAddr, MAX_PROCESSABLE_BLOCK_COUNT>;
-const uint64_t INVALID_BLOCK_MAP_SIZE = 0xFFFFFFFFFFFFFFFF;
-using LsidRefResult = std::tuple<StripeAddr, bool>;
 
-class Mapper
+class Mapper : public IMapFlush, public IMapperWbt, public IMountSequence
 {
-    friend class MapperTest;
+    friend class MapperTestFixture;
 
 public:
-    Mapper(void);
+    Mapper(IArrayInfo* iarrayInfo, IStateControl* iState);
     virtual ~Mapper(void);
 
-    void Init(void);
-    int SyncStore(void);  // FlushMetadata::Start()
-    int AsyncStore(void); // MainHandler::Unmount()
+    virtual int Init(void) override;
+    virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
+    virtual void Flush(void) override;
+
     void Close(void);
 
-    // Get & Set APIs for VSAMap
-    int GetVSAs(int volumeId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray);
-    VirtualBlkAddr GetVSA(int volumeId, BlkAddr rba);
-    virtual VirtualBlkAddr GetVSAInternal(int volumeId, BlkAddr rba, int& caller);
-    VirtualBlkAddr GetRandomVSA(BlkAddr rba);
-    int SetVsaMap(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks);
-    virtual int SetVsaMapInternal(int volumeId, BlkAddr startRba,
-        VirtualBlks& virtualBlks);
-    int ResetVSARange(int volumeId, BlkAddr rba, uint64_t cnt);
+    virtual IVSAMap* GetIVSAMap(void);
+    virtual IStripeMap* GetIStripeMap(void);
+    IReverseMap* GetIReverseMap(void);
+    virtual IMapFlush* GetIMapFlush(void);
+    IMapperWbt* GetIMapperWbt(void);
 
-    // Get & Set APIs for StripeMap
-    virtual StripeAddr GetLSA(StripeId vsid);
-    LsidRefResult GetAndReferLsid(StripeId vsid);
-    StripeId GetRandomLsid(StripeId vsid);
-    virtual int UpdateStripeMap(StripeId vsid, StripeId lsid, StripeLoc loc);
-    bool ReferLsid(StripeAddr& lsidEntry);
-    void DereferLsid(StripeAddr& lsidEntry, uint32_t blockCount);
+    int FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages = DEFAULT_DIRTYPAGE_SET) override;
+    int FlushAllMaps(void) override;
+    void WaitForFlushAllMapsDone(void) override;
+    int StoreAllMaps(void) override;
 
-    // ReverseMap
-    int LinkReverseMap(Stripe* stripe, StripeId wbLsid, StripeId vsid);
-    MetaFileIntf* GetRevMapWholeFile(void);
-
-    // CheckPoint
-    MpageList GetDirtyVsaMapPages(int volumeId, BlkAddr startRba, uint64_t numBlks);
-    MpageList GetDirtyStripeMapPages(int vsid);
-    virtual int StartDirtyPageFlush(int mapId, MpageList dirtyPages, EventSmartPtr callback);
-
-    // NVMe FLUSH command
-    int FlushMap(int mapId, EventSmartPtr callback);
-
-    // WBT
-    int GetMapLayout(std::string fname);
-    int ReadVsaMap(int volId, std::string fname);
-    int ReadVsaMapEntry(int volId, BlkAddr rba, std::string fname);
-    int WriteVsaMap(int volId, std::string fname);
-    int WriteVsaMapEntry(int volId, BlkAddr rba, VirtualBlkAddr vsa);
-    int ReadStripeMap(std::string fname);
-    int ReadStripeMapEntry(StripeId vsid, std::string fname);
-    int WriteStripeMap(std::string fname);
-    int WriteStripeMapEntry(StripeId vsid, StripeLoc loc, StripeId lsid);
-    int ReadReverseMap(StripeId vsid, std::string fname);
-    int ReadWholeReverseMap(std::string fname);
-    int ReadReverseMapEntry(StripeId vsid, BlkOffset offset, std::string fname);
-    int WriteReverseMap(StripeId vsid, std::string fname);
-    int WriteWholeReverseMap(std::string fname);
-    int WriteReverseMapEntry(StripeId vsid, BlkOffset offset, BlkAddr rba,
-        uint32_t volumeId);
-
-    // Etc
-    int64_t GetNumUsedBlocks(int volId);
-    void RegisterToPublisher(void);
-    void RemoveFromPublisher(void);
-    bool
-    IsInUserDataArea(StripeAddr entry)
-    {
-        return entry.stripeLoc == IN_USER_AREA;
-    }
-    bool
-    IsInWriteBufferArea(StripeAddr entry)
-    {
-        return entry.stripeLoc == IN_WRITE_BUFFER_AREA;
-    }
-    void CheckMapStoreDone(void);
+    int GetMapLayout(std::string fname) override;
+    int ReadVsaMap(int volId, std::string fname) override;
+    int ReadVsaMapEntry(int volId, BlkAddr rba, std::string fname) override;
+    int WriteVsaMap(int volId, std::string fname) override;
+    int WriteVsaMapEntry(int volId, BlkAddr rba, VirtualBlkAddr vsa) override;
+    int ReadStripeMap(std::string fname) override;
+    int ReadStripeMapEntry(StripeId vsid, std::string fname) override;
+    int WriteStripeMap(std::string fname) override;
+    int WriteStripeMapEntry(StripeId vsid, StripeLoc loc, StripeId lsid) override;
+    int ReadReverseMap(StripeId vsid, std::string fname) override;
+    int ReadWholeReverseMap(std::string fname) override;
+    int ReadReverseMapEntry(StripeId vsid, BlkOffset offset, std::string fname) override;
+    int WriteReverseMap(StripeId vsid, std::string fname) override;
+    int WriteWholeReverseMap(std::string fname) override;
+    int WriteReverseMapEntry(StripeId vsid, BlkOffset offset, BlkAddr rba, uint32_t volumeId) override;
 
 private:
-    int _UpdateVsaMap(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks);
-    VirtualBlkAddr _ReadVSA(int volumeId, BlkAddr rba);
-    void _InitMetadata(const MapperAddressInfo& info);
-    VSAMapContent* _GetFirstValidVolume(void);
-    MapContent* _GetMapContent(int mapId);
     int _LoadReverseMapVsidFromMFS(ReverseMapPack* reverseMapPack, StripeId vsid);
     int _StoreReverseMapToMFS(ReverseMapPack* reverseMapPack);
+    VSAMapContent* _GetFirstValidVolume(void);
+    MapContent* _GetMapContent(int mapId);
+    void _RegisterToMapperService(void);
+    void _UnregisterFromMapperService(void);
 
-    MapperAddressInfo info;
+    MapperAddressInfo* addrInfo;
     VSAMapManager* vsaMapManager;
-    StripeMapContent* stripeMap;
-    ReverseMapPack* revMapPacks;
-    MetaFileIntf* revMapWholefile;
+    StripeMapManager* stripeMapManager;
+    ReverseMapManager* reverseMapManager;
 
-    pthread_rwlock_t stripeMapLock;
+    IArrayInfo* iArrayinfo;
+    IStateControl* iStateControl;
+
+    bool isInitialized;
 };
 
-using MapperSingleton = Singleton<Mapper>;
-
-} // namespace ibofos
+} // namespace pos

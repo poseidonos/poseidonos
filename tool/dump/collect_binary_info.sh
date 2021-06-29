@@ -1,9 +1,9 @@
 #!/bin/bash
 cd $(dirname $(realpath $0))
 
-IBOFOS=../../bin/ibofos
+IBOFOS=../../bin/poseidonos
 TEMP=collect_binary.tmp
-IBOF_CONF=/etc/ibofos/conf/ibofos.conf
+IBOF_CONF=/etc/pos/pos.conf
 
 Branch=`git branch -v | grep "*" | awk '{print $2}'`
 
@@ -24,7 +24,7 @@ if [ -f $IBOF_CONF ]; then
     cat $IBOF_CONF 
     echo ""
 else
-    echo "There are no ibofos config file in /etc/ibofos/conf/"
+    echo "There are no pos config file in /etc/pos/"
 fi
 
 

@@ -31,16 +31,18 @@
  */
 
 #include "meta_file_intf.h"
+#include "src/logger/logger.h"
 
 #include <fcntl.h>
 #include <unistd.h>
 
 #include <string>
 
-namespace ibofos
+namespace pos
 {
-MetaFileIntf::MetaFileIntf(std::string name)
-: fileName(name),
+MetaFileIntf::MetaFileIntf(std::string fname, std::string aname)
+: fileName(fname),
+  arrayName(aname),
   size(0),
   isOpened(false),
   fd(-1)
@@ -48,8 +50,8 @@ MetaFileIntf::MetaFileIntf(std::string name)
 }
 
 int
-MetaFileIntf::IssueIO(MetaFsIoOpcode opType, uint32_t fileOffset,
-    uint32_t length, char* buffer)
+MetaFileIntf::IssueIO(MetaFsIoOpcode opType, uint64_t fileOffset,
+    uint64_t length, char* buffer)
 {
     int ret = 0;
 
@@ -66,8 +68,8 @@ MetaFileIntf::IssueIO(MetaFsIoOpcode opType, uint32_t fileOffset,
 }
 
 int
-MetaFileIntf::AppendIO(MetaFsIoOpcode opType, uint32_t& offset,
-    uint32_t length, char* buffer)
+MetaFileIntf::AppendIO(MetaFsIoOpcode opType, uint64_t& offset,
+    uint64_t length, char* buffer)
 {
     int ret = 0;
 
@@ -89,6 +91,7 @@ int
 MetaFileIntf::Open(void)
 {
     isOpened = true;
+    POS_TRACE_INFO(EID(SUCCESS), "File Opened, fileName:{}  fd:{}", fileName, fd);
     return 0;
 }
 
@@ -96,6 +99,7 @@ int
 MetaFileIntf::Close(void)
 {
     isOpened = false;
+    POS_TRACE_INFO(EID(SUCCESS), "File Closed, fileName:{}  fd:{}", fileName, fd);
     fd = -1;
 
     return 0;
@@ -107,4 +111,4 @@ MetaFileIntf::IsOpened(void)
     return isOpened;
 }
 
-} // namespace ibofos
+} // namespace pos

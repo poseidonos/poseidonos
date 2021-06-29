@@ -7,8 +7,8 @@ sys.path.append("../volume/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
-import ibofos_util
+import pos
+import pos_util
 import cli
 import test_result
 import json
@@ -17,47 +17,38 @@ import fio
 import time
 import CREATE_ARRAY_NO_SPARE
 DETACH_TARGET_DEV = CREATE_ARRAY_NO_SPARE.DATA_DEV_1
-
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
+ANY_OTHER_DATA = CREATE_ARRAY_NO_SPARE.DATA_DEV_2
+ARRAYNAME = MOUNT_VOL_NO_SPARE.ARRAYNAME
 
 def check_result():
-    out = cli.get_ibofos_info()
-    data = json.loads(out)
-    if data['Response']['info']['situation'] == "DEGRADED":
-        list = cli.array_info("")
-        data = json.loads(list)
+    out = cli.array_info(ARRAYNAME)
+    situ = json_parser.get_situation(out)
+    if situ == "DEGRADED":
+        data = json.loads(out)
         for item in data['Response']['result']['data']['devicelist']:
             if item['name'] == DETACH_TARGET_DEV :
-                return "fail", list
+                return "fail", out
         return "pass", out
     return "fail", out
 
-def set_result(detail):
-    code = json_parser.get_response_code(detail)
-    if code == 0:
-        result, out = check_result()
-    else:
-        result = "fail"
-        out = detail
+def set_result():
+    result, out = check_result()
+    code = json_parser.get_response_code(out)
 
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + out)
 
 def execute():
-    clear_result()
     MOUNT_VOL_NO_SPARE.execute()
     fio_proc = fio.start_fio(0, 30)
     time.sleep(1)
-    ibofos_util.pci_detach(DETACH_TARGET_DEV)
+    pos_util.pci_detach(DETACH_TARGET_DEV)
     time.sleep(1)
-    out = cli.get_ibofos_info()
-    fio.wait_fio(fio_proc)
-    return out
+    return fio_proc
 
 if __name__ == "__main__":
-    out = execute()
-    set_result(out)
-    ibofos.kill_ibofos()
-    ibofos_util.pci_rescan()
+    fio_proc = execute()
+    fio.wait_fio(fio_proc)
+    set_result()
+    pos.kill_pos()
+    pos_util.pci_rescan()

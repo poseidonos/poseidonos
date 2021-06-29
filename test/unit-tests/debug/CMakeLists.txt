@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(memory_checker_ut memory_checker_test.cpp)
+POS_ADD_UNIT_TEST(debug_info_ut debug_info_test.cpp)

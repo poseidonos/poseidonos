@@ -39,11 +39,11 @@
 #include <list>
 #include <memory>
 
-#include "src/device/spdk/spdk.hpp"
+#include "src/spdk_wrapper/spdk.hpp"
 #include "src/include/memory.h"
 #include "unvme_drv.h"
 
-namespace ibofos
+namespace pos
 {
 UnvmeBlockDeviceTest::UnvmeBlockDeviceTest(DeviceDriver* inputDeviceDriver,
     uint32_t ioContextCount)
@@ -64,9 +64,9 @@ UnvmeBlockDeviceTest::PrintUsage(void)
     std::cout << "Usage: sudo unvme_block_device_test" << std::endl;
 }
 
-} // namespace ibofos
+} // namespace pos
 
-using namespace ibofos;
+using namespace pos;
 
 int
 main(int argc, char** argv)

@@ -11,7 +11,7 @@ import (
 
 func Dial(network, addr string) (*tls.Conn, error) {
 
-	caCert, err := ioutil.ReadFile("/etc/ibofos/cert/cert.crt")
+	caCert, err := ioutil.ReadFile("/etc/pos/cert/cert.crt")
 
 	if err != nil {
 		log.Fatal(err)

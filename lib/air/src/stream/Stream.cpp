@@ -44,7 +44,10 @@ stream::Stream::SendPacket(void)
     filename += ".json";
 
     export_file.open(filename, std::ofstream::out | std::ofstream::app);
-    export_file << air::json("air") << std::endl;
+    if (!export_file.fail())
+    {
+        export_file << air::json("air") << std::endl;
+    }
     export_file.close();
 
     air::json_clear();

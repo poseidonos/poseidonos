@@ -32,22 +32,34 @@
 
 #pragma once
 
-#include "src/scheduler/event.h"
+#include <string>
 
-namespace ibofos
+#include "src/event_scheduler/event.h"
+
+namespace pos
 {
 class Stripe;
+class IStripeMap;
+class StripePutEvent;
+class EventScheduler;
 
 class FlushCompletion : public Event
 {
 public:
     FlushCompletion(void) = delete;
-    explicit FlushCompletion(Stripe* inputStripe);
+    explicit FlushCompletion(Stripe* stripe, std::string& arrayName);
+    FlushCompletion(Stripe* stripe,
+        IStripeMap* stripeMap,
+        EventScheduler* eventScheduler,
+        std::string& arrayName);
     virtual ~FlushCompletion(void);
 
     virtual bool Execute(void) override;
 
 private:
     Stripe* stripe;
+    IStripeMap* iStripeMap;
+    EventScheduler* eventScheduler;
+    std::string arrayName;
 };
-} // namespace ibofos
+} // namespace pos

@@ -40,12 +40,13 @@
 #include <thread>
 
 #include "io_submit_handler_test.h"
+#include "src/event_scheduler/io_completer.h"
 #include "src/include/memory.h"
-#include "src/scheduler/io_queue.h"
-#include "src/scheduler/io_worker.h"
-#include "ubio.h"
+#include "src/io_scheduler/io_queue.h"
+#include "src/io_scheduler/io_worker.h"
+#include "src/bio/ubio.h"
 
-namespace ibofos
+namespace pos
 {
 static uint32_t timeSeed;
 static uint8_t (*storage)[BLOCK_SIZE];
@@ -58,7 +59,8 @@ EmulateWrite(UbioSmartPtr ubio)
     //     " Bytes" << std::endl;
     memcpy(storage[blockIndex], ubio->GetBuffer(), ubio->GetSize());
 
-    ubio->CompleteWithoutRecovery(CallbackError::SUCCESS);
+    IoCompleter ioCompleter(ubio);
+    ioCompleter.CompleteUbio(IOErrorType::SUCCESS, true);
 }
 
 static void
@@ -69,7 +71,8 @@ EmulateRead(UbioSmartPtr ubio)
     //     " Bytes" << std::endl;
     memcpy(ubio->GetBuffer(), storage[blockIndex], ubio->GetSize());
 
-    ubio->CompleteWithoutRecovery(CallbackError::SUCCESS);
+    IoCompleter ioCompleter(ubio);
+    ioCompleter.CompleteUbio(IOErrorType::SUCCESS, true);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -110,6 +113,7 @@ IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id)
 IOWorker::~IOWorker(void)
 {
     delete storage;
+    delete ioQueue;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -168,4 +172,4 @@ IOWorker::_SubmitAsyncIO(UbioSmartPtr ubio)
     }
 }
 
-} // namespace ibofos
+} // namespace pos

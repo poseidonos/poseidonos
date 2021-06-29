@@ -31,7 +31,7 @@
  */
 
 /* 
- * iBoFOS - Meta Filesystem Layer
+ * PoseidonOS - Meta Filesystem Layer
  * 
  * Meta API Wrapper (Mock)
 */
@@ -39,7 +39,7 @@
 
 #undef Max // this is to resolve compile error conflicting to gtest/internal/gtest-internal.h
 #include "gmock/gmock.h"
-#include "mfs_fscontrol_api_mock.h"
-#include "mfs_io_api_mock.h"
-#include "mfs_mgmt_api_mock.h"
+#include "metafs_management_api_mock.h"
+#include "metafs_io_api_mock.h"
+#include "metafs_file_control_api_mock.h"
 #include "mfs_util_api_mock.h"

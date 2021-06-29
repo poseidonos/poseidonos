@@ -37,7 +37,7 @@
 
 #include "src/lib/timeout_checker.h"
 
-namespace ibofos
+namespace pos
 {
 class SystemTimeoutChecker : public TimeoutChecker
 {
@@ -53,6 +53,6 @@ private:
     uint64_t targetFromStartInNSec;
     struct timespec startTime;
 };
-} // namespace ibofos
+} // namespace pos
 
 #endif // __SYSTEM_TIMEOUT_CHECKER_H__

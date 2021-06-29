@@ -1,10 +1,12 @@
 #include <assert.h>
 
-#include "src/scheduler/io_dispatcher.h"
+#include "src/io_scheduler/io_dispatcher.h"
 
-namespace ibofos
+namespace pos
 {
 IODispatcher::IODispatcher(void)
+: ioWorkerCount(0),
+  deviceAllocationTurn(0)
 {
 
 }
@@ -64,5 +66,5 @@ IODispatcher::GetIOWorker(UBlockDevice* device)
     return nullptr;
 }
 
-}  // namespace ibofos
+}  // namespace pos
 

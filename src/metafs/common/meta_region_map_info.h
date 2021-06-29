@@ -32,17 +32,19 @@
 
 #pragma once
 
-#include "mfs_common.h"
+#include "metafs_common.h"
 
-class MetaRegionMapInfo
+namespace pos
+{
+class MetaRegionMap
 {
 public:
-    MetaRegionMapInfo(void)
+    MetaRegionMap(void)
     : baseLpn(MetaFsCommonConst::INVALID_META_LPN),
       maxLpn(MetaFsCommonConst::INVALID_META_LPN)
     {
     }
-    MetaRegionMapInfo(MetaLpnType _baseLpn, MetaLpnType _maxLpn)
+    MetaRegionMap(MetaLpnType _baseLpn, MetaLpnType _maxLpn)
     : baseLpn(_baseLpn),
       maxLpn(_maxLpn)
     {
@@ -51,3 +53,4 @@ public:
     MetaLpnType baseLpn;
     MetaLpnType maxLpn;
 };
+} // namespace pos

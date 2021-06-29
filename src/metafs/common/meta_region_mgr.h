@@ -32,15 +32,18 @@
 
 #pragma once
 
+#include <string>
 #include "meta_storage_specific.h"
-#include "mfs_common.h"
+#include "metafs_common.h"
 
+namespace pos
+{
 // A interface class for meta region management: contains common API set
-class MetaRegionMgr
+class MetaRegionManager
 {
 public:
-    MetaRegionMgr(void);
-    virtual ~MetaRegionMgr(void);
+    explicit MetaRegionManager(std::string arrayName);
+    virtual ~MetaRegionManager(void);
 
     // Init: used to initialize internal context based on given paramters
     virtual void Init(MetaStorageType mediaType, MetaLpnType baseLpn, MetaLpnType maxLpn) = 0;
@@ -57,4 +60,6 @@ protected:
     MetaStorageType mediaType;
     MetaLpnType baseLpn;
     MetaLpnType maxLpn;
+    std::string arrayName;
 };
+} // namespace pos

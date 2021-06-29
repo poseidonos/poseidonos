@@ -32,7 +32,7 @@
 
 #include "src/io/general_io/sync_io_completion.h"
 
-namespace ibofos
+namespace pos
 {
 SyncIoCompletion::SyncIoCompletion(
     std::atomic<bool>& inputNeedToWait, uint32_t& inputErrorCount)
@@ -53,4 +53,4 @@ SyncIoCompletion::_DoSpecificJob(void)
     needToWait = false;
     return true;
 }
-} // namespace ibofos
+} // namespace pos

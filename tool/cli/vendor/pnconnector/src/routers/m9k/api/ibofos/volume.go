@@ -22,10 +22,6 @@ func CreateVolume(xrId string, param interface{}) (model.Request, model.Response
 	return req, res, err
 }
 
-func UpdateVolume(xrId string, param interface{}) (model.Request, model.Response, error) {
-	return Requester{xrId, param, model.VolumeParam{}}.Send("UPDATEVOLUMEQOS")
-}
-
 func MountVolume(xrId string, param interface{}) (model.Request, model.Response, error) {
 	return Requester{xrId, param, model.VolumeParam{}}.Send("MOUNTVOLUME")
 }
@@ -51,10 +47,6 @@ func DeleteVolume(xrId string, param interface{}) (model.Request, model.Response
 
 func ListVolume(xrId string, param interface{}) (model.Request, model.Response, error) {
 	return volumeSender(xrId, param, "LISTVOLUME")
-}
-
-func UpdateVolumeQoS(xrId string, param interface{}) (model.Request, model.Response, error) {
-	return volumeSender(xrId, param, "UPDATEVOLUMEQOS")
 }
 
 func RenameVolume(xrId string, param interface{}) (model.Request, model.Response, error) {

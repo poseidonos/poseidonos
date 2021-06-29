@@ -31,8 +31,9 @@
  */
 
 #include "mss_disk_place.h"
+#include "src/include/array_config.h"
 
-namespace ibofos
+namespace pos
 {
 
 MssDiskPlace::~MssDiskPlace(void)
@@ -45,7 +46,7 @@ MssDiskPlace::~MssDiskPlace(void)
 const PartitionLogicalSize*
 MssDiskPlace::GetPartitionSizeInfo(void)
 {
-    return arrayManager->GetSizeInfo(partitionType);
+    return array->GetSizeInfo(partitionType);
 }
 
 /**
@@ -62,4 +63,4 @@ MssDiskPlace::GetMetaDiskCapacity(void)
 
     return metaDiskCapacity;
 }
-} // namespace ibofos
+} // namespace pos

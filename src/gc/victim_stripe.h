@@ -32,20 +32,27 @@
 
 #pragma once
 
-#include <list>
 #include <vector>
+#include <list>
 
-#include "src/gc/copier_meta.h"
-#include "src/mapper/reverse_map.h"
+#include "src/mapper/reversemap/reverse_map.h"
+#include "src/array_models/interface/i_array_info.h"
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
+struct BlkInfo
+{
+    BlkAddr rba;
+    uint32_t volID;
+    VirtualBlkAddr vsa;
+};
+
 class VictimStripe
 {
 public:
-    VictimStripe(void);
+    VictimStripe(IArrayInfo* array, ReverseMapPack* revMapPack_ = nullptr);
     virtual ~VictimStripe(void);
     void Load(StripeId _lsid, CallbackSmartPtr callback);
 
@@ -69,18 +76,21 @@ public:
     bool LoadValidBlock(void);
 
 private:
-    void _LoadReverseMap(CallbackSmartPtr callback);
     void _InitValue(StripeId _lsid);
+    void _LoadReverseMap(CallbackSmartPtr callback);
 
     StripeId myLsid;
-    vector< list<BlkInfo> > validBlkInfos;
+    vector<list<BlkInfo>> validBlkInfos;
     list<BlkInfo> blkInfoList;
 
     uint32_t dataBlks;
     uint32_t chunkIndex;
     uint32_t blockOffset;
     uint32_t validBlockCnt;
+    bool isLoaded;
+
+    IArrayInfo* array;
     ReverseMapPack* revMapPack;
 };
 
-} // namespace ibofos
+} // namespace pos

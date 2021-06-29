@@ -32,6 +32,8 @@
 
 #pragma once
 
+namespace pos
+{
 enum class MetaSsState
 {
     Init,
@@ -43,3 +45,4 @@ enum class MetaSsState
 
     Default = Init
 };
+} // namespace pos

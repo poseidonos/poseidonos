@@ -25,10 +25,9 @@ function usage()
 	echo "Valid dependencies are listed below."
 	echo " mfs-raid                  Build IBOF with Meta FileSystem with RAID1 capability"
 	echo " library-build             Build IBOF with library"
+	echo " fpic                      Build IBOF with fpic option"	
 	echo " gcov                      Build IBOF with gcov"	
-    echo " be-qos                    Build IBOF with BE QoS"
-    echo " fe-qos                    Build IBOF with BE & FE QoS"
-    echo " nvme-flush                Build IBOF with nvme flush enabled"
+    echo " fe-qos                    Build IBOF with FE QoS"
     #Just another example 
     #echo " mbr-mock                  Build IBOF with mock mbr."
 	echo ""
@@ -81,25 +80,17 @@ for i in "$@"; do
 		--without-gcov)
 			CONFIG[GCOV]=n
 			;;
-        --with-be-qos)
-            CONFIG[BE_QOS]=y
-            ;;
-        --without-be-qos)
-            CONFIG[BE_QOS]=n
-            CONFIG[FE_QOS]=n
-            ;;
+		--with-fpic)
+			CONFIG[FPIC]=y
+			;;
+		--without-fpic)
+			CONFIG[FPIC]=n
+			;;
         --with-fe-qos)
-            CONFIG[BE_QOS]=y
             CONFIG[FE_QOS]=y
             ;;
         --without-fe-qos)
             CONFIG[FE_QOS]=n
-            ;;
-        --with-nvme-flush)
-            CONFIG[NVME_FLUSH]=y
-            ;;
-        --without-nvme-flush)
-            CONFIG[NVME_FLUSH]=n
             ;;
 		--)
 			break

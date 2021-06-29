@@ -7,20 +7,21 @@ sys.path.append("../lib/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
 import CREATE_VOL_NO_SPARE
-import MOUNT_ARRAY_NO_SPARE_3
+import MOUNT_ARRAY_NO_SPARE
 
 VOL_NAME = CREATE_VOL_NO_SPARE.VOL_NAME
 VOL_SIZE = CREATE_VOL_NO_SPARE.VOL_SIZE
 VOL_IOPS = CREATE_VOL_NO_SPARE.VOL_IOPS
 VOL_BW = CREATE_VOL_NO_SPARE.VOL_BW
 
-REMAINING_DEV = MOUNT_ARRAY_NO_SPARE_3.REMAINING_DEV
-DETACH_ANOTHER_TARGET_DEV = MOUNT_ARRAY_NO_SPARE_3.DATA_DEV_2
-ANY_DATA = MOUNT_ARRAY_NO_SPARE_3.ANY_DATA
+REMAINING_DEV = MOUNT_ARRAY_NO_SPARE.REMAINING_DEV
+DETACH_ANOTHER_TARGET_DEV = MOUNT_ARRAY_NO_SPARE.DATA_DEV_2
+ANY_DATA = MOUNT_ARRAY_NO_SPARE.ANY_DATA
+ARRAYNAME = CREATE_VOL_NO_SPARE.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -35,10 +36,10 @@ def set_result(detail):
 def execute():
     clear_result()
     CREATE_VOL_NO_SPARE.execute()
-    out = cli.mount_volume(CREATE_VOL_NO_SPARE.VOL_NAME, "", "")
+    out = cli.mount_volume(CREATE_VOL_NO_SPARE.VOL_NAME, ARRAYNAME, "")
     return out
 
 if __name__ == "__main__":
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

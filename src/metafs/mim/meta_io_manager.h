@@ -31,53 +31,59 @@
  */
 
 /* 
- * iBoFOS - Meta Filesystem Layer
+ * PoseidonOS - Meta Filesystem Layer
  * 
  * Meta File I/O Manager
 */
 #pragma once
 
-#include "mfs_io_q.h"
-#include "mfs_io_scheduler.h"
-#include "mfs_mim_top.h"
+#include <string>
+#include "src/metafs/storage/mss.h"
+#include "metafs_manager_base.h"
+#include "metafs_io_scheduler.h"
+#include "meta_io_manager.h"
+#include "metafs_io_request.h"
+#include "meta_volume_manager.h"
 
-class MetaIoMgr;
-extern MetaIoMgr metaIoMgr;
-using MetaIoReqHandler = IBOF_EVENT_ID (MetaIoMgr::*)(MetaFsIoReqMsg& reqMsg);
+namespace pos
+{
+class MetaIoManager;
+using MetaIoReqHandler = POS_EVENT_ID (MetaIoManager::*)(MetaFsIoRequest& reqMsg);
 
-class MetaIoMgr : public MetaFsMIMTopMgrClass
+class MetaIoManager : public MetaFsManagerBase
 {
 public:
-    MetaIoMgr(void);
-    virtual ~MetaIoMgr(void);
-    static MetaIoMgr& GetInstance(void);
+    MetaIoManager(void);
+    virtual ~MetaIoManager(void);
 
-    virtual void Init(void) override;
-    virtual bool Bringup(void) override;
-    virtual void Close(void) override;
-    virtual IBOF_EVENT_ID ProcessNewReq(MetaFsIoReqMsg& reqMsg) override;
-    virtual void SetMDpageEpochSignature(uint64_t mbrEpochSignature) override;
-    uint64_t GetMDpageEpochSignature(void); // FIXME: Need to move other place
+    const char* GetModuleName(void) override;
+    bool IsSuccess(POS_EVENT_ID rc);
+
+    virtual void Init(void);
+    void Close(void);
+    virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
+    virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
+    void SetMss(MetaStorageSubsystem* metaStorage);
     void Finalize(void);
+
+    bool AddArrayInfo(std::string arrayName);
+    bool RemoveArrayInfo(std::string arrayName);
 
 private:
     void _InitReqHandler(void);
-    void _PrepareIoThreads(void);
 
-    ScalableMetaIoWorker* _InitiateMioHandler(int handlerId, int coreId, int coreCount);
-    IBOF_EVENT_ID _ProcessNewIoReq(MetaFsIoReqMsg& reqMsg);
-    IBOF_EVENT_ID _CheckFileIoBoundary(MetaFsIoReqMsg& reqMsg);
-    void _AddExtraIoReqInfo(MetaFsIoReqMsg& reqMsg);
-    void _SetByteRangeForFullFileIo(MetaFsIoReqMsg& reqMsg);
-    void _SetTargetMediaType(MetaFsIoReqMsg& reqMsg);
-    void _WaitForDone(MetaFsIoReqMsg& reqMsg);
+    POS_EVENT_ID _ProcessNewIoReq(MetaFsIoRequest& reqMsg);
+    void _SetByteRangeForFullFileIo(MetaFsIoRequest& reqMsg);
+    void _SetTargetMediaType(MetaFsIoRequest& reqMsg);
+    void _WaitForDone(MetaFsIoRequest& reqMsg);
 
-    static const uint32_t NUM_IO_TYPE = static_cast<uint32_t>(MetaIoReqTypeEnum::Max);
+    static const uint32_t NUM_IO_TYPE = static_cast<uint32_t>(MetaIoRequestType::Max);
     MetaIoReqHandler reqHandler[NUM_IO_TYPE];
     MetaFsIoScheduler* ioScheduler;
 
-    uint64_t epochSignature;
     uint32_t totalMetaIoCoreCnt;
     uint32_t mioHandlerCount;
     bool finalized;
+    MetaStorageSubsystem* metaStorage;
 };
+} // namespace pos

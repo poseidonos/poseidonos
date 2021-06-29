@@ -33,28 +33,31 @@
 #ifndef _INCLUDE_MSS_DISK_PLACE_H_
 #define _INCLUDE_MSS_DISK_PLACE_H_
 
-#include "meta_storage_specific.h"
+#include <string>
+#include "src/array_models/interface/i_array_info.h"
+#include "src/include/address_type.h"
 #include "os_header.h"
+#include "meta_storage_specific.h"
 #include "src/array/array.h"
 
+namespace pos
+{
 /**
  * class MssDiskPlace is abstract class for getting the physical address
  * From 1.Inplace update
  *      2.OutOfPlace update
  * To decouple mss_on_disk class from where data is stored.
  */
-namespace ibofos
-{
 class MssDiskPlace
 {
 public:
     // MssDiskPlace( MetaStorageType mediaType, uint64_t capacity);
     virtual ~MssDiskPlace(void);
-    virtual const PartitionLogicalSize* GetPartitionSizeInfo(void);
+    virtual const pos::PartitionLogicalSize* GetPartitionSizeInfo(void);
     virtual uint64_t GetMetaDiskCapacity(void);
-    virtual LogicalBlkAddr CalculateOnDiskAddress(uint64_t metaLpn) = 0;
+    virtual pos::LogicalBlkAddr CalculateOnDiskAddress(uint64_t metaLpn) = 0;
     virtual uint32_t GetMaxLpnCntPerIOSubmit(void) = 0;
-    PartitionType
+    pos::PartitionType
     GetPartitionType(void)
     {
         return partitionType;
@@ -62,11 +65,9 @@ public:
 
 protected:
     MetaStorageType mediaType;
-    PartitionType partitionType;
-    Array* arrayManager;
-
-private:
-    bool isActive;
+    pos::PartitionType partitionType;
+    pos::IArrayInfo* array;
 };
-} // namespace ibofos
+} // namespace pos
+
 #endif // _INCLUDE_MSS_DISK_PLACE_H_

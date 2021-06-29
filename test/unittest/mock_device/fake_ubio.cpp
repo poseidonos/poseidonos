@@ -4,14 +4,14 @@
 
 #include "src/array/device/array_device.h"
 #include "src/include/branch_prediction.h"
-#include "src/include/ibof_event_id.hpp"
+#include "src/include/pos_event_id.hpp"
 #include "src/include/meta_const.h"
 #include "src/include/memory.h"
 #include "src/logger/logger.h"
-#include "src/scheduler/event.h"
+#include "src/event_scheduler/event.h"
 #include "src/volume/volume_list.h"
 
-namespace ibofos {
+namespace pos {
 
 IoState initialState;
 static const VirtualBlkAddr INVALID_VSA =
@@ -62,7 +62,7 @@ Ubio::Ubio(void *buffer, uint32_t unitCount)
     if (nullptr == buffer)
     {
         memoryOwnership = true;
-        buffer = ibofos::Memory<BYTES_PER_UNIT>::Alloc(unitCount);
+        buffer = pos::Memory<BYTES_PER_UNIT>::Alloc(unitCount);
     }
 
     mem = buffer;
@@ -73,7 +73,7 @@ Ubio::~Ubio(void)
 {
     if (memoryOwnership)
     {
-        ibofos::Memory<>::Free(mem);
+        pos::Memory<>::Free(mem);
     }
 
     if(nullptr != callbackEvent)
@@ -93,14 +93,14 @@ Ubio::SetEventCallback(Event *inputEvent)
 {
     if (unlikely(nullptr != callbackEvent))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::UBIO_CALLBACK_EVENT_ALREADY_SET;
+        POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_CALLBACK_EVENT_ALREADY_SET;
         std::stringstream oldEvent, newEvent;
         oldEvent << "0x" << std::hex <<
                 reinterpret_cast<uint64_t>(callbackEvent);
         newEvent << "0x" << std::hex <<
                 reinterpret_cast<uint64_t>(inputEvent);
-        IBOF_TRACE_WARN(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId), oldEvent.str(), newEvent.str());
+        POS_TRACE_WARN(static_cast<int>(eventId),
+            PosEventId::GetString(eventId), oldEvent.str(), newEvent.str());
     }
 
     callbackEvent = inputEvent;
@@ -120,8 +120,8 @@ Ubio::SetPba(PhysicalBlkAddr& pbaInput)
 {
     if (unlikely(IsInvalidPba(pbaInput)))
     {
-        IBOF_TRACE_WARN((int)IBOF_EVENT_ID::UBIO_INVALID_PBA,
-                IbofEventId::GetString(IBOF_EVENT_ID::UBIO_INVALID_PBA));
+        POS_TRACE_WARN((int)POS_EVENT_ID::UBIO_INVALID_PBA,
+                PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_PBA));
         return;
     }
 
@@ -133,8 +133,8 @@ Ubio::GetBuffer(uint32_t blockIndex, uint32_t sectorOffset) const
 {
     if (unlikely(nullptr == mem))
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::UBIO_REQUEST_NULL_BUFFER,
-                IbofEventId::GetString(IBOF_EVENT_ID::UBIO_REQUEST_NULL_BUFFER));
+        POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_REQUEST_NULL_BUFFER,
+                PosEventId::GetString(POS_EVENT_ID::UBIO_REQUEST_NULL_BUFFER));
 
         return mem;
     }
@@ -144,8 +144,8 @@ Ubio::GetBuffer(uint32_t blockIndex, uint32_t sectorOffset) const
 
     if (unlikely(size <= shiftSize))
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::UBIO_REQUEST_OUT_RANGE,
-                IbofEventId::GetString(IBOF_EVENT_ID::UBIO_REQUEST_OUT_RANGE));
+        POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_REQUEST_OUT_RANGE,
+                PosEventId::GetString(POS_EVENT_ID::UBIO_REQUEST_OUT_RANGE));
         return mem;
     }
 
@@ -176,11 +176,11 @@ Ubio::GetUBlock(void)
 {
     if (unlikely(false == CheckPbaSet()))
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::UBIO_INVALID_PBA,
-                IbofEventId::GetString(IBOF_EVENT_ID::UBIO_INVALID_PBA));
-        throw IBOF_EVENT_ID::UBIO_INVALID_PBA;
+        POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_PBA,
+                PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_PBA));
+        throw POS_EVENT_ID::UBIO_INVALID_PBA;
     }
-    return pba.dev->uBlock;
+    return pba.dev->GetUblock();
 }
 
 ArrayDevice*
@@ -188,9 +188,9 @@ Ubio::GetDev(void)
 {
     if (unlikely(false == CheckPbaSet()))
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::UBIO_INVALID_PBA,
-                IbofEventId::GetString(IBOF_EVENT_ID::UBIO_INVALID_PBA));
-        throw IBOF_EVENT_ID::UBIO_INVALID_PBA;
+        POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_PBA,
+                PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_PBA));
+        throw POS_EVENT_ID::UBIO_INVALID_PBA;
     }
     return pba.dev;
 }
@@ -200,9 +200,9 @@ Ubio::GetPba(void)
 {
     if (unlikely(false == CheckPbaSet()))
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::UBIO_INVALID_PBA,
-                IbofEventId::GetString(IBOF_EVENT_ID::UBIO_INVALID_PBA));
-        throw IBOF_EVENT_ID::UBIO_INVALID_PBA;
+        POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_PBA,
+                PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_PBA));
+        throw POS_EVENT_ID::UBIO_INVALID_PBA;
     }
 
     return pba;
@@ -213,9 +213,9 @@ Ubio::GetLba(void)
 {
     if (unlikely(false == CheckPbaSet()))
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::UBIO_INVALID_PBA,
-                IbofEventId::GetString(IBOF_EVENT_ID::UBIO_INVALID_PBA));
-        throw IBOF_EVENT_ID::UBIO_INVALID_PBA;
+        POS_TRACE_ERROR((int)POS_EVENT_ID::UBIO_INVALID_PBA,
+                PosEventId::GetString(POS_EVENT_ID::UBIO_INVALID_PBA));
+        throw POS_EVENT_ID::UBIO_INVALID_PBA;
     }
 
     return pba.lba;
@@ -232,9 +232,9 @@ Ubio::SetIoAbstraction(RequestContext* ctx)
 {
     if (unlikely(CheckRequestContextSet()))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::UBIO_DUPLICATE_IO_ABSTRACTION;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-                IbofEventId::GetString(eventId));
+        POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_DUPLICATE_IO_ABSTRACTION;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+                PosEventId::GetString(eventId));
         return;
     }
     requestContext = ctx;
@@ -245,9 +245,9 @@ Ubio::GetRequestContext(void)
 {
     if (unlikely(false == CheckRequestContextSet()))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::UBIO_DUPLICATE_IO_ABSTRACTION;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-                IbofEventId::GetString(eventId));
+        POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_DUPLICATE_IO_ABSTRACTION;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+                PosEventId::GetString(eventId));
         return nullptr;
     }
     return requestContext;

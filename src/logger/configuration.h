@@ -37,7 +37,7 @@
 #include "src/master_context/config_manager.h"
 
 using namespace std;
-namespace ibofos_logger
+namespace pos_logger
 {
 class Configuration
 {
@@ -59,4 +59,4 @@ private:
     const uint32_t DEDUPLICATION_SENSITIVITY_MS = 20;
     const string LOG_LEVEL = "debug";
 };
-} // namespace ibofos_logger
+} // namespace pos_logger

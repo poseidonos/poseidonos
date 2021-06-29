@@ -35,37 +35,65 @@
 #include <algorithm>
 #include <future>
 
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/scheduler/event.h"
-#include "src/scheduler/event_argument.h"
+#include "src/event_scheduler/event.h"
+#include "src/event_scheduler/event_scheduler.h"
 
-namespace ibofos
+namespace pos
 {
-GarbageCollector::GarbageCollector(void)
-: StateEvent("GarbageCollector"),
+GarbageCollector::GarbageCollector(IArrayInfo* i, IStateControl* s)
+: arrayInfo(i),
+  state(s),
   gcStatus()
 {
-    StateManagerSingleton::Instance()->Subscribe(this);
+}
+
+int GarbageCollector::Init(void)
+{
+    state->Subscribe(this, typeid(*this).name());
+    return Start();
+}
+
+void GarbageCollector::Dispose(void)
+{
+    End();
+    state->Unsubscribe(this);
+}
+
+void GarbageCollector::Shutdown(void)
+{
+    Dispose();
+}
+
+void GarbageCollector::Flush(void)
+{
+    // no-op for IMountSequence
+}
+
+void GarbageCollector::StateChanged(StateContext* prev, StateContext* next)
+{
 }
 
 int
-GarbageCollector::IsGcPossible(void)
+GarbageCollector::IsEnabled(void)
 {
-    int returnVal = static_cast<int>(IBOF_EVENT_ID::SUCCESS);
+    int returnVal = static_cast<int>(POS_EVENT_ID::SUCCESS);
 
-    State ibofState = currState.GetState();
-    bool isPossible = ((ibofState == State::NORMAL) || (ibofState == State::BUSY));
+    StateEnum currState = state->GetState()->ToStateType();
 
-    if (false == isPossible)
+    bool isEnabled = ((currState == StateEnum::NORMAL) ||
+                       (currState == StateEnum::BUSY));
+
+    if (false == isEnabled)
     {
-        IBOF_TRACE_INFO(static_cast<int>(IBOF_EVENT_ID::GC_CANNOT_START), "cannot start gc");
-        return static_cast<int>(IBOF_EVENT_ID::GC_CANNOT_START);
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_CANNOT_START), "cannot start gc");
+        return static_cast<int>(POS_EVENT_ID::GC_CANNOT_START);
     }
 
     if (true == isRunning)
     {
-        IBOF_TRACE_INFO(static_cast<int>(IBOF_EVENT_ID::GC_STARTED), "gc already running");
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_STARTED), "gc already running");
     }
 
     return returnVal;
@@ -78,22 +106,22 @@ GarbageCollector::Start(void)
 
     if (false == isRunning)
     {
-        IBOF_TRACE_INFO(static_cast<int>(IBOF_EVENT_ID::GC_STARTED), "gc started");
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_STARTED), "gc started");
         _DoGC();
         isRunning = true;
-        returnVal = static_cast<int>(IBOF_EVENT_ID::SUCCESS);
+        returnVal = static_cast<int>(POS_EVENT_ID::SUCCESS);
     }
     else
     {
-        IBOF_TRACE_INFO(static_cast<int>(IBOF_EVENT_ID::GC_STARTED), "gc already running");
-        returnVal = static_cast<int>(IBOF_EVENT_ID::SUCCESS);
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_STARTED), "gc already running");
+        returnVal = static_cast<int>(POS_EVENT_ID::SUCCESS);
     }
 
     return returnVal;
 }
 
 int
-GarbageCollector::DisableThreshold(void)
+GarbageCollector::DisableThresholdCheck(void)
 {
     if (false == copierPtr->IsEnableThresholdCheck())
     {
@@ -123,9 +151,10 @@ GarbageCollector::End(void)
 void
 GarbageCollector::_DoGC(void)
 {
-    IBOF_TRACE_INFO(3401, "GC started");
-    CopierSmartPtr event(new Copier(UNMAP_SEGMENT, UNMAP_SEGMENT, &gcStatus));
-    EventArgument::GetEventScheduler()->EnqueueEvent(event);
+    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_STARTED), "GC started");
+    CopierSmartPtr event(new Copier(UNMAP_SEGMENT, UNMAP_SEGMENT, &gcStatus, arrayInfo));
+
+    EventSchedulerSingleton::Instance()->EnqueueEvent(event);
     copierPtr = event;
 }
 
@@ -134,17 +163,6 @@ GarbageCollector::_GCdone(void)
 {
     copierPtr->ReadyToEnd();
     copierPtr = nullptr;
-    IBOF_TRACE_INFO(static_cast<int>(IBOF_EVENT_ID::GC_DONE), "GC done");
+    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_DONE), "GC done");
 }
-
-void
-GarbageCollector::StateChanged(StateContext prev, StateContext next)
-{
-    currState = next;
-    if (currState.GetState() == State::STOP)
-    {
-        End();
-    }
-}
-
-} // namespace ibofos
+} // namespace pos

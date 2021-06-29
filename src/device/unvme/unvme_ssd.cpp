@@ -36,12 +36,12 @@
 #include <iostream>
 
 #include "src/include/branch_prediction.h"
-#include "src/include/ibof_event_id.hpp"
+#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "unvme_device_context.h"
 #include "unvme_drv.h"
 
-namespace ibofos
+namespace pos
 {
 UnvmeSsd::UnvmeSsd(
     std::string name, uint64_t size, UnvmeDrv* driverToUse,
@@ -55,6 +55,7 @@ UnvmeSsd::UnvmeSsd(
     property.type = DeviceType::SSD;
     property.mn = _GetMN();
     property.sn = _GetSN();
+    property.numa = _GetNuma();
 }
 
 UnvmeSsd::~UnvmeSsd(void)
@@ -102,6 +103,16 @@ UnvmeSsd::_GetMN()
     snprintf(str, sizeof(cdata->mn) + 1, "%s", cdata->mn);
     return std::string(str);
 }
+
+int
+UnvmeSsd::_GetNuma()
+{
+    spdk_nvme_ctrlr* ctrlr = spdk_nvme_ns_get_ctrlr(ns);
+    spdk_pci_device* pciDev = spdk_nvme_ctrlr_get_pci_device(ctrlr);
+    int numa = spdk_pci_device_get_socket_id(pciDev);
+    return numa;
+}
+
 /*	
 int
 UnvmeSsd::PassThroughNvmeAdminCommand(struct spdk_nvme_cmd *cmd,
@@ -124,18 +135,18 @@ UnvmeSsd::PassThroughNvmeAdminCommand(struct spdk_nvme_cmd *cmd,
             //errorCode = spdk_nvme_ctrlr_process_admin_completions(ctrlr);
             if (0 > errorCode)
             {
-                IBOF_EVENT_ID eventId = IBOF_EVENT_ID::UNVME_COMPLETION_FAILED;
-                IBOF_TRACE_ERROR(static_cast<int>(eventId),
-                            IbofEventId::GetString(eventId),
+                POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_COMPLETION_FAILED;
+                POS_TRACE_ERROR(static_cast<int>(eventId),
+                            PosEventId::GetString(eventId),
                             spdk_nvme_ns_get_id(ns), errorCode);
             }
         }
     }
     else
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::UNVME_SUBMISSION_FAILED;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId), errorCode);
+        POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SUBMISSION_FAILED;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId), errorCode);
     }
 
     return errorCode;
@@ -158,18 +169,18 @@ UnvmeSsd::PassThroughNvmeAdminCommand(struct spdk_nvme_cmd* cmd,
             errorCode = spdk_nvme_ctrlr_process_admin_completions(ctrlr);
             if (0 > errorCode)
             {
-                IBOF_EVENT_ID eventId = IBOF_EVENT_ID::UNVME_COMPLETION_FAILED;
-                IBOF_TRACE_ERROR(static_cast<int>(eventId),
-                    IbofEventId::GetString(eventId),
+                POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_COMPLETION_FAILED;
+                POS_TRACE_ERROR(static_cast<int>(eventId),
+                    PosEventId::GetString(eventId),
                     spdk_nvme_ns_get_id(ns), errorCode);
             }
         }
     }
     else
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::UNVME_SUBMISSION_FAILED;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId), errorCode);
+        POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SUBMISSION_FAILED;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId), errorCode);
     }
 
     return errorCode;
@@ -182,9 +193,9 @@ UnvmeSsd::DecreaseOutstandingAdminCount(void)
     uint32_t currentCompletionCount = 1;
     if (unlikely(oldOutstandingCount < currentCompletionCount))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::UNVME_SSD_UNDERFLOW_HAPPENED;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId),
+        POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_UNDERFLOW_HAPPENED;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId),
             oldOutstandingCount, currentCompletionCount);
     }
 }
@@ -202,4 +213,4 @@ UnvmeSsd::_CallbackAdminCommand(void* arg, const struct spdk_nvme_cpl* cpl)
     unvmeSsd->DecreaseOutstandingAdminCount();
 }
 
-} // namespace ibofos
+} // namespace pos

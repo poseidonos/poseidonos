@@ -33,33 +33,25 @@
 #ifndef NVM_PARTITION_H_
 #define NVM_PARTITION_H_
 
-#include <list>
 #include <vector>
+#include <list>
+#include <string>
 
 #include "partition.h"
 
-namespace ibofos
+namespace pos
 {
 class NvmPartition : public Partition
 {
 public:
-    NvmPartition(PartitionType type,
-        PartitionPhysicalSize physicalSize,
-        vector<ArrayDevice*> devs);
-    ~NvmPartition();
-    int Translate(PhysicalBlkAddr&, const LogicalBlkAddr&) override;
-    int Convert(list<PhysicalWriteEntry>&, const LogicalWriteEntry&) override;
-    int
-    Rebuild(RebuildBehavior* behavior) override
-    {
-        return -1;
-    };
-    int
-    RebuildRead(UbioSmartPtr targetUbio) override
-    {
-        return -1;
-    };
+    NvmPartition(string array,
+                 PartitionType type,
+                 PartitionPhysicalSize physicalSize,
+                 vector<ArrayDevice*> devs);
+    virtual ~NvmPartition();
+    int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
+    int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
 };
 
-} // namespace ibofos
+} // namespace pos
 #endif // NVM_PARTITION_H_

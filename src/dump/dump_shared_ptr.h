@@ -52,10 +52,11 @@ enum class DumpSharedPtrType
 {
     UBIO,
     IO_CONTEXT,
+    JOURNAL_IO_CONTEXT,
     MAX_DUMP_PTR
 };
 
-namespace ibofos
+namespace pos
 {
 template<typename T, int>
 class DumpSharedPtr
@@ -109,6 +110,6 @@ using DumpSharedModuleInstanceSingleton =
     Singleton<DumpSharedModuleInstance<T, moduleNumber>>;
 extern void* gDumpSharedModulePtr[static_cast<int>(DumpSharedPtrType::MAX_DUMP_PTR)];
 
-} // namespace ibofos
+} // namespace pos
 
 #endif // DUMP_SHARED_PTR_H_

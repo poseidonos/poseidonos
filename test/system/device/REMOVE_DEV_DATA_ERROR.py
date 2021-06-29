@@ -7,16 +7,13 @@ sys.path.append("../volume/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
 import json
-import MOUNT_ARRAY_BASIC_1
-ANY_DATA = MOUNT_ARRAY_BASIC_1.ANY_DATA
-
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
+import MOUNT_ARRAY_BASIC
+ANY_DATA = MOUNT_ARRAY_BASIC.ANY_DATA
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)
@@ -26,12 +23,12 @@ def set_result(detail):
         result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
 def execute():
-    clear_result()
-    MOUNT_ARRAY_BASIC_1.execute()
-    out = cli.remove_device(ANY_DATA, "")
+    MOUNT_ARRAY_BASIC.execute()
+    out = cli.remove_device(ANY_DATA, ARRAYNAME)
     return out
 
 if __name__ == "__main__":
+    test_result.clear_result(__file__)
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

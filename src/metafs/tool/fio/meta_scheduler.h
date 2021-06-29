@@ -33,11 +33,14 @@
 #pragma once
 
 #include <stdint.h>
-
+#include <string>
 #include <list>
 #include <mutex>
+#include "metafs_aiocb_cxt.h"
+#include "spdk/pos_volume.h"
 
-#include "spdk/ibof_volume.h"
+namespace pos
+{
 extern const char* META_FIO_TARGET_FILE;
 
 class MetaIoHandler
@@ -59,13 +62,13 @@ public:
         MetaIoHandler::fdList[MetaIoHandler::index] = fd;
     }
 
-    static int IoSubmitHandler0(struct ibof_io* io);
-    static int IoSubmitHandler1(struct ibof_io* io);
-    static int IoSubmitHandler2(struct ibof_io* io);
-    static int IoSubmitHandler3(struct ibof_io* io);
+    static int IoSubmitHandler0(struct pos_io* io);
+    static int IoSubmitHandler1(struct pos_io* io);
+    static int IoSubmitHandler2(struct pos_io* io);
+    static int IoSubmitHandler3(struct pos_io* io);
     static void MetaFsIOCompleteHandler(void);
 
-    static int MetaFsIOSubmitHandler(struct ibof_io* io, int fd);
+    static int MetaFsIOSubmitHandler(struct pos_io* io, int fd);
 
     static unvmf_submit_handler submitHandlerList[4];
     static int fdList[4];
@@ -93,18 +96,17 @@ private:
 
 extern MetaIOScheduler metaioScheduler;
 
-#include "mfs_aiocb_cxt.h"
 class MetaFioAIOCxt : public MetaFsAioCbCxt
 {
 public:
-    explicit MetaFioAIOCxt(MetaFsIoOpcode opcode, uint32_t fd, size_t soffset, size_t nbytes, void* buf, MetaFsAioCallbackPointer func, ibof_io* io, uint32_t reactor)
-    : MetaFsAioCbCxt(opcode, fd, soffset, nbytes, buf, func),
+    explicit MetaFioAIOCxt(MetaFsIoOpcode opcode, uint32_t fd, std::string arrayName, size_t soffset, size_t nbytes, void* buf, MetaFsAioCallbackPointer func, pos_io* io, uint32_t reactor)
+    : MetaFsAioCbCxt(opcode, fd, arrayName, soffset, nbytes, buf, func),
       io(io),
       reactor(reactor)
     {
     }
 
-    ibof_io*
+    pos_io*
     GetIBoFIOCxt(void)
     {
         return io;
@@ -117,6 +119,7 @@ public:
     }
 
 private:
-    ibof_io* io;
+    pos_io* io;
     uint32_t reactor;
 };
+} // namespace pos

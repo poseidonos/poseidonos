@@ -37,6 +37,8 @@
 #include "mpio.h"
 #include "os_header.h"
 
+namespace pos
+{
 // MpioListContext is used to track the status of individual meta page io execution util mio is finalized
 class Mpio;
 class MpioListContext
@@ -61,3 +63,4 @@ private:
 
     MetaFsSpinLock outstandingMpioMapLock;
 };
+} // namespace pos

@@ -7,8 +7,8 @@ sys.path.append("../volume/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
-import ibofos_util
+import pos
+import pos_util
 import cli
 import test_result
 import json
@@ -17,20 +17,16 @@ import MOUNT_VOL_BASIC_1
 
 DETACH_TARGET_DATA = MOUNT_VOL_BASIC_1.ANY_DATA
 DETACH_TARGET_SPARE = MOUNT_VOL_BASIC_1.SPARE
-
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 def check_result():
-    out = cli.get_ibofos_info()
-    data = json.loads(out)
-    if data['Response']['info']['situation'] == "DEGRADED":
-        list = cli.array_info("")
-        data = json.loads(list)
+    out = cli.array_info(ARRAYNAME)
+    situ = json_parser.get_situation(out)
+    if situ == "DEGRADED":
+        data = json.loads(out)
         for item in data['Response']['result']['data']['devicelist']:
             if item['name'] == DETACH_TARGET_DATA or item['name'] == DETACH_TARGET_SPARE:
-                return "fail", list
+                return "fail", out
         return "pass", out
     return "fail", out
 
@@ -41,15 +37,15 @@ def set_result():
         result_file.write(result + "\n" + out)
 
 def execute():
-    clear_result()
-    ibofos_util.pci_rescan()
+    pos_util.pci_rescan()
     MOUNT_VOL_BASIC_1.execute()
-    ibofos_util.pci_detach(DETACH_TARGET_DATA)
-    ibofos_util.pci_detach(DETACH_TARGET_SPARE)
+    pos_util.pci_detach(DETACH_TARGET_DATA)
+    pos_util.pci_detach(DETACH_TARGET_SPARE)
     time.sleep(0.1)
 
 if __name__ == "__main__":
+    test_result.clear_result(__file__)
     execute()
     set_result()
-    ibofos.kill_ibofos()
-    ibofos_util.pci_rescan()
+    pos.kill_pos()
+    pos_util.pci_rescan()

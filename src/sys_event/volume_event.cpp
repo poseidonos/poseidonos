@@ -34,23 +34,29 @@
 
 #include "volume_event_publisher.h"
 
-namespace ibofos
+namespace pos
 {
 VolumeEvent::~VolumeEvent(void)
 {
-    RemoveFromPublisher();
+    RemoveFromPublisher(arrayName);
 }
 
 void
-VolumeEvent::RegisterToPublisher(void)
+VolumeEvent::RegisterToPublisher(std::string arrayName)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this);
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName);
 }
 
 void
-VolumeEvent::RemoveFromPublisher(void)
+VolumeEvent::RegisterNvmfTargetToPublisher(std::string arrayName)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this);
+    VolumeEventPublisherSingleton::Instance()->RegisterNvmfTargetSubscriber(this, arrayName);
 }
 
-} // namespace ibofos
+void
+VolumeEvent::RemoveFromPublisher(std::string arrayName)
+{
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName);
+}
+
+} // namespace pos

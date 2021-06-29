@@ -33,29 +33,34 @@
 #include "src/io/frontend_io/block_map_update_request.h"
 
 #include "mk/ibof_config.h"
-#include "src/allocator/allocator.h"
-#include "src/allocator/stripe.h"
+#include "src/allocator/i_block_allocator.h"
+#include "src/allocator/i_wbstripe_allocator.h"
 #include "src/array/array.h"
-#include "src/device/event_framework_api.h"
-#include "src/include/ibof_event_id.hpp"
+#include "src/bio/volume_io.h"
+#include "src/event_scheduler/event.h"
+#include "src/event_scheduler/io_completer.h"
+#include "src/include/branch_prediction.h"
 #include "src/include/meta_const.h"
-#include "src/io/frontend_io/block_map_update.h"
-#include "src/io/frontend_io/write_completion.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/io/general_io/rba_state_manager.h"
-#include "src/io/general_io/volume_io.h"
-#include "src/io/general_io/vsa_range_maker.h"
 #include "src/logger/logger.h"
-#include "src/scheduler/event.h"
-#include "src/scheduler/event_argument.h"
-#include "src/scheduler/event_scheduler.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
-namespace ibofos
+namespace pos
 {
 BlockMapUpdateRequest::BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback)
+: BlockMapUpdateRequest(volumeIo, originCallback, std::make_shared<BlockMapUpdate>(volumeIo, originCallback),
+      EventSchedulerSingleton::Instance())
+{
+}
+
+BlockMapUpdateRequest::BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback,
+    EventSmartPtr blockMapUpdateEvent, EventScheduler* eventScheduler)
 : Callback(EventFrameworkApi::IsReactorNow()),
   volumeIo(volumeIo),
   originCallback(originCallback),
-  retryNeeded(false)
+  blockMapUpdateEvent(blockMapUpdateEvent),
+  eventScheduler(eventScheduler)
 {
 }
 
@@ -70,16 +75,11 @@ BlockMapUpdateRequest::_DoSpecificJob(void)
     {
         if (unlikely(_GetErrorCount() > 0))
         {
-            IBOF_EVENT_ID eventId = IBOF_EVENT_ID::WRCMP_IO_ERROR;
-            IBOF_TRACE_ERROR(static_cast<int>(eventId),
-                IbofEventId::GetString(eventId));
+            POS_EVENT_ID eventId = POS_EVENT_ID::WRCMP_IO_ERROR;
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                PosEventId::GetString(eventId));
             throw eventId;
         }
-
-        StripeAddr lsidEntry = volumeIo->GetLsidEntry();
-        Stripe& stripe = _GetStripe(lsidEntry);
-
-        _UpdateReverseMap(stripe);
         _UpdateMeta();
     }
     catch (...)
@@ -97,146 +97,30 @@ BlockMapUpdateRequest::_DoSpecificJob(void)
         return true;
     }
 
-    if (retryNeeded)
-    {
-        return false;
-    }
-    else
-    {
-        volumeIo = nullptr;
-        return true;
-    }
-}
-
-void
-BlockMapUpdateRequest::_UpdateReverseMap(Stripe& stripe)
-{
-    VirtualBlkAddr startVsa = volumeIo->GetVsa();
-    uint32_t blocks = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
-    uint64_t startRba = ChangeSectorToBlock(volumeIo->GetRba());
-    uint32_t startVsOffset = startVsa.offset;
-    uint32_t volumeId = volumeIo->GetVolumeId();
-
-    for (uint32_t blockIndex = 0; blockIndex < blocks; blockIndex++)
-    {
-        uint64_t vsOffset = startVsOffset + blockIndex;
-        BlkAddr targetRba = startRba + blockIndex;
-        stripe.UpdateReverseMap(vsOffset, targetRba, volumeId);
-    }
-}
-
-Stripe&
-BlockMapUpdateRequest::_GetStripe(StripeAddr& lsidEntry)
-{
-    Allocator& allocator = *AllocatorSingleton::Instance();
-    Stripe* foundStripe = allocator.GetStripe(lsidEntry);
-
-    if (unlikely(nullptr == foundStripe))
-    {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::WRCMP_INVALID_STRIPE;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId));
-        throw eventId;
-    }
-
-    return *foundStripe;
+    volumeIo = nullptr;
+    return true;
 }
 
 void
 BlockMapUpdateRequest::_UpdateMeta(void)
 {
-    VirtualBlkAddr vsa = volumeIo->GetVsa();
-    uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
-    BlkAddr startRba = ChangeSectorToBlock(volumeIo->GetRba());
-    uint32_t volumeId = volumeIo->GetVolumeId();
-    Allocator& allocator = *AllocatorSingleton::Instance();
-    VirtualBlks targetVsaRange = {.startVsa = vsa,
-        .numBlks = blockCount};
-
-    bool isGc = volumeIo->IsGc();
-
-    VsaRangeMaker vsaRangeMaker(volumeId, startRba, blockCount, isGc);
-    retryNeeded = vsaRangeMaker.CheckRetry();
-    if (retryNeeded)
+    if (likely(blockMapUpdateEvent != nullptr))
     {
-        return;
-    }
-    uint32_t vsaRangeCount = vsaRangeMaker.GetCount();
-    bool isOldData = false;
-
-    for (uint32_t vsaRangeIndex = 0; vsaRangeIndex < vsaRangeCount;
-         vsaRangeIndex++)
-    {
-        VirtualBlks& vsaRange = vsaRangeMaker.GetVsaRange(vsaRangeIndex);
-        if (true == volumeIo->IsGc())
+        bool mapUpdateSuccessful = blockMapUpdateEvent->Execute();
+        if (unlikely(false == mapUpdateSuccessful))
         {
-            if (IsSameVsa(vsaRange.startVsa, volumeIo->GetOldVsa()))
-            {
-                allocator.InvalidateBlks(vsaRange);
-            }
-            else
-            {
-                isOldData = true;
-                allocator.InvalidateBlks(targetVsaRange);
-            }
-        }
-        else
-        {
-            allocator.InvalidateBlks(vsaRange);
-        }
-    }
-
-    if (false == isOldData)
-    {
-        EventSmartPtr event(new BlockMapUpdate(volumeIo, originCallback));
-        if (likely(event != nullptr))
-        {
-            bool mapUpdateSuccessful = event->Execute();
-
-            if (unlikely(false == mapUpdateSuccessful))
-            {
-                IBOF_EVENT_ID eventId = IBOF_EVENT_ID::WRCMP_MAP_UPDATE_FAILED;
-                IBOF_TRACE_ERROR(static_cast<int>(eventId),
-                    IbofEventId::GetString(eventId));
-                EventArgument::GetEventScheduler()->EnqueueEvent(event);
-            }
-        }
-        else
-        {
-            IBOF_EVENT_ID eventId = IBOF_EVENT_ID::WRWRAPUP_EVENT_ALLOC_FAILED;
-            IBOF_TRACE_ERROR(static_cast<int>(eventId), IbofEventId::GetString(eventId));
-            EventArgument::GetEventScheduler()->EnqueueEvent(event);
+            POS_EVENT_ID eventId = POS_EVENT_ID::WRCMP_MAP_UPDATE_FAILED;
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                PosEventId::GetString(eventId));
+            eventScheduler->EnqueueEvent(blockMapUpdateEvent);
         }
     }
     else
     {
-        WriteCompletion event(volumeIo);
-
-        CallbackSmartPtr callee;
-        if (originCallback == nullptr)
-        {
-            callee = volumeIo->GetOriginUbio()->GetCallback();
-        }
-        else
-        {
-            callee = originCallback;
-        }
-
-        event.SetCallee(callee);
-        bool wrapupSuccessful = event.Execute();
-
-        if (unlikely(false == wrapupSuccessful))
-        {
-            IBOF_EVENT_ID eventId =
-                IBOF_EVENT_ID::WRCMP_WRITE_WRAPUP_FAILED;
-            IBOF_TRACE_ERROR(static_cast<int>(eventId),
-                IbofEventId::GetString(eventId));
-
-            CallbackSmartPtr callback(new WriteCompletion(volumeIo));
-            callback->SetCallee(callee);
-            EventArgument::GetEventScheduler()->EnqueueEvent(callback);
-        }
+        POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_EVENT_ALLOC_FAILED;
+        POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId));
+        eventScheduler->EnqueueEvent(blockMapUpdateEvent);
     }
 }
 
-} // namespace ibofos
+} // namespace pos

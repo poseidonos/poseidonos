@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(allocator_address_info_ut allocator_address_info_test.cpp)

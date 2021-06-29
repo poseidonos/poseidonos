@@ -35,9 +35,11 @@
 #include <string>
 
 #include "mf_pagemap.h"
-#include "mfs_file_property.h"
-#include "mvm_req.h"
+#include "mf_property.h"
+#include "metafs_control_request.h"
 
+namespace pos
+{
 class MetaFileInodeCreateReq
 {
 public:
@@ -48,13 +50,13 @@ public:
       media(MetaStorageType::Default),
       pageMap(nullptr)
     {
-        ioAttribute.ioAccPattern = MDFilePropIoAccessPattern::Default;
-        ioAttribute.ioOpType = MDFilePropIoOpType::Default;
-        ioAttribute.integrity = MDFilePropIntegrity::Default;
+        ioAttribute.ioAccPattern = MetaFileAccessPattern::Default;
+        ioAttribute.ioOpType = MetaFileDominant::Default;
+        ioAttribute.integrity = MetaFileIntegrityType::Default;
     }
 
     void
-    Setup(MetaFsMoMReqMsg& reqMsg, FileFDType newFD, MetaStorageType mediaType, MetaFilePageMap& newExtent)
+    Setup(MetaFsFileControlRequest& reqMsg, FileDescriptorType newFD, MetaStorageType mediaType, MetaFilePageMap& newExtent)
     {
         fd = newFD;
         fileName = reqMsg.fileName;
@@ -64,10 +66,11 @@ public:
         pageMap = &newExtent;
     }
 
-    FileFDType fd;
+    FileDescriptorType fd;
     std::string* fileName;
     FileSizeType fileByteSize;
     MetaFilePropertySet ioAttribute;
     MetaStorageType media;
     MetaFilePageMap* pageMap;
 };
+} // namespace pos

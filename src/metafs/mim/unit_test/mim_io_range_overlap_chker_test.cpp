@@ -30,11 +30,13 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "mim_io_range_overlap_chker_test.h"
-
-#include "mfs_io_config.h"
+#include "metafs_config.h"
 #include "mfs_io_range_overlap_chker.h"
 
+namespace pos
+{
 MetaFsIoRangeOverlapChker globalIoRangeOverlapChker;
 
 InstanceTagIdAllocator aiocbTagIdAllocator;
@@ -62,14 +64,15 @@ Req3 R : no outstaing I/O count, so that can be executed
 
 TEST_F(UtMIMRangeLockChker, RangeOverlapChkTest1)
 {
-    FileFDType fd;
-    const FileFDType invalidFD = MetaFsCommonConst::INVALID_FD;
+    FileDescriptorType fd;
+    const FileDescriptorType invalidFD = MetaFsCommonConst::INVALID_FD;
+    std::string arrayName = "POSArray";
 
-    fd = OpenDummyFile();
+    fd = OpenDummyFile(arrayName);
     if (fd == invalidFD)
     {
         FileSizeType fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100; // 400KB
-        fd = CreateFileAndOpen(fileSize);
+        fd = CreateFileAndOpen(fileSize, arrayName);
     }
 
     // outstandingQ & pendingQ should be cleared.
@@ -78,17 +81,18 @@ TEST_F(UtMIMRangeLockChker, RangeOverlapChkTest1)
     EXPECT_EQ(globalPendingIoRetryQ.size(), 0);
 
     // Issue write => Add a request to the range map (outstanding map)
-    MetaFsIoReqMsg req1;
+    MetaFsIoRequest req1;
     {
         req1.fd = fd;
-        req1.ioMode = MetaIoModeEnum::Async;
-        req1.reqType = MetaIoReqTypeEnum::Write;
+        req1.ioMode = MetaIoMode::Async;
+        req1.reqType = MetaIoRequestType::Write;
         req1.targetMediaType = MetaStorageType::SSD;
         req1.byteOffsetInFile = 0;
         req1.byteSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
         req1.isFullFileIo = false;
         req1.SetValidForIoExecution();
         req1.tagId = aiocbTagIdAllocator();
+        req1.arrayName = arrayName;
 
         // push req1 to range map
         globalIoRangeOverlapChker.PushReqToRangeLockMap(&req1);
@@ -98,16 +102,17 @@ TEST_F(UtMIMRangeLockChker, RangeOverlapChkTest1)
     EXPECT_EQ(outstandingQCnt, 1);
 
     // Issue read : W -> R conflicted
-    MetaFsIoReqMsg req2;
+    MetaFsIoRequest req2;
     { // the request range is overlap to the previous I/O
         req2.fd = fd;
-        req2.ioMode = MetaIoModeEnum::Async;
-        req2.reqType = MetaIoReqTypeEnum::Read;
+        req2.ioMode = MetaIoMode::Async;
+        req2.reqType = MetaIoRequestType::Read;
         req2.targetMediaType = MetaStorageType::SSD;
         req2.byteOffsetInFile = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE - 10;
         req2.byteSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
         req2.isFullFileIo = false;
         req2.tagId = aiocbTagIdAllocator();
+        req2.arrayName = arrayName;
 
         // Check LPN overlap between req1 and req2
         EXPECT_EQ(globalIoRangeOverlapChker.IsRangeOverlapConflicted(&req2), true);
@@ -123,15 +128,16 @@ TEST_F(UtMIMRangeLockChker, RangeOverlapChkTest1)
     EXPECT_EQ(outstandingQCnt, 0);
 
     // Issue read, buf there is no outstaing I/O => no conflicted
-    MetaFsIoReqMsg req3;
+    MetaFsIoRequest req3;
     {
         req3.fd = fd;
-        req3.ioMode = MetaIoModeEnum::Async;
-        req3.reqType = MetaIoReqTypeEnum::Read;
+        req3.ioMode = MetaIoMode::Async;
+        req3.reqType = MetaIoRequestType::Read;
         req3.targetMediaType = MetaStorageType::SSD;
         req3.byteOffsetInFile = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE - 10;
         req3.byteSize = 40;
         req3.tagId = aiocbTagIdAllocator();
+        req3.arrayName = arrayName;
 
         EXPECT_EQ(globalIoRangeOverlapChker.IsRangeOverlapConflicted(&req3), false);
 
@@ -167,14 +173,15 @@ Req2 R : R - R case
 
 TEST_F(UtMIMRangeLockChker, RangeOverlapChkTest2)
 {
-    FileFDType fd;
-    const FileFDType invalidFD = MetaFsCommonConst::INVALID_FD;
+    FileDescriptorType fd;
+    const FileDescriptorType invalidFD = MetaFsCommonConst::INVALID_FD;
+    std::string arrayName = "POSArray";
 
-    fd = OpenDummyFile();
+    fd = OpenDummyFile(arrayName);
     if (fd == invalidFD)
     {
         FileSizeType fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100; // 400KB
-        fd = CreateFileAndOpen(fileSize);
+        fd = CreateFileAndOpen(fileSize, arrayName);
     }
 
     // outstandingQ & pendingQ should be cleared.
@@ -183,17 +190,18 @@ TEST_F(UtMIMRangeLockChker, RangeOverlapChkTest2)
     EXPECT_EQ(globalPendingIoRetryQ.size(), 0);
 
     // Issue write => Add a request to the range map (outstanding map)
-    MetaFsIoReqMsg req1;
+    MetaFsIoRequest req1;
     {
         req1.fd = fd;
-        req1.ioMode = MetaIoModeEnum::Async;
-        req1.reqType = MetaIoReqTypeEnum::Read;
+        req1.ioMode = MetaIoMode::Async;
+        req1.reqType = MetaIoRequestType::Read;
         req1.targetMediaType = MetaStorageType::SSD;
         req1.byteOffsetInFile = 0;
         req1.byteSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
         req1.isFullFileIo = false;
         req1.SetValidForIoExecution();
         req1.tagId = aiocbTagIdAllocator();
+        req1.arrayName = arrayName;
 
         // push req1 to range map
         globalIoRangeOverlapChker.PushReqToRangeLockMap(&req1);
@@ -202,15 +210,16 @@ TEST_F(UtMIMRangeLockChker, RangeOverlapChkTest2)
     EXPECT_EQ(outstandingQCnt, 1);
 
     // Issue read : R -> R no need to check conflict
-    MetaFsIoReqMsg req2;
+    MetaFsIoRequest req2;
     {
         req2.fd = fd;
-        req2.ioMode = MetaIoModeEnum::Async;
-        req2.reqType = MetaIoReqTypeEnum::Read;
+        req2.ioMode = MetaIoMode::Async;
+        req2.reqType = MetaIoRequestType::Read;
         req2.targetMediaType = MetaStorageType::SSD;
         req2.byteOffsetInFile = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE - 10;
         req2.byteSize = 40;
         req2.tagId = aiocbTagIdAllocator();
+        req2.arrayName = arrayName;
 
         EXPECT_EQ(globalIoRangeOverlapChker.IsRangeOverlapConflicted(&req2), false);
 
@@ -243,14 +252,15 @@ Req1 W release from outstanding Q
 
 TEST_F(UtMIMRangeLockChker, RangeOverlapChkTest3)
 {
-    FileFDType fd;
-    const FileFDType invalidFD = MetaFsCommonConst::INVALID_FD;
+    FileDescriptorType fd;
+    const FileDescriptorType invalidFD = MetaFsCommonConst::INVALID_FD;
+    std::string arrayName = "POSArray";
 
-    fd = OpenDummyFile();
+    fd = OpenDummyFile(arrayName);
     if (fd == invalidFD)
     {
         FileSizeType fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100; // 400KB
-        fd = CreateFileAndOpen(fileSize);
+        fd = CreateFileAndOpen(fileSize, arrayName);
     }
 
     // outstandingQ & pendingQ should be cleared.
@@ -259,17 +269,18 @@ TEST_F(UtMIMRangeLockChker, RangeOverlapChkTest3)
     EXPECT_EQ(globalPendingIoRetryQ.size(), 0);
 
     // Issue write => Add a request to the range map (outstanding map)
-    MetaFsIoReqMsg req1;
+    MetaFsIoRequest req1;
     {
         req1.fd = fd;
-        req1.ioMode = MetaIoModeEnum::Async;
-        req1.reqType = MetaIoReqTypeEnum::Write;
+        req1.ioMode = MetaIoMode::Async;
+        req1.reqType = MetaIoRequestType::Write;
         req1.targetMediaType = MetaStorageType::SSD;
         req1.byteOffsetInFile = 0;
         req1.byteSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
         req1.isFullFileIo = false;
         req1.SetValidForIoExecution();
         req1.tagId = aiocbTagIdAllocator();
+        req1.arrayName = arrayName;
 
         // push req1 to range map
         globalIoRangeOverlapChker.PushReqToRangeLockMap(&req1);
@@ -278,15 +289,16 @@ TEST_F(UtMIMRangeLockChker, RangeOverlapChkTest3)
     EXPECT_EQ(outstandingQCnt, 1);
 
     // Issue write : LPN conflcted between Req1 and Req2
-    MetaFsIoReqMsg req2;
+    MetaFsIoRequest req2;
     {
         req2.fd = fd;
-        req2.ioMode = MetaIoModeEnum::Async;
-        req2.reqType = MetaIoReqTypeEnum::Write;
+        req2.ioMode = MetaIoMode::Async;
+        req2.reqType = MetaIoRequestType::Write;
         req2.targetMediaType = MetaStorageType::SSD;
         req2.byteOffsetInFile = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE - 10;
         req2.byteSize = 40;
         req2.tagId = aiocbTagIdAllocator();
+        req2.arrayName = arrayName;
 
         EXPECT_EQ(globalIoRangeOverlapChker.IsRangeOverlapConflicted(&req2), true);
 
@@ -296,15 +308,16 @@ TEST_F(UtMIMRangeLockChker, RangeOverlapChkTest3)
     EXPECT_EQ(globalPendingIoRetryQ.size(), 1);
 
     // Issue Read : LPN Conflicted between Req 1 and Req3 since Req1 is still alive in the outstandingQ.
-    MetaFsIoReqMsg req3;
+    MetaFsIoRequest req3;
     {
         req3.fd = fd;
-        req3.ioMode = MetaIoModeEnum::Async;
-        req3.reqType = MetaIoReqTypeEnum::Read;
+        req3.ioMode = MetaIoMode::Async;
+        req3.reqType = MetaIoRequestType::Read;
         req3.targetMediaType = MetaStorageType::SSD;
         req3.byteOffsetInFile = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE - 1024;
         req3.byteSize = 40;
         req3.tagId = aiocbTagIdAllocator();
+        req3.arrayName = arrayName;
 
         EXPECT_EQ(globalIoRangeOverlapChker.IsRangeOverlapConflicted(&req3), true);
 
@@ -331,11 +344,11 @@ UtMIMRangeLockChker::DiscoverIORangeOverlap(void)
 
     for (auto it = globalPendingIoRetryQ.begin(); it != globalPendingIoRetryQ.end();)
     {
-        MetaFsIoReqMsg* pendingIoReq = *it;
+        MetaFsIoRequest* pendingIoReq = *it;
 
         if (!globalIoRangeOverlapChker.IsRangeOverlapConflicted(pendingIoReq))
         {
-            MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+            MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                 "[Dispatch next candidate!!] ioreq.id={}", pendingIoReq->tagId);
 
             globalPendingIoRetryQ.erase(it++);
@@ -350,18 +363,19 @@ UtMIMRangeLockChker::DiscoverIORangeOverlap(void)
     return issuedMioCnt;
 }
 
-FileFDType
-UtMIMRangeLockChker::CreateFileAndOpen(FileSizeType fileSize)
+FileDescriptorType
+UtMIMRangeLockChker::CreateFileAndOpen(FileSizeType fileSize, std::string arrayName)
 {
-    FileFDType fd;
-    CreateDummyFile(fileSize);
-    fd = OpenDummyFile();
+    FileDescriptorType fd;
+    CreateDummyFile(fileSize, arrayName);
+    fd = OpenDummyFile(arrayName);
     MetaLpnType fileBaseLpn;
     {
-        IBOF_EVENT_ID sc;
-        sc = mvmTopMgr.GetFileBaseLpn(fd, fileBaseLpn);
-        assert(sc == IBOF_EVENT_ID::SUCCESS);
+        POS_EVENT_ID sc;
+        sc = mvmTopMgr.GetFileBaseLpn(fd, arrayName, fileBaseLpn);
+        assert(sc == POS_EVENT_ID::SUCCESS);
     }
 
     return fd;
 }
+} // namespace pos

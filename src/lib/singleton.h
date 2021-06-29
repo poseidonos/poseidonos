@@ -37,7 +37,7 @@
 #include <mutex>
 #include <utility>
 
-namespace ibofos
+namespace pos
 {
 template<typename T>
 class Singleton
@@ -93,6 +93,6 @@ std::atomic<T*> Singleton<T>::instance;
 template<typename T>
 std::mutex Singleton<T>::instanceMutex;
 
-} // namespace ibofos
+} // namespace pos
 
 #endif // IBOFOS_SINGLETON_H_

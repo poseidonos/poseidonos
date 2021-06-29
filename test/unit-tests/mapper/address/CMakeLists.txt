@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(mapper_address_info_ut mapper_address_info_test.cpp)

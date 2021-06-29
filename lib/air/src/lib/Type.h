@@ -11,24 +11,23 @@ enum class ProcessorType : uint32_t
     PERFORMANCE = 0,
     LATENCY,
     QUEUE,
-
+    UTILIZATION,
     COUNT,
     PROCESSORTYPE_NULL
 };
 
-struct Node
+struct NodeMetaData
 {
     // Mandatory
     uint32_t nid{0};
     ProcessorType processor_type{ProcessorType::PROCESSORTYPE_NULL};
-    bool enable{false};
+    bool run{false};
+    uint32_t group_id{0};
+    uint32_t index_size{0};
+    uint32_t filter_size{0};
 
     // Optional
     uint32_t sample_ratio{1000};
-    uint32_t child_id[4]{
-        0,
-    };
-    int32_t group_id{-1};
 };
 
 } // namespace air

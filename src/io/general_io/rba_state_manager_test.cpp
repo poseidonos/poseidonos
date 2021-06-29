@@ -30,11 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/io/general_io/rba_state_manager.h"
+#include "src/io/general_io/rba_state_service.h"
 
 #include "gtest/gtest.h"
 
-using namespace ibofos;
+using namespace pos;
 
 class RBAStateManagerFixture : public testing::Test
 {
@@ -42,13 +42,14 @@ protected:
     virtual void
     SetUp(void)
     {
-        target = RbaStateManagerSingleton::Instance();
+        RBAStateManager rbaStateManager("");
+        target = RBAStateServiceSingleton::Instance()->GetRBAStateManager("");
     }
 
     virtual void
     TearDown(void)
     {
-        RbaStateManagerSingleton::ResetInstance();
+        RBAStateServiceSingleton::ResetInstance();
     }
     RBAStateManager* target;
 
@@ -63,10 +64,10 @@ TEST_F(RBAStateManagerFixture, OwnershipProtection_RBAStateManager)
 
     target->CreateRBAState(VOLUME_ID, RBA_AMOUNT);
 
-    EXPECT_EQ(true, target->AcquireOwnership(VOLUME_ID, RBA));
-    EXPECT_EQ(false, target->AcquireOwnership(VOLUME_ID, RBA));
-    target->ReleaseOwnership(VOLUME_ID, RBA);
-    EXPECT_EQ(true, target->AcquireOwnership(VOLUME_ID, RBA));
+    EXPECT_EQ(true, target->BulkAcquireOwnership(VOLUME_ID, RBA, 1));
+    EXPECT_EQ(false, target->BulkAcquireOwnership(VOLUME_ID, RBA, 1));
+    target->BulkReleaseOwnership(VOLUME_ID, RBA, 1);
+    EXPECT_EQ(true, target->BulkAcquireOwnership(VOLUME_ID, RBA, 1));
 
     target->DeleteRBAState(VOLUME_ID);
 }

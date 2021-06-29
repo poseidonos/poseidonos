@@ -37,12 +37,15 @@
 #include <map>
 #include <vector>
 
-#include "src/allocator/allocator.h"
+#include "victim_stripe.h"
+#include "src/allocator/i_block_allocator.h"
+#include "src/allocator/i_context_manager.h"
 #include "src/gc/copier_meta.h"
 #include "src/gc/gc_status.h"
-#include "src/gc/victim_stripe.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/event_scheduler/event.h"
 
-namespace ibofos
+namespace pos
 {
 enum CopierStateType
 {
@@ -52,53 +55,64 @@ enum CopierStateType
     COPIER_READY_TO_END_STATE
 };
 
+class StripeCopySubmission;
+class ReverseMapLoadCompletion;
+
 class Copier : public Event
 {
 public:
-    Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus);
+    Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus,
+                IArrayInfo* array, const PartitionLogicalSize* udSize = nullptr, CopierMeta* meta_ = nullptr,
+                IBlockAllocator* iBlockAllocator_ = nullptr, IContextManager* iContextManager_ = nullptr,
+                CallbackSmartPtr stripeCopySubmissionPtr_ = nullptr, CallbackSmartPtr reverseMapLoadCompletionPtr_ = nullptr);
+
     virtual ~Copier(void);
     virtual bool Execute(void);
 
-    void
+    virtual void
     Stop(void)
     {
-        isStop = true;
+        isStopped = true;
     }
-    bool
+    virtual bool
     IsStopped(void)
     {
-        return isStop;
+        return isStopped;
     }
-    void
+    virtual void
     ReadyToEnd(void)
     {
         readyToEnd = true;
     }
-
-    void
+    virtual void
     Pause(void)
     {
-        isPause = true;
+        isPaused = true;
     }
-    void
+    virtual void
     Resume(void)
     {
-        isPause = false;
+        isPaused = false;
     }
-    bool
-    IsPause(void)
+    virtual bool
+    IsPaused(void)
     {
-        return isPause;
+        return isPaused;
     }
-    void
+    virtual void
     DisableThresholdCheck(void)
     {
         thresholdCheck = false;
     }
-    bool
+    virtual bool
     IsEnableThresholdCheck(void)
     {
         return thresholdCheck;
+    }
+    virtual CopierStateType
+    GetCopybackState(void)
+    {
+        return copybackState;
     }
 
 private:
@@ -108,8 +122,8 @@ private:
 
     void _InitVariables(void);
     bool _Stop(void);
-    bool _Sync(void);
-    int _ReleaseSegment(void);
+    bool _IsSynchronized(void);
+    bool _IsAllVictimSegmentCopyDone(void);
     void
     _ChangeEventState(CopierStateType state)
     {
@@ -123,20 +137,25 @@ private:
     SegmentId victimId;
     SegmentId targetId;
     StripeId victimStripeId;
+    uint32_t victimIndex;
 
     CopierStateType copybackState;
-    CopierMeta* meta = nullptr;
-    VictimStripe* victimStripe = nullptr;
+    CopierMeta* meta;
 
-    Allocator* allocator;
+    IArrayInfo* array;
+    IBlockAllocator* iBlockAllocator;
+    IContextManager* iContextManager;
     GcStatus* gcStatus;
     std::map<uint32_t, BlkInfo> validStripes;
     bool loadedValidBlock;
 
     bool thresholdCheck = true;
-    bool isStop = false;
-    bool isPause = false;
+    bool isStopped = false;
+    bool isPaused = false;
     bool readyToEnd = false;
+
+    CallbackSmartPtr stripeCopySubmissionPtr;
+    CallbackSmartPtr reverseMapLoadCompletionPtr;
 };
 
-} // namespace ibofos
+} // namespace pos

@@ -30,78 +30,257 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vsamap_manager_test.h"
+#include "src/mapper/unit_test/vsamap_manager_test.h"
 
-namespace ibofos
+namespace pos
 {
-std::map<int, uint64_t> VSAMapManagerTest::volumeInfo;
 
 void
 VSAMapManagerTest::SetUp(void)
 {
-    vsaMapManagerSUT = new VSAMapManager();
+    MapperTestFixture::SetUp();
 }
 
 void
 VSAMapManagerTest::TearDown(void)
 {
-    delete vsaMapManagerSUT;
+    MapperTestFixture::TearDown();
 }
 
 void
-VSAMapManagerTest::_CreateRandVolume(int volId)
+AccessRequest::CLIThreadFunc(IVSAMap* iVSAMap, BlkAddr rba)
 {
-    // int volId = numVolumeCreated;
-    std::string volName = "Vol" + std::to_string(volId);
-    uint64_t volSizeByte = _GetRandomSection(1, 50) * SZ_1G; // 1 ... 50 GB
-
-    std::cout << "Volume Name: " << volName << "  Size(Byte): " << volSizeByte << std::endl;
-    bool reb = vsaMapManagerSUT->VolumeCreated(volName, volId, volSizeByte, 0, 0);
-    EXPECT_EQ(reb, true);
-    volumeInfo.emplace(volId, volSizeByte);
+    POS_TRACE_INFO(9999, "Call GetVSAInternal(), CLI");
+    int caller = CALLER_NOT_EVENT;
+    iVSAMap->GetVSAInternal(0, rba, caller);
+    POS_TRACE_INFO(9999, "CLI Done");
 }
 
-void
-VSAMapManagerTest::_LoadVolume(int volId)
+//------------------------------------------------------------------------------
+
+TEST_F(VSAMapManagerTest, SetAndStore)
 {
-    bool retb = vsaMapManagerSUT->VolumeLoaded("", volId, 0, 0, 0);
-    EXPECT_EQ(retb, true);
+    POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.SetAndStore ********************");
+    int reti = 0;
+    _CreateRandVolume(0);
+    _MountVolume(0);
+
+    _FillRandomSection(0, _GetRbaMax(0), rbas0, NUM_MAP_ENTRY);
+    _PrintData("RBA   ", rbas0);
+    _FillRandomSection(0, TEST_VSID_MAX, vsids0, NUM_MAP_ENTRY);
+    _PrintData("VSID  ", vsids0);
+    _FillRandomSection(0, TEST_OFFSET_MAX, offsets0, NUM_MAP_ENTRY);
+    _PrintData("OFFSET", offsets0);
+    for (int i = 0; i < NUM_MAP_ENTRY; ++i)
+    {
+        _SetVSAs(0, rbas0[i], vsids0[i], offsets0[i]);
+    }
+
+    reti = vsaMapManagerSUT->StoreMaps();
+    EXPECT_EQ(reti, RET_INT_SUCCESS);
+    _UnmountVolume(0);
 }
 
-int
-VSAMapManagerTest::GetSavedVolumeSize(int volId, uint64_t& volSize)
+TEST_F(VSAMapManagerTest, LoadAndGet)
 {
-    volSize = volumeInfo[volId];
-    return 0;
-}
+    POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.LoadAndGet ********************");
+    _LoadVolume(0);
+    _MountVolume(0);
+    for (int i = 0; i < NUM_MAP_ENTRY; ++i)
+    {
+        _GetAndCompareVSA(0, rbas0[i], vsids0[i], offsets0[i]);
+    }
+    _UnmountVolume(0);
+    _DeleteVolume(0);
 
-// Create 3 random size volumes
-TEST_F(VSAMapManagerTest, Create3RandomVolume)
-{
+    // Pre-setting for next test
     _CreateRandVolume(0);
     _CreateRandVolume(1);
-    _CreateRandVolume(2);
 }
 
-// Empty VSAMap Internal loading
 TEST_F(VSAMapManagerTest, EmptyVSAMapInternalLoading)
 {
-    MockVolumeManager* mockVolumeManager = new MockVolumeManager();
-    EXPECT_CALL(*mockVolumeManager, GetVolumeSize(_, _)).WillRepeatedly(Invoke(this, &VSAMapManagerTest::GetSavedVolumeSize));
-    vsaMapManagerSUT->SetVolumeManagerObject(mockVolumeManager);
+    POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.EmptyVSAMapInternalLoading ********************");
+    _UseMockVolumeManager();
+    _LoadVolume(0);
+    _LoadVolume(1);
+    VirtualBlkAddr vsa;
+    int caller;
+    IVSAMap* iVSAMap = vsaMapManagerSUT->GetIVSAMap();
 
-    LoadVolume(0);
-    LoadVolume(1);
-    LoadVolume(2);
+    do
+    {
+        usleep(1);
+        POS_TRACE_INFO(9999, "Call GetVSAInternal(), event");
+        caller = CALLER_EVENT;
+        vsa = iVSAMap->GetVSAInternal(0, 0, caller);
+    } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
+    EXPECT_EQ(vsa, UNMAP_VSA);
 
-    int caller = CALLER_EVENT;
-    int reti = vsaMapManagerSUT->EnableInternalAccess(0, caller);
-    EXPECT_EQ(reti, 0);
+    do
+    {
+        usleep(1);
+        POS_TRACE_INFO(9999, "Call GetVSAInternal(), not event");
+        caller = CALLER_NOT_EVENT;
+        vsa = iVSAMap->GetVSAInternal(1, 0, caller);
+    } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
+    EXPECT_EQ(vsa, UNMAP_VSA);
 
-    caller = CALLER_NOT_EVENT;
-    reti = vsaMapManagerSUT->EnableInternalAccess(1, caller);
-    EXPECT_EQ(reti, 0);
-    delete mockVolumeManager;
+    // Pre-setting for next test
+    _MountVolume(0);
+    _MountVolume(1);
+
+    _FillRandomSection(0, _GetRbaMax(0), rbas0, NUM_MAP_ENTRY);
+    _FillRandomSection(1, _GetRbaMax(1), rbas1, NUM_MAP_ENTRY);
+    _FillRandomSection(0, TEST_VSID_MAX, vsids0, NUM_MAP_ENTRY);
+    _FillRandomSection(1, TEST_VSID_MAX, vsids1, NUM_MAP_ENTRY);
+    _FillRandomSection(0, TEST_OFFSET_MAX, offsets0, NUM_MAP_ENTRY);
+    _FillRandomSection(1, TEST_OFFSET_MAX, offsets1, NUM_MAP_ENTRY);
+    for (int i = 0; i < NUM_MAP_ENTRY; ++i)
+    {
+        _SetVSAs(0, rbas0[i], vsids0[i], offsets0[i]);
+        _SetVSAs(1, rbas1[i], vsids1[i], offsets1[i]);
+    }
+
+    _UnmountVolume(0);
+    _UnmountVolume(1);
+    _DeleteMockVolumeManager();
 }
 
-} // namespace ibofos
+TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_1)
+{
+    POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.RandomWrittenVSAMapInternalLoading_1 ********************");
+    _UseMockVolumeManager();
+    _LoadVolume(0);
+    _LoadVolume(1);
+    VirtualBlkAddr vsa;
+    int caller;
+    IVSAMap* iVSAMap = vsaMapManagerSUT->GetIVSAMap();
+
+    do
+    {
+        usleep(1);
+        POS_TRACE_INFO(9999, "Call GetVSAInternal(), event");
+        caller = CALLER_EVENT;
+        vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
+    } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
+    VirtualBlkAddr vsaOrig = {.stripeId = vsids0[0], .offset = offsets0[0]};
+    EXPECT_EQ(vsa, vsaOrig);
+
+    do
+    {
+        usleep(1);
+        POS_TRACE_INFO(9999, "Call GetVSAInternal(), not event");
+        caller = CALLER_NOT_EVENT;
+        vsa = iVSAMap->GetVSAInternal(1, rbas1[0], caller);
+    } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
+    vsaOrig = {.stripeId = vsids1[0], .offset = offsets1[0]};
+    EXPECT_EQ(vsa, vsaOrig);
+
+    // Pre-setting for next test
+    _UnmountVolume(0);
+    _UnmountVolume(1);
+    _DeleteMockVolumeManager();
+}
+
+TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_2)
+{
+    POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.RandomWrittenVSAMapInternalLoading_2 ********************");
+    _UseMockVolumeManager();
+    _LoadVolume(0);
+    VirtualBlkAddr vsa;
+    int caller;
+    IVSAMap* iVSAMap = vsaMapManagerSUT->GetIVSAMap();
+
+    POS_TRACE_INFO(9999, "Call GetVSAInternal(), event_1");
+    caller = CALLER_EVENT;
+    vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
+
+    do
+    {
+        POS_TRACE_INFO(9999, "Call GetVSAInternal(), event_2");
+        caller = CALLER_EVENT;
+        vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
+    } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
+    VirtualBlkAddr vsaOrig = {.stripeId = vsids0[0], .offset = offsets0[0]};
+    EXPECT_EQ(vsa, vsaOrig);
+
+    // Pre-setting for next test
+    _UnmountVolume(0);
+    _DeleteMockVolumeManager();
+}
+
+TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_3)
+{
+    POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.RandomWrittenVSAMapInternalLoading_3 ********************");
+    _UseMockVolumeManager();
+    _LoadVolume(0);
+    VirtualBlkAddr vsa;
+    int caller;
+    IVSAMap* iVSAMap = vsaMapManagerSUT->GetIVSAMap();
+
+    POS_TRACE_INFO(9999, "Call GetVSAInternal(), event");
+    caller = CALLER_EVENT;
+    vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
+
+    POS_TRACE_INFO(9999, "Call GetVSAInternal(), NOT event");
+    caller = CALLER_NOT_EVENT;
+    vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
+
+    VirtualBlkAddr vsaOrig = {.stripeId = vsids0[0], .offset = offsets0[0]};
+    EXPECT_EQ(vsa, vsaOrig);
+
+    // Pre-setting for next test
+    _UnmountVolume(0);
+    _DeleteMockVolumeManager();
+}
+
+TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_4)
+{
+    POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.RandomWrittenVSAMapInternalLoading_4 ********************");
+    _UseMockVolumeManager();
+    _LoadVolume(0);
+    VirtualBlkAddr vsa;
+    int caller;
+    IVSAMap* iVSAMap = vsaMapManagerSUT->GetIVSAMap();
+
+    AccessRequest req;
+    std::thread t{&AccessRequest::CLIThreadFunc, &req, iVSAMap, rbas0[0]};
+
+    usleep(200);
+    POS_TRACE_INFO(9999, "Call GetVSAInternal(), NOT event");
+    caller = CALLER_NOT_EVENT;
+    vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
+    POS_TRACE_INFO(9999, "Let's check");
+    VirtualBlkAddr vsaOrig = {.stripeId = vsids0[0], .offset = offsets0[0]};
+    EXPECT_EQ(vsa, vsaOrig);
+
+    t.join();
+    // Pre-setting for next test
+    _UnmountVolume(0);
+    _DeleteMockVolumeManager();
+}
+
+TEST_F(VSAMapManagerTest, InternalLoadingAndFGMount)
+{
+    POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.InternalLoadingAndFGMount ********************");
+    _UseMockVolumeManager();
+    _LoadVolume(0);
+    _LoadVolume(1);
+
+    VirtualBlkAddr vsa;
+    int caller;
+    IVSAMap* iVSAMap = vsaMapManagerSUT->GetIVSAMap();
+
+    caller = CALLER_EVENT;
+    vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
+    _MountVolume(0);
+
+    // Pre-setting for next test
+    _UnmountVolume(0);
+    _DeleteVolume(0);
+    _DeleteVolume(1);
+    _DeleteMockVolumeManager();
+}
+
+} // namespace pos

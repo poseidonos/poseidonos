@@ -32,7 +32,7 @@
 
 #include "src/io/general_io/internal_read_completion.h"
 
-namespace ibofos
+namespace pos
 {
 InternalReadCompletion::InternalReadCompletion(
     uint32_t weight)
@@ -49,4 +49,4 @@ InternalReadCompletion::_DoSpecificJob(void)
 {
     return true;
 }
-} // namespace ibofos
+} // namespace pos

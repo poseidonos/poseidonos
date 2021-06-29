@@ -33,6 +33,9 @@
 #ifndef __UT_MVM_H__
 #define __UT_MVM_H__
 
+namespace pos
+{
 void MountMetaStorage(void);
+} // namespace pos
 
 #endif // __UT_MVM_H__

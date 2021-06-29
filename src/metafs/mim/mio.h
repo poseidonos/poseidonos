@@ -33,20 +33,22 @@
 #pragma once
 
 #include <condition_variable>
-
-#include "mfs_io_q.h"
-#include "mfs_ret_code.h"
-#include "mim_req.h"
+#include <string>
+#include <vector>
+#include "metafs_io_q.h"
+#include "metafs_return_code.h"
+#include "metafs_io_request.h"
 #include "mim_state.h"
 #include "mpio.h"
 #include "mpio_list_context.h"
 #include "mpio_pool.h"
+#include "metafs_aiocb_cxt.h"
 
-using namespace ibofos;
-
+namespace pos
+{
 #define AsMioStateEntryPoint(funcPointer, obj) AsEntryPointParam1(funcPointer, obj)
 
-using mpioDonePollerCb = std::function<void(void)>;
+using MpioDonePollerCb = std::function<void(void)>;
 using MioAsyncDoneCb = AsyncCallback;
 
 class MioStateExecuteEntry
@@ -86,7 +88,7 @@ private:
     MioState expNextState;
 };
 
-class Mio : public MetaAsyncRunnableClass<MetaAsyncCbCxt, MioState, MioStateExecuteEntry>
+class Mio : public MetaAsyncRunnable<MetaAsyncCbCxt, MioState, MioStateExecuteEntry>
 {
 public:
     Mio(void) = delete;
@@ -97,27 +99,21 @@ public:
     virtual ~Mio(void);
 
     virtual void InitStateHandler(void) override;
-    void Setup(MetaFsIoReqMsg* ioReq, MetaLpnType baseLpn);
+    void Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* metaStorage);
     void Reset(void);
 
-    uint32_t GetOriginReqID(void);
-
     void SetMpioDoneNotifier(PartialMpioDoneCb& partialMpioDoneHandler);
-    void SetMpioDonePoller(mpioDonePollerCb& mpioDonePoller);
+    void SetMpioDonePoller(MpioDonePollerCb& mpioDonePoller);
 
-    void SetIoCQ(MetaIoQClass<Mio*>* ioCQ);
+    void SetIoCQ(MetaFsIoQ<Mio*>* ioCQ);
 
     void NotifiyPartialMpioDone(Mpio* mpio);
     bool IsSyncIO(void);
-    bool IsTargetToSSD(void);
 
     const MetaIoOpcode GetOpCode(void);
-    const FileFDType GetFD(void);
-    FileSizeType GetIOSize(void);
+    const FileDescriptorType GetFD(void);
     bool IsRead(void);
-    uint32_t GetFileDataChunkSize(void);
     MetaLpnType GetStartLpn(void);
-    MetaLpnType GetLpnCnt(void);
     bool IsTargetStorageSSD(void);
     bool Init(MioState expNextState = MioState::Max);
     bool Issue(MioState expNextState = MioState::Max);
@@ -125,9 +121,12 @@ public:
     MfsError GetError(void);
     void* GetClientAioCbCxt(void);
     void NotifyCompletionToClient(void);
-    bool IsFirstAttempt(void);
-    void SetRetryFlag(void);
     void SetLocalAioCbCxt(MioAsyncDoneCb& callback);
+    std::string GetArrayName(void);
+
+    void SetMergedRequestList(std::vector<MetaFsIoRequest*>* list);
+    void ClearMergedRequestList(void);
+    std::vector<MetaFsIoRequest*>* GetMergedRequestList(void);
 
 private:
     void _BindMpioPool(MpioPool* mpioPool);
@@ -138,32 +137,31 @@ private:
     void _MarkMpioComplete(Mpio& mpio);
     void _FinalizeMpio(Mpio& mpio);
     void _NotifyIoCompletionToClient(void);
-    Mpio& _AllocNewMpio(MpioIoInfo& mpioIoInfo, bool partialIO);
-    uint32_t _GetDataChunkSize(void);
+    Mpio* _AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO);
     void _HandleMpioDone(void* data);
-    MpioType _LookupMpioType(MetaIoReqTypeEnum type);
+    MpioType _LookupMpioType(MetaIoRequestType type);
 
-    MetaFsIoReqMsg* originReq;
+    MetaFsIoRequest* originReq;
     MetaIoOpcode opCode;
     MpioListContext mpioListCxt;
     uint32_t fileDataChunkSize;
     MetaLpnType startLpn;
-    MetaLpnType numLpns;
     MfsError error;
-    bool retryFlag;
-    MetaIoQClass<Mio*>* ioCQ;
+    MetaFsIoQ<Mio*>* ioCQ;
     MpioPool* mpioPool;
     MetaAsyncCbCxt aioCbCxt;
+    std::vector<MetaFsIoRequest*>* mergedRequestList;
 
-    VolumeIoSmartPtr userIo;
-
-    static const MetaIoOpcode ioOpcodeMap[static_cast<uint32_t>(MetaIoReqTypeEnum::Max)];
+    static const MetaIoOpcode ioOpcodeMap[static_cast<uint32_t>(MetaIoRequestType::Max)];
     MetaFsSpinLock mpioListCxtLock;
     std::mutex mioDoneLock;
 
     PartialMpioDoneCb partialMpioDoneNotifier;
-    mpioDonePollerCb mpioDonePoller;
+    MpioDonePollerCb mpioDonePoller;
     MpioAsyncDoneCb mpioAsyncDoneCallback;
+
+    MetaStorageSubsystem* metaStorage = nullptr;
 };
 
 extern InstanceTagIdAllocator mioTagIdAllocator;
+} // namespace pos

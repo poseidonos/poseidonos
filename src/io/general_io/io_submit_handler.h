@@ -34,52 +34,32 @@
 
 #include <cstdint>
 #include <list>
+#include <string>
 
-#include "src/array/partition/partition.h"
-#include "src/io/general_io/io_submit_handler_status.h"
-
-namespace ibofos
+#include "src/array/ft/buffer_entry.h"
+#include "src/include/address_type.h"
+#include "src/include/partition_type.h"
+#include "src/include/pos_event_id.h"
+#include "src/include/smart_ptr_type.h"
+#include "src/io_submit_interface/i_io_submit_handler.h"
+#include "src/io_submit_interface/io_submit_handler_status.h"
+namespace pos
 {
-enum class IODirection
-{
-    WRITE,
-    READ,
-    TRIM,
-};
-
-class IOSubmitHandler
+class IOSubmitHandler : public IIOSubmitHandler
 {
 public:
-    IOSubmitHandler(void) = delete;
-    ~IOSubmitHandler(void) = delete;
-
-    static IOSubmitHandlerStatus
-    SyncIO(IODirection direction,
+    IOSubmitHandler(void);
+    ~IOSubmitHandler(void);
+    IOSubmitHandlerStatus SyncIO(IODirection direction,
         std::list<BufferEntry>& bufferList,
         LogicalBlkAddr& startLSA, uint64_t blockCount,
-        PartitionType partitionToIO);
+        PartitionType partitionToIO, std::string arrayName);
 
-    static IOSubmitHandlerStatus
-    SubmitAsyncIO(IODirection direction,
+    IOSubmitHandlerStatus SubmitAsyncIO(IODirection direction,
         std::list<BufferEntry>& bufferList,
         LogicalBlkAddr& startLSA, uint64_t blockCount,
         PartitionType partitionToIO,
-        CallbackSmartPtr callback);
+        CallbackSmartPtr callback, std::string arrayName);
+};
 
-private:
-    static IOSubmitHandlerStatus _AsyncRead(std::list<BufferEntry>& bufferList,
-        LogicalBlkAddr& startLSA, uint64_t blockCount,
-        PartitionType partitionToIO, CallbackSmartPtr callback);
-
-    static IOSubmitHandlerStatus _AsyncWrite(std::list<BufferEntry>& bufferList,
-        LogicalBlkAddr& startLSA, uint64_t blockCount,
-        PartitionType partitionToIO, CallbackSmartPtr callback);
-
-    static IOSubmitHandlerStatus _TrimData(std::list<BufferEntry>& bufferList,
-        LogicalBlkAddr& startLSA, uint64_t blockCount,
-        PartitionType partitionToIO, CallbackSmartPtr callbackO);
-
-    static IOSubmitHandlerStatus _CheckAsyncWriteError(IBOF_EVENT_ID eventId);
-}; // class IOSubmitHandler
-
-} // namespace ibofos
+} // namespace pos

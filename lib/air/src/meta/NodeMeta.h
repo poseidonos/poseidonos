@@ -2,6 +2,8 @@
 #ifndef AIR_NODE_META_H
 #define AIR_NODE_META_H
 
+#include <stdexcept>
+
 #include "src/config/ConfigInterface.h"
 #include "src/lib/Casting.h"
 #include "src/lib/Type.h"
@@ -14,95 +16,135 @@ public:
     virtual ~NodeMeta(void)
     {
     }
-    inline uint32_t
-    NodeSize(void)
-    {
-        return sizeof(struct air::Node);
-    }
     inline air::ProcessorType
-    NodeProcessorType(uint32_t i) const
+    ProcessorType(uint32_t nid) const
     {
-        return node[i].processor_type;
-    }
-    inline bool
-    Run(void) const
-    {
-        return run;
-    }
-    virtual inline bool
-    Update(void) const
-    {
-        return update;
+        if (MAX_NID_SIZE <= nid)
+        {
+            throw std::out_of_range("nid exceeded maximum node size!");
+        }
+
+        return node[nid].processor_type;
     }
     virtual inline bool
-    NodeEnable(uint32_t i) const
+    Run(uint32_t nid) const
     {
-        return node[i].enable;
+        if (MAX_NID_SIZE <= nid)
+        {
+            throw std::out_of_range("nid exceeded maximum node size!");
+        }
+
+        return node[nid].run;
     }
     virtual inline uint32_t
-    NodeSampleRatio(uint32_t i) const
+    SampleRatio(uint32_t nid) const
     {
-        return node[i].sample_ratio;
+        if (MAX_NID_SIZE <= nid)
+        {
+            throw std::out_of_range("nid exceeded maximum node size!");
+        }
+
+        return node[nid].sample_ratio;
     }
-    inline uint32_t
-    NodeChildId(uint32_t i, uint32_t idx) const
+    virtual inline uint32_t
+    GroupId(uint32_t nid) const
     {
-        return node[i].child_id[idx];
-    }
-    virtual inline int32_t
-    NodeGroupId(uint32_t i) const
-    {
-        return node[i].group_id;
+        if (MAX_NID_SIZE <= nid)
+        {
+            throw std::out_of_range("nid exceeded maximum node size!");
+        }
+
+        return node[nid].group_id;
     }
     inline void*
     Meta(void)
     {
         return &node;
     }
+    inline void
+    SetProcessorType(uint32_t nid, air::ProcessorType processor_type)
+    {
+        if (MAX_NID_SIZE <= nid)
+        {
+            throw std::out_of_range("nid exceeded maximum node size!");
+        }
 
+        node[nid].processor_type = processor_type;
+    }
+    virtual inline void
+    SetRun(uint32_t nid, bool run)
+    {
+        if (MAX_NID_SIZE <= nid)
+        {
+            throw std::out_of_range("nid exceeded maximum node size!");
+        }
+
+        node[nid].run = run;
+    }
+    virtual inline void
+    SetSampleRatio(uint32_t nid, uint32_t sample_ratio)
+    {
+        if (MAX_NID_SIZE <= nid)
+        {
+            throw std::out_of_range("nid exceeded maximum node size!");
+        }
+
+        node[nid].sample_ratio = sample_ratio;
+    }
+    virtual inline void
+    SetGroupId(uint32_t nid, uint32_t group_id)
+    {
+        if (MAX_NID_SIZE <= nid)
+        {
+            throw std::out_of_range("nid exceeded maximum node size!");
+        }
+
+        node[nid].group_id = group_id;
+    }
     inline void
-    SetNodeProcessorType(uint32_t i,
-        air::ProcessorType processor_type)
+    SetIndexSize(uint32_t nid, uint32_t index_size)
     {
-        node[i].processor_type = processor_type;
+        if (MAX_NID_SIZE <= nid)
+        {
+            throw std::out_of_range("nid exceeded maximum node size!");
+        }
+
+        node[nid].index_size = index_size;
     }
-    virtual inline void
-    SetRun(bool new_run)
+    inline uint32_t
+    IndexSize(uint32_t nid) const
     {
-        run = new_run;
-        update = true;
-    }
-    virtual inline void
-    SetUpdate(bool new_update)
-    {
-        update = new_update;
-    }
-    virtual inline void
-    SetNodeEnable(uint32_t i, bool enable)
-    {
-        node[i].enable = enable;
-        update = true;
-    }
-    virtual inline void
-    SetNodeSampleRatio(uint32_t i, uint32_t sample_ratio)
-    {
-        node[i].sample_ratio = sample_ratio;
+        if (MAX_NID_SIZE <= nid)
+        {
+            throw std::out_of_range("nid exceeded maximum node size!");
+        }
+
+        return node[nid].index_size;
     }
     inline void
-    SetNodeChildId(uint32_t i, uint32_t idx, uint32_t nid)
+    SetFilterSize(uint32_t nid, uint32_t filter_size)
     {
-        node[i].child_id[idx] = nid;
+        if (MAX_NID_SIZE <= nid)
+        {
+            throw std::out_of_range("nid exceeded maximum node size!");
+        }
+
+        node[nid].filter_size = filter_size;
     }
-    virtual inline void
-    SetNodeGroupId(uint32_t i, int32_t group_id)
+    inline uint32_t
+    FilterSize(uint32_t nid) const
     {
-        node[i].group_id = group_id;
+        if (MAX_NID_SIZE <= nid)
+        {
+            throw std::out_of_range("nid exceeded maximum node size!");
+        }
+
+        return node[nid].filter_size;
     }
 
 private:
-    bool run{true};
-    bool update{false};
-    air::Node node[cfg::GetArrSize(config::ConfigType::NODE)];
+    const uint32_t MAX_NID_SIZE{cfg::GetSentenceCount(config::ParagraphType::NODE)};
+    air::NodeMetaData node[cfg::GetSentenceCount(config::ParagraphType::NODE)];
 };
 
 class NodeMetaGetter
@@ -118,50 +160,40 @@ public:
     : node_meta(new_node_meta)
     {
     }
-    inline uint32_t
-    NodeSize(void)
-    {
-        return node_meta->NodeSize();
-    }
     virtual inline air::ProcessorType
-    NodeProcessorType(uint32_t i) const
+    ProcessorType(uint32_t nid) const
     {
-        return node_meta->NodeProcessorType(i);
-    }
-    inline bool
-    Run(void) const
-    {
-        return node_meta->Run();
-    }
-    inline bool
-    Update(void) const
-    {
-        return node_meta->Update();
+        return node_meta->ProcessorType(nid);
     }
     virtual inline bool
-    NodeEnable(uint32_t i) const
+    Run(uint32_t nid) const
     {
-        return node_meta->NodeEnable(i);
+        return node_meta->Run(nid);
     }
     inline uint32_t
-    NodeSampleRatio(uint32_t i) const
+    SampleRatio(uint32_t nid) const
     {
-        return node_meta->NodeSampleRatio(i);
+        return node_meta->SampleRatio(nid);
     }
-    inline uint32_t
-    NodeChildId(uint32_t i, uint32_t idx) const
+    virtual inline uint32_t
+    GroupId(uint32_t nid) const
     {
-        return node_meta->NodeChildId(i, idx);
-    }
-    virtual inline int32_t
-    NodeGroupId(uint32_t i) const
-    {
-        return node_meta->NodeGroupId(i);
+        return node_meta->GroupId(nid);
     }
     inline void*
     Meta(void)
     {
         return node_meta->Meta();
+    }
+    virtual inline uint32_t
+    IndexSize(uint32_t nid) const
+    {
+        return node_meta->IndexSize(nid);
+    }
+    virtual inline uint32_t
+    FilterSize(uint32_t nid) const
+    {
+        return node_meta->FilterSize(nid);
     }
 
 private:

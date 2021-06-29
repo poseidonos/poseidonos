@@ -32,36 +32,80 @@
 
 #include "stripe_map_update.h"
 
-#include "src/allocator/stripe.h"
-#include "src/include/ibof_event_id.hpp"
+#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/io/backend_io/stripe_map_update_completion.h"
-#include "src/journal_manager/journal_manager.h"
-#include "src/mapper/mapper.h"
+#include "src/journal_service/journal_service.h"
+#include "src/logger/logger.h"
+#include "src/mapper_service/mapper_service.h"
 
-namespace ibofos
+namespace pos
 {
-StripeMapUpdate::StripeMapUpdate(Stripe* stripe)
+StripeMapUpdate::StripeMapUpdate(Stripe* stripe, std::string& arrayName)
+: StripeMapUpdate(stripe,
+    MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
+    JournalServiceSingleton::Instance(), EventSchedulerSingleton::Instance(),
+    arrayName)
+{
+}
+
+StripeMapUpdate::StripeMapUpdate(Stripe* stripe, IStripeMap* iStripeMap,
+    JournalService* journalService, EventScheduler* scheduler, std::string& arrayName)
 : stripe(stripe),
-  mapper(MapperSingleton::Instance()),
-  journalManager(JournalManagerSingleton::Instance())
+  iStripeMap(iStripeMap),
+  journalService(journalService),
+  eventScheduler(scheduler),
+  arrayName(arrayName)
+{
+}
+
+StripeMapUpdate::~StripeMapUpdate(void)
 {
 }
 
 bool
 StripeMapUpdate::Execute(void)
 {
-    MpageList dirty = mapper->GetDirtyStripeMapPages(stripe->GetVsid());
-    StripeAddr oldAddr = mapper->GetLSA(stripe->GetVsid());
+    bool executionSuccessful = false;
 
-    EventSmartPtr event(new StripeMapUpdateCompletion(stripe));
-    bool logWriteRequestSuccessful = journalManager->AddStripeMapUpdatedLog(stripe, oldAddr, dirty, event);
+    if (journalService->IsEnabled(arrayName))
+    {
+        IJournalWriter* journal = journalService->GetWriter(arrayName);
 
-    IBOF_EVENT_ID eventId = IBOF_EVENT_ID::NFLSH_STRIPE_DEBUG_UPDATE;
-    IBOF_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, IbofEventId::GetString(eventId),
+        MpageList dirty = iStripeMap->GetDirtyStripeMapPages(stripe->GetVsid());
+        StripeAddr oldAddr = iStripeMap->GetLSA(stripe->GetVsid());
+        EventSmartPtr callbackEvent(new StripeMapUpdateCompletion(stripe, arrayName));
+
+        int result = journal->AddStripeMapUpdatedLog(stripe, oldAddr,
+            dirty, callbackEvent);
+
+        executionSuccessful = (result == 0);
+    }
+    else
+    {
+        StripeMapUpdateCompletion event(stripe, arrayName);
+        executionSuccessful = event.Execute();
+        if (unlikely(false == executionSuccessful))
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::NFLSH_STRIPE_DEBUG_UPDATE;
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                PosEventId::GetString(eventId));
+
+            EventSmartPtr event(new StripeMapUpdateCompletion(stripe, arrayName));
+            eventScheduler->EnqueueEvent(event);
+
+            executionSuccessful = true;
+        }
+    }
+
+    POS_EVENT_ID eventId = POS_EVENT_ID::NFLSH_STRIPE_DEBUG_UPDATE;
+    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, PosEventId::GetString(eventId),
         stripe->GetVsid(),
-        static_cast<uint32_t>(logWriteRequestSuccessful));
+        static_cast<uint32_t>(executionSuccessful));
 
-    return logWriteRequestSuccessful;
+    return executionSuccessful;
 }
 
-} // namespace ibofos
+} // namespace pos

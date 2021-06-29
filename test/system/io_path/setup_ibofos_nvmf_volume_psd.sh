@@ -54,21 +54,21 @@ ibofos_bringup(){
     turn=0
     for i in `seq 1 $SUBSYSTEM_COUNT`
     do
-        sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem$i -m 256 -a -s IBOF0000000000000$i -d IBOF_VOLUME_EXTENTION
+        sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem$i -m 256 -a -s POS0000000000000$i -d POS_VOLUME_EXTENTION
         port=`expr $i % $PORT_COUNT + 1158`
         if [ $turn -eq 0 ]; then
-            sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem$i -t $TRANSPORT -a $TARGET_IP1 -s $port
+            sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP1 -s $port
             turn=1
         else
-            sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem$i -t $TRANSPORT -a $TARGET_IP2 -s $port
+            sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP2 -s $port
             turn=0
         fi
     done
 
     if [ "$CLEAN_BRINGUP" -eq 1 ]; then
-        echo "ibofos clean bringup"
+        echo "poseidonos clean bringup"
         sudo $ROOT_DIR/bin/cli array create -b uram0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --name $ARRAYNAME --raidtype RAID5
-        sudo $ROOT_DIR/bin/cli system mount
+        sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME
 
         for i in `seq 1 $VOLUME_COUNT`
         do
@@ -76,10 +76,10 @@ ibofos_bringup(){
             sudo $ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME
         done
     else
-        echo "ibofos dirty bringup"
+        echo "poseidonos dirty bringup"
         #TODO : need to backup uram before load_array
-        sudo $ROOT_DIR/bin/cli array load --name $ARRAYNAME
-        sudo $ROOT_DIR/bin/cli system mount
+        sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME 
+        
         for i in `seq 1 $VOLUME_COUNT`
         do
             sudo $ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME

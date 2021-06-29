@@ -38,6 +38,8 @@
 #include "mio.h"
 #include "os_header.h"
 
+namespace pos
+{
 class MioPool
 {
 public:
@@ -52,3 +54,4 @@ private:
     void _FreeAllMioinPool(void);
     std::vector<Mio*> mioList;
 };
+} // namespace pos

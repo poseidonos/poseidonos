@@ -32,6 +32,8 @@
 
 #pragma once
 
+namespace pos
+{
 enum class MetaStorageType
 {
     SSD,
@@ -52,3 +54,4 @@ enum class MetaIoUnitEnum
 
     Default = BlockIO
 };
+} // namespace pos

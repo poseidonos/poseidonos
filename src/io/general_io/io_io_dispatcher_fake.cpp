@@ -32,14 +32,16 @@
 
 #include <assert.h>
 
-#include "src/scheduler/io_dispatcher.h"
-#include "src/scheduler/io_worker.h"
+#include "src/io_scheduler/io_dispatcher.h"
+#include "src/io_scheduler/io_worker.h"
 
-namespace ibofos
+namespace pos
 {
 static uint32_t CORE_FOR_IO_WORKER = 3;
 
 IODispatcher::IODispatcher(void)
+: ioWorkerCount(0),
+  deviceAllocationTurn(0)
 {
     cpu_set_t cpuSet;
 
@@ -59,4 +61,4 @@ IODispatcher::~IODispatcher(void)
     }
 }
 
-} // namespace ibofos
+} // namespace pos

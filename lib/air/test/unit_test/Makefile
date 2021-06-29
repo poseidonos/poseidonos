@@ -7,12 +7,11 @@ CXXFLAGS	= -std=c++14 -fprofile-arcs -ftest-coverage -Wall
 THREAD		= -pthread
 TEST		= -lgtest
 INCLUDES	= -I${AIR_TOP_DIR} -I${GTEST_DIR}/include -I${GMOCK_DIR}/include
-LIB_DIRS    = -L/usr/local/lib
 TEST_SUITE	= test_suite
 GCOV		= gcov
 
 # add directory(module) which to unit-test here
-TEST_DIRS = api chain collection config input lib meta object output policy process profile_data stream target_detector thread
+TEST_DIRS = api chain collection config data_structure input lib meta object output policy process stream target_detector thread
 
 test :
 	@for dir in $(TEST_DIRS); do \
@@ -24,4 +23,4 @@ clean :
 	$(MAKE) clean -C $$dir || exit $?; \
 	done
 
-export AIR_TOP_DIR CXX CXXFLAGS THREAD TEST INCLUDES LIB_DIRS TEST_SUITE GCOV
+export AIR_TOP_DIR CXX CXXFLAGS THREAD TEST INCLUDES TEST_SUITE GCOV

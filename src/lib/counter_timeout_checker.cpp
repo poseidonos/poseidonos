@@ -32,7 +32,7 @@
 
 #include "counter_timeout_checker.h"
 
-namespace ibofos
+namespace pos
 {
 CounterTimeoutChecker::CounterTimeoutChecker(void)
 : counterLeftToTimeout(0)
@@ -66,4 +66,4 @@ CounterTimeoutChecker::CheckTimeout(void)
     return timeoutReached;
 }
 
-} // namespace ibofos
+} // namespace pos

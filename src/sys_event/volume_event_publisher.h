@@ -32,39 +32,41 @@
 
 #pragma once
 
+#include "src/lib/singleton.h"
+#include "src/sys_event/volume_event.h"
+
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
-
-#include "src/lib/singleton.h"
-#include "volume_event.h"
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 class VolumeEventPublisher
 {
 public:
-    VolumeEventPublisher();
-    virtual ~VolumeEventPublisher();
-    void RegisterSubscriber(VolumeEvent* subscriber);
-    void RemoveSubscriber(VolumeEvent* subscriber);
+    VolumeEventPublisher(void);
+    virtual ~VolumeEventPublisher(void);
+    void RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName);
+    void RegisterNvmfTargetSubscriber(VolumeEvent* subscriber, std::string arrayName);
+    void RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName);
     bool NotifyVolumeCreated(std::string volName, int volID,
-        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw);
+        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName);
     bool NotifyVolumeUpdated(std::string volName, int volID,
-        uint64_t maxiops, uint64_t maxbw);
-    bool NotifyVolumeDeleted(std::string volName, int volID, uint64_t volSizeByte);
+        uint64_t maxiops, uint64_t maxbw, std::string arrayName);
+    bool NotifyVolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName);
     bool NotifyVolumeMounted(std::string volName, std::string subnqn, int volID,
-        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw);
-    bool NotifyVolumeUnmounted(std::string volName, int volID);
+        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName);
+    bool NotifyVolumeUnmounted(std::string volName, int volID, std::string arrayName);
     bool NotifyVolumeLoaded(std::string name, int id,
-        uint64_t totalSize, uint64_t maxiops, uint64_t maxbw);
-    void NotifyVolumeDetached(vector<int> volList);
+        uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName);
+    void NotifyVolumeDetached(vector<int> volList, std::string arrayName);
 
 private:
-    vector<VolumeEvent*> subscribers;
+    vector<std::pair<std::string, VolumeEvent*>> subscribers;
 };
 
 using VolumeEventPublisherSingleton = Singleton<VolumeEventPublisher>;
-} // namespace ibofos
+} // namespace pos

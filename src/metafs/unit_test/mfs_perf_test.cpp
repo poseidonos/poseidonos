@@ -33,14 +33,16 @@
 #include "mfs_perf_test.h"
 
 #include <algorithm>
+#include <string>
+#include "metafs.h"
+#include "metafs_common.h"
+#include "metafs_common_const.h"
+#include "metafs_config.h"
+#include "metafs_log.h"
+#include "metafs_time.h"
 
-#include "mfs.h"
-#include "mfs_common.h"
-#include "mfs_common_const.h"
-#include "mfs_io_config.h"
-#include "mfs_log.h"
-#include "mfs_time.h"
-
+namespace pos
+{
 TestClient client;
 static std::atomic<bool> stopFlag;
 static std::atomic<uint32_t> currQD;
@@ -61,11 +63,12 @@ ResetTestContext(void)
 TEST_F(UtMetaFsPerf, FullPageWrite_Sync_QD1)
 {
     std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
+    std::string arrayName = "POSArray";
     size_t fileSize = 1024 * 1024 * 100;
     int fd;
-    fd = CreateFileAndOpen(fileName, fileSize);
+    fd = CreateFileAndOpen(fileName, arrayName, fileSize);
 
-    uint32_t dataChunkSize = metaFsMgr.util.GetAlignedFileIOSize(fd);
+    uint32_t dataChunkSize = metaFs.ctrl.GetAlignedFileIOSize(fd, arrayName);
     EXPECT_NE(dataChunkSize, 0);
 
     FileSizeType targetOffset = 0;
@@ -73,27 +76,27 @@ TEST_F(UtMetaFsPerf, FullPageWrite_Sync_QD1)
 
     void* wBuf = calloc(1, targetByteSize);
     std::generate_n((uint8_t*)wBuf, targetByteSize, Sequential_data_pattern_gen);
-    MetaFsReturnCode<IBOF_EVENT_ID> ioRC;
+    MetaFsReturnCode<POS_EVENT_ID> ioRC;
 
     int it = fileSize / targetByteSize;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
+    MetaFsReturnCode<POS_EVENT_ID> rc_io;
 
     EnableAIR();
 
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "T=[{}] Start full page write. Iteration=", GetTimestampUs(), it);
     while (it--)
     {
-        rc_io = metaFsMgr.io.Write(fd, targetOffset, targetByteSize, wBuf);
+        rc_io = metaFs.io.Write(fd, arrayName, targetOffset, targetByteSize, wBuf);
         targetOffset += targetByteSize;
     }
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "T=[{}] Completed", GetTimestampUs());
-    EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
 
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    rc_mgmt = metaFsMgr.mgmt.Close(fd);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    rc_mgmt = metaFs.ctrl.Close(fd, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
     free(wBuf);
 }
 
@@ -103,11 +106,12 @@ TEST_F(UtMetaFsPerf, FullPageRead_Sync_QD1)
     completedAioCnt = 0;
 
     std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
+    std::string arrayName = "POSArray";
     size_t fileSize = 1024 * 1024 * 100; // 100MB file
 
-    int fd = CreateFileAndOpen(fileName, fileSize);
+    int fd = CreateFileAndOpen(fileName, arrayName, fileSize);
 
-    uint32_t dataChunkSize = metaFsMgr.util.GetAlignedFileIOSize(fd);
+    uint32_t dataChunkSize = metaFs.ctrl.GetAlignedFileIOSize(fd, arrayName);
     EXPECT_NE(dataChunkSize, 0);
 
     FileSizeType targetOffset = 0;
@@ -116,34 +120,35 @@ TEST_F(UtMetaFsPerf, FullPageRead_Sync_QD1)
     uint8_t* rBuf = (uint8_t*)calloc(1, targetByteSize);
 
     int it = fileSize / targetByteSize;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
+    MetaFsReturnCode<POS_EVENT_ID> rc_io;
     EnableAIR();
 
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "T=[{}] Start full page read. Iteration={}", GetTimestampUs(), it);
     while (it--)
     {
-        rc_io = metaFsMgr.io.Read(fd, targetOffset, targetByteSize, rBuf);
+        rc_io = metaFs.io.Read(fd, arrayName, targetOffset, targetByteSize, rBuf);
         targetOffset += targetByteSize;
     }
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "T=[{}] Completed", GetTimestampUs());
-    EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
 
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    rc_mgmt = metaFsMgr.mgmt.Close(fd);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    rc_mgmt = metaFs.ctrl.Close(fd, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
     free(rBuf);
 }
 
 TEST_F(UtMetaFsPerf, AIO_4KB_Rand_Read_AIO_QD1)
 {
     std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
+    std::string arrayName = "POSArray";
     size_t fileSize = 1024 * 1024 * 100; // 100MB file
     int fd;
-    fd = CreateFileAndOpen(fileName, fileSize);
+    fd = CreateFileAndOpen(fileName, arrayName, fileSize);
 
-    client.RunMultiQDAIOTest(fd, fileSize, MetaFsIoOpcode::Read, 1);
+    client.RunMultiQDAIOTest(fd, arrayName, fileSize, MetaFsIoOpcode::Read, 1);
 }
 
 TEST_F(UtMetaFsPerf, AIO_4KB_Overwrite_QD4)
@@ -151,28 +156,30 @@ TEST_F(UtMetaFsPerf, AIO_4KB_Overwrite_QD4)
     uint32_t maxQD = 4;
 
     std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
+    std::string arrayName = "POSArray";
     size_t fileSize = 1024 * 1024; // 1MB file
-    FileFDType fd;
-    fd = CreateFileAndOpen(fileName, fileSize);
+    FileDescriptorType fd;
+    fd = CreateFileAndOpen(fileName, arrayName, fileSize);
 
     uint8_t* wBuf = (uint8_t*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
     std::generate_n(wBuf, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES, Sequential_data_pattern_gen);
 
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
+    MetaFsReturnCode<POS_EVENT_ID> rc_io;
     uint64_t soffset = 0;
     for (uint32_t qd = 0; qd < maxQD; qd++)
     {
         MetaFsAioCbCxt* aiocb = new MetaFsAioCbCxt(MetaFsIoOpcode::Write,
             fd,
+            arrayName,
             soffset,
             MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES, wBuf,
             AsEntryPointParam1(&TestClient::HandleIOCallback, &client));
         issuedAioCnt++;
-        rc_io = metaFsMgr.io.SubmitIO(aiocb);
+        rc_io = metaFs.io.SubmitIO(aiocb);
 
-        if (rc_io.sc != IBOF_EVENT_ID::SUCCESS)
+        if (rc_io.sc != POS_EVENT_ID::SUCCESS)
         {
-            EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+            EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
             break;
         }
     }
@@ -182,8 +189,8 @@ TEST_F(UtMetaFsPerf, AIO_4KB_Overwrite_QD4)
     }
 
     void* rBuf = malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
-    rc_io = metaFsMgr.io.Read(fd, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES, rBuf);
-    EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+    rc_io = metaFs.io.Read(fd, arrayName, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES, rBuf);
+    EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
 
     // verify data
     int status = memcmp(wBuf, rBuf, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
@@ -198,29 +205,31 @@ TEST_F(UtMetaFsPerf, AIO_4KB_Overwrite_QD4)
     free(wBuf);
     free(rBuf);
 
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    rc_mgmt = metaFsMgr.mgmt.Close(fd);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    rc_mgmt = metaFs.ctrl.Close(fd, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
 }
 
 TEST_F(UtMetaFsPerf, AIO_4KB_Rand_Read_AIO_QD32)
 {
     std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
+    std::string arrayName = "POSArray";
     uint64_t fileSize = 1024 * 1024 * 100; // 100MB file
-    FileFDType fd;
-    fd = CreateFileAndOpen(fileName, fileSize);
+    FileDescriptorType fd;
+    fd = CreateFileAndOpen(fileName, arrayName, fileSize);
 
-    client.RunMultiQDAIOTest(fd, fileSize, MetaFsIoOpcode::Read, 32);
+    client.RunMultiQDAIOTest(fd, arrayName, fileSize, MetaFsIoOpcode::Read, 32);
 }
 
 TEST_F(UtMetaFsPerf, AIO_4KB_Rand_Read_AIO_QD128)
 {
     std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
+    std::string arrayName = "POSArray";
     uint64_t fileSize = 1024 * 1024 * 100; // 100MB file
-    FileFDType fd;
-    fd = CreateFileAndOpen(fileName, fileSize);
+    FileDescriptorType fd;
+    fd = CreateFileAndOpen(fileName, arrayName, fileSize);
 
-    client.RunMultiQDAIOTest(fd, fileSize, MetaFsIoOpcode::Read, 128);
+    client.RunMultiQDAIOTest(fd, arrayName, fileSize, MetaFsIoOpcode::Read, 128);
 }
 
 TEST_F(UtMetaFsPerf, AIO_Sub4KB_PartialWrite_QD128)
@@ -228,16 +237,17 @@ TEST_F(UtMetaFsPerf, AIO_Sub4KB_PartialWrite_QD128)
     uint32_t maxQD = 128 * 3;
 
     std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
+    std::string arrayName = "POSArray";
     uint64_t fileSize = 1024 * 1024; // 1MB file
-    FileFDType fd;
-    fd = CreateFileAndOpen(fileName, fileSize);
+    FileDescriptorType fd;
+    fd = CreateFileAndOpen(fileName, arrayName, fileSize);
 
     uint32_t byteShiftSize = 10;
 
     uint8_t* wBuf = (uint8_t*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
     std::generate_n(wBuf, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES, Sequential_data_pattern_gen);
 
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
+    MetaFsReturnCode<POS_EVENT_ID> rc_io;
     void* tempBuf[maxQD] = {nullptr};
     uint64_t soffset = 0;
     uint64_t totalWrittenSize = 0;
@@ -247,16 +257,17 @@ TEST_F(UtMetaFsPerf, AIO_Sub4KB_PartialWrite_QD128)
         memcpy(tempBuf[qd], wBuf + (byteShiftSize * qd), byteShiftSize);
         MetaFsAioCbCxt* aiocb = new MetaFsAioCbCxt(MetaFsIoOpcode::Write,
             fd,
+            arrayName,
             soffset,
             byteShiftSize, tempBuf[qd],
             AsEntryPointParam1(&TestClient::HandleIOCallback, &client));
         issuedAioCnt++;
-        rc_io = metaFsMgr.io.SubmitIO(aiocb);
+        rc_io = metaFs.io.SubmitIO(aiocb);
         // rc_io = metaFsMgr.io.Write(fd, soffset, byteShiftSize, tempBuf[qd]);
 
-        if (rc_io.sc != IBOF_EVENT_ID::SUCCESS)
+        if (rc_io.sc != POS_EVENT_ID::SUCCESS)
         {
-            EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+            EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
             break;
         }
         soffset += byteShiftSize;
@@ -268,8 +279,8 @@ TEST_F(UtMetaFsPerf, AIO_Sub4KB_PartialWrite_QD128)
     }
 
     void* rBuf = malloc(totalWrittenSize);
-    rc_io = metaFsMgr.io.Read(fd, 0, totalWrittenSize, rBuf);
-    EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+    rc_io = metaFs.io.Read(fd, arrayName, 0, totalWrittenSize, rBuf);
+    EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
 
     // verify data
     int status = memcmp(wBuf, rBuf, totalWrittenSize);
@@ -289,17 +300,17 @@ TEST_F(UtMetaFsPerf, AIO_Sub4KB_PartialWrite_QD128)
     free(wBuf);
     free(rBuf);
 
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    rc_mgmt = metaFsMgr.mgmt.Close(fd);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    rc_mgmt = metaFs.ctrl.Close(fd, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
 }
 
 void
-TestClient::RunMultiQDAIOTest(FileFDType fd, FileSizeType ioRange, MetaFsIoOpcode opcode, uint32_t maxQD)
+TestClient::RunMultiQDAIOTest(FileDescriptorType fd, std::string arrayName, FileSizeType ioRange, MetaFsIoOpcode opcode, uint32_t maxQD)
 {
     FileSizeType fileSize = ioRange;
 
-    uint32_t dataChunkSize = metaFsMgr.util.GetAlignedFileIOSize(fd);
+    uint32_t dataChunkSize = metaFs.ctrl.GetAlignedFileIOSize(fd, arrayName);
     EXPECT_NE(dataChunkSize, 0);
 
     FileSizeType targetByteSize = dataChunkSize * 1; // single page read
@@ -311,9 +322,9 @@ TestClient::RunMultiQDAIOTest(FileFDType fd, FileSizeType ioRange, MetaFsIoOpcod
         rBuf[idx] = (uint8_t*)calloc(1, targetByteSize);
     }
 
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
+    MetaFsReturnCode<POS_EVENT_ID> rc_io;
 
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "T=[{}] Start full page read (async).", GetTimestampUs());
     uint32_t soffset;
     volatile uint32_t qIdx = 0;
@@ -324,15 +335,16 @@ TestClient::RunMultiQDAIOTest(FileFDType fd, FileSizeType ioRange, MetaFsIoOpcod
         soffset = ((std::rand() % (fileSize / MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES)) - 1) * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES;
         MetaFsAioCbCxt* aiocb = new MetaFsAioCbCxt(opcode,
             fd,
+            arrayName,
             soffset,
             targetByteSize, rBuf[qIdx],
             AsEntryPointParam1(&TestClient::HandleIOCallback, this));
         issuedAioCnt++;
-        rc_io = metaFsMgr.io.SubmitIO(aiocb);
-        if (rc_io.sc != IBOF_EVENT_ID::SUCCESS)
+        rc_io = metaFs.io.SubmitIO(aiocb);
+        if (rc_io.sc != POS_EVENT_ID::SUCCESS)
         {
             std::cout << "errror???" << std::endl;
-            EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+            EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
             break;
         }
 
@@ -353,10 +365,10 @@ TestClient::RunMultiQDAIOTest(FileFDType fd, FileSizeType ioRange, MetaFsIoOpcod
                 availableAioCb.pop_back();
             }
 
-            rc_io = metaFsMgr.io.SubmitIO(aiocb);
-            if (rc_io.sc != IBOF_EVENT_ID::SUCCESS)
+            rc_io = metaFs.io.SubmitIO(aiocb);
+            if (rc_io.sc != POS_EVENT_ID::SUCCESS)
             {
-                EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+                EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
                 break;
             }
             issuedAioCnt++;
@@ -364,20 +376,20 @@ TestClient::RunMultiQDAIOTest(FileFDType fd, FileSizeType ioRange, MetaFsIoOpcod
         }
         std::this_thread::yield();
     }
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "Stop to send AIO now...");
     stopFlag = true;
     while (issuedAioCnt != completedAioCnt)
     {
     }
 
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "T=[{}] Completed", GetTimestampUs());
-    EXPECT_EQ(rc_io.sc, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(rc_io.sc, POS_EVENT_ID::SUCCESS);
 
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    rc_mgmt = metaFsMgr.mgmt.Close(fd);
-    EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    rc_mgmt = metaFs.ctrl.Close(fd, arrayName);
+    EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
 
     for (uint32_t idx = 0; idx < maxQD; idx++)
     {
@@ -392,7 +404,7 @@ TestClient::HandleIOCallback(void* data)
 
     if (cxt->CheckIOError())
     {
-        MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE, "io error");
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE, "io error");
     }
 
     // issue next io with same io info
@@ -410,3 +422,4 @@ TestClient::HandleIOCallback(void* data)
         currQD--;
     }
 }
+} // namespace pos

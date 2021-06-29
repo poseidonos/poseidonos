@@ -7,8 +7,8 @@ endif
 
 ifeq ($(MFS_EXTERNAL_FAKE), 1)
 MFS_TESTDOUBLE_SRCS += \
-    mfs_io_api_fake.cpp \
-	mfs_mgmt_api_fake.cpp 
+    metafs_io_api_fake.cpp \
+	metafs_file_control_api_fake.cpp 
 
 endif
 
@@ -24,7 +24,7 @@ endif
 
 ifeq ($(UT_TESTDOUBLE_MOCK), 1)
 UT_SRCS += \
-	ut_mfs_io_api_mock.cpp  \
+	ut_metafs_io_api_mock.cpp  \
 
 endif
 

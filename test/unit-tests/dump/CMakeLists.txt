@@ -1,0 +1,4 @@
+POS_ADD_UNIT_TEST(dump_manager_ut dump_manager_test.cpp)
+POS_ADD_UNIT_TEST(dump_shared_ptr_ut dump_shared_ptr_test.cpp)
+POS_ADD_UNIT_TEST(dump_buffer_ut dump_buffer_test.cpp)
+POS_ADD_UNIT_TEST(dump_module_ut dump_module_test.cpp)

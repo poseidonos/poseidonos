@@ -30,46 +30,20 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 
-#ifdef WITH_PSTORE_STORAGE
-#include "mss_on_disk.h"
-MssOnDisk pstore;
-MetaStorageSubsystem* metaStorage = &pstore;
-#else
-#include "mss_ramdisk.h"
-MssRamdisk vstore;
-MetaStorageSubsystem* metaStorage = &vstore;
-#endif
-
-MetaStorageSubsystem::MetaStorageSubsystem(void)
-: state(MetaSsState::Default)
+namespace pos
+{
+MetaStorageSubsystem::MetaStorageSubsystem(std::string arrayName)
+: arrayName(arrayName)
 {
 }
 
 MetaStorageSubsystem::~MetaStorageSubsystem(void)
 {
-    state = MetaSsState::Close;
 }
 
-bool
-MetaStorageSubsystem::IsSuccess(IBOF_EVENT_ID ret)
-{
-    return (ret == IBOF_EVENT_ID::SUCCESS ? true : false);
-}
-
-bool
-MetaStorageSubsystem::IsReady(void)
-{
-    return state == MetaSsState::Ready ? true : false;
-}
-void
-MetaStorageSubsystem::_SetState(MetaSsState parmState)
-{
-    state = parmState;
-}
-
-IBOF_EVENT_ID
+POS_EVENT_ID
 MetaStorageSubsystem::DoPageIO(MssOpcode opcode, MetaStorageType mediaType,
     MetaLpnType metaLpn, void* buffer, MetaLpnType numPages,
     uint32_t mpio_id, uint32_t tagId)
@@ -99,7 +73,7 @@ MetaStorageSubsystem::DoPageIO(MssOpcode opcode, MetaStorageType mediaType,
     }
 }
 
-IBOF_EVENT_ID
+POS_EVENT_ID
 MetaStorageSubsystem::DoPageIOAsync(MssOpcode opcode, MssAioCbCxt* cb)
 {
     switch (opcode)
@@ -126,3 +100,4 @@ MetaStorageSubsystem::DoPageIOAsync(MssOpcode opcode, MssAioCbCxt* cb)
             assert(false);
     }
 }
+} // namespace pos

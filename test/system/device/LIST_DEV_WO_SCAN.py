@@ -4,15 +4,13 @@ import os
 import sys
 import json
 sys.path.append("../lib/")
+sys.path.append("../start/")
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
-import LIST_DEV_BASIC_1
+import START_POS_BASIC
 
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
 
 
 def check_result(out):
@@ -29,12 +27,12 @@ def set_result(out):
         result_file.write(result + " (" + str(code) + ")" + "\n" + out)
 
 def execute():
-    clear_result()
-    ibofos.start_ibofos()
+    START_POS_BASIC.execute()
     out = cli.list_device()
     return out
 
 if __name__ == "__main__":
+    test_result.clear_result(__file__)
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

@@ -1,49 +1,71 @@
 #!/usr/bin/env python3
 
+import TEST_SETUP_POS
+import TEST_LOG
+import TEST
 import sys
 import os
 import subprocess
 
 sys.path.append("../lib/")
-import cli
-import json_parser
+import cli  # noqa: E402
+import json_parser  # noqa: E402
 
-import TEST
-import TEST_LOG
 
 def flush_gcov():
     out = cli.send_request("wbt flush_gcov")
     if json_parser.get_response_code(out) != 0:
         TEST_LOG.print_err("* Gcov flush failed, check WBT option")
     elif json_parser.get_data_code(out) != 0:
-        TEST_LOG.print_info("* Gcov flush failed, check gcov option") 
+        TEST_LOG.print_info("* Gcov flush failed, check gcov option")
     else:
         TEST_LOG.print_info("* Flush gcov completed")
 
-def dump_journal(dump_file):
+
+def dump_journal(arrayId, dump_file):
     if TEST.dump_log_buffer == False:
         return
 
-    fd = get_fd(TEST.log_buffer_filename)
+    fd = get_fd(arrayId, TEST.log_buffer_filename)
     if fd == -1:
         TEST_LOG.print_err("* Log buffer dump failed (cannot get fd), check WBT option")
         return
 
-    file_size = get_file_size(fd)
+    file_size = get_file_size(arrayId, fd)
     if file_size == -1:
         TEST_LOG.print_err("* Log buffer dump failed (cannot get filesize), check WBT option")
         return
 
-    result = dump_log_buffer(fd, file_size, dump_file)
+    result = dump_log_buffer(arrayId, fd, file_size, dump_file)
     if result == -1:
         TEST_LOG.print_err("* Log buffer dump failed, check WBT option")
         return
 
     TEST_LOG.print_info("* Dump log buffer completed")
 
-def get_fd(filename):
+
+def dump_vsamap(arrayId, volid, dump_file):
+    if TEST.dump_map == False:
+        return
+
+    volname = TEST_SETUP_POS.get_volname(volid)
+    out = cli.send_request("wbt read_vsamap --name " + volname + " --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + dump_file)
+    if json_parser.get_response_code(out) != 0:
+        return -1
+
+
+def dump_stripemap(dump_file):
+    if TEST.dump_map == False:
+        return
+
+    out = cli.send_request("wbt read_stripemap --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + dump_file)
+    if json_parser.get_response_code(out) != 0:
+        return -1
+
+
+def get_fd(arrayId, filename):
     filesInfo = "filesInfo.json"
-    out = cli.send_request("wbt mfs_dump_files_list --output " + filesInfo)
+    out = cli.send_request("wbt mfs_dump_files_list" + " --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + filesInfo)
     if json_parser.get_response_code(out) != 0:
         return -1
 
@@ -55,16 +77,23 @@ def get_fd(filename):
                 fd = f['fd']
     return fd
 
-def get_file_size(fd):
-    out = cli.send_request("wbt mfs_get_file_size --fd " + str(fd))
+
+def get_file_size(arrayId, fd):
+    out = cli.send_request("wbt mfs_get_file_size --fd " + str(fd) + " --array " + TEST_SETUP_POS.get_arrayname(arrayId))
     if json_parser.get_response_code(out) != 0:
         return -1
     else:
         return json_parser.get_data_code(out)
 
 
-def dump_log_buffer(fd, filesize, dumpfile):
-    out = cli.send_request("wbt mfs_read_file --fd " + str(fd) + " --offset 0 --count " + str(filesize) + " --output " + dumpfile)
+def start_core_dump(trigger_option):
+    TEST_LOG.print_err("* Try to dump core file. (option: {})".format(trigger_option))
+    core_dump_cmd = TEST.pos_root + "/tool/dump/trigger_core_dump.sh"
+    subprocess.call(core_dump_cmd + " " + trigger_option, shell=True)
+
+
+def dump_log_buffer(arrayId, fd, filesize, dumpfile):
+    out = cli.send_request("wbt mfs_read_file --fd " + str(fd) + " --offset 0 --count " + str(filesize) + " --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + dumpfile)
     if json_parser.get_response_code(out) != 0:
         return -1
     return 0

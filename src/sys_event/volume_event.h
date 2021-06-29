@@ -37,14 +37,15 @@
 #include <vector>
 
 using namespace std;
-namespace ibofos
+namespace pos
 {
 class VolumeEvent
 {
 public:
-    VolumeEvent(string _tag)
+    VolumeEvent(string _tag, string _arrayName)
     {
         tag = _tag;
+        arrayName = _arrayName;
     };
     virtual ~VolumeEvent(void);
     string
@@ -52,19 +53,23 @@ public:
     {
         return tag;
     }
-    void RegisterToPublisher(void);
-    void RemoveFromPublisher(void);
-    virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw) = 0;
-    virtual bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw) = 0;
-    virtual bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte) = 0;
-    virtual bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw) = 0;
-    virtual bool VolumeUnmounted(string volName, int volID) = 0;
-    virtual bool VolumeLoaded(string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw) = 0;
-    virtual void VolumeDetached(vector<int> volList) = 0;
+    void RegisterToPublisher(std::string arrayName);
+    void RegisterNvmfTargetToPublisher(std::string arrayName);
+    void RemoveFromPublisher(std::string arrayName);
+    virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, string arrayName) = 0;
+    virtual bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw, string arrayName) = 0;
+    virtual bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte, string arrayName) = 0;
+    virtual bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName) = 0;
+    virtual bool VolumeUnmounted(string volName, int volID, string arrayName) = 0;
+    virtual bool VolumeLoaded(string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, string arrayName) = 0;
+    virtual void VolumeDetached(vector<int> volList, string arrayName) = 0;
+
+protected:
+    string arrayName = "";
 
 private:
     string tag = "";
 };
-} // namespace ibofos
+} // namespace pos
 
 #endif // __VOLUME_EVENT__

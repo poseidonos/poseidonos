@@ -38,14 +38,14 @@
 int
 main(int argc, char** argv)
 {
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "You entered Unit tests for MIM function block");
 
     ::testing::InitGoogleTest(&argc, argv);
 
-    SetupTestEnv(argc, argv);
+    pos::SetupTestEnv(argc, argv);
 
-    MountMetaStorage();
+    pos::MountMetaStorage();
 
     int status = RUN_ALL_TESTS();
 

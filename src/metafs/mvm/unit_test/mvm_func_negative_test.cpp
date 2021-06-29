@@ -31,62 +31,65 @@
  */
 
 #include "mvm_func_negative_test.h"
+#include "metafs_common_const.h"
 
-#include "mfs_common_const.h"
-
+namespace pos
+{
 // assume, the vol.has been already closed when the vol has not opened.
 TEST_F(UtMVMFunctionalNegative, CloseVolumeBeforeOpen)
 {
+    std::string arrayName = "POSArray";
     TearDown(); // There is setup step to open
-    bool isVolOpened = metaVolMgr.GetVolOpenFlag();
+    bool isVolOpened = metaVolMgr.GetVolOpenFlag(arrayName);
     EXPECT_EQ(isVolOpened, false);
 
     bool resetCxt = false;
-    bool isSuccess = metaVolMgr.Close(resetCxt);
+    bool isSuccess = metaVolMgr.Close(resetCxt, arrayName);
     EXPECT_EQ(isSuccess, true);
 }
 
 // Duplicate file creation
 TEST_F(UtMVMFunctionalNegative, DuplicateFileCreation)
 {
-    std::string fileName = std::string("testfile").append(std::to_string(std::rand() % 1024));
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    std::string fileName = std::string("testfile").append(std::to_string(GetRandomNumber(1024)));
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "fineName = {}", fileName.c_str());
 
-    IBOF_EVENT_ID sc;
+    POS_EVENT_ID sc;
     sc = CreateTestFile(fileName, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 1000);
-    EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Test file created sucessfully...");
 
     sc = CreateTestFile(fileName, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 30);
-    EXPECT_EQ(sc, IBOF_EVENT_ID::MFS_FILE_CREATE_FAILED);
+    EXPECT_EQ(sc, POS_EVENT_ID::MFS_FILE_CREATE_FAILED);
 }
 
 // vol open without file creation
 TEST_F(UtMVMFunctionalNegative, AttemptingOpenForUncreatedFile)
 {
-    std::string fileName = std::string("testfile").append(std::to_string(std::rand() % 1024));
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    std::string fileName = std::string("testfile").append(std::to_string(GetRandomNumber(1024)));
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "fineName = {}", fileName.c_str());
 
-    IBOF_EVENT_ID sc;
-    FileFDType fd;
+    POS_EVENT_ID sc;
+    FileDescriptorType fd;
     // attempting to open file without file creation
     sc = OpenTestFile(fileName, fd);
-    EXPECT_NE(sc, IBOF_EVENT_ID::SUCCESS); // should be failed
+    EXPECT_NE(sc, POS_EVENT_ID::SUCCESS); // should be failed
 }
 
 // vol close with invalid file.
 TEST_F(UtMVMFunctionalNegative, AttemptingCloseForInvalidFile)
 {
-    std::string fileName = std::string("testfile").append(std::to_string(std::rand() % 1024));
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    std::string fileName = std::string("testfile").append(std::to_string(GetRandomNumber(1024)));
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "fineName = ", fileName.c_str());
 
-    IBOF_EVENT_ID sc;
-    FileFDType fd = 0x850024;
+    POS_EVENT_ID sc;
+    FileDescriptorType fd = 0x850024;
     // attempting to close file which is invalid file
     sc = CloseTestFile(fd);
-    EXPECT_NE(sc, IBOF_EVENT_ID::SUCCESS); // should be failed
+    EXPECT_NE(sc, POS_EVENT_ID::SUCCESS); // should be failed
 }
+} // namespace pos

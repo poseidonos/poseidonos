@@ -32,9 +32,11 @@
 
 #pragma once
 
-#include "mfs_common.h"
+#include "metafs_common.h"
 #include "os_header.h"
 
+namespace pos
+{
 class MDPageControlInfo
 {
 public:
@@ -46,10 +48,11 @@ public:
             uint32_t mfsSignature;
             uint64_t epochSignature;
             uint32_t version;
-            FileFDType fd;
+            FileDescriptorType fd;
             MetaLpnType metaLpn;
         };
 
         uint8_t all[CONTROL_INFO_SIZE];
     };
 };
+} // namespace pos

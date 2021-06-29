@@ -32,45 +32,43 @@
 
 #pragma once
 
+#include <string>
 #include "meta_storage_specific.h"
 #include "mss_opcode.h"
 #include "mss_state.h"
 #include "mss_status_callback.h"
 
+namespace pos
+{
 /* MetaStorageSubsystem Class
  * Base Class for MSS Layer
  * Provides API to Store Pages
- * Currently Only Two APIs 1. ReadPage, 2. WritePage are there. Will include more as system will build.
+ * Currently Only Two APIs 1. ReadPage, 2. WritePage are there. Will include more as mgmt will build.
  * */
-
 class MetaStorageSubsystem
 {
 public:
-    MetaStorageSubsystem(void);
+    explicit MetaStorageSubsystem(std::string arrayName);
     virtual ~MetaStorageSubsystem(void);
 
-    virtual IBOF_EVENT_ID CreateMetaStore(MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) = 0;
-    virtual IBOF_EVENT_ID Open(void) = 0;
-    virtual IBOF_EVENT_ID Close(void) = 0;
+    virtual POS_EVENT_ID CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) = 0;
+    virtual POS_EVENT_ID Open(void) = 0;
+    virtual POS_EVENT_ID Close(void) = 0;
     virtual uint64_t GetCapacity(MetaStorageType mediaType) = 0;
-    virtual IBOF_EVENT_ID ReadPage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) = 0;
-    virtual IBOF_EVENT_ID WritePage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) = 0;
+    virtual POS_EVENT_ID ReadPage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) = 0;
+    virtual POS_EVENT_ID WritePage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) = 0;
     virtual bool IsAIOSupport(void) = 0; // Asynchronos API's used with pstore
-    virtual IBOF_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) = 0;
-    virtual IBOF_EVENT_ID WritePageAsync(MssAioCbCxt* cb) = 0;
+    virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) = 0;
+    virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) = 0;
 
-    virtual IBOF_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) = 0;
+    virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) = 0;
 
-    IBOF_EVENT_ID DoPageIO(MssOpcode opcode, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer,
+    POS_EVENT_ID DoPageIO(MssOpcode opcode, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer,
         MetaLpnType numPages, uint32_t mpio_id, uint32_t tagid);
-    IBOF_EVENT_ID DoPageIOAsync(MssOpcode opcode, MssAioCbCxt* cb);
-    bool IsReady(void);
-    bool IsSuccess(IBOF_EVENT_ID ret);
+    POS_EVENT_ID DoPageIOAsync(MssOpcode opcode, MssAioCbCxt* cb);
 
 protected:
-    void _SetState(MetaSsState state);
 
-    MetaSsState state;
+    std::string arrayName;
 };
-
-extern MetaStorageSubsystem* metaStorage;
+} // namespace pos

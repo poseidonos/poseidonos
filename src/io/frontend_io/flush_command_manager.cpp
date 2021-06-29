@@ -32,37 +32,61 @@
 
 #include "src/io/frontend_io/flush_command_manager.h"
 
-namespace ibofos
+#include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/io/frontend_io/flush_command_handler.h"
+
+namespace pos
 {
-#if defined NVMe_FLUSH_HANDLING
-FlushCmdManager::FlushCmdManager()
+FlushCmdManager::FlushCmdManager(void)
+: metaFlushInProgress(false)
 {
-    state = FLUSH_RESET;
+}
+
+FlushCmdManager::~FlushCmdManager(void)
+{
 }
 
 bool
-FlushCmdManager::LockIo(void)
+FlushCmdManager::IsFlushEnabled(void)
 {
-    return flushLock.try_lock();
+    return config.IsEnabled();
+}
+
+bool
+FlushCmdManager::CanFlushMeta(int core, FlushIoSmartPtr flushIo)
+{
+    std::unique_lock<std::mutex> lock(metaFlushLock);
+
+    if (metaFlushInProgress == false)
+    {
+        metaFlushInProgress = true;
+        return true;
+    }
+
+    flushEvents.push_back(flushIo);
+
+    return false;
 }
 
 void
-FlushCmdManager::UnlockIo(void)
+FlushCmdManager::FinishMetaFlush(void)
 {
-    flushLock.unlock();
+    std::unique_lock<std::mutex> lock(metaFlushLock);
+
+    if (flushEvents.size() == 0)
+    {
+        metaFlushInProgress = false;
+    }
+    else
+    {
+        FlushIoSmartPtr flushIo = flushEvents.front();
+        flushEvents.pop_front();
+
+        EventSmartPtr flushCmdHandler =
+                std::make_shared<FlushCmdHandler>(flushIo);
+
+        SpdkEventScheduler::SendSpdkEvent(flushIo->GetOriginCore(), flushCmdHandler);
+    }
 }
 
-void
-FlushCmdManager::SetState(FlushState state)
-{
-    this->state = state;
-}
-
-FlushState
-FlushCmdManager::GetState()
-{
-    return state;
-}
-
-#endif
-} // namespace ibofos
+} // namespace pos

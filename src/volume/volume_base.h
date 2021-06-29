@@ -33,24 +33,28 @@
 #ifndef VOLUME_BASE_H_
 #define VOLUME_BASE_H_
 
+#include <array>
 #include <atomic>
 #include <cstdint>
 #include <mutex>
 #include <string>
 
-namespace ibofos
+#define MAX_VOLUME_COUNT (256)
+
+namespace pos
 {
 enum VolumeStatus
 {
     Unmounted,
-    Mounted
+    Mounted,
+    MaxVolumeStatus
 };
 
 class VolumeBase
 {
 public:
-    VolumeBase(std::string volName, uint64_t volSizeByte);
-    VolumeBase(std::string volName, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw);
+    VolumeBase(std::string arrayName, std::string volName, uint64_t volSizeByte);
+    VolumeBase(std::string arrayName, std::string volName, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw);
     virtual ~VolumeBase(void);
     int Mount(void);
     int Unmount(void);
@@ -113,10 +117,6 @@ public:
     {
         totalSize = val;
     }
-    void IncreasePendingIOCount(uint32_t ioSubmissionCount = 1);
-    void DecreasePendingIOCount(uint32_t ioCompletionCount = 1);
-    void WaitUntilIdle(void);
-    bool CheckIdle(void);
 
     int ID;
 
@@ -138,10 +138,9 @@ protected:
     const uint64_t MAX_IOPS_LIMIT = UINT64_MAX / KIOPS;
     const uint64_t MAX_BW_LIMIT = UINT64_MAX / MIB_IN_BYTE;
 
-private:
-    std::atomic<uint32_t> pendingIOCount;
+    static const int INVALID_VOL_ID = -1;
 };
 
-} // namespace ibofos
+} // namespace pos
 
 #endif // VOLUME_BASE_H_

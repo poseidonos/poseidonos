@@ -32,10 +32,12 @@
 
 #pragma once
 
-#include "mfs_common.h"
-#include "mim_req.h"
+#include "metafs_common.h"
+#include "metafs_io_request.h"
 #include "src/lib/bitmap.h"
 
+namespace pos
+{
 using MetaIoReqIdType = uint32_t;
 
 class MetaFsIoRangeOverlapChker
@@ -44,14 +46,14 @@ public:
     MetaFsIoRangeOverlapChker(void);
     ~MetaFsIoRangeOverlapChker(void);
     void Init(MetaLpnType maxLpn);
-    void Reset(void);
 
-    bool IsRangeOverlapConflicted(MetaFsIoReqMsg* newReq);
+    bool IsRangeOverlapConflicted(MetaFsIoRequest* newReq);
     void FreeLockContext(uint64_t startLpn, bool isRead);
-    void PushReqToRangeLockMap(MetaFsIoReqMsg* newReq);
+    void PushReqToRangeLockMap(MetaFsIoRequest* newReq);
     BitMap* GetOutstandingMioMap(void);
     uint64_t GetOutstandingMioCount(void);
 
 private:
     BitMap* outstandingIoMap;
 };
+} // namespace pos

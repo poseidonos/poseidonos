@@ -32,10 +32,10 @@
 
 #include "volume_name_policy.h"
 
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
 int
 VolumeNamePolicy::CheckVolumeName(string name)
@@ -44,32 +44,32 @@ VolumeNamePolicy::CheckVolumeName(string name)
     size_t len = checker.Length();
     if (len < MIN_LEN)
     {
-        IBOF_TRACE_WARN((int)IBOF_EVENT_ID::NAME_TOO_SHORT,
+        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NAME_TOO_SHORT,
             "Volume name must be at least {} characters", MIN_LEN);
-        return (int)IBOF_EVENT_ID::NAME_TOO_SHORT;
+        return (int)POS_EVENT_ID::VOL_NAME_TOO_SHORT;
     }
     else if (len > MAX_LEN)
     {
-        IBOF_TRACE_WARN((int)IBOF_EVENT_ID::NAME_TOO_LONG,
+        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NAME_TOO_LONG,
             "Volume name must be less or equal than {} characters", MAX_LEN);
-        return (int)IBOF_EVENT_ID::NAME_TOO_LONG;
+        return (int)POS_EVENT_ID::VOL_NAME_TOO_LONG;
     }
 
     if (checker.StartWith(SPACE) || checker.EndWith(SPACE))
     {
-        IBOF_TRACE_WARN((int)IBOF_EVENT_ID::NAME_NOT_ALLOWED,
+        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED,
             "Blank cannot be placed at the beginning or end of a volume name");
-        return (int)IBOF_EVENT_ID::NAME_NOT_ALLOWED;
+        return (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED;
     }
 
     if (checker.OnlyContains(ALLOWED_CHAR) == false)
     {
-        IBOF_TRACE_WARN((int)IBOF_EVENT_ID::NAME_NOT_ALLOWED,
+        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED,
             "Special characters cannot be used as volume names");
-        return (int)IBOF_EVENT_ID::NAME_NOT_ALLOWED;
+        return (int)POS_EVENT_ID::VOL_NAME_NOT_ALLOWED;
     }
 
-    return (int)IBOF_EVENT_ID::SUCCESS;
+    return (int)POS_EVENT_ID::SUCCESS;
 }
 
-} // namespace ibofos
+} // namespace pos

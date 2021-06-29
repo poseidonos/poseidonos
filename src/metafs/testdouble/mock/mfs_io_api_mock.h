@@ -32,9 +32,11 @@
 
 #pragma once
 
-#include "mfs_io_api_base.h"
+#include "metafs_io_api.h"
 
-class MetaFsIoApiWrapperClass : public IMetaFsIoApiWrapperClass
+namespace pos
+{
+class MetaFsIoApi
 {
 public:
     MOCK_METHOD(MetaFsReturnCode<MetaFsStatusCodeIoSpcf>, Read, (uint32_t fd, void* buf), (override));
@@ -43,3 +45,4 @@ public:
     MOCK_METHOD(MetaFsReturnCode<MetaFsStatusCodeIoSpcf>, Write, (uint32_t fd, uint64_t byteOffset, uint64_t byteSize, void* buf), (override));
     MOCK_METHOD(MetaFsReturnCode<MetaFsStatusCodeIoSpcf>, SubmitIO, (MetaFsAioCbCxt * cxt), (override));
 };
+} // namespace pos

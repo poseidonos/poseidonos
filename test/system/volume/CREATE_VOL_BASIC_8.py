@@ -7,15 +7,16 @@ sys.path.append("../lib/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
-import ibofos_constant
-import MOUNT_ARRAY_BASIC_1
+import pos_constant
+import MOUNT_ARRAY_BASIC
 import volume
 
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
 VOL_NAME_PREFIX = "vol"
-VOL_SIZE = ibofos_constant.SIZE_1MB * 100
+VOL_SIZE = pos_constant.SIZE_1MB * 100
 VOL_IOPS = 10
 VOL_BW = 10
 vol_list = []
@@ -26,7 +27,7 @@ def clear_result():
 
 def check_result(detail):
     expected_list = []
-    for i in range(0, ibofos_constant.MAX_VOL_CNT):
+    for i in range(0, pos_constant.MAX_VOL_CNT):
         expected_list.append(volume.Volume(VOL_NAME_PREFIX + str(i+1), VOL_SIZE, VOL_IOPS, VOL_BW))
     
     data = json.loads(detail)
@@ -49,7 +50,7 @@ def check_result(detail):
     return "pass"
 
 def set_result(detail):
-    out = cli.list_volume("")
+    out = cli.list_volume(ARRAYNAME)
     result = check_result(out)
     code = json_parser.get_response_code(out)
     with open(__file__ + ".result", "w") as result_file:
@@ -57,10 +58,10 @@ def set_result(detail):
 
 def execute():
     clear_result()
-    MOUNT_ARRAY_BASIC_1.execute()
-    for i in range(0, ibofos_constant.MAX_VOL_CNT):
+    MOUNT_ARRAY_BASIC.execute()
+    for i in range(0, pos_constant.MAX_VOL_CNT):
         print ("creating " + VOL_NAME_PREFIX + str(i+1))
-        out = cli.create_volume(VOL_NAME_PREFIX + str(i+1), str(VOL_SIZE), str(VOL_IOPS), str(VOL_BW), "")
+        out = cli.create_volume(VOL_NAME_PREFIX + str(i+1), str(VOL_SIZE), str(VOL_IOPS), str(VOL_BW), ARRAYNAME)
         ret = json_parser.get_response_code(out)
         if ret != 0:
             break;
@@ -69,4 +70,4 @@ def execute():
 if __name__ == "__main__":
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

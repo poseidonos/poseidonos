@@ -6,7 +6,7 @@ UT_OBJDIR_REL=obj_output
 UT_OBJDIR=$(abspath $(UT_OBJDIR_REL))
 
 INTF_SRCS = $(wildcard $(IBOF_DIR)/src/meta_file_intf/*.cpp)
-INTF_EXCLUDE = $(IBOF_DIR)/src/meta_file_intf/mfs_file_intf.cpp
+INTF_EXCLUDE = $(IBOF_DIR)/src/metafs_file_intf.cpp
 TEST_SRCS=$(filter-out $(INTF_EXCLUDE), $(INTF_SRCS))
 
 UT_CPPFLAGS =-g

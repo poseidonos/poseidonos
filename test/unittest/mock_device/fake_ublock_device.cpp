@@ -1,6 +1,6 @@
 #include "src/device/ublock_device.h"
 
-namespace ibofos {
+namespace pos {
 
 static std::atomic<uint32_t> currentOutstandingIOCount;
 

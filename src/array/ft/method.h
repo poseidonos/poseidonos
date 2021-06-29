@@ -33,16 +33,15 @@
 #ifndef METHOD_H_
 #define METHOD_H_
 
-#include <functional>
 #include <list>
 
-#include "rebuild_behavior.h"
-#include "src/array/partition/partition_size_info.h"
 #include "src/include/address_type.h"
+#include "src/include/recover_func.h"
+#include "src/include/raid_type.h"
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 struct FtSizeInfo
 {
@@ -52,8 +51,6 @@ struct FtSizeInfo
     uint32_t blksPerStripe;
     uint32_t chunksPerStripe;
 };
-
-using RebuildFunc = function<void(void*, void*, uint32_t)>;
 
 class Method
 {
@@ -65,24 +62,23 @@ public:
     {
     }
 
-    RebuildFunc& GetRebuildFunc(void);
+    RecoverFunc& GetRecoverFunc(void);
     const FtSizeInfo* GetSizeInfo(void);
 
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) = 0;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) = 0;
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) = 0;
-    virtual RebuildBehavior* GetRebuildBehavior() = 0;
-    virtual StripeLocker* GetStripeLocker() = 0;
+    RaidType GetRaidType(void);
 
 protected:
-    virtual LogicalBlkAddr _Translate(const FtBlkAddr&) = 0;
-    virtual void _BindRebuildFunc(void) = 0;
+    virtual void _BindRecoverFunc(void) = 0;
 
     FtSizeInfo ftSize_ = {
         0,
     };
-    RebuildFunc rebuildFunc_ = nullptr;
+    RecoverFunc recoverFunc_ = nullptr;
+    RaidType raidType;
 };
 
-} // namespace ibofos
+} // namespace pos
 #endif // METHOD_H_

@@ -31,8 +31,11 @@
  */
 
 #pragma once
-#include "mss.h"
+#include "src/metafs/storage/mss.h"
 #include "rte_eal.h"
 
+namespace pos
+{
 extern void SetupTestEnv(int argc, char** argv);
 extern void MountMetaStorage(void);
+} // namespace pos

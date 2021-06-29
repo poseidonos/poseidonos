@@ -33,71 +33,53 @@
 #ifndef PARTITION_H_
 #define PARTITION_H_
 
-#include <list>
 #include <string>
 #include <vector>
 
-#include "src/array/ft/method.h"
-#include "src/array/ft/rebuild_behavior.h"
-#include "src/array/partition/partition_size_info.h"
+#include "src/include/partition_type.h"
 #include "src/include/address_type.h"
+#include "src/array/device/array_device.h"
+#include "src/array/ft/method.h"
+#include "src/array_models/dto/partition_physical_size.h"
+#include "src/array_models/dto/partition_logical_size.h"
+#include "src/array/service/io_translator/i_translator.h"
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
-class UBlockDevice;
-class ArrayDevice;
 class Ubio;
 
-enum PartitionType
-{
-    META_NVM = 0,
-    WRITE_BUFFER,
-    META_SSD,
-    USER_DATA,
-    PARTITION_TYPE_MAX
-};
-
-class Partition
+class Partition : public ITranslator
 {
 public:
-    Partition(PartitionType type,
+    Partition(
+        string array,
+        PartitionType type,
         PartitionPhysicalSize physicalSize,
         vector<ArrayDevice*> devs,
         Method* method);
-    virtual ~Partition();
+    virtual ~Partition(void);
 
-    virtual int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) = 0;
-    virtual int Convert(list<PhysicalWriteEntry>& dst,
-        const LogicalWriteEntry& src) = 0;
+    int Create(PartitionPhysicalSize size, vector<ArrayDevice*> devs);
     const PartitionLogicalSize* GetLogicalSize();
     const PartitionPhysicalSize* GetPhysicalSize();
     bool IsValidLba(uint64_t lba);
     int FindDevice(ArrayDevice* dev);
-    virtual int Rebuild(RebuildBehavior* behavior) = 0;
-    virtual int RebuildRead(UbioSmartPtr targetUbio) = 0;
-    bool TryLock(StripeId stripeId);
-    void Unlock(StripeId stripeId);
-    Method*
-    GetMethod()
-    {
-        return method_;
-    }
-    virtual void
-    Format()
-    {
-    }
+    Method* GetMethod(void);
+    virtual void Format(void) {}
 
 protected:
+    bool _IsValidAddress(const LogicalBlkAddr& lsa);
+    bool _IsValidEntry(const LogicalWriteEntry& entry);
+    string arrayName_;
     PartitionType type_;
     PartitionLogicalSize logicalSize_;
     PartitionPhysicalSize physicalSize_;
     vector<ArrayDevice*> devs_;
     Method* method_ = nullptr;
-    bool _IsValidAddress(const LogicalBlkAddr& lsa);
-    bool _IsValidEntry(const LogicalWriteEntry& entry);
+    uint64_t lastLba_ = 0;
 };
 
-} // namespace ibofos
+} // namespace pos
 #endif // PARTITION_H_

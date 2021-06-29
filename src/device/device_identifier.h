@@ -36,11 +36,11 @@
 #include <functional>
 #include <string>
 
-#include "ublock_device.h"
+#include "src/device/base/ublock_device.h"
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 class DeviceIdentifierPredicate
 {
@@ -51,7 +51,7 @@ public:
     {
     }
 
-    virtual bool operator()(UBlockDevice* dev) const = 0;
+    virtual bool operator()(UblockSharedPtr dev) const = 0;
 };
 
 class DevNamePred : public DeviceIdentifierPredicate
@@ -63,7 +63,7 @@ public:
     }
 
     bool
-    operator()(UBlockDevice* dev) const override
+    operator()(UblockSharedPtr dev) const override
     {
         return (dev->GetName() == KEY);
     }
@@ -78,7 +78,7 @@ public:
     }
 
     bool
-    operator()(UBlockDevice* dev) const override
+    operator()(UblockSharedPtr dev) const override
     {
         return (dev->GetSN() == KEY);
     }
@@ -87,7 +87,7 @@ public:
 class DeviceIdentifier
 {
 public:
-    typedef function<bool(UBlockDevice*&)> Predicate;
+    typedef function<bool(UblockSharedPtr&)> Predicate;
     DeviceIdentifier(void)
     {
     }
@@ -152,5 +152,5 @@ public:
     }
 };
 
-} // namespace ibofos
+} // namespace pos
 #endif // DEVICE_IDENTIFIER_H_

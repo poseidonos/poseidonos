@@ -33,38 +33,28 @@
 #pragma once
 #include <string>
 
-#include "state_policy.h"
+#include "src/state/include/state_type.h"
+#include "src/state/include/situation_type.h"
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 class StateContext
 {
 public:
-    StateContext(string _sender);
-    StateContext(string _sender, Situation s);
-    State GetState(void);
-    Situation GetSituation(void);
-    string GetStateStr(void);
-    string GetSituationStr(void);
-    string GetUuid(void);
-    string Sender(void);
-    bool IsOnline(void);
+    StateContext(string sender, SituationEnum situ);
+    StateType ToStateType(void);
+    SituationType GetSituation(void);
     int GetPriority(void) const;
-    bool operator==(const StateContext& ctx) const;
-    bool operator!=(const StateContext& ctx) const;
+    string Owner(void);
+
+private:
     bool operator<=(const StateContext& ctx) const;
     bool operator>=(const StateContext& ctx) const;
     bool operator<(const StateContext& ctx) const;
     bool operator>(const StateContext& ctx) const;
-    struct timespec issued_time;
-
-private:
-    void _MakeUuid(void);
-    string sender;
-    string uuid;
-    Situation situation;
-    struct timespec ts;
+    string owner;
+    SituationType situation;
 };
-} // namespace ibofos
+} // namespace pos

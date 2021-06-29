@@ -35,9 +35,12 @@
 
 #include "mvm_base_test.h"
 
+namespace pos
+{
 class UtMVMFunctionalPositive : public UtMVMBasic
 {
 public:
 };
+} // namespace pos
 
 #endif // __UT_MVM_FUNC_POSITIVE_H__

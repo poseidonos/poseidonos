@@ -33,79 +33,72 @@
 #ifndef DEBUG_INFO_H_
 #define DEBUG_INFO_H_
 
-class MetaVolMgrClass;
-namespace ibofos
+#include "src/array_components/mount_temp/debug_info_updater.h"
+
+namespace pos
 {
 class AffinityManager;
-class Allocator;
-class Array;
+class AllocatorService;
+class ArrayManager;
 class CommandTimeoutHandler;
 class ConfigManager;
 class DebugInfo;
 class DeviceManager;
 class DumpManager;
 class EventScheduler;
-#if defined NVMe_FLUSH_HANDLING
 class FlushCmdManager;
-#endif
 class GarbageCollector;
 class IODispatcher;
-class JournalManager;
 class Logger;
-class Mapper;
+class MapperService;
 class MbrManager;
 class MockDeviceDriver;
 class QosManager;
-class RBAStateManager;
+class RBAStateService;
 class Reporter;
 class Spdk;
-class StateManager;
-class StatePolicy;
 class UnvmeDrv;
-class UnvramDrv;
+class UramDrv;
 class VersionProvider;
 class VolumeEventPublisher;
-class VolumeManager;
+class VolumeService;
+class MetaFsService;
 
 extern DebugInfo* debugInfo;
 
-class DebugInfo
+class DebugInfo : public DebugInfoUpdater
 {
 public:
     DebugInfo(void);
-    void UpdateModulePointer(void);
+    ~DebugInfo(void) override;
+
+    void Update(void) override;
 
 private:
     AffinityManager* affinityManager;
-    Allocator* allocator;
-    Array* array;
+    AllocatorService* allocatorService;
+    ArrayManager* arrayManager;
     CommandTimeoutHandler* commandTimeoutHandler;
     ConfigManager* configManager;
     DeviceManager* deviceManager;
     DumpManager* dumpManager;
     EventScheduler* eventScheduler;
-#if defined NVMe_FLUSH_HANDLING
     FlushCmdManager *flushCmdManager;
-#endif
     GarbageCollector* garbageCollector;
     IODispatcher* ioDispatcher;
-    JournalManager* journalManager;
     Logger* logger;
-    Mapper* mapper;
-    MbrManager* mbrManager;
-    MetaVolMgrClass* metaVolManager;
+    MapperService* mapperService;
+    MetaFsService* metaFsService;
     QosManager *qosManager;
-    RBAStateManager* rbaStateManager;
+    RBAStateService* rbaStateService;
     Reporter* reporter;
     Spdk* spdk;
-    StateManager* stateManager;
-    StatePolicy* statePolicy;
     UnvmeDrv* unvmeDrv;
-    UnvramDrv* unvramDrv;
+    UramDrv* uramDrv;
     VersionProvider *versionProvider;
     VolumeEventPublisher* volumeEventPublisher;
-    VolumeManager* volumeManager;
+    VolumeService* volumeService;
 };
 
-} // namespace ibofos
+} // namespace pos
 #endif // DEBUG_INFO_H_

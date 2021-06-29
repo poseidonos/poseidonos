@@ -6,29 +6,29 @@ dirpath=`dirname $0`
 rootdir=$(readlink -f ${dirpath})/../../..
 
 sudo rm ${dirpath}/test_done.txt
-sudo ${rootdir}/test/script/kill_ibofos.sh 
+sudo ${rootdir}/test/script/kill_poseidonos.sh 
 
 cd ${rootdir};
 
-sudo make -j 12                                                                 
+sudo make -j 4
 
-if [ $? -ne 0 ]                                                                 
-then                                                                            
-sudo ./script/build_ibofos.sh >> /dev/null                                      
+if [ $? -ne 0 ]
+then
+sudo ./script/build_ibofos.sh >> /dev/null
 fi 
 
 cd -;
 
-sudo ${rootdir}/script/start_ibofos.sh
+sudo ${rootdir}/script/start_poseidonos.sh
 
-procid=`pgrep ibofos`
+procid=`pgrep poseidonos`
 echo "get pgrep $procid"
 
-sudo ${dirpath}/bisect_longterm_test.sh & >> /dev/null
+sudo ${rootpath}/test/regression/long_term_ci_test.sh & >> /dev/null
 
 while [ ! -f "${dirpath}/test_done.txt" ]
 do
-    sudo pgrep ibofos >> /dev/null
+    sudo pgrep poseidonos >> /dev/null
     if [ $? -ne 0 ];
     then
         sudo pkill -9 fio

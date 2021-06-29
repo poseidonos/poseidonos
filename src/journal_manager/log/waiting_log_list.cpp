@@ -32,7 +32,7 @@
 
 #include "waiting_log_list.h"
 
-namespace ibofos
+namespace pos
 {
 WaitingLogList::WaitingLogList(void)
 {
@@ -45,6 +45,7 @@ WaitingLogList::~WaitingLogList(void)
 bool
 WaitingLogList::IsEmpty(void)
 {
+    std::unique_lock<std::mutex> lock(waitingListLock);
     return (waitingList.size() == 0);
 }
 
@@ -59,9 +60,16 @@ LogWriteContext*
 WaitingLogList::GetWaitingIo(void)
 {
     std::unique_lock<std::mutex> lock(waitingListLock);
-    auto context = waitingList.front();
-    waitingList.pop_front();
-    return context;
+    if (waitingList.size() == 0)
+    {
+        return nullptr;
+    }
+    else
+    {
+        auto context = waitingList.front();
+        waitingList.pop_front();
+        return context;
+    }
 }
 
-} // namespace ibofos
+} // namespace pos

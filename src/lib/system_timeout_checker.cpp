@@ -32,7 +32,7 @@
 
 #include "system_timeout_checker.h"
 
-namespace ibofos
+namespace pos
 {
 const uint64_t
     SystemTimeoutChecker::NANOS_PER_SECOND = 1000000000ULL;
@@ -84,4 +84,4 @@ SystemTimeoutChecker::CheckTimeout(void)
     return timeoutReached;
 }
 
-} // namespace ibofos
+} // namespace pos

@@ -1,10 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include "config_manager.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include <gtest/gtest.h>
 
-using namespace ibofos;
+using namespace pos;
 using namespace std;
 
 
@@ -30,19 +30,19 @@ TEST_F(ConfigTest, ReadTest)
     int ioUnitSize;
     int ret;
     
-    system("cp ./default.conf /etc/ibofos/conf/ibofos.conf");
+    system("cp ./default.conf /etc/pos/pos.conf");
 
     ConfigManager& configMgr = *ConfigManagerSingleton::Instance();
     ret = configMgr.ReadFile();
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_FILE_READ_DONE == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_FILE_READ_DONE == ret);
 
     ret = configMgr.GetValue("nvmfSubsystem", "ip", 
                              (void*)&ip, CONFIG_TYPE_STRING);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_GET_VALUE_DONE == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_GET_VALUE_DONE == ret);
 
     ret = configMgr.GetValue("nvmfTransport", "ioUnitSize", 
                              (void*)&ioUnitSize, CONFIG_TYPE_INT);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_GET_VALUE_DONE == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_GET_VALUE_DONE == ret);
 
     EXPECT_TRUE(ip == "172.16.1.1");
     EXPECT_TRUE(ioUnitSize == 131072);
@@ -55,17 +55,17 @@ TEST_F(ConfigTest, ValidateTrueTest)
     int ioUnitSize;
     int ret;
 
-    system("cp ./default.conf /etc/ibofos/conf/ibofos.conf");
+    system("cp ./default.conf /etc/pos/pos.conf");
 
     ConfigManager& configMgr = *ConfigManagerSingleton::Instance();
     
     ret = configMgr.GetValue("nvmfSubsystem", "ip", 
                              (void*)&ip, CONFIG_TYPE_STRING);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_GET_VALUE_DONE == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_GET_VALUE_DONE == ret);
     
     ret = configMgr.GetValue("nvmfTransport", "ioUnitSize", 
                              (void*)&ioUnitSize, CONFIG_TYPE_INT);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_GET_VALUE_DONE == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_GET_VALUE_DONE == ret);
 }
 
 TEST_F(ConfigTest, ValidateFalseTest)
@@ -74,49 +74,49 @@ TEST_F(ConfigTest, ValidateFalseTest)
     int ioUnitSize = 0xFA;
     int ret;
 
-    system("cp ./default.conf /etc/ibofos/conf/ibofos.conf");
+    system("cp ./default.conf /etc/pos/pos.conf");
 
     ConfigManager& configMgr = *ConfigManagerSingleton::Instance();
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_VALIDATE_VALUE_FAIL == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_VALIDATE_VALUE_FAIL == ret);
 }
 
 TEST_F(ConfigTest, FormatErrorTest)
 {
-    system("cp ./format_fault.conf /etc/ibofos/conf/ibofos.conf");
+    system("cp ./format_fault.conf /etc/pos/pos.conf");
     
     string ip;
     int ret;
     
     ConfigManager& configMgr = *ConfigManagerSingleton::Instance();
     ret = configMgr.ReadFile();
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_FILE_FORMAT_ERROR == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_FILE_FORMAT_ERROR == ret);
 
     ConfigManagerSingleton::ResetInstance();
     ConfigManager& configMgr1 = *ConfigManagerSingleton::Instance();
     
     ret = configMgr1.GetValue("nvmfSubsystem", "ip", 
                               (void*)&ip, CONFIG_TYPE_STRING);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_FILE_FORMAT_ERROR == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_FILE_FORMAT_ERROR == ret);
 
 }
 
 TEST_F(ConfigTest, FileNotExistErrorTest)
 {
-    system("rm /etc/ibofos/conf/ibofos.conf");
+    system("rm /etc/pos/pos.conf");
     
     string ip;
     int ret;
     
     ConfigManager& configMgr = *ConfigManagerSingleton::Instance();
     ret = configMgr.ReadFile();
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_FILE_OPEN_FAIL == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_FILE_OPEN_FAIL == ret);
 
     ConfigManagerSingleton::ResetInstance();
     ConfigManager& configMgr1 = *ConfigManagerSingleton::Instance();
     
     ret = configMgr1.GetValue("nvmfSubsystem", "ip", 
                               (void*)&ip, CONFIG_TYPE_STRING);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_FILE_OPEN_FAIL == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_FILE_OPEN_FAIL == ret);
 }
 
 TEST_F(ConfigTest, ValueTypeFaultTest)
@@ -126,21 +126,21 @@ TEST_F(ConfigTest, ValueTypeFaultTest)
     bool isInit;
     int ret;
 
-    system("cp ./default.conf /etc/ibofos/conf/ibofos.conf");
+    system("cp ./default.conf /etc/pos/pos.conf");
 
     ConfigManager& configMgr = *ConfigManagerSingleton::Instance();
     
     ret = configMgr.GetValue("nvmfSubsystem", "ip", 
                              (void*)&ip, CONFIG_TYPE_INT);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_VALUE_TYPE_ERROR == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR == ret);
     
     ret = configMgr.GetValue("nvmfSubsystem", "port", 
                              (void*)&port, CONFIG_TYPE_BOOL);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_VALUE_TYPE_ERROR == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR == ret);
 
     ret = configMgr.GetValue("nvmfSubsystem", "init", 
                              (void*)&isInit, CONFIG_TYPE_STRING);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_VALUE_TYPE_ERROR == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR == ret);
 }
 
 TEST_F(ConfigTest, ModuleNameFaultTest)
@@ -150,21 +150,21 @@ TEST_F(ConfigTest, ModuleNameFaultTest)
     bool isInit;
     int ret;
 
-    system("cp ./default.conf /etc/ibofos/conf/ibofos.conf");
+    system("cp ./default.conf /etc/pos/pos.conf");
 
     ConfigManager& configMgr = *ConfigManagerSingleton::Instance();
     
     ret = configMgr.GetValue("faultModule", "ip", 
                              (void*)&ip, CONFIG_TYPE_STRING);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_REQUEST_MODULE_ERROR == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_REQUEST_MODULE_ERROR == ret);
     
     ret = configMgr.GetValue("faultModule", "port", 
                              (void*)&port, CONFIG_TYPE_INT);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_REQUEST_MODULE_ERROR == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_REQUEST_MODULE_ERROR == ret);
 
     ret = configMgr.GetValue("faultModule", "init", 
                              (void*)&isInit, CONFIG_TYPE_BOOL);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_REQUEST_MODULE_ERROR == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_REQUEST_MODULE_ERROR == ret);
 }
 
 TEST_F(ConfigTest, KeyNameFaultTest)
@@ -174,21 +174,21 @@ TEST_F(ConfigTest, KeyNameFaultTest)
     bool isInit;
     int ret;
 
-    system("cp ./default.conf /etc/ibofos/conf/ibofos.conf");
+    system("cp ./default.conf /etc/pos/pos.conf");
 
     ConfigManager& configMgr = *ConfigManagerSingleton::Instance();
     
     ret = configMgr.GetValue("nvmfSubsystem", "faultKey", 
                              (void*)&ip, CONFIG_TYPE_STRING);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_REQUEST_KEY_ERROR == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_REQUEST_KEY_ERROR == ret);
     
     ret = configMgr.GetValue("nvmfTransport", "faultKey1", 
                              (void*)&port, CONFIG_TYPE_INT);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_REQUEST_KEY_ERROR == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_REQUEST_KEY_ERROR == ret);
 
     ret = configMgr.GetValue("nvmfSubsystem", "faultKey2", 
                              (void*)&isInit, CONFIG_TYPE_BOOL);
-    EXPECT_TRUE((int)IBOF_EVENT_ID::CONFIG_REQUEST_KEY_ERROR == ret);
+    EXPECT_TRUE((int)POS_EVENT_ID::CONFIG_REQUEST_KEY_ERROR == ret);
 }
 
 

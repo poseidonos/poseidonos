@@ -6,7 +6,7 @@
 #include <iostream>
 #include <condition_variable>
 
-using namespace ibofos;
+using namespace pos;
 using namespace std;
 
 static condition_variable cv;
@@ -15,7 +15,7 @@ static mutex m;
 static StateContext currState = {"default", State::OFFLINE};
 static StateContext expState = {"default", State::OFFLINE};
 
-class IBoFStateTester : public testing::Test, StateEvent
+class IBoFStateTester : public testing::Test, IStateObserver
 {
 
 protected:
@@ -38,11 +38,11 @@ protected:
         StateManager::Instance()->ResetContext();
     }
 
-    void StateChanged(StateContext prev, StateContext next)
+    void StateChanged(StateContext* prev, StateContext* next)
     {
         if (currState != next)
         {
-            IBOF_TRACE_WARN(1111, "STATECHANGED {} -> {}", prev.ToString(), next.ToString());
+            POS_TRACE_WARN(1111, "STATECHANGED {} -> {}", prev.ToString(), next.ToString());
             currState = next;
             cv.notify_all();
 

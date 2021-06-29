@@ -2,9 +2,11 @@
 #ifndef AIR_CONFIG_INTERFACE_H
 #define AIR_CONFIG_INTERFACE_H
 
+#include <string>
+
 #include "src/config/ConfigLib.h"
 #include "src/config/ConfigParser.h"
-#include "src/config/ConfigString.h"
+#include "src/lib/StringView.h"
 
 namespace config
 {
@@ -19,106 +21,172 @@ public:
     }
 
     static constexpr int32_t
-    CheckConfigRule(void)
+    GetSentenceIndex(ParagraphType type, air::string_view name = "")
     {
-        return Config::CheckRule();
+        return config_parser.GetIndexFromParagraph(type, name);
     }
 
-    static constexpr int32_t
-    GetIndex(ConfigType type, String name = "")
+    static constexpr uint32_t
+    GetSentenceCount(ParagraphType type)
     {
-        return config.GetIndexFromStrArr(type, name);
+        return config_parser.GetSentenceCount(type);
     }
 
-    static constexpr int32_t
-    GetIntValue(ConfigType type, String key,
-        int index_c)
+    static constexpr air::string_view
+    GetSentenceName(ParagraphType type, uint32_t index)
     {
-        int32_t index = index_c;
-        String entry = config.GetEntryFromStrArr(type, index);
-        int32_t ret = config.GetIntValueFromEntry(entry, key);
-        if (0 > ret &&
-            (key == "NodeBuild" || key == "NodeRun" || key == "SamplingRatio"))
+        air::string_view key{""};
+        if (ParagraphType::GROUP == type)
         {
-            if (ConfigType::NODE == type)
+            key = "Group";
+        }
+        else if (ParagraphType::NODE == type)
+        {
+            key = "Node";
+        }
+        else if (ParagraphType::FILTER == type)
+        {
+            key = "Filter";
+        }
+        else
+        {
+            return "";
+        }
+
+        air::string_view sentence = config_parser.GetSentenceFromParagraph(type, index);
+        return config_parser.GetStrValueFromSentence(sentence, key);
+    }
+
+    static constexpr int32_t
+    GetIntValue(ParagraphType type, air::string_view key, int index_c, air::string_view item)
+    {
+        if (ParagraphType::DEFAULT == type)
+        {
+            if (key != "AirBuild" && key != "StreamingInterval" && key != "NodeBuild" && key != "NodeRun" &&
+                key != "NodeSamplingRatio" && key != "NodeIndexSize" && key != "NodeEnumSize")
             {
-                String group_name = config.GetStrValueFromEntry(entry, "GroupName");
-                if (group_name != "")
-                {
-                    index = config.GetIndexFromStrArr(ConfigType::GROUP, group_name);
-                    entry = config.GetEntryFromStrArr(ConfigType::GROUP, index);
-                    ret = config.GetIntValueFromEntry(entry, key);
-                    if (ret < 0)
-                    {
-                        entry = config.GetEntryFromStrArr(ConfigType::DEFAULT, 0);
-                        ret = config.GetIntValueFromEntry(entry, key);
-                    }
-                }
-                else
-                {
-                    entry = config.GetEntryFromStrArr(ConfigType::DEFAULT, 0);
-                    ret = config.GetIntValueFromEntry(entry, key);
-                }
-            }
-            else
-            {
-                entry = config.GetEntryFromStrArr(ConfigType::DEFAULT, 0);
-                ret = config.GetIntValueFromEntry(entry, key);
+                return -1;
             }
         }
+        else if (ParagraphType::GROUP == type)
+        {
+            if (key != "NodeBuild" && key != "NodeRun" && key != "NodeSamplingRatio" && key != "NodeIndexSize" && key != "NodeEnumSize")
+            {
+                return -1;
+            }
+        }
+        else if (ParagraphType::FILTER == type)
+        {
+            if (key != "Item")
+            {
+                return -1;
+            }
+        }
+        else if (ParagraphType::NODE == type)
+        {
+            if (key != "Build" && key != "Run" && key != "SamplingRatio" && key != "IndexSize")
+            {
+                return -1;
+            }
+        }
+
+        int32_t index = index_c;
+        air::string_view sentence = config_parser.GetSentenceFromParagraph(type, index);
+        int32_t ret = config_parser.GetIntValueFromSentence(sentence, key, item);
+
+        if (0 > ret && ParagraphType::NODE == type)
+        {
+            air::string_view group_name = config_parser.GetStrValueFromSentence(sentence, "Group");
+            index = config_parser.GetIndexFromParagraph(ParagraphType::GROUP, group_name);
+            sentence = config_parser.GetSentenceFromParagraph(ParagraphType::GROUP, index);
+            if (key == "Build")
+            {
+                ret = config_parser.GetIntValueFromSentence(sentence, "NodeBuild");
+                if (0 > ret)
+                {
+                    sentence = config_parser.GetSentenceFromParagraph(ParagraphType::DEFAULT, 0);
+                    ret = config_parser.GetIntValueFromSentence(sentence, "NodeBuild");
+                }
+            }
+            else if (key == "Run")
+            {
+                ret = config_parser.GetIntValueFromSentence(sentence, "NodeRun");
+                if (0 > ret)
+                {
+                    sentence = config_parser.GetSentenceFromParagraph(ParagraphType::DEFAULT, 0);
+                    ret = config_parser.GetIntValueFromSentence(sentence, "NodeRun");
+                }
+            }
+            else if (key == "SamplingRatio")
+            {
+                ret = config_parser.GetIntValueFromSentence(sentence, "NodeSamplingRatio");
+                if (0 > ret)
+                {
+                    sentence = config_parser.GetSentenceFromParagraph(ParagraphType::DEFAULT, 0);
+                    ret = config_parser.GetIntValueFromSentence(sentence, "NodeSamplingRatio");
+                }
+            }
+            else if (key == "IndexSize")
+            {
+                ret = config_parser.GetIntValueFromSentence(sentence, "NodeIndexSize");
+                if (0 > ret)
+                {
+                    sentence = config_parser.GetSentenceFromParagraph(ParagraphType::DEFAULT, 0);
+                    ret = config_parser.GetIntValueFromSentence(sentence, "NodeIndexSize");
+                }
+            }
+        }
+        else if (0 > ret && ParagraphType::GROUP == type)
+        {
+            sentence = config_parser.GetSentenceFromParagraph(ParagraphType::DEFAULT, 0);
+            ret = config_parser.GetIntValueFromSentence(sentence, key);
+        }
+
         return ret;
     }
 
     static constexpr int32_t
-    GetIntValue(ConfigType type, String key,
-        String name = "")
+    GetIntValue(ParagraphType type, air::string_view key, air::string_view name = "", air::string_view item = "")
     {
-        int32_t index = config.GetIndexFromStrArr(type, name);
-        return GetIntValue(type, key, index);
+        int32_t index = config_parser.GetIndexFromParagraph(type, name);
+        return GetIntValue(type, key, index, item);
     }
 
-    static constexpr String
-    GetStrValue(ConfigType type, String key,
-        String name = "")
+    static constexpr air::string_view
+    GetStrValue(ParagraphType type, air::string_view key, air::string_view name = "")
     {
-        int32_t index = config.GetIndexFromStrArr(type, name);
-        String entry = config.GetEntryFromStrArr(type, index);
-        return config.GetStrValueFromEntry(entry, key);
+        int32_t index = config_parser.GetIndexFromParagraph(type, name);
+        air::string_view sentence = config_parser.GetSentenceFromParagraph(type, index);
+        return config_parser.GetStrValueFromSentence(sentence, key);
     }
 
-    static constexpr String
-    GetName(ConfigType type, uint32_t entry_index)
+    static std::string
+    GetItemStrWithNodeName(air::string_view node_name, uint32_t item_index)
     {
-        String key{""};
-        if (ConfigType::DEFAULT == type)
-        {
-            return "";
-        }
-        else if (ConfigType::GROUP == type)
-        {
-            key = "GroupName";
-        }
-        else if (ConfigType::NODE == type)
-        {
-            key = "NodeName";
-        }
-        else
-        { // WEB
-            key = "NodeType";
-        }
-
-        String entry = config.GetEntryFromStrArr(type, entry_index);
-        return config.GetStrValueFromEntry(entry, key);
+        air::string_view filter_name = GetStrValue(ParagraphType::NODE, "Filter", node_name);
+        int32_t index = config_parser.GetIndexFromParagraph(ParagraphType::FILTER, filter_name);
+        air::string_view sentence = config_parser.GetSentenceFromParagraph(ParagraphType::FILTER, index);
+        return config_parser.GetItemStrFromFilterSentence(sentence, item_index);
     }
 
-    static constexpr uint32_t
-    GetArrSize(ConfigType type)
+    static std::string
+    GetItemStrWithFilterName(air::string_view filter_name, uint32_t item_index)
     {
-        return config.GetArrSize(type);
+        int32_t index = config_parser.GetIndexFromParagraph(ParagraphType::FILTER, filter_name);
+        air::string_view sentence = config_parser.GetSentenceFromParagraph(ParagraphType::FILTER, index);
+        return config_parser.GetItemStrFromFilterSentence(sentence, item_index);
+    }
+
+    static constexpr int32_t
+    GetItemSizeWithFilterName(air::string_view filter_name)
+    {
+        int32_t index = config_parser.GetIndexFromParagraph(ParagraphType::FILTER, filter_name);
+        air::string_view sentence = config_parser.GetSentenceFromParagraph(ParagraphType::FILTER, index);
+        return config_parser.GetItemSizeFromFilterSentence(sentence);
     }
 
 private:
-    static Config config;
+    static ConfigParser config_parser;
 };
 
 } // namespace config

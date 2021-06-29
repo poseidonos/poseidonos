@@ -33,44 +33,77 @@
 #pragma once
 
 #include <atomic>
+#include <string>
+#include <vector>
 
-#include "src/array/free_buffer_pool.h"
+#include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/include/address_type.h"
+#include "src/gc/gc_stripe_manager.h"
+#include "src/lib/bitmap.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/gc/victim_stripe.h"
 
-namespace ibofos
+namespace pos
 {
-struct BlkInfo
-{
-    BlkAddr rba;
-    uint32_t volID;
-    VirtualBlkAddr vsa;
-};
 
 class CopierMeta
 {
 public:
-    explicit CopierMeta(uint64_t maxBufferCount, uint32_t bufferSize);
-    ~CopierMeta(void);
+    CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize = nullptr,
+               BitMapMutex* inUseBitmap_ = nullptr, GcStripeManager* gcStripeManager_ = nullptr,
+               std::vector<std::vector<VictimStripe*>>* victimStripes_ = nullptr,
+               std::vector<FreeBufferPool*>* gcBufferPool_ = nullptr);
+    virtual ~CopierMeta(void);
 
-    void* GetBuffer(StripeId stripeId);
-    void ReturnBuffer(StripeId stripeId, void* buffer);
+    virtual void* GetBuffer(StripeId stripeId);
+    virtual void ReturnBuffer(StripeId stripeId, void* buffer);
 
-    void SetStartCopyStripes(void);
-    void SetStartCopyBlks(uint32_t blocks);
-    void SetDoneCopyBlks(uint32_t blocks);
-    uint32_t GetStartCopyBlks(void);
-    uint32_t GetDoneCopyBlks(void);
-    void InitProgressCount(void);
-    bool IsSync(void);
+    virtual void SetStartCopyStripes(void);
+    virtual void SetStartCopyBlks(uint32_t blocks);
+    virtual void SetDoneCopyBlks(uint32_t blocks);
+    virtual uint32_t GetStartCopyBlks(void);
+    virtual uint32_t GetDoneCopyBlks(void);
+    virtual void InitProgressCount(void);
 
-    static const uint32_t GC_BUFFER_COUNT = 4;
+    virtual uint32_t SetInUseBitmap(void);
+    virtual bool IsSynchronized(void);
+    virtual bool IsAllVictimSegmentCopyDone(void);
+    virtual bool IsCopyDone(void);
+    virtual bool IsReadytoCopy(uint32_t index);
 
+    virtual uint32_t GetStripePerSegment(void);
+    virtual uint32_t GetBlksPerStripe(void);
+    virtual VictimStripe* GetVictimStripe(uint32_t victimSegmentIndex, uint32_t stripeOffset);
+
+    virtual GcStripeManager* GetGcStripeManager(void);
+    virtual std::string GetArrayName(void);
+
+    static const uint32_t GC_BUFFER_COUNT = 512;
+    static const uint32_t GC_CONCURRENT_COUNT = 16;
+    static const uint32_t GC_VICTIM_SEGMENT_COUNT = 2;
 private:
     void _CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize);
-    std::atomic<uint32_t> requestCopyStripes;
-    std::atomic<uint32_t> startCount;
-    std::atomic<uint32_t> doneCount;
-    FreeBufferPool* gcBufferPool[GC_BUFFER_COUNT];
+    void _CreateVictimStripes(IArrayInfo* array);
+
+    std::atomic<uint32_t> requestStripeCount;
+    std::atomic<uint32_t> requestBlockCount;
+    std::atomic<uint32_t> doneBlockCount;
+
+    BitMapMutex* inUseBitmap;
+    GcStripeManager* gcStripeManager;
+
+    uint32_t stripesPerSegment;
+    uint32_t blksPerStripe;
+
+    uint32_t victimSegmentIndex = 0;
+
+    uint32_t copyIndex = 0;
+    bool firstGc = true;
+    std::atomic_flag copyLock = ATOMIC_FLAG_INIT;
+    std::string arrayName;
+
+    std::vector<std::vector<VictimStripe*>>* victimStripes;
+    std::vector<FreeBufferPool*>* gcBufferPool;
 };
 
-} // namespace ibofos
+} // namespace pos

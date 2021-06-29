@@ -1,0 +1,4 @@
+POS_ADD_UNIT_TEST(i_array_state_subscription_ut i_array_state_subscription_test.cpp)
+POS_ADD_UNIT_TEST(i_mount_sequence_ut i_mount_sequence_test.cpp)
+POS_ADD_UNIT_TEST(i_array_state_subscriber_ut i_array_state_subscriber_test.cpp)
+POS_ADD_UNIT_TEST(i_array_info_ut i_array_info_test.cpp)

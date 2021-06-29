@@ -33,11 +33,12 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
-#include "spdk/ibof_volume.h"
+#include "spdk/pos_volume.h"
 
 using namespace std;
-namespace ibofos
+namespace pos
 {
 /*
  * NvmfVolume : NvmfVolume abstraction
@@ -50,15 +51,15 @@ public:
     void SetuNVMfIOHandler(unvmf_io_handler handler);
     unvmf_io_handler GetuNVMfIOHandler(void);
 
-    virtual void VolumeCreated(struct ibof_volume_info* info) = 0;
-    virtual void VolumeDeleted(struct ibof_volume_info* info) = 0;
-    virtual void VolumeMounted(struct ibof_volume_info* info) = 0;
-    virtual void VolumeUnmounted(struct ibof_volume_info* info) = 0;
-    virtual void VolumeUpdated(struct ibof_volume_info* info) = 0;
-    virtual void VolumeDetached(vector<int>& volList) = 0;
+    virtual void VolumeCreated(struct pos_volume_info* info) = 0;
+    virtual void VolumeDeleted(struct pos_volume_info* info) = 0;
+    virtual void VolumeMounted(struct pos_volume_info* info) = 0;
+    virtual void VolumeUnmounted(struct pos_volume_info* info) = 0;
+    virtual void VolumeUpdated(struct pos_volume_info* info) = 0;
+    virtual void VolumeDetached(vector<int>& volList, std::string arrayName) = 0;
 
 private:
     unvmf_io_handler ioHandler = {nullptr, nullptr};
 };
 
-} // namespace ibofos
+} // namespace pos

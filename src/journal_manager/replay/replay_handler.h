@@ -34,53 +34,68 @@
 
 #include <list>
 
-#include "../log/log_handler.h"
-#include "pending_stripe.h"
-#include "replay_progress_reporter.h"
-#include "replay_state_changer.h"
-#include "replay_task.h"
+#include "src/journal_manager/replay/log_delete_checker.h"
+#include "src/journal_manager/replay/pending_stripe.h"
+#include "src/journal_manager/replay/replay_log_list.h"
+#include "src/journal_manager/replay/replay_progress_reporter.h"
+#include "src/journal_manager/replay/replay_state_changer.h"
+#include "src/journal_manager/replay/replay_task.h"
 
-namespace ibofos
+namespace pos
 {
 class Allocator;
 class Mapper;
-class Array;
 
+class JournalConfiguration;
 class JournalLogBuffer;
 class LogReplayer;
+
+class IVSAMap;
+class IStripeMap;
+class IMapFlush;
+class IBlockAllocator;
+class IWBStripeAllocator;
+class IContextManager;
+class IContextReplayer;
+class IArrayInfo;
+class IVolumeManager;
 
 class ReplayHandler
 {
 public:
-    ReplayHandler(void);
+    ReplayHandler(void) = default;
+    explicit ReplayHandler(IStateControl* iState);
     virtual ~ReplayHandler(void);
 
-    void Init(JournalLogBuffer* logBuffer);
+    virtual void Init(JournalConfiguration* journalConfiguration,
+        JournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
+        IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
+        IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
+        IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager);
 
-    void SetMapperToUse(Mapper* mapperToUse);
-    void SetAllocatorToUse(Allocator* allocatorToUse);
-    void SetArrayToUse(Array* arrayToUse);
-
-    int Start(void);
+    virtual int Start(void);
 
 private:
-    void _InitializeTaskList(void);
+    void _InitializeExternalModuleReferences(void);
+    void _InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
+        IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
+        IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
+        IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager);
     void _AddTask(ReplayTask* task);
     int _ExecuteReplayTasks(void);
 
     ReplayStateChanger replayState;
 
-    LogList logList;
+    ReplayLogList logList;
     PendingStripeList pendingWbStripes;
 
+    LogDeleteChecker* logDeleteChecker;
+
+    JournalConfiguration* config;
     JournalLogBuffer* logBuffer;
 
     ReplayProgressReporter* reporter;
     std::list<ReplayTask*> taskList;
-
-    Mapper* mapper;
-    Allocator* allocator;
-    Array* array;
 };
 
-} // namespace ibofos
+} // namespace pos

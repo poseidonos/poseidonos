@@ -30,16 +30,15 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "bitmap.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/memory.h"
+#include "src/lib/bitmap.h"
 
 #include <cmath>
 #include <iostream>
 #include <string.h>
 
-#include "src/include/branch_prediction.h"
-#include "src/include/memory.h"
-
-namespace ibofos
+namespace pos
 {
 /*
  *  ffsl - Find First bit Set in a Long
@@ -116,10 +115,17 @@ BitMap::SetBit(uint64_t bitOffset)
     {
         return false;
     }
+
+    if (IsSetBit(bitOffset) == true)
+    {
+        return true;
+    }
+
     uint64_t row = bitOffset / BITMAP_ENTRY_BITS;
     uint64_t col = bitOffset % BITMAP_ENTRY_BITS;
     map[row] |= (1ULL << col);
     ++numBitsSet;
+    lastSetPosition = bitOffset;
     return true;
 }
 
@@ -130,6 +136,12 @@ BitMap::ClearBit(uint64_t bitOffset)
     {
         return false;
     }
+
+    if (IsSetBit(bitOffset) == false)
+    {
+        return true;
+    }
+
     uint64_t row = bitOffset / BITMAP_ENTRY_BITS;
     uint64_t col = bitOffset % BITMAP_ENTRY_BITS;
     map[row] &= (~(1ULL << col));
@@ -270,6 +282,29 @@ BitMap::FindFirstSet(uint64_t begin)
 }
 
 uint64_t
+BitMap::FindNextZero(void)
+{
+    uint64_t posToBegin = (lastSetPosition + 1) % numBits;
+
+    uint64_t foundPos = FindFirstZero(posToBegin);
+    if (foundPos == numBits)
+    {
+        if (unlikely(numBitsSet >= numBits))
+        {
+            return numBits;
+        }
+        else
+        {
+            return FindFirstZero(0);
+        }
+    }
+    else
+    {
+        return foundPos;
+    }
+}
+
+uint64_t
 BitMap::FindFirstZero(uint64_t begin)
 {
     if (unlikely(IsValidBit(begin) == false))
@@ -373,9 +408,9 @@ BitMap::Set(BitMap& inputBitMap)
 BitMap::BitMap(uint64_t totalBits)
 {
     assert(totalBits != 0);
-
-    numBits = totalBits;
     numBitsSet = 0;
+    numBits = totalBits;
+    lastSetPosition = numBits - 1;
 
     uint64_t row = totalBits / BITMAP_ENTRY_BITS;
     uint64_t col = totalBits % BITMAP_ENTRY_BITS;
@@ -395,144 +430,171 @@ BitMap::BitMap(uint64_t totalBits)
 BitMap::~BitMap(void)
 {
     delete[] map;
+    map = nullptr;
+}
+
+BitMapMutex::BitMapMutex(BitMap* bitmap)
+: bitMap(bitmap)
+{
 }
 
 BitMapMutex::BitMapMutex(uint64_t totalBits)
-: bitmap(totalBits)
+: BitMapMutex(new BitMap(totalBits))
 {
+}
+
+BitMapMutex::~BitMapMutex(void)
+{
+    delete bitMap;
+    bitMap = nullptr;
 }
 
 bool
 BitMapMutex::IsValidBit(uint64_t bitOffset)
 {
-    return bitmap.IsValidBit(bitOffset);
+    return bitMap->IsValidBit(bitOffset);
 }
 
 uint64_t
 BitMapMutex::FindFirstSetBit(uint64_t begin)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    return bitmap.FindFirstSet(begin);
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    return bitMap->FindFirstSet(begin);
 }
 
 uint64_t
 BitMapMutex::SetFirstZeroBit(void)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    uint64_t bit = bitmap.FindFirstZero();
-    bitmap.SetBit(bit);
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    uint64_t bit = bitMap->FindFirstZero();
+    bitMap->SetBit(bit);
     return bit;
 }
 
 uint64_t
 BitMapMutex::SetFirstZeroBit(uint64_t begin)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    uint64_t bit = bitmap.FindFirstZero(begin);
-    bitmap.SetBit(bit);
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    uint64_t bit = bitMap->FindFirstZero(begin);
+    bitMap->SetBit(bit);
     return bit;
 }
 
 uint64_t
 BitMapMutex::SetFirstZeroBit(uint64_t begin, uint64_t end)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    uint32_t bit = bitmap.FindFirstZero(begin, end);
-    bitmap.SetBit(bit);
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    uint32_t bit = bitMap->FindFirstZero(begin, end);
+    bitMap->SetBit(bit);
+    return bit;
+}
+
+uint64_t
+BitMapMutex::SetNextZeroBit(void)
+{
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    uint32_t bit = bitMap->FindNextZero();
+    bitMap->SetBit(bit);
     return bit;
 }
 
 bool
 BitMapMutex::SetBit(uint64_t bit)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    return bitmap.SetBit(bit);
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    return bitMap->SetBit(bit);
 }
 
 bool
 BitMapMutex::ClearBit(uint64_t bit)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    return bitmap.ClearBit(bit);
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    return bitMap->ClearBit(bit);
 }
 
 bool
 BitMapMutex::ClearBits(uint64_t begin, uint64_t end)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    return bitmap.ClearBits(begin, end);
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    return bitMap->ClearBits(begin, end);
 }
 
 void
 BitMapMutex::ResetBitmap(void)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    bitmap.ResetBitmap();
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    bitMap->ResetBitmap();
 }
 
 void
 BitMapMutex::SetNumBitsSet(uint64_t numBits)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    bitmap.SetNumBitsSet(numBits);
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    bitMap->SetNumBitsSet(numBits);
 }
 
 uint64_t*
 BitMapMutex::GetMapAddr(void)
 {
-    return bitmap.GetMapAddr();
+    return bitMap->GetMapAddr();
 }
 
 uint64_t
 BitMapMutex::GetNumBits(void)
 {
-    return bitmap.GetNumBits();
+    return bitMap->GetNumBits();
 }
 
 bool
 BitMapMutex::IsSetBit(uint64_t bit)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    return bitmap.IsSetBit(bit);
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    return bitMap->IsSetBit(bit);
 }
 
 uint64_t
 BitMapMutex::GetNumEntry(void)
 {
-    return bitmap.GetNumEntry();
+    return bitMap->GetNumEntry();
 }
 
 void
 BitMapMutex::FlipBit(uint64_t bit)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    bitmap.FlipBit(bit);
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    bitMap->FlipBit(bit);
 }
 void
 BitMapMutex::PrintMap(void)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    bitmap.PrintMap();
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    bitMap->PrintMap();
 }
 
 uint64_t
 BitMapMutex::GetNumBitsSet(void)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    return bitmap.GetNumBitsSet();
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    return bitMap->GetNumBitsSet();
+}
+
+uint64_t
+BitMapMutex::GetNumBitsSetWoLock(void)
+{
+    return bitMap->GetNumBitsSet();
 }
 
 uint64_t
 BitMapMutex::GetNumBitsSet(uint64_t begin, uint64_t end)
 {
-    assert(end <= bitmap.GetNumBits());
+    assert(end <= bitMap->GetNumBits());
 
-    std::unique_lock<std::mutex> lock(bitmapMutex);
+    std::unique_lock<std::mutex> lock(bitMapLock);
     uint64_t ret = 0;
 
     for (uint64_t bitOffset = begin; bitOffset <= end; ++bitOffset)
     {
-        if (bitmap.IsSetBit(bitOffset))
+        if (bitMap->IsSetBit(bitOffset))
         {
             ++ret;
         }
@@ -543,8 +605,14 @@ BitMapMutex::GetNumBitsSet(uint64_t begin, uint64_t end)
 bool
 BitMapMutex::SetBitMap(BitMapMutex& inputBitMapMutex)
 {
-    std::unique_lock<std::mutex> lock(bitmapMutex);
-    return bitmap.Set(inputBitMapMutex.bitmap);
+    std::unique_lock<std::mutex> lock(bitMapLock);
+    return bitMap->Set(*inputBitMapMutex.bitMap);
 }
 
-} // namespace ibofos
+std::mutex&
+BitMapMutex::GetLock(void)
+{
+    return bitMapLock;
+}
+
+} // namespace pos

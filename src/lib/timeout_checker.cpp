@@ -32,7 +32,7 @@
 
 #include "timeout_checker.h"
 
-namespace ibofos
+namespace pos
 {
 TimeoutChecker::TimeoutChecker(void)
 {
@@ -42,4 +42,4 @@ TimeoutChecker::~TimeoutChecker(void)
 {
 }
 
-} // namespace ibofos
+} // namespace pos

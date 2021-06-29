@@ -32,41 +32,83 @@
 
 #include "src/io/frontend_io/block_map_update.h"
 
-#include "src/device/event_framework_api.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/include/branch_prediction.h"
 #include "src/include/memory.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/block_map_update_completion.h"
-#include "src/journal_manager/journal_manager.h"
-#include "src/mapper/mapper.h"
+#include "src/journal_service/journal_service.h"
+#include "src/logger/logger.h"
+#include "src/mapper_service/mapper_service.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
-namespace ibofos
+namespace pos
 {
-BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback)
-: Event(EventFrameworkApi::IsReactorNow()),
+BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback,
+    function<bool(void)> IsReactorNow, IVSAMap* iVSAMap, JournalService* journalService, EventScheduler* eventScheduler,
+    EventSmartPtr blockMapUpdateCompletionEvent)
+: Event(IsReactorNow()),
   volumeIo(inputVolumeIo),
-  mapper(MapperSingleton::Instance()),
-  journalManager(JournalManagerSingleton::Instance()),
-  originCallback(originCallback)
+  iVSAMap(iVSAMap),
+  originCallback(originCallback),
+  journalService(journalService),
+  eventScheduler(eventScheduler),
+  blockMapUpdateCompletionEvent(blockMapUpdateCompletionEvent)
+{
+}
+
+BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback)
+: BlockMapUpdate(
+      inputVolumeIo, originCallback, EventFrameworkApi::IsReactorNow,
+      MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayName()),
+      JournalServiceSingleton::Instance(),
+      EventSchedulerSingleton::Instance(),
+      std::make_shared<BlockMapUpdateCompletion>(inputVolumeIo, originCallback))
 {
 }
 
 bool
 BlockMapUpdate::Execute(void)
 {
-    uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
-    BlkAddr rba = ChangeSectorToBlock(volumeIo->GetRba());
-    MpageList dirty = mapper->GetDirtyVsaMapPages(volumeIo->GetVolumeId(),
-        rba, blockCount);
+    bool executionSuccessful = false;
 
-    EventSmartPtr event(new BlockMapUpdateCompletion(volumeIo, originCallback));
-    bool logWriteRequestSuccessful = journalManager->AddBlockMapUpdatedLog(
-        volumeIo, dirty, event);
+    if (journalService->IsEnabled(volumeIo->GetArrayName()))
+    {
+        IJournalWriter* journal = journalService->GetWriter(volumeIo->GetArrayName());
 
-    if (logWriteRequestSuccessful)
+        MpageList dirty = _GetDirtyPages(volumeIo);
+        int result = journal->AddBlockMapUpdatedLog(volumeIo, dirty, blockMapUpdateCompletionEvent);
+
+        executionSuccessful = (result == 0);
+    }
+    else
+    {
+        executionSuccessful = blockMapUpdateCompletionEvent->Execute();
+        if (unlikely(false == executionSuccessful))
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::WRCMP_MAP_UPDATE_FAILED;
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                PosEventId::GetString(eventId));
+            eventScheduler->EnqueueEvent(blockMapUpdateCompletionEvent);
+            executionSuccessful = true;
+        }
+    }
+
+    if (executionSuccessful == true)
     {
         volumeIo = nullptr;
     }
-
-    return logWriteRequestSuccessful;
+    return executionSuccessful;
 }
 
-} // namespace ibofos
+MpageList
+BlockMapUpdate::_GetDirtyPages(VolumeIoSmartPtr volumeIo)
+{
+    uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
+    BlkAddr rba = ChangeSectorToBlock(volumeIo->GetSectorRba());
+    MpageList dirty = iVSAMap->GetDirtyVsaMapPages(volumeIo->GetVolumeId(), rba, blockCount);
+    return dirty;
+}
+
+} // namespace pos

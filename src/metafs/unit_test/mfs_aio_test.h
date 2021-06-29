@@ -34,6 +34,8 @@
 
 #include "mfs_functional_test.h"
 
+namespace pos
+{
 class UtMetaFsTopAIOPositive : public UtMetaFsTopFunctionalPositive
 {
 public:
@@ -42,3 +44,4 @@ public:
     static void FillupPattern(void* buf, size_t nbytes, int pattern);
     static bool VerifyData(void* origin, void* exp, size_t nbytes);
 };
+} // namespace pos

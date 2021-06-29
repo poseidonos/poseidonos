@@ -1,0 +1,7 @@
+POS_ADD_UNIT_TEST(stripe_locker_state_ut stripe_locker_state_test.cpp)
+POS_ADD_UNIT_TEST(stripe_locker_busy_state_ut stripe_locker_busy_state_test.cpp)
+POS_ADD_UNIT_TEST(stripe_locker_ut stripe_locker_test.cpp)
+POS_ADD_UNIT_TEST(stripe_locker_normal_state_ut stripe_locker_normal_state_test.cpp)
+POS_ADD_UNIT_TEST(io_locker_ut io_locker_test.cpp)
+POS_ADD_UNIT_TEST(locker_mode_ut locker_mode_test.cpp)
+POS_ADD_UNIT_TEST(i_io_locker_ut i_io_locker_test.cpp)

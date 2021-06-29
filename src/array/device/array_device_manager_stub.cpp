@@ -32,14 +32,18 @@
 
 #include "array_device_manager.h"
 
-namespace ibofos
+namespace pos
 {
 ArrayDeviceManager::ArrayDeviceManager(DeviceManager* sysDevMgr)
-: sysDevMgr_(sysDevMgr)
+:
+#ifdef _ADMIN_ENABLED
+  IArrayDevMgr(sysDevMgr),
+#endif
+  sysDevMgr_(sysDevMgr)
 {
 }
 
-ArrayDeviceManager::~ArrayDeviceManager()
+ArrayDeviceManager::~ArrayDeviceManager(void)
 {
 }
 
@@ -142,7 +146,13 @@ ArrayDeviceManager::_CheckSsdsCapacity(const ArrayDeviceSet& devSet)
 }
 
 tuple<ArrayDevice*, ArrayDeviceType>
-ArrayDeviceManager::GetDev(UBlockDevice* uBlock)
+ArrayDeviceManager::GetDev(UblockSharedPtr uBlock)
+{
+    return make_tuple(nullptr, ArrayDeviceType::NONE);
+}
+
+tuple<ArrayDevice*, ArrayDeviceType>
+ArrayDeviceManager::GetDev(string sn)
 {
     return make_tuple(nullptr, ArrayDeviceType::NONE);
 }
@@ -153,4 +163,4 @@ ArrayDeviceManager::_GetBaseline(const vector<ArrayDevice*>& devs)
     return nullptr;
 }
 
-} // namespace ibofos
+} // namespace pos

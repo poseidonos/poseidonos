@@ -31,27 +31,42 @@
  */
 
 #include "src/gc/victim_stripe.h"
-
-#include "src/array/array.h"
+#include "src/mapper/include/mapper_const.h"
 #include "src/io/general_io/io_submit_handler.h"
+#include "src/event_scheduler/callback.h"
 #include "src/logger/logger.h"
-#include "src/mapper/mapper.h"
+#include "src/mapper_service/mapper_service.h"
+#include "src/include/meta_const.h"
+#include "src/volume/volume_service.h"
+#include "src/include/branch_prediction.h"
 
-namespace ibofos
+namespace pos
 {
-VictimStripe::VictimStripe(void)
-: myLsid(UNMAP_STRIPE)
+VictimStripe::VictimStripe(IArrayInfo* array, ReverseMapPack* revMapPack_)
+: myLsid(UNMAP_STRIPE),
+  dataBlks(0),
+  chunkIndex(0),
+  blockOffset(0),
+  validBlockCnt(0),
+  isLoaded(false),
+  array(array),
+  revMapPack(revMapPack_)
 {
-    dataBlks =
-        ArraySingleton::Instance()->GetSizeInfo(PartitionType::USER_DATA)->blksPerStripe;
-    revMapPack = new ReverseMapPack();
+    dataBlks = array->GetSizeInfo(PartitionType::USER_DATA)->blksPerStripe;
+    if (nullptr == revMapPack)
+    {
+        IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(array->GetName());
+        revMapPack = iReverseMap->AllocReverseMapPack(false);
+    }
 }
 
 VictimStripe::~VictimStripe(void)
 {
     validBlkInfos.clear();
-
-    delete revMapPack;
+    if (nullptr != revMapPack)
+    {
+        delete revMapPack;
+    }
 }
 void
 VictimStripe::Load(StripeId _lsid, CallbackSmartPtr callback)
@@ -70,12 +85,13 @@ VictimStripe::_InitValue(StripeId _lsid)
     chunkIndex = 0;
     blockOffset = 0;
     validBlockCnt = 0;
+    isLoaded = false;
 }
 
 void
 VictimStripe::_LoadReverseMap(CallbackSmartPtr callback)
 {
-    IBOF_TRACE_INFO((int)IBOF_EVENT_ID::GC_LOAD_REVERSE_MAP,
+    POS_TRACE_INFO((int)POS_EVENT_ID::GC_LOAD_REVERSE_MAP,
         "load reversemap for lsid:{}", myLsid);
 
     revMapPack->LinkVsid(myLsid);
@@ -85,6 +101,16 @@ VictimStripe::_LoadReverseMap(CallbackSmartPtr callback)
 bool
 VictimStripe::LoadValidBlock(void)
 {
+    if (isLoaded == true)
+    {
+        return true;
+    }
+
+    IVSAMap* iVSAMap = MapperServiceSingleton::Instance()->GetIVSAMap(array->GetName());
+    IStripeMap* iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(array->GetName());
+    IVolumeManager* volumeManager
+        = VolumeServiceSingleton::Instance()->GetVolumeManager(array->GetName());
+
     for (; blockOffset < dataBlks; blockOffset++)
     {
         if (chunkIndex != blockOffset / BLOCKS_IN_CHUNK)
@@ -98,16 +124,16 @@ VictimStripe::LoadValidBlock(void)
         }
 
         BlkInfo blkInfo;
-
         std::tie(blkInfo.rba, blkInfo.volID) = revMapPack->GetReverseMapEntry(blockOffset);
+
         if ((MAX_VOLUME_COUNT <= blkInfo.volID) || (INVALID_RBA <= blkInfo.rba))
         {
             continue;
         }
 
+
         int shouldRetry = CALLER_EVENT;
-        blkInfo.vsa =
-            MapperSingleton::Instance()->GetVSAInternal(blkInfo.volID, blkInfo.rba, shouldRetry);
+        blkInfo.vsa = iVSAMap->GetVSAInternal(blkInfo.volID, blkInfo.rba, shouldRetry);
 
         if (NEED_RETRY == shouldRetry)
         {
@@ -120,17 +146,16 @@ VictimStripe::LoadValidBlock(void)
 
         if ((UNMAP_STRIPE <= blkInfo.vsa.stripeId) || (UNMAP_OFFSET <= blkInfo.vsa.offset))
         {
-            IBOF_TRACE_INFO((int)IBOF_EVENT_ID::GC_GET_UNMAP_VSA,
+            POS_TRACE_INFO((int)POS_EVENT_ID::GC_GET_UNMAP_VSA,
                 "loaded Unmap VSA, volId:{}, rba:{}, stripeId:{}, vsaOffset:{}",
                 blkInfo.volID, blkInfo.rba, blkInfo.vsa.stripeId, blkInfo.vsa.offset);
             continue;
         }
 
-        StripeAddr lsa =
-            MapperSingleton::Instance()->GetLSA(blkInfo.vsa.stripeId);
+        StripeAddr lsa = iStripeMap->GetLSA(blkInfo.vsa.stripeId);
         if (true == IsUnMapStripe(lsa.stripeId))
         {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::GC_GET_UNMAP_LSA,
+            POS_TRACE_ERROR((int)POS_EVENT_ID::GC_GET_UNMAP_LSA,
                 "Get Unmap LSA, volId:{}, rba:{}, vsaStripeId:{}, vsaOffset:{}, lsaStripeId:{}",
                 blkInfo.volID, blkInfo.rba, blkInfo.vsa.stripeId, blkInfo.vsa.offset, lsa.stripeId);
             continue;
@@ -138,6 +163,12 @@ VictimStripe::LoadValidBlock(void)
 
         if ((lsa.stripeId == myLsid) && (blockOffset == blkInfo.vsa.offset))
         {
+            if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS)
+                != volumeManager->IncreasePendingIOCountIfNotZero(blkInfo.volID, VolumeStatus::Unmounted)))
+            {
+                break;
+            }
+
             blkInfoList.push_back(blkInfo);
             validBlockCnt++;
         }
@@ -149,11 +180,13 @@ VictimStripe::LoadValidBlock(void)
         blkInfoList.clear();
     }
 
+    isLoaded = true;
     revMapPack->UnLinkVsid();
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::GC_LOAD_VALID_BLOCKS,
-        "valid blocks loaded, cnt:{}", validBlockCnt);
+
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_LOAD_VALID_BLOCKS,
+        "valid blocks loaded, myLsid:{}, cnt:{}", myLsid, validBlockCnt);
 
     return true;
 }
 
-} // namespace ibofos
+} // namespace pos

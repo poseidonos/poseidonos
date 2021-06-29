@@ -32,18 +32,23 @@
 
 #include "src/io/frontend_io/read_completion.h"
 
-#include "src/include/ibof_event_id.hpp"
-#include "src/io/general_io/block_alignment.h"
-#include "src/io/general_io/volume_io.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/include/branch_prediction.h"
+#include "src/lib/block_alignment.h"
+#include "src/bio/volume_io.h"
 #include "src/logger/logger.h"
-#include "src/mapper/mapper.h"
-#include "src/scheduler/event_argument.h"
 
-namespace ibofos
+namespace pos
 {
 ReadCompletion::ReadCompletion(VolumeIoSmartPtr input)
+: ReadCompletion(input, AllocatorServiceSingleton::Instance())
+{
+}
+
+ReadCompletion::ReadCompletion(VolumeIoSmartPtr input, AllocatorService* allocatorService)
 : Callback(true),
-  volumeIo(input)
+  volumeIo(input),
+  allocatorService(allocatorService)
 {
 }
 
@@ -58,9 +63,9 @@ ReadCompletion::_DoSpecificJob(void)
     {
         if (unlikely(nullptr == volumeIo))
         {
-            IBOF_EVENT_ID eventId = IBOF_EVENT_ID::RDCMP_INVALID_UBIO;
-            IBOF_TRACE_ERROR(static_cast<int>(eventId),
-                IbofEventId::GetString(eventId));
+            POS_EVENT_ID eventId = POS_EVENT_ID::RDCMP_INVALID_UBIO;
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                PosEventId::GetString(eventId));
             throw eventId;
         }
 
@@ -71,18 +76,19 @@ ReadCompletion::_DoSpecificJob(void)
             // this error will be automatically transfered to AIO
             // with callback mechanism.
             // Check Partition type and ft method
-            IBOF_EVENT_ID eventId = IBOF_EVENT_ID::RDCMP_READ_FAIL;
-            IBOF_TRACE_ERROR(static_cast<int>(eventId),
-                IbofEventId::GetString(eventId));
+            POS_EVENT_ID eventId = POS_EVENT_ID::RDCMP_READ_FAIL;
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                PosEventId::GetString(eventId));
         }
 
         StripeAddr lsidEntry = volumeIo->GetLsidEntry();
         if (false == IsUnMapStripe(lsidEntry.stripeId))
         {
-            uint64_t byteRba = ChangeSectorToByte(volumeIo->GetRba());
+            IWBStripeAllocator* iWBStripeAllocator = allocatorService->GetIWBStripeAllocator(volumeIo->GetArrayName());
+            uint64_t byteRba = ChangeSectorToByte(volumeIo->GetSectorRba());
             BlockAlignment blockAlignment(byteRba, volumeIo->GetSize());
             uint32_t blockCount = blockAlignment.GetBlockCount();
-            MapperSingleton::Instance()->DereferLsid(lsidEntry, blockCount);
+            iWBStripeAllocator->DereferLsidCnt(lsidEntry, blockCount);
         }
     }
     catch (...)
@@ -92,4 +98,4 @@ ReadCompletion::_DoSpecificJob(void)
     return true;
 }
 
-} // namespace ibofos
+} // namespace pos

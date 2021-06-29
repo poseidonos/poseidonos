@@ -32,9 +32,10 @@
 
 #include "volume_manager_mock.h"
 
-namespace ibofos
+namespace pos
 {
 MockVolumeManager::MockVolumeManager()
+: VolumeManager(nullptr, nullptr)
 {
 }
 
@@ -42,4 +43,4 @@ MockVolumeManager::~MockVolumeManager()
 {
 }
 
-} // namespace ibofos
+} // namespace pos

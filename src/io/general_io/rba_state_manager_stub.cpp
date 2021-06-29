@@ -31,11 +31,12 @@
  */
 
 #include "src/io/general_io/rba_state_manager.h"
+#include "src/array_models/interface/i_array_info.h"
 
-namespace ibofos
+namespace pos
 {
-RBAStateManager::RBAStateManager()
-: VolumeEvent("RBAStateManager")
+RBAStateManager::RBAStateManager(std::string arrayName)
+: VolumeEvent("RBAStateManager", arrayName)
 {
 }
 
@@ -68,58 +69,47 @@ RBAStateManager::BulkReleaseOwnership(uint32_t volumeID,
 {
 }
 
-bool
-RBAStateManager::AcquireOwnership(uint32_t volumeID, BlkAddr rba)
-{
-    return false;
-}
-
-void
-RBAStateManager::ReleaseOwnership(uint32_t volumeID, BlkAddr rba)
-{
-}
-
 RBAStateManager::RBAState::RBAState(void)
 {
 }
 
 bool
 RBAStateManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByte,
-    uint64_t maxiops, uint64_t maxbw)
+    uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
     return true;
 }
 
 bool
-RBAStateManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte)
+RBAStateManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName)
 {
     return true;
 }
 
 bool
 RBAStateManager::VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte,
-    uint64_t maxiops, uint64_t maxbw)
+    uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
     return true;
 }
 
 bool
-RBAStateManager::VolumeUnmounted(std::string volName, int volID)
+RBAStateManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName)
 {
     return true;
 }
 
 bool
 RBAStateManager::VolumeLoaded(std::string name, int id, uint64_t totalSize,
-    uint64_t maxiops, uint64_t maxbw)
+    uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
     return true;
 }
 
 bool
-RBAStateManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw)
+RBAStateManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
     return true;
 }
 
-} // namespace ibofos
+} // namespace pos

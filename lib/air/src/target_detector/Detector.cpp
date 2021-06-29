@@ -29,49 +29,45 @@ detect::Detector::Process(void)
             {
                 continue;
             }
-            _CreateThread(std::stoi(str_tid));
+            _CreateNodeDataArray(std::stoi(str_tid));
         }
     }
     closedir(dp);
 
-    _DeleteThread();
+    _DeleteNodeDataArray();
 }
 
-int
-detect::Detector::_CreateThread(uint32_t tid)
+void
+detect::Detector::_CreateNodeDataArray(uint32_t tid)
 {
-    // 0 -> already create
-    // 1 -> create complete
-    return node_manager->CreateThread(tid);
+    node_manager->CreateNodeDataArray(tid);
 }
 
-int
-detect::Detector::_DeleteThread(void)
+void
+detect::Detector::_DeleteNodeDataArray(void)
 {
     std::string str_dir = "/proc/" + std::to_string(getpid()) + "/task/";
-    std::map<uint32_t, node::ThreadArray>::iterator it;
 
-    it = node_manager->thread_map.begin();
-    while (it != node_manager->thread_map.end())
+    auto iter = node_manager->nda_map.begin();
+    while (iter != node_manager->nda_map.end())
     {
-        DIR* dp = opendir((str_dir + std::to_string(it->first)).c_str());
+        DIR* dp = opendir((str_dir + std::to_string(iter->first)).c_str());
         if (nullptr == dp)
         {
-            if (true == node_manager->CanDelete(&(it->second)))
+            if (true == node_manager->CanDeleteNodeDataArray(iter->second))
             {
-                node_manager->DeleteThread(&(it->second));
-                node_manager->thread_map.erase(it++);
+                node_manager->DeleteNodeDataArray(iter->second);
+                node_manager->nda_map.erase(iter++);
             }
             else
             {
-                it++;
+                iter++;
             }
         }
         else
         {
-            it++;
+            iter++;
         }
         closedir(dp);
     }
-    return 1;
 }

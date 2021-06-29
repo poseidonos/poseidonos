@@ -32,46 +32,49 @@
 
 #include "mf_extent.h"
 
-#include "mfs_log.h"
+#include "metafs_log.h"
 
-MetaFileExtentContent::MetaFileExtentContent(void)
+namespace pos
+{
+MetaFileExtent::MetaFileExtent(void)
 {
     startLpn = 0;
     count = 0;
 }
 
-MetaFileExtentContent::MetaFileExtentContent(MetaLpnType startLpn, MetaLpnType count)
+MetaFileExtent::MetaFileExtent(MetaLpnType startLpn, MetaLpnType count)
 {
     this->startLpn = startLpn;
     this->count = count;
 }
 
 bool
-MetaFileExtentContent::operator<(const MetaFileExtentContent& a)
+MetaFileExtent::operator<(const MetaFileExtent& a)
 {
     return this->startLpn < a.startLpn;
 }
 
 MetaLpnType
-MetaFileExtentContent::GetStartLpn(void)
+MetaFileExtent::GetStartLpn(void)
 {
     return startLpn;
 }
 
 void
-MetaFileExtentContent::SetStartLpn(MetaLpnType lpn)
+MetaFileExtent::SetStartLpn(MetaLpnType lpn)
 {
     startLpn = lpn;
 }
 
 MetaLpnType
-MetaFileExtentContent::GetCount(void)
+MetaFileExtent::GetCount(void)
 {
     return count;
 }
 
 void
-MetaFileExtentContent::SetCount(MetaLpnType lpn)
+MetaFileExtent::SetCount(MetaLpnType lpn)
 {
     count = lpn;
 }
+} // namespace pos

@@ -32,35 +32,39 @@
 
 #include "mpio.h"
 
+#include "Air.h"
 #include "instance_tagid_allocator.h"
 #include "meta_storage_specific.h"
-#include "mfs_common.h"
-#include "mfs_mem_lib.h"
+#include "metafs_common.h"
+#include "metafs_mem_lib.h"
+#include "metafs_system_manager.h"
 
+namespace pos
+{
 Mpio::Mpio(void* mdPageBuf)
-: mdpage(nullptr),
+: mdpage(mdPageBuf),
   partialIO(false),
-  mssIntf(metaStorage),
-  aioModeEnabled(metaStorage->IsAIOSupport()),
+  mssIntf(nullptr),
+  aioModeEnabled(false),
   error(0),
   errorStopState(false),
-  forceSyncIO(false)
+  forceSyncIO(false),
+  cacheState(MpioCacheState::Init)
 {
-    AllocateMDPage(mdPageBuf);
     mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }
 
 Mpio::Mpio(void* mdPageBuf, MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
 : io(mpioIoInfo),
-  mdpage(nullptr),
+  mdpage(mdPageBuf),
   partialIO(partialIO),
-  mssIntf(metaStorage),
-  aioModeEnabled(metaStorage->IsAIOSupport()),
+  mssIntf(nullptr),
+  aioModeEnabled(false),
   error(0),
   errorStopState(false),
-  forceSyncIO(forceSyncIO)
+  forceSyncIO(forceSyncIO),
+  cacheState(MpioCacheState::Init)
 {
-    AllocateMDPage(mdPageBuf);
     mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }
 
@@ -68,7 +72,7 @@ void
 Mpio::Reset(void)
 {
     // state init.
-    MetaAsyncRunnableClass<MetaAsyncCbCxt, MpAioState, MpioStateExecuteEntry>::Init();
+    MetaAsyncRunnable<MetaAsyncCbCxt, MpAioState, MpioStateExecuteEntry>::Init();
 
     // ctrl. info init.
     mdpage.ClearCtrlInfo();
@@ -79,11 +83,13 @@ Mpio::~Mpio(void)
 }
 
 void
-Mpio::Setup(MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
+Mpio::Setup(MetaStorageType targetMediaType, MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage)
 {
     this->io = mpioIoInfo;
     this->partialIO = partialIO;
     this->forceSyncIO = forceSyncIO;
+    this->mssIntf = metaStorage;
+    aioModeEnabled = metaStorage->IsAIOSupport();
 }
 
 void
@@ -124,23 +130,25 @@ Mpio::SetPartialDoneNotifier(PartialMpioDoneCb& partialMpioDoneNotifier)
     this->partialMpioDoneNotifier = partialMpioDoneNotifier;
 }
 
-// void
-// Mpio::SetTimestampForCompletion(void)
-// {
-//     time.timeTickCompleted = GetTimestampUs();
-// }
-
 bool
 Mpio::IsPartialIO(void)
 {
     return partialIO;
 }
 
-void
-Mpio::AllocateMDPage(void* buf)
+#if MPIO_CACHE_EN
+MpioCacheState
+Mpio::GetCacheState(void)
 {
-    mdpage.Init(buf);
+    return cacheState;
 }
+
+void
+Mpio::SetCacheState(MpioCacheState state)
+{
+    cacheState = state;
+}
+#endif
 
 void
 Mpio::Issue(void)
@@ -186,10 +194,9 @@ Mpio::_CheckIOStatus(MpAioState expNextState)
 }
 
 void
-Mpio::BuildCompositeMDPage(CompMDPageGenClass* compMdPageGenHelper)
+Mpio::BuildCompositeMDPage(void)
 {
-    mdpage.Make(io.metaLpn, io.targetFD);
-    compMdPageGenHelper->CreateCompMDPage(&mdpage);
+    mdpage.Make(io.metaLpn, io.targetFD, io.arrayName);
 }
 
 void*
@@ -209,15 +216,15 @@ Mpio::IsValidPage(void)
 {
     mdpage.AttachControlInfo();
 
-    if ((mdpage.GetmfsSignature() == 0) && (GetOpcode() == MetaIoOpcode::Read))
+    if ((mdpage.GetMfsSignature() == 0) && (GetOpcode() == MetaIoOpcode::Read))
     {
         // clean page , need to change read state machin.
     }
 
-    bool isValid = mdpage.CheckValid();
+    bool isValid = mdpage.CheckValid(io.arrayName);
     if (!isValid)
     {
-        MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "it's empty or invalid mdpage");
         return false;
     }
@@ -254,7 +261,7 @@ Mpio::DoE2ECheck(MpAioState expNextState)
     {
         if (false == CheckDataIntegrity())
         {
-            MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_INVALID_INFORMATION,
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_INFORMATION,
                 "E2E Check fail!!!!");
             // FIXME: need to handle error
             assert(false);
@@ -290,27 +297,34 @@ Mpio::_ConvertToMssOpcode(const MpAioState mpioState)
 bool
 Mpio::DoIO(MpAioState expNextState)
 {
-    assert(mssIntf->IsReady());
-
     bool continueToNextStateRun = true;
-    IBOF_EVENT_ID ret;
+    POS_EVENT_ID ret;
     void* buf = GetMDPageDataBuf();
     MssOpcode opcode = _ConvertToMssOpcode(GetStateInExecution());
 
     if (aioModeEnabled && (!forceSyncIO))
     {
-        mssAioData.Init(io.targetMediaType, io.metaLpn, io.pageCnt, buf, io.mpioId, io.tagId, io.startByteOffset);
+#if RANGE_OVERLAP_CHECK_EN
+        if (cacheState != MpioCacheState::Init)
+        {
+            mssAioData.Init(io.arrayName, io.targetMediaType, io.metaLpn, io.pageCnt, buf, io.mpioId, io.tagId, 0);
+        }
+        else
+#endif
+        {
+            mssAioData.Init(io.arrayName, io.targetMediaType, io.metaLpn, io.pageCnt, buf, io.mpioId, io.tagId, io.startByteOffset);
+        }
         mssAioCbCxt.Init(&mssAioData, mpioDoneCallback);
 
         SetNextState(expNextState);
 
         ret = mssIntf->DoPageIOAsync(opcode, &mssAioCbCxt);
 
-        if (ret != IBOF_EVENT_ID::SUCCESS)
+        if (ret != POS_EVENT_ID::SUCCESS)
         {
             SetNextState(MpAioState::Error);
 
-            if (ret == IBOF_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE)
+            if (ret == POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE)
             {
                 errorStopState = true;
             }
@@ -321,7 +335,7 @@ Mpio::DoIO(MpAioState expNextState)
     else
     {
         ret = mssIntf->DoPageIO(opcode, io.targetMediaType, io.metaLpn, buf, io.pageCnt, io.mpioId, io.tagId);
-        if (ret == IBOF_EVENT_ID::SUCCESS)
+        if (ret == POS_EVENT_ID::SUCCESS)
         {
             SetNextState(expNextState);
         }
@@ -329,7 +343,7 @@ Mpio::DoIO(MpAioState expNextState)
         {
             SetNextState(MpAioState::Error);
 
-            if (ret == IBOF_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE)
+            if (ret == POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE)
             {
                 errorStopState = true;
             }
@@ -359,9 +373,9 @@ bool
 Mpio::_DoMemCpy(void* dst, void* src, size_t nbytes)
 {
     bool syncOp = true;
-    if (MetaFsSysHwMemLib::IsResourceAvailable())
+    if (MetaFsMemLib::IsResourceAvailable())
     {
-        MetaFsSysHwMemLib::MemCpyAsync(dst, src, nbytes, _HandleAsyncMemOpDone, this);
+        MetaFsMemLib::MemCpyAsync(dst, src, nbytes, _HandleAsyncMemOpDone, this);
         syncOp = false;
     }
     else
@@ -375,9 +389,9 @@ bool
 Mpio::_DoMemSetZero(void* addr, size_t nbytes)
 {
     bool syncOp = true;
-    if (MetaFsSysHwMemLib::IsResourceAvailable())
+    if (MetaFsMemLib::IsResourceAvailable())
     {
-        MetaFsSysHwMemLib::MemSetZero(addr, nbytes, _HandleAsyncMemOpDone, this);
+        MetaFsMemLib::MemSetZero(addr, nbytes, _HandleAsyncMemOpDone, this);
         syncOp = false;
     }
     else
@@ -393,3 +407,4 @@ Mpio::_HandleAsyncMemOpDone(void* obj)
     Mpio* mpio = reinterpret_cast<Mpio*>(obj);
     mpio->_HandlePartialDone();
 }
+} // namespace pos

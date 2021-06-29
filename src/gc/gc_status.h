@@ -39,7 +39,7 @@
 
 #include "src/lib/singleton.h"
 
-namespace ibofos
+namespace pos
 {
 class CopyInfo
 {
@@ -126,4 +126,4 @@ private:
     struct timeval endTime;
 };
 
-} // namespace ibofos
+} // namespace pos

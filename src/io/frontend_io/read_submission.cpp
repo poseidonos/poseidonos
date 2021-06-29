@@ -35,16 +35,17 @@
 #include "spdk/event.h"
 #include "src/array/array.h"
 #include "src/array/device/array_device.h"
-#include "src/device/ublock_device.h"
+#include "src/device/base/ublock_device.h"
 #include "src/dump/dump_module.h"
 #include "src/dump/dump_module.hpp"
-#include "src/include/ibof_event_id.hpp"
-#include "src/io/general_io/volume_io.h"
-#include "src/mapper/mapper.h"
-#include "src/scheduler/callback.h"
-#include "src/scheduler/event_argument.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/bio/volume_io.h"
+#include "src/event_scheduler/callback.h"
+#ifdef _ADMIN_ENABLED
+#include "src/admin/smart_log_mgr.h"
+#endif
 
-namespace ibofos
+namespace pos
 {
 static const char* DUMP_NAME = "ReadSubmission_Constructor_VolumeIo";
 static const bool DEFAULT_DUMP_ON = false;
@@ -53,25 +54,56 @@ DumpModule<VolumeIo> dumpReadVolumeIo(DUMP_NAME,
     DumpModule<VolumeIo>::MAX_ENTRIES_FOR_READHANDLER_CONSTRUCTOR_UBIO,
     DEFAULT_DUMP_ON);
 
-ReadSubmission::ReadSubmission(VolumeIoSmartPtr volumeIo)
+ReadSubmission::ReadSubmission(VolumeIoSmartPtr volumeIo, BlockAlignment* blockAlignment_, Merger* merger_, Translator* translator_)
 : Event(true),
-  blockAlignment(ChangeSectorToByte(volumeIo->GetRba()), volumeIo->GetSize()),
-  merger(volumeIo),
-  translator(volumeIo->GetVolumeId(), blockAlignment.GetHeadBlock(),
-      blockAlignment.GetBlockCount(), true),
+  blockAlignment(blockAlignment_),
+  merger(merger_),
+  translator(translator_),
   volumeIo(volumeIo)
 {
-    dumpReadVolumeIo.AddDump(*volumeIo, volumeIo->GetRba());
+    if (nullptr == blockAlignment)
+    {
+        blockAlignment = new BlockAlignment{ChangeSectorToByte(volumeIo->GetSectorRba()), volumeIo->GetSize()};
+    }
+    if (nullptr == merger)
+    {
+        merger = new Merger{volumeIo, &readCompletionFactory};
+    }
+    if (nullptr == translator)
+    {
+        translator = new Translator{volumeIo->GetVolumeId(), blockAlignment->GetHeadBlock(), blockAlignment->GetBlockCount(), volumeIo->GetArrayName(), true};
+    }
+    dumpReadVolumeIo.AddDump(*volumeIo, volumeIo->GetSectorRba());
 }
 
 ReadSubmission::~ReadSubmission()
 {
+    if (nullptr != blockAlignment)
+    {
+        delete blockAlignment;
+        blockAlignment = nullptr;
+    }
+    if (nullptr != merger)
+    {
+        delete merger;
+        merger = nullptr;
+    }
+    if (nullptr != translator)
+    {
+        delete translator;
+        translator = nullptr;
+    }
 }
 
 bool
 ReadSubmission::Execute(void)
 {
-    bool isInSingleBlock = (blockAlignment.GetBlockCount() == 1);
+#ifdef _ADMIN_ENABLED
+    uint32_t volId = volumeIo->GetVolumeId();
+    SmartLogMgrSingleton::Instance()->IncreaseReadCmds(volId);
+    SmartLogMgrSingleton::Instance()->IncreaseReadBytes(blockAlignment->GetBlockCount(), volId);
+#endif
+    bool isInSingleBlock = (blockAlignment->GetBlockCount() == 1);
     if (isInSingleBlock)
     {
         _PrepareSingleBlock();
@@ -90,12 +122,12 @@ ReadSubmission::Execute(void)
 void
 ReadSubmission::_PrepareSingleBlock(void)
 {
-    PhysicalBlkAddr pba = translator.GetPba();
-    pba.lba = blockAlignment.AlignHeadLba(0, pba.lba);
+    PhysicalBlkAddr pba = translator->GetPba();
+    pba.lba = blockAlignment->AlignHeadLba(0, pba.lba);
     volumeIo->SetPba(pba);
     StripeAddr lsidEntry;
     bool referenced;
-    std::tie(lsidEntry, referenced) = translator.GetLsidRefResult(0);
+    std::tie(lsidEntry, referenced) = translator->GetLsidRefResult(0);
     if (referenced)
     {
         CallbackSmartPtr callee(volumeIo->GetCallback());
@@ -110,31 +142,31 @@ ReadSubmission::_PrepareSingleBlock(void)
 void
 ReadSubmission::_PrepareMergedIo(void)
 {
-    uint32_t blockCount = blockAlignment.GetBlockCount();
+    uint32_t blockCount = blockAlignment->GetBlockCount();
 
     for (uint32_t blockIndex = 0; blockIndex < blockCount; blockIndex++)
     {
         _MergeBlock(blockIndex);
     }
 
-    merger.Cut();
+    merger->Cut();
 }
 
 void
 ReadSubmission::_MergeBlock(uint32_t blockIndex)
 {
-    PhysicalBlkAddr pba = translator.GetPba(blockIndex);
-    VirtualBlkAddr vsa = translator.GetVsa(blockIndex);
-    StripeAddr lsidEntry = translator.GetLsidEntry(blockIndex);
-    uint32_t dataSize = blockAlignment.GetDataSize(blockIndex);
-    pba.lba = blockAlignment.AlignHeadLba(blockIndex, pba.lba);
-    merger.Add(pba, vsa, lsidEntry, dataSize);
+    PhysicalBlkAddr pba = translator->GetPba(blockIndex);
+    VirtualBlkAddr vsa = translator->GetVsa(blockIndex);
+    StripeAddr lsidEntry = translator->GetLsidEntry(blockIndex);
+    uint32_t dataSize = blockAlignment->GetDataSize(blockIndex);
+    pba.lba = blockAlignment->AlignHeadLba(blockIndex, pba.lba);
+    merger->Add(pba, vsa, lsidEntry, dataSize);
 }
 
 void
 ReadSubmission::_ProcessMergedIo(void)
 {
-    uint32_t volumeIoCount = merger.GetSplitCount();
+    uint32_t volumeIoCount = merger->GetSplitCount();
     CallbackSmartPtr callback = volumeIo->GetCallback();
     callback->SetWaitingCount(volumeIoCount);
 
@@ -148,8 +180,8 @@ ReadSubmission::_ProcessMergedIo(void)
 void
 ReadSubmission::_ProcessVolumeIo(uint32_t volumeIoIndex)
 {
-    VolumeIoSmartPtr volumeIo = merger.GetSplit(volumeIoIndex);
+    VolumeIoSmartPtr volumeIo = merger->GetSplit(volumeIoIndex);
     _SendVolumeIo(volumeIo);
 }
 
-} // namespace ibofos
+} // namespace pos

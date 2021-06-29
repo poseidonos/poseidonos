@@ -38,49 +38,55 @@
 #include <string>
 #include <vector>
 
-#include "src/sys_event/volume_event.h"
+#include "allocator_context_flush_completed_event.h"
+#include "src/allocator/i_context_manager.h"
+#include "src/journal_service/i_volume_event.h"
 
-namespace ibofos
+namespace pos
 {
 class LogWriteContextFactory;
 class DirtyMapManager;
 class LogWriteHandler;
 class JournalConfiguration;
 
-class JournalVolumeEventHandler : public VolumeEvent
+class JournalVolumeEventHandler : public IVolumeEventHandler, public IAllocatorContextFlushed
 {
 public:
     JournalVolumeEventHandler(void);
     virtual ~JournalVolumeEventHandler(void);
 
-    void Init(LogWriteContextFactory* logFactory, DirtyMapManager* dirtyPages,
-        LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration);
+    virtual void Init(LogWriteContextFactory* logFactory, DirtyMapManager* dirtyPages,
+        LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration,
+        IContextManager* contextManager);
 
-    virtual bool VolumeCreated(std::string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw);
-    virtual bool VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw);
-    virtual bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte);
-    virtual bool VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw);
-    virtual bool VolumeUnmounted(std::string volName, int volID);
-    virtual bool VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw);
-    void VolumeDetached(vector<int> volList) override;
+    virtual int VolumeDeleted(int volID) override;
+    virtual void AllocatorContextFlushed(void) override;
 
-    void VolumeDeletedLogWriteDone(int volumeId);
+    virtual void VolumeDeletedLogWriteDone(int volumeId);
 
 private:
+    int _WriteVolumeDeletedLog(int volumeId, uint64_t segCtxVersion);
     void _WaitForLogWriteDone(int volumeId);
 
+    int _FlushAllocatorContext(void);
+    void _WaitForAllocatorContextFlushCompleted(void);
+
     bool isInitialized;
-    bool isJournalEnabled;
+
+    IContextManager* contextManager;
 
     JournalConfiguration* config;
     LogWriteContextFactory* logFactory;
     DirtyMapManager* dirtyPageManager;
     LogWriteHandler* logWriteHandler;
 
-    std::mutex mutex;
-    std::condition_variable cv;
+    std::mutex logWriteMutex;
+    std::condition_variable logWriteCondVar;
+    bool logWriteInProgress;
 
-    std::map<int, bool> volumeDeleteInProgress;
+    std::mutex flushMutex;
+    std::condition_variable flushCondVar;
+    bool flushInProgress;
 };
 
-} // namespace ibofos
+} // namespace pos

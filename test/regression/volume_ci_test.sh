@@ -8,12 +8,13 @@ source tc_lib_ci.sh
 ############################
 tc_vol_0()
 {
-    bringup_ibofos create
-
     tcName="tc_vol_0"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
     print_info "scenario: do nothing"
+
+    bringup_pos create
+    EXPECT_PASS "bringup_pos" $?
 
     end_tc "${tcName}"
     graceful_shutdown
@@ -25,12 +26,13 @@ tc_vol_0()
 ############################
 tc_vol_1()
 {
-    bringup_ibofos create
-
     tcName="tc_vol_1"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
     print_info "scenario: [create] vol1 -> [delete] vol1"
+
+    bringup_pos create
+    EXPECT_PASS "bringup_pos" $?
 
     create_and_check '1' 2147483648 0 0
     EXPECT_PASS "create_and_check" $?
@@ -48,12 +50,13 @@ tc_vol_1()
 ############################
 tc_vol_2()
 {
-    bringup_ibofos create
-
     tcName="tc_vol_2"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
     print_info "scenario: [create] vol1 -> [mount] vol1 -> [unmount] vol1 -> [delete] vol1"
+
+    bringup_pos create
+    EXPECT_PASS "bringup_pos" $?
 
     create_and_check '1' 2147483648 0 0
     EXPECT_PASS "create_and_check" $?
@@ -77,12 +80,13 @@ tc_vol_2()
 ############################
 tc_vol_3()
 {
-    bringup_ibofos create
-
     tcName="tc_vol_3"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
     print_info "scenario: [create] vol1 -> [mount] vol1 -> [io] vol1 -> NPOR -> [delete] vol1"
+
+    bringup_pos create
+    EXPECT_PASS "bringup_pos" $?
 
     create_and_check '1' 2147483648 0 0
     EXPECT_PASS "create_and_check" $?
@@ -109,12 +113,13 @@ tc_vol_3()
 ############################
 tc_vol_4()
 {
-    bringup_ibofos create
-
     tcName="tc_vol_4"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
     print_info "scenario: [create] vol1 -> [mount] vol1 -> [create] vol2 -> [mount] vol2 -> [unmount] vol2 -> [delete] vol2"
+
+    bringup_pos create
+    EXPECT_PASS "bringup_pos" $?
 
     create_and_check '1' 2147483648 0 0
     EXPECT_PASS "create_and_check" $?
@@ -144,12 +149,13 @@ tc_vol_4()
 ############################
 tc_vol_5()
 {
-    bringup_ibofos create
-
     tcName="tc_vol_5"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
     print_info "scenario: [create] vol1 -> [mount] vol1 -> [create] vol2 -> [delete] vol2 -> NPOR"
+
+    bringup_pos create
+    EXPECT_PASS "bringup_pos" $?
 
     create_and_check '1' 2147483648 0 0
     EXPECT_PASS "create_and_check" $?
@@ -176,12 +182,13 @@ tc_vol_5()
 ############################
 tc_vol_6()
 {
-    bringup_ibofos create
-
     tcName="tc_vol_6"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
     print_info "scenario: {[create/mount] vol1 & vol2  -> [unmount] vol1 & vol2 -> [delete] vol1 & vol2 } x 10"
+
+    bringup_pos create
+    EXPECT_PASS "bringup_pos" $?
 
     tcTestCount=10
     for fidx in `seq 1 ${tcTestCount}`
@@ -217,20 +224,20 @@ tc_vol_6()
     graceful_shutdown
 }
 
-
 ############################
 # tc_vol_7
 #  [create] vol1 & vol2  -> {[mount] vol1 & vol2 -> [unmount] vol1 & vol2 } x 10"
 ############################
 tc_vol_7()
 {
-    bringup_ibofos create
-
     tcName="tc_vol_7"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
     print_info "scenario: [create] vol1 & vol2  -> {[mount] vol1 & vol2 -> [unmount] vol1 & vol2 } x 10"
-    
+
+    bringup_pos create
+    EXPECT_PASS "bringup_pos" $?
+
     create_and_check '1' 2147483648 0 0
     EXPECT_PASS "create_and_check" $?
 
@@ -259,39 +266,64 @@ tc_vol_7()
     graceful_shutdown
 }
 
-
+############################
+# tc_vol_8
+# TC from SSIR
+# { [mount] poseidonos -> [create/mount/unmount] vol -> [delete] vol -> [unmount] poseidonos } x 10
+############################
 tc_vol_8()
 {
-    tcName="tc_vol8"
+    tcName="tc_vol_8"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
-    print_info "scenario: [mount] ibofos -> [create/mount/unmount] vol -> [delete] vol -> [unmount] ibofos } x 10"
-        
+    print_info "scenario: { [mount] poseidonos -> [create/mount/unmount] vol -> [delete] vol -> [unmount] poseidonos } x 10"
+
+    start_pos;
+    EXPECT_PASS "start_pos" $?
+
+    create_base;
+    EXPECT_PASS "create_base" $?
+
+    create_subsystem
+
     tcTestCount=10
     for fidx in `seq 1 ${tcTestCount}`
     do
-        print_notice "TC=${tcName} : All test count =  ${fidx}, total = ${tcTestCount}"    
+        print_notice "${tcName}: test count=${fidx}, total=${tcTestCount}"
 
-        bringup_ibofos create
+        create_array create
+        EXPECT_PASS "create_array" $?
 
-        create_and_check '01' 4194304 0 0
+        mount_array
+        EXPECT_PASS "mount_array" $?
+
+        create_volume 'vol1' 4194304 0 0
+        EXPECT_PASS "create_volume" $?
+
+        change_volume_name_and_check vol1 volx
+        EXPECT_PASS "change_volume_name_and_check" $?
+
+        change_volume_name_and_check volx vol1
+        EXPECT_PASS "change_volume_name_and_check" $?
+
+        mount_and_check '1' skip
         EXPECT_PASS "create_and_check" $?
 
-        texecc ./bin/cli request rename_vol --name vol01 --newname volxx
-        texecc ./bin/cli request rename_vol --name volxx --newname vol01
-        texecc ./bin/cli request list_vol
+        unmount_and_check '1'
+        EXPECT_PASS "unmount_and_check" $?
 
-        texecc ./bin/cli request mount_vol --name vol01
-        texecc ./bin/cli request unmount_vol --name vol01
-        
-        texecc ./bin/cli request delete_vol --name vol01
+        delete_and_check '1'
+        EXPECT_PASS "delete_and_check" $?
 
-        texecc ./bin/cli request unmount_ibofos
-        texecc ./bin/cli request delete_array
+        unmount_array
+        EXPECT_PASS "unmount_array" $?
+
+        delete_array
+        EXPECT_PASS "delete_array" $?
     done
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown skip
 }
 
 ############################
@@ -300,12 +332,13 @@ tc_vol_8()
 ############################
 tc_npor_0()
 {
-    bringup_ibofos create
-
     tcName="tc_npor_0"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
     print_info "scenario: vol1 -> [mount] vol1 -> [write] vol1 -> NPOR -> [mount] vol1 -> [verify] vol1"
+
+    bringup_pos create
+    EXPECT_PASS "bringup_pos" $?
 
     create_and_check '1' 2147483648 0 0
     EXPECT_PASS "create_and_check" $?
@@ -335,12 +368,13 @@ tc_npor_0()
 ############################
 tc_npor_1()
 {
-    bringup_ibofos create
-
     tcName="tc_npor_1"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
     print_info "scenario: [create] vol1 -> [mount] vol1 -> [create] vol2 -> [mount] vol2 -> [write] vol1 -> [write] vol2 -> NPOR -> [mount] vol1 -> [verify] vol1 -> [mount] vol2 -> [verify] vol2"
+
+    bringup_pos create
+    EXPECT_PASS "bringup_pos" $?
 
     create_and_check '1' 2147483648 0 0
     EXPECT_PASS "create_and_check" $?
@@ -385,12 +419,13 @@ tc_npor_1()
 ############################
 tc_npor_2()
 {
-    bringup_ibofos create
-
     tcName="tc_npor_2"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
     print_info "scenario: [create] vol1 -> [mount] vol1 -> [write] vol1 -> NPOR -> [mount] vol1 -> [verify] vol1 -> [unmount] vol1 -> [delete] vol1 -> NPOR"
+
+    bringup_pos create
+    EXPECT_PASS "bringup_pos" $?
 
     create_and_check '1' 2147483648 0 0
     EXPECT_PASS "create_and_check" $?
@@ -424,17 +459,118 @@ tc_npor_2()
 }
 
 ############################
+# tc_npor_3
+# { [create] vol1 -> ([mount] vol1 -> [write] vol1 -> [unmount] vol1 -> [NPOR] } x 50
+############################
+tc_npor_3()
+{
+    tcName="tc_npor_3"
+    show_tc_info "${tcName}"
+    start_tc "${tcName}"
+    print_info "scenario: { [create] vol1 -> ([mount] vol1 -> [write] vol1 -> [unmount] vol1 -> [NPOR] } x 50"
+
+    bringup_pos create
+    EXPECT_PASS "bringup" $?
+
+    create_and_check '1' 2147483648 0 0
+    EXPECT_PASS "create_and_check" $?
+
+    tcTestCount=50
+    for fidx in `seq 1 ${tcTestCount}`
+    do
+        print_notice "TC=${tcName} : All test count=${fidx}, total=${tcTestCount}"
+
+        mount_and_check '1'
+        EXPECT_PASS "mount_and_check" $?
+
+        write_data '1'
+        EXPECT_PASS "write_data" $?
+
+        unmount_and_check '1'
+        EXPECT_PASS "unmount_and_check" $?
+        
+        npor_and_check_volumes
+        EXPECT_PASS "npor_and_check_volumes" $?
+
+    done
+
+    end_tc "${tcName}"
+    graceful_shutdown
+}
+
+############################
+# tc_npor_4
+# complicated
+############################
+tc_npor_4()
+{
+    tcName="tc_npor_4"
+    show_tc_info "${tcName}"
+    start_tc "${tcName}"
+    print_info "scenario: complicated"
+
+    bringup_pos create
+    EXPECT_PASS "bringup" $?
+
+    create_and_check '1' 2147483648 0 0
+    EXPECT_PASS "create_and_check" $?
+
+    create_and_check '2' 2147483648 0 0
+    EXPECT_PASS "create_and_check" $?
+
+    delete_and_check '1'
+    EXPECT_PASS "delete_and_check" $?
+
+    npor_and_check_volumes
+    EXPECT_PASS "npor_and_check_volumes" $?
+
+    create_and_check '3' 2147483648 0 0
+    EXPECT_PASS "create_and_check" $?
+
+    delete_and_check '2'
+    EXPECT_PASS "delete_and_check" $?
+
+    delete_and_check '3'
+    EXPECT_PASS "delete_and_check" $?
+
+    npor_and_check_volumes
+    EXPECT_PASS "npor_and_check_volumes" $?
+
+    create_and_check '4' 2147483648 0 0
+    EXPECT_PASS "create_and_check" $?
+
+    create_and_check '5' 2147483648 0 0
+    EXPECT_PASS "create_and_check" $?
+
+    delete_and_check '4'
+    EXPECT_PASS "delete_and_check" $?
+
+    npor_and_check_volumes
+    EXPECT_PASS "npor_and_check_volumes" $?
+
+    create_and_check '6' 2147483648 0 0
+    EXPECT_PASS "create_and_check" $?
+
+    delete_and_check '6'
+    EXPECT_PASS "delete_and_check" $?
+
+    end_tc "${tcName}"
+    abrupt_shutdown
+}
+
+############################
 # tc_spor_0
 # [create] vol1 -> [mount] vol1 -> [write] vol1 -> SPOR -> [mount] vol1 -> [verify] vol1
 ############################
 tc_spor_0()
 {
-    bringup_ibofos create
-
     tcName="tc_spor_0"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
     print_info "[create] vol1 -> [mount] vol1 -> [write] vol1 -> SPOR -> [mount] vol1 -> [verify] vol1"
+
+    bringup_pos create
+    EXPECT_PASS "bringup_pos" $?
 
     create_and_check '1' 2147483648 0 0
     EXPECT_PASS "create_and_check" $?
@@ -464,12 +600,12 @@ tc_spor_0()
 ############################
 tc_inode_0()
 {
-    bringup_ibofos create
-    EXPECT_PASS "bringup" $?
-
     tcName="tc_inode_0"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
+
+    bringup_pos create
+    EXPECT_PASS "bringup" $?
 
     create_and_check '2' 2147483648 0 0
     EXPECT_PASS "create_and_check" $?
@@ -502,41 +638,6 @@ tc_inode_0()
     graceful_shutdown
 }
 
-tc_npor_3()
-{
-    bringup_ibofos create
-
-    tcName="tc_npor_3"
-    show_tc_info "${tcName}"
-    start_tc "${tcName}"
-    print_info "scenario: [create] vol1 -> ([mount] vol1 -> [write] vol1 -> [unmount] vol1 -> [NPOR]) x 50"
-
-    create_and_check '1' 2147483648 0 0
-    EXPECT_PASS "create_and_check" $?
-
-    tcTestCount=50
-   for fidx in `seq 1 ${tcTestCount}`
-    do           
-        print_notice "TC=${tcName} : All test count =  ${fidx}, total = ${tcTestCount}"    
-
-    mount_and_check '1'
-    EXPECT_PASS "mount_and_check" $?
-
-    write_data '1'
-    EXPECT_PASS "write_data" $?
-
-    unmount_and_check '1'
-    EXPECT_PASS "unmount_and_check" $?
-    
-    npor_and_check_volumes
-    EXPECT_PASS "npor_and_check_volumes" $?
-
-    done    
-
-    end_tc "${tcName}"
-    graceful_shutdown
-}
-
 ############################
 # tc array
 ############################
@@ -548,20 +649,19 @@ run()
     if [ $isVm == 0 ];
     then
         tc_array=(
-                c_vol_2 tc_vol_3 tc_vol_4
+                tc_vol_2 tc_vol_3 tc_vol_4
                 tc_vol_5 tc_vol_6 tc_vol_7 tc_vol_8
-                tc_npor_1 tc_npor_2
+                tc_npor_1 tc_npor_2 tc_npor_4
                 tc_inode_0
             )
     else
         tc_array=(
-            tc_vol_5 tc_vol_6 tc_vol_7 
-            tc_npor_2
-            tc_npor_3
-            tc_inode_0
-        )
+                tc_vol_5 tc_vol_6 tc_vol_7
+                tc_npor_2 tc_npor_3 tc_npor_4
+                tc_inode_0
+            )
     fi
-    
+
     tcTotalCount=${#tc_array[@]}
 
     ####################################

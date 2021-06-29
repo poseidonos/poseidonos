@@ -39,29 +39,45 @@
 #include "src/gc/copier_meta.h"
 #include "src/gc/victim_stripe.h"
 
-namespace ibofos
+namespace pos
 {
 class StripeCopier : public Event
 {
 public:
     StripeCopier(StripeId victimStripeId,
-        VictimStripe* victimStripe,
-        CopierMeta* meta);
+        CopierMeta* meta, uint32_t copyIndex);
     virtual ~StripeCopier(void);
     virtual bool Execute(void);
 
 private:
-    int _Copy(void* buffer,
-        LogicalBlkAddr lsa,
-        uint32_t listIndex);
+    class CopyEvent : public Event
+    {
+    public:
+        CopyEvent(void* buffer,
+            LogicalBlkAddr lsa,
+            uint32_t listIndex,
+            CopierMeta* meta,
+            uint32_t stripeId,
+            uint32_t copyIndex);
+        virtual ~CopyEvent(void);
+        virtual bool Execute(void);
+
+    private:
+        void* buffer;
+        LogicalBlkAddr lsa;
+        uint32_t listIndex;
+        CopierMeta* meta;
+        uint32_t stripeId;
+        uint32_t copyIndex;
+    };
 
     StripeId victimStripeId;
-
     CopierMeta* meta;
-    VictimStripe* victimStripe;
 
     bool loadedValidBlock;
     uint32_t listIndex;
+    uint32_t stripeOffset;
+    uint32_t copyIndex;
 };
 
-} // namespace ibofos
+} // namespace pos

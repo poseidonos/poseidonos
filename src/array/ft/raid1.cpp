@@ -36,15 +36,14 @@
 #include <cstring>
 #include <list>
 
-#include "../config/array_config.h"
-#include "../partition/partition_size_info.h"
-#include "src/array/ft/stripe_locker.h"
+#include "src/include/array_config.h"
+#include "src/array_models/dto/partition_physical_size.h"
 
-namespace ibofos
+namespace pos
 {
 Raid1::Raid1(const PartitionPhysicalSize* physicalSize)
 {
-    locker = new StripeLocker();
+    raidType = RaidTypeEnum::RAID1;
     mirrorDevCnt = physicalSize->chunksPerStripe / 2;
 
     ftSize_ = {
@@ -54,7 +53,7 @@ Raid1::Raid1(const PartitionPhysicalSize* physicalSize)
         .blksPerStripe =
             physicalSize->chunksPerStripe * physicalSize->blksPerChunk,
         .chunksPerStripe = physicalSize->chunksPerStripe};
-    _BindRebuildFunc();
+    _BindRecoverFunc();
 }
 
 int
@@ -63,22 +62,6 @@ Raid1::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
     dst = {.stripeId = src.stripeId,
         .offset = src.offset};
     return 0;
-}
-
-LogicalBlkAddr
-Raid1::_Translate(const FtBlkAddr& fsa)
-{
-    LogicalBlkAddr lsa = {.stripeId = fsa.stripeId,
-        .offset = fsa.offset};
-    if (lsa.offset >= ftSize_.backupBlkCnt)
-    {
-        assert(0);
-        // TODO Error
-    }
-
-    _BindRebuildFunc();
-
-    return lsa;
 }
 
 int
@@ -113,18 +96,10 @@ Raid1::GetRebuildGroup(FtBlkAddr fba)
 }
 
 void
-Raid1::_BindRebuildFunc(void)
+Raid1::_BindRecoverFunc(void)
 {
     using namespace std::placeholders;
-    rebuildFunc_ = bind(&Raid1::_RebuildData, this, _1, _2, _3);
-}
-
-RebuildBehavior*
-Raid1::GetRebuildBehavior()
-{
-    unique_ptr<RebuildContext> ctx(new RebuildContext());
-    ctx->locker = locker;
-    return new Raid1Rebuild(move(ctx));
+    recoverFunc_ = bind(&Raid1::_RebuildData, this, _1, _2, _3);
 }
 
 void
@@ -148,8 +123,6 @@ Raid1::_GetMirrorIndex(uint32_t idx)
 
 Raid1::~Raid1()
 {
-    delete locker;
-    locker = nullptr;
 }
 
-} // namespace ibofos
+} // namespace pos

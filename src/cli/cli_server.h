@@ -35,7 +35,7 @@
 #include "cli_event_code.h"
 using namespace std;
 
-namespace ibofos_cli
+namespace pos_cli
 {
 #define SERV_PORT 18716
 #define MAX_THREAD_CNT 10
@@ -53,7 +53,7 @@ typedef struct
     int sockfd;
     int used;
     int state;
-    char recv_buff[MAX_BUFF_SZ];
+    char recv_buff[MAX_BUFF_SZ + 1];
     bool work;
 #ifdef SSL_ON
     void* ssl;
@@ -63,4 +63,4 @@ typedef struct
 void CLIServerMain();
 void Wait();
 void Exit();
-}; // namespace ibofos_cli
+}; // namespace pos_cli

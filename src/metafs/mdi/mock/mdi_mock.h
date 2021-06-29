@@ -35,16 +35,23 @@
 //
 #pragma once
 
-#include "mfs_mdi_top.h"
+#include "metafs_manager_base.h"
 
-class MockMetaDIMgrClass : public MetaFsMDITopMgrClass
+namespace pos
+{
+class MockMetaIntegrityManager : public MetaFsManagerBase
 {
 public:
-    MockMetaDIMgrClass(void);
+    MockMetaIntegrityManager(void);
 
-    static MockMetaDIMgrClass* GetInstance(void);
+    static MockMetaIntegrityManager* GetInstance(void);
+    const char* GetModuleName(void);
+
+protected:
+    virtual bool _IsSiblingModuleReady(void) override;
 
 private:
 };
 
-extern MockMetaDIMgrClass metaDIMgr;
+extern MockMetaIntegrityManager metaDIMgr;
+} // namespace pos

@@ -34,7 +34,7 @@
 
 #include <string>
 
-namespace ibofos
+namespace pos
 {
 DumpManager::DumpManager()
 {
@@ -62,4 +62,4 @@ DumpManager::SetEnableModuleByCLI(string moduleName, bool enable)
     return 0;
 }
 
-} // namespace ibofos
+} // namespace pos

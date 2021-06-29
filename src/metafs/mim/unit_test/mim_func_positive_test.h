@@ -35,9 +35,12 @@
 
 #include "mim_base_test.h"
 
+namespace pos
+{
 class UtMIMFunctionalPositive : public UtMIMBasic
 {
 public:
 };
+} // namespace pos
 
 #endif // __UT_MIM_FUNC_POSITIVE_H__

@@ -34,7 +34,7 @@
 
 #include "src/include/memory.h"
 
-namespace ibofos
+namespace pos
 {
 /*
   * Make this 128 when using disks which have MDTS = 5
@@ -49,4 +49,4 @@ const uint64_t SEGMENT_SIZE = STRIPE_CHUNK_SIZE * 1024 * 1024; /*256MB*/
 const uint32_t STRIPES_PER_SEGMENT = SEGMENT_SIZE / CHUNK_SIZE;
 const uint64_t INVALID_RBA = UINT64_MAX;
 
-} // namespace ibofos
+} // namespace pos

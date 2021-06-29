@@ -32,9 +32,9 @@
 
 #include "deduplicator.h"
 
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 
-namespace ibofos_logger
+namespace pos_logger
 {
 bool
 Deduplicator::_CheckDuplication(int id, string msg, chrono::system_clock::time_point now)
@@ -62,4 +62,4 @@ Deduplicator::IsDuplicated(int id, string msg)
 
     return ret;
 }
-} // namespace ibofos_logger
+} // namespace pos_logger

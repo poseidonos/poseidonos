@@ -33,23 +33,39 @@
 #pragma once
 
 #include "src/io/general_io/io_controller.h"
-#include "src/scheduler/callback.h"
+#include "src/event_scheduler/callback.h"
 
-namespace ibofos
+namespace pos
 {
+class IWBStripeAllocator;
+class Translator;
 class ReadCompletionForPartialWrite : public Callback, public IOController
 {
 public:
-    ReadCompletionForPartialWrite(VolumeIoSmartPtr volumeIo);
+    ReadCompletionForPartialWrite(VolumeIoSmartPtr volumeIo,
+            uint32_t alignmentSize, uint32_t alignmentOffset,
+            IWBStripeAllocator* iWBStripeAllocator = nullptr, bool tested = false);
     ~ReadCompletionForPartialWrite(void) override;
+    static void HandleCopyDone(void* argument);
 
 private:
     bool _DoSpecificJob(void) override;
     void _Copy(VolumeIoSmartPtr srcVolumeIo, uint64_t srcOffset,
-        VolumeIoSmartPtr dstVolumeIo, uint64_t dsdtOffset, uint64_t size);
-    static void _HandleCopyDone(void* argument);
+        VolumeIoSmartPtr dstVolumeIo, uint64_t dstOffset, uint64_t size);
 
     VolumeIoSmartPtr volumeIo;
+    uint32_t alignmentSize;
+    uint32_t alignmentOffset;
+    IWBStripeAllocator* iWBStripeAllocator;
+    bool tested;
 };
 
-} // namespace ibofos
+struct CopyParameter
+{
+    CopyParameter(VolumeIoSmartPtr volumeIo, Translator* translator, bool tested = false);
+    VolumeIoSmartPtr volumeIo;
+    Translator* translator;
+    bool tested;
+};
+
+} // namespace pos

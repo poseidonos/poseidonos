@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(i_array_mgmt_ut i_array_mgmt_test.cpp)

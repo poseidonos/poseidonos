@@ -38,22 +38,27 @@
 using ::testing::_;
 using ::testing::Invoke;
 
+namespace pos
+{
 class MockDeviceDriver : public DeviceDriver
 {
     MockDeviceDriver(void)
     {
         deviceDriver = DeviceDriver::Instance();
     }
-    MOCK_METHOD1(AsyncIO, int(fluidos::Ubio*));
+    MOCK_METHOD1(AsyncIO, int(pos::Ubio*));
 
     void
     DelegateToFake(void)
     {
-        ON_CALL(*this, AsyncIO(_))
-            .WillByDefault(Invoke(deviceDriver, &DeviceDriver::SubmitAsyncIO));
+        /*ON_CALL(*this, AsyncIO(_))
+            .WillByDefault(Invoke(deviceDriver, &DeviceDriver::SubmitAsyncIO));*/
+            // It seems to be deprecated. Commenting out for now. (by yyu)
     }
 
 private:
     DeviceDriver* deviceDriver;
 };
+} // namespace pos
+
 #endif // _INCLUDE_MOCK_DRIVER_H

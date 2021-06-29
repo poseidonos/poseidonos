@@ -32,10 +32,12 @@
 
 #include "mss_disk_handler.h"
 
-#include "mss_on_disk.h"
+#include "src/metafs/storage/pstore/mss_on_disk.h"
 
 #ifdef LEGACY_IOPATH
 
+namespace pos
+{
 MssCompleteHandler::MssCompleteHandler(UbioSmartPtr input)
 : ubio(input)
 {
@@ -69,4 +71,6 @@ MssCompleteHandler::Execute(void)
     ubio = nullptr;
     return true;
 }
+} // namespace pos
+
 #endif // #ifdef LEGACY_IOPATH

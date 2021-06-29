@@ -32,6 +32,45 @@
 
 #include "json_helper.h"
 
+static void
+JsonFormatSubStringAddTab(JsonFormatType type, string& subString)
+{
+    if (JsonFormatType::JSON_FORMAT_TYPE_READABLE == type)
+    {
+        uint32_t pos = 0;
+        string newLine = "\n";
+        string tap = "    ";
+        while (subString.find(newLine, pos) != string::npos)
+        {
+            uint32_t newLinePos = subString.find(newLine, pos);
+            pos = newLinePos + 1;
+            subString.insert(pos, tap);
+        }
+    }
+};
+
+static void
+JsonFormatAddNewLine(JsonFormatType type, string& subString)
+{
+    string newLine = "\n";
+    if (JsonFormatType::JSON_FORMAT_TYPE_READABLE == type)
+    {
+        subString += newLine;
+    }
+};
+
+static void
+JsonFormatAddNewLineAndTab(JsonFormatType type, string& subString)
+{
+    string newLine = "\n";
+    string tap = "    ";
+    if (JsonFormatType::JSON_FORMAT_TYPE_READABLE == type)
+    {
+        subString += newLine;
+        subString += tap;
+    }
+};
+
 string
 JsonAttribute::ToJson()
 {
@@ -39,31 +78,44 @@ JsonAttribute::ToJson()
 }
 
 string
-JsonArray::ToJson()
+JsonArray::ToJson(JsonFormatType type)
 {
     string jsonstr = "\"" + name + "\"" + ":";
     jsonstr += "[";
+    JsonFormatAddNewLineAndTab(type, jsonstr);
+
     for (vector<JsonElement>::iterator it = item.begin();
          it != item.end();
          it++)
     {
-        jsonstr += it->ToJson();
+        string subElem = it->ToJson(type);
+        JsonFormatSubStringAddTab(type, subElem);
+
+        jsonstr += subElem;
+
         if (std::next(it) != item.end())
+        {
             jsonstr += ",";
+            JsonFormatAddNewLineAndTab(type, jsonstr);
+        }
     }
+
+    JsonFormatAddNewLine(type, jsonstr);
     jsonstr += "]";
     return jsonstr;
 }
 
 string
-JsonElement::ToJson()
+JsonElement::ToJson(JsonFormatType type)
 {
     string jsonstr = "";
+
     if (name.empty() == false)
     {
         jsonstr = "\"" + name + "\"" + ":";
     }
     jsonstr += "{";
+    JsonFormatAddNewLineAndTab(type, jsonstr);
 
     bool addComma = false;
     // ToJson for attributes
@@ -75,6 +127,7 @@ JsonElement::ToJson()
         if (std::next(it) != attributes.end())
         {
             jsonstr += ",";
+            JsonFormatAddNewLineAndTab(type, jsonstr);
         }
         addComma = true;
     }
@@ -82,6 +135,7 @@ JsonElement::ToJson()
     if (array.size() > 0 && addComma == true)
     {
         jsonstr += ",";
+        JsonFormatAddNewLineAndTab(type, jsonstr);
         addComma = false;
     }
 
@@ -89,10 +143,14 @@ JsonElement::ToJson()
          it != array.end();
          ++it)
     {
-        jsonstr += it->ToJson();
+        string subElem = it->ToJson(type);
+        JsonFormatSubStringAddTab(type, subElem);
+        jsonstr += subElem;
+
         if (std::next(it) != array.end())
         {
             jsonstr += ",";
+            JsonFormatAddNewLineAndTab(type, jsonstr);
         }
 
         addComma = true;
@@ -101,6 +159,7 @@ JsonElement::ToJson()
     if (elements.size() > 0 && addComma == true)
     {
         jsonstr += ",";
+        JsonFormatAddNewLineAndTab(type, jsonstr);
         addComma = false;
     }
 
@@ -109,11 +168,18 @@ JsonElement::ToJson()
          it != elements.end();
          it++)
     {
-        jsonstr += it->ToJson();
+        string subElem = it->ToJson(type);
+        JsonFormatSubStringAddTab(type, subElem);
+
+        jsonstr += subElem;
         if (std::next(it) != elements.end())
+        {
             jsonstr += ",";
+            JsonFormatAddNewLineAndTab(type, jsonstr);
+        }
     }
 
+    JsonFormatAddNewLine(type, jsonstr);
     jsonstr += "}";
     return jsonstr;
 }
@@ -132,7 +198,7 @@ JsonFormat::MakeResponse(
     result.SetElement(status);
     root.SetElement(result);
     root.SetElement(info);
-    return root.ToJson();
+    return root.ToJson(JSON_FORMAT_TYPE_DEFAULT);
 }
 
 // For WBT
@@ -159,7 +225,7 @@ JsonFormat::MakeResponse(
     root.SetElement(result);
     root.SetElement(info);
 
-    return root.ToJson();
+    return root.ToJson(JSON_FORMAT_TYPE_DEFAULT);
 }
 
 string
@@ -178,5 +244,5 @@ JsonFormat::MakeResponse(
     result.SetElement(dataElem);
     root.SetElement(result);
     root.SetElement(info);
-    return root.ToJson();
+    return root.ToJson(JSON_FORMAT_TYPE_DEFAULT);
 }

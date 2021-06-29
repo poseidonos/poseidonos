@@ -70,7 +70,7 @@ def check_module_number_and_change_script():
     for line in f:
         if ("ReplaceThisStatement" in line):
             for index in range(0, max_count):
-                f_write.write("p (ibofos::debugInfo->logger->dumpModule[%d]->dumpQueue)\n" % (index))
+                f_write.write("p (pos::debugInfo->logger->dumpModule[%d]->dumpQueue)\n" % (index))
         else:
             f_write.write(line)
 

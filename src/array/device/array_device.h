@@ -34,44 +34,29 @@
 #define ARRAY_DEVICE_H_
 
 #include <atomic>
-#include <thread>
-#include <tuple>
+#include "src/include/i_array_device.h"
 
-namespace ibofos
+namespace pos
 {
-class UBlockDevice;
-
-enum class ArrayDeviceState
-{
-    NORMAL = 0,
-    FAULT,
-    REBUILD,
-};
-
-class ArrayDevice
+class ArrayDevice : public IArrayDevice
 {
 public:
-    ArrayDevice(UBlockDevice* uBlock,
+    ArrayDevice(UblockSharedPtr uBlock,
         ArrayDeviceState state = ArrayDeviceState::NORMAL);
-    ~ArrayDevice(void);
-    void SetState(ArrayDeviceState state);
-    ArrayDeviceState GetState(void);
+    ~ArrayDevice(void) override;
 
-    std::tuple<bool, ArrayDeviceState> GetStatusAndAddPendingIo(bool isWrite);
-    void RemovePendingIo(void);
-    bool TryRemoveUblock(void);
+    ArrayDeviceState GetState(void) override;
+    void SetState(ArrayDeviceState state) override;
 
-    UBlockDevice* uBlock;
+    UblockSharedPtr GetUblock(void) override;
+    UBlockDevice* GetUblockPtr(void) override;
+    void SetUblock(UblockSharedPtr uBlock) override;
 
 private:
-    bool _IsPendingIoZero(void);
-
-    std::atomic<uint32_t> pendingIo;
-
-    pthread_rwlock_t stateLock;
+    UblockSharedPtr uBlock;
     ArrayDeviceState state;
 };
 
-} // namespace ibofos
+} // namespace pos
 
 #endif // ARRAY_DEVICE_H_

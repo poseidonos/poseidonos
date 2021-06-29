@@ -38,7 +38,7 @@
 
 #include "device_manager.h"
 
-namespace ibofos
+namespace pos
 {
 using ::testing::_;
 using ::testing::Return;
@@ -47,13 +47,13 @@ class MockDeviceManager : public DeviceManager
 {
 public:
     MOCK_METHOD(void, ScanDevs, ());
-    MOCK_METHOD(UBlockDevice*, GetDev, (DevName));
-    MOCK_METHOD(UBlockDevice*, GetDev, (DevUid));
-    MOCK_METHOD(vector<UBlockDevice*>, GetDevs, ());
+    MOCK_METHOD(UblockSharedPtr, GetDev, (DevName));
+    MOCK_METHOD(UblockSharedPtr, GetDev, (DevUid));
+    MOCK_METHOD(vector<UblockSharedPtr>, GetDevs, ());
     MOCK_METHOD(vector<DeviceProperty>, ListDevs, ());
-    MOCK_METHOD(void, AttachDevice, (UBlockDevice*));
+    MOCK_METHOD(void, AttachDevice, (UblockSharedPtr));
     MOCK_METHOD(void, DetachDevice, (string));
-    MOCK_METHOD(int, RemoveDevice, (UBlockDevice*));
+    MOCK_METHOD(int, RemoveDevice, (UblockSharedPtr));
     MOCK_METHOD(void, OpenAllDevices, ());
     MOCK_METHOD(void, RegisterToAllDevices, ());
     MOCK_METHOD(void, HandleCompletedCommand, ());
@@ -62,5 +62,5 @@ public:
     MOCK_METHOD(void, StopMonitoring, ());
 };
 
-} // namespace ibofos
+} // namespace pos
 #endif // MOCK_DEVICE_MANAGER_H_

@@ -33,15 +33,17 @@
 #pragma once
 
 #include "meta_file_util.h"
-#include "meta_region_template.h"
-#include "vol_meta_region_type.h"
+#include "meta_region.h"
+#include "meta_region_type.h"
 
+namespace pos
+{
 template<typename VolMetaRegionT, typename MetaContentT>
 class OnVolumeMetaRegion : public MetaRegion<VolMetaRegionT, MetaContentT>
 {
 public:
     explicit OnVolumeMetaRegion(MetaVolumeType volumeType, VolMetaRegionT regionType, MetaLpnType baseLpn, uint32_t mirrorCnt = 0)
-    : MetaRegion<VolMetaRegionT, MetaContentT>(MetaFsUtilLib::ConvertToMediaType(volumeType), regionType, baseLpn, mirrorCnt)
+    : MetaRegion<VolMetaRegionT, MetaContentT>(MetaFileUtil::ConvertToMediaType(volumeType), regionType, baseLpn, mirrorCnt)
     {
     }
     virtual ~OnVolumeMetaRegion(void)
@@ -50,3 +52,4 @@ public:
 
 private:
 };
+} // namespace pos

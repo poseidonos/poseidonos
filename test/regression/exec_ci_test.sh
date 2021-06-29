@@ -1,8 +1,8 @@
 #!/bin/bash
 test_dir=$(readlink -f $(dirname $0))
 ibof_root="/home/ibof/ibofos"
-ibof_bin="/etc/ibofos/bin"
-ibof_conf="/etc/ibofos/conf"
+ibof_bin="/etc/pos/bin"
+ibof_conf="/etc/pos"
 target_ip=127.0.0.1
 target_type="VM"
 config_option=0
@@ -31,7 +31,7 @@ printVariable()
     echo "Target IP : $target_ip"
     echo "Transport Type : $trtype"
     echo "Port Number : $port"
-    echo "iBoFOS Root : $ibof_root"
+    echo "PoseidonOS Root : $ibof_root"
     echo "Target Type : $target_type"
     echo "Config Option : $config_option"
     echo "Test Revision : $test_rev"

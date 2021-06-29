@@ -33,96 +33,264 @@
 #include "src/gc/copier_meta.h"
 
 #include "src/include/meta_const.h"
+#include "src/logger/logger.h"
 
-namespace ibofos
+#include <string>
+
+namespace pos
 {
-CopierMeta::CopierMeta(uint64_t maxBufferCount, uint32_t bufferSize)
+
+CopierMeta::CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize,
+                       BitMapMutex* inUseBitmap_, GcStripeManager* gcStripeManager_,
+                       std::vector<std::vector<VictimStripe*>>* victimStripes_,
+                       std::vector<FreeBufferPool*>* gcBufferPool_)
+: inUseBitmap(inUseBitmap_),
+  gcStripeManager(gcStripeManager_),
+  victimStripes(victimStripes_),
+  gcBufferPool(gcBufferPool_)
 {
+    if (nullptr == udSize)
+    {
+        arrayName = array->GetName();
+        udSize = array->GetSizeInfo(PartitionType::USER_DATA);
+    }
+    stripesPerSegment = udSize->stripesPerSegment;
+    blksPerStripe = udSize->blksPerStripe;
+
     InitProgressCount();
-    _CreateBufferPool(maxBufferCount, bufferSize);
+
+    if (nullptr == inUseBitmap)
+    {
+        inUseBitmap = new BitMapMutex(GC_VICTIM_SEGMENT_COUNT);
+    }
+    if (nullptr == gcStripeManager)
+    {
+        gcStripeManager = new GcStripeManager(array);
+    }
+    if (nullptr == victimStripes)
+    {
+        _CreateVictimStripes(array);
+    }
+    if (nullptr == gcBufferPool)
+    {
+        _CreateBufferPool(udSize->chunksPerStripe, CHUNK_SIZE);
+    }
 }
+
 
 CopierMeta::~CopierMeta(void)
 {
     for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
     {
-        delete gcBufferPool[index];
+        if (nullptr != (*gcBufferPool)[index])
+        {
+            delete (*gcBufferPool)[index];
+        }
+    }
+    delete gcBufferPool;
+
+    for (uint32_t stripeIndex = 0; stripeIndex < GC_VICTIM_SEGMENT_COUNT; stripeIndex++)
+    {
+        for (uint32_t i = 0 ; i < stripesPerSegment; i++)
+        {
+            if (nullptr != (*victimStripes)[stripeIndex][i])
+            {
+                delete (*victimStripes)[stripeIndex][i];
+            }
+        }
+    }
+    delete victimStripes;
+
+    if (nullptr != gcStripeManager)
+    {
+        delete gcStripeManager;
+    }
+    if (nullptr != inUseBitmap)
+    {
+        delete inUseBitmap;
     }
 }
 
 void*
 CopierMeta::GetBuffer(StripeId stripeId)
 {
-    return gcBufferPool[stripeId % GC_BUFFER_COUNT]->GetBuffer();
+    return (*gcBufferPool)[stripeId % GC_BUFFER_COUNT]->GetBuffer();
 }
 
 void
 CopierMeta::ReturnBuffer(StripeId stripeId, void* buffer)
 {
-    gcBufferPool[stripeId % GC_BUFFER_COUNT]->ReturnBuffer(buffer);
+    (*gcBufferPool)[stripeId % GC_BUFFER_COUNT]->ReturnBuffer(buffer);
 }
 
 void
 CopierMeta::SetStartCopyStripes(void)
 {
-    requestCopyStripes++;
+    requestStripeCount++;
 }
 
 void
 CopierMeta::SetStartCopyBlks(uint32_t blocks)
 {
-    startCount.fetch_add(blocks);
+    requestBlockCount.fetch_add(blocks);
 }
 
 void
 CopierMeta::SetDoneCopyBlks(uint32_t blocks)
 {
-    doneCount.fetch_add(blocks);
+    doneBlockCount.fetch_add(blocks);
 }
 
 uint32_t
 CopierMeta::GetStartCopyBlks(void)
 {
-    return startCount;
+    return requestBlockCount;
 }
 
 uint32_t
 CopierMeta::GetDoneCopyBlks(void)
 {
-    return doneCount;
+    return doneBlockCount;
 }
 
 void
 CopierMeta::InitProgressCount(void)
 {
-    requestCopyStripes = 0;
-    startCount = 0;
-    doneCount = 0;
+    requestStripeCount = 0;
+    requestBlockCount = 0;
+    doneBlockCount = 0;
+}
+
+uint32_t
+CopierMeta::SetInUseBitmap(void)
+{
+    inUseBitmap->SetBit((uint64_t)victimSegmentIndex);
+    uint32_t retVal = victimSegmentIndex;
+    victimSegmentIndex++;
+    victimSegmentIndex = victimSegmentIndex % GC_VICTIM_SEGMENT_COUNT;
+
+    return retVal;
 }
 
 bool
-CopierMeta::IsSync(void)
+CopierMeta::IsSynchronized(void)
 {
-    if (STRIPES_PER_SEGMENT != requestCopyStripes)
-    {
-        return false;
-    }
+    bool ret = inUseBitmap->IsSetBit((uint64_t)victimSegmentIndex);
 
-    if (startCount != doneCount)
-    {
-        return false;
-    }
+    return !ret;
+}
 
+bool
+CopierMeta::IsAllVictimSegmentCopyDone(void)
+{
+    bool ret = false;
+    for (uint32_t index = 0; index < GC_VICTIM_SEGMENT_COUNT; index++)
+    {
+        ret = inUseBitmap->IsSetBit((uint64_t)index);
+        if (ret == true)
+        {
+            IsCopyDone();
+            return false;
+        }
+    }
     return true;
+}
+
+bool
+CopierMeta::IsCopyDone(void)
+{
+    if (STRIPES_PER_SEGMENT != requestStripeCount)
+    {
+        return false;
+    }
+
+    if (requestBlockCount != doneBlockCount)
+    {
+        return false;
+    }
+    InitProgressCount();
+
+    bool ret = inUseBitmap->IsSetBit((uint64_t)copyIndex);
+    if (ret == true)
+    {
+        inUseBitmap->ClearBit(copyIndex);
+    }
+    else
+    {
+        assert(false);
+    }
+    copyIndex++;
+    copyIndex = copyIndex % GC_VICTIM_SEGMENT_COUNT;
+
+    copyLock.clear();
+    return true;
+}
+
+bool
+CopierMeta::IsReadytoCopy(uint32_t index)
+{
+    if (index == copyIndex)
+    {
+        if (copyLock.test_and_set() == false)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+uint32_t
+CopierMeta::GetStripePerSegment(void)
+{
+    return stripesPerSegment;
+}
+
+uint32_t
+CopierMeta::GetBlksPerStripe(void)
+{
+    return blksPerStripe;
+}
+
+VictimStripe*
+CopierMeta::GetVictimStripe(uint32_t victimSegmentIndex, uint32_t stripeOffset)
+{
+    return (*victimStripes)[victimSegmentIndex][stripeOffset];
+}
+
+GcStripeManager*
+CopierMeta::GetGcStripeManager(void)
+{
+    return gcStripeManager;
 }
 
 void
 CopierMeta::_CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize)
 {
+    gcBufferPool = new std::vector<FreeBufferPool*>;
     for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
     {
-        gcBufferPool[index] = new FreeBufferPool(maxBufferCount, bufferSize);
+        gcBufferPool->push_back(new FreeBufferPool(maxBufferCount, bufferSize));
     }
 }
 
-} // namespace ibofos
+void
+CopierMeta::_CreateVictimStripes(IArrayInfo* array)
+{
+    victimStripes = new std::vector<std::vector<VictimStripe*>>;
+    victimStripes->resize(GC_VICTIM_SEGMENT_COUNT);
+    for (uint32_t stripeIndex = 0; stripeIndex < GC_VICTIM_SEGMENT_COUNT; stripeIndex++)
+    {
+        for (uint32_t i = 0 ; i < stripesPerSegment; i++)
+        {
+            (*victimStripes)[stripeIndex].push_back(new VictimStripe(array));
+        }
+    }
+}
+
+std::string
+CopierMeta::GetArrayName(void)
+{
+    return arrayName;
+}
+
+} // namespace pos

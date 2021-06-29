@@ -47,7 +47,7 @@ Port : 18716
 func init() {
 
 	if Mode == "debug" {
-		rootCmd.AddCommand(daemonCmd)
+		RootCmd.AddCommand(daemonCmd)
 	}
 }
 

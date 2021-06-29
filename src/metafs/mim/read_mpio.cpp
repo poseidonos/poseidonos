@@ -31,10 +31,11 @@
  */
 
 #include "read_mpio.h"
-
 #include "mfs_asynccb_cxt_template.h"
 #include "os_header.h"
 
+namespace pos
+{
 ReadMpio::ReadMpio(void* mdPageBuf)
 : Mpio(mdPageBuf)
 {
@@ -95,10 +96,14 @@ ReadMpio::_CompleteIO(MpAioState expNextState)
 {
     bool contd2NextRun = _CopyToUserBuf();
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Mpio][RdMpioDone ] ReadMpio Complete...req.tagId={}, mpio_id={}", io.tagId, io.mpioId);
 
     SetNextState(expNextState);
+
+    mssIntf = nullptr;
+    aioModeEnabled = false;
+
     return contd2NextRun;
 }
 
@@ -110,7 +115,7 @@ ReadMpio::_CopyToUserBuf(void)
     uint32_t byteOffset = io.startByteOffset;
     uint32_t byteSize = io.byteSize;
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Mpio][CopyDat2Buf] Copy R data to user buf req.tagId={}, mpio_id={}, offsetInChunk={}, size={}",
         io.tagId, io.mpioId, byteOffset, byteSize);
 
@@ -118,3 +123,4 @@ ReadMpio::_CopyToUserBuf(void)
 
     return syncDone;
 }
+} // namespace pos

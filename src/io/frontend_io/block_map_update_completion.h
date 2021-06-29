@@ -32,26 +32,48 @@
 
 #pragma once
 
-#include "src/io/general_io/volume_io.h"
-#include "src/scheduler/event.h"
+#include <functional>
 
-namespace ibofos
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/bio/volume_io.h"
+#include "src/event_scheduler/event.h"
+#include "src/io/general_io/vsa_range_maker.h"
+
+namespace pos
 {
 class VolumeIo;
-class Mapper;
+class IVSAMap;
+class EventScheduler;
+class WriteCompletion;
+class IBlockAllocator;
 
 class BlockMapUpdateCompletion : public Event
 {
 public:
     BlockMapUpdateCompletion(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback);
+    BlockMapUpdateCompletion(VolumeIoSmartPtr input, CallbackSmartPtr originCallback,
+        function<bool(void)> IsReactorNow,
+        IVSAMap* iVSAMap, EventScheduler* eventScheduler,
+        CallbackSmartPtr writeCompletionEvent,
+        IBlockAllocator* iBlockAllocator,
+        IWBStripeAllocator* iWBStripeAllocator,
+        VsaRangeMaker* VsaRangeMaker);
     virtual ~BlockMapUpdateCompletion(void);
 
     virtual bool Execute(void) override;
 
 private:
+    Stripe& _GetStripe(StripeAddr& lsidEntry);
+    virtual void _UpdateReverseMap(Stripe& stripe);
+
     VolumeIoSmartPtr volumeIo;
-    Mapper* mapper;
     CallbackSmartPtr originCallback;
+    IVSAMap* iVSAMap;
+    EventScheduler* eventScheduler;
+    CallbackSmartPtr writeCompletionEvent;
+    IBlockAllocator* iBlockAllocator;
+    IWBStripeAllocator* iWBStripeAllocator;
+    VsaRangeMaker* vsaRangeMaker;
 };
 
-} // namespace ibofos
+} // namespace pos

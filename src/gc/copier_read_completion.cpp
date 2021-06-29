@@ -33,13 +33,22 @@
 #include "src/gc/copier_read_completion.h"
 
 #include "Air.h"
-#include "src/gc/copier_write_completion.h"
+#include "src/include/backend_event.h"
+#include "src/gc/gc_flush_submission.h"
 #include "src/io/frontend_io/write_submission.h"
-#include "src/io/general_io/volume_io.h"
+#include "src/include/branch_prediction.h"
+#include "src/bio/volume_io.h"
 #include "src/logger/logger.h"
-#include "src/scheduler/event_argument.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/io/general_io/translator.h"
+#include "src/io/backend_io/flush_submission.h"
+#include "src/gc/gc_flush_submission.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/allocator/i_block_allocator.h"
+#include "src/volume/volume_service.h"
 
-namespace ibofos
+namespace pos
 {
 CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe,
     uint32_t listIndex,
@@ -51,8 +60,11 @@ CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe,
   listIndex(listIndex),
   buffer(buffer),
   meta(meta),
-  stripeId(stripeId)
+  stripeId(stripeId),
+  allocatedCnt(0)
 {
+    list<BlkInfo> blkInfoList = victimStripe->GetBlkInfoList(listIndex);
+    blkCnt = blkInfoList.size();
 }
 
 CopierReadCompletion::~CopierReadCompletion(void)
@@ -62,50 +74,87 @@ CopierReadCompletion::~CopierReadCompletion(void)
 bool
 CopierReadCompletion::_DoSpecificJob(void)
 {
+    GcStripeManager* gcStripeManager = meta->GetGcStripeManager();
+    IVolumeManager* volumeManager
+        = VolumeServiceSingleton::Instance()->GetVolumeManager(meta->GetArrayName());
     list<BlkInfo> blkInfoList = victimStripe->GetBlkInfoList(listIndex);
-    uint32_t blksCnt = blkInfoList.size();
 
-    CallbackSmartPtr gcChunkWriteCompletion(
-        new GcChunkWriteCompletion(buffer,
-            blksCnt,
-            meta,
-            stripeId));
-    gcChunkWriteCompletion->SetWaitingCount(blksCnt);
-
-    auto blkInfo = blkInfoList.begin();
-    uint32_t baseOffset = (blkInfo->vsa.offset / BLOCKS_IN_CHUNK) * BLOCKS_IN_CHUNK;
-
-    for (auto blkInfo : blkInfoList)
+    uint32_t volId = blkInfoList.begin()->volID;
+    uint32_t remainCnt = blkCnt - allocatedCnt;
+    while (remainCnt)
     {
-        VolumeIoSmartPtr volumeIo(new VolumeIo((char*)buffer +
-            ((blkInfo.vsa.offset - baseOffset) * BLOCK_SIZE),
-            VolumeIo::UNITS_PER_BLOCK));
+        uint32_t startOffset;
+        uint32_t numBlks;
 
-        volumeIo->dir = UbioDir::Write;
-        volumeIo->SetVolumeId(blkInfo.volID);
-        volumeIo->SetRba(blkInfo.rba * VolumeIo::UNITS_PER_BLOCK);
-
-        CallbackSmartPtr callback(new GcBlkWriteCompletion(volumeIo));
-        callback->SetCallee(gcChunkWriteCompletion);
-        volumeIo->SetCallback(callback);
-        volumeIo->SetGc(blkInfo.vsa);
-
-        AIRLOG(PERF_COPY, 0, AIR_WRITE, volumeIo->GetSize());
-        bool done = false;
-        WriteSubmission write(volumeIo);
-        done = write.Execute();
-
-        if (unlikely(false == done))
+        bool ret = gcStripeManager->AllocateWriteBufferBlks(volId, remainCnt, startOffset, numBlks);
+        if (false == ret)
         {
-            EventSmartPtr writeEvent(new WriteSubmission(volumeIo));
-#if defined QOS_ENABLED_BE
-            writeEvent->SetEventType(BackendEvent_GC);
-#endif
-            EventArgument::GetEventScheduler()->EnqueueEvent(writeEvent);
+            return false;
+        }
+
+        GcWriteBuffer* dataBuffer = gcStripeManager->GetWriteBuffer(volId);
+
+        std::vector<BlkInfo>* allocatedBlkInfoList = gcStripeManager->GetBlkInfoList(volId);
+        for (uint32_t i = 0; i < numBlks; i++)
+        {
+            list<BlkInfo>::iterator it = blkInfoList.begin();
+            std::advance(it, offset);
+            BlkInfo blkInfo = *it;
+            uint32_t vsaOffset = startOffset + i;
+            gcStripeManager->SetBlkInfo(volId, vsaOffset, blkInfo);
+            _MemCopyValidData(dataBuffer, vsaOffset, blkInfo);
+
+            offset++;
+        }
+
+        allocatedCnt += numBlks;
+        remainCnt = blkCnt - allocatedCnt;
+
+        if (gcStripeManager->DecreaseRemainingAndCheckIsFull(volId, numBlks))
+        {
+            if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS)
+                != volumeManager->IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted)))
+            {
+                gcStripeManager->SetFlushed(volId);
+                allocatedBlkInfoList->clear();
+                delete allocatedBlkInfoList;
+                gcStripeManager->SetFinished(dataBuffer);
+                break;
+            }
+            else
+            {
+                EventSmartPtr flushEvent(new GcFlushSubmission(meta->GetArrayName(),
+                            allocatedBlkInfoList,
+                            volId,
+                            dataBuffer,
+                            gcStripeManager));
+                EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
+
+                gcStripeManager->SetFlushed(volId);
+            }
         }
     }
+
+    volumeManager->DecreasePendingIOCount(volId, VolumeStatus::Unmounted, blkCnt);
+    meta->ReturnBuffer(stripeId, buffer);
+    meta->SetDoneCopyBlks(blkCnt);
+    airlog("PERF_COPY", "AIR_READ", 0, BLOCK_SIZE * blkCnt);
 
     return true;
 }
 
-} // namespace ibofos
+void
+CopierReadCompletion::_MemCopyValidData(GcWriteBuffer* dataBuffer, uint32_t offset, BlkInfo blkInfo)
+{
+    uint32_t bufferIndex = offset / BLOCKS_IN_CHUNK;
+    uint32_t bufferOffset = offset % BLOCKS_IN_CHUNK;
+
+    GcWriteBuffer::iterator bufferIt = dataBuffer->begin();
+    std::advance(bufferIt, bufferIndex);
+
+    void* srcBuffer = (void*)((char*)buffer + ((blkInfo.vsa.offset % BLOCKS_IN_CHUNK) * BLOCK_SIZE));
+    void* destBuffer = (void*)((char*)(*bufferIt) + (bufferOffset * BLOCK_SIZE));
+    memcpy(destBuffer, srcBuffer, BLOCK_SIZE);
+}
+
+} // namespace pos

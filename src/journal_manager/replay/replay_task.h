@@ -34,7 +34,7 @@
 
 #include "replay_progress_reporter.h"
 
-namespace ibofos
+namespace pos
 {
 class ReplayTask
 {
@@ -56,4 +56,4 @@ protected:
     ReplayProgressReporter* reporter;
 };
 
-} // namespace ibofos
+} // namespace pos

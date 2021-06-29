@@ -36,16 +36,16 @@
 #include <list>
 
 #include "method.h"
-#include "src/array/free_buffer_pool.h"
+#include "src/spdk_wrapper/free_buffer_pool.h"
 
-namespace ibofos
+namespace pos
 {
 class PartitionPhysicalSize;
 class RebuildBehavior;
 
 class Raid5 : public Method
 {
-    friend class WbtCmdHandler;
+    friend class ParityLocationWbtCommand;
 
 public:
     Raid5(const PartitionPhysicalSize* physicalSize, const uint64_t parityCount);
@@ -55,16 +55,9 @@ public:
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
-    virtual RebuildBehavior* GetRebuildBehavior() override;
-    virtual StripeLocker*
-    GetStripeLocker() override
-    {
-        return nullptr;
-    };
 
 private:
-    virtual LogicalBlkAddr _Translate(const FtBlkAddr&) override;
-    virtual void _BindRebuildFunc(void) override;
+    virtual void _BindRecoverFunc(void) override;
     void _RebuildData(void* dst, void* src, uint32_t size);
     BufferEntry _AllocBuffer();
     void _ComputeParity(BufferEntry& dst, const list<BufferEntry>& srcs);
@@ -76,5 +69,5 @@ private:
     FreeBufferPool freeParityPool;
 };
 
-} // namespace ibofos
+} // namespace pos
 #endif // RAID5_H_

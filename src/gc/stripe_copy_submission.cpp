@@ -34,24 +34,23 @@
 
 #include <list>
 
+#include "Air.h"
 #include "src/gc/stripe_copier.h"
 #include "src/logger/logger.h"
-#include "src/scheduler/event_argument.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/include/backend_event.h"
 
-namespace ibofos
+namespace pos
 {
 StripeCopySubmission::StripeCopySubmission(StripeId baseStripeId,
-    VictimStripe* victimStripe,
-    CopierMeta* meta)
+                                        CopierMeta* meta, uint32_t copyIndex)
 : Callback(false),
   baseStripeId(baseStripeId),
   meta(meta),
-  victimStripe(victimStripe)
+  copyIndex(copyIndex),
+  isLoaded(false)
 {
-    loadedReverseMapCount = 0;
-#if defined QOS_ENABLED_BE
     SetEventType(BackendEvent_GC);
-#endif
 }
 
 StripeCopySubmission::~StripeCopySubmission(void)
@@ -66,15 +65,28 @@ StripeCopySubmission::_DoSpecificJob(void)
         // TODO(jg121.lim) : reverse map load error handling
     }
 
-    for (uint32_t index = 0; index < STRIPES_PER_SEGMENT; index++)
+    if (isLoaded == false)
+    {
+        for (uint32_t index = 0; index < meta->GetStripePerSegment(); index++)
+        {
+            meta->GetVictimStripe(copyIndex, index)->LoadValidBlock();
+        }
+        isLoaded = true;
+    }
+
+    if (meta->IsReadytoCopy(copyIndex) == false)
+    {
+        return false;
+    }
+
+    for (uint32_t index = 0; index < CopierMeta::GC_CONCURRENT_COUNT; index++)
     {
         EventSmartPtr stripeCopier(new StripeCopier(baseStripeId + index,
-            &victimStripe[index],
-            meta));
-        EventArgument::GetEventScheduler()->EnqueueEvent(stripeCopier);
+                                                    meta, copyIndex));
+        EventSchedulerSingleton::Instance()->EnqueueEvent(stripeCopier);
     }
 
     return true;
 }
 
-} // namespace ibofos
+} // namespace pos

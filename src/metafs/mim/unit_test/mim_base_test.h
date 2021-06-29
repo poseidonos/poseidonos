@@ -37,9 +37,10 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "mfs_fb_adapter.h"
 #include "mfs_ut_framework.h"
 
+namespace pos
+{
 // class UtMIMBasic : public MetaFsUnitTestBase
 class UtMIMBasic : public ::testing::Test
 {
@@ -61,28 +62,30 @@ public:
     }
 
     void
-    CreateDummyFile(FileSizeType fileSize)
+    CreateDummyFile(FileSizeType fileSize, std::string arrayName)
     {
-        IBOF_EVENT_ID sc;
-        MetaFsMoMReqMsg req;
-        req.reqType = MetaFsMoMReqType::FileCreate;
+        POS_EVENT_ID sc;
+        MetaFsFileControlRequest req;
+        req.reqType = MetaFsFileControlType::FileCreate;
         req.fileByteSize = fileSize;
+        req.arrayName = &arrayName;
         sc = mvmTopMgr.ProcessNewReq(req);
-        EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
     }
 
     uint32_t
-    OpenDummyFile(void)
+    OpenDummyFile(std::string arrayName)
     {
         uint32_t fd;
 
-        IBOF_EVENT_ID sc;
-        MetaFsMoMReqMsg req;
-        req.reqType = MetaFsMoMReqType::FileOpen;
+        POS_EVENT_ID sc;
+        MetaFsFileControlRequest req;
+        req.reqType = MetaFsFileControlType::FileOpen;
         std::string dummyFile("dummyFile.txt");
         req.fileName = &dummyFile;
+        req.arrayName = &arrayName;
         sc = mvmTopMgr.ProcessNewReq(req);
-        EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
 
         fd = req.completionData.openfd;
 
@@ -90,13 +93,14 @@ public:
     }
 
     void
-    CloseDummyFile(uint32_t fd)
+    CloseDummyFile(uint32_t fd, std::string arrayName)
     {
-        IBOF_EVENT_ID sc;
-        MetaFsMoMReqMsg req;
-        req.reqType = MetaFsMoMReqType::FileClose;
+        POS_EVENT_ID sc;
+        MetaFsFileControlRequest req;
+        req.reqType = MetaFsFileControlType::FileClose;
+        req.arrayName = &arrayName;
         sc = mvmTopMgr.ProcessNewReq(req);
-        EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
     }
 
     void
@@ -106,9 +110,9 @@ public:
         std::ofstream ofile(targetFile, std::ios::binary);
         ofile.write((char*)buf, byteSize);
         ofile.close();
-        MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "Dump finished..file={}", targetFile.c_str());
     }
 };
-
+} // namespace pos
 #endif // __UT_MIM_BASE_H__

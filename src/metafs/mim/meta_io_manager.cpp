@@ -31,214 +31,152 @@
  */
 
 /* 
- * iBoFOS - Meta Filesystem Layer
+ * PoseidonOS - Meta Filesystem Layer
  * 
  * Meta File I/O Manager
 */
 
+#include <string>
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/msc/metafs_mbr_mgr.h"
 #include "meta_io_manager.h"
+#include "metafs_aio_completer.h"
+#include "metafs_log.h"
+#include "metafs_mem_lib.h"
+#include "metafs_control_request.h"
+#include "src/cpu_affinity/affinity_manager.h"
+#include "src/logger/logger.h"
 
-#include "mfs_aio_completer.h"
-#include "mfs_log.h"
-#include "mfs_mem_lib.h"
-#include "mfs_mvm_top.h"
-#include "src/io/general_io/affinity_manager.h"
-
-MetaIoMgr metaIoMgr;
-MetaFsMIMTopMgrClass& mimTopMgr = metaIoMgr;
-
-MetaIoMgr::MetaIoMgr(void)
+namespace pos
+{
+MetaIoManager::MetaIoManager(void)
 : ioScheduler(nullptr),
-  epochSignature(0),
   totalMetaIoCoreCnt(0),
-  mioHandlerCount(0)
+  mioHandlerCount(0),
+  metaStorage(nullptr)
 {
     _InitReqHandler();
+
+    ioScheduler = MetaFsServiceSingleton::Instance()->GetScheduler();
 }
 
-MetaIoMgr::~MetaIoMgr(void)
+MetaIoManager::~MetaIoManager(void)
 {
     Finalize();
 }
 
-void
-MetaIoMgr::_InitReqHandler(void)
+const char*
+MetaIoManager::GetModuleName(void)
 {
-    reqHandler[static_cast<uint32_t>(MetaIoReqTypeEnum::Read)] = &MetaIoMgr::_ProcessNewIoReq;
-    reqHandler[static_cast<uint32_t>(MetaIoReqTypeEnum::Write)] = &MetaIoMgr::_ProcessNewIoReq;
-
-    finalized = false;
+    return "Meta IO Manager";
 }
 
-MetaIoMgr&
-MetaIoMgr::GetInstance(void)
+POS_EVENT_ID
+MetaIoManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 {
-    return metaIoMgr;
-}
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    // MetaFsIoRequest* msg = static_cast<MetaFsIoRequest*>(&reqMsg);
 
-void
-MetaIoMgr::Init(void)
-{
-    totalMetaIoCoreCnt =
-        ibofos::AffinityManagerSingleton::Instance()->GetCoreCount(
-            ibofos::CoreType::META_IO);
-
-    MetaFsSysHwMemLib::Init();
-
-    finalized = false;
-    SetModuleInit();
+    return rc;
 }
 
 bool
-MetaIoMgr::Bringup(void)
+MetaIoManager::IsSuccess(POS_EVENT_ID rc)
 {
-    if (IsModuleReady())
-    {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_MODULE_ALREADY_READY,
-            "You attempt to bringup metaIoMgr again. Ignore it");
-        return true;
-    }
-    _PrepareIoThreads();
-    SetModuleReady();
-
-    return true;
+    return rc == POS_EVENT_ID::SUCCESS;
 }
 
 void
-MetaIoMgr::Close(void)
+MetaIoManager::_InitReqHandler(void)
 {
-    if (IsModuleReady())
-    {
-        Finalize();
+    reqHandler[static_cast<uint32_t>(MetaIoRequestType::Read)] = &MetaIoManager::_ProcessNewIoReq;
+    reqHandler[static_cast<uint32_t>(MetaIoRequestType::Write)] = &MetaIoManager::_ProcessNewIoReq;
 
-        MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "Meta Io Mgr has been closed");
-    }
+    finalized = false;
 }
 
 void
-MetaIoMgr::Finalize(void)
+MetaIoManager::Init(void)
 {
-    if (IsModuleReady() && (finalized == false))
+    totalMetaIoCoreCnt =
+        pos::AffinityManagerSingleton::Instance()->GetCoreCount(
+            pos::CoreType::META_IO);
+
+    MetaFsMemLib::Init();
+
+    finalized = false;
+}
+
+void
+MetaIoManager::Close(void)
+{
+    Finalize();
+
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "Meta Io Mgr has been closed");
+}
+
+void
+MetaIoManager::Finalize(void)
+{
+    if (finalized == false)
     {
-        ioScheduler->ClearHandlerThread(); // exit mioHandler thread
-        ioScheduler->ExitThread();         // exit scheduler thread
-        ioScheduler->ClearQ();             // clear MultQ
-
-        delete ioScheduler;
-        ioScheduler = nullptr;
-
-        MetaFsSysHwMemLib::Finalize();
+        MetaFsMemLib::Finalize();
 
         finalized = true;
     }
 }
 
-void
-MetaIoMgr::_PrepareIoThreads(void)
+bool
+MetaIoManager::AddArrayInfo(std::string arrayName)
 {
-    ibofos::AffinityManager& affinityManager =
-        *ibofos::AffinityManagerSingleton::Instance();
-    cpu_set_t metaIoSchedulerList = affinityManager.GetCpuSet(ibofos::CoreType::META_SCHEDULER);
-    cpu_set_t metaIoCoreList = affinityManager.GetCpuSet(ibofos::CoreType::META_IO);
-    uint32_t maxCoreCount = affinityManager.GetTotalCore();
-    uint32_t availableMetaIoCoreCnt = CPU_COUNT(&metaIoCoreList);
-    uint32_t handlerId = 0;
-    uint32_t numCPUsInSystem = std::thread::hardware_concurrency();
-
-    // meta io scheduler
-    for (uint32_t coreId = 0; coreId < numCPUsInSystem; ++coreId)
-    {
-        if (CPU_ISSET(coreId, &metaIoSchedulerList))
-        {
-            ioScheduler = new MetaFsIoScheduler(0, coreId, maxCoreCount);
-            ioScheduler->StartThread();
-            break;
-        }
-    }
-
-    // meta io handler
-    for (uint32_t coreId = 0; coreId < numCPUsInSystem; ++coreId)
-    {
-        if (CPU_ISSET(coreId, &metaIoCoreList))
-        {
-            _InitiateMioHandler(handlerId++, coreId, maxCoreCount);
-            availableMetaIoCoreCnt--;
-
-            if (availableMetaIoCoreCnt == 0)
-            {
-                break;
-            }
-        }
-    }
-
-    mioHandlerCount = ioScheduler->GetMioHandlerCount();
+    return ioScheduler->AddArrayInfo(arrayName);
 }
 
-ScalableMetaIoWorker*
-MetaIoMgr::_InitiateMioHandler(int handlerId, int coreId, int coreCount)
+bool
+MetaIoManager::RemoveArrayInfo(std::string arrayName)
 {
-    ScalableMetaIoWorker* mioHandler =
-        new ScalableMetaIoWorker(handlerId, coreId, coreCount);
-    mioHandler->StartThread();
-    ioScheduler->RegisterMioHandler(mioHandler);
-
-    return mioHandler;
+    return ioScheduler->RemoveArrayInfo(arrayName);
 }
 
-void
-MetaIoMgr::SetMDpageEpochSignature(uint64_t mbrEpochSignature)
+POS_EVENT_ID
+MetaIoManager::ProcessNewReq(MetaFsRequestBase& reqMsg)
 {
-    epochSignature = mbrEpochSignature;
-}
-
-uint64_t
-MetaIoMgr::GetMDpageEpochSignature(void)
-{
-    return epochSignature;
-}
-
-IBOF_EVENT_ID
-MetaIoMgr::ProcessNewReq(MetaFsIoReqMsg& reqMsg)
-{
-    IBOF_EVENT_ID rc;
-
-    rc = (this->*(reqHandler[static_cast<uint32_t>(reqMsg.reqType)]))(reqMsg);
-
+    POS_EVENT_ID rc;
+    MetaFsIoRequest* msg = static_cast<MetaFsIoRequest*>(&reqMsg);
+    rc = (this->*(reqHandler[(uint32_t)(msg->reqType)]))(*msg);
     return rc;
 }
 
-IBOF_EVENT_ID
-MetaIoMgr::_ProcessNewIoReq(MetaFsIoReqMsg& reqMsg)
+void
+MetaIoManager::SetMss(MetaStorageSubsystem* metaStorage)
 {
-    _AddExtraIoReqInfo(reqMsg);
+    this->metaStorage = metaStorage;
+}
 
-    IBOF_EVENT_ID rc;
-    rc = _CheckFileIoBoundary(reqMsg);
-    if (false == IsSuccess(rc))
-    {
-        MFS_TRACE_ERROR((int)rc, "File I/O boundary error. rc={}", (int)rc);
-        return rc;
-    }
+POS_EVENT_ID
+MetaIoManager::_ProcessNewIoReq(MetaFsIoRequest& reqMsg)
+{
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
 
     // reqMsg     : original message, used only this thread
     // cloneReqMsg: new copy, only for meta scheduler, not meta handler thread
-    MetaFsIoReqMsg* cloneReqMsg = new MetaFsIoReqMsg();
+    MetaFsIoRequest* cloneReqMsg = new MetaFsIoRequest();
     cloneReqMsg->CopyUserReqMsg(reqMsg);
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[MSG ][EnqueueReq ] type={}, req.TagId={}, mediaType={}, io_mode={}, fileOffset={}, Size={}, Lpn={}",
         (int)reqMsg.reqType, (int)reqMsg.tagId, (int)reqMsg.targetMediaType,
         (int)reqMsg.ioMode, reqMsg.byteOffsetInFile, reqMsg.byteSize,
         reqMsg.byteOffsetInFile / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
 
-    bool reqQueued = ioScheduler->EnqueueNewReq(*cloneReqMsg);
+    bool reqQueued = ioScheduler->EnqueueNewReq(cloneReqMsg);
 
     if (!reqQueued)
     {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR,
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR,
             "Failed to enqueue new request...");
-        return IBOF_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
+        return POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
     }
 
     if (reqMsg.IsSyncIO())
@@ -248,9 +186,9 @@ MetaIoMgr::_ProcessNewIoReq(MetaFsIoReqMsg& reqMsg)
         int error = reqMsg.GetError();
         if (error)
         {
-            MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR,
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR,
                 "[MSG ] Sync I/O failed. req.tagId={}, fd={}", reqMsg.tagId, reqMsg.fd);
-            rc = IBOF_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
+            rc = POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
         }
     }
 
@@ -258,76 +196,11 @@ MetaIoMgr::_ProcessNewIoReq(MetaFsIoReqMsg& reqMsg)
 }
 
 void
-MetaIoMgr::_WaitForDone(MetaFsIoReqMsg& reqMsg)
+MetaIoManager::_WaitForDone(MetaFsIoRequest& reqMsg)
 {
     if (false == reqMsg.IsIoCompleted())
     {
         reqMsg.SuspendUntilIoCompletion();
     }
 }
-
-void
-MetaIoMgr::_SetByteRangeForFullFileIo(MetaFsIoReqMsg& reqMsg)
-{
-    reqMsg.byteOffsetInFile = 0;
-
-    FileSizeType outfileByteSize;
-    IBOF_EVENT_ID ret = mvmTopMgr.GetFileSize(reqMsg.fd, outfileByteSize);
-    if (ret == IBOF_EVENT_ID::SUCCESS)
-    {
-        reqMsg.byteSize = outfileByteSize;
-    }
-}
-
-void
-MetaIoMgr::_SetTargetMediaType(MetaFsIoReqMsg& reqMsg)
-{
-    reqMsg.targetMediaType = MetaStorageType::Max;
-    MetaStorageType outTargetMediaType;
-    IBOF_EVENT_ID ret = mvmTopMgr.GetTargetMediaType(reqMsg.fd, outTargetMediaType);
-    if (ret == IBOF_EVENT_ID::SUCCESS)
-    {
-        reqMsg.targetMediaType = outTargetMediaType;
-    }
-}
-
-IBOF_EVENT_ID
-MetaIoMgr::_CheckFileIoBoundary(MetaFsIoReqMsg& reqMsg)
-{
-    IBOF_EVENT_ID rc = IBOF_EVENT_ID::SUCCESS;
-    FileSizeType fileByteSize;
-    IBOF_EVENT_ID ret = mvmTopMgr.GetFileSize(reqMsg.fd, fileByteSize);
-    if (ret != IBOF_EVENT_ID::SUCCESS)
-    {
-        return IBOF_EVENT_ID::MFS_INVALID_PARAMETER;
-    }
-
-    if (reqMsg.isFullFileIo)
-    {
-        if (reqMsg.byteOffsetInFile != 0 ||
-            reqMsg.byteSize != fileByteSize)
-        {
-            rc = IBOF_EVENT_ID::MFS_INVALID_PARAMETER;
-        }
-    }
-    else
-    {
-        if (reqMsg.byteOffsetInFile >= fileByteSize ||
-            (reqMsg.byteOffsetInFile + reqMsg.byteSize) > fileByteSize)
-        {
-            rc = IBOF_EVENT_ID::MFS_INVALID_PARAMETER;
-        }
-    }
-
-    return rc;
-}
-
-void
-MetaIoMgr::_AddExtraIoReqInfo(MetaFsIoReqMsg& reqMsg)
-{
-    if (true == reqMsg.isFullFileIo)
-    {
-        _SetByteRangeForFullFileIo(reqMsg);
-    }
-    _SetTargetMediaType(reqMsg);
-}
+} // namespace pos

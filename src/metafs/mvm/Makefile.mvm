@@ -19,7 +19,6 @@ endif # MFS_INTEGRATION_TEST_EN
 ########################################
 
 MVM_SRCS += \
-	mfs_mvm_top.cpp \
 	mf_inode.cpp \
 
 ifeq ($(MOCK_MVM_EN), 1)
@@ -32,21 +31,22 @@ MVM_SRCS += \
 
 else
 MVM_SRCS += \
-	meta_vol_base.cpp \
-	ssd_meta_vol.cpp \
-	nvram_meta_vol.cpp \
-	meta_vol_container.cpp \
-	meta_vol_context.cpp \
-	meta_vol_mgr.cpp \
+	meta_volume.cpp \
+	ssd_meta_volume.cpp \
+	nvram_meta_volume.cpp \
+	meta_volume_container.cpp \
+	meta_volume_handler.cpp \
+	meta_volume_context.cpp \
+	meta_volume_manager.cpp \
 	mf_inode_mgr.cpp \
-	meta_fd_mgr.cpp \
-	meta_file_mgr.cpp \
-	meta_vol_catalog.cpp \
-	meta_vol_catalog_mgr.cpp \
+	file_descriptor_manager.cpp \
+	meta_file_manager.cpp \
+	volume_catalog.cpp \
+	volume_catalog_manager.cpp \
 	mf_extent.cpp \
 	mf_extent_mgr.cpp \
-	mf_inode_hdr.cpp \
-	mf_inode_table.cpp \
+	inode_table_header.cpp \
+	inode_table.cpp \
 	on_volume_meta_region_mgr.cpp \
 
 ifeq ($(COMPACTION_EN), 1)
@@ -65,10 +65,10 @@ UT_PATH += \
 endif
 
 ifeq ($(UT_MVM_EN), 1)
-UT_SRCS += \
-	mvm_test.cpp \
-	mvm_func_positive_test.cpp \
-	mvm_func_negative_test.cpp \
+#UT_SRCS += \
+#	mvm_test.cpp \
+#	mvm_func_positive_test.cpp \
+#	mvm_func_negative_test.cpp \
 
 endif
 

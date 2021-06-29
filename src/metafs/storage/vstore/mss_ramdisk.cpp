@@ -34,13 +34,17 @@
 
 #include <errno.h>
 
-#include "mfs_io_config.h"
+#include "metafs_config.h"
 #include "mss_complete_handler.h"
 #include "mss_utils.h"
 #include "os_header.h"
 #include "src/logger/logger.h"
 
-MssRamdisk::MssRamdisk(void)
+namespace pos
+{
+
+MssRamdisk::MssRamdisk(std::string arrayName)
+: MetaStorageSubsystem(arrayName)
 {
     for (int i = 0; i < static_cast<int>(MetaStorageType::Max); i++)
     {
@@ -52,15 +56,15 @@ MssRamdisk::MssRamdisk(void)
 
 MssRamdisk::~MssRamdisk(void)
 {
+    // TODO(munseop.lim): need to fix
     _Finalize();
-
-    _SetState(MetaSsState::Close);
 }
+
 
 void
 MssRamdisk::_Finalize(void)
 {
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Closing File Descriptor of Meta storage subsystem.");
     for (int fd : fd_)
     {
@@ -94,24 +98,24 @@ MssRamdisk::_Finalize(void)
 
             if (!opSuccess)
             {
-                MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_ERROR_MESSAGE,
+                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
                     "Unmount ramdisk failed due to some reasons...");
             }
             else
             {
-                MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+                MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                     "Completed to unmount meta storage.");
             }
-            freeCommand = "rm -rf " + path + FILE_NAME;
+            freeCommand = "rm -rf " + path + FILE_NAME + "." + arrayName;
             status = system(freeCommand.c_str());
             if (status != 0)
             {
-                MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_ERROR_MESSAGE,
+                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
                     "File Delete operation failed due to some reasons...");
             }
             else
             {
-                MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+                MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                     "Completed File Delete in  meta storage.");
             }
         }
@@ -136,8 +140,8 @@ MssRamdisk::_Finalize(void)
  * @return Success(0)/Failure(-1)
  */
 
-IBOF_EVENT_ID
-MssRamdisk::CreateMetaStore(MetaStorageType mediaType, uint64_t capacity, bool formatFlag)
+POS_EVENT_ID
+MssRamdisk::CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag)
 {
     std::string mountCommand;
     std::string createDir;
@@ -147,11 +151,11 @@ MssRamdisk::CreateMetaStore(MetaStorageType mediaType, uint64_t capacity, bool f
 
     if (!path_[index].empty())
     {
-        MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "You attempt to create meta storage again. media type={}",
             (int)mediaType);
         Open();
-        return IBOF_EVENT_ID::SUCCESS; // just return success
+        return POS_EVENT_ID::SUCCESS; // just return success
     }
 
     switch (mediaType)
@@ -163,7 +167,7 @@ MssRamdisk::CreateMetaStore(MetaStorageType mediaType, uint64_t capacity, bool f
             path_[index] = RAMDISK_PATH + "SSD/";
             break;
         default:
-            MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_INVALID_PARAMETER,
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
                 "Wrong Media Type Provided");
             assert(false);
     }
@@ -175,10 +179,10 @@ MssRamdisk::CreateMetaStore(MetaStorageType mediaType, uint64_t capacity, bool f
         // if resource was not freed last time. free it now.
         if (false == DeleteFile(path_[index] + FILE_NAME))
         {
-            MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_FILE_DELETE_FAILED,
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_DELETE_FAILED,
                 "Delete file {} manually.",
                 path_[index] + FILE_NAME);
-            return IBOF_EVENT_ID::MFS_FILE_DELETE_FAILED;
+            return POS_EVENT_ID::MFS_FILE_DELETE_FAILED;
         }
     }
 
@@ -188,13 +192,13 @@ MssRamdisk::CreateMetaStore(MetaStorageType mediaType, uint64_t capacity, bool f
 
     mountCommand = "mount -o size=" + std::to_string(BTOMB(capacity)) + "M -t tmpfs none " + path_[index];
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "{}", mountCommand.c_str());
     status = system(mountCommand.c_str());
 
     if (status != 0)
     {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_MEDIA_MOUNT_FAILED,
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MEDIA_MOUNT_FAILED,
             "Mount ramdisk failed. Please run as root permission or sudo option...");
     }
     assert(0 == status);
@@ -202,7 +206,7 @@ MssRamdisk::CreateMetaStore(MetaStorageType mediaType, uint64_t capacity, bool f
     fileName = path_[index] + FILE_NAME;
     fd_[index] = open(fileName.c_str(), O_RDWR | O_CREAT, 644);
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Opened File Descriptor: {}", fd_[index]);
     assert(fd_[index] > 2);
     assert(capacity != 0 && (capacity % MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES == 0));
@@ -214,13 +218,13 @@ MssRamdisk::CreateMetaStore(MetaStorageType mediaType, uint64_t capacity, bool f
         EraseAllData(mediaType);
     }
 
-    return IBOF_EVENT_ID::SUCCESS;
+    return POS_EVENT_ID::SUCCESS;
 }
 
-IBOF_EVENT_ID
+POS_EVENT_ID
 MssRamdisk::EraseAllData(MetaStorageType mediaType)
 {
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Start to erase all data in Meta storage..");
     int index = static_cast<int>(mediaType);
     const uint64_t bufferByteSize = 1024 * 1024; // 1MB
@@ -235,27 +239,27 @@ MssRamdisk::EraseAllData(MetaStorageType mediaType)
         bytesWritten = pwrite(fd_[index], buffer, bufferByteSize, idx * bufferByteSize);
         if (bytesWritten != wBytesReqested)
         {
-            MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_MEDIA_WROTE_SIZE_NOT_MATCHED,
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MEDIA_WROTE_SIZE_NOT_MATCHED,
                 "Error occurred during AllData erase.");
             free(buffer);
-            return IBOF_EVENT_ID::MFS_MEDIA_WROTE_SIZE_NOT_MATCHED;
+            return POS_EVENT_ID::MFS_MEDIA_WROTE_SIZE_NOT_MATCHED;
         }
     }
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Rollback lseek offset to 0");
     off_t off = lseek(fd_[index], 0, SEEK_SET);
     if (off == -1)
     {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_MEDIA_SEEK_FAILED,
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MEDIA_SEEK_FAILED,
             "lseek failed.");
         free(buffer);
-        return IBOF_EVENT_ID::MFS_MEDIA_SEEK_FAILED;
+        return POS_EVENT_ID::MFS_MEDIA_SEEK_FAILED;
     }
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Erase completed");
     free(buffer);
 
-    return IBOF_EVENT_ID::SUCCESS;
+    return POS_EVENT_ID::SUCCESS;
 }
 
 /**
@@ -284,7 +288,7 @@ MssRamdisk::GetCapacity(MetaStorageType mediaType)
  * @return  Success(0)/Failure(-1)
  */
 
-IBOF_EVENT_ID
+POS_EVENT_ID
 MssRamdisk::ReadPage(MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType count)
 {
     int64_t bytesRead;
@@ -292,16 +296,9 @@ MssRamdisk::ReadPage(MetaStorageType mediaType, MetaLpnType pageNumber, void* bu
     int64_t rBytesRequested = (int64_t)count * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES;
     int index = static_cast<int>(mediaType);
 
-    if (!IsReady())
-    {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_META_STORAGE_NOT_READY,
-            "IO failed. Meta storage subsystem is not ready yet.");
-        return IBOF_EVENT_ID::MFS_META_STORAGE_NOT_READY;
-    }
-
     std::unique_lock<std::mutex> lock(lock_io);
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[RamD][Read page  ] mediaType={}, pageNum={}, OffsetInPread={}, BytesReq={}",
         (int)mediaType, pageNumber, rByteOffset, rBytesRequested);
 
@@ -309,17 +306,17 @@ MssRamdisk::ReadPage(MetaStorageType mediaType, MetaLpnType pageNumber, void* bu
 
     if (bytesRead != rBytesRequested)
     {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_MEDIA_READ_FAILED,
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MEDIA_READ_FAILED,
             "Read failed. return val={}, bytes requested={}",
             bytesRead, rBytesRequested);
         if (bytesRead == -1)
         {
-            MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_ERROR_MESSAGE,
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
                 "ERROR: errno={}", errno);
         }
-        return IBOF_EVENT_ID::MFS_MEDIA_READ_FAILED;
+        return POS_EVENT_ID::MFS_MEDIA_READ_FAILED;
     }
-    return IBOF_EVENT_ID::SUCCESS;
+    return POS_EVENT_ID::SUCCESS;
 }
 
 /**
@@ -333,7 +330,7 @@ MssRamdisk::ReadPage(MetaStorageType mediaType, MetaLpnType pageNumber, void* bu
  * @return  Success(0)/Failure(-1)
  */
 
-IBOF_EVENT_ID
+POS_EVENT_ID
 MssRamdisk::WritePage(MetaStorageType mediaType, MetaLpnType pageNumber, void* buffer, MetaLpnType count)
 {
     int64_t bytesWritten = 0;
@@ -341,16 +338,9 @@ MssRamdisk::WritePage(MetaStorageType mediaType, MetaLpnType pageNumber, void* b
     int64_t wBytesRequested = (int64_t)count * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES;
     int index = static_cast<int>(mediaType);
 
-    if (!IsReady())
-    {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_META_STORAGE_NOT_READY,
-            "Error: Meta storage subsystem is not ready yet.");
-        return IBOF_EVENT_ID::MFS_META_STORAGE_NOT_READY;
-    }
-
     std::unique_lock<std::mutex> lock(lock_io);
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[RamD][Write page ] mediaType={}, pageNum={}, OffsetInPread={}, BytesReq={}",
         (int)mediaType, pageNumber, wByteOffset, wBytesRequested);
 
@@ -359,41 +349,38 @@ MssRamdisk::WritePage(MetaStorageType mediaType, MetaLpnType pageNumber, void* b
 
     if (bytesWritten != wBytesRequested)
     {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_MEDIA_WRITE_FAILED,
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MEDIA_WRITE_FAILED,
             "Write failed. return val={}, bytes requested={}",
             bytesWritten, wBytesRequested);
         if (bytesWritten == -1)
         {
-            MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_ERROR_MESSAGE,
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
                 "ERROR: errno={}", errno);
         }
-        return IBOF_EVENT_ID::MFS_MEDIA_WRITE_FAILED;
+        return POS_EVENT_ID::MFS_MEDIA_WRITE_FAILED;
     }
-    return IBOF_EVENT_ID::SUCCESS;
+    return POS_EVENT_ID::SUCCESS;
 }
 
 
-IBOF_EVENT_ID
+POS_EVENT_ID
 MssRamdisk::Open(void)
 {
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Meta storage system is opened");
-    _SetState(MetaSsState::Ready);
 
-    return IBOF_EVENT_ID::SUCCESS;
+    return POS_EVENT_ID::SUCCESS;
 }
 
-IBOF_EVENT_ID
+POS_EVENT_ID
 MssRamdisk::Close(void)
 {
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Meta storage system is closed");
 
     _Finalize();
 
-    _SetState(MetaSsState::Close);
-
-    return IBOF_EVENT_ID::SUCCESS;
+    return POS_EVENT_ID::SUCCESS;
 }
 
 bool
@@ -402,19 +389,19 @@ MssRamdisk::IsAIOSupport(void)
     return false;
 }
 
-IBOF_EVENT_ID
+POS_EVENT_ID
 MssRamdisk::ReadPageAsync(MssAioCbCxt* cb)
 {
     assert(false); // not supported
 }
 
-IBOF_EVENT_ID
+POS_EVENT_ID
 MssRamdisk::WritePageAsync(MssAioCbCxt* cb)
 {
     assert(false); // not supported
 }
 
-IBOF_EVENT_ID
+POS_EVENT_ID
 MssRamdisk::TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages)
 {
     int media = static_cast<int>(mediaType);
@@ -429,10 +416,10 @@ MssRamdisk::TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* 
 
         if (trimedSize != ioSize)
         {
-            MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_FILE_TRIM_FAILED,
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_TRIM_FAILED,
                 "Error occurred during triming file");
             free(buffer);
-            return IBOF_EVENT_ID::MFS_FILE_TRIM_FAILED;
+            return POS_EVENT_ID::MFS_FILE_TRIM_FAILED;
         }
 
         remainedSize = trimReqSize - ioSize;
@@ -448,14 +435,15 @@ MssRamdisk::TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* 
 
     if (off == -1)
     {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_MEDIA_SEEK_FAILED,
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MEDIA_SEEK_FAILED,
             "lseek failed.");
 
-        return IBOF_EVENT_ID::MFS_MEDIA_SEEK_FAILED;
+        return POS_EVENT_ID::MFS_MEDIA_SEEK_FAILED;
     }
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Trim completed");
 
-    return IBOF_EVENT_ID::SUCCESS;
+    return POS_EVENT_ID::SUCCESS;
 }
+} // namespace pos

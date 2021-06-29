@@ -33,15 +33,18 @@
 #pragma once
 
 #include <map>
-
-#include "meta_io_req_q.h"
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include "metafs_io_multi_q.h"
 #include "mfs_io_handler_base.h"
 #include "mfs_io_range_overlap_chker.h"
-#include "mfs_page_level_lock.h"
 #include "mio_pool.h"
 #include "mpio.h"
 #include "mpio_handler.h"
 
+namespace pos
+{
 class MioHandler
 {
 public:
@@ -51,26 +54,31 @@ public:
     void TophalfMioProcessing(void);
     void BindPartialMpioHandler(MpioHandler* ptMpioHandler);
 
-    bool EnqueueNewReq(MetaFsIoReqMsg& reqMsg);
-    Mio* DispatchMio(MetaFsIoReqMsg& reqMsg);
+    bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
+    Mio* DispatchMio(MetaFsIoRequest& reqMsg);
     void ExecuteMio(Mio& mio);
+
+    bool AddArrayInfo(std::string arrayName);
+    bool RemoveArrayInfo(std::string arrayName);
 
 private:
     void _HandleIoSQ(void);
-    void _PushToRetry(MetaFsIoReqMsg* reqMsg);
+    void _PushToRetry(MetaFsIoRequest* reqMsg);
     void _HandleIoCQ(void);
-    Mio* _AllocNewMio(MetaFsIoReqMsg& reqMsg);
+    Mio* _AllocNewMio(MetaFsIoRequest& reqMsg);
     void _FinalizeMio(Mio* mio);
     void _HandleMioCompletion(void* data);
     void _SendAioDoneEvent(void* aiocb);
-    bool _IsRangeOverlapConflicted(MetaFsIoReqMsg* reqMsg);
-    void _RegisterRangeLockInfo(MetaFsIoReqMsg* reqMsg);
+    bool _IsRangeOverlapConflicted(MetaFsIoRequest* reqMsg);
+    void _RegisterRangeLockInfo(MetaFsIoRequest* reqMsg);
     void _FreeLockContext(Mio* mio);
     void _HandleRetryQDeferred(void);
     void _DiscoverIORangeOverlap(void);
+    bool _IsPendedRange(MetaFsIoRequest* reqMsg);
+    bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
 
-    MetaIoQ ioSQ;
-    MetaIoQClass<Mio*> ioCQ;
+    MetaFsIoQ<MetaFsIoRequest*> ioSQ;
+    MetaFsIoQ<Mio*> ioCQ;
 
     MpioHandler* bottomhalfHandler;
     MioPool* mioPool;
@@ -78,11 +86,15 @@ private:
     int cpuStallCnt;
     MioAsyncDoneCb mioCompletionCallback;
     PartialMpioDoneCb partialMpioDoneNotifier;
-    mpioDonePollerCb mpioDonePoller;
+    MpioDonePollerCb mpioDonePoller;
 
-    std::multimap<MetaLpnType, MetaFsIoReqMsg*> pendingIoRetryQ;
+    std::multimap<MetaLpnType, MetaFsIoRequest*> pendingIoRetryQ;
     static const uint32_t NUM_STORAGE = (int)MetaStorageType::Max;
-    MetaFsIoRangeOverlapChker ioRangeOverlapChker[NUM_STORAGE];
+
+    BitMap* checkerBitmap;
+    std::unordered_map<std::string, uint32_t> checkerMap;
+    MetaFsIoRangeOverlapChker* ioRangeOverlapChker[MetaFsConfig::MAX_ARRAY_CNT][NUM_STORAGE];
 
     static const uint32_t MAX_CONCURRENT_MIO_PROC_THRESHOLD = MetaFsConfig::MAX_CONCURRENT_IO_CNT;
 };
+} // namespace pos

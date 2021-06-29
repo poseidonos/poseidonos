@@ -31,15 +31,22 @@
  */
 
 #include "src/io/general_io/vsa_range_maker.h"
+#include "src/mapper/include/mapper_const.h"
+#include "src/mapper_service/mapper_service.h"
 
-namespace ibofos
+namespace pos
 {
 VsaRangeMaker::VsaRangeMaker(uint32_t volumeId, BlkAddr startRba,
-    uint32_t blockCount, bool isGc)
-: vsaRange({.startVsa = {.stripeId = 0, .offset = 0}, .numBlks = 0}),
-  retry(false)
+    uint32_t blockCount, bool isGc, std::string arrayName)
+: VsaRangeMaker(volumeId, startRba, blockCount, isGc, MapperServiceSingleton::Instance()->GetIVSAMap(arrayName) )
 {
-    Mapper& mapper = *MapperSingleton::Instance();
+}
+
+VsaRangeMaker::VsaRangeMaker(uint32_t volumeId, BlkAddr startRba,
+    uint32_t blockCount, bool isGc, IVSAMap* iVSAMap)
+: vsaRange({.startVsa = {.stripeId = 0, .offset = 0}, .numBlks = 0}),
+  retry(false), iVSAMap(iVSAMap)
+{
     VsaArray vsaArray;
     if (isGc)
     {
@@ -48,7 +55,7 @@ VsaRangeMaker::VsaRangeMaker(uint32_t volumeId, BlkAddr startRba,
         {
             BlkAddr rba = startRba + processedCount;
             int caller = 0;
-            vsa = mapper.GetVSAInternal(volumeId, rba, caller);
+            vsa = iVSAMap->GetVSAInternal(volumeId, rba, caller);
             if (caller == NEED_RETRY)
             {
                 retry = true;
@@ -63,11 +70,10 @@ VsaRangeMaker::VsaRangeMaker(uint32_t volumeId, BlkAddr startRba,
     }
     else
     {
-        int ret = mapper.GetVSAs(volumeId, startRba, blockCount, vsaArray);
+        int ret = iVSAMap->GetVSAs(volumeId, startRba, blockCount, vsaArray);
 
         if (ret < 0)
         {
-            assert(false);
             throw ret;
         }
     }
@@ -129,6 +135,10 @@ VsaRangeMaker::_Cut(void)
     }
 }
 
+VsaRangeMaker::~VsaRangeMaker(void)
+{
+}
+
 uint32_t
 VsaRangeMaker::GetCount(void)
 {
@@ -147,4 +157,4 @@ VsaRangeMaker::CheckRetry(void)
     return retry;
 }
 
-} // namespace ibofos
+} // namespace pos

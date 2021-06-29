@@ -37,9 +37,9 @@
 #include <string>
 
 #include "spdk/nvme.h"
-#include "src/device/ublock_device.h"
+#include "src/device/base/ublock_device.h"
 
-namespace ibofos
+namespace pos
 {
 class DeviceContext;
 class UnvmeDrv;
@@ -74,10 +74,11 @@ private:
 
     std::string _GetSN();
     std::string _GetMN();
+    int _GetNuma();
 
     spdk_nvme_ns* ns;
     std::atomic<uint32_t> outstandingAdminCommands;
 };
-} // namespace ibofos
+} // namespace pos
 
 #endif // __IBOFOS_UNVME_SSD_H__

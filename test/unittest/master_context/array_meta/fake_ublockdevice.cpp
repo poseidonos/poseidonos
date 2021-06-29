@@ -1,6 +1,6 @@
 #include "src/device/ublock_device.h"
 
-namespace ibofos
+namespace pos
 {
 UBlockDevice::UBlockDevice(std::string name, uint64_t size)
 {

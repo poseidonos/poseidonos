@@ -27,13 +27,13 @@ from collections import defaultdict
 #subprcess.call ('ls -al', shell=True)
 FIO_BENCH_SCRIPT = './fio_bench.py'
 CLI_CMD = '../../../bin/cli'
-IBOFOS_ROOT = '../../../'
-IBOFOS_CMD = '../../../bin/ibofos'
+POS_ROOT = '../../../'
+IBOFOS_CMD = '../../../bin/poseidonos'
 SETUP_IBOFOS_PATH = '../../../script/'
 SETUP_IBOFOS_CMD = './setup_ibofos_nvmf_volume.sh'
 SIZE = 2147483648
 NVME_CLI_CMD='nvme'
-LOG_PATH = 'ibofos.log'
+LOG_PATH = 'pos.log'
 DEFAULT_TR_ADDR = "10.100.11.16"
 TR_TYPE = 'tcp'
 TR_PORT = '1158'
@@ -41,7 +41,7 @@ IO_ENGINE = 'aio'
 IO_DEPTH = '128'
 SECTOR_SIZE=512
 TEST_INTERNAL_ERR = -1
-NQN = 'nqn.2019-04.ibof:subsystem1'
+NQN = 'nqn.2019-04.pos:subsystem1'
 stopOnError = False
 result = dict()
 retry_limit = 4
@@ -86,7 +86,7 @@ def ReadWriteCommand(lbaList, sizeList, cmd, verify, addedCmd = ""):
 
 def PowerOff():
     stdout_type = subprocess.DEVNULL
-    common_test_lib.terminate_ibofos(IBOFOS_ROOT, stdout_type)
+    common_test_lib.terminate_pos(POS_ROOT, stdout_type)
     
     print("########## disconnect nvmf controllers ##########")
     command = NVME_CLI_CMD + ' disconnect -n ' + NQN;
@@ -100,19 +100,19 @@ def PowerOff():
     return 0;
 
 def PowerOn(clean):
-    print("########## Power On Ibofos.. ##########")    
+    print("########## Power On PoseidonOS.. ##########")    
     stdout_type = subprocess.DEVNULL
     
     bringup_argument = {
         'log_path' : LOG_PATH,
-        'ibof_root' : IBOFOS_ROOT,
+        'ibof_root' : POS_ROOT,
         'transport' : TR_TYPE,
         'target_ip' : args.fabric_ip,
         'volume_size' : SIZE,
         'stdout_type' : stdout_type,
         'clean' : clean}
 
-    common_test_lib.bringup_ibofos(**bringup_argument)
+    common_test_lib.bringup_pos(**bringup_argument)
 
     Wait(3)
     command = NVME_CLI_CMD + " connect " + " -t " + TR_TYPE + " -a " +\
@@ -124,7 +124,7 @@ def PowerOn(clean):
         #this error is critical, exit this process.
         exit(1)  
 
-    command = "nvme list | grep IBOF | awk '{print $1; exit}'"
+    command = "nvme list | grep POS | awk '{print $1; exit}'"
     global dev_name
     retry_count = 0
     dev_name = ""
@@ -198,7 +198,7 @@ def ClearEnv():
                 proc.wait()                
         except psutil.NoSuchProcess:
             pass
-    common_test_lib.terminate_ibofos(IBOFOS_ROOT, subprocess.DEVNULL)
+    common_test_lib.terminate_pos(POS_ROOT, subprocess.DEVNULL)
 
     command = NVME_CLI_CMD + ' disconnect -n ' + NQN;
     ret = subprocess.call(command, shell=True);
@@ -403,7 +403,7 @@ def parse_arguments():
             help='Specify Test Name (FLUSH, SEQ_WRITE_UNMAP, RND_WRITE_UNMAP, \
             UNMAP_NPOR, SEQ_WRITE_ZERO, RND_WRITE_ZERO, WRITE_ZERO_NPOR')
     parser.add_argument('-s', '--stop_on_error', action='store_true',
-            help='If Error Failure happens, Stop and do not clear ibofos')
+            help='If Error Failure happens, Stop and do not clear poseidonos')
     parser.add_argument('-f', '--fabric_ip', default = DEFAULT_TR_ADDR,\
             help='Set Fabric IP, default: ' + DEFAULT_TR_ADDR)
     global args

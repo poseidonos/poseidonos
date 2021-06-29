@@ -35,21 +35,25 @@
 #include <algorithm>
 #include <vector>
 
-#include "src/array/config/array_config.h"
+#include "src/device/base/ublock_device.h"
 #include "src/device/device_manager.h"
-#include "src/device/ublock_device.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/array_config.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/volume/volume_list.h"
 
-namespace ibofos
+namespace pos
 {
 ArrayDeviceManager::ArrayDeviceManager(DeviceManager* sysDevMgr)
-: sysDevMgr_(sysDevMgr)
+:
+#ifdef _ADMIN_ENABLED
+  IArrayDevMgr(sysDevMgr),
+#endif
+  sysDevMgr_(sysDevMgr)
 {
 }
 
-ArrayDeviceManager::~ArrayDeviceManager()
+ArrayDeviceManager::~ArrayDeviceManager(void)
 {
     delete devs_;
 }
@@ -63,17 +67,17 @@ ArrayDeviceManager::Import(DeviceSet<string> nameSet)
     for (string devName : nameSet.nvm)
     {
         DevName name(devName);
-        UBlockDevice* uBlock = sysDevMgr_->GetDev(name);
+        UblockSharedPtr uBlock = sysDevMgr_->GetDev(name);
         if (nullptr == uBlock)
         {
             delete devs;
-            ret = (int)IBOF_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+            ret = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
             return ret;
         }
         if (uBlock->GetType() != DeviceType::NVRAM)
         {
             delete devs;
-            ret = (int)IBOF_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
+            ret = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
             return ret;
         }
         ret = devs->SetNvm(new ArrayDevice(uBlock));
@@ -87,17 +91,17 @@ ArrayDeviceManager::Import(DeviceSet<string> nameSet)
     for (string devName : nameSet.data)
     {
         DevName name(devName);
-        UBlockDevice* uBlock = sysDevMgr_->GetDev(name);
+        UblockSharedPtr uBlock = sysDevMgr_->GetDev(name);
         if (nullptr == uBlock)
         {
             delete devs;
-            ret = (int)IBOF_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+            ret = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
             return ret;
         }
         if (uBlock->GetType() != DeviceType::SSD)
         {
             delete devs;
-            ret = (int)IBOF_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
+            ret = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
             return ret;
         }
         ret = devs->AddData((new ArrayDevice(uBlock)));
@@ -110,17 +114,17 @@ ArrayDeviceManager::Import(DeviceSet<string> nameSet)
     for (string devName : nameSet.spares)
     {
         DevName name(devName);
-        UBlockDevice* uBlock = sysDevMgr_->GetDev(name);
+        UblockSharedPtr uBlock = sysDevMgr_->GetDev(name);
         if (nullptr == uBlock)
         {
             delete devs;
-            ret = (int)IBOF_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+            ret = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
             return ret;
         }
         if (uBlock->GetType() != DeviceType::SSD)
         {
             delete devs;
-            ret = (int)IBOF_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
+            ret = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
             return ret;
         }
         ret = devs->AddSpare(new ArrayDevice(uBlock));
@@ -152,11 +156,11 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet, uint32_t& missingCnt, 
     for (DeviceMeta meta : metaSet.nvm)
     {
         DevUid uid(meta.uid);
-        UBlockDevice* uBlock = sysDevMgr_->GetDev(uid);
+        UblockSharedPtr uBlock = sysDevMgr_->GetDev(uid);
         if (nullptr == uBlock)
         {
             delete devs;
-            ret = (int)IBOF_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+            ret = (int)POS_EVENT_ID::ARRAY_DEVICE_NVM_NOT_FOUND;
             return ret;
         }
         devs->SetNvm(new ArrayDevice(uBlock));
@@ -174,12 +178,19 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet, uint32_t& missingCnt, 
         }
         else
         {
-            UBlockDevice* uBlock = sysDevMgr_->GetDev(uid);
+            UblockSharedPtr uBlock = sysDevMgr_->GetDev(uid);
             if (uBlock == nullptr)
             {
                 missingCnt++;
                 meta.state = ArrayDeviceState::FAULT;
             }
+            else if (ArrayDeviceState::REBUILD == meta.state)
+            {
+                brokenCnt++;
+                POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEVICE_REBUILD_STATE,
+                    "Rebuilding device found {}", meta.uid);
+            }
+
             dev = new ArrayDevice(uBlock, meta.state);
         }
 
@@ -189,7 +200,7 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet, uint32_t& missingCnt, 
     for (DeviceMeta meta : metaSet.spares)
     {
         DevUid uid(meta.uid);
-        UBlockDevice* uBlock = sysDevMgr_->GetDev(uid);
+        UblockSharedPtr uBlock = sysDevMgr_->GetDev(uid);
         if (nullptr != uBlock)
         {
             devs->AddSpare(new ArrayDevice(uBlock));
@@ -204,16 +215,16 @@ int
 ArrayDeviceManager::AddSpare(string devName)
 {
     DevName name(devName);
-    UBlockDevice* spare = sysDevMgr_->GetDev(name);
+    UblockSharedPtr spare = sysDevMgr_->GetDev(name);
 
     if (spare == nullptr)
     {
-        return (int)IBOF_EVENT_ID::ARRAY_DEVICE_WRONG_NAME;
+        return (int)POS_EVENT_ID::ARRAY_DEVICE_WRONG_NAME;
     }
 
     if (spare->GetClass() != DeviceClass::SYSTEM)
     {
-        return (int)IBOF_EVENT_ID::ARRAY_DEVICE_ALREADY_ADDED;
+        return (int)POS_EVENT_ID::ARRAY_DEVICE_ALREADY_ADDED;
     }
 
     if (false == spare->IsAlive())
@@ -222,9 +233,9 @@ ArrayDeviceManager::AddSpare(string devName)
     }
 
     ArrayDevice* baseline = _GetBaseline(devs_->GetDevs().data);
-    if (baseline->uBlock->GetSize() != spare->GetSize())
+    if (baseline->GetUblock()->GetSize() != spare->GetSize())
     {
-        return (int)IBOF_EVENT_ID::ARRAY_SSD_SAME_CAPACITY_ERROR;
+        return (int)POS_EVENT_ID::ARRAY_SSD_SAME_CAPACITY_ERROR;
     }
 
     devs_->AddSpare(new ArrayDevice(spare));
@@ -242,28 +253,28 @@ ArrayDeviceManager::_CheckDevs(const ArrayDeviceSet& devSet)
 
     for (ArrayDevice* dev : devSet.nvm)
     {
-        if (nullptr != dev->uBlock && false == dev->uBlock->IsAlive())
+        if (nullptr != dev->GetUblock() && false == dev->GetUblock()->IsAlive())
         {
-            int eventId = (int)IBOF_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
-            IBOF_TRACE_WARN(eventId, "Device not found");
+            int eventId = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+            POS_TRACE_WARN(eventId, "Device not found");
             return eventId;
         }
     }
     for (ArrayDevice* dev : devSet.data)
     {
-        if (nullptr != dev->uBlock && false == dev->uBlock->IsAlive())
+        if (nullptr != dev->GetUblock() && false == dev->GetUblock()->IsAlive())
         {
-            int eventId = (int)IBOF_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
-            IBOF_TRACE_WARN(eventId, "Device not found");
+            int eventId = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+            POS_TRACE_WARN(eventId, "Device not found");
             return eventId;
         }
     }
     for (ArrayDevice* dev : devSet.spares)
     {
-        if (nullptr == dev->uBlock || false == dev->uBlock->IsAlive())
+        if (nullptr == dev->GetUblock() || false == dev->GetUblock()->IsAlive())
         {
-            int eventId = (int)IBOF_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
-            IBOF_TRACE_WARN(eventId, "Device not found");
+            int eventId = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+            POS_TRACE_WARN(eventId, "Device not found");
             return eventId;
         }
     }
@@ -271,7 +282,7 @@ ArrayDeviceManager::_CheckDevs(const ArrayDeviceSet& devSet)
 }
 
 void
-ArrayDeviceManager::Clear()
+ArrayDeviceManager::Clear(void)
 {
     if (devs_ != nullptr)
     {
@@ -286,7 +297,7 @@ ArrayDeviceManager::ExportToMeta(void)
 {
     DeviceSet<ArrayDevice*> _d = devs_->GetDevs();
     DeviceSet<DeviceMeta> metaSet;
-    string sn = _d.nvm.at(0)->uBlock->GetSN();
+    string sn = _d.nvm.at(0)->GetUblock()->GetSN();
     DeviceMeta nvmMeta(sn, _d.nvm.at(0)->GetState());
     metaSet.nvm.push_back(nvmMeta);
 
@@ -300,13 +311,13 @@ ArrayDeviceManager::ExportToMeta(void)
         }
         else
         {
-            deviceMeta.uid = dev->uBlock->GetSN();
+            deviceMeta.uid = dev->GetUblock()->GetSN();
         }
         metaSet.data.push_back(deviceMeta);
     }
     for (ArrayDevice* dev : _d.spares)
     {
-        DeviceMeta deviceMeta(dev->uBlock->GetSN(), dev->GetState());
+        DeviceMeta deviceMeta(dev->GetUblock()->GetSN(), dev->GetState());
         metaSet.spares.push_back(deviceMeta);
     }
 
@@ -336,11 +347,11 @@ ArrayDeviceManager::RemoveSpare(string devName)
     ArrayDeviceType devType;
     ArrayDevice* dev = nullptr;
     DevName name(devName);
-    UBlockDevice* uBlock = sysDevMgr_->GetDev(name);
+    UblockSharedPtr uBlock = sysDevMgr_->GetDev(name);
     tie(dev, devType) = this->GetDev(uBlock);
     if (devType != ArrayDeviceType::SPARE)
     {
-        return (int)IBOF_EVENT_ID::ARRAY_DEVICE_REMOVE_FAIL;
+        return (int)POS_EVENT_ID::ARRAY_DEVICE_REMOVE_FAIL;
     }
     return devs_->RemoveSpare(dev);
 }
@@ -422,7 +433,7 @@ ArrayDeviceManager::_CheckDevsCount(ArrayDeviceSet devSet)
     uint32_t faultDataCnt = 0;
     for (ArrayDevice* dev : devSet.data)
     {
-        if (dev->uBlock != nullptr)
+        if (dev->GetUblock() != nullptr)
         {
             activeDataCnt++;
         }
@@ -435,7 +446,7 @@ ArrayDeviceManager::_CheckDevsCount(ArrayDeviceSet devSet)
     uint32_t totalCnt = activeDataCnt + spareCnt;
 
     int ret = 0;
-    uint32_t errEventId = (uint32_t)IBOF_EVENT_ID::ARRAY_DEVICE_COUNT_ERROR;
+    uint32_t errEventId = (uint32_t)POS_EVENT_ID::ARRAY_DEVICE_COUNT_ERROR;
 
     uint32_t maxNvmCnt = ArrayConfig::NVM_DEVICE_COUNT;
     uint32_t minDataCnt = ArrayConfig::MINIMUM_DATA_DEVICE_COUNT;
@@ -443,19 +454,19 @@ ArrayDeviceManager::_CheckDevsCount(ArrayDeviceSet devSet)
 
     if (nvmCnt != maxNvmCnt)
     {
-        IBOF_TRACE_ERROR(errEventId,
+        POS_TRACE_ERROR(errEventId,
             "The number of nvm device must be {}", maxNvmCnt);
         ret = errEventId;
     }
     else if (activeDataCnt + faultDataCnt < minDataCnt)
     {
-        IBOF_TRACE_ERROR(errEventId,
+        POS_TRACE_ERROR(errEventId,
             "The number of data disks must be {} or more", minDataCnt);
         ret = errEventId;
     }
     else if (totalCnt > maxDataCnt)
     {
-        IBOF_TRACE_ERROR(errEventId,
+        POS_TRACE_ERROR(errEventId,
             "The number of disks must be no more {}", maxDataCnt);
         ret = errEventId;
     }
@@ -478,8 +489,8 @@ ArrayDeviceManager::_CheckFaultTolerance(DeviceSet<ArrayDevice*> devSet)
     const int brokenCnt = 2;
     if (faultDevCnt >= brokenCnt)
     {
-        uint32_t eventId = (uint32_t)IBOF_EVENT_ID::ARRAY_BROKEN_ERROR;
-        IBOF_TRACE_ERROR(eventId,
+        uint32_t eventId = (uint32_t)POS_EVENT_ID::ARRAY_BROKEN_ERROR;
+        POS_TRACE_ERROR(eventId,
             "Array cannot be configured due to faults of {} data devices",
             faultDevCnt);
         return eventId;
@@ -495,10 +506,10 @@ ArrayDeviceManager::_CheckNvmCapacity(const DeviceSet<ArrayDevice*>& devSet)
     uint32_t logicalChunkCount = devSet.data.size() - ArrayConfig::PARITY_COUNT;
     uint64_t minNvmSize = _ComputeMinNvmCapacity(logicalChunkCount);
 
-    if (nvm->uBlock->GetSize() < minNvmSize)
+    if (nvm->GetUblock()->GetSize() < minNvmSize)
     {
-        int eventId = (int)IBOF_EVENT_ID::ARRAY_NVM_CAPACITY_ERROR;
-        IBOF_TRACE_WARN(eventId, "NVM device size error");
+        int eventId = (int)POS_EVENT_ID::ARRAY_NVM_CAPACITY_ERROR;
+        POS_TRACE_WARN(eventId, "NVM device size error");
         return eventId;
     }
 
@@ -526,12 +537,12 @@ int
 ArrayDeviceManager::_CheckSsdsCapacity(const ArrayDeviceSet& devSet)
 {
     ArrayDevice* baseline = _GetBaseline(devSet.data);
-    uint64_t capacityBytes = baseline->uBlock->GetSize();
+    uint64_t capacityBytes = baseline->GetUblock()->GetSize();
 
     if (capacityBytes < ArrayConfig::MINIMUM_SSD_SIZE_BYTE || capacityBytes > ArrayConfig::MAXIMUM_SSD_SIZE_BYTE)
     {
-        uint32_t eventId = (uint32_t)IBOF_EVENT_ID::ARRAY_SSD_CAPACITY_ERROR;
-        IBOF_TRACE_ERROR(eventId,
+        uint32_t eventId = (uint32_t)POS_EVENT_ID::ARRAY_SSD_CAPACITY_ERROR;
+        POS_TRACE_ERROR(eventId,
             "SSD capacity is not valid. Valid capacity is from {}GB to {}TB",
             ArrayConfig::MINIMUM_SSD_SIZE_BYTE / SIZE_GB,
             ArrayConfig::MAXIMUM_SSD_SIZE_BYTE / SIZE_TB);
@@ -539,19 +550,19 @@ ArrayDeviceManager::_CheckSsdsCapacity(const ArrayDeviceSet& devSet)
     }
     for (ArrayDevice* dev : devSet.data)
     {
-        if (ArrayDeviceState::NORMAL == dev->GetState() && capacityBytes != dev->uBlock->GetSize())
+        if (ArrayDeviceState::NORMAL == dev->GetState() && capacityBytes != dev->GetUblock()->GetSize())
         {
-            int eventId = (int)IBOF_EVENT_ID::ARRAY_SSD_SAME_CAPACITY_ERROR;
-            IBOF_TRACE_WARN(eventId, "SSDs must be the same sizes");
+            int eventId = (int)POS_EVENT_ID::ARRAY_SSD_SAME_CAPACITY_ERROR;
+            POS_TRACE_WARN(eventId, "SSDs must be the same sizes");
             return eventId;
         }
     }
     for (ArrayDevice* dev : devSet.spares)
     {
-        if (capacityBytes != dev->uBlock->GetSize())
+        if (capacityBytes != dev->GetUblock()->GetSize())
         {
-            int eventId = (int)IBOF_EVENT_ID::ARRAY_SSD_SAME_CAPACITY_ERROR;
-            IBOF_TRACE_WARN(eventId, "SSDs must be the same sizes");
+            int eventId = (int)POS_EVENT_ID::ARRAY_SSD_SAME_CAPACITY_ERROR;
+            POS_TRACE_WARN(eventId, "SSDs must be the same sizes");
             return eventId;
         }
     }
@@ -560,36 +571,43 @@ ArrayDeviceManager::_CheckSsdsCapacity(const ArrayDeviceSet& devSet)
 }
 
 tuple<ArrayDevice*, ArrayDeviceType>
-ArrayDeviceManager::GetDev(UBlockDevice* uBlock)
+ArrayDeviceManager::GetDev(UblockSharedPtr uBlock)
 {
     if (uBlock == nullptr)
     {
         return make_tuple(nullptr, ArrayDeviceType::NONE);
     }
-
     DeviceSet<ArrayDevice*> _d = devs_->GetDevs();
     for (ArrayDevice* dev : _d.nvm)
     {
-        if (dev->uBlock == uBlock)
+        if (dev->GetUblock() == uBlock)
         {
             return make_tuple(dev, ArrayDeviceType::NVM);
         }
     }
     for (ArrayDevice* dev : _d.data)
     {
-        if (dev->uBlock == uBlock)
+        if (dev->GetUblock() == uBlock)
         {
             return make_tuple(dev, ArrayDeviceType::DATA);
         }
     }
     for (ArrayDevice* dev : _d.spares)
     {
-        if (dev->uBlock == uBlock)
+        if (dev->GetUblock() == uBlock)
         {
             return make_tuple(dev, ArrayDeviceType::SPARE);
         }
     }
     return make_tuple(nullptr, ArrayDeviceType::NONE);
+}
+
+tuple<ArrayDevice*, ArrayDeviceType>
+ArrayDeviceManager::GetDev(string devSn)
+{
+    DevUid sn(devSn);
+    UblockSharedPtr dev = sysDevMgr_->GetDev(sn);
+    return GetDev(dev);
 }
 
 ArrayDevice*
@@ -612,4 +630,9 @@ ArrayDeviceManager::_GetBaseline(const vector<ArrayDevice*>& devs)
     return baseline;
 }
 
-} // namespace ibofos
+void
+ArrayDeviceManager::SetArrayDeviceList(ArrayDeviceList* arrayDeviceList)
+{
+    this->devs_ = arrayDeviceList;
+}
+} // namespace pos

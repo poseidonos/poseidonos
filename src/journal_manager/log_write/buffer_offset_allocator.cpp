@@ -34,35 +34,48 @@
 
 #include <functional>
 
-#include "../checkpoint/log_group_releaser.h"
-#include "src/include/ibof_event_id.h"
+#include "src/journal_manager/checkpoint/log_group_releaser.h"
+#include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/config/log_buffer_layout.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
 BufferOffsetAllocator::BufferOffsetAllocator(void)
-: releaser(nullptr),
-  currentLogGroupId(INT32_MAX),
-  numLogGroups(0),
-  maxOffsetPerGroup(UINT32_MAX)
+: config(nullptr),
+  releaser(nullptr),
+  nextSeqNumber(UINT32_MAX),
+  currentLogGroupId(INT32_MAX)
 {
 }
 
 BufferOffsetAllocator::~BufferOffsetAllocator(void)
 {
+    for (auto it : statusList)
+    {
+        delete it;
+    }
     statusList.clear();
 }
 
 void
-BufferOffsetAllocator::Init(int num, uint32_t groupSize,
-    LogGroupReleaser* logGroupReleaser)
+BufferOffsetAllocator::Init(LogGroupReleaser* logGroupReleaser,
+    JournalConfiguration* journalConfiguration)
 {
     releaser = logGroupReleaser;
+    config = journalConfiguration;
 
-    numLogGroups = num;
-    maxOffsetPerGroup = groupSize;
+    int numLogGroups = config->GetNumLogGroups();
+    uint64_t metaPageSize = config->GetMetaPageSize();
 
-    statusList.resize(numLogGroups);
+    for (int groupId = 0; groupId < numLogGroups; groupId++)
+    {
+        LogGroupLayout groupLayout = config->GetLogBufferLayout(groupId);
+        LogGroupBufferStatus* status = new LogGroupBufferStatus(groupLayout.startOffset,
+            groupLayout.footerStartOffset, metaPageSize);
+        statusList.push_back(status);
+    }
 
     Reset();
 }
@@ -70,90 +83,71 @@ BufferOffsetAllocator::Init(int num, uint32_t groupSize,
 void
 BufferOffsetAllocator::Reset(void)
 {
-    for (auto it = statusList.begin(); it != statusList.end(); ++it)
+    for (auto it : statusList)
     {
-        (*it).Reset();
+        it->Reset();
     }
 
     nextSeqNumber = 0;
     currentLogGroupId = 0;
 }
 
-OffsetInFile
-BufferOffsetAllocator::AllocateBuffer(int size)
+int
+BufferOffsetAllocator::AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffset)
 {
-    std::unique_lock<std::mutex> lock(allocateLock);
+    std::lock_guard<std::mutex> lock(allocateLock);
 
-    if (statusList[currentLogGroupId].status == LogGroupBufferStatus::INIT)
+    if (statusList[currentLogGroupId]->GetStatus() == LogGroupStatus::FULL)
     {
-        _SetActive(currentLogGroupId);
+        return (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
+    }
 
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_DEBUG,
+    if (statusList[currentLogGroupId]->GetStatus() == LogGroupStatus::INIT)
+    {
+        statusList[currentLogGroupId]->SetActive(_GetNextSeqNum());
+
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_DEBUG,
             "New log group {} is allocated", currentLogGroupId);
     }
 
-    if (statusList[currentLogGroupId].status == LogGroupBufferStatus::FULL)
+    uint64_t offset = 0;
+    if (statusList[currentLogGroupId]->TryToAllocate(logSize, offset) == false)
     {
-        return {currentLogGroupId, -1 * (int)IBOF_EVENT_ID::JOURNAL_LOG_GROUP_FULL, 0};
-    }
-
-    if (_CanAllocate(currentLogGroupId, size) == false)
-    {
-        if (statusList[currentLogGroupId].waitingToBeFilled.exchange(true) == false)
+        _TryToSetFull(currentLogGroupId);
+        int result = _GetNewActiveGroup();
+        if (result != 0)
         {
-            _TryToSetFull(currentLogGroupId);
+            return result;
+        }
 
-            int result = _GetNewActiveGroup();
-            if (result < 0)
-            {
-                return {currentLogGroupId, -1 * (int)IBOF_EVENT_ID::JOURNAL_LOG_GROUP_FULL, 0};
-            }
+        if (statusList[currentLogGroupId]->TryToAllocate(logSize, offset) == false)
+        {
+            return (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
         }
     }
 
-    int offset = _GetBufferOffsetToWrite(currentLogGroupId, size);
-    return {currentLogGroupId, offset, statusList[currentLogGroupId].seqNum};
-}
+    allocatedOffset = offset;
 
-void
-BufferOffsetAllocator::_SetActive(int id)
-{
-    statusList[id].seqNum = _GetNextSeqNum();
-    statusList[id].status = LogGroupBufferStatus::ACTIVE;
-}
-
-uint64_t
-BufferOffsetAllocator::_GetBufferOffsetToWrite(int id, int size)
-{
-    uint32_t bufferOffset = statusList[id].nextOffset;
-    statusList[id].nextOffset += size;
-
-    std::lock_guard<std::mutex> lock(statusList[id].countLock);
-    statusList[id].numLogsAdded++;
-
-    return bufferOffset;
-}
-
-bool
-BufferOffsetAllocator::_CanAllocate(int id, int size)
-{
-    return (statusList[id].nextOffset + size < maxOffsetPerGroup);
+    return 0;
 }
 
 int
 BufferOffsetAllocator::_GetNewActiveGroup(void)
 {
+    int numLogGroups = config->GetNumLogGroups();
     currentLogGroupId = (currentLogGroupId + 1) % numLogGroups;
 
-    if (statusList[currentLogGroupId].status != LogGroupBufferStatus::INIT)
+    if (statusList[currentLogGroupId]->GetStatus() != LogGroupStatus::INIT)
     {
-        IBOF_TRACE_WARN((int)IBOF_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE,
+        POS_TRACE_WARN((int)POS_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE,
             "No log buffer available for journal");
-        return -1 * (int)IBOF_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE;
+        return (int)POS_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE;
     }
     else
     {
-        _SetActive(currentLogGroupId);
+        statusList[currentLogGroupId]->SetActive(_GetNextSeqNum());
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_DEBUG,
+            "New log group {} is allocated", currentLogGroupId);
         return 0;
     }
 }
@@ -161,69 +155,77 @@ BufferOffsetAllocator::_GetNewActiveGroup(void)
 uint32_t
 BufferOffsetAllocator::_GetNextSeqNum(void)
 {
-    std::unique_lock<std::mutex> lock(seqNumberLock);
     return nextSeqNumber++;
 }
 
 void
 BufferOffsetAllocator::_TryToSetFull(int id)
 {
-    std::unique_lock<std::mutex> lock(fullTriggerLock);
-    if ((statusList[id].waitingToBeFilled == true) && _IsFullyFilled(id))
+    bool changedToFullStatus = statusList[id]->TryToSetFull();
+    if (changedToFullStatus == true)
     {
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_LOG_GROUP_FULL,
-            "Log group id {} is full (numLogsAdded {}, numLogsFilled {})",
-            id, statusList[id].numLogsAdded, statusList[id].numLogsFilled);
-
-        statusList[id].status = LogGroupBufferStatus::FULL;
-        statusList[id].waitingToBeFilled = false;
-
         releaser->AddToFullLogGroup(id);
+
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL,
+            "Log group id {} is added to full log group", id);
     }
 }
 
-bool
-BufferOffsetAllocator::_IsFullyFilled(int id)
+void
+BufferOffsetAllocator::LogWriteCanceled(int id)
 {
-    return (statusList[id].numLogsAdded == statusList[id].numLogsFilled);
+    statusList[id]->LogFilled();
+    _TryToSetFull(id);
 }
 
 void
 BufferOffsetAllocator::LogFilled(int id, MapPageList& dirty)
 {
-    {
-        std::lock_guard<std::mutex> lock(statusList[id].countLock);
-        statusList[id].numLogsFilled++;
-        assert(statusList[id].numLogsAdded >= statusList[id].numLogsFilled);
-    }
+    statusList[id]->LogFilled();
     _TryToSetFull(id);
 }
 
 void
 BufferOffsetAllocator::LogBufferReseted(int logGroupId)
 {
-    statusList[logGroupId].Reset();
+    statusList[logGroupId]->Reset();
 }
 
-LogGroupBufferStatus
-BufferOffsetAllocator::GetStatus(int logGroupId)
-{
-    return statusList[logGroupId].status;
-}
-
-uint32_t
+uint64_t
 BufferOffsetAllocator::GetNumLogsAdded(void)
 {
-    uint32_t numLogsAdded = 0;
+    uint64_t numLogsAdded = 0;
+    int numLogGroups = config->GetNumLogGroups();
+
     for (int id = 0; id < numLogGroups; id++)
     {
-        std::lock_guard<std::mutex> lock(statusList[id].countLock);
-        if (statusList[id].status != LogGroupBufferStatus::INVALID)
-        {
-            numLogsAdded += statusList[id].numLogsAdded;
-        }
+        numLogsAdded += statusList[id]->GetNumLogsAdded();
     }
     return numLogsAdded;
 }
 
-} // namespace ibofos
+uint64_t
+BufferOffsetAllocator::GetNextOffset(void)
+{
+    return statusList[currentLogGroupId]->GetNextOffset();
+}
+
+LogGroupStatus
+BufferOffsetAllocator::GetBufferStatus(int logGroupId)
+{
+    return statusList[logGroupId]->GetStatus();
+}
+
+uint32_t
+BufferOffsetAllocator::GetSequenceNumber(int logGroupId)
+{
+    return statusList[logGroupId]->GetSeqNum();
+}
+
+int
+BufferOffsetAllocator::GetLogGroupId(uint64_t fileOffset)
+{
+    return fileOffset / config->GetLogGroupSize();
+}
+
+} // namespace pos

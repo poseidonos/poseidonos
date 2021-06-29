@@ -32,7 +32,7 @@
 
 #include "src/gc/reverse_map_load_completion.h"
 
-namespace ibofos
+namespace pos
 {
 ReverseMapLoadCompletion::ReverseMapLoadCompletion(void)
 : Callback(false)
@@ -49,4 +49,4 @@ ReverseMapLoadCompletion::_DoSpecificJob(void)
     return true;
 }
 
-} // namespace ibofos
+} // namespace pos

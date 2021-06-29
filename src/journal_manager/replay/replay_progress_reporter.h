@@ -33,12 +33,13 @@
 #pragma once
 #include <map>
 
-namespace ibofos
+namespace pos
 {
 enum class ReplayTaskId
 {
     READ_LOG_BUFFER,
     REPLAY_LOGS,
+    REPLAY_VOLUME_DELETION,
     FLUSH_METADATA,
     RESET_LOG_BUFFER,
     FLUSH_PENDING_STRIPES
@@ -86,4 +87,4 @@ private:
     int reportedProgress;
 };
 
-} // namespace ibofos
+} // namespace pos

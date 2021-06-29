@@ -38,13 +38,13 @@
 
 #include "meta_file_intf.h"
 
-namespace ibofos
+namespace pos
 {
 class MockFileIntf : public MetaFileIntf
 {
 public:
-    explicit MockFileIntf(std::string name)
-    : MetaFileIntf(name)
+    explicit MockFileIntf(std::string fname, std::string aname)
+    : MetaFileIntf(fname, aname)
     {
     }
     virtual ~MockFileIntf(void) = default;
@@ -52,7 +52,7 @@ public:
     virtual int Create(uint64_t fileSize, StorageOpt storageOpt) override;
     virtual bool DoesFileExist(void) override;
     virtual int Delete(void) override;
-    virtual uint32_t GetFileSize(void) override;
+    virtual uint64_t GetFileSize(void) override;
 
     virtual int AsyncIO(AsyncMetaFileIoCtx* ctx) override;
     virtual int CheckIoDoneStatus(void* data) override;
@@ -61,12 +61,12 @@ public:
     virtual int Close(void) override;
 
 private:
-    virtual int _Read(int fd, uint32_t fileOffset, uint32_t length, char* buffer) override;
-    virtual int _Write(int fd, uint32_t fileOffset, uint32_t length, char* buffer) override;
+    virtual int _Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
+    virtual int _Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
 
     void _MockAsyncIo(AsyncMetaFileIoCtx* ctx);
     void _MockAsyncRead(AsyncMetaFileIoCtx* ctx);
     void _MockAsyncWrite(AsyncMetaFileIoCtx* ctx);
 };
 
-} // namespace ibofos
+} // namespace pos

@@ -38,7 +38,7 @@
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 class VolumeNamePolicy
 {
@@ -52,4 +52,4 @@ private:
     const char* ALLOWED_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_- ";
 };
 
-} // namespace ibofos
+} // namespace pos

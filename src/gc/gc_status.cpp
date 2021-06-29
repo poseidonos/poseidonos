@@ -31,8 +31,9 @@
  */
 
 #include "src/gc/gc_status.h"
+#include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
 CopyInfo::CopyInfo(uint32_t victimSegment)
 : segmentId(victimSegment)
@@ -97,4 +98,4 @@ GcStatus::SetCopyInfo(bool started, uint32_t victimSegment,
     return 0;
 }
 
-} // namespace ibofos
+} // namespace pos

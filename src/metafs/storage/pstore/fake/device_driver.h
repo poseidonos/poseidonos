@@ -38,8 +38,11 @@
 #include "mss_ramdisk.h"
 #include "mss_ret_code.h"
 #include "os_header.h"
-#include "src/io/general_io/ubio.h"
+#include "src/bio/ubio.h"
+#include <thread>
 
+namespace pos
+{
 #define NVRAM_CAPACITY 2UL * 1024 * 1024 * 1024
 #define SSD_CAPACITY 2UL * 1024 * 1024 * 1024
 
@@ -50,8 +53,8 @@ class DeviceDriver
 {
 public:
     static DeviceDriver* Instance(MetaStorageType mediaType);
-    MssReturnCode SyncIO(ibofos::Ubio* ubio);
-    MssReturnCode AsyncIO(ibofos::Ubio* ubio);
+    MssReturnCode SyncIO(pos::Ubio* ubio);
+    MssReturnCode AsyncIO(pos::Ubio* ubio);
     void Flush(void);
 
     explicit DeviceDriver(MetaStorageType mediaType);
@@ -63,13 +66,14 @@ private:
     MetaStorageType mediaType_;
     std::mutex ramLock;
     std::mutex queueLock;
-    std::queue<ibofos::Ubio*> requestQueue;
+    std::queue<pos::Ubio*> requestQueue;
     std::thread asyncHandlerThread;
     bool quitThread;
     int driverState;
-    void _AsyncHandlerRead(ibofos::Ubio* ubio);
-    void _AsyncHandlerWrite(ibofos::Ubio* ubio);
+    void _AsyncHandlerRead(pos::Ubio* ubio);
+    void _AsyncHandlerWrite(pos::Ubio* ubio);
     void _AsyncRequestHandler(void);
 };
+} // namespace pos
 
 #endif // _INCLUDE_DEVICE_DRIVER_H_

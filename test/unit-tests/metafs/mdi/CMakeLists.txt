@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(mdi_manager_ut mdi_manager_test.cpp)
+POS_ADD_UNIT_TEST(mdi_level_def_ut mdi_level_def_test.cpp)

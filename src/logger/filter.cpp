@@ -37,9 +37,9 @@
 #include <sstream>
 
 #include "src/helper/string_helper.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 
-namespace ibofos_logger
+namespace pos_logger
 {
 void
 Filter::Clear()
@@ -72,7 +72,7 @@ Filter::ApplyFilter(string filePath)
     }
     else
     {
-        return (int)IBOF_EVENT_ID::LOGGER_FILTER_POLICY_FILE_NOT_FOUND;
+        return (int)POS_EVENT_ID::LOGGER_FILTER_POLICY_FILE_NOT_FOUND;
     }
 
     return 0;
@@ -103,7 +103,7 @@ Filter::_Decode(string policy)
     vector<string> pol = _Split(policy, policyDelimiter);
     if (pol.size() != 2)
     {
-        return (int)IBOF_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL;
+        return (int)POS_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL;
     }
     string mode = pol.at(0);
     string val = pol.at(1);
@@ -115,7 +115,7 @@ Filter::_Decode(string policy)
 
     if (mode != "include" && mode != "exclude")
     {
-        return (int)IBOF_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL;
+        return (int)POS_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL;
     }
 
     vector<string> id = _Split(val, idDelimiter);
@@ -138,7 +138,7 @@ Filter::_Decode(string policy)
                 }
                 else
                 {
-                    return (int)IBOF_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL;
+                    return (int)POS_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL;
                 }
             }
             else
@@ -150,7 +150,7 @@ Filter::_Decode(string policy)
     catch (const std::exception& e)
     {
         filter.clear();
-        return (int)IBOF_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL;
+        return (int)POS_EVENT_ID::LOGGER_FILTER_POLICY_DECODE_FAIL;
     }
 
     if (mode == "include")
@@ -189,4 +189,4 @@ Filter::_Decode(string policy)
     return 0;
 }
 
-} // namespace ibofos_logger
+} // namespace pos_logger

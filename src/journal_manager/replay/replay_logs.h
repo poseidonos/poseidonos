@@ -34,26 +34,39 @@
 
 #include <vector>
 
-#include "../log/log_handler.h"
-#include "active_user_stripe_replayer.h"
-#include "active_wb_stripe_replayer.h"
-#include "replay_stripe.h"
-#include "replay_task.h"
+#include "src/journal_manager/replay/active_user_stripe_replayer.h"
+#include "src/journal_manager/replay/active_wb_stripe_replayer.h"
+#include "src/journal_manager/replay/log_delete_checker.h"
+#include "src/journal_manager/replay/replay_task.h"
+#include "src/journal_manager/replay/replay_log_list.h"
 
-namespace ibofos
+#include "src/mapper/i_vsamap.h"
+#include "src/mapper/i_stripemap.h"
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/array_models/interface/i_array_info.h"
+
+namespace pos
 {
-class Mapper;
-class Allocator;
-class Array;
+class IVSAMap;
+class IStripeMap;
+class IContextManager;
+class IContextReplayer;
+class IBlockAllocator;
+class IArrayInfo;
 
 class LogReplayer;
+class ReplayStripe;
+class LogHandlerInterface;
 
 class ReplayLogs : public ReplayTask
 {
 public:
-    ReplayLogs(LogList& logList, Mapper* mapper, Allocator* allocator,
-        Array* array, ReplayProgressReporter* reporter,
-        PendingStripeList& pendingWbStripes);
+    ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
+        IVSAMap* vsaMap, IStripeMap* stripeMap,
+        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+        IContextManager* contextManager,
+        IContextReplayer* contextReplayer, IArrayInfo* arrayInfo,
+        ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes);
     virtual ~ReplayLogs(void);
 
     virtual int Start(void) override;
@@ -62,19 +75,30 @@ public:
     virtual int GetNumSubTasks(void) override;
 
 private:
-    void _CreateReplayStripe(void);
-    void _DeleteVolumeLogs(LogHandlerInterface* log);
-    ReplayStripe* _FindStripe(StripeId vsid);
-    int _Replay(void);
+    int _ReplayFinishedStripes(void);
+    int _ReplayUnfinishedStripes(void);
 
-    LogList& logList;
-    Mapper* mapper;
-    Allocator* allocator;
-    Array* array;
+    int _ReplayStripe(ReplayStripe* stripe);
 
-    std::vector<ReplayStripe*> replayStripeList;
+    ReplayStripe* _FindUserStripe(StripeId vsid);
+    void _MoveToReplayedStripe(ReplayStripe* stripe);
+
+    ReplayLogList& logList;
+    LogDeleteChecker* logDeleteChecker;
+
+    IVSAMap* vsaMap;
+    IStripeMap* stripeMap;
+    IBlockAllocator* blockAllocator;
+    IWBStripeAllocator* wbStripeAllocator;
+    IContextManager* contextManager;
+    IContextReplayer* contextReplayer;
+    IArrayInfo* arrayInfo;
+
+    std::vector<ReplayStripe*> replayingStripeList;
+    std::vector<ReplayStripe*> replayedStripeList;
+
     ActiveWBStripeReplayer* wbStripeReplayer;
     ActiveUserStripeReplayer* userStripeReplayer;
 };
 
-} // namespace ibofos
+} // namespace pos

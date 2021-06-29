@@ -36,7 +36,7 @@
 
 #include "meta_file_include.h"
 
-namespace ibofos
+namespace pos
 {
 class AsyncMetaFileIoCtx;
 
@@ -49,7 +49,9 @@ public:
     AsyncMetaFileIoCtx(void);
     virtual ~AsyncMetaFileIoCtx(void) = default;
 
-    void HandleIoComplete(void* data);
+    virtual void HandleIoComplete(void* data);
+    virtual int GetError(void);
+    virtual uint64_t GetLength(void);
 
     MetaFsIoOpcode opcode;
     int fd;
@@ -58,10 +60,8 @@ public:
     char* buffer;
     MetaIoCbPtr callback;
 
-    VolumeIoSmartPtr volumeIo;
-
     int error = 0;
     MetaFileIoCbPtr ioDoneCheckCallback;
 };
 
-} // namespace ibofos
+} // namespace pos

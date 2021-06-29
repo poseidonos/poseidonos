@@ -1,8 +1,8 @@
 #include <assert.h>
 
-#include "src/scheduler/event_argument.h"
+#include "src/event_scheduler/event_argument.h"
 
-namespace ibofos
+namespace pos
 {
 
 EventScheduler* EventArgument::eventScheduler = nullptr;

@@ -34,13 +34,14 @@
 #include "io_submit_handler_test.h"
 
 #include <iostream>
+#include <unistd.h>
 
 #include "src/include/memory.h"
-#include "src/io/general_io/buffer_entry.h"
-#include "src/scheduler/event_argument.h"
-#include "src/scheduler/io_dispatcher.h"
+#include "src/array/ft/buffer_entry.h"
+#include "src/event_scheduler/callback.h"
+#include "src/io_scheduler/io_dispatcher.h"
 
-namespace ibofos
+namespace pos
 {
 class WriteTestCompletion : public Callback
 {
@@ -109,8 +110,9 @@ WriteTestCompletion::_DoSpecificJob(void)
 
     std::cout << "5. AsyncIOTest:: Verifying pattern #" << bufferIndex << " start ..." << std::endl;
 
-    IOSubmitHandler::SubmitAsyncIO(IODirection::READ, bufferList,
-        startLSA, readBufferEntry->GetBlkCnt(), USER_DATA, callback);
+    std::string arr_name = "arr_name";
+    IIOSubmitHandler::GetInstance()->SubmitAsyncIO(IODirection::READ, bufferList,
+        startLSA, readBufferEntry->GetBlkCnt(), USER_DATA, callback, arr_name);
 
     return true;
 }
@@ -137,14 +139,14 @@ VerifyTestCompletion::_DoSpecificJob(void)
 {
     // Read and verify
     bool successful = IOSubmitHandlerTest::VerifyPattern(
-        readBufferEntry->GetBufferEntry(),
-        writeBufferEntry->GetBufferEntry(),
+        readBufferEntry->GetBufferPtr(),
+        writeBufferEntry->GetBufferPtr(),
         readBufferEntry->GetBlkCnt() * BLOCK_SIZE);
     if (false == successful)
     {
         std::cout << "Miscompare!!!!!!" << std::endl;
         std::cout << "Buffer Index: " << bufferIndex << std::endl;
-        std::cout << "Block Count: " << readBufferEntry->GetBufferEntry() << std::endl;
+        std::cout << "Block Count: " << readBufferEntry->GetBufferPtr() << std::endl;
     }
 
     remainingRequests--;
@@ -187,7 +189,7 @@ IOSubmitHandlerTest::TestSyncIO(void)
     std::cout << "2. SyncIOTest:: Generating Random patterns..." << std::endl;
     for (uint32_t bufferIndex = 0; bufferIndex < BUFFER_COUNT; bufferIndex++)
     {
-        GeneratePattern(writeBufferEntry[bufferIndex]->GetBufferEntry(),
+        GeneratePattern(writeBufferEntry[bufferIndex]->GetBufferPtr(),
             writeBufferEntry[bufferIndex]->GetBlkCnt() * BLOCK_SIZE);
 
         std::list<BufferEntry> bufferList;
@@ -198,8 +200,9 @@ IOSubmitHandlerTest::TestSyncIO(void)
             .offset = 0,
         };
 
-        IOSubmitHandler::SyncIO(IODirection::WRITE, bufferList,
-            startLSA, writeBufferEntry[bufferIndex]->GetBlkCnt(), USER_DATA);
+        std::string arr_name = "arr_name";
+        IIOSubmitHandler::GetInstance()->SyncIO(IODirection::WRITE, bufferList,
+            startLSA, writeBufferEntry[bufferIndex]->GetBlkCnt(), USER_DATA, arr_name);
     }
     std::cout << "3. SyncIOTest:: " << BUFFER_COUNT << " Patterns have been Written ..." << std::endl;
 
@@ -215,11 +218,12 @@ IOSubmitHandlerTest::TestSyncIO(void)
             .offset = 0,
         };
 
-        IOSubmitHandler::SyncIO(IODirection::READ, bufferList,
-            startLSA, readBufferEntry[bufferIndex]->GetBlkCnt(), USER_DATA);
+        std::string arr_name = "arr_name";
+        IIOSubmitHandler::GetInstance()->SyncIO(IODirection::READ, bufferList,
+            startLSA, readBufferEntry[bufferIndex]->GetBlkCnt(), USER_DATA, arr_name);
 
-        successful = VerifyPattern(readBufferEntry[bufferIndex]->GetBufferEntry(),
-            writeBufferEntry[bufferIndex]->GetBufferEntry(),
+        successful = VerifyPattern(readBufferEntry[bufferIndex]->GetBufferPtr(),
+            writeBufferEntry[bufferIndex]->GetBufferPtr(),
             readBufferEntry[bufferIndex]->GetBlkCnt() * BLOCK_SIZE);
 
         if (false == successful)
@@ -236,8 +240,8 @@ IOSubmitHandlerTest::TestSyncIO(void)
     std::cout << "6. SyncIOTest:: Releasing Memory..." << std::endl;
     for (uint32_t bufferIndex = 0; bufferIndex < BUFFER_COUNT; bufferIndex++)
     {
-        free(writeBufferEntry[bufferIndex]->GetBufferEntry());
-        free(readBufferEntry[bufferIndex]->GetBufferEntry());
+        free(writeBufferEntry[bufferIndex]->GetBufferPtr());
+        free(readBufferEntry[bufferIndex]->GetBufferPtr());
         delete writeBufferEntry[bufferIndex];
         delete readBufferEntry[bufferIndex];
     }
@@ -272,7 +276,7 @@ IOSubmitHandlerTest::TestAsyncIO(void)
 
     for (uint32_t bufferIndex = 0; bufferIndex < BUFFER_COUNT; bufferIndex++)
     {
-        GeneratePattern(writeBufferEntry[bufferIndex]->GetBufferEntry(),
+        GeneratePattern(writeBufferEntry[bufferIndex]->GetBufferPtr(),
             writeBufferEntry[bufferIndex]->GetBlkCnt() * BLOCK_SIZE);
 
         std::list<BufferEntry> bufferList;
@@ -288,9 +292,10 @@ IOSubmitHandlerTest::TestAsyncIO(void)
                 writeBufferEntry[bufferIndex], readBufferEntry[bufferIndex]));
 
         std::cout << "3. AsyncIOTest:: Writing pattern #" << bufferIndex << " start ..." << std::endl;
-        IOSubmitHandler::SubmitAsyncIO(IODirection::WRITE, bufferList,
+        std::string arr_name = "arr_name";
+        IIOSubmitHandler::GetInstance()->SubmitAsyncIO(IODirection::WRITE, bufferList,
             startLSA, writeBufferEntry[bufferIndex]->GetBlkCnt(), USER_DATA,
-            callback);
+            callback, arr_name);
     }
 
     // wait until all done.
@@ -304,8 +309,8 @@ IOSubmitHandlerTest::TestAsyncIO(void)
     std::cout << "8. AsyncIOTest:: Releasing Memory..." << std::endl;
     for (uint32_t bufferIndex = 0; bufferIndex < BUFFER_COUNT; bufferIndex++)
     {
-        free(writeBufferEntry[bufferIndex]->GetBufferEntry());
-        free(readBufferEntry[bufferIndex]->GetBufferEntry());
+        free(writeBufferEntry[bufferIndex]->GetBufferPtr());
+        free(readBufferEntry[bufferIndex]->GetBufferPtr());
         delete writeBufferEntry[bufferIndex];
         delete readBufferEntry[bufferIndex];
     }
@@ -332,18 +337,15 @@ IOSubmitHandlerTest::VerifyPattern(
     return (0 == memcmpResult);
 }
 
-} // namespace ibofos
+} // namespace pos
 
 int
 main(void)
 {
     bool successful;
-    // Setup environment for the test.
-    ibofos::IODispatcher ioDispatcher;
-    ibofos::EventArgument::SetStaticMember(nullptr, &ioDispatcher);
 
     // Test start
-    ibofos::IOSubmitHandlerTest ioSubmitHandlerTest;
+    pos::IOSubmitHandlerTest ioSubmitHandlerTest;
 
     do
     {

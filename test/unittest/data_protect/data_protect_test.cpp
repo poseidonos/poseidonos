@@ -2,7 +2,7 @@
 #include "e2e_protect.h"
 #include <gtest/gtest.h>
 
-using namespace ibofos;
+using namespace pos;
 using namespace std;
 
 

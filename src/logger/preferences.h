@@ -39,7 +39,7 @@
 #include "src/helper/json_helper.h"
 
 using namespace std;
-namespace ibofos_logger
+namespace pos_logger
 {
 class Preferences
 {
@@ -103,9 +103,9 @@ public:
     spdlog::level::level_enum StringToLogLevel(string lvl);
 
 private:
-    const string LOG_PATH = "/var/log/ibofos/";
-    const string MINOR_LOG_NAME = "ibofos.log";
-    const string MAJOR_LOG_NAME = "ibofos_major.log";
+    const string LOG_PATH = "/var/log/pos/";
+    const string MINOR_LOG_NAME = "pos.log";
+    const string MAJOR_LOG_NAME = "pos_major.log";
     const string FILTER_NAME = "filter";
     static const int LOG_LEVEL_SIZE = 7;
     const string LOG_LEVEL_NAME[LOG_LEVEL_SIZE] = {
@@ -117,4 +117,4 @@ private:
     Filter filter;
     Deduplicator deduplicator;
 };
-} // namespace ibofos_logger
+} // namespace pos_logger

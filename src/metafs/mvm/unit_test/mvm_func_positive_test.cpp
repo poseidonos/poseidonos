@@ -30,20 +30,23 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "mvm_func_positive_test.h"
-
 #include "mdpage_control_info.h"
-#include "mfs.h"
-#include "mfs_common_const.h"
-#include "mfs_io_config.h"
-#include "mfs_time.h"
+#include "metafs.h"
+#include "metafs_common_const.h"
+#include "metafs_config.h"
+#include "metafs_time.h"
 
+namespace pos
+{
 // meta vol. open
 TEST_F(UtMVMFunctionalPositive, MetaVolumeOpen)
 {
+    std::string arrayName = "POSArray";
     bool resetCxt = false;
-    metaVolMgr.Close(resetCxt);
-    metaVolMgr.Open(false);
+    metaVolMgr.Close(resetCxt, arrayName);
+    metaVolMgr.Open(false, arrayName);
     EXPECT_EQ(metaVolMgr.IsModuleReady(), true);
 }
 
@@ -64,13 +67,13 @@ TEST_P(UtMVMFunctionalPositive, FileCreateMany)
     while (repeat--) // create random files by repeating
     {
         std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
-        MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             " File name = ", fileName.c_str());
 
-        IBOF_EVENT_ID sc;
+        POS_EVENT_ID sc;
         sc = CreateTestFile(fileName, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100);
-        EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
-        MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "Test file created sucessfully...");
     }
 }
@@ -78,118 +81,119 @@ TEST_P(UtMVMFunctionalPositive, FileCreateMany)
 // vol open check after close
 TEST_P(UtMVMFunctionalPositive, FileCreatePersistentCheckAfterVolumeClose)
 {
+    std::string arrayName = "POSArray";
     int repeat = GetParam();
 
     while (repeat--)
     {
         std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
-        MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             " File name = ", fileName.c_str());
 
-        IBOF_EVENT_ID sc;
+        POS_EVENT_ID sc;
         sc = CreateTestFile(fileName, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100);
-        EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
-        MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "Test file created sucessfully...");
     }
     bool resetCxt = false;
-    EXPECT_EQ(metaVolMgr.Close(resetCxt /*output*/), true);
-    EXPECT_EQ(metaVolMgr.Open(false), true);
+    EXPECT_EQ(metaVolMgr.Close(resetCxt /*output*/, arrayName), true);
+    EXPECT_EQ(metaVolMgr.Open(false, arrayName), true);
 }
 
 // file create -> open -> fd validity check
 TEST_F(UtMVMFunctionalPositive, FileOpen)
 {
-    FileFDType fd;
+    FileDescriptorType fd;
     std::string fileName = std::string("testfile" + std::to_string(GetTimeStampInMs()));
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         " File name = ", fileName.c_str());
 
-    IBOF_EVENT_ID sc;
+    POS_EVENT_ID sc;
     sc = CreateTestFile(fileName, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 400);
-    EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Test file created sucessfully...");
 
     sc = OpenTestFile(fileName, fd);
-    EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
 
-    const FileFDType invalidFD = MetaFsCommonConst::INVALID_FD;
+    const FileDescriptorType invalidFD = MetaFsCommonConst::INVALID_FD;
     EXPECT_NE(fd, invalidFD);
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Test file opened successfully...");
 
     sc = CloseTestFile(fd);
-    EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Test file closed successfully...");
 }
 
 // file create -> open -> close
 TEST_F(UtMVMFunctionalPositive, FileClose)
 {
-    IBOF_EVENT_ID ret;
-    FileFDType fd;
+    POS_EVENT_ID ret;
+    FileDescriptorType fd;
     std::string fileName = std::string("testfile" + std::to_string(GetTimeStampInMs()));
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         " File name = ", fileName.c_str());
 
     ret = CreateTestFile(fileName, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 400);
-    EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Test file created sucessfully...");
 
     ret = OpenTestFile(fileName, fd);
-    EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Test file opened successfully...");
 
     ret = CloseTestFile(fd);
-    EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Test file closed successfully...");
 }
 
 // check the file is on NVRAM
 void
-_CheckIfFileOnNVRAM(FileFDType fd)
+_CheckIfFileOnNVRAM(FileDescriptorType fd, std::string arrayName)
 {
-    IBOF_EVENT_ID ret;
+    POS_EVENT_ID ret;
     MetaStorageType outTargetMediaType;
-    ret = mvmTopMgr.GetTargetMediaType(fd, outTargetMediaType);
+    ret = mvmTopMgr.GetTargetMediaType(fd, arrayName, outTargetMediaType);
 
-    EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
     EXPECT_EQ(outTargetMediaType, MetaStorageType::NVRAM);
 }
 
 // check the file is on SSD
 void
-_CheckIfFileOnSSD(FileFDType fd)
+_CheckIfFileOnSSD(FileDescriptorType fd, std::string arrayName)
 {
-    IBOF_EVENT_ID ret;
+    POS_EVENT_ID ret;
     MetaStorageType outTargetMediaType;
-    ret = mvmTopMgr.GetTargetMediaType(fd, outTargetMediaType);
+    ret = mvmTopMgr.GetTargetMediaType(fd, arrayName, outTargetMediaType);
 
-    EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
     EXPECT_EQ(outTargetMediaType, MetaStorageType::SSD);
 }
 
 void
-_CheckAllocatedMedia(FileFDType fd, size_t NVRAMSize, size_t reqSize)
+_CheckAllocatedMedia(FileDescriptorType fd, std::string arrayName, size_t NVRAMSize, size_t reqSize)
 {
     if (reqSize < NVRAMSize)
     {
-        MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "The requested I/O is allocated in NVRAM: NVRAMSize=", NVRAMSize, " >  reqSize=", reqSize);
 
-        _CheckIfFileOnNVRAM(fd);
+        _CheckIfFileOnNVRAM(fd, arrayName);
     }
     else
     {
-        MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "The requested I/O is allocated in SSD: NVRAMSize=", NVRAMSize, " <= reqSize=", reqSize);
 
-        _CheckIfFileOnSSD(fd);
+        _CheckIfFileOnSSD(fd, arrayName);
     }
 }
 
@@ -197,41 +201,42 @@ _CheckAllocatedMedia(FileFDType fd, size_t NVRAMSize, size_t reqSize)
 // The NVRAM size is about 1GB (2020/02/06).
 TEST_F(UtMVMFunctionalPositive, TestFileCreateOnNVRAM)
 {
-    IBOF_EVENT_ID ret;
-    FileFDType fd;
+    POS_EVENT_ID ret;
+    FileDescriptorType fd;
 
     std::string fileName = std::string("testfile" + std::to_string(GetTimeStampInMs()));
-    MetaFsMoMReqMsg req;
-    req.fileProperty.ioAccPattern = MDFilePropIoAccessPattern::ByteIntensive;
+    std::string arrayName = "POSArray";
+    MetaFsFileControlRequest req;
+    req.fileProperty.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
 
-    size_t NVRAMSize = metaFsMgr.util.GetTheBiggestExtentSize(req.fileProperty);
-    req.fileProperty.ioAccPattern = MDFilePropIoAccessPattern::Default;
-    req.fileProperty.ioOpType = MDFilePropIoOpType::Default;
-    size_t SSDSize = metaFsMgr.util.GetTheBiggestExtentSize(req.fileProperty);
+    size_t NVRAMSize = metaFs.ctrl.GetTheBiggestExtentSize(req.fileProperty, arrayName);
+    req.fileProperty.ioAccPattern = MetaFileAccessPattern::Default;
+    req.fileProperty.ioOpType = MetaFileDominant::Default;
+    size_t SSDSize = metaFs.ctrl.GetTheBiggestExtentSize(req.fileProperty, arrayName);
 
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         " NVRAM size = ", NVRAMSize, " SSD Size = ", SSDSize);
 
     // 1. frequent-byte access file with write dominant workload characteristic
     {
         std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
 
-        MetaFsMoMReqMsg req;
-        req.reqType = MetaFsMoMReqType::FileCreate;
+        MetaFsFileControlRequest req;
+        req.reqType = MetaFsFileControlType::FileCreate;
         req.fileName = &fileName;
         req.fileByteSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 400;
-        req.fileProperty.ioAccPattern = MDFilePropIoAccessPattern::ByteIntensive;
+        req.fileProperty.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
 
         // file create on NVRAM
         ret = metaVolMgr.ProcessNewReq(req);
-        EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
         // file open
         ret = OpenTestFile(fileName, fd);
-        EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
         // Check media type is NVRAM.
-        _CheckAllocatedMedia(fd, NVRAMSize, req.fileByteSize);
+        _CheckAllocatedMedia(fd, arrayName, NVRAMSize, req.fileByteSize);
         NVRAMSize -= req.fileByteSize;
 
         CloseTestFile(fd);
@@ -240,19 +245,19 @@ TEST_F(UtMVMFunctionalPositive, TestFileCreateOnNVRAM)
     // 2. small-size block io
     {
         std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
-        MetaFsMoMReqMsg req;
-        req.reqType = MetaFsMoMReqType::FileCreate;
+        MetaFsFileControlRequest req;
+        req.reqType = MetaFsFileControlType::FileCreate;
         req.fileName = &fileName;
         req.fileByteSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 1024;
-        req.fileProperty.ioAccPattern = MDFilePropIoAccessPattern::SmallSizeBlockIO;
+        req.fileProperty.ioAccPattern = MetaFileAccessPattern::SmallSizeBlockIO;
 
         ret = metaVolMgr.ProcessNewReq(req);
-        EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
         ret = OpenTestFile(fileName, fd);
-        EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
-        _CheckAllocatedMedia(fd, NVRAMSize, req.fileByteSize);
+        _CheckAllocatedMedia(fd, arrayName, NVRAMSize, req.fileByteSize);
         NVRAMSize -= req.fileByteSize;
         CloseTestFile(fd);
     }
@@ -260,19 +265,19 @@ TEST_F(UtMVMFunctionalPositive, TestFileCreateOnNVRAM)
     // 3. write dominant io
     {
         std::string fileName = std::string("testfile" + std::to_string(GetTimestampUs()));
-        MetaFsMoMReqMsg req;
-        req.reqType = MetaFsMoMReqType::FileCreate;
+        MetaFsFileControlRequest req;
+        req.reqType = MetaFsFileControlType::FileCreate;
         req.fileName = &fileName;
         req.fileByteSize = (size_t)(SSDSize * 20) / 100; // 20%
-        req.fileProperty.ioOpType = MDFilePropIoOpType::WriteDominant;
+        req.fileProperty.ioOpType = MetaFileDominant::WriteDominant;
 
         ret = metaVolMgr.ProcessNewReq(req);
-        EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
         ret = OpenTestFile(fileName, fd);
-        EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
-        _CheckAllocatedMedia(fd, NVRAMSize, req.fileByteSize);
+        _CheckAllocatedMedia(fd, arrayName, NVRAMSize, req.fileByteSize);
         NVRAMSize -= req.fileByteSize;
         CloseTestFile(fd);
     }
@@ -287,10 +292,10 @@ TEST_F(UtMVMFunctionalPositive, TestFileCreateOnNVRAM)
         req.fileByteSize = MetaFsConfig::TYPICAL_NVRAM_META_FILE_KB_SIZE * 1024;
 
         ret = metaVolMgr.ProcessNewReq(req);
-        EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
         ret = OpenTestFile(fileName, fd);
-        EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
         _CheckAllocatedMedia(fd, NVRAMSize, req.fileByteSize);
     }
@@ -300,14 +305,14 @@ TEST_F(UtMVMFunctionalPositive, TestFileCreateOnNVRAM)
 // test for chunk size accoring to the data integtiry level
 TEST_F(UtMVMFunctionalPositive, EstimateDataChunkSize)
 {
-    IBOF_EVENT_ID ret;
-    MetaFsMoMReqMsg req;
+    POS_EVENT_ID ret;
+    MetaFsFileControlRequest req;
     MetaFilePropertySet prop;
-    prop.integrity = MDFilePropIntegrity::Lvl0_Disable;
-    req.reqType = MetaFsMoMReqType::EstimateDataChunkSize;
+    prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
+    req.reqType = MetaFsFileControlType::EstimateDataChunkSize;
     req.fileProperty = prop;
     ret = metaVolMgr.ProcessNewReq(req);
-    EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
     uint32_t exp_size = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     EXPECT_EQ(req.completionData.dataChunkSize, exp_size);
@@ -315,56 +320,60 @@ TEST_F(UtMVMFunctionalPositive, EstimateDataChunkSize)
 
 TEST_F(UtMVMFunctionalPositive, AlmostFullFileSizeTest)
 {
-    IBOF_EVENT_ID ret;
-    MetaFsMoMReqMsg req;
-    FileFDType fd1, fd2;
+    POS_EVENT_ID ret;
+    MetaFsFileControlRequest req;
+    FileDescriptorType fd1, fd2;
+    std::string arrayName = "POSArray";
 
-    req.fileProperty.ioAccPattern = MDFilePropIoAccessPattern::ByteIntensive;
-    size_t NVRAMSize = metaFsMgr.util.GetTheBiggestExtentSize(req.fileProperty);
+    req.fileProperty.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
+    size_t NVRAMSize = metaFs.ctrl.GetTheBiggestExtentSize(req.fileProperty, arrayName);
 
-    req.fileProperty.ioAccPattern = MDFilePropIoAccessPattern::Default;
-    req.fileProperty.ioOpType = MDFilePropIoOpType::Default;
-    size_t SSDSize = metaFsMgr.util.GetTheBiggestExtentSize(req.fileProperty);
+    req.fileProperty.ioAccPattern = MetaFileAccessPattern::Default;
+    req.fileProperty.ioOpType = MetaFileDominant::Default;
+    size_t SSDSize = metaFs.ctrl.GetTheBiggestExtentSize(req.fileProperty, arrayName);
 
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         " NVRAM size = ", NVRAMSize, " SSD Size = ", SSDSize);
 
-    req.fileProperty.ioAccPattern = MDFilePropIoAccessPattern::ByteIntensive;
-    req.fileProperty.ioOpType = MDFilePropIoOpType::WriteDominant;
-    req.fileProperty.integrity = MDFilePropIntegrity::Lvl0_Disable;
-    uint32_t pageSize = metaFsMgr.util.EstimateAlignedFileIOSize(req.fileProperty);
-    uint32_t maxSize = metaFsMgr.util.GetTheBiggestExtentSize(req.fileProperty);
+    req.fileProperty.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
+    req.fileProperty.ioOpType = MetaFileDominant::WriteDominant;
+    req.fileProperty.integrity = MetaFileIntegrityType::Lvl0_Disable;
+    uint32_t pageSize = metaFs.ctrl.EstimateAlignedFileIOSize(req.fileProperty, arrayName);
+    uint32_t maxSize = metaFs.ctrl.GetTheBiggestExtentSize(req.fileProperty, arrayName);
+
+    assert(0 != pageSize);
 
     req.fileByteSize = (maxSize / pageSize - 1) * pageSize - (maxSize * 2) / 100; // almost 98% area.
 
     std::string fileName1 = std::string("testfile" + std::to_string(GetTimeStampInMs()));
     req.fileName = &fileName1;
-    req.reqType = MetaFsMoMReqType::FileCreate;
+    req.reqType = MetaFsFileControlType::FileCreate;
 
     // file create on NVRAM
     ret = metaVolMgr.ProcessNewReq(req);
-    EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
     // file open
     ret = OpenTestFile(fileName1, fd1);
-    EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
     // create another file
     std::string fileName2 = std::string("testfile" + std::to_string(GetTimestampUs()));
 
-    req.reqType = MetaFsMoMReqType::FileCreate;
+    req.reqType = MetaFsFileControlType::FileCreate;
     req.fileName = &fileName2;
     req.fileByteSize = (NVRAMSize * 5) / 100; // 5% of NVRAM size
-    req.fileProperty.ioAccPattern = MDFilePropIoAccessPattern::ByteIntensive;
+    req.fileProperty.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
 
     // file create on NVRAM
     ret = metaVolMgr.ProcessNewReq(req);
-    EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
     // file open
     ret = OpenTestFile(fileName2, fd2);
-    EXPECT_EQ(ret, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(ret, POS_EVENT_ID::SUCCESS);
 
     CloseTestFile(fd1);
     CloseTestFile(fd2);
 }
+} // namespace pos

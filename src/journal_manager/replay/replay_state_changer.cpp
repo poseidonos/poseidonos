@@ -32,23 +32,36 @@
 
 #include "replay_state_changer.h"
 
-namespace ibofos
+namespace pos
 {
 ReplayStateChanger::ReplayStateChanger(void)
-: StateEvent("journal_manager")
+: recoverCtx(nullptr),
+  state(nullptr)
 {
-    StateManagerSingleton::Instance()->Subscribe(this);
+}
+
+ReplayStateChanger::ReplayStateChanger(IStateControl* iState)
+{
+    state = iState;
+    string sender = typeid(ReplayStateChanger).name();
+    recoverCtx = new StateContext(sender, SituationEnum::JOURNAL_RECOVERY);
+    state->Subscribe(this, sender);
 }
 
 ReplayStateChanger::~ReplayStateChanger(void)
 {
-    StateManagerSingleton::Instance()->Dispose(this);
+    // TODO (huijeong.kim) nullptr check is temporal workaround for mocking
+    if (state != nullptr)
+    {
+        state->Unsubscribe(this);
+        delete recoverCtx;
+    }
 }
 
 int
 ReplayStateChanger::GetRecoverState(void)
 {
-    recoverCtx = StateManagerSingleton::Instance()->Invoke(sender, Situation::JOURNAL_RECOVERY);
+    state->Invoke(recoverCtx);
     _WaitState(recoverCtx);
 
     return 0;
@@ -57,26 +70,25 @@ ReplayStateChanger::GetRecoverState(void)
 int
 ReplayStateChanger::RemoveRecoverState(void)
 {
-    StateManagerSingleton::Instance()->Remove(recoverCtx);
+    state->Remove(recoverCtx);
     return 0;
 }
 
 void
-ReplayStateChanger::StateChanged(StateContext prev, StateContext next)
+ReplayStateChanger::StateChanged(StateContext* prev, StateContext* next)
 {
     std::unique_lock<std::mutex> lock(mtx);
-    currState = next;
     cv.notify_all();
 }
 
 void
-ReplayStateChanger::_WaitState(StateContext& goal)
+ReplayStateChanger::_WaitState(StateContext* goal)
 {
     std::unique_lock<std::mutex> lock(mtx);
-    while (currState != goal)
+    while (state->GetState() != goal)
     {
         cv.wait(lock);
     }
 }
 
-} // namespace ibofos
+} // namespace pos

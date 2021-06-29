@@ -36,11 +36,11 @@
 #include <list>
 
 #include "method.h"
-#include "raid1_rebuild.h"
 
-namespace ibofos
+namespace pos
 {
 class PartitionPhysicalSize;
+class RebuildBehavior;
 
 class Raid1 : public Method
 {
@@ -51,21 +51,13 @@ public:
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
     list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
-    virtual RebuildBehavior* GetRebuildBehavior() override;
-    virtual StripeLocker*
-    GetStripeLocker() override
-    {
-        return locker;
-    };
 
 private:
-    virtual LogicalBlkAddr _Translate(const FtBlkAddr&) override;
     void _RebuildData(void* dst, void* src, uint32_t size);
     uint32_t _GetMirrorIndex(uint32_t idx);
-    virtual void _BindRebuildFunc(void) override;
+    virtual void _BindRecoverFunc(void) override;
     uint32_t mirrorDevCnt = 0;
-    StripeLocker* locker = nullptr;
 };
 
-} // namespace ibofos
+} // namespace pos
 #endif // RAID1_H_

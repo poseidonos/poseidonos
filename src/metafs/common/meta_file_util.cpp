@@ -34,31 +34,33 @@
 
 #include <string.h>
 
+namespace pos
+{
 static_assert(((int)MetaStorageType::SSD) == 0, "error");
-const MetaFsMEDIA2VOLUME MetaFsUtilLib::MEDIA2VOLUME[] =
+const MfsMediaToVolume MetaFileUtil::MEDIA_TO_VOLUME[] =
     {
         {MetaStorageType::SSD, MetaVolumeType::SsdVolume},
         {MetaStorageType::NVRAM, MetaVolumeType::NvRamVolume}};
 static_assert(((int)MetaVolumeType::SsdVolume) == 0, "error");
-const MetaFsVOLUME2MEDIA MetaFsUtilLib::VOLUME2MEDIA[] =
+const MfsVolumeToMedia MetaFileUtil::VOLUME_TO_MEDIA[] =
     {
         {MetaVolumeType::SsdVolume, MetaStorageType::SSD},
         {MetaVolumeType::NvRamVolume, MetaStorageType::NVRAM}};
 
 StringHashType
-MetaFsUtilLib::GetHashKeyFromFileName(const std::string& fileName)
+MetaFileUtil::GetHashKeyFromFileName(const std::string& fileName)
 {
     return std::hash<std::string>{}(fileName.c_str());
 }
 
 MetaStorageType
-MetaFsUtilLib::ConvertToMediaType(MetaVolumeType volume)
+MetaFileUtil::ConvertToMediaType(MetaVolumeType volume)
 {
-    return VOLUME2MEDIA[(uint32_t)volume].media;
+    return VOLUME_TO_MEDIA[(uint32_t)volume].media;
 }
 
 std::string
-MetaFsUtilLib::ConvertToMediaTypeName(MetaVolumeType volume)
+MetaFileUtil::ConvertToMediaTypeName(MetaVolumeType volume)
 {
     switch (volume)
     {
@@ -80,7 +82,26 @@ MetaFsUtilLib::ConvertToMediaTypeName(MetaVolumeType volume)
 }
 
 MetaVolumeType
-MetaFsUtilLib::ConvertToVolumeType(MetaStorageType media)
+MetaFileUtil::ConvertToVolumeType(MetaStorageType media)
 {
-    return MEDIA2VOLUME[(uint32_t)media].volumeType;
+    return MEDIA_TO_VOLUME[(uint32_t)media].volumeType;
 }
+
+uint64_t
+MetaFileUtil::GetEpochSignature(void)
+{
+    // CreateMBR, Need to add more context
+    std::time_t t = std::time(0); // get time now
+    std::tm* now = std::localtime(&t);
+
+    // 0000_YYYY_MMDD_HHMM_
+    uint64_t sign = (uint64_t)(now->tm_year + 1900) * 10000000000 +
+        (uint64_t)(now->tm_mon + 1) * 100000000 +
+        (uint64_t)now->tm_mday * 1000000 +
+        (uint64_t)now->tm_hour * 10000 +
+        (uint64_t)now->tm_min * 100 +
+        (uint64_t)now->tm_sec;
+
+    return sign;
+}
+} // namespace pos

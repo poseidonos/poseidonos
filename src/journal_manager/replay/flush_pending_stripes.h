@@ -35,14 +35,15 @@
 #include "pending_stripe.h"
 #include "replay_task.h"
 
-namespace ibofos
+#include "src/allocator/i_wbstripe_allocator.h"
+
+namespace pos
 {
-class Allocator;
 
 class FlushPendingStripes : public ReplayTask
 {
 public:
-    FlushPendingStripes(PendingStripeList& pendingStripes, Allocator* allocator, ReplayProgressReporter* reporter);
+    FlushPendingStripes(PendingStripeList& pendingStripes, IWBStripeAllocator* iwbstripeAllocator, ReplayProgressReporter* reporter);
     virtual ~FlushPendingStripes(void);
 
     virtual int Start(void) override;
@@ -52,7 +53,7 @@ public:
 
 private:
     PendingStripeList& pendingStripes;
-    Allocator* allocator;
+    IWBStripeAllocator* wbStripeAllocator;
 };
 
-} // namespace ibofos
+} // namespace pos

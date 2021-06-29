@@ -3,15 +3,13 @@ import subprocess
 import os
 import sys
 sys.path.append("../lib/")
+sys.path.append("../device/")
 
+import SCAN_DEV_BASIC
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
-
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)
@@ -20,12 +18,12 @@ def set_result(detail):
         result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
 def execute():
-    clear_result()
-    ibofos.start_ibofos()
-    out = cli.mount_ibofos()
+    SCAN_DEV_BASIC.execute()
+    out = cli.mount_array("POSArray")
     return out
 
 if __name__ == "__main__":
+    test_result.clear_result(__file__)
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

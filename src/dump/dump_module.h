@@ -44,7 +44,7 @@
 
 #include "src/dump/dump_buffer.h"
 
-namespace ibofos
+namespace pos
 {
 template<typename T>
 class DumpObject
@@ -93,5 +93,5 @@ protected:
     uint32_t entryMaxNum;
 };
 
-} // namespace ibofos
+} // namespace pos
 #endif // DUMP_MODULE_H_

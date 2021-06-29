@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(io_translator_ut io_translator_test.cpp)
+POS_ADD_UNIT_TEST(i_io_translator_ut i_io_translator_test.cpp)
+POS_ADD_UNIT_TEST(i_translator_ut i_translator_test.cpp)

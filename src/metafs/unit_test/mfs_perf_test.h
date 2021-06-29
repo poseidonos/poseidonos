@@ -32,8 +32,12 @@
 
 #pragma once
 
+#include <string>
 #include "mfs_functional_test.h"
+#include "meta_file_include.h"
 
+namespace pos
+{
 void ResetTestContext(void);
 
 class UtMetaFsPerf : public UtMetaFsTopFunctionalPositive
@@ -51,7 +55,8 @@ public:
     virtual void
     TearDown(void) override
     {
-        metaFsMgr.sys.Unmount();
+        std::string arrayName = "POSArray";
+        metaFs.mgmt.UnmountSystem(arrayName);
     }
 
     static void
@@ -63,9 +68,10 @@ public:
 class TestClient
 {
 public:
-    void RunMultiQDAIOTest(FileFDType fd, FileSizeType ioRange, MetaFsIoOpcode opcode, uint32_t maxQD);
+    void RunMultiQDAIOTest(FileDescriptorType fd, std::string arrayName, FileSizeType ioRange, MetaFsIoOpcode opcode, uint32_t maxQD);
     void HandleIOCallback(void* data);
 
 private:
     MetaFsSpinLock availableQIdxLock;
 };
+} // namespace pos

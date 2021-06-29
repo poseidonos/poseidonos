@@ -34,49 +34,49 @@
 
 #include <unistd.h>
 
-#include "mfs_log.h"
-#include "mfs_mvm_top.h"
-#include "src/scheduler/event.h"
-#include "src/scheduler/event_argument.h"
+#include "metafs_log.h"
+#include "src/event_scheduler/event.h"
 
-MockMetaIoMgr mockMetaIoMgr;
-MetaFsMIMTopMgrClass& mimTopMgr = mockMetaIoMgr;
+namespace pos
+{
+MockMetaIoManager mockMetaIoMgr;
+MockMetaIoManager& mimTopMgr = mockMetaIoMgr;
 
-MockMetaIoMgr::MockMetaIoMgr(void)
+MockMetaIoManager::MockMetaIoManager(void)
 {
 }
 
-MockMetaIoMgr::~MockMetaIoMgr(void)
+MockMetaIoManager::~MockMetaIoManager(void)
 {
 }
 
-MockMetaIoMgr&
-MockMetaIoMgr::GetInstance(void)
+MockMetaIoManager&
+MockMetaIoManager::GetInstance(void)
 {
     return mockMetaIoMgr;
 }
 
 void
-MockMetaIoMgr::Init(void)
+MockMetaIoManager::Init(void)
 {
     // nothing required
     SetModuleInit();
 }
 
 bool
-MockMetaIoMgr::Bringup(void)
+MockMetaIoManager::Bringup(void)
 {
     SetModuleReady();
     return true;
 }
 
-IBOF_EVENT_ID
-MockMetaIoMgr::ProcessNewReq(MetaFsIoReqMsg& reqMsg)
+POS_EVENT_ID
+MockMetaIoManager::ProcessNewReq(MetaFsIoRequest& reqMsg)
 {
     bool isSuccess = true;
     switch (reqMsg.reqType)
     {
-        case MetaIoReqTypeEnum::Read:
+        case MetaIoRequestType::Read:
         {
             FileSizeType ioByteSize, ioByteOffset;
             _SetFileIoInfo(reqMsg, ioByteSize, ioByteOffset);
@@ -84,7 +84,7 @@ MockMetaIoMgr::ProcessNewReq(MetaFsIoReqMsg& reqMsg)
         }
         break;
 
-        case MetaIoReqTypeEnum::Write:
+        case MetaIoRequestType::Write:
         {
             FileSizeType ioByteSize, ioByteOffset;
             _SetFileIoInfo(reqMsg, ioByteSize, ioByteOffset);
@@ -94,32 +94,32 @@ MockMetaIoMgr::ProcessNewReq(MetaFsIoReqMsg& reqMsg)
 
         default:
         {
-            return IBOF_EVENT_ID::MFS_INVALID_PARAMETER;
+            return POS_EVENT_ID::MFS_INVALID_PARAMETER;
         }
     }
 
     if (!isSuccess)
     {
-        return IBOF_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
+        return POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
     }
     else
     {
 #if 0
-        if (MetaIoModeEnum::Async == reqMsg.ioMode)
+        if (MetaIoMode::Async == reqMsg.ioMode)
         {
             MetaFsAioCbCompleter* event =
                 new MetaFsAioCbCompleter(
                         static_cast<MetaFsAioCbCxt*>(reqMsg.aiocb));
-            ibofos::EventArgument::GetEventScheduler()->EnqueueEvent(event);
+            pos::EventSchedulerSingleton::Instance()->EnqueueEvent(event);
         }
 #endif
     }
 
-    return IBOF_EVENT_ID::SUCCESS;
+    return POS_EVENT_ID::SUCCESS;
 };
 
 void
-MockMetaIoMgr::_SetFileIoInfo(const MetaFsIoReqMsg& reqMsg, FileSizeType& ioByteSize, FileSizeType& ioByteOffset)
+MockMetaIoManager::_SetFileIoInfo(const MetaFsIoRequest& reqMsg, FileSizeType& ioByteSize, FileSizeType& ioByteOffset)
 {
     if (true == reqMsg.isFullFileIo)
     {
@@ -134,15 +134,16 @@ MockMetaIoMgr::_SetFileIoInfo(const MetaFsIoReqMsg& reqMsg, FileSizeType& ioByte
 }
 
 bool
-MockMetaIoMgr::_ReadFile(uint32_t fd, void* buf, FileSizeType byteSize, FileSizeType byteOffset)
+MockMetaIoManager::_ReadFile(uint32_t fd, void* buf, FileSizeType byteSize, FileSizeType byteOffset)
 {
     // what required to internal mock?
     return true;
 }
 
 bool
-MockMetaIoMgr::_WriteFile(uint32_t fd, void* buf, FileSizeType byteSize, FileSizeType byteOffset)
+MockMetaIoManager::_WriteFile(uint32_t fd, void* buf, FileSizeType byteSize, FileSizeType byteOffset)
 {
     // what required to internal mock?
     return true;
 }
+} // namespace pos

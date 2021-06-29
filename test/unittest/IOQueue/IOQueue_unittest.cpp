@@ -4,7 +4,7 @@
 
 using namespace std;
 
-namespace ibofos{ 
+namespace pos{ 
 class IOQueueTest : public testing ::Test{
 protected:
     IOQueue *iq;

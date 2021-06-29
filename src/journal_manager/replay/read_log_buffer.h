@@ -32,18 +32,22 @@
 
 #pragma once
 
-#include "../log/log_handler.h"
-#include "replay_task.h"
+#include <vector>
 
-namespace ibofos
+#include "src/journal_manager/replay/replay_task.h"
+
+namespace pos
 {
 class JournalLogBuffer;
 class LogReplayer;
+class JournalConfiguration;
+class ReplayLogList;
 
 class ReadLogBuffer : public ReplayTask
 {
 public:
-    ReadLogBuffer(JournalLogBuffer* logBuffer, LogList& logList, ReplayProgressReporter* progressReporter);
+    ReadLogBuffer(JournalConfiguration* journalConfig, JournalLogBuffer* logBuffer,
+        ReplayLogList& logList, ReplayProgressReporter* progressReporter);
     virtual ~ReadLogBuffer(void);
 
     virtual int Start(void) override;
@@ -52,8 +56,11 @@ public:
     virtual int GetNumSubTasks(void) override;
 
 private:
+    JournalConfiguration* config;
     JournalLogBuffer* logBuffer;
-    LogList& logList;
+    ReplayLogList& logList;
+
+    std::vector<void*> readLogBuffer;
 };
 
-} // namespace ibofos
+} // namespace pos

@@ -34,18 +34,18 @@
 
 #include <list>
 
-#include "../config/array_config.h"
-#include "../partition/partition_size_info.h"
-#include "raid5_rebuild.h"
+#include "src/include/array_config.h"
+#include "src/array_models/dto/partition_physical_size.h"
 #include "src/include/memory.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
 Raid5::Raid5(const PartitionPhysicalSize* physicalSize,
     const uint64_t parityCount)
 : freeParityPool(parityCount, CHUNK_SIZE)
 {
+    raidType = RaidTypeEnum::RAID5;
     ftSize_ = {
         .minWriteBlkCnt = 0,
         .backupBlkCnt = physicalSize->blksPerChunk,
@@ -54,7 +54,7 @@ Raid5::Raid5(const PartitionPhysicalSize* physicalSize,
             physicalSize->chunksPerStripe * physicalSize->blksPerChunk,
         .chunksPerStripe = physicalSize->chunksPerStripe};
     ftSize_.minWriteBlkCnt = ftSize_.blksPerStripe - ftSize_.backupBlkCnt;
-    _BindRebuildFunc();
+    _BindRecoverFunc();
 }
 
 int
@@ -70,26 +70,6 @@ Raid5::Translate(FtBlkAddr& dst, const LogicalBlkAddr& src)
         dst.offset += ftSize_.blksPerChunk;
     }
     return 0;
-}
-
-LogicalBlkAddr
-Raid5::_Translate(const FtBlkAddr& fsa)
-{
-    LogicalBlkAddr lsa = {.stripeId = fsa.stripeId,
-        .offset = fsa.offset};
-    uint32_t chunkIndex = fsa.offset / ftSize_.blksPerChunk;
-    uint32_t parityIndex = _GetParityOffset(lsa.stripeId);
-    if (chunkIndex == parityIndex)
-    {
-        assert(0);
-        // TODO Error; This address is not logical address;
-    }
-    else if (chunkIndex > parityIndex)
-    {
-        lsa.offset -= ftSize_.blksPerChunk;
-    }
-
-    return lsa;
 }
 
 list<FtBlkAddr>
@@ -161,18 +141,18 @@ Raid5::_ComputeParity(BufferEntry& dst, const list<BufferEntry>& src)
     {
         if (nullptr == src1)
         {
-            src1 = buffer.GetBufferEntry();
+            src1 = buffer.GetBufferPtr();
             continue;
         }
 
         if (nullptr == src2)
         {
-            src2 = buffer.GetBufferEntry();
-            _XorBlocks(dst.GetBufferEntry(), src1, src2, memSize);
+            src2 = buffer.GetBufferPtr();
+            _XorBlocks(dst.GetBufferPtr(), src1, src2, memSize);
             continue;
         }
 
-        _XorBlocks(dst.GetBufferEntry(), buffer.GetBufferEntry(), memSize);
+        _XorBlocks(dst.GetBufferPtr(), buffer.GetBufferPtr(), memSize);
     }
 }
 
@@ -208,17 +188,10 @@ Raid5::_GetParityOffset(StripeId lsid)
 }
 
 void
-Raid5::_BindRebuildFunc(void)
+Raid5::_BindRecoverFunc(void)
 {
     using namespace std::placeholders;
-    rebuildFunc_ = bind(&Raid5::_RebuildData, this, _1, _2, _3);
-}
-
-RebuildBehavior*
-Raid5::GetRebuildBehavior()
-{
-    unique_ptr<RebuildContext> ctx(new RebuildContext());
-    return new Raid5Rebuild(move(ctx));
+    recoverFunc_ = bind(&Raid5::_RebuildData, this, _1, _2, _3);
 }
 
 void
@@ -232,4 +205,4 @@ Raid5::_RebuildData(void* dst, void* src, uint32_t dstSize)
     }
 }
 
-} // namespace ibofos
+} // namespace pos

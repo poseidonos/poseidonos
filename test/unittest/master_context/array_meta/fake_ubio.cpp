@@ -2,7 +2,7 @@
 #include "src/include/memory.h"
 #include "src/io/ubio.h"
 
-namespace ibofos {
+namespace pos {
 
 Ubio::Ubio(void *buffer, uint32_t unitCount, bool needDeviceLba)
 :   dir(UbioDir::Read), sync(false), volumeId(-1), dev(nullptr),
@@ -23,7 +23,7 @@ Ubio::Ubio(void *buffer, uint32_t unitCount, bool needDeviceLba)
     if (nullptr == buffer)
     {
         memoryOwnership = true;
-        buffer = ibofos::Memory<BYTES_PER_UNIT>::Alloc(unitCount);
+        buffer = pos::Memory<BYTES_PER_UNIT>::Alloc(unitCount);
     }
 
     mem = buffer;
@@ -38,7 +38,7 @@ Ubio::~Ubio(void)
 
     if (memoryOwnership)
     {
-        ibofos::Memory<>::Free(mem);
+        pos::Memory<>::Free(mem);
     }
 }
 

@@ -32,11 +32,11 @@
 
 #include "map_flushed_event.h"
 
-namespace ibofos
+namespace pos
 {
-MapFlushedEvent::MapFlushedEvent(int mapId, VSAMapManager* vsaMapMgr)
+MapFlushedEvent::MapFlushedEvent(int mapId, IMapManagerInternal* mapMgr)
 : mapId(mapId),
-  vsaMapManager(vsaMapMgr)
+  mapManager(mapMgr)
 {
 }
 
@@ -47,8 +47,8 @@ MapFlushedEvent::~MapFlushedEvent(void)
 bool
 MapFlushedEvent::Execute(void)
 {
-    vsaMapManager->MapAsyncFlushed(mapId);
+    mapManager->MapAsyncFlushDone(mapId);
     return true;
 }
 
-} // namespace ibofos
+} // namespace pos

@@ -34,69 +34,64 @@
 
 #include <list>
 
-#include "../log/log_handler.h"
-#include "replay_event.h"
-#include "src/allocator/active_stripe_index_info.h"
 #include "src/include/address_type.h"
-#include "stripe_info.h"
+#include "src/journal_manager/replay/replay_log.h"
+#include "src/journal_manager/statistics/stripe_replay_status.h"
 
-namespace ibofos
+namespace pos
 {
-class ReplayStripe;
-class Mapper;
-class Allocator;
-class Array;
-class ReplayEvent;
+class IVSAMap;
+class IStripeMap;
+class IContextReplayer;
+class IBlockAllocator;
+class IArrayInfo;
+
+class LogHandlerInterface;
+class StripeReplayStatus;
+class ReplayEventFactory;
 class ActiveWBStripeReplayer;
 class ActiveUserStripeReplayer;
+class ReplayEvent;
 
 class ReplayStripe
 {
 public:
     ReplayStripe(void) = delete;
-    ReplayStripe(StripeId vsid, Mapper* mapper, Allocator* allocator, Array* array,
+    ReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
+        IContextReplayer* ctxReplayer,
+        IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
     virtual ~ReplayStripe(void);
 
-    void AddLog(LogHandlerInterface* log);
-    int Replay(void);
+    virtual void AddLog(ReplayLog replayLog);
+    virtual void AddLog(LogHandlerInterface* log) = 0;
+    virtual int Replay(void);
 
-    inline StripeId
-    GetVsid(void)
-    { // TODO(huijeong.kim): remove this function
-        return info.GetVsid();
-    }
-    inline int
-    GetVolumeId(void)
-    {
-        return info.GetVolumeId();
-    }
+    StripeId GetVsid(void) { return status->GetVsid(); }
+    int GetVolumeId(void) { return status->GetVolumeId(); }
+    bool IsFlushed(void) { return status->IsFlushed(); }
 
     void DeleteBlockMapReplayEvents(void);
 
-private:
-    void _AddBlockWriteReplayEvent(BlockWriteDoneLog dat);
-    void _AddStripeFlushReplayEvent(StripeMapUpdatedLog dat);
+protected:
+    void _CreateSegmentAllocationEvent(void);
+    void _CreateStripeAllocationEvent(void);
+    void _CreateStripeFlushReplayEvent(void);
 
-    bool _IsSegmentAllocationReplayRequired(void);
-    bool _IsStripeAllocationReplayRequired(void);
-    bool _IsStripeFlushReplayRequired(StripeMapUpdatedLog dat);
-
-    void _UpdateStripeInfo(BlockWriteDoneLog log);
-    void _UpdateStripeInfo(StripeMapUpdatedLog log);
-
-    int _UpdateActiveStripeInfo(void);
     int _ReplayEvents(void);
 
-    StripeInfo info;
-    std::list<ReplayEvent*> logs;
+    StripeReplayStatus* status;
+    ReplayEventFactory* replayEventFactory;
+
+    std::list<ReplayEvent*> replayEvents;
 
     ActiveWBStripeReplayer* wbStripeReplayer;
     ActiveUserStripeReplayer* userStripeReplayer;
 
-    Mapper* mapper;
-    Allocator* allocator;
-    Array* array;
+    IVSAMap* vsaMap;
+    IStripeMap* stripeMap;
+
+    bool replaySegmentInfo;
 };
 
-} // namespace ibofos
+} // namespace pos

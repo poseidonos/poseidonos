@@ -1,11 +1,11 @@
 #include <atomic>
 
 #include "gtest/gtest.h"
-#include "src/device/ioat_api.h"
+#include "src/spdk_wrapper/accel_engine_api.h"
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 class IoatTest : public testing::Test
 {

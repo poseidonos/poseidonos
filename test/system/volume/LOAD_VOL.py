@@ -7,14 +7,16 @@ sys.path.append("../lib/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
-import ibofos_constant
+import pos_constant
 import volume
 import CREATE_VOL_BASIC_1
 import CREATE_VOL_BASIC_2
 import CREATE_VOL_BASIC_3
+
+ARRAYNAME = CREATE_VOL_BASIC_1.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -49,7 +51,7 @@ def check_result(detail):
     return "pass"
 
 def set_result():
-    out = cli.list_volume("")
+    out = cli.list_volume(ARRAYNAME)
     result = check_result(out)
     code = json_parser.get_response_code(out)
     with open(__file__ + ".result", "w") as result_file:
@@ -60,14 +62,13 @@ def execute():
     CREATE_VOL_BASIC_1.execute()
     CREATE_VOL_BASIC_2.execute()
     CREATE_VOL_BASIC_3.execute()
-    cli.unmount_ibofos()
-    ibofos.exit_ibofos()
-    ibofos.start_ibofos()
+    cli.unmount_array(ARRAYNAME)
+    pos.exit_pos()
+    pos.start_pos()
     cli.scan_device()
-    cli.load_array("")
-    cli.mount_ibofos()
+    cli.mount_array(ARRAYNAME)
 
 if __name__ == "__main__":
     execute()
     set_result()
-    ibofos.kill_ibofos()
+    pos.kill_pos()

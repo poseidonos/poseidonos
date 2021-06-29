@@ -35,12 +35,12 @@
 
 #include <string>
 
-#include "src/device/ublock_device.h"
+#include "src/device/base/ublock_device.h"
 
 using ::testing::_;
 using ::testing::Return;
 
-using namespace ibofos;
+using namespace pos;
 
 class MockUBlockDevice : public UBlockDevice
 {

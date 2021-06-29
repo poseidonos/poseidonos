@@ -32,10 +32,13 @@
 
 #pragma once
 
+#include <string>
 #include "mfs_io_handler_base.h"
 #include "mio_handler.h"
 #include "mpio_handler.h"
 
+namespace pos
+{
 class ScalableMetaIoWorker : public MetaFsIoHandlerBase
 {
 public:
@@ -43,10 +46,13 @@ public:
     virtual ~ScalableMetaIoWorker(void);
 
     virtual void StartThread(void) override;
+    virtual bool AddArrayInfo(std::string arrayName);
+    virtual bool RemoveArrayInfo(std::string arrayName);
     void Execute(void);
-    bool EnqueueNewReq(MetaFsIoReqMsg& reqMsg);
+    bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
 
 private:
     MioHandler* tophalfHandler;
     MpioHandler* bottomhalfHandler;
 };
+} // namespace pos

@@ -1,124 +1,84 @@
+/*
+ *   BSD LICENSE
+ *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without
+ *   modification, are permitted provided that the following conditions
+ *   are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided with the
+ *       distribution.
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
+ *
+ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #pragma once
 
-#include <condition_variable>
-#include <mutex>
 #include <vector>
+#include <mutex>
 
-#include "../log_buffer/journal_write_context.h"
-#include "../log_write/buffer_write_done_notifier.h"
+#include "log_group_buffer_status.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/status/i_log_buffer_status.h"
 
-namespace ibofos
+namespace pos
 {
+class JournalConfiguration;
 class LogGroupReleaser;
 
-struct OffsetInFile // TODO(huijeong.kim) to be removed
-{
-    int id;
-    int offset;
-    uint32_t seqNum;
-};
-
-enum class LogGroupBufferStatus
-{
-    INVALID = -1,
-    INIT = 0,
-    ACTIVE,
-    FULL
-};
-
-struct LogGroupStatus
-{
-    uint32_t seqNum;
-
-    LogGroupBufferStatus status;
-    std::atomic<bool> waitingToBeFilled;
-
-    std::mutex countLock;
-    uint32_t numLogsAdded;
-    uint32_t numLogsFilled;
-
-    uint64_t nextOffset;
-
-    LogGroupStatus(void)
-    {
-        Reset();
-    }
-
-    LogGroupStatus(const LogGroupStatus& input)
-    {
-        seqNum = input.seqNum;
-        status = input.status;
-        waitingToBeFilled = input.waitingToBeFilled.load();
-        numLogsAdded = input.numLogsAdded;
-        numLogsFilled = input.numLogsFilled;
-        nextOffset = input.nextOffset;
-    }
-
-    LogGroupStatus&
-    operator=(const LogGroupStatus& input)
-    {
-        seqNum = input.seqNum;
-        status = input.status;
-        waitingToBeFilled = input.waitingToBeFilled.load();
-        numLogsAdded = input.numLogsAdded;
-        numLogsFilled = input.numLogsFilled;
-        nextOffset = input.nextOffset;
-
-        return *this;
-    }
-
-    void
-    Reset(void)
-    {
-        seqNum = 0;
-        status = LogGroupBufferStatus::INIT;
-        waitingToBeFilled = false;
-        numLogsAdded = 0;
-        numLogsFilled = 0;
-
-        nextOffset = 0;
-    }
-};
-
-class BufferOffsetAllocator : public LogBufferWriteDoneEvent
+class BufferOffsetAllocator : public LogBufferWriteDoneEvent, public ILogBufferStatus
 {
 public:
     BufferOffsetAllocator(void);
     virtual ~BufferOffsetAllocator(void);
 
-    void Init(int numLogGroups, uint32_t logGroupSize, LogGroupReleaser* releaser);
+    virtual void Init(LogGroupReleaser* releaser, JournalConfiguration* journalConfiguration);
     void Reset(void);
 
-    struct OffsetInFile AllocateBuffer(int size);
+    virtual int AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffset);
+    virtual void LogWriteCanceled(int logGroupId);
 
     virtual void LogFilled(int logGroupId, MapPageList& dirty) override;
     virtual void LogBufferReseted(int logGroupId) override;
 
-    LogGroupBufferStatus GetStatus(int logGroupId);
-    uint32_t GetNumLogsAdded(void);
+    uint64_t GetNumLogsAdded(void);
+    uint64_t GetNextOffset(void);
+
+    virtual LogGroupStatus GetBufferStatus(int logGroupId) override;
+    virtual uint32_t GetSequenceNumber(int logGroupId) override;
+
+    virtual int GetLogGroupId(uint64_t fileOffset);
 
 private:
-    inline bool _CanAllocate(int logGroupId, int size);
-
-    uint64_t _GetBufferOffsetToWrite(int logGroupId, int size);
     int _GetNewActiveGroup(void);
     uint32_t _GetNextSeqNum(void);
-    bool _IsFullyFilled(int logGroupId);
     void _TryToSetFull(int logGroupId);
-    void _SetActive(int logGroupId);
 
+    JournalConfiguration* config;
     LogGroupReleaser* releaser;
 
     std::mutex allocateLock;
-    std::mutex fullTriggerLock;
-    std::vector<LogGroupStatus> statusList;
+    std::vector<LogGroupBufferStatus*> statusList;
 
-    std::mutex seqNumberLock;
     uint32_t nextSeqNumber;
-
     int currentLogGroupId;
-
-    int numLogGroups;
-    uint32_t maxOffsetPerGroup;
 };
-} // namespace ibofos
+} // namespace pos

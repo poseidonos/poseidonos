@@ -35,11 +35,12 @@
 #include <string>
 
 #include "src/include/branch_prediction.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
+
 VolumeList::VolumeList()
 {
     volCnt = 0;
@@ -75,22 +76,22 @@ VolumeList::Add(VolumeBase* volume)
 {
     if (volCnt == MAX_VOLUME_COUNT)
     {
-        IBOF_TRACE_WARN((int)IBOF_EVENT_ID::VOL_CNT_EXCEEDED, "Excced maximum number of volumes");
-        return (int)IBOF_EVENT_ID::VOL_CNT_EXCEEDED;
+        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_CNT_EXCEEDED, "Excced maximum number of volumes");
+        return (int)POS_EVENT_ID::VOL_CNT_EXCEEDED;
     }
 
     std::unique_lock<std::mutex> lock(listMutex);
     int id = _NewID();
     if (id < 0)
     {
-        return (int)IBOF_EVENT_ID::VOLID_ALLOC_FAIL;
+        return (int)POS_EVENT_ID::VOLID_ALLOC_FAIL;
     }
     volume->ID = id;
     items[id] = volume;
     volCnt++;
-
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::SUCCESS, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
-    return (int)IBOF_EVENT_ID::SUCCESS;
+    InitializePendingIOCount(id, VolumeStatus::Unmounted);
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::SUCCESS, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
+    return (int)POS_EVENT_ID::SUCCESS;
 }
 
 int
@@ -102,12 +103,13 @@ VolumeList::Add(VolumeBase* volume, int id)
         volume->ID = id;
         items[id] = volume;
         volCnt++;
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::VOL_ADDED, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
-        return (int)IBOF_EVENT_ID::SUCCESS;
+        InitializePendingIOCount(id, VolumeStatus::Unmounted);
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::VOL_ADDED, "Volume added to the list, VOL_CNT: {}, VOL_ID: {}", volCnt, id);
+        return (int)POS_EVENT_ID::SUCCESS;
     }
 
-    IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::VOL_SAMEID_EXIST, "The same ID volume exists");
-    return (int)IBOF_EVENT_ID::VOL_SAMEID_EXIST;
+    POS_TRACE_ERROR((int)POS_EVENT_ID::VOL_SAMEID_EXIST, "The same ID volume exists");
+    return (int)POS_EVENT_ID::VOL_SAMEID_EXIST;
 }
 
 int
@@ -115,24 +117,24 @@ VolumeList::Remove(int volId)
 {
     if (volId < 0 || volId >= MAX_VOLUME_COUNT)
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::INVALID_INDEX, "Invalid index error");
-        return (int)IBOF_EVENT_ID::INVALID_INDEX;
+        POS_TRACE_ERROR((int)POS_EVENT_ID::INVALID_INDEX, "Invalid index error");
+        return (int)POS_EVENT_ID::INVALID_INDEX;
     }
 
     std::unique_lock<std::mutex> lock(listMutex);
     VolumeBase* target = items[volId];
     if (target == nullptr)
     {
-        IBOF_TRACE_WARN((int)IBOF_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
-        return (int)IBOF_EVENT_ID::VOL_NOT_EXIST;
+        POS_TRACE_WARN((int)POS_EVENT_ID::VOL_NOT_EXIST, "The requested volume does not exist");
+        return (int)POS_EVENT_ID::VOL_NOT_EXIST;
     }
 
     delete target;
     items[volId] = nullptr;
     volCnt--;
 
-    IBOF_TRACE_INFO((int)IBOF_EVENT_ID::VOL_REMOVED, "Volume removed from the list VOL_CNT {}", volCnt);
-    return (int)IBOF_EVENT_ID::SUCCESS;
+    POS_TRACE_INFO((int)POS_EVENT_ID::VOL_REMOVED, "Volume removed from the list VOL_CNT {}", volCnt);
+    return (int)POS_EVENT_ID::SUCCESS;
 }
 
 int
@@ -142,7 +144,7 @@ VolumeList::_NewID()
     {
         if (items[i] == nullptr)
         {
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::SUCCESS, "Volume New ID: {}", i);
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::SUCCESS, "Volume New ID: {}", i);
             return i;
         }
     }
@@ -216,4 +218,93 @@ VolumeList::Next(int& index)
     return nullptr;
 }
 
-} // namespace ibofos
+void
+VolumeList::InitializePendingIOCount(int volId, VolumeStatus volumeStatus)
+{
+    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    pendingIOCount[volId][index] = 1;
+    possibleIncreaseIOCount[volId][index] = true;
+}
+
+// This function check possibleIncreaseIOCount before increase pendingIO Count to avoid waiting infinite IO from HOST (or Internal Module)
+// Even if possibleIncreaseIOCount is false, we need to check pendingIOCount == 0 or not
+// because there is a possibility that calls in sequence of "WaitUntilIdle => IncreasePendingIOCountIfoNozero"
+
+bool
+VolumeList::IncreasePendingIOCountIfNotZero(int volId, VolumeStatus volumeStatus, uint32_t ioSubmissionCount)
+{
+    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    if (unlikely (possibleIncreaseIOCount[volId][index] == false))
+    {
+        return false;
+    }
+    uint32_t oldPendingIOCount = pendingIOCount[volId][index].load();
+    do
+    {
+        if (unlikely(oldPendingIOCount == 0))
+        {
+            // already volume base is deleted
+            return false;
+        }
+    } while (!pendingIOCount[volId][index].compare_exchange_weak(oldPendingIOCount, oldPendingIOCount + ioSubmissionCount));
+
+    if (unlikely((UINT32_MAX - oldPendingIOCount) < ioSubmissionCount))
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::VOL_UNEXPECTED_PENDING_IO_COUNT,
+            "PendingIOCount overflow!!: Current PendingIOCount: {}, "
+            "Submission Count: {}",
+            oldPendingIOCount,
+            ioSubmissionCount);
+        return false;
+    }
+    return true;
+}
+
+void
+VolumeList::DecreasePendingIOCount(int volId, VolumeStatus volumeStatus, uint32_t ioCompletionCount)
+{
+    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    uint32_t oldPendingIOCount = pendingIOCount[volId][index].fetch_sub(ioCompletionCount,
+        memory_order_relaxed);
+    if (unlikely(oldPendingIOCount < ioCompletionCount))
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::VOL_UNEXPECTED_PENDING_IO_COUNT,
+            "PendingIOCount underflow!!: Current PendingIOCount: {}, "
+            "Completion Count: {}",
+            oldPendingIOCount,
+            ioCompletionCount);
+    }
+}
+
+bool
+VolumeList::CheckIdleAndSetZero(int volId, VolumeStatus volumeStatus)
+{
+    uint32_t index = static_cast<uint32_t>(volumeStatus);
+    uint32_t oldPendingIOCount = pendingIOCount[volId][index].load();
+    // If oldPendingIOCount is greater than 0
+    // If oldPendingIOCount == 1, decrease and return idle as true.
+    do
+    {
+        if (unlikely(oldPendingIOCount > 1))
+        {
+            return false;
+        }
+    } while (!pendingIOCount[volId][index].compare_exchange_weak(oldPendingIOCount, oldPendingIOCount - 1));
+    assert(oldPendingIOCount == 1);
+    return true;
+}
+
+void
+VolumeList::WaitUntilIdle(int volId, VolumeStatus volumeStatus)
+{
+    possibleIncreaseIOCount[volId][volumeStatus] = false;
+    while (false == CheckIdleAndSetZero(volId, volumeStatus))
+    {
+        usleep(1);
+    }
+}
+
+
+
+
+} // namespace pos

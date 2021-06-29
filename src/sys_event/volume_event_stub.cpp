@@ -33,20 +33,20 @@
 #include "volume_event.h"
 #include "volume_event_publisher.h"
 
-namespace ibofos
+namespace pos
 {
 VolumeEvent::~VolumeEvent(void)
 {
 }
 
 void
-VolumeEvent::RegisterToPublisher()
+VolumeEvent::RegisterToPublisher(std::string arrayName)
 {
 }
 
 void
-VolumeEvent::RemoveFromPublisher(void)
+VolumeEvent::RemoveFromPublisher(std::string arrayName)
 {
 }
 
-} // namespace ibofos
+} // namespace pos

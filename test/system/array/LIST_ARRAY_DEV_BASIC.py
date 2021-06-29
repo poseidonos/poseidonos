@@ -6,15 +6,13 @@ import json
 sys.path.append("../lib/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
-import CREATE_ARRAY_BASIC_1
+import CREATE_ARRAY_BASIC
 import array_device
 
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
+ARRAYNAME = CREATE_ARRAY_BASIC.ARRAYNAME
 
 def check_result(detail):
     expected_list = []
@@ -47,14 +45,14 @@ def set_result(detail):
         result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
 def execute():
-    clear_result()
-    out = CREATE_ARRAY_BASIC_1.execute()
+    out = CREATE_ARRAY_BASIC.execute()
     ret = json_parser.get_response_code(out)
     if ret == 0:
-        out = cli.list_array_device("")
+        out = cli.list_array_device(ARRAYNAME)
     return out
 
 if __name__ == "__main__":
+    test_result.clear_result(__file__)
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

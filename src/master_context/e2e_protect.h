@@ -37,12 +37,12 @@
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 class DataProtect
 {
 public:
-    uint32_t
+    virtual uint32_t
     MakeParity(unsigned char* data, size_t len)
     {
         uint32_t a = 1;
@@ -58,9 +58,10 @@ public:
 
         return (b << 16) | a;
     }
+    virtual ~DataProtect(void) = default;
 
 private:
     static const uint32_t MOD_ADLER = 65521;
 };
 
-} // namespace ibofos
+} // namespace pos

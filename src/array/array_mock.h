@@ -47,11 +47,11 @@ class MockArray : public MockArray
 {
 public:
     MOCK_METHOD0(Load, int(void));
-    MOCK_METHOD1(Create, int(DeviceSet<UBlockDevice*>);
+    MOCK_METHOD1(Create, int(DeviceSet<UblockSharedPtr>);
     MOCK_METHOD0(Mount, int(void));
     MOCK_METHOD0(Unmount, int(void));
     MOCK_METHOD0(Delete, int(void));
-    MOCK_METHOD1(AddSpare, int(UBlockDevice*));
+    MOCK_METHOD1(AddSpare, int(UblockSharedPtr));
     MOCK_METHOD0(GetStatus, ArrayStatus(void));
     MOCK_METHOD1(GetSizeInfo, const PartitionLogicalSize*(PartitionType));
     MOCK_METHOD2(Translate,

@@ -7,11 +7,13 @@ sys.path.append("../lib/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
-import ibofos_constant
+import pos_constant
 import CREATE_VOL_BASIC_1
+
+ARRAYNAME = CREATE_VOL_BASIC_1.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -33,11 +35,11 @@ def set_result(detail):
 def execute():
     clear_result()
     CREATE_VOL_BASIC_1.execute()
-    cli.unmount_ibofos()
-    out = cli.list_volume("")
+    cli.unmount_array(ARRAYNAME)
+    out = cli.list_volume(ARRAYNAME)
     return out
 
 if __name__ == "__main__":
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

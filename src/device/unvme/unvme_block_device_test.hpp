@@ -33,10 +33,10 @@
 #ifndef UNVME_BLOCK_DEVICE_TEST_HPP_
 #define UNVME_BLOCK_DEVICE_TEST_HPP_
 
-#include "src/device/spdk/nvme.hpp"
-#include "ublock_device_test.hpp"
+#include "src/spdk_wrapper/nvme.hpp"
+#include "src/device/base/ublock_device_test.hpp"
 
-namespace ibofos
+namespace pos
 {
 class UnvmeBlockDeviceTest : public UBlockDeviceTest
 {
@@ -50,5 +50,5 @@ public:
 private:
     Nvme* spdkNVMe;
 };
-} // namespace ibofos
+} // namespace pos
 #endif // UNVME_BLOCK_DEVICE_TEST_HPP_

@@ -34,12 +34,13 @@
 
 #include <atomic>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "src/network/nvmf_target_spdk.hpp"
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 enum NvmfCallbackStatus
 {
@@ -55,17 +56,17 @@ public:
     ~NvmfTarget(void);
 
     bool IsTargetExist(void);
-    bool CreateIBoFBdev(const string& bdevName, uint32_t id, uint64_t volumeSizeInMb,
-        uint32_t blockSize, bool volumeTypeInMem);
-    bool DeleteIBoFBdev(const string& bdevName);
+    bool CreatePosBdev(const string& bdevName, uint32_t id, uint64_t volumeSizeInMb,
+        uint32_t blockSize, bool volumeTypeInMem, const string& arrayName);
+    bool DeletePosBdev(const string& bdevName);
 
     bool AttachNamespace(const string& nqn, const string& bdevName,
-        IBoFNvmfEventDoneCallback_t cb, void* cbArg);
+        PosNvmfEventDoneCallback_t cb, void* cbArg);
     bool AttachNamespace(const string& nqn, const string& bdevName, uint32_t nsid,
-        IBoFNvmfEventDoneCallback_t cb, void* cbArg);
+        PosNvmfEventDoneCallback_t cb, void* cbArg);
     bool DetachNamespace(const string& nqn, uint32_t nsid,
-        IBoFNvmfEventDoneCallback_t cb, void* cbArg);
-    bool DetachNamespaceAll(const string& nqn, IBoFNvmfEventDoneCallback_t cb,
+        PosNvmfEventDoneCallback_t cb, void* cbArg);
+    bool DetachNamespaceAll(const string& nqn, PosNvmfEventDoneCallback_t cb,
         void* cbArg);
 
     uint32_t GetSubsystemNsCnt(struct spdk_nvmf_subsystem* subsystem);
@@ -76,12 +77,15 @@ public:
     void SetVolumeQos(const string& bdevName, uint64_t maxIops, uint64_t maxBw);
     static void QosEnableDone(void* cbArg, int status);
 
-    string GetBdevName(uint32_t id);
+    string GetBdevName(uint32_t id, string arrayName);
     string GetVolumeNqn(struct spdk_nvmf_subsystem* subsystem);
-    uint32_t GetVolumeNqnId(struct spdk_nvmf_subsystem* subsystem);
+    uint32_t GetVolumeNqnId(const string& subnqn);
     spdk_nvmf_subsystem* FindSubsystem(const string& nqn);
     vector<string> GetHostNqn(string subnqn);
-    bool TryToAttachNamespace(const string& nqn, int volId);
+    bool TryToAttachNamespace(const string& nqn, int volId, string& arrayName);
+    bool CheckSubsystemExistance(void);
+    bool CheckVolumeAttached(int volId, string arrayName);
+    vector<pair<int, string>> GetAttachedVolumeList(string& nqn);
 
 private:
     static struct NvmfTargetCallbacks nvmfCallbacks;
@@ -89,7 +93,7 @@ private:
     static const char* BDEV_NAME_PREFIX;
     static atomic<int> attachedNsid;
 
-    struct EventContext* _CreateEventContext(IBoFNvmfEventDoneCallback_t callback,
+    struct EventContext* _CreateEventContext(PosNvmfEventDoneCallback_t callback,
         void* userArg, void* eventArg1, void* eventArg2);
     static void _DetachNamespaceWithPause(void* arg1, void* arg2);
     static void _AttachNamespaceWithPause(void* arg1, void* arg2);
@@ -98,4 +102,4 @@ private:
     static void _TryAttachHandler(void* arg1, void* arg2);
 };
 
-} // namespace ibofos
+} // namespace pos

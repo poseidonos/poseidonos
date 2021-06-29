@@ -36,7 +36,7 @@
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 NvmfVolume::NvmfVolume(void)
 {
@@ -63,4 +63,4 @@ NvmfVolume::GetuNVMfIOHandler(void)
     return ioHandler;
 }
 
-} // namespace ibofos
+} // namespace pos

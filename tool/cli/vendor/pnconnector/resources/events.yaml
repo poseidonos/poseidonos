@@ -204,7 +204,7 @@ modules:
         solution: Enter a volume name between 2 and 255 characters
       - code: 2021
         level: WARN
-        message: Volume name  is too long
+        message: Volume name is too long
         problem: Volume name entered is too long
         solution: Enter a volume name that does not exceed 255 characters
       - code: 2022
@@ -380,6 +380,16 @@ modules:
         message: mbr key not found
         problem:
         solution:
+      - code: 2315
+        level: WARN
+        message: array boot record not found
+        problem: no abr with request array name
+        solution: check array name
+      - code: 2316
+        level: WARN
+        message: array boot record delete failed
+        problem: no abr with request array name
+        solution: check array name
       - code: 2330
         level: ERROR
         message: Allocate memory fail
@@ -527,22 +537,22 @@ modules:
     info:
       - code: 2500
         level: ERROR
-        message: Array is alreday mounted.
+        message: Array is already mounted.
         problem:
         solution:
       - code: 2501
         level: ERROR
-        message: Array is already umounted.
+        message: Array is already unmounted.
         problem:
         solution:
       - code: 2502
         level: ERROR
-        message: Array already exists
+        message: Array already exists.
         problem:
         solution:
       - code: 2503
         level: ERROR
-        message: Array does not exists
+        message: Array does not exist.
         problem:
         solution:
       - code: 2504
@@ -610,6 +620,11 @@ modules:
         message: invalid logical address error
         problem:
         solution:
+      - code: 2517
+        level: ERROR
+        message: Array is broken
+        problem: Device detached more than recoverable counts or Cannot load Array
+        solution: Delete array and create new one
       - code: 2518
         level: ERROR
         message: Wrong type for array device
@@ -627,7 +642,7 @@ modules:
         solution:
       - code: 2522
         level: WARN
-        message: no array exist
+        message: Array does not exist. Please check the array name in the command line or type the array name. 
         problem:
         solution:
       - code: 2523
@@ -635,6 +650,16 @@ modules:
         message: need mount first add or remove device
         problem:
         solution:
+      - code : 2527
+        level: WARN
+        message: shutdown process not terminated
+        problem:
+        solution: retry later
+      - code : 2528
+        level: ERROR
+        message: Invalid operation on load failed array
+        problem: Load failed array cannot process requested command
+        solution: Check reason of array load fail or delete array
       - code: 2530
         level: INFO
         message: the array device has been added
@@ -675,6 +700,11 @@ modules:
         message: failed to add device
         problem: the requested device is already in the array
         solution:
+      - code: 2538
+        level: ERROR
+        message: buffer device not found
+        problem: the requested device does not exist
+        solution: create the buffer device or check its state
       - code: 2550
         level: INFO
         message: array status updated
@@ -704,6 +734,46 @@ modules:
       - code: 2558
         level: INFO
         message: "Array State : Stop"
+      - code: 2560
+        level: WARN
+        message: Array name is too short
+        problem: The Array name entered is to short
+        solution: Enter a Array name between 2 and 63 characters
+      - code: 2561
+        level: WARN
+        message: Array name is too long
+        problem: Array name entered is too long
+        solution: Enter a Array name that does not exceed 63 characters
+      - code: 2562
+        level: WARN
+        message: Unacceptable Array name
+        problem: Array name entered contains a string that is not allowed
+        solution: Enter the Array name that meets the Array name rules
+      - code: 2580
+        level: ERROR
+        message: Failed to exit poseidonos because of mounted array
+        problem: Some array is not unmounted
+        solution: Unmount array first
+      - code: 2581
+        level: ERROR
+        message: failed to unmount array
+        problem: array is not mounted
+        solution: mount array first
+      - code: 2582
+        level: ERROR
+        message: failed to mount array
+        problem: higher priority job is progressing.
+        solution: try again after a while
+      - code: 2583
+        level: ERROR
+        message: failed to unmount array
+        problem: higher priority job such as rebuilding is progressing.
+        solution: try again after a while
+      - code: 2586
+        level: WARN
+        message: Failed to mount array
+        problem: Array already mounted
+        solution:
   - name: "Rebuild"
     count: 100
     idStart: 2800
@@ -1212,6 +1282,16 @@ modules:
     idStart: 5200
     idEnd:   5299
     info:
+  - name: "DeviceManager"
+    count: 100
+    idStart: 5500
+    idEnd:   5599
+    info:
+      - code: 5525
+        level: ERROR
+        message: Device not found
+        problem: Devices not found
+        solution: Scan device and try again
   - name: "system"
     count: 1000
     idStart: 9000
@@ -1222,29 +1302,6 @@ modules:
         message: SPACE INFO
         problem:
         solution:
-      - code: 9001
-        level: ERROR
-        message: failed to unmount ibofos
-        problem: ibofos not mounted
-        solution:
-      - code: 9002
-        level: ERROR
-        message: failed to unmount ibofos
-        problem: higher priority job such as rebuilding is progressing.
-        solution: try again after a while
-      - code: 9003
-        level: ERROR
-        message: The request cannot be executed since ibofos is mounted
-        problem: ibofos already has been mounted
-        solution: try again after unmount ibofos
-      - code: 9004
-        level: INFO
-        message: load system versionA
-        problem: load system versionA
-      - code: 9005
-        level: INFO
-        message: system unmounting
-        problem: pos system unmounting
   - name: "D-Agent"
     count: 10000
     idStart: 10000

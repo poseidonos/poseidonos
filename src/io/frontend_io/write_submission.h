@@ -37,47 +37,43 @@
 #include <queue>
 #include <utility>
 #include <vector>
+#include <string>
 
-#include "src/allocator/allocator.h"
-#include "src/include/ibof_event_id.hpp"
-#include "src/io/general_io/block_alignment.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/lib/block_alignment.h"
 #include "src/io/general_io/io_controller.h"
-#include "src/io/general_io/volume_io.h"
-#include "src/scheduler/event.h"
+#include "src/bio/volume_io.h"
+#include "src/event_scheduler/event.h"
 
-namespace ibofos
+namespace pos
 {
 class EventArgument;
-class Allocator;
 class VolumeIo;
 class RBAStateManager;
+class IBlockAllocator;
 
 class WriteSubmission : public IOController, public Event
 {
 public:
-    WriteSubmission(VolumeIoSmartPtr volumeIo);
-    virtual ~WriteSubmission(void);
+    WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* rbaStateManager = nullptr, IBlockAllocator* iBlockAllocator = nullptr);
+    ~WriteSubmission(void) override;
 
-    virtual bool Execute(void);
-    uint32_t GetOriginCore(void);
+    bool Execute(void) override;
 
 private:
-    RBAStateManager& rbaStateManager;
-
-    using BlockAllocationArray = std::vector<VirtualBlks>;
-    using EventIdWithLevel = std::pair<IBOF_EVENT_ID, EventLevel>;
-
-    Allocator* allocator;
+    RBAStateManager* rbaStateManager;
+    IBlockAllocator* iBlockAllocator;
     VolumeIoSmartPtr volumeIo;
-    uint32_t blockCount;
     uint32_t volumeId;
-    uint32_t volumeIoCount;
-    uint32_t remainSize;
+    std::string arrayName;
     BlockAlignment blockAlignment;
+    uint32_t blockCount;
     uint32_t allocatedBlockCount;
+    std::list<VirtualBlks> allocatedVirtualBlks;
     uint32_t processedBlockCount;
     std::queue<VolumeIoSmartPtr> splitVolumeIoQueue;
 
+    void _SendVolumeIo(VolumeIoSmartPtr volumeIo);
     bool _ProcessOwnedWrite(void);
     void _AllocateFreeWriteBuffer(void);
     void _ReadOldBlock(BlkAddr rba, VirtualBlkAddr& vsa, bool isTail);
@@ -91,5 +87,9 @@ private:
     void _WriteSingleBlock(void);
     void _WriteMultipleBlocks(void);
     void _SubmitVolumeIo(void);
+    VirtualBlkAddr _PopHeadVsa(void);
+    VirtualBlkAddr _PopTailVsa(void);
+    void _SetupVolumeIo(VolumeIoSmartPtr newVolumeIo, VirtualBlks& vsaRange,
+            CallbackSmartPtr callback);
 };
-} // namespace ibofos
+} // namespace pos

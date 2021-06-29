@@ -34,7 +34,7 @@
 
 #include <string>
 
-namespace ibofos
+namespace pos
 {
 VersionProvider::VersionProvider(void)
 : VERSION(POS_VERSION)
@@ -51,4 +51,4 @@ VersionProvider::GetVersion(void)
     return VERSION;
 }
 
-} // namespace ibofos
+} // namespace pos

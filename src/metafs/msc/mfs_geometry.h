@@ -32,15 +32,17 @@
 
 #pragma once
 
-#include <vector>
+#include <array>
 
 #include "meta_storage_specific.h"
 #include "os_header.h"
 
+namespace pos
+{
 class MetaFsVolumeSpcfInfo
 {
 public:
-    uint32_t totalFilesystemVolumeCnt;
+    uint32_t totalFilesystemVolumeCnt = 0;
 };
 
 class MetaFsStorageIoInfo
@@ -49,23 +51,16 @@ public:
     MetaStorageType mediaType;
     bool valid;
     uint64_t totalCapacity;
-    uint64_t stripeSizeIn4KB;
-    uint64_t maxStripeCnt;
 };
-using MetaFsStorageIoInfoList = std::vector<MetaFsStorageIoInfo>;
-// ArrayMgr will provide media specific information. Don't need to keep it
-/*
-class MetaFsPhyDeviceInfo
-{
-public:
-    std::string nvram;
-    std::vector<std::string> ssdArray;
-};
-*/
 
 class MetaFsGeometryInfo
 {
 public:
+    static const uint32_t MAX_INFO_COUNT = 8;
+
     MetaFsVolumeSpcfInfo volumeInfo;
-    std::vector<MetaFsStorageIoInfo> mediaPartitionInfo;
+    std::array<MetaFsStorageIoInfo, MAX_INFO_COUNT> mediaPartitionInfo;
 };
+
+using MetaFsStorageIoInfoList = std::array<MetaFsStorageIoInfo, MetaFsGeometryInfo::MAX_INFO_COUNT>;
+} // namespace pos

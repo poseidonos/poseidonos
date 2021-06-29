@@ -41,33 +41,29 @@
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 class StateList
 {
 public:
-    using ListUpdatedHandler = std::function<void(StateContext)>;
+    using ListUpdatedHandler = std::function<void(StateContext*)>;
     StateList(ListUpdatedHandler cb)
     {
         listUpdated = move(cb);
     };
     virtual ~StateList();
 
-    void Add(StateContext ctx);
-    void Remove(StateContext ctx);
-    bool Exist(StateContext ctx);
-    bool ExistRebuild(void);
-    void AddandRemove(StateContext add, StateContext remove);
-    size_t
-    Size()
-    {
-        return contextList.size();
-    }
-    vector<StateContext>::iterator Find(StateContext ctx);
+    void Add(StateContext* ctx);
+    void Remove(StateContext* ctx);
+    bool Exists(StateContext* ctx);
+    bool Exists(StateEnum state);
+    bool Exists(SituationEnum situ);
 
 private:
+    vector<StateContext*>::iterator _Find(StateContext* ctx);
+    static bool _Compare(StateContext* a, StateContext* b);
     ListUpdatedHandler listUpdated = nullptr;
-    vector<StateContext> contextList;
+    vector<StateContext*> contextList;
     std::mutex listMutex;
 };
-} // namespace ibofos
+} // namespace pos

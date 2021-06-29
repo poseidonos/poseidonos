@@ -1,6 +1,6 @@
 IBOF_SRC_DIR := $(abspath $(CURDIR)/../../../../)
-SPDK_ROOT_DIR := $(abspath $(IBOF_SRC_DIR)/lib/spdk-19.10)
-DPDK_ROOT_DIR := $(abspath $(IBOF_SRC_DIR)/lib/dpdk-stable-19.08.2)
+SPDK_ROOT_DIR := $(abspath $(IBOF_SRC_DIR)/lib/spdk)
+DPDK_ROOT_DIR := $(abspath $(IBOF_SRC_DIR)/lib/dpdk)
 SRC_DIR := .
 MFS_DIR := ./../../
 
@@ -43,7 +43,7 @@ PSTORE_LDFLAGS := -DFLUIDOS_CONFIG='"$(IBOF_SRC_DIR)/config/fluidos.cfg"' \
 	-lspdk_bdev_null -lspdk_bdev_nvme -lspdk_nvme  \
 	-lspdk_bdev_passthru -lspdk_bdev_error -lspdk_bdev_gpt \
 	-lspdk_bdev_split -lspdk_bdev_raid -lspdk_bdev_aio \
-	-lspdk_bdev_virtio -lspdk_virtio -lspdk_bdev_ibof \
+	-lspdk_bdev_virtio -lspdk_virtio -lspdk_bdev_pos \
 	-lspdk_copy_ioat -lspdk_ioat -lspdk_sock_posix \
 	-lspdk_event_bdev -lspdk_event_copy -lspdk_event_nvmf \
 	-lspdk_event_net -lspdk_nvmf -lspdk_event \

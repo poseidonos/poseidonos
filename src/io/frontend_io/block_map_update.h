@@ -32,26 +32,38 @@
 
 #pragma once
 
-#include "src/io/general_io/volume_io.h"
-#include "src/scheduler/event.h"
+#include <functional>
 
-namespace ibofos
+#include "src/bio/volume_io.h"
+#include "src/event_scheduler/event.h"
+#include "src/mapper/i_vsamap.h"
+#include "src/mapper/include/mpage_info.h"
+
+namespace pos
 {
 class VolumeIo;
 class Mapper;
-class JournalManager;
-
+class JournalService;
+class EventScheduler;
+class BlockMapUpdateCompletion;
 class BlockMapUpdate : public Event
 {
 public:
     BlockMapUpdate(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback);
+    BlockMapUpdate(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback,
+        function<bool(void)> IsReactorNow, IVSAMap* iVSAMap, JournalService* journalService,
+        EventScheduler* eventScheduler, EventSmartPtr blockMapUpdateCompletionEvent);
     virtual bool Execute(void) override;
 
 private:
+    MpageList _GetDirtyPages(VolumeIoSmartPtr volumeIo);
+
     VolumeIoSmartPtr volumeIo;
-    Mapper* mapper;
-    JournalManager* journalManager;
+    IVSAMap* iVSAMap;
     CallbackSmartPtr originCallback;
+    JournalService* journalService;
+    EventScheduler* eventScheduler;
+    EventSmartPtr blockMapUpdateCompletionEvent;
 };
 
-} // namespace ibofos
+} // namespace pos

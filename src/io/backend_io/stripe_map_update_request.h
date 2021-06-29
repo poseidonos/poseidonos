@@ -32,21 +32,30 @@
 
 #pragma once
 
+#include <string>
+
+#include "src/event_scheduler/callback.h"
 #include "src/io/general_io/io_submit_handler.h"
 
-namespace ibofos
+namespace pos
 {
 class Stripe;
+class IStripeMap;
+class EventScheduler;
 
 class StripeMapUpdateRequest : public Callback
 {
 public:
-    StripeMapUpdateRequest(Stripe* stripe);
+    explicit StripeMapUpdateRequest(Stripe* stripe, std::string& arrayName);
+    StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* eventScheduler, std::string& arrayName);
     ~StripeMapUpdateRequest(void) override;
 
 private:
     bool _DoSpecificJob(void) override;
     Stripe* stripe;
+    IStripeMap* iStripeMap;
+    EventScheduler* eventScheduler;
+    std::string arrayName;
 };
 
-} // namespace ibofos
+} // namespace pos

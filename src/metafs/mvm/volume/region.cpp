@@ -34,48 +34,47 @@
 #include "src/include/memory.h"
 #include "rte_malloc.h"
 
+namespace pos
+{
 bool
 Region::Move(Region* target)
 {
-    IBOF_EVENT_ID rc = IBOF_EVENT_ID::SUCCESS;
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
     MetaLpnType targetBaseLPN = target->content.GetBaseMetaLpn();
     MetaLpnType sourceBaseLPN = content.GetBaseMetaLpn();
 
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "Copy meta lpns<mediaType, source_startLpn, target_startLpn, totalLpn>={}, {}, {}, {}",
-        (int)regionType, targetBaseLPN, sourceBaseLPN, content.GetSize());
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "[Metadata File] Move meta lpns mediaType={}, target_startLpn={}, source_startLpn={}, totalLpn={}",
+        (int)regionType, sourceBaseLPN, targetBaseLPN, content.GetSize());
 
     void* rBuf = (void*)rte_malloc(nullptr, 4096, 1);
-    MDPage bufferPage(nullptr);
-    bufferPage.Init(rBuf);
+    MDPage bufferPage(rBuf);
 
     for (uint64_t idx = 0; idx < content.GetSize(); idx++)
     {
         rc = mssIntf->ReadPage(regionType, sourceBaseLPN + idx, bufferPage.GetDataBuf(), 1);
-        if (rc != IBOF_EVENT_ID::SUCCESS)
+        if (rc != POS_EVENT_ID::SUCCESS)
         {
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
-                "Failed loading meta lpns {} of {}, #{}",
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                "[Metadata File] It's failed to load meta lpns {} of {}, #{}",
                 idx + 1, content.GetSize(), sourceBaseLPN + idx);
             break;
         }
 
-        bufferPage.Make(targetBaseLPN + idx, content.GetInode()->data.basic.field.fd);
+        bufferPage.Make(targetBaseLPN + idx, content.GetInode()->data.basic.field.fd, arrayName);
 
         rc = mssIntf->WritePage(regionType, targetBaseLPN + idx, bufferPage.GetDataBuf(), 1);
-        if (rc != IBOF_EVENT_ID::SUCCESS)
+        if (rc != POS_EVENT_ID::SUCCESS)
         {
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
-                "Failed saving meta lpns {} of {}, #{}",
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                "[Metadata File] It's failed to save meta lpns {} of {}, #{}",
                 idx, content.GetSize(), targetBaseLPN + idx);
             break;
         }
     }
 
-    if (IBOF_EVENT_ID::SUCCESS == rc)
+    if (POS_EVENT_ID::SUCCESS == rc)
     {
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
-            "Try to trim: startLpn={}, count={}", sourceBaseLPN, content.GetSize());
         rc = Erase(sourceBaseLPN, content.GetSize());
     }
 
@@ -84,21 +83,25 @@ Region::Move(Region* target)
     content.SetBaseMetaLpn(targetBaseLPN);
     content.GetInode()->data.basic.field.pagemap.baseMetaLpn = targetBaseLPN;
 
-    return (rc == IBOF_EVENT_ID::SUCCESS) ? true : false;
+    return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
 }
 
-IBOF_EVENT_ID
+POS_EVENT_ID
 Region::Erase(MetaLpnType startLpn, MetaLpnType numTrimLpns)
 {
     void* buf = nullptr;
 
-    IBOF_EVENT_ID ret = IBOF_EVENT_ID::SUCCESS;
+    POS_EVENT_ID ret = POS_EVENT_ID::SUCCESS;
     ret = mssIntf->TrimFileData(regionType, startLpn, buf, numTrimLpns);
 
-    if (ret != IBOF_EVENT_ID::SUCCESS)
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "[Metadata File] Trim mediaType={}, startLpn={}, count={}",
+        (int)regionType, startLpn, numTrimLpns);
+
+    if (ret != POS_EVENT_ID::SUCCESS)
     {
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "NVMe Admin TRIM has been failed due to not supported the command");
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            "[Metadata File] NVMe Admin TRIM has been failed due to not supported the command");
 
         const FileSizeType pageSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES;
         FileSizeType fileSize = numTrimLpns * pageSize;
@@ -109,10 +112,10 @@ Region::Erase(MetaLpnType startLpn, MetaLpnType numTrimLpns)
         // write all zeros
         ret = mssIntf->WritePage(regionType, startLpn, buf, numTrimLpns); // should be async.
 
-        if (ret != IBOF_EVENT_ID::SUCCESS)
+        if (ret != POS_EVENT_ID::SUCCESS)
         {
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
-                "failed to write all zero patterned data");
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                "[Metadata File] Trim failed to write all zero patterned data");
 
             Memory<>::Free(buf);
             return ret;
@@ -122,3 +125,4 @@ Region::Erase(MetaLpnType startLpn, MetaLpnType numTrimLpns)
 
     return ret;
 }
+} // namespace pos

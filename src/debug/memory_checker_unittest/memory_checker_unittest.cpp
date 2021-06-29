@@ -93,9 +93,9 @@ test_erase_list_single(void)
         ptr[i] = new Dummy;
     }
     delete (ptr[0]);
-    ibofos::MemoryChecker::Enable(false);
+    pos::MemoryChecker::Enable(false);
     printf("%ld %ld \n", (uint64_t)ptr[0], sizeof(Dummy));
-    ibofos::MemoryChecker::EraseFromFreeList((uint64_t)((char*)ptr[0] + 1), 4);
+    pos::MemoryChecker::EraseFromFreeList((uint64_t)((char*)ptr[0] + 1), 4);
     while (1)
     {
         // Do nothing
@@ -118,10 +118,10 @@ test_erase_list_multiple(void)
     delete (ptr[0]);
     delete (ptr[1]);
     delete (ptr[2]);
-    ibofos::MemoryChecker::Enable(false);
+    pos::MemoryChecker::Enable(false);
     printf("%ld %ld \n", (uint64_t)ptr[2], sizeof(Dummy));
     // You need to expermentally choose the size (96+64)
-    ibofos::MemoryChecker::EraseFromFreeList((uint64_t)((char*)ptr[0] + 1), 96 + 64);
+    pos::MemoryChecker::EraseFromFreeList((uint64_t)((char*)ptr[0] + 1), 96 + 64);
     while (1)
     {
         // Do nothing
@@ -129,9 +129,9 @@ test_erase_list_multiple(void)
 }
 
 int
-main()
+main(void)
 {
-    ibofos::MemoryChecker::Enable(true);
+    pos::MemoryChecker::Enable(true);
     // All should be segmentation failure,
     // So, please check one by one.
     test_fail_memory_corruption();
@@ -139,5 +139,5 @@ main()
     test_fail_complex_double_free();
     test_erase_list_single();
     test_erase_list_multiple();
-    ibofos::MemoryChecker::Enable(false);
+    pos::MemoryChecker::Enable(false);
 }

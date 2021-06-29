@@ -34,126 +34,140 @@
 
 #include <functional>
 
-#include "../checkpoint/dirty_map_manager.h"
-#include "../journal_configuration.h"
-#include "../log_buffer/journal_log_buffer.h"
-#include "../log_buffer/log_write_context_factory.h"
-#include "log_write_handler.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
+#include "src/journal_manager/checkpoint/dirty_map_manager.h"
+#include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/log_write_context_factory.h"
+#include "src/journal_manager/log_write/log_write_handler.h"
+#include "src/journal_manager/log_write/volume_deleted_log_write_callback.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
 JournalVolumeEventHandler::JournalVolumeEventHandler(void)
-: VolumeEvent("Journal"),
-  isInitialized(false),
-  isJournalEnabled(false),
+: isInitialized(false),
+  contextManager(nullptr),
   config(nullptr),
   logFactory(nullptr),
   dirtyPageManager(nullptr),
-  logWriteHandler(nullptr)
+  logWriteHandler(nullptr),
+  logWriteInProgress(false),
+  flushInProgress(false)
 {
-    volumeDeleteInProgress.clear();
-    this->RegisterToPublisher();
 }
 
 JournalVolumeEventHandler::~JournalVolumeEventHandler(void)
 {
-    this->RemoveFromPublisher();
 }
 
 void
 JournalVolumeEventHandler::Init(LogWriteContextFactory* factory,
     DirtyMapManager* dirtyPages, LogWriteHandler* writter,
-    JournalConfiguration* journalConfiguration)
+    JournalConfiguration* journalConfiguration, IContextManager* contextManagerToUse)
 {
     config = journalConfiguration;
     logFactory = factory;
     dirtyPageManager = dirtyPages;
     logWriteHandler = writter;
 
+    contextManager = contextManagerToUse;
+
     isInitialized = true;
 }
 
-bool
-JournalVolumeEventHandler::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte)
+int
+JournalVolumeEventHandler::VolumeDeleted(int volumeId)
 {
-    int ret = 0;
-
-    if (isInitialized == true && config->IsEnabled() == true)
+    if (isInitialized == false || config->IsEnabled() == false)
     {
-        auto status = volumeDeleteInProgress.find(volID);
-        if (status == volumeDeleteInProgress.end() || (status->second == false))
-        {
-            volumeDeleteInProgress.emplace(volID, true);
-
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_VOLUME_DELETE_LOG_WRITE_STARTED,
-                "Issue writes for volume {} deleted log event", volID);
-
-            LogWriteContext* logWriteContext = logFactory->CreateVolumeDeletedLogWriteContext(volID,
-                std::bind(&JournalVolumeEventHandler::VolumeDeletedLogWriteDone, this, std::placeholders::_1));
-            logWriteHandler->AddLog(logWriteContext);
-        }
-        _WaitForLogWriteDone(volID);
-        dirtyPageManager->DeleteDirtyList(volID);
-
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_VOLUME_DELETE_LOG_WRITTEN,
-            "Volume deleted log event is written");
+        return 0;
     }
+    else
+    {
+        POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+            "Start volume delete event handler (volume id {})", volumeId);
 
-    return (ret == 0);
+        int ret = 0;
+        ret = _WriteVolumeDeletedLog(volumeId, contextManager->GetStoredContextVersion(SEGMENT_CTX));
+        if (ret != 0)
+        {
+            POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+                "Writing volume deleted log failed (volume id {})", volumeId);
+            return ret;
+        }
+        _WaitForLogWriteDone(volumeId);
+
+        // TODO (huijeong.kim) need to flush map also
+        ret = _FlushAllocatorContext();
+        if (ret != 0)
+        {
+            POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+                "Failed to flush allocator context");
+            return ret;
+        }
+        _WaitForAllocatorContextFlushCompleted();
+
+        dirtyPageManager->DeleteDirtyList(volumeId);
+
+        return 0;
+    }
+}
+
+int
+JournalVolumeEventHandler::_WriteVolumeDeletedLog(int volumeId, uint64_t segCtxVersion)
+{
+    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+        "Write volume deleted log, segInfo version is {}", segCtxVersion);
+    EventSmartPtr callback(new VolumeDeletedLogWriteCallback(this, volumeId));
+
+    LogWriteContext* logWriteContext =
+        logFactory->CreateVolumeDeletedLogWriteContext(volumeId, segCtxVersion, callback);
+
+    logWriteInProgress = true;
+    return logWriteHandler->AddLog(logWriteContext);
 }
 
 void
 JournalVolumeEventHandler::_WaitForLogWriteDone(int volumeId)
 {
-    std::unique_lock<std::mutex> lock(mutex);
-    cv.wait(lock, [&] {
-        return (volumeDeleteInProgress[volumeId] == false);
+    std::unique_lock<std::mutex> lock(logWriteMutex);
+    logWriteCondVar.wait(lock, [&] {
+        return (logWriteInProgress == false);
+    });
+}
+
+int
+JournalVolumeEventHandler::_FlushAllocatorContext(void)
+{
+    EventSmartPtr callback(new AllocatorContextFlushCompleted(this));
+
+    flushInProgress = true;
+    return contextManager->FlushContextsAsync(callback);
+}
+
+void
+JournalVolumeEventHandler::_WaitForAllocatorContextFlushCompleted(void)
+{
+    std::unique_lock<std::mutex> lock(flushMutex);
+    flushCondVar.wait(lock, [&] {
+        return (flushInProgress == false);
     });
 }
 
 void
 JournalVolumeEventHandler::VolumeDeletedLogWriteDone(int volumeId)
 {
-    std::unique_lock<std::mutex> lock(mutex);
-    volumeDeleteInProgress[volumeId] = false;
-    cv.notify_all();
-}
-
-bool
-JournalVolumeEventHandler::VolumeCreated(std::string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw)
-{
-    return true;
-}
-
-bool
-JournalVolumeEventHandler::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw)
-{
-    return true;
-}
-
-bool
-JournalVolumeEventHandler::VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw)
-{
-    return true;
-}
-
-bool
-JournalVolumeEventHandler::VolumeUnmounted(std::string volName, int volID)
-{
-    return true;
-}
-
-bool
-JournalVolumeEventHandler::VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw)
-{
-    return true;
+    std::unique_lock<std::mutex> lock(logWriteMutex);
+    logWriteInProgress = false;
+    logWriteCondVar.notify_one();
 }
 
 void
-JournalVolumeEventHandler::VolumeDetached(vector<int> volList)
+JournalVolumeEventHandler::AllocatorContextFlushed(void)
 {
+    std::unique_lock<std::mutex> lock(flushMutex);
+    flushInProgress = false;
+    flushCondVar.notify_one();
 }
-
-} // namespace ibofos
+} // namespace pos

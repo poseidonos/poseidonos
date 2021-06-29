@@ -32,18 +32,21 @@
 
 #pragma once
 
-#include "src/io/general_io/volume_io.h"
-#include "src/scheduler/callback.h"
+#include "src/bio/volume_io.h"
+#include "src/event_scheduler/callback.h"
 
-namespace ibofos
+namespace pos
 {
 class Stripe;
 class VolumeIo;
+class IWBStripeAllocator;
 
 class WriteCompletion : public Callback
 {
 public:
     WriteCompletion(VolumeIoSmartPtr inputVolumeIo);
+    WriteCompletion(VolumeIoSmartPtr inputVolumeIo,
+        IWBStripeAllocator* iWBStripeAllocator);
     ~WriteCompletion(void) override;
 
 private:
@@ -52,5 +55,6 @@ private:
     bool _DoSpecificJob(void) override;
 
     VolumeIoSmartPtr volumeIo;
+    IWBStripeAllocator* iWBStripeAllocator;
 };
-} // namespace ibofos
+} // namespace pos

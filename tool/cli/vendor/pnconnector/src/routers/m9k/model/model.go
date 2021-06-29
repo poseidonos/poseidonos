@@ -58,6 +58,9 @@ type DeviceParam struct {
 	Name        string `json:"name,omitempty"`
 	Spare       string `json:"spare,omitempty"`
 	Array       string `json:"array,omitempty"`
+	DevType		string `json:"dev_type,omitempty"`
+	NumBlocks	uint `json:"num_blocks,omitempty"`
+	BlockSize	uint `json:"block_size,omitempty"`
 }
 type VolumeParam struct {
 	Name        string `json:"name,omitempty"`
@@ -115,11 +118,39 @@ type WBTArgv struct {
 	Dev       string `json:"dev,omitempty"`
 	Normal    string `json:"normal,omitempty"`
 	Urgent    string `json:"urgent,omitempty"`
+	Op        string `json:"op,omitempty"`
+	Cns       string `json:"cns,omitempty"`
+	Nsid      string `json:"nsid,omitempty"`
+	Cdw10     string `json:"cdw10,omitempty"`
+	Cdw11     string `json:"cdw11,omitempty"`
+	Cdw12     string `json:"cdw12,omitempty"`
+	Cdw13     string `json:"cdw13,omitempty"`
+	Cdw14     string `json:"cdw14,omitempty"`
+	Cdw15     string `json:"cdw15,omitempty"`
+	Lbaf      string `json:"lbaf,omitempty"`
+	Ms        string `json:"ms,omitempty"`
+	Pi        string `json:"pi,omitempty"`
+	Pil       string `json:"pil,omitempty"`
+	Ses       string `json:"ses,omitempty"`
+	Array     string `json:"array,omitempty"`
 }
 
 type BuildInfo struct {
 	GitHash   string `json:"githash"`
 	BuildTime string `json:"buildTime"`
+}
+
+type QosParam struct {
+    Vol    []Volume `json:"vol,omitempty"`
+    Array   string `json:"array,omitempty"`
+    Minbw   uint64   `json:"minbw,omitempty"`
+    Maxbw   uint64   `json:"maxbw,omitempty"`
+    Miniops uint64   `json:"miniops,omitempty"`
+    Maxiops uint64   `json:"maxiops,omitempty"`
+}
+
+type Volume struct {
+    VolumeName string `json:"volumeName"`
 }
 
 //type SMART struct {

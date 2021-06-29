@@ -60,9 +60,9 @@
 using namespace std;
 using namespace std::chrono_literals;
 
-namespace ibofos_cli
+namespace pos_cli
 {
-const char* CERT_PATH = "/etc/ibofos/cert/";
+const char* CERT_PATH = "/etc/pos/cert/";
 sock_pool_t sock_pool[MAX_CLI_CNT];
 fd_set rset, allset;
 
@@ -87,8 +87,8 @@ Wait()
     }
 
     cliThread->join();
-    int event = (int)IBOF_EVENT_ID::SERVER_THREAD_JOINED;
-    IBOF_TRACE_INFO(event, cliEventDic.at(event));
+    int event = (int)POS_EVENT_ID::SERVER_THREAD_JOINED;
+    POS_TRACE_INFO(event, cliEventDic.at(event));
 }
 
 void
@@ -96,8 +96,8 @@ Exit()
 {
     std::unique_lock<std::mutex> lock(exitMutex);
     exit_flag = true;
-    int event = (int)IBOF_EVENT_ID::SERVER_TRY_EXIT;
-    IBOF_TRACE_INFO(event, cliEventDic.at(event));
+    int event = (int)POS_EVENT_ID::SERVER_TRY_EXIT;
+    POS_TRACE_INFO(event, cliEventDic.at(event));
     exitCond.notify_all();
 }
 
@@ -115,11 +115,11 @@ SendMsg(sock_pool_t* client, string msg)
 
     if (ret < 0)
     {
-        int event = (int)IBOF_EVENT_ID::MSG_SEND_FAILED;
-        IBOF_TRACE_ERROR(event, cliEventDic.at(event), ret);
+        int event = (int)POS_EVENT_ID::MSG_SEND_FAILED;
+        POS_TRACE_ERROR(event, cliEventDic.at(event), ret);
     }
-    int event = (int)IBOF_EVENT_ID::MSG_SENT;
-    IBOF_TRACE_INFO(event, cliEventDic.at(event), msg);
+    int event = (int)POS_EVENT_ID::MSG_SENT;
+    POS_TRACE_INFO(event, cliEventDic.at(event), msg);
 
     free(buffer);
     return ret;
@@ -128,8 +128,8 @@ SendMsg(sock_pool_t* client, string msg)
 sock_pool_t*
 AddClient(int sockfd)
 {
-    int event = (int)IBOF_EVENT_ID::CLIENT_CONNECTED;
-    IBOF_TRACE_INFO(event, cliEventDic.at(event), sockfd);
+    int event = (int)POS_EVENT_ID::CLIENT_CONNECTED;
+    POS_TRACE_INFO(event, cliEventDic.at(event), sockfd);
     pthread_mutex_lock(&mutx);
     for (int i = 1; i < MAX_CLI_CNT; i++)
     {
@@ -142,16 +142,16 @@ AddClient(int sockfd)
         }
     }
     pthread_mutex_unlock(&mutx);
-    event = (int)IBOF_EVENT_ID::MAX_CLIENT_ERROR;
-    IBOF_TRACE_WARN(event, cliEventDic.at(event));
+    event = (int)POS_EVENT_ID::MAX_CLIENT_ERROR;
+    POS_TRACE_WARN(event, cliEventDic.at(event));
     return nullptr;
 }
 
 void
 RemoveClient(int sockfd)
 {
-    int event = (int)IBOF_EVENT_ID::CLIENT_DISCONNECTED;
-    IBOF_TRACE_INFO(event, cliEventDic.at(event), sockfd);
+    int event = (int)POS_EVENT_ID::CLIENT_DISCONNECTED;
+    POS_TRACE_INFO(event, cliEventDic.at(event), sockfd);
     pthread_mutex_lock(&mutx);
     close(sockfd);
     for (int i = 1; i < MAX_CLI_CNT; i++)
@@ -173,7 +173,7 @@ TryProcessing(char* msg)
     notifyDone = false;
 
     thread t([&msg]() {
-        string res = reqHandler.CommandProcessing(msg);
+        string res = reqHandler.ProcessCommand(msg);
 
         if (!notifyDone)
             threadRes = res;
@@ -215,8 +215,8 @@ ClientThread(void* arg)
 #endif
     if (str_len > 0)
     {
-        int event = (int)IBOF_EVENT_ID::MSG_RECEIVED;
-        IBOF_TRACE_INFO(event, cliEventDic.at(event), clnt->recv_buff);
+        int event = (int)POS_EVENT_ID::MSG_RECEIVED;
+        POS_TRACE_INFO(event, cliEventDic.at(event), clnt->recv_buff);
 
         if (clnt->work)
         {
@@ -234,8 +234,8 @@ ClientThread(void* arg)
 
             if (timedout)
             {
-                int event = (int)IBOF_EVENT_ID::TIMED_OUT;
-                IBOF_TRACE_INFO(event, cliEventDic.at(event));
+                int event = (int)POS_EVENT_ID::TIMED_OUT;
+                POS_TRACE_INFO(event, cliEventDic.at(event));
                 SendMsg(clnt, reqHandler.TimedOut(clnt->recv_buff));
             }
             else
@@ -245,9 +245,9 @@ ClientThread(void* arg)
         }
         else
         {
+            clnt->recv_buff[str_len] = 0;
             SendMsg(clnt, reqHandler.PosBusy(clnt->recv_buff));
         }
-
         if (reqHandler.IsExit() == true)
         {
             Exit();
@@ -255,8 +255,8 @@ ClientThread(void* arg)
     }
     else
     {
-        int event = (int)IBOF_EVENT_ID::MSG_RECEIVED;
-        IBOF_TRACE_ERROR(event, cliEventDic.at(event), strerror(errno));
+        int event = (int)POS_EVENT_ID::MSG_RECEIVED;
+        POS_TRACE_ERROR(event, cliEventDic.at(event), strerror(errno));
 
         if (clnt->work)
             pthread_mutex_unlock(&workmutx);
@@ -310,12 +310,12 @@ EnableReuseAddr(int sockfd)
     int rc = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
     if (rc < 0)
     {
-        int event = (int)IBOF_EVENT_ID::REUSE_ADDR_FAILED;
-        IBOF_TRACE_WARN(event, cliEventDic.at(event));
+        int event = (int)POS_EVENT_ID::REUSE_ADDR_FAILED;
+        POS_TRACE_WARN(event, cliEventDic.at(event));
         return rc;
     }
-    int event = (int)IBOF_EVENT_ID::REUSE_ADDR_ENABLED;
-    IBOF_TRACE_INFO(event, cliEventDic.at(event));
+    int event = (int)POS_EVENT_ID::REUSE_ADDR_ENABLED;
+    POS_TRACE_INFO(event, cliEventDic.at(event));
     return 0;
 }
 
@@ -326,8 +326,8 @@ CreateSocket(int& sock)
 
     if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     {
-        int event = (int)IBOF_EVENT_ID::SOCK_CREATE_FAILED;
-        IBOF_TRACE_ERROR(event, cliEventDic.at(event));
+        int event = (int)POS_EVENT_ID::SOCK_CREATE_FAILED;
+        POS_TRACE_ERROR(event, cliEventDic.at(event));
         return event;
     }
 
@@ -340,15 +340,15 @@ CreateSocket(int& sock)
 
     if (bind(sock, (struct sockaddr*)&servaddr, sizeof(struct sockaddr_in)) < 0)
     {
-        int event = (int)IBOF_EVENT_ID::SOCK_BIND_FAILED;
-        IBOF_TRACE_ERROR(event, cliEventDic.at(event));
+        int event = (int)POS_EVENT_ID::SOCK_BIND_FAILED;
+        POS_TRACE_ERROR(event, cliEventDic.at(event));
         return event;
     }
 
     if (listen(sock, SOMAXCONN))
     {
-        int event = (int)IBOF_EVENT_ID::SOCK_LISTEN_FAILED;
-        IBOF_TRACE_ERROR(event, cliEventDic.at(event));
+        int event = (int)POS_EVENT_ID::SOCK_LISTEN_FAILED;
+        POS_TRACE_ERROR(event, cliEventDic.at(event));
         return event;
     }
 
@@ -413,7 +413,6 @@ void
 CLIServer()
 {
     int sock_fd;
-
 #ifdef SSL_ON
     SSL_CTX* ctx;
     SSL_library_init();
@@ -431,8 +430,8 @@ CLIServer()
     int efd = epoll_create(MAX_CLI_CNT);
     if (efd < 0)
     {
-        int event = (int)IBOF_EVENT_ID::EPOLL_CREATE_FAILED;
-        IBOF_TRACE_ERROR(event, cliEventDic.at(event));
+        int event = (int)POS_EVENT_ID::EPOLL_CREATE_FAILED;
+        POS_TRACE_ERROR(event, cliEventDic.at(event));
         return;
     }
 
@@ -449,8 +448,8 @@ CLIServer()
     struct sockaddr_in cli_addr;
     socklen_t clilen = sizeof(cli_addr);
 
-    IBOF_TRACE_INFO((int)IBOF_EVENT_ID::SERVER_READY,
-        cliEventDic.at((int)IBOF_EVENT_ID::SERVER_READY));
+    POS_TRACE_INFO((int)POS_EVENT_ID::SERVER_READY,
+        cliEventDic.at((int)POS_EVENT_ID::SERVER_READY));
     while (1)
     {
         int s_cnt = epoll_wait(efd, event, MAX_CLI_CNT, 1000);
@@ -472,8 +471,8 @@ CLIServer()
                 int cli_fd = accept(sock_fd, (struct sockaddr*)&cli_addr, &clilen);
                 if (cli_fd < 0 || reqHandler.IsExit())
                 {
-                    int event = (int)IBOF_EVENT_ID::SOCK_ACCEPT_FAILED;
-                    IBOF_TRACE_WARN(event, cliEventDic.at(event));
+                    int event = (int)POS_EVENT_ID::SOCK_ACCEPT_FAILED;
+                    POS_TRACE_WARN(event, cliEventDic.at(event));
                 }
                 else if (cli_fd >= 0)
                 {
@@ -505,7 +504,6 @@ CLIServer()
                         pthread_mutex_unlock(&mutx);
                     }
                 }
-                continue;
             }
         }
     }
@@ -521,4 +519,4 @@ CLIServerMain()
 {
     cliThread = new std::thread(CLIServer);
 }
-}; // namespace ibofos_cli
+}; // namespace pos_cli

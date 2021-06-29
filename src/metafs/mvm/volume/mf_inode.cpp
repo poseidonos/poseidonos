@@ -32,8 +32,10 @@
 
 #include "mf_inode.h"
 
-#include "mfs_common_const.h"
+#include "metafs_common_const.h"
 
+namespace pos
+{
 MetaFileInodeData::MetaFileInodeData(void)
 {
 }
@@ -128,3 +130,4 @@ MetaFileInode::GetInodePageMap(void)
 {
     return data.basic.field.pagemap;
 }
+} // namespace pos

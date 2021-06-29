@@ -32,30 +32,38 @@
 
 #pragma once
 
-#include "src/include/address_type.h"
-#include "src/io/general_io/volume_io.h"
-#include "src/scheduler/callback.h"
+#include <functional>
 
-namespace ibofos
+#include "src/allocator_service/allocator_service.h"
+#include "src/bio/volume_io.h"
+#include "src/event_scheduler/callback.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/include/address_type.h"
+#include "src/io/frontend_io/block_map_update.h"
+#include "src/io/frontend_io/write_completion.h"
+
+namespace pos
 {
 class Stripe;
 class VolumeIo;
 
+using WriteCompletionFunc = std::function<bool(VolumeIoSmartPtr, CallbackSmartPtr)>;
 class BlockMapUpdateRequest : public Callback
 {
 public:
     BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback = nullptr);
-    ~BlockMapUpdateRequest(void) override;
+    BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback,
+        EventSmartPtr blockMapUpdateEvent, EventScheduler* eventScheduler);
+    virtual ~BlockMapUpdateRequest(void) override;
 
 private:
     bool _DoSpecificJob(void) override;
-    void _UpdateMeta(void);
-    Stripe& _GetStripe(StripeAddr& lsidEntry);
-    void _UpdateReverseMap(Stripe& stripe);
+    virtual void _UpdateMeta(void);
 
     VolumeIoSmartPtr volumeIo;
     CallbackSmartPtr originCallback;
-    bool retryNeeded;
+    EventSmartPtr blockMapUpdateEvent;
+    EventScheduler* eventScheduler;
 };
 
-} // namespace ibofos
+} // namespace pos

@@ -32,6 +32,8 @@
 
 #include "region_deque.h"
 
+namespace pos
+{
 bool
 RegionDeque::InsertUsedRange(MetaFileInode* inode, uint64_t baseLpn, uint64_t count, bool inUse)
 {
@@ -39,7 +41,7 @@ RegionDeque::InsertUsedRange(MetaFileInode* inode, uint64_t baseLpn, uint64_t co
     {
         remainedMetaLpnCount -= count;
     }
-    regionList.push_back(Region(regionType, inode, baseLpn, count, inUse));
+    regionList.push_back(Region(arrayName, regionType, inode, baseLpn, count, inUse, metaStorage));
 
     return true;
 }
@@ -123,7 +125,7 @@ RegionDeque::Compaction(void)
 
     if (false == isDone)
     {
-        MFS_TRACE_WARN((int)IBOF_EVENT_ID::MFS_COMPACTION_FAILED,
+        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_COMPACTION_FAILED,
             "Compaction couldn't be done due to not enough free space");
     }
 
@@ -134,12 +136,12 @@ RegionDeque::Compaction(void)
 }
 
 void
-RegionDeque::UpdateExtentsList(MetaFileExtentContent* allocExtentsList)
+RegionDeque::UpdateExtentsList(MetaFileExtent* allocExtentsList)
 {
     uint32_t newItemIdx = 0;
 
     memset(allocExtentsList, 0x0,
-        sizeof(MetaFileExtentContent) * MetaFsConfig::MAX_VOLUME_CNT);
+        sizeof(MetaFileExtent) * MetaFsConfig::MAX_VOLUME_CNT);
 
     if (0 == regionList.size())
         return;
@@ -187,3 +189,4 @@ RegionDeque::ReadRegions(void)
         }
     }
 }
+} // namespace pos

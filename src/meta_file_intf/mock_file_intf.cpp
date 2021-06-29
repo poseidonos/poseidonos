@@ -38,10 +38,10 @@
 
 #include <thread>
 
-namespace ibofos
+namespace pos
 {
 int
-MockFileIntf::_Read(int fd, uint32_t fileOffset, uint32_t length, char* buffer)
+MockFileIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 {
     ssize_t result = pread(fd, buffer, length, fileOffset);
     if (result < 0)
@@ -52,7 +52,7 @@ MockFileIntf::_Read(int fd, uint32_t fileOffset, uint32_t length, char* buffer)
 }
 
 int
-MockFileIntf::_Write(int fd, uint32_t fileOffset, uint32_t length, char* buffer)
+MockFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 {
     ssize_t result = pwrite(fd, buffer, length, fileOffset);
     if (result < 0)
@@ -209,7 +209,7 @@ MockFileIntf::Delete(void)
     return ret;
 }
 
-uint32_t
+uint64_t
 MockFileIntf::GetFileSize(void)
 {
     if (isOpened != true)
@@ -233,4 +233,4 @@ MockFileIntf::GetFileSize(void)
     return size;
 }
 
-} // namespace ibofos
+} // namespace pos

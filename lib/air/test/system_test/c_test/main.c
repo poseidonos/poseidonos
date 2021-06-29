@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include "Air.h"
+#include "Air_c.h"
 
 static int run = 1;
 
@@ -14,14 +14,13 @@ void* test_func(void* data)
 
     while (run)
     {
-        AIRLOG(PERF_TEST, 0, AIR_READ, 4096);
-        AIRLOG(PERF_BUILD_FALSE, 1, AIR_READ, 4096);
-        AIRLOG(LAT_TEST, 2, 0, key);
+        AIRLOG(PERF_TEST, AIR_READ, 0, 4096);
+        AIRLOG(LAT_TEST, AIR_1, 0, key);
         usleep(100);
-        AIRLOG(LAT_TEST, 2, 1, key);
+        AIRLOG(LAT_TEST, AIR_1, 1, key);
         key++;
-        AIRLOG(Q_TEST, 3, 3, 33);
-        AIRLOG(Q_RUN_OFF, 4, 4, 44);
+        AIRLOG(Q_TEST, AIR_2, 2, 22);
+        AIRLOG_FAKE(Q_TEST_OFF, AIR_3, 3, 33);
     }
 }
 

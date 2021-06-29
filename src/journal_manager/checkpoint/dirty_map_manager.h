@@ -35,43 +35,29 @@
 #include <mutex>
 #include <vector>
 
-#include "../log_write/buffer_write_done_notifier.h"
-#include "src/mapper/mpage_info.h"
+#include "src/journal_manager/checkpoint/dirty_page_list.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/mapper/include/mpage_info.h"
 
-namespace ibofos
+namespace pos
 {
-class DirtyPageList
-{
-public:
-    DirtyPageList(void);
-
-    void Add(MapPageList& dirty);
-    MapPageList GetList(void);
-    void Reset(void);
-    void Delete(int volumeId);
-
-private:
-    std::mutex dirtyListLock;
-    MapPageList dirtyPages;
-};
-
+class JournalConfiguration;
 class DirtyMapManager : public LogBufferWriteDoneEvent
 {
 public:
     virtual ~DirtyMapManager(void);
 
-    void Init(int numLogGroups);
+    virtual void Init(JournalConfiguration* journalConfiguration);
+    void Init(std::vector<DirtyPageList* > dirtyPages);
 
-    MapPageList GetDirtyList(int logGroupId);
+    virtual MapPageList GetDirtyList(int logGroupId);
     void DeleteDirtyList(int volumeId);
 
     virtual void LogFilled(int logGroupId, MapPageList& dirty) override;
     virtual void LogBufferReseted(int logGroupId) override;
 
 private:
-    void _Reset(int logGroupId);
-
     std::vector<DirtyPageList*> pendingDirtyPages;
 };
 
-} // namespace ibofos
+} // namespace pos

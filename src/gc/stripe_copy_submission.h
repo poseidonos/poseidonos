@@ -33,31 +33,20 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 #include "src/gc/copier_meta.h"
 #include "src/gc/victim_stripe.h"
-#include "src/scheduler/callback.h"
+#include "src/event_scheduler/callback.h"
 
-namespace ibofos
+namespace pos
 {
-class GcBlkWriteCompletion : public Callback
-{
-public:
-    explicit GcBlkWriteCompletion(VolumeIoSmartPtr volumeIo);
-    ~GcBlkWriteCompletion(void) override;
-
-private:
-    bool _DoSpecificJob(void) override;
-
-    VolumeIoSmartPtr volumeIo;
-};
 
 class StripeCopySubmission : public Callback
 {
 public:
     StripeCopySubmission(StripeId baseStripeId,
-        VictimStripe* victimStripe,
-        CopierMeta* meta);
+                        CopierMeta* meta, uint32_t copyIndex);
     virtual ~StripeCopySubmission(void) override;
 
 private:
@@ -65,8 +54,8 @@ private:
     StripeId baseStripeId;
 
     CopierMeta* meta = nullptr;
-    VictimStripe* victimStripe = nullptr;
-    std::atomic<uint32_t> loadedReverseMapCount;
+    uint32_t copyIndex = 0;
+    bool isLoaded;
 };
 
-} // namespace ibofos
+} // namespace pos

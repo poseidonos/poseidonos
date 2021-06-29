@@ -1,0 +1,5 @@
+POS_ADD_UNIT_TEST(metafs_control_api_stub_ut metafs_control_api_stub_test.cpp)
+POS_ADD_UNIT_TEST(metafs_util_api_stub_ut metafs_util_api_stub_test.cpp)
+POS_ADD_UNIT_TEST(metafs_io_api_stub_ut metafs_io_api_stub_test.cpp)
+POS_ADD_UNIT_TEST(metafs_mgmt_api_stub_ut metafs_mgmt_api_stub_test.cpp)
+POS_ADD_UNIT_TEST(metafs_api_wrapper_ut metafs_api_wrapper_test.cpp)

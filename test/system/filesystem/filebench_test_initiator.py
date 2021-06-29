@@ -24,7 +24,7 @@ def connect():
         "-t", "tcp",
         "-s", "1158",
         "-a", args.fabric_ip,
-        "-n", "nqn.2019-04.ibof:subsystem1"])
+        "-n", "nqn.2019-04.pos:subsystem1"])
 
 def get_target_device():
     print ("Try to get target device")
@@ -60,7 +60,7 @@ def execute_filebench():
 def clean_up():
     subprocess.call(["umount", mount_path])
     subprocess.call(["nvme", "disconnect",
-        "-n", "nqn.2019-04.ibof:subsystem1"])
+        "-n", "nqn.2019-04.pos:subsystem1"])
     subprocess.call("echo 0 > /proc/sys/kernel/randomize_va_space", shell=True)
 
 if __name__ == "__main__":

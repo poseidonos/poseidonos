@@ -36,8 +36,10 @@
 
 #include "mf_inode_req.h"
 #include "mf_pagemap.h"
-#include "mfs_common.h"
+#include "metafs_common.h"
 
+namespace pos
+{
 class MetaFileName
 {
 public:
@@ -52,6 +54,7 @@ public:
     ToString(void)
     {
         std::string fileName(std::begin(str), std::end(str));
+        fileName.erase(std::find(fileName.begin(), fileName.end(), '\0'), fileName.end());
         return fileName;
     }
     const char*
@@ -91,7 +94,7 @@ public:
             bool inUse;
             uint64_t ctime;
             uint32_t referenceCnt;
-            FileFDType fd;
+            FileDescriptorType fd;
             MetaFileName fileName;
             FileSizeType fileByteSize;
             FileSizeType dataChunkSize;
@@ -148,3 +151,4 @@ public:
     MetaFileInodeData data;
     static_assert(sizeof(data) == INODE_DATA_BYTE_SIZE, "MetaFileInode size is overflow");
 };
+} // namespace pos

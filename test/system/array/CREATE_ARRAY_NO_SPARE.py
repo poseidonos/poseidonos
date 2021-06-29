@@ -3,21 +3,19 @@ import subprocess
 import os
 import sys
 sys.path.append("../lib/")
+sys.path.append("../device/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
+import SCAN_DEV_BASIC
 
-ARRAYNAME = "POSArray"
 DATA_DEV_1 = "unvme-ns-0"
 DATA_DEV_2 = "unvme-ns-1"
 DATA_DEV_3 = "unvme-ns-2"
 REMAINING_DEV = "unvme-ns-3"
-
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
+ARRAYNAME = "POSArray"
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)
@@ -26,13 +24,12 @@ def set_result(detail):
         result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
 def execute():
-    clear_result()
-    ibofos.start_ibofos()
-    cli.scan_device()
-    out = cli.create_array("uram0", ",".join([DATA_DEV_1,DATA_DEV_2,DATA_DEV_3]), "", ARRAYNAME, "")
+    SCAN_DEV_BASIC.execute()
+    out = cli.create_array("uram0", "unvme-ns-0,unvme-ns-1,unvme-ns-2", "", ARRAYNAME, "RAID5")
     return out
 
 if __name__ == "__main__":
+    test_result.clear_result(__file__)
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

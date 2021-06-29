@@ -33,6 +33,9 @@
 #pragma once
 
 #include <string>
+
+namespace pos
+{
 /**
  * Check if file exists
  *
@@ -50,3 +53,4 @@ bool CheckFileExists(std::string path);
  * @return true if deleted, false otherwise
  */
 bool DeleteFile(std::string path);
+} // namespace pos

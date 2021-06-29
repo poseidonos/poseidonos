@@ -34,18 +34,20 @@
 
 #include <string>
 
+namespace pos
+{
 MpioHandler::MpioHandler(int threadId, int coreId)
 : mpioPool(nullptr),
   coreId(coreId)
 {
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "threadId={}, coreId={}",
         threadId, coreId);
 }
 
 MpioHandler::~MpioHandler(void)
 {
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE, "MpioHandler is desctructed");
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE, "MpioHandler is desctructed");
 }
 
 void
@@ -63,7 +65,7 @@ MpioHandler::BindMpioPool(MpioPool* mpioPool)
     _InitPartialMpioDoneQ(mpioPool->GetPoolSize());
 }
 
-MetaIoQClass<Mpio*>*
+MetaFsIoQ<Mpio*>*
 MpioHandler::GetPartialMpioDoneQ(void)
 {
     return &partialMpioDoneQ;
@@ -89,4 +91,9 @@ MpioHandler::BottomhalfMioProcessing(void)
             mpioPool->Release(mpio);
         }
     }
+
+#if MPIO_CACHE_EN
+    mpioPool->ReleaseCache();
+#endif
 }
+} // namespace pos

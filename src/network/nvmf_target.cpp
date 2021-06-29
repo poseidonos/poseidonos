@@ -33,25 +33,27 @@
 #include "src/network/nvmf_target.hpp"
 
 #include <iostream>
+#include <sstream>
 #include <string>
 
-#include "spdk/ibof_volume.h"
-#include "src/device/event_framework_api.h"
-#include "src/device/spdk/spdk.hpp"
+#include "spdk/pos_volume.h"
+#include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/logger/logger.h"
 #include "src/network/nvmf_target_spdk.hpp"
-#include "src/network/nvmf_volume_ibof.hpp"
-#include "src/sys_event/volume_event_publisher.h"
-#if defined QOS_ENABLED_FE
+#include "src/network/nvmf_volume_pos.hpp"
 #include "src/qos/qos_manager.h"
-#endif
+#include "src/spdk_wrapper/event_framework_api.h"
+#include "src/spdk_wrapper/spdk.hpp"
+#include "src/sys_event/volume_event_publisher.h"
 
 using namespace std;
 
 extern struct spdk_nvmf_tgt* g_spdk_nvmf_tgt;
-namespace ibofos
+namespace pos
 {
 struct NvmfTargetCallbacks NvmfTarget::nvmfCallbacks;
-const char* NvmfTarget::BDEV_NAME_PREFIX = "bdev";
+const char* NvmfTarget::BDEV_NAME_PREFIX = "bdev_";
 std::atomic<int> NvmfTarget::attachedNsid;
 
 NvmfTarget::NvmfTarget(void)
@@ -64,12 +66,12 @@ NvmfTarget::~NvmfTarget(void)
 }
 
 bool
-NvmfTarget::CreateIBoFBdev(const string& bdevName, uint32_t id,
-    uint64_t volumeSizeInMb, uint32_t blockSize, bool volumeTypeInMem)
+NvmfTarget::CreatePosBdev(const string& bdevName, uint32_t id,
+    uint64_t volumeSizeInMb, uint32_t blockSize, bool volumeTypeInMem, const string& arrayName)
 {
     uint64_t volumeSizeInByte = volumeSizeInMb * MB;
-    struct spdk_bdev* bdev = spdk_bdev_create_ibof_disk(bdevName.c_str(), id, nullptr,
-        volumeSizeInByte / blockSize, blockSize, volumeTypeInMem);
+    struct spdk_bdev* bdev = spdk_bdev_create_pos_disk(bdevName.c_str(), id, nullptr,
+        volumeSizeInByte / blockSize, blockSize, volumeTypeInMem, arrayName.c_str());
     if (bdev == nullptr)
     {
         SPDK_ERRLOG("bdev %s does not exist\n", bdevName.c_str());
@@ -81,12 +83,12 @@ NvmfTarget::CreateIBoFBdev(const string& bdevName, uint32_t id,
     {
         return false;
     }
-    nvmfCallbacks.createIbofBdevDone(ctx, NvmfCallbackStatus::SUCCESS);
+    nvmfCallbacks.createPosBdevDone(ctx, NvmfCallbackStatus::SUCCESS);
     return true;
 }
 
 bool
-NvmfTarget::DeleteIBoFBdev(const string& bdevName)
+NvmfTarget::DeletePosBdev(const string& bdevName)
 {
     struct spdk_bdev* bdev = spdk_bdev_get_by_name(bdevName.c_str());
     if (bdev == nullptr)
@@ -101,7 +103,7 @@ NvmfTarget::DeleteIBoFBdev(const string& bdevName)
     {
         return false;
     }
-    spdk_bdev_delete_ibof_disk(bdev, nvmfCallbacks.deleteIbofBdevDone, ctx);
+    spdk_bdev_delete_pos_disk(bdev, nvmfCallbacks.deletePosBdevDone, ctx);
     return true;
 }
 
@@ -130,12 +132,12 @@ NvmfTarget::_TryAttachHandler(void* arg1, void* arg2)
 }
 
 bool
-NvmfTarget::TryToAttachNamespace(const string& nqn, int volId)
+NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName)
 {
     int yetAttached = -1;
     attachedNsid = -1;
 
-    string* bdevName = new string(GetBdevName(volId));
+    string* bdevName = new string(GetBdevName(volId, arrayName));
     string* subnqn = new string(nqn);
 
     EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(),
@@ -154,14 +156,14 @@ NvmfTarget::TryToAttachNamespace(const string& nqn, int volId)
 
 bool
 NvmfTarget::AttachNamespace(const string& nqn, const string& bdevName,
-    IBoFNvmfEventDoneCallback_t callback, void* arg)
+    PosNvmfEventDoneCallback_t callback, void* arg)
 {
     return AttachNamespace(nqn, bdevName, 0, callback, arg);
 }
 
 bool
 NvmfTarget::AttachNamespace(const string& nqn, const string& bdevName,
-    uint32_t nsid, IBoFNvmfEventDoneCallback_t callback, void* arg)
+    uint32_t nsid, PosNvmfEventDoneCallback_t callback, void* arg)
 {
     if (!IsTargetExist())
     {
@@ -224,7 +226,7 @@ NvmfTarget::GetNamespace(
 
 bool
 NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
-    IBoFNvmfEventDoneCallback_t callback, void* arg)
+    PosNvmfEventDoneCallback_t callback, void* arg)
 {
     if (!IsTargetExist())
     {
@@ -245,8 +247,8 @@ NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
     bool nsidUndefined = (nsid == 0);
     if (nsidUndefined)
     {
-        struct ibof_volume_info* vInfo = (struct ibof_volume_info*)arg;
-        string bdevName = GetBdevName(vInfo->id);
+        struct pos_volume_info* vInfo = (struct pos_volume_info*)arg;
+        string bdevName = GetBdevName(vInfo->id, vInfo->array_name);
         struct spdk_nvmf_ns* ns = GetNamespace(subsystem, bdevName);
         if (ns == nullptr)
         {
@@ -267,6 +269,24 @@ NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
     return true;
 }
 
+bool
+NvmfTarget::CheckSubsystemExistance(void)
+{
+    struct spdk_nvmf_tgt* nvmf_tgt;
+    struct spdk_nvmf_subsystem* subsystem;
+    nvmf_tgt = spdk_nvmf_get_tgt("nvmf_tgt");
+    subsystem = spdk_nvmf_subsystem_get_first(nvmf_tgt);
+    while (subsystem != NULL)
+    {
+        if (spdk_nvmf_subsystem_get_type(subsystem) == SPDK_NVMF_SUBTYPE_NVME)
+        {
+            return true;
+        }
+        subsystem = spdk_nvmf_subsystem_get_next(subsystem);
+    }
+    return false;
+}
+
 void
 NvmfTarget::_DetachNamespaceWithPause(void* arg1, void* arg2)
 {
@@ -283,7 +303,7 @@ NvmfTarget::_DetachNamespaceWithPause(void* arg1, void* arg2)
 
 bool
 NvmfTarget::DetachNamespaceAll(const string& nqn,
-    IBoFNvmfEventDoneCallback_t callback, void* arg)
+    PosNvmfEventDoneCallback_t callback, void* arg)
 {
     if (!IsTargetExist())
     {
@@ -371,9 +391,9 @@ NvmfTarget::AllocateSubsystem(void)
 }
 
 string
-NvmfTarget::GetBdevName(uint32_t id)
+NvmfTarget::GetBdevName(uint32_t id, string arrayName)
 {
-    return BDEV_NAME_PREFIX + to_string(id);
+    return BDEV_NAME_PREFIX + to_string(id) + "_" + arrayName;
 }
 
 string
@@ -382,13 +402,16 @@ NvmfTarget::GetVolumeNqn(struct spdk_nvmf_subsystem* subsystem)
     return spdk_nvmf_subsystem_get_nqn(subsystem);
 }
 
-#if defined QOS_ENABLED_FE
 uint32_t
-NvmfTarget::GetVolumeNqnId(struct spdk_nvmf_subsystem* subsystem)
+NvmfTarget::GetVolumeNqnId(const string& subnqn)
 {
+    spdk_nvmf_subsystem* subsystem = FindSubsystem(subnqn);
+    if (nullptr == subsystem)
+    {
+        return -1;
+    }
     return spdk_nvmf_subsystem_get_id(subsystem);
 }
-#endif
 
 void
 NvmfTarget::QosEnableDone(void* cbArg, int status)
@@ -398,9 +421,10 @@ NvmfTarget::QosEnableDone(void* cbArg, int status)
 void
 NvmfTarget::SetVolumeQos(const string& bdevName, uint64_t maxIops, uint64_t maxBw)
 {
-#if defined QOS_ENABLED_FE
-    // if POS QOS FE throttling is enabled , SPDK throttling is disabled
-#else
+    if (true == QosManagerSingleton::Instance()->IsFeQosEnabled())
+    {
+        return;
+    }
     uint64_t limits[SPDK_BDEV_QOS_NUM_RATE_LIMIT_TYPES];
     struct spdk_bdev* bdev = spdk_bdev_get_by_name(bdevName.c_str());
     if (bdev == nullptr)
@@ -415,7 +439,6 @@ NvmfTarget::SetVolumeQos(const string& bdevName, uint64_t maxIops, uint64_t maxB
     limits[SPDK_BDEV_QOS_R_BPS_RATE_LIMIT] = 0;
     limits[SPDK_BDEV_QOS_W_BPS_RATE_LIMIT] = 0;
     spdk_bdev_set_qos_rate_limits(bdev, limits, QosEnableDone, nullptr);
-#endif
 }
 
 bool
@@ -441,7 +464,7 @@ NvmfTarget::FindSubsystem(const string& nqn)
 }
 
 struct EventContext*
-NvmfTarget::_CreateEventContext(IBoFNvmfEventDoneCallback_t callback,
+NvmfTarget::_CreateEventContext(PosNvmfEventDoneCallback_t callback,
     void* userArg, void* eventArg1, void* eventArg2)
 {
     struct EventContext* ctx = AllocEventContext(callback, userArg);
@@ -474,4 +497,67 @@ NvmfTarget::GetHostNqn(string subnqn)
     return hostNqns;
 }
 
-} // namespace ibofos
+bool
+NvmfTarget::CheckVolumeAttached(int volId, string arrayName)
+{
+    string bdevName = GetBdevName(volId, arrayName);
+    const char* nqn = get_attached_subsystem_nqn(bdevName.c_str());
+    if (nqn == nullptr)
+    {
+        return false;
+    }
+    string subnqn(nqn);
+    if (subnqn.empty() == true)
+    {
+        return false;
+    }
+    struct spdk_nvmf_subsystem* subsystem = FindSubsystem(subnqn);
+    struct spdk_nvmf_ns* ns = GetNamespace(subsystem, bdevName);
+    if (ns != nullptr)
+    {
+        return true;
+    }
+    return false;
+}
+
+vector<pair<int, string>>
+NvmfTarget::GetAttachedVolumeList(string& subnqn)
+{
+    vector<pair<int, string>> volList;
+    struct spdk_nvmf_subsystem* subsystem = FindSubsystem(subnqn);
+    if (nullptr == subsystem)
+    {
+        return volList;
+    }
+    struct spdk_nvmf_ns* ns = spdk_nvmf_subsystem_get_first_ns(subsystem);
+    while (ns != nullptr)
+    {
+        struct spdk_bdev* bdev = spdk_nvmf_ns_get_bdev(ns);
+        string bdevName = spdk_bdev_get_name(bdev);
+        size_t volIdIdx = bdevName.find("_");
+        if (volIdIdx == string::npos)
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::IONVMF_FAIL_TO_FIND_VOLID;
+            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+            continue;
+        }
+        size_t arrayNameIdx = bdevName.find("_", volIdIdx + 1);
+        if (arrayNameIdx == string::npos)
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::IONVMF_FAIL_TO_FIND_ARRAYNAME;
+            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+            continue;
+        }
+        arrayNameIdx += 1;
+        volIdIdx += 1;
+        int volId = stoi(bdevName.substr(volIdIdx, arrayNameIdx - volIdIdx - 1));
+        string arrayName = bdevName.substr(arrayNameIdx, bdevName.length() - arrayNameIdx);
+        volList.push_back(make_pair(volId, arrayName));
+
+        ns = spdk_nvmf_subsystem_get_next_ns(subsystem, ns);
+    }
+    return volList;
+}
+} // namespace pos

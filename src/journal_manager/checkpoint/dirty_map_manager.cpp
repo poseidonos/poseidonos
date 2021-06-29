@@ -33,76 +33,35 @@
 #include "dirty_map_manager.h"
 
 #include "assert.h"
+#include "src/journal_manager/config/journal_configuration.h"
 
-namespace ibofos
+namespace pos
 {
-DirtyPageList::DirtyPageList(void)
-{
-    dirtyPages.clear();
-}
-
-void
-DirtyPageList::Add(MapPageList& dirty)
-{
-    std::unique_lock<std::mutex> lock(dirtyListLock);
-
-    for (auto it = dirty.begin(); it != dirty.end(); it++)
-    {
-        int mapId = it->first;
-
-        auto mapIt = dirtyPages.find(mapId);
-        if (mapIt != dirtyPages.end())
-        {
-            dirtyPages[mapId].insert((it->second.begin()), it->second.end());
-        }
-        else
-        {
-            dirtyPages.emplace(mapId, it->second);
-        }
-    }
-}
-
-MapPageList
-DirtyPageList::GetList(void)
-{
-    return dirtyPages;
-}
-
-void
-DirtyPageList::Reset(void)
-{
-    dirtyPages.clear();
-}
-
-void
-DirtyPageList::Delete(int volumeId)
-{
-    std::unique_lock<std::mutex> lock(dirtyListLock);
-
-    auto mapIt = dirtyPages.find(volumeId);
-    if (mapIt != dirtyPages.end())
-    {
-        (mapIt->second).clear();
-        dirtyPages.erase(volumeId);
-    }
-}
-
 DirtyMapManager::~DirtyMapManager(void)
 {
-    for (auto it = pendingDirtyPages.begin(); it != pendingDirtyPages.end(); ++it)
+    for (auto it : pendingDirtyPages)
     {
-        it = pendingDirtyPages.erase(it);
+        delete it;
     }
     pendingDirtyPages.clear();
 }
 
 void
-DirtyMapManager::Init(int numLogGroups)
+DirtyMapManager::Init(JournalConfiguration* journalConfiguration)
 {
+    int numLogGroups = journalConfiguration->GetNumLogGroups();
     for (int id = 0; id < numLogGroups; id++)
     {
         pendingDirtyPages.push_back(new DirtyPageList());
     }
+}
+
+// Init function for unit test
+// TODO (huijeong.kim) move initialization to the construcor
+void
+DirtyMapManager::Init(std::vector<DirtyPageList* > dirtyPages)
+{
+    pendingDirtyPages = dirtyPages;
 }
 
 MapPageList
@@ -130,14 +89,8 @@ DirtyMapManager::LogFilled(int logGroupId, MapPageList& dirty)
 void
 DirtyMapManager::LogBufferReseted(int logGroupId)
 {
-    _Reset(logGroupId);
-}
-
-void
-DirtyMapManager::_Reset(int logGroupId)
-{
     assert(logGroupId < static_cast<int>(pendingDirtyPages.size()));
     pendingDirtyPages[logGroupId]->Reset();
 }
 
-} // namespace ibofos
+} // namespace pos

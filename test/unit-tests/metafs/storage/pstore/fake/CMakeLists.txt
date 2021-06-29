@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(device_driver_ut device_driver_test.cpp)
+POS_ADD_UNIT_TEST(array_partation_ut array_partation_test.cpp)
+POS_ADD_UNIT_TEST(array_manager_ut array_manager_test.cpp)

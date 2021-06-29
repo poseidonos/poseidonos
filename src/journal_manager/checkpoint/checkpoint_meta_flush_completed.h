@@ -32,9 +32,9 @@
 
 #pragma once
 
-#include "src/scheduler/event.h"
+#include "src/event_scheduler/event.h"
 
-namespace ibofos
+namespace pos
 {
 class CheckpointHandler;
 
@@ -50,4 +50,4 @@ private:
     int mapId;
 };
 
-} // namespace ibofos
+} // namespace pos

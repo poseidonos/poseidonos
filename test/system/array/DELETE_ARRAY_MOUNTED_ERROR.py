@@ -5,14 +5,12 @@ import sys
 sys.path.append("../lib/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
-import CREATE_ARRAY_BASIC_1
+import MOUNT_ARRAY_BASIC
 
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)
@@ -21,17 +19,14 @@ def set_result(detail):
         result_file.write(result + " (" + str(code) + ")" + "\n" + detail)
 
 def execute():
-    clear_result()
-    out = CREATE_ARRAY_BASIC_1.execute()
+    out = MOUNT_ARRAY_BASIC.execute()
     ret = json_parser.get_response_code(out)
     if ret == 0:
-        out = cli.mount_ibofos()
-        ret = json_parser.get_response_code(out)
-        if ret ==0:
-            out = cli.delete_array("")
+        out = cli.delete_array(ARRAYNAME)
     return out
 
 if __name__ == "__main__":
+    test_result.clear_result(__file__)
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

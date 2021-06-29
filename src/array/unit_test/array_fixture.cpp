@@ -89,7 +89,7 @@ protected:
 
         BufferEntry buffer;
         uint32_t size = sizeof(Block) * blkCnt;
-        buffer.GetBufferEntry() = malloc(size);
+        buffer.GetBufferPtr() = malloc(size);
         memset(buffer.mem, 1, size);
         buffer.blkCnt = blkCnt;
 
@@ -161,11 +161,11 @@ TEST_F(ArrayFixture, Load)
 //
 //TEST_F(ArrayFixture, AddSpare)
 //{
-//    UBlockDevice* spare1 = new MockUBlockDevice("SPARE_1", SSD_SIZE);
+//    UblockSharedPtr spare1 = new MockUBlockDevice("SPARE_1", SSD_SIZE);
 //    int ret = sysArray->AddSpare(spare1);
 //    EXPECT_EQ(0, ret);
 //    sysArray->Unmount();
-//    UBlockDevice* spare2 = new MockUBlockDevice("SPARE_2", SSD_SIZE);
+//    UblockSharedPtr spare2 = new MockUBlockDevice("SPARE_2", SSD_SIZE);
 //    ret = sysArray->AddSpare(spare2);
 //    EXPECT_EQ(0, ret);
 //}

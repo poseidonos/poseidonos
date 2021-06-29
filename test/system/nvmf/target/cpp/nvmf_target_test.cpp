@@ -12,12 +12,12 @@
 #include "nvmf_volume_mock.hpp"
 #include "src/device/spdk/spdk.hpp"
 
-using namespace ibofos;
+using namespace pos;
 using namespace std;
 
 NvmfTarget* target;
 
-static const char* nqn = "nqn.2019-04.ibof:subsystem1";
+static const char* nqn = "nqn.2019-04.pos:subsystem1";
 static const char* ibof_bdev0 = "Volume0";
 static const char* ibof_bdev1 = "Volume1";
 static const char* ip = "10.100.11.20";
@@ -94,7 +94,7 @@ void nvmfCreateTransportDone(void* cb_arg, int status){
 	NvmfTarget* target = (NvmfTarget*)cb_arg;
 	cout<<"nvmfCreateTransportDone status="<<status<<endl;
 
-	ret = target->CreateNvmfSubsystem(nqn, "IBOF00000000000001", 0, true, nvmfCreateSubsystemDone, target);
+	ret = target->CreateNvmfSubsystem(nqn, "POS00000000000001", 0, true, nvmfCreateSubsystemDone, target);
 	cout<<"CreateNvmfSubsystem ret="<<ret<<endl;
 }
 

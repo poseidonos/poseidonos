@@ -33,44 +33,55 @@
 #include "replay_handler.h"
 
 #include <functional>
+#include <string>
 
-#include "../log_buffer/journal_log_buffer.h"
-#include "flush_metadata.h"
-#include "flush_pending_stripes.h"
-#include "read_log_buffer.h"
-#include "replay_logs.h"
-#include "reset_log_buffer.h"
-#include "src/allocator/allocator.h"
-#include "src/array/array.h"
-#include "src/mapper/mapper.h"
+#include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/replay/flush_metadata.h"
+#include "src/journal_manager/replay/flush_pending_stripes.h"
+#include "src/journal_manager/replay/read_log_buffer.h"
+#include "src/journal_manager/replay/replay_logs.h"
+#include "src/journal_manager/replay/replay_volume_deletion.h"
+#include "src/journal_manager/replay/reset_log_buffer.h"
 
-namespace ibofos
+namespace pos
 {
-ReplayHandler::ReplayHandler(void)
-: logBuffer(nullptr)
+ReplayHandler::ReplayHandler(IStateControl* iState)
+: replayState(iState),
+  config(nullptr),
+  logBuffer(nullptr)
 {
     reporter = new ReplayProgressReporter();
-
-    mapper = MapperSingleton::Instance();
-    allocator = AllocatorSingleton::Instance();
-    array = ArraySingleton::Instance();
+    logDeleteChecker = new LogDeleteChecker();
 }
 
 void
-ReplayHandler::Init(JournalLogBuffer* journalLogBuffer)
+ReplayHandler::Init(JournalConfiguration* journalConfiguration,
+    JournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
+    IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
+    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
+    IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager)
 {
+    config = journalConfiguration;
     logBuffer = journalLogBuffer;
-    _InitializeTaskList();
+
+    _InitializeTaskList(vsaMap, stripeMap, mapFlush, blockAllocator,
+        wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);
 }
 
 void
-ReplayHandler::_InitializeTaskList(void)
+ReplayHandler::_InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
+    IMapFlush* mapFlush, IBlockAllocator* blockAllocator,
+    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
+    IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeManager* volumeManager)
 {
-    _AddTask(new ReadLogBuffer(logBuffer, logList, reporter));
-    _AddTask(new ReplayLogs(logList, mapper, allocator, array, reporter, pendingWbStripes));
-    _AddTask(new FlushMetadata(mapper, allocator, reporter));
+    _AddTask(new ReadLogBuffer(config, logBuffer, logList, reporter));
+    _AddTask(new ReplayLogs(logList, logDeleteChecker, vsaMap, stripeMap, blockAllocator,
+        wbStripeAllocator, contextManager, contextReplayer, arrayInfo, reporter, pendingWbStripes));
+    _AddTask(new ReplayVolumeDeletion(logDeleteChecker, contextManager, volumeManager, reporter));
+    _AddTask(new FlushMetadata(mapFlush, contextManager, reporter));
     _AddTask(new ResetLogBuffer(logBuffer, reporter));
-    _AddTask(new FlushPendingStripes(pendingWbStripes, allocator, reporter));
+    _AddTask(new FlushPendingStripes(pendingWbStripes, wbStripeAllocator, reporter));
 }
 
 void
@@ -82,8 +93,8 @@ ReplayHandler::_AddTask(ReplayTask* task)
 
 ReplayHandler::~ReplayHandler(void)
 {
+    delete logDeleteChecker;
     delete reporter;
-
     for (auto task : taskList)
     {
         delete task;
@@ -91,36 +102,24 @@ ReplayHandler::~ReplayHandler(void)
     taskList.clear();
 }
 
-void
-ReplayHandler::SetMapperToUse(Mapper* mapperToUse)
-{
-    mapper = mapperToUse;
-}
-
-void
-ReplayHandler::SetAllocatorToUse(Allocator* allocatorToUse)
-{
-    allocator = allocatorToUse;
-}
-
-void
-ReplayHandler::SetArrayToUse(Array* arrayToUse)
-{
-    array = arrayToUse;
-}
-
 int
 ReplayHandler::Start(void)
 {
     replayState.GetRecoverState();
 
+    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STARTED);
+    POS_TRACE_INFO(eventId, "Journal replay started");
+
     int result = _ExecuteReplayTasks();
     if (result < 0)
     {
-        IBOF_TRACE_CRITICAL((int)IBOF_EVENT_ID::JOURNAL_REPLAY_FAILED,
+        POS_TRACE_CRITICAL((int)POS_EVENT_ID::JOURNAL_REPLAY_FAILED,
             "Journal replay failed");
     }
     replayState.RemoveRecoverState();
+
+    eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_COMPLETED);
+    POS_TRACE_INFO(eventId, "Journal replay completed");
 
     return result;
 }
@@ -131,9 +130,6 @@ ReplayHandler::_ExecuteReplayTasks(void)
     int result = 0;
     for (auto task : taskList)
     {
-        int eventId = (int)IBOF_EVENT_ID::JOURNAL_REPLAY_STATUS;
-        IBOF_TRACE_INFO(eventId, "Start replay task {}", task->GetId());
-
         reporter->TaskStarted(task->GetId(), task->GetNumSubTasks());
         result = task->Start();
         reporter->TaskCompleted(task->GetId());
@@ -150,4 +146,4 @@ ReplayHandler::_ExecuteReplayTasks(void)
     return result;
 }
 
-} // namespace ibofos
+} // namespace pos

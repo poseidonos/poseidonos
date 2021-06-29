@@ -35,6 +35,8 @@
 
 #include "mss_disk_place.h"
 
+namespace pos
+{
 /**
  * Provides logic for out of place updation of LPN's
  * given LPN can be mapped to different LBA's
@@ -42,6 +44,8 @@
 class MssDiskOutOfPlace : public MssDiskPlace
 {
 public:
-    ibofos::LogicalBlkAddr* CalculateOnDiskAddress(uint64_t metaLpn);
+    pos::LogicalBlkAddr CalculateOnDiskAddress(uint64_t metaLpn);
 };
+} // namespace pos
+
 #endif // _INCLUDE_MSS_DISK_INPLACE_H

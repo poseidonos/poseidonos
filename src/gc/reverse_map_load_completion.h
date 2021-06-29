@@ -32,9 +32,10 @@
 
 #pragma once
 
-#include "src/scheduler/callback.h"
+#include "src/event_scheduler/callback.h"
+#include "src/gc/victim_stripe.h"
 
-namespace ibofos
+namespace pos
 {
 class ReverseMapLoadCompletion : public Callback
 {
@@ -46,4 +47,4 @@ private:
     bool _DoSpecificJob(void) override;
 };
 
-} // namespace ibofos
+} // namespace pos

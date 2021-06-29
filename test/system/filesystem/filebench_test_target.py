@@ -6,7 +6,7 @@ import argparse
 import psutil
 
 default_fabric_ip = "127.0.0.1"
-ibofos_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
+pos_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Filebench target')
@@ -16,10 +16,10 @@ def parse_arguments():
     args = parser.parse_args()
     print (args)
 
-def bring_up_ibofos():
-    start_ibofos_script = ibofos_root + "test/regression/start_ibofos.sh"
-    subprocess.call(start_ibofos_script)
-    bring_up_script = ibofos_root + "/test/system/io_path/setup_ibofos_nvmf_volume.sh"
+def bring_up_pos():
+    start_pos_script = pos_root + "test/regression/start_poseidonos.sh"
+    subprocess.call(start_pos_script)
+    bring_up_script = pos_root + "/test/system/io_path/setup_ibofos_nvmf_volume.sh"
     subprocess.call([bring_up_script,
         "-a", args.fabric_ip,
         "-s", "1",
@@ -27,10 +27,10 @@ def bring_up_ibofos():
         "-v", "1",
         "-b", "2048"])
 
-def kill_ibofos():
+def kill_pos():
     for proc in psutil.process_iter():
         try:
-            if "ibofos" in proc.name():
+            if "poseidonos" in proc.name():
                 proc.kill()
                 proc.wait()
         except psutil.NoSuchProcess:
@@ -38,5 +38,5 @@ def kill_ibofos():
 
 if __name__ == "__main__":
     parse_arguments()
-    kill_ibofos()
-    bring_up_ibofos()
+    kill_pos()
+    bring_up_pos()

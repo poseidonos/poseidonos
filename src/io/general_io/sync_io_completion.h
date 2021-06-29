@@ -34,9 +34,9 @@
 
 #include <cstdint>
 
-#include "src/scheduler/callback.h"
+#include "src/event_scheduler/callback.h"
 
-namespace ibofos
+namespace pos
 {
 class SyncIoCompletion : public Callback
 {
@@ -49,4 +49,4 @@ private:
     std::atomic<bool>& needToWait;
     uint32_t& errorCount;
 };
-} // namespace ibofos
+} // namespace pos

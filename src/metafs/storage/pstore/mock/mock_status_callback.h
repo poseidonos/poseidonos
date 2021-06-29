@@ -36,9 +36,13 @@
 #include "../mss_on_disk.h"
 #include "gmock/gmock.h"
 
+namespace pos
+{
 class MockStatusCallback : public MssAioCbCxt
 {
 public:
     MOCK_METHOD3(callback, void(uint64_t metaLpn, void* buffer, int status));
 };
+} // namespace pos
+
 #endif // _INCLUDE_MOCK_STATUS_CALLBACK_H

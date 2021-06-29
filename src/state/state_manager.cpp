@@ -31,104 +31,74 @@
  */
 
 #include "state_manager.h"
-
-#include <algorithm>
-
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
-StateManager::StateManager()
+StateManager::StateManager(void)
 {
-    stateList = new StateList(bind(&StateManager::ListUpdated,
-        this, placeholders::_1));
-    stateList->Add(curr);
 }
 
-StateManager::~StateManager()
+StateManager::~StateManager(void)
 {
-    delete stateList;
-    stateList = nullptr;
 }
 
-void
-StateManager::Subscribe(StateEvent* sub)
+IStateControl* StateManager::CreateStateControl(string array)
 {
-    publisher.RegisterSubscriber(sub);
-}
-
-void
-StateManager::Dispose(StateEvent* sub)
-{
-    publisher.RemoveSubscriber(sub);
-}
-
-StateContext
-StateManager::Invoke(string _sender, Situation s)
-{
-    StateContext ctx(_sender, s);
-    async_future = async(launch::async, &StateList::Add, stateList, ctx);
-    return ctx;
-}
-
-void
-StateManager::Invoke(StateContext ctx)
-{
-    async_future = async(launch::async, &StateList::Add, stateList, ctx);
-}
-
-StateContext
-StateManager::InvokeAndRemove(StateContext remove, string _sender, Situation s)
-{
-    StateContext add(_sender, s);
-    async_future = async(launch::async, &StateList::AddandRemove, stateList, add, remove);
-    return add;
-}
-
-void
-StateManager::Remove(StateContext ctx)
-{
-    stateList->Remove(ctx);
-}
-
-bool
-StateManager::Exist(StateContext ctx)
-{
-    return stateList->Exist(ctx);
-}
-
-bool
-StateManager::ExistRebuild(void)
-{
-    return stateList->ExistRebuild();
-}
-
-void
-StateManager::ListUpdated(StateContext front)
-{
-    _ChangeState(front);
-}
-
-void
-StateManager::_ChangeState(StateContext next)
-{
-    if (curr != next)
+    unique_lock<mutex> lock(stateMapMtx);
+    StateControl* state = _Find(array);
+    if (state == nullptr)
     {
-        IBOF_TRACE_INFO((int)IBOF_EVENT_ID::STATE_CHANGED,
-            "STATE_CHANGED[{}] -> [{}]", curr.GetUuid(), next.GetUuid());
-
-        StateContext prev = curr;
-        curr = next;
-
-        _NotifyState(prev, curr);
+        state = new StateControl();
+        stateMap.emplace(array, state);
+        POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_ADDED,
+            "statecontrol of array:{} is added", array);
     }
+    return state;
 }
 
-void
-StateManager::_NotifyState(StateContext& prev, StateContext& next)
+IStateControl* StateManager::GetStateControl(string array)
 {
-    publisher.NotifyStateChanged(prev, next);
+    return _Find(array);
 }
 
-} // namespace ibofos
+void StateManager::RemoveStateControl(string array)
+{
+    unique_lock<mutex> lock(stateMapMtx);
+    if (array == "" && stateMap.size() == 1)
+    {
+        delete stateMap.begin()->second;
+        stateMap.erase(stateMap.begin());
+    }
+    else
+    {
+        auto it = stateMap.find(array);
+        if (it != stateMap.end())
+        {
+            delete it->second;
+            stateMap.erase(array);
+        }
+    }
+
+    POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_REMOVED,
+        "statecontrol of array:{} is removed", array);
+}
+
+StateControl* StateManager::_Find(string array)
+{
+    if (array == "" && stateMap.size() == 1)
+    {
+        return stateMap.begin()->second;
+    }
+    auto it = stateMap.find(array);
+    if (it == stateMap.end())
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_DEBUG,
+        "statecontrol of array:{} is nullptr", array);
+        return nullptr;
+    }
+    return it->second;
+}
+
+} // namespace pos

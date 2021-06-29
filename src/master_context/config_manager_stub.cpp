@@ -32,9 +32,9 @@
 
 #include "src/master_context/config_manager.h"
 
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 
-namespace ibofos
+namespace pos
 {
 ConfigManager::ConfigManager()
 {
@@ -43,14 +43,14 @@ ConfigManager::ConfigManager()
 int
 ConfigManager::ReadFile()
 {
-    return (int)IBOF_EVENT_ID::CONFIG_FILE_READ_DONE;
+    return (int)POS_EVENT_ID::CONFIG_FILE_READ_DONE;
 }
 
 int
 ConfigManager::GetValue(string module, string key,
     void* value, ConfigType type)
 {
-    return (int)IBOF_EVENT_ID::SUCCESS;
+    return (int)POS_EVENT_ID::SUCCESS;
 }
 
-} // namespace ibofos
+} // namespace pos

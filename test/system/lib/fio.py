@@ -1,7 +1,7 @@
 import os
 import subprocess
-import ibofos_constant
-import ibofos
+import pos_constant
+import pos
 
 # def run_fio(readwrite, offset):
 #     print("\tExecute FIO")
@@ -10,10 +10,10 @@ import ibofos
 #     fio_proc = subprocess.Popen([fio_bench,
 #                 "--bs", "4k", \
 #                 "--readwrite", readwrite, \
-#                 "-t", ibofos.TR_TYPE, \
-#                 "-i", ibofos.TR_ADDR, \
+#                 "-t", pos.TR_TYPE, \
+#                 "-i", pos.TR_ADDR, \
 #                 "--offset", str(offset), \
-#                 "--io_size", str(ibofos_constant.SIZE_1GB * 20), \
+#                 "--io_size", str(pos_constant.SIZE_1GB * 20), \
 #                 "--verify", "1"]\
 #                 )
 #     print("\tFIO start")
@@ -29,7 +29,7 @@ import ibofos
 
 
 def start_fio(vol_id, runtime_sec, testname = ""):
-    ip_addr = ibofos.TR_ADDR
+    ip_addr = pos.TR_ADDR
     ns_id = str(vol_id + 1)
     if testname != "":
         test_name = testname
@@ -37,8 +37,8 @@ def start_fio(vol_id, runtime_sec, testname = ""):
         test_name = "fio_custom_test"
 
     file_name = "trtype=tcp adrfam=IPv4 traddr=" + ip_addr + \
-        " trsvcid=1158 subnqn=nqn.2019-04.ibof\:subsystem1 ns= " + ns_id
-    ioengine_path = ibofos.IBOFOS_ROOT + "lib/spdk-19.10/examples/nvme/fio_plugin/fio_plugin"
+        " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem1 ns= " + ns_id
+    ioengine_path = pos.POS_ROOT + "lib/spdk/examples/nvme/fio_plugin/fio_plugin"
     fio_proc = subprocess.Popen(["fio",
         "--ioengine=" + ioengine_path,\
         "--runtime=" + str(runtime_sec), \

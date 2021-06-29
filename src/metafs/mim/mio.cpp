@@ -31,15 +31,19 @@
  */
 
 #include "mio.h"
-
+#include "metafs_config.h"
 #include "instance_tagid_allocator.h"
-#include "mfs_common.h"
-#include "mfs_mvm_top.h"
+#include "metafs_common.h"
+#include "meta_volume_manager.h"
 #include "mpio.h"
-#include "mvm_req.h"
+#include "metafs_control_request.h"
 #include "read_mpio.h"
 #include "write_mpio.h"
 
+#include <string>
+
+namespace pos
+{
 const MetaIoOpcode Mio::ioOpcodeMap[] = {MetaIoOpcode::Write, MetaIoOpcode::Read};
 
 InstanceTagIdAllocator mioTagIdAllocator;
@@ -48,14 +52,12 @@ Mio::Mio(MpioPool* mpioPool)
 : originReq(nullptr),
   fileDataChunkSize(0),
   error(0, false),
-  retryFlag(false),
   ioCQ(nullptr),
   mpioPool(nullptr),
-  userIo(nullptr)
+  mergedRequestList(nullptr)
 {
     opCode = MetaIoOpcode::Max;
     startLpn = 0;
-    numLpns = 0;
 
     mpioAsyncDoneCallback = AsEntryPointParam1(&Mio::_HandleMpioDone, this);
     _BindMpioPool(mpioPool);
@@ -66,19 +68,18 @@ Mio::~Mio(void)
 }
 
 void
-Mio::Setup(MetaFsIoReqMsg* ioReq, MetaLpnType baseLpn)
+Mio::Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* metaStorage)
 {
     assert(mpioPool != nullptr);
 
     originReq = ioReq;
+    this->metaStorage = metaStorage;
 
     fileDataChunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     opCode = ioOpcodeMap[static_cast<uint32_t>(originReq->reqType)];
     startLpn = baseLpn + (originReq->byteOffsetInFile / fileDataChunkSize);
-    numLpns = 1 + ((originReq->byteOffsetInFile + originReq->byteSize) / fileDataChunkSize);
-    userIo = ioReq->userIo;
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Mio ][SetupMio   ] type={}, req.tagId={}, fileOffset={}, baseLpn={}, startLpn={}",
         originReq->reqType, originReq->tagId, originReq->byteOffsetInFile, baseLpn, startLpn);
 }
@@ -86,10 +87,14 @@ Mio::Setup(MetaFsIoReqMsg* ioReq, MetaLpnType baseLpn)
 void
 Mio::Reset(void)
 {
-    MetaAsyncRunnableClass<MetaAsyncCbCxt, MioState, MioStateExecuteEntry>::Init();
+    MetaAsyncRunnable<MetaAsyncCbCxt, MioState, MioStateExecuteEntry>::Init();
     fileDataChunkSize = 0;
     error = std::make_pair(0, false);
-    retryFlag = false;
+
+    if (nullptr != mergedRequestList)
+    {
+        ClearMergedRequestList();
+    }
 
     if (originReq)
     {
@@ -110,12 +115,6 @@ Mio::InitStateHandler(void)
         new MioStateExecuteEntry(MioState::Complete, AsMioStateEntryPoint(&Mio::Complete, this), MioState::Complete));
 }
 
-uint32_t
-Mio::GetOriginReqID(void)
-{
-    return originReq->tagId;
-}
-
 void
 Mio::_BindMpioPool(MpioPool* mpioPool)
 {
@@ -130,13 +129,13 @@ Mio::SetMpioDoneNotifier(PartialMpioDoneCb& partialMpioDoneNotifier)
 }
 
 void
-Mio::SetMpioDonePoller(mpioDonePollerCb& mpioDonePoller)
+Mio::SetMpioDonePoller(MpioDonePollerCb& mpioDonePoller)
 {
     this->mpioDonePoller = mpioDonePoller;
 }
 
 void
-Mio::SetIoCQ(MetaIoQClass<Mio*>* ioCQ)
+Mio::SetIoCQ(MetaFsIoQ<Mio*>* ioCQ)
 {
     this->ioCQ = ioCQ;
 }
@@ -145,7 +144,6 @@ void
 Mio::_HandleMpioDone(void* data)
 {
     Mpio* mpio = reinterpret_cast<Mpio*>(data);
-    assert(mpio->io.opcode < MetaIoOpcode::Max);
 
     _FinalizeMpio(*mpio);
 
@@ -156,32 +154,20 @@ Mio::_HandleMpioDone(void* data)
     }
 }
 
-FileSizeType
-Mio::GetIOSize(void)
-{
-    return originReq->byteSize;
-}
-
-bool
-Mio::IsTargetToSSD(void)
-{
-    return originReq->targetMediaType == MetaStorageType::SSD;
-}
-
 bool
 Mio::IsRead(void)
 {
-    return originReq->reqType == MetaIoReqTypeEnum::Read;
+    return originReq->reqType == MetaIoRequestType::Read;
 }
 
 MpioType
-Mio::_LookupMpioType(MetaIoReqTypeEnum type)
+Mio::_LookupMpioType(MetaIoRequestType type)
 {
     switch (type)
     {
-        case MetaIoReqTypeEnum::Read:
+        case MetaIoRequestType::Read:
             return MpioType::Read;
-        case MetaIoReqTypeEnum::Write:
+        case MetaIoRequestType::Write:
             return MpioType::Write;
         default:
             assert(false);
@@ -195,25 +181,55 @@ Mio::SetLocalAioCbCxt(MioAsyncDoneCb& callback)
     SetAsyncCbCxt(&aioCbCxt, false);
 }
 
-Mpio&
-Mio::_AllocNewMpio(MpioIoInfo& mpioIoInfo, bool partialIO)
+std::string
+Mio::GetArrayName(void)
 {
-    assert(mpioPool != nullptr);
+    return originReq->arrayName;
+}
 
+Mpio*
+Mio::_AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO)
+{
     MpioType mpioType = _LookupMpioType(originReq->reqType);
+    MetaStorageType storageType = originReq->targetMediaType;
+    Mpio* mpio = mpioPool->Alloc(mpioType, storageType, mpioIoInfo.metaLpn, partialIO, mpioIoInfo.arrayName);
 
-    Mpio* mpio = mpioPool->Alloc(mpioType);
-    assert(mpio != nullptr);
+    if (mpio == nullptr)
+        return nullptr;
 
-    mpio->Setup(originReq->targetMediaType, mpioIoInfo, partialIO, false /*forceSyncIO*/);
+    mpio->Setup(storageType, mpioIoInfo, partialIO, false /*forceSyncIO*/, metaStorage);
     mpio->SetLocalAioCbCxt(mpioAsyncDoneCallback);
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Mpio][Alloc      ] type={}, req.tagId={}, mpio_id={}, fileOffsetinChunk={}, fileOffset={}",
         mpioIoInfo.opcode, mpioIoInfo.tagId, mpioIoInfo.mpioId,
         mpioIoInfo.startByteOffset, originReq->byteOffsetInFile);
 
-    return *mpio;
+    return mpio;
+}
+
+void
+Mio::SetMergedRequestList(std::vector<MetaFsIoRequest*>* list)
+{
+    assert(mergedRequestList == nullptr);
+    mergedRequestList = list;
+}
+
+void
+Mio::ClearMergedRequestList(void)
+{
+    for (auto it : *mergedRequestList)
+        if (it != originReq)
+            delete it;
+
+    delete mergedRequestList;
+    mergedRequestList = nullptr;
+}
+
+std::vector<MetaFsIoRequest*>*
+Mio::GetMergedRequestList(void)
+{
+    return mergedRequestList;
 }
 
 void
@@ -230,6 +246,7 @@ Mio::_PrepareMpioInfo(MpioIoInfo& mpioIoInfo,
     mpioIoInfo.userBuf = buf;
     mpioIoInfo.tagId = originReq->tagId;
     mpioIoInfo.mpioId = mpio_id;
+    mpioIoInfo.arrayName = originReq->arrayName;
 }
 
 // FIXME: for better parallel execution, let's issue io request for each mpio as soon as mio builds mpio contexta
@@ -283,11 +300,42 @@ Mio::_BuildMpioMap(void)
         MpioIoInfo mpioIoInfo;
         _PrepareMpioInfo(mpioIoInfo, curLpn, byteOffsetInChunk, byteSize, curUserBuf, 1 /* LpnCnt */, mpio_cnt++);
 
-        Mpio& mpio = _AllocNewMpio(mpioIoInfo, byteSize != fileDataChunkSize /* partialIO */);
-        mpio.SetPartialDoneNotifier(partialMpioDoneNotifier);
-        mpioListCxt.PushMpio(mpio);
+        // _AllocMpio() always returns valid mpio, because of mpioDonePoller() above.
+        Mpio* mpio = _AllocMpio(mpioIoInfo, byteSize != fileDataChunkSize /* partialIO */);
+        mpio->SetPartialDoneNotifier(partialMpioDoneNotifier);
+        mpioListCxt.PushMpio(*mpio);
 
-        mpio.ExecuteAsyncState();
+#if MPIO_CACHE_EN
+        if (MpioCacheState::FirstRead == mpio->GetCacheState())
+        {
+            // pass, new mpio
+        }
+        else if (MpioCacheState::Mergeable == mpio->GetCacheState())
+        {
+            // copy data for merged requests
+            if (nullptr != mergedRequestList)
+            {
+                for (std::vector<MetaFsIoRequest*>::iterator it = mergedRequestList->begin(); it != mergedRequestList->end(); ++it)
+                {
+                    FileSizeType size = (*it)->byteSize;
+                    FileBufType targetBuf = (uint8_t*)(mpio->GetMDPageDataBuf()) + ((*it)->byteOffsetInFile % fileDataChunkSize);
+                    FileBufType originBuf = (*it)->buf;
+                    memcpy(targetBuf, originBuf, size);
+                }
+            }
+            // copy data for single request
+            else
+            {
+                mpio->SetCacheState(MpioCacheState::MergeSingle);
+            }
+        }
+        else if (MpioCacheState::MergeSingle == mpio->GetCacheState())
+        {
+            assert(0);
+        }
+#endif
+
+        mpio->ExecuteAsyncState();
 
         curLpn++;
         curUserBuf = (void*)((uint8_t*)curUserBuf + byteSize);
@@ -305,27 +353,10 @@ Mio::_BuildMpioMap(void)
     } while (remainingBytes);
 }
 
-uint32_t
-Mio::_GetDataChunkSize(void)
-{
-    MetaFsMoMReqMsg req;
-    req.reqType = MetaFsMoMReqType::GetDataChunkSize;
-    req.fd = originReq->fd;
-
-    mvmTopMgr.ProcessNewReq(req);
-    return req.completionData.dataChunkSize;
-}
-
 MetaLpnType
 Mio::GetStartLpn(void)
 {
     return startLpn;
-}
-
-MetaLpnType
-Mio::GetLpnCnt(void)
-{
-    return numLpns;
 }
 
 bool
@@ -343,7 +374,7 @@ Mio::GetClientAioCbCxt(void)
 bool
 Mio::IsSyncIO(void)
 {
-    return originReq->ioMode == MetaIoModeEnum::Sync;
+    return originReq->ioMode == MetaIoMode::Sync;
 }
 
 void
@@ -359,16 +390,10 @@ Mio::GetOpCode(void)
     return opCode;
 }
 
-const FileFDType
+const FileDescriptorType
 Mio::GetFD(void)
 {
     return originReq->fd;
-}
-
-uint32_t
-Mio::GetFileDataChunkSize(void)
-{
-    return fileDataChunkSize;
 }
 
 bool
@@ -415,6 +440,8 @@ Mio::Complete(MioState expNextState)
 
     ioCQ->Enqueue(this);
 
+    metaStorage = nullptr;
+
     return true;
 }
 
@@ -423,20 +450,11 @@ Mio::NotifyCompletionToClient(void)
 {
     if (error.first != 0 || error.second == true)
     {
+        // originReq => cloneReqMsg
+        // originalMsg => the msg from a user thread
         originReq->originalMsg->SetError(true);
     }
 
     originReq->originalMsg->NotifyIoCompletionToClient();
 }
-
-bool
-Mio::IsFirstAttempt(void)
-{
-    return retryFlag == false;
-}
-
-void
-Mio::SetRetryFlag(void)
-{
-    retryFlag = true;
-}
+} // namespace pos

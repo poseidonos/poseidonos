@@ -35,6 +35,8 @@
 
 #include "mim_base_test.h"
 
+namespace pos
+{
 class UtMIMFunctionalNegative : public UtMIMBasic
 {
 public:
@@ -42,5 +44,6 @@ public:
     void TC001_ProcessInvalidNewReq(void);
     void TC002_IssueFileReadToUncreatedFile(void);
 };
+} // namespace pos
 
 #endif // __UT_MIM_FUNC_NEGATIVE_H__

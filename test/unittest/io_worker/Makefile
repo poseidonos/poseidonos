@@ -1,5 +1,5 @@
 IBOF_SRC_DIR := $(abspath $(CURDIR)/../../..)
-SPDK_ROOT_DIR := $(IBOF_SRC_DIR)/lib/spdk-19.10
+SPDK_ROOT_DIR := $(IBOF_SRC_DIR)/lib/spdk
 GTEST_DIR := $(IBOF_SRC_DIR)/lib/googletest-release-1.10.x/googletest
 
 include $(SPDK_ROOT_DIR)/mk/spdk.common.mk

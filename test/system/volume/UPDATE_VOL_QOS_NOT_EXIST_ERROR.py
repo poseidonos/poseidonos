@@ -7,12 +7,13 @@ sys.path.append("../lib/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
 import MOUNT_VOL_BASIC_1
 import volume
 
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 SIZE = MOUNT_VOL_BASIC_1.VOL_SIZE
 IOPS = 100
 BW = 200
@@ -31,10 +32,10 @@ def execute():
     clear_result()
     MOUNT_VOL_BASIC_1.execute()
     wrong_name = "wrong_vol"
-    out = cli.update_volume_qos(wrong_name, str(IOPS), str(BW), "")
+    out = cli.update_volume_qos(wrong_name, str(IOPS), str(BW), ARRAYNAME)
     return out
 
 if __name__ == "__main__":
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

@@ -34,26 +34,33 @@
 
 #include <functional>
 
-#include "../config/array_config.h"
-#include "../device/array_device.h"
 #include "nvm_partition.h"
+#include "src/array/array_interface.h"
+#include "src/array/device/array_device.h"
 #include "src/array/ft/raid1.h"
 #include "src/array/ft/raid5.h"
-#include "src/device/ublock_device.h"
+#include "src/array/interface/i_abr_control.h"
+#include "src/device/base/ublock_device.h"
+#include "src/include/array_config.h"
 #include "src/logger/logger.h"
-#include "src/master_context/mbr_manager.h"
 #include "stripe_partition.h"
 
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
 
-namespace ibofos
+namespace pos
 {
-PartitionManager::PartitionManager()
+PartitionManager::PartitionManager(string array, IAbrControl* abr)
+: arrayName_(array)
 {
     for (uint32_t i = 0; i < partitions_.size(); i++)
     {
         partitions_[i] = nullptr;
     }
+    abrControl = abr;
+}
+
+PartitionManager::~PartitionManager()
+{
 }
 
 const PartitionLogicalSize*
@@ -70,45 +77,47 @@ PartitionManager::GetSizeInfo(PartitionType type)
 }
 
 int
-PartitionManager::CreateAll(ArrayDevice* nvm,
-    vector<ArrayDevice*> dataDevs)
+PartitionManager::CreateAll(vector<ArrayDevice*> buf,
+    vector<ArrayDevice*> data, ArrayInterface* intf)
 {
-    int ret = _CreateMetaSsd(dataDevs);
+    int ret = _CreateMetaSsd(data, intf);
     if (ret != 0)
     {
         goto error;
     }
-    ret = _CreateUserData(dataDevs, nvm);
+    ret = _CreateUserData(data, buf.front(), intf);
     if (ret != 0)
     {
         goto error;
     }
-    ret = _CreateMetaNvm(nvm);
+    ret = _CreateMetaNvm(buf.front(), intf);
     if (ret != 0)
     {
         goto error;
     }
-    ret = _CreateWriteBuffer(nvm);
+    ret = _CreateWriteBuffer(buf.front(), intf);
     if (ret != 0)
     {
         goto error;
     }
+
     return 0;
 
 error:
-    DeleteAll();
+    DeleteAll(intf);
     return ret;
 }
 
 int
-PartitionManager::_CreateMetaNvm(ArrayDevice* dev)
+PartitionManager::_CreateMetaNvm(ArrayDevice* dev, ArrayInterface* intf)
 {
     const PartitionLogicalSize* metaSsdSize = nullptr;
+    PartitionType partType = PartitionType::META_NVM;
     metaSsdSize = GetSizeInfo(PartitionType::META_SSD);
     if (nullptr == metaSsdSize)
     {
-        int eventId = (int)IBOF_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
-        IBOF_TRACE_ERROR(eventId, "Failed to create partition \"META_NVM\"");
+        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
+        POS_TRACE_ERROR(eventId, "Failed to create partition \"META_NVM\"");
         return eventId;
     }
 
@@ -123,34 +132,37 @@ PartitionManager::_CreateMetaNvm(ArrayDevice* dev)
     vector<ArrayDevice*> nvm;
     nvm.push_back(dev);
 
-    Partition* partition = new NvmPartition(PartitionType::META_NVM, physicalSize, nvm);
+    Partition* partition = new NvmPartition(arrayName_,
+        partType, physicalSize, nvm);
     if (nullptr == partition)
     {
-        int eventId = (int)IBOF_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
-        IBOF_TRACE_ERROR(eventId, "Failed to create partition \"META_NVM\"");
+        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
+        POS_TRACE_ERROR(eventId, "Failed to create partition \"META_NVM\"");
         return eventId;
     }
-    partitions_[PartitionType::META_NVM] = partition;
+    partitions_[partType] = partition;
+    intf->AddTranslator(partType, partition);
     return 0;
 }
 
 int
-PartitionManager::_CreateWriteBuffer(ArrayDevice* dev)
+PartitionManager::_CreateWriteBuffer(ArrayDevice* dev, ArrayInterface* intf)
 {
     const PartitionLogicalSize* userDataSize = nullptr;
+    PartitionType partType = PartitionType::WRITE_BUFFER;
     userDataSize = GetSizeInfo(PartitionType::USER_DATA);
     if (nullptr == userDataSize)
     {
-        int eventId = (int)IBOF_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
-        IBOF_TRACE_ERROR(eventId, "Failed to create partition \"WRITE_BUFFER\"");
+        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
+        POS_TRACE_ERROR(eventId, "Failed to create partition \"WRITE_BUFFER\"");
         return eventId;
     }
     const PartitionPhysicalSize* metaNvmSize = nullptr;
     metaNvmSize = partitions_[PartitionType::META_NVM]->GetPhysicalSize();
     if (nullptr == metaNvmSize)
     {
-        int eventId = (int)IBOF_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
-        IBOF_TRACE_ERROR(eventId, "Failed to create partition \"WRITE_BUFFER\"");
+        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
+        POS_TRACE_ERROR(eventId, "Failed to create partition \"WRITE_BUFFER\"");
         return eventId;
     }
 
@@ -159,29 +171,28 @@ PartitionManager::_CreateWriteBuffer(ArrayDevice* dev)
     physicalSize.startLba = metaNvmSize->startLba + (metaNvmTotalBlks * ArrayConfig::SECTORS_PER_BLOCK);
     physicalSize.blksPerChunk = userDataSize->blksPerStripe;
     physicalSize.chunksPerStripe = ArrayConfig::NVM_DEVICE_COUNT;
-    physicalSize.stripesPerSegment = (dev->uBlock->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE - DIV_ROUND_UP(physicalSize.startLba, ArrayConfig::SECTORS_PER_BLOCK)) / userDataSize->blksPerStripe;
+    physicalSize.stripesPerSegment = (dev->GetUblock()->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE - DIV_ROUND_UP(physicalSize.startLba, ArrayConfig::SECTORS_PER_BLOCK)) / userDataSize->blksPerStripe;
     physicalSize.totalSegments = ArrayConfig::NVM_SEGMENT_SIZE;
 
     vector<ArrayDevice*> nvm;
     nvm.push_back(dev);
-    Partition* partition = new NvmPartition(PartitionType::WRITE_BUFFER,
-        physicalSize, nvm);
+    Partition* partition = new NvmPartition(arrayName_,
+        partType, physicalSize, nvm);
     if (nullptr == partition)
     {
-        int eventId = (int)IBOF_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
-        IBOF_TRACE_ERROR(eventId, "Failed to create partition \"WRITE_BUFFER\"");
+        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
+        POS_TRACE_ERROR(eventId, "Failed to create partition \"WRITE_BUFFER\"");
         return eventId;
     }
-    partitions_[PartitionType::WRITE_BUFFER] = partition;
+    partitions_[partType] = partition;
+    intf->AddTranslator(partType, partition);
     return 0;
 }
 
 int
-PartitionManager::_CreateMetaSsd(vector<ArrayDevice*> devs)
+PartitionManager::_CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf)
 {
-    MbrManager& mbrManager = *MbrManagerSingleton::Instance();
-    int arrayNum = 0;
-    bool isInitialized = mbrManager.GetMfsInit(arrayNum);
+    PartitionType partType = PartitionType::META_SSD;
 
     if (0 != devs.size() % 2)
     {
@@ -196,40 +207,39 @@ PartitionManager::_CreateMetaSsd(vector<ArrayDevice*> devs)
     physicalSize.chunksPerStripe = devs.size();
     physicalSize.stripesPerSegment = ArrayConfig::STRIPES_PER_SEGMENT;
     uint64_t ssdTotalSegments =
-        baseline->uBlock->GetSize() / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
+        baseline->GetUblock()->GetSize() / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
     physicalSize.totalSegments =
         DIV_ROUND_UP(ssdTotalSegments * ArrayConfig::META_SSD_SIZE_RATIO, 100);
 
-    PartitionType type = PartitionType::META_SSD;
     Method* method = new Raid1(&physicalSize);
-    Partition* partition = new StripePartition(type, physicalSize, devs, method);
+    StripePartition* partition = new StripePartition(arrayName_,
+        partType, physicalSize, devs, method);
 
     if (nullptr == partition)
     {
-        int eventId = (int)IBOF_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
-        IBOF_TRACE_ERROR(eventId, "Failed to create partition \"META_SSD\"");
+        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
+        POS_TRACE_ERROR(eventId, "Failed to create partition \"META_SSD\"");
         return eventId;
     }
 
-    if (isInitialized == false)
-    {
-        partition->Format();
-    }
-    partitions_[type] = partition;
-
+    partitions_[partType] = partition;
+    intf->AddTranslator(partType, partition);
+    intf->AddRecover(partType, partition);
+    intf->AddRebuildTarget(partition);
     return 0;
 }
 
 int
 PartitionManager::_CreateUserData(const vector<ArrayDevice*> devs,
-    const ArrayDevice* nvm)
+    ArrayDevice* nvm, ArrayInterface* intf)
 {
+    PartitionType partType = PartitionType::USER_DATA;
     Partition* metaSsd = nullptr;
     metaSsd = partitions_[PartitionType::META_SSD];
     if (nullptr == metaSsd)
     {
-        int eventId = (int)IBOF_EVENT_ID::ARRAY_PARTITION_LOAD_ERROR;
-        IBOF_TRACE_ERROR(eventId, "Failed to create partition \"USER_DATA\"");
+        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_LOAD_ERROR;
+        POS_TRACE_ERROR(eventId, "Failed to create partition \"USER_DATA\"");
         return eventId;
     }
     const PartitionPhysicalSize* metaSsdSize = nullptr;
@@ -243,31 +253,34 @@ PartitionManager::_CreateUserData(const vector<ArrayDevice*> devs,
     physicalSize.stripesPerSegment = ArrayConfig::STRIPES_PER_SEGMENT;
     ArrayDevice* baseline = _GetBaseline(devs);
     uint64_t ssdTotalSegments =
-        baseline->uBlock->GetSize() / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
+        baseline->GetUblock()->GetSize() / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
     uint64_t mbrSegments =
         ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
     physicalSize.totalSegments =
         ssdTotalSegments - mbrSegments - metaSsdSize->totalSegments;
 
-    uint64_t totalNvmBlks = nvm->uBlock->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE;
-    uint64_t blksPerStripe = physicalSize.blksPerChunk * physicalSize.chunksPerStripe;
+    uint64_t totalNvmBlks = nvm->GetUblock()->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE;
+    uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
     uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
     PartitionType type = PartitionType::USER_DATA;
     Method* method = new Raid5(&physicalSize, totalNvmStripes);
-    Partition* partition = new StripePartition(type, physicalSize, devs, method);
+    StripePartition* partition = new StripePartition(arrayName_, type, physicalSize, devs, method);
     if (nullptr == partition)
     {
-        int eventId = (int)IBOF_EVENT_ID::ARRAY_PARTITION_LOAD_ERROR;
-        IBOF_TRACE_ERROR(eventId, "Failed to create partition \"USER_DATA\"");
+        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_LOAD_ERROR;
+        POS_TRACE_ERROR(eventId, "Failed to create partition \"USER_DATA\"");
         return eventId;
     }
 
-    partitions_[type] = partition;
+    partitions_[partType] = partition;
+    intf->AddTranslator(partType, partition);
+    intf->AddRecover(partType, partition);
+    intf->AddRebuildTarget(partition);
     return 0;
 }
 
 void
-PartitionManager::DeleteAll()
+PartitionManager::DeleteAll(ArrayInterface* intf)
 {
     for (uint32_t i = 0; i < partitions_.size(); i++)
     {
@@ -277,133 +290,7 @@ PartitionManager::DeleteAll()
             partitions_[i] = nullptr;
         }
     }
-}
-
-int
-PartitionManager::Translate(const PartitionType type,
-    PhysicalBlkAddr& dst,
-    const LogicalBlkAddr& src)
-{
-    return partitions_[type]->Translate(dst, src);
-}
-
-int
-PartitionManager::Convert(const PartitionType type,
-    list<PhysicalWriteEntry>& dst,
-    const LogicalWriteEntry& src)
-{
-    return partitions_[type]->Convert(dst, src);
-}
-
-void
-PartitionManager::Rebuild(ArrayDevice* target, RebuildResultCallback cb)
-{
-    rebuildJobs.progress = new RebuildProgress();
-    rebuildJobs.resultCb = cb;
-    uint32_t totalStripes = 0;
-    rebuildMtx.lock();
-    for (Partition* p : partitions_)
-    {
-        if (p != nullptr)
-        {
-            int devIdx = p->FindDevice(target);
-            if (devIdx >= 0)
-            {
-                Method* method = p->GetMethod();
-                RebuildBehavior* behavior = method->GetRebuildBehavior();
-                RebuildContext* ctx = behavior->GetContext();
-                ctx->faultIdx = devIdx;
-                ctx->prog = rebuildJobs.progress;
-                ctx->completeHandler = bind(&PartitionManager::_RebuildDone, this);
-                RebuildJob* job = new RebuildJob(p, behavior);
-                rebuildJobs.jobList.push_back(job);
-                totalStripes += job->GetSize();
-            }
-        }
-    }
-    rebuildMtx.unlock();
-
-    if (!rebuildJobs.jobList.empty())
-    {
-        rebuildJobs.progress->SetTotal(totalStripes);
-        rebuildJobs.state = RebuildState::READY;
-        _DoRebuilding(rebuildJobs.jobList.front());
-    }
-    else
-    {
-        delete rebuildJobs.progress;
-        rebuildJobs.progress = nullptr;
-        rebuildJobs.state = RebuildState::NO_TARGET;
-        _RebuildDone();
-    }
-}
-
-void
-PartitionManager::_DoRebuilding(RebuildJob* job)
-{
-    if (job->GetResult() == RebuildState::READY)
-    {
-        job->Start();
-    }
-    else
-    {
-        _RebuildDone();
-    }
-}
-
-void
-PartitionManager::StopRebuilding()
-{
-    for (RebuildJob* job : rebuildJobs.jobList)
-    {
-        job->Stop();
-    }
-
-    _WaitRebuildingDone();
-}
-
-int
-PartitionManager::RebuildRead(UbioSmartPtr ubio)
-{
-    if (true == ubio->IsRetry())
-    {
-        return -1;
-    }
-
-    ubio->SetRetry(true);
-
-    uint64_t lba = ubio->GetLba();
-    ArrayDevice* dev = ubio->GetDev();
-
-    for (uint32_t i = 0; i < partitions_.size(); i++)
-    {
-        Partition* ptn = partitions_[i];
-        if (nullptr != ptn && ptn->IsValidLba(lba) && (ptn->FindDevice(dev) >= 0))
-        {
-            return ptn->RebuildRead(ubio);
-        }
-    }
-
-    return -1;
-}
-
-bool
-PartitionManager::TryLock(PartitionType type, StripeId stripeId)
-{
-    if (partitions_[type] != nullptr)
-    {
-        return partitions_[type]->TryLock(stripeId);
-    }
-    return false;
-}
-
-void
-PartitionManager::Unlock(PartitionType type, StripeId stripeId)
-{
-    if (partitions_[type] != nullptr)
-    {
-        partitions_[type]->Unlock(stripeId);
-    }
+    intf->ClearInterface();
 }
 
 ArrayDevice*
@@ -426,80 +313,12 @@ PartitionManager::_GetBaseline(const vector<ArrayDevice*>& devs)
 }
 
 void
-PartitionManager::_RebuildDone()
+PartitionManager::FormatMetaPartition(vector<ArrayDevice*> data, ArrayInterface* intf)
 {
-    rebuildMtx.lock();
-    if (!rebuildJobs.jobList.empty())
-    {
-        RebuildJob* job = rebuildJobs.jobList.front();
-        if (rebuildJobs.state < job->GetResult())
-        {
-            rebuildJobs.state = job->GetResult();
-        }
-        job->Complete();
-        delete job;
-        rebuildJobs.jobList.pop_front();
-    }
-    rebuildMtx.unlock();
-
-    if (rebuildJobs.jobList.empty() == true)
-    {
-        delete rebuildJobs.progress;
-        rebuildJobs.progress = nullptr;
-        RebuildState result = rebuildJobs.state;
-        switch (result)
-        {
-            case RebuildState::PASS:
-                IBOF_TRACE_INFO((int)IBOF_EVENT_ID::REBUILD_RESULT_PASS,
-                    "rebuild complete sucessfully");
-                break;
-            case RebuildState::FAIL:
-                IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::REBUILD_FAILED,
-                    "rebuild failure");
-                break;
-            case RebuildState::CANCELLED:
-                IBOF_TRACE_WARN((int)IBOF_EVENT_ID::REBUILD_RESULT_CANCELLED,
-                    "rebuild cancelled");
-                break;
-            case RebuildState::NO_TARGET:
-                IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::REBUILD_DEBUG_MSG,
-                    "the device detached is not belong to any partition");
-                break;
-            default:
-                break;
-        }
-        rebuildJobs.resultCb(result);
-        std::unique_lock<std::mutex> lock(rebuildMtx);
-        rebuildCv.notify_one();
-    }
-    else if (rebuildJobs.state == RebuildState::FAIL)
-    {
-        _RebuildDone();
-    }
-    else
-    {
-        _DoRebuilding(rebuildJobs.jobList.front());
-    }
+    _CreateMetaSsd(data, intf);
+    auto partition = partitions_[PartitionType::META_SSD];
+    partition->Format();
+    DeleteAll(intf);
 }
 
-void
-PartitionManager::_WaitRebuildingDone()
-{
-    std::unique_lock<std::mutex> lock(rebuildMtx);
-    while (rebuildJobs.jobList.empty() != true)
-    {
-        rebuildCv.wait(lock);
-    }
-}
-
-uint32_t
-PartitionManager::GetRebuildingProgress()
-{
-    if (rebuildJobs.progress != nullptr)
-    {
-        return rebuildJobs.progress->Current();
-    }
-
-    return 0;
-}
-} // namespace ibofos
+} // namespace pos

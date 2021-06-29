@@ -1,0 +1,4 @@
+POS_ADD_UNIT_TEST(config_manager_ut config_manager_test.cpp)
+POS_ADD_UNIT_TEST(e2e_protect_ut e2e_protect_test.cpp)
+POS_ADD_UNIT_TEST(default_configuration_ut default_configuration_test.cpp)
+POS_ADD_UNIT_TEST(version_provider_ut version_provider_test.cpp)

@@ -9,6 +9,7 @@ TEST_SRCS = $(filter %_stub.cpp, $(SRCS))
 TEST_SRCS += $(filter %_mock.cpp, $(SRCS))
 TEST_SRCS += $(filter %_fake.cpp, $(SRCS))
 TEST_SRCS += $(filter %_test.cpp, $(SRCS))
+TEST_SRCS += $(filter %_fixture.cpp, $(SRCS))
 BUILD_SRCS = $(filter-out $(TEST_SRCS), $(SRCS))
 
 OBJECTS = $(BUILD_SRCS:.cpp=.o)

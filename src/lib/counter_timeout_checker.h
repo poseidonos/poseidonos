@@ -35,7 +35,7 @@
 
 #include "src/lib/timeout_checker.h"
 
-namespace ibofos
+namespace pos
 {
 class CounterTimeoutChecker : public TimeoutChecker
 {
@@ -49,6 +49,6 @@ public:
 private:
     uint64_t counterLeftToTimeout;
 };
-} // namespace ibofos
+} // namespace pos
 
 #endif // __COUNTER_TIMEOUT_CHECKER_H__

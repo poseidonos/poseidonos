@@ -32,22 +32,33 @@
 
 #include "src/io/frontend_io/read_completion_for_partial_write.h"
 
-#include "src/device/event_framework_api.h"
-#include "src/device/ioat_api.h"
-#include "src/include/ibof_event_id.hpp"
-#include "src/io/frontend_io/partial_write_completion.h"
+#include "src/event_scheduler/io_completer.h"
+#include "src/spdk_wrapper/event_framework_api.h"
+#include "src/spdk_wrapper/accel_engine_api.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/include/branch_prediction.h"
 #include "src/io/general_io/translator.h"
-#include "src/io/general_io/volume_io.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/bio/volume_io.h"
 #include "src/logger/logger.h"
-#include "src/mapper/mapper.h"
 
-namespace ibofos
+namespace pos
 {
+
 ReadCompletionForPartialWrite::ReadCompletionForPartialWrite(
-    VolumeIoSmartPtr volumeIo)
+    VolumeIoSmartPtr volumeIo, uint32_t alignmentSize, uint32_t alignmentOffset,
+    IWBStripeAllocator* inputIWBStripeAllocator, bool tested)
 : Callback(true),
-  volumeIo(volumeIo)
+  volumeIo(volumeIo),
+  alignmentSize(alignmentSize),
+  alignmentOffset(alignmentOffset),
+  iWBStripeAllocator(inputIWBStripeAllocator),
+  tested(tested)
 {
+    if (likely(iWBStripeAllocator == nullptr))
+    {
+        iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(volumeIo->GetArrayName());
+    }
 }
 
 ReadCompletionForPartialWrite::~ReadCompletionForPartialWrite(void)
@@ -55,28 +66,38 @@ ReadCompletionForPartialWrite::~ReadCompletionForPartialWrite(void)
 }
 
 void
-ReadCompletionForPartialWrite::_HandleCopyDone(void* argument)
+ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
 {
+    Translator* translator = nullptr;
     try
     {
         if (unlikely(nullptr == argument))
         {
-            IBOF_EVENT_ID eventId = IBOF_EVENT_ID::BLKALGN_INVALID_UBIO;
-            IBOF_TRACE_ERROR(static_cast<int>(eventId),
-                IbofEventId::GetString(eventId));
+            POS_EVENT_ID eventId = POS_EVENT_ID::BLKALGN_INVALID_UBIO;
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                PosEventId::GetString(eventId));
             throw eventId;
         }
+        CopyParameter* copyParam = static_cast<CopyParameter*>(argument);
+        VolumeIoSmartPtr volumeIo = copyParam->volumeIo;
+        translator = copyParam->translator;
 
-        VolumeIoSmartPtr volumeIo = *(static_cast<VolumeIoSmartPtr*>(argument));
-        Translator translator(volumeIo->GetVsa());
+        // If UT is executed, translator will be input.
+        // otherwise, translator will be nullptr
+        Translator translatorLocal(volumeIo->GetVsa(), volumeIo->GetArrayName());
+        if (likely(translator == nullptr))
+        {
+            translator = &translatorLocal;
+        }
         void* mem = volumeIo->GetBuffer();
-        PhysicalEntries physicalEntries = translator.GetPhysicalEntries(mem, 1);
+        PhysicalEntries physicalEntries = translator->GetPhysicalEntries(mem, 1);
         VolumeIoSmartPtr split = volumeIo->GetOriginVolumeIo();
-        StripeAddr lsidEntry = translator.GetLsidEntry(0);
+        StripeAddr lsidEntry = translator->GetLsidEntry(0);
         split->SetLsidEntry(lsidEntry);
 
         // TODO Support multiple buffers (for RAID1) - create additional VolumeIo
         assert(physicalEntries.size() == 1);
+
         for (auto& physicalEntry : physicalEntries)
         {
             PhysicalBlkAddr pba = physicalEntry.addr;
@@ -89,20 +110,18 @@ ReadCompletionForPartialWrite::_HandleCopyDone(void* argument)
                 volumeIo->dir = UbioDir::Write;
                 volumeIo->SetPba(pba);
                 volumeIo->ClearCallback();
-                CallbackSmartPtr completion(
-                    new PartialWriteCompletion(volumeIo));
                 CallbackSmartPtr splitCallback = split->GetCallback();
-                splitCallback->SetWaitingCount(1);
-                completion->SetCallee(splitCallback);
-                volumeIo->SetCallback(completion);
-
-                _SendVolumeIo(volumeIo);
+                volumeIo->SetCallback(splitCallback);
+                if (likely(copyParam->tested == false))
+                {
+                    _SendVolumeIo(volumeIo);
+                }
 
                 pba.lba += ChangeBlockToSector(blockCount);
             }
         }
 
-        delete (static_cast<VolumeIoSmartPtr*>(argument));
+        delete (static_cast<CopyParameter*>(argument));
     }
     catch (...)
     {
@@ -110,14 +129,13 @@ ReadCompletionForPartialWrite::_HandleCopyDone(void* argument)
         {
             VolumeIoSmartPtr volumeIo =
                 *(static_cast<VolumeIoSmartPtr*>(argument));
-            CallbackSmartPtr callback = volumeIo->GetCallback();
-            if (callback)
+            UbioSmartPtr origin = volumeIo->GetOriginUbio();
+            if (origin != nullptr)
             {
-                callback->InformError(CallbackError::GENERIC_ERROR);
+                IoCompleter ioCompleter(origin);
+                ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::GENERIC_ERROR, true);
             }
-            PartialWriteCompletion event(volumeIo);
-            event.Execute();
-            delete (static_cast<VolumeIoSmartPtr*>(argument));
+            delete (static_cast<CopyParameter*>(argument));
         }
     }
 }
@@ -129,8 +147,12 @@ ReadCompletionForPartialWrite::_Copy(VolumeIoSmartPtr srcVolumeIo,
 {
     void* src = srcVolumeIo->GetBuffer(0, ChangeByteToSector(srcOffset));
     void* dst = dstVolumeIo->GetBuffer(0, ChangeByteToSector(dstOffset));
-    VolumeIoSmartPtr* volumeIoSmartPtr = new VolumeIoSmartPtr(dstVolumeIo);
-    IoatApi::SubmitCopy(dst, src, size, _HandleCopyDone, volumeIoSmartPtr);
+    CopyParameter* copyParam = nullptr;
+    if (tested == false)
+    {
+        copyParam = new CopyParameter(dstVolumeIo, nullptr);
+    }
+    AccelEngineApi::SubmitCopy(dst, src, size, HandleCopyDone, copyParam);
 }
 
 bool
@@ -138,15 +160,12 @@ ReadCompletionForPartialWrite::_DoSpecificJob(void)
 {
     try
     {
-        AlignmentInformation alignment = volumeIo->GetAlignmentInformation();
-        uint32_t alignmentOffset = alignment.offset;
-        uint32_t alignmentSize = alignment.size;
         VolumeIoSmartPtr split = volumeIo->GetOriginVolumeIo();
         if (unlikely(nullptr == split))
         {
-            IBOF_EVENT_ID eventId = IBOF_EVENT_ID::BLKALGN_INVALID_UBIO;
-            IBOF_TRACE_ERROR(static_cast<int>(eventId),
-                IbofEventId::GetString(eventId));
+            POS_EVENT_ID eventId = POS_EVENT_ID::BLKALGN_INVALID_UBIO;
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                PosEventId::GetString(eventId));
             throw eventId;
         }
         StripeAddr oldLsidEntry = volumeIo->GetOldLsidEntry();
@@ -154,20 +173,30 @@ ReadCompletionForPartialWrite::_DoSpecificJob(void)
         if (false == IsUnMapStripe(oldLsidEntry.stripeId))
         {
             uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
-            MapperSingleton::Instance()->DereferLsid(oldLsidEntry, blockCount);
+            iWBStripeAllocator->DereferLsidCnt(oldLsidEntry, blockCount);
         }
 
         _Copy(split, 0, volumeIo, alignmentOffset, alignmentSize);
     }
     catch (...)
     {
-        InformError(CallbackError::GENERIC_ERROR);
-        PartialWriteCompletion event(volumeIo);
-        event.Execute();
+        UbioSmartPtr origin = volumeIo->GetOriginUbio();
+        if (origin != nullptr)
+        {
+            IoCompleter ioCompleter(origin);
+            ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::GENERIC_ERROR, true);
+        }
     }
 
     volumeIo = nullptr;
 
     return true;
 }
-} // namespace ibofos
+
+CopyParameter::CopyParameter(VolumeIoSmartPtr volumeIo, Translator* translator, bool tested)
+: volumeIo(volumeIo),
+  translator(translator),
+  tested(tested)
+{
+}
+} // namespace pos

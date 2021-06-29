@@ -33,28 +33,42 @@
 #include "flush_submission.h"
 
 #include <list>
+#include <string>
 
-#include "src/allocator/allocator.h"
-#include "src/allocator/stripe.h"
-#include "src/include/ibof_event_id.hpp"
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/include/meta_const.h"
+#include "src/include/backend_event.h"
 #include "src/io/backend_io/stripe_map_update_request.h"
+#include "src/logger/logger.h"
+#include "src/array/service/array_service_layer.h"
+#include "src/include/i_array_device.h"
+#include "src/spdk_wrapper/bdev_api.h"
+#include "src/include/array_config.h"
+#include "src/device/base/ublock_device.h"
 
-namespace ibofos
+namespace pos
 {
-#if defined QOS_ENABLED_BE
-FlushSubmission::FlushSubmission(Stripe* inputStripe)
+FlushSubmission::FlushSubmission(Stripe* inputStripe, std::string& arrayName)
+: FlushSubmission(inputStripe,
+    AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName),
+    IIOSubmitHandler::GetInstance(), arrayName, ArrayService::Instance()->Getter()->GetTranslator())
+{
+}
+
+FlushSubmission::FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, std::string& arrayName,
+    IIOTranslator* translator)
 : Event(false, BackendEvent_Flush),
-  stripe(inputStripe)
+  stripe(inputStripe),
+  iWBStripeAllocator(wbStripeAllocator),
+  iIOSubmitHandler(ioSubmitHandler),
+  arrayName(arrayName),
+  translator(translator)
 {
     SetEventType(BackendEvent_Flush);
 }
-#else
-FlushSubmission::FlushSubmission(Stripe* inputStripe)
-: Event(false),
-  stripe(inputStripe)
-{
-}
-#endif
 
 FlushSubmission::~FlushSubmission(void)
 {
@@ -63,36 +77,70 @@ FlushSubmission::~FlushSubmission(void)
 bool
 FlushSubmission::Execute(void)
 {
-    Allocator& allocator = *AllocatorSingleton::Instance();
-    StripeId logicalStripeId = allocator.AllocateUserDataStripeId(stripe->GetVsid());
+    StripeId logicalStripeId = iWBStripeAllocator->AllocateUserDataStripeId(stripe->GetVsid());
 
-    std::list<BufferEntry> bufferList;
     uint64_t blocksInStripe = 0;
+    bufferList.clear();
+
+    StripeId logicalWbStripeId = stripe->GetWbLsid();
+    LogicalBlkAddr startWbLSA = {
+        .stripeId = logicalWbStripeId,
+        .offset = 0};
+
+    PhysicalBlkAddr physicalWriteEntry = {
+        .lba = 0,
+        .arrayDev = nullptr};
+    void* basePointer = nullptr;
+    if (likely(translator != nullptr))
+    {
+        int ret = translator->Translate(
+            arrayName, WRITE_BUFFER, physicalWriteEntry, startWbLSA);
+        if (unlikely(ret != static_cast<int>(POS_EVENT_ID::SUCCESS)))
+        {
+            POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;
+            POS_TRACE_ERROR(eventId, "translator in Flush Submission has error code : {} stripeId : {}", stripe->GetVsid(), logicalStripeId);
+            // No retry
+            return true;
+        }
+        if (likely(physicalWriteEntry.arrayDev != nullptr))
+        {
+            basePointer = physicalWriteEntry.arrayDev->GetUblock()->GetByteAddress();
+        }
+    }
+    char* offset = static_cast<char *>(basePointer) + (physicalWriteEntry.lba * ArrayConfig::SECTOR_SIZE_BYTE);
     for (auto it = stripe->DataBufferBegin(); it != stripe->DataBufferEnd(); ++it)
     {
-        BufferEntry bufferEntry(*it, BLOCKS_IN_CHUNK);
+        BufferEntry bufferEntry(offset, BLOCKS_IN_CHUNK);
         bufferList.push_back(bufferEntry);
         blocksInStripe += BLOCKS_IN_CHUNK;
+        offset += BLOCKS_IN_CHUNK * ArrayConfig::BLOCK_SIZE_BYTE;
     }
-
-    stripe->SetUserLsid(logicalStripeId);
-    CallbackSmartPtr callback(new StripeMapUpdateRequest(stripe));
 
     LogicalBlkAddr startLSA = {
         .stripeId = logicalStripeId,
         .offset = 0};
 
-    IBOF_EVENT_ID eventId = IBOF_EVENT_ID::FLUSH_DEBUG_SUBMIT;
+    stripe->SetUserLsid(logicalStripeId);
+    CallbackSmartPtr callback(new StripeMapUpdateRequest(stripe, arrayName));
 
-    IBOF_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, IbofEventId::GetString(eventId), stripe->GetVsid(), startLSA.stripeId, blocksInStripe);
+    POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;
 
-    IOSubmitHandlerStatus errorReturned = IOSubmitHandler::SubmitAsyncIO(
+    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, PosEventId::GetString(eventId), stripe->GetVsid(), startLSA.stripeId, blocksInStripe);
+
+    IOSubmitHandlerStatus errorReturned = iIOSubmitHandler->SubmitAsyncIO(
         IODirection::WRITE,
         bufferList,
         startLSA, blocksInStripe,
         USER_DATA,
-        callback);
+        callback, arrayName);
 
     return (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned);
 }
-} // namespace ibofos
+
+uint32_t
+FlushSubmission::GetBufferListSize(void)
+{
+    return bufferList.size();
+}
+
+} // namespace pos

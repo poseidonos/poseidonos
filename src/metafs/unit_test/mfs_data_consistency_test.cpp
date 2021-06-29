@@ -30,11 +30,13 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "mfs_data_consistency_test.h"
-
-#include "mfs.h"
+#include "metafs.h"
 #include "mfs_functional_test.h"
 
+namespace pos
+{
 static std::atomic<int> issuedAioCnt;
 static std::atomic<int> completedAioCnt;
 
@@ -46,12 +48,12 @@ MetaFSNonFuncDataConsistency::HandleIOCallback(void* data)
     MetaFsAioCbCxt* cxt = reinterpret_cast<MetaFsAioCbCxt*>(data);
     if (cxt->CheckIOError())
     {
-        MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE, "io error");
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE, "io error");
     }
 
     delete cxt;
     completedAioCnt++;
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE, "callback done");
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE, "callback done");
 }
 
 void
@@ -83,16 +85,20 @@ MetaFSNonFuncDataConsistency::VerifyData(void* origin, void* exp, size_t nbytes)
 // The scenario generates multiple mpios over 1 LPN (AWIBOF-988 issue)
 TEST_F(MetaFSNonFuncDataConsistency, VerifyDataMultiSub4KWrite)
 {
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_sys;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
+    MetaFsReturnCode<POS_EVENT_ID> rc_sys;
+    MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+    MetaFsReturnCode<POS_EVENT_ID> rc_io;
 
+    std::string arrayName = "POSArray";
     size_t fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 50; // 200KB file size
     int fd;
     CreateDummyFile(fileSize);
     fd = OpenDummyFile();
 
-    uint32_t dataChunkSize = metaFsMgr.util.GetAlignedFileIOSize(fd);
+    bool result = metaFs.mgmt.AddArray(arrayName);
+    EXPECT_EQ(result, true);
+
+    uint32_t dataChunkSize = metaFs.ctrl.GetAlignedFileIOSize(fd, arrayName);
     EXPECT_NE(dataChunkSize, 0);
 
     static const int NUM_REQS = 4;
@@ -109,20 +115,20 @@ TEST_F(MetaFSNonFuncDataConsistency, VerifyDataMultiSub4KWrite)
     {
         uint8_t* curbuf = wbuf + (reqId * FIXED_WRITE_SIZE);
         MetaFSNonFuncDataConsistency::FillupPattern(curbuf, FIXED_WRITE_SIZE, reqId + 1);
-        aiocb[reqId] = new MetaFsAioCbCxt(MetaFsIoOpcode::Write, fd, reqId * FIXED_WRITE_SIZE, FIXED_WRITE_SIZE, curbuf,
+        aiocb[reqId] = new MetaFsAioCbCxt(MetaFsIoOpcode::Write, fd, arrayName, reqId * FIXED_WRITE_SIZE, FIXED_WRITE_SIZE, curbuf,
             AsEntryPointParam1(&MetaFSNonFuncDataConsistency::HandleIOCallback, this));
     }
 
     for (int reqId = 0; reqId < NUM_REQS; ++reqId)
     {
-        metaFsMgr.io.SubmitIO(aiocb[reqId]);
+        metaFs.io.SubmitIO(aiocb[reqId]);
         issuedAioCnt++;
     }
     while (issuedAioCnt != completedAioCnt)
     {
     }
 
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "AIO done. Do verify...");
 
     // data verify
@@ -131,7 +137,7 @@ TEST_F(MetaFSNonFuncDataConsistency, VerifyDataMultiSub4KWrite)
     bool res;
     for (int reqId = 0; reqId < NUM_REQS; ++reqId)
     {
-        metaFsMgr.io.Read(fd, reqId * FIXED_WRITE_SIZE, FIXED_WRITE_SIZE, rbuf);
+        metaFs.io.Read(fd, arrayName, reqId * FIXED_WRITE_SIZE, FIXED_WRITE_SIZE, rbuf);
 
         uint8_t* curbuf = wbuf + (reqId * FIXED_WRITE_SIZE);
 
@@ -140,7 +146,7 @@ TEST_F(MetaFSNonFuncDataConsistency, VerifyDataMultiSub4KWrite)
 
         if (!res)
         {
-            MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_ERROR_MESSAGE,
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
                 "Data miscompare detected!!! reqId={}", reqId);
             DumpMetaBuffer("wBuf.bin", curbuf, FIXED_WRITE_SIZE);
             DumpMetaBuffer("rBuf.bin", rbuf, FIXED_WRITE_SIZE);
@@ -149,7 +155,7 @@ TEST_F(MetaFSNonFuncDataConsistency, VerifyDataMultiSub4KWrite)
     }
     if (res)
     {
-        MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
             "All data matched! No miscompare detected!!");
     }
     delete rbuf;
@@ -157,3 +163,4 @@ TEST_F(MetaFSNonFuncDataConsistency, VerifyDataMultiSub4KWrite)
 
     CloseDummyFile(fd);
 }
+} // namespace pos

@@ -6,7 +6,7 @@ import os
 import subprocess
 
 POS_ROOT_DIR = os.path.dirname(os.path.abspath(__file__)) + "/../../.."
-SPDK_DIR = POS_ROOT_DIR + "/lib/spdk-19.10"
+SPDK_DIR = POS_ROOT_DIR + "/lib/spdk"
 SPDK_RPC = SPDK_DIR + "/scripts/rpc.py"
 
 #sudo $SPDK_DIR/scripts/rpc.py nvmf_get_subsystems

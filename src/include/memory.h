@@ -52,7 +52,7 @@
 
 #define Min(x, y) (x) > (y) ? (y) : (x) // TODO(하진용) : need to delete
 
-namespace ibofos
+namespace pos
 {
 static const std::size_t BLOCK_SIZE_SHIFT = 12;
 static const std::size_t BLOCK_SIZE = 1 << BLOCK_SIZE_SHIFT;
@@ -156,7 +156,13 @@ public:
     AllocFromSocket(const std::size_t cnt, uint32_t socket)
     {
 #if defined UNVME_BUILD
-        return rte_malloc_socket(nullptr, N * cnt, N, socket);
+        void* ret = rte_malloc_socket(nullptr, N * cnt, N, socket);
+        // best effort for another socket id to avoid memory allocation fail
+        if (ret == nullptr)
+        {
+            ret = Alloc(cnt);
+        }
+        return ret;
 #else
         return Alloc(cnt);
 #endif
@@ -173,4 +179,4 @@ public:
     }
 };
 
-} // namespace ibofos
+} // namespace pos

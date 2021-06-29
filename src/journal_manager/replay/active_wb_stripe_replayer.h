@@ -37,20 +37,21 @@
 
 #include "active_stripe_address.h"
 #include "pending_stripe.h"
-#include "src/allocator/active_stripe_index_info.h"
-#include "src/include/address_type.h"
-#include "stripe_info.h"
+#include "src/journal_manager/statistics/stripe_info.h"
 
-namespace ibofos
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/allocator/i_context_replayer.h"
+#include "src/include/address_type.h"
+
+namespace pos
 {
-class Allocator;
 class Array;
 class ReplayStripe;
 
 class ActiveWBStripeReplayer
 {
 public:
-    ActiveWBStripeReplayer(Allocator* allocator, PendingStripeList& pendingStripeList);
+    ActiveWBStripeReplayer(IContextReplayer* contextReplayer, IWBStripeAllocator* iwbstripeAllocator, PendingStripeList& pendingStripeList);
     virtual ~ActiveWBStripeReplayer(void);
 
     int Replay(void);
@@ -58,13 +59,12 @@ public:
 
 private:
     int _FindWbufIndex(StripeInfo stripeInfo);
-    void _AddToPendingFlushList(int volId, StripeId wbLsid, VirtualBlkAddr tail);
     void _ResetWbufTail(int index);
     void _UpdateWbufTail(int index, ActiveStripeAddr addr);
     bool _IsFlushedStripe(StripeInfo stripeInfo);
     ActiveStripeAddr _ReplayStripesExceptActive(int index);
 
-    static const int INDEX_NOT_FOUND = -1;
+    const int INDEX_NOT_FOUND = -1;
 
     using PendingActiveStripeList = std::vector<ActiveStripeAddr>;
 
@@ -72,7 +72,8 @@ private:
     std::vector<PendingActiveStripeList> foundActiveStripes;
 
     PendingStripeList& pendingStripes;
-    Allocator* allocator;
+    IContextReplayer* contextReplayer;
+    IWBStripeAllocator* wbStripeAllocator;
 };
 
-} // namespace ibofos
+} // namespace pos

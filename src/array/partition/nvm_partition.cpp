@@ -32,21 +32,18 @@
 
 #include "nvm_partition.h"
 
-#include <list>
 #include <vector>
 
-#include "../config/array_config.h"
-#include "../device/array_device.h"
-#include "src/device/ublock_device.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/array_config.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-
-namespace ibofos
+namespace pos
 {
-NvmPartition::NvmPartition(PartitionType type,
+NvmPartition::NvmPartition(string array,
+    PartitionType type,
     PartitionPhysicalSize physicalSize,
     vector<ArrayDevice*> devs)
-: Partition(type, physicalSize, devs, nullptr)
+: Partition(array, type, physicalSize, devs, nullptr)
 {
     logicalSize_.minWriteBlkCnt = 1;
     logicalSize_.blksPerChunk = physicalSize.blksPerChunk;
@@ -69,12 +66,12 @@ NvmPartition::Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src)
 {
     if (false == _IsValidAddress(src))
     {
-        int error = (int)IBOF_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
-        IBOF_TRACE_ERROR(error, "Invalid Address Error");
+        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
+        POS_TRACE_ERROR(error, "Invalid Address Error");
         return error;
     }
 
-    dst.dev = devs_.front();
+    dst.arrayDev = devs_.front();
     dst.lba = physicalSize_.startLba +
         (src.stripeId * logicalSize_.blksPerStripe + src.offset) *
             ArrayConfig::SECTORS_PER_BLOCK;
@@ -88,8 +85,8 @@ NvmPartition::Convert(list<PhysicalWriteEntry>& dst,
 {
     if (false == _IsValidEntry(src))
     {
-        int error = (int)IBOF_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
-        IBOF_TRACE_ERROR(error, "Invalid Address Error");
+        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
+        POS_TRACE_ERROR(error, "Invalid Address Error");
         return error;
     }
 
@@ -104,4 +101,4 @@ NvmPartition::Convert(list<PhysicalWriteEntry>& dst,
     return 0;
 }
 
-} // namespace ibofos
+} // namespace pos

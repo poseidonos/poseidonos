@@ -32,21 +32,29 @@
 
 #include "src/io/frontend_io/write_completion.h"
 
-#include "src/allocator/allocator.h"
-#include "src/allocator/stripe.h"
-#include "src/device/event_framework_api.h"
-#include "src/include/ibof_event_id.hpp"
-#include "src/io/backend_io/flush_read_submission.h"
-#include "src/io/general_io/rba_state_manager.h"
-#include "src/io/general_io/volume_io.h"
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/bio/volume_io.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/io/backend_io/flush_submission.h"
+#include "src/io/general_io/rba_state_service.h"
 #include "src/logger/logger.h"
-#include "src/scheduler/event_argument.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
-namespace ibofos
+namespace pos
 {
 WriteCompletion::WriteCompletion(VolumeIoSmartPtr input)
+: WriteCompletion(input,
+      AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(input.get()->GetArrayName()))
+{
+}
+
+WriteCompletion::WriteCompletion(VolumeIoSmartPtr input,
+    IWBStripeAllocator* iWBStripeAllocator)
 : Callback(EventFrameworkApi::IsReactorNow()),
-  volumeIo(input)
+  volumeIo(input),
+  iWBStripeAllocator(iWBStripeAllocator)
 {
 }
 
@@ -60,11 +68,11 @@ WriteCompletion::_DoSpecificJob()
     bool executionSuccessful = false;
 
     uint32_t volumeId = volumeIo->GetVolumeId();
-    BlkAddr startRba = ChangeSectorToBlock(volumeIo->GetRba());
+    BlkAddr startRba = ChangeSectorToBlock(volumeIo->GetSectorRba());
     uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
 
     RBAStateManager& rbaStateManager =
-        *RbaStateManagerSingleton::Instance();
+        *RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayName());
     rbaStateManager.BulkReleaseOwnership(volumeId, startRba, blockCount);
 
     Stripe* stripeToFlush = nullptr;
@@ -78,7 +86,7 @@ WriteCompletion::_DoSpecificJob()
     {
         // We inform the error to the Callee of this callback,
         // and do not retry this callback.
-        InformError(CallbackError::GENERIC_ERROR);
+        InformError(IOErrorType::GENERIC_ERROR);
         executionSuccessful = true;
     }
 
@@ -91,10 +99,8 @@ bool
 WriteCompletion::_UpdateStripe(Stripe*& stripeToFlush)
 {
     bool stripeUpdateSuccessful = true;
-
     StripeAddr lsidEntry = volumeIo->GetLsidEntry();
-    Allocator& allocator = *AllocatorSingleton::Instance();
-    Stripe* stripe = allocator.GetStripe(lsidEntry);
+    Stripe* stripe = iWBStripeAllocator->GetStripe(lsidEntry);
     if (likely(nullptr != stripe))
     {
         uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
@@ -109,9 +115,9 @@ WriteCompletion::_UpdateStripe(Stripe*& stripeToFlush)
     {
         VirtualBlkAddr startVsa = volumeIo->GetVsa();
         StripeId vsid = startVsa.stripeId;
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::WRWRAPUP_STRIPE_NOT_FOUND;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId), vsid);
+        POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_STRIPE_NOT_FOUND;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId), vsid);
 
         stripeUpdateSuccessful = false;
     }
@@ -123,13 +129,13 @@ bool
 WriteCompletion::_RequestFlush(Stripe* stripe)
 {
     bool requestFlushSuccessful = true;
-    EventSmartPtr event(new FlushReadSubmission(stripe));
+    EventSmartPtr event(new FlushSubmission(stripe, volumeIo->GetArrayName()));
 
     if (unlikely(stripe->Flush(event) < 0))
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::WRWRAPUP_EVENT_ALLOC_FAILED;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId));
+        POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_EVENT_ALLOC_FAILED;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
 
         requestFlushSuccessful = false;
     }
@@ -137,4 +143,4 @@ WriteCompletion::_RequestFlush(Stripe* stripe)
     return requestFlushSuccessful;
 }
 
-} // namespace ibofos
+} // namespace pos

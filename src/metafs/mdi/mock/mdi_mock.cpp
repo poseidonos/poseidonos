@@ -31,18 +31,32 @@
  */
 
 #include "mdi_mock.h"
+#include "mdi_manager.h"
 
-#include "mfs_mdi_top.h"
+namespace pos
+{
+MockMetaIntegrityManager metaDIMgr;
+MockMetaIntegrityManager* mdiTopMgr = &metaDIMgr;
 
-MockMetaDIMgrClass metaDIMgr;
-MetaFsMDITopMgrClass* mdiTopMgr = &metaDIMgr;
-
-MockMetaDIMgrClass::MockMetaDIMgrClass(void)
+MockMetaIntegrityManager::MockMetaIntegrityManager(void)
 {
 }
 
-MockMetaDIMgrClass*
-MockMetaDIMgrClass::GetInstance(void)
+MockMetaIntegrityManager*
+MockMetaIntegrityManager::GetInstance(void)
 {
     return &metaDIMgr;
 }
+
+const char*
+MockMetaIntegrityManager::GetModuleName(void)
+{
+    return "Meta Data Integrity Manager";
+}
+
+bool
+MockMetaIntegrityManager::_IsSiblingModuleReady(void)
+{
+    return true;
+}
+} // namespace pos

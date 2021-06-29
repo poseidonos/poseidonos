@@ -9,11 +9,10 @@ endif
 
 # MAI
 MAI_SRCS += \
-	mfs_fscontrol_api.cpp \
-	mfs_mgmt_api.cpp \
-	mfs_util_api.cpp \
-	mfs_io_api.cpp \
-	mfs_wbt_api.cpp \
+	metafs_management_api.cpp \
+	metafs_file_control_api.cpp \
+	metafs_io_api.cpp \
+	metafs_wbt_api.cpp \
 
 SRCS += $(MAI_SRCS)
 

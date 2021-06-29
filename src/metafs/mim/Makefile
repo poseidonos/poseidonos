@@ -20,12 +20,12 @@ VPATH += $(MFS_INCLUDE_PATH)
 ######################################################################
 SRCS += $(wildcard *.cpp) 
       
-UT_SRCS += \
-           mim_test.cpp \
-           mim_func_positive_test.cpp \
-           mim_func_negative_test.cpp \
-           mim_io_range_overlap_chker_test.cpp \
-           mim_aio_positive_test.cpp 
+#UT_SRCS += \
+#           mim_test.cpp \
+#           mim_func_positive_test.cpp \
+#           mim_func_negative_test.cpp \
+#           mim_io_range_overlap_chker_test.cpp \
+#           mim_aio_positive_test.cpp 
 
 
 SRCS += $(UT_SRCS)    

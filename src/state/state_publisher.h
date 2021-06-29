@@ -32,26 +32,26 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
+#include <map>
+#include <mutex>
+#include <string>
 
-#include "src/lib/singleton.h"
-#include "state_event.h"
+#include "src/state/interface/i_state_publisher.h"
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
-class StatePublisher
+class StatePublisher : public IStatePublisher
 {
 public:
-    StatePublisher();
-    virtual ~StatePublisher();
-    void RegisterSubscriber(StateEvent* subscriber);
-    void RemoveSubscriber(StateEvent* subscriber);
-    void NotifyStateChanged(StateContext prev, StateContext next);
+    virtual ~StatePublisher(void);
+    void Add(IStateObserver* ob, string name) override;
+    void Remove(IStateObserver* ob) override;
+    void Notify(StateContext* prev, StateContext* next) override;
 
 private:
-    vector<StateEvent*> subscribers;
+    map<IStateObserver*, string> observersMap;
+    mutex observersMapMtx;
 };
-} // namespace ibofos
+} // namespace pos

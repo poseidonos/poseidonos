@@ -19,7 +19,7 @@ Synopsis
 Prerequisite
     1. please make sure that file below is properly configured according to your env.
         {IBOFOS_ROOT}/test/system/network/network_config.sh
-    2. please make sure that ibofos binary exists on top of ${IBOFOS_ROOT}
+    2. please make sure that poseidonos binary exists on top of ${IBOFOS_ROOT}
     3. please configure your ip address, volume size, etc. propertly by editing fault_tolerance_test.sh
 
 Description
@@ -27,7 +27,7 @@ Description
         Repeat test sequence n times according to the given value
         Default setting value is 10
     -m
-        Manual mode for ibofos start. You should start ibofos application by yourself according to follow the indication.
+        Manual mode for poseidonos start. You should start poseidonos application by yourself according to follow the indication.
         You can use this option for debugging purpose.
     -f [target_fabric_ip]
     -h 
@@ -58,9 +58,10 @@ detach_index=0
 attach_index=3
 nvme_cli="nvme"
 root_dir="../../"
-ibof_cli="${root_dir}bin/cli request"
+ibof_cli="${root_dir}bin/cli "
 network_config_file="${root_dir}test/system/network/network_config.sh"
 total_iter=3
+array_name="POSArray"
 #---------------------------------
 # internal configuration
 target_nvme=""
@@ -69,11 +70,11 @@ file_postfix=".dat"
 write_file="write.tmp"
 read_file="read"${file_postfix}
 cmp_file="cmp"${file_postfix}
-device_type_list=("iBoFOS bdev" "iBOFOS bdev under Mock drive")
+device_type_list=("PoseidonOS bdev" "iBOFOS bdev under Mock drive")
 io_size_kb_list=(64 128 256) #KB
-spdk_rpc_script="${root_dir}lib/spdk-19.10/scripts/rpc.py"
-spdk_nvmf_tgt="${root_dir}lib/spdk-19.10/app/nvmf_tgt/nvmf_tgt"
-nss="nqn.2019-04.ibof:subsystem1"
+spdk_rpc_script="${root_dir}lib/spdk/scripts/rpc.py"
+spdk_nvmf_tgt="${root_dir}lib/spdk/app/nvmf_tgt/nvmf_tgt"
+nss="nqn.2019-04.pos:subsystem1"
 echo_slient=1
 logfile="ft_test.log"
 #---------------------------------
@@ -102,7 +103,7 @@ print_test_configuration()
     echo "  - Test Iteration:       ${total_iter}"
     echo ""
     echo "> Logging:"
-    echo "  - File: ${logfile}@initiator, ibofos.log@target"
+    echo "  - File: ${logfile}@initiator, pos.log@target"
     echo ""
     echo "NOTE:"
     echo "  - Please make sure that manual configuration in this script has been properly edited"
@@ -148,7 +149,7 @@ setup_prerequisite()
 
 kill_ibofos()
 {
-	pkill -9 ibofos
+	pkill -9 poseidonos
     echo ""
 }
 
@@ -160,7 +161,7 @@ clean_up()
 
     rm -rf *${file_postfix}
     rm -rf ${logfile}
-    rm -rf ibofos.log
+    rm -rf pos.log
 }
 
 start_ibofos()
@@ -169,16 +170,16 @@ start_ibofos()
     rm -rf /dev/shm/ibof_nvmf_trace.pid*
 
     if [ ${manual_ibofos_run_mode} -eq 1 ]; then
-        notice "Please start iBoFOS application now..."
+        notice "Please start PoseidonOS application now..."
         wait_any_keyboard_input
     else 
-        notice "Starting ibofos..."
-        ${root_dir}/test/regression/start_ibofos.sh
+        notice "Starting poseidonos..."
+        ${root_dir}/test/regression/start_poseidonos.sh
 #		nohup ${ibof_cli} &>> ${logfile} & 
     fi
 
-    sleep 15 # takes longer if ibofos accesses actual drives
-    notice "Now ibofos is running..."
+    sleep 15 # takes longer if poseidonos accesses actual drives
+    notice "Now poseidonos is running..."
 }
 
 establish_nvmef_target()
@@ -188,11 +189,12 @@ establish_nvmef_target()
 
     if [ ${trtype} == "rdma" ]; then
         create_trtype="RDMA"
+        ${spdk_rpc_script} nvmf_create_transport -t ${create_trtype} -u 131072 #>> ${logfile}
     else
         create_trtype="TCP"
+        ${spdk_rpc_script} nvmf_create_transport -t ${create_trtype} -b 64 -n 4096 #>> ${logfile}
     fi
 
-    ${spdk_rpc_script} nvmf_create_transport -t ${create_trtype} -u 131072 -p 4 -c 0 -n 4096 #>> ${logfile}
     ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss} -t ${trtype} -a ${target_fabric_ip} -s ${port} #>> ${logfile}
 
     notice "New NVMe subsystem accessiable via Fabric has been added successfully to target!"
@@ -206,7 +208,7 @@ discover_n_connect_nvme_from_initiator()
     
     notice "Connecting remote NVMe drives..."
     ${nvme_cli} connect -t ${trtype} -n ${nss} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
-    target_nvme=`sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}' | head -n 1`
+    target_nvme=`sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}' | head -n 1`
 
     if [[ "${target_nvme}" == "" ]] || ! ls ${target_nvme} > /dev/null ; then
         error "NVMe drive is not found..."
@@ -300,24 +302,24 @@ write_pattern()
 
 shutdown_ibofos()
 {
-    notice "Shutting down ibofos..."
-	${ibof_cli} unmount_ibofos
-	${ibof_cli} exit_ibofos
+    notice "Shutting down poseidonos..."
+	${ibof_cli} array unmount --name $array_name
+	${ibof_cli} system exit
     notice "Shutdown has been completed!"
 
     disconnect_nvmf_contollers;
 
-    notice "ibofos killed..."
+    notice "poseidonos killed..."
     wait_ibofos
 }
 
 wait_ibofos()
 {
-    ps -C ibofos > /dev/null
+    ps -C poseidonos > /dev/null
     while [[ ${?} == 0 ]]
     do
         sleep 1s
-        ps -C ibofos > /dev/null
+        ps -C poseidonos > /dev/null
     done
 }
 
@@ -332,38 +334,37 @@ bringup_ibofos()
 
     start_ibofos;
 
-    ${spdk_rpc_script} nvmf_create_subsystem ${nss} -a -s IBOF00000000000001  -d IBOF_VOLUME #>> ${logfile}
+    ${spdk_rpc_script} nvmf_create_subsystem ${nss} -a -s POS00000000000001  -d POS_VOLUME #>> ${logfile}
     ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512
     sleep 1
 
-    ${ibof_cli} scan_dev >> ${logfile}
-    ${ibof_cli} list_dev >> ${logfile}
+    ${ibof_cli} device scan >> ${logfile}
+    ${ibof_cli} device list >> ${logfile}
 
 	if [ $create_array -eq 1 ]; then
+        ${ibof_cli} array reset
 		info "Target device list=${target_dev_list}"
-		${ibof_cli} create_array -b uram0 -d ${target_dev_list}
-	else
-		${ibof_cli} load_array
+		${ibof_cli} array create -b uram0 -d ${target_dev_list} --name $array_name
 	fi
 	
-	${ibof_cli} mount_ibofos
+	${ibof_cli} array mount --name $array_name
 
     if [ ${ibofos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        ${ibof_cli} create_vol --name ${volname} --size ${ibof_phy_volume_size_byte} >> ${logfile};
+        ${ibof_cli} volume create --name ${volname} --size ${ibof_phy_volume_size_byte} --array $array_name >> ${logfile};
         check_result_err_from_logfile
     fi
 
     if [ ${ibofos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
-        ${ibof_cli} mount_vol --name ${volname} >> ${logfile};
+        ${ibof_cli} volume mount --name ${volname} --array $array_name >> ${logfile};
         check_result_err_from_logfile
     fi
     
     establish_nvmef_target;
     discover_n_connect_nvme_from_initiator;
     
-    notice "Bring-up iBoFOS done!"
+    notice "Bring-up PoseidonOS done!"
 }
 
 verify_data()
@@ -405,7 +406,7 @@ detach_device()
 	local dev_name="unvme-ns-"${detach_index}
     ${root_dir}/test/script/detach_device.sh ${dev_name} 1
     sleep 0.1
-    notice "${dev_name} is detected."
+    notice "${dev_name} is detached."
 	detach_index=$((detach_index+1))
 }
 
@@ -413,7 +414,7 @@ add_spare()
 {
 	local spare_dev_name="unvme-ns-"${attach_index}
     notice "add spare device ${spare_dev_name}"
-	${ibof_cli} add_dev --spare ${spare_dev_name}
+	${ibof_cli} array add --spare ${spare_dev_name} --array $array_name
 	attach_index=$((attach_index+1))
 }
 
@@ -422,11 +423,11 @@ waiting_for_rebuild_complete()
 	notice "waiting for rebuild complete"
 	while :
 	do
-		state=$(${ibof_cli} --json info | jq '.Response.info.state')
+		state=$(${ibof_cli} array info --name $array_name --json | jq '.Response.result.data.state')
 		if [ $state = "\"NORMAL\"" ]; then
 			break;
 		else
-            rebuild_progress=$(${ibof_cli} --json info | jq '.Response.info.rebuildingProgress')
+            rebuild_progress=$(${ibof_cli} array info --name $array_name --json | jq '.Response.result.data.rebuildingProgress')
             info "Rebuilding Progress [${rebuild_progress}]"
 			sleep 3
 		fi

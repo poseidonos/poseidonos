@@ -32,36 +32,40 @@
 
 #include "src/io/frontend_io/aio.h"
 
-#include "Air.h"
 #include <unistd.h>
 
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "src/io/frontend_io/read_submission.h"
-#include "src/io/frontend_io/write_submission.h"
-#include "src/io/general_io/affinity_manager.h"
-#if defined NVMe_FLUSH_HANDLING
-#include "src/io/frontend_io/flush_command_handler.h"
-#endif
+#include "Air.h"
+#include "spdk/pos.h"
+#include "src/array_mgmt/array_manager.h"
+#include "src/cpu_affinity/affinity_manager.h"
 #include "src/device/device_manager.h"
-#include "src/device/event_framework_api.h"
 #include "src/dump/dump_module.h"
 #include "src/dump/dump_module.hpp"
+#include "src/event_scheduler/event.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/include/branch_prediction.h"
 #include "src/include/memory.h"
+#include "src/io/frontend_io/flush_command_handler.h"
+#include "src/io/frontend_io/read_submission.h"
+#include "src/io/frontend_io/write_submission.h"
 #include "src/logger/logger.h"
-#include "src/scheduler/event.h"
-#include "src/scheduler/event_argument.h"
-#include "src/scheduler/event_scheduler.h"
+#include "src/spdk_wrapper/event_framework_api.h"
+#include "src/spdk_wrapper/spdk.hpp"
 #include "src/volume/volume_manager.h"
-#if defined QOS_ENABLED_FE
-#include "src/qos/qos_manager.h"
-#endif
-#include "spdk/ibof.h"
-#include "src/device/spdk/spdk.hpp"
+#include "src/volume/volume_service.h"
+#include "src/event_scheduler/io_completer.h"
 
-namespace ibofos
+#ifdef _ADMIN_ENABLED
+#include "src/admin/admin_command_handler.h"
+#include "src/io_scheduler/io_dispatcher.h"
+#endif
+
+namespace pos
 {
 IOCtx::IOCtx(void)
 : cnt(0),
@@ -75,15 +79,40 @@ AIO::AIO(void)
 {
 }
 
-VolumeManager& AioCompletion::volumeManager =
-    *VolumeManagerSingleton::Instance();
+VolumeService& AioCompletion::volumeService =
+    *VolumeServiceSingleton::Instance();
 
-AioCompletion::AioCompletion(VolumeIoSmartPtr volumeIo, ibof_io& ibofIo,
-    IOCtx& ioContext)
+AioCompletion::AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo, IOCtx& ioContext)
+: AioCompletion(flushIo, posIo, ioContext,
+      EventFrameworkApi::IsSameReactorNow)
+{
+}
+
+AioCompletion::AioCompletion(FlushIoSmartPtr flushIo, pos_io& posIo,
+    IOCtx& ioContext, std::function<bool(uint32_t)> isSameReactorNowFunc)
 : Callback(true),
+  flushIo(flushIo),
+  volumeIo(nullptr),
+  posIo(posIo),
+  ioContext(ioContext),
+  isSameReactorNowFunc(isSameReactorNowFunc)
+{
+}
+
+AioCompletion::AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo, IOCtx& ioContext)
+: AioCompletion(volumeIo, posIo, ioContext,
+      EventFrameworkApi::IsSameReactorNow)
+{
+}
+
+AioCompletion::AioCompletion(VolumeIoSmartPtr volumeIo, pos_io& posIo,
+    IOCtx& ioContext, std::function<bool(uint32_t)> isSameReactorNowFunc)
+: Callback(true),
+  flushIo(nullptr),
   volumeIo(volumeIo),
-  ibofIo(ibofIo),
-  ioContext(ioContext)
+  posIo(posIo),
+  ioContext(ioContext),
+  isSameReactorNowFunc(isSameReactorNowFunc)
 {
 }
 
@@ -94,9 +123,18 @@ AioCompletion::~AioCompletion(void)
 bool
 AioCompletion::_DoSpecificJob(void)
 {
-    uint32_t originCore = volumeIo->GetOriginCore();
+    uint32_t originCore;
 
-    bool keepCurrentReactor = EventFrameworkApi::IsSameReactorNow(originCore);
+    if (posIo.ioType == IO_TYPE::FLUSH)
+    {
+        originCore = flushIo->GetOriginCore();
+    }
+    else
+    {
+        originCore = volumeIo->GetOriginCore();
+    }
+
+    bool keepCurrentReactor = isSameReactorNowFunc(originCore);
 
     if (likely(keepCurrentReactor))
     {
@@ -105,7 +143,7 @@ AioCompletion::_DoSpecificJob(void)
     }
     else
     {
-        bool success = EventFrameworkApi::SendSpdkEvent(originCore,
+        bool success = SpdkEventScheduler::SendSpdkEvent(originCore,
             shared_from_this());
         return success;
     }
@@ -114,65 +152,62 @@ AioCompletion::_DoSpecificJob(void)
 void
 AioCompletion::_SendUserCompletion(void)
 {
-    if (volumeIo->IsPollingNecessary())
+    int dir = posIo.ioType;
+    if (dir != IO_TYPE::FLUSH)
     {
-        ioContext.needPollingCount--;
+        if (volumeIo->IsPollingNecessary())
+        {
+            ioContext.needPollingCount--;
+        }
     }
     ioContext.cnt--;
 
-    if (ibofIo.complete_cb)
+    if (posIo.complete_cb)
     {
-        int status = IBOF_IO_STATUS_SUCCESS;
+        int status = POS_IO_STATUS_SUCCESS;
         if (unlikely(_GetErrorCount() > 0))
         {
-            status = IBOF_IO_STATUS_FAIL;
+            status = POS_IO_STATUS_FAIL;
         }
 
-        ibofIo.complete_cb(&ibofIo, status);
+        posIo.complete_cb(&posIo, status);
     }
 
-#if defined NVMe_FLUSH_HANDLING
-    if (volumeIo->dir == UbioDir::Flush)
+    if (dir == IO_TYPE::FLUSH)
     {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::AIO_FLUSH_END;
-        IBOF_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
-            eventId, IbofEventId::GetString(eventId),
-            ibofIo.volume_id);
+        POS_EVENT_ID eventId = POS_EVENT_ID::AIO_FLUSH_END;
+        POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
+            eventId, PosEventId::GetString(eventId),
+            posIo.volume_id);
     }
     else
-#endif
     {
-        volumeManager.DecreasePendingIOCount(volumeIo->GetVolumeId());
+        IVolumeManager* volumeManager = volumeService.GetVolumeManager(volumeIo->GetArrayName());
+        if (likely(_GetMostCriticalError() != IOErrorType::VOLUME_UMOUNTED))
+        {
+            volumeManager->DecreasePendingIOCount(volumeIo->GetVolumeId());
+        }
     }
     volumeIo = nullptr;
+    flushIo = nullptr;
 }
 
 VolumeIoSmartPtr
-AIO::_CreateVolumeIo(ibof_io& ibofIo)
+AIO::_CreateVolumeIo(pos_io& posIo)
 {
-    uint64_t sectorSize = ChangeByteToSector(ibofIo.length);
+    uint64_t sectorSize = ChangeByteToSector(posIo.length);
     void* buffer = nullptr;
 
-    if (ibofIo.iov != nullptr)
+    if (posIo.iov != nullptr)
     {
-        buffer = ibofIo.iov->iov_base;
+        buffer = posIo.iov->iov_base;
     }
 
-    VolumeIoSmartPtr volumeIo(new VolumeIo(buffer, sectorSize));
+    std::string arrayName(posIo.arrayName);
+    VolumeIoSmartPtr volumeIo(new VolumeIo(buffer, sectorSize, arrayName));
 
-    switch (ibofIo.ioType)
+    switch (posIo.ioType)
     {
-#if defined NVMe_FLUSH_HANDLING
-        case IO_TYPE::FLUSH:
-        {
-            volumeIo->dir = UbioDir::Flush;
-            IBOF_EVENT_ID eventId = IBOF_EVENT_ID::AIO_FLUSH_START;
-            IBOF_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
-                eventId, IbofEventId::GetString(eventId),
-                ibofIo.volume_id);
-            break;
-        }
-#endif
         case IO_TYPE::READ:
         {
             volumeIo->dir = UbioDir::Read;
@@ -185,17 +220,17 @@ AIO::_CreateVolumeIo(ibof_io& ibofIo)
         }
         default:
         {
-            IBOF_EVENT_ID eventId = IBOF_EVENT_ID::BLKHDLR_WRONG_IO_DIRECTION;
-            IBOF_TRACE_ERROR(eventId, IbofEventId::GetString(eventId));
+            POS_EVENT_ID eventId = POS_EVENT_ID::BLKHDLR_WRONG_IO_DIRECTION;
+            POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
             throw eventId;
             break;
         }
     }
-    volumeIo->SetVolumeId(ibofIo.volume_id);
-    uint64_t sectorRba = ChangeByteToSector(ibofIo.offset);
-    volumeIo->SetRba(sectorRba);
+    volumeIo->SetVolumeId(posIo.volume_id);
+    uint64_t sectorRba = ChangeByteToSector(posIo.offset);
+    volumeIo->SetSectorRba(sectorRba);
 
-    CallbackSmartPtr aioCompletion(new AioCompletion(volumeIo, ibofIo,
+    CallbackSmartPtr aioCompletion(new AioCompletion(volumeIo, posIo,
         ioContext));
 
     volumeIo->SetCallback(aioCompletion);
@@ -203,17 +238,38 @@ AIO::_CreateVolumeIo(ibof_io& ibofIo)
     return volumeIo;
 }
 
-void
-AIO::SubmitAsyncIO(ibof_io& ibofIo)
+FlushIoSmartPtr
+AIO::_CreateFlushIo(pos_io& posIo)
 {
-    VolumeIoSmartPtr volumeIo = _CreateVolumeIo(ibofIo);
+    std::string arrayName(posIo.arrayName);
+    FlushIoSmartPtr flushIo(new FlushIo(arrayName));
+    flushIo->SetVolumeId(posIo.volume_id);
 
-#if defined QOS_ENABLED_FE
-    QosManager* qosManager = QosManagerSingleton::Instance();
-    qosManager->LogVolBw(ibofIo.volume_id, ibofIo.length);
-    qosManager->AioSubmitAsyncIO(volumeIo);
-    return;
-#endif
+    POS_EVENT_ID eventId = POS_EVENT_ID::AIO_FLUSH_START;
+    POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
+        eventId, PosEventId::GetString(eventId),
+        posIo.volume_id);
+
+    CallbackSmartPtr aioCompletion(new AioCompletion(flushIo, posIo,
+        ioContext));
+    flushIo->SetCallback(aioCompletion);
+
+    return flushIo;
+}
+
+void
+AIO::SubmitAsyncIO(pos_io& posIo)
+{
+    if (posIo.ioType == IO_TYPE::FLUSH)
+    {
+        FlushIoSmartPtr flushIo = _CreateFlushIo(posIo);
+        ioContext.cnt++;
+
+        SpdkEventScheduler::ExecuteOrScheduleEvent(flushIo->GetOriginCore(), std::make_shared<FlushCmdHandler>(flushIo));
+        return;
+    }
+
+    VolumeIoSmartPtr volumeIo = _CreateVolumeIo(posIo);
 
     ioContext.cnt++;
     if (volumeIo->IsPollingNecessary())
@@ -221,39 +277,46 @@ AIO::SubmitAsyncIO(ibof_io& ibofIo)
         ioContext.needPollingCount++;
     }
 
-    VolumeManager* volumeManager = VolumeManagerSingleton::Instance();
+    IVolumeManager* volumeManager
+        = VolumeServiceSingleton::Instance()->GetVolumeManager(volumeIo->GetArrayName());
+
+    uint32_t core = volumeIo->GetOriginCore();
     switch (volumeIo->dir)
     {
-#if defined NVMe_FLUSH_HANDLING
-        case UbioDir::Flush:
-        {
-            uint32_t core = volumeIo->GetOriginCore();
-            EventSmartPtr flushCmdHandler =
-                std::make_shared<FlushCmdHandler>(volumeIo);
-            EventFrameworkApi::ExecuteOrScheduleEvent(core, flushCmdHandler);
-            break;
-        }
-#endif
         case UbioDir::Write:
         {
-            AIRLOG(PERF_VOLUME, ibofIo.volume_id, AIR_WRITE, ibofIo.length);
-            volumeManager->IncreasePendingIOCount(volumeIo->GetVolumeId());
-            EventFrameworkApi::CreateAndExecuteOrScheduleEvent<WriteSubmission>(
-                volumeIo->GetOriginCore(), volumeIo);
+            airlog("PERF_VOLUME", "AIR_WRITE", posIo.volume_id, posIo.length);
+            if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volumeIo->GetVolumeId())))
+            {
+                IoCompleter ioCompleter(volumeIo);
+                ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::VOLUME_UMOUNTED, true);
+            }
+            else
+            {
+                SpdkEventScheduler::ExecuteOrScheduleEvent(core,
+                    std::make_shared<WriteSubmission>(volumeIo));
+            }
             break;
         }
         case UbioDir::Read:
         {
-            AIRLOG(PERF_VOLUME, ibofIo.volume_id, AIR_READ, ibofIo.length);
-            volumeManager->IncreasePendingIOCount(volumeIo->GetVolumeId());
-            EventFrameworkApi::CreateAndExecuteOrScheduleEvent<ReadSubmission>(
-                volumeIo->GetOriginCore(), volumeIo);
+            airlog("PERF_VOLUME", "AIR_READ", posIo.volume_id, posIo.length);
+            if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volumeIo->GetVolumeId())))
+            {
+                IoCompleter ioCompleter(volumeIo);
+                ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::VOLUME_UMOUNTED, true);
+            }
+            else
+            {
+                SpdkEventScheduler::ExecuteOrScheduleEvent(core,
+                    std::make_shared<ReadSubmission>(volumeIo));
+            }
             break;
         }
         default:
         {
-            IBOF_EVENT_ID eventId = IBOF_EVENT_ID::BLKHDLR_WRONG_IO_DIRECTION;
-            IBOF_TRACE_ERROR(eventId, IbofEventId::GetString(eventId));
+            POS_EVENT_ID eventId = POS_EVENT_ID::BLKHDLR_WRONG_IO_DIRECTION;
+            POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
             throw eventId;
             break;
         }
@@ -265,11 +328,63 @@ AIO::CompleteIOs(void)
 {
     uint32_t aid = EventFrameworkApi::GetCurrentReactor();
     uint32_t size = ioContext.cnt;
-    AIRLOG(Q_AIO, aid, size, size);
+    airlog("Q_AIO", "AIR_BASE", aid, size);
     if (ioContext.needPollingCount > 0)
     {
         DeviceManagerSingleton::Instance()->HandleCompletedCommand();
     }
 }
+#ifdef _ADMIN_ENABLED
+void
+AIO::SubmitAsyncAdmin(pos_io& io)
+{
+    if (io.ioType == GET_LOG_PAGE)
+    {
+        void* bio = io.context;
+        struct spdk_bdev_io* bioPos = (struct spdk_bdev_io*)bio;
+        void* callerContext = bioPos->internal.caller_ctx;
 
-} // namespace ibofos
+        struct spdk_nvmf_request* req = (struct spdk_nvmf_request*)callerContext;
+
+        struct spdk_nvme_cmd* cmd = &req->cmd->nvme_cmd;
+        uint8_t lid = cmd->cdw10 & 0xFF;
+        if (lid == SPDK_NVME_LOG_HEALTH_INFORMATION)
+        {
+            ioContext.needPollingCount++;
+        }
+    }
+    CallbackSmartPtr adminCompletion(new AdminCompletion(&io, ioContext));
+    uint32_t originCore = EventFrameworkApi::GetCurrentReactor();
+    string arrayName = "POSArray";
+    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    IDevInfo* devmgr = DeviceManagerSingleton::Instance();
+    IIODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
+    IArrayDevMgr* arrayDevMgr = info->GetArrayManager();
+    EventSmartPtr event(new AdminCommandHandler(&io, originCore, adminCompletion, info, devmgr, ioDispatcher, arrayDevMgr));
+    EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+    return;
+}
+
+AdminCompletion::AdminCompletion(pos_io* posIo, IOCtx& ioContext)
+: Callback(false),
+  io(posIo),
+  ioContext(ioContext)
+{
+}
+AdminCompletion::~AdminCompletion(void)
+{
+}
+
+bool
+AdminCompletion::_DoSpecificJob(void)
+{
+    if (ioContext.needPollingCount > 0)
+    {
+        ioContext.needPollingCount--;
+    }
+    io->complete_cb(io, POS_IO_STATUS_SUCCESS);
+    return true;
+}
+
+#endif
+} // namespace pos

@@ -32,8 +32,8 @@
 
 #include "src/volume/volume.h"
 
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 
-namespace ibofos
+namespace pos
 {
-} // namespace ibofos
+} // namespace pos

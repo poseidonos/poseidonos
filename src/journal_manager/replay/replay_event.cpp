@@ -33,13 +33,19 @@
 #include "replay_event.h"
 
 #include "src/allocator/allocator.h"
-#include "src/include/ibof_event_id.h"
+#include "src/allocator/i_context_replayer.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/include/pos_event_id.h"
+#include "src/journal_manager/statistics/stripe_replay_status.h"
 #include "src/logger/logger.h"
-#include "src/mapper/mapper.h"
+#include "src/mapper/i_stripemap.h"
+#include "src/mapper/i_vsamap.h"
+#include "src/mapper/include/mapper_const.h"
 
-namespace ibofos
+namespace pos
 {
-ReplayEvent::ReplayEvent(void)
+ReplayEvent::ReplayEvent(StripeReplayStatus* status)
+: status(status)
 {
 }
 
@@ -47,10 +53,17 @@ ReplayEvent::~ReplayEvent(void)
 {
 }
 
-ReplayBlockMapUpdate::ReplayBlockMapUpdate(Mapper* mapper, Allocator* allocator, BlockWriteDoneLog dat)
-: mapper(mapper),
-  allocator(allocator),
-  logData(dat)
+ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, IBlockAllocator* blkAllocator,
+    StripeReplayStatus* status, int volId, BlkAddr startRba, VirtualBlkAddr startVsa,
+    uint64_t numBlks, bool replaySegmentInfo)
+: ReplayEvent(status),
+  vsaMap(vsaMap),
+  blockAllocator(blkAllocator),
+  volId(volId),
+  startRba(startRba),
+  startVsa(startVsa),
+  numBlks(numBlks),
+  replaySegmentInfo(replaySegmentInfo)
 {
 }
 
@@ -61,13 +74,12 @@ ReplayBlockMapUpdate::~ReplayBlockMapUpdate(void)
 void
 ReplayBlockMapUpdate::_ReadBlockMap(void)
 {
-    readMap.resize(logData.numBlks);
+    readMap.resize(numBlks);
 
-    for (uint32_t offset = 0; offset < logData.numBlks; offset++)
+    for (uint32_t offset = 0; offset < numBlks; offset++)
     {
         int shouldRetry = CALLER_NOT_EVENT;
-        readMap[offset] = mapper->GetVSAInternal(logData.volId,
-            logData.startRba + offset, shouldRetry);
+        readMap[offset] = vsaMap->GetVSAInternal(volId, startRba + offset, shouldRetry);
         assert(shouldRetry == OK_READY);
     }
 }
@@ -78,68 +90,38 @@ ReplayBlockMapUpdate::Replay(void)
     _ReadBlockMap();
 
     int result = 0;
-    for (uint32_t offset = 0; offset < logData.numBlks; offset++)
+    for (uint32_t offset = 0; offset < numBlks; offset++)
     {
         VirtualBlkAddr currentVsa = _GetVsa(offset);
         VirtualBlkAddr read = readMap[offset];
 
         if (IsSameVsa(read, currentVsa) == false)
         {
-            bool needToUpdateMap = _InvalidateOldBlock(offset);
-            if (needToUpdateMap == true)
+            if (replaySegmentInfo == true)
             {
-                result = _UpdateMap(offset);
+                _InvalidateOldBlock(offset);
             }
+
+            result = _UpdateMap(offset);
         }
     }
 
     return result;
 }
 
-bool
+void
 ReplayBlockMapUpdate::_InvalidateOldBlock(uint32_t offset)
 {
-    bool isCurrentBlockValid = true;
-
-    VirtualBlkAddr old = _GetOldVsa(offset);
     VirtualBlkAddr read = readMap[offset];
-    VirtualBlkAddr current = _GetVsa(offset);
 
-    VirtualBlks blksToInvalidate = {
-        .startVsa = UNMAP_VSA,
-        .numBlks = 1};
-
-    if (logData.isGC == true)
+    if (read.stripeId != UNMAP_STRIPE)
     {
-        if (IsSameVsa(read, old))
-        {
-            blksToInvalidate.startVsa = read;
-        }
-        else
-        {
-            assert(read.stripeId != UNMAP_STRIPE);
-            blksToInvalidate.startVsa = current;
-            isCurrentBlockValid = false;
-        }
+        VirtualBlks blksToInvalidate = {
+            .startVsa = read,
+            .numBlks = 1};
+        blockAllocator->InvalidateBlks(blksToInvalidate);
+        status->BlockInvalidated(blksToInvalidate.numBlks);
     }
-    else
-    {
-        if (read.stripeId != UNMAP_STRIPE)
-        {
-            blksToInvalidate.startVsa = read;
-        }
-    }
-
-    if (IsSameVsa(blksToInvalidate.startVsa, UNMAP_VSA) == false)
-    {
-        allocator->InvalidateBlks(blksToInvalidate);
-
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_REPLAY_STATUS,
-            "Replay blk invalidation, RBA {} VSA stripe {} offset {}",
-            logData.startRba + offset, logData.startVsa.stripeId, logData.startVsa.offset + offset);
-    }
-
-    return isCurrentBlockValid;
 }
 
 int
@@ -150,18 +132,23 @@ ReplayBlockMapUpdate::_UpdateMap(uint32_t offset)
         .startVsa = _GetVsa(offset),
         .numBlks = 1};
 
-    int result = mapper->SetVsaMapInternal(logData.volId, rba, virtualBlks);
+    int result = vsaMap->SetVSAsInternal(volId, rba, virtualBlks);
+    if (replaySegmentInfo == true)
+    {
+        blockAllocator->ValidateBlks(virtualBlks);
+    }
 
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_REPLAY_STATUS,
-        "[vsid {}] Block map request (retcode {}), rba {}, stripe offset {}",
-        virtualBlks.startVsa.stripeId, result, rba, virtualBlks.startVsa.offset);
+    status->BlockWritten(virtualBlks.startVsa.offset, virtualBlks.numBlks);
 
     return result;
 }
 
-ReplayStripeMapUpdate::ReplayStripeMapUpdate(Mapper* mapper, StripeMapUpdatedLog dat)
-: mapper(mapper),
-  logData(dat)
+ReplayStripeMapUpdate::ReplayStripeMapUpdate(IStripeMap* stripeMap,
+    StripeReplayStatus* status, StripeId vsid, StripeAddr dest)
+: ReplayEvent(status),
+  stripeMap(stripeMap),
+  vsid(vsid),
+  dest(dest)
 {
 }
 
@@ -172,20 +159,17 @@ ReplayStripeMapUpdate::~ReplayStripeMapUpdate(void)
 int
 ReplayStripeMapUpdate::Replay(void)
 {
-    int ret = mapper->UpdateStripeMap(logData.vsid, logData.newMap.stripeId,
-        logData.newMap.stripeLoc);
-
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_REPLAY_STATUS,
-        "[vsid {}] Stripe map updated, lsid {}, location {}",
-        logData.vsid, logData.newMap.stripeId, logData.newMap.stripeLoc);
-
+    int ret = stripeMap->SetLSA(vsid, dest.stripeId, dest.stripeLoc);
+    // TODO(huijeong.kim) notify replay status that stripe map is updated
     return ret;
 }
 
-ReplayStripeAllocation::ReplayStripeAllocation(Mapper* mapper, Allocator* allocator,
+ReplayStripeAllocation::ReplayStripeAllocation(IStripeMap* stripeMap,
+    IContextReplayer* ctxReplayer, StripeReplayStatus* status,
     StripeId vsid, StripeId wbLsid)
-: mapper(mapper),
-  allocator(allocator),
+: ReplayEvent(status),
+  stripeMap(stripeMap),
+  contextReplayer(ctxReplayer),
   vsid(vsid),
   wbLsid(wbLsid)
 {
@@ -200,23 +184,24 @@ ReplayStripeAllocation::Replay(void)
 {
     int result = 0;
 
-    result = mapper->UpdateStripeMap(vsid, wbLsid, IN_WRITE_BUFFER_AREA);
+    result = stripeMap->SetLSA(vsid, wbLsid, IN_WRITE_BUFFER_AREA);
+
     if (result != 0)
     {
         return result;
     }
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_REPLAY_STATUS,
-        "[vsid {}] Stripe map updated, wblsid {}", vsid, wbLsid);
 
-    allocator->ReplayStripeAllocation(vsid, wbLsid);
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_REPLAY_STATUS,
-        "[vsid {}] wblsid {} is allocated", vsid, wbLsid);
+    contextReplayer->ReplayStripeAllocation(wbLsid);
+    status->StripeAllocated();
     return result;
 }
 
-ReplaySegmentAllocation::ReplaySegmentAllocation(Allocator* allocator, StripeId userLsid)
-: allocator(allocator),
-  userLsid(userLsid)
+ReplaySegmentAllocation::ReplaySegmentAllocation(IContextReplayer* ctxReplayer,
+    IArrayInfo* iarrayInfo, StripeReplayStatus* status, StripeId stripeId)
+: ReplayEvent(status),
+  contextReplayer(ctxReplayer),
+  arrayInfo(iarrayInfo),
+  userLsid(stripeId)
 {
 }
 
@@ -227,12 +212,19 @@ ReplaySegmentAllocation::~ReplaySegmentAllocation(void)
 int
 ReplaySegmentAllocation::Replay(void)
 {
-    allocator->ReplaySegmentAllocation(userLsid);
+    uint32_t numStripesPerSegment = arrayInfo->GetSizeInfo(PartitionType::USER_DATA)->stripesPerSegment;
+    SegmentId segmentId = userLsid / numStripesPerSegment;
+    StripeId firstStripe = segmentId * numStripesPerSegment;
+
+    contextReplayer->ReplaySegmentAllocation(firstStripe);
+    status->SegmentAllocated();
     return 0;
 }
 
-ReplayStripeFlush::ReplayStripeFlush(Allocator* allocator, StripeId vsid, StripeId wbLsid, StripeId userLsid)
-: allocator(allocator),
+ReplayStripeFlush::ReplayStripeFlush(IContextReplayer* ctxReplayer,
+    StripeReplayStatus* status, StripeId vsid, StripeId wbLsid, StripeId userLsid)
+: ReplayEvent(status),
+  contextReplayer(ctxReplayer),
   vsid(vsid),
   wbLsid(wbLsid),
   userLsid(userLsid)
@@ -246,13 +238,14 @@ ReplayStripeFlush::~ReplayStripeFlush(void)
 int
 ReplayStripeFlush::Replay(void)
 {
-    allocator->ReplayStripeFlushed(wbLsid);
-    allocator->TryToUpdateSegmentValidBlks(userLsid);
-
-    IBOF_TRACE_DEBUG(EID(JOURNAL_REPLAY_STRIPE_FLUSHED),
-        "[vsid {}] Write buffer lsid {} is freed", vsid, wbLsid);
+    if (wbLsid != UNMAP_STRIPE)
+    {
+        contextReplayer->ReplayStripeRelease(wbLsid);
+    }
+    contextReplayer->ReplayStripeFlushed(userLsid);
+    status->StripeFlushed();
 
     return 0;
 }
 
-} // namespace ibofos
+} // namespace pos

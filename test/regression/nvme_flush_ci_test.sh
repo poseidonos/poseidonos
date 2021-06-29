@@ -1,11 +1,12 @@
 #!/bin/bash
 ROOT_DIR=$(readlink -f $(dirname $0))/../../
-SPDK_DIR=$ROOT_DIR/lib/spdk-19.10/
+SPDK_DIR=$ROOT_DIR/lib/spdk/
 SETUP_NVMf_PATH=test/system/io_path/setup_ibofos_nvmf_volume.sh
 network_config_file=test/system/network/network_config.sh
-CONFIG_FILE=/etc/ibofos/conf/ibofos.conf
+CONFIG_FILE=/etc/pos/pos.conf
+ORIG_CONFIG_FILE=/etc/pos/pos_orig.conf
 DEVICES=()
-globalLogFile="/var/log/ibofos/nvme_flush_test.log"
+globalLogFile="/var/log/pos/nvme_flush_test.log"
 localLogDirPath=$ROOT_DIR/test/system/nvme_flush/
 logfile=$globalLogFile
 
@@ -29,7 +30,7 @@ DEFAULT_VOLUME_SIZE=21474836480
 TARGET_USERNAME=$DEFAULT_TARGET_USERNAME
 TARGET_PASSWORD=$DEFAULT_TARGET_PASSWORD
 TARGET_ROOT_DIR=$DEFAULT_TARGET_ROOT_DIR
-TARGET_SPDK_DIR=$TARGET_ROOT_DIR/lib/spdk-19.10/
+TARGET_SPDK_DIR=$TARGET_ROOT_DIR/lib/spdk/
 
 TRANSPORT=$DEFAULT_TRANSPORT
 TARGET_IP=$DEFAULT_TARGET_IP
@@ -74,18 +75,15 @@ texecc()
 #**************************************************************************
 cleanup()
 {
-    texecc rm -f /etc/ibofos/core/*.core
+    texecc rm -f /etc/pos/core/*.core
     texecc rm -f ${logfile}
     texecc touch ${logfile}
 
-    if [[ -d $localLogDirPath ]]; then
-        for usecase in $(seq 0 $((total_usecases-1)))
-        do
-            rm -f $localLogDirPath/usecase$((usecase+1)).log
-        done
-    else
-        mkdir $localLogDirPath
-    fi
+    mkdir -p $localLogDirPath
+    for usecase in $(seq 0 $((total_usecases-1)))
+    do
+        rm -f $localLogDirPath/usecase$((usecase+1)).log
+    done
 }
 
 #**************************************************************************
@@ -168,14 +166,14 @@ connect_devices()
 
     for i in $(seq 1 $num_subsystems)
     do
-        sudo nvme connect -t $TRANSPORT -a $TARGET_FABRIC_IP -s $PORT_NUM -n nqn.2019-04.ibof:subsystem$i >> ${logfile}
+        sudo nvme connect -t $TRANSPORT -a $TARGET_FABRIC_IP -s $PORT_NUM -n nqn.2019-04.pos:subsystem$i >> ${logfile}
         if [[ $? -ne 0 ]]; then
             echo "Failed to connect devices using nvmf. Check ip."
             exit_CItest_on_Failure $num_subsystems
         fi
     done
 
-    target_devices=($(sudo nvme list | grep -E 'SPDK|IBOF|iBoF' | awk '{print $1}'))
+    target_devices=($(sudo nvme list | grep -E 'SPDK|POS|pos' | awk '{print $1}'))
 
     for device in "${target_devices[@]}"
     do
@@ -196,7 +194,7 @@ disconnect_nvmf_controllers()
     echo "  Disconnecting nvmf controllers"
     for i in $(seq 1 $num_subsystems)
     do
-        sudo nvme disconnect -n nqn.2019-04.ibof:subsystem$i >> ${logfile}
+        sudo nvme disconnect -n nqn.2019-04.pos:subsystem$i >> ${logfile}
     done
 }
 
@@ -210,7 +208,7 @@ start_POS()
     clean=$3
 
     echo "Starting POS" >> ${logfile}
-    texecc test/regression/start_ibofos.sh >> ${logfile}
+    texecc test/regression/start_poseidonos.sh >> ${logfile}
     #POS working condition checked using nvme connect
     #after setup of arrays and volumes
     sleep 10
@@ -225,14 +223,14 @@ start_POS()
 exit_POS()
 {
     echo "  Unmounting and Exiting POS"
-    texecc ./bin/cli request unmount_ibofos >> ${logfile}
-    texecc ./bin/cli request exit_ibofos >> ${logfile}
+    texecc ./bin/cli array unmount --name POSArray >> ${logfile}
+    texecc ./bin/cli system exit >> ${logfile}
 
-    texecc ps -C ibofos > /dev/null >> ${logfile}
+    texecc ps -C poseidonos > /dev/null >> ${logfile}
     while [[ ${?} == 0 ]]
     do
         texecc sleep 1s
-        texecc ps -C ibofos > /dev/null >> ${logfile}
+        texecc ps -C poseidonos > /dev/null >> ${logfile}
     done
     echo "  POS exited successfully"
 }
@@ -243,13 +241,13 @@ exit_POS()
 kill_POS()
 {
     echo "  Kill POS"
-    texecc ./test/script/kill_ibofos.sh >> ${logfile}
+    texecc ./test/script/kill_poseidonos.sh >> ${logfile}
 
-    texecc ps -C ibofos > /dev/null >> ${logfile}
+    texecc ps -C poseidonos > /dev/null >> ${logfile}
     while [[ ${?} == 0 ]]
     do
         texecc sleep 1s
-        texecc ps -C ibofos > /dev/null >> ${logfile}
+        texecc ps -C poseidonos > /dev/null >> ${logfile}
     done
 }
 
@@ -392,6 +390,25 @@ copy_usecase_logs()
     done
 }
 
+#****************************************************************************************
+#Set flush in config file
+#****************************************************************************************
+enable_flush()
+{
+    texecc cp $CONFIG_FILE $ORIG_CONFIG_FILE
+    echo " Enabling flush command handling in POS"
+    texecc -s eval "jq -r '.flush.enable |= true' $CONFIG_FILE > /tmp/temp.json && mv /tmp/temp.json $CONFIG_FILE"
+}
+
+#****************************************************************************************
+#Reset flush in config file
+#****************************************************************************************
+disable_flush()
+{
+    echo "  Restoring the original config file"
+    texecc mv $ORIG_CONFIG_FILE $CONFIG_FILE
+}
+
 #**************************************************************************
 #Main Function:
 #Multiple usecases: ("Single-subsystem,Single-volume" "Multi-subsystem,Multi-volume")
@@ -414,6 +431,8 @@ start_test_cases()
     kill_POS
 
     print_help
+
+    enable_flush
 
     for usecase in $(seq 0 $((total_usecases-1)))
     do
@@ -450,7 +469,7 @@ start_test_cases()
         isBackground=0
         flush_data $isBackground #$num_volumes
 
-        if [[ $totalFlushFaile -ne 0 ]];then
+        if [[ $totalFlushFails -ne 0 ]];then
             exit_CItest_on_Failure $num_subsystems
         fi
 
@@ -468,7 +487,7 @@ start_test_cases()
         write_data $num_subsystems $total_data_to_write $isBackground
         flush_data $isBackground $num_volumes
 
-        if [[ $totalFlushFaile -ne 0 ]];then
+        if [[ $totalFlushFails -ne 0 ]];then
             exit_CItest_on_Failure $num_subsystems
         fi
 
@@ -518,6 +537,8 @@ start_test_cases()
         DEVICES=()
     done
 
+    disable_flush
+
     copy_usecase_logs
 }
 
@@ -532,7 +553,7 @@ Synopsis
 Prerequisite
     1. please make sure that file below is properly configured according to your env.
         {IBOFOS_ROOT}/test/system/network/network_config.sh
-    2. please make sure that ibofos binary exists on top of {IBOFOS_ROOT}
+    2. please make sure that poseidonos binary exists on top of {IBOFOS_ROOT}
     3. please configure your ip address, volume size, etc. propertly by editing nvme_flush_ci_test.sh
 
 Description

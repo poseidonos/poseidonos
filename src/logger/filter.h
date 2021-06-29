@@ -37,7 +37,7 @@
 #include <vector>
 using namespace std;
 
-namespace ibofos_logger
+namespace pos_logger
 {
 class Filter
 {
@@ -108,4 +108,4 @@ private:
     string include_rule = "";
     string exclude_rule = "";
 };
-} // namespace ibofos_logger
+} // namespace pos_logger

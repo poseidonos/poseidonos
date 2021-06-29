@@ -32,26 +32,28 @@
 
 #pragma once
 
-#include "mfs_mim_top.h"
-#include "mfs_ret_code.h"
+#include "meta_io_manager.h"
+#include "metafs_return_code.h"
 
-class MockMetaIoMgr : public MetaFsMIMTopMgrClass
+namespace pos
+{
+class MockMetaIoManager : public MetaIoManager
 {
 public:
-    MockMetaIoMgr(void);
-    virtual ~MockMetaIoMgr(void);
+    MockMetaIoManager(void);
+    virtual ~MockMetaIoManager(void);
 
-    static MockMetaIoMgr& GetInstance(void);
+    static MockMetaIoManager& GetInstance(void);
 
-    virtual void Init(void) override;
-    virtual bool Bringup(void) override;
-    virtual IBOF_EVENT_ID ProcessNewReq(MetaFsIoReqMsg& reqMsg) override;
-    virtual void SetMDpageEpochSignature(uint64_t mbrEpochSignature) override;
-    virtual void Close(void) override;
+    virtual void Init(void);
+    virtual bool Bringup(void);
+    virtual POS_EVENT_ID ProcessNewReq(MetaFsIoRequest& reqMsg);
+    virtual void Close(void);
 
 private:
     virtual bool _ReadFile(uint32_t fd, void* buf, FileSizeType byteSize, FileSizeType byteOffset);
     virtual bool _WriteFile(uint32_t fd, void* buf, FileSizeType byteSize, FileSizeType byteOffset);
 
-    void _SetFileIoInfo(const MetaFsIoReqMsg& reqMsg, FileSizeType& ioByteSize, FileSizeType& ioByteOffset);
+    void _SetFileIoInfo(const MetaFsIoRequest& reqMsg, FileSizeType& ioByteSize, FileSizeType& ioByteOffset);
 };
+} // namespace pos

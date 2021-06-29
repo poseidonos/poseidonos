@@ -32,24 +32,33 @@
 
 #pragma once
 
-#include "src/scheduler/event.h"
+#include <string>
 
-namespace ibofos
+#include "src/event_scheduler/event.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/mapper/i_stripemap.h"
+
+namespace pos
 {
 class Stripe;
 class Mapper;
-class JournalManager;
+class JournalService;
 
 class StripeMapUpdate : public Event
 {
 public:
-    StripeMapUpdate(Stripe* stripe);
+    explicit StripeMapUpdate(Stripe* stripe, std::string& arrayName);
+    StripeMapUpdate(Stripe* stripe, IStripeMap* iStripeMap, JournalService* journalService,
+        EventScheduler* scheduler, std::string& arrayName);
+    virtual ~StripeMapUpdate(void) override;
     virtual bool Execute(void) override;
 
 private:
     Stripe* stripe;
-    Mapper* mapper;
-    JournalManager* journalManager;
+    IStripeMap* iStripeMap;
+    JournalService* journalService;
+    EventScheduler* eventScheduler;
+    std::string arrayName;
 };
 
-} // namespace ibofos
+} // namespace pos

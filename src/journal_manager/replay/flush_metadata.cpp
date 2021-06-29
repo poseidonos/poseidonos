@@ -32,15 +32,16 @@
 
 #include "flush_metadata.h"
 
-#include "src/allocator/allocator.h"
-#include "src/mapper/mapper.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
-FlushMetadata::FlushMetadata(Mapper* mapper, Allocator* allocator, ReplayProgressReporter* reporter)
+FlushMetadata::FlushMetadata(IMapFlush* mapFlush, IContextManager* ctxManager,
+    ReplayProgressReporter* reporter)
 : ReplayTask(reporter),
-  mapper(mapper),
-  allocator(allocator)
+  mapFlush(mapFlush),
+  contextManager(ctxManager)
 {
 }
 
@@ -57,12 +58,15 @@ FlushMetadata::GetNumSubTasks(void)
 int
 FlushMetadata::Start(void)
 {
-    int result = mapper->SyncStore();
+    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
+    POS_TRACE_DEBUG(eventId, "[ReplayTask] Start flushing replayed metadata");
+
+    int result = mapFlush->StoreAllMaps();
     reporter->SubTaskCompleted(GetId(), 1);
 
     if (result == 0)
     {
-        result = allocator->Store();
+        result = contextManager->FlushContextsSync();
         reporter->SubTaskCompleted(GetId(), 1);
     }
 
@@ -81,4 +85,4 @@ FlushMetadata::GetWeight(void)
     return 20;
 }
 
-} // namespace ibofos
+} // namespace pos

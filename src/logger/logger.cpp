@@ -37,10 +37,10 @@
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "src/helper/directory.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/include/memory.h"
 
-namespace ibofos
+namespace pos
 {
 Logger::Logger(void)
 {
@@ -74,7 +74,7 @@ Logger::Logger(void)
         dumpModule[i] = new DumpModule<DumpBuffer>(str, MAX_LOGGER_DUMP_SIZE / AVG_LINE, true);
     }
 
-    logger = std::make_shared<spdlog::logger>("ibof_logger", begin(sinks), end(sinks));
+    logger = std::make_shared<spdlog::logger>("pos_logger", begin(sinks), end(sinks));
     logger->flush_on(spdlog::level::debug);
     SetLevel(preferences.LogLevel());
 }
@@ -118,8 +118,8 @@ Reporter::Reporter(void)
         REPORT_PATH + REPORT_NAME, SIZE_MB * SZ_1MB, ROTATION);
     reporter_sink->set_level(spdlog::level::info);
     reporter_sink->set_pattern(pattern);
-    reporter = std::make_shared<spdlog::logger>("ibof_reporter", reporter_sink);
+    reporter = std::make_shared<spdlog::logger>("pos_reporter", reporter_sink);
     reporter->set_level(spdlog::level::info);
     reporter->flush_on(spdlog::level::info);
 }
-} // namespace ibofos
+} // namespace pos

@@ -11,17 +11,15 @@ UT_TARGET_FILE =	$(IBOF_DIR)src/array/device/array_device.cpp \
 				$(IBOF_DIR)src/io/general_io/device_io.cpp \
 				$(IBOF_DIR)src/io/general_io/io_submit_handler.cpp \
 				$(IBOF_DIR)src/io/general_io/request_context.cpp \
-				$(IBOF_DIR)src/logger/ibof_event_id.cpp \
+				$(IBOF_DIR)src/logger/pos_event_id.cpp \
 				$(IBOF_DIR)src/logger/logger.cpp \
 				$(IBOF_DIR)src/master_context/config_manager.cpp \
-				$(IBOF_DIR)src/scheduler/event_argument.cpp \
 				$(IBOF_DIR)src/scheduler/io_queue.cpp \
 				$(IBOF_DIR)src/state/state_context.cpp
 
 UT_FAKE_FILE = io_array_fake.cpp \
 			io_array_device_list_fake.cpp \
 			io_array_device_manager_fake.cpp \
-			io_array_meta_manager_fake.cpp \
 			io_free_buffer_pool_fake.cpp \
 			io_io_dispatcher_fake.cpp \
 			io_io_worker_fake.cpp \

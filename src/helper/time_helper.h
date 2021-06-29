@@ -30,24 +30,17 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef TIME_HELPER_H
+#define TIME_HELPER_H
 
 #include <time.h>
 
-bool
-operator<(const timespec& lhs, const timespec& rhs)
-{
-    if (lhs.tv_sec == rhs.tv_sec)
-        return lhs.tv_nsec < rhs.tv_nsec;
-    else
-        return lhs.tv_sec < rhs.tv_sec;
-}
+#include <string>
 
-bool
-operator>(const timespec& lhs, const timespec& rhs)
-{
-    if (lhs.tv_sec == rhs.tv_sec)
-        return lhs.tv_nsec > rhs.tv_nsec;
-    else
-        return lhs.tv_sec > rhs.tv_sec;
-}
+using namespace std;
+
+string GetCurrentTimeStr(string timeFormat, int maxBufferSize);
+
+time_t GetTimeT(string datetime, string timeFormat);
+
+#endif // TIME_HELPER_H

@@ -32,6 +32,8 @@
 
 #include "mss_status_callback.h"
 
+namespace pos
+{
 InstanceTagIdAllocator mssAioTagAllocator;
 
 MssAioCbCxt::MssAioCbCxt(void)
@@ -55,9 +57,4 @@ MssAioCbCxt::SaveIOStatus(int error)
 {
     cxt->error = error;
 }
-
-MssAioData*
-MssAioCbCxt::GetAioCbCxt(void)
-{
-    return cxt;
-}
+} // namespace pos

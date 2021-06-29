@@ -32,14 +32,17 @@
 
 #pragma once
 
-#include "../log_write/buffer_write_done_notifier.h"
-#include "journal_write_context.h"
-#include "src/include/address_type.h"
-#include "src/io/general_io/volume_io.h"
-#include "src/mapper/mpage_info.h"
-#include "src/scheduler/event.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
+#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 
-namespace ibofos
+#include "src/include/address_type.h"
+#include "src/bio/volume_io.h"
+#include "src/mapper/include/mpage_info.h"
+#include "src/event_scheduler/event.h"
+
+namespace pos
 {
 
 class LogWriteContextFactory
@@ -48,17 +51,21 @@ public:
     LogWriteContextFactory(void);
     virtual ~LogWriteContextFactory(void);
 
-    void Init(LogBufferWriteDoneNotifier* target);
+    virtual void Init(LogBufferWriteDoneNotifier* target,
+        CallbackSequenceController* sequencer);
 
-    LogWriteContext* CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
+    virtual LogWriteContext* CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
         MpageList dirty, EventSmartPtr callbackEvent);
-    LogWriteContext* CreateStripeMapLogWriteContext(Stripe* stripe,
+    virtual LogWriteContext* CreateStripeMapLogWriteContext(Stripe* stripe,
         StripeAddr oldAddr, MpageList dirty, EventSmartPtr callbackEvent);
+    virtual LogWriteContext* CreateGcStripeFlushedLogWriteContext(
+        GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
     LogWriteContext* CreateVolumeDeletedLogWriteContext(int volId,
-        JournalInternalEventCallback callback);
+        uint64_t contextVersion, EventSmartPtr callback);
 
 private:
     LogBufferWriteDoneNotifier* notifier;
+    CallbackSequenceController* sequenceController;
 };
 
-} // namespace ibofos
+} // namespace pos

@@ -32,10 +32,10 @@
 
 #pragma once
 
-#include "src/io/general_io/buffer_entry.h"
-#include "src/scheduler/callback.h"
+#include "src/array/ft/buffer_entry.h"
+#include "src/event_scheduler/callback.h"
 
-namespace ibofos
+namespace pos
 {
 class InternalWriteCompletion : public Callback
 {
@@ -48,4 +48,4 @@ private:
 
     BufferEntry bufferEntry;
 };
-} // namespace ibofos
+} // namespace pos

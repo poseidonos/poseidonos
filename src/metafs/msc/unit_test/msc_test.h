@@ -33,6 +33,9 @@
 #ifndef __UT_MSC_H__
 #define __UT_MSC_H__
 
+namespace pos
+{
 int Main(int argc, char** argv);
+} // namespace pos
 
 #endif // __UT_MSC_H__

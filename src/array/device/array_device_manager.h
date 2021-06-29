@@ -39,38 +39,47 @@
 
 #include "array_device.h"
 #include "array_device_list.h"
-#include "device_set.h"
 #include "src/array/meta/device_meta.h"
+#include "src/array_models/dto/device_set.h"
 #include "src/device/device_identifier.h"
-
+#ifdef _ADMIN_ENABLED
+#include "src/array/device/i_array_device_manager.h"
+#endif
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 class DeviceManager;
 class DeviceMeta;
 
 class ArrayDeviceManager
+#ifdef _ADMIN_ENABLED
+: public IArrayDevMgr
+#endif
 {
 public:
     ArrayDeviceManager(DeviceManager* sysDevMgr);
-    virtual ~ArrayDeviceManager();
-    int Import(DeviceSet<string> nameSet);
-    int Import(DeviceSet<DeviceMeta> metaSet,
+    virtual ~ArrayDeviceManager(void);
+    virtual int Import(DeviceSet<string> nameSet);
+    virtual int Import(DeviceSet<DeviceMeta> metaSet,
         uint32_t& missingCnt,
         uint32_t& brokenCnt);
-    DeviceSet<ArrayDevice*>& Export(void);
-    DeviceSet<string> ExportToName(void);
-    DeviceSet<DeviceMeta> ExportToMeta(void);
-    void Clear();
-    int AddSpare(string devName);
-    int RemoveSpare(string devName);
-    int RemoveSpare(ArrayDevice* dev);
-    int ReplaceWithSpare(ArrayDevice* target);
+    virtual DeviceSet<ArrayDevice*>& Export(void);
+    virtual DeviceSet<string> ExportToName(void);
+    virtual DeviceSet<DeviceMeta> ExportToMeta(void);
+    virtual void Clear(void);
+    virtual int AddSpare(string devName);
+    virtual int RemoveSpare(string devName);
+    virtual int RemoveSpare(ArrayDevice* dev);
+    virtual int ReplaceWithSpare(ArrayDevice* target);
 
-    tuple<ArrayDevice*, ArrayDeviceType> GetDev(UBlockDevice* uBlock);
-    ArrayDevice* GetFaulty();
-    ArrayDevice* GetRebuilding();
+    virtual tuple<ArrayDevice*, ArrayDeviceType> GetDev(UblockSharedPtr uBlock);
+    virtual tuple<ArrayDevice*, ArrayDeviceType> GetDev(string devSn);
+    virtual ArrayDevice* GetFaulty(void);
+    virtual ArrayDevice* GetRebuilding(void);
+
+    // This is UT helper method and doesn't need to be inherited. This isn't for production use.
+    void SetArrayDeviceList(ArrayDeviceList* arrayDeviceList);
 
 private:
     int _CheckDevs(const ArrayDeviceSet& devSet);
@@ -86,6 +95,6 @@ private:
     DeviceManager* sysDevMgr_;
 };
 
-} // namespace ibofos
+} // namespace pos
 
 #endif // ARRAY_DEVICE_MANAGER_H_

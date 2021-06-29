@@ -6,11 +6,11 @@
 
 #include "src/collection/Collector.h"
 #include "src/config/ConfigInterface.h"
+#include "src/data_structure/NodeManager.h"
 #include "src/lib/Design.h"
 #include "src/lib/Msg.h"
 #include "src/meta/GlobalMeta.h"
 #include "src/meta/NodeMeta.h"
-#include "src/profile_data/node/NodeManager.h"
 
 namespace collection
 {
@@ -44,47 +44,34 @@ public:
     virtual ~CollectionManager(void);
     void Init(void);
 
-    node::ThreadArray*
-    GetThread(uint32_t tid)
+    node::NodeDataArray*
+    GetNodeDataArray(uint32_t tid)
     {
-        return node_manager->GetThread(tid);
-    }
-
-    int
-    CreateThread(uint32_t tid)
-    {
-        // 0 -> already create
-        // 1 -> create complete
-        return node_manager->CreateThread(tid);
+        return node_manager->GetNodeDataArray(tid);
     }
 
     virtual inline bool
     IsLog(uint32_t nid)
     {
-        return (air_enable & node_enable[nid]);
+        return (air_run & node_run[nid]);
     }
 
     virtual inline void
-    LogData(uint32_t nid, uint32_t aid,
-        node::ThreadArray* thread_array, uint32_t value1,
-        uint64_t value2)
+    LogData(uint32_t nid, uint32_t filter_index, node::NodeDataArray* node_data_array,
+        uint64_t node_index, uint64_t value)
     {
-        if (nullptr != thread_array)
+        node::NodeData* node_data = node_data_array->node[nid];
+        if (nullptr == node_data)
         {
-            node::Thread* thr = thread_array->node[nid];
-            if (nullptr == thr)
-            {
-                return;
-            }
-            lib::Data* user_data = thr->GetUserDataByAidValue(aid);
-            if (nullptr == user_data)
-            {
-                return;
-            }
-            // thread-aware data
-            thr->SetIsLogging(true);
-            collector[nid]->LogData(user_data, value1, value2);
+            return;
         }
+        lib::Data* user_data = node_data->GetUserDataByNodeIndex(node_index, filter_index);
+        if (nullptr == user_data)
+        {
+            return;
+        }
+
+        collector[nid]->LogData(user_data, value);
     }
 
     void HandleMsg(void);
@@ -112,22 +99,21 @@ private:
     int _UpdateSamplingRate(uint32_t type1, uint32_t type2, uint32_t value1,
         uint32_t value2);
 
-    Collector* collector[cfg::GetArrSize(config::ConfigType::NODE)]{
+    Collector* collector[cfg::GetSentenceCount(config::ParagraphType::NODE)]{
         nullptr,
     };
 
     meta::GlobalMetaGetter* global_meta_getter{nullptr};
-    bool air_enable{false};
+    bool air_run{false};
 
     meta::NodeMetaGetter* node_meta_getter{nullptr};
-    bool node_enable[cfg::GetArrSize(config::ConfigType::NODE)]{
+    bool node_run[cfg::GetSentenceCount(config::ParagraphType::NODE)]{
         false,
     };
 
     node::NodeManager* node_manager{nullptr};
 
-    uint32_t max_aid_size{0};
-    const uint32_t MAX_NID_SIZE{cfg::GetArrSize(config::ConfigType::NODE)};
+    const uint32_t MAX_NID_SIZE{cfg::GetSentenceCount(config::ParagraphType::NODE)};
     const uint32_t MAX_SEQ_IDX{10};
 
     std::queue<lib::MsgEntry> msg;

@@ -34,25 +34,25 @@
 
 #include "mdpage_buf_pool.h"
 #include "meta_io_manager.h"
-#include "mfs_io_config.h"
-#include "mfs_log.h"
+#include "metafs_config.h"
+#include "metafs_log.h"
 #include "os_header.h"
 #include "src/include/memory.h"
+#include "src/metafs/include/metafs_service.h"
 
+#include <string>
+
+namespace pos
+{
 MDPage::MDPage(void* buf)
 : dataAll(nullptr),
   ctrlInfo(nullptr)
 {
+    dataAll = reinterpret_cast<uint8_t*>(buf);
 }
 
 MDPage::~MDPage(void)
 {
-}
-
-void
-MDPage::Init(void* buf)
-{
-    dataAll = reinterpret_cast<uint8_t*>(buf);
 }
 
 void
@@ -83,44 +83,44 @@ MDPage::AttachControlInfo(void)
     if (nullptr == ctrlInfo)
     {
         ctrlInfo = reinterpret_cast<MDPageControlInfo*>(dataAll + GetDefaultDataChunkSize());
-        MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "[Mpio][ControlInfo] Control info attached");
     }
 }
 
 void
-MDPage::Make(MetaLpnType metaLpn, FileFDType fd)
+MDPage::Make(MetaLpnType metaLpn, FileDescriptorType fd, std::string& arrayName)
 {
     assert(dataAll != nullptr);
 
     AttachControlInfo();
-    UpdateControlInfo(metaLpn, fd);
+    _UpdateControlInfo(metaLpn, fd, arrayName);
 }
 
 uint32_t
-MDPage::GetmfsSignature(void)
+MDPage::GetMfsSignature(void)
 {
     return ctrlInfo->mfsSignature;
 }
 
 void
-MDPage::UpdateControlInfo(MetaLpnType srcLpn, FileFDType srcFD)
+MDPage::_UpdateControlInfo(MetaLpnType srcLpn, FileDescriptorType srcFD, std::string& arrayName)
 {
     memset(ctrlInfo, 0x0, sizeof(MDPageControlInfo));
 
     ctrlInfo->mfsSignature = MDPageControlInfo::MDPAGE_CTRL_INFO_SIG;
-    ctrlInfo->epochSignature = metaIoMgr.GetMDpageEpochSignature();
+    ctrlInfo->epochSignature = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->GetEpochSignature();
     ctrlInfo->metaLpn = srcLpn;
     ctrlInfo->fd = srcFD;
 }
 
 bool
-MDPage::CheckValid(void)
+MDPage::CheckValid(std::string& arrayName)
 {
     // detect mdpage validity by combining two signatures
     // note that it has to have additional logic to detect signature corruption case later on
     return (ctrlInfo->mfsSignature == MDPageControlInfo::MDPAGE_CTRL_INFO_SIG &&
-        ctrlInfo->epochSignature == metaIoMgr.GetMDpageEpochSignature());
+        ctrlInfo->epochSignature == MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->GetEpochSignature());
 }
 
 bool
@@ -128,7 +128,7 @@ MDPage::CheckLpnMismatch(MetaLpnType srcLpn)
 {
     if (ctrlInfo->metaLpn != srcLpn)
     {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_INVALID_PARAMETER,
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
             "Lpn mismatch detected: target_lpn={}, saved lpn={}",
             srcLpn, ctrlInfo->metaLpn);
 
@@ -138,28 +138,15 @@ MDPage::CheckLpnMismatch(MetaLpnType srcLpn)
 }
 
 bool
-MDPage::CheckEpochSigMismatch(void)
-{
-    const uint64_t mfsEpochSig = metaIoMgr.GetMDpageEpochSignature();
-    if (ctrlInfo->epochSignature != mfsEpochSig)
-    {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_INVALID_PARAMETER,
-            "Epoch signature mismatch detected. MFS epoch sig={}, saved epoch sig={}",
-            mfsEpochSig, ctrlInfo->epochSignature);
-        return false;
-    }
-    return true;
-}
-
-bool
-MDPage::CheckFileMismatch(FileFDType fd)
+MDPage::CheckFileMismatch(FileDescriptorType fd)
 {
     if (ctrlInfo->fd != fd)
     {
-        MFS_TRACE_ERROR((int)IBOF_EVENT_ID::MFS_INVALID_PARAMETER,
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
             "FD mismatch detected: target FD={}, saved FD={}, lpn={}",
             fd, ctrlInfo->fd, ctrlInfo->metaLpn);
         return false;
     }
     return true;
 }
+} // namespace pos

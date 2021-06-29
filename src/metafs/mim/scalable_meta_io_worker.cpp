@@ -32,6 +32,8 @@
 
 #include "scalable_meta_io_worker.h"
 
+namespace pos
+{
 ScalableMetaIoWorker::ScalableMetaIoWorker(int threadId, int coreId, int coreCount)
 : MetaFsIoHandlerBase(threadId, coreId)
 {
@@ -50,15 +52,27 @@ ScalableMetaIoWorker::~ScalableMetaIoWorker(void)
 void
 ScalableMetaIoWorker::StartThread(void)
 {
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "mio_handler:: threadId={}, coreId={}",
         threadId, coreId);
 
     th = new std::thread(AsEntryPointNoParam(&ScalableMetaIoWorker::Execute, this));
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "Thread(metafs-mio-handler) joined. thread id={}",
         std::hash<std::thread::id>{}(th->get_id()));
+}
+
+bool
+ScalableMetaIoWorker::AddArrayInfo(std::string arrayName)
+{
+    return tophalfHandler->AddArrayInfo(arrayName);
+}
+
+bool
+ScalableMetaIoWorker::RemoveArrayInfo(std::string arrayName)
+{
+    return tophalfHandler->RemoveArrayInfo(arrayName);
 }
 
 void
@@ -74,7 +88,8 @@ ScalableMetaIoWorker::Execute(void)
 }
 
 bool
-ScalableMetaIoWorker::EnqueueNewReq(MetaFsIoReqMsg& reqMsg)
+ScalableMetaIoWorker::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
     return tophalfHandler->EnqueueNewReq(reqMsg);
 }
+} // namespace pos

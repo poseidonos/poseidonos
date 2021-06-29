@@ -1,6 +1,6 @@
 IBOF_SRC_DIR := $(abspath $(CURDIR)/../../..)
 IBOF_NVMF_SRC_DIR := $(IBOF_SRC_DIR)/src/ibofos/network
-SPDK_ROOT_DIR := $(IBOF_SRC_DIR)/lib/spdk-19.10
+SPDK_ROOT_DIR := $(IBOF_SRC_DIR)/lib/spdk
 GTEST_DIR := $(IBOF_SRC_DIR)/lib/googletest-release-1.8.1/googletest
 
 include $(SPDK_ROOT_DIR)/mk/spdk.common.mk

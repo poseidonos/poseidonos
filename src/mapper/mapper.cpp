@@ -30,402 +30,186 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mapper.h"
-
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <tuple>
 
-#include "map_flushed_event.h"
-#include "reverse_map.h"
-#include "src/allocator/allocator.h"
-#include "src/allocator/stripe.h"
-#include "src/array/array.h"
+#include "src/mapper/mapper.h"
+#include "src/mapper/map_flushed_event.h"
+#include "src/mapper/reversemap/reverse_map.h"
+#include "src/mapper_service/mapper_service.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume_manager.h"
 
-namespace ibofos
+namespace pos
 {
-Mapper::Mapper(void)
-: vsaMapManager(nullptr),
-  stripeMap(nullptr),
-  revMapPacks(nullptr),
-  revMapWholefile(nullptr)
+
+MpageList IMapFlush::DEFAULT_DIRTYPAGE_SET;
+
+Mapper::Mapper(IArrayInfo* iarrayInfo, IStateControl* iState)
+: iArrayinfo(iarrayInfo),
+  iStateControl(iState),
+  isInitialized(false)
 {
-    vsaMapManager = new VSAMapManager();
-    pthread_rwlock_init(&stripeMapLock, nullptr);
+    addrInfo = new MapperAddressInfo();
+    vsaMapManager = new VSAMapManager(addrInfo, iarrayInfo->GetName());
+    stripeMapManager = new StripeMapManager(addrInfo, iarrayInfo->GetName());
+    reverseMapManager = new ReverseMapManager(vsaMapManager->GetIVSAMap(), stripeMapManager, iArrayinfo);
 }
 
 Mapper::~Mapper(void)
 {
-    if (revMapPacks != nullptr)
-    {
-        delete[] revMapPacks;
-        revMapPacks = nullptr;
-    }
-
-    if (revMapWholefile != nullptr)
-    {
-        revMapWholefile->Close();
-
-        delete revMapWholefile;
-        revMapWholefile = nullptr;
-    }
-
-    if (stripeMap != nullptr)
-    {
-        delete stripeMap;
-        stripeMap = nullptr;
-    }
-
+    delete reverseMapManager;
+    delete stripeMapManager;
     delete vsaMapManager;
-    vsaMapManager = nullptr;
+    delete addrInfo;
 }
 
-void
+int
 Mapper::Init(void)
 {
-    info.Load();
-    _InitMetadata(info);
+    if (isInitialized == false)
+    {
+        addrInfo->SetupAddressInfo(iArrayinfo->GetName());
+        vsaMapManager->Init();
+        stripeMapManager->Init(*addrInfo);
+        reverseMapManager->Init(*addrInfo);
+        _RegisterToMapperService();
+        isInitialized = true;
+    }
+
+    return 0;
 }
 
 void
-Mapper::_InitMetadata(const MapperAddressInfo& info)
+Mapper::Dispose(void)
 {
-    stripeMap = new StripeMapContent(STRIPE_MAP_ID);
-    stripeMap->Prepare(info.maxVsid);
-    stripeMap->LoadSync(CREATE_FILE_IF_NOT_EXIST);
-
-    // Set special variables for ReverseMapPack::
-    ReverseMapPack::SetPageSize();
-    ReverseMapPack::SetNumMpages();
-
-    // Create MFS and Open the file for whole reverse map
-    revMapWholefile = new FILESTORE("RevMapWhole");
-    if (revMapWholefile->DoesFileExist() == false)
+    if (isInitialized == true)
     {
-        uint64_t fileSize = ReverseMapPack::GetfileSizePerStripe() * info.maxVsid;
-        IBOF_TRACE_INFO((int)IBOF_EVENT_ID::REVMAP_FILE_SIZE,
-            "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
-            ReverseMapPack::GetfileSizePerStripe(), info.maxVsid, fileSize);
-
-        int ret = revMapWholefile->Create(fileSize);
-        if (ret != 0)
-        {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::REVMAP_FILE_SIZE,
-                "RevMapWhole file Create failed, ret:{}", ret);
-            assert(false);
-        }
-    }
-    revMapWholefile->Open();
-
-    // Make ReverseMapPack:: objects by the number of WriteBuffer stripes
-    revMapPacks = new ReverseMapPack[info.numWbStripes];
-    for (StripeId wbLsid = 0; wbLsid < info.numWbStripes; ++wbLsid)
-    {
-        revMapPacks[wbLsid].Init(wbLsid);
+        FlushAllMaps();
+        WaitForFlushAllMapsDone();
+        Close();
+        _UnregisterFromMapperService();
+        isInitialized = false;
     }
 }
 
-int
-Mapper::SyncStore(void)
+void
+Mapper::Shutdown(void)
 {
-    int ret = 0;
-
-    ret = stripeMap->StoreSync();
-    if (ret < 0)
+    if (isInitialized == true)
     {
-        IBOF_TRACE_ERROR(EID(STRIPEMAP_STORE_FAILURE), "StripeMap Store failed");
-        return ret;
+        Close();
+        _UnregisterFromMapperService();
+        isInitialized = false;
     }
-
-    ret = vsaMapManager->SyncStore();
-    if (ret < 0)
-    {
-        return ret;
-    }
-
-    return ret;
 }
 
-int
-Mapper::AsyncStore(void)
+void
+Mapper::Flush(void)
 {
-    int ret = 0;
-    ret = vsaMapManager->AsyncStore();
-    if (ret < 0)
-    {
-        IBOF_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE),
-            "AsyncStore() of vsaMapManager Failed, Check logs");
-    }
-
-    EventSmartPtr callBackStripeMap = std::make_shared<MapFlushedEvent>(STRIPE_MAP_ID, vsaMapManager);
-    ret = stripeMap->Flush(callBackStripeMap);
-    if (ret < 0)
-    {
-        IBOF_TRACE_ERROR(EID(STRIPEMAP_STORE_FAILURE), "Flush() for stripeMap Failed");
-    }
-
-    return ret;
+    // no-op for IMountSequence
 }
 
 void
 Mapper::Close(void)
 {
     vsaMapManager->Close();
+    stripeMapManager->Close();
+    reverseMapManager->Close();
 }
 
-void
-Mapper::RegisterToPublisher(void)
+IVSAMap*
+Mapper::GetIVSAMap(void)
 {
-    vsaMapManager->RegisterToPublisher();
+    return vsaMapManager->GetIVSAMap();
 }
 
-void
-Mapper::RemoveFromPublisher(void)
+IStripeMap*
+Mapper::GetIStripeMap(void)
 {
-    vsaMapManager->RemoveFromPublisher();
+    return stripeMapManager;
 }
 
-VirtualBlkAddr
-Mapper::GetVSA(int volumeId, BlkAddr rba)
+IReverseMap*
+Mapper::GetIReverseMap(void)
 {
-    VsaArray vsaArray;
-    GetVSAs(volumeId, rba, 1 /* numBlks */, vsaArray);
-    return vsaArray[0];
+    return reverseMapManager;
 }
 
-VirtualBlkAddr
-Mapper::GetVSAInternal(int volumeId, BlkAddr rba, int& caller)
+IMapFlush*
+Mapper::GetIMapFlush(void)
 {
-    int ret = vsaMapManager->EnableInternalAccess(volumeId, caller);
-    if (CALLER_EVENT == caller)
-    {
-        if (vsaMapManager->IsVSAMapLoaded(volumeId) == false)
-        {
-            // [Exist Volume Case]
-            // 0: The First Internal-Approach
-            // -EID(MAP_LOAD_ONGOING): Subsequent Internal-Approaches
-            if (0 == ret || -EID(MAP_LOAD_ONGOING) == ret)
-            {
-                caller = NEED_RETRY;
-            }
-            // [Deleted Volume Case]
-            else if (-EID(VSAMAP_LOAD_FAILURE) == ret)
-            {
-                // Do nothing
-            }
-            return UNMAP_VSA;
-        }
-    }
-    else if (ret < 0)
-    {
-        return UNMAP_VSA;
-    }
-
-    caller = OK_READY;
-    return _ReadVSA(volumeId, rba);
+    return this;
 }
 
-VirtualBlkAddr
-Mapper::_ReadVSA(int volumeId, BlkAddr rba)
+IMapperWbt*
+Mapper::GetIMapperWbt(void)
 {
-    VSAMapContent* vsaMap = vsaMapManager->GetVSAMapContent(volumeId);
-    return vsaMap->GetEntry(rba);
+    return this;
 }
 
 int
-Mapper::GetVSAs(int volumeId, BlkAddr startRba, uint32_t numBlks,
-    VsaArray& vsaArray)
+Mapper::FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages)
 {
-    if (false == vsaMapManager->IsVsaMapAccessible(volumeId))
+    MapContent* map = _GetMapContent(mapId);
+    if (nullptr == map)
     {
-        IBOF_TRACE_WARN(EID(VSAMAP_NOT_ACCESSIBLE),
-            "VolumeId:{} is not accessible, maybe unmounted", volumeId);
-        for (uint32_t blkIdx = 0; blkIdx < numBlks; ++blkIdx)
-        {
-            vsaArray[blkIdx] = UNMAP_VSA;
-        }
-        return -EID(VSAMAP_NOT_ACCESSIBLE);
+        return -EID(WRONG_MAP_ID);
     }
 
-    VSAMapContent* vsaMap = vsaMapManager->GetVSAMapContent(volumeId);
-    for (uint32_t blkIdx = 0; blkIdx < numBlks; ++blkIdx)
+    if (IMapFlush::DEFAULT_DIRTYPAGE_SET == dirtyPages)
     {
-        BlkAddr targetRba = startRba + blkIdx;
-        vsaArray[blkIdx] = vsaMap->GetEntry(targetRba);
-    }
-    return 0;
-}
-
-int
-Mapper::SetVsaMap(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks)
-{
-    if (false == vsaMapManager->IsVsaMapAccessible(volumeId))
-    {
-        IBOF_TRACE_WARN(EID(VSAMAP_NOT_ACCESSIBLE),
-            "VolumeId:{} is not accessible, maybe unmounted", volumeId);
-        return -EID(VSAMAP_NOT_ACCESSIBLE);
-    }
-    return _UpdateVsaMap(volumeId, startRba, virtualBlks);
-}
-
-int
-Mapper::SetVsaMapInternal(int volumeId, BlkAddr startRba,
-    VirtualBlks& virtualBlks)
-{
-    int caller = CALLER_NOT_EVENT;
-    int ret = vsaMapManager->EnableInternalAccess(volumeId, caller);
-    if (ret < 0)
-    {
-        return ret;
-    }
-    return _UpdateVsaMap(volumeId, startRba, virtualBlks);
-}
-
-int
-Mapper::_UpdateVsaMap(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks)
-{
-    int ret = 0;
-    VSAMapContent* vsaMap = vsaMapManager->GetVSAMapContent(volumeId);
-
-    for (uint32_t blkIdx = 0; blkIdx < virtualBlks.numBlks; blkIdx++)
-    {
-        VirtualBlkAddr targetVsa = {.stripeId = virtualBlks.startVsa.stripeId,
-            .offset = virtualBlks.startVsa.offset + blkIdx};
-        BlkAddr targetRba = startRba + blkIdx;
-        ret = vsaMap->SetEntry(targetRba, targetVsa);
-        if (ret < 0)
-        {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::VSAMAP_SET_FAILURE,
-                "VSAMap set failure, volumeId:{}  targetRba:{}  targetVsa.sid:{}  targetVsa.offset:{}",
-                volumeId, targetRba, targetVsa.stripeId, targetVsa.offset);
-            break;
-        }
-    }
-    return ret;
-}
-
-MpageList
-Mapper::GetDirtyVsaMapPages(int volumeId, BlkAddr startRba, uint64_t numBlks)
-{
-    VSAMapContent* vsaMap = vsaMapManager->GetVSAMapContent(volumeId);
-    return vsaMap->GetDirtyPages(startRba, numBlks);
-}
-
-int
-Mapper::LinkReverseMap(Stripe* stripe, StripeId wbLsid, StripeId vsid)
-{
-    int ret = 0;
-
-    // Let Stripe:: know the wbLsid(th) ReverseMapPack:: object
-    ret = stripe->LinkReverseMap(&revMapPacks[wbLsid]);
-    if (ret < 0)
-    {
-        return ret;
-    }
-
-    // Let wbLsid(th) ReverseMapPack:: object point vsid(SSD LSID)
-    ReverseMapPack& revMapPack = revMapPacks[wbLsid];
-    ret = revMapPack.LinkVsid(vsid);
-    if (ret < 0)
-    {
-        return ret;
-    }
-
-    return ret;
-}
-
-int
-Mapper::ResetVSARange(int volumeId, BlkAddr rba, uint64_t cnt)
-{
-    if (false == vsaMapManager->IsVsaMapAccessible(volumeId))
-    {
-        IBOF_TRACE_WARN(EID(VSAMAP_NOT_ACCESSIBLE),
-            "VolumeId:{} is not accessible, maybe unmounted", volumeId);
-        return -EID(VSAMAP_NOT_ACCESSIBLE);
-    }
-
-    VSAMapContent* vsaMap = vsaMapManager->GetVSAMapContent(volumeId);
-    vsaMap->ResetEntries(rba, cnt);
-
-    return 0;
-}
-
-VirtualBlkAddr
-Mapper::GetRandomVSA(BlkAddr rba)
-{
-    VirtualBlkAddr vsa;
-    vsa.stripeId = rba / info.blksPerStripe;
-    vsa.offset = rba % info.blksPerStripe;
-    return vsa;
-}
-
-StripeId
-Mapper::GetRandomLsid(StripeId vsid)
-{
-    return vsid + info.numWbStripes;
-}
-
-StripeAddr
-Mapper::GetLSA(StripeId vsid)
-{
-    pthread_rwlock_rdlock(&stripeMapLock);
-    StripeAddr stripeAddr = stripeMap->GetEntry(vsid);
-    pthread_rwlock_unlock(&stripeMapLock);
-    return stripeAddr;
-}
-
-int
-Mapper::UpdateStripeMap(StripeId vsid, StripeId lsid, StripeLoc loc)
-{
-    StripeAddr entry = {.stripeLoc = loc, .stripeId = lsid};
-    pthread_rwlock_wrlock(&stripeMapLock);
-    int ret = stripeMap->SetEntry(vsid, entry);
-    pthread_rwlock_unlock(&stripeMapLock);
-    if (ret < 0)
-    {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::STRIPEMAP_SET_FAILURE,
-            "StripeMap set failure, vsid:{}  lsid:{}  loc:{}", vsid, lsid, loc);
+        return map->FlushTouchedPages(callback);
     }
     else
     {
-        ret = 0;
+        return map->FlushDirtyPagesGiven(dirtyPages, callback);
     }
+}
+
+int
+Mapper::FlushAllMaps(void)
+{
+    int ret = 0;
+
+    ret = vsaMapManager->FlushMaps();
+    if (ret < 0)
+    {
+        POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "AsyncStore() of vsaMapManager Failed, Check logs");
+    }
+
+    ret = stripeMapManager->FlushMap();
+    if (ret < 0)
+    {
+        POS_TRACE_ERROR(EID(STRIPEMAP_STORE_FAILURE), "AsyncStore() of stripeMapManager Failed, Check logs");
+    }
+
     return ret;
 }
 
-MpageList
-Mapper::GetDirtyStripeMapPages(int vsid)
-{
-    return stripeMap->GetDirtyPages(vsid, 1);
-}
-
 int
-Mapper::StartDirtyPageFlush(int mapId, MpageList dirtyPages,
-    EventSmartPtr callback)
+Mapper::StoreAllMaps(void)
 {
-    MapContent* map = _GetMapContent(mapId);
-    if (nullptr == map)
+    int ret = 0;
+
+    ret = stripeMapManager->StoreMap();
+    if (ret < 0)
     {
-        return -EID(WRONG_MAP_ID);
+        return ret;
     }
 
-    return map->StartDirtyPageFlush(dirtyPages, callback);
-}
-
-int
-Mapper::FlushMap(int mapId, EventSmartPtr callback)
-{
-    MapContent* map = _GetMapContent(mapId);
-    if (nullptr == map)
+    ret = vsaMapManager->StoreMaps();
+    if (ret < 0)
     {
-        return -EID(WRONG_MAP_ID);
+        return ret;
     }
 
-    return map->Flush(callback);
+    return ret;
 }
+
+//------------------------------------------------------------------------------
 
 MapContent*
 Mapper::_GetMapContent(int mapId)
@@ -434,7 +218,7 @@ Mapper::_GetMapContent(int mapId)
 
     if (mapId == STRIPE_MAP_ID)
     {
-        map = stripeMap;
+        map = stripeMapManager->GetStripeMapContent();
     }
     else if (0 <= mapId && mapId < MAX_VOLUME_COUNT)
     {
@@ -444,41 +228,24 @@ Mapper::_GetMapContent(int mapId)
     return map;
 }
 
-std::tuple<StripeAddr, bool>
-Mapper::GetAndReferLsid(StripeId vsid)
+void
+Mapper::_RegisterToMapperService(void)
 {
-    pthread_rwlock_rdlock(&stripeMapLock);
-    StripeAddr stripeAddr = stripeMap->GetEntry(vsid);
-    bool referenced = ReferLsid(stripeAddr);
-    pthread_rwlock_unlock(&stripeMapLock);
-
-    return std::make_tuple(stripeAddr, referenced);
-}
-
-bool
-Mapper::ReferLsid(StripeAddr& lsidEntry)
-{
-    if (IsInUserDataArea(lsidEntry))
-    {
-        return false;
-    }
-    Stripe& stripe =
-        *AllocatorSingleton::Instance()->GetStripe(lsidEntry);
-    stripe.Refer();
-
-    return true;
+    std::string arrayName = iArrayinfo->GetName();
+    MapperService* mapperService = MapperServiceSingleton::Instance();
+    mapperService->RegisterMapper(arrayName, GetIVSAMap());
+    mapperService->RegisterMapper(arrayName, GetIStripeMap());
+    mapperService->RegisterMapper(arrayName, GetIReverseMap());
+    mapperService->RegisterMapper(arrayName, GetIMapFlush());
+    mapperService->RegisterMapper(arrayName, GetIMapperWbt());
 }
 
 void
-Mapper::DereferLsid(StripeAddr& lsidEntry, uint32_t blockCount)
+Mapper::_UnregisterFromMapperService(void)
 {
-    if (IsInUserDataArea(lsidEntry))
-    {
-        return;
-    }
-    Stripe& stripe =
-        *AllocatorSingleton::Instance()->GetStripe(lsidEntry);
-    stripe.Derefer(blockCount);
+    std::string arrayName = iArrayinfo->GetName();
+    MapperService* mapperService = MapperServiceSingleton::Instance();
+    mapperService->UnregisterMapper(arrayName);
 }
 
 /*
@@ -503,32 +270,37 @@ int
 Mapper::ReadVsaMap(int volId, std::string fname)
 {
     VSAMapContent* vsaMap = vsaMapManager->GetVSAMapContent(volId);
-    return vsaMap->Dump(fname);
+    return vsaMap->Dump(fname, iArrayinfo->GetName());
 }
 
 int
 Mapper::WriteVsaMap(int volId, std::string fname)
 {
     VSAMapContent* vsaMap = vsaMapManager->GetVSAMapContent(volId);
-    return vsaMap->DumpLoad(fname);
+    return vsaMap->DumpLoad(fname, iArrayinfo->GetName());
 }
 
 int
 Mapper::ReadStripeMap(std::string fname)
 {
-    return stripeMap->Dump(fname);
+    StripeMapContent* stripeMap = stripeMapManager->GetStripeMapContent();
+    return stripeMap->Dump(fname, iArrayinfo->GetName());
 }
 
 int
 Mapper::WriteStripeMap(std::string fname)
 {
-    return stripeMap->DumpLoad(fname);
+    StripeMapContent* stripeMap = stripeMapManager->GetStripeMapContent();
+    return stripeMap->DumpLoad(fname, iArrayinfo->GetName());
 }
 
 int
 Mapper::ReadVsaMapEntry(int volId, BlkAddr rba, std::string fname)
 {
-    VirtualBlkAddr vsa = GetVSA(volId, rba);
+    IVSAMap* iVSAMap = GetIVSAMap();
+    VsaArray vsaArray;
+    iVSAMap->GetVSAs(volId, rba, 1, vsaArray);
+    VirtualBlkAddr vsa = vsaArray[0];
 
     ofstream out(fname.c_str(), std::ofstream::app);
 
@@ -544,14 +316,15 @@ int
 Mapper::WriteVsaMapEntry(int volId, BlkAddr rba, VirtualBlkAddr vsa)
 {
     VirtualBlks blks = {.startVsa = vsa, .numBlks = 1};
-    int ret = _UpdateVsaMap(volId, rba, blks);
+    int ret = vsaMapManager->GetVSAMapAPI()->SetVSAsInternal(volId, rba, blks);
     return ret;
 }
 
 int
 Mapper::ReadStripeMapEntry(StripeId vsid, std::string fname)
 {
-    StripeAddr entry = GetLSA(vsid);
+    IStripeMap* iStripeMap = GetIStripeMap();
+    StripeAddr entry = iStripeMap->GetLSA(vsid);
 
     ofstream out(fname.c_str(), std::ofstream::app);
 
@@ -566,14 +339,15 @@ Mapper::ReadStripeMapEntry(StripeId vsid, std::string fname)
 int
 Mapper::WriteStripeMapEntry(StripeId vsid, StripeLoc loc, StripeId lsid)
 {
-    int ret = UpdateStripeMap(vsid, lsid, loc);
+    IStripeMap* iStripeMap = GetIStripeMap();
+    int ret = iStripeMap->SetLSA(vsid, lsid, loc);
     return ret;
 }
 
 int
 Mapper::ReadReverseMap(StripeId vsid, std::string fname)
 {
-    ReverseMapPack* reverseMapPack = new ReverseMapPack;
+    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack(false);
 
     int ret = _LoadReverseMapVsidFromMFS(reverseMapPack, vsid);
     if (ret < 0)
@@ -583,14 +357,14 @@ Mapper::ReadReverseMap(StripeId vsid, std::string fname)
     }
 
     // Store ReverseMap of vsid to Linux file(fname)
-    MetaFileIntf* fileToStore = new MockFileIntf(fname);
-    fileToStore->Create(reverseMapPack->GetfileSizePerStripe());
+    MetaFileIntf* fileToStore = new MockFileIntf(fname, iArrayinfo->GetName());
+    fileToStore->Create(reverseMapManager->GetReverseMapPerStripeFileSize());
     fileToStore->Open();
 
     ret = reverseMapPack->WbtFileSyncIo(fileToStore, MetaFsIoOpcode::Write);
     if (ret < 0)
     {
-        IBOF_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Write failed");
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Write failed");
     }
 
     fileToStore->Close();
@@ -602,7 +376,7 @@ Mapper::ReadReverseMap(StripeId vsid, std::string fname)
 int
 Mapper::WriteReverseMap(StripeId vsid, std::string fname)
 {
-    ReverseMapPack* reverseMapPack = new ReverseMapPack;
+    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack(false);
     int ret = reverseMapPack->LinkVsid(vsid);
     if (ret < 0)
     {
@@ -611,13 +385,13 @@ Mapper::WriteReverseMap(StripeId vsid, std::string fname)
     }
 
     // Load ReverseMap from Linux file(fname)
-    MetaFileIntf* fileFromLoad = new MockFileIntf(fname);
+    MetaFileIntf* fileFromLoad = new MockFileIntf(fname, iArrayinfo->GetName());
     fileFromLoad->Open();
 
     ret = reverseMapPack->WbtFileSyncIo(fileFromLoad, MetaFsIoOpcode::Read);
     if (ret < 0)
     {
-        IBOF_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Read failed");
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "WbtFileIo() Read failed");
     }
 
     fileFromLoad->Close();
@@ -633,11 +407,11 @@ int
 Mapper::ReadWholeReverseMap(std::string fname)
 {
     int ret = 0;
-    uint64_t fileSize = ReverseMapPack::GetfileSizePerStripe() * info.maxVsid;
+    uint64_t fileSize = reverseMapManager->GetWholeReverseMapFileSize();
     char* buffer = new char[fileSize]();
 
     // Load Whole ReverseMap from MFS
-    ret = revMapWholefile->IssueIO(MetaFsIoOpcode::Read, 0, fileSize, buffer);
+    ret = reverseMapManager->LoadWholeReverseMap(buffer);
     if (ret < 0)
     {
         delete[] buffer;
@@ -645,10 +419,9 @@ Mapper::ReadWholeReverseMap(std::string fname)
     }
 
     // Store Whole ReverseMap to Linux file(fname)
-    MetaFileIntf* fileToStore = new MockFileIntf(fname);
-    IBOF_TRACE_INFO((int)IBOF_EVENT_ID::REVMAP_FILE_SIZE,
-        "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
-        ReverseMapPack::GetfileSizePerStripe(), info.maxVsid, fileSize);
+    MetaFileIntf* fileToStore = new MockFileIntf(fname, iArrayinfo->GetName());
+    POS_TRACE_INFO((int)POS_EVENT_ID::REVMAP_FILE_SIZE, "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
+                    reverseMapManager->GetReverseMapPerStripeFileSize(), addrInfo->maxVsid, fileSize);
     fileToStore->Create(fileSize);
     fileToStore->Open();
 
@@ -664,18 +437,18 @@ int
 Mapper::WriteWholeReverseMap(std::string fname)
 {
     int ret = 0;
-    uint64_t fileSize = ReverseMapPack::GetfileSizePerStripe() * info.maxVsid;
+    uint64_t fileSize = reverseMapManager->GetWholeReverseMapFileSize();
     char* buffer = new char[fileSize]();
 
     // Load Whole ReverseMap from Linux file(fname)
-    MetaFileIntf* filefromLoad = new MockFileIntf(fname);
+    MetaFileIntf* filefromLoad = new MockFileIntf(fname, iArrayinfo->GetName());
     filefromLoad->Open();
     filefromLoad->IssueIO(MetaFsIoOpcode::Read, 0, fileSize, buffer);
     filefromLoad->Close();
     delete filefromLoad;
 
     // Store Whole ReverseMap to MFS
-    ret = revMapWholefile->IssueIO(MetaFsIoOpcode::Write, 0, fileSize, buffer);
+    ret = reverseMapManager->StoreWholeReverseMap(buffer);
 
     delete[] buffer;
     return ret;
@@ -684,7 +457,7 @@ Mapper::WriteWholeReverseMap(std::string fname)
 int
 Mapper::ReadReverseMapEntry(StripeId vsid, BlkOffset offset, std::string fname)
 {
-    ReverseMapPack* reverseMapPack = new ReverseMapPack;
+    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack(false);
 
     int ret = _LoadReverseMapVsidFromMFS(reverseMapPack, vsid);
 
@@ -709,7 +482,7 @@ int
 Mapper::WriteReverseMapEntry(StripeId vsid, BlkOffset offset, BlkAddr rba,
     uint32_t volumeId)
 {
-    ReverseMapPack* reverseMapPack = new ReverseMapPack;
+    ReverseMapPack* reverseMapPack = reverseMapManager->AllocReverseMapPack(false);
 
     int ret = _LoadReverseMapVsidFromMFS(reverseMapPack, vsid);
     if (ret < 0)
@@ -774,30 +547,22 @@ Mapper::GetMapLayout(std::string fname)
 {
     ofstream out(fname.c_str(), std::ofstream::app);
 
-    out << "Stripe Location: " << IN_WRITE_BUFFER_AREA << "(WRITE_BUFFER), "
-        << IN_USER_AREA << "(USER_AREA) " << std::endl;
-
-    out << "VSA map entry size: 0x" << std::hex
-        << sizeof(VirtualBlkAddr) << std::endl;
-    out << "Stripe map entry size: 0x" << std::hex
-        << sizeof(StripeAddr) << std::endl;
-
+    out << "Stripe Location: " << IN_WRITE_BUFFER_AREA << "(WRITE_BUFFER), " << IN_USER_AREA << "(USER_AREA) " << std::endl;
+    out << "VSA map entry size: 0x" << std::hex << sizeof(VirtualBlkAddr) << std::endl;
+    out << "Stripe map entry size: 0x" << std::hex << sizeof(StripeAddr) << std::endl;
     out << "VSA stripe id bit length: " << std::dec << STRIPE_ID_BIT_LEN << std::endl;
     out << "VSA block offset bit length: " << BLOCK_OFFSET_BIT_LEN << std::endl;
-
     out << "Stripe map location bit length: " << STRIPE_LOC_BIT_LEN << std::endl;
     out << "Stripe map stripe id bit length: " << STRIPE_ID_BIT_LEN << std::endl;
 
-    if (stripeMap == nullptr)
+    if (stripeMapManager->GetStripeMapContent() == nullptr)
     {
-        out << "Please create array and mount ibofos to see stripe map mpage info" << std::endl;
+        out << "Please create array and mount poseidonos to see stripe map mpage info" << std::endl;
     }
     else
     {
-        out << "Meta page size: 0x" << std::hex
-            << stripeMap->GetPageSize() << std::endl;
-        out << "Stripe map entries per mpage: 0x" << std::hex
-            << stripeMap->GetEntriesPerPage() << std::endl;
+        out << "Meta page size: 0x" << std::hex << stripeMapManager->GetStripeMapContent()->GetPageSize() << std::endl;
+        out << "Stripe map entries per mpage: 0x" << std::hex << stripeMapManager->GetStripeMapContent()->GetEntriesPerPage() << std::endl;
 
         VSAMapContent* validVsaMap = _GetFirstValidVolume();
         if (validVsaMap == nullptr)
@@ -806,8 +571,7 @@ Mapper::GetMapLayout(std::string fname)
         }
         else
         {
-            out << "VSA map entries per mpage: 0x" << std::hex
-                << validVsaMap->GetEntriesPerPage() << std::endl;
+            out << "VSA map entries per mpage: 0x" << std::hex << validVsaMap->GetEntriesPerPage() << std::endl;
         }
     }
 
@@ -832,32 +596,14 @@ Mapper::_GetFirstValidVolume(void)
     return nullptr;
 }
 
-int64_t
-Mapper::GetNumUsedBlocks(int volId)
-{
-    VSAMapContent* vsaMap = vsaMapManager->GetVSAMapContent(volId);
-    if (vsaMap == nullptr)
-    {
-        return -(int64_t)IBOF_EVENT_ID::VSAMAP_NULL_PTR;
-    }
-
-    return vsaMap->GetNumUsedBlocks();
-}
-
 void
-Mapper::CheckMapStoreDone(void)
+Mapper::WaitForFlushAllMapsDone(void)
 {
-    while (vsaMapManager->AllMapsAsyncFlushed() == false)
+    while (vsaMapManager->AllMapsAsyncFlushed() == false || stripeMapManager->AllMapsAsyncFlushed() == false)
     {
         usleep(1);
     }
-    IBOF_TRACE_INFO(EID(MAPPER_SUCCESS), "All VSAMaps and StripeMap are AsyncStored");
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "All VSAMaps and StripeMap are AsyncStored");
 }
 
-MetaFileIntf*
-Mapper::GetRevMapWholeFile(void)
-{
-    return revMapWholefile;
-}
-
-} // namespace ibofos
+} // namespace pos

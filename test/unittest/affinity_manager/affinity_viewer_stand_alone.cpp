@@ -1,10 +1,10 @@
 #include <numa.h>
 #include <iostream>
 
-#include "src/io/general_io/affinity_viewer.h"
+#include "src/cpu_affinity/affinity_viewer.h"
 
 using namespace std;
-using namespace ibofos;
+using namespace pos;
 
 int main(void)
 {

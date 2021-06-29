@@ -89,7 +89,7 @@ clean_up_build
 
 #########################################################
 notice "================================="
-notice "iBoFOS binding build test"
+notice "PoseidonOS binding build test"
 notice "================================="
 TARGET_OBJDIR=obj_output
 export OBJDIR=${TARGET_OBJDIR}

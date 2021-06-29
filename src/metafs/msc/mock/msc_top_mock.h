@@ -32,24 +32,28 @@
 
 #pragma once
 
-#include "mfs_media_info.h"
-#include "mfs_msc_top.h"
-#include "mfs_ret_code.h"
+#include <string>
+#include "src/metafs/include/meta_storage_info.h"
+#include "metafs_system_manager.h"
+#include "metafs_return_code.h"
 
-class MockMetaFsCoreMgrClass : public MetaFsMSCTopMgrClass
+namespace pos
+{
+class MockMetaFsCoreManager : public MetaFsMSCTopManager
 {
 public:
-    MockMetaFsCoreMgrClass(void);
-    virtual ~MockMetaFsCoreMgrClass(void);
+    MockMetaFsCoreManager(void);
+    virtual ~MockMetaFsCoreManager(void);
 
-    static MockMetaFsCoreMgrClass& GetInstance(void);
+    static MockMetaFsCoreManager& GetInstance(void);
 
-    virtual bool Init(MetaStorageMediaInfoList& mediaInfoList) override;
-    virtual bool Bringup(void) override;
-    virtual IBOF_EVENT_ID ProcessNewReq(MetaFsControlReqMsg& reqMsg);
-    virtual bool IsMounted(void);
+    virtual bool Init(std::string& arrayName, MetaStorageMediaInfoList& mediaInfoList) override;
+    virtual bool Bringup(std::string& arrayName) override;
+    virtual POS_EVENT_ID ProcessNewReq(MetaFsControlReqMsg& reqMsg);
+    virtual bool IsMounted(std::string& arrayName);
     virtual void ResetState(void);
 
 protected:
     MetaStorageMediaInfoList mediaInfoList;
 };
+} // namespace pos

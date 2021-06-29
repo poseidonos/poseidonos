@@ -14,7 +14,7 @@ Synopsis
     ./spor_regression_test.sh [OPTION]
 
 Prerequisite
-    Build ibofos with journaling
+    Build poseidonos with journaling
 
 Description
     -t transport type, rdma or tcp
@@ -40,9 +40,9 @@ trtype=tcp
 port="1158"
 #---------------------------------------------------
 nvme_cli="nvme"
-nss="nqn.2019-04.ibof:subsystem"
+nss="nqn.2019-04.pos:subsystem"
 subsystem_num=6
-uram_backup_dir="/etc/uram_backup"
+uram_backup_dir="/tmp"
 log_dir="$(pwd)/spor_log"
 logfile="${log_dir}/spor_test.log"
 test_mode="precommit"
@@ -112,8 +112,8 @@ print_configuration()
 
 kill_ibofos()
 {
-    # kill ibofos if exists
-    execc ${ibof_root}/test/script/kill_ibofos.sh
+    # kill poseidonos if exists
+    execc ${ibof_root}/test/script/kill_poseidonos.sh
     echo ""
 }
 
@@ -125,14 +125,8 @@ clean_up()
     done
     notice "Remote NVMe drive has been disconnected..."
 
-    umount ${uram_backup_dir}
+	rm -rf ${uram_backup_dir}/*.uram.dat
     kill_ibofos
-}
-
-set_journal_enable()
-{
-    info "Enable journaling"
-    jq -r  '.journal.enable |= true'  ${ibof_root}/config/ibofos.conf > /etc/ibofos/conf/ibofos.conf
 }
 
 network_module_check()
@@ -144,11 +138,11 @@ run_test(){
     info "Start SPOR regression test"
 
     cd ${ibof_root}/test/system/spor
-    
+
     if [ ${test_mode} = "precommit" ] ; then
-        python3 run_all_tests.py -f ${target_fabric_ip} -l ${log_dir} -q -s "SPOR_BASIC_[3,6,8].py"
+        python3 run_all_tests.py -f ${target_fabric_ip} -l ${log_dir} -q -s "SPOR_BASIC_4.py, SPOR_MULTI_VOLUME_WRITE_2.py, SPOR_OVERWRITE_2.py, SPOR_CHECK_POINT_3.py"
     elif [ ${test_mode} = "postcommit" ] ; then
-        python3 run_all_tests.py -f ${target_fabric_ip} -l ${log_dir} -q
+        python3 run_all_tests.py -f ${target_fabric_ip} -l ${log_dir} -q -s "SPOR_BASIC_[4,5].py, SPOR_MULTI_VOLUME_WRITE_2.py, SPOR_OVERWRITE_2.py, SPOR_CHECK_POINT*.py, SPOR_VOLUME_BASIC_[2,5,6].py, SPOR_MULTI_ARRAY_4.py"
     fi
 
     if [ $? -ne 0 ];then
@@ -176,7 +170,6 @@ info "Starting SPOR CI test..."
 check_permission
 print_configuration
 clean_up
-set_journal_enable
 network_module_check 
 
 run_test

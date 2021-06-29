@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(block_manager_ut block_manager_test.cpp)

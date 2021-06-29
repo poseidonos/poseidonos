@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(log_buffer_layout_ut log_buffer_layout_test.cpp)
+POS_ADD_UNIT_TEST(journal_configuration_ut journal_configuration_test.cpp)

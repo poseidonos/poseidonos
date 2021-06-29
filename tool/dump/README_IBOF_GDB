@@ -16,7 +16,7 @@ ibofgdb [command] [subcommand]
 3) ibofgdb pending ubio
    show pending ubio when debug option is on.
 
-4) ibofgdb pending io_context
+4) ibofgdb pending iocontext
    show pending io context when debug option is on.
 
 5) ibofgdb callback

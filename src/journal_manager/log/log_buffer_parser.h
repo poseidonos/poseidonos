@@ -32,20 +32,42 @@
 
 #pragma once
 
-#include "log_handler.h"
+#include <cstdint>
+#include <vector>
 
-namespace ibofos
+#include "src/journal_manager/log/log_group_footer.h"
+#include "src/journal_manager/log/log_handler.h"
+#include "src/journal_manager/log/log_list.h"
+
+namespace pos
 {
 class LogBufferParser
 {
 public:
     LogBufferParser(void);
     virtual ~LogBufferParser(void);
-    int GetLogs(void* buffer, uint32_t size, LogList& logs);
+    int GetLogs(void* buffer, uint64_t bufferSize, LogList& logs);
 
 private:
-    char* _GetNextValidLogEntry(char* buffer, uint32_t& currentOffset,
-        int& curLogType, uint32_t bufferSize);
+    class ValidMarkFinder
+    {
+    public:
+        ValidMarkFinder(char* bufferPtr, uint64_t maxOffset);
+        virtual ~ValidMarkFinder(void) = default;
+
+        bool GetNextValidMarkOffset(uint64_t startOffset, uint64_t& foundOffset);
+
+    private:
+        char* buffer;
+        uint64_t maxOffset;
+    };
+
+    void _LogFound(LogType type);
+    void _PrintFoundLogTypes(void);
+
+    LogHandlerInterface* _GetLogHandler(char* ptr);
+
+    std::vector<int> logsFound;
 };
 
-} // namespace ibofos
+} // namespace pos

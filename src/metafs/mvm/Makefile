@@ -18,26 +18,26 @@ VPATH += $(MFS_INCLUDE_PATH)
 ###############################################################
 
 SRCS += $(wildcard *.cpp) \
-	meta_file_mgr.cpp \
-	meta_vol_base.cpp \
-	meta_vol_catalog.cpp \
-	meta_vol_catalog_mgr.cpp \
+	meta_file_manager.cpp \
+	meta_volume.cpp \
+	volume_catalog.cpp \
+	volume_catalog_manager.cpp \
 	mf_extent.cpp \
 	mf_extent_mgr.cpp \
 	mf_inode.cpp \
-	mf_inode_hdr.cpp \
+	inode_table_header.cpp \
 	mf_inode_mgr.cpp \
-	mf_inode_table.cpp \
+	inode_table.cpp \
 	on_volume_meta_region_mgr.cpp \
-	ssd_meta_vol.cpp \
-	nvram_meta_vol.cpp \
+	ssd_meta_volume.cpp \
+	nvram_meta_volume.cpp \
 	region.cpp \
 	region_deque.cpp
 
-UT_SRCS +=\
-    mvm_test.cpp \
-    mvm_func_negative_test.cpp \
-    mvm_func_positive_test.cpp 
+#UT_SRCS +=\
+#    mvm_test.cpp \
+#    mvm_func_negative_test.cpp \
+#    mvm_func_positive_test.cpp 
 
 
 SRCS += $(UT_SRCS)

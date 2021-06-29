@@ -34,9 +34,12 @@
 
 #include <algorithm>
 
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-namespace ibofos
+
+using namespace std;
+
+namespace pos
 {
 StateList::~StateList()
 {
@@ -44,101 +47,83 @@ StateList::~StateList()
 }
 
 void
-StateList::Add(StateContext ctx)
+StateList::Add(StateContext* ctx)
 {
-    if (Exist(ctx) == false)
+    unique_lock<mutex> lock(listMutex);
+    if (Exists(ctx) == false)
     {
-        listMutex.lock();
-        clock_gettime(CLOCK_REALTIME, &ctx.issued_time);
         contextList.push_back(ctx);
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::STATE_CONTEXT_UPDATED,
-            "statecontext added - {}", ctx.GetUuid());
-        sort(contextList.begin(), contextList.end());
-        StateContext next = contextList.front();
-        listMutex.unlock();
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::STATE_CONTEXT_UPDATED,
+            "statecontext added - {}", ctx->GetSituation().ToString());
+        sort(contextList.begin(), contextList.end(), _Compare);
+        StateContext* next = contextList.front();
         listUpdated(next);
     }
 }
 
 void
-StateList::Remove(StateContext ctx)
+StateList::Remove(StateContext* ctx)
 {
-    auto it = Find(ctx);
+    unique_lock<mutex> lock(listMutex);
+    auto it = _Find(ctx);
     if (it != contextList.end())
     {
-        listMutex.lock();
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::STATE_CONTEXT_UPDATED,
-            "statecontext removed - {}", ctx.GetUuid());
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::STATE_CONTEXT_UPDATED,
+            "statecontext removed - {}", (*it)->GetSituation().ToString());
         contextList.erase(it);
-        StateContext next = contextList.front();
-        listMutex.unlock();
+        StateContext* next = contextList.front();
         listUpdated(next);
     }
 }
 
 bool
-StateList::Exist(StateContext ctx)
+StateList::Exists(StateContext* ctx)
 {
-    return Find(ctx) != contextList.end();
+    return _Find(ctx) != contextList.end();
 }
 
 bool
-StateList::ExistRebuild(void)
+StateList::Exists(StateEnum state)
 {
-    bool exist = false;
-
-    listMutex.lock();
-    for (StateContext ctx : contextList)
+    for (auto it = contextList.begin(); it != contextList.end(); ++it)
     {
-        if (ctx.GetSituation() == Situation::REBUILDING)
+        if ((*it)->ToStateType() == state)
         {
-            exist = true;
-            break;
+            return true;
         }
     }
-    listMutex.unlock();
-    return exist;
+    return false;
 }
 
-void
-StateList::AddandRemove(StateContext add, StateContext remove)
+bool StateList::Exists(SituationEnum situ)
 {
-    IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::STATE_CONTEXT_UPDATED,
-        "statecontext add {} and remove {}",
-        add.GetUuid(), remove.GetUuid());
-    bool isChanged = false;
-    listMutex.lock();
-    if (Exist(add) == false)
+    for (auto it = contextList.begin(); it != contextList.end(); ++it)
     {
-        clock_gettime(CLOCK_REALTIME, &add.issued_time);
-        contextList.push_back(add);
-        isChanged = true;
+        if ((*it)->GetSituation() == situ)
+        {
+            return true;
+        }
     }
-
-    auto it = Find(remove);
-    if (it != contextList.end())
-    {
-        contextList.erase(it);
-        isChanged = true;
-    }
-
-    if (isChanged == true)
-    {
-        sort(contextList.begin(), contextList.end());
-        StateContext next = contextList.front();
-        listMutex.unlock();
-        listUpdated(next);
-    }
-    else
-    {
-        listMutex.unlock();
-    }
+    return false;
 }
 
-vector<StateContext>::iterator
-StateList::Find(StateContext ctx)
+vector<StateContext*>::iterator
+StateList::_Find(StateContext* ctx)
 {
-    return find(contextList.begin(), contextList.end(), ctx);
+    for (auto it = contextList.begin(); it != contextList.end(); ++it)
+    {
+        if (*it == ctx)
+        {
+            return it;
+        }
+    }
+    return contextList.end();
 }
 
-} // namespace ibofos
+bool
+StateList::_Compare(StateContext* a, StateContext* b)
+{
+    return a->GetPriority() > b->GetPriority();
+}
+
+} // namespace pos

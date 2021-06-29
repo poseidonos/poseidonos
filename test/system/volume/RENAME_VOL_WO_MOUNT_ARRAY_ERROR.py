@@ -7,11 +7,12 @@ sys.path.append("../lib/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
 import MOUNT_VOL_BASIC_1
 
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 NAME = MOUNT_VOL_BASIC_1.VOL_NAME
 NEW_NAME = "new_vol"
 
@@ -28,11 +29,11 @@ def set_result(detail):
 def execute():
     clear_result()
     MOUNT_VOL_BASIC_1.execute()
-    cli.unmount_ibofos()
-    out = cli.rename_volume(NAME, NEW_NAME, "")
+    cli.unmount_array(ARRAYNAME)
+    out = cli.rename_volume(NAME, NEW_NAME, ARRAYNAME)
     return out
 
 if __name__ == "__main__":
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

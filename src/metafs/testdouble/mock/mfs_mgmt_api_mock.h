@@ -35,12 +35,15 @@
 #include <string>
 
 #include "gmock/gmock.h"
-#include "mfs_mgmt_api_base.h"
+#include "metafs_file_control_api_base.h"
 
-class MetaFsMgmtApiWrapperClass : public IMetaFsMgmtApiWrapperClass
+namespace pos
+{
+class MetaFsFileControlApi : public IMetaFsMgmtApiWrapper
 {
 public:
-    MOCK_METHOD(MetaFsReturnCode<MetaFsStatusCodeMgmtSpcf>, Create, (std::string & fileName, uint64_t fileByteSize, MetaFilePropertySet prop), (override));
-    MOCK_METHOD(MetaFsReturnCode<MetaFsStatusCodeMgmtSpcf>, Open, (std::string & fileName), (override));
-    MOCK_METHOD(MetaFsReturnCode<MetaFsStatusCodeMgmtSpcf>, Close, (uint32_t fd), (override));
+    MOCK_METHOD(MetaFsReturnCode<MetaFsStatusCodeMgmtSpcf>, Create, (std::string & fileName, std::string& arrayName, uint64_t fileByteSize, MetaFilePropertySet prop), (override));
+    MOCK_METHOD(MetaFsReturnCode<MetaFsStatusCodeMgmtSpcf>, Open, (std::string & fileName, std::string& arrayName), (override));
+    MOCK_METHOD(MetaFsReturnCode<MetaFsStatusCodeMgmtSpcf>, Close, (uint32_t fd, std::string& arrayName), (override));
 };
+} // namespace pos

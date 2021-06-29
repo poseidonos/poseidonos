@@ -34,71 +34,42 @@
 #define PARTITION_MANAGER_H_
 
 #include <array>
-#include <condition_variable>
-#include <list>
-#include <mutex>
+#include <string>
 #include <vector>
 
 #include "partition.h"
-#include "rebuild_job.h"
-#include "src/include/address_type.h"
-
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
-using RebuildResultCallback = function<void(RebuildState)>;
 class Ubio;
-
-struct RebuildJobs
-{
-    list<RebuildJob*> jobList;
-    RebuildState state;
-    RebuildProgress* progress = nullptr;
-    RebuildResultCallback resultCb = nullptr;
-};
+class ArrayInterface;
+class IAbrControl;
 
 class PartitionManager
 {
-    friend class WbtCmdHandler;
+    friend class ParityLocationWbtCommand;
 
 public:
-    PartitionManager();
-    virtual ~PartitionManager()
-    {
-    }
-    const PartitionLogicalSize* GetSizeInfo(PartitionType type);
-    int Translate(const PartitionType type,
-        PhysicalBlkAddr& dst,
-        const LogicalBlkAddr& src);
-    int Convert(const PartitionType type,
-        list<PhysicalWriteEntry>& dst,
-        const LogicalWriteEntry& src);
-    int CreateAll(ArrayDevice* nvm, vector<ArrayDevice*> dataDevs);
-    void DeleteAll();
-    void Rebuild(ArrayDevice* target, RebuildResultCallback cb);
-    void StopRebuilding();
-    uint32_t GetRebuildingProgress();
-    int RebuildRead(UbioSmartPtr ubio);
-    bool TryLock(PartitionType type, StripeId stripeId);
-    void Unlock(PartitionType type, StripeId stripeId);
+    PartitionManager(string array, IAbrControl* abr);
+    virtual ~PartitionManager();
+    virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type);
+    virtual int CreateAll(vector<ArrayDevice*> buf, vector<ArrayDevice*> data,
+        ArrayInterface* intf);
+    virtual void DeleteAll(ArrayInterface* intf);
+    virtual void FormatMetaPartition(vector<ArrayDevice*> data, ArrayInterface* intf);
 
 private:
-    int _CreateMetaSsd(vector<ArrayDevice*> devs);
-    int _CreateUserData(const vector<ArrayDevice*> devs, const ArrayDevice* nvm);
-    int _CreateMetaNvm(ArrayDevice* dev);
-    int _CreateWriteBuffer(ArrayDevice* dev);
-    void _DoRebuilding(RebuildJob* job);
-    void _RebuildDone(void);
-    void _RebuildingProgressUpdated(void);
-    void _WaitRebuildingDone(void);
+    int _CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf);
+    int _CreateUserData(const vector<ArrayDevice*> devs, ArrayDevice* nvm, ArrayInterface* intf);
+    int _CreateMetaNvm(ArrayDevice* dev, ArrayInterface* intf);
+    int _CreateWriteBuffer(ArrayDevice* dev, ArrayInterface* intf);
     ArrayDevice* _GetBaseline(const vector<ArrayDevice*>& devs);
 
+    string arrayName_ = "";
     array<Partition*, PartitionType::PARTITION_TYPE_MAX> partitions_;
-    mutex rebuildMtx;
-    condition_variable rebuildCv;
-    RebuildJobs rebuildJobs;
+    IAbrControl* abrControl = nullptr;
 };
 
-} // namespace ibofos
+} // namespace pos
 #endif // PARTITION_MANAGER_H_

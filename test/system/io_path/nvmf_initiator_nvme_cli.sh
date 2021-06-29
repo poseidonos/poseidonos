@@ -4,11 +4,11 @@
 #
 
 ROOT_DIR=$(readlink -f $(dirname $0))/../../../
-SPDK_DIR=$ROOT_DIR/lib/spdk-19.10
+SPDK_DIR=$ROOT_DIR/lib/spdk
 
-NVMF_TARGET_NQN_PREFIX=nqn.2019-04.ibof:subsystem
+NVMF_TARGET_NQN_PREFIX=nqn.2019-04.pos:subsystem
 NVMF_TARGET_PORT=1158
-NVMF_INITIATOR_APP=$ROOT_DIR/lib/nvme-cli-1.8.1/nvme
+NVMF_INITIATOR_APP=nvme
 
 DEFAULT_VOLUME_COUNT=1
 DEFAULT_TEST_COUNT=1

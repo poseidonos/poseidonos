@@ -34,25 +34,22 @@
 
 #include <queue>
 #include <vector>
+#include <iostream>
+#include <iomanip>
 
-#include "../log/log_buffer_parser.h"
-#include "../log_buffer/journal_log_buffer.h"
-#include "src/include/ibof_event_id.h"
+#include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/replay/replay_log_list.h"
+#include "src/journal_manager/log/log_buffer_parser.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-namespace ibofos
+namespace pos
 {
-struct SeqNumComparator
-{
-    bool
-    operator()(LogList a, LogList b)
-    {
-        return (a.front()->GetSeqNum() > b.front()->GetSeqNum());
-    }
-};
 
-ReadLogBuffer::ReadLogBuffer(JournalLogBuffer* logBuffer,
-    LogList& logList, ReplayProgressReporter* reporter)
+ReadLogBuffer::ReadLogBuffer(JournalConfiguration* journalConfig,
+    JournalLogBuffer* logBuffer, ReplayLogList& logList, ReplayProgressReporter* reporter)
 : ReplayTask(reporter),
+  config(journalConfig),
   logBuffer(logBuffer),
   logList(logList)
 {
@@ -60,67 +57,64 @@ ReadLogBuffer::ReadLogBuffer(JournalLogBuffer* logBuffer,
 
 ReadLogBuffer::~ReadLogBuffer(void)
 {
+    for (auto buffer : readLogBuffer)
+    {
+        free(buffer);
+    }
+    readLogBuffer.clear();
 }
 
 int
 ReadLogBuffer::GetNumSubTasks(void)
 {
-    return 2 * logBuffer->GetNumLogGroups();
+    return config->GetNumLogGroups();
 }
 
 int
 ReadLogBuffer::Start(void)
 {
-    int result = 0;
+    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
+    POS_TRACE_DEBUG(eventId, "[ReplayTask] Read log buffer started");
 
-    std::priority_queue<LogList, std::vector<LogList>, SeqNumComparator> logs;
+    int result = 0;
     LogBufferParser parser;
 
-    int numLogGroups = logBuffer->GetNumLogGroups();
-    int groupSize = logBuffer->GetLogGroupSize();
-    void* logGroupBuffer = malloc(groupSize);
+    int numLogGroups = config->GetNumLogGroups();
+    uint64_t groupSize = config->GetLogGroupSize();
 
     for (int groupId = 0; groupId < numLogGroups; groupId++)
     {
+        void* logGroupBuffer = malloc(groupSize);
+        readLogBuffer.push_back(logGroupBuffer);
+
         result = logBuffer->ReadLogBuffer(groupId, logGroupBuffer);
         if (result != 0)
         {
             break;
         }
 
-        LogList groupLogs;
-        result = parser.GetLogs(logGroupBuffer, groupSize, groupLogs);
+        result = parser.GetLogs(logGroupBuffer, groupSize, logList);
         if (result != 0)
         {
             break;
-        }
-
-        if (groupLogs.size() != 0)
-        {
-            logs.push(groupLogs);
         }
         reporter->SubTaskCompleted(GetId(), 1);
     }
 
     if (result == 0)
     {
-        while (logs.size() != 0)
+        if (logList.IsEmpty() == true)
         {
-            LogList groupLogs = logs.top();
-            logList.insert(logList.end(), groupLogs.begin(), groupLogs.end());
-            logs.pop();
+            int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STOPPED);
+            std::ostringstream os;
+            os << "No logs to replay. Stop replaying";
 
-            reporter->SubTaskCompleted(GetId(), 1);
-        }
-
-        if (logList.size() == 0)
-        {
-            IBOF_TRACE_INFO(EID(JOURNAL_REPLAY_STOPPED), "No logs to replay. Stop replaying");
-            result = (int)IBOF_EVENT_ID::JOURNAL_REPLAY_STOPPED;
+            POS_TRACE_DEBUG(eventId, os.str());
+            POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
+            result = eventId;
         }
     }
 
-    free(logGroupBuffer);
     return result;
 }
 
@@ -136,4 +130,4 @@ ReadLogBuffer::GetWeight(void)
     return 50;
 }
 
-} // namespace ibofos
+} // namespace pos

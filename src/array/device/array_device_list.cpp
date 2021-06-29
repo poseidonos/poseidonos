@@ -35,11 +35,11 @@
 #include <algorithm>
 #include <functional>
 
-#include "src/device/ublock_device.h"
-#include "src/include/ibof_event_id.h"
+#include "src/device/base/ublock_device.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
 ArrayDeviceList::ArrayDeviceList()
 {
@@ -58,7 +58,7 @@ ArrayDeviceList::ExportNames()
     DeviceSet<string> devices;
 
     for_each(devSet_.nvm.begin(), devSet_.nvm.end(), [&](ArrayDevice* dev) {
-        devices.nvm.push_back(dev->uBlock->GetName());
+        devices.nvm.push_back(dev->GetUblock()->GetName());
     });
 
     for_each(devSet_.data.begin(), devSet_.data.end(), [&](ArrayDevice* dev) {
@@ -69,12 +69,12 @@ ArrayDeviceList::ExportNames()
         }
         else
         {
-            devices.data.push_back(dev->uBlock->GetName());
+            devices.data.push_back(dev->GetUblock()->GetName());
         }
     });
 
     for_each(devSet_.spares.begin(), devSet_.spares.end(), [&](ArrayDevice* dev) {
-        devices.spares.push_back(dev->uBlock->GetName());
+        devices.spares.push_back(dev->GetUblock()->GetName());
     });
 
     return devices;
@@ -92,35 +92,35 @@ ArrayDeviceList::SetNvm(ArrayDevice* nvm)
     unique_lock<mutex> lock(*mtx);
     if (devSet_.nvm.size() != 0)
     {
-        int eventId = (int)IBOF_EVENT_ID::ARRAY_DEVICE_ADD_FAIL;
-        IBOF_TRACE_WARN(eventId,
+        int eventId = (int)POS_EVENT_ID::ARRAY_DEVICE_ADD_FAIL;
+        POS_TRACE_WARN(eventId,
             "set nvm device without reset previous nvm");
         return eventId;
     }
 
-    if (nvm == nullptr || nvm->uBlock == nullptr)
+    if (nvm == nullptr || nvm->GetUblock() == nullptr)
     {
-        int eventId = (int)IBOF_EVENT_ID::ARRAY_DEVICE_ADD_FAIL;
-        IBOF_TRACE_WARN(eventId,
+        int eventId = (int)POS_EVENT_ID::ARRAY_DEVICE_ADD_FAIL;
+        POS_TRACE_WARN(eventId,
             "failed to add buffer device to the Array");
         return eventId;
     }
-    else if (nvm->uBlock != nullptr)
+    else if (nvm->GetUblock() != nullptr)
     {
-        if (Exists(nvm->uBlock->GetName()) != ArrayDeviceType::NONE)
+        if (Exists(nvm->GetUblock()->GetName()) != ArrayDeviceType::NONE)
         {
-            int eventId = (int)IBOF_EVENT_ID::ARRAY_DEVICE_ADD_FAIL;
-            IBOF_TRACE_WARN(eventId,
+            int eventId = (int)POS_EVENT_ID::ARRAY_DEVICE_ADD_FAIL;
+            POS_TRACE_WARN(eventId,
                 "failed to add the device {} to the Array",
-                nvm->uBlock->GetName());
+                nvm->GetUblock()->GetName());
             return eventId;
         }
-        nvm->uBlock->SetClass(DeviceClass::ARRAY);
+        nvm->GetUblock()->SetClass(DeviceClass::ARRAY);
     }
     devSet_.nvm.push_back(nvm);
-    IBOF_TRACE_INFO(IBOF_EVENT_ID::ARRAY_DEVICE_ADDED,
+    POS_TRACE_INFO(POS_EVENT_ID::ARRAY_DEVICE_ADDED,
         "the device {} added to the Array as NVM",
-        nvm->uBlock->GetName());
+        nvm->GetUblock()->GetName());
     return 0;
 }
 
@@ -128,20 +128,20 @@ int
 ArrayDeviceList::AddData(ArrayDevice* dev)
 {
     unique_lock<mutex> lock(*mtx);
-    if (dev->uBlock != nullptr)
+    if (dev->GetUblock() != nullptr)
     {
-        if (Exists(dev->uBlock->GetName()) != ArrayDeviceType::NONE)
+        if (Exists(dev->GetUblock()->GetName()) != ArrayDeviceType::NONE)
         {
-            int eventId = (int)IBOF_EVENT_ID::ARRAY_DEVICE_ADD_FAIL;
-            IBOF_TRACE_WARN(eventId,
+            int eventId = (int)POS_EVENT_ID::ARRAY_DEVICE_ADD_FAIL;
+            POS_TRACE_WARN(eventId,
                 "failed to add the device {} to the Array, Duplicated",
-                dev->uBlock->GetName());
+                dev->GetUblock()->GetName());
             return eventId; // already exists
         }
-        dev->uBlock->SetClass(DeviceClass::ARRAY);
+        dev->GetUblock()->SetClass(DeviceClass::ARRAY);
     }
     devSet_.data.push_back(dev);
-    IBOF_TRACE_INFO(IBOF_EVENT_ID::ARRAY_DEVICE_ADDED,
+    POS_TRACE_INFO(POS_EVENT_ID::ARRAY_DEVICE_ADDED,
         "the device added to the Array as DATA");
     return 0;
 }
@@ -150,20 +150,20 @@ int
 ArrayDeviceList::AddSpare(ArrayDevice* dev)
 {
     unique_lock<mutex> lock(*mtx);
-    ArrayDeviceType existType = Exists(dev->uBlock->GetName());
+    ArrayDeviceType existType = Exists(dev->GetUblock()->GetName());
     if (existType != ArrayDeviceType::NONE)
     {
-        int eventId = (int)IBOF_EVENT_ID::ARRAY_DEVICE_ADD_FAIL;
-        IBOF_TRACE_WARN(eventId,
+        int eventId = (int)POS_EVENT_ID::ARRAY_DEVICE_ADD_FAIL;
+        POS_TRACE_WARN(eventId,
             "failed to add the device {} to the Array, Duplicated",
-            dev->uBlock->GetName());
+            dev->GetUblock()->GetName());
         return eventId; // already exists
     }
-    dev->uBlock->SetClass(DeviceClass::ARRAY);
+    dev->GetUblock()->SetClass(DeviceClass::ARRAY);
     devSet_.spares.push_back(dev);
-    IBOF_TRACE_INFO(IBOF_EVENT_ID::ARRAY_DEVICE_ADDED,
+    POS_TRACE_INFO(POS_EVENT_ID::ARRAY_DEVICE_ADDED,
         "the device {} added to the Array as SPARE",
-        dev->uBlock->GetName());
+        dev->GetUblock()->GetName());
     return 0;
 }
 
@@ -174,9 +174,9 @@ ArrayDeviceList::RemoveSpare(ArrayDevice* target)
     auto it = FindSpare(target);
     if (it == devSet_.spares.end())
     {
-        return (int)IBOF_EVENT_ID::ARRAY_DEVICE_REMOVE_FAIL;
+        return (int)POS_EVENT_ID::ARRAY_DEVICE_REMOVE_FAIL;
     }
-    (*it)->uBlock->SetClass(DeviceClass::SYSTEM);
+    (*it)->GetUblock()->SetClass(DeviceClass::SYSTEM);
     devSet_.spares.erase(it);
     return 0;
 }
@@ -188,9 +188,9 @@ ArrayDeviceList::Clear()
 
     for (ArrayDevice* dev : devSet_.nvm)
     {
-        if (dev->uBlock != nullptr)
+        if (dev->GetUblock() != nullptr)
         {
-            dev->uBlock->SetClass(DeviceClass::SYSTEM);
+            dev->GetUblock()->SetClass(DeviceClass::SYSTEM);
         }
         delete dev;
     }
@@ -198,9 +198,9 @@ ArrayDeviceList::Clear()
 
     for (ArrayDevice* dev : devSet_.data)
     {
-        if (dev->uBlock != nullptr)
+        if (dev->GetUblock() != nullptr)
         {
-            dev->uBlock->SetClass(DeviceClass::SYSTEM);
+            dev->GetUblock()->SetClass(DeviceClass::SYSTEM);
         }
         delete dev;
     }
@@ -208,15 +208,15 @@ ArrayDeviceList::Clear()
 
     for (ArrayDevice* dev : devSet_.spares)
     {
-        if (dev->uBlock != nullptr)
+        if (dev->GetUblock() != nullptr)
         {
-            dev->uBlock->SetClass(DeviceClass::SYSTEM);
+            dev->GetUblock()->SetClass(DeviceClass::SYSTEM);
         }
         delete dev;
     }
     devSet_.spares.clear();
 
-    IBOF_TRACE_INFO(IBOF_EVENT_ID::ARRAY_DEVICE_CLEARED,
+    POS_TRACE_INFO(POS_EVENT_ID::ARRAY_DEVICE_CLEARED,
         "the array devices are cleared");
 }
 
@@ -224,7 +224,7 @@ vector<ArrayDevice*>::iterator
 ArrayDeviceList::FindNvm(string devName)
 {
     auto it = find_if(devSet_.nvm.begin(), devSet_.nvm.end(), [&](ArrayDevice* dev) -> bool {
-        return dev->uBlock != nullptr && dev->uBlock->GetName() == devName;
+        return dev->GetUblock() != nullptr && dev->GetUblock()->GetName() == devName;
     });
 
     return it;
@@ -234,7 +234,7 @@ vector<ArrayDevice*>::iterator
 ArrayDeviceList::FindData(string devName)
 {
     auto it = find_if(devSet_.data.begin(), devSet_.data.end(), [&](ArrayDevice* dev) -> bool {
-        return dev->uBlock != nullptr && dev->uBlock->GetName() == devName;
+        return dev->GetUblock() != nullptr && dev->GetUblock()->GetName() == devName;
     });
 
     return it;
@@ -244,7 +244,7 @@ vector<ArrayDevice*>::iterator
 ArrayDeviceList::FindSpare(string devName)
 {
     auto it = find_if(devSet_.spares.begin(), devSet_.spares.end(), [&](ArrayDevice* dev) -> bool {
-        return dev->uBlock->GetName() == devName;
+        return dev->GetUblock()->GetName() == devName;
     });
 
     return it;
@@ -287,20 +287,18 @@ ArrayDeviceList::SpareToData(ArrayDevice* target)
     unique_lock<mutex> lock(*mtx);
     if (devSet_.spares.size() == 0)
     {
-        IBOF_TRACE_WARN((int)IBOF_EVENT_ID::ARRAY_NO_REMAINING_SPARE,
+        POS_TRACE_WARN((int)POS_EVENT_ID::ARRAY_NO_REMAINING_SPARE,
             "No remaining spare device");
-        return (int)IBOF_EVENT_ID::ARRAY_NO_REMAINING_SPARE;
+        return (int)POS_EVENT_ID::ARRAY_NO_REMAINING_SPARE;
     }
 
     ArrayDevice* spare = devSet_.spares.back();
-    IBOF_TRACE_INFO((int)IBOF_EVENT_ID::ARRAY_DEVICE_REPLACED,
-        "Faulty device is replaced to the spare {}", spare->uBlock->GetName());
-    target->uBlock = spare->uBlock;
-    spare->uBlock = nullptr;
-    delete spare;
+    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEVICE_REPLACED,
+        "Faulty device is replaced to the spare {}", spare->GetUblock()->GetName());
+    target->SetUblock(spare->GetUblock());
     devSet_.spares.pop_back();
 
     return 0;
 }
 
-} // namespace ibofos
+} // namespace pos

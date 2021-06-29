@@ -1,97 +1,109 @@
 
-#ifndef AIR_CONFIG_H
-#define AIR_CONFIG_H
+#ifndef AIR_CONFIG_PARSER_H
+#define AIR_CONFIG_PARSER_H
 
-#include "src/config/ConfigChecker.h"
+#include <iostream>
+#include <string>
+
 #include "src/config/ConfigLib.h"
-#include "src/config/ConfigString.h"
-
-#define AIR_CFG_FILE <AIR_CFG>
+#include "src/config/ConfigReader.h"
+#include "src/lib/StringView.h"
 
 namespace config
 {
-struct ConfigReader
-{
-    ConfigReader(void)
-    {
-    }
-    ~ConfigReader(void)
-    {
-    }
-    static constexpr uint32_t
-    GetStrArrSize(String cfg_str)
-    {
-        size_t count{0};
-        size_t pos{0};
-
-        pos = cfg_str.Find("\"");
-        while (npos != pos)
-        {
-            pos = cfg_str.Find("\"", pos + 1);
-            count++;
-        }
-
-        return (count / 2);
-    }
-
-    static constexpr String
-    GetStrArrFromRawData(String start_del,
-        String end_del)
-    {
-        size_t start_pos = raw_data.Find(start_del) + start_del.Length() + 1;
-        size_t end_pos = raw_data.Find(end_del);
-        return raw_data.Substr(start_pos, end_pos - start_pos);
-    }
-
-private:
-    static constexpr String raw_data =
-#include AIR_CFG_FILE
-        ;
-};
-
-class Config
+class ConfigParser
 {
 public:
-    Config(void)
+    ConfigParser(void)
     {
     }
-    virtual ~Config(void)
+    virtual ~ConfigParser(void)
     {
     }
 
     static constexpr int32_t
-    GetIntValueFromEntry(String entry, String key)
+    GetItemSizeFromFilterSentence(air::string_view sentence)
     {
-        if (key != "AirBuild" && key != "NodeBuild" && key != "NodeRun" &&
-            key != "AidSize" && key != "StreamingInterval" &&
-            key != "SamplingRatio")
+        size_t value_start_pos = sentence.find("(");
+        size_t value_end_pos = sentence.find(")");
+        air::string_view value = sentence.substr(value_start_pos + 1, value_end_pos - value_start_pos - 1);
+
+        size_t range_pos = value.find("...");
+        size_t comma_pos = value.find(",");
+
+        if (air::string_view::npos != range_pos)
+        {
+            air::string_view start_item = value.substr(0, range_pos);
+            air::string_view end_item = value.substr(range_pos + 3, value.size() - range_pos - 3);
+            start_item = Strip(start_item);
+            end_item = Strip(end_item);
+            size_t start_token_pos = start_item.find("_");
+            size_t end_token_pos = end_item.find("_");
+            air::string_view start_suffix = start_item.substr(start_token_pos + 1, start_item.size() - start_token_pos);
+            air::string_view end_suffix = end_item.substr(end_token_pos + 1, end_item.size() - end_token_pos);
+            uint32_t start_num = Stoi(start_suffix);
+            uint32_t end_num = Stoi(end_suffix);
+
+            if (end_num < start_num)
+            {
+                return -1;
+            }
+
+            return end_num - start_num + 1;
+        }
+        else if (air::string_view::npos != comma_pos)
+        {
+            int32_t count{0};
+            size_t c_index{0};
+
+            while (c_index < value.size())
+            {
+                if (',' == value[c_index])
+                {
+                    count++;
+                }
+                c_index++;
+            }
+
+            return count + 1;
+        }
+        else
+        {
+            return 1;
+        }
+
+        return -1;
+    }
+
+    static constexpr int32_t
+    GetIntValueFromSentence(air::string_view sentence, air::string_view key, air::string_view index = "")
+    {
+        size_t start_pos = sentence.find(key);
+
+        if (air::string_view::npos == start_pos)
         {
             return -1;
         }
 
-        size_t start_pos = entry.Find(key);
-
-        if (npos == start_pos)
+        if (key == "Item")
         {
-            return -1;
+            return _GetItemIndexValueFromFilterSentence(sentence, index);
         }
 
-        size_t comma_pos = entry.Find(",", start_pos + 1);
-        if (comma_pos > entry.Size())
+        size_t comma_pos = sentence.find(",", start_pos + 1);
+        if (comma_pos > sentence.size())
         {
-            comma_pos = entry.Size();
+            comma_pos = sentence.size();
         }
-        String key_value = entry.Substr(start_pos, comma_pos - start_pos + 1);
-        size_t colon_pos = key_value.Find(":");
+        air::string_view key_value = sentence.substr(start_pos, comma_pos - start_pos);
+        size_t colon_pos = key_value.find(":");
 
-        String value =
-            key_value.Substr(colon_pos + 1, key_value.Length() - colon_pos);
+        air::string_view value = key_value.substr(colon_pos + 1, key_value.size() - colon_pos);
         value = Strip(value);
 
-        if (key == "AirBuild" || key == "NodeBuild" || key == "NodeRun")
+        if (key == "AirBuild" || key == "NodeBuild" || key == "NodeRun" || key == "Build" || key == "Run")
         {
-            if (value == "True" || value == "true" || value == "On" ||
-                value == "on")
+            if (value == "TRUE" || value == "True" || value == "true" || value == "ON" || value == "On" || value == "on")
             {
                 return 1;
             }
@@ -101,113 +113,180 @@ public:
             }
         }
 
-        return _Stoi(value);
+        return Stoi(value);
     }
 
-    static constexpr String
-    GetStrValueFromEntry(String entry, String key)
+    static std::string
+    GetItemStrFromFilterSentence(air::string_view sentence, uint32_t index)
     {
-        if (key != "GroupName" && key != "NodeName" && key != "Type" &&
-            key != "NodeType" && key != "Item")
+        size_t value_start_pos = sentence.find("(");
+        size_t value_end_pos = sentence.find(")");
+        air::string_view value = sentence.substr(value_start_pos + 1, value_end_pos - value_start_pos - 1);
+
+        size_t comma_pos = value.find(",");
+        size_t range_pos = value.find("...");
+
+        std::string result{""};
+
+        if (air::string_view::npos != range_pos)
+        {
+            air::string_view start_item = value.substr(0, range_pos);
+            start_item = Strip(start_item);
+            size_t start_token_pos = start_item.find("_");
+            air::string_view start_prefix = start_item.substr(0, start_token_pos);
+            air::string_view start_suffix = start_item.substr(start_token_pos + 1, start_item.size() - start_token_pos);
+            uint32_t start_num = Stoi(start_suffix);
+            air::string_view end_item = value.substr(range_pos + 3, value.size() - range_pos - 3);
+            end_item = Strip(end_item);
+            size_t end_token_pos = end_item.find("_");
+            air::string_view end_suffix = end_item.substr(end_token_pos + 1, end_item.size() - end_token_pos);
+            uint32_t end_num = Stoi(end_suffix);
+
+            if (end_num < start_num + index)
+            {
+                return "";
+            }
+
+            result.assign(start_prefix.data(), start_prefix.size());
+            result += "_";
+            result += std::to_string(start_num + index);
+        }
+        else if (air::string_view::npos != comma_pos)
+        {
+            uint32_t count = 0;
+            size_t prev_comma = 0;
+            size_t curr_comma = comma_pos;
+
+            while (prev_comma < value.size())
+            {
+                air::string_view range_value = value.substr(prev_comma, curr_comma - prev_comma);
+                range_value = Strip(range_value);
+
+                if (index == count)
+                {
+                    result.assign(range_value.data(), range_value.size());
+                    break;
+                }
+                count++;
+
+                prev_comma = curr_comma + 1;
+                curr_comma = value.find(",", curr_comma + 1);
+
+                if (air::string_view::npos == curr_comma)
+                {
+                    curr_comma = value.size();
+                }
+            }
+        }
+        else
+        {
+            air::string_view strip_value = Strip(value);
+            result.assign(strip_value.data(), strip_value.size());
+        }
+
+        return result;
+    }
+
+    static constexpr air::string_view
+    GetStrValueFromSentence(air::string_view sentence, air::string_view key)
+    {
+        if (key != "Group" && key != "Node" && key != "Filter" && key != "Type")
         {
             return "";
         }
 
-        size_t start_pos = entry.Find(key);
-        if (npos == start_pos)
+        size_t start_pos = sentence.find(key);
+        if (air::string_view::npos == start_pos)
         {
             return "";
         }
 
-        size_t comma_pos = entry.Find(",", start_pos + 1);
-        if (npos == comma_pos)
+        size_t comma_pos = sentence.find(",", start_pos + 1);
+        if (air::string_view::npos == comma_pos)
         {
-            comma_pos = entry.Size();
+            comma_pos = sentence.size();
         }
 
-        size_t colon_pos = entry.Find(":", start_pos + 1);
-        String value = entry.Substr(colon_pos + 1, comma_pos - colon_pos);
+        size_t colon_pos = sentence.find(":", start_pos + 1);
+        air::string_view value = sentence.substr(colon_pos + 1, comma_pos - colon_pos - 1);
         value = Strip(value);
 
         return value;
     }
 
-    static constexpr String
-    GetEntryFromStrArr(ConfigType type,
-        uint32_t index = 0)
+    static constexpr air::string_view
+    GetSentenceFromParagraph(ParagraphType type, uint32_t index = 0)
     {
-        String cfg_str = str_arr[dtype(type)];
-        uint32_t cfg_size = arr_size[dtype(type)];
+        air::string_view paragraph = paragraphs[dtype(type)];
+        uint32_t sentence_size = sentences_count[dtype(type)];
 
-        if (cfg_size <= index)
+        if (sentence_size <= index)
         {
             return "";
         }
 
         size_t skip_count = 2 * index;
-        size_t start_pos = cfg_str.Find("\"");
+        size_t start_pos = paragraph.find("\"");
         while (skip_count)
         {
-            start_pos = cfg_str.Find("\"", start_pos + 1);
+            start_pos = paragraph.find("\"", start_pos + 1);
             skip_count--;
         }
-        size_t end_pos = cfg_str.Find("\"", start_pos + 1);
+        size_t end_pos = paragraph.find("\"", start_pos + 1);
 
-        return cfg_str.Substr(start_pos + 1, end_pos - start_pos);
+        return paragraph.substr(start_pos + 1, end_pos - start_pos - 1);
     }
 
     static constexpr int32_t
-    GetIndexFromStrArr(ConfigType type,
-        String name = "")
+    GetIndexFromParagraph(ParagraphType type, air::string_view name = "")
     {
-        String cfg_str{""};
-        String key_name{""};
+        air::string_view paragraph{""};
+        air::string_view key_name{""};
 
-        if (ConfigType::DEFAULT == type)
+        if (ParagraphType::GROUP == type)
+        {
+            key_name = "Group";
+        }
+        else if (ParagraphType::FILTER == type)
+        {
+            key_name = "Filter";
+        }
+        else if (ParagraphType::NODE == type)
+        {
+            key_name = "Node";
+        }
+        else
         {
             return 0;
         }
-        else if (ConfigType::GROUP == type)
-        {
-            cfg_str = str_arr[dtype(ConfigType::GROUP)];
-            key_name = "GroupName";
-        }
-        else if (ConfigType::NODE == type)
-        {
-            cfg_str = str_arr[dtype(ConfigType::NODE)];
-            key_name = "NodeName";
-        }
-        else
-        { // WEB
-            cfg_str = str_arr[dtype(ConfigType::WEB)];
-            key_name = "NodeType";
-        }
 
-        size_t start_kv = cfg_str.Find(key_name);
-        size_t colon_pos = cfg_str.Find(":");
-        size_t separator_pos = cfg_str.Find(",");
+        paragraph = paragraphs[dtype(type)];
+
+        size_t start_kv = paragraph.find(key_name);
+        size_t colon_pos = paragraph.find(":");
+        size_t separator_pos = paragraph.find(",");
         size_t count = 0;
-        while (npos != start_kv)
+        while (air::string_view::npos != start_kv)
         {
-            size_t quote_pos = cfg_str.Find("\"", colon_pos + 1);
-            if (npos == separator_pos || quote_pos <= separator_pos)
+            size_t quote_pos = paragraph.find("\"", colon_pos + 1);
+            if (air::string_view::npos == separator_pos || quote_pos <= separator_pos)
             {
                 separator_pos = quote_pos;
             }
 
-            String key = cfg_str.Substr(start_kv, colon_pos - start_kv + 1);
+            air::string_view key = paragraph.substr(start_kv, colon_pos - start_kv + 1);
             key = Strip(key);
-            String value = cfg_str.Substr(colon_pos + 1, separator_pos - colon_pos);
+            air::string_view value = paragraph.substr(colon_pos + 1, separator_pos - colon_pos - 1);
             value = Strip(value);
 
-            if (name == value)
+            if (0 == name.compare(value))
             {
                 return count;
             }
 
-            start_kv = cfg_str.Find(key_name, start_kv + 1);
-            colon_pos = cfg_str.Find(":", start_kv + 1);
-            separator_pos = cfg_str.Find(",", start_kv + 1);
+            start_kv = paragraph.find(key_name, start_kv + 1);
+            colon_pos = paragraph.find(":", start_kv + 1);
+            separator_pos = paragraph.find(",", start_kv + 1);
             count += 1;
         }
 
@@ -215,146 +294,81 @@ public:
     }
 
     static constexpr uint32_t
-    GetArrSize(ConfigType type)
+    GetSentenceCount(ParagraphType type)
     {
-        return arr_size[dtype(type)];
-    }
-
-    static constexpr int32_t
-    CheckRule(void)
-    {
-        int32_t result{0};
-
-        result = _CheckDefaultRule();
-        if (0 != result)
-        {
-            return result;
-        }
-
-        result = _CheckGroupRule();
-        if (0 != result)
-        {
-            return result;
-        }
-
-        result = _CheckNodeRule();
-        if (0 != result)
-        {
-            return result;
-        }
-
-        return 0;
+        return sentences_count[dtype(type)];
     }
 
 private:
     static constexpr int32_t
-    _CheckDefaultRule(void)
+    _GetItemIndexValueFromFilterSentence(air::string_view sentence, air::string_view index)
     {
-        return _CheckRule(dtype(ConfigType::DEFAULT));
-    }
+        size_t value_end_pos = sentence.find(")");
+        size_t value_start_pos = sentence.find("(");
+        air::string_view value = sentence.substr(value_start_pos + 1, value_end_pos - value_start_pos - 1);
 
-    static constexpr int32_t
-    _CheckGroupRule(void)
-    {
-        if (0 == arr_size[dtype(ConfigType::GROUP)])
-        {
-            return 0;
-        }
-        else
-        {
-            return _CheckRule(dtype(ConfigType::GROUP));
-        }
-    }
+        size_t comma_pos = value.find(",");
+        size_t range_pos = value.find("...");
 
-    static constexpr int32_t
-    _CheckNodeRule(void)
-    {
-        return _CheckRule(dtype(ConfigType::NODE));
-    }
-
-    static constexpr int32_t
-    _CheckRule(uint32_t cfg_index)
-    {
-        int32_t result = ConfigChecker::CheckArrayRule(
-            static_cast<ConfigType>(cfg_index), str_arr[cfg_index]);
-        if (result < 0)
+        if (air::string_view::npos != range_pos)
         {
-            return result;
-        }
+            air::string_view end_item = value.substr(range_pos + 3, value.size() - range_pos - 3);
+            air::string_view start_item = value.substr(0, range_pos);
+            end_item = Strip(end_item);
+            start_item = Strip(start_item);
+            size_t end_token_pos = end_item.find("_");
+            size_t start_token_pos = start_item.find("_");
+            air::string_view end_suffix = end_item.substr(end_token_pos + 1, end_item.size() - end_token_pos);
+            air::string_view start_suffix = start_item.substr(start_token_pos + 1, start_item.size() - start_token_pos);
+            int32_t end_num = static_cast<int32_t>(Stoi(end_suffix));
+            int32_t start_num = static_cast<int32_t>(Stoi(start_suffix));
 
-        for (uint32_t entry_index = 0; entry_index < arr_size[cfg_index]; entry_index++)
-        {
-            result = ConfigChecker::CheckKeyRule(
-                static_cast<ConfigType>(cfg_index),
-                GetEntryFromStrArr(static_cast<ConfigType>(cfg_index), entry_index));
-            if (result < 0)
+            size_t index_token_pos = index.find("_");
+            air::string_view index_suffix = index.substr(index_token_pos + 1, index.size() - index_token_pos);
+            int32_t index_num = static_cast<int32_t>(Stoi(index_suffix));
+
+            if (end_num < index_num)
             {
-                return result;
+                return -1;
             }
+            
+            return index_num - start_num;
+        }
+        else if (air::string_view::npos != comma_pos)
+        {
+            size_t prev_comma = 0;
+            size_t curr_comma = comma_pos;
+            uint32_t count = 0;
 
-            result = ConfigChecker::CheckValueRule(
-                static_cast<ConfigType>(cfg_index),
-                GetEntryFromStrArr(static_cast<ConfigType>(cfg_index), entry_index));
-            if (result < 0)
+            while (prev_comma < value.size())
             {
-                return result;
-            }
+                air::string_view range_value = value.substr(prev_comma, curr_comma - prev_comma);
+                range_value = Strip(range_value);
 
-            if (dtype(ConfigType::NODE) == cfg_index)
-            {
-                result = ConfigChecker::CheckGroupNameInNode(
-                    GetEntryFromStrArr(ConfigType::NODE, entry_index),
-                    str_arr[dtype(ConfigType::GROUP)]);
-                if (result < 0)
+                if (index == range_value)
                 {
-                    return result;
+                    return count;
+                }
+                count++;
+
+                prev_comma = curr_comma + 1;
+                curr_comma = value.find(",", curr_comma + 1);
+
+                if (air::string_view::npos == curr_comma)
+                {
+                    curr_comma = value.size();
                 }
             }
         }
-
-        return 0;
-    }
-
-    static constexpr int32_t
-    _PowerOfTen(int32_t pow)
-    {
-        int32_t result = 1;
-        if (0 < pow)
+        else
         {
-            for (int32_t i = 0; i < pow; i++)
-            {
-                result *= 10;
-            }
+            return 0;
         }
-        return result;
+
+        return -1;
     }
-
-    static constexpr int32_t
-    _Stoi(String str)
-    {
-        int32_t length = str.Size();
-        int32_t int_value = 0;
-        for (int32_t i = 0; i < length; i++)
-        {
-            int32_t num = str[i] - '0';
-            int_value += num * _PowerOfTen(length - i - 1);
-        }
-        return int_value;
-    }
-
-    static constexpr String str_arr[dtype(ConfigType::COUNT)] = {
-        ConfigReader::GetStrArrFromRawData("[DEFAULT]", "[/DEFAULT]"),
-        ConfigReader::GetStrArrFromRawData("[GROUP]", "[/GROUP]"),
-        ConfigReader::GetStrArrFromRawData("[NODE]", "[/NODE]"),
-        ConfigReader::GetStrArrFromRawData("[WEB]", "[/WEB]")};
-
-    static constexpr uint32_t arr_size[dtype(ConfigType::COUNT)] = {
-        ConfigReader::GetStrArrSize(str_arr[dtype(ConfigType::DEFAULT)]),
-        ConfigReader::GetStrArrSize(str_arr[dtype(ConfigType::GROUP)]),
-        ConfigReader::GetStrArrSize(str_arr[dtype(ConfigType::NODE)]),
-        ConfigReader::GetStrArrSize(str_arr[dtype(ConfigType::WEB)])};
 };
 
 } // namespace config
 
-#endif // AIR_CONFIG_H
+#endif // AIR_CONFIG_PARSER_H

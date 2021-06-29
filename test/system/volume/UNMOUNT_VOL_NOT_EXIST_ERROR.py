@@ -7,10 +7,12 @@ sys.path.append("../lib/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
 import MOUNT_VOL_BASIC_1
+
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -26,10 +28,10 @@ def execute():
     clear_result()
     MOUNT_VOL_BASIC_1.execute()
     wrong_name = "wrong_vol"
-    out = cli.unmount_volume(wrong_name, "")
+    out = cli.unmount_volume(wrong_name, ARRAYNAME)
     return out
 
 if __name__ == "__main__":
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

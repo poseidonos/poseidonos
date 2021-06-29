@@ -1,0 +1,4 @@
+POS_ADD_UNIT_TEST(state_priority_ut state_priority_test.cpp)
+POS_ADD_UNIT_TEST(state_type_ut state_type_test.cpp)
+POS_ADD_UNIT_TEST(state_converter_ut state_converter_test.cpp)
+POS_ADD_UNIT_TEST(situation_type_ut situation_type_test.cpp)

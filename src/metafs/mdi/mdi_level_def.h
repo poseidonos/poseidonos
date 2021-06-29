@@ -32,4 +32,4 @@
 
 #pragma once
 
-#include "mfs_file_prop_integrity_def.h"
+#include "mf_integrity_type.h"

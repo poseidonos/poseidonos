@@ -4,23 +4,16 @@ import os
 import sys
 import json
 sys.path.append("../lib/")
-sys.path.append("../volume/")
-sys.path.append("../array/")
+sys.path.append("../exit/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import time
 import test_result
-import ibofos_constant
-import CREATE_ARRAY_BASIC_1
-import ibofos_util
+import EXIT_POS_AFTER_UNMOUNT_VOL
 
-IBOFOS_ROOT = '../../../'
-
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
+POS_ROOT = '../../../'
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)
@@ -29,19 +22,17 @@ def set_result(detail):
         result_file.write(result + " (" + str(code) + ")" + "\n" + out)
 
 def execute():
-    clear_result()
-    CREATE_ARRAY_BASIC_1.execute()
-    ibofos.exit_ibofos()
-    
-    ibofos_mbr_reset = IBOFOS_ROOT + "/test/script/mbr_reset.sh"
+    EXIT_POS_AFTER_UNMOUNT_VOL.execute()
+    time.sleep(5)
+    ibofos_mbr_reset = POS_ROOT + "/test/script/mbr_reset.sh"
     subprocess.call([ibofos_mbr_reset])
-
-    ibofos.start_ibofos()
-    out = cli.load_array("")
-
+    pos.start_pos()
+    cli.scan_device()
+    out = cli.array_info(EXIT_POS_AFTER_UNMOUNT_VOL.ARRAYNAME)
     return out
 
 if __name__ == "__main__":
+    test_result.clear_result(__file__)
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

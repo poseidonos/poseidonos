@@ -34,27 +34,17 @@
 
 #include <cassert>
 #include <iostream>
-#include <list>
-#include <string>
-#include <vector>
 
-#include "../config/array_config.h"
-#include "../device/array_device.h"
-#include "../ft/method.h"
-#include "../ft/rebuild_read_complete_handler.h"
-#include "../ft/rebuild_read_intermediate_complete_handler.h"
-#include "../ft/rebuilder.h"
-#include "src/allocator/allocator.h"
-#include "src/device/ublock_device.h"
-#include "src/device/unvme/unvme_ssd.h"
-#include "src/include/ibof_event_id.h"
-#include "src/io/general_io/block_alignment.h"
-#include "src/io/general_io/ubio.h"
+#include "src/bio/ubio.h"
+#include "src/device/base/ublock_device.h"
+#include "src/include/pos_event_id.h"
+#include "src/include/array_config.h"
+#include "src/io_scheduler/io_dispatcher.h"
+#include "src/lib/block_alignment.h"
 #include "src/logger/logger.h"
-#include "src/scheduler/event_argument.h"
 #include "src/state/state_manager.h"
 
-namespace ibofos
+namespace pos
 {
 const char* PARTITION_TYPE_STR[4] = {
     "META_NVM",
@@ -62,17 +52,34 @@ const char* PARTITION_TYPE_STR[4] = {
     "META_SSD",
     "USER_DATA"};
 
-StripePartition::StripePartition(PartitionType type,
+StripePartition::StripePartition(
+    string array,
+    PartitionType type,
     PartitionPhysicalSize physicalSize,
     vector<ArrayDevice*> devs,
     Method* method)
-: Partition(type, physicalSize, devs, method)
+: StripePartition(array, type, physicalSize, devs, method, IODispatcherSingleton::Instance())
+{}
+
+StripePartition::StripePartition(
+    string array,
+    PartitionType type,
+    PartitionPhysicalSize physicalSize,
+    vector<ArrayDevice*> devs,
+    Method* method,
+    IODispatcher* ioDispatcher)
+: Partition(array, type, physicalSize, devs, method),
+  ioDispatcher_(ioDispatcher)
 {
     _SetLogicalSize();
 }
 
+StripePartition::~StripePartition(void)
+{
+}
+
 int
-StripePartition::_SetLogicalSize()
+StripePartition::_SetLogicalSize(void)
 {
     const FtSizeInfo* ftSize = nullptr;
     ftSize = method_->GetSizeInfo();
@@ -93,17 +100,13 @@ StripePartition::_SetLogicalSize()
     return 0;
 }
 
-StripePartition::~StripePartition()
-{
-}
-
 int
 StripePartition::Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src)
 {
     if (false == _IsValidAddress(src))
     {
-        int error = (int)IBOF_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
-        IBOF_TRACE_ERROR(error, "Invalid Address Error");
+        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
+        POS_TRACE_ERROR(error, "Invalid Address Error");
         return error;
     }
 
@@ -111,19 +114,20 @@ StripePartition::Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src)
     method_->Translate(fsa, src);
 
     dst = _F2PTranslate(fsa);
+
     return 0;
 }
 
 PhysicalBlkAddr
-StripePartition::_F2PTranslate(const FtBlkAddr& fsa)
+StripePartition::_F2PTranslate(const FtBlkAddr& fba)
 {
-    PhysicalBlkAddr psa;
-    uint32_t chunkIndex = fsa.offset / physicalSize_.blksPerChunk;
-    psa.dev = devs_.at(chunkIndex);
-    psa.lba = physicalSize_.startLba +
-        (fsa.stripeId * physicalSize_.blksPerChunk + fsa.offset % physicalSize_.blksPerChunk) * ArrayConfig::SECTORS_PER_BLOCK;
+    PhysicalBlkAddr pba;
+    uint32_t chunkIndex = fba.offset / physicalSize_.blksPerChunk;
+    pba.arrayDev = devs_.at(chunkIndex);
+    pba.lba = physicalSize_.startLba +
+        (fba.stripeId * physicalSize_.blksPerChunk + fba.offset % physicalSize_.blksPerChunk) * ArrayConfig::SECTORS_PER_BLOCK;
 
-    return psa;
+    return pba;
 }
 
 FtBlkAddr
@@ -132,7 +136,7 @@ StripePartition::_P2FTranslate(const PhysicalBlkAddr& pba)
     int chunkIndex = -1;
     for (uint32_t i = 0; i < devs_.size(); i++)
     {
-        if (pba.dev == devs_.at(i))
+        if (pba.arrayDev == devs_.at(i))
         {
             chunkIndex = i;
             break;
@@ -160,12 +164,11 @@ StripePartition::Convert(list<PhysicalWriteEntry>& dst,
 {
     if (false == _IsValidEntry(src))
     {
-        int error = (int)IBOF_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
-        IBOF_TRACE_ERROR(error, "Invalid Address Error");
+        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
+        POS_TRACE_ERROR(error, "Invalid Address Error");
         return error;
     }
     dst.clear();
-
     list<FtWriteEntry> ftEntries;
     method_->Convert(ftEntries, src);
     for (FtWriteEntry& ftEntry : ftEntries)
@@ -178,7 +181,6 @@ StripePartition::Convert(list<PhysicalWriteEntry>& dst,
             assert(0);
         }
     }
-
     return 0;
 }
 
@@ -216,8 +218,8 @@ StripePartition::_ConvertToPhysical(list<PhysicalWriteEntry>& dst,
     {
         PhysicalWriteEntry physicalEntry;
         physicalEntry.addr = {
-            .dev = devs_.at(i),
-            .lba = stripeLba + startOffset * ArrayConfig::SECTORS_PER_BLOCK};
+            .lba = stripeLba + startOffset * ArrayConfig::SECTORS_PER_BLOCK,
+            .arrayDev = devs_.at(i) };
         if (i != chunkEnd)
         {
             physicalEntry.blkCnt = chunkSize - startOffset;
@@ -251,7 +253,7 @@ StripePartition::_SpliceBuffer(list<BufferEntry>& src, uint32_t start, uint32_t 
             BufferEntry split = buffer;
 
             uint32_t gap = start - offset;
-            split.SetBuffer(reinterpret_cast<Block*>(buffer.GetBufferEntry()) + gap);
+            split.SetBuffer(reinterpret_cast<Block*>(buffer.GetBufferPtr()) + gap);
             blkCnt = blkCnt - gap;
             if (blkCnt >= remain)
             {
@@ -273,107 +275,60 @@ StripePartition::_SpliceBuffer(list<BufferEntry>& src, uint32_t start, uint32_t 
 }
 
 int
-StripePartition::Rebuild(RebuildBehavior* behavior)
+StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
 {
-    using namespace std::placeholders;
-    Restorer restorer = std::bind(&StripePartition::RebuildRead, this, _1);
-    F2PTranslator translator = std::bind(&StripePartition::_F2PTranslate, this, _1);
+    uint64_t lba = ubio->GetLba();
+    ArrayDevice* dev = static_cast<ArrayDevice*>(ubio->GetArrayDev());
+    if (IsValidLba(lba) && (FindDevice(dev) >= 0))
+    {
+        // Chunk Aliging check
+        const uint32_t sectorSize = ArrayConfig::SECTOR_SIZE_BYTE;
+        const uint32_t sectorsPerBlock = ArrayConfig::SECTORS_PER_BLOCK;
 
-    string partName = PARTITION_TYPE_STR[type_];
-    RebuildContext* ctx = behavior->GetContext();
-    ctx->id = partName;
-    ctx->size = GetPhysicalSize();
-    ctx->result = RebuildState::REBUILDING;
-    ctx->restore = restorer;
-    ctx->translate = translator;
-    EventSmartPtr rebuilder(new Rebuilder(behavior));
-    EventArgument::GetEventScheduler()->EnqueueEvent(rebuilder);
-    return 0;
+        PhysicalBlkAddr originPba = ubio->GetPba();
+        BlockAlignment blockAlignment(originPba.lba * sectorSize, ubio->GetSize());
+        originPba.lba = blockAlignment.GetHeadBlock() * sectorsPerBlock;
+        FtBlkAddr fba = _P2FTranslate(originPba);
+        out.srcAddr = _GetRebuildGroup(fba);
+        out.recoverFunc = method_->GetRecoverFunc();
+
+        return (int)POS_EVENT_ID::SUCCESS;
+    }
+    return (int)POS_EVENT_ID::RECOVER_INVALID_LBA;
 }
 
-int
-StripePartition::RebuildRead(UbioSmartPtr ubio)
+unique_ptr<RebuildContext>
+StripePartition::GetRebuildCtx(ArrayDevice* fault)
 {
-    if (nullptr == ubio)
+    int index = FindDevice(fault);
+    if (index >= 0)
     {
-        return -1;
+        unique_ptr<RebuildContext> ctx(new RebuildContext());
+        ctx->raidType = method_->GetRaidType();
+        ctx->array = arrayName_;
+        ctx->part = PARTITION_TYPE_STR[type_];
+        ctx->faultIdx = index;
+        ctx->stripeCnt = logicalSize_.totalStripes;
+        ctx->result = RebuildState::READY;
+        ctx->size = GetPhysicalSize();
+        {
+            using namespace std::placeholders;
+            F2PTranslator trns = std::bind(&StripePartition::_F2PTranslate, this, _1);
+            ctx->translate = trns;
+        }
+        return ctx;
     }
-    // Chunk Aliging check
-    const uint32_t sectorSize = ArrayConfig::SECTOR_SIZE_BYTE;
-    const uint32_t sectorsPerBlock = ArrayConfig::SECTORS_PER_BLOCK;
-    const uint32_t blockSize = ArrayConfig::BLOCK_SIZE_BYTE;
-
-    PhysicalBlkAddr originPba = ubio->GetPba();
-    BlockAlignment blockAlignment(originPba.lba * sectorSize, ubio->GetSize());
-    originPba.lba = blockAlignment.GetHeadBlock() * sectorsPerBlock;
-    FtBlkAddr fba = _P2FTranslate(originPba);
-    list<PhysicalBlkAddr> rebuildGroup = _GetRebuildGroup(fba);
-
-    uint32_t readSize = blockAlignment.GetBlockCount() * blockSize;
-    uint32_t sectorCnt = rebuildGroup.size() * readSize / sectorSize;
-    uint32_t memSize = sectorSize * sectorCnt;
-    void* mem = Memory<sectorSize>::Alloc(sectorCnt);
-    if (nullptr == mem)
-    {
-        // TODO : this will be considered after reference based handling
-        return -1; // Memory Alloc failed
-    }
-    memset(mem, 0, memSize);
-
-    UbioSmartPtr rebuildUbio(new Ubio(mem, sectorCnt));
-    rebuildUbio->SetRetry(true);
-    RebuildFunc rebuildFunc = method_->GetRebuildFunc();
-
-    CallbackSmartPtr rebuildCompletion(
-        new RebuildReadCompleteHandler(rebuildUbio, rebuildFunc, readSize));
-
-    rebuildUbio->SetCallback(rebuildCompletion);
-    rebuildUbio->SetOriginUbio(ubio);
-#if defined QOS_ENABLED_BE
-    rebuildCompletion->SetEventType(ubio->GetEventType());
-    rebuildUbio->SetEventType(ubio->GetEventType());
-#endif
-    rebuildUbio->SetCallback(rebuildCompletion);
-    rebuildUbio->SetOriginUbio(ubio);
-
-    list<UbioSmartPtr> splitList;
-    for (auto pba : rebuildGroup)
-    {
-        bool isTail = false;
-        UbioSmartPtr split =
-            rebuildUbio->Split(ChangeByteToSector(readSize), isTail);
-        split->SetPba(pba);
-        CallbackSmartPtr event(
-            new RebuildReadIntermediateCompleteHandler(split));
-        event->SetCallee(rebuildCompletion);
-#if defined QOS_ENABLED_BE
-        event->SetEventType(ubio->GetEventType());
-        split->SetEventType(ubio->GetEventType());
-#endif
-        split->SetCallback(event);
-        split->SetOriginUbio(rebuildUbio);
-        splitList.push_back(split);
-    }
-
-    rebuildCompletion->SetWaitingCount(splitList.size());
-
-    for (auto split : splitList)
-    {
-        IODispatcher* ioDispatcher = EventArgument::GetIODispatcher();
-        ioDispatcher->Submit(split);
-    }
-
-    return 0;
+    return nullptr;
 }
 
 void
-StripePartition::Format()
+StripePartition::Format(void)
 {
     _Trim();
 }
 
 void
-StripePartition::_Trim()
+StripePartition::_Trim(void)
 {
     uint32_t blkCount = GetPhysicalSize()->totalSegments *
         GetPhysicalSize()->stripesPerSegment *
@@ -397,7 +352,7 @@ StripePartition::_Trim()
             unitCount = totalUnitCount % ubioUnit;
         }
 
-        UbioSmartPtr ubio(new Ubio(dummyBuffer, unitCount));
+        UbioSmartPtr ubio(new Ubio(dummyBuffer, unitCount, arrayName_));
         ubio->dir = UbioDir::Deallocate;
 
         for (uint32_t i = 0; i < devs_.size(); i++)
@@ -407,26 +362,26 @@ StripePartition::_Trim()
                 continue;
             }
 
-            PhysicalBlkAddr pba = {.dev = devs_[i],
-                .lba = startLba};
+            PhysicalBlkAddr pba = {
+                .lba = startLba,
+                .arrayDev = devs_[i] };
             ubio->SetPba(pba);
-            IODispatcher* ioDispatcher = EventArgument::GetIODispatcher();
-            result = ioDispatcher->Submit(ubio, true);
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::ARRAY_PARTITION_TRIM,
+            ubio->SetUblock(devs_[i]->GetUblock());
+            result = ioDispatcher_->Submit(ubio, true);
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
                 "Try to trim from {} for {} on {}",
-                pba.lba, unitCount, devs_[i]->uBlock->GetName());
+                pba.lba, unitCount, devs_[i]->GetUblock()->GetName());
 
-            if (result < 0 || ubio->GetError() != CallbackError::SUCCESS)
+            if (result < 0 || ubio->GetError() != IOErrorType::SUCCESS)
             {
-                IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::ARRAY_PARTITION_TRIM,
-                    "Trim Failed on {}", devs_[i]->uBlock->GetName());
+                POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
+                    "Trim Failed on {}", devs_[i]->GetUblock()->GetName());
                 trimResult = 1;
             }
         }
 
         totalUnitCount -= unitCount;
         startLba += unitCount;
-
     } while (totalUnitCount != 0);
 
     if (trimResult == 0)
@@ -435,25 +390,25 @@ StripePartition::_Trim()
 
         if (result == 0)
         {
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::ARRAY_PARTITION_TRIM,
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
                 "Trim Succeeded from {} ", startLba);
         }
         else
         {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::ARRAY_PARTITION_TRIM,
+            POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
                 "Trim Succeeded with wrong value from {}", startLba);
             // To Do : Write All Zeroes
         }
     }
     else
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::ARRAY_PARTITION_TRIM, "Trim Failed on some devices");
+        POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM, "Trim Failed on some devices");
         // To Do : Write All Zeroes
     }
 }
 
 int
-StripePartition::_CheckTrimValue()
+StripePartition::_CheckTrimValue(void)
 {
     uint64_t startLba = GetPhysicalSize()->startLba;
     uint64_t readUnitCount = 1;
@@ -463,20 +418,20 @@ StripePartition::_CheckTrimValue()
     int result = 0;
     int nonZeroResult = 0;
 
-    UbioSmartPtr readUbio(new Ubio(readbuffer, readUnitCount));
+    UbioSmartPtr readUbio(new Ubio(readbuffer, readUnitCount, arrayName_));
     for (uint32_t i = 0; i < devs_.size(); i++)
     {
-        PhysicalBlkAddr pba = {.dev = devs_[i],
-            .lba = startLba};
+        PhysicalBlkAddr pba = {
+            .lba = startLba,
+            .arrayDev = devs_[i] };
         readUbio->SetPba(pba);
-        IODispatcher* ioDispatcher = EventArgument::GetIODispatcher();
-        ioDispatcher->Submit(readUbio, true);
+        ioDispatcher_->Submit(readUbio, true);
         result = memcmp(readUbio->GetBuffer(), zerobuffer, Ubio::BYTES_PER_UNIT);
 
         if (result != 0)
         {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::ARRAY_PARTITION_TRIM,
-                "Trim Value is not Zero on {}", devs_[i]->uBlock->GetName());
+            POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
+                "Trim Value is not Zero on {}", devs_[i]->GetUblock()->GetName());
             nonZeroResult = 1;
         }
     }
@@ -487,4 +442,4 @@ StripePartition::_CheckTrimValue()
     return nonZeroResult;
 }
 
-} // namespace ibofos
+} // namespace pos

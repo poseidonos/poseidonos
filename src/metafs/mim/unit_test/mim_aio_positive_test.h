@@ -33,4 +33,4 @@
 #pragma once
 
 #include "meta_io_manager.h"
-#include "mfs_io_config.h"
+#include "metafs_config.h"

@@ -32,24 +32,33 @@
 
 #include "src/io/general_io/merged_io.h"
 
+#include "src/array/ft/buffer_entry.h"
+#include "src/bio/ubio.h"
 #include "src/include/memory.h"
-#include "src/io/general_io/buffer_entry.h"
 #include "src/io/general_io/internal_read_completion.h"
-#include "src/io/general_io/ubio.h"
+#include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
-#include "src/scheduler/event_argument.h"
-#include "src/scheduler/io_dispatcher.h"
 #include "src/state/state_manager.h"
 
-namespace ibofos
+#include <string>
+
+namespace pos
 {
-MergedIO::MergedIO(CallbackSmartPtr callback)
+MergedIO::MergedIO(CallbackSmartPtr callback, IODispatcher* inputIoDispatcher, StateType intputStateType)
 : bufferEntry(new BufferEntry(nullptr, 0)),
-  startPba({.dev = nullptr, .lba = static_cast<uint64_t>(-1)}),
+  startPba({.lba = static_cast<uint64_t>(-1), .arrayDev = nullptr}),
   nextContiguousLba(UINT64_MAX),
   callback(callback),
-  ioDispatcher(*EventArgument::GetIODispatcher())
+  stateType(intputStateType)
 {
+    if (inputIoDispatcher == nullptr)
+    {
+        ioDispatcher = IODispatcherSingleton::Instance();
+    }
+    else
+    {
+        ioDispatcher = inputIoDispatcher;
+    }
 }
 
 MergedIO::~MergedIO(void)
@@ -61,7 +70,7 @@ void
 MergedIO::Reset(void)
 {
     bufferEntry->Reset();
-    startPba = {.dev = nullptr, .lba = static_cast<uint64_t>(-1)};
+    startPba = {.lba = static_cast<uint64_t>(-1), .arrayDev = nullptr};
     nextContiguousLba = static_cast<uint64_t>(-1);
 }
 
@@ -86,7 +95,7 @@ MergedIO::SetNewStart(void* newBuffer, PhysicalBlkAddr& newPba)
 bool
 MergedIO::IsContiguous(PhysicalBlkAddr& targetPba)
 {
-    bool isSameDevice = (startPba.dev == targetPba.dev);
+    bool isSameDevice = (startPba.arrayDev == targetPba.arrayDev);
     bool isContiguousLba = (nextContiguousLba == targetPba.lba);
     bool isContiguous = (isSameDevice && isContiguousLba);
 
@@ -94,32 +103,27 @@ MergedIO::IsContiguous(PhysicalBlkAddr& targetPba)
 }
 
 IOSubmitHandlerStatus
-MergedIO::Process(void)
+MergedIO::Process(std::string& arrayName)
 {
     IOSubmitHandlerStatus status = IOSubmitHandlerStatus::SUCCESS;
 
     if (0 < bufferEntry->GetBlkCnt())
     {
         uint32_t blockCount = bufferEntry->GetBlkCnt();
-        UbioSmartPtr ubio(new Ubio(bufferEntry->GetBufferEntry(),
-            blockCount * Ubio::UNITS_PER_BLOCK));
+        UbioSmartPtr ubio(new Ubio(bufferEntry->GetBufferPtr(),
+            blockCount * Ubio::UNITS_PER_BLOCK, arrayName));
         ubio->SetPba(startPba);
 
         CallbackSmartPtr event(new InternalReadCompletion(blockCount));
-#if defined QOS_ENABLED_BE
         event->SetEventType(callback->GetEventType());
-#endif
         event->SetCallee(callback);
         ubio->SetCallback(event);
 
-#if defined QOS_ENABLED_BE
         ubio->SetEventType(callback->GetEventType());
-#endif
-        IODispatcher* ioDispatcher = EventArgument::GetIODispatcher();
         if (ioDispatcher->Submit(ubio) < 0)
         {
             IOSubmitHandlerStatus status =
-                _CheckAsyncReadError(IBOF_EVENT_ID::REF_COUNT_RAISE_FAIL);
+                _CheckAsyncReadError(POS_EVENT_ID::REF_COUNT_RAISE_FAIL, arrayName);
             return status;
         }
     }
@@ -128,20 +132,20 @@ MergedIO::Process(void)
 }
 
 IOSubmitHandlerStatus
-MergedIO::_CheckAsyncReadError(IBOF_EVENT_ID eventId)
+MergedIO::_CheckAsyncReadError(POS_EVENT_ID eventId, const std::string& arrayName)
 {
-    StateManager* stateMgr = StateManagerSingleton::Instance();
-    if (stateMgr->GetState() == State::STOP)
+    if (StateEnum::TYPE_COUNT == stateType)
     {
-        IBOF_TRACE_ERROR(eventId, IbofEventId::GetString(eventId));
+        IStateControl* stateControl = StateManagerSingleton::Instance()->GetStateControl(arrayName);
+        stateType = stateControl->GetState()->ToStateType();
+    }
+
+    if (StateEnum::STOP == stateType)
+    {
+        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
         return IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP;
     }
     return IOSubmitHandlerStatus::SUCCESS;
 }
 
-uint32_t
-MergedIO::GetBlockCount(void)
-{
-    return bufferEntry->GetBlkCnt();
-}
-} // namespace ibofos
+} // namespace pos

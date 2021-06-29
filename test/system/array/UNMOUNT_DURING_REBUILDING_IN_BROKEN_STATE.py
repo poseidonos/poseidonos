@@ -6,13 +6,15 @@ sys.path.append("../lib/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
-import ibofos_util
+import pos
+import pos_util
 import cli
 import test_result
 import json
 import time
-import MOUNT_ARRAY_BASIC_1
+import MOUNT_ARRAY_BASIC
+
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -35,16 +37,16 @@ def set_result(detail):
 
 def execute():
     clear_result()
-    MOUNT_ARRAY_BASIC_1.execute()
-    ibofos_util.pci_detach(MOUNT_ARRAY_BASIC_1.ANY_DATA)
+    MOUNT_ARRAY_BASIC.execute()
+    pos_util.pci_detach(MOUNT_ARRAY_BASIC.ANY_DATA)
     time.sleep(0.5)
     print(cli.list_device())
-    ibofos_util.pci_detach(MOUNT_ARRAY_BASIC_1.ANY_OTHER_DATA)
+    pos_util.pci_detach(MOUNT_ARRAY_BASIC.ANY_OTHER_DATA)
 
-    out = cli.unmount_ibofos()
+    out = cli.unmount_array(ARRAYNAME)
     print (out)
 
-    cur_info = json.loads(cli.array_info(""))
+    cur_info = json.loads(cli.array_info(ARRAYNAME))
     cur_state = cur_info['Response']['info']['situation']
     print(cur_state)
     if cur_state != 'FAULT':
@@ -55,12 +57,12 @@ def execute():
         print ("Wait to cancel rebuild " + str(i) + " seconds left")
         time.sleep(1)
 
-    out = cli.unmount_ibofos()
+    out = cli.unmount_array(ARRAYNAME)
     print (out)
     return out
 
 if __name__ == "__main__":
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
-    ibofos_util.pci_rescan()
+    pos.kill_pos()
+    pos_util.pci_rescan()

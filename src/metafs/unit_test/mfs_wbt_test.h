@@ -36,6 +36,8 @@
 
 #include "mfs_top_base_test.h"
 
+namespace pos
+{
 class UtMetaFsWBT : public UtMetaFsTop
 {
 public:
@@ -51,22 +53,22 @@ public:
         UtMetaFsTop::TearDown();
     }
 
-    FileFDType
+    FileDescriptorType
     CreateFileAndOpen(std::string& fileName, FileSizeType fileSize)
     {
-        FileFDType fd;
-        const FileFDType INVALID_FD = MetaFsCommonConst::INVALID_FD;
+        FileDescriptorType fd;
+        const FileDescriptorType INVALID_FD = MetaFsCommonConst::INVALID_FD;
 
-        MetaFsReturnCode<IBOF_EVENT_ID> rc_mgmt;
-        rc_mgmt = metaFsMgr.mgmt.Create(fileName, fileSize);
-        EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+        MetaFsReturnCode<POS_EVENT_ID> rc_mgmt;
+        rc_mgmt = metaFs.ctrl.CreateVolume(fileName, fileSize);
+        EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
 
-        rc_mgmt = metaFsMgr.mgmt.Open(fileName);
-        EXPECT_EQ(rc_mgmt.sc, IBOF_EVENT_ID::SUCCESS);
+        rc_mgmt = metaFs.ctrl.Open(fileName);
+        EXPECT_EQ(rc_mgmt.sc, POS_EVENT_ID::SUCCESS);
         fd = rc_mgmt.returnData;
         EXPECT_NE(fd, INVALID_FD);
 
-        FileSizeType fileByteSize = metaFsMgr.util.GetFileSize(fd);
+        FileSizeType fileByteSize = metaFs.ctrl.GetFileSize(fd);
         EXPECT_EQ(fileSize, fileByteSize);
 
         return fd;
@@ -74,3 +76,4 @@ public:
 
 private:
 };
+} // namespace pos

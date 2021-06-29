@@ -32,29 +32,25 @@
 
 #include "state_publisher.h"
 
-namespace ibofos
+namespace pos
 {
-StatePublisher::StatePublisher()
-{
-}
-
-StatePublisher::~StatePublisher()
+StatePublisher::~StatePublisher(void)
 {
 }
 
 void
-StatePublisher::RegisterSubscriber(StateEvent* subscriber)
+StatePublisher::Add(IStateObserver* ob, string name)
 {
 }
 
 void
-StatePublisher::RemoveSubscriber(StateEvent* subscriber)
+StatePublisher::Remove(IStateObserver* ob)
 {
 }
 
 void
-StatePublisher::NotifyStateChanged(StateContext prev, StateContext next)
+StatePublisher::Notify(StateContext* prev, StateContext* next)
 {
 }
 
-} // namespace ibofos
+} // namespace pos

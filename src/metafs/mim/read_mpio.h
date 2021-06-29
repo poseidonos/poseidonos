@@ -34,6 +34,8 @@
 
 #include "mpio.h"
 
+namespace pos
+{
 class ReadMpio : public Mpio
 {
 public:
@@ -55,3 +57,4 @@ private:
     bool _CompleteIO(MpAioState expNextState);
     bool _CopyToUserBuf(void);
 };
+} // namespace pos

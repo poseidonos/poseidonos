@@ -45,9 +45,10 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
+#include "src/helper/json_helper.h"
 
-namespace ibofos
+namespace pos
 {
 ConfigManager::ConfigManager(void)
 {
@@ -58,16 +59,23 @@ ConfigManager::ReadFile(void)
 {
     if (read == true)
     {
-        return (int)IBOF_EVENT_ID::CONFIG_FILE_READ_DONE;
+        return (int)POS_EVENT_ID::CONFIG_FILE_READ_DONE;
     }
 
-    string filePath = "/etc/ibofos/conf/ibofos.conf";
+    string filePath = defaultConfig.ConfigurationFilePath();
     ifstream openFile;
     openFile.open(filePath.data());
 
     if (!openFile.is_open())
     {
-        return (int)IBOF_EVENT_ID::CONFIG_FILE_OPEN_FAIL;
+        string defaultFilePath =
+            defaultConfig.DefaultConfigurationFilePath();
+        openFile.open(defaultFilePath.data());
+        if (!openFile.is_open())
+        {
+            defaultConfig.Restore();
+            openFile.open(defaultFilePath.data());
+        }
     }
 
     std::stringstream strStream;
@@ -80,11 +88,11 @@ ConfigManager::ReadFile(void)
 
     if (!result)
     {
-        return (int)IBOF_EVENT_ID::CONFIG_FILE_FORMAT_ERROR;
+        return (int)POS_EVENT_ID::CONFIG_FILE_FORMAT_ERROR;
     }
 
     read = true;
-    return (int)IBOF_EVENT_ID::CONFIG_FILE_READ_DONE;
+    return (int)POS_EVENT_ID::CONFIG_FILE_READ_DONE;
 }
 
 int
@@ -94,7 +102,7 @@ ConfigManager::GetValue(string module, string key,
     if (read == false)
     {
         int ret = ReadFile();
-        if ((int)IBOF_EVENT_ID::CONFIG_FILE_READ_DONE != ret)
+        if ((int)POS_EVENT_ID::CONFIG_FILE_READ_DONE != ret)
         {
             return ret;
         }
@@ -102,17 +110,17 @@ ConfigManager::GetValue(string module, string key,
 
     if (!doc.IsObject())
     {
-        return (int)IBOF_EVENT_ID::CONFIG_JSON_DOC_IS_NOT_OBJECT;
+        return (int)POS_EVENT_ID::CONFIG_JSON_DOC_IS_NOT_OBJECT;
     }
 
     if (false == doc.HasMember(module.c_str()))
     {
-        return (int)IBOF_EVENT_ID::CONFIG_REQUEST_MODULE_ERROR;
+        return (int)POS_EVENT_ID::CONFIG_REQUEST_MODULE_ERROR;
     }
 
     if (false == doc[module.c_str()].HasMember(key.c_str()))
     {
-        return (int)IBOF_EVENT_ID::CONFIG_REQUEST_KEY_ERROR;
+        return (int)POS_EVENT_ID::CONFIG_REQUEST_KEY_ERROR;
     }
 
     switch (type)
@@ -121,45 +129,45 @@ ConfigManager::GetValue(string module, string key,
             if (doc[module.c_str()][key.c_str()].IsString() == true)
             {
                 *(string*)value = doc[module.c_str()][key.c_str()].GetString();
-                return (int)IBOF_EVENT_ID::SUCCESS;
+                return (int)POS_EVENT_ID::SUCCESS;
             }
-            return (int)IBOF_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
+            return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
 
         case CONFIG_TYPE_INT:
             if (doc[module.c_str()][key.c_str()].IsInt() == true)
             {
                 *(int*)value = doc[module.c_str()][key.c_str()].GetInt();
-                return (int)IBOF_EVENT_ID::SUCCESS;
+                return (int)POS_EVENT_ID::SUCCESS;
             }
-            return (int)IBOF_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
+            return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
 
         case CONFIG_TYPE_UINT32:
             if (doc[module.c_str()][key.c_str()].IsUint() == true)
             {
                 *(uint32_t*)value = doc[module.c_str()][key.c_str()].GetUint();
-                return (int)IBOF_EVENT_ID::SUCCESS;
+                return (int)POS_EVENT_ID::SUCCESS;
             }
-            return (int)IBOF_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
+            return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
 
         case CONFIG_TYPE_UINT64:
             if (doc[module.c_str()][key.c_str()].IsUint64() == true)
             {
                 *(uint64_t*)value = doc[module.c_str()][key.c_str()].GetUint64();
-                return (int)IBOF_EVENT_ID::SUCCESS;
+                return (int)POS_EVENT_ID::SUCCESS;
             }
-            return (int)IBOF_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
+            return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
 
         case CONFIG_TYPE_BOOL:
             if (doc[module.c_str()][key.c_str()].IsBool() == true)
             {
                 *(bool*)value = doc[module.c_str()][key.c_str()].GetBool();
-                return (int)IBOF_EVENT_ID::SUCCESS;
+                return (int)POS_EVENT_ID::SUCCESS;
             }
-            return (int)IBOF_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
+            return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
 
         default:
-            return (int)IBOF_EVENT_ID::CONFIG_REQUEST_CONFIG_TYPE_ERROR;
+            return (int)POS_EVENT_ID::CONFIG_REQUEST_CONFIG_TYPE_ERROR;
             break;
     }
 }
-} // namespace ibofos
+} // namespace pos

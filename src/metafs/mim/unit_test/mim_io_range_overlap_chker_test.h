@@ -34,9 +34,11 @@
 #define __UT_MIM_RANGE_OVERLAP_H__
 
 #include <list>
-
+#include <string>
 #include "mim_base_test.h"
 
+namespace pos
+{
 class UtMIMRangeLockChker : public UtMIMBasic
 {
 public:
@@ -44,9 +46,9 @@ public:
     ~UtMIMRangeLockChker(void);
 
     int DiscoverIORangeOverlap(void);
-    FileFDType CreateFileAndOpen(FileSizeType fileSize);
+    FileDescriptorType CreateFileAndOpen(FileSizeType fileSize, std::string arrayName);
 
-    std::list<MetaFsIoReqMsg*> globalPendingIoRetryQ;
+    std::list<MetaFsIoRequest*> globalPendingIoRetryQ;
 };
-
+} // namespace pos
 #endif // __UT_MIM_RANGE_OVERLAP_H__

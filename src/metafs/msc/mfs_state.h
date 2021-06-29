@@ -32,6 +32,8 @@
 
 #pragma once
 
+namespace pos
+{
 enum class MetaFsSystemState
 {
     PowerOn = 0,
@@ -52,3 +54,4 @@ enum class MetaFsSystemState
 
     Default = PowerOn,
 };
+} // namespace pos

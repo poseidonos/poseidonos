@@ -22,7 +22,7 @@ ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../../"
 
 #select fio plugin for nvmf/e or bdev
 fio_plugin='nvme'
-ioengine = ibof_root + "/lib/spdk-19.10/examples/" + str(fio_plugin) + "/fio_plugin/fio_plugin"
+ioengine = ibof_root + "/lib/spdk/examples/" + str(fio_plugin) + "/fio_plugin/fio_plugin"
 #ioengine = ibof_root + "/bin/ibof_bdev_fio_plugin"
 spdk_conf= ibof_root + "test/system/nvmf/initiator/spdk_tcp_fio/BDEV.conf"
 
@@ -32,7 +32,7 @@ traddr='172.16.1.1'
 #filename='trtype=pcie traddr=0000.02.00.0 ns=1'
 #filename="Nvme1n1"
 trtype="tcp"
-filename="trtype=tcp adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=nqn.2019-04.ibof\:subsystem1 ns=1:"
+filename="trtype=tcp adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem1 ns=1:"
 #filename='vol=vol1 setup_path='+ibof_root+'tool/ibof_bdev_fio_plugin/'
 
 # the configuration below runs QD 1 & 128. 
@@ -136,7 +136,7 @@ def run_fio(io_size_bytes, block_size, qd, rw_mix, cpus_allowed, run_num, worklo
     if file_num > 1:
         for i in range(0, file_num):
             if fio_plugin == "nvme":
-                command += " --name=test" + str(i) + " --filename='trtype="+str(trtype)+" adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=nqn.2019-04.ibof\:subsystem" + str(i+1) + " ns=1'"
+                command += " --name=test" + str(i) + " --filename='trtype="+str(trtype)+" adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem" + str(i+1) + " ns=1'"
             else:
                 command += " --name=test" + str(i) + "" + " --filename='Nvme" + str(i+1) + "n1'"
     else:

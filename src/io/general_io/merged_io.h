@@ -33,13 +33,15 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
+#include "src/event_scheduler/callback.h"
 #include "src/include/address_type.h"
-#include "src/include/ibof_event_id.hpp"
-#include "src/io/general_io/io_submit_handler_status.h"
-#include "src/scheduler/callback.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/io_submit_interface/io_submit_handler_status.h"
+#include "src/state/state_context.h"
 
-namespace ibofos
+namespace pos
 {
 class BufferEntry;
 class IODispatcher;
@@ -47,25 +49,23 @@ class IODispatcher;
 class MergedIO
 {
 public:
-    explicit MergedIO(CallbackSmartPtr callback);
+    explicit MergedIO(CallbackSmartPtr callback, IODispatcher* ioDispatcher = nullptr, StateType stateType = StateEnum::TYPE_COUNT);
     ~MergedIO(void);
 
     void Reset(void);
-    void NotifyError(void);
-    IOSubmitHandlerStatus Process(void);
-    void AddConticuousBlock(void);
+    IOSubmitHandlerStatus Process(std::string& arrayName);
     void AddContiguousBlock(void);
     void SetNewStart(void* newBuffer, PhysicalBlkAddr& newPba);
     bool IsContiguous(PhysicalBlkAddr& targetPba);
-    uint32_t GetBlockCount(void);
 
 private:
     BufferEntry* bufferEntry;
     PhysicalBlkAddr startPba;
     uint64_t nextContiguousLba;
     CallbackSmartPtr callback;
-    IODispatcher& ioDispatcher;
+    IODispatcher* ioDispatcher;
+    StateType stateType;
 
-    IOSubmitHandlerStatus _CheckAsyncReadError(IBOF_EVENT_ID eventId);
+    IOSubmitHandlerStatus _CheckAsyncReadError(POS_EVENT_ID eventId, const std::string& arrayName);
 };
-} // namespace ibofos
+} // namespace pos

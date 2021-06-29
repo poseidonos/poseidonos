@@ -5,16 +5,17 @@ NR_VOLUME=1
 VOLUME_SIZE=2147483648
 #VirtualMachine?
 IS_VM=false
-SPDK_DIR=../../lib/spdk-19.10
+SPDK_DIR=../../lib/spdk
 BIN_PATH=../../bin
 ibofos_bringup(){
         clean=$1
-        sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem1 -a -s IBOF00000000000001 -d IBOF_VOLUME_EXTENTION
+        sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem1 -a -s POS00000000000001 -d POS_VOLUME_EXTENTION
 
         sudo $SPDK_DIR/scripts/rpc.py bdev_malloc_create -b uram0 1024 512
 
         sudo $BIN_PATH/cli request scan_dev
         if [ "$clean" -eq 1 ]; then
+                sudo $BIN_PATH/cli array reset
                 sudo $BIN_PATH/cli request create_array -b uram0 -d unvme-ns-0,unvme-ns-1,unvme-ns-2  -s unvme-ns-3
 				sudo $BIN_PATH/cli request mount_ibofos
                 # sudo $BIN_PATH/cli request mount_arr -ft 1 -b 1 uram0 -d 3 mock1 mock2 mock3 -s 1 mock4
@@ -28,7 +29,6 @@ ibofos_bringup(){
 
                 echo "ibofos dirty bringup"
                 #TODO : need to backup uram before load_array
-                sudo $BIN_PATH/cli request load_array
                 sudo $BIN_PATH/cli request mount_ibofos
                 for i in `seq 1 $NR_VOLUME`
                 do

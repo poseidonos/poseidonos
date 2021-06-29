@@ -33,24 +33,26 @@
 #ifndef _INCLUDE_MSS_DISK_INPLACE_H
 #define _INCLUDE_MSS_DISK_INPLACE_H
 
-#include "mss_disk_place.h"
+#include "src/metafs/storage/pstore/mss_disk_place.h"
 
+#include <string>
+
+namespace pos
+{
 /**
  * MssDiskInPlace provide concrete implementation of logic to
  * map metaLpn to physical lba. This is inplace update of page.
  */
-namespace ibofos
-{
 class MssDiskInplace : public MssDiskPlace
 {
 public:
-    MssDiskInplace(MetaStorageType mediaType, uint64_t capcacity);
+    MssDiskInplace(std::string arrayName, MetaStorageType mediaType, uint64_t capcacity);
     virtual ~MssDiskInplace(void);
 
     // Only inherit function whose defination will change
-    ibofos::LogicalBlkAddr CalculateOnDiskAddress(uint64_t metaLpn);
+    pos::LogicalBlkAddr CalculateOnDiskAddress(uint64_t metaLpn);
     virtual uint32_t GetMaxLpnCntPerIOSubmit(void);
 };
-} // namespace ibofos
+} // namespace pos
 
 #endif // _INCLUDE_MSS_DISK_INPLACE_H

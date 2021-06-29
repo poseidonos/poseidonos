@@ -27,8 +27,8 @@ run_build()
 {
     _target_ut=$1
 	if [ ${_target_ut} == "mfs" ]; then
-	    echo "Start to build iBoFOS..."
-		# iBoFOS build required as of now
+	    echo "Start to build PoseidonOS..."
+		# PoseidonOS build required as of now
 		(cd ${IBOF_DIR_TOP} && make clean > /dev/null 2> /dev/null && make ${MFS_MAKE_FLAGS} > /dev/null 2> /dev/null)
 	fi
     echo "Start to build MFS..."

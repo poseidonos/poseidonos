@@ -41,7 +41,7 @@
 #include "src/dump/dump_module.h"
 #include "src/lib/singleton.h"
 
-namespace ibofos
+namespace pos
 {
 #define MAX_MEMORY_SIZE_IN_DUMP (20 * 1024)
 
@@ -63,6 +63,6 @@ private:
 
 using DumpManagerSingleton = Singleton<DumpManager>;
 
-} // namespace ibofos
+} // namespace pos
 
 #endif // DUMP_MANAGER_H_

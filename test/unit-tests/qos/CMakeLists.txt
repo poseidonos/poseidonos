@@ -1,0 +1,5 @@
+POS_ADD_UNIT_TEST(qos_manager_ut qos_manager_test.cpp)
+POS_ADD_UNIT_TEST(qos_common_ut qos_common_test.cpp)
+POS_ADD_UNIT_TEST(qos_avg_compute_ut qos_avg_compute_test.cpp)
+POS_ADD_UNIT_TEST(submission_notifier_ut submission_notifier_test.cpp)
+POS_ADD_UNIT_TEST(submission_adapter_ut submission_adapter_test.cpp)

@@ -35,7 +35,7 @@
 
 #include "dump_module.h"
 
-namespace ibofos
+namespace pos
 {
 class AbstractDumpModule;
 
@@ -59,6 +59,6 @@ private:
     std::shared_ptr<uint8_t> ptr;
     AbstractDumpModule* dumpModule;
 };
-} // namespace ibofos
+} // namespace pos
 
 #endif // DUMP_BUFFER_H_

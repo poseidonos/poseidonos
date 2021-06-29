@@ -31,25 +31,38 @@
  */
 
 #pragma once
-#include "src/scheduler/event.h"
 
-namespace ibofos
+#include "src/event_scheduler/event.h"
+#include "src/mapper/i_stripemap.h"
+
+#include <string>
+
+namespace pos
 {
 class Stripe;
 class Allocator;
 class Mapper;
+class EventScheduler;
+class IContextManager;
 class StripeMapUpdateCompletion : public Event
 {
 public:
-    StripeMapUpdateCompletion(Stripe* inputStripe);
+    StripeMapUpdateCompletion(Stripe* inputStripe, std::string& arrayName);
+    StripeMapUpdateCompletion(Stripe* inputStripe,
+        IContextManager* icontextManager,
+        IStripeMap* iStripeMap,
+        EventScheduler* eventScheduler,
+        std::string& arrayName);
     virtual ~StripeMapUpdateCompletion(void);
 
     virtual bool Execute(void) override;
 
 private:
     Stripe* stripe;
-    Allocator* allocator;
-    Mapper* mapper;
+    IContextManager* iContextManager;
+    IStripeMap* iStripeMap;
+    EventScheduler* eventScheduler;
+    std::string arrayName;
 };
 
-}; // namespace ibofos
+}; // namespace pos

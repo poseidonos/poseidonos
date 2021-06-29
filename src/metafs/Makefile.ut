@@ -46,10 +46,10 @@ MFS_INCLUDE_PATH = \
 
 SRCS += $(wildcard *.cpp) \
         async_context.cpp \
-        mfs_log.cpp \
         meta_file_intf.cpp \
+        metafs_log.cpp \
         meta_file_util.cpp \
-        mfs_mem_lib.cpp
+        metafs_mem_lib.cpp
 
 include ext_ibofos_module.mk
 include common/Makefile.common

@@ -32,61 +32,76 @@
 
 #include "space_info.h"
 
-#include "src/array/array.h"
-#include "src/logger/logger.h"
-#include "src/volume/volume_manager.h"
+#include <string>
 
-namespace ibofos
+#include "src/array_mgmt/array_manager.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/include/array_config.h"
+#include "src/logger/logger.h"
+#include "src/volume/volume_service.h"
+
+namespace pos
 {
 bool
-SpaceInfo::IsEnough(uint64_t size)
+SpaceInfo::IsEnough(std::string& arrayName, uint64_t size)
 {
-    return Remaining() >= size;
+    return Remaining(arrayName) >= size;
 }
 
 uint64_t
-SpaceInfo::OPSize()
+SpaceInfo::OPSize(std::string& arrayName)
 {
-    uint64_t capa = TotalCapacity();
+    uint64_t capa = TotalCapacity(arrayName);
     return (uint64_t)(capa * ArrayConfig::OVER_PROVISIONING_RATIO / 100);
 }
 
 uint64_t
-SpaceInfo::TotalCapacity()
+SpaceInfo::TotalCapacity(std::string& arrayName)
 {
-    const PartitionLogicalSize* ptnSize =
-        ArraySingleton::Instance()->GetSizeInfo(PartitionType::USER_DATA);
-
-    if (ptnSize == nullptr)
+    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    if (info != nullptr)
     {
-        return 0;
+        const PartitionLogicalSize* ptnSize =
+            info->GetSizeInfo(PartitionType::USER_DATA);
+
+        if (ptnSize != nullptr)
+        {
+            uint64_t dataBlks = ptnSize->blksPerStripe;
+            return ptnSize->totalStripes * dataBlks * ArrayConfig::BLOCK_SIZE_BYTE;
+        }
     }
-
-    uint64_t dataBlks = ptnSize->blksPerStripe;
-
-    return ptnSize->totalStripes * dataBlks * ArrayConfig::BLOCK_SIZE_BYTE;
+    return 0;
 }
 
 uint64_t
-SpaceInfo::SystemCapacity()
+SpaceInfo::SystemCapacity(std::string& arrayName)
 {
-    uint64_t total = TotalCapacity();
-    uint64_t op = OPSize();
-    IBOF_TRACE_INFO(9000, "SystemCapacity: total:{} - op:{} = sys:{} ",
+    uint64_t total = TotalCapacity(arrayName);
+    uint64_t op = OPSize(arrayName);
+    POS_TRACE_INFO(9000, "SystemCapacity: total:{} - op:{} = sys:{} ",
         total, op, total - op);
     return total - op;
 }
 
 uint64_t
-SpaceInfo::Used()
+SpaceInfo::Used(std::string& arrayName)
 {
-    return VolumeManagerSingleton::Instance()->EntireVolumeSize();
+    uint64_t usedSize = 0;
+    IVolumeManager* volMgr =
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+
+    if (volMgr != nullptr)
+    {
+        usedSize = volMgr->EntireVolumeSize();
+    }
+
+    return usedSize;
 }
 
 uint64_t
-SpaceInfo::Remaining()
+SpaceInfo::Remaining(std::string& arrayName)
 {
-    return SystemCapacity() - Used();
+    return SystemCapacity(arrayName) - Used(arrayName);
 }
 
-} // namespace ibofos
+} // namespace pos

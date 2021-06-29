@@ -1,34 +1,39 @@
-#define QOS_ENABLED_BE
 #define UNVME_BUILD
 
 #include "library_unit_test.h"
-#include "src/main/ibofos.h"
+#include "src/main/poseidonos.h"
+#include <sstream>
+
+std::ostringstream stringStream;
 
 
-namespace ibofos
+namespace pos
 {
     static void async_run(void *ptr)
     {
-        ibofos::Ibofos *ibofos = (ibofos::Ibofos *)ptr;
+        pos::Poseidonos *ibofos = (pos::Poseidonos *)ptr;
         ibofos->Run();
     }
-    void LibraryUnitTest::Initialize(int argc, char *argv[])
+    void LibraryUnitTest::Initialize(int argc, char *argv[], std::string rootDir)
     {
-        char cmd_str[200];
-        ibofos::Ibofos _ibofos;
+        std::ostringstream cmdStr;
+        pos::Poseidonos _pos;
         int dummy_argc = 1;
-        char *argvPtr[2] = {"ibofos",};
-        _ibofos.Init(dummy_argc, argvPtr);
+        char *argvPtr[2] = {"poseidonos",};
+        _pos.Init(dummy_argc, argvPtr);
         if(argc == 1)
         {
-            printf("Please specify the IP!\n");   
+            printf("Please specify the IP!\n");
             raise(11);
         }
         sleep(3);
-        f = std::async(std::launch::async, ibofos::async_run, &_ibofos);
-                
-        sprintf(cmd_str, "cd ../../../../test/system/io_path/ && ./setup_ibofos_nvmf_volume.sh -a %s", argv[1] );
-        system(cmd_str);
+        f = std::async(std::launch::async, pos::async_run, &_pos);
+        cmdStr << "cd " << rootDir << "/test/system/io_path/ && ./setup_ibofos_nvmf_volume.sh";
+        for (uint32_t i = 1; i < argc; i++)
+        {
+            cmdStr << " " << argv[i];
+        }
+        system(cmdStr.str().c_str());
 
         sleep(1);
     }   

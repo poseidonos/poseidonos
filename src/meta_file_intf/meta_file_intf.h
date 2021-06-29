@@ -37,52 +37,44 @@
 #include "async_context.h"
 #include "meta_file_include.h"
 
-namespace ibofos
+namespace pos
 {
 class MetaFileIntf
 {
 public:
-    explicit MetaFileIntf(std::string name);
+    explicit MetaFileIntf(std::string fname, std::string aname);
     virtual ~MetaFileIntf(void) = default;
 
-    virtual int Create(uint64_t size,
-        StorageOpt storageOpt = StorageOpt::DEFAULT) = 0;
+    virtual int Create(uint64_t size, StorageOpt storageOpt = StorageOpt::DEFAULT) = 0;
     virtual bool DoesFileExist(void) = 0;
     virtual int Delete(void) = 0;
-    virtual uint32_t GetFileSize(void) = 0;
+    virtual uint64_t GetFileSize(void) = 0;
 
     virtual int AsyncIO(AsyncMetaFileIoCtx* ctx) = 0;
     virtual int CheckIoDoneStatus(void* data) = 0;
 
     virtual int Open(void);
     virtual int Close(void);
-    bool IsOpened(void);
+    virtual bool IsOpened(void);
 
-    int
-    GetFd(void)
-    {
-        return fd;
-    }
-    std::string
-    GetFileName(void)
-    {
-        return fileName;
-    }
+    virtual int GetFd(void) { return fd; }
+    virtual std::string GetFileName(void) { return fileName; }
     // SyncIO APIs
-    int IssueIO(MetaFsIoOpcode opType, uint32_t fileOffset, uint32_t length,
+    virtual int IssueIO(MetaFsIoOpcode opType, uint64_t fileOffset, uint64_t length,
         char* buffer);
-    int AppendIO(MetaFsIoOpcode opType, uint32_t& offset, uint32_t length,
+    virtual int AppendIO(MetaFsIoOpcode opType, uint64_t& offset, uint64_t length,
         char* buffer);
 
 protected:
-    virtual int _Read(int fd, uint32_t fileOffset, uint32_t length,
+    virtual int _Read(int fd, uint64_t fileOffset, uint64_t length,
         char* buffer) = 0;
-    virtual int _Write(int fd, uint32_t fileOffset, uint32_t length,
+    virtual int _Write(int fd, uint64_t fileOffset, uint64_t length,
         char* buffer) = 0;
 
     std::string fileName;
+    std::string arrayName;
     uint64_t size;
     bool isOpened;
     int fd;
 };
-} // namespace ibofos
+} // namespace pos

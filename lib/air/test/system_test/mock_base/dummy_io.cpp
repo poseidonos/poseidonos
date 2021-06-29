@@ -5,6 +5,8 @@
 #include <pthread.h>
 #include <thread>
 
+#include <string>
+
 bool DummyIO::run = true;
 
 unsigned int DummyIO::read_iops = 0;
@@ -63,8 +65,8 @@ DummyIO::SubmitIO()
             i = 0;
 
         {
-            AIRLOG(LAT_SUBMIT, 0, 0, i);
-            AIRLOG(LAT_IO_PATH, 0, 0, i);
+            airlog("LAT_SUBMIT", "AIR_0", 0, i);
+            airlog("LAT_IO_PATH", "AIR_0", 0, i);
 
             std::lock_guard<std::mutex> guard(sq_lock[0]);
             if (sq[0].size() < 256) {
@@ -76,14 +78,15 @@ DummyIO::SubmitIO()
             }
 
             if (sq_push) {
-                AIRLOG(LAT_IO_PATH, 0, 1, i);
-                AIRLOG(LAT_SUBMIT, 0, 1, i);
+                airlog("LAT_IO_PATH", "AIR_1", 0, i);
+                airlog("LAT_SUBMIT", "AIR_1", 0, i);
                 i++;
             }
+            airlog("UTIL_SUBMIT_THR", "AIR_SUBMIT", 0, 10);
         }
 
         {
-            AIRLOG(LAT_IO_PATH, 0, 0, i);
+            airlog("LAT_IO_PATH", "AIR_0", 1, i);
 
             std::lock_guard<std::mutex> guard(sq_lock[1]);
             if (sq[1].size() < 256) {
@@ -95,9 +98,10 @@ DummyIO::SubmitIO()
             }
 
             if (sq_push) {
-                AIRLOG(LAT_IO_PATH, 0, 1, i);
+                airlog("LAT_IO_PATH", "AIR_1", 1, i);
                 i++;
             }
+            airlog("UTIL_SUBMIT_THR", "AIR_SUBMIT", 1, 10);
         }
 
     }
@@ -119,14 +123,14 @@ DummyIO::ProcessIO(int qid)
         {
             std::lock_guard<std::mutex> guard(sq_lock[qid]);
             if (!sq[qid].empty()) {
-                AIRLOG(Q_SUBMISSION, qid,
-                        sq[qid].size(), sq[qid].size());
+                airlog("Q_SUBMISSION", "AIR_BASE", qid, sq[qid].size());
                 valid = true;
                 value = sq[qid].front();
                 sq[qid].pop();
 
-                AIRLOG(LAT_PROCESS, qid, 0, value);
-                AIRLOG(LAT_IO_PATH, 0, 2, value);
+                airlog("LAT_PROCESS", "AIR_0", qid, value);
+                airlog("LAT_IO_PATH", "AIR_2", qid, value);
+                airlog("UTIL_SUBMIT_THR", "AIR_PROCESS", qid, 10);
             }
         }
 
@@ -134,7 +138,7 @@ DummyIO::ProcessIO(int qid)
             std::lock_guard<std::mutex> guard(cq_lock[qid]);
             if (cq[qid].size() < 256) {
                 cq[qid].push(value);
-                AIRLOG(LAT_PROCESS, qid, 1, value);
+                airlog("LAT_PROCESS", "AIR_1", qid, value);
             }
         }
     }
@@ -157,32 +161,35 @@ DummyIO::CompleteIO()
         {
             std::lock_guard<std::mutex> guard(cq_lock[0]);
             if (!cq[0].empty()) {
-                AIRLOG(Q_COMPLETION, 0,
-                        cq[0].size(), cq[0].size());
+                airlog("Q_COMPLETION", "AIR_BASE", 0, cq[0].size());
                 count++;
                 value = cq[0].front();
 
-                AIRLOG(LAT_COMPLETE, 0, 0, value);
+                airlog("LAT_COMPLETE", "AIR_0", 0, value);
 
                 cq[0].pop();
 
-                AIRLOG(PERF_BENCHMARK, 0, AIR_READ, 4096);
-                AIRLOG(LAT_IO_PATH, 0, 3, value);
-                AIRLOG(LAT_COMPLETE, 0, 1, value);
+                airlog("PERF_BENCHMARK", "AIR_READ", 0, 4096);
+                airlog("CNT_TEST_EVENT", "AIR_COMPLETE", 0, 1);
+                airlog("LAT_IO_PATH", "AIR_3", 0, value);
+                airlog("LAT_COMPLETE", "AIR_1", 0, value);
+                airlog("UTIL_SUBMIT_THR", "AIR_COMPLETE", 0, 3);
             }
         }
 
         {
             std::lock_guard<std::mutex> guard(cq_lock[1]);
             if (!cq[1].empty()) {
-                AIRLOG(Q_COMPLETION, 1,
-                        cq[1].size(), cq[1].size());
+                airlog("Q_COMPLETION", "AIR_BASE", 1, cq[1].size());
                 count++;
                 value = cq[1].front();
                 cq[1].pop();
-                AIRLOG(PERF_BENCHMARK, 1, AIR_READ, 4096);
                 
-                AIRLOG(LAT_IO_PATH, 0, 3, value);
+                airlog("PERF_BENCHMARK", "AIR_READ", 1, 4096);
+                airlog("CNT_TEST_EVENT", "AIR_COMPLETE", 1, -1);
+                
+                airlog("LAT_IO_PATH", "AIR_3", 1, value);
+                airlog("UTIL_SUBMIT_THR", "AIR_COMPLETE", 1, 10);
             }
         }
 

@@ -35,14 +35,14 @@
 #include <unordered_map>
 
 #include "src/device/device_manager.h"
-#include "src/device/spdk/nvme.hpp"
+#include "src/spdk_wrapper/nvme.hpp"
 #include "src/device/unvme/unvme_drv.h"
 #include "src/lib/system_timeout_checker.h"
-namespace ibofos
+#include "src/event_scheduler/callback.h"
+
+namespace pos
 {
 class UBlockDevice;
-class Event;
-class Callback;
 
 class CommandTimeoutHandler
 {
@@ -55,15 +55,6 @@ public:
     // test usage. pending abort zero is automatically checked by device context.
     bool IsPendingAbortZero();
 
-    // We need to disable abort logic. this logic needs to get the device lock.
-    // device lock also taken from mbr manager or device detach sequence.
-    // This disable shall be called before getting the device lock in other side.
-    // Todo : If pending ublock logic is moved to ublock, this logic is not necessary
-
-    // Abort Enable after mount sequence.
-    void EnableAbort();
-    void DisableAbort();
-
     // We abort handling by "event", because the entry point of handler is "ioworker"
     // If abort and detach process are simulatneously happen, io worker requires "array state lock" and,
     // Event also requires "array state lock" and submit i/o to io worker and waiting with "array state lock"
@@ -73,7 +64,7 @@ public:
     {
     public:
         AbortSubmitHandler(AbortContext* inputAbortContext);
-        void DiskIO(UBlockDevice* dev, void* ctx);
+        void DiskIO(UblockSharedPtr dev, void* ctx);
         bool Execute(void) override;
 
     private:
@@ -100,7 +91,7 @@ private:
         struct spdk_nvme_ctrlr* ctrlr,
         struct spdk_nvme_qpair* qpair, uint16_t cid);
 
-    void _ResetDevice(UBlockDevice* dev, void* ctx);
+    void _ResetDevice(UblockSharedPtr dev, void* ctx);
 
     static void _TryResetHandler(
         struct spdk_nvme_ctrlr* ctrlr,
@@ -110,15 +101,12 @@ private:
 
     static void _Delete(struct spdk_nvme_ctrlr* ctrlr, uint16_t cid);
 
+
     static std::unordered_map<uint64_t, SystemTimeoutChecker*> mapAbort;
-    // Abort Enable after mount sequence.
-    void _EnableAbort(bool flag);
+
 
     TimeoutHandlerFunction timeoutAbortHandler;
     TimeoutHandlerFunction resetHandler;
-    EnableAbortFunction enableAbortFunc;
-    EnableAbortFunction disableAbortFunc;
-    std::atomic<int> abortDisabledCount;
     static DeviceIterFunc resetDevice;
     static const uint64_t ABORT_TIMEOUT_IN_NS;
 
@@ -126,10 +114,8 @@ private:
 
     // x86 uses 48bit virtual address space.
     static const uint32_t ADDR_MAX_BIT = 48;
-    // basic Disabled Count
-    static const uint32_t ABORT_DISABLED_INIT = 1;
 };
 
 using CommandTimeoutHandlerSingleton = Singleton<CommandTimeoutHandler>;
 
-} // namespace ibofos
+} // namespace pos

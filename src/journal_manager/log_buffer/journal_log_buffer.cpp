@@ -29,180 +29,175 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/journal_log_buffer.h"
 
 #include <memory>
+#include <string>
 
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
+#include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
+#include "src/journal_manager/log_buffer/log_group_reset_context.h"
+#include "src/journal_manager/log_buffer/log_write_context.h"
 #include "src/logger/logger.h"
+#include "src/metafs/metafs_file_intf.h"
 
-namespace ibofos
+namespace pos
 {
 JournalLogBuffer::JournalLogBuffer(void)
-: bufferSize(INVALID_BUFFER_SIZE),
-  groupSize(INVALID_BUFFER_SIZE),
-  numLogGroups(2),
+: config(nullptr),
   numInitializedLogGroup(0),
+  logFile(nullptr),
   initializedDataBuffer(nullptr)
 {
-    logFile = new FILESTORE("JournalLogBuffer");
+}
+
+JournalLogBuffer::JournalLogBuffer(std::string arrayName)
+: JournalLogBuffer()
+{
+    logFile = new MetaFsFileIntf("JournalLogBuffer", arrayName);
+}
+
+JournalLogBuffer::JournalLogBuffer(MetaFileIntf* metaFile)
+: JournalLogBuffer()
+{
+    logFile = metaFile;
 }
 
 JournalLogBuffer::~JournalLogBuffer(void)
 {
     if (initializedDataBuffer != nullptr)
     {
-        delete[] initializedDataBuffer;
-    }
-
-    if (logFile->IsOpened() == true)
-    {
-        int ret = logFile->Close();
-        if (ret != 0)
-        {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::JOURNAL_LOG_BUFFER_CLOSE_FAILED,
-                "Failed to close journal log buffer");
-        }
+        delete [] initializedDataBuffer;
     }
 
     delete logFile;
 }
 
-void
-JournalLogBuffer::SetSize(uint32_t size)
+bool
+JournalLogBuffer::DoesLogFileExist(void)
 {
-    bufferSize = size;
-    groupSize = bufferSize / numLogGroups;
+    return logFile->DoesFileExist();
 }
 
 int
-JournalLogBuffer::Setup(void)
+JournalLogBuffer::Create(uint64_t logBufferSize)
 {
-    int ret = 0;
+    if (logFile->DoesFileExist() == true)
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED,
+            "Log buffer already exists");
+        return -1 * (int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED;
+    }
 
+    int ret = logFile->Create(logBufferSize, StorageOpt::NVRAM);
+    if (ret != 0)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED,
+            "Failed to create log buffer");
+        return ret;
+    }
+
+    ret = logFile->Open();
+    if (ret != 0)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
+            "Failed to open log buffer");
+        return ret;
+    }
+
+    POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_CREATED), "Log buffer is created");
+    return ret;
+}
+
+int
+JournalLogBuffer::Open(uint64_t& logBufferSize)
+{
     if (logFile->DoesFileExist() == false)
     {
-        _SetupBufferSize();
-        ret = logFile->Create(bufferSize, StorageOpt::NVRAM);
-        if (ret != 0)
-        {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED,
-                "Failed to create log buffer");
-            return ret;
-        }
-
-        ret = logFile->Open();
-        if (ret != 0)
-        {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
-                "Failed to open log buffer");
-            return ret;
-        }
-
-        IBOF_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_CREATED), "Log buffer is created");
+        POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
+            "Log buffer does not exist");
+        return (-1 * (int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED);
     }
-    else
+
+    int ret = logFile->Open();
+    if (ret != 0)
     {
-        int ret = logFile->Open();
-        if (ret != 0)
-        {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
-                "Failed to open log buffer");
-            return ret;
-        }
-        else
-        {
-            _LoadBufferSize();
-            logBufferLoaded = true;
-        }
-        ret = (int)IBOF_EVENT_ID::JOURNAL_LOG_BUFFER_LOADED;
+        POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
+            "Failed to open log buffer");
+        return ret;
     }
+
+    logBufferSize = logFile->GetFileSize();
+
+    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_LOG_BUFFER_LOADED,
+        "Journal log buffer is loaded");
+    return ret;
+}
+
+int
+JournalLogBuffer::Init(JournalConfiguration* journalConfiguration)
+{
+    config = journalConfiguration;
 
     assert(initializedDataBuffer == nullptr);
 
+    uint64_t groupSize = config->GetLogGroupSize();
     initializedDataBuffer = new char[groupSize];
     memset(initializedDataBuffer, 0xFF, groupSize);
-    return ret;
+
+    return 0;
+}
+
+void
+JournalLogBuffer::Dispose(void)
+{
+    if (logFile->IsOpened() == true)
+    {
+        int ret = logFile->Close();
+        if (ret != 0)
+        {
+            POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CLOSE_FAILED,
+                "Failed to close journal log buffer");
+        }
+    }
+
+    if (initializedDataBuffer != nullptr)
+    {
+        delete [] initializedDataBuffer;
+        initializedDataBuffer = nullptr;
+    }
 }
 
 int
 JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
 {
+    uint64_t groupSize = config->GetLogGroupSize();
+
+    // TODO(huijeong.kim) change meta_file_intf file offset to uint64_t
     int ret = logFile->IssueIO(MetaFsIoOpcode::Read, _GetFileOffset(groupId, 0),
         groupSize, (char*)buffer);
 
     if (ret != 0)
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::JOURNAL_LOG_BUFFER_READ_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_READ_FAILED,
             "Failed to read log buffer");
-        return -1 * ((int)IBOF_EVENT_ID::JOURNAL_LOG_BUFFER_READ_FAILED);
+        return -1 * ((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_READ_FAILED);
     }
 
     return ret;
 }
 
-void
-JournalLogBuffer::_SetupBufferSize(void)
-{
-    if (bufferSize == INVALID_BUFFER_SIZE)
-    {
-        bufferSize = _DetermineLogBufferSize();
-    }
-    groupSize = bufferSize / numLogGroups;
-    assert(bufferSize != 0);
-}
-
-void
-JournalLogBuffer::_LoadBufferSize(void)
-{
-    bufferSize = logFile->GetFileSize();
-    groupSize = bufferSize / numLogGroups;
-    assert(bufferSize != 0);
-}
-
-uint32_t
-JournalLogBuffer::_DetermineLogBufferSize(void)
-{
-    uint32_t pageSize = 0;
-    uint32_t maxSize = 0;
-
-#ifndef IBOF_CONFIG_USE_MOCK_FS
-    MetaFilePropertySet prop;
-    prop.ioAccPattern = MDFilePropIoAccessPattern::ByteIntensive;
-    prop.ioOpType = MDFilePropIoOpType::WriteDominant;
-    prop.integrity = MDFilePropIntegrity::Lvl0_Disable;
-
-    pageSize = metaFsMgr.util.EstimateAlignedFileIOSize(prop);
-    maxSize = metaFsMgr.util.GetTheBiggestExtentSize(prop);
-#endif
-
-    if (pageSize == 0 || maxSize == 0)
-    {
-        return DEFAULT_BUFFER_SIZE;
-    }
-    else
-    {
-        return (maxSize / pageSize - 1) * pageSize;
-    }
-}
-
 int
-JournalLogBuffer::WriteLog(LogWriteContext* context, int logGroupID, int offset)
+JournalLogBuffer::WriteLog(LogWriteContext* context)
 {
-    context->opcode = MetaFsIoOpcode::Write;
-    context->fd = logFile->GetFd();
-    context->fileOffset = logGroupID * GetLogGroupSize() + offset;
-    context->length = context->GetLog()->GetSize();
-    context->buffer = context->GetLog()->GetData();
-
+    context->SetFile(logFile->GetFd());
     int ret = logFile->AsyncIO(context);
 
     if (ret != 0)
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::JOURNAL_LOG_WRITE_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_WRITE_FAILED,
             "Failed to write journal log");
-        ret = -1 * (int)IBOF_EVENT_ID::JOURNAL_LOG_WRITE_FAILED;
+        ret = -1 * (int)POS_EVENT_ID::JOURNAL_LOG_WRITE_FAILED;
     }
 
     return ret;
@@ -213,12 +208,15 @@ JournalLogBuffer::SyncResetAll(void)
 {
     int ret = 0;
     numInitializedLogGroup = 0;
+    int numLogGroups = config->GetNumLogGroups();
+
     for (int groupId = 0; groupId < numLogGroups; groupId++)
     {
-        ret = AsyncReset(groupId, std::bind(&JournalLogBuffer::_LogBufferResetCompleted, this, std::placeholders::_1));
+        EventSmartPtr callbackEvent(new LogGroupResetCompletedEvent(this, groupId));
+        ret = AsyncReset(groupId, callbackEvent);
         if (ret != 0)
         {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::JOURNAL_LOG_BUFFER_RESET_FAILED,
+            POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_RESET_FAILED,
                 "Failed to reset journal log buffer");
             return ret;
         }
@@ -228,44 +226,53 @@ JournalLogBuffer::SyncResetAll(void)
     {
     }
 
-    IBOF_TRACE_INFO((int)IBOF_EVENT_ID::JOURNAL_LOG_BUFFER_RESET,
+    POS_TRACE_INFO((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_RESET,
         "Journal log buffer is reset");
 
     return ret;
 }
 
 void
-JournalLogBuffer::_LogBufferResetCompleted(int logGroupId)
+JournalLogBuffer::LogGroupResetCompleted(int logGroupId)
 {
     numInitializedLogGroup++;
 }
 
 int
-JournalLogBuffer::AsyncReset(int id, JournalInternalEventCallback callbackFunc)
+JournalLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
 {
-    JournalResetContext* resetRequest = new JournalResetContext(id, callbackFunc);
-    resetRequest->opcode = MetaFsIoOpcode::Write;
-    resetRequest->fd = logFile->GetFd();
-    resetRequest->fileOffset = _GetFileOffset(id, 0);
-    resetRequest->length = groupSize;
-    resetRequest->buffer = initializedDataBuffer;
-    resetRequest->callback = std::bind(&JournalLogBuffer::AsyncResetDone, this, std::placeholders::_1);
+    uint64_t groupSize = config->GetLogGroupSize();
+    LogGroupResetContext* resetRequest = new LogGroupResetContext(id, callbackEvent);
+    resetRequest->SetIoRequest(_GetFileOffset(id, 0), groupSize, initializedDataBuffer);
 
-    int ret = logFile->AsyncIO(resetRequest);
+    return InternalIo(resetRequest);
+}
+
+int
+JournalLogBuffer::InternalIo(LogBufferIoContext* context)
+{
+    MetaIoCbPtr callbackFunc = std::bind(&JournalLogBuffer::InternalIoDone, this, std::placeholders::_1);
+    context->SetInternalCallback(callbackFunc);
+    context->SetFile(logFile->GetFd());
+
+    int ret = logFile->AsyncIO(context);
     if (ret != 0)
     {
-        IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::JOURNAL_LOG_BUFFER_RESET_FAILED,
+        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_RESET_FAILED,
             "Failed to reset log buffer");
     }
     return ret;
 }
 
 void
-JournalLogBuffer::AsyncResetDone(AsyncMetaFileIoCtx* ctx)
+JournalLogBuffer::InternalIoDone(AsyncMetaFileIoCtx* ctx)
 {
-    JournalResetContext* context = reinterpret_cast<JournalResetContext*>(ctx);
-    context->ResetDone();
-    delete context;
+    LogBufferIoContext* context = dynamic_cast<LogBufferIoContext*>(ctx);
+    if (context != nullptr)
+    {
+        context->IoDone();
+        delete context;
+    }
 }
 
 int
@@ -276,10 +283,10 @@ JournalLogBuffer::Delete(void)
     {
         ret = logFile->Delete();
 
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_DEBUG,
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_DEBUG,
             "Journal log buffer is deleted");
     }
     return ret;
 }
 
-} // namespace ibofos
+} // namespace pos

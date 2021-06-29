@@ -8,13 +8,14 @@ import sys
 sys.path.append("../lib/")
 import json
 import json_parser
-import ibofos
-import ibofos_util
+import pos
+import pos_util
 import cli
-import ibofos_constant
+import pos_constant
 import time
 
-IBOFOS_ROOT = '../../../'
+POS_ROOT = '../../../'
+ARRAYNAME = "POSArray"
 
 #SECONDS FOR A MINUTE
 #SET 60 FOR REALTIME TESTING
@@ -35,7 +36,7 @@ RC = True
 # SPARE_3 = "unvme-ns-7"
 # DETACH_1 = "unvme-ns-0"
 # DETACH_2 = "unvme-ns-1"
-#VOL_SIZE = 2 * ibofos_constant.SIZE_1GB
+#VOL_SIZE = 2 * pos_constant.SIZE_1GB
 
 
 DEV_1 = "unvme-ns-0"
@@ -48,12 +49,12 @@ DEV_2_RECYCLED = "unvme-ns-5"
 DEV_3_RECYCLED = "unvme-ns-6"
 DEV_4_RECYCLED = "unvme-ns-7"
 
-VOL_SIZE = 5 * ibofos_constant.SIZE_1GB
+VOL_SIZE = 10 * pos_constant.SIZE_1GB
 
 #MAX VOLUME COUNT FOR A TEST
 #DO NOT SET GREATER THAN 24 
 #In the VM environment recommends up to 12 or less
-MAX_VOL_CNT = 6
+MAX_VOL_CNT = 2
 
 VOL_NAME_PREFIX = "vol"
 VOL_CNT = 0
@@ -110,15 +111,15 @@ class FIO():
             write_log ("fio id: " + key + " is already running")
             return False
         else:
-            ip_addr = ibofos.TR_ADDR
+            ip_addr = pos.TR_ADDR
             ns_id = str(vol_id + 1)
             test_name = key
             file_name = "trtype=tcp adrfam=IPv4 traddr=" + ip_addr + \
-                " trsvcid=1158 subnqn=nqn.2019-04.ibof\:subsystem1 ns= " + ns_id
+                " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem1 ns= " + ns_id
             remainig_min = (TESTTIME_IN_HOUR - ELAPSED_HOUR) * MINUTES_PER_HOUR - ELAPSED_MIN
             runtime_sec = remainig_min * SECONDS_PER_MINUTE
             write_log ("runtime_in_sec: " + str(runtime_sec))
-            ioengine_path = IBOFOS_ROOT + "lib/spdk-19.10/examples/nvme/fio_plugin/fio_plugin"
+            ioengine_path = POS_ROOT + "lib/spdk/examples/nvme/fio_plugin/fio_plugin"
             fio_proc = subprocess.Popen(["fio",
                 "--ioengine=" + ioengine_path,\
                 "--runtime=" + str(runtime_sec), \
@@ -186,41 +187,42 @@ def write_log(_log):
     with open("72hour_test_log", "a") as result_file:
         result_file.write(_log+"\n")
 
-def start_ibofos():
-    write_log ("starting ibofos...")
-    ibofos.start_ibofos()
-    write_log ("ibofos is running")
+def start_pos():
+    write_log ("starting pos...")
+    pos.start_pos()
+    write_log ("pos is running")
 
-def exit_ibofos():
-    write_log ("exiting ibofos...")
-    if get_state() != "OFFLINE":
-        ret = unmount_ibofos()
+def exit_pos():
+    write_log ("exiting pos...")
+    state = get_state()
+    if state == "NORMAL" or state == "BUSY":
+        ret = unmount_pos()
         if ret == False:
-            write_log("ibofos unmounting failed")
+            write_log("pos unmounting failed")
             return False
     fio_util.dispose()
-    ibofos.exit_ibofos()
-    write_log ("ibofos has been terminated")
+    pos.exit_pos()
+    write_log ("pos has been terminated")
     return True
 
-def abort_ibofos():
-    write_log ("abort ibofos for dump...")
+def abort_pos():
+    write_log ("abort pos for dump...")
     fio_util.dispose()
-    ibofos_util.abort_process("ibofos")
-    write_log ("ibofos has been terminated")
+    pos_util.abort_process("pos")
+    write_log ("pos has been terminated")
 
-def restart_ibofos():
-    ret = exit_ibofos()
+def restart_pos():
+    ret = exit_pos()
     if ret == False:
-        write_log("ibofos restarting failed while exiting")
+        write_log("pos restarting failed while exiting")
         return False
-    start_ibofos()
-    write_log("ibofos has been restarted")
+    start_pos()
+    write_log("pos has been restarted")
     return True
 
 def scan_dev():
     write_log ("scan_dev begin")
-    ibofos_util.pci_rescan()
+    pos_util.pci_rescan()
     time.sleep(2)
     cli.scan_device()
     cli.list_device()
@@ -228,7 +230,7 @@ def scan_dev():
 
 def create_array():
     DATA = DEV_1 + "," + DEV_2 + "," + DEV_3
-    out = cli.create_array("uram0", DATA, "", "", "")
+    out = cli.create_array("uram0", DATA, "", ARRAYNAME, "")
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array created successfully")
@@ -237,20 +239,8 @@ def create_array():
         write_log ("array creation failed, code: " + str(code))
         return False
 
-def load_array():
-    out = cli.load_array("")
-    code = json_parser.get_response_code(out)
-    cli.list_device()
-    cli.list_volume("")
-    if code == 0:
-        write_log ("array loaded successfully")
-        return True
-    else:
-        write_log ("array loading failed, code: " + str(code))
-        return False
-
-def mount_ibofos():
-    out = cli.mount_ibofos()
+def mount_pos():
+    out = cli.mount_array(ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array mounted successfully")
@@ -259,8 +249,8 @@ def mount_ibofos():
         write_log ("array mounting failed code: " + str(code))
         return False
 
-def unmount_ibofos():
-    out = cli.unmount_ibofos()
+def unmount_pos():
+    out = cli.unmount_array(ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array unmounted successfully")
@@ -273,7 +263,7 @@ def create_and_mount_vol():
     global VOL_CNT
     vol_name = VOL_NAME_PREFIX + str(VOL_CNT)
     write_log ("try to create volume, name: " + vol_name + ", size: " + str(VOL_SIZE))
-    out = cli.create_volume(vol_name, str(VOL_SIZE), "", "", "")
+    out = cli.create_volume(vol_name, str(VOL_SIZE), "", "", ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         VOL_CNT = VOL_CNT + 1
@@ -284,7 +274,7 @@ def create_and_mount_vol():
         return False
 
 def mount_vol(vol_name):
-    out = cli.mount_volume(vol_name, "", "")
+    out = cli.mount_volume(vol_name, ARRAYNAME, "")
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("volume: " + vol_name + " mounted successfully")
@@ -294,11 +284,11 @@ def mount_vol(vol_name):
         return False
 
 def detach_data(target):
-    ibofos_util.pci_detach_and_attach(target)
+    pos_util.pci_detach_and_attach(target)
     time.sleep(0.1)
 
 def add_spare(spare):
-    out = cli.add_device(spare, "")
+    out = cli.add_device(spare, ARRAYNAME)
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("Spare device: " + spare + " has been added successfully")
@@ -307,16 +297,20 @@ def add_spare(spare):
         write_log ("Spare device: " + spare + " adding failed, code: " + str(code))
         return False
 
+def mbr_reset():
+    cli.mbr_reset()
+
 def tick_hour():
     global RC
     RC = do_event(ELAPSED_HOUR)
 
 def init_test():
-    # ibofos_util.kill_process("ibofos")
-    start_ibofos()
+    # pos_util.kill_process("poseidonos")
+    start_pos()
     scan_dev()
+    mbr_reset()
     create_array()
-    ret = mount_ibofos()
+    ret = mount_pos()
     return ret
 
 def add_new_vol_and_do_io(cnt = 1):
@@ -329,24 +323,9 @@ def add_new_vol_and_do_io(cnt = 1):
         write_log (VOL_NAME_PREFIX + str(VOL_CNT - 1) + " volume is newly created and I/O is being performed there")
     return True
 
-def get_situation():
-    out = cli.get_ibofos_info()
-    data = json.loads(out)
-    situ = data['Response']['info']['situation']
-    return situ
-
-def check_situation(situ_expected):
-    situ = get_situation()
-    if situ == situ_expected:
-        write_log ("current situation is " + situ)
-        return True
-    write_log ("current situation is " + situ + " but we expected " + situ_expected)
-    return False
-
 def get_state():
-    out = cli.get_ibofos_info()
-    data = json.loads(out)
-    state = data['Response']['info']['state']
+    out = cli.array_info(ARRAYNAME)
+    state = json_parser.get_state(out)
     return state
 
 def check_state(state_expected):
@@ -357,46 +336,58 @@ def check_state(state_expected):
     write_log ("current state is " + state + " but we expected " + state_expected)
     return False
 
+def get_situation():
+    out = cli.array_info(ARRAYNAME)
+    situ = json_parser.get_situation(out)
+    return situ
+
+def check_situation(situ_expected):
+    situ = get_situation()
+    if situ == situ_expected:
+        write_log ("current situation is " + situ)
+        return True
+    write_log ("current situation is " + situ + " but we expected " + situ_expected)
+    return False
+
 def do_event(elapsed_hour):
     if elapsed_hour == 0:
         ret = init_test()
         if ret == True:
             if add_new_vol_and_do_io() == True:
-                return check_state("NORMAL")
+                return check_situation("NORMAL")
         return False
 
     elif elapsed_hour >= 1 and elapsed_hour <= 11:
         if (VOL_CNT >= MAX_VOL_CNT // 2):
-            return check_state("NORMAL")
+            return check_situation("NORMAL")
         if add_new_vol_and_do_io() == True:
-            return check_state("NORMAL")
+            return check_situation("NORMAL")
         return False
 
     elif elapsed_hour == 12:
-        ret = restart_ibofos()
+        ret = restart_pos()
         if ret == True:
             scan_dev()
-            if load_array() == True:
-                if mount_ibofos() == True:
-                    for i in range(MAX_VOL_CNT // 2):
-                        mnt_res = mount_vol(VOL_NAME_PREFIX + str(i))
-                        if mnt_res == False:
-                            return False
-                        fio_util.start_fio(i)
-                    for i in range(MAX_VOL_CNT - (MAX_VOL_CNT// 2)):
-                        add_new_vol_and_do_io()
-                    return check_state("NORMAL")
+            if mount_pos() == True:
+                for i in range(MAX_VOL_CNT // 2):
+                    mnt_res = mount_vol(VOL_NAME_PREFIX + str(i))
+                    if mnt_res == False:
+                        return False
+                    fio_util.start_fio(i)
+                for i in range(MAX_VOL_CNT - (MAX_VOL_CNT// 2)):
+                    add_new_vol_and_do_io()
+                return check_situation("NORMAL")
         return False
         # for i in range(MAX_VOL_CNT - (MAX_VOL_CNT// 2)):
         #     add_new_vol_and_do_io()
-        # return check_state("NORMAL")
+        # return check_situation("NORMAL")
 
     elif elapsed_hour == 13:
-        return check_state("NORMAL")
+        return check_situation("NORMAL")
 
     elif elapsed_hour == 14:
         detach_data(DEV_1)
-        time.sleep(60)
+        time.sleep(10)
         return check_situation("DEGRADED")
 
     elif elapsed_hour >= 15 and elapsed_hour <= 35:
@@ -404,17 +395,17 @@ def do_event(elapsed_hour):
 
     elif elapsed_hour == 36:
         ret = add_spare(DEV_4)
-        time.sleep(60)
+        time.sleep(10)
         if ret == True:
             return check_situation("REBUILDING")
         return False
 
     elif elapsed_hour >= 37 and elapsed_hour <= 39:
-        return check_state("NORMAL") or check_situation("REBUILDING")
+        return check_situation("NORMAL") or check_situation("REBUILDING")
 
     elif elapsed_hour == 40:
         detach_data(DEV_2)
-        time.sleep(60)
+        time.sleep(10)
         return check_situation("DEGRADED")
 
     elif elapsed_hour >= 41 and elapsed_hour <= 43:
@@ -422,17 +413,17 @@ def do_event(elapsed_hour):
 
     elif elapsed_hour == 44:
         ret = add_spare(DEV_1_RECYCLED)
-        time.sleep(60)
+        time.sleep(10)
         if ret == True:
             return check_situation("REBUILDING")
         return False
 
     elif elapsed_hour >= 45 and elapsed_hour <= 47:
-        return check_state("NORMAL") or check_situation("REBUILDING")
+        return check_situation("NORMAL") or check_situation("REBUILDING")
 
     elif elapsed_hour == 48:
         detach_data(DEV_3)
-        time.sleep(60)
+        time.sleep(10)
         return check_situation("DEGRADED")
 
     elif elapsed_hour >= 49 and elapsed_hour <= 51:
@@ -440,17 +431,17 @@ def do_event(elapsed_hour):
 
     elif elapsed_hour == 52:
         ret = add_spare(DEV_2_RECYCLED)
-        time.sleep(60)
+        time.sleep(10)
         if ret == True:
             return check_situation("REBUILDING")
         return False
 
     elif elapsed_hour >= 53 and elapsed_hour <= 55:
-        return check_state("NORMAL") or check_situation("REBUILDING")
+        return check_situation("NORMAL") or check_situation("REBUILDING")
 
     elif elapsed_hour == 56:
         detach_data(DEV_4)
-        time.sleep(60)
+        time.sleep(10)
         return check_situation("DEGRADED")
 
     elif elapsed_hour >= 57 and elapsed_hour <= 59:
@@ -458,13 +449,13 @@ def do_event(elapsed_hour):
 
     elif elapsed_hour == 60:
         ret = add_spare(DEV_3_RECYCLED)
-        time.sleep(60)
+        time.sleep(10)
         if ret == True:
             return check_situation("REBUILDING")
         return False
 
     elif elapsed_hour >= 61 and elapsed_hour <= 71:
-        return check_state("NORMAL") or check_situation("REBUILDING")
+        return check_situation("NORMAL") or check_situation("REBUILDING")
 
     elif elapsed_hour == TESTTIME_IN_HOUR:
         return True
@@ -474,8 +465,8 @@ def do_event(elapsed_hour):
         return False
 
 def main(ip_addr):
-    ibofos.set_addr(ip_addr)
-    write_log("IPADDRESS: " + ibofos.TR_ADDR)
+    pos.set_addr(ip_addr)
+    write_log("IPADDRESS: " + pos.TR_ADDR)
     print_time()
     global RC
     RC = do_event(0)
@@ -488,12 +479,12 @@ def main(ip_addr):
     
     if RC == False:
         write_log("TEST FAILED AFTER " + str(ELAPSED_HOUR) +"h")
-        abort_ibofos()
+        abort_pos()
         exit(-1)
     else:
         write_log("TEST SUCCESS")
-        if exit_ibofos() == False:
-            abort_ibofos()
+        if exit_pos() == False:
+            abort_pos()
         exit(0)
 
 if __name__ == "__main__":

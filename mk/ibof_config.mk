@@ -27,8 +27,8 @@ export CONFIG_BE_QOS?=y
 # for fe qos
 export CONFIG_FE_QOS?=n
 
-#Build Ibofos as library
+#Build PoseidonOS as library
 export CONFIG_LIBRARY_BUILD?=n
 
-# Enable nvme flush functionality
-export CONFIG_NVME_FLUSH?=n
+#Build PoseidonOS with -FPIC option
+export CONFIG_FPIC?=y

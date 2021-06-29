@@ -30,30 +30,33 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "meta_scheduler.h"
-
-#include "mfs.h"
-#include "src/device/event_framework_api.h"
-
-MetaIOScheduler metaioScheduler;
-const char* META_FIO_TARGET_FILE = "bdev";
-uint32_t g_meta_outstandingCmd = 0;
+#include "src/metafs/include/metafs_service.h"
+#include "src/spdk_wrapper/event_framework_api.h"
+#include "src/event_scheduler/spdk_event_scheduler.h"
 
 extern "C"
 {
 #include "spdk/bdev_module.h"
-#include "spdk/ibof_volume.h"
+#include "spdk/pos_volume.h"
 }
 
-void HandleMetaIoCompletion(void* arg1, void* arg2);
+namespace pos
+{
+MetaIOScheduler metaioScheduler;
+const char* META_FIO_TARGET_FILE = "bdev";
+uint32_t g_meta_outstandingCmd = 0;
+
+void HandleMetaIoCompletion(void* arg1);
 
 void
-HandleMetaIoCompletion(void* arg1, void* arg2)
+HandleMetaIoCompletion(void* arg1)
 {
-    ibof_io* io = static_cast<ibof_io*>(arg1);
+    pos_io* io = static_cast<pos_io*>(arg1);
     if (io->complete_cb)
     {
-        io->complete_cb(io, IBOF_IO_STATUS_SUCCESS); // always success for perf test
+        io->complete_cb(io, POS_IO_STATUS_SUCCESS); // always success for perf test
     }
 }
 
@@ -61,13 +64,13 @@ void
 MetaIOScheduler::HandleIOCallback(void* data)
 {
     MetaFioAIOCxt* cxt = reinterpret_cast<MetaFioAIOCxt*>(data);
-    ibofos::EventFrameworkApi::SendSpdkEvent(
+    pos::EventFrameworkApi::SendSpdkEvent(
         cxt->GetReactor(),
-        HandleMetaIoCompletion, cxt->GetIBoFIOCxt(), nullptr);
+        HandleMetaIoCompletion, cxt->GetIBoFIOCxt());
 
     delete cxt;
     g_meta_outstandingCmd--;
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE, "callback done");
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE, "callback done");
 }
 
 #include "meta_io_manager.h"
@@ -81,52 +84,47 @@ int MetaIoHandler::fdList[4] = {
 int MetaIoHandler::index = 0;
 
 int
-MetaIoHandler::IoSubmitHandler0(struct ibof_io* io)
+MetaIoHandler::IoSubmitHandler0(struct pos_io* io)
 {
     return MetaIoHandler::MetaFsIOSubmitHandler(io, MetaIoHandler::fdList[0]);
 }
 
 int
-MetaIoHandler::IoSubmitHandler1(struct ibof_io* io)
+MetaIoHandler::IoSubmitHandler1(struct pos_io* io)
 {
     return MetaIoHandler::MetaFsIOSubmitHandler(io, MetaIoHandler::fdList[1]);
 }
 
 int
-MetaIoHandler::IoSubmitHandler2(struct ibof_io* io)
+MetaIoHandler::IoSubmitHandler2(struct pos_io* io)
 {
     return MetaIoHandler::MetaFsIOSubmitHandler(io, MetaIoHandler::fdList[2]);
 }
 
 int
-MetaIoHandler::IoSubmitHandler3(struct ibof_io* io)
+MetaIoHandler::IoSubmitHandler3(struct pos_io* io)
 {
     return MetaIoHandler::MetaFsIOSubmitHandler(io, MetaIoHandler::fdList[3]);
 }
 
 int
-MetaIoHandler::MetaFsIOSubmitHandler(struct ibof_io* io, int fd)
+MetaIoHandler::MetaFsIOSubmitHandler(struct pos_io* io, int fd)
 {
     assert(io->ioType == IO_TYPE::READ || io->ioType == IO_TYPE::WRITE);
     // assert(io->length == 4096); // LIMITATION: currently 4KB workload is targeted to metafs perf evaluation!
 
-    MetaFsReturnCode<IBOF_EVENT_ID> rc_io;
+    POS_EVENT_ID rc_io;
     assert(fd != INT_MAX);
 #if 1
-    // NOTE: In order to issue the command performing single 4KB internal operation, it has to aligned specific data chunk size of metafs.
-    //       Typical data chunk size of each meta page is 4032Byte which is the value excluded meta control info in meta page.
-    //       In real user scenario, consumer of metafs issues io awaring this aligned data chunk size. So the assumption of below is not unrealistic
     MetaFsIoOpcode opcode = (io->ioType == IO_TYPE::READ) ? MetaFsIoOpcode::Read : MetaFsIoOpcode::Write;
-    uint32_t alignedIOSize = metaFsMgr.util.GetAlignedFileIOSize(fd);
-    assert (alignedIOSize != 0);
-
+    uint32_t alignedIOSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     uint64_t soffset = ((io->offset / alignedIOSize) * alignedIOSize);
-    uint64_t nbytes = alignedIOSize;
-    uint32_t reactor = ibofos::EventFrameworkApi::GetCurrentReactor();
-    MetaFsAioCbCxt* aiocb = new MetaFioAIOCxt(opcode, fd, soffset, nbytes, io->iov->iov_base,
+    uint32_t reactor = pos::EventFrameworkApi::GetCurrentReactor();
+    std::string arrayName = "POSArray";
+    MetaFsAioCbCxt* aiocb = new MetaFioAIOCxt(opcode, fd, arrayName, soffset, alignedIOSize, io->iov->iov_base,
         AsEntryPointParam1(&MetaIOScheduler::HandleIOCallback, &metaioScheduler),
         io, reactor);
-    rc_io = metaFsMgr.io.SubmitIO(aiocb);
+    rc_io = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->io->SubmitIO(aiocb);
     g_meta_outstandingCmd++;
 
 #else // testing for sync io
@@ -146,7 +144,7 @@ MetaIoHandler::MetaFsIOSubmitHandler(struct ibof_io* io, int fd)
     io->complete_cb(io, 0);
 #endif
 
-    return rc_io.IsSuccess() ? 0 : 1;
+    return (POS_EVENT_ID::SUCCESS == rc_io) ? 0 : 1;
 }
 
 void
@@ -154,3 +152,4 @@ MetaIoHandler::MetaFsIOCompleteHandler(void)
 {
     // nothing
 }
+} // namespace pos

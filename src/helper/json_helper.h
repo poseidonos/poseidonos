@@ -41,6 +41,12 @@
 
 using namespace std;
 
+enum JsonFormatType
+{
+    JSON_FORMAT_TYPE_DEFAULT = 0,
+    JSON_FORMAT_TYPE_READABLE
+};
+
 class JsonAttribute // name-value pair
 {
 private:
@@ -90,7 +96,7 @@ public:
     {
         elements.push_back(elem);
     }
-    string ToJson();
+    string ToJson(JsonFormatType type = JSON_FORMAT_TYPE_DEFAULT);
 };
 
 class JsonArray // group of elements
@@ -109,7 +115,7 @@ public:
     {
         item.push_back(element);
     }
-    string ToJson();
+    string ToJson(JsonFormatType type = JSON_FORMAT_TYPE_DEFAULT);
 };
 
 class JsonFormat

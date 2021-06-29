@@ -34,33 +34,35 @@
 
 #include "src/logger/logger.h"
 
-MetaFileExtentMgrClass::MetaFileExtentMgrClass(void)
+namespace pos
+{
+MetaFileExtentManager::MetaFileExtentManager(void)
 : fileRegionBaseLpnInVolume(MetaFsCommonConst::INVALID_META_LPN),
   maxFileRegionLpn(MetaFsCommonConst::INVALID_META_LPN),
   availableLpnCount(0)
 {
 }
 
-MetaFileExtentMgrClass::~MetaFileExtentMgrClass(void)
+MetaFileExtentManager::~MetaFileExtentManager(void)
 {
 }
 
 void
-MetaFileExtentMgrClass::Init(MetaLpnType baseLpn, MetaLpnType maxFileRegionLpn)
+MetaFileExtentManager::Init(MetaLpnType baseLpn, MetaLpnType maxFileRegionLpn)
 {
     fileRegionBaseLpnInVolume = baseLpn;
     this->maxFileRegionLpn = maxFileRegionLpn;
     availableLpnCount = maxFileRegionLpn - fileRegionBaseLpnInVolume + 1;
 
-    freeExtentsList.push_front(MetaFileExtentContent(fileRegionBaseLpnInVolume, availableLpnCount));
+    freeExtentsList.push_front(MetaFileExtent(fileRegionBaseLpnInVolume, availableLpnCount));
 
-    MFS_TRACE_DEBUG(IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "MetaFileExtentMgrClass::Init fileRegionBaseLpnInVolume={}, maxFileRegionLpn={}, availableLpnCount={}",
+    MFS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "MetaFileExtentManager::Init fileRegionBaseLpnInVolume={}, maxFileRegionLpn={}, availableLpnCount={}",
         fileRegionBaseLpnInVolume, maxFileRegionLpn, availableLpnCount);
 }
 
 MetaFilePageMap
-MetaFileExtentMgrClass::AllocExtent(MetaLpnType lpnCnt)
+MetaFileExtentManager::AllocExtent(MetaLpnType lpnCnt)
 {
     pair<bool, MetaLpnType> ret = AddToFreeExtentsList(lpnCnt);
 
@@ -77,30 +79,30 @@ MetaFileExtentMgrClass::AllocExtent(MetaLpnType lpnCnt)
         pagemap.pageCnt = 0;
     }
 
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "New File pagemap info <baseLpn, lpnCnt>=<{}, {}>",
         pagemap.baseMetaLpn, pagemap.pageCnt);
     return pagemap;
 }
 
 MetaLpnType
-MetaFileExtentMgrClass::GetAvailableLpnCount(void)
+MetaFileExtentManager::GetAvailableLpnCount(void)
 {
     return availableLpnCount;
 }
 
 void
-MetaFileExtentMgrClass::GetContent(MetaFileExtentContent* list)
+MetaFileExtentManager::GetContent(MetaFileExtent* list)
 {
     int index = 0;
 
-    memset(list, 0x0, sizeof(MetaFileExtentContent) * MetaFsConfig::MAX_VOLUME_CNT);
+    memset(list, 0x0, sizeof(MetaFileExtent) * MetaFsConfig::MAX_VOLUME_CNT);
 
-    MakeAllocatedExtentsList();
+    _MakeAllocatedExtentsList();
 
     for (auto iter = allocatedExtentsList.begin(); iter != allocatedExtentsList.end(); iter++)
     {
-        MFS_TRACE_DEBUG(IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "copy content from allocated list to outside: index={} iter->GetStartLpn()={}, iter->GetCount()={}",
             index, iter->GetStartLpn(), iter->GetCount());
 
@@ -110,11 +112,11 @@ MetaFileExtentMgrClass::GetContent(MetaFileExtentContent* list)
 }
 
 void
-MetaFileExtentMgrClass::SetContent(MetaFileExtentContent* list)
+MetaFileExtentManager::SetContent(MetaFileExtent* list)
 {
     if (list[0].GetCount() == 0)
     {
-        MFS_TRACE_DEBUG(IBOF_EVENT_ID::MFS_DEBUG_MESSAGE, "There is no content in the list");
+        MFS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE, "There is no content in the list");
         return;
     }
 
@@ -128,19 +130,19 @@ MetaFileExtentMgrClass::SetContent(MetaFileExtentContent* list)
             break;
         }
 
-        MFS_TRACE_DEBUG(IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "copy content from outside to allocated list: index={} list[index].GetStartLpn()={}, list[index].GetCount()={}",
             index, list[index].GetStartLpn(), list[index].GetCount());
 
         AddToAllocatedExtentsList(list[index].GetStartLpn(), list[index].GetCount());
     }
 
-    MakeFreeExtentsList();
+    _MakeFreeExtentsList();
     PrintFreeExtentsList();
 }
 
 MetaLpnType
-MetaFileExtentMgrClass::GetTheBiggestExtentSize(void)
+MetaFileExtentManager::GetTheBiggestExtentSize(void)
 {
     MetaLpnType size = 0;
 
@@ -156,21 +158,21 @@ MetaFileExtentMgrClass::GetTheBiggestExtentSize(void)
 }
 
 void
-MetaFileExtentMgrClass::SetFileBaseLpn(MetaLpnType BaseLpn)
+MetaFileExtentManager::SetFileBaseLpn(MetaLpnType BaseLpn)
 {
     fileRegionBaseLpnInVolume = BaseLpn;
     availableLpnCount = maxFileRegionLpn - fileRegionBaseLpnInVolume + 1;
 
-    MFS_TRACE_DEBUG(IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "set file base lpn, availableLpnCount={}", availableLpnCount);
 
     freeExtentsList.clear();
-    freeExtentsList.push_front(MetaFileExtentContent(fileRegionBaseLpnInVolume, availableLpnCount));
+    freeExtentsList.push_front(MetaFileExtent(fileRegionBaseLpnInVolume, availableLpnCount));
     PrintFreeExtentsList();
 }
 
 pair<bool, MetaLpnType>
-MetaFileExtentMgrClass::AddToFreeExtentsList(MetaLpnType requestLpnCount)
+MetaFileExtentManager::AddToFreeExtentsList(MetaLpnType requestLpnCount)
 {
     int index = 0;
     for (auto iter = freeExtentsList.begin(); iter != freeExtentsList.end(); iter++, index++)
@@ -183,7 +185,7 @@ MetaFileExtentMgrClass::AddToFreeExtentsList(MetaLpnType requestLpnCount)
             freeExtentsList[index].SetCount(freeExtentsList[index].GetCount() - requestLpnCount);
             availableLpnCount -= requestLpnCount;
 
-            SortFreeExtentsList();
+            _SortFreeExtentsList();
             PrintFreeExtentsList();
 
             return make_pair(true, newStartLpn);
@@ -195,7 +197,7 @@ MetaFileExtentMgrClass::AddToFreeExtentsList(MetaLpnType requestLpnCount)
             freeExtentsList.erase(iter);
             availableLpnCount -= requestLpnCount;
 
-            SortFreeExtentsList();
+            _SortFreeExtentsList();
             PrintFreeExtentsList();
 
             return make_pair(true, newStartLpn);
@@ -206,7 +208,7 @@ MetaFileExtentMgrClass::AddToFreeExtentsList(MetaLpnType requestLpnCount)
 }
 
 bool
-MetaFileExtentMgrClass::RemoveFromFreeExtentsList(MetaLpnType startLpn, MetaLpnType count)
+MetaFileExtentManager::RemoveFromFreeExtentsList(MetaLpnType startLpn, MetaLpnType count)
 {
     if (count == 0)
     {
@@ -222,8 +224,8 @@ MetaFileExtentMgrClass::RemoveFromFreeExtentsList(MetaLpnType startLpn, MetaLpnT
             freeExtentsList[index].SetStartLpn(freeExtentsList[index].GetStartLpn() - count);
             freeExtentsList[index].SetCount(freeExtentsList[index].GetCount() + count);
             availableLpnCount += count;
-            SortFreeExtentsList();
-            MergeFreeExtents();
+            _SortFreeExtentsList();
+            _MergeFreeExtents();
 
             return true;
         }
@@ -231,8 +233,8 @@ MetaFileExtentMgrClass::RemoveFromFreeExtentsList(MetaLpnType startLpn, MetaLpnT
         {
             iter->SetCount(iter->GetCount() + count);
             availableLpnCount += count;
-            SortFreeExtentsList();
-            MergeFreeExtents();
+            _SortFreeExtentsList();
+            _MergeFreeExtents();
 
             return true;
         }
@@ -242,16 +244,16 @@ MetaFileExtentMgrClass::RemoveFromFreeExtentsList(MetaLpnType startLpn, MetaLpnT
         }
     }
 
-    freeExtentsList.push_back(MetaFileExtentContent(startLpn, count));
+    freeExtentsList.push_back(MetaFileExtent(startLpn, count));
     availableLpnCount += count;
-    SortFreeExtentsList();
-    MergeFreeExtents();
+    _SortFreeExtentsList();
+    _MergeFreeExtents();
 
     return true;
 }
 
 void
-MetaFileExtentMgrClass::MergeFreeExtents(void)
+MetaFileExtentManager::_MergeFreeExtents(void)
 {
     uint32_t index = 0;
     bool eraseNext = false;
@@ -282,7 +284,7 @@ MetaFileExtentMgrClass::MergeFreeExtents(void)
 }
 
 void
-MetaFileExtentMgrClass::MakeFreeExtentsList(void)
+MetaFileExtentManager::_MakeFreeExtentsList(void)
 {
     uint32_t index = 0;
     MetaLpnType startLpn = 0;
@@ -303,7 +305,7 @@ MetaFileExtentMgrClass::MakeFreeExtentsList(void)
             if (count != 0)
             {
                 availableLpnCount += count;
-                freeExtentsList.push_back(MetaFileExtentContent(startLpn, count));
+                freeExtentsList.push_back(MetaFileExtent(startLpn, count));
             }
         }
 
@@ -322,48 +324,48 @@ MetaFileExtentMgrClass::MakeFreeExtentsList(void)
         if (count != 0)
         {
             availableLpnCount += count;
-            freeExtentsList.push_back(MetaFileExtentContent(startLpn, count));
+            freeExtentsList.push_back(MetaFileExtent(startLpn, count));
         }
     }
 
-    MergeFreeExtents();
+    _MergeFreeExtents();
 }
 
 void
-MetaFileExtentMgrClass::SortFreeExtentsList(void)
+MetaFileExtentManager::_SortFreeExtentsList(void)
 {
     sort(freeExtentsList.begin(), freeExtentsList.end());
 }
 
 void
-MetaFileExtentMgrClass::PrintFreeExtentsList(void)
+MetaFileExtentManager::PrintFreeExtentsList(void)
 {
     int totalCount = 0;
 
-    MFS_TRACE_DEBUG(IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "free space -> {}",
         availableLpnCount);
 
-    for (MetaFileExtentContent extent : freeExtentsList)
+    for (MetaFileExtent extent : freeExtentsList)
     {
         totalCount += extent.GetCount();
-        MFS_TRACE_DEBUG(IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "({}, {})", extent.GetStartLpn(), extent.GetCount());
     }
 
-    MFS_TRACE_DEBUG(IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "total free lpn count: {} -> calculated)", totalCount);
 }
 
 void
-MetaFileExtentMgrClass::AddToAllocatedExtentsList(MetaLpnType startLpn, MetaLpnType requestLpnCount)
+MetaFileExtentManager::AddToAllocatedExtentsList(MetaLpnType startLpn, MetaLpnType requestLpnCount)
 {
-    allocatedExtentsList.push_back(MetaFileExtentContent(startLpn, requestLpnCount));
-    SortAllocatedExtentsList();
+    allocatedExtentsList.push_back(MetaFileExtent(startLpn, requestLpnCount));
+    _SortAllocatedExtentsList();
 }
 
 void
-MetaFileExtentMgrClass::MakeAllocatedExtentsList(void)
+MetaFileExtentManager::_MakeAllocatedExtentsList(void)
 {
     uint32_t index = 0;
     MetaLpnType startLpn = 0;
@@ -381,7 +383,7 @@ MetaFileExtentMgrClass::MakeAllocatedExtentsList(void)
 
             if (count != 0)
             {
-                allocatedExtentsList.push_back(MetaFileExtentContent(startLpn, count));
+                allocatedExtentsList.push_back(MetaFileExtent(startLpn, count));
             }
         }
 
@@ -402,34 +404,35 @@ MetaFileExtentMgrClass::MakeAllocatedExtentsList(void)
 
         if (count != 0)
         {
-            allocatedExtentsList.push_back(MetaFileExtentContent(startLpn, count));
+            allocatedExtentsList.push_back(MetaFileExtent(startLpn, count));
         }
     }
 
-    PrintAllocatedExtentsList();
+    _PrintAllocatedExtentsList();
 }
 
 void
-MetaFileExtentMgrClass::SortAllocatedExtentsList(void)
+MetaFileExtentManager::_SortAllocatedExtentsList(void)
 {
     sort(allocatedExtentsList.begin(), allocatedExtentsList.end());
 }
 
 void
-MetaFileExtentMgrClass::PrintAllocatedExtentsList(void)
+MetaFileExtentManager::_PrintAllocatedExtentsList(void)
 {
     int totalCount = 0;
 
-    IBOF_TRACE_DEBUG(IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "allocated space");
 
-    for (MetaFileExtentContent extent : allocatedExtentsList)
+    for (MetaFileExtent extent : allocatedExtentsList)
     {
         totalCount += extent.GetCount();
-        IBOF_TRACE_DEBUG(IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+        POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "({}, {})", extent.GetStartLpn(), extent.GetCount());
     }
 
-    IBOF_TRACE_DEBUG(IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "total allocated lpn count: {} -> calculated)", totalCount);
 }
+} // namespace pos

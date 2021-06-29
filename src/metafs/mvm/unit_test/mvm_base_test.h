@@ -36,31 +36,34 @@
 #include <chrono>
 #include <cstdint>
 #include <string>
-
-#include "mfs_fb_adapter.h"
-#include "mfs_io_config.h"
+#include <random>
+#include "metafs_config.h"
 #include "mfs_ut_framework.h"
 
+namespace pos
+{
 class UtMVMBasic : public ::testing::TestWithParam<int> //, public ::testing::Test
 {
 public:
     void
     SetUp(void) override
     {
-        MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+        arrayName = "POSArray";
+
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
             "Start SetUp sequence...");
         mimTopMgr.SetModuleReady();
 
         uint64_t testVolumeByteSize = 1 * 1024 * 1024 * 1024;
         MetaLpnType testMaxMetaLpn = testVolumeByteSize / MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES;
 
-        metaVolMgr.Init(MetaVolumeType::NvRamVolume, testMaxMetaLpn);
-        metaVolMgr.Init(MetaVolumeType::SsdVolume, testMaxMetaLpn);
+        metaVolMgr.Init(MetaVolumeType::NvRamVolume, arrayName, testMaxMetaLpn);
+        metaVolMgr.Init(MetaVolumeType::SsdVolume, arrayName, testMaxMetaLpn);
         metaVolMgr.Bringup();
-        metaVolMgr.CreateVolume(MetaVolumeType::NvRamVolume);
-        metaVolMgr.CreateVolume(MetaVolumeType::SsdVolume);
-        metaVolMgr.Open(false);
-        MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+        metaVolMgr.CreateVolume(MetaVolumeType::NvRamVolume, arrayName);
+        metaVolMgr.CreateVolume(MetaVolumeType::SsdVolume, arrayName);
+        metaVolMgr.Open(false, arrayName);
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
             "SetUp done...");
     }
 
@@ -68,59 +71,76 @@ public:
     TearDown(void) override
     {
         bool resetCxt = false;
-        MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
             "Start TearDown sequence...");
-        metaVolMgr.Close(resetCxt);
+        metaVolMgr.Close(resetCxt, arrayName);
         mimTopMgr.SetModuleHalt();
-        MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
             "TearDown done...");
     }
 
-    IBOF_EVENT_ID
+    POS_EVENT_ID
     CreateTestFile(std::string& fileName, FileSizeType fileSize, MetaVolumeType volumeType = MetaVolumeType::SsdVolume)
     {
-        MetaFsMoMReqMsg req;
-        req.reqType = MetaFsMoMReqType::FileCreate;
+        MetaFsFileControlRequest req;
+        req.reqType = MetaFsFileControlType::FileCreate;
         req.fileName = &fileName;
         req.fileByteSize = fileSize;
+        req.arrayName = &arrayName;
 
         if (volumeType == MetaVolumeType::NvRamVolume)
         {
-            req.fileProperty.ioAccPattern = MDFilePropIoAccessPattern::ByteIntensive;
-            req.fileProperty.ioOpType = MDFilePropIoOpType::WriteDominant;
+            req.fileProperty.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
+            req.fileProperty.ioOpType = MetaFileDominant::WriteDominant;
         }
 
-        IBOF_EVENT_ID sc;
-        sc = metaVolMgr.ProcessNewReq(req); // MetaVolMgrClass::_HandleCreateFileReq()
+        POS_EVENT_ID sc;
+        sc = metaVolMgr.ProcessNewReq(req); // MetaVolumeManager::_HandleCreateFileReq()
 
         return sc;
     }
 
-    IBOF_EVENT_ID
-    OpenTestFile(std::string& fileName, FileFDType& fd)
+    POS_EVENT_ID
+    OpenTestFile(std::string& fileName, FileDescriptorType& fd)
     {
-        MetaFsMoMReqMsg req;
-        req.reqType = MetaFsMoMReqType::FileOpen;
+        MetaFsFileControlRequest req;
+        req.reqType = MetaFsFileControlType::FileOpen;
         req.fileName = &fileName;
+        req.arrayName = &arrayName;
 
-        IBOF_EVENT_ID sc;
-        sc = metaVolMgr.ProcessNewReq(req); // MetaVolMgrClass::_HandleOpenFileReq()
+        POS_EVENT_ID sc;
+        sc = metaVolMgr.ProcessNewReq(req); // MetaVolumeManager::_HandleOpenFileReq()
         fd = req.completionData.openfd;
 
         return sc;
     }
 
-    IBOF_EVENT_ID
-    CloseTestFile(FileFDType& fd)
+    POS_EVENT_ID
+    CloseTestFile(FileDescriptorType& fd)
     {
-        MetaFsMoMReqMsg req;
-        req.reqType = MetaFsMoMReqType::FileClose;
+        MetaFsFileControlRequest req;
+        req.reqType = MetaFsFileControlType::FileClose;
         req.fd = fd;
+        req.arrayName = &arrayName;
 
-        IBOF_EVENT_ID sc;
+        POS_EVENT_ID sc;
         sc = metaVolMgr.ProcessNewReq(req);
         return sc;
     }
+
+    int
+    GetRandomNumber(int maxNumber)
+    {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<int> dis(0, maxNumber);
+
+        return dis(gen);
+    }
+
+private:
+    std::string arrayName;
 };
+} // namespace pos
 
 #endif // __UT_MVM_BASE_H__

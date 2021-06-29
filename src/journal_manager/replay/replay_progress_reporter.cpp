@@ -34,10 +34,10 @@
 
 #include <unistd.h>
 
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
 TaskProgress::TaskProgress(int weight)
 : numSubTasks(0),
@@ -139,15 +139,20 @@ ReplayProgressReporter::CompleteAll(void)
 void
 ReplayProgressReporter::_ReportProgress(void)
 {
+    if (totalWeight == 0)
+    {
+        return;
+    }
+
     int percent = (progress + currentTaskProgress) * 100 / totalWeight;
 
     if (percent != reportedProgress)
     {
-        IBOF_REPORT_TRACE((int)IBOF_EVENT_ID::SYSTEM_RECOVERY,
+        POS_REPORT_TRACE((int)POS_EVENT_ID::SYSTEM_RECOVERY,
             "progress report: [" + to_string(percent) + "]");
         usleep(100 * 1000); // delay for the m-tool integration
         reportedProgress = percent;
     }
 }
 
-} // namespace ibofos
+} // namespace pos

@@ -1,0 +1,1 @@
+POS_ADD_INTEGRATION_TEST(array_device_manager_it array_device_manager_test.cpp)

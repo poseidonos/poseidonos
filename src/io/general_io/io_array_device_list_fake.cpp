@@ -32,7 +32,7 @@
 
 #include "src/array/device/array_device_list.h"
 
-namespace ibofos
+namespace pos
 {
 ArrayDeviceList::ArrayDeviceList()
 {
@@ -42,4 +42,4 @@ ArrayDeviceList::~ArrayDeviceList()
 {
 }
 
-} // namespace ibofos
+} // namespace pos

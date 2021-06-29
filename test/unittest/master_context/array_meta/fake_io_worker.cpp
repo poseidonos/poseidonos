@@ -3,11 +3,11 @@
 
 #include "src/include/memory.h"
 #include "src/device/mock_device.h"
-#include "src/scheduler/io_worker.h"
+#include "src/io_scheduler/io_worker.h"
 
 //#include "tool/air/air.h"
 
-namespace ibofos
+namespace pos
 {
 
 /* --------------------------------------------------------------------------*/
@@ -150,5 +150,5 @@ IOWorker::CompleteCommand(void)
 {
 }
 
-} // namespace ibofos
+} // namespace pos
 

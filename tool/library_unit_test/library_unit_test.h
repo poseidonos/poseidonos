@@ -1,20 +1,20 @@
 #pragma once
 
-#define QOS_ENABLED_BE
 #define UNVME_BUILD
 
 #include <future>
 #include <thread>
+#include <string>
 
-namespace ibofos
+namespace pos
 {
     
     class LibraryUnitTest
     {
         public:
-            void Initialize(int argc, char *argv[]);
-            void FailAndExit();
-            void SuccessAndExit();
+            void Initialize(int argc, char *argv[], std::string rootDir);
+            void FailAndExit(void);
+            void SuccessAndExit(void);
             void TestStart(int i);
             void TestResult(int i, bool success);
         private:

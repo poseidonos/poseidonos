@@ -32,11 +32,14 @@
 
 #pragma once
 
-#include "src/metafs/common/mfs_type.h"
+#include "src/metafs/common/metafs_type.h"
 
+namespace pos
+{
 class MetaFilePageMap
 {
 public:
     MetaLpnType baseMetaLpn;
     MetaLpnType pageCnt;
 };
+} // namespace pos

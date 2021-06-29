@@ -1,19 +1,33 @@
 
-#include "src/lib/Type.h"
 #include "src/config/ConfigInterface.h"
+#include "src/lib/Type.h"
 
 class TypeTest : public ::testing::Test
 {
 public:
-    air::Node node {};
+    air::NodeMetaData node_meta{};
 
 protected:
-    TypeTest() {}
-    ~TypeTest() override {}
-    void SetUp() override {
-        node.nid = cfg::GetIndex(config::ConfigType::NODE, "Q_COMPLETION");
-        node.processor_type = air::ProcessorType::QUEUE;
-        node.enable = true;
+    TypeTest()
+    {
     }
-    void TearDown() override {}
+    ~TypeTest() override
+    {
+    }
+    void
+    SetUp() override
+    {
+        node_meta.nid = cfg::GetSentenceIndex(config::ParagraphType::NODE, "Q_COMPLETION");
+        node_meta.processor_type = air::ProcessorType::QUEUE;
+        node_meta.run = true;
+        node_meta.group_id = 1;
+        node_meta.index_size = 10;
+        ;
+        node_meta.filter_size = 10;
+        node_meta.sample_ratio = 1000;
+    }
+    void
+    TearDown() override
+    {
+    }
 };

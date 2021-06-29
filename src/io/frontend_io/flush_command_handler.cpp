@@ -32,27 +32,37 @@
 
 #include "src/io/frontend_io/flush_command_handler.h"
 
-#include "src/device/event_framework_api.h"
+#include "src/allocator/i_context_manager.h"
+#include "src/allocator/i_block_allocator.h"
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/event_scheduler/io_completer.h"
 #include "src/logger/logger.h"
+#include "src/mapper_service/mapper_service.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
-namespace ibofos
+namespace pos
 {
-#if defined NVMe_FLUSH_HANDLING
-FlushCmdHandler::FlushCmdHandler(VolumeIoSmartPtr volumeIo)
-: allocator(AllocatorSingleton::Instance()),
-  mapper(MapperSingleton::Instance()),
-  volumeIo(volumeIo),
-  volumeId(volumeIo->GetVolumeId()),
-  flushCmdManager(FlushCmdManagerSingleton::Instance())
+FlushCmdHandler::FlushCmdHandler(FlushIoSmartPtr flushIo)
+: FlushCmdHandler(flushIo, FlushCmdManagerSingleton::Instance(),
+      AllocatorServiceSingleton::Instance()->GetIBlockAllocator(flushIo->GetArrayName()),
+      AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(flushIo->GetArrayName()),
+      AllocatorServiceSingleton::Instance()->GetIContextManager(flushIo->GetArrayName()),
+      MapperServiceSingleton::Instance()->GetIMapFlush(flushIo->GetArrayName()))
 {
-    hasLock = false;
-    totalMapsCompleted = 0;
-    totalMapsToFlush = 0;
-    mapperFlushComplete = false;
-    allocaterFlushComplete = false;
-    // TODO: To be changed when multi volumes flush is handled
-    numVSAMapsForFlushing = 1;
-    numStripeMapsForFlushing = 1;
+}
+
+FlushCmdHandler::FlushCmdHandler(FlushIoSmartPtr flushIo, FlushCmdManager* flushCmdManager,
+    IBlockAllocator* iBlockAllocator, IWBStripeAllocator* iWBStripeAllocator,
+    IContextManager* ctxManager, IMapFlush* iMapFlush)
+: flushCmdManager(flushCmdManager),
+  iWBStripeAllocator(iWBStripeAllocator),
+  iBlockAllocator(iBlockAllocator),
+  icontextManager(ctxManager),
+  iMapFlush(iMapFlush),
+  flushIo(flushIo),
+  volumeId(flushIo->GetVolumeId()),
+  stripeMapFlushIssued(false)
+{
 }
 
 FlushCmdHandler::~FlushCmdHandler(void)
@@ -60,152 +70,181 @@ FlushCmdHandler::~FlushCmdHandler(void)
 }
 
 bool
-FlushCmdHandler::Execute()
+FlushCmdHandler::Execute(void)
 {
-    FlushState currentState = flushCmdManager->GetState();
-
-    // Check if present flush event is in progress
-    if (currentState != FLUSH_RESET && hasLock == false)
+    if (flushCmdManager->IsFlushEnabled() == false)
     {
-        return false;
+        IoCompleter ioCompleter(flushIo);
+        ioCompleter.CompleteUbio(IOErrorType::SUCCESS, true);
+        return true;
     }
 
-    switch (currentState)
+    switch (flushIo->GetState())
     {
-        case FLUSH_RESET:
-            // Acquire flush lock. Only one flush can be in progress.
-            if (false == flushCmdManager->LockIo())
+        case FLUSH__BLOCK_ALLOCATION:
+            // Block allocation for new writes
+            if (iBlockAllocator->BlockAllocating(volumeId) == false)
             {
+                // Flush handler on volumeId already in progress
                 return false;
             }
-            flushCmdManager->SetState(FLUSH_START);
-            hasLock = true;
-        case FLUSH_START:
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::FLUSH_CMD_ONGOING,
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
                 "Flush command started on volume {}", volumeId);
 
-            // Block allocation for new writes and get all active stripes for flush
-            allocator->GetAllActiveStripes(volumeId);
-            flushCmdManager->SetState(FLUSH_PENDING_WRITE_IN_PROGRESS);
-        case FLUSH_PENDING_WRITE_IN_PROGRESS:
-            // Check if all writes on partial stripes are complete and issue flush on them.
-            if (allocator->FlushPartialStripes() == false)
+            flushIo->SetState(FLUSH__FINISH_ACTIVE_STRIPES);
+        case FLUSH__FINISH_ACTIVE_STRIPES:
+            // Get all active stripes for flush
+            iWBStripeAllocator->GetAllActiveStripes(volumeId);
+
+            flushIo->SetState(FLUSH__PENDING_WRITE_IN_PROGRESS);
+        case FLUSH__PENDING_WRITE_IN_PROGRESS:
+            // Check if all writes on partial stripes are complete
+            if (iWBStripeAllocator->WaitPendingWritesOnStripes(volumeId) == false)
             {
-                // Pending IO(s) on active stripes not complete.
-                // Put flush event back to SPDK reactor queue and return
+                // Pending Write IO(s) on active stripes not complete.
                 return false;
             }
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
+                "Writes on partial stripes completed");
 
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::FLUSH_CMD_ONGOING,
-                "Flush partial stripes requested");
-
-            flushCmdManager->SetState(FLUSH_ACTIVE_STRIPE_FLUSH_IN_PROGRESS);
-        case FLUSH_ACTIVE_STRIPE_FLUSH_IN_PROGRESS:
-            // Check if all partial stripes flush complete
-            if (allocator->WaitForPartialStripesFlush() == false)
-            {
-                // Partial stripe(s) flush not complete.
-                // Put flush event back to SPDK reactor queue and return
-                return false;
-            }
-
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::FLUSH_CMD_ONGOING,
-                "Partial stripes flush completed");
-
-            flushCmdManager->SetState(FLUSH_ALL_STRIPE_FLUSH_IN_PROGRESS);
-        case FLUSH_ALL_STRIPE_FLUSH_IN_PROGRESS:
+            flushIo->SetState(FLUSH__STRIPE_FLUSH_IN_PROGRESS);
+        case FLUSH__STRIPE_FLUSH_IN_PROGRESS:
             // Check is all stripes flush are complete
-            if (allocator->WaitForAllStripesFlush(volumeId) == false)
+            if (iWBStripeAllocator->WaitStripesFlushCompletion(volumeId) == false)
             {
                 // All stripe(s) flush not complete.
-                // Put flush event back to SPDK reactor queue and return
                 return false;
             }
-
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::FLUSH_CMD_ONGOING,
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
                 "All stripes flush completed");
 
-            IBOF_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
-                IBOF_EVENT_ID::FLUSH_CMD_ONGOING,
+            POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
+                POS_EVENT_ID::FLUSH_CMD_ONGOING,
                 "User data flush for volume {} completed", volumeId);
 
-            flushCmdManager->SetState(FLUSH_STRIPE_FLUSH_COMPLETE);
-        case FLUSH_STRIPE_FLUSH_COMPLETE:
+            flushIo->SetState(FLUSH__VSAMAP);
+        case FLUSH__VSAMAP:
         {
-            // Mapper Flush
-            // TODO change when all volume flush to be handled
-            int ret;
-            int mapId;
-
-            // Flush volume specific map and stripe map
-            totalMapsToFlush = numVSAMapsForFlushing + numStripeMapsForFlushing;
-
-            mapId = volumeId;
-            EventSmartPtr callbackVSAMap(new MapFlushCompleteEvent(volumeId, this));
-            ret = mapper->FlushMap(volumeId, callbackVSAMap);
+            int ret = 0;
+            EventSmartPtr callbackVSAMap(new MapFlushCompleteEvent(volumeId, flushIo));
+            ret = iMapFlush->FlushDirtyMpages(volumeId, callbackVSAMap);
             if (ret != 0)
             {
-                IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::FLUSH_CMD_MAPPER_FLUSH_FAILED,
-                    "Failed to start flushing dirty vsamap pages");
-                volumeIo->GetCallback()->InformError(CallbackError::GENERIC_ERROR);
-                totalMapsToFlush--;
+                if (ret == -EID(MAP_FLUSH_IN_PROGRESS))
+                {
+                    return false;
+                }
+                else
+                {
+                    POS_TRACE_ERROR((int)POS_EVENT_ID::FLUSH_CMD_MAPPER_FLUSH_FAILED,
+                        "Failed to start flushing dirty vsamap pages");
+                    flushIo->GetCallback()->InformError(IOErrorType::GENERIC_ERROR);
+                    IoCompleter ioCompleter(flushIo);
+                    ioCompleter.CompleteUbio(IOErrorType::SUCCESS, true);
+                    iBlockAllocator->UnblockAllocating(volumeId);
+                    return true;
+                }
             }
-
-            mapId = STRIPE_MAP_ID;
-            EventSmartPtr callbackStripeMap(new MapFlushCompleteEvent(mapId, this));
-            ret = mapper->FlushMap(STRIPE_MAP_ID, callbackStripeMap);
-            if (ret != 0)
-            {
-                IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::FLUSH_CMD_MAPPER_FLUSH_FAILED,
-                    "Failed to start flushing dirty stripe map pages");
-                volumeIo->GetCallback()->InformError(CallbackError::GENERIC_ERROR);
-                totalMapsToFlush--;
-            }
-
-            if (totalMapsToFlush == 0)
-            {
-                mapperFlushComplete = true;
-            }
-
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::FLUSH_CMD_ONGOING,
-                "Map flush requested (num maps to flush: {})", totalMapsToFlush);
-
-            // Allocator Flush
-            EventSmartPtr callbackAllocator(new AllocatorFlushDoneEvent(this));
-            ret = allocator->FlushMetadata(callbackAllocator);
-            if (ret != 0)
-            {
-                IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::FLUSH_CMD_ALLOCATOR_FLUSH_FAILED,
-                    "Failed to start flushing allocator meta pages");
-                volumeIo->GetCallback()->InformError(CallbackError::GENERIC_ERROR);
-                allocaterFlushComplete = true;
-            }
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
+                "VSA Map flush requested");
+        }
 
             // Unblock allocation
-            allocator->UnblockAllocating();
-            flushCmdManager->SetState(FLUSH_META_FLUSH_IN_PROGRESS);
+            iBlockAllocator->UnblockAllocating(volumeId);
+            flushIo->SetState(FLUSH__STRIPEMAP_ALLOCATOR);
 
-            IBOF_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
-                IBOF_EVENT_ID::FLUSH_CMD_ONGOING,
-                "Meta data flush for volume {} is requested", volumeId);
-        }
-        case FLUSH_META_FLUSH_IN_PROGRESS:
-            if (mapperFlushComplete && allocaterFlushComplete)
+            if (flushCmdManager->CanFlushMeta(flushIo->GetOriginCore(), flushIo) == false)
             {
-                flushCmdManager->SetState(FLUSH_META_FLUSH_COMPLETE);
+                return true;
+            }
+        case FLUSH__STRIPEMAP_ALLOCATOR:
+        {
+            int ret = 0;
+            bool stripeMapFlushFailed = false;
+
+            if (stripeMapFlushIssued != true)
+            {
+                // Stripe Map Flush
+                EventSmartPtr callbackStripeMap(new MapFlushCompleteEvent(STRIPE_MAP_ID, flushIo));
+                ret = iMapFlush->FlushDirtyMpages(STRIPE_MAP_ID, callbackStripeMap);
+
+                if (ret != 0)
+                {
+                    if (ret == -EID(MAP_FLUSH_IN_PROGRESS))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        POS_TRACE_ERROR((int)POS_EVENT_ID::FLUSH_CMD_MAPPER_FLUSH_FAILED,
+                            "Failed to start flushing dirty stripe map pages. Error code {}", ret);
+                        flushIo->GetCallback()->InformError(IOErrorType::GENERIC_ERROR);
+                        flushIo->SetStripeMapFlushComplete(true);
+                        stripeMapFlushFailed = true;
+                    }
+                }
+                stripeMapFlushIssued = true;
+
+                POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
+                    "Stripe Map flush requested");
+            }
+
+            if (stripeMapFlushFailed == false)
+            {
+                // Allocator Flush
+                EventSmartPtr callbackAllocator(new AllocatorFlushDoneEvent(flushIo));
+                ret = icontextManager->FlushContextsAsync(callbackAllocator);
+                if (ret != 0)
+                {
+                    if (ret == (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS)
+                    {
+                        return false;
+                    }
+
+                    POS_TRACE_ERROR((int)POS_EVENT_ID::FLUSH_CMD_ALLOCATOR_FLUSH_FAILED,
+                        "Failed to start flushing allocator meta pages. Error code {}", ret);
+                    flushIo->GetCallback()->InformError(IOErrorType::GENERIC_ERROR);
+                    flushIo->SetAllocatorFlushComplete(true);
+                }
             }
             else
             {
+                flushIo->SetAllocatorFlushComplete(true);
+            }
+
+            POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
+                POS_EVENT_ID::FLUSH_CMD_ONGOING,
+                "Meta data flush for volume {} is requested", volumeId);
+        }
+
+            flushIo->SetState(FLUSH__META_FLUSH_IN_PROGRESS);
+        case FLUSH__META_FLUSH_IN_PROGRESS:
+            if (flushIo->IsStripeMapAllocatorFlushComplete() == false)
+            {
+                if (flushIo->IsStripeMapFlushComplete() == true &&
+                    flushIo->IsAllocatorFlushComplete() == true)
+                {
+                    flushCmdManager->FinishMetaFlush();
+                    flushIo->SetStripeMapAllocatorFlushComplete(true);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            if (flushIo->IsVsaMapFlushComplete() == false)
+            {
                 return false;
             }
-        case FLUSH_META_FLUSH_COMPLETE:
-            flushCmdManager->SetState(FLUSH_RESET);
-            flushCmdManager->UnlockIo();
 
             // Call Complete
-            volumeIo->CompleteWithoutRecovery(CallbackError::SUCCESS);
+            {
+                IoCompleter ioCompleter(flushIo);
+                ioCompleter.CompleteUbio(IOErrorType::SUCCESS, true);
+            }
 
-            IBOF_TRACE_INFO((int)IBOF_EVENT_ID::SUCCESS, "NVMe Flush Command Complete");
+            POS_TRACE_INFO((int)POS_EVENT_ID::SUCCESS, "NVMe Flush Command Complete");
         default:
             break;
     }
@@ -213,25 +252,9 @@ FlushCmdHandler::Execute()
     return true;
 }
 
-void
-FlushCmdHandler::MapFlushCompleted(int mapId)
-{
-    std::unique_lock<std::mutex> lock(mapCountUpdateLock);
-    if (++totalMapsCompleted == totalMapsToFlush)
-    {
-        mapperFlushComplete = true;
-    }
-}
-
-void
-FlushCmdHandler::AllocatorMetaFlushCompleted()
-{
-    allocaterFlushComplete = true;
-}
-
-MapFlushCompleteEvent::MapFlushCompleteEvent(int mapId, FlushCmdHandler* flushCmdHandler)
+MapFlushCompleteEvent::MapFlushCompleteEvent(int mapId, FlushIoSmartPtr flushIo)
 : mapId(mapId),
-  flushCmdHandler(flushCmdHandler)
+  flushIo(flushIo)
 {
 }
 
@@ -242,12 +265,20 @@ MapFlushCompleteEvent::~MapFlushCompleteEvent(void)
 bool
 MapFlushCompleteEvent::Execute(void)
 {
-    flushCmdHandler->MapFlushCompleted(mapId);
+    if (mapId == STRIPE_MAP_ID)
+    {
+        flushIo->SetStripeMapFlushComplete(true);
+    }
+    else
+    {
+        flushIo->SetVsaMapFlushComplete(true);
+    }
+
     return true;
 }
 
-AllocatorFlushDoneEvent::AllocatorFlushDoneEvent(FlushCmdHandler* flushCmdHandler)
-: flushCmdHandler(flushCmdHandler)
+AllocatorFlushDoneEvent::AllocatorFlushDoneEvent(FlushIoSmartPtr flushIo)
+: flushIo(flushIo)
 {
 }
 
@@ -258,9 +289,8 @@ AllocatorFlushDoneEvent::~AllocatorFlushDoneEvent(void)
 bool
 AllocatorFlushDoneEvent::Execute(void)
 {
-    flushCmdHandler->AllocatorMetaFlushCompleted();
+    flushIo->SetAllocatorFlushComplete(true);
     return true;
 }
 
-#endif
-} // namespace ibofos
+} // namespace pos

@@ -22,11 +22,11 @@ from collections import defaultdict
 
 
 #subprcess.call ('ls -al', shell=True)
-LIB_OUTPUT = 'ibofos.library'
-LL_OUTPUT = 'ibofos.lloutput'
+LIB_OUTPUT = 'poseidonos.library'
+LL_OUTPUT = 'poseidonos.lloutput'
 os.system ('rm -rf '+LIB_OUTPUT)
 os.system ('rm -rf '+LL_OUTPUT)
-os.system ('ldd ibofos > '+LIB_OUTPUT)
+os.system ('ldd poseidonos > '+LIB_OUTPUT)
 
 f = open(LIB_OUTPUT)
 toCompressedLibs = ""

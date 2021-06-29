@@ -31,66 +31,48 @@
  */
 
 #include "state_publisher.h"
-
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
-StatePublisher::StatePublisher(void)
-{
-}
-
 StatePublisher::~StatePublisher(void)
 {
-    subscribers.clear();
+    observersMap.clear();
 }
 
 void
-StatePublisher::RegisterSubscriber(StateEvent* subscriber)
+StatePublisher::Add(IStateObserver* ob, string name)
 {
-    subscribers.push_back(subscriber);
+    unique_lock<mutex> lock(observersMapMtx);
+    observersMap.emplace(ob, name);
 }
 
 void
-StatePublisher::RemoveSubscriber(StateEvent* subscriber)
+StatePublisher::Remove(IStateObserver* ob)
 {
-    for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
+    unique_lock<mutex> lock(observersMapMtx);
+    observersMap.erase(ob);
+}
+
+void
+StatePublisher::Notify(StateContext* prev, StateContext* next)
+{
+    IStateObserver* owner = nullptr;
+    for (auto it = observersMap.begin(); it != observersMap.end(); ++it)
     {
-        if (*it == subscriber)
+        if (next->Owner() == it->second)
         {
-            subscribers.erase(it);
-            break;
-        }
-    }
-}
-
-void
-StatePublisher::NotifyStateChanged(StateContext prev, StateContext next)
-{
-    StateEvent* requester = nullptr;
-    for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
-    {
-        if (next.Sender() == (*it)->Tag())
-        {
-            requester = *it;
+            owner = it->first;
             continue;
         }
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::STATE_EVENT,
-            "NotifyStateChanged to {}", (*it)->Tag());
-        (*it)->StateChanged(prev, next);
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::STATE_EVENT,
-            "NotifyStateChanged to {} done", (*it)->Tag());
+        it->first->StateChanged(prev, next);
     }
 
-    if (requester != nullptr)
+    if (owner != nullptr)
     {
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::STATE_EVENT,
-            "NotifyStateChanged to (requester) {}", requester->Tag());
-        requester->StateChanged(prev, next);
-        IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::STATE_EVENT,
-            "NotifyStateChanged to (requester) {} done", requester->Tag());
+        owner->StateChanged(prev, next);
     }
 }
 
-} // namespace ibofos
+} // namespace pos

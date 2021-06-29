@@ -37,12 +37,12 @@
 #define BITMAP_ENTRY_BITS (64) // entry size of map_ in bits
 #define BITMAP_ENTRY_SIZE (8)  // entry size of map_ in bytes
 
-namespace ibofos
+namespace pos
 {
 class BitMap
 {
 public:
-    BitMap(uint64_t totalBits);
+    explicit BitMap(uint64_t totalBits);
     virtual ~BitMap(void);
 
     uint64_t GetNumBits(void);
@@ -52,18 +52,19 @@ public:
     uint64_t* GetMapAddr(void);
 
     void PrintMap(void);
-    bool SetBit(uint64_t bitOffset);
-    bool ClearBit(uint64_t bitOffset);
-    bool ClearBits(uint64_t begin, uint64_t end);
-    void ResetBitmap(void);
-    bool IsSetBit(uint64_t bit);
-    void FlipBit(uint64_t bit);
-    uint64_t FindFirstSet(uint64_t begin);
-    uint64_t FindFirstZero(void);
-    uint64_t FindFirstZero(uint64_t begin);
-    uint64_t FindFirstZero(uint64_t begin, uint64_t end);
-    bool IsValidBit(uint64_t bitOffset);
-    bool Set(BitMap &inputBitMap);
+    virtual bool SetBit(uint64_t bitOffset);
+    virtual bool ClearBit(uint64_t bitOffset);
+    virtual bool ClearBits(uint64_t begin, uint64_t end);
+    virtual void ResetBitmap(void);
+    virtual bool IsSetBit(uint64_t bit);
+    virtual void FlipBit(uint64_t bit);
+    virtual uint64_t FindFirstSet(uint64_t begin);
+    virtual uint64_t FindFirstZero(void);
+    virtual uint64_t FindFirstZero(uint64_t begin);
+    virtual uint64_t FindFirstZero(uint64_t begin, uint64_t end);
+    virtual uint64_t FindNextZero(void);
+    virtual bool IsValidBit(uint64_t bitOffset);
+    virtual bool Set(BitMap &inputBitMap);
 
 private:
     uint64_t _GetMask(uint64_t numSetBits, uint64_t offset);
@@ -72,36 +73,43 @@ private:
     uint64_t numBits; // The total number of bits set by the Ctor
     uint64_t numEntry;
     uint64_t numBitsSet;
+    uint64_t lastSetPosition;
 };
 
 class BitMapMutex
 {
 public:
-    BitMapMutex(uint64_t totalBits);
+    explicit BitMapMutex(BitMap* bitmap);       // Ctor for DoCs Injection in UT
+    explicit BitMapMutex(uint64_t totalBits);   // Ctor for Production code
+    virtual ~BitMapMutex(void);
 
-    bool IsValidBit(uint64_t bitOffset);
-    uint64_t FindFirstSetBit(uint64_t begin);
+    virtual bool IsValidBit(uint64_t bitOffset);
+    virtual uint64_t FindFirstSetBit(uint64_t begin);
     uint64_t SetFirstZeroBit(void);
-    uint64_t SetFirstZeroBit(uint64_t begin);
+    virtual uint64_t SetFirstZeroBit(uint64_t begin);
     uint64_t SetFirstZeroBit(uint64_t begin, uint64_t end);
-    bool SetBit(uint64_t bit);
-    bool ClearBit(uint64_t bit);
-    bool ClearBits(uint64_t begin, uint64_t end);
-    void ResetBitmap(void);
-    bool IsSetBit(uint64_t bit);
-    void FlipBit(uint64_t bit);
-    uint64_t GetNumEntry(void);
-    uint64_t GetNumBits(void);
-    void SetNumBitsSet(uint64_t numBits);
-    uint64_t* GetMapAddr(void);
+    virtual uint64_t SetNextZeroBit(void);
+    virtual bool SetBit(uint64_t bit);
+    virtual bool ClearBit(uint64_t bit);
+    virtual bool ClearBits(uint64_t begin, uint64_t end);
+    virtual void ResetBitmap(void);
+    virtual bool IsSetBit(uint64_t bit);
+    virtual void FlipBit(uint64_t bit);
+    virtual uint64_t GetNumEntry(void);
+    virtual uint64_t GetNumBits(void);
+    virtual void SetNumBitsSet(uint64_t numBits);
+    virtual uint64_t* GetMapAddr(void);
     void PrintMap(void);
-    uint64_t GetNumBitsSet(void);
+    virtual uint64_t GetNumBitsSet(void);
+    virtual uint64_t GetNumBitsSetWoLock(void);
     uint64_t GetNumBitsSet(uint64_t begin, uint64_t end);
     bool SetBitMap(BitMapMutex& inputBitMapMutex);
+    virtual std::mutex& GetLock(void);
 
 private:
-    BitMap bitmap;
-    std::mutex bitmapMutex;
+    std::mutex bitMapLock;
+    // DoCs
+    BitMap* bitMap;
 };
 
-} // namespace ibofos
+} // namespace pos

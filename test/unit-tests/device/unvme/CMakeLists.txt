@@ -1,0 +1,6 @@
+POS_ADD_UNIT_TEST(unvme_drv_ut unvme_drv_test.cpp)
+POS_ADD_UNIT_TEST(unvme_ssd_ut unvme_ssd_test.cpp)
+POS_ADD_UNIT_TEST(unvme_io_context_ut unvme_io_context_test.cpp)
+POS_ADD_UNIT_TEST(unvme_mgmt_ut unvme_mgmt_test.cpp)
+POS_ADD_UNIT_TEST(unvme_device_context_ut unvme_device_context_test.cpp)
+POS_ADD_UNIT_TEST(unvme_cmd_ut unvme_cmd_test.cpp)

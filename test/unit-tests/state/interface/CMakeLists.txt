@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(i_state_control_ut i_state_control_test.cpp)
+POS_ADD_UNIT_TEST(i_state_publisher_ut i_state_publisher_test.cpp)
+POS_ADD_UNIT_TEST(i_state_observer_ut i_state_observer_test.cpp)

@@ -36,7 +36,7 @@
 
 using namespace ::testing;
 
-namespace ibofos
+namespace pos
 {
 const int RET_INT_SUCCESS = 0;
 const int UT_REVMAP_PAGES_PER_STRIPE = 3;
@@ -59,5 +59,5 @@ protected:
     ReverseMapPack* reverseMapPack = nullptr; // SUT object
 };
 
-} // namespace ibofos
+} // namespace pos
 

@@ -31,26 +31,29 @@
  */
 
 #include "mss_disk_inplace.h"
+#include "src/array_mgmt/array_manager.h"
 
-namespace ibofos
+#include <string>
+
+namespace pos
 {
 
 /**
  * Constructor
  */
-MssDiskInplace::MssDiskInplace(MetaStorageType mediaType, uint64_t capacity)
+MssDiskInplace::MssDiskInplace(std::string arrayName, MetaStorageType mediaType, uint64_t capacity)
 {
     this->mediaType = mediaType;
     if (MetaStorageType::SSD == mediaType)
     {
-        partitionType = ibofos::PartitionType::META_SSD;
+        partitionType = pos::PartitionType::META_SSD;
     }
     else
     {
-        partitionType = ibofos::PartitionType::META_NVM;
+        partitionType = pos::PartitionType::META_NVM;
     }
-    string emptyStringToGetFirstArray = "";
-    arrayManager = ibofos::ArraySingleton::Instance();
+
+    array = pos::ArrayMgr::Instance()->GetArrayInfo(arrayName);
 }
 
 MssDiskInplace::~MssDiskInplace(void)
@@ -60,7 +63,7 @@ MssDiskInplace::~MssDiskInplace(void)
 uint32_t
 MssDiskInplace::GetMaxLpnCntPerIOSubmit(void)
 {
-    return arrayManager->GetSizeInfo(partitionType)->blksPerStripe;
+    return array->GetSizeInfo(partitionType)->blksPerStripe;
 }
 /**
  * Calculate on disk address for given LPN.
@@ -70,14 +73,14 @@ MssDiskInplace::GetMaxLpnCntPerIOSubmit(void)
  *
  * @return physical LBA and device
  */
-ibofos::LogicalBlkAddr
+pos::LogicalBlkAddr
 MssDiskInplace::CalculateOnDiskAddress(uint64_t pageNumber)
 {
-    ibofos::LogicalBlkAddr logicalAddr;
+    pos::LogicalBlkAddr logicalAddr;
     uint32_t blksPerStripe = GetMaxLpnCntPerIOSubmit();
     logicalAddr.stripeId = pageNumber / blksPerStripe; // calculate stripe id
     logicalAddr.offset = pageNumber % blksPerStripe;   // calculate offset in stripe
 
     return logicalAddr;
 }
-} // namespace ibofos
+} // namespace pos

@@ -1,9 +1,9 @@
 #include <assert.h>
 
 #include "src/io/ubio.h"
-#include "src/scheduler/io_queue.h"
+#include "src/io_scheduler/io_queue.h"
 
-namespace ibofos
+namespace pos
 {
 IOQueue::IOQueue(void)
 : lastQueue(queueMap.end())
@@ -52,4 +52,4 @@ IOQueue::GetQueueSize(void){
     return 0;
 }
 
-} // namespace ibofos
+} // namespace pos

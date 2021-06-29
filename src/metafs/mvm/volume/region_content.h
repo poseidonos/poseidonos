@@ -34,6 +34,8 @@
 
 #include "mf_inode.h"
 
+namespace pos
+{
 class RegionContent
 {
 public:
@@ -114,3 +116,4 @@ private:
     uint32_t currentIndexInInodeTable;
     bool inUse;
 };
+} // namespace pos

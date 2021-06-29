@@ -32,15 +32,15 @@
 
 #include "mdi_manager.h"
 
-MetaDIMgrClass metaDIMgr;
-MetaFsMDITopMgrClass* mdiTopMgr = &metaDIMgr;
-
-MetaDIMgrClass::MetaDIMgrClass(void)
+namespace pos
+{
+MetaIntegrityManager::MetaIntegrityManager(void)
 {
 }
 
-MetaDIMgrClass*
-MetaDIMgrClass::GetInstance(void)
+const char*
+MetaIntegrityManager::GetModuleName(void)
 {
-    return &metaDIMgr;
+    return "Meta Data Integrity Manager";
 }
+} // namespace pos

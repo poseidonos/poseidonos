@@ -7,9 +7,9 @@ import argparse
 
 #######################################################################
 ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
-spdk_path = ibof_root + "lib/spdk-19.10/"
+spdk_path = ibof_root + "lib/spdk/"
 spdk_rpc_path = spdk_path + "scripts/rpc.py"
-default_log_path = "ibofos.log"
+default_log_path = "pos.log"
 default_print_on = False
 default_transport = "tcp" #or rdma
 default_target_ip = "10.100.11.16"
@@ -18,12 +18,12 @@ default_target_ip = "10.100.11.16"
 
 def create_transport_test(EXPECT, trtype, b, n):
     nvmf = nvmf_common.Nvmf("[ Create Transport ", EXPECT, spdk_rpc_path)
-    common_test_lib.start_ibofos(args.log_path, ibof_root)
+    common_test_lib.start_pos(args.log_path, ibof_root)
 
     ret = nvmf.create_transport(trtype, b, n)
 
     common_test_lib.expect_true(ret, "Transport Creation")
-    common_test_lib.terminate_ibofos(ibof_root, stdout_type)
+    common_test_lib.terminate_pos(ibof_root, stdout_type)
     success = (EXPECT==ret)
     common_test_lib.print_result("[ Create Transport Test ]", success)
     return success
@@ -31,48 +31,48 @@ def create_transport_test(EXPECT, trtype, b, n):
 def create_subsystem_test(EXPECT, nqn, serial_num, model_num, max_ns,
         allow_any_host):
     nvmf = nvmf_common.Nvmf("[ Create Subsystem ", EXPECT, spdk_rpc_path)
-    common_test_lib.start_ibofos(args.log_path, ibof_root)
+    common_test_lib.start_pos(args.log_path, ibof_root)
 
     ret = nvmf.create_subsystem(nqn, serial_num, model_num, max_ns,
             allow_any_host)
 
     common_test_lib.expect_true(ret, "Subsystem Creation")
-    common_test_lib.terminate_ibofos(ibof_root, stdout_type)
+    common_test_lib.terminate_pos(ibof_root, stdout_type)
     success = (EXPECT == ret)
     common_test_lib.print_result("[ Create Subsystem Test ]", success)
     return success
 
 def delete_subsystem_test(EXPECT, nqn, allow_any_host):
     nvmf = nvmf_common.Nvmf("[ Delete Subsystem ", EXPECT, spdk_rpc_path)
-    common_test_lib.start_ibofos(args.log_path, ibof_root)
+    common_test_lib.start_pos(args.log_path, ibof_root)
 
-    ret = nvmf.create_subsystem("nqn.2019-04.ibof:subsystem1",\
-            "IBOF00000000000001","IBOF_VOLUME_EXTENTION", "256", allow_any_host)
+    ret = nvmf.create_subsystem("nqn.2019-04.pos:subsystem1",\
+            "POS00000000000001","POS_VOLUME_EXTENTION", "256", allow_any_host)
     common_test_lib.expect_true(ret, "Subsystem Creation")
     
     ret = nvmf.delete_subsystem(nqn)
 
     common_test_lib.expect_true(ret, "Subsystem Deletion")
-    common_test_lib.terminate_ibofos(ibof_root, stdout_type)
+    common_test_lib.terminate_pos(ibof_root, stdout_type)
     success = (EXPECT == ret)
     common_test_lib.print_result("[ Delete Subsystem Test ]", success)
     return success
 
 def add_subsystem_listener_test(EXPECT, nqn, trtype, traddr, trsvid, allow_any_host):
     nvmf = nvmf_common.Nvmf("[ Add Subsystem Listener ", EXPECT, spdk_rpc_path)
-    common_test_lib.start_ibofos(args.log_path, ibof_root)
+    common_test_lib.start_pos(args.log_path, ibof_root)
 
     ret = nvmf.create_transport(trtype, "64", "2048")
     common_test_lib.expect_true(ret, "Transport Creation")
 
-    ret = nvmf.create_subsystem("nqn.2019-04.ibof:subsystem1",\
-            "IBOF00000000000001","IBOF_VOLUME_EXTENTION", "256", allow_any_host)
+    ret = nvmf.create_subsystem("nqn.2019-04.pos:subsystem1",\
+            "POS00000000000001","POS_VOLUME_EXTENTION", "256", allow_any_host)
     common_test_lib.expect_true(ret, "Subsystem Creation")
 
     ret = nvmf.add_subsystem_listener(nqn, trtype, traddr, trsvid)
     
     common_test_lib.expect_true(ret, "Subsystem Listener Added")
-    common_test_lib.terminate_ibofos(ibof_root, stdout_type)
+    common_test_lib.terminate_pos(ibof_root, stdout_type)
     success = (EXPECT == ret)
     common_test_lib.print_result("[ Add Subsystem Listener Test ]", success)
     return success
@@ -93,12 +93,12 @@ def subsystem_namespace_mapping_test(trtype, traddr, subsystem_cnt, volume_cnt):
     common_test_lib.bringup_multiple_volume(**bringup_argument)
 
     map = nvmf.get_subsystem_ns_map()
-    ret = nvmf.check_subsystem_ns_mapping(map, "subsystem1", "bdev3")
+    ret = nvmf.check_subsystem_ns_mapping(map, "subsystem1", "bdev_3")
     success = (ret == True)
-    ret = nvmf.check_subsystem_ns_mapping(map, "subsystem3", "bdev3")
+    ret = nvmf.check_subsystem_ns_mapping(map, "subsystem3", "bdev_3")
     success &= (ret == False)
 
-    common_test_lib.terminate_ibofos(ibof_root, stdout_type)
+    common_test_lib.terminate_pos(ibof_root, stdout_type)
     common_test_lib.print_result("[ Subsystem-Namespace Mapping Test ]", success)
     return success
 
@@ -125,18 +125,18 @@ if __name__ == "__main__":
     success &= create_transport_test(False, "wrong_transport_type", "64",
             "2048")
     allow_any_host = True
-    success &= create_subsystem_test(True, "nqn.2019-04.ibof:subsystem1",\
-            "IBOF00000000000001","IBOF_VOLUME_EXTENTION", "256", allow_any_host)
+    success &= create_subsystem_test(True, "nqn.2019-04.pos:subsystem1",\
+            "POS00000000000001","POS_VOLUME_EXTENTION", "256", allow_any_host)
     success &= create_subsystem_test(False, "nqn.2019-04",\
-            "IBOF00000000000001","IBOF_VOLUME_EXTENTION", "256", allow_any_host)
+            "POS00000000000001","POS_VOLUME_EXTENTION", "256", allow_any_host)
 
-    success &= delete_subsystem_test(True, "nqn.2019-04.ibof:subsystem1",
+    success &= delete_subsystem_test(True, "nqn.2019-04.pos:subsystem1",
                     allow_any_host)
     success &= delete_subsystem_test(False, "nqn.2019", allow_any_host)
 
-    success &= add_subsystem_listener_test(True, "nqn.2019-04.ibof:subsystem1",
+    success &= add_subsystem_listener_test(True, "nqn.2019-04.pos:subsystem1",
             args.transport, args.fabric_ip, "1158", allow_any_host)
-    success &= add_subsystem_listener_test(False, "nqn.2019-04.ibof:subsystem2",
+    success &= add_subsystem_listener_test(False, "nqn.2019-04.pos:subsystem2",
             args.transport, args.fabric_ip, "1158", allow_any_host)
     
     success &= subsystem_namespace_mapping_test(args.transport, args.fabric_ip,

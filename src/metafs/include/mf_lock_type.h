@@ -32,7 +32,9 @@
 
 #pragma once
 
-enum class MDFileLockTypeEnum
+namespace pos
+{
+enum class MetaFileLockType
 {
     NoFLock, // no explicit file lock. Lock will be granted while processing I/O for the byte range
     Read,    // explicit read lock. Subsequent read request will be blocked if any single read op. is inprogress
@@ -42,3 +44,4 @@ enum class MDFileLockTypeEnum
 
     Default = NoFLock,
 };
+} // namespace pos

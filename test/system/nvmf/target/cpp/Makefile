@@ -1,5 +1,5 @@
 IBOF_SRC_DIR := $(abspath $(CURDIR)/../../../../../)
-SPDK_ROOT_DIR := $(IBOF_SRC_DIR)/lib/spdk-19.10
+SPDK_ROOT_DIR := $(IBOF_SRC_DIR)/lib/spdk
 
 include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
 include $(SPDK_ROOT_DIR)/mk/spdk.modules.mk

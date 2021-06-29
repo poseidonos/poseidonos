@@ -32,7 +32,7 @@
 
 #include <gtest/gtest.h>
 
-#include "mfs.h"
+#include "metafs.h"
 
 // https://github.com/google/googletest/blob/master/googlemock/docs/for_dummies.md
 // https://github.com/google/googletest/blob/master/googlemock/docs/cheat_sheet.md
@@ -41,25 +41,27 @@ using testing::InitGoogleMock;
 
 using ::testing::Return;
 
+namespace pos
+{
 TEST(MockMFSIOAPITest, Read)
 {
-    MetaFsMgrClass metaFsMgr;
+    MetaFs metaFsMgr;
 
     void* buf = nullptr;
-    MetaFsReturnCode<IBOF_EVENT_ID> rc;
-    rc.sc = IBOF_EVENT_ID::ParamErr;
+    MetaFsReturnCode<POS_EVENT_ID> rc;
+    rc.sc = POS_EVENT_ID::ParamErr;
     EXPECT_CALL(metaFsMgr.io, Read(0, buf))
         .WillOnce(Return(rc));
 
     rc = metaFsMgr.io.Read(0, buf);
-    EXPECT_EQ(rc.sc, IBOF_EVENT_ID::ParamErr);
+    EXPECT_EQ(rc.sc, POS_EVENT_ID::ParamErr);
 
-    rc.sc = IBOF_EVENT_ID::FileNotOpened;
+    rc.sc = POS_EVENT_ID::FileNotOpened;
     EXPECT_CALL(metaFsMgr.io, Read(0, buf))
         .WillOnce(Return(rc));
 
     rc = metaFsMgr.io.Read(0, buf);
-    EXPECT_EQ(rc.sc, IBOF_EVENT_ID::FileNotOpened);
+    EXPECT_EQ(rc.sc, POS_EVENT_ID::FileNotOpened);
 }
 
 int
@@ -69,3 +71,4 @@ main(int argc, char* argv[])
     ::testing::InitGoogleMock(&argc, argv);
     return RUN_ALL_TESTS();
 }
+} // namespace pos

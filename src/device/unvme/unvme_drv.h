@@ -33,43 +33,33 @@
 #pragma once
 
 #include <cstdint>
-#include <functional>
 #include <string>
 #include <vector>
 
 #include "spdk/nvme.h"
-#include "src/device/device_driver.h"
+
+#include "src/device/base/device_driver.h"
+#include "src/device/unvme/unvme_cmd.h"
+#include "src/device/unvme/unvme_mgmt.h"
 #include "src/lib/singleton.h"
 
 struct spdk_nvme_qpair;
-namespace ibofos
+namespace pos
 {
 class DeviceContext;
+
 class DeviceMonitor;
-class Nvme;
 class Ubio;
-class UBlockDevice;
+
 class UnvmeDeviceContext;
 class UnvmeIOContext;
-class NsEntry;
-
-class AbortContext
-{
-public:
-    AbortContext(struct spdk_nvme_ctrlr* ctrlr,
-        struct spdk_nvme_qpair* qpair, uint16_t cid);
-
-    struct spdk_nvme_ctrlr* ctrlr;
-    struct spdk_nvme_qpair* qpair;
-    uint16_t cid;
-};
 
 class UnvmeDrv : public DeviceDriver
 {
 public:
     UnvmeDrv(void);
     ~UnvmeDrv(void) override;
-    int ScanDevs(std::vector<UBlockDevice*>* devs) override;
+    int ScanDevs(std::vector<UblockSharedPtr>* devs) override;
 
     bool Open(DeviceContext* deviceContext) override;
     bool Close(DeviceContext* deviceContext) override;
@@ -85,8 +75,6 @@ public:
     void DeviceDetached(std::string sn);
 
 private:
-    int _CheckConstraints(const NsEntry* nsEntry);
-
     int _RequestIO(UnvmeDeviceContext* deviceContext,
         spdk_nvme_cmd_cb callbackFunc,
         UnvmeIOContext* ioContext);
@@ -106,8 +94,9 @@ private:
 
     static const uint32_t SUBMISSION_RETRY_LIMIT;
     Nvme* nvmeSsd;
-    bool spdkInitDone;
+    UnvmeMgmt unvmeMgmt;
+    UnvmeCmd unvmeCmd;
 };
 
 using UnvmeDrvSingleton = Singleton<UnvmeDrv>;
-} // namespace ibofos
+} // namespace pos

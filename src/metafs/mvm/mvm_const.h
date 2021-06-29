@@ -33,6 +33,10 @@
 #pragma once
 
 #include <cstdint>
+
+namespace pos
+{
 class MetaFsMVMConst
 {
 };
+} // namespace pos

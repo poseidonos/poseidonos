@@ -5,7 +5,8 @@ import sys
 import glob
 import subprocess
 
-import TEST_SETUP_IBOFOS
+import TEST_LIB
+import TEST_SETUP_POS
 
 GREEN = "\033[1;32m"
 RED = "\033[1;31m"
@@ -24,7 +25,7 @@ def get_tests(filter):
 
 def get_test_list(test_set_filter=[]):
     if(len(test_set_filter) == 0):
-        test_set_filter = ['SPOR_BASIC*.py', 'SPOR_VOLUME*.py']
+        test_set_filter = ['SPOR_*.py']
     else:
         test_set_filter = test_set_filter.split(", ")
 
@@ -42,10 +43,7 @@ def run_test(testlist):
         ret = subprocess.call("python3 " + test + ' ' + ' '.join([x for x in sys.argv[1:]]), shell=True)
         if ret != 0:
             test_failed.append(test)
-            print_err(test + "failed: Try to kill ibofos for dumping core file.")
-            TEST_SETUP_IBOFOS.kill_process("ibof", 11)
-            subprocess.call(os.path.dirname(os.path.realpath(__file__)) + "/../../../tool/dump/trigger_core_dump.sh crashed", shell=True)
-            sys.exit(1)
+            break
         else:
             test_passed.append(test)
 
@@ -57,15 +55,19 @@ def run_test(testlist):
 
 if __name__ == "__main__":
     print_msg("Start SPOR Test")
-    TEST_SETUP_IBOFOS.cleanup_ibof_logs()
+    
+    origin_value = TEST_LIB.is_journal_enabled().rstrip('\n')
+    TEST_LIB.set_journal("true")
 
-    if sys.argv[-2] == "-s":
+    if len(sys.argv) > 2 and sys.argv[-2] == "-s":
         tests = get_test_list(sys.argv[-1])
         sys.argv = sys.argv[:-2]
     else:
         tests = get_test_list()
 
     result = run_test(tests)
+
+    TEST_LIB.set_journal(origin_value)
 
     print_msg("SPOR Test Completed")
     print_msg("Passed test : ")

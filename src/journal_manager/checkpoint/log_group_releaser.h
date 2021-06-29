@@ -32,36 +32,52 @@
 
 #pragma once
 
+#include <atomic>
 #include <list>
 #include <mutex>
 
-#include "checkpoint_observer.h"
+#include "src/journal_manager/checkpoint/checkpoint_observer.h"
+#include "src/journal_manager/log/log_group_footer.h"
+#include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
+#include "src/journal_manager/status/i_checkpoint_status.h"
 
-namespace ibofos
+namespace pos
 {
+class JournalConfiguration;
 class JournalLogBuffer;
 class CheckpointHandler;
-class LogWriteHandler;
 class DirtyMapManager;
 class LogBufferWriteDoneNotifier;
+class CallbackSequenceController;
+class EventScheduler;
 
-class LogGroupReleaser : public CheckpointObserver
+class IMapFlush;
+class IContextManager;
+
+class LogGroupReleaser : public CheckpointObserver, public ICheckpointStatus, public ILogGroupResetCompleted
 {
 public:
     LogGroupReleaser(void);
+    explicit LogGroupReleaser(CheckpointHandler* checkpointHandler);
     virtual ~LogGroupReleaser(void);
 
-    void Init(LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer,
-        LogWriteHandler* logWriteHandler, DirtyMapManager* dirtyPage);
+    virtual void Init(JournalConfiguration* config,
+        LogBufferWriteDoneNotifier* notified, JournalLogBuffer* logBuffer,
+        DirtyMapManager* dirtyPage, CallbackSequenceController* sequencer,
+        IMapFlush* mapFlush, IContextManager* contextManager, EventScheduler* scheduler);
     void Reset(void);
 
-    void AddToFullLogGroup(int groupId);
+    virtual void AddToFullLogGroup(int groupId);
 
     int GetNumFullLogGroups(void);
-    int GetFlushingLogGroupId(void);
 
-    int StartCheckpoint(void);
     virtual void CheckpointCompleted(void);
+
+    virtual int GetFlushingLogGroupId(void) override;
+    virtual std::list<int> GetFullLogGroups(void) override;
+    virtual CheckpointStatus GetStatus(void) override;
+
+    virtual void LogGroupResetCompleted(int logGroupId) override;
 
 protected:
     void _AddToFullLogGroupList(int groupId);
@@ -70,24 +86,29 @@ protected:
     virtual void _FlushNextLogGroup(void);
     void _UpdateFlushingLogGroup(void);
     int _PopFullLogGroup(void);
-
-    void _LogGroupResetCompleted(int logGroupId);
+    virtual void _TriggerCheckpoint(void);
 
     void _ResetFlushingLogGroup(void);
 
+    void _CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t& footerOffset);
+
+    JournalConfiguration* config;
     LogBufferWriteDoneNotifier* releaseNotifier;
 
     JournalLogBuffer* logBuffer;
-    LogWriteHandler* logWriteHandler;
     DirtyMapManager* dirtyPageManager;
+    CallbackSequenceController* sequenceController;
 
     std::mutex fullLogGroupLock;
     std::list<int> fullLogGroup;
 
-    std::mutex flushLock;
-    int flushingLogGroupId;
+    std::atomic<int> flushingLogGroupId;
 
+    std::atomic<bool> checkpointTriggerInProgress;
     CheckpointHandler* checkpointHandler;
+
+    IContextManager* contextManager;
+    EventScheduler* eventScheduler;
 };
 
-} // namespace ibofos
+} // namespace pos

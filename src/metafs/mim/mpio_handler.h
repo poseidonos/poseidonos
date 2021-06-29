@@ -33,9 +33,11 @@
 #pragma once
 
 #include "mfs_io_handler_base.h"
-#include "mfs_io_q.h"
+#include "metafs_io_q.h"
 #include "mpio_pool.h"
 
+namespace pos
+{
 class MpioHandler
 {
 public:
@@ -47,10 +49,11 @@ public:
     void BottomhalfMioProcessing(void);
 
 private:
-    MetaIoQClass<Mpio*>* GetPartialMpioDoneQ(void);
+    MetaFsIoQ<Mpio*>* GetPartialMpioDoneQ(void);
     void _InitPartialMpioDoneQ(size_t mpioDoneQSize);
 
-    MetaIoQClass<Mpio*> partialMpioDoneQ;
+    MetaFsIoQ<Mpio*> partialMpioDoneQ;
     MpioPool* mpioPool;
     int coreId;
 };
+} // namespace pos

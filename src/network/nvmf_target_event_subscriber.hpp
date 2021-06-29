@@ -40,28 +40,29 @@ using namespace std;
 
 class NvmfVolume;
 
-namespace ibofos
+namespace pos
 {
 class NvmfTargetEventSubscriber : public VolumeEvent
 {
 public:
-    NvmfTargetEventSubscriber(NvmfVolume* vol);
+    NvmfTargetEventSubscriber(NvmfVolume* vol, std::string arrayName);
     ~NvmfTargetEventSubscriber(void);
 
-    bool VolumeCreated(string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw) override;
-    bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte) override;
-    bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw) override;
-    bool VolumeUnmounted(string volName, int volID) override;
-    bool VolumeLoaded(string volName, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw) override;
-    bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw) override;
-    void VolumeDetached(vector<int> volList) override;
+    bool VolumeCreated(string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName) override;
+    bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte, string arrayName) override;
+    bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName) override;
+    bool VolumeUnmounted(string volName, int volID, string arrayName) override;
+    bool VolumeLoaded(string volName, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, string arrayName) override;
+    bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw, string arrayName) override;
+    void VolumeDetached(vector<int> volList, string arrayName) override;
 
     void CopyVolumeInfo(char* destInfo, const char* srcInfo, int len);
 
 private:
     NvmfVolume* volume;
+    std::string arrayName;
     const uint32_t MIB_IN_BYTE = 1024 * 1024;
     const uint32_t KIOPS = 1000;
 };
 
-} // namespace ibofos
+} // namespace pos

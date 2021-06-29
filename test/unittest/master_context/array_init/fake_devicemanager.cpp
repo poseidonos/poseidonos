@@ -1,8 +1,8 @@
 #include "src/device/device_manager.h"
 #include "src/device/mock_device.h"
-#include "src/scheduler/event_argument.h"
+#include "src/event_scheduler/event_argument.h"
 
-namespace ibofos {
+namespace pos {
 
 const uint64_t BLOCK_PER_MOCK_DEVICE = 20UL * 1024 * 1024 * 1024;
 const uint64_t BLOCK_PER_NVM_MOCK_DEVICE = 2UL * 1024 * 1024 * 1024;
@@ -92,4 +92,4 @@ vector<DeviceProperty> DeviceManager::ListDevs()
     return devs;
 }
 
-}  // namespace ibofos
+}  // namespace pos

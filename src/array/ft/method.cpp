@@ -32,7 +32,7 @@
 
 #include "method.h"
 
-namespace ibofos
+namespace pos
 {
 const FtSizeInfo*
 Method::GetSizeInfo()
@@ -40,10 +40,16 @@ Method::GetSizeInfo()
     return &ftSize_;
 }
 
-RebuildFunc&
-Method::GetRebuildFunc(void)
+RecoverFunc&
+Method::GetRecoverFunc(void)
 {
-    return rebuildFunc_;
+    return recoverFunc_;
 }
 
-} // namespace ibofos
+RaidType
+Method::GetRaidType(void)
+{
+    return raidType;
+}
+
+} // namespace pos

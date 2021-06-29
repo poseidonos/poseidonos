@@ -33,43 +33,45 @@
 #include "mvm_top_mock.h"
 
 #include "mdpage.h"
-#include "meta_vol_base.h"
-#include "mfs_io_config.h"
+#include "meta_volume.h"
+#include "metafs_config.h"
 
-MockMetaVolMgrClass mockMetaVolMgr;
-MetaFsMVMTopMgrClass& mvmTopMgr = mockMetaVolMgr;
+namespace pos
+{
+MockMetaVolManager mockMetaVolMgr;
+MetaFsMVMTopManager& mvmTopMgr = mockMetaVolMgr;
 
-MockMetaVolMgrClass::MockMetaVolMgrClass(void)
+MockMetaVolManager::MockMetaVolManager(void)
 {
 }
 
-MockMetaVolMgrClass&
-MockMetaVolMgrClass::GetInstance(void)
+MockMetaVolManager&
+MockMetaVolManager::GetInstance(void)
 {
     return mockMetaVolMgr;
 }
 
 void
-MockMetaVolMgrClass::Init(MetaVolumeType volType, MetaLpnType maxVolPageNum)
+MockMetaVolManager::Init(MetaVolumeType volType, MetaLpnType maxVolPageNum)
 {
     SetModuleInit();
 }
 
 bool
-MockMetaVolMgrClass::Bringup(void)
+MockMetaVolManager::Bringup(void)
 {
     SetModuleReady();
     return true;
 }
 
 bool
-MockMetaVolMgrClass::Open(bool isNPOR)
+MockMetaVolManager::Open(bool isNPOR)
 {
     return true;
 }
 
 bool
-MockMetaVolMgrClass::Close(bool& resetCxt /*output*/)
+MockMetaVolManager::Close(bool& resetCxt /*output*/)
 {
     SetModuleInactive();
 
@@ -78,35 +80,35 @@ MockMetaVolMgrClass::Close(bool& resetCxt /*output*/)
 }
 
 bool
-MockMetaVolMgrClass::CreateVolume(MetaVolumeType volType)
+MockMetaVolManager::CreateVolume(MetaVolumeType volType)
 {
     return true;
 }
 
-IBOF_EVENT_ID
-MockMetaVolMgrClass::ProcessNewReq(MetaFsMoMReqMsg& reqMsg)
+POS_EVENT_ID
+MockMetaVolManager::ProcessNewReq(MetaFsFileControlRequest& reqMsg)
 {
-    if (reqMsg.reqType == MetaFsMoMReqType::FileCreate)
+    if (reqMsg.reqType == MetaFsFileControlType::FileCreate)
     {
         _CreateDummyFile(reqMsg.fileByteSize);
     }
-    else if (reqMsg.reqType == MetaFsMoMReqType::FileOpen)
+    else if (reqMsg.reqType == MetaFsFileControlType::FileOpen)
     {
         reqMsg.completionData.openfd = dummyInode.data.basic.field.fd;
     }
-    else if (reqMsg.reqType == MetaFsMoMReqType::GetDataChunkSize)
+    else if (reqMsg.reqType == MetaFsFileControlType::GetDataChunkSize)
     {
         reqMsg.completionData.dataChunkSize = dummyInode.data.basic.field.dataChunkSize;
     }
-    else if (reqMsg.reqType == MetaFsMoMReqType::GetFileSize)
+    else if (reqMsg.reqType == MetaFsFileControlType::GetFileSize)
     {
         reqMsg.completionData.fileSize = dummyInode.data.basic.field.fileByteSize;
     }
-    else if (reqMsg.reqType == MetaFsMoMReqType::GetTargetMediaType)
+    else if (reqMsg.reqType == MetaFsFileControlType::GetTargetMediaType)
     {
         reqMsg.completionData.targetMediaType = dummyInode.data.basic.field.ioAttribute.media;
     }
-    else if (reqMsg.reqType == MetaFsMoMReqType::GetFileBaseLpn)
+    else if (reqMsg.reqType == MetaFsFileControlType::GetFileBaseLpn)
     {
         reqMsg.completionData.fileBaseLpn = dummyInode.data.basic.field.pagemap.baseMetaLpn;
     }
@@ -115,21 +117,21 @@ MockMetaVolMgrClass::ProcessNewReq(MetaFsMoMReqMsg& reqMsg)
         // you hit here because you haven't implement code to handle given reqType above
         assert(false);
     }
-    return IBOF_EVENT_ID::SUCCESS;
+    return POS_EVENT_ID::SUCCESS;
 }
 
-IBOF_EVENT_ID
-MockMetaVolMgrClass::_CreateDummyFile(FileSizeType fileByteSize)
+POS_EVENT_ID
+MockMetaVolManager::_CreateDummyFile(FileSizeType fileByteSize)
 {
-    FileFDType NewFd = 0;
+    FileDescriptorType NewFd = 0;
 
     _CreateFileInode(NewFd, fileByteSize);
 
-    return IBOF_EVENT_ID::SUCCESS;
+    return POS_EVENT_ID::SUCCESS;
 }
 
 void
-MockMetaVolMgrClass::_CreateFileInode(FileFDType fd, FileSizeType fileByteSize)
+MockMetaVolManager::_CreateFileInode(FileDescriptorType fd, FileSizeType fileByteSize)
 {
     dummyInode.data.basic.field.fileByteSize = fileByteSize;
     dummyInode.data.basic.field.fd = fd;
@@ -140,7 +142,8 @@ MockMetaVolMgrClass::_CreateFileInode(FileFDType fd, FileSizeType fileByteSize)
 }
 
 uint32_t
-MockMetaVolMgrClass::_GetDefaultDataChunkSize(void)
+MockMetaVolManager::_GetDefaultDataChunkSize(void)
 {
     return MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
 }
+} // namespace pos

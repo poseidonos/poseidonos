@@ -33,30 +33,33 @@
 #pragma once
 
 #include <string>
+#include <mutex>
+#include <condition_variable>
 
-#include "src/state/state_manager.h"
+#include "src/state/interface/i_state_control.h"
+#include "src/state/interface/i_state_observer.h"
 
-namespace ibofos
+namespace pos
 {
-class ReplayStateChanger : public StateEvent
+class ReplayStateChanger : public IStateObserver
 {
 public:
     ReplayStateChanger(void);
+    explicit ReplayStateChanger(IStateControl* iState);
     virtual ~ReplayStateChanger(void);
 
     int GetRecoverState(void);
     int RemoveRecoverState(void);
 
-    void StateChanged(StateContext prev, StateContext next) override;
+    void StateChanged(StateContext* prev, StateContext* next) override;
 
 private:
-    void _WaitState(StateContext& target);
+    void _WaitState(StateContext* target);
 
-    string sender = "journal_manager";
-    StateContext recoverCtx{sender};
-    StateContext currState{sender};
+    StateContext* recoverCtx;
     std::mutex mtx;
     std::condition_variable cv;
+    IStateControl* state;
 };
 
-} // namespace ibofos
+} // namespace pos

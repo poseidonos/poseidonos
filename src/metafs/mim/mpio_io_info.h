@@ -32,10 +32,14 @@
 
 #pragma once
 
+#include <string>
 #include "meta_storage_specific.h"
-#include "mfs_common.h"
+#include "metafs_common.h"
 #include "os_header.h"
+#include "src/metafs/mim/metafs_io_request.h"
 
+namespace pos
+{
 class MpioIoInfo
 {
 public:
@@ -49,6 +53,7 @@ public:
       startByteOffset(0),
       byteSize(0),
       pageCnt(1),
+      arrayName(""),
       userBuf(nullptr)
     {
     }
@@ -57,11 +62,12 @@ public:
     uint32_t mpioId;
     MetaIoOpcode opcode;
     MetaStorageType targetMediaType;
-    FileFDType targetFD;
+    FileDescriptorType targetFD;
     MetaLpnType metaLpn;
     FileSizeType startByteOffset;
     FileSizeType byteSize;
     MetaLpnType pageCnt; // should be 1 since currently we only supports 4KB considering IO Parallelism for 4KB IO
+    std::string arrayName;
     void* userBuf;
 
     static const MetaLpnType INVALID_LPN = UINT64_MAX;
@@ -78,3 +84,4 @@ public:
 
 private:
 };
+} // namespace pos

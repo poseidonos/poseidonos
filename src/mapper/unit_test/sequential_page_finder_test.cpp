@@ -30,11 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sequential_page_finder_test.h"
+#include "src/mapper/unit_test/sequential_page_finder_test.h"
 
 #include <list>
 
-namespace ibofos
+namespace pos
 {
 void
 SequentialPageFinderTest::SetUp(void)
@@ -50,7 +50,7 @@ void
 SequentialPageFinderTest::_AddPages(MpageSet set, MpageList& dest)
 {
     for (int currentPage = set.startMpage;
-         currentPage < set.startMpage + set.numMpages; currentPage++)
+        currentPage < set.startMpage + set.numMpages; currentPage++)
     {
         dest.insert(currentPage);
     }
@@ -126,9 +126,11 @@ TEST_F(SequentialPageFinderTest, SeveralSequentialPages)
 
     for (int count = 0; count < numSetsToTest; count++)
     {
-        MpageSet currentSet = {
+        MpageSet currentSet =
+        {
             .startMpage = currentPage,
-            .numMpages = std::rand() % (MAX_MPAGES_PER_SET - 1) + 1};
+            .numMpages = std::rand() % (MAX_MPAGES_PER_SET - 1) + 1
+        };
 
         currentPage += currentSet.numMpages;
         currentPage += (std::rand() % (maxInterval - 1) + 1);
@@ -160,4 +162,4 @@ TEST_F(SequentialPageFinderTest, SeveralSequentialPages)
     EXPECT_TRUE(sets.size() == 0);
 }
 
-} // namespace ibofos
+} // namespace pos

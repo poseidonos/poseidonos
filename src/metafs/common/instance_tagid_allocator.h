@@ -33,6 +33,8 @@
 #pragma once
 #include "os_header.h"
 
+namespace pos
+{
 class InstanceTagIdAllocator
 {
 public:
@@ -59,3 +61,4 @@ public:
 private:
     std::atomic<uint32_t> tagId;
 };
+} // namespace pos

@@ -34,15 +34,22 @@
 
 #include <utility>
 
-#include "src/include/ibof_event_id.hpp"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/include/memory.h"
+#include "src/io/general_io/rba_state_service.h"
 #include "src/sys_event/volume_event_publisher.h"
+#include "src/lib/block_alignment.h"
+#include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
-RBAStateManager::RBAStateManager(void)
-: VolumeEvent("RBAStateManager")
+RBAStateManager::RBAStateManager(std::string arrayName)
+: VolumeEvent("RBAStateManager", arrayName),
+  arrayName(arrayName)
 {
+    RBAStateServiceSingleton::Instance()->Register(arrayName, this);
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName);
 }
 
 RBAStateManager::~RBAStateManager()
@@ -51,6 +58,8 @@ RBAStateManager::~RBAStateManager()
     {
         vol.SetSize(0);
     }
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName);
+    RBAStateServiceSingleton::Instance()->Unregister(arrayName);
 }
 
 void
@@ -72,12 +81,65 @@ RBAStateManager::BulkAcquireOwnership(uint32_t volumeID,
     BlkAddr startRba,
     uint32_t count)
 {
+    return _AcquireOwnership(volumeID, startRba, count);
+}
+
+void
+RBAStateManager::BulkReleaseOwnership(uint32_t volumeID,
+    BlkAddr startRba,
+    uint32_t count)
+{
+    _ReleaseOwnership(volumeID, startRba, count);
+}
+
+bool
+RBAStateManager::AcquireOwnershipRbaList(uint32_t volumeId,
+        const VolumeIo::RbaList& sectorRbaList)
+{
+    for (auto& rbaAndSize : sectorRbaList)
+    {
+        BlockAlignment blockAlignment(ChangeSectorToByte(rbaAndSize.sectorRba),
+                rbaAndSize.size);
+        bool success = _AcquireOwnership(volumeId,
+                blockAlignment.GetHeadBlock(), blockAlignment.GetBlockCount());
+        if (success == false)
+        {
+            auto iterator =
+                std::find(sectorRbaList.cbegin(), sectorRbaList.cend(), rbaAndSize);
+            VolumeIo::RbaList rbaList;
+            rbaList.insert(rbaList.begin(), sectorRbaList.cbegin(), iterator);
+            ReleaseOwnershipRbaList(volumeId, rbaList);
+
+            return false;
+        }
+    }
+    return true;
+}
+
+void
+RBAStateManager::ReleaseOwnershipRbaList(uint32_t volumeId,
+        const VolumeIo::RbaList& sectorRbaList)
+{
+    for (auto& rbaAndSize : sectorRbaList)
+    {
+        BlockAlignment blockAlignment(ChangeSectorToByte(rbaAndSize.sectorRba),
+                rbaAndSize.size);
+        _ReleaseOwnership(volumeId, blockAlignment.GetHeadBlock(),
+                blockAlignment.GetBlockCount());
+    }
+}
+
+bool
+RBAStateManager::_AcquireOwnership(uint32_t volumeID, BlkAddr startRba,
+        uint32_t count)
+{
     if (unlikely(volumeID >= MAX_VOLUME_COUNT))
     {
-        std::pair<IBOF_EVENT_ID, EventLevel> eventIdWithLevel(
-            IBOF_EVENT_ID::RBAMGR_WRONG_VOLUME_ID, EventLevel::ERROR);
+        std::pair<POS_EVENT_ID, EventLevel> eventIdWithLevel(
+            POS_EVENT_ID::RBAMGR_WRONG_VOLUME_ID, EventLevel::ERROR);
         throw eventIdWithLevel;
     }
+
 
     RBAStatesInVolume& targetVolume = rbaStatesInArray[volumeID];
     bool acquired = targetVolume.AcquireOwnership(startRba, count);
@@ -86,31 +148,18 @@ RBAStateManager::BulkAcquireOwnership(uint32_t volumeID,
 }
 
 void
-RBAStateManager::BulkReleaseOwnership(uint32_t volumeID,
-    BlkAddr startRba,
-    uint32_t count)
+RBAStateManager::_ReleaseOwnership(uint32_t volumeID, BlkAddr startRba,
+        uint32_t count)
 {
     if (unlikely(volumeID >= MAX_VOLUME_COUNT))
     {
-        IbofEventId::Print(IBOF_EVENT_ID::RBAMGR_WRONG_VOLUME_ID,
+        PosEventId::Print(POS_EVENT_ID::RBAMGR_WRONG_VOLUME_ID,
             EventLevel::ERROR);
         return;
     }
 
     RBAStatesInVolume& targetVolume = rbaStatesInArray[volumeID];
     targetVolume.ReleaseOwnership(startRba, count);
-}
-
-bool
-RBAStateManager::AcquireOwnership(uint32_t volumeID, BlkAddr rba)
-{
-    return BulkAcquireOwnership(volumeID, rba, 1);
-}
-
-void
-RBAStateManager::ReleaseOwnership(uint32_t volumeID, BlkAddr rba)
-{
-    BulkReleaseOwnership(volumeID, rba, 1);
 }
 
 RBAStateManager::RBAState::RBAState(void)
@@ -186,8 +235,7 @@ RBAStateManager::RBAStatesInVolume::SetSize(uint64_t newSize)
             size = newSize;
         }
     }
-
-    if (size == 0 && newSize > 0)
+    else if (size == 0 && newSize > 0)
     {
         rbaStates = new RBAState[newSize];
         size = newSize;
@@ -203,14 +251,14 @@ RBAStateManager::RBAStatesInVolume::_IsAccessibleRba(BlkAddr endRba)
 
 bool
 RBAStateManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByte,
-    uint64_t maxiops, uint64_t maxbw)
+    uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
     CreateRBAState(volID, ChangeByteToBlock(volSizeByte));
     return true;
 }
 
 bool
-RBAStateManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte)
+RBAStateManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName)
 {
     DeleteRBAState(volID);
     return true;
@@ -218,34 +266,34 @@ RBAStateManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeB
 
 bool
 RBAStateManager::VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte,
-    uint64_t maxiops, uint64_t maxbw)
+    uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
     return true;
 }
 
 bool
-RBAStateManager::VolumeUnmounted(std::string volName, int volID)
+RBAStateManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName)
 {
     return true;
 }
 
 bool
-RBAStateManager::VolumeLoaded(std::string name, int volID, uint64_t volSizeByte,
-    uint64_t maxiops, uint64_t maxbw)
+RBAStateManager::VolumeLoaded(std::string name, int id, uint64_t totalSize,
+    uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
-    CreateRBAState(volID, ChangeByteToBlock(volSizeByte));
+    CreateRBAState(id, ChangeByteToBlock(totalSize));
     return true;
 }
 
 bool
-RBAStateManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw)
+RBAStateManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
     return true;
 }
 
 void
-RBAStateManager::VolumeDetached(vector<int> volList)
+RBAStateManager::VolumeDetached(vector<int> volList, std::string arrayName)
 {
 }
 
-} // namespace ibofos
+} // namespace pos

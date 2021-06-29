@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(debug_info_updater_ut debug_info_updater_test.cpp)
+POS_ADD_UNIT_TEST(mount_temp_ut mount_temp_test.cpp)

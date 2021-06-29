@@ -32,11 +32,14 @@
 
 #pragma once
 
-#include "mfs_common.h"
+#include "metafs_common.h"
 
-class MetaVolumeBasicInfo
+namespace pos
+{
+class VolumeBasicInfo
 {
 public:
     MetaLpnType maxVolPageNum;
     uint32_t maxFileNumSupport;
 };
+} // namespace pos

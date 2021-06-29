@@ -35,10 +35,9 @@
 
 #include <string>
 
-#include "src/array/device/array_device.h"
+#include "src/include/array_device_state.h"
 using namespace std;
-
-namespace ibofos
+namespace pos
 {
 class DeviceMeta
 {
@@ -53,6 +52,6 @@ public:
     ArrayDeviceState state;
 };
 
-} // namespace ibofos
+} // namespace pos
 
 #endif // DEVICE_META_H_

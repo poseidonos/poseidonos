@@ -32,15 +32,14 @@
 
 #include "async_context.h"
 
-namespace ibofos
+namespace pos
 {
 AsyncMetaFileIoCtx::AsyncMetaFileIoCtx(void)
 : opcode(MetaFsIoOpcode::Write),
   fd(-1),
   fileOffset(0),
   length(0),
-  buffer(nullptr),
-  volumeIo(nullptr)
+  buffer(nullptr)
 {
 }
 
@@ -51,4 +50,16 @@ AsyncMetaFileIoCtx::HandleIoComplete(void* data)
     callback(this);
 }
 
-} // namespace ibofos
+int
+AsyncMetaFileIoCtx::GetError(void)
+{
+    return error;
+}
+
+uint64_t
+AsyncMetaFileIoCtx::GetLength(void)
+{
+    return length;
+}
+
+} // namespace pos

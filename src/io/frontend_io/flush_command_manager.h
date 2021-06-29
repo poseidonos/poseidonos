@@ -32,46 +32,32 @@
 
 #pragma once
 
+#include <list>
 #include <mutex>
-#include <vector>
 
-#include "src/allocator/stripe.h"
+#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/bio/flush_io.h"
+#include "src/io/frontend_io/flush_configuration.h"
 #include "src/lib/singleton.h"
-#include "src/mapper/mapper.h"
-#include "src/mapper/mpage_info.h"
-namespace ibofos
-{
-#if defined NVMe_FLUSH_HANDLING
-enum FlushState
-{
-    FLUSH_RESET,
-    FLUSH_START,
-    FLUSH_PENDING_WRITE_IN_PROGRESS,
-    FLUSH_ACTIVE_STRIPE_FLUSH_IN_PROGRESS,
-    FLUSH_ALL_STRIPE_FLUSH_IN_PROGRESS,
-    FLUSH_STRIPE_FLUSH_COMPLETE,
-    FLUSH_META_FLUSH_IN_PROGRESS,
-    FLUSH_META_FLUSH_COMPLETE
-};
 
+namespace pos
+{
 class FlushCmdManager
 {
 public:
-    FlushCmdManager();
-    std::atomic<enum FlushState> state;
-    // lock to control mutiple flush event
-    bool LockIo(void);
-    void UnlockIo(void);
-    // State of flush handling
-    void SetState(FlushState state);
-    FlushState GetState();
-    std::vector<Stripe*> stripesToFlush;
-    std::vector<StripeId> vsidToCheckFlushDone;
+    FlushCmdManager(void);
+    virtual ~FlushCmdManager(void);
+    virtual bool IsFlushEnabled(void);
+    virtual bool CanFlushMeta(int core, FlushIoSmartPtr flushIo);
+    virtual void FinishMetaFlush(void);
 
 private:
-    std::mutex flushLock;
+    std::mutex metaFlushLock;
+    std::list<FlushIoSmartPtr> flushEvents;
+    bool metaFlushInProgress;
+    FlushConfiguration config;
 };
 
 using FlushCmdManagerSingleton = Singleton<FlushCmdManager>;
-#endif
-} // namespace ibofos
+
+} // namespace pos

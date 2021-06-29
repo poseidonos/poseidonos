@@ -34,49 +34,63 @@
 
 #include <mutex>
 
-#include "src/allocator/allocator.h"
-#include "src/device/event_framework_api.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/allocator/i_block_allocator.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/dump/dump_module.h"
 #include "src/dump/dump_module.hpp"
+#include "src/event_scheduler/io_completer.h"
 #include "src/include/address_type.h"
+#include "src/include/branch_prediction.h"
 #include "src/include/meta_const.h"
 #include "src/io/frontend_io/aio.h"
 #include "src/io/frontend_io/block_map_update_request.h"
 #include "src/io/frontend_io/read_completion_for_partial_write.h"
-#include "src/io/general_io/rba_state_manager.h"
+#include "src/io/general_io/rba_state_service.h"
 #include "src/io/general_io/translator.h"
-#include "src/io/general_io/ubio.h"
-#include "src/io/general_io/volume_io.h"
+#include "src/bio/ubio.h"
+#include "src/bio/volume_io.h"
 #include "src/logger/logger.h"
 #include "src/state/state_manager.h"
-#include "src/state/state_policy.h"
+#ifdef _ADMIN_ENABLED
+#include "src/admin/smart_log_mgr.h"
+#endif
 
-namespace ibofos
+namespace pos
 {
-WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo)
+WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inputRbaStateManager, IBlockAllocator* inputIBlockAllocator)
 : Event(EventFrameworkApi::IsReactorNow()),
-  rbaStateManager(*RbaStateManagerSingleton::Instance()),
-  allocator(AllocatorSingleton::Instance()),
   volumeIo(volumeIo),
-  blockCount(0),
   volumeId(volumeIo->GetVolumeId()),
-  volumeIoCount(0),
-  remainSize(0),
-  blockAlignment(ChangeSectorToByte(volumeIo->GetRba()), volumeIo->GetSize()),
-  allocatedBlockCount(volumeIo->GetAllocatedBlockCount()),
+  arrayName(volumeIo->GetArrayName()),
+  blockAlignment(ChangeSectorToByte(volumeIo->GetSectorRba()),
+      volumeIo->GetSize()),
+  blockCount(blockAlignment.GetBlockCount()),
+  allocatedBlockCount(0),
   processedBlockCount(0)
 {
+    if (nullptr == inputRbaStateManager)
+    {
+        rbaStateManager = RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayName());
+    }
+    else
+    {
+        rbaStateManager = inputRbaStateManager;
+    }
+
+    if (nullptr == inputIBlockAllocator)
+    {
+        iBlockAllocator = AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayName());
+    }
+    else
+    {
+        iBlockAllocator = inputIBlockAllocator;
+    }
 }
 
 WriteSubmission::~WriteSubmission(void)
 {
-}
-
-uint32_t
-WriteSubmission::GetOriginCore(void)
-{
-    uint32_t originCore = volumeIo->GetOriginCore();
-    return originCore;
 }
 
 bool
@@ -84,27 +98,27 @@ WriteSubmission::Execute(void)
 {
     try
     {
-        BlkAddr startRba = ChangeSectorToBlock(volumeIo->GetRba());
-        blockCount = blockAlignment.GetBlockCount();
-        remainSize = ChangeBlockToByte(blockCount);
-
-        bool ownershipAcquired = rbaStateManager.BulkAcquireOwnership(volumeId,
+        BlkAddr startRba = blockAlignment.GetHeadBlock();
+        bool ownershipAcquired = rbaStateManager->BulkAcquireOwnership(volumeId,
             startRba, blockCount);
         if (false == ownershipAcquired)
         {
             return false;
         }
-
         bool done = _ProcessOwnedWrite();
 
         if (unlikely(!done))
         {
-            rbaStateManager.BulkReleaseOwnership(volumeId, startRba,
+            rbaStateManager->BulkReleaseOwnership(volumeId, startRba,
                 blockCount);
         }
         else
         {
             volumeIo = nullptr;
+#ifdef _ADMIN_ENABLED
+            SmartLogMgrSingleton::Instance()->IncreaseWriteBytes(blockCount, volumeId);
+            SmartLogMgrSingleton::Instance()->IncreaseWriteCmds(volumeId);
+#endif
         }
 
         return done;
@@ -113,11 +127,42 @@ WriteSubmission::Execute(void)
     {
         if (nullptr != volumeIo)
         {
-            volumeIo->CompleteWithoutRecovery(CallbackError::GENERIC_ERROR);
+            IoCompleter ioCompleter(volumeIo);
+            ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::GENERIC_ERROR, true);
         }
         volumeIo = nullptr;
         return true;
     }
+}
+
+VirtualBlkAddr
+WriteSubmission::_PopHeadVsa(void)
+{
+    VirtualBlks& firstVsaRange = allocatedVirtualBlks.front();
+    VirtualBlkAddr headVsa = firstVsaRange.startVsa;
+    firstVsaRange.numBlks--;
+    firstVsaRange.startVsa.offset++;
+
+    if (firstVsaRange.numBlks == 0)
+    {
+        allocatedVirtualBlks.pop_front();
+    }
+
+    return headVsa;
+}
+VirtualBlkAddr
+WriteSubmission::_PopTailVsa(void)
+{
+    VirtualBlks& lastVsaRange = allocatedVirtualBlks.back();
+    VirtualBlkAddr tailVsa = lastVsaRange.startVsa;
+    tailVsa.offset += lastVsaRange.numBlks - 1;
+    lastVsaRange.numBlks--;
+    if (lastVsaRange.numBlks == 0)
+    {
+        allocatedVirtualBlks.pop_back();
+    }
+
+    return tailVsa;
 }
 
 bool
@@ -131,17 +176,24 @@ WriteSubmission::_ProcessOwnedWrite(void)
     }
 
     _PrepareBlockAlignment();
-
     if (processedBlockCount == 0 && allocatedBlockCount == 1)
     {
         _WriteSingleBlock();
-        return true;
+    }
+    else
+    {
+        _WriteMultipleBlocks();
     }
 
-    _WriteMultipleBlocks();
-    _SubmitVolumeIo();
-
     return true;
+}
+
+void
+WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
+{
+    bool isRead = (volumeIo->dir == UbioDir::Read);
+    // If Read for partial write case, handling device failure is necessary.
+    ioDispatcher->Submit(volumeIo, false, isRead);
 }
 
 void
@@ -157,7 +209,8 @@ WriteSubmission::_SubmitVolumeIo(void)
         bool skipIoSubmission = (false == volumeIo->CheckPbaSet());
         if (skipIoSubmission)
         {
-            volumeIo->CompleteWithoutRecovery(CallbackError::SUCCESS);
+            IoCompleter ioCompleter(volumeIo);
+            ioCompleter.CompleteUbio(IOErrorType::SUCCESS, true);
         }
         else
         {
@@ -170,40 +223,27 @@ WriteSubmission::_SubmitVolumeIo(void)
 void
 WriteSubmission::_WriteSingleBlock(void)
 {
-    uint32_t count = volumeIo->GetAllocatedVirtualBlksCount();
-    for (uint32_t index = 0; index < count; index++)
-    {
-        VirtualBlks& vsaRange = volumeIo->GetAllocatedVirtualBlks(index);
-
-        if (vsaRange.numBlks != 0)
-        {
-            _PrepareSingleBlock(vsaRange);
-            _SendVolumeIo(volumeIo);
-            return;
-        }
-    }
+    VirtualBlks& virtualBlks = allocatedVirtualBlks.front();
+    _PrepareSingleBlock(virtualBlks);
+    _SendVolumeIo(volumeIo);
 }
 
 void
 WriteSubmission::_WriteMultipleBlocks(void)
 {
-    uint32_t count = volumeIo->GetAllocatedVirtualBlksCount();
-    for (uint32_t index = 0; index < count; index++)
+    for (auto& virtualBlks : allocatedVirtualBlks)
     {
-        VirtualBlks& virtualBlks = volumeIo->GetAllocatedVirtualBlks(index);
         _WriteDataAccordingToVsaRange(virtualBlks);
     }
+    _SubmitVolumeIo();
 }
 
 void
 WriteSubmission::_WriteDataAccordingToVsaRange(VirtualBlks& vsaRange)
 {
-    if (vsaRange.numBlks != 0)
-    {
-        VolumeIoSmartPtr newVolumeIo = _CreateVolumeIo(vsaRange);
+    VolumeIoSmartPtr newVolumeIo = _CreateVolumeIo(vsaRange);
 
-        splitVolumeIoQueue.push(newVolumeIo);
-    }
+    splitVolumeIoQueue.push(newVolumeIo);
 }
 
 void
@@ -224,7 +264,7 @@ void
 WriteSubmission::_ReadOldHeadBlock(void)
 {
     BlkAddr headRba = blockAlignment.GetHeadBlock();
-    VirtualBlkAddr vsa = volumeIo->PopHeadVsa();
+    VirtualBlkAddr vsa = _PopHeadVsa();
 
     _ReadOldBlock(headRba, vsa, false);
 }
@@ -232,13 +272,13 @@ WriteSubmission::_ReadOldHeadBlock(void)
 void
 WriteSubmission::_ReadOldTailBlock(void)
 {
-    if (remainSize == 0)
+    if (processedBlockCount == blockCount)
     {
         return;
     }
 
     BlkAddr tailRba = blockAlignment.GetTailBlock();
-    VirtualBlkAddr vsa = volumeIo->PopTailVsa();
+    VirtualBlkAddr vsa = _PopTailVsa();
 
     _ReadOldBlock(tailRba, vsa, true);
 }
@@ -267,27 +307,19 @@ WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddr& vsa, bool isTail)
     CallbackSmartPtr callback(new BlockMapUpdateRequest(split));
     split->SetCallback(callback);
 
-    VolumeIoSmartPtr newVolumeIo(new VolumeIo(nullptr, Ubio::UNITS_PER_BLOCK));
-    if (unlikely(nullptr == newVolumeIo))
-    {
-        IBOF_EVENT_ID eventId = IBOF_EVENT_ID::WRHDLR_FAIL_TO_ALLOCATE_MEMORY;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId));
-        throw eventId;
-    }
+    VolumeIoSmartPtr newVolumeIo(new VolumeIo(nullptr, Ubio::UNITS_PER_BLOCK, arrayName));
 
     newVolumeIo->SetVolumeId(volumeId);
     newVolumeIo->SetOriginUbio(split);
-    CallbackSmartPtr event(new ReadCompletionForPartialWrite(newVolumeIo));
+    CallbackSmartPtr event(new ReadCompletionForPartialWrite(newVolumeIo,
+        alignmentSize, alignmentOffset));
     newVolumeIo->SetCallback(event);
-    newVolumeIo->SetAlignmentInformation({.offset = alignmentOffset,
-        .size = alignmentSize});
-    newVolumeIo->SetRba(ChangeBlockToSector(rba));
+    uint64_t sectorRba = ChangeBlockToSector(rba);
+    newVolumeIo->SetSectorRba(sectorRba);
     newVolumeIo->SetVsa(vsa);
 
     const bool isRead = true;
-    Translator oldDataTranslator(volumeId, rba, isRead);
-    remainSize -= newVolumeIo->GetSize();
+    Translator oldDataTranslator(volumeId, rba, arrayName, isRead);
     StripeAddr oldLsidEntry = oldDataTranslator.GetLsidEntry(0);
 
     newVolumeIo->SetOldLsidEntry(oldLsidEntry);
@@ -307,37 +339,26 @@ void
 WriteSubmission::_AllocateFreeWriteBuffer(void)
 {
     int remainBlockCount = blockCount - allocatedBlockCount;
-    if (remainBlockCount == 0)
-    {
-        return;
-    }
 
     while (remainBlockCount > 0)
     {
         VirtualBlks targetVsaRange;
 
-        if (volumeIo->IsGc())
-        {
-            targetVsaRange = allocator->AllocateGcBlk(volumeId,
-                remainBlockCount);
-        }
-        else
-        {
-            targetVsaRange = allocator->AllocateWriteBufferBlks(volumeId,
-                remainBlockCount);
-        }
+        targetVsaRange = iBlockAllocator->AllocateWriteBufferBlks(volumeId,
+            remainBlockCount);
 
         if (IsUnMapVsa(targetVsaRange.startVsa))
         {
-            IBOF_EVENT_ID eventId = IBOF_EVENT_ID::WRHDLR_NO_FREE_SPACE;
-            IBOF_TRACE_DEBUG(eventId, IbofEventId::GetString(eventId));
+            POS_EVENT_ID eventId = POS_EVENT_ID::WRHDLR_NO_FREE_SPACE;
+            POS_TRACE_DEBUG(eventId, PosEventId::GetString(eventId));
 
-            StateManager* stateManager = StateManagerSingleton::Instance();
-            if (unlikely(stateManager->GetState() == State::STOP))
+            IStateControl* stateControl =
+                StateManagerSingleton::Instance()->GetStateControl(volumeIo->GetArrayName());
+            if (unlikely(stateControl->GetState()->ToStateType() == StateEnum::STOP))
             {
-                IBOF_EVENT_ID eventId =
-                    IBOF_EVENT_ID::WRHDLR_FAIL_BY_SYSTEM_STOP;
-                IBOF_TRACE_ERROR(eventId, IbofEventId::GetString(eventId));
+                POS_EVENT_ID eventId =
+                    POS_EVENT_ID::WRHDLR_FAIL_BY_SYSTEM_STOP;
+                POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
                 throw eventId;
             }
             break;
@@ -352,62 +373,33 @@ void
 WriteSubmission::_AddVirtualBlks(VirtualBlks& virtualBlks)
 {
     allocatedBlockCount += virtualBlks.numBlks;
-    volumeIo->AddAllocatedVirtualBlks(virtualBlks);
+    allocatedVirtualBlks.push_back(virtualBlks);
 }
 
 VolumeIoSmartPtr
 WriteSubmission::_CreateVolumeIo(VirtualBlks& vsaRange)
 {
-    VirtualBlkAddr startVsa = vsaRange.startVsa;
-    Translator translator(startVsa);
-    void* mem = volumeIo->GetBuffer();
-    uint32_t blockCount = vsaRange.numBlks;
-    PhysicalEntries physicalEntries =
-        translator.GetPhysicalEntries(mem, blockCount);
-
-    // TODO Support multiple buffers (for RAID1) - create additional VolumeIo
-    assert(physicalEntries.size() == 1);
-
     VolumeIoSmartPtr split =
-        volumeIo->Split(ChangeBlockToSector(blockCount), false);
-    split->SetVsa(startVsa);
-
-    for (auto& physicalEntry : physicalEntries)
-    {
-        PhysicalBlkAddr pba = physicalEntry.addr;
-        assert(physicalEntry.buffers.size() == 1);
-
-        for (auto& buffer : physicalEntry.buffers)
-        {
-            split->SetOriginUbio(volumeIo);
-            split->SetVsa(startVsa);
-            split->SetPba(pba);
-            CallbackSmartPtr callback(new BlockMapUpdateRequest(split));
-            split->SetCallback(callback);
-            StripeAddr lsidEntry = translator.GetLsidEntry(0);
-            split->SetLsidEntry(lsidEntry);
-
-            pba.lba += ChangeBlockToSector(buffer.GetBlkCnt());
-        }
-    }
+        volumeIo->Split(ChangeBlockToSector(vsaRange.numBlks), false);
+    _SetupVolumeIo(split, vsaRange, nullptr);
 
     return split;
 }
 
 void
-WriteSubmission::_PrepareSingleBlock(VirtualBlks& vsaRange)
+WriteSubmission::_SetupVolumeIo(VolumeIoSmartPtr newVolumeIo,
+    VirtualBlks& vsaRange, CallbackSmartPtr callback)
 {
     VirtualBlkAddr startVsa = vsaRange.startVsa;
-    Translator translator(startVsa);
-    void* mem = volumeIo->GetBuffer();
-    uint32_t blockCount = vsaRange.numBlks;
+    Translator translator(startVsa, arrayName);
+    void* mem = newVolumeIo->GetBuffer();
     PhysicalEntries physicalEntries =
-        translator.GetPhysicalEntries(mem, blockCount);
+        translator.GetPhysicalEntries(mem, vsaRange.numBlks);
 
     // TODO Support multiple buffers (for RAID1) - create additional VolumeIo
     assert(physicalEntries.size() == 1);
 
-    volumeIo->SetVsa(startVsa);
+    newVolumeIo->SetVsa(startVsa);
 
     for (auto& physicalEntry : physicalEntries)
     {
@@ -416,18 +408,29 @@ WriteSubmission::_PrepareSingleBlock(VirtualBlks& vsaRange)
 
         for (auto& buffer : physicalEntry.buffers)
         {
-            volumeIo->SetVsa(startVsa);
-            volumeIo->SetPba(pba);
+            if (volumeIo != newVolumeIo)
+            {
+                newVolumeIo->SetOriginUbio(volumeIo);
+            }
+            newVolumeIo->SetVsa(startVsa);
+            newVolumeIo->SetPba(pba);
 
-            CallbackSmartPtr callback(new BlockMapUpdateRequest(volumeIo, volumeIo->GetCallback()));
+            CallbackSmartPtr blockMapUpdateRequest(
+                new BlockMapUpdateRequest(newVolumeIo, callback));
 
-            volumeIo->SetCallback(callback);
+            newVolumeIo->SetCallback(blockMapUpdateRequest);
             StripeAddr lsidEntry = translator.GetLsidEntry(0);
-            volumeIo->SetLsidEntry(lsidEntry);
+            newVolumeIo->SetLsidEntry(lsidEntry);
 
             pba.lba += ChangeBlockToSector(buffer.GetBlkCnt());
         }
     }
 }
 
-} // namespace ibofos
+void
+WriteSubmission::_PrepareSingleBlock(VirtualBlks& vsaRange)
+{
+    _SetupVolumeIo(volumeIo, vsaRange, volumeIo->GetCallback());
+}
+
+} // namespace pos

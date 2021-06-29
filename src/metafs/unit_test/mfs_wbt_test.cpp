@@ -32,8 +32,10 @@
 
 #include "mfs_wbt_test.h"
 
-#include "mfs_wbt_api.h"
+#include "metafs_wbt_api.h"
 
+namespace pos
+{
 TEST_F(UtMetaFsWBT, TestAPI_GetMetaFileList)
 {
     std::string fileName = std::string("wbt_" + std::to_string(GetTimestampUs()));
@@ -41,7 +43,7 @@ TEST_F(UtMetaFsWBT, TestAPI_GetMetaFileList)
     CreateFileAndOpen(fileName, fileSize);
 
     MetaFsReturnCode<MetaFsStatusCodeWBTSpcf, std::vector<MetaFileInfoDumpCxt>> rc;
-    rc = metaFsMgr.wbt.GetMetaFileList();
+    rc = metaFs.wbt.GetMetaFileList();
 
     for (auto it = rc.returnData.begin(); it != rc.returnData.end(); it++)
     {
@@ -62,3 +64,4 @@ TEST_F(UtMetaFsWBT, GetMaxFileSizeLimit)
 TEST_F(UtMetaFsWBT, GetMetaFileInode)
 {
 }
+} // namespace pos

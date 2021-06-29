@@ -7,8 +7,8 @@ sys.path.append("../volume/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
-import ibofos_util
+import pos
+import pos_util
 import cli
 import test_result
 import json
@@ -16,42 +16,31 @@ import MOUNT_VOL_BASIC_1
 import fio
 import time
 DETACH_TARGET_DEV = MOUNT_VOL_BASIC_1.ANY_DATA
-
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 def check_result():
-    out = cli.get_ibofos_info()
-    data = json.loads(out)
-    if data['Response']['info']['situation'] == "NORMAL":
-        list = cli.array_info("")
-        data = json.loads(list)
+    out = cli.array_info(ARRAYNAME)
+    state = json_parser.get_state(out)
+    if state == "NORMAL":
+        data = json.loads(out)
         for item in data['Response']['result']['data']['devicelist']:
             if item['name'] == DETACH_TARGET_DEV :
-                return "fail", list
+                return "fail", out
         return "pass", out
     return "fail", out
 
 def set_result():
-    detail = cli.get_ibofos_info()
-    code = json_parser.get_response_code(detail)
-    if code == 0:
-        result, out = check_result()
-    else:
-        result = "fail"
-        out = detail
+    result, out = check_result()
 
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + out)
 
 def execute():
-    clear_result()
     MOUNT_VOL_BASIC_1.execute()
     fio_proc = fio.start_fio(0, 20)
     fio.wait_fio(fio_proc)
-    ibofos_util.pci_detach(DETACH_TARGET_DEV)
-    time.sleep(0.1)
+    pos_util.pci_detach(DETACH_TARGET_DEV)
+    time.sleep(5)
     
     fio_proc = fio.start_fio(0, 20)
     fio.wait_fio(fio_proc)
@@ -59,8 +48,9 @@ def execute():
     rebuild_started = False
     wait_threshold = 60
     for i in range(0, wait_threshold):
-        out = cli.get_ibofos_info()
-        if out.find("REBUILDING") >= 0:
+        out = cli.array_info(ARRAYNAME)
+        situ = json_parser.get_situation(out)
+        if situ.find("REBUILD") >= 0:
             print ("rebuilding started")
             rebuild_started = True
             break
@@ -69,14 +59,16 @@ def execute():
     if rebuild_started == True: 
         fio_proc2 = fio.start_fio(0, 120)
         while True:
-            out = cli.get_ibofos_info()
-            if out.find("REBUILDING") == -1:
+            out = cli.array_info(ARRAYNAME)
+            situ = json_parser.get_situation(out)
+            if situ.find("REBUILD") == -1:
                 print ("rebuilding done")
                 fio.wait_fio(fio_proc2)
                 break
 
 if __name__ == "__main__":
+    test_result.clear_result(__file__)
     execute()
     set_result()
-    ibofos.kill_ibofos()
-    ibofos_util.pci_rescan()
+    pos.kill_pos()
+    pos_util.pci_rescan()

@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(stripe_info_ut stripe_info_test.cpp)
+POS_ADD_UNIT_TEST(stripe_replay_status_ut stripe_replay_status_test.cpp)
+POS_ADD_UNIT_TEST(stripe_log_write_status_ut stripe_log_write_status_test.cpp)

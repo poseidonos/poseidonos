@@ -31,51 +31,62 @@
  */
 
 #include "space_info.h"
+#include "src/array_mgmt/array_manager.h"
 #include "src/include/memory.h"
 #include "src/logger/logger.h"
-#include "src/volume/volume_manager.h"
+#include "src/volume/volume_service.h"
 
-namespace ibofos
+namespace pos
 {
 bool
-SpaceInfo::IsEnough(uint64_t size)
+SpaceInfo::IsEnough(std::string& arrayName, uint64_t size)
 {
-    return Remaining() > size;
+    return Remaining(arrayName) > size;
 }
 
 uint64_t
-SpaceInfo::OPSize()
+SpaceInfo::OPSize(std::string& arrayName)
 {
-    uint64_t capa = TotalCapacity();
+    uint64_t capa = TotalCapacity(arrayName);
     return (uint64_t)(capa * 10 / 100);
 }
 
 uint64_t
-SpaceInfo::TotalCapacity()
+SpaceInfo::TotalCapacity(std::string& arrayName)
 {
     return (uint64_t)1024 * (uint64_t)SZ_1GB;
 }
 
 uint64_t
-SpaceInfo::SystemCapacity()
+SpaceInfo::SystemCapacity(std::string& arrayName)
 {
-    uint64_t total = TotalCapacity();
-    uint64_t op = OPSize();
-    IBOF_TRACE_INFO(9000, "SystemCapacity: total:{} - op:{} = sys:{} ",
+    uint64_t total = TotalCapacity(arrayName);
+    uint64_t op = OPSize(arrayName);
+    POS_TRACE_INFO(9000, "SystemCapacity: total:{} - op:{} = sys:{} ",
         total, op, total - op);
     return total - op;
 }
 
 uint64_t
-SpaceInfo::Used()
+SpaceInfo::Used(std::string& arrayName)
 {
-    return VolumeManagerSingleton::Instance()->EntireVolumeSize();
+    uint64_t usedSize = 0;
+
+    IVolumeManager* volMgr =
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+
+    if (volMgr != nullptr)
+    {
+        usedSize = volMgr->EntireVolumeSize();
+    }
+
+    return usedSize;
 }
 
 uint64_t
-SpaceInfo::Remaining()
+SpaceInfo::Remaining(std::string& arrayName)
 {
-    return SystemCapacity() - Used();
+    return SystemCapacity(arrayName) - Used(arrayName);
 }
 
-} // namespace ibofos
+} // namespace pos

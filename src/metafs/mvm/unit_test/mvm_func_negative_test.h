@@ -35,9 +35,12 @@
 
 #include "mvm_base_test.h"
 
+namespace pos
+{
 class UtMVMFunctionalNegative : public UtMVMBasic
 {
 public:
 };
+} // namespace pos
 
 #endif // __UT_MVM_FUNC_NEGATIVE_H__

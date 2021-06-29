@@ -9,10 +9,9 @@ sr_128k_limit = 12300
 rw_4k_limit = 6900
 rr_4k_limit = 10000
 
-qds_to_parse = "4,4,44,128"
 sw_128k_test_name = "write_128KiB_QD4_BW"
 sr_128k_test_name = "read_128KiB_QD4_BW"
-rw_4k_test_name = "randwrite_4096B_QD44_BW"
+rw_4k_test_name = "randwrite_4096B_QD128_BW"
 rr_4k_test_name = "randread_4096B_QD128_BW"
 
 ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../../../"
@@ -20,6 +19,8 @@ cur_dir = ibof_root + "/test/system/nvmf/initiator/automated"
 
 path_128k= cur_dir + "/128k_log/full_result"
 path_4k= cur_dir + "/4k_log/full_result"
+
+test_name = "POS"
 ##############################################################
 
 def read_test_result(filename):
@@ -37,21 +38,6 @@ def read_test_result(filename):
     r.close()
     return True
 
-def set_test_name_to_parse_result(qds):
-    global sw_128k_test_name
-    global sr_128k_test_name
-    global rw_4k_test_name
-    global rr_4k_test_name
-   
-    qd_list = []
-    qd_list = qds.split(',')
-    idx = 0
-    sw_128k_test_name="write_128KiB_QD" + qd_list[0] + "_BW"
-    sr_128k_test_name="read_128KiB_QD" + qd_list[1] + "_BW"
-    rw_4k_test_name="randwrite_4096B_QD" + qd_list[2] + "_BW"
-    rr_4k_test_name="randread_4096B_QD" + qd_list[3] + "_BW"
-    return True
-
 def get_revision():
     p1 = subprocess.Popen(["git", "log"], stdout = subprocess.PIPE)
     p2 = subprocess.Popen(["head", "-n", "1"], stdin=p1.stdout, stdout = subprocess.PIPE)
@@ -67,7 +53,7 @@ def init_test_list():
     global max_perf_test_value_list
 
     test_name_list = ["Project", "Revision"]
-    test_value_list = ["POS"]  
+    test_value_list = [args.test_name]  
     test_value_list.append(args.revision)
     max_perf_test_name_list = []
     max_perf_test_value_list = []
@@ -78,13 +64,16 @@ def add_max_perf_result(test_name, value):
     max_perf_test_value_list.append(value)
 
 def convert_test_result():
+
     for i in range(2, len(result)):
-        for j in range(1, len(result[0])):
+        for j in range(1, len(result[i])):
+            if len(result[0]) != len(result[i]):
+                print("Result does not exists")
+                return False
             if j % 2 == 1:
                 test_name = result[0][j] + "_" + result[0][j+1] + "_" + result[i][0].replace("=","") + "_" + result[1][j]                
             else:
-                test_name = result[0][j-1] + "_" + result[0][j] + "_" +  result[i][0].replace("=","") + "_" + result[1][j]
-           
+                test_name = result[0][j-1] + "_" + result[0][j] + "_" +  result[i][0].replace("=","") + "_" + result[1][j]        
             if sw_128k_test_name == test_name or sr_128k_test_name == test_name:
                 name = "Default_" + test_name
                 test_name_list.insert(2, name)
@@ -105,7 +94,7 @@ def convert_test_result():
 def write_csv_file():
     if not args.revision:
         args.revision = "0"
-    output = "AP_POS_" + args.revision + ".csv"
+    output = "AP_POS" + "_" + args.revision + ".csv"
     f = open(output, 'w', encoding='utf-8', newline='')
     wr = csv.writer(f)
     wr.writerow(test_name_list)
@@ -120,7 +109,7 @@ def compare_and_print(idx, limit, actual_result):
     GREEN  = '\33[32m'
     if float(actual_result) < limit:
         print(RED + max_perf_test_name_list[idx]," Below TH(",limit, "> ): ", actual_result + END)
-        success = False
+        success &= False
     else:
         print(GREEN + max_perf_test_name_list[idx]," Above TH(", limit, "<= ): ", actual_result + END)
     return success
@@ -159,6 +148,8 @@ def parse_arguments():
             help='Select 4k Test Result to convert to csv, Default: ' + path_4k)
     parser.add_argument('-r', '--revision', default=0, \
             help='Set Revision, Default: 0')
+    parser.add_argument('-t', '--test_name', default=test_name, \
+            help='Set Test Name, Default:' + test_name)
     parser.add_argument('-sw', '--seq_write', default=sw_128k_limit,\
             help='Set 128k seq. write limit, Default: ' + str(sw_128k_limit) + ' MB/s')
     parser.add_argument('-sr', '--seq_read', default=sr_128k_limit,\
@@ -167,16 +158,13 @@ def parse_arguments():
             help='Set 4k random write limit, Default: ' + str(rw_4k_limit) + ' MB/s')
     parser.add_argument('-rr', '--rand_read', default=rr_4k_limit, \
             help='Set 4k random read limit, Default: ' + str(rr_4k_limit) + ' MB/s')
-    parser.add_argument('-a', '--qds_to_parse', default=qds_to_parse, \
-            help='Type (sw,sr,rw,rr) queue depth to parse result! (So server:4,4,44,128 / PSD: 4,4,20,128), Default: ' + str(qds_to_parse))
     global args
     args = parser.parse_args()
 
 if __name__=="__main__":
     parse_arguments()
     init_test_list()
-    success = set_test_name_to_parse_result(args.qds_to_parse)
-    success &= read_test_result(args.path_128k)
+    success = read_test_result(args.path_128k)
     success &= convert_test_result()
     success &= read_test_result(args.path_4k)
     success &=convert_test_result()

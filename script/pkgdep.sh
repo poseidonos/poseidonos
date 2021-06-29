@@ -3,7 +3,7 @@
 
 SYSTEM=`uname -s`
 POS_ROOT=`pwd`/../
-SPDK_DIR=spdk-19.10
+SPDK_DIR=spdk
 SPDK_ROOT=${POS_ROOT}/lib/${SPDK_DIR}/
 
 if [ -f /etc/debian_version ]; then
@@ -38,18 +38,23 @@ if [ -f /etc/debian_version ]; then
     apt-get install -y libmnl-dev
     # For filebench
     apt install -y automake autoconf libtool bison flex python3-paramiko
-    # For xfs
-    apt install -y xfsprogs
     # for SPDK
     $SPDK_ROOT/scripts/pkgdep.sh
+    # For xfs
+    apt install -y xfsprogs
     # for clang-format
     apt install -y clang-format
+    # for nvdimm
+    apt install -y libpmemblk-dev
+    # for UT build
+    apt install -y meson
     # for python3-tz (timezone)
     apt install -y python3-tz
     # for gdb
     apt install -y gdb
-    # for zip, unzip
-    apt install -y zip unzip
+	# rpc client for cpp for invoke spdk rpc
+	apt install -y libjsonrpccpp-dev libjsoncpp-dev
+
 else
     echo "pkgdep: unknown system type."
 	exit 1

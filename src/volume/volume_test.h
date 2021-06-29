@@ -37,6 +37,8 @@
 
 #include "gtest/gtest.h"
 #include "src/include/memory.h"
+#include "src/volume/i_volume_manager.h"
+#include "src/volume/volume_service.h"
 
 using namespace std;
 

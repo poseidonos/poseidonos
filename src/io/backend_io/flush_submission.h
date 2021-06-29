@@ -32,21 +32,37 @@
 
 #pragma once
 
-#include "src/io/general_io/io_submit_handler.h"
+#include <list>
+#include <string>
 
-namespace ibofos
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/event_scheduler/event.h"
+#include "src/io_submit_interface/i_io_submit_handler.h"
+
+namespace pos
 {
 class Stripe;
+class IWBStripeAllocator;
+class IIOSubmitHandler;
+class IIOTranslator;
 
 class FlushSubmission : public Event
 {
 public:
-    FlushSubmission(Stripe* inputStripe);
+    FlushSubmission(Stripe* inputStripe, std::string& arrayName);
+    FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, std::string& arrayName,
+        IIOTranslator* translator);
     ~FlushSubmission() override;
     bool Execute(void) override;
+    uint32_t GetBufferListSize(void);
 
 private:
     Stripe* stripe;
+    IWBStripeAllocator* iWBStripeAllocator;
+    IIOSubmitHandler* iIOSubmitHandler;
+    std::list<BufferEntry> bufferList;
+    std::string arrayName;
+    IIOTranslator* translator;
 };
 
-} // namespace ibofos
+} // namespace pos

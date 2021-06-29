@@ -33,10 +33,10 @@
 #ifndef UNVME_DEVICE_CONTEXT_H_
 #define UNVME_DEVICE_CONTEXT_H_
 
-#include "device_context.h"
+#include "src/device/base/device_context.h"
 #include "spdk/nvme.h"
 
-namespace ibofos
+namespace pos
 {
 class UnvmeDeviceContext : public DeviceContext
 {
@@ -53,6 +53,6 @@ public:
     uint32_t adminCommandPending = 0;
     bool IsAdminCommandPendingZero();
 };
-} // namespace ibofos
+} // namespace pos
 
 #endif // UNVME_DEVICE_CONTEXT_H_

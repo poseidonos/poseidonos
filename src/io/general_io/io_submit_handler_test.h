@@ -37,7 +37,7 @@
 #include "src/include/meta_const.h"
 #include "src/io/general_io/io_submit_handler.h"
 
-namespace ibofos
+namespace pos
 {
 class IOSubmitHandlerTest
 {
@@ -59,4 +59,4 @@ private:
     static BufferEntry* readBufferEntry[BUFFER_COUNT];
 };
 
-} // namespace ibofos
+} // namespace pos

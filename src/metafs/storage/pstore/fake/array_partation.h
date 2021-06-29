@@ -33,16 +33,18 @@
 #ifndef _INCLUDE_MOCK_ARRAY_PARTATION_H_
 #define _INCLUDE_MOCK_ARRAY_PARTATION_H_
 
-#include "mss.h"
-#include "src/device/ublock_device.h"
-#include "src/io/general_io/ubio.h"
+#include "src/metafs/storage/mss.h"
+#include "src/device/base/ublock_device.h"
+#include "src/bio/ubio.h"
 
 #define NUM_OF_DEVICES 1
 #define NUM_OF_STRIPES 1
 
+namespace pos
+{
 struct DeviceLba
 {
-    ibofos::UBlockDevice* dev;
+    pos::UblockSharedPtr dev;
     uint64_t lba;
 };
 
@@ -66,4 +68,6 @@ public:
     explicit ArrayPartation(uint64_t capacity);
     DeviceLba ToDeviceLBA(LogicalBlkAddr lsa);
 };
+} // namespace pos
+
 #endif // _INCLUDE_MOCK_ARRAY_PARTATION_H_

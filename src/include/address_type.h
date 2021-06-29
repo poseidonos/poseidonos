@@ -35,9 +35,10 @@
 #include <cstdint>
 #include <list>
 
-#include "src/io/general_io/buffer_entry.h"
+#include "src/array/ft/buffer_entry.h"
+#include "src/include/smart_ptr_type.h"
 
-namespace ibofos
+namespace pos
 {
 static const uint32_t BLOCK_ADDR_BIT_LEN = 64;
 static const uint32_t STRIPE_ID_BIT_LEN = 30;
@@ -52,7 +53,7 @@ using BlkAddr = uint64_t;
 
 using ChunkIndex = uint32_t;
 
-class ArrayDevice;
+class IArrayDevice;
 
 struct VirtualBlkAddr
 {
@@ -86,8 +87,8 @@ typedef struct
 
 struct PhysicalBlkAddr
 {
-    ArrayDevice* dev;
     uint64_t lba;
+    IArrayDevice* arrayDev;
 };
 
 struct LogicalWriteEntry
@@ -142,6 +143,7 @@ static const SegmentId UNMAP_SEGMENT = ((1UL << SEGMENT_ID_BIT_LEN) - 1);
 static const StripeId UNMAP_STRIPE = ((1UL << STRIPE_ID_BIT_LEN) - 1);
 static const BlkOffset UNMAP_OFFSET = ((1UL << BLOCK_OFFSET_BIT_LEN) - 1);
 static const VirtualBlkAddr UNMAP_VSA = {.stripeId = UNMAP_STRIPE, .offset = UNMAP_OFFSET};
+static const SegmentId NEED_TO_RETRY = UNMAP_SEGMENT - 1;
 
 constexpr bool
 IsUnMapVsa(VirtualBlkAddr vsa)
@@ -161,4 +163,4 @@ IsSameVsa(VirtualBlkAddr vsa1, VirtualBlkAddr vsa2)
     return ((vsa1.stripeId == vsa2.stripeId) && (vsa1.offset == vsa2.offset));
 }
 
-} // namespace ibofos
+} // namespace pos

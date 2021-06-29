@@ -39,7 +39,7 @@
 #include <mutex>
 #include <unordered_map>
 
-namespace ibofos
+namespace pos
 {
 class MemoryChecker
 {
@@ -62,4 +62,4 @@ private:
     static thread_local bool inMemoryCheckerContext;
     static const uint32_t PADDING_BYTE;
 };
-} // namespace ibofos
+} // namespace pos

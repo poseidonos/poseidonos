@@ -31,35 +31,35 @@
  */
 
 #include "msc_top_mock.h"
+#include "meta_io_manager.h"
 
-#include "mfs_mim_top.h"
-#include "mfs_mvm_top.h"
+namespace pos
+{
+MockMetaFsCoreManager mockMetaFsCoreMgr;
+MetaFsMSCTopManager& mscTopMgr = mockMetaFsCoreMgr;
 
-MockMetaFsCoreMgrClass mockMetaFsCoreMgr;
-MetaFsMSCTopMgrClass& mscTopMgr = mockMetaFsCoreMgr;
-
-MockMetaFsCoreMgrClass::MockMetaFsCoreMgrClass(void)
+MockMetaFsCoreManager::MockMetaFsCoreManager(void)
 {
 }
 
-MockMetaFsCoreMgrClass::~MockMetaFsCoreMgrClass(void)
+MockMetaFsCoreManager::~MockMetaFsCoreManager(void)
 {
 }
 
-MockMetaFsCoreMgrClass&
-MockMetaFsCoreMgrClass::GetInstance(void)
+MockMetaFsCoreManager&
+MockMetaFsCoreManager::GetInstance(void)
 {
     return mockMetaFsCoreMgr;
 }
 
 bool
-MockMetaFsCoreMgrClass::Init(MetaStorageMediaInfoList& mediaInfoList)
+MockMetaFsCoreManager::Init(MetaStorageMediaInfoList& mediaInfoList)
 {
     this->mediaInfoList = mediaInfoList;
 
     for (auto& item : mediaInfoList)
     {
-        MetaVolumeType volumeType = MetaFsUtilLib::ConvertToVolumeType(item.media);
+        MetaVolumeType volumeType = MetaFileUtil::ConvertToVolumeType(item.media);
         MetaLpnType maxVolumeLpn = item.mediaCapacity / MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES;
         mvmTopMgr.Init(volumeType, maxVolumeLpn);
     }
@@ -71,7 +71,7 @@ MockMetaFsCoreMgrClass::Init(MetaStorageMediaInfoList& mediaInfoList)
 }
 
 bool
-MockMetaFsCoreMgrClass::Bringup(void)
+MockMetaFsCoreManager::Bringup(void)
 {
     mvmTopMgr.Bringup();
     mimTopMgr.Bringup();
@@ -81,41 +81,36 @@ MockMetaFsCoreMgrClass::Bringup(void)
     return true;
 }
 
-IBOF_EVENT_ID
-MockMetaFsCoreMgrClass::ProcessNewReq(MetaFsControlReqMsg& reqMsg)
+POS_EVENT_ID
+MockMetaFsCoreManager::ProcessNewReq(MetaFsControlReqMsg& reqMsg)
 {
     switch (reqMsg.reqType)
     {
-        case MetaFsControlReqType::FileSysCreate:
+        case MetaFsControlReqType::CreateSystem:
         {
             for (auto& item : mediaInfoList)
             {
-                IBOF_EVENT_ID rc;
-                rc = metaStorage->CreateMetaStore(item.media, item.mediaCapacity, true);
-                if (rc != IBOF_EVENT_ID::SUCCESS)
+                POS_EVENT_ID rc;
+                rc = metaStorage->CreateMetaStore(*reqMsg.arrayName, item.media, item.mediaCapacity, true);
+                if (rc != POS_EVENT_ID::SUCCESS)
                 {
-                    IBOF_TRACE_ERROR((int)rc, "Failed to mount meta storage subsystem");
-                    return IBOF_EVENT_ID::MFS_MODULE_NOT_READY;
+                    POS_TRACE_ERROR((int)rc, "Failed to mount meta storage subsystem");
+                    return POS_EVENT_ID::MFS_MODULE_NOT_READY;
                 }
             }
         }
         break;
-        case MetaFsControlReqType::Mount:
+        case MetaFsControlReqType::MountSystem:
         {
         }
         break;
-        case MetaFsControlReqType::Unmount:
+        case MetaFsControlReqType::UnmountSystem:
         {
         }
         break;
         default:
             assert(false);
     }
-    return IBOF_EVENT_ID::SUCCESS;
+    return POS_EVENT_ID::SUCCESS;
 }
-
-bool
-MockMetaFsCoreMgrClass::IsMounted(void)
-{
-    return true;
-}
+} // namespace pos

@@ -32,6 +32,8 @@
 
 #pragma once
 
+namespace pos
+{
 enum class MssReturnCode
 {
     Success = 0,
@@ -40,3 +42,4 @@ enum class MssReturnCode
 
     Max,
 };
+} // namespace pos

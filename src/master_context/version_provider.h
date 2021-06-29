@@ -36,7 +36,7 @@
 
 #include "src/lib/singleton.h"
 
-namespace ibofos
+namespace pos
 {
 class VersionProvider
 {
@@ -52,4 +52,4 @@ private:
 
 using VersionProviderSingleton = Singleton<VersionProvider>;
 
-} // namespace ibofos
+} // namespace pos

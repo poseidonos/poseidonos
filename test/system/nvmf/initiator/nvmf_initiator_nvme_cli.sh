@@ -5,13 +5,13 @@
 #
 
 rootdir=$(readlink -f $(dirname $0))/../../../../
-spdk_dir=$rootdir/lib/spdk-19.10
+spdk_dir=$rootdir/lib/spdk
 
 TEST_NUM=1
 
-NVMF_TARGET_NQN=nqn.2019-04.ibof:subsystem1
+NVMF_TARGET_NQN=nqn.2019-04.pos:subsystem1
 NVMF_TARGET_PORT=1158
-NVMF_INITIATOR_APP=$rootdir/lib/nvme-cli-1.8.1/nvme
+NVMF_INITIATOR_APP=nvme
 SERVER_IP=172.16.1.1
 NVMF_TRANSPORT=tcp
 

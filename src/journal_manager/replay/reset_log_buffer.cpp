@@ -33,10 +33,10 @@
 #include "reset_log_buffer.h"
 
 #include "../log_buffer/journal_log_buffer.h"
-#include "src/include/ibof_event_id.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
 ResetLogBuffer::ResetLogBuffer(JournalLogBuffer* logBuffer, ReplayProgressReporter* reporter)
 : ReplayTask(reporter),
@@ -57,6 +57,9 @@ ResetLogBuffer::GetNumSubTasks(void)
 int
 ResetLogBuffer::Start(void)
 {
+    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
+    POS_TRACE_DEBUG(eventId, "[ReplayTask] Reset journal log buffer");
+
     int ret = logBuffer->SyncResetAll();
     reporter->SubTaskCompleted(GetId(), 1);
 
@@ -75,4 +78,4 @@ ResetLogBuffer::GetWeight(void)
     return 10;
 }
 
-} // namespace ibofos
+} // namespace pos

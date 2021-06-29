@@ -7,29 +7,25 @@ sys.path.append("../volume/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
-import ibofos_util
+import pos
+import pos_util
 import cli
 import test_result
 import json
 import time
 import MOUNT_VOL_BASIC_1
-import MOUNT_ARRAY_BASIC_1
-DETACH_TARGET_DEV = MOUNT_ARRAY_BASIC_1.SPARE
-
-def clear_result():
-    if os.path.exists( __file__ + ".result"):
-        os.remove( __file__ + ".result")
+import MOUNT_ARRAY_BASIC
+DETACH_TARGET_DEV = MOUNT_ARRAY_BASIC.SPARE
+ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 def check_result():
-    out = cli.get_ibofos_info()
-    data = json.loads(out)
-    if data['Response']['info']['situation'] == "NORMAL":
-        list = cli.array_info("")
-        data = json.loads(list)
+    out = cli.array_info(ARRAYNAME)
+    state = json_parser.get_state(out)
+    if state == "NORMAL":
+        data = json.loads(out)
         for item in data['Response']['result']['data']['devicelist']:
             if item['name'] == DETACH_TARGET_DEV :
-                return "fail", list
+                return "fail", out
         return "pass", out
     return "fail", out
 
@@ -40,13 +36,13 @@ def set_result():
         result_file.write(result + "\n" + out)
 
 def execute():
-    clear_result()
     MOUNT_VOL_BASIC_1.execute()
-    ibofos_util.pci_detach(DETACH_TARGET_DEV)
+    pos_util.pci_detach(DETACH_TARGET_DEV)
     time.sleep(0.1)
 
 if __name__ == "__main__":
+    test_result.clear_result(__file__)
     execute()
     set_result()
-    ibofos.kill_ibofos()
-    ibofos_util.pci_rescan()
+    pos.kill_pos()
+    pos_util.pci_rescan()

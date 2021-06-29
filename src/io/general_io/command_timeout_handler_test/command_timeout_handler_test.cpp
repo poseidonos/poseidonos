@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "tool/library_unit_test/library_unit_test.h"
+#define UNVME_BUILD
 
 #include "src/io/general_io/command_timeout_handler.h"
 
@@ -44,27 +44,25 @@
 #include "spdk/nvme_spec.h"
 #include "src/array/array.h"
 #include "src/device/device_manager.h"
-#include "src/device/spdk/nvme.hpp"
+#include "src/spdk_wrapper/nvme.hpp"
 #include "src/device/unvme/unvme_drv.h"
 #include "src/device/unvme/unvme_ssd.h"
-#include "src/main/ibofos.h"
-#include "src/scheduler/event_argument.h"
-#include "src/scheduler/io_dispatcher.h"
+#include "src/main/poseidonos.h"
+#include "src/event_scheduler/io_completer.h"
+#include "src/io_scheduler/io_dispatcher.h"
+#include "tool/library_unit_test/library_unit_test.h"
 
-extern int argc;
-extern char* argv;
-ibofos::LibraryUnitTest libraryUnitTest;
-
-namespace ibofos
+pos::LibraryUnitTest libraryUnitTest;
+namespace pos
 {
 std::atomic<int> testCount;
-CallbackError retError;
+IOErrorType retError;
 volatile int errCount = 0;
 
 class DummyCallbackHandler : public Callback
 {
 public:
-    DummyCallbackHandler(bool isFront, Ubio* ubio = nullptr)
+    DummyCallbackHandler(bool isFront, UbioSmartPtr ubio = nullptr)
     : Callback(isFront),
       ubio(ubio)
     {
@@ -73,7 +71,7 @@ public:
 
 private:
     bool completeOrigin;
-    Ubio* ubio;
+    UbioSmartPtr ubio;
     bool
     _DoSpecificJob()
     {
@@ -82,7 +80,8 @@ private:
         retError = _GetMostCriticalError();
         if (ubio)
         {
-            ubio->CompleteOrigin();
+            IoCompleter ioCompleter(ubio);
+            ioCompleter.CompleteOriginUbio();
         }
         return true;
     }
@@ -115,41 +114,39 @@ test1_iotimeout_abort()
 {
     clean_test();
     libraryUnitTest.TestStart(1);
-    IODispatcher& ioDispatcher = *EventArgument::GetIODispatcher();
+    IODispatcher& ioDispatcher = *IODispatcherSingleton::Instance();
 
-    std::vector<UBlockDevice*> devs = DeviceManagerSingleton::Instance()->GetDevs();
+    std::vector<UblockSharedPtr> devs = DeviceManagerSingleton::Instance()->GetDevs();
     struct spdk_nvme_ctrlr *ctrlr = nullptr, *prevCtrlr = nullptr;
-    UBlockDevice* targetDevice = nullptr;
+    UblockSharedPtr targetDevice = nullptr;
     UnvmeSsd* ssd = nullptr;
     struct spdk_nvme_ns* ns;
     string sn;
-
     for (auto& iter : devs)
     {
         if (iter->GetType() == DeviceType::SSD)
         {
             printf("%s will be timed-out \n", iter->GetName());
-            ssd = dynamic_cast<UnvmeSsd*>(iter);
+            ssd = dynamic_cast<UnvmeSsd*>(iter.get());
             ns = ssd->GetNs();
             sn = iter->GetSN();
 
             ctrlr = spdk_nvme_ns_get_ctrlr(ns);
-            spdk_nvme_ctrlr_register_timeout_callback(ctrlr, 0,
+            spdk_nvme_ctrlr_register_timeout_callback(ctrlr, 1,
                 &Nvme::ControllerTimeoutCallback, nullptr);
 
             uint64_t size = 8 * 1024 / 512;
 
-            void* mem = ibofos::Memory<512>::Alloc(size);
+            void* mem = pos::Memory<512>::Alloc(size);
 
-            UbioSmartPtr bio(new Ubio(mem, size));
+            UbioSmartPtr bio(new Ubio(mem, size, ""));
             CallbackSmartPtr callback(new DummyCallbackHandler(false));
             bio->dir = UbioDir::Write;
-            ArrayDevice* arrayDev = new ArrayDevice(iter, ArrayDeviceState::NORMAL);
-            PhysicalBlkAddr pba = {.dev = arrayDev, .lba = 512 * 1024 * 1024 / 512};
 
-            bio->SetPba(pba);
+            bio->SetLba(512 * 1024 * 1024 / 512);
+            bio->SetUblock(iter);
             bio->SetCallback(callback);
-            EventArgument::GetIODispatcher()->Submit(bio);
+            IODispatcherSingleton::Instance()->Submit(bio);
             prevCtrlr = ctrlr;
             break;
         }
@@ -159,25 +156,27 @@ test1_iotimeout_abort()
     sleep(10);
     int testCountLocal = testCount;
     printf("callback : %d\n", testCountLocal);
-    libraryUnitTest.TestResult(1, testCount == 1);
+    bool success = (testCountLocal == 1);
+    libraryUnitTest.TestResult(1, success);
 }
 
+const uint32_t CALLBACK_COUNT = 1024;
+
 void
-DiskIo(UBlockDevice* dev, void* ctx)
+DiskIo(UblockSharedPtr dev, void* ctx)
 {
     struct spdk_nvme_ctrlr *ctrlr = nullptr, *prevCtrlr = nullptr;
-    UBlockDevice* targetDevice = nullptr;
+    UblockSharedPtr targetDevice = nullptr;
     UnvmeSsd* ssd = nullptr;
     struct spdk_nvme_ns* ns;
     string sn;
-
     if (dev->GetType() == DeviceType::SSD)
     {
         if (firstdev == true)
             return;
         firstdev = true;
         printf("%s will be timed-out \n", dev->GetName());
-        ssd = dynamic_cast<UnvmeSsd*>(dev);
+        ssd = dynamic_cast<UnvmeSsd*>(dev.get());
         ns = ssd->GetNs();
         sn = dev->GetSN();
 
@@ -185,25 +184,24 @@ DiskIo(UBlockDevice* dev, void* ctx)
         spdk_nvme_ctrlr_register_timeout_callback(ctrlr, 0,
             &Nvme::ControllerTimeoutCallback, nullptr);
 
-        ArrayDevice* arrayDev = new ArrayDevice(dev, ArrayDeviceState::NORMAL);
-        *(ArrayDevice **)ctx = arrayDev;
-
-        for (unsigned int i = 0; i < 1024; i++)
+        for (unsigned int i = 0; i < CALLBACK_COUNT; i++)
         {
             uint64_t size = 8 * 1024 / 512;
 
-            void* mem = ibofos::Memory<512>::Alloc(size);
+            void* mem = pos::Memory<512>::Alloc(size);
 
-            UbioSmartPtr bio(new Ubio(mem, size));
+            UbioSmartPtr bio(new Ubio(mem, size, ""));
             CallbackSmartPtr callback(new DummyCallbackHandler(false));
             bio->dir = UbioDir::Write;
 
-            PhysicalBlkAddr pba = {.dev = arrayDev, .lba = 512 * 1024 * 1024 / 512};
+            bio->SetLba(512 * 1024 * 1024 / 512);
+            bio->SetUblock(dev);
 
-            bio->SetPba(pba);
             bio->SetCallback(callback);
-            EventArgument::GetIODispatcher()->Submit(bio);
+            IODispatcherSingleton::Instance()->Submit(bio);
         }
+        // We wait that callback is called for all IOs
+        sleep(20);
     }
 }
 
@@ -212,30 +210,27 @@ test2_io_multiple_abort()
 {
     clean_test();
     libraryUnitTest.TestStart(2);
-    IODispatcher& ioDispatcher = *EventArgument::GetIODispatcher();
+    IODispatcher& ioDispatcher = *IODispatcherSingleton::Instance();
 
-    ArrayDevice *arrayDevice = nullptr;
-    DeviceManagerSingleton::Instance()->IterateDevicesAndDoFunc(DiskIo, (void *)&arrayDevice);
+    DeviceManagerSingleton::Instance()->IterateDevicesAndDoFunc(DiskIo, nullptr);
+
     // We wait for detaching the device from the device manager.
-    sleep(5);
-    delete arrayDevice;
+    sleep(50);
+
     int testCountLocal = testCount;
 
     printf("callback : %d\n", testCountLocal);
-    libraryUnitTest.TestResult(2, testCount == 1024
-        && CommandTimeoutHandlerSingleton::Instance()->IsPendingAbortZero() == true);
+    libraryUnitTest.TestResult(2, testCount == CALLBACK_COUNT);
 }
 
-} // namespace ibofos
+} // namespace pos
 
 int
-main(int argc, char* argv[])
+main(int argc, char *argv[])
 {
-    libraryUnitTest.Initialize(argc, argv);
-    ibofos::test1_iotimeout_abort();
-    ibofos::test2_io_multiple_abort();
+    libraryUnitTest.Initialize(argc, argv, "../../../../");
+    pos::test1_iotimeout_abort();
+    pos::test2_io_multiple_abort();
     libraryUnitTest.SuccessAndExit();
-
-
     return 0;
 }

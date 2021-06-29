@@ -39,14 +39,14 @@
 #include <list>
 #include <memory>
 
-#include "src/device/device_driver.h"
-#include "src/device/spdk/nvme.hpp"
-#include "src/device/spdk/spdk.hpp"
+#include "src/device/base/device_driver.h"
+#include "src/spdk_wrapper/nvme.hpp"
+#include "src/spdk_wrapper/spdk.hpp"
 #include "src/include/memory.h"
 #include "unvme_device_context.h"
 #include "unvme_drv.h"
 
-namespace ibofos
+namespace pos
 {
 UNVMeTest::UNVMeTest(DeviceDriver* inputDeviceDriver)
 : NVMeTest(inputDeviceDriver)
@@ -112,9 +112,9 @@ UNVMeTest::_TestDeviceContextInitialized(void)
 
     return testSuccessful;
 }
-} // namespace ibofos
+} // namespace pos
 
-using namespace ibofos;
+using namespace pos;
 
 int
 main(int argc, char** argv)

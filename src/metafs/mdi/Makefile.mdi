@@ -16,7 +16,7 @@ else
 endif
 ########################################
 MDI_SRCS += \
-	mfs_mdi_top.cpp \
+	mdi_manager.cpp \
 
 ifeq ($(MOCK_MDI_EN), 1)
 MDI_SRCS += \

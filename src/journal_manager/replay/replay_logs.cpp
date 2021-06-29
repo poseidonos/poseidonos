@@ -32,31 +32,58 @@
 
 #include "replay_logs.h"
 
-#include "pending_stripe.h"
-#include "src/include/ibof_event_id.h"
+#include <iomanip>
+#include <iostream>
+#include <algorithm>
+
+#include "src/journal_manager/log/log_handler.h"
+#include "src/journal_manager/replay/log_delete_checker.h"
+#include "src/journal_manager/replay/pending_stripe.h"
+#include "src/journal_manager/replay/gc_replay_stripe.h"
+#include "src/journal_manager/replay/user_replay_stripe.h"
+
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+#include "src/allocator/i_context_manager.h"
+
+namespace pos
 {
-ReplayLogs::ReplayLogs(LogList& logList, Mapper* mapper, Allocator* allocator,
-    Array* array, ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes)
+ReplayLogs::ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
+    IVSAMap* vsaMap, IStripeMap* stripeMap,
+    IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+    IContextManager* contextManager,
+    IContextReplayer* ctxReplayer, IArrayInfo* arrayInfo,
+    ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes)
 : ReplayTask(reporter),
   logList(logList),
-  mapper(mapper),
-  allocator(allocator),
-  array(array)
+  logDeleteChecker(deleteChecker),
+  vsaMap(vsaMap),
+  stripeMap(stripeMap),
+  blockAllocator(blockAllocator),
+  wbStripeAllocator(wbStripeAllocator),
+  contextManager(contextManager),
+  contextReplayer(ctxReplayer),
+  arrayInfo(arrayInfo)
 {
-    wbStripeReplayer = new ActiveWBStripeReplayer(allocator, pendingWbStripes);
-    userStripeReplayer = new ActiveUserStripeReplayer(allocator, array);
+    wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer,
+        wbStripeAllocator, pendingWbStripes);
+    userStripeReplayer = new ActiveUserStripeReplayer(contextReplayer, arrayInfo);
 }
 
 ReplayLogs::~ReplayLogs(void)
 {
-    for (auto stripe : replayStripeList)
+    for (auto stripe : replayingStripeList)
     {
         delete stripe;
     }
-    replayStripeList.clear();
+    replayingStripeList.clear();
+
+    for (auto stripe : replayedStripeList)
+    {
+        delete stripe;
+    }
+    replayedStripeList.clear();
 
     delete wbStripeReplayer;
     delete userStripeReplayer;
@@ -65,103 +92,200 @@ ReplayLogs::~ReplayLogs(void)
 int
 ReplayLogs::GetNumSubTasks(void)
 {
-    return 2;
+    return 5;
 }
 
 int
 ReplayLogs::Start(void)
 {
-    _CreateReplayStripe();
+    int result = 0;
+
+    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_STATUS,
+        "[ReplayTask] Log replay started");
+
+    logDeleteChecker->Update(logList.GetDeletingLogs());
+
+    result = _ReplayFinishedStripes();
+    if (result != 0)
+    {
+        return result;
+    }
     reporter->SubTaskCompleted(GetId(), 1);
 
-    int result = _Replay();
+    result = _ReplayUnfinishedStripes();
+    if (result != 0)
+    {
+        return result;
+    }
     reporter->SubTaskCompleted(GetId(), 1);
+
+    result = wbStripeReplayer->Replay();
+    if (result != 0)
+    {
+        return result;
+    }
+    reporter->SubTaskCompleted(GetId(), 1);
+
+    result = userStripeReplayer->Replay();
+    if (result != 0)
+    {
+        return result;
+    }
+    reporter->SubTaskCompleted(GetId(), 1);
+
+    contextReplayer->ResetSegmentsStates();
+    reporter->SubTaskCompleted(GetId(), 1);
+
+    std::ostringstream os;
+    os << "[Replay] " << replayedStripeList.size() << " stripes are replayed";
+
+    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_STATUS, os.str());
+    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL,
+        POS_EVENT_ID::JOURNAL_REPLAY_STATUS, os.str());
 
     return result;
-}
-
-void
-ReplayLogs::_CreateReplayStripe(void)
-{
-    for (auto log : logList)
-    {
-        if (log->GetType() == LogType::VOLUME_DELETED)
-        {
-            _DeleteVolumeLogs(log);
-        }
-        else
-        {
-            ReplayStripe* stripe = _FindStripe(log->GetVsid());
-            if (stripe == nullptr)
-            {
-                // TODO(huijeong.kim) There can be two stripes with same vsid
-                // if there was a GC in-between
-                stripe = new ReplayStripe(log->GetVsid(), mapper, allocator, array,
-                    wbStripeReplayer, userStripeReplayer);
-                replayStripeList.push_back(stripe);
-
-                IBOF_TRACE_INFO(EID(JOURNAL_REPLAY_STRIPE),
-                    "[Replay] new stripe (vsid {}) is found for replay", log->GetVsid());
-            }
-            stripe->AddLog(log);
-        }
-        delete log;
-    }
-    logList.clear();
-}
-
-void
-ReplayLogs::_DeleteVolumeLogs(LogHandlerInterface* log)
-{
-    VolumeDeletedLog* logData = reinterpret_cast<VolumeDeletedLog*>(log->GetData());
-
-    IBOF_TRACE_INFO(EID(JOURNAL_REPLAY_VOLUME_EVENT),
-        "[Replay] Deleted volume {} is found", logData->volId);
-
-    for (auto stripe : replayStripeList)
-    {
-        if (stripe->GetVolumeId() == logData->volId)
-        {
-            stripe->DeleteBlockMapReplayEvents();
-        }
-    }
 }
 
 int
-ReplayLogs::_Replay(void)
+ReplayLogs::_ReplayFinishedStripes(void)
 {
-    int result = 0;
+    std::vector<ReplayLog> replayLogs;
 
-    for (auto stripe : replayStripeList)
+    while (logList.IsEmpty() == false)
     {
-        result = stripe->Replay();
-        if (result != 0)
+        ReplayLogGroup logGroup = logList.PopReplayLogGroup();
+
+        if (logGroup.isFooterValid == true)
         {
-            IBOF_TRACE_ERROR(EID(JOURNAL_REPLAY_FAILED),
-                "[Replay] Replay Failed, Stop Replaying");
-            return result;
+            uint64_t currentSegInfoVersion = contextManager->GetStoredContextVersion(SEGMENT_CTX);
+            if (logGroup.footer.lastCheckpointedSeginfoVersion < currentSegInfoVersion)
+            {
+                // Checkpoint started, allocator context is stored, but checkpoint is not completed
+                for (auto it = logGroup.logs.begin(); it != logGroup.logs.end(); it++)
+                {
+                    it->segInfoFlushed = true;
+                }
+
+                POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_STATUS,
+                    "Segment context is flushed, skip replaying seginfo (last ver in the footer {}, current {}",
+                    logGroup.footer.lastCheckpointedSeginfoVersion, currentSegInfoVersion);
+            }
         }
+
+        replayLogs.insert(replayLogs.end(), logGroup.logs.begin(), logGroup.logs.end());
     }
 
-    wbStripeReplayer->Replay();
-    userStripeReplayer->Replay();
+    for (auto replayLog : replayLogs)
+    {
+        LogHandlerInterface* log = replayLog.log;
 
-    return result;
+        if (log->GetType() == LogType::BLOCK_WRITE_DONE)
+        {
+            ReplayStripe* stripe = _FindUserStripe(log->GetVsid());
+            stripe->AddLog(replayLog);
+
+            int volumeId = reinterpret_cast<BlockWriteDoneLog*>(log->GetData())->volId;
+            logDeleteChecker->ReplayedUntil(replayLog.time, volumeId);
+        }
+        else if (log->GetType() == LogType::STRIPE_MAP_UPDATED)
+        {
+            ReplayStripe* stripe = _FindUserStripe(log->GetVsid());
+            stripe->AddLog(replayLog);
+
+            int result = _ReplayStripe(stripe);
+            if (result != 0)
+            {
+                return result;
+            }
+
+            _MoveToReplayedStripe(stripe);
+        }
+        else if (log->GetType() == LogType::GC_STRIPE_FLUSHED)
+        {
+            ReplayStripe* stripe = new GcReplayStripe(log->GetVsid(), vsaMap, stripeMap,
+                contextReplayer, blockAllocator, arrayInfo,
+                wbStripeReplayer, userStripeReplayer);
+            stripe->AddLog(replayLog);
+
+            int result = _ReplayStripe(stripe);
+            if (result != 0)
+            {
+                return result;
+            }
+
+            int volumeId = reinterpret_cast<GcStripeFlushedLog*>(log->GetData())->volId;
+            logDeleteChecker->ReplayedUntil(replayLog.time, volumeId);
+
+            replayedStripeList.push_back(stripe);
+        }
+        else
+        {
+            POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_STATUS,
+                "Unknwon log type {} found", log->GetType());
+        }
+    }
+    return 0;
+}
+
+int
+ReplayLogs::_ReplayStripe(ReplayStripe* stripe)
+{
+    if (logDeleteChecker->IsDeleted(stripe->GetVolumeId()))
+    {
+        stripe->DeleteBlockMapReplayEvents();
+    }
+
+    return stripe->Replay();
+}
+
+void
+ReplayLogs::_MoveToReplayedStripe(ReplayStripe* stripe)
+{
+    replayedStripeList.push_back(stripe);
+
+    replayingStripeList.erase(std::remove(replayingStripeList.begin(),
+        replayingStripeList.end(), stripe), replayingStripeList.end());
 }
 
 ReplayStripe*
-ReplayLogs::_FindStripe(StripeId vsid)
+ReplayLogs::_FindUserStripe(StripeId vsid)
 {
-    ReplayStripe* stripeFound = nullptr;
-    for (auto stripe : replayStripeList)
+    for (auto stripe : replayingStripeList)
     {
-        if (stripe->GetVsid() == vsid)
+        if (stripe->IsFlushed() == false && stripe->GetVsid() == vsid)
         {
-            stripeFound = stripe;
-            break;
+            return stripe;
         }
     }
-    return stripeFound;
+
+    ReplayStripe* stripe = new UserReplayStripe(vsid, vsaMap, stripeMap,
+        contextReplayer, blockAllocator, arrayInfo,
+        wbStripeReplayer, userStripeReplayer);
+
+    replayingStripeList.push_back(stripe);
+
+    return stripe;
+}
+
+int
+ReplayLogs::_ReplayUnfinishedStripes(void)
+{
+    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_STATUS,
+        "{} stripes are not flushed", replayingStripeList.size());
+
+    while (replayingStripeList.size() != 0)
+    {
+        ReplayStripe* stripe = replayingStripeList.front();
+
+        int result = stripe->Replay();
+        if (result != 0)
+        {
+            return result;
+        }
+
+        _MoveToReplayedStripe(stripe);
+    }
+    return 0;
 }
 
 ReplayTaskId
@@ -176,4 +300,4 @@ ReplayLogs::GetWeight(void)
     return 30;
 }
 
-} // namespace ibofos
+} // namespace pos

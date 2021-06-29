@@ -36,7 +36,7 @@
 
 #include "src/include/address_type.h"
 
-namespace ibofos
+namespace pos
 {
 class ActiveStripeAddr
 {
@@ -121,4 +121,4 @@ private:
     StripeId wbLsid;
 };
 
-} // namespace ibofos
+} // namespace pos

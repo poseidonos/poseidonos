@@ -43,7 +43,7 @@
 template<typename T>
 class DumpSharedPtr;
 
-namespace ibofos
+namespace pos
 {
 template<typename T>
 DumpObject<T>::DumpObject()
@@ -138,5 +138,5 @@ DumpModule<T>::IsEnable()
     return isEnabled;
 }
 
-} // namespace ibofos
+} // namespace pos
 #endif // DUMP_MODULE_HPP_

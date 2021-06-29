@@ -32,6 +32,8 @@
 
 #include "mss_disk_handler.h"
 
+namespace pos
+{
 MssCompleteHandler::MssCompleteHandler(Ubio* input)
 : ubio(input)
 {
@@ -48,3 +50,4 @@ MssCompleteHandler::Execute(void)
     assert(false);
     return true;
 }
+} // namespace pos

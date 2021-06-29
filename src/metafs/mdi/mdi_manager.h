@@ -31,23 +31,22 @@
  */
 
 /* 
- * iBoFOS - Meta Filesystem Layer
+ * PoseidonOS - Meta Filesystem Layer
  * 
  * Meta Data Integrity Manager
 */
 #pragma once
 
-#include "mfs_mdi_top.h"
-#include "mvm_req.h"
+#include "metafs_manager_base.h"
+#include "metafs_control_request.h"
 
-class MetaDIMgrClass : public MetaFsMDITopMgrClass
+namespace pos
+{
+class MetaIntegrityManager : public MetaFsManagerBase
 {
 public:
-    MetaDIMgrClass(void);
+    MetaIntegrityManager(void);
 
-    static MetaDIMgrClass* GetInstance(void);
-
-private:
+    const char* GetModuleName(void);
 };
-
-extern MetaDIMgrClass metaDIMgr;
+} // namespace pos

@@ -32,10 +32,12 @@
 
 #pragma once
 
-#include "src/io/general_io/volume_io.h"
-#include "src/scheduler/callback.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/bio/volume_io.h"
+#include "src/event_scheduler/callback.h"
 
-namespace ibofos
+namespace pos
 {
 class VolumeIo;
 
@@ -43,11 +45,13 @@ class ReadCompletion : public Callback
 {
 public:
     ReadCompletion(VolumeIoSmartPtr volumeIo);
+    ReadCompletion(VolumeIoSmartPtr input, AllocatorService* allocatorService);
     ~ReadCompletion(void) override;
 
 private:
     bool _DoSpecificJob(void) override;
 
     VolumeIoSmartPtr volumeIo;
+    AllocatorService* allocatorService;
 };
-} // namespace ibofos
+} // namespace pos

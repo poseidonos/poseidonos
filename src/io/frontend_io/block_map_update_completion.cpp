@@ -32,26 +32,55 @@
 
 #include "src/io/frontend_io/block_map_update_completion.h"
 
-#include "src/device/event_framework_api.h"
+#include "src/allocator/i_block_allocator.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/write_completion.h"
-#include "src/io/general_io/volume_io.h"
-#include "src/mapper/mapper.h"
-#include "src/scheduler/event_argument.h"
-
-namespace ibofos
+#include "src/logger/logger.h"
+#include "src/mapper_service/mapper_service.h"
+#include "src/spdk_wrapper/event_framework_api.h"
+namespace pos
 {
 BlockMapUpdateCompletion::BlockMapUpdateCompletion(
-    VolumeIoSmartPtr input, CallbackSmartPtr originCallback)
-: Event(EventFrameworkApi::IsReactorNow()),
+    VolumeIoSmartPtr input, CallbackSmartPtr originCallback,
+    function<bool(void)> IsReactorNow,
+    IVSAMap* iVSAMap, EventScheduler* eventScheduler, CallbackSmartPtr writeCompletionEvent,
+    IBlockAllocator* iBlockAllocator, IWBStripeAllocator* iWBStripeAllocator, VsaRangeMaker* vsaRangeMaker)
+: Event(IsReactorNow()),
   volumeIo(input),
-  mapper(MapperSingleton::Instance()),
-  originCallback(originCallback)
+  originCallback(originCallback),
+  iVSAMap(iVSAMap),
+  eventScheduler(eventScheduler),
+  writeCompletionEvent(writeCompletionEvent),
+  iBlockAllocator(iBlockAllocator),
+  iWBStripeAllocator(iWBStripeAllocator),
+  vsaRangeMaker(vsaRangeMaker)
+{
+}
+
+BlockMapUpdateCompletion::BlockMapUpdateCompletion(VolumeIoSmartPtr inputVolumeIo,
+    CallbackSmartPtr originCallback)
+: BlockMapUpdateCompletion(
+      inputVolumeIo, originCallback, EventFrameworkApi::IsReactorNow,
+      MapperServiceSingleton::Instance()->GetIVSAMap(inputVolumeIo->GetArrayName()),
+      EventSchedulerSingleton::Instance(),
+      std::make_shared<WriteCompletion>(inputVolumeIo),
+      AllocatorServiceSingleton::Instance()->GetIBlockAllocator(inputVolumeIo->GetArrayName()),
+      AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(inputVolumeIo->GetArrayName()),
+      new VsaRangeMaker(inputVolumeIo->GetVolumeId(), ChangeSectorToBlock(inputVolumeIo->GetSectorRba()),
+          DivideUp(inputVolumeIo->GetSize(), BLOCK_SIZE), inputVolumeIo->IsGc(), inputVolumeIo->GetArrayName()))
 {
 }
 
 BlockMapUpdateCompletion::~BlockMapUpdateCompletion(void)
 {
+    if (nullptr != vsaRangeMaker)
+    {
+        delete vsaRangeMaker;
+        vsaRangeMaker = nullptr;
+    }
 }
 
 bool
@@ -59,17 +88,23 @@ BlockMapUpdateCompletion::Execute(void)
 {
     uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
     VirtualBlks targetVsaRange = {.startVsa = volumeIo->GetVsa(), .numBlks = blockCount};
-    BlkAddr rba = ChangeSectorToBlock(volumeIo->GetRba());
-    if (volumeIo->IsGc())
+    BlkAddr rba = ChangeSectorToBlock(volumeIo->GetSectorRba());
+    iVSAMap->SetVSAs(volumeIo->GetVolumeId(), rba, targetVsaRange);
+
+    StripeAddr lsidEntry = volumeIo->GetLsidEntry();
+    Stripe& stripe = _GetStripe(lsidEntry);
+    _UpdateReverseMap(stripe);
+
+    uint32_t vsaRangeCount = vsaRangeMaker->GetCount();
+    for (uint32_t vsaRangeIndex = 0; vsaRangeIndex < vsaRangeCount;
+         vsaRangeIndex++)
     {
-        mapper->SetVsaMapInternal(volumeIo->GetVolumeId(), rba, targetVsaRange);
-    }
-    else
-    {
-        mapper->SetVsaMap(volumeIo->GetVolumeId(), rba, targetVsaRange);
+        VirtualBlks& vsaRange = vsaRangeMaker->GetVsaRange(vsaRangeIndex);
+        iBlockAllocator->InvalidateBlks(vsaRange);
     }
 
-    WriteCompletion event(volumeIo);
+    iBlockAllocator->ValidateBlks(targetVsaRange);
+
     CallbackSmartPtr callee;
 
     if (originCallback == nullptr)
@@ -81,27 +116,50 @@ BlockMapUpdateCompletion::Execute(void)
         callee = originCallback;
     }
 
-    event.SetCallee(callee);
-    bool wrapupSuccessful = event.Execute();
+    writeCompletionEvent->SetCallee(callee);
+    bool wrapupSuccessful = writeCompletionEvent->Execute();
 
     if (unlikely(false == wrapupSuccessful))
     {
-        WriteCompletion* writeCompletion = new WriteCompletion(volumeIo);
-        if (likely(writeCompletion != nullptr))
-        {
-            writeCompletion->SetCallee(callee);
-            EventSmartPtr event(writeCompletion);
-            EventArgument::GetEventScheduler()->EnqueueEvent(event);
-        }
-        else
-        {
-            IBOF_TRACE_ERROR(static_cast<int>(IBOF_EVENT_ID::MAP_UPDATE_HANDLER_EVENT_ALLOCATE_FAIL),
-                "Failed to allocate write wrapup event");
-        }
+        writeCompletionEvent->SetCallee(callee);
+        eventScheduler->EnqueueEvent(writeCompletionEvent);
     }
     volumeIo = nullptr;
 
     return true;
 }
 
-} // namespace ibofos
+void
+BlockMapUpdateCompletion::_UpdateReverseMap(Stripe& stripe)
+{
+    VirtualBlkAddr startVsa = volumeIo->GetVsa();
+    uint32_t blocks = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
+    uint64_t startRba = ChangeSectorToBlock(volumeIo->GetSectorRba());
+    uint32_t startVsOffset = startVsa.offset;
+    uint32_t volumeId = volumeIo->GetVolumeId();
+
+    for (uint32_t blockIndex = 0; blockIndex < blocks; blockIndex++)
+    {
+        uint64_t vsOffset = startVsOffset + blockIndex;
+        BlkAddr targetRba = startRba + blockIndex;
+        stripe.UpdateReverseMap(vsOffset, targetRba, volumeId);
+    }
+}
+
+Stripe&
+BlockMapUpdateCompletion::_GetStripe(StripeAddr& lsidEntry)
+{
+    Stripe* foundStripe = iWBStripeAllocator->GetStripe(lsidEntry);
+
+    if (unlikely(nullptr == foundStripe))
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::WRCMP_INVALID_STRIPE;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
+        throw eventId;
+    }
+
+    return *foundStripe;
+}
+
+} // namespace pos

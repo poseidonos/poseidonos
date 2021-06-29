@@ -32,16 +32,19 @@
 
 #pragma once
 
+#include <string>
+
 #include "src/array/partition/partition.h"
 #include "src/include/address_type.h"
-#include "src/scheduler/callback.h"
+#include "src/event_scheduler/callback.h"
 
-namespace ibofos
+namespace pos
 {
+class IIOLocker;
 class ArrayUnlocking : public Callback
 {
 public:
-    ArrayUnlocking(PartitionType type, StripeId stripeId);
+    ArrayUnlocking(PartitionType type, StripeId stripeId, const std::string& arrayName, IIOLocker* inputLocker = nullptr);
     ~ArrayUnlocking(void) override;
 
 private:
@@ -49,5 +52,7 @@ private:
 
     PartitionType type;
     StripeId stripeId;
+    std::string arrayName;
+    IIOLocker* locker;
 };
-} // namespace ibofos
+} // namespace pos

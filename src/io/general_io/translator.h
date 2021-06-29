@@ -32,53 +32,57 @@
 
 #pragma once
 
-#include <mutex>
+#include <string>
 
-#include "src/array/partition/partition.h"
+#include "src/allocator/i_wbstripe_allocator.h"
 #include "src/include/address_type.h"
-#include "src/mapper/mapper.h"
+#include "src/include/partition_type.h"
 
-namespace ibofos
+namespace pos
 {
-class Array;
-
 class Translator
 {
 public:
     Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
-        bool isRead = false);
-    Translator(uint32_t volumeId, BlkAddr rba, bool isRead);
-    Translator(const VirtualBlkAddr& vsa);
-    PhysicalBlkAddr GetPba(uint32_t blockIndex);
-    PhysicalBlkAddr GetPba(void);
-    PhysicalEntries GetPhysicalEntries(void* mem, uint32_t blockCount);
-    StripeAddr GetLsidEntry(uint32_t blockIndex);
-    LsidRefResult GetLsidRefResult(uint32_t blockIndex);
-    bool IsUnmapped(void);
-    bool IsMapped(void);
-    VirtualBlkAddr GetVsa(void);
-    VirtualBlkAddr GetVsa(uint32_t blockIndex);
+        std::string& arrayName, bool isRead = false, IVSAMap* iVSAMap = nullptr,
+        IStripeMap* iStripeMap = nullptr, IWBStripeAllocator* iWBStripeAllocator = nullptr);
+    Translator(uint32_t volumeId, BlkAddr rba, std::string& arrayName, bool isRead);
+    Translator(const VirtualBlkAddr& vsa, std::string& arrayName);
+    virtual ~Translator(void)
+    {
+    }
+    virtual PhysicalBlkAddr GetPba(uint32_t blockIndex);
+    virtual PhysicalBlkAddr GetPba(void);
+    virtual PhysicalEntries GetPhysicalEntries(void* mem, uint32_t blockCount);
+    virtual StripeAddr GetLsidEntry(uint32_t blockIndex);
+    virtual LsidRefResult GetLsidRefResult(uint32_t blockIndex);
+    virtual bool IsUnmapped(void);
+    virtual bool IsMapped(void);
+    virtual VirtualBlkAddr GetVsa(uint32_t blockIndex);
 
 private:
     static const uint32_t ONLY_ONE = 1;
 
-    Mapper* mapper;
+    IVSAMap* iVSAMap{nullptr};
+    IStripeMap* iStripeMap{nullptr};
+    IWBStripeAllocator* iWBStripeAllocator{nullptr};
     BlkAddr startRba;
     uint32_t blockCount;
     VsaArray vsaArray;
     VirtualBlkAddr lastVsa;
     StripeAddr lastLsidEntry;
     std::array<LsidRefResult, MAX_PROCESSABLE_BLOCK_COUNT> lsidRefResults;
-    Array* arrayManager;
     bool isRead;
     uint32_t volumeId;
     static thread_local StripeId recentVsid;
     static thread_local StripeId recentLsid;
+    static thread_local std::string recentArrayName;
 
     LogicalBlkAddr _GetLsa(uint32_t blockIndex);
     LsidRefResult _GetLsidRefResult(BlkAddr rba, VirtualBlkAddr& vsa);
     void _CheckSingleBlock(void);
     PartitionType _GetPartitionType(uint32_t blockIndex);
+    std::string arrayName;
 };
 
-} // namespace ibofos
+} // namespace pos

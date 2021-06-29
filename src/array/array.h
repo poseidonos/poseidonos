@@ -36,115 +36,114 @@
 #include <list>
 #include <string>
 
-#include "src/array/array_state.h"
-#include "src/array/config/array_config.h"
+#include "array_interface.h"
 #include "src/array/device/array_device_manager.h"
-#include "src/array/meta/array_meta_manager.h"
+#include "src/array/meta/array_meta.h"
 #include "src/array/partition/partition_manager.h"
+#include "src/array/rebuild/i_array_rebuilder.h"
+#include "src/array/service/io_device_checker/i_device_checker.h"
+#include "src/array/state/array_state.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/array_models/interface/i_mount_sequence.h"
+#include "src/bio/ubio.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/include/address_type.h"
-#include "src/io/general_io/ubio.h"
-#include "src/lib/singleton.h"
+#include "src/include/array_config.h"
 
+#ifdef _ADMIN_ENABLED
+#include "src/array/device/i_array_device_manager.h"
+#endif
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 class DeviceManager;
 class MbrManager;
-class ArrayState;
 class UBlockDevice;
+class IAbrControl;
+class IStateControl;
 
-class Array
+class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker
 {
-    friend class WbtCmdHandler;
+    friend class ParityLocationWbtCommand;
+    friend class GcWbtCommand;
 
 public:
-    Array(void);
+    Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState);
+    Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr,
+        PartitionManager* ptnMgr, ArrayState* arrayState, ArrayInterface* arrayInterface, EventScheduler* eventScheduler);
     virtual ~Array(void);
-    bool ArrayExist(string arrayName);
-    int Load(string arrayName);
-    int Create(DeviceSet<string> nameSet, string arrayName, string metaRaidType = "RAID1", string dataRaidType = "RAID5");
-    int Mount(void);
-    int Unmount(void);
-    int Delete(string arrayName);
-    int AddSpare(string devName, string arrayName);
-    int RemoveSpare(string devName, string arrayName);
-    int DetachDevice(UBlockDevice* uBlock);
-    DeviceSet<string> GetDevNames(void);
-    string
-    GetArrayName(void)
-    {
-        return name_;
-    };
-    string
-    GetMetaRaidType(void)
-    {
-        return metaRaidtype_;
-    };
-    string
-    GetDataRaidType(void)
-    {
-        return dataRaidtype_;
-    };
-    void
-    SetArrayName(string arrayName)
-    {
-        name_ = arrayName;
-    };
-    void
+    virtual int Init(void) override;
+    virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
+    virtual void Flush(void) override;
+    virtual int Load(void);
+    virtual int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
+    virtual int Delete(void);
+    virtual int AddSpare(string devName);
+    virtual int RemoveSpare(string devName);
+    virtual int DetachDevice(UblockSharedPtr uBlock);
+    virtual void MountDone(void);
+    virtual int CheckUnmountable(void);
+    virtual int CheckDeletable(void);
+    virtual void
     SetMetaRaidType(string raidType)
     {
-        metaRaidtype_ = raidType;
+        meta_.metaRaidType = raidType;
     };
-    void
+    virtual void
     SetDataRaidType(string raidType)
     {
-        dataRaidtype_ = raidType;
+        meta_.dataRaidType = raidType;
     };
 
-    virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type);
-    int Translate(const PartitionType, PhysicalBlkAddr&, const LogicalBlkAddr&);
-    int Convert(const PartitionType,
-        list<PhysicalWriteEntry>&,
-        const LogicalWriteEntry&);
-    string GetCurrentStateStr(void);
-
-    bool TryLock(PartitionType type, StripeId stripeId);
-    void Unlock(PartitionType type, StripeId stripeId);
-    void NotifyIbofosMounted();
-    int RebuildRead(UbioSmartPtr ubio);
-    int PrepareRebuild(ArrayDevice* target);
-    void Rebuild(ArrayDevice* target);
-    bool TriggerRebuild(ArrayDevice* target);
-    bool IsRecoverableDevice(ArrayDevice* target);
-    bool IsRecoverableDevice(ArrayDevice* target, ArrayDeviceState oldState);
-    void StopRebuilding();
-    uint32_t GetRebuildingProgress();
+    const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
+    DeviceSet<string> GetDevNames(void) override;
+    string GetName(void) override;
+    string GetMetaRaidType(void) override;
+    string GetDataRaidType(void) override;
+    string GetCreateDatetime(void) override;
+    string GetUpdateDatetime(void) override;
+    ArrayStateType GetState(void) override;
+    StateContext* GetStateCtx(void) override;
+    uint32_t GetRebuildingProgress(void) override;
+    bool IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
+    IArrayDevice* FindDevice(string devSn) override;
+    virtual bool TriggerRebuild(ArrayDevice* target);
+    virtual bool ResumeRebuild(ArrayDevice* target);
+#ifdef _ADMIN_ENABLED
+    IArrayDevMgr* GetArrayManager(void);
+#endif
 
 private:
-    int _LoadImpl(string arrayName);
+    int _LoadImpl(void);
     int _CreatePartitions(void);
+    void _DeletePartitions(void);
+    void _FormatMetaPartition(void);
     int _Flush(void);
-    int _ResumeRebuild(ArrayDevice* target);
-    void _RebuildDone(ArrayDevice* target, RebuildState result);
+    int _CheckRebuildNecessity(ArrayDevice* target);
+    void _RebuildDone(RebuildResult result);
     void _DetachSpare(ArrayDevice* target);
     void _DetachData(ArrayDevice* target);
+    void _RegisterService(void);
+    void _UnregisterService(void);
+    void _CheckRebuildNecessity(void);
+    void _ResetMeta(void);
 
-    string name_ = "";
-    string metaRaidtype_ = "";
-    string dataRaidtype_ = "";
-    ArrayState state_;
+    ArrayState* state = nullptr;
+    ArrayInterface* intf = nullptr;
+    PartitionManager* ptnMgr = nullptr;
+
+    ArrayMeta meta_;
+    string name_;
     pthread_rwlock_t stateLock;
-
-    ArrayMetaManager metaMgr_;
-    ArrayDeviceManager devMgr_;
-    PartitionManager ptnMgr_;
-
-    DeviceManager* sysDevMgr;
-    static const int LOCK_ACQUIRE_FAILED = -1;
+    ArrayDeviceManager* devMgr_;
+    DeviceManager* sysDevMgr = nullptr;
+    IArrayRebuilder* rebuilder = nullptr;
+    static const int LOCK_ACQUIRE_FAILED;
+    IAbrControl* abrControl = nullptr;
+    EventScheduler* eventScheduler = nullptr;
+    int shutdownFlag = 0;
 };
-
-using ArraySingleton = Singleton<Array>;
-
-} // namespace ibofos
+} // namespace pos
 #endif // ARRAY_H_

@@ -32,17 +32,19 @@
 
 #include "flush_pending_stripes.h"
 
-#include "src/allocator/allocator.h"
-#include "src/include/ibof_event_id.h"
+#include <iostream>
+#include <iomanip>
+
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
 FlushPendingStripes::FlushPendingStripes(PendingStripeList& pendingStripes,
-    Allocator* allocator, ReplayProgressReporter* reporter)
+    IWBStripeAllocator* wbStripeAllocator, ReplayProgressReporter* reporter)
 : ReplayTask(reporter),
   pendingStripes(pendingStripes),
-  allocator(allocator)
+  wbStripeAllocator(wbStripeAllocator)
 {
 }
 
@@ -64,26 +66,44 @@ FlushPendingStripes::GetNumSubTasks(void)
 int
 FlushPendingStripes::Start(void)
 {
+    int loggingEventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
+    std::ostringstream os;
+    os << "[ReplayTask] Flush pending stripes (num: " << pendingStripes.size() << ")";
+
+    POS_TRACE_DEBUG(loggingEventId, os.str());
+    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, loggingEventId, os.str());
+
     int ret = 0;
     for (auto pStripe : pendingStripes)
     {
-        ret = allocator->FlushStripe(pStripe->volumeId, pStripe->wbLsid, pStripe->tailVsa);
+        ret = wbStripeAllocator->ReconstructActiveStripe(pStripe->volumeId,
+            pStripe->wbLsid, pStripe->tailVsa);
         if (ret < 0)
         {
-            IBOF_TRACE_ERROR((int)IBOF_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH_FAILED,
-                "Failed to flush stripe, wb lsid {}, tail offset {}",
-                pStripe->wbLsid, pStripe->tailVsa.offset);
+            int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH_FAILED);
+            std::ostringstream os;
+            os << "Failed to reconstruct active stripe, wb lsid " << pStripe->wbLsid
+                << ", tail offset " << pStripe->tailVsa.offset;
+
+            POS_TRACE_DEBUG(eventId, os.str());
+            POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
         }
         else
         {
-            IBOF_TRACE_DEBUG((int)IBOF_EVENT_ID::JOURNAL_REPLAY_STRIPE,
-                "Request to flush stripe, wb lsid {}, tail offset {}",
-                pStripe->wbLsid, pStripe->tailVsa.offset);
+            wbStripeAllocator->FinishReconstructedStripe(pStripe->wbLsid, pStripe->tailVsa);
+
+            int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH);
+            std::ostringstream os;
+            os << "[Replay] Request to flush stripe, wb lsid " << pStripe->wbLsid
+                << ", tail offset " << pStripe->tailVsa.offset;
+
+            POS_TRACE_DEBUG(eventId, os.str());
+            POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
         }
     }
     reporter->SubTaskCompleted(GetId(), 1);
 
-    allocator->FlushFullActiveStripes();
+    wbStripeAllocator->FlushPendingActiveStripes();
     reporter->SubTaskCompleted(GetId(), 1);
     return ret;
 }
@@ -100,4 +120,4 @@ FlushPendingStripes::GetWeight(void)
     return 10;
 }
 
-} // namespace ibofos
+} // namespace pos

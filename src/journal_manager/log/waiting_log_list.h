@@ -35,7 +35,7 @@
 #include <list>
 #include <mutex>
 
-namespace ibofos
+namespace pos
 {
 class LogWriteContext;
 
@@ -45,14 +45,14 @@ public:
     WaitingLogList(void);
     virtual ~WaitingLogList(void);
 
-    void AddToList(LogWriteContext* context);
-    LogWriteContext* GetWaitingIo(void);
+    virtual void AddToList(LogWriteContext* context);
+    virtual LogWriteContext* GetWaitingIo(void);
 
-    bool IsEmpty(void);
+    virtual bool IsEmpty(void);
 
 private:
     std::mutex waitingListLock;
     std::list<LogWriteContext*> waitingList;
 };
 
-} // namespace ibofos
+} // namespace pos

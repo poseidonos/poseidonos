@@ -37,7 +37,7 @@
 #include <string>
 using namespace std;
 
-namespace ibofos_logger
+namespace pos_logger
 {
 class Deduplicator
 {
@@ -82,4 +82,4 @@ private:
     bool isEnabled = true;
     uint32_t sensitivity_ms = 20;
 };
-} // namespace ibofos_logger
+} // namespace pos_logger

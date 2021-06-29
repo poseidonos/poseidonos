@@ -30,15 +30,18 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "device_driver.h"
+#include "src/device/base/device_driver.h"
 
 #include <future>
 #include <thread>
 
 #define MOCK_DRIVER 1
 #define SLEEP_TIME (0)
+
+namespace pos
+{
 // Can change it to META_PAGE_SIZE_IN_BYTES
-const unsigned int PAGE_SIZE = ibofos::PageSize;
+const unsigned int PAGE_SIZE = pos::PageSize;
 
 /**
  * Single global instance of DeviceDriver class
@@ -49,7 +52,7 @@ const unsigned int PAGE_SIZE = ibofos::PageSize;
  * Fault tolerance layer will be used instead of this.
  */
 MssReturnCode
-DeviceDriver::SyncIO(ibofos::Ubio* ubio)
+DeviceDriver::SyncIO(pos::Ubio* ubio)
 {
     unsigned char* data;
     uint64_t lba;
@@ -65,7 +68,7 @@ DeviceDriver::SyncIO(ibofos::Ubio* ubio)
         return MssReturnCode::Failed;
     }
 
-    if (ubio->dir == ibofos::UbioDir::Write)
+    if (ubio->dir == pos::UbioDir::Write)
     {
         ramLock.lock();
         for (int i = 0; i < ubio->size / PAGE_SIZE; i++)
@@ -79,7 +82,7 @@ DeviceDriver::SyncIO(ibofos::Ubio* ubio)
         }
         ramLock.unlock();
     }
-    else if (ubio->dir == ibofos::UbioDir::Read)
+    else if (ubio->dir == pos::UbioDir::Read)
     {
         ramLock.lock();
         for (int i = 0; i < ubio->size / PAGE_SIZE; i++)
@@ -107,21 +110,21 @@ DeviceDriver::SyncIO(ibofos::Ubio* ubio)
  * @ubio request information
  */
 void
-DeviceDriver::_AsyncHandlerRead(ibofos::Ubio* ubio)
+DeviceDriver::_AsyncHandlerRead(pos::Ubio* ubio)
 {
     unsigned char* data;
 
     ramLock.lock();
 
     // As memory is already preallocated in beginning , so no pointer check
-    for (int i = 0; i < ubio->size / ibofos::PageSize; i++)
+    for (int i = 0; i < ubio->size / pos::PageSize; i++)
     {
         if (MssReturnCode::Failed == mssRamdisk->ReadPage(mediaType_, ubio->address + i, ubio->GetBuffer(i), 1))
         {
             ubio->error = 1;
         }
         /*data = dataMap[ubio->address + i];
-          memcpy( (char*) ubio->GetBuffer(i), (char*) data , ibofos::PageSize);
+          memcpy( (char*) ubio->GetBuffer(i), (char*) data , pos::PageSize);
           */
     }
 
@@ -139,14 +142,14 @@ DeviceDriver::_AsyncHandlerRead(ibofos::Ubio* ubio)
  * @ubio request information
  */
 void
-DeviceDriver::_AsyncHandlerWrite(ibofos::Ubio* ubio)
+DeviceDriver::_AsyncHandlerWrite(pos::Ubio* ubio)
 {
     unsigned char* data;
 
     ramLock.lock();
 
     // As memory is already preallocated in beginning , so no pointer check
-    for (int i = 0; i < ubio->size / ibofos::PageSize; i++)
+    for (int i = 0; i < ubio->size / pos::PageSize; i++)
     {
         if (MssReturnCode::Failed == mssRamdisk->ReadPage(mediaType_, ubio->address + i, ubio->GetBuffer(i), 1))
         {
@@ -166,7 +169,7 @@ DeviceDriver::_AsyncHandlerWrite(ibofos::Ubio* ubio)
 void
 DeviceDriver::_AsyncRequestHandler(void)
 {
-    ibofos::Ubio* request;
+    pos::Ubio* request;
     do
     {
         request = nullptr;
@@ -179,7 +182,7 @@ DeviceDriver::_AsyncRequestHandler(void)
         queueLock.unlock();
         if (request != nullptr)
         {
-            if (request->dir == ibofos::UbioDir::Read)
+            if (request->dir == pos::UbioDir::Read)
             {
                 _AsyncHandlerRead(request);
             }
@@ -199,12 +202,12 @@ DeviceDriver::_AsyncRequestHandler(void)
  *
  */
 MssReturnCode
-DeviceDriver::AsyncIO(ibofos::Ubio* ubio)
+DeviceDriver::AsyncIO(pos::Ubio* ubio)
 {
     // Make is look like this thread is submitting request to
     // other thread. So new thread is created on each request.
     // And control will be returned to caller function.
-    if (ubio->dir == ibofos::UbioDir::Read || ubio->dir == ibofos::UbioDir::Write)
+    if (ubio->dir == pos::UbioDir::Read || ubio->dir == pos::UbioDir::Write)
     {
         queueLock.lock();
         requestQueue.push(ubio);
@@ -266,3 +269,4 @@ DeviceDriver::~DeviceDriver(void)
     }
     quitThread = true;
 }
+} // namespace pos

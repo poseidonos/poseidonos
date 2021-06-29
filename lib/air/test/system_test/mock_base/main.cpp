@@ -8,8 +8,8 @@ int main(void)
 {
     printf("\n");
 
-    AIR_INITIALIZE(0);
-    AIR_ACTIVATE();
+    air_initialize(0);
+    air_activate();
 
     DummyIO dummy_io;
     dummy_io.Run();
@@ -32,8 +32,8 @@ int main(void)
     thr_process2.join();
     thr_complete.join();
 
-    AIR_DEACTIVATE();
-    AIR_FINALIZE();
+    air_deactivate();
+    air_finalize();
 
     printf("\n");
 

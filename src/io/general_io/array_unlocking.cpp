@@ -32,15 +32,23 @@
 
 #include "src/io/general_io/array_unlocking.h"
 
-#include "src/array/array.h"
+#include "src/array/service/array_service_layer.h"
+#include "src/include/branch_prediction.h"
 
-namespace ibofos
+namespace pos
 {
-ArrayUnlocking::ArrayUnlocking(PartitionType type, StripeId stripeId)
+ArrayUnlocking::ArrayUnlocking(PartitionType type, StripeId stripeId,
+    const std::string& arrayName, IIOLocker* inputLocker)
 : Callback(false),
   type(type),
-  stripeId(stripeId)
+  stripeId(stripeId),
+  arrayName(arrayName),
+  locker(inputLocker)
 {
+    if (likely(locker == nullptr))
+    {
+        locker = ArrayService::Instance()->Getter()->GetLocker();
+    }
 }
 
 ArrayUnlocking::~ArrayUnlocking(void)
@@ -50,8 +58,7 @@ ArrayUnlocking::~ArrayUnlocking(void)
 bool
 ArrayUnlocking::_DoSpecificJob(void)
 {
-    Array& sysArray = *ArraySingleton::Instance();
-    sysArray.Unlock(type, stripeId);
+    locker->Unlock(arrayName, stripeId);
     return true;
 }
-} // namespace ibofos
+} // namespace pos

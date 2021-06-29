@@ -1,7 +1,7 @@
 #!/bin/bash
 ibof_root="/home/ibof/ibofos"
-ibof_bin="/etc/ibofos/bin"
-ibof_conf="/etc/ibofos/conf"
+ibof_bin="/etc/pos/bin"
+ibof_conf="/etc/pos"
 target_ip=127.0.0.1
 target_type="VM"
 trtype="tcp"
@@ -29,7 +29,7 @@ printVariable()
     echo "Target IP : $target_ip"
     echo "Transport Type : $trtype"
     echo "Port Number : $port"
-    echo "iBoFOS Root : $ibof_root"
+    echo "PoseidonOS Root : $ibof_root"
     echo "Target Type : $target_type"
     echo "Config Option : $config_option"
     echo "Test Revision : $test_rev"
@@ -37,38 +37,37 @@ printVariable()
     echo "*****************************************************************"
 }
 
-processCheck()
+processKill()
 {
-    result=`sshpass -p bamboo ssh -tt root@$target_ip pgrep ibofos -c`
-    if [ $result -ne 0 ];
-    then
-        echo "ibofos already started before"
-        texecc $ibof_root/test/script/kill_ibofos.sh
-    fi
+    echo "Killing previously-running poseidonos..."
+    texecc $ibof_root/test/script/kill_poseidonos.sh
 }
 
 repositorySetup()
 {
+    echo "Setting git repository..."
     texecc git fetch -p
     texecc git clean -dff
     texecc rm -rf *
     texecc git reset --hard $test_rev
+    echo "Setting git repository done"
 }
 
 buildTest()
 {
+    texecc $ibof_root/script/pkgdep.sh
     texecc rm -rf /dev/shm/*
-    texecc rm $ibof_root/bin/ibofos
+    texecc rm $ibof_root/bin/poseidonos
 
     texecc ./configure $config_option
     texecc ./lib/build_ibof_lib.sh clean_ci
-    texecc ./lib/build_ibof_lib.sh ci
+    texecc ./lib/build_ibof_lib.sh perf_ci
     
     sshpass -p bamboo ssh -tt root@${target_ip} [[ -f $ibof_bin/ibofos_${test_rev} ]]
 
     if [ $? -eq 0 ];
     then
-        sshpass -p bamboo ssh -tt root@${target_ip} "cp $ibof_bin/ibofos_${test_rev} $ibof_root/bin/ibofos"
+        sshpass -p bamboo ssh -tt root@${target_ip} "cp $ibof_bin/ibofos_${test_rev} $ibof_root/bin/poseidonos"
         texecc $ibof_root/tool/cli/script/build_cli.sh
         texecc cp $ibof_root/tool/cli/bin/cli $ibof_root/bin
         echo "Binary Copied"
@@ -90,11 +89,11 @@ buildTest()
     fi
     
 
-    texecc rm $ibof_conf/ibofos.conf
+    texecc rm $ibof_conf/pos.conf
     texecc make install
     texecc make udev_install
 
-    sshpass -p bamboo ssh -tt root@${target_ip} [[ -f $ibof_root/bin/ibofos ]]
+    sshpass -p bamboo ssh -tt root@${target_ip} [[ -f $ibof_root/bin/poseidonos ]]
     if [ $? -eq 0 ]
     then
         echo "Build Success"
@@ -104,7 +103,7 @@ buildTest()
             texecc mkdir -p $ibof_bin
         fi
 
-        texecc cp $ibof_root/bin/ibofos $ibof_bin/ibofos_${test_rev}
+        texecc cp $ibof_root/bin/poseidonos $ibof_bin/ibofos_${test_rev}
     else
         echo "Build Failed"
         exit 1
@@ -118,7 +117,7 @@ setupTest()
 
     if [ $target_type == "VM" ]
     then
-        texecc cp $ibof_root/config/ibofos_for_vm_ci.conf $ibof_conf/ibofos.conf
+        texecc cp $ibof_root/config/ibofos_for_vm_ci.conf $ibof_conf/pos.conf
     fi
 
     texecc rmmod nvme_tcp
@@ -154,7 +153,7 @@ do
 done
 
 printVariable
-processCheck
+processKill
 repositorySetup
 buildTest
 setupTest

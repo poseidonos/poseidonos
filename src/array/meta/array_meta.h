@@ -36,10 +36,10 @@
 #include <string>
 
 #include "src/array/device/array_device.h"
-#include "src/array/device/device_set.h"
+#include "src/array_models/dto/device_set.h"
 #include "src/array/meta/device_meta.h"
 
-namespace ibofos
+namespace pos
 {
 class ArrayMeta
 {
@@ -48,8 +48,10 @@ public:
     string arrayName;
     string metaRaidType;
     string dataRaidType;
+    string createDatetime;
+    string updateDatetime;
 };
 
-} // namespace ibofos
+} // namespace pos
 
 #endif // ARRAY_META_H_

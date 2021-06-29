@@ -4,7 +4,7 @@
 #
 
 rootdir=$(readlink -f $(dirname $0))/../../../../
-spdk_dir=$rootdir/lib/spdk-19.10
+spdk_dir=$rootdir/lib/spdk
 NVMF_INITIATOR_APP=$spdk_dir/examples/nvme/fio_plugin/fio_plugin
 
 set -e

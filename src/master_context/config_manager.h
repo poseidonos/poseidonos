@@ -32,15 +32,17 @@
 
 #pragma once
 
+#include <rapidjson/document.h>
+
 #include <string>
 #include <vector>
 
-#include <rapidjson/document.h>
 #include "src/lib/singleton.h"
+#include "src/master_context/default_configuration.h"
 
 using namespace std;
 
-namespace ibofos
+namespace pos
 {
 enum ConfigType
 {
@@ -60,15 +62,19 @@ class ConfigManager
 {
 public:
     ConfigManager(void);
+    virtual ~ConfigManager(void)
+    {
+    }
 
-    int ReadFile(void);
-    int GetValue(string module, string key, void* value, ConfigType type);
+    virtual int ReadFile(void);
+    virtual int GetValue(string module, string key, void* value, ConfigType type);
 
 private:
     bool read = false;
     rapidjson::Document doc;
+    DefaultConfiguration defaultConfig;
 };
 
 using ConfigManagerSingleton = Singleton<ConfigManager>;
 
-} // namespace ibofos
+} // namespace pos

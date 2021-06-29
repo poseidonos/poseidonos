@@ -32,12 +32,14 @@
 
 #pragma once
 
-#include "../sequential_page_finder.h"
 #include "gtest/gtest.h"
 
-namespace ibofos
+#include "src/mapper/map/sequential_page_finder.h"
+#include "src/mapper/unit_test/mapper_testfixture.h"
+
+namespace pos
 {
-class SequentialPageFinderTest : public ::testing::Test
+class SequentialPageFinderTest : public MapperTestFixture
 {
 protected:
     void SetUp(void) override;
@@ -46,4 +48,4 @@ protected:
     void _AddPages(MpageSet set, MpageList& dest);
 };
 
-} // namespace ibofos
+} // namespace pos

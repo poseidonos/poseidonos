@@ -33,17 +33,18 @@
 #pragma once
 
 #include <stdint.h>
+#include <string>
 
-namespace ibofos
+namespace pos
 {
 class SpaceInfo
 {
 public:
-    static bool IsEnough(uint64_t size);
-    static uint64_t OPSize();
-    static uint64_t TotalCapacity();
-    static uint64_t SystemCapacity();
-    static uint64_t Used();
-    static uint64_t Remaining();
+    static bool IsEnough(std::string& arrayName, uint64_t size);
+    static uint64_t OPSize(std::string& arrayName);
+    static uint64_t TotalCapacity(std::string& arrayName);
+    static uint64_t SystemCapacity(std::string& arrayName);
+    static uint64_t Used(std::string& arrayName);
+    static uint64_t Remaining(std::string& arrayName);
 };
-} // namespace ibofos
+} // namespace pos

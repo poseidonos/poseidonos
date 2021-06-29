@@ -13,38 +13,35 @@ namespace lib
 {
 const uint32_t IDLE_THRESHOLD{5};
 const uint32_t MAX_PACKET_CNT_SIZE{10};
+const uint32_t TIMELAG_SIZE{100};
 
 struct Data
 {
     virtual ~Data(void)
     {
     }
-    uint32_t idle_count{0};
     uint32_t access{0};
 };
 
 struct AccData
 {
+    virtual ~AccData(void)
+    {
+    }
     uint32_t need_erase{0};
 };
 
 struct PerformanceData : public Data
 {
-    uint64_t bandwidth_read{0};
-    uint64_t bandwidth_write{0};
-    uint64_t bandwidth_total{0};
-    uint32_t iops_read{0};
-    uint32_t iops_write{0};
-    uint32_t iops_total{0};
+    uint64_t bandwidth{0};
+    uint32_t iops{0};
     std::map<uint32_t, uint32_t> packet_cnt;
 };
 
 struct AccPerformanceData : public AccData
 {
-    uint64_t bandwidth_read_avg{0};
-    uint64_t bandwidth_write_avg{0};
-    uint32_t iops_read_avg{0};
-    uint32_t iops_write_avg{0};
+    uint64_t bandwidth_avg{0};
+    uint32_t iops_avg{0};
     uint32_t time_spent{0};
 };
 
@@ -65,9 +62,7 @@ struct TimeLog
     };
 };
 
-const uint32_t SID_SIZE{10};
-const uint32_t TIME_LAG_SIZE{30};
-struct LatencySeqData
+struct LatencyData : public Data
 {
     std::vector<struct TimeLog> start_v;
     TimeLogState start_state{TimeLogState::IDLE};
@@ -84,20 +79,7 @@ struct LatencySeqData
     int32_t end_deadline{-45};
 };
 
-struct LatencyData : public Data
-{
-    LatencySeqData seq_data[SID_SIZE];
-};
-
-struct AccLatencySeqDataBucket
-{
-    uint32_t time_lag[TIME_LAG_SIZE]{
-        0,
-    };
-    uint32_t time_lag_size{0};
-};
-
-struct AccLatencySeqData
+struct AccLatencyData : public AccData
 {
     uint32_t mean{0};
     uint32_t min{0};
@@ -106,7 +88,6 @@ struct AccLatencySeqData
     uint32_t lower_quartile{0};
     uint32_t upper_quartile{0};
     uint32_t sample_count{0};
-    uint32_t bucket_count{0};
 
     uint32_t total_mean{0};
     uint32_t total_min{0};
@@ -117,21 +98,17 @@ struct AccLatencySeqData
     uint64_t total_sample_count{0};
     uint32_t overflow_warning{0};
 
-    std::vector<struct AccLatencySeqDataBucket*> bucket;
-};
-
-struct AccLatencyData : public AccData
-{
-    AccLatencySeqData seq_data[SID_SIZE];
+    uint64_t timelag[TIMELAG_SIZE]{
+        0,
+    };
 };
 
 struct QueueData : public Data
 {
-    uint32_t q_size{0};
     uint32_t num_req{0};
     uint64_t sum_depth{0};
     float depth_period_avg{0.0};
-    uint32_t depth_period_max{0};
+    uint64_t depth_period_max{0};
     uint32_t dummy_u32{0};
     uint32_t logging_point{0};
     uint32_t num_called{0};
@@ -144,8 +121,36 @@ struct QueueData : public Data
 struct AccQueueData : public AccData
 {
     uint32_t depth_total_max{0};
-    uint32_t time_spent{0};
+    uint32_t total_num_req{0};
     double depth_total_avg{0.0};
+};
+
+struct UtilizationData : public Data
+{
+    uint64_t usage{0};
+};
+
+struct AccUtilizationData : public AccData
+{
+    uint64_t total_usage{0};
+};
+
+struct CountData : public Data
+{
+    uint64_t count_positive{0};
+    uint64_t count_negative{0};
+    uint64_t num_req_positive{0};
+    uint64_t num_req_negative{0};
+    uint64_t count{0};
+    uint32_t negative{0};
+};
+
+struct AccCountData : public AccData
+{
+    uint64_t total_count{0};
+    uint64_t total_num_req_positive{0};
+    uint64_t total_num_req_negative{0};
+    uint32_t negative{0};
 };
 
 } // namespace lib

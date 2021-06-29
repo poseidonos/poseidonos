@@ -32,23 +32,26 @@
 
 #pragma once
 
+#include "src/bio/volume_io.h"
 #include "src/include/address_type.h"
-#include "src/io/general_io/volume_io.h"
 
-namespace ibofos
+namespace pos
 {
 class VolumeIo;
+class CallbackFactory;
 
-template<typename T>
 class Merger
 {
 public:
-    Merger(VolumeIoSmartPtr originalVolumeIo);
-    void Add(PhysicalBlkAddr& pba, VirtualBlkAddr& vsa, StripeAddr& lsidEntry,
+    Merger(VolumeIoSmartPtr originalVolumeIo, CallbackFactory* callbackFactory);
+    virtual ~Merger(void)
+    {
+    }
+    virtual void Add(PhysicalBlkAddr& pba, VirtualBlkAddr& vsa, StripeAddr& lsidEntry,
         uint32_t targetSize);
-    void Cut(void);
-    uint32_t GetSplitCount(void);
-    VolumeIoSmartPtr GetSplit(uint32_t index);
+    virtual void Cut(void);
+    virtual uint32_t GetSplitCount(void);
+    virtual VolumeIoSmartPtr GetSplit(uint32_t index);
 
 private:
     uint32_t mergingSize;
@@ -58,10 +61,11 @@ private:
     VolumeIoSmartPtr splitVolumeIo[MAX_PROCESSABLE_BLOCK_COUNT];
     uint32_t splitVolumeIoCount;
     VolumeIoSmartPtr originalVolumeIo;
+    CallbackFactory* callbackFactory;
 
     bool _IsMergable(PhysicalBlkAddr& pba, VirtualBlkAddr& vsa);
     void _Start(PhysicalBlkAddr& pba, VirtualBlkAddr& vsa,
         StripeAddr& lsidEntry, uint32_t targetSize);
 };
 
-} // namespace ibofos
+} // namespace pos

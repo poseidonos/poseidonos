@@ -32,62 +32,55 @@
 
 #include "array.h"
 
-namespace ibofos
+namespace pos
 {
-Array::Array(void)
-: metaMgr_(ArrayMetaManager(nullptr)),
-  devMgr_(ArrayDeviceManager(nullptr))
+Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
+: devMgr_(new ArrayDeviceManager(nullptr))
 {
-}
-
-bool
-Array::ArrayExist(string arrayName)
-{
-    return arrayName == name_;
 }
 
 int
-Array::Load(string arrayName)
+Array::Load()
 {
     return 0;
 }
 
 Array::~Array(void)
 {
+    delete devMgr_;
 }
 
 int
-Create(DeviceSet<string> nameSet)
+Array::Create(DeviceSet<string> nameSet, string dataRaidType)
 {
     return 0;
 }
 
 int
-Array::Mount(void)
+Array::Init(void)
+{
+    return 0;
+}
+
+void
+Array::Dispose(void)
+{
+}
+
+int
+Array::Delete()
 {
     return 0;
 }
 
 int
-Array::Unmount(void)
+Array::AddSpare(string spare)
 {
     return 0;
 }
 
 int
-Array::Delete(string arrayName)
-{
-    return 0;
-}
-
-int
-Array::AddSpare(string spare, string arrayName)
-{
-    return 0;
-}
-
-int
-Array::RemoveSpare(string devName, string arrayName)
+Array::RemoveSpare(string devName)
 {
     return 0;
 }
@@ -103,19 +96,6 @@ Array::GetSizeInfo(PartitionType type)
     return nullptr;
 }
 
-int
-Array::Translate(PartitionType type, PhysicalBlkAddr& dst, const LogicalBlkAddr& lsa)
-{
-    return 0;
-}
-
-int
-Array::Convert(PartitionType type, list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& entry)
-
-{
-    return 0;
-}
-
 DeviceSet<string>
 Array::GetDevNames()
 {
@@ -124,20 +104,9 @@ Array::GetDevNames()
 }
 
 int
-Array::DetachDevice(UBlockDevice* uBlock)
+Array::DetachDevice(UblockSharedPtr uBlock)
 {
     return 0;
 }
 
-void
-Array::Unlock(PartitionType type, StripeId stripeId)
-{
-}
-
-bool
-Array::TryLock(PartitionType type, StripeId stripeId)
-{
-    return true;
-}
-
-} // namespace ibofos
+} // namespace pos

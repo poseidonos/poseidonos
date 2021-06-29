@@ -36,11 +36,12 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "mfs.h"
-#include "mfs_fb_adapter.h"
-#include "mfs_msc_top.h"
+#include "metafs.h"
+#include "metafs_adapter_include.h"
 #include "mfs_ut_framework.h"
 
+namespace pos
+{
 class UtMetaFsTop : public ::testing::Test // public MetaFsUnitTestBase
 {
 public:
@@ -48,32 +49,34 @@ public:
     SetUp(void) override
     {
         MetaStorageMediaInfoList mediaInfoList;
-        MetaStorageMediaInfo ssdInfo;
+        MetaStorageInfo ssdInfo;
         ssdInfo.media = MetaStorageType::SSD;
         ssdInfo.mediaCapacity = (uint64_t)2 * 1024 * 1024 * 1024; // 5GB
         mediaInfoList.push_back(ssdInfo);
-        MetaStorageMediaInfo nvramInfo;
+        MetaStorageInfo nvramInfo;
         nvramInfo.media = MetaStorageType::NVRAM;
         nvramInfo.mediaCapacity = (uint64_t)512 * 1024 * 1024; // 1GB
         mediaInfoList.push_back(nvramInfo);
 
-        metaFsMgr.Init(mediaInfoList);
+        dummyArrayName = "POSArray";
+
+        metaFs.Init(dummyArrayName, mediaInfoList);
     }
     virtual void
     TearDown(void) override
     {
-        metaFsMgr.sys.Unmount();
+        metaFs.mgmt.UnmountSystem(dummyArrayName);
     }
 
     void
     EstablishFilesystem(void)
     {
-        MetaFsReturnCode<IBOF_EVENT_ID> rc_sys;
+        MetaFsReturnCode<POS_EVENT_ID> rc_sys;
 
-        rc_sys = metaFsMgr.sys.Create();
-        EXPECT_EQ(rc_sys.sc, IBOF_EVENT_ID::SUCCESS);
-        rc_sys = metaFsMgr.sys.Mount();
-        EXPECT_EQ(rc_sys.sc, IBOF_EVENT_ID::SUCCESS);
+        rc_sys = metaFs.mgmt.CreateSystem(dummyArrayName);
+        EXPECT_EQ(rc_sys.sc, POS_EVENT_ID::SUCCESS);
+        rc_sys = metaFs.mgmt.MountSystem(dummyArrayName);
+        EXPECT_EQ(rc_sys.sc, POS_EVENT_ID::SUCCESS);
     }
 
     const char*
@@ -85,14 +88,15 @@ public:
     void
     CreateDummyFile(uint64_t fileSize)
     {
-        IBOF_EVENT_ID sc;
-        MetaFsMoMReqMsg req;
-        req.reqType = MetaFsMoMReqType::FileCreate;
+        POS_EVENT_ID sc;
+        MetaFsFileControlRequest req;
+        req.reqType = MetaFsFileControlType::FileCreate;
         req.fileByteSize = fileSize;
         dummyFileName = GetDummyFileName();
         req.fileName = &dummyFileName;
+        req.arrayName = &dummyArrayName;
         sc = mvmTopMgr.ProcessNewReq(req);
-        EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
     }
 
     int
@@ -100,13 +104,14 @@ public:
     {
         int fd;
 
-        IBOF_EVENT_ID sc;
-        MetaFsMoMReqMsg req;
-        req.reqType = MetaFsMoMReqType::FileOpen;
+        POS_EVENT_ID sc;
+        MetaFsFileControlRequest req;
+        req.reqType = MetaFsFileControlType::FileOpen;
         std::string dummyFile(GetDummyFileName());
         req.fileName = &dummyFile;
+        req.arrayName = &dummyArrayName;
         sc = mvmTopMgr.ProcessNewReq(req);
-        EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
 
         fd = req.completionData.openfd;
 
@@ -116,16 +121,19 @@ public:
     void
     CloseDummyFile(uint32_t fd)
     {
-        IBOF_EVENT_ID sc;
-        MetaFsMoMReqMsg req;
-        req.reqType = MetaFsMoMReqType::FileClose;
+        POS_EVENT_ID sc;
+        MetaFsFileControlRequest req;
+        req.reqType = MetaFsFileControlType::FileClose;
         req.fd = fd;
+        req.arrayName = &dummyArrayName;
         sc = mvmTopMgr.ProcessNewReq(req);
-        EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
     }
 
 private:
     std::string dummyFileName;
+    std::string dummyArrayName;
 };
+} // namespace pos
 
 #endif // __UT_MFS_TOP_BASE_H__

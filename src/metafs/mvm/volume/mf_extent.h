@@ -32,14 +32,16 @@
 
 #pragma once
 
-#include "mfs_common.h"
+#include "metafs_common.h"
 
-class MetaFileExtentContent
+namespace pos
+{
+class MetaFileExtent
 {
 public:
-    MetaFileExtentContent(void);
-    MetaFileExtentContent(MetaLpnType startLpn, MetaLpnType count);
-    bool operator<(const MetaFileExtentContent& a);
+    MetaFileExtent(void);
+    MetaFileExtent(MetaLpnType startLpn, MetaLpnType count);
+    bool operator<(const MetaFileExtent& a);
     MetaLpnType GetStartLpn(void);
     void SetStartLpn(MetaLpnType lpn);
     MetaLpnType GetCount(void);
@@ -49,3 +51,4 @@ private:
     MetaLpnType startLpn;
     MetaLpnType count;
 };
+} // namespace pos

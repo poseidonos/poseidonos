@@ -32,19 +32,31 @@
 
 #include "flush_completion.h"
 
-#include "src/allocator/allocator.h"
-#include "src/allocator/stripe.h"
-#include "src/allocator/stripe_put_event.h"
-#include "src/include/ibof_event_id.hpp"
+#include "src/allocator/event/stripe_put_event.h"
+#include "src/allocator/wb_stripe_manager/stripe.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
-#include "src/mapper/mapper.h"
-#include "src/scheduler/event_argument.h"
+#include "src/mapper_service/mapper_service.h"
 
-namespace ibofos
+namespace pos
 {
-FlushCompletion::FlushCompletion(Stripe* inputStripe)
+FlushCompletion::FlushCompletion(Stripe* stripe, std::string& arrayName)
+: FlushCompletion(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
+      EventSchedulerSingleton::Instance(), arrayName)
+{
+}
+
+FlushCompletion::FlushCompletion(Stripe* stripe,
+    IStripeMap* stripeMap,
+    EventScheduler* eventScheduler,
+    std::string& arrayName)
 : Event(true),
-  stripe(inputStripe)
+  stripe(stripe),
+  iStripeMap(stripeMap),
+  eventScheduler(eventScheduler),
+  arrayName(arrayName)
 {
 }
 
@@ -57,37 +69,35 @@ FlushCompletion::Execute()
 {
     bool wrapupSuccessful = true;
 
-    Mapper& mapper = *MapperSingleton::Instance();
-    StripeAddr userAreaStripeAddr = mapper.GetLSA(stripe->GetVsid());
-    bool userArea = mapper.IsInUserDataArea(userAreaStripeAddr);
+    StripeAddr userAreaStripeAddr = iStripeMap->GetLSA(stripe->GetVsid());
+    bool userArea = iStripeMap->IsInUserDataArea(userAreaStripeAddr);
 
-    IBOF_EVENT_ID eventId =
-        IBOF_EVENT_ID::FLUSH_DEBUG_COMPLETION;
-    IBOF_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, static_cast<int>(eventId),
-        IbofEventId::GetString(eventId), stripe->GetVsid(),
+    POS_EVENT_ID eventId =
+        POS_EVENT_ID::FLUSH_DEBUG_COMPLETION;
+    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, static_cast<int>(eventId),
+        PosEventId::GetString(eventId), stripe->GetVsid(),
         userAreaStripeAddr.stripeId,
         static_cast<uint32_t>(userArea));
 
     if (likely(true == userArea))
     {
         StripeId nvmStripeId = stripe->GetWbLsid();
-        StripePutEvent event(*stripe, nvmStripeId);
+        StripePutEvent event(*stripe, nvmStripeId, arrayName);
 
         bool done = event.Execute();
 
         if (false == done)
         {
-            EventSmartPtr eventForSchedule(
-                new StripePutEvent(*stripe, nvmStripeId));
-            EventArgument::GetEventScheduler()->EnqueueEvent(eventForSchedule);
+            EventSmartPtr eventForSchedule(new StripePutEvent(*stripe, nvmStripeId, arrayName));
+            eventScheduler->EnqueueEvent(eventForSchedule);
         }
     }
     else
     {
-        IBOF_EVENT_ID eventId =
-            IBOF_EVENT_ID::FLUSH_WRAPUP_STRIPE_NOT_IN_USER_AREA;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId), stripe->GetVsid());
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::FLUSH_WRAPUP_STRIPE_NOT_IN_USER_AREA;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId), stripe->GetVsid());
 
         wrapupSuccessful = false;
     }
@@ -95,4 +105,4 @@ FlushCompletion::Execute()
     return wrapupSuccessful;
 }
 
-} // namespace ibofos
+} // namespace pos

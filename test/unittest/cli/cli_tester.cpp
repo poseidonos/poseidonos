@@ -3,7 +3,7 @@
 #include "tool/cli_client/cli_client.h"
 #include "request.h"
 
-using namespace ibofos_cli;
+using namespace pos_cli;
 
 static CLIClient *fake_mtool;
 static Request request;

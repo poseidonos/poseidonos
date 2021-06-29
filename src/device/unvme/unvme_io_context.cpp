@@ -32,7 +32,7 @@
 
 #include "unvme_io_context.h"
 
-namespace ibofos
+namespace pos
 {
 UnvmeIOContext::UnvmeIOContext(UnvmeDeviceContext* inputDevCtx,
     UbioSmartPtr inputUbio, uint32_t inputRetry,
@@ -72,4 +72,4 @@ UnvmeIOContext::IsAdminCommand(void)
     return adminCommand;
 }
 
-} // namespace ibofos
+} // namespace pos

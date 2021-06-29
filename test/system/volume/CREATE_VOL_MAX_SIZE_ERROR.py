@@ -7,11 +7,13 @@ sys.path.append("../lib/")
 sys.path.append("../array/")
 
 import json_parser
-import ibofos
+import pos
 import cli
 import test_result
-import ibofos_constant
-import MOUNT_ARRAY_BASIC_1
+import pos_constant
+import MOUNT_ARRAY_BASIC
+
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
 
 def clear_result():
     if os.path.exists( __file__ + ".result"):
@@ -25,16 +27,15 @@ def set_result(detail):
 
 def execute():
     clear_result()
-    MOUNT_ARRAY_BASIC_1.execute()
-    out = cli.get_ibofos_info()
-    data = json.loads(out)
-    capacity = data['Response']['info']['capacity']
+    MOUNT_ARRAY_BASIC.execute()
+    out = cli.array_info(ARRAYNAME)
+    capacity = json_parser.get_capacity(out)
     print("capa: " + str(capacity))
-    size = capacity + ibofos_constant.SIZE_1GB
-    out = cli.create_volume("vol1", str(size), "", "", "")
+    size = capacity + pos_constant.SIZE_1GB
+    out = cli.create_volume("vol1", str(size), "", "", ARRAYNAME)
     return out
 
 if __name__ == "__main__":
     out = execute()
     set_result(out)
-    ibofos.kill_ibofos()
+    pos.kill_pos()

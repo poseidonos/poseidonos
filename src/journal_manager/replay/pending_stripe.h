@@ -36,7 +36,7 @@
 
 #include "src/include/address_type.h"
 
-namespace ibofos
+namespace pos
 {
 struct PendingStripe
 {
@@ -54,4 +54,4 @@ struct PendingStripe
 
 using PendingStripeList = std::vector<PendingStripe*>;
 
-} // namespace ibofos
+} // namespace pos

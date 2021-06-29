@@ -31,7 +31,10 @@
  */
 
 #pragma once
-
+#include <functional>
+#include "src/metafs/mim/mim_state.h"
+namespace pos
+{
 class MpioStateExecuteEntry
 {
 public:
@@ -67,3 +70,4 @@ private:
     MpAioStateHandler handler;
     MpAioState expNextState;
 };
+} // namespace pos

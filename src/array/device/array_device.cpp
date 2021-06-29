@@ -36,87 +36,52 @@
 
 #include <tuple>
 
-#include "src/device/ublock_device.h"
-#include "src/include/ibof_event_id.h"
+#include "src/device/base/ublock_device.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-namespace ibofos
+namespace pos
 {
-ArrayDevice::ArrayDevice(UBlockDevice* uBlock,
+ArrayDevice::ArrayDevice(UblockSharedPtr uBlock,
     ArrayDeviceState state)
 : uBlock(uBlock),
-  pendingIo(0),
   state(state)
 {
-    pthread_rwlock_init(&stateLock, nullptr);
-};
+}
 
 ArrayDevice::~ArrayDevice(void)
 {
 }
 
-std::tuple<bool, ArrayDeviceState>
-ArrayDevice::GetStatusAndAddPendingIo(bool isWrite)
+UblockSharedPtr
+ArrayDevice::GetUblock(void)
 {
-    pthread_rwlock_rdlock(&stateLock);
-    bool increased = false;
-    ArrayDeviceState currState = state;
-    if (state == ArrayDeviceState::NORMAL || (isWrite && state == ArrayDeviceState::REBUILD))
-    {
-        pendingIo++;
-        increased = true;
-    }
-
-    pthread_rwlock_unlock(&stateLock);
-
-    return std::make_tuple(increased, currState);
+    return uBlock;
 }
 
-bool
-ArrayDevice::TryRemoveUblock(void)
+UBlockDevice*
+ArrayDevice::GetUblockPtr(void)
 {
-    pthread_rwlock_rdlock(&stateLock);
-    if (state != ArrayDeviceState::NORMAL && _IsPendingIoZero() == false)
-    {
-        pthread_rwlock_unlock(&stateLock);
-        return false;
-    }
-    IBOF_TRACE_INFO((int)IBOF_EVENT_ID::ARRAY_DEVICE_REMOVED,
-        "Device {} is removed",
-        uBlock->GetName());
-    uBlock = nullptr;
-    pthread_rwlock_unlock(&stateLock);
-    return true;
+    return uBlock.get();
 }
 
 void
-ArrayDevice::RemovePendingIo(void)
+ArrayDevice::SetUblock(UblockSharedPtr uBlock)
 {
-    pendingIo--;
-}
-
-bool
-ArrayDevice::_IsPendingIoZero(void)
-{
-    bool isZero = (pendingIo == 0);
-    return isZero;
+    this->uBlock = uBlock;
 }
 
 ArrayDeviceState
 ArrayDevice::GetState(void)
 {
-    pthread_rwlock_rdlock(&stateLock);
     ArrayDeviceState retStatus = state;
-    pthread_rwlock_unlock(&stateLock);
     return retStatus;
 }
 
 void
 ArrayDevice::SetState(ArrayDeviceState input)
 {
-    pthread_rwlock_wrlock(&stateLock);
     state = input;
-    pthread_rwlock_unlock(&stateLock);
 }
 
-} // namespace ibofos
+} // namespace pos

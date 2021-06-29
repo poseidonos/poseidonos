@@ -39,11 +39,13 @@
 #define TEST_DESCRIPTION(desc) \
     RecordProperty("Description", desc);
 
+namespace pos
+{
 class UtMetaFsTopFunctionalPositive : public UtMetaFsTop
 {
 public:
-    FileFDType CreateFileAndOpen(std::string& fileName, FileSizeType fileSize);
-    void UnmountFilesystem(void);
+    FileDescriptorType CreateFileAndOpen(std::string& fileName, string& arrayName, FileSizeType fileSize);
+    void UnmountFilesystem(std::string& arrayName);
 };
 
 class UtMetaFsTopFunctionalNegative : public UtMetaFsTop
@@ -53,7 +55,8 @@ public:
 };
 
 extern int Sequential_data_pattern_gen(void);
-extern void WriteDataAndClose(FileFDType fd, FileSizeType startOffset, FileSizeType byteSize, void* wBuf);
+extern void WriteDataAndClose(FileDescriptorType fd, string arrayName, FileSizeType startOffset, FileSizeType byteSize, void* wBuf);
 extern void DumpMetaBuffer(const char* fileName, const void* buf, FileSizeType byteSize);
-extern bool CheckDataPersistency(std::string fileName, FileSizeType ioOffset, FileSizeType ioByteSize, const void* wBuf);
+extern bool CheckDataPersistency(string fileName, string arrayName, FileSizeType ioOffset, FileSizeType ioByteSize, const void* wBuf);
 extern bool VerifyData(const void* wBuf, const void* rBuf, FileSizeType byteSize);
+} // namespace pos

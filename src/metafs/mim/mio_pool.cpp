@@ -34,12 +34,14 @@
 
 #include <vector>
 
-#include "mfs_common.h"
+#include "metafs_common.h"
 
+namespace pos
+{
 MioPool::MioPool(MpioPool* mpioPool, uint32_t poolSize)
 {
     assert(mpioPool != nullptr && poolSize != 0);
-    MFS_TRACE_DEBUG((int)IBOF_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "MioPool poolsize={}", poolSize);
 
     while (poolSize-- != 0)
@@ -91,3 +93,4 @@ MioPool::_FreeAllMioinPool(void)
         *itr = nullptr;
     }
 }
+} // namespace pos

@@ -32,7 +32,7 @@
 
 #include "device_meta.h"
 
-namespace ibofos
+namespace pos
 {
 DeviceMeta::DeviceMeta(const DeviceMeta& deviceMeta)
 : uid(deviceMeta.uid),
@@ -60,4 +60,4 @@ DeviceMeta::operator=(const DeviceMeta deviceMeta)
     return *this;
 }
 
-} // namespace ibofos
+} // namespace pos

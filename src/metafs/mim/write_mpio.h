@@ -34,6 +34,8 @@
 
 #include "mpio.h"
 
+namespace pos
+{
 class WriteMpio : public Mpio
 {
 public:
@@ -59,5 +61,5 @@ private:
     MetaLpnType currLpn;
     void* prevBuf;
     void* currBuf;
-    CompMDPageGenClass* compMdPageGenHelper;
 };
+} // namespace pos

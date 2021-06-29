@@ -33,34 +33,45 @@
 #pragma once
 
 #include "../log/waiting_log_list.h"
+#include "../log_buffer/buffer_write_done_notifier.h"
 #include "src/meta_file_intf/async_context.h"
 
-namespace ibofos
+namespace pos
 {
 class BufferOffsetAllocator;
 class LogWriteContext;
 class JournalLogBuffer;
+class JournalConfiguration;
+class LogWriteStatistics;
 
-class LogWriteHandler
+class LogWriteHandler : public LogBufferWriteDoneEvent
 {
 public:
     LogWriteHandler(void);
+    LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList* waitingList);
     virtual ~LogWriteHandler(void);
 
-    void Init(BufferOffsetAllocator* allocator, JournalLogBuffer* buffer);
+    virtual void Init(BufferOffsetAllocator* allocator, JournalLogBuffer* buffer,
+        JournalConfiguration* config);
 
-    int AddLog(LogWriteContext* context);
+    virtual int AddLog(LogWriteContext* context);
     void LogWriteDone(AsyncMetaFileIoCtx* ctx);
 
-    void StartWaitingIos(void);
+    virtual void LogFilled(int logGroupId, MapPageList& dirty) override;
+    virtual void LogBufferReseted(int logGroupId) override;
 
 private:
     int _AddLogInternal(LogWriteContext* context);
+    void _StartWaitingIos(void);
 
     JournalLogBuffer* logBuffer;
     BufferOffsetAllocator* bufferAllocator;
 
-    WaitingLogList waitingList;
+    LogWriteStatistics* logWriteStats;
+    WaitingLogList* waitingList;
+
+    std::atomic<uint64_t> numIosRequested;
+    std::atomic<uint64_t> numIosCompleted;
 };
 
-} // namespace ibofos
+} // namespace pos

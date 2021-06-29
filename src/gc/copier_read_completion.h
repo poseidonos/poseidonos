@@ -38,9 +38,9 @@
 
 #include "src/gc/victim_stripe.h"
 #include "src/gc/copier_meta.h"
-#include "src/scheduler/callback.h"
+#include "src/event_scheduler/callback.h"
 
-namespace ibofos
+namespace pos
 {
 class CopierReadCompletion : public Callback
 {
@@ -54,12 +54,18 @@ public:
 
 private:
     bool _DoSpecificJob(void) override;
+    void _MemCopyValidData(Stripe* stripe, uint32_t offset, BlkInfo blkInfo);
+    void _MemCopyValidData(GcWriteBuffer* dataBuffer, uint32_t offset, BlkInfo blkInfo);
 
     VictimStripe* victimStripe;
     uint32_t listIndex;
     void* buffer;
     CopierMeta* meta;
     StripeId stripeId;
+    uint32_t offset = 0;
+
+    uint32_t blkCnt;
+    uint32_t allocatedCnt;
 };
 
-} // namespace ibofos
+} // namespace pos

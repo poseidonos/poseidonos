@@ -35,35 +35,34 @@
 #include <atomic>
 #include <mutex>
 
-#include "src/mapper/mpage_info.h"
+#include "src/allocator/i_context_manager.h"
+#include "src/journal_manager/checkpoint/checkpoint_status.h"
+#include "src/mapper/i_map_flush.h"
+#include "src/mapper/include/mpage_info.h"
 
-namespace ibofos
+namespace pos
 {
-enum CheckpointStatus
-{
-    INIT,
-    STARTED,
-    WAITING_FOR_FLUSH_DONE,
-    COMPLETED,
-};
 
-class Mapper;
-class Allocator;
 class CheckpointObserver;
 
 class CheckpointHandler
 {
 public:
+    CheckpointHandler(void);
     explicit CheckpointHandler(CheckpointObserver* observer);
+    CheckpointHandler(CheckpointObserver* observer, int numMapsToFlush, int numMapsFlushed);
     virtual ~CheckpointHandler(void) = default;
 
-    void SetMapperToUse(Mapper* mapperToUse);
-    void SetAllocatorToUse(Allocator* allocatorToUse);
+    virtual void Init(IMapFlush* mapFlush, IContextManager* contextManer);
 
-    int Start(MapPageList pendingDirtyPages);
-    int FlushCompleted(int metaId);
+    virtual int Start(MapPageList pendingDirtyPages);
+    virtual int FlushCompleted(int metaId);
+
+    virtual CheckpointStatus GetStatus(void);
 
 private:
+    void _InitializeExternalModuleReferences(void);
+
     bool _IncreaseNumMapsFlushed(void);
     void _TryToComplete(void);
     void _Reset(void);
@@ -72,16 +71,14 @@ private:
 
     static const int ALLOCATOR_META_ID = 1000;
 
-    Mapper* mapper;
-    Allocator* allocator;
+    IMapFlush* mapFlush;
+    IContextManager* contextManager;
 
     CheckpointObserver* obs;
 
     std::atomic<CheckpointStatus> status;
-
-    std::mutex mapFlushCountLock;
-    int numMapsToFlush;
-    int numMapsFlushed;
+    std::atomic<int> numMapsToFlush;
+    std::atomic<int> numMapsFlushed;
 
     std::atomic<bool> allocatorMetaFlushCompleted;
     std::atomic<bool> mapFlushCompleted;
@@ -89,4 +86,4 @@ private:
     std::mutex completionLock;
 };
 
-} // namespace ibofos
+} // namespace pos

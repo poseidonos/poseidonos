@@ -33,17 +33,14 @@
 #include "mim_func_positive_test.h"
 
 #include <algorithm>
-
+#include <string>
 #include "meta_io_manager.h"
-#include "mfs_io_config.h"
+#include "metafs_config.h"
 
-// #include "gmock/gmock.h"
-// #include "mvm_top_mock.h"
-// using ::testing::AtLeast;
-// using ::testing::Return;
-
-// 1. Check if MFS status is running  and storage system is ready to execute I/O.
-// MetaFsTopMgrClass <- MDI/MIM/MSC/MVM top mgr
+namespace pos
+{
+// 1. Check if MFS status is running  and storage mgmt is ready to execute I/O.
+// MetaFsManagerBase <- MDI/MIM/MSC/MVM top mgr
 TEST_F(UtMIMFunctionalPositive, CheckModuleReady)
 {
     bool ret;
@@ -54,156 +51,166 @@ TEST_F(UtMIMFunctionalPositive, CheckModuleReady)
 // 2. Full IO (4032B) Sync. Read Operation at SSD
 TEST_F(UtMIMFunctionalPositive, ProcessNewReq_FullRead)
 {
-    FileFDType fd;
+    FileDescriptorType fd;
     FileSizeType fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100; // 400KB
+    std::string arrayName = "POSArray";
 
     // dummy file create & open
-    CreateDummyFile(fileSize);
-    fd = OpenDummyFile();
+    CreateDummyFile(fileSize, arrayName);
+    fd = OpenDummyFile(arrayName);
 
-    MetaFsIoReqMsg req;
+    MetaFsIoRequest req;
 
     req.fd = fd;
-    req.ioMode = MetaIoModeEnum::Sync;
-    req.reqType = MetaIoReqTypeEnum::Read;
+    req.ioMode = MetaIoMode::Sync;
+    req.reqType = MetaIoRequestType::Read;
     req.targetMediaType = MetaStorageType::SSD;
     req.isFullFileIo = true;
+    req.arrayName = arrayName;
     req.buf = malloc(fileSize); // Need to prepare sufficient buffer to read full file
 
-    IBOF_EVENT_ID sc;
+    POS_EVENT_ID sc;
     sc = metaIoMgr.ProcessNewReq(req);
     free(req.buf);
 
-    EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
 }
 
 // 3. Full IO (4032B) Sync, Write operation at SSD
 TEST_F(UtMIMFunctionalPositive, ProcessNewReq_FullWrite)
 {
-    FileFDType fd = 0;
+    FileDescriptorType fd = 0;
     FileSizeType fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100; // 400KB
+    std::string arrayName = "POSArray";
 
-    CreateDummyFile(fileSize);
-    fd = OpenDummyFile();
+    CreateDummyFile(fileSize, arrayName);
+    fd = OpenDummyFile(arrayName);
 
-    MetaFsIoReqMsg req;
+    MetaFsIoRequest req;
 
     req.fd = fd;
-    req.ioMode = MetaIoModeEnum::Sync;
-    req.reqType = MetaIoReqTypeEnum::Write;
+    req.ioMode = MetaIoMode::Sync;
+    req.reqType = MetaIoRequestType::Write;
     req.targetMediaType = MetaStorageType::SSD;
     req.isFullFileIo = true;
+    req.arrayName = arrayName;
     req.buf = malloc(fileSize);
     memset(req.buf, 0x85, fileSize);
 
-    IBOF_EVENT_ID sc;
+    POS_EVENT_ID sc;
     sc = metaIoMgr.ProcessNewReq(req);
     free(req.buf);
 
-    EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
 }
 
 // 4. Aligned Partial IO Sync. Read
 TEST_F(UtMIMFunctionalPositive, ProcessNewReq_AlignedPartialRead)
 {
-    FileFDType fd = 0;
+    FileDescriptorType fd = 0;
     FileSizeType fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100; // 4KB * 100
+    std::string arrayName = "POSArray";
 
-    CreateDummyFile(fileSize);
-    fd = OpenDummyFile();
+    CreateDummyFile(fileSize, arrayName);
+    fd = OpenDummyFile(arrayName);
 
     FileSizeType dataChunkSize;
-    mvmTopMgr.GetDataChunkSize(fd, dataChunkSize);
+    mvmTopMgr.GetDataChunkSize(fd, arrayName, dataChunkSize);
 
     // Offset  ~ (offset + size)
     FileSizeType fileReadOffset = dataChunkSize * 20;
     FileSizeType fileReadSize = dataChunkSize * 1;
 
-    MetaFsIoReqMsg req;
+    MetaFsIoRequest req;
 
     req.fd = fd;
-    req.ioMode = MetaIoModeEnum::Sync;
-    req.reqType = MetaIoReqTypeEnum::Read;
+    req.ioMode = MetaIoMode::Sync;
+    req.reqType = MetaIoRequestType::Read;
     req.targetMediaType = MetaStorageType::SSD;
     req.byteOffsetInFile = fileReadOffset;
     req.byteSize = fileReadSize;
     req.isFullFileIo = false;
+    req.arrayName = arrayName;
     req.buf = malloc(fileReadSize);
 
-    IBOF_EVENT_ID sc;
-    sc = metaIoMgr.ProcessNewReq(req); // MetaIoMgr::_ProcessNewIoReq()
+    POS_EVENT_ID sc;
+    sc = metaIoMgr.ProcessNewReq(req); // MetaIoManager::_ProcessNewIoReq()
 
     free(req.buf);
 
-    EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
 }
 
 // 5. Unaligned Partial I/O Sync. Read
 TEST_F(UtMIMFunctionalPositive, ProcessNewReq_UnalignedPartialRead)
 {
-    FileFDType fd = 0;
+    FileDescriptorType fd = 0;
     FileSizeType fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 100; // 4KB * 100
+    std::string arrayName = "POSArray";
 
-    CreateDummyFile(fileSize);
-    fd = OpenDummyFile();
+    CreateDummyFile(fileSize, arrayName);
+    fd = OpenDummyFile(arrayName);
 
     FileSizeType dataChunkSize;
-    mvmTopMgr.GetDataChunkSize(fd, dataChunkSize);
+    mvmTopMgr.GetDataChunkSize(fd, arrayName, dataChunkSize);
 
     FileSizeType fileReadOffset = 4;
     FileSizeType fileReadSize = 128;
 
-    MetaFsIoReqMsg req;
+    MetaFsIoRequest req;
 
     req.fd = fd;
-    req.ioMode = MetaIoModeEnum::Sync;
-    req.reqType = MetaIoReqTypeEnum::Read;
+    req.ioMode = MetaIoMode::Sync;
+    req.reqType = MetaIoRequestType::Read;
     req.targetMediaType = MetaStorageType::SSD;
     req.byteOffsetInFile = fileReadOffset;
     req.byteSize = fileReadSize;
     req.isFullFileIo = false;
+    req.arrayName = arrayName;
     req.buf = malloc(fileReadSize);
 
-    IBOF_EVENT_ID sc;
-    sc = metaIoMgr.ProcessNewReq(req); // MetaIoMgr::_ProcessNewIoReq()
+    POS_EVENT_ID sc;
+    sc = metaIoMgr.ProcessNewReq(req); // MetaIoManager::_ProcessNewIoReq()
 
     free(req.buf);
 
-    EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
 }
 
 // 6. Aligned Patrial I/O Sync. Write
 TEST_F(UtMIMFunctionalPositive, ProcessNewReq_AlignedPartialWrite)
 {
-    FileFDType fd = 0;
+    FileDescriptorType fd = 0;
     FileSizeType fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 50; // 4KB * 50
+    std::string arrayName = "POSArray";
 
-    CreateDummyFile(fileSize);
-    fd = OpenDummyFile();
+    CreateDummyFile(fileSize, arrayName);
+    fd = OpenDummyFile(arrayName);
 
     FileSizeType dataChunkSize;
-    mvmTopMgr.GetDataChunkSize(fd, dataChunkSize);
+    mvmTopMgr.GetDataChunkSize(fd, arrayName, dataChunkSize);
 
     FileSizeType fileWriteOffset = dataChunkSize * 5;
     FileSizeType fileWriteSize = dataChunkSize * 15;
 
-    MetaFsIoReqMsg req;
+    MetaFsIoRequest req;
 
     req.fd = fd;
-    req.ioMode = MetaIoModeEnum::Sync;
-    req.reqType = MetaIoReqTypeEnum::Write;
+    req.ioMode = MetaIoMode::Sync;
+    req.reqType = MetaIoRequestType::Write;
     req.targetMediaType = MetaStorageType::SSD;
     req.byteOffsetInFile = fileWriteOffset;
     req.byteSize = fileWriteSize;
     req.isFullFileIo = false;
+    req.arrayName = arrayName;
     req.buf = malloc(fileWriteSize);
     memset(req.buf, 0x85, fileWriteSize);
 
-    IBOF_EVENT_ID sc;
-    sc = metaIoMgr.ProcessNewReq(req); // MetaIoMgr::_ProcessNewIoReq()
+    POS_EVENT_ID sc;
+    sc = metaIoMgr.ProcessNewReq(req); // MetaIoManager::_ProcessNewIoReq()
     free(req.buf);
 
-    EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
 }
 
 int
@@ -221,14 +228,15 @@ sequential_gen(void)
 ************************************************************/
 TEST_F(UtMIMFunctionalPositive, ProcessNewReq_PageWriteWithVerify)
 {
-    FileFDType fd = 0;
+    FileDescriptorType fd = 0;
     FileSizeType fileSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * 50; // 4KB * 50
+    std::string arrayName = "POSArray";
 
-    CreateDummyFile(fileSize);
-    fd = OpenDummyFile();
+    CreateDummyFile(fileSize, arrayName);
+    fd = OpenDummyFile(arrayName);
 
     FileSizeType dataChunkSize;
-    mvmTopMgr.GetDataChunkSize(fd, dataChunkSize);
+    mvmTopMgr.GetDataChunkSize(fd, arrayName, dataChunkSize);
 
     uint8_t* wBuf = (uint8_t*)calloc(1, fileSize);
     std::generate_n(wBuf, dataChunkSize, sequential_gen);
@@ -238,34 +246,36 @@ TEST_F(UtMIMFunctionalPositive, ProcessNewReq_PageWriteWithVerify)
     FileSizeType fileWriteOffset = dataChunkSize * 5;
     FileSizeType fileWriteSize = dataChunkSize;
 
-    MetaFsIoReqMsg req;
+    MetaFsIoRequest req;
 
     // Write in a file chunk size
     req.fd = fd;
-    req.ioMode = MetaIoModeEnum::Sync;
-    req.reqType = MetaIoReqTypeEnum::Write;
+    req.ioMode = MetaIoMode::Sync;
+    req.reqType = MetaIoRequestType::Write;
     req.targetMediaType = MetaStorageType::SSD;
     req.byteOffsetInFile = fileWriteOffset;
     req.byteSize = fileWriteSize;
     req.isFullFileIo = false;
+    req.arrayName = arrayName;
     req.buf = wBuf;
 
-    IBOF_EVENT_ID sc;
+    POS_EVENT_ID sc;
     sc = metaIoMgr.ProcessNewReq(req);
-    EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
 
     // Read in a file chunk size
     req.fd = fd;
-    req.ioMode = MetaIoModeEnum::Sync;
-    req.reqType = MetaIoReqTypeEnum::Read;
+    req.ioMode = MetaIoMode::Sync;
+    req.reqType = MetaIoRequestType::Read;
     req.targetMediaType = MetaStorageType::SSD;
     req.byteOffsetInFile = fileWriteOffset;
     req.byteSize = fileWriteSize; // same with read
     req.isFullFileIo = false;
+    req.arrayName = arrayName;
     req.buf = rBuf;
 
     sc = metaIoMgr.ProcessNewReq(req);
-    EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+    EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
 
     // data compare
     int ret = memcmp(wBuf, rBuf, fileWriteSize);
@@ -284,16 +294,17 @@ TEST_F(UtMIMFunctionalPositive, ProcessNewReq_PageWriteWithVerify)
     {
         FileSizeType partialReadByteSize = 512;
         req.fd = fd;
-        req.ioMode = MetaIoModeEnum::Sync;
-        req.reqType = MetaIoReqTypeEnum::Read;
+        req.ioMode = MetaIoMode::Sync;
+        req.reqType = MetaIoRequestType::Read;
         req.targetMediaType = MetaStorageType::SSD;
         req.byteOffsetInFile = fileWriteOffset;
         req.byteSize = partialReadByteSize; // same with read
         req.isFullFileIo = false;
+        req.arrayName = arrayName;
         req.buf = rBuf;
 
         sc = metaIoMgr.ProcessNewReq(req);
-        EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
         int ret = memcmp(wBuf + partialReadByteSize, rBuf + partialReadByteSize, partialReadByteSize);
         EXPECT_EQ(ret, 0);
 
@@ -309,16 +320,17 @@ TEST_F(UtMIMFunctionalPositive, ProcessNewReq_PageWriteWithVerify)
         FileSizeType partialReadByteSize = 512;
         FileSizeType byteShift = 50;
         req.fd = fd;
-        req.ioMode = MetaIoModeEnum::Sync;
-        req.reqType = MetaIoReqTypeEnum::Read;
+        req.ioMode = MetaIoMode::Sync;
+        req.reqType = MetaIoRequestType::Read;
         req.targetMediaType = MetaStorageType::SSD;
         req.byteOffsetInFile = fileWriteOffset + byteShift;
         req.byteSize = partialReadByteSize; // same with read
         req.isFullFileIo = false;
+        req.arrayName = arrayName;
         req.buf = rBuf;
 
         sc = metaIoMgr.ProcessNewReq(req);
-        EXPECT_EQ(sc, IBOF_EVENT_ID::SUCCESS);
+        EXPECT_EQ(sc, POS_EVENT_ID::SUCCESS);
 
         // data compare
         int ret = memcmp(wBuf + fileWriteOffset + byteShift,
@@ -335,3 +347,4 @@ TEST_F(UtMIMFunctionalPositive, ProcessNewReq_PageWriteWithVerify)
     free(wBuf);
     free(rBuf);
 }
+} // namespace pos

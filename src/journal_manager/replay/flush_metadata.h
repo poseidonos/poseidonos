@@ -31,17 +31,19 @@
  */
 
 #pragma once
-#include "replay_task.h"
 
-namespace ibofos
+#include "replay_task.h"
+#include "src/allocator/i_context_manager.h"
+#include "src/mapper/i_map_flush.h"
+
+namespace pos
 {
-class Mapper;
-class Allocator;
 
 class FlushMetadata : public ReplayTask
 {
 public:
-    FlushMetadata(Mapper* mapper, Allocator* allocator, ReplayProgressReporter* reporter);
+    FlushMetadata(IMapFlush* mapFlush, IContextManager* ctxManager,
+        ReplayProgressReporter* reporter);
     virtual ~FlushMetadata(void);
 
     virtual int Start(void) override;
@@ -50,7 +52,7 @@ public:
     virtual int GetNumSubTasks(void) override;
 
 private:
-    Mapper* mapper;
-    Allocator* allocator;
+    IMapFlush* mapFlush;
+    IContextManager* contextManager;
 };
-} // namespace ibofos
+} // namespace pos

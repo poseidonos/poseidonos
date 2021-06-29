@@ -33,21 +33,20 @@
 #include "src/io/backend_io/flush_read_completion.h"
 
 #include "src/include/branch_prediction.h"
-#include "src/include/ibof_event_id.hpp"
+#include "src/include/pos_event_id.hpp"
+#include "src/include/backend_event.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/io/backend_io/flush_submission.h"
 #include "src/logger/logger.h"
-#include "src/scheduler/event_argument.h"
-#include "src/scheduler/event_scheduler.h"
 
-namespace ibofos
+namespace pos
 {
-FlushReadCompletion::FlushReadCompletion(Stripe* stripe)
+FlushReadCompletion::FlushReadCompletion(Stripe* stripe, std::string& arrayName)
 : Callback(false),
-  stripe(stripe)
+  stripe(stripe),
+  arrayName(arrayName)
 {
-#if defined QOS_ENABLED_BE
     SetEventType(BackendEvent_Flush);
-#endif
 }
 
 FlushReadCompletion::~FlushReadCompletion(void)
@@ -57,18 +56,18 @@ FlushReadCompletion::~FlushReadCompletion(void)
 bool
 FlushReadCompletion::_DoSpecificJob(void)
 {
-    EventSmartPtr flushEvent(new FlushSubmission(stripe));
+    EventSmartPtr flushEvent(new FlushSubmission(stripe, arrayName));
     if (unlikely(nullptr == flushEvent))
     {
-        IBOF_EVENT_ID eventId =
-            IBOF_EVENT_ID::FLUSHREAD_FAIL_TO_ALLOCATE_MEMORY;
-        IBOF_TRACE_ERROR(static_cast<int>(eventId),
-            IbofEventId::GetString(eventId));
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::FLUSHREAD_FAIL_TO_ALLOCATE_MEMORY;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
         return false;
     }
-    EventArgument::GetEventScheduler()->EnqueueEvent(flushEvent);
+    EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
 
     return true;
 }
 
-} // namespace ibofos
+} // namespace pos

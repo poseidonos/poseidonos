@@ -38,10 +38,12 @@
 #include "start_ibof.h"
 #endif
 
+using namespace pos;
+
 int
 main(int argc, char* argv[])
 {
-    MFS_TRACE_INFO((int)IBOF_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "You entered Unit tests on top of Meta Filesystem Layer");
 
     std::srand(0);
