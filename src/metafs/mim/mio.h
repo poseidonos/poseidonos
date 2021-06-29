@@ -122,7 +122,7 @@ public:
     void* GetClientAioCbCxt(void);
     void NotifyCompletionToClient(void);
     void SetLocalAioCbCxt(MioAsyncDoneCb& callback);
-    std::string GetArrayName(void);
+    int GetArrayId(void);
 
     void SetMergedRequestList(std::vector<MetaFsIoRequest*>* list);
     void ClearMergedRequestList(void);

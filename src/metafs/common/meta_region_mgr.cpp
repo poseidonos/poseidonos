@@ -36,11 +36,11 @@
 
 namespace pos
 {
-MetaRegionManager::MetaRegionManager(std::string arrayName)
+MetaRegionManager::MetaRegionManager(int arrayId)
 : mediaType(MetaStorageType::Default),
   baseLpn(MetaFsCommonConst::INVALID_META_LPN),
   maxLpn(MetaFsCommonConst::INVALID_META_LPN),
-  arrayName(arrayName)
+  arrayId(arrayId)
 {
 }
 

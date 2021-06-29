@@ -53,8 +53,8 @@ public:
     virtual bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
     int GetMioHandlerCount(void);
 
-    virtual bool AddArrayInfo(std::string arrayName);
-    virtual bool RemoveArrayInfo(std::string arrayName);
+    virtual bool AddArrayInfo(int arrayId);
+    virtual bool RemoveArrayInfo(int arrayId);
 
     virtual void StartThread(void) override;
     void Execute(void);

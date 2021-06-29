@@ -46,8 +46,8 @@ public:
     virtual ~ScalableMetaIoWorker(void);
 
     virtual void StartThread(void) override;
-    virtual bool AddArrayInfo(std::string arrayName);
-    virtual bool RemoveArrayInfo(std::string arrayName);
+    virtual bool AddArrayInfo(int arrayId);
+    virtual bool RemoveArrayInfo(int arrayId);
     void Execute(void);
     bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
 

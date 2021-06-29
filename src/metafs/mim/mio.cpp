@@ -181,10 +181,10 @@ Mio::SetLocalAioCbCxt(MioAsyncDoneCb& callback)
     SetAsyncCbCxt(&aioCbCxt, false);
 }
 
-std::string
-Mio::GetArrayName(void)
+int
+Mio::GetArrayId(void)
 {
-    return originReq->arrayName;
+    return originReq->arrayId;
 }
 
 Mpio*
@@ -192,7 +192,7 @@ Mio::_AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO)
 {
     MpioType mpioType = _LookupMpioType(originReq->reqType);
     MetaStorageType storageType = originReq->targetMediaType;
-    Mpio* mpio = mpioPool->Alloc(mpioType, storageType, mpioIoInfo.metaLpn, partialIO, mpioIoInfo.arrayName);
+    Mpio* mpio = mpioPool->Alloc(mpioType, storageType, mpioIoInfo.metaLpn, partialIO, mpioIoInfo.arrayId);
 
     if (mpio == nullptr)
         return nullptr;
@@ -246,7 +246,7 @@ Mio::_PrepareMpioInfo(MpioIoInfo& mpioIoInfo,
     mpioIoInfo.userBuf = buf;
     mpioIoInfo.tagId = originReq->tagId;
     mpioIoInfo.mpioId = mpio_id;
-    mpioIoInfo.arrayName = originReq->arrayName;
+    mpioIoInfo.arrayId = originReq->arrayId;
 }
 
 // FIXME: for better parallel execution, let's issue io request for each mpio as soon as mio builds mpio contexta

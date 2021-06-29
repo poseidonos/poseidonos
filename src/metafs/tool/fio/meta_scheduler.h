@@ -99,8 +99,8 @@ extern MetaIOScheduler metaioScheduler;
 class MetaFioAIOCxt : public MetaFsAioCbCxt
 {
 public:
-    explicit MetaFioAIOCxt(MetaFsIoOpcode opcode, uint32_t fd, std::string arrayName, size_t soffset, size_t nbytes, void* buf, MetaFsAioCallbackPointer func, pos_io* io, uint32_t reactor)
-    : MetaFsAioCbCxt(opcode, fd, arrayName, soffset, nbytes, buf, func),
+    explicit MetaFioAIOCxt(MetaFsIoOpcode opcode, uint32_t fd, int arrayId, size_t soffset, size_t nbytes, void* buf, MetaFsAioCallbackPointer func, pos_io* io, uint32_t reactor)
+    : MetaFsAioCbCxt(opcode, fd, arrayId, soffset, nbytes, buf, func),
       io(io),
       reactor(reactor)
     {

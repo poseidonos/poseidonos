@@ -40,8 +40,8 @@
 
 namespace pos
 {
-VolumeCatalogManager::VolumeCatalogManager(std::string arrayName)
-: OnVolumeMetaRegionManager(arrayName),
+VolumeCatalogManager::VolumeCatalogManager(int arrayId)
+: OnVolumeMetaRegionManager(arrayId),
   catalog(nullptr)
 {
 }

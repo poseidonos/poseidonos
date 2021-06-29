@@ -19,7 +19,8 @@ TEST(MDPage, Mdpage_Normal)
     bool result = false;
 
     MockIArrayInfo* info = new MockIArrayInfo();
-    EXPECT_CALL(*info, GetName()).Times(2);
+    EXPECT_CALL(*info, GetName()).Times(1);
+    EXPECT_CALL(*info, GetIndex()).Times(2);
 
     MockMetaFs* metaFs = new MockMetaFs(info, false);
     EXPECT_CALL(*metaFs, GetEpochSignature()).Times(2);
@@ -27,8 +28,8 @@ TEST(MDPage, Mdpage_Normal)
     MDPage* page = new MDPage(buf);
     EXPECT_NE(page->GetDataBuf(), nullptr);
 
-    std::string arrayName = info->GetName();
-    page->Make(lpn, fd, arrayName);
+    int arrayId = info->GetIndex();
+    page->Make(lpn, fd, arrayId);
 
     uint32_t signature = page->GetMfsSignature();
     EXPECT_NE(signature, 0);
@@ -39,7 +40,7 @@ TEST(MDPage, Mdpage_Normal)
     result = page->CheckLpnMismatch(lpn);
     EXPECT_EQ(result, true);
 
-    result = page->CheckValid(arrayName);
+    result = page->CheckValid(arrayId);
     EXPECT_EQ(result, true);
 
     // null check

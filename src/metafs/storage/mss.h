@@ -48,10 +48,10 @@ namespace pos
 class MetaStorageSubsystem
 {
 public:
-    explicit MetaStorageSubsystem(std::string arrayName);
+    explicit MetaStorageSubsystem(int arrayId);
     virtual ~MetaStorageSubsystem(void);
 
-    virtual POS_EVENT_ID CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) = 0;
+    virtual POS_EVENT_ID CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) = 0;
     virtual POS_EVENT_ID Open(void) = 0;
     virtual POS_EVENT_ID Close(void) = 0;
     virtual uint64_t GetCapacity(MetaStorageType mediaType) = 0;
@@ -69,6 +69,6 @@ public:
 
 protected:
 
-    std::string arrayName;
+    int arrayId;
 };
 } // namespace pos

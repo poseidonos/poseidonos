@@ -43,8 +43,8 @@
 namespace pos
 {
 
-MssRamdisk::MssRamdisk(std::string arrayName)
-: MetaStorageSubsystem(arrayName)
+MssRamdisk::MssRamdisk(int arrayId)
+: MetaStorageSubsystem(arrayId)
 {
     for (int i = 0; i < static_cast<int>(MetaStorageType::Max); i++)
     {
@@ -106,7 +106,7 @@ MssRamdisk::_Finalize(void)
                 MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                     "Completed to unmount meta storage.");
             }
-            freeCommand = "rm -rf " + path + FILE_NAME + "." + arrayName;
+            freeCommand = "rm -rf " + path + FILE_NAME + "." + to_string(arrayId);
             status = system(freeCommand.c_str());
             if (status != 0)
             {
@@ -141,7 +141,7 @@ MssRamdisk::_Finalize(void)
  */
 
 POS_EVENT_ID
-MssRamdisk::CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag)
+MssRamdisk::CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capacity, bool formatFlag)
 {
     std::string mountCommand;
     std::string createDir;

@@ -35,8 +35,8 @@
 
 namespace pos
 {
-MetaFsFileControlApi::MetaFsFileControlApi(std::string arrayName)
-: arrayName(arrayName)
+MetaFsFileControlApi::MetaFsFileControlApi(int arrayId)
+: arrayId(arrayId)
 {
     bitmap = new BitMap(MetaFsConfig::MAX_VOLUME_CNT);
     bitmap->ResetBitmap();
@@ -69,7 +69,7 @@ MetaFsFileControlApi::Create(std::string& fileName, uint64_t fileByteSize, MetaF
 
     reqMsg.reqType = MetaFsFileControlType::FileCreate;
     reqMsg.fileName = &fileName;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
     reqMsg.fileByteSize = fileByteSize;
     reqMsg.fileProperty = prop;
 
@@ -89,7 +89,7 @@ MetaFsFileControlApi::Delete(std::string& fileName)
 
     reqMsg.reqType = MetaFsFileControlType::FileDelete;
     reqMsg.fileName = &fileName;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
     rc = volMgr->HandleNewRequest(reqMsg);
 
     return rc;
@@ -106,7 +106,7 @@ MetaFsFileControlApi::Open(std::string& fileName, int& fd)
 
     reqMsg.reqType = MetaFsFileControlType::FileOpen;
     reqMsg.fileName = &fileName;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
     rc = volMgr->HandleNewRequest(reqMsg); // validity check & MetaVolumeManager::HandleOpenFileReq()
 
     fd = reqMsg.completionData.openfd;
@@ -128,7 +128,7 @@ MetaFsFileControlApi::Close(uint32_t fd)
 
     reqMsg.reqType = MetaFsFileControlType::FileClose;
     reqMsg.fd = fd;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
     rc = volMgr->HandleNewRequest(reqMsg); // validity check &  MetaVolumeManager::HandleCloseFileReq()
 
     _RemoveFileContext(fd);
@@ -147,7 +147,7 @@ MetaFsFileControlApi::CheckFileExist(std::string& fileName)
 
     reqMsg.reqType = MetaFsFileControlType::CheckFileExist;
     reqMsg.fileName = &fileName;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
     rc = volMgr->HandleNewRequest(reqMsg);
 
     return rc;
@@ -166,7 +166,7 @@ MetaFsFileControlApi::GetFileSize(int fd)
 
     reqMsg.reqType = MetaFsFileControlType::GetFileSize;
     reqMsg.fd = fd;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::HandleGetFileSizeReq()
 
     if (POS_EVENT_ID::SUCCESS == rc)
@@ -192,7 +192,7 @@ MetaFsFileControlApi::GetAlignedFileIOSize(int fd)
 
     reqMsg.reqType = MetaFsFileControlType::GetDataChunkSize;
     reqMsg.fd = fd;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::HandleGetDataChunkSizeReq()
 
     if (POS_EVENT_ID::SUCCESS == rc)
@@ -214,7 +214,7 @@ MetaFsFileControlApi::EstimateAlignedFileIOSize(MetaFilePropertySet& prop)
 
     reqMsg.reqType = MetaFsFileControlType::EstimateDataChunkSize;
     reqMsg.fileProperty = prop;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::HandleEstimateDataChunkSizeReq()
 
     if (POS_EVENT_ID::SUCCESS == rc)
@@ -236,7 +236,7 @@ MetaFsFileControlApi::GetTheBiggestExtentSize(MetaFilePropertySet& prop)
     reqMsg.reqType = MetaFsFileControlType::GetTheBiggestExtentSize;
     reqMsg.fileByteSize = 0;
     reqMsg.fileProperty = prop;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::HandleGetFreeFileRegionSizeReq()
 
     if (POS_EVENT_ID::SUCCESS == rc)
@@ -305,7 +305,7 @@ MetaFsFileControlApi::Wbt_GetMetaFileList(void)
     result.clear();
 
     reqMsg.reqType = MetaFsFileControlType::GetMetaFileInfoList;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
 
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::_HandleGetMetaFileInodeListReq()
 
@@ -337,7 +337,7 @@ MetaFsFileControlApi::Wbt_GetMaxFileSizeLimit(void)
     FileSizeType result = 0;
 
     reqMsg.reqType = MetaFsFileControlType::GetMaxFileSizeLimit;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
 
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::_HandleGetMaxFileSizeLimitReq()
 
@@ -357,7 +357,7 @@ MetaFsFileControlApi::Wbt_GetMetaFileInode(std::string& fileName)
 
     reqMsg.reqType = MetaFsFileControlType::GetFileInode;
     reqMsg.fileName = &fileName;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
 
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::_HandleGetFileInodeReq()
 
@@ -377,7 +377,7 @@ MetaFsFileControlApi::_GetFileInode(std::string& fileName)
 
     reqMsg.reqType = MetaFsFileControlType::GetFileInode;
     reqMsg.fileName = &fileName;
-    reqMsg.arrayName = &arrayName;
+    reqMsg.arrayId = arrayId;
 
     rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::_HandleGetFileInodeReq()
 
@@ -419,7 +419,7 @@ MetaFsFileControlApi::_AddFileContext(std::string& fileName, FileDescriptorType 
         }
 
         MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-                "FileContext is allocated index={}, array={}", index, arrayName);
+                "FileContext is allocated index={}, arrayId={}", index, arrayId);
 
         bitmap->SetBit(index);
         nameMapByfd.insert(std::pair<FileDescriptorType, std::string>(fd, fileName));
@@ -455,7 +455,7 @@ MetaFsFileControlApi::_RemoveFileContext(FileDescriptorType fd)
         cxtList[index].Reset();
 
         MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-            "FileContext is deallocated index={}, array={}", index, arrayName);
+            "FileContext is deallocated index={}, arrayId={}", index, arrayId);
     }
 }
 
@@ -466,9 +466,9 @@ MetaFsFileControlApi::SetMss(MetaStorageSubsystem* metaStorage)
 }
 
 void
-MetaFsFileControlApi::InitVolume(MetaVolumeType volType, std::string arrayName, MetaLpnType maxVolPageNum)
+MetaFsFileControlApi::InitVolume(MetaVolumeType volType, int arrayId, MetaLpnType maxVolPageNum)
 {
-    volMgr->InitVolume(volType, arrayName, maxVolPageNum);
+    volMgr->InitVolume(volType, arrayId, maxVolPageNum);
 }
 
 bool

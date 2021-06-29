@@ -49,7 +49,8 @@ public:
     explicit MpioPool(uint32_t poolSize);
     virtual ~MpioPool(void);
 
-    Mpio* Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn, bool partialIO, std::string arrayName);
+    Mpio* Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn,
+                bool partialIO, int arrayId);
     virtual void Release(Mpio* mpio);
     virtual size_t GetPoolSize(void);
 
@@ -67,7 +68,7 @@ private:
     void _InitCache(uint32_t poolSize);
     bool _IsFullyCached(void);
     bool _IsEmptyCached(void);
-    Mpio* _CacheHit(MpioType mpioType, MetaLpnType lpn, std::string arrayName);
+    Mpio* _CacheHit(MpioType mpioType, MetaLpnType lpn, int arrayId);
     Mpio* _CacheAlloc(MpioType mpioType, MetaLpnType lpn);
     void _CacheRemove(MpioType mpioType);
 #endif

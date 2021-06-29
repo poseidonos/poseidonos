@@ -43,9 +43,9 @@ namespace pos
 class Region
 {
 public:
-    Region(std::string arrayName, MetaStorageType type, MetaFileInode* inode, uint64_t baseMetaLpn, uint64_t count, bool inUse, MetaStorageSubsystem* metaStorage)
+    Region(int arrayId, MetaStorageType type, MetaFileInode* inode, uint64_t baseMetaLpn, uint64_t count, bool inUse, MetaStorageSubsystem* metaStorage)
     {
-        this->arrayName = arrayName;
+        this->arrayId = arrayId;
 
         regionType = type;
         mssIntf = metaStorage;
@@ -135,7 +135,7 @@ public:
     POS_EVENT_ID Erase(MetaLpnType startLpn, MetaLpnType numTrimLpns);
 
 protected:
-    std::string arrayName;
+    int arrayId;
     MetaStorageType regionType;
     RegionContent content;
 

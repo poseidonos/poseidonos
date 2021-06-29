@@ -79,6 +79,7 @@ protected:
 
     std::string fileName;
     std::string arrayName;
+    int arrayId;
     uint64_t size;
     bool isOpened;
     int fd;

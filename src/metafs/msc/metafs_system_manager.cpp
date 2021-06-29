@@ -44,11 +44,11 @@
 
 namespace pos
 {
-MetaFsSystemManager::MetaFsSystemManager(std::string arrayName)
+MetaFsSystemManager::MetaFsSystemManager(int arrayId)
 : mbrMgr(nullptr),
   metaStorage(nullptr)
 {
-    mbrMgr = new MetaFsMBRManager(arrayName);
+    mbrMgr = new MetaFsMBRManager(arrayId);
     _InitReqHandler();
 }
 
@@ -191,7 +191,7 @@ MetaFsSystemManager::_HandleInitializeRequest(MetaFsControlReqMsg& reqMsg)
 {
     if (nullptr == metaStorage)
     {
-        metaStorage = new MssOnDisk(reqMsg.arrayName);
+        metaStorage = new MssOnDisk(reqMsg.arrayId);
     }
 
     if (true == Init(*reqMsg.mediaList))

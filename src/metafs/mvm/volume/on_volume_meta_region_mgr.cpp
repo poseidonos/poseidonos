@@ -36,8 +36,8 @@
 
 namespace pos
 {
-OnVolumeMetaRegionManager::OnVolumeMetaRegionManager(std::string arrayName)
-: MetaRegionManager(arrayName),
+OnVolumeMetaRegionManager::OnVolumeMetaRegionManager(int arrayId)
+: MetaRegionManager(arrayId),
   volumeType(MetaVolumeType::Invalid)
 {
 }

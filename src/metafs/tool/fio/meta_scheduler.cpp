@@ -120,8 +120,9 @@ MetaIoHandler::MetaFsIOSubmitHandler(struct pos_io* io, int fd)
     uint32_t alignedIOSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     uint64_t soffset = ((io->offset / alignedIOSize) * alignedIOSize);
     uint32_t reactor = pos::EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
-    std::string arrayName = "POSArray";
-    MetaFsAioCbCxt* aiocb = new MetaFioAIOCxt(opcode, fd, arrayName, soffset, alignedIOSize, io->iov->iov_base,
+    std::string arrayName = io->arrayName;
+    int arrayId = MetaFsServiceSingleton::Instance()->GetArrayId(arrayName);
+    MetaFsAioCbCxt* aiocb = new MetaFioAIOCxt(opcode, fd, arrayId, soffset, alignedIOSize, io->iov->iov_base,
         AsEntryPointParam1(&MetaIOScheduler::HandleIOCallback, &metaioScheduler),
         io, reactor);
     rc_io = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->io->SubmitIO(aiocb);

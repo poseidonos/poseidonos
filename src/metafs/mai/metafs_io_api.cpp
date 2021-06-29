@@ -39,8 +39,8 @@ namespace pos
 {
 static InstanceTagIdAllocator aiocbTagIdAllocator;
 
-MetaFsIoApi::MetaFsIoApi(std::string arrayName, MetaFsFileControlApi* ctrl)
-: arrayName(arrayName),
+MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl)
+: arrayId(arrayId),
   ctrlMgr(ctrl)
 {
     ioMgr = new MetaIoManager();
@@ -62,7 +62,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, void* buf)
 
     reqMsg.reqType = MetaIoRequestType::Read;
     reqMsg.fd = fd;
-    reqMsg.arrayName = arrayName;
+    reqMsg.arrayId = arrayId;
     reqMsg.buf = buf;
     reqMsg.isFullFileIo = true;
     reqMsg.ioMode = MetaIoMode::Sync;
@@ -97,7 +97,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
 
     reqMsg.reqType = MetaIoRequestType::Read;
     reqMsg.fd = fd;
-    reqMsg.arrayName = arrayName;
+    reqMsg.arrayId = arrayId;
     reqMsg.buf = buf;
     reqMsg.isFullFileIo = false;
     reqMsg.ioMode = MetaIoMode::Sync;
@@ -133,7 +133,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, void* buf)
 
     reqMsg.reqType = MetaIoRequestType::Write;
     reqMsg.fd = fd;
-    reqMsg.arrayName = arrayName;
+    reqMsg.arrayId = arrayId;
     reqMsg.buf = buf;
     reqMsg.isFullFileIo = true;
     reqMsg.ioMode = MetaIoMode::Sync;
@@ -168,7 +168,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
 
     reqMsg.reqType = MetaIoRequestType::Write;
     reqMsg.fd = fd;
-    reqMsg.arrayName = arrayName;
+    reqMsg.arrayId = arrayId;
     reqMsg.buf = buf;
     reqMsg.isFullFileIo = false;
     reqMsg.ioMode = MetaIoMode::Sync;
@@ -206,7 +206,7 @@ MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt)
 
     reqMsg.reqType = (MetaIoRequestType)cxt->opcode;
     reqMsg.fd = cxt->fd;
-    reqMsg.arrayName = cxt->arrayName;
+    reqMsg.arrayId = cxt->arrayId;
     reqMsg.buf = cxt->buf;
     reqMsg.isFullFileIo = (cxt->soffset == 0 && cxt->nbytes == 0);
     reqMsg.ioMode = MetaIoMode::Async;
@@ -236,15 +236,15 @@ MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt)
 }
 
 bool
-MetaFsIoApi::AddArray(std::string& arrayName)
+MetaFsIoApi::AddArray(int arrayId)
 {
-    return ioMgr->AddArrayInfo(arrayName);
+    return ioMgr->AddArrayInfo(arrayId);
 }
 
 bool
-MetaFsIoApi::RemoveArray(std::string& arrayName)
+MetaFsIoApi::RemoveArray(int arrayId)
 {
-    return ioMgr->RemoveArrayInfo(arrayName);
+    return ioMgr->RemoveArrayInfo(arrayId);
 }
 
 void

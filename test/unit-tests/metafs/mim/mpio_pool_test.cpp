@@ -7,7 +7,7 @@ namespace pos
 TEST(MpioPool, AllocAndReleaseForSsd)
 {
     const uint32_t COUNT = 10;
-    std::string arrayName = "TESTARRAY";
+    int arrayId = 0;
     Mpio* mpioList[10] = { 0, };
     MpioPool* pool = new MpioPool(COUNT);
 
@@ -18,7 +18,7 @@ TEST(MpioPool, AllocAndReleaseForSsd)
     {
         for (uint32_t index = 0; index < COUNT; index++)
         {
-            mpioList[index] = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::SSD, index, true, arrayName);
+            mpioList[index] = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::SSD, index, true, arrayId);
         }
 
         // check read mpio list
@@ -26,7 +26,7 @@ TEST(MpioPool, AllocAndReleaseForSsd)
         EXPECT_EQ(isEmpty, true);
 
         // check free read mpio
-        Mpio* temp = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::SSD, COUNT + 1, true, arrayName);
+        Mpio* temp = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::SSD, COUNT + 1, true, arrayId);
         EXPECT_EQ(temp, nullptr);
 
         for (uint32_t index = 0; index < COUNT; index++)
@@ -41,7 +41,7 @@ TEST(MpioPool, AllocAndReleaseForSsd)
 TEST(MpioPool, AllocAndReleaseForNvRam)
 {
     const uint32_t COUNT = 10;
-    std::string arrayName = "TESTARRAY";
+    int arrayId = 0;
     Mpio* mpioList[10] = { 0, };
     MpioPool* pool = new MpioPool(COUNT);
 
@@ -52,7 +52,7 @@ TEST(MpioPool, AllocAndReleaseForNvRam)
     {
         for (uint32_t index = 0; index < COUNT; index++)
         {
-            mpioList[index] = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, index, false, arrayName);
+            mpioList[index] = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, index, false, arrayId);
         }
 
         // check read mpio list
@@ -60,7 +60,7 @@ TEST(MpioPool, AllocAndReleaseForNvRam)
         EXPECT_EQ(isEmpty, true);
 
         // check free read mpio
-        Mpio* temp = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, COUNT + 1, false, arrayName);
+        Mpio* temp = pool->Alloc(static_cast<MpioType>(i), MetaStorageType::NVRAM, COUNT + 1, false, arrayId);
         EXPECT_EQ(temp, nullptr);
 
         for (uint32_t index = 0; index < COUNT; index++)
@@ -75,7 +75,7 @@ TEST(MpioPool, AllocAndReleaseForNvRam)
 TEST(MpioPool, AllocAndReleaseForNvRamCache)
 {
     const uint32_t COUNT = 10;
-    std::string arrayName = ""; // in this ut, mpio.io.arrayName is ""
+    int arrayId = 0;
     Mpio* mpioList[10] = { 0, };
     MpioPool* pool = new MpioPool(COUNT);
     uint32_t index = 0;
@@ -85,34 +85,32 @@ TEST(MpioPool, AllocAndReleaseForNvRamCache)
 
     for (uint32_t idx = 0; idx < COUNT; idx++)
     {
-        Mpio* m = pool->Alloc(MpioType::Write, MetaStorageType::NVRAM, 0, true, arrayName);
+        Mpio* m = pool->Alloc(MpioType::Write, MetaStorageType::NVRAM, 0, true, arrayId);
 
         if (nullptr == mpioList[index])
             mpioList[index] = m;
         else if (m != mpioList[index])
             mpioList[++index] = m;
     }
+    EXPECT_EQ(index, COUNT - 1);
 
-    // std::cout << "index=" << index << std::endl;
-    EXPECT_LT(index, COUNT);
-
-    // check read mpio list
+    // check write mpio list, not hit all the mpios
     bool isEmpty = pool->IsEmpty(MpioType::Write);
-    EXPECT_EQ(isEmpty, false);
+    EXPECT_TRUE(isEmpty);
 
     // check free read mpio
-    Mpio* temp = pool->Alloc(MpioType::Read, MetaStorageType::NVRAM, COUNT + 1, true, arrayName);
+    Mpio* temp = pool->Alloc(MpioType::Read, MetaStorageType::NVRAM, COUNT + 1, true, arrayId);
     EXPECT_NE(temp, nullptr);
 
-    for (uint32_t index = 0; index < COUNT; index++)
+    pool->Release(temp);
+
+    for (index = 0; index < COUNT; index++)
     {
-        if (nullptr != mpioList[index])
-            break;
+        if (nullptr == mpioList[index])
+            continue;
 
         pool->Release(mpioList[index]);
     }
-
-    pool->ReleaseCache();
 
     delete pool;
 }

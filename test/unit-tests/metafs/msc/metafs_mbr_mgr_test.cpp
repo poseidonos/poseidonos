@@ -55,13 +55,13 @@ TEST(MetaFsMBRManager, CreateMBR_)
 TEST(MetaFsMBRManager, RegisterVolumeGeometry_Normal)
 {
     // Given
-    const std::string arrayName = "TestArray";
+    const int arrayId = 0;
 
     MetaFsMBRContent* metaFsMBRContent = new (1) MetaFsMBRContent;  // meta_region.h:88
     MockMetaFsMBR* mockMetaFsMBR = new MockMetaFsMBR;
     mockMetaFsMBR->SetContent(metaFsMBRContent);
 
-    MetaFsMBRManager metaFsMBRManagerSUT(arrayName, mockMetaFsMBR);
+    MetaFsMBRManager metaFsMBRManagerSUT(arrayId, mockMetaFsMBR);
 
     // When
     MetaStorageInfo mediaInfo {.media = MetaStorageType::SSD};
@@ -73,13 +73,13 @@ TEST(MetaFsMBRManager, RegisterVolumeGeometry_Normal)
 TEST(MetaFsMBRManager, GetAllStoragePartitionInfo_Normal)
 {
     // Given
-    const std::string arrayName = "TestArray";
+    const int arrayId = 0;
 
     MetaFsMBRContent* metaFsMBRContent = new (1) MetaFsMBRContent;  // meta_region.h:88
     MockMetaFsMBR* mockMetaFsMBR = new MockMetaFsMBR;
     mockMetaFsMBR->SetContent(metaFsMBRContent);
 
-    MetaFsMBRManager metaFsMBRManagerSUT(arrayName, mockMetaFsMBR);
+    MetaFsMBRManager metaFsMBRManagerSUT(arrayId, mockMetaFsMBR);
 
     // When
     metaFsMBRManagerSUT.GetAllStoragePartitionInfo();
@@ -90,12 +90,12 @@ TEST(MetaFsMBRManager, GetAllStoragePartitionInfo_Normal)
 TEST(MetaFsMBRManager, SetPowerStatus_Normal)
 {
     // Given
-    const std::string arrayName = "TestArray";
+    const int arrayId = 0;
 
     MockMetaFsMBR* mockMetaFsMBR = new MockMetaFsMBR;
     EXPECT_CALL(*mockMetaFsMBR, SetPORStatus);
 
-    MetaFsMBRManager metaFsMBRManagerSUT(arrayName, mockMetaFsMBR);
+    MetaFsMBRManager metaFsMBRManagerSUT(arrayId, mockMetaFsMBR);
 
     // When
     metaFsMBRManagerSUT.SetPowerStatus(true);
@@ -107,12 +107,12 @@ TEST(MetaFsMBRManager, GetPowerStatus_Normal)
 {
     // Given
     bool retb = false;
-    const std::string arrayName = "TestArray";
+    const int arrayId = 0;
 
     MockMetaFsMBR* mockMetaFsMBR = new MockMetaFsMBR;
     EXPECT_CALL(*mockMetaFsMBR, GetPORStatus).WillRepeatedly(Return(true));
 
-    MetaFsMBRManager metaFsMBRManagerSUT(arrayName, mockMetaFsMBR);
+    MetaFsMBRManager metaFsMBRManagerSUT(arrayId, mockMetaFsMBR);
 
     // When
     retb = metaFsMBRManagerSUT.GetPowerStatus();
@@ -124,12 +124,12 @@ TEST(MetaFsMBRManager, GetPowerStatus_Normal)
 TEST(MetaFsMBRManager, InvalidMBR_mbrIsValid)
 {
     // Given
-    const std::string arrayName = "TestArray";
+    const int arrayId = 0;
 
     MockMetaFsMBR* mockMetaFsMBR = new MockMetaFsMBR;
     EXPECT_CALL(*mockMetaFsMBR, InvalidMBRSignature);
 
-    MetaFsMBRManager metaFsMBRManagerSUT(arrayName, mockMetaFsMBR);
+    MetaFsMBRManager metaFsMBRManagerSUT(arrayId, mockMetaFsMBR);
 
     // When
     metaFsMBRManagerSUT.InvalidMBR();

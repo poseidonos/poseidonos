@@ -37,15 +37,14 @@
 #include <string>
 namespace pos
 {
-SsdMetaVolume::SsdMetaVolume(std::string arrayName, MetaLpnType maxVolumePageNum)
-: MetaVolume(arrayName, MetaVolumeType::SsdVolume, maxVolumePageNum)
+SsdMetaVolume::SsdMetaVolume(int arrayId, MetaLpnType maxVolumePageNum)
+: MetaVolume(arrayId, MetaVolumeType::SsdVolume, maxVolumePageNum)
 {
 }
 
 SsdMetaVolume::SsdMetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
-        VolumeCatalogManager* catalogMgr, std::string arrayName,
-        MetaLpnType maxVolumePageNum)
-: MetaVolume(fileMgr, inodeMgr, catalogMgr, arrayName, MetaVolumeType::SsdVolume, maxVolumePageNum)
+        VolumeCatalogManager* catalogMgr, int arrayId, MetaLpnType maxVolumePageNum)
+: MetaVolume(fileMgr, inodeMgr, catalogMgr, arrayId, MetaVolumeType::SsdVolume, maxVolumePageNum)
 {
 }
 

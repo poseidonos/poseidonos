@@ -49,16 +49,16 @@ public:
     void AttachControlInfo(void);
     size_t GetDefaultDataChunkSize(void);
 
-    void Make(MetaLpnType metaLpn, FileDescriptorType fd, std::string& arrayName);
+    void Make(MetaLpnType metaLpn, FileDescriptorType fd, int arrayId);
     uint8_t* GetDataBuf(void);
-    bool CheckValid(std::string& arrayName);
+    bool CheckValid(int arrayId);
     bool CheckFileMismatch(FileDescriptorType fd);
     bool CheckLpnMismatch(MetaLpnType srcLpn);
     uint32_t GetMfsSignature(void);
     void ClearCtrlInfo(void);
 
 private:
-    void _UpdateControlInfo(MetaLpnType srcLpn, FileDescriptorType srcFD, std::string& arrayName);
+    void _UpdateControlInfo(MetaLpnType srcLpn, FileDescriptorType srcFD, int arrayId);
 
     uint8_t* dataAll;
     MDPageControlInfo* ctrlInfo;

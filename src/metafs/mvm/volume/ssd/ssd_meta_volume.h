@@ -41,9 +41,9 @@ namespace pos
 class SsdMetaVolume : public MetaVolume
 {
 public:
-    SsdMetaVolume(std::string arrayName, MetaLpnType maxVolumePageNum);
+    SsdMetaVolume(int arrayId, MetaLpnType maxVolumePageNum);
     SsdMetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
-            VolumeCatalogManager* catalogMgr, std::string arrayName,
+            VolumeCatalogManager* catalogMgr, int arrayId,
             MetaLpnType maxVolumePageNum);
     ~SsdMetaVolume(void);
     virtual void InitVolumeBaseLpn(void) override;

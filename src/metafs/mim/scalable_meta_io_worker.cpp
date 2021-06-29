@@ -64,15 +64,15 @@ ScalableMetaIoWorker::StartThread(void)
 }
 
 bool
-ScalableMetaIoWorker::AddArrayInfo(std::string arrayName)
+ScalableMetaIoWorker::AddArrayInfo(int arrayId)
 {
-    return tophalfHandler->AddArrayInfo(arrayName);
+    return tophalfHandler->AddArrayInfo(arrayId);
 }
 
 bool
-ScalableMetaIoWorker::RemoveArrayInfo(std::string arrayName)
+ScalableMetaIoWorker::RemoveArrayInfo(int arrayId)
 {
-    return tophalfHandler->RemoveArrayInfo(arrayName);
+    return tophalfHandler->RemoveArrayInfo(arrayId);
 }
 
 void

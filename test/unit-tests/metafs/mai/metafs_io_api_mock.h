@@ -17,8 +17,8 @@ public:
     MOCK_METHOD(POS_EVENT_ID, Write, (FileDescriptorType fd, void* buf), (override));
     MOCK_METHOD(POS_EVENT_ID, Write, (FileDescriptorType fd, FileSizeType byteOffset, FileSizeType byteSize, void* buf), (override));
     MOCK_METHOD(POS_EVENT_ID, SubmitIO, (MetaFsAioCbCxt * cxt), (override));
-    MOCK_METHOD(bool, AddArray, (std::string & arrayName), (override));
-    MOCK_METHOD(bool, RemoveArray, (std::string & arrayName), (override));
+    MOCK_METHOD(bool, AddArray, (int arrayId), (override));
+    MOCK_METHOD(bool, RemoveArray, (int arrayId), (override));
     MOCK_METHOD(void, SetStatus, (bool isNormal), (override));
 };
 

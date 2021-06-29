@@ -36,10 +36,10 @@
 
 namespace pos
 {
-MetaFsManagementApi::MetaFsManagementApi(std::string arrayName)
-: arrayName(arrayName)
+MetaFsManagementApi::MetaFsManagementApi(int arrayId)
+: arrayId(arrayId)
 {
-    sysMgr = new MetaFsSystemManager(arrayName);
+    sysMgr = new MetaFsSystemManager(arrayId);
 }
 
 MetaFsManagementApi::~MetaFsManagementApi(void)
@@ -48,14 +48,14 @@ MetaFsManagementApi::~MetaFsManagementApi(void)
 }
 
 POS_EVENT_ID
-MetaFsManagementApi::InitializeSystem(std::string& arrayName,
+MetaFsManagementApi::InitializeSystem(int arrayId,
                                 MetaStorageMediaInfoList* mediaInfoList)
 {
     POS_EVENT_ID rc;
     MetaFsControlReqMsg reqMsg;
 
     reqMsg.reqType = MetaFsControlReqType::InitializeSystem;
-    reqMsg.arrayName = arrayName;
+    reqMsg.arrayId = arrayId;
     reqMsg.mediaList = mediaInfoList;
 
     rc = sysMgr->HandleNewRequest(reqMsg); // MetaFsSystemManager::_HandleInitializeRequest()
@@ -64,13 +64,13 @@ MetaFsManagementApi::InitializeSystem(std::string& arrayName,
 }
 
 POS_EVENT_ID
-MetaFsManagementApi::CloseSystem(std::string& arrayName)
+MetaFsManagementApi::CloseSystem(int arrayId)
 {
     POS_EVENT_ID rc;
     MetaFsControlReqMsg reqMsg;
 
     reqMsg.reqType = MetaFsControlReqType::CloseSystem;
-    reqMsg.arrayName = arrayName;
+    reqMsg.arrayId = arrayId;
 
     rc = sysMgr->HandleNewRequest(reqMsg); // MetaFsSystemManager::_HandleCloseRequest()
 

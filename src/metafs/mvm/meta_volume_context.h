@@ -59,7 +59,8 @@ public:
     MetaVolumeContext(void);
     ~MetaVolumeContext(void);
 
-    void InitContext(MetaVolumeType volumeType, std::string arrayName, MetaLpnType maxVolPageNum, MetaStorageSubsystem* metaStorage);
+    void InitContext(MetaVolumeType volumeType, int arrayId,
+            MetaLpnType maxVolPageNum, MetaStorageSubsystem* metaStorage);
 
     bool CreateVolume(MetaVolumeType volumeType);
     bool Open(bool isNPOR);
@@ -100,7 +101,8 @@ public:
     FileDescriptorType LookupFileDescByName(std::string& fileName);
 
 private:
-    MetaVolume* _InitVolume(MetaVolumeType volType, std::string arrayName, MetaLpnType maxLpnNum, MetaStorageSubsystem* metaStorage);
+    MetaVolume* _InitVolume(MetaVolumeType volType, int arrayId,
+                    MetaLpnType maxLpnNum, MetaStorageSubsystem* metaStorage);
     void _SetGlobalMaxFileSizeLimit(MetaLpnType maxVolumeLpn);
 
     FileDescriptorType _AllocFileDescriptor(std::string& fileName);

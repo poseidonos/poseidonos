@@ -68,8 +68,8 @@ public:
     MetaStorageSubsystem* GetMss(void);
     void Finalize(void);
 
-    bool AddArrayInfo(std::string arrayName);
-    bool RemoveArrayInfo(std::string arrayName);
+    bool AddArrayInfo(int arrayId);
+    bool RemoveArrayInfo(int arrayId);
 
 private:
     void _InitReqHandler(void);

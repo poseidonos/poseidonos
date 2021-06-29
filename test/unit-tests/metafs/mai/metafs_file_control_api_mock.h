@@ -25,7 +25,7 @@ public:
     MOCK_METHOD(FileSizeType, Wbt_GetMaxFileSizeLimit, (), (override));
     MOCK_METHOD(MetaFileInodeInfo*, Wbt_GetMetaFileInode, (std::string & fileName), (override));
     MOCK_METHOD(void, SetMss, (MetaStorageSubsystem * metaStorage), (override));
-    MOCK_METHOD(void, InitVolume, (MetaVolumeType volType, std::string arrayName, MetaLpnType maxVolPageNum), (override));
+    MOCK_METHOD(void, InitVolume, (MetaVolumeType volType, int arrayId, MetaLpnType maxVolPageNum), (override));
     MOCK_METHOD(bool, CreateVolume, (MetaVolumeType volType), (override));
     MOCK_METHOD(bool, OpenVolume, (bool isNPOR), (override));
     MOCK_METHOD(bool, CloseVolume, (bool& isNPOR), (override));

@@ -40,8 +40,8 @@
 
 namespace pos
 {
-MetaFileManager::MetaFileManager(std::string arrayName)
-: OnVolumeMetaRegionManager(arrayName),
+MetaFileManager::MetaFileManager(int arrayId)
+: OnVolumeMetaRegionManager(arrayId),
   isAllocated(false),
   extentMgr(new MetaFileExtentManager()),
   mfssIntf(nullptr)

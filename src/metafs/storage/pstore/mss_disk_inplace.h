@@ -46,7 +46,7 @@ namespace pos
 class MssDiskInplace : public MssDiskPlace
 {
 public:
-    MssDiskInplace(std::string arrayName, MetaStorageType mediaType, uint64_t capcacity);
+    MssDiskInplace(int arrayId, MetaStorageType mediaType, uint64_t capcacity);
     virtual ~MssDiskInplace(void);
 
     // Only inherit function whose defination will change

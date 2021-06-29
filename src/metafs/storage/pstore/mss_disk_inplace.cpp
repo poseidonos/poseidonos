@@ -41,7 +41,7 @@ namespace pos
 /**
  * Constructor
  */
-MssDiskInplace::MssDiskInplace(std::string arrayName, MetaStorageType mediaType, uint64_t capacity)
+MssDiskInplace::MssDiskInplace(int arrayId, MetaStorageType mediaType, uint64_t capacity)
 {
     this->mediaType = mediaType;
     if (MetaStorageType::SSD == mediaType)
@@ -53,7 +53,7 @@ MssDiskInplace::MssDiskInplace(std::string arrayName, MetaStorageType mediaType,
         partitionType = pos::PartitionType::META_NVM;
     }
 
-    array = pos::ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    array = pos::ArrayMgr::Instance()->GetArrayInfo(arrayId);
 }
 
 MssDiskInplace::~MssDiskInplace(void)

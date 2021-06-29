@@ -38,22 +38,22 @@
 
 namespace pos
 {
-MetaVolume::MetaVolume(std::string arrayName, MetaVolumeType metaVolumeType, MetaLpnType maxVolumePageNum)
+MetaVolume::MetaVolume(int arrayId, MetaVolumeType metaVolumeType, MetaLpnType maxVolumePageNum)
 : volumeBaseLpn(),
   maxVolumeLpn(maxVolumePageNum),
   volumeType(metaVolumeType),
   volumeState(MetaVolumeState::Default),
   inUse(false),
   sumOfRegionBaseLpns(0),
-  arrayName(arrayName)
+  arrayId(arrayId)
 {
-    fileMgr = new MetaFileManager(arrayName);
-    inodeMgr = new MetaFileInodeManager(arrayName);
-    catalogMgr = new VolumeCatalogManager(arrayName);
+    fileMgr = new MetaFileManager(arrayId);
+    inodeMgr = new MetaFileInodeManager(arrayId);
+    catalogMgr = new VolumeCatalogManager(arrayId);
 }
 
 MetaVolume::MetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
-        VolumeCatalogManager* catalogMgr, std::string arrayName,
+        VolumeCatalogManager* catalogMgr, int arrayId,
         MetaVolumeType metaVolumeType, MetaLpnType maxVolumePageNum)
 : volumeBaseLpn(),
   maxVolumeLpn(maxVolumePageNum),
@@ -61,7 +61,7 @@ MetaVolume::MetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
   volumeState(MetaVolumeState::Default),
   inUse(false),
   sumOfRegionBaseLpns(0),
-  arrayName(arrayName)
+  arrayId(arrayId)
 {
     this->fileMgr = fileMgr;
     this->inodeMgr = inodeMgr;

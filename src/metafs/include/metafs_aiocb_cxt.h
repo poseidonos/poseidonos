@@ -36,8 +36,6 @@
 #include <atomic>
 #include "os_header.h"
 #include "src/meta_file_intf/meta_file_include.h"
-#include "metafs_return_code.h"
-#include "metafs_spinlock.h"
 #include "metafs_type.h"
 #include "src/bio/volume_io.h"
 #include "metafs_def.h"
@@ -49,10 +47,10 @@ class MetaFsAioCbCxt
 {
 public:
     using MetaFsAioCallbackPointer = std::function<void(void*)>;
-    MetaFsAioCbCxt(MetaFsIoOpcode opcode, uint32_t fd, std::string arrayName, uint64_t soffset, uint64_t nbytes, void* buf, MetaFsAioCallbackPointer func)
+    MetaFsAioCbCxt(MetaFsIoOpcode opcode, uint32_t fd, int arrayId, uint64_t soffset, uint64_t nbytes, void* buf, MetaFsAioCallbackPointer func)
     : opcode(opcode),
       fd(fd),
-      arrayName(arrayName),
+      arrayId(arrayId),
       soffset(soffset),
       nbytes(nbytes),
       buf(buf),
@@ -64,10 +62,10 @@ public:
         callbackCount = 0;
     }
 
-    MetaFsAioCbCxt(MetaFsIoOpcode opcode, uint32_t fd, std::string arrayName, void* buf, MetaFsAioCallbackPointer func)
+    MetaFsAioCbCxt(MetaFsIoOpcode opcode, uint32_t fd, int arrayId, void* buf, MetaFsAioCallbackPointer func)
     : opcode(opcode),
       fd(fd),
-      arrayName(arrayName),
+      arrayId(arrayId),
       soffset(0),
       nbytes(0),
       buf(buf),
@@ -145,12 +143,6 @@ public:
         return fd;
     }
 
-    std::string
-    GetarrayName(void)
-    {
-        return arrayName;
-    }
-
     FileSizeType
     GetOffset(void)
     {
@@ -180,7 +172,7 @@ private:
 
     MetaFsIoOpcode opcode;
     FileDescriptorType fd;
-    std::string arrayName;
+    int arrayId;
     FileSizeType soffset;
     FileSizeType nbytes;
     void* buf;

@@ -55,9 +55,9 @@ enum class MetaRegionManagerType
 class MetaVolume
 {
 public:
-    explicit MetaVolume(std::string arrayName, MetaVolumeType volumeType, MetaLpnType maxVolumePageNum = 0);
+    explicit MetaVolume(int arrayId, MetaVolumeType volumeType, MetaLpnType maxVolumePageNum = 0);
     explicit MetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
-            VolumeCatalogManager* catalogMgr, std::string arrayName,
+            VolumeCatalogManager* catalogMgr, int arrayId,
             MetaVolumeType volumeType, MetaLpnType maxVolumePageNum = 0);
     virtual ~MetaVolume(void);
 
@@ -139,6 +139,6 @@ private:
     bool _BackupContents(MetaLpnType* info);
     bool _RestoreContents(MetaLpnType* info);
 
-    std::string arrayName;
+    int arrayId;
 };
 } // namespace pos

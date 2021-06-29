@@ -68,7 +68,7 @@ public:
     const char* GetModuleName(void) override;
     POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
 
-    virtual void InitVolume(MetaVolumeType volType, std::string arrayName, MetaLpnType maxVolPageNum);
+    virtual void InitVolume(MetaVolumeType volType, int arrayId, MetaLpnType maxVolPageNum);
     virtual bool OpenVolume(bool isNPOR);
     virtual bool CloseVolume(bool& resetCxt /*output */);
     virtual bool CreateVolume(MetaVolumeType volType);
@@ -79,7 +79,7 @@ public:
     // API for MetaFs MGMT API (File meta operation, Utility API to obtain specific file meta info.)
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
     virtual bool
-    GetVolOpenFlag(std::string arrayName)
+    GetVolOpenFlag(int arrayId)
     {
         return volContext.GetVolOpenFlag();
     }

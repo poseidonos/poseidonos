@@ -33,6 +33,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/meta_file_intf/meta_file_intf.h"
+#include "src/metafs/include/metafs_service.h"
 
 #include <fcntl.h>
 #include <string>
@@ -43,10 +44,12 @@ namespace pos
 MetaFileIntf::MetaFileIntf(std::string fname, std::string aname)
 : fileName(fname),
   arrayName(aname),
+  arrayId(INT32_MAX),
   size(0),
   isOpened(false),
   fd(-1)
 {
+    arrayId = MetaFsServiceSingleton::Instance()->GetArrayId(aname);
 }
 
 int

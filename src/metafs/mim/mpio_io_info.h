@@ -53,7 +53,7 @@ public:
       startByteOffset(0),
       byteSize(0),
       pageCnt(1),
-      arrayName(""),
+      arrayId(INT32_MAX),
       userBuf(nullptr)
     {
     }
@@ -67,7 +67,7 @@ public:
     FileSizeType startByteOffset;
     FileSizeType byteSize;
     MetaLpnType pageCnt; // should be 1 since currently we only supports 4KB considering IO Parallelism for 4KB IO
-    std::string arrayName;
+    int arrayId;
     void* userBuf;
 
     static const MetaLpnType INVALID_LPN = UINT64_MAX;

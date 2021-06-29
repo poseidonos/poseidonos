@@ -137,7 +137,7 @@ MetaVolumeManager::_CheckSanityBasic(MetaFsFileControlRequest& reqMsg)
 }
 
 void
-MetaVolumeManager::InitVolume(MetaVolumeType volumeType, std::string arrayName, MetaLpnType maxVolPageNum)
+MetaVolumeManager::InitVolume(MetaVolumeType volumeType, int arrayId, MetaLpnType maxVolPageNum)
 {
     if (true == volContext.IsGivenVolumeExist(volumeType))
     {
@@ -148,7 +148,7 @@ MetaVolumeManager::InitVolume(MetaVolumeType volumeType, std::string arrayName, 
         return;
     }
 
-    volContext.InitContext(volumeType, arrayName, maxVolPageNum, metaStorage);
+    volContext.InitContext(volumeType, arrayId, maxVolPageNum, metaStorage);
     volHandler.InitHandler(&volContext);
 }
 

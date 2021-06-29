@@ -25,7 +25,7 @@ TEST(MetaFsIoRequest, CopyMsg_SyncRequest_FromUserThread)
     EXPECT_EQ(reqOrigin->ioMode, req->ioMode);
     EXPECT_EQ(reqOrigin->isFullFileIo, req->isFullFileIo);
     EXPECT_EQ(reqOrigin->fd, req->fd);
-    EXPECT_EQ(reqOrigin->arrayName, req->arrayName);
+    EXPECT_EQ(reqOrigin->arrayId, req->arrayId);
     EXPECT_EQ(reqOrigin->buf, req->buf);
     EXPECT_EQ(reqOrigin->byteOffsetInFile, req->byteOffsetInFile);
     EXPECT_EQ(reqOrigin->byteSize, req->byteSize);
@@ -59,7 +59,7 @@ TEST(MetaFsIoRequest, CopyMsg_SyncRequest_FromScheduler)
     EXPECT_EQ(reqOrigin->ioMode, req->ioMode);
     EXPECT_EQ(reqOrigin->isFullFileIo, req->isFullFileIo);
     EXPECT_EQ(reqOrigin->fd, req->fd);
-    EXPECT_EQ(reqOrigin->arrayName, req->arrayName);
+    EXPECT_EQ(reqOrigin->arrayId, req->arrayId);
     EXPECT_EQ(reqOrigin->buf, req->buf);
     EXPECT_EQ(reqOrigin->byteOffsetInFile, req->byteOffsetInFile);
     EXPECT_EQ(reqOrigin->byteSize, req->byteSize);
@@ -92,7 +92,7 @@ TEST(MetaFsIoRequest, CopyMsg_AsyncRequest)
     EXPECT_EQ(reqOrigin->ioMode, req->ioMode);
     EXPECT_EQ(reqOrigin->isFullFileIo, req->isFullFileIo);
     EXPECT_EQ(reqOrigin->fd, req->fd);
-    EXPECT_EQ(reqOrigin->arrayName, req->arrayName);
+    EXPECT_EQ(reqOrigin->arrayId, req->arrayId);
     EXPECT_EQ(reqOrigin->buf, req->buf);
     EXPECT_EQ(reqOrigin->byteOffsetInFile, req->byteOffsetInFile);
     EXPECT_EQ(reqOrigin->byteSize, req->byteSize);

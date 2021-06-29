@@ -124,7 +124,7 @@ public:
     : reqType(MetaFsFileControlType::Max),
       fd(MetaFsCommonConst::INVALID_FD),
       fileName(nullptr),
-      arrayName(nullptr),
+      arrayId(0),
       fileByteSize(MetaFsCommonConst::INVALID_BYTE_SIZE),
       volType(MetaVolumeType::Max),
       lock(MetaFileLockType::Default)
@@ -144,7 +144,7 @@ public:
     MetaFsFileControlType reqType;
     FileDescriptorType fd;
     std::string* fileName;
-    std::string* arrayName;
+    int arrayId;
     FileSizeType fileByteSize;
     MetaVolumeType volType;
     MetaFileLockType lock;

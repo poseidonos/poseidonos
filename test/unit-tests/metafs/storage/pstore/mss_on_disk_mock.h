@@ -19,7 +19,7 @@ class MockMssOnDisk : public MssOnDisk
 {
 public:
     using MssOnDisk::MssOnDisk;
-    MOCK_METHOD(POS_EVENT_ID, CreateMetaStore, (std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag), (override));
+    MOCK_METHOD(POS_EVENT_ID, CreateMetaStore, (int arrayId, MetaStorageType mediaType, uint64_t capacity, bool formatFlag), (override));
     MOCK_METHOD(POS_EVENT_ID, Open, (), (override));
     MOCK_METHOD(POS_EVENT_ID, Close, (), (override));
     MOCK_METHOD(uint64_t, GetCapacity, (MetaStorageType mediaType), (override));

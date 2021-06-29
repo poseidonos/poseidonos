@@ -47,8 +47,8 @@ public:
     virtual void StartThread(void) = 0;
     virtual void ExitThread(void);
 
-    virtual bool AddArrayInfo(std::string arrayName) = 0;
-    virtual bool RemoveArrayInfo(std::string arrayName) = 0;
+    virtual bool AddArrayInfo(int arrayId) = 0;
+    virtual bool RemoveArrayInfo(int arrayId) = 0;
 
     void PrepareThread(const char* name);
 

@@ -137,15 +137,15 @@ MetaIoManager::Finalize(void)
 }
 
 bool
-MetaIoManager::AddArrayInfo(std::string arrayName)
+MetaIoManager::AddArrayInfo(int arrayId)
 {
-    return ioScheduler->AddArrayInfo(arrayName);
+    return ioScheduler->AddArrayInfo(arrayId);
 }
 
 bool
-MetaIoManager::RemoveArrayInfo(std::string arrayName)
+MetaIoManager::RemoveArrayInfo(int arrayId)
 {
-    return ioScheduler->RemoveArrayInfo(arrayName);
+    return ioScheduler->RemoveArrayInfo(arrayId);
 }
 
 POS_EVENT_ID

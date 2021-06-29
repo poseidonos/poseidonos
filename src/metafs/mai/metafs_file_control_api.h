@@ -53,7 +53,7 @@ class MetaFsFileControlApi
 {
 public:
     MetaFsFileControlApi(void) = default;
-    explicit MetaFsFileControlApi(std::string arrayName);
+    explicit MetaFsFileControlApi(int arrayId);
     virtual ~MetaFsFileControlApi(void);
 
     virtual POS_EVENT_ID Create(std::string& fileName, uint64_t fileByteSize,
@@ -76,7 +76,7 @@ public:
     virtual MetaFileInodeInfo* Wbt_GetMetaFileInode(std::string& fileName);
 
     virtual void SetMss(MetaStorageSubsystem* metaStorage);
-    virtual void InitVolume(MetaVolumeType volType, std::string arrayName, MetaLpnType maxVolPageNum);
+    virtual void InitVolume(MetaVolumeType volType, int arrayId, MetaLpnType maxVolPageNum);
     virtual bool CreateVolume(MetaVolumeType volType);
     virtual bool OpenVolume(bool isNPOR);
     virtual bool CloseVolume(bool& isNPOR);
@@ -90,7 +90,7 @@ private:
     void _AddFileContext(std::string& fileName, FileDescriptorType fd);
     void _RemoveFileContext(FileDescriptorType fd);
 
-    std::string arrayName = "";
+    int arrayId = INT32_MAX;
     bool isNormal = false;
     MetaVolumeManager* volMgr;
 

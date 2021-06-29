@@ -59,10 +59,10 @@ public:
         EXPECT_CALL(*arrayInfo, GetName).WillRepeatedly(Return("TESTARRAY"));
         EXPECT_CALL(*arrayInfo, GetIndex).WillRepeatedly(Return(0));
 
-        mgmt = new MockMetaFsManagementApi(arrayInfo->GetName());
+        mgmt = new MockMetaFsManagementApi(arrayInfo->GetIndex());
         ctrl = new MockMetaFsFileControlApi();
-        wbt = new MockMetaFsWBTApi(arrayInfo->GetName(), ctrl);
-        io = new MockMetaFsIoApi(arrayInfo->GetName(), ctrl);
+        wbt = new MockMetaFsWBTApi(arrayInfo->GetIndex(), ctrl);
+        io = new MockMetaFsIoApi(arrayInfo->GetIndex(), ctrl);
         metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt);
 
         handler = new MioHandler(0, 0, ioSQ, ioCQ, mpioPool, mioPool);
@@ -107,7 +107,7 @@ TEST_F(MioHandlerTestFixture, Normal)
     EXPECT_CALL(*ctrl, GetMaxMetaLpn).WillRepeatedly(Return(100));
 
     handler->BindPartialMpioHandler(bottomhalfHandler);
-    result = handler->AddArrayInfo(arrayInfo->GetName());
+    result = handler->AddArrayInfo(arrayInfo->GetIndex());
     EXPECT_TRUE(result);
 
     MockMetaFsIoRequest* msg = new MockMetaFsIoRequest();
@@ -123,7 +123,7 @@ TEST_F(MioHandlerTestFixture, Normal)
         handler->TophalfMioProcessing();
     }
 
-    result = handler->RemoveArrayInfo(arrayInfo->GetName());
+    result = handler->RemoveArrayInfo(arrayInfo->GetIndex());
     EXPECT_TRUE(result);
 
     delete msg;
@@ -137,13 +137,13 @@ TEST_F(MioHandlerTestFixture, Repeat_AddAndRemoveArray)
     EXPECT_CALL(*arrayInfo, GetName).WillRepeatedly(Return("TESTARRAY"));
     EXPECT_CALL(*ctrl, GetMaxMetaLpn).WillRepeatedly(Return(100));
 
-    result = handler->AddArrayInfo(arrayInfo->GetName());
+    result = handler->AddArrayInfo(arrayInfo->GetIndex());
     EXPECT_TRUE(result);
 
-    result = handler->RemoveArrayInfo(arrayInfo->GetName());
+    result = handler->RemoveArrayInfo(arrayInfo->GetIndex());
     EXPECT_TRUE(result);
 
-    result = handler->RemoveArrayInfo(arrayInfo->GetName());
+    result = handler->RemoveArrayInfo(arrayInfo->GetIndex());
     EXPECT_FALSE(result);
 }
 

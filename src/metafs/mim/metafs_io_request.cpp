@@ -69,7 +69,7 @@ MetaFsIoRequest::CopyUserReqMsg(const MetaFsIoRequest& req)
     this->ioMode = req.ioMode;
     this->isFullFileIo = req.isFullFileIo;
     this->fd = req.fd;
-    this->arrayName = req.arrayName;
+    this->arrayId = req.arrayId;
     this->buf = req.buf;
     this->byteOffsetInFile = req.byteOffsetInFile;
     this->byteSize = req.byteSize;

@@ -50,10 +50,10 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
     arrayName = arrayInfo->GetName();
     arrayId = arrayInfo->GetIndex();
 
-    mgmt = new MetaFsManagementApi(arrayName);
-    ctrl = new MetaFsFileControlApi(arrayName);
-    io = new MetaFsIoApi(arrayName, ctrl);
-    wbt = new MetaFsWBTApi(arrayName, ctrl);
+    mgmt = new MetaFsManagementApi(arrayId);
+    ctrl = new MetaFsFileControlApi(arrayId);
+    io = new MetaFsIoApi(arrayId, ctrl);
+    wbt = new MetaFsWBTApi(arrayId, ctrl);
 
     MetaFsServiceSingleton::Instance()->Register(arrayName, arrayId, this);
 }
@@ -115,7 +115,7 @@ MetaFs::Init(void)
     if (POS_EVENT_ID::SUCCESS != rc)
         return (int)rc;
 
-    if (false == io->AddArray(arrayName))
+    if (false == io->AddArray(arrayId))
         return (int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED;
 
     isNormal = true;
@@ -137,14 +137,14 @@ MetaFs::Dispose(void)
             "It's failed to close meta volume, arrayName={}", arrayName);
     }
 
-    rc = mgmt->CloseSystem(arrayName);
+    rc = mgmt->CloseSystem(arrayId);
     if (rc != POS_EVENT_ID::SUCCESS)
     {
         MFS_TRACE_WARN((int)rc,
             "It's failed to unmount system, arrayName={}", arrayName);
     }
 
-    io->RemoveArray(arrayName);
+    io->RemoveArray(arrayId);
 
     _ClearMss();
 }
@@ -155,7 +155,7 @@ MetaFs::Shutdown(void)
     MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
             "Shutdown metafs, arrayName={}", arrayName);
 
-    io->RemoveArray(arrayName);
+    io->RemoveArray(arrayId);
 
     // TODO(munseop.lim): refactoring requires
     if (nullptr != metaStorage)
@@ -194,7 +194,7 @@ MetaFs::_Initialize(void)
         return false;
     }
 
-    if (POS_EVENT_ID::SUCCESS != mgmt->InitializeSystem(arrayName, &mediaInfoList))
+    if (POS_EVENT_ID::SUCCESS != mgmt->InitializeSystem(arrayId, &mediaInfoList))
         return false;
 
     if (nullptr == metaStorage)
@@ -227,9 +227,9 @@ MetaFs::_PrepareMetaVolume(void)
             maxVolumeLpn -= mgmt->GetRegionSizeInLpn(); // considered due to MBR placement for SSD volume
         }
 
-        ctrl->InitVolume(volumeType, arrayName, maxVolumeLpn);
+        ctrl->InitVolume(volumeType, arrayId, maxVolumeLpn);
 
-        rc = metaStorage->CreateMetaStore(arrayName, item.mediaType, item.totalCapacity, !isLoaded);
+        rc = metaStorage->CreateMetaStore(arrayId, item.mediaType, item.totalCapacity, !isLoaded);
         if (rc != POS_EVENT_ID::SUCCESS)
         {
             MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED,

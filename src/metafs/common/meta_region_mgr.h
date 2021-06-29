@@ -42,7 +42,7 @@ namespace pos
 class MetaRegionManager
 {
 public:
-    explicit MetaRegionManager(std::string arrayName);
+    explicit MetaRegionManager(int arrayId);
     virtual ~MetaRegionManager(void);
 
     // Init: used to initialize internal context based on given paramters
@@ -60,6 +60,6 @@ protected:
     MetaStorageType mediaType;
     MetaLpnType baseLpn;
     MetaLpnType maxLpn;
-    std::string arrayName;
+    int arrayId;
 };
 } // namespace pos

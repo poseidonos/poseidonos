@@ -61,8 +61,8 @@ public:
     Mio* DispatchMio(MetaFsIoRequest& reqMsg);
     void ExecuteMio(Mio& mio);
 
-    bool AddArrayInfo(std::string arrayName);
-    bool RemoveArrayInfo(std::string arrayName);
+    bool AddArrayInfo(int arrayId);
+    bool RemoveArrayInfo(int arrayId);
 
 private:
     void _HandleIoSQ(void);
@@ -94,8 +94,6 @@ private:
     std::multimap<MetaLpnType, MetaFsIoRequest*> pendingIoRetryQ;
     static const uint32_t NUM_STORAGE = (int)MetaStorageType::Max;
 
-    BitMap* checkerBitmap;
-    std::unordered_map<std::string, uint32_t> checkerMap;
     MetaFsIoRangeOverlapChker* ioRangeOverlapChker[MetaFsConfig::MAX_ARRAY_CNT][NUM_STORAGE] = { 0 };
 
     static const uint32_t MAX_CONCURRENT_MIO_PROC_THRESHOLD = MetaFsConfig::MAX_CONCURRENT_IO_CNT;

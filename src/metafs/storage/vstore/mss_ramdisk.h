@@ -55,10 +55,10 @@ namespace pos
 class MssRamdisk : public MetaStorageSubsystem
 {
 public:
-    explicit MssRamdisk(std::string arrayName);
+    explicit MssRamdisk(int arrayId);
     virtual ~MssRamdisk(void);
 
-    virtual POS_EVENT_ID CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) override;
+    virtual POS_EVENT_ID CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) override;
     virtual POS_EVENT_ID Open(void) override;
     virtual POS_EVENT_ID Close(void) override;
     virtual POS_EVENT_ID ReadPage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages) override;

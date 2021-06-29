@@ -36,8 +36,8 @@
 
 namespace pos
 {
-MetaFsWBTApi::MetaFsWBTApi(std::string arrayName, MetaFsFileControlApi* ctrl)
-: arrayName(arrayName),
+MetaFsWBTApi::MetaFsWBTApi(int arrayId, MetaFsFileControlApi* ctrl)
+: arrayId(arrayId),
   ctrl(ctrl)
 {
 }

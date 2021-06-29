@@ -196,7 +196,7 @@ Mpio::_CheckIOStatus(MpAioState expNextState)
 void
 Mpio::BuildCompositeMDPage(void)
 {
-    mdpage.Make(io.metaLpn, io.targetFD, io.arrayName);
+    mdpage.Make(io.metaLpn, io.targetFD, io.arrayId);
 }
 
 void*
@@ -221,7 +221,7 @@ Mpio::IsValidPage(void)
         // clean page , need to change read state machin.
     }
 
-    bool isValid = mdpage.CheckValid(io.arrayName);
+    bool isValid = mdpage.CheckValid(io.arrayId);
     if (!isValid)
     {
         MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
@@ -307,12 +307,12 @@ Mpio::DoIO(MpAioState expNextState)
 #if RANGE_OVERLAP_CHECK_EN
         if (cacheState != MpioCacheState::Init)
         {
-            mssAioData.Init(io.arrayName, io.targetMediaType, io.metaLpn, io.pageCnt, buf, io.mpioId, io.tagId, 0);
+            mssAioData.Init(io.arrayId, io.targetMediaType, io.metaLpn, io.pageCnt, buf, io.mpioId, io.tagId, 0);
         }
         else
 #endif
         {
-            mssAioData.Init(io.arrayName, io.targetMediaType, io.metaLpn, io.pageCnt, buf, io.mpioId, io.tagId, io.startByteOffset);
+            mssAioData.Init(io.arrayId, io.targetMediaType, io.metaLpn, io.pageCnt, buf, io.mpioId, io.tagId, io.startByteOffset);
         }
         mssAioCbCxt.Init(&mssAioData, mpioDoneCallback);
 

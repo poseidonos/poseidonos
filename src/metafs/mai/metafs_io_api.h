@@ -47,7 +47,7 @@ namespace pos
 class MetaFsIoApi
 {
 public:
-    MetaFsIoApi(std::string arrayName, MetaFsFileControlApi* ctrl);
+    MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl);
     virtual ~MetaFsIoApi(void);
 
     virtual POS_EVENT_ID Read(FileDescriptorType fd, void* buf);
@@ -58,8 +58,8 @@ public:
                     FileSizeType byteSize, void* buf);
     virtual POS_EVENT_ID SubmitIO(MetaFsAioCbCxt* cxt);
 
-    virtual bool AddArray(std::string& arrayName);
-    virtual bool RemoveArray(std::string& arrayName);
+    virtual bool AddArray(int arrayId);
+    virtual bool RemoveArray(int arrayId);
 
     void SetMss(MetaStorageSubsystem* metaStorage);
     virtual void SetStatus(bool isNormal);
@@ -71,7 +71,7 @@ private:
     POS_EVENT_ID _CheckFileIoBoundary(MetaFsIoRequest& reqMsg);
     POS_EVENT_ID _CheckReqSanity(MetaFsIoRequest& reqMsg);
 
-    std::string arrayName = "";
+    int arrayId = INT32_MAX;
     bool isNormal = false;
     MetaIoManager* ioMgr;
     MetaFsFileControlApi* ctrlMgr = nullptr;

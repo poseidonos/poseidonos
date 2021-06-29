@@ -78,7 +78,8 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
         std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
 
     MetaFsAioCbCxt* aioCb = new MetaFsAioCbCxt(ctx->opcode, ctx->fd,
-        arrayName, ctx->fileOffset, ctx->length, (void*)ctx->buffer,
+        MetaFsServiceSingleton::Instance()->GetArrayId(arrayName),
+        ctx->fileOffset, ctx->length, (void*)ctx->buffer,
         AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx));
 
     POS_EVENT_ID rc = metaFs->io->SubmitIO(aioCb);

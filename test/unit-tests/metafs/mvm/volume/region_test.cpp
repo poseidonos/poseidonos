@@ -24,9 +24,9 @@ public:
     SetUp(void)
     {
         inode = new MockMetaFileInode();
-        mss = new MockMetaStorageSubsystem(arrayName);
+        mss = new MockMetaStorageSubsystem(arrayId);
 
-        region = new Region(arrayName, type, inode, baseMetaLpn,
+        region = new Region(arrayId, type, inode, baseMetaLpn,
                                 count, inUse, mss);
     }
 
@@ -44,7 +44,7 @@ protected:
     MockMetaFileInode* inode = nullptr;
     MockMetaStorageSubsystem* mss = nullptr;
 
-    std::string arrayName = "TESTARRAY";
+    int arrayId = 0;
     MetaStorageType type = MetaStorageType::SSD;
     uint64_t baseMetaLpn = 100;
     uint64_t count = 50;
@@ -66,7 +66,7 @@ TEST_F(RegionTestFixture, CheckInode)
 
 TEST_F(RegionTestFixture, CheckOperation0)
 {
-    Region* regionTest = new Region(arrayName, type, inode, baseMetaLpn,
+    Region* regionTest = new Region(arrayId, type, inode, baseMetaLpn,
                                 count, inUse, mss);
     MetaLpnType baseLpn = regionTest->GetContent()->GetBaseMetaLpn();
 

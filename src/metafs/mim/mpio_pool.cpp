@@ -99,7 +99,8 @@ MpioPool::~MpioPool(void)
 }
 
 Mpio*
-MpioPool::Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn, bool partialIO, std::string arrayName)
+MpioPool::Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn,
+                bool partialIO, int arrayId)
 {
 #if RANGE_OVERLAP_CHECK_EN
     Mpio* mpio = nullptr;
@@ -119,7 +120,7 @@ MpioPool::Alloc(MpioType mpioType, MetaStorageType storageType, MetaLpnType lpn,
     else
     {
         // find mpio
-        mpio = _CacheHit(mpioType, lpn, arrayName);
+        mpio = _CacheHit(mpioType, lpn, arrayId);
         if (nullptr != mpio)
             return mpio;
 
@@ -178,11 +179,9 @@ MpioPool::GetPoolSize(void)
 void
 MpioPool::_FreeAllMpioinPool(MpioType type)
 {
-    std::vector<Mpio*>& pool = mpioList[(uint32_t)type];
-    for (std::vector<Mpio*>::iterator itr = pool.begin(); itr != pool.end(); ++itr)
+    for (auto itr : mpioList[(uint32_t)type])
     {
-        delete *itr;
-        *itr = nullptr;
+        delete itr;
     }
 }
 
@@ -238,12 +237,12 @@ MpioPool::_IsEmptyCached(void)
 }
 
 Mpio*
-MpioPool::_CacheHit(MpioType mpioType, MetaLpnType lpn, std::string arrayName)
+MpioPool::_CacheHit(MpioType mpioType, MetaLpnType lpn, int arrayId)
 {
     auto range = cachedMpio.equal_range(lpn);
     for (multimap<MetaLpnType, Mpio*>::iterator iter = range.first; iter != range.second; ++iter)
     {
-        if (arrayName == iter->second->io.arrayName)
+        if (arrayId == iter->second->io.arrayId)
         {
             return iter->second;
         }

@@ -61,7 +61,7 @@ Region::Move(Region* target)
             break;
         }
 
-        bufferPage.Make(targetBaseLPN + idx, content.GetInode()->data.basic.field.fd, arrayName);
+        bufferPage.Make(targetBaseLPN + idx, content.GetInode()->data.basic.field.fd, arrayId);
 
         rc = mssIntf->WritePage(regionType, targetBaseLPN + idx, bufferPage.GetDataBuf(), 1);
         if (rc != POS_EVENT_ID::SUCCESS)

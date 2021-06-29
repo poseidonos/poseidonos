@@ -29,11 +29,11 @@ public:
     virtual void
     SetUp(void)
     {
-        fileMgr = new NiceMock<MetaFileManager>(arrayName);
-        inodeMgr = new NiceMock<MetaFileInodeManager>(arrayName);
-        catalogMgr = new NiceMock<VolumeCatalogManager>(arrayName);
+        fileMgr = new NiceMock<MetaFileManager>(arrayId);
+        inodeMgr = new NiceMock<MetaFileInodeManager>(arrayId);
+        catalogMgr = new NiceMock<VolumeCatalogManager>(arrayId);
 
-        volume = new SsdMetaVolume(fileMgr, inodeMgr, catalogMgr, arrayName, maxLpn);
+        volume = new SsdMetaVolume(fileMgr, inodeMgr, catalogMgr, arrayId, maxLpn);
         volume->Init(metaStorage);
         volume->InitVolumeBaseLpn();
     }
@@ -51,7 +51,7 @@ protected:
     NiceMock<MetaFileInodeManager>* inodeMgr;
     NiceMock<VolumeCatalogManager>* catalogMgr;
 
-    std::string arrayName = "TESTARRAY";
+    int arrayId = 0;
     MetaLpnType maxLpn = 8192;
     MockMetaStorageSubsystem* metaStorage;
     MetaFilePropertySet prop;

@@ -47,9 +47,9 @@ namespace pos
 class RegionDeque
 {
 public:
-    RegionDeque(std::string arrayName, MetaStorageType type, InodeTableContent* content, uint64_t maxLpnCount, MetaStorageSubsystem* metaStorage)
+    RegionDeque(int arrayId, MetaStorageType type, InodeTableContent* content, uint64_t maxLpnCount, MetaStorageSubsystem* metaStorage)
     {
-        this->arrayName = arrayName;
+        this->arrayId = arrayId;
         regionType = type;
         maxMetaLpn = maxLpnCount - 1;
         remainedMetaLpnCount = maxMetaLpn + 1;
@@ -104,7 +104,7 @@ private:
     bool needCompaction;
     InodeTableContent* tableContent;
     uint64_t reducedLpnCount;
-    std::string arrayName;
+    int arrayId;
     MetaStorageSubsystem* metaStorage;
 };
 } // namespace pos

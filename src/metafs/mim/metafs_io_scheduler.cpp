@@ -181,13 +181,13 @@ MetaFsIoScheduler::GetMioHandlerCount(void)
 }
 
 bool
-MetaFsIoScheduler::AddArrayInfo(std::string arrayName)
+MetaFsIoScheduler::AddArrayInfo(int arrayId)
 {
     bool result = true;
 
     for (auto metaIoWorker : metaIoWorkerList)
     {
-        if (false == metaIoWorker->AddArrayInfo(arrayName))
+        if (false == metaIoWorker->AddArrayInfo(arrayId))
         {
             result = false;
             break;
@@ -198,13 +198,13 @@ MetaFsIoScheduler::AddArrayInfo(std::string arrayName)
 }
 
 bool
-MetaFsIoScheduler::RemoveArrayInfo(std::string arrayName)
+MetaFsIoScheduler::RemoveArrayInfo(int arrayId)
 {
     bool result = true;
 
     for (auto metaIoWorker : metaIoWorkerList)
     {
-        if (false == metaIoWorker->RemoveArrayInfo(arrayName))
+        if (false == metaIoWorker->RemoveArrayInfo(arrayId))
         {
             result = false;
             break;

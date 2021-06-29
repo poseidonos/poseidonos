@@ -60,7 +60,7 @@ public:
     bool IsValid(void);
 
     MetaFsControlReqType reqType;
-    std::string arrayName;
+    int arrayId;
     MetaStorageMediaInfoList* mediaList = nullptr;
 };
 } // namespace pos

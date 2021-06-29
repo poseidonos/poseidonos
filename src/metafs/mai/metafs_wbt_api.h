@@ -45,7 +45,7 @@ namespace pos
 class MetaFsWBTApi
 {
 public:
-    MetaFsWBTApi(std::string arrayName, MetaFsFileControlApi* ctrl);
+    MetaFsWBTApi(int arrayId, MetaFsFileControlApi* ctrl);
     virtual ~MetaFsWBTApi(void);
 
     bool GetMetaFileList(std::vector<MetaFileInfoDumpCxt>& result);
@@ -54,7 +54,7 @@ public:
     void SetStatus(bool isNormal);
 
 private:
-    std::string arrayName = "";
+    int arrayId = INT32_MAX;
     bool isNormal = false;
 
     MetaFsFileControlApi* ctrl = nullptr;

@@ -45,12 +45,12 @@ namespace pos
 class MetaFsManagementApi
 {
 public:
-    explicit MetaFsManagementApi(std::string arrayName);
+    explicit MetaFsManagementApi(int arrayId);
     virtual ~MetaFsManagementApi(void);
 
-    virtual POS_EVENT_ID InitializeSystem(std::string& arrayName,
+    virtual POS_EVENT_ID InitializeSystem(int arrayId,
                                 MetaStorageMediaInfoList* mediaInfoList);
-    virtual POS_EVENT_ID CloseSystem(std::string& arrayName);
+    virtual POS_EVENT_ID CloseSystem(int arrayId);
 
     virtual uint64_t GetEpochSignature(void);
     virtual MetaFsStorageIoInfoList& GetAllStoragePartitionInfo(void);
@@ -62,7 +62,7 @@ public:
     virtual void SetStatus(bool isNormal);
 
 private:
-    std::string arrayName = "";
+    int arrayId = INT32_MAX;
     bool isNormal = false;
     MetaFsSystemManager* sysMgr;
 };

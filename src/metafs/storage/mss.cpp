@@ -34,8 +34,8 @@
 
 namespace pos
 {
-MetaStorageSubsystem::MetaStorageSubsystem(std::string arrayName)
-: arrayName(arrayName)
+MetaStorageSubsystem::MetaStorageSubsystem(int arrayId)
+: arrayId(arrayId)
 {
 }
 

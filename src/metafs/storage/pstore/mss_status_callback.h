@@ -67,9 +67,9 @@ public:
     }
 
     void
-    Init(std::string arrayName, MetaStorageType media, MetaLpnType metaLpn, MetaLpnType lpnCnt, void* buf, uint32_t id, uint32_t tagId, FileSizeType offset)
+    Init(int arrayId, MetaStorageType media, MetaLpnType metaLpn, MetaLpnType lpnCnt, void* buf, uint32_t id, uint32_t tagId, FileSizeType offset)
     {
-        this->arrayName = arrayName;
+        this->arrayId = arrayId;
         this->media = media;
         this->metaLpn = metaLpn;
         this->lpnCnt = lpnCnt;
@@ -81,7 +81,7 @@ public:
         this->offset = offset;
     }
 
-    std::string arrayName;
+    int arrayId;
     MetaStorageType media;
     MetaLpnType metaLpn;
     MetaLpnType lpnCnt;
@@ -103,9 +103,9 @@ public:
     void Init(MssAioData* cxt, MssCallbackPointer& callback);
     virtual ~MssAioCbCxt(void);
     void SaveIOStatus(int error);
-    std::string& GetArrayName(void)
+    int GetArrayId(void)
     {
-        return cxt->arrayName;
+        return cxt->arrayId;
     }
 
 private:

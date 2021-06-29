@@ -103,7 +103,7 @@ public:
     MetaIoMode ioMode;
     bool isFullFileIo;
     FileDescriptorType fd;
-    std::string arrayName;
+    int arrayId;
     FileBufType buf;
     FileSizeType byteOffsetInFile;
     FileSizeType byteSize;

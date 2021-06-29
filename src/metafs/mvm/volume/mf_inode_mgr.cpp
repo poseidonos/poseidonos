@@ -38,8 +38,8 @@
 
 namespace pos
 {
-MetaFileInodeManager::MetaFileInodeManager(std::string arrayName)
-: OnVolumeMetaRegionManager(arrayName),
+MetaFileInodeManager::MetaFileInodeManager(int arrayId)
+: OnVolumeMetaRegionManager(arrayId),
   inodeHdr(nullptr),
   inodeTable(nullptr)
 {
@@ -548,7 +548,7 @@ MetaFileInodeManager::Compaction(void)
         maxLpn = content->allocExtentsList[index].GetStartLpn() + content->allocExtentsList[index].GetCount();
     }
 
-    RegionDeque* regionList = new RegionDeque(arrayName, mediaType, inodeTable->GetContent(), maxLpn, metaStorage);
+    RegionDeque* regionList = new RegionDeque(arrayId, mediaType, inodeTable->GetContent(), maxLpn, metaStorage);
 
     regionList->ReadRegions();
     regionList->InsertDone();

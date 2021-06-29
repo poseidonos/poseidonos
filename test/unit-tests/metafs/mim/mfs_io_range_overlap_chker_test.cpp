@@ -11,7 +11,7 @@ TEST(MetaFsIoRangeOverlapChker, MetaFsIoRangeOverlapChker_NormalRead)
 {
     const MetaLpnType maxLpn = 100;
     const MetaLpnType testLpn = 80;
-    const std::string arrayName = "TESTARRAY";
+    int arrayId = 0;
     MetaFsIoRangeOverlapChker* checker = new MetaFsIoRangeOverlapChker();
 
     checker->Init(maxLpn);
@@ -26,7 +26,7 @@ TEST(MetaFsIoRangeOverlapChker, MetaFsIoRangeOverlapChker_NormalRead)
     req.targetMediaType = MetaStorageType::SSD;
     req.byteOffsetInFile = 0;
     req.byteSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
-    req.arrayName = arrayName;
+    req.arrayId = arrayId;
     req.baseMetaLpn = testLpn;
 
     bool result = checker->IsRangeOverlapConflicted(&req);
@@ -49,7 +49,7 @@ TEST(MetaFsIoRangeOverlapChker, MetaFsIoRangeOverlapChker_NormalWrite)
 {
     const MetaLpnType maxLpn = 100;
     const MetaLpnType testLpn = 80;
-    const std::string arrayName = "TESTARRAY";
+    int arrayId = 0;
     MetaFsIoRangeOverlapChker* checker = new MetaFsIoRangeOverlapChker();
 
     checker->Init(maxLpn);
@@ -64,7 +64,7 @@ TEST(MetaFsIoRangeOverlapChker, MetaFsIoRangeOverlapChker_NormalWrite)
     req.targetMediaType = MetaStorageType::SSD;
     req.byteOffsetInFile = 0;
     req.byteSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
-    req.arrayName = arrayName;
+    req.arrayId = arrayId;
     req.baseMetaLpn = testLpn;
 
     bool result = checker->IsRangeOverlapConflicted(&req);

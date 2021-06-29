@@ -71,6 +71,10 @@ MetaFsService::Initialize(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t wor
 void
 MetaFsService::Register(std::string& arrayName, int arrayId, MetaFs* fileSystem)
 {
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "New metafs instance registered. arrayId={}, arrayName={}",
+            arrayId, arrayName);
+
     arrayNameToId.insert(std::pair<std::string, int>(arrayName, arrayId));
     fileSystems[arrayId] = fileSystem;
 }
@@ -80,6 +84,9 @@ MetaFsService::Deregister(std::string& arrayName)
 {
     int arrayId = arrayNameToId[arrayName];
     arrayNameToId.erase(arrayName);
+
+    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "A metafs instance deregistered. arrayName={}", arrayName);
 
     fileSystems[arrayId] = nullptr;
 }
@@ -96,6 +103,18 @@ MetaFsService::GetMetaFs(std::string& arrayName)
     {
         return fileSystems[iter->second];
     }
+}
+
+MetaFs*
+MetaFsService::GetMetaFs(int arrayId)
+{
+    return fileSystems[arrayId];
+}
+
+int
+MetaFsService::GetArrayId(std::string& arrayName)
+{
+    return arrayNameToId[arrayName];
 }
 
 void

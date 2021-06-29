@@ -36,15 +36,15 @@
 
 namespace pos
 {
-NvRamMetaVolume::NvRamMetaVolume(std::string arrayName, MetaLpnType maxVolumePageNum)
-: MetaVolume(arrayName, MetaVolumeType::NvRamVolume, maxVolumePageNum)
+NvRamMetaVolume::NvRamMetaVolume(int arrayId, MetaLpnType maxVolumePageNum)
+: MetaVolume(arrayId, MetaVolumeType::NvRamVolume, maxVolumePageNum)
 {
 }
 
 NvRamMetaVolume::NvRamMetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
-        VolumeCatalogManager* catalogMgr, std::string arrayName,
+        VolumeCatalogManager* catalogMgr, int arrayId,
         MetaLpnType maxVolumePageNum)
-: MetaVolume(fileMgr, inodeMgr, catalogMgr, arrayName, MetaVolumeType::NvRamVolume, maxVolumePageNum)
+: MetaVolume(fileMgr, inodeMgr, catalogMgr, arrayId, MetaVolumeType::NvRamVolume, maxVolumePageNum)
 {
 }
 

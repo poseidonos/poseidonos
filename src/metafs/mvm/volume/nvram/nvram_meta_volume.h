@@ -43,9 +43,9 @@ namespace pos
 class NvRamMetaVolume : public MetaVolume
 {
 public:
-    NvRamMetaVolume(std::string arrayName, MetaLpnType maxVolumePageNum);
+    NvRamMetaVolume(int arrayId, MetaLpnType maxVolumePageNum);
     NvRamMetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
-            VolumeCatalogManager* catalogMgr, std::string arrayName,
+            VolumeCatalogManager* catalogMgr, int arrayId,
             MetaLpnType maxVolumePageNum);
     ~NvRamMetaVolume(void);
     virtual bool IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop) override;

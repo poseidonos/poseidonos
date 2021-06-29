@@ -89,12 +89,12 @@ MDPage::AttachControlInfo(void)
 }
 
 void
-MDPage::Make(MetaLpnType metaLpn, FileDescriptorType fd, std::string& arrayName)
+MDPage::Make(MetaLpnType metaLpn, FileDescriptorType fd, int arrayId)
 {
     assert(dataAll != nullptr);
 
     AttachControlInfo();
-    _UpdateControlInfo(metaLpn, fd, arrayName);
+    _UpdateControlInfo(metaLpn, fd, arrayId);
 }
 
 uint32_t
@@ -104,23 +104,23 @@ MDPage::GetMfsSignature(void)
 }
 
 void
-MDPage::_UpdateControlInfo(MetaLpnType srcLpn, FileDescriptorType srcFD, std::string& arrayName)
+MDPage::_UpdateControlInfo(MetaLpnType srcLpn, FileDescriptorType srcFD, int arrayId)
 {
     memset(ctrlInfo, 0x0, sizeof(MDPageControlInfo));
 
     ctrlInfo->mfsSignature = MDPageControlInfo::MDPAGE_CTRL_INFO_SIG;
-    ctrlInfo->epochSignature = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->GetEpochSignature();
+    ctrlInfo->epochSignature = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->GetEpochSignature();
     ctrlInfo->metaLpn = srcLpn;
     ctrlInfo->fd = srcFD;
 }
 
 bool
-MDPage::CheckValid(std::string& arrayName)
+MDPage::CheckValid(int arrayId)
 {
     // detect mdpage validity by combining two signatures
     // note that it has to have additional logic to detect signature corruption case later on
     return (ctrlInfo->mfsSignature == MDPageControlInfo::MDPAGE_CTRL_INFO_SIG &&
-        ctrlInfo->epochSignature == MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->GetEpochSignature());
+        ctrlInfo->epochSignature == MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->GetEpochSignature());
 }
 
 bool

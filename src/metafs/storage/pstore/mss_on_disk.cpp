@@ -49,8 +49,8 @@ namespace pos
 /**
  * Constructor
  */
-MssOnDisk::MssOnDisk(std::string arrayName)
-: MetaStorageSubsystem(arrayName),
+MssOnDisk::MssOnDisk(int arrayId)
+: MetaStorageSubsystem(arrayId),
   retryIoCnt(0)
 {
     for (int i = 0; i < static_cast<int>(MetaStorageType::Max); i++)
@@ -92,7 +92,7 @@ MssOnDisk::_Finalize(void)
  * @return Success(0)/Failure(-1)
  */
 POS_EVENT_ID
-MssOnDisk::CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag)
+MssOnDisk::CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capacity, bool formatFlag)
 {
     // 4KB aligned
     assert(capacity % MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES == 0);
@@ -112,7 +112,7 @@ MssOnDisk::CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uin
     // Can also choose update type base on mediaType
     if (INPLACE)
     {
-        mssDiskPlace[index] = new MssDiskInplace(arrayName, mediaType, capacity);
+        mssDiskPlace[index] = new MssDiskInplace(arrayId, mediaType, capacity);
     }
     else
     {
@@ -214,7 +214,7 @@ MssOnDisk::_SendSyncRequest(IODirection direction, MetaStorageType mediaType, Me
         do
         {
             ioStatus = IIOSubmitHandler::GetInstance()->SyncIO(direction, bufferList,
-                blkAddr, currLpnCnt, storagelld->GetPartitionType(), arrayName);
+                blkAddr, currLpnCnt, storagelld->GetPartitionType(), arrayId);
 
             if (ioStatus == IOSubmitHandlerStatus::SUCCESS ||
                 ioStatus == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
@@ -360,7 +360,7 @@ MssOnDisk::_SendAsyncRequest(IODirection direction, MssAioCbCxt* cb)
     {
         ioStatus = IIOSubmitHandler::GetInstance()->SubmitAsyncIO(direction, bufferList,
             blkAddr, numPages /*4KB*/, storagelld->GetPartitionType(),
-            callback, arrayName);
+            callback, arrayId);
         if (ioStatus == IOSubmitHandlerStatus::SUCCESS ||
             ioStatus == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
         {

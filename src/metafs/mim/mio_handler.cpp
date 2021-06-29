@@ -69,10 +69,6 @@ MioHandler::MioHandler(int threadId, int coreId, int coreCount)
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "mio handler constructed. threadId={}, coreId={}",
         threadId, coreId);
-
-    checkerBitmap = new BitMap(MetaFsConfig::MAX_ARRAY_CNT);
-    checkerBitmap->ResetBitmap();
-    checkerMap.clear();
 }
 
 MioHandler::MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* ioSQ,
@@ -89,10 +85,6 @@ MioHandler::MioHandler(int threadId, int coreId, MetaFsIoQ<MetaFsIoRequest*>* io
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
 
     this->bottomhalfHandler = nullptr;
-
-    checkerBitmap = new BitMap(MetaFsConfig::MAX_ARRAY_CNT);
-    checkerBitmap->ResetBitmap();
-    checkerMap.clear();
 }
 
 MioHandler::~MioHandler(void)
@@ -110,11 +102,6 @@ MioHandler::~MioHandler(void)
             }
         }
     }
-
-    checkerBitmap->ResetBitmap();
-    delete checkerBitmap;
-
-    checkerMap.clear();
 
     if (nullptr != ioCQ)
         delete ioCQ;
@@ -319,7 +306,7 @@ MioHandler::_AllocNewMio(MetaFsIoRequest& reqMsg)
 
     MetaLpnType fileBaseLpn = reqMsg.fileCtx->fileBaseLpn;
 
-    mio->Setup(&reqMsg, fileBaseLpn, MetaFsServiceSingleton::Instance()->GetMetaFs(reqMsg.arrayName)->GetMss());
+    mio->Setup(&reqMsg, fileBaseLpn, MetaFsServiceSingleton::Instance()->GetMetaFs(reqMsg.arrayId)->GetMss());
 
     if (false == mio->IsSyncIO())
     {
@@ -364,29 +351,20 @@ MioHandler::_IsRangeOverlapConflicted(MetaFsIoRequest* reqMsg)
         return false;
     }
 
-    auto it = checkerMap.find(reqMsg->arrayName);
-    assert(it != checkerMap.end());
-
-    return ioRangeOverlapChker[it->second][(int)reqMsg->targetMediaType]->IsRangeOverlapConflicted(reqMsg);
+    return ioRangeOverlapChker[reqMsg->arrayId][(int)reqMsg->targetMediaType]->IsRangeOverlapConflicted(reqMsg);
 }
 
 void
 MioHandler::_RegisterRangeLockInfo(MetaFsIoRequest* reqMsg)
 {
-    auto it = checkerMap.find(reqMsg->arrayName);
-    assert(it != checkerMap.end());
-
-    ioRangeOverlapChker[it->second][(int)reqMsg->targetMediaType]->PushReqToRangeLockMap(reqMsg);
+    ioRangeOverlapChker[reqMsg->arrayId][(int)reqMsg->targetMediaType]->PushReqToRangeLockMap(reqMsg);
 }
 
 void
 MioHandler::_FreeLockContext(Mio* mio)
 {
-    auto it = checkerMap.find(mio->GetArrayName());
-    assert(it != checkerMap.end());
-
     int storage = mio->IsTargetStorageSSD() ? (int)MetaStorageType::SSD : (int)MetaStorageType::NVRAM;
-    ioRangeOverlapChker[it->second][storage]->FreeLockContext(mio->GetStartLpn(), mio->IsRead());
+    ioRangeOverlapChker[mio->GetArrayId()][storage]->FreeLockContext(mio->GetStartLpn(), mio->IsRead());
 }
 
 void
@@ -396,44 +374,43 @@ MioHandler::ExecuteMio(Mio& mio)
 }
 
 bool
-MioHandler::AddArrayInfo(std::string arrayName)
+MioHandler::AddArrayInfo(int arrayId)
 {
-    uint32_t index = checkerBitmap->FindFirstZero();
-    checkerBitmap->SetBit(index);
-    checkerMap.insert(std::pair<std::string, uint32_t>(arrayName, index));
+    assert(arrayId < (int)MetaFsConfig::MAX_ARRAY_CNT);
 
-    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
 
     for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
     {
         size_t maxLpn = metaFs->ctrl->GetMaxMetaLpn(static_cast<MetaVolumeType>(storage));
 
-        ioRangeOverlapChker[index][storage] = new MetaFsIoRangeOverlapChker();
-        ioRangeOverlapChker[index][storage]->Init(maxLpn);
+        ioRangeOverlapChker[arrayId][storage] = new MetaFsIoRangeOverlapChker();
+        ioRangeOverlapChker[arrayId][storage]->Init(maxLpn);
     }
 
     return true;
 }
 
 bool
-MioHandler::RemoveArrayInfo(std::string arrayName)
+MioHandler::RemoveArrayInfo(int arrayId)
 {
-    auto it = checkerMap.find(arrayName);
-    if (it == checkerMap.end())
-        return false;
-    else
-    {
-        uint32_t index = it->second;
-        checkerBitmap->ClearBit(index);
-        checkerMap.erase(arrayName);
+    assert(arrayId < (int)MetaFsConfig::MAX_ARRAY_CNT);
 
-        for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
+    bool result = true;
+
+    for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
+    {
+        if (nullptr == ioRangeOverlapChker[arrayId][storage])
         {
-            delete ioRangeOverlapChker[index][storage];
-            ioRangeOverlapChker[index][storage] = nullptr;
+            result = false;
+            continue;
         }
-        return true;
+
+        delete ioRangeOverlapChker[arrayId][storage];
+        ioRangeOverlapChker[arrayId][storage] = nullptr;
     }
+
+    return result;
 }
 
 void

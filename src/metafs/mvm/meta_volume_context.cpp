@@ -45,9 +45,10 @@ MetaVolumeContext::~MetaVolumeContext(void)
 }
 
 void
-MetaVolumeContext::InitContext(MetaVolumeType volumeType, std::string arrayName, MetaLpnType maxVolPageNum, MetaStorageSubsystem* metaStorage)
+MetaVolumeContext::InitContext(MetaVolumeType volumeType, int arrayId,
+                MetaLpnType maxVolPageNum, MetaStorageSubsystem* metaStorage)
 {
-    MetaVolume* volume = _InitVolume(volumeType, arrayName, maxVolPageNum, metaStorage);
+    MetaVolume* volume = _InitVolume(volumeType, arrayId, maxVolPageNum, metaStorage);
     volumeContainer.RegisterVolumeInstance(volumeType, volume);
 
     _SetGlobalMaxFileSizeLimit(maxVolPageNum);
@@ -336,16 +337,16 @@ MetaVolumeContext::LookupFileDescByName(std::string& fileName)
 }
 
 MetaVolume*
-MetaVolumeContext::_InitVolume(MetaVolumeType volType, std::string arrayName, MetaLpnType maxLpnNum, MetaStorageSubsystem* metaStorage)
+MetaVolumeContext::_InitVolume(MetaVolumeType volType, int arrayId, MetaLpnType maxLpnNum, MetaStorageSubsystem* metaStorage)
 {
     MetaVolume* volume;
     if (MetaVolumeType::SsdVolume == volType)
     {
-        volume = new SsdMetaVolume(arrayName, maxLpnNum);
+        volume = new SsdMetaVolume(arrayId, maxLpnNum);
     }
     else if (MetaVolumeType::NvRamVolume == volType)
     {
-        volume = new NvRamMetaVolume(arrayName, maxLpnNum);
+        volume = new NvRamMetaVolume(arrayId, maxLpnNum);
         volumeContainer.SetNvRamVolumeAvailable();
     }
     else

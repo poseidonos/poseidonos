@@ -89,11 +89,11 @@ private:
 class MssOnDisk : public MetaStorageSubsystem
 {
 public:
-    explicit MssOnDisk(std::string arrayName);
+    explicit MssOnDisk(int arrayId);
     virtual ~MssOnDisk(void);
 
     // Need to remove this function
-    virtual POS_EVENT_ID CreateMetaStore(std::string arrayName, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) override;
+    virtual POS_EVENT_ID CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false) override;
     virtual POS_EVENT_ID Open(void) override;
     virtual POS_EVENT_ID Close(void) override;
     virtual uint64_t GetCapacity(MetaStorageType mediaType) override;

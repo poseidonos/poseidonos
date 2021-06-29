@@ -23,9 +23,9 @@ public:
     virtual void
     SetUp(void)
     {
-        mss = new MockMetaStorageSubsystem(arrayName);
+        mss = new MockMetaStorageSubsystem(arrayId);
 
-        regionDeque = new RegionDeque(arrayName, type, &inodeContent, count, mss);
+        regionDeque = new RegionDeque(arrayId, type, &inodeContent, count, mss);
     }
 
     virtual void
@@ -41,7 +41,7 @@ protected:
     MockInodeTableContent inodeContent;
     MockMetaStorageSubsystem* mss = nullptr;
 
-    std::string arrayName = "TESTARRAY";
+    int arrayId = 0;
     MetaStorageType type = MetaStorageType::SSD;
     uint64_t count = 50;
 };

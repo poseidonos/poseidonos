@@ -101,8 +101,8 @@ TEST(MetaIoManager, CheckProcess_SyncRequest)
 
 TEST(MetaIoManager, CheckMss)
 {
-    const std::string arrayName = "TESTARRAY";
-    MockMetaStorageSubsystem* mss = new MockMetaStorageSubsystem(arrayName);
+    const int arrayId = 0;
+    MockMetaStorageSubsystem* mss = new MockMetaStorageSubsystem(arrayId);
     MetaIoManager* mgr = new MetaIoManager();
     mgr->Init();
 
@@ -115,7 +115,7 @@ TEST(MetaIoManager, CheckMss)
 
 TEST(MetaIoManager, CheckArray)
 {
-    const std::string arrayName = "TESTARRAY";
+    const int arrayId = 0;
     MockMetaFsIoScheduler* scheduler = new MockMetaFsIoScheduler(0, 0, 0);
     EXPECT_CALL(*scheduler, AddArrayInfo).WillRepeatedly(Return(true));
     EXPECT_CALL(*scheduler, RemoveArrayInfo).WillRepeatedly(Return(true));
@@ -123,14 +123,14 @@ TEST(MetaIoManager, CheckArray)
     MetaIoManager* mgr = new MetaIoManager(scheduler);
     mgr->Init();
 
-    EXPECT_TRUE(mgr->AddArrayInfo(arrayName));
-    EXPECT_TRUE(mgr->RemoveArrayInfo(arrayName));
+    EXPECT_TRUE(mgr->AddArrayInfo(arrayId));
+    EXPECT_TRUE(mgr->RemoveArrayInfo(arrayId));
 
     EXPECT_CALL(*scheduler, AddArrayInfo).WillRepeatedly(Return(false));
     EXPECT_CALL(*scheduler, RemoveArrayInfo).WillRepeatedly(Return(false));
 
-    EXPECT_FALSE(mgr->AddArrayInfo(arrayName));
-    EXPECT_FALSE(mgr->RemoveArrayInfo(arrayName));
+    EXPECT_FALSE(mgr->AddArrayInfo(arrayId));
+    EXPECT_FALSE(mgr->RemoveArrayInfo(arrayId));
 
     delete mgr;
     delete scheduler;
