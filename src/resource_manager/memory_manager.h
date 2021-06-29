@@ -51,9 +51,7 @@ class MemoryManager
 {
 public:
     MemoryManager(BufferPoolFactory* bufferPoolFactory = nullptr,
-        AffinityManager* affinityManager = AffinityManagerSingleton::Instance(),
-        HugepageAllocator* hugepageAllocator =
-            HugepageAllocatorSingleton::Instance());
+        AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
     virtual ~MemoryManager(void);
     virtual BufferPool* CreateBufferPool(BufferInfo& info,
         uint32_t socket = USE_DEFAULT_SOCKET);
@@ -67,7 +65,6 @@ private:
 
     BufferPoolFactory* bufferPoolFactory;
     AffinityManager* affinityManager;
-    HugepageAllocator* hugepageAllocator;
 };
 
 using MemoryManagerSingleton = Singleton<MemoryManager>;

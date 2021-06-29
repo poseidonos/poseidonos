@@ -69,8 +69,6 @@ private:
     std::list<void*> allocatedHugepages;
 
     HugepageAllocator* hugepageAllocator;
-
-    const uint32_t HUGEPAGE_ALLOCATION_SIZE_BYTE = 2 * 1024 * 1024; // 2MB
 };
 
 } // namespace pos

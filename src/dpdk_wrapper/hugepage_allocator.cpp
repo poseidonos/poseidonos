@@ -34,6 +34,9 @@
 
 #include <rte_malloc.h>
 
+#include "src/logger/logger.h"
+#include "src/include/pos_event_id.hpp"
+
 using namespace pos;
 
 void*
@@ -42,6 +45,18 @@ HugepageAllocator::AllocFromSocket(const uint32_t size,
     const uint32_t socket)
 {
     void* ret = rte_malloc_socket(nullptr, size * count, size, socket);
+    // best effort for another socket id to avoid memory allocation fail
+    if (ret == nullptr)
+    {
+        POS_TRACE_WARN(POS_EVENT_ID::HUGEPAGE_ALLOCATION_FAIL,
+            "Failed to allocate Hugepages in socket {}. Try to another socket.", socket);
+        ret = rte_malloc(nullptr, size * count, size);
+    }
+    if (ret == nullptr)
+    {
+        POS_TRACE_WARN(POS_EVENT_ID::HUGEPAGE_ALLOCATION_FAIL,
+            "Failed to allocate Hugepages");
+    }
     return ret;
 }
 

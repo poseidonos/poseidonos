@@ -30,8 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rebuilder.h"
 #include "raid5_rebuild.h"
+
+#include <typeinfo>
+
+#include "rebuilder.h"
 #include "rebuild_completed.h"
 #include "update_data_handler.h"
 #include "update_data_complete_handler.h"
@@ -47,6 +50,7 @@
 #include "src/event_scheduler/io_completer.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/io/backend_io/rebuild_io/rebuild_read.h"
+#include "src/resource_manager/buffer_pool.h"
 
 #include "Air.h"
 
@@ -58,16 +62,27 @@ Raid5Rebuild::Raid5Rebuild(unique_ptr<RebuildContext> c)
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid5Rebuild");
     allocatorSvc = AllocatorServiceSingleton::Instance()->GetIContextManager(ctx->array);
     assert(allocatorSvc != nullptr);
-    uint32_t bufferCnt = ctx->size->stripesPerSegment;
-    uint32_t bufferSize = ctx->size->blksPerChunk;
-    rebuildBuffer = new FreeBufferPool(bufferCnt, bufferSize * ArrayConfig::BLOCK_SIZE_BYTE);
+
+    bool ret = _InitBuffers();
+    assert(ret);
 }
 
 Raid5Rebuild::~Raid5Rebuild(void)
 {
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "~Raid5Rebuild");
-    delete rebuildBuffer;
-};
+}
+
+string
+Raid5Rebuild::_GetClassName(void)
+{
+    return typeid(this).name();
+}
+
+int
+Raid5Rebuild::_GetTotalReadChunksForRecovery(void)
+{
+    return ctx->size->chunksPerStripe - 1; // Except faulty device
+}
 
 SegmentId
 Raid5Rebuild::_NextSegment(void)
@@ -136,7 +151,7 @@ Raid5Rebuild::Read(void)
     for (uint32_t offset = 0; offset < strCnt; offset++)
     {
         StripeId stripeId = baseStripe + offset;
-        void* buffer = rebuildBuffer->GetBuffer();
+        void* buffer = recoverBuffers->TryGetBuffer();
         assert(buffer != nullptr);
         UbioSmartPtr ubio(new Ubio(buffer, blkCnt * Ubio::UNITS_PER_BLOCK, ctx->array));
         ubio->dir = UbioDir::Write;
@@ -149,7 +164,7 @@ Raid5Rebuild::Read(void)
         ubio->SetEventType(BackendEvent_UserdataRebuild);
         ubio->SetCallback(callback);
         RebuildRead rebuildRead;
-        int res = rebuildRead.Recover(ubio);
+        int res = rebuildRead.Recover(ubio, rebuildReadBuffers);
         if (res != 0)
         {
             POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
@@ -203,7 +218,7 @@ bool Raid5Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
         nextEvent->SetEventType(BackendEvent_UserdataRebuild);
         EventSchedulerSingleton::Instance()->EnqueueEvent(nextEvent);
     }
-    rebuildBuffer->ReturnBuffer(ubio->GetBuffer());
+    recoverBuffers->ReturnBuffer(ubio->GetBuffer());
     ubio = nullptr;
 
     return true;

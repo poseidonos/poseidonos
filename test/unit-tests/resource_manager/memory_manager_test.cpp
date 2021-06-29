@@ -53,12 +53,10 @@ TEST(MemoryManager, CreateBufferPool_testIfBufferPoolCreatedProperly)
         .count = 1024};
     MockAffinityManager mockAffinityManager;
     EXPECT_CALL(mockAffinityManager, GetNumaIdFromCurrentThread).WillOnce(Return(0));
-    MockHugepageAllocator mockHugepageAllocator;
-    EXPECT_CALL(mockHugepageAllocator, GetDefaultPageSize).WillOnce(Return(2097152));
     MockBufferPool* mockBufferPool = new MockBufferPool(info, 0, nullptr);
     MockBufferPoolFactory* mockBufferPoolFactory = new MockBufferPoolFactory();
     EXPECT_CALL(*mockBufferPoolFactory, Create).WillOnce(Return(mockBufferPool));
-    MemoryManager mm(mockBufferPoolFactory, &mockAffinityManager, &mockHugepageAllocator);
+    MemoryManager mm(mockBufferPoolFactory, &mockAffinityManager);
 
     // When
     BufferPool* pool = mm.CreateBufferPool(info);
@@ -76,8 +74,7 @@ TEST(MemoryManager, CreateBufferPool_testIfOwnerIsMissed)
         .count = 1024};
     NiceMock<MockBufferPoolFactory>* mockBufferPoolFactory = new NiceMock<MockBufferPoolFactory>;
     NiceMock<MockAffinityManager> mockAffinityManager;
-    NiceMock<MockHugepageAllocator> mockHugepageAllocator;
-    MemoryManager mm(mockBufferPoolFactory, &mockAffinityManager, &mockHugepageAllocator);
+    MemoryManager mm(mockBufferPoolFactory, &mockAffinityManager);
 
     // When
     BufferPool* pool = mm.CreateBufferPool(info);
@@ -95,28 +92,7 @@ TEST(MemoryManager, CreateBufferPool_testIfSizeIsZero)
         .count = 1024};
     NiceMock<MockBufferPoolFactory>* mockBufferPoolFactory = new NiceMock<MockBufferPoolFactory>;
     NiceMock<MockAffinityManager> mockAffinityManager;
-    NiceMock<MockHugepageAllocator> mockHugepageAllocator;
-    MemoryManager mm(mockBufferPoolFactory, &mockAffinityManager, &mockHugepageAllocator);
-
-    // When
-    BufferPool* pool = mm.CreateBufferPool(info);
-
-    // Then
-    EXPECT_EQ(pool, nullptr);
-}
-
-TEST(MemoryManager, CreateBufferPool_testIfSizeIsGraterThanMaximum)
-{
-    // Given
-    BufferInfo info = {
-        .owner = "test",
-        .size = 4 * 1024 * 1024, // 4MB
-        .count = 1024};
-    NiceMock<MockBufferPoolFactory>* mockBufferPoolFactory = new NiceMock<MockBufferPoolFactory>;
-    NiceMock<MockAffinityManager> mockAffinityManager;
-    MockHugepageAllocator mockHugepageAllocator;
-    EXPECT_CALL(mockHugepageAllocator, GetDefaultPageSize).WillOnce(Return(2097152));
-    MemoryManager mm(mockBufferPoolFactory, &mockAffinityManager, &mockHugepageAllocator);
+    MemoryManager mm(mockBufferPoolFactory, &mockAffinityManager);
 
     // When
     BufferPool* pool = mm.CreateBufferPool(info);
@@ -134,9 +110,7 @@ TEST(MemoryManager, CreateBufferPool_testIfNonAlignedMemoryAllocationIsRejected)
         .count = 1024};
     NiceMock<MockBufferPoolFactory>* mockBufferPoolFactory = new NiceMock<MockBufferPoolFactory>;
     NiceMock<MockAffinityManager> mockAffinityManager;
-    MockHugepageAllocator mockHugepageAllocator;
-    EXPECT_CALL(mockHugepageAllocator, GetDefaultPageSize).WillOnce(Return(2097152));
-    MemoryManager mm(mockBufferPoolFactory, &mockAffinityManager, &mockHugepageAllocator);
+    MemoryManager mm(mockBufferPoolFactory, &mockAffinityManager);
 
     // When
     BufferPool* pool = mm.CreateBufferPool(info);
@@ -155,10 +129,8 @@ TEST(MemoryManager, CreateBufferPool_testIfSocketIsInvalid)
     uint32_t socket = 100;
     MockAffinityManager mockAffinityManager;
     EXPECT_CALL(mockAffinityManager, GetNumaCount).WillOnce(Return(2));
-    MockHugepageAllocator mockHugepageAllocator;
-    EXPECT_CALL(mockHugepageAllocator, GetDefaultPageSize).WillOnce(Return(2097152));
     NiceMock<MockBufferPoolFactory>* mockBufferPoolFactory = new NiceMock<MockBufferPoolFactory>;
-    MemoryManager mm(mockBufferPoolFactory, &mockAffinityManager, &mockHugepageAllocator);
+    MemoryManager mm(mockBufferPoolFactory, &mockAffinityManager);
 
     // When
     BufferPool* pool = mm.CreateBufferPool(info, socket);

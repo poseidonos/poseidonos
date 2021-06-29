@@ -46,8 +46,12 @@ BufferPool::BufferPool(const BufferInfo info,
   SOCKET(socket),
   hugepageAllocator(hugepageAllocator)
 {
+    POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        "BufferPool Construct");
     if (hugepageAllocator == nullptr)
     {
+        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+            "Faild to get hugepageAllocator");
         return;
     }
 
@@ -76,14 +80,21 @@ BufferPool::_Alloc(void)
 {
     uint32_t remainBufferCount = 0;
     uint8_t* buffer = 0;
+    // 2MB allocation for avoiding buddy allocation overhead
+    uint64_t allocSize = hugepageAllocator->GetDefaultPageSize();
+    uint32_t allocCount = 1;
+    if (allocSize < BUFFER_INFO.size)
+    {
+        allocCount = BUFFER_INFO.size / allocSize + 1;
+    }
+    POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        "AllocBuffers allocSize={}", allocSize);
     for (uint32_t i = 0; i < BUFFER_INFO.count; i++)
     {
         if (remainBufferCount == 0)
         {
-            // 2MB allocation for avoiding buddy allocation overhead
-            uint32_t allocSize = hugepageAllocator->GetDefaultPageSize();
             buffer = static_cast<uint8_t*>(
-                hugepageAllocator->AllocFromSocket(allocSize, 1, this->SOCKET));
+                hugepageAllocator->AllocFromSocket(allocSize, allocCount, this->SOCKET));
 
             if (buffer == nullptr)
             {
@@ -93,7 +104,7 @@ BufferPool::_Alloc(void)
                     PosEventId::GetString(eventId));
                 return false;
             }
-            remainBufferCount = HUGEPAGE_ALLOCATION_SIZE_BYTE / BUFFER_INFO.size;
+            remainBufferCount = allocSize * allocCount / BUFFER_INFO.size;
             allocatedHugepages.push_back(buffer);
         }
 
@@ -113,6 +124,8 @@ BufferPool::TryGetBuffer(void)
 
     if (freeBuffers.empty())
     {
+        POS_TRACE_WARN(POS_EVENT_ID::BUFFER_POOL_EMPTY,
+            "Failed to get buffer. {} Pool is empty", BUFFER_INFO.owner);
         return nullptr;
     }
 

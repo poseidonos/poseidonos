@@ -41,15 +41,13 @@ using namespace pos;
 using namespace std;
 
 MemoryManager::MemoryManager(BufferPoolFactory* bufferPoolFactory,
-    AffinityManager* affinityManager,
-    HugepageAllocator* hugepageAllocator)
+    AffinityManager* affinityManager)
 : bufferPoolFactory(bufferPoolFactory),
-  affinityManager(affinityManager),
-  hugepageAllocator(hugepageAllocator)
+  affinityManager(affinityManager)
 {
     if (this->bufferPoolFactory == nullptr)
     {
-        bufferPoolFactory = new BufferPoolFactory();
+        this->bufferPoolFactory = new BufferPoolFactory();
     }
 }
 
@@ -75,6 +73,9 @@ MemoryManager::CreateBufferPool(BufferInfo& info, uint32_t socket)
         return nullptr;
     }
 
+    POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        "CreateBufferPool owner={}, size={}, count={}",
+        info.owner, info.size, info.count);
     BufferPool* pool = bufferPoolFactory->Create(info, socket);
     if (pool != nullptr)
     {
@@ -114,15 +115,6 @@ MemoryManager::_CheckBufferPolicy(const BufferInfo& info, uint32_t& socket)
     {
         POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
             "Illegal buffer policy. Buffer size is zero");
-        return false;
-    }
-
-    const uint32_t MAX_ALLOCATION_BUFFER_SIZE_BYTE =
-        hugepageAllocator->GetDefaultPageSize();
-    if (info.size > MAX_ALLOCATION_BUFFER_SIZE_BYTE)
-    {
-        POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
-            "Illegal buffer policy. Buffer size is too large");
         return false;
     }
 

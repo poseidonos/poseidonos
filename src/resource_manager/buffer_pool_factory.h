@@ -46,9 +46,6 @@ public:
     BufferPoolFactory(void);
     virtual ~BufferPoolFactory(void);
     virtual BufferPool* Create(BufferInfo& info, uint32_t socket);
-
-private:
-    HugepageAllocator* hugepageAllocator;
 };
 
 } // namespace pos

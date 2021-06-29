@@ -30,70 +30,87 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rebuild_read_complete_handler.h"
+#include "rebuild_behavior.h"
 
-#include "src/bio/ubio.h"
-#include "src/event_scheduler/event.h"
-#include "src/event_scheduler/io_completer.h"
-#include "src/include/io_error_type.h"
-#include "src/logger/logger.h"
+#include "src/array_models/dto/partition_physical_size.h"
+#include "src/include/array_config.h"
 #include "src/resource_manager/buffer_pool.h"
+#include "src/resource_manager/memory_manager.h"
 
-namespace pos
-{
-RebuildReadCompleteHandler::RebuildReadCompleteHandler(
-    UbioSmartPtr input, RecoverFunc func, uint64_t readSize, BufferPool* bufferPool)
-: Callback(false, CallbackType_RebuildReadCompleteHandler),
-  ubio(input),
-  recoverFunc(func),
-  readSize(readSize),
-  bufferPool(bufferPool)
+using namespace pos;
+
+RebuildBehavior::RebuildBehavior(unique_ptr<RebuildContext> ctx,
+    MemoryManager* mm)
+: ctx(move(ctx)),
+  mm(mm)
 {
 }
 
-RebuildReadCompleteHandler::~RebuildReadCompleteHandler(void)
+RebuildBehavior::~RebuildBehavior(void)
 {
+    delete recoverBuffers;
+    delete rebuildReadBuffers;
+}
+
+void
+RebuildBehavior::StopRebuilding(void)
+{
+    ctx->result = RebuildState::CANCELLED;
+}
+
+void
+RebuildBehavior::UpdateProgress(uint32_t val)
+{
+    ctx->prog->Update(ctx->part, val);
+}
+
+RebuildContext*
+RebuildBehavior::GetContext(void)
+{
+    return ctx.get();
 }
 
 bool
-RebuildReadCompleteHandler::_DoSpecificJob(void)
+RebuildBehavior::_InitRecoverBuffers(string owner)
 {
-    uint8_t* ptr = nullptr;
-    uint64_t originalUbioAddress;
-    uint64_t sectorOffset;
-    UbioSmartPtr originUbio = ubio->GetOriginUbio();
-
-    if (_GetErrorCount() > 0)
+    BufferInfo info = {
+        .owner = owner,
+        .size = ctx->size->blksPerChunk * ArrayConfig::BLOCK_SIZE_BYTE,
+        .count = ctx->size->stripesPerSegment};
+    recoverBuffers = mm->CreateBufferPool(info);
+    if (recoverBuffers == nullptr)
     {
-        goto end;
+        return false;
     }
-
-    ptr = static_cast<uint8_t*>(malloc(readSize));
-    recoverFunc(ptr, (char*)ubio->GetWholeBuffer(), readSize);
-
-    originalUbioAddress = originUbio->GetPba().lba;
-    sectorOffset = GetSectorOffsetInBlock(originalUbioAddress);
-
-    memcpy(originUbio->GetBuffer(),
-        ptr + ChangeSectorToByte(sectorOffset), originUbio->GetSize());
-
-    free(ptr);
-
-end:
-    if (bufferPool == nullptr)
-    {
-        ubio->FreeDataBuffer();
-    }
-    else
-    {
-        bufferPool->ReturnBuffer(ubio->GetWholeBuffer());
-    }
-
-    IoCompleter ioCompleter(ubio);
-    ioCompleter.CompleteOriginUbio();
-    ubio = nullptr;
-
     return true;
 }
 
-} // namespace pos
+bool
+RebuildBehavior::_InitRebuildReadBuffers(string owner, int totalChunksToRead)
+{
+    BufferInfo info = {
+        .owner = owner,
+        .size = ctx->size->blksPerChunk * ArrayConfig::BLOCK_SIZE_BYTE * totalChunksToRead,
+        .count = ctx->size->stripesPerSegment};
+    rebuildReadBuffers = mm->CreateBufferPool(info);
+    if (rebuildReadBuffers == nullptr)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool
+RebuildBehavior::_InitBuffers(void)
+{
+    string owner = _GetClassName();
+    bool ret = _InitRecoverBuffers(owner);
+    if (ret == false)
+    {
+        return ret;
+    }
+
+    int totalChunks = _GetTotalReadChunksForRecovery();
+    ret = _InitRebuildReadBuffers(owner, totalChunks);
+    return ret;
+}

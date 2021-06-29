@@ -33,7 +33,6 @@
 #include "buffer_pool_factory.h"
 
 #include "buffer_pool.h"
-#include "src/dpdk_wrapper/hugepage_allocator.h"
 
 using namespace pos;
 

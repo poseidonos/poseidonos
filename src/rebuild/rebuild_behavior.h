@@ -32,44 +32,41 @@
 
 #pragma once
 
+#include <string>
+
 #include "src/array/rebuild/rebuild_context.h"
-#include "src/spdk_wrapper/free_buffer_pool.h"
 #include "src/logger/logger.h"
+#include "src/resource_manager/memory_manager.h"
 
 namespace pos
 {
+class BufferPool;
 class RebuildBehavior
 {
 public:
-    RebuildBehavior(unique_ptr<RebuildContext> ctx)
-    : ctx(move(ctx))
-    {
-    }
-    virtual ~RebuildBehavior(void)
-    {
-    }
+    RebuildBehavior(unique_ptr<RebuildContext> ctx,
+        MemoryManager* mm = MemoryManagerSingleton::Instance());
+    virtual ~RebuildBehavior(void);
+
+    void StopRebuilding(void);
+    void UpdateProgress(uint32_t val);
+    RebuildContext* GetContext(void);
+
     virtual bool Read(void) = 0;
     virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) = 0;
     virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) = 0;
 
-    void
-    StopRebuilding(void)
-    {
-        ctx->result = RebuildState::CANCELLED;
-    }
-    void
-    UpdateProgress(uint32_t val)
-    {
-        ctx->prog->Update(ctx->part, val);
-    }
-    RebuildContext*
-    GetContext(void)
-    {
-        return ctx.get();
-    }
-
 protected:
+    bool _InitBuffers(void);
+    bool _InitRecoverBuffers(string owner);
+    bool _InitRebuildReadBuffers(string owner, int totalChunksToRead);
+
+    virtual string _GetClassName(void) = 0;
+    virtual int _GetTotalReadChunksForRecovery(void) = 0;
+
     unique_ptr<RebuildContext> ctx = nullptr;
-    FreeBufferPool* rebuildBuffer = nullptr;
+    MemoryManager* mm = nullptr;
+    BufferPool* recoverBuffers = nullptr;
+    BufferPool* rebuildReadBuffers = nullptr;
 };
 } // namespace pos
