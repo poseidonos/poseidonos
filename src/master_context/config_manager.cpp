@@ -33,6 +33,10 @@
 #include "config_manager.h"
 
 #include <fcntl.h>
+#include <rapidjson/document.h>
+#include <rapidjson/error/error.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 #include <unistd.h>
 
 #include <fstream>
@@ -40,13 +44,8 @@
 #include <sstream>
 #include <string>
 
-#include <rapidjson/document.h>
-#include <rapidjson/error/error.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
-
-#include "src/include/pos_event_id.h"
 #include "src/helper/json_helper.h"
+#include "src/include/pos_event_id.h"
 
 namespace pos
 {
@@ -61,6 +60,8 @@ ConfigManager::ReadFile(void)
     {
         return (int)POS_EVENT_ID::CONFIG_FILE_READ_DONE;
     }
+
+    std::lock_guard<std::recursive_mutex> guard(configManagerMutex);
 
     string filePath = defaultConfig.ConfigurationFilePath();
     ifstream openFile;

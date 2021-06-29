@@ -32,7 +32,7 @@
 
 #ifdef _ADMIN_ENABLED
 #pragma once
-#include "lib/spdk-19.10/lib/nvmf/nvmf_internal.h"
+#include "lib/spdk/lib/nvmf/nvmf_internal.h"
 #include "spdk/pos.h"
 #include "src/admin/admin_command_handler.h"
 #include "src/admin/smart_log_page_handler.h"

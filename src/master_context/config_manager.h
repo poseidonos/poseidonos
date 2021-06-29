@@ -73,6 +73,7 @@ private:
     bool read = false;
     rapidjson::Document doc;
     DefaultConfiguration defaultConfig;
+    std::recursive_mutex configManagerMutex;
 };
 
 using ConfigManagerSingleton = Singleton<ConfigManager>;

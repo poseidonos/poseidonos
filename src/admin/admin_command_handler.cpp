@@ -34,7 +34,7 @@
 #include "src/admin/admin_command_handler.h"
 
 #include "Air.h"
-#include "lib/spdk-19.10/include/spdk/bdev_module.h"
+#include "lib/spdk/include/spdk/bdev_module.h"
 #include "spdk/pos.h"
 #include "src/admin/smart_log_page_handler.h"
 #include "src/event_scheduler/event_scheduler.h"

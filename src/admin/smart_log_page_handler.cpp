@@ -33,9 +33,9 @@
 #ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_page_handler.h"
 
-#include "lib/spdk-19.10/include/spdk/bdev_module.h"
-#include "lib/spdk-19.10/include/spdk/nvme_spec.h"
-#include "lib/spdk-19.10/lib/nvmf/nvmf_internal.h"
+#include "lib/spdk/include/spdk/bdev_module.h"
+#include "lib/spdk/include/spdk/nvme_spec.h"
+#include "lib/spdk/lib/nvmf/nvmf_internal.h"
 #include "spdk/pos.h"
 #include "src/admin/admin_command_handler.h"
 #include "src/admin/disk_query_manager.h"

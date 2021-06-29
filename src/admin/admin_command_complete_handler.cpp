@@ -35,8 +35,8 @@
 
 #include <iostream>
 
-#include "lib/spdk-19.10/include/spdk/bdev_module.h"
-#include "lib/spdk-19.10/lib/nvmf/nvmf_internal.h"
+#include "lib/spdk/include/spdk/bdev_module.h"
+#include "lib/spdk/lib/nvmf/nvmf_internal.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 using namespace std;

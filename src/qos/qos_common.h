@@ -86,9 +86,6 @@ const int PRIO_WT_L2 = -800;
 
 const uint32_t DEFAULT_MIN_VOL = MAX_VOLUME_COUNT + 1;
 
-const uint16_t M_INVALID_SUBSYSTEM = 0;
-const uint16_t M_VALID_SUBSYSTEM = 1;
-
 const uint32_t PENDING_CPU_THRESHOLD = 20;
 
 const uint32_t DEFAULT_MIN_BW_MBPS = 100;
