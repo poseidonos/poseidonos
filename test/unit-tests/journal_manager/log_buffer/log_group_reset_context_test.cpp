@@ -4,16 +4,22 @@
 
 namespace pos
 {
-TEST(LogGroupResetContext, JournalResetContext_)
+TEST(LogGroupResetContext, SetIoRequest_testIfExecutedSuccessfully)
 {
-}
+    // Given
+    LogGroupResetContext logGroupResetContext(0, nullptr);
 
-TEST(LogGroupResetContext, SetIoRequest_)
-{
-}
+    // When
+    uint64_t fileOffset = 0;
+    uint64_t length = 1024;
+    char* buffer = new char[length];
+    logGroupResetContext.SetIoRequest(fileOffset, length, buffer);
 
-TEST(LogGroupResetContext, ResetDone_)
-{
-}
+    // Then
+    EXPECT_EQ(fileOffset, logGroupResetContext.fileOffset);
+    EXPECT_EQ(length, logGroupResetContext.length);
+    EXPECT_EQ(buffer, logGroupResetContext.buffer);
 
+    delete buffer;
+}
 } // namespace pos

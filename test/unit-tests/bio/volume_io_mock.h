@@ -16,10 +16,15 @@ class MockVolumeIo : public VolumeIo
 {
 public:
     using VolumeIo::VolumeIo;
+    MockVolumeIo(void)
+    : VolumeIo(nullptr, 0, "")
+    {
+    }
     MOCK_METHOD(VolumeIoSmartPtr, Split, (uint32_t sectors, bool removalFromTail), (override));
     MOCK_METHOD(VolumeIoSmartPtr, GetOriginVolumeIo, (), (override));
     MOCK_METHOD(uint32_t, GetVolumeId, (), (override));
     MOCK_METHOD(uint32_t, GetOriginCore, (), (override));
+    MOCK_METHOD(uint64_t, GetSize, (), (override));
     MOCK_METHOD(void, SetLsidEntry, (StripeAddr& lsidEntry), (override));
     MOCK_METHOD(const StripeAddr&, GetLsidEntry, (), (override));
     MOCK_METHOD(const StripeAddr&, GetOldLsidEntry, (), (override));

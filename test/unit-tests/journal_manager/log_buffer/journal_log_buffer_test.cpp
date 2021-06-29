@@ -18,7 +18,7 @@ namespace pos
 TEST(JournalLogBuffer, Init_testIfExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
     NiceMock<MockJournalConfiguration> journalConfig;
 
@@ -35,7 +35,7 @@ TEST(JournalLogBuffer, Init_testIfExecutedSuccessfully)
 TEST(JournalLogBuffer, Dispose_testIfExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
     MockJournalConfiguration journalConfig;
     journalLogBuffer.Init(&journalConfig, nullptr);
@@ -49,7 +49,7 @@ TEST(JournalLogBuffer, Dispose_testIfExecutedSuccessfully)
 TEST(JournalLogBuffer, Dispose_testIfLogFileIsNotOpened)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When, Then
@@ -60,7 +60,7 @@ TEST(JournalLogBuffer, Dispose_testIfLogFileIsNotOpened)
 TEST(JournalLogBuffer, Dispose_testIfLogFileIsNotClosed)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When, Then
@@ -72,7 +72,7 @@ TEST(JournalLogBuffer, Dispose_testIfLogFileIsNotClosed)
 TEST(JournalLogBuffer, Create_testIfExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When, Then
@@ -86,7 +86,7 @@ TEST(JournalLogBuffer, Create_testIfExecutedSuccessfully)
 TEST(JournalLogBuffer, Create_testIfLogBufferAlreadyExisted)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When
@@ -102,7 +102,7 @@ TEST(JournalLogBuffer, Create_testIfLogBufferAlreadyExisted)
 TEST(JournalLogBuffer, Create_testIfLogBufferCreateFailed)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When
@@ -119,7 +119,7 @@ TEST(JournalLogBuffer, Create_testIfLogBufferCreateFailed)
 TEST(JournalLogBuffer, Create_testIfLogBufferOpenFailed)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When
@@ -137,7 +137,7 @@ TEST(JournalLogBuffer, Create_testIfLogBufferOpenFailed)
 TEST(JournalLogBuffer, Open_testIfExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When
@@ -158,7 +158,7 @@ TEST(JournalLogBuffer, Open_testIfExecutedSuccessfully)
 TEST(JournalLogBuffer, Open_testIfLogBufferFileDoesNotExist)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When
@@ -174,7 +174,7 @@ TEST(JournalLogBuffer, Open_testIfLogBufferFileDoesNotExist)
 TEST(JournalLogBuffer, Open_testIfLogBufferFileOpenFailed)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When
@@ -191,7 +191,7 @@ TEST(JournalLogBuffer, Open_testIfLogBufferFileOpenFailed)
 TEST(JournalLogBuffer, ReadLogBuffer_testIfExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     NiceMock<MockJournalConfiguration> journalConfig;
     JournalLogBuffer journalLogBuffer(metaFile);
     journalLogBuffer.Init(&journalConfig, nullptr);
@@ -211,7 +211,7 @@ TEST(JournalLogBuffer, ReadLogBuffer_testIfExecutedSuccessfully)
 TEST(JournalLogBuffer, ReadLogBuffer_testIfReadFail)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     NiceMock<MockJournalConfiguration> journalConfig;
     JournalLogBuffer journalLogBuffer(metaFile);
     journalLogBuffer.Init(&journalConfig, nullptr);
@@ -232,7 +232,7 @@ TEST(JournalLogBuffer, ReadLogBuffer_testIfReadFail)
 TEST(JournalLogBuffer, WriteLog_testIfExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
     NiceMock<MockLogWriteContext> context;
 
@@ -251,7 +251,7 @@ TEST(JournalLogBuffer, WriteLog_testIfExecutedSuccessfully)
 TEST(JournalLogBuffer, WriteLog_testIfWriteFailed)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
     NiceMock<MockLogWriteContext> context;
 
@@ -271,7 +271,7 @@ TEST(JournalLogBuffer, WriteLog_testIfWriteFailed)
 TEST(JournalLogBuffer, SyncResetAll_testIfExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     NiceMock<MockJournalConfiguration> journalConfig;
     NiceMock<MockLogWriteContextFactory> logFactory;
     JournalLogBuffer journalLogBuffer(metaFile);
@@ -288,7 +288,7 @@ TEST(JournalLogBuffer, SyncResetAll_testIfExecutedSuccessfully)
     std::vector<NiceMock<MockLogGroupResetContext>*> resetContextList;
     for (int id = 0; id < numLogGroups; id++)
     {
-        NiceMock<MockLogGroupResetContext>* resetRequest = new NiceMock<MockLogGroupResetContext>(id, nullptr);
+        NiceMock<MockLogGroupResetContext>* resetRequest = new NiceMock<MockLogGroupResetContext>;
         resetContextList.push_back(resetRequest);
         EXPECT_CALL(logFactory, CreateLogGroupResetContext(_, id, logGroupSize, _, _)).WillRepeatedly(Return(resetRequest));
         EXPECT_CALL(*resetRequest, SetInternalCallback);
@@ -315,7 +315,7 @@ TEST(JournalLogBuffer, SyncResetAll_testIfExecutedSuccessfully)
 TEST(JournalLogBuffer, SyncResetAll_testIfAsyncIOFailed)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     NiceMock<MockJournalConfiguration> journalConfig;
     NiceMock<MockLogWriteContextFactory> logFactory;
     JournalLogBuffer journalLogBuffer(metaFile);
@@ -331,7 +331,7 @@ TEST(JournalLogBuffer, SyncResetAll_testIfAsyncIOFailed)
     int retCode = -1;
     int groupId = 0;
     std::vector<NiceMock<MockLogGroupResetContext>*> resetContextList;
-    NiceMock<MockLogGroupResetContext>* resetRequest = new NiceMock<MockLogGroupResetContext>(groupId, nullptr);
+    NiceMock<MockLogGroupResetContext>* resetRequest = new NiceMock<MockLogGroupResetContext>;
     resetContextList.push_back(resetRequest);
     EXPECT_CALL(logFactory, CreateLogGroupResetContext(_, groupId, logGroupSize, _, _)).WillRepeatedly(Return(resetRequest));
     EXPECT_CALL(*resetRequest, SetInternalCallback);
@@ -357,7 +357,7 @@ TEST(JournalLogBuffer, SyncResetAll_testIfAsyncIOFailed)
 TEST(JournalLogBuffer, InternalIo_testIfExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     int groupId = 0;
     NiceMock<MockLogGroupResetContext> resetRequest(groupId, nullptr);
     JournalLogBuffer journalLogBuffer(metaFile);
@@ -379,9 +379,9 @@ TEST(JournalLogBuffer, InternalIo_testIfExecutedSuccessfully)
 TEST(JournalLogBuffer, InternalIo_testIfAsycIoFailed)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     int groupId = 0;
-    NiceMock<MockLogGroupResetContext> resetRequest(groupId, nullptr);
+    NiceMock<MockLogGroupResetContext> resetRequest;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When
@@ -402,7 +402,7 @@ TEST(JournalLogBuffer, InternalIoDone_testIfExecutedSuccessfully)
 {
     // Given
     int groupId = 0;
-    NiceMock<MockLogGroupResetContext>* resetRequest = new NiceMock<MockLogGroupResetContext>(groupId, nullptr);
+    NiceMock<MockLogGroupResetContext>* resetRequest = new NiceMock<MockLogGroupResetContext>;
     JournalLogBuffer journalLogBuffer(nullptr);
 
     // When, Then
@@ -422,7 +422,7 @@ TEST(JournalLogBuffer, InternalIoDone_testIfContextDoesNotExist)
 TEST(JournalLogBuffer, Delete_testIfExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When
@@ -440,7 +440,7 @@ TEST(JournalLogBuffer, Delete_testIfExecutedSuccessfully)
 TEST(JournalLogBuffer, Delete_testIfDeleteFailed)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When
@@ -458,7 +458,7 @@ TEST(JournalLogBuffer, Delete_testIfDeleteFailed)
 TEST(JournalLogBuffer, Delete_testIfFileDoesNotExist)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When
@@ -475,15 +475,15 @@ TEST(JournalLogBuffer, Delete_testIfFileDoesNotExist)
 TEST(JournalLogBuffer, DoesLogFileExist_testIfExecutedSuccessfully)
 {
     // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>("logBuffer", "POSArray");
+    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     JournalLogBuffer journalLogBuffer(metaFile);
 
     // When
-    bool retCode = true;
-    EXPECT_CALL(*metaFile, DoesFileExist).WillOnce(Return(retCode));
+    bool expect = true;
+    EXPECT_CALL(*metaFile, DoesFileExist).WillOnce(Return(expect));
     int result = journalLogBuffer.DoesLogFileExist();
 
     // Then
-    EXPECT_EQ(retCode, result);
+    EXPECT_EQ(expect, result);
 }
 } // namespace pos

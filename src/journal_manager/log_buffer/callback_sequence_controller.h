@@ -45,8 +45,8 @@ public:
     CallbackSequenceController(int numCallbacks, bool checkpointTriggered);
     virtual ~CallbackSequenceController(void) = default;
 
-    void GetCallbackExecutionApproval(void);
-    void NotifyCallbackCompleted(void);
+    virtual void GetCallbackExecutionApproval(void);
+    virtual void NotifyCallbackCompleted(void);
 
     virtual void GetCheckpointExecutionApproval(void);
     virtual void AllowCallbackExecution(void);

@@ -66,6 +66,18 @@ public:
     virtual LogGroupResetContext* CreateLogGroupResetContext(uint64_t offset, int id,
         uint64_t groupSize, EventSmartPtr callbackEvent, char* dataBuffer);
 
+    // For UT
+    inline LogBufferWriteDoneNotifier*
+    GetLogBufferWriteDoneNotifier(void)
+    {
+        return notifier;
+    }
+    inline CallbackSequenceController*
+    GetCallbackSequenceController(void)
+    {
+        return sequenceController;
+    }
+
 private:
     LogBufferWriteDoneNotifier* notifier;
     CallbackSequenceController* sequenceController;

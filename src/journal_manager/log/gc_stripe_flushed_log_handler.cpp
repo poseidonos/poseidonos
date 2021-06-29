@@ -84,7 +84,7 @@ GcStripeFlushedLogHandler::~GcStripeFlushedLogHandler(void)
 }
 
 bool
-GcStripeFlushedLogHandler::operator==(GcStripeFlushedLogHandler& log)
+GcStripeFlushedLogHandler::operator==(const GcStripeFlushedLogHandler& log)
 {
     bool isSameStripe = (logPtr->volId == log.logPtr->volId)
                     && (logPtr->vsid == log.logPtr->vsid)

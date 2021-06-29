@@ -42,6 +42,13 @@ LogWriteContext::LogWriteContext(void)
 {
 }
 
+LogWriteContext::LogWriteContext(EventSmartPtr callback, LogBufferWriteDoneNotifier* notifie)
+: LogBufferIoContext(INVALID_GROUP_ID, callback),
+  logFilledNotifier(notifie),
+  log(nullptr)
+{
+}
+
 LogWriteContext::LogWriteContext(LogHandlerInterface* log, EventSmartPtr callback,
     LogBufferWriteDoneNotifier* notifier)
 : LogBufferIoContext(INVALID_GROUP_ID, callback),

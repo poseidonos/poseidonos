@@ -44,6 +44,7 @@ namespace pos
 class LogBufferIoContext : public AsyncMetaFileIoCtx, public DumpSharedPtr<LogBufferIoContext*, static_cast<int>(DumpSharedPtrType::JOURNAL_IO_CONTEXT)>
 {
 public:
+    LogBufferIoContext(void) = default;
     LogBufferIoContext(int logGroupId, EventSmartPtr clientCallback);
     virtual ~LogBufferIoContext(void) = default;
 
@@ -51,6 +52,18 @@ public:
     virtual void SetFile(int fileDescriptor);
 
     virtual void IoDone(void);
+
+    // For UT
+    inline int
+    GetLogGroupId(void)
+    {
+        return logGroupId;
+    }
+    inline EventSmartPtr
+    GetClientCallback(void)
+    {
+        return clientCallback;
+    }
 
 protected:
     int logGroupId;

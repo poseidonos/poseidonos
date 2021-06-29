@@ -44,7 +44,7 @@ public:
     explicit VolumeDeletedLogEntry(VolumeDeletedLog& log);
     virtual ~VolumeDeletedLogEntry(void) = default;
 
-    bool operator==(VolumeDeletedLogEntry log);
+    bool operator==(const VolumeDeletedLogEntry log);
 
     virtual LogType GetType(void);
     virtual uint32_t GetSize(void);

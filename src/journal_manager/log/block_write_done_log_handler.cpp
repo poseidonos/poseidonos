@@ -53,7 +53,7 @@ BlockWriteDoneLogHandler::BlockWriteDoneLogHandler(BlockWriteDoneLog& log)
 }
 
 bool
-BlockWriteDoneLogHandler::operator==(BlockWriteDoneLogHandler log)
+BlockWriteDoneLogHandler::operator==(const  BlockWriteDoneLogHandler log)
 {
     return ((dat.volId == log.dat.volId) && (dat.startRba == log.dat.startRba)
         && (dat.numBlks == log.dat.numBlks) && (dat.startVsa == log.dat.startVsa)

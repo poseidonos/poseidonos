@@ -46,7 +46,7 @@ public:
     explicit GcStripeFlushedLogHandler(void* inputData);
     virtual ~GcStripeFlushedLogHandler(void);
 
-    bool operator==(GcStripeFlushedLogHandler& log);
+    bool operator==(const GcStripeFlushedLogHandler& log);
 
     virtual LogType GetType(void);
     virtual uint32_t GetSize(void);

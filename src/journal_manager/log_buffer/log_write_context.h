@@ -45,6 +45,9 @@ class LogWriteContext : public LogBufferIoContext
 {
 public:
     LogWriteContext(void);
+    // For UT
+    LogWriteContext(EventSmartPtr callback, LogBufferWriteDoneNotifier* notifie);
+
     LogWriteContext(LogHandlerInterface* log, EventSmartPtr callbackEvent, LogBufferWriteDoneNotifier* notifier);
     virtual ~LogWriteContext(void);
 
@@ -55,6 +58,13 @@ public:
     virtual void SetBufferAllocated(uint64_t offset, int groupId, uint32_t seqNum);
 
     virtual void IoDone(void) override;
+
+    // For UT
+    inline LogBufferWriteDoneNotifier*
+    GetLogBufferWriteDoneNotifier(void)
+    {
+        return logFilledNotifier;
+    }
 
 protected:
     LogBufferWriteDoneNotifier* logFilledNotifier;

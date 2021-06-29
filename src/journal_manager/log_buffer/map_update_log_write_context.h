@@ -51,6 +51,11 @@ class MapUpdateLogWriteContext : public LogWriteContext
 {
 public:
     MapUpdateLogWriteContext(void) = default;
+
+    // For UT
+    MapUpdateLogWriteContext(MapPageList dirtyList, EventSmartPtr callback,
+        LogBufferWriteDoneNotifier* logFilledNotifier, CallbackSequenceController* sequencer);
+
     MapUpdateLogWriteContext(LogHandlerInterface* log, MapPageList dirtyList,
         EventSmartPtr callback, LogBufferWriteDoneNotifier* notifier,
         CallbackSequenceController* sequencer);
@@ -58,6 +63,13 @@ public:
 
     MapPageList& GetDirtyList(void);
     virtual void IoDone(void) override;
+
+    // For UT
+    inline CallbackSequenceController*
+    GetCallbackSequenceController(void)
+    {
+        return sequenceController;
+    }
 
 protected:
     CallbackSequenceController* sequenceController;

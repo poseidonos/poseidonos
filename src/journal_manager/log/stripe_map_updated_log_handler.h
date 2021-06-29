@@ -45,7 +45,7 @@ public:
     explicit StripeMapUpdatedLogHandler(StripeMapUpdatedLog& log);
     virtual ~StripeMapUpdatedLogHandler(void) = default;
 
-    bool operator==(StripeMapUpdatedLogHandler log);
+    bool operator==(const StripeMapUpdatedLogHandler log);
 
     virtual LogType GetType(void);
     virtual uint32_t GetSize(void);

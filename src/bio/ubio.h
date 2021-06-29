@@ -126,7 +126,7 @@ public:
     virtual uint32_t GetOriginCore(void);
     void SetOriginUbio(UbioSmartPtr ubio);
     UbioSmartPtr GetOriginUbio(void);
-    uint64_t GetSize(void);
+    virtual uint64_t GetSize(void);
 
     IOErrorType GetError(void);
     virtual void SetError(IOErrorType inputErrorType);

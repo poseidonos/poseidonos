@@ -51,6 +51,7 @@ class MetaFsFileIntf;
 class MetaFileIntf
 {
 public:
+    MetaFileIntf(void) = default;
     MetaFileIntf(std::string fname, std::string aname);
     virtual ~MetaFileIntf(void) = default;
 

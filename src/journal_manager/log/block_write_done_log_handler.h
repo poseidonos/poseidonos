@@ -46,7 +46,7 @@ public:
     explicit BlockWriteDoneLogHandler(BlockWriteDoneLog& log);
     virtual ~BlockWriteDoneLogHandler(void) = default;
 
-    bool operator==(BlockWriteDoneLogHandler log);
+    bool operator==(const BlockWriteDoneLogHandler log);
 
     virtual LogType GetType(void);
     virtual uint32_t GetSize(void);

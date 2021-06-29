@@ -37,6 +37,14 @@
 
 namespace pos
 {
+MapUpdateLogWriteContext::MapUpdateLogWriteContext(MapPageList dirtyList, EventSmartPtr callback,
+    LogBufferWriteDoneNotifier* logFilledNotifier, CallbackSequenceController* sequencer)
+: LogWriteContext(callback, logFilledNotifier),
+  sequenceController(sequencer),
+  dirty(dirtyList)
+{
+}
+
 MapUpdateLogWriteContext::MapUpdateLogWriteContext(LogHandlerInterface* log,
     MapPageList dirtyList, EventSmartPtr callback,
     LogBufferWriteDoneNotifier* logFilledNotifier,

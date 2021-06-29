@@ -47,7 +47,7 @@ VolumeDeletedLogEntry::VolumeDeletedLogEntry(VolumeDeletedLog& log)
 }
 
 bool
-VolumeDeletedLogEntry::operator==(VolumeDeletedLogEntry log)
+VolumeDeletedLogEntry::operator==(const VolumeDeletedLogEntry log)
 {
     return ((log.dat.volId == dat.volId) &&
         (log.dat.allocatorContextVersion == dat.allocatorContextVersion));
