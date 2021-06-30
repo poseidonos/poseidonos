@@ -29,63 +29,56 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#pragma once
 
-#include "stripe_locker_busy_state.h"
+#include <vector>
+#include <map>
+#include "src/array/device/array_device.h"
 
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
+using namespace std;
 
 namespace pos
 {
-bool
-StripeLockerBusyState::TryLock(StripeId id)
+class LockerGroup
 {
-    std::unique_lock<std::mutex> lock(mtx);
-    if (busySet.find(id) == busySet.end())
+public:
+    void AddDevice(vector<ArrayDevice*> d)
     {
-        busySet.insert(id);
-        return true;
+        int size = d.size() / 2;
+        for (int i = 0; i < size ; i++)
+        {
+            IArrayDevice* origin = d.at(i);
+            IArrayDevice* mirror = d.at(i + size);
+            pairs.emplace(origin, mirror);
+            pairs.emplace(mirror, origin);
+        }
     }
 
-    return false;
-}
-
-void
-StripeLockerBusyState::Unlock(StripeId id)
-{
-    unique_lock<mutex> lock(mtx);
-    busySet.erase(id);
-}
-
-bool
-StripeLockerBusyState::StateChange(LockerMode mode)
-{
-    if (mode != LockerMode::NORMAL)
+    void RemoveDevice(vector<ArrayDevice*> d)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "busylocker: requested mode {} is invalid", mode);
-        return false;
+        for (IArrayDevice* dev : d)
+        {
+            auto it = pairs.find(dev);
+            if (it != pairs.end())
+            {
+                pairs.erase(it);
+            }
+        }
     }
 
-    unique_lock<mutex> lock(mtx);
-    if (busySet.size() == 0)
+    IArrayDevice*
+    GetMirror(IArrayDevice* dev)
     {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "locker mode will be changed successfully busy to normal");
-        return true;
+        auto it = pairs.find(dev);
+        if (it == pairs.end())
+        {
+            return nullptr;
+        }
+        return it->second;
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "waiting for releasing busy lock (remaining count, busy:{}",
-        busySet.size());
-    return false;
-}
+private:
+    map<IArrayDevice*, IArrayDevice*> pairs;
+};
 
-uint32_t
-StripeLockerBusyState::Count(void)
-{
-    unique_lock<mutex> lock(mtx);
-    return busySet.size();
-}
-
-}; // namespace pos
+} // namespace pos

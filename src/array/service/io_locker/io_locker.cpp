@@ -40,81 +40,150 @@ namespace pos
 {
 IOLocker::IOLocker(void)
 {
-    lockers = new StripeLocker*[ArrayMgmtPolicy::MAX_ARRAY_CNT];
-    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
-    {
-        lockers[i] = nullptr;
-    }
 }
 
 IOLocker::~IOLocker(void)
 {
-    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
-    {
-        if (lockers[i] != nullptr)
-        {
-            delete lockers[i];
-            lockers[i] = nullptr;
-        }
-    }
-    delete lockers;
-    lockers = nullptr;
 }
 
 bool
-IOLocker::Register(string array)
+IOLocker::Register(vector<ArrayDevice*> devList)
 {
-    if (_Find(array) == nullptr)
+    group.AddDevice(devList);
+    size_t prevSize = lockers.size();
+    for (IArrayDevice* d : devList)
     {
-        StripeLocker* locker = new StripeLocker();
-        auto ret = tempLockers.emplace(array, locker);
-        return ret.second;
+        if (_Find(d) == nullptr)
+        {
+            IArrayDevice* m = group.GetMirror(d);
+            StripeLocker* locker = new StripeLocker();
+            lockers.emplace(d, locker);
+            lockers.emplace(m, locker);
+        }
     }
+    size_t newSize = lockers.size();
+    POS_TRACE_INFO(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::Register, {} devs added, size: {} -> {}",
+        devList.size(), prevSize, newSize);
     return true;
 }
 
 void
-IOLocker::Unregister(string array)
+IOLocker::Unregister(vector<ArrayDevice*> devList)
 {
-    StripeLocker* locker = _Find(array);
-    if (locker != nullptr)
+    size_t prevSize = lockers.size();
+    for (IArrayDevice* d : devList)
     {
-        _Erase(array);
-        delete locker;
-        locker = nullptr;
+        StripeLocker* locker = _Find(d);
+        if (locker != nullptr)
+        {
+            lockers.erase(d);
+            IArrayDevice* m = group.GetMirror(d);
+            if (m != nullptr)
+            {
+                lockers.erase(m);
+            }
+            delete locker;
+            locker = nullptr;
+        }
     }
+    group.RemoveDevice(devList);
+    size_t newSize = lockers.size();
+    POS_TRACE_INFO(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::Unregister, {} devs removed, size: {} -> {}",
+        devList.size(), prevSize, newSize);
 }
 
 bool
-IOLocker::TryLock(string array, StripeId val)
+IOLocker::TryLock(IArrayDevice* dev, StripeId val)
 {
-    StripeLocker* locker = _Find(array);
+    StripeLocker* locker = _Find(dev);
     if (locker == nullptr)
     {
+        POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryLock, no locker exists");
         return false;
     }
 
     return locker->TryLock(val);
 }
 
-void
-IOLocker::Unlock(string array, StripeId val)
+bool
+IOLocker::TryLock(set<IArrayDevice*>& devs, StripeId val)
 {
-    StripeLocker* locker = _Find(array);
+    set<StripeLocker*> lockersByGroup;
+    for (IArrayDevice* d : devs)
+    {
+        StripeLocker* locker = _Find(d);
+        if (locker == nullptr)
+        {
+            POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryLock, no locker exists");
+            return false;
+        }
+        lockersByGroup.insert(locker);
+    }
+    int lockedCnt = 0;
+    for (auto it = lockersByGroup.begin(); it != lockersByGroup.end(); ++it)
+    {
+        bool ret = (*it)->TryLock(val);
+        if (ret == true)
+        {
+            lockedCnt++;
+        }
+        else
+        {
+            POS_TRACE_INFO(POS_EVENT_ID::LOCKER_DEBUG_MSG, 
+                "IOLocker::TryLock, failed to acquire entire locks for request, stripe:{}, total:{}, acquired:{}",
+                val, lockersByGroup.size(), lockedCnt);
+            while (lockedCnt > 0)
+            {
+                --it;
+                (*it)->Unlock(val);
+                lockedCnt--;
+            }
+            return false;
+        }
+    }
+    return true;
+}
+
+void
+IOLocker::Unlock(IArrayDevice* dev, StripeId val)
+{
+    StripeLocker* locker = _Find(dev);
     if (locker != nullptr)
+    {
+        locker->Unlock(val);
+    }
+    else
+    {
+        POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::Unlock, no locker exists");
+    }
+}
+
+void
+IOLocker::Unlock(set<IArrayDevice*>& devs, StripeId val)
+{
+    set<StripeLocker*> lockersByGroup;
+    for (IArrayDevice* d : devs)
+    {
+        StripeLocker* locker = _Find(d);
+        if (locker == nullptr)
+        {
+            POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryLock, no locker exists");
+        }
+        lockersByGroup.insert(locker);
+    }
+    for (StripeLocker* locker : lockersByGroup)
     {
         locker->Unlock(val);
     }
 }
 
 bool
-IOLocker::TryChange(string array, LockerMode mode)
+IOLocker::TryChange(IArrayDevice* dev, LockerMode mode)
 {
-    StripeLocker* locker = _Find(array);
+    StripeLocker* locker = _Find(dev);
     if (locker == nullptr)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
-            "Locker not found, fatal error if array is not broken");
+        POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryChange, no locker exists");
         return true;
     }
 
@@ -122,10 +191,10 @@ IOLocker::TryChange(string array, LockerMode mode)
 }
 
 StripeLocker*
-IOLocker::_Find(string array)
+IOLocker::_Find(IArrayDevice* dev)
 {
-    auto it = tempLockers.find(array);
-    if (it == tempLockers.end())
+    auto it = lockers.find(dev);
+    if (it == lockers.end())
     {
         return nullptr;
     }
@@ -133,70 +202,4 @@ IOLocker::_Find(string array)
     return it->second;
 }
 
-void
-IOLocker::_Erase(string array)
-{
-        tempLockers.erase(array);
-}
-
-// new iolocker with array index
-
-bool
-IOLocker::Register(unsigned int arrayIndex)
-{
-    if (lockers[arrayIndex] == nullptr)
-    {
-        StripeLocker* locker = new StripeLocker();
-        lockers[arrayIndex] = locker;
-        POS_TRACE_INFO((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
-            "StripeLocker::Register, array:{}", arrayIndex);
-        return true;
-    }
-    return false;
-}
-
-void
-IOLocker::Unregister(unsigned int arrayIndex)
-{
-    if (lockers[arrayIndex] != nullptr)
-    {
-        /* new register method with array index : need enable after using array Idx
-        delete lockers[arrayIndex];*/
-
-        lockers[arrayIndex] = nullptr;
-        POS_TRACE_INFO((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
-            "StripeLocker::Unregister, array:{}", arrayIndex);
-    }
-}
-
-bool
-IOLocker::TryLock(unsigned int arrayIndex, StripeId val)
-{
-    if (lockers[arrayIndex] == nullptr)
-    {
-        return false;
-    }
-
-    return lockers[arrayIndex]->TryLock(val);
-}
-
-void
-IOLocker::Unlock(unsigned int arrayIndex, StripeId val)
-{
-    if (lockers[arrayIndex] != nullptr)
-    {
-        lockers[arrayIndex]->Unlock(val);
-    }
-}
-
-bool
-IOLocker::TryChange(unsigned int arrayIndex, LockerMode mode)
-{
-    if (lockers[arrayIndex] == nullptr)
-    {
-        return false;
-    }
-
-    return lockers[arrayIndex]->TryModeChanging(mode);
-}
 } // namespace pos

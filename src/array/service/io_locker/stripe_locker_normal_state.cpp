@@ -41,12 +41,6 @@ bool
 StripeLockerNormalState::TryLock(StripeId id)
 {
     std::unique_lock<std::mutex> lock(mtx);
-    if (isStateChanging == true)
-    {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "normallocker is now changing state. Using stripe {} is refused", id);
-        return false;
-    }
     workingSet.insert(id);
     return true;
 }

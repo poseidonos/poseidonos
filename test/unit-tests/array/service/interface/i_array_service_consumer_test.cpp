@@ -12,10 +12,6 @@ TEST(IArrayServiceConsumer, GetRecover_)
 {
 }
 
-TEST(IArrayServiceConsumer, GetLocker_)
-{
-}
-
 TEST(IArrayServiceConsumer, GetDeviceChecker_)
 {
 }

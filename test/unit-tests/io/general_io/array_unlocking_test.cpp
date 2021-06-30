@@ -10,27 +10,23 @@ namespace pos
 TEST(ArrayUnlocking, ArrayUnlocking_Constructor)
 {
     // Given : User Data and simple partition type
-    PartitionType partitionType = PartitionType::USER_DATA;
+    std::set<IArrayDevice*> devs;
     StripeId stripeId = 0;
-    const std::string str = "array";
     MockIIOLocker mockIIOLocker;
     // When : Constructor
-    ArrayUnlocking arrayUnlocking(partitionType, stripeId, 0, &mockIIOLocker);
+    ArrayUnlocking arrayUnlocking(devs, stripeId, &mockIIOLocker);
 }
 
 TEST(ArrayUnlocking, ArrayUnlocking_DoSpecificJob)
 {
     // Given : User Data and simple partition type
-    PartitionType partitionType = PartitionType::USER_DATA;
+    std::set<IArrayDevice*> devs;
     StripeId stripeId = 0;
-    const std::string str = "array";
-    unsigned int arrayId = 0;
     MockIIOLocker mockIIOLocker;
-    // When : Constructor
-    ArrayUnlocking arrayUnlocking(partitionType, stripeId, 0, &mockIIOLocker);
-    Callback* callback = &arrayUnlocking;
     // Then : Execute and check result
-    EXPECT_CALL(mockIIOLocker, Unlock(arrayId, _));
+    ArrayUnlocking arrayUnlocking(devs, stripeId, &mockIIOLocker);
+    Callback* callback = &arrayUnlocking;
+    EXPECT_CALL(mockIIOLocker, Unlock(devs, _));
     bool actual = callback->Execute();
     ASSERT_EQ(actual, true);
 }

@@ -40,14 +40,12 @@ ArrayServiceLayer::ArrayServiceLayer(void)
 {
     ioTranslator = new IOTranslator();
     ioRecover = new IORecover();
-    ioLocker = new IOLocker();
     deviceChecker = new IODeviceChecker();
 }
 
 ArrayServiceLayer::~ArrayServiceLayer(void)
 {
     delete deviceChecker;
-    delete ioLocker;
     delete ioRecover;
     delete ioTranslator;
 }
@@ -79,11 +77,6 @@ ArrayServiceLayer::Register(string array, unsigned int arrayIndex,
     {
         return ret;
     }
-    ret = ioLocker->Register(array);
-    if (!ret)
-    {
-        return ret;
-    }
     ret = deviceChecker->Register(array, checker);
     if (!ret)
     {
@@ -102,11 +95,6 @@ ArrayServiceLayer::Register(string array, unsigned int arrayIndex,
     {
         return ret;
     }
-    ret = ioLocker->Register(arrayIndex);
-    if (!ret)
-    {
-        return ret;
-    }
     ret = deviceChecker->Register(arrayIndex, checker);
     return ret;
 }
@@ -115,12 +103,10 @@ void
 ArrayServiceLayer::Unregister(string array, unsigned int arrayIndex)
 {
     deviceChecker->Unregister(arrayIndex);
-    ioLocker->Unregister(arrayIndex);
     ioRecover->Unregister(arrayIndex);
     ioTranslator->Unregister(arrayIndex);
 
     deviceChecker->Unregister(array);
-    ioLocker->Unregister(array);
     ioRecover->Unregister(array);
     ioTranslator->Unregister(array);
 }
@@ -135,12 +121,6 @@ IIORecover*
 ArrayServiceLayer::GetRecover(void)
 {
     return ioRecover;
-}
-
-IIOLocker*
-ArrayServiceLayer::GetLocker(void)
-{
-    return ioLocker;
 }
 
 IIODeviceChecker*

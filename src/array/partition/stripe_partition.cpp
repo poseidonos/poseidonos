@@ -311,6 +311,7 @@ StripePartition::GetRebuildCtx(ArrayDevice* fault)
         ctx->arrayIndex = arrayIndex_;
         ctx->part = PARTITION_TYPE_STR[type_];
         ctx->faultIdx = index;
+        ctx->faultDev = fault;
         ctx->stripeCnt = logicalSize_.totalStripes;
         ctx->result = RebuildState::READY;
         ctx->size = GetPhysicalSize();

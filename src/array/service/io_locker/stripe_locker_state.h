@@ -42,7 +42,6 @@ public:
     virtual void Unlock(StripeId val) = 0;
     virtual bool StateChange(LockerMode mode) = 0;
     virtual uint32_t Count(void) = 0;
-    static bool isStateChanging;
 };
 
 } // namespace pos

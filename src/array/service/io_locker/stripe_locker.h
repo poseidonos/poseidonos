@@ -56,8 +56,9 @@ private:
     StripeLockerState* locker = nullptr;
     StripeLockerNormalState* normalLocker = nullptr;
     StripeLockerBusyState* busyLocker = nullptr;
-    int state = LockerMode::NORMAL;
     mutex statechangingMtx;
+    int state = LockerMode::NORMAL;
+    bool isStateChanging = false;
 };
 
 } // namespace pos

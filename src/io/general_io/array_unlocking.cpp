@@ -37,17 +37,16 @@
 
 namespace pos
 {
-ArrayUnlocking::ArrayUnlocking(PartitionType type, StripeId stripeId,
-    const int arrayId, IIOLocker* inputLocker)
+ArrayUnlocking::ArrayUnlocking(std::set<IArrayDevice*> devs, StripeId stripeId,
+    IIOLocker* inputLocker)
 : Callback(false, CallbackType_ArrayUnlocking),
-  type(type),
+  lockedDevs(devs),
   stripeId(stripeId),
-  arrayId(arrayId),
   locker(inputLocker)
 {
     if (likely(locker == nullptr))
     {
-        locker = ArrayService::Instance()->Getter()->GetLocker();
+        locker = IOLockerSingleton::Instance();
     }
 }
 
@@ -58,7 +57,7 @@ ArrayUnlocking::~ArrayUnlocking(void)
 bool
 ArrayUnlocking::_DoSpecificJob(void)
 {
-    locker->Unlock(arrayId, stripeId);
+    locker->Unlock(lockedDevs, stripeId);
     return true;
 }
 } // namespace pos

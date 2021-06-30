@@ -14,7 +14,6 @@ public:
     using IArrayServiceConsumer::IArrayServiceConsumer;
     MOCK_METHOD(IIOTranslator*, GetTranslator, (), (override));
     MOCK_METHOD(IIORecover*, GetRecover, (), (override));
-    MOCK_METHOD(IIOLocker*, GetLocker, (), (override));
     MOCK_METHOD(IIODeviceChecker*, GetDeviceChecker, (), (override));
 };
 

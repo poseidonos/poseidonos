@@ -33,8 +33,10 @@
 #pragma once
 
 #include "src/include/address_type.h"
+#include "src/array/device/array_device.h"
 #include "locker_mode.h"
 #include <string>
+#include <set>
 
 using namespace std;
 
@@ -43,11 +45,10 @@ namespace pos
 class IIOLocker
 {
 public:
-    virtual bool TryLock(string array, StripeId val) = 0;
-    virtual void Unlock(string array, StripeId val) = 0;
-    virtual bool TryChange(string array, LockerMode mode) = 0;
-    virtual bool TryLock(unsigned int arrayIndex, StripeId val) = 0;
-    virtual void Unlock(unsigned int arrayIndex, StripeId val) = 0;
-    virtual bool TryChange(unsigned int arrayIndex, LockerMode mode) = 0;
+    virtual bool TryLock(IArrayDevice* dev, StripeId val) = 0;
+    virtual bool TryLock(set<IArrayDevice*>& devs, StripeId val) = 0;
+    virtual void Unlock(IArrayDevice* dev, StripeId val) = 0;
+    virtual void Unlock(set<IArrayDevice*>& devs, StripeId val) = 0;
+    virtual bool TryChange(IArrayDevice* dev, LockerMode mode) = 0;
 };
 } // namespace pos

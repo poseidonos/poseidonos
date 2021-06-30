@@ -32,8 +32,4 @@ TEST(IOLocker, _Find_)
 {
 }
 
-TEST(IOLocker, _Erase_)
-{
-}
-
 } // namespace pos

@@ -57,7 +57,7 @@ Raid1Rebuild::Raid1Rebuild(unique_ptr<RebuildContext> c)
 : RebuildBehavior(move(c))
 {
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid1Rebuild");
-    locker = ArrayService::Instance()->Getter()->GetLocker();
+    locker = IOLockerSingleton::Instance();
     assert(locker != nullptr);
 
     bool ret = _InitBuffers();
@@ -95,9 +95,7 @@ Raid1Rebuild::Read(void)
     if (baseStripe >= maxStripeId ||
         ctx->result >= RebuildState::CANCELLED)
     {
-        bool ret = locker->TryChange(
-            ctx->array, LockerMode::NORMAL);
-        if (ret == false)
+        if (locker->TryChange(ctx->faultDev, LockerMode::NORMAL) == false)
         {
             POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
                 "Partition {} rebuild done, but waiting lock release",
@@ -133,10 +131,11 @@ Raid1Rebuild::Read(void)
 
     if (baseStripe == 0)
     {
-        bool ret =  locker->TryChange(
-            ctx->array, LockerMode::BUSY);
-        if (ret == false)
+        if (locker->TryChange(ctx->faultDev, LockerMode::BUSY) == false)
         {
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+                "Try to rebuild partition {}, but waiting lock aquisition",
+                ctx->part);
             return false;
         }
     }
@@ -151,7 +150,7 @@ Raid1Rebuild::Read(void)
     for (uint32_t offset = 0; offset < currWorkload; offset++)
     {
         uint32_t stripeId = baseStripe + offset;
-        if (locker->TryLock(ctx->array, stripeId) == false)
+        if (locker->TryLock(ctx->faultDev, stripeId) == false)
         {
             break;
         }
@@ -225,7 +224,7 @@ bool Raid1Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 
 bool Raid1Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
 {
-    locker->Unlock(ctx->array, targetId);
+    locker->Unlock(ctx->faultDev, targetId);
 
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
 

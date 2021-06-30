@@ -37,14 +37,13 @@
 
 namespace pos
 {
-bool StripeLockerState::isStateChanging;
 
 StripeLocker::StripeLocker(void)
 {
     normalLocker = new StripeLockerNormalState();
     busyLocker = new StripeLockerBusyState();
     locker = normalLocker;
-    locker->isStateChanging = false;
+    isStateChanging = false;
 }
 
 StripeLocker::~StripeLocker(void)
@@ -63,7 +62,7 @@ StripeLocker::TryModeChanging(LockerMode mode)
     {
         return true;
     }
-    locker->isStateChanging = true;
+    isStateChanging = true;
     if (locker->StateChange(mode) == true)
     {
         _ChangeMode(mode);
@@ -81,14 +80,14 @@ StripeLocker::_ChangeMode(LockerMode mode)
         locker = busyLocker;
         POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
             "busylocker: set size is {}", locker->Count());
-        locker->isStateChanging = false;
+        isStateChanging = false;
     }
     else if (mode == LockerMode::NORMAL)
     {
         locker = normalLocker;
         POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
             "normalLocker: set size is {}", locker->Count());
-        locker->isStateChanging = false;
+        isStateChanging = false;
     }
 }
 
@@ -98,6 +97,12 @@ StripeLocker::TryLock(StripeId id)
     unique_lock<mutex> lock(statechangingMtx, defer_lock);
     if (lock.try_lock())
     {
+        if (isStateChanging == true)
+        {
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+                "Locker is now changing state. TryLock {} is refused", id);
+            return false;
+        }
         return locker->TryLock(id);
     }
     else

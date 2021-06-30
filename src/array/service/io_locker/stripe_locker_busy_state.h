@@ -52,7 +52,7 @@ public:
     uint32_t Count(void) override;
 
 private:
-    set<StripeId> workingSet;
+    set<StripeId> busySet;
     mutex mtx;
 };
 

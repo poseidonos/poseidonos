@@ -34,7 +34,6 @@
 
 #include "src/array/service/io_translator/io_translator.h"
 #include "src/array/service/io_recover/io_recover.h"
-#include "src/array/service/io_locker/io_locker.h"
 #include "src/array/service/io_device_checker/io_device_checker.h"
 
 using namespace std;
@@ -46,7 +45,6 @@ class IArrayServiceConsumer
 public:
     virtual IIOTranslator* GetTranslator(void) = 0;
     virtual IIORecover* GetRecover(void) = 0;
-    virtual IIOLocker* GetLocker(void) = 0;
     virtual IIODeviceChecker* GetDeviceChecker(void) = 0;
 };
 } // namespace pos
