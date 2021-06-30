@@ -69,6 +69,7 @@ public:
     int FindDevice(ArrayDevice* dev);
     Method* GetMethod(void);
     virtual void Format(void) {}
+    virtual bool IsByteAccessSupported(void) = 0;
 
 protected:
     bool _IsValidAddress(const LogicalBlkAddr& lsa);

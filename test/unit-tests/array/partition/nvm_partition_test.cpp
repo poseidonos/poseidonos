@@ -135,6 +135,67 @@ TEST(NvmPartition, Translate_testIfValidAddressIsFilledIn)
     ASSERT_EQ(expectedDestSector, dest.lba);
 }
 
+TEST(NvmPartition, ByteTranslate_testIfInvalidAddressReturnsError)
+{
+    // Given
+    PartitionPhysicalSize partPhySize{
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    uint32_t totalStripes = partPhySize.stripesPerSegment * partPhySize.totalSegments;
+    uint32_t blksPerStripe = partPhySize.blksPerChunk * partPhySize.chunksPerStripe;
+    uint32_t testByteOffset = 10;
+    LogicalBlkAddr logicalByteAddr = buildInvalidLogicalBlkAddr(totalStripes);
+    LogicalByteAddr invalidAddr;
+    invalidAddr.blkAddr = logicalByteAddr;
+    invalidAddr.byteOffset = testByteOffset;
+    vector<ArrayDevice*> devs;
+
+    NvmPartition nvmPart("mock-array", PartitionType::META_NVM, partPhySize, devs);
+    PhysicalByteAddr ignored;
+
+    // When
+    int actual = nvmPart.ByteTranslate(ignored, invalidAddr);
+
+    // Then
+    ASSERT_EQ(EID(ARRAY_INVALID_ADDRESS_ERROR), actual);
+}
+
+TEST(NvmPartition, ByteTranslate_testIfValidAddressIsFilledIn)
+{
+    // Given
+    PartitionPhysicalSize partPhySize{
+        .startLba = 8192,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    uint32_t totalStripes = partPhySize.stripesPerSegment * partPhySize.totalSegments;
+    uint32_t blksPerStripe = partPhySize.blksPerChunk * partPhySize.chunksPerStripe;
+    uint32_t testByteOffset = 5;
+    LogicalBlkAddr logicalblkAddr = buildValidLogicalBlkAddr(totalStripes, blksPerStripe);
+    LogicalByteAddr validAddr;
+    validAddr.blkAddr = logicalblkAddr;
+    validAddr.byteOffset = testByteOffset;
+    validAddr.byteSize = 10;
+    vector<ArrayDevice*> devs;
+    devs.push_back(nullptr);  // putting dummy 'cause I'm not interested
+
+    NvmPartition nvmPart("mock-array", PartitionType::META_NVM, partPhySize, devs);
+    PhysicalByteAddr dest;
+
+    // When
+    int actual = nvmPart.ByteTranslate(dest, validAddr);
+
+    // Then
+    ASSERT_EQ(0, actual);
+    int expectedSrcBlock = totalStripes / 2 * nvmPart.GetLogicalSize()->blksPerStripe;
+    int expectedSrcSector = expectedSrcBlock * ArrayConfig::SECTORS_PER_BLOCK;
+    int expectedDestByte = (expectedSrcSector + partPhySize.startLba) * ArrayConfig::SECTOR_SIZE_BYTE + testByteOffset;
+    ASSERT_EQ(expectedDestByte, dest.byteAddress);
+}
+
 TEST(NvmPartition, Convert_testIfInvalidEntryReturnsError)
 {
     // Given

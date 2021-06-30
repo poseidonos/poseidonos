@@ -45,11 +45,15 @@ static const uint32_t STRIPE_ID_BIT_LEN = 30;
 static const uint32_t STRIPE_LOC_BIT_LEN = 1;
 static const uint32_t BLOCK_OFFSET_BIT_LEN = 33;
 static const uint32_t SEGMENT_ID_BIT_LEN = 32;
+static const uint32_t BYTE_OFFSET_BIT_LEN = 32;
+static const uint32_t BYTE_SIZE_BIT_LEN = 32;
 
 using SegmentId = uint32_t;
 using StripeId = uint32_t;
 using BlkOffset = uint64_t;
 using BlkAddr = uint64_t;
+using ByteOffset = uint32_t;
+using ByteSize = uint32_t;
 
 using ChunkIndex = uint32_t;
 
@@ -85,9 +89,22 @@ typedef struct
     BlkOffset offset : BLOCK_OFFSET_BIT_LEN;
 } LogicalBlkAddr;
 
+struct LogicalByteAddr
+{
+    LogicalBlkAddr blkAddr;
+    ByteOffset byteOffset : BYTE_OFFSET_BIT_LEN;
+    ByteSize byteSize : BYTE_SIZE_BIT_LEN;
+};
+
 struct PhysicalBlkAddr
 {
     uint64_t lba;
+    IArrayDevice* arrayDev;
+};
+
+struct PhysicalByteAddr
+{
+    uint64_t byteAddress;
     IArrayDevice* arrayDev;
 };
 
@@ -98,10 +115,24 @@ struct LogicalWriteEntry
     std::list<BufferEntry>* buffers;
 };
 
+struct LogicalByteWriteEntry
+{
+    LogicalByteAddr addr;
+    uint32_t byteCnt;
+    std::list<BufferEntry>* buffers;
+};
+
 struct PhysicalWriteEntry
 {
     PhysicalBlkAddr addr;
     uint32_t blkCnt;
+    std::list<BufferEntry> buffers;
+};
+
+struct PhysicalByteWriteEntry
+{
+    PhysicalByteAddr addr;
+    uint32_t byteCnt;
     std::list<BufferEntry> buffers;
 };
 

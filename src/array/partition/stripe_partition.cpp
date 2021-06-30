@@ -120,6 +120,12 @@ StripePartition::Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src)
     return 0;
 }
 
+int
+StripePartition::ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src)
+{
+    return -1;
+}
+
 PhysicalBlkAddr
 StripePartition::_F2PTranslate(const FtBlkAddr& fba)
 {
@@ -184,6 +190,13 @@ StripePartition::Convert(list<PhysicalWriteEntry>& dst,
         }
     }
     return 0;
+}
+
+int
+StripePartition::ByteConvert(list<PhysicalByteWriteEntry> &dst,
+    const LogicalByteWriteEntry &src)
+{
+    return -1;
 }
 
 list<PhysicalBlkAddr>
@@ -329,6 +342,12 @@ void
 StripePartition::Format(void)
 {
     _Trim();
+}
+
+bool
+StripePartition::IsByteAccessSupported(void)
+{
+    return false;
 }
 
 void

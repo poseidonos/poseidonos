@@ -67,10 +67,13 @@ public:
                     IODispatcher* ioDispatcher);
     virtual ~StripePartition();
     int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
+    int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src) override;
     int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
+    int ByteConvert(list<PhysicalByteWriteEntry> &dst, const LogicalByteWriteEntry &src) override;
     int GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out) override;
     unique_ptr<RebuildContext> GetRebuildCtx(ArrayDevice* fault) override;
     void Format(void) override;
+    bool IsByteAccessSupported(void) override;
 
 private:
     FtBlkAddr _P2FTranslate(const PhysicalBlkAddr& pba);

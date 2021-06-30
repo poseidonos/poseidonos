@@ -47,11 +47,19 @@ class IIOTranslator
 public:
     virtual int Translate(string array, PartitionType part,
         PhysicalBlkAddr& dst, const LogicalBlkAddr& src) = 0;
+    virtual int ByteTranslate(string array, PartitionType part,
+        PhysicalByteAddr& dst, const LogicalByteAddr& src) = 0;
     virtual int Convert(string array, PartitionType part,
         list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) = 0;
+    virtual int ByteConvert(string array, PartitionType part,
+        list<PhysicalByteWriteEntry>& dst, const LogicalByteWriteEntry& src) = 0;
     virtual int Translate(unsigned int arrayIndex, PartitionType part,
         PhysicalBlkAddr& dst, const LogicalBlkAddr& src) = 0;
+    virtual int ByteTranslate(unsigned int arrayIndex, PartitionType part,
+        PhysicalByteAddr& dst, const LogicalByteAddr& src) = 0;
     virtual int Convert(unsigned int arrayIndex, PartitionType part,
         list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) = 0;
+    virtual int ByteConvert(unsigned int arrayIndex, PartitionType part,
+        list<PhysicalByteWriteEntry>& dst, const LogicalByteWriteEntry& src) = 0;
 };
 } // namespace pos

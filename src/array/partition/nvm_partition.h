@@ -51,7 +51,14 @@ public:
                  vector<ArrayDevice*> devs);
     virtual ~NvmPartition();
     int Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
+    int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src);
     int Convert(list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
+    int ByteConvert(list<PhysicalByteWriteEntry>& dst, const LogicalByteWriteEntry& src);
+    bool IsByteAccessSupported(void) override;
+
+private:
+    bool _IsValidByteAddress(const LogicalByteAddr& lsa);
+    bool _IsValidByteEntry(const LogicalByteWriteEntry& entry);
 };
 
 } // namespace pos

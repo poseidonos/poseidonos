@@ -91,6 +91,30 @@ IOTranslator::Translate(string array, PartitionType part,
 }
 
 int
+IOTranslator::ByteTranslate(string array, PartitionType part,
+    PhysicalByteAddr& dst, const LogicalByteAddr& src)
+{
+    int event;
+    if (part != PartitionType::META_NVM)
+    {
+        event = (int)POS_EVENT_ID::TRANSLATOR_NOT_SUPPORT;
+        POS_TRACE_ERROR(event, "Byte Access is not supported for partition {}", part);
+        return event;
+    }
+
+    ITranslator* trans = _Find(array, part);
+    if (trans != nullptr)
+    {
+        return trans->ByteTranslate(dst, src);
+    }
+
+    event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
+    POS_TRACE_ERROR(event,
+        "IOTranslator::Translate ERROR, array:{} part:{}", array, part);
+    return event;
+}
+
+int
 IOTranslator::Convert(string array, PartitionType part,
     list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src)
 {
@@ -98,6 +122,22 @@ IOTranslator::Convert(string array, PartitionType part,
     if (trans != nullptr)
     {
         return trans->Convert(dst, src);
+    }
+
+    int event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
+    POS_TRACE_ERROR(event,
+        "IOTranslator::Convert ERROR, array:{} part:{}", array, part);
+    return event;
+}
+
+int
+IOTranslator::ByteConvert(string array, PartitionType part,
+    list<PhysicalByteWriteEntry>& dst, const LogicalByteWriteEntry& src)
+{
+    ITranslator* trans = _Find(array, part);
+    if (trans != nullptr)
+    {
+        return trans->ByteConvert(dst, src);
     }
 
     int event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
@@ -172,6 +212,33 @@ IOTranslator::Translate(unsigned int arrayIndex, PartitionType part,
 }
 
 int
+IOTranslator::ByteTranslate(unsigned int arrayIndex, PartitionType part,
+    PhysicalByteAddr& dst, const LogicalByteAddr& src)
+{
+    int event;
+    auto it = translators[arrayIndex].find(part);
+    if (it != translators[arrayIndex].end())
+    {
+        if (it->second->IsByteAccessSupported())
+        {
+            return it->second->ByteTranslate(dst, src);
+        }
+        else
+        {
+            event = (int)POS_EVENT_ID::TRANSLATOR_NOT_SUPPORT;
+            POS_TRACE_ERROR(event,
+                "IOTranslator::ByteTranslate not supported, array:{} part:{}", arrayIndex, part);
+            return event;
+        }
+    }
+
+    event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
+    POS_TRACE_ERROR(event,
+        "IOTranslator::Translate ERROR, array:{} part:{}", arrayIndex, part);
+    return event;
+}
+
+int
 IOTranslator::Convert(unsigned int arrayIndex, PartitionType part,
     list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src)
 {
@@ -179,6 +246,22 @@ IOTranslator::Convert(unsigned int arrayIndex, PartitionType part,
     if (it != translators[arrayIndex].end())
     {
         return it->second->Convert(dst, src);
+    }
+
+    int event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
+    POS_TRACE_ERROR(event,
+        "IOTranslator::Convert ERROR, array:{} part:{}", arrayIndex, part);
+    return event;
+}
+
+int
+IOTranslator::ByteConvert(unsigned int arrayIndex, PartitionType part,
+    list<PhysicalByteWriteEntry>& dst, const LogicalByteWriteEntry& src)
+{
+    auto it = translators[arrayIndex].find(part);
+    if (it != translators[arrayIndex].end())
+    {
+        return it->second->ByteConvert(dst, src);
     }
 
     int event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;

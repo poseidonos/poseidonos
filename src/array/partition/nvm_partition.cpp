@@ -81,6 +81,25 @@ NvmPartition::Translate(PhysicalBlkAddr& dst, const LogicalBlkAddr& src)
 }
 
 int
+NvmPartition::ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src)
+{
+    if (false == _IsValidByteAddress(src))
+    {
+        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
+        POS_TRACE_ERROR(error, "Invalid Address Error");
+        return error;
+    }
+
+    dst.arrayDev = devs_.front();
+    dst.byteAddress = (physicalSize_.startLba +
+        (src.blkAddr.stripeId * logicalSize_.blksPerStripe + src.blkAddr.offset) *
+        ArrayConfig::SECTORS_PER_BLOCK) * ArrayConfig::SECTOR_SIZE_BYTE +
+        src.byteOffset;
+
+    return 0;
+}
+
+int
 NvmPartition::Convert(list<PhysicalWriteEntry>& dst,
     const LogicalWriteEntry& src)
 {
@@ -100,6 +119,101 @@ NvmPartition::Convert(list<PhysicalWriteEntry>& dst,
     dst.push_back(physicalEntry);
 
     return 0;
+}
+
+int
+NvmPartition::ByteConvert(list<PhysicalByteWriteEntry>& dst,
+    const LogicalByteWriteEntry& src)
+{
+    if (false == _IsValidByteEntry(src))
+    {
+        int error = (int)POS_EVENT_ID::ARRAY_INVALID_ADDRESS_ERROR;
+        POS_TRACE_ERROR(error, "Invalid Address Error");
+        return error;
+    }
+
+    PhysicalByteWriteEntry physicalByteEntry;
+
+    ByteTranslate(physicalByteEntry.addr, src.addr);
+    physicalByteEntry.byteCnt = src.byteCnt;
+    physicalByteEntry.buffers = *(src.buffers);
+
+    dst.clear();
+    dst.push_back(physicalByteEntry);
+
+    return 0;
+}
+
+bool
+NvmPartition::IsByteAccessSupported(void)
+{
+    return true;
+}
+
+bool
+NvmPartition::_IsValidByteAddress(const LogicalByteAddr& lsa)
+{
+    uint32_t block_size = ArrayConfig::BLOCK_SIZE_BYTE;
+    uint64_t start_blk_offset = lsa.blkAddr.offset + lsa.byteOffset / block_size;
+    uint64_t start_stripe_id = lsa.blkAddr.stripeId + start_blk_offset / logicalSize_.blksPerStripe;
+    uint64_t end_blk_offset = lsa.blkAddr.offset + (lsa.byteOffset + lsa.byteSize) / block_size;
+    uint64_t end_stripe_id = lsa.blkAddr.stripeId + end_blk_offset / logicalSize_.blksPerStripe;
+
+    if (lsa.blkAddr.stripeId < logicalSize_.totalStripes &&
+        lsa.blkAddr.offset < logicalSize_.blksPerStripe)
+    {
+        if (start_blk_offset < logicalSize_.blksPerStripe &&
+            end_blk_offset < logicalSize_.blksPerStripe &&
+            lsa.byteOffset < ArrayConfig::BLOCK_SIZE_BYTE)
+        {
+            if (start_stripe_id < logicalSize_.totalStripes &&
+                end_stripe_id < logicalSize_.totalStripes)
+            {
+                if (start_stripe_id == end_stripe_id)
+                {
+                    return true;
+                }
+                else
+                {
+                    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_PARTITION_TRANSLATED_OVER_STRIPE,
+                        "Translated Stripe ID is different from original");
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool
+NvmPartition::_IsValidByteEntry(const LogicalByteWriteEntry& entry)
+{
+    uint32_t block_size = ArrayConfig::BLOCK_SIZE_BYTE;
+    uint64_t start_blk_offset = entry.addr.blkAddr.offset + entry.addr.byteOffset / block_size;
+    uint64_t start_stripe_id = entry.addr.blkAddr.stripeId + start_blk_offset / logicalSize_.blksPerStripe;
+    uint64_t end_blk_offset = entry.addr.blkAddr.offset + (entry.addr.byteOffset + entry.addr.byteSize) / block_size;
+    uint64_t end_stripe_id = entry.addr.blkAddr.stripeId + end_blk_offset / logicalSize_.blksPerStripe;
+
+    if (entry.addr.blkAddr.stripeId < logicalSize_.totalStripes &&
+        entry.addr.blkAddr.offset < logicalSize_.blksPerStripe)
+    {
+        if (end_blk_offset < logicalSize_.blksPerStripe &&
+            entry.addr.byteOffset < ArrayConfig::BLOCK_SIZE_BYTE)
+        {
+            if (end_stripe_id < logicalSize_.totalStripes)
+            {
+                if (start_stripe_id == end_stripe_id)
+                {
+                    return true;
+                }
+                else
+                {
+                    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_PARTITION_TRANSLATED_OVER_STRIPE,
+                        "Translated Stripe ID is different from original");
+                }
+            }
+        }
+    }
+    return false;
 }
 
 } // namespace pos
