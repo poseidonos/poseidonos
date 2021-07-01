@@ -584,7 +584,7 @@ MapIoHandler::_CompleteFlush(void)
     delete touchedPages;
     touchedPages = nullptr;
     delete mapHeaderTempBuffer;
-    mapHeaderTempBuffer = nullptr;    
+    mapHeaderTempBuffer = nullptr;
     flushInProgress = false;
 }
 
