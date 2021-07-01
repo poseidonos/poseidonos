@@ -157,8 +157,8 @@ type ListVolumeResData struct {
 }
 
 type Volume struct {
-	VOLUMENAME string `json:"array"`
-	VOLUMEID   string `json:"id"`
+	VOLUMENAME string `json:"name"`
+	VOLUMEID   int    `json:"id"`
 	TOTAL      int    `json:"total"`
 	REMAIN     int    `json:"remain"`
 	STATUS     string `json:"status"`
@@ -192,20 +192,20 @@ type ListDeviceInfo struct {
 }
 
 type ListQosResponse struct {
-	RID     string          `json:"rid"`
-	COMMAND string          `json:"command"`
-	RESULT  QosResult       `json:"result"`
-	INFO    Info            `json:"info"`
+	RID     string    `json:"rid"`
+	COMMAND string    `json:"command"`
+	RESULT  QosResult `json:"result"`
+	INFO    Info      `json:"info"`
 }
 
 type QosResult struct {
-    STATUS QosStatus      `json:"status"`
-    DATA   ListQosResult   `json:"data,omitempty"`
+	STATUS QosStatus     `json:"status"`
+	DATA   ListQosResult `json:"data,omitempty"`
 }
 
 type QosStatus struct {
-    CODE        int    `json:"code"`
-    DESCRIPTION string `json:"description"`
+	CODE        int    `json:"code"`
+	DESCRIPTION string `json:"description"`
 }
 
 type ListQosResult struct {
@@ -215,21 +215,20 @@ type ListQosResult struct {
 }
 
 type Rebuild struct {
-    IMPACT   string  `json:"rebuild,omitempty"`
+	IMPACT string `json:"rebuild,omitempty"`
 }
 
 type ArrayNameQos struct {
-    ARRNAME   string  `json:"ArrayName"`
+	ARRNAME string `json:"ArrayName"`
 }
 
 type VolumeQos struct {
-	VOLUMENAME         string `json:"name"`
-	VOLUMEID           int    `json:"id"`
-	MINIOPS            int    `json:"miniops"`
-	MAXIOPS            int    `json:"maxiops"`
-	MINBW              int    `json:"minbw"`
-	MAXBW              int    `json:"maxbw"`
-	MINBWGUARANTEE     string `json:"min_bw_guarantee"`
-	MINIOPSGUARANTEE   string `json:"min_iops_guarantee"`
+	VOLUMENAME       string `json:"name"`
+	VOLUMEID         int    `json:"id"`
+	MINIOPS          int    `json:"miniops"`
+	MAXIOPS          int    `json:"maxiops"`
+	MINBW            int    `json:"minbw"`
+	MAXBW            int    `json:"maxbw"`
+	MINBWGUARANTEE   string `json:"min_bw_guarantee"`
+	MINIOPSGUARANTEE string `json:"min_iops_guarantee"`
 }
-

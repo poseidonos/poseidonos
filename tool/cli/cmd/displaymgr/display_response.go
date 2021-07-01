@@ -4,9 +4,10 @@ import (
 	"cli/cmd/messages"
 	"encoding/json"
 	"fmt"
-	"log"
+	"os"
 	"pnconnector/src/util"
 	"strconv"
+	"text/tabwriter"
 )
 
 func PrintResponse(command string, resJSON string, isDebug bool, isJSONRes bool) {
@@ -26,21 +27,27 @@ func printResToDebug(resJSON string) {
 	printStatus(res.RESULT.STATUS.CODE)
 	statusInfo, _ := util.GetStatusInfo(res.RESULT.STATUS.CODE)
 
-	log.Println()
-	log.Println("------------ Debug message ------------")
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-	log.Println("Code         : ", statusInfo.Code)
-	log.Println("Level        : ", statusInfo.Level)
-	log.Println("Description  : ", statusInfo.Description)
-	log.Println("Problem      : ", statusInfo.Problem)
-	log.Println("Solution     : ", statusInfo.Solution)
-	//log.Println("Data         : ", res.RESULT.DATA)
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "------------ Debug message ------------")
+
+	fmt.Fprintln(w, "Code\t: ", statusInfo.Code)
+	fmt.Fprintln(w, "Level\t: ", statusInfo.Level)
+	fmt.Fprintln(w, "Description\t: ", statusInfo.Description)
+	fmt.Fprintln(w, "Problem\t: ", statusInfo.Problem)
+	fmt.Fprintln(w, "Solution\t: ", statusInfo.Solution)
+	//fmt.Fprintln(w, "Data\t: ", res.RESULT.DATA)
+
+	w.Flush()
 }
 
 func printResInJSON(resJSON string) {
-	log.Println(resJSON)
+	fmt.Println(resJSON)
 }
 
+// TODO(mj): Currently, the output records may have whitespace.
+// It should be assured that the output records do not have whitespace to pipeline the data to awk.
 func printResToHumanReadable(command string, resJSON string) {
 	switch command {
 	case "LISTARRAY":
@@ -48,103 +55,96 @@ func printResToHumanReadable(command string, resJSON string) {
 		json.Unmarshal([]byte(resJSON), &res)
 		printStatus(res.RESULT.STATUS.CODE)
 
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+		fmt.Fprintln(w, "Array\tDatetimeCreated\tDatetimeUpdated\tStatus\tDevices(Type)")
+		fmt.Fprintln(w, "----------\t---------------------\t---------------------\t----------\t-----------------------------------")
+
 		for _, array := range res.RESULT.DATA.ARRAYLIST {
-			log.Println("Name: " + array.ARRAYNAME)
-			log.Println("---------------------------")
-			log.Println("Datetime Created: " + array.CREATEDATETIME)
-			log.Println("Datetime Updated: " + array.UPDATEDATETIME)
-			log.Println("Status: " + array.STATUS)
-			log.Println("")
-			log.Println("Devices")
-			log.Println("-------------")
+			fmt.Fprint(w, array.ARRAYNAME+"\t"+array.CREATEDATETIME+"\t"+array.UPDATEDATETIME+"\t"+array.STATUS+"\t")
+
 			for _, device := range array.DEVICELIST {
-				log.Println("Name: " + device.DEVICENAME)
-				log.Println("Type: " + device.DEVICETYPE)
-				log.Println("")
+				fmt.Fprint(w, device.DEVICENAME+"(")
+				fmt.Fprint(w, device.DEVICETYPE+") ")
 			}
-			log.Println("")
+			fmt.Fprintln(w, "")
 		}
+		w.Flush()
+
 	case "ARRAYINFO":
 		res := messages.ArrayInfoResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
 		printStatus(res.RESULT.STATUS.CODE)
-
 		array := res.RESULT.DATA
 
-		log.Println("Name: " + array.ARRAYNAME)
-		log.Println("---------------------------")
-		log.Println("State: " + array.STATE)
-		log.Println("Situation: " + array.SITUATION)
-		log.Println("Rebuilding Progress: ", array.REBUILDINGPROGRESS)
-		log.Println("Total: ", array.CAPACITY)
-		log.Println("Used: ", array.USED)
-		log.Println("")
-		log.Println("Devices")
-		log.Println("-------------")
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		fmt.Fprintln(w, "Array\t:"+array.ARRAYNAME)
+		fmt.Fprintln(w, "------------------------------------")
+		fmt.Fprintln(w, "State\t: "+array.STATE)
+		fmt.Fprintln(w, "Situation\t: "+array.SITUATION)
+		fmt.Fprintln(w, "Rebuilding Progress\t:", array.REBUILDINGPROGRESS)
+		fmt.Fprintln(w, "Total(byte)\t:", array.CAPACITY)
+		fmt.Fprintln(w, "Used(byte)\t:", array.USED)
+		fmt.Fprintln(w, "")
+		fmt.Fprintln(w, "Devices")
+		fmt.Fprintln(w, "Name\tType")
+		fmt.Fprintln(w, "----\t------")
 
 		for _, device := range array.DEVICELIST {
-			log.Println("Name: " + device.DEVICENAME)
-			log.Println("Type: " + device.DEVICETYPE)
-			log.Println("")
+			fmt.Fprintln(w, device.DEVICENAME+"\t"+device.DEVICETYPE)
 		}
-		log.Println("")
+		w.Flush()
+
 	case "LISTVOLUME":
 		res := messages.ListVolumeResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
 		printStatus(res.RESULT.STATUS.CODE)
 
-		log.Println(res)
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-		log.Println("Array name: " + res.RESULT.DATA.ARRAYNAME)
-		log.Println("---------------------------")
+		fmt.Fprintln(w, "Name\tID\tTotalCapacity(byte)\tRemainingCapacity(byte)\tStatus\tMaximumIOPS\tMaximumBandwith")
+		fmt.Fprintln(w, "---------\t-----\t----------------------------\t----------------------------\t----------\t----------------\t----------------")
 
 		for _, volume := range res.RESULT.DATA.VOLUMELIST {
-			log.Println("Name: " + volume.VOLUMENAME)
-			log.Println("ID: " + volume.VOLUMEID)
-			log.Println("Total capacity: ", volume.TOTAL)
-			log.Println("Remaining capacity: ", volume.REMAIN)
-			log.Println("Status: " + volume.STATUS)
-			log.Println("Maximum IOPS: ", volume.MAXIOPS)
-			log.Println("Maximum bandwidth: ", volume.MAXBW)
-
-			log.Println("")
+			fmt.Fprintln(w, volume.VOLUMENAME+"\t"+strconv.Itoa(volume.VOLUMEID)+
+				"\t"+strconv.Itoa(volume.TOTAL)+"\t"+strconv.Itoa(volume.REMAIN)+"\t"+
+				volume.STATUS+"\t"+strconv.Itoa(volume.MAXIOPS)+"\t"+strconv.Itoa(volume.MAXBW))
 		}
-		log.Println("")
+		w.Flush()
 
 	case "LISTDEVICE":
 		res := messages.ListDeviceResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
 		printStatus(res.RESULT.STATUS.CODE)
 
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		fmt.Fprintln(w, "Name\tSerialNumber(SN)\tAddress\tClass\tMN\tNUMA\tSize(byte)")
+		fmt.Fprintln(w, "--------------\t-------------------\t--------------\t-------------\t--------------------------\t------\t------------------")
+
 		for _, device := range res.RESULT.DATA.DEVICELIST {
-			log.Println("Name: " + device.DEVICENAME)
-			log.Println("---------------------------")
-			log.Println("Serial Number: " + device.SERIAL)
-			log.Println("Address: " + device.ADDRESS)
-			log.Println("Class: " + device.CLASS)
-			log.Println("MN: " + device.MN)
-			log.Println("NUMA: " + device.NUMA)
-			log.Println("Size: ", device.SIZE)
-			log.Println("Serial Number: " + device.SERIAL)
-			log.Println("")
+			fmt.Fprintln(w, device.DEVICENAME+"\t"+device.SERIAL+"\t"+device.ADDRESS+"\t"+device.CLASS+
+				"\t"+device.MN+"\t"+device.NUMA+"\t"+strconv.Itoa(device.SIZE))
 		}
-		log.Println("")
+		w.Flush()
 
 	case "SMART":
 		res := messages.SMARTResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
 		printStatus(res.RESULT.STATUS.CODE)
 
-		log.Print("Percentage used: ", res.RESULT.DATA.PERCENTAGEUSED)
-		log.Print("Tempurature: ", res.RESULT.DATA.TEMPERATURE)
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+		fmt.Fprintln(w, "Percentage used\t:", res.RESULT.DATA.PERCENTAGEUSED)
+		fmt.Fprintln(w, "Tempurature\t:", res.RESULT.DATA.TEMPERATURE)
+
+		w.Flush()
 
 	case "GETLOGLEVEL":
 		res := messages.GetLogLevelResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
 		printStatus(res.RESULT.STATUS.CODE)
 
-		log.Print("Log level: ")
-		log.Println(res.RESULT.DATA.LEVEL)
+		fmt.Println("Log level: " + res.RESULT.DATA.LEVEL)
 
 	case "LOGGERINFO":
 		res := messages.LoggerInfoResponse{}
@@ -153,64 +153,64 @@ func printResToHumanReadable(command string, resJSON string) {
 
 		loggerInfo := res.RESULT.DATA
 
-		log.Println("minor_log_path: " + loggerInfo.MINORLOGPATH)
-		log.Println("major_log_path: " + loggerInfo.MAJORLOGPATH)
-		log.Println("logfile_size_in_mb: " + loggerInfo.LOGFILESIZEINBM)
-		log.Println("logfile_rotation_count: ", loggerInfo.LOGFILEROTATIONCOUNT)
-		log.Println("min_allowable_log_level: " + loggerInfo.MINALLOWABLELOGLEVEL)
-		log.Println("deduplication_enabled: ", loggerInfo.DEDUPLICATIONENABLED)
-		log.Println("deduplication_sensitivity_in_msec: ", loggerInfo.DEDUPLICATIONSENSITIVITYINMSEC)
-		log.Println("filter_enabled: ", loggerInfo.FILTERENABLED)
-		log.Println("filter_included: " + loggerInfo.FILTERINCLUDED)
-		log.Println("filter_excluded: " + loggerInfo.FILTEREXCLUDED)
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-		log.Println("")
+		fmt.Fprintln(w, "minor_log_path\t: "+loggerInfo.MINORLOGPATH)
+		fmt.Fprintln(w, "major_log_path\t: "+loggerInfo.MAJORLOGPATH)
+		fmt.Fprintln(w, "logfile_size_in_mb\t: "+loggerInfo.LOGFILESIZEINBM)
+		fmt.Fprintln(w, "logfile_rotation_count\t:", loggerInfo.LOGFILEROTATIONCOUNT)
+		fmt.Fprintln(w, "min_allowable_log_level\t: "+loggerInfo.MINALLOWABLELOGLEVEL)
+		fmt.Fprintln(w, "deduplication_enabled\t:", loggerInfo.DEDUPLICATIONENABLED)
+		fmt.Fprintln(w, "deduplication_sensitivity_in_msec\t:", loggerInfo.DEDUPLICATIONSENSITIVITYINMSEC)
+		fmt.Fprintln(w, "filter_enabled\t:", loggerInfo.FILTERENABLED)
+		fmt.Fprintln(w, "filter_included\t: "+loggerInfo.FILTERINCLUDED)
+		fmt.Fprintln(w, "filter_excluded\t: "+loggerInfo.FILTEREXCLUDED)
+
+		w.Flush()
 
 	case "QOSCREATEVOLUMEPOLICY":
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)
-        if (0 != res.RESULT.STATUS.CODE) {
-		    printStatus(res.RESULT.STATUS.CODE)
-            fmt.Println("Description: ",res.RESULT.STATUS.DESCRIPTION)
-        }
+		if 0 != res.RESULT.STATUS.CODE {
+			printStatus(res.RESULT.STATUS.CODE)
+			fmt.Println("Description: ", res.RESULT.STATUS.DESCRIPTION)
+		}
 
 	case "QOSRESETVOLUMEPOLICY":
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)
-        if (0 != res.RESULT.STATUS.CODE) {
-		    printStatus(res.RESULT.STATUS.CODE)
-            fmt.Println("Description: ",res.RESULT.STATUS.DESCRIPTION)
-        }
+		if 0 != res.RESULT.STATUS.CODE {
+			printStatus(res.RESULT.STATUS.CODE)
+			fmt.Println("Description: ", res.RESULT.STATUS.DESCRIPTION)
+		}
 
 	case "QOSLISTPOLICIES":
-	    res := messages.ListQosResponse{}
-	    json.Unmarshal([]byte(resJSON), &res)
-        if (0 != res.RESULT.STATUS.CODE) {
-            printStatus(res.RESULT.STATUS.CODE)
-            fmt.Println("Description: ",res.RESULT.STATUS.DESCRIPTION)
-        } else {
-            for _, array := range res.RESULT.DATA.QOSARRAYNAME {
-                log.Println("Array Name: " + array.ARRNAME)
-                log.Println("")
-            }
-            for _, rebuild := range res.RESULT.DATA.REBUILDPOLICY {
-                log.Println("Rebuild Impact: " + rebuild.IMPACT)
-            }
-            for _, volume := range res.RESULT.DATA.VOLUMEQOSLIST {
+		res := messages.ListQosResponse{}
+		json.Unmarshal([]byte(resJSON), &res)
+		if 0 != res.RESULT.STATUS.CODE {
+			printStatus(res.RESULT.STATUS.CODE)
+			fmt.Println("Description: ", res.RESULT.STATUS.DESCRIPTION)
+		} else {
+			for _, array := range res.RESULT.DATA.QOSARRAYNAME {
+				fmt.Println("Array Name: " + array.ARRNAME)
+				fmt.Println("")
+			}
+			for _, rebuild := range res.RESULT.DATA.REBUILDPOLICY {
+				fmt.Println("Rebuild Impact: " + rebuild.IMPACT)
+			}
+			for _, volume := range res.RESULT.DATA.VOLUMEQOSLIST {
 
-                log.Println("Name: " + volume.VOLUMENAME)
-                log.Println("ID: ",  volume.VOLUMEID)
-                log.Println("Minimim Iops: ", volume.MINIOPS)
-                log.Println("Maximum Iops: ", volume.MAXIOPS)
-                log.Println("Minimum Bw: ",  volume.MINBW)
-                log.Println("Maximum Bw: ", volume.MAXBW)
-                log.Println("Minimum Bw Guarantee: "  + volume.MINBWGUARANTEE)
-                log.Println("Minimum IOPS Guarantee: " +  volume.MINIOPSGUARANTEE)
-
-                log.Println("")
-            }
-            log.Println("")
-        }
+				fmt.Println("Name: " + volume.VOLUMENAME)
+				fmt.Println("ID: ", volume.VOLUMEID)
+				fmt.Println("Minimim Iops: ", volume.MINIOPS)
+				fmt.Println("Maximum Iops: ", volume.MAXIOPS)
+				fmt.Println("Minimum Bw: ", volume.MINBW)
+				fmt.Println("Maximum Bw: ", volume.MAXBW)
+				fmt.Println("Minimum Bw Guarantee: " + volume.MINBWGUARANTEE)
+				fmt.Println("Minimum IOPS Guarantee: " + volume.MINIOPSGUARANTEE)
+			}
+			fmt.Println("")
+		}
 	default:
 		res := messages.Response{}
 		json.Unmarshal([]byte(resJSON), &res)
@@ -225,9 +225,8 @@ func printStatus(code int) {
 		// fmt.Println("PoseidonOS: command has been successfully executed")
 	} else {
 		statusInfo, _ := util.GetStatusInfo(code)
-		fmt.Println("A problem occured during process with error code " +
-			strconv.Itoa(code) + " - " + statusInfo.Description)
-
+		fmt.Println("A problem occured during process with error code: " + strconv.Itoa(code))
+		fmt.Println("Problem: " + statusInfo.Description)
 		fmt.Println("Possible solution: " + statusInfo.Solution)
 	}
 }
