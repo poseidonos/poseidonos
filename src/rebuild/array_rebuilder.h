@@ -56,6 +56,8 @@ public:
     void StopRebuild(string array) override;
     void RebuildDone(string array) override;
     void WaitRebuildDone(string array) override;
+    bool IsRebuilding(string array) override;
+    void CleanUp(string array) override;
     uint32_t GetRebuildProgress(string array) override;
 
 private:
