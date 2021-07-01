@@ -19,6 +19,8 @@ pos_log_path = ""
 quick_mode = False
 print_log_with_color = False
 run_pos_manually = False
+skip_fio_run = False
+print_fio_result_to_log_file = False
 
 # pos setup
 trtype = "tcp"

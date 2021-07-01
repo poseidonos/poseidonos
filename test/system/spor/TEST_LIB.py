@@ -88,6 +88,18 @@ def parse_size(size):
     return int(int(number) * units[unit])
 
 
+def get_size(size_int):
+    unit = 'B'
+    for it_unit in reversed(list(units)):
+        if size_int > units[it_unit]:
+            size_int = size_int // units[it_unit]
+            unit = it_unit
+        else:
+            break
+
+    return (str(size_int) + unit)
+
+
 def get_available_memory():
     memory_usage_dict = dict(psutil.virtual_memory()._asdict())
     return memory_usage_dict['available']
@@ -137,6 +149,16 @@ def is_journal_enabled():
     command = "cat /etc/pos/pos.conf | jq .journal.enable"
     out = subprocess.check_output(command, universal_newlines=True, shell=True)
     return out
+
+
+def get_array_capacity(arrayId=0):
+    out = cli.send_request("array info --name " + TEST_SETUP_POS.get_arrayname(arrayId))
+    if json_parser.get_response_code(out) != 0:
+        return -1
+    else:
+        data = json_parser.get_data(out)
+        capacity = data["capacity"]
+        return capacity
 
 
 def kill_process(procname, sig=9):

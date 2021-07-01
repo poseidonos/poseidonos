@@ -215,15 +215,15 @@ def get_volname(volumeId):
     return "vol" + str(volumeId)
 
 
-def create_volume(arrayId, volumeId):
-    out = cli.create_volume(get_volname(volumeId), str(TEST.volSize), "0", "0", get_arrayname(arrayId))
+def create_volume(arrayId, volumeId, volSize=TEST.volSize):
+    out = cli.create_volume(get_volname(volumeId), str(volSize), "0", "0", get_arrayname(arrayId))
     ret = json_parser.get_response_code(out)
     if ret != 0:
         TEST_LOG.print_err("Failed to create volume")
         TEST_LOG.print_debug(out)
         sys.exit(1)
 
-    TEST_LOG.print_info("* Volume {} created".format(volumeId))
+    TEST_LOG.print_info("* Volume {} created, size {}".format(volumeId, volSize))
     mount_volume(arrayId, volumeId)
 
 
