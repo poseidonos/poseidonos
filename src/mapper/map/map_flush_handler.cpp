@@ -215,8 +215,6 @@ MapIoHandler::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback)
     {
         POS_TRACE_DEBUG(EID(MAP_FLUSH_STARTED), "FlushDirtyPagesGiven mapId:{} completed, W/O any pages to flush", mapHeader->GetMapId());
         _CompleteFlush();
-        delete mapHeaderTempBuffer;
-        mapHeaderTempBuffer = nullptr;
     }
 
     return result;
@@ -246,8 +244,6 @@ MapIoHandler::FlushTouchedPages(EventSmartPtr callback)
     {
         POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "mapId:{} FlushTouchedPages completed, W/O any pages to flush", mapHeader->GetMapId());
         _CompleteFlush();
-        delete mapHeaderTempBuffer;
-        mapHeaderTempBuffer = nullptr;
         // TODO(r.saraf) Handle callback returning false value (callback executed in _CompleteFlush)
     }
 
@@ -541,7 +537,7 @@ MapIoHandler::_HeaderFlushed(AsyncMetaFileIoCtx* ctx)
 
     _CompleteFlush();
 
-    delete[] ctx->buffer;
+    // mapHeaderTempBuffer that was deleted in _CompleteFlush() was assigned to ctx->buffer
     delete ctx;
 }
 
@@ -587,6 +583,8 @@ MapIoHandler::_CompleteFlush(void)
     EventSchedulerSingleton::Instance()->EnqueueEvent(flushDoneCallBack);
     delete touchedPages;
     touchedPages = nullptr;
+    delete mapHeaderTempBuffer;
+    mapHeaderTempBuffer = nullptr;    
     flushInProgress = false;
 }
 
