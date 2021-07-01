@@ -71,6 +71,10 @@ FlowControl::~FlowControl(void)
     {
         delete tokenDistributer;
     }
+    if (nullptr != systemTimeoutChecker)
+    {
+        delete systemTimeoutChecker;
+    }
 }
 
 int
