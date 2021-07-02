@@ -144,6 +144,19 @@ Poseidonos::_InitDebugInfo(void)
     debugInfo = new DebugInfo();
     debugInfoUpdater = debugInfo;
     debugInfo->Update();
+    int ret;
+    ret = system("mkdir -p /etc/pos/core");
+    if (ret != 0)
+    {
+        POS_TRACE_DEBUG(POS_EVENT_ID::DEBUG_CORE_DUMP_SETTING_FAILED, "Core directory will not be created");
+        return;
+    }
+    ret = system("echo /etc/pos/core/%E.core > /proc/sys/kernel/core_pattern");
+    if (ret != 0)
+    {
+        POS_TRACE_DEBUG(POS_EVENT_ID::DEBUG_CORE_DUMP_SETTING_FAILED, "Core pattern is not set properly");
+        return;
+    }
 }
 
 void
