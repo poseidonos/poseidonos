@@ -4,7 +4,7 @@
 - All Management S/W
 
 ```
-$ sudo $IBOF_MGMT_HOME /m9k/install_all.sh
+$ sudo $POS_MGMT_HOME /m9k/install_all.sh
 
 # 1. installs dependent libraries such as libcurl, influxdb, kapacitor, chronograf, nginx-common, libnginx-mod-http-echo, and nginx-light from local deb packages ("nas") or internet ("apt")
 # 2. starts up dependent services such as influxdb, chronograf, and kapacitor
@@ -15,7 +15,7 @@ $ sudo $IBOF_MGMT_HOME /m9k/install_all.sh
 POS management tool is built as a set of processes, all of which can be run by a single bash script:
 
 ```
-$ sudo $IBOF_MGMT_HOME /m9k/run_all.sh
+$ sudo $POS_MGMT_HOME /m9k/run_all.sh
 
 # 1. cleans up the previous deployment of dagent at /usr/local/dagent and redeploys it
 # 2. cleans up the previous deployment of magent at /var/log/m9k, restarts influxdb, and redeploys magent
@@ -64,6 +64,6 @@ Upon RUNIBOFOS http call, m9k executes `~/m9k/dagent/script/run_os.sh` to start 
 ## Integrating with External Application
 POS management tool provides REST APIs to help workflow automation. The whole set of the APIs is documented at [REST API](https://github.com/poseidonos/poseidonos/tree/main/doc/guides/rest_api) with sample inputs/outputs captured at the following:
 
-- ```$IBOF_MGMT_HOME/m9k/dagent/postman/D-Agent.postman_collection.json```
-- ```$IBOF_MGMT_HOME/m9k/dagent/postman/D-Agent.postman_environment.json```
+- ```$POS_MGMT_HOME/m9k/dagent/postman/D-Agent.postman_collection.json```
+- ```$POS_MGMT_HOME/m9k/dagent/postman/D-Agent.postman_environment.json```
 
