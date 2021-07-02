@@ -39,15 +39,6 @@ $ cli array unmount --name TargetArrayName
 * RPC request: {"rid":"fromCLI","command":"UNMOUNTARRAY","param":{"name":"TargetArrayName"}}
 * RPC response: {"command":"UNMOUNTARRAY","rid":"fromfakeclient","result":{"status":{"code":0,"description":"DONE"}}}
 
-### LOADARRAY
-```
-$ cli array load --name TargetArrayName
-```
-
-* It loads existing POS array information into POS. 
-* RPC request: {"rid":"fromCLI","command":"LOADARRAY","param":{"name":"TargetArrayName"}}
-* RPC response: {"command":"LOADARRAY","rid":"fromfakeclient","result":{"status":{"code":0,"description":"DONE"}}}
-
 ### LISTARRAYDEVICE
 ```
 $ cli array list_device --name TargetArrayName
@@ -55,8 +46,7 @@ $ cli array list_device --name TargetArrayName
 
 * It shows all devices in POS array
 * RPC request: {"rid":"fromCLI","command":"LISTARRAYDEVICE","param":{"name":"TargetArrayName"}}
-* RPC response: 
-{"command":"LISTARRAYDEVICE","rid":"fromCLI","result":{"status":{"code":0,"description":"DONE"},"data":{"name":"TargetArrayName", "devicelist":[{"type":"BUFFER","name":"uram0"},{"type":"DATA","name":"samsung-unvmens-0"},{"type":"DATA","name":"samsung-unvmens-1"},{"type":"DATA","name":"samsung-unvmens-2"},{"type":"SPARE","name":"samsung-unvmens-3"}]}}}
+* RPC response: {"command":"LISTARRAYDEVICE","rid":"fromCLI","result":{"status":{"code":0,"description":"DONE"},"data":{"name":"TargetArrayName", "devicelist":[{"type":"BUFFER","name":"uram0"},{"type":"DATA","name":"samsung-unvmens-0"},{"type":"DATA","name":"samsung-unvmens-1"},{"type":"DATA","name":"samsung-unvmens-2"},{"type":"SPARE","name":"samsung-unvmens-3"}]}}}
 
 ### ARRAYINFO
 ```
