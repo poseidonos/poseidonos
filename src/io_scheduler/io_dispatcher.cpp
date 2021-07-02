@@ -51,11 +51,16 @@ bool IODispatcher::frontendDone;
 thread_local std::vector<UblockSharedPtr> IODispatcher::threadLocalDeviceList;
 EventFactory* IODispatcher::recoveryEventFactory = nullptr;
 
-IODispatcher::IODispatcher(void)
+IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApi_)
 : ioWorkerCount(0),
-  deviceAllocationTurn(0)
+  deviceAllocationTurn(0),
+  eventFrameworkApi(eventFrameworkApi_)
 {
     pthread_rwlock_init(&ioWorkerMapLock, nullptr);
+    if (nullptr == eventFrameworkApi)
+    {
+        eventFrameworkApi = EventFrameworkApiSingleton::Instance();
+    }
 }
 
 IODispatcher::~IODispatcher(void)
@@ -117,6 +122,16 @@ IODispatcher::RemoveIOWorker(cpu_set_t cpuSet)
         }
     }
     pthread_rwlock_unlock(&ioWorkerMapLock);
+}
+
+std::size_t
+IODispatcher::SizeIOWorker(void)
+{
+    std::size_t size = 0;
+    pthread_rwlock_wrlock(&ioWorkerMapLock);
+    size = ioWorkerMap.size();
+    pthread_rwlock_unlock(&ioWorkerMapLock);
+    return size;
 }
 
 void
@@ -190,7 +205,7 @@ IODispatcher::_SubmitRecovery(UbioSmartPtr ubio)
 int
 IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded)
 {
-    bool isReactor = EventFrameworkApiSingleton::Instance()->IsReactorNow();
+    bool isReactor = eventFrameworkApi->IsReactorNow();
 
     // sync io for reactor is not allowed. (reactor should not be stuck in any point.)
     if (unlikely(isReactor && sync))
@@ -287,16 +302,16 @@ IODispatcher::_CallForFrontend(UblockSharedPtr dev)
     UblockSharedPtr* devArg = new UblockSharedPtr(dev);
     frontendDone = false;
 
-    uint32_t firstReactorCore = EventFrameworkApiSingleton::Instance()->GetFirstReactor();
+    uint32_t firstReactorCore = eventFrameworkApi->GetFirstReactor();
     bool succeeded = true;
 
-    if (firstReactorCore == EventFrameworkApiSingleton::Instance()->GetCurrentReactor())
+    if (firstReactorCore == eventFrameworkApi->GetCurrentReactor())
     {
         _ProcessFrontend(devArg);
     }
     else
     {
-        succeeded = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(firstReactorCore,
+        succeeded = eventFrameworkApi->SendSpdkEvent(firstReactorCore,
             _ProcessFrontend, devArg);
     }
     if (unlikely(false == succeeded))

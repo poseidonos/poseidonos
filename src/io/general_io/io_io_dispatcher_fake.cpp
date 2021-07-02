@@ -39,7 +39,7 @@ namespace pos
 {
 static uint32_t CORE_FOR_IO_WORKER = 3;
 
-IODispatcher::IODispatcher(void)
+IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApi_)
 : ioWorkerCount(0),
   deviceAllocationTurn(0)
 {

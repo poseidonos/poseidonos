@@ -46,14 +46,17 @@ namespace pos
 
 class IOWorker;
 class EventFactory;
+class EventFrameworkApi;
+class EventScheduler;
 class IODispatcher : public IIODispatcher
 {
 public:
-    IODispatcher(void);
+    explicit IODispatcher(EventFrameworkApi* eventFrameworkApi = nullptr);
     ~IODispatcher(void);
 
     void AddIOWorker(cpu_set_t cpuSet) override;
     void RemoveIOWorker(cpu_set_t cpuSet) override;
+    std::size_t SizeIOWorker(void);
 
     // These functions shall be guarrenteed to run itself at once by caller.
     void AddDeviceForReactor(UblockSharedPtr dev) override;
@@ -87,6 +90,7 @@ private:
     static bool frontendDone;
 
     uint32_t deviceAllocationTurn;
+    EventFrameworkApi* eventFrameworkApi{nullptr};
     static thread_local std::vector<UblockSharedPtr> threadLocalDeviceList;
 
     static const int DEVICE_FAILED = -1;

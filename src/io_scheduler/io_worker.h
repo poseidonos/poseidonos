@@ -62,10 +62,10 @@ public:
     IOWorker(cpu_set_t cpuSetInput, uint32_t id);
     virtual ~IOWorker(void);
 
-    void EnqueueUbio(UbioSmartPtr ubio);
+    virtual void EnqueueUbio(UbioSmartPtr ubio);
     uint32_t AddDevice(UblockSharedPtr device);
     uint32_t AddDevices(std::vector<UblockSharedPtr>* inputList);
-    uint32_t RemoveDevice(UblockSharedPtr device);
+    virtual uint32_t RemoveDevice(UblockSharedPtr device);
     bool HasDevice(UblockSharedPtr device);
 
     void Run(void);

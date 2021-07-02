@@ -12,6 +12,8 @@ class MockIOWorker : public IOWorker
 {
 public:
     using IOWorker::IOWorker;
+    MOCK_METHOD(void, EnqueueUbio, (UbioSmartPtr), (override));
+    MOCK_METHOD(uint32_t, RemoveDevice, (UblockSharedPtr), (override));
 };
 
 } // namespace pos

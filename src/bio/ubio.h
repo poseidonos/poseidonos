@@ -101,21 +101,21 @@ public:
     void MarkDone(void);
     void* GetBuffer(uint32_t blockIndex = 0, uint32_t sectorOffset = 0) const;
     void* GetWholeBuffer(void) const;
-    void WaitDone(void);
+    virtual void WaitDone(void);
 
     void Complete(IOErrorType error);
     void ClearOrigin(void);
 
     void SetPba(PhysicalBlkAddr& pbaInput);
     void FreeDataBuffer(void);
-    void SetSyncMode(void);
+    virtual void SetSyncMode(void);
     void SetAsyncMode(void);
     void SetCallback(CallbackSmartPtr inputCallback);
     CallbackSmartPtr GetCallback(void);
     void ClearCallback(void);
 
     UBlockDevice* GetUBlock(void);
-    IArrayDevice* GetArrayDev(void);
+    virtual IArrayDevice* GetArrayDev(void);
     uint64_t GetLba(void);
     const PhysicalBlkAddr GetPba(void);
     void SetRba(uint64_t inputSectorRba);
@@ -129,17 +129,17 @@ public:
     uint64_t GetSize(void);
 
     IOErrorType GetError(void);
-    void SetError(IOErrorType inputErrorType);
+    virtual void SetError(IOErrorType inputErrorType);
     void ResetError(void);
 
     bool CheckPbaSet(void);
     bool CheckRecoveryAllowed(void);
     void SetReferenceIncreased(bool increased);
-    bool IsSyncMode(void);
+    virtual bool IsSyncMode(void);
 
     void SetLba(uint64_t lba);
     void SetUblock(UblockSharedPtr uBlock);
-    bool NeedRecovery(void);
+    virtual bool NeedRecovery(void);
 
     int GetArrayId(void);
     void SetEventType(BackendEvent event);
