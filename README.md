@@ -42,14 +42,6 @@ sudo ./build_ibof_lib.sh all
 cd script/
 sudo ./build_ibofos.sh
 ```
-
-## Preparation
-
-```bash
-cd script/
-sudo ./setup_env.sh
-```
-
 ## Run POS
 
 ```bash
