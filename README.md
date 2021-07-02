@@ -39,7 +39,7 @@ sudo ./build_ibof_lib.sh all
 ### 2. Build Source Code
 
 ```bash
-cd script
+cd script/
 sudo ./build_ibofos.sh
 ```
 
@@ -53,15 +53,28 @@ sudo ./setup_env.sh
 ## Run POS
 
 ```bash
-sudo ./bin/ibofos
+cd script/
+sudo ./start_poseidonos.sh
 ```
 
 ## Learning POS Commands
 
 This document demonstrates how to start up POS and manage storage resources. The target audience is whoever wants to learn about POS and explore its capabilities. The minimum knowledge of Linux administration would be sufficient.
 
-### Prerequisites
+### Environments
+The following configs are used for this demonstration, but may change as this document gets revised.
+| Config | Value |
+| ------ | ----- |
+| OS     | Ubuntu 5.3.0-24-generic      |
+| POS location |  |
+| POS config |  |
+| POS scripts |  |
+| POS log |  |
+| POS dump |  |
+| SPDK RPC Server UDS |  |
+| Hugepage information |  |
 
+The following hardware has been used for evaluation.
 ```bash
 Hardware: Poseidon server
  - Reference server h/w implementation engineered by Samsung and Inspur
@@ -71,11 +84,6 @@ Hardware: Poseidon server
  - Network speed: up to 600 GbE
  - PCIe generation: gen4
  - Storage: E1.S SSD * 32 ea
-OS: Ubuntu 18.04 (kernel: 5.3.0-24-generic)
-Application binary: ibofos, cli
-Application config: /etc/ibofos/conf/ibofos.conf
-Application scripts to configure environments
-Writable file system for RPC socket, application logs/dump, and hugepage info
 ```
 
 ### Step 1. Start POS application
