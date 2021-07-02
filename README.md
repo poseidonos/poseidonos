@@ -66,7 +66,8 @@ The following configs are used for this demonstration, but may change as this do
 | Config | Value |
 | ------ | ----- |
 | OS     | Ubuntu 5.3.0-24-generic      |
-| POS location |  |
+| POS location | $POS_HOME/bin/poseidonos |
+|  | $POS_HOME/bin/cli |
 | POS config |  |
 | POS scripts |  |
 | POS log |  |
