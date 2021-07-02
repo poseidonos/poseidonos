@@ -66,14 +66,13 @@ The following configs are used for this demonstration, but may change as this do
 | Config | Value |
 | ------ | ----- |
 | OS     | Ubuntu 5.3.0-24-generic      |
-| POS location | $POS_HOME/bin/poseidonos |
-|  | $POS_HOME/bin/cli |
-| POS config |  |
-| POS scripts |  |
-| POS log |  |
-| POS dump |  |
-| SPDK RPC Server UDS |  |
-| Hugepage information |  |
+| POS location | $POS_HOME/bin/poseidonos <br/> $POS_HOME/bin/cli |
+| POS config | /etc/pos/pos.conf |
+| POS scripts |  $POS_HOME/script/start_poseidonos.sh <br/> $POS_HOME/lib/spdk-20.10/script/rpc.py <br/> $POS_HOME/test/script/set_irq_affinity_cpulist.sh <br/> $POS_HOME/test/script/common_irq_affinity.sh <br/> $POS_HOME/script/setup_env.sh <br/> $POS_HOME/lib/spdk-20.10/scripts/setup.sh <br/> $POS_HOME/lib/spdk-20.10/scripts/common.sh |
+| POS log | /var/log/pos/pos.log |
+| POS dump | /etc/pos/core/poseidonos.core |
+| SPDK RPC Server UDS | /var/tmp/spdk.sock |
+| Hugepage information | /tmp/uram_hugepage |
 
 The following hardware has been used for evaluation.
 ```bash
@@ -86,15 +85,16 @@ Hardware: Poseidon server
  - PCIe generation: gen4
  - Storage: E1.S SSD * 32 ea
 ```
+We provide the step-by-step guide to run POS commands with actual outputs. In the example, $POS_HOME is set to "/poseidonos" and the host name to "R2U14-PSD-3". The same could be achieved through web interface called M-Tool. Managing POS with M-Tool is explained in GUI section.
 
 ### Step 1. Start POS application
 
 ```bash
 # Become a root user and check if you have local NVMe devices attached to the OS with its Kernel Device Driver.
-ibof@R2U18-PSD-1-CI_TARGET:~$ su -
+ibof@R2U14-PSD-3:~$ su -
 Password:
-root@R2U18-PSD-1-CI_TARGET:~# cd /poseidonos
-root@R2U18-PSD-1-CI_TARGET:/poseidonos# fdisk -l | grep nvme
+root@R2U14-PSD-3:~# cd /poseidonos
+root@R2U14-PSD-3:/poseidonos# fdisk -l | grep nvme
 Disk /dev/nvme0n1: 3.5 TiB, 3840755982336 bytes, 7501476528 sectors
 Disk /dev/nvme1n1: 3.5 TiB, 3840755982336 bytes, 7501476528 sectors
 Disk /dev/nvme2n1: 3.5 TiB, 3840755982336 bytes, 7501476528 sectors
@@ -127,137 +127,137 @@ Disk /dev/nvme24n1: 3.5 TiB, 3840755982336 bytes, 7501476528 sectors
 Disk /dev/nvme21n1: 3.5 TiB, 3840755982336 bytes, 7501476528 sectors
 Disk /dev/nvme27n1: 3.5 TiB, 3840755982336 bytes, 7501476528 sectors
 Disk /dev/nvme30n1: 3.5 TiB, 3840755982336 bytes, 7501476528 sectors
- 
+
 # Start POS and check if the NVMe devices are detached from Linux kernel and attached to SPDK (user level application)
-root@R2U18-PSD-1-CI_TARGET:/poseidonos# cd script/
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/script# ls -al
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/script# ./start_ibofos.sh
-0000:4d:00.0 (144d a80a): Already using the nvme driver
-0000:4e:00.0 (144d a80a): Already using the nvme driver
-0000:4f:00.0 (144d a80a): Already using the nvme driver
-0000:50:00.0 (144d a80a): Already using the nvme driver
-0000:51:00.0 (144d a80a): Already using the nvme driver
-0000:52:00.0 (144d a80a): Already using the nvme driver
-0000:53:00.0 (144d a80a): Already using the nvme driver
-0000:54:00.0 (144d a80a): Already using the nvme driver
-0000:67:00.0 (144d a80a): Already using the nvme driver
-0000:68:00.0 (144d a80a): Already using the nvme driver
-0000:69:00.0 (144d a80a): Already using the nvme driver
-0000:6a:00.0 (144d a80a): Already using the nvme driver
-0000:6b:00.0 (144d a80a): Already using the nvme driver
-0000:6c:00.0 (144d a80a): Already using the nvme driver
-0000:6d:00.0 (144d a80a): Already using the nvme driver
-0000:6e:00.0 (144d a80a): Already using the nvme driver
-0000:cc:00.0 (144d a80a): Already using the nvme driver
-0000:cd:00.0 (144d a80a): Already using the nvme driver
-0000:ce:00.0 (144d a80a): Already using the nvme driver
-0000:cf:00.0 (144d a80a): Already using the nvme driver
-0000:d0:00.0 (144d a80a): Already using the nvme driver
-0000:d1:00.0 (144d a80a): Already using the nvme driver
-0000:d2:00.0 (144d a80a): Already using the nvme driver
-0000:d3:00.0 (144d a80a): Already using the nvme driver
-0000:e5:00.0 (144d a80a): Already using the nvme driver
-0000:e6:00.0 (144d a80a): Already using the nvme driver
-0000:e7:00.0 (144d a80a): Already using the nvme driver
-0000:e8:00.0 (144d a80a): Already using the nvme driver
-0000:e9:00.0 (144d a80a): Already using the nvme driver
-0000:ea:00.0 (144d a80a): Already using the nvme driver
-0000:eb:00.0 (144d a80a): Already using the nvme driver
-0000:ec:00.0 (144d a80a): Already using the nvme driver
-0000:00:01.0 (8086 0b00): Already using the ioatdma driver
-0000:00:01.1 (8086 0b00): Already using the ioatdma driver
-0000:00:01.2 (8086 0b00): Already using the ioatdma driver
-0000:00:01.3 (8086 0b00): Already using the ioatdma driver
-0000:00:01.4 (8086 0b00): Already using the ioatdma driver
-0000:00:01.5 (8086 0b00): Already using the ioatdma driver
-0000:00:01.6 (8086 0b00): Already using the ioatdma driver
-0000:00:01.7 (8086 0b00): Already using the ioatdma driver
-0000:80:01.0 (8086 0b00): Already using the ioatdma driver
-0000:80:01.1 (8086 0b00): Already using the ioatdma driver
-0000:80:01.2 (8086 0b00): Already using the ioatdma driver
-0000:80:01.3 (8086 0b00): Already using the ioatdma driver
-0000:80:01.4 (8086 0b00): Already using the ioatdma driver
-0000:80:01.5 (8086 0b00): Already using the ioatdma driver
-0000:80:01.6 (8086 0b00): Already using the ioatdma driver
-0000:80:01.7 (8086 0b00): Already using the ioatdma driver
+root@R2U14-PSD-3:/poseidonos# cd script/
+root@R2U14-PSD-3:/poseidonos/script# ls -al
+root@R2U14-PSD-3:/poseidonos/script# ./start_poseidonos.sh
+0000:4e:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:ce:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:ea:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:68:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:4d:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:50:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:4f:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:6d:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:cd:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:6e:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:6c:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:80:01.3 (8086 0b00): uio_pci_generic -> ioatdma
+0000:80:01.2 (8086 0b00): uio_pci_generic -> ioatdma
+0000:d1:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:80:01.1 (8086 0b00): uio_pci_generic -> ioatdma
+0000:d0:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:80:01.0 (8086 0b00): uio_pci_generic -> ioatdma
+0000:80:01.7 (8086 0b00): uio_pci_generic -> ioatdma
+0000:80:01.6 (8086 0b00): uio_pci_generic -> ioatdma
+0000:80:01.5 (8086 0b00): uio_pci_generic -> ioatdma
+0000:ec:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:80:01.4 (8086 0b00): uio_pci_generic -> ioatdma
+0000:cc:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:6b:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:cf:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:e9:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:67:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:d2:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:eb:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:d3:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:51:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:69:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:e5:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:53:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:00:01.3 (8086 0b00): uio_pci_generic -> ioatdma
+0000:00:01.2 (8086 0b00): uio_pci_generic -> ioatdma
+0000:e6:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:00:01.1 (8086 0b00): uio_pci_generic -> ioatdma
+0000:e7:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:00:01.0 (8086 0b00): uio_pci_generic -> ioatdma
+0000:00:01.7 (8086 0b00): uio_pci_generic -> ioatdma
+0000:00:01.6 (8086 0b00): uio_pci_generic -> ioatdma
+0000:00:01.5 (8086 0b00): uio_pci_generic -> ioatdma
+0000:00:01.4 (8086 0b00): uio_pci_generic -> ioatdma
+0000:54:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:52:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:e8:00.0 (144d a80a): uio_pci_generic -> nvme
+0000:6a:00.0 (144d a80a): uio_pci_generic -> nvme
 Setting maximum # of Huge Page Size is 128GB
-0000:4d:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:4e:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:4f:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:50:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:51:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:52:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:53:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:54:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:67:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:68:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:69:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:6a:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:6b:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:6c:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:6d:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:6e:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:cc:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:cd:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:ce:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:cf:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:d0:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:d1:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:d2:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:d3:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:e5:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:e6:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:e7:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:e8:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:e9:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:ea:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:eb:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:ec:00.0 (144d a80a): nvme -> uio_pci_generic
-0000:00:01.0 (8086 0b00): ioatdma -> uio_pci_generic
-0000:00:01.1 (8086 0b00): ioatdma -> uio_pci_generic
-0000:00:01.2 (8086 0b00): ioatdma -> uio_pci_generic
-0000:00:01.3 (8086 0b00): ioatdma -> uio_pci_generic
-0000:00:01.4 (8086 0b00): ioatdma -> uio_pci_generic
-0000:00:01.5 (8086 0b00): ioatdma -> uio_pci_generic
-0000:00:01.6 (8086 0b00): ioatdma -> uio_pci_generic
-0000:00:01.7 (8086 0b00): ioatdma -> uio_pci_generic
-0000:80:01.0 (8086 0b00): ioatdma -> uio_pci_generic
-0000:80:01.1 (8086 0b00): ioatdma -> uio_pci_generic
-0000:80:01.2 (8086 0b00): ioatdma -> uio_pci_generic
+0000:4e:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:ce:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:ea:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:68:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:4d:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:50:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:4f:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:6d:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:cd:00.0 (144d a80a): no driver -> uio_pci_generic
 0000:80:01.3 (8086 0b00): ioatdma -> uio_pci_generic
-0000:80:01.4 (8086 0b00): ioatdma -> uio_pci_generic
-0000:80:01.5 (8086 0b00): ioatdma -> uio_pci_generic
-0000:80:01.6 (8086 0b00): ioatdma -> uio_pci_generic
+0000:6e:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:6c:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:80:01.2 (8086 0b00): ioatdma -> uio_pci_generic
+0000:80:01.1 (8086 0b00): ioatdma -> uio_pci_generic
+0000:d1:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:80:01.0 (8086 0b00): ioatdma -> uio_pci_generic
+0000:d0:00.0 (144d a80a): no driver -> uio_pci_generic
 0000:80:01.7 (8086 0b00): ioatdma -> uio_pci_generic
-/home/ibof/projects/poseidonos/script
+0000:80:01.6 (8086 0b00): ioatdma -> uio_pci_generic
+0000:80:01.5 (8086 0b00): ioatdma -> uio_pci_generic
+0000:80:01.4 (8086 0b00): ioatdma -> uio_pci_generic
+0000:ec:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:cc:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:6b:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:cf:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:e9:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:67:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:d2:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:eb:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:d3:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:51:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:69:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:00:01.3 (8086 0b00): ioatdma -> uio_pci_generic
+0000:e5:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:53:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:00:01.2 (8086 0b00): ioatdma -> uio_pci_generic
+0000:00:01.1 (8086 0b00): ioatdma -> uio_pci_generic
+0000:e6:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:00:01.0 (8086 0b00): ioatdma -> uio_pci_generic
+0000:e7:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:00:01.7 (8086 0b00): ioatdma -> uio_pci_generic
+0000:00:01.6 (8086 0b00): ioatdma -> uio_pci_generic
+0000:00:01.5 (8086 0b00): ioatdma -> uio_pci_generic
+0000:00:01.4 (8086 0b00): ioatdma -> uio_pci_generic
+0000:54:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:52:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:e8:00.0 (144d a80a): no driver -> uio_pci_generic
+0000:6a:00.0 (144d a80a): no driver -> uio_pci_generic
+/root/doc_center/ibofos/script
 apport.service is not a native service, redirecting to systemd-sysv-install.
 Executing: /lib/systemd/systemd-sysv-install disable apport
-Current maximum # of memory map areas per process is 65530.
-Setting maximum # of memory map areas per process to 65535.
-vm.max_map_count = 65535
+Current maximum # of memory map areas per process is 65535.
 Setup env. done!
-Execute ibofos
-Wait ibofos
-ibofos is running in background...logfile=ibofos.log
- 
+Execute poseidonos
+Wait poseidonos
+Wait poseidonos
+Wait poseidonos
+poseidonos is running in background...logfile=pos.log
+
 # Verify if the application is up and running
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/script# ps -ef | grep ibofos | grep -v grep
-root     78059     1 99 03:01 pts/0    00:02:53 /home/ibof/projects/poseidonos/script/..//bin/ibofos
- 
+root@R2U14-PSD-3:/poseidonos/script# ps -ef | grep poseidonos | grep -v grep
+root     90998     1 99 20:09 pts/7    01:15:34 /root/doc_center/ibofos/script/..//bin/poseidonos
+
 # Unlike in the the previous execution, you shouldn't see the NVMe devices from the fdisk output since all of them must have been reattached from OS to SPDK.
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/script# fdisk -l |grep nvme
+root@R2U14-PSD-3:/poseidonos/script# fdisk -l |grep nvme
 ```
 
 ### Step 2. Create Write Buffer within DRAM
 
 ```bash
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/script# cd ../lib/spdk-19.10/scripts/
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts#
+root@R2U14-PSD-3:/poseidonos/script# cd ../lib/spdk-20.10/scripts/
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts#
  
 # Check the usage to create write buffer for POS array
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py bdev_malloc_create -h
-usage: rpc.py bdev_malloc_create [-h] [-b NAME] [-u UUID]
-                                 total_size block_size
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py bdev_malloc_create -h
+usage: rpc.py [options] bdev_malloc_create [-h] [-b NAME] [-u UUID]
+                                           total_size block_size
  
 positional arguments:
   total_size            Size of malloc bdev in MB (float > 0)
@@ -270,7 +270,7 @@ optional arguments:
  
 # Create write buffer with the total size of 8192 MB, the block size of 512 B, and the name of "uram0".
 # Technically, the command is sent to SPDK server and creates a SPDK block device called "malloc bdev", which is a userspace ramdisk.
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py bdev_malloc_create -b uram0 8192 512
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py bdev_malloc_create -b uram0 8192 512
 uram0
 ```
 
@@ -281,14 +281,13 @@ The recommended size of uram0 may differ by environment. Please refer to "bdev" 
 ### Step 3. Check POS information and version
 
 ```bash
-# You don't have to become root to run "cli" commands. The actual output may differ by env where the command is executed.
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# logout
-ibof@R2U18-PSD-1-CI_TARGET:~$ cd /poseidonos/bin/
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli system info
+# The actual output may differ by env where the command is executed.
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# cd /poseidonos/bin/
+root@R2U14-PSD-3:/poseidonos/bin# ./cli system info
  
  
 Request to Poseidon OS
-    xrId        :  333e8518-3243-11ea-b47f-a0369f78dd8c
+    xrId        :  7dac37be-d93e-11eb-b677-a0369f78dee4
     command     :  GETIBOFOSINFO
  
  
@@ -300,30 +299,7 @@ Response from Poseidon OS
     Solution     :
     Data         :
  {
-    "capacity": "0GB (0B)",
-    "rebuildingProgress": "0",
-    "situation": "DEFAULT",
-    "state": "OFFLINE",
-    "used": "0GB (0B)"
-}
- 
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli system version
- 
- 
-Request to Poseidon OS
-    xrId        :  61a8531e-3243-11ea-a489-a0369f78dd8c
-    command     :  GETVERSION
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
-{
-    "version": "pos-0.7.3-alpha8"
+    "version": "pos-0.9.2"
 }
 ```
 
@@ -331,11 +307,11 @@ Response from Poseidon OS
 
 ```bash
 # If this is the first run, you wouldn't see any devices showing up in the output as in the following.
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli device list
+root@R2U14-PSD-3:/poseidonos/bin# ./cli device list
  
  
 Request to Poseidon OS
-    xrId        :  a9a36672-3243-11ea-ad67-a0369f78dd8c
+    xrId        :  fa29b0b0-d93e-11eb-8fce-a0369f78dee4
     command     :  LISTDEVICE
  
  
@@ -346,12 +322,12 @@ Response from Poseidon OS
     Problem      :
     Solution     :
  
-# Issue "scan" command so that POS can discover NVMe devices and refresh its device information
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli device scan
+# Let's run the scan so that POS can detect devices.
+root@R2U14-PSD-3:/poseidonos/bin# ./cli device scan
  
  
 Request to Poseidon OS
-    xrId        :  d5c9e3a6-3243-11ea-be3b-a0369f78dd8c
+    xrId        :  fc44f1aa-d93e-11eb-9e3d-a0369f78dee4
     command     :  SCANDEVICE
  
  
@@ -362,14 +338,12 @@ Response from Poseidon OS
     Problem      :
     Solution     :
  
-  
-# Let's give it one more try with "list". Now that local NVMe devices have been scanned, POS should
-# be able to give us the list.
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli device list
+# This time, we should see a full list of devices
+root@R2U14-PSD-3:/poseidonos/bin# ./cli device list
  
  
 Request to Poseidon OS
-    xrId        :  1269f0fe-3244-11ea-b75f-a0369f78dd8c
+    xrId        :  fe4b9b38-d93e-11eb-ae7a-a0369f78dee4
     command     :  LISTDEVICE
  
  
@@ -387,294 +361,327 @@ Response from Poseidon OS
             "class": "SYSTEM",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-0",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045141      ",
+            "sn": "A000032M045104      ",
             "type": "SSD"
         },
         {
             "addr": "0000:4e:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-1",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045142      ",
+            "sn": "A000032M045041      ",
             "type": "SSD"
         },
         {
             "addr": "0000:4f:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-2",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045126      ",
+            "sn": "A000032M045050      ",
             "type": "SSD"
         },
         {
             "addr": "0000:50:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-3",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045123      ",
+            "sn": "A000032M045038      ",
             "type": "SSD"
         },
         {
             "addr": "0000:51:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-4",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045121      ",
+            "sn": "A000032M045107      ",
             "type": "SSD"
         },
         {
             "addr": "0000:52:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-5",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045119      ",
+            "sn": "A000032M045042      ",
             "type": "SSD"
         },
         {
             "addr": "0000:53:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-6",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045128      ",
+            "sn": "A000032M045040      ",
             "type": "SSD"
         },
         {
             "addr": "0000:54:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-7",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045129      ",
+            "sn": "A000032M045083      ",
             "type": "SSD"
         },
         {
             "addr": "0000:67:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-8",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045113      ",
+            "sn": "A000032M045049      ",
             "type": "SSD"
         },
         {
             "addr": "0000:68:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-9",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045115      ",
+            "sn": "A000032M045096      ",
             "type": "SSD"
         },
         {
             "addr": "0000:69:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-10",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045117      ",
+            "sn": "A000032M045032      ",
             "type": "SSD"
         },
         {
             "addr": "0000:6a:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-11",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045133      ",
+            "sn": "A000032M045071      ",
             "type": "SSD"
         },
         {
             "addr": "0000:6b:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-12",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045135      ",
+            "sn": "A000032M045099      ",
             "type": "SSD"
         },
         {
             "addr": "0000:6c:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-13",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045136      ",
+            "sn": "A000032M045098      ",
             "type": "SSD"
         },
         {
             "addr": "0000:6d:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-14",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045140      ",
+            "sn": "A000032M045084      ",
             "type": "SSD"
         },
         {
             "addr": "0000:6e:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-15",
+            "numa": "0",
             "size": 3840755982336,
-            "sn": "FL10035M045137      ",
+            "sn": "A000032M045105      ",
             "type": "SSD"
         },
         {
             "addr": "0000:cc:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-16",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045139      ",
+            "sn": "A000032M045220      ",
             "type": "SSD"
         },
         {
             "addr": "0000:cd:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-17",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045144      ",
+            "sn": "A000032M045088      ",
             "type": "SSD"
         },
         {
             "addr": "0000:ce:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-18",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045132      ",
+            "sn": "A000032M045090      ",
             "type": "SSD"
         },
         {
             "addr": "0000:cf:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-19",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045131      ",
+            "sn": "A000032M045078      ",
             "type": "SSD"
         },
         {
             "addr": "0000:d0:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-20",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045138      ",
+            "sn": "A000032M045077      ",
             "type": "SSD"
         },
         {
             "addr": "0000:d1:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-21",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045134      ",
+            "sn": "A000032M045051      ",
             "type": "SSD"
         },
         {
             "addr": "0000:d2:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-22",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045114      ",
+            "sn": "A000032M045034      ",
             "type": "SSD"
         },
         {
             "addr": "0000:d3:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-23",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045130      ",
+            "sn": "A000032M045085      ",
             "type": "SSD"
         },
         {
             "addr": "0000:e5:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-24",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045127      ",
+            "sn": "A000032M045053      ",
             "type": "SSD"
         },
         {
             "addr": "0000:e6:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-25",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045120      ",
+            "sn": "A000032M045054      ",
             "type": "SSD"
         },
         {
             "addr": "0000:e7:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-26",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045118      ",
+            "sn": "A000032M045048      ",
             "type": "SSD"
         },
         {
             "addr": "0000:e8:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-27",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045122      ",
+            "sn": "A000032M045039      ",
             "type": "SSD"
         },
         {
             "addr": "0000:e9:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-28",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045124      ",
+            "sn": "A000032M045087      ",
             "type": "SSD"
         },
         {
             "addr": "0000:ea:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-29",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045125      ",
+            "sn": "A000032M045086      ",
             "type": "SSD"
         },
         {
             "addr": "0000:eb:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-30",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045116      ",
+            "sn": "A000032M045100      ",
             "type": "SSD"
         },
         {
             "addr": "0000:ec:00.0",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "SAMSUNG NVMe SSD PM9A3                  ",
             "name": "unvme-ns-31",
+            "numa": "1",
             "size": 3840755982336,
-            "sn": "FL10035M045143      ",
+            "sn": "A000032M045055      ",
             "type": "SSD"
         },
         {
             "addr": "",
-            "class": "SYSTEM",
+            "class": "ARRAY",
             "mn": "uram0",
             "name": "uram0",
+            "numa": "UNKNOWN",
             "size": 8589934592,
             "sn": "uram0",
             "type": "NVRAM"
@@ -685,18 +692,18 @@ Response from Poseidon OS
 
 ### Step 5. Import POS Array
 
-If you have not created any POS array before, you could start with a new one and import into the POS (Step 5a). Otherwise, you could load existing POS arrays if POS is not aware of them due to host reboot or POS restart (Step 5b). 
+If you have not created any POS array before, you could start with a new one and import into the POS (Step 5a). Otherwise, you could skip this step. 
 
 ### 5a. Create new POS Array
 
 Now that POS has completed the scanning, it should be able to create POS array with a set of block devices we choose.
 
 ```bash
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli array create -b uram0 -d unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3,unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7,unvme-ns-8,unvme-ns-9,unvme-ns-10,unvme-ns-11,unvme-ns-12,unvme-ns-13,unvme-ns-14,unvme-ns-15,unvme-ns-16,unvme-ns-17,unvme-ns-18,unvme-ns-19,unvme-ns-20,unvme-ns-21,unvme-ns-22,unvme-ns-23,unvme-ns-24,unvme-ns-25,unvme-ns-26,unvme-ns-27,unvme-ns-28 -s unvme-ns-29,unvme-ns-30,unvme-ns-31 --name POSArray --raidtype RAID5
+root@R2U14-PSD-3:/poseidonos/bin#  ./cli array create -b uram0 -d unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3,unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7,unvme-ns-8,unvme-ns-9,unvme-ns-10,unvme-ns-11,unvme-ns-12,unvme-ns-13,unvme-ns-14,unvme-ns-15,unvme-ns-16,unvme-ns-17,unvme-ns-18,unvme-ns-19,unvme-ns-20,unvme-ns-21,unvme-ns-22,unvme-ns-23,unvme-ns-24,unvme-ns-25,unvme-ns-26,unvme-ns-27,unvme-ns-28 -s unvme-ns-29,unvme-ns-30,unvme-ns-31 --name POSArray --raidtype RAID5
  
  
 Request to Poseidon OS
-    xrId        :  4f249204-3246-11ea-97df-a0369f78dd8c
+    xrId        :  5512d085-d940-11eb-a518-a0369f78dee4
     command     :  CREATEARRAY
     Param       :
 {
@@ -827,11 +834,11 @@ As you may have noticed, some of the parameters should be passed in from the out
 Once POS array has been created, you could query the POS array information as in the following:
 
 ```bash
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli array list_device --name POSArray
+root@R2U14-PSD-3:/poseidonos/bin# ./cli array list_device --name POSArray
  
  
 Request to Poseidon OS
-    xrId        :  b5c0f89c-3246-11ea-a125-a0369f78dd8c
+    xrId        :  8d74f019-d940-11eb-a553-a0369f78dee4
     command     :  LISTARRAYDEVICE
     Param       :
 {
@@ -986,15 +993,19 @@ Response from Poseidon OS
 
 ### Step 5b. Load existing POS Array
 
-"Load" command is to support a case that POS/host has restarted and lost its in-memory state. The following command will retrieve the array information from MBR partition and import into POS. 
+This step is not needed any more since POS version 0.9.2. In earlier version, "load" command was explicitly used to read MBR information and put array in unmounted state. This procedure has become part of "scan" command, where POS will automatically read MBR and load the array during "scan" command execution. 
+
+### Step 6. Mount POS Array 
+Even though we have POS array provisioned, we can't use it until it is mounted. Let's check out what happens with system state around POS array mount.
 
 ```bash
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli array load --name POSArray
+# Check if the array information is valid
+root@R2U14-PSD-3:/poseidonos/bin# ./cli array info --name POSArray
  
  
 Request to Poseidon OS
-    xrId        :  f4b6f898-3246-11ea-b74e-a0369f78dd8c
-    command     :  LOADARRAY
+    xrId        :  6f7060b8-d943-11eb-978d-a0369f78dee4
+    command     :  ARRAYINFO
     Param       :
 {
     "name": "POSArray"
@@ -1007,44 +1018,163 @@ Response from Poseidon OS
     Description  :  Success
     Problem      :
     Solution     :
-```
-
-Please make sure that Step 2 (creating write buffer) and Step 4 (scanning NVMe devices) should run before the LOADARRAY command. After a reboot/restart, the write buffer should be recreated and rescanned. Otherwise, LOADARRAY command would fail. 
-
-
-### Step 6. Mount POS Array 
-Even though we have POS array provisioned, we can't use it until it is mounted. Let's check out what happens with system state around POS array mount.
-
-```bash
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli system info
- 
- 
-Request to Poseidon OS
-    xrId        :  30b300b0-3247-11ea-8e5c-a0369f78dd8c
-    command     :  GETIBOFOSINFO
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
     Data         :
  {
     "capacity": "0GB (0B)",
+    "createDatetime": "2021-06-30 10:35:00 +0900",
+    "devicelist": [
+        {
+            "name": "uram0",
+            "type": "BUFFER"
+        },
+        {
+            "name": "unvme-ns-0",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-1",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-2",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-3",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-4",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-5",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-6",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-7",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-8",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-9",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-10",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-11",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-12",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-13",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-14",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-15",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-16",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-17",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-18",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-19",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-20",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-21",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-22",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-23",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-24",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-25",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-26",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-27",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-28",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-29",
+            "type": "SPARE"
+        },
+        {
+            "name": "unvme-ns-30",
+            "type": "SPARE"
+        },
+        {
+            "name": "unvme-ns-31",
+            "type": "SPARE"
+        }
+    ],
+    "name": "POSArray",
     "rebuildingProgress": "0",
     "situation": "DEFAULT",
     "state": "OFFLINE",
+    "updateDatetime": "2021-06-30 10:35:00 +0900",
     "used": "0GB (0B)"
 }
  
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli system mount
+# Let's mount the array
+root@R2U14-PSD-3:/poseidonos/bin# ./cli array mount --name POSArray
  
  
 Request to Poseidon OS
-    xrId        :  3dda457a-3247-11ea-b7a0-a0369f78dd8c
-    command     :  MOUNTIBOFOS
+    xrId        :  8d9303e4-d943-11eb-88b5-a0369f78dee4
+    command     :  MOUNTARRAY
+    Param       :
+{
+    "name": "POSArray"
+}
  
  
 Response from Poseidon OS
@@ -1054,13 +1184,18 @@ Response from Poseidon OS
     Problem      :
     Solution     :
  
-  
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli system info
+ 
+# Check if the array state has become "NORMAL"
+root@R2U14-PSD-3:/poseidonos/bin# ./cli array info --name POSArray
  
  
 Request to Poseidon OS
-    xrId        :  4bd07a89-3247-11ea-ac3d-a0369f78dd8c
-    command     :  GETIBOFOSINFO
+    xrId        :  adbfa8e0-d943-11eb-93e3-a0369f78dee4
+    command     :  ARRAYINFO
+    Param       :
+{
+    "name": "POSArray"
+}
  
  
 Response from Poseidon OS
@@ -1072,17 +1207,151 @@ Response from Poseidon OS
     Data         :
  {
     "capacity": "94.832555773133TB (94832555773133B)",
+    "createDatetime": "2021-06-30 10:35:00 +0900",
+    "devicelist": [
+        {
+            "name": "uram0",
+            "type": "BUFFER"
+        },
+        {
+            "name": "unvme-ns-0",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-1",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-2",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-3",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-4",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-5",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-6",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-7",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-8",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-9",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-10",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-11",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-12",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-13",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-14",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-15",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-16",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-17",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-18",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-19",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-20",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-21",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-22",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-23",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-24",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-25",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-26",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-27",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-28",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-29",
+            "type": "SPARE"
+        },
+        {
+            "name": "unvme-ns-30",
+            "type": "SPARE"
+        },
+        {
+            "name": "unvme-ns-31",
+            "type": "SPARE"
+        }
+    ],
+    "name": "POSArray",
     "rebuildingProgress": "0",
     "situation": "NORMAL",
     "state": "NORMAL",
+    "updateDatetime": "2021-06-30 10:35:00 +0900",
     "used": "0GB (0B)"
 }
 ```
 
 Please note that state field in the output has changed from OFFLINE to NORMAL. Also, "capacity" is now reflecting the size of the NVMe storage pool available to POS. 
-```bash
-Please note that, as of Nov/30/2020, POS supports a single POS array only, which is why "mount" command belongs to "system" (i.e., it's currently "cli system mount", but not "cli array mount --name POSArray"). Once POS gets a new feature to support multi array, the command will change accordingly. 
-```
 
 ### Step 7. Configure NVM Subsystems for NVMe Over Fabric Target
 POS is ready to perform volume management task, but still unable to expose its volume over network since we haven't configured an NVM subsystem yet. POS is not ready to expose its volume over network since it does not have NVM subsystem in which NVM namespaces(s) are created. Creating NVM subsystem remains in manual fashion  (vs. running automatically during POS startup) by design. Administrators need to understand its functionality so that they can easily come up with a workaround when needed. Once we have enough understanding about various user environments, this step could be automated in a future release.
