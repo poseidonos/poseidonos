@@ -177,7 +177,7 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
     {
         pendingIO[reactorId][volId]++;
         _EnqueueVolumeUbio(reactorId, volId, volIo);
-        while (1)
+        while (!IsExitQosSet())
         {
             if (_RateLimit(reactorId, volId) == true)
             {
@@ -460,7 +460,7 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
             currentBW = 0;
             currentIO = 0;
             _ResetRateLimit(reactor, volId, offset);
-            while (1)
+            while (!IsExitQosSet())
             {
                 if (_RateLimit(reactor, volId) == true)
                 {

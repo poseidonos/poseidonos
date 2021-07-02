@@ -30,48 +30,56 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __IBOF_EVENT_ID_HPP__
-#define __IBOF_EVENT_ID_HPP__
-
-#include <string>
-
-#include "pos_event_id.h"
+#include "src/qos/exit_handler.h"
 
 namespace pos
 {
-enum class EventLevel
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+ExitQosHandler::ExitQosHandler(void)
+    : exitQos(false)
 {
-    CRITICAL,
-    ERROR,
-    WARNING,
-    INFO,
-    DEBUG,
-};
+}
 
-class PosEventId
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+ExitQosHandler::~ExitQosHandler(void)
 {
-public:
-    static const char*& GetString(POS_EVENT_ID eventId);
-    static void Print(POS_EVENT_ID id, EventLevel level);
-    static void Print(POS_EVENT_ID id, EventLevel level,
-        std::string& additionalMessage);
+}
 
-private:
-    struct PosEventIdEntry
-    {
-        POS_EVENT_ID eventId;
-        const char* message;
-    };
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+ExitQosHandler::IsExitQosSet(void)
+{
+    return exitQos;
+}
 
-    static PosEventIdEntry RESERVED_EVENT_ENTRY;
-    static PosEventIdEntry QOS_EVENT_ENTRY[(int)POS_EVENT_ID::QOS_COUNT];
-    static PosEventIdEntry IOPATH_NVMF_EVENT_ENTRY[(int)POS_EVENT_ID::IONVMF_COUNT];
-    static PosEventIdEntry IOPATH_FRONTEND_EVENT_ENTRY[(int)POS_EVENT_ID::IOFRONTEND_COUNT];
-    static PosEventIdEntry IOPATH_BACKEND_EVENT_ENTRY[(int)POS_EVENT_ID::IOBACKEND_COUNT];
-
-    PosEventId(void) = delete;
-    ~PosEventId(void);
-};
-
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+ExitQosHandler::SetExitQos(void)
+{
+    exitQos = true;
+}
 } // namespace pos
-#endif // __IBOF_EVENT_ID_HPP__
