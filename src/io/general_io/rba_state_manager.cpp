@@ -44,12 +44,23 @@
 
 namespace pos
 {
-RBAStateManager::RBAStateManager(std::string arrayName)
+RBAStateManager::RBAStateManager(std::string arrayName, RBAStateService* rbaStateService, VolumeEventPublisher *volumeEventPublisher)
 : VolumeEvent("RBAStateManager", arrayName),
   arrayName(arrayName)
 {
-    RBAStateServiceSingleton::Instance()->Register(arrayName, this);
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName);
+    if (nullptr != rbaStateService)
+    {
+        rbaStateService->Register(arrayName, this);
+    }
+    if (nullptr != volumeEventPublisher)
+    {
+        volumeEventPublisher->RegisterSubscriber(this, arrayName);
+    }
+}
+
+RBAStateManager::RBAStateManager(std::string arrayName)
+: RBAStateManager(arrayName, RBAStateServiceSingleton::Instance(), VolumeEventPublisherSingleton::Instance())
+{
 }
 
 RBAStateManager::~RBAStateManager()
@@ -96,7 +107,10 @@ bool
 RBAStateManager::AcquireOwnershipRbaList(uint32_t volumeId,
         const VolumeIo::RbaList& sectorRbaList)
 {
-    for (auto& rbaAndSize : sectorRbaList)
+    VolumeIo::RbaList uniqueList = sectorRbaList;
+    uniqueList.sort();
+    uniqueList.unique();
+    for (auto& rbaAndSize : uniqueList)
     {
         BlockAlignment blockAlignment(ChangeSectorToByte(rbaAndSize.sectorRba),
                 rbaAndSize.size);
@@ -105,9 +119,9 @@ RBAStateManager::AcquireOwnershipRbaList(uint32_t volumeId,
         if (success == false)
         {
             auto iterator =
-                std::find(sectorRbaList.cbegin(), sectorRbaList.cend(), rbaAndSize);
+                std::find(uniqueList.cbegin(), uniqueList.cend(), rbaAndSize);
             VolumeIo::RbaList rbaList;
-            rbaList.insert(rbaList.begin(), sectorRbaList.cbegin(), iterator);
+            rbaList.insert(rbaList.begin(), uniqueList.cbegin(), iterator);
             ReleaseOwnershipRbaList(volumeId, rbaList);
 
             return false;
