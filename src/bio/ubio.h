@@ -132,7 +132,7 @@ public:
 
     bool CheckPbaSet(void);
     bool CheckRecoveryAllowed(void);
-    void SetReferenceIncreased(bool increased);
+
     virtual bool IsSyncMode(void);
 
     void SetLba(uint64_t lba);

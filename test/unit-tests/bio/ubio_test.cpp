@@ -15,14 +15,14 @@ TEST(Ubio, Constructor)
     // Given : Nothing
     // When : Constructor and Destructor
     void *ptr = nullptr;
-    Ubio* ubio = new Ubio(ptr, 8, "");
+    Ubio* ubio = new Ubio(ptr, 8, 0);
     delete ubio;
     // Then : Nothing
 
     // Given : Temporary buffer pointer is given
     // When : Constructor and Destructor
     ptr = (void *)0x12345678;
-    ubio = new Ubio(ptr, 8, "");
+    ubio = new Ubio(ptr, 8, 0);
     delete ubio;
     // Then : Nothing
 }
@@ -32,7 +32,7 @@ TEST(Ubio, Split)
     // Given : Nothing
     // When : Constructor and Destructor
     void *ptr = nullptr;
-    Ubio* ubio = new Ubio(ptr, 16, "");
+    Ubio* ubio = new Ubio(ptr, 16, 0);
     UbioSmartPtr ubioSplit = ubio->Split(8, false);
     ASSERT_EQ(ubio->GetSize() / 512, 8);
     ASSERT_EQ(ubio->GetMemSize() / 512, 16);
@@ -46,7 +46,7 @@ TEST(Ubio, SyncRelatedFunction)
     // Given : Nothing
     // When : Constructor and Destructor
     void *ptr = nullptr;
-    Ubio* ubio = new Ubio(ptr, 16, "");
+    Ubio* ubio = new Ubio(ptr, 16, 0);
     UblockSharedPtr ublock(new MockUBlockDevice("name", 8192, nullptr));
     // Then : Use normal case. 
     ubio->SetUblock(ublock);
@@ -58,7 +58,7 @@ TEST(Ubio, SyncRelatedFunction)
 
     // Given : Nothing
     // When : Constructor and Destructor
-    ubio = new Ubio(ptr, 16, "");
+    ubio = new Ubio(ptr, 16, 0);
     // Use illegal case, even if we get error log, it should be not stuck.
     ubio->SetUblock(ublock);
     ubio->SetAsyncMode();
@@ -74,7 +74,7 @@ TEST(Ubio, GetBuffer)
     // Given : Nothing
     // When : Constructor and Destructor
     void* ptr = nullptr;
-    Ubio* ubio = new Ubio(ptr, 32, "");
+    Ubio* ubio = new Ubio(ptr, 32, 0);
 
     // Then : specific offset given is well obtained as expected
     void* baseAddress = ubio->GetBuffer(1, 0);
@@ -93,10 +93,10 @@ TEST(Ubio, Complete)
     // Given : Nothing
     // When : Constructor and Destructor
     void *ptr = nullptr;
-    UbioSmartPtr ubio(new Ubio(ptr, 32, ""));
+    UbioSmartPtr ubio(new Ubio(ptr, 32, 0));
     UblockSharedPtr ublock(new MockUBlockDevice("name", 8192, nullptr));
     ubio->Complete(IOErrorType::SUCCESS);
-    UbioSmartPtr ubio2(new Ubio(ptr, 32, ""));
+    UbioSmartPtr ubio2(new Ubio(ptr, 32, 0));
     ubio->WaitDone();
     // Then : Use normal case. 
     // Then : ubio error type is done and Mark is done
@@ -110,8 +110,8 @@ TEST(Ubio, OriginRelated)
     // Given : Nothing
     // When : Constructor and Destructor
     void *ptr = nullptr;
-    UbioSmartPtr ubio(new Ubio(ptr, 32, ""));
-    UbioSmartPtr ubio2(new Ubio(ptr, 32, ""));
+    UbioSmartPtr ubio(new Ubio(ptr, 32, 0));
+    UbioSmartPtr ubio2(new Ubio(ptr, 32, 0));
     // Then : ubio origin set is properly done
     ubio->SetOriginUbio(ubio2);
     UbioSmartPtr ubio3 = ubio->GetOriginUbio();
@@ -126,7 +126,7 @@ TEST(Ubio, SetPba)
 {
     // Given : Nothing
     // When : Constructor and Destructor
-    UbioSmartPtr ubio(new Ubio(nullptr, 32, "temporary"));
+    UbioSmartPtr ubio(new Ubio(nullptr, 32, 3));
     PhysicalBlkAddr pba, tempPba;
     pba.lba = 123;
     pba.arrayDev = nullptr;
@@ -140,7 +140,7 @@ TEST(Ubio, SetPba)
     // Then : get value after setting value is same?
     ASSERT_EQ(ubio->GetLba(), 123);
     ASSERT_EQ(ubio->GetArrayDev(), &arrayDevice);
-    ASSERT_EQ(ubio->GetArrayName(), "temporary");
+    ASSERT_EQ(ubio->GetArrayId(), 3);
     ASSERT_EQ(tempPba.lba, 123);
 }
 
@@ -149,7 +149,7 @@ TEST(Ubio, FreeDataBuffer)
     // Given : Nothing
     // When : Memory Alloc externally for a ubio
     void* ptr = Memory<4096>::Alloc();
-    UbioSmartPtr ubio(new Ubio(nullptr, 32, ""));
+    UbioSmartPtr ubio(new Ubio(nullptr, 32, 0));
     // Then : Nothing
     ubio->FreeDataBuffer();
 }
@@ -174,7 +174,7 @@ TEST(Ubio, EventRelated)
 {
     // Given : Nothing
     // When : Constructor and Destructor
-    UbioSmartPtr ubio(new Ubio(nullptr, 32, ""));
+    UbioSmartPtr ubio(new Ubio(nullptr, 32, 0));
     CallbackSmartPtr callback(new DummyCallback(true));
     PhysicalBlkAddr pba;
     pba.lba = 0;
@@ -191,7 +191,7 @@ TEST(Ubio, GetUBlock)
     // Given : Nothing
     // When : Constructor and Destructor
     void *ptr = nullptr;
-    Ubio* ubio = new Ubio(ptr, 16, "");
+    Ubio* ubio = new Ubio(ptr, 16, 0);
     UblockSharedPtr ublock(new MockUBlockDevice("name", 8192, nullptr));
     // Then : Set ptr and check if pointers are same
     ubio->SetUblock(ublock);
@@ -203,7 +203,7 @@ TEST(Ubio, RetryRelated)
     // Given : Nothing
     // When : Constructor and Destructor
     void *ptr = nullptr;
-    Ubio* ubio = new Ubio(ptr, 16, "");
+    Ubio* ubio = new Ubio(ptr, 16, 0);
     ubio->SetRetry(true);
     // Then : Use normal case. 
     ASSERT_EQ(ubio->IsRetry(), true);
@@ -217,7 +217,7 @@ TEST(Ubio, ErrorRelated)
     // Given : Nothing
     // When : Constructor and Destructor
     void *ptr = nullptr;
-    UbioSmartPtr ubio(new Ubio(ptr, 32, ""));
+    UbioSmartPtr ubio(new Ubio(ptr, 32, 0));
     UblockSharedPtr ublock(new MockUBlockDevice("name", 8192, nullptr));
     // Then : Use normal case. 
     // Then : ubio error type is done and Mark is done
@@ -234,16 +234,16 @@ TEST(Ubio, GetOriginCore)
     // Given : Nothing
     // When : Constructor and Destructor
     void *ptr = nullptr;
-    UbioSmartPtr ubio(new Ubio(ptr, 32, ""));
+    UbioSmartPtr ubio(new Ubio(ptr, 32, 0));
     ASSERT_EQ(ubio->GetOriginCore(), INVALID_CORE);
 }
 
-TEST(Ubio, CheckRecoveryAllowed_)
+TEST(Ubio, CheckRecoveryAllowed)
 {
     // Given : Nothing
     // When : Constructor and Destructor
     void *ptr = nullptr;
-    UbioSmartPtr ubio(new Ubio(ptr, 16, ""));
+    UbioSmartPtr ubio(new Ubio(ptr, 16, 0));
     // arrayDev == null, no allow to recovery
     ASSERT_EQ(ubio->CheckRecoveryAllowed(), false);
     MockArrayDevice arrayDevice(nullptr, ArrayDeviceState::NORMAL);
@@ -259,7 +259,7 @@ TEST(Ubio, CheckRecoveryAllowed_)
     
 }
 
-TEST(Ubio, SetReferenceIncreased_)
+TEST(Ubio, SetReferenceIncreased)
 {
 }
 

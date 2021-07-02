@@ -63,9 +63,9 @@ DataBuffer::DataBuffer(uint64_t size, void* buffer)
 // to avoid double free for base address.
 DataBuffer::DataBuffer(const DataBuffer& dataBuffer)
 : baseAddress(dataBuffer.baseAddress),
-  currentAddress(currentAddress),
-  size(size),
-  originalSize(size),
+  currentAddress(dataBuffer.currentAddress),
+  size(dataBuffer.size),
+  originalSize(dataBuffer.size),
   ownership(false)
 {
 }
