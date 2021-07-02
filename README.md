@@ -829,7 +829,7 @@ As you may have noticed, some of the parameters should be passed in from the out
  - The write buffer device (-b) should be the name of a device whose "type" is "NVRAM".
  - The data devices (-d) should be comma-separated list of devices, the type of which being "SSD".
  - The name of POS array must comply with a naming convention described in Creating POS Array. 
- - As of Nov/30/2020, the available RAID types (--raidtype) are only ["RAID5"]
+ - The available RAID types (--raidtype) are only ["RAID5"]
 
 Once POS array has been created, you could query the POS array information as in the following:
 
@@ -1358,13 +1358,14 @@ POS is ready to perform volume management task, but still unable to expose its v
 
 #### Create NVMe-oF Subsystem
 ```bash
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ su -
-Password:
-root@R2U18-PSD-1-CI_TARGET:~# cd /poseidonos/lib/spdk-19.10/scripts/
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_subsystem -h
-usage: rpc.py nvmf_create_subsystem [-h] [-t TGT_NAME] [-s SERIAL_NUMBER]
-                                    [-d MODEL_NUMBER] [-a] [-m MAX_NAMESPACES]
-                                    nqn
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# cd /poseidonos/bin/
+root@R2U14-PSD-3:/poseidonos/bin# cd /poseidonos/lib/spdk-20.10/scripts/
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_create_subsystem -h
+usage: rpc.py [options] nvmf_create_subsystem [-h] [-t TGT_NAME]
+                                              [-s SERIAL_NUMBER]
+                                              [-d MODEL_NUMBER] [-a]
+                                              [-m MAX_NAMESPACES] [-r]
+                                              nqn
  
 positional arguments:
   nqn                   Subsystem NQN (ASCII)
@@ -1381,25 +1382,32 @@ optional arguments:
                         whitelist)
   -m MAX_NAMESPACES, --max-namespaces MAX_NAMESPACES
                         Maximum number of namespaces allowed
+  -r, --ana-reporting   Enable ANA reporting feature
   
  
 # If successful, the following doesn't print out any response
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem1 -a -s IBOF00000000000001 -d IBOF_VOLUME_EXTENSION -m 256
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem1 -a -s IBOF00000000000001 -d IBOF_VOLUME_EXTENSION -m 256
 ```
 
 The following command configures TCP transport to use when network connection is established between an initiator and a target. is between initiator and target. 
 
 #### Create NVMe-oF Transport
 ```bash
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_transport -h
-usage: rpc.py nvmf_create_transport [-h] -t TRTYPE [-g TGT_NAME]
-                                    [-q MAX_QUEUE_DEPTH]
-                                    [-p MAX_QPAIRS_PER_CTRLR]
-                                    [-c IN_CAPSULE_DATA_SIZE] [-i MAX_IO_SIZE]
-                                    [-u IO_UNIT_SIZE] [-a MAX_AQ_DEPTH]
-                                    [-n NUM_SHARED_BUFFERS]
-                                    [-b BUF_CACHE_SIZE] [-s MAX_SRQ_DEPTH]
-                                    [-r] [-o] [-f] [-y SOCK_PRIORITY]
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_create_transport -h
+usage: rpc.py [options] nvmf_create_transport [-h] -t TRTYPE [-g TGT_NAME]
+                                              [-q MAX_QUEUE_DEPTH]
+                                              [-p MAX_QPAIRS_PER_CTRLR]
+                                              [-m MAX_IO_QPAIRS_PER_CTRLR]
+                                              [-c IN_CAPSULE_DATA_SIZE]
+                                              [-i MAX_IO_SIZE]
+                                              [-u IO_UNIT_SIZE]
+                                              [-a MAX_AQ_DEPTH]
+                                              [-n NUM_SHARED_BUFFERS]
+                                              [-b BUF_CACHE_SIZE]
+                                              [-s MAX_SRQ_DEPTH] [-r] [-o]
+                                              [-f] [-y SOCK_PRIORITY]
+                                              [-l ACCEPTOR_BACKLOG]
+                                              [-x ABORT_TIMEOUT_SEC] [-w]
  
 optional arguments:
   -h, --help            show this help message and exit
@@ -1410,7 +1418,10 @@ optional arguments:
   -q MAX_QUEUE_DEPTH, --max-queue-depth MAX_QUEUE_DEPTH
                         Max number of outstanding I/O per queue
   -p MAX_QPAIRS_PER_CTRLR, --max-qpairs-per-ctrlr MAX_QPAIRS_PER_CTRLR
-                        Max number of SQ and CQ per controller
+                        Max number of SQ and CQ per controller. Deprecated,
+                        use max-io-qpairs-per-ctrlr
+  -m MAX_IO_QPAIRS_PER_CTRLR, --max-io-qpairs-per-ctrlr MAX_IO_QPAIRS_PER_CTRLR
+                        Max number of IO qpairs per controller
   -c IN_CAPSULE_DATA_SIZE, --in-capsule-data-size IN_CAPSULE_DATA_SIZE
                         Max number of in-capsule data size
   -i MAX_IO_SIZE, --max-io-size MAX_IO_SIZE
@@ -1438,21 +1449,28 @@ optional arguments:
   -y SOCK_PRIORITY, --sock-priority SOCK_PRIORITY
                         The sock priority of the tcp connection. Relevant only
                         for TCP transport
+  -l ACCEPTOR_BACKLOG, --acceptor_backlog ACCEPTOR_BACKLOG
+                        Pending connections allowed at one time. Relevant only
+                        for RDMA transport
+  -x ABORT_TIMEOUT_SEC, --abort-timeout-sec ABORT_TIMEOUT_SEC
+                        Abort execution timeout value, in seconds
+  -w, --no-wr-batching  Disable work requests batching. Relevant only for RDMA
+                        transport
  
  
 # If successful, the following doesn't print out any response
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_create_transport -t tcp -b 64 -n 4096
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_create_transport -t tcp -b 64 -n 4096
 ```
 
 The following command makes a given NVM subsystem listen on a TCP port and serve incoming NVMe-oF requests. 
 
 #### Add NVMe-oF Subsystem Listener
 ```bash
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_subsystem_add_listener -h
-usage: rpc.py nvmf_subsystem_add_listener [-h] -t TRTYPE -a TRADDR
-                                          [-p TGT_NAME] [-f ADRFAM]
-                                          [-s TRSVCID]
-                                          nqn
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_subsystem_add_listener -h
+usage: rpc.py [options] nvmf_subsystem_add_listener [-h] -t TRTYPE -a TRADDR
+                                                    [-p TGT_NAME] [-f ADRFAM]
+                                                    [-s TRSVCID]
+                                                    nqn
  
 positional arguments:
   nqn                   NVMe-oF subsystem NQN
@@ -1471,58 +1489,68 @@ optional arguments:
   -s TRSVCID, --trsvcid TRSVCID
                         NVMe-oF transport service id: e.g., a port number
  
+ 
 # Check out what NICs are available on this host
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ifconfig
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ifconfig
+enp0s20f0u8u3c2: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        ether c6:a7:37:55:cd:ff  txqueuelen 1000  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 9714  bytes 1626100 (1.6 MB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+ 
+ens17f0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 9000
+        inet 10.100.2.14  netmask 255.255.255.0  broadcast 10.100.2.255
+        inet6 fe80::63f:72ff:febf:38de  prefixlen 64  scopeid 0x20<link>
+        ether 04:3f:72:bf:38:de  txqueuelen 1000  (Ethernet)
+        RX packets 15380  bytes 4253283 (4.2 MB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 524  bytes 46571 (46.5 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+ 
+ens17f1: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 9000
+        inet 10.100.3.14  netmask 255.255.255.0  broadcast 10.100.3.255
+        inet6 fe80::63f:72ff:febf:38df  prefixlen 64  scopeid 0x20<link>
+        ether 04:3f:72:bf:38:df  txqueuelen 1000  (Ethernet)
+        RX packets 15382  bytes 4253753 (4.2 MB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 522  bytes 46494 (46.4 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+ 
 ens21f0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
-        inet 10.1.2.18  netmask 255.255.0.0  broadcast 10.1.255.255
-        inet6 fe80::d2e7:8941:fa2c:d4c6  prefixlen 64  scopeid 0x20<link>
-        ether a0:36:9f:78:dd:8c  txqueuelen 1000  (Ethernet)
-        RX packets 1438408  bytes 1736122845 (1.7 GB)
-        RX errors 0  dropped 230  overruns 0  frame 0
-        TX packets 714766  bytes 56404958 (56.4 MB)
+        inet 10.1.2.14  netmask 255.255.0.0  broadcast 10.1.255.255
+        inet6 fe80::a236:9fff:fe78:dee4  prefixlen 64  scopeid 0x20<link>
+        ether a0:36:9f:78:de:e4  txqueuelen 1000  (Ethernet)
+        RX packets 282894  bytes 29772255 (29.7 MB)
+        RX errors 0  dropped 286  overruns 0  frame 0
+        TX packets 9347  bytes 1226074 (1.2 MB)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
  
 ens21f1: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
-        ether a0:36:9f:78:dd:8e  txqueuelen 1000  (Ethernet)
+        ether a0:36:9f:78:de:e6  txqueuelen 1000  (Ethernet)
         RX packets 0  bytes 0 (0.0 B)
         RX errors 0  dropped 0  overruns 0  frame 0
         TX packets 0  bytes 0 (0.0 B)
-        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
- 
-ens5f0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
-        ether 04:3f:72:9b:ed:4a  txqueuelen 1000  (Ethernet)
-        RX packets 11568  bytes 4006229 (4.0 MB)
-        RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 0  bytes 0 (0.0 B)
-        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
- 
-ens5f1: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 9000
-        inet 10.100.2.18  netmask 255.255.255.0  broadcast 10.100.2.255
-        inet6 fe80::f25d:f1ad:4648:f946  prefixlen 64  scopeid 0x20<link>
-        ether 04:3f:72:9b:ed:4b  txqueuelen 1000  (Ethernet)
-        RX packets 16567  bytes 4864266 (4.8 MB)
-        RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 444  bytes 39889 (39.8 KB)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
  
 lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
         inet 127.0.0.1  netmask 255.0.0.0
         inet6 ::1  prefixlen 128  scopeid 0x10<host>
         loop  txqueuelen 1000  (Local Loopback)
-        RX packets 83194  bytes 5964948 (5.9 MB)
+        RX packets 30454  bytes 2290385 (2.2 MB)
         RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 83194  bytes 5964948 (5.9 MB)
+        TX packets 30454  bytes 2290385 (2.2 MB)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
  
-# Pick up one of the NICs (e.g., ens21f0) and pass it to -a option. If successful, the following doesn't print out any response
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem1 -t tcp -a 10.1.2.18 -s 1158
+# Pick up one of the NICs (e.g., ens17f0) and pass it to -a option. If successful, the following doesn't print out any response
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem1 -t tcp -a 10.100.2.14 -s 1158
 ```
-In the above example, the NVM subsystem called "nqn.2019-04.ibof:subsystem1" has been configured to listen on (10.100.11.20, 1158) and use TCP transport. If you miss this step, POS wouldn't be able to mount POS volumes even though it could create new ones. 
+In the above example, the NVM subsystem called "nqn.2019-04.ibof:subsystem1" has been configured to listen on (10.100.2.14, 1158) and use TCP transport. If you miss this step, POS wouldn't be able to mount POS volumes even though it could create new ones. 
 At this point, you should be able to retrieve the configured NVM subsystem like in the following:
 
 #### Retrieve NVM subsystem information
 ```bash
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_get_subsystems
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_get_subsystems
 [
   {
     "nqn": "nqn.2014-08.org.nvmexpress.discovery",
@@ -1539,7 +1567,7 @@ root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_get
         "transport": "TCP",
         "trtype": "TCP",
         "adrfam": "IPv4",
-        "traddr": "10.1.2.18",
+        "traddr": "10.100.2.14",
         "trsvcid": "1158"
       }
     ],
@@ -1560,12 +1588,11 @@ This step is to create a logical entry point of the target side IO which will be
 #### Create a volume
 ```bash
 # Create a 50-TB volume
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# logout
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli volume create --name vol1 --size 54975581388800 --maxiops 0 --maxbw 0 --array POSArray
+root@R2U14-PSD-3:/poseidonos/bin# ./cli volume create --name vol1 --size 54975581388800 --maxiops 0 --maxbw 0 --array POSArray
  
  
 Request to Poseidon OS
-    xrId        :  7a693202-327b-11ea-9906-a0369f78dd8c
+    xrId        :  aee4416b-dac1-11eb-b080-a0369f78dee4
     command     :  CREATEVOLUME
     Param       :
 {
@@ -1581,188 +1608,14 @@ Response from Poseidon OS
     Description  :  Success
     Problem      :
     Solution     :
-```
-
-#### Retrieve volume information
-```bash
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli volume create --name vol1 --size 54975581388800 --maxiops 0 --maxbw 0 --array POSArray
+ 
+ 
+# Check the volume information
+root@R2U14-PSD-3:/poseidonos/bin# ./cli volume list --array POSArray
  
  
 Request to Poseidon OS
-    xrId        :  7a693202-327b-11ea-9906-a0369f78dd8c
-    command     :  CREATEVOLUME
-    Param       :
-{
-    "name": "vol1",
-    "array": "POSArray",
-    "size": 54975581388800
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-```
-Please note that the initial status of POS volume is Unmounted. 
-
-### Step 9. Mount POS Volume
-
-This is to make a particular POS volume ready to perform IO. After this step, POS volume is attached as bdev to an NVM subsystem and seen as an NVM namespace. 
-```bash
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli volume mount --name vol1 --array POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  14e7d33a-327c-11ea-a8d0-a0369f78dd8c
-    command     :  MOUNTVOLUME
-    Param       :
-{
-    "name": "vol1",
-    "array": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli volume list --array POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  6cff1f6a-327c-11ea-a9c8-a0369f78dd8c
-    command     :  LISTVOLUME
-    Param       :
-{
-    "array": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "volumes": [
-        {
-            "id": 0,
-            "maxbw": 0,
-            "maxiops": 0,
-            "name": "vol1",
-            "remain": "54.9755813888TB (54975581388800B)",
-            "status": "Mounted",
-            "total": "54.9755813888TB (54975581388800B)"
-        }
-    ]
-}
- 
-  
-  
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "volumes": [
-        {
-            "id": 0,
-            "maxbw": 0,
-            "maxiops": 0,
-            "name": "vol1",
-            "remain": "1.073741824GB (1073741824B)",
-            "status": "Mounted",
-            "total": "1.073741824GB (1073741824B)"
-        }
-    ]
-}
-```
-
-Please note that the status of the volume has become Mounted.  If we check the NVM subsystem again, we can notice an NVM namespace has been added to an NVM subsystem with its bdev_name as follows.
-
-#### Retrieve NVM subsystem information
-```bash
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# ./rpc.py nvmf_get_subsystems
-[
-  {
-    "nqn": "nqn.2014-08.org.nvmexpress.discovery",
-    "subtype": "Discovery",
-    "listen_addresses": [],
-    "allow_any_host": true,
-    "hosts": []
-  },
-  {
-    "nqn": "nqn.2019-04.ibof:subsystem1",
-    "subtype": "NVMe",
-    "listen_addresses": [
-      {
-        "transport": "TCP",
-        "trtype": "TCP",
-        "adrfam": "IPv4",
-        "traddr": "10.1.2.18",
-        "trsvcid": "1158"
-      }
-    ],
-    "allow_any_host": true,
-    "hosts": [],
-    "serial_number": "IBOF00000000000001",
-    "model_number": "IBOF_VOLUME_EXTENSION",
-    "max_namespaces": 256,
-    "namespaces": [
-      {
-        "nsid": 1,
-        "bdev_name": "bdev0",
-        "name": "bdev0",
-        "uuid": "d3d3dcda-1134-4f1d-979f-0f58168ed228"
-      }
-    ]
-  }
-]
-```
-
-```bash
-Once mounted, the connection is established between an initiator and an NVM subsystem. Then, POS volume becomes accessible over network by an initiator.
-```
-
-### Step 10. Unmount POS Volume
-```bash
-root@R2U18-PSD-1-CI_TARGET:/poseidonos/lib/spdk-19.10/scripts# logout
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli volume unmount --name vol1 --array POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  cb218e5b-327c-11ea-a417-a0369f78dd8c
-    command     :  UNMOUNTVOLUME
-    Param       :
-{
-    "name": "vol1",
-    "array": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli volume list --array POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  d8cb0eb9-327c-11ea-84df-a0369f78dd8c
+    xrId        :  f7b3d6ec-dac1-11eb-b9f7-a0369f78dee4
     command     :  LISTVOLUME
     Param       :
 {
@@ -1790,17 +1643,187 @@ Response from Poseidon OS
     ]
 }
 ```
-```bash
-Please note that the status of the POS volume has changed from "Mounted" to "Unmounted".
-```
 
-### Step 11. Delete POS Volume
+Please note that the initial status of POS volume is Unmounted. 
+
+### Step 9. Mount POS Volume
+
+This is to make a particular POS volume ready to perform IO. After this step, POS volume is attached as bdev to an NVM subsystem and seen as an NVM namespace. 
 ```bash
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli volume delete --name vol1 --array POSArray
+# Mount the volume
+root@R2U14-PSD-3:/poseidonos/bin# ./cli volume mount --name vol1 --array POSArray
  
  
 Request to Poseidon OS
-    xrId        :  e74c6df5-327c-11ea-9250-a0369f78dd8c
+    xrId        :  32527ba5-dac2-11eb-870b-a0369f78dee4
+    command     :  MOUNTVOLUME
+    Param       :
+{
+    "name": "vol1",
+    "array": "POSArray"
+}
+ 
+ 
+Response from Poseidon OS
+    Code         :  0
+    Level        :  INFO
+    Description  :  Success
+    Problem      :
+    Solution     :
+ 
+ 
+# Check if the volume status is "Mounted" and the size is 50 TB
+root@R2U14-PSD-3:/poseidonos/bin# ./cli volume list --array POSArray
+ 
+ 
+Request to Poseidon OS
+    xrId        :  4f8680aa-dac2-11eb-9f74-a0369f78dee4
+    command     :  LISTVOLUME
+    Param       :
+{
+    "array": "POSArray"
+}
+ 
+ 
+Response from Poseidon OS
+    Code         :  0
+    Level        :  INFO
+    Description  :  Success
+    Problem      :
+    Solution     :
+    Data         :
+ {
+    "volumes": [
+        {
+            "id": 0,
+            "maxbw": 0,
+            "maxiops": 0,
+            "name": "vol1",
+            "remain": "54.9755813888TB (54975581388800B)",
+            "status": "Mounted",
+            "total": "54.9755813888TB (54975581388800B)"
+        }
+    ]
+}
+```
+
+Please note that the status of the volume has become Mounted.  If we check the NVM subsystem again, we can notice an NVM namespace has been added to an NVM subsystem with its bdev_name as follows.
+
+#### Retrieve NVM subsystem information
+```bash
+# Check if nvmf_get_subsystems() command shows NVM namespace information that contains "bdev_0_POSArray"
+root@R2U14-PSD-3:/poseidonos/bin# cd /poseidonos/lib/spdk-20.10/scripts/
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_get_subsystems
+[
+  {
+    "nqn": "nqn.2014-08.org.nvmexpress.discovery",
+    "subtype": "Discovery",
+    "listen_addresses": [],
+    "allow_any_host": true,
+    "hosts": []
+  },
+  {
+    "nqn": "nqn.2019-04.ibof:subsystem1",
+    "subtype": "NVMe",
+    "listen_addresses": [
+      {
+        "transport": "TCP",
+        "trtype": "TCP",
+        "adrfam": "IPv4",
+        "traddr": "10.100.2.14",
+        "trsvcid": "1158"
+      }
+    ],
+    "allow_any_host": true,
+    "hosts": [],
+    "serial_number": "IBOF00000000000001",
+    "model_number": "IBOF_VOLUME_EXTENSION",
+    "max_namespaces": 256,
+    "namespaces": [
+      {
+        "nsid": 1,
+        "bdev_name": "bdev_0_POSArray",
+        "name": "bdev_0_POSArray",
+        "uuid": "c5705687-d266-4a1b-99b1-bb204ab0e3b8"
+      }
+    ]
+  }
+]
+```
+
+```bash
+Once mounted, the connection is established between an initiator and an NVM subsystem. Then, POS volume becomes accessible over network by an initiator.
+```
+
+### Step 10. Unmount POS Volume
+```bash
+# Unmount the volume
+root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# cd /poseidonos/bin/
+root@R2U14-PSD-3:/poseidonos/bin# ./cli volume unmount --name vol1 --array POSArray
+ 
+ 
+Request to Poseidon OS
+    xrId        :  d90aa185-dac2-11eb-8e19-a0369f78dee4
+    command     :  UNMOUNTVOLUME
+    Param       :
+{
+    "name": "vol1",
+    "array": "POSArray"
+}
+ 
+ 
+Response from Poseidon OS
+    Code         :  0
+    Level        :  INFO
+    Description  :  Success
+    Problem      :
+    Solution     :
+ 
+ 
+# Check if the volume status is now "Unmounted"
+root@R2U14-PSD-3:/poseidonos/bin# ./cli volume list --array POSArray
+ 
+ 
+Request to Poseidon OS
+    xrId        :  e0589732-dac2-11eb-97e7-a0369f78dee4
+    command     :  LISTVOLUME
+    Param       :
+{
+    "array": "POSArray"
+}
+ 
+ 
+Response from Poseidon OS
+    Code         :  0
+    Level        :  INFO
+    Description  :  Success
+    Problem      :
+    Solution     :
+    Data         :
+ {
+    "volumes": [
+        {
+            "id": 0,
+            "maxbw": 0,
+            "maxiops": 0,
+            "name": "vol1",
+            "status": "Unmounted",
+            "total": "54.9755813888TB (54975581388800B)"
+        }
+    ]
+} 
+```
+Please note that the status of the POS volume has changed from "Mounted" to "Unmounted".
+
+
+### Step 11. Delete POS Volume
+```bash
+# Delete the volume
+root@R2U14-PSD-3:/poseidonos/bin# ./cli volume delete --name vol1 --array POSArray
+ 
+ 
+Request to Poseidon OS
+    xrId        :  15274937-dac3-11eb-9c21-a0369f78dee4
     command     :  DELETEVOLUME
     Param       :
 {
@@ -1816,11 +1839,13 @@ Response from Poseidon OS
     Problem      :
     Solution     :
  
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli volume list --array POSArray
+ 
+# Make sure the volume list output does not contain "vol1" anymore
+root@R2U14-PSD-3:/poseidonos/bin# ./cli volume list --array POSArray
  
  
 Request to Poseidon OS
-    xrId        :  001764a5-327d-11ea-ad8c-a0369f78dd8c
+    xrId        :  6266b333-dac4-11eb-8fa7-a0369f78dee4
     command     :  LISTVOLUME
     Param       :
 {
@@ -1839,53 +1864,13 @@ POS volume can be deleted only when it is in Unmounted state.
 
 ### Step 12. Unmount POS Array
 ```bash
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli system unmount
+# Unmount the array
+root@R2U14-PSD-3:/poseidonos/bin# ./cli array unmount --name POSArray
  
  
 Request to Poseidon OS
-    xrId        :  10e208d4-327d-11ea-aba8-a0369f78dd8c
-    command     :  UNMOUNTIBOFOS
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli system info
- 
- 
-Request to Poseidon OS
-    xrId        :  1dee075d-327d-11ea-ab6a-a0369f78dd8c
-    command     :  GETIBOFOSINFO
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "capacity": "0GB (0B)",
-    "rebuildingProgress": "0",
-    "situation": "DEFAULT",
-    "state": "OFFLINE",
-    "used": "0GB (0B)"
-}
-```
-
-### Step 13. Delete POS Array
-```bash
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli array delete --name POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  2e9c9326-327d-11ea-9a3f-a0369f78dd8c
-    command     :  DELETEARRAY
+    xrId        :  b66e9e2b-dac4-11eb-b50e-a0369f78dee4
+    command     :  UNMOUNTARRAY
     Param       :
 {
     "name": "POSArray"
@@ -1900,11 +1885,12 @@ Response from Poseidon OS
     Solution     :
  
  
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli array info --name POSArray
+# Make sure the array is now in "OFFLINE" state
+root@R2U14-PSD-3:/poseidonos/bin# ./cli array info --name POSArray
  
  
 Request to Poseidon OS
-    xrId        :  39fdd5ec-327d-11ea-9b62-a0369f78dd8c
+    xrId        :  c4c60226-dac4-11eb-a661-a0369f78dee4
     command     :  ARRAYINFO
     Param       :
 {
@@ -1920,19 +1906,206 @@ Response from Poseidon OS
     Solution     :
     Data         :
  {
+    "capacity": "0GB (0B)",
+    "createDatetime": "2021-07-02 08:08:23 +0900",
+    "devicelist": [
+        {
+            "name": "uram0",
+            "type": "BUFFER"
+        },
+        {
+            "name": "unvme-ns-0",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-1",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-2",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-3",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-4",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-5",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-6",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-7",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-8",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-9",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-10",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-11",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-12",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-13",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-14",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-15",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-16",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-17",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-18",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-19",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-20",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-21",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-22",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-23",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-24",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-25",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-26",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-27",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-28",
+            "type": "DATA"
+        },
+        {
+            "name": "unvme-ns-29",
+            "type": "SPARE"
+        },
+        {
+            "name": "unvme-ns-30",
+            "type": "SPARE"
+        },
+        {
+            "name": "unvme-ns-31",
+            "type": "SPARE"
+        }
+    ],
     "name": "POSArray",
-    "state": "NOT_EXIST"
+    "rebuildingProgress": "0",
+    "situation": "DEFAULT",
+    "state": "OFFLINE",
+    "updateDatetime": "2021-07-02 08:08:23 +0900",
+    "used": "0GB (0B)"
+}
+```
+
+### Step 13. Delete POS Array
+```bash
+# Delete the array. It make take a few minutes to fininsh. In this demonstration, it took 6 minutes.
+root@R2U14-PSD-3:/poseidonos/bin# ./cli array delete --name POSArray
+ 
+ 
+Request to Poseidon OS
+    xrId        :  ff26cfef-dac4-11eb-afce-a0369f78dee4
+    command     :  DELETEARRAY
+    Param       :
+{
+    "name": "POSArray"
+}
+ 
+ 
+Response from Poseidon OS
+    Code         :  0
+    Level        :  INFO
+    Description  :  Success
+    Problem      :
+    Solution     :
+ 
+ 
+# Make sure that POSArray does not show up in array list command
+root@R2U14-PSD-3:/poseidonos/bin# ./cli array list
+ 
+ 
+Request to Poseidon OS
+    xrId        :  0210a23c-dac5-11eb-bc89-a0369f78dee4
+    command     :  LISTARRAY
+    Param       :
+{}
+ 
+ 
+Response from Poseidon OS
+    Code         :  0
+    Level        :  INFO
+    Description  :  Success
+    Problem      :
+    Solution     :
+    Data         :
+ {
+    "arrayList": "There is no array"
 }
 ```
 POS array can be deleted only when it is in OFFLINE state.
 
 ### Step 14. Shut down POS application
 ```bash
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ./cli system exit
+# Trigger a shutdown. The command does not block on the shutdown result.
+root@R2U14-PSD-3:/poseidonos/bin# ./cli system exit
  
  
 Request to Poseidon OS
-    xrId        :  4587f79d-327d-11ea-b9c8-a0369f78dd8c
+    xrId        :  a42c5e59-dac5-11eb-9b94-a0369f78dee4
     command     :  EXITIBOFOS
  
  
@@ -1942,10 +2115,7 @@ Response from Poseidon OS
     Description  :  Success
     Problem      :
     Solution     :
+ 
+# Check if the poseidonos process is not shown from ps output. The shutdown process may take a few minutes to finish.
+root@R2U14-PSD-3:/poseidonos/bin# ps -ef | grep poseidon | grep -v grep
 ```
-Please make sure that POS is not running anymore as in the following.
-```bash
-ibof@R2U18-PSD-1-CI_TARGET:/poseidonos/bin$ ps -ef | grep ibofos | grep -v grep
-```
-
-
