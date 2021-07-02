@@ -51,9 +51,9 @@ public:
     uint64_t rebuiltSegCnt = 0;
 
 private:
-    string array;
-    string rebuildResult;
-    int rebuildTaskCnt;
+    string array = "";
+    string rebuildResult = "";
+    int rebuildTaskCnt = 0;
     chrono::system_clock::time_point start;
     map<string, chrono::system_clock::time_point> partStart;
     chrono::system_clock::time_point end;
