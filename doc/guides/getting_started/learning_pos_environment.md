@@ -1,5 +1,5 @@
 # Overview
-POS relies on external software components to implement its functionalities. It provides an NVM subsystem using SPDK library, communicates with Linux kernel for PCI and VM management, and offers web UI by using nginx. In this section, we will cover a list of environment configs that could affect the behavior of POS. 
+POS relies on external software components to implement its functionalities. It leverages SPDK library to satisfy NVM subsystem semantics, communicates with Linux kernel for PCI and virtual memory management, and offers web UI by using nginx. In this section, we will cover a list of environment configs that could affect the behavior of POS. 
 
 ## Table of Contents
 - [Linux Kernel](#linux-kernel)
@@ -25,23 +25,23 @@ POS relies on external software components to implement its functionalities. It 
 * are reserved and kept from being swapped out so that memory paging in/out operations
 * are removed and hit ratio in CPU can be also increased.
 * are mainly used for SPDK library which supports user level device driver, so POS also needs to reserve them to use SPDK library.
-  - This reservation can be done by running ```NRHUGE=XXXXX $POS_REPO/lib/$SPDK/scripts/setup.sh```
+  - This reservation can be done by running ```NRHUGE=XXXXX $POS_HOME/lib/$SPDK/scripts/setup.sh```
 * becomes available to Linux only when "hugetlbfs" is mounted on ```/dev/hugepages```
   - e.g., hugetlbfs on ```/dev/hugepages``` type hugetlbfs (rw,relatime,pagesize=2M) should appear in the output of mount command. 
 * becomes available to application (i.e., POS) only when the required amount is specified through proc fs.
   - e.g., ```echo $NRHUGE > /proc/sys/vm/nr_hugepages```
-* currently, ```$NRHUGE``` is calculated as 2 / 3 of the total memory in the unit of 2 MB pages. If needed, this can be adjusted in ```$POS_REPO/script/setup_env.sh```
+* currently, ```$NRHUGE``` is calculated as 2 / 3 of the total memory in the unit of 2 MB pages. If needed, this can be adjusted in ```$POS_HOME/script/setup_env.sh```
   - e.g., ```$(cat /proc/meminfo | grep MemTotal | awk '{print $2}') / 3 * 2 / 2 / 1024```
 
 ### max virtual memory map count
 * is set to Math.min(65536, current_max_map_count) where current_max_map_count is from ```/proc/sys/vm/max_map_count```
 * If you observe an issue with mmap()/mprotect() in POS, please consider increasing it to higher value, 
-  - e.g., 262144, in ```$POS_REPO/script/setup_env.sh```
+  - e.g., 262144, in ```$POS_HOME/script/setup_env.sh```
 
 ### tcp parameters
 * can be optimized on the target side if needed.
 * POS offers an example script as in the following and the numbers are from experiments.
-  - ```$POS_REPO/test/system/network/tcp_tune.sh max```
+  - ```$POS_HOME/test/system/network/tcp_tune.sh max```
 
 ```bash
 sysctl -w net.core.rmem_default="268435456"
@@ -59,7 +59,7 @@ sysctl -w net.ipv4.tcp_slow_start_after_idle="0"
 ### bdev
 * is a SPDK-provided block device that runs at user level.
 * can be configured by a RPC call to SPDK server that gets spawned during POS initialization and listens on localhost:5260
-  - ```$IBOF_HOME/lib/spdk-19.10/scripts/rpc.py bdev_malloc_create  {total_size } {block_size }```
+  - ```$POS_HOME/lib/spdk-20.10/scripts/rpc.py bdev_malloc_create  {total_size } {block_size }```
   - *(mandatory)* ```total size```: the size of bdev in MB
   - *(mandatory)* ```block_size```: the size of a block in the bdev
   - *(optional)* ```-b```: the name of the block device name to use. If the name starts with "uram", SPDK library automatically populates the metadata of the allocated hugepage at /tmp/uram_hugepage, which includes pid, startpage, and pageCount. If the option is omitted, SPDK library appends monotonically-increasing non-negative integer to "Malloc". The device name would look like Malloc0, Malloc1, Malloc2, ..., and so in subsequent runs. 
@@ -68,14 +68,14 @@ sysctl -w net.ipv4.tcp_slow_start_after_idle="0"
 
 ### NVM Subsystem
 
-* preents a collection of controller(s) which are used to access NVM namespaces.
+* presents a collection of controller(s) which are used to access NVM namespaces.
 * can be configured by a RPC call
-  - ```$IBOF_HOME/lib/spdk-19.10/scripts/rpc.py nvmf_create_subsystem  {nqn }```
+  - ```$POS_HOME/lib/spdk-20.10/scripts/rpc.py nvmf_create_subsystem  {nqn }```
   - *(mandatory)* ```nqn```: Nvm Qualified Name that uniquely identifies NVMe-oF target
   - *(mandatory)* ```-s```: the serial number of the target. Any vendor-identifiable string should be okay.
   - *(mandatory)* ```-d```: the model number of the target. Any vendor-identifiable string should be okay.
   - *(mandatory)* ```-m```: the maximum number of namespaces of the target.
-  - *(optional)* ```-t```: the type of the target. It is "nvmf_tgt" by default. The parameter is passed in to [spdk_nvmf_subsystem_create()](https://github.com/spdk/spdk/blob/v19.10.x/lib/nvmf/nvmf_rpc.c#L399).
+  - *(optional)* ```-t```: the type of the target. It is "nvmf_tgt" by default.
 * The maximum number of namespaces (```-m```) determines the maximum number of POS volumes we could have for an NVM subsystem. Currently, max 256 POS volumes are supported.
 * Each namespace for a controller is mapped to POS volume.
 
@@ -83,10 +83,8 @@ sysctl -w net.ipv4.tcp_slow_start_after_idle="0"
 ### NVMe-oF transport
 * determines the data transfer mechanism between an initiator and a target
 * can be configured by a RPC call
-  - ```$IBOF_HOME/lib/spdk-19.10/scripts/rpc.py nvmf_create_transport```
+  - ```$POS_HOME/lib/spdk-20.10/scripts/rpc.py nvmf_create_transport```
   - *(mandatory)* ```-t```: the type of the transport. It should be either "tcp" or "rdma". 
-    - If it is tcp, SPDK uses [spdk_nvmf_transport_tcp](https://github.com/spdk/spdk/blob/v19.10.x/lib/nvmf/tcp.c#L2900) for the transfer. 
-    - If it is rdma, SPDK uses [spdk_nvmf_transport_rdma](https://github.com/spdk/spdk/blob/v19.10.x/lib/nvmf/rdma.c#L4134). 
     - Please make sure the POS binary is built with ```-DSPDK_CONFIG_RDMA``` to be able to use RDMA.
   - *(mandatory)* ```-b```: the number of shared buffers to reserve for each poll group
   - *(mandatory)* ```-n```: the number of pooled data buffers available to the transport
@@ -106,7 +104,7 @@ sysctl -w net.ipv4.tcp_slow_start_after_idle="0"
 ### NVMe-oF listener
 * determines transport endpoint configuration.
 * can be configured by a RPC call
-  - ```$IBOF_HOME/lib/spdk-19.10/scripts/rpc.py nvmf_subsystem_add_listener {nqn}```
+  - ```$POS_HOME/lib/spdk-20.10/scripts/rpc.py nvmf_subsystem_add_listener {nqn}```
   - *(mandatory)* ```nqn```: Nvm Qualified Name that uniquely identifies NVMe-oF target
   - *(mandatory)* ```-t```: the type of the transport. It should be either "tcp" or "rdma".
   - *(mandatory)* ```-a```: the transport address to listen on,
