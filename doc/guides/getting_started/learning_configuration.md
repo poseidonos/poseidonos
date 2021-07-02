@@ -6,17 +6,14 @@ POS provides a lot of knobs so that,
   1) The benefits of using fast NVMe-oF storage could be fully achieved with various environments and
   2) The integration efforts with existing infrastructure could be minimized.
 
-In this section, we will go over the list of configuration variables that can affect the behavior of POS. Some of those are meaningful to POS developers only, unlikely to change by users. </br>
-Though, we explicitly list up all of them here to share hidden assumptions and magic numbers to be able to explain any side effects quickly that could happen due to user-specific environment issues. </br>
-
-The configuration is encoded in json at /etc/ibofos/conf/ibofos.conf. </br>
+In this section, we will go over the list of configuration variables that can change the behavior of POS. Some of those are meaningful to POS developers only, unlikely to change by users. Though, we explicitly list them up here to share hidden assumptions and magic numbers to be able to diagnose any side effects quickly that could happen due to user-specific environment issues. The configuration is encoded in json at /etc/pos/pos.conf. The following tables describe a list of (config name, the range of valid values, the default value, whether it can change at runtime, whether it is supported today). 
 
 The following tables describe a list of (config name, the range of valid values, the default value, whether it can change at runtime, whether it is supported today). </br>
 
 |                     **Name**                     |      **Category**      |                          **Value**                           | **Note**                                                     |
 | :----------------------------------------------: | :--------------------: | :----------------------------------------------------------: | :----------------------------------------------------------- |
 |                  journal.enable                  | Range of valid values  |                        true \| false                         | If true, POS logs metadata updates and performs recovery upon power-failure or crash. |
-|                                                  |     Default value      |                            FALSE                             |                                                              |
+|                                                  |     Default value      |                            true                             |                                                              |
 |                                                  | Changeable at runtime  |                              NO                              |                                                              |
 |                                                  | Current Support Status |                         Experimental                         |                                                              |
 |                                                  |                        |                            <br />                            |                                                              |
@@ -143,12 +140,6 @@ The following tables describe a list of (config name, the range of valid values,
 |                     **Name**                     |      **Category**      |                          **Value**                           | **Note**                                                     |
 |   user_nvme_driver.<br>retry_count_frontend_io   | Range of valid values  |                           0  ~ 10                            | It specifies how many times to retry an IO request on failure from frontend IO thread<br>to a device including backend storage devices and write   buffer. |
 |                                                  |     Default value      |                              3                               | It defaults to 0 if "use_config" is false.                   |
-|                                                  | Changeable at runtime  |                              NO                              |                                                              |
-|                                                  | Current Support Status |                          Supported                           |                                                              |
-|                                                  |                        |                            <br />                            |                                                              |
-|                     **Name**                     |      **Category**      |                          **Value**                           | **Note**                                                     |
-|                  perf_impact.gc                  | Range of valid values  |                 "low" \| "medium" \| "high"                  | It specifies the priority of GC bandwidth compared to user IO.<br><br><br>  "high" is the highest priority to operate which is the,<br />same as user IO so that GC and user IO will compete for the bandwidth.<br>  "low" is the lowest priority to operate so that GC will,get the minimum bandwidth. |
-|                                                  |     Default value      |                            "high"                            |                                                              |
 |                                                  | Changeable at runtime  |                              NO                              |                                                              |
 |                                                  | Current Support Status |                          Supported                           |                                                              |
 |                                                  |                        |                            <br />                            |                                                              |
