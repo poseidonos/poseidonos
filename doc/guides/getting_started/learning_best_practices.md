@@ -10,9 +10,9 @@ initiator$ sudo umount /mnt
 # Unmount the POS volume (assumption: the volume name is vol1 and created within Array called POSArray)
 target$ cli volume unmount --name vol1 --array POSArray
  
-# Unmount the POS array (assumption: POS does not support multi-arrays yet)
-target$ cli system unmount
- 
+# Unmount the POS array
+target$ cli array unmount --name POSArray
+
 # Kill the POS
 target$ cli system exit
 ```
@@ -36,16 +36,13 @@ The solution is to copy the whole bytes from the hugepage memory area to shared 
 $ sudo ./script/backup_latest_hugepages_for_uram.sh
  
 # Bring up POS (refer to Getting Started for further details)
-$ sudo ./script/start_ibofos.sh
+$ sudo ./script/start_poseidonos.sh
  
 # Create write buffer. Please make sure the same parameters should be used as before the crash.
-$ ./lib/spdk-19.10/scripts/rpc.py bdev_malloc_create -b uram0 8192 512
+$ ./lib/spdk-20.10/scripts/rpc.py bdev_malloc_create -b uram0 8192 512
  
-# Scan the devices
+# Scan the devices and load the array automatically
 $ bin/cli device scan
- 
-# Load the array. Please make sure the same array name should be used as in the previous execution.
-$ bin/cli array load --name {ArrayName}
- 
+  
 # POS will perform the recovery and become mountable.
 ```

@@ -2,7 +2,7 @@
 This section will walk you through the basic concepts and terms to understand Poseidon OS (POS) with a few illustrative examples of the network architecture and software stack.
 
 ## What is Poseidon OS (POS)?
-Poseidon OS (POS) is a light-weight storage OS that offers the best performance and valuable features over storage network. POS exploits the benefit of NVMe SSDs by optimizing storage stack and leveraging the state-of-the-art high speed interface. Also, it implements software-defined storage capabilities to meet the various needs of storage applications in a data center. With POS, industries can easily build Composable Disaggregated Infrastructure in their data centers. The latest version of POS has been developed and tested with PCIe Gen4 interconnect, targeted to be open-sourced in the next few releases. 
+Poseidon OS (POS) is a light-weight storage OS that offers the best performance and valuable features over storage network. POS exploits the benefit of NVMe SSDs by optimizing storage stack and leveraging the state-of-the-art high speed interface. Also, it implements software-defined storage capabilities to meet the various needs of storage applications in a data center. With POS, industries can easily build Composable Disaggregated Infrastructure in their data centers. The latest version of POS is 0.9.2 and released at https://github.com/poseidonos/poseidonos.
 
 The key characteristics of POS are as follows: 
 
@@ -24,7 +24,7 @@ POS offers virtualized block devices that provide valuable features as well as b
 
 ## NVMe-over-Fabrics (NVMe-oF) Interface
 ### Why New Interface?
-NVMe-oF has emerged to break through the scaling limitations of PCIe-attached NVMe. NVMe-oF allows storage applications to talk to remote NVMe devices over network and consequently unblocks those applications from the physical limitation on the number of PCIe lanes a single host can have. NVMe-oF performs encapsulation/decapsulation at each layer of the software stack to maintain end-to-end NVMe semantics across a range of topology. The following illustrates how an NVMe command travels from client (hosts) to server SSDs through NVMe-oF protocol.
+NVMe-oF has emerged to break through the scaling limitations of PCIe-attached NVMe. NVMe-oF allows storage applications to talk to remote NVMe devices over network and consequently unblocks those applications from the physical limitation on the number of PCIe lanes a single host can have. NVMe-oF performs encapsulation/decapsulation at each layer of the software stack to maintain end-to-end NVMe semantics across a range of topology. The following illustrates how an NVMe command travels from client (hosts) to server SSDs through NVMe-oF protocol. 
 
 ### Network Transport (TCP vs. RDMA)
 The network fabric used for NVMe-oF can be several types (i.e., Fibre Channel, RDMA, and TCP) according to the current NVMe-oF 1.1 Specification.  POS currently supports TCP and RDMA (RoCE v2). We should be aware of pros and cons of each transport type, so that we could make the best decision under various constraints. 
@@ -54,7 +54,7 @@ In the following figure, POS manages two POS arrays, "A" and "B", each exposing 
 ### Creating POS Array
 Storage administrator may want to manage multiple POS arrays to meet various Service-Level Agreement (SLA) requirements.  
 
-- Currently, only one array is supported, but multiple arrays will be supported during the first half of 2021 (up to 8).
+- POS can have up to 8 arrays in total.
 - Applications having strict performance SLA should run on a dedicated, isolated set of SSD devices, because they should not be interfered by the other applications.
 - Certain application has strict durability SLA and needs to have higher redundancy than RAID 5. 
 - The failure domain of one application needs to be isolated from that of other application. Even if certain POS array gets data loss due to bugs, multiple SSD failures, corruptions, and etc, the issue shouldn't propagate to other POS arrays. 
@@ -64,17 +64,17 @@ Storage administrator may want to manage multiple POS arrays to meet various Ser
 To create a new array, the following information needs to be provided for POS:
 
 - Array name: POS needs to be able to uniquely identify the target POS array. 
-- Buffer device: POS accumulates both user data and metadata in a sequential fashion in a given "buffer" device (normally, NVRAM) to improve write performance and latency. 
-- Data devices: POS stores both user data and metadata in "data" devices. POS internally maintains block mapping to make the best use of SSDs by striping across data devices and chunking within a data device. 
-- Spare device(s): POS rebuilds lost device's image onto a spare device based on the RAID configuration of the target POS array. The list of spare devices can be dynamically modified even after POS array has been created and mounted. 
-- RAID type: POS protects user data based on the RAID configuration. Currently only RAID5 is supported.
+- Buffer device: POS accumulates writes in a sequential fashion in a given "buffer" device (normally, NVRAM) to improve write performance and latency.
+- Data devices: POS stores both user data and metadata in "data" devices. POS internally maintains block mapping to make the best use of SSDs, e.g., by striping across data devices and chunking within a data device.
+- Spare device(s): When POS detects a faulty device, it rebuilds missing data onto a spare device by calculating RAID parity. Spare devices can be dynamically attached/detached even when POS array is mounted.
+- RAID type: POS protects user data with RAID. Currently only RAID5 is supported.
 
 
 POS validates if user-supplied inputs are well-formed and complies with system constraints:
 
-- The length of the array name can be up to 63 characters. The possible characters are [a-zA-Z0-9_-].
-POS array must have exactly one buffer device by design.
-- The minimum number of data devices is 3. This limitation comes from RAID 5.
+- The length of an array name can be up to 63 characters. The possible character is [a-zA-Z0-9_-].
+- POS array must have exactly one buffer device by design.
+- The minimum number of data devices is 3. This is required by RAID 5.
 - The name of a buffer/data/spare must be picked up from SPDK runtime. Getting started describes what those names look like and how to retrieve them by using POS CLI. 
 - The capacity of a buffer device must be equal to or larger than "(128 MB * # of data devices) + 512 MB". 
 - The maximum number of data and spare devices in total is 32. 
@@ -109,12 +109,12 @@ POS implements data redundancy at POS partition level. Parity device in POS is d
 
 When POS detects a data device failure, it automatically enters "degraded" mode, which is a fallback mode that continues general array operations but with potential performance degradation caused by 1) decreased read parallelism and 2) resource contention due to RAID rebuild operation. 
 
-POS conditionally initiates data construction procedure, called as "RAID rebuild", to replace a failed device with a new one. In degraded mode, POS checks periodically whether there is an available spare device and proceed to rebuild if there is any. Otherwise, POS array will remain in degraded mode until a spare device is newly added. The RAID rebuild doesn't block user I/Os from being processed, although it may impact on the performance of user I/Os. Please note that RAID rebuild generates intense internal I/Os to copy blocks between spare and data devices. POS offers a CLI command called "perf_impact" for a storage administrator to be able to adjust the level of the intensity and find a balance between fast recovery and user's perf SLA.
+POS conditionally initiates data construction procedure, called as "RAID rebuild", to replace a failed device with a new one. In degraded mode, POS checks periodically whether there is an available spare device and proceeds to rebuild if there is any. Otherwise, POS array will remain in degraded mode until a spare device is newly added. The RAID rebuild doesn't block user I/Os from being processed, although it may impact on the performance of user I/Os. Please note that RAID rebuild generates intense internal I/Os to copy blocks between spare and data devices. POS offers a CLI command called "perf_impact" for a storage administrator to be able to adjust the level of the intensity and find a balance between fast recovery and user's perf SLA. 
 
 ### State Transition Diagram
 Upon internal/external events, POS may switch from one state to another and adjust its behavior. For example, if POS is in PAUSE state to recover from journals, it will block any user I/Os during the period. In this section, we will explain the states that POS could enter and what their implications are. 
 
-#### Types of POS state
+#### Types of Array State
 Array is always in one of POS states in the following table.
 
 |State|Description|
@@ -126,18 +126,18 @@ Array is always in one of POS states in the following table.
 |PAUSE|POS array is blocking user I/Os to change online - offline state.|
 
 #### Types of Situation
-Situation indicates the detailed explanation of POS state. Situation has a single state, while State can have multiple Situations.
+Situation indicates the detailed explanation of POS array state. Situation is always mapped to a single state, while State can be mapped to multiple Situations. 
 
 |Situation|Description|State|
 |---|---|---|
-|DEFAULT|Initial state of POS array.|OFFLINE|
-|NORMAL|POS array is operating normally and able to serve user I/Os without performance degradation or blockers.|NORMAL|
-|TRY_MOUNT|POS array is being mounted. It is retrieving configuration information and checking integrity.|PAUSE|
-|DEGRADED|One or more storage devices has failed, resulting in RAID rebuild|BUSY|
+|DEFAULT|Initial state of POS array|OFFLINE|
+|NORMAL|POS array is operating normally and able to serve user I/Os without performance degradation or blockers|NORMAL|
+|TRY_MOUNT|POS array is being mounted. It is retrieving configuration information and checking integrity|PAUSE|
+|DEGRADED|One storage device has failed, resulting in RAID rebuild|BUSY|
 |TRY_UNMOUNT|POS array is performing "unmount" by blocking both user and internal I/Os|PAUSE|
-|JOURNAL_RECOVERY|During "mount" operation, POS array has detected unapplied journal logs from meta-data partition and started recovery operation.|PAUSE|
+|JOURNAL_RECOVERY|During "mount" operation, POS array has detected unapplied journal logs from meta-data partition and started recovery operation|PAUSE|
 |REBUILDING|RAID rebuild operation is in progress|BUSY|
-|FAULT|POS array is not able to proceed with RAID rebuild because the number of failed devices has exceeded the level the array can tolerate.|STOP|
+|FAULT|POS array is not able to proceed with RAID rebuild because the number of failed devices has exceeded the level the array can tolerate|STOP|
 
 #### State Transition Diagram
 The following diagram illustrates what conditions trigger a state transition of POS array.
@@ -205,18 +205,18 @@ When user data arrives at POS, it is first accumulated in internal storage resou
 Sometime, however, it is possible that POS crashes due to power failure before flushing the user data into NVMe SSDs, although POS sent back the write acknowledgement to the initiator. To deal with this situation, POS should be able to handle the following issues:
 
 - Persistence issue: If a buffer device is allocated from volatile media (e.g., DRAM) for any reason, the write buffer would be lost after a server reboot. In this case, an initiator would think its data should be persistent on POS since it got write ack already, but in fact has lost its data. 
-- Consistency issue: POS may have been in the middle of updating its internal metadata, resulting in partial updates. After a server reboot, POS might see inconsistent image of metadata such as dangling pointers or orphans.
+- Consistency issue: POS may have been in the middle of updating its internal metadata, resulting in partial updates. After a server reboot, POS might see inconsistent image of metadata such as dangling pointers or orphans. 
 
-POS offers a few workarounds to deal with such expected issues and plans to have new features that solve the problems in the next releases.
+POS offers a few workarounds to deal with such expected issues.
 
 ### How To Keep Data Persistent and Metadata Consistent
 #### Issue NVM Flush Command
-NVMe specification explains what to expect from NVM flush command: "The Flush command shall commit data and metadata associated with the specified namespace(s) to nonvolatile media". Provided that POS volume is implemented as an NVM namespace, it is supposed to copy all dirty blocks to NVMe SSDs synchronously upon receiving the command. The feature has been implemented in the latest POS release, but not enabled by default yet. This does not solve the sudden crash problem perfectly, but can help to reduce the data loss window if it is run on a reasonably-short interval. 
+NVMe specification explains what to expect from NVM flush command: "The Flush command shall commit data and metadata associated with the specified namespace(s) to nonvolatile media". Provided that POS volume is implemented as an NVM namespace, it is supposed to copy all dirty blocks to NVMe SSDs synchronously upon receiving the command. The feature was enabled/disabled through build option in earlier version, but it has been configurable through config file change (at /etc/pos/pos.conf) since 0.9.2. It is not enabled by default yet. This does not solve the sudden crash problem perfectly, but can help to reduce the data loss window if it is run on a reasonably-short interval. 
 
-#### Exit POS Gracefully
-We offer the best practice to shut down POS, which is called "graceful exit". The word "graceful" means that user application prepares for a stop and should not observe any errors during the procedure. The following steps guarantee that all in-transit writes are successfully done to NVMe SSDs consistently:
+#### Unmount POS Array Gracefully
+We offer the best practice to shut down POS array, which is called "graceful unmount". The word "graceful" means that user application prepares for a stop and should not observe any errors during the procedure. The following steps guarantee that all in-transit writes are successfully done to NVMe SSDs consistently:
 
-1. Stop receiving user I/Os from the initiator by disconnecting the block device
+1. Stop receiving user I/Os from the initiator by stopping user application and unmounting the file system
 2. Unmount POS volume from the target
 3. Unmount POS array from the target
 4. Stop POS at the target
@@ -246,4 +246,4 @@ Storage administrator may want to store system-of-records (SOR) in POS and favor
 
 With journal feature disabled, the only way to guarantee metadata consistency is for a user to issue NVM flush command periodically and perform graceful exit. Given that sudden crash could occur at any time point, this configuration is still vulnerable to power failures; POS's internal metadata has a small chance of being inconsistent. 
 
-With journal feature enabled, the metadata consistency is guaranteed as well as the data persistence.
+With journal feature enabled, the metadata consistency is guaranteed as well as the data persistence. 
