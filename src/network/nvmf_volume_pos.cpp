@@ -175,7 +175,13 @@ NvmfVolumePos::_VolumeMountHandler(void* arg1, void* arg2)
         string subNqn(vInfo->nqn);
         string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
         spdk_bdev_pos_register_io_handler(bdevName.c_str(), vInfo->unvmf_io);
-        uint32_t nqn_id = target.GetVolumeNqnId(subNqn);
+        int32_t nqn_id = target.GetVolumeNqnId(subNqn);
+        if (nqn_id < 0)
+        {
+            SPDK_ERRLOG("Failed to Get Subsystem Id. Unable to update subsystem to volume map and volume info.\n");
+            delete vInfo;
+            return;
+        }
         QosManagerSingleton::Instance()->UpdateSubsystemToVolumeMap(nqn_id, vInfo->id);
         set_pos_volume_info(bdevName.c_str(), subNqn.c_str(), nqn_id);
         target.SetVolumeQos(bdevName, vInfo->iops_limit, vInfo->bw_limit);

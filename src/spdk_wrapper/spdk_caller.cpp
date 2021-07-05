@@ -63,9 +63,9 @@ SpdkCaller::SpdkNvmfSubsystemGetFirstCtrlr(struct spdk_nvmf_subsystem* subsystem
 
 struct spdk_nvmf_ctrlr*
 SpdkCaller::SpdkNvmfSubsystemGetNextCtrlr(struct spdk_nvmf_subsystem* subsystem,
-    struct spdk_nvmf_ctrlr* prev_ctrlr)
+    struct spdk_nvmf_ctrlr* prevCtrlr)
 {
-    return spdk_nvmf_subsystem_get_next_ctrlr(subsystem, prev_ctrlr);
+    return spdk_nvmf_subsystem_get_next_ctrlr(subsystem, prevCtrlr);
 }
 
 struct spdk_nvmf_ns*
@@ -76,23 +76,23 @@ SpdkCaller::SpdkNvmfSubsystemGetFirstNs(struct spdk_nvmf_subsystem* subsystem)
 
 struct spdk_nvmf_ns*
 SpdkCaller::SpdkNvmfSubsystemGetNextNs(struct spdk_nvmf_subsystem* subsystem,
-    struct spdk_nvmf_ns* prev_ns)
+    struct spdk_nvmf_ns* prevNs)
 {
-    return spdk_nvmf_subsystem_get_next_ns(subsystem, prev_ns);
+    return spdk_nvmf_subsystem_get_next_ns(subsystem, prevNs);
 }
 
 int
 SpdkCaller::SpdkNvmfSubsystemPause(struct spdk_nvmf_subsystem* subsystem,
-    spdk_nvmf_subsystem_state_change_done cb_fn, void* cb_arg)
+    spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg)
 {
-    return spdk_nvmf_subsystem_pause(subsystem, cb_fn, cb_arg);
+    return spdk_nvmf_subsystem_pause(subsystem, cbFunc, cbArg);
 }
 
 int
 SpdkCaller::SpdkNvmfSubsystemResume(struct spdk_nvmf_subsystem* subsystem,
-    spdk_nvmf_subsystem_state_change_done cb_fn, void* cb_arg)
+    spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg)
 {
-    return spdk_nvmf_subsystem_resume(subsystem, cb_fn, cb_arg);
+    return spdk_nvmf_subsystem_resume(subsystem, cbFunc, cbArg);
 }
 
 struct spdk_bdev*
@@ -114,24 +114,24 @@ SpdkCaller::SpdkNvmfSubsystemGetId(spdk_nvmf_subsystem* subsystem)
 }
 
 struct spdk_bdev*
-SpdkCaller::SpdkBdevCreatePosDisk(const char* volume_name, uint32_t volume_id,
-    const struct spdk_uuid* bdev_uuid, uint64_t num_blocks, uint32_t block_size,
-    bool volume_type_in_memory, const char* array_name, uint64_t array_id)
+SpdkCaller::SpdkBdevCreatePosDisk(const char* volume_name, uint32_t volumeId,
+    const struct spdk_uuid* bdevUuid, uint64_t numBlocks, uint32_t blockSize,
+    bool volume_type_in_memory, const char* array_name, uint64_t arrayId)
 {
-    return spdk_bdev_create_pos_disk(volume_name, volume_id, bdev_uuid, num_blocks, block_size,
-        volume_type_in_memory, array_name, array_id);
+    return spdk_bdev_create_pos_disk(volume_name, volumeId, bdevUuid, numBlocks, blockSize,
+        volume_type_in_memory, array_name, arrayId);
 }
 
 void
-SpdkCaller::SpdkBdevDeletePosDisk(struct spdk_bdev* bdev, pos_bdev_delete_callback cb_fn, void* cb_arg)
+SpdkCaller::SpdkBdevDeletePosDisk(struct spdk_bdev* bdev, pos_bdev_delete_callback cbFunc, void* cbArg)
 {
-    return spdk_bdev_delete_pos_disk(bdev, cb_fn, cb_arg);
+    return spdk_bdev_delete_pos_disk(bdev, cbFunc, cbArg);
 }
 
 struct spdk_bdev*
-SpdkCaller::SpdkBdevGetByName(const char* bdev_name)
+SpdkCaller::SpdkBdevGetByName(const char* bdevName)
 {
-    return spdk_bdev_get_by_name(bdev_name);
+    return spdk_bdev_get_by_name(bdevName);
 }
 
 const char*
@@ -142,8 +142,14 @@ SpdkCaller::SpdkBdevGetName(const struct spdk_bdev* bdev)
 
 void
 SpdkCaller::SpdkBdevSetQosRateLimits(struct spdk_bdev* bdev, uint64_t* limits,
-    void (*cb_fn)(void* cb_arg, int status), void* cb_arg)
+    void (*cbFunc)(void* cbArg, int status), void* cbArg)
 {
-    return spdk_bdev_set_qos_rate_limits(bdev, limits, cb_fn, cb_arg);
+    return spdk_bdev_set_qos_rate_limits(bdev, limits, cbFunc, cbArg);
+}
+
+const char*
+SpdkCaller::SpdkGetAttachedSubsystemNqn(const char* bdevName)
+{
+    return get_attached_subsystem_nqn(bdevName);
 }
 } // namespace pos

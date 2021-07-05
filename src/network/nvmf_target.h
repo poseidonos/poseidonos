@@ -38,6 +38,7 @@
 #include <vector>
 
 #include "src/network/nvmf_target_spdk.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/spdk_caller.h"
 using namespace std;
 
@@ -53,10 +54,10 @@ enum NvmfCallbackStatus
 class NvmfTarget
 {
 public:
-    explicit NvmfTarget(SpdkCaller* spdkCaller = nullptr);
+    NvmfTarget(void);
+    explicit NvmfTarget(SpdkCaller* spdkCaller, bool feQosEnable, EventFrameworkApi* eventFrameworkApi);
     ~NvmfTarget(void);
 
-    static bool IsTargetExist(void);
     bool CreatePosBdev(const string& bdevName, uint32_t id, uint64_t volumeSizeInMb,
         uint32_t blockSize, bool volumeTypeInMem, const string& arrayName, uint64_t arrayId);
     bool DeletePosBdev(const string& bdevName);
@@ -76,13 +77,15 @@ public:
 
     string GetBdevName(uint32_t id, string arrayName);
     string GetVolumeNqn(struct spdk_nvmf_subsystem* subsystem);
-    uint32_t GetVolumeNqnId(const string& subnqn);
+    int32_t GetVolumeNqnId(const string& subnqn);
     spdk_nvmf_subsystem* FindSubsystem(const string& subnqn);
     vector<string> GetHostNqn(string subnqn);
     bool TryToAttachNamespace(const string& nqn, int volId, string& arrayName);
     bool CheckSubsystemExistance(void);
     bool CheckVolumeAttached(int volId, string arrayName);
     vector<pair<int, string>> GetAttachedVolumeList(string& nqn);
+    static bool AttachNamespace(const string& nqn, const string& bdevName,
+        PosNvmfEventDoneCallback_t cb, void* cbArg);
 
 private:
     static struct NvmfTargetCallbacks nvmfCallbacks;
@@ -90,15 +93,16 @@ private:
     static const char* BDEV_NAME_PREFIX;
     static atomic<int> attachedNsid;
     SpdkCaller* spdkCaller;
+    bool feQosEnable;
+    EventFrameworkApi* eventFrameworkApi;
     static struct EventContext* _CreateEventContext(PosNvmfEventDoneCallback_t callback,
         void* userArg, void* eventArg1, void* eventArg2);
+    static bool _IsTargetExist(void);
+    static void _AttachDone(void* cbArg, int status);
     static void _DetachNamespaceWithPause(void* arg1, void* arg2);
     static void _AttachNamespaceWithPause(void* arg1, void* arg2);
     static void _DetachNamespaceAllWithPause(void* arg1, void* arg2);
-    static void _AttachDone(void* cbArg, int status);
     static void _TryAttachHandler(void* arg1, void* arg2);
-    static bool _AttachNamespace(const string& nqn, const string& bdevName,
-        PosNvmfEventDoneCallback_t cb, void* cbArg);
     static bool _AttachNamespaceWithNsid(const string& nqn, const string& bdevName, uint32_t nsid,
         PosNvmfEventDoneCallback_t cb, void* cbArg);
 };

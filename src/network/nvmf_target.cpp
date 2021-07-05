@@ -38,11 +38,11 @@
 
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/include/pos_event_id.hpp"
+#include "src/lib/system_timeout_checker.h"
 #include "src/logger/logger.h"
 #include "src/network/nvmf_target_spdk.h"
 #include "src/network/nvmf_volume_pos.h"
 #include "src/qos/qos_manager.h"
-#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/spdk.hpp"
 #include "src/sys_event/volume_event_publisher.h"
 
@@ -55,12 +55,18 @@ struct NvmfTargetCallbacks NvmfTarget::nvmfCallbacks;
 const char* NvmfTarget::BDEV_NAME_PREFIX = "bdev_";
 std::atomic<int> NvmfTarget::attachedNsid;
 
-NvmfTarget::NvmfTarget(SpdkCaller* spdkCaller)
+NvmfTarget::NvmfTarget(void)
+: NvmfTarget(SpdkCallerSingleton::Instance(),
+      QosManagerSingleton::Instance()->IsFeQosEnabled(),
+      EventFrameworkApiSingleton::Instance())
 {
-    if (nullptr == spdkCaller)
-    {
-        spdkCaller = SpdkCallerSingleton::Instance();
-    }
+}
+
+NvmfTarget::NvmfTarget(SpdkCaller* spdkCaller, bool feQosEnable, EventFrameworkApi* eventFrameworkApi)
+: spdkCaller(spdkCaller),
+  feQosEnable(feQosEnable),
+  eventFrameworkApi(eventFrameworkApi)
+{
     InitNvmfCallbacks(&nvmfCallbacks);
 }
 
@@ -73,8 +79,9 @@ NvmfTarget::CreatePosBdev(const string& bdevName, uint32_t id,
     uint64_t volumeSizeInMb, uint32_t blockSize, bool volumeTypeInMem, const string& arrayName, uint64_t arrayId)
 {
     uint64_t volumeSizeInByte = volumeSizeInMb * MB;
+    uint64_t numBlocks = volumeSizeInByte / blockSize;
     struct spdk_bdev* bdev = spdkCaller->SpdkBdevCreatePosDisk(bdevName.c_str(), id, nullptr,
-        volumeSizeInByte / blockSize, blockSize, volumeTypeInMem, arrayName.c_str(), arrayId);
+        numBlocks, blockSize, volumeTypeInMem, arrayName.c_str(), arrayId);
     if (bdev == nullptr)
     {
         SPDK_ERRLOG("bdev %s does not exist\n", bdevName.c_str());
@@ -142,10 +149,20 @@ NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName
     string* bdevName = new string(GetBdevName(volId, arrayName));
     string* subnqn = new string(nqn);
 
-    EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
+    eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _TryAttachHandler, static_cast<void*>(subnqn), static_cast<void*>(bdevName));
+
+    SystemTimeoutChecker timeChecker;
+    uint64_t time = 15 * 1000000000ULL;
+    timeChecker.SetTimeout(time);
+
     while (attachedNsid == yetAttached)
     {
+        if (true == timeChecker.CheckTimeout())
+        {
+            attachedNsid = NvmfCallbackStatus::FAILED;
+            break;
+        }
         usleep(1);
     }
     if (attachedNsid == NvmfCallbackStatus::FAILED)
@@ -157,7 +174,7 @@ NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName
 }
 
 bool
-NvmfTarget::_AttachNamespace(const string& nqn, const string& bdevName,
+NvmfTarget::AttachNamespace(const string& nqn, const string& bdevName,
     PosNvmfEventDoneCallback_t callback, void* arg)
 {
     return _AttachNamespaceWithNsid(nqn, bdevName, 0, callback, arg);
@@ -167,7 +184,7 @@ bool
 NvmfTarget::_AttachNamespaceWithNsid(const string& nqn, const string& bdevName,
     uint32_t nsid, PosNvmfEventDoneCallback_t callback, void* arg)
 {
-    if (!IsTargetExist())
+    if (!_IsTargetExist())
     {
         SPDK_ERRLOG("fail to attach namespace: target does not exist\n");
         return false;
@@ -236,7 +253,7 @@ bool
 NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
     PosNvmfEventDoneCallback_t callback, void* arg)
 {
-    if (!IsTargetExist())
+    if (!_IsTargetExist())
     {
         SPDK_ERRLOG("fail to detach namespace: target does not exist\n");
         return false;
@@ -320,7 +337,7 @@ bool
 NvmfTarget::DetachNamespaceAll(const string& nqn,
     PosNvmfEventDoneCallback_t callback, void* arg)
 {
-    if (!IsTargetExist())
+    if (!_IsTargetExist())
     {
         SPDK_ERRLOG("fail to detach namespace: target does not exist\n");
         return false;
@@ -423,7 +440,7 @@ NvmfTarget::GetVolumeNqn(struct spdk_nvmf_subsystem* subsystem)
     return spdkCaller->SpdkNvmfSubsystemGetNqn(subsystem);
 }
 
-uint32_t
+int32_t
 NvmfTarget::GetVolumeNqnId(const string& nqn)
 {
     struct spdk_nvmf_subsystem* subsystem =
@@ -456,7 +473,7 @@ NvmfTarget::QosEnableDone(void* cbArg, int status)
 void
 NvmfTarget::SetVolumeQos(const string& bdevName, uint64_t maxIops, uint64_t maxBw)
 {
-    if (true == QosManagerSingleton::Instance()->IsFeQosEnabled())
+    if (true == feQosEnable)
     {
         return;
     }
@@ -465,7 +482,6 @@ NvmfTarget::SetVolumeQos(const string& bdevName, uint64_t maxIops, uint64_t maxB
     if (bdev == nullptr)
     {
         SPDK_ERRLOG("Could not find the bdev: %s\n", bdevName.c_str());
-        spdk_app_stop(-1);
         return;
     }
 
@@ -477,7 +493,7 @@ NvmfTarget::SetVolumeQos(const string& bdevName, uint64_t maxIops, uint64_t maxB
 }
 
 bool
-NvmfTarget::IsTargetExist(void)
+NvmfTarget::_IsTargetExist(void)
 {
     if (g_spdk_nvmf_tgt == nullptr)
     {
@@ -508,7 +524,7 @@ NvmfTarget::GetHostNqn(string subnqn)
     struct spdk_nvmf_subsystem* subsystem =
         spdkCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, subnqn.c_str());
     struct spdk_nvmf_ctrlr* ctrlr = spdkCaller->SpdkNvmfSubsystemGetFirstCtrlr(subsystem);
-    while (ctrlr != NULL)
+    while (ctrlr != nullptr)
     {
         string hostNqn = spdkCaller->SpdkNvmfSubsystemGetCtrlrHostnqn(ctrlr);
         if (!hostNqn.empty())
@@ -524,7 +540,7 @@ bool
 NvmfTarget::CheckVolumeAttached(int volId, string arrayName)
 {
     string bdevName = GetBdevName(volId, arrayName);
-    const char* nqn = get_attached_subsystem_nqn(bdevName.c_str());
+    const char* nqn = spdkCaller->SpdkGetAttachedSubsystemNqn(bdevName.c_str());
     if (nqn == nullptr)
     {
         return false;
@@ -571,6 +587,7 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_FAIL_TO_FIND_VOLID;
             POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+            ns = spdkCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
             continue;
         }
         size_t arrayNameIdx = bdevName.find("_", volIdIdx + 1);
@@ -579,6 +596,7 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_FAIL_TO_FIND_ARRAYNAME;
             POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+            ns = spdkCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
             continue;
         }
         arrayNameIdx += 1;
