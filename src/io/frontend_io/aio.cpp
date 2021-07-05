@@ -280,16 +280,12 @@ AIO::SubmitAsyncIO(pos_io& posIo)
         = VolumeServiceSingleton::Instance()->GetVolumeManager(volumeIo->GetArrayId());
 
     uint32_t core = volumeIo->GetOriginCore();
-    uint32_t volume_id = posIo.volume_id;
-    if (0 != strncmp("POSArray", posIo.arrayName, 9))
-    {
-        volume_id += 0x100;
-    }
+    uint32_t arr_vol_id = posIo.volume_id + (posIo.array_id << 8);
     switch (volumeIo->dir)
     {
         case UbioDir::Write:
         {
-            airlog("PERF_ARR_VOL", "AIR_WRITE", volume_id, posIo.length);
+            airlog("PERF_ARR_VOL", "AIR_WRITE", arr_vol_id, posIo.length);
             if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volumeIo->GetVolumeId())))
             {
                 IoCompleter ioCompleter(volumeIo);
@@ -304,7 +300,7 @@ AIO::SubmitAsyncIO(pos_io& posIo)
         }
         case UbioDir::Read:
         {
-            airlog("PERF_ARR_VOL", "AIR_READ", volume_id, posIo.length);
+            airlog("PERF_ARR_VOL", "AIR_READ", arr_vol_id, posIo.length);
             if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volumeIo->GetVolumeId())))
             {
                 IoCompleter ioCompleter(volumeIo);

@@ -384,14 +384,11 @@ static void bdev_pos_io_complete(struct pos_io *io, int status)
 		spdk_bdev_io_complete(bio, ret);
 	}
 
-	uint32_t volume_id = io->volume_id;
-	if (0 != strncmp("POSArray", io->arrayName, 9)) {
-		volume_id += 0x100;
-	}
+	uint32_t arr_vol_id = io->volume_id + (io->array_id << 8);
 	if (READ == io->ioType) {
-		AIRLOG(LAT_ARR_VOL_READ, AIR_END, volume_id, (uint64_t)io->context);
+		AIRLOG(LAT_ARR_VOL_READ, AIR_END, arr_vol_id, (uint64_t)io->context);
 	} else if (WRITE == io->ioType) {
-		AIRLOG(LAT_ARR_VOL_WRITE, AIR_END, volume_id, (uint64_t)io->context);
+		AIRLOG(LAT_ARR_VOL_WRITE, AIR_END, arr_vol_id, (uint64_t)io->context);
 	}
 
 	free(io);
@@ -576,21 +573,19 @@ static int _bdev_pos_eventq_rw(struct spdk_io_channel *ch, struct spdk_bdev_io *
 	uint32_t block_size = bdev_io->bdev->blocklen;
 
 	struct pos_disk *disk = (struct pos_disk *)bdev_io->bdev->ctxt;
-	uint32_t vol_id = disk->volume.id;
-	if (0 != strncmp("POSArray", disk->volume.array_name, 9)) {
-		vol_id += 0x100;
-	}
+	struct pos_volume_info* volume = &(disk->volume);
+	uint32_t arr_vol_id = volume->id + (volume->array_id << 8);
 
 	switch (bdev_io->type) {
 	case SPDK_BDEV_IO_TYPE_READ: {
-		AIRLOG(LAT_ARR_VOL_READ, AIR_BEGIN, vol_id, (uint64_t)bdev_io);
+		AIRLOG(LAT_ARR_VOL_READ, AIR_BEGIN, arr_vol_id, (uint64_t)bdev_io);
 		spdk_bdev_io_get_buf(bdev_io, bdev_pos_get_buf_cb,
 				     bdev_io->u.bdev.num_blocks * block_size);
 		return 0;
 	}
 
 	case SPDK_BDEV_IO_TYPE_WRITE: {
-		AIRLOG(LAT_ARR_VOL_WRITE, AIR_BEGIN, vol_id, (uint64_t)bdev_io);
+		AIRLOG(LAT_ARR_VOL_WRITE, AIR_BEGIN, arr_vol_id, (uint64_t)bdev_io);
 		return bdev_pos_eventq_writev(disk,
 					      ch,
 					      bdev_io,
