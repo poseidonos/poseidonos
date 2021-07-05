@@ -269,7 +269,6 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     mapper = new Mapper(array, state);
     allocator = new Allocator(array, state);
     journal = new JournalManager(array, state);
-    rbaStateMgr = new RBAStateManager(array->GetName());
     flowControl = new FlowControl(array);
     gc = new GarbageCollector(array, state);
     metaMountSequence = new MetaMountSequence(arrayName, mapper, allocator, journal); // remember the ref to be able to delete during ~ArrayComponents()
