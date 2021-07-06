@@ -76,6 +76,10 @@ Mpio::Reset(void)
 
     // ctrl. info init.
     mdpage.ClearCtrlInfo();
+
+    // clear error info
+    error = 0;
+    errorStopState = false;
 }
 
 Mpio::~Mpio(void)
