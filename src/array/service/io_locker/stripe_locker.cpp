@@ -31,7 +31,6 @@
  */
 
 #include "stripe_locker.h"
-
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
@@ -42,68 +41,85 @@ StripeLocker::StripeLocker(void)
 {
     normalLocker = new StripeLockerNormalState();
     busyLocker = new StripeLockerBusyState();
-    locker = normalLocker;
-    isStateChanging = false;
 }
 
 StripeLocker::~StripeLocker(void)
 {
     delete busyLocker;
-    busyLocker = nullptr;
     delete normalLocker;
-    normalLocker = nullptr;
 }
 
 bool
-StripeLocker::TryModeChanging(LockerMode mode)
+StripeLocker::TryBusyLock(StripeId from, StripeId to)
 {
-    unique_lock<mutex> lock(statechangingMtx);
-    if (state == mode)
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+        "StripeLocker::TryBusyLock-try {} ~ {}", from, to);
+
+    unique_lock<mutex> lock(lockerMtx);
+    isBusyRangeChanging = true;
+
+    if (busyLocker->Count() > 0)
     {
-        return true;
+        return false;
     }
-    isStateChanging = true;
-    if (locker->StateChange(mode) == true)
+
+    for (StripeId id = from; id <= to; id++)
     {
-        _ChangeMode(mode);
-        return true;
+        if (normalLocker->Exists(id) == true)
+        {
+            return false;
+        }
     }
-    return false;
+
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+        "StripeLocker::TryBusyLock-success, {} ~ {}", from, to);
+    if (busyRange == nullptr)
+    {
+        busyRange = new BusyRange();
+    }
+    busyRange->SetRange(from, to);
+
+    for (StripeId id = from; id <= to; id++)
+    {
+        bool ret = busyLocker->TryLock(id);
+        assert(ret == true);
+    }
+    isBusyRangeChanging = false;
+    return true;
 }
 
-void
-StripeLocker::_ChangeMode(LockerMode mode)
+bool
+StripeLocker::ResetBusyLock(void)
 {
-    state = mode;
-    if (mode == LockerMode::BUSY)
+    unique_lock<mutex> lock(lockerMtx);
+    if (busyLocker->Count() > 0)
     {
-        locker = busyLocker;
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "busylocker: set size is {}", locker->Count());
-        isStateChanging = false;
+        return false;
     }
-    else if (mode == LockerMode::NORMAL)
-    {
-        locker = normalLocker;
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "normalLocker: set size is {}", locker->Count());
-        isStateChanging = false;
-    }
+
+    delete busyRange;
+    busyRange = nullptr;
+    isBusyRangeChanging = false;
+    return true;
 }
 
 bool
 StripeLocker::TryLock(StripeId id)
 {
-    unique_lock<mutex> lock(statechangingMtx, defer_lock);
+    unique_lock<mutex> lock(lockerMtx, defer_lock);
     if (lock.try_lock())
     {
-        if (isStateChanging == true)
+        if (isBusyRangeChanging == true)
         {
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-                "Locker is now changing state. TryLock {} is refused", id);
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+                "StripeLocker::TryLock, Locker is now state changing. stripe {} is refused", id);
             return false;
         }
-        return locker->TryLock(id);
+        if (busyRange != nullptr && busyRange->IsBusy(id) == true)
+        {
+            return busyLocker->TryLock(id);
+        }
+        return normalLocker->TryLock(id);
     }
     else
     {
@@ -114,7 +130,16 @@ StripeLocker::TryLock(StripeId id)
 void
 StripeLocker::Unlock(StripeId id)
 {
-    locker->Unlock(id);
+    unique_lock<mutex> lock(lockerMtx);
+    if (busyRange != nullptr && busyRange->IsBusy(id) == true)
+    {
+        busyLocker->Unlock(id);
+        return;
+    }
+    else
+    {
+        normalLocker->Unlock(id);
+    }
 }
 
 } // namespace pos

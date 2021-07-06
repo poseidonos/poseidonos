@@ -30,17 +30,22 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-#include "src/include/address_type.h"
+#include "busy_range.h"
+
 namespace pos
 {
-class StripeLockerState
+
+void
+BusyRange::SetRange(StripeId from, StripeId to)
 {
-public:
-    virtual bool TryLock(StripeId val) = 0;
-    virtual void Unlock(StripeId val) = 0;
-    virtual bool Exists(StripeId val) = 0;
-    virtual uint32_t Count(void) = 0;
-};
+    lower = from;
+    upper = to;
+}
+
+bool
+BusyRange::IsBusy(StripeId val)
+{
+    return val >= lower && val <= upper;
+}
 
 } // namespace pos

@@ -38,13 +38,6 @@
 
 namespace pos
 {
-IOLocker::IOLocker(void)
-{
-}
-
-IOLocker::~IOLocker(void)
-{
-}
 
 bool
 IOLocker::Register(vector<ArrayDevice*> devList)
@@ -93,7 +86,7 @@ IOLocker::Unregister(vector<ArrayDevice*> devList)
 }
 
 bool
-IOLocker::TryLock(IArrayDevice* dev, StripeId val)
+IOLocker::TryBusyLock(IArrayDevice* dev, StripeId from, StripeId to)
 {
     StripeLocker* locker = _Find(dev);
     if (locker == nullptr)
@@ -102,7 +95,7 @@ IOLocker::TryLock(IArrayDevice* dev, StripeId val)
         return false;
     }
 
-    return locker->TryLock(val);
+    return locker->TryBusyLock(from, to);
 }
 
 bool
@@ -178,16 +171,16 @@ IOLocker::Unlock(set<IArrayDevice*>& devs, StripeId val)
 }
 
 bool
-IOLocker::TryChange(IArrayDevice* dev, LockerMode mode)
+IOLocker::ResetBusyLock(IArrayDevice* dev)
 {
     StripeLocker* locker = _Find(dev);
     if (locker == nullptr)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryChange, no locker exists");
-        return true;
+        POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryLock, no locker exists");
+        return false;
     }
 
-    return locker->TryModeChanging(mode);
+    return locker->ResetBusyLock();
 }
 
 StripeLocker*

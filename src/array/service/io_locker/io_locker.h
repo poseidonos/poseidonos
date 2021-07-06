@@ -49,15 +49,15 @@ namespace pos
 class IOLocker : public IIOLocker
 {
 public:
-    IOLocker(void);
-    virtual ~IOLocker(void);
+    IOLocker(void) {}
+    virtual ~IOLocker(void) {}
     bool Register(vector<ArrayDevice*> devList);
     void Unregister(vector<ArrayDevice*> devList);
-    bool TryLock(IArrayDevice* dev, StripeId val) override;
+    bool TryBusyLock(IArrayDevice* dev, StripeId from, StripeId to) override;
+    bool ResetBusyLock(IArrayDevice* dev) override;
     bool TryLock(set<IArrayDevice*>& devs, StripeId val) override;
     void Unlock(IArrayDevice* dev, StripeId val) override;
     void Unlock(set<IArrayDevice*>& devs, StripeId val) override;
-    bool TryChange(IArrayDevice* dev, LockerMode mode) override;
 
 private:
     StripeLocker* _Find(IArrayDevice* dev);

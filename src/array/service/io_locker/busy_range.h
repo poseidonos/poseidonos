@@ -32,13 +32,25 @@
 
 #pragma once
 
+#include <mutex>
+
+#include "src/include/address_type.h"
+
+using namespace std;
+
 namespace pos
 {
 
-enum LockerMode
+class BusyRange
 {
-    NORMAL, // Without rebuild
-    BUSY,   // With rebuild
+public:
+    virtual ~BusyRange(void) {}
+    virtual void SetRange(StripeId from, StripeId to);
+    virtual bool IsBusy(StripeId val);
+
+private:
+    StripeId lower = 0;
+    StripeId upper = 0;
 };
 
-}
+} // namespace pos

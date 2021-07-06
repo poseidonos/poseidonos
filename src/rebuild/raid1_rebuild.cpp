@@ -95,7 +95,7 @@ Raid1Rebuild::Read(void)
     if (baseStripe >= maxStripeId ||
         ctx->result >= RebuildState::CANCELLED)
     {
-        if (locker->TryChange(ctx->faultDev, LockerMode::NORMAL) == false)
+        if (locker->ResetBusyLock(ctx->faultDev) == false)
         {
             POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
                 "Partition {} rebuild done, but waiting lock release",
@@ -129,43 +129,21 @@ Raid1Rebuild::Read(void)
         return true;
     }
 
-    if (baseStripe == 0)
-    {
-        if (locker->TryChange(ctx->faultDev, LockerMode::BUSY) == false)
-        {
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-                "Try to rebuild partition {}, but waiting lock aquisition",
-                ctx->part);
-            return false;
-        }
-    }
-
-    uint32_t taskCnt = 0;
     uint32_t currWorkload = strPerSeg;
     if (baseStripe + currWorkload > maxStripeId)
     {
         currWorkload = maxStripeId - baseStripe;
     }
 
-    for (uint32_t offset = 0; offset < currWorkload; offset++)
-    {
-        uint32_t stripeId = baseStripe + offset;
-        if (locker->TryLock(ctx->faultDev, stripeId) == false)
-        {
-            break;
-        }
-        taskCnt++;
-    }
-
-    if (taskCnt == 0)
+    if (locker->TryBusyLock(ctx->faultDev, baseStripe, baseStripe + currWorkload - 1) == false)
     {
         return false;
     }
 
-    ctx->taskCnt = taskCnt;
+    ctx->taskCnt = currWorkload;
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "Raid1Rebuild - from:{}, cnt:{}", baseStripe, taskCnt);
-    for (uint32_t offset = 0; offset < taskCnt; offset++)
+        "Raid1Rebuild - from:{}, cnt:{}", baseStripe, currWorkload);
+    for (uint32_t offset = 0; offset < currWorkload; offset++)
     {
         uint32_t stripeId = baseStripe + offset;
         void* buffer = recoverBuffers->TryGetBuffer();
@@ -193,7 +171,7 @@ Raid1Rebuild::Read(void)
         }
     }
 
-    baseStripe += taskCnt;
+    baseStripe += currWorkload;
     return true;
 }
 

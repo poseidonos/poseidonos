@@ -16,15 +16,19 @@ TEST(IOLocker, Unregister_)
 {
 }
 
+TEST(IOLocker, TryBusyLock_)
+{
+}
+
+TEST(IOLocker, ResetBusyLock_)
+{
+}
+
 TEST(IOLocker, TryLock_)
 {
 }
 
 TEST(IOLocker, Unlock_)
-{
-}
-
-TEST(IOLocker, TryChange_)
 {
 }
 

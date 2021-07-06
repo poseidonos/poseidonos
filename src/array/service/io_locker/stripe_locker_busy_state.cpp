@@ -58,27 +58,9 @@ StripeLockerBusyState::Unlock(StripeId id)
 }
 
 bool
-StripeLockerBusyState::StateChange(LockerMode mode)
+StripeLockerBusyState::Exists(StripeId id)
 {
-    if (mode != LockerMode::NORMAL)
-    {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "busylocker: requested mode {} is invalid", mode);
-        return false;
-    }
-
-    unique_lock<mutex> lock(mtx);
-    if (busySet.size() == 0)
-    {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "locker mode will be changed successfully busy to normal");
-        return true;
-    }
-
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "waiting for releasing busy lock (remaining count, busy:{}",
-        busySet.size());
-    return false;
+    return busySet.find(id) != busySet.end();
 }
 
 uint32_t
