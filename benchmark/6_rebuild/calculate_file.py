@@ -19,6 +19,8 @@ rand_read_iops = []
 for filename in files:
     if ".log" not in filename:
         continue
+    if ".fio" in filename:
+        continue
     file = open(filename)
     write_temp = []
     read_temp = []
