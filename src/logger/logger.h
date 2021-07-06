@@ -69,6 +69,7 @@ public:
         spdlog::source_loc loc, spdlog::level::level_enum lvl,
         int id, spdlog::string_view_t fmt, const Args&... args)
     {
+#ifndef POS_UT_SUPPRESS_LOGMSG
         if (_ShouldLog(lvl, id, fmt))
         {
             uint32_t moduleId = static_cast<uint32_t>(module);
@@ -78,6 +79,7 @@ public:
             DumpBuffer dumpBuffer(buf.data(), buf.size(), dumpModulePtr);
             dumpModulePtr->AddDump(dumpBuffer, 0);
         }
+#endif
     }
 
     template<typename... Args>
@@ -85,10 +87,12 @@ public:
     Poslog(spdlog::source_loc loc, spdlog::level::level_enum lvl,
         int id, spdlog::string_view_t fmt, const Args&... args)
     {
+#ifndef POS_UT_SUPPRESS_LOGMSG
         if (_ShouldLog(lvl, id, fmt))
         {
             logger->iboflog_sink(loc, lvl, id, fmt, args...);
         }
+#endif
     }
     int SetLevel(string lvl);
     string GetLevel();
@@ -132,7 +136,9 @@ public:
     Poslog(spdlog::source_loc loc, spdlog::level::level_enum lvl,
         int id, spdlog::string_view_t fmt, const Args&... args)
     {
+#ifndef POS_UT_SUPPRESS_LOGMSG
         reporter->iboflog_sink(loc, lvl, id, fmt, args...);
+#endif
     }
 
 private:

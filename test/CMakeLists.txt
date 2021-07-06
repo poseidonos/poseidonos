@@ -350,11 +350,11 @@ endif()
 #maybe we could embed likely() unlikely() macro into add_definitions() for unit-test's build context
 #commented out UNVME_BUILD since this requires rte_malloc() to function properly, which is meaningful 
 #only in prod release build, but not in unit test build
-add_definitions(-DPOS_VERSION="pos-0.8.0-alpha1" 
-    #-DUNVME_BUILD 
+add_definitions(-DPOS_VERSION="pos-0.9.3"
     -DSPDLOG_COMPILED_LIB
     -D_ADMIN_ENABLED
     -DAIR_CFG=${PROJ_ROOT}/config/air.cfg
+    -DPOS_UT_SUPPRESS_LOGMSG
 )
 remove_definitions(-DAIR_BUILD)
 
