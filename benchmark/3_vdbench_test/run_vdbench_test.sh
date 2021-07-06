@@ -3,23 +3,37 @@ source ../config.sh
 
 vdfile=test_1ms.vd
 
+### 0. Disconnect if any device connected
+turn=0
+for i in `seq 1 $VOLUME_CNT`
+do
+    if [ $turn -eq 0 ]; then
+	sshpass -p ${INIT_1_PW} ssh ${INIT_1_ID}@${INIT_1_IP} "echo ${INIT_1_PW} | sudo -S nvme disconnect -n nqn.2019-04.pos:subsystem${i}"
+        turn=1
+    else
+	sshpass -p ${INIT_2_PW} ssh ${INIT_2_ID}@${INIT_2_IP} "echo ${INIT_2_PW} | sudo -S nvme disconnect -n nqn.2019-04.pos:subsystem${i}"
+        turn=0
+    fi
+done
+
+
 ### 1. Connect
 turn=0
 for i in `seq 1 $VOLUME_CNT`
 do
     if [ $turn -eq 0 ]; then
-	sshpass -p ${INIT_1_PW} ssh ${INIT_1_ID}@${INIT_1_IP} "echo ${INIT_1_PW} | sudo -S nvme connect -n nqn.2019-04.ibof:subsystem${i} -t tcp -a ${TARGET_IP_1} -s 1158"
+	sshpass -p ${INIT_1_PW} ssh ${INIT_1_ID}@${INIT_1_IP} "echo ${INIT_1_PW} | sudo -S nvme connect -n nqn.2019-04.pos:subsystem${i} -t tcp -a ${TARGET_IP_1} -s 1158"
         turn=1
     else
-	sshpass -p ${INIT_2_PW} ssh ${INIT_2_ID}@${INIT_2_IP} "echo ${INIT_2_PW} | sudo -S nvme connect -n nqn.2019-04.ibof:subsystem${i} -t tcp -a ${TARGET_IP_2} -s 1158"
+	sshpass -p ${INIT_2_PW} ssh ${INIT_2_ID}@${INIT_2_IP} "echo ${INIT_2_PW} | sudo -S nvme connect -n nqn.2019-04.pos:subsystem${i} -t tcp -a ${TARGET_IP_2} -s 1158"
         turn=0
     fi
 done
 sleep 2
 
 ### 2. Get device list
-devlist_init1=`sshpass -p ${INIT_1_PW} ssh ${INIT_1_ID}@${INIT_1_IP} "echo ${INIT_1_PW} | sudo -S nvme list | grep IBOF" | awk '{print $1}'`
-devlist_init2=`sshpass -p ${INIT_2_PW} ssh ${INIT_2_ID}@${INIT_2_IP} "echo ${INIT_2_PW} | sudo -S nvme list | grep IBOF" | awk '{print $1}'`
+devlist_init1=`sshpass -p ${INIT_1_PW} ssh ${INIT_1_ID}@${INIT_1_IP} "echo ${INIT_1_PW} | sudo -S nvme list" | awk '/dev/{print $1}'`
+devlist_init2=`sshpass -p ${INIT_2_PW} ssh ${INIT_2_ID}@${INIT_2_IP} "echo ${INIT_2_PW} | sudo -S nvme list" | awk '/dev/{print $1}'`
 
 ### 3. Make vdbench file
 count_init1=0
@@ -72,10 +86,10 @@ turn=0
 for i in `seq 1 $VOLUME_CNT`
 do
     if [ $turn -eq 0 ]; then
-	sshpass -p ${INIT_1_PW} ssh ${INIT_1_ID}@${INIT_1_IP} "echo ${INIT_1_PW} | sudo -S nvme disconnect -n nqn.2019-04.ibof:subsystem${i}"
+	sshpass -p ${INIT_1_PW} ssh ${INIT_1_ID}@${INIT_1_IP} "echo ${INIT_1_PW} | sudo -S nvme disconnect -n nqn.2019-04.pos:subsystem${i}"
         turn=1
     else
-	sshpass -p ${INIT_2_PW} ssh ${INIT_2_ID}@${INIT_2_IP} "echo ${INIT_2_PW} | sudo -S nvme disconnect -n nqn.2019-04.ibof:subsystem${i}"
+	sshpass -p ${INIT_2_PW} ssh ${INIT_2_ID}@${INIT_2_IP} "echo ${INIT_2_PW} | sudo -S nvme disconnect -n nqn.2019-04.pos:subsystem${i}"
         turn=0
     fi
 done
