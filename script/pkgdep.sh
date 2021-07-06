@@ -18,7 +18,7 @@ if [ -f /etc/debian_version ]; then
     # Additional dependencies for SPDK CLI
     apt-get install -y "python-configshell*"
     # Additional dependencies for DPDK
-    apt-get install -y libnuma-dev uuid-dev
+    apt-get install -y libnuma-dev uuid-dev libncurses5
     # Additional RDMA
     apt-get install -y libnuma-dev uuid-dev ibverbs-utils perftest
     # Additional dependencies for iBOF OS
