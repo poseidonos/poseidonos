@@ -12,7 +12,10 @@ class MockEvent : public Event
 {
 public:
     using Event::Event;
+    MOCK_METHOD(BackendEvent, GetEventType, (), (override));
+    MOCK_METHOD(void, SetEventType, (BackendEvent), (override));
     MOCK_METHOD(bool, Execute, (), (override));
+    MOCK_METHOD(bool, IsFrontEnd, (), (override));
 };
 
 } // namespace pos

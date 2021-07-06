@@ -49,13 +49,13 @@ class Event
 {
 public:
     Event(bool isFrontEndEvent = false, BackendEvent event = BackendEvent_Unknown);
-    BackendEvent GetEventType(void);
+    virtual BackendEvent GetEventType(void);
     void SetFrontEnd(bool state);
-    void SetEventType(BackendEvent event);
+    virtual void SetEventType(BackendEvent event);
     uint32_t GetNumaId(void);
     virtual ~Event(void);
     virtual bool Execute(void) = 0;
-    bool IsFrontEnd(void);
+    virtual bool IsFrontEnd(void);
 
 private:
     bool frontEndEvent;

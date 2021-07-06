@@ -72,8 +72,6 @@ public:
     std::queue<EventSmartPtr> DequeueEvents(void);
     void Run(void);
 
-    Event* GetNextEvent(void);
-
 private:
     void _BuildCpuSet(cpu_set_t& cpuSet);
     ISchedulerPolicy* policy;
