@@ -1,30 +1,28 @@
 #include "src/event_scheduler/event_scheduler.h"
 
+#include <assert.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
-#include <assert.h>
 #include <unistd.h>
 
 #include "src/cpu_affinity/affinity_manager.h"
-#include "src/include/branch_prediction.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/logger/logger.h"
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_queue.h"
 #include "src/event_scheduler/event_worker.h"
 #include "src/event_scheduler/minimum_job_policy.h"
 #include "src/event_scheduler/scheduler_queue.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 #include "src/qos/qos_manager.h"
-
 #include "test/unit-tests/event_scheduler/event_mock.h"
 
 using namespace pos;
 using namespace std;
 using ::testing::_;
-using ::testing::NiceMock;
 using ::testing::AtLeast;
+using ::testing::NiceMock;
 using ::testing::Return;
 
 namespace pos
@@ -111,7 +109,8 @@ TEST(EventScheduler, EnqueueEvent_FrontendIO)
     auto mockEventSharedPtr = std::make_shared<MockEvent>(true);
     ON_CALL(*mockEventSharedPtr.get(), IsFrontEnd()).WillByDefault(Return(true));
     int eventTypeCount = 0;
-    ON_CALL(*mockEventSharedPtr.get(), GetEventType()).WillByDefault([&eventTypeCount](){
+    ON_CALL(*mockEventSharedPtr.get(), GetEventType()).WillByDefault([&eventTypeCount]()
+    {
         eventTypeCount++;
         if (1 == eventTypeCount)
         {
