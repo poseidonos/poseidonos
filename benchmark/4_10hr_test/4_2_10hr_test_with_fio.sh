@@ -56,8 +56,8 @@ echo "prepare init 2 finish"
 if [ ${seq_io_time} -gt 1 ]
 then
 echo "sequential write start"
-sshpass -p ${init1_pw} ssh ${init1_id}@${init1_ip} "cd ${init1_fio_conf_dir}; echo ${init1_pw} | sudo -S nohup fio ./sw_tcp_init1.conf > /dev/null 2>&1 &"
-sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "cd ${init2_fio_conf_dir}; echo ${init2_pw} | sudo -S nohup fio ./sw_tcp_init2.conf > /dev/null 2>&1"
+sshpass -p ${init1_pw} ssh ${init1_id}@${init1_ip} "cd ${init1_fio_conf_dir}; echo ${init1_pw} | sudo -S nohup fio ./sw_tcp_init1.conf > init1_10hr_seq_fill.fio.log 2>&1 &"
+sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "cd ${init2_fio_conf_dir}; echo ${init2_pw} | sudo -S nohup fio ./sw_tcp_init2.conf > init2_10hr_seq_fill.fio.log 2>&1"
 echo "sequential write sleep"
 sleep 1
 fi
@@ -65,8 +65,8 @@ fi
 if [ ${rand_io_time} -gt 1 ]
 then
 echo "random write start"
-sshpass -p ${init1_pw} ssh ${init1_id}@${init1_ip} "cd ${init1_fio_conf_dir}; echo ${init1_pw} | sudo -S nohup fio ./rw_tcp_init1.conf > /dev/null 2>&1 &"
-sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "cd ${init2_fio_conf_dir}; echo ${init2_pw} | sudo -S nohup fio ./rw_tcp_init2.conf > /dev/null 2>&1"
+sshpass -p ${init1_pw} ssh ${init1_id}@${init1_ip} "cd ${init1_fio_conf_dir}; echo ${init1_pw} | sudo -S nohup fio ./rw_tcp_init1.conf > init1_10hr_rand_io.fio.log 2>&1 &"
+sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "cd ${init2_fio_conf_dir}; echo ${init2_pw} | sudo -S nohup fio ./rw_tcp_init2.conf > init2_10hr_rand_io.fio.log 2>&1"
 echo "random write sleep"
 fi
 

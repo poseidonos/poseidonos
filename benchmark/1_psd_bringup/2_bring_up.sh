@@ -82,13 +82,11 @@ ibofos_bringup(){
             while [ $ret -ne 0 ];
             do
                 ret=$(sudo $ROOT_DIR/bin/cli --json volume create --name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array $ARRAYNAME | jq ".Response.result.status.code")
-                echo $ret
             done
             ret=1
             while [ $ret -ne 0 ];
             do
                 ret=$(sudo $ROOT_DIR/bin/cli --json volume mount --name vol$i --array $ARRAYNAME | jq ".Response.result.status.code")
-                echo $ret
             done
         done
     else
