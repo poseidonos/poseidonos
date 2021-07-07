@@ -83,6 +83,7 @@ public:
     virtual int AddSpare(string devName);
     virtual int RemoveSpare(string devName);
     virtual int DetachDevice(UblockSharedPtr uBlock);
+    virtual void AttachDevice(UblockSharedPtr uBlock);
     virtual void MountDone(void);
     virtual int CheckUnmountable(void);
     virtual int CheckDeletable(void);
