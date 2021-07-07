@@ -30,9 +30,6 @@ init2_fio_engine=${INIT2_FIO_ENGINE}
 init1_files=${INIT1_FILES}
 init2_files=${INIT2_FILES}
 
-#sudo ../1_psd_bringup/1_start_pos.sh
-#sudo ../1_psd_bringup/2_bring_up.sh -a ${target_ip_1} -b ${target_ip_2} -s ${volume_cnt} -v ${volume_cnt} -S ${volume_byte_size} -n ${target_nic_1} -m ${target_nic_2}
-
 echo "test start"
 sudo ./create_test_config.sh -a ${target_ip_1} -b ${target_ip_2} -v ${volume_cnt} -S ${volume_gb_size} -s ${seq_io_time} -r ${rand_io_time} -p ${vdbench_sub_initiator_ip} -f ${init1_fio_conf_dir} -e ${init1_fio_engine}
 

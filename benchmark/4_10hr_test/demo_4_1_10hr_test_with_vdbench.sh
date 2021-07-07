@@ -87,12 +87,6 @@ kill_vdbench()
     sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "echo ${init2_pw} | sudo -S pkill -9 vdbench; echo ${init2_pw} | sudo -S pkill -9 java"
 }
 
-echo "pos start"
-#sudo ../1_psd_bringup/1_start_pos.sh
-
-echo "bring up start"
-#sudo ../1_psd_bringup/2_bring_up.sh -a ${target_ip_1} -b ${target_ip_2} -s ${volume_cnt} -v ${volume_cnt} -S ${volume_byte_size} -n ${target_nic_1} -m ${target_nic_2}
-
 kill_vdbench
 disconnect_nvme
 

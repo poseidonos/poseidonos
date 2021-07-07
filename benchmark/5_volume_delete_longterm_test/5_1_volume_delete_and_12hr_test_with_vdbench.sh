@@ -154,9 +154,6 @@ echo "longterm test finish"
 }
 
 echo "test start"
-sudo ../1_psd_bringup/1_start_pos.sh
-sudo ../1_psd_bringup/2_bring_up.sh -a ${target_ip_1} -b ${target_ip_2} -s ${volume_cnt} -v ${volume_cnt} -S ${volume_byte_size} -n ${target_nic_1} -m ${target_nic_2}
-
 #copy_and_unzip_vdbench
 
 connect_nvme

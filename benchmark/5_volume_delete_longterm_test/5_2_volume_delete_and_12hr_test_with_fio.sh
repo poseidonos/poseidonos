@@ -145,8 +145,6 @@ volume_create_and_mount
 }
 
 echo "test start"
-sudo ../1_psd_bringup/1_start_pos.sh
-sudo ../1_psd_bringup/2_bring_up.sh -a ${target_ip_1} -b ${target_ip_2} -s ${volume_cnt} -v ${volume_cnt} -S ${volume_byte_size} -n ${target_nic_1} -m ${target_nic_2}
 
 write_fill_pos_before_vol_delete
 

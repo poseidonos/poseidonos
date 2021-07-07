@@ -81,12 +81,6 @@ sshpass -p ${init2_pw} scp -o StrictHostKeyChecking=no ./longterm_test.vd ${init
 sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "cd ${init2_vdbench_dir}; echo ${init2_pw} | sudo -S ./vdbench -f ./longterm_test.vd -o longterm_test"
 }
 
-echo "pos start"
-sudo ../1_psd_bringup/1_start_pos.sh
-
-echo "bring up start"
-sudo ../1_psd_bringup/2_bring_up.sh -a ${target_ip_1} -b ${target_ip_2} -s ${volume_cnt} -v ${volume_cnt} -S ${volume_byte_size} -n ${target_nic_1} -m ${target_nic_2}
-
 connect_nvme
 #copy_and_unzip_vdbench
 
@@ -95,4 +89,3 @@ run_vdbench
 disconnect_nvme
 
 echo "longterm test finish"
-
