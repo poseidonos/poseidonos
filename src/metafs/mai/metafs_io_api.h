@@ -47,6 +47,7 @@ namespace pos
 class MetaFsIoApi
 {
 public:
+    MetaFsIoApi(void);
     MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl);
     virtual ~MetaFsIoApi(void);
 

@@ -45,6 +45,7 @@ namespace pos
 class MetaFsWBTApi
 {
 public:
+    MetaFsWBTApi(void);
     MetaFsWBTApi(int arrayId, MetaFsFileControlApi* ctrl);
     virtual ~MetaFsWBTApi(void);
 

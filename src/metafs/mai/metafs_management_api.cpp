@@ -36,9 +36,15 @@
 
 namespace pos
 {
-MetaFsManagementApi::MetaFsManagementApi(int arrayId)
-: arrayId(arrayId)
+MetaFsManagementApi::MetaFsManagementApi(void)
+: arrayId(INT32_MAX)
 {
+}
+
+MetaFsManagementApi::MetaFsManagementApi(int arrayId)
+: MetaFsManagementApi()
+{
+    this->arrayId = arrayId;
     sysMgr = new MetaFsSystemManager(arrayId);
 }
 

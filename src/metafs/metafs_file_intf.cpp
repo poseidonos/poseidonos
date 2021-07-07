@@ -45,6 +45,20 @@ MetaFsFileIntf::MetaFsFileIntf(std::string fname, std::string aname)
     metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(aname);
 }
 
+MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId)
+: MetaFileIntf(fname, arrayId),
+  metaFs(nullptr)
+{
+    metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
+}
+
+// only for test
+MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId, MetaFs* metaFs)
+: MetaFileIntf(fname, arrayId),
+  metaFs(metaFs)
+{
+}
+
 MetaFsFileIntf::~MetaFsFileIntf(void)
 {
 }

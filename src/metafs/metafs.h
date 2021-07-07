@@ -49,6 +49,7 @@ namespace pos
 class MetaFs : public IMountSequence
 {
 public:
+    MetaFs(void);
     MetaFs(IArrayInfo* arrayInfo, bool isLoaded);
     MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
             MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt);

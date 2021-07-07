@@ -52,7 +52,7 @@ namespace pos
 class MetaFsFileControlApi
 {
 public:
-    MetaFsFileControlApi(void) = default;
+    MetaFsFileControlApi(void);
     explicit MetaFsFileControlApi(int arrayId);
     virtual ~MetaFsFileControlApi(void);
 

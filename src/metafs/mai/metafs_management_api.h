@@ -45,6 +45,7 @@ namespace pos
 class MetaFsManagementApi
 {
 public:
+    MetaFsManagementApi(void);
     explicit MetaFsManagementApi(int arrayId);
     virtual ~MetaFsManagementApi(void);
 

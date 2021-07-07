@@ -41,15 +41,29 @@
 
 namespace pos
 {
-MetaFileIntf::MetaFileIntf(std::string fname, std::string aname)
-: fileName(fname),
-  arrayName(aname),
+MetaFileIntf::MetaFileIntf(void)
+: fileName(""),
+  arrayName(""),
   arrayId(INT32_MAX),
   size(0),
   isOpened(false),
   fd(-1)
 {
+}
+
+MetaFileIntf::MetaFileIntf(std::string fname, std::string aname)
+: MetaFileIntf()
+{
+    fileName = fname;
+    arrayName = aname;
     arrayId = MetaFsServiceSingleton::Instance()->GetArrayId(aname);
+}
+
+MetaFileIntf::MetaFileIntf(std::string fname, int arrayId)
+: MetaFileIntf()
+{
+    fileName = fname;
+    this->arrayId = arrayId;
 }
 
 int
@@ -94,7 +108,8 @@ int
 MetaFileIntf::Open(void)
 {
     isOpened = true;
-    POS_TRACE_INFO(EID(SUCCESS), "File Opened, fileName:{}  fd:{}", fileName, fd);
+    POS_TRACE_INFO(EID(MFS_CREATE_META_FILE), "File Opened, fileName:{}  fd:{}",
+                fileName, fd);
     return 0;
 }
 
@@ -102,7 +117,8 @@ int
 MetaFileIntf::Close(void)
 {
     isOpened = false;
-    POS_TRACE_INFO(EID(SUCCESS), "File Closed, fileName:{}  fd:{}", fileName, fd);
+    POS_TRACE_INFO(EID(MFS_CREATE_META_FILE), "File Closed, fileName:{}  fd:{}",
+                fileName, fd);
     fd = -1;
 
     return 0;

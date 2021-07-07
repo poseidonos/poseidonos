@@ -48,6 +48,8 @@ class MetaFsFileIntf : public MetaFileIntf
 {
 public:
     explicit MetaFsFileIntf(std::string fname, std::string aname);
+    explicit MetaFsFileIntf(std::string fname, int arrayId);
+    explicit MetaFsFileIntf(std::string fname, int arrayId, MetaFs* metaFs); // only for test
     virtual ~MetaFsFileIntf(void) override;
 
     virtual int Create(uint64_t fileSize, StorageOpt storageOpt) override;
@@ -61,7 +63,7 @@ public:
     virtual int Open(void) override;
     virtual int Close(void) override;
 
-private:
+protected:
     virtual int _Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
     virtual int _Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
 

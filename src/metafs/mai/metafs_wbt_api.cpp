@@ -36,10 +36,17 @@
 
 namespace pos
 {
-MetaFsWBTApi::MetaFsWBTApi(int arrayId, MetaFsFileControlApi* ctrl)
-: arrayId(arrayId),
-  ctrl(ctrl)
+MetaFsWBTApi::MetaFsWBTApi(void)
+: arrayId(INT32_MAX),
+  ctrl(nullptr)
 {
+}
+
+MetaFsWBTApi::MetaFsWBTApi(int arrayId, MetaFsFileControlApi* ctrl)
+: MetaFsWBTApi()
+{
+    this->arrayId = arrayId;
+    this->ctrl = ctrl;
 }
 
 MetaFsWBTApi::~MetaFsWBTApi(void)

@@ -51,8 +51,9 @@ class MetaFsFileIntf;
 class MetaFileIntf
 {
 public:
-    MetaFileIntf(void) = default;
-    MetaFileIntf(std::string fname, std::string aname);
+    MetaFileIntf(void);
+    explicit MetaFileIntf(std::string fname, std::string aname);
+    explicit MetaFileIntf(std::string fname, int arrayId);
     virtual ~MetaFileIntf(void) = default;
 
     virtual int Create(uint64_t size, StorageOpt storageOpt = StorageOpt::DEFAULT) = 0;

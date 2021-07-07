@@ -38,15 +38,23 @@
 
 namespace pos
 {
-MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
+MetaFs::MetaFs(void)
 : isNpor(false),
-  isLoaded(isLoaded),
+  isLoaded(false),
   isNormal(false),
-  arrayInfo(arrayInfo),
+  arrayInfo(nullptr),
   arrayName(""),
   arrayId(INT32_MAX),
   metaStorage(nullptr)
 {
+}
+
+MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
+: MetaFs()
+{
+    this->isLoaded = isLoaded;
+    this->arrayInfo = arrayInfo;
+
     arrayName = arrayInfo->GetName();
     arrayId = arrayInfo->GetIndex();
 
@@ -60,14 +68,11 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
 
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
         MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt)
-: isNpor(false),
-  isLoaded(isLoaded),
-  isNormal(false),
-  arrayInfo(arrayInfo),
-  arrayName(""),
-  arrayId(INT32_MAX),
-  metaStorage(nullptr)
+: MetaFs()
 {
+    this->isLoaded = isLoaded;
+    this->arrayInfo = arrayInfo;
+
     arrayName = arrayInfo->GetName();
     arrayId = arrayInfo->GetIndex();
 

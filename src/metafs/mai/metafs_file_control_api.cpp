@@ -35,9 +35,16 @@
 
 namespace pos
 {
-MetaFsFileControlApi::MetaFsFileControlApi(int arrayId)
-: arrayId(arrayId)
+MetaFsFileControlApi::MetaFsFileControlApi(void)
+: arrayId(INT32_MAX)
 {
+}
+
+MetaFsFileControlApi::MetaFsFileControlApi(int arrayId)
+: MetaFsFileControlApi()
+{
+    this->arrayId = arrayId;
+
     bitmap = new BitMap(MetaFsConfig::MAX_VOLUME_CNT);
     bitmap->ResetBitmap();
 

@@ -39,10 +39,17 @@ namespace pos
 {
 static InstanceTagIdAllocator aiocbTagIdAllocator;
 
-MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl)
-: arrayId(arrayId),
-  ctrlMgr(ctrl)
+MetaFsIoApi::MetaFsIoApi(void)
+: arrayId(INT32_MAX),
+  ctrlMgr(nullptr)
 {
+}
+
+MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl)
+: MetaFsIoApi()
+{
+    this->arrayId = arrayId;
+    ctrlMgr = ctrl;
     ioMgr = new MetaIoManager();
 }
 
