@@ -37,9 +37,11 @@ make_fio_config()
 {
 sw_files=("sw_tcp_init1.conf" "sw_tcp_init2.conf")
 rw_files=("rw_tcp_init1.conf" "rw_tcp_init2.conf")
+sw_rate=$(($SW_MAX * 7 / 10))
+rw_rate=$(($RW_MAX * 7 / 10))
 general_configs=("[global]" "ioengine=${FIO_IO_ENGINE}" "size=100%" "thread=1" "serialize_overlap=0" "group_reporting=1" "direct=1" "numjobs=1" "ramp_time=0" "time_based=1" "log_avg_msec=2000")
-sw_configs=("rwmixread=0" "readwrite=rw" "iodepth=4" "runtime=${SEQ_IO_TIME}" "io_size=${VOLUME_SIZE}g" "bs=128k" "write_bw_log=seqrw.log" "write_iops_log=seqrw.log")
-rw_configs=("rwmixread=70" "readwrite=randrw" "iodepth=128" "runtime=${RAND_IO_TIME}" "io_size=${VOLUME_SIZE}g" "bs=4k" "write_bw_log=randrw.log" "write_iops_log=randrw.log")
+sw_configs=("rwmixread=0" "readwrite=rw" "iodepth=4" "runtime=${SEQ_IO_TIME}" "io_size=${VOLUME_SIZE}g" "bs=128k" "write_bw_log=seqrw.log" "write_iops_log=seqrw.log" "rate=$sw_rate")
+rw_configs=("rwmixread=70" "readwrite=randrw" "iodepth=128" "runtime=${RAND_IO_TIME}" "io_size=${VOLUME_SIZE}g" "bs=4k" "write_bw_log=randrw.log" "write_iops_log=randrw.log" "rate=$rw_rate")
 
     for file in ${sw_files[@]}
     do
@@ -109,16 +111,20 @@ make_vdbench_config()
         initiator2_nvme_num=$((initiator2_nvme_num+1))
     done
 
+    GB_TO_KB=$((1024 * 1024))
+    sw_iorate=$((${SW_MAX} * ${GB_TO_KB} / 128 * 7 / 10))
+    rw_iorate=$((${RW_MAX} * ${GB_TO_KB} / 4 * 7 / 10))
+    
     echo wd=seq,sd=nvme*,xfersize=4k,rdpct=0,seekpct=0 >> ${file_name}
     echo wd=rand,sd=nvme*,xfersize=4k,rdpct=0,seekpct=100 >> ${file_name}
     if [ ${SEQ_IO_TIME} -gt 3 ] 
     then
-    echo "rd=seq_r,wd=seq,iorate=max,elapsed=${SEQ_IO_TIME},interval=2,warmup=2,pause=5,forxfersize=(128k),forrdpct=(0),forthreads=(4)" >> ${file_name}
+    echo "rd=seq_r,wd=seq,iorate=max,elapsed=${SEQ_IO_TIME},interval=1,warmup=2,pause=5,forxfersize=(128k),forrdpct=(0),forthreads=(4),iorate=${sw_iorate}" >> ${file_name}
     fi
     
     if [ ${RAND_IO_TIME} -gt 3 ]
     then
-    echo "rd=rand_r,wd=rand,iorate=max,elapsed=${RAND_IO_TIME},interval=2,warmup=2,pause=5,forxfersize=(4k),forrdpct=(70),forthreads=(128)" >> ${file_name}
+    echo "rd=rand_r,wd=rand,iorate=max,elapsed=${RAND_IO_TIME},interval=1,warmup=2,pause=5,forxfersize=(4k),forrdpct=(70),forthreads=(128),iorate=${rw_iorate}" >> ${file_name}
     fi
 }
 

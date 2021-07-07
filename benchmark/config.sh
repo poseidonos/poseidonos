@@ -40,6 +40,12 @@ sw_tcp_init2.conf
 rw_tcp_init2.conf
 "
 
+# Measured Performance in GB/s
+export SW_MAX=14600
+export SR_MAX=23100
+export RW_MAX=9500
+export RR_MAX=19300
+
 #Benchmark1 (Default I/O) Variables
 export INIT1_FIO_SCRIPT_DIR=/home/psd/poseidonos
 export INIT2_FIO_SCRIPT_DIR=/home/psd/poseidonos
@@ -50,6 +56,11 @@ export IO_RUN_TIME=20
 
 #Benchmark3 Vdbench Variables
 export DEMO_TEST=0
+export VD_TEST_SEQUENTIAL=1
+export VD_TEST_RANDOM=1
+export VD_IOSIZE="4k,8k,16k,128k,256k,512k,1m,4m"
+export VD_READ_RATIO="100,70,50,30,0"
+export VD_THREAD="1,2,4,8,16,32,64,128"
 
 #Benchmark 4~5 Variables
 export INIT1_VDBENCH_DIR=/home/psd/vdbench
@@ -76,3 +87,13 @@ export WRITE_FILL_SEQ_IO_TIME=10800
 export WRITE_FILL_RAND_IO_TIME=0
 export VOL_DEL_SEQ_IO_TIME=0
 export VOL_DEL_RAND_IO_TIME=43200
+
+# Benchmark 6 (Rebuild)
+export REBUILD_NEED_BRINGUP=false               # true | false
+export REBUILD_NEED_PREDATA_WRITE=false         # true | false
+export REBUILD_NEED_IO_DURING_REBUILD=false     # true | false
+export REBUILD_IMPACT="high"                    # high | low
+
+export REBUILD_PREDATA_WRITE_TIME=600           # seconds to write pre-data
+export REBUILD_IO_DURING_REBUILD_TIME=86400     # seconds to IO during rebuild
+export REBUILD_MAX_REBUILD_TEST_TIME=86400      # seconds to wait rebuild done

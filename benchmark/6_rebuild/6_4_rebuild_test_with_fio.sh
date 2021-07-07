@@ -25,13 +25,13 @@ ibof_cli="${ibofos_root}/bin/cli"
 ARRAYNAME=POSArray
 # Test Configuration
 sleep_time=10
-predata_write_time=120
-rebuild_io_time=600
-rebuild_test_time=600000
-need_bringup=true
-need_predata_write=true
-enable_io_during_rebuild=false
-impact_level="high" # high | low
+predata_write_time=${REBUILD_PREDATA_WRITE_TIME}
+rebuild_io_time=${REBUILD_IO_DURING_REBUILD_TIME}
+rebuild_test_time=${REBUILD_MAX_REBUILD_TEST_TIME}
+need_bringup=${REBUILD_NEED_BRINGUP}
+need_predata_write=${REBUILD_NEED_PREDATA_WRITE}
+enable_io_during_rebuild=${REBUILD_NEED_IO_DURING_REBUILD}
+impact_level=${REBUILD_IMPACT}
 
 start_and_bringup()
 {
@@ -106,4 +106,9 @@ waiting_for_rebuild_complete
 
 echo "rebuild test finished"
 
-calc_performance
+if [ $enable_io_during_rebuild = true ]; then
+	calc_performance
+	sshpass -p ${init1_pw} ssh -tt ${init1_id}@${init1_ip} "echo ${init1_pw} | sudo -S pkill -9 fio"
+	sshpass -p ${init2_pw} ssh -tt ${init2_id}@${init2_ip} "echo ${init1_pw} | sudo -S pkill -9 fio"
+fi
+

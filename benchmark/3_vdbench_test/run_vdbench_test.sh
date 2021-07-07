@@ -61,8 +61,13 @@ if [ ${DEMO_TEST} -eq 1 ]; then
 	echo "rd=seq_r,wd=seq,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(4k),forrdpct=(100),forthreads=(1,64)" >> ${vdfile}
 	echo "rd=rand_r,wd=rand,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(4k),forrdpct=(100),forthreads=(1,64)" >> ${vdfile}
 else
-	echo "rd=seq_r,wd=seq,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(4k,8k,16k,128k,256k,512k,1m,4m),forrdpct=(100,70,50,30,0),forthreads=(1,2,4,8,16,32,64,128)" >> ${vdfile}
-	echo "rd=rand_r,wd=rand,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(4k,8k,16k,128k,256k,512k,1m,4m),forrdpct=(100,70,50,30,0),forthreads=(1,2,4,8,16,32,64,128)" >> ${vdfile}
+	if [ ${VD_TEST_SEQUENTIAL} -eq 1 ]; then
+		echo "rd=seq_r,wd=seq,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(${VD_IOSIZE}),forrdpct=(${VD_READ_RATIO}),forthreads=(${VD_THREAD})" >> ${vdfile}
+	fi
+	if [ ${VD_TEST_RANDOM} -eq 1 ]; then
+	echo "rd=rand_r,wd=rand,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(${VD_IOSIZE}),forrdpct=(${VD_READ_RATIO}),forthreads=(${VD_THREAD})" >> ${vdfile}
+	fi
+
 fi
 
 ### 4. Copy vdbench script
