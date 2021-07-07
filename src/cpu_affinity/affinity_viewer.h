@@ -34,6 +34,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "src/include/core_const.h"
 
 namespace pos
 {

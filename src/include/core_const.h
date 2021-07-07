@@ -37,4 +37,5 @@
 namespace pos
 {
 static const uint32_t INVALID_CORE = UINT32_MAX;
+static const uint32_t INVALID_NUMA = UINT32_MAX;
 } // namespace pos

@@ -36,10 +36,13 @@
 
 namespace pos
 {
+
+class BufferPool;
+
 class RebuildRead
 {
 public:
-    int Recover(UbioSmartPtr ubio);
+    int Recover(UbioSmartPtr ubio, BufferPool* bufferPool = nullptr);
 };
 
 } // namespace pos

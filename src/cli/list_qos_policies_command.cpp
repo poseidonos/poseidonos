@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/cli/qos_list_policies_command.h"
+#include "src/cli/list_qos_policies_command.h"
 
 #include "src/array/array.h"
 #include "src/cli/cli_event_code.h"
@@ -66,7 +66,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
         arrayName = doc["param"]["array"].get<std::string>();
         if (0 == arrayName.compare(""))
         {
-            return jFormat.MakeResponse("QOSLISTPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Array Name Missing", GetPosInfo());
+            return jFormat.MakeResponse("LISTQOSPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Array Name Missing", GetPosInfo());
         }
     }
     JsonElement data("data");
@@ -81,7 +81,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
     data.SetArray(arrayJson);
 
     rebuildPolicy = QosManagerSingleton::Instance()->GetRebuildPolicy();
-    string impact = GetRebuildImpactString(rebuildPolicy.rebuildImpact);
+    string impact = _GetRebuildImpactString(rebuildPolicy.rebuildImpact);
 
     JsonElement rebuild("");
     rebuild.SetAttribute(JsonAttribute("rebuild", "\"" + impact + "\""));
@@ -92,7 +92,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     if (nullptr == volMgr)
     {
-        return jFormat.MakeResponse("QOSLISTPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Invalid Array Name", GetPosInfo());
+        return jFormat.MakeResponse("LISTQOSPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Invalid Array Name", GetPosInfo());
     }
     if (doc["param"].contains("vol"))
     {
@@ -107,7 +107,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
             if (-1 == validVol)
             {
                 errorMsg = "Invalid Volume Name " + (*vol);
-                return jFormat.MakeResponse("QOSLISTPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
+                return jFormat.MakeResponse("LISTQOSPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
             }
             else
             {
@@ -131,11 +131,11 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
         }
         data.SetArray(volPolicies);
     }
-    return jFormat.MakeResponse("QOSLISTPOLICIES", rid, SUCCESS, "List of Volume Policies in " + arrayName, data, GetPosInfo());
+    return jFormat.MakeResponse("LISTQOSPOLICIES", rid, SUCCESS, "List of Volume Policies in " + arrayName, data, GetPosInfo());
 }
 
 string
-QosListPoliciesCommand::GetRebuildImpactString(uint8_t impact)
+QosListPoliciesCommand::_GetRebuildImpactString(uint8_t impact)
 {
     switch (impact)
     {

@@ -82,9 +82,9 @@
 #include "src/cli/apply_log_filter_command.h"
 #include "src/cli/handle_wbt_command.h"
 #include "src/cli/list_wbt_command.h"
-#include "src/cli/qos_list_policies_command.h"
-#include "src/cli/qos_create_volume_policy_command.h"
-#include "src/cli/qos_reset_volume_policy_command.h"
+#include "src/cli/list_qos_policies_command.h"
+#include "src/cli/create_qos_volume_policy_command.h"
+#include "src/cli/reset_qos_volume_policy_command.h"
 
 namespace pos_cli
 {
@@ -126,9 +126,9 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["GETLOGLEVEL"] = new GetLogLevelCommand();
     cmdDictionary["LISTWBT"] = new ListWbtCommand();
     cmdDictionary["WBT"] = new HandleWbtCommand();
-    cmdDictionary["QOSLISTPOLICIES"] = new QosListPoliciesCommand();
-    cmdDictionary["QOSCREATEVOLUMEPOLICY"] = new QosCreateVolumePolicyCommand();
-    cmdDictionary["QOSRESETVOLUMEPOLICY"] = new QosResetVolumePolicyCommand();
+    cmdDictionary["LISTQOSPOLICIES"] = new QosListPoliciesCommand();
+    cmdDictionary["CREATEQOSVOLUMEPOLICY"] = new QosCreateVolumePolicyCommand();
+    cmdDictionary["RESETQOSVOLUMEPOLICY"] = new QosResetVolumePolicyCommand();
 }
 
 RequestHandler::~RequestHandler(void)

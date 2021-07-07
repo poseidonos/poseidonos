@@ -121,6 +121,31 @@ ArrayRebuilder::WaitRebuildDone(string array)
     }
 }
 
+bool
+ArrayRebuilder::IsRebuilding(string array)
+{
+    if ( _Find(array) != nullptr)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+void
+ArrayRebuilder::CleanUp(string array)
+{
+    ArrayRebuild* job = _Find(array);
+    if (job != nullptr)
+    {
+        delete job;
+        jobsInProgress.erase(array);
+    }
+    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+        "ArrayRebuilder::CleanUp {}, inProgressCnt:{}",
+        array, jobsInProgress.size());
+}
+
 uint32_t
 ArrayRebuilder::GetRebuildProgress(string array)
 {

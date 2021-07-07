@@ -75,7 +75,7 @@ CpuSetGenerator::_SetNumaInformation(void)
     for (uint32_t cpu = 0; cpu < TOTAL_CORE_COUNT; cpu++)
     {
         int32_t numa = numa_node_of_cpu(cpu);
-        if (numa == INVALID_NUMA)
+        if (static_cast<uint32_t>(numa) == INVALID_NUMA)
         {
             continue;
         }
@@ -92,7 +92,7 @@ uint32_t
 CpuSetGenerator::_GetNextCpuFromThisNuma(uint32_t cpu)
 {
     int32_t numa = numa_node_of_cpu(cpu);
-    if (numa == INVALID_NUMA)
+    if (static_cast<uint32_t>(numa) == INVALID_NUMA)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_DISABLED_CORE;
         POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId), cpu);

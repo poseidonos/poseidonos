@@ -33,6 +33,7 @@
 #include "src/cpu_affinity/affinity_manager.h"
 
 #include <numa.h>
+#include <sched.h>
 
 #include <iomanip>
 
@@ -48,6 +49,7 @@
 namespace pos
 {
 const bool AffinityManager::PROHIBIT_CORE_MASK_OVERLAPPED = false;
+thread_local uint32_t AffinityManager::numaId = INVALID_NUMA;
 
 AffinityManager::AffinityManager(void)
 : AffinityManager::AffinityManager(new AffinityConfigParser())
@@ -130,7 +132,7 @@ AffinityManager::_SetNumaInformation(const CoreDescriptionArray& descArray)
     for (uint32_t cpu = 0; cpu < TOTAL_COUNT; cpu++)
     {
         int32_t numa = numa_node_of_cpu(cpu);
-        if (numa == INVALID_NUMA)
+        if (static_cast<uint32_t>(numa) == INVALID_NUMA)
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_DISABLED_CORE;
             POS_TRACE_INFO(eventId, PosEventId::GetString(eventId), cpu);
@@ -190,7 +192,7 @@ AffinityManager::GetEventWorkerSocket(void)
         if (CPU_ISSET(cpu, &eventCpuSet))
         {
             int32_t numa = numa_node_of_cpu(cpu);
-            if (numa == INVALID_NUMA)
+            if (static_cast<uint32_t>(numa) == INVALID_NUMA)
             {
                 continue;
             }
@@ -227,6 +229,23 @@ AffinityManager::GetReactorCPUSetString(void)
     cpu_set_t reactorCpuSet = GetCpuSet(CoreType::REACTOR);
     string cpuString = _GetCPUSetString(reactorCpuSet);
     return cpuString;
+}
+
+uint32_t
+AffinityManager::GetNumaIdFromCurrentThread(void)
+{
+    if (unlikely(numaId == INVALID_NUMA))
+    {
+        numaId = numa_node_of_cpu(sched_getcpu());
+    }
+    return numaId;
+}
+
+uint32_t
+AffinityManager::GetNumaIdFromCoreId(uint32_t coreId)
+{
+    numaId = numa_node_of_cpu(coreId);
+    return numaId;
 }
 
 std::string
@@ -285,6 +304,12 @@ AffinityManager::SetGeneralAffinitySelf(void)
 {
     cpu_set_t generalCPUSet = GetCpuSet(CoreType::GENERAL_USAGE);
     sched_setaffinity(0, sizeof(cpu_set_t), &generalCPUSet);
+}
+
+uint32_t
+AffinityManager::GetNumaCount(void)
+{
+    return NUMA_COUNT;
 }
 
 } // namespace pos

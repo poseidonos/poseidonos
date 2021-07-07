@@ -1,0 +1,4 @@
+POS_ADD_UNIT_TEST(flow_control_service_ut flow_control_service_test.cpp)
+POS_ADD_UNIT_TEST(linear_distributer_ut linear_distributer_test.cpp)
+POS_ADD_UNIT_TEST(state_distributer_ut state_distributer_test.cpp)
+POS_ADD_UNIT_TEST(token_distributer_ut token_distributer_test.cpp)

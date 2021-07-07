@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "rebuild_behavior.h"
 #include "src/include/address_type.h"
 #include "src/allocator/i_context_manager.h"
@@ -49,6 +51,9 @@ public:
     virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) override;
 
 private:
+    virtual string _GetClassName(void);
+    virtual int _GetTotalReadChunksForRecovery(void);
+
     SegmentId _NextSegment(void);
     IContextManager* allocatorSvc = nullptr;
 };

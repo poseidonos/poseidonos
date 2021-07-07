@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "rebuild_behavior.h"
 #include "src/array/service/io_locker/i_io_locker.h"
 
@@ -48,6 +50,9 @@ public:
     virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) override;
 
 private:
+    virtual string _GetClassName(void);
+    virtual int _GetTotalReadChunksForRecovery(void);
+
     StripeId baseStripe = 0;
     IIOLocker* locker = nullptr;
 };

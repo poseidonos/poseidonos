@@ -45,7 +45,11 @@
 #include "src/io/general_io/rba_state_service.h"
 #include "src/io/backend_io/flush_completion.h"
 #include "src/gc/copier_meta.h"
+#include "src/gc/gc_stripe_manager.h"
 #include "src/gc/gc_map_update_request.h"
+#include "src/gc/flow_control/flow_control.h"
+#include "src/gc/flow_control/flow_control_service.h"
+#include "src/array/service/array_service_layer.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "Air.h"
 
@@ -72,7 +76,7 @@ GcFlushCompletion::_DoSpecificJob(void)
 {
     if (nullptr != dataBuffer)
     {
-        gcStripeManager->SetFinished(dataBuffer);
+        gcStripeManager->ReturnBuffer(dataBuffer);
         dataBuffer = nullptr;
     }
 
@@ -87,6 +91,7 @@ GcFlushCompletion::_DoSpecificJob(void)
     BlkAddr rba;
     uint32_t volId;
     std::list<RbaAndSize> rbaList;
+    int cnt = 0;
 
     for (uint32_t i = 0; i < totalBlksPerUserStripe; i++)
     {
@@ -96,19 +101,32 @@ GcFlushCompletion::_DoSpecificJob(void)
             RbaAndSize rbaAndSize = {rba * VolumeIo::UNITS_PER_BLOCK,
                 BLOCK_SIZE};
             rbaList.push_back(rbaAndSize);
+            cnt++;
         }
     }
     std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
+
+    FlowControl* flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(arrayName);
+    int token = flowControl->GetToken(FlowControlType::GC, cnt);
+    if (0 >= token)
+    {
+        return false;
+    }
+
     bool ownershipAcquired = rbaStateManager->AcquireOwnershipRbaList(volId,
             rbaList);
     if (false == ownershipAcquired)
     {
+        if (0 < token)
+        {
+            flowControl->ReturnToken(FlowControlType::GC, token);
+        }
         return false;
     }
 
     airlog("PERF_COPY", "AIR_WRITE", 0, totalBlksPerUserStripe * BLOCK_SIZE);
 
-    EventSmartPtr event(new GcMapUpdateRequest(stripe, arrayName));
+    EventSmartPtr event(new GcMapUpdateRequest(stripe, arrayName, gcStripeManager));
     stripe->Flush(event);
 
     return true;

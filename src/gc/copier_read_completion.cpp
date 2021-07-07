@@ -118,7 +118,8 @@ CopierReadCompletion::_DoSpecificJob(void)
                 gcStripeManager->SetFlushed(volId);
                 allocatedBlkInfoList->clear();
                 delete allocatedBlkInfoList;
-                gcStripeManager->SetFinished(dataBuffer);
+                gcStripeManager->ReturnBuffer(dataBuffer);
+                gcStripeManager->SetFinished();
                 break;
             }
             else

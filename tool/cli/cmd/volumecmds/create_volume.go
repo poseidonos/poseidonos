@@ -76,6 +76,6 @@ func init() {
 	CreateVolumeCmd.Flags().StringVarP(&create_volume_volumeName, "volume-name", "", "", "Name of the volume to create")
 	CreateVolumeCmd.Flags().StringVarP(&create_volume_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
 	CreateVolumeCmd.Flags().IntVarP(&create_volume_volumeSize, "size", "", 0, "The size of the volume in MB")
-	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxIOPS, "maxiops", "", 0, "The maximum IOPS for the volume in Kilo")
-	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxBandwidth, "maxbw", "", 0, "The maximum bandwidth for the volume in MB/s")
+	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxIOPS, "maxiops", "", 0, "The maximum IOPS for the volume in KIOPS")
+	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxBandwidth, "maxbw", "", 0, "The maximum bandwidth for the volume in MiB/s")
 }

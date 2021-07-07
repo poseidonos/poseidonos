@@ -41,7 +41,7 @@
 namespace pos
 {
 PartitionRebuild::PartitionRebuild(RebuildTarget* t, ArrayDevice* d,
-    RebuildProgress* p)
+    RebuildProgress* p, RebuildLogger* l)
 : targetPart(t), targetDev(d)
 {
     unique_ptr<RebuildContext> ctx = targetPart->GetRebuildCtx(targetDev);
@@ -51,6 +51,7 @@ PartitionRebuild::PartitionRebuild(RebuildTarget* t, ArrayDevice* d,
         if (bhvr != nullptr)
         {
             bhvr->GetContext()->prog = p;
+            bhvr->GetContext()->logger = l;
         }
     }
 }
@@ -67,6 +68,7 @@ void PartitionRebuild::Start(RebuildComplete cb)
     completeCb = cb;
     if (bhvr != nullptr)
     {
+        bhvr->GetContext()->logger->SetPartitionRebuildStart(bhvr->GetContext()->part);
         bhvr->GetContext()->rebuildComplete =
             bind(&PartitionRebuild::_Complete, this, placeholders::_1);
         EventSmartPtr rebuilder(new Rebuilder(bhvr));

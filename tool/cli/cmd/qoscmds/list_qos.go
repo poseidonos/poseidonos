@@ -28,7 +28,7 @@ Example:
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var command = "QOSLISTPOLICIES"
+		var command = "LISTQOSPOLICIES"
 
 		qosListReq := formListQosReq()
 		reqJSON, err := json.Marshal(qosListReq)
@@ -63,7 +63,7 @@ func formListQosReq() messages.Request {
 
 	qosListReq := messages.Request{
 		RID:     "fromCLI",
-		COMMAND: "QOSLISTPOLICIES",
+		COMMAND: "LISTQOSPOLICIES",
 		PARAM:   listQosParam,
 	}
 

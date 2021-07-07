@@ -15,6 +15,7 @@ SUBDIRS = allocator \
         io_submit_interface \
         master_context \
         gc \
+        gc/flow_control \
         array \
         array/device \
         array/ft \
@@ -64,7 +65,9 @@ SUBDIRS = allocator \
         qos \
         debug \
         wbt \
-        admin
+        admin \
+        resource_manager \
+        dpdk_wrapper
 .PHONY: $(SUBDIRS)
 
 poseidonos: $(SUBDIRS)

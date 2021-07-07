@@ -41,6 +41,7 @@
 #include "src/array_mgmt/array_manager.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/gc/copier_meta.h"
+#include "src/gc/gc_stripe_manager.h"
 #include "src/io/backend_io/flush_completion.h"
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/io/general_io/rba_state_manager.h"
@@ -54,12 +55,14 @@
 
 namespace pos
 {
-GcMapUpdateCompletion::GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap, EventScheduler* eventScheduler)
+GcMapUpdateCompletion::GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
+                                            EventScheduler* eventScheduler, GcStripeManager* gcStripeManager)
 : Event(false),
   stripe(stripe),
   arrayName(arrayName),
   iStripeMap(iStripeMap),
-  eventScheduler(eventScheduler)
+  eventScheduler(eventScheduler),
+  gcStripeManager(gcStripeManager)
 {
     IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
     const PartitionLogicalSize* udSize =
@@ -97,6 +100,8 @@ GcMapUpdateCompletion::Execute(void)
     IVolumeManager* volumeManager
         = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     volumeManager->DecreasePendingIOCount(volId, VolumeStatus::Unmounted);
+
+    gcStripeManager->SetFinished();
 
     delete stripe;
     return true;

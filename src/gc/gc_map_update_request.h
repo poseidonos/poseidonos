@@ -51,13 +51,14 @@ namespace pos
 class Stripe;
 class IStripeMap;
 class EventScheduler;
+class GcStripeManager;
 
 class GcMapUpdateRequest : public Event
 {
 public:
-    GcMapUpdateRequest(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
+    GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager, IStripeMap* iStripeMap,
                     IVSAMap *iVSAMap, JournalService *journalService, EventScheduler *eventScheduler);
-    GcMapUpdateRequest(Stripe* stripe, std::string arrayName);
+    GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager);
     virtual bool Execute(void) override;
 
 private:
@@ -66,17 +67,19 @@ private:
     void _AddVsaMapUpdateLog(uint32_t volId, BlkAddr rba, VirtualBlks writeVsaRange);
     void _RegisterInvalidateSegments(VirtualBlkAddr vsa);
 
-    std::string arrayName;
-    IVSAMap* iVSAMap;
-
     Stripe* stripe;
+    std::string arrayName;
+
+    GcStripeManager* gcStripeManager;
+    IStripeMap* iStripeMap;
+    IVSAMap* iVSAMap;
     JournalService *journalService;
     EventScheduler *eventScheduler;
 
     uint32_t totalBlksPerUserStripe;
     uint32_t stripesPerSegment;
     uint32_t stripeOffset;
-    IStripeMap* iStripeMap;
+
 
     std::map<SegmentId, uint32_t > invalidSegCnt;
 

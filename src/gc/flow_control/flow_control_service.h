@@ -32,16 +32,35 @@
 
 #pragma once
 
-#include "src/cli/command.h"
+#include <cstdint>
+#include <unordered_map>
 #include <string>
 
-namespace pos_cli
+#include "src/lib/singleton.h"
+
+namespace pos
 {
-class QosResetVolumePolicyCommand : public Command
+
+class FlowControl;
+
+class FlowControlService
 {
+    friend class Singleton<FlowControlService>;
+
 public:
-    QosResetVolumePolicyCommand(void);
-    ~QosResetVolumePolicyCommand(void) override;
-    string Execute(json& doc, string rid) override;
+    virtual void Register(std::string arrayName, FlowControl* flowControl);
+    virtual void UnRegister(std::string arrayName);
+
+    virtual FlowControl* GetFlowControl(std::string arrayName);
+
+protected:
+    FlowControlService(void);
+    virtual ~FlowControlService(void);
+
+private:
+    FlowControl* _Find(std::string arrayName);
+    std::unordered_map<std::string, FlowControl*> flowControls;
 };
-}; // namespace pos_cli
+
+using FlowControlServiceSingleton = Singleton<FlowControlService>;
+} // namespace pos

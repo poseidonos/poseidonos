@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/cli/qos_reset_volume_policy_command.h"
+#include "src/cli/reset_qos_volume_policy_command.h"
 
 #include <utility>
 
@@ -61,7 +61,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
     int retVal = -1;
     if (false == QosManagerSingleton::Instance()->IsFeQosEnabled())
     {
-        return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, SUCCESS, "QOS Settings Skipped", GetPosInfo());
+        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, SUCCESS, "QOS Settings Skipped", GetPosInfo());
     }
     if (doc["param"].contains("array") == true)
     {
@@ -69,12 +69,12 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
     }
     if (0 == arrayName.compare(""))
     {
-        return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Array Name Missing", GetPosInfo());
+        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Array Name Missing", GetPosInfo());
     }
     IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     if (nullptr == volMgr)
     {
-        return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Invalid Array Name", GetPosInfo());
+        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Invalid Array Name", GetPosInfo());
     }
     if (doc["param"].contains("vol"))
     {
@@ -89,7 +89,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
             if (-1 == validVol)
             {
                 errorMsg = "Invalid Volume Name " + (*vol);
-                return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
+                return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
             }
             else
             {
@@ -99,7 +99,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
     }
     else
     {
-        return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "vol, Parameter Missing", GetPosInfo());
+        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "vol, Parameter Missing", GetPosInfo());
     }
 
     qos_vol_policy newVolPolicy;
@@ -117,14 +117,14 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
         retVal = volMgr->UpdateQoS(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw);
         if (retVal != SUCCESS)
         {
-            return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, retVal, "FAILED", GetPosInfo());
+            return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, retVal, "FAILED", GetPosInfo());
         }
         retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy);
         if (retVal != SUCCESS)
         {
-            return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, retVal, "FAILED", GetPosInfo());
+            return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, retVal, "FAILED", GetPosInfo());
         }
     }
-    return jFormat.MakeResponse("QOSRESETVOLUMEPOLICY", rid, SUCCESS, "Volume Qos Policy Reset", GetPosInfo());
+    return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, SUCCESS, "Volume Qos Policy Reset", GetPosInfo());
 }
 } // namespace pos_cli

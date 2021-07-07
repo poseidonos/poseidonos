@@ -32,34 +32,25 @@
 
 #pragma once
 
-#include "src/cli/command.h"
-#include "src/qos/qos_common.h"
-#include <string>
-#include <vector>
-#include <utility>
+#include "src/gc/flow_control/token_distributer.h"
+#include <tuple>
 
-namespace pos_cli
+namespace pos
 {
-class QosCreateVolumePolicyCommand : public Command
+class LinearDistributer : public TokenDistributer
 {
 public:
-    QosCreateVolumePolicyCommand(void);
-    ~QosCreateVolumePolicyCommand(void) override;
-    string Execute(json& doc, string rid) override;
+    LinearDistributer(uint32_t totalToken, uint32_t gcThreshold, uint32_t gcUrgentThreshold,
+                    uint32_t totalTokenInStripe, uint32_t blksPerStripe);
+    ~LinearDistributer(void) override;
+    std::tuple<uint32_t, uint32_t> Distribute(uint32_t freeSegments) override;
 
 private:
-    bool _HandleInputVolumes(json& doc);
-    bool _VerifyMultiVolumeInput(json& doc);
-    uint32_t _HandleVolumePolicy(json& doc);
-    std::vector<string> volumeNames;
-    std::vector<std::pair<string, uint32_t>> validVolumes;
-    std::string errorMsg;
-    int64_t minBw;
-    int64_t maxBw;
-    int64_t minIops;
-    int64_t maxIops;
-    qos_vol_policy prevVolPolicy;
-    qos_vol_policy newVolPolicy;
-    string arrayName;
+    uint32_t totalToken = 0;
+    uint32_t gcThreshold = 0;
+    uint32_t gcUrgentThreshold = 0;
+    uint32_t totalTokenInStripe = 0;
+    uint32_t blksPerStripe = 0;
 };
-}; // namespace pos_cli
+
+}; // namespace pos

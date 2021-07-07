@@ -41,6 +41,12 @@ LogBufferWriteDoneNotifier::Register(LogBufferWriteDoneEvent* notified)
 }
 
 void
+LogBufferWriteDoneNotifier::Dispose(void)
+{
+    subscribers.clear();
+}
+
+void
 LogBufferWriteDoneNotifier::NotifyLogFilled(int logGroupId, MapPageList& dirty)
 {
     for (auto sub : subscribers)

@@ -24,7 +24,7 @@ func TestVolumePolicyCommandReq(t *testing.T) {
 
 	output := buff.String()
 	output = output[:len(output)-1] // Remove the last n from output string
-	expected := `{"command":"QOSCREATEVOLUMEPOLICY","rid":"fromCLI","param":{"name":"vol01","maxiops":3000,"maxbw":2000,"array":"Array0"}}`
+	expected := `{"command":"CREATEQOSVOLUMEPOLICY","rid":"fromCLI","param":{"name":"vol01","maxiops":3000,"maxbw":2000,"array":"Array0"}}`
 
 	if expected != output {
 		t.Errorf("Expected: %q Output: %q", expected, output)

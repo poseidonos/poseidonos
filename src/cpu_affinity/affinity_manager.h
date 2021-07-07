@@ -47,7 +47,7 @@ public:
     AffinityManager(void);
     AffinityManager(uint32_t totalCount, CpuSetArray& cpuSetArray);
     explicit AffinityManager(AffinityConfigParser* parser_);
-    ~AffinityManager(void);
+    virtual ~AffinityManager(void);
 
     void SetGeneralAffinitySelf(void);
     cpu_set_t GetCpuSet(CoreType type);
@@ -55,7 +55,10 @@ public:
     uint32_t GetMasterReactorCore(void);
     uint32_t GetEventWorkerSocket(void);
     uint32_t GetTotalCore(void);
+    virtual uint32_t GetNumaIdFromCurrentThread(void);
+    uint32_t GetNumaIdFromCoreId(uint32_t coreId);
     uint32_t GetCoreCount(CoreType type);
+    virtual uint32_t GetNumaCount(void);
 
 private:
     static const uint32_t MAX_NUMA_COUNT = RTE_MAX_NUMA_NODES;
@@ -72,6 +75,7 @@ private:
     void _SetNumaInformation(const CoreDescriptionArray& descArray);
     bool _IsCoreSufficient(void);
     std::string _GetCPUSetString(cpu_set_t cpuSet);
+    static thread_local uint32_t numaId;
 };
 
 using AffinityManagerSingleton = Singleton<AffinityManager>;

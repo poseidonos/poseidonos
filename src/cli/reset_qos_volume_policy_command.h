@@ -32,19 +32,17 @@
 
 #pragma once
 
-#include "src/cli/command.h"
 #include <string>
+
+#include "src/cli/command.h"
 
 namespace pos_cli
 {
-class QosListPoliciesCommand : public Command
+class QosResetVolumePolicyCommand : public Command
 {
 public:
-    QosListPoliciesCommand(void);
-    ~QosListPoliciesCommand(void) override;
+    QosResetVolumePolicyCommand(void);
+    ~QosResetVolumePolicyCommand(void) override;
     string Execute(json& doc, string rid) override;
-
-private:
-    string GetRebuildImpactString(uint8_t impact);
 };
 }; // namespace pos_cli

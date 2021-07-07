@@ -514,6 +514,19 @@ index 4b7e65051..a8b70800b 100644
  #ifdef __cplusplus
  }
  #endif
+diff --git lib/spdk-20.10/include/spdk_internal/sock.h lib/spdk-20.10/include/spdk_internal/sock.h
+index 15cc84edb..a146d3448 100644
+--- lib/spdk-20.10/include/spdk_internal/sock.h
++++ lib/spdk-20.10/include/spdk_internal/sock.h
+@@ -46,7 +46,7 @@
+ extern "C" {
+ #endif
+ 
+-#define MAX_EVENTS_PER_POLL 32
++#define MAX_EVENTS_PER_POLL 1025
+ #define DEFAULT_SOCK_PRIORITY 0
+ #define MIN_SOCK_PIPE_SIZE 1024
+ #define MIN_SO_RCVBUF_SIZE (2 * 1024 * 1024)
 diff --git lib/spdk-20.10/lib/accel/accel_engine.c lib/spdk-20.10/lib/accel/accel_engine.c
 index b65528984..9bf47d7f5 100644
 --- lib/spdk-20.10/lib/accel/accel_engine.c
@@ -757,7 +770,7 @@ index dffc13ac3..aaf690733 100644
  		ctrlr->outstanding_aborts++;
  		return nvme_ctrlr_submit_admin_request(ctrlr, req);
 diff --git lib/spdk-20.10/lib/nvmf/ctrlr.c lib/spdk-20.10/lib/nvmf/ctrlr.c
-index 31ed06670..2d8e78557 100644
+index 31ed06670..8d582cd3b 100644
 --- lib/spdk-20.10/lib/nvmf/ctrlr.c
 +++ lib/spdk-20.10/lib/nvmf/ctrlr.c
 @@ -52,6 +52,7 @@
@@ -958,7 +971,25 @@ index 31ed06670..2d8e78557 100644
  	/* fail before passing a message to the controller thread. */
  	if (ctrlr->in_destruct) {
  		SPDK_ERRLOG("Got I/O connect while ctrlr was being destroyed.\n");
-@@ -3279,6 +3430,7 @@ _nvmf_request_complete(void *ctx)
+@@ -721,8 +872,7 @@ spdk_nvmf_ctrlr_connect(struct spdk_nvmf_request *req)
+ 		status = SPDK_NVMF_REQUEST_EXEC_STATUS_COMPLETE;
+ 		goto out;
+ 	}
+-
+-	sgroup->io_outstanding++;
++	spdk_nvmf_subsystem_poll_group_increase_io_outstanding(req, sgroup);
+ 	TAILQ_INSERT_TAIL(&qpair->outstanding, req, link);
+ 
+ 	status = _nvmf_ctrlr_connect(req);
+@@ -1618,7 +1768,6 @@ nvmf_ctrlr_async_event_request(struct spdk_nvmf_request *req)
+ 	/* AER cmd is an exception */
+ 	sgroup = &req->qpair->group->sgroups[ctrlr->subsys->id];
+ 	assert(sgroup != NULL);
+-	sgroup->io_outstanding--;
+ 
+ 	/* Four asynchronous events are supported for now */
+ 	if (ctrlr->nr_aer_reqs >= NVMF_MAX_ASYNC_EVENTS) {
+@@ -3279,6 +3428,7 @@ _nvmf_request_complete(void *ctx)
  	rsp->cid = req->cmd->nvme_cmd.cid;
  
  	qpair = req->qpair;
@@ -966,7 +997,7 @@ index 31ed06670..2d8e78557 100644
  	if (qpair->ctrlr) {
  		sgroup = &qpair->group->sgroups[qpair->ctrlr->subsys->id];
  		assert(sgroup != NULL);
-@@ -3306,7 +3458,6 @@ _nvmf_request_complete(void *ctx)
+@@ -3306,7 +3456,6 @@ _nvmf_request_complete(void *ctx)
  			sgroup->cb_fn(sgroup->cb_arg, 0);
  		}
  	}
@@ -974,7 +1005,7 @@ index 31ed06670..2d8e78557 100644
  	nvmf_qpair_request_cleanup(qpair);
  }
  
-@@ -3314,7 +3465,6 @@ int
+@@ -3314,7 +3463,6 @@ int
  spdk_nvmf_request_complete(struct spdk_nvmf_request *req)
  {
  	struct spdk_nvmf_qpair *qpair = req->qpair;
@@ -982,6 +1013,40 @@ index 31ed06670..2d8e78557 100644
  	if (spdk_likely(qpair->group->thread == spdk_get_thread())) {
  		_nvmf_request_complete(req);
  	} else {
+@@ -3337,7 +3485,7 @@ _nvmf_request_exec(struct spdk_nvmf_request *req,
+ 	}
+ 
+ 	if (sgroup) {
+-		sgroup->io_outstanding++;
++		spdk_nvmf_subsystem_poll_group_increase_io_outstanding(req, sgroup);
+ 	}
+ 
+ 	/* Place the request on the outstanding list so we can keep track of it */
+@@ -3376,7 +3524,7 @@ spdk_nvmf_request_exec(struct spdk_nvmf_request *req)
+ 		TAILQ_INSERT_TAIL(&qpair->outstanding, req, link);
+ 		/* Still increment io_outstanding because request_complete decrements it */
+ 		if (sgroup != NULL) {
+-			sgroup->io_outstanding++;
++			spdk_nvmf_subsystem_poll_group_increase_io_outstanding(req, sgroup);
+ 		}
+ 		_nvmf_request_complete(req);
+ 		return;
+@@ -3555,3 +3703,15 @@ struct spdk_nvmf_request *spdk_nvmf_request_get_req_to_abort(struct spdk_nvmf_re
+ {
+ 	return req->req_to_abort;
+ }
++
++void
++spdk_nvmf_subsystem_poll_group_increase_io_outstanding(struct spdk_nvmf_request *req,
++		struct spdk_nvmf_subsystem_poll_group *sgroup)
++{
++	struct spdk_nvme_cmd *cmd = &req->cmd->nvme_cmd;
++	if (cmd->opc == SPDK_NVME_OPC_ASYNC_EVENT_REQUEST)
++	{
++		return;
++	}
++	sgroup->io_outstanding++;
++}
 diff --git lib/spdk-20.10/lib/nvmf/nvmf.c lib/spdk-20.10/lib/nvmf/nvmf.c
 index d30f315b3..a8aa0df12 100644
 --- lib/spdk-20.10/lib/nvmf/nvmf.c
@@ -1020,7 +1085,7 @@ index d30f315b3..a8aa0df12 100644
  		rc = spdk_nvmf_qpair_disconnect(qpair, _nvmf_subsystem_disconnect_next_qpair, ctx);
  	} else {
 diff --git lib/spdk-20.10/lib/nvmf/nvmf_internal.h lib/spdk-20.10/lib/nvmf/nvmf_internal.h
-index f20ae924e..36487e09d 100644
+index f20ae924e..3fafb8ae2 100644
 --- lib/spdk-20.10/lib/nvmf/nvmf_internal.h
 +++ lib/spdk-20.10/lib/nvmf/nvmf_internal.h
 @@ -49,6 +49,9 @@
@@ -1033,9 +1098,14 @@ index f20ae924e..36487e09d 100644
  enum spdk_nvmf_subsystem_state {
  	SPDK_NVMF_SUBSYSTEM_INACTIVE = 0,
  	SPDK_NVMF_SUBSYSTEM_ACTIVATING,
-@@ -399,3 +402,4 @@ nvmf_qpair_is_admin_queue(struct spdk_nvmf_qpair *qpair)
+@@ -398,4 +401,9 @@ nvmf_qpair_is_admin_queue(struct spdk_nvmf_qpair *qpair)
+ 	return qpair->qid == 0;
  }
  
++void
++spdk_nvmf_subsystem_poll_group_increase_io_outstanding(struct spdk_nvmf_request *req,
++	struct spdk_nvmf_subsystem_poll_group *sgroup);
++
  #endif /* __NVMF_INTERNAL_H__ */
 +
 diff --git lib/spdk-20.10/lib/nvmf/rdma.c lib/spdk-20.10/lib/nvmf/rdma.c

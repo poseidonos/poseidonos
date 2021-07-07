@@ -37,15 +37,17 @@
 #include "src/event_scheduler/io_completer.h"
 #include "src/include/io_error_type.h"
 #include "src/logger/logger.h"
+#include "src/resource_manager/buffer_pool.h"
 
 namespace pos
 {
 RebuildReadCompleteHandler::RebuildReadCompleteHandler(
-    UbioSmartPtr input, RecoverFunc func, uint64_t readSize)
+    UbioSmartPtr input, RecoverFunc func, uint64_t readSize, BufferPool* bufferPool)
 : Callback(false),
   ubio(input),
   recoverFunc(func),
-  readSize(readSize)
+  readSize(readSize),
+  bufferPool(bufferPool)
 {
 }
 
@@ -78,7 +80,14 @@ RebuildReadCompleteHandler::_DoSpecificJob(void)
     free(ptr);
 
 end:
-    ubio->FreeDataBuffer();
+    if (bufferPool == nullptr)
+    {
+        ubio->FreeDataBuffer();
+    }
+    else
+    {
+        bufferPool->ReturnBuffer(ubio->GetWholeBuffer());
+    }
 
     IoCompleter ioCompleter(ubio);
     ioCompleter.CompleteOriginUbio();
@@ -88,3 +97,4 @@ end:
 }
 
 } // namespace pos
+
