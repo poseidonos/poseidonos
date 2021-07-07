@@ -351,20 +351,33 @@ MioHandler::_IsRangeOverlapConflicted(MetaFsIoRequest* reqMsg)
         return false;
     }
 
-    return ioRangeOverlapChker[reqMsg->arrayId][(int)reqMsg->targetMediaType]->IsRangeOverlapConflicted(reqMsg);
+    int storage = (int)reqMsg->targetMediaType;
+    int arrayId = reqMsg->arrayId;
+
+    if (nullptr != ioRangeOverlapChker[arrayId][storage])
+        return ioRangeOverlapChker[arrayId][storage]->IsRangeOverlapConflicted(reqMsg);
+
+    return false;
 }
 
 void
 MioHandler::_RegisterRangeLockInfo(MetaFsIoRequest* reqMsg)
 {
-    ioRangeOverlapChker[reqMsg->arrayId][(int)reqMsg->targetMediaType]->PushReqToRangeLockMap(reqMsg);
+    int storage = (int)reqMsg->targetMediaType;
+    int arrayId = reqMsg->arrayId;
+
+    if (nullptr != ioRangeOverlapChker[arrayId][storage])
+        ioRangeOverlapChker[arrayId][storage]->PushReqToRangeLockMap(reqMsg);
 }
 
 void
 MioHandler::_FreeLockContext(Mio* mio)
 {
     int storage = mio->IsTargetStorageSSD() ? (int)MetaStorageType::SSD : (int)MetaStorageType::NVRAM;
-    ioRangeOverlapChker[mio->GetArrayId()][storage]->FreeLockContext(mio->GetStartLpn(), mio->IsRead());
+    int arrayId = mio->GetArrayId();
+
+    if (nullptr != ioRangeOverlapChker[arrayId][storage])
+        ioRangeOverlapChker[arrayId][storage]->FreeLockContext(mio->GetStartLpn(), mio->IsRead());
 }
 
 void

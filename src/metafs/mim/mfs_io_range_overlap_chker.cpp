@@ -75,6 +75,9 @@ MetaFsIoRangeOverlapChker::IsRangeOverlapConflicted(MetaFsIoRequest* newReq)
 void
 MetaFsIoRangeOverlapChker::FreeLockContext(uint64_t startLpn, bool isRead)
 {
+    if (unlikely(outstandingIoMap == nullptr))
+        return;
+
     if (true != isRead)
     {
         outstandingIoMap->ClearBit(startLpn);
