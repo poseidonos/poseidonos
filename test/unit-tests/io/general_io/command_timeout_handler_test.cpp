@@ -29,18 +29,6 @@ using ::testing::ReturnRef;
 
 namespace pos
 {
-int
-nvme_get_reg_4(struct spdk_nvme_ctrlr* ctrlr, uint32_t offset, uint32_t* value)
-{
-    static int call_count = 0;
-    if (call_count++ % 2 == 0)
-    {
-        *value = 0;
-        return 0;
-    }
-    return -1;
-}
-
 class CommandTimeoutHandlerFixture : public ::testing::Test
 {
 public:
@@ -52,18 +40,33 @@ public:
     {
     }
 
+    static int
+    NvmeGetReg4(struct spdk_nvme_ctrlr* ctrlr, uint32_t offset, uint32_t* value)
+    {
+        if (call_count++ % 2 == 0)
+        {
+            *value = 0;
+            return 0;
+        }
+        return -1;
+    }
+
     static void
     SetUpTestSuite(void)
     {
-        strcpy((char*)ctrlrData.sn, "different");
-        qpair.state = NVME_QPAIR_DISCONNECTING;
-        ctrlr.adminq = &qpair;
-        ctrlr.cdata = ctrlrData;
-        strcpy(ctrlr.trid.trstring, "TCP");
+        if (!initialized)
+        {
+            strcpy((char*)ctrlrData.sn, "different");
+            qpair.state = NVME_QPAIR_DISCONNECTING;
+            ctrlr.adminq = &qpair;
+            ctrlr.cdata = ctrlrData;
+            strcpy(ctrlr.trid.trstring, "TCP");
 
-        tcp_ops.ctrlr_get_reg_4 = nvme_get_reg_4;
-        strcpy(tcp_ops.name, "TCP");
-        spdk_nvme_transport_register(&tcp_ops);
+            tcp_ops.ctrlr_get_reg_4 = NvmeGetReg4;
+            strcpy(tcp_ops.name, "TCP");
+            spdk_nvme_transport_register(&tcp_ops);
+            initialized = true;
+        }
     }
 
     virtual void
@@ -88,6 +91,7 @@ public:
         devMgr->SetDeviceEventCallback(mockArrayMgr);
         devMgr->Initialize(&mockIODispatcher);
         devMgr->AttachDevice(ublockShared);
+        call_count = 0;
     }
 
     virtual void
@@ -108,6 +112,8 @@ protected:
     static struct spdk_nvme_ctrlr ctrlr;
     static struct spdk_nvme_qpair qpair;
     static struct spdk_nvme_transport_ops tcp_ops;
+    static bool initialized;
+    static int call_count;
     uint16_t cid{0};
 };
 
@@ -115,6 +121,8 @@ struct spdk_nvme_ctrlr_data CommandTimeoutHandlerFixture::ctrlrData;
 struct spdk_nvme_ctrlr CommandTimeoutHandlerFixture::ctrlr;
 struct spdk_nvme_qpair CommandTimeoutHandlerFixture::qpair;
 struct spdk_nvme_transport_ops CommandTimeoutHandlerFixture::tcp_ops;
+bool CommandTimeoutHandlerFixture::initialized;
+int CommandTimeoutHandlerFixture::call_count;
 
 TEST_F(CommandTimeoutHandlerFixture, Constructor)
 {
@@ -163,6 +171,7 @@ TEST_F(CommandTimeoutHandlerFixture, AbortSubmitHandler_DiskIO)
 TEST_F(CommandTimeoutHandlerFixture, AbortSubmitHandler_Execute)
 {
     // When : Timeout occured (cfs is not set)
+    ctrlr.is_failed = false;
     Nvme::ControllerTimeoutCallback(nullptr, &ctrlr, nullptr, cid);
     // Then : Command Timeout Abort Handler is called and abort event is submitted
     std::queue<EventSmartPtr> queue =
