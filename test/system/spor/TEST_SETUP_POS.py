@@ -120,11 +120,8 @@ def get_device_name(arrayId):
     dataDevice = ""
     spareDevice = ""
     for index in range(TEST.numSSDPerArray):
-        deviceName = "unvme-ns-" + str(index + arrayId * 4)
-        if index is TEST.numSSDPerArray - 1:
-            spareDevice = deviceName
-        else:
-            dataDevice += ("," + deviceName)
+        deviceName = "unvme-ns-" + str(index + arrayId * TEST.numSSDPerArray)
+        dataDevice += ("," + deviceName)
     dataDevice = dataDevice[1:]
     return (dataDevice, spareDevice)
 
@@ -144,7 +141,7 @@ def get_max_num_array():
 
 def create_array(arrayId):
     if get_max_num_array() < arrayId + 1:
-        TEST_LOG.print_info("Not enough SSD to create array. Therefore this test will be bypassed.")
+        TEST_LOG.print_info("Not enough SSD to create array. Therefore this test will be bypassed. Number of SSD is {}".format(get_num_ssd()))
         sys.exit(0)
 
     dataDevice, spareDevice = get_device_name(arrayId)
