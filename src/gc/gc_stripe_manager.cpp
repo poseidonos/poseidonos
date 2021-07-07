@@ -53,11 +53,10 @@
 namespace pos
 {
 GcStripeManager::GcStripeManager(IArrayInfo* array, FreeBufferPool* gcWriteBufferPool_)
-: VolumeEvent("GcStripeManager", array->GetName()),
+: VolumeEvent("GcStripeManager", array->GetName(), array->GetIndex()),
   array(array),
   gcWriteBufferPool(gcWriteBufferPool_)
 {
-    arrayName = array->GetName();
     udSize = array->GetSizeInfo(PartitionType::USER_DATA);
     if (nullptr == gcWriteBufferPool)
     {
@@ -70,7 +69,7 @@ GcStripeManager::GcStripeManager(IArrayInfo* array, FreeBufferPool* gcWriteBuffe
         flushed[volId] = true;
     }
     flushedStripeCnt = 0;
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, 0);
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayId);
 }
 
 GcStripeManager::~GcStripeManager(void)
@@ -92,7 +91,7 @@ GcStripeManager::~GcStripeManager(void)
     }
 
     delete gcWriteBufferPool;
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, 0);
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayId);
 }
 
 bool

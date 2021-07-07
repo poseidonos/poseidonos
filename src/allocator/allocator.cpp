@@ -53,7 +53,7 @@ namespace pos
 {
 Allocator::Allocator(AllocatorAddressInfo* addrInfo_, ContextManager* contextManager_, BlockManager* blockManager_,
     WBStripeManager* wbStripeManager_, IArrayInfo* info_, IStateControl* iState_)
-: VolumeEvent("Allocator", info_->GetName()),
+: VolumeEvent("Allocator", info_->GetName(), info_->GetIndex()),
   addrInfo(addrInfo_),
   contextManager(contextManager_),
   blockManager(blockManager_),
@@ -62,19 +62,18 @@ Allocator::Allocator(AllocatorAddressInfo* addrInfo_, ContextManager* contextMan
   iArrayInfo(info_),
   iStateControl(iState_)
 {
-    arrayName = info_->GetName();
 }
 
 Allocator::Allocator(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* iState)
 : Allocator(nullptr, nullptr, nullptr, nullptr, info, iState)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, 0);
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayId);
     _CreateSubmodules(tp);
 }
 
 Allocator::~Allocator(void)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, 0);
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayId);
     _DeleteSubmodules();
 }
 

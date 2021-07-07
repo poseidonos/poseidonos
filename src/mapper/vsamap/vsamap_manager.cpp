@@ -42,10 +42,10 @@
 namespace pos
 {
 VSAMapManager::VSAMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId)
-: VolumeEvent("Mapper", arrayName),
+: VolumeEvent("Mapper", arrayName, arrayId),
   volumeManager(nullptr)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, 0);
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayId);
 
     vsaMapAPI = new VSAMapAPI(this, info);
 
@@ -61,7 +61,7 @@ VSAMapManager::VSAMapManager(MapperAddressInfo* info, std::string arrayName, int
 
 VSAMapManager::~VSAMapManager(void)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, 0);
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayId);
 
     if (vsaMapAPI != nullptr)
     {

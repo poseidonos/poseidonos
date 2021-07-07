@@ -279,11 +279,11 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     // Please note that the order of creation should be like the following:
     metafs = metaFsFactory(array, isArrayLoaded);
     volMgr = new VolumeManager(array, state);
-    nvmf = new Nvmf(array->GetName(), 0);
+    nvmf = new Nvmf(array->GetName(), array->GetIndex());
     mapper = new Mapper(array, state);
     allocator = new Allocator(telPublisher, array, state);
     journal = new JournalManager(array, state);
-    rbaStateMgr = new RBAStateManager(array->GetName(), 0);
+    rbaStateMgr = new RBAStateManager(array->GetName(), array->GetIndex());
     flowControl = new FlowControl(array);
     gc = new GarbageCollector(array, state);
     metaMountSequence = new MetaMountSequence(arrayName, mapper, allocator, journal); // remember the ref to be able to delete during ~ArrayComponents()

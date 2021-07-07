@@ -42,7 +42,7 @@ namespace pos
 class VolumeEvent
 {
 public:
-    VolumeEvent(string _tag, string _arrayName, int _arrayId = 0);
+    VolumeEvent(string _tag, string _arrayName, int _arrayId);
     virtual ~VolumeEvent(void);
     string Tag(void);
     virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) = 0;

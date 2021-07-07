@@ -90,7 +90,6 @@ private:
 
     std::vector<Stripe*> gcStripeArray;
     IArrayInfo* array;
-    std::string arrayName;
 
     FreeBufferPool* gcWriteBufferPool;
     GcWriteBuffer* gcActiveWriteBuffers[GC_VOLUME_COUNT];

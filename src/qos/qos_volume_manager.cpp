@@ -55,7 +55,7 @@ namespace pos
  */
 /* --------------------------------------------------------------------------*/
 QosVolumeManager::QosVolumeManager(bool feQos)
-: VolumeEvent("QosManager", ""),
+: VolumeEvent("QosManager", "", ArrayMgmtPolicy::MAX_ARRAY_CNT),
   feQosEnabled(feQos)
 {
     for (uint32_t reactor = 0; reactor < M_MAX_REACTORS; reactor++)
@@ -90,7 +90,7 @@ QosVolumeManager::QosVolumeManager(bool feQos)
 /* --------------------------------------------------------------------------*/
 QosVolumeManager::~QosVolumeManager(void)
 {
-    int arrayID = 0;
+    int arrayID = ArrayMgmtPolicy::MAX_ARRAY_CNT;
     VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, "", arrayID);
     delete bwIopsRateLimit;
     delete parameterQueue;

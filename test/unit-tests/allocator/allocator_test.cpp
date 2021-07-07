@@ -28,7 +28,6 @@ TEST(Allocator, Allocator_TestConstructor)
     // given
     NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
     NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
-    EXPECT_CALL(*iArrayInfo, GetName).WillOnce(Return("")).WillOnce(Return(""));
     Allocator alloc(nullptr, iArrayInfo, iState);
     delete iArrayInfo;
     delete iState;
