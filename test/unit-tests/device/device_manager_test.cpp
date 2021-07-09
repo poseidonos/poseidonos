@@ -136,14 +136,6 @@ TEST(DeviceManager, _RegisterThread_)
 {
 }
 
-TEST(DeviceManager, _RegisterToAllDevices_)
-{
-}
-
-TEST(DeviceManager, _RegisterToDevice_)
-{
-}
-
 TEST(DeviceManager, _RegisterThreadToDevice_)
 {
 }

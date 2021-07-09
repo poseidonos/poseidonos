@@ -79,7 +79,6 @@ MonitorStart(DeviceMonitor* monitor)
 
 DeviceManager::DeviceManager(void)
 : affinityManager(AffinityManagerSingleton::Instance()),
-  reactorRegistered(false),
   deviceEvent(nullptr),
   ioDispatcher(nullptr)
 {
@@ -560,27 +559,16 @@ DeviceManager::_PrepareDevices(void)
 {
     for (auto& iter : devices)
     {
-        ioDispatcher->AddDeviceForReactor(iter);
-        cpu_set_t targetCpuSet =
-            affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
-        ioDispatcher->AddDeviceForIOWorker(iter, targetCpuSet);
+        _PrepareDevice(iter);
     }
 }
 
 void
 DeviceManager::_PrepareDevice(UblockSharedPtr dev)
 {
+    cpu_set_t ioWorkerCpuSet = affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
+    ioDispatcher->AddDeviceForIOWorker(dev, ioWorkerCpuSet);
     ioDispatcher->AddDeviceForReactor(dev);
-    cpu_set_t cpuSet = affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
-    ioDispatcher->AddDeviceForIOWorker(dev, cpuSet);
-    dev->Open();
-}
-
-void
-DeviceManager::_PrepareMockDevice(UblockSharedPtr dev)
-{
-    cpu_set_t cpuSet = affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
-    ioDispatcher->AddDeviceForIOWorker(dev, cpuSet);
 }
 
 void
