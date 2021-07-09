@@ -854,12 +854,20 @@ Array::_RegisterService(void)
 {
     ArrayService::Instance()->Setter()->Register(name_, intf->GetTranslator(),
         intf->GetRecover(), this);
+    if (devMgr_ != nullptr)
+    {
+        IOLockerSingleton::Instance()->Register(devMgr_->GetDataDevices());
+    }
 }
 
 void
 Array::_UnregisterService(void)
 {
     ArrayService::Instance()->Setter()->Unregister(name_);
+    if (devMgr_ != nullptr)
+    {
+        IOLockerSingleton::Instance()->Unregister(devMgr_->GetDataDevices());
+    }
 }
 
 void

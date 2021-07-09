@@ -33,6 +33,7 @@
 #pragma once
 
 #include <string>
+#include <set>
 
 #include "src/array/partition/partition.h"
 #include "src/include/address_type.h"
@@ -44,15 +45,14 @@ class IIOLocker;
 class ArrayUnlocking : public Callback
 {
 public:
-    ArrayUnlocking(PartitionType type, StripeId stripeId, const std::string& arrayName, IIOLocker* inputLocker = nullptr);
+    ArrayUnlocking(std::set<IArrayDevice*> devs, StripeId stripeId, IIOLocker* inputLocker);
     ~ArrayUnlocking(void) override;
 
 private:
     bool _DoSpecificJob(void) override;
 
-    PartitionType type;
+    std::set<IArrayDevice*> lockedDevs;
     StripeId stripeId;
-    std::string arrayName;
     IIOLocker* locker;
 };
 } // namespace pos

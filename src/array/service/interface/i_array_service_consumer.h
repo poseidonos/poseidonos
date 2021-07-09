@@ -46,7 +46,6 @@ class IArrayServiceConsumer
 public:
     virtual IIOTranslator* GetTranslator(void) = 0;
     virtual IIORecover* GetRecover(void) = 0;
-    virtual IIOLocker* GetLocker(void) = 0;
     virtual IIODeviceChecker* GetDeviceChecker(void) = 0;
 };
 } // namespace pos

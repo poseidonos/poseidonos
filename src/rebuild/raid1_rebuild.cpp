@@ -57,7 +57,7 @@ Raid1Rebuild::Raid1Rebuild(unique_ptr<RebuildContext> c)
 : RebuildBehavior(move(c))
 {
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid1Rebuild");
-    locker = ArrayService::Instance()->Getter()->GetLocker();
+    locker = IOLockerSingleton::Instance();
     assert(locker != nullptr);
 
     bool ret = _InitBuffers();
@@ -95,9 +95,7 @@ Raid1Rebuild::Read(void)
     if (baseStripe >= maxStripeId ||
         ctx->result >= RebuildState::CANCELLED)
     {
-        bool ret = locker->TryChange(
-            ctx->array, LockerMode::NORMAL);
-        if (ret == false)
+        if (locker->ResetBusyLock(ctx->faultDev) == false)
         {
             POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
                 "Partition {} rebuild done, but waiting lock release",
@@ -131,46 +129,27 @@ Raid1Rebuild::Read(void)
         return true;
     }
 
-    if (baseStripe == 0)
-    {
-        bool ret =  locker->TryChange(
-            ctx->array, LockerMode::BUSY);
-        if (ret == false)
-        {
-            return false;
-        }
-    }
-
-    uint32_t taskCnt = 0;
     uint32_t currWorkload = strPerSeg;
     if (baseStripe + currWorkload > maxStripeId)
     {
         currWorkload = maxStripeId - baseStripe;
     }
 
-    for (uint32_t offset = 0; offset < currWorkload; offset++)
-    {
-        uint32_t stripeId = baseStripe + offset;
-        if (locker->TryLock(ctx->array, stripeId) == false)
-        {
-            break;
-        }
-        taskCnt++;
-    }
-
-    if (taskCnt == 0)
+    if (locker->TryBusyLock(ctx->faultDev, baseStripe, baseStripe + currWorkload - 1) == false)
     {
         return false;
     }
 
-    ctx->taskCnt = taskCnt;
+    ctx->taskCnt = currWorkload;
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "Raid1Rebuild - from:{}, cnt:{}", baseStripe, taskCnt);
-    for (uint32_t offset = 0; offset < taskCnt; offset++)
+        "Raid1Rebuild - from:{}, cnt:{}", baseStripe, currWorkload);
+    for (uint32_t offset = 0; offset < currWorkload; offset++)
     {
         uint32_t stripeId = baseStripe + offset;
         void* buffer = recoverBuffers->TryGetBuffer();
         assert(buffer != nullptr);
+
+
         UbioSmartPtr ubio(new Ubio(buffer, blkCnt * Ubio::UNITS_PER_BLOCK, ctx->array));
         ubio->dir = UbioDir::Write;
         FtBlkAddr fta = {.stripeId = stripeId,
@@ -192,7 +171,7 @@ Raid1Rebuild::Read(void)
         }
     }
 
-    baseStripe += taskCnt;
+    baseStripe += currWorkload;
     return true;
 }
 
@@ -223,7 +202,7 @@ bool Raid1Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 
 bool Raid1Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
 {
-    locker->Unlock(ctx->array, targetId);
+    locker->Unlock(ctx->faultDev, targetId);
 
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
 

@@ -14,7 +14,7 @@ public:
     using StripeLockerBusyState::StripeLockerBusyState;
     MOCK_METHOD(bool, TryLock, (StripeId val), (override));
     MOCK_METHOD(void, Unlock, (StripeId val), (override));
-    MOCK_METHOD(bool, StateChange, (LockerMode mode), (override));
+    MOCK_METHOD(bool, Exists, (StripeId val), (override));
     MOCK_METHOD(uint32_t, Count, (), (override));
 };
 

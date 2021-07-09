@@ -16,11 +16,11 @@ TEST(StripeLocker, Unlock_)
 {
 }
 
-TEST(StripeLocker, TryModeChanging_)
+TEST(StripeLocker, TryBusyLock_)
 {
 }
 
-TEST(StripeLocker, _ChangeMode_)
+TEST(StripeLocker, ResetBusyLock_)
 {
 }
 

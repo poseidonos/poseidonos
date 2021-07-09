@@ -59,13 +59,11 @@ public:
     void Unregister(string array) override;
     IIOTranslator* GetTranslator(void) override;
     IIORecover* GetRecover(void) override;
-    IIOLocker* GetLocker(void) override;
     IIODeviceChecker* GetDeviceChecker(void) override;
 
 private:
     IOTranslator* ioTranslator = nullptr;
     IORecover* ioRecover = nullptr;
-    IOLocker* ioLocker = nullptr;
     IODeviceChecker* deviceChecker = nullptr;
 };
 

@@ -30,34 +30,27 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/io/general_io/array_unlocking.h"
+#pragma once
 
-#include "src/array/service/array_service_layer.h"
-#include "src/include/branch_prediction.h"
+#include <mutex>
+
+#include "src/include/address_type.h"
+
+using namespace std;
 
 namespace pos
 {
-ArrayUnlocking::ArrayUnlocking(std::set<IArrayDevice*> devs, StripeId stripeId,
-    IIOLocker* inputLocker)
-: Callback(false),
-  lockedDevs(devs),
-  stripeId(stripeId),
-  locker(inputLocker)
-{
-    if (likely(locker == nullptr))
-    {
-        locker = IOLockerSingleton::Instance();
-    }
-}
 
-ArrayUnlocking::~ArrayUnlocking(void)
+class BusyRange
 {
-}
+public:
+    virtual ~BusyRange(void) {}
+    virtual void SetRange(StripeId from, StripeId to);
+    virtual bool IsBusy(StripeId val);
 
-bool
-ArrayUnlocking::_DoSpecificJob(void)
-{
-    locker->Unlock(lockedDevs, stripeId);
-    return true;
-}
-} // namespace pos
+private:
+    StripeId lower = 0;
+    StripeId upper = 0;
+};
+
+}  // namespace pos

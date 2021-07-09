@@ -29,16 +29,56 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #pragma once
+
+#include <vector>
+#include <map>
+#include "src/array/device/array_device.h"
+
+using namespace std;
 
 namespace pos
 {
-
-enum LockerMode
+class LockerGroup
 {
-    NORMAL, // Without rebuild
-    BUSY,   // With rebuild
+public:
+    void AddDevice(vector<ArrayDevice*> d)
+    {
+        int size = d.size() / 2;
+        for (int i = 0; i < size ; i++)
+        {
+            IArrayDevice* origin = d.at(i);
+            IArrayDevice* mirror = d.at(i + size);
+            pairs.emplace(origin, mirror);
+            pairs.emplace(mirror, origin);
+        }
+    }
+
+    void RemoveDevice(vector<ArrayDevice*> d)
+    {
+        for (IArrayDevice* dev : d)
+        {
+            auto it = pairs.find(dev);
+            if (it != pairs.end())
+            {
+                pairs.erase(it);
+            }
+        }
+    }
+
+    IArrayDevice*
+    GetMirror(IArrayDevice* dev)
+    {
+        auto it = pairs.find(dev);
+        if (it == pairs.end())
+        {
+            return nullptr;
+        }
+        return it->second;
+    }
+
+private:
+    map<IArrayDevice*, IArrayDevice*> pairs;
 };
 
-}
+}  // namespace pos

@@ -41,16 +41,9 @@ bool
 StripeLockerBusyState::TryLock(StripeId id)
 {
     std::unique_lock<std::mutex> lock(mtx);
-    if (isStateChanging == true)
+    if (busySet.find(id) == busySet.end())
     {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "busylocker is now changing state. Using stripe {} is refused", id);
-        return false;
-    }
-
-    if (workingSet.find(id) == workingSet.end())
-    {
-        workingSet.insert(id);
+        busySet.insert(id);
         return true;
     }
 
@@ -61,39 +54,20 @@ void
 StripeLockerBusyState::Unlock(StripeId id)
 {
     unique_lock<mutex> lock(mtx);
-    workingSet.erase(id);
+    busySet.erase(id);
 }
 
 bool
-StripeLockerBusyState::StateChange(LockerMode mode)
+StripeLockerBusyState::Exists(StripeId id)
 {
-    // ONLY BUSY TO NORMAL ALLOWED
-    if (mode != LockerMode::NORMAL)
-    {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "busylocker: requested mode {} is invalid", mode);
-        return false;
-    }
-
-    unique_lock<mutex> lock(mtx);
-    if (workingSet.size() == 0)
-    {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "locker mode will be changed successfully busy to normal");
-        return true;
-    }
-
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "waiting for releasing busy lock (remaining count:{})",
-        workingSet.size());
-    return false;
+    return busySet.find(id) != busySet.end();
 }
 
 uint32_t
 StripeLockerBusyState::Count(void)
 {
     unique_lock<mutex> lock(mtx);
-    return workingSet.size();
+    return busySet.size();
 }
 
 }; // namespace pos
