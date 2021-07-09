@@ -120,6 +120,8 @@ private:
     IIODispatcher* ioDispatcher;
 };
 
+void DeviceDetachEventHandler(string sn);
+
 using DeviceManagerSingleton = Singleton<DeviceManager>;
 
 } // namespace pos

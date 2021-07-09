@@ -566,9 +566,14 @@ DeviceManager::_PrepareDevices(void)
 void
 DeviceManager::_PrepareDevice(UblockSharedPtr dev)
 {
+    /*
+        Device must be added to the reactor before the ioworker.
+        Adding uram to IOworker, it has recovery behavior.
+        Then ioworker issue IO to the uram and then reactor access to uram context
+    */
+    ioDispatcher->AddDeviceForReactor(dev);
     cpu_set_t ioWorkerCpuSet = affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
     ioDispatcher->AddDeviceForIOWorker(dev, ioWorkerCpuSet);
-    ioDispatcher->AddDeviceForReactor(dev);
 }
 
 void
