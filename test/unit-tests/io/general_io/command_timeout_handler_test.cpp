@@ -19,6 +19,7 @@
 #include "test/unit-tests/device/device_manager_mock.h"
 #include "test/unit-tests/io_scheduler/io_dispatcher_mock.h"
 #include "test/unit-tests/io_scheduler/io_worker_mock.h"
+#include "test/unit-tests/array_mgmt/array_manager_mock.h"
 #include "test/unit-tests/utils/mock_builder.h"
 
 using ::testing::_;
@@ -83,6 +84,8 @@ public:
         EXPECT_CALL(*dev, GetName).WillRepeatedly(Return("dev"));
         EXPECT_CALL(*dev, GetSN).WillRepeatedly(Return("different"));
         UblockSharedPtr ublockShared(dev);
+        mockArrayMgr = new NiceMock<MockArrayManager>(nullptr, nullptr, nullptr, nullptr, nullptr);
+        devMgr->SetDeviceEventCallback(mockArrayMgr);
         devMgr->Initialize(&mockIODispatcher);
         devMgr->AttachDevice(ublockShared);
     }
@@ -93,12 +96,14 @@ public:
         DeviceManagerSingleton::ResetInstance();
         devMgr = nullptr;
         delete mockIOWorker;
+        delete mockArrayMgr;
     }
 
 protected:
     DeviceManager* devMgr;
     NiceMock<MockIOWorker>* mockIOWorker;
     NiceMock<MockIODispatcher> mockIODispatcher;
+    NiceMock<MockArrayManager>* mockArrayMgr;
     static struct spdk_nvme_ctrlr_data ctrlrData;
     static struct spdk_nvme_ctrlr ctrlr;
     static struct spdk_nvme_qpair qpair;

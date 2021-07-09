@@ -19,7 +19,8 @@ public:
     MOCK_METHOD(int, AddDevice, (string name, string dev), (override));
     MOCK_METHOD(int, RemoveDevice, (string name, string dev), (override));
     MOCK_METHOD(int, DeviceDetached, (UblockSharedPtr dev), (override));
-    MOCK_METHOD(int, PrepareRebuild, (string name), (override));
+    MOCK_METHOD(void, DeviceAttached, (UblockSharedPtr dev), (override));
+    MOCK_METHOD(int, PrepareRebuild, (string name, bool& resume), (override));
     MOCK_METHOD(void, RebuildDone, (string name), (override));
     MOCK_METHOD(int, Load, (list<string> & failedArrayList), (override));
     MOCK_METHOD(int, ResetMbr, (), (override));

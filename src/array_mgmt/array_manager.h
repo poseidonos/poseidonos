@@ -71,24 +71,24 @@ public:
         DeviceManager* deviceManager, TelemetryClient* telClient,
         function<ArrayComponents*(string, IArrayRebuilder*, IAbrControl*)> arrayComponentsFactory);
     virtual ~ArrayManager();
-    int Create(string name, DeviceSet<string> devs, string raidtype) override;
-    int Delete(string name) override;
-    int Mount(string name) override;
-    int Unmount(string name) override;
-    int AddDevice(string name, string dev) override;
-    int RemoveDevice(string name, string dev) override;
-    int DeviceDetached(UblockSharedPtr dev) override;
-    void DeviceAttached(UblockSharedPtr dev) override;
+    virtual int Create(string name, DeviceSet<string> devs, string raidtype) override;
+    virtual int Delete(string name) override;
+    virtual int Mount(string name) override;
+    virtual int Unmount(string name) override;
+    virtual int AddDevice(string name, string dev) override;
+    virtual int RemoveDevice(string name, string dev) override;
+    virtual int DeviceDetached(UblockSharedPtr dev) override;
+    virtual void DeviceAttached(UblockSharedPtr dev) override;
 
-    int PrepareRebuild(string name, bool& resume) override;
-    void RebuildDone(string name) override;
+    virtual int PrepareRebuild(string name, bool& resume) override;
+    virtual void RebuildDone(string name) override;
 
-    bool ArrayExists(string name);
-    bool AbrExists(string name);
+    virtual bool ArrayExists(string name);
+    virtual bool AbrExists(string name);
     virtual int Load(list<string>& failedArrayList);
-    int GetAbrList(vector<ArrayBootRecord>& abrList);
-    IArrayInfo* GetArrayInfo(string name);
-    IArrayInfo* GetArrayInfo(uint32_t arrayIdx);
+    virtual int GetAbrList(vector<ArrayBootRecord>& abrList);
+    virtual IArrayInfo* GetArrayInfo(string name);
+    virtual IArrayInfo* GetArrayInfo(uint32_t arrayIdx);
     virtual int ResetMbr(void);
 
     // UT helper funcs, not meant for Prod usage
