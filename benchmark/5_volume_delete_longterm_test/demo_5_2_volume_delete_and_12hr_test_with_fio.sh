@@ -32,6 +32,12 @@ init2_fio_engine=${INIT2_FIO_ENGINE}
 init1_files=${INIT1_FILES}
 init2_files=${INIT2_FILES}
 
+kill_vdbench()
+{
+    sshpass -p ${init1_pw} ssh ${init1_id}@${init1_ip} "echo ${init1_pw} | sudo -S pkill -9 vdbench; echo ${init1_pw} | sudo -S pkill -9 java"
+    sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "echo ${init2_pw} | sudo -S pkill -9 vdbench; echo ${init2_pw} | sudo -S pkill -9 java"
+}
+
 
 volume_delete()
 {
@@ -145,8 +151,9 @@ volume_create_and_mount
 }
 
 echo "test start"
-#sudo ../1_psd_bringup/1_start_pos.sh
-#sudo ../1_psd_bringup/2_bring_up.sh -a ${target_ip_1} -b ${target_ip_2} -s ${volume_cnt} -v ${volume_cnt} -S ${volume_byte_size} -n ${target_nic_1} -m ${target_nic_2}
+
+
+kill_vdbench
 
 write_fill_pos_before_vol_delete
 

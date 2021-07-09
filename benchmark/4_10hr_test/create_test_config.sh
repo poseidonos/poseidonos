@@ -18,6 +18,8 @@ DEFAULT_FIO_DIR=/home/psd/fio_conf/
 DEFAULT_FIO_IO_ENGINE="/home/psd/ibofos/lib/spdk/examples/nvme/fio_plugin/fio_plugin"
 DEFAULT_NVME_LIST_1="/dev/nvme0n1 /dev/nvme1n1"
 DEFAULT_NVME_LIST_2="/dev/nvme0n1 /dev/nvme1n1"
+DEFAULT_SW_MAX=14600
+DEFAULT_RW_MAX=9500
 
 ############## ^^^ USER CONFIGURABLES ^^^ #################
 
@@ -37,9 +39,9 @@ make_fio_config()
 {
 sw_files=("sw_tcp_init1.conf" "sw_tcp_init2.conf")
 rw_files=("rw_tcp_init1.conf" "rw_tcp_init2.conf")
-sw_rate=$(($SW_MAX * 7 / 10))
-rw_rate=$(($RW_MAX * 7 / 10))
-general_configs=("[global]" "ioengine=${FIO_IO_ENGINE}" "size=100%" "thread=1" "serialize_overlap=0" "group_reporting=1" "direct=1" "numjobs=1" "ramp_time=0" "time_based=1" "log_avg_msec=2000")
+sw_rate=$(($SW_MAX * 7 / 10 / 2))
+rw_rate=$(($RW_MAX * 7 / 10 / 2))
+general_configs=("[global]" "ioengine=${FIO_IO_ENGINE}" "size=100%" "thread=1" "serialize_overlap=0" "group_reporting=1" "direct=1" "numjobs=1" "ramp_time=0" "time_based=1" "log_avg_msec=1000")
 sw_configs=("rwmixread=0" "readwrite=rw" "iodepth=4" "runtime=${SEQ_IO_TIME}" "io_size=${VOLUME_SIZE}g" "bs=128k" "write_bw_log=seqrw.log" "write_iops_log=seqrw.log" "rate=$sw_rate")
 rw_configs=("rwmixread=70" "readwrite=randrw" "iodepth=128" "runtime=${RAND_IO_TIME}" "io_size=${VOLUME_SIZE}g" "bs=4k" "write_bw_log=randrw.log" "write_iops_log=randrw.log" "rate=$rw_rate")
 
@@ -158,7 +160,7 @@ Options:
 END_OF_HELP
 }
 
-while getopts a:b:s:v:S:r:p:h:d:f:e:l:L: ARG ; do
+while getopts a:b:s:v:S:r:p:h:d:f:e:l:L:m:n: ARG ; do
 case $ARG in
 a )
 TARGET_IP1=$OPTARG
@@ -195,6 +197,12 @@ NVME_LIST_1=$OPTARG
 ;;
 L )
 NVME_LIST_2=$OPTARG
+;;
+m )
+SW_MAX=$OPTARG
+;;
+n )
+RW_MAX=$OPTARG
 ;;
 h )
 print_help ;
@@ -299,5 +307,25 @@ log_normal "11. NVME_LIST_2 => "$line
 done
 echo ""
 
+if [ -z $SW_MAX ]; then
+SW_MAX=$DEFAULT_SW_MAX
+log_error "12. SW_MAX empty, use default:"
+fi
+for line in ${SW_MAX[@]}
+do
+log_normal "12. SW_MAX => "$line
+done
+echo ""
+
+
+if [ -z $RW_MAX ]; then
+RW_MAX=$DEFAULT_RW_MAX
+log_error "13. RW_MAX empty, use default:"
+fi
+for line in ${RW_MAX[@]}
+do
+log_normal "13. RW_MAX => "$line
+done
+echo ""
 
 make_test_script

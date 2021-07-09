@@ -23,6 +23,9 @@ init1_vdbench_dir=${INIT1_VDBENCH_DIR}
 init2_vdbench_dir=${INIT2_VDBENCH_DIR}
 vdbench_sub_initiator_ip=${VDBENCH_SUB_INIT_IP}
 
+sw_max=${SW_MAX}
+rw_max=${RW_MAX}
+
 connect_nvme()
 {
 for ((i=1;i<=${volume_cnt};i+=2))
@@ -73,7 +76,7 @@ nvmelist1=`sshpass -p ${init1_pw} ssh ${init1_id}@${init1_ip} "echo ${init1_pw} 
 nvmelist2=`sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "echo ${init2_pw} | sudo -S nvme list" | awk '/dev/{print $1}'`
 echo nvme list : $nvmelisti1
 echo nvme list : $nvmelisti2
-sudo ./create_test_config.sh -a ${target_ip_1} -b ${target_ip_2} -v ${volume_cnt} -S ${volume_gb_size} -s ${seq_io_time} -r ${rand_io_time} -p ${vdbench_sub_initiator_ip} -d ${init1_vdbench_dir} -l "${nvmelist1}" -L "${nvmelist2}"
+sudo ./create_test_config.sh -a ${target_ip_1} -b ${target_ip_2} -v ${volume_cnt} -S ${volume_gb_size} -s ${seq_io_time} -r ${rand_io_time} -p ${vdbench_sub_initiator_ip} -d ${init1_vdbench_dir} -l "${nvmelist1}" -L "${nvmelist2}" -m "${sw_max}" -n "${rw_max}"
 
 sshpass -p ${init1_pw} ssh ${init1_id}@${init1_ip} "cd ${init1_vdbench_dir}; echo ${init1_pw} | sudo -S nohup ./vdbench rsh > /dev/null 2>&1 &"
 
