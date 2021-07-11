@@ -87,6 +87,12 @@ Nvmf::Shutdown(void)
 }
 
 void
+Nvmf::Flush(void)
+{
+    // no-op
+}
+
+void
 Nvmf::SetuNVMfIOHandler(unvmf_io_handler handler)
 {
     if (ioHandler.submit || ioHandler.complete)

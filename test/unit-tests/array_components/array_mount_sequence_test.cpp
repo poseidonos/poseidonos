@@ -180,7 +180,7 @@ TEST(ArrayMountSequence, StateChanged_testIfFlushIsntInvokedWhenStateChangesFrom
     vector<IMountSequence*> arrayMntSeq{&mockSeq1, &mockSeq2, &mockSeq3};
     NiceMock<MockStateControl> stateControl;
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
-    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array");
+    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array", 0);
 
     ArrayMountSequence mntSeq(arrayMntSeq, mockMntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr);
 
@@ -190,7 +190,6 @@ TEST(ArrayMountSequence, StateChanged_testIfFlushIsntInvokedWhenStateChangesFrom
     EXPECT_CALL(mockSeq3, Shutdown).Times(1);
     EXPECT_CALL(mockSeq2, Shutdown).Times(1);
     EXPECT_CALL(mockSeq1, Shutdown).Times(1);
-    EXPECT_CALL(*mockMntTmp, Shutdown).Times(1);
 
     // flush shouldn't be invoked
     EXPECT_CALL(mockSeq3, Flush).Times(0);

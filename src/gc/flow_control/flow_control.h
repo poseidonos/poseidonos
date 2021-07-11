@@ -88,6 +88,7 @@ public:
     virtual int Init(void) override;
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
+    virtual void Flush(void) override;
 
     virtual int GetToken(FlowControlType type, int token);
     virtual void ReturnToken(FlowControlType type, int token);

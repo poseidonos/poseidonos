@@ -17,7 +17,7 @@ class MockVolumeIo : public VolumeIo
 public:
     using VolumeIo::VolumeIo;
     MockVolumeIo(void)
-    : VolumeIo(nullptr, 0, "")
+    : VolumeIo(nullptr, 0, 0)
     {
     }
     MOCK_METHOD(VolumeIoSmartPtr, Split, (uint32_t sectors, bool removalFromTail), (override));

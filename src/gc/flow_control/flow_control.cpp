@@ -130,6 +130,12 @@ FlowControl::Shutdown(void)
     flowControlService->UnRegister(arrayInfo->GetName());
 }
 
+void
+FlowControl::Flush(void)
+{
+    // no-op
+}
+
 int
 FlowControl::GetToken(FlowControlType type, int token)
 {

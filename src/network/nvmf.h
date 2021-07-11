@@ -55,6 +55,7 @@ public:
     int Init(void) override;
     void Dispose(void) override;
     void Shutdown(void) override;
+    void Flush(void) override;
     void SetuNVMfIOHandler(unvmf_io_handler handler);
 
     virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;

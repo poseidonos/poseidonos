@@ -1196,7 +1196,7 @@ TEST(Array, Flush_testIfAbrRecordIsSaved)
     NiceMock<MockIStateControl> mockStateControl;
     MockArrayState* mockArrayState = new MockArrayState(&mockStateControl);
 
-    Array array("mock-array", NULL, mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockArrayState, NULL, NULL);
+    Array array("mock-array", NULL, mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockArrayState, NULL, NULL, NULL);
 
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).Times(1);
     EXPECT_CALL(*mockAbrControl, SaveAbr).Times(1);
