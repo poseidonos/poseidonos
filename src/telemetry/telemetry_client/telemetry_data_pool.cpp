@@ -33,7 +33,7 @@
 
 namespace pos
 {
-TelemetryDataPool::TelemetryDataPool()
+TelemetryDataPool::TelemetryDataPool(void)
 : maxEntry(LIMIT_NUM_MAX_ENTRY)
 {
 }
