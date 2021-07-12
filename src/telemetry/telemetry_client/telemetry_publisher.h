@@ -54,6 +54,7 @@ public:
 private:
     TelemetryDataPool dataPool;
     bool turnOn;
+    int maxEntry;
 };
 
 } // namespace pos

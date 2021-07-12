@@ -45,8 +45,17 @@ void
 TelemetryDataPool::SetLog(std::string id, uint32_t value)
 {
     tm curTime = _GetCurTime();
-    TelemetryGeneralMetric entry(curTime, value);
-    pool[id] = entry;
+    TelemetryGeneralMetric metric(curTime, value);
+    if (pool.size() == LIMIT_NUM_MAX_ENTRY)
+    {
+        auto entry = pool.find(id);
+        if (entry == pool.end())
+        {
+            POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] error!! failed to add new entry, num of entries reached max limit. Item:{}", id);
+            return;
+        }
+    }
+    pool[id] = metric;
 }
 
 int

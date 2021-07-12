@@ -80,6 +80,8 @@ public:
     list<TelemetryGeneralMetric> GetAll(void);
     int GetNumEntries(void);
 
+    static const int LIMIT_NUM_MAX_ENTRY = 100000; 
+
 private:
     tm _GetCurTime(void);
 
