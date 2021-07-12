@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "src/qos/qos_common.h"
 #include "src/qos/resource_array.h"
 #include "src/qos/resource_cpu.h"
 #include "src/qos/resource_nvram.h"
@@ -50,14 +51,14 @@ public:
     QosResource(void);
     ~QosResource(void);
     void Reset(void);
-    ResourceNvramStripes& GetResourceNvramStripes(void);
+    ResourceNvramStripes& GetResourceNvramStripes(uint32_t arrayId);
     ResourceCpu& GetResourceCpu(void);
-    ResourceArray& GetResourceArray(void);
+    ResourceArray& GetResourceArray(uint32_t arrayId);
 
 private:
-    ResourceNvramStripes resourceNvram;
+    ResourceNvramStripes resourceNvram[MAX_ARRAY_COUNT];
+    ResourceArray resourceArray[MAX_ARRAY_COUNT];
     ResourceCpu resourceCpu;
-    ResourceArray resourceArray;
     bool resourceCompromised;
 };
 } // namespace pos

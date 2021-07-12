@@ -33,14 +33,15 @@
 #pragma once
 
 #include <atomic>
-#include <queue>
-#include <unordered_map>
 #include <map>
-#include <vector>
+#include <queue>
 #include <string>
+#include <unordered_map>
+#include <vector>
+#include "src/qos/exit_handler.h"
+#include "src/qos/qos_array_manager.h"
 #include "src/qos/qos_common.h"
 #include "src/sys_event/volume_event.h"
-#include "src/qos/exit_handler.h"
 
 namespace pos
 {
@@ -52,7 +53,7 @@ class IoQueue;
 class QosVolumeManager : public VolumeEvent, public ExitQosHandler
 {
 public:
-    explicit QosVolumeManager(bool feQos);
+    QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arrayIndex, QosArrayManager* qosArrayManager);
     ~QosVolumeManager(void);
     bool VolumeCreated(std::string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override;
     bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayID) override;
@@ -65,19 +66,25 @@ public:
     std::vector<int> GetVolumeFromActiveSubsystem(uint32_t nqnId);
     void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* io);
     bw_iops_parameter DequeueParams(uint32_t reactor, uint32_t volId);
-    int VolumeQosPoller(struct poller_structure* param, IbofIoSubmissionAdapter* aioSubmission);
+    int VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aioSubmission, double offset);
     void SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops);
     int64_t GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops);
+    void DeleteVolumeFromSubsystemMap(uint32_t nqnId, uint32_t volId);
+    void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap);
+    void ResetRateLimit(uint32_t reactor, int volId, double offset);
+    std::string GetArrayName(void);
+    void SetArrayName(std::string arrayName);
 
 private:
     void _EnqueueParams(uint32_t reactor, uint32_t volId, bw_iops_parameter& volume_param);
-    void _ResetRateLimit(uint32_t reactor, int volId, double offset);
     bool _RateLimit(uint32_t reactor, int volId);
     void _UpdateRateLimit(uint32_t reactor, int volId, uint64_t size);
     void _EnqueueVolumeUbio(uint32_t rectorId, uint32_t volId, pos_io* io);
-    void _UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxbw);
+    void _UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxbw, std::string arrayName);
     pos_io* _DequeueVolumeUbio(uint32_t reactorId, uint32_t volId);
     void _EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, double offset);
+    void _ClearVolumeParameters(uint32_t volId);
+    std::string _GetBdevName(uint32_t id, string arrayName);
     std::unordered_map<int32_t, std::vector<int>> nqnVolumeMap;
     std::map<uint32_t, vector<int>> volList[M_MAX_REACTORS];
     bw_iops_parameter volumeQosParam[M_MAX_REACTORS][MAX_VOLUME_COUNT];
@@ -88,5 +95,9 @@ private:
     BwIopsRateLimit* bwIopsRateLimit;
     ParameterQueue* parameterQueue;
     IoQueue<pos_io*>* ioQueue;
+    QosContext* qosContext;
+    QosArrayManager* qosArrayManager;
+    std::mutex subsysVolMapLock;
+    const char* BDEV_NAME_PREFIX = "bdev_";
 };
 } // namespace pos

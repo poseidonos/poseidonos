@@ -47,6 +47,7 @@ public:
     ~ParameterQueue(void);
     void EnqueueParameter(uint32_t id1, uint32_t id2, bw_iops_parameter& param);
     bw_iops_parameter DequeueParameter(uint32_t id1, uint32_t id2);
+    void ClearParameters(uint32_t id2);
 
 private:
     std::mutex queueLock[MAX_REACTOR_WORKER][MAX_VOLUME_EVENT];

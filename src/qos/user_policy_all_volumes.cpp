@@ -29,9 +29,12 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "src/qos/user_policy_all_volumes.h"
+
+#include <utility>
+
 #include "src/qos/helper_templates.h"
+#include "src/qos/qos_common.h"
 
 namespace pos
 {
@@ -71,7 +74,8 @@ AllVolumeUserPolicy::Reset(void)
     volumeUserPolicyMap.clear();
     minInEffect = false;
     minBwGuarantee = false;
-    minGuaranteeVolume = DEFAULT_MIN_VOL;
+    minGuaranteeVolume.first = DEFAULT_MIN_VOL;
+    minGuaranteeVolume.second = DEFAULT_MIN_ARRAY;
     maxThrottlingChanged = false;
 }
 
@@ -127,9 +131,9 @@ AllVolumeUserPolicy::operator==(AllVolumeUserPolicy allVolPolicy)
  */
 /* --------------------------------------------------------------------------*/
 void
-AllVolumeUserPolicy::InsertVolumeUserPolicy(uint32_t vol, const VolumeUserPolicy& userPolicy)
+AllVolumeUserPolicy::InsertVolumeUserPolicy(uint32_t array, uint32_t vol, const VolumeUserPolicy& userPolicy)
 {
-    volumeUserPolicyMap[vol] = userPolicy;
+    volumeUserPolicyMap[make_pair(array, vol)] = userPolicy;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -140,9 +144,9 @@ AllVolumeUserPolicy::InsertVolumeUserPolicy(uint32_t vol, const VolumeUserPolicy
  */
 /* --------------------------------------------------------------------------*/
 VolumeUserPolicy*
-AllVolumeUserPolicy::GetVolumeUserPolicy(uint32_t vol)
+AllVolumeUserPolicy::GetVolumeUserPolicy(uint32_t array, uint32_t vol)
 {
-    auto search = volumeUserPolicyMap.find(vol);
+    auto search = volumeUserPolicyMap.find(make_pair(array, vol));
     if (search != volumeUserPolicyMap.end())
     {
         return &(search->second);
@@ -158,9 +162,10 @@ AllVolumeUserPolicy::GetVolumeUserPolicy(uint32_t vol)
  */
 /* --------------------------------------------------------------------------*/
 void
-AllVolumeUserPolicy::SetMinimumGuaranteeVolume(uint32_t volId)
+AllVolumeUserPolicy::SetMinimumGuaranteeVolume(uint32_t volId, uint32_t arrayId)
 {
-    minGuaranteeVolume = volId;
+    minGuaranteeVolume.first = volId;
+    minGuaranteeVolume.second = arrayId;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -170,7 +175,7 @@ AllVolumeUserPolicy::SetMinimumGuaranteeVolume(uint32_t volId)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-uint32_t
+std::pair<uint32_t, uint32_t>
 AllVolumeUserPolicy::GetMinimumGuaranteeVolume(void)
 {
     return minGuaranteeVolume;

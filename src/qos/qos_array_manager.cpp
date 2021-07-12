@@ -1,0 +1,483 @@
+/*
+ *   BSD LICENSE
+ *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without
+ *   modification, are permitted provided that the following conditions
+ *   are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided with the
+ *       distribution.
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
+ *
+ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "src/qos/qos_array_manager.h"
+
+#include "src/master_context/config_manager.h"
+#include "src/qos/qos_volume_manager.h"
+
+namespace pos
+{
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+QosArrayManager::QosArrayManager(uint32_t arrayIndex, QosContext* qosCtx)
+{
+    arrayId = arrayIndex;
+    feQosEnabled = false;
+    initialized = false;
+    ConfigManager& configManager = *ConfigManagerSingleton::Instance();
+    volMinPolicyInEffect = false;
+    gcFreeSegments = UPPER_GC_TH + 1;
+    minBwGuarantee = false;
+    bool enabled = false;
+    int ret = configManager.GetValue("fe_qos", "enable", &enabled,
+        CONFIG_TYPE_BOOL);
+    if (ret == (int)POS_EVENT_ID::SUCCESS)
+    {
+        feQosEnabled = enabled;
+    }
+
+    volumePolicyUpdated = false;
+    try
+    {
+        qosVolumeManager = new QosVolumeManager(qosCtx, feQosEnabled, arrayId, this);
+    }
+    catch (bad_alloc& ex)
+    {
+        assert(0);
+    }
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+QosArrayManager::~QosArrayManager(void)
+{
+    initialized = false;
+    delete qosVolumeManager;
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+qos_vol_policy
+QosArrayManager::GetVolumePolicy(uint32_t volId)
+{
+    std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+    return volPolicyCli[volId];
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+int
+QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
+{
+    uint32_t minGuaranteeVol = minGuaranteeVolume;
+    bool minBwPolicy = minBwGuarantee;
+    bool minPolicyInEffect = volMinPolicyInEffect;
+    qos_vol_policy cliPolicy = policy;
+
+    bool minPolicyReceived = ((true == policy.minBwGuarantee) || (true == policy.minIopsGuarantee));
+
+    if (true == volMinPolicyInEffect)
+    {
+        if (true == minPolicyReceived)
+        {
+            if (minGuaranteeVolume != volId)
+            {
+                // Min Volume set, trying to set minimum for diff volume
+                return QosReturnCode::ONE_MINIMUM_GUARANTEE_SUPPORTED;
+            }
+            else
+            {
+                if (true == minBwPolicy)
+                {
+                    if (true == policy.minIopsGuarantee)
+                    {
+                        // Min BW set, trying to set Min IOPS
+                        return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
+                    }
+                }
+                else
+                {
+                    if (true == policy.minBwGuarantee)
+                    {
+                        // Min IOPS set, trying to set Min BW
+                        return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (minGuaranteeVolume == volId)
+            {
+                minGuaranteeVol = DEFAULT_MIN_VOL;
+                minPolicyInEffect = false;
+                minBwPolicy = false;
+            }
+        }
+    }
+    else
+    {
+        if (true == minPolicyReceived)
+        {
+            minGuaranteeVol = volId;
+            minPolicyInEffect = true;
+
+            if (true == policy.minBwGuarantee)
+            {
+                minBwPolicy = true;
+            }
+            else
+            {
+                minBwPolicy = false;
+            }
+        }
+    }
+
+    if (0 == policy.maxBw)
+    {
+        policy.maxBw = DEFAULT_MAX_BW_IOPS;
+    }
+    else
+    {
+        policy.maxBw = policy.maxBw * (M_KBYTES * M_KBYTES / (PARAMETER_COLLECTION_INTERVAL));
+        if (policy.maxBw == 0)
+        {
+            policy.maxBw = 1;
+        }
+    }
+    for (uint32_t i = 0; i < M_MAX_REACTORS; i++)
+    {
+        qosVolumeManager->SetVolumeLimit(i, volId, policy.maxBw, false);
+        qosVolumeManager->ResetRateLimit(i, volId, 1);
+    }
+
+    if (0 == policy.maxIops)
+    {
+        policy.maxIops = DEFAULT_MAX_BW_IOPS;
+    }
+    else
+    {
+        // since value is taken in KIOPS, convert to actual number here
+        policy.maxIops = policy.maxIops * KIOPS / PARAMETER_COLLECTION_INTERVAL;
+        if (policy.maxIops == 0)
+        {
+            policy.maxIops = 1;
+        }
+    }
+    for (uint32_t i = 0; i < M_MAX_REACTORS; i++)
+    {
+        qosVolumeManager->SetVolumeLimit(i, volId, policy.maxIops, true);
+        qosVolumeManager->ResetRateLimit(i, volId, 1);
+    }
+
+    if (0 == policy.minBw)
+    {
+        policy.minBw = DEFAULT_MIN_BW_MBPS;
+    }
+    policy.minBw = policy.minBw * (M_KBYTES * M_KBYTES / (PARAMETER_COLLECTION_INTERVAL));
+
+    if (0 == policy.minIops)
+    {
+        policy.minIops = DEFAULT_MIN_IOPS;
+    }
+    else
+    {
+        // since value is taken in KIOPS, convert to actual number here
+        policy.minIops = policy.minIops * KIOPS / PARAMETER_COLLECTION_INTERVAL;
+    }
+    {
+        std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+        volPolicyCli[volId] = cliPolicy;
+        volumePolicyMapCli[volId] = policy;
+        minGuaranteeVolume = minGuaranteeVol;
+        minBwGuarantee = minBwPolicy;
+        volMinPolicyInEffect = minPolicyInEffect;
+        volumePolicyUpdated = true;
+    }
+    return QosReturnCode::SUCCESS;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+QosArrayManager::IsVolumePolicyUpdated(void)
+{
+    return volumePolicyUpdated;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+QosArrayManager::IsMinimumPolicyInEffect(void)
+{
+    return volMinPolicyInEffect;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+
+void
+QosArrayManager::GetVolumePolicyMap(std::map<uint32_t, qos_vol_policy>& volumePolicyMapCopy)
+{
+    std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+    volumePolicyMapCopy = volumePolicyMapCli;
+    volumePolicyMapCli.clear();
+    volumePolicyUpdated = false;
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+void
+QosArrayManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* volIo)
+{
+    qosVolumeManager->HandlePosIoSubmission(aioSubmission, volIo);
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+bw_iops_parameter
+QosArrayManager::DequeueVolumeParams(uint32_t reactor, uint32_t volId)
+{
+    return qosVolumeManager->DequeueParams(reactor, volId);
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+void
+QosArrayManager::IncreaseUsedStripeCnt(void)
+{
+    usedStripeCnt++;
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+void
+QosArrayManager::DecreaseUsedStripeCnt(void)
+{
+    usedStripeCnt--;
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+uint32_t
+QosArrayManager::GetUsedStripeCnt(void)
+{
+    return usedStripeCnt;
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+qos_rebuild_policy
+QosArrayManager::GetRebuildPolicy(void)
+{
+    return rebuildPolicyCli;
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+int
+QosArrayManager::UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy)
+{
+    rebuildPolicyCli = rebuildPolicy;
+    return QosReturnCode::SUCCESS;
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+void
+QosArrayManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops)
+{
+    qosVolumeManager->SetVolumeLimit(reactor, volId, weight, iops);
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+int64_t
+QosArrayManager::GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops)
+{
+    return qosVolumeManager->GetVolumeLimit(reactor, volId, iops);
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+void
+QosArrayManager::SetGcFreeSegment(uint32_t freeSegments)
+{
+    gcFreeSegments = freeSegments;
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+uint32_t
+QosArrayManager::GetGcFreeSegment(void)
+{
+    return gcFreeSegments;
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+std::vector<int>
+QosArrayManager::GetVolumeFromActiveSubsystem(uint32_t nqnId)
+{
+    return qosVolumeManager->GetVolumeFromActiveSubsystem(nqnId);
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosArrayManager::UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId)
+{
+    qosVolumeManager->UpdateSubsystemToVolumeMap(nqnId, volId);
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+void
+QosArrayManager::DeleteVolumeFromSubsystemMap(uint32_t nqnId, uint32_t volId)
+{
+    qosVolumeManager->DeleteVolumeFromSubsystemMap(nqnId, volId);
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+void
+QosArrayManager::VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aioSubmission, double offset)
+{
+    qosVolumeManager->VolumeQosPoller(reactor, aioSubmission, offset);
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+void
+QosArrayManager::GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap)
+{
+    qosVolumeManager->GetSubsystemVolumeMap(subsysVolMap);
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+
+void
+QosArrayManager::SetArrayName(std::string name)
+{
+    arrayName = name;
+    qosVolumeManager->SetArrayName(arrayName);
+}
+} // namespace pos

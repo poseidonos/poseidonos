@@ -41,7 +41,6 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/lib/system_timeout_checker.h"
 #include "src/logger/logger.h"
-#include "src/qos/qos_manager.h"
 #include "src/volume/volume_manager.h"
 
 namespace pos
@@ -216,7 +215,6 @@ NvmfVolumePos::_VolumeMountHandler(void* arg1, void* arg2)
             delete vInfo;
             return;
         }
-        QosManagerSingleton::Instance()->UpdateSubsystemToVolumeMap(nqn_id, vInfo->id);
         set_pos_volume_info(bdevName.c_str(), subNqn.c_str(), nqn_id);
         target->SetVolumeQos(bdevName, vInfo->iops_limit, vInfo->bw_limit);
         delete vInfo;

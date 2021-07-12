@@ -35,6 +35,7 @@
 #include <map>
 
 #include "src/qos/internal_manager.h"
+#include "src/qos/processing_manager_array.h"
 #include "src/qos/qos_common.h"
 
 namespace pos
@@ -58,7 +59,7 @@ public:
 private:
     void _SetNextManagerType(void);
     QosContext* qosContext;
-    MovingAvgCompute* movingAvgCompute;
     QosInternalManagerType nextManagerType;
+    QosProcessingManagerArray* qosProcessingManagerArray[MAX_ARRAY_COUNT];
 };
 } // namespace pos

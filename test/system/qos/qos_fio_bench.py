@@ -179,7 +179,11 @@ def run_fio(io_size_bytes, block_size, qd, rw_mix, cpus_allowed, run_num, worklo
                 if workload_type <= 3:
                     command += " --name=test" + str(i) + " --readwrite=" +str(readwrite[i]) + " --bs=" + str(blocksize[i]) + " --bs_unaligned=0 " " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) +  " trsvcid=1158" " subnqn=nqn.2019-04.pos\:subsystem" + str(i+1) + " ns=1'"
                 else:
-                    command += " --name=test" + str(i) + " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 " "subnqn=nqn.2019-04.pos\:subsystem" + str(i+1) + " ns=1'"
+                    if(multiArray == 1):
+                        command += " --name=test" + str(i) + " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 " "subnqn=nqn.2019-04.pos\:subsystem" + str(i + 1) + " ns=1'"
+                    else:
+                        command += " --name=test" + str(i) + " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 " "subnqn=nqn.2019-04.pos\:subsystem1" + " ns=" + str(i + 1) +"'"
+                        command += " --name=test" + str(i) + " --filename='trtype=" + str(trtype) + " adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 " "subnqn=nqn.2019-04.pos\:subsystem2" + " ns=" + str(i + 1) +"'"
             else:
                 command += " --name=test" + str(i) + "" + " --filename='Nvme" + str(i+1) + "n1'"
     else:
@@ -300,6 +304,7 @@ def parse_argument():
     global offset
     global workload_type
     global group_reporting
+    global multiArray
     parser = argparse.ArgumentParser(description='Please add fio option to fio_full_bench.py')
     parser.add_argument('--iodepth', required=False, help='Set I/O Queue Depth. Please input without space  Ex) --iodepth="1,32,128"');
     parser.add_argument('--io_size', required=False, help='Set io_size. Please input without space. Please set single number');
@@ -325,6 +330,7 @@ def parse_argument():
     parser.add_argument('-n', '--nsid', required=False, help='Set Namespace id ');
     parser.add_argument('-wl','--workload_type', required=False, help='Defines workload type');
     parser.add_argument('--group_reporting', required=False, help='Enables or disables hroup reporting');
+    parser.add_argument('--multiArray', required=False, help='Running on multi subsystem')
 
     args = parser.parse_args()
     if(args.iodepth!=None):
@@ -376,6 +382,9 @@ def parse_argument():
         group_reporting=args.group_reporting
     if(args.filename):
         filename=args.filename
+    if(args.multiArray):
+        multiArray = int(args.multiArray)
+
 
 # set up for output file
 host_name = os.uname()[1]

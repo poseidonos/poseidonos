@@ -30,33 +30,56 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/qos/policy_manager_array.h"
 
-#include <map>
-#include <utility>
-
-#include "src/qos/throttle_volume.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/qos/correction_manager.h"
+#include "src/qos/qos_context.h"
+#include "src/qos/qos_manager.h"
+#include "src/qos/volume_policy.h"
 
 namespace pos
 {
-class VolumeThrottle;
 /* --------------------------------------------------------------------------*/
 /**
- * @Synopsis
- *
- */
+  * @Synopsis
+  *
+  * @Returns
+  */
 /* --------------------------------------------------------------------------*/
-class AllVolumeThrottle
+QosPolicyManagerArray::QosPolicyManagerArray(QosContext* qosCtx, uint32_t arrayIndex)
 {
-public:
-    AllVolumeThrottle(void);
-    ~AllVolumeThrottle(void);
-    void Reset(void);
-    void InsertVolumeThrottle(uint32_t array, uint32_t vol, const VolumeThrottle& volThrottle);
-    std::map<std::pair<uint32_t, uint32_t>, VolumeThrottle>& GetVolumeThrottleMap(void);
-
-private:
-    std::map<std::pair<uint32_t, uint32_t>, VolumeThrottle> volumeThrottleMap;
-    bool inEffect;
-};
+    qosContext = qosCtx;
+    arrayId = arrayIndex;
+    volumePolicy = new VolumePolicy(qosCtx);
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+QosPolicyManagerArray::~QosPolicyManagerArray(void)
+{
+    delete volumePolicy;
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+void
+QosPolicyManagerArray::Execute(void)
+{
+    qosContext->SetApplyCorrection(false);
+    QosCorrection& qosCorrection = qosContext->GetQosCorrection();
+    qosCorrection.SetCorrectionType(QosCorrection_VolumeThrottle, false);
+    if (true == QosManagerSingleton::Instance()->IsFeQosEnabled())
+    {
+        volumePolicy->HandlePolicy();
+    }
+}
 } // namespace pos

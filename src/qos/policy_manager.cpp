@@ -33,11 +33,10 @@
 #include "src/qos/policy_manager.h"
 
 #include "src/include/pos_event_id.hpp"
-#include "src/qos/qos_context.h"
 #include "src/qos/correction_manager.h"
 #include "src/qos/event_cpu_policy.h"
 #include "src/qos/policy_handler.h"
-#include "src/qos/volume_policy.h"
+#include "src/qos/qos_context.h"
 #include "src/qos/qos_manager.h"
 
 namespace pos
@@ -53,8 +52,11 @@ QosPolicyManager::QosPolicyManager(QosContext* qosCtx)
 {
     qosContext = qosCtx;
     nextManagerType = QosInternalManager_Unknown;
-    volumePolicy = new VolumePolicy(qosCtx);
     eventCpuPolicy = new EventCpuPolicy(qosCtx);
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    {
+        qosPolicyManagerArray[i] = new QosPolicyManagerArray(qosContext, i);
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -66,7 +68,10 @@ QosPolicyManager::QosPolicyManager(QosContext* qosCtx)
 /* --------------------------------------------------------------------------*/
 QosPolicyManager::~QosPolicyManager(void)
 {
-    delete volumePolicy;
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    {
+        delete qosPolicyManagerArray[i];
+    }
     delete eventCpuPolicy;
 }
 
@@ -82,12 +87,12 @@ QosPolicyManager::Execute(void)
 {
     qosContext->SetApplyCorrection(false);
     QosCorrection& qosCorrection = qosContext->GetQosCorrection();
-    qosCorrection.SetCorrectionType(QosCorrection_VolumeThrottle, false);
     qosCorrection.SetCorrectionType(QosCorrection_EventThrottle, false);
     qosCorrection.SetCorrectionType(QosCorrection_EventWrr, false);
-    if (true == QosManagerSingleton::Instance()->IsFeQosEnabled())
+    uint32_t numberOfArrays = QosManagerSingleton::Instance()->GetNumberOfArrays();
+    for (uint32_t i = 0; i < numberOfArrays; i++)
     {
-        volumePolicy->HandlePolicy();
+        qosPolicyManagerArray[i]->Execute();
     }
     eventCpuPolicy->HandlePolicy();
     _SetNextManagerType();

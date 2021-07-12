@@ -161,7 +161,7 @@ WBStripeManager::FreeWBStripeId(StripeId lsid)
     std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
     assert(!IsUnMapStripe(lsid));
     wbStripeCtx->ReleaseWbStripe(lsid);
-    QosManagerSingleton::Instance()->DecreaseUsedStripeCnt();
+    QosManagerSingleton::Instance()->DecreaseUsedStripeCnt(arrayName);
 }
 
 void

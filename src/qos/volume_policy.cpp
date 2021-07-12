@@ -87,7 +87,9 @@ VolumePolicy::_HandleInternalPolicy(void)
 {
     bool retVal = false;
     QosCorrection& qosCorrection = qosContext->GetQosCorrection();
-    uint32_t minVolId = DEFAULT_MIN_VOL;
+    std::pair<uint32_t, uint32_t> minVolId;
+    minVolId.first = DEFAULT_MIN_VOL;
+    minVolId.second = DEFAULT_MIN_ARRAY;
 
     retVal = _MinimumPolicyDisabledChanged(minVolId);
     if (true == retVal)
@@ -95,7 +97,7 @@ VolumePolicy::_HandleInternalPolicy(void)
         return;
     }
 
-    if (minVolId == DEFAULT_MIN_VOL)
+    if (minVolId.first == DEFAULT_MIN_VOL)
     {
         return;
     }
@@ -117,14 +119,15 @@ VolumePolicy::_HandleInternalPolicy(void)
  */
 /* --------------------------------------------------------------------------*/
 bool
-VolumePolicy::_MinimumPolicyDisabledChanged(uint32_t& minVolId)
+VolumePolicy::_MinimumPolicyDisabledChanged(std::pair<uint32_t, uint32_t>& minVolId)
 {
     QosUserPolicy& currUserPolicy = qosContext->GetQosUserPolicy();
     QosCorrection& qosCorrection = qosContext->GetQosCorrection();
     AllVolumeUserPolicy& currAllVolumePolicy = currUserPolicy.GetAllVolumeUserPolicy();
-    uint32_t currMinVolId = currAllVolumePolicy.GetMinimumGuaranteeVolume();
-    uint32_t lastMinVolId = lastAllVolumePolicy.GetMinimumGuaranteeVolume();
-    minVolId = currMinVolId;
+    std::pair<uint32_t, uint32_t> currMinVolId = currAllVolumePolicy.GetMinimumGuaranteeVolume();
+    std::pair<uint32_t, uint32_t> lastMinVolId = lastAllVolumePolicy.GetMinimumGuaranteeVolume();
+    minVolId.first = currMinVolId.first;
+    minVolId.second = currMinVolId.second;
 
     if ((false == currAllVolumePolicy.IsMinPolicyInEffect()) && (true == lastAllVolumePolicy.IsMinPolicyInEffect()))
     {
@@ -148,6 +151,7 @@ VolumePolicy::_MinimumPolicyDisabledChanged(uint32_t& minVolId)
         qosContext->SetApplyCorrection(true);
         return true;
     }
+
     if (lastVolReactorMap == qosContext->GetActiveVolumeReactors())
     {
         return false;
@@ -178,16 +182,16 @@ VolumePolicy::_HandleBandwidthIopsUpdate(void)
     AllVolumeUserPolicy& currAllVolumePolicy = currUserPolicy.GetAllVolumeUserPolicy();
     QosCorrection& qosCorrection = qosContext->GetQosCorrection();
     std::map<uint32_t, uint32_t> activeVolumeMap = qosContext->GetActiveVolumes();
-    uint32_t currMinVolId = currAllVolumePolicy.GetMinimumGuaranteeVolume();
+    std::pair<uint32_t, uint32_t> currMinVolId = currAllVolumePolicy.GetMinimumGuaranteeVolume();
     bool minBwPolicy = currAllVolumePolicy.IsMinBwPolicyInEffect();
 
-    VolumeUserPolicy* volPolicy = currAllVolumePolicy.GetVolumeUserPolicy(currMinVolId);
+    VolumeUserPolicy* volPolicy = currAllVolumePolicy.GetVolumeUserPolicy(currMinVolId.second, currMinVolId.first);
     if (volPolicy == nullptr)
     {
         return;
     }
 
-    if (false == allVolumeParam.VolumeExists(currMinVolId))
+    if (false == allVolumeParam.VolumeExists(currMinVolId.first, currMinVolId.second))
     {
         return;
     }
@@ -196,11 +200,13 @@ VolumePolicy::_HandleBandwidthIopsUpdate(void)
     uint64_t minVolAverageBw = 0;
     for (map<uint32_t, uint32_t>::iterator it = activeVolumeMap.begin(); it != activeVolumeMap.end(); it++)
     {
-        if (false == allVolumeParam.VolumeExists(it->first))
+        uint32_t arrayId = it->first / MAX_VOLUME_COUNT;
+        uint32_t volId = it->first % MAX_VOLUME_COUNT;
+        if (false == allVolumeParam.VolumeExists(arrayId, it->first))
         {
             return;
         }
-        VolumeParameter& volParam = allVolumeParam.GetVolumeParameter(it->first);
+        VolumeParameter& volParam = allVolumeParam.GetVolumeParameter(arrayId, volId);
         uint64_t averageIops = volParam.GetAvgIops();
         uint64_t averageBandwidth = volParam.GetAvgBandwidth();
 
@@ -208,13 +214,12 @@ VolumePolicy::_HandleBandwidthIopsUpdate(void)
         {
             return;
         }
-        if (currMinVolId == it->first)
+        if (currMinVolId.first == volId && currMinVolId.second == arrayId)
         {
             minVolAverageIops = averageIops;
             minVolAverageBw = averageBandwidth;
         }
     }
-
     uint64_t minIops = volPolicy->GetMinIops();
     uint64_t minBandwidth = volPolicy->GetMinBandwidth();
 
@@ -271,12 +276,13 @@ VolumePolicy::_MarkAllVolumesThrottling(bool skipMinVol, uint32_t change)
     AllVolumeThrottle& allVolumeThrottle = qosCorrection.GetVolumeThrottlePolicy();
     QosUserPolicy& currUserPolicy = qosContext->GetQosUserPolicy();
     AllVolumeUserPolicy& currAllVolumePolicy = currUserPolicy.GetAllVolumeUserPolicy();
-    uint32_t currMinVolId = currAllVolumePolicy.GetMinimumGuaranteeVolume();
+    std::pair<uint32_t, uint32_t> currMinVolId = currAllVolumePolicy.GetMinimumGuaranteeVolume();
 
-    std::map<uint32_t, VolumeThrottle>& volumeThrottleMap = allVolumeThrottle.GetVolumeThrottleMap();
+    std::map<std::pair<uint32_t, uint32_t>, VolumeThrottle>& volumeThrottleMap = allVolumeThrottle.GetVolumeThrottleMap();
     for (auto it = volumeThrottleMap.begin(); it != volumeThrottleMap.end(); it++)
     {
-        if ((currMinVolId == it->first) && (true == skipMinVol))
+        std::pair<uint32_t, uint32_t> volId = it->first;
+        if ((currMinVolId.second == volId.first) && (currMinVolId.first == volId.second) && (true == skipMinVol))
         {
             continue;
         }

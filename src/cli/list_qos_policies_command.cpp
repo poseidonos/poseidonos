@@ -80,7 +80,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
     arrayJson.AddElement(array);
     data.SetArray(arrayJson);
 
-    rebuildPolicy = QosManagerSingleton::Instance()->GetRebuildPolicy();
+    rebuildPolicy = QosManagerSingleton::Instance()->GetRebuildPolicy(arrayName);
     string impact = _GetRebuildImpactString(rebuildPolicy.rebuildImpact);
 
     JsonElement rebuild("");
@@ -116,7 +116,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
         }
         for (auto vol = volumeIds.begin(); vol != volumeIds.end(); vol++)
         {
-            volPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(*vol);
+            volPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(*vol, arrayName);
             volMgr->VolumeName(*vol, volName);
             JsonElement volume("");
             volume.SetAttribute(JsonAttribute("name", "\"" + volName + "\""));

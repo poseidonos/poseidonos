@@ -369,7 +369,7 @@ VolumeManager::UpdateVolumePolicy(std::string volName, qos_vol_policy volPolicy)
     QosManager* qosManager = QosManagerSingleton::Instance();
     if (true == qosManager->IsFeQosEnabled())
     {
-        return QosManagerSingleton::Instance()->UpdateVolumePolicy(volId, volPolicy);
+        return QosManagerSingleton::Instance()->UpdateVolumePolicy(volId, volPolicy, arrayInfo->GetIndex());
     }
     else
     {
@@ -385,7 +385,7 @@ VolumeManager::GetVolumePolicy(std::string volName)
     QosManager* qosManager = QosManagerSingleton::Instance();
     if (true == qosManager->IsFeQosEnabled())
     {
-        volPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volId);
+        volPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volId, arrayInfo->GetName());
     }
     return volPolicy;
 }

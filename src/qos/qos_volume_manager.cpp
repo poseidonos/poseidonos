@@ -30,8 +30,8 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "lib/spdk/lib/nvmf/nvmf_internal.h"
 #include "src/qos/qos_volume_manager.h"
+
 #include "src/include/array_mgmt_policy.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/aio_submission_adapter.h"
@@ -54,10 +54,13 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-QosVolumeManager::QosVolumeManager(bool feQos)
-: VolumeEvent("QosManager", "", ArrayMgmtPolicy::MAX_ARRAY_CNT),
-  feQosEnabled(feQos)
+QosVolumeManager::QosVolumeManager(QosContext* qosCtx, bool feQos, uint32_t arrayIndex, QosArrayManager* qosArrayMgr)
+: VolumeEvent("QosManager", "", arrayIndex),
+  feQosEnabled(feQos),
+  qosContext(qosCtx)
 {
+    arrayId = arrayIndex;
+    qosArrayManager = qosArrayMgr;
     for (uint32_t reactor = 0; reactor < M_MAX_REACTORS; reactor++)
     {
         for (uint32_t volId = 0; volId < MAX_VOLUME_COUNT; volId++)
@@ -67,8 +70,7 @@ QosVolumeManager::QosVolumeManager(bool feQos)
             pendingIO[reactor][volId] = 0;
         }
     }
-    int arrayID = ArrayMgmtPolicy::MAX_ARRAY_CNT;
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, "", arrayID);
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, "", arrayId);
     try
     {
         bwIopsRateLimit = new BwIopsRateLimit;
@@ -90,8 +92,7 @@ QosVolumeManager::QosVolumeManager(bool feQos)
 /* --------------------------------------------------------------------------*/
 QosVolumeManager::~QosVolumeManager(void)
 {
-    int arrayID = ArrayMgmtPolicy::MAX_ARRAY_CNT;
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, "", arrayID);
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, "", arrayId);
     delete bwIopsRateLimit;
     delete parameterQueue;
     delete ioQueue;
@@ -107,6 +108,10 @@ QosVolumeManager::~QosVolumeManager(void)
 void
 QosVolumeManager::UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId)
 {
+    if (std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volId) != nqnVolumeMap[nqnId].end())
+    {
+        return;
+    }
     nqnVolumeMap[nqnId].push_back(volId);
 }
 
@@ -117,6 +122,23 @@ QosVolumeManager::UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::DeleteVolumeFromSubsystemMap(uint32_t nqnId, uint32_t volId)
+{
+    std::vector<int>::iterator position = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volId);
+    if (position != nqnVolumeMap[nqnId].end())
+    {
+        nqnVolumeMap[nqnId].erase(position);
+    }
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+
 std::vector<int>
 QosVolumeManager::GetVolumeFromActiveSubsystem(uint32_t nqnId)
 {
@@ -237,6 +259,19 @@ QosVolumeManager::DequeueParams(uint32_t reactor, uint32_t volId)
  */
 /* --------------------------------------------------------------------------*/
 void
+QosVolumeManager::_ClearVolumeParameters(uint32_t volId)
+{
+    parameterQueue->ClearParameters(volId);
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
 QosVolumeManager::_EnqueueVolumeUbio(uint32_t reactorId, uint32_t volId, pos_io* io)
 {
     ioQueue->EnqueueIo(reactorId, volId, io);
@@ -263,7 +298,7 @@ QosVolumeManager::_DequeueVolumeUbio(uint32_t reactorId, uint32_t volId)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosVolumeManager::_UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxbw)
+QosVolumeManager::_UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
 {
     qos_vol_policy volumePolicy;
     volumePolicy.maxBw = maxbw;
@@ -271,7 +306,7 @@ QosVolumeManager::_UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxb
     volumePolicy.maxIops = maxiops;
     volumePolicy.policyChange = true;
     volumePolicy.maxValueChanged = true;
-    QosManagerSingleton::Instance()->UpdateVolumePolicy(volId, volumePolicy);
+    qosArrayManager->UpdateVolumePolicy(volId, volumePolicy);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -285,7 +320,7 @@ bool
 QosVolumeManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByte,
     uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
 {
-    _UpdateVolumeMaxQos(volID, maxiops, maxbw);
+    _UpdateVolumeMaxQos(volID, maxiops, maxbw, arrayName);
     return true;
 }
 
@@ -301,7 +336,7 @@ QosVolumeManager::VolumeDeleted(std::string volName, int volID, uint64_t volSize
 {
     qos_vol_policy volumePolicy;
     volumePolicy.policyChange = true;
-    QosManagerSingleton::Instance()->UpdateVolumePolicy(volID, volumePolicy);
+    qosArrayManager->UpdateVolumePolicy(volID, volumePolicy);
     return true;
 }
 
@@ -316,7 +351,10 @@ bool
 QosVolumeManager::VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte,
     uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
 {
-    _UpdateVolumeMaxQos(volID, maxiops, maxbw);
+    string bdevName = _GetBdevName(volID, arrayName);
+    uint32_t nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
+    UpdateSubsystemToVolumeMap(nqnId, volID);
+    _UpdateVolumeMaxQos(volID, maxiops, maxbw, arrayName);
     return true;
 }
 
@@ -334,15 +372,14 @@ QosVolumeManager::VolumeUnmounted(std::string volName, int volID, std::string ar
     {
         return true;
     }
-    uint32_t nqnId = SpdkConnection::GetAttachedSubsystemId(volName.c_str());
-    uint32_t i = 0;
-    for (i = 0; i < nqnVolumeMap[nqnId].size(); i++)
+    string bdevName = _GetBdevName(volID, arrayName);
+    uint32_t nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
+    std::vector<int>::iterator position = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volID);
+    if (position != nqnVolumeMap[nqnId].end())
     {
-        if (volID == nqnVolumeMap[nqnId][i])
-        {
-            nqnVolumeMap[nqnId].erase(nqnVolumeMap[nqnId].begin() + i);
-        }
+        nqnVolumeMap[nqnId].erase(position);
     }
+    _ClearVolumeParameters(volID);
     return true;
 }
 
@@ -357,6 +394,7 @@ bool
 QosVolumeManager::VolumeLoaded(std::string volName, int id, uint64_t totalSize,
     uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
 {
+    _UpdateVolumeMaxQos(id, maxiops, maxbw, arrayName);
     return true;
 }
 
@@ -371,12 +409,16 @@ bool
 QosVolumeManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops,
     uint64_t maxbw, std::string arrayName, int arrayID)
 {
-    qos_vol_policy volumePolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volID);
+    qos_vol_policy volumePolicy = qosArrayManager->GetVolumePolicy(volID);
     if ((volumePolicy.maxBw == maxbw) && (volumePolicy.maxIops == maxiops))
     {
         return true;
     }
-    _UpdateVolumeMaxQos(volID, maxiops, maxbw);
+    std::string arrName = GetArrayName();
+    if (0 == arrayName.compare(arrName))
+    {
+        _UpdateVolumeMaxQos(volID, maxiops, maxbw, arrayName);
+    }
     return true;
 }
 
@@ -390,6 +432,18 @@ QosVolumeManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops
 void
 QosVolumeManager::VolumeDetached(vector<int> volList, std::string arrayName, int arrayID)
 {
+    for (auto volId : volList)
+    {
+        string bdevName = _GetBdevName(volId, arrayName);
+        uint32_t nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
+        std::vector<int>::iterator position = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volId);
+        if (position != nqnVolumeMap[nqnId].end())
+        {
+            nqnVolumeMap[nqnId].erase(position);
+        }
+
+        _ClearVolumeParameters(volId);
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -400,7 +454,7 @@ QosVolumeManager::VolumeDetached(vector<int> volList, std::string arrayName, int
  */
 /* --------------------------------------------------------------------------*/
 void
-QosVolumeManager::_ResetRateLimit(uint32_t reactor, int volId, double offset)
+QosVolumeManager::ResetRateLimit(uint32_t reactor, int volId, double offset)
 {
     int64_t setBwLimit = GetVolumeLimit(reactor, volId, false);
     int64_t setIopsLimit = GetVolumeLimit(reactor, volId, true);
@@ -415,54 +469,32 @@ QosVolumeManager::_ResetRateLimit(uint32_t reactor, int volId, double offset)
  */
 /* --------------------------------------------------------------------------*/
 int
-QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissionAdapter* aioSubmission)
+QosVolumeManager::VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aioSubmission, double offset)
 {
-    if (false == feQosEnabled)
-    {
-        return 0;
-    }
     uint32_t retVal = 0;
-    uint32_t reactor = param->id;
-    uint64_t now = SpdkConnection::SpdkGetTicks();
     pos_io* queuedVolumeIo = nullptr;
     uint64_t currentBW = 0;
     uint64_t currentIO = 0;
-    uint64_t next_tick = param->nextTimeStamp;
-    if (now < next_tick)
+    volList[reactor].clear();
+    for (auto it = nqnVolumeMap.begin(); it != nqnVolumeMap.end(); it++)
     {
-        return 0;
-    }
-    double offset = (double)(now - next_tick) / param->qosTimeSlice;
-    offset = offset + 1.0;
-    param->nextTimeStamp = now + param->qosTimeSlice;
-    if (SpdkConnection::IsReactorConnectionChanged(reactor) == true)
-    {
-        SpdkConnection::ResetReactorConnection(reactor);
-        volList[reactor].clear();
-        for (auto it = nqnVolumeMap.begin(); it != nqnVolumeMap.end(); it++)
+        uint32_t subsys = it->first;
+        if (SpdkConnection::SpdkNvmfGetReactorSubsystemMapping(reactor, subsys) != INVALID_SUBSYSTEM)
         {
-            uint32_t subsys = it->first;
-            if (SpdkConnection::SpdkNvmfGetReactorSubsystemMapping(reactor, subsys) != M_INVALID_SUBSYSTEM)
-            {
-                volList[reactor][subsys] = GetVolumeFromActiveSubsystem(subsys);
-            }
+            volList[reactor][subsys] = GetVolumeFromActiveSubsystem(subsys);
         }
     }
+
     for (auto subsystem = volList[reactor].begin(); subsystem != volList[reactor].end(); subsystem++)
     {
         std::vector<int> volumeList = volList[reactor][subsystem->first];
         for (uint32_t i = 0; i < volumeList.size(); i++)
         {
             int volId = volumeList[i];
-            // Currently Qos supports just 1 Volume per subsystem, so default considers only 1st volume of subsystem list
-            // Fix for memory leak issue SHPOS-410
-            if (volId == volumeList[0])
-            {
-                _EnqueueVolumeParameter(reactor, volId, offset);
-            }
             currentBW = 0;
             currentIO = 0;
-            _ResetRateLimit(reactor, volId, offset);
+            ResetRateLimit(reactor, volId, offset);
+            _EnqueueVolumeParameter(reactor, volId, offset);
             while (!IsExitQosSet())
             {
                 if (_RateLimit(reactor, volId) == true)
@@ -497,10 +529,21 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
 void
 QosVolumeManager::_EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, double offset)
 {
-    volumeQosParam[reactor][volId].valid = M_VALID_ENTRY;
-    volumeQosParam[reactor][volId].currentBW = volumeQosParam[reactor][volId].currentBW / offset;
-    volumeQosParam[reactor][volId].currentIOs = volumeQosParam[reactor][volId].currentIOs / offset;
-    _EnqueueParams(reactor, volId, volumeQosParam[reactor][volId]);
+    uint64_t currentBW = volumeQosParam[reactor][volId].currentBW / offset;
+    uint64_t currentIops = volumeQosParam[reactor][volId].currentIOs / offset;
+    bool minimumPolicyInEffect = qosArrayManager->IsMinimumPolicyInEffect();
+    qos_vol_policy volPolicy = qosArrayManager->GetVolumePolicy(volId);
+    bool enqueueParameters = false;
+
+    enqueueParameters = minimumPolicyInEffect || (0 != volPolicy.maxBw) || (0 != volPolicy.maxIops);
+    enqueueParameters = enqueueParameters && currentBW;
+    if (enqueueParameters)
+    {
+        volumeQosParam[reactor][volId].valid = M_VALID_ENTRY;
+        volumeQosParam[reactor][volId].currentBW = currentBW;
+        volumeQosParam[reactor][volId].currentIOs = currentIops;
+        _EnqueueParams(reactor, volId, volumeQosParam[reactor][volId]);
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -543,4 +586,47 @@ QosVolumeManager::GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops)
     }
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subSysVolMap)
+{
+    std::unique_lock<std::mutex> uniqueLock(subsysVolMapLock);
+    subSysVolMap = nqnVolumeMap;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosVolumeManager::SetArrayName(std::string name)
+{
+    arrayName = name;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+std::string
+QosVolumeManager::GetArrayName(void)
+{
+    return arrayName;
+}
+
+string
+QosVolumeManager::_GetBdevName(uint32_t volId, string arrayName)
+{
+    return BDEV_NAME_PREFIX + to_string(volId) + "_" + arrayName;
+}
 } // namespace pos

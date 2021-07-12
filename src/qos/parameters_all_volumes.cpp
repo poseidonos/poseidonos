@@ -80,9 +80,9 @@ AllVolumeParameter::Reset(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-AllVolumeParameter::InsertVolumeParameter(uint32_t volId, const VolumeParameter& volParam)
+AllVolumeParameter::InsertVolumeParameter(uint32_t arrayId, uint32_t volId, const VolumeParameter& volParam)
 {
-    volumeParameterMap[volId] = volParam;
+    volumeParameterMap[make_pair(arrayId, volId)] = volParam;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -93,9 +93,9 @@ AllVolumeParameter::InsertVolumeParameter(uint32_t volId, const VolumeParameter&
  */
 /* --------------------------------------------------------------------------*/
 bool
-AllVolumeParameter::VolumeExists(uint32_t volId)
+AllVolumeParameter::VolumeExists(uint32_t arrayId, uint32_t volId)
 {
-    auto search = volumeParameterMap.find(volId);
+    auto search = volumeParameterMap.find(make_pair(arrayId, volId));
     if (search != volumeParameterMap.end())
     {
         return true;
@@ -111,9 +111,9 @@ AllVolumeParameter::VolumeExists(uint32_t volId)
  */
 /* --------------------------------------------------------------------------*/
 VolumeParameter&
-AllVolumeParameter::GetVolumeParameter(uint32_t volId)
+AllVolumeParameter::GetVolumeParameter(uint32_t arrayId, uint32_t volId)
 {
-    auto search = volumeParameterMap.find(volId);
+    auto search = volumeParameterMap.find(make_pair(arrayId, volId));
     if (search != volumeParameterMap.end())
     {
         return search->second;

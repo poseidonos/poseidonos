@@ -52,11 +52,6 @@ VolumeEventPublisher::~VolumeEventPublisher()
 void
 VolumeEventPublisher::RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayId)
 {
-    if (arrayId == ArrayMgmtPolicy::MAX_ARRAY_CNT)
-    {
-        qosManagerVolumeEvent = subscriber;
-        return;
-    }
     subscribers.push_back(std::pair<int, VolumeEvent*>(arrayId, subscriber));
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "VolumeEvent subscriber {} is registered", subscriber->Tag());
@@ -65,12 +60,6 @@ VolumeEventPublisher::RegisterSubscriber(VolumeEvent* subscriber, std::string ar
 void
 VolumeEventPublisher::RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayId)
 {
-    if (arrayId == ArrayMgmtPolicy::MAX_ARRAY_CNT)
-    {
-        qosManagerVolumeEvent = nullptr;
-        return;
-    }
-
     for (auto it = subscribers.begin(); it != subscribers.end(); ++it)
     {
         if (it->first == arrayId)
@@ -114,7 +103,6 @@ VolumeEventPublisher::NotifyVolumeCreated(std::string volName, int volID,
         }
     }
 
-    qosManagerVolumeEvent->VolumeCreated(volName, volID, volSizeByte, maxiops, maxbw, arrayName, arrayId);
     return ret;
 }
 
@@ -146,7 +134,6 @@ VolumeEventPublisher::NotifyVolumeUpdated(std::string volName, int volID, uint64
         }
     }
 
-    qosManagerVolumeEvent->VolumeUpdated(volName, volID, maxiops, maxbw, arrayName, arrayId);
     return ret;
 }
 
@@ -178,7 +165,6 @@ VolumeEventPublisher::NotifyVolumeDeleted(std::string volName, int volID, uint64
         }
     }
 
-    qosManagerVolumeEvent->VolumeDeleted(volName, volID, volSizeByte, arrayName, arrayId);
     return ret;
 }
 
@@ -209,7 +195,6 @@ VolumeEventPublisher::NotifyVolumeMounted(std::string volName, std::string subnq
         }
     }
 
-    qosManagerVolumeEvent->VolumeMounted(volName, subnqn, volID, volSizeByte, maxiops, maxbw, arrayName, arrayId);
     return ret;
 }
 
@@ -240,7 +225,6 @@ VolumeEventPublisher::NotifyVolumeUnmounted(std::string volName, int volID, std:
         }
     }
 
-    qosManagerVolumeEvent->VolumeUnmounted(volName, volID, arrayName, arrayId);
     return ret;
 }
 
@@ -272,7 +256,6 @@ VolumeEventPublisher::NotifyVolumeLoaded(std::string name, int id,
         }
     }
 
-    qosManagerVolumeEvent->VolumeLoaded(name, id, totalSize, maxiops, maxbw, arrayName, arrayId);
     return ret;
 }
 
@@ -298,7 +281,6 @@ VolumeEventPublisher::NotifyVolumeDetached(vector<int> volList, std::string arra
         }
     }
 
-    qosManagerVolumeEvent->VolumeDetached(volList, arrayName, arrayId);
 }
 
 } // namespace pos

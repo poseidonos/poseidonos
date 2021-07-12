@@ -29,8 +29,9 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "src/qos/throttle_all_volumes.h"
+
+#include <utility>
 
 namespace pos
 {
@@ -79,9 +80,9 @@ AllVolumeThrottle::Reset(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-AllVolumeThrottle::InsertVolumeThrottle(uint32_t vol, const VolumeThrottle& volThrottle)
+AllVolumeThrottle::InsertVolumeThrottle(uint32_t array, uint32_t vol, const VolumeThrottle& volThrottle)
 {
-    volumeThrottleMap[vol] = volThrottle;
+    volumeThrottleMap[make_pair(array, vol)] = volThrottle;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -91,7 +92,7 @@ AllVolumeThrottle::InsertVolumeThrottle(uint32_t vol, const VolumeThrottle& volT
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-std::map<uint32_t, VolumeThrottle>&
+std::map<std::pair<uint32_t, uint32_t>, VolumeThrottle>&
 AllVolumeThrottle::GetVolumeThrottleMap(void)
 {
     return volumeThrottleMap;

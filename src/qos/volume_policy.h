@@ -33,6 +33,8 @@
 #pragma once
 
 #include <map>
+#include <utility>
+
 #include "src/qos/policy_handler.h"
 #include "src/qos/qos_context.h"
 
@@ -53,16 +55,16 @@ public:
 
 private:
     void _HandleInternalPolicy(void);
-    bool _MinimumPolicyDisabledChanged(uint32_t& minVolId);
+    bool _MinimumPolicyDisabledChanged(std::pair<uint32_t, uint32_t>& minVolId);
     void _HandleBandwidthIopsUpdate(void);
     void _MarkAllVolumesThrottling(bool skipMinVol, uint32_t change);
     void _StoreContext(void);
     AllVolumeUserPolicy lastAllVolumePolicy;
     AllVolumeParameter lastAllVolumeParam;
     std::map<uint32_t, uint32_t> lastActiveVolMap;
-    std::map<uint32_t, map<uint32_t, uint32_t>> lastVolReactorMap;
     QosContext* qosContext;
     bool resetBwThrottling;
     bool changeCorrection;
+    std::map<uint32_t, map<uint32_t, uint32_t>> lastVolReactorMap;
 };
 } // namespace pos

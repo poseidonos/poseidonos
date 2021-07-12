@@ -60,10 +60,8 @@ private:
     void _SetNextManagerType(void);
     void _HandleVolumeCorrection(void);
     void _HandleMaxThrottling(void);
-    void _HandleMinThrottling(uint32_t volId);
     void _HandleWrrCorrection(void);
     uint64_t _InitialValueCheck(uint64_t value, bool iops, VolumeParameter& volParameter, VolumeUserPolicy& volUserPolicy);
-    void _ApplyCorrection(uint64_t value, bool iops, uint64_t volId, uint64_t reactor, uint64_t count, uint64_t totalConnection);
     QosContext* qosContext;
     QosInternalManagerType nextManagerType;
 };

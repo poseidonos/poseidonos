@@ -67,7 +67,6 @@ public:
 
 private:
     vector<std::pair<int, VolumeEvent*>> subscribers;
-    VolumeEvent* qosManagerVolumeEvent;
 };
 
 using VolumeEventPublisherSingleton = Singleton<VolumeEventPublisher>;

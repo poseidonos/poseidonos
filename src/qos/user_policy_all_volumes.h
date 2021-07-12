@@ -33,6 +33,7 @@
 #pragma once
 
 #include <map>
+#include <utility>
 
 #include "src/qos/user_policy_volume.h"
 
@@ -52,10 +53,10 @@ public:
     ~AllVolumeUserPolicy(void);
     void Reset(void);
     bool operator==(AllVolumeUserPolicy allVolPolicy);
-    void InsertVolumeUserPolicy(uint32_t vol, const VolumeUserPolicy& userPolicy);
-    VolumeUserPolicy* GetVolumeUserPolicy(uint32_t vol);
-    void SetMinimumGuaranteeVolume(uint32_t volId);
-    uint32_t GetMinimumGuaranteeVolume(void);
+    void InsertVolumeUserPolicy(uint32_t array, uint32_t vol, const VolumeUserPolicy& userPolicy);
+    VolumeUserPolicy* GetVolumeUserPolicy(uint32_t array, uint32_t vol);
+    void SetMinimumGuaranteeVolume(uint32_t volId, uint32_t arrayId);
+    std::pair<uint32_t, uint32_t> GetMinimumGuaranteeVolume(void);
     void SetMinimumPolicyInEffect(bool value);
     void SetMinimumPolicyType(bool minBw);
     bool IsMinPolicyInEffect(void);
@@ -64,8 +65,8 @@ public:
     bool IsMaxThrottlingChanged(void);
 
 private:
-    std::map<uint32_t, VolumeUserPolicy> volumeUserPolicyMap;
-    uint32_t minGuaranteeVolume;
+    std::map<std::pair<uint32_t, uint32_t>, VolumeUserPolicy> volumeUserPolicyMap;
+    std::pair<uint32_t, uint32_t> minGuaranteeVolume;
     bool maxThrottlingChanged;
     bool minInEffect;
     bool minBwGuarantee;

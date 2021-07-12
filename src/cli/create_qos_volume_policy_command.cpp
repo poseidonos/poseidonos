@@ -166,7 +166,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
     for (auto vol = validVolumes.begin(); vol != validVolumes.end(); vol++)
     {
         std::pair<string, uint32_t> volume = (*vol);
-        prevVolPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volume.second);
+        prevVolPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volume.second, arrayName);
         newVolPolicy = prevVolPolicy;
         newVolPolicy.policyChange = false;
         newVolPolicy.maxValueChanged = false;
@@ -188,6 +188,9 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 {
                     newVolPolicy.policyChange = true;
                 }
+                newVolPolicy.minBwGuarantee = false;  // TODO(s3.paliwal): Multi Array Qos does not support min vol guarantee
+                errorMsg = "Minimum Bandwidth not supported";
+                return static_cast<int>(POS_EVENT_ID::QOS_NOT_SUPPORTED);
             }
         }
 
@@ -229,6 +232,9 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 {
                     newVolPolicy.policyChange = true;
                 }
+                newVolPolicy.minIopsGuarantee = false;  // TODO(s3.paliwal): Multi Array Qos does not support min vol guarantee
+                errorMsg = "Minimum Iops not supported";
+                return static_cast<int>(POS_EVENT_ID::QOS_NOT_SUPPORTED);
             }
         }
 
@@ -269,7 +275,8 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                     return retVal;
                 }
             }
-            retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy);
+            uint32_t arrayId = QosManagerSingleton::Instance()->GetArrayIdFromMap(arrayName);
+            retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy, arrayId);
             if (retVal != SUCCESS)
             {
                 errorMsg = "Qos Volume Policy Updated in QosManager failed";

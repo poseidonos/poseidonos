@@ -45,7 +45,6 @@
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 #include "src/network/nvmf_volume_pos.h"
-#include "src/qos/qos_context.h"
 #include "src/qos/context_factory.h"
 #include "src/qos/internal_manager.h"
 #include "src/qos/internal_manager_factory.h"
@@ -70,18 +69,16 @@ QosManager::QosManager(void)
     qosThread = nullptr;
     feQosEnabled = false;
     pollerTime = UINT32_MAX;
-    volMinPolicyInEffect = false;
-    minBwGuarantee = false;
-    minGuaranteeVolume = DEFAULT_MIN_VOL;
-    usedStripeCnt = 0;
+    arrayNameMap.clear();
+    arrayIdMap.clear();
+
     for (uint32_t event = 0; (BackendEvent)event < BackendEvent_Count; event++)
     {
         pendingEvents[event] = M_RESET_TO_ZERO;
         eventLog[event] = M_RESET_TO_ZERO;
         oldLog[event] = M_RESET_TO_ZERO;
     }
-    volumePolicyUpdated = false;
-    gcFreeSegments = 0;
+
     ConfigManager& configManager = *ConfigManagerSingleton::Instance();
     bool enabled = false;
     int ret = configManager.GetValue("fe_qos", "enable", &enabled,
@@ -95,8 +92,11 @@ QosManager::QosManager(void)
     try
     {
         qosEventManager = new QosEventManager;
-        qosVolumeManager = new QosVolumeManager(feQosEnabled);
         qosContext = ContextFactory::CreateQosContext();
+        for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+        {
+            qosArrayManager[i] = new QosArrayManager(i, qosContext);
+        }
         spdkManager = new QosSpdkManager(qosContext, feQosEnabled);
         monitoringManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Monitor, qosContext);
         policyManager = InternalManagerFactory::CreateInternalManager(QosInternalManager_Policy, qosContext);
@@ -107,6 +107,7 @@ QosManager::QosManager(void)
     {
         assert(0);
     }
+    currentNumberOfArrays = 0;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -122,9 +123,7 @@ QosManager::~QosManager(void)
     initialized = false;
     delete qosThread;
     delete spdkManager;
-    delete qosVolumeManager;
     delete qosEventManager;
-    delete qosContext;
     delete monitoringManager;
     delete policyManager;
     delete processingManager;
@@ -185,7 +184,10 @@ QosManager::_Finalize(void)
     }
     POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosSpdkManager Finalization complete");
     SetExitQos();
-    qosVolumeManager->SetExitQos();
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    {
+        qosArrayManager[i]->SetExitQos();
+    }
     qosEventManager->SetExitQos();
     monitoringManager->SetExitQos();
     policyManager->SetExitQos();
@@ -208,7 +210,9 @@ QosManager::_Finalize(void)
 void
 QosManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* volIo)
 {
-    qosVolumeManager->HandlePosIoSubmission(aioSubmission, volIo);
+    std::string arrayName(volIo->arrayName);
+    uint32_t arrayId = arrayNameMap[arrayName];
+    qosArrayManager[arrayId]->HandlePosIoSubmission(aioSubmission, volIo);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -300,9 +304,9 @@ QosManager::_GetNextInternalManager(QosInternalManagerType internalManagerType)
  */
 /* --------------------------------------------------------------------------*/
 bw_iops_parameter
-QosManager::DequeueVolumeParams(uint32_t reactor, uint32_t volId)
+QosManager::DequeueVolumeParams(uint32_t reactor, uint32_t volId, uint32_t arrayId)
 {
-    return qosVolumeManager->DequeueParams(reactor, volId);
+    return qosArrayManager[arrayId]->DequeueVolumeParams(reactor, volId);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -352,9 +356,9 @@ QosManager::GetEventWeightWRR(BackendEvent eventId)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosManager::IncreaseUsedStripeCnt(void)
+QosManager::IncreaseUsedStripeCnt(uint32_t arrayId)
 {
-    usedStripeCnt++;
+    qosArrayManager[arrayId]->IncreaseUsedStripeCnt();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -365,9 +369,10 @@ QosManager::IncreaseUsedStripeCnt(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosManager::DecreaseUsedStripeCnt(void)
+QosManager::DecreaseUsedStripeCnt(std::string arrayName)
 {
-    usedStripeCnt--;
+    uint32_t arrayId = arrayNameMap[arrayName];
+    qosArrayManager[arrayId]->DecreaseUsedStripeCnt();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -378,9 +383,9 @@ QosManager::DecreaseUsedStripeCnt(void)
  */
 /* --------------------------------------------------------------------------*/
 uint32_t
-QosManager::GetUsedStripeCnt(void)
+QosManager::GetUsedStripeCnt(uint32_t arrayId)
 {
-    return usedStripeCnt;
+    return qosArrayManager[arrayId]->GetUsedStripeCnt();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -391,9 +396,9 @@ QosManager::GetUsedStripeCnt(void)
  */
 /* --------------------------------------------------------------------------*/
 std::vector<int>
-QosManager::GetVolumeFromActiveSubsystem(uint32_t nqnId)
+QosManager::GetVolumeFromActiveSubsystem(uint32_t nqnId, uint32_t arrayId)
 {
-    return qosVolumeManager->GetVolumeFromActiveSubsystem(nqnId);
+    return qosArrayManager[arrayId]->GetVolumeFromActiveSubsystem(nqnId);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -404,11 +409,24 @@ QosManager::GetVolumeFromActiveSubsystem(uint32_t nqnId)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosManager::UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId)
+QosManager::UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId, std::string arrayName)
 {
-    qosVolumeManager->UpdateSubsystemToVolumeMap(nqnId, volId);
+    uint32_t arrayId = GetArrayIdFromMap(arrayName);
+    qosArrayManager[arrayId]->UpdateSubsystemToVolumeMap(nqnId, volId);
 }
-
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosManager::DeleteVolumeFromSubsystemMap(uint32_t nqnId, uint32_t volId, std::string arrayName)
+{
+    uint32_t arrayId = GetArrayIdFromMap(arrayName);
+    qosArrayManager[arrayId]->DeleteVolumeFromSubsystemMap(nqnId, volId);
+}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -421,12 +439,24 @@ QosManager::VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* ai
 {
     if (true == feQosEnabled)
     {
-        return qosVolumeManager->VolumeQosPoller(param, aioSubmission);
+        uint64_t now = SpdkConnection::SpdkGetTicks();
+        uint32_t reactor = param->id;
+        uint64_t next_tick = param->nextTimeStamp;
+        if (now < next_tick)
+        {
+            return 0;
+        }
+        double offset = (double)(now - next_tick) / param->qosTimeSlice;
+        offset = offset + 1.0;
+        for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+        {
+            qosArrayManager[i]->VolumeQosPoller(reactor, aioSubmission, offset);
+        }
+        qosContext->SetReactorProcessed(reactor, true);
+        now = SpdkConnection::SpdkGetTicks();
+        param->nextTimeStamp = now + param->qosTimeSlice;
     }
-    else
-    {
-        return 0;
-    }
+    return 0;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -450,115 +480,9 @@ QosManager::IOWorkerPoller(uint32_t id, SubmissionAdapter* ioSubmission)
  */
 /* --------------------------------------------------------------------------*/
 int
-QosManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
+QosManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy, uint32_t arrayId)
 {
-    uint32_t minGuaranteeVol = minGuaranteeVolume;
-    bool minBwPolicy = minBwGuarantee;
-    bool minPolicyInEffect = volMinPolicyInEffect;
-    qos_vol_policy cliPolicy = policy;
-
-    bool minPolicyReceived = ((true == policy.minBwGuarantee) || (true == policy.minIopsGuarantee));
-
-    if (true == volMinPolicyInEffect)
-    {
-        if (true == minPolicyReceived)
-        {
-            if (minGuaranteeVolume != volId)
-            {
-                // Min Volume set, trying to set minimum for diff volume
-                return QosReturnCode::ONE_MINIMUM_GUARANTEE_SUPPORTED;
-            }
-            else
-            {
-                if (true == minBwPolicy)
-                {
-                    if (true == policy.minIopsGuarantee)
-                    {
-                        // Min BW set, trying to set Min IOPS
-                        return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
-                    }
-                }
-                else
-                {
-                    if (true == policy.minBwGuarantee)
-                    {
-                        // Min IOPS set, trying to set Min BW
-                        return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
-                    }
-                }
-            }
-        }
-        else
-        {
-            if (minGuaranteeVolume == volId)
-            {
-                minGuaranteeVol = DEFAULT_MIN_VOL;
-                minPolicyInEffect = false;
-                minBwPolicy = false;
-            }
-        }
-    }
-    else
-    {
-        if (true == minPolicyReceived)
-        {
-            minGuaranteeVol = volId;
-            minPolicyInEffect = true;
-
-            if (true == policy.minBwGuarantee)
-            {
-                minBwPolicy = true;
-            }
-            else
-            {
-                minBwPolicy = false;
-            }
-        }
-    }
-
-    if (0 == policy.maxBw)
-    {
-        policy.maxBw = DEFAULT_MAX_BW_IOPS;
-    }
-    else
-    {
-        policy.maxBw = policy.maxBw * (M_KBYTES * M_KBYTES / (PARAMETER_COLLECTION_INTERVAL));
-    }
-
-    if (0 == policy.maxIops)
-    {
-        policy.maxIops = DEFAULT_MAX_BW_IOPS;
-    }
-    else
-    {
-        // since value is taken in KIOPS, convert to actual number here
-        policy.maxIops = policy.maxIops * KIOPS / PARAMETER_COLLECTION_INTERVAL;
-    }
-
-    if (0 == policy.minBw)
-    {
-        policy.minBw = DEFAULT_MIN_BW_MBPS;
-    }
-    policy.minBw = policy.minBw * (M_KBYTES * M_KBYTES / (PARAMETER_COLLECTION_INTERVAL));
-
-    if (0 == policy.minIops)
-    {
-        policy.minIops = DEFAULT_MIN_IOPS;
-    }
-    else
-    {
-        // since value is taken in KIOPS, convert to actual number here
-        policy.minIops = policy.minIops * KIOPS / PARAMETER_COLLECTION_INTERVAL;
-    }
-    {
-        std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
-        volPolicyCli[volId] = cliPolicy;
-        volumePolicyMapCli[volId] = policy;
-        minGuaranteeVolume = minGuaranteeVol;
-        minBwGuarantee = minBwPolicy;
-        volMinPolicyInEffect = minPolicyInEffect;
-        volumePolicyUpdated = true;
-    }
+    qosArrayManager[arrayId]->UpdateVolumePolicy(volId, policy);
     return QosReturnCode::SUCCESS;
 }
 
@@ -570,10 +494,11 @@ QosManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
   */
 /* --------------------------------------------------------------------------*/
 qos_vol_policy
-QosManager::GetVolumePolicy(uint32_t volId)
+QosManager::GetVolumePolicy(uint32_t volId, std::string arrayName)
 {
     std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
-    return volPolicyCli[volId];
+    uint32_t arrayId = arrayNameMap[arrayName];
+    return qosArrayManager[arrayId]->GetVolumePolicy(volId);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -659,10 +584,11 @@ QosManager::GetEventLog(BackendEvent event)
   */
 /* --------------------------------------------------------------------------*/
 qos_rebuild_policy
-QosManager::GetRebuildPolicy(void)
+QosManager::GetRebuildPolicy(std::string arrayName)
 {
     std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
-    return rebuildPolicyCli;
+    uint32_t arrayId = arrayNameMap[arrayName];
+    return qosArrayManager[arrayId]->GetRebuildPolicy();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -675,8 +601,11 @@ QosManager::GetRebuildPolicy(void)
 int
 QosManager::UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy)
 {
-    std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
-    rebuildPolicyCli = rebuildPolicy;
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    {
+        std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+        qosArrayManager[i]->UpdateRebuildPolicy(rebuildPolicy);
+    }
     return QosReturnCode::SUCCESS;
 }
 
@@ -688,9 +617,9 @@ QosManager::UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops)
+QosManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops, uint32_t arrayId)
 {
-    qosVolumeManager->SetVolumeLimit(reactor, volId, weight, iops);
+    qosArrayManager[arrayId]->SetVolumeLimit(reactor, volId, weight, iops);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -701,9 +630,9 @@ QosManager::SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, boo
  */
 /* --------------------------------------------------------------------------*/
 int64_t
-QosManager::GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops)
+QosManager::GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops, uint32_t arrayId)
 {
-    return qosVolumeManager->GetVolumeLimit(reactor, volId, iops);
+    return qosArrayManager[arrayId]->GetVolumeLimit(reactor, volId, iops);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -714,9 +643,9 @@ QosManager::GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops)
  */
 /* --------------------------------------------------------------------------*/
 bool
-QosManager::IsVolumePolicyUpdated(void)
+QosManager::IsVolumePolicyUpdated(uint32_t arrayId)
 {
-    return volumePolicyUpdated;
+    return qosArrayManager[arrayId]->IsVolumePolicyUpdated();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -727,9 +656,10 @@ QosManager::IsVolumePolicyUpdated(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosManager::SetGcFreeSegment(uint32_t freeSegments)
+QosManager::SetGcFreeSegment(uint32_t freeSegments, std::string arrayName)
 {
-    gcFreeSegments = freeSegments;
+    uint32_t arrayId = arrayNameMap[arrayName];
+    qosArrayManager[arrayId]->SetGcFreeSegment(freeSegments);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -740,9 +670,9 @@ QosManager::SetGcFreeSegment(uint32_t freeSegments)
  */
 /* --------------------------------------------------------------------------*/
 uint32_t
-QosManager::GetGcFreeSegment(void)
+QosManager::GetGcFreeSegment(uint32_t arrayId)
 {
-    return gcFreeSegments;
+    return qosArrayManager[arrayId]->GetGcFreeSegment();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -753,11 +683,83 @@ QosManager::GetGcFreeSegment(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosManager::GetVolumePolicyMap(std::map<uint32_t, qos_vol_policy>& volumePolicyMapCopy)
+QosManager::GetVolumePolicyMap(uint32_t arrayId, std::map<uint32_t, qos_vol_policy>& volumePolicyMapCopy)
 {
-    std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
-    volumePolicyMapCopy = volumePolicyMapCli;
-    volumePolicyMapCli.clear();
-    volumePolicyUpdated = false;
+    qosArrayManager[arrayId]->GetVolumePolicyMap(volumePolicyMapCopy);
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+uint32_t
+QosManager::GetArrayIdFromMap(std::string arrayName)
+{
+    return arrayNameMap[arrayName];
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+std::string
+QosManager::GetArrayNameFromMap(uint32_t arrayId)
+{
+    return arrayIdMap[arrayId];
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+uint32_t
+QosManager::GetNumberOfArrays(void)
+{
+    return currentNumberOfArrays;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosManager::UpdateArrayMap(std::string arrayName)
+{
+    if (arrayNameMap.find(arrayName) != arrayNameMap.end())
+    {
+        return;
+    }
+    else
+    {
+        mapUpdateLock.lock();
+        arrayNameMap.insert({arrayName, currentNumberOfArrays});
+        qosArrayManager[currentNumberOfArrays]->SetArrayName(arrayName);
+        arrayIdMap.insert({currentNumberOfArrays, arrayName});
+        mapUpdateLock.unlock();
+        currentNumberOfArrays++;
+    }
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosManager::GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap, uint32_t arrayId)
+{
+    qosArrayManager[arrayId]->GetSubsystemVolumeMap(subsysVolMap);
 }
 } // namespace pos

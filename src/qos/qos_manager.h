@@ -35,6 +35,7 @@
 #include <atomic>
 #include <iostream>
 #include <map>
+#include <mutex>
 #include <queue>
 #include <string>
 #include <thread>
@@ -48,9 +49,11 @@
 #include "src/include/event_priority.h"
 #include "src/io/frontend_io/aio.h"
 #include "src/lib/singleton.h"
+#include "src/qos/qos_array_manager.h"
 #include "src/qos/qos_common.h"
 #include "submission_adapter.h"
 #include "submission_notifier.h"
+
 namespace pos
 {
 class Ubio;
@@ -78,16 +81,17 @@ public:
     int IOWorkerPoller(uint32_t id, SubmissionAdapter* ioSubmission);
     void HandleEventUbioSubmission(SubmissionAdapter* ioSubmission,
         SubmissionNotifier* submissionNotifier, uint32_t id, UbioSmartPtr ubio);
-    int UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy);
-    qos_vol_policy GetVolumePolicy(uint32_t volId);
-    bw_iops_parameter DequeueVolumeParams(uint32_t reactor, uint32_t volId);
+    int UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy, uint32_t arrayId);
+    qos_vol_policy GetVolumePolicy(uint32_t volId, std::string arrayName);
+    bw_iops_parameter DequeueVolumeParams(uint32_t reactor, uint32_t volId, uint32_t arrayId);
     bw_iops_parameter DequeueEventParams(uint32_t workerId, BackendEvent event);
     void SetEventWeightWRR(BackendEvent event, int64_t weight);
     int64_t GetEventWeightWRR(BackendEvent event);
-    uint32_t GetUsedStripeCnt(void);
-    void IncreaseUsedStripeCnt(void);
-    void DecreaseUsedStripeCnt(void);
-    void UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId);
+    uint32_t GetUsedStripeCnt(uint32_t arrayId);
+    void IncreaseUsedStripeCnt(uint32_t arrayId);
+    void DecreaseUsedStripeCnt(std::string arrayName);
+    void UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId, std::string arrayName);
+    void DeleteVolumeFromSubsystemMap(uint32_t nqnId, uint32_t volId, std::string arrayName);
     void IncreasePendingEvents(BackendEvent event);
     void DecreasePendingEvents(BackendEvent event);
     void LogEvent(BackendEvent event);
@@ -97,15 +101,20 @@ public:
     void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* io);
     int VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* aioSubmission);
     bool IsFeQosEnabled(void);
-    qos_rebuild_policy GetRebuildPolicy(void);
+    qos_rebuild_policy GetRebuildPolicy(std::string arrayName);
     int UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy);
-    void SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops);
-    int64_t GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops);
-    bool IsVolumePolicyUpdated(void);
-    void SetGcFreeSegment(uint32_t count);
-    uint32_t GetGcFreeSegment(void);
-    void GetVolumePolicyMap(std::map<uint32_t, qos_vol_policy>& volumePolicyMapCopy);
-    std::vector<int> GetVolumeFromActiveSubsystem(uint32_t nqnId);
+    void SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops, uint32_t arrayId);
+    int64_t GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops, uint32_t arrayId);
+    bool IsVolumePolicyUpdated(uint32_t arrayId);
+    void SetGcFreeSegment(uint32_t count, std::string arrayName);
+    uint32_t GetGcFreeSegment(uint32_t arrayId);
+    void GetVolumePolicyMap(uint32_t arrayId, std::map<uint32_t, qos_vol_policy>& volumePolicyMapCopy);
+    std::vector<int> GetVolumeFromActiveSubsystem(uint32_t nqnId, uint32_t arrayId);
+    uint32_t GetArrayIdFromMap(std::string arrayName);
+    std::string GetArrayNameFromMap(uint32_t arrayId);
+    uint32_t GetNumberOfArrays(void);
+    void UpdateArrayMap(string arrayName);
+    void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap, uint32_t arrayId);
 
 private:
     void _Finalize(void);
@@ -121,23 +130,18 @@ private:
     uint32_t pollerTime;
     std::atomic<uint32_t> pendingEvents[BackendEvent_Count];
     std::atomic<uint32_t> eventLog[BackendEvent_Count];
-    std::atomic<uint32_t> usedStripeCnt;
-    std::atomic<uint32_t> minGuaranteeVolume;
-    std::atomic<bool> volMinPolicyInEffect;
-    std::atomic<bool> minBwGuarantee;
-    std::atomic<bool> volumePolicyUpdated;
-    uint32_t gcFreeSegments;
-    qos_vol_policy volPolicyCli[MAX_VOLUME_COUNT];
-    qos_rebuild_policy rebuildPolicyCli;
-    std::map<uint32_t, qos_vol_policy> volumePolicyMapCli;
-    QosVolumeManager* qosVolumeManager;
     QosEventManager* qosEventManager;
+    QosArrayManager* qosArrayManager[MAX_ARRAY_COUNT];
+    std::map<std::string, uint32_t> arrayNameMap;
+    std::map<uint32_t, std::string> arrayIdMap;
     QosSpdkManager* spdkManager;
     QosContext* qosContext;
     QosInternalManager* monitoringManager;
     QosInternalManager* policyManager;
     QosInternalManager* processingManager;
     QosInternalManager* correctionManager;
+    uint32_t currentNumberOfArrays;
+    std::mutex mapUpdateLock;
 };
 
 using QosManagerSingleton = Singleton<QosManager>;

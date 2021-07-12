@@ -32,8 +32,8 @@
 
 #pragma once
 
-#include <utility>
 #include <map>
+#include <utility>
 #include <vector>
 
 #include "src/qos/correction.h"
@@ -41,6 +41,7 @@
 #include "src/qos/parameters.h"
 #include "src/qos/parameters_all_events.h"
 #include "src/qos/parameters_all_volumes.h"
+#include "src/qos/qos_common.h"
 #include "src/qos/resource.h"
 #include "src/qos/resource_array.h"
 #include "src/qos/resource_cpu.h"
@@ -49,7 +50,6 @@
 #include "src/qos/user_policy.h"
 #include "src/qos/user_policy_all_volumes.h"
 #include "src/qos/user_policy_rebuild.h"
-#include "src/qos/qos_common.h"
 
 namespace pos
 {
@@ -87,6 +87,9 @@ public:
     uint32_t GetTotalConnection(uint32_t volId);
     void UpdateReactorCoreList(uint32_t reactorCore);
     std::vector<uint32_t>& GetReactorCoreList(void);
+    void SetReactorProcessed(uint32_t reactorId, bool value);
+    bool AllReactorsProcessed(void);
+    void ResetAllReactorsProcessed(void);
 
 private:
     QosUserPolicy userPolicy;
@@ -104,7 +107,8 @@ private:
     bool correctionChange;
     bool resourceStateChange;
     uint32_t qosCorrectionCycle;
-    uint32_t totalConnection[MAX_VOLUME_COUNT];
+    uint32_t totalConnection[MAX_ARRAY_COUNT * MAX_VOLUME_COUNT];
+    std::atomic<bool> reactorProcessed[M_MAX_REACTORS];
     std::vector<uint32_t> reactorCoreList;
 };
 } // namespace pos

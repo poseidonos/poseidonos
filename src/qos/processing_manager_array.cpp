@@ -30,7 +30,12 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/qos/parameter_queue.h"
+#include "src/qos/processing_manager_array.h"
+
+#include "src/include/pos_event_id.hpp"
+#include "src/qos/qos_avg_compute.h"
+#include "src/qos/qos_context.h"
+#include "src/qos/qos_manager.h"
 
 namespace pos
 {
@@ -41,8 +46,32 @@ namespace pos
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-ParameterQueue::ParameterQueue(void)
+QosProcessingManagerArray::QosProcessingManagerArray(uint32_t arrayIndex, QosContext* qosCtx)
 {
+    qosContext = qosCtx;
+
+    arrayId = arrayIndex;
+    try
+    {
+        movingAvgCompute = new MovingAvgCompute(M_QOS_AVERAGE_WINDOW_SIZE);
+    }
+    catch (bad_alloc& ex)
+    {
+        assert(0);
+    }
+    movingAvgCompute->Initilize();
+}
+/* --------------------------------------------------------------------------*/
+/**
+  * @Synopsis
+  *
+  * @Returns
+  */
+/* --------------------------------------------------------------------------*/
+void
+QosProcessingManagerArray::Initilize(void)
+{
+    movingAvgCompute->Initilize();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -52,8 +81,9 @@ ParameterQueue::ParameterQueue(void)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-ParameterQueue::~ParameterQueue(void)
+QosProcessingManagerArray::~QosProcessingManagerArray(void)
 {
+    delete movingAvgCompute;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -64,50 +94,24 @@ ParameterQueue::~ParameterQueue(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-ParameterQueue::EnqueueParameter(uint32_t id1, uint32_t id2, bw_iops_parameter& param)
+QosProcessingManagerArray::Execute(uint32_t volId)
 {
-    std::unique_lock<std::mutex> uniqueLock(queueLock[id1][id2]);
-    parameterQueue[id1][id2].push(param);
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
-bw_iops_parameter
-ParameterQueue::DequeueParameter(uint32_t id1, uint32_t id2)
-{
-    bw_iops_parameter ret;
-    ret.valid = M_INVALID_ENTRY;
-    std::unique_lock<std::mutex> uniqueLock(queueLock[id1][id2]);
-    if (false == parameterQueue[id1][id2].empty())
+    QosParameters& qosParam = qosContext->GetQosParameters();
+    AllVolumeParameter& allVolParam = qosParam.GetAllVolumeParameter();
+    uint64_t bw = 0;
+    uint64_t iops = 0;
+    if (false == allVolParam.VolumeExists(arrayId, volId))
     {
-        ret = parameterQueue[id1][id2].front();
-        parameterQueue[id1][id2].pop();
+        assert(0);
     }
-    return ret;
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
-void
-ParameterQueue::ClearParameters(uint32_t id2)
-{
-    std::queue<bw_iops_parameter> emptyQueue;
-    for (int id1 = 0; id1 < MAX_REACTOR_WORKER; id1++)
+    VolumeParameter& volParam = allVolParam.GetVolumeParameter(arrayId, volId);
+    bw = volParam.GetBandwidth();
+    iops = volParam.GetIops();
+    iops *= PARAMETER_COLLECTION_INTERVAL;
+    if (false != movingAvgCompute->EnqueueAvgData(volId, bw, iops))
     {
-        std::unique_lock<std::mutex> uniqueLock(queueLock[id1][id2]);
-        std::swap(parameterQueue[id1][id2], emptyQueue);
+        volParam.SetAvgBandwidth(movingAvgCompute->GetMovingAvgBw(volId));
+        volParam.SetAvgIops(movingAvgCompute->GetMovingAvgIops(volId) / PARAMETER_COLLECTION_INTERVAL);
     }
 }
-
 } // namespace pos
-

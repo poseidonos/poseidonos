@@ -32,21 +32,20 @@
 
 #include "src/volume/volume_detacher.h"
 
-#include <vector>
 #include <algorithm>
 #include <string>
+#include <vector>
 
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+#include "src/network/nvmf_volume_pos.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume.h"
 #include "src/volume/volume_list.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/network/nvmf_volume_pos.h"
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
 
 namespace pos
 {
-
 VolumeDetacher::VolumeDetacher(VolumeList& volumeList, std::string arrayName, int arrayID)
 : VolumeInterface(volumeList, arrayName, arrayID)
 {

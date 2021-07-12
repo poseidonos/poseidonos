@@ -34,8 +34,9 @@
 
 #include "src/device/base/ublock_device.h"
 #include "src/event_scheduler/event.h"
-#include "src/volume/volume_list.h"
+#include "src/include/array_mgmt_policy.h"
 #include "src/include/backend_event.h"
+#include "src/volume/volume_list.h"
 
 #define TIME_1_SEC_IN_USEC (1000 * 1000)
 #define IBOF_QOS_TIMESLICE_IN_USEC (10000)
@@ -84,7 +85,8 @@ const int PRIO_WT_M2 = -100;
 const int PRIO_WT_L1 = -100;
 const int PRIO_WT_L2 = -800;
 
-const uint32_t DEFAULT_MIN_VOL = MAX_VOLUME_COUNT + 1;
+const uint16_t INVALID_SUBSYSTEM = 0;
+//const uint16_t M_VALID_SUBSYSTEM = 1;
 
 const uint32_t PENDING_CPU_THRESHOLD = 20;
 
@@ -113,6 +115,12 @@ namespace pos
  * ENUMERATION DEFINITIONS
  */
 /* --------------------------------------------------------------------------*/
+const uint32_t MAX_ARRAY_COUNT = ArrayMgmtPolicy::MAX_ARRAY_CNT;
+
+const uint32_t DEFAULT_MIN_VOL = MAX_ARRAY_COUNT * MAX_VOLUME_COUNT + 1;
+
+const uint32_t DEFAULT_MIN_ARRAY = MAX_ARRAY_COUNT + 1;
+
 enum QosGcState
 {
     QosGcState_Start = 0,

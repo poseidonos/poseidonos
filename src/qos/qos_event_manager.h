@@ -37,6 +37,7 @@
 
 #include "src/qos/exit_handler.h"
 #include "src/qos/qos_common.h"
+#include "src/qos/exit_handler.h"
 
 namespace pos
 {

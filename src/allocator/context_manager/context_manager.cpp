@@ -250,7 +250,7 @@ GcMode
 ContextManager::GetCurrentGcMode(void)
 {
     int numFreeSegments = allocatorCtx->GetNumOfFreeSegment();
-    QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments);
+    QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments, arrayName);
     prevGcMode = curGcMode;
     curGcMode = gcCtx.GetCurrentGcMode(numFreeSegments);
     if (prevGcMode != curGcMode)

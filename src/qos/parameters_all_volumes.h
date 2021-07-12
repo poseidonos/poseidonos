@@ -33,6 +33,7 @@
 #pragma once
 
 #include <map>
+#include <utility>
 
 #include "src/qos/parameters_volume.h"
 
@@ -50,11 +51,11 @@ public:
     AllVolumeParameter(void);
     ~AllVolumeParameter(void);
     void Reset(void);
-    void InsertVolumeParameter(uint32_t volId, const VolumeParameter& volParam);
-    bool VolumeExists(uint32_t volId);
-    VolumeParameter& GetVolumeParameter(uint32_t volId);
+    void InsertVolumeParameter(uint32_t arrayId, uint32_t volId, const VolumeParameter& volParam);
+    bool VolumeExists(uint32_t arrayId, uint32_t volId);
+    VolumeParameter& GetVolumeParameter(uint32_t arrayId, uint32_t volId);
 
 private:
-    std::map<uint32_t, VolumeParameter> volumeParameterMap;
+    std::map<std::pair<uint32_t, uint32_t>, VolumeParameter> volumeParameterMap;
 };
 } // namespace pos

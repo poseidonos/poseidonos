@@ -110,7 +110,7 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
         return nullptr;
     }
 
-    QosManagerSingleton::Instance()->IncreaseUsedStripeCnt();
+    QosManagerSingleton::Instance()->IncreaseUsedStripeCnt(arrayId);
 
     // 2. SSD Logical StripeId/vsid Allocation
     StripeId arrayLsid = _AllocateUserDataStripeIdInternal(false /*isUser*/);
@@ -272,7 +272,7 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
         return -EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE);
     }
 
-    QosManagerSingleton::Instance()->IncreaseUsedStripeCnt();
+    QosManagerSingleton::Instance()->IncreaseUsedStripeCnt(arrayId);
 
     // 2. SSD Logical StripeId Allocation
     bool isUserStripeAlloc = _IsUserStripeAllocation(asTailArrayIdx);

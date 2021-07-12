@@ -33,30 +33,40 @@
 #pragma once
 
 #include <map>
-#include <utility>
 
-#include "src/qos/throttle_volume.h"
+#include "src/qos/internal_manager.h"
+#include "src/qos/monitoring_manager.h"
+#include "src/qos/qos_common.h"
+#include "src/qos/qos_context.h"
 
 namespace pos
 {
-class VolumeThrottle;
+class QosContext;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
  *
  */
 /* --------------------------------------------------------------------------*/
-class AllVolumeThrottle
+class QosMonitoringManagerArray
 {
 public:
-    AllVolumeThrottle(void);
-    ~AllVolumeThrottle(void);
-    void Reset(void);
-    void InsertVolumeThrottle(uint32_t array, uint32_t vol, const VolumeThrottle& volThrottle);
-    std::map<std::pair<uint32_t, uint32_t>, VolumeThrottle>& GetVolumeThrottleMap(void);
+    QosMonitoringManagerArray(uint32_t arrayIndex, QosContext* qosCtx);
+    ~QosMonitoringManagerArray(void);
+    void UpdateContextUserVolumePolicy(void);
+    void UpdateVolumeParameter(uint32_t volId);
+    void UpdateContextResourceDetails(void);
+    void UpdateContextUserRebuildPolicy(void);
+    bool VolParamActivities(uint32_t volId, uint32_t rector);
 
 private:
-    std::map<std::pair<uint32_t, uint32_t>, VolumeThrottle> volumeThrottleMap;
-    bool inEffect;
+    uint32_t arrayId;
+    QosContext* qosContext;
+    void _UpdateContextActiveReactorVolumes(uint32_t reactor, uint32_t volId);
+    void _UpdateContextActiveVolumes(uint32_t volumeId);
+    void _UpdateContextVolumeThrottle(uint32_t volId);
+    void _UpdateContextVolumeParameter(uint32_t volId);
+    bw_iops_parameter volParams[MAX_VOLUME_COUNT];
+    void _UpdateVolumeReactorParameter(uint32_t volId, uint32_t reactor);
 };
 } // namespace pos

@@ -35,11 +35,13 @@
 #include <map>
 
 #include "src/qos/internal_manager.h"
+#include "src/qos/monitoring_manager_array.h"
 #include "src/qos/qos_common.h"
 
 namespace pos
 {
 class QosContext;
+class QosMonitoringManagerArray;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -58,26 +60,18 @@ private:
     void _SetNextManagerType(void);
     void _UpdateContextUserVolumePolicy(void);
     void _UpdateContextUserRebuildPolicy(void);
-    void _UpdateContextVolumeThrottle(uint32_t volId);
-    void _UpdateContextVolumeParameter(uint32_t volId);
     void _UpdateContextResourceDetails(void);
-    bool _GatherActiveVolumeParameters(void);
-    void _UpdateContextActiveVolumes(uint32_t volId);
-    void _UpdateContextActiveReactorVolumes(uint32_t reactor, uint32_t volId);
     void _UpdateContextActiveVolumeReactors(std::map<uint32_t, map<uint32_t, uint32_t>> map);
-    void _UpdateVolumeParameter(uint32_t volId);
     void _UpdateAllVolumeParameter(void);
-    void _UpdateVolumeReactorParameter(uint32_t volId, uint32_t reactor);
+    bool _GatherActiveVolumeParameters(void);
     void _GatherActiveEventParameters(void);
     void _UpdateEventParameter(BackendEvent event);
     void _ComputeTotalActiveConnection(void);
     QosContext* qosContext;
     QosInternalManagerType nextManagerType;
-    std::map<uint32_t, uint32_t> volumeMap;
     std::map<uint32_t, map<uint32_t, uint32_t>> volReactorMap;
     std::map<uint32_t, map<uint32_t, uint32_t>> reactorVolMap;
-    uint32_t totalConnection[MAX_VOLUME_COUNT];
-    bw_iops_parameter volParams[MAX_VOLUME_COUNT];
     bw_iops_parameter eventParams[BackendEvent_Count];
+    QosMonitoringManagerArray* qosMonitoringManagerArray[MAX_ARRAY_COUNT];
 };
 } // namespace pos

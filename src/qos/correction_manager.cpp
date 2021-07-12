@@ -138,130 +138,7 @@ QosCorrectionManager::_HandleWrrCorrection(void)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-void
-QosCorrectionManager::_HandleMinThrottling(uint32_t minVolId)
-{
-    QosManager* qosManager = QosManagerSingleton::Instance();
-    QosCorrection& qosCorrection = qosContext->GetQosCorrection();
-    AllVolumeThrottle& allVolumeThrottle = qosCorrection.GetVolumeThrottlePolicy();
-    std::map<uint32_t, map<uint32_t, uint32_t>> volReactorMap = qosContext->GetActiveVolumeReactors();
-    QosParameters qosParameters = qosContext->GetQosParameters();
-    QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
-    AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
-    AllVolumeParameter& allVolumeParameters = qosParameters.GetAllVolumeParameter();
-    std::map<uint32_t, VolumeThrottle>& volumeThrottleMap = allVolumeThrottle.GetVolumeThrottleMap();
-    bool minBwPolicy = allVolUserPolicy.IsMinBwPolicyInEffect();
 
-    for (auto it = volumeThrottleMap.begin(); it != volumeThrottleMap.end(); it++)
-    {
-        VolumeThrottle& volThrottle = it->second;
-        uint32_t volId = it->first;
-        int64_t bwCorrection = 0;
-        int64_t iopsCorrection = 0;
-        uint64_t currentBwWeight = 0;
-        uint64_t currentIopsWeight = 0;
-        uint64_t newBwWeight = 0;
-        uint64_t newIopsWeight = 0;
-        uint32_t totalConnection = qosContext->GetTotalConnection(volId);
-        VolumeUserPolicy* volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(volId);
-        if (volumeUserPolicy == nullptr)
-        {
-            continue;
-        }
-        uint64_t userSetMaxBw = volumeUserPolicy->GetMaxBandwidth();
-        uint64_t userSetMaxIops = volumeUserPolicy->GetMaxIops();
-
-        if ((minVolId == it->first))
-        {
-            qosManager->SetVolumeLimit(it->first, volId, userSetMaxBw, false);
-            qosManager->SetVolumeLimit(it->first, volId, userSetMaxIops, true);
-            continue;
-        }
-        switch (volThrottle.CorrectionType())
-        {
-            case QosCorrectionDir_Increase:
-                bwCorrection = volThrottle.GetCorrectionValue(false);
-                iopsCorrection = volThrottle.GetCorrectionValue(true);
-                bwCorrection = bwCorrection * -1;
-                iopsCorrection = iopsCorrection * -1;
-                break;
-            case QosCorrectionDir_Decrease:
-                bwCorrection = volThrottle.GetCorrectionValue(false);
-                iopsCorrection = volThrottle.GetCorrectionValue(true);
-                break;
-            case QosCorrectionDir_NoChange:
-                continue;
-                break;
-            default:
-                break;
-        }
-        for (map<uint32_t, uint32_t>::iterator it = volReactorMap[volId].begin(); it != volReactorMap[volId].end(); ++it)
-        {
-            currentBwWeight += qosManager->GetVolumeLimit(it->first, volId, false);
-            currentIopsWeight += qosManager->GetVolumeLimit(it->first, volId, true);
-        }
-        for (map<uint32_t, uint32_t>::iterator it = volReactorMap[volId].begin(); it != volReactorMap[volId].end(); ++it)
-        {
-            VolumeParameter& volParameter = allVolumeParameters.GetVolumeParameter(volId);
-            newBwWeight = _InitialValueCheck(currentBwWeight, false, volParameter, *volumeUserPolicy);
-            newBwWeight = newBwWeight + bwCorrection;
-            if (newBwWeight > userSetMaxBw)
-            {
-                newBwWeight = userSetMaxBw;
-            }
-            newIopsWeight = _InitialValueCheck(currentIopsWeight, true, volParameter, *volumeUserPolicy);
-            newIopsWeight = newIopsWeight + iopsCorrection;
-            if (newIopsWeight > userSetMaxIops)
-            {
-                newIopsWeight = userSetMaxIops;
-            }
-            if (true == minBwPolicy)
-            {
-                _ApplyCorrection(newBwWeight, false, volId, it->first, it->second, totalConnection);
-            }
-            else
-            {
-                _ApplyCorrection(newIopsWeight, true, volId, it->first, it->second, totalConnection);
-            }
-        }
-    }
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
-void
-QosCorrectionManager::_ApplyCorrection(uint64_t value, bool iops, uint64_t volId, uint64_t reactor, uint64_t count, uint64_t totalConnection)
-{
-    QosManager* qosManager = QosManagerSingleton::Instance();
-    if (true == iops)
-    {
-        value = (value <= DEFAULT_MIN_IO_PCS) ? DEFAULT_MIN_IO_PCS : value;
-        int64_t weight = (value * count) / totalConnection;
-        if (0 == weight)
-        {
-            weight = 1;
-        }
-        qosManager->SetVolumeLimit(reactor, volId, weight, true);
-    }
-    else
-    {
-        value = (value <= DEFAULT_MIN_BW_PCS) ? DEFAULT_MIN_BW_PCS : value;
-        qosManager->SetVolumeLimit(reactor, volId, (int64_t)(value * (count)) / (totalConnection), false);
-    }
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
 uint64_t
 QosCorrectionManager::_InitialValueCheck(uint64_t value, bool iops, VolumeParameter& volParameter, VolumeUserPolicy& volUserPolicy)
 {
@@ -293,32 +170,36 @@ QosCorrectionManager::_HandleMaxThrottling(void)
     std::map<uint32_t, map<uint32_t, uint32_t>> volReactorMap = qosContext->GetActiveVolumeReactors();
     QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
     AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
-    uint32_t minVolId = allVolUserPolicy.GetMinimumGuaranteeVolume();
+    std::pair<uint32_t, uint32_t> minVolId = allVolUserPolicy.GetMinimumGuaranteeVolume();
     QosCorrection qosCorrection = qosContext->GetQosCorrection();
-    QosParameters qosParameters = qosContext->GetQosParameters();
 
+    QosParameters qosParameters = qosContext->GetQosParameters();
     for (map<uint32_t, uint32_t>::iterator it = activeVolumeMap.begin(); it != activeVolumeMap.end(); it++)
     {
         uint64_t currentBwWeight = 0;
         uint64_t currentIopsWeight = 0;
         uint32_t volId = it->first;
         uint32_t totalConnection = qosContext->GetTotalConnection(volId);
-        VolumeUserPolicy* volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(volId);
+
+        uint32_t arrayId = volId / MAX_VOLUME_COUNT;
+        uint32_t volumeId = volId % MAX_VOLUME_COUNT;
+        VolumeUserPolicy* volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(arrayId, volumeId);
         if (volumeUserPolicy == nullptr)
         {
             continue;
         }
         for (map<uint32_t, uint32_t>::iterator it = volReactorMap[volId].begin(); it != volReactorMap[volId].end(); ++it)
         {
-            currentBwWeight += qosManager->GetVolumeLimit(it->first, volId, false);
-            currentIopsWeight += qosManager->GetVolumeLimit(it->first, volId, true);
+            currentBwWeight += qosManager->GetVolumeLimit(it->first, volumeId, false, arrayId);
+            currentIopsWeight += qosManager->GetVolumeLimit(it->first, volumeId, true, arrayId);
         }
 
         uint64_t userSetBwWeight = volumeUserPolicy->GetMaxBandwidth();
         uint64_t userSetIopsWeight = volumeUserPolicy->GetMaxIops();
+
         for (map<uint32_t, uint32_t>::iterator it = volReactorMap[volId].begin(); it != volReactorMap[volId].end(); ++it)
         {
-            if (minVolId != DEFAULT_MIN_VOL)
+            if (minVolId.first != DEFAULT_MIN_VOL)
             {
                 currentBwWeight = currentBwWeight >= userSetBwWeight ? userSetBwWeight : currentBwWeight;
                 currentIopsWeight = currentIopsWeight >= userSetIopsWeight ? userSetIopsWeight : currentIopsWeight;
@@ -328,13 +209,13 @@ QosCorrectionManager::_HandleMaxThrottling(void)
                 currentBwWeight = userSetBwWeight;
                 currentIopsWeight = userSetIopsWeight;
             }
-            qosManager->SetVolumeLimit(it->first, volId, (currentBwWeight * (it->second)) / (totalConnection), false);
+            qosManager->SetVolumeLimit(it->first, volumeId, (currentBwWeight * (it->second)) / (totalConnection), false, arrayId);
             int64_t weight = (currentIopsWeight * it->second) / totalConnection;
             if (0 == weight)
             {
                 weight = 1;
             }
-            qosManager->SetVolumeLimit(it->first, volId, weight, true);
+            qosManager->SetVolumeLimit(it->first, volumeId, weight, true, arrayId);
         }
     }
 }
@@ -351,10 +232,11 @@ QosCorrectionManager::_HandleVolumeCorrection(void)
 {
     QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
     AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
-    uint32_t minVolId = allVolUserPolicy.GetMinimumGuaranteeVolume();
-    if (minVolId != DEFAULT_MIN_VOL)
+    std::pair<uint32_t, uint32_t> minVolId = allVolUserPolicy.GetMinimumGuaranteeVolume();
+    if (minVolId.first != DEFAULT_MIN_VOL)
     {
-        _HandleMinThrottling(minVolId);
+        // _HandleMinThrottling(minVolId);
+        // Min Throttling not supported in multi array
     }
     _HandleMaxThrottling();
 }

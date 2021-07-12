@@ -33,9 +33,9 @@
 #include "src/qos/processing_manager.h"
 
 #include "src/include/pos_event_id.hpp"
+#include "src/qos/qos_avg_compute.h"
 #include "src/qos/qos_context.h"
 #include "src/qos/qos_manager.h"
-#include "src/qos/qos_avg_compute.h"
 
 namespace pos
 {
@@ -49,15 +49,10 @@ namespace pos
 QosProcessingManager::QosProcessingManager(QosContext* qosCtx)
 {
     qosContext = qosCtx;
-    try
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
     {
-        movingAvgCompute = new MovingAvgCompute(M_QOS_AVERAGE_WINDOW_SIZE);
+        qosProcessingManagerArray[i] = new QosProcessingManagerArray(i, qosCtx);
     }
-    catch (bad_alloc& ex)
-    {
-        assert(0);
-    }
-    movingAvgCompute->Initilize();
     nextManagerType = QosInternalManager_Unknown;
 }
 
@@ -70,7 +65,10 @@ QosProcessingManager::QosProcessingManager(QosContext* qosCtx)
 /* --------------------------------------------------------------------------*/
 QosProcessingManager::~QosProcessingManager(void)
 {
-    delete movingAvgCompute;
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    {
+        delete qosProcessingManagerArray[i];
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -83,40 +81,27 @@ QosProcessingManager::~QosProcessingManager(void)
 void
 QosProcessingManager::Execute(void)
 {
-    if (false == QosManagerSingleton::Instance()->IsFeQosEnabled())
-    {
-        nextManagerType = QosInternalManager_Policy;
-        return;
-    }
     std::map<uint32_t, uint32_t> activeVolMap = qosContext->GetActiveVolumes();
+
     if (0 == activeVolMap.size())
     {
-        movingAvgCompute->Initilize();
+        uint32_t numberArrays = QosManagerSingleton::Instance()->GetNumberOfArrays();
+        for (uint32_t i = 0; i < numberArrays; i++)
+        {
+            qosProcessingManagerArray[i]->Initilize();
+        }
         nextManagerType = QosInternalManager_Policy;
         return;
     }
 
-    QosParameters& qosParam = qosContext->GetQosParameters();
-    AllVolumeParameter& allVolParam = qosParam.GetAllVolumeParameter();
     for (map<uint32_t, uint32_t>::iterator it = activeVolMap.begin(); it != activeVolMap.end(); it++)
     {
         uint32_t volId = it->first;
-        uint64_t bw = 0;
-        uint64_t iops = 0;
-        if (false == allVolParam.VolumeExists(volId))
-        {
-            assert(0);
-        }
-        VolumeParameter& volParam = allVolParam.GetVolumeParameter(volId);
-        bw = volParam.GetBandwidth();
-        iops = volParam.GetIops();
-        iops *= PARAMETER_COLLECTION_INTERVAL;
-        if (false != movingAvgCompute->EnqueueAvgData(volId, bw, iops))
-        {
-            volParam.SetAvgBandwidth(movingAvgCompute->GetMovingAvgBw(volId));
-            volParam.SetAvgIops(movingAvgCompute->GetMovingAvgIops(volId) / PARAMETER_COLLECTION_INTERVAL);
-        }
+        uint32_t arrVolId = volId % MAX_VOLUME_COUNT;
+        uint32_t arrayId = volId / MAX_VOLUME_COUNT;
+        qosProcessingManagerArray[arrayId]->Execute(arrVolId);
     }
+
     _SetNextManagerType();
 }
 

@@ -97,9 +97,19 @@ void
 EventCpuPolicy::_CheckMinimum(QosCorrectionDir priority)
 {
     QosResource& qosResource = qosContext->GetQosResource();
-    ResourceArray& arrayState = qosResource.GetResourceArray();
+    QosGcState gcState = QosGcState_Start;
+    ResourceArray arrayState;
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    {
+        ResourceArray& arrayStateTemp = qosResource.GetResourceArray(i);
+        QosGcState gcStateArray = arrayStateTemp.GetGcThreshold();
+        if (gcStateArray >= gcState)
+        {
+            gcState = gcStateArray;
+            arrayState = arrayStateTemp;
+        }
+    }
     ResourceCpu& cpuState = qosResource.GetResourceCpu();
-    QosGcState gcState = QosGcState_Unknown;
     gcState = arrayState.GetGcThreshold();
 
     if (gcState == QosGcState_Normal)
@@ -133,9 +143,20 @@ void
 EventCpuPolicy::_ManageEventCorrectionOnGcState(QosCorrectionDir priority)
 {
     QosResource& qosResource = qosContext->GetQosResource();
-    ResourceArray& arrayState = qosResource.GetResourceArray();
+    QosGcState gcState = QosGcState_Start;
+    ResourceArray arrayState;
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    {
+        ResourceArray& arrayStateTemp = qosResource.GetResourceArray(i);
+        QosGcState gcStateArray = arrayStateTemp.GetGcThreshold();
+        if (gcStateArray >= gcState)
+        {
+            gcState = gcStateArray;
+            arrayState = arrayStateTemp;
+        }
+    }
     ResourceArray& prevArrayState = lastArrayState;
-    QosGcState gcState = QosGcState_Unknown;
+    gcState = QosGcState_Unknown;
     gcState = arrayState.GetGcThreshold();
     uint32_t currFreeSegment = arrayState.GetGcFreeSegment();
     uint32_t lastFreeSegment = prevArrayState.GetGcFreeSegment();
@@ -234,9 +255,20 @@ void
 EventCpuPolicy::_NoRebuildScenario(void)
 {
     QosResource& qosResource = qosContext->GetQosResource();
-    ResourceArray& arrayState = qosResource.GetResourceArray();
+    QosGcState gcState = QosGcState_Start;
+    ResourceArray arrayState;
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    {
+        ResourceArray& arrayStateTemp = qosResource.GetResourceArray(i);
+        QosGcState gcStateArray = arrayStateTemp.GetGcThreshold();
+        if (gcStateArray >= gcState)
+        {
+            gcState = gcStateArray;
+            arrayState = arrayStateTemp;
+        }
+    }
     ResourceArray& prevArrayState = lastArrayState;
-    QosGcState gcState = QosGcState_Unknown;
+    gcState = QosGcState_Unknown;
     QosGcState prevGcState = QosGcState_Unknown;
     gcState = arrayState.GetGcThreshold();
     prevGcState = prevArrayState.GetGcThreshold();
@@ -301,8 +333,18 @@ void
 EventCpuPolicy::_StoreContext(void)
 {
     QosResource& qosResource = qosContext->GetQosResource();
-    ResourceArray& arrayState = qosResource.GetResourceArray();
-
+    QosGcState gcState = QosGcState_Start;
+    ResourceArray arrayState;
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    {
+        ResourceArray& arrayStateTemp = qosResource.GetResourceArray(i);
+        QosGcState gcStateArray = arrayStateTemp.GetGcThreshold();
+        if (gcStateArray >= gcState)
+        {
+            gcState = gcStateArray;
+            arrayState = arrayStateTemp;
+        }
+    }
     lastArrayState = arrayState;
     lastMimimumPolicy = qosContext->IsVolumeMinPolicyInEffect();
 }

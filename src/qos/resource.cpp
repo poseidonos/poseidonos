@@ -67,9 +67,12 @@ QosResource::~QosResource(void)
 void
 QosResource::Reset(void)
 {
-    resourceNvram.Reset();
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    {
+        resourceNvram[i].Reset();
+        resourceArray[i].Reset();
+    }
     resourceCpu.Reset();
-    resourceArray.Reset();
     resourceCompromised = false;
 }
 
@@ -81,9 +84,9 @@ QosResource::Reset(void)
  */
 /* --------------------------------------------------------------------------*/
 ResourceNvramStripes&
-QosResource::GetResourceNvramStripes(void)
+QosResource::GetResourceNvramStripes(uint32_t arrayId)
 {
-    return resourceNvram;
+    return resourceNvram[arrayId];
 }
 
 /* --------------------------------------------------------------------------*/
@@ -94,9 +97,9 @@ QosResource::GetResourceNvramStripes(void)
  */
 /* --------------------------------------------------------------------------*/
 ResourceArray&
-QosResource::GetResourceArray(void)
+QosResource::GetResourceArray(uint32_t arrayId)
 {
-    return resourceArray;
+    return resourceArray[arrayId];
 }
 
 /* --------------------------------------------------------------------------*/

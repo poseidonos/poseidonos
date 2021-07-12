@@ -134,6 +134,14 @@ QosContext::Reset(void)
     applyCorrection = false;
     qosCorrectionCycle = 0;
     reactorCoreList.clear();
+    for (int i = 0; i < MAX_VOLUME_COUNT; i++)
+    {
+        totalConnection[i] = 0;
+    }
+    for (int i = 0; i < M_MAX_REACTORS; i++)
+    {
+        reactorProcessed[i] = false;
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -374,4 +382,58 @@ QosContext::IsCorrectionCycleOver(void)
         return false;
     }
 }
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosContext::SetReactorProcessed(uint32_t reactorId, bool value)
+{
+    reactorProcessed[reactorId] = value;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosContext::ResetAllReactorsProcessed(void)
+{
+    for (int i = 0; i < M_MAX_REACTORS; i++)
+    {
+        reactorProcessed[i] = false;
+    }
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+QosContext::AllReactorsProcessed(void)
+{
+    bool allProcessed = true;
+    for (auto& reactorId : reactorCoreList)
+    {
+        bool processed = false;
+        processed = reactorProcessed[reactorId];
+        if (false == processed)
+        {
+            allProcessed = false;
+            break;
+        }
+    }
+    return allProcessed;
+}
+
 } // namespace pos

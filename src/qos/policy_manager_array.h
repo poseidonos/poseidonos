@@ -31,32 +31,25 @@
  */
 
 #pragma once
-
-#include <map>
-#include <utility>
-
-#include "src/qos/throttle_volume.h"
+#include "src/qos/internal_manager.h"
+#include "src/qos/qos_common.h"
 
 namespace pos
 {
-class VolumeThrottle;
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- */
-/* --------------------------------------------------------------------------*/
-class AllVolumeThrottle
+class QosContext;
+class PolicyHandler;
+
+class QosPolicyManagerArray
 {
 public:
-    AllVolumeThrottle(void);
-    ~AllVolumeThrottle(void);
-    void Reset(void);
-    void InsertVolumeThrottle(uint32_t array, uint32_t vol, const VolumeThrottle& volThrottle);
-    std::map<std::pair<uint32_t, uint32_t>, VolumeThrottle>& GetVolumeThrottleMap(void);
+    QosPolicyManagerArray(QosContext* qosCtx, uint32_t arrayIndex);
+    ~QosPolicyManagerArray(void);
+    void Execute(void);
 
 private:
-    std::map<std::pair<uint32_t, uint32_t>, VolumeThrottle> volumeThrottleMap;
-    bool inEffect;
+    QosContext* qosContext;
+    PolicyHandler* volumePolicy;
+    uint32_t arrayId;
 };
+
 } // namespace pos

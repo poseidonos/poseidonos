@@ -119,7 +119,8 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
         {
             return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, retVal, "FAILED", GetPosInfo());
         }
-        retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy);
+        uint32_t arrayId = QosManagerSingleton::Instance()->GetArrayIdFromMap(arrayName);
+        retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy, arrayId);
         if (retVal != SUCCESS)
         {
             return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, retVal, "FAILED", GetPosInfo());

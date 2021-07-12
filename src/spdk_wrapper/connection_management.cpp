@@ -75,23 +75,5 @@ SpdkConnection::SetQosInSpdk(bool value)
 {
     spdk_nvmf_configure_pos_qos(value);
 }
-
-bool
-SpdkConnection::IsReactorConnectionChanged(uint32_t reactor)
-{
-    return spdk_nvmf_connection_changed(reactor);
-}
-
-void
-SpdkConnection::ResetReactorConnection(uint32_t reactor)
-{
-    return spdk_nvmf_connection_reset(reactor);
-}
-
-bool
-SpdkConnection::GetNvmfReactorConnection(uint32_t reactor, void* entry)
-{
-    return spdk_nvmf_connection_pop(reactor, entry);
-}
 } // namespace pos
 
