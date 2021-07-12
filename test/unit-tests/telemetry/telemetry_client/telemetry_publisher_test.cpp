@@ -50,6 +50,9 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
     ret = tp.PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, 300);
     // then 2.
     EXPECT_EQ(0, ret);
+    TelemetryGeneralMetric log;
+    tp.CollectData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, log);
+    EXPECT_EQ(300, log.GetValue());
 }
 
 } // namespace pos

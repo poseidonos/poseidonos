@@ -69,7 +69,7 @@ TelemetryDataPool::SetLog(std::string id, uint32_t value)
         }
         else
         {
-            POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] new entry added, id:{}, num of entries:{}", id, (pool.size() + 1));
+            POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] new entry added, id:{}, num of entries:{}", id, (pool.size() + 1));
         }
         pool.emplace(id, metric);
     }
