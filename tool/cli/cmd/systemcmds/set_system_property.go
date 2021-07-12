@@ -48,11 +48,14 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 
 		displaymgr.PrintRequest(string(reqJSON))
 
-		socketmgr.Connect()
-		resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
-		socketmgr.Close()
+		// Do not send request to server and print response when testing request build.
+		if !(globals.IsTestingReqBld) {
+			socketmgr.Connect()
+			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			socketmgr.Close()
 
-		displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes)
+			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes)
+		}
 	},
 }
 

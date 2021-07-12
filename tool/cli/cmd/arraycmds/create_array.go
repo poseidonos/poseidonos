@@ -38,11 +38,13 @@ Example:
 
 		displaymgr.PrintRequest(string(reqJSON))
 
-		socketmgr.Connect()
-		resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
-		socketmgr.Close()
+		if !(globals.IsTestingReqBld) {
+			socketmgr.Connect()
+			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			socketmgr.Close()
 
-		displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes)
+			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes)
+		}
 	},
 }
 

@@ -1,10 +1,11 @@
 package systemcmds_test
 
 import (
-	"bytes"
 	"cli/cmd"
+	"cli/cmd/globals"
 	"cli/cmd/testmgr"
-	"log"
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -15,20 +16,24 @@ func TestSetSystemPropertyCommandReq(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
 	// mj: For testing, I temporarily redirect log output to buffer.
-	var buff bytes.Buffer
-	log.SetOutput(&buff)
-	log.SetFlags(0)
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 
+	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
 	testmgr.ExecuteCommand(rootCmd, "system", "set-property", "--rebuild-impact", "low", "--json-req")
 
-	output := buff.String()
-	if output != "" {
-		output = output[:len(output)-1] // Remove the last \n from output string
-	}
-	expected := `{"command":"REBUILDPERFIMPACT","rid":"fromfakeclient","param":{"level":"low"}}`
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
 
-	if expected != output {
-		t.Errorf("Expected: %q Output: %q", expected, output)
+	// TODO(mj): Currently, we compare strings to test the result.
+	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
+	expected := `{"command":"REBUILDPERFIMPACT","rid":"fromfakeclient",` +
+		`"param":{"level":"low"}}`
+
+	if expected != string(out) {
+		t.Errorf("Expected: %q Output: %q", expected, string(out))
 	}
 }

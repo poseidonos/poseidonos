@@ -1,10 +1,11 @@
 package devicecmds_test
 
 import (
-	"bytes"
 	"cli/cmd"
+	"cli/cmd/globals"
 	"cli/cmd/testmgr"
-	"log"
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -15,18 +16,24 @@ func TestCreateDeviceCommandReq(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
 	// mj: For testing, I temporarily redirect log output to buffer.
-	var buff bytes.Buffer
-	log.SetOutput(&buff)
-	log.SetFlags(0)
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 
+	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
 	testmgr.ExecuteCommand(rootCmd, "device", "create", "--device-name", "dev0", "--num-blocks", "512", "--block-size", "4096", "--device-type", "uram", "--json-req")
 
-	output := buff.String()
-	output = output[:len(output)-1] // Remove the last n from output string
-	expected := `{"command":"CREATEDEVICE","rid":"fromfakeclient","param":{"name":"dev0","num_blocks":512,"block_size":4096,"dev_type":"uram"}}`
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
 
-	if expected != output {
-		t.Errorf("Expected: %q Output: %q", expected, output)
+	// TODO(mj): Currently, we compare strings to test the result.
+	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
+	expected := `{"command":"CREATEDEVICE","rid":"fromfakeclient",` +
+		`"param":{"name":"dev0","num_blocks":512,"block_size":4096,"dev_type":"uram"}}`
+
+	if expected != string(out) {
+		t.Errorf("Expected: %q Output: %q", expected, string(out))
 	}
 }

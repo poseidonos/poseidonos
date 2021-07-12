@@ -1,10 +1,11 @@
 package arraycmds_test
 
 import (
-	"bytes"
 	"cli/cmd"
+	"cli/cmd/globals"
 	"cli/cmd/testmgr"
-	"log"
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -14,20 +15,28 @@ func TestCreateArrayCommandReq(t *testing.T) {
 	// Command creation
 	rootCmd := cmd.RootCmd
 
-	// mj: For testing, I temporarily redirect log output to buffer.
-	var buff bytes.Buffer
-	log.SetOutput(&buff)
-	log.SetFlags(0)
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	globals.IsTestingReqBld = true
 
 	// Execute the command to test with argument
 	testmgr.ExecuteCommand(rootCmd, "array", "create", "--buffer", "uram0", "--data-devs",
 		"device1,device2,device3", "--spare", "devspare", "--array-name", "Array0", "--raid", "RAID5", "--json-req")
 
-	output := buff.String()
-	output = output[:len(output)-1] // Remove the last n from output string
-	expected := `{"command":"CREATEARRAY","rid":"fromfakeclient","param":{"name":"Array0","raidtype":"RAID5","buffer":[{"deviceName":"uram0"}],"data":[{"deviceName":"device1"},{"deviceName":"device2"},{"deviceName":"device3"}],"spare":[{"deviceName":"devspare"}]}}`
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
 
-	if expected != output {
-		t.Errorf("Expected: %q Output: %q", expected, output)
+	// TODO(mj): Currently, we compare strings to test the result.
+	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
+	expected := `{"command":"CREATEARRAY","rid":"fromfakeclient","param":` +
+		`{"name":"Array0","raidtype":"RAID5","buffer":[{"deviceName":"uram0"}],` +
+		`"data":[{"deviceName":"device1"},{"deviceName":"device2"},` +
+		`{"deviceName":"device3"}],"spare":[{"deviceName":"devspare"}]}}`
+
+	if expected != string(out) {
+		t.Errorf("Expected: %q Output: %q", expected, string(out))
 	}
 }

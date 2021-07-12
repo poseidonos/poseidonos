@@ -2,11 +2,11 @@ package displaymgr
 
 import (
 	"cli/cmd/globals"
-	"log"
+	"fmt"
 )
 
 func PrintRequest(reqJSON string) {
 	if globals.IsJSONReq {
-		log.Print(string(reqJSON))
+		fmt.Print(string(reqJSON))
 	}
 }

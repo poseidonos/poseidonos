@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"cli/cmd/displaymgr"
+	"cli/cmd/globals"
 	"cli/cmd/messages"
 
 	"github.com/labstack/gommon/log"
@@ -43,24 +44,27 @@ Syntax:
 		// TODO(mj): Here, we execute a script to run POS. This needs to be revised in the future.
 		res := model.Response{}
 
-		fmt.Println("Start system...")
+		// Do not send request to server and print response when testing request build.
+		if !(globals.IsTestingReqBld) {
+			fmt.Println("Start system...")
 
-		// TODO(mj): Although go test for this command will be passed,
-		// it will print out some error commands because of the file path
-		// to the execution script. This needs to be fixed later.
-		path, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-		startCmd := fmt.Sprintf("/../script/start_poseidonos.sh")
-		err = util.ExecCmd(path+startCmd, false)
+			// TODO(mj): Although go test for this command will be passed,
+			// it will print out some error commands because of the file path
+			// to the execution script. This needs to be fixed later.
+			path, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+			startCmd := fmt.Sprintf("/../script/start_poseidonos.sh")
+			err = util.ExecCmd(path+startCmd, false)
 
-		fmt.Println(err)
+			fmt.Println(err)
 
-		if err != nil {
-			res.Result.Status.Code = 11000
-			fmt.Println("PoseidonOS has failed to start with error code: ", res.Result.Status.Code)
-		} else {
-			res.Result.Status.Code = 0
-			res.LastSuccessTime = time.Now().UTC().Unix()
-			fmt.Println("PoseidonOS has successfully started")
+			if err != nil {
+				res.Result.Status.Code = 11000
+				fmt.Println("PoseidonOS has failed to start with error code: ", res.Result.Status.Code)
+			} else {
+				res.Result.Status.Code = 0
+				res.LastSuccessTime = time.Now().UTC().Unix()
+				fmt.Println("PoseidonOS has successfully started")
+			}
 		}
 
 	},

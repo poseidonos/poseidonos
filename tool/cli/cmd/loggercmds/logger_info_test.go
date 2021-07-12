@@ -1,10 +1,11 @@
 package loggercmds_test
 
 import (
-	"bytes"
 	"cli/cmd"
+	"cli/cmd/globals"
 	"cli/cmd/testmgr"
-	"log"
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -15,18 +16,23 @@ func TestLoggerInfoCommandReq(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
 	// mj: For testing, I temporarily redirect log output to buffer.
-	var buff bytes.Buffer
-	log.SetOutput(&buff)
-	log.SetFlags(0)
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 
+	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
 	testmgr.ExecuteCommand(rootCmd, "logger", "info", "--json-req")
 
-	output := buff.String()
-	output = output[:len(output)-1] // Remove the last n from output string
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+
+	// TODO(mj): Currently, we compare strings to test the result.
+	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
 	expected := `{"command":"LOGGERINFO","rid":"fromCLI"}`
 
-	if expected != output {
-		t.Errorf("Expected: %q Output: %q", expected, output)
+	if expected != string(out) {
+		t.Errorf("Expected: %q Output: %q", expected, string(out))
 	}
 }

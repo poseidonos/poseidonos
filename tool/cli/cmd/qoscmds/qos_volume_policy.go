@@ -23,9 +23,6 @@ Syntax:
 
 Example: 
 	poseidonos-cli qos create --volume-name Volume0 --array-name Array0 --maxiops 500 --maxbw 50GB/s
-
-NOTE!!!!
-    Current design of Qos supports just 1 Volume per Subsystem, so if many configured Qos in effect only for 1st Volume in Subsystem!!!
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -37,12 +34,17 @@ NOTE!!!!
 		if err != nil {
 			log.Debug("error:", err)
 		}
+
 		displaymgr.PrintRequest(string(reqJSON))
 
-		socketmgr.Connect()
-		resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
-		socketmgr.Close()
-		displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes)
+		// Do not send request to server and print response when testing request build.
+		if !(globals.IsTestingReqBld) {
+			socketmgr.Connect()
+			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			socketmgr.Close()
+
+			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes)
+		}
 	},
 }
 

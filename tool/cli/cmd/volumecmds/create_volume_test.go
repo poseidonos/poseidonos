@@ -1,10 +1,11 @@
 package volumecmds_test
 
 import (
-	"bytes"
 	"cli/cmd"
+	"cli/cmd/globals"
 	"cli/cmd/testmgr"
-	"log"
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -15,18 +16,24 @@ func TestCreateVolumeCommandReq(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
 	// mj: For testing, I temporarily redirect log output to buffer.
-	var buff bytes.Buffer
-	log.SetOutput(&buff)
-	log.SetFlags(0)
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 
+	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
 	testmgr.ExecuteCommand(rootCmd, "volume", "create", "--volume-name", "vol01", "--array-name", "Array0", "--size", "4194304", "--maxiops", "5000", "--maxbw", "6000", "--json-req")
 
-	output := buff.String()
-	output = output[:len(output)-1] // Remove the last n from output string
-	expected := `{"command":"CREATEVOLUME","rid":"fromfakeclient","param":{"name":"vol01","size":4194304,"maxiops":5000,"maxbw":6000,"array":"Array0"}}`
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
 
-	if expected != output {
-		t.Errorf("Expected: %q Output: %q", expected, output)
+	// TODO(mj): Currently, we compare strings to test the result.
+	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
+	expected := `{"command":"CREATEVOLUME","rid":"fromfakeclient",` +
+		`"param":{"name":"vol01","size":4194304,"maxiops":5000,"maxbw":6000,"array":"Array0"}}`
+
+	if expected != string(out) {
+		t.Errorf("Expected: %q Output: %q", expected, string(out))
 	}
 }
