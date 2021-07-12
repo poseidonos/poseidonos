@@ -264,6 +264,8 @@ MapIoHandler::_HeaderAsyncLoaded(AsyncMetaFileIoCtx* ctx)
     int bufferOffset = 0;
     memcpy(&mapHeader->mpageData, mapHeaderTempBuffer + bufferOffset, sizeof(mapHeader->mpageData));
     bufferOffset += sizeof(mapHeader->mpageData);
+    memcpy(&mapHeader->usedBlkCnt, mapHeaderTempBuffer + bufferOffset, sizeof(mapHeader->usedBlkCnt));
+    bufferOffset += sizeof(mapHeader->usedBlkCnt);
     memcpy(mapHeader->bitmap->GetMapAddr(), mapHeaderTempBuffer + bufferOffset, mapHeader->bitmap->GetNumEntry() * BITMAP_ENTRY_SIZE);
 
     mapHeader->ApplyNumValidMpages();
@@ -344,6 +346,13 @@ MapIoHandler::_IssueHeaderIO(MetaFsIoOpcode opType, MetaFileIntf* inputFile)
     int ret = 0;
 
     ret = inputFile->AppendIO(opType, curOffset, sizeof(mapHeader->mpageData), (char*)&mapHeader->mpageData);
+    if (ret < 0)
+    {
+        POS_TRACE_ERROR(EID(MFS_SYNCIO_ERROR), "AppendIO Error, retMFS:{}  fd:{}", ret, inputFile->GetFd());
+        return ret;
+    }
+
+    ret = inputFile->AppendIO(opType, curOffset, sizeof(mapHeader->usedBlkCnt), (char*)&mapHeader->usedBlkCnt);
     if (ret < 0)
     {
         POS_TRACE_ERROR(EID(MFS_SYNCIO_ERROR), "AppendIO Error, retMFS:{}  fd:{}", ret, inputFile->GetFd());

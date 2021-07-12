@@ -56,10 +56,9 @@ public:
     int InvalidateAllBlocks(void);
 
 private:
-    uint64_t _GetNumValidEntries(char* mpage);
+    void _UpdateUsedBlkCnt(VirtualBlkAddr vsa);
 
-    int64_t totalBlks = 0;
-    int64_t usedBlks = 0;
+    int64_t totalBlks;
 };
 
 } // namespace pos
