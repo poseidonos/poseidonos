@@ -78,7 +78,12 @@ def parse(fileArg):
                     ioDepth   = st[COL_IODEPTH].split('=')[1]
                     nextLineIsResult = 1
                 #Get the result 
-                elif("IOPS=" in line and nextLineIsResult == 1 and "fio" not in line):
+                elif("IOPS=" in line and nextLineIsResult == 1 and "fail" not in line):
+                    for rw in ["write", "read"]:
+                        if rw in line:
+                            idx = line.find(rw)
+                            line = line[idx:]
+                            break
                     st        = line.split()
                     iops      = st[COL_IOPS].split('=')[1]
                     bandwidth = st[COL_BW  ].split('(')[1]
@@ -113,6 +118,7 @@ def parse(fileArg):
                         reportDataBW[ioDepth][readWrite][blockSize]   = \
                         ((reportDataBW[ioDepth][readWrite][blockSize] * testIndex) + bandwidth) / (testIndex + 1)                                        
                     nextLineIsResult = 0
+        filePointer.close()
 
 def print_result():
     print ("blockSize", end = ' ')
