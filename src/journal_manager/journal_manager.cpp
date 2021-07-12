@@ -231,7 +231,7 @@ JournalManager::_InitConfigAndPrepareLogBuffer(MetaFsFileControlApi* metaFsCtrl)
         {
             return result;
         }
-        config->Init(loadedLogBufferSize);
+        config->Init(loadedLogBufferSize, metaFsCtrl);
 
         journalManagerStatus = WAITING_TO_BE_REPLAYED;
     }

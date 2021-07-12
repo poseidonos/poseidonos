@@ -58,6 +58,8 @@ public:
     void SegmentAllocated(void);
     void StripeAllocated(void);
 
+    void RecordLogFoundTime(uint64_t time);
+
     // For unit test
     inline uint32_t
     GetNumUpdatedBlockMaps(void)
@@ -97,6 +99,9 @@ private:
     bool segmentAllocated;
     bool stripeAllocated;
     bool stripeMapReplayed;
+
+    uint64_t minTime;
+    uint64_t maxTime;
 };
 
 } // namespace pos

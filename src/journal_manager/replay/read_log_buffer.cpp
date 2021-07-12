@@ -57,6 +57,11 @@ ReadLogBuffer::ReadLogBuffer(JournalConfiguration* journalConfig,
 
 ReadLogBuffer::~ReadLogBuffer(void)
 {
+    for (auto buffer : readLogBuffer)
+    {
+        free(buffer);
+    }
+    readLogBuffer.clear();
 }
 
 int
@@ -76,10 +81,12 @@ ReadLogBuffer::Start(void)
 
     int numLogGroups = config->GetNumLogGroups();
     uint64_t groupSize = config->GetLogGroupSize();
-    void* logGroupBuffer = malloc(groupSize);
 
     for (int groupId = 0; groupId < numLogGroups; groupId++)
     {
+        void* logGroupBuffer = malloc(groupSize);
+        readLogBuffer.push_back(logGroupBuffer);
+
         result = logBuffer->ReadLogBuffer(groupId, logGroupBuffer);
         if (result != 0)
         {
@@ -108,7 +115,6 @@ ReadLogBuffer::Start(void)
         }
     }
 
-    free(logGroupBuffer);
     return result;
 }
 

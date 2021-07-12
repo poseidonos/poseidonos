@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "src/journal_manager/replay/replay_task.h"
 
 namespace pos
@@ -57,6 +59,8 @@ private:
     JournalConfiguration* config;
     JournalLogBuffer* logBuffer;
     ReplayLogList& logList;
+
+    std::vector<void*> readLogBuffer;
 };
 
 } // namespace pos

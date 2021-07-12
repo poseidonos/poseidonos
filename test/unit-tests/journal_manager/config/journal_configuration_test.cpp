@@ -174,6 +174,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsNotZe
     int numLogGroups = config.GetNumLogGroups();
     EXPECT_EQ(config.GetLogBufferSize(), loadedLogBufferSize);
     EXPECT_EQ(config.GetLogGroupSize(), loadedLogBufferSize / numLogGroups);
+    EXPECT_EQ(config.GetMetaPageSize(), metaPageSize);
 
     delete configManager;
 }

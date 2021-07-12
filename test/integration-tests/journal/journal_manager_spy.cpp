@@ -149,7 +149,7 @@ JournalManagerSpy::GetLogs(LogList& logList)
 {
     if (config->IsEnabled() == false)
     {
-        config->Init();
+        config->Init(0, nullptr);
 
         bool fileExist = logBuffer->DoesLogFileExist();
         if (fileExist == false)
