@@ -62,7 +62,7 @@ TelemetryDataPool::SetLog(std::string id, uint32_t value)
     auto entry = pool.find(id);
     if (entry == pool.end())
     {
-        if (pool.size() == maxEntry)
+        if ((int)pool.size() == maxEntry)
         {
             POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] error!! failed to add new entry, num of entries reached max limit. Item:{}", id);
             return;
