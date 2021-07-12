@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/debug/memory_checker.h"
+#include "src/memory_checker/memory_checker.h"
 
 namespace pos
 {

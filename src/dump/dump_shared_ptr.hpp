@@ -39,7 +39,7 @@
 #include "src/dump/dump_manager.h"
 #include "src/dump/dump_shared_ptr.h"
 #include "src/include/pos_event_id.h"
-#include "src/debug/memory_checker.h"
+#include "src/memory_checker/memory_checker.h"
 
 namespace pos
 {

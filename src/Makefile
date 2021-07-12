@@ -68,7 +68,8 @@ SUBDIRS = allocator \
         admin \
         resource_manager \
         telemetry/telemetry_client \
-        dpdk_wrapper
+        dpdk_wrapper \
+        memory_checker
 .PHONY: $(SUBDIRS)
 
 poseidonos: $(SUBDIRS)

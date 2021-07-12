@@ -1,4 +1,4 @@
-#include "src/debug/memory_checker.h"
+#include "src/memory_checker/memory_checker.h"
 
 #include <gtest/gtest.h>
 
