@@ -52,12 +52,20 @@ class Stripe;
 class IStripeMap;
 class EventScheduler;
 class GcStripeManager;
+class IArrayInfo;
+class RBAStateManager;
+class IVolumeManager;
 
 class GcMapUpdateCompletion : public Event
 {
 public:
+    explicit GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
+                               EventScheduler* eventScheduler, GcStripeManager* gcStripeManager);
     GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
-                        EventScheduler* eventScheduler, GcStripeManager* gcStripeManager);
+                        EventScheduler* eventScheduler, GcStripeManager* gcStripeManager,
+                        IArrayInfo* inputIArrayInfo,
+                        RBAStateManager* inputRbaStateManager,
+                        IVolumeManager* inputVolumeManager);
     ~GcMapUpdateCompletion(void) override;
     bool Execute(void) override;
 
@@ -69,6 +77,10 @@ private:
     GcStripeManager* gcStripeManager;
 
     uint32_t totalBlksPerUserStripe;
+
+    IArrayInfo* iArrayInfo;
+    RBAStateManager* rbaStateManager;
+    IVolumeManager* volumeManager;
 };
 
 } // namespace pos

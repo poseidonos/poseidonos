@@ -61,10 +61,12 @@ class ReverseMapLoadCompletion;
 class Copier : public Event
 {
 public:
-    Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus,
-                IArrayInfo* array, const PartitionLogicalSize* udSize = nullptr, CopierMeta* meta_ = nullptr,
-                IBlockAllocator* iBlockAllocator_ = nullptr, IContextManager* iContextManager_ = nullptr,
-                CallbackSmartPtr stripeCopySubmissionPtr_ = nullptr, CallbackSmartPtr reverseMapLoadCompletionPtr_ = nullptr);
+    explicit Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArrayInfo* array);
+    Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArrayInfo* array,
+            const PartitionLogicalSize* udSize, CopierMeta* inputMeta,
+            IBlockAllocator* inputIBlockAllocator,
+            IContextManager* inputIContextManager,
+            CallbackSmartPtr inputStripeCopySubmissionPtr, CallbackSmartPtr inputReverseMapLoadCompletionPtr);
 
     virtual ~Copier(void);
     virtual bool Execute(void);

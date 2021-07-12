@@ -49,10 +49,21 @@ struct BlkInfo
     VirtualBlkAddr vsa;
 };
 
+class ReverseMapPack;
+class IVSAMap;
+class IStripeMap;
+class IVolumeManager;
+
 class VictimStripe
 {
 public:
-    VictimStripe(IArrayInfo* array, ReverseMapPack* revMapPack_ = nullptr);
+    explicit VictimStripe(IArrayInfo* array);
+    VictimStripe(IArrayInfo* array,
+                ReverseMapPack* inputRevMapPack,
+                IVSAMap* inputIVSAMap,
+                IStripeMap* inputIStripeMap,
+                IVolumeManager* inputVolumeManager);
+
     virtual ~VictimStripe(void);
     void Load(StripeId _lsid, CallbackSmartPtr callback);
 
@@ -91,6 +102,9 @@ private:
 
     IArrayInfo* array;
     ReverseMapPack* revMapPack;
+    IVSAMap* iVSAMap;
+    IStripeMap* iStripeMap;
+    IVolumeManager* volumeManager;
 };
 
 } // namespace pos

@@ -57,11 +57,25 @@
 namespace pos
 {
 GcFlushCompletion::GcFlushCompletion(Stripe* stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer)
+: GcFlushCompletion(stripe, arrayName, gcStripeManager, dataBuffer,
+                    nullptr,
+                    RBAStateServiceSingleton::Instance()->GetRBAStateManager(arrayName),
+                    ArrayMgr::Instance()->GetArrayInfo(arrayName))
+{
+}
+
+GcFlushCompletion::GcFlushCompletion(Stripe* stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer,
+                                    EventSmartPtr inputEvent,
+                                    RBAStateManager* inputRbaStateManager,
+                                    IArrayInfo* inputIArrayInfo)
 : Callback(false, CallbackType_GcFlushCompletion),
   stripe(stripe),
   arrayName(arrayName),
   gcStripeManager(gcStripeManager),
-  dataBuffer(dataBuffer)
+  dataBuffer(dataBuffer),
+  inputEvent(inputEvent),
+  rbaStateManager(inputRbaStateManager),
+  iArrayInfo(inputIArrayInfo)
 {
 }
 
@@ -78,12 +92,8 @@ GcFlushCompletion::_DoSpecificJob(void)
         dataBuffer = nullptr;
     }
 
-    RBAStateManager* rbaStateManager =
-        RBAStateServiceSingleton::Instance()->GetRBAStateManager(arrayName);
-
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
     const PartitionLogicalSize* udSize =
-        info->GetSizeInfo(PartitionType::USER_DATA);
+        iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
     uint32_t totalBlksPerUserStripe = udSize->blksPerStripe;
 
     BlkAddr rba;
@@ -111,7 +121,16 @@ GcFlushCompletion::_DoSpecificJob(void)
 
     airlog("PERF_GcFlush", "AIR_WRITE", 0, totalBlksPerUserStripe * BLOCK_SIZE);
 
-    EventSmartPtr event(new GcMapUpdateRequest(stripe, arrayName, gcStripeManager));
+    EventSmartPtr event;
+    if (nullptr == inputEvent)
+    {
+        event = std::make_shared<GcMapUpdateRequest>(stripe, arrayName, gcStripeManager);
+    }
+    else
+    {
+        event = inputEvent;
+    }
+
     stripe->Flush(event);
 
     return true;

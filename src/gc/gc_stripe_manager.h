@@ -45,13 +45,19 @@ namespace pos
 {
 class IBlockAllocator;
 class IWBStripeAllocator;
+class VolumeEventPublisher;
 
 using GcWriteBuffer = std::vector<void*>;
 
 class GcStripeManager : public VolumeEvent
 {
 public:
-    explicit GcStripeManager(IArrayInfo* array, FreeBufferPool* gcWriteBufferPool_ = nullptr);
+    explicit GcStripeManager(IArrayInfo* iArrayInfo);
+    GcStripeManager(IArrayInfo* iArrayInfo,
+                    FreeBufferPool* inputGcWriteBufferPool,
+                    std::vector<BlkInfo>* inputBlkInfoList,
+                    GcWriteBuffer* inputGcActiveWriteBuffer,
+                    VolumeEventPublisher* inputVolumeEventPublisher);
     ~GcStripeManager(void);
 
     virtual bool VolumeCreated(std::string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override;
@@ -89,7 +95,7 @@ private:
     void _CreateBlkInfoList(uint32_t volumeId);
 
     std::vector<Stripe*> gcStripeArray;
-    IArrayInfo* array;
+    IArrayInfo* iArrayInfo;
 
     FreeBufferPool* gcWriteBufferPool;
     GcWriteBuffer* gcActiveWriteBuffers[GC_VOLUME_COUNT];
@@ -101,6 +107,10 @@ private:
     std::vector<BlkInfo>* blkInfoList[GC_VOLUME_COUNT];
     const PartitionLogicalSize* udSize;
     std::atomic<uint32_t> flushedStripeCnt;
+
+    std::vector<BlkInfo>* inputBlkInfoList;
+    GcWriteBuffer* inputGcActiveWriteBuffer;
+    VolumeEventPublisher* volumeEventPublisher;
 };
 
 } // namespace pos

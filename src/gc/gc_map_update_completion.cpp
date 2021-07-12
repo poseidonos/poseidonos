@@ -57,16 +57,30 @@ namespace pos
 {
 GcMapUpdateCompletion::GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
                                             EventScheduler* eventScheduler, GcStripeManager* gcStripeManager)
+: GcMapUpdateCompletion(stripe, arrayName, iStripeMap, eventScheduler, gcStripeManager,
+                        ArrayMgr::Instance()->GetArrayInfo(arrayName),
+                        RBAStateServiceSingleton::Instance()->GetRBAStateManager(arrayName),
+                        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName))
+{
+}
+
+GcMapUpdateCompletion::GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
+                                            EventScheduler* eventScheduler, GcStripeManager* gcStripeManager,
+                                            IArrayInfo* inputIArrayInfo,
+                                            RBAStateManager* inputRbaStateManager,
+                                            IVolumeManager* inputVolumeManager)
 : Event(false),
   stripe(stripe),
   arrayName(arrayName),
   iStripeMap(iStripeMap),
   eventScheduler(eventScheduler),
-  gcStripeManager(gcStripeManager)
+  gcStripeManager(gcStripeManager),
+  iArrayInfo(inputIArrayInfo),
+  rbaStateManager(inputRbaStateManager),
+  volumeManager(inputVolumeManager)
 {
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
     const PartitionLogicalSize* udSize =
-        info->GetSizeInfo(PartitionType::USER_DATA);
+        iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
     totalBlksPerUserStripe = udSize->blksPerStripe;
 }
 
@@ -80,8 +94,6 @@ GcMapUpdateCompletion::Execute(void)
     BlkAddr rba;
     uint32_t volId;
 
-    RBAStateManager* rbaStateManager =
-        RBAStateServiceSingleton::Instance()->GetRBAStateManager(arrayName);
     std::list<RbaAndSize> rbaList;
 
     for (uint32_t i = 0; i < totalBlksPerUserStripe; i++)
@@ -97,8 +109,6 @@ GcMapUpdateCompletion::Execute(void)
     std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
     rbaStateManager->ReleaseOwnershipRbaList(volId, rbaList);
 
-    IVolumeManager* volumeManager
-        = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     volumeManager->DecreasePendingIOCount(volId, VolumeStatus::Unmounted);
 
     gcStripeManager->SetFinished();

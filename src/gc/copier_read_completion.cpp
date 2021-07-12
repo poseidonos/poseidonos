@@ -50,18 +50,28 @@
 
 namespace pos
 {
-CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe,
-    uint32_t listIndex,
-    void* buffer,
-    CopierMeta* meta,
-    StripeId stripeId)
+CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe, uint32_t listIndex,
+                                            void* buffer, CopierMeta* meta, StripeId stripeId)
+: CopierReadCompletion(victimStripe, listIndex, buffer, meta, stripeId, nullptr,
+                        VolumeServiceSingleton::Instance()->GetVolumeManager(meta->GetArrayName()),
+                        EventSchedulerSingleton::Instance())
+{
+}
+
+CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe, uint32_t listIndex,
+                                            void* buffer, CopierMeta* meta, StripeId stripeId,
+                                            EventSmartPtr inputFlushEvent, IVolumeManager* inputVolumeManager,
+                                            EventScheduler* inputEventScheduler)
 : Callback(false, CallbackType_CopierReadCompletion),
   victimStripe(victimStripe),
   listIndex(listIndex),
   buffer(buffer),
   meta(meta),
   stripeId(stripeId),
-  allocatedCnt(0)
+  allocatedCnt(0),
+  inputFlushEvent(inputFlushEvent),
+  volumeManager(inputVolumeManager),
+  eventScheduler(inputEventScheduler)
 {
     list<BlkInfo> blkInfoList = victimStripe->GetBlkInfoList(listIndex);
     blkCnt = blkInfoList.size();
@@ -75,8 +85,6 @@ bool
 CopierReadCompletion::_DoSpecificJob(void)
 {
     GcStripeManager* gcStripeManager = meta->GetGcStripeManager();
-    IVolumeManager* volumeManager
-        = VolumeServiceSingleton::Instance()->GetVolumeManager(meta->GetArrayName());
     list<BlkInfo> blkInfoList = victimStripe->GetBlkInfoList(listIndex);
 
     uint32_t volId = blkInfoList.begin()->volID;
@@ -124,13 +132,17 @@ CopierReadCompletion::_DoSpecificJob(void)
             }
             else
             {
-                EventSmartPtr flushEvent(new GcFlushSubmission(meta->GetArrayName(),
-                            allocatedBlkInfoList,
-                            volId,
-                            dataBuffer,
-                            gcStripeManager));
-                EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
-
+                EventSmartPtr flushEvent;
+                if (nullptr == inputFlushEvent)
+                {
+                    flushEvent = std::make_shared<GcFlushSubmission>(meta->GetArrayName(),
+                            allocatedBlkInfoList, volId, dataBuffer, gcStripeManager);
+                }
+                else
+                {
+                    flushEvent = inputFlushEvent;
+                }
+                eventScheduler->EnqueueEvent(flushEvent);
                 gcStripeManager->SetFlushed(volId);
             }
         }

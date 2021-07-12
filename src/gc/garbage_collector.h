@@ -45,13 +45,16 @@ using namespace std;
 namespace pos
 {
 class Copier;
+class EventScheduler;
 using CopierSmartPtr = std::shared_ptr<Copier>;
 
 class GarbageCollector : public IGCControl, public IMountSequence,
                          public IStateObserver
 {
 public:
-    GarbageCollector(IArrayInfo* i, IStateControl* s);
+    explicit GarbageCollector(IArrayInfo* i, IStateControl* s);
+    GarbageCollector(IArrayInfo* i, IStateControl* s,
+                    CopierSmartPtr inputEvent, EventScheduler* inputEventScheduler);
     virtual ~GarbageCollector(void) {}
     virtual int Start(void) override;
     virtual void End(void) override;
@@ -82,6 +85,9 @@ private:
     IStateControl* state;
     GcStatus gcStatus;
     CopierSmartPtr copierPtr;
+
+    CopierSmartPtr inputEvent;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos

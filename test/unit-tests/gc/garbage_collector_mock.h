@@ -16,6 +16,7 @@ public:
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));
+    MOCK_METHOD(void, Flush, (), (override));
     MOCK_METHOD(void, Pause, (), (override));
     MOCK_METHOD(void, Resume, (), (override));
     MOCK_METHOD(bool, IsPaused, (), (override));

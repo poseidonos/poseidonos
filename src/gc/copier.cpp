@@ -49,44 +49,40 @@
 namespace pos
 {
 
-Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus,
-               IArrayInfo* array, const PartitionLogicalSize* udSize, CopierMeta* meta_,
-               IBlockAllocator* iBlockAllocator_, IContextManager* iContextManager_,
-               CallbackSmartPtr stripeCopySubmissionPtr_, CallbackSmartPtr reverseMapLoadCompletionPtr_)
+Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArrayInfo* array)
+: Copier(victimId, targetId, gcStatus, array,
+    array->GetSizeInfo(PartitionType::USER_DATA), new CopierMeta(array),
+    AllocatorServiceSingleton::Instance()->GetIBlockAllocator(array->GetName()),
+    AllocatorServiceSingleton::Instance()->GetIContextManager(array->GetName()),
+    nullptr, nullptr)
+{
+}
+
+Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArrayInfo* array,
+                const PartitionLogicalSize* udSize, CopierMeta* inputMeta,
+                IBlockAllocator* inputIBlockAllocator,
+                IContextManager* inputIContextManager,
+                CallbackSmartPtr inputStripeCopySubmissionPtr, CallbackSmartPtr inputReverseMapLoadCompletionPtr)
 : currentStripeOffset(0),
   victimId(victimId),
   targetId(targetId),
   victimStripeId(UNMAP_STRIPE),
   copybackState(COPIER_THRESHOLD_CHECK_STATE),
-  meta(meta_),
+  meta(inputMeta),
   array(array),
-  iBlockAllocator(iBlockAllocator_),
-  iContextManager(iContextManager_),
+  iBlockAllocator(inputIBlockAllocator),
+  iContextManager(inputIContextManager),
   gcStatus(gcStatus),
   loadedValidBlock(false),
-  stripeCopySubmissionPtr(stripeCopySubmissionPtr_),
-  reverseMapLoadCompletionPtr(reverseMapLoadCompletionPtr_)
+  stripeCopySubmissionPtr(inputStripeCopySubmissionPtr),
+  reverseMapLoadCompletionPtr(inputReverseMapLoadCompletionPtr)
 {
-    if (nullptr == udSize)
-    {
-        udSize = array->GetSizeInfo(PartitionType::USER_DATA);
-    }
     userDataMaxStripes = udSize->stripesPerSegment;
     userDataMaxBlks = udSize->blksPerStripe * userDataMaxStripes;
     blocksPerChunk = udSize->blksPerChunk;
+
     victimIndex = 0;
-    if (nullptr == meta)
-    {
-        meta = new CopierMeta(array);
-    }
-    if (nullptr == iBlockAllocator)
-    {
-        iBlockAllocator =  AllocatorServiceSingleton::Instance()->GetIBlockAllocator(array->GetName());
-    }
-    if (nullptr == iContextManager)
-    {
-        iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(array->GetName());
-    }
+
     SetEventType(BackendEvent_GC);
 }
 
@@ -210,7 +206,15 @@ Copier::_CopyPrepareState(void)
     loadedValidBlock = false;
     validStripes.clear();
 
-    CallbackSmartPtr callee = std::make_shared<StripeCopySubmission>(baseStripe, meta, victimIndex);
+    CallbackSmartPtr callee;
+    if (nullptr == stripeCopySubmissionPtr)
+    {
+        callee = std::make_shared<StripeCopySubmission>(baseStripe, meta, victimIndex);
+    }
+    else
+    {
+        callee = stripeCopySubmissionPtr;
+    }
     callee->SetWaitingCount(userDataMaxStripes);
 
     for (uint32_t index = 0; index < userDataMaxStripes; index++)
@@ -219,12 +223,12 @@ Copier::_CopyPrepareState(void)
         if (nullptr == reverseMapLoadCompletionPtr)
         {
             callback = std::make_shared<ReverseMapLoadCompletion>();
-            callback->SetCallee(callee);
         }
         else
         {
             callback = reverseMapLoadCompletionPtr;
         }
+        callback->SetCallee(callee);
         meta->GetVictimStripe(victimIndex, index)->Load(baseStripe + index, callback);
     }
 

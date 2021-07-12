@@ -42,13 +42,21 @@
 
 namespace pos
 {
-StripeCopySubmission::StripeCopySubmission(StripeId baseStripeId,
-                                        CopierMeta* meta, uint32_t copyIndex)
+StripeCopySubmission::StripeCopySubmission(StripeId baseStripeId, CopierMeta* meta, uint32_t copyIndex)
+: StripeCopySubmission(baseStripeId, meta, copyIndex,
+                        nullptr, EventSchedulerSingleton::Instance())
+{
+}
+
+StripeCopySubmission::StripeCopySubmission(StripeId baseStripeId, CopierMeta* meta, uint32_t copyIndex,
+                                        EventSmartPtr inputEvent, EventScheduler* inputEventScheduler)
 : Callback(false, CallbackType_StripeCopySubmission),
   baseStripeId(baseStripeId),
   meta(meta),
   copyIndex(copyIndex),
-  isLoaded(false)
+  isLoaded(false),
+  inputEvent(inputEvent),
+  eventScheduler(inputEventScheduler)
 {
     SetEventType(BackendEvent_GC);
 }
@@ -79,11 +87,19 @@ StripeCopySubmission::_DoSpecificJob(void)
         return false;
     }
 
+    EventSmartPtr stripeCopier;
     for (uint32_t index = 0; index < CopierMeta::GC_CONCURRENT_COUNT; index++)
     {
-        EventSmartPtr stripeCopier(new StripeCopier(baseStripeId + index,
-                                                    meta, copyIndex));
-        EventSchedulerSingleton::Instance()->EnqueueEvent(stripeCopier);
+        if (nullptr == inputEvent)
+        {
+            stripeCopier = std::make_shared<StripeCopier>(baseStripeId + index, meta, copyIndex);
+        }
+        else
+        {
+            stripeCopier = inputEvent;
+        }
+
+        eventScheduler->EnqueueEvent(stripeCopier);
     }
 
     return true;

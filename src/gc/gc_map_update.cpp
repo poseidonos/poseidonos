@@ -57,27 +57,40 @@ namespace pos
 GcMapUpdate::GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
                         std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, GcStripeManager* gcStripeManager)
 : GcMapUpdate(stripe, arrayName, mapUpdateInfoList, invalidSegCnt, iStripeMap, gcStripeManager,
-      EventSchedulerSingleton::Instance())
+      EventSchedulerSingleton::Instance(),
+      nullptr,
+      ArrayMgr::Instance()->GetArrayInfo(arrayName),
+      MapperServiceSingleton::Instance()->GetIVSAMap(arrayName),
+      AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName),
+      AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName))
 {
 }
 
 GcMapUpdate::GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
                         std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, GcStripeManager* gcStripeManager,
-                        EventScheduler* eventScheduler)
+                        EventScheduler* eventScheduler,
+                        EventSmartPtr inputEvent,
+                        IArrayInfo* inputIArrayInfo,
+                        IVSAMap* inputIVSAMap,
+                        IContextManager* inputContextManager,
+                        IBlockAllocator* inputIBlockAllocator)
 : stripe(stripe),
   iStripeMap(iStripeMap),
   gcStripeManager(gcStripeManager),
   eventScheduler(eventScheduler),
   invalidSegCnt(invalidSegCnt),
   arrayName(arrayName),
-  mapUpdateInfoList(mapUpdateInfoList)
+  mapUpdateInfoList(mapUpdateInfoList),
+  iArrayInfo(inputIArrayInfo),
+  iVSAMap(inputIVSAMap),
+  iContextManager(inputContextManager),
+  iBlockAllocator(inputIBlockAllocator)
 {
     SetFrontEnd(false);
     SetEventType(BackendEvent_GC);
 
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
     const PartitionLogicalSize* udSize =
-        info->GetSizeInfo(PartitionType::USER_DATA);
+        iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
     totalBlksPerUserStripe = udSize->blksPerStripe;
     stripesPerSegment = udSize->stripesPerSegment;
 }
@@ -89,8 +102,6 @@ GcMapUpdate::~GcMapUpdate(void)
 bool
 GcMapUpdate::Execute(void)
 {
-    IVSAMap* iVSAMap = MapperServiceSingleton::Instance()->GetIVSAMap(arrayName);
-    IContextManager* ctxManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
     StripeId stripeId = stripe->GetVsid();
     BlkAddr rba;
     uint32_t volId = mapUpdateInfoList.volumeId;
@@ -98,7 +109,7 @@ GcMapUpdate::Execute(void)
 
     StripeId currentLsid = stripe->GetUserLsid();
     iStripeMap->SetLSA(stripe->GetVsid(), stripe->GetUserLsid(), IN_USER_AREA);
-    ctxManager->UpdateOccupiedStripeCount(currentLsid);
+    iContextManager->UpdateOccupiedStripeCount(currentLsid);
 
     uint32_t validCount = mapUpdateInfoList.blockMapUpdateList.size();
     for (auto it : mapUpdateInfoList.blockMapUpdateList)
@@ -111,7 +122,16 @@ GcMapUpdate::Execute(void)
     _InvalidateBlock();
     _ValidateBlock(stripeId, validCount);
 
-    EventSmartPtr event(new GcMapUpdateCompletion(stripe, arrayName, iStripeMap, eventScheduler, gcStripeManager));
+    EventSmartPtr event;
+    if (nullptr == inputEvent)
+    {
+        event = std::make_shared<GcMapUpdateCompletion>(stripe, arrayName, iStripeMap, eventScheduler, gcStripeManager);
+    }
+    else
+    {
+        event = inputEvent;
+    }
+
     if (likely(event != nullptr))
     {
         eventScheduler->EnqueueEvent(event);
@@ -138,7 +158,6 @@ GcMapUpdate::_RegisterInvalidateSegments(VirtualBlkAddr vsa)
 void
 GcMapUpdate::_InvalidateBlock(void)
 {
-    IBlockAllocator* iBlockAllocator = AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName);
     for (auto it : invalidSegCnt)
     {
         SegmentId segId = it.first;
@@ -156,7 +175,6 @@ GcMapUpdate::_InvalidateBlock(void)
 void
 GcMapUpdate::_ValidateBlock(StripeId stripeId, uint32_t cnt)
 {
-    IBlockAllocator* iBlockAllocator = AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName);
     VirtualBlkAddr writeVsa = {stripeId, 0};
     VirtualBlks writeVsaRange = {writeVsa, cnt};
 

@@ -44,7 +44,20 @@
 
 namespace pos
 {
-VictimStripe::VictimStripe(IArrayInfo* array, ReverseMapPack* revMapPack_)
+VictimStripe::VictimStripe(IArrayInfo* array)
+: VictimStripe(array,
+            MapperServiceSingleton::Instance()->GetIReverseMap(array->GetName())->AllocReverseMapPack(false),
+            MapperServiceSingleton::Instance()->GetIVSAMap(array->GetName()),
+            MapperServiceSingleton::Instance()->GetIStripeMap(array->GetName()),
+            VolumeServiceSingleton::Instance()->GetVolumeManager(array->GetName()))
+{
+}
+
+VictimStripe::VictimStripe(IArrayInfo* array,
+                        ReverseMapPack* inputRevMapPack,
+                        IVSAMap* inputIVSAMap,
+                        IStripeMap* inputIStripeMap,
+                        IVolumeManager* inputVolumeManager)
 : myLsid(UNMAP_STRIPE),
   dataBlks(0),
   chunkIndex(0),
@@ -52,14 +65,12 @@ VictimStripe::VictimStripe(IArrayInfo* array, ReverseMapPack* revMapPack_)
   validBlockCnt(0),
   isLoaded(false),
   array(array),
-  revMapPack(revMapPack_)
+  revMapPack(inputRevMapPack),
+  iVSAMap(inputIVSAMap),
+  iStripeMap(inputIStripeMap),
+  volumeManager(inputVolumeManager)
 {
     dataBlks = array->GetSizeInfo(PartitionType::USER_DATA)->blksPerStripe;
-    if (nullptr == revMapPack)
-    {
-        IReverseMap* iReverseMap = MapperServiceSingleton::Instance()->GetIReverseMap(array->GetName());
-        revMapPack = iReverseMap->AllocReverseMapPack(false);
-    }
 }
 
 VictimStripe::~VictimStripe(void)
@@ -70,6 +81,7 @@ VictimStripe::~VictimStripe(void)
         delete revMapPack;
     }
 }
+
 void
 VictimStripe::Load(StripeId _lsid, CallbackSmartPtr callback)
 {
@@ -109,11 +121,6 @@ VictimStripe::LoadValidBlock(void)
     {
         return true;
     }
-
-    IVSAMap* iVSAMap = MapperServiceSingleton::Instance()->GetIVSAMap(array->GetName());
-    IStripeMap* iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(array->GetName());
-    IVolumeManager* volumeManager
-        = VolumeServiceSingleton::Instance()->GetVolumeManager(array->GetName());
 
     for (; blockOffset < dataBlks; blockOffset++)
     {

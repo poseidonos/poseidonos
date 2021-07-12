@@ -76,13 +76,19 @@ class FlowControlService;
 class IArrayInfo;
 class PartitionLogicalSize;
 class TokenDistributer;
+class ConfigManager;
 
 class FlowControl : public IMountSequence
 {
 public:
     explicit FlowControl(IArrayInfo* arrayInfo);
-    FlowControl(IArrayInfo* arrayInfo, IContextManager* iContextManager, const PartitionLogicalSize* sizeInfo,
-                  SystemTimeoutChecker* systemTimeoutChecker, FlowControlService* flowControlService, TokenDistributer* tokenDistributer);
+    FlowControl(IArrayInfo* arrayInfo,
+                IContextManager* inputIContextManager,
+                const PartitionLogicalSize* inputSizeInfo,
+                SystemTimeoutChecker* inputSystemTimeoutChecker,
+                FlowControlService* inputFlowControlService,
+                TokenDistributer* inputTokenDistributer,
+                ConfigManager* inputConfigManager);
     virtual ~FlowControl(void);
 
     virtual int Init(void) override;
@@ -137,5 +143,6 @@ private:
     SystemTimeoutChecker* systemTimeoutChecker = nullptr;
     FlowControlService* flowControlService = nullptr;
     TokenDistributer* tokenDistributer = nullptr;
+    ConfigManager* configManager = nullptr;
 };
 } // namespace pos

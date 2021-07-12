@@ -49,10 +49,12 @@ namespace pos
 class CopierMeta
 {
 public:
-    CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize = nullptr,
-               BitMapMutex* inUseBitmap_ = nullptr, GcStripeManager* gcStripeManager_ = nullptr,
-               std::vector<std::vector<VictimStripe*>>* victimStripes_ = nullptr,
-               std::vector<FreeBufferPool*>* gcBufferPool_ = nullptr);
+    explicit CopierMeta(IArrayInfo* array);
+    CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize,
+                BitMapMutex* inputInUseBitmap, GcStripeManager* inputGcStripeManager,
+                std::vector<std::vector<VictimStripe*>>* inputVictimStripes,
+                std::vector<FreeBufferPool*>* inputGcBufferPool);
+
     virtual ~CopierMeta(void);
 
     virtual void* GetBuffer(StripeId stripeId);
@@ -82,8 +84,8 @@ public:
     static const uint32_t GC_CONCURRENT_COUNT = 16;
     static const uint32_t GC_VICTIM_SEGMENT_COUNT = 2;
 private:
-    void _CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize);
-    void _CreateVictimStripes(IArrayInfo* array);
+    std::vector<FreeBufferPool*>* _CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize);
+    std::vector<std::vector<VictimStripe*>>* _CreateVictimStripes(IArrayInfo* array);
 
     std::atomic<uint32_t> requestStripeCount;
     std::atomic<uint32_t> requestBlockCount;

@@ -41,11 +41,16 @@
 
 namespace pos
 {
+class EventScheduler;
+class IIOSubmitHandler;
+
 class StripeCopier : public Event
 {
 public:
-    StripeCopier(StripeId victimStripeId,
-        CopierMeta* meta, uint32_t copyIndex);
+    explicit StripeCopier(StripeId victimStripeId, CopierMeta* meta, uint32_t copyIndex);
+    StripeCopier(StripeId victimStripeId, CopierMeta* meta, uint32_t copyIndex,
+                EventSmartPtr inputCopyEvent, EventSmartPtr inputStripeCopier,
+                EventScheduler* inputEventScheduler);
     virtual ~StripeCopier(void);
     virtual bool Execute(void);
 
@@ -53,12 +58,21 @@ private:
     class CopyEvent : public Event
     {
     public:
-        CopyEvent(void* buffer,
+        explicit CopyEvent(void* buffer,
             LogicalBlkAddr lsa,
             uint32_t listIndex,
             CopierMeta* meta,
             uint32_t stripeId,
             uint32_t copyIndex);
+
+        CopyEvent(void* buffer,
+            LogicalBlkAddr lsa,
+            uint32_t listIndex,
+            CopierMeta* meta,
+            uint32_t stripeId,
+            uint32_t copyIndex,
+            CallbackSmartPtr inputCallback,
+            IIOSubmitHandler* inputIIOSubmitHandler);
         virtual ~CopyEvent(void);
         virtual bool Execute(void);
 
@@ -69,6 +83,9 @@ private:
         CopierMeta* meta;
         uint32_t stripeId;
         uint32_t copyIndex;
+
+        CallbackSmartPtr inputCallback;
+        IIOSubmitHandler* iIOSubmitHandler;
     };
 
     StripeId victimStripeId;
@@ -78,6 +95,10 @@ private:
     uint32_t listIndex;
     uint32_t stripeOffset;
     uint32_t copyIndex;
+
+    EventSmartPtr inputCopyEvent;
+    EventSmartPtr inputStripeCopier;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos

@@ -52,16 +52,25 @@ class Stripe;
 class IStripeMap;
 class EventScheduler;
 class GcStripeManager;
+class IArrayInfo;
+class IVSAMap;
+class IContextManager;
+class IBlockAllocator;
 
 class GcMapUpdate : public Event
 {
 public:
     GcMapUpdate(void) = delete;
     explicit GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
-                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, GcStripeManager* gcStripeManager,
-                        EventScheduler* eventScheduler);
-    GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
                         std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, GcStripeManager* gcStripeManager);
+    GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpdateList mapUpdateInfoList,
+                        std::map<SegmentId, uint32_t > invalidSegCnt, IStripeMap* iStripeMap, GcStripeManager* gcStripeManager,
+                        EventScheduler* eventScheduler,
+                        EventSmartPtr inputEvent,
+                        IArrayInfo* inputIArrayInfo,
+                        IVSAMap* inputIVSAMap,
+                        IContextManager* inputContextManager,
+                        IBlockAllocator* inputIBlockAllocator);
     ~GcMapUpdate(void) override;
     bool Execute(void) override;
 
@@ -82,6 +91,12 @@ private:
     std::string arrayName;
 
     GcStripeMapUpdateList mapUpdateInfoList;
+
+    EventSmartPtr inputEvent;
+    IArrayInfo* iArrayInfo;
+    IVSAMap* iVSAMap;
+    IContextManager* iContextManager;
+    IBlockAllocator* iBlockAllocator;
 };
 
 } // namespace pos

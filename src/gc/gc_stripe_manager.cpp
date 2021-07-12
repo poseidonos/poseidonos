@@ -52,16 +52,29 @@
 
 namespace pos
 {
-GcStripeManager::GcStripeManager(IArrayInfo* array, FreeBufferPool* gcWriteBufferPool_)
-: VolumeEvent("GcStripeManager", array->GetName(), array->GetIndex()),
-  array(array),
-  gcWriteBufferPool(gcWriteBufferPool_)
+GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo)
+: GcStripeManager(iArrayInfo,
+                new FreeBufferPool(iArrayInfo->GetSizeInfo(PartitionType::USER_DATA)->chunksPerStripe * GC_WRITE_BUFFER_CONUNT, CHUNK_SIZE),
+                nullptr,
+                nullptr,
+                VolumeEventPublisherSingleton::Instance())
 {
-    udSize = array->GetSizeInfo(PartitionType::USER_DATA);
-    if (nullptr == gcWriteBufferPool)
-    {
-        gcWriteBufferPool = new FreeBufferPool(udSize->chunksPerStripe * GC_WRITE_BUFFER_CONUNT, CHUNK_SIZE);
-    }
+}
+
+GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
+                                FreeBufferPool* inputGcWriteBufferPool,
+                                std::vector<BlkInfo>* inputBlkInfoList,
+                                GcWriteBuffer* inputGcActiveWriteBuffer,
+                                VolumeEventPublisher* inputVolumeEventPublisher)
+: VolumeEvent("GcStripeManager", iArrayInfo->GetName(), iArrayInfo->GetIndex()),
+  iArrayInfo(iArrayInfo),
+  gcWriteBufferPool(inputGcWriteBufferPool),
+  inputBlkInfoList(inputBlkInfoList),
+  inputGcActiveWriteBuffer(inputGcActiveWriteBuffer),
+  volumeEventPublisher(inputVolumeEventPublisher)
+{
+    udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+
     for (uint32_t volId = 0; volId < GC_VOLUME_COUNT; volId++)
     {
         blkInfoList[volId] = nullptr;
@@ -69,7 +82,7 @@ GcStripeManager::GcStripeManager(IArrayInfo* array, FreeBufferPool* gcWriteBuffe
         flushed[volId] = true;
     }
     flushedStripeCnt = 0;
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayId);
+    volumeEventPublisher->RegisterSubscriber(this, arrayName, arrayId);
 }
 
 GcStripeManager::~GcStripeManager(void)
@@ -90,8 +103,11 @@ GcStripeManager::~GcStripeManager(void)
         }
     }
 
-    delete gcWriteBufferPool;
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayId);
+    if (gcWriteBufferPool != nullptr)
+    {
+        delete gcWriteBufferPool;
+    }
+    volumeEventPublisher->RemoveSubscriber(this, arrayName, arrayId);
 }
 
 bool
@@ -271,13 +287,28 @@ GcStripeManager::_SetActiveStripeRemaining(uint32_t volumeId, uint32_t cnt)
 void
 GcStripeManager::_CreateBlkInfoList(uint32_t volumeId)
 {
-    blkInfoList[volumeId] = new std::vector<BlkInfo>(udSize->blksPerStripe);
+    if (nullptr == inputBlkInfoList)
+    {
+        blkInfoList[volumeId] = new std::vector<BlkInfo>(udSize->blksPerStripe);
+    }
+    else
+    {
+        blkInfoList[volumeId] = inputBlkInfoList;
+    }
 }
 
 bool
 GcStripeManager::_CreateActiveWriteBuffer(uint32_t volumeId)
 {
-    gcActiveWriteBuffers[volumeId] = new GcWriteBuffer();
+    if (nullptr == inputGcActiveWriteBuffer)
+    {
+        gcActiveWriteBuffers[volumeId] = new GcWriteBuffer();
+    }
+    else
+    {
+        gcActiveWriteBuffers[volumeId] = inputGcActiveWriteBuffer;
+    }
+
     for (uint32_t chunkCnt = 0; chunkCnt < udSize->chunksPerStripe; ++chunkCnt)
     {
         void* buffer = gcWriteBufferPool->GetBuffer();

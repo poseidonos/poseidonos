@@ -43,11 +43,17 @@
 namespace pos
 {
 class GcStripeManager;
+class RBAStateManager;
+class IArrayInfo;
 
 class GcFlushCompletion : public Callback
 {
 public:
     explicit GcFlushCompletion(Stripe* stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer);
+    GcFlushCompletion(Stripe* stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer,
+                    EventSmartPtr inputEvent,
+                    RBAStateManager* inputRbaStateManager,
+                    IArrayInfo* inputIArrayInfo);
     ~GcFlushCompletion(void) override;
 
 private:
@@ -57,6 +63,10 @@ private:
     std::string arrayName;
     GcStripeManager* gcStripeManager;
     GcWriteBuffer* dataBuffer;
+
+    EventSmartPtr inputEvent;
+    RBAStateManager* rbaStateManager;
+    IArrayInfo* iArrayInfo;
 };
 
 } // namespace pos

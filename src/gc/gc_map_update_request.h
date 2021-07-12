@@ -52,13 +52,18 @@ class Stripe;
 class IStripeMap;
 class EventScheduler;
 class GcStripeManager;
+class IArrayInfo;
 
 class GcMapUpdateRequest : public Event
 {
 public:
-    GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager, IStripeMap* iStripeMap,
-                    IVSAMap *iVSAMap, JournalService *journalService, EventScheduler *eventScheduler);
-    GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager);
+    explicit GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager);
+    GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager, EventSmartPtr inputEvent,
+                    IStripeMap* inputIStripeMap,
+                    IVSAMap* inputIVSAMap,
+                    JournalService* inputJournalService,
+                    EventScheduler* inputEventScheduler,
+                    IArrayInfo* inputIArrayInfo);
     virtual bool Execute(void) override;
 
 private:
@@ -71,10 +76,12 @@ private:
     std::string arrayName;
 
     GcStripeManager* gcStripeManager;
+    EventSmartPtr inputEvent;
     IStripeMap* iStripeMap;
     IVSAMap* iVSAMap;
     JournalService *journalService;
     EventScheduler *eventScheduler;
+    IArrayInfo *iArrayInfo;
 
     uint32_t totalBlksPerUserStripe;
     uint32_t stripesPerSegment;

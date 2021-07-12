@@ -50,7 +50,7 @@ TEST(WriteSubmission, WriteSubmission_Constructor_Three)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name, 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
-    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     // when
     WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator, &mockFlowControl, false);
@@ -71,7 +71,7 @@ TEST(WriteSubmission, Execute_SingleBlock_ownershipFail)
     NiceMock<MockAllocatorService> mockAllocatorService;
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
-    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     // when
     WriteSubmission writeSubmission(volumeIo, &mockRBAStateManager, &mockIBlockAllocator, &mockFlowControl, false);
@@ -96,7 +96,7 @@ TEST(WriteSubmission, Execute_SingleBlock)
     NiceMock<MockAllocatorService> mockAllocatorService;
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
-    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
@@ -129,7 +129,7 @@ TEST(WriteSubmission, Execute_AlgnedMultiBlock)
     NiceMock<MockAllocatorService> mockAllocatorService;
     NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name, 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
-    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
@@ -162,7 +162,7 @@ TEST(WriteSubmission, Execute_MisAlgnedMultiBlock)
     NiceMock<MockAllocatorService> mockAllocatorService;
     NiceMock<MockRBAStateManager> mockRBAStateManager(arr_name, 0);
     NiceMock<MockIBlockAllocator> mockIBlockAllocator;
-    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    NiceMock<MockFlowControl> mockFlowControl(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     VolumeIoSmartPtr mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));

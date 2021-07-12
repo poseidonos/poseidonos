@@ -49,19 +49,30 @@ namespace pos
 {
 
 FlowControl::FlowControl(IArrayInfo* arrayInfo)
-: FlowControl(arrayInfo, AllocatorServiceSingleton::Instance()->GetIContextManager(arrayInfo->GetName()), nullptr,
-              new SystemTimeoutChecker(), FlowControlServiceSingleton::Instance(), nullptr)
+: FlowControl(arrayInfo,
+            AllocatorServiceSingleton::Instance()->GetIContextManager(arrayInfo->GetName()),
+            nullptr,
+            new SystemTimeoutChecker(),
+            FlowControlServiceSingleton::Instance(),
+            nullptr,
+            ConfigManagerSingleton::Instance())
 {
 }
 
-FlowControl::FlowControl(IArrayInfo* arrayInfo, IContextManager* inputIContextManager, const PartitionLogicalSize* inputSizeInfo,
-                         SystemTimeoutChecker* inputSystemTimeoutChecker, FlowControlService* inputFlowControlService, TokenDistributer* inputTokenDistributer)
+FlowControl::FlowControl(IArrayInfo* arrayInfo,
+                        IContextManager* inputIContextManager,
+                        const PartitionLogicalSize* inputSizeInfo,
+                        SystemTimeoutChecker* inputSystemTimeoutChecker,
+                        FlowControlService* inputFlowControlService,
+                        TokenDistributer* inputTokenDistributer,
+                        ConfigManager* inputConfigManager)
 : arrayInfo(arrayInfo),
   iContextManager(inputIContextManager),
   sizeInfo(inputSizeInfo),
   systemTimeoutChecker(inputSystemTimeoutChecker),
   flowControlService(inputFlowControlService),
-  tokenDistributer(inputTokenDistributer)
+  tokenDistributer(inputTokenDistributer),
+  configManager(inputConfigManager)
 {
 }
 
@@ -71,17 +82,16 @@ FlowControl::~FlowControl(void)
     {
         delete tokenDistributer;
     }
+    if (nullptr != systemTimeoutChecker)
+    {
+        delete systemTimeoutChecker;
+    }
 }
 
 int
 FlowControl::Init(void)
 {
     int result = 0;
-
-    if (nullptr == iContextManager)
-    {
-        iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayInfo->GetName());
-    }
 
     sizeInfo = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
 
@@ -274,7 +284,7 @@ FlowControl::_ReadConfig(void)
     int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
 
     bool enable = true;
-    int ret = ConfigManagerSingleton::Instance()->GetValue("flow_control", "enable",
+    int ret = configManager->GetValue("flow_control", "enable",
                 &enable, ConfigType::CONFIG_TYPE_BOOL);
     if (SUCCESS == ret)
     {
@@ -286,7 +296,7 @@ FlowControl::_ReadConfig(void)
     }
 
     bool use_default = true;
-    ret = ConfigManagerSingleton::Instance()->GetValue("flow_control", "use_default",
+    ret = configManager->GetValue("flow_control", "use_default",
                 &use_default, ConfigType::CONFIG_TYPE_BOOL);
     if (SUCCESS == ret)
     {
@@ -297,7 +307,7 @@ FlowControl::_ReadConfig(void)
     }
 
     uint64_t refill_timeout_in_msec = 1000;
-    ret = ConfigManagerSingleton::Instance()->GetValue("flow_control", "refill_timeout_in_msec",
+    ret = configManager->GetValue("flow_control", "refill_timeout_in_msec",
             &refill_timeout_in_msec, ConfigType::CONFIG_TYPE_UINT64);
     if (SUCCESS == ret)
     {
@@ -306,7 +316,7 @@ FlowControl::_ReadConfig(void)
 
 
     uint32_t total_token_in_stripe = 1024;
-    ret = ConfigManagerSingleton::Instance()->GetValue("flow_control", "total_token_in_stripe",
+    ret = configManager->GetValue("flow_control", "total_token_in_stripe",
             &total_token_in_stripe, ConfigType::CONFIG_TYPE_UINT32);
     if (SUCCESS == ret)
     {
@@ -315,7 +325,7 @@ FlowControl::_ReadConfig(void)
     }
 
     std::string strategy = "linear";
-    ret = ConfigManagerSingleton::Instance()->GetValue("flow_control", "strategy",
+    ret = configManager->GetValue("flow_control", "strategy",
             &strategy, ConfigType::CONFIG_TYPE_STRING);
     if (SUCCESS == ret)
     {
@@ -334,25 +344,25 @@ FlowControl::_ReadConfig(void)
     uint32_t flow_control_urgent_segment = 5;
     if (FlowControlStrategy::STATE == flowControlStrategy)
     {
-        ret = ConfigManagerSingleton::Instance()->GetValue("flow_control", "flow_control_target_percent",
+        ret = configManager->GetValue("flow_control", "flow_control_target_percent",
                 &flow_control_target_percent, ConfigType::CONFIG_TYPE_UINT32);
         if (SUCCESS != ret)
         {
             return;
         }
-        ret = ConfigManagerSingleton::Instance()->GetValue("flow_control", "flow_control_urgent_percent",
+        ret = configManager->GetValue("flow_control", "flow_control_urgent_percent",
                 &flow_control_urgent_percent, ConfigType::CONFIG_TYPE_UINT32);
         if (SUCCESS != ret)
         {
             return;
         }
-        ret = ConfigManagerSingleton::Instance()->GetValue("flow_control", "flow_control_target_segment",
+        ret = configManager->GetValue("flow_control", "flow_control_target_segment",
                 &flow_control_target_segment, ConfigType::CONFIG_TYPE_UINT32);
         if (SUCCESS != ret)
         {
             return;
         }
-        ret = ConfigManagerSingleton::Instance()->GetValue("flow_control", "flow_control_urgent_segment",
+        ret = configManager->GetValue("flow_control", "flow_control_urgent_segment",
                 &flow_control_urgent_segment, ConfigType::CONFIG_TYPE_UINT32);
         if (SUCCESS != ret)
         {

@@ -42,14 +42,18 @@
 
 namespace pos
 {
+class IVolumeManager;
+class EventScheduler;
+
 class CopierReadCompletion : public Callback
 {
 public:
-    CopierReadCompletion(VictimStripe* victimStripe,
-        uint32_t listIndex,
-        void* buffer,
-        CopierMeta* meta,
-        uint32_t stripeId);
+    explicit CopierReadCompletion(VictimStripe* victimStripe, uint32_t listIndex,
+                        void* buffer, CopierMeta* meta, uint32_t stripeId);
+    CopierReadCompletion(VictimStripe* victimStripe, uint32_t listIndex,
+                        void* buffer, CopierMeta* meta, StripeId stripeId,
+                        EventSmartPtr inputFlushEvent, IVolumeManager* inputVolumeManager,
+                        EventScheduler* inputEventScheduler);
     ~CopierReadCompletion(void) override;
 
 private:
@@ -66,6 +70,10 @@ private:
 
     uint32_t blkCnt;
     uint32_t allocatedCnt;
+
+    EventSmartPtr inputFlushEvent;
+    IVolumeManager* volumeManager;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos

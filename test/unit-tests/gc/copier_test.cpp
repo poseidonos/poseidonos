@@ -15,6 +15,7 @@
 #include <test/unit-tests/gc/stripe_copy_submission_mock.h>
 #include <test/unit-tests/gc/victim_stripe_mock.h>
 #include <test/unit-tests/lib/bitmap_mock.h>
+#include <test/unit-tests/sys_event/volume_event_publisher_mock.h>
 #include <test/unit-tests/mapper/i_reversemap_mock.h>
 #include <test/unit-tests/mapper/reversemap/reverse_map_mock.h>
 #include <test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h>
@@ -55,6 +56,7 @@ public:
       gcStripeManager(nullptr),
       reverseMapPack(nullptr),
       gcWriteBufferPool(nullptr),
+      volumeEventPublisher(nullptr),
       victimStripes(nullptr),
       gcBufferPool(nullptr),
       stripeCopySubmissionPtr(nullptr),
@@ -79,7 +81,8 @@ public:
         gcStatus = new NiceMock<MockGcStatus>;
         affinityManager = new NiceMock<MockAffinityManager>(BuildDefaultAffinityManagerMock());
         gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, affinityManager);
-        gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool);
+        volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
+        gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool, nullptr, nullptr, volumeEventPublisher);
 
         victimStripes = new std::vector<std::vector<VictimStripe*>>;
         victimStripes->resize(GC_VICTIM_SEGMENT_COUNT);
@@ -88,7 +91,7 @@ public:
             for (uint32_t i = 0; i < partitionLogicalSize.stripesPerSegment; i++)
             {
                 reverseMapPack = new NiceMock<MockReverseMapPack>;
-                (*victimStripes)[stripeIndex].push_back(new NiceMock<MockVictimStripe>(array, reverseMapPack));
+                (*victimStripes)[stripeIndex].push_back(new NiceMock<MockVictimStripe>(array, reverseMapPack, nullptr, nullptr, nullptr));
             }
         }
 
@@ -128,6 +131,7 @@ protected:
     NiceMock<MockIBlockAllocator>* iBlockAllocator;
     NiceMock<MockIContextManager>* iContextManager;
     NiceMock<MockBitMapMutex>* inUseBitmap;
+    NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
     NiceMock<MockGcStripeManager>* gcStripeManager;
     NiceMock<MockReverseMapPack>* reverseMapPack;
     NiceMock<MockAffinityManager>* affinityManager;

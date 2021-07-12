@@ -43,14 +43,25 @@
 
 namespace pos
 {
-StripeCopier::StripeCopier(StripeId victimStripeId,
-    CopierMeta* meta, uint32_t copyIndex)
+StripeCopier::StripeCopier(StripeId victimStripeId, CopierMeta* meta, uint32_t copyIndex)
+: StripeCopier(victimStripeId, meta, copyIndex,
+                nullptr, nullptr,
+                EventSchedulerSingleton::Instance())
+{
+}
+
+StripeCopier::StripeCopier(StripeId victimStripeId, CopierMeta* meta, uint32_t copyIndex,
+                        EventSmartPtr inputCopyEvent, EventSmartPtr inputStripeCopier,
+                        EventScheduler* inputEventScheduler)
 : victimStripeId(victimStripeId),
   meta(meta),
   loadedValidBlock(false),
   listIndex(0),
   stripeOffset(victimStripeId % STRIPES_PER_SEGMENT),
-  copyIndex(copyIndex)
+  copyIndex(copyIndex),
+  inputCopyEvent(inputCopyEvent),
+  inputStripeCopier(inputStripeCopier),
+  eventScheduler(inputEventScheduler)
 {
     SetEventType(BackendEvent_GC);
 }
@@ -105,8 +116,16 @@ StripeCopier::Execute(void)
             uint32_t offset = (startOffset / BLOCKS_IN_CHUNK) * BLOCKS_IN_CHUNK;
             lsa = {victimStripeId, offset};
 
-            EventSmartPtr copyEvent(new CopyEvent(buffer, lsa, listIndex, meta, victimStripeId, copyIndex));
-            EventSchedulerSingleton::Instance()->EnqueueEvent(copyEvent);
+            EventSmartPtr copyEvent;
+            if (nullptr == inputCopyEvent)
+            {
+                copyEvent = std::make_shared<CopyEvent>(buffer, lsa, listIndex, meta, victimStripeId, copyIndex);
+            }
+            else
+            {
+                copyEvent = inputCopyEvent;
+            }
+            eventScheduler->EnqueueEvent(copyEvent);
             requestCount += blkInfoList.size();
             listIndex++;
         }
@@ -117,8 +136,16 @@ StripeCopier::Execute(void)
     victimStripeId += CopierMeta::GC_CONCURRENT_COUNT;
     if ((victimStripeId % meta->GetStripePerSegment() /*STRIPES_PER_SEGMENT*/) >= CopierMeta::GC_CONCURRENT_COUNT)
     {
-        EventSmartPtr stripeCopier(new StripeCopier(victimStripeId, meta, copyIndex));
-        EventSchedulerSingleton::Instance()->EnqueueEvent(stripeCopier);
+        EventSmartPtr stripeCopier;
+        if (nullptr == inputStripeCopier)
+        {
+            stripeCopier = std::make_shared<StripeCopier>(victimStripeId, meta, copyIndex);
+        }
+        else
+        {
+            stripeCopier = inputStripeCopier;
+        }
+        eventScheduler->EnqueueEvent(stripeCopier);
     }
 
     return true;
@@ -130,14 +157,30 @@ StripeCopier::CopyEvent::CopyEvent(void* buffer,
     CopierMeta* meta,
     uint32_t stripeId,
     uint32_t copyIndex)
+: CopyEvent(buffer, lsa, listIndex, meta, stripeId, copyIndex,
+            nullptr, IIOSubmitHandler::GetInstance())
+{
+}
+
+StripeCopier::CopyEvent::CopyEvent(void* buffer,
+    LogicalBlkAddr lsa,
+    uint32_t listIndex,
+    CopierMeta* meta,
+    uint32_t stripeId,
+    uint32_t copyIndex,
+    CallbackSmartPtr inputCallback,
+    IIOSubmitHandler* inputIIOSubmitHandle)
 : buffer(buffer),
   lsa(lsa),
   listIndex(listIndex),
   meta(meta),
   stripeId(stripeId),
-  copyIndex(copyIndex)
+  copyIndex(copyIndex),
+  inputCallback(inputCallback),
+  iIOSubmitHandler(inputIIOSubmitHandle)
 {
 }
+
 StripeCopier::CopyEvent::~CopyEvent(void)
 {
 }
@@ -155,15 +198,21 @@ StripeCopier::CopyEvent::Execute(void)
 
     PartitionType partitionType = PartitionType::USER_DATA;
 
-    CallbackSmartPtr callback(
-        new CopierReadCompletion(meta->GetVictimStripe(copyIndex, stripeId % meta->GetStripePerSegment()),
-            listIndex,
-            buffer, meta,
-            stripeId));
+    CallbackSmartPtr callback;
+    if (nullptr == inputCallback)
+    {
+        callback = std::make_shared<CopierReadCompletion>(meta->GetVictimStripe(copyIndex, stripeId % meta->GetStripePerSegment()),
+                                                        listIndex, buffer, meta, stripeId);
+    }
+    else
+    {
+        callback = inputCallback;
+    }
     callback->SetEventType(BackendEvent_GC);
-        IIOSubmitHandler::GetInstance()->SubmitAsyncIO(IODirection::READ,
-        bufferList, lsa, numPage,
-        partitionType, callback, arrayName);
+
+    iIOSubmitHandler->SubmitAsyncIO(IODirection::READ,
+                                    bufferList, lsa, numPage,
+                                    partitionType, callback, arrayName);
     return true;
 }
 

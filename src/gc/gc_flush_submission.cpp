@@ -59,17 +59,35 @@
 
 namespace pos
 {
+GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
+                                    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager)
+: GcFlushSubmission(arrayName, blkInfoList, volumeId, dataBuffer, gcStripeManager, nullptr,
+                    AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName),
+                    AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName),
+                    IIOSubmitHandler::GetInstance(),
+                    FlowControlServiceSingleton::Instance()->GetFlowControl(arrayName),
+                    ArrayMgr::Instance()->GetArrayInfo(arrayName))
+{
+}
 
-GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId, GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager)
+GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
+                                    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager,
+                                    CallbackSmartPtr inputCallback, IBlockAllocator* inputIBlockAllocator,
+                                    IWBStripeAllocator* inputIWBStripeAllocator, IIOSubmitHandler* inputIIOSubmitHandler,
+                                    FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo)
 : Event(false, BackendEvent_Flush),
   arrayName(arrayName),
   blkInfoList(blkInfoList),
   volumeId(volumeId),
   dataBuffer(dataBuffer),
-  gcStripeManager(gcStripeManager)
+  gcStripeManager(gcStripeManager),
+  inputCallback(inputCallback),
+  iBlockAllocator(inputIBlockAllocator),
+  iWBStripeAllocator(inputIWBStripeAllocator),
+  iIOSubmitHandler(inputIIOSubmitHandler),
+  flowControl(inputFlowControl),
+  iArrayInfo(inputIArrayInfo)
 {
-    iBlockAllocator = AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName);
-    iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName);
     SetEventType(BackendEvent_Flush);
 }
 
@@ -80,12 +98,9 @@ GcFlushSubmission::~GcFlushSubmission(void)
 bool
 GcFlushSubmission::Execute(void)
 {
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
     const PartitionLogicalSize* udSize =
-        info->GetSizeInfo(PartitionType::USER_DATA);
+        iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
     uint32_t totalBlksPerUserStripe = udSize->blksPerStripe;
-
-    FlowControl* flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(arrayName);
 
     int token = flowControl->GetToken(FlowControlType::GC, totalBlksPerUserStripe);
     if (0 >= token)
@@ -132,7 +147,15 @@ GcFlushSubmission::Execute(void)
 
     stripe->SetUserLsid(logicalStripeId);
 
-    CallbackSmartPtr callback(new GcFlushCompletion(stripe, arrayName, gcStripeManager, dataBuffer));
+    CallbackSmartPtr callback;
+    if (nullptr == inputCallback)
+    {
+        callback = std::make_shared<GcFlushCompletion>(stripe, arrayName, gcStripeManager, dataBuffer);
+    }
+    else
+    {
+        callback = inputCallback;
+    }
 
     LogicalBlkAddr startLSA = {
         .stripeId = logicalStripeId,
@@ -142,7 +165,7 @@ GcFlushSubmission::Execute(void)
 
     POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, PosEventId::GetString(eventId), stripe->GetVsid(), startLSA.stripeId, blocksInStripe);
 
-    IOSubmitHandlerStatus errorReturned = IIOSubmitHandler::GetInstance()->SubmitAsyncIO(
+    IOSubmitHandlerStatus errorReturned = iIOSubmitHandler->SubmitAsyncIO(
         IODirection::WRITE,
         bufferList,
         startLSA, blocksInStripe,

@@ -43,9 +43,17 @@
 namespace pos
 {
 GarbageCollector::GarbageCollector(IArrayInfo* i, IStateControl* s)
+: GarbageCollector(i, s, nullptr, EventSchedulerSingleton::Instance())
+{
+}
+
+GarbageCollector::GarbageCollector(IArrayInfo* i, IStateControl* s,
+                                CopierSmartPtr inputEvent, EventScheduler* inputEventScheduler)
 : arrayInfo(i),
   state(s),
-  gcStatus()
+  gcStatus(),
+  inputEvent(inputEvent),
+  eventScheduler(inputEventScheduler)
 {
 }
 
@@ -152,9 +160,17 @@ void
 GarbageCollector::_DoGC(void)
 {
     POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_STARTED), "GC started");
-    CopierSmartPtr event(new Copier(UNMAP_SEGMENT, UNMAP_SEGMENT, &gcStatus, arrayInfo));
 
-    EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+    CopierSmartPtr event;
+    if (nullptr == inputEvent)
+    {
+        event = std::make_shared<Copier>(UNMAP_SEGMENT, UNMAP_SEGMENT, &gcStatus, arrayInfo);
+    }
+    else
+    {
+        event = inputEvent;
+    }
+    eventScheduler->EnqueueEvent(event);
     copierPtr = event;
 }
 

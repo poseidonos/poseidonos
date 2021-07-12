@@ -55,38 +55,43 @@
 
 namespace pos
 {
-GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager, IStripeMap* iStripeMap,
-                IVSAMap *iVSAMap, JournalService *journalService, EventScheduler *eventScheduler)
-: Event(false),
-  stripe(stripe),
-  arrayName(arrayName),
-  gcStripeManager(gcStripeManager),
-  iStripeMap(iStripeMap),
-  iVSAMap(iVSAMap),
-  journalService(journalService),
-  eventScheduler(eventScheduler)
-  
-{
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
-    const PartitionLogicalSize* udSize =
-        info->GetSizeInfo(PartitionType::USER_DATA);
-    totalBlksPerUserStripe = udSize->blksPerStripe;
-    stripesPerSegment = udSize->stripesPerSegment;;
-
-    stripeOffset = 0;
-}
-
-
 GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager)
 : GcMapUpdateRequest(
     stripe,
     arrayName,
     gcStripeManager,
+    nullptr,
     MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
     MapperServiceSingleton::Instance()->GetIVSAMap(arrayName),
     JournalServiceSingleton::Instance(),
-    EventSchedulerSingleton::Instance())
+    EventSchedulerSingleton::Instance(),
+    ArrayMgr::Instance()->GetArrayInfo(arrayName))
 {
+}
+
+GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager, EventSmartPtr inputEvent,
+                    IStripeMap* inputIStripeMap,
+                    IVSAMap* inputIVSAMap,
+                    JournalService* inputJournalService,
+                    EventScheduler* inputEventScheduler,
+                    IArrayInfo* inputIArrayInfo)
+: Event(false),
+  stripe(stripe),
+  arrayName(arrayName),
+  gcStripeManager(gcStripeManager),
+  inputEvent(inputEvent),
+  iStripeMap(inputIStripeMap),
+  iVSAMap(inputIVSAMap),
+  journalService(inputJournalService),
+  eventScheduler(inputEventScheduler),
+  iArrayInfo(inputIArrayInfo)
+{
+    const PartitionLogicalSize* udSize =
+        iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    totalBlksPerUserStripe = udSize->blksPerStripe;
+    stripesPerSegment = udSize->stripesPerSegment;;
+
+    stripeOffset = 0;
 }
 
 bool
@@ -132,7 +137,16 @@ GcMapUpdateRequest::Execute(void)
     mapUpdates.wbLsid = stripe->GetWbLsid();
     mapUpdates.userLsid = stripe->GetUserLsid();
 
-    EventSmartPtr event(new GcMapUpdate(stripe, arrayName, mapUpdates, invalidSegCnt, iStripeMap, gcStripeManager));
+    EventSmartPtr event;
+    if (nullptr == inputEvent)
+    {
+        event = std::make_shared<GcMapUpdate>(stripe, arrayName, mapUpdates, invalidSegCnt, iStripeMap, gcStripeManager);
+    }
+    else
+    {
+        event = inputEvent;
+    }
+
     if (journalService->IsEnabled(arrayName))
     {
         MapPageList dirtyMap;

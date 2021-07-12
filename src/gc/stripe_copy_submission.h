@@ -41,12 +41,14 @@
 
 namespace pos
 {
+class EventScheduler;
 
 class StripeCopySubmission : public Callback
 {
 public:
-    StripeCopySubmission(StripeId baseStripeId,
-                        CopierMeta* meta, uint32_t copyIndex);
+    explicit StripeCopySubmission(StripeId baseStripeId, CopierMeta* meta, uint32_t copyIndex);
+    StripeCopySubmission(StripeId baseStripeId, CopierMeta* meta, uint32_t copyIndex,
+                        EventSmartPtr inputEvent, EventScheduler* inputEventScheduler);
     virtual ~StripeCopySubmission(void) override;
 
 private:
@@ -56,6 +58,9 @@ private:
     CopierMeta* meta = nullptr;
     uint32_t copyIndex = 0;
     bool isLoaded;
+
+    EventSmartPtr inputEvent;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos
