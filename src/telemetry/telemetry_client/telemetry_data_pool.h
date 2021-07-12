@@ -75,6 +75,7 @@ class TelemetryDataPool
 public:
     TelemetryDataPool(void);
     ~TelemetryDataPool(void);
+    void SetMaxEntryLimit(int limit);
     void SetLog(std::string id, uint32_t value);
     int GetLog(std::string id, TelemetryGeneralMetric& outLog);
     list<TelemetryGeneralMetric> GetAll(void);
@@ -86,6 +87,7 @@ private:
     tm _GetCurTime(void);
 
     std::map<std::string, TelemetryGeneralMetric> pool;
+    int maxEntry;
 };
 
 } // namespace pos

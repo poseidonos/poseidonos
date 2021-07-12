@@ -33,7 +33,8 @@
 
 namespace pos
 {
-TelemetryDataPool::TelemetryDataPool(void)
+TelemetryDataPool::TelemetryDataPool()
+: maxEntry(LIMIT_NUM_MAX_ENTRY)
 {
 }
 
@@ -42,20 +43,40 @@ TelemetryDataPool::~TelemetryDataPool(void)
 }
 
 void
+TelemetryDataPool::SetMaxEntryLimit(int limit)
+{
+    maxEntry = limit;
+}
+
+int
+TelemetryDataPool::GetNumEntries(void)
+{
+    return pool.size();
+}
+
+void
 TelemetryDataPool::SetLog(std::string id, uint32_t value)
 {
     tm curTime = _GetCurTime();
     TelemetryGeneralMetric metric(curTime, value);
-    if (pool.size() == LIMIT_NUM_MAX_ENTRY)
+    auto entry = pool.find(id);
+    if (entry == pool.end())
     {
-        auto entry = pool.find(id);
-        if (entry == pool.end())
+        if (pool.size() == maxEntry)
         {
             POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] error!! failed to add new entry, num of entries reached max limit. Item:{}", id);
             return;
         }
+        else
+        {
+            POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] new entry added, id:{}, num of entries:{}", id, (pool.size() + 1));
+        }
+        pool.emplace(id, metric);
     }
-    pool[id] = metric;
+    else
+    {
+        entry->second = metric;
+    }
 }
 
 int
@@ -91,12 +112,6 @@ TelemetryDataPool::_GetCurTime(void)
     auto t = std::time(nullptr);
     tm ret = *std::localtime(&t);
     return ret;
-}
-
-int
-TelemetryDataPool::GetNumEntries(void)
-{
-    return pool.size();
 }
 
 } // namespace pos

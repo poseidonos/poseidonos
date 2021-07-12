@@ -47,6 +47,8 @@ public:
     virtual void StartPublishing(void);
     virtual void StopPublishing(void);
     virtual bool IsRunning(void);
+    virtual void SetMaxEntryLimit(int limit);
+    virtual int GetNumEntries(void);
     virtual int PublishData(std::string id, uint32_t value);
     virtual int CollectData(std::string id, TelemetryGeneralMetric& outLog);
     virtual list<TelemetryGeneralMetric> CollectAll(void);
@@ -54,7 +56,6 @@ public:
 private:
     TelemetryDataPool dataPool;
     bool turnOn;
-    int maxEntry;
 };
 
 } // namespace pos

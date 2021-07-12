@@ -43,6 +43,18 @@ TelemetryPublisher::~TelemetryPublisher(void)
 }
 
 void
+TelemetryPublisher::SetMaxEntryLimit(int limit)
+{
+    dataPool.SetMaxEntryLimit(limit);
+}
+
+int
+TelemetryPublisher::GetNumEntries(void)
+{
+    return dataPool.GetNumEntries();
+}
+
+void
 TelemetryPublisher::StartPublishing(void)
 {
     turnOn = true;
