@@ -87,6 +87,9 @@ Raid5Rebuild::_NextSegment(void)
 {
     SegmentId segId = allocatorSvc->AllocateRebuildTargetSegment();
 
+    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+                "Raid5Rebuild::_NextSegment is {}",
+                segId);
     if (segId == UINT32_MAX)
     {
         return ctx->size->totalSegments;
