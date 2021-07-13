@@ -858,8 +858,49 @@ root@ibof-target:IBOF_HOME/lib/spdk-20.10/scripts# ./rpc.py nvmf_get_subsystems
 ```bash
 Once mounted, the connection is established between an initiator and an NVM subsystem. Then, POS volume becomes accessible over network by an initiator.
 ```
+### Step 10. Set Iops and BW limit on mounted volume
 
-### Step 10. Unmount POS Volume
+```bash
+ibof@ibof-target:IBOF_HOME/bin$ ./poseidonos-cli qos create --volume-name vol1 --array-name POSArray --minbw 100
+
+
+RPC Request to Poseidon OS
+
+	{"command":"CREATEQOSVOLUMEPOLICY","rid":"fromCLI","param":{"vol":[{"volumeName":"vol1"}],"miniops":-1,"maxiops":-1,"minbw":100,"maxbw":-1,"array":"POSArray"}}
+
+
+RPC Response from Poseidon OS
+    {"command":"CREATEQOSVOLUMEPOLICY","rid":"fromCLI","result":{"status":{"code":0,"description":"Volume Qos Policy Create"}},"info":{"version":"pos-0.9.0"}}
+```
+```bash
+ibof@ibof-target:IBOF_HOME/bin$ ./poseidonos-cli qos list --volume-name vol1 --array-name POSArray
+
+
+RPC Request to Poseidon OS
+    {"command":"LISTQOSPOLICIES","rid":"fromCLI","param":{"vol":[{"volumeName":"vol1"}],"array":"POSArray"}}
+
+
+RPC Response from Poseidon OS
+     {"command":"LISTQOSPOLICIES","rid":"fromCLI","result":{"status":{"code":0,"description":"List of Volume Policies in POSArray"},"data":{"arrayName":[{"ArrayName":"POSArray"}],"rebuildPolicy":[{"rebuild":"low"}],"volumePolicies":[{"name":"vol1","id":0,"minbw":100,"miniops":0,"maxbw":0,"maxiops":0,"min_bw_guarantee":"No","min_iops_guarantee":"No"}]}},"info":{"version":"pos-0.9.0"}}
+```
+```bash
+ibof@ibof-target:IBOF_HOME/bin$ ./poseidonos-cli qos reset --volume-name vol1 --array-name POSArray
+
+
+Request to Poseidon OS
+    {"command":"RESETQOSPOLICIES","rid":"fromCLI","param":{"vol":[{"volumeName":"vol1"}],"array":"POSArray"}}
+
+
+Response from Poseidon OS
+     {"command":"RESETQOSVOLUMEPOLICY","rid":"fromCLI","result":{"status":{"code":0,"description":"Volume Qos Policy Reset"}},"info":{"version":"pos-0.9.0"}}
+```
+```bash
+Please note that the "qos list" command shows the value set for minbw/miniops/maxbw/maxiops which can be passed as parameters to the "qos create" command as --minbw ,--miniops,--maxbw and --maxiops respectively. The above example shows setting of minbw.
+
+The "qos reset" command will reset all the values set to 0. If the "qos list" command is run again, all values will be listed as 0.
+```
+
+### Step 11. Unmount POS Volume
 
 ```bash
 ibof@ibof-target:IBOF_HOME/bin$ ./cli volume unmount --name vol1 --array POSArray
@@ -920,7 +961,7 @@ Response from Poseidon OS
 Please note that the status of the POS volume has changed from "Mounted" to "Unmounted".
 ```
 
-### Step 11. Delete POS Volume
+### Step 12. Delete POS Volume
 
 ```bash
 ibof@ibof-target:IBOF_HOME/bin$ ./cli volume delete --name vol1 --array POSArray
@@ -965,7 +1006,7 @@ Response from Poseidon OS
 ```
 POS volume can be deleted only when it is in Unmounted state. 
 
-### Step 12. Unmount POS Array
+### Step 13. Unmount POS Array
 
 ```bash
 ibof@ibof-target:IBOF_HOME/bin$ ./cli array unmount --name POSArray
@@ -1032,7 +1073,7 @@ Response from Poseidon OS
 
 ```
 
-### Step 13. Delete POS Array
+### Step 14. Delete POS Array
 
 ```bash
 ibof@ibof-target:IBOF_HOME/bin$ ./cli array delete --name POSArray
@@ -1081,7 +1122,7 @@ Response from Poseidon OS
 ```
 POS array can be deleted only when it is in OFFLINE state.
 
-### Step 14. Shut down POS application
+### Step 15. Shut down POS application
 
 ```bash
 ibof@ibof-target:IBOF_HOME/bin$ ./cli system exit

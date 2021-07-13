@@ -12,7 +12,6 @@ namespace pos_cli
 {
 DeleteSubsystemCommand::DeleteSubsystemCommand(void)
 {
-    errorMessage = "Failed to delete subsystem.";
 }
 
 DeleteSubsystemCommand::~DeleteSubsystemCommand(void)
@@ -49,6 +48,11 @@ DeleteSubsystemCommand::_DeleteSubsystem(json& doc)
 {
     SpdkRpcClient rpcClient;
     NvmfTarget target;
+    if (nullptr == target.FindSubsystem(subnqn))
+    {
+        errorMessage = "Failed to delete subsystem. Requested Subsystem does not exist or invalid subnqn. ";
+        return FAIL;
+    }
     vector<pair<int, string>> attachedVolList = target.GetAttachedVolumeList(subnqn);
     map<string, vector<int>> volListPerArray;
     for (auto& volInfo : attachedVolList)
@@ -70,13 +74,13 @@ DeleteSubsystemCommand::_DeleteSubsystem(json& doc)
                 ret = volMgr->VolumeName(volId, volName);
                 if (ret != SUCCESS)
                 {
-                    errorMessage += "Failed to find volume name. Only some of volumes are unmounted.";
+                    errorMessage = "Failed to delete subsystem. Failed to find volume name. Only some of volumes are unmounted.";
                     return ret;
                 }
                 ret = volMgr->Unmount(volName);
                 if (ret != SUCCESS)
                 {
-                    errorMessage += "Failed to unmount volume. Only some of volumes are unmounted.";
+                    errorMessage = "Failed to delete subsystem. Failed to unmount volume. Only some of volumes are unmounted.";
                     return ret;
                 }
             }
@@ -86,7 +90,7 @@ DeleteSubsystemCommand::_DeleteSubsystem(json& doc)
     auto ret = rpcClient.SubsystemDelete(subnqn);
     if (ret.first != SUCCESS)
     {
-        errorMessage += ret.second;
+        errorMessage = "Failed to delete subsystem. " + ret.second;
     }
     return ret.first;
 }
@@ -97,7 +101,7 @@ DeleteSubsystemCommand::_CheckParamValidityAndGetNqn(json& doc)
     auto param = doc["param"];
     if (!param.contains("name"))
     {
-        errorMessage += "Subsystem nqn must be included";
+        errorMessage = "Failed to delete subsystem. Subsystem nqn must be included.";
         return false;
     }
     subnqn = param["name"].get<string>();

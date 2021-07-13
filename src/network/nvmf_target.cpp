@@ -577,6 +577,7 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
         return volList;
     }
     struct spdk_nvmf_ns* ns = spdkCaller->SpdkNvmfSubsystemGetFirstNs(subsystem);
+
     while (ns != nullptr)
     {
         struct spdk_bdev* bdev = spdkCaller->SpdkNvmfNsGetBdev(ns);

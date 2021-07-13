@@ -145,13 +145,14 @@ QosManager::Initialize(void)
     {
         return;
     }
-    AffinityManager* affinityManager = AffinityManagerSingleton::Instance();
-    cpuSet = affinityManager->GetCpuSet(CoreType::QOS);
-    qosThread = new std::thread(&QosManager::_QosWorker, this);
     if (true == feQosEnabled)
     {
         spdkManager->Initialize();
     }
+
+    AffinityManager* affinityManager = AffinityManagerSingleton::Instance();
+    cpuSet = affinityManager->GetCpuSet(CoreType::QOS);
+    qosThread = new std::thread(&QosManager::_QosWorker, this);
     initialized = true;
 }
 

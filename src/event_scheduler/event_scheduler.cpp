@@ -66,7 +66,7 @@ EventScheduler::EventScheduler(void)
     }
 
     for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count;
-            event++)
+         event++)
     {
         eventQueue[event] = new SchedulerQueue;
     }
@@ -77,8 +77,8 @@ EventScheduler::EventScheduler(void)
     totalWorkerIDVector.clear();
 }
 
-
-uint32_t EventScheduler::GetWorkerIDMinimumJobs(uint32_t numa)
+uint32_t
+EventScheduler::GetWorkerIDMinimumJobs(uint32_t numa)
 {
     const uint32_t MAX_VALUE = UINT32_MAX;
     uint32_t minimumJobs = MAX_VALUE, minimumWorkerID = 0;
@@ -107,7 +107,7 @@ uint32_t EventScheduler::GetWorkerIDMinimumJobs(uint32_t numa)
 
 void
 EventScheduler::Initialize(uint32_t workerCountInput,
-        cpu_set_t schedulerCPUInput, cpu_set_t eventCPUSetInput)
+    cpu_set_t schedulerCPUInput, cpu_set_t eventCPUSetInput)
 {
     policy = new MinimumJobPolicy(workerCountInput);
     workerCount = workerCountInput;
@@ -131,7 +131,7 @@ EventScheduler::~EventScheduler(void)
         schedulerThread->join();
     }
     for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count;
-            event++)
+         event++)
     {
         delete eventQueue[event];
     }
@@ -148,7 +148,6 @@ EventScheduler::~EventScheduler(void)
     {
         delete policy;
     }
-    QosManagerSingleton::ResetInstance();
 }
 
 void
