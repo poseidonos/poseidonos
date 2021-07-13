@@ -220,9 +220,11 @@ TEST(AllocatorCtx, GetNumOfFreeSegment_TestSimpleGetter)
     AllocatorCtx allocCtx(nullptr, allocBitmap, segStates, segLocks, nullptr);
     EXPECT_CALL(*allocBitmap, GetNumBits).WillOnce(Return(10));
     EXPECT_CALL(*allocBitmap, GetNumBitsSet).WillOnce(Return(3));
-
     int ret = allocCtx.GetNumOfFreeSegment();
     EXPECT_EQ(7, ret);
+
+    EXPECT_CALL(*allocBitmap, GetNumBits).WillOnce(Return(10));
+    EXPECT_CALL(*allocBitmap, GetNumBitsSetWoLock).WillOnce(Return(3));
     ret = allocCtx.GetNumOfFreeSegmentWoLock();
     EXPECT_EQ(7, ret);
 
