@@ -19,11 +19,10 @@ import (
 	"cli/cmd/devicecmds"
 	"cli/cmd/globals"
 	"cli/cmd/loggercmds"
-	"cli/cmd/socketmgr"
+	"cli/cmd/qoscmds"
 	"cli/cmd/subsystemcmds"
 	"cli/cmd/systemcmds"
 	"cli/cmd/volumecmds"
-    "cli/cmd/qoscmds"
 )
 
 var isVerbose bool
@@ -90,8 +89,8 @@ func init() {
 
 	// Global flags
 	// TODO(mj): Add verbose and quiet modes
-	RootCmd.PersistentFlags().StringVar(&socketmgr.ServerConfig.IPAddress, "ip", "127.0.0.1", "Set IPv4 Address to PoseidonOS for this command")
-	RootCmd.PersistentFlags().StringVar(&socketmgr.ServerConfig.Port, "port", "18716", "Set the port number to PoseidonOS for this command")
+	RootCmd.PersistentFlags().StringVar(&globals.IPv4, "ip", "127.0.0.1", "Set IPv4 address to PoseidonOS for this command")
+	RootCmd.PersistentFlags().StringVar(&globals.Port, "port", "18716", "Set the port number to PoseidonOS for this command")
 	RootCmd.PersistentFlags().BoolVar(&globals.IsDebug, "debug", false, "Print response for debug")
 	RootCmd.PersistentFlags().BoolVar(&globals.IsJSONReq, "json-req", false, "Print request in JSON form")
 	RootCmd.PersistentFlags().BoolVar(&globals.IsJSONRes, "json-res", false, "Print response in JSON form")
@@ -121,11 +120,11 @@ func InitConnect() {
 	setting.LoadConfig()
 
 	if len(ip) != 0 {
-		setting.Config.Server.IBoF.IP = ip
+		globals.IPv4 = ip
 	}
 
 	if len(port) != 0 {
-		setting.Config.Server.IBoF.Port = port
+		globals.Port = port
 	}
 
 	unixIntValue, _ := strconv.ParseInt(BuildTime, 10, 64)

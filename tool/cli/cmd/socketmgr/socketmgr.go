@@ -2,56 +2,42 @@ package socketmgr
 
 import (
 	"bufio"
+	"cli/cmd/globals"
+	"errors"
 	"fmt"
-	"io/ioutil"
 	"net"
-	"path/filepath"
 	"pnconnector/src/log"
-
-	"gopkg.in/yaml.v2"
 )
 
-type structServerConfig struct {
-	IPAddress string `yaml:"ServerIPAddress"`
-	Port      string `yaml:"ServerPort"`
-}
-
 var conn net.Conn
-var ServerConfig structServerConfig
 
 func Connect() {
-
-	filename, err := filepath.Abs("socketmgr/setting.yaml")
-	yamlFile, err := ioutil.ReadFile(filename)
-	if err != nil {
-		log.Debug("error:", err)
-		log.Debug("Using default socket address: localhost:18716")
-
-		ServerConfig.IPAddress = "127.0.0.1"
-		ServerConfig.Port = "18716"
-	}
-
-	err = yaml.Unmarshal(yamlFile, &ServerConfig)
-	if err != nil {
-		log.Debug("error:", err)
-	}
-
 	// Connect to server
-	conn, err = net.Dial("tcp", ServerConfig.IPAddress+":"+ServerConfig.Port)
+	var err error
+	conn, err = net.Dial("tcp", globals.IPv4+":"+globals.Port)
 	if err != nil {
 		log.Debug("error:", err)
 	}
 }
 
-func SendReqAndReceiveRes(reqJSON string) string {
+func SendReqAndReceiveRes(reqJSON string) (string, error) {
+	if conn == nil {
+		println("Error: cannot connect to the PoseidonOS server!")
+		return "", errors.New("SocketMgr: not connected to the server")
+	}
 
 	fmt.Fprintf(conn, reqJSON)
-	// wait for reply
-	res, _ := bufio.NewReader(conn).ReadString('\n')
+	res, err := bufio.NewReader(conn).ReadString('\n')
+	if err != nil {
+		log.Debug("error:", err)
+	}
 
-	return res
+	return res, nil
 }
 
 func Close() {
+	if conn == nil {
+		return
+	}
 	conn.Close()
 }

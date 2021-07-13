@@ -50,7 +50,13 @@ Example (renaming a volume):
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
 			socketmgr.Connect()
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+
+			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			if err != nil {
+				log.Debug("error:", err)
+				return
+			}
+
 			socketmgr.Close()
 
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes)
