@@ -231,6 +231,9 @@ FlowControl::_TryForceResetToken(FlowControlType type)
         previousBucket[counterType] = bucket[counterType].load();
         if (true == isForceReset)
         {
+            POS_TRACE_INFO(EID(FC_RESET_FORCERESET), "_reset isForceReset, userBucket:{}, gcBucket:{}, userPrevBucket:{}, gcPrevBucket:{}",
+                            bucket[FlowControlType::USER], bucket[FlowControlType::GC],
+                            previousBucket[FlowControlType::USER], previousBucket[FlowControlType::GC]);
             isForceReset = false;
         }
         return false;
@@ -238,6 +241,8 @@ FlowControl::_TryForceResetToken(FlowControlType type)
 
     if (false == isForceReset)
     {
+        POS_TRACE_INFO(EID(FC_SET_FORCERESET), "_set isForceReset, userBucket:{}, gcBucket:{}",
+                        bucket[FlowControlType::USER], bucket[FlowControlType::GC]);
         systemTimeoutChecker->SetTimeout(forceResetTimeout);
         isForceReset = true;
         return false;
@@ -252,7 +257,8 @@ FlowControl::_TryForceResetToken(FlowControlType type)
     bucket[FlowControlType::GC] = 0;
 
     isForceReset = false;
-
+    POS_TRACE_INFO(EID(FC_FORCERESET_DONE), "_force Reset, userPrevBucket:{}, gcPrevBucket:{}",
+                        previousBucket[FlowControlType::USER], previousBucket[FlowControlType::GC]);
     return true;
 }
 

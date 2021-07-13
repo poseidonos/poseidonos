@@ -53,6 +53,9 @@
 
 #include "src/array_mgmt/array_manager.h"
 #include "src/volume/volume_service.h"
+#include "src/gc/flow_control/flow_control.h"
+#include "src/gc/flow_control/flow_control_service.h"
+#include "src/array/service/array_service_layer.h"
 
 namespace pos
 {
@@ -77,12 +80,29 @@ GcFlushSubmission::~GcFlushSubmission(void)
 bool
 GcFlushSubmission::Execute(void)
 {
+    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    const PartitionLogicalSize* udSize =
+        info->GetSizeInfo(PartitionType::USER_DATA);
+    uint32_t totalBlksPerUserStripe = udSize->blksPerStripe;
+
+    FlowControl* flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(arrayName);
+
+    int token = flowControl->GetToken(FlowControlType::GC, totalBlksPerUserStripe);
+    if (0 >= token)
+    {
+        return false;
+    }
+
     Stripe* stripe;
 
     stripe = AllocateStripe(volumeId);
 
     if (stripe == nullptr)
     {
+        if (0 < token)
+        {
+            flowControl->ReturnToken(FlowControlType::GC, token);
+        }
         return false;
     }
 

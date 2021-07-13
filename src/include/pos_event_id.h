@@ -443,6 +443,9 @@ enum class POS_EVENT_ID
     FC_TOKEN_OVERFLOW,
     FC_NEGATIVE_TOKEN,
     FC_WRONG_STRATEGY,
+    FC_RESET_FORCERESET,
+    FC_SET_FORCERESET,
+    FC_FORCERESET_DONE,
 
     // --------------Meta filesystem (4000)----------------
     // Debug, Info, Warning, Error, Critical
