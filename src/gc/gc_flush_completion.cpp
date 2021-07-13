@@ -78,6 +78,9 @@ GcFlushCompletion::_DoSpecificJob(void)
     {
         gcStripeManager->ReturnBuffer(dataBuffer);
         dataBuffer = nullptr;
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_STRIPE_FLUSH_COMPLETION,
+            "gc flush completion, arrayName:{}, stripeUserLsid:{}",
+            arrayName, stripe->GetUserLsid());
     }
 
     RBAStateManager* rbaStateManager =
@@ -128,6 +131,10 @@ GcFlushCompletion::_DoSpecificJob(void)
 
     EventSmartPtr event(new GcMapUpdateRequest(stripe, arrayName, gcStripeManager));
     stripe->Flush(event);
+
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_ACQUIRE_OWNERSHIP_RBA_LIST,
+            "acquire ownership copied rba list, arrayName:{}, stripeUserLsid:{}",
+            arrayName, stripe->GetUserLsid());
 
     return true;
 }
