@@ -205,7 +205,7 @@ ContextManager::AllocateFreeSegment(void)
         segId = allocatorCtx->AllocateFreeSegment(segId);
     }
 
-    int freeSegCount = allocatorCtx->GetNumOfFreeUserDataSegment();
+    int freeSegCount = allocatorCtx->GetNumOfFreeSegmentWoLock();
     if (segId == UNMAP_SEGMENT)
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "Failed to allocate segment, free segment count:{}", freeSegCount);
@@ -242,7 +242,7 @@ ContextManager::AllocateGCVictimSegment(void)
     if (victimSegment != UNMAP_SEGMENT)
     {
         allocatorCtx->SetSegmentState(victimSegment, SegmentState::VICTIM, true);
-        POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "segmentId:{} @AllocateGCVictim, free segment count:{}", victimSegment, allocatorCtx->GetNumOfFreeUserDataSegment());
+        POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "segmentId:{} @AllocateGCVictim, free segment count:{}", victimSegment, allocatorCtx->GetNumOfFreeSegmentWoLock());
         telPublisher->PublishData(TEL_ALLOCATOR_GCVICTIM_SEGMENT, victimSegment);
     }
     return victimSegment;
@@ -251,7 +251,7 @@ ContextManager::AllocateGCVictimSegment(void)
 GcMode
 ContextManager::GetCurrentGcMode(void)
 {
-    int numFreeSegments = allocatorCtx->GetNumOfFreeUserDataSegment();
+    int numFreeSegments = allocatorCtx->GetNumOfFreeSegmentWoLock();
     QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments);
     prevGcMode = curGcMode;
     curGcMode = gcCtx.GetCurrentGcMode(numFreeSegments);
@@ -269,9 +269,16 @@ ContextManager::GetGcThreshold(GcMode mode)
 }
 
 int
-ContextManager::GetNumFreeSegment(void)
+ContextManager::GetNumOfFreeSegment(bool needLock)
 {
-    return allocatorCtx->GetNumOfFreeUserDataSegment();
+    if (needLock == true)
+    {
+        return allocatorCtx->GetNumOfFreeSegment();
+    }
+    else
+    {
+        return allocatorCtx->GetNumOfFreeSegmentWoLock();
+    }
 }
 
 int
@@ -377,7 +384,7 @@ ContextManager::_FreeSegment(SegmentId segId)
     segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */);
     allocatorCtx->SetSegmentState(segId, SegmentState::FREE, false);
     allocatorCtx->ReleaseSegment(segId);
-    int freeSegCount = allocatorCtx->GetNumOfFreeUserDataSegment();
+    int freeSegCount = allocatorCtx->GetNumOfFreeSegmentWoLock();
     telPublisher->PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, freeSegCount);
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was freed by allocator, free segment count:{}", segId, freeSegCount);
     int ret = rebuildCtx->FreeSegmentInRebuildTarget(segId);

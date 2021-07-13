@@ -32,7 +32,7 @@ public:
     MOCK_METHOD(void, ReleaseSegment, (SegmentId segId), (override));
     MOCK_METHOD(SegmentId, AllocateFreeSegment, (SegmentId startSegId), (override));
     MOCK_METHOD(SegmentId, GetUsedSegment, (SegmentId startSegId), (override));
-    MOCK_METHOD(uint64_t, GetNumOfFreeUserDataSegment, (), (override));
+    MOCK_METHOD(uint64_t, GetNumOfFreeSegment, (), (override));
     MOCK_METHOD(SegmentState, GetSegmentState, (SegmentId segmentId, bool needlock), (override));
     MOCK_METHOD(void, SetSegmentState, (SegmentId segmentId, SegmentState state, bool needlock), (override));
     MOCK_METHOD(void, SetAllocatedSegmentCount, (int count), (override));

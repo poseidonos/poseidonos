@@ -76,7 +76,7 @@ GetGcStatusWbtCommand::Execute(Args &argv, JsonElement &elem)
 
     bool gcRunning = gc->GetGcRunning();
     IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
-    uint32_t freeSegments = iContextManager->GetNumFreeSegment();
+    uint32_t freeSegments = iContextManager->GetNumOfFreeSegment(false);
     uint32_t numGcThreshold = iContextManager->GetGcThreshold(MODE_NORMAL_GC);
     uint32_t numUrgentThreshold = iContextManager->GetGcThreshold(MODE_URGENT_GC);
 

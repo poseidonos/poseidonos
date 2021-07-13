@@ -76,7 +76,7 @@ public:
     virtual bool NeedRebuildAgain(void);
     virtual int MakeRebuildTarget(void);
     virtual int StopRebuilding(void);
-    virtual int GetNumFreeSegment(void);
+    virtual int GetNumOfFreeSegment(bool needLock);
     virtual GcMode GetCurrentGcMode(void);
     virtual int GetGcThreshold(GcMode mode);
     virtual uint64_t GetStoredContextVersion(int owner);

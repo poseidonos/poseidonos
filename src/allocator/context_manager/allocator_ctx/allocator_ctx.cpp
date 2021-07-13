@@ -207,9 +207,15 @@ AllocatorCtx::RollbackCurrentSsdLsid(void)
 }
 
 uint64_t
-AllocatorCtx::GetNumOfFreeUserDataSegment(void)
+AllocatorCtx::GetNumOfFreeSegment(void)
 {
     return allocSegBitmap->GetNumBits() - allocSegBitmap->GetNumBitsSet();
+}
+
+uint64_t
+AllocatorCtx::GetNumOfFreeSegmentWoLock(void)
+{
+    return allocSegBitmap->GetNumBits() - allocSegBitmap->GetNumBitsSetWoLock();
 }
 
 SegmentState

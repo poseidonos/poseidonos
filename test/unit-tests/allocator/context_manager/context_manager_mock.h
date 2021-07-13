@@ -24,7 +24,7 @@ public:
     MOCK_METHOD(bool, NeedRebuildAgain, (), (override));
     MOCK_METHOD(int, MakeRebuildTarget, (), (override));
     MOCK_METHOD(int, StopRebuilding, (), (override));
-    MOCK_METHOD(int, GetNumFreeSegment, (), (override));
+    MOCK_METHOD(int, GetNumOfFreeSegment, (bool needLock), (override));
     MOCK_METHOD(GcMode, GetCurrentGcMode, (), (override));
     MOCK_METHOD(int, GetGcThreshold, (GcMode mode), (override));
     MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));

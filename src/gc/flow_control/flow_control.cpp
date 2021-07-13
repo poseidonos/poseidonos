@@ -150,7 +150,7 @@ FlowControl::GetToken(FlowControlType type, int token)
         return token;
     }
 
-    uint32_t freeSegments = iContextManager->GetNumFreeSegment();
+    uint32_t freeSegments = iContextManager->GetNumOfFreeSegment(false);
     if (freeSegments > gcThreshold)
     {
         return token;
@@ -265,7 +265,7 @@ FlowControl::_TryForceResetToken(FlowControlType type)
 std::tuple<uint32_t, uint32_t>
 FlowControl::_DistributeToken(void)
 {
-    return tokenDistributer->Distribute(iContextManager->GetNumFreeSegment());
+    return tokenDistributer->Distribute(iContextManager->GetNumOfFreeSegment(false));
 }
 
 void

@@ -23,7 +23,7 @@ public:
     virtual int MakeRebuildTarget(void) { return 0; }
     virtual int StopRebuilding(void) { return 0; }
     virtual bool NeedRebuildAgain(void) { return true; }
-    virtual int GetNumFreeSegment(void) { return 0; }
+    virtual int GetNumOfFreeSegment(bool needLock) { return 0; }
     virtual GcMode GetCurrentGcMode(void) { return MODE_NO_GC; }
     virtual int GetGcThreshold(GcMode mode) { return 0; }
     virtual uint64_t GetStoredContextVersion(int owner) { return 0; }

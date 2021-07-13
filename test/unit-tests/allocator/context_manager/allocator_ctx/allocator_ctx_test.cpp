@@ -211,7 +211,7 @@ TEST(AllocatorCtx, AllocateFreeSegment_TestAllocSegmentWithCheckingConditions)
     delete segLocks;
 }
 
-TEST(AllocatorCtx, GetNumOfFreeUserDataSegment_TestSimpleGetter)
+TEST(AllocatorCtx, GetNumOfFreeSegment_TestSimpleGetter)
 {
     // given
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
@@ -221,7 +221,9 @@ TEST(AllocatorCtx, GetNumOfFreeUserDataSegment_TestSimpleGetter)
     EXPECT_CALL(*allocBitmap, GetNumBits).WillOnce(Return(10));
     EXPECT_CALL(*allocBitmap, GetNumBitsSet).WillOnce(Return(3));
 
-    int ret = allocCtx.GetNumOfFreeUserDataSegment();
+    int ret = allocCtx.GetNumOfFreeSegment();
+    EXPECT_EQ(7, ret);
+    ret = allocCtx.GetNumOfFreeSegmentWoLock();
     EXPECT_EQ(7, ret);
 
     delete allocBitmap;

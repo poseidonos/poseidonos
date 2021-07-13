@@ -54,7 +54,7 @@ public:
     virtual int MakeRebuildTarget(void) = 0;
     virtual int StopRebuilding(void) = 0;
     virtual bool NeedRebuildAgain(void) = 0;
-    virtual int GetNumFreeSegment(void) = 0;
+    virtual int GetNumOfFreeSegment(bool needLock) = 0;
 
     virtual GcMode GetCurrentGcMode(void) = 0;
     virtual int GetGcThreshold(GcMode mode) = 0;
