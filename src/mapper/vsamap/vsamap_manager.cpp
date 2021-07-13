@@ -54,8 +54,8 @@ VSAMapManager::VSAMapManager(MapperAddressInfo* info, std::string arrayName, int
     {
         loadDoneFlag[volumeId] = NOT_LOADED;
     }
-    loadDoneWakeUp = std::bind(&VSAMapManager::_WakeUpAfterLoadDone, this, std::placeholders::_1);
-    loadDone = std::bind(&VSAMapManager::_AfterLoadDone, this, std::placeholders::_1);
+    cbMapLoadDoneByCli = std::bind(&VSAMapManager::_MapLoadDoneByCli, this, std::placeholders::_1);
+    cbMapLoadDoneByEw = std::bind(&VSAMapManager::_MapLoadDoneByEw, this, std::placeholders::_1);
     volumeManager = nullptr;
 }
 
@@ -76,46 +76,19 @@ VSAMapManager::Init(void)
 }
 
 int
-VSAMapManager::StoreMaps(void)
+VSAMapManager::StoreAllMaps(void)
 {
-    int ret = 0;
-    for (int volumeId = 0; volumeId < MAX_VOLUME_COUNT; ++volumeId)
+    int ret = _FlushMaps();
+    if (ret < 0)
     {
-        if (GetVSAMapContent(volumeId) == nullptr)   // Not loaded volumes
-            continue;
-
-        ret = GetVSAMapContent(volumeId)->StoreMap();
-        if (ret < 0)
-        {
-            POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "VSAMap SyncStore failed, volumeId:{}", volumeId);
-        }
+        return ret;
     }
-    return ret;
-}
 
-int
-VSAMapManager::FlushMaps(void)
-{
-    int ret = 0;
-    for (auto& volState : volumeMountState)
+    while (AllMapsFlushedDone() == false)
     {
-        if (VolState::EXIST_UNLOADED != volState.second)
-        {
-            int volumeId = volState.first;
-            EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volumeId, this);
-            mapFlushStatus[volumeId] = MapFlushState::FLUSHING;
-            ret = GetVSAMapContent(volumeId)->FlushTouchedPages(callBackVSAMap);
-            if (ret < 0)
-            {
-                POS_TRACE_ERROR(EID(MAPPER_FAILED), "AsyncStore() for volumeId:{} Failed", volumeId);
-            }
-            else
-            {
-                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "AsyncStore() for volumeId:{} Started", volumeId);
-            }
-        }
+        usleep(1);
     }
-    return ret;
+    return 0;
 }
 
 void
@@ -233,20 +206,20 @@ VSAMapManager::GetVSAMapContent(int volID)
 }
 
 bool
-VSAMapManager::AllMapsAsyncFlushed(void)
+VSAMapManager::AllMapsFlushedDone(void)
 {
-    bool allFlushed = true;
+    bool allFlushedDone = true;
 
     for (auto& mapStatus : mapFlushStatus)
     {
         if (mapStatus.second != MapFlushState::FLUSH_DONE)
         {
-            allFlushed = false;
+            allFlushedDone = false;
             break;
         }
     }
 
-    return allFlushed;
+    return allFlushedDone;
 }
 
 void
@@ -267,10 +240,8 @@ VSAMapManager::GetVSAMapAPI(void)
     return vsaMapAPI;
 }
 
-//------------------------------------------------------------------------------
-
 void
-VSAMapManager::MapAsyncFlushDone(int mapId)
+VSAMapManager::MapFlushDone(int mapId)
 {
     POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "mapId:{} Flushed @MapAsyncFlushed", mapId);
     mapFlushStatus[mapId] = MapFlushState::FLUSH_DONE;
@@ -356,15 +327,15 @@ VSAMapManager::VolumeUnmounted(std::string volName, int volID, std::string array
 
     do
     {
-        EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volID, this);
+        EventSmartPtr eventVSAMap = std::make_shared<MapFlushedEvent>(volID, this);
         mapFlushStatus[volID] = MapFlushState::FLUSHING;
 
-        int ret = GetVSAMapContent(volID)->FlushTouchedPages(callBackVSAMap);
+        int ret = GetVSAMapContent(volID)->FlushTouchedPages(eventVSAMap);
         if (ret < 0)
         {
             POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "ret:{} of vsaMap->Unload(), VolumeId:{} @VolumeUnmounted", ret, volID);
         }
-        _WaitForMapAsyncFlushed(volID);
+        _WaitForMapFlushed(volID);
 
         std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
         VolMountStateIter iter;
@@ -581,51 +552,51 @@ VSAMapManager::_VSAMapFileCreate(int volID)
 }
 
 int
-VSAMapManager::_VSAMapFileAsyncLoad(int volID)
+VSAMapManager::_VSAMapFileLoadByCliThread(int volID)
 {
     VSAMapContent*& vsaMapRef = vsaMapAPI->GetVSAMapContent(volID);
     assert(vsaMapRef != nullptr);
 
-    unique_lock<std::mutex> lock(volAsyncLoadLock);
+    unique_lock<std::mutex> lock(volLoadLock);
     loadDoneFlag[volID] = NOT_LOADED;
 
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VSAMap Async Load Started, volID:{} @_VSAMapFileAsyncLoad", volID);
-    int ret = vsaMapRef->LoadAsync(loadDoneWakeUp);
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VSAMap Load Started, volID:{} @_VSAMapFileLoadByCliThread", volID);
+    int ret = vsaMapRef->Load(cbMapLoadDoneByCli);
     if (ret < 0)
     {
         if (-EID(MAP_LOAD_COMPLETED) == ret)
         {
             loadDoneFlag[volID] = LOAD_DONE;
             ret = 0; // This is a normal case
-            POS_TRACE_INFO(EID(MAPPER_START), "No mpage to Load, so VSAMap Async Load Finished, volID:{} @_VSAMapFileAsyncLoad", volID);
+            POS_TRACE_INFO(EID(MAPPER_START), "No mpage to Load, so VSAMap Load Finished, volID:{} @_VSAMapFileLoadByCliThread", volID);
         }
         else
         {
-            POS_TRACE_ERROR(EID(MAPPER_FAILED), "Error on AsyncLoad trigger, volID:{}  ret:{} @_VSAMapFileAsyncLoad", volID, ret);
+            POS_TRACE_ERROR(EID(MAPPER_FAILED), "Error on Load trigger, volID:{}  ret:{} @_VSAMapFileLoadByCliThread", volID, ret);
         }
     }
     else
     {
         cvLoadDone.wait(lock, [&] { return LOAD_DONE == loadDoneFlag[volID]; });
-        POS_TRACE_INFO(EID(MAPPER_START), "after waking up, VSAMap Async Load Finished, volID:{} @_VSAMapFileAsyncLoad", volID);
+        POS_TRACE_INFO(EID(MAPPER_START), "after waking up, VSAMap Load Finished, volID:{} @_VSAMapFileLoadByCliThread", volID);
     }
 
     return ret;
 }
 
 int
-VSAMapManager::_VSAMapFileAsyncLoadNoWait(int volID)
+VSAMapManager::_VSAMapFileLoadbyEwThread(int volID)
 {
     VSAMapContent*& vsaMapRef = vsaMapAPI->GetVSAMapContent(volID);
     assert(vsaMapRef != nullptr);
 
     loadDoneFlag[volID] = LOADING;
 
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VSAMap Async Load Started, volID:{} @VSAMapFileAsyncLoadNoWait", volID);
-    int ret = vsaMapRef->LoadAsyncEvent(loadDone);
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VSAMap Load Started, volID:{} @_VSAMapFileLoadbyEwThread", volID);
+    int ret = vsaMapRef->Load(cbMapLoadDoneByEw, true);
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(MAPPER_FAILED), "Error on AsyncLoad trigger, volID:{}  ret:{} @VSAMapFileAsyncLoadNoWait", volID, ret);
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "Error on Load trigger, volID:{}  ret:{} @_VSAMapFileLoadbyEwThread", volID, ret);
     }
 
     return ret;
@@ -637,20 +608,20 @@ VSAMapManager::_VSAMapFileStore(int volID)
     VSAMapContent*& vsaMapRef = vsaMapAPI->GetVSAMapContent(volID);
     assert(vsaMapRef != nullptr);
 
-    return (0 == vsaMapRef->StoreMap());
+    return (0 == vsaMapRef->Store());
 }
 
 void
-VSAMapManager::_WakeUpAfterLoadDone(int volID)
+VSAMapManager::_MapLoadDoneByCli(int volID)
 {
-    std::unique_lock<std::mutex> lock(volAsyncLoadLock);
+    std::unique_lock<std::mutex> lock(volLoadLock);
     POS_TRACE_INFO(EID(MAP_LOAD_COMPLETED), "volID:{} async load done, so wake up! @_WakeUpAfterLoadDone", volID);
     loadDoneFlag[volID] = LOAD_DONE;
     cvLoadDone.notify_all();
 }
 
 void
-VSAMapManager::_AfterLoadDone(int volID)
+VSAMapManager::_MapLoadDoneByEw(int volID)
 {
     std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
 
@@ -726,7 +697,7 @@ VSAMapManager::_LoadVolumeMeta(std::string volName, int volID, uint64_t volSizeB
             // GC: EventWorker thread
             if (isUnknownVolSize && ("CALLER_EVENT" == volName))
             {
-                if (_VSAMapFileAsyncLoadNoWait(volID) != 0)
+                if (_VSAMapFileLoadbyEwThread(volID) != 0)
                 {
                     POS_TRACE_ERROR(EID(MAPPER_FAILED), "Vsa map File Async Load Trigger Failed @VolumeMounted");
                     break;
@@ -734,7 +705,7 @@ VSAMapManager::_LoadVolumeMeta(std::string volName, int volID, uint64_t volSizeB
             }
             else
             {
-                if (_VSAMapFileAsyncLoad(volID) != 0)
+                if (_VSAMapFileLoadByCliThread(volID) != 0)
                 {
                     POS_TRACE_ERROR(EID(MAPPER_FAILED), "Vsa map File Async Load Failed @VolumeMounted");
                     break;
@@ -762,12 +733,37 @@ VSAMapManager::_LoadVolumeMeta(std::string volName, int volID, uint64_t volSizeB
 }
 
 void
-VSAMapManager::_WaitForMapAsyncFlushed(int volId)
+VSAMapManager::_WaitForMapFlushed(int volId)
 {
     while (mapFlushStatus[volId] != MapFlushState::FLUSH_DONE)
     {
         usleep(1);
     }
+}
+
+int
+VSAMapManager::_FlushMaps(void)
+{
+    int ret = 0;
+    for (auto& volState : volumeMountState)
+    {
+        if (VolState::EXIST_UNLOADED != volState.second)
+        {
+            int volumeId = volState.first;
+            EventSmartPtr eventVSAMap = std::make_shared<MapFlushedEvent>(volumeId, this);
+            mapFlushStatus[volumeId] = MapFlushState::FLUSHING;
+            ret = GetVSAMapContent(volumeId)->FlushTouchedPages(eventVSAMap);
+            if (unlikely(ret < 0))
+            {
+                POS_TRACE_ERROR(EID(MAPPER_FAILED), "_FlushMaps() for volumeId:{} Failed", volumeId);
+            }
+            else
+            {
+                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "_FlushMaps() for volumeId:{} Started", volumeId);
+            }
+        }
+    }
+    return ret;
 }
 
 } // namespace pos

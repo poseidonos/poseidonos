@@ -201,7 +201,11 @@ TEST(JournalLogBuffer, ReadLogBuffer_testIfExecutedSuccessfully)
     int logGroupId = 1;
     int retCode = 0;
     EXPECT_CALL(journalConfig, GetLogGroupSize).WillRepeatedly(Return(logGroupSize));
-    EXPECT_CALL(*metaFile, IssueIO(MetaFsIoOpcode::Read, logGroupId * logGroupSize, logGroupSize, _)).WillOnce(Return(retCode));
+    EXPECT_CALL(*metaFile, AsyncIO).WillOnce([&](AsyncMetaFileIoCtx* ctx)
+                {
+                    journalLogBuffer.SetLogBufferReadDone(true);
+                    return retCode;
+                });
     int result = journalLogBuffer.ReadLogBuffer(logGroupId, nullptr);
 
     // Then
@@ -221,7 +225,7 @@ TEST(JournalLogBuffer, ReadLogBuffer_testIfReadFail)
     int logGroupId = 1;
     int retCode = -1;
     EXPECT_CALL(journalConfig, GetLogGroupSize).WillRepeatedly(Return(logGroupSize));
-    EXPECT_CALL(*metaFile, IssueIO(MetaFsIoOpcode::Read, logGroupId * logGroupSize, logGroupSize, _)).WillOnce(Return(retCode));
+    EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(retCode));
     int result = journalLogBuffer.ReadLogBuffer(logGroupId, nullptr);
 
     // Then: journalLogBuffer will be return error code

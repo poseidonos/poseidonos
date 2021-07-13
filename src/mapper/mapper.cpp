@@ -87,8 +87,7 @@ Mapper::Dispose(void)
 {
     if (isInitialized == true)
     {
-        FlushAllMaps();
-        WaitForFlushAllMapsDone();
+        StoreAllMaps();
         Close();
         _UnregisterFromMapperService();
         isInitialized = false;
@@ -151,7 +150,7 @@ Mapper::GetIMapperWbt(void)
 }
 
 int
-Mapper::FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages)
+Mapper::FlushDirtyMpages(int mapId, EventSmartPtr event, MpageList dirtyPages)
 {
     MapContent* map = _GetMapContent(mapId);
     if (nullptr == map)
@@ -159,34 +158,16 @@ Mapper::FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages
         return -EID(WRONG_MAP_ID);
     }
 
+    // NVMe FLUSH command: executed by event (FlushCmdHandler)
     if (IMapFlush::DEFAULT_DIRTYPAGE_SET == dirtyPages)
     {
-        return map->FlushTouchedPages(callback);
+        return map->FlushTouchedPages(event);
     }
+    // Journal Checkpoint: executed by event (CheckpointSubmission)
     else
     {
-        return map->FlushDirtyPagesGiven(dirtyPages, callback);
+        return map->FlushDirtyPagesGiven(dirtyPages, event);
     }
-}
-
-int
-Mapper::FlushAllMaps(void)
-{
-    int ret = 0;
-
-    ret = vsaMapManager->FlushMaps();
-    if (ret < 0)
-    {
-        POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "AsyncStore() of vsaMapManager Failed, Check logs");
-    }
-
-    ret = stripeMapManager->FlushMap();
-    if (ret < 0)
-    {
-        POS_TRACE_ERROR(EID(STRIPEMAP_STORE_FAILURE), "AsyncStore() of stripeMapManager Failed, Check logs");
-    }
-
-    return ret;
 }
 
 int
@@ -200,7 +181,7 @@ Mapper::StoreAllMaps(void)
         return ret;
     }
 
-    ret = vsaMapManager->StoreMaps();
+    ret = vsaMapManager->StoreAllMaps();
     if (ret < 0)
     {
         return ret;
@@ -208,8 +189,6 @@ Mapper::StoreAllMaps(void)
 
     return ret;
 }
-
-//------------------------------------------------------------------------------
 
 MapContent*
 Mapper::_GetMapContent(int mapId)
@@ -592,16 +571,6 @@ Mapper::_GetFirstValidVolume(void)
         }
     }
     return nullptr;
-}
-
-void
-Mapper::WaitForFlushAllMapsDone(void)
-{
-    while (vsaMapManager->AllMapsAsyncFlushed() == false || stripeMapManager->AllMapsAsyncFlushed() == false)
-    {
-        usleep(1);
-    }
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "All VSAMaps and StripeMap are AsyncStored");
 }
 
 } // namespace pos

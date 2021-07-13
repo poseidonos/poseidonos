@@ -47,7 +47,7 @@ MapFlushedEvent::~MapFlushedEvent(void)
 bool
 MapFlushedEvent::Execute(void)
 {
-    mapManager->MapAsyncFlushDone(mapId);
+    mapManager->MapFlushDone(mapId);
     return true;
 }
 

@@ -32,56 +32,21 @@
 
 #pragma once
 
-#include "src/mapper/include/mapper_const.h"
-#include "src/mapper/i_map_manager.h"
-#include "src/mapper/i_stripemap.h"
-#include "src/mapper/stripemap/stripemap_content.h"
-#include "src/mapper/address/mapper_address_info.h"
-
-#include <atomic>
-#include <map>
-#include <string>
-
-#include <pthread.h>
+#include "src/event_scheduler/event.h"
+#include "src/mapper/map/map_content.h"
 
 namespace pos
 {
-
-class StripeMapManager : public IMapManagerInternal, public IStripeMap
+class EventMapFlushCompleted : public Event
 {
 public:
-    StripeMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId);
-    virtual ~StripeMapManager(void);
+    explicit EventMapFlushCompleted(MapContent* mapContent_);
+    virtual ~EventMapFlushCompleted(void) = default;
 
-    void MapFlushDone(int mapId) override;
-
-    StripeAddr GetLSA(StripeId vsid) override;
-    LsidRefResult GetLSAandReferLsid(StripeId vsid) override;
-    StripeId GetRandomLsid(StripeId vsid) override;
-    int SetLSA(StripeId vsid, StripeId lsid, StripeLoc loc) override;
-    bool IsInUserDataArea(StripeAddr entry) override { return entry.stripeLoc == IN_USER_AREA; }
-    bool IsInWriteBufferArea(StripeAddr entry) override { return entry.stripeLoc == IN_WRITE_BUFFER_AREA; }
-    MpageList GetDirtyStripeMapPages(int vsid) override;
-
-    void Init(MapperAddressInfo& info);
-    int StoreMap(void);
-    void Close(void);
-
-    StripeMapContent* GetStripeMapContent(void);
-    bool AllMapsFlushedDone(void);
+    bool Execute(void) override;
 
 private:
-    int _FlushMap(void);
-    void _MapLoadDone(int volID);
-
-    std::atomic<bool> isMapLoadDone;
-    std::map<int, MapFlushState> mapFlushStatus;
-    StripeMapContent* stripeMap;
-    pthread_rwlock_t stripeMapLock;
-
-    MapperAddressInfo* addrInfo;
-    std::string arrayName;
-    int arrayId;
+    MapContent* mapContent;
 };
 
-} // namespace pos
+}   // namespace pos

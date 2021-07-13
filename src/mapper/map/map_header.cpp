@@ -133,6 +133,7 @@ void
 MapHeader::UpdateNumValidMpages(void)
 {
     mpageData.numValidMpages = mPageMap->GetNumBitsSet();
+    mpageData.numTotalMpages = mPageMap->GetNumBits();
 }
 
 bool

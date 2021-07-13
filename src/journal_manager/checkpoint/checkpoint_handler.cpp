@@ -99,8 +99,8 @@ CheckpointHandler::Start(MapPageList pendingDirtyPages, EventSmartPtr callback)
             POS_TRACE_DEBUG(eventId, "Request to flush map {}, {} pages",
                 mapIt->first, (mapIt->second).size());
 
-            EventSmartPtr mapFlushCallback(new CheckpointMetaFlushCompleted(this, mapIt->first));
-            ret = mapFlush->FlushDirtyMpages(mapIt->first, mapFlushCallback, mapIt->second);
+            EventSmartPtr eventMapFlush(new CheckpointMetaFlushCompleted(this, mapIt->first));
+            ret = mapFlush->FlushDirtyMpages(mapIt->first, eventMapFlush, mapIt->second);
             if (ret != 0)
             {
                 // TODO(Cheolho.kang): Add status that can additionally indicate checkpoint status

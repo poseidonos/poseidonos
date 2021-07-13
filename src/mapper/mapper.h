@@ -74,8 +74,6 @@ public:
     IMapperWbt* GetIMapperWbt(void);
 
     int FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages = DEFAULT_DIRTYPAGE_SET) override;
-    int FlushAllMaps(void) override;
-    void WaitForFlushAllMapsDone(void) override;
     int StoreAllMaps(void) override;
 
     int GetMapLayout(std::string fname) override;

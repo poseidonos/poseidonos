@@ -38,7 +38,7 @@ namespace pos
 class IMapManagerInternal
 {
 public:
-    virtual void MapAsyncFlushDone(int mapId) = 0;
+    virtual void MapFlushDone(int mapId) = 0;
 };
 
 } // namespace pos

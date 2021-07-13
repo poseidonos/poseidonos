@@ -34,8 +34,6 @@ public:
     VSAMapMock* GetVSAMapMock(void);
     StripeMapMock* GetStripeMapMock(void);
 
-    virtual int FlushAllMaps(void) override;
-    virtual void WaitForFlushAllMapsDone(void) override;
     virtual int StoreAllMaps(void) override;
 
 private:

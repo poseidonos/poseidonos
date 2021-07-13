@@ -168,15 +168,28 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
 {
     uint64_t groupSize = config->GetLogGroupSize();
 
-    // TODO(huijeong.kim) change meta_file_intf file offset to uint64_t
-    int ret = logFile->IssueIO(MetaFsIoOpcode::Read, _GetFileOffset(groupId, 0),
-        groupSize, (char*)buffer);
+    AsyncMetaFileIoCtx* logBufferReadReq = new AsyncMetaFileIoCtx();
+    logBufferReadReq->opcode = MetaFsIoOpcode::Read;
+    logBufferReadReq->fd = logFile->GetFd();
+    logBufferReadReq->fileOffset = _GetFileOffset(groupId, 0);
+    logBufferReadReq->length = groupSize;
+    logBufferReadReq->buffer = (char*)buffer;
+    logBufferReadReq->callback = std::bind(&JournalLogBuffer::_LogBufferReadDone,
+                                 this, std::placeholders::_1);
 
+    logBufferReadDone = false;
+    int ret = logFile->AsyncIO(logBufferReadReq);
     if (ret != 0)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_READ_FAILED,
             "Failed to read log buffer");
+        delete logBufferReadReq;
         return -1 * ((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_READ_FAILED);
+    }
+
+    while (logBufferReadDone == false)
+    {
+        usleep(1);
     }
 
     return ret;
@@ -288,6 +301,13 @@ bool
 JournalLogBuffer::DoesLogFileExist(void)
 {
     return logFile->DoesFileExist();
+}
+
+void
+JournalLogBuffer::_LogBufferReadDone(AsyncMetaFileIoCtx* ctx)
+{
+    logBufferReadDone = true;
+    delete ctx;
 }
 
 } // namespace pos

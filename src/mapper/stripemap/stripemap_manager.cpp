@@ -43,7 +43,8 @@
 namespace pos
 {
 StripeMapManager::StripeMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId)
-: stripeMap(nullptr),
+: isMapLoadDone(false),
+  stripeMap(nullptr),
   addrInfo(info),
   arrayName(arrayName),
   arrayId(arrayId)
@@ -65,33 +66,54 @@ StripeMapManager::Init(MapperAddressInfo& info)
 {
     stripeMap = new StripeMapContent(STRIPE_MAP_ID, arrayName);
     stripeMap->Prepare(info.maxVsid);
-    stripeMap->LoadSync(CREATE_FILE_IF_NOT_EXIST);
+
+    int ret = 0;
+    if (stripeMap->DoesFileExist() == false)
+    {
+        ret = stripeMap->CreateMapFile();
+        if (ret == 0)
+        {
+            ret = stripeMap->FileOpen();
+            if (ret == 0)
+            {
+                stripeMap->Store();
+            }
+        }
+    }
+    else
+    {
+        isMapLoadDone = false;
+        AsyncLoadCallBack cb = std::bind(&StripeMapManager::_MapLoadDone, this, std::placeholders::_1);
+        ret = stripeMap->Load(cb);
+        if (ret == -EID(MAP_LOAD_COMPLETED))
+        {
+            POS_TRACE_INFO(EID(MAPPER_START), "No mpage to Load, so StripeMap Load Finished");
+            return;
+        }
+
+        while (isMapLoadDone == false)
+        {
+            usleep(1);
+        }
+        POS_TRACE_INFO(EID(MAPPER_START), "After waking up..., StripeMap Load Finished");
+    }
 }
 
 int
 StripeMapManager::StoreMap(void)
 {
-    int ret = stripeMap->StoreMap();
+    int ret = _FlushMap();
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(STRIPEMAP_STORE_FAILURE), "StripeMap Store failed");
+        return ret;
     }
 
-    return ret;
-}
-
-int
-StripeMapManager::FlushMap(void)
-{
-    EventSmartPtr callBackStripeMap = std::make_shared<MapFlushedEvent>(STRIPE_MAP_ID, this);
-    mapFlushStatus[STRIPE_MAP_ID] = MapFlushState::FLUSHING;
-    int ret = stripeMap->FlushTouchedPages(callBackStripeMap);
-    if (ret < 0)
+    while (AllMapsFlushedDone() == false)
     {
-        POS_TRACE_ERROR(EID(STRIPEMAP_STORE_FAILURE), "Flush() for stripeMap Failed");
+        usleep(1);
     }
 
-     return ret;
+    return 0;
 }
 
 void
@@ -109,15 +131,15 @@ StripeMapManager::GetStripeMapContent(void)
 }
 
 bool
-StripeMapManager::AllMapsAsyncFlushed(void)
+StripeMapManager::AllMapsFlushedDone(void)
 {
     return mapFlushStatus[STRIPE_MAP_ID] == MapFlushState::FLUSH_DONE;
 }
-//----------------------------------------------------------------------------//
+
 void
-StripeMapManager::MapAsyncFlushDone(int mapId)
+StripeMapManager::MapFlushDone(int mapId)
 {
-    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "mapId:{} Flushed @MapAsyncFlushDone", mapId);
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "mapId:{} Flushed @MapFlushDone", mapId);
     mapFlushStatus[STRIPE_MAP_ID] = MapFlushState::FLUSH_DONE;
 }
 
@@ -171,6 +193,27 @@ MpageList
 StripeMapManager::GetDirtyStripeMapPages(int vsid)
 {
     return stripeMap->GetDirtyPages(vsid, 1);
+}
+
+int
+StripeMapManager::_FlushMap(void)
+{
+    EventSmartPtr eventStripeMap = std::make_shared<MapFlushedEvent>(STRIPE_MAP_ID, this);
+    mapFlushStatus[STRIPE_MAP_ID] = MapFlushState::FLUSHING;
+    int ret = stripeMap->FlushTouchedPages(eventStripeMap);
+    if (ret < 0)
+    {
+        POS_TRACE_ERROR(EID(STRIPEMAP_STORE_FAILURE), "_FlushMap() for stripeMap Failed");
+    }
+
+    return ret;
+}
+
+void
+StripeMapManager::_MapLoadDone(int volID)
+{
+    isMapLoadDone = true;
+    POS_TRACE_INFO(EID(MAP_LOAD_COMPLETED), "volID:{} load done, so wake up! @_MapLoadDone", volID);
 }
 
 } // namespace pos

@@ -32,9 +32,9 @@
 
 #pragma once
 
-#include "map_content.h"
-#include "sequential_page_finder.h"
 #include "src/journal_manager/checkpoint/checkpoint_handler.h"
+#include "src/mapper/map/map_content.h"
+#include "src/mapper/map/sequential_page_finder.h"
 #include "src/meta_file_intf/async_context.h"
 
 namespace pos
@@ -56,30 +56,41 @@ enum MapIoStatus
 class MapFlushIoContext : public AsyncMetaFileIoCtx
 {
 public:
+    MapFlushIoContext(void) = default;
+    MapFlushIoContext(MetaFsIoOpcode op, int fdesc, uint64_t fOffset, uint64_t len, char* buf, MetaIoCbPtr cb)
+    {
+        opcode = op;
+        fd = fdesc;
+        fileOffset = fOffset;
+        length = len;
+        buffer = buf;
+        callback = cb;
+    }
+
     MpageNum startMpage;
     int numMpages;
 };
 
 class MapIoHandler
 {
-    friend class MapIoHandlerTest;
-
 public:
     MapIoHandler(Map* mapData, MapHeader* mapHeaderData);
     virtual ~MapIoHandler(void) = default;
 
-    int LoadFromMFS(void);
-    int SyncLoad(MetaFileIntf* fileFromLoad);
-    int AsyncLoad(AsyncLoadCallBack& cb);
-    int AsyncLoadEvent(AsyncLoadCallBack& cb);
-    int StoreToMFS();
-    int SyncStore(MetaFileIntf* fileToStore);
+    // cb is assigned to loadFinishedCallBack
+    int LoadByCliThread(AsyncLoadCallBack& cb);
+    int LoadByEwThread(AsyncLoadCallBack& cb);
+
+    // event is assigned to eventAfterflushDone
+    int FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr event);
+    int FlushTouchedPages(EventSmartPtr event);
+    int FlushAllPages(EventSmartPtr event);
 
     void RegisterFile(MetaFileIntf* mapFile);
-    int SaveHeader(void);
 
-    int FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback);
-    int FlushTouchedPages(EventSmartPtr callback);
+    int SyncLoad(MetaFileIntf* fileFromLoad);   // For WBT commands
+    int SyncStore(MetaFileIntf* fileToStore);   // For WBT commands
+    int StoreToMFS(void);                       // For WBT commands
 
 protected:
     BitMap* touchedPages;
@@ -87,36 +98,43 @@ protected:
 private:
     bool _IncreaseAsyncIoDonePageNum(int numPagesDone);
     void _ResetAsyncIoPageNum();
-    int _IssueHeaderIO(MetaFsIoOpcode opType);
-    int _IssueHeaderIO(MetaFsIoOpcode opType, MetaFileIntf* file);
-    int _IssueMpageIO(MetaFsIoOpcode opType);
-    int _IssueMpageIO(MetaFsIoOpcode opType, MetaFileIntf* fileToIo);
-    void _HeaderFlushed(AsyncMetaFileIoCtx* ctx);
-    void _MpageFlushed(AsyncMetaFileIoCtx* ctx);
-    void _HeaderAsyncLoaded(AsyncMetaFileIoCtx* ctx);
-    void _MpageAsyncLoaded(AsyncMetaFileIoCtx* ctx);
+
+    int _LoadHeader(AsyncLoadCallBack& cb, MetaIoCbPtr mioCb);
+    void _LoadMpages(AsyncMetaFileIoCtx* ctx);
+    void _HeaderLoadDone(AsyncMetaFileIoCtx* ctx);
+    void _FillMapHeader(AsyncMetaFileIoCtx* ctx);
+    void _MpageLoadDone(AsyncMetaFileIoCtx* ctx);
+
     bool _PrepareFlush(EventSmartPtr callback);
-    void _CompleteFlush(void);
     void _RemoveCleanPages(MpageList& pages);
-    void _GetTouchedPages(BitMap* validPages);
+    void _GetTouchedPages(BitMap* mpageMap);
+    int _FlushTouchedPages(void);
+    int _Flush(SequentialPageFinder& sequentialPages);
     int _FlushMpages(MpageNum startPage, int numPages);
     int _IssueFlush(char* buffer, MpageNum startMpage, int numMpages);
-    int _Flush(SequentialPageFinder& sequentialPages);
+    void _MpageFlushed(AsyncMetaFileIoCtx* ctx);
+    void _HeaderFlushed(AsyncMetaFileIoCtx* ctx);
+    void _CompleteFlush(void);
 
-    Map* map;                  // by Ctor()
-    MapHeader* mapHeader;      // by Ctor()
-    MetaFileIntf* file;        // by RegisterFile()
-    char* mapHeaderTempBuffer; // by FlushDirtyPages(), AsyncLoad()
-    MapIoStatus status;
+    int _IssueHeaderIO(MetaFsIoOpcode opType, MetaFileIntf* file);      // For WBT commands
+    int _IssueMpageIO(MetaFsIoOpcode opType, MetaFileIntf* fileToIo);   // For WBT commands
+
+    Map* map;                   // by Ctor()
+    MapHeader* mapHeader;       // by Ctor()
+    MetaFileIntf* file;         // by RegisterFile()
+    char* mapHeaderTempBuffer;  // by FlushDirtyPages(), AsyncLoad()
+    MapIoStatus status;         // Load/Flush status
+
     int numPagesToAsyncIo;
-    int numPagesAsyncIoDone;
+    std::atomic<int> numPagesAsyncIoDone;
     int ioError; // indicates if there is an Async-IO error among mpages
 
     std::atomic<bool> flushInProgress; // under CheckPoint or FLUSH command
 
-    std::mutex mpageAsyncIoCountLock;
     AsyncLoadCallBack loadFinishedCallBack;
-    EventSmartPtr flushDoneCallBack;
+    EventSmartPtr eventAfterflushDone;
+
+    std::atomic<bool> isHeaderLoaded;
 };
 
 } // namespace pos

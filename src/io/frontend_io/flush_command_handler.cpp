@@ -115,8 +115,8 @@ FlushCmdHandler::Execute(void)
         case FLUSH__VSAMAP:
         {
             int ret = 0;
-            EventSmartPtr callbackVSAMap(new MapFlushCompleteEvent(volumeId, flushIo));
-            ret = iMapFlush->FlushDirtyMpages(volumeId, callbackVSAMap);
+            EventSmartPtr eventVSAMap(new MapFlushCompleteEvent(volumeId, flushIo));
+            ret = iMapFlush->FlushDirtyMpages(volumeId, eventVSAMap);
             if (ret != 0)
             {
                 if (ret == -EID(MAP_FLUSH_IN_PROGRESS))
@@ -154,8 +154,8 @@ FlushCmdHandler::Execute(void)
             if (stripeMapFlushIssued != true)
             {
                 // Stripe Map Flush
-                EventSmartPtr callbackStripeMap(new MapFlushCompleteEvent(STRIPE_MAP_ID, flushIo));
-                ret = iMapFlush->FlushDirtyMpages(STRIPE_MAP_ID, callbackStripeMap);
+                EventSmartPtr eventStripeMap(new MapFlushCompleteEvent(STRIPE_MAP_ID, flushIo));
+                ret = iMapFlush->FlushDirtyMpages(STRIPE_MAP_ID, eventStripeMap);
 
                 if (ret != 0)
                 {

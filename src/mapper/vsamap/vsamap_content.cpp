@@ -67,7 +67,7 @@ VSAMapContent::Prepare(uint64_t blkCnt, int64_t volid)
 
     mapHeader->SetEntriesPerMpage(mapHeader->GetMpageSize() / sizeof(VirtualBlkAddr));
     uint64_t mpagesNeeded = DivideUp(totalBlks, mapHeader->GetEntriesPerMpage());
-    InitHeaderInfo(mpagesNeeded);
+    _InitHeaderInfo(mpagesNeeded);
 
     return 0;
 }

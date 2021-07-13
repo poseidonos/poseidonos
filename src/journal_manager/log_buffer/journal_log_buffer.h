@@ -82,14 +82,12 @@ public:
     }
 
     // For UT
-    inline char*
-    GetInitializedDataBuffer(void)
-    {
-        return initializedDataBuffer;
-    }
+    char* GetInitializedDataBuffer(void) { return initializedDataBuffer; }
+    void SetLogBufferReadDone(bool val) { logBufferReadDone = val; }
 
 private:
     void _LoadBufferSize(void);
+    void _LogBufferReadDone(AsyncMetaFileIoCtx* ctx);
 
     inline uint64_t
     _GetFileOffset(int groupId, uint64_t offset)
@@ -101,6 +99,7 @@ private:
     JournalConfiguration* config;
     LogWriteContextFactory* logFactory;
     std::atomic<int> numInitializedLogGroup;
+    std::atomic<bool> logBufferReadDone;
     MetaFileIntf* logFile;
 
     char* initializedDataBuffer;

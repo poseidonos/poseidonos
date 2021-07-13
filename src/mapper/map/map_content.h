@@ -59,23 +59,22 @@ public:
     virtual MpageList GetDirtyPages(BlkAddr start, uint64_t numEntries) = 0;
 
     int Init(uint64_t numMpages);
-    void InitHeaderInfo(uint64_t numMpages);
 
     int CreateMapFile(void);
     int FileOpen(void);
     bool IsFileOpened(void);
-    int LoadSync(int opt = 0);
-    int LoadAsync(AsyncLoadCallBack& cb);
-    int LoadAsyncEvent(AsyncLoadCallBack& cb);
+
+    int Load(AsyncLoadCallBack& cb, bool eventWorkerTH = false);
     bool IsLoaded(void);
 
-    int StoreMap(void);
+    int FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr event);
+    int FlushTouchedPages(EventSmartPtr event);
+    int Store(void);
+    void SetAllFlushed(void) { allFlushed = true; }
+
     int FileClose(void);
     int DeleteMapFile(void);
     bool DoesFileExist(void);
-
-    int FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback);
-    int FlushTouchedPages(EventSmartPtr callback);
 
     int Dump(std::string fileName, std::string aname);
     int DumpLoad(std::string fileName, std::string aname);
@@ -91,17 +90,18 @@ public:
     void SetMetaFsService(MetaFsService* metaFsService_) { metaFsService = metaFsService_; }
 
 protected:
-    MapHeader* mapHeader;       // by InitHeaderInfo()
-    Map* map;                   // by Init()
-    MapIoHandler* mapIoHandler; // by Init()
-    MetaFileIntf* metaFile;     // assigned by CreateMapFile(), LoadSync(), LoadAsync()
-    std::string filename;       // by Ctor() of derived class
+    void _InitHeaderInfo(uint64_t numMpages);
+    int _PrepareMetaFile(void);
+
+    MapHeader* mapHeader;           // by InitHeaderInfo()
+    Map* map;                       // by Init()
+    MapIoHandler* mapIoHandler;     // Created by Init()
+    MetaFileIntf* metaFile;         // assigned by CreateMapFile() ...
+    std::string filename;           // by Ctor() of derived class
     std::string arrayName;
     MetaFsService* metaFsService;
     bool loaded;
-
-private:
-    int _Unload(void);
+    bool allFlushed;
 };
 
 } // namespace pos

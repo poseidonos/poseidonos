@@ -70,18 +70,7 @@ public:
     VSAMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId);
     virtual ~VSAMapManager(void);
 
-    void Init(void);
-    int StoreMaps(void);
-    int FlushMaps(void);
-    void Close(void);
-    VSAMapContent*& GetVSAMapContent(int volID);
-    bool AllMapsAsyncFlushed(void);
-    void SetVolumeManagerObject(IVolumeManager* volumeManagerToUse);
-
-    IVSAMap* GetIVSAMap(void);
-    VSAMapAPI* GetVSAMapAPI(void);
-
-    void MapAsyncFlushDone(int mapId) override;
+    void MapFlushDone(int mapId) override;
 
     int EnableInternalAccess(int volID, int caller) override;
     std::atomic<int>& GetLoadDoneFlag(int volumeId) override;
@@ -94,18 +83,30 @@ public:
     bool VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayID) override;
     void VolumeDetached(vector<int> volList, std::string arrayName, int arrayID) override;
 
+    void Init(void);
+    int StoreAllMaps(void);
+    void Close(void);
+
+    VSAMapContent*& GetVSAMapContent(int volID);
+    bool AllMapsFlushedDone(void);
+    void SetVolumeManagerObject(IVolumeManager* volumeManagerToUse);
+
+    IVSAMap* GetIVSAMap(void);
+    VSAMapAPI* GetVSAMapAPI(void);
+
 private:
     bool _PrepareVsaMapAndHeader(int volID, uint64_t& volSizeByte, bool isUnknownVolSize);
     bool _PrepareInMemoryData(int volID, uint64_t volSizeByte);
     bool _VSAMapFileCreate(int volID);
-    int _VSAMapFileAsyncLoad(int volID);
-    int _VSAMapFileAsyncLoadNoWait(int volID);
+    int _VSAMapFileLoadByCliThread(int volID);
+    int _VSAMapFileLoadbyEwThread(int volID);
     bool _VSAMapFileStore(int volID);
-    void _WakeUpAfterLoadDone(int volID);
-    void _AfterLoadDone(int volID);
+    void _MapLoadDoneByCli(int volID);
+    void _MapLoadDoneByEw(int volID);
     bool _IsVolumeExist(int volID, VolMountStateIter& iter);
     bool _LoadVolumeMeta(std::string volName, int volID, uint64_t volSizeByte, bool isUnknownVolSize);
-    void _WaitForMapAsyncFlushed(int volId);
+    void _WaitForMapFlushed(int volId);
+    int _FlushMaps(void);
 
     bool _ChangeVolumeStateDeleting(uint32_t volumeId);
     VolState _GetVolumeState(uint32_t volumeId);
@@ -113,11 +114,11 @@ private:
     std::map<int, VolState> volumeMountState;
     std::recursive_mutex volMountStateLock[MAX_VOLUME_COUNT];
 
-    std::mutex volAsyncLoadLock; // for cvLoadDone.wait()
+    std::mutex volLoadLock;
     std::condition_variable cvLoadDone;
     std::atomic<int> loadDoneFlag[MAX_VOLUME_COUNT];
-    AsyncLoadCallBack loadDoneWakeUp;
-    AsyncLoadCallBack loadDone;
+    AsyncLoadCallBack cbMapLoadDoneByCli;
+    AsyncLoadCallBack cbMapLoadDoneByEw;
 
     std::map<int, MapFlushState> mapFlushStatus;
 

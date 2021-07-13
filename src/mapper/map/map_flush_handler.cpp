@@ -48,14 +48,9 @@ MapIoHandler::MapIoHandler(Map* mapData, MapHeader* mapHeaderData)
   numPagesToAsyncIo(0),
   numPagesAsyncIoDone(0),
   ioError(0),
-  flushInProgress(false)
+  flushInProgress(false),
+  isHeaderLoaded(false)
 {
-}
-
-int
-MapIoHandler::LoadFromMFS(void)
-{
-    return SyncLoad(file);
 }
 
 int
@@ -73,49 +68,55 @@ MapIoHandler::SyncLoad(MetaFileIntf* fileFromLoad)
     return ret;
 }
 
+// Executed by EventWorker thread
+int
+MapIoHandler::LoadByEwThread(AsyncLoadCallBack& cb)
+{
+    // 1. Load Header Start
+    MetaIoCbPtr mioCb = std::bind(&MapIoHandler::_LoadMpages, this, std::placeholders::_1);
+    return _LoadHeader(cb, mioCb);
+}
+
+
 // Executed by CLI thread
 int
-MapIoHandler::AsyncLoad(AsyncLoadCallBack& cb)
+MapIoHandler::LoadByCliThread(AsyncLoadCallBack& cb)
 {
-    // MapHeader Sync-Load
-    status = LOADING_HEADER_STARTED;
-    POS_TRACE_INFO(EID(MAP_LOAD_STARTED), "Header Async Loading Started, mapId:{}", mapHeader->GetMapId());
-    int ret = _IssueHeaderIO(MetaFsIoOpcode::Read);
+    // 1. Load Header Start
+    MetaIoCbPtr mioCb1 = std::bind(&MapIoHandler::_HeaderLoadDone, this, std::placeholders::_1);
+    int ret = _LoadHeader(cb, mioCb1);
     if (ret < 0)
     {
         return ret;
     }
-    mapHeader->ApplyNumValidMpages();
-    status = LOADING_HEADER_DONE;
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "fileName:{} Header Sync Load Success, Valid:{} / Total:{}",
-                    file->GetFileName(), mapHeader->GetNumValidMpages(), mapHeader->GetNumTotalMpages());
+    // Wait here for mapHeader to load
+    while (isHeaderLoaded == false)
+    {
+        usleep(1);
+    }
 
-    loadFinishedCallBack = cb;
+    // 2. Header load done, check 'valid mpage count' in Header
     if (0 == mapHeader->GetNumValidMpages())
     {
         POS_TRACE_INFO(EID(MAPPER_SUCCESS), "There is no mpage to load, 'numValidMpage == 0'");
         return -EID(MAP_LOAD_COMPLETED);
     }
 
-    // Mpages Async-Load
+    // 3. Load Mpages Start
     uint64_t fileOffset = mapHeader->GetSize();
     MpageNum mpageNum = 0;
     uint64_t numBitsSet = mapHeader->GetMpageMap()->GetNumBitsSet();
     numPagesToAsyncIo = numBitsSet;
     numPagesAsyncIoDone = 0;
 
+    MetaIoCbPtr mioCb2 = std::bind(&MapIoHandler::_MpageLoadDone, this, std::placeholders::_1);
     for (uint64_t cnt = 0; cnt < numBitsSet; ++cnt)
     {
         mpageNum = mapHeader->GetMpageMap()->FindFirstSet(mpageNum);
         char* mpage = map->AllocateMpage(mpageNum);
-
-        MapFlushIoContext* mPageLoadRequest = new MapFlushIoContext();
-        mPageLoadRequest->opcode = MetaFsIoOpcode::Read;
-        mPageLoadRequest->fd = file->GetFd();
-        mPageLoadRequest->fileOffset = fileOffset + (mpageNum * mapHeader->GetMpageSize());
-        mPageLoadRequest->length = mapHeader->GetMpageSize();
-        mPageLoadRequest->buffer = mpage;
-        mPageLoadRequest->callback = std::bind(&MapIoHandler::_MpageAsyncLoaded, this, std::placeholders::_1);
+        MapFlushIoContext* mPageLoadRequest = new MapFlushIoContext(MetaFsIoOpcode::Read, file->GetFd(),
+                                              fileOffset + (mpageNum * mapHeader->GetMpageSize()), mapHeader->GetMpageSize(),
+                                              mpage, mioCb2);
         mPageLoadRequest->startMpage = mpageNum;
         mPageLoadRequest->numMpages = 1;
 
@@ -125,35 +126,6 @@ MapIoHandler::AsyncLoad(AsyncLoadCallBack& cb)
             return ret;
         }
         mpageNum++;
-    }
-
-    return ret;
-}
-
-// Executed by EventWorker thread
-int
-MapIoHandler::AsyncLoadEvent(AsyncLoadCallBack& cb)
-{
-    status = LOADING_HEADER_STARTED;
-    POS_TRACE_INFO(EID(MAP_LOAD_STARTED), "Header Async Loading Started, mapId:{}", mapHeader->GetMapId());
-
-    loadFinishedCallBack = cb;
-    uint64_t lenToRead = mapHeader->GetSize();
-    mapHeaderTempBuffer = new char[lenToRead]();
-
-    MapFlushIoContext* headerLoadRequest = new MapFlushIoContext();
-    headerLoadRequest->opcode = MetaFsIoOpcode::Read;
-    headerLoadRequest->fd = file->GetFd();
-    headerLoadRequest->fileOffset = 0;
-    headerLoadRequest->length = lenToRead;
-    headerLoadRequest->buffer = mapHeaderTempBuffer;
-    headerLoadRequest->callback = std::bind(&MapIoHandler::_HeaderAsyncLoaded, this, std::placeholders::_1);
-
-    ioError = 0;
-    int ret = file->AsyncIO(headerLoadRequest);
-    if (ret < 0)
-    {
-        POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "MFS returned error on Header async loading, mapId:{}", mapHeader->GetMapId());
     }
 
     return ret;
@@ -187,15 +159,9 @@ MapIoHandler::RegisterFile(MetaFileIntf* mapFile)
 }
 
 int
-MapIoHandler::SaveHeader(void)
+MapIoHandler::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr event)
 {
-    return _IssueHeaderIO(MetaFsIoOpcode::Write);
-}
-
-int
-MapIoHandler::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback)
-{
-    if (_PrepareFlush(callback) == false)
+    if (_PrepareFlush(event) == false)
     {
         return -EID(MAP_FLUSH_IN_PROGRESS);
     }
@@ -207,7 +173,6 @@ MapIoHandler::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback)
     if (numPagesToAsyncIo != 0)
     {
         POS_TRACE_DEBUG(EID(MAP_FLUSH_STARTED), "FlushDirtyPagesGiven mapId:{} started", mapHeader->GetMapId());
-
         SequentialPageFinder sequentialPages(dirtyPages);
         result = _Flush(sequentialPages);
     }
@@ -221,42 +186,117 @@ MapIoHandler::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback)
 }
 
 int
-MapIoHandler::FlushTouchedPages(EventSmartPtr callback)
+MapIoHandler::FlushTouchedPages(EventSmartPtr event)
 {
-    if (_PrepareFlush(callback) == false)
+    if (_PrepareFlush(event) == false)
     {
         return -EID(MAP_FLUSH_IN_PROGRESS);
     }
 
-    int result = EID(SUCCESS);
-    BitMap* copiedBitmap = mapHeader->GetBitmapFromTempBuffer(mapHeaderTempBuffer);
-    _GetTouchedPages(copiedBitmap);
-    delete copiedBitmap;
+    BitMap* clonedMpageMap = mapHeader->GetBitmapFromTempBuffer(mapHeaderTempBuffer);
+    _GetTouchedPages(clonedMpageMap);
+    delete clonedMpageMap;
 
+    return _FlushTouchedPages();
+}
+
+int
+MapIoHandler::FlushAllPages(EventSmartPtr event)
+{
+    if (_PrepareFlush(event) == false)
+    {
+        return -EID(MAP_FLUSH_IN_PROGRESS);
+    }
+
+    BitMap* clonedMpageMap = mapHeader->GetBitmapFromTempBuffer(mapHeaderTempBuffer);
+    touchedPages = clonedMpageMap;
+
+    return _FlushTouchedPages();
+}
+
+int
+MapIoHandler::_FlushTouchedPages(void)
+{
+    int ret = 0;
     if (touchedPages->GetNumBitsSet() != 0)
     {
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_STARTED), "FlushTouchedPages mapId:{} started", mapHeader->GetMapId());
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_STARTED), "_TriggerFlushWithTouchedPages mapId:{} started", mapHeader->GetMapId());
         numPagesToAsyncIo = touchedPages->GetNumBitsSet();
         SequentialPageFinder finder(touchedPages);
-        result = _Flush(finder);
+        ret = _Flush(finder);
     }
     else
     {
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "mapId:{} FlushTouchedPages completed, W/O any pages to flush", mapHeader->GetMapId());
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "mapId:{} _TriggerFlushWithTouchedPages completed, W/O any pages to flush", mapHeader->GetMapId());
         _CompleteFlush();
-        // TODO(r.saraf) Handle callback returning false value (callback executed in _CompleteFlush)
     }
-
-    return result;
+    return ret;
 }
 
+int
+MapIoHandler::_LoadHeader(AsyncLoadCallBack& cb, MetaIoCbPtr mioCb)
+{
+    status = LOADING_HEADER_STARTED;
+    POS_TRACE_INFO(EID(MAP_LOAD_STARTED), "Header Async Loading Started, mapId:{}", mapHeader->GetMapId());
+
+    loadFinishedCallBack = cb;
+    uint64_t lenToRead = mapHeader->GetSize();
+    mapHeaderTempBuffer = new char[lenToRead]();
+
+    MapFlushIoContext* headerLoadRequest = new MapFlushIoContext(MetaFsIoOpcode::Read, file->GetFd(), 0, lenToRead, mapHeaderTempBuffer, mioCb);
+
+    ioError = 0;
+    int ret = file->AsyncIO(headerLoadRequest);
+    if (unlikely(ret < 0))
+    {
+        POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "MFS returned error on Header async loading, mapId:{}", mapHeader->GetMapId());
+    }
+
+    return ret;
+}
 
 // Executed by meta-fs thread
 void
-MapIoHandler::_HeaderAsyncLoaded(AsyncMetaFileIoCtx* ctx)
+MapIoHandler::_LoadMpages(AsyncMetaFileIoCtx* ctx)
 {
     MapFlushIoContext* headerLoadReqCtx = static_cast<MapFlushIoContext*>(ctx);
-    if (headerLoadReqCtx->error < 0)
+    _FillMapHeader(ctx);
+
+    // 2. Header load done, check 'valid mpage count' in Header
+    if (0 == mapHeader->GetNumValidMpages())
+    {
+        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "There is no mpage to load, 'numValidMpage == 0'");
+        loadFinishedCallBack(mapHeader->GetMapId());
+        delete[] headerLoadReqCtx->buffer;
+        delete headerLoadReqCtx;
+        return;
+    }
+
+    // 3. Load Mpages Start (by Event)
+    numPagesToAsyncIo = mapHeader->GetMpageMap()->GetNumBitsSet();
+    numPagesAsyncIoDone = 0;
+    MetaIoCbPtr mpageAsyncLoadReqCB = std::bind(&MapIoHandler::_MpageLoadDone, this, std::placeholders::_1);
+
+    EventSmartPtr mpageLoadRequest = std::make_shared<EventMpageAsyncIo>(mapHeader, map, file, mpageAsyncLoadReqCB);
+    EventSchedulerSingleton::Instance()->EnqueueEvent(mpageLoadRequest);
+
+    delete[] headerLoadReqCtx->buffer;
+    delete headerLoadReqCtx;
+}
+
+void
+MapIoHandler::_HeaderLoadDone(AsyncMetaFileIoCtx* ctx)
+{
+    _FillMapHeader(ctx);
+    isHeaderLoaded = true;
+}
+
+void
+MapIoHandler::_FillMapHeader(AsyncMetaFileIoCtx* ctx)
+{
+    // Update mapHeader with mapHeaderTempBuffer read
+    MapFlushIoContext* headerLoadReqCtx = static_cast<MapFlushIoContext*>(ctx);
+    if (unlikely(headerLoadReqCtx->error < 0))
     {
         ioError = headerLoadReqCtx->error;
         POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "MFS AsyncIO error, ioError:{}", ioError);
@@ -269,34 +309,14 @@ MapIoHandler::_HeaderAsyncLoaded(AsyncMetaFileIoCtx* ctx)
 
     mapHeader->ApplyNumValidMpages();
     status = LOADING_HEADER_DONE;
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS),
-        "fileName:{} Header Sync Load Success, Valid:{} / Total:{}",
-        file->GetFileName(), mapHeader->GetNumValidMpages(), mapHeader->GetNumTotalMpages());
-
-    if (0 == mapHeader->GetNumValidMpages())
-    {
-        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "There is no mpage to load, 'numValidMpage == 0'");
-        loadFinishedCallBack(mapHeader->GetMapId());
-        delete[] headerLoadReqCtx->buffer;
-        delete headerLoadReqCtx;
-        return;
-    }
-
-    // Mpages Async-load Request by Event
-    numPagesToAsyncIo = mapHeader->GetMpageMap()->GetNumBitsSet();
-    numPagesAsyncIoDone = 0;
-    MetaIoCbPtr mpageAsyncLoadReqCB = std::bind(&MapIoHandler::_MpageAsyncLoaded, this, std::placeholders::_1);
-
-    EventSmartPtr mpageLoadRequest = std::make_shared<EventMpageAsyncIo>(mapHeader, map, file, mpageAsyncLoadReqCB);
-    EventSchedulerSingleton::Instance()->EnqueueEvent(mpageLoadRequest);
-
-    delete[] headerLoadReqCtx->buffer;
-    delete headerLoadReqCtx;
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "fileName:{} Header Load Success, ValidMpages:{} / TotalMpages:{}",
+                   file->GetFileName(), mapHeader->GetNumValidMpages(), mapHeader->GetNumTotalMpages());
 }
+
 
 // Executed by meta-fs thread
 void
-MapIoHandler::_MpageAsyncLoaded(AsyncMetaFileIoCtx* ctx)
+MapIoHandler::_MpageLoadDone(AsyncMetaFileIoCtx* ctx)
 {
     MapFlushIoContext* mPageLoadReqCtx = static_cast<MapFlushIoContext*>(ctx);
     MpageNum startMpage = mPageLoadReqCtx->startMpage;
@@ -331,12 +351,6 @@ MapIoHandler::_MpageAsyncLoaded(AsyncMetaFileIoCtx* ctx)
 }
 
 int
-MapIoHandler::_IssueHeaderIO(MetaFsIoOpcode opType)
-{
-    return _IssueHeaderIO(opType, file);
-}
-
-int
 MapIoHandler::_IssueHeaderIO(MetaFsIoOpcode opType, MetaFileIntf* inputFile)
 {
     uint64_t curOffset = 0;
@@ -357,12 +371,6 @@ MapIoHandler::_IssueHeaderIO(MetaFsIoOpcode opType, MetaFileIntf* inputFile)
     }
 
     return ret;
-}
-
-int
-MapIoHandler::_IssueMpageIO(MetaFsIoOpcode opType)
-{
-    return _IssueMpageIO(opType, file);
 }
 
 int
@@ -453,13 +461,10 @@ MapIoHandler::_FlushMpages(MpageNum startMpage, int numMpages)
 int
 MapIoHandler::_IssueFlush(char* buffer, MpageNum startMpage, int numMpages)
 {
-    MapFlushIoContext* flushRequest = new MapFlushIoContext();
-    flushRequest->opcode = MetaFsIoOpcode::Write;
-    flushRequest->fd = file->GetFd();
-    flushRequest->fileOffset = mapHeader->GetSize() + startMpage * mapHeader->GetMpageSize();
-    flushRequest->length = mapHeader->GetMpageSize() * numMpages;
-    flushRequest->buffer = buffer;
-    flushRequest->callback = std::bind(&MapIoHandler::_MpageFlushed, this, std::placeholders::_1);
+    MetaIoCbPtr mioCb = std::bind(&MapIoHandler::_MpageFlushed, this, std::placeholders::_1);
+    MapFlushIoContext* flushRequest = new MapFlushIoContext(MetaFsIoOpcode::Write, file->GetFd(),
+                                      mapHeader->GetSize() + startMpage * mapHeader->GetMpageSize(), mapHeader->GetMpageSize() * numMpages,
+                                      buffer, mioCb);
     flushRequest->startMpage = startMpage;
     flushRequest->numMpages = numMpages;
 
@@ -491,13 +496,8 @@ MapIoHandler::_MpageFlushed(AsyncMetaFileIoCtx* ctx)
         status = FLUSHING_HEADER;
         POS_TRACE_DEBUG(EID(MAP_FLUSH_ONGOING), "Starting Flush mapId:{} Header", mapHeader->GetMapId());
 
-        MapFlushIoContext* headerFlushReq = new MapFlushIoContext();
-        headerFlushReq->opcode = MetaFsIoOpcode::Write;
-        headerFlushReq->fd = file->GetFd();
-        headerFlushReq->length = mapHeader->GetSize();
-        headerFlushReq->buffer = mapHeaderTempBuffer;
-        headerFlushReq->callback = std::bind(&MapIoHandler::_HeaderFlushed, this, std::placeholders::_1);
-
+        MetaIoCbPtr mioCb = std::bind(&MapIoHandler::_HeaderFlushed, this, std::placeholders::_1);
+        MapFlushIoContext* headerFlushReq = new MapFlushIoContext(MetaFsIoOpcode::Write, file->GetFd(), 0, mapHeader->GetSize(), mapHeaderTempBuffer, mioCb);
         ret = file->AsyncIO(headerFlushReq);
         if (ret < 0)
         {
@@ -542,13 +542,14 @@ MapIoHandler::_HeaderFlushed(AsyncMetaFileIoCtx* ctx)
 }
 
 void
-MapIoHandler::_GetTouchedPages(BitMap* validPages)
+MapIoHandler::_GetTouchedPages(BitMap* mpageMap)
 {
     uint32_t lastBit = 0;
     uint32_t currentPage = 0;
 
-    while ((currentPage = validPages->FindFirstSet(lastBit)) != validPages->GetNumBits())
+    while ((currentPage = mpageMap->FindFirstSet(lastBit)) != mpageMap->GetNumBits())
     {
+        // Clone 'touchedMpages' in 'mapHeader' to 'touchedPages'
         if (mapHeader->GetTouchedMpages()->IsSetBit(currentPage) == true)
         {
             touchedPages->SetBit(currentPage);
@@ -558,16 +559,16 @@ MapIoHandler::_GetTouchedPages(BitMap* validPages)
 }
 
 bool
-MapIoHandler::_PrepareFlush(EventSmartPtr callback)
+MapIoHandler::_PrepareFlush(EventSmartPtr event)
 {
     if (flushInProgress.exchange(true) == true)
     {
         return false;
     }
 
-    flushDoneCallBack = callback;
+    eventAfterflushDone = event;
 
-    // Copy mpage info of mapHeader to Temporary Buffer
+    // Copy mpage info of mapHeader to Temporary Buffer (mapHeaderTempBuffer)
     mapHeaderTempBuffer = new char[mapHeader->GetSize()];
     mapHeader->CopyToBuffer(mapHeaderTempBuffer);
 
@@ -580,7 +581,7 @@ MapIoHandler::_PrepareFlush(EventSmartPtr callback)
 void
 MapIoHandler::_CompleteFlush(void)
 {
-    EventSchedulerSingleton::Instance()->EnqueueEvent(flushDoneCallBack);
+    EventSchedulerSingleton::Instance()->EnqueueEvent(eventAfterflushDone);
     delete touchedPages;
     touchedPages = nullptr;
     delete mapHeaderTempBuffer;
@@ -591,10 +592,8 @@ MapIoHandler::_CompleteFlush(void)
 bool
 MapIoHandler::_IncreaseAsyncIoDonePageNum(int numMpagesDone)
 {
-    std::unique_lock<std::mutex> lock(mpageAsyncIoCountLock);
-    numPagesAsyncIoDone += numMpagesDone;
-
-    return (numPagesAsyncIoDone == numPagesToAsyncIo);
+    int numIoDoneSoFar = numPagesAsyncIoDone.fetch_add(numMpagesDone) + numMpagesDone;
+    return (numIoDoneSoFar == numPagesToAsyncIo);
 }
 
 void

@@ -53,8 +53,9 @@ StripeMapContent::Prepare(uint64_t numEntries, int64_t opt)
     mapHeader->SetEntriesPerMpage(mapHeader->GetMpageSize() / sizeof(StripeAddr));
 
     uint64_t numPages = DivideUp(numEntries, mapHeader->GetEntriesPerMpage());
-    InitHeaderInfo(numPages);
+    _InitHeaderInfo(numPages);
     int ret = Init(numPages);
+    metaFile = new FILESTORE(filename, arrayName);
 
     return ret;
 }
