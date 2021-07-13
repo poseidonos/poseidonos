@@ -90,8 +90,9 @@ IOLocker::TryBusyLock(IArrayDevice* dev, StripeId from, StripeId to)
     StripeLocker* locker = _Find(dev);
     if (locker == nullptr)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryLock, no locker exists");
-        return false;
+        // TODO(SRM) expect a path that will not be reached
+        POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryBusyLock, no locker exists");
+        return true;
     }
 
     return locker->TryBusyLock(from, to);
@@ -106,8 +107,9 @@ IOLocker::TryLock(set<IArrayDevice*>& devs, StripeId val)
         StripeLocker* locker = _Find(d);
         if (locker == nullptr)
         {
+            // TODO(SRM) expect a path that will not be reached
             POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryLock, no locker exists");
-            return false;
+            return true;
         }
         lockersByGroup.insert(locker);
     }
@@ -146,6 +148,7 @@ IOLocker::Unlock(IArrayDevice* dev, StripeId val)
     }
     else
     {
+        // TODO(SRM) expect a path that will not be reached
         POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::Unlock, no locker exists");
     }
 }
@@ -159,7 +162,8 @@ IOLocker::Unlock(set<IArrayDevice*>& devs, StripeId val)
         StripeLocker* locker = _Find(d);
         if (locker == nullptr)
         {
-            POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryLock, no locker exists");
+            // TODO(SRM) expect a path that will not be reached
+            POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::Unlock, no locker exists");
         }
         lockersByGroup.insert(locker);
     }
@@ -175,8 +179,9 @@ IOLocker::ResetBusyLock(IArrayDevice* dev)
     StripeLocker* locker = _Find(dev);
     if (locker == nullptr)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::TryLock, no locker exists");
-        return false;
+        // TODO(SRM) expect a path that will not be reached
+        POS_TRACE_WARN(POS_EVENT_ID::LOCKER_DEBUG_MSG, "IOLocker::ResetBusyLock, no locker exists");
+        return true;
     }
 
     return locker->ResetBusyLock();

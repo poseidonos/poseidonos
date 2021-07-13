@@ -290,8 +290,6 @@ Array::Delete(void)
     if (rebuilder->IsRebuilding(name_))
     {
         ret = (int)POS_EVENT_ID::ARRAY_REBUILD_NOT_DONE;
-        POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG , "Rebuild not done, try again later");
-        rebuilder->CleanUp(name_);
         goto error;
     }
 
@@ -676,6 +674,12 @@ Array::_DetachData(ArrayDevice* target)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEVICE_DETACHED,
         "Data device {} is detached from array {}", target->GetUblock()->GetName(), name_);
+
+    pthread_rwlock_unlock(&stateLock);
+    rebuilder->StopRebuild(name_);
+    rebuilder->WaitRebuildDone(name_);
+    pthread_rwlock_wrlock(&stateLock);
+
     bool isRebuildingDevice = false;
     ArrayDeviceState devState = target->GetState();
     if (devState == ArrayDeviceState::FAULT)
@@ -703,11 +707,7 @@ Array::_DetachData(ArrayDevice* target)
         }
     }
 
-    if (isRebuildingDevice || state->IsBroken())
-    {
-        rebuilder->StopRebuild(name_);
-    }
-    else if (isRebuildable)
+    if (isRebuildable)
     {
         EventSmartPtr event(new RebuildHandler(this, target));
         eventScheduler->EnqueueEvent(event);

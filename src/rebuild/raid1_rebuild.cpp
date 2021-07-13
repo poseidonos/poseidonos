@@ -186,7 +186,7 @@ bool Raid1Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
     ubio->ClearCallback();
     ubio->SetCallback(event);
 
-    if (likely(ctx->result != RebuildState::FAIL))
+    if (likely(ctx->result == RebuildState::REBUILDING))
     {
         ioDisp->Submit(ubio);
     }
