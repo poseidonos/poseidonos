@@ -189,7 +189,7 @@ Copier::_CompareThresholdState(void)
 
             POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_GET_VICTIM_SEGMENT,
                 "trigger start, cnt:{}, victimId:{}",
-                 iContextManager->GetNumOfFreeSegment(false), victimId);
+                 iContextManager->GetNumOfFreeSegment(true), victimId);
 
             if (gcMode == MODE_NORMAL_GC)
             {
