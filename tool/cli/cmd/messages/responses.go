@@ -54,6 +54,7 @@ type ArrayInfoResult struct {
 // TODO(mj): use omitempty because LISTARRAY and ARRAYINFO have different array structure.
 // The commands will be merged and this should be revised.
 type Array struct {
+	ARRAYINDEX         int      `json:"index"`
 	ARRAYNAME          string   `json:"name"`
 	CREATEDATETIME     string   `json:"createDatetime,omitempty"`
 	STATUS             string   `json:"status,omitempty"`

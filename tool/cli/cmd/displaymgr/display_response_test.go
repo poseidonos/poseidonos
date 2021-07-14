@@ -13,21 +13,22 @@ func TestListArrayResHumanReadable(t *testing.T) {
 	var resJSON = `{"command":"LISTARRAY","rid":"fromCLI",
 	"result":{"status":{"code":0,"description":"DONE"},
 	"data":{"arrayList": [{"createDatetime": "2021-04-16 15:52:14 +0900",
-	"devicelist": [{"name": "uram0","type": "BUFFER"},
-	{"name": "S4H2NE0M600736","type": "DATA"},
-	{"name": "S4H2NE0M600745","type": "DATA"},
-	{"name": "S4H2NE0M600763","type": "DATA"}],
-	"name": "ARRAY0","status":"Mounted","updateDatetime": "2021-04-16 15:52:14 +0900"},
-	{"createDatetime": "2021-04-16 15:52:14 +0900","devicelist": [{"name": "uram1","type": "BUFFER"},
-	{"name": "S4H2NE0M600744","type": "DATA"},{"name": "S4H2NE0M600743","type": "DATA"},
-	{"name": "S4H2NE0M600746","type": "DATA"}],"name": "ARRAY1","status":"Unmounted",
+	"devicelist": [{"sn": "uram0","type": "BUFFER"},
+	{"sn": "S4H2NE0M600736","type": "DATA"},
+	{"sn": "S4H2NE0M600745","type": "DATA"},
+	{"sn": "S4H2NE0M600763","type": "DATA"}],
+	"index": 0,"name": "ARRAY0","status":"Mounted","updateDatetime": "2021-04-16 15:52:14 +0900"},
+	{"createDatetime": "2021-04-16 15:52:14 +0900","devicelist": [{"sn": "uram1","type": "BUFFER"},
+	{"sn": "S4H2NE0M600744","type": "DATA"},{"sn": "S4H2NE0M600743","type": "DATA"},
+	{"sn": "S4H2NE0M600746","type": "DATA"}],"index": 1,"name": "ARRAY1","status":"Unmounted",
 	"updateDatetime": "2021-04-16 15:52:14 +0900"}]}}}`
 
-	expected := `Array      DatetimeCreated           DatetimeUpdated           Status     Devices(Type)
----------- ---------------------     ---------------------     ---------- -----------------------------------
-ARRAY0     2021-04-16 15:52:14 +0900 2021-04-16 15:52:14 +0900 Mounted    uram0(BUFFER) S4H2NE0M600736(DATA) S4H2NE0M600745(DATA) S4H2NE0M600763(DATA) 
-ARRAY1     2021-04-16 15:52:14 +0900 2021-04-16 15:52:14 +0900 Unmounted  uram1(BUFFER) S4H2NE0M600744(DATA) S4H2NE0M600743(DATA) S4H2NE0M600746(DATA) 
+	expected := `Index Name       DatetimeCreated           DatetimeUpdated           Status     Devices(Type)
+----- ---------- ---------------------     ---------------------     ---------- -----------------------------------
+0     ARRAY0     2021-04-16 15:52:14 +0900 2021-04-16 15:52:14 +0900 Mounted    uram0(BUFFER) S4H2NE0M600736(DATA) S4H2NE0M600745(DATA) S4H2NE0M600763(DATA) 
+1     ARRAY1     2021-04-16 15:52:14 +0900 2021-04-16 15:52:14 +0900 Unmounted  uram1(BUFFER) S4H2NE0M600744(DATA) S4H2NE0M600743(DATA) S4H2NE0M600746(DATA) 
 `
+
 	output := hookResponse(command, resJSON, false, false)
 
 	if output != expected {
@@ -53,10 +54,18 @@ vol2      1     11474836480                  31474836480                  Unmoun
 
 func TestArrayInfoResHumanReadable(t *testing.T) {
 	var command = "ARRAYINFO"
-	var resJSON = `{"command":"ARRAYINFO","rid":"fromCLI","result":{"status":{"code":0,"description":"DONE"},"data":{"name":"TargetArrayName", "state":"BUSY","situation":"REBUILDING", "rebuilding_progress":10, "capacity":120795955200, "used":107374182400, "devicelist":[{"type":"BUFFER","name":"uram0"},{"type":"DATA","name":"unvme-ns-0"},{"type":"DATA","name":"unvme-ns-1"},{"type":"DATA","name":"unvme-ns-2"},{"type":"SPARE","name":"unvme-ns-3"}]}}}`
+	var resJSON = `{"command":"ARRAYINFO","rid":"fromCLI",` +
+		`"result":{"status":{"code":0,"description":"DONE"},` +
+		`"data":{"index": 0,"name":"TargetArrayName", ` +
+		`"state":"BUSY","situation":"REBUILDING", "rebuilding_progress":10, ` +
+		`"capacity":120795955200, "used":107374182400, ` +
+		`"devicelist":[{"type":"BUFFER","name":"uram0"}, ` +
+		`{"type":"DATA","name":"unvme-ns-0"},{"type":"DATA","name":"unvme-ns-1"},` +
+		`{"type":"DATA","name":"unvme-ns-2"},{"type":"SPARE","name":"unvme-ns-3"}]}}}`
 
-	expected := `Array :TargetArrayName
+	expected := `Array : TargetArrayName
 ------------------------------------
+Index               : 0
 State               : BUSY
 Situation           : REBUILDING
 Rebuilding Progress : 0
@@ -160,7 +169,8 @@ unvme-ns-3     VMWare NVME_0001    0000:1b:00.0   SYSTEM        VMware Virtual N
 
 func TestSMARTResHumanReadable(t *testing.T) {
 	var command = "SMART"
-	var resJSON = `{"rid":"fromCLI","result":{"status":{"module":"","code":0,"description":"DONE"},"data":{"percentage_used":"0","temperature":"11759"}}}`
+	var resJSON = `{"rid":"fromCLI","result":{"status":{"module":"",` +
+		`"code":0,"description":"DONE"},"data":{"percentage_used":"0","temperature":"11759"}}}`
 
 	expected := `Percentage used : 0
 Tempurature     : 11759
@@ -175,7 +185,14 @@ Tempurature     : 11759
 
 func TestLoggerInfoResHumanReadable(t *testing.T) {
 	var command = "LOGGERINFO"
-	var resJSON = `{"command":"LOGGERINFO","rid":"fromCLI","result":{"status":{"module":"","code":0,"description":"DONE"},"data":{"minor_log_path":"/etc/ibofos/log/ibofos_log.log", "major_log_path":"/etc/ibofos/log/ibof_majorlog.log", "logfile_size_in_mb":50, "logfile_rotation_count":20, "min_allowable_log_level":"info", "deduplication_enabled":true, "deduplication_sensitivity_in_msec":20, "filter_enabled":true, "filter_included":"1000-2000", "filter_excluded":""}}}`
+	var resJSON = `{"command":"LOGGERINFO","rid":"fromCLI",` +
+		`"result":{"status":{"module":"","code":0,"description":"DONE"},` +
+		`"data":{"minor_log_path":"/etc/ibofos/log/ibofos_log.log",` +
+		` "major_log_path":"/etc/ibofos/log/ibof_majorlog.log",` +
+		` "logfile_size_in_mb":50, "logfile_rotation_count":20,` +
+		` "min_allowable_log_level":"info", "deduplication_enabled":true,` +
+		` "deduplication_sensitivity_in_msec":20, "filter_enabled":true,` +
+		` "filter_included":"1000-2000", "filter_excluded":""}}}`
 
 	expected := `minor_log_path                    : /etc/ibofos/log/ibofos_log.log
 major_log_path                    : /etc/ibofos/log/ibof_majorlog.log

@@ -108,6 +108,7 @@ ListArrayCommand::Execute(json& doc, string rid)
                 arrayStatus = "Fault";
             }
 
+            arrayElement.SetAttribute(JsonAttribute("index", to_string(info->GetIndex())));
             arrayElement.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
             arrayElement.SetAttribute(JsonAttribute("status", "\"" + arrayStatus + "\""));
             arrayElement.SetAttribute(JsonAttribute("createDatetime", "\"" + createDatetime + "\""));

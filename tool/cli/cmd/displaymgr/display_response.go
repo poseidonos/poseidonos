@@ -56,14 +56,15 @@ func printResToHumanReadable(command string, resJSON string) {
 		printStatus(res.RESULT.STATUS.CODE)
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-		fmt.Fprintln(w, "Array\tDatetimeCreated\tDatetimeUpdated\tStatus\tDevices(Type)")
-		fmt.Fprintln(w, "----------\t---------------------\t---------------------\t----------\t-----------------------------------")
+		fmt.Fprintln(w, "Index\tName\tDatetimeCreated\tDatetimeUpdated\tStatus\tDevices(Type)")
+		fmt.Fprintln(w, "-----\t----------\t---------------------\t---------------------\t----------\t-----------------------------------")
 
 		for _, array := range res.RESULT.DATA.ARRAYLIST {
-			fmt.Fprint(w, array.ARRAYNAME+"\t"+array.CREATEDATETIME+"\t"+array.UPDATEDATETIME+"\t"+array.STATUS+"\t")
+			fmt.Fprint(w, strconv.Itoa(array.ARRAYINDEX)+"\t"+array.ARRAYNAME+
+				"\t"+array.CREATEDATETIME+"\t"+array.UPDATEDATETIME+"\t"+array.STATUS+"\t")
 
 			for _, device := range array.DEVICELIST {
-				fmt.Fprint(w, device.DEVICENAME+"(")
+				fmt.Fprint(w, device.SERIAL+"(")
 				fmt.Fprint(w, device.DEVICETYPE+") ")
 			}
 			fmt.Fprintln(w, "")
@@ -78,8 +79,9 @@ func printResToHumanReadable(command string, resJSON string) {
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-		fmt.Fprintln(w, "Array\t:"+array.ARRAYNAME)
+		fmt.Fprintln(w, "Array\t: "+array.ARRAYNAME)
 		fmt.Fprintln(w, "------------------------------------")
+		fmt.Fprintln(w, "Index\t: "+strconv.Itoa(array.ARRAYINDEX))
 		fmt.Fprintln(w, "State\t: "+array.STATE)
 		fmt.Fprintln(w, "Situation\t: "+array.SITUATION)
 		fmt.Fprintln(w, "Rebuilding Progress\t:", array.REBUILDINGPROGRESS)
@@ -93,6 +95,7 @@ func printResToHumanReadable(command string, resJSON string) {
 		for _, device := range array.DEVICELIST {
 			fmt.Fprintln(w, device.DEVICENAME+"\t"+device.DEVICETYPE)
 		}
+
 		w.Flush()
 
 	case "LISTVOLUME":

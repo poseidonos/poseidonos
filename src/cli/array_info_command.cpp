@@ -74,6 +74,7 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     JsonElement data("data");
     string state = array->GetStateCtx()->ToStateType().ToString();
     string situ = array->GetStateCtx()->GetSituation().ToString();
+    data.SetAttribute(JsonAttribute("index", to_string(array->GetIndex())));
     data.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
     data.SetAttribute(JsonAttribute("state", "\"" + state + "\""));
     data.SetAttribute(JsonAttribute("situation", "\"" + situ + "\""));
