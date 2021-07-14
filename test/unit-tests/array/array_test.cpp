@@ -8,11 +8,11 @@
 #include "src/include/partition_type.h"
 #include "test/unit-tests/array/array_interface_mock.h"
 #include "test/unit-tests/array/array_mock.h"
-#include "test/unit-tests/array/rebuild/i_array_rebuilder_mock.h"
 #include "test/unit-tests/array/device/array_device_manager_mock.h"
 #include "test/unit-tests/array/device/array_device_mock.h"
 #include "test/unit-tests/array/interface/i_abr_control_mock.h"
 #include "test/unit-tests/array/partition/partition_manager_mock.h"
+#include "test/unit-tests/array/rebuild/i_array_rebuilder_mock.h"
 #include "test/unit-tests/array/state/array_state_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
 #include "test/unit-tests/device/device_manager_mock.h"
@@ -495,22 +495,62 @@ TEST(Array, AddSpare_testIfSpareIsAddedWhenInputsAreValid)
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockDeviceManager mockDevMgr;
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
+
+    string spareDevName = "spareDev";
+    MockUBlockDevice* rawPtr = new MockUBlockDevice(spareDevName, 1024, nullptr);
+    UblockSharedPtr mockSpareDev = shared_ptr<MockUBlockDevice>(rawPtr);
 
     EXPECT_CALL(*mockState, CanAddSpare).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, AddSpare).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
+    EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(mockSpareDev));
+    EXPECT_CALL(mockAbrControl, FindArrayWithDeviceSN).WillOnce(Return(""));
+    EXPECT_CALL(*rawPtr, GetSN).WillOnce(Return(""));
     EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(1);
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, &mockEventScheduler);
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, NULL, mockState, NULL, &mockEventScheduler);
 
     // When: we try to add a spare device
     int actual = array.AddSpare("mock-spare");
 
     // Then: we should receive 0 as a return
     ASSERT_EQ(0, actual);
+}
+
+TEST(Array, AddSpare_testIfSpareIsAddedWhenDeviceIsAlreadyInOtherArray)
+{
+    // Given: a happy path scenario
+    NiceMock<MockIStateControl> mockIStateControl;
+    MockArrayState* mockState = new MockArrayState(&mockIStateControl);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockDeviceManager mockDevMgr;
+    MockIAbrControl mockAbrControl;
+    MockEventScheduler mockEventScheduler;
+    int expected = (int)POS_EVENT_ID::MBR_DEVICE_ALREADY_IN_ARRAY;
+    string spareDevName = "spareDev";
+    MockUBlockDevice* rawPtr = new MockUBlockDevice(spareDevName, 1024, nullptr);
+    UblockSharedPtr mockSpareDev = shared_ptr<MockUBlockDevice>(rawPtr);
+
+    EXPECT_CALL(*mockState, CanAddSpare).WillOnce(Return(0));
+    EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(mockSpareDev));
+    EXPECT_CALL(mockAbrControl, FindArrayWithDeviceSN).WillOnce(Return("OtherArrayName"));
+    EXPECT_CALL(*rawPtr, GetSN).WillOnce(Return(""));
+    EXPECT_CALL(*mockArrDevMgr, AddSpare).Times(0);
+    EXPECT_CALL(*mockArrDevMgr, ExportToMeta).Times(0);
+    EXPECT_CALL(mockAbrControl, SaveAbr).Times(0);
+    EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(0);
+
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, NULL, mockState, NULL, &mockEventScheduler);
+
+    // When: we try to add a spare device
+    int actual = array.AddSpare("mock-spare");
+
+    // Then: we should receive 0 as a return
+    ASSERT_EQ(expected, actual);
 }
 
 TEST(Array, RemoveSpare_testIfSpareIsRemovedWhenInputsAreValid)
@@ -815,7 +855,7 @@ TEST(Array, GetRebuildingProgress_testIfArrayNameIsPassedInProperly)
     MockArrayRebuilder mockArrayRebuilder(NULL);
     int expectedProgress = 121212;
     EXPECT_CALL(mockArrayRebuilder, GetRebuildProgress(arrayName)).WillOnce(Return(expectedProgress));
-    
+
     Array array(arrayName, &mockArrayRebuilder, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     // When

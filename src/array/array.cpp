@@ -342,6 +342,19 @@ Array::AddSpare(string devName)
         POS_TRACE_ERROR(ret, "Failed to add spare device to array {}", name_);
         return ret;
     }
+
+    DevName spareDevName(devName);
+    string spareSN = sysDevMgr->GetDev(spareDevName)->GetSN();
+
+    string involvedArray = abrControl->FindArrayWithDeviceSN(spareSN);
+    if (involvedArray != "")
+    {
+        pthread_rwlock_unlock(&stateLock);
+        ret = (int)POS_EVENT_ID::MBR_DEVICE_ALREADY_IN_ARRAY;
+        POS_TRACE_ERROR(ret, "Failed to add spare device to array {}, it's already in other array {}", name_, involvedArray);
+        return ret;
+    }
+
     ret = devMgr_->AddSpare(devName);
     if (0 != ret)
     {
