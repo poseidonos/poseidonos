@@ -97,6 +97,8 @@ StripeLocker::ResetBusyLock(void)
         return false;
     }
 
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+        "StripeLocker::ResetBusyLock busyrange is reset");
     delete busyRange;
     busyRange = nullptr;
     isBusyRangeChanging = false;
@@ -117,12 +119,16 @@ StripeLocker::TryLock(StripeId id)
         }
         if (busyRange != nullptr && busyRange->IsBusy(id) == true)
         {
+            POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+                "StripeLocker::TryLock, stripe {} is in busyrange", id);
             return busyLocker->TryLock(id);
         }
         return normalLocker->TryLock(id);
     }
     else
     {
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+                "StripeLocker::TryLock, acquiring mutex failed");
         return false;
     }
 }

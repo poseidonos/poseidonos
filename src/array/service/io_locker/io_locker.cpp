@@ -48,9 +48,12 @@ IOLocker::Register(vector<ArrayDevice*> devList)
         if (_Find(d) == nullptr)
         {
             IArrayDevice* m = group.GetMirror(d);
-            StripeLocker* locker = new StripeLocker();
-            lockers.emplace(d, locker);
-            lockers.emplace(m, locker);
+            if (m != nullptr)
+            {
+                StripeLocker* locker = new StripeLocker();
+                lockers.emplace(d, locker);
+                lockers.emplace(m, locker);
+            }
         }
     }
     size_t newSize = lockers.size();

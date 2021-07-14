@@ -51,6 +51,7 @@ ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
 
     StopRebuild(array);
     WaitRebuildDone(array);
+
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "ArrayRebuilder::Rebuild, start job");
 

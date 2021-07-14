@@ -692,11 +692,6 @@ Array::_DetachData(ArrayDevice* target)
     POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEVICE_DETACHED,
         "Data device {} is detached from array {}", target->GetUblock()->GetName(), name_);
 
-    pthread_rwlock_unlock(&stateLock);
-    rebuilder->StopRebuild(name_);
-    rebuilder->WaitRebuildDone(name_);
-    pthread_rwlock_wrlock(&stateLock);
-
     bool isRebuildingDevice = false;
     ArrayDeviceState devState = target->GetState();
     if (devState == ArrayDeviceState::FAULT)
@@ -724,7 +719,11 @@ Array::_DetachData(ArrayDevice* target)
         }
     }
 
-    if (isRebuildable)
+    if (isRebuildingDevice || state->IsBroken())
+    {
+        rebuilder->StopRebuild(name_);
+    }
+    else if (isRebuildable)
     {
         EventSmartPtr event(new RebuildHandler(this, target));
         eventScheduler->EnqueueEvent(event);
@@ -736,12 +735,12 @@ Array::_RebuildDone(RebuildResult result)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "Array {} rebuild done. result:{}", name_, result.result);
+    rebuilder->RebuildDone(name_);
     pthread_rwlock_wrlock(&stateLock);
     if (result.result != RebuildState::PASS)
     {
         state->SetRebuildDone(false);
         pthread_rwlock_unlock(&stateLock);
-        rebuilder->RebuildDone(name_);
         POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
             "Array {} rebuild done. but result:{} . Retry ", name_, result.result);
         EventSmartPtr event(new RebuildHandler(this, nullptr));
@@ -760,7 +759,6 @@ Array::_RebuildDone(RebuildResult result)
         POS_TRACE_ERROR(ret, "Array {} failed to save the device state from rebuild to normal", name_);
     }
     pthread_rwlock_unlock(&stateLock);
-    rebuilder->RebuildDone(name_);
 }
 
 bool

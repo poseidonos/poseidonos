@@ -36,6 +36,7 @@
 #include "src/state/interface/i_state_observer.h"
 #include "src/state/interface/i_state_control.h"
 #include "src/volume/i_volume_manager.h"
+#include "src/array/rebuild/i_array_rebuilder.h"
 
 #include <vector>
 #include <string>
@@ -54,13 +55,14 @@ class ArrayMountSequence : public IStateObserver
 {
 public:
     ArrayMountSequence(vector<IMountSequence*> seq, IAbrControl* abr,
-                        IStateControl* iState, string name, IVolumeManager* volMgr);
+                        IStateControl* iState, string name, IVolumeManager* volMgr, IArrayRebuilder* rbdr);
     ArrayMountSequence(vector<IMountSequence*> seq, MountTemp* mntTmp,
                         IStateControl* iState, string name,
                         StateContext* mountState,
                         StateContext* unmountState,
                         StateContext* normalState,
-                        IVolumeManager* volMgr);
+                        IVolumeManager* volMgr,
+                        IArrayRebuilder* rbdr);
 
     virtual ~ArrayMountSequence(void);
     virtual int Mount(void);
@@ -83,5 +85,6 @@ private:
 
     string arrayName = "";
     IVolumeManager* volMgr = nullptr;
+    IArrayRebuilder* rebuilder = nullptr;
 };
 } // namespace pos
