@@ -596,7 +596,8 @@ Array::DetachDevice(UblockSharedPtr uBlock)
 void
 Array::AttachDevice(UblockSharedPtr uBlock)
 {
-    if (state->GetState() < ArrayStateEnum::BROKEN)
+    pthread_rwlock_wrlock(&stateLock);
+    if (state->GetState() == ArrayStateEnum::EXIST_DEGRADED)
     {
         ArrayDevice* dev = devMgr_->GetFaulty();
         if (dev != nullptr)
@@ -605,10 +606,13 @@ Array::AttachDevice(UblockSharedPtr uBlock)
             POS_TRACE_INFO(eventId,
                 "Updating the device class of a newly attached faulty device {} to ARRAY",
                 uBlock->GetSN());
+            state->SetState(ArrayStateEnum::EXIST_NORMAL);
             uBlock->SetClass(DeviceClass::ARRAY);
             dev->SetUblock(uBlock);
+            dev->SetState(ArrayDeviceState::NORMAL);
         }
     }
+    pthread_rwlock_unlock(&stateLock);
 }
 
 void
