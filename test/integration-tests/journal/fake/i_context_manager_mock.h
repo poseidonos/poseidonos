@@ -12,9 +12,8 @@ class IContextManagerMock : public IContextManager
 {
 public:
     using IContextManager::IContextManager;
-    MOCK_METHOD(int, FlushContextsAsync, (EventSmartPtr callback), (override));
+    MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync), (override));
 
-    virtual int FlushContextsSync(void) { return 0; }
     virtual void UpdateOccupiedStripeCount(StripeId lsid) {}
     virtual SegmentId AllocateFreeSegment(void) { return 0; }
     virtual SegmentId AllocateGCVictimSegment(void) { return 0; }
@@ -29,12 +28,12 @@ public:
     virtual uint64_t GetStoredContextVersion(int owner) { return 0; }
     IContextManagerMock(void)
     {
-        ON_CALL(*this, FlushContextsAsync).WillByDefault(::testing::Invoke(this,
-        &IContextManagerMock::_FlushContextsAsync));
+        ON_CALL(*this, FlushContexts).WillByDefault(::testing::Invoke(this,
+        &IContextManagerMock::_FlushContexts));
     }
 
 private:
-    int _FlushContextsAsync(EventSmartPtr callback)
+    int _FlushContexts(EventSmartPtr callback)
     {
         {
             bool result = callback->Execute();

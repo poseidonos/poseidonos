@@ -66,7 +66,7 @@ FlushMetadata::Start(void)
 
     if (result == 0)
     {
-        result = contextManager->FlushContextsSync();
+        result = contextManager->FlushContexts(nullptr, true);
         reporter->SubTaskCompleted(GetId(), 1);
     }
 

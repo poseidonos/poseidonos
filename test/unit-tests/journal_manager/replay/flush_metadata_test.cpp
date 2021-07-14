@@ -22,7 +22,7 @@ TEST(FlushMetadata, Start_testIfTaskCompletedSuccessfullyWhenAllFlushSuccess)
 
     // Then
     EXPECT_CALL(mapFlush, StoreAllMaps).WillOnce(Return(0));
-    EXPECT_CALL(contextManager, FlushContextsSync).WillOnce(Return(0));
+    EXPECT_CALL(contextManager, FlushContexts).WillOnce(Return(0));
 
     // When
     int result = flushMetadataTask.Start();
@@ -41,7 +41,7 @@ TEST(FlushMetadata, Start_testIfTaskCompletedWithNegativeValueWhenMapFlushFails)
     // Then
     int retCode = -1000;
     EXPECT_CALL(mapFlush, StoreAllMaps).WillOnce(Return(retCode));
-    EXPECT_CALL(contextManager, FlushContextsSync).Times(0);
+    EXPECT_CALL(contextManager, FlushContexts).Times(0);
 
     // When
     int result = flushMetadataTask.Start();
@@ -60,7 +60,7 @@ TEST(FlushMetadata, Start_testIfTaskCompletedWithNegativeValueWhenAllocatorConte
     // Then
     int retCode = -2000;
     EXPECT_CALL(mapFlush, StoreAllMaps).WillOnce(Return(0));
-    EXPECT_CALL(contextManager, FlushContextsSync).WillOnce(Return(retCode));
+    EXPECT_CALL(contextManager, FlushContexts).WillOnce(Return(retCode));
 
     // When
     int result = flushMetadataTask.Start();

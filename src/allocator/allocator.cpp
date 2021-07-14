@@ -130,7 +130,7 @@ Allocator::Dispose(void)
         wbStripeManager->Dispose();
 
         POS_TRACE_INFO(eventId, "Start allocator contexts store");
-        contextManager->FlushContextsSync();
+        contextManager->FlushContexts(nullptr, true);
         contextManager->Close();
 
         _UnregisterFromAllocatorService();
@@ -399,7 +399,7 @@ Allocator::GetInstantMetaInfo(std::string fname)
 
     oss << "<< Rebuild >>" << std::endl;
     oss << "NeedRebuildCont:" << std::boolalpha << contextManager->NeedRebuildAgain() << std::endl;
-    oss << "TargetSegmentCount:" << rebuildCtx->GetRebuildTargetSegmentsCount() << std::endl;
+    oss << "TargetSegmentCount:" << rebuildCtx->GetRebuildTargetSegmentCount() << std::endl;
     oss << "TargetSegnent ID" << std::endl;
     int cnt = 0;
     for (RTSegmentIter iter = rebuildCtx->GetRebuildTargetSegmentsBegin(); iter != rebuildCtx->GetRebuildTargetSegmentsEnd(); ++iter, ++cnt)

@@ -89,39 +89,28 @@ RebuildCtx::Close(void)
 void
 RebuildCtx::AfterLoad(char* buf)
 {
-    if (ctxHeader.sig != SIG_REBUILD_CTX)
-    {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "RebuildCtx file signature is not matched:{}", ctxHeader.sig);
-        while (addrInfo->IsUT() != true)
-        {
-            usleep(1); // assert(false);
-        }
-    }
-    else
-    {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "RebuildCtx file Integrity check SUCCESS:{}", ctxHeader.ctxVersion);
-        ctxDirtyVersion = ctxHeader.ctxVersion + 1;
-        targetSegmentCount = ctxHeader.numTargetSegments;
+    POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "RebuildCtx file loaded:{}", ctxHeader.ctxVersion);
+    ctxDirtyVersion = ctxHeader.ctxVersion + 1;
+    targetSegmentCount = ctxHeader.numTargetSegments;
 
-        SegmentId* segmentList = reinterpret_cast<SegmentId*>(buf + sizeof(RebuildCtxHeader));
-        for (uint32_t cnt = 0; cnt < targetSegmentCount; ++cnt)
+    SegmentId* segmentList = reinterpret_cast<SegmentId*>(buf + sizeof(RebuildCtxHeader));
+    for (uint32_t cnt = 0; cnt < targetSegmentCount; ++cnt)
+    {
+        auto pr = targetSegmentList.emplace(segmentList[cnt]);
+        if (pr.second == false)
         {
-            auto pr = targetSegmentList.emplace(segmentList[cnt]);
-            if (pr.second == false)
+            POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "Failed to load RebuildCtx, segmentId:{} is already in set", segmentList[cnt]);
+            while (addrInfo->IsUT() != true)
             {
-                POS_TRACE_ERROR(EID(ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE), "Failed to load RebuildCtx, segmentId:{} is already in set", segmentList[cnt]);
-                while (addrInfo->IsUT() != true)
-                {
-                    usleep(1); // assert(false);
-                }
+                usleep(1); // assert(false);
             }
         }
-        POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_LOAD_REBUILD_SEGMENT), "RebuildCtx file loaded, segmentCount:{}", targetSegmentCount);
-        if (targetSegmentCount != 0)
-        {
-            assert(targetSegmentCount == targetSegmentList.size());
-            needContinue = true;
-        }
+    }
+    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_LOAD_REBUILD_SEGMENT), "RebuildCtx file loaded, segmentCount:{}", targetSegmentCount);
+    if (targetSegmentCount != 0)
+    {
+        assert(targetSegmentCount == targetSegmentList.size());
+        needContinue = true;
     }
 }
 
@@ -313,7 +302,7 @@ RebuildCtx::IsRebuildTargetSegment(SegmentId segId)
 }
 
 uint32_t
-RebuildCtx::GetRebuildTargetSegmentsCount(void)
+RebuildCtx::GetRebuildTargetSegmentCount(void)
 {
     return targetSegmentCount;
 }

@@ -4,11 +4,7 @@
 
 namespace pos
 {
-TEST(IContextManager, FlushContextsSync_)
-{
-}
-
-TEST(IContextManager, FlushContextsAsync_)
+TEST(IContextManager, FlushContexts_)
 {
 }
 

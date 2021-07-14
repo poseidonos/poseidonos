@@ -67,7 +67,7 @@ public:
     virtual int FreeSegmentInRebuildTarget(SegmentId segId);
     virtual bool IsRebuidTargetSegmentsEmpty(void);
     virtual bool IsRebuildTargetSegment(SegmentId segId);
-    virtual uint32_t GetRebuildTargetSegmentsCount(void);
+    virtual uint32_t GetRebuildTargetSegmentCount(void);
     virtual RTSegmentIter GetRebuildTargetSegmentsBegin(void);
     virtual RTSegmentIter GetRebuildTargetSegmentsEnd(void);
     virtual int MakeRebuildTarget(void);

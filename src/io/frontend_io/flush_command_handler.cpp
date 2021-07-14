@@ -182,7 +182,7 @@ FlushCmdHandler::Execute(void)
             {
                 // Allocator Flush
                 EventSmartPtr callbackAllocator(new AllocatorFlushDoneEvent(flushIo));
-                ret = icontextManager->FlushContextsAsync(callbackAllocator);
+                ret = icontextManager->FlushContexts(callbackAllocator, false);
                 if (ret != 0)
                 {
                     if (ret == (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS)

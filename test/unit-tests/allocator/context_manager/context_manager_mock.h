@@ -14,8 +14,7 @@ public:
     using ContextManager::ContextManager;
     MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD(void, Close, (), (override));
-    MOCK_METHOD(int, FlushContextsSync, (), (override));
-    MOCK_METHOD(int, FlushContextsAsync, (EventSmartPtr callback), (override));
+    MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync), (override));
     MOCK_METHOD(void, UpdateOccupiedStripeCount, (StripeId lsid), (override));
     MOCK_METHOD(SegmentId, AllocateFreeSegment, (), (override));
     MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));

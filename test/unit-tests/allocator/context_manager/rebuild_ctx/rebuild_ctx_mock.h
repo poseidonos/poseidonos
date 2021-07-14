@@ -27,7 +27,7 @@ public:
     MOCK_METHOD(int, FreeSegmentInRebuildTarget, (SegmentId segId), (override));
     MOCK_METHOD(bool, IsRebuidTargetSegmentsEmpty, (), (override));
     MOCK_METHOD(bool, IsRebuildTargetSegment, (SegmentId segId), (override));
-    MOCK_METHOD(uint32_t, GetRebuildTargetSegmentsCount, (), (override));
+    MOCK_METHOD(uint32_t, GetRebuildTargetSegmentCount, (), (override));
     MOCK_METHOD(RTSegmentIter, GetRebuildTargetSegmentsBegin, (), (override));
     MOCK_METHOD(RTSegmentIter, GetRebuildTargetSegmentsEnd, (), (override));
     MOCK_METHOD(int, MakeRebuildTarget, (), (override));

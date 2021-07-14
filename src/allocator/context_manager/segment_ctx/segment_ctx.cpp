@@ -150,19 +150,8 @@ SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
 void
 SegmentCtx::AfterLoad(char* buf)
 {
-    if (ctxHeader.sig != SIG_SEGMENT_CTX)
-    {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "SegmentCtx file signature is not matched:{}", ctxHeader.sig);
-        while (addrInfo->IsUT() != true)
-        {
-            usleep(1); // assert(false);
-        }
-    }
-    else
-    {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "SegmentCtx file Integrity check SUCCESS:{}", ctxHeader.ctxVersion);
-        ctxDirtyVersion = ctxHeader.ctxVersion + 1;
-    }
+    POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "SegmentCtx file loaded:{}", ctxHeader.ctxVersion);
+    ctxDirtyVersion = ctxHeader.ctxVersion + 1;
 }
 
 void

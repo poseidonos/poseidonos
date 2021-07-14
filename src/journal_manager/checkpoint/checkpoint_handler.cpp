@@ -113,7 +113,7 @@ CheckpointHandler::Start(MapPageList pendingDirtyPages, EventSmartPtr callback)
 
     EventSmartPtr allocMetaFlushCallback(new CheckpointMetaFlushCompleted(this,
         ALLOCATOR_META_ID));
-    ret = contextManager->FlushContextsAsync(allocMetaFlushCallback);
+    ret = contextManager->FlushContexts(allocMetaFlushCallback, false);
     if (ret != 0)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,

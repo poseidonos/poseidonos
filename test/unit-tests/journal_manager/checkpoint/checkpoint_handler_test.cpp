@@ -79,7 +79,7 @@ TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointStartSuccessfullywith
     // When : Succeed flushing dirty map and allocator meta pages
     MapPageList pendingDirtyPages = GenerateDummyDirtyPageList(1);
     EXPECT_CALL(*mapFlush, FlushDirtyMpages).WillOnce(Return(0));
-    EXPECT_CALL(*contextManager, FlushContextsAsync).WillOnce(Return(0));
+    EXPECT_CALL(*contextManager, FlushContexts).WillOnce(Return(0));
 
     // Then : Will restore the active stipre tail to this stripe
     EXPECT_EQ(checkpointHandler->Start(pendingDirtyPages, nullptr), 0);
@@ -97,7 +97,7 @@ TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointStartSuccessfullywith
     EXPECT_CALL(*mapFlush, FlushDirtyMpages)
         .Times(numDirtyMaps)
         .WillRepeatedly(Return(0));
-    EXPECT_CALL(*contextManager, FlushContextsAsync).WillOnce(Return(0));
+    EXPECT_CALL(*contextManager, FlushContexts).WillOnce(Return(0));
 
     // Then : Will restore the active stipre tail to this stripe
     EXPECT_EQ(checkpointHandler->Start(pendingDirtyPages, nullptr), 0);
@@ -135,7 +135,7 @@ TEST_F(CheckpointHandlerTestFixture, Start_testIfCheckpointFailedWhencontextMana
     EXPECT_CALL(*mapFlush, FlushDirtyMpages)
         .Times(numDirtyMaps)
         .WillRepeatedly(Return(0));
-    EXPECT_CALL(*contextManager, FlushContextsAsync).WillOnce(Return(-1));
+    EXPECT_CALL(*contextManager, FlushContexts).WillOnce(Return(-1));
 
     // Then : Checkpoint should be started
     EXPECT_TRUE(checkpointHandler->Start(pendingDirtyPages, nullptr) != 0);

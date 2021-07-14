@@ -56,6 +56,13 @@ const int NO_REBUILD_TARGET_USER_SEGMENT = 0;
 
 class ContextManager : public IContextManager
 {
+enum IOTYPE
+{
+    IOTYPE_READ,
+    IOTYPE_WRITE,
+    IOTYPE_ALL
+};
+
 public:
     ContextManager(void) = default;
     ContextManager(TelemetryPublisher* tp, AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
@@ -66,8 +73,7 @@ public:
     virtual void Init(void);
     virtual void Close(void);
 
-    virtual int FlushContextsSync(void);
-    virtual int FlushContextsAsync(EventSmartPtr callback);
+    virtual int FlushContexts(EventSmartPtr callback, bool sync);
     virtual void UpdateOccupiedStripeCount(StripeId lsid);
     virtual SegmentId AllocateFreeSegment(void);
     virtual SegmentId AllocateGCVictimSegment(void);
@@ -76,6 +82,7 @@ public:
     virtual bool NeedRebuildAgain(void);
     virtual int MakeRebuildTarget(void);
     virtual int StopRebuilding(void);
+    virtual uint32_t GetRebuildTargetSegmentCount(void);
     virtual int GetNumOfFreeSegment(bool needLock);
     virtual GcMode GetCurrentGcMode(void);
     virtual int GetGcThreshold(GcMode mode);
@@ -93,16 +100,17 @@ public:
     virtual ContextReplayer* GetContextReplayer(void) { return contextReplayer; }
     virtual GcCtx* GetGcCtx(void) { return &gcCtx; }
     virtual std::mutex& GetCtxLock(void) { return ctxLock; }
-
-    void TestCallbackFunc(AsyncMetaFileIoCtx* ctx, int numIssuedIo);
+// for UT
     void SetCallbackFunc(EventSmartPtr callback);
+    void TestCallbackFunc(AsyncMetaFileIoCtx* ctx, IOTYPE type, int cnt);
 
 private:
     void _UpdateSectionInfo(void);
     int _LoadContexts(void);
-    int _FlushAsync(int owner, EventSmartPtr callback);
-    int _FlushSync(int owner);
+    int _Flush(int owner, EventSmartPtr callback);
     void _FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
+    void _LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx);
+    void _WaitPendingIo(IOTYPE type);
     MetaIoCbPtr _SetCallbackFunc(int owner, EventSmartPtr callbackEvent);
     void _PrepareBuffer(int owner, char* buf);
     void _ResetSegmentStates(void);
@@ -110,7 +118,8 @@ private:
 
     std::string fileNames[NUM_FILES] = {"SegmentContext", "AllocatorContexts", "RebuildContext"};
     IAllocatorFileIoClient* fileOwner[NUM_FILES];
-    std::atomic<int> numAsyncIoIssued;
+    std::atomic<int> numReadIoIssued;
+    std::atomic<int> numWriteIoIssued;
     std::atomic<bool> flushInProgress;
     EventSmartPtr flushCallback;
 

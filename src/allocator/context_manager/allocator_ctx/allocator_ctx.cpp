@@ -267,20 +267,9 @@ AllocatorCtx::GetTotalSegmentsCount(void)
 void
 AllocatorCtx::AfterLoad(char* buf)
 {
-    if (ctxHeader.sig != SIG_ALLOCATOR_CTX)
-    {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "AllocatorCtx file signature is not matched:{}", ctxHeader.sig);
-        while (addrInfo->IsUT() != true)
-        {
-            usleep(1); // assert(false);
-        }
-    }
-    else
-    {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "AllocatorCtx file Integrity check SUCCESS:{}, {}", ctxHeader.ctxVersion, ctxHeader.numValidSegment);
-        allocSegBitmap->SetNumBitsSet(ctxHeader.numValidSegment);
-        ctxDirtyVersion = ctxHeader.ctxVersion + 1;
-    }
+    POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "AllocatorCtx file loaded:{}, {}", ctxHeader.ctxVersion, ctxHeader.numValidSegment);
+    allocSegBitmap->SetNumBitsSet(ctxHeader.numValidSegment);
+    ctxDirtyVersion = ctxHeader.ctxVersion + 1;
 }
 
 void

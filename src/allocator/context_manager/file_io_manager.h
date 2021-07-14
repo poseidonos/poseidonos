@@ -76,9 +76,8 @@ public:
 
     virtual void UpdateSectionInfo(int owner, int section, char* addr, int size, int offset);
 
-    virtual int LoadSync(int owner, char* buf);
-    virtual int StoreSync(int owner, char* buf);
-    virtual int StoreAsync(int owner, char* buf, MetaIoCbPtr callback);
+    virtual int Load(int owner, char* buf, MetaIoCbPtr callback);
+    virtual int Store(int owner, char* buf, MetaIoCbPtr callback);
 
     virtual void LoadSectionData(int owner, char* buf);
     virtual void CopySectionData(int owner, char* buf, int startSection, int endSection);

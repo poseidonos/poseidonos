@@ -73,14 +73,14 @@ TEST(Allocator, Dispose_TestDisposeAfterInitOrNot)
     alloc.Init();
     // given 1.
     EXPECT_CALL(*wbManager, FlushAllActiveStripes);
-    EXPECT_CALL(*ctxManager, FlushContextsSync);
+    EXPECT_CALL(*ctxManager, FlushContexts);
     EXPECT_CALL(*ctxManager, Close);
     // when 1.
     alloc.Dispose();
 
     // given 2.
     EXPECT_CALL(*wbManager, FlushAllActiveStripes).Times(0);
-    EXPECT_CALL(*ctxManager, FlushContextsSync).Times(0);
+    EXPECT_CALL(*ctxManager, FlushContexts).Times(0);
     // when 2.
     alloc.Dispose();
 }

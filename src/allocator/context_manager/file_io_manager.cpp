@@ -114,7 +114,7 @@ AllocatorFileIoManager::Close(void)
 }
 
 int
-AllocatorFileIoManager::LoadSync(int owner, char* buf)
+AllocatorFileIoManager::Load(int owner, char* buf, MetaIoCbPtr callback)
 {
     if (fileInfo[owner].file->DoesFileExist() == false)
     {
@@ -126,34 +126,31 @@ AllocatorFileIoManager::LoadSync(int owner, char* buf)
         }
         else
         {
-            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "Failed to create file:{}, size:{}", fileInfo[owner].fileName, fileInfo[owner].size);
+            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "[AllocatorFileIo] Failed to create file:{}, size:{}", fileInfo[owner].fileName, fileInfo[owner].size);
             return -1;
         }
     }
     else
     {
         fileInfo[owner].file->Open();
-        int ret = fileInfo[owner].file->IssueIO(MetaFsIoOpcode::Read, 0, fileInfo[owner].size, buf);
+        AllocatorIoCtx* request = new AllocatorIoCtx(MetaFsIoOpcode::Read,
+                fileInfo[owner].file->GetFd(), 0, fileInfo[owner].size, buf, callback);
+        int ret = fileInfo[owner].file->AsyncIO(request);
         if (ret == 0)
         {
             return 1;
         }
         else
         {
-            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "Failed to load file:{}, size:{}", fileInfo[owner].fileName, fileInfo[owner].size);
+            delete request;
+            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "[AllocatorFileIo] Failed to issue load:{}, fname:{}, size:{}", ret, fileInfo[owner].fileName, fileInfo[owner].size);
             return -1;
         }
     }
 }
 
 int
-AllocatorFileIoManager::StoreSync(int owner, char* buf)
-{
-    return fileInfo[owner].file->IssueIO(MetaFsIoOpcode::Write, 0, fileInfo[owner].size, buf);
-}
-
-int
-AllocatorFileIoManager::StoreAsync(int owner, char* buf, MetaIoCbPtr callback)
+AllocatorFileIoManager::Store(int owner, char* buf, MetaIoCbPtr callback)
 {
     AllocatorIoCtx* request = new AllocatorIoCtx(MetaFsIoOpcode::Write,
         fileInfo[owner].file->GetFd(), 0, fileInfo[owner].size, buf, callback);
@@ -161,7 +158,7 @@ AllocatorFileIoManager::StoreAsync(int owner, char* buf, MetaIoCbPtr callback)
     if (ret != 0)
     {
         delete request;
-        POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO), "Failed to issue AsyncMetaIo:{}, fname:{}", ret, fileInfo[owner].fileName);
+        POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO), "[AllocatorFileIo] Failed to issue store:{}, fname:{}", ret, fileInfo[owner].fileName);
     }
     return ret;
 }

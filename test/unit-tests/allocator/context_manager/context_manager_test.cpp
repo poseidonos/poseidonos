@@ -125,7 +125,7 @@ TEST(ContextManager, Close_TestIfAllCalled)
     ctxManager.Close();
 }
 
-TEST(ContextManager, FlushContextsSync_IfSuccessAllFile)
+TEST(ContextManager, FlushContexts_IfSyncSuccessAllFile)
 {
     // given
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
@@ -140,14 +140,14 @@ TEST(ContextManager, FlushContextsSync_IfSuccessAllFile)
     EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
     EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
     EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillOnce(ReturnRef(wbLsidBitmapLock));
-    EXPECT_CALL(*fileMan, StoreSync).WillOnce(Return(0)).WillOnce(Return(0));
+    EXPECT_CALL(*fileMan, Store).WillOnce(Return(0)).WillOnce(Return(0));
     // when
-    int ret = ctxManager.FlushContextsSync();
+    int ret = ctxManager.FlushContexts(nullptr, true);
     // then
     EXPECT_EQ(0, ret);
 }
 
-TEST(ContextManager, FlushContextsSync_IfFailFirstFile)
+TEST(ContextManager, FlushContexts_IfSyncFailFirstFile)
 {
     // given
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
@@ -160,14 +160,14 @@ TEST(ContextManager, FlushContextsSync_IfFailFirstFile)
 
     std::mutex segCtxLock;
     EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
-    EXPECT_CALL(*fileMan, StoreSync).WillOnce(Return(-1));
+    EXPECT_CALL(*fileMan, Store).WillOnce(Return(-1));
     // when
-    int ret = ctxManager.FlushContextsSync();
+    int ret = ctxManager.FlushContexts(nullptr, true);
     // then
     EXPECT_LE(-1, ret);
 }
 
-TEST(ContextManager, FlushContextsSync_IfFailSecondFile)
+TEST(ContextManager, FlushContexts_IfSyncFailSecondFile)
 {
     // given
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
@@ -182,14 +182,14 @@ TEST(ContextManager, FlushContextsSync_IfFailSecondFile)
     EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
     EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
     EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillOnce(ReturnRef(wbLsidBitmapLock));
-    EXPECT_CALL(*fileMan, StoreSync).WillOnce(Return(0)).WillOnce(Return(-1));
+    EXPECT_CALL(*fileMan, Store).WillOnce(Return(0)).WillOnce(Return(-1));
     // when
-    int ret = ctxManager.FlushContextsSync();
+    int ret = ctxManager.FlushContexts(nullptr, true);
     // then
     EXPECT_LE(-1, ret);
 }
 
-TEST(ContextManager, FlushContextsAsync_IfAlreadyFlushing)
+TEST(ContextManager, FlushContexts_IfAsyncAlreadyFlushing)
 {
     // given
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
@@ -201,12 +201,12 @@ TEST(ContextManager, FlushContextsAsync_IfAlreadyFlushing)
     ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, true, nullptr, "");
 
     // when
-    int ret = ctxManager.FlushContextsAsync(nullptr);
+    int ret = ctxManager.FlushContexts(nullptr, false);
     // then
     EXPECT_EQ((int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS, ret);
 }
 
-TEST(ContextManager, FlushContextsAsync_IfSuccessAllFile)
+TEST(ContextManager, FlushContexts_IfAsyncSuccessAllFile)
 {
     // given
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
@@ -221,14 +221,14 @@ TEST(ContextManager, FlushContextsAsync_IfSuccessAllFile)
     EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
     EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
     EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillOnce(ReturnRef(wbLsidBitmapLock));
-    EXPECT_CALL(*fileMan, StoreAsync).WillOnce(Return(0)).WillOnce(Return(0));
+    EXPECT_CALL(*fileMan, Store).WillOnce(Return(0)).WillOnce(Return(0));
     // when
-    int ret = ctxManager.FlushContextsAsync(nullptr);
+    int ret = ctxManager.FlushContexts(nullptr, false);
     // then
     EXPECT_EQ(0, ret);
 }
 
-TEST(ContextManager, FlushContextsAsync_IfFailFirstFile)
+TEST(ContextManager, FlushContexts_IfAsyncFailFirstFile)
 {
     // given
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
@@ -243,12 +243,12 @@ TEST(ContextManager, FlushContextsAsync_IfFailFirstFile)
     EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
     EXPECT_CALL(*fileMan, StoreAsync).WillOnce(Return(-1));
     // when
-    int ret = ctxManager.FlushContextsAsync(nullptr);
+    int ret = ctxManager.FlushContexts(nullptr, false);
     // then
     EXPECT_LE(-1, ret);
 }
 
-TEST(ContextManager, FlushContextsAsync_IfFailSecondFile)
+TEST(ContextManager, FlushContexts_IfAsyncFailSecondFile)
 {
     // given
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
@@ -263,9 +263,9 @@ TEST(ContextManager, FlushContextsAsync_IfFailSecondFile)
     EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
     EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
     EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillOnce(ReturnRef(wbLsidBitmapLock));
-    EXPECT_CALL(*fileMan, StoreAsync).WillOnce(Return(0)).WillOnce(Return(-1));
+    EXPECT_CALL(*fileMan, Store).WillOnce(Return(0)).WillOnce(Return(-1));
     // when
-    int ret = ctxManager.FlushContextsAsync(nullptr);
+    int ret = ctxManager.FlushContexts(nullptr, false);
     // then
     EXPECT_LE(-1, ret);
 }

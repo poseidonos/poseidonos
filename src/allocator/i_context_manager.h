@@ -42,8 +42,7 @@ namespace pos
 class IContextManager
 {
 public:
-    virtual int FlushContextsSync(void) = 0;
-    virtual int FlushContextsAsync(EventSmartPtr callback) = 0;
+    virtual int FlushContexts(EventSmartPtr callback, bool sync) = 0;
     virtual void UpdateOccupiedStripeCount(StripeId lsid) = 0;
     virtual uint64_t GetStoredContextVersion(int owner) = 0;
 
@@ -54,6 +53,7 @@ public:
     virtual int MakeRebuildTarget(void) = 0;
     virtual int StopRebuilding(void) = 0;
     virtual bool NeedRebuildAgain(void) = 0;
+    virtual uint32_t GetRebuildTargetSegmentCount(void) = 0;
     virtual int GetNumOfFreeSegment(bool needLock) = 0;
 
     virtual GcMode GetCurrentGcMode(void) = 0;
