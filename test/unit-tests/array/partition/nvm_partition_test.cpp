@@ -152,7 +152,7 @@ TEST(NvmPartition, ByteTranslate_testIfInvalidAddressReturnsError)
     invalidAddr.byteOffset = testByteOffset;
     vector<ArrayDevice*> devs;
 
-    NvmPartition nvmPart("mock-array", PartitionType::META_NVM, partPhySize, devs);
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     PhysicalByteAddr ignored;
 
     // When
@@ -182,7 +182,7 @@ TEST(NvmPartition, ByteTranslate_testIfValidAddressIsFilledIn)
     vector<ArrayDevice*> devs;
     devs.push_back(nullptr);  // putting dummy 'cause I'm not interested
 
-    NvmPartition nvmPart("mock-array", PartitionType::META_NVM, partPhySize, devs);
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     PhysicalByteAddr dest;
 
     // When
