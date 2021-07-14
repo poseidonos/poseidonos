@@ -36,8 +36,10 @@
 #include <vector>
 
 #include "spdk/pos.h"
+#include "src/include/nvmf_const.h"
 #include "src/network/nvmf.h"
 #include "src/network/nvmf_target.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
 using namespace std;
 namespace pos
@@ -53,6 +55,7 @@ class NvmfVolumePos
 {
 public:
     explicit NvmfVolumePos(unvmf_io_handler ioHandler);
+    NvmfVolumePos(unvmf_io_handler ioHandler, EventFrameworkApi* eventFrameworkApi, SpdkCaller* spdkCaller, NvmfTarget* target = nullptr);
     virtual ~NvmfVolumePos(void);
 
     virtual void VolumeCreated(struct pos_volume_info* info);
@@ -61,25 +64,27 @@ public:
     virtual void VolumeUnmounted(struct pos_volume_info* info);
     virtual void VolumeUpdated(struct pos_volume_info* info);
     virtual void VolumeDetached(vector<int>& volList, string arrayName);
-
     static uint32_t VolumeDetachCompleted(void);
-    static bool WaitRequestedVolumesDetached(uint32_t volCnt);
+    static bool WaitRequestedVolumesDetached(uint32_t volCnt, uint64_t time = NS_DETACH_TIMEOUT);
 
-private:
-    static NvmfTarget target;
-    static atomic<bool> detachFailed;
+protected:
     static atomic<uint32_t> volumeDetachedCnt;
-    unvmf_io_handler ioHandler;
 
+    static void _VolumeDetachHandler(void* arg1, void* arg2);
     static void _VolumeCreateHandler(void* arg1, void* arg2);
     static void _VolumeMountHandler(void* arg1, void* arg2);
     static void _VolumeUnmountHandler(void* arg1, void* arg2);
     static void _VolumeDeleteHandler(void* arg1, void* arg2);
     static void _VolumeUpdateHandler(void* arg1, void* arg2);
-    static void _VolumeDetachHandler(void* arg1, void* arg2);
     static void _NamespaceDetachedHandler(void* cbArg, int status);
     static void _NamespaceDetachedAllHandler(void* cbArg, int status);
-    static void _CompleteVolumeUnmount(struct pos_volume_info* vInfo);
+
+private:
+    static NvmfTarget* target;
+    static atomic<bool> detachFailed;
+    unvmf_io_handler ioHandler;
+    EventFrameworkApi* eventFrameworkApi;
+    SpdkCaller* spdkCaller;
 };
 
 } // namespace pos

@@ -53,7 +53,11 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::IONVMF_NAMESPACE_ATTACH_FAILED, "Fail to attach Namespace "},
             {POS_EVENT_ID::IONVMF_FAIL_TO_FIND_VOLID, "Fail to parse volume id from bdev name"},
             {POS_EVENT_ID::IONVMF_FAIL_TO_FIND_ARRAYNAME, "Fail to parse array name from bdev name"},
-            {POS_EVENT_ID::IONVMF_OVERRIDE_UNVMF_IO_HANDLER, "Override unvmf_io_handler"}
+            {POS_EVENT_ID::IONVMF_OVERRIDE_UNVMF_IO_HANDLER, "Override unvmf_io_handler"},
+            {POS_EVENT_ID::IONVMF_VOLUME_DETACH_COUNT_OVERFLOW, "Volume detached count is bigger than expected volume count"},
+            {POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_POS_BDEV, "Fail to create pos bdev"},
+            {POS_EVENT_ID::IONVMF_FAIL_TO_DELETE_POS_BDEV, "Fail to delete pos bdev"},
+            {POS_EVENT_ID::IONVMF_FAIL_TO_DETACH_NAMESPACE, "Fail to detach namespace from subsystem"},
 };
 
 PosEventId::PosEventIdEntry

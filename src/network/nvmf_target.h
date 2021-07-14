@@ -37,6 +37,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/include/nvmf_const.h"
 #include "src/network/nvmf_target_spdk.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/spdk_caller.h"
@@ -56,33 +57,33 @@ class NvmfTarget
 public:
     NvmfTarget(void);
     explicit NvmfTarget(SpdkCaller* spdkCaller, bool feQosEnable, EventFrameworkApi* eventFrameworkApi);
-    ~NvmfTarget(void);
+    virtual ~NvmfTarget(void);
 
-    bool CreatePosBdev(const string& bdevName, uint32_t id, uint64_t volumeSizeInMb,
+    virtual bool CreatePosBdev(const string& bdevName, uint32_t id, uint64_t volumeSizeInMb,
         uint32_t blockSize, bool volumeTypeInMem, const string& arrayName, uint64_t arrayId);
-    bool DeletePosBdev(const string& bdevName);
+    virtual bool DeletePosBdev(const string& bdevName);
 
-    bool DetachNamespace(const string& nqn, uint32_t nsid,
+    virtual bool DetachNamespace(const string& nqn, uint32_t nsid,
         PosNvmfEventDoneCallback_t cb, void* cbArg);
-    bool DetachNamespaceAll(const string& nqn, PosNvmfEventDoneCallback_t cb,
+    virtual bool DetachNamespaceAll(const string& nqn, PosNvmfEventDoneCallback_t cb,
         void* cbArg);
 
     uint32_t GetSubsystemNsCnt(struct spdk_nvmf_subsystem* subsystem);
     struct spdk_nvmf_subsystem* AllocateSubsystem(void);
-    struct spdk_nvmf_ns* GetNamespace(struct spdk_nvmf_subsystem* subsystem,
+    virtual struct spdk_nvmf_ns* GetNamespace(struct spdk_nvmf_subsystem* subsystem,
         const string& bdevName);
 
-    void SetVolumeQos(const string& bdevName, uint64_t maxIops, uint64_t maxBw);
+    virtual void SetVolumeQos(const string& bdevName, uint64_t maxIops, uint64_t maxBw);
     static void QosEnableDone(void* cbArg, int status);
 
-    string GetBdevName(uint32_t id, string arrayName);
+    virtual string GetBdevName(uint32_t id, string arrayName);
     string GetVolumeNqn(struct spdk_nvmf_subsystem* subsystem);
-    int32_t GetVolumeNqnId(const string& subnqn);
-    spdk_nvmf_subsystem* FindSubsystem(const string& subnqn);
+    virtual int32_t GetVolumeNqnId(const string& subnqn);
+    virtual spdk_nvmf_subsystem* FindSubsystem(const string& subnqn);
     vector<string> GetHostNqn(string subnqn);
-    bool TryToAttachNamespace(const string& nqn, int volId, string& arrayName);
+    bool TryToAttachNamespace(const string& nqn, int volId, string& arrayName, uint64_t time = NS_ATTACH_TIMEOUT);
     bool CheckSubsystemExistance(void);
-    bool CheckVolumeAttached(int volId, string arrayName);
+    virtual bool CheckVolumeAttached(int volId, string arrayName);
     vector<pair<int, string>> GetAttachedVolumeList(string& nqn);
     static bool AttachNamespace(const string& nqn, const string& bdevName,
         PosNvmfEventDoneCallback_t cb, void* cbArg);

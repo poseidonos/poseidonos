@@ -15,6 +15,7 @@ public:
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));
+    MOCK_METHOD(void, Flush, (), (override));
     MOCK_METHOD(bool, VolumeCreated, (string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId), (override));
     MOCK_METHOD(bool, VolumeDeleted, (string volName, int volID, uint64_t volSizeByte, string arrayName, int arrayId), (override));
     MOCK_METHOD(bool, VolumeMounted, (string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId), (override));

@@ -38,25 +38,46 @@
 #include "spdk/event.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/lib/system_timeout_checker.h"
+#include "src/logger/logger.h"
 #include "src/qos/qos_manager.h"
-#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/volume/volume_manager.h"
 
 namespace pos
 {
-NvmfTarget NvmfVolumePos::target;
+NvmfTarget* NvmfVolumePos::target;
 
 std::atomic<bool> NvmfVolumePos::detachFailed;
 std::atomic<uint32_t> NvmfVolumePos::volumeDetachedCnt;
 
 NvmfVolumePos::NvmfVolumePos(unvmf_io_handler ioHandler)
-: ioHandler(ioHandler)
+: NvmfVolumePos(ioHandler, EventFrameworkApiSingleton::Instance(), SpdkCallerSingleton::Instance())
 {
+}
+
+NvmfVolumePos::NvmfVolumePos(unvmf_io_handler ioHandler, EventFrameworkApi* eventFrameworkApi, SpdkCaller* spdkCaller, NvmfTarget* inputTarget)
+: ioHandler(ioHandler),
+  eventFrameworkApi(eventFrameworkApi),
+  spdkCaller(spdkCaller)
+{
+    if (nullptr == inputTarget)
+    {
+        target = new NvmfTarget();
+    }
+    else
+    {
+        target = inputTarget;
+    }
 }
 
 NvmfVolumePos::~NvmfVolumePos(void)
 {
+    if (nullptr != target)
+    {
+        delete target;
+        target = nullptr;
+    }
 }
 
 void
@@ -68,7 +89,7 @@ NvmfVolumePos::_NamespaceDetachedHandler(void* cbArg, int status)
         if (vInfo)
         {
             volumeDetachedCnt++;
-            string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
+            string bdevName = target->GetBdevName(vInfo->id, vInfo->array_name);
             spdk_bdev_pos_unregister_io_handler(bdevName.c_str());
             reset_pos_volume_info(bdevName.c_str());
         }
@@ -97,9 +118,9 @@ NvmfVolumePos::_NamespaceDetachedAllHandler(void* cbArg, int status)
 
         for (auto volId : volList)
         {
-            string bdevName = target.GetBdevName(volId, volsInfo.arrayName);
-            struct spdk_nvmf_subsystem* subsystem = target.FindSubsystem(subnqn);
-            struct spdk_nvmf_ns* ns = target.GetNamespace(subsystem, bdevName);
+            string bdevName = target->GetBdevName(volId, volsInfo.arrayName);
+            struct spdk_nvmf_subsystem* subsystem = target->FindSubsystem(subnqn);
+            struct spdk_nvmf_ns* ns = target->GetNamespace(subsystem, bdevName);
             if (ns != nullptr)
             {
                 SPDK_NOTICELOG("Requested volume(%s) is still attached\n", bdevName.c_str());
@@ -133,8 +154,14 @@ NvmfVolumePos::_VolumeCreateHandler(void* arg1, void* arg2)
     struct pos_volume_info* vInfo = (struct pos_volume_info*)arg1;
     if (vInfo)
     {
-        string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
-        target.CreatePosBdev(bdevName, vInfo->id, vInfo->size_mb, 512, false, vInfo->array_name, vInfo->array_id);
+        string bdevName = target->GetBdevName(vInfo->id, vInfo->array_name);
+        bool ret = target->CreatePosBdev(bdevName, vInfo->id, vInfo->size_mb, 512, false, vInfo->array_name, vInfo->array_id);
+        if (false == ret)
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_POS_BDEV;
+            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+        }
         delete vInfo;
     }
 }
@@ -142,7 +169,7 @@ NvmfVolumePos::_VolumeCreateHandler(void* arg1, void* arg2)
 void
 NvmfVolumePos::VolumeCreated(struct pos_volume_info* vInfo)
 {
-    EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
+    eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _VolumeCreateHandler, vInfo, nullptr);
 }
 
@@ -152,8 +179,15 @@ NvmfVolumePos::_VolumeDeleteHandler(void* arg1, void* arg2)
     struct pos_volume_info* vInfo = (struct pos_volume_info*)arg1;
     if (vInfo)
     {
-        string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
-        target.DeletePosBdev(bdevName);
+        string bdevName = target->GetBdevName(vInfo->id, vInfo->array_name);
+        bool ret = target->DeletePosBdev(bdevName);
+        if (false == ret)
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::IONVMF_FAIL_TO_DELETE_POS_BDEV;
+            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+        }
+
         delete vInfo;
     }
 }
@@ -161,7 +195,7 @@ NvmfVolumePos::_VolumeDeleteHandler(void* arg1, void* arg2)
 void
 NvmfVolumePos::VolumeDeleted(struct pos_volume_info* vInfo)
 {
-    EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
+    eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _VolumeDeleteHandler, vInfo, nullptr);
 }
 
@@ -173,9 +207,9 @@ NvmfVolumePos::_VolumeMountHandler(void* arg1, void* arg2)
     if (vInfo)
     {
         string subNqn(vInfo->nqn);
-        string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
+        string bdevName = target->GetBdevName(vInfo->id, vInfo->array_name);
         spdk_bdev_pos_register_io_handler(bdevName.c_str(), vInfo->unvmf_io);
-        int32_t nqn_id = target.GetVolumeNqnId(subNqn);
+        int32_t nqn_id = target->GetVolumeNqnId(subNqn);
         if (nqn_id < 0)
         {
             SPDK_ERRLOG("Failed to Get Subsystem Id. Unable to update subsystem to volume map and volume info.\n");
@@ -184,7 +218,7 @@ NvmfVolumePos::_VolumeMountHandler(void* arg1, void* arg2)
         }
         QosManagerSingleton::Instance()->UpdateSubsystemToVolumeMap(nqn_id, vInfo->id);
         set_pos_volume_info(bdevName.c_str(), subNqn.c_str(), nqn_id);
-        target.SetVolumeQos(bdevName, vInfo->iops_limit, vInfo->bw_limit);
+        target->SetVolumeQos(bdevName, vInfo->iops_limit, vInfo->bw_limit);
         delete vInfo;
     }
 }
@@ -193,7 +227,7 @@ void
 NvmfVolumePos::VolumeMounted(struct pos_volume_info* vInfo)
 {
     vInfo->unvmf_io = ioHandler;
-    EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
+    eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _VolumeMountHandler, vInfo, nullptr);
 }
 
@@ -204,10 +238,19 @@ NvmfVolumePos::_VolumeUnmountHandler(void* arg1, void* arg2)
     bool ret = false;
     if (vInfo)
     {
-        string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
-        const char* nqn = get_attached_subsystem_nqn(bdevName.c_str());
-        string subnqn(nqn);
-        ret = target.DetachNamespace(subnqn, 0, _NamespaceDetachedHandler, vInfo);
+        string bdevName = target->GetBdevName(vInfo->id, vInfo->array_name);
+        const char* nqn = SpdkCallerSingleton::Instance()->SpdkGetAttachedSubsystemNqn(bdevName.c_str());
+        if (nqn != NULL)
+        {
+            string subnqn(nqn);
+            ret = target->DetachNamespace(subnqn, 0, _NamespaceDetachedHandler, vInfo);
+            if (false == ret)
+            {
+                POS_EVENT_ID eventId =
+                    POS_EVENT_ID::IONVMF_FAIL_TO_DELETE_POS_BDEV;
+                POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+            }
+        }
     }
     if (ret == false)
     {
@@ -222,7 +265,7 @@ NvmfVolumePos::_VolumeUnmountHandler(void* arg1, void* arg2)
 void
 NvmfVolumePos::VolumeUnmounted(struct pos_volume_info* vInfo)
 {
-    bool mounted = target.CheckVolumeAttached(vInfo->id, vInfo->array_name);
+    bool mounted = target->CheckVolumeAttached(vInfo->id, vInfo->array_name);
     if (mounted == false)
     {
         volumeDetachedCnt++;
@@ -230,7 +273,7 @@ NvmfVolumePos::VolumeUnmounted(struct pos_volume_info* vInfo)
     else
     {
         volumeDetachedCnt = 0;
-        EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
+        eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
             _VolumeUnmountHandler, vInfo, nullptr);
     }
 }
@@ -241,8 +284,8 @@ NvmfVolumePos::_VolumeUpdateHandler(void* arg1, void* arg2)
     struct pos_volume_info* vInfo = (struct pos_volume_info*)arg1;
     if (vInfo)
     {
-        string bdevName = target.GetBdevName(vInfo->id, vInfo->array_name);
-        target.SetVolumeQos(bdevName, vInfo->iops_limit, vInfo->bw_limit);
+        string bdevName = target->GetBdevName(vInfo->id, vInfo->array_name);
+        target->SetVolumeQos(bdevName, vInfo->iops_limit, vInfo->bw_limit);
         delete vInfo;
     }
 }
@@ -250,7 +293,7 @@ NvmfVolumePos::_VolumeUpdateHandler(void* arg1, void* arg2)
 void
 NvmfVolumePos::VolumeUpdated(struct pos_volume_info* vInfo)
 {
-    EventFrameworkApiSingleton::Instance()->SendSpdkEvent(EventFrameworkApiSingleton::Instance()->GetFirstReactor(),
+    eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _VolumeUpdateHandler, vInfo, nullptr);
 }
 
@@ -260,7 +303,7 @@ NvmfVolumePos::_VolumeDetachHandler(void* volListInfo, void* arg)
     int ret = false;
     volumeListInfo volsInfo = *(static_cast<volumeListInfo*>(volListInfo));
     string subnqn = volsInfo.subnqn;
-    ret = target.DetachNamespaceAll(subnqn, _NamespaceDetachedAllHandler, volListInfo);
+    ret = target->DetachNamespaceAll(subnqn, _NamespaceDetachedAllHandler, volListInfo);
     if (ret == false)
     {
         detachFailed = true;
@@ -275,12 +318,12 @@ NvmfVolumePos::VolumeDetached(vector<int>& volList, string arrayName)
     map<string, vector<int>> volsPerSubsystem;
     for (auto volId : volList)
     {
-        string bdevName = target.GetBdevName(volId, arrayName);
-        const char* nqn = get_attached_subsystem_nqn(bdevName.c_str());
+        string bdevName = target->GetBdevName(volId, arrayName);
+        const char* nqn = spdkCaller->SpdkGetAttachedSubsystemNqn(bdevName.c_str());
         if (nqn != nullptr)
         {
             string subnqn(nqn);
-            if (subnqn.empty() == false && target.CheckVolumeAttached(volId, arrayName) == true)
+            if (subnqn.empty() == false && target->CheckVolumeAttached(volId, arrayName) == true)
             {
                 volsPerSubsystem[subnqn].push_back(volId);
                 volsCountToDetach++;
@@ -291,24 +334,30 @@ NvmfVolumePos::VolumeDetached(vector<int>& volList, string arrayName)
     {
         return;
     }
-    uint32_t target_core = EventFrameworkApiSingleton::Instance()->GetFirstReactor();
+    uint32_t target_core = eventFrameworkApi->GetFirstReactor();
     for (auto volumes : volsPerSubsystem)
     {
         volumeListInfo* volsInfo = new volumeListInfo;
         volsInfo->subnqn = volumes.first;
         volsInfo->vols = volumes.second;
         volsInfo->arrayName = arrayName;
-        EventFrameworkApiSingleton::Instance()->SendSpdkEvent(target_core, _VolumeDetachHandler,
+        eventFrameworkApi->SendSpdkEvent(target_core, _VolumeDetachHandler,
             volsInfo, nullptr);
     }
 }
 
 bool
-NvmfVolumePos::WaitRequestedVolumesDetached(uint32_t volCnt)
+NvmfVolumePos::WaitRequestedVolumesDetached(uint32_t volCnt, uint64_t time)
 {
     SystemTimeoutChecker timeChecker;
-    uint64_t time = 15 * 1000000000ULL;
     timeChecker.SetTimeout(time);
+    if (volumeDetachedCnt > volCnt)
+    {
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::IONVMF_VOLUME_DETACH_COUNT_OVERFLOW;
+        POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId));
+        return false;
+    }
     while ((volumeDetachedCnt < volCnt))
     {
         if ((true == detachFailed) || (true == timeChecker.CheckTimeout()))

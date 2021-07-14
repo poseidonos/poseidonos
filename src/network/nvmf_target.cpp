@@ -141,7 +141,7 @@ NvmfTarget::_TryAttachHandler(void* arg1, void* arg2)
 }
 
 bool
-NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName)
+NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName, uint64_t time)
 {
     int yetAttached = -1;
     attachedNsid = -1;
@@ -153,7 +153,6 @@ NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName
         _TryAttachHandler, static_cast<void*>(subnqn), static_cast<void*>(bdevName));
 
     SystemTimeoutChecker timeChecker;
-    uint64_t time = 15 * 1000000000ULL;
     timeChecker.SetTimeout(time);
 
     while (attachedNsid == yetAttached)

@@ -118,9 +118,8 @@ TEST(NvmfTarget, TryToAttachNamespace_Fail)
     bool actual, expected{false};
 
     ON_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, _, _, _)).WillByDefault(Return(true));
-    ON_CALL(*mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
     NvmfTarget nvmfTarget(mockSpdkCaller, false, mockEventFrameworkApi);
-    actual = nvmfTarget.TryToAttachNamespace(nqn, 0, arrayName);
+    actual = nvmfTarget.TryToAttachNamespace(nqn, 0, arrayName, 500000000ULL);
     ASSERT_EQ(actual, expected);
     delete mockEventFrameworkApi;
     delete mockSpdkCaller;
