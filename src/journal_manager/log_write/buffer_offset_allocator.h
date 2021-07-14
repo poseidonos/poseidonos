@@ -51,6 +51,8 @@ public:
     virtual ~BufferOffsetAllocator(void);
 
     virtual void Init(LogGroupReleaser* releaser, JournalConfiguration* journalConfiguration);
+    virtual void Dispose(void);
+
     void Reset(void);
 
     virtual int AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffset);

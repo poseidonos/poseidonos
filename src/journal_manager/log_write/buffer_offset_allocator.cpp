@@ -81,6 +81,16 @@ BufferOffsetAllocator::Init(LogGroupReleaser* logGroupReleaser,
 }
 
 void
+BufferOffsetAllocator::Dispose(void)
+{
+    for (auto it : statusList)
+    {
+        delete it;
+    }
+    statusList.clear();
+}
+
+void
 BufferOffsetAllocator::Reset(void)
 {
     for (auto it : statusList)

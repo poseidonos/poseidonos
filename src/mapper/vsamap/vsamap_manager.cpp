@@ -412,6 +412,14 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
         return true;
     }
 
+    if (vsaMap->IsFileOpened() == false)
+    {
+        if (0 != vsaMap->FileOpen())
+        {
+            POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "VSAMap load failed, volumeID:{} @VolumeDeleted", volID);
+        }
+    }
+
     if (vsaMap->DoesFileExist() == false)
     {
         // VolumeDeleted can be notified again when pos crashes during volume deletion

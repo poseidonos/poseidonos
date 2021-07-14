@@ -49,6 +49,7 @@ public:
 
     virtual void Init(JournalConfiguration* journalConfiguration);
     void Init(std::vector<DirtyPageList* > dirtyPages);
+    virtual void Dispose(void);
 
     virtual MapPageList GetDirtyList(int logGroupId);
     virtual MapPageList GetTotalDirtyList(void);

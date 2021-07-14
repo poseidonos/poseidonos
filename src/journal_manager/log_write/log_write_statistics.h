@@ -54,6 +54,7 @@ public:
     virtual ~LogWriteStatistics(void);
 
     virtual void Init(int numLogGroups);
+    virtual void Dispose(void);
 
     virtual bool UpdateStatus(LogWriteContext* context);
     virtual void AddToList(LogWriteContext* context);

@@ -53,6 +53,15 @@ LogWriteStatistics::Init(int numLogGroups)
     enabled = true;
 }
 
+void
+LogWriteStatistics::Dispose(void)
+{
+    for (int groupId = 0; groupId < (int)stripeLogsAdded.size(); groupId++)
+    {
+        _Reset(groupId);
+    }
+}
+
 LogWriteStatistics::~LogWriteStatistics(void)
 {
     for (int groupId = 0; groupId < (int)stripeLogsAdded.size(); groupId++)

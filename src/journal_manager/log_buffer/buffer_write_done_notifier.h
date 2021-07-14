@@ -52,6 +52,7 @@ public:
     virtual ~LogBufferWriteDoneNotifier(void) = default;
 
     virtual void Register(LogBufferWriteDoneEvent* notified);
+    virtual void Dispose(void);
 
     virtual void NotifyLogFilled(int logGroupId, MapPageList& dirty);
     virtual void NotifyLogBufferReseted(int logGroupId);
