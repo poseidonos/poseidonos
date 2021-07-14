@@ -42,7 +42,6 @@
 
 namespace pos
 {
-
 VolumeMounter::VolumeMounter(VolumeList& volumeList, std::string arrayName)
 : VolumeInterface(volumeList, arrayName)
 {

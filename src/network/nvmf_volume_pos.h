@@ -30,23 +30,56 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "volume_event.h"
-#include "volume_event_publisher.h"
+#pragma once
+#include <atomic>
+#include <string>
+#include <vector>
 
+#include "spdk/pos.h"
+#include "src/network/nvmf.h"
+#include "src/network/nvmf_target.h"
+
+using namespace std;
 namespace pos
 {
-VolumeEvent::~VolumeEvent(void)
+struct volumeListInfo
 {
-}
+    string arrayName;
+    string subnqn;
+    vector<int> vols;
+};
 
-void
-VolumeEvent::RegisterToPublisher(std::string arrayName)
+class NvmfVolumePos
 {
-}
+public:
+    explicit NvmfVolumePos(unvmf_io_handler ioHandler);
+    virtual ~NvmfVolumePos(void);
 
-void
-VolumeEvent::RemoveFromPublisher(std::string arrayName)
-{
-}
+    virtual void VolumeCreated(struct pos_volume_info* info);
+    virtual void VolumeDeleted(struct pos_volume_info* info);
+    virtual void VolumeMounted(struct pos_volume_info* info);
+    virtual void VolumeUnmounted(struct pos_volume_info* info);
+    virtual void VolumeUpdated(struct pos_volume_info* info);
+    virtual void VolumeDetached(vector<int>& volList, string arrayName);
+
+    static uint32_t VolumeDetachCompleted(void);
+    static bool WaitRequestedVolumesDetached(uint32_t volCnt);
+
+private:
+    static NvmfTarget target;
+    static atomic<bool> detachFailed;
+    static atomic<uint32_t> volumeDetachedCnt;
+    unvmf_io_handler ioHandler;
+
+    static void _VolumeCreateHandler(void* arg1, void* arg2);
+    static void _VolumeMountHandler(void* arg1, void* arg2);
+    static void _VolumeUnmountHandler(void* arg1, void* arg2);
+    static void _VolumeDeleteHandler(void* arg1, void* arg2);
+    static void _VolumeUpdateHandler(void* arg1, void* arg2);
+    static void _VolumeDetachHandler(void* arg1, void* arg2);
+    static void _NamespaceDetachedHandler(void* cbArg, int status);
+    static void _NamespaceDetachedAllHandler(void* cbArg, int status);
+    static void _CompleteVolumeUnmount(struct pos_volume_info* vInfo);
+};
 
 } // namespace pos

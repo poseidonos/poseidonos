@@ -34,21 +34,31 @@
 #include <string>
 #include <vector>
 
-#include "src/network/nvmf_volume.hpp"
+#include "spdk/pos.h"
+#include "src/array_models/interface/i_mount_sequence.h"
+#include "src/network/nvmf_volume_pos.h"
 #include "src/sys_event/volume_event.h"
+#include "src/sys_event/volume_event_publisher.h"
 using namespace std;
 
-class NvmfVolume;
+class NvmfVolumePos;
 
 namespace pos
 {
-class NvmfTargetEventSubscriber : public VolumeEvent
+class Nvmf : public VolumeEvent, public IMountSequence
 {
 public:
-    NvmfTargetEventSubscriber(NvmfVolume* vol, std::string arrayName);
-    ~NvmfTargetEventSubscriber(void);
+    explicit Nvmf(std::string arrayName);
+    Nvmf(std::string arrayName, VolumeEventPublisher* volumeEventPublisher, NvmfVolumePos* inputNvmfVolume);
+    virtual ~Nvmf(void);
 
-    bool VolumeCreated(string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName) override;
+    int Init(void) override;
+    void Dispose(void) override;
+    void Shutdown(void) override;
+    void Flush(void) override;
+    void SetuNVMfIOHandler(unvmf_io_handler handler);
+
+    virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName) override;
     bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte, string arrayName) override;
     bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName) override;
     bool VolumeUnmounted(string volName, int volID, string arrayName) override;
@@ -56,13 +66,14 @@ public:
     bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw, string arrayName) override;
     void VolumeDetached(vector<int> volList, string arrayName) override;
 
-    void CopyVolumeInfo(char* destInfo, const char* srcInfo, int len);
-
 private:
-    NvmfVolume* volume;
-    std::string arrayName;
+    NvmfVolumePos* volume;
+    VolumeEventPublisher* volumeEventPublisher;
     const uint32_t MIB_IN_BYTE = 1024 * 1024;
     const uint32_t KIOPS = 1000;
+    unvmf_io_handler ioHandler = {nullptr, nullptr};
+
+    void _CopyVolumeInfo(char* destInfo, const char* srcInfo, int len);
 };
 
 } // namespace pos

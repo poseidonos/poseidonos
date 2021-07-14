@@ -32,18 +32,20 @@
 
 #pragma once
 
+#include <functional>
+#include <string>
+#include <vector>
+
 #include "src/array/array.h"
 #include "src/array_components/meta_mount_sequence.h"
-#include "src/gc/garbage_collector.h"
 #include "src/gc/flow_control/flow_control.h"
+#include "src/gc/garbage_collector.h"
+#include "src/io/general_io/rba_state_manager.h"
 #include "src/journal_manager/journal_manager.h"
 #include "src/mapper/mapper.h"
-#include "src/volume/volume_manager.h"
 #include "src/metafs/metafs.h"
-#include "src/io/general_io/rba_state_manager.h"
-#include <vector>
-#include <string>
-#include <functional>
+#include "src/network/nvmf.h"
+#include "src/volume/volume_manager.h"
 
 using namespace std;
 
@@ -73,7 +75,8 @@ public:
         Allocator* allocator,
         JournalManager* journal,
         RBAStateManager* rbaStateMgr,
-        function<MetaFs* (Array*, bool)> metaFsFactory);
+        function<MetaFs*(Array*, bool)> metaFsFactory,
+        Nvmf* nvmf);
     virtual ~ArrayComponents(void);
     virtual int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
     virtual int Load(void);
@@ -82,7 +85,11 @@ public:
     virtual int Delete(void);
     virtual int PrepareRebuild(bool& resume);
     virtual void RebuildDone(void);
-    virtual Array* GetArray(void) { return array; }
+    virtual Array*
+    GetArray(void)
+    {
+        return array;
+    }
 
 private:
     void _SetMountSequence(void);
@@ -105,6 +112,7 @@ private:
     Allocator* allocator = nullptr;
     MetaFs* metafs = nullptr;
     RBAStateManager* rbaStateMgr = nullptr;
+    Nvmf* nvmf = nullptr;
 
     // instantiated internally
     vector<IMountSequence*> mountSequence;
@@ -112,6 +120,6 @@ private:
     MetaMountSequence* metaMountSequence = nullptr;
 
     // MetaFs factory: MetaFs creation is not determined during ArrayComponents construction. Hence, we need a lambda.
-    function<MetaFs* (Array*, bool)> metaFsFactory = nullptr;
+    function<MetaFs*(Array*, bool)> metaFsFactory = nullptr;
 };
 } // namespace pos

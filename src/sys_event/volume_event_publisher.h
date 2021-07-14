@@ -32,13 +32,13 @@
 
 #pragma once
 
-#include "src/lib/singleton.h"
-#include "src/sys_event/volume_event.h"
-
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "src/lib/singleton.h"
+#include "src/sys_event/volume_event.h"
 
 using namespace std;
 
@@ -50,7 +50,6 @@ public:
     VolumeEventPublisher(void);
     virtual ~VolumeEventPublisher(void);
     void RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName);
-    void RegisterNvmfTargetSubscriber(VolumeEvent* subscriber, std::string arrayName);
     void RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName);
     bool NotifyVolumeCreated(std::string volName, int volID,
         uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName);

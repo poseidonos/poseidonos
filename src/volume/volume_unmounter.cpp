@@ -34,16 +34,15 @@
 
 #include <string>
 
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/network/nvmf_volume_pos.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume.h"
 #include "src/volume/volume_list.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/network/nvmf_volume_pos.hpp"
 namespace pos
 {
-
 VolumeUnmounter::VolumeUnmounter(VolumeList& volumeList, std::string arrayName)
 : VolumeInterface(volumeList, arrayName)
 {
@@ -71,7 +70,6 @@ VolumeUnmounter::Do(string name)
         volumeList.WaitUntilIdle(vol->ID, VolumeStatus::Mounted);
         res = VolumeEventPublisherSingleton::Instance()->NotifyVolumeUnmounted(
             name, vol->ID, arrayName);
-
 
         bool volumeUnmounted = NvmfVolumePos::WaitRequestedVolumesDetached(1);
         if (volumeUnmounted == false)

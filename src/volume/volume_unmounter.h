@@ -34,12 +34,11 @@
 
 #include <string>
 
+#include "src/network/nvmf_target.h"
 #include "src/volume/volume_interface.h"
-#include "src/network/nvmf_target.hpp"
 
 namespace pos
 {
-
 class VolumeUnmounter : public VolumeInterface
 {
 public:

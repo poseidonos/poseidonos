@@ -167,7 +167,6 @@ TEST(ArrayMountSequence, StateChanged_testIfShutdownAndFlushAreInvokedWhenStateC
     EXPECT_CALL(mockSeq3, Shutdown).Times(1);
     EXPECT_CALL(mockSeq2, Shutdown).Times(1);
     EXPECT_CALL(mockSeq1, Shutdown).Times(1);
-    EXPECT_CALL(*mockMntTmp, Shutdown).Times(1);
 
     EXPECT_CALL(mockSeq3, Flush).Times(1);
     EXPECT_CALL(mockSeq2, Flush).Times(1);
@@ -197,7 +196,6 @@ TEST(ArrayMountSequence, StateChanged_testIfFlushIsntInvokedWhenStateChangesFrom
     EXPECT_CALL(mockSeq3, Shutdown).Times(1);
     EXPECT_CALL(mockSeq2, Shutdown).Times(1);
     EXPECT_CALL(mockSeq1, Shutdown).Times(1);
-    EXPECT_CALL(*mockMntTmp, Shutdown).Times(1);
 
     // flush shouldn't be invoked
     EXPECT_CALL(mockSeq3, Flush).Times(0);
@@ -229,7 +227,6 @@ TEST(ArrayMountSequence, DISABLED_StateChanged_testIfShutdownIsNotInvokedWhenNex
     EXPECT_CALL(mockSeq3, Shutdown).Times(0);
     EXPECT_CALL(mockSeq2, Shutdown).Times(0);
     EXPECT_CALL(mockSeq1, Shutdown).Times(0);
-    EXPECT_CALL(*mockMntTmp, Shutdown).Times(0);
 
     // When & Then: trivial. as long as there's no exception, I'm good
     mntSeq.StateChanged(&offlineContext, &stopContext);

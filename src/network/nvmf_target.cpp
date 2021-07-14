@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/network/nvmf_target.hpp"
+#include "src/network/nvmf_target.h"
 
 #include <iostream>
 #include <sstream>
@@ -40,8 +40,8 @@
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
-#include "src/network/nvmf_target_spdk.hpp"
-#include "src/network/nvmf_volume_pos.hpp"
+#include "src/network/nvmf_target_spdk.h"
+#include "src/network/nvmf_volume_pos.h"
 #include "src/qos/qos_manager.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/spdk.hpp"

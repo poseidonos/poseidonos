@@ -37,7 +37,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/network/nvmf_target_spdk.hpp"
+#include "src/network/nvmf_target_spdk.h"
 using namespace std;
 
 namespace pos

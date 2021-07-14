@@ -30,27 +30,83 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/network/nvmf_target_event_subscriber.hpp"
+#include "src/network/nvmf.h"
 
-#include "spdk/pos.h"
-#include "src/sys_event/volume_event_publisher.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/io/frontend_io/unvmf_io_handler.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-NvmfTargetEventSubscriber::NvmfTargetEventSubscriber(NvmfVolume* vol, std::string arrayName)
-: VolumeEvent("NvmfTarget", arrayName),
-  volume(vol)
+Nvmf::Nvmf(std::string arrayName)
+: Nvmf(arrayName, VolumeEventPublisherSingleton::Instance(), nullptr)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterNvmfTargetSubscriber(this, arrayName);
 }
 
-NvmfTargetEventSubscriber::~NvmfTargetEventSubscriber(void)
+Nvmf::Nvmf(std::string arrayName, VolumeEventPublisher* volumeEventPublisher, NvmfVolumePos* inputNvmfVolume)
+: VolumeEvent("NvmfTarget", arrayName),
+  volumeEventPublisher(volumeEventPublisher)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName);
+    if (nullptr != inputNvmfVolume)
+    {
+        volume = inputNvmfVolume;
+    }
+    volumeEventPublisher->RegisterSubscriber(this, arrayName);
+}
+
+Nvmf::~Nvmf(void)
+{
+    volumeEventPublisher->RemoveSubscriber(this, arrayName);
+}
+
+int
+Nvmf::Init(void)
+{
+    unvmf_io_handler handler = {.submit = UNVMfSubmitHandler,
+        .complete = UNVMfCompleteHandler};
+    SetuNVMfIOHandler(handler);
+
+    volume = new NvmfVolumePos(ioHandler);
+    return 0;
 }
 
 void
-NvmfTargetEventSubscriber::CopyVolumeInfo(char* destInfo,
+Nvmf::Dispose(void)
+{
+    if (volume != nullptr)
+    {
+        delete volume;
+        volume = nullptr;
+    }
+}
+
+void
+Nvmf::Shutdown(void)
+{
+    Dispose();
+}
+
+void
+Nvmf::Flush(void)
+{
+    // no-op
+}
+
+void
+Nvmf::SetuNVMfIOHandler(unvmf_io_handler handler)
+{
+    if (ioHandler.submit || ioHandler.complete)
+    {
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::IONVMF_OVERRIDE_UNVMF_IO_HANDLER;
+        POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+    }
+    ioHandler.submit = handler.submit;
+    ioHandler.complete = handler.complete;
+}
+
+void
+Nvmf::_CopyVolumeInfo(char* destInfo,
     const char* srcInfo, int len)
 {
     strncpy(destInfo, srcInfo, len);
@@ -58,18 +114,18 @@ NvmfTargetEventSubscriber::CopyVolumeInfo(char* destInfo,
 }
 
 bool
-NvmfTargetEventSubscriber::VolumeCreated(string volName, int volId,
+Nvmf::VolumeCreated(string volName, int volId,
     uint64_t volSizeByte, uint64_t maxIops, uint64_t maxBw, string arrayName)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
-        CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
+        _CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
         vInfo->id = volId;
         vInfo->size_mb = volSizeByte / MIB_IN_BYTE;
         vInfo->iops_limit = maxIops * KIOPS;
         vInfo->bw_limit = maxBw;
-        CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
+        _CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
         volume->VolumeCreated(vInfo);
         return true;
     }
@@ -77,14 +133,14 @@ NvmfTargetEventSubscriber::VolumeCreated(string volName, int volId,
 }
 
 bool
-NvmfTargetEventSubscriber::VolumeDeleted(string volName, int volId,
+Nvmf::VolumeDeleted(string volName, int volId,
     uint64_t volSizeByte, string arrayName)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
-        CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
-        CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
+        _CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
+        _CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
         vInfo->id = volId;
         volume->VolumeDeleted(vInfo);
         return true;
@@ -93,15 +149,15 @@ NvmfTargetEventSubscriber::VolumeDeleted(string volName, int volId,
 }
 
 bool
-NvmfTargetEventSubscriber::VolumeMounted(string volName, string subNqn, int volId,
+Nvmf::VolumeMounted(string volName, string subNqn, int volId,
     uint64_t volSizeByte, uint64_t maxIops, uint64_t maxBw, string arrayName)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
-        CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
-        CopyVolumeInfo(vInfo->nqn, subNqn.c_str(), sizeof(vInfo->nqn) - 1);
-        CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
+        _CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
+        _CopyVolumeInfo(vInfo->nqn, subNqn.c_str(), sizeof(vInfo->nqn) - 1);
+        _CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
         vInfo->id = volId;
         vInfo->size_mb = volSizeByte / MIB_IN_BYTE;
         vInfo->iops_limit = maxIops * KIOPS;
@@ -113,13 +169,13 @@ NvmfTargetEventSubscriber::VolumeMounted(string volName, string subNqn, int volI
 }
 
 bool
-NvmfTargetEventSubscriber::VolumeUnmounted(string volName, int volId, string arrayName)
+Nvmf::VolumeUnmounted(string volName, int volId, string arrayName)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
-        CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
-        CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
+        _CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
+        _CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
         vInfo->id = volId;
         volume->VolumeUnmounted(vInfo);
         return true;
@@ -128,21 +184,21 @@ NvmfTargetEventSubscriber::VolumeUnmounted(string volName, int volId, string arr
 }
 
 bool
-NvmfTargetEventSubscriber::VolumeLoaded(string volName, int id,
+Nvmf::VolumeLoaded(string volName, int id,
     uint64_t totalSize, uint64_t maxIops, uint64_t maxBw, string arrayName)
 {
     return VolumeCreated(volName, id, totalSize, maxIops, maxBw, arrayName);
 }
 
 bool
-NvmfTargetEventSubscriber::VolumeUpdated(string volName, int volId,
+Nvmf::VolumeUpdated(string volName, int volId,
     uint64_t maxIops, uint64_t maxBw, string arrayName)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
-        CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
-        CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
+        _CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
+        _CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
         vInfo->id = volId;
         vInfo->iops_limit = maxIops * KIOPS;
         vInfo->bw_limit = maxBw;
@@ -153,7 +209,7 @@ NvmfTargetEventSubscriber::VolumeUpdated(string volName, int volId,
 }
 
 void
-NvmfTargetEventSubscriber::VolumeDetached(vector<int> volList, string arrayName)
+Nvmf::VolumeDetached(vector<int> volList, string arrayName)
 {
     if (!volList.empty())
     {
