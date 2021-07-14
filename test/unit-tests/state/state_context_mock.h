@@ -30,28 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
+
+#include <list>
 #include <string>
+#include <vector>
 
-#include "src/state/include/state_type.h"
-#include "src/state/include/situation_type.h"
-
-using namespace std;
+#include "src/state/state_context.h"
 
 namespace pos
 {
-class StateContext
+class MockStateContext : public StateContext
 {
 public:
-    StateContext(string sender, SituationEnum situ);
-    virtual ~StateContext(void);
-    virtual StateType ToStateType(void);
-    virtual SituationType GetSituation(void);
-    virtual int GetPriority(void) const;
-    virtual string Owner(void);
-
-private:
-    string owner;
-    SituationType situation;
+    using StateContext::StateContext;
+    MOCK_METHOD(StateType, ToStateType, (), (override));
+    MOCK_METHOD(SituationType, GetSituation, (), (override));
+    MOCK_METHOD(int, GetPriority, (), (const));
+    MOCK_METHOD(string, Owner, (), (override));
 };
+
 } // namespace pos

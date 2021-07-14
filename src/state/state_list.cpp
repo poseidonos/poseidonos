@@ -59,6 +59,12 @@ StateList::Add(StateContext* ctx)
         StateContext* next = contextList.front();
         listUpdated(next);
     }
+    else
+    {
+        POS_TRACE_WARN((int)POS_EVENT_ID::STATE_CONTROL_DEBUG,
+            "statecontext couldn't be added since it exists already - {}",
+            ctx->GetSituation().ToString());
+    }
 }
 
 void
@@ -73,6 +79,12 @@ StateList::Remove(StateContext* ctx)
         contextList.erase(it);
         StateContext* next = contextList.front();
         listUpdated(next);
+    }
+    else
+    {
+        POS_TRACE_WARN((int)POS_EVENT_ID::STATE_CONTROL_DEBUG,
+            "couldn't remove statecontext because it's already gone - {}",
+            (ctx->GetSituation().ToString()));
     }
 }
 
@@ -105,6 +117,18 @@ bool StateList::Exists(SituationEnum situ)
         }
     }
     return false;
+}
+
+const vector<StateContext*>&
+StateList::GetContextList(void)
+{
+    return this->contextList;
+}
+
+void
+StateList::SetContextList(const vector<StateContext*>& cList)
+{
+    this->contextList = cList; // copy to the internal member
 }
 
 vector<StateContext*>::iterator

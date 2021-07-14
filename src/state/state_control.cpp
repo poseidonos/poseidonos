@@ -41,21 +41,31 @@
 namespace pos
 {
 StateControl::StateControl(void)
+: StateControl(
+    &defaultCtx,
+    new StatePublisher(),
+    new StateList(bind(&StateControl::_ListUpdated, this, placeholders::_1))
+    )
 {
-    curr = &defaultCtx;
-    stateList = new StateList(bind(&StateControl::_ListUpdated,
-        this, placeholders::_1));
-    stateList->Add(curr);
-    publisher = new StatePublisher();
+    // delegated to other constructor
 }
 
-StateControl::StateControl(StateContext* defaultCtx)
+StateControl::StateControl(StateContext* stateCtx)
+: StateControl(
+    stateCtx,
+    new StatePublisher(),
+    new StateList(bind(&StateControl::_ListUpdated, this, placeholders::_1))
+    )
 {
-    curr = defaultCtx;
-    stateList = new StateList(bind(&StateControl::_ListUpdated,
-        this, placeholders::_1));
-    stateList->Add(defaultCtx);
-    publisher = new StatePublisher();
+    // delegated to other constructor
+}
+
+StateControl::StateControl(StateContext* stateCtx, StatePublisher* publisher, StateList* stateList)
+: publisher(publisher),
+  curr(stateCtx),
+  stateList(stateList)
+{
+    stateList->Add(stateCtx);
 }
 
 StateControl::~StateControl(void)
@@ -89,6 +99,13 @@ StateControl::Invoke(StateContext* ctx)
 }
 
 void
+StateControl::WaitOnInvokeFuture(void)
+{
+    // we don't expect any return value from this "future", so just "wait" should be enough.
+    async_future.wait();
+}
+
+void
 StateControl::Remove(StateContext* ctx)
 {
     stateList->Remove(ctx);
@@ -98,18 +115,6 @@ bool
 StateControl::Exists(SituationEnum situ)
 {
     return stateList->Exists(situ);
-}
-
-bool
-StateControl::_Exists(StateContext* ctx)
-{
-    return stateList->Exists(ctx);
-}
-
-bool
-StateControl::_Exists(StateEnum state)
-{
-    return stateList->Exists(state);
 }
 
 void

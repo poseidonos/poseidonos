@@ -55,6 +55,11 @@ IStateControl* StateManager::CreateStateControl(string array)
         POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_ADDED,
             "statecontrol of array:{} is added", array);
     }
+    else
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_DEBUG,
+            "statecontrol of array:{} exists already. skipping the creation of statecontrol.", array);
+    }
     return state;
 }
 
@@ -70,6 +75,8 @@ void StateManager::RemoveStateControl(string array)
     {
         delete stateMap.begin()->second;
         stateMap.erase(stateMap.begin());
+        POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_REMOVED,
+                "statecontrol of array:'{}' is removed - empty array name", array);
     }
     else
     {
@@ -78,11 +85,15 @@ void StateManager::RemoveStateControl(string array)
         {
             delete it->second;
             stateMap.erase(array);
+            POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_REMOVED,
+                "statecontrol of array:{} is removed", array);
+        }
+        else
+        {
+            POS_TRACE_WARN((int)POS_EVENT_ID::STATE_CONTROL_DEBUG,
+                "couldn't remove statecontrol of array - {} : not existent", array);
         }
     }
-
-    POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_REMOVED,
-        "statecontrol of array:{} is removed", array);
 }
 
 StateControl* StateManager::_Find(string array)
@@ -99,6 +110,18 @@ StateControl* StateManager::_Find(string array)
         return nullptr;
     }
     return it->second;
+}
+
+void
+StateManager::SetStateMap(const map<string, StateControl*>& stateMap)
+{
+    this->stateMap = stateMap;  // copy to the internal member
+}
+
+const map<string, StateControl*>&
+StateManager::GetStateMap(void)
+{
+    return stateMap;
 }
 
 } // namespace pos

@@ -47,6 +47,11 @@ StateContext::StateContext(string sender, SituationEnum situ)
     situation = situ;
 }
 
+StateContext::~StateContext(void)
+{
+    // nothing to clean up
+}
+
 StateType
 StateContext::ToStateType(void)
 {
@@ -63,30 +68,6 @@ string
 StateContext::Owner(void)
 {
     return owner;
-}
-
-bool
-StateContext::operator<=(const StateContext& ctx) const
-{
-    return GetPriority() <= ctx.GetPriority();
-}
-
-bool
-StateContext::operator>=(const StateContext& ctx) const
-{
-    return GetPriority() >= ctx.GetPriority();
-}
-
-bool
-StateContext::operator<(const StateContext& ctx) const
-{
-    return !operator<=(ctx);
-}
-
-bool
-StateContext::operator>(const StateContext& ctx) const
-{
-    return !operator>=(ctx);
 }
 
 int

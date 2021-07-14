@@ -53,11 +53,15 @@ public:
     };
     virtual ~StateList();
 
-    void Add(StateContext* ctx);
-    void Remove(StateContext* ctx);
-    bool Exists(StateContext* ctx);
-    bool Exists(StateEnum state);
-    bool Exists(SituationEnum situ);
+    virtual void Add(StateContext* ctx);
+    virtual void Remove(StateContext* ctx);
+    virtual bool Exists(StateContext* ctx);
+    virtual bool Exists(StateEnum state);
+    virtual bool Exists(SituationEnum situ);
+
+    // Helpers for UT
+    virtual const vector<StateContext*>& GetContextList(void);
+    virtual void SetContextList(const vector<StateContext*>& cList);
 
 private:
     vector<StateContext*>::iterator _Find(StateContext* ctx);

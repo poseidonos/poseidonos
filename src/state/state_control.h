@@ -48,7 +48,8 @@ class StateControl : public IStateControl
 {
 public:
     StateControl(void);
-    StateControl(StateContext* defaultCtx);
+    explicit StateControl(StateContext* stateCtx);
+    StateControl(StateContext* stateCtx, StatePublisher* publisher, StateList* stateList);
     virtual ~StateControl(void);
     void Subscribe(IStateObserver* sub, string name) override;
     void Unsubscribe(IStateObserver* sub) override;
@@ -57,9 +58,10 @@ public:
     void Remove(StateContext* ctx) override;
     bool Exists(SituationEnum situ) override;
 
+    // Helper for UT
+    virtual void WaitOnInvokeFuture(void);
+
 private:
-    bool _Exists(StateContext* ctx);
-    bool _Exists(StateEnum state);
     void _ListUpdated(StateContext* front);
     void _UpdateState(void);
     void _ChangeState(StateContext* next);

@@ -62,12 +62,6 @@ StateControl::Remove(StateContext* ctx)
 {
 }
 
-bool
-StateControl::_Exists(StateContext* ctx)
-{
-    return true;
-}
-
 void
 StateControl::_ListUpdated(StateContext* front)
 {

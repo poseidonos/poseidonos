@@ -53,6 +53,10 @@ public:
     virtual IStateControl* GetStateControl(string array);
     virtual void RemoveStateControl(string array);
 
+    // Helpers for UT
+    void SetStateMap(const map<string, StateControl*>& stateMap);
+    const map<string, StateControl*>& GetStateMap(void);
+
 private:
     StateControl* _Find(string array);
     map<string, StateControl*> stateMap;
