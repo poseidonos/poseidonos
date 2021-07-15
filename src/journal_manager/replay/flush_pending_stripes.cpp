@@ -76,35 +76,15 @@ FlushPendingStripes::Start(void)
     int result = 0;
     for (auto pStripe : pendingStripes)
     {
-        int reconstructResult = wbStripeAllocator->ReconstructActiveStripe(pStripe->volumeId,
-            pStripe->wbLsid, pStripe->tailVsa);
-        if (reconstructResult < 0)
-        {
-            int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH_FAILED);
-            std::ostringstream os;
-            os << "Failed to reconstruct active stripe, wb lsid " << pStripe->wbLsid
-                << ", tail offset " << pStripe->tailVsa.offset;
+        wbStripeAllocator->FinishReconstructedStripe(pStripe->wbLsid, pStripe->tailVsa);
 
-            POS_TRACE_DEBUG(eventId, os.str());
-            POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
+        int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH);
+        std::ostringstream os;
+        os << "[Replay] Request to flush stripe, wb lsid " << pStripe->wbLsid
+            << ", tail offset " << pStripe->tailVsa.offset;
 
-            if (result == 0)
-            {
-                result = reconstructResult;
-            }
-        }
-        else
-        {
-            wbStripeAllocator->FinishReconstructedStripe(pStripe->wbLsid, pStripe->tailVsa);
-
-            int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH);
-            std::ostringstream os;
-            os << "[Replay] Request to flush stripe, wb lsid " << pStripe->wbLsid
-                << ", tail offset " << pStripe->tailVsa.offset;
-
-            POS_TRACE_DEBUG(eventId, os.str());
-            POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
-        }
+        POS_TRACE_DEBUG(eventId, os.str());
+        POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
     }
     reporter->SubTaskCompleted(GetId(), 1);
 

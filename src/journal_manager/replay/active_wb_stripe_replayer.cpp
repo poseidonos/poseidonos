@@ -194,10 +194,24 @@ ActiveWBStripeReplayer::_ReplayStripesExceptActive(int index)
         {
             if (lastActiveStripe.IsValid() == true)
             {
-                pendingStripes.push_back(new PendingStripe(lastActiveStripe.GetVolumeId(),
-                    lastActiveStripe.GetWbLsid(), lastActiveStripe.GetTail()));
-            }
+                int reconstructResult = wbStripeAllocator->ReconstructActiveStripe(lastActiveStripe.GetVolumeId(),
+                    lastActiveStripe.GetWbLsid(), lastActiveStripe.GetTail());
+                if (reconstructResult < 0)
+                {
+                    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH_FAILED);
+                    std::ostringstream os;
+                    os << "Failed to reconstruct active stripe, wb lsid " << it->GetWbLsid()
+                        << ", tail offset " << it->GetTail().offset;
 
+                    POS_TRACE_DEBUG(eventId, os.str());
+                    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
+                }
+                else
+                {
+                    pendingStripes.push_back(new PendingStripe(lastActiveStripe.GetVolumeId(),
+                        lastActiveStripe.GetWbLsid(), lastActiveStripe.GetTail()));
+                }
+            }
             lastActiveStripe = *it;
             ++it;
         }

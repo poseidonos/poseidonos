@@ -22,7 +22,6 @@ TEST(FlushPendingStripes, Start_testIfTaskCompletedSuccessfullyWhenThereIsOnlyOn
     FlushPendingStripes flushPendingStripesTask(pendingStripeList, &wbStripeAllocator, &reporter);
 
     // Then
-    EXPECT_CALL(wbStripeAllocator, ReconstructActiveStripe).WillOnce(Return(0));
     EXPECT_CALL(wbStripeAllocator, FinishReconstructedStripe).Times(1);
 
     // When
@@ -47,7 +46,6 @@ TEST(FlushPendingStripes, Start_testIfTaskCompletedSuccessfullyWhenThereArePendi
     FlushPendingStripes flushPendingStripesTask(pendingStripeList, &wbStripeAllocator, &reporter);
 
     // Then
-    EXPECT_CALL(wbStripeAllocator, ReconstructActiveStripe).WillRepeatedly(Return(0));
     EXPECT_CALL(wbStripeAllocator, FinishReconstructedStripe).Times(numPendingStripes);
 
     // When
@@ -55,60 +53,6 @@ TEST(FlushPendingStripes, Start_testIfTaskCompletedSuccessfullyWhenThereArePendi
 
     // Then
     EXPECT_EQ(result, 0);
-}
-
-TEST(FlushPendingStripes, Start_testIfTaskCompletedWithNegativeValueWhenOneStripeReconstructionFails)
-{
-    // Given
-    int numPendingStripes = 3;
-    PendingStripeList pendingStripeList;
-    for (int count = 0; count < numPendingStripes; count++)
-    {
-        pendingStripeList.push_back(new NiceMock<PendingStripe>);
-    }
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockReplayProgressReporter> reporter;
-
-    FlushPendingStripes flushPendingStripesTask(pendingStripeList, &wbStripeAllocator, &reporter);
-
-    // Then: 2/3 stripes success
-    int retCode = -1000;
-    EXPECT_CALL(wbStripeAllocator, ReconstructActiveStripe)
-        .WillOnce(Return(0))
-        .WillOnce(Return(retCode))
-        .WillOnce(Return(0));
-    EXPECT_CALL(wbStripeAllocator, FinishReconstructedStripe).Times(2);
-
-    // When
-    int result = flushPendingStripesTask.Start();
-
-    // Then
-    EXPECT_EQ(result, retCode);
-}
-
-TEST(FlushPendingStripes, Start_testIfTaskCompletedWithNegativeValueWhenSomeStripeReconstructionFails)
-{
-    // Given
-    int numPendingStripes = 5;
-    PendingStripeList pendingStripeList;
-    for (int count = 0; count < numPendingStripes; count++)
-    {
-        pendingStripeList.push_back(new NiceMock<PendingStripe>);
-    }
-    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockReplayProgressReporter> reporter;
-
-    FlushPendingStripes flushPendingStripesTask(pendingStripeList, &wbStripeAllocator, &reporter);
-
-    // Then: 3/5 stripes success
-    EXPECT_CALL(wbStripeAllocator, ReconstructActiveStripe).WillOnce(Return(0)).WillOnce(Return(-1000)).WillOnce(Return(0)).WillOnce(Return(-2000)).WillOnce(Return(0));
-    EXPECT_CALL(wbStripeAllocator, FinishReconstructedStripe).Times(3);
-
-    // When
-    int result = flushPendingStripesTask.Start();
-
-    // Then
-    EXPECT_EQ(result, -1000);
 }
 
 TEST(FlushPendingStripes, GetId_testIfExecutedSuccessfully)
