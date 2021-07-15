@@ -365,6 +365,7 @@ IODispatcher::_ProcessFrontend(void* ublockDevice)
             frontendDone = true;
         }
     }
+    delete static_cast<UblockSharedPtr*>(ublockDevice);
 }
 
 /* --------------------------------------------------------------------------*/
