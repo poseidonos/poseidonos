@@ -71,6 +71,45 @@ void GarbageCollector::Flush(void)
     // no-op for IMountSequence
 }
 
+void GarbageCollector::Pause(void)
+{
+    if (nullptr != copierPtr)
+    {
+        copierPtr->Pause();
+    }
+    else
+    {
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_COPIER_NOT_EXIST), "gc copierPtr not exist");
+    }
+}
+
+void GarbageCollector::Resume(void)
+{
+    if (nullptr != copierPtr)
+    {
+        copierPtr->Resume();
+    }
+    else
+    {
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_COPIER_NOT_EXIST), "gc copierPtr not exist");
+    }
+}
+
+bool GarbageCollector::IsPaused(void)
+{
+    bool ret = true;
+    if (nullptr != copierPtr)
+    {
+        ret = copierPtr->IsPaused();
+    }
+    else
+    {
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_COPIER_NOT_EXIST), "gc copierPtr not exist");
+    }
+    return ret;
+}
+
+
 void GarbageCollector::StateChanged(StateContext* prev, StateContext* next)
 {
 }

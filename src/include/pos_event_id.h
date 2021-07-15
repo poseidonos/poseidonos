@@ -438,6 +438,7 @@ enum class POS_EVENT_ID
     GC_MAP_UPDATE_REQUEST = 3424,
     GC_MAP_UPDATE = 3425,
     GC_MAP_UPDATE_COMPLETION = 3426,
+    GC_COPIER_NOT_EXIST = 3427,
 
     // --------------Flow control (3500)----------------
     FC_START = 3500,

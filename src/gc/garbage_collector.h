@@ -62,9 +62,9 @@ public:
     virtual void Shutdown(void) override;
     virtual void Flush(void) override;
 
-    virtual void Pause(void) { copierPtr->Pause(); }
-    virtual void Resume(void) { copierPtr->Resume(); }
-    virtual bool IsPaused(void) { return copierPtr->IsPaused(); }
+    virtual void Pause(void);
+    virtual void Resume(void);
+    virtual bool IsPaused(void);
 
     virtual int DisableThresholdCheck(void);
     virtual int IsEnabled(void);
