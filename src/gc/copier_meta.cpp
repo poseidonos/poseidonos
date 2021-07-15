@@ -43,8 +43,7 @@ namespace pos
 CopierMeta::CopierMeta(IArrayInfo* array)
 : CopierMeta(array, array->GetSizeInfo(PartitionType::USER_DATA),
     new BitMapMutex(GC_VICTIM_SEGMENT_COUNT), new GcStripeManager(array),
-    _CreateVictimStripes(array),
-    _CreateBufferPool(array->GetSizeInfo(PartitionType::USER_DATA)->chunksPerStripe, CHUNK_SIZE))
+    nullptr, nullptr)
 {
 }
 
@@ -61,6 +60,14 @@ CopierMeta::CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize,
     stripesPerSegment = udSize->stripesPerSegment;
     blksPerStripe = udSize->blksPerStripe;
 
+    if (nullptr == inputVictimStripes)
+    {
+        _CreateVictimStripes(array);
+    }
+    if (nullptr == inputGcBufferPool)
+    {
+        _CreateBufferPool(array->GetSizeInfo(PartitionType::USER_DATA)->chunksPerStripe, CHUNK_SIZE);
+    }
     InitProgressCount();
 }
 
@@ -74,7 +81,10 @@ CopierMeta::~CopierMeta(void)
             delete (*gcBufferPool)[index];
         }
     }
-    delete gcBufferPool;
+    if (nullptr != gcBufferPool)
+    {
+        delete gcBufferPool;
+    }
 
     for (uint32_t stripeIndex = 0; stripeIndex < GC_VICTIM_SEGMENT_COUNT; stripeIndex++)
     {
@@ -86,7 +96,10 @@ CopierMeta::~CopierMeta(void)
             }
         }
     }
-    delete victimStripes;
+    if (nullptr != victimStripes)
+    {
+        delete victimStripes;
+    }
 
     if (nullptr != gcStripeManager)
     {
@@ -250,30 +263,28 @@ CopierMeta::GetGcStripeManager(void)
     return gcStripeManager;
 }
 
-std::vector<FreeBufferPool*>*
+void
 CopierMeta::_CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize)
 {
-    std::vector<FreeBufferPool*>* bufferPool = new std::vector<FreeBufferPool*>;
+    gcBufferPool = new std::vector<FreeBufferPool*>;
     for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
     {
-        bufferPool->push_back(new FreeBufferPool(maxBufferCount, bufferSize));
+        gcBufferPool->push_back(new FreeBufferPool(maxBufferCount, bufferSize));
     }
-    return bufferPool;
 }
 
-std::vector<std::vector<VictimStripe*>>*
+void
 CopierMeta::_CreateVictimStripes(IArrayInfo* array)
 {
-    std::vector<std::vector<VictimStripe*>>* stripes = new std::vector<std::vector<VictimStripe*>>;
-    stripes->resize(GC_VICTIM_SEGMENT_COUNT);
+    victimStripes = new std::vector<std::vector<VictimStripe*>>;
+    victimStripes->resize(GC_VICTIM_SEGMENT_COUNT);
     for (uint32_t stripeIndex = 0; stripeIndex < GC_VICTIM_SEGMENT_COUNT; stripeIndex++)
     {
         for (uint32_t i = 0 ; i < stripesPerSegment; i++)
         {
-            (*stripes)[stripeIndex].push_back(new VictimStripe(array));
+            (*victimStripes)[stripeIndex].push_back(new VictimStripe(array));
         }
     }
-    return stripes;
 }
 
 std::string

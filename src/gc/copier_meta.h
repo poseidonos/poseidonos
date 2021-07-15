@@ -84,8 +84,8 @@ public:
     static const uint32_t GC_CONCURRENT_COUNT = 16;
     static const uint32_t GC_VICTIM_SEGMENT_COUNT = 2;
 private:
-    std::vector<FreeBufferPool*>* _CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize);
-    std::vector<std::vector<VictimStripe*>>* _CreateVictimStripes(IArrayInfo* array);
+    void _CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize);
+    void _CreateVictimStripes(IArrayInfo* array);
 
     std::atomic<uint32_t> requestStripeCount;
     std::atomic<uint32_t> requestBlockCount;
