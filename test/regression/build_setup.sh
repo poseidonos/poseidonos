@@ -1,6 +1,5 @@
 #!/bin/bash
 ibof_root="/home/ibof/ibofos"
-ibof_bin="/etc/pos/bin"
 ibof_conf="/etc/pos"
 target_ip=127.0.0.1
 target_type="VM"
@@ -65,27 +64,19 @@ buildTest()
     
     sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -f $ibof_bin/ibofos_${test_rev} ]]
 
-    if [ $? -eq 0 ];
+    echo "There is no binary with rev ${test_rev}"
+    texecc make -j 4 clean
+    if [ $target_type == "VM" ]
     then
-        sshpass -p bamboo ssh -q -tt root@${target_ip} "cp $ibof_bin/ibofos_${test_rev} $ibof_root/bin/poseidonos"
-        texecc $ibof_root/tool/cli/script/build_cli.sh
-        texecc cp $ibof_root/tool/cli/bin/cli $ibof_root/bin
-        echo "Binary Copied"
-    else
-        echo "There is no binary with rev ${test_rev}"
-        texecc make -j 4 clean
-        if [ $target_type == "VM" ]
-        then
-            echo "Build For VM"
-            texecc make CCACHE=Y -j 4
-        elif [ $target_type == "PM" ]
-        then
-            echo "Build For PM"
-            texecc make CCACHE=Y -j 16
-        else 
-            echo "Build For PSD"
-            texecc make CCACHE=Y -j 16
-        fi
+        echo "Build For VM"
+        texecc make CACHE=Y -j 4
+    elif [ $target_type == "PM" ]
+    then
+        echo "Build For PM"
+        texecc make CACHE=Y -j 16
+    else 
+        echo "Build For PSD"
+        texecc make CACHE=Y -j 16
     fi
     
 
@@ -97,13 +88,6 @@ buildTest()
     if [ $? -eq 0 ]
     then
         echo "Build Success"
-        sshpass -p bamboo ssh -q -tt root@${target_ip} [[ ! -d $ibof_bin ]]
-        if [ $? -eq 0 ]
-        then
-            texecc mkdir -p $ibof_bin
-        fi
-
-        texecc cp $ibof_root/bin/poseidonos $ibof_bin/ibofos_${test_rev}
     else
         echo "Build Failed"
         exit 1
