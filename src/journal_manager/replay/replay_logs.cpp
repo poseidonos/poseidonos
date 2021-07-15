@@ -224,6 +224,12 @@ ReplayLogs::_ReplayFinishedStripes(void)
                 "Unknwon log type {} found", log->GetType());
         }
     }
+
+    for (auto replayLog : replayLogs)
+    {
+        delete replayLog.log;
+    }
+    replayLogs.clear();
     return 0;
 }
 
@@ -244,7 +250,7 @@ ReplayLogs::_MoveToReplayedStripe(ReplayStripe* stripe)
     replayedStripeList.push_back(stripe);
 
     replayingStripeList.erase(std::remove(replayingStripeList.begin(),
-        replayingStripeList.end(), stripe), replayingStripeList.end());
+         replayingStripeList.end(), stripe), replayingStripeList.end());
 }
 
 ReplayStripe*

@@ -155,6 +155,7 @@ JournalManager::~JournalManager(void)
     delete logWriteHandler;
     delete logFactory;
 
+    delete checkpointManager;
     delete statusProvider;
     delete config;
 }
