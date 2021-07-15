@@ -247,10 +247,12 @@ ContextManager::GetCurrentGcMode(void)
     QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments);
     if (gcCtx.GetUrgentThreshold() >= numFreeSegments)
     {
+        POS_TRACE_DEBUG(EID(GET_URGENT_GC_MODE), "get urgent gc mode, free segments:{}", numFreeSegments);
         return MODE_URGENT_GC;
     }
     else if (gcCtx.GetGcThreshold() >= numFreeSegments)
     {
+        POS_TRACE_DEBUG(EID(GET_NORMAL_GC_MODE), "get normal gc mode, free segments:{}", numFreeSegments);
         return MODE_NORMAL_GC;
     }
     return MODE_NO_GC;
