@@ -792,4 +792,73 @@ TEST(NvmfTarget, GetAttachedVolumeList_FailToFindArrayName)
     ASSERT_EQ(actual, expected);
     delete mockSpdkCaller;
 }
+
+TEST(NvmfTarget, GetPosBdevUuid_Success)
+{
+    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    struct spdk_bdev* bdev[1];
+    struct spdk_uuid* uuid[1];
+    string expected = "abcd";
+
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(bdev[0]));
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetUuid(_)).WillByDefault(Return(uuid[0]));
+    EXPECT_CALL(*mockSpdkCaller, SpdkUuidFmtLower(_, _, _)).WillOnce([&](char* uuidStr, size_t uuidStrSize, const spdk_uuid* uuid)
+    {
+        snprintf(uuidStr, sizeof(uuidStr), "abcd");
+        return 0;
+    });
+
+    NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
+    string actual = nvmfTarget.GetPosBdevUuid(0, "array");
+    ASSERT_EQ(actual, expected);
+    delete mockSpdkCaller;
+}
+
+TEST(NvmfTarget, GetPosBdevUuid_BdevNotExist)
+{
+    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    string expected = "";
+
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(nullptr));
+    NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
+    string actual = nvmfTarget.GetPosBdevUuid(0, "array");
+
+    ASSERT_EQ(actual, expected);
+    delete mockSpdkCaller;
+}
+
+TEST(NvmfTarget, GetPosBdevUuid_BdevUuidNotExist)
+{
+    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    struct spdk_bdev* bdev[1];
+    string expected = "";
+
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(bdev[0]));
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetUuid(_)).WillByDefault(Return(nullptr));
+
+    NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
+    string actual = nvmfTarget.GetPosBdevUuid(0, "array");
+
+    ASSERT_EQ(actual, expected);
+    delete mockSpdkCaller;
+}
+
+TEST(NvmfTarget, GetPosBdevUuid_FailToConvertUuidToString)
+{
+    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    struct spdk_bdev* bdev[1];
+    struct spdk_uuid* uuid[1];
+
+    string expected = "";
+
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(bdev[0]));
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetUuid(_)).WillByDefault(Return(uuid[0]));
+    ON_CALL(*mockSpdkCaller, SpdkUuidFmtLower(_, _, _)).WillByDefault(Return(-1));
+
+    NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
+    string actual = nvmfTarget.GetPosBdevUuid(0, "array");
+
+    ASSERT_EQ(actual, expected);
+    delete mockSpdkCaller;
+}
 } // namespace pos

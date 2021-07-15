@@ -184,4 +184,16 @@ SpdkCaller::SpdkGetAttachedSubsystemNqn(const char* bdevName)
 {
     return get_attached_subsystem_nqn(bdevName);
 }
+
+const struct spdk_uuid*
+SpdkCaller::SpdkBdevGetUuid(const struct spdk_bdev* bdev)
+{
+    return spdk_bdev_get_uuid(bdev);
+}
+
+int
+SpdkCaller::SpdkUuidFmtLower(char* uuid_str, size_t uuid_str_size, const struct spdk_uuid* uuid)
+{
+    return spdk_uuid_fmt_lower(uuid_str, uuid_str_size, uuid);
+}
 } // namespace pos

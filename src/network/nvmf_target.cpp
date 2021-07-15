@@ -609,4 +609,37 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
     }
     return volList;
 }
+
+string
+NvmfTarget::GetPosBdevUuid(uint32_t id, string arrayName)
+{
+    char uuidStr[SPDK_UUID_STRING_LEN];
+
+    string bdevName = GetBdevName(id, arrayName);
+    struct spdk_bdev* bdev = spdkCaller->SpdkBdevGetByName(bdevName.c_str());
+    if (bdev == nullptr)
+    {
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::IONVMF_BDEV_DOES_NOT_EXIST;
+        POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
+        return "";
+    }
+    const struct spdk_uuid* uuid = spdkCaller->SpdkBdevGetUuid(bdev);
+    if (uuid == nullptr)
+    {
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::IONVMF_BDEV_UUID_DOES_NOT_EXIST;
+        POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
+        return "";
+    }
+    int ret = spdkCaller->SpdkUuidFmtLower(uuidStr, sizeof(uuidStr), uuid);
+    if (ret != 0)
+    {
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::IONVMF_FAIL_TO_CONVERT_UUID_INTO_STRING;
+        POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
+        return "";
+    }
+    return uuidStr;
+}
 } // namespace pos

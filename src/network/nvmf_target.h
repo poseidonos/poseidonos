@@ -87,6 +87,7 @@ public:
     vector<pair<int, string>> GetAttachedVolumeList(string& nqn);
     static bool AttachNamespace(const string& nqn, const string& bdevName,
         PosNvmfEventDoneCallback_t cb, void* cbArg);
+    string GetPosBdevUuid(uint32_t id, string arrayName);
 
 private:
     static struct NvmfTargetCallbacks nvmfCallbacks;

@@ -71,6 +71,8 @@ public:
     virtual void SpdkBdevSetQosRateLimits(struct spdk_bdev* bdev, uint64_t* limits,
         void (*cbFunc)(void* cbArg, int status), void* cbArg);
     virtual const char* SpdkGetAttachedSubsystemNqn(const char* bdevName);
+    virtual const struct spdk_uuid* SpdkBdevGetUuid(const struct spdk_bdev* bdev);
+    virtual int SpdkUuidFmtLower(char* uuid_str, size_t uuid_str_size, const struct spdk_uuid* uuid);
 };
 
 using SpdkCallerSingleton = Singleton<SpdkCaller>;

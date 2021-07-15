@@ -58,6 +58,9 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_POS_BDEV, "Fail to create pos bdev"},
             {POS_EVENT_ID::IONVMF_FAIL_TO_DELETE_POS_BDEV, "Fail to delete pos bdev"},
             {POS_EVENT_ID::IONVMF_FAIL_TO_DETACH_NAMESPACE, "Fail to detach namespace from subsystem"},
+            {POS_EVENT_ID::IONVMF_BDEV_DOES_NOT_EXIST, "Fail to find requested bdev"},
+            {POS_EVENT_ID::IONVMF_BDEV_UUID_DOES_NOT_EXIST, "Fail to get requeted bdev uuid"},
+            {POS_EVENT_ID::IONVMF_FAIL_TO_CONVERT_UUID_INTO_STRING, "Fail to convert uuid into string"},
 };
 
 PosEventId::PosEventIdEntry

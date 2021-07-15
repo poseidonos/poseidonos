@@ -1151,7 +1151,7 @@ nvme_qpair_set_state(struct spdk_nvme_qpair *qpair, enum nvme_qpair_state state)
 
 static inline enum nvme_qpair_state
 nvme_qpair_get_state(struct spdk_nvme_qpair *qpair) {
-	return qpair->state;
+	return (enum nvme_qpair_state)qpair->state;
 }
 
 static inline void
@@ -1179,7 +1179,7 @@ nvme_request_remove_child(struct nvme_request *parent, struct nvme_request *chil
 static inline void
 nvme_cb_complete_child(void *child_arg, const struct spdk_nvme_cpl *cpl)
 {
-	struct nvme_request *child = child_arg;
+	struct nvme_request *child = (struct nvme_request*)child_arg;
 	struct nvme_request *parent = child->parent;
 
 	nvme_request_remove_child(parent, child);
