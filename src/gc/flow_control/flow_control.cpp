@@ -50,7 +50,7 @@ namespace pos
 
 FlowControl::FlowControl(IArrayInfo* arrayInfo)
 : FlowControl(arrayInfo,
-            AllocatorServiceSingleton::Instance()->GetIContextManager(arrayInfo->GetName()),
+            nullptr,
             nullptr,
             new SystemTimeoutChecker(),
             FlowControlServiceSingleton::Instance(),
@@ -92,6 +92,11 @@ int
 FlowControl::Init(void)
 {
     int result = 0;
+
+    if (nullptr == iContextManager)
+    {
+        iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayInfo->GetName());
+    }
 
     sizeInfo = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
 
