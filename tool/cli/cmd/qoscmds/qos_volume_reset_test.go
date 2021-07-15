@@ -22,7 +22,7 @@ func TestVolumeResetCommandReq(t *testing.T) {
 
 	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
-	testmgr.ExecuteCommand(rootCmd, "qos", "create", "--volume-name", "vol01", "--array-name", "Array0", "--maxiops", "3000", "--maxbw", "2000", "--json-req")
+	testmgr.ExecuteCommand(rootCmd, "qos", "reset", "--volume-name", "vol01", "--array-name", "Array0", "--json-req")
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)
@@ -30,7 +30,8 @@ func TestVolumeResetCommandReq(t *testing.T) {
 
 	// TODO(mj): Currently, we compare strings to test the result.
 	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
-	expected := `{"command":"QOSCREATEVOLUMEPOLICY","rid":"fromCLI","param":{"name":"vol01","maxiops":3000,"maxbw":2000,"array":"Array0"}}`
+
+    expected := `{"command":"QOSRESETVOLUMEPOLICY","rid":"fromCLI","param":{"vol":[{"volumeName":"vol01"}],"array":"Array0"}}`
 
 	if expected != string(out) {
 		t.Errorf("Expected: %q Output: %q", expected, string(out))
