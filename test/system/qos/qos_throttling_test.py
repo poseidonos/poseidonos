@@ -15,7 +15,7 @@ default_initiator_id = "root"
 default_initiator_pw = "ibof"
 cli = "bin/poseidonos-cli qos create"
 default_ibofos_root = "/home/ibof/ibofos"
-config_dir = "/etc/ibofos/conf/"
+config_dir = "/etc/pos/"
 
 
 def remote_execute(ip, id, pw, command, stderr_report=False):
@@ -158,11 +158,13 @@ def cli_max_iops_setting(max_iops, ratio):
 def test_scenario():
     os.system("rm -rf /dev/shm/ibof_nvmf_trace.pid*")
     os.system("mkdir " + config_dir)
-    if (os.path.isfile(config_dir + "ibofos.conf")):
-        os.system("cp " + config_dir + "ibofos.conf " +
-                  config_dir + "ibofos.conf.reserved -rf")
+
+    if (os.path.isfile(config_dir + "pos.conf")):
+        os.system("cp " + config_dir + "pos.conf " +
+                  config_dir + "pos.conf.reserved -rf")
+
     os.system("cp " + ibofos_root + "config/ibofos_for_perf_ci.conf " +
-              config_dir + "ibofos.conf -rf")
+              config_dir + "pos.conf -rf")
 
     bring_up_ibofos()
 

@@ -24,16 +24,14 @@ ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
 fio_plugin='nvme'
 ioengine = ibof_root + "lib/spdk/examples/" + str(fio_plugin) + "/fio_plugin/fio_plugin"
 #ioengine = ibof_root + "/bin/ibof_bdev_fio_plugin"
-spdk_conf= ibof_root + "test/system/nvmf/initiator/spdk_tcp_fio/BDEV.conf"
+spdk_conf = ibof_root + "test/system/nvmf/initiator/spdk_tcp_fio/BDEV.conf"
 
-file_num=1
+file_base = 0
+file_num = 1
 traddr='10.100.11.1'
 # could be either nvme or nvmf or bdev
-#filename='trtype=pcie traddr=0000.02.00.0 ns=1'
-#filename="Nvme1n1"
 trtype="tcp"
 filename="trtype=tcp adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem1 ns=1:"
-#filename='vol=vol1 setup_path='+ibof_root+'tool/ibof_bdev_fio_plugin/'
 
 # the configuration below runs QD 1 & 128. 
 # To add set q_depth=['1', '32', '128']
@@ -72,7 +70,6 @@ cpus_allowed=['']
 # iter_num parameter is used to run the test multiple times.
 # set iter_num = ['1', '2', '3'] to repeat each test 3 times
 iter_num=['1']
-
 # setting profile_mode True | False. True will remains profile json file and .csv result file
 profile_mode=False
 
@@ -86,6 +83,8 @@ offset=0
 
 # extra fio options
 extra_fio_options=" --thread=1 --group_reporting=1 --direct=1"
+
+json_output_file = ""
 
 #######################################################################################
 
@@ -120,11 +119,6 @@ def run_fio(io_size_bytes, block_size, qd, rw_mix, cpus_allowed, run_num, worklo
     if cpus_allowed != "":
         command += " --cpus_allowed=" + str(cpus_allowed) + ""
 
-    if block_size.find('-') == -1:
-        command += " --bs_unaligned=1 --bs=" + str(block_size)
-    else:
-        command += " --bsrange=" + str(block_size)
-
     if workload.find('rw') == -1:
         command += " --norandommap=1 "
 
@@ -149,13 +143,16 @@ def run_fio(io_size_bytes, block_size, qd, rw_mix, cpus_allowed, run_num, worklo
     command += " --numjobs=" + str(numjobs)+" ";
 
     if profile_mode == True:
-        string = "size_" + str(io_size_bytes) + "_bs_" + str(block_size) + "_qd_" + str(qd) + "_mix_" + str(rw_mix) + "_workload_" + str(workload) + "_run_" + str(run_num)
+        if (json_output_file == ""):
+            string = "size_" + str(io_size_bytes) + "_bs_" + str(block_size) + "_qd_" + str(qd) + "_mix_" + str(rw_mix) + "_workload_" + str(workload) + "_run_" + str(run_num)
+        else:
+            string = json_output_file
         command += " --output=" + string + " --output-format=json "
 
     command += extra_fio_options
 
     if file_num > 1:
-        for i in range(0, file_num):
+        for i in range(file_base, file_base + file_num):
             if fio_plugin == "nvme":
                 command += " --name=test" + str(i) + " --filename='trtype="+str(trtype)+" adrfam=IPv4 traddr=" + str(traddr) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem" + str(i+1) + " ns=1'"
             else:
@@ -173,7 +170,7 @@ def run_fio(io_size_bytes, block_size, qd, rw_mix, cpus_allowed, run_num, worklo
     if ret != 0 and (skip_exit_with_signal == False or (ret & exit_with_signal) == 0):
         print("Test {} Failed".format(run_num))
         sys.stdout.write(reset)
-        sys.exit(1);
+        sys.exit(1)
     else:
         print("[TEST {}] ".format(run_num), end='')
         sys.stdout.write(green)
@@ -276,43 +273,48 @@ def parse_argument():
     global trtype
     global traddr
     global offset
+    global file_base
+    global json_output_file
+    global profile_mode
 
     parser = argparse.ArgumentParser(description='Please add fio option to fio_full_bench.py')
-    parser.add_argument('--iodepth', required=False, help='Set I/O Queue Depth. Please input without space  Ex) --iodepth="1,32,128"');
-    parser.add_argument('--io_size', required=False, help='Set io_size. Please input without space. Please set single number');
-    parser.add_argument('--ioengine', required=False, help='Set ioengine Ex) --ioengine=aio');
-    parser.add_argument('--bs', required=False, help='Block Size setting. Ex) --bs="4096B,128k"');
-    parser.add_argument('--readwrite', required=False, help='Set write read ... Ex) --readwrite="read,write,randread,randwrite"');
+    parser.add_argument('--iodepth', required=False, help='Set I/O Queue Depth. Please input without space  Ex) --iodepth="1,32,128"')
+    parser.add_argument('--io_size', required=False, help='Set io_size. Please input without space. Please set single number')
+    parser.add_argument('--ioengine', required=False, help='Set ioengine Ex) --ioengine=aio')
+    parser.add_argument('--bs', required=False, help='Block Size setting. Ex) --bs="4096B,128k"')
+    parser.add_argument('--readwrite', required=False, help='Set write read ... Ex) --readwrite="read,write,randread,randwrite"')
     parser.add_argument('--verify', required=False, help='Please verify option as true or false or pattern Ex) --verify=true or --verify=false or --verify=pattern');
     parser.add_argument('--verify_pattern', required=False, help='Please give a verify_pattern for fio Ex) --verify_pattern=\'filename\' or --verify_pattern=0xffffffff or --verify_pattern=\"str\"');
     parser.add_argument('--buffer_pattern', required=False, help='Please give a buffer_pattern for fio Ex) --buffer_pattern=\'filename\' or --buffer_pattern=0xffffffff or --buffer_pattern=\"str\"');
-    parser.add_argument('--ramp_time', required=False, help='Set ramp time. ');
-    parser.add_argument('--run_time', required=False, help='Set run time. please set as --time_based=1 also ');
-    parser.add_argument('--file_num', required=False, help='Set number of files for tests ');
-    parser.add_argument('--time_based', required=False, help='Set time Based option');
-    parser.add_argument('--cpus_allowed', required=False, help='Set cpu list, --cpus_allowed=2-31,41');
-    parser.add_argument('--numjobs', required=False, help='Set numberof jobs ');
-    parser.add_argument('--mix', required=False, help='Set mix percentage ');
-    parser.add_argument('--target_volume', required=False, help='Set target volume to io ');
-    parser.add_argument('--offset', required=False, help='Set start offset ');
-    parser.add_argument('--filename', required=False, help='Set FileName');
-    parser.add_argument('-i', '--traddr', required=False, help='Set target ip address ');
-    parser.add_argument('-t', '--trtype', required=False, help='Set transfer type (tcp or rdma) ');
-    parser.add_argument('-p', '--port', required=False, help='Set NVMeoF listening port ');
-    parser.add_argument('-n', '--nsid', required=False, help='Set Namespace id ');
+    parser.add_argument('--ramp_time', required=False, help='Set ramp time. ')
+    parser.add_argument('--run_time', required=False, help='Set run time. please set as --time_based=1 also ')
+    parser.add_argument('--file_num', required=False, help='Set number of files for tests ')
+    parser.add_argument('--file_base', required=False, help='Set base number of file test')
+    parser.add_argument('--time_based', required=False, help='Set time Based option')
+    parser.add_argument('--cpus_allowed', required=False, help='Set cpu list, --cpus_allowed=2-31,41')
+    parser.add_argument('--numjobs', required=False, help='Set numberof jobs ')
+    parser.add_argument('--mix', required=False, help='Set mix percentage ')
+    parser.add_argument('--target_volume', required=False, help='Set target volume to io ')
+    parser.add_argument('--offset', required=False, help='Set start offset ')
+    parser.add_argument('--filename', required=False, help='Set FileName')
+    parser.add_argument('-i', '--traddr', required=False, help='Set target ip address ')
+    parser.add_argument('-t', '--trtype', required=False, help='Set transfer type (tcp or rdma) ')
+    parser.add_argument('-p', '--port', required=False, help='Set NVMeoF listening port ')
+    parser.add_argument('-n', '--nsid', required=False, help='Set Namespace id ')
+    parser.add_argument('-j', '--json_output_file', required=False, help='Output will be json file')
 
     args = parser.parse_args()
-    if(args.iodepth!=None):
+    if(args.iodepth is not None):
         q_depth=args.iodepth.split(',')
-    if(args.io_size!=None):
+    if(args.io_size is not None):
         io_size=args.io_size.split(',')
-    if(args.ioengine!=None):
+    if(args.ioengine is not None):
         ioengine=args.ioengine
-    if(args.bs!=None):
+    if(args.bs is not None):
         block_size=args.bs.split(',')
-    if(args.readwrite!=None):
+    if(args.readwrite is not None):
         readwrite=args.readwrite.split(',')
-    if(args.verify!=None):
+    if(args.verify is not None):
         if(args.verify == "true" or args.verify == "True" or args.verify == "1"):
             verify = "True"
         elif(args.verify == "pattern" or args.verify == "Pattern"):
@@ -320,33 +322,38 @@ def parse_argument():
             verify_pattern = args.verify_pattern
         else:
             verify = False
-    if(args.buffer_pattern!=None):
+    if(args.buffer_pattern is not None):
         buffer_pattern = args.buffer_pattern
-    if(args.ramp_time!=None):
+    if(args.ramp_time is not None):
         ramp_time=args.ramp_time
-    if(args.run_time!=None):
+    if(args.run_time is not None):
         run_time=args.run_time.split(',')
-    if(args.file_num!=None):
+    if(args.file_num is not None):
         file_num=int(args.file_num,0)
-    if(args.time_based!=None):
+    if(args.file_base is not None):
+        file_base = int(args.file_base, 0)
+    if(args.time_based is not None):
         time_based=args.time_based
-    if(args.cpus_allowed!=None):
+    if(args.cpus_allowed is not None):
         cpus_allowed=[args.cpus_allowed]
-    if(args.numjobs!=None):
+    if(args.numjobs is not None):
         numjobs=args.numjobs
-    if(args.traddr!=None):
+    if(args.traddr is not None):
         filename=filename.replace("traddr=10.100.11.1","traddr="+args.traddr)
         traddr=args.traddr #for multi subsystem test
-    if(args.trtype!=None):
+    if(args.trtype is not None):
         filename=filename.replace("trtype=tcp","trtype="+args.trtype)
         trtype=args.trtype #for multi subsystem test
     if(args.target_volume):
         if(1 == file_num):
             filename=filename.replace("subsystem1", "subsystem"+args.target_volume)
-    if(args.offset!=None):
+    if(args.offset is not None):
         offset=args.offset
     if(args.filename):
-        filename=args.filename 
+        filename = args.filename
+    if(args.json_output_file is not None):
+        json_output_file = args.json_output_file
+        profile_mode = True
 
 # set up for output file
 host_name = os.uname()[1]
