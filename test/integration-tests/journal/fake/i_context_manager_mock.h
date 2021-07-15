@@ -22,6 +22,7 @@ public:
     virtual int MakeRebuildTarget(void) { return 0; }
     virtual int StopRebuilding(void) { return 0; }
     virtual bool NeedRebuildAgain(void) { return true; }
+    virtual uint32_t GetRebuildTargetSegmentCount(void) { return 0; }
     virtual int GetNumOfFreeSegment(bool needLock) { return 0; }
     virtual GcMode GetCurrentGcMode(void) { return MODE_NO_GC; }
     virtual int GetGcThreshold(GcMode mode) { return 0; }
@@ -33,7 +34,7 @@ public:
     }
 
 private:
-    int _FlushContexts(EventSmartPtr callback)
+    int _FlushContexts(EventSmartPtr callback, bool sync)
     {
         {
             bool result = callback->Execute();
@@ -48,5 +49,4 @@ private:
         }
     }
 };
-
 } // namespace pos

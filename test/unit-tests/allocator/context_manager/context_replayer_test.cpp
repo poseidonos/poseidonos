@@ -36,6 +36,9 @@ TEST(ContextReplayer, ResetDirtyContextVersion_TestSimpleSetter)
     // when 2.
     ctxReplayer.ResetDirtyContextVersion(SEGMENT_CTX);
 
+    // when 3.
+    ctxReplayer.ResetDirtyContextVersion(11);
+
     delete allocCtx;
     delete wbStripeCtx;
     delete segCtx;

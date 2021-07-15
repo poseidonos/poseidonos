@@ -35,26 +35,6 @@ TEST(AllocatorCtx, AfterLoad_TestCheckingSignatureSuccess)
     delete segLocks;
 }
 
-TEST(AllocatorCtx, AfterLoad_TestCheckingSignatureFail)
-{
-    // given
-    AllocatorCtxHeader header;
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    NiceMock<MockSegmentStates>* segStates = new NiceMock<MockSegmentStates>();
-    NiceMock<MockSegmentLock>* segLocks = new NiceMock<MockSegmentLock>();
-    header.sig = 0;
-    AllocatorCtx allocCtx(&header, allocBitmap, segStates, segLocks, addrInfo);
-    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
-    // when
-    allocCtx.AfterLoad(nullptr);
-
-    delete allocBitmap;
-    delete segStates;
-    delete segLocks;
-    delete addrInfo;
-}
-
 TEST(AllocatorCtx, GetStoredVersion_TestSimpleGetter)
 {
     // given
@@ -367,6 +347,7 @@ TEST(AllocatorCtx, Init_InitAndClose)
     AllocatorCtx allocCtx(&addrInfo);
     // when
     allocCtx.Init();
+    allocCtx.Close();
     allocCtx.Close();
 }
 

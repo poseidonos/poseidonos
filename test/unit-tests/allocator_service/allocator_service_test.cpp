@@ -88,4 +88,28 @@ TEST(AllocatorService, GetInterfaceFunc_TestSimpleGetter)
     delete ctxRep;
 }
 
+TEST(AllocatorService, GetInterfaceFunc_TestSimpleGetterFail)
+{
+    // given
+    NiceMock<MockIAllocatorWbt>* allWbt = new NiceMock<MockIAllocatorWbt>();
+    NiceMock<MockIBlockAllocator>* blkAlloc = new NiceMock<MockIBlockAllocator>();
+    NiceMock<MockIWBStripeAllocator>* wbAlloc = new NiceMock<MockIWBStripeAllocator>();
+    NiceMock<MockIContextManager>* ctxMan = new NiceMock<MockIContextManager>();
+    NiceMock<MockContextReplayer>* ctxRep = new NiceMock<MockContextReplayer>();
+    AllocatorService allocService;
+    allocService.RegisterAllocator("", 0, blkAlloc, wbAlloc, allWbt, ctxMan, ctxRep);
+    // when
+    allocService.GetIContextReplayer("a");
+    allocService.GetIContextManager("a");
+    allocService.GetIWBStripeAllocator("a");
+    allocService.GetIBlockAllocator("a");
+    allocService.GetIAllocatorWbt("a");
+
+    delete allWbt;
+    delete blkAlloc;
+    delete wbAlloc;
+    delete ctxMan;
+    delete ctxRep;
+}
+
 } // namespace pos

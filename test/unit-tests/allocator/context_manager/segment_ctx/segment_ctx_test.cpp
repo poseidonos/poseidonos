@@ -25,19 +25,6 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentSignatureSuccess)
     segCtx.AfterLoad(nullptr);
 }
 
-TEST(SegmentCtx, AfterLoad_testIfSegmentSignatureFail)
-{
-    // given
-    SegmentCtxHeader header;
-    header.sig = 0;
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    SegmentCtx segCtx(&header, nullptr, addrInfo);
-    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
-    // when
-    segCtx.AfterLoad(nullptr);
-    delete addrInfo;
-}
-
 TEST(SegmentCtx, BeforeFlush_TestSimpleSetter)
 {
     // given

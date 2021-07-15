@@ -60,6 +60,7 @@ public:
     void SetblksPerSegment(uint32_t value) { blksPerSegment = value; }
     void SetstripesPerSegment(uint32_t value) { stripesPerSegment = value; }
     void SetnumUserAreaSegments(uint32_t value) { numUserAreaSegments = value; }
+    void SetUT(bool ut) { isUT = ut; }
     virtual bool IsUT(void) { return isUT; }
 
 private:

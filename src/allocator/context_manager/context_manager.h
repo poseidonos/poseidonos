@@ -56,14 +56,14 @@ const int NO_REBUILD_TARGET_USER_SEGMENT = 0;
 
 class ContextManager : public IContextManager
 {
-enum IOTYPE
-{
-    IOTYPE_READ,
-    IOTYPE_WRITE,
-    IOTYPE_ALL
-};
-
 public:
+    enum IOTYPE
+    {
+        IOTYPE_READ,
+        IOTYPE_WRITE,
+        IOTYPE_ALL
+    };
+
     ContextManager(void) = default;
     ContextManager(TelemetryPublisher* tp, AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
         WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileMananager_,

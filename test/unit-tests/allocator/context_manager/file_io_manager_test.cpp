@@ -15,6 +15,16 @@ namespace pos
 {
 TEST(AllocatorFileIoManager, AllocatorFileIoManager_)
 {
+    AllocatorFileIoManager fileManager;
+    fileManager.Init();
+
+    NiceMock<AllocatorAddressInfo>* addrInfo = new NiceMock<AllocatorAddressInfo>();
+    NiceMock<MockMetaFileIntf>* file[NUM_FILES];
+    for (int i = 0; i < NUM_FILES; i++)
+    {
+        file[i] = nullptr;
+    }
+    AllocatorFileIoManager fileManager2((MetaFileIntf**)file, addrInfo);
 }
 
 TEST(AllocatorFileIoManager, Init_TestInitAndClose)
@@ -56,7 +66,7 @@ TEST(AllocatorFileIoManager, UpdateSectionInfo_TestSimpleSetter)
     }
 }
 
-TEST(AllocatorFileIoManager, LoadSync_TestFileLoadWhenFileExistOrNot)
+TEST(AllocatorFileIoManager, Load_TestFileLoadWhenFileExistOrNot)
 {
     // given
     NiceMock<AllocatorAddressInfo>* addrInfo = new NiceMock<AllocatorAddressInfo>();
@@ -71,7 +81,7 @@ TEST(AllocatorFileIoManager, LoadSync_TestFileLoadWhenFileExistOrNot)
     EXPECT_CALL(*file[0], DoesFileExist).WillOnce(Return(false));
     EXPECT_CALL(*file[0], Create).WillOnce(Return(-1));
     // when 1.
-    int ret = fileManager.LoadSync(0, buf);
+    int ret = fileManager.Load(0, buf, nullptr);
     // then 1.
     EXPECT_EQ(-1, ret);
 
@@ -79,23 +89,23 @@ TEST(AllocatorFileIoManager, LoadSync_TestFileLoadWhenFileExistOrNot)
     EXPECT_CALL(*file[0], DoesFileExist).WillOnce(Return(false));
     EXPECT_CALL(*file[0], Create).WillOnce(Return(0));
     // when 2.
-    ret = fileManager.LoadSync(0, buf);
+    ret = fileManager.Load(0, buf, nullptr);
     // then 2.
     EXPECT_EQ(0, ret);
 
     // given 3.
     EXPECT_CALL(*file[0], DoesFileExist).WillOnce(Return(true));
-    EXPECT_CALL(*file[0], IssueIO).WillOnce(Return(-1));
+    EXPECT_CALL(*file[0], AsyncIO).WillOnce(Return(-1));
     // when 3.
-    ret = fileManager.LoadSync(0, buf);
+    ret = fileManager.Load(0, buf, nullptr);
     // then 3.
     EXPECT_EQ(-1, ret);
 
     // given 4.
     EXPECT_CALL(*file[0], DoesFileExist).WillOnce(Return(true));
-    EXPECT_CALL(*file[0], IssueIO).WillOnce(Return(0));
+    EXPECT_CALL(*file[0], AsyncIO).WillOnce(Return(0));
     // when 3.
-    ret = fileManager.LoadSync(0, buf);
+    ret = fileManager.Load(0, buf, nullptr);
     // then 3.
     EXPECT_EQ(1, ret);
     delete[] buf;
@@ -106,29 +116,7 @@ TEST(AllocatorFileIoManager, LoadSync_TestFileLoadWhenFileExistOrNot)
     }
 }
 
-TEST(AllocatorFileIoManager, StoreSync_TestSimpleCaller)
-{
-    // given
-    NiceMock<AllocatorAddressInfo>* addrInfo = new NiceMock<AllocatorAddressInfo>();
-    NiceMock<MockMetaFileIntf>* file[NUM_FILES];
-    for (int i = 0; i < NUM_FILES; i++)
-    {
-        file[i] = new NiceMock<MockMetaFileIntf>("aa", "bb");
-    }
-    AllocatorFileIoManager fileManager((MetaFileIntf**)file, addrInfo);
-    char* buf = new char[100];
-    EXPECT_CALL(*file[0], IssueIO);
-    // when
-    fileManager.StoreSync(0, buf);
-    delete[] buf;
-    delete addrInfo;
-    for (int i = 0; i < NUM_FILES; i++)
-    {
-        delete file[i];
-    }
-}
-
-TEST(AllocatorFileIoManager, StoreAsync_TestSimpleCaller)
+TEST(AllocatorFileIoManager, Store_TestSimpleCaller)
 {
     // given
     NiceMock<AllocatorAddressInfo>* addrInfo = new NiceMock<AllocatorAddressInfo>();
@@ -143,13 +131,13 @@ TEST(AllocatorFileIoManager, StoreAsync_TestSimpleCaller)
     EXPECT_CALL(*file[0], GetFd).WillOnce(Return(0));
     EXPECT_CALL(*file[0], AsyncIO).WillOnce(Return(0));
     // when 1.
-    fileManager.StoreAsync(0, buf, nullptr);
+    fileManager.Store(0, buf, nullptr);
 
     // given 2.
     EXPECT_CALL(*file[0], GetFd).WillOnce(Return(0));
     EXPECT_CALL(*file[0], AsyncIO).WillOnce(Return(-2));
     // when 2.
-    fileManager.StoreAsync(0, buf, nullptr);
+    fileManager.Store(0, buf, nullptr);
 
     delete addrInfo;
     for (int i = 0; i < NUM_FILES; i++)
@@ -176,13 +164,12 @@ TEST(AllocatorFileIoManager, LoadSectionData_)
     bufSrc[20] = 'c';
     fileManager.UpdateSectionInfo(0, 0, &bufDst[0], 10, 0);
     fileManager.UpdateSectionInfo(0, 1, &bufDst[10], 10, 10);
-    fileManager.UpdateSectionInfo(0, 2, &bufDst[20], 30, 20);
+    fileManager.UpdateSectionInfo(0, 2, nullptr, 30, 20);
     // when
     fileManager.LoadSectionData(0, bufSrc);
     // then
     EXPECT_EQ(bufSrc[0], bufDst[0]);
     EXPECT_EQ(bufSrc[10], bufDst[10]);
-    EXPECT_EQ(bufSrc[20], bufDst[20]);
     delete addrInfo;
     for (int i = 0; i < NUM_FILES; i++)
     {
@@ -206,13 +193,12 @@ TEST(AllocatorFileIoManager, CopySectionData_)
     bufSrc[20] = 'c';
     fileManager.UpdateSectionInfo(0, 0, &bufSrc[0], 10, 0);
     fileManager.UpdateSectionInfo(0, 1, &bufSrc[10], 10, 10);
-    fileManager.UpdateSectionInfo(0, 2, &bufSrc[20], 30, 20);
+    fileManager.UpdateSectionInfo(0, 2, nullptr, 30, 20);
     // when
     fileManager.CopySectionData(0, bufDst, 0, 3);
     // then
     EXPECT_EQ(bufSrc[0], bufDst[0]);
     EXPECT_EQ(bufSrc[10], bufDst[10]);
-    EXPECT_EQ(bufSrc[20], bufDst[20]);
     delete addrInfo;
     for (int i = 0; i < NUM_FILES; i++)
     {

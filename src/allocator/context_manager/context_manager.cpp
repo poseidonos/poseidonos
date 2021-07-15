@@ -110,7 +110,13 @@ ContextManager::Init(void)
     fileIoManager->Init();
     _UpdateSectionInfo();
     int ret = _LoadContexts();
-    assert(ret >= 0);
+    if (ret < 0)
+    {
+        while (addrInfo->IsUT() != true)
+        {
+            usleep(1); // assert(false);
+        }
+    }
 }
 
 void
@@ -373,10 +379,15 @@ ContextManager::TestCallbackFunc(AsyncMetaFileIoCtx* ctx, IOTYPE type, int cnt)
         numReadIoIssued = cnt;
         _LoadCompletedThenCB(ctx);
     }
-    else
+    else if (type == IOTYPE_WRITE)
     {
         numWriteIoIssued = cnt;
         _FlushCompletedThenCB(ctx);
+    }
+    else
+    {
+        numWriteIoIssued = cnt;
+        _WaitPendingIo(IOTYPE_ALL);
     }
 }
 
@@ -455,16 +466,19 @@ ContextManager::_LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx)
     {
         owner = REBUILD_CTX;
         fileIoManager->LoadSectionData(owner, ctx->buffer);
+        fileOwner[owner]->AfterLoad(ctx->buffer);
     }
     else if (header->sig == SegmentCtx::SIG_SEGMENT_CTX)
     {
         owner = SEGMENT_CTX;
         fileIoManager->LoadSectionData(owner, ctx->buffer);
+        fileOwner[owner]->AfterLoad(ctx->buffer);
     }
     else if (header->sig == AllocatorCtx::SIG_ALLOCATOR_CTX)
     {
         owner = ALLOCATOR_CTX;
         fileIoManager->LoadSectionData(owner, ctx->buffer);
+        fileOwner[owner]->AfterLoad(ctx->buffer);
         wbStripeCtx->AfterLoad(ctx->buffer);
     }
     else
@@ -476,8 +490,8 @@ ContextManager::_LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx)
         {
             usleep(1); // assert(false);
         }
+        return;
     }
-    fileOwner[owner]->AfterLoad(ctx->buffer);
     POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] Async allocator file:{} load done!", owner);
     delete[] ctx->buffer;
     delete ctx;
@@ -488,7 +502,7 @@ ContextManager::_WaitPendingIo(IOTYPE type)
 {
     while (type == IOTYPE_ALL)
     {
-        if (numReadIoIssued + numWriteIoIssued == 0)
+        if ((numReadIoIssued + numWriteIoIssued == 0) || (addrInfo->IsUT() == true))
         {
             return;
         }
@@ -497,7 +511,7 @@ ContextManager::_WaitPendingIo(IOTYPE type)
 
     while (type == IOTYPE_READ)
     {
-        if (numReadIoIssued == 0)
+        if ((numReadIoIssued == 0) || (addrInfo->IsUT() == true))
         {
             return;
         }
@@ -506,7 +520,7 @@ ContextManager::_WaitPendingIo(IOTYPE type)
 
     while (type == IOTYPE_WRITE)
     {
-        if (numWriteIoIssued == 0)
+        if ((numWriteIoIssued == 0) || (addrInfo->IsUT() == true))
         {
             return;
         }
@@ -587,7 +601,6 @@ ContextManager::_LoadContexts(void)
             return ret;
         }
     }
-    assert((numReadIoIssued + numWriteIoIssued) == 0);
     return ret;
 }
 
