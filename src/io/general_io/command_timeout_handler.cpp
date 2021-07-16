@@ -190,7 +190,7 @@ CommandTimeoutHandler::_TimeoutActionAbortHandler(
     // so, null check is necessary
     // Pending abort command is allocated on the map Abort
 
-    if (qpair == nullptr && mapAbort.find(key) != mapAbort.end())
+    if (qpair == nullptr)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_ABORT_TIMEOUT;
         const struct spdk_nvme_ctrlr_data* ctrlrData = spdk_nvme_ctrlr_get_data(ctrlr);

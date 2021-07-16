@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "lib/spdk/lib/nvme/nvme_internal.h"
+
 #include "spdk/nvme_spec.h"
 #include "src/array/array.h"
 #include "src/device/device_manager.h"
@@ -172,12 +173,23 @@ TEST_F(CommandTimeoutHandlerFixture, AbortSubmitHandler_Execute)
 {
     // When : Timeout occured (cfs is not set)
     ctrlr.is_failed = false;
-    Nvme::ControllerTimeoutCallback(nullptr, &ctrlr, nullptr, cid);
+
+    struct spdk_nvme_qpair qpair;
+    Nvme::ControllerTimeoutCallback(nullptr, &ctrlr, &qpair, cid);
     // Then : Command Timeout Abort Handler is called and abort event is submitted
     std::queue<EventSmartPtr> queue =
         EventSchedulerSingleton::Instance()->DequeueEvents();
     EXPECT_GT(queue.size(), 0);
     EXPECT_FALSE(ctrlr.is_failed);
+
+    // When : Timeout occured (cfs is not set) Cid is random value.
+    ctrlr.is_failed = false;
+    Nvme::ControllerTimeoutCallback(nullptr, &ctrlr, nullptr, 1);
+    // Then : qpair is null and is_failed is set as true
+    queue =
+        EventSchedulerSingleton::Instance()->DequeueEvents();
+    EXPECT_EQ(queue.size(), 0);
+    EXPECT_TRUE(ctrlr.is_failed);
 
     // When : Timeout occured (cfs is set)
     Nvme::ControllerTimeoutCallback(nullptr, &ctrlr, &qpair, cid);
@@ -187,7 +199,7 @@ TEST_F(CommandTimeoutHandlerFixture, AbortSubmitHandler_Execute)
     // Given: Ctrl status went back to normal
     ctrlr.is_failed = true;
     // When : Timeout occured (cfs is not set but previous abort event is pending)
-    Nvme::ControllerTimeoutCallback(nullptr, &ctrlr, nullptr, cid);
+    Nvme::ControllerTimeoutCallback(nullptr, &ctrlr, &qpair, cid);
     // Then : Controller is failed due to reset handler being called
     EXPECT_TRUE(ctrlr.is_failed);
 
