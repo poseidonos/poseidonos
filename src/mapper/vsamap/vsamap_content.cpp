@@ -40,10 +40,10 @@
 
 namespace pos
 {
-
 VSAMapContent::VSAMapContent(void)
 : MapContent()
 {
+    totalBlks = 0;
 }
 
 VSAMapContent::VSAMapContent(int mapId, std::string arrayName)
