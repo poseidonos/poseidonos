@@ -105,6 +105,7 @@ VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
 
     if (res == false)
     {
+        volumeList.Remove(vol->ID);
         return static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
     }
 

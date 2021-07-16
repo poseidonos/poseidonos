@@ -70,6 +70,7 @@ SUBDIRS = allocator \
         telemetry/telemetry_client \
         dpdk_wrapper \
         memory_checker
+
 .PHONY: $(SUBDIRS)
 
 poseidonos: $(SUBDIRS)

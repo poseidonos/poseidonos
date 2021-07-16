@@ -47,7 +47,6 @@
 #include "src/gc/copier_meta.h"
 #include "src/gc/gc_stripe_manager.h"
 #include "src/gc/gc_map_update_request.h"
-
 #include "src/event_scheduler/event_scheduler.h"
 #include "Air.h"
 
@@ -99,6 +98,7 @@ GcFlushCompletion::_DoSpecificJob(void)
     BlkAddr rba;
     uint32_t volId;
     std::list<RbaAndSize> rbaList;
+    int cnt = 0;
 
     for (uint32_t i = 0; i < totalBlksPerUserStripe; i++)
     {
@@ -108,6 +108,7 @@ GcFlushCompletion::_DoSpecificJob(void)
             RbaAndSize rbaAndSize = {rba * VolumeIo::UNITS_PER_BLOCK,
                 BLOCK_SIZE};
             rbaList.push_back(rbaAndSize);
+            cnt++;
         }
     }
     std::tie(rba, volId) = stripe->GetReverseMapEntry(0);

@@ -33,6 +33,7 @@
 #include "src/cpu_affinity/affinity_manager.h"
 
 #include <numa.h>
+#include <sched.h>
 
 #include <iomanip>
 #include <sched.h>
