@@ -175,6 +175,7 @@ ReplayLogs::_ReplayFinishedStripes(void)
         replayLogs.insert(replayLogs.end(), logGroup.logs.begin(), logGroup.logs.end());
     }
 
+    int result = 0;
     for (auto replayLog : replayLogs)
     {
         LogHandlerInterface* log = replayLog.log;
@@ -192,10 +193,10 @@ ReplayLogs::_ReplayFinishedStripes(void)
             ReplayStripe* stripe = _FindUserStripe(log->GetVsid());
             stripe->AddLog(replayLog);
 
-            int result = _ReplayStripe(stripe);
+            result = _ReplayStripe(stripe);
             if (result != 0)
             {
-                return result;
+                break;
             }
 
             _MoveToReplayedStripe(stripe);
@@ -207,10 +208,10 @@ ReplayLogs::_ReplayFinishedStripes(void)
                 wbStripeReplayer, userStripeReplayer);
             stripe->AddLog(replayLog);
 
-            int result = _ReplayStripe(stripe);
+            result = _ReplayStripe(stripe);
             if (result != 0)
             {
-                return result;
+                break;
             }
 
             int volumeId = reinterpret_cast<GcStripeFlushedLog*>(log->GetData())->volId;
@@ -230,7 +231,7 @@ ReplayLogs::_ReplayFinishedStripes(void)
         delete replayLog.log;
     }
     replayLogs.clear();
-    return 0;
+    return result;
 }
 
 int
