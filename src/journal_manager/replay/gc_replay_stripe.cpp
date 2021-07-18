@@ -46,7 +46,8 @@ GcReplayStripe::GcReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* strip
     IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
     ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer)
 : ReplayStripe(vsid, vsaMap, stripeMap, contextReplayer, blockAllocator,
-      arrayInfo, wbReplayer, userReplayer)
+      arrayInfo, wbReplayer, userReplayer),
+  totalNumBlocks(0)
 {
 }
 
@@ -68,6 +69,8 @@ GcReplayStripe::AddLog(LogHandlerInterface* log)
     {
         GcStripeFlushedLog dat = *(reinterpret_cast<GcStripeFlushedLog*>(log->GetData()));
         status->GcStripeLogFound(dat);
+
+        totalNumBlocks = dat.totalNumBlockMaps;
     }
 }
 
@@ -86,15 +89,18 @@ GcReplayStripe::_CreateBlockWriteReplayEvents(GcBlockMapUpdate* blockList, int v
 int
 GcReplayStripe::Replay(void)
 {
-    // TODO (huijeong.kim) check all blocks are found in this gc stripe
+    int result = 0;
 
-    _CreateStripeFlushReplayEvent();
-    _CreateSegmentAllocationEvent();
-
-    int result = ReplayStripe::Replay();
-    if (result == 0)
+    if (status->IsFlushed() == true && totalNumBlocks == status->GetNumFoundBlocks())
     {
-        userStripeReplayer->Update(status->GetUserLsid());
+        _CreateStripeFlushReplayEvent();
+        _CreateSegmentAllocationEvent();
+
+        result = ReplayStripe::Replay();
+        if (result == 0)
+        {
+            userStripeReplayer->Update(status->GetUserLsid());
+        }
     }
     return result;
 }
