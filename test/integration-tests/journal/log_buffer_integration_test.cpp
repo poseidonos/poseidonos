@@ -40,7 +40,7 @@ JournalLogBufferIntegrationTest::SetUp(void)
     ON_CALL(config, GetLogGroupSize).WillByDefault(Return(LOG_GROUP_SIZE));
 
     // TODO(huijeong.kim) This injected modules should be deleted
-    factory.Init(new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
+    factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
 
     logBuffer = new JournalLogBuffer(new MockFileIntf(GetLogFileName(), "POSArray"));
     logBuffer->Delete();

@@ -370,7 +370,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     bufferAllocator->Init(logGroupReleaser, config);
     dirtyMapManager->Init(config);
 
-    logFactory->Init(logFilledNotifier, sequenceController);
+    logFactory->Init(config, logFilledNotifier, sequenceController);
 
     // Note that bufferAllocator should be notified after dirtyMapManager,
     // and logWriteHandler should be notified after bufferAllocator
