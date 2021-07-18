@@ -32,40 +32,35 @@
 
 #pragma once
 
-#include "src/journal_manager/log/gc_map_update_list.h"
-#include "src/journal_service/i_journal_writer.h"
+#include <atomic>
+#include <functional>
+
+#include "src/event_scheduler/event.h"
+#include "src/include/smart_ptr_type.h"
 #include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
-class Stripe;
+class LogWriteContext;
 
-class LogWriteHandler;
-class LogWriteContextFactory;
-class JournalingStatus;
+using GcLogWriteCallback = std::function<int(LogWriteContext*)>;
 
-class JournalWriter : public IJournalWriter
+class GcLogWriteCompleted : public Event
 {
 public:
-    JournalWriter(void);
-    virtual ~JournalWriter(void);
+    GcLogWriteCompleted(GcLogWriteCallback func, LogWriteContext* context);
+    virtual ~GcLogWriteCompleted(void) = default;
 
-    virtual int Init(LogWriteHandler* writeHandler, LogWriteContextFactory* factory, JournalingStatus* status);
+    virtual bool Execute(void) override;
 
-    virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo,
-        MpageList dirty, EventSmartPtr callbackEvent);
-    virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
-        MpageList dirty, EventSmartPtr callbackEvent);
-    virtual int AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates,
-        MapPageList dirty, EventSmartPtr callbackEvent);
+    virtual void SetNumLogs(uint64_t val);
 
 private:
-    int _CanBeWritten(void);
-    int _AddGcLogs(GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
+    std::atomic<uint64_t> numLogs;
+    std::atomic<uint64_t> numCompletedLogs;
 
-    LogWriteHandler* logWriteHandler;
-    LogWriteContextFactory* logFactory;
-    JournalingStatus* status;
+    GcLogWriteCallback callbackFunc;
+    LogWriteContext* context;
 };
 
 } // namespace pos

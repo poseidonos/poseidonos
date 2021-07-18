@@ -55,15 +55,12 @@ LogBufferIoContext::SetFile(int fileDesc)
 void
 LogBufferIoContext::IoDone(void)
 {
-    if (clientCallback != nullptr)
-    {
-        bool executionSuccessful = clientCallback->Execute();
+    bool executionSuccessful = clientCallback->Execute();
 
-        // TODO(huijeong.kim) handle execution fail case
-        assert(executionSuccessful == true);
+    // TODO(huijeong.kim) handle execution fail case
+    assert(executionSuccessful == true);
 
-        clientCallback = nullptr;
-    }
+    clientCallback = nullptr;
 }
 
 } // namespace pos

@@ -30,42 +30,41 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include "src/journal_manager/log_write/gc_log_write_completed.h"
 
-#include "src/journal_manager/log/gc_map_update_list.h"
-#include "src/journal_service/i_journal_writer.h"
-#include "src/mapper/include/mpage_info.h"
+#include <assert.h>
 
 namespace pos
 {
-class Stripe;
-
-class LogWriteHandler;
-class LogWriteContextFactory;
-class JournalingStatus;
-
-class JournalWriter : public IJournalWriter
+GcLogWriteCompleted::GcLogWriteCompleted(GcLogWriteCallback callback, LogWriteContext* context)
+: numLogs(-1),
+  numCompletedLogs(0),
+  callbackFunc(callback),
+  context(context)
 {
-public:
-    JournalWriter(void);
-    virtual ~JournalWriter(void);
+}
 
-    virtual int Init(LogWriteHandler* writeHandler, LogWriteContextFactory* factory, JournalingStatus* status);
+bool
+GcLogWriteCompleted::Execute(void)
+{
+    assert(numLogs > 0);
 
-    virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo,
-        MpageList dirty, EventSmartPtr callbackEvent);
-    virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
-        MpageList dirty, EventSmartPtr callbackEvent);
-    virtual int AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates,
-        MapPageList dirty, EventSmartPtr callbackEvent);
+    uint64_t result = numCompletedLogs.fetch_add(1) + 1;
+    if (result == numLogs)
+    {
+        int result = callbackFunc(context);
+        if (result != 0)
+        {
+            // TODO (huijeong.kim) to handle error case
+        }
+    }
+    return true;
+}
 
-private:
-    int _CanBeWritten(void);
-    int _AddGcLogs(GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
-
-    LogWriteHandler* logWriteHandler;
-    LogWriteContextFactory* logFactory;
-    JournalingStatus* status;
-};
+void
+GcLogWriteCompleted::SetNumLogs(uint64_t val)
+{
+    numLogs = val;
+}
 
 } // namespace pos

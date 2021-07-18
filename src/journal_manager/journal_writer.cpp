@@ -34,6 +34,7 @@
 
 #include "src/journal_manager/journaling_status.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
+#include "src/journal_manager/log_write/gc_log_write_completed.h"
 #include "src/journal_manager/log_write/log_write_handler.h"
 
 namespace pos
@@ -124,21 +125,44 @@ JournalWriter::AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates, MapPageLi
     int result = _CanBeWritten();
     if (result == 0)
     {
-        MapPageList dummyList;
-        LogWriteContext* blockWriteDoneLogWriteContext =
-            logFactory->CreateGcBlockMapLogWriteContext(mapUpdates, dummyList, nullptr);
-        result = logWriteHandler->AddLog(blockWriteDoneLogWriteContext);
+        return _AddGcLogs(mapUpdates, dirty, callbackEvent);
+    }
+    else
+    {
+        return result;
+    }
+}
 
+int
+JournalWriter::_AddGcLogs(GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent)
+{
+    int result = 0;
+
+    LogWriteContext* stripeFlushedLogWriteContext =
+        logFactory->CreateGcStripeFlushedLogWriteContext(mapUpdates, dirty, callbackEvent);
+    GcLogWriteCallback writeHandler = std::bind(&LogWriteHandler::AddLog, logWriteHandler, std::placeholders::_1);
+
+    GcLogWriteCompleted* gcLogCallback = new GcLogWriteCompleted(writeHandler, stripeFlushedLogWriteContext);
+
+    MapPageList dummyList;
+    EventSmartPtr callbackSmartPtr(gcLogCallback);
+    auto blockContexts = logFactory->CreateGcBlockMapLogWriteContexts(mapUpdates, dummyList, callbackSmartPtr);
+
+    gcLogCallback->SetNumLogs(blockContexts.size());
+
+    for (auto it = blockContexts.begin(); it != blockContexts.end(); it++)
+    {
+        result = logWriteHandler->AddLog(*it);
         if (result < 0)
         {
-            return result;
-        }
+            for (auto delIt = it + 1; delIt != blockContexts.end(); delIt++)
+            {
+                delete *delIt;
+            }
+            blockContexts.clear();
 
-        LogWriteContext* stripeFlushedLogWriteContext =
-            logFactory->CreateGcStripeFlushedLogWriteContext(mapUpdates, dirty, callbackEvent);
-        result = logWriteHandler->AddLog(stripeFlushedLogWriteContext);
-        if (result < 0)
-        {
+            delete stripeFlushedLogWriteContext;
+
             return result;
         }
     }
