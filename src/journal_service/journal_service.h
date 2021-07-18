@@ -34,10 +34,10 @@
 
 #include <string>
 
+#include "i_journal_manager.h"
+#include "i_journal_status_provider.h"
 #include "i_journal_writer.h"
 #include "i_volume_event.h"
-#include "i_journal_status_provider.h"
-
 #include "journal_service_list.h"
 #include "src/lib/singleton.h"
 
@@ -50,6 +50,7 @@ class JournalService
 public:
     virtual bool IsEnabled(std::string arrayName);
 
+    void Register(std::string arrayName, IJournalManager* journal);
     virtual void Register(std::string arrayName, IJournalWriter* writer);
     void Register(std::string arrayName, IVolumeEventHandler* handler);
     void Register(std::string arrayName, IJournalStatusProvider* provider);
@@ -64,6 +65,7 @@ protected:
     virtual ~JournalService(void);
 
 private:
+    JournalServiceList<IJournalManager> journalManagers;
     JournalServiceList<IJournalWriter> journalWriters;
     JournalServiceList<IVolumeEventHandler> volEventHandlers;
     JournalServiceList<IJournalStatusProvider> statusProvider;

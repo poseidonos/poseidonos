@@ -48,7 +48,7 @@ JournalService::~JournalService(void)
 bool
 JournalService::IsEnabled(std::string arrayName)
 {
-    IJournalWriter* journal = journalWriters.Find(arrayName);
+    IJournalManager* journal = journalManagers.Find(arrayName);
     if (journal == nullptr)
     {
         return false;
@@ -57,6 +57,12 @@ JournalService::IsEnabled(std::string arrayName)
     {
         return journal->IsEnabled();
     }
+}
+
+void
+JournalService::Register(std::string arrayName, IJournalManager* journal)
+{
+    journalManagers.Register(arrayName, journal);
 }
 
 void
@@ -83,6 +89,7 @@ JournalService::Unregister(std::string arrayName)
     journalWriters.Unregister(arrayName);
     volEventHandlers.Unregister(arrayName);
     statusProvider.Unregister(arrayName);
+    journalManagers.Unregister(arrayName);
 }
 
 IJournalWriter*

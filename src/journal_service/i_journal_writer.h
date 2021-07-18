@@ -44,7 +44,6 @@ class Stripe;
 class IJournalWriter
 {
 public:
-    virtual bool IsEnabled(void) = 0;
     virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo,
         MpageList dirty, EventSmartPtr callbackEvent) = 0;
     virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,

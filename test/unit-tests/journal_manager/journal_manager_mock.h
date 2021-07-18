@@ -11,12 +11,10 @@ class MockJournalManager : public JournalManager
 public:
     using JournalManager::JournalManager;
     MOCK_METHOD(bool, IsEnabled, (), (override));
-    MOCK_METHOD(int, AddBlockMapUpdatedLog, (VolumeIoSmartPtr volumeIo, MpageList dirty, EventSmartPtr callbackEvent), (override));
-    MOCK_METHOD(int, AddStripeMapUpdatedLog, (Stripe* stripe, StripeAddr oldAddr, MpageList dirty, EventSmartPtr callbackEvent), (override));
-    MOCK_METHOD(int, AddGcStripeFlushedLog, (GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent), (override));
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));
+    MOCK_METHOD(void, Flush, (), (override));
 };
 
 } // namespace pos

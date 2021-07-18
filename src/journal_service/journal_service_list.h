@@ -37,6 +37,7 @@
 
 namespace pos
 {
+class IJournalManager;
 class IJournalWriter;
 class IVolumeEventHandler;
 class IJournalStatusProvider;
@@ -57,6 +58,7 @@ private:
     std::unordered_map<std::string, T*> list;
 };
 
+template class JournalServiceList<IJournalManager>;
 template class JournalServiceList<IJournalWriter>;
 template class JournalServiceList<IVolumeEventHandler>;
 template class JournalServiceList<IJournalStatusProvider>;
