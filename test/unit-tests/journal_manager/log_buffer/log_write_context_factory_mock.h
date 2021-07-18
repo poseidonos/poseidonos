@@ -13,6 +13,7 @@ public:
     MOCK_METHOD(void, Init, (LogBufferWriteDoneNotifier* target, CallbackSequenceController* sequencer), (override));
     MOCK_METHOD(LogWriteContext*, CreateBlockMapLogWriteContext, (VolumeIoSmartPtr volumeIo, MpageList dirty, EventSmartPtr callbackEvent), (override));
     MOCK_METHOD(LogWriteContext*, CreateStripeMapLogWriteContext, (Stripe* stripe, StripeAddr oldAddr, MpageList dirty, EventSmartPtr callbackEvent), (override));
+    MOCK_METHOD(LogWriteContext*, CreateGcBlockMapLogWriteContext, (GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent), (override));
     MOCK_METHOD(LogWriteContext*, CreateGcStripeFlushedLogWriteContext, (GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent), (override));
 };
 

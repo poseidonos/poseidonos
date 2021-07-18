@@ -32,11 +32,12 @@
 
 #include "log_write_context_factory.h"
 
+#include "src/allocator/wb_stripe_manager/stripe.h"
 #include "src/journal_manager/log/block_write_done_log_handler.h"
+#include "src/journal_manager/log/gc_block_write_done_log_handler.h"
+#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
-#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
-#include "src/allocator/wb_stripe_manager/stripe.h"
 
 namespace pos
 {
@@ -101,10 +102,25 @@ LogWriteContextFactory::CreateStripeMapLogWriteContext(Stripe* stripe,
 }
 
 LogWriteContext*
+LogWriteContextFactory::CreateGcBlockMapLogWriteContext(GcStripeMapUpdateList mapUpdates,
+    MapPageList dirty, EventSmartPtr callbackEvent)
+{
+    GcBlockWriteDoneLogHandler* log
+        = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId, mapUpdates.vsid, mapUpdates.blockMapUpdateList);
+
+    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
+        dirty, callbackEvent, notifier, sequenceController);
+
+    return logWriteContext;
+}
+
+LogWriteContext*
 LogWriteContextFactory::CreateGcStripeFlushedLogWriteContext(
     GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent)
 {
-    GcStripeFlushedLogHandler* log = new GcStripeFlushedLogHandler(mapUpdates);
+    GcStripeFlushedLogHandler* log
+        = new GcStripeFlushedLogHandler(mapUpdates.volumeId, mapUpdates.vsid,
+        mapUpdates.wbLsid, mapUpdates.userLsid, mapUpdates.blockMapUpdateList.size());
 
     MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
         dirty, callbackEvent, notifier, sequenceController);

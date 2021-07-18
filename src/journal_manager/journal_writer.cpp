@@ -124,13 +124,25 @@ JournalWriter::AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates, MapPageLi
     int result = _CanBeWritten();
     if (result == 0)
     {
-        LogWriteContext* logWriteContext =
+        MapPageList dummyList;
+        LogWriteContext* blockWriteDoneLogWriteContext =
+            logFactory->CreateGcBlockMapLogWriteContext(mapUpdates, dummyList, nullptr);
+        result = logWriteHandler->AddLog(blockWriteDoneLogWriteContext);
+
+        if (result < 0)
+        {
+            return result;
+        }
+
+        LogWriteContext* stripeFlushedLogWriteContext =
             logFactory->CreateGcStripeFlushedLogWriteContext(mapUpdates, dirty, callbackEvent);
-        return logWriteHandler->AddLog(logWriteContext);
+        result = logWriteHandler->AddLog(stripeFlushedLogWriteContext);
+        if (result < 0)
+        {
+            return result;
+        }
     }
-    else
-    {
-        return result;
-    }
+
+    return result;
 }
 } // namespace pos

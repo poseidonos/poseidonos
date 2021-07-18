@@ -151,7 +151,7 @@ TEST(JournalWriter, AddGcStripeFlushedLog_testIfSuccessWhenStatusIsJournaling)
     writer.Init(&writeHandler, &factory, &status);
 
     // Then: Should request writing logs to write handler
-    EXPECT_CALL(writeHandler, AddLog).WillOnce(Return(0));
+    EXPECT_CALL(writeHandler, AddLog).WillRepeatedly(Return(0));
 
     // When: Journal is requested to write block write done log
     // Then: Log write should be successfully requested
