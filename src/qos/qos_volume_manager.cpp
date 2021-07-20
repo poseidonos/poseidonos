@@ -104,7 +104,11 @@ QosVolumeManager::~QosVolumeManager(void)
 void
 QosVolumeManager::UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId)
 {
-    nqnVolumeMap[nqnId].push_back(volId);
+    std::vector<int>::iterator it;
+    it = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volId);
+    // add volume id in map only if it is not already there to avoid douplicate entries.
+    if (it == nqnVolumeMap[nqnId].end())
+        nqnVolumeMap[nqnId].push_back(volId);
 }
 
 /* --------------------------------------------------------------------------*/
