@@ -449,6 +449,7 @@ ContextManager::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
         if (flushCallback != nullptr)
         {
             EventSchedulerSingleton::Instance()->EnqueueEvent(flushCallback);
+            flushCallback = nullptr;
         }
     }
     delete[] ctx->buffer;
