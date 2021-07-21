@@ -34,29 +34,36 @@
 #define RAID5_H_
 
 #include <list>
+#include <vector>
 
 #include "method.h"
-#include "src/spdk_wrapper/free_buffer_pool.h"
+#include "src/resource_manager/memory_manager.h"
+#include "src/cpu_affinity/affinity_manager.h"
 
 namespace pos
 {
 class PartitionPhysicalSize;
 class RebuildBehavior;
+class BufferPool;
 
 class Raid5 : public Method
 {
     friend class ParityLocationWbtCommand;
 
 public:
-    Raid5(const PartitionPhysicalSize* physicalSize, const uint64_t parityCount,
-      AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
-    virtual ~Raid5()
-    {
-    }
+    Raid5(const PartitionPhysicalSize* physicalSize,
+        const uint64_t maxParityBufferCountPerNuma,
+        AffinityManager* affinityManager = AffinityManagerSingleton::Instance(),
+        MemoryManager* memoryManager = MemoryManagerSingleton::Instance());
+    virtual ~Raid5();
+    virtual bool AllocParityPools();
+    virtual void ClearParityPools();
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
 
+    // This function is for unit testing only
+    virtual int GetParityPoolSize();
 private:
     virtual void _BindRecoverFunc(void) override;
     void _RebuildData(void* dst, void* src, uint32_t size);
@@ -66,8 +73,12 @@ private:
     void _XorBlocks(void* dst, void* src1, void* src2, uint32_t memSize);
     uint32_t _GetParityOffset(StripeId lsid);
 
-    uint32_t paritySizeBlock_ = 0;
-    FreeBufferPool freeParityPool;
+    const uint64_t MAX_PARITY_BUFFER_COUNT_PER_NUMA;
+
+    vector<BufferPool*> parityPools;
+
+    AffinityManager* affinityManager;
+    MemoryManager* memoryManager;
 };
 
 } // namespace pos

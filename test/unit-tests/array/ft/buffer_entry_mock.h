@@ -12,6 +12,7 @@ class MockBufferEntry : public BufferEntry
 {
 public:
     using BufferEntry::BufferEntry;
+    MOCK_METHOD(void, ReturnBuffer, (), (override));
 };
 
 } // namespace pos

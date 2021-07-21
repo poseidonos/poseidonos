@@ -4,8 +4,13 @@
 
 #include "src/array_models/dto/partition_physical_size.h"
 #include "src/include/array_config.h"
+#include "test/unit-tests/resource_manager/buffer_pool_mock.h"
+#include "test/unit-tests/resource_manager/memory_manager_mock.h"
 #include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
 #include "test/unit-tests/utils/mock_builder.h"
+
+using ::testing::Return;
+using ::testing::NiceMock;
 
 namespace pos
 {
@@ -61,7 +66,7 @@ TEST(Raid5, Raid5_testIfConstructorIsInvoked)
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
 
     // When
-    Raid5 raid5(&physicalSize, 10 /* meaningless in this UT file */, &mockAffMgr);
+    Raid5 raid5(&physicalSize, 10 /* meaningless in this UT file */, &mockAffMgr, nullptr);
 }
 
 TEST(Raid5, Raid5_testIfTranslateCalculatesDestinationOffsetProperly)
@@ -78,7 +83,7 @@ TEST(Raid5, Raid5_testIfTranslateCalculatesDestinationOffsetProperly)
         .offset = OFFSET};
 
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
-    Raid5 raid5(&physicalSize, 10, &mockAffMgr);
+    Raid5 raid5(&physicalSize, 10, &mockAffMgr, nullptr);
     FtBlkAddr dest;
 
     // When
@@ -99,7 +104,20 @@ TEST(Raid5, Convert_testIfParityBufferIsProperlyCalculated)
         .blksPerChunk = 4,
         .chunksPerStripe = 4};
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
-    Raid5 raid5(&physicalSize, physicalSize.blksPerChunk * 2 /* just to be large enough */, &mockAffMgr);
+    EXPECT_CALL(mockAffMgr, GetNumaCount).WillRepeatedly(Return(1));
+    EXPECT_CALL(mockAffMgr, GetNumaIdFromCurrentThread).WillRepeatedly(Return(0));
+    BufferInfo info = {
+        .owner = "Raid5Test_Convert",
+        .size = 65535,
+        .count = 1
+    };
+    char mem[65535];
+    MockBufferPool mockBufferPool(info, 0, nullptr);
+    EXPECT_CALL(mockBufferPool, TryGetBuffer).WillOnce(Return(&mem));
+    MockMemoryManager mockMemoryManager;
+    EXPECT_CALL(mockMemoryManager, CreateBufferPool).WillOnce(Return(&mockBufferPool));
+    Raid5 raid5(&physicalSize, physicalSize.blksPerChunk * 2 /* just to be large enough */, &mockAffMgr, &mockMemoryManager);
+    raid5.AllocParityPools();
 
     std::list<BufferEntry> buffers;
     int NUM_BLOCKS = physicalSize.blksPerChunk;
@@ -170,4 +188,38 @@ TEST(Raid5, Getters_testIfGettersAreInvoked)
     ASSERT_EQ(100, raid5.GetSizeInfo()->chunksPerStripe);
 }
 
+TEST(Raid5, AllocResetParityPools_testIfPoolCreateAndDeletedProperlyWithTwoNuma)
+{
+    // Given
+    const PartitionPhysicalSize physicalSize{
+        .blksPerChunk = 27,
+        .chunksPerStripe = 100};
+    MockAffinityManager mockAffinityManager;
+    MockMemoryManager mockMemoryManager;
+    BufferInfo info = {
+        .owner = "Raid5Test",
+        .size = 4096,
+        .count = 1,
+    };
+    unsigned int numaCount = 2;
+    MockBufferPool mockBufferPool(info, 0, nullptr);
+    EXPECT_CALL(mockAffinityManager, GetNumaCount).WillOnce(Return(numaCount));
+    EXPECT_CALL(mockMemoryManager, CreateBufferPool)
+        .Times(numaCount)
+        .WillRepeatedly(Return(&mockBufferPool));
+    EXPECT_CALL(mockMemoryManager, DeleteBufferPool).Times(numaCount);
+    Raid5 raid5(&physicalSize, 10, &mockAffinityManager, &mockMemoryManager);
+    
+    // When : Alloc Pools
+    bool ret = raid5.AllocParityPools();
+
+    // Then
+    EXPECT_TRUE(ret);
+
+    // When : Reset Pools
+    raid5.ClearParityPools();
+
+    // Then
+    EXPECT_EQ(raid5.GetParityPoolSize(), 0);
+}
 } // namespace pos

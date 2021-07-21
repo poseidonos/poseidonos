@@ -43,8 +43,8 @@ class MockMemoryManager : public MemoryManager
 {
 public:
     using MemoryManager::MemoryManager;
-    MOCK_METHOD(BufferPool*, CreateBufferPool, (BufferInfo & info), (override));
-    MOCK_METHOD(void, DeleteBufferPool, (BufferPool * pool), (override));
+    MOCK_METHOD(BufferPool*, CreateBufferPool, (BufferInfo & info, uint32_t socket), (override));
+    MOCK_METHOD(bool, DeleteBufferPool, (BufferPool * pool), (override));
 };
 
 } // namespace pos

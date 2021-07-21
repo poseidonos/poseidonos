@@ -38,7 +38,7 @@
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
-#include "src/spdk_wrapper/free_buffer_pool.h"
+#include "src/resource_manager/buffer_pool.h"
 
 namespace pos
 {
@@ -48,7 +48,7 @@ BufferEntry::Reset(void)
     buffer = nullptr;
     blkCnt = 0;
     isParity = false;
-    freeBufferPool = nullptr;
+    bufferPool = nullptr;
 }
 
 void
@@ -64,17 +64,17 @@ BufferEntry::SetBlkCnt(uint32_t inputBlkCnt)
 }
 
 void
-BufferEntry::SetFreeBufferPool(FreeBufferPool* inputFreeBufferPool)
+BufferEntry::SetBufferPool(BufferPool* inputBufferPool)
 {
-    freeBufferPool = inputFreeBufferPool;
+    bufferPool = inputBufferPool;
 }
 
 void
 BufferEntry::ReturnBuffer(void)
 {
-    if (nullptr != freeBufferPool)
+    if (nullptr != bufferPool)
     {
-        freeBufferPool->ReturnBuffer(buffer);
+        bufferPool->ReturnBuffer(buffer);
         Reset();
     }
 }

@@ -265,10 +265,20 @@ PartitionManager::_CreateUserData(const vector<ArrayDevice*> devs,
     uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
     uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
     PartitionType type = PartitionType::USER_DATA;
-    Method* method = new Raid5(&physicalSize, totalNvmStripes, affinityManager);
+    Raid5* method = new Raid5(&physicalSize, totalNvmStripes, affinityManager);
+    if (method->AllocParityPools() == false)
+    {
+        delete method;
+        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_LOAD_ERROR;
+        string errorMsg =
+            "Failed to create partition \"USER_DATA\". Buffer pool allocation failed.";
+        POS_TRACE_ERROR(eventId, errorMsg);
+        return eventId;
+    }
     StripePartition* partition = new StripePartition(arrayName_, arrayIndex, type, physicalSize, devs, method);
     if (nullptr == partition)
     {
+        delete method;
         int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_LOAD_ERROR;
         POS_TRACE_ERROR(eventId, "Failed to create partition \"USER_DATA\"");
         return eventId;

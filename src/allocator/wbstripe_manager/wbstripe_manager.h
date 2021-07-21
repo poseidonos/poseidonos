@@ -46,6 +46,7 @@ namespace pos
 using StripeVec = std::vector<Stripe*>;
 class IVolumeManager;
 class IReverseMap;
+class FreeBufferPool;
 class WBStripeManager : public IWBStripeAllocator, public IWBStripeInternal
 {
 public:

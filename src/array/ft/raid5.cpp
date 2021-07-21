@@ -32,18 +32,20 @@
 
 #include "raid5.h"
 
-#include <list>
-
 #include "src/include/array_config.h"
 #include "src/array_models/dto/partition_physical_size.h"
-#include "src/include/memory.h"
 #include "src/logger/logger.h"
+#include "src/resource_manager/buffer_pool.h"
 
 namespace pos
 {
 Raid5::Raid5(const PartitionPhysicalSize* physicalSize,
-    const uint64_t parityCount, AffinityManager* affinityManager)
-: freeParityPool(parityCount, CHUNK_SIZE, affinityManager)
+    const uint64_t maxParityBufferCountPerNuma,
+    AffinityManager* affinityManager,
+    MemoryManager* memoryManager)
+: MAX_PARITY_BUFFER_COUNT_PER_NUMA(maxParityBufferCountPerNuma),
+  affinityManager(affinityManager),
+  memoryManager(memoryManager)
 {
     raidType = RaidTypeEnum::RAID5;
     ftSize_ = {
@@ -119,14 +121,16 @@ Raid5::Convert(list<FtWriteEntry>& dst, const LogicalWriteEntry& src)
 BufferEntry
 Raid5::_AllocBuffer()
 {
-    void* mem = freeParityPool.GetBuffer();
+    uint32_t numa = affinityManager->GetNumaIdFromCurrentThread();
+    BufferPool* bufferPool = parityPools.at(numa);
+    void* mem = bufferPool->TryGetBuffer();
     uint32_t blkCnt = ArrayConfig::BLOCKS_PER_CHUNK;
 
     // TODO error handling for the case of insufficient free parity buffer
     assert(nullptr != mem);
 
     BufferEntry buffer(mem, blkCnt, true);
-    buffer.SetFreeBufferPool(&freeParityPool);
+    buffer.SetBufferPool(bufferPool);
     return buffer;
 }
 
@@ -205,4 +209,59 @@ Raid5::_RebuildData(void* dst, void* src, uint32_t dstSize)
     }
 }
 
+bool
+Raid5::AllocParityPools()
+{
+    const string NUMA_PREFIX = "_NUMA_";
+    const uint64_t ARRAY_CHUNK_SIZE = ArrayConfig::BLOCK_SIZE_BYTE
+        * ArrayConfig::BLOCKS_PER_CHUNK;
+
+    uint32_t totalNumaCount = affinityManager->GetNumaCount();
+    parityPools.clear();
+
+    for (uint32_t numa = 0; numa < totalNumaCount; numa++)
+    {
+        BufferInfo info = {
+            .owner = typeid(this).name() + NUMA_PREFIX + to_string(numa),
+            .size = ARRAY_CHUNK_SIZE,
+            .count = MAX_PARITY_BUFFER_COUNT_PER_NUMA
+        };
+        BufferPool* pool = memoryManager->CreateBufferPool(info, numa);
+        if (pool == nullptr)
+        {
+            parityPools.clear();
+            return false;
+        }
+        parityPools.push_back(pool);
+    }
+    return true;
+}
+
+void
+Raid5::ClearParityPools()
+{
+    for(unsigned int i = 0; i < parityPools.size(); i++)
+    {
+        if(parityPools[i] != nullptr)
+        {
+            memoryManager->DeleteBufferPool(parityPools[i]);
+            parityPools[i] = nullptr;
+        }
+    }
+    parityPools.clear();
+}
+
+Raid5::~Raid5()
+{
+    ClearParityPools();
+}
+
+int
+Raid5::GetParityPoolSize()
+{
+    return parityPools.size();
+}
+
+
 } // namespace pos
+

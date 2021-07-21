@@ -37,16 +37,16 @@
 
 namespace pos
 {
-class FreeBufferPool;
+class BufferPool;
 
 struct BufferEntry
 {
 public:
     BufferEntry(void* inputBuffer, uint32_t inputBlkCnt, bool inputIsParity = false);
-    ~BufferEntry(void);
+    virtual ~BufferEntry(void);
 
     void SetBuffer(void* inputBuffer);
-    void SetFreeBufferPool(FreeBufferPool* freeBufferPool);
+    void SetBufferPool(BufferPool* bufferPool);
     void SetBlkCnt(uint32_t inputBlkCnt);
 
     void Reset(void);
@@ -54,13 +54,13 @@ public:
     uint32_t GetBlkCnt(void);
 
     void* GetBlock(uint32_t blockIndex);
-    void ReturnBuffer(void);
+    virtual void ReturnBuffer(void);
 
 private:
     void* buffer;
     uint32_t blkCnt;
     bool isParity = false;
-    FreeBufferPool* freeBufferPool;
+    BufferPool* bufferPool;
 };
 
 } // namespace pos

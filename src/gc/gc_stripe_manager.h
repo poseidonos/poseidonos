@@ -46,6 +46,7 @@ namespace pos
 class IBlockAllocator;
 class IWBStripeAllocator;
 class VolumeEventPublisher;
+class FreeBufferPool;
 
 using GcWriteBuffer = std::vector<void*>;
 

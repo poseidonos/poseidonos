@@ -3,8 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "src/include/array_config.h"
-#include "test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h"
-#include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
+#include "test/unit-tests/resource_manager/buffer_pool_mock.h"
 #include "test/unit-tests/utils/mock_builder.h"
 
 namespace pos
@@ -66,15 +65,19 @@ TEST(BufferEntry, GetBlock_testIfVBlockIndexWithinBoundIsHandled)
     ASSERT_EQ(expected, actualCharPtr);
 }
 
-TEST(BufferEntry, ReturnBuffer_testIfFreeBufferPoolIsQueriedAgainst)
+TEST(BufferEntry, ReturnBuffer_testIfBufferPoolIsQueriedAgainst)
 {
     // Given
     char fakeBuffer[10];
     BufferEntry be(fakeBuffer, 1, false);
 
-    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
-    MockFreeBufferPool mockBufferPool(10, 4096, &mockAffMgr);
-    be.SetFreeBufferPool(&mockBufferPool);
+    BufferInfo info = {
+        .owner = "BufferEntryTest_ReturnBuffer",
+        .size = 4096,
+        .count = 10
+    };
+    MockBufferPool mockBufferPool(info, 0);
+    be.SetBufferPool(&mockBufferPool);
 
     EXPECT_CALL(mockBufferPool, ReturnBuffer).Times(1);
 
@@ -89,7 +92,7 @@ TEST(BufferEntry, ReturnBuffer_testIfFreeBufferPoolIsntQueriedAgainst)
     // Given
     char fakeBuffer[10];
     BufferEntry be(fakeBuffer, 1, false);
-    be.SetFreeBufferPool(nullptr);
+    be.SetBufferPool(nullptr);
 
     // When
     be.ReturnBuffer();
