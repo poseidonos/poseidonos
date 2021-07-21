@@ -459,7 +459,7 @@ TEST(ContextManager, GetNumOfFreeSegment_TestSimpleGetter)
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>(nullptr, "");
     ContextManager ctxManager(allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
-    EXPECT_CALL(*allocCtx, GetNumOfFreeUserDataSegment).WillOnce(Return(50));
+    EXPECT_CALL(*allocCtx, GetNumOfFreeSegment).WillOnce(Return(50));
     // when
     int ret = ctxManager.GetNumOfFreeSegment(true);
     // then
@@ -480,35 +480,35 @@ TEST(ContextManager, GetCurrentGcMode_TestGetGcModeByNumberOfFreeSegment)
     ctxManager.GetGcCtx()->SetUrgentThreshold(5);
 
     // given 1.
-    EXPECT_CALL(*allocCtx, GetNumOfFreeUserDataSegment).WillOnce(Return(11));
+    EXPECT_CALL(*allocCtx, GetNumOfFreeSegment).WillOnce(Return(11));
     // when 1.
     CurrentGcMode ret = ctxManager.GetCurrentGcMode();
     // then 1.
     EXPECT_EQ(MODE_NO_GC, ret);
 
     // given 2.
-    EXPECT_CALL(*allocCtx, GetNumOfFreeUserDataSegment).WillOnce(Return(10));
+    EXPECT_CALL(*allocCtx, GetNumOfFreeSegment).WillOnce(Return(10));
     // when 2.
     ret = ctxManager.GetCurrentGcMode();
     // then 2.
     EXPECT_EQ(MODE_NORMAL_GC, ret);
 
     // given 3.
-    EXPECT_CALL(*allocCtx, GetNumOfFreeUserDataSegment).WillOnce(Return(9));
+    EXPECT_CALL(*allocCtx, GetNumOfFreeSegment).WillOnce(Return(9));
     // when 3.
     ret = ctxManager.GetCurrentGcMode();
     // then 3.
     EXPECT_EQ(MODE_NORMAL_GC, ret);
 
     // given 4.
-    EXPECT_CALL(*allocCtx, GetNumOfFreeUserDataSegment).WillOnce(Return(5));
+    EXPECT_CALL(*allocCtx, GetNumOfFreeSegment).WillOnce(Return(5));
     // when 4.
     ret = ctxManager.GetCurrentGcMode();
     // then 4.
     EXPECT_EQ(MODE_URGENT_GC, ret);
 
     // given 5.
-    EXPECT_CALL(*allocCtx, GetNumOfFreeUserDataSegment).WillOnce(Return(4));
+    EXPECT_CALL(*allocCtx, GetNumOfFreeSegment).WillOnce(Return(4));
     // when 5.
     ret = ctxManager.GetCurrentGcMode();
     // then 5.
