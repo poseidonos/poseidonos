@@ -36,17 +36,16 @@ public:
 private:
     int _FlushContexts(EventSmartPtr callback, bool sync)
     {
+        if (callback != nullptr)
         {
             bool result = callback->Execute();
-            if (result == true)
-            {
-                return 0;
-            }
-            else
+            if (result == false)
             {
                 return -1;
             }
         }
+        return 0;
     }
 };
+
 } // namespace pos
