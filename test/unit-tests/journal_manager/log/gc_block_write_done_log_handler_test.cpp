@@ -12,7 +12,11 @@ TEST(GcBlockWriteDoneLogHandler, GcBlockWriteDoneLogHandler_testIfLogDataIsCreat
     GcBlockMapUpdateList blockMapUpdateList;
     for (uint64_t offset = 0; offset < 128; offset++)
     {
-        GcBlockMapUpdate update{.rba = offset, .vsa = {.stripeId = vsid, .offset = offset}};
+        GcBlockMapUpdate update = {
+            .rba = offset,
+            .vsa = {
+                .stripeId = vsid,
+                .offset = offset}};
         blockMapUpdateList.push_back(update);
     }
 
@@ -33,7 +37,11 @@ TEST(GcBlockWriteDoneLogHandler, GetData_testIfDataIsReturnedProperly)
     GcBlockMapUpdateList blockMapUpdateList;
     for (uint64_t offset = 0; offset < 128; offset++)
     {
-        GcBlockMapUpdate update{.rba = offset, .vsa = {.stripeId = vsid, .offset = offset}};
+        GcBlockMapUpdate update = {
+            .rba = offset,
+            .vsa = {
+                .stripeId = vsid,
+                .offset = offset}};
         blockMapUpdateList.push_back(update);
     }
 
@@ -78,7 +86,11 @@ TEST(GcBlockWriteDoneLogHandler, GetGcBlockMapWriteDoneLog_testIfLogPtrIsReturne
     GcBlockMapUpdateList blockMapUpdateList;
     for (uint64_t offset = 0; offset < 128; offset++)
     {
-        GcBlockMapUpdate update{.rba = offset + 1024, .vsa = {.stripeId = vsid, .offset = offset}};
+        GcBlockMapUpdate update = {
+            .rba = offset + 1024,
+            .vsa = {
+                .stripeId = vsid,
+                .offset = offset}};
         blockMapUpdateList.push_back(update);
     }
 
@@ -100,7 +112,11 @@ TEST(GcBlockWriteDoneLogHandler, GetMapList_testIfMapListIsReturned)
     GcBlockMapUpdateList blockMapUpdateList;
     for (uint64_t offset = 0; offset < 128; offset++)
     {
-        GcBlockMapUpdate update{.rba = offset + 512, .vsa = {.stripeId = vsid, .offset = offset}};
+        GcBlockMapUpdate update = {
+            .rba = offset + 512,
+            .vsa = {
+                .stripeId = vsid,
+                .offset = offset}};
         blockMapUpdateList.push_back(update);
     }
 
@@ -111,7 +127,11 @@ TEST(GcBlockWriteDoneLogHandler, GetMapList_testIfMapListIsReturned)
     // Then
     for (uint64_t offset = 0; offset < 128; offset++)
     {
-        GcBlockMapUpdate expected{.rba = offset + 512, .vsa = {.stripeId = vsid, .offset = offset}};
+        GcBlockMapUpdate expected = {
+            .rba = offset + 512,
+            .vsa = {
+                .stripeId = vsid,
+                .offset = offset}};
         GcBlockMapUpdate actual = mapList[offset];
 
         EXPECT_EQ(expected.rba, actual.rba);

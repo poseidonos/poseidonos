@@ -49,7 +49,11 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testCreatingSmallL
     uint64_t numBlocks = 1;
     for (uint64_t index = 0; index < numBlocks; index++)
     {
-        GcBlockMapUpdate update{.rba = 1023 + index, .vsa = {.stripeId = 1023, .offset = index}};
+        GcBlockMapUpdate update = {
+            .rba = 1023 + index,
+            .vsa = {
+                .stripeId = 1023,
+                .offset = index}};
         mapUpdates.blockMapUpdateList.push_back(update);
     }
 
@@ -68,7 +72,11 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testCreatingSmallL
 
     for (uint64_t index = 0; index < numBlocks; index++)
     {
-        GcBlockMapUpdate expected{.rba = 1023 + index, .vsa = {.stripeId = 1023, .offset = index}};
+        GcBlockMapUpdate expected = {
+            .rba = 1023 + index,
+            .vsa = {
+                .stripeId = 1023,
+                .offset = index}};
         GcBlockMapUpdate actual = *reinterpret_cast<GcBlockMapUpdate*>
             (createdContexts.front()->buffer + sizeof(GcBlockWriteDoneLog) + sizeof(GcBlockMapUpdate) * index);
 
@@ -95,7 +103,11 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testIfLogsAreSplii
     uint64_t numBlocks = 3685;
     for (uint64_t index = 0; index < numBlocks; index++)
     {
-        GcBlockMapUpdate update{.rba = 1023 + index, .vsa = {.stripeId = 1023, .offset = index}};
+        GcBlockMapUpdate update = {
+            .rba = 1023 + index,
+            .vsa = {
+                .stripeId = 1023,
+                .offset = index}};
         mapUpdates.blockMapUpdateList.push_back(update);
     }
 
@@ -115,7 +127,11 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testIfLogsAreSplii
 
         for (uint64_t index = 0; index < log.numBlockMaps; index++)
         {
-            GcBlockMapUpdate expected{.rba = 1023 + numBlockMaps + index, .vsa = {.stripeId = 1023, .offset = numBlockMaps + index}};
+            GcBlockMapUpdate expected = {
+                .rba = 1023 + numBlockMaps + index,
+                .vsa = {
+                    .stripeId = 1023,
+                    .offset = numBlockMaps + index}};
             GcBlockMapUpdate actual = *reinterpret_cast<GcBlockMapUpdate*>
                 (context->buffer + sizeof(GcBlockWriteDoneLog) + sizeof(GcBlockMapUpdate) * index);
 
