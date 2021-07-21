@@ -73,7 +73,8 @@ public:
     virtual void ReleaseSegment(SegmentId segId);
     virtual SegmentId AllocateFreeSegment(SegmentId startSegId);
     virtual SegmentId GetUsedSegment(SegmentId startSegId);
-    virtual uint64_t GetNumOfFreeUserDataSegment(void);
+    virtual uint64_t GetNumOfFreeSegment(void);
+    virtual uint64_t GetNumOfFreeSegmentWoLock(void);
     virtual SegmentState GetSegmentState(SegmentId segmentId, bool needlock);
     virtual void SetSegmentState(SegmentId segmentId, SegmentState state, bool needlock);
 

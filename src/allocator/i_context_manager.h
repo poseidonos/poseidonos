@@ -52,7 +52,7 @@ public:
     virtual SegmentId AllocateRebuildTargetSegment(void) = 0;
     virtual int ReleaseRebuildSegment(SegmentId segmentId) = 0;
     virtual bool NeedRebuildAgain(void) = 0;
-    virtual int GetNumFreeSegment(void) = 0;
+    virtual int GetNumOfFreeSegment(bool needLock) = 0;
 
     virtual CurrentGcMode GetCurrentGcMode(void) = 0;
     virtual int GetGcThreshold(CurrentGcMode mode) = 0;

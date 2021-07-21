@@ -201,13 +201,14 @@ ContextManager::AllocateFreeSegment(bool forUser)
         ++segId;
         segId = allocatorCtx->AllocateFreeSegment(segId);
     }
+    int freeSegCount = allocatorCtx->GetNumOfFreeSegmentWoLock();
     if (segId == UNMAP_SEGMENT)
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "Failed to allocate segment, free segment count:{}", allocatorCtx->GetNumOfFreeUserDataSegment());
+        POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "Failed to allocate segment, free segment count:{}", freeSegCount);
     }
     else
     {
-        POS_TRACE_INFO(EID(ALLOCATOR_START), "segmentId:{} @AllocateUserDataSegmentId, free segment count:{}", segId, allocatorCtx->GetNumOfFreeUserDataSegment());
+        POS_TRACE_INFO(EID(ALLOCATOR_START), "segmentId:{} @AllocateUserDataSegmentId, free segment count:{}", segId, freeSegCount);
     }
     return segId;
 }
@@ -243,7 +244,7 @@ ContextManager::AllocateGCVictimSegment(void)
 CurrentGcMode
 ContextManager::GetCurrentGcMode(void)
 {
-    int numFreeSegments = allocatorCtx->GetNumOfFreeUserDataSegment();
+    int numFreeSegments = allocatorCtx->GetNumOfFreeSegment();
     QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments);
     if (gcCtx.GetUrgentThreshold() >= numFreeSegments)
     {
@@ -265,9 +266,16 @@ ContextManager::GetGcThreshold(CurrentGcMode mode)
 }
 
 int
-ContextManager::GetNumFreeSegment(void)
+ContextManager::GetNumOfFreeSegment(bool needLock)
 {
-    return allocatorCtx->GetNumOfFreeUserDataSegment();
+    if (needLock == true)
+    {
+        return allocatorCtx->GetNumOfFreeSegment();
+    }
+    else
+    {
+        return allocatorCtx->GetNumOfFreeSegmentWoLock();
+    }
 }
 
 int

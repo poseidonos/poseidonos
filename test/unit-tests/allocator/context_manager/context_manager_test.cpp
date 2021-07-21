@@ -449,7 +449,7 @@ TEST(ContextManager, AllocateGCVictimSegment_TestGCVictimAllocationByStateAndVal
     EXPECT_EQ(UNMAP_SEGMENT, ret);
 }
 
-TEST(ContextManager, GetNumFreeSegment_TestSimpleGetter)
+TEST(ContextManager, GetNumOfFreeSegment_TestSimpleGetter)
 {
     // given
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
@@ -461,7 +461,7 @@ TEST(ContextManager, GetNumFreeSegment_TestSimpleGetter)
 
     EXPECT_CALL(*allocCtx, GetNumOfFreeUserDataSegment).WillOnce(Return(50));
     // when
-    int ret = ctxManager.GetNumFreeSegment();
+    int ret = ctxManager.GetNumOfFreeSegment(true);
     // then
     EXPECT_EQ(50, ret);
 }
