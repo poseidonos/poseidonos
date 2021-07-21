@@ -6,6 +6,9 @@
 
 #include "src/allocator/i_context_manager.h"
 
+using ::testing::_;
+using ::testing::AtLeast;
+
 namespace pos
 {
 class IContextManagerMock : public IContextManager
@@ -29,8 +32,8 @@ public:
     virtual uint64_t GetStoredContextVersion(int owner) { return 0; }
     IContextManagerMock(void)
     {
-        ON_CALL(*this, FlushContexts).WillByDefault(::testing::Invoke(this,
-        &IContextManagerMock::_FlushContexts));
+        ON_CALL(*this, FlushContexts).WillByDefault(::testing::Invoke(this, &IContextManagerMock::_FlushContexts));
+        EXPECT_CALL(*this, FlushContexts(_, true)).Times(AtLeast(0));
     }
 
 private:
