@@ -610,10 +610,7 @@ ContextManager::_Flush(int owner, EventSmartPtr callbackEvent)
     int size = fileIoManager->GetFileSize(owner);
     char* buf = new char[size]();
     _PrepareBuffer(owner, buf);
-    if (callbackEvent != nullptr)
-    {
-        flushCallback = callbackEvent;
-    }
+    flushCallback = callbackEvent;
     int ret = fileIoManager->Store(owner, buf, std::bind(&ContextManager::_FlushCompletedThenCB, this, std::placeholders::_1));
     if (ret != 0)
     {
