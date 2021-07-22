@@ -21,7 +21,9 @@ TEST(StripePartition, StripePartition_testIfConstructorSetsLogicalSizeProperly)
 {
     // Given
     PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 10,
+        .chunksPerStripe = 0/* not interesting */,
         .stripesPerSegment = 20,
         .totalSegments = 30};
     MockRaid1* mockRaid1 = new MockRaid1(&physicalSize);

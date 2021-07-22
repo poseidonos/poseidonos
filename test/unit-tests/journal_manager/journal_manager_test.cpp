@@ -352,7 +352,7 @@ TEST_F(JournalManagerTestFixture, AddStripeMapUpdatedLog_testIfFailsWithJournalD
     // When: Journal is requested to write stripe map updated log
     // Then: Log write should be failed
     MpageList dummyList;
-    StripeAddr unmap = {.stripeId = UNMAP_STRIPE};
+    StripeAddr unmap = {.stripeLoc = IN_USER_AREA/* not interesting */, .stripeId = UNMAP_STRIPE};
     EXPECT_TRUE(journal->AddStripeMapUpdatedLog(nullptr, unmap, dummyList, nullptr) < 0);
 }
 
@@ -371,7 +371,7 @@ TEST_F(JournalManagerTestFixture, AddStripeMapUpdatedLog_testIfSuccessWithJourna
     // When: Journal is requested to write stripe map updated log
     // Then: Log write should be successfully requested
     MpageList dummyList;
-    StripeAddr unmap = {.stripeId = UNMAP_STRIPE};
+    StripeAddr unmap = {.stripeLoc = IN_USER_AREA/* not interesting */, .stripeId = UNMAP_STRIPE};
     EXPECT_TRUE(journal->AddStripeMapUpdatedLog(nullptr, unmap, dummyList, nullptr) == 0);
 }
 

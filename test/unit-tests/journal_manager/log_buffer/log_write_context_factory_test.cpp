@@ -133,6 +133,7 @@ TEST(LogWriteContextFactory, CreateGcStripeFlushedLogWriteContext_testIfExecuted
     int volumeId = 1;
     GcStripeMapUpdateList mapUpdates = {
         .volumeId = volumeId,
+        .blockMapUpdateList = std::vector<GcBlockMapUpdate>()/* not interesting */,
         .vsid = 100,
         .wbLsid = 1,
         .userLsid = 100};

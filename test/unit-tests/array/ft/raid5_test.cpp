@@ -61,8 +61,11 @@ TEST(Raid5, Raid5_testIfConstructorIsInvoked)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 1234,
-        .chunksPerStripe = 4567};
+        .chunksPerStripe = 4567,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
 
     // When
@@ -73,8 +76,11 @@ TEST(Raid5, Raid5_testIfTranslateCalculatesDestinationOffsetProperly)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 27,
-        .chunksPerStripe = 10};
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
     uint32_t STRIPE_ID = 13;
     uint32_t OFFSET = 400;
 
@@ -101,8 +107,11 @@ TEST(Raid5, Convert_testIfParityBufferIsProperlyCalculated)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 4,
-        .chunksPerStripe = 4};
+        .chunksPerStripe = 4,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
     EXPECT_CALL(mockAffMgr, GetNumaCount).WillRepeatedly(Return(1));
     EXPECT_CALL(mockAffMgr, GetNumaIdFromCurrentThread).WillRepeatedly(Return(0));
@@ -153,8 +162,11 @@ TEST(Raid5, GetRebuildGroup_testIfRebuildGroupDoesNotContainTargetFtBlockAddr)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 27,
-        .chunksPerStripe = 100};
+        .chunksPerStripe = 100,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
     Raid5 raid5(&physicalSize, 10, &mockAffMgr);
     StripeId STRIPE_ID = 1234;
@@ -177,8 +189,11 @@ TEST(Raid5, Getters_testIfGettersAreInvoked)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 27,
-        .chunksPerStripe = 100};
+        .chunksPerStripe = 100,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
     Raid5 raid5(&physicalSize, 10, &mockAffMgr);
 

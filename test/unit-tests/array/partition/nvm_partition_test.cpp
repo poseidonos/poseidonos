@@ -64,6 +64,7 @@ TEST(NvmPartition, NvmPartition_testIfConstructorInitializesLogicalSizeProperly)
 {
     // Given
     PartitionPhysicalSize partPhySize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 100,
         .chunksPerStripe = 10,
         .stripesPerSegment = 5,
@@ -87,6 +88,7 @@ TEST(NvmPartition, Translate_testIfInvalidAddressReturnsError)
 {
     // Given
     PartitionPhysicalSize partPhySize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 100,
         .chunksPerStripe = 10,
         .stripesPerSegment = 5,
@@ -139,6 +141,7 @@ TEST(NvmPartition, ByteTranslate_testIfInvalidAddressReturnsError)
 {
     // Given
     PartitionPhysicalSize partPhySize{
+        .startLba = 0/* not interseting */,
         .blksPerChunk = 100,
         .chunksPerStripe = 10,
         .stripesPerSegment = 5,
@@ -200,6 +203,7 @@ TEST(NvmPartition, Convert_testIfInvalidEntryReturnsError)
 {
     // Given
     PartitionPhysicalSize partPhySize{
+        .startLba = 0/* not interesting */,
         .blksPerChunk = 100,
         .chunksPerStripe = 10,
         .stripesPerSegment = 5,

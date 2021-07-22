@@ -31,6 +31,7 @@ using ::testing::Test;
 namespace pos
 {
 PartitionLogicalSize partitionLogicalSize = {
+    .minWriteBlkCnt = 0/* not interesting */,
     .blksPerChunk = 64,
     .blksPerStripe = 2048,
     .chunksPerStripe = 32,

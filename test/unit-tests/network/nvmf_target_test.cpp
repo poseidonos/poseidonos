@@ -170,7 +170,9 @@ TEST(NvmfTarget, GetNamespace_Success_Iter)
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
     string bdevName{"bdev"};
     struct spdk_nvmf_ns* ns[1];
+    ns[0] = reinterpret_cast<struct spdk_nvmf_ns*>(0x1);  // to make it non-null
     struct spdk_bdev* targetBdev[1];
+    targetBdev[0] = reinterpret_cast<struct spdk_bdev*>(0x1);  // to make it non-null
     ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(targetBdev[0]));
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirstNs(_)).WillByDefault(Return(ns[0]));
     EXPECT_CALL(*mockSpdkCaller, SpdkNvmfNsGetBdev(_))
@@ -623,7 +625,7 @@ TEST(NvmfTarget, GetHostNqn_Success)
     expected.push_back(hostNqn);
     ON_CALL(*mockSpdkCaller, SpdkNvmfTgtFindSubsystem(_, _)).WillByDefault(Return(subsystem[0]));
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirstCtrlr(_)).WillByDefault(Return(ctrlr[0]));
-    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetCtrlrHostnqn(_)).WillByDefault(Return(hostNqn.c_str()));
+    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetCtrlrHostnqn(_)).WillByDefault(Return(const_cast<char*>(hostNqn.c_str())));
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetNextCtrlr(_, _)).WillByDefault(Return(nullptr));
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
@@ -713,8 +715,10 @@ TEST(NvmfTarget, GetAttachedVolumeList_Success)
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
     vector<pair<int, string>> expected;
     expected.push_back(make_pair(0, "array"));
-    struct spdk_nvmf_subsystem* subsystem[1];
+    struct spdk_nvmf_subsystem* subsystem[0];
+    subsystem[0] = reinterpret_cast<struct spdk_nvmf_subsystem*>(0x1);  // to make it non-null
     struct spdk_nvmf_ns* ns[1];
+    ns[0] = reinterpret_cast<struct spdk_nvmf_ns*>(0x1);  // to make it non-null
     struct spdk_bdev* bdev;
     string bdevName = "bdev_0_array";
     ON_CALL(*mockSpdkCaller, SpdkNvmfTgtFindSubsystem(_, _)).WillByDefault(Return(subsystem[0]));
