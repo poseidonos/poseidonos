@@ -44,6 +44,7 @@ class AllocatorAddressInfo;
 class WbStripeCtx : public IAllocatorFileIoClient
 {
 public:
+    WbStripeCtx(void);
     WbStripeCtx(BitMapMutex* allocWbLsidBitmap, AllocatorAddressInfo* info);
     WbStripeCtx(AllocatorAddressInfo* info);
     virtual ~WbStripeCtx(void);

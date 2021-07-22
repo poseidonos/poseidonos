@@ -47,6 +47,7 @@ class SegmentLock;
 class AllocatorCtx : public IAllocatorFileIoClient
 {
 public:
+    AllocatorCtx(void);
     AllocatorCtx(BitMapMutex* allocSegBitmap, SegmentStates* segmentStates, SegmentLock* segStateLock, AllocatorAddressInfo* info, std::string arrayName);
     AllocatorCtx(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~AllocatorCtx(void);

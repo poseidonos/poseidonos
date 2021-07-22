@@ -76,7 +76,7 @@ ContextManager::ContextManager(AllocatorAddressInfo* info, IStateControl* iState
 {
     allocatorCtx = new AllocatorCtx(info, arrayName);
     segmentCtx = new SegmentCtx(info, arrayName);
-    rebuildCtx = new RebuildCtx(arrayName, allocatorCtx, iStateCtrl);
+    rebuildCtx = new RebuildCtx(arrayName, allocatorCtx);
     wbStripeCtx = new WbStripeCtx(info);
     fileIoManager = new AllocatorFileIoManager(info, arrayName);
     contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, wbStripeCtx, info);

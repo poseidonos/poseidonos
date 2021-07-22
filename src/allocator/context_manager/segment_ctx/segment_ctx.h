@@ -46,6 +46,7 @@ namespace pos
 class SegmentCtx : public IAllocatorFileIoClient
 {
 public:
+    SegmentCtx(void);
     SegmentCtx(SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_);
     SegmentCtx(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~SegmentCtx(void);

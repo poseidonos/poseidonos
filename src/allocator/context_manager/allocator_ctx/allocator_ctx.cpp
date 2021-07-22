@@ -44,6 +44,10 @@
 #include "src/logger/logger.h"
 namespace pos
 {
+AllocatorCtx::AllocatorCtx(void)
+{
+}
+
 AllocatorCtx::AllocatorCtx(BitMapMutex* allocSegBitmap_, SegmentStates* segmentStates_, SegmentLock* segStateLocks_, AllocatorAddressInfo* info_, std::string arrayName_)
 : ctxStoredVersion(0),
   ctxDirtyVersion(0),
@@ -79,15 +83,27 @@ AllocatorCtx::Init(void)
     if (initialized == false)
     {
         uint32_t numSegment = addrInfo->GetnumUserAreaSegments();
-        allocSegBitmap = new BitMapMutex(numSegment);
+        if (allocSegBitmap == nullptr)
+        {
+            allocSegBitmap = new BitMapMutex(numSegment);
+        }
+
         currentSsdLsid = STRIPES_PER_SEGMENT - 1;
         prevSsdLsid = STRIPES_PER_SEGMENT - 1;
-        segmentStates = new SegmentStates[numSegment];
+
+        if (segmentStates == nullptr)
+        {
+            segmentStates = new SegmentStates[numSegment];
+        }
         for (uint32_t segmentId = 0; segmentId < numSegment; ++segmentId)
         {
             segmentStates[segmentId].SetSegmentId(segmentId);
         }
-        segStateLocks = new SegmentLock[numSegment];
+
+        if (segStateLocks == nullptr)
+        {
+            segStateLocks = new SegmentLock[numSegment];
+        }
         ctxHeader.ctxVersion = 0;
 
         initialized = true;

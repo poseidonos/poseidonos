@@ -41,6 +41,10 @@
 
 namespace pos
 {
+WbStripeCtx::WbStripeCtx(void)
+{
+}
+
 WbStripeCtx::WbStripeCtx(BitMapMutex* allocWbLsidBitmap_, AllocatorAddressInfo* info_)
 : initialized(false),
   addrInfo(info_)

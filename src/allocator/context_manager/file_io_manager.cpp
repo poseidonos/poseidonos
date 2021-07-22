@@ -39,6 +39,10 @@
 
 namespace pos
 {
+AllocatorFileIoManager::AllocatorFileIoManager(void)
+{
+}
+
 AllocatorFileIoManager::AllocatorFileIoManager(MetaFileIntf** fileIntf, AllocatorAddressInfo* info, std::string arrayName)
 : addrInfo(info),
   arrayName(arrayName),

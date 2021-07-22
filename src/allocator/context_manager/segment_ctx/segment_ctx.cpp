@@ -42,6 +42,10 @@
 
 namespace pos
 {
+SegmentCtx::SegmentCtx(void)
+{
+}
+
 SegmentCtx::SegmentCtx(SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_)
 : numSegments(0),
   initialized(false),
