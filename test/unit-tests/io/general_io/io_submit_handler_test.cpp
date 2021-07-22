@@ -129,4 +129,26 @@ TEST(IOSubmitHandler, IOSubmitHandler_TrimData)
     // Then: fail return
     EXPECT_EQ(errorToReturn, IOSubmitHandlerStatus::FAIL);
 }
+
+TEST(IOSubmitHandler, IOSubmitHandler_SubmitAsyncByteIO)
+{
+    IOSubmitHandler ioSubmitHandler;
+
+    uint64_t blockCount = 0;
+    PartitionType partitionToIO = PartitionType::USER_DATA;
+    CallbackSmartPtr callback = nullptr;
+    IODirection direction = IODirection::READ;
+
+    // When: IODirection is trim
+    LogicalByteAddr startLSA = {
+        .byteOffset = 0,
+        .byteSize = 8};
+    IOSubmitHandlerStatus errorToReturn;
+    errorToReturn = ioSubmitHandler.SubmitAsyncByteIO(direction, nullptr, startLSA,
+        partitionToIO, callback, 0);
+
+    // Then: fail return, success case is handled by submit_async_byte_io_test.
+    EXPECT_EQ(errorToReturn, IOSubmitHandlerStatus::FAIL);
+}
+
 } // namespace pos

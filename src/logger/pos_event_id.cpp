@@ -249,6 +249,10 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::IOSMHDLR_DEBUG_ASYNC_WRITE, "IOSubmitHandler Async Write : physical lba : {} blkcnt : {} partitionToIO : {} totalcnt :{}"},
             {POS_EVENT_ID::IOSMHDLR_ARRAY_LOCK, "IOSubmitHandler Array Locking type : {} stripeId :{} count :{}"},
             {POS_EVENT_ID::IOSMHDLR_ARRAY_UNLOCK, "IOSubmitHandler Array Unlocking type : {} stripeId :{}"},
+            {POS_EVENT_ID::IOSMHDLR_BYTEIO_BUFFER_NULLPTR, "Buffer pointer of Byte IO is null"},
+            {POS_EVENT_ID::IOSMHDLR_BYTEIO_PARTITION_IS_NOT_BYTE_ACCESSIBLE, "Parition type is not allowed for memory access"},
+            {POS_EVENT_ID::IOSMHDLR_BYTEIO_DIR_NOT_SUPORTTED, "Given Direction {} is not supported"},
+            {POS_EVENT_ID::IOSMHDLR_BYTEIO_PARTITION_TRANSLATE_ERROR, "Translate or Convert Error in ByteIO"},
             {POS_EVENT_ID::I_IOSMHDLR_NULLPTR, "IIOSubmitHandler instance nullptr!"},
 
             {POS_EVENT_ID::DEVICE_OPEN_FAILED, "Device open failed: Name: {}, Desc: {}, libaioContextID: {}, events: {}"},

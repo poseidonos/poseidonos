@@ -40,6 +40,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/io/general_io/submit_async_read.h"
 #include "src/io/general_io/submit_async_write.h"
+#include "src/io/general_io/submit_async_byte_io.h"
 #include "src/io/general_io/sync_io_completion.h"
 #include "src/logger/logger.h"
 
@@ -114,6 +115,19 @@ IOSubmitHandler::SubmitAsyncIO(
 }
 
 IOSubmitHandlerStatus
+IOSubmitHandler::SubmitAsyncByteIO(
+    IODirection direction,
+    void* buffer,
+    LogicalByteAddr& startLSA,
+    PartitionType partitionToIO,
+    CallbackSmartPtr callback,
+    std::string arrayName)
+{
+    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    return SubmitAsyncByteIO(direction, buffer, startLSA, partitionToIO, callback, info->GetIndex());
+}
+
+IOSubmitHandlerStatus
 IOSubmitHandler::SubmitAsyncIO(
     IODirection direction,
     std::list<BufferEntry>& bufferList,
@@ -149,7 +163,23 @@ IOSubmitHandler::SubmitAsyncIO(
             break;
         }
     } while (false);
+    return errorToReturn;
+}
 
+IOSubmitHandlerStatus
+IOSubmitHandler::SubmitAsyncByteIO(
+    IODirection direction,
+    void* buffer,
+    LogicalByteAddr& startLSA,
+    PartitionType partitionToIO,
+    CallbackSmartPtr callback,
+    int arrayId)
+{
+    IOSubmitHandlerStatus errorToReturn = IOSubmitHandlerStatus::FAIL;
+
+    AsyncByteIO asyncByteIO;
+    errorToReturn = asyncByteIO.Execute(direction,
+        buffer, startLSA, partitionToIO, callback, arrayId);
     return errorToReturn;
 }
 } // namespace pos

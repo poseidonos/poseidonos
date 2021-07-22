@@ -88,6 +88,20 @@ public:
         PartitionType partitionToIO,
         CallbackSmartPtr callback, std::string arrayName) = 0;
 
+    virtual IOSubmitHandlerStatus
+    SubmitAsyncByteIO(IODirection direction,
+        void* buffer,
+        LogicalByteAddr& startLSA,
+        PartitionType partitionToIO,
+        CallbackSmartPtr callback, int arrayId) = 0;
+
+    virtual IOSubmitHandlerStatus
+    SubmitAsyncByteIO(IODirection direction,
+        void* buffer,
+        LogicalByteAddr& startLSA,
+        PartitionType partitionToIO,
+        CallbackSmartPtr callback, std::string arrayName) = 0;
+
 private:
     static IIOSubmitHandler* instance;
 }; // class IOSubmitHandler

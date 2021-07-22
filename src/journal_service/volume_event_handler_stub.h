@@ -43,7 +43,7 @@ public:
     virtual ~VolumeEventHandlerStub(void);
 
     virtual int
-    VolumeDeleted(int volId) override
+    VolumeDeleted(int volId)
     {
         return 0;
     }

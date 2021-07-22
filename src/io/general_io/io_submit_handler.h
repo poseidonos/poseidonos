@@ -71,6 +71,18 @@ public:
         LogicalBlkAddr& startLSA, uint64_t blockCount,
         PartitionType partitionToIO,
         CallbackSmartPtr callback, std::string arrayName);
+
+    IOSubmitHandlerStatus SubmitAsyncByteIO(IODirection direction,
+        void* buffer,
+        LogicalByteAddr& startLSA,
+        PartitionType partitionToIO,
+        CallbackSmartPtr callback, int arrayId);
+
+    IOSubmitHandlerStatus SubmitAsyncByteIO(IODirection direction,
+        void* buffer,
+        LogicalByteAddr& startLSA,
+        PartitionType partitionToIO,
+        CallbackSmartPtr callback, std::string arrayName);
 };
 
 } // namespace pos
