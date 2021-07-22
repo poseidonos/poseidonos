@@ -45,12 +45,9 @@ Nvmf::Nvmf(std::string arrayName)
 
 Nvmf::Nvmf(std::string arrayName, VolumeEventPublisher* volumeEventPublisher, NvmfVolumePos* inputNvmfVolume)
 : VolumeEvent("NvmfTarget", arrayName),
+  volume(inputNvmfVolume),
   volumeEventPublisher(volumeEventPublisher)
 {
-    if (nullptr != inputNvmfVolume)
-    {
-        volume = inputNvmfVolume;
-    }
     volumeEventPublisher->RegisterSubscriber(this, arrayName);
 }
 
