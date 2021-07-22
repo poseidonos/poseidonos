@@ -163,7 +163,6 @@ JournalManager::~JournalManager(void)
 int
 JournalManager::Init(void)
 {
-    std::string arrayName = arrayInfo->GetName();
     int arrayId = arrayInfo->GetIndex();
 
     // TODO (huijeong.kim) Dependency injection should be moved to the constructor
@@ -174,8 +173,8 @@ JournalManager::Init(void)
         AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayId),
         AllocatorServiceSingleton::Instance()->GetIContextManager(arrayId),
         AllocatorServiceSingleton::Instance()->GetIContextReplayer(arrayId),
-        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName),
-        MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->ctrl,
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId),
+        MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->ctrl,
         EventSchedulerSingleton::Instance());
 }
 

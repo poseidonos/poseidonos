@@ -142,9 +142,12 @@ VolumeService::GetVolumeManager(std::string arrayName)
 
     for (int arrayId = 0 ; arrayId < ArrayMgmtPolicy::MAX_ARRAY_CNT; arrayId++)
     {
-        if (items[arrayId]->GetArrayName() == arrayName)
+        if (items[arrayId] != nullptr)
         {
-            return items[arrayId];
+            if (items[arrayId]->GetArrayName() == arrayName)
+            {
+                return items[arrayId];
+            }
         }
     }
 
