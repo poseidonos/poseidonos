@@ -70,7 +70,7 @@ type SetSystemPropReqParam struct {
 // Volume request params
 type CreateVolumeParam struct {
 	VOLUMENAME   string `json:"name"`
-	VOLUMESIZE   int    `json:"size"`
+	VOLUMESIZE   uint64 `json:"size"`
 	MAXIOPS      int    `json:"maxiops,omitempty"`
 	MAXBANDWIDTH int    `json:"maxbw,omitempty"`
 	ARRAYNAME    string `json:"array"`
@@ -108,21 +108,21 @@ type VolumeNameList struct {
 
 type VolumePolicyParam struct {
 	VOLUMENAME   []VolumeNameList `json:"vol"`
-	MINIOPS      int    `json:"miniops,omitempty"`
-	MAXIOPS      int    `json:"maxiops,omitempty"`
-	MINBANDWIDTH int    `json:"minbw,omitempty"`
-	MAXBANDWIDTH int    `json:"maxbw,omitempty"`
-	ARRAYNAME    string `json:"array"`
+	MINIOPS      int              `json:"miniops,omitempty"`
+	MAXIOPS      int              `json:"maxiops,omitempty"`
+	MINBANDWIDTH int              `json:"minbw,omitempty"`
+	MAXBANDWIDTH int              `json:"maxbw,omitempty"`
+	ARRAYNAME    string           `json:"array"`
 }
 
 type VolumeResetParam struct {
-	VOLUMENAME   []VolumeNameList `json:"vol"`
-	ARRAYNAME    string `json:"array"`
+	VOLUMENAME []VolumeNameList `json:"vol"`
+	ARRAYNAME  string           `json:"array"`
 }
 
 type ListQosParam struct {
-	VOLUMENAME   []VolumeNameList `json:"vol,omitempty"`
-	ARRAYNAME    string `json:"array"`
+	VOLUMENAME []VolumeNameList `json:"vol,omitempty"`
+	ARRAYNAME  string           `json:"array"`
 }
 
 // Subsystem request params

@@ -19,7 +19,7 @@ TargetNVMSubsystemNVMeQualifiedName = Letter {Letter | Digit | "-" | "_"} .
 RaidType = ["RAID5" | "raid5"] .
 SubsystemNQN = Letter {Letter | Digit | "-" | "_"} . 
 
-VolumeSize = {Digit} ("GB" | "gb" | "MB" | "mb" | "KB" | "kb" | "b" | "B") .
+VolumeSize = {Digit} ("B" | "K" | "KiB" | "KB" | "G" | "GiB" | "GB" | "T" | "TiB" | "TB" | "P" | "PiB" | "PB" | "E" | "EiB" | "EB") .
 IOPS = {Digit} .
 Bandwidth = {Digit} "MB/s".
 
