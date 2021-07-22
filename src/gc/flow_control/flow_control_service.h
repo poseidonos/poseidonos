@@ -48,14 +48,11 @@ class FlowControlService
     friend class Singleton<FlowControlService>;
 
 public:
-    virtual void Register(std::string arrayName, FlowControl* flowControl);
-    virtual void UnRegister(std::string arrayName);
-
-    virtual FlowControl* GetFlowControl(std::string arrayName);
-
-protected:
     FlowControlService(void);
     virtual ~FlowControlService(void);
+    virtual void Register(std::string arrayName, FlowControl* flowControl);
+    virtual void UnRegister(std::string arrayName);
+    virtual FlowControl* GetFlowControl(std::string arrayName);
 
 private:
     FlowControl* _Find(std::string arrayName);

@@ -30,11 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/master_context/config_manager.h"
 #include "src/include/pos_event_id.h"
 #include "src/lib/system_timeout_checker.h"
 #include "src/gc/flow_control/flow_control.h"
 #include "src/gc/flow_control/flow_control_service.h"
+#include "src/gc/flow_control/flow_control_configuration.h"
 #include "src/gc/flow_control/token_distributer.h"
 #include "src/gc/flow_control/linear_distributer.h"
 #include "src/gc/flow_control/state_distributer.h"
@@ -51,28 +51,25 @@ namespace pos
 FlowControl::FlowControl(IArrayInfo* arrayInfo)
 : FlowControl(arrayInfo,
             nullptr,
-            nullptr,
             new SystemTimeoutChecker(),
             FlowControlServiceSingleton::Instance(),
             nullptr,
-            ConfigManagerSingleton::Instance())
+            new FlowControlConfiguration(arrayInfo))
 {
 }
 
 FlowControl::FlowControl(IArrayInfo* arrayInfo,
                         IContextManager* inputIContextManager,
-                        const PartitionLogicalSize* inputSizeInfo,
                         SystemTimeoutChecker* inputSystemTimeoutChecker,
                         FlowControlService* inputFlowControlService,
                         TokenDistributer* inputTokenDistributer,
-                        ConfigManager* inputConfigManager)
+                        FlowControlConfiguration* inputFlowControlConfiguration)
 : arrayInfo(arrayInfo),
   iContextManager(inputIContextManager),
-  sizeInfo(inputSizeInfo),
   systemTimeoutChecker(inputSystemTimeoutChecker),
   flowControlService(inputFlowControlService),
   tokenDistributer(inputTokenDistributer),
-  configManager(inputConfigManager)
+  flowControlConfiguration(inputFlowControlConfiguration)
 {
 }
 
@@ -86,6 +83,10 @@ FlowControl::~FlowControl(void)
     {
         delete systemTimeoutChecker;
     }
+    if (nullptr != flowControlConfiguration)
+    {
+        delete flowControlConfiguration;
+    }
 }
 
 int
@@ -97,18 +98,20 @@ FlowControl::Init(void)
     {
         iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayInfo->GetName());
     }
-
-    sizeInfo = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-
-    blksPerStripe = sizeInfo->blksPerStripe;
-    stripesPerSegment = sizeInfo->stripesPerSegment;
-    totalSegments = sizeInfo->totalSegments;
-    totalTokenInStripe = stripesPerSegment;
-    totalToken = totalTokenInStripe * blksPerStripe;
     gcThreshold = iContextManager->GetGcThreshold(GcMode::MODE_NORMAL_GC);
     gcUrgentThreshold = iContextManager->GetGcThreshold(GcMode::MODE_URGENT_GC);
 
-    _ReadConfig();
+    sizeInfo = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    blksPerStripe = sizeInfo->blksPerStripe;
+
+    flowControlConfiguration->ReadConfig();
+    totalToken = flowControlConfiguration->GetTotalToken();
+    totalTokenInStripe = flowControlConfiguration->GetTotalTokenInStripe();
+    targetSegment = flowControlConfiguration->GetTargetSegment();
+    targetPercent = flowControlConfiguration->GetTargetPercent();
+    urgentSegment = flowControlConfiguration->GetUrgentSegment();
+    urgentPercent = flowControlConfiguration->GetUrgentPercent();
+    flowControlStrategy = flowControlConfiguration->GetFlowControlStrategy();
 
     if (nullptr == tokenDistributer)
     {
@@ -157,10 +160,11 @@ FlowControl::GetToken(FlowControlType type, int token)
     if (token < 0)
     {
         POS_TRACE_DEBUG(EID(FC_NEGATIVE_TOKEN), "FlowControl GetToken should be greater than or equal to zero token:{}", token);
-        assert(false);
+        return 0;
     }
 
-    if (FlowControlStrategy::DISABLE == flowControlStrategy)
+    FlowControlStrategy strategy = flowControlConfiguration->GetFlowControlStrategy();
+    if (FlowControlStrategy::DISABLE == strategy)
     {
         return token;
     }
@@ -184,6 +188,10 @@ FlowControl::GetToken(FlowControlType type, int token)
                 {
                     return 0;
                 }
+                if (0 >= bucket[type].load())
+                {
+                    return 0;
+                }
             }
             else
             {
@@ -201,10 +209,10 @@ FlowControl::ReturnToken(FlowControlType type, int token)
     if (token < 0)
     {
         POS_TRACE_DEBUG(EID(FC_NEGATIVE_TOKEN), "FlowControl GetToken should be greater than or equal to zero token:{}", token);
-        assert(false);
+        return;
     }
 
-    if (FlowControlStrategy::DISABLE == flowControlStrategy)
+    if (FlowControlStrategy::DISABLE == flowControlConfiguration->GetFlowControlStrategy())
     {
         return;
     }
@@ -258,7 +266,7 @@ FlowControl::_TryForceResetToken(FlowControlType type)
     {
         POS_TRACE_INFO(EID(FC_SET_FORCERESET), "_set isForceReset, userBucket:{}, gcBucket:{}",
                         bucket[FlowControlType::USER], bucket[FlowControlType::GC]);
-        systemTimeoutChecker->SetTimeout(forceResetTimeout);
+        systemTimeoutChecker->SetTimeout(flowControlConfiguration->GetForceResetTimeout());
         isForceReset = true;
         return false;
     }
@@ -282,110 +290,4 @@ FlowControl::_DistributeToken(void)
 {
     return tokenDistributer->Distribute(iContextManager->GetNumOfFreeSegment(false));
 }
-
-void
-FlowControl::_ReadConfig(void)
-{
-    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
-
-    bool enable = true;
-    int ret = configManager->GetValue("flow_control", "enable",
-                &enable, ConfigType::CONFIG_TYPE_BOOL);
-    if (SUCCESS == ret)
-    {
-        if (false == enable)
-        {
-            flowControlStrategy = FlowControlStrategy::DISABLE;
-            return;
-        }
-    }
-
-    bool use_default = true;
-    ret = configManager->GetValue("flow_control", "use_default",
-                &use_default, ConfigType::CONFIG_TYPE_BOOL);
-    if (SUCCESS == ret)
-    {
-        if (true == use_default)
-        {
-            return;
-        }
-    }
-
-    uint64_t refill_timeout_in_msec = 1000;
-    ret = configManager->GetValue("flow_control", "refill_timeout_in_msec",
-            &refill_timeout_in_msec, ConfigType::CONFIG_TYPE_UINT64);
-    if (SUCCESS == ret)
-    {
-        forceResetTimeout = refill_timeout_in_msec * NANOS_PER_MSEC;
-    }
-
-
-    uint32_t total_token_in_stripe = 1024;
-    ret = configManager->GetValue("flow_control", "total_token_in_stripe",
-            &total_token_in_stripe, ConfigType::CONFIG_TYPE_UINT32);
-    if (SUCCESS == ret)
-    {
-        totalTokenInStripe = total_token_in_stripe;
-        totalToken = totalTokenInStripe * blksPerStripe;
-    }
-
-    std::string strategy = "linear";
-    ret = configManager->GetValue("flow_control", "strategy",
-            &strategy, ConfigType::CONFIG_TYPE_STRING);
-    if (SUCCESS == ret)
-    {
-        for (int i = 0; i < (int)FlowControlStrategy::MAX_FLOW_CONTROL_STRATEGY; i++)
-        {
-            if (FLOW_CONTROL_STRATEGY_NAME[i] == strategy)
-            {
-                flowControlStrategy = (FlowControlStrategy)i;
-            }
-        }
-    }
-
-    uint32_t flow_control_target_percent = 30;
-    uint32_t flow_control_urgent_percent = 10;
-    uint32_t flow_control_target_segment = 10;
-    uint32_t flow_control_urgent_segment = 5;
-    if (FlowControlStrategy::STATE == flowControlStrategy)
-    {
-        ret = configManager->GetValue("flow_control", "flow_control_target_percent",
-                &flow_control_target_percent, ConfigType::CONFIG_TYPE_UINT32);
-        if (SUCCESS != ret)
-        {
-            return;
-        }
-        ret = configManager->GetValue("flow_control", "flow_control_urgent_percent",
-                &flow_control_urgent_percent, ConfigType::CONFIG_TYPE_UINT32);
-        if (SUCCESS != ret)
-        {
-            return;
-        }
-        ret = configManager->GetValue("flow_control", "flow_control_target_segment",
-                &flow_control_target_segment, ConfigType::CONFIG_TYPE_UINT32);
-        if (SUCCESS != ret)
-        {
-            return;
-        }
-        ret = configManager->GetValue("flow_control", "flow_control_urgent_segment",
-                &flow_control_urgent_segment, ConfigType::CONFIG_TYPE_UINT32);
-        if (SUCCESS != ret)
-        {
-            return;
-        }
-
-        if (flow_control_target_percent < flow_control_urgent_percent || flow_control_target_segment < flow_control_urgent_segment)
-        {
-            return;
-        }
-        else
-        {
-            targetPercent = flow_control_target_percent;
-            urgentPercent = flow_control_urgent_percent;
-            targetSegment = flow_control_target_segment;
-            urgentSegment = flow_control_urgent_segment;
-        }
-    }
-}
-
 } // namespace pos

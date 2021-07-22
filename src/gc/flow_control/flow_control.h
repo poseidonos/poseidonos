@@ -41,6 +41,7 @@
 
 #include "src/lib/singleton.h"
 #include "src/array_models/interface/i_mount_sequence.h"
+#include "src/gc/flow_control/flow_control_configuration.h"
 
 namespace pos
 {
@@ -61,22 +62,12 @@ enum class FlowControlState : uint32_t
     MAX_FLOW_CONTROL_STATE
 };
 
-enum class FlowControlStrategy : uint32_t
-{
-    DISABLE = 0,
-    LINEAR,
-    STATE,
-    MAX_FLOW_CONTROL_STRATEGY
-};
-
 class IContextManager;
-class IArrayInfo;
 class SystemTimeoutChecker;
 class FlowControlService;
 class IArrayInfo;
 class PartitionLogicalSize;
 class TokenDistributer;
-class ConfigManager;
 
 class FlowControl : public IMountSequence
 {
@@ -84,11 +75,10 @@ public:
     explicit FlowControl(IArrayInfo* arrayInfo);
     FlowControl(IArrayInfo* arrayInfo,
                 IContextManager* inputIContextManager,
-                const PartitionLogicalSize* inputSizeInfo,
                 SystemTimeoutChecker* inputSystemTimeoutChecker,
                 FlowControlService* inputFlowControlService,
                 TokenDistributer* inputTokenDistributer,
-                ConfigManager* inputConfigManager);
+                FlowControlConfiguration* inputFlowControlConfiguration);
     virtual ~FlowControl(void);
 
     virtual int Init(void) override;
@@ -103,8 +93,6 @@ private:
     bool _RefillToken(FlowControlType type);
     bool _TryForceResetToken(FlowControlType type);
     std::tuple<uint32_t, uint32_t> _DistributeToken(void);
-    std::tuple<uint32_t, uint32_t> _DistributeTokenLinear(void);
-    std::tuple<uint32_t, uint32_t> _DistributeTokenState(void);
     void _ReadConfig(void);
 
     IArrayInfo* arrayInfo = nullptr;
@@ -143,6 +131,6 @@ private:
     SystemTimeoutChecker* systemTimeoutChecker = nullptr;
     FlowControlService* flowControlService = nullptr;
     TokenDistributer* tokenDistributer = nullptr;
-    ConfigManager* configManager = nullptr;
+    FlowControlConfiguration* flowControlConfiguration = nullptr;
 };
 } // namespace pos

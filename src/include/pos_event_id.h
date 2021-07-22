@@ -452,6 +452,7 @@ enum class POS_EVENT_ID
     FC_RESET_FORCERESET,
     FC_SET_FORCERESET,
     FC_FORCERESET_DONE,
+    FC_CONFIGURATION,
 
     // --------------Meta filesystem (4000)----------------
     // Debug, Info, Warning, Error, Critical

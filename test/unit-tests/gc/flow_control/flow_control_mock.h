@@ -13,6 +13,7 @@ public:
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));
+    MOCK_METHOD(void, Flush, (), (override));
     MOCK_METHOD(int, GetToken, (FlowControlType type, int token), (override));
     MOCK_METHOD(void, ReturnToken, (FlowControlType type, int token), (override));
 };
