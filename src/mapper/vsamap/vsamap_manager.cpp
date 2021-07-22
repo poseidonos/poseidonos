@@ -329,37 +329,22 @@ VSAMapManager::VolumeUnmounted(std::string volName, int volID, std::string array
 {
     vsaMapAPI->DisableVsaMapAccess(volID);
 
-    do
+    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
+    VolMountStateIter iter;
+    if (_IsVolumeExist(volID, iter))
     {
-        EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volID, this);
-        mapFlushStatus[volID] = MapFlushState::FLUSHING;
-
-        int ret = GetVSAMapContent(volID)->FlushTouchedPages(callBackVSAMap);
-        if (ret < 0)
+        if (iter->second == VolState::FOREGROUND_MOUNTED)
         {
-            POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "ret:{} of vsaMap->Unload(), VolumeId:{} @VolumeUnmounted", ret, volID);
+            volumeMountState[iter->first] = VolState::BACKGROUND_MOUNTED;
+            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was set as BG_MOUNTED @VolumeUnmounted", volID);
         }
-        _WaitForMapAsyncFlushed(volID);
-
-        std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
-        VolMountStateIter iter;
-        if (_IsVolumeExist(volID, iter))
+        else
         {
-            if (iter->second == VolState::FOREGROUND_MOUNTED)
-            {
-                volumeMountState[iter->first] = VolState::BACKGROUND_MOUNTED;
-                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was set as BG_MOUNTED @VolumeUnmounted", volID);
-            }
-            else
-            {
-                POS_TRACE_WARN(EID(VSAMAP_UNMOUNT_FAILURE), "volumeID:{} is Not FG_MOUNTED @VolumeUnmounted", volID);
-            }
+            POS_TRACE_WARN(EID(VSAMAP_UNMOUNT_FAILURE), "volumeID:{} is Not FG_MOUNTED @VolumeUnmounted", volID);
         }
+    }
 
-        return true;
-    } while (false);
-
-    return false;
+    return true;
 }
 
 bool
