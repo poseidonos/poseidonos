@@ -381,7 +381,7 @@ UnvmeDrv::CompleteErrors(DeviceContext* deviceContext)
             {
                 UnvmeDeviceContext* unvmeDevCtx = static_cast<UnvmeDeviceContext*>(deviceContext);
                 UnvmeIOContext* unvmeIoCtx = static_cast<UnvmeIOContext*>(ioCtx);
-                _SubmitAsyncIOInternal(unvmeDevCtx, unvmeIoCtx);
+                completionCount = _SubmitAsyncIOInternal(unvmeDevCtx, unvmeIoCtx);
 
                 return completionCount;
             }
@@ -396,7 +396,7 @@ UnvmeDrv::CompleteErrors(DeviceContext* deviceContext)
                     ioCtx->GetSectorCount(),
                     static_cast<int>(ioCtx->GetOpcode()),
                     ioCtx->GetDeviceName());
-                _SubmitAsyncIOInternal(unvmeDevCtx, unvmeIoCtx);
+                completionCount = _SubmitAsyncIOInternal(unvmeDevCtx, unvmeIoCtx);
 
                 return completionCount;
             }

@@ -401,5 +401,9 @@ nvmf_qpair_is_admin_queue(struct spdk_nvmf_qpair *qpair)
 	return qpair->qid == 0;
 }
 
+void
+spdk_nvmf_subsystem_poll_group_increase_io_outstanding(struct spdk_nvmf_request *req,
+	struct spdk_nvmf_subsystem_poll_group *sgroup);
+
 #endif /* __NVMF_INTERNAL_H__ */
 

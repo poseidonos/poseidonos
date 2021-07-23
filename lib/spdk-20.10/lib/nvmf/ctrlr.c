@@ -872,8 +872,7 @@ spdk_nvmf_ctrlr_connect(struct spdk_nvmf_request *req)
 		status = SPDK_NVMF_REQUEST_EXEC_STATUS_COMPLETE;
 		goto out;
 	}
-
-	sgroup->io_outstanding++;
+	spdk_nvmf_subsystem_poll_group_increase_io_outstanding(req, sgroup);
 	TAILQ_INSERT_TAIL(&qpair->outstanding, req, link);
 
 	status = _nvmf_ctrlr_connect(req);
@@ -1769,7 +1768,6 @@ nvmf_ctrlr_async_event_request(struct spdk_nvmf_request *req)
 	/* AER cmd is an exception */
 	sgroup = &req->qpair->group->sgroups[ctrlr->subsys->id];
 	assert(sgroup != NULL);
-	sgroup->io_outstanding--;
 
 	/* Four asynchronous events are supported for now */
 	if (ctrlr->nr_aer_reqs >= NVMF_MAX_ASYNC_EVENTS) {
@@ -3487,7 +3485,7 @@ _nvmf_request_exec(struct spdk_nvmf_request *req,
 	}
 
 	if (sgroup) {
-		sgroup->io_outstanding++;
+		spdk_nvmf_subsystem_poll_group_increase_io_outstanding(req, sgroup);
 	}
 
 	/* Place the request on the outstanding list so we can keep track of it */
@@ -3526,7 +3524,7 @@ spdk_nvmf_request_exec(struct spdk_nvmf_request *req)
 		TAILQ_INSERT_TAIL(&qpair->outstanding, req, link);
 		/* Still increment io_outstanding because request_complete decrements it */
 		if (sgroup != NULL) {
-			sgroup->io_outstanding++;
+			spdk_nvmf_subsystem_poll_group_increase_io_outstanding(req, sgroup);
 		}
 		_nvmf_request_complete(req);
 		return;
@@ -3704,4 +3702,16 @@ uint16_t spdk_nvmf_ctrlr_get_id(struct spdk_nvmf_ctrlr *ctrlr)
 struct spdk_nvmf_request *spdk_nvmf_request_get_req_to_abort(struct spdk_nvmf_request *req)
 {
 	return req->req_to_abort;
+}
+
+void
+spdk_nvmf_subsystem_poll_group_increase_io_outstanding(struct spdk_nvmf_request *req,
+		struct spdk_nvmf_subsystem_poll_group *sgroup)
+{
+	struct spdk_nvme_cmd *cmd = &req->cmd->nvme_cmd;
+	if (cmd->opc == SPDK_NVME_OPC_ASYNC_EVENT_REQUEST)
+	{
+		return;
+	}
+	sgroup->io_outstanding++;
 }

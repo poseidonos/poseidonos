@@ -8,6 +8,7 @@
 #include "src/include/partition_type.h"
 #include "test/unit-tests/array/array_interface_mock.h"
 #include "test/unit-tests/array/array_mock.h"
+#include "test/unit-tests/array/rebuild/i_array_rebuilder_mock.h"
 #include "test/unit-tests/array/device/array_device_manager_mock.h"
 #include "test/unit-tests/array/device/array_device_mock.h"
 #include "test/unit-tests/array/interface/i_abr_control_mock.h"
@@ -613,24 +614,29 @@ TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeSaved)
 TEST(Array, Delete_testIfArrayDeletedSuccessfullyWhenInputsAreValid)
 {
     // Given
+    MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
 
+    EXPECT_CALL(*mockRebuilder, IsRebuilding).WillOnce(Return(false));
     EXPECT_CALL(*mockState, IsDeletable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
     EXPECT_CALL(mockAbrControl, DeleteAbr).WillOnce(Return(0));
     EXPECT_CALL(*mockState, SetDelete).Times(1);
     EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock", mockRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
     int actual = array.Delete();
 
     // Then
     ASSERT_EQ(0, actual);
+
+    // CleanUp
+    delete mockRebuilder;
 }
 
 TEST(Array, Delete_testIfArrayNotDeletedWhenStateIsNotDeletable)
@@ -658,24 +664,57 @@ TEST(Array, Delete_testIfArrayNotDeletedWhenArrayBootRecordFailsToBeUpdated)
 {
     // Given: a deletable state, but ABR I/O fails
     int ABR_FAILURE = 1;
+    MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
 
+    EXPECT_CALL(*mockRebuilder, IsRebuilding).WillOnce(Return(false));
     EXPECT_CALL(*mockState, IsDeletable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
     EXPECT_CALL(mockAbrControl, DeleteAbr).WillOnce(Return(ABR_FAILURE));
     EXPECT_CALL(*mockState, SetDelete).Times(0); // this should never be called
     EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock", mockRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
+    int actual = array.Delete();
+    // Then: state should never be set to Delete
+    ASSERT_EQ(ABR_FAILURE, actual);
+
+    // CleanUp
+    delete mockRebuilder;
+}
+
+TEST(Array, Delete_testIfArrayNotDeletedWhenRebuildNotDone)
+{
+    // Given: a deletable state, but ABR I/O fails
+    int REBUILD_NOT_DONE_FAIL = (int)POS_EVENT_ID::ARRAY_REBUILD_NOT_DONE;
+    NiceMock<MockIStateControl> mockIStateControl;
+    
+    MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
+    MockArrayState* mockState = new MockArrayState(&mockIStateControl);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockIAbrControl mockAbrControl;
+
+    EXPECT_CALL(*mockRebuilder, IsRebuilding).WillOnce(Return(true));
+    EXPECT_CALL(*mockRebuilder, CleanUp).Times(1);
+    EXPECT_CALL(*mockState, IsDeletable).WillOnce(Return(0));
+    EXPECT_CALL(*mockArrDevMgr, Clear).Times(0);
+    EXPECT_CALL(mockAbrControl, DeleteAbr).Times(0);
+    EXPECT_CALL(*mockState, SetDelete).Times(0); // this should never be called
+    EXPECT_CALL(*mockState, IsBroken).Times(0);
+
+    Array array("mock", mockRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
     int actual = array.Delete();
 
     // Then: state should never be set to Delete
-    ASSERT_EQ(ABR_FAILURE, actual);
+    ASSERT_EQ(REBUILD_NOT_DONE_FAIL, actual);
+
+    // CleanUp
+    delete mockRebuilder;
 }
 
 TEST(Array, Delete_testIfArrayDeletedWhenArrayIsBrokenAndShutdownNotEnded)
@@ -685,20 +724,25 @@ TEST(Array, Delete_testIfArrayDeletedWhenArrayIsBrokenAndShutdownNotEnded)
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
+    MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
 
     EXPECT_CALL(*mockState, IsDeletable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(0);
     EXPECT_CALL(mockAbrControl, DeleteAbr).Times(0);
     EXPECT_CALL(*mockState, SetDelete).Times(0);
+    EXPECT_CALL(*mockRebuilder, IsRebuilding).WillOnce(Return(false));
     EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(true));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock", mockRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When: array is broken but shutdown process is not finished
     int actual = array.Delete();
 
     // Then
     ASSERT_EQ(EID(ARRAY_SHUTDOWN_TAKES_TOO_LONG), actual);
+
+    // CleanUp
+    delete mockRebuilder;
 }
 
 TEST(Array, AddSpare_testIfSpareIsAddedWhenInputsAreValid)

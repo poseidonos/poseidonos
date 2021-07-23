@@ -49,6 +49,8 @@ public:
     virtual void StopRebuild(string array) = 0;
     virtual void RebuildDone(string array) = 0;
     virtual void WaitRebuildDone(string array) = 0;
+    virtual bool IsRebuilding(string array) = 0;
+    virtual void CleanUp(string array) = 0;
     virtual uint32_t GetRebuildProgress(string array) = 0;
 };
 } // namespace pos

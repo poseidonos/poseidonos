@@ -315,6 +315,15 @@ Array::Delete(void)
         goto error;
     }
 
+    // Rebuild would not be finished when rebuild io have an error on broken array
+    if ( rebuilder->IsRebuilding(name_))
+    {
+        ret = (int)POS_EVENT_ID::ARRAY_REBUILD_NOT_DONE;
+        POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG , "Rebuild not done, try again later");
+        rebuilder->CleanUp(name_);
+        goto error;
+    }
+
     if (state->IsBroken())
     {
         int waitcount = 0;
