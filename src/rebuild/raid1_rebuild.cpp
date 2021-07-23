@@ -120,6 +120,7 @@ Raid1Rebuild::Read(void)
                 "Partition {} (RAID1) rebuilding done",
                 ctx->part);
             ctx->result = RebuildState::PASS;
+            UpdateProgress(ctx->stripeCnt);
         }
 
         EventSmartPtr complete(new RebuildCompleted(this));
@@ -129,20 +130,23 @@ Raid1Rebuild::Read(void)
         return true;
     }
 
-    uint32_t currWorkload = strPerSeg;
-    if (baseStripe + currWorkload > maxStripeId)
+    uint32_t from = baseStripe;
+    uint32_t to = baseStripe + strPerSeg - 1;
+    if (to > maxStripeId)
     {
-        currWorkload = maxStripeId - baseStripe;
+        to = maxStripeId;
     }
 
-    if (locker->TryBusyLock(ctx->faultDev, baseStripe, baseStripe + currWorkload - 1) == false)
+    uint32_t currWorkload = to - from + 1;
+
+    if (locker->TryBusyLock(ctx->faultDev, from, to) == false)
     {
         return false;
     }
 
     ctx->taskCnt = currWorkload;
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "Raid1Rebuild - from:{}, cnt:{}", baseStripe, currWorkload);
+        "Raid1Rebuild - from:{}, to:{}", from, to);
     for (uint32_t offset = 0; offset < currWorkload; offset++)
     {
         uint32_t stripeId = baseStripe + offset;
@@ -216,6 +220,11 @@ bool Raid1Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
     ubio = nullptr;
 
     return true;
+}
+
+void Raid1Rebuild::UpdateProgress(uint32_t val)
+{
+    ctx->prog->Update(ctx->part, val, ctx->stripeCnt);
 }
 
 } // namespace pos

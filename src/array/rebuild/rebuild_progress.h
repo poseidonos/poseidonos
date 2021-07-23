@@ -39,19 +39,24 @@
 namespace pos
 {
 using namespace std;
+
+struct PartitionProgress{
+    uint32_t total = 0;
+    uint32_t done = 0;
+};
+
 class RebuildProgress
 {
 public:
     RebuildProgress(string name);
-    void Update(string _id, uint64_t _done);
-    void SetTotal(uint64_t _total);
-    uint64_t Current(void);
+    virtual ~RebuildProgress(void);
+    void Update(string _id, uint32_t _done, uint32_t _total);
+    uint32_t Current(void);
 
 private:
-    uint64_t total = 0;
-    uint64_t done = 0;
-    uint64_t percent = 0;
-    map<string, uint64_t> progress;
+    uint32_t total = 0;
+    uint32_t percent = 0;
+    map<string, PartitionProgress*> progress;
     string arrayName;
 };
 

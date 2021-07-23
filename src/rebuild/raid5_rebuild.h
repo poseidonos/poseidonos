@@ -33,6 +33,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include "rebuild_behavior.h"
 #include "src/include/address_type.h"
@@ -43,12 +44,13 @@ namespace pos
 class Raid5Rebuild : public RebuildBehavior
 {
 public:
-    Raid5Rebuild(unique_ptr<RebuildContext> c);
+    Raid5Rebuild(unique_ptr<RebuildContext> c, IContextManager* allocatorSvc);
     ~Raid5Rebuild(void);
 
     virtual bool Read(void) override;
     virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) override;
     virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) override;
+    virtual void UpdateProgress(uint32_t val) override;
 
 private:
     virtual string _GetClassName(void);

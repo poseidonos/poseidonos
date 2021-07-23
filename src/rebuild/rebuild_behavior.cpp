@@ -58,12 +58,6 @@ RebuildBehavior::StopRebuilding(void)
     ctx->result = RebuildState::CANCELLED;
 }
 
-void
-RebuildBehavior::UpdateProgress(uint32_t val)
-{
-    ctx->prog->Update(ctx->part, val);
-}
-
 RebuildContext*
 RebuildBehavior::GetContext(void)
 {

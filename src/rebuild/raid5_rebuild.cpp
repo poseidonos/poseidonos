@@ -43,7 +43,6 @@
 #include "src/include/branch_prediction.h"
 #include "src/include/backend_event.h"
 #include "src/array_models/dto/partition_physical_size.h"
-#include "src/allocator_service/allocator_service.h"
 #include "src/bio/ubio.h"
 #include "src/logger/logger.h"
 #include "src/event_scheduler/event_scheduler.h"
@@ -56,13 +55,11 @@
 
 namespace pos
 {
-Raid5Rebuild::Raid5Rebuild(unique_ptr<RebuildContext> c)
-: RebuildBehavior(move(c))
+Raid5Rebuild::Raid5Rebuild(unique_ptr<RebuildContext> c, IContextManager* allocatorSvc)
+: RebuildBehavior(move(c)),
+  allocatorSvc(allocatorSvc)
 {
     POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid5Rebuild");
-    allocatorSvc = AllocatorServiceSingleton::Instance()->GetIContextManager(ctx->array);
-    assert(allocatorSvc != nullptr);
-
     bool ret = _InitBuffers();
     assert(ret);
 }
@@ -111,7 +108,7 @@ Raid5Rebuild::Read(void)
         airlog("LAT_Raid5RebuildRead", "AIR_END", 0, key);
         return false;
     }
-    UpdateProgress(segId * strCnt);
+    UpdateProgress(0);
 
     if (segId == ctx->size->totalSegments ||
         ctx->result >= RebuildState::CANCELLED)
@@ -185,7 +182,7 @@ bool Raid5Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
     uint64_t objAddr = reinterpret_cast<uint64_t>(ubio.get());
     airlog("LAT_Raid5RebuildWrite", "AIR_BEGIN", 0, objAddr);
 
-    POS_TRACE_DEBUG(2831, "Raid5Rebuild::Write, target segment:{}", targetId);
+    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "Raid5Rebuild::Write, target segment:{}", targetId);
     CallbackSmartPtr event(
         new UpdateDataCompleteHandler(targetId, ubio, this));
     event->SetEventType(BackendEvent_UserdataRebuild);
@@ -224,6 +221,15 @@ bool Raid5Rebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
     ubio = nullptr;
 
     return true;
+}
+
+void Raid5Rebuild::UpdateProgress(uint32_t val)
+{
+    uint32_t remainingStripe =
+        allocatorSvc->GetRebuildTargetSegmentCount() * ctx->size->stripesPerSegment;
+    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG,
+        "Raid5Rebuild::UpdateProgress, reamining:{}", remainingStripe);
+    ctx->prog->Update(ctx->part, val, remainingStripe);
 }
 
 } // namespace pos

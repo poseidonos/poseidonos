@@ -49,12 +49,12 @@ public:
     virtual ~RebuildBehavior(void);
 
     void StopRebuilding(void);
-    void UpdateProgress(uint32_t val);
     RebuildContext* GetContext(void);
 
     virtual bool Read(void) = 0;
     virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) = 0;
     virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) = 0;
+    virtual void UpdateProgress(uint32_t val) = 0;
 
 protected:
     bool _InitBuffers(void);

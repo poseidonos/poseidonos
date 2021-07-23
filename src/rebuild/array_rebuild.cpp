@@ -49,16 +49,13 @@ ArrayRebuild::ArrayRebuild(string array, ArrayDevice* dev, RebuildComplete cb,
     progress = new RebuildProgress(arrayName);
     rebuildLogger = new RebuildLogger(arrayName);
     rebuildLogger->SetArrayRebuildStart();
-    uint64_t totalStripes = 0;
 
     for (RebuildTarget* tar : tgt)
     {
         PartitionRebuild* ptnRbd = new PartitionRebuild(tar, dev, progress, rebuildLogger);
-        uint64_t stripes = ptnRbd->TotalStripes();
-        if (stripes > 0)
+        if (ptnRbd->TotalStripes() > 0)
         {
             tasks.push_back(ptnRbd);
-            totalStripes += stripes;
             POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
                 "partition added to array {} for rebuild", arrayName);
         }
@@ -67,7 +64,6 @@ ArrayRebuild::ArrayRebuild(string array, ArrayDevice* dev, RebuildComplete cb,
             delete ptnRbd;
         }
     }
-    progress->SetTotal(totalStripes);
     rebuildDoneCb = bind(&ArrayRebuild::_RebuildDone, this, placeholders::_1);
 }
 

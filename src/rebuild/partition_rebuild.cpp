@@ -37,6 +37,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/allocator_service/allocator_service.h"
 
 namespace pos
 {
@@ -52,6 +53,7 @@ PartitionRebuild::PartitionRebuild(RebuildTarget* t, ArrayDevice* d,
         {
             bhvr->GetContext()->prog = p;
             bhvr->GetContext()->logger = l;
+            bhvr->UpdateProgress(0);
         }
     }
 }
@@ -107,10 +109,6 @@ void PartitionRebuild::_Complete(RebuildResult res)
         "PartitionRebuild::_Complete, res {}", res.result);
 
     res.target = targetDev;
-    if (bhvr != nullptr)
-    {
-        bhvr->UpdateProgress(bhvr->GetContext()->stripeCnt);
-    }
     completeCb(res);
 }
 
@@ -119,7 +117,11 @@ RebuildBehavior* PartitionRebuild::_GetRebuildBehavior(unique_ptr<RebuildContext
     switch (ctx->raidType)
     {
     case RaidTypeEnum::RAID5 :
-        return new Raid5Rebuild(move(ctx));
+    {
+        IContextManager* allocatorSvc =
+            AllocatorServiceSingleton::Instance()->GetIContextManager(ctx->array);
+        return new Raid5Rebuild(move(ctx), allocatorSvc);
+    }
 
     case RaidTypeEnum::RAID1 :
         return new Raid1Rebuild(move(ctx));

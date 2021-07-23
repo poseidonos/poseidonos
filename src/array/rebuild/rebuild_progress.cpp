@@ -43,27 +43,45 @@ RebuildProgress::RebuildProgress(string name)
     POS_REPORT_TRACE((int)POS_EVENT_ID::REBUILD_PROGRESS, "[0], {}", arrayName);
 }
 
+RebuildProgress::~RebuildProgress(void)
+{
+    for (auto it : progress)
+    {
+        delete it.second;
+    }
+}
+
 void
-RebuildProgress::Update(string _id, uint64_t _done)
+RebuildProgress::Update(string _id, uint32_t _done, uint32_t _total)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_PROGRESS_DETAIL,
-        "array:{}, id:{}, done:{}", arrayName, _id, _done);
+        "array:{}, id:{}, done:{}, total:{}", arrayName, _id, _done, _total);
 
-    uint64_t delta = 0;
     auto it = progress.find(_id);
     if (it == progress.end())
     {
-        progress.insert(make_pair(_id, _done));
-        delta = _done;
+        PartitionProgress* partProg = new PartitionProgress();
+        partProg->total = _total;
+        partProg->done = 0;
+        progress.insert(make_pair(_id, partProg));
     }
     else
     {
-        delta = _done - progress[_id]; // assume incremental progress
-        progress[_id] = _done;
+        uint32_t increment = it->second->total - _total;
+
+        if (increment > 0 && _done == 0)
+        {
+            // cases where the progress is increasing as the total decreases
+            it->second->done = increment;
+        }
+        else
+        {
+            it->second->total = _total;
+            it->second->done = _done;
+        }
     }
 
-    done += delta;
-    uint64_t now = done * 100 / total;
+    uint32_t now = Current();
 
     if (percent != now)
     {
@@ -72,14 +90,26 @@ RebuildProgress::Update(string _id, uint64_t _done)
     }
 }
 
-void RebuildProgress::SetTotal(uint64_t _total)
+uint32_t RebuildProgress::Current(void)
 {
-    total = _total;
-}
+    uint32_t total = 0;
+    uint32_t done = 0;
 
-uint64_t RebuildProgress::Current(void)
-{
-    return percent;
+    for (auto it : progress)
+    {
+        PartitionProgress* partProg = it.second;
+        total += partProg->total;
+        done += partProg->done;
+    }
+
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_PROGRESS,
+        "array:{}, done:{}, total:{}", arrayName, done, total);
+
+    if (total == 0)
+    {
+        return 100;
+    }
+    return done * 100 / total;
 }
 
 } // namespace pos
