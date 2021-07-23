@@ -66,12 +66,16 @@ public:
     IContextManager*GetIContextManager(std::string arrayName);
     IContextReplayer*GetIContextReplayer(std::string arrayName);
 
+    void StoreAllocatorPtr(std::string arrayName, void* allocator);
+
 private:
     AllocatorInterfaceContainer<IBlockAllocator> iBlockAllocator;
     AllocatorInterfaceContainer<IWBStripeAllocator> iWBStripeAllocator;
     AllocatorInterfaceContainer<IAllocatorWbt> iAllocatorWbt;
     AllocatorInterfaceContainer<IContextManager> iContextManager;
     AllocatorInterfaceContainer<IContextReplayer> iContextReplayer;
+
+    std::unordered_map<std::string, void*> allocators;
 };
 
 using AllocatorServiceSingleton = Singleton<AllocatorService>;

@@ -59,21 +59,24 @@ Allocator::Allocator(AllocatorAddressInfo* addrInfo_, ContextManager* contextMan
   wbStripeManager(wbStripeManager_),
   isInitialized(false),
   iArrayInfo(info_),
-  iStateControl(iState_)
+  iStateControl(iState_),
+  arrayName(info_->GetName())
 {
 }
 
 Allocator::Allocator(IArrayInfo* info, IStateControl* iState)
 : Allocator(nullptr, nullptr, nullptr, nullptr, info, iState)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, info->GetName());
+    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName);
     _CreateSubmodules();
+    POS_TRACE_INFO(EID(ALLOCATOR_START), "Allocator in Array:{} was Created", arrayName);
 }
 
 Allocator::~Allocator(void)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, iArrayInfo->GetName());
+    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName);
     _DeleteSubmodules();
+    POS_TRACE_INFO(EID(ALLOCATOR_START), "Allocator in Array:{} was Destroyed", arrayName);
 }
 
 int
@@ -81,7 +84,7 @@ Allocator::Init(void)
 {
     if (false == isInitialized)
     {
-        addrInfo->Init(iArrayInfo->GetName());
+        addrInfo->Init(arrayName);
         contextManager->Init();
         blockManager->Init(wbStripeManager);
         wbStripeManager->Init();
@@ -97,27 +100,26 @@ void
 Allocator::_CreateSubmodules(void)
 {
     addrInfo = new AllocatorAddressInfo();
-    contextManager = new ContextManager(addrInfo, iArrayInfo->GetName());
-    blockManager = new BlockManager(addrInfo, contextManager, iArrayInfo->GetName());
-    wbStripeManager = new WBStripeManager(addrInfo, contextManager, blockManager, iArrayInfo->GetName());
+    contextManager = new ContextManager(addrInfo, arrayName);
+    blockManager = new BlockManager(addrInfo, contextManager, arrayName);
+    wbStripeManager = new WBStripeManager(addrInfo, contextManager, blockManager, arrayName);
 }
 
 void
 Allocator::_RegisterToAllocatorService(void)
 {
-    std::string arrayName = iArrayInfo->GetName();
     AllocatorService* allocatorService = AllocatorServiceSingleton::Instance();
     allocatorService->RegisterAllocator(arrayName, GetIBlockAllocator());
     allocatorService->RegisterAllocator(arrayName, GetIWBStripeAllocator());
     allocatorService->RegisterAllocator(arrayName, GetIAllocatorWbt());
     allocatorService->RegisterAllocator(arrayName, GetIContextManager());
     allocatorService->RegisterAllocator(arrayName, GetIContextReplayer());
+    allocatorService->StoreAllocatorPtr(arrayName, this);
 }
 
 void
 Allocator::_UnregisterFromAllocatorService(void)
 {
-    std::string arrayName = iArrayInfo->GetName();
     AllocatorService* allocatorService = AllocatorServiceSingleton::Instance();
     allocatorService->UnregisterAllocator(arrayName);
 }
@@ -200,7 +202,7 @@ Allocator::GetIContextReplayer(void)
 {
     return (IContextReplayer*)contextManager->GetContextReplayer();
 }
-//----------------------------------------------------------------------------//
+
 bool
 Allocator::VolumeUnmounted(std::string volName, int volID, std::string arrayName)
 {
@@ -231,7 +233,7 @@ Allocator::SetUrgentThreshold(uint32_t inputThreshold)
 int
 Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file)
 {
-    MetaFileIntf* dumpFile = new MockFileIntf(fname, iArrayInfo->GetName());
+    MetaFileIntf* dumpFile = new MockFileIntf(fname, arrayName);
     if (file != nullptr)
     {
         delete dumpFile;
@@ -287,7 +289,7 @@ Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
 int
 Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file)
 {
-    MetaFileIntf* fileProvided = new MockFileIntf(fname, iArrayInfo->GetName());
+    MetaFileIntf* fileProvided = new MockFileIntf(fname, arrayName);
     if (file != nullptr)
     {
         delete fileProvided;

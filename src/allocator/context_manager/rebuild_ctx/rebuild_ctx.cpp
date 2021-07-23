@@ -54,6 +54,16 @@ RebuildCtx::RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx)
 
 RebuildCtx::~RebuildCtx(void)
 {
+    if (bufferInObj != nullptr)
+    {
+        delete[] bufferInObj;
+        bufferInObj = nullptr;
+    }
+    if (rebuildSegmentsFile != nullptr)
+    {
+        delete rebuildSegmentsFile;
+        rebuildSegmentsFile = nullptr;
+    }
 }
 
 void
@@ -89,13 +99,6 @@ RebuildCtx::Close(void)
         {
             rebuildSegmentsFile->Close();
         }
-        delete rebuildSegmentsFile;
-        rebuildSegmentsFile = nullptr;
-    }
-    if (bufferInObj != nullptr)
-    {
-        delete[] bufferInObj;
-        bufferInObj = nullptr;
     }
 }
 
