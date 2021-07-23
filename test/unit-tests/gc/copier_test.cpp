@@ -30,16 +30,6 @@ using ::testing::Test;
 
 namespace pos
 {
-PartitionLogicalSize partitionLogicalSize = {
-    .minWriteBlkCnt = 0/* not interesting */,
-    .blksPerChunk = 64,
-    .blksPerStripe = 2048,
-    .chunksPerStripe = 32,
-    .stripesPerSegment = 1024,
-    .totalStripes = 32,
-    .totalSegments = 32768,
-};
-
 static const uint32_t GC_BUFFER_COUNT = 512;
 static const uint32_t GC_CONCURRENT_COUNT = 16;
 static const uint32_t GC_VICTIM_SEGMENT_COUNT = 2;
@@ -116,6 +106,8 @@ public:
         delete copier;
         delete array;
         delete affinityManager;
+        delete iBlockAllocator;
+        delete iContextManager;
     }
 
 protected:
@@ -138,7 +130,7 @@ protected:
     NiceMock<MockAffinityManager>* affinityManager;
     NiceMock<MockFreeBufferPool>* gcWriteBufferPool;
 
-    std::vector<std::vector<VictimStripe*>>* victimStripes;
+    std::vector<std::vector<VictimStripe*>>* victimStripes;    
     std::vector<FreeBufferPool*>* gcBufferPool;
     CpuSetArray cpuSetArray;
 
@@ -146,7 +138,307 @@ protected:
 
     CallbackSmartPtr stripeCopySubmissionPtr;
     CallbackSmartPtr reverseMapLoadCompletionPtr;
+    PartitionLogicalSize partitionLogicalSize = {
+    .minWriteBlkCnt = 0/* not interesting */,
+    .blksPerChunk = 64,
+    .blksPerStripe = 2048,
+    .chunksPerStripe = 32,
+    .stripesPerSegment = 1024,
+    .totalStripes = 32,
+    .totalSegments = 32768,
+    };
+
+    uint32_t TEST_SEGMENT_1 = 100;
+    uint32_t TEST_SEGMENT_2 = 200;
+    uint32_t TEST_SEGMENT_1_BASE_STRIPE_ID = TEST_SEGMENT_1 * partitionLogicalSize.stripesPerSegment;
+    uint32_t TEST_SEGMENT_2_BASE_STRIPE_ID = TEST_SEGMENT_2 * partitionLogicalSize.stripesPerSegment;
 };
+
+TEST_F(CopierTestFixture, Execute_NoGcMode)
+{
+    // check gc mode when no gc situation
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NO_GC));
+    EXPECT_FALSE(copier->Execute());
+}
+
+TEST_F(CopierTestFixture, Execute_testNormalGcAndGetUnmapSegmentId)
+{
+    // check gc mode when normal gc situation and do not find victim segment
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(UNMAP_SEGMENT));
+    EXPECT_FALSE(copier->Execute());
+}
+
+TEST_F(CopierTestFixture, Execute_testNormalGcAndGetTestSegmentId)
+{
+    // check gc mode when normal gc situation and find victim segment
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
+    EXPECT_FALSE(copier->Execute());
+}
+
+TEST_F(CopierTestFixture, Execute_testUrgentGcAndGetTestSegmentId)
+{
+    // check gc mode when normal gc situation and find victim segment
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_URGENT_GC));
+    EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
+    EXPECT_FALSE(copier->Execute());
+}
+
+TEST_F(CopierTestFixture, Execute_testPrepareState)
+{
+    EXPECT_CALL(*meta, GetGcStripeManager()).WillRepeatedly(Return(gcStripeManager));
+    for (uint32_t i = 0; i < partitionLogicalSize.stripesPerSegment; i++)
+    {
+        EXPECT_CALL(*meta, GetVictimStripe(0, i)).WillRepeatedly(Return((*victimStripes)[0][i]));
+        EXPECT_CALL(*dynamic_cast<MockVictimStripe*>((*victimStripes)[0][i]), Load(TEST_SEGMENT_1_BASE_STRIPE_ID + i, reverseMapLoadCompletionPtr)).Times(1);
+    }
+
+    // check gc mode when normal gc situation and find victim segment
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
+    EXPECT_FALSE(copier->Execute());
+
+    // prepare gc state
+    EXPECT_CALL(*meta, SetInUseBitmap()).WillOnce(Return(0));
+    EXPECT_FALSE(copier->Execute());
+}
+
+TEST_F(CopierTestFixture, Execute_testCompleteState)
+{
+    EXPECT_CALL(*meta, GetGcStripeManager()).WillRepeatedly(Return(gcStripeManager));
+    for (uint32_t i = 0; i < partitionLogicalSize.stripesPerSegment; i++)
+    {
+        EXPECT_CALL(*meta, GetVictimStripe(0, i)).WillRepeatedly(Return((*victimStripes)[0][i]));
+        EXPECT_CALL(*dynamic_cast<MockVictimStripe*>((*victimStripes)[0][i]), Load(TEST_SEGMENT_1_BASE_STRIPE_ID + i, reverseMapLoadCompletionPtr)).Times(1);
+    }
+
+    // check gc mode when normal gc situation and find victim segment
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
+    EXPECT_FALSE(copier->Execute());
+
+    // prepare gc state
+    EXPECT_CALL(*meta, SetInUseBitmap()).WillOnce(Return(0));
+    EXPECT_FALSE(copier->Execute());
+
+    // wait gc completion state
+    EXPECT_CALL(*meta, IsSynchronized()).WillOnce(Return(false));
+    EXPECT_CALL(*meta, IsCopyDone()).WillOnce(Return(false));
+    EXPECT_FALSE(copier->Execute());
+
+    // wait gc completion state done
+    EXPECT_CALL(*meta, IsSynchronized()).WillOnce(Return(false));
+    EXPECT_CALL(*meta, IsCopyDone()).WillOnce(Return(true));
+    EXPECT_FALSE(copier->Execute());
+}
+
+TEST_F(CopierTestFixture, Execute_testDisableThresholdCheck)
+{
+    EXPECT_CALL(*meta, GetGcStripeManager()).WillRepeatedly(Return(gcStripeManager));
+    for (uint32_t i = 0; i < partitionLogicalSize.stripesPerSegment; i++)
+    {
+        EXPECT_CALL(*meta, GetVictimStripe(0, i)).WillRepeatedly(Return((*victimStripes)[0][i]));
+        EXPECT_CALL(*dynamic_cast<MockVictimStripe*>((*victimStripes)[0][i]), Load(TEST_SEGMENT_1_BASE_STRIPE_ID + i, reverseMapLoadCompletionPtr)).Times(1);
+    }
+
+    // check gc mode state and disable threshold check test
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NO_GC));
+    EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
+    EXPECT_TRUE(copier->IsEnableThresholdCheck());
+    copier->DisableThresholdCheck();
+    EXPECT_FALSE(copier->IsEnableThresholdCheck());
+    EXPECT_FALSE(copier->Execute());
+
+    // prepare gc test
+    EXPECT_CALL(*meta, SetInUseBitmap()).WillOnce(Return(0));
+    EXPECT_FALSE(copier->Execute());
+
+    // wait gc completion
+    EXPECT_CALL(*meta, IsSynchronized()).WillOnce(Return(true));
+    EXPECT_FALSE(copier->Execute());
+}
+
+TEST_F(CopierTestFixture, Execute_testStopWhenPrepareState)
+{
+    EXPECT_CALL(*meta, GetGcStripeManager()).WillRepeatedly(Return(gcStripeManager));
+    // check gc mode state and disable threshold check test
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
+    EXPECT_FALSE(copier->Execute());
+
+    // gc stop done test
+    EXPECT_CALL(*meta, IsAllVictimSegmentCopyDone()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*gcStripeManager, IsAllFinished()).WillOnce(Return(false));
+    copier->Stop();
+    EXPECT_TRUE(copier->IsStopped());
+    EXPECT_FALSE(copier->Execute());
+
+    EXPECT_CALL(*gcStripeManager, IsAllFinished()).WillRepeatedly(Return(true));
+    EXPECT_FALSE(copier->Execute());
+    EXPECT_FALSE(copier->IsStopped());
+    EXPECT_FALSE(copier->Execute());
+    copier->ReadyToEnd();
+    EXPECT_TRUE(copier->Execute());
+}
+
+TEST_F(CopierTestFixture, Execute_testStopWhenCompleteState)
+{
+    EXPECT_CALL(*meta, GetGcStripeManager()).WillRepeatedly(Return(gcStripeManager));
+    for (uint32_t i = 0; i < partitionLogicalSize.stripesPerSegment; i++)
+    {
+        EXPECT_CALL(*meta, GetVictimStripe(0, i)).WillRepeatedly(Return((*victimStripes)[0][i]));
+        EXPECT_CALL(*dynamic_cast<MockVictimStripe*>((*victimStripes)[0][i]), Load(TEST_SEGMENT_1_BASE_STRIPE_ID + i, reverseMapLoadCompletionPtr)).Times(1);
+    }
+
+    // check gc mode state and disable threshold check test
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
+    EXPECT_FALSE(copier->Execute());
+
+    // prepare gc test
+    EXPECT_CALL(*meta, SetInUseBitmap()).WillOnce(Return(0));
+    EXPECT_FALSE(copier->Execute());
+
+    // wait gc completion
+    EXPECT_CALL(*meta, IsSynchronized()).WillOnce(Return(false));
+    EXPECT_CALL(*meta, IsCopyDone()).WillOnce(Return(false));
+    EXPECT_FALSE(copier->Execute());
+
+    // wait gc stop test
+    EXPECT_CALL(*meta, IsAllVictimSegmentCopyDone()).WillOnce(Return(false));
+    copier->Stop();
+    EXPECT_TRUE(copier->IsStopped());
+    EXPECT_FALSE(copier->Execute());
+
+    // gc stop done test
+    EXPECT_CALL(*meta, IsAllVictimSegmentCopyDone()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*gcStripeManager, IsAllFinished()).WillOnce(Return(false));
+    EXPECT_FALSE(copier->Execute());
+
+    EXPECT_CALL(*gcStripeManager, IsAllFinished()).WillRepeatedly(Return(true));
+    EXPECT_FALSE(copier->Execute());
+    EXPECT_FALSE(copier->IsStopped());
+    EXPECT_FALSE(copier->Execute());
+    copier->ReadyToEnd();
+    EXPECT_TRUE(copier->Execute());
+}
+
+TEST_F(CopierTestFixture, Execute_testPauseAndResume)
+{
+    EXPECT_CALL(*meta, GetGcStripeManager()).WillRepeatedly(Return(gcStripeManager));
+    for (uint32_t i = 0; i < partitionLogicalSize.stripesPerSegment; i++)
+    {
+        EXPECT_CALL(*meta, GetVictimStripe(0, i)).WillRepeatedly(Return((*victimStripes)[0][i]));
+        EXPECT_CALL(*dynamic_cast<MockVictimStripe*>((*victimStripes)[0][i]), Load(TEST_SEGMENT_1_BASE_STRIPE_ID + i, reverseMapLoadCompletionPtr)).Times(1);
+    }
+
+    // check gc mode when normal gc situation and find victim segment
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
+    EXPECT_FALSE(copier->Execute());
+
+    // gc puase test
+    EXPECT_FALSE(copier->IsPaused());
+    copier->Pause();
+    EXPECT_TRUE(copier->IsPaused());
+    EXPECT_FALSE(copier->Execute());
+
+    // gc resume test
+    copier->Resume();
+    EXPECT_FALSE(copier->IsPaused());
+
+    // prepare gc state
+    EXPECT_CALL(*meta, SetInUseBitmap()).WillOnce(Return(0));
+    EXPECT_FALSE(copier->Execute());
+
+    // wait gc completion state
+    EXPECT_CALL(*meta, IsSynchronized()).WillOnce(Return(false));
+    EXPECT_CALL(*meta, IsCopyDone()).WillOnce(Return(false));
+    EXPECT_FALSE(copier->Execute());
+
+    // wait gc completion state done
+    EXPECT_CALL(*meta, IsSynchronized()).WillOnce(Return(false));
+    EXPECT_CALL(*meta, IsCopyDone()).WillOnce(Return(true));
+    EXPECT_FALSE(copier->Execute());
+}
+
+TEST_F(CopierTestFixture, Execute_testComplexityScenario)
+{
+    EXPECT_CALL(*meta, GetGcStripeManager()).WillRepeatedly(Return(gcStripeManager));
+    for (uint32_t i = 0; i < partitionLogicalSize.stripesPerSegment; i++)
+    {
+        EXPECT_CALL(*meta, GetVictimStripe(0, i)).WillRepeatedly(Return((*victimStripes)[0][i]));
+        EXPECT_CALL(*meta, GetVictimStripe(1, i)).WillRepeatedly(Return((*victimStripes)[1][i]));
+        EXPECT_CALL(*dynamic_cast<MockVictimStripe*>((*victimStripes)[0][i]), Load(TEST_SEGMENT_1_BASE_STRIPE_ID + i, reverseMapLoadCompletionPtr)).Times(1);
+        EXPECT_CALL(*dynamic_cast<MockVictimStripe*>((*victimStripes)[1][i]), Load(TEST_SEGMENT_2_BASE_STRIPE_ID + i, reverseMapLoadCompletionPtr)).Times(1);
+    }
+
+    // check gc mode when no gc situation
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NO_GC));
+    EXPECT_FALSE(copier->Execute());
+
+    // check gc mode when normal gc situation and do not find victim segment
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(UNMAP_SEGMENT));
+    EXPECT_FALSE(copier->Execute());
+
+    // check gc mode when normal gc situation and find victim segment
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_NORMAL_GC));
+    EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_1));
+    EXPECT_FALSE(copier->Execute());
+
+    // prepare gc state
+    EXPECT_CALL(*meta, SetInUseBitmap()).WillOnce(Return(0));
+    EXPECT_FALSE(copier->Execute());
+
+    // wait gc completion state
+    EXPECT_CALL(*meta, IsSynchronized()).WillOnce(Return(false));
+    EXPECT_CALL(*meta, IsCopyDone()).WillOnce(Return(false));
+    EXPECT_FALSE(copier->Execute());
+
+    // wait gc completion state done
+    EXPECT_CALL(*meta, IsSynchronized()).WillOnce(Return(true));
+    EXPECT_FALSE(copier->Execute());
+
+    // check gc mode when normal gc situation and find victim segment
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillOnce(Return(GcMode::MODE_URGENT_GC));
+    EXPECT_CALL(*iContextManager, AllocateGCVictimSegment()).WillOnce(Return(TEST_SEGMENT_2));
+    EXPECT_FALSE(copier->Execute());
+
+    // prepare gc state
+    EXPECT_CALL(*meta, SetInUseBitmap()).WillOnce(Return(1));
+    EXPECT_FALSE(copier->Execute());
+
+    // wait gc completion state done
+    EXPECT_CALL(*meta, IsSynchronized()).WillOnce(Return(true));
+    EXPECT_FALSE(copier->Execute());
+
+    // gc puase test
+    EXPECT_FALSE(copier->IsPaused());
+    copier->Pause();
+    EXPECT_TRUE(copier->IsPaused());
+    EXPECT_FALSE(copier->Execute());
+
+    // gc resume test
+    copier->Resume();
+    EXPECT_FALSE(copier->IsPaused());
+    EXPECT_CALL(*iContextManager, GetCurrentGcMode()).WillRepeatedly(Return(GcMode::MODE_NO_GC));
+    EXPECT_FALSE(copier->Execute());
+
+    // gc stop test
+    copier->Stop();
+    EXPECT_CALL(*gcStripeManager, IsAllFinished()).WillOnce(Return(false));
+    EXPECT_FALSE(copier->Execute());
+
+    // gc ready to end
+    EXPECT_CALL(*gcStripeManager, IsAllFinished()).WillRepeatedly(Return(true));
+    EXPECT_FALSE(copier->Execute());
+    EXPECT_FALSE(copier->IsStopped());
+    EXPECT_FALSE(copier->Execute());
+    copier->ReadyToEnd();
+    EXPECT_TRUE(copier->Execute());
+}
 
 TEST_F(CopierTestFixture, Stop_testIfStopped)
 {

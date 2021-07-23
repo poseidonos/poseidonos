@@ -16,6 +16,11 @@ class MockVictimStripe : public VictimStripe
 {
 public:
     using VictimStripe::VictimStripe;
+    MOCK_METHOD(void, Load, (StripeId, CallbackSmartPtr), (override));
+    MOCK_METHOD(list<BlkInfo>&, GetBlkInfoList, (uint32_t), (override));
+    MOCK_METHOD(uint32_t, GetBlkInfoListSize, (), (override));
+    MOCK_METHOD(int, IsAsyncIoDone, (), (override));
+    MOCK_METHOD(bool, LoadValidBlock, (), (override));
 };
 
 } // namespace pos

@@ -65,26 +65,26 @@ public:
                 IVolumeManager* inputVolumeManager);
 
     virtual ~VictimStripe(void);
-    void Load(StripeId _lsid, CallbackSmartPtr callback);
+    virtual void Load(StripeId _lsid, CallbackSmartPtr callback);
 
-    list<BlkInfo>&
+    virtual list<BlkInfo>&
     GetBlkInfoList(uint32_t index)
     {
         return validBlkInfos[index];
     };
 
-    uint32_t
+    virtual uint32_t
     GetBlkInfoListSize(void)
     {
         return validBlkInfos.size();
     };
 
-    int
+    virtual int
     IsAsyncIoDone(void)
     {
         return revMapPack->IsAsyncIoDone();
     }
-    bool LoadValidBlock(void);
+    virtual bool LoadValidBlock(void);
 
 private:
     void _InitValue(StripeId _lsid);

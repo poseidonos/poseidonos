@@ -236,13 +236,10 @@ Copier::_CopyPrepareState(void)
 bool
 Copier::_CopyCompleteState(void)
 {
-    bool ret = meta->IsSynchronized();
+    bool ret = _IsSynchronized();
     if (false == ret)
     {
-        if (meta->IsCopyDone() == false)
-        {
-            return false;
-        }
+        return false;
     }
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_COPY_COMPLETE,
@@ -267,6 +264,17 @@ bool
 Copier::_IsSynchronized(void)
 {
     bool ret = meta->IsSynchronized();
+    if (false == ret)
+    {
+        if (meta->IsCopyDone() == false)
+        {
+            ret = false;
+        }
+        else
+        {
+            ret = true;
+        }
+    }
 
     return ret;
 }
