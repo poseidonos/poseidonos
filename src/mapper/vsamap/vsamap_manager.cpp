@@ -34,7 +34,6 @@
 #include "src/mapper/map_flushed_event.h"
 #include "src/mapper/vsamap/vsamap_manager.h"
 #include "src/sys_event/volume_event_publisher.h"
-#include "src/journal_service/journal_service.h"
 
 #include <string>
 #include <vector>
@@ -56,7 +55,7 @@ VSAMapManager::VSAMapManager(MapperAddressInfo* info, std::string arrayName)
     }
     loadDoneWakeUp = std::bind(&VSAMapManager::_WakeUpAfterLoadDone, this, std::placeholders::_1);
     loadDone = std::bind(&VSAMapManager::_AfterLoadDone, this, std::placeholders::_1);
-    volumeManager = nullptr;
+    journalService = JournalServiceSingleton::Instance();
 }
 
 VSAMapManager::~VSAMapManager(void)
@@ -258,8 +257,6 @@ VSAMapManager::GetVSAMapAPI(void)
     return vsaMapAPI;
 }
 
-//------------------------------------------------------------------------------
-
 void
 VSAMapManager::MapAsyncFlushDone(int mapId)
 {
@@ -329,6 +326,20 @@ VSAMapManager::VolumeUnmounted(std::string volName, int volID, std::string array
 {
     vsaMapAPI->DisableVsaMapAccess(volID);
 
+    bool journalEnabled = journalService->IsEnabled(arrayName);
+    if (journalEnabled == false)
+    {
+        EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volID, this);
+        mapFlushStatus[volID] = MapFlushState::FLUSHING;
+
+        int ret = GetVSAMapContent(volID)->FlushTouchedPages(callBackVSAMap);
+        if (ret < 0)
+        {
+            POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "ret:{} of vsaMap->Unload(), VolumeId:{} @VolumeUnmounted", ret, volID);
+        }
+        _WaitForMapAsyncFlushed(volID);
+    }
+
     std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
     VolMountStateIter iter;
     if (_IsVolumeExist(volID, iter))
@@ -390,7 +401,7 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
     }
 
     // Write log for deleted volume
-    if (0 != JournalServiceSingleton::Instance()->GetVolumeEventHandler(arrayName)->VolumeDeleted(volID))
+    if (0 != journalService->GetVolumeEventHandler(arrayName)->VolumeDeleted(volID))
     {
         return false;
     }
