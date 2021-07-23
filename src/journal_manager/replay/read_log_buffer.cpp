@@ -45,13 +45,20 @@
 #include "src/logger/logger.h"
 namespace pos
 {
-
 ReadLogBuffer::ReadLogBuffer(JournalConfiguration* journalConfig,
     JournalLogBuffer* logBuffer, ReplayLogList& logList, ReplayProgressReporter* reporter)
+: ReadLogBuffer(journalConfig, logBuffer, logList, reporter, new LogBufferParser())
+{
+}
+
+ReadLogBuffer::ReadLogBuffer(JournalConfiguration* journalConfig,
+    JournalLogBuffer* logBuffer, ReplayLogList& logList,
+    ReplayProgressReporter* reporter, LogBufferParser* logBufferParser)
 : ReplayTask(reporter),
   config(journalConfig),
   logBuffer(logBuffer),
-  logList(logList)
+  logList(logList),
+  parser(logBufferParser)
 {
 }
 
@@ -77,8 +84,6 @@ ReadLogBuffer::Start(void)
     POS_TRACE_DEBUG(eventId, "[ReplayTask] Read log buffer started");
 
     int result = 0;
-    LogBufferParser parser;
-
     int numLogGroups = config->GetNumLogGroups();
     uint64_t groupSize = config->GetLogGroupSize();
 
@@ -93,7 +98,7 @@ ReadLogBuffer::Start(void)
             break;
         }
 
-        result = parser.GetLogs(logGroupBuffer, groupSize, logList);
+        result = parser->GetLogs(logGroupBuffer, groupSize, logList);
         if (result != 0)
         {
             break;

@@ -61,7 +61,7 @@ public:
     virtual int Create(uint64_t logBufferSize);
     virtual int Open(uint64_t& logBufferSize);
 
-    int ReadLogBuffer(int groupId, void* buffer);
+    virtual int ReadLogBuffer(int groupId, void* buffer);
     virtual int WriteLog(LogWriteContext* context);
 
     virtual int SyncResetAll(void);

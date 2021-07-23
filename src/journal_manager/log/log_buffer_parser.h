@@ -46,7 +46,7 @@ class LogBufferParser
 public:
     LogBufferParser(void);
     virtual ~LogBufferParser(void);
-    int GetLogs(void* buffer, uint64_t bufferSize, LogList& logs);
+    virtual int GetLogs(void* buffer, uint64_t bufferSize, LogList& logs);
 
 private:
     class ValidMarkFinder
