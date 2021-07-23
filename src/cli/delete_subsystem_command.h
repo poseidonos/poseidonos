@@ -3,6 +3,7 @@
 #include <string>
 
 #include "src/cli/command.h"
+#include "src/network/nvmf_target.h"
 
 namespace pos_cli
 {
@@ -18,5 +19,6 @@ private:
     int _DeleteSubsystem(json& doc);
     string errorMessage;
     string subnqn;
+    NvmfTarget* nvmfTarget;
 };
 }; // namespace pos_cli

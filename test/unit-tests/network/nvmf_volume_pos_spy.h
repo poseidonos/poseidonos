@@ -33,12 +33,18 @@
 #pragma once
 
 #include "src/network/nvmf_volume_pos.h"
+#include "src/network/nvmf_target.h"
 namespace pos
 {
 class NvmfVolumePosSpy : public NvmfVolumePos
 {
 public:
     using NvmfVolumePos::NvmfVolumePos;
+    NvmfVolumePosSpy(unvmf_io_handler ioHandler, EventFrameworkApi* eventFrameworkApi, SpdkCaller* spdkCaller, NvmfTarget* mockTarget)
+    : NvmfVolumePos(ioHandler, eventFrameworkApi, spdkCaller, mockTarget)
+    {
+    }
+
     virtual ~NvmfVolumePosSpy(void) = default;
 
     void

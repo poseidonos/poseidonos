@@ -49,6 +49,7 @@ public:
     int Do(string name, string subnqn);
 
 private:
+    NvmfTarget* nvmfTarget;
     bool _CheckFailStatus(int checkValue);
     int _CheckIfExistVolume(VolumeBase* vol);
     int _CheckIfExistSubsystem(string subnqn);

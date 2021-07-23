@@ -53,6 +53,7 @@
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/io_submit_interface/i_io_submit_handler.h"
 #include "src/metafs/include/metafs_service.h"
+#include "src/network/nvmf_target.h"
 #include "src/qos/qos_manager.h"
 #include "src/spdk_wrapper/spdk.hpp"
 
@@ -94,6 +95,7 @@ void
 Poseidonos::Terminate(void)
 {
     MemoryChecker::Enable(false);
+    NvmfTargetSingleton::ResetInstance();
     DeviceManagerSingleton::ResetInstance();
     IODispatcherSingleton::ResetInstance();
     EventSchedulerSingleton::ResetInstance();

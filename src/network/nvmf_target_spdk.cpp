@@ -303,14 +303,13 @@ DetachNamespaceAllPauseDone(struct spdk_nvmf_subsystem* subsystem,
     struct EventContext* ctx = (struct EventContext*)arg;
     if (status == NvmfCallbackStatus::SUCCESS)
     {
-        NvmfTarget target;
         volumeListInfo volsInfo = *(static_cast<volumeListInfo*>(ctx->userArg));
         struct spdk_nvmf_ns* ns = nullptr;
         uint32_t nsid = 0;
         for (auto volId : volsInfo.vols)
         {
-            string bdevName = target.GetBdevName(volId, volsInfo.arrayName);
-            ns = target.GetNamespace(subsystem, bdevName);
+            string bdevName = NvmfTargetSingleton::Instance()->GetBdevName(volId, volsInfo.arrayName);
+            ns = NvmfTargetSingleton::Instance()->GetNamespace(subsystem, bdevName);
             nsid = spdk_nvmf_ns_get_id(ns);
             int ret = spdk_nvmf_subsystem_remove_ns(subsystem, nsid);
             if (ret < 0)

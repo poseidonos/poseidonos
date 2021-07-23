@@ -38,6 +38,7 @@
 #include <vector>
 
 #include "src/include/nvmf_const.h"
+#include "src/lib/singleton.h"
 #include "src/network/nvmf_target_spdk.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/spdk_caller.h"
@@ -109,4 +110,5 @@ private:
         PosNvmfEventDoneCallback_t cb, void* cbArg);
 };
 
+using NvmfTargetSingleton = Singleton<NvmfTarget>;
 } // namespace pos

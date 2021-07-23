@@ -62,6 +62,18 @@ public:
     SetUp(void)
     {
         mockNvmfTarget = new NiceMock<MockNvmfTarget>(&mockSpdkCaller, false, &mockEventFrameworkApi);
+    }
+    virtual void
+    TearDown(void)
+    {
+        if (nullptr != mockNvmfTarget)
+        {
+            delete mockNvmfTarget;
+        }
+    }
+    void
+    InitVolumeInfo(void)
+    {
         vInfo = new pos_volume_info;
         vInfo->id = 0;
         snprintf(vInfo->array_name, sizeof(vInfo->array_name), "array");
@@ -101,7 +113,7 @@ TEST_F(NvmfVolumePosFixture, NvmfvolumePos_FourArgument_Heap)
 
 TEST_F(NvmfVolumePosFixture, VolumeCreated_Success)
 {
-    NvmfVolumePos nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    NvmfVolumePosSpy nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
 
     EXPECT_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _, _)).Times(1);
 
@@ -110,7 +122,7 @@ TEST_F(NvmfVolumePosFixture, VolumeCreated_Success)
 
 TEST_F(NvmfVolumePosFixture, VolumeDeleted_Success)
 {
-    NvmfVolumePos nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    NvmfVolumePosSpy nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
 
     EXPECT_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _, _)).Times(1);
 
@@ -119,11 +131,13 @@ TEST_F(NvmfVolumePosFixture, VolumeDeleted_Success)
 
 TEST_F(NvmfVolumePosFixture, VolumeMounted_Success)
 {
-    NvmfVolumePos nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    NvmfVolumePosSpy nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    InitVolumeInfo();
 
     EXPECT_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _, _)).Times(1);
 
     nvmfVolumePos.VolumeMounted(vInfo);
+    delete vInfo;
 }
 
 TEST_F(NvmfVolumePosFixture, VolumeUnmounted_Success)
@@ -132,7 +146,7 @@ TEST_F(NvmfVolumePosFixture, VolumeUnmounted_Success)
     struct spdk_nvmf_subsystem* subsystem[1];
     struct spdk_bdev* targetBdev[1];
     struct spdk_nvmf_ns* ns[1];
-    NvmfVolumePos nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    NvmfVolumePosSpy nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
 
     ON_CALL(*mockNvmfTarget, CheckVolumeAttached(_, _)).WillByDefault(Return(true));
     EXPECT_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _, _)).Times(1);
@@ -142,7 +156,7 @@ TEST_F(NvmfVolumePosFixture, VolumeUnmounted_Success)
 
 TEST_F(NvmfVolumePosFixture, VolumeUnmounted_VolumeAlreadyDetached)
 {
-    NvmfVolumePos nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    NvmfVolumePosSpy nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
 
     ON_CALL(mockSpdkCaller, SpdkGetAttachedSubsystemNqn(_)).WillByDefault(Return(nullptr));
 
@@ -151,7 +165,7 @@ TEST_F(NvmfVolumePosFixture, VolumeUnmounted_VolumeAlreadyDetached)
 
 TEST_F(NvmfVolumePosFixture, VolumeUpdated_Success)
 {
-    NvmfVolumePos nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    NvmfVolumePosSpy nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
 
     EXPECT_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _, _)).Times(1);
 
@@ -162,7 +176,7 @@ TEST_F(NvmfVolumePosFixture, VolumeDetached_Success)
 {
     vector<int> volList{0, 1, 2};
     const char* nqn = "subnqn";
-    NvmfVolumePos nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    NvmfVolumePosSpy nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
 
     EXPECT_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _, _)).Times(1);
     ON_CALL(mockSpdkCaller, SpdkGetAttachedSubsystemNqn(_)).WillByDefault(Return(nqn));
@@ -175,7 +189,7 @@ TEST_F(NvmfVolumePosFixture, VolumeDetached_Success)
 TEST_F(NvmfVolumePosFixture, VolumeDetached_NoVolumesToDetach)
 {
     vector<int> volList{};
-    NvmfVolumePos nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    NvmfVolumePosSpy nvmfVolumePos(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
     nvmfVolumePos.VolumeDetached(volList, "array");
 }
 
@@ -213,6 +227,7 @@ TEST_F(NvmfVolumePosFixture, WaitRequestedVolumesDetached_Fail)
 TEST_F(NvmfVolumePosFixture, _VolumeCreateHandler_Success)
 {
     NvmfVolumePosSpy nvmfVolume(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    InitVolumeInfo();
 
     ON_CALL(*mockNvmfTarget, GetBdevName(_, _)).WillByDefault(Return("bdev"));
     ON_CALL(*mockNvmfTarget, CreatePosBdev(_, _, _, _, _, _, _)).WillByDefault(Return(true));
@@ -223,6 +238,7 @@ TEST_F(NvmfVolumePosFixture, _VolumeCreateHandler_Success)
 TEST_F(NvmfVolumePosFixture, _VolumeCreateHandler_Fail)
 {
     NvmfVolumePosSpy nvmfVolume(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    InitVolumeInfo();
 
     ON_CALL(*mockNvmfTarget, GetBdevName(_, _)).WillByDefault(Return("bdev"));
     ON_CALL(*mockNvmfTarget, CreatePosBdev(_, _, _, _, _, _, _)).WillByDefault(Return(false));
@@ -233,6 +249,7 @@ TEST_F(NvmfVolumePosFixture, _VolumeCreateHandler_Fail)
 TEST_F(NvmfVolumePosFixture, _VolumeMountHandler_GetNqnIdFail)
 {
     NvmfVolumePosSpy nvmfVolume(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    InitVolumeInfo();
 
     ON_CALL(*mockNvmfTarget, GetBdevName(_, _)).WillByDefault(Return(""));
     ON_CALL(*mockNvmfTarget, GetVolumeNqnId(_)).WillByDefault(Return(-1));
@@ -243,6 +260,7 @@ TEST_F(NvmfVolumePosFixture, _VolumeMountHandler_GetNqnIdFail)
 TEST_F(NvmfVolumePosFixture, _VolumeMountHandler_Success)
 {
     NvmfVolumePosSpy nvmfVolume(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    InitVolumeInfo();
 
     ON_CALL(*mockNvmfTarget, GetBdevName(_, _)).WillByDefault(Return(""));
     ON_CALL(*mockNvmfTarget, GetVolumeNqnId(_)).WillByDefault(Return(0));
@@ -254,6 +272,7 @@ TEST_F(NvmfVolumePosFixture, _VolumeMountHandler_Success)
 TEST_F(NvmfVolumePosFixture, _VolumeUnmountHandler_Fail)
 {
     NvmfVolumePosSpy nvmfVolume(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    InitVolumeInfo();
 
     ON_CALL(*mockNvmfTarget, GetBdevName(_, _)).WillByDefault(Return(""));
 
@@ -263,6 +282,7 @@ TEST_F(NvmfVolumePosFixture, _VolumeUnmountHandler_Fail)
 TEST_F(NvmfVolumePosFixture, _VolumeDeleteHandler_Success)
 {
     NvmfVolumePosSpy nvmfVolume(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    InitVolumeInfo();
 
     ON_CALL(*mockNvmfTarget, GetBdevName(_, _)).WillByDefault(Return("bdev"));
     ON_CALL(*mockNvmfTarget, DeletePosBdev(_)).WillByDefault(Return(true));
@@ -273,6 +293,7 @@ TEST_F(NvmfVolumePosFixture, _VolumeDeleteHandler_Success)
 TEST_F(NvmfVolumePosFixture, _VolumeDeleteHandler_Fail)
 {
     NvmfVolumePosSpy nvmfVolume(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    InitVolumeInfo();
 
     ON_CALL(*mockNvmfTarget, GetBdevName(_, _)).WillByDefault(Return("bdev"));
     ON_CALL(*mockNvmfTarget, DeletePosBdev(_)).WillByDefault(Return(false));
@@ -283,6 +304,7 @@ TEST_F(NvmfVolumePosFixture, _VolumeDeleteHandler_Fail)
 TEST_F(NvmfVolumePosFixture, _VolumeUpdateHandler_Success)
 {
     NvmfVolumePosSpy nvmfVolume(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    InitVolumeInfo();
 
     ON_CALL(*mockNvmfTarget, GetBdevName(_, _)).WillByDefault(Return("bdev"));
     ON_CALL(*mockNvmfTarget, SetVolumeQos(_, _, _)).WillByDefault(Return());
@@ -293,6 +315,7 @@ TEST_F(NvmfVolumePosFixture, _VolumeUpdateHandler_Success)
 TEST_F(NvmfVolumePosFixture, _NamespaceDetachedHandler_Success)
 {
     NvmfVolumePosSpy nvmfVolume(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    InitVolumeInfo();
 
     ON_CALL(*mockNvmfTarget, GetBdevName(_, _)).WillByDefault(Return(""));
 
@@ -302,6 +325,7 @@ TEST_F(NvmfVolumePosFixture, _NamespaceDetachedHandler_Success)
 TEST_F(NvmfVolumePosFixture, _NamespaceDetachedHandler_Fail)
 {
     NvmfVolumePosSpy nvmfVolume(ioHandler, &mockEventFrameworkApi, &mockSpdkCaller, mockNvmfTarget);
+    InitVolumeInfo();
 
     nvmfVolume.NamespaceDetachedHandler(vInfo, NvmfCallbackStatus::FAILED);
 }
@@ -366,5 +390,4 @@ TEST_F(NvmfVolumePosFixture, _VolumeDetachedAllHandler_Success)
 
     nvmfVolume.VolumeDetachHandler(volsInfo, nullptr);
 }
-
 } // namespace pos

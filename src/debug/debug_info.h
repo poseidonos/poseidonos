@@ -63,6 +63,7 @@ class VersionProvider;
 class VolumeEventPublisher;
 class VolumeService;
 class MetaFsService;
+class NvmfTarget;
 
 extern DebugInfo* debugInfo;
 
@@ -98,6 +99,7 @@ private:
     VersionProvider *versionProvider;
     VolumeEventPublisher* volumeEventPublisher;
     VolumeService* volumeService;
+    NvmfTarget* nvmfTarget;
 };
 
 } // namespace pos

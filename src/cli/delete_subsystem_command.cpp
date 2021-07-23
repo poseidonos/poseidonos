@@ -11,6 +11,7 @@
 namespace pos_cli
 {
 DeleteSubsystemCommand::DeleteSubsystemCommand(void)
+: nvmfTarget(NvmfTargetSingleton::Instance())
 {
 }
 
@@ -47,13 +48,12 @@ int
 DeleteSubsystemCommand::_DeleteSubsystem(json& doc)
 {
     SpdkRpcClient rpcClient;
-    NvmfTarget target;
-    if (nullptr == target.FindSubsystem(subnqn))
+    if (nullptr == nvmfTarget->FindSubsystem(subnqn))
     {
         errorMessage = "Failed to delete subsystem. Requested Subsystem does not exist or invalid subnqn. ";
         return FAIL;
     }
-    vector<pair<int, string>> attachedVolList = target.GetAttachedVolumeList(subnqn);
+    vector<pair<int, string>> attachedVolList = nvmfTarget->GetAttachedVolumeList(subnqn);
     map<string, vector<int>> volListPerArray;
     for (auto& volInfo : attachedVolList)
     {

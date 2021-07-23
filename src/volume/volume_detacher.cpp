@@ -47,7 +47,8 @@
 namespace pos
 {
 VolumeDetacher::VolumeDetacher(VolumeList& volumeList, std::string arrayName, int arrayID)
-: VolumeInterface(volumeList, arrayName, arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID),
+  nvmfTarget(NvmfTargetSingleton::Instance())
 {
 }
 
@@ -70,7 +71,7 @@ VolumeDetacher::DoAll(void)
     {
         if (vol->GetStatus() != VolumeStatus::Unmounted)
         {
-            if (target.CheckVolumeAttached(vol->ID, arrayName) == true)
+            if (nvmfTarget->CheckVolumeAttached(vol->ID, arrayName) == true)
             {
                 volumeList.WaitUntilIdle(vol->ID, VolumeStatus::Mounted);
                 mountedVols.push_back(vol->ID);

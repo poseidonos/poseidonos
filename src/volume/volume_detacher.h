@@ -50,7 +50,7 @@ public:
 private:
     void _UnregisterDetachedVolume(vector<int>& mountedVols);
     bool _NeedIOHandlerUnregister(int volId, vector<int>& mountedVols);
-    NvmfTarget target;
+    NvmfTarget* nvmfTarget;
 };
 
 }  // namespace pos

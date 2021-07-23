@@ -86,8 +86,7 @@ GetHostNqnCommand::Execute(json& doc, string rid)
             return jFormat.MakeResponse("GETHOSTNQN", rid, FAIL,
                 volName + " does not have subnqn", GetPosInfo());
         }
-        NvmfTarget nvmfTarget;
-        vector<string> list = nvmfTarget.GetHostNqn(subnqn);
+        vector<string> list = NvmfTargetSingleton::Instance()->GetHostNqn(subnqn);
         if (list.size() == 0)
         {
             return jFormat.MakeResponse("GETHOSTNQN", rid, FAIL,

@@ -44,7 +44,8 @@ namespace pos
 {
 
 VolumeMounter::VolumeMounter(VolumeList& volumeList, std::string arrayName, int arrayID)
-: VolumeInterface(volumeList, arrayName, arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID),
+  nvmfTarget(NvmfTargetSingleton::Instance())
 {
 }
 
@@ -72,12 +73,10 @@ VolumeMounter::Do(string name, string subnqn)
         return ret;
     }
 
-    NvmfTarget nvmfTarget;
-
     if (subnqn.empty())
     {
-        struct spdk_nvmf_subsystem* subsystem = nvmfTarget.AllocateSubsystem();
-        subnqn = nvmfTarget.GetVolumeNqn(subsystem);
+        struct spdk_nvmf_subsystem* subsystem = nvmfTarget->AllocateSubsystem();
+        subnqn = nvmfTarget->GetVolumeNqn(subsystem);
     }
 
     ret = _MountVolume(vol, subnqn);
@@ -87,7 +86,7 @@ VolumeMounter::Do(string name, string subnqn)
         return ret;
     }
 
-    if (nvmfTarget.TryToAttachNamespace(subnqn, vol->ID, arrayName) == false)
+    if (nvmfTarget->TryToAttachNamespace(subnqn, vol->ID, arrayName) == false)
     {
         ret = _RollBackVolumeMount(vol, subnqn);
     }
@@ -131,10 +130,9 @@ int
 VolumeMounter::_CheckIfExistSubsystem(string subnqn)
 {
     int ret = static_cast<int>(POS_EVENT_ID::SUCCESS);
-    NvmfTarget nvmfTarget;
 
-    if ((subnqn.empty() && nvmfTarget.CheckSubsystemExistance() == false) ||
-        (!subnqn.empty() && nvmfTarget.FindSubsystem(subnqn) == nullptr))
+    if ((subnqn.empty() && nvmfTarget->CheckSubsystemExistance() == false) ||
+        (!subnqn.empty() && nvmfTarget->FindSubsystem(subnqn) == nullptr))
     {
         ret = static_cast<int>(POS_EVENT_ID::SUBSYSTEM_NOT_CREATED);
         POS_TRACE_WARN(ret, "No subsystem:{} was created to attach the volume", subnqn);

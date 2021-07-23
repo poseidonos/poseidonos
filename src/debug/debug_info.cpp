@@ -52,6 +52,7 @@
 #include "src/mbr/mbr_manager.h"
 #include "src/master_context/version_provider.h"
 #include "src/metafs/include/metafs_service.h"
+#include "src/network/nvmf_target.h"
 #include "src/qos/qos_manager.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/io_scheduler/io_dispatcher.h"
@@ -86,7 +87,8 @@ DebugInfo::DebugInfo(void)
     uramDrv(nullptr),
     versionProvider(nullptr),
     volumeEventPublisher(nullptr),
-    volumeService(nullptr)
+    volumeService(nullptr),
+    nvmfTarget(nullptr)
 {
 }
 
@@ -119,5 +121,6 @@ DebugInfo::Update(void)
     commandTimeoutHandler = CommandTimeoutHandlerSingleton::Instance();
     metaFsService = MetaFsServiceSingleton::Instance();
     volumeService = VolumeServiceSingleton::Instance();
+    nvmfTarget = NvmfTargetSingleton::Instance();
 }
 } // namespace pos

@@ -46,37 +46,24 @@
 namespace pos
 {
 NvmfTarget* NvmfVolumePos::target;
-
 std::atomic<bool> NvmfVolumePos::detachFailed;
 std::atomic<uint32_t> NvmfVolumePos::volumeDetachedCnt;
 
 NvmfVolumePos::NvmfVolumePos(unvmf_io_handler ioHandler)
-: NvmfVolumePos(ioHandler, EventFrameworkApiSingleton::Instance(), SpdkCallerSingleton::Instance())
+: NvmfVolumePos(ioHandler, EventFrameworkApiSingleton::Instance(), SpdkCallerSingleton::Instance(), NvmfTargetSingleton::Instance())
 {
 }
 
-NvmfVolumePos::NvmfVolumePos(unvmf_io_handler ioHandler, EventFrameworkApi* eventFrameworkApi, SpdkCaller* spdkCaller, NvmfTarget* inputTarget)
+NvmfVolumePos::NvmfVolumePos(unvmf_io_handler ioHandler, EventFrameworkApi* eventFrameworkApi, SpdkCaller* spdkCaller, NvmfTarget* nvmfTarget)
 : ioHandler(ioHandler),
   eventFrameworkApi(eventFrameworkApi),
   spdkCaller(spdkCaller)
 {
-    if (nullptr == inputTarget)
-    {
-        target = new NvmfTarget();
-    }
-    else
-    {
-        target = inputTarget;
-    }
+    target = nvmfTarget;
 }
 
 NvmfVolumePos::~NvmfVolumePos(void)
 {
-    if (nullptr != target)
-    {
-        delete target;
-        target = nullptr;
-    }
 }
 
 void
@@ -224,7 +211,10 @@ NvmfVolumePos::_VolumeMountHandler(void* arg1, void* arg2)
 void
 NvmfVolumePos::VolumeMounted(struct pos_volume_info* vInfo)
 {
-    vInfo->unvmf_io = ioHandler;
+    if (vInfo)
+    {
+        vInfo->unvmf_io = ioHandler;
+    }
     eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _VolumeMountHandler, vInfo, nullptr);
 }
@@ -332,14 +322,14 @@ NvmfVolumePos::VolumeDetached(vector<int>& volList, string arrayName)
     {
         return;
     }
-    uint32_t target_core = eventFrameworkApi->GetFirstReactor();
+    uint32_t targetCore = eventFrameworkApi->GetFirstReactor();
     for (auto volumes : volsPerSubsystem)
     {
         volumeListInfo* volsInfo = new volumeListInfo;
         volsInfo->subnqn = volumes.first;
         volsInfo->vols = volumes.second;
         volsInfo->arrayName = arrayName;
-        eventFrameworkApi->SendSpdkEvent(target_core, _VolumeDetachHandler,
+        eventFrameworkApi->SendSpdkEvent(targetCore, _VolumeDetachHandler,
             volsInfo, nullptr);
     }
 }

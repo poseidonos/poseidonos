@@ -55,7 +55,7 @@ class NvmfVolumePos
 {
 public:
     explicit NvmfVolumePos(unvmf_io_handler ioHandler);
-    NvmfVolumePos(unvmf_io_handler ioHandler, EventFrameworkApi* eventFrameworkApi, SpdkCaller* spdkCaller, NvmfTarget* target = nullptr);
+    NvmfVolumePos(unvmf_io_handler ioHandler, EventFrameworkApi* eventFrameworkApi, SpdkCaller* spdkCaller, NvmfTarget* nvmfTarget);
     virtual ~NvmfVolumePos(void);
 
     virtual void VolumeCreated(struct pos_volume_info* info);
@@ -69,6 +69,10 @@ public:
 
 protected:
     static atomic<uint32_t> volumeDetachedCnt;
+    unvmf_io_handler ioHandler;
+    EventFrameworkApi* eventFrameworkApi;
+    SpdkCaller* spdkCaller;
+    static NvmfTarget* target;
 
     static void _VolumeDetachHandler(void* arg1, void* arg2);
     static void _VolumeCreateHandler(void* arg1, void* arg2);
@@ -80,11 +84,7 @@ protected:
     static void _NamespaceDetachedAllHandler(void* cbArg, int status);
 
 private:
-    static NvmfTarget* target;
     static atomic<bool> detachFailed;
-    unvmf_io_handler ioHandler;
-    EventFrameworkApi* eventFrameworkApi;
-    SpdkCaller* spdkCaller;
 };
 
 } // namespace pos
