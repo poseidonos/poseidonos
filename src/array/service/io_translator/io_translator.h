@@ -49,16 +49,6 @@ class IOTranslator : public IIOTranslator
 public:
     IOTranslator(void);
     virtual ~IOTranslator(void);
-    int Translate(string array, PartitionType part,
-        PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
-    int ByteTranslate(string array, PartitionType part,
-        PhysicalByteAddr& dst, const LogicalByteAddr& src) override;
-    int Convert(string array, PartitionType part,
-        list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src) override;
-    int ByteConvert(string array, PartitionType part,
-        list<PhysicalByteWriteEntry>& dst, const LogicalByteWriteEntry& src) override;
-    bool Register(string array, ArrayTranslator trans);
-    void Unregister(string array);
     int Translate(unsigned int arrayIndex, PartitionType part,
         PhysicalBlkAddr& dst, const LogicalBlkAddr& src) override;
     int ByteTranslate(unsigned int arrayIndex, PartitionType part,
@@ -71,9 +61,6 @@ public:
     void Unregister(unsigned int arrayIndex);
 
 private:
-    ITranslator* _Find(string array, PartitionType part);
-    void _Erase(string array);
-    map<string, ArrayTranslator> tempTranslators;
     ArrayTranslator* translators;
 };
 } // namespace pos

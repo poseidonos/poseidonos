@@ -50,9 +50,14 @@
 namespace pos
 {
 
-PartitionManager::PartitionManager(string array, IAbrControl* abr, AffinityManager* affinityManager)
+PartitionManager::PartitionManager(
+    string array,
+    IAbrControl* abr,
+    AffinityManager* affinityManager,
+    IODispatcher* ioDispatcher)
 : arrayName_(array),
-  affinityManager(affinityManager)
+  affinityManager(affinityManager),
+  ioDispatcher(ioDispatcher)
 {
     for (uint32_t i = 0; i < partitions_.size(); i++)
     {
@@ -215,7 +220,7 @@ PartitionManager::_CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf
 
     Method* method = new Raid1(&physicalSize);
     StripePartition* partition = new StripePartition(arrayName_, arrayIndex,
-        partType, physicalSize, devs, method);
+        partType, physicalSize, devs, method, ioDispatcher);
 
     if (nullptr == partition)
     {

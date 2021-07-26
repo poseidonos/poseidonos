@@ -255,4 +255,62 @@ TEST(StripePartition, Format_testIfThereAre4DeallocatesAnd4ReadsWhenThereAre4Nor
     // Then
 }
 
+TEST(StripePartition, ByteTranslate_testFunctionCallForCoverage)
+{
+    // Given
+    PartitionPhysicalSize physicalSize{
+        .blksPerChunk = 10,
+        .stripesPerSegment = 20,
+        .totalSegments = 30};
+    MockRaid1* mockRaid1 = new MockRaid1(&physicalSize);
+    vector<ArrayDevice*> devs;
+
+    StripePartition sPartition("mock-array", 0, PartitionType::USER_DATA, physicalSize, devs, mockRaid1);
+    // When
+    PhysicalByteAddr dst;
+    LogicalByteAddr src;
+    int result = sPartition.ByteTranslate(dst, src);
+    // Then
+    int BYTE_TRANSLATE_NOT_SUPPORTED = -1;
+    EXPECT_EQ(BYTE_TRANSLATE_NOT_SUPPORTED, result);
+}
+
+TEST(StripePartition, ByteConvert_testFunctionCallForCoverage)
+{
+    // Given
+    PartitionPhysicalSize physicalSize{
+        .blksPerChunk = 10,
+        .stripesPerSegment = 20,
+        .totalSegments = 30};
+    MockRaid1* mockRaid1 = new MockRaid1(&physicalSize);
+    vector<ArrayDevice*> devs;
+
+    StripePartition sPartition("mock-array", 0, PartitionType::USER_DATA, physicalSize, devs, mockRaid1);
+    // When
+    list<PhysicalByteWriteEntry> dst;
+    LogicalByteWriteEntry src;
+    int result = sPartition.ByteConvert(dst, src);
+    // Then
+    int BYTE_CONVERT_NOT_SUPPORTED = -1;
+    EXPECT_EQ(BYTE_CONVERT_NOT_SUPPORTED, result);
+}
+
+TEST(StripePartition, IsByteAccessSupported_testReturnValue)
+{
+    // Given
+    PartitionPhysicalSize physicalSize{
+        .blksPerChunk = 10,
+        .stripesPerSegment = 20,
+        .totalSegments = 30};
+    MockRaid1* mockRaid1 = new MockRaid1(&physicalSize);
+    vector<ArrayDevice*> devs;
+
+    StripePartition sPartition("mock-array", 0, PartitionType::USER_DATA, physicalSize, devs, mockRaid1);
+    // When
+    bool result = sPartition.IsByteAccessSupported();
+    // Then
+    EXPECT_FALSE(result);
+}
+
+
 } // namespace pos

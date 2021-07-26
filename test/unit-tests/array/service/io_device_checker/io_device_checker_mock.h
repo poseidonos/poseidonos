@@ -12,8 +12,8 @@ class MockIODeviceChecker : public IODeviceChecker
 {
 public:
     using IODeviceChecker::IODeviceChecker;
-    MOCK_METHOD(bool, IsRecoverable, (string array, IArrayDevice* target, UBlockDevice* uBlock), (override));
-    MOCK_METHOD(IArrayDevice*, FindDevice, (string array, string devSn), (override));
+    MOCK_METHOD(bool, IsRecoverable, (unsigned int arrayIndex, IArrayDevice* target, UBlockDevice* uBlock), (override));
+    MOCK_METHOD(IArrayDevice*, FindDevice, (unsigned int arrayIndex, string devSn), (override));
 };
 
 } // namespace pos

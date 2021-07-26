@@ -61,6 +61,7 @@ TranslateDeviceLbaWbtCommand::Execute(Args& argv, JsonElement& elem)
     std::string coutfile = "output.txt";
     std::ofstream out(coutfile.c_str(), std::ofstream::app);
     string arrayName;
+    unsigned int arrayIndex;
 
     if (!argv.contains("lsid") || !argv.contains("offset") || !argv.contains("name"))
     {
@@ -72,6 +73,7 @@ TranslateDeviceLbaWbtCommand::Execute(Args& argv, JsonElement& elem)
     if (argv.contains("name"))
     {
         arrayName = argv["name"].get<std::string>();
+        arrayIndex = ArrayMgr::Instance()->GetArrayInfo(arrayName)->GetIndex();
     }
     else
     {
@@ -91,7 +93,7 @@ TranslateDeviceLbaWbtCommand::Execute(Args& argv, JsonElement& elem)
 
     PhysicalBlkAddr pba;
     IIOTranslator* trans = ArrayService::Instance()->Getter()->GetTranslator();
-    int ret = trans->Translate(arrayName, USER_DATA, pba, lsa);
+    int ret = trans->Translate(arrayIndex, USER_DATA, pba, lsa);
     if (ret != 0 || pba.arrayDev == nullptr)
     {
         out << "translation failed" << std::endl;

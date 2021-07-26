@@ -51,17 +51,11 @@ class IORecover : public IIORecover
 public:
     IORecover(void);
     virtual ~IORecover(void);
-    int GetRecoverMethod(string array, UbioSmartPtr ubio, RecoverMethod& out) override;
-    bool Register(string array, ArrayRecover recover);
-    void Unregister(string array);
     int GetRecoverMethod(unsigned int arrayIndex, UbioSmartPtr ubio, RecoverMethod& out) override;
     bool Register(unsigned int arrayIndex, ArrayRecover recover);
     void Unregister(unsigned int arrayIndex);
 
 private:
-    ArrayRecover* _Find(string array);
-    void _Erase(string array);
-    map<string, ArrayRecover> tempRecoveries;
     ArrayRecover* recoveries;
 };
 } // namespace pos

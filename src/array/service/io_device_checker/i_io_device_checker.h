@@ -44,8 +44,6 @@ class IArrayDevice;
 class IIODeviceChecker
 {
 public:
-    virtual bool IsRecoverable(string array, IArrayDevice* target, UBlockDevice* uBlock) = 0;
-    virtual IArrayDevice* FindDevice(string array, string devSn) = 0;
     virtual bool IsRecoverable(unsigned int arrayIndex, IArrayDevice* target, UBlockDevice* uBlock) = 0;
     virtual IArrayDevice* FindDevice(unsigned int arrayIndex, string devSn) = 0;
 };

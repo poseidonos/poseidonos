@@ -12,6 +12,7 @@
 #include "test/unit-tests/device/base/ublock_device_mock.h"
 #include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
 #include "test/unit-tests/utils/mock_builder.h"
+#include "test/unit-tests/io_scheduler/io_dispatcher_mock.h"
 
 // copied from partition_manager.cpp to calculate expected total segments
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
@@ -128,6 +129,42 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
     ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::META_NVM));
     ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::META_SSD));
     ASSERT_EQ(nullptr, pm.GetSizeInfo(PartitionType::WRITE_BUFFER));
+}
+
+TEST(PartitionManager, FormatMetaPartition_testIfMetaPartitionFormattedWell)
+{
+    // Given
+    using MockUblockSharedPtr = std::shared_ptr<MockUBlockDevice>;
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    MockIAbrControl mockAbrControl;
+    MockIODispatcher mockIoDispatcher;
+    PartitionManager pm("mock-array", &mockAbrControl, &mockAffMgr, &mockIoDispatcher);
+    EXPECT_CALL(mockIoDispatcher, Submit).WillRepeatedly(Return(0));
+    vector<ArrayDevice*> devs;
+    shared_ptr<MockUBlockDevice> ptrMockUblockDev = make_shared<MockUBlockDevice>("mockUblock", 0, nullptr);
+    MockArrayDevice* mockDev1 = new MockArrayDevice(ptrMockUblockDev, ArrayDeviceState::NORMAL);
+    MockArrayDevice* mockDev2 = new MockArrayDevice(ptrMockUblockDev, ArrayDeviceState::NORMAL);
+    devs.push_back(mockDev1);
+    devs.push_back(mockDev2);
+    EXPECT_CALL(*mockDev1, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
+    EXPECT_CALL(*mockDev2, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
+    EXPECT_CALL(*mockDev1, GetUblock).WillRepeatedly(Return(ptrMockUblockDev));
+    EXPECT_CALL(*mockDev2, GetUblock).WillRepeatedly(Return(ptrMockUblockDev));
+    EXPECT_CALL(*ptrMockUblockDev, GetSize).WillOnce(Return(0));
+    MockArrayInterface mockArrayItf;
+    EXPECT_CALL(mockArrayItf, AddTranslator).Times(1);
+    EXPECT_CALL(mockArrayItf, AddRecover).Times(1);
+    EXPECT_CALL(mockArrayItf, AddRebuildTarget).Times(1);
+
+    // When
+
+    pm.FormatMetaPartition(devs, &mockArrayItf, 0);
+
+    // Then
+
+    // Cleanup
+    delete mockDev1;
+    delete mockDev2;
 }
 
 } // namespace pos

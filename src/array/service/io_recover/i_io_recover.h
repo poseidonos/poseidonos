@@ -46,7 +46,6 @@ class Ubio;
 class IIORecover
 {
 public:
-    virtual int GetRecoverMethod(string array, UbioSmartPtr ubio, RecoverMethod& out) = 0;
     virtual int GetRecoverMethod(unsigned int arrayIndex, UbioSmartPtr ubio, RecoverMethod& out) = 0;
 };
 } // namespace pos

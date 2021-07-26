@@ -146,7 +146,7 @@ TEST(FlushSubmission, FlushSubmission_Execute_TranslatorNotNull)
     bool actualReturn;
 
     // When : Translate returns value except SUCCESS(0)
-    ON_CALL(mockIIOTranslator, Translate("", _, _, _)).WillByDefault(Return(-1));
+    ON_CALL(mockIIOTranslator, Translate(_, _, _, _)).WillByDefault(Return(-1));
     actualReturn = flushSubmission.Execute();
 
     // Then : Return true

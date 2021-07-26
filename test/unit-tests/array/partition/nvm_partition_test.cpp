@@ -45,6 +45,36 @@ buildValidLogicalWriteEntry(uint32_t totalStripes, uint32_t blksPerStripe)
     return lWriteEntry;
 }
 
+static LogicalByteWriteEntry
+buildValidLogicalByteWriteEntry(uint32_t totalStripes, uint32_t byteCnt)
+{
+    LogicalBlkAddr lBlkAddr
+    {
+        .stripeId = totalStripes / 2,
+        .offset = 0
+    };
+
+    LogicalByteAddr lByteAddr
+    {
+        .blkAddr = lBlkAddr,
+        .byteOffset = 0,
+        .byteSize = byteCnt
+    };
+
+    std::list<BufferEntry>* fakeBuffers = new std::list<BufferEntry>;
+    MockBufferEntry mockBuffer(nullptr, 0, false);
+    fakeBuffers->push_back(mockBuffer);
+
+    LogicalByteWriteEntry lWriteEntry
+    {
+        .addr = lByteAddr,
+        .byteCnt = byteCnt,
+        .buffers = fakeBuffers
+    };
+
+    return lWriteEntry;
+}
+
 static LogicalWriteEntry
 buildInvalidLogicalWriteEntry(uint32_t totalStripes, uint32_t blksPerStripe)
 {
@@ -248,6 +278,88 @@ TEST(NvmPartition, Convert_testIfValidEntryIsFilledIn)
     ASSERT_EQ(validEntry.blkCnt, pWriteEntry.blkCnt);
     PhysicalBlkAddr phyBlkAddr = pWriteEntry.addr;
     // The validation on phyBlkAddr will be skipped for now since it's already done as part of Translate() UT.
+}
+
+TEST(NvmPartition, ByteConvert_testIfValidEntryIsFilledIn)
+{
+    // Given
+    PartitionPhysicalSize partPhySize{
+        .startLba = 8192,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    uint32_t totalStripes = partPhySize.stripesPerSegment * partPhySize.totalSegments;
+    uint32_t blkCnt = 10; // bytes to convert
+    LogicalByteWriteEntry validEntry = buildValidLogicalByteWriteEntry(totalStripes, blkCnt);
+    vector<ArrayDevice*> devs;
+    devs.push_back(nullptr); // 'cause I'm not interested
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
+    std::list<PhysicalByteWriteEntry> dest;
+
+    // When
+    int actual = nvmPart.ByteConvert(dest, validEntry);
+
+    // Then
+    ASSERT_EQ(1, dest.size());
+    PhysicalByteWriteEntry pWriteEntry = dest.front();
+    ASSERT_EQ(validEntry.byteCnt, pWriteEntry.byteCnt);
+    PhysicalByteAddr phyByteAddr = pWriteEntry.addr;
+}
+
+TEST(NvmPartition, IsByteAccessSupported_testIfReturnValueCorrect)
+{
+    // Given
+    PartitionPhysicalSize partPhySize{
+        .startLba = 8192,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    vector<ArrayDevice*> devs;
+    devs.push_back(nullptr); // 'cause I'm not interested
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
+
+    // When
+    bool actual = nvmPart.IsByteAccessSupported();
+
+    // Then
+    ASSERT_TRUE(actual);
+}
+
+TEST(NvmPartition, GetMethod_testIfNoMethodReturnedForNvmPartition)
+{
+    // Given
+    PartitionPhysicalSize partPhySize{
+        .startLba = 8192,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    vector<ArrayDevice*> devs;
+    devs.push_back(nullptr); // 'cause I'm not interested
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
+    // When
+    Method* actual = nvmPart.GetMethod();
+    // Then
+    ASSERT_EQ(nullptr, actual);
+}
+
+TEST(NvmPartition, Format_dummyTestForCoverage)
+{
+    // Given
+    PartitionPhysicalSize partPhySize{
+        .startLba = 8192,
+        .blksPerChunk = 100,
+        .chunksPerStripe = 10,
+        .stripesPerSegment = 5,
+        .totalSegments = 2};
+    vector<ArrayDevice*> devs;
+    devs.push_back(nullptr); // 'cause I'm not interested
+    NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
+    // When
+    nvmPart.Format(); // nothing happens
+    // Then
 }
 
 } // namespace pos

@@ -47,10 +47,6 @@ class IODeviceChecker : public IIODeviceChecker
 public:
     IODeviceChecker(void);
     virtual ~IODeviceChecker(void);
-    bool Register(string array, IDeviceChecker* checker);
-    void Unregister(string array);
-    bool IsRecoverable(string array, IArrayDevice* target, UBlockDevice* uBlock) override;
-    IArrayDevice* FindDevice(string array, string devSn) override;
     bool Register(unsigned int arrayIndex, IDeviceChecker* checker);
     void Unregister(unsigned int arrayIndex);
     bool IsRecoverable(unsigned int arrayIndex, IArrayDevice* target, UBlockDevice* uBlock) override;

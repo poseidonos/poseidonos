@@ -38,6 +38,7 @@
 #include <vector>
 
 #include "partition.h"
+#include "src/io_scheduler/io_dispatcher.h"
 #include "src/cpu_affinity/affinity_manager.h"
 using namespace std;
 
@@ -52,7 +53,11 @@ class PartitionManager
     friend class ParityLocationWbtCommand;
 
 public:
-    PartitionManager(string array, IAbrControl* abr, AffinityManager* affinityManager = AffinityManagerSingleton::Instance());
+    PartitionManager(
+        string array,
+        IAbrControl* abr,
+        AffinityManager* affinityManager = AffinityManagerSingleton::Instance(),
+        IODispatcher* ioDispatcher = IODispatcherSingleton::Instance());
     virtual ~PartitionManager();
     virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type);
     virtual int CreateAll(vector<ArrayDevice*> buf, vector<ArrayDevice*> data,
@@ -71,6 +76,7 @@ private:
     array<Partition*, PartitionType::PARTITION_TYPE_MAX> partitions_;
     IAbrControl* abrControl = nullptr;
     AffinityManager* affinityManager = nullptr;
+    IODispatcher* ioDispatcher = nullptr;
 };
 
 } // namespace pos

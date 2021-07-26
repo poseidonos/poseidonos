@@ -12,10 +12,6 @@ class MockIIOTranslator : public IIOTranslator
 {
 public:
     using IIOTranslator::IIOTranslator;
-    MOCK_METHOD(int, Translate, (string array, PartitionType part, PhysicalBlkAddr& dst, const LogicalBlkAddr& src), (override));
-    MOCK_METHOD(int, ByteTranslate, (string array, PartitionType part, PhysicalByteAddr& dst, const LogicalByteAddr& src), (override));
-    MOCK_METHOD(int, Convert, (string array, PartitionType part, list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src), (override));
-    MOCK_METHOD(int, ByteConvert, (string array, PartitionType part, list<PhysicalByteWriteEntry>& dst, const LogicalByteWriteEntry& src), (override));
     MOCK_METHOD(int, Translate, (unsigned int arrayIndex, PartitionType part, PhysicalBlkAddr& dst, const LogicalBlkAddr& src), (override));
     MOCK_METHOD(int, ByteTranslate, (unsigned int arrayIndex, PartitionType part, PhysicalByteAddr& dst, const LogicalByteAddr& src), (override));
     MOCK_METHOD(int, Convert, (unsigned int arrayIndex, PartitionType part, list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src), (override));

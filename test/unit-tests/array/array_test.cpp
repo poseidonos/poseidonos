@@ -1162,6 +1162,7 @@ TEST(Array, Set_testIfSettersAreInvoked)
     array.GetStateCtx();
     array.GetCreateDatetime();
     array.GetUpdateDatetime();
+    array.GetArrayManager(); // ADMIN_ENABLED
 
     // Then:
     ASSERT_EQ(expectedMRT, array.GetMetaRaidType());

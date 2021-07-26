@@ -1,4 +1,5 @@
 #include "src/array/partition/partition.h"
+#include "src/array/ft/raid5.h"
 
 #include <gtest/gtest.h>
 

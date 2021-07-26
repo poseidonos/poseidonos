@@ -55,127 +55,6 @@ IOTranslator::~IOTranslator(void)
 }
 
 bool
-IOTranslator::Register(string array, ArrayTranslator trans)
-{
-    if (tempTranslators.find(array) == tempTranslators.end())
-    {
-        POS_TRACE_INFO((int)POS_EVENT_ID::TRANSLATOR_DEBUG_MSG,
-            "IOTranslator::Register, array:{} size:{}",
-            array, trans.size());
-        auto ret = tempTranslators.emplace(array, trans);
-        return ret.second;
-    }
-    return true;
-}
-
-void
-IOTranslator::Unregister(string array)
-{
-    _Erase(array);
-}
-
-int
-IOTranslator::Translate(string array, PartitionType part,
-    PhysicalBlkAddr& dst, const LogicalBlkAddr& src)
-{
-    ITranslator* trans = _Find(array, part);
-    if (trans != nullptr)
-    {
-        return trans->Translate(dst, src);
-    }
-
-    int event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
-    POS_TRACE_ERROR(event,
-        "IOTranslator::Translate ERROR, array:{} part:{}", array, part);
-    return event;
-}
-
-int
-IOTranslator::ByteTranslate(string array, PartitionType part,
-    PhysicalByteAddr& dst, const LogicalByteAddr& src)
-{
-    int event;
-    if (part != PartitionType::META_NVM)
-    {
-        event = (int)POS_EVENT_ID::TRANSLATOR_NOT_SUPPORT;
-        POS_TRACE_ERROR(event, "Byte Access is not supported for partition {}", part);
-        return event;
-    }
-
-    ITranslator* trans = _Find(array, part);
-    if (trans != nullptr)
-    {
-        return trans->ByteTranslate(dst, src);
-    }
-
-    event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
-    POS_TRACE_ERROR(event,
-        "IOTranslator::Translate ERROR, array:{} part:{}", array, part);
-    return event;
-}
-
-int
-IOTranslator::Convert(string array, PartitionType part,
-    list<PhysicalWriteEntry>& dst, const LogicalWriteEntry& src)
-{
-    ITranslator* trans = _Find(array, part);
-    if (trans != nullptr)
-    {
-        return trans->Convert(dst, src);
-    }
-
-    int event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
-    POS_TRACE_ERROR(event,
-        "IOTranslator::Convert ERROR, array:{} part:{}", array, part);
-    return event;
-}
-
-int
-IOTranslator::ByteConvert(string array, PartitionType part,
-    list<PhysicalByteWriteEntry>& dst, const LogicalByteWriteEntry& src)
-{
-    ITranslator* trans = _Find(array, part);
-    if (trans != nullptr)
-    {
-        return trans->ByteConvert(dst, src);
-    }
-
-    int event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
-    POS_TRACE_ERROR(event,
-        "IOTranslator::Convert ERROR, array:{} part:{}", array, part);
-    return event;
-}
-
-ITranslator*
-IOTranslator::_Find(string array, PartitionType part)
-{
-    auto it = tempTranslators.find(array);
-    if (it == tempTranslators.end())
-    {
-        return nullptr;
-    }
-    return it->second[part];
-}
-
-void
-IOTranslator::_Erase(string array)
-{
-    if (array == "" && tempTranslators.size() == 1)
-    {
-        tempTranslators.clear();
-    }
-    else
-    {
-        tempTranslators.erase(array);
-    }
-
-    POS_TRACE_INFO((int)POS_EVENT_ID::TRANSLATOR_DEBUG_MSG,
-        "IORecover::_Erase, array:{}, remaining:{}", array, tempTranslators.size());
-}
-
-// new iotranslator with arrayIndex
-
-bool
 IOTranslator::Register(unsigned int arrayIndex, ArrayTranslator trans)
 {
     if (translators[arrayIndex].empty())
@@ -258,13 +137,24 @@ int
 IOTranslator::ByteConvert(unsigned int arrayIndex, PartitionType part,
     list<PhysicalByteWriteEntry>& dst, const LogicalByteWriteEntry& src)
 {
+    int event;
     auto it = translators[arrayIndex].find(part);
     if (it != translators[arrayIndex].end())
     {
-        return it->second->ByteConvert(dst, src);
+        if (it->second->IsByteAccessSupported())
+        {
+            return it->second->ByteConvert(dst, src);
+        }
+        else
+        {
+            event = (int)POS_EVENT_ID::TRANSLATOR_NOT_SUPPORT;
+            POS_TRACE_ERROR(event,
+                "IOTranslator::ByteTranslate not supported, array:{} part:{}", arrayIndex, part);
+            return event;
+        }
     }
 
-    int event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
+    event = (int)POS_EVENT_ID::TRANSLATOR_NOT_EXIST;
     POS_TRACE_ERROR(event,
         "IOTranslator::Convert ERROR, array:{} part:{}", arrayIndex, part);
     return event;
