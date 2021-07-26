@@ -201,7 +201,7 @@ RequestHandler::PosBusy(char* msg)
 
     JsonFormat jFormat;
 
-    return jFormat.MakeResponse(command, rid, (int)POS_EVENT_ID::POS_BUSY, "POS IS BUSY",
+    return jFormat.MakeResponse(command, rid, (int)POS_EVENT_ID::POS_BUSY, "CLI SERVER IS NOW PROCESSING A COMMAND",
         GetPosInfo());
 }
 
