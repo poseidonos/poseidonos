@@ -786,14 +786,14 @@ struct spdk_bdev *create_pos_disk(const char *volume_name, uint32_t volume_id,
 	mdisk->disk.fn_table = &pos_fn_table;
 	mdisk->disk.module = &pos_if;
 
-	TAILQ_INSERT_TAIL(&g_pos_disks, mdisk, link);
-	pos_disk_count++;
-
 	rc = spdk_bdev_register(&mdisk->disk);
 	if (rc) {
 		pos_disk_free(mdisk);
 		return NULL;
 	}
+
+	TAILQ_INSERT_TAIL(&g_pos_disks, mdisk, link);
+	pos_disk_count++;
 
 	SPDK_NOTICELOG("pos_Volume(volume_id=%u, size_mb=%ld) has created. volume_type_in_memory=%d\n",
 		       mdisk->volume.id, mdisk->volume.size_mb, volume_type_in_memory);

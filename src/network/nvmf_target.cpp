@@ -70,11 +70,21 @@ NvmfTarget::CreatePosBdev(const string& bdevName, uint32_t id,
     uint64_t volumeSizeInMb, uint32_t blockSize, bool volumeTypeInMem, const string& arrayName)
 {
     uint64_t volumeSizeInByte = volumeSizeInMb * MB;
-    struct spdk_bdev* bdev = spdk_bdev_create_pos_disk(bdevName.c_str(), id, nullptr,
+    struct spdk_bdev* bdev = spdk_bdev_get_by_name(bdevName.c_str());
+    if (nullptr != bdev)
+    {
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::IONVMF_BDEV_ALREADY_EXIST;
+        POS_TRACE_INFO(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
+        return false;
+    }
+    bdev = spdk_bdev_create_pos_disk(bdevName.c_str(), id, nullptr,
         volumeSizeInByte / blockSize, blockSize, volumeTypeInMem, arrayName.c_str());
     if (bdev == nullptr)
     {
-        SPDK_ERRLOG("bdev %s does not exist\n", bdevName.c_str());
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_BDEV;
+        POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
         return false;
     }
     struct EventContext* ctx = _CreateEventContext(nullptr, nullptr,

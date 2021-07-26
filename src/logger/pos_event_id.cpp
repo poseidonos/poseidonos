@@ -60,7 +60,9 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::IONVMF_NAMESPACE_ATTACH_FAILED, "Fail to attach Namespace "},
             {POS_EVENT_ID::IONVMF_FAIL_TO_FIND_VOLID, "Fail to parse volume id from bdev name"},
             {POS_EVENT_ID::IONVMF_FAIL_TO_FIND_ARRAYNAME, "Fail to parse array name from bdev name"},
-            {POS_EVENT_ID::IONVMF_OVERRIDE_UNVMF_IO_HANDLER, "Override unvmf_io_handler"}
+            {POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_BDEV, "Fail to create bdev{}"},
+            {POS_EVENT_ID::IONVMF_OVERRIDE_UNVMF_IO_HANDLER, "Override unvmf_io_handler"},
+            {POS_EVENT_ID::IONVMF_BDEV_ALREADY_EXIST, "Requested bdev{} already exist"},
 };
 
 PosEventId::PosEventIdEntry
