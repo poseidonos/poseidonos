@@ -459,6 +459,10 @@ ArrayState::StateChanged(StateContext* prev, StateContext* next)
 {
     unique_lock<mutex> lock(mtx);
     cv.notify_all();
+    if (next != nullptr && next->ToStateType() == StateEnum::STOP)
+    {
+        iStateControl->Remove(degradedState);
+    }
 }
 
 void

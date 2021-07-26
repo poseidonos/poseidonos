@@ -35,6 +35,7 @@
 #include <atomic>
 #include <queue>
 
+#include "src/qos/exit_handler.h"
 #include "src/qos/qos_common.h"
 
 namespace pos
@@ -45,7 +46,7 @@ class BwIopsRateLimit;
 class ParameterQueue;
 template<class T>
 class IoQueue;
-class QosEventManager
+class QosEventManager : public ExitQosHandler
 {
 public:
     QosEventManager(void);

@@ -316,7 +316,7 @@ Array::Delete(void)
     }
 
     // Rebuild would not be finished when rebuild io have an error on broken array
-    if ( rebuilder->IsRebuilding(name_))
+    if (rebuilder->IsRebuilding(name_))
     {
         ret = (int)POS_EVENT_ID::ARRAY_REBUILD_NOT_DONE;
         POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG , "Rebuild not done, try again later");
@@ -615,6 +615,24 @@ Array::DetachDevice(UblockSharedPtr uBlock)
     }
 
     return eventId;
+}
+
+void
+Array::AttachDevice(UblockSharedPtr uBlock)
+{
+    if (state->GetState() < ArrayStateEnum::BROKEN)
+    {
+        ArrayDevice* dev = devMgr_->GetFaulty();
+        if (dev != nullptr)
+        {
+            int eventId = (int)POS_EVENT_ID::ARRAY_DEVICE_ATTACHED;
+            POS_TRACE_INFO(eventId,
+                "Updating the device class of a newly attached faulty device {} to ARRAY",
+                uBlock->GetSN());
+            uBlock->SetClass(DeviceClass::ARRAY);
+            dev->SetUblock(uBlock);
+        }
+    }
 }
 
 void

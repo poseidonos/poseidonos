@@ -231,7 +231,7 @@ ArrayManager::DeviceAttached(UblockSharedPtr dev)
     ArrayComponents* array = _FindArrayWithDevSN(dev->GetSN());
     if (array != nullptr)
     {
-        dev->SetClass(DeviceClass::ARRAY);
+        array->GetArray()->AttachDevice(dev);
     }
 }
 

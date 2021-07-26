@@ -55,6 +55,12 @@ struct RbaAndSize
     {
         return (input.sectorRba == sectorRba && input.size == size);
     }
+
+    inline bool
+    operator<(RbaAndSize input) const
+    {
+        return (sectorRba < input.sectorRba);
+    }
 };
 
 class VolumeIo : public Ubio

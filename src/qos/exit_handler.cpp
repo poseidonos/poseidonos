@@ -30,21 +30,56 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/qos/exit_handler.h"
 
-#include "src/cli/command.h"
-#include <string>
-
-namespace pos_cli
+namespace pos
 {
-class QosListPoliciesCommand : public Command
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+ExitQosHandler::ExitQosHandler(void)
+    : exitQos(false)
 {
-public:
-    QosListPoliciesCommand(void);
-    ~QosListPoliciesCommand(void) override;
-    string Execute(json& doc, string rid) override;
+}
 
-private:
-    string GetRebuildImpactString(uint8_t impact);
-};
-}; // namespace pos_cli
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+ExitQosHandler::~ExitQosHandler(void)
+{
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+ExitQosHandler::IsExitQosSet(void)
+{
+    return exitQos;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+ExitQosHandler::SetExitQos(void)
+{
+    exitQos = true;
+}
+} // namespace pos

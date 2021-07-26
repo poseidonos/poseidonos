@@ -49,11 +49,12 @@
 #include "src/qos/context_factory.h"
 #include "src/qos/internal_manager.h"
 #include "src/qos/internal_manager_factory.h"
+#include "src/qos/qos_context.h"
 #include "src/qos/qos_event_manager.h"
 #include "src/qos/qos_spdk_manager.h"
 #include "src/qos/qos_volume_manager.h"
-#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/connection_management.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {
@@ -66,7 +67,6 @@ namespace pos
 /* --------------------------------------------------------------------------*/
 QosManager::QosManager(void)
 {
-    quitQos = false;
     qosThread = nullptr;
     feQosEnabled = false;
     pollerTime = UINT32_MAX;
@@ -183,11 +183,19 @@ QosManager::_Finalize(void)
     {
         spdkManager->Finalize();
     }
-    quitQos = true;
+    POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosSpdkManager Finalization complete");
+    SetExitQos();
+    qosVolumeManager->SetExitQos();
+    qosEventManager->SetExitQos();
+    monitoringManager->SetExitQos();
+    policyManager->SetExitQos();
+    processingManager->SetExitQos();
+    correctionManager->SetExitQos();
     if (nullptr != qosThread)
     {
         qosThread->join();
     }
+    POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosManager Finalization complete");
 }
 
 /* --------------------------------------------------------------------------*/
@@ -237,8 +245,9 @@ QosManager::_QosWorker(void)
     QosInternalManager* nextManager = nullptr;
     while (nullptr != currentManager)
     {
-        if (true == quitQos)
+        if (true == IsExitQosSet())
         {
+            POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosManager Finalization Triggered, QosWorker thread exit");
             break;
         }
         currentManager->Execute();
@@ -522,7 +531,8 @@ QosManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
     }
     else
     {
-        policy.maxIops = policy.maxIops / PARAMETER_COLLECTION_INTERVAL;
+        // since value is taken in KIOPS, convert to actual number here
+        policy.maxIops = policy.maxIops * KIOPS / PARAMETER_COLLECTION_INTERVAL;
     }
 
     if (0 == policy.minBw)
@@ -535,7 +545,11 @@ QosManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
     {
         policy.minIops = DEFAULT_MIN_IOPS;
     }
-    policy.minIops = policy.minIops / PARAMETER_COLLECTION_INTERVAL;
+    else
+    {
+        // since value is taken in KIOPS, convert to actual number here
+        policy.minIops = policy.minIops * KIOPS / PARAMETER_COLLECTION_INTERVAL;
+    }
     {
         std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
         volPolicyCli[volId] = cliPolicy;

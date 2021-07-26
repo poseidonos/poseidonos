@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "src/qos/exit_handler.h"
 #include "src/qos/qos_common.h"
 
 namespace pos
@@ -43,9 +44,10 @@ class QosContext;
  *
  */
 /* --------------------------------------------------------------------------*/
-class QosInternalManager
+class QosInternalManager : public ExitQosHandler
 {
 public:
+    QosInternalManager(void) {}
     virtual ~QosInternalManager(void) {}
     virtual void Execute(void) = 0;
     virtual QosInternalManagerType GetNextManagerType(void) = 0;

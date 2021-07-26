@@ -148,7 +148,7 @@ QosEventManager::HandleEventUbioSubmission(SubmissionAdapter* ioSubmission,
     {
         pendingEventIO[id][event]++;
         _EnqueueEventUbio(id, event, ubio);
-        while (1)
+        while (!IsExitQosSet())
         {
             if (_RateLimit(id, event) == true)
             {
@@ -293,7 +293,7 @@ QosEventManager::IOWorkerPoller(uint32_t id, SubmissionAdapter* ioSubmission)
         _EnqueueParams(workerId, (BackendEvent)event, eventQosParam[workerId][event]);
         currentBW = 0;
         _ResetRateLimit(workerId, (BackendEvent)event);
-        while (1)
+        while (!IsExitQosSet())
         {
             if (_RateLimit(workerId, (BackendEvent)event) == true)
             {

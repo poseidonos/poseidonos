@@ -239,8 +239,15 @@ MioHandler::_ExecutePendedIo(MetaFsIoRequest* reqMsg)
     for (auto it = range.first; it != range.second;)
     {
         MetaFsIoRequest* msg = it->second;
-        reqList->push_back(msg);
-        pendingIoRetryQ.erase(it++);
+        if (reqMsg->arrayId == msg->arrayId)
+        {
+            reqList->push_back(msg);
+            pendingIoRetryQ.erase(it++);
+        }
+        else
+        {
+            ++it;
+        }
     }
 
     mio->SetMergedRequestList(reqList);

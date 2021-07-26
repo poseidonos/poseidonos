@@ -47,17 +47,20 @@
 
 namespace pos
 {
+class RBAStateService;
+class VolumeEventPublisher;
+
 class RBAStateManager : public VolumeEvent
 {
 public:
     explicit RBAStateManager(std::string arrayName, int arrayID);
     virtual ~RBAStateManager();
 
-    void CreateRBAState(uint32_t volumeID, uint64_t totalRBACount);
-    void DeleteRBAState(uint32_t volumeID);
-    bool AcquireOwnershipRbaList(uint32_t volumeId,
+    virtual void CreateRBAState(uint32_t volumeID, uint64_t totalRBACount);
+    virtual void DeleteRBAState(uint32_t volumeID);
+    virtual bool AcquireOwnershipRbaList(uint32_t volumeId,
         const VolumeIo::RbaList& sectorRbaList);
-    void ReleaseOwnershipRbaList(uint32_t volumeId,
+    virtual void ReleaseOwnershipRbaList(uint32_t volumeId,
         const VolumeIo::RbaList& sectorRbaList);
     virtual bool BulkAcquireOwnership(uint32_t volumeID,
         BlkAddr startRba,

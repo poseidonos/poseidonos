@@ -38,9 +38,9 @@
 #include <map>
 #include <vector>
 #include <string>
-
 #include "src/qos/qos_common.h"
 #include "src/sys_event/volume_event.h"
+#include "src/qos/exit_handler.h"
 
 namespace pos
 {
@@ -49,7 +49,7 @@ class BwIopsRateLimit;
 class ParameterQueue;
 template<class T>
 class IoQueue;
-class QosVolumeManager : public VolumeEvent
+class QosVolumeManager : public VolumeEvent, public ExitQosHandler
 {
 public:
     explicit QosVolumeManager(bool feQos);

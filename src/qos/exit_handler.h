@@ -32,34 +32,26 @@
 
 #pragma once
 
-#include "src/cli/command.h"
+#include <atomic>
 #include "src/qos/qos_common.h"
-#include <string>
-#include <vector>
-#include <utility>
 
-namespace pos_cli
+namespace pos
 {
-class QosCreateVolumePolicyCommand : public Command
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ */
+/* --------------------------------------------------------------------------*/
+class ExitQosHandler
 {
 public:
-    QosCreateVolumePolicyCommand(void);
-    ~QosCreateVolumePolicyCommand(void) override;
-    string Execute(json& doc, string rid) override;
+    ExitQosHandler(void);
+    ~ExitQosHandler(void);
+    bool IsExitQosSet(void);
+    void SetExitQos(void);
 
 private:
-    bool _HandleInputVolumes(json& doc);
-    bool _VerifyMultiVolumeInput(json& doc);
-    uint32_t _HandleVolumePolicy(json& doc);
-    std::vector<string> volumeNames;
-    std::vector<std::pair<string, uint32_t>> validVolumes;
-    std::string errorMsg;
-    int64_t minBw;
-    int64_t maxBw;
-    int64_t minIops;
-    int64_t maxIops;
-    qos_vol_policy prevVolPolicy;
-    qos_vol_policy newVolPolicy;
-    string arrayName;
+    std::atomic<bool> exitQos;
 };
-}; // namespace pos_cli
+} // namespace pos

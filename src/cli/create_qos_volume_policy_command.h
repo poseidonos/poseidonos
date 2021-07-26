@@ -30,48 +30,37 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __IBOF_EVENT_ID_HPP__
-#define __IBOF_EVENT_ID_HPP__
+#pragma once
 
 #include <string>
+#include <utility>
+#include <vector>
 
-#include "pos_event_id.h"
+#include "src/cli/command.h"
+#include "src/qos/qos_common.h"
 
-namespace pos
+namespace pos_cli
 {
-enum class EventLevel
-{
-    CRITICAL,
-    ERROR,
-    WARNING,
-    INFO,
-    DEBUG,
-};
-
-class PosEventId
+class QosCreateVolumePolicyCommand : public Command
 {
 public:
-    static const char*& GetString(POS_EVENT_ID eventId);
-    static void Print(POS_EVENT_ID id, EventLevel level);
-    static void Print(POS_EVENT_ID id, EventLevel level,
-        std::string& additionalMessage);
+    QosCreateVolumePolicyCommand(void);
+    ~QosCreateVolumePolicyCommand(void) override;
+    string Execute(json& doc, string rid) override;
 
 private:
-    struct PosEventIdEntry
-    {
-        POS_EVENT_ID eventId;
-        const char* message;
-    };
-
-    static PosEventIdEntry RESERVED_EVENT_ENTRY;
-    static PosEventIdEntry QOS_EVENT_ENTRY[(int)POS_EVENT_ID::QOS_COUNT];
-    static PosEventIdEntry IOPATH_NVMF_EVENT_ENTRY[(int)POS_EVENT_ID::IONVMF_COUNT];
-    static PosEventIdEntry IOPATH_FRONTEND_EVENT_ENTRY[(int)POS_EVENT_ID::IOFRONTEND_COUNT];
-    static PosEventIdEntry IOPATH_BACKEND_EVENT_ENTRY[(int)POS_EVENT_ID::IOBACKEND_COUNT];
-
-    PosEventId(void) = delete;
-    ~PosEventId(void);
+    bool _HandleInputVolumes(json& doc);
+    bool _VerifyMultiVolumeInput(json& doc);
+    uint32_t _HandleVolumePolicy(json& doc);
+    std::vector<string> volumeNames;
+    std::vector<std::pair<string, uint32_t>> validVolumes;
+    std::string errorMsg;
+    uint64_t minBw;
+    uint64_t maxBw;
+    uint64_t minIops;
+    uint64_t maxIops;
+    qos_vol_policy prevVolPolicy;
+    qos_vol_policy newVolPolicy;
+    string arrayName;
 };
-
-} // namespace pos
-#endif // __IBOF_EVENT_ID_HPP__
+}; // namespace pos_cli

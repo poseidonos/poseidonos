@@ -41,7 +41,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
+#include "src/qos/exit_handler.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/event.h"
 #include "src/include/backend_event.h"
@@ -69,7 +69,7 @@ class QosSpdkManager;
 class QosContext;
 class QosInternalManager;
 
-class QosManager
+class QosManager : public ExitQosHandler
 {
 public:
     QosManager(void);
@@ -111,7 +111,6 @@ private:
     void _Finalize(void);
     void _QosWorker(void);
     QosInternalManager* _GetNextInternalManager(QosInternalManagerType internalManagerType);
-    volatile bool quitQos;
     std::thread* qosThread;
     cpu_set_t cpuSet;
     volatile uint64_t eventWeight[BackendEvent_Count];

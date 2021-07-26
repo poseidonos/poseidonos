@@ -32,8 +32,9 @@
 
 #pragma once
 
-#include "src/cli/command.h"
 #include <string>
+
+#include "src/cli/command.h"
 
 namespace pos_cli
 {

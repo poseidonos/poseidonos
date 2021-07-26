@@ -36,14 +36,14 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/aio_submission_adapter.h"
 #include "src/logger/logger.h"
+#include "src/qos/io_queue.h"
+#include "src/qos/parameter_queue.h"
 #include "src/qos/qos_manager.h"
+#include "src/qos/rate_limit.h"
 #include "src/qos/submission_adapter.h"
+#include "src/spdk_wrapper/connection_management.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/sys_event/volume_event_publisher.h"
-#include "src/spdk_wrapper/connection_management.h"
-#include "src/qos/rate_limit.h"
-#include "src/qos/parameter_queue.h"
-#include "src/qos/io_queue.h"
 
 namespace pos
 {
@@ -75,7 +75,7 @@ QosVolumeManager::QosVolumeManager(bool feQos)
         parameterQueue = new ParameterQueue;
         ioQueue = new IoQueue<pos_io*>;
     }
-    catch(std::bad_alloc& ex)
+    catch (std::bad_alloc& ex)
     {
         assert(0);
     }
@@ -180,7 +180,7 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
     {
         pendingIO[reactorId][volId]++;
         _EnqueueVolumeUbio(reactorId, volId, volIo);
-        while (1)
+        while (!IsExitQosSet())
         {
             if (_RateLimit(reactorId, volId) == true)
             {
@@ -267,6 +267,7 @@ QosVolumeManager::_UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxb
 {
     qos_vol_policy volumePolicy;
     volumePolicy.maxBw = maxbw;
+    // update max iops here to display for qos list
     volumePolicy.maxIops = maxiops;
     volumePolicy.policyChange = true;
     volumePolicy.maxValueChanged = true;
@@ -462,7 +463,7 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
             currentBW = 0;
             currentIO = 0;
             _ResetRateLimit(reactor, volId, offset);
-            while (1)
+            while (!IsExitQosSet())
             {
                 if (_RateLimit(reactor, volId) == true)
                 {

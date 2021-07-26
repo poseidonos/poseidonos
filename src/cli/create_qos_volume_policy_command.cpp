@@ -30,21 +30,14 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/cli/qos_create_volume_policy_command.h"
+#include "src/cli/create_qos_volume_policy_command.h"
 
 #include "src/cli/cli_event_code.h"
 #include "src/qos/qos_manager.h"
+#include "src/volume/volume_base.h"
 #include "src/volume/volume_manager.h"
-
 namespace pos_cli
 {
-const uint32_t KIOPS = 1000;
-const uint32_t MIB_IN_BYTE = 1024 * 1024;
-const int64_t MIN_IOPS_LIMIT = 10;
-const int64_t MIN_BW_LIMIT = 10;
-const int64_t MAX_IOPS_LIMIT = INT64_MAX / KIOPS;
-const int64_t MAX_BW_LIMIT = INT64_MAX / MIB_IN_BYTE;
-
 QosCreateVolumePolicyCommand::QosCreateVolumePolicyCommand(void)
 {
     minBw = 0;
@@ -67,31 +60,31 @@ QosCreateVolumePolicyCommand::Execute(json& doc, string rid)
     string ioType;
     if (false == QosManagerSingleton::Instance()->IsFeQosEnabled())
     {
-        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, SUCCESS, "QOS Settings Skipped", GetPosInfo());
+        return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, SUCCESS, "QOS Settings Skipped", GetPosInfo());
     }
     if (doc["param"].contains("vol"))
     {
         validInput = _HandleInputVolumes(doc);
         if (false == validInput)
         {
-            return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
+            return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
         }
     }
     else
     {
-        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "vol, Parameter Missing", GetPosInfo());
+        return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "vol, Parameter Missing", GetPosInfo());
     }
     validInput = _VerifyMultiVolumeInput(doc);
     if (false == validInput)
     {
-        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
+        return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
     }
     retVal = _HandleVolumePolicy(doc);
     if (SUCCESS != retVal)
     {
-        return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, retVal, errorMsg, GetPosInfo());
+        return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, retVal, errorMsg, GetPosInfo());
     }
-    return jFormat.MakeResponse("QOSCREATEVOLUMEPOLICY", rid, SUCCESS, "Volume Qos Policy Create", GetPosInfo());
+    return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, SUCCESS, "Volume Qos Policy Create", GetPosInfo());
 }
 
 bool
@@ -180,18 +173,16 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
 
         if (doc["param"].contains("minbw"))
         {
-            minBw = doc["param"]["minbw"].get<int64_t>();
-            if (-1 != minBw)
+            int64_t minBwFromCli = doc["param"]["minbw"].get<int64_t>();
+            if (-1 != minBwFromCli)
             {
-                if (0xFFFFFFFF == minBw)
+                if (minBwFromCli < 0)
                 {
-                    newVolPolicy.minBwGuarantee = false;
-                    minBw = 0;
+                    errorMsg = "Min Bandwidth value outside allowed range";
+                    return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
                 }
-                else
-                {
-                    newVolPolicy.minBwGuarantee = true;
-                }
+                minBw = minBwFromCli;
+                newVolPolicy.minBwGuarantee = true;
                 newVolPolicy.minBw = minBw;
                 if (newVolPolicy.minBw != prevVolPolicy.minBw)
                 {
@@ -202,14 +193,12 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
 
         if (doc["param"].contains("maxbw"))
         {
-            maxBw = doc["param"]["maxbw"].get<int64_t>();
-            if (-1 != maxBw)
+            int64_t maxBwFromCli = doc["param"]["maxbw"].get<int64_t>();
+            if (-1 != maxBwFromCli)
             {
-                if (0xFFFFFFFF == maxBw)
-                {
-                    maxBw = 0;
-                }
-                else if (maxBw < MIN_BW_LIMIT || maxBw > MAX_BW_LIMIT)
+                maxBw = maxBwFromCli;
+                // value 0 means no throttling set
+                if ((0 != maxBw) && (maxBw < MIN_BW_LIMIT || maxBw > MAX_BW_LIMIT))
                 {
                     errorMsg = "Max Bandwidth value outside allowed range";
                     return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
@@ -225,18 +214,16 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
 
         if (doc["param"].contains("miniops"))
         {
-            minIops = doc["param"]["miniops"].get<int64_t>();
-            if (-1 != minIops)
+            int64_t minIopsFromCli = doc["param"]["miniops"].get<int64_t>();
+            if (-1 != minIopsFromCli)
             {
-                if (0xFFFFFFFF == minIops)
+                if (minIopsFromCli < 0)
                 {
-                    newVolPolicy.minIopsGuarantee = false;
-                    minIops = 0;
+                    errorMsg = "Min Iops value outside allowed range";
+                    return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);
                 }
-                else
-                {
-                    newVolPolicy.minIopsGuarantee = true;
-                }
+                minIops = minIopsFromCli;
+                newVolPolicy.minIopsGuarantee = true;
                 newVolPolicy.minIops = minIops;
                 if (newVolPolicy.minIops != prevVolPolicy.minIops)
                 {
@@ -247,14 +234,12 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
 
         if (doc["param"].contains("maxiops"))
         {
-            maxIops = doc["param"]["maxiops"].get<int64_t>();
-            if (-1 != maxIops)
+            int64_t maxIopsFromCli = doc["param"]["maxiops"].get<int64_t>();
+            if (-1 != maxIopsFromCli)
             {
-                if (0xFFFFFFFF == maxIops)
-                {
-                    maxIops = 0;
-                }
-                else if (maxIops < MIN_IOPS_LIMIT || maxIops > MAX_IOPS_LIMIT)
+                maxIops = maxIopsFromCli;
+                // value 0 means no throttling set.
+                if ((0 != maxIops) && (maxIops < MIN_IOPS_LIMIT || maxIops > MAX_IOPS_LIMIT))
                 {
                     errorMsg = "Max IOPS Value outside allowed range";
                     return static_cast<int>(POS_EVENT_ID::OUT_OF_QOS_RANGE);

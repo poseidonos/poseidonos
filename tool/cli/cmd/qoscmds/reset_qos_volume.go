@@ -2,7 +2,6 @@ package qoscmds
 
 import (
 	"encoding/json"
-	"fmt"
 	"pnconnector/src/log"
 	"strings"
 
@@ -14,24 +13,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ListQosCmd = &cobra.Command{
-	Use:   "list [flags]",
-	Short: "List qos policy for a volume(s) of PoseidonOS.",
-	Long: `List qos policy for a volume of PoseidonOS.
+var VolumeResetCmd = &cobra.Command{
+	Use:   "reset [flags]",
+	Short: "Reset qos policy for a volume(s) of PoseidonOS.",
+	Long: `Reset qos policy for a volume of PoseidonOS.
 
 Syntax: 
-	poseidonos-cli qos list [(--volume-name | -v) VolumeName] [(--array-name | -a) ArrayName] .
+	poseidonos-cli qos reset (--volume-name | -v) VolumeName (--array-name | -a) ArrayName .
 
 Example: 
-	poseidonos-cli qos create --volume-name Volume0 --array-name Array0
+	poseidonos-cli qos reset --volume-name Volume0 --array-name Array0
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var command = "QOSLISTPOLICIES"
+		var command = "RESETQOSVOLUMEPOLICY"
 
-		qosListReq := formListQosReq()
-		reqJSON, err := json.Marshal(qosListReq)
+		volumeResetReq := formVolumeResetReq()
+		reqJSON, err := json.Marshal(volumeResetReq)
 		if err != nil {
 			log.Debug("error:", err)
 		}
@@ -55,9 +54,9 @@ Example:
 	},
 }
 
-func formListQosReq() messages.Request {
+func formVolumeResetReq() messages.Request {
 
-	volumeNameListSlice := strings.Split(listQos_volumeNameList, ",")
+	volumeNameListSlice := strings.Split(volumeReset_volumeNameList, ",")
 	var volumeNames []messages.VolumeNameList
 	for _, str := range volumeNameListSlice {
 		var volumeNameList messages.VolumeNameList // Single device name that is splitted
@@ -65,31 +64,27 @@ func formListQosReq() messages.Request {
 		volumeNames = append(volumeNames, volumeNameList)
 	}
 
-	listQosParam := messages.VolumePolicyParam{
+	volumeResetParam := messages.VolumePolicyParam{
 		VOLUMENAME: volumeNames,
-		ARRAYNAME:  listQos_arrayName,
+		ARRAYNAME:  volumeReset_arrayName,
 	}
 
-	qosListReq := messages.Request{
+	volumeResetReq := messages.Request{
 		RID:     "fromCLI",
-		COMMAND: "QOSLISTPOLICIES",
-		PARAM:   listQosParam,
+		COMMAND: "RESETQOSVOLUMEPOLICY",
+		PARAM:   volumeResetParam,
 	}
 
-	return qosListReq
+	return volumeResetReq
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
-var listQos_volumeNameList = ""
-var listQos_arrayName = ""
+var volumeReset_volumeNameList = ""
+var volumeReset_arrayName = ""
 
 func init() {
-	ListQosCmd.Flags().StringVarP(&listQos_volumeNameList, "volume-name", "v", "", "A comma-seperated names of volumes to set qos policy for")
-	ListQosCmd.Flags().StringVarP(&listQos_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
-}
-
-func PrintResponse(response string) {
-	fmt.Println(response)
+	VolumeResetCmd.Flags().StringVarP(&volumeReset_volumeNameList, "volume-name", "v", "", "A comma-seperated names of volumes to set qos policy for")
+	VolumeResetCmd.Flags().StringVarP(&volumeReset_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
 }
