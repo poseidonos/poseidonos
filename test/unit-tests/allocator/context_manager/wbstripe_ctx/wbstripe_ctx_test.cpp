@@ -259,7 +259,7 @@ TEST(WbStripeCtx, Init_TestInitAndClose)
         VirtualBlkAddr vsa = wbstripeCtx.GetActiveStripeTail(i);
         EXPECT_EQ(vsa, UNMAP_VSA);
     }
-    wbstripeCtx.Close();
+    wbstripeCtx.Dispose();
 }
 
 TEST(WbStripeCtx, GetActiveStripeTailLock_TestSimpleGetter)

@@ -41,29 +41,20 @@
 
 namespace pos
 {
-RebuildCtx::RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx)
+RebuildCtx::RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx, IStateControl* iStateCtrl)
 : needRebuildCont(false),
   targetSegmentCnt(0),
   underRebuildSegmentId(UINT32_MAX),
   rebuildSegmentsFile(nullptr),
   bufferInObj(nullptr),
   arrayName(arrayName),
-  allocatorCtx(allocCtx)
+  allocatorCtx(allocCtx),
+  iStateControl(iStateCtrl)
 {
 }
 
 RebuildCtx::~RebuildCtx(void)
 {
-    if (bufferInObj != nullptr)
-    {
-        delete[] bufferInObj;
-        bufferInObj = nullptr;
-    }
-    if (rebuildSegmentsFile != nullptr)
-    {
-        delete rebuildSegmentsFile;
-        rebuildSegmentsFile = nullptr;
-    }
 }
 
 void
@@ -91,7 +82,7 @@ RebuildCtx::Init(AllocatorAddressInfo* info)
 }
 
 void
-RebuildCtx::Close(void)
+RebuildCtx::Dispose(void)
 {
     if (rebuildSegmentsFile != nullptr)
     {
@@ -99,6 +90,13 @@ RebuildCtx::Close(void)
         {
             rebuildSegmentsFile->Close();
         }
+        delete rebuildSegmentsFile;
+        rebuildSegmentsFile = nullptr;
+    }
+    if (bufferInObj != nullptr)
+    {
+        delete[] bufferInObj;
+        bufferInObj = nullptr;
     }
 }
 
@@ -182,6 +180,12 @@ RebuildCtx::ClearRebuildTargetSegments(void)
 void
 RebuildCtx::FlushRebuildCtx(void)
 {
+    if (iStateControl->GetState()->GetSituation().ToString() == "FAULT")
+    {
+        POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT), "state:FAULT so FlushRebuildCtx() is canceled");
+        return;
+    }
+
     int lenToWrite = _PrepareRebuildCtx();
 
     AllocatorIoCtx* rebuildStoreRequest = new AllocatorIoCtx(MetaFsIoOpcode::Write,

@@ -22,7 +22,7 @@ TEST(ContextReplayer, ResetDirtyContextVersion_TestSimpleSetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr, nullptr);
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, wbStripeCtx, nullptr);
 
@@ -48,7 +48,7 @@ TEST(ContextReplayer, ReplaySsdLsid_TestSimpleSetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr, nullptr);
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, wbStripeCtx, nullptr);
     EXPECT_CALL(*allocCtx, SetCurrentSsdLsid);
@@ -69,7 +69,7 @@ TEST(ContextReplayer, ReplaySegmentAllocation_TestAllocSegmentWithSegmentState)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr, nullptr);
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, wbStripeCtx, &addrInfo);
 
@@ -100,7 +100,7 @@ TEST(ContextReplayer, ReplayStripeAllocation_TestSimpleSetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr, nullptr);
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, wbStripeCtx, nullptr);
     EXPECT_CALL(*wbStripeCtx, AllocWbStripe);
@@ -120,7 +120,7 @@ TEST(ContextReplayer, ReplayStripeRelease_TestSimpleSetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr, nullptr);
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, wbStripeCtx, nullptr);
     EXPECT_CALL(*wbStripeCtx, ReleaseWbStripe);
@@ -142,7 +142,7 @@ TEST(ContextReplayer, ReplayStripeFlushed_TestStripeFlushedWithSeveralConditions
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr, nullptr);
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, wbStripeCtx, &addrInfo);
 
@@ -191,7 +191,7 @@ TEST(ContextReplayer, ResetActiveStripeTail_TestSimpleSetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr, nullptr);
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, wbStripeCtx, nullptr);
     EXPECT_CALL(*wbStripeCtx, SetActiveStripeTail);
@@ -211,7 +211,7 @@ TEST(ContextReplayer, GetAllActiveStripeTail_TestSimpleGetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr, nullptr);
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, wbStripeCtx, nullptr);
     EXPECT_CALL(*wbStripeCtx, GetAllActiveStripeTail);
@@ -233,7 +233,7 @@ TEST(ContextReplayer, ResetSegmentsStates_TestSimpleSetter)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>(nullptr, "");
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>(nullptr);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>(nullptr, "");
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr);
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>("", nullptr, nullptr);
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, wbStripeCtx, &addrInfo);
     EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::VICTIM)).WillOnce(Return(SegmentState::VICTIM)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::NVRAM));

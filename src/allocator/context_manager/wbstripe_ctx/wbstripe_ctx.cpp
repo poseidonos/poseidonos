@@ -68,7 +68,7 @@ WbStripeCtx::Init(void)
 }
 
 void
-WbStripeCtx::Close(void)
+WbStripeCtx::Dispose(void)
 {
     if (allocWbLsidBitmap != nullptr)
     {

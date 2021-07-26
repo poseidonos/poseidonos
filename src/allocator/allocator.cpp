@@ -100,7 +100,7 @@ void
 Allocator::_CreateSubmodules(void)
 {
     addrInfo = new AllocatorAddressInfo();
-    contextManager = new ContextManager(addrInfo, arrayName);
+    contextManager = new ContextManager(addrInfo, iStateControl, arrayName);
     blockManager = new BlockManager(addrInfo, contextManager, arrayName);
     wbStripeManager = new WBStripeManager(addrInfo, contextManager, blockManager, arrayName);
 }
@@ -114,7 +114,7 @@ Allocator::_RegisterToAllocatorService(void)
     allocatorService->RegisterAllocator(arrayName, GetIAllocatorWbt());
     allocatorService->RegisterAllocator(arrayName, GetIContextManager());
     allocatorService->RegisterAllocator(arrayName, GetIContextReplayer());
-    allocatorService->StoreAllocatorPtr(arrayName, this);
+    allocatorService->UpdateAllocator(arrayName, this);
 }
 
 void
@@ -137,7 +137,7 @@ Allocator::Dispose(void)
 
         POS_TRACE_INFO(eventId, "Start allocator contexts store");
         contextManager->FlushContextsSync();
-        contextManager->Close();
+        contextManager->Dispose();
 
         _UnregisterFromAllocatorService();
         isInitialized = false;
@@ -152,7 +152,7 @@ Allocator::Shutdown(void)
         int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_UNMOUNTING);
         POS_TRACE_INFO(eventId, "dispose allocator modules to STOP ARRAY");
 
-        contextManager->Close();
+        contextManager->Dispose();
         _UnregisterFromAllocatorService();
         isInitialized = false;
     }

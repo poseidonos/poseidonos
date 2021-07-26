@@ -41,6 +41,7 @@
 #include "src/allocator/i_context_replayer.h"
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator/include/allocator_const.h"
+#include "src/state/interface/i_state_control.h"
 
 namespace pos
 {
@@ -57,12 +58,13 @@ class ContextManager : public IContextManager
 {
 public:
     ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_, 
-                               WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileMananager_,
-                               ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_);
-    ContextManager(AllocatorAddressInfo* info, std::string arrayName);
+                    WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileMananager_,
+                    ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_,
+                    IStateControl* iStateCtrl, std::string arrayName_);
+    ContextManager(AllocatorAddressInfo* info, IStateControl* iStateCtrl, std::string arrayName);
     virtual ~ContextManager(void);
     virtual void Init(void);
-    virtual void Close(void);
+    virtual void Dispose(void);
 
     virtual int FlushContextsSync(void);
     virtual int FlushContextsAsync(EventSmartPtr callback);
@@ -116,6 +118,7 @@ private:
     RebuildCtx* rebuildCtx;
     ContextReplayer* contextReplayer;
     GcCtx gcCtx;
+    IStateControl* iStateControl;
 
     std::string arrayName;
     std::mutex ctxLock;

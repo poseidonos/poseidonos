@@ -88,7 +88,7 @@ AllocatorCtx::Init(void)
 }
 
 void
-AllocatorCtx::Close(void)
+AllocatorCtx::Dispose(void)
 {
     if (segmentStates != nullptr)
     {

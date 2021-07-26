@@ -13,7 +13,7 @@ class MockAllocatorFileIoManager : public AllocatorFileIoManager
 public:
     using AllocatorFileIoManager::AllocatorFileIoManager;
     MOCK_METHOD(void, Init, (), (override));
-    MOCK_METHOD(void, Close, (), (override));
+    MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, UpdateSectionInfo, (int owner, int section, char* addr, int size, int offset), (override));
     MOCK_METHOD(int, LoadSync, (int owner, char* buf), (override));
     MOCK_METHOD(int, StoreSync, (int owner, char* buf), (override));

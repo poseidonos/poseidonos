@@ -40,16 +40,17 @@
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/meta_file_intf/meta_file_intf.h"
+#include "src/state/interface/i_state_control.h"
 
 namespace pos
 {
 class RebuildCtx
 {
 public:
-    RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx);
+    RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx, IStateControl* iStateCtrl);
     virtual ~RebuildCtx(void);
     virtual void Init(AllocatorAddressInfo* info);
-    virtual void Close(void);
+    virtual void Dispose(void);
 
     virtual SegmentId GetRebuildTargetSegment(void);
     virtual int ReleaseRebuildSegment(SegmentId segmentId);
@@ -86,6 +87,7 @@ private:
     std::string arrayName;
 
     AllocatorCtx* allocatorCtx;
+    IStateControl* iStateControl;
 };
 
 } // namespace pos

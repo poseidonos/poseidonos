@@ -65,9 +65,9 @@ AllocatorService::RegisterAllocator(std::string arrayName, IContextReplayer* ico
 }
 
 void
-AllocatorService::StoreAllocatorPtr(std::string arrayName, void* allocator)
+AllocatorService::UpdateAllocator(std::string arrayName, void* allocator)
 {
-    allocators[arrayName] = allocator;
+    allocators.Update(arrayName, allocator);
 }
 
 void

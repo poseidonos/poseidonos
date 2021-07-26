@@ -13,7 +13,7 @@ class MockContextManager : public ContextManager
 public:
     using ContextManager::ContextManager;
     MOCK_METHOD(void, Init, (), (override));
-    MOCK_METHOD(void, Close, (), (override));
+    MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(int, FlushContextsSync, (), (override));
     MOCK_METHOD(int, FlushContextsAsync, (EventSmartPtr callback), (override));
     MOCK_METHOD(void, UpdateOccupiedStripeCount, (StripeId lsid), (override));

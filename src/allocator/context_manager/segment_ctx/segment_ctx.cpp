@@ -72,7 +72,7 @@ SegmentCtx::Init(void)
 }
 
 void
-SegmentCtx::Close(void)
+SegmentCtx::Dispose(void)
 {
     if (segmentInfos != nullptr)
     {

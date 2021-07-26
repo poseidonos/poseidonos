@@ -33,9 +33,9 @@ TEST(AllocatorFileIoManager, Init_TestInitAndClose)
     EXPECT_CALL(*file[0], IsOpened).WillOnce(Return(true));
     EXPECT_CALL(*file[1], IsOpened).WillOnce(Return(false));
     EXPECT_CALL(*file[0], Close);
-    fileManager.Close();
+    fileManager.Dispose();
     // when 2.
-    fileManager.Close();
+    fileManager.Dispose();
 }
 
 TEST(AllocatorFileIoManager, UpdateSectionInfo_TestSimpleSetter)

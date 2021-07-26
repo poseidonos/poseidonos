@@ -89,7 +89,7 @@ AllocatorFileIoManager::UpdateSectionInfo(int owner, int section, char* addr, in
 }
 
 void
-AllocatorFileIoManager::Close(void)
+AllocatorFileIoManager::Dispose(void)
 {
     for (int file = 0; file < NUM_FILES; file++)
     {
