@@ -48,7 +48,6 @@ public:
 
     void Register(std::string name, T* interface);
     void Unregister(std::string name);
-    void Update(std::string name, T* object);
 
 private:
     std::unordered_map<std::string, T*> container;

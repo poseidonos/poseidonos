@@ -114,7 +114,6 @@ Allocator::_RegisterToAllocatorService(void)
     allocatorService->RegisterAllocator(arrayName, GetIAllocatorWbt());
     allocatorService->RegisterAllocator(arrayName, GetIContextManager());
     allocatorService->RegisterAllocator(arrayName, GetIContextReplayer());
-    allocatorService->UpdateAllocator(arrayName, this);
 }
 
 void

@@ -46,7 +46,6 @@ template class AllocatorInterfaceContainer<IWBStripeAllocator>;
 template class AllocatorInterfaceContainer<IAllocatorWbt>;
 template class AllocatorInterfaceContainer<IContextManager>;
 template class AllocatorInterfaceContainer<IContextReplayer>;
-template class AllocatorInterfaceContainer<void>;
 
 template<typename T>
 T*
@@ -94,13 +93,6 @@ AllocatorInterfaceContainer<T>::Unregister(std::string name)
     {
         POS_TRACE_INFO(EID(MAPPER_ALREADY_EXIST), "{} for array {} already unregistered", typeid(T).name(), name);
     }
-}
-
-template<typename T>
-void
-AllocatorInterfaceContainer<T>::Update(std::string name, T* object)
-{
-    container[name] = object;
 }
 
 } // namespace pos

@@ -65,12 +65,6 @@ AllocatorService::RegisterAllocator(std::string arrayName, IContextReplayer* ico
 }
 
 void
-AllocatorService::UpdateAllocator(std::string arrayName, void* allocator)
-{
-    allocators.Update(arrayName, allocator);
-}
-
-void
 AllocatorService::UnregisterAllocator(std::string arrayName)
 {
     iBlockAllocator.Unregister(arrayName);

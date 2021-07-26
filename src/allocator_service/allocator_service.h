@@ -59,7 +59,6 @@ public:
     void RegisterAllocator(std::string arrayName, IAllocatorWbt* iAllocatorWbt);
     void RegisterAllocator(std::string arrayName, IContextManager* iContextManager);
     void RegisterAllocator(std::string arrayName, IContextReplayer* iContextReplayer);
-    void UpdateAllocator(std::string arrayName, void* allocator);
     void UnregisterAllocator(std::string arrayName);
 
     virtual IBlockAllocator* GetIBlockAllocator(std::string arrayName);
@@ -74,7 +73,6 @@ private:
     AllocatorInterfaceContainer<IAllocatorWbt> iAllocatorWbt;
     AllocatorInterfaceContainer<IContextManager> iContextManager;
     AllocatorInterfaceContainer<IContextReplayer> iContextReplayer;
-    AllocatorInterfaceContainer<void> allocators;
 };
 
 using AllocatorServiceSingleton = Singleton<AllocatorService>;
