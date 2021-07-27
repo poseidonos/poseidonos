@@ -943,7 +943,8 @@ spdk_thread_send_msg(const struct spdk_thread *thread, spdk_msg_fn fn, void *ctx
 	if (msg == NULL) {
 		msg = spdk_mempool_get(g_spdk_msg_mempool);
 		if (!msg) {
-			SPDK_ERRLOG("msg could not be allocated\n");
+			// It can be handled by caller
+			SPDK_WARNLOG("msg could not be allocated\n");
 			return -ENOMEM;
 		}
 	}
@@ -953,7 +954,8 @@ spdk_thread_send_msg(const struct spdk_thread *thread, spdk_msg_fn fn, void *ctx
 
 	rc = spdk_ring_enqueue(thread->messages, (void **)&msg, 1, NULL);
 	if (rc != 1) {
-		SPDK_ERRLOG("msg could not be enqueued\n");
+		// It can be handled by caller
+		SPDK_WARNLOG("msg could not be enqueued\n");
 		spdk_mempool_put(g_spdk_msg_mempool, msg);
 		return -EIO;
 	}
