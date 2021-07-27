@@ -50,7 +50,7 @@ TEST(ContextManagerIntegrationTest, GetRebuildTargetSegment_FreeUserDataSegment)
     std::mutex allocWbLsidbitMapLock;
     EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillRepeatedly(ReturnRef(allocWbLsidbitMapLock));
 
-    // MockAllocatorFileIoManager
+    // AllocatorFileIoManager
     NiceMock<MockAllocatorFileIoManager>* allocatorFileIoManager = new NiceMock<MockAllocatorFileIoManager>();
 
     // ContextReplayer
@@ -59,8 +59,10 @@ TEST(ContextManagerIntegrationTest, GetRebuildTargetSegment_FreeUserDataSegment)
     // AllocatorCtx (Real)
     NiceMock<MockBitMapMutex>* allocSegBitmap = new NiceMock<MockBitMapMutex>();
     NiceMock<MockSegmentStates>* segmentStates = new NiceMock<MockSegmentStates>();
+    Mock::AllowLeak(segmentStates);
     EXPECT_CALL(*segmentStates, GetState).WillRepeatedly(Return(SegmentState::SSD));
     NiceMock<MockSegmentLock>* segmentLocks = new NiceMock<MockSegmentLock>();
+    Mock::AllowLeak(segmentLocks);
     std::mutex segLock;
     EXPECT_CALL(*segmentLocks, GetLock).WillRepeatedly(ReturnRef(segLock));
     AllocatorCtx* allocatorCtx = new AllocatorCtx(allocSegBitmap, segmentStates, segmentLocks, allocatorAddressInfo, ARRAY_NAME);
@@ -96,9 +98,8 @@ TEST(ContextManagerIntegrationTest, GetRebuildTargetSegment_FreeUserDataSegment)
         th4.join();
     }
 
+    // Clean up
     delete allocatorAddressInfo;
-    delete segmentStates;
-    delete segmentLocks;
 }
 
 }   // namespace pos
