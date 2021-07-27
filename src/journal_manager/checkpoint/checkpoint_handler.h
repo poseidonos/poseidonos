@@ -61,7 +61,7 @@ public:
 private:
     void _InitializeExternalModuleReferences(void);
 
-    bool _IncreaseNumMapsFlushed(void);
+    void _CheckMapFlushCompleted(void);
     void _TryToComplete(void);
     void _Reset(void);
 

@@ -17,4 +17,4 @@ public:
     MOCK_METHOD(bool, IsBusy, (StripeId val), (override));
 };
 
-} // namespace pos
+}  // namespace pos

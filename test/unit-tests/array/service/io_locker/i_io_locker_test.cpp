@@ -8,11 +8,15 @@ TEST(IIOLocker, TryLock_)
 {
 }
 
+TEST(IIOLocker, TryBusyLock_)
+{
+}
+
 TEST(IIOLocker, Unlock_)
 {
 }
 
-TEST(IIOLocker, TryChange_)
+TEST(IIOLocker, ResetBusyLock_)
 {
 }
 

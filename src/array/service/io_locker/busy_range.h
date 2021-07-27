@@ -53,4 +53,4 @@ private:
     StripeId upper = 0;
 };
 
-} // namespace pos
+}  // namespace pos

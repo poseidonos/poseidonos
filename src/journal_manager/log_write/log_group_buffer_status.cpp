@@ -134,10 +134,9 @@ LogGroupBufferStatus::TryToSetFull(void)
 void
 LogGroupBufferStatus::LogFilled(void)
 {
-    numLogsFilled++;
+    uint64_t result = numLogsFilled.fetch_add(1) + 1;
 
-    assert(numLogsAdded.load(std::memory_order_seq_cst)
-        >= numLogsFilled.load(std::memory_order_seq_cst));
+    assert(numLogsAdded.load(std::memory_order_seq_cst) >= result);
 }
 
 void

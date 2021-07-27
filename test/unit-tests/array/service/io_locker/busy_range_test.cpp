@@ -12,4 +12,4 @@ TEST(BusyRange, IsBusy_)
 {
 }
 
-} // namespace pos
+}  // namespace pos

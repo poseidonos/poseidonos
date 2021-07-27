@@ -81,4 +81,4 @@ private:
     map<IArrayDevice*, IArrayDevice*> pairs;
 };
 
-} // namespace pos
+}  // namespace pos

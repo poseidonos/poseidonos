@@ -122,7 +122,7 @@ IOLocker::TryLock(set<IArrayDevice*>& devs, StripeId val)
         }
         else
         {
-            POS_TRACE_INFO(POS_EVENT_ID::LOCKER_DEBUG_MSG, 
+            POS_TRACE_INFO(POS_EVENT_ID::LOCKER_DEBUG_MSG,
                 "IOLocker::TryLock, failed to acquire entire locks for request, stripe:{}, total:{}, acquired:{}",
                 val, lockersByGroup.size(), lockedCnt);
             while (lockedCnt > 0)

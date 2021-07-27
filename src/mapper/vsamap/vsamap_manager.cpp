@@ -640,14 +640,7 @@ VSAMapManager::_IsVolumeExist(int volID, VolMountStateIter& iter)
 
     if (it == volumeMountState.end())
     {
-        POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "VolumeId:{} is not in volumeMountState", volID);
-        int cnt = 0;
-        for (auto& entry : volumeMountState)
-        {
-            ++cnt;
-            POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "INFO - volumeMountState {}/{}  K:{}  V:{}",
-                            cnt, volumeMountState.size(), entry.first, entry.second);
-        }
+        POS_TRACE_DEBUG(EID(VSAMAP_LOAD_FAILURE), "VolumeId:{} is not in volumeMountState", volID);
         return false;
     }
 
