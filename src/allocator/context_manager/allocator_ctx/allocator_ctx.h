@@ -106,6 +106,8 @@ private:
     // Lock
     std::mutex allocCtxLock;
     SegmentLock* segStateLocks;
+
+    bool initialized;
 };
 
 } // namespace pos

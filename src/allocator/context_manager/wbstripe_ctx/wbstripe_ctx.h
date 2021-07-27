@@ -79,6 +79,7 @@ private:
     VirtualBlkAddr activeStripeTail[ACTIVE_STRIPE_TAIL_ARRAYLEN];
     std::mutex activeStripeTailLock[ACTIVE_STRIPE_TAIL_ARRAYLEN];
     BitMapMutex* allocWbLsidBitmap;
+    bool initialized;
 
     // DOCs
     AllocatorAddressInfo* addrInfo;

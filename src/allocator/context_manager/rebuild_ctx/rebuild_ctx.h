@@ -84,6 +84,7 @@ private:
     MetaFileIntf* rebuildSegmentsFile;
     std::mutex rebuildLock;
     char* bufferInObj;
+    bool initialized;
     std::string arrayName;
 
     AllocatorCtx* allocatorCtx;

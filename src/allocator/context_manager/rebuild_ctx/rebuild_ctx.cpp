@@ -47,6 +47,7 @@ RebuildCtx::RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx, IStateCont
   underRebuildSegmentId(UINT32_MAX),
   rebuildSegmentsFile(nullptr),
   bufferInObj(nullptr),
+  initialized(false),
   arrayName(arrayName),
   allocatorCtx(allocCtx),
   iStateControl(iStateCtrl)
@@ -55,48 +56,59 @@ RebuildCtx::RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx, IStateCont
 
 RebuildCtx::~RebuildCtx(void)
 {
+    Dispose();
 }
 
 void
 RebuildCtx::Init(AllocatorAddressInfo* info)
 {
-    targetSegmentCnt = info->GetnumUserAreaSegments();
-    bufferInObj = new char[sizeof(targetSegmentCnt) + targetSegmentCnt * sizeof(SegmentId)];
+    if (initialized == false)
+    {
+        targetSegmentCnt = info->GetnumUserAreaSegments();
+        bufferInObj = new char[sizeof(targetSegmentCnt) + targetSegmentCnt * sizeof(SegmentId)];
 
-    rebuildSegmentsFile = new FILESTORE("RebuildContext", arrayName);
-    if (rebuildSegmentsFile->DoesFileExist() == false)
-    {
-        rebuildSegmentsFile->Create(sizeof(targetSegmentCnt) + sizeof(SegmentId) * targetSegmentCnt);
-        rebuildSegmentsFile->Open();
-        _StoreRebuildCtx();
-    }
-    else
-    {
-        rebuildSegmentsFile->Open();
-        _LoadRebuildCtxSync();
-        if (targetSegmentCnt != 0)
+        rebuildSegmentsFile = new FILESTORE("RebuildContext", arrayName);
+        if (rebuildSegmentsFile->DoesFileExist() == false)
         {
-            needRebuildCont = true;
+            rebuildSegmentsFile->Create(sizeof(targetSegmentCnt) + sizeof(SegmentId) * targetSegmentCnt);
+            rebuildSegmentsFile->Open();
+            _StoreRebuildCtx();
         }
+        else
+        {
+            rebuildSegmentsFile->Open();
+            _LoadRebuildCtxSync();
+            if (targetSegmentCnt != 0)
+            {
+                needRebuildCont = true;
+            }
+        }
+
+        initialized = true;
     }
 }
 
 void
 RebuildCtx::Dispose(void)
 {
-    if (rebuildSegmentsFile != nullptr)
+    if (initialized == true)
     {
-        if (rebuildSegmentsFile->IsOpened() == true)
+        if (rebuildSegmentsFile != nullptr)
         {
-            rebuildSegmentsFile->Close();
+            if (rebuildSegmentsFile->IsOpened() == true)
+            {
+                rebuildSegmentsFile->Close();
+            }
+            delete rebuildSegmentsFile;
+            rebuildSegmentsFile = nullptr;
         }
-        delete rebuildSegmentsFile;
-        rebuildSegmentsFile = nullptr;
-    }
-    if (bufferInObj != nullptr)
-    {
-        delete[] bufferInObj;
-        bufferInObj = nullptr;
+        if (bufferInObj != nullptr)
+        {
+            delete[] bufferInObj;
+            bufferInObj = nullptr;
+        }
+
+        initialized = false;
     }
 }
 
@@ -180,12 +192,6 @@ RebuildCtx::ClearRebuildTargetSegments(void)
 void
 RebuildCtx::FlushRebuildCtx(void)
 {
-    if (iStateControl->GetState()->GetSituation().ToString() == "FAULT")
-    {
-        POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT), "state:FAULT so FlushRebuildCtx() is canceled");
-        return;
-    }
-
     int lenToWrite = _PrepareRebuildCtx();
 
     AllocatorIoCtx* rebuildStoreRequest = new AllocatorIoCtx(MetaFsIoOpcode::Write,
@@ -275,7 +281,7 @@ RebuildCtx::SetUnderRebuildSegmentId(SegmentId segmentId)
 {
     underRebuildSegmentId = segmentId;
 }
-//----------------------------------------------------------------------------//
+
 int
 RebuildCtx::_PrepareRebuildCtx(void)
 {

@@ -82,6 +82,7 @@ private:
     std::atomic<uint64_t> ctxStoredVersion;
     SegmentInfo* segmentInfos;
     uint32_t numSegments;
+    bool initialized;
 
     AllocatorAddressInfo* addrInfo;
     std::string arrayName;

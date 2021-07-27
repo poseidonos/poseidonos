@@ -48,7 +48,8 @@ AllocatorCtx::AllocatorCtx(BitMapMutex* allocSegBitmap_, SegmentStates* segmentS
 : ctxStoredVersion(0),
   ctxDirtyVersion(0),
   addrInfo(info_),
-  arrayName(arrayName_)
+  arrayName(arrayName_),
+  initialized(false)
 {
     allocSegBitmap = allocSegBitmap_; // for UT
     segmentStates = segmentStates_;   // for UT
@@ -69,41 +70,52 @@ AllocatorCtx::AllocatorCtx(AllocatorAddressInfo* info, std::string arrayName)
 
 AllocatorCtx::~AllocatorCtx(void)
 {
+    Dispose();
 }
 
 void
 AllocatorCtx::Init(void)
 {
-    uint32_t numSegment = addrInfo->GetnumUserAreaSegments();
-    allocSegBitmap = new BitMapMutex(numSegment);
-    currentSsdLsid = STRIPES_PER_SEGMENT - 1;
-    prevSsdLsid = STRIPES_PER_SEGMENT - 1;
-    segmentStates = new SegmentStates[numSegment];
-    for (uint32_t segmentId = 0; segmentId < numSegment; ++segmentId)
+    if (initialized == false)
     {
-        segmentStates[segmentId].SetSegmentId(segmentId);
+        uint32_t numSegment = addrInfo->GetnumUserAreaSegments();
+        allocSegBitmap = new BitMapMutex(numSegment);
+        currentSsdLsid = STRIPES_PER_SEGMENT - 1;
+        prevSsdLsid = STRIPES_PER_SEGMENT - 1;
+        segmentStates = new SegmentStates[numSegment];
+        for (uint32_t segmentId = 0; segmentId < numSegment; ++segmentId)
+        {
+            segmentStates[segmentId].SetSegmentId(segmentId);
+        }
+        segStateLocks = new SegmentLock[numSegment];
+        ctxHeader.ctxVersion = 0;
+
+        initialized = true;
     }
-    segStateLocks = new SegmentLock[numSegment];
-    ctxHeader.ctxVersion = 0;
 }
 
 void
 AllocatorCtx::Dispose(void)
 {
-    if (segmentStates != nullptr)
+    if (initialized == true)
     {
-        delete[] segmentStates;
-        segmentStates = nullptr;
-    }
-    if (segStateLocks != nullptr)
-    {
-        delete[] segStateLocks;
-        segStateLocks = nullptr;
-    }
-    if (allocSegBitmap != nullptr)
-    {
-        delete allocSegBitmap;
-        allocSegBitmap = nullptr;
+        if (segmentStates != nullptr)
+        {
+            delete[] segmentStates;
+            segmentStates = nullptr;
+        }
+        if (segStateLocks != nullptr)
+        {
+            delete[] segStateLocks;
+            segStateLocks = nullptr;
+        }
+        if (allocSegBitmap != nullptr)
+        {
+            delete allocSegBitmap;
+            allocSegBitmap = nullptr;
+        }
+
+        initialized = false;
     }
 }
 

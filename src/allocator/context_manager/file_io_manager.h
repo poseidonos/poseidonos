@@ -93,6 +93,8 @@ private:
     // DOCs
     AllocatorAddressInfo* addrInfo;
     std::string arrayName;
+
+    bool initialized;
 };
 
 } // namespace pos
