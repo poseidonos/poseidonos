@@ -42,7 +42,15 @@
 namespace pos
 {
 WbStripeCtx::WbStripeCtx(void)
+: allocWbLsidBitmap(nullptr),
+  initialized(false),
+  addrInfo(nullptr)
 {
+    for (int i = 0; i < ACTIVE_STRIPE_TAIL_ARRAYLEN; ++i)
+    {
+        activeStripeTail[i].stripeId = 0;
+        activeStripeTail[i].offset = 0;
+    }
 }
 
 WbStripeCtx::WbStripeCtx(BitMapMutex* allocWbLsidBitmap_, AllocatorAddressInfo* info_)

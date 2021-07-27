@@ -45,7 +45,18 @@
 namespace pos
 {
 AllocatorCtx::AllocatorCtx(void)
+: allocSegBitmap(nullptr),
+  prevSsdLsid(0),
+  currentSsdLsid(0),
+  segmentStates(nullptr),
+  addrInfo(nullptr),
+  segStateLocks(nullptr),
+  initialized(false)
 {
+    ctxHeader.sig = SIG_ALLOCATOR_CTX;
+    ctxHeader.numValidSegment = 0;
+    ctxHeader.numValidWbLsid = 0;
+    ctxHeader.ctxVersion = 0;
 }
 
 AllocatorCtx::AllocatorCtx(BitMapMutex* allocSegBitmap_, SegmentStates* segmentStates_, SegmentLock* segStateLocks_, AllocatorAddressInfo* info_, std::string arrayName_)

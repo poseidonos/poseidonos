@@ -43,7 +43,13 @@
 namespace pos
 {
 SegmentCtx::SegmentCtx(void)
+: segmentInfos(nullptr),
+  numSegments(0),
+  initialized(false),
+  addrInfo(nullptr)
 {
+    ctxHeader.sig = SIG_SEGMENT_CTX;
+    ctxHeader.ctxVersion = 0;
 }
 
 SegmentCtx::SegmentCtx(SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_)

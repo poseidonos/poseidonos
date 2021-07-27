@@ -40,7 +40,15 @@
 namespace pos
 {
 AllocatorFileIoManager::AllocatorFileIoManager(void)
+: addrInfo(nullptr),
+  initialized(false)
 {
+    for (int file = 0; file < NUM_FILES; file++)
+    {
+        ctxFile[file] = nullptr;
+        fileSize[file] = 0;
+        numSections[file] = 0;
+    }
 }
 
 AllocatorFileIoManager::AllocatorFileIoManager(MetaFileIntf** fileIntf, AllocatorAddressInfo* info, std::string arrayName)
@@ -55,6 +63,7 @@ AllocatorFileIoManager::AllocatorFileIoManager(MetaFileIntf** fileIntf, Allocato
         numSections[file] = 0;
     }
 }
+
 AllocatorFileIoManager::AllocatorFileIoManager(AllocatorAddressInfo* info, std::string arrayName)
 : addrInfo(info),
   arrayName(arrayName),

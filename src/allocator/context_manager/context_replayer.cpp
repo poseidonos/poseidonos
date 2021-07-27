@@ -45,6 +45,10 @@
 namespace pos
 {
 ContextReplayer::ContextReplayer(void)
+: allocatorCtx(nullptr),
+  segmentCtx(nullptr),
+  wbStripeCtx(nullptr),
+  addrInfo(nullptr)
 {
 }
 
