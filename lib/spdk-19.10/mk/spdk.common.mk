@@ -235,9 +235,8 @@ COMMON_CFLAGS += -DQOS_ENABLED_BE
 #COMMON_CFLAGS += -DQOS_ENABLED_FE
 endif
 
-AIR_ROOT_DIR=$(SPDK_ROOT_DIR)/../air/
-SYS_LIBS += -L$(AIR_ROOT_DIR)/lib/ -lair -lstdc++
-COMMON_CFLAGS += -I$(AIR_ROOT_DIR) -I$(AIR_ROOT_DIR)/include/
+SYS_LIBS += -lair -lstdc++
+COMMON_CFLAGS += -I$(SPDK_ROOT_DIR)/../air
 
 MAKEFLAGS += --no-print-directory
 

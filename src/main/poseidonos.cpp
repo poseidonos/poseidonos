@@ -118,12 +118,12 @@ Poseidonos::_InitAffinity(void)
     pos::AffinityViewer::Print();
     pos::AffinityManagerSingleton::Instance()->SetGeneralAffinitySelf();
 
-    cpu_set_t general_core = pos::AffinityManagerSingleton::Instance()
-                                 ->GetCpuSet(pos::CoreType::GENERAL_USAGE);
+    cpu_set_t air_core = pos::AffinityManagerSingleton::Instance()
+                                 ->GetCpuSet(pos::CoreType::AIR);
     long nproc = sysconf(_SC_NPROCESSORS_ONLN);
     for (long i = 0; i < nproc; i++)
     {
-        if (1 == CPU_ISSET(i, &general_core))
+        if (1 == CPU_ISSET(i, &air_core))
         {
             std::cout << "CPU ID: " << i << "       Usage: AIR\n";
             air_initialize((unsigned int)i);

@@ -54,6 +54,7 @@ enum class CoreType
     QOS,
     META_SCHEDULER,
     META_IO,
+    AIR,
     COUNT
 };
 

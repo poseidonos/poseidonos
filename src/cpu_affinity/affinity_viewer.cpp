@@ -51,7 +51,8 @@ const char* AffinityViewer::Cpu::ROLE_DESCRIPTIONS[ROLE_COUNT] =
         "General",
         "MetaScheduler",
         "MetaIO",
-        "QOS"};
+        "QOS",
+        "AIR"};
 
 AffinityViewer::Socket::Socket(void)
 : id(0),
@@ -242,6 +243,14 @@ AffinityViewer::Numa::_RegisterGeneralCpu(void)
 }
 
 void
+AffinityViewer::Numa::_RegisterAirCpu(void)
+{
+    cpu_set_t airCpuSet =
+        affinityManager.GetCpuSet(CoreType::AIR);
+    _RegisterCpuSetRole(airCpuSet, AIR);
+}
+
+void
 AffinityViewer::Numa::RegisterEveryCpuRole(void)
 {
     _RegisterReactorCpu();
@@ -252,6 +261,7 @@ AffinityViewer::Numa::RegisterEveryCpuRole(void)
     _RegisterMetaSchedulerCpu();
     _RegisterMetaCpu();
     _RegisterQoSCpu();
+    _RegisterAirCpu();
 }
 
 void

@@ -268,8 +268,6 @@ INCLUDE_DIRECTORIES(
 
     # for AIRLOG() macro
     ${PROJ_ROOT}/lib/air
-
-    # for enum AIR_NODE like Q_EVENT
     ${PROJ_ROOT}/lib/air/src/api
 
     ${PROJ_ROOT}/lib/spdlog-1.4.2/include
@@ -340,7 +338,7 @@ else()
 endif()
 
 # Build AIR conditionally
-SET(POS_DEP_AIR "${PROJ_ROOT}/lib/air/lib/libair.a")
+SET(POS_DEP_AIR "${PROJ_ROOT}/lib/air/build/src/libair.a")
 if(EXISTS "${POS_DEP_AIR}")
     message("AIR library exists: ${POS_DEP_AIR}. Build skipped.")
 else()
@@ -356,7 +354,7 @@ add_definitions(-DPOS_VERSION="pos-0.8.0-alpha1"
     #-DUNVME_BUILD 
     -DSPDLOG_COMPILED_LIB
     -D_ADMIN_ENABLED
-    -DAIR_CFG=${PROJ_ROOT}/lib/air/config/air.cfg
+    -DAIR_CFG=${PROJ_ROOT}/config/air.cfg
 )
 remove_definitions(-DAIR_BUILD)
 
@@ -421,7 +419,7 @@ add_library(
 
 link_directories (
     ${PROJ_ROOT}/lib/dpdk/lib
-    ${PROJ_ROOT}/lib/air/lib
+    ${PROJ_ROOT}/lib/air/build/src
     ${PROJ_ROOT}/lib/spdk/build/lib
 
     # for libspdlog.a

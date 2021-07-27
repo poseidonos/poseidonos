@@ -107,7 +107,8 @@ private:
         {"general_usage", "\"6\""},
         {"qos", "\"7\""},
         {"meta_scheduler", "\"8\""},
-        {"meta_io", "\"9-10\""}
+        {"meta_io", "\"9-10\""},
+        {"air", "\"11\""}
     };
     vector<ConfigKeyValue> userNvmeDriverData = {
         {"use_config", "true"},

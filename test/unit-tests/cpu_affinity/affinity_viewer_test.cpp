@@ -24,6 +24,7 @@ const CoreDescriptionArray TEST_CORE_DESCRIPTIONS =
         CoreDescription{CoreType::QOS, {1, 0}, "7"},
         CoreDescription{CoreType::META_SCHEDULER, {1, 0}, "8"},
         CoreDescription{CoreType::META_IO, {2, 0}, "9-10"},
+        CoreDescription{CoreType::AIR, {1, 0}, "11"},
 };
 
 TEST(AffinityViewer, Print_numaAvailable)

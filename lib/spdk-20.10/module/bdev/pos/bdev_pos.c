@@ -54,7 +54,8 @@
 #ifdef _ADMIN_ENABLED
 #include "spdk/nvmf_transport.h"
 #endif
-#include "Air_c.h"
+
+#include <air/Air_c.h>
 
 #include "string.h"
 

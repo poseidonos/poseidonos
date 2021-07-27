@@ -193,17 +193,19 @@ build_air(){
         log_normal "[Build $AIR_SOURCE]"
         git submodule init
         git submodule update
-        make clean
-        make -j4 lib cfg=../../config/air.cfg
-        make -j4 cli
-        make -j4 tui
+        rm -rf build
+        mkdir build
+        cd build
+        cmake .. -DCONFIG=../../config/air.cfg
+        make -j 4
+        make install
         ret=$?
         if [ $ret = 0 ]; then
             log_normal "[Build $AIR_SOURCE].. Done"
         else
             log_normal "[Build $AIR_SOURCE].. Error"
         fi
-        cd -
+        cd ../..
     else
         log_normal "No dir: $AIR_SOURCE"
     fi
@@ -310,7 +312,7 @@ clean_air()
 	log_normal "clean AIR"
     if [ -d "${AIR_SOURCE}" ]; then
         cd ${AIR_SOURCE}
-        make clean
+        rm -rf build
         cd -
     fi
     log_normal "clean AIR.. done"

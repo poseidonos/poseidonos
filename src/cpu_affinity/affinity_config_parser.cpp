@@ -54,6 +54,7 @@ const CoreDescriptionArray AffinityConfigParser::DEFAULT_CORE_DESCRIPTIONS =
         CoreDescription{CoreType::QOS, {1, 0}, "7"},
         CoreDescription{CoreType::META_SCHEDULER, {1, 0}, "8"},
         CoreDescription{CoreType::META_IO, {2, 0}, "9-10"},
+        CoreDescription{CoreType::AIR, {1, 0}, "11"},
 };
 
 const AffinityConfigParser::ConfigKeyAndCoreTypes
@@ -67,6 +68,7 @@ const AffinityConfigParser::ConfigKeyAndCoreTypes
             ConfigKeyAndCoreType{CoreType::QOS, "qos"},
             ConfigKeyAndCoreType{CoreType::META_SCHEDULER, "meta_scheduler"},
             ConfigKeyAndCoreType{CoreType::META_IO, "meta_io"},
+            ConfigKeyAndCoreType{CoreType::AIR, "air"},
 };
 
 AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
