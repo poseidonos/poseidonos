@@ -104,6 +104,7 @@ private:
     bool _IsVolumeExist(int volID, VolMountStateIter& iter);
     bool _LoadVolumeMeta(std::string volName, int volID, uint64_t volSizeByte, bool isUnknownVolSize);
     void _WaitForMapAsyncFlushed(int volId);
+    void _HandleVolumeCreationFail(int volID);
 
     std::map<int, VolState> volumeMountState;
     std::recursive_mutex volMountStateLock[MAX_VOLUME_COUNT];
