@@ -19,10 +19,10 @@ type SpareDeviceName struct {
 
 type CreateArrayParam struct {
 	ARRAYNAME string            `json:"name"`
-	RAID      string            `json:"raidtype"`
 	BUFFER    [1]DeviceNameList `json:"buffer"`
 	DATA      []DeviceNameList  `json:"data"`
-	SPARE     [1]DeviceNameList `json:"spare"`
+	SPARE     [1]DeviceNameList `json:"spare,omitempty"`
+	RAID      string            `json:"raidtype,omitempty"`
 }
 
 type DeviceNameList struct {
@@ -70,10 +70,10 @@ type SetSystemPropReqParam struct {
 // Volume request params
 type CreateVolumeParam struct {
 	VOLUMENAME   string `json:"name"`
+	ARRAYNAME    string `json:"array"`
 	VOLUMESIZE   uint64 `json:"size"`
 	MAXIOPS      int    `json:"maxiops,omitempty"`
 	MAXBANDWIDTH int    `json:"maxbw,omitempty"`
-	ARRAYNAME    string `json:"array"`
 }
 
 type DeleteVolumeParam struct {
@@ -121,7 +121,7 @@ type VolumeResetParam struct {
 }
 
 type ListQosParam struct {
-	VOLUMENAME []VolumeNameList `json:"vol,omitempty"`
+	VOLUMENAME []VolumeNameList `json:"vol"`
 	ARRAYNAME  string           `json:"array"`
 }
 

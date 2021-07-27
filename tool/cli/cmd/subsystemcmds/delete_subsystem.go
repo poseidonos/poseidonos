@@ -67,5 +67,6 @@ Example:
 var subsystem_delete_subnqn = ""
 
 func init() {
-	DeleteSubsystemCmd.Flags().StringVarP(&subsystem_delete_subnqn, "subnqn", "a", "", "NQN of the subsystem to delete")
+	DeleteSubsystemCmd.Flags().StringVarP(&subsystem_delete_subnqn, "subnqn", "", "", "NQN of the subsystem to delete")
+	DeleteSubsystemCmd.MarkFlagRequired("subnqn")
 }

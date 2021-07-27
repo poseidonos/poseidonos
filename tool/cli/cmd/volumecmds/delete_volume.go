@@ -18,7 +18,7 @@ var DeleteVolumeCmd = &cobra.Command{
 	Long: `Delete a volume from PoseidonOS.
 
 Syntax:
-	poseidonos-cli volume delete (--volume-name | -v) VolumeName --array-name ArrayName
+	poseidonos-cli volume delete (--volume-name | -v) VolumeName (--array-name | -a) ArrayName
 
 Example: 
 	poseidonos-cli volume delete --volume-name Volume0 --array=name Array0
@@ -71,5 +71,8 @@ var delete_volume_arrayName = ""
 
 func init() {
 	DeleteVolumeCmd.Flags().StringVarP(&delete_volume_volumeName, "volume-name", "v", "", "The Name of the volume to delete")
+	DeleteVolumeCmd.MarkFlagRequired("volume-name")
+
 	DeleteVolumeCmd.Flags().StringVarP(&delete_volume_arrayName, "array-name", "a", "", "The Name of the array where the volume belongs to")
+	DeleteVolumeCmd.MarkFlagRequired("array-name")
 }

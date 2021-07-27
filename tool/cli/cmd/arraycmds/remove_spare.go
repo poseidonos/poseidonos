@@ -73,5 +73,8 @@ var remove_spare_arrayName = ""
 
 func init() {
 	RemoveSpareCmd.Flags().StringVarP(&remove_spare_arrayName, "array-name", "a", "", "Name of the array to remove a spare device")
+	RemoveSpareCmd.MarkFlagRequired("array-name")
+
 	RemoveSpareCmd.Flags().StringVarP(&remove_spare_spareDevName, "spare", "s", "", "Name of the device to remove to an array")
+	RemoveSpareCmd.MarkFlagRequired("spare")
 }

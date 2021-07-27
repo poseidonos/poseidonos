@@ -65,14 +65,21 @@ Syntax:
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
 var create_device_deviceName = ""
-var create_device_numBlocks = 512
-var create_device_blockSize = 4096
+var create_device_numBlocks = 0
+var create_device_blockSize = 0
 var create_device_deviceType = ""
 
 func init() {
 	CreateDeviceCmd.Flags().StringVarP(&create_device_deviceName, "device-name", "d", "", "The name of device to create")
+	CreateDeviceCmd.MarkFlagRequired("device-name")
+
 	CreateDeviceCmd.Flags().StringVarP(&create_device_deviceType, "device-type", "", "", "The type of device to create")
-	CreateDeviceCmd.Flags().IntVarP(&create_device_numBlocks, "num-blocks", "", 512, "The number of blocks in the device")
-	CreateDeviceCmd.Flags().IntVarP(&create_device_blockSize, "block-size", "", 4096, "The block size of the device")
+	CreateDeviceCmd.MarkFlagRequired("device-type")
+
+	CreateDeviceCmd.Flags().IntVarP(&create_device_numBlocks, "num-blocks", "", 0, "The number of blocks in the device")
+	CreateDeviceCmd.MarkFlagRequired("num-blocks")
+
+	CreateDeviceCmd.Flags().IntVarP(&create_device_blockSize, "block-size", "", 0, "The block size of the device")
+	CreateDeviceCmd.MarkFlagRequired("block-size")
 
 }

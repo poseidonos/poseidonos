@@ -101,7 +101,11 @@ var volumePolicy_maxBandwidth = -1
 
 func init() {
 	VolumePolicyCmd.Flags().StringVarP(&volumePolicy_volumeNameList, "volume-name", "v", "", "A comma-seperated names of volumes to set qos policy for")
+	VolumePolicyCmd.MarkFlagRequired("volume-name")
+
 	VolumePolicyCmd.Flags().StringVarP(&volumePolicy_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
+	VolumePolicyCmd.MarkFlagRequired("array-name")
+
 	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_minIOPS, "miniops", "", -1, "The minimum IOPS for the volume in KIOPS")
 	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_maxIOPS, "maxiops", "", -1, "The maximum IOPS for the volume in KIOPS")
 	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_minBandwidth, "minbw", "", -1, "The minimum bandwidth for the volume in MiB/s")

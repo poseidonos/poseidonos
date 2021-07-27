@@ -73,6 +73,10 @@ var mount_volume_subNqnName = ""
 
 func init() {
 	MountVolumeCmd.Flags().StringVarP(&mount_volume_volumeName, "volume-name", "v", "", "The name of the volume to mount")
+	MountVolumeCmd.MarkFlagRequired("volume-name")
+
 	MountVolumeCmd.Flags().StringVarP(&mount_volume_arrayName, "array-name", "a", "", "The name of the array where the volume belongs to")
+	MountVolumeCmd.MarkFlagRequired("array-name")
+
 	MountVolumeCmd.Flags().StringVarP(&mount_volume_subNqnName, "subnqn", "", "", "NVMe qualified name of target NVM subsystem")
 }

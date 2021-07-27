@@ -66,4 +66,5 @@ var set_level_loggerLevel = ""
 func init() {
 	//LogLevel = "error" | "debug" | "warn" | "err" | "critical"
 	SetLevelCmd.Flags().StringVarP(&set_level_loggerLevel, "level", "", "", "The level of logger to set")
+	SetLevelCmd.MarkFlagRequired("level")
 }

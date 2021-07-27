@@ -74,5 +74,8 @@ var add_spare_spareDev = ""
 
 func init() {
 	AddSpareCmd.Flags().StringVarP(&add_spare_arrayName, "array-name", "a", "", "Name of the array to add a spare device")
+	AddSpareCmd.MarkFlagRequired("array-name")
+
 	AddSpareCmd.Flags().StringVarP(&add_spare_spareDev, "spare", "s", "", "Name of the device to add to an array")
+	AddSpareCmd.MarkFlagRequired("spare")
 }

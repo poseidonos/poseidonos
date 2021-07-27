@@ -68,4 +68,5 @@ var array_delete_arrayName = ""
 
 func init() {
 	DeleteArrayCmd.Flags().StringVarP(&array_delete_arrayName, "array-name", "a", "", "Name of the array to delete")
+	DeleteArrayCmd.MarkFlagRequired("array-name")
 }

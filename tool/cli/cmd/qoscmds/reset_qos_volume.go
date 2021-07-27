@@ -86,5 +86,8 @@ var volumeReset_arrayName = ""
 
 func init() {
 	VolumeResetCmd.Flags().StringVarP(&volumeReset_volumeNameList, "volume-name", "v", "", "A comma-seperated names of volumes to set qos policy for")
+	VolumeResetCmd.MarkFlagRequired("volume-name")
+
 	VolumeResetCmd.Flags().StringVarP(&volumeReset_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
+	VolumeResetCmd.MarkFlagRequired("array-name")
 }

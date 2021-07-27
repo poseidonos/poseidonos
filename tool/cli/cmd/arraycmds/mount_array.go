@@ -69,4 +69,5 @@ var mount_array_arrayName = ""
 
 func init() {
 	MountArrayCmd.Flags().StringVarP(&mount_array_arrayName, "array-name", "a", "", "The name of the array to mount")
+	MountArrayCmd.MarkFlagRequired("array-name")
 }

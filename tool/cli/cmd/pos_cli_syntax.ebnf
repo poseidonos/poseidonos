@@ -32,7 +32,7 @@ UnmountArrayCmd = "unmount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayN
 ListArrayCmd = "list" [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] .
 AddSpareCmd = "addspare" WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName ("--array-name" | "-a") WhiteSpace ArrayName .
 RemoveSpareCmd = "rmspare" WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName ("--array-name" | "-a")  WhiteSpace ArrayName .
-CreateArrayCmd = "create" ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ("--buffer" | "-b") WhiteSpace DeviceName WhiteSpace ("--data-devs" | "-d") WhiteSpace DeviceNameList WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName [WhiteSpace "--raid" WhiteSpace RaidType] .
+CreateArrayCmd = "create" ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ("--buffer" | "-b") WhiteSpace DeviceName WhiteSpace ("--data-devs" | "-d") WhiteSpace DeviceNameList [WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName] [WhiteSpace "--raid" WhiteSpace RaidType] .
 DeleteArrayCmd = "delete" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
 
 VolumeCmd = "volume" WhiteSpace (VolumeCreateCmd | VolumeDeleteCmd | VolumeMountCmd | VolumeUnmountCmd | VolumeListCmd | VolumeSetPropertyCmd | VolumeRenameCmd) .

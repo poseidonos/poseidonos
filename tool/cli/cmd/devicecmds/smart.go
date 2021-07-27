@@ -65,4 +65,5 @@ var smart_deviceName = ""
 
 func init() {
 	SMARTCmd.Flags().StringVarP(&smart_deviceName, "device-name", "d", "", "The name of device to get the SMART information")
+	SMARTCmd.MarkFlagRequired("device-name")
 }

@@ -68,4 +68,5 @@ var unmount_array_arrayName = ""
 
 func init() {
 	UnmountArrayCmd.Flags().StringVarP(&unmount_array_arrayName, "array-name", "a", "", "The name of the array to unmount")
+	UnmountArrayCmd.MarkFlagRequired("array-name")
 }

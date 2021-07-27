@@ -87,7 +87,10 @@ var listQos_arrayName = ""
 
 func init() {
 	ListQosCmd.Flags().StringVarP(&listQos_volumeNameList, "volume-name", "v", "", "A comma-seperated names of volumes to set qos policy for")
+	ListQosCmd.MarkFlagRequired("volume-name")
+
 	ListQosCmd.Flags().StringVarP(&listQos_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
+	ListQosCmd.MarkFlagRequired("array-name")
 }
 
 func PrintResponse(response string) {

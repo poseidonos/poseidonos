@@ -18,7 +18,7 @@ var UnmountVolumeCmd = &cobra.Command{
 	Long: `Unmount a volume to Host.
 
 Syntax:
-	unmount --volume-name VolumeName (--array-name | -a) VolumeName [--subnqn TargetNVMSubsystemNVMeQualifiedName]
+	unmount (--volume-name | -v) VolumeName (--array-name | -a) ArrayName [--subnqn TargetNVMSubsystemNVMeQualifiedName]
 
 Example: 
 	poseidonos-cli volume unmount --volume-name Volume0 --array-name Volume0
@@ -70,6 +70,9 @@ var unmount_volume_volumeName = ""
 var unmount_volume_arrayName = ""
 
 func init() {
-	UnmountVolumeCmd.Flags().StringVarP(&unmount_volume_volumeName, "volume-name", "", "", "The name of the volume to unmount")
+	UnmountVolumeCmd.Flags().StringVarP(&unmount_volume_volumeName, "volume-name", "v", "", "The name of the volume to unmount")
+	UnmountVolumeCmd.MarkFlagRequired("volume-name")
+
 	UnmountVolumeCmd.Flags().StringVarP(&unmount_volume_arrayName, "array-name", "a", "", "The name of the array where the volume belongs to")
+	UnmountVolumeCmd.MarkFlagRequired("array-name")
 }
