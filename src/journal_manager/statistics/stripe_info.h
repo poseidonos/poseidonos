@@ -50,31 +50,31 @@ public:
     explicit StripeInfo(StripeId inputVsid);
     StripeInfo(int volumeId, StripeId vsid, StripeId wbLsid, StripeId userLsid, BlkOffset lastOffset, int wbIndex);
 
-    inline int
+    virtual int
     GetVolumeId(void)
     {
         return volId;
     }
 
-    inline StripeId
+    virtual StripeId
     GetVsid(void)
     {
         return vsid;
     }
 
-    inline StripeId
+    virtual StripeId
     GetWbLsid(void)
     {
         return wbLsid;
     }
 
-    inline StripeId
+    virtual StripeId
     GetUserLsid(void)
     {
         return userLsid;
     }
 
-    inline BlkOffset
+    virtual BlkOffset
     GetLastOffset(void)
     {
         return lastOffset;
@@ -86,19 +86,19 @@ public:
         lastOffset = UINT64_MAX;
     }
 
-    inline bool
+    virtual bool
     IsLastOffsetValid(void)
     {
         return (lastOffset != UINT64_MAX);
     }
 
-    inline int
+    virtual int
     GetWbIndex(void)
     {
         return wbIndex;
     }
 
-    inline bool
+    virtual bool
     IsWbIndexValid(void)
     {
         return (wbIndex != INT32_MAX);

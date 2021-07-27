@@ -16,17 +16,18 @@ class IArrayInfo;
 class ReplayEventFactory
 {
 public:
+    ReplayEventFactory(void) = default;
     ReplayEventFactory(StripeReplayStatus* status, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IContextReplayer* contextReplayer,
         IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo);
 
     virtual ~ReplayEventFactory(void) = default;
 
-    ReplayEvent* CreateBlockWriteReplayEvent(int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks, bool replaySegmentInfo);
-    ReplayEvent* CreateStripeMapUpdateReplayEvent(StripeId vsid, StripeAddr dest);
-    ReplayEvent* CreateStripeFlushReplayEvent(StripeId vsid, StripeId wbLsid, StripeId userLsid);
-    ReplayEvent* CreateStripeAllocationReplayEvent(StripeId vsid, StripeId wbLsid);
-    ReplayEvent* CreateSegmentAllocationReplayEvent(StripeId userLsid);
+    virtual ReplayEvent* CreateBlockWriteReplayEvent(int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks, bool replaySegmentInfo);
+    virtual ReplayEvent* CreateStripeMapUpdateReplayEvent(StripeId vsid, StripeAddr dest);
+    virtual ReplayEvent* CreateStripeFlushReplayEvent(StripeId vsid, StripeId wbLsid, StripeId userLsid);
+    virtual ReplayEvent* CreateStripeAllocationReplayEvent(StripeId vsid, StripeId wbLsid);
+    virtual ReplayEvent* CreateSegmentAllocationReplayEvent(StripeId userLsid);
 
 private:
     StripeReplayStatus* status;

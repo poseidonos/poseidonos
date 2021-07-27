@@ -47,11 +47,12 @@ class ReplayStripe;
 class ActiveUserStripeReplayer
 {
 public:
+    ActiveUserStripeReplayer(void) = default;
     ActiveUserStripeReplayer(IContextReplayer* ictxReplayer, IArrayInfo* array);
-    ~ActiveUserStripeReplayer(void);
+    virtual ~ActiveUserStripeReplayer(void);
 
-    int Replay(void);
-    void Update(StripeId userLsid);
+    virtual int Replay(void);
+    virtual void Update(StripeId userLsid);
 
 private:
     void _Reset(void);

@@ -51,7 +51,14 @@ GcReplayStripe::GcReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* strip
 }
 
 void
-GcReplayStripe::AddLog(LogHandlerInterface* log)
+GcReplayStripe::AddLog(ReplayLog replayLog)
+{
+    ReplayStripe::AddLog(replayLog);
+    _AddLog(replayLog.log);
+}
+
+void
+GcReplayStripe::_AddLog(LogHandlerInterface* log)
 {
     assert(log->GetType() == LogType::GC_STRIPE_FLUSHED);
 

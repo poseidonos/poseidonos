@@ -35,9 +35,9 @@
 #include <list>
 
 #include "src/include/address_type.h"
+#include "src/journal_manager/replay/i_replay_stripe.h"
 #include "src/journal_manager/replay/replay_log.h"
 #include "src/journal_manager/statistics/stripe_replay_status.h"
-
 namespace pos
 {
 class IVSAMap;
@@ -53,7 +53,9 @@ class ActiveWBStripeReplayer;
 class ActiveUserStripeReplayer;
 class ReplayEvent;
 
-class ReplayStripe
+using ReplayEventList = std::list<ReplayEvent*>;
+
+class ReplayStripe : public IReplayStripe
 {
 public:
     ReplayStripe(void) = delete;
@@ -61,11 +63,13 @@ public:
         IContextReplayer* ctxReplayer,
         IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
+    ReplayStripe(IVSAMap* vsaMap, IStripeMap* stripeMap,
+        ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer,
+        StripeReplayStatus* status, ReplayEventFactory* factory, ReplayEventList* replayEvents);
     virtual ~ReplayStripe(void);
 
-    virtual void AddLog(ReplayLog replayLog);
-    virtual void AddLog(LogHandlerInterface* log) = 0;
-    virtual int Replay(void);
+    virtual void AddLog(ReplayLog replayLog) override;
+    virtual int Replay(void) override;
 
     StripeId GetVsid(void) { return status->GetVsid(); }
     int GetVolumeId(void) { return status->GetVolumeId(); }
@@ -83,7 +87,7 @@ protected:
     StripeReplayStatus* status;
     ReplayEventFactory* replayEventFactory;
 
-    std::list<ReplayEvent*> replayEvents;
+    ReplayEventList replayEvents;
 
     ActiveWBStripeReplayer* wbStripeReplayer;
     ActiveUserStripeReplayer* userStripeReplayer;

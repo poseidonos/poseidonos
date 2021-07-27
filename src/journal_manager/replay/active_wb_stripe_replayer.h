@@ -51,11 +51,12 @@ class ReplayStripe;
 class ActiveWBStripeReplayer
 {
 public:
+    explicit ActiveWBStripeReplayer(PendingStripeList& pendingStripeList);
     ActiveWBStripeReplayer(IContextReplayer* contextReplayer, IWBStripeAllocator* iwbstripeAllocator, PendingStripeList& pendingStripeList);
     virtual ~ActiveWBStripeReplayer(void);
 
-    int Replay(void);
-    void Update(StripeInfo info);
+    virtual int Replay(void);
+    virtual void Update(StripeInfo info);
 
 private:
     int _FindWbufIndex(StripeInfo stripeInfo);

@@ -12,6 +12,8 @@ class MockActiveUserStripeReplayer : public ActiveUserStripeReplayer
 {
 public:
     using ActiveUserStripeReplayer::ActiveUserStripeReplayer;
+    MOCK_METHOD(int, Replay, (), (override));
+    MOCK_METHOD(void, Update, (StripeId userLsid), (override));
 };
 
 } // namespace pos

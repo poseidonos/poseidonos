@@ -42,6 +42,7 @@
 
 namespace pos
 {
+// Constructor for product code
 UserReplayStripe::UserReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
     IContextReplayer* contextReplayer,
     IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
@@ -51,8 +52,23 @@ UserReplayStripe::UserReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* s
 {
 }
 
+// Constructor for unit test
+UserReplayStripe::UserReplayStripe(IVSAMap* vsaMap, IStripeMap* stripeMap,
+    ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer,
+    StripeReplayStatus* status, ReplayEventFactory* factory, ReplayEventList* replayEvents)
+: ReplayStripe(vsaMap, stripeMap, wbReplayer, userReplayer, status, factory, replayEvents)
+{
+}
+
 void
-UserReplayStripe::AddLog(LogHandlerInterface* log)
+UserReplayStripe::AddLog(ReplayLog replayLog)
+{
+    ReplayStripe::AddLog(replayLog);
+    _AddLog(replayLog.log);
+}
+
+void
+UserReplayStripe::_AddLog(LogHandlerInterface* log)
 {
     if (log->GetType() == LogType::BLOCK_WRITE_DONE)
     {

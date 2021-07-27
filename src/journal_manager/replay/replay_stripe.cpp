@@ -38,19 +38,34 @@
 
 namespace pos
 {
-ReplayStripe::ReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
+// Constructor for product code
+ReplayStripe::ReplayStripe(StripeId vsid, IVSAMap* inputVsaMap, IStripeMap* inputStripeMap,
     IContextReplayer* ctxReplayer,
     IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
     ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer)
-: wbStripeReplayer(wbReplayer),
-  userStripeReplayer(userReplayer),
-  vsaMap(vsaMap),
-  stripeMap(stripeMap),
-  replaySegmentInfo(true)
+: ReplayStripe(inputVsaMap, inputStripeMap, wbReplayer, userReplayer, nullptr, nullptr, nullptr)
 {
     status = new StripeReplayStatus(vsid);
-    replayEventFactory = new ReplayEventFactory(status,
-        vsaMap, stripeMap, ctxReplayer, blockAllocator, arrayInfo);
+    replayEventFactory = new ReplayEventFactory(status, inputVsaMap, inputStripeMap, ctxReplayer, blockAllocator, arrayInfo);
+}
+
+// Constructor for unit test
+ReplayStripe::ReplayStripe(IVSAMap* inputVsaMap, IStripeMap* inputStripeMap,
+    ActiveWBStripeReplayer* wbReplayer,
+    ActiveUserStripeReplayer* userReplayer,
+    StripeReplayStatus* inputStatus, ReplayEventFactory* factory, ReplayEventList* inputReplayEventList)
+: status(inputStatus),
+  replayEventFactory(factory),
+  wbStripeReplayer(wbReplayer),
+  userStripeReplayer(userReplayer),
+  vsaMap(inputVsaMap),
+  stripeMap(inputStripeMap),
+  replaySegmentInfo(true)
+{
+    if (inputReplayEventList != nullptr)
+    {
+        replayEvents = *inputReplayEventList;
+    }
 }
 
 ReplayStripe::~ReplayStripe(void)
@@ -72,8 +87,6 @@ ReplayStripe::AddLog(ReplayLog replayLog)
     {
         replaySegmentInfo = false;
     }
-
-    this->AddLog(replayLog.log);
     status->RecordLogFoundTime(replayLog.time);
 }
 
@@ -104,7 +117,7 @@ ReplayStripe::_CreateStripeAllocationEvent(void)
 {
     ReplayEvent* stripeAllocation =
         replayEventFactory->CreateStripeAllocationReplayEvent(status->GetVsid(), status->GetWbLsid());
-        replayEvents.push_front(stripeAllocation);
+    replayEvents.push_front(stripeAllocation);
 }
 
 void

@@ -39,6 +39,13 @@
 
 namespace pos
 {
+ActiveWBStripeReplayer::ActiveWBStripeReplayer(PendingStripeList& pendingStripeList)
+: pendingStripes(pendingStripeList),
+  contextReplayer(nullptr),
+  wbStripeAllocator(nullptr)
+{
+}
+
 ActiveWBStripeReplayer::ActiveWBStripeReplayer(IContextReplayer* ctxReplayer,
     IWBStripeAllocator* wbstripeAllocator, PendingStripeList& pendingStripeList)
 : pendingStripes(pendingStripeList),

@@ -51,14 +51,14 @@ public:
 
     virtual void Print(void) override;
 
-    void BlockWritten(BlkOffset startOffset, uint32_t numBlks);
-    void StripeFlushed(void);
-    void BlockInvalidated(uint32_t numBlks);
+    virtual void BlockWritten(BlkOffset startOffset, uint32_t numBlks);
+    virtual void StripeFlushed(void);
+    virtual void BlockInvalidated(uint32_t numBlks);
 
-    void SegmentAllocated(void);
-    void StripeAllocated(void);
+    virtual void SegmentAllocated(void);
+    virtual void StripeAllocated(void);
 
-    void RecordLogFoundTime(uint64_t time);
+    virtual void RecordLogFoundTime(uint64_t time);
 
     // For unit test
     inline uint32_t

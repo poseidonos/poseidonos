@@ -44,13 +44,17 @@ public:
         IContextReplayer* contextReplayer,
         IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
+    UserReplayStripe(IVSAMap* vsaMap, IStripeMap* stripeMap,
+        ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer,
+        StripeReplayStatus* status, ReplayEventFactory* factory, ReplayEventList* replayEvents);
     virtual ~UserReplayStripe(void) = default;
+
+    virtual void AddLog(ReplayLog replayLog) override;
     virtual int Replay(void) override;
 
-public:
-    virtual void AddLog(LogHandlerInterface* log) override;
-
 private:
+    void _AddLog(LogHandlerInterface* log);
+
     void _CreateBlockWriteReplayEvent(BlockWriteDoneLog dat);
     void _CreateStripeEvents(void);
 

@@ -57,6 +57,7 @@ enum class ReplayEventType
 class ReplayEvent
 {
 public:
+    ReplayEvent(void) = default;
     explicit ReplayEvent(StripeReplayStatus* status);
     virtual ~ReplayEvent(void);
 

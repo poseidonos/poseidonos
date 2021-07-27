@@ -1,7 +1,9 @@
 #include <gmock/gmock.h>
-#include <string>
+
 #include <list>
+#include <string>
 #include <vector>
+
 #include "src/journal_manager/replay/replay_log_list.h"
 
 namespace pos

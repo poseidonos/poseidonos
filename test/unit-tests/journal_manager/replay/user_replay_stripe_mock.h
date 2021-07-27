@@ -4,14 +4,14 @@
 #include <string>
 #include <vector>
 
-#include "src/journal_manager/replay/replay_stripe.h"
+#include "src/journal_manager/replay/user_replay_stripe.h"
 
 namespace pos
 {
-class MockReplayStripe : public ReplayStripe
+class MockUserReplayStripe : public UserReplayStripe
 {
 public:
-    using ReplayStripe::ReplayStripe;
+    using UserReplayStripe::UserReplayStripe;
     MOCK_METHOD(void, AddLog, (ReplayLog replayLog), (override));
     MOCK_METHOD(int, Replay, (), (override));
 };

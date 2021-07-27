@@ -59,7 +59,11 @@ public:
 
     virtual void Print(void);
 
-    bool IsFlushed(void) { return stripeFlushed == true; }
+    virtual bool
+    IsFlushed(void)
+    {
+        return stripeFlushed == true;
+    }
 
     // For unit test
     void SetFirstBlockOffset(BlkOffset offset);
