@@ -32,17 +32,9 @@
 
 #include "mount_temp.h"
 
-#include "src/device/device_manager.h"
-#include "src/io/frontend_io/flush_command_manager.h"
-#include "src/io/general_io/rba_state_manager.h"
-#include "src/logger/logger.h"
-#include "src/volume/volume_manager.h"
-#include "src/array_components/mount_temp/debug_info_updater.h"
-#include "src/debug/debug_info.h"
-#include "src/io/frontend_io/unvmf_io_handler.h"
-#include "src/array_mgmt/array_manager.h"
 #include "src/array/interface/i_abr_control.h"
-#include "src/sys_info/space_info.h"
+#include "src/io/frontend_io/flush_command_manager.h"
+#include "src/logger/logger.h"
 #ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_mgr.h"
 #endif
@@ -68,51 +60,12 @@ MountTemp::Unmount2(void)
 #endif
     POS_TRACE_INFO(eventId, "start flush cmd manager reset instance");
     FlushCmdManagerSingleton::ResetInstance();
-
-    _ResetNvmf();
-
     return ret;
 }
 
 int
 MountTemp::Mount1(void)
 {
-    debugInfoUpdater->Update();
-
-    _InitNvmf();
     return 0;
 }
-
-void
-MountTemp::Shutdown(void)
-{
-    _ResetNvmf();
-}
-
-void
-MountTemp::_InitNvmf(void)
-{
-    nvmfVolume = new pos::NvmfVolumePos();
-    unvmf_io_handler handler = {.submit = UNVMfSubmitHandler,
-        .complete = UNVMfCompleteHandler};
-    nvmfVolume->SetuNVMfIOHandler(handler);
-    nvmfTargetEventSubscriber = new pos::NvmfTargetEventSubscriber(nvmfVolume, arrayName);
-}
-
-void
-MountTemp::_ResetNvmf(void)
-{
-    if (nvmfTargetEventSubscriber != nullptr)
-    {
-        delete nvmfTargetEventSubscriber;
-        nvmfTargetEventSubscriber = nullptr;
-    }
-
-    if (nvmfVolume != nullptr)
-    {
-        delete nvmfVolume;
-        nvmfVolume = nullptr;
-    }
-}
-
 } // namespace pos

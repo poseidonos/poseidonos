@@ -367,7 +367,6 @@ ArrayState::DataRemoved(bool isRebuildingDevice)
 void
 ArrayState::SetDelete(void)
 {
-    iStateControl->Remove(stopState);
     _SetState(ArrayStateEnum::NOT_EXIST);
 }
 

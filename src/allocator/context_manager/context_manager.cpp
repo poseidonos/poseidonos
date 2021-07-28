@@ -52,10 +52,11 @@ namespace pos
 {
 ContextManager::ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
     WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileManager_,
-    ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_)
+    ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, IStateControl* iStateCtrl, std::string arrayName_)
 : numAsyncIoIssued(0),
   flushInProgress(false),
   addrInfo(info_),
+  iStateControl(iStateCtrl),
   arrayName(arrayName_)
 {
     // for UT
@@ -70,8 +71,8 @@ ContextManager::ContextManager(AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, Reb
     flushInProgress = flushProgress;
 }
 
-ContextManager::ContextManager(AllocatorAddressInfo* info, std::string arrayName)
-: ContextManager(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false, info, arrayName)
+ContextManager::ContextManager(AllocatorAddressInfo* info, IStateControl* iStateCtrl, std::string arrayName)
+: ContextManager(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false, info, iStateCtrl, arrayName)
 {
     allocatorCtx = new AllocatorCtx(info, arrayName);
     segmentCtx = new SegmentCtx(info, arrayName);
@@ -141,13 +142,13 @@ ContextManager::FreeUserDataSegment(SegmentId segId)
 }
 
 void
-ContextManager::Close(void)
+ContextManager::Dispose(void)
 {
-    segmentCtx->Close();
-    wbStripeCtx->Close();
-    rebuildCtx->Close();
-    allocatorCtx->Close();
-    fileIoManager->Close();
+    segmentCtx->Dispose();
+    wbStripeCtx->Dispose();
+    rebuildCtx->Dispose();
+    allocatorCtx->Dispose();
+    fileIoManager->Dispose();
 }
 
 int
@@ -201,13 +202,14 @@ ContextManager::AllocateFreeSegment(bool forUser)
         ++segId;
         segId = allocatorCtx->AllocateFreeSegment(segId);
     }
+    int freeSegCount = allocatorCtx->GetNumOfFreeSegmentWoLock();
     if (segId == UNMAP_SEGMENT)
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "Failed to allocate segment, free segment count:{}", allocatorCtx->GetNumOfFreeUserDataSegment());
+        POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "Failed to allocate segment, free segment count:{}", freeSegCount);
     }
     else
     {
-        POS_TRACE_INFO(EID(ALLOCATOR_START), "segmentId:{} @AllocateUserDataSegmentId, free segment count:{}", segId, allocatorCtx->GetNumOfFreeUserDataSegment());
+        POS_TRACE_INFO(EID(ALLOCATOR_START), "segmentId:{} @AllocateUserDataSegmentId, free segment count:{}", segId, freeSegCount);
     }
     return segId;
 }
@@ -243,14 +245,16 @@ ContextManager::AllocateGCVictimSegment(void)
 CurrentGcMode
 ContextManager::GetCurrentGcMode(void)
 {
-    int numFreeSegments = allocatorCtx->GetNumOfFreeUserDataSegment();
+    int numFreeSegments = allocatorCtx->GetNumOfFreeSegment();
     QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments);
     if (gcCtx.GetUrgentThreshold() >= numFreeSegments)
     {
+        POS_TRACE_DEBUG(EID(GET_URGENT_GC_MODE), "get urgent gc mode, free segments:{}", numFreeSegments);
         return MODE_URGENT_GC;
     }
     else if (gcCtx.GetGcThreshold() >= numFreeSegments)
     {
+        POS_TRACE_DEBUG(EID(GET_NORMAL_GC_MODE), "get normal gc mode, free segments:{}", numFreeSegments);
         return MODE_NORMAL_GC;
     }
     return MODE_NO_GC;
@@ -263,9 +267,16 @@ ContextManager::GetGcThreshold(CurrentGcMode mode)
 }
 
 int
-ContextManager::GetNumFreeSegment(void)
+ContextManager::GetNumOfFreeSegment(bool needLock)
 {
-    return allocatorCtx->GetNumOfFreeUserDataSegment();
+    if (needLock == true)
+    {
+        return allocatorCtx->GetNumOfFreeSegment();
+    }
+    else
+    {
+        return allocatorCtx->GetNumOfFreeSegmentWoLock();
+    }
 }
 
 int

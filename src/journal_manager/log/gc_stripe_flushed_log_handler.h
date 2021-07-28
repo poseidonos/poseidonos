@@ -33,7 +33,6 @@
 #pragma once
 
 #include "src/journal_manager/log/gc_map_update_list.h"
-#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
 #include "src/journal_manager/log/log_handler.h"
 
 namespace pos
@@ -42,9 +41,10 @@ class GcStripeFlushedLogHandler : public LogHandlerInterface
 {
 public:
     GcStripeFlushedLogHandler(void) = default;
-    explicit GcStripeFlushedLogHandler(GcStripeMapUpdateList mapUpdates);
-    explicit GcStripeFlushedLogHandler(void* inputData);
-    virtual ~GcStripeFlushedLogHandler(void);
+    GcStripeFlushedLogHandler(int volumeId, StripeId vsid,
+        StripeId wbLsid, StripeId userLsid, uint64_t numBlks);
+    explicit GcStripeFlushedLogHandler(GcStripeFlushedLog& log);
+    virtual ~GcStripeFlushedLogHandler(void) = default;
 
     bool operator==(GcStripeFlushedLogHandler& log);
 
@@ -56,15 +56,8 @@ public:
     virtual uint32_t GetSeqNum(void);
     virtual void SetSeqNum(uint32_t num);
 
-    GcStripeFlushedLog* GetGcStripeFlushedLog(void);
-    GcBlockMapUpdate* GetGcBlockMapUpdateLogs(void);
-
 private:
-    int logSize;
-    GcStripeFlushedLog* logPtr;
-    GcBlockMapUpdate* blockLogPtr;
-
-    void* dat = nullptr; // GcStripeFlushedLog + GcBlockMapUpdate * N
+    GcStripeFlushedLog dat;
 };
 
 } // namespace pos

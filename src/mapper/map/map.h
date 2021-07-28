@@ -82,6 +82,8 @@ public:
     void SetMpageValidInfo(uint64_t numPages, uint64_t ValidPages);
 
     MpageValidInfo mpageData;
+    std::atomic<int64_t> usedBlkCnt;
+
     BitMap* bitmap;
 
     std::mutex mpageHeaderLock;
@@ -89,7 +91,7 @@ public:
     BitMap* touchedPages;
 
     bool isInitialized;
-    uint32_t size;      // header size(MpageValidInfo + BitMap), aligned by mpageSize
+    uint32_t size;      // header size(MpageValidInfo + usedBlkCnt + BitMap), aligned by mpageSize
     uint32_t mpageSize; // by MapContent::SetPageSize()
     int mapId;          // by MapContent::Ctor()
     uint32_t entriesPerMpage;

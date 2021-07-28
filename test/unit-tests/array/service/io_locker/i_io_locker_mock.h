@@ -3,6 +3,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <set>
 
 #include "src/array/service/io_locker/i_io_locker.h"
 
@@ -12,9 +13,11 @@ class MockIIOLocker : public IIOLocker
 {
 public:
     using IIOLocker::IIOLocker;
-    MOCK_METHOD(bool, TryLock, (string array, StripeId val), (override));
-    MOCK_METHOD(void, Unlock, (string array, StripeId val), (override));
-    MOCK_METHOD(bool, TryChange, (string array, LockerMode mode), (override));
+    MOCK_METHOD(bool, TryBusyLock, (IArrayDevice* dev, StripeId from, StripeId to), (override));
+    MOCK_METHOD(bool, ResetBusyLock, (IArrayDevice* dev), (override));
+    MOCK_METHOD(bool, TryLock, (set<IArrayDevice*>& devs, StripeId val), (override));
+    MOCK_METHOD(void, Unlock, (IArrayDevice* dev, StripeId val), (override));
+    MOCK_METHOD(void, Unlock, (set<IArrayDevice*>& devs, StripeId val), (override));
 };
 
 } // namespace pos

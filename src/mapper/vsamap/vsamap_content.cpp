@@ -40,10 +40,10 @@
 
 namespace pos
 {
-
 VSAMapContent::VSAMapContent(void)
 : MapContent()
 {
+    totalBlks = 0;
 }
 
 VSAMapContent::VSAMapContent(int mapId, std::string arrayName)
@@ -51,6 +51,7 @@ VSAMapContent::VSAMapContent(int mapId, std::string arrayName)
 {
     filename = "VSAMap." + std::to_string(mapId) + ".bin";
     this->arrayName = arrayName;
+    totalBlks = 0;
 }
 
 int
@@ -58,7 +59,6 @@ VSAMapContent::Prepare(uint64_t blkCnt, int64_t volid)
 {
     SetPageSize(arrayName);
     totalBlks = blkCnt;
-    usedBlks = 0;
 
     header.entriesPerMpage = header.mpageSize / sizeof(VirtualBlkAddr);
     uint64_t mpagesNeeded = DivideUp(totalBlks, header.entriesPerMpage);
@@ -119,7 +119,7 @@ VSAMapContent::SetEntry(BlkAddr rba, VirtualBlkAddr vsa)
     mpageMap[entNr] = vsa;
 
     header.touchedPages->SetBit(pageNr);
-
+    _UpdateUsedBlkCnt(vsa);
     map->ReleaseMpageLock(pageNr);
 
     return 0;
@@ -200,32 +200,7 @@ VSAMapContent::GetDirtyPages(BlkAddr start, uint64_t numEntries)
 int64_t
 VSAMapContent::GetNumUsedBlocks(void)
 {
-    int curMpage = 0;
-    uint32_t mpageId = 0;
-
-    usedBlks = 0;
-    while ((mpageId = header.bitmap->FindFirstSet(curMpage)) != header.bitmap->GetNumBits())
-    {
-        usedBlks += _GetNumValidEntries(map->GetMpageWithLock(mpageId));
-        curMpage = mpageId + 1;
-    }
-
-    return usedBlks;
-}
-
-uint64_t
-VSAMapContent::_GetNumValidEntries(char* mpage)
-{
-    uint64_t numValid = 0;
-
-    for (uint32_t i = 0; i < header.entriesPerMpage; i++)
-    {
-        if (!IsUnMapVsa(((VirtualBlkAddr*)mpage)[i]))
-        {
-            numValid++;
-        }
-    }
-    return numValid;
+    return header.usedBlkCnt;
 }
 
 int
@@ -255,6 +230,23 @@ VSAMapContent::InvalidateAllBlocks(void)
     }
 
     return 0;
+}
+
+void
+VSAMapContent::_UpdateUsedBlkCnt(VirtualBlkAddr vsa)
+{
+    if (IsUnMapVsa(vsa))
+    {
+        header.usedBlkCnt--;
+        if (header.usedBlkCnt < 0)
+        {
+            header.usedBlkCnt = 0;
+        }
+    }
+    else
+    {
+        header.usedBlkCnt++;
+    }
 }
 
 } // namespace pos

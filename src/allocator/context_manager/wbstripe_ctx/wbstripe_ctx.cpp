@@ -41,8 +41,21 @@
 
 namespace pos
 {
+WbStripeCtx::WbStripeCtx(void)
+: allocWbLsidBitmap(nullptr),
+  initialized(false),
+  addrInfo(nullptr)
+{
+    for (int i = 0; i < ACTIVE_STRIPE_TAIL_ARRAYLEN; ++i)
+    {
+        activeStripeTail[i].stripeId = 0;
+        activeStripeTail[i].offset = 0;
+    }
+}
+
 WbStripeCtx::WbStripeCtx(BitMapMutex* allocWbLsidBitmap_, AllocatorAddressInfo* info_)
-: addrInfo(info_)
+: initialized(false),
+  addrInfo(info_)
 {
     // for UT
     allocWbLsidBitmap = allocWbLsidBitmap_;
@@ -55,25 +68,36 @@ WbStripeCtx::WbStripeCtx(AllocatorAddressInfo* info)
 
 WbStripeCtx::~WbStripeCtx(void)
 {
+    Dispose();
 }
 
 void
 WbStripeCtx::Init(void)
 {
-    allocWbLsidBitmap = new BitMapMutex(addrInfo->GetnumWbStripes());
-    for (ASTailArrayIdx asTailArrayIdx = 0; asTailArrayIdx < ACTIVE_STRIPE_TAIL_ARRAYLEN; ++asTailArrayIdx)
+    if (initialized == false)
     {
-        activeStripeTail[asTailArrayIdx] = UNMAP_VSA;
+        allocWbLsidBitmap = new BitMapMutex(addrInfo->GetnumWbStripes());
+        for (ASTailArrayIdx asTailArrayIdx = 0; asTailArrayIdx < ACTIVE_STRIPE_TAIL_ARRAYLEN; ++asTailArrayIdx)
+        {
+            activeStripeTail[asTailArrayIdx] = UNMAP_VSA;
+        }
+
+        initialized = true;
     }
 }
 
 void
-WbStripeCtx::Close(void)
+WbStripeCtx::Dispose(void)
 {
-    if (allocWbLsidBitmap != nullptr)
+    if (initialized == true)
     {
-        delete allocWbLsidBitmap;
-        allocWbLsidBitmap = nullptr;
+        if (allocWbLsidBitmap != nullptr)
+        {
+            delete allocWbLsidBitmap;
+            allocWbLsidBitmap = nullptr;
+        }
+
+        initialized = false;
     }
 }
 

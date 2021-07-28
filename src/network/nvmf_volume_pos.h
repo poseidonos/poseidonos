@@ -30,75 +30,56 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "volume_event_publisher.h"
+#pragma once
+#include <atomic>
+#include <string>
+#include <vector>
 
+#include "spdk/pos.h"
+#include "src/network/nvmf.h"
+#include "src/network/nvmf_target.h"
+
+using namespace std;
 namespace pos
 {
-VolumeEventPublisher::VolumeEventPublisher(void)
+struct volumeListInfo
 {
-}
+    string arrayName;
+    string subnqn;
+    vector<int> vols;
+};
 
-VolumeEventPublisher::~VolumeEventPublisher(void)
+class NvmfVolumePos
 {
-}
+public:
+    explicit NvmfVolumePos(unvmf_io_handler ioHandler);
+    virtual ~NvmfVolumePos(void);
 
-void
-VolumeEventPublisher::RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName)
-{
-}
+    virtual void VolumeCreated(struct pos_volume_info* info);
+    virtual void VolumeDeleted(struct pos_volume_info* info);
+    virtual void VolumeMounted(struct pos_volume_info* info);
+    virtual void VolumeUnmounted(struct pos_volume_info* info);
+    virtual void VolumeUpdated(struct pos_volume_info* info);
+    virtual void VolumeDetached(vector<int>& volList, string arrayName);
 
-void
-VolumeEventPublisher::RegisterNvmfTargetSubscriber(VolumeEvent* subscriber, std::string arrayName)
-{
-}
+    static uint32_t VolumeDetachCompleted(void);
+    static bool WaitRequestedVolumesDetached(uint32_t volCnt);
 
-void
-VolumeEventPublisher::RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName)
-{
-}
+private:
+    static NvmfTarget target;
+    static atomic<bool> detachFailed;
+    static atomic<uint32_t> volumeDetachedCnt;
+    unvmf_io_handler ioHandler;
 
-bool
-VolumeEventPublisher::NotifyVolumeCreated(std::string volName, int volID,
-    uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
-{
-    return true;
-}
-
-bool
-VolumeEventPublisher::NotifyVolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
-{
-    return true;
-}
-
-bool
-VolumeEventPublisher::NotifyVolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName)
-{
-    return true;
-}
-
-bool
-VolumeEventPublisher::NotifyVolumeMounted(std::string volName, std::string subnqn,
-    int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
-{
-    return true;
-}
-
-bool
-VolumeEventPublisher::NotifyVolumeUnmounted(std::string volName, int volID, std::string arrayName)
-{
-    return true;
-}
-
-bool
-VolumeEventPublisher::NotifyVolumeLoaded(std::string name, int id,
-    uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName)
-{
-    return true;
-}
-
-void
-VolumeEventPublisher::NotifyVolumeDetached(vector<int> volList, std::string arrayName)
-{
-}
+    static void _VolumeCreateHandler(void* arg1, void* arg2);
+    static void _VolumeMountHandler(void* arg1, void* arg2);
+    static void _VolumeUnmountHandler(void* arg1, void* arg2);
+    static void _VolumeDeleteHandler(void* arg1, void* arg2);
+    static void _VolumeUpdateHandler(void* arg1, void* arg2);
+    static void _VolumeDetachHandler(void* arg1, void* arg2);
+    static void _NamespaceDetachedHandler(void* cbArg, int status);
+    static void _NamespaceDetachedAllHandler(void* cbArg, int status);
+    static void _CompleteVolumeUnmount(struct pos_volume_info* vInfo);
+};
 
 } // namespace pos

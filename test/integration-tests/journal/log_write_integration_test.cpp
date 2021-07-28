@@ -100,7 +100,7 @@ TEST_F(LogWriteIntegrationTest, WriteLog_GcStripe)
     EXPECT_TRUE(writeSuccessful == true);
     writeTester->WaitForAllLogWriteDone();
 
-    EXPECT_TRUE(journal->GetNumLogsAdded() == 1);
+    EXPECT_TRUE(journal->GetNumLogsAdded() == 2);
     writeTester->CompareLogs();
 }
 

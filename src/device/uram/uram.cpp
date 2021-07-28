@@ -216,22 +216,23 @@ UramBdev::_InitByteAddress(void)
 bool
 UramBdev::_WrapupOpenDeviceSpecific(DeviceContext* deviceContext)
 {
-    bool restoreSuccessful = false;
-
     // Reactor cannot handle Async operation for Uram in current implementation.
     // ioat poll cannot be called in Empty(), so, we restore the contents by IO worker.
-    if (!EventFrameworkApi::IsReactorNow())
+    if (EventFrameworkApi::IsReactorNow())
     {
-        if (isPersistent == true)
-        {
-            restoreSuccessful = true;
-        }
-        else
-        {
-            restoreSuccessful = _RecoverBackup(deviceContext);
-        }
-        _InitByteAddress();
+        return true;
     }
+
+    bool restoreSuccessful = false;
+    if (isPersistent == true)
+    {
+        restoreSuccessful = true;
+    }
+    else
+    {
+        restoreSuccessful = _RecoverBackup(deviceContext);
+    }
+    _InitByteAddress();
     return restoreSuccessful;
 }
 

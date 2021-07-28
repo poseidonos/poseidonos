@@ -65,8 +65,7 @@ TEST_F(JournalServiceIntegrationTest, RegisterEnabledJournal)
 
     InitializeAndRegisterJournal(arrayName, builder.Build());
 
-    IJournalWriter* journal = JournalServiceSingleton::Instance()->GetWriter("");
-    EXPECT_TRUE(journal->IsEnabled() == true);
+    EXPECT_TRUE(JournalServiceSingleton::Instance()->IsEnabled(arrayName) == true);
 
     int logWriteResult = fixtures[arrayName]->AddDummyLog();
     EXPECT_TRUE(logWriteResult == 0);
@@ -83,8 +82,7 @@ TEST_F(JournalServiceIntegrationTest, RegisterDisabledJournal)
 
     InitializeAndRegisterJournal(arrayName, builder.Build());
 
-    IJournalWriter* journal = JournalServiceSingleton::Instance()->GetWriter("");
-    EXPECT_TRUE(journal->IsEnabled() == false);
+    EXPECT_TRUE(JournalServiceSingleton::Instance()->IsEnabled(arrayName) == false);
 
     int logWriteResult = fixtures[arrayName]->AddDummyLog();
     EXPECT_TRUE(logWriteResult != 0);
@@ -107,9 +105,7 @@ TEST_F(JournalServiceIntegrationTest, RegisterEnabledJournals)
     for (int id = 0; id < numArrays; id++)
     {
         std::string arrayName = "array" + std::to_string(id);
-
-        IJournalWriter* journal = JournalServiceSingleton::Instance()->GetWriter(arrayName);
-        EXPECT_TRUE(journal->IsEnabled() == true);
+        EXPECT_TRUE(JournalServiceSingleton::Instance()->IsEnabled(arrayName) == true);
 
         int logWriteResult = fixtures[arrayName]->AddDummyLog();
         EXPECT_TRUE(logWriteResult == 0);
@@ -137,9 +133,7 @@ TEST_F(JournalServiceIntegrationTest, RegisterDisabledJournals)
     for (int id = 0; id < numArrays; id++)
     {
         std::string arrayName = "array" + std::to_string(id);
-        IJournalWriter* journal = JournalServiceSingleton::Instance()->GetWriter(arrayName);
-
-        EXPECT_TRUE(journal->IsEnabled() == false);
+        EXPECT_TRUE(JournalServiceSingleton::Instance()->IsEnabled(arrayName) == false);
 
         int logWriteResult = fixtures[arrayName]->AddDummyLog();
         EXPECT_TRUE(logWriteResult < 0);

@@ -39,9 +39,22 @@
 
 namespace pos
 {
+AllocatorFileIoManager::AllocatorFileIoManager(void)
+: addrInfo(nullptr),
+  initialized(false)
+{
+    for (int file = 0; file < NUM_FILES; file++)
+    {
+        ctxFile[file] = nullptr;
+        fileSize[file] = 0;
+        numSections[file] = 0;
+    }
+}
+
 AllocatorFileIoManager::AllocatorFileIoManager(MetaFileIntf** fileIntf, AllocatorAddressInfo* info, std::string arrayName)
 : addrInfo(info),
-  arrayName(arrayName)
+  arrayName(arrayName),
+  initialized(false)
 {
     for (int file = 0; file < NUM_FILES; file++)
     {
@@ -50,9 +63,11 @@ AllocatorFileIoManager::AllocatorFileIoManager(MetaFileIntf** fileIntf, Allocato
         numSections[file] = 0;
     }
 }
+
 AllocatorFileIoManager::AllocatorFileIoManager(AllocatorAddressInfo* info, std::string arrayName)
 : addrInfo(info),
-  arrayName(arrayName)
+  arrayName(arrayName),
+  initialized(false)
 {
     for (int file = 0; file < NUM_FILES; file++)
     {
@@ -64,19 +79,25 @@ AllocatorFileIoManager::AllocatorFileIoManager(AllocatorAddressInfo* info, std::
 
 AllocatorFileIoManager::~AllocatorFileIoManager(void)
 {
+    Dispose();
 }
 
 void
 AllocatorFileIoManager::Init(void)
 {
-    for (int file = 0; file < NUM_FILES; file++)
+    if (initialized == false)
     {
-        fileSize[file] = 0;
-        numSections[file] = 0;
-        if (ctxFile[file] == nullptr)
+        for (int file = 0; file < NUM_FILES; file++)
         {
-            ctxFile[file] = new FILESTORE(ctxFileName[file], arrayName);
+            fileSize[file] = 0;
+            numSections[file] = 0;
+            if (ctxFile[file] == nullptr)
+            {
+                ctxFile[file] = new FILESTORE(ctxFileName[file], arrayName);
+            }
         }
+
+        initialized = true;
     }
 }
 
@@ -89,19 +110,24 @@ AllocatorFileIoManager::UpdateSectionInfo(int owner, int section, char* addr, in
 }
 
 void
-AllocatorFileIoManager::Close(void)
+AllocatorFileIoManager::Dispose(void)
 {
-    for (int file = 0; file < NUM_FILES; file++)
+    if (initialized == true)
     {
-        if (ctxFile[file] != nullptr)
+        for (int file = 0; file < NUM_FILES; file++)
         {
-            if (ctxFile[file]->IsOpened() == true)
+            if (ctxFile[file] != nullptr)
             {
-                ctxFile[file]->Close();
+                if (ctxFile[file]->IsOpened() == true)
+                {
+                    ctxFile[file]->Close();
+                }
+                delete ctxFile[file];
+                ctxFile[file] = nullptr;
             }
-            delete ctxFile[file];
-            ctxFile[file] = nullptr;
         }
+
+        initialized = false;
     }
 }
 

@@ -233,3 +233,18 @@ type VolumeQos struct {
 	MINIOPSGUARANTEE   string `json:"min_iops_guarantee"`
 }
 
+type RebuildImpactResponse struct {
+    RID     string                    `json:"rid"`
+    COMMAND string                    `json:"command"`
+    RESULT  RebuildImpactResult       `json:"result"`
+    INFO    Info                      `json:"info"`
+}
+
+type RebuildImpactResult struct {
+    STATUS RebuildImpactStatus      `json:"status"`
+}
+
+type RebuildImpactStatus struct {
+    CODE        int    `json:"code"`
+    DESCRIPTION string `json:"description"`
+}

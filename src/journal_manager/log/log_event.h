@@ -42,6 +42,7 @@ enum class LogType
 {
     BLOCK_WRITE_DONE,
     STRIPE_MAP_UPDATED,
+    GC_BLOCK_WRITE_DONE,
     GC_STRIPE_FLUSHED,
     VOLUME_DELETED,
     NUM_LOG_TYPE,
@@ -64,8 +65,7 @@ struct BlockWriteDoneLog : Log
     VirtualBlkAddr startVsa;
     int wbIndex;
     StripeAddr writeBufferStripeAddress;
-    bool isGC;
-    VirtualBlkAddr oldVsa;
+    uint8_t reserved[12];
 };
 
 struct StripeMapUpdatedLog : Log
@@ -75,14 +75,21 @@ struct StripeMapUpdatedLog : Log
     StripeAddr newMap;
 };
 
+struct GcBlockWriteDoneLog : Log
+{
+    int volId;
+    StripeId vsid;
+    int numBlockMaps;
+    // BlockMap list should be appended
+};
+
 struct GcStripeFlushedLog : Log
 {
     int volId;
     StripeId vsid;
     StripeId wbLsid;
     StripeId userLsid;
-    int numBlockMaps;
-    // BlockMap list should be appended
+    int totalNumBlockMaps;
 };
 
 struct VolumeDeletedLog : Log

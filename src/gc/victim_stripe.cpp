@@ -91,9 +91,6 @@ VictimStripe::_InitValue(StripeId _lsid)
 void
 VictimStripe::_LoadReverseMap(CallbackSmartPtr callback)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::GC_LOAD_REVERSE_MAP,
-        "load reversemap for lsid:{}", myLsid);
-
     revMapPack->LinkVsid(myLsid);
     revMapPack->Load(callback);
 }
@@ -182,9 +179,6 @@ VictimStripe::LoadValidBlock(void)
 
     isLoaded = true;
     revMapPack->UnLinkVsid();
-
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_LOAD_VALID_BLOCKS,
-        "valid blocks loaded, myLsid:{}, cnt:{}", myLsid, validBlockCnt);
 
     return true;
 }

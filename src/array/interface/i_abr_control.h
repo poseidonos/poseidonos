@@ -51,5 +51,6 @@ public:
     virtual bool GetMfsInit(string arrayName) = 0;
     virtual int SetMfsInit(string arrayName, bool value) = 0;
     virtual int ResetMbr(void) = 0;
+    virtual string FindArrayWithDeviceSN(string devSN) = 0;
 };
 } // namespace pos

@@ -45,12 +45,12 @@ public:
     virtual ~AllocatorAddressInfo(void) = default;
     virtual void Init(std::string arrayName, IArrayInfo* iArrayInfo = nullptr);
 
-    uint32_t GetblksPerStripe(void) { return blksPerStripe; }
-    uint32_t GetchunksPerStripe(void) { return chunksPerStripe; }
-    uint32_t GetnumWbStripes(void) { return numWbStripes; }
-    uint32_t GetnumUserAreaStripes(void) { return numUserAreaStripes; }
-    uint32_t GetblksPerSegment(void) { return blksPerSegment; }
-    uint32_t GetstripesPerSegment(void) { return stripesPerSegment; }
+    virtual uint32_t GetblksPerStripe(void) { return blksPerStripe; }
+    virtual uint32_t GetchunksPerStripe(void) { return chunksPerStripe; }
+    virtual uint32_t GetnumWbStripes(void) { return numWbStripes; }
+    virtual uint32_t GetnumUserAreaStripes(void) { return numUserAreaStripes; }
+    virtual uint32_t GetblksPerSegment(void) { return blksPerSegment; }
+    virtual uint32_t GetstripesPerSegment(void) { return stripesPerSegment; }
     virtual uint32_t GetnumUserAreaSegments(void) { return numUserAreaSegments; }
 
     void SetblksPerStripe(uint32_t value) { blksPerStripe = value; }

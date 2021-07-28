@@ -30,37 +30,27 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "nvmf_volume.hpp"
+#pragma once
 
-#include <iostream>
+#include <mutex>
+
+#include "src/include/address_type.h"
 
 using namespace std;
 
 namespace pos
 {
-NvmfVolume::NvmfVolume(void)
-{
-}
 
-NvmfVolume::~NvmfVolume(void)
+class BusyRange
 {
-}
+public:
+    virtual ~BusyRange(void) {}
+    virtual void SetRange(StripeId from, StripeId to);
+    virtual bool IsBusy(StripeId val);
 
-void
-NvmfVolume::SetuNVMfIOHandler(unvmf_io_handler handler)
-{
-    if (ioHandler.submit || ioHandler.complete)
-    {
-        cout << "warning: override unvmf_io_handler" << endl;
-    }
-    ioHandler.submit = handler.submit;
-    ioHandler.complete = handler.complete;
-}
+private:
+    StripeId lower = 0;
+    StripeId upper = 0;
+};
 
-unvmf_io_handler
-NvmfVolume::GetuNVMfIOHandler(void)
-{
-    return ioHandler;
-}
-
-} // namespace pos
+}  // namespace pos

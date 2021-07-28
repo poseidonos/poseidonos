@@ -5,6 +5,7 @@
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/checkpoint/checkpoint_handler.h"
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"
+#include "src/journal_manager/journal_writer.h"
 #include "src/journal_manager/log/log_buffer_parser.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_write/buffer_offset_allocator.h"
@@ -47,7 +48,7 @@ JournalManagerSpy::InitializeForTest(Mapper* mapper, Allocator* allocator, IVolu
         allocator->GetIContextManager(), allocator->GetIContextReplayer(),
         volumeManager);
 
-    if (journalManagerStatus != WAITING_TO_BE_REPLAYED)
+    if (journalingStatus.Get() != WAITING_TO_BE_REPLAYED)
     {
         ret = JournalManager::_Reset();
     }
@@ -193,6 +194,12 @@ uint64_t
 JournalManagerSpy::GetNextOffset(void)
 {
     return bufferAllocator->GetNextOffset();
+}
+
+IJournalWriter*
+JournalManagerSpy::GetJournalWriter(void)
+{
+    return journalWriter;
 }
 
 } // namespace pos

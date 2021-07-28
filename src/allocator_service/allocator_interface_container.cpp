@@ -46,6 +46,7 @@ template class AllocatorInterfaceContainer<IWBStripeAllocator>;
 template class AllocatorInterfaceContainer<IAllocatorWbt>;
 template class AllocatorInterfaceContainer<IContextManager>;
 template class AllocatorInterfaceContainer<IContextReplayer>;
+
 template<typename T>
 T*
 AllocatorInterfaceContainer<T>::GetInterface(std::string name)

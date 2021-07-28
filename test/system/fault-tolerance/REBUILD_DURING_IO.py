@@ -32,12 +32,13 @@ def check_result():
 
 def set_result():
     result, out = check_result()
+    code = json_parser.get_response_code(out)
     with open(__file__ + ".result", "w") as result_file:
         result_file.write(result + " (" + str(code) + ")" + "\n" + out)
 
 def execute():
     MOUNT_VOL_BASIC_1.execute()
-    fio_proc = fio.start_fio(0, 120)
+    fio_proc = fio.start_fio(0, 200)
     time.sleep(10)
     pos_util.pci_detach(DETACH_TARGET_DEV)
     time.sleep(0.1)

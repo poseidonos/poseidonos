@@ -183,6 +183,12 @@ ArrayManager::DeviceDetached(UblockSharedPtr dev)
     {
         return array->GetArray()->DetachDevice(dev);
     }
+    else
+    {
+        POS_TRACE_WARN(POS_EVENT_ID::ARRAY_DEBUG_MSG,
+            "Detached device is not found in existing array");
+    }
+    
 
     return 0; // this function will be void type when device lock is removed
 }
@@ -193,7 +199,7 @@ ArrayManager::DeviceAttached(UblockSharedPtr dev)
     ArrayComponents* array = _FindArrayWithDevSN(dev->GetSN());
     if (array != nullptr)
     {
-        dev->SetClass(DeviceClass::ARRAY);
+        array->GetArray()->AttachDevice(dev);
     }
 }
 

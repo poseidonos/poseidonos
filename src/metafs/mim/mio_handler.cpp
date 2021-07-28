@@ -349,7 +349,8 @@ MioHandler::_IsRangeOverlapConflicted(MetaFsIoRequest* reqMsg)
     }
 
     auto it = checkerMap.find(reqMsg->arrayName);
-    assert(it != checkerMap.end());
+    if (it == checkerMap.end())
+        return false;
 
     return ioRangeOverlapChker[it->second][(int)reqMsg->targetMediaType]->IsRangeOverlapConflicted(reqMsg);
 }
@@ -358,7 +359,8 @@ void
 MioHandler::_RegisterRangeLockInfo(MetaFsIoRequest* reqMsg)
 {
     auto it = checkerMap.find(reqMsg->arrayName);
-    assert(it != checkerMap.end());
+    if (it == checkerMap.end())
+        return;
 
     ioRangeOverlapChker[it->second][(int)reqMsg->targetMediaType]->PushReqToRangeLockMap(reqMsg);
 }
@@ -367,7 +369,8 @@ void
 MioHandler::_FreeLockContext(Mio* mio)
 {
     auto it = checkerMap.find(mio->GetArrayName());
-    assert(it != checkerMap.end());
+    if (it == checkerMap.end())
+        return;
 
     int storage = mio->IsTargetStorageSSD() ? (int)MetaStorageType::SSD : (int)MetaStorageType::NVRAM;
     ioRangeOverlapChker[it->second][storage]->FreeLockContext(mio->GetStartLpn(), mio->IsRead());

@@ -87,6 +87,9 @@ Raid5Rebuild::_NextSegment(void)
 {
     SegmentId segId = allocatorSvc->AllocateRebuildTargetSegment();
 
+    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+                "Raid5Rebuild::_NextSegment is {}",
+                segId);
     if (segId == UINT32_MAX)
     {
         return ctx->size->totalSegments;
@@ -182,7 +185,7 @@ bool Raid5Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
     ubio->ClearCallback();
     ubio->SetCallback(event);
 
-    if (likely(ctx->result != RebuildState::FAIL))
+    if (likely(ctx->result == RebuildState::REBUILDING))
     {
         ioDisp->Submit(ubio);
     }

@@ -5,7 +5,7 @@
 
 #include "src/cli/cli_event_code.h"
 #include "src/helper/spdk_rpc_client.h"
-#include "src/network/nvmf_target.hpp"
+#include "src/network/nvmf_target.h"
 #include "src/volume/volume_service.h"
 
 namespace pos_cli

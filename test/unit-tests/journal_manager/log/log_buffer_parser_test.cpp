@@ -29,8 +29,6 @@ TEST(LogBufferParser, GetLogs_testIfBlockWriteDoneLogIsParsed)
     log.writeBufferStripeAddress = {
         .stripeLoc = IN_WRITE_BUFFER_AREA,
         .stripeId = 0};
-    log.isGC = false;
-    log.oldVsa = UNMAP_VSA;
 
     uint64_t bufferSize = sizeof(log);
     void* buffer = malloc(bufferSize);
@@ -77,15 +75,13 @@ TEST(LogBufferParser, GetLogs_testIfStripeMapUpdatedLogIsParsed)
     free(buffer);
 }
 
-TEST(LogBufferParser, GetLogs_testIfGcStripeFlushedLogIsParsed)
+TEST(LogBufferParser, GetLogs_testIfGcBlockWriteDoneLogIsParsed)
 {
     // Given
-    GcStripeFlushedLog log;
-    log.type = LogType::GC_STRIPE_FLUSHED;
+    GcBlockWriteDoneLog log;
+    log.type = LogType::GC_BLOCK_WRITE_DONE;
     log.volId = 1;
     log.vsid = 100;
-    log.wbLsid = 20;
-    log.userLsid = 100;
     log.numBlockMaps = 2;
 
     GcBlockMapUpdate blockMapUpdates[log.numBlockMaps];
@@ -102,6 +98,33 @@ TEST(LogBufferParser, GetLogs_testIfGcStripeFlushedLogIsParsed)
     void* buffer = malloc(bufferSize);
     memcpy(buffer, &log, sizeof(log));
     memcpy((char*)buffer + sizeof(log), &blockMapUpdates, sizeof(blockMapUpdates));
+
+    NiceMock<MockLogList> logList;
+
+    // Then
+    EXPECT_CALL(logList, AddLog(EqLog(buffer)));
+
+    // When
+    LogBufferParser parser;
+    parser.GetLogs(buffer, bufferSize, logList);
+
+    free(buffer);
+}
+
+TEST(LogBufferParser, GetLogs_testIfGcStripeFlushedLogIsParsed)
+{
+    // Given
+    GcStripeFlushedLog log;
+    log.type = LogType::GC_STRIPE_FLUSHED;
+    log.volId = 1;
+    log.vsid = 100;
+    log.wbLsid = 20;
+    log.userLsid = 100;
+    log.totalNumBlockMaps = 2;
+
+    uint64_t bufferSize = sizeof(log);
+    void* buffer = malloc(bufferSize);
+    memcpy(buffer, &log, sizeof(log));
 
     NiceMock<MockLogList> logList;
 
@@ -162,8 +185,6 @@ TEST(LogBufferParser, GetLogs_testIfLogsAreParsed)
         log.writeBufferStripeAddress = {
             .stripeLoc = IN_WRITE_BUFFER_AREA,
             .stripeId = 0};
-        log.isGC = false;
-        log.oldVsa = UNMAP_VSA;
 
         char* targetBuffer = (char*)logBuffer + currentOffset;
         memcpy(targetBuffer, &log, sizeof(log));

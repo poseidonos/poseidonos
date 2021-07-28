@@ -104,7 +104,11 @@ QosVolumeManager::~QosVolumeManager(void)
 void
 QosVolumeManager::UpdateSubsystemToVolumeMap(uint32_t nqnId, uint32_t volId)
 {
-    nqnVolumeMap[nqnId].push_back(volId);
+    std::vector<int>::iterator it;
+    it = std::find(nqnVolumeMap[nqnId].begin(), nqnVolumeMap[nqnId].end(), volId);
+    // add volume id in map only if it is not already there to avoid douplicate entries.
+    if (it == nqnVolumeMap[nqnId].end())
+        nqnVolumeMap[nqnId].push_back(volId);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -177,7 +181,7 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
     {
         pendingIO[reactorId][volId]++;
         _EnqueueVolumeUbio(reactorId, volId, volIo);
-        while (1)
+        while (!IsExitQosSet())
         {
             if (_RateLimit(reactorId, volId) == true)
             {
@@ -460,7 +464,7 @@ QosVolumeManager::VolumeQosPoller(struct poller_structure* param, IbofIoSubmissi
             currentBW = 0;
             currentIO = 0;
             _ResetRateLimit(reactor, volId, offset);
-            while (1)
+            while (!IsExitQosSet())
             {
                 if (_RateLimit(reactor, volId) == true)
                 {

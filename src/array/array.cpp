@@ -287,11 +287,9 @@ Array::Delete(void)
     }
 
     // Rebuild would not be finished when rebuild io have an error on broken array
-    if ( rebuilder->IsRebuilding(name_))
+    if (rebuilder->IsRebuilding(name_))
     {
         ret = (int)POS_EVENT_ID::ARRAY_REBUILD_NOT_DONE;
-        POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG , "Rebuild not done, try again later");
-        rebuilder->CleanUp(name_);
         goto error;
     }
 
@@ -344,6 +342,19 @@ Array::AddSpare(string devName)
         POS_TRACE_ERROR(ret, "Failed to add spare device to array {}", name_);
         return ret;
     }
+
+    DevName spareDevName(devName);
+    string spareSN = sysDevMgr->GetDev(spareDevName)->GetSN();
+
+    string involvedArray = abrControl->FindArrayWithDeviceSN(spareSN);
+    if (involvedArray != "")
+    {
+        pthread_rwlock_unlock(&stateLock);
+        ret = (int)POS_EVENT_ID::MBR_DEVICE_ALREADY_IN_ARRAY;
+        POS_TRACE_ERROR(ret, "Failed to add spare device to array {}, it's already in other array {}", name_, involvedArray);
+        return ret;
+    }
+
     ret = devMgr_->AddSpare(devName);
     if (0 != ret)
     {
@@ -583,6 +594,28 @@ Array::DetachDevice(UblockSharedPtr uBlock)
 }
 
 void
+Array::AttachDevice(UblockSharedPtr uBlock)
+{
+    pthread_rwlock_wrlock(&stateLock);
+    if (state->GetState() == ArrayStateEnum::EXIST_DEGRADED)
+    {
+        ArrayDevice* dev = devMgr_->GetFaulty();
+        if (dev != nullptr)
+        {
+            int eventId = (int)POS_EVENT_ID::ARRAY_DEVICE_ATTACHED;
+            POS_TRACE_INFO(eventId,
+                "Updating the device class of a newly attached faulty device {} to ARRAY",
+                uBlock->GetSN());
+            state->SetState(ArrayStateEnum::EXIST_NORMAL);
+            uBlock->SetClass(DeviceClass::ARRAY);
+            dev->SetUblock(uBlock);
+            dev->SetState(ArrayDeviceState::NORMAL);
+        }
+    }
+    pthread_rwlock_unlock(&stateLock);
+}
+
+void
 Array::MountDone(void)
 {
     _CheckRebuildNecessity();
@@ -658,6 +691,7 @@ Array::_DetachData(ArrayDevice* target)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEVICE_DETACHED,
         "Data device {} is detached from array {}", target->GetUblock()->GetName(), name_);
+
     bool isRebuildingDevice = false;
     ArrayDeviceState devState = target->GetState();
     if (devState == ArrayDeviceState::FAULT)
@@ -701,12 +735,12 @@ Array::_RebuildDone(RebuildResult result)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "Array {} rebuild done. result:{}", name_, result.result);
+    rebuilder->RebuildDone(name_);
     pthread_rwlock_wrlock(&stateLock);
     if (result.result != RebuildState::PASS)
     {
         state->SetRebuildDone(false);
         pthread_rwlock_unlock(&stateLock);
-        rebuilder->RebuildDone(name_);
         POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
             "Array {} rebuild done. but result:{} . Retry ", name_, result.result);
         EventSmartPtr event(new RebuildHandler(this, nullptr));
@@ -725,7 +759,6 @@ Array::_RebuildDone(RebuildResult result)
         POS_TRACE_ERROR(ret, "Array {} failed to save the device state from rebuild to normal", name_);
     }
     pthread_rwlock_unlock(&stateLock);
-    rebuilder->RebuildDone(name_);
 }
 
 bool
@@ -836,12 +869,20 @@ Array::_RegisterService(void)
 {
     ArrayService::Instance()->Setter()->Register(name_, intf->GetTranslator(),
         intf->GetRecover(), this);
+    if (devMgr_ != nullptr)
+    {
+        IOLockerSingleton::Instance()->Register(devMgr_->GetDataDevices());
+    }
 }
 
 void
 Array::_UnregisterService(void)
 {
     ArrayService::Instance()->Setter()->Unregister(name_);
+    if (devMgr_ != nullptr)
+    {
+        IOLockerSingleton::Instance()->Unregister(devMgr_->GetDataDevices());
+    }
 }
 
 void

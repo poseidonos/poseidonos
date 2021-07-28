@@ -30,18 +30,18 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/network/nvmf_volume_pos.hpp"
+#include "src/network/nvmf_volume_pos.h"
 
 #include <map>
 #include <string>
 
 #include "spdk/event.h"
-#include "src/lib/system_timeout_checker.h"
-#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
-#include "src/volume/volume_manager.h"
+#include "src/lib/system_timeout_checker.h"
 #include "src/qos/qos_manager.h"
+#include "src/spdk_wrapper/event_framework_api.h"
+#include "src/volume/volume_manager.h"
 
 namespace pos
 {
@@ -50,7 +50,8 @@ NvmfTarget NvmfVolumePos::target;
 std::atomic<bool> NvmfVolumePos::detachFailed;
 std::atomic<uint32_t> NvmfVolumePos::volumeDetachedCnt;
 
-NvmfVolumePos::NvmfVolumePos(void)
+NvmfVolumePos::NvmfVolumePos(unvmf_io_handler ioHandler)
+: ioHandler(ioHandler)
 {
 }
 
@@ -143,7 +144,7 @@ NvmfVolumePos::_VolumeCreateHandler(void* arg1, void* arg2)
 void
 NvmfVolumePos::VolumeCreated(struct pos_volume_info* vInfo)
 {
-    vInfo->unvmf_io = GetuNVMfIOHandler();
+    vInfo->unvmf_io = ioHandler;
     EventFrameworkApi::SendSpdkEvent(EventFrameworkApi::GetFirstReactor(),
         _VolumeCreateHandler, vInfo, nullptr);
 }
@@ -182,7 +183,7 @@ NvmfVolumePos::_VolumeMountHandler(void* arg1, void* arg2)
         set_pos_volume_info(bdevName.c_str(), subNqn.c_str(), nqn_id);
         target.SetVolumeQos(bdevName, vInfo->iops_limit, vInfo->bw_limit);
         delete vInfo;
-  }
+    }
 }
 
 void

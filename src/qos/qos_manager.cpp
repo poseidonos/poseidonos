@@ -44,7 +44,7 @@
 #include "src/io_scheduler/io_worker.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
-#include "src/network/nvmf_volume_pos.hpp"
+#include "src/network/nvmf_volume_pos.h"
 #include "src/qos/context_factory.h"
 #include "src/qos/internal_manager.h"
 #include "src/qos/internal_manager_factory.h"
@@ -66,7 +66,6 @@ namespace pos
 /* --------------------------------------------------------------------------*/
 QosManager::QosManager(void)
 {
-    quitQos = false;
     qosThread = nullptr;
     feQosEnabled = false;
     pollerTime = UINT32_MAX;
@@ -183,11 +182,19 @@ QosManager::_Finalize(void)
     {
         spdkManager->Finalize();
     }
-    quitQos = true;
+    POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosSpdkManager Finalization complete");
+    SetExitQos();
+    qosVolumeManager->SetExitQos();
+    qosEventManager->SetExitQos();
+    monitoringManager->SetExitQos();
+    policyManager->SetExitQos();
+    processingManager->SetExitQos();
+    correctionManager->SetExitQos();
     if (nullptr != qosThread)
     {
         qosThread->join();
     }
+    POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosManager Finalization complete");
 }
 
 /* --------------------------------------------------------------------------*/
@@ -237,8 +244,9 @@ QosManager::_QosWorker(void)
     QosInternalManager* nextManager = nullptr;
     while (nullptr != currentManager)
     {
-        if (true == quitQos)
+        if (true == IsExitQosSet())
         {
+            POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosManager Finalization Triggered, QosWorker thread exit");
             break;
         }
         currentManager->Execute();

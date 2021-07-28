@@ -130,6 +130,11 @@ BlockManager::InvalidateBlks(VirtualBlks blks)
     if (validCount == 0)
     {
         contextManager->FreeUserDataSegment(segId);
+        CurrentGcMode gcMode = contextManager->GetCurrentGcMode();
+        if (gcMode != MODE_URGENT_GC)
+        {
+            PermitUserBlkAlloc();
+        }
     }
 }
 

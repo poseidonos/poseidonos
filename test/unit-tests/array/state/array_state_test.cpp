@@ -132,13 +132,7 @@ TEST(ArrayState, SetDelete_testIfStateIsNotifiedAndBecomesNotExist)
     NiceMock<MockIStateControl> mockIStateControl;
     ArrayState arrayState(&mockIStateControl);
 
-    EXPECT_CALL(mockIStateControl, Remove).WillOnce([](StateContext* ctx)
-    {
-        SituationType actual = ctx->GetSituation();
-        SituationType expected(SituationEnum::FAULT);
-        ASSERT_EQ(expected, actual);
-    });
-
+    EXPECT_CALL(mockIStateControl, Remove).Times(0);
     EXPECT_CALL(mockIStateControl, Invoke).Times(0);
 
     // When

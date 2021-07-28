@@ -185,12 +185,7 @@ Copier::_CompareThresholdState(void)
 
             POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_GET_VICTIM_SEGMENT,
                 "trigger start, cnt:{}, victimId:{}",
-                 iContextManager->GetNumFreeSegment(), victimId);
-
-            if (gcMode == MODE_NORMAL_GC)
-            {
-                iBlockAllocator->PermitUserBlkAlloc();
-            }
+            iContextManager->GetNumOfFreeSegment(true), victimId);
         }
     }
 }
@@ -223,6 +218,9 @@ Copier::_CopyPrepareState(void)
         }
         meta->GetVictimStripe(victimIndex, index)->Load(baseStripe + index, callback);
     }
+
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_LOAD_REVERSE_MAP,
+                "load reverse map, victimSegmentId:{}", victimId);
 
     _ChangeEventState(CopierStateType::COPIER_COPY_COMPLETE_STATE);
 }

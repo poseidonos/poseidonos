@@ -47,11 +47,12 @@ class SegmentLock;
 class AllocatorCtx : public IAllocatorFileIoClient
 {
 public:
+    AllocatorCtx(void);
     AllocatorCtx(BitMapMutex* allocSegBitmap, SegmentStates* segmentStates, SegmentLock* segStateLock, AllocatorAddressInfo* info, std::string arrayName);
     AllocatorCtx(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~AllocatorCtx(void);
     virtual void Init(void);
-    virtual void Close(void);
+    virtual void Dispose(void);
 
     virtual void AfterLoad(char* buf);
     virtual void BeforeFlush(int section, char* buf);
@@ -73,7 +74,8 @@ public:
     virtual void ReleaseSegment(SegmentId segId);
     virtual SegmentId AllocateFreeSegment(SegmentId startSegId);
     virtual SegmentId GetUsedSegment(SegmentId startSegId);
-    virtual uint64_t GetNumOfFreeUserDataSegment(void);
+    virtual uint64_t GetNumOfFreeSegment(void);
+    virtual uint64_t GetNumOfFreeSegmentWoLock(void);
     virtual SegmentState GetSegmentState(SegmentId segmentId, bool needlock);
     virtual void SetSegmentState(SegmentId segmentId, SegmentState state, bool needlock);
 
@@ -105,6 +107,8 @@ private:
     // Lock
     std::mutex allocCtxLock;
     SegmentLock* segStateLocks;
+
+    bool initialized;
 };
 
 } // namespace pos

@@ -1,21 +1,19 @@
 #include "log_buffer_integration_test.h"
 
-#include "src/logger/logger.h"
-#include "src/meta_file_intf/mock_file_intf.h"
+#include <string>
 
+#include "src/journal_manager/log/block_write_done_log_handler.h"
+#include "src/journal_manager/log/gc_block_write_done_log_handler.h"
+#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
 #include "src/journal_manager/log/log_buffer_parser.h"
 #include "src/journal_manager/log/log_handler.h"
-#include "src/journal_manager/log/block_write_done_log_handler.h"
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
-#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
-
+#include "src/logger/logger.h"
+#include "src/meta_file_intf/mock_file_intf.h"
 #include "test/integration-tests/journal/utils/test_info.h"
-
 #include "test/unit-tests/allocator/wb_stripe_manager/stripe_mock.h"
-
-#include <string>
 
 namespace pos
 {
@@ -42,7 +40,7 @@ JournalLogBufferIntegrationTest::SetUp(void)
     ON_CALL(config, GetLogGroupSize).WillByDefault(Return(LOG_GROUP_SIZE));
 
     // TODO(huijeong.kim) This injected modules should be deleted
-    factory.Init(new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
+    factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
 
     logBuffer = new JournalLogBuffer(new MockFileIntf(GetLogFileName(), "POSArray"));
     logBuffer->Delete();
@@ -130,6 +128,35 @@ JournalLogBufferIntegrationTest::_CreateContextForStripeMapUpdatedLog(void)
 
     LogWriteContext* context =
         factory.CreateStripeMapLogWriteContext(stripe, oldAddr, dummyDirty, callback);
+    context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
+        this, std::placeholders::_1));
+
+    return context;
+}
+
+LogWriteContext*
+JournalLogBufferIntegrationTest::_CreateContextForGcBlockWriteDoneLog(void)
+{
+    GcStripeMapUpdateList mapUpdates;
+    mapUpdates.volumeId = TEST_VOLUME_ID;
+    mapUpdates.vsid = 100;
+    mapUpdates.wbLsid = 2;
+    mapUpdates.userLsid = 100;
+
+    for (int offset = 0; offset < 128; offset++)
+    {
+        GcBlockMapUpdate mapUpdate;
+        mapUpdate.rba = offset;
+        mapUpdate.vsa.stripeId = 100;
+        mapUpdate.vsa.offset = offset;
+
+        mapUpdates.blockMapUpdateList.push_back(mapUpdate);
+    }
+
+    MapPageList dummyDirty;
+    EventSmartPtr callback(new LogBufferWriteDone());
+    LogWriteContext* context =
+        factory.CreateGcBlockMapLogWriteContext(mapUpdates, dummyDirty, callback);
     context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
         this, std::placeholders::_1));
 
@@ -233,9 +260,13 @@ JournalLogBufferIntegrationTest::_AddToList(LogWriteContext* context)
     {
         handler = new StripeMapUpdatedLogHandler(*(reinterpret_cast<StripeMapUpdatedLog*>(data)));
     }
+    else if (logType == LogType::GC_BLOCK_WRITE_DONE)
+    {
+        handler = new GcBlockWriteDoneLogHandler(data);
+    }
     else if (logType == LogType::GC_STRIPE_FLUSHED)
     {
-        handler = new GcStripeFlushedLogHandler(data);
+        handler = new GcStripeFlushedLogHandler(*(reinterpret_cast<GcStripeFlushedLog*>(data)));
     }
     addedLogs.push_back(handler);
 }
@@ -256,6 +287,14 @@ TEST_F(JournalLogBufferIntegrationTest, ParseLogBuffer_testIfAllLogsAreParsed)
 
     // Write stripe map updated log
     context = _CreateContextForStripeMapUpdatedLog();
+    context->SetBufferAllocated(offset, 0, 0);
+    EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
+
+    offset += context->GetLength();
+    _AddToList(context);
+
+    // Write gc block write done log
+    context = _CreateContextForGcBlockWriteDoneLog();
     context->SetBufferAllocated(offset, 0, 0);
     EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
 

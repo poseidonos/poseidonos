@@ -32,10 +32,6 @@ TEST(ArrayServiceLayer, GetRecover_)
 {
 }
 
-TEST(ArrayServiceLayer, GetLocker_)
-{
-}
-
 TEST(ArrayServiceLayer, GetDeviceChecker_)
 {
 }

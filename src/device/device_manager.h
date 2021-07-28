@@ -105,17 +105,7 @@ private:
     void _PrepareIOWorker(void);
     void _PrepareDevices(void);
     void _PrepareDevice(UblockSharedPtr dev);
-    void _PrepareMockDevice(UblockSharedPtr dev);
-    void _ReleaseDevice(UblockSharedPtr dev);
     bool _CheckDuplication(UblockSharedPtr dev);
-
-    void _WaitRegistration(void);
-    void _RegisterThread(void);
-    static void _RegisterToAllDevices(void* arg1, void* arg2);
-    static void _RegisterToDevice(void* arg1, void* arg2);
-
-    void _RegisterThread(UblockSharedPtr dev);
-    void _RegisterThreadToDevice(UblockSharedPtr dev);
 
     static const int LOCK_ACQUIRE_FAILED = -1;
 
@@ -126,10 +116,11 @@ private:
     vector<future<void>> monitorFutures;
 
     AffinityManager* affinityManager;
-    std::atomic<bool> reactorRegistered;
     IDeviceEvent* deviceEvent = nullptr;
     IIODispatcher* ioDispatcher;
 };
+
+void DeviceDetachEventHandler(string sn);
 
 using DeviceManagerSingleton = Singleton<DeviceManager>;
 

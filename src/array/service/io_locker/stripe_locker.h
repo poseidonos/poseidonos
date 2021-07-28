@@ -34,6 +34,7 @@
 
 #include <mutex>
 
+#include "busy_range.h"
 #include "src/include/address_type.h"
 #include "stripe_locker_busy_state.h"
 #include "stripe_locker_normal_state.h"
@@ -49,15 +50,15 @@ public:
     virtual ~StripeLocker(void);
     bool TryLock(StripeId val);
     void Unlock(StripeId val);
-    bool TryModeChanging(LockerMode mode);
+    bool TryBusyLock(StripeId from, StripeId to);
+    bool ResetBusyLock(void);
 
 private:
-    void _ChangeMode(LockerMode mode);
-    StripeLockerState* locker = nullptr;
     StripeLockerNormalState* normalLocker = nullptr;
     StripeLockerBusyState* busyLocker = nullptr;
-    int state = LockerMode::NORMAL;
-    mutex statechangingMtx;
+    BusyRange* busyRange = nullptr;
+    mutex lockerMtx;
+    bool isBusyRangeChanging = false;
 };
 
 } // namespace pos

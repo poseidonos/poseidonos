@@ -1213,8 +1213,42 @@ index 04141fb42..b00bd0931 100644
  		return 0;
  	}
  
+diff --git lib/spdk-20.10/lib/nvmf/tcp.c lib/spdk-20.10/lib/nvmf/tcp.c
+index 4c0f7cd3b..6c2e9f0f8 100644
+--- lib/spdk-20.10/lib/nvmf/tcp.c
++++ lib/spdk-20.10/lib/nvmf/tcp.c
+@@ -2470,14 +2470,6 @@ nvmf_tcp_poll_group_add(struct spdk_nvmf_transport_poll_group *group,
+ 	tgroup = SPDK_CONTAINEROF(group, struct spdk_nvmf_tcp_poll_group, group);
+ 	tqpair = SPDK_CONTAINEROF(qpair, struct spdk_nvmf_tcp_qpair, qpair);
+ 
+-	rc = spdk_sock_group_add_sock(tgroup->sock_group, tqpair->sock,
+-				      nvmf_tcp_sock_cb, tqpair);
+-	if (rc != 0) {
+-		SPDK_ERRLOG("Could not add sock to sock_group: %s (%d)\n",
+-			    spdk_strerror(errno), errno);
+-		return -1;
+-	}
+-
+ 	rc =  nvmf_tcp_qpair_sock_init(tqpair);
+ 	if (rc != 0) {
+ 		SPDK_ERRLOG("Cannot set sock opt for tqpair=%p\n", tqpair);
+@@ -2496,6 +2488,14 @@ nvmf_tcp_poll_group_add(struct spdk_nvmf_transport_poll_group *group,
+ 		return -1;
+ 	}
+ 
++	rc = spdk_sock_group_add_sock(tgroup->sock_group, tqpair->sock,
++				      nvmf_tcp_sock_cb, tqpair);
++	if (rc != 0) {
++		SPDK_ERRLOG("Could not add sock to sock_group: %s (%d)\n",
++			    spdk_strerror(errno), errno);
++		return -1;
++	}
++
+ 	tqpair->group = tgroup;
+ 	tqpair->state = NVME_TCP_QPAIR_STATE_INVALID;
+ 	TAILQ_INSERT_TAIL(&tgroup->qpairs, tqpair, link);
 diff --git lib/spdk-20.10/lib/thread/thread.c lib/spdk-20.10/lib/thread/thread.c
-index 9334678c4..153bc5924 100644
+index 9334678c4..436fbe230 100644
 --- lib/spdk-20.10/lib/thread/thread.c
 +++ lib/spdk-20.10/lib/thread/thread.c
 @@ -49,7 +49,7 @@
@@ -1297,6 +1331,26 @@ index 9334678c4..153bc5924 100644
  void
  spdk_set_thread(struct spdk_thread *thread)
  {
+@@ -906,7 +943,8 @@ spdk_thread_send_msg(const struct spdk_thread *thread, spdk_msg_fn fn, void *ctx
+ 	if (msg == NULL) {
+ 		msg = spdk_mempool_get(g_spdk_msg_mempool);
+ 		if (!msg) {
+-			SPDK_ERRLOG("msg could not be allocated\n");
++			// It can be handled by caller
++			SPDK_WARNLOG("msg could not be allocated\n");
+ 			return -ENOMEM;
+ 		}
+ 	}
+@@ -916,7 +954,8 @@ spdk_thread_send_msg(const struct spdk_thread *thread, spdk_msg_fn fn, void *ctx
+ 
+ 	rc = spdk_ring_enqueue(thread->messages, (void **)&msg, 1, NULL);
+ 	if (rc != 1) {
+-		SPDK_ERRLOG("msg could not be enqueued\n");
++		// It can be handled by caller
++		SPDK_WARNLOG("msg could not be enqueued\n");
+ 		spdk_mempool_put(g_spdk_msg_mempool, msg);
+ 		return -EIO;
+ 	}
 diff --git lib/spdk-20.10/mk/spdk.common.mk lib/spdk-20.10/mk/spdk.common.mk
 index 3fc04792f..91b7d3066 100644
 --- lib/spdk-20.10/mk/spdk.common.mk
@@ -1665,7 +1719,7 @@ index 000000000..35f1946bd
 +include $(SPDK_ROOT_DIR)/mk/spdk.lib.mk
 diff --git lib/spdk-20.10/module/bdev/pos/bdev_pos.c lib/spdk-20.10/module/bdev/pos/bdev_pos.c
 new file mode 100644
-index 000000000..82089f9b0
+index 000000000..c1ca19df2
 --- /dev/null
 +++ lib/spdk-20.10/module/bdev/pos/bdev_pos.c
 @@ -0,0 +1,1038 @@
@@ -2457,14 +2511,14 @@ index 000000000..82089f9b0
 +	mdisk->disk.fn_table = &pos_fn_table;
 +	mdisk->disk.module = &pos_if;
 +
-+	TAILQ_INSERT_TAIL(&g_pos_disks, mdisk, link);
-+	pos_disk_count++;
-+
 +	rc = spdk_bdev_register(&mdisk->disk);
 +	if (rc) {
 +		pos_disk_free(mdisk);
 +		return NULL;
 +	}
++
++	TAILQ_INSERT_TAIL(&g_pos_disks, mdisk, link);
++	pos_disk_count++;
 +
 +	SPDK_NOTICELOG("pos_Volume(volume_id=%u, size_mb=%ld) has created. volume_type_in_memory=%d\n",
 +		       mdisk->volume.id, mdisk->volume.size_mb, volume_type_in_memory);

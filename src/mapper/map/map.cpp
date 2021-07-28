@@ -37,7 +37,8 @@
 namespace pos
 {
 MapHeader::MapHeader(void)
-: bitmap(nullptr),
+: usedBlkCnt(0),
+  bitmap(nullptr),
   touchedPages(nullptr),
   isInitialized(false),
   size(0),
@@ -62,6 +63,7 @@ MapHeader::SetSize(void)
     uint32_t curOffset = 0;
 
     curOffset += sizeof(mpageData);
+    curOffset += sizeof(usedBlkCnt);
     curOffset += (bitmap->GetNumEntry() * BITMAP_ENTRY_SIZE);
 
     size = Align(curOffset, mpageSize);
@@ -86,9 +88,9 @@ MapHeader::CopyToBuffer(char* buffer)
 
     memcpy(buffer, (void*)(&mpageData), sizeof(mpageData));
     curOffset += sizeof(mpageData);
-
-    memcpy(buffer + curOffset, (void*)bitmap->GetMapAddr(),
-        bitmap->GetNumEntry() * BITMAP_ENTRY_SIZE);
+    memcpy(buffer + curOffset, (void*)(&usedBlkCnt), sizeof(usedBlkCnt));
+    curOffset += sizeof(usedBlkCnt);
+    memcpy(buffer + curOffset, (void*)bitmap->GetMapAddr(), bitmap->GetNumEntry() * BITMAP_ENTRY_SIZE);
 
     return 0;
 }
@@ -97,7 +99,7 @@ BitMap*
 MapHeader::GetBitmapFromTempBuffer(char* buffer)
 {
     MpageValidInfo* validInfo = reinterpret_cast<MpageValidInfo*>(buffer);
-    int bitmapOffset = sizeof(mpageData);
+    int bitmapOffset = sizeof(mpageData) + sizeof(usedBlkCnt);
 
     BitMap* copiedBitmap = new BitMap(validInfo->numTotalMpages);
     copiedBitmap->SetNumBitsSet(validInfo->numValidMpages);

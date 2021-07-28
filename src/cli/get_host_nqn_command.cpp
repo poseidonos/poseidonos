@@ -38,7 +38,7 @@
 #include "src/volume/volume_service.h"
 #include "src/volume/volume_list.h"
 #include "src/volume/volume_base.h"
-#include "src/network/nvmf_target.hpp"
+#include "src/network/nvmf_target.h"
 
 namespace pos_cli
 {

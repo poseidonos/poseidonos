@@ -47,7 +47,6 @@ class IArrayInfo;
 class IDevInfo;
 class IIODispatcher;
 class IArrayDevMgr;
-static const int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
 static const uint64_t INVALID_LBA = UINT64_MAX;
 class GetLogPageContext
 {

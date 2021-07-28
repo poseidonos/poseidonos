@@ -46,11 +46,12 @@ namespace pos
 class SegmentCtx : public IAllocatorFileIoClient
 {
 public:
+    SegmentCtx(void);
     SegmentCtx(SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_);
     SegmentCtx(AllocatorAddressInfo* info, std::string arrayName);
     virtual ~SegmentCtx(void);
     virtual void Init(void);
-    virtual void Close(void);
+    virtual void Dispose(void);
 
     virtual void AfterLoad(char* buf);
     virtual void BeforeFlush(int section, char* buf);
@@ -82,6 +83,7 @@ private:
     std::atomic<uint64_t> ctxStoredVersion;
     SegmentInfo* segmentInfos;
     uint32_t numSegments;
+    bool initialized;
 
     AllocatorAddressInfo* addrInfo;
     std::string arrayName;

@@ -79,6 +79,7 @@ private:
 class BitMapMutex
 {
 public:
+    BitMapMutex(void) = default;
     explicit BitMapMutex(BitMap* bitmap);       // Ctor for DoCs Injection in UT
     explicit BitMapMutex(uint64_t totalBits);   // Ctor for Production code
     virtual ~BitMapMutex(void);

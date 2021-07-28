@@ -57,7 +57,8 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     nullptr /*allocator*/,
     nullptr /*journal*/,
     nullptr /*rbaStateMgr*/,
-    nullptr /*metaFsFactory*/
+    nullptr /*metaFsFactory*/,
+    nullptr /*nvmf*/
     )
 {
     // object instantiations for prod
@@ -89,7 +90,8 @@ ArrayComponents::ArrayComponents(string arrayName,
     Allocator* allocator,
     JournalManager* journal,
     RBAStateManager* rbaStateMgr,
-    function<MetaFs* (Array*, bool)> metaFsFactory)
+    function<MetaFs* (Array*, bool)> metaFsFactory,
+    Nvmf* nvmf)
 : arrayName(arrayName),
   state(state),
   arrayRebuilder(rebuilder),
@@ -102,6 +104,7 @@ ArrayComponents::ArrayComponents(string arrayName,
   mapper(mapper),
   allocator(allocator),
   rbaStateMgr(rbaStateMgr),
+  nvmf(nvmf),
   metaFsFactory(metaFsFactory)
 {
     // dependency injection for ut
@@ -233,6 +236,7 @@ void
 ArrayComponents::_SetMountSequence(void)
 {
     mountSequence.push_back(array);
+    mountSequence.push_back(nvmf);
     mountSequence.push_back(metafs);
     mountSequence.push_back(volMgr);
     mountSequence.push_back(metaMountSequence);
@@ -244,7 +248,7 @@ ArrayComponents::_SetMountSequence(void)
     {
         POS_TRACE_WARN(EID(ARRAY_COMPONENTS_LEAK), "Memory leakage found for ArrayMountSequence for " + arrayName);
     }
-    arrayMountSequence = new ArrayMountSequence(mountSequence, iAbr, state, arrayName, volMgr);
+    arrayMountSequence = new ArrayMountSequence(mountSequence, iAbr, state, arrayName, volMgr, arrayRebuilder);
 }
 
 void
@@ -252,6 +256,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
 {
     if (metafs != nullptr
         || volMgr != nullptr
+        || nvmf != nullptr
         || mapper != nullptr
         || allocator != nullptr
         || journal != nullptr
@@ -266,6 +271,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     // Please note that the order of creation should be like the following:
     metafs = metaFsFactory(array, isArrayLoaded);
     volMgr = new VolumeManager(array, state);
+    nvmf = new Nvmf(array->GetName());
     mapper = new Mapper(array, state);
     allocator = new Allocator(array, state);
     journal = new JournalManager(array, state);
@@ -318,6 +324,13 @@ ArrayComponents::_DestructMetaComponentsInOrder(void)
         delete mapper;
         mapper = nullptr;
         POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Mapper for {} has been deleted.", arrayName);
+    }
+
+    if (nvmf != nullptr)
+    {
+        delete nvmf;
+        nvmf = nullptr;
+        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Nvmf for {} has been deleted.", arrayName);
     }
 
     if (volMgr != nullptr)

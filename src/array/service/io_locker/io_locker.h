@@ -32,11 +32,16 @@
 
 #pragma once
 
+#include "src/array/device/array_device.h"
 #include "stripe_locker.h"
 #include "i_io_locker.h"
+#include "locker_group.h"
+#include "src/lib/singleton.h"
 
 #include <string>
 #include <map>
+#include <vector>
+#include <set>
 using namespace std;
 
 namespace pos
@@ -44,16 +49,21 @@ namespace pos
 class IOLocker : public IIOLocker
 {
 public:
+    IOLocker(void) {}
     virtual ~IOLocker(void) {}
-    void Register(string array);
-    void Unregister(string array);
-    bool TryLock(string array, StripeId val) override;
-    void Unlock(string array, StripeId val) override;
-    bool TryChange(string array, LockerMode mode) override;
+    bool Register(vector<ArrayDevice*> devList);
+    void Unregister(vector<ArrayDevice*> devList);
+    bool TryBusyLock(IArrayDevice* dev, StripeId from, StripeId to) override;
+    bool ResetBusyLock(IArrayDevice* dev) override;
+    bool TryLock(set<IArrayDevice*>& devs, StripeId val) override;
+    void Unlock(IArrayDevice* dev, StripeId val) override;
+    void Unlock(set<IArrayDevice*>& devs, StripeId val) override;
 
 private:
-    StripeLocker* _Find(string array);
-    void _Erase(string array);
-    map<string, StripeLocker*> lockers;
+    StripeLocker* _Find(IArrayDevice* dev);
+    map<IArrayDevice*, StripeLocker*> lockers;
+    LockerGroup group;
 };
+
+using IOLockerSingleton = Singleton<IOLocker>;
 } // namespace pos

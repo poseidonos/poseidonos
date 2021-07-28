@@ -15,7 +15,7 @@
 namespace pos
 {
 SubmitAsyncWrite::SubmitAsyncWrite(void)
-: SubmitAsyncWrite(ArrayService::Instance()->Getter()->GetLocker(),
+: SubmitAsyncWrite(IOLockerSingleton::Instance(),
       ArrayService::Instance()->Getter()->GetTranslator(),
       IODispatcherSingleton::Instance())
 {
@@ -51,27 +51,29 @@ SubmitAsyncWrite::Execute(
         .blkCnt = static_cast<uint32_t>(blockCount),
         .buffers = &bufferList};
 
-    StripeId stripeId = startLSA.stripeId;
-    if (partitionToIO == PartitionType::META_SSD)
-    {
-        if (locker->TryLock(arrayName, stripeId) == false)
-        {
-            return IOSubmitHandlerStatus::TRYLOCK_FAIL;
-        }
-    }
-
     std::list<PhysicalWriteEntry> physicalWriteEntries;
     int ret = translator->Convert(
         arrayName, partitionToIO, physicalWriteEntries, logicalWriteEntry);
     if (ret != 0)
     {
         callback->InformError(IOErrorType::GENERIC_ERROR);
-        if (partitionToIO == PartitionType::META_SSD)
-        {
-            locker->Unlock(arrayName, stripeId);
-        }
         EventSchedulerSingleton::Instance()->EnqueueEvent(callback);
         return IOSubmitHandlerStatus::SUCCESS;
+    }
+
+    std::set<IArrayDevice*> targetDevices;
+    StripeId stripeId = startLSA.stripeId;
+    if (partitionToIO == PartitionType::META_SSD)
+    {
+        for (PhysicalWriteEntry& physicalWriteEntry : physicalWriteEntries)
+        {
+            targetDevices.insert(physicalWriteEntry.addr.arrayDev);
+        }
+        bool result = locker->TryLock(targetDevices, stripeId);
+        if (result == false)
+        {
+            return IOSubmitHandlerStatus::TRYLOCK_FAIL;
+        }
     }
 
     uint32_t totalIoCount = 0;
@@ -82,7 +84,7 @@ SubmitAsyncWrite::Execute(
     }
     callback->SetWaitingCount(1);
     CallbackSmartPtr arrayUnlocking(
-        new ArrayUnlocking(partitionToIO, stripeId, arrayName));
+        new ArrayUnlocking(targetDevices, stripeId, locker));
     arrayUnlocking->SetCallee(callback);
     arrayUnlocking->SetWaitingCount(totalIoCount);
     arrayUnlocking->SetEventType(callback->GetEventType());

@@ -32,10 +32,11 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
+
+#include "src/network/nvmf_target.h"
 #include "src/volume/volume_interface.h"
-#include "src/network/nvmf_target.hpp"
 
 namespace pos
 {
@@ -53,4 +54,4 @@ private:
     NvmfTarget target;
 };
 
-}  // namespace pos
+} // namespace pos

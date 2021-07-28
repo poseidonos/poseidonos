@@ -32,134 +32,66 @@
 
 #include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
 
-#include <string.h>
-
 namespace pos
 {
-GcStripeFlushedLogHandler::GcStripeFlushedLogHandler(GcStripeMapUpdateList mapUpdates)
+GcStripeFlushedLogHandler::GcStripeFlushedLogHandler(int volumeId, StripeId vsid,
+    StripeId wbLsid, StripeId userLsid, uint64_t numBlks)
 {
-    int numBlockMaps = mapUpdates.blockMapUpdateList.size();
-    logSize = sizeof(GcStripeFlushedLog) + sizeof(GcBlockMapUpdate) * numBlockMaps;
-
-    dat = malloc(logSize);
-
-    logPtr = new (dat) GcStripeFlushedLog;
-    blockLogPtr = reinterpret_cast<GcBlockMapUpdate*>((char*)dat + sizeof(GcStripeFlushedLog));
-
-    logPtr->type = LogType::GC_STRIPE_FLUSHED;
-    logPtr->volId = mapUpdates.volumeId;
-    logPtr->vsid = mapUpdates.vsid;
-    logPtr->wbLsid = mapUpdates.wbLsid;
-    logPtr->userLsid = mapUpdates.userLsid;
-    logPtr->numBlockMaps = numBlockMaps;
-
-    GcBlockMapUpdate* currentPtr = blockLogPtr;
-    for (auto blockMapUpdate : mapUpdates.blockMapUpdateList)
-    {
-        currentPtr->rba = blockMapUpdate.rba;
-        currentPtr->vsa = blockMapUpdate.vsa;
-
-        currentPtr++;
-    }
+    dat.type = LogType::GC_STRIPE_FLUSHED;
+    dat.volId = volumeId;
+    dat.vsid = vsid;
+    dat.wbLsid = wbLsid;
+    dat.userLsid = userLsid;
+    dat.totalNumBlockMaps = numBlks;
 }
 
-GcStripeFlushedLogHandler::GcStripeFlushedLogHandler(void* inputData)
+GcStripeFlushedLogHandler::GcStripeFlushedLogHandler(GcStripeFlushedLog& log)
 {
-    GcStripeFlushedLog* inputLog = reinterpret_cast<GcStripeFlushedLog*>(inputData);
-    logSize = sizeof(GcStripeFlushedLog) + sizeof(GcBlockMapUpdate) * inputLog->numBlockMaps;
-
-    dat = malloc(logSize);
-    memcpy(dat, inputData, logSize);
-
-    logPtr = reinterpret_cast<GcStripeFlushedLog*>(dat);
-    blockLogPtr = reinterpret_cast<GcBlockMapUpdate*>((char*)dat + sizeof(GcStripeFlushedLog));
-}
-
-GcStripeFlushedLogHandler::~GcStripeFlushedLogHandler(void)
-{
-    if (dat != nullptr)
-    {
-        free(dat);
-    }
+    dat = log;
 }
 
 bool
 GcStripeFlushedLogHandler::operator==(GcStripeFlushedLogHandler& log)
 {
-    bool isSameStripe = (logPtr->volId == log.logPtr->volId)
-                    && (logPtr->vsid == log.logPtr->vsid)
-                    && (logPtr->wbLsid == log.logPtr->wbLsid)
-                    && (logPtr->userLsid == log.logPtr->userLsid)
-                    && (logPtr->numBlockMaps == log.logPtr->numBlockMaps);
-
-    if (isSameStripe == false)
-    {
-        return false;
-    }
-    else
-    {
-        for (int index = 0; index < logPtr->numBlockMaps; index++)
-        {
-            if ((blockLogPtr[index].rba == log.blockLogPtr[index].rba)
-                && (blockLogPtr[index].vsa == log.blockLogPtr[index].vsa))
-            {
-                continue;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        return true;
-    }
+    return ((dat.volId == log.dat.volId) && (dat.vsid == log.dat.vsid)
+        && (dat.userLsid == log.dat.userLsid)
+        && (dat.totalNumBlockMaps == log.dat.totalNumBlockMaps));
 }
 
 LogType
 GcStripeFlushedLogHandler::GetType(void)
 {
-    return logPtr->type;
+    return dat.type;
 }
 
 uint32_t
 GcStripeFlushedLogHandler::GetSize(void)
 {
-    return logSize;
+    return sizeof(GcStripeFlushedLog);
 }
 
 char*
 GcStripeFlushedLogHandler::GetData(void)
 {
-    return (char*)dat;
+    return (char*)&dat;
 }
 
 StripeId
 GcStripeFlushedLogHandler::GetVsid(void)
 {
-    return logPtr->vsid;
+    return dat.vsid;
 }
 
 uint32_t
 GcStripeFlushedLogHandler::GetSeqNum(void)
 {
-    return logPtr->seqNum;
+    return dat.seqNum;
 }
 
 void
 GcStripeFlushedLogHandler::SetSeqNum(uint32_t num)
 {
-    logPtr->seqNum = num;
-}
-
-GcStripeFlushedLog*
-GcStripeFlushedLogHandler::GetGcStripeFlushedLog(void)
-{
-    return logPtr;
-}
-
-GcBlockMapUpdate*
-GcStripeFlushedLogHandler::GetGcBlockMapUpdateLogs(void)
-{
-    return blockLogPtr;
+    dat.seqNum = num;
 }
 
 } // namespace pos

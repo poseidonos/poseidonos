@@ -34,7 +34,6 @@
 #include "src/mapper/map_flushed_event.h"
 #include "src/mapper/vsamap/vsamap_manager.h"
 #include "src/sys_event/volume_event_publisher.h"
-#include "src/journal_service/journal_service.h"
 
 #include <string>
 #include <vector>
@@ -56,7 +55,7 @@ VSAMapManager::VSAMapManager(MapperAddressInfo* info, std::string arrayName)
     }
     loadDoneWakeUp = std::bind(&VSAMapManager::_WakeUpAfterLoadDone, this, std::placeholders::_1);
     loadDone = std::bind(&VSAMapManager::_AfterLoadDone, this, std::placeholders::_1);
-    volumeManager = nullptr;
+    journalService = JournalServiceSingleton::Instance();
 }
 
 VSAMapManager::~VSAMapManager(void)
@@ -258,8 +257,6 @@ VSAMapManager::GetVSAMapAPI(void)
     return vsaMapAPI;
 }
 
-//------------------------------------------------------------------------------
-
 void
 VSAMapManager::MapAsyncFlushDone(int mapId)
 {
@@ -299,6 +296,7 @@ VSAMapManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByt
         return true;
     }
     while (false);
+    _HandleVolumeCreationFail(volID);
     return false;
 }
 
@@ -329,7 +327,8 @@ VSAMapManager::VolumeUnmounted(std::string volName, int volID, std::string array
 {
     vsaMapAPI->DisableVsaMapAccess(volID);
 
-    do
+    bool journalEnabled = journalService->IsEnabled(arrayName);
+    if (journalEnabled == false)
     {
         EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volID, this);
         mapFlushStatus[volID] = MapFlushState::FLUSHING;
@@ -340,26 +339,24 @@ VSAMapManager::VolumeUnmounted(std::string volName, int volID, std::string array
             POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "ret:{} of vsaMap->Unload(), VolumeId:{} @VolumeUnmounted", ret, volID);
         }
         _WaitForMapAsyncFlushed(volID);
+    }
 
-        std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
-        VolMountStateIter iter;
-        if (_IsVolumeExist(volID, iter))
+    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
+    VolMountStateIter iter;
+    if (_IsVolumeExist(volID, iter))
+    {
+        if (iter->second == VolState::FOREGROUND_MOUNTED)
         {
-            if (iter->second == VolState::FOREGROUND_MOUNTED)
-            {
-                volumeMountState[iter->first] = VolState::BACKGROUND_MOUNTED;
-                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was set as BG_MOUNTED @VolumeUnmounted", volID);
-            }
-            else
-            {
-                POS_TRACE_WARN(EID(VSAMAP_UNMOUNT_FAILURE), "volumeID:{} is Not FG_MOUNTED @VolumeUnmounted", volID);
-            }
+            volumeMountState[iter->first] = VolState::BACKGROUND_MOUNTED;
+            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was set as BG_MOUNTED @VolumeUnmounted", volID);
         }
+        else
+        {
+            POS_TRACE_WARN(EID(VSAMAP_UNMOUNT_FAILURE), "volumeID:{} is Not FG_MOUNTED @VolumeUnmounted", volID);
+        }
+    }
 
-        return true;
-    } while (false);
-
-    return false;
+    return true;
 }
 
 bool
@@ -405,7 +402,7 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
     }
 
     // Write log for deleted volume
-    if (0 != JournalServiceSingleton::Instance()->GetVolumeEventHandler(arrayName)->VolumeDeleted(volID))
+    if (0 != journalService->GetVolumeEventHandler(arrayName)->VolumeDeleted(volID))
     {
         return false;
     }
@@ -510,6 +507,17 @@ VSAMapManager::_VSAMapFileCreate(int volID)
     return (0 == vsaMapRef->CreateMapFile());
 }
 
+void
+VSAMapManager::_HandleVolumeCreationFail(int volID)
+{
+    VSAMapContent*& vsaMapRef = GetVSAMapContent(volID);
+    if (vsaMapRef != nullptr)
+    {
+        delete vsaMapRef;
+        vsaMapRef = nullptr;
+    }
+}
+
 int
 VSAMapManager::_VSAMapFileAsyncLoad(int volID)
 {
@@ -599,14 +607,7 @@ VSAMapManager::_IsVolumeExist(int volID, VolMountStateIter& iter)
 
     if (it == volumeMountState.end())
     {
-        POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "VolumeId:{} is not in volumeMountState", volID);
-        int cnt = 0;
-        for (auto& entry : volumeMountState)
-        {
-            ++cnt;
-            POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "INFO - volumeMountState {}/{}  K:{}  V:{}",
-                            cnt, volumeMountState.size(), entry.first, entry.second);
-        }
+        POS_TRACE_DEBUG(EID(VSAMAP_LOAD_FAILURE), "VolumeId:{} is not in volumeMountState", volID);
         return false;
     }
 

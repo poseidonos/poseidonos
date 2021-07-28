@@ -46,10 +46,10 @@ namespace pos
 class RebuildCtx
 {
 public:
-    RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx);
+    RebuildCtx(std::string arrayName, AllocatorCtx* allocCtx, MetaFileIntf* rebuildSegFile = nullptr);
     virtual ~RebuildCtx(void);
     virtual void Init(AllocatorAddressInfo* info);
-    virtual void Close(void);
+    virtual void Dispose(void);
 
     virtual SegmentId GetRebuildTargetSegment(void);
     virtual int ReleaseRebuildSegment(SegmentId segmentId);
@@ -63,7 +63,8 @@ public:
     RTSegmentIter RebuildTargetSegmentsEnd(void);
     std::pair<RTSegmentIter, bool> EmplaceRebuildTargetSegment(SegmentId segmentId);
     void ClearRebuildTargetSegments(void);
-    uint32_t GetTargetSegmentCnt(void);
+    uint32_t GetTargetSegmentCnt(void) { return targetSegmentCnt; }
+    void SetTargetSegmentCnt(uint32_t val) { targetSegmentCnt = val; }
     void FlushRebuildCtx(void);
     void SetUnderRebuildSegmentId(SegmentId segmentId);
 
@@ -77,12 +78,13 @@ private:
     SegmentId _GetUnderRebuildSegmentId(void);
 
     bool needRebuildCont;
-    uint32_t targetSegmentCnt;
-    std::set<SegmentId> rebuildTargetSegments; // No lock
+    std::atomic<uint32_t> targetSegmentCnt;
+    std::mutex rebuildLock;     // rebuildTargetSegments
+    std::set<SegmentId> rebuildTargetSegments;
     SegmentId underRebuildSegmentId;
     MetaFileIntf* rebuildSegmentsFile;
-    std::mutex rebuildLock;
     char* bufferInObj;
+    bool initialized;
     std::string arrayName;
 
     AllocatorCtx* allocatorCtx;

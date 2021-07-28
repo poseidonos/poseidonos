@@ -44,11 +44,12 @@ class AllocatorAddressInfo;
 class WbStripeCtx : public IAllocatorFileIoClient
 {
 public:
+    WbStripeCtx(void);
     WbStripeCtx(BitMapMutex* allocWbLsidBitmap, AllocatorAddressInfo* info);
     WbStripeCtx(AllocatorAddressInfo* info);
     virtual ~WbStripeCtx(void);
     virtual void Init(void);
-    virtual void Close(void);
+    virtual void Dispose(void);
 
     virtual void AfterLoad(char* buf);
     virtual void BeforeFlush(int section, char* buf);
@@ -79,6 +80,7 @@ private:
     VirtualBlkAddr activeStripeTail[ACTIVE_STRIPE_TAIL_ARRAYLEN];
     std::mutex activeStripeTailLock[ACTIVE_STRIPE_TAIL_ARRAYLEN];
     BitMapMutex* allocWbLsidBitmap;
+    bool initialized;
 
     // DOCs
     AllocatorAddressInfo* addrInfo;

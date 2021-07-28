@@ -49,6 +49,7 @@ class EventScheduler;
 class IOQueue;
 class Ubio;
 class UBlockDevice;
+class DeviceDetachTrigger;
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -59,7 +60,8 @@ class UBlockDevice;
 class IOWorker
 {
 public:
-    IOWorker(cpu_set_t cpuSetInput, uint32_t id);
+    IOWorker(cpu_set_t cpuSetInput, uint32_t id,
+        DeviceDetachTrigger* detachTrigger = nullptr);
     virtual ~IOWorker(void);
 
     void EnqueueUbio(UbioSmartPtr ubio);
@@ -92,5 +94,7 @@ private:
     DeviceSet deviceList;
     std::atomic<bool> exit;
     uint32_t id;
+
+    DeviceDetachTrigger* detachTrigger;
 };
 } // namespace pos

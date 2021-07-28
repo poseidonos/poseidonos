@@ -7,6 +7,7 @@
 #include "test/unit-tests/journal_manager/checkpoint/dirty_map_manager_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/log_group_releaser_mock.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
+#include "test/unit-tests/journal_manager/journal_writer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
@@ -56,6 +57,7 @@ public:
         config = new NiceMock<MockJournalConfiguration>;
         statusProvider = new NiceMock<MockJournalStatusProvider>;
         logWriteHandler = new NiceMock<MockLogWriteHandler>;
+        journalWriter = new NiceMock<MockJournalWriter>;
         logWriteContextFactory = new NiceMock<MockLogWriteContextFactory>;
         volumeEventHandler = new NiceMock<MockJournalVolumeEventHandler>;
         logBuffer = new NiceMock<MockJournalLogBuffer>;
@@ -69,8 +71,8 @@ public:
         service = new NiceMock<MockJournalService>;
 
         journal = new JournalManager(config, statusProvider,
-            logWriteContextFactory, logWriteHandler, volumeEventHandler, logBuffer,
-            bufferAllocator, logGroupReleaser, dirtyMapManager, logFilledNotifier,
+            logWriteContextFactory, logWriteHandler, volumeEventHandler, journalWriter,
+            logBuffer, bufferAllocator, logGroupReleaser, dirtyMapManager, logFilledNotifier,
             callbackSequenceController, replayHandler, arrayInfo, service);
     }
 
@@ -89,6 +91,7 @@ protected:
     NiceMock<MockJournalConfiguration>* config;
     NiceMock<MockJournalStatusProvider>* statusProvider;
     NiceMock<MockLogWriteHandler>* logWriteHandler;
+    NiceMock<MockJournalWriter>* journalWriter;
     NiceMock<MockLogWriteContextFactory>* logWriteContextFactory;
     NiceMock<MockJournalVolumeEventHandler>* volumeEventHandler;
     NiceMock<MockJournalLogBuffer>* logBuffer;
@@ -310,97 +313,6 @@ TEST_F(JournalManagerTestFixture, IsEnabled_testWithJournalEnabled)
     // When: Journal is asked if it's enabled
     // Then: Journal should be enabled
     EXPECT_TRUE(journal->IsEnabled() == true);
-}
-
-TEST_F(JournalManagerTestFixture, AddBlockMapUpdatedLog_testIfFailsWithJournalDisabled)
-{
-    // Given: Journal config manager is configured to be disabled
-    ON_CALL(*config, IsEnabled).WillByDefault(Return(false));
-
-    // When: Journal is requested to write block write done log
-    // Then: Log write should be failed
-    MpageList dummyList;
-    EXPECT_TRUE(journal->AddBlockMapUpdatedLog(nullptr, dummyList, nullptr) < 0);
-}
-
-TEST_F(JournalManagerTestFixture, AddBlockMapUpdatedLog_testIfSuccessWithJournalEnabled)
-{
-    // Given: Journal config manager is configured to be enabled
-    ON_CALL(*config, IsEnabled).WillByDefault(Return(true));
-
-    // When: Journal is initialized beforehead
-    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
-                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
-
-    // Then: Journal should request writing logs to write handler
-    EXPECT_CALL(*logWriteHandler, AddLog);
-
-    // When: Journal is requested to write block write done log
-    // Then: Log write should be successfully requested
-    MpageList dummyList;
-    EXPECT_TRUE(journal->AddBlockMapUpdatedLog(nullptr, dummyList, nullptr) == 0);
-}
-
-TEST_F(JournalManagerTestFixture, AddStripeMapUpdatedLog_testIfFailsWithJournalDisabled)
-{
-    // Given: Journal config manager is configured to be disabled
-    ON_CALL(*config, IsEnabled).WillByDefault(Return(false));
-
-    // When: Journal is requested to write stripe map updated log
-    // Then: Log write should be failed
-    MpageList dummyList;
-    StripeAddr unmap = {.stripeId = UNMAP_STRIPE};
-    EXPECT_TRUE(journal->AddStripeMapUpdatedLog(nullptr, unmap, dummyList, nullptr) < 0);
-}
-
-TEST_F(JournalManagerTestFixture, AddStripeMapUpdatedLog_testIfSuccessWithJournalEnabled)
-{
-    // Given: Journal config manager is configured to be disabled
-    ON_CALL(*config, IsEnabled).WillByDefault(Return(true));
-
-    // When: Journal is initialized beforehead
-    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
-                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
-
-    // Then: Journal should request writing logs to write handler
-    EXPECT_CALL(*logWriteHandler, AddLog);
-
-    // When: Journal is requested to write stripe map updated log
-    // Then: Log write should be successfully requested
-    MpageList dummyList;
-    StripeAddr unmap = {.stripeId = UNMAP_STRIPE};
-    EXPECT_TRUE(journal->AddStripeMapUpdatedLog(nullptr, unmap, dummyList, nullptr) == 0);
-}
-
-TEST_F(JournalManagerTestFixture, AddGcStripeFlushedLog_testIfFailsWithJournalDisabled)
-{
-    // Given: Journal config manager is configured to be enabled
-    EXPECT_CALL(*config, IsEnabled).WillRepeatedly(Return(false));
-
-    // When: Journal is requested to write gc stripe flushed log
-    // Then: Log write should be failed
-    GcStripeMapUpdateList dummyMapUpdates;
-    MapPageList dummyList;
-    EXPECT_TRUE(journal->AddGcStripeFlushedLog(dummyMapUpdates, dummyList, nullptr) < 0);
-}
-
-TEST_F(JournalManagerTestFixture, AddGcStripeFlushedLog_testIfSuccessWithJournalEnabled)
-{
-    // Given: Journal config manager is configured to be enabled
-    ON_CALL(*config, IsEnabled).WillByDefault(Return(true));
-
-    // When: Journal is initialized beforehead
-    ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
-                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
-
-    // Then: Journal should request writing logs to write handler
-    EXPECT_CALL(*logWriteHandler, AddLog);
-
-    // When: Journal is requested to write gc stripe flushed log
-    // Then: Log write should be successfully requested
-    GcStripeMapUpdateList dummyMapUpdates;
-    MapPageList dummyList;
-    EXPECT_TRUE(journal->AddGcStripeFlushedLog(dummyMapUpdates, dummyList, nullptr) == 0);
 }
 
 } // namespace pos

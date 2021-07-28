@@ -33,7 +33,7 @@
 #include "src/journal_manager/replay/gc_replay_stripe.h"
 
 #include "src/include/pos_event_id.h"
-#include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
+#include "src/journal_manager/log/gc_block_write_done_log_handler.h"
 #include "src/journal_manager/replay/active_user_stripe_replayer.h"
 #include "src/journal_manager/replay/replay_event_factory.h"
 #include "src/logger/logger.h"
@@ -46,46 +46,61 @@ GcReplayStripe::GcReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* strip
     IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo,
     ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer)
 : ReplayStripe(vsid, vsaMap, stripeMap, contextReplayer, blockAllocator,
-      arrayInfo, wbReplayer, userReplayer)
+      arrayInfo, wbReplayer, userReplayer),
+  totalNumBlocks(0)
 {
 }
 
 void
 GcReplayStripe::AddLog(LogHandlerInterface* log)
 {
-    assert(log->GetType() == LogType::GC_STRIPE_FLUSHED);
+    if (log->GetType() == LogType::GC_BLOCK_WRITE_DONE)
+    {
+        GcBlockWriteDoneLogHandler* gcBlockLogHandler = dynamic_cast<GcBlockWriteDoneLogHandler*>(log);
+        assert(gcBlockLogHandler != nullptr);
 
-    GcStripeFlushedLogHandler* gcLogHandler = dynamic_cast<GcStripeFlushedLogHandler*>(log);
+        GcBlockWriteDoneLog* blockWriteDoneLog = gcBlockLogHandler->GetGcBlockMapWriteDoneLog();
+        GcBlockMapUpdate* blockList = gcBlockLogHandler->GetMapList();
 
-    // This should be true
-    // TODO (huijeong.kim) pass the exact type instead of dynamic casting here
-    assert (gcLogHandler != nullptr);
+        status->GcBlockLogFound(blockList, blockWriteDoneLog->numBlockMaps);
+        _CreateBlockWriteReplayEvents(blockList, blockWriteDoneLog->volId, blockWriteDoneLog->numBlockMaps);
+    }
+    else if (log->GetType() == LogType::GC_STRIPE_FLUSHED)
+    {
+        GcStripeFlushedLog dat = *(reinterpret_cast<GcStripeFlushedLog*>(log->GetData()));
+        status->GcStripeLogFound(dat);
 
-    GcStripeFlushedLog* gcLog = gcLogHandler->GetGcStripeFlushedLog();
-    GcBlockMapUpdate* blockLogs = gcLogHandler->GetGcBlockMapUpdateLogs();
+        totalNumBlocks = dat.totalNumBlockMaps;
+    }
+}
 
-    status->GcBlockLogFound(blockLogs, gcLog->numBlockMaps);
-    for (int blkCount = 0; blkCount < gcLog->numBlockMaps; blkCount++)
+void
+GcReplayStripe::_CreateBlockWriteReplayEvents(GcBlockMapUpdate* blockList, int volId, uint64_t numBlocks)
+{
+    for (uint64_t offset = 0; offset < numBlocks; offset++)
     {
         ReplayEvent* blockWriteEvent =
-            replayEventFactory->CreateBlockWriteReplayEvent(gcLog->volId,
-                blockLogs[blkCount].rba, blockLogs[blkCount].vsa, 1, replaySegmentInfo);
+            replayEventFactory->CreateBlockWriteReplayEvent(volId,
+                blockList[offset].rba, blockList[offset].vsa, 1, replaySegmentInfo);
         replayEvents.push_back(blockWriteEvent);
     }
-
-    status->GcStripeLogFound(*gcLog);
-    _CreateStripeFlushReplayEvent();
-
-    _CreateSegmentAllocationEvent();
 }
 
 int
 GcReplayStripe::Replay(void)
 {
-    int result = ReplayStripe::Replay();
-    if (result == 0)
+    int result = 0;
+
+    if (status->IsFlushed() == true && totalNumBlocks == status->GetNumFoundBlocks())
     {
-        userStripeReplayer->Update(status->GetUserLsid());
+        _CreateStripeFlushReplayEvent();
+        _CreateSegmentAllocationEvent();
+
+        result = ReplayStripe::Replay();
+        if (result == 0)
+        {
+            userStripeReplayer->Update(status->GetUserLsid());
+        }
     }
     return result;
 }

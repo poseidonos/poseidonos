@@ -48,5 +48,10 @@ public:
 
 protected:
     virtual void AddLog(LogHandlerInterface* log) override;
+
+private:
+    void _CreateBlockWriteReplayEvents(GcBlockMapUpdate* blockList, int volId, uint64_t numBlocks);
+
+    uint64_t totalNumBlocks;
 };
 } // namespace pos

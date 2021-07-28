@@ -35,25 +35,24 @@ def set_result():
 def execute():
     MOUNT_VOL_BASIC_1.execute()
     fio_proc = fio.start_fio(0, 200)
-    time.sleep(10)
+    time.sleep(3)
     pos_util.pci_detach_and_attach(DETACH_TARGET_DEV)
-    detach_dev_timeout = 80
+    detach_dev_timeout = 5
     time.sleep(detach_dev_timeout)
     print(cli.list_device())
     spare_dev_newly_attached = "unvme-ns-4"
     result = cli.add_device(spare_dev_newly_attached, ARRAYNAME)
     code = json_parser.get_response_code(result)
     if code == 0:
-        print ("device added successfully")
-        rebuild_trigger_timeout = 100
+        print("device added successfully")
+        rebuild_trigger_timeout = 20
         rebuild_started = False
         for i in range(rebuild_trigger_timeout):
             out = cli.array_info(ARRAYNAME)
+            print("out: " + out)
             situ = json_parser.get_situation(out)
             if situ.find("REBUILD") >= 0:
-                print ("rebuilding started")
-                rebuild_duration = 5
-                time.sleep(rebuild_duration)
+                print("rebuilding started")
                 rebuild_started = True
                 break
             time.sleep(1)
@@ -64,24 +63,22 @@ def execute():
 
         pos_util.pci_detach_and_attach(MOUNT_VOL_BASIC_1.SPARE)
         #waiting for rebuild stopped
-        print ("Waiting for rebuild stopped")
-        rebuild_stop_delay = 60
-        time.sleep(rebuild_stop_delay)
+        print("Waiting for rebuild stopped")
         
         rebuild_started = False
         while True:
             out = cli.array_info(ARRAYNAME)
             situ = json_parser.get_situation(out)
             if situ.find("REBUILD") == -1 and rebuild_started == True:
-                print ("2nd rebuilding done")
+                print("2nd rebuilding done")
                 fio.wait_fio(fio_proc)
                 return True
             elif rebuild_started == False and situ.find("REBUILD") >= 0:
-                print ("2nd rebuilding started")
+                print("2nd rebuilding started")
                 rebuild_started = True
             time.sleep(1)
     else:
-        print ("device added failure")
+        print("device added failure")
         fio.stop_fio(fio_proc)
         return False
 

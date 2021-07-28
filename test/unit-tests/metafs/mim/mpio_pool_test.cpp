@@ -74,6 +74,7 @@ TEST(MpioPool, AllocAndReleaseForNvRam)
 
 TEST(MpioPool, AllocAndReleaseForNvRamCache)
 {
+#if MPIO_CACHE_EN
     const uint32_t COUNT = 10;
     std::string arrayName = ""; // in this ut, mpio.io.arrayName is ""
     Mpio* mpioList[10] = { 0, };
@@ -115,6 +116,7 @@ TEST(MpioPool, AllocAndReleaseForNvRamCache)
     pool->ReleaseCache();
 
     delete pool;
+#endif
 }
 
 } // namespace pos

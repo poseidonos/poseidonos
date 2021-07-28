@@ -32,7 +32,7 @@
 
 #pragma once
 #include "src/include/address_type.h"
-#include "locker_mode.h"
+
 namespace pos
 {
 class StripeLockerState
@@ -40,9 +40,8 @@ class StripeLockerState
 public:
     virtual bool TryLock(StripeId val) = 0;
     virtual void Unlock(StripeId val) = 0;
-    virtual bool StateChange(LockerMode mode) = 0;
+    virtual bool Exists(StripeId val) = 0;
     virtual uint32_t Count(void) = 0;
-    static bool isStateChanging;
 };
 
 } // namespace pos

@@ -42,20 +42,9 @@ namespace pos
 class VolumeEvent
 {
 public:
-    VolumeEvent(string _tag, string _arrayName)
-    {
-        tag = _tag;
-        arrayName = _arrayName;
-    };
+    VolumeEvent(string _tag, string _arrayName);
     virtual ~VolumeEvent(void);
-    string
-    Tag()
-    {
-        return tag;
-    }
-    void RegisterToPublisher(std::string arrayName);
-    void RegisterNvmfTargetToPublisher(std::string arrayName);
-    void RemoveFromPublisher(std::string arrayName);
+    string Tag(void);
     virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, string arrayName) = 0;
     virtual bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw, string arrayName) = 0;
     virtual bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte, string arrayName) = 0;

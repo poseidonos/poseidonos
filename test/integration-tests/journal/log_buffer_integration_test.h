@@ -46,6 +46,7 @@ protected:
 
     LogWriteContext* _CreateContextForBlockWriteDoneLog(void);
     LogWriteContext* _CreateContextForStripeMapUpdatedLog(void);
+    LogWriteContext* _CreateContextForGcBlockWriteDoneLog(void);
     LogWriteContext* _CreateContextForGcStripeFlushedLog(void);
 
     int _ParseLogBuffer(int groupId, LogList& logs);

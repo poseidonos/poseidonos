@@ -53,7 +53,7 @@ SystemCmd = "system" WhiteSpace (StartSystemCmd | StopSystemCmd | SystemInfoCmd 
 StartSystemCmd = "start" .
 StopSystemCmd = "stop" .
 SystemInfoCmd = "info" .
-SetSystemPropertyCmd = "set-property" [WhiteSpace "--rebuild-impact" WhiteSpace ("high" | "medium" | "low")] .
+SetSystemPropertyCmd = "set-property" [WhiteSpace "--rebuild-impact" WhiteSpace ("high" | "low")] .
 
 LoggerCmd = "logger" (SetLogLevelCmd | GetLogLeveCmd | ApplyLogFilterCmd | LoggerInfoCmd) .
 SetLogLevelCmd = "set-level" WhiteSpace "--level" LogLevel . 

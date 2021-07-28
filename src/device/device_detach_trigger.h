@@ -30,23 +30,20 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "volume_event.h"
-#include "volume_event_publisher.h"
+#ifndef DEVICE_DETACH_TRIGGER_H_
+#define DEVICE_DETACH_TRIGGER_H_
+
+#include "device_manager.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
-VolumeEvent::~VolumeEvent(void)
+class DeviceDetachTrigger
 {
-}
+public:
+    void Run(UblockSharedPtr& dev);
+};
 
-void
-VolumeEvent::RegisterToPublisher(std::string arrayName)
-{
-}
+}  // namespace pos
 
-void
-VolumeEvent::RemoveFromPublisher(std::string arrayName)
-{
-}
-
-} // namespace pos
+#endif  // DEVICE_DETACH_TRIGGER_H_

@@ -40,7 +40,7 @@ TEST(IContextManager, NeedRebuildAgain_)
 {
 }
 
-TEST(IContextManager, GetNumFreeSegment_)
+TEST(IContextManager, GetNumOfFreeSegment_)
 {
 }
 

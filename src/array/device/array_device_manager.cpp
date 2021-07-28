@@ -51,6 +51,7 @@ ArrayDeviceManager::ArrayDeviceManager(DeviceManager* sysDevMgr)
 #endif
   sysDevMgr_(sysDevMgr)
 {
+    devs_ = new ArrayDeviceList();
 }
 
 ArrayDeviceManager::~ArrayDeviceManager(void)
@@ -137,6 +138,7 @@ ArrayDeviceManager::Import(DeviceSet<string> nameSet)
     ret = _CheckConstraints(devs);
     if (ret == 0)
     {
+        delete devs_;
         devs_ = devs;
     }
     else
@@ -207,6 +209,7 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet, uint32_t& missingCnt, 
         }
     }
 
+    delete devs_;
     devs_ = devs;
     return ret;
 }
@@ -394,6 +397,18 @@ ArrayDeviceManager::GetRebuilding(void)
     }
 
     return nullptr;
+}
+
+vector<ArrayDevice*>
+ArrayDeviceManager::GetDataDevices(void)
+{
+    vector<ArrayDevice*> dataDevs;
+    for (ArrayDevice* dev : devs_->GetDevs().data)
+    {
+        dataDevs.push_back(dev);
+    }
+
+    return dataDevs;
 }
 
 int

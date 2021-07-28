@@ -48,11 +48,11 @@ public:
     }
     bool TryLock(StripeId val) override;
     void Unlock(StripeId val) override;
-    bool StateChange(LockerMode mode) override;
+    bool Exists(StripeId val) override;
     uint32_t Count(void) override;
 
 private:
-    set<StripeId> workingSet;
+    set<StripeId> busySet;
     mutex mtx;
 };
 

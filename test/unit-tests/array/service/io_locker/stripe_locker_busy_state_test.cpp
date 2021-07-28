@@ -16,7 +16,7 @@ TEST(StripeLockerBusyState, Unlock_)
 {
 }
 
-TEST(StripeLockerBusyState, StateChange_)
+TEST(StripeLockerBusyState, Exists_)
 {
 }
 

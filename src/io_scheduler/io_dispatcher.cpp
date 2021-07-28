@@ -43,6 +43,7 @@
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/event_factory.h"
+#include "src/device/device_detach_trigger.h"
 
 namespace pos
 {
@@ -321,8 +322,18 @@ IODispatcher::_ProcessFrontend(void* ublockDevice)
     UblockSharedPtr dev = *static_cast<UblockSharedPtr*>(ublockDevice);
     if (frontendOperation == DispatcherAction::OPEN)
     {
-        _AddDeviceToThreadLocalList(dev);
-        dev->Open();
+        if (dev->Open())
+        {
+            _AddDeviceToThreadLocalList(dev);
+        }
+        else
+        {
+            if (dev->GetType() == DeviceType::SSD)
+            {
+                DeviceDetachTrigger detachTrigger;
+                detachTrigger.Run(dev);
+            }
+        }
     }
     else
     {

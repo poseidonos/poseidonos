@@ -42,8 +42,19 @@
 
 namespace pos
 {
+SegmentCtx::SegmentCtx(void)
+: segmentInfos(nullptr),
+  numSegments(0),
+  initialized(false),
+  addrInfo(nullptr)
+{
+    ctxHeader.sig = SIG_SEGMENT_CTX;
+    ctxHeader.ctxVersion = 0;
+}
+
 SegmentCtx::SegmentCtx(SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_, std::string arrayName_)
 : numSegments(0),
+  initialized(false),
   addrInfo(addrInfo_),
   arrayName(arrayName_)
 {
@@ -58,26 +69,37 @@ SegmentCtx::SegmentCtx(AllocatorAddressInfo* info, std::string arrayName)
 
 SegmentCtx::~SegmentCtx(void)
 {
+    Dispose();
 }
 
 void
 SegmentCtx::Init(void)
 {
-    ctxHeader.ctxVersion = 0;
-    ctxStoredVersion = 0;
-    ctxDirtyVersion = 0;
+    if (initialized == false)
+    {
+        ctxHeader.ctxVersion = 0;
+        ctxStoredVersion = 0;
+        ctxDirtyVersion = 0;
 
-    numSegments = addrInfo->GetnumUserAreaSegments();
-    segmentInfos = new SegmentInfo[numSegments];
+        numSegments = addrInfo->GetnumUserAreaSegments();
+        segmentInfos = new SegmentInfo[numSegments];
+
+        initialized = true;
+    }
 }
 
 void
-SegmentCtx::Close(void)
+SegmentCtx::Dispose(void)
 {
-    if (segmentInfos != nullptr)
+    if (initialized == true)
     {
-        delete[] segmentInfos;
-        segmentInfos = nullptr;
+        if (segmentInfos != nullptr)
+        {
+            delete[] segmentInfos;
+            segmentInfos = nullptr;
+        }
+
+        initialized = false;
     }
 }
 

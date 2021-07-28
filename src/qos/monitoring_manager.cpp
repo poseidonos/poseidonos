@@ -412,8 +412,13 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
 
         for (uint32_t index = 0; index < reactorCoreList.size(); index++)
         {
+            if (true == IsExitQosSet())
+            {
+                activeConnectionCtr = M_RESET_TO_ZERO;
+                break;
+            }
             uint32_t reactor = reactorCoreList[index];
-            while (1)
+            while (!IsExitQosSet())
             {
                 struct nvmfConnectEntry connectEntry;
                 bool entry = SpdkConnection::GetNvmfReactorConnection(reactor, &connectEntry);
@@ -555,7 +560,7 @@ QosMonitoringManager::_GatherActiveEventParameters(void)
                 {
                     _UpdateEventParameter(static_cast<BackendEvent>(event));
                 }
-            } while (eventParams[event].valid == M_VALID_ENTRY);
+            } while ((eventParams[event].valid == M_VALID_ENTRY) && (!IsExitQosSet()));
         }
     }
 }

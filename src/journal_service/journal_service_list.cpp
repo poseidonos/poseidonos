@@ -32,10 +32,10 @@
 
 #include "journal_service_list.h"
 
+#include "i_journal_manager.h"
+#include "i_journal_status_provider.h"
 #include "i_journal_writer.h"
 #include "i_volume_event.h"
-#include "i_journal_status_provider.h"
-
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 

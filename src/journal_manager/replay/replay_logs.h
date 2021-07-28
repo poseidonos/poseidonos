@@ -81,6 +81,7 @@ private:
     int _ReplayStripe(ReplayStripe* stripe);
 
     ReplayStripe* _FindUserStripe(StripeId vsid);
+    ReplayStripe* _FindGcStripe(StripeId vsid);
     void _MoveToReplayedStripe(ReplayStripe* stripe);
 
     ReplayLogList& logList;

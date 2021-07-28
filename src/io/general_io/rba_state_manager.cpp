@@ -134,7 +134,10 @@ void
 RBAStateManager::ReleaseOwnershipRbaList(uint32_t volumeId,
         const VolumeIo::RbaList& sectorRbaList)
 {
-    for (auto& rbaAndSize : sectorRbaList)
+    VolumeIo::RbaList uniqueList = sectorRbaList;
+    uniqueList.sort();
+    uniqueList.unique();
+    for (auto& rbaAndSize : uniqueList)
     {
         BlockAlignment blockAlignment(ChangeSectorToByte(rbaAndSize.sectorRba),
                 rbaAndSize.size);

@@ -48,8 +48,8 @@ public:
     }
     bool TryLock(StripeId val) override;
     void Unlock(StripeId val) override;
-    bool StateChange(LockerMode mode) override;
-    uint32_t Count(void);
+    bool Exists(StripeId val) override;
+    uint32_t Count(void) override;
 
 private:
     multiset<StripeId> workingSet;

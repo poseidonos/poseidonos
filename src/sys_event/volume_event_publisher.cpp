@@ -32,11 +32,11 @@
 
 #include "volume_event_publisher.h"
 
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-
 #include <iostream>
 #include <utility>
+
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -53,14 +53,6 @@ void
 VolumeEventPublisher::RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName)
 {
     subscribers.push_back(std::pair<std::string, VolumeEvent*>(arrayName, subscriber));
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
-        "VolumeEvent subscriber {} is registered", subscriber->Tag());
-}
-
-void
-VolumeEventPublisher::RegisterNvmfTargetSubscriber(VolumeEvent* subscriber, std::string arrayName)
-{
-    subscribers.insert(subscribers.begin(), std::pair<std::string, VolumeEvent*>(arrayName, subscriber));
     POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
         "VolumeEvent subscriber {} is registered", subscriber->Tag());
 }

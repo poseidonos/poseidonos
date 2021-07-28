@@ -30,20 +30,20 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/logger/logger.h"
 #include "array_mount_sequence.h"
 
 #include "src/array/interface/i_abr_control.h"
 #include "src/array_components/mount_temp/mount_temp.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 #include "src/volume/volume_manager.h"
 
 namespace pos
 {
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
-    IAbrControl* abr, IStateControl* iState, string name, IVolumeManager* volMgr)
-: ArrayMountSequence(seq, new MountTemp(abr, name), iState, name, nullptr, nullptr, nullptr, volMgr)
+    IAbrControl* abr, IStateControl* iState, string name, IVolumeManager* volMgr, IArrayRebuilder* rbdr)
+: ArrayMountSequence(seq, new MountTemp(abr, name), iState, name, nullptr, nullptr, nullptr, volMgr, rbdr)
 {
     // delegated to other constructor. The other constructor doesn't have IAbrControl in its
     // params because ArrayMountSequence uses IAbrControl just to instantiate MountTemp!
@@ -58,14 +58,15 @@ ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
     MountTemp* mntTmp, IStateControl* iState, string name,
     StateContext* mountState, StateContext* unmountState, StateContext* normalState,
-    IVolumeManager* volMgr)
+    IVolumeManager* volMgr, IArrayRebuilder* rbdr)
 : temp(mntTmp),
   state(iState),
   mountState(mountState),
   unmountState(unmountState),
   normalState(normalState),
   arrayName(name),
-  volMgr(volMgr)
+  volMgr(volMgr),
+  rebuilder(rbdr)
 {
     sequence.assign(seq.begin(), seq.end());
     string sender = typeid(*this).name();
@@ -212,7 +213,13 @@ ArrayMountSequence::Unmount(void)
 void
 ArrayMountSequence::Shutdown(void)
 {
+    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down {} ...", arrayName);
+    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down - wait for rebuilding");
+    rebuilder->StopRebuild(arrayName);
+    rebuilder->WaitRebuildDone(arrayName);
+    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down - rebuild done");
     volMgr->DetachVolumes();
+    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down - volumes detached");
 
     // unmount meta, gc
     auto it = sequence.rbegin();
@@ -221,11 +228,9 @@ ArrayMountSequence::Shutdown(void)
         (*it)->Shutdown();
     }
 
-    // unmount metafs
-    temp->Shutdown();
-
     // unmount array
     (*it)->Shutdown();
+    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down - array shutdowned");
 }
 
 void

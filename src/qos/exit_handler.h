@@ -32,34 +32,26 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
+#include <atomic>
+#include "src/qos/qos_common.h"
 
-#include "spdk/pos_volume.h"
-
-using namespace std;
 namespace pos
 {
-/*
- * NvmfVolume : NvmfVolume abstraction
- * */
-class NvmfVolume
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ */
+/* --------------------------------------------------------------------------*/
+class ExitQosHandler
 {
 public:
-    NvmfVolume(void);
-    virtual ~NvmfVolume(void);
-    void SetuNVMfIOHandler(unvmf_io_handler handler);
-    unvmf_io_handler GetuNVMfIOHandler(void);
-
-    virtual void VolumeCreated(struct pos_volume_info* info) = 0;
-    virtual void VolumeDeleted(struct pos_volume_info* info) = 0;
-    virtual void VolumeMounted(struct pos_volume_info* info) = 0;
-    virtual void VolumeUnmounted(struct pos_volume_info* info) = 0;
-    virtual void VolumeUpdated(struct pos_volume_info* info) = 0;
-    virtual void VolumeDetached(vector<int>& volList, std::string arrayName) = 0;
+    ExitQosHandler(void);
+    ~ExitQosHandler(void);
+    bool IsExitQosSet(void);
+    void SetExitQos(void);
 
 private:
-    unvmf_io_handler ioHandler = {nullptr, nullptr};
+    std::atomic<bool> exitQos;
 };
-
 } // namespace pos

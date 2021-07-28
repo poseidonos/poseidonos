@@ -125,11 +125,14 @@ CheckpointHandler::Start(MapPageList pendingDirtyPages)
     return ret;
 }
 
-bool
-CheckpointHandler::_IncreaseNumMapsFlushed(void)
+void
+CheckpointHandler::_CheckMapFlushCompleted(void)
 {
     int flushResult = numMapsFlushed.fetch_add(1) + 1;
-    return (numMapsToFlush == flushResult);
+    if (numMapsToFlush == flushResult)
+    {
+        mapFlushCompleted = true;
+    }
 }
 
 int
@@ -146,7 +149,7 @@ CheckpointHandler::FlushCompleted(int metaId)
     {
         POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STATUS),
             "Map {} flush completed", metaId);
-        mapFlushCompleted = _IncreaseNumMapsFlushed();
+        _CheckMapFlushCompleted();
     }
 
     _TryToComplete();

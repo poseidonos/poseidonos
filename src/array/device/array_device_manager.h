@@ -77,6 +77,7 @@ public:
     virtual tuple<ArrayDevice*, ArrayDeviceType> GetDev(string devSn);
     virtual ArrayDevice* GetFaulty(void);
     virtual ArrayDevice* GetRebuilding(void);
+    virtual vector<ArrayDevice*> GetDataDevices(void);
 
     // This is UT helper method and doesn't need to be inherited. This isn't for production use.
     void SetArrayDeviceList(ArrayDeviceList* arrayDeviceList);
