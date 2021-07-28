@@ -280,6 +280,7 @@ VSAMapManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByt
         return true;
     }
     while (false);
+    _HandleVolumeCreationFail(volID);
     return false;
 }
 
@@ -549,6 +550,17 @@ VSAMapManager::_VSAMapFileCreate(int volID)
     assert(vsaMapRef != nullptr);
 
     return (0 == vsaMapRef->CreateMapFile());
+}
+
+void
+VSAMapManager::_HandleVolumeCreationFail(int volID)
+{
+    VSAMapContent*& vsaMapRef = GetVSAMapContent(volID);
+    if (vsaMapRef != nullptr)
+    {
+        delete vsaMapRef;
+        vsaMapRef = nullptr;
+    }
 }
 
 int

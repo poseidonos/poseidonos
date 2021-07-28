@@ -110,6 +110,7 @@ private:
 
     bool _ChangeVolumeStateDeleting(uint32_t volumeId);
     VolState _GetVolumeState(uint32_t volumeId);
+    void _HandleVolumeCreationFail(int volID);
 
     std::map<int, VolState> volumeMountState;
     std::recursive_mutex volMountStateLock[MAX_VOLUME_COUNT];
