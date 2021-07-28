@@ -46,11 +46,13 @@ export SR_MAX=23100
 export RW_MAX=9500
 export RR_MAX=19300
 
-#Benchmark1 (Default I/O) Variables
+#Benchmark2 (Default I/O) Variables
 export INIT1_FIO_SCRIPT_DIR=/home/psd/poseidonos
 export INIT2_FIO_SCRIPT_DIR=/home/psd/poseidonos
 export INIT1_FIO_SCRIPT_FILE=perf_200g.py
 export INIT2_FIO_SCRIPT_FILE=perf_200g.py
+export INIT1_PARSE_RESULT_FILE=parse_result.py
+export INIT2_PARSE_RESULT_FILE=parse_result.py
 export RAMP_TIME=5
 export IO_RUN_TIME=20
 

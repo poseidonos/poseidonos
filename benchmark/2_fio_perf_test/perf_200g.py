@@ -6,7 +6,7 @@ import os
 import shutil
 
 ibof_root = "/home/psd/poseidonos"
-#os.path.dirname(os.path.abspath(__file__)) 
+#os.path.dirname(os.path.abspath(__file__))
 cur_dir = "."
 TEST_NR=1
 
@@ -18,19 +18,26 @@ NUMJOBS = "1"
 RAMP_TIME = "5"
 TIME_BASED = "1"
 QD = "4"
-IP="10.100.3.16"
+IP="10.100.2.16"
 TRANSPORT="tcp"
 NUMCPUS="24"
 RESULT=""
+ORDER="1"
+
 readwrite=["write","read","randwrite","randread"]
 
 ########################################################################################
 def get_qd_and_filename():
     command=""
     for i in range(0, int(args.numcpus)):
-       command += " --name=test" + str(i) + " --iodepth=" + str(args.qd) + " --filename='trtype=" + str(args.transport) + " adrfam=IPv4 traddr=" + str(args.address) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem" + str((i+1)*2) + " ns=1'"
+        command += " --name=test" + str(i) + " --iodepth=" + str(args.qd) + " --filename='trtype=" + str(args.transport) + " adrfam=IPv4 traddr=" + str(args.address) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem"
+        if int(args.order) == 1:
+            command += str(i*2+1)
+        else:
+            command += str((i+1)*2)
+        command += " ns=1 '"
     return command
-            
+
 def run_fio(workload, fio_command_for_each_test, fio_result_fd):
     command = "fio" \
             + " --name=global" \
@@ -46,7 +53,7 @@ def run_fio(workload, fio_command_for_each_test, fio_result_fd):
             + " --numjobs=" + str(args.numjobs) + "" \
             + " --ramp_time=" + str(args.ramp_time) + "" \
             + " --time_based=" + str(args.time_based) + "" \
-            + fio_command_for_each_test + "" 
+            + fio_command_for_each_test + ""
     ret = subprocess.call(command,shell=True, stdout=fio_result_fd, stderr=fio_result_fd)
     return ret
 
@@ -85,8 +92,8 @@ def parse_arguments():
             help='Set transport tcp|rdma, default: ' + TRANSPORT)
     parser.add_argument('-i', '--address', default=IP,\
             help='Set IP address, default: ' + IP)
-    parser.add_argument('-o', '--output', default=RESULT,\
-            help='Set output file, default: ' + RESULT )
+    parser.add_argument('-o', '--order', default=ORDER,\
+            help='Set initiator order, default: ' + ORDER)
     global args
     args = parser.parse_args()
 
