@@ -35,6 +35,8 @@
 #include <string>
 #include <cstdint>
 
+#include "src/sys_event/volume_event.h"
+
 using namespace std;
 
 namespace pos
@@ -56,10 +58,18 @@ protected:
     void _PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops, uint64_t originalMaxBw);
     int _SaveVolumes(void);
 
+    void _SetVolumeEventBase(VolumeBase* volume, std::string subnqn = "");
+    void _SetVolumeEventPerf(VolumeBase* volume);
+    void _SetVolumeArrayInfo(void);
+
     VolumeList& volumeList;
     std::string arrayName;
     int arrayID;
     VolumeEventPublisher* eventPublisher;
+
+    VolumeEventBase volumeEventBase;
+    VolumeEventPerf volumeEventPerf;
+    VolumeArrayInfo volumeArrayInfo;
 };
 
 } // namespace pos

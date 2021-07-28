@@ -71,8 +71,10 @@ VolumeUnmounter::Do(string name)
     if (VolumeStatus::Unmounted != vol->GetStatus())
     {
         volumeList.WaitUntilIdle(vol->ID, VolumeStatus::Mounted);
-        res = VolumeEventPublisherSingleton::Instance()->NotifyVolumeUnmounted(
-            name, vol->ID, arrayName, arrayID);
+        _SetVolumeEventBase(vol);
+        _SetVolumeEventPerf(vol);
+        _SetVolumeArrayInfo();
+        res = VolumeEventPublisherSingleton::Instance()->NotifyVolumeUnmounted(&volumeEventBase, &volumeArrayInfo);
 
         bool volumeUnmounted = NvmfVolumePos::WaitRequestedVolumesDetached(1);
         if (volumeUnmounted == false)

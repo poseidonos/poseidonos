@@ -129,4 +129,35 @@ VolumeInterface::_SaveVolumes(void)
     return VolumeMetaIntf::SaveVolumes(volumeList, arrayName, arrayID);
 }
 
+void
+VolumeInterface::_SetVolumeEventBase(VolumeBase* volume, std::string subnqn)
+{
+    volumeEventBase.volId = volume->ID;
+    volumeEventBase.volName = volume->GetName();
+    volumeEventBase.volSizeByte = volume->TotalSize();
+    if (subnqn.empty() == false)
+    {
+        volumeEventBase.subnqn = subnqn;
+    }
+    else
+    {
+        volumeEventBase.subnqn = volume->GetSubnqn();
+    }
+    volumeEventBase.uuid = volume->GetUuid();
+}
+
+void
+VolumeInterface::_SetVolumeEventPerf(VolumeBase* volume)
+{
+    volumeEventPerf.maxbw = volume->MaxBW();
+    volumeEventPerf.maxiops = volume->MaxIOPS();
+}
+
+void
+VolumeInterface::_SetVolumeArrayInfo(void)
+{
+    volumeArrayInfo.arrayId = arrayID;
+    volumeArrayInfo.arrayName = arrayName;
+}
+
 } // namespace pos

@@ -151,8 +151,11 @@ VolumeMounter::_MountVolume(VolumeBase* vol, string subnqn)
 
     if (VolumeStatus::Mounted != vol->GetStatus())
     {
-        done = VolumeEventPublisherSingleton::Instance()->NotifyVolumeMounted(
-            vol->GetName(), subnqn, vol->ID, vol->TotalSize(), vol->MaxIOPS(), vol->MaxBW(), arrayName, arrayID);
+        _SetVolumeEventBase(vol, subnqn);
+        _SetVolumeEventPerf(vol);
+        _SetVolumeArrayInfo();
+
+        done = VolumeEventPublisherSingleton::Instance()->NotifyVolumeMounted(&volumeEventBase, &volumeEventPerf, &volumeArrayInfo);
 
         if (done == true)
         {
@@ -183,8 +186,10 @@ VolumeMounter::_RollBackVolumeMount(VolumeBase* vol, string subnqn)
 
     vol->LockStatus();
 
-    done = VolumeEventPublisherSingleton::Instance()->NotifyVolumeUnmounted(
-        vol->GetName(), vol->ID, arrayName, arrayID);
+    _SetVolumeEventBase(vol);
+    _SetVolumeArrayInfo();
+
+    done = VolumeEventPublisherSingleton::Instance()->NotifyVolumeUnmounted(&volumeEventBase, &volumeArrayInfo);
 
     if (done == false)
     {

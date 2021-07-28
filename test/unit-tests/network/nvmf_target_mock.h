@@ -12,7 +12,7 @@ class MockNvmfTarget : public NvmfTarget
 {
 public:
     using NvmfTarget::NvmfTarget;
-    MOCK_METHOD(bool, CreatePosBdev, (const string& bdevName, uint32_t id, uint64_t volumeSizeInMb, uint32_t blockSize, bool volumeTypeInMem, const string& arrayName, uint64_t arrayId), (override));
+    MOCK_METHOD(bool, CreatePosBdev, (const string& bdevName, const string& uuid, uint32_t id, uint64_t volumeSizeInMb, uint32_t blockSize, bool volumeTypeInMem, const string& arrayName, uint64_t arrayId), (override));
     MOCK_METHOD(bool, DeletePosBdev, (const string& bdevName), (override));
     MOCK_METHOD(bool, DetachNamespace, (const string& nqn, uint32_t nsid, PosNvmfEventDoneCallback_t cb, void* cbArg), (override));
     MOCK_METHOD(bool, DetachNamespaceAll, (const string& nqn, PosNvmfEventDoneCallback_t cb, void* cbArg), (override));

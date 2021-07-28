@@ -46,24 +46,26 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     array = arrayName;
     arrayId = arrayIdx;
     name = volName;
+    uuid = "";
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
     ID = INVALID_VOL_ID;
     POS_TRACE_INFO(POS_EVENT_ID::VOL_CREATED, "Volume name:{} size:{} created", name, totalSize);
 }
 
-VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte, uint64_t _maxiops, uint64_t _maxbw)
+VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string uuid, uint64_t volSizeByte, uint64_t _maxiops, uint64_t _maxbw)
 {
     array = arrayName;
     arrayId = arrayIdx;
     name = volName;
+    uuid = uuid;
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
     maxiops = _maxiops;
     maxbw = _maxbw;
     ID = INVALID_VOL_ID;
-    POS_TRACE_INFO(POS_EVENT_ID::VOL_CREATED, "Volume name:{} size:{} iops:{} bw:{} created",
-        name, totalSize, maxiops, maxbw);
+    POS_TRACE_INFO(POS_EVENT_ID::VOL_CREATED, "Volume name:{} uuid:{} size:{} iops:{} bw:{} created",
+        name, uuid, totalSize, maxiops, maxbw);
 }
 
 VolumeBase::~VolumeBase(void)
@@ -136,6 +138,23 @@ VolumeBase::SetSubnqn(std::string inputSubNqn)
             subNqn, inputSubNqn);
     }
     subNqn = inputSubNqn;
+}
+
+void
+VolumeBase::SetUuid(std::string inputUuid)
+{
+    if (uuid.empty() == false)
+    {
+        POS_TRACE_INFO(POS_EVENT_ID::VOL_ALD_SET_SUBNQN,
+            "The volume already has set uuid {}", uuid);
+    }
+
+    if (inputUuid.empty() == false)
+    {
+        POS_TRACE_INFO(POS_EVENT_ID::VOL_ALD_SET_SUBNQN,
+            "The volume has set uuid {}", inputUuid);
+    }
+    subNqn = uuid;
 }
 
 int

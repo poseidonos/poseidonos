@@ -61,7 +61,7 @@ class VolumeBase
 {
 public:
     VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte);
-    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw);
+    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string uuid, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw);
     virtual ~VolumeBase(void);
     int Mount(void);
     int Unmount(void);
@@ -76,6 +76,16 @@ public:
     {
         return name;
     }
+    std::string
+    GetUuid(void)
+    {
+        return uuid;
+    }
+    std::string
+    GetArrayName(void)
+    {
+        return array;
+    }
     int
     GetArray(void)
     {
@@ -87,6 +97,7 @@ public:
         return subNqn;
     }
     void SetSubnqn(std::string inputSubNqn);
+    void SetUuid(std::string inputUuid);
     VolumeStatus
     GetStatus(void)
     {
@@ -130,6 +141,7 @@ public:
 protected:
     VolumeStatus status;
     std::string name;
+    std::string uuid;
     std::string array;
     int arrayId;
     std::string subNqn = "";

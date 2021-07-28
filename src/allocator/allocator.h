@@ -70,35 +70,35 @@ public:
     virtual void Flush(void) override;
 
     bool
-    VolumeCreated(std::string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override
+    VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override
     {
         return true;
     }
     bool
-    VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override
+    VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override
     {
         return true;
     }
     bool
-    VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override
+    VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override
     {
         return true;
     }
     bool
-    VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID) override
+    VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override
     {
         return true;
     }
     void
-    VolumeDetached(vector<int> volList, std::string arrayName, int arrayID) override
+    VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) override
     {
     }
     bool
-    VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayID) override
+    VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override
     {
         return true;
     }
-    bool VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID) override;
+    bool VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
 
     void SetNormalGcThreshold(uint32_t inputThreshold) override;
     void SetUrgentThreshold(uint32_t inputThreshold) override;

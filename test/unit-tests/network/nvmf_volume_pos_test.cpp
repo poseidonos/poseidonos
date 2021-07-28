@@ -230,7 +230,7 @@ TEST_F(NvmfVolumePosFixture, _VolumeCreateHandler_Success)
     InitVolumeInfo();
 
     ON_CALL(*mockNvmfTarget, GetBdevName(_, _)).WillByDefault(Return("bdev"));
-    ON_CALL(*mockNvmfTarget, CreatePosBdev(_, _, _, _, _, _, _)).WillByDefault(Return(true));
+    ON_CALL(*mockNvmfTarget, CreatePosBdev(_, _, _, _, _, _, _, _)).WillByDefault(Return(true));
 
     nvmfVolume.VolumeCreateHandler(vInfo, nullptr);
 }
@@ -241,7 +241,7 @@ TEST_F(NvmfVolumePosFixture, _VolumeCreateHandler_Fail)
     InitVolumeInfo();
 
     ON_CALL(*mockNvmfTarget, GetBdevName(_, _)).WillByDefault(Return("bdev"));
-    ON_CALL(*mockNvmfTarget, CreatePosBdev(_, _, _, _, _, _, _)).WillByDefault(Return(false));
+    ON_CALL(*mockNvmfTarget, CreatePosBdev(_, _, _, _, _, _, _, _)).WillByDefault(Return(false));
 
     nvmfVolume.VolumeCreateHandler(vInfo, nullptr);
 }

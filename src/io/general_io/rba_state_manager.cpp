@@ -255,49 +255,46 @@ RBAStateManager::RBAStatesInVolume::_IsAccessibleRba(BlkAddr endRba)
 }
 
 bool
-RBAStateManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByte,
-    uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId)
+RBAStateManager::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    CreateRBAState(volID, ChangeByteToBlock(volSizeByte));
+    CreateRBAState(volEventBase->volId, ChangeByteToBlock(volEventBase->volSizeByte));
     return true;
 }
 
 bool
-RBAStateManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayId)
+RBAStateManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
-    DeleteRBAState(volID);
+    DeleteRBAState(volEventBase->volId);
     return true;
 }
 
 bool
-RBAStateManager::VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte,
-    uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId)
+RBAStateManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     return true;
 }
 
 bool
-RBAStateManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayId)
+RBAStateManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     return true;
 }
 
 bool
-RBAStateManager::VolumeLoaded(std::string name, int id, uint64_t totalSize,
-    uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId)
+RBAStateManager::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    CreateRBAState(id, ChangeByteToBlock(totalSize));
+    CreateRBAState(volEventBase->volId, ChangeByteToBlock(volEventBase->volSizeByte));
     return true;
 }
 
 bool
-RBAStateManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId)
+RBAStateManager::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     return true;
 }
 
 void
-RBAStateManager::VolumeDetached(vector<int> volList, std::string arrayName, int arrayId)
+RBAStateManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
 {
 }
 

@@ -53,17 +53,13 @@ public:
     virtual ~VolumeEventPublisher(void);
     void RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayId);
     void RemoveSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayId);
-    bool NotifyVolumeCreated(std::string volName, int volID,
-        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId);
-    bool NotifyVolumeUpdated(std::string volName, int volID,
-        uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId);
-    bool NotifyVolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayId);
-    bool NotifyVolumeMounted(std::string volName, std::string subnqn, int volID,
-        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId);
-    bool NotifyVolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayId);
-    bool NotifyVolumeLoaded(std::string name, int id,
-        uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayId);
-    void NotifyVolumeDetached(vector<int> volList, std::string arrayName, int arrayId);
+    bool NotifyVolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo);
+    bool NotifyVolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo);
+    bool NotifyVolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo);
+    bool NotifyVolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo);
+    bool NotifyVolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo);
+    bool NotifyVolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo);
+    void NotifyVolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo);
 
 private:
     vector<std::pair<int, VolumeEvent*>> subscribers;

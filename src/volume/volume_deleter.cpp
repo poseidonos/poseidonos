@@ -72,7 +72,6 @@ VolumeDeleter::Do(string name)
     }
 
     int volID = vol->ID;
-    uint64_t volSize = vol->TotalSize();
     string subNqn = vol->GetSubnqn();
 
     volumeList.WaitUntilIdle(volID, VolumeStatus::Unmounted);
@@ -80,7 +79,10 @@ VolumeDeleter::Do(string name)
     vol->SetValid(false); // remove tempo.
     vol->SetSubnqn("");
 
-    bool res = eventPublisher->NotifyVolumeDeleted(name, volID, volSize, arrayName, arrayID);
+    _SetVolumeEventBase(vol);
+    _SetVolumeArrayInfo();
+
+    bool res = eventPublisher->NotifyVolumeDeleted(&volumeEventBase, &volumeArrayInfo);
 
     if (res == false)
     {

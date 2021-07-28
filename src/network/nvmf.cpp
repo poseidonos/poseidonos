@@ -110,20 +110,40 @@ Nvmf::_CopyVolumeInfo(char* destInfo,
     destInfo[len] = '\0';
 }
 
+void
+Nvmf::_CopyVolumeEventBase(pos_volume_info* vInfo, VolumeEventBase* volEventBase)
+{
+    _CopyVolumeInfo(vInfo->name, volEventBase->volName.c_str(), sizeof(vInfo->name) - 1);
+    _CopyVolumeInfo(vInfo->uuid, volEventBase->uuid.c_str(), volEventBase->uuid.size());
+    _CopyVolumeInfo(vInfo->nqn, volEventBase->subnqn.c_str(), sizeof(vInfo->nqn) - 1);
+    vInfo->id = volEventBase->volId;
+    vInfo->size_mb = volEventBase->volSizeByte / MIB_IN_BYTE;
+}
+
+void
+Nvmf::_CopyVolumeEventPerf(pos_volume_info* vInfo, VolumeEventPerf* volEventPerf)
+{
+    vInfo->iops_limit = volEventPerf->maxiops * KIOPS;
+    vInfo->bw_limit = volEventPerf->maxbw;
+}
+
+void
+Nvmf::_CopyVolumeArrayInfo(pos_volume_info* vInfo, VolumeArrayInfo* volArrayInfo)
+{
+    vInfo->array_id = arrayId;
+    _CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
+}
+
 bool
-Nvmf::VolumeCreated(string volName, int volId,
-    uint64_t volSizeByte, uint64_t maxIops, uint64_t maxBw, string arrayName, int arrayId)
+Nvmf::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
-        _CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
-        vInfo->id = volId;
-        vInfo->array_id = arrayId;
-        vInfo->size_mb = volSizeByte / MIB_IN_BYTE;
-        vInfo->iops_limit = maxIops * KIOPS;
-        vInfo->bw_limit = maxBw;
-        _CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
+        _CopyVolumeEventBase(vInfo, volEventBase);
+        _CopyVolumeEventPerf(vInfo, volEventPerf);
+        _CopyVolumeArrayInfo(vInfo, volArrayInfo);
+
         volume->VolumeCreated(vInfo);
         return true;
     }
@@ -131,16 +151,14 @@ Nvmf::VolumeCreated(string volName, int volId,
 }
 
 bool
-Nvmf::VolumeDeleted(string volName, int volId,
-    uint64_t volSizeByte, string arrayName, int arrayId)
+Nvmf::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
-        _CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
-        _CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
-        vInfo->id = volId;
-        vInfo->array_id = arrayId;
+        _CopyVolumeEventBase(vInfo, volEventBase);
+        _CopyVolumeArrayInfo(vInfo, volArrayInfo);
+
         volume->VolumeDeleted(vInfo);
         return true;
     }
@@ -148,20 +166,15 @@ Nvmf::VolumeDeleted(string volName, int volId,
 }
 
 bool
-Nvmf::VolumeMounted(string volName, string subNqn, int volId,
-    uint64_t volSizeByte, uint64_t maxIops, uint64_t maxBw, string arrayName, int arrayId)
+Nvmf::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
-        _CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
-        _CopyVolumeInfo(vInfo->nqn, subNqn.c_str(), sizeof(vInfo->nqn) - 1);
-        _CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
-        vInfo->id = volId;
-        vInfo->array_id = arrayId;
-        vInfo->size_mb = volSizeByte / MIB_IN_BYTE;
-        vInfo->iops_limit = maxIops * KIOPS;
-        vInfo->bw_limit = maxBw;
+        _CopyVolumeEventBase(vInfo, volEventBase);
+        _CopyVolumeEventPerf(vInfo, volEventPerf);
+        _CopyVolumeArrayInfo(vInfo, volArrayInfo);
+
         volume->VolumeMounted(vInfo);
         return true;
     }
@@ -169,15 +182,14 @@ Nvmf::VolumeMounted(string volName, string subNqn, int volId,
 }
 
 bool
-Nvmf::VolumeUnmounted(string volName, int volId, string arrayName, int arrayId)
+Nvmf::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
-        _CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
-        _CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
-        vInfo->id = volId;
-        vInfo->array_id = arrayId;
+        _CopyVolumeEventBase(vInfo, volEventBase);
+        _CopyVolumeArrayInfo(vInfo, volArrayInfo);
+
         volume->VolumeUnmounted(vInfo);
         return true;
     }
@@ -185,25 +197,21 @@ Nvmf::VolumeUnmounted(string volName, int volId, string arrayName, int arrayId)
 }
 
 bool
-Nvmf::VolumeLoaded(string volName, int id,
-    uint64_t totalSize, uint64_t maxIops, uint64_t maxBw, string arrayName, int arrayId)
+Nvmf::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    return VolumeCreated(volName, id, totalSize, maxIops, maxBw, arrayName, arrayId);
+    return VolumeCreated(volEventBase, volEventPerf, volArrayInfo);
 }
 
 bool
-Nvmf::VolumeUpdated(string volName, int volId,
-    uint64_t maxIops, uint64_t maxBw, string arrayName, int arrayId)
+Nvmf::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
     if (vInfo)
     {
-        _CopyVolumeInfo(vInfo->name, volName.c_str(), sizeof(vInfo->name) - 1);
-        _CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
-        vInfo->id = volId;
-        vInfo->array_id = arrayId;
-        vInfo->iops_limit = maxIops * KIOPS;
-        vInfo->bw_limit = maxBw;
+        _CopyVolumeEventBase(vInfo, volEventBase);
+        _CopyVolumeEventPerf(vInfo, volEventPerf);
+        _CopyVolumeArrayInfo(vInfo, volArrayInfo);
+
         volume->VolumeUpdated(vInfo);
         return true;
     }
@@ -211,9 +219,9 @@ Nvmf::VolumeUpdated(string volName, int volId,
 }
 
 void
-Nvmf::VolumeDetached(vector<int> volList, string arrayName, int arrayId)
+Nvmf::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
 {
-    volume->VolumeDetached(volList, arrayName);
+    volume->VolumeDetached(volList, volArrayInfo->arrayName);
     return;
 }
 

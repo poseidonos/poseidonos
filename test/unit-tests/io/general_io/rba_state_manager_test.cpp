@@ -37,6 +37,7 @@
 #include "src/bio/volume_io.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io/general_io/rba_state_service.h"
+#include "src/sys_event/volume_event.h"
 
 using namespace pos;
 using namespace std;
@@ -187,41 +188,48 @@ TEST_F(RBAStateManagerFixture, BulkReleaseOwnershipTest)
 
 TEST_F(RBAStateManagerFixture, VolumeEventTest)
 {
+    VolumeEventBase volumeEventBase;
+    rbaStateManager->SetVolumeBase(&volumeEventBase, VOLUME_ID, ChangeBlockToByte(RBA_AMOUNT), "", "", "");
+    VolumeEventPerf volumeMountPerf;
+    rbaStateManager->SetVolumePerf(&volumeMountPerf, 0, 0);
+    VolumeArrayInfo volumeArrayInfo;
+    rbaStateManager->SetVolumeArrayInfo(&volumeArrayInfo, arrayId, arrayName);
+
     //When: receive volume creation event
-    EXPECT_TRUE(rbaStateManager->VolumeCreated("", VOLUME_ID, ChangeBlockToByte(RBA_AMOUNT), 0, 0, arrayName, arrayId));
+    EXPECT_TRUE(rbaStateManager->VolumeCreated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo));
     //When: try to acquire ownership
     //Then: returns success
     EXPECT_TRUE(rbaStateManager->BulkAcquireOwnership(VOLUME_ID, 0, RBA_AMOUNT));
 
     //When: receive volume mount event
-    EXPECT_TRUE(rbaStateManager->VolumeMounted("", "", VOLUME_ID, ChangeBlockToByte(RBA_AMOUNT), 0, 0, arrayName, arrayId));
+    EXPECT_TRUE(rbaStateManager->VolumeMounted(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo));
     //When: try to acquire ownership again
     //Then: returns failure since no change has been made
     EXPECT_FALSE(rbaStateManager->BulkAcquireOwnership(VOLUME_ID, 0, RBA_AMOUNT));
 
     //When: receive volume unmount event
-    EXPECT_TRUE(rbaStateManager->VolumeUnmounted("", VOLUME_ID, arrayName, arrayId));
+    EXPECT_TRUE(rbaStateManager->VolumeUnmounted(&volumeEventBase, &volumeArrayInfo));
     //When: try to release ownership
     //Then: returns failure since the previous ownership is preserved even after volume became unmount
     EXPECT_FALSE(rbaStateManager->BulkAcquireOwnership(VOLUME_ID, 0, RBA_AMOUNT));
 
     //When: receive volume deletion event
-    EXPECT_TRUE(rbaStateManager->VolumeDeleted("", VOLUME_ID, ChangeBlockToByte(RBA_AMOUNT), arrayName, arrayId));
+    EXPECT_TRUE(rbaStateManager->VolumeDeleted(&volumeEventBase, &volumeArrayInfo));
 
     //When: receive volume loaded event
-    EXPECT_TRUE(rbaStateManager->VolumeLoaded("", VOLUME_ID, ChangeBlockToByte(RBA_AMOUNT), 0, 0, arrayName, arrayId));
+    EXPECT_TRUE(rbaStateManager->VolumeLoaded(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo));
     //When: try to acquire ownership
     //Then: returns success
     EXPECT_TRUE(rbaStateManager->BulkAcquireOwnership(VOLUME_ID, 0, RBA_AMOUNT));
 
     //When: receive volume updated event
-    EXPECT_TRUE(rbaStateManager->VolumeUpdated("", VOLUME_ID, 0, 0, arrayName, arrayId));
+    EXPECT_TRUE(rbaStateManager->VolumeUpdated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo));
     //When: try to acquire ownership again
     //Then: returns failure since no change has been made
     EXPECT_FALSE(rbaStateManager->BulkAcquireOwnership(VOLUME_ID, 0, RBA_AMOUNT));
 
     //When: receive volume detached event
-    rbaStateManager->VolumeDetached(vector<int>{0, 1}, arrayName, arrayId);
+    rbaStateManager->VolumeDetached(vector<int>{0, 1}, &volumeArrayInfo);
     //When: try to release ownership
     //Then: returns failure since the previous ownership is preserved even after volume is detached
     EXPECT_FALSE(rbaStateManager->BulkAcquireOwnership(VOLUME_ID, 0, RBA_AMOUNT));

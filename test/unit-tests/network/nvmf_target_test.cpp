@@ -58,7 +58,7 @@ TEST(NvmfTarget, CreatePosBdev_CreateBdevSuccess)
     ON_CALL(*mockSpdkCaller, SpdkBdevCreatePosDisk(_, _, _, _, _, _, _, _)).WillByDefault(Return(bdev));
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
-    actual = nvmfTarget.CreatePosBdev("bdev", 0, 1024, 512, false, "array", 0);
+    actual = nvmfTarget.CreatePosBdev("bdev", "", 0, 1024, 512, false, "array", 0);
 
     ASSERT_EQ(actual, expected);
     delete mockSpdkCaller;
@@ -73,7 +73,7 @@ TEST(NvmfTarget, CreatePosBdev_CreateBdevFail)
     ON_CALL(*mockSpdkCaller, SpdkBdevCreatePosDisk(_, _, _, _, _, _, _, _)).WillByDefault(Return(nullptr));
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
-    actual = nvmfTarget.CreatePosBdev("bdev", 0, 1024, 512, false, "array", 0);
+    actual = nvmfTarget.CreatePosBdev("bdev", "", 0, 1024, 512, false, "array", 0);
 
     ASSERT_EQ(actual, expected);
     delete mockSpdkCaller;

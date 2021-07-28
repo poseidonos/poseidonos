@@ -51,6 +51,30 @@ VolumeEvent::Tag(void)
     return tag;
 }
 
+void
+VolumeEvent::SetVolumeBase(VolumeEventBase* volEventBase, int volId, uint64_t volSizeByte, string volName, string uuid, string subnqn)
+{
+    volEventBase->volId = volId;
+    volEventBase->volName = volName;
+    volEventBase->volSizeByte = volSizeByte;
+    volEventBase->subnqn = subnqn;
+    volEventBase->uuid = uuid;
+}
+
+void
+VolumeEvent::SetVolumePerf(VolumeEventPerf* volEventPerf, uint64_t maxiops, uint64_t maxbw)
+{
+    volEventPerf->maxbw = maxbw;
+    volEventPerf->maxiops = maxiops;
+}
+
+void
+VolumeEvent::SetVolumeArrayInfo(VolumeArrayInfo* volArrayInfo, int arrayId, string arrayName)
+{
+    volArrayInfo->arrayId = arrayId;
+    volArrayInfo->arrayName = arrayName;
+}
+
 
 
 } // namespace pos

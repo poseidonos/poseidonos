@@ -58,13 +58,13 @@ public:
     void Flush(void) override;
     void SetuNVMfIOHandler(unvmf_io_handler handler);
 
-    virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;
-    bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte, string arrayName, int arrayId) override;
-    bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;
-    bool VolumeUnmounted(string volName, int volID, string arrayName, int arrayId) override;
-    bool VolumeLoaded(string volName, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;
-    bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) override;
-    void VolumeDetached(vector<int> volList, string arrayName, int arrayId) override;
+    virtual bool VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
+    bool VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
+    bool VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
+    bool VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
+    bool VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
+    bool VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
+    void VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) override;
 
 private:
     NvmfVolumePos* volume;
@@ -74,6 +74,9 @@ private:
     unvmf_io_handler ioHandler = {nullptr, nullptr};
 
     void _CopyVolumeInfo(char* destInfo, const char* srcInfo, int len);
+    void _CopyVolumeEventBase(pos_volume_info* vInfo, VolumeEventBase* volEventBase);
+    void _CopyVolumeEventPerf(pos_volume_info* vInfo, VolumeEventPerf* volEventPerf);
+    void _CopyVolumeArrayInfo(pos_volume_info* vInfo, VolumeArrayInfo* volArrayInfo);
 };
 
 } // namespace pos

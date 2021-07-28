@@ -75,12 +75,16 @@ NvmfTarget::~NvmfTarget(void)
 }
 
 bool
-NvmfTarget::CreatePosBdev(const string& bdevName, uint32_t id,
+NvmfTarget::CreatePosBdev(const string& bdevName, const string& uuid, uint32_t id,
     uint64_t volumeSizeInMb, uint32_t blockSize, bool volumeTypeInMem, const string& arrayName, uint64_t arrayId)
 {
     uint64_t volumeSizeInByte = volumeSizeInMb * MB;
     uint64_t numBlocks = volumeSizeInByte / blockSize;
-    struct spdk_bdev* bdev = spdkCaller->SpdkBdevCreatePosDisk(bdevName.c_str(), id, nullptr,
+    struct spdk_uuid* bdev_uuid = nullptr;
+
+    // spdkCaller->SpdkUuidParse(bdev_uuid, (char *)&uuid);
+
+    struct spdk_bdev* bdev = spdkCaller->SpdkBdevCreatePosDisk(bdevName.c_str(), id, bdev_uuid,
         numBlocks, blockSize, volumeTypeInMem, arrayName.c_str(), arrayId);
     if (bdev == nullptr)
     {

@@ -46,8 +46,8 @@ public:
     : VolumeBase(arrayName, arrayIdx, volName, volSizeByte)
     {
     }
-    Volume(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw)
-    : VolumeBase(arrayName, arrayIdx, volName, volSizeByte, maxiops, maxbw)
+    Volume(std::string arrayName, int arrayIdx, std::string volName, std::string uuid, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw)
+    : VolumeBase(arrayName, arrayIdx, volName, uuid, volSizeByte, maxiops, maxbw)
     {
     }
     ~Volume(void) override

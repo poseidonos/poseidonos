@@ -37,6 +37,7 @@
 #include "spdk/stdinc.h"
 #include "nvmf_spec.h"
 #include "pos.h"
+#include "uuid.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,6 +88,7 @@ struct pos_volume_info {
 	char name[VOLUME_NAME_MAX_LEN + 1];
 	char nqn[SPDK_NVMF_NQN_MAX_LEN + 1];
 	char array_name[ARRAY_NAME_MAX_LEN + 1];
+	char uuid[SPDK_UUID_STRING_LEN];
 	uint32_t nqn_id;
 	uint64_t size_mb;
 	uint64_t iops_limit;

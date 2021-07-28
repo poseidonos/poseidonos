@@ -34,6 +34,7 @@
 #include "src/volume/volume_creator.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/network/nvmf_target.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume.h"
 #include "src/volume/volume_name_policy.h"
@@ -100,14 +101,30 @@ VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops,
     POS_TRACE_DEBUG(static_cast<int>(POS_EVENT_ID::SUCCESS),
             "Volume meta saved successfully");
 
-    bool res = eventPublisher->NotifyVolumeCreated(name, vol->ID, size,
-            vol->MaxIOPS(), vol->MaxBW(), arrayName, arrayID);
+    _SetVolumeEventBase(vol);
+    _SetVolumeEventPerf(vol);
+    _SetVolumeArrayInfo();
+
+    bool res = eventPublisher->NotifyVolumeCreated(&volumeEventBase, &volumeEventPerf, &volumeArrayInfo);
 
     if (res == false)
     {
         volumeList.Remove(vol->ID);
         return static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
     }
+
+    NvmfTarget nvmfTarget;
+
+    std::string uuid = nvmfTarget.GetPosBdevUuid(vol->ID, vol->GetArrayName());
+
+    if (uuid.empty() == true)
+    {
+        // wait create bdev creation
+        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::VOL_CREATED),
+            "uuid : {}", uuid);
+    }
+
+    vol->SetUuid(uuid);
 
     ret = _SaveVolumes();
     if (ret != static_cast<int>(POS_EVENT_ID::SUCCESS))

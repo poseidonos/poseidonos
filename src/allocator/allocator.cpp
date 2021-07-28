@@ -198,14 +198,14 @@ Allocator::GetIContextReplayer(void)
 }
 //----------------------------------------------------------------------------//
 bool
-Allocator::VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID)
+Allocator::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     std::vector<Stripe*> stripesToFlush;
     std::vector<StripeId> vsidToCheckFlushDone;
 
     {
         std::unique_lock<std::mutex> lock(contextManager->GetCtxLock());
-        wbStripeManager->PickActiveStripe(volID, stripesToFlush, vsidToCheckFlushDone);
+        wbStripeManager->PickActiveStripe(volEventBase->volId, stripesToFlush, vsidToCheckFlushDone);
     }
 
     wbStripeManager->FinalizeWriteIO(stripesToFlush, vsidToCheckFlushDone);

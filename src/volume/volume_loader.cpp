@@ -74,8 +74,11 @@ VolumeLoader::Do(void)
             if (vol == nullptr)
                 break;
 
-            bool ret = eventPublisher->NotifyVolumeLoaded(vol->GetName(), idx,
-                    vol->TotalSize(), vol->MaxIOPS(), vol->MaxBW(), arrayName, arrayID);
+            _SetVolumeEventBase(vol);
+            _SetVolumeEventPerf(vol);
+            _SetVolumeArrayInfo();
+
+            bool ret = eventPublisher->NotifyVolumeLoaded(&volumeEventBase, &volumeEventPerf, &volumeArrayInfo);
 
             if (ret == false)
             {

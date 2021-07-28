@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "src/allocator/address/allocator_address_info.h"
+#include "src/sys_event/volume_event.h"
 #include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/block_manager/block_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
@@ -124,8 +125,13 @@ TEST(Allocator, VolumeUnmounted_TestSimpleCall)
     EXPECT_CALL(*wbManager, FinalizeWriteIO);
     EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
 
+    VolumeEventBase volumeEventBase;
+    alloc.SetVolumeBase(&volumeEventBase, 0, 0, "", "", "");
+    VolumeArrayInfo volumeArrayInfo;
+    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
+
     // when
-    alloc.VolumeUnmounted("", 0, "", 0);
+    alloc.VolumeUnmounted(&volumeEventBase, &volumeArrayInfo);
 }
 
 TEST(Allocator, SetNormalGcThreshold_TestSimpleSetter)
@@ -503,8 +509,15 @@ TEST(Allocator, VolumeCreated_TestSimpleCallEmptyFunc)
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
+    VolumeEventBase volumeEventBase;
+    alloc.SetVolumeBase(&volumeEventBase, 0, 0, "", "", "");
+    VolumeEventPerf volumeMountPerf;
+    alloc.SetVolumePerf(&volumeMountPerf, 0, 0);
+    VolumeArrayInfo volumeArrayInfo;
+    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
+
     // when
-    alloc.VolumeCreated("", 0, 0, 0, 0, "", 0);
+    alloc.VolumeCreated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo);
 }
 
 TEST(Allocator, VolumeLoaded_TestSimpleCallEmptyFunc)
@@ -518,8 +531,14 @@ TEST(Allocator, VolumeLoaded_TestSimpleCallEmptyFunc)
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
+    VolumeEventBase volumeEventBase;
+    alloc.SetVolumeBase(&volumeEventBase, 0, 0, "", "", "");
+    VolumeEventPerf volumeMountPerf;
+    alloc.SetVolumePerf(&volumeMountPerf, 0, 0);
+    VolumeArrayInfo volumeArrayInfo;
+    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
     // when
-    alloc.VolumeLoaded("", 0, 0, 0, 0, "", 0);
+    alloc.VolumeLoaded(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo);
 }
 
 TEST(Allocator, VolumeUpdated_TestSimpleCallEmptyFunc)
@@ -533,8 +552,15 @@ TEST(Allocator, VolumeUpdated_TestSimpleCallEmptyFunc)
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
+    VolumeEventBase volumeEventBase;
+    alloc.SetVolumeBase(&volumeEventBase, 0, 0, "", "", "");
+    VolumeEventPerf volumeMountPerf;
+    alloc.SetVolumePerf(&volumeMountPerf, 0, 0);
+    VolumeArrayInfo volumeArrayInfo;
+    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
+
     // when
-    alloc.VolumeUpdated("", 0, 0, 0, "", 0);
+    alloc.VolumeUpdated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo);
 }
 
 TEST(Allocator, VolumeMounted_TestSimpleCallEmptyFunc)
@@ -548,8 +574,15 @@ TEST(Allocator, VolumeMounted_TestSimpleCallEmptyFunc)
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
+    VolumeEventBase volumeEventBase;
+    alloc.SetVolumeBase(&volumeEventBase, 0, 0, "", "", "");
+    VolumeEventPerf volumeMountPerf;
+    alloc.SetVolumePerf(&volumeMountPerf, 0, 0);
+    VolumeArrayInfo volumeArrayInfo;
+    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
+
     // when
-    alloc.VolumeMounted("", "", 0, 0, 0, 0, "", 0);
+    alloc.VolumeMounted(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo);
 }
 
 TEST(Allocator, VolumeDetached_TestSimpleCallEmptyFunc)
@@ -563,9 +596,12 @@ TEST(Allocator, VolumeDetached_TestSimpleCallEmptyFunc)
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
+    VolumeArrayInfo volumeArrayInfo;
+    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
+
     // when
     std::vector<int> param;
-    alloc.VolumeDetached(param, "", 0);
+    alloc.VolumeDetached(param, &volumeArrayInfo);
 }
 
 TEST(Allocator, VolumeDeleted_TestSimpleCallEmptyFunc)
@@ -579,7 +615,12 @@ TEST(Allocator, VolumeDeleted_TestSimpleCallEmptyFunc)
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
     Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
+    VolumeEventBase volumeEventBase;
+    alloc.SetVolumeBase(&volumeEventBase, 0, 0, "", "", "");
+    VolumeArrayInfo volumeArrayInfo;
+    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
+
     // when
-    alloc.VolumeDeleted("", 0, 0, "", 0);
+    alloc.VolumeDeleted(&volumeEventBase, &volumeArrayInfo);
 }
 } // namespace pos

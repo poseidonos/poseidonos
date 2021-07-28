@@ -166,7 +166,14 @@ VSAMapManager::EnableInternalAccess(int volID, int caller)
         }
 
         // In case of internal-loading, we don't know the volume size
-        if (VolumeMounted(volName, "", volID, UNKNOWN_SIZE_BECAUSEOF_INTERNAL_LOAD, 0, 0, "", 0))
+        VolumeEventBase volumeEventBase;
+        SetVolumeBase(&volumeEventBase, volID, UNKNOWN_SIZE_BECAUSEOF_INTERNAL_LOAD, volName, "", "");
+        VolumeEventPerf volumeMountPerf;
+        SetVolumePerf(&volumeMountPerf, 0, 0);
+        VolumeArrayInfo volumeArrayInfo;
+        SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
+
+        if (VolumeMounted(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo))
         {
             POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} Internal Mount Request Succeeded", volID);
         }
@@ -248,108 +255,108 @@ VSAMapManager::MapFlushDone(int mapId)
 }
 
 bool
-VSAMapManager::VolumeCreated(std::string volName, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
+VSAMapManager::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     do
     {
-        if (false == _PrepareVsaMapAndHeader(volID, volSizeByte, false))
+        if (false == _PrepareVsaMapAndHeader(volEventBase->volId, volEventBase->volSizeByte, false))
         {
             POS_TRACE_ERROR(EID(MAPPER_FAILED), "Vsa map & Header Prepare Failed");
             break;
         }
-        if (false == _PrepareInMemoryData(volID, volSizeByte))
+        if (false == _PrepareInMemoryData(volEventBase->volId, volEventBase->volSizeByte))
         {
             POS_TRACE_ERROR(EID(MAPPER_FAILED), "In-memory Data Prepare Failed");
             break;
         }
-        if (false == _VSAMapFileCreate(volID))
+        if (false == _VSAMapFileCreate(volEventBase->volId))
         {
             POS_TRACE_ERROR(EID(MAPPER_FAILED), "Vsa map File Creation Failed");
             break;
         }
-        if (false == _VSAMapFileStore(volID))
+        if (false == _VSAMapFileStore(volEventBase->volId))
         {
             POS_TRACE_ERROR(EID(MAPPER_FAILED), "Vsa map File Store Failed");
             break;
         }
 
-        std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
-        volumeMountState.emplace(volID, VolState::JUST_CREATED);
-        vsaMapAPI->EnableVsaMapInternalAccess(volID);
-        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} JUST_CREATED", volID);
+        std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volEventBase->volId]);
+        volumeMountState.emplace(volEventBase->volId, VolState::JUST_CREATED);
+        vsaMapAPI->EnableVsaMapInternalAccess(volEventBase->volId);
+        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} JUST_CREATED", volEventBase->volId);
         return true;
     }
     while (false);
-    _HandleVolumeCreationFail(volID);
+    _HandleVolumeCreationFail(volEventBase->volId);
     return false;
 }
 
 bool
-VSAMapManager::VolumeMounted(std::string volName, std::string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, std::string arrayNAme, int arrayID)
+VSAMapManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    if (_GetVolumeState(volID) == VolState::VOLUME_DELETING)
+    if (_GetVolumeState(volEventBase->volId) == VolState::VOLUME_DELETING)
     {
         return false;
     }
 
-    bool isUnknownSize = (volSizeByte == UNKNOWN_SIZE_BECAUSEOF_INTERNAL_LOAD);
-    return _LoadVolumeMeta(volName, volID, volSizeByte, isUnknownSize);
+    bool isUnknownSize = (volEventBase->volSizeByte == UNKNOWN_SIZE_BECAUSEOF_INTERNAL_LOAD);
+    return _LoadVolumeMeta(volEventBase->volName, volEventBase->volId, volEventBase->volSizeByte, isUnknownSize);
 }
 
 bool
-VSAMapManager::VolumeLoaded(std::string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
+VSAMapManager::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    if (_GetVolumeState(id) == VolState::VOLUME_DELETING)
+    if (_GetVolumeState(volEventBase->volId) == VolState::VOLUME_DELETING)
     {
         return false;
     }
 
-    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[id]);
-    volumeMountState.emplace(id, VolState::EXIST_UNLOADED);
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} is inserted to volumeMountState as EXIST_UNLOADED @VolumeLoaded", id);
+    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volEventBase->volId]);
+    volumeMountState.emplace(volEventBase->volId, VolState::EXIST_UNLOADED);
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} is inserted to volumeMountState as EXIST_UNLOADED @VolumeLoaded", volEventBase->volId);
     return true;
 }
 
 bool
-VSAMapManager::VolumeUpdated(std::string volName, int volID, uint64_t maxiops, uint64_t maxbw, std::string arrayName, int arrayID)
+VSAMapManager::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     return true;
 }
 
 bool
-VSAMapManager::VolumeUnmounted(std::string volName, int volID, std::string arrayName, int arrayID)
+VSAMapManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
-    if (_GetVolumeState(volID) == VolState::VOLUME_DELETING)
+    if (_GetVolumeState(volEventBase->volId) == VolState::VOLUME_DELETING)
     {
         return false;
     }
 
-    vsaMapAPI->DisableVsaMapAccess(volID);
+    vsaMapAPI->DisableVsaMapAccess(volEventBase->volId);
 
     do
     {
-        EventSmartPtr eventVSAMap = std::make_shared<MapFlushedEvent>(volID, this);
-        mapFlushStatus[volID] = MapFlushState::FLUSHING;
+        EventSmartPtr eventVSAMap = std::make_shared<MapFlushedEvent>(volEventBase->volId, this);
+        mapFlushStatus[volEventBase->volId] = MapFlushState::FLUSHING;
 
-        int ret = GetVSAMapContent(volID)->FlushTouchedPages(eventVSAMap);
+        int ret = GetVSAMapContent(volEventBase->volId)->FlushTouchedPages(eventVSAMap);
         if (ret < 0)
         {
-            POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "ret:{} of vsaMap->Unload(), VolumeId:{} @VolumeUnmounted", ret, volID);
+            POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "ret:{} of vsaMap->Unload(), VolumeId:{} @VolumeUnmounted", ret, volEventBase->volId);
         }
-        _WaitForMapFlushed(volID);
+        _WaitForMapFlushed(volEventBase->volId);
 
-        std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
+        std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volEventBase->volId]);
         VolMountStateIter iter;
-        if (_IsVolumeExist(volID, iter))
+        if (_IsVolumeExist(volEventBase->volId, iter))
         {
             if (iter->second == VolState::FOREGROUND_MOUNTED)
             {
                 volumeMountState[iter->first] = VolState::BACKGROUND_MOUNTED;
-                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was set as BG_MOUNTED @VolumeUnmounted", volID);
+                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was set as BG_MOUNTED @VolumeUnmounted", volEventBase->volId);
             }
             else
             {
-                POS_TRACE_WARN(EID(VSAMAP_UNMOUNT_FAILURE), "volumeID:{} is Not FG_MOUNTED @VolumeUnmounted", volID);
+                POS_TRACE_WARN(EID(VSAMAP_UNMOUNT_FAILURE), "volumeID:{} is Not FG_MOUNTED @VolumeUnmounted", volEventBase->volId);
             }
         }
 
@@ -360,27 +367,27 @@ VSAMapManager::VolumeUnmounted(std::string volName, int volID, std::string array
 }
 
 bool
-VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByte, std::string arrayName, int arrayID)
+VSAMapManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     // std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "Starting VolumeDelete: volID:{}  volSizeByte:{}", volID, volSizeByte);
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "Starting VolumeDelete: volID:{}  volSizeByte:{}", volEventBase->volId, volEventBase->volSizeByte);
 
-    VSAMapContent*& vsaMap = GetVSAMapContent(volID);
+    VSAMapContent*& vsaMap = GetVSAMapContent(volEventBase->volId);
 
     // Unloaded case: Load & BG Mount
     if (nullptr == vsaMap)
     {
         // We know the volume size but deal with internal loading
-        if (false == _LoadVolumeMeta(volName, volID, volSizeByte, true))
+        if (false == _LoadVolumeMeta(volEventBase->volName, volEventBase->volId, volEventBase->volSizeByte, true))
         {
-            POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "VSAMap load failed, volumeID:{} @VolumeDeleted", volID);
+            POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "VSAMap load failed, volumeID:{} @VolumeDeleted", volEventBase->volId);
             return false;
         }
     }
 
-    if (_ChangeVolumeStateDeleting(volID) == false)
+    if (_ChangeVolumeStateDeleting(volEventBase->volId) == false)
     {
-        POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "Another thread started to delete volumeID:{} @VolumeDeleted", volID);
+        POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "Another thread started to delete volumeID:{} @VolumeDeleted", volEventBase->volId);
         return true;
     }
 
@@ -388,20 +395,20 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
     {
         if (0 != vsaMap->FileOpen())
         {
-            POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "VSAMap load failed, volumeID:{} @VolumeDeleted", volID);
+            POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "VSAMap load failed, volumeID:{} @VolumeDeleted", volEventBase->volId);
         }
     }
 
     if (vsaMap->DoesFileExist() == false)
     {
         // VolumeDeleted can be notified again when pos crashes during volume deletion
-        POS_TRACE_DEBUG(EID(NO_BLOCKMAP_MFS_FILE), "No MFS filename:{} for volName:{} @VolumeDeleted", vsaMap->GetFileName(), volName);
+        POS_TRACE_DEBUG(EID(NO_BLOCKMAP_MFS_FILE), "No MFS filename:{} for volName:{} @VolumeDeleted", vsaMap->GetFileName(), volEventBase->volName);
         return true;
     }
 
     IVolumeEventHandler* journalVolumeHandler = JournalServiceSingleton::Instance()->GetVolumeEventHandler(arrayName);
     // Write log for deleted volume
-    if (0 != journalVolumeHandler->WriteVolumeDeletedLog(volID))
+    if (0 != journalVolumeHandler->WriteVolumeDeletedLog(volEventBase->volId))
     {
         return false;
     }
@@ -409,7 +416,7 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
     // Mark all blocks in this volume up as Invalidated
     if (0 != vsaMap->InvalidateAllBlocks())
     {
-        POS_TRACE_WARN(EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE), "VSAMap Invalidate all blocks Failed, volumeID:{} @VolumeDeleted", volID);
+        POS_TRACE_WARN(EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE), "VSAMap Invalidate all blocks Failed, volumeID:{} @VolumeDeleted", volEventBase->volId);
         return false;
     }
 
@@ -422,25 +429,25 @@ VSAMapManager::VolumeDeleted(std::string volName, int volID, uint64_t volSizeByt
     // file close and delete
     if (0 != vsaMap->FileClose())
     {
-        POS_TRACE_WARN(EID(MFS_FILE_CLOSE_FAILED), "VSAMap File close failed, volumeID:{} @VolumeDeleted", volID);
+        POS_TRACE_WARN(EID(MFS_FILE_CLOSE_FAILED), "VSAMap File close failed, volumeID:{} @VolumeDeleted", volEventBase->volId);
         return false;
     }
     if (0 != vsaMap->DeleteMapFile())
     {
-        POS_TRACE_WARN(EID(MFS_FILE_DELETE_FAILED), "VSAMap File delete failed, volumeID:{} @VolumeDeleted", volID);
+        POS_TRACE_WARN(EID(MFS_FILE_DELETE_FAILED), "VSAMap File delete failed, volumeID:{} @VolumeDeleted", volEventBase->volId);
         return false;
     }
 
     // clean up contents in dram
     delete vsaMap;
     vsaMap = nullptr;
-    volumeMountState.erase(volID);
+    volumeMountState.erase(volEventBase->volId);
 
     return true;
 }
 
 void
-VSAMapManager::VolumeDetached(vector<int> volList, std::string arrayName, int arrayID)
+VSAMapManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
 {
     for (int volumeId : volList)
     {

@@ -39,19 +39,43 @@
 using namespace std;
 namespace pos
 {
+struct VolumeEventBase
+{
+    int volId;
+    uint64_t volSizeByte;
+    string volName;
+    string uuid;
+    string subnqn;
+};
+
+struct VolumeEventPerf
+{
+    uint64_t maxiops;
+    uint64_t maxbw;
+};
+
+struct VolumeArrayInfo
+{
+    int arrayId;
+    string arrayName;
+};
 class VolumeEvent
 {
 public:
     VolumeEvent(string _tag, string _arrayName, int _arrayId);
     virtual ~VolumeEvent(void);
     string Tag(void);
-    virtual bool VolumeCreated(string volName, int volID, uint64_t volSizeBytem, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) = 0;
-    virtual bool VolumeUpdated(string volName, int volID, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) = 0;
-    virtual bool VolumeDeleted(string volName, int volID, uint64_t volSizeByte, string arrayName, int arrayId) = 0;
-    virtual bool VolumeMounted(string volName, string subnqn, int volID, uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) = 0;
-    virtual bool VolumeUnmounted(string volName, int volID, string arrayName, int arrayId) = 0;
-    virtual bool VolumeLoaded(string name, int id, uint64_t totalSize, uint64_t maxiops, uint64_t maxbw, string arrayName, int arrayId) = 0;
-    virtual void VolumeDetached(vector<int> volList, string arrayName, int arrayId) = 0;
+    void SetVolumeBase(VolumeEventBase* volEventBase, int volId, uint64_t volSizeByte, string volName, string uuid, string subnqn);
+    void SetVolumePerf(VolumeEventPerf* volEventPerf, uint64_t maxiops, uint64_t maxbw);
+    void SetVolumeArrayInfo(VolumeArrayInfo* volArrayInfo, int arrayId, string arrayName);
+
+    virtual bool VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual bool VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual bool VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual bool VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual bool VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual bool VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual void VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) = 0;
 
 protected:
     string arrayName = "";

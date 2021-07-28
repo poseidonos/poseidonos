@@ -196,4 +196,10 @@ SpdkCaller::SpdkUuidFmtLower(char* uuid_str, size_t uuid_str_size, const struct 
 {
     return spdk_uuid_fmt_lower(uuid_str, uuid_str_size, uuid);
 }
+
+int
+SpdkCaller::SpdkUuidParse(struct spdk_uuid *uuid, const char *uuid_str)
+{
+    return spdk_uuid_parse(uuid, uuid_str);
+}
 } // namespace pos
