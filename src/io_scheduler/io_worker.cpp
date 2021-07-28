@@ -38,21 +38,22 @@
 #include <string>
 #include <thread>
 
-#include "spdk/thread.h"
-#include "src/device/base/ublock_device.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/include/memory.h"
-#include "src/bio/ubio.h"
-#include "src/logger/logger.h"
-#include "src/io_scheduler/io_queue.h"
-#include "src/include/branch_prediction.h"
-#include "spdk/event.h"
 #include "io_worker_submission_notifier.h"
+#include "spdk/event.h"
+#include "spdk/thread.h"
+#include "src/bio/ubio.h"
+#include "src/device/base/ublock_device.h"
 #include "src/device/base/ublock_device_submission_adapter.h"
+#include "src/device/device_detach_trigger.h"
 #include "src/device/unvme/unvme_ssd.h"
+#include "src/event_scheduler/event.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/memory.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/io_scheduler/io_queue.h"
+#include "src/logger/logger.h"
 #include "src/qos/qos_common.h"
 #include "src/qos/qos_manager.h"
-#include "src/event_scheduler/event.h"
 
 namespace pos
 {
@@ -63,14 +64,20 @@ namespace pos
  * @Param    coreAffinityInput
  */
 /* --------------------------------------------------------------------------*/
-IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id)
+IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id,
+    DeviceDetachTrigger* detachTrigger)
 : cpuSet(cpuSetInput),
   ioQueue(new IOQueue),
   currentOutstandingIOCount(0),
   exit(false),
-  id(id)
+  id(id),
+  detachTrigger(detachTrigger)
 {
     thread = new std::thread(&IOWorker::Run, this);
+    if (detachTrigger == nullptr)
+    {
+        this->detachTrigger = new DeviceDetachTrigger();
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -83,6 +90,11 @@ IOWorker::~IOWorker(void)
     exit = true;
     thread->join();
     delete ioQueue;
+
+    if (detachTrigger != nullptr)
+    {
+        delete detachTrigger;
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -206,7 +218,6 @@ IOWorker::_DoPeriodicJob(void)
     _HandleDeviceOperation();
 }
 
-
 void
 IOWorker::_HandleDeviceOperation(void)
 {
@@ -221,8 +232,22 @@ IOWorker::_HandleDeviceOperation(void)
     {
         case INSERT:
         {
+            /*
+                When opening the uram in IOWorker, Uram will issue recovery IO.
+                Completion check for this io,
+                device must be added to list before device open.
+            */
             deviceList.insert(device);
-            device->Open();
+            bool isOpened = device->Open();
+            if (isOpened == false)
+            {
+                deviceList.erase(device);
+                if (device->GetType() == DeviceType::SSD)
+                {
+                    detachTrigger->Run(device);
+                }
+            }
+
             break;
         }
         case REMOVE:
@@ -275,7 +300,7 @@ IOWorker::_SubmitAsyncIO(UbioSmartPtr ubio)
     UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
     IOWorkerSubmissionNotifier ioWorkerSubmissionNotifier(this);
     QosManagerSingleton::Instance()->HandleEventUbioSubmission(&ublockDeviceSubmission,
-                        &ioWorkerSubmissionNotifier, id, ubio);
+        &ioWorkerSubmissionNotifier, id, ubio);
 }
 
 /* --------------------------------------------------------------------------*/

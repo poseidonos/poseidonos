@@ -30,71 +30,20 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef DEVICE_DETACH_TRIGGER_H_
+#define DEVICE_DETACH_TRIGGER_H_
 
-#include <atomic>
-#include <cstdint>
-#include <thread>
-#include <unordered_set>
-#include <vector>
-
-#include "io_worker_device_operation.h"
-#include "io_worker_device_operation_queue.h"
-#include "src/bio/ubio.h"
-
+#include "device_manager.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
-class EventScheduler;
-class IOQueue;
-class Ubio;
-class UBlockDevice;
-class DeviceDetachTrigger;
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Handle bio, interact with devices
- *           Affinited to single core
- */
-/* --------------------------------------------------------------------------*/
-class IOWorker
+class DeviceDetachTrigger
 {
 public:
-    IOWorker(cpu_set_t cpuSetInput, uint32_t id,
-        DeviceDetachTrigger* detachTrigger = nullptr);
-    virtual ~IOWorker(void);
-
-    virtual void EnqueueUbio(UbioSmartPtr ubio);
-    uint32_t AddDevice(UblockSharedPtr device);
-    uint32_t AddDevices(std::vector<UblockSharedPtr>* inputList);
-    virtual uint32_t RemoveDevice(UblockSharedPtr device);
-    bool HasDevice(UblockSharedPtr device);
-
-    void Run(void);
-
-    void DecreaseCurrentOutstandingIoCount(int count);
-    uint32_t GetWorkerId(void);
-
-private:
-    void _SubmitAsyncIO(UbioSmartPtr ubio);
-    void _CompleteCommand(void);
-    void _DoPeriodicJob(void);
-    void _HandleDeviceOperation(void);
-    void _SubmitPendingIO(void);
-
-    using DeviceSet = std::unordered_set<UblockSharedPtr>;
-    using DeviceSetIter = DeviceSet::iterator;
-
-    IoWorkerDeviceOperationQueue operationQueue;
-    cpu_set_t cpuSet;
-    IOQueue* ioQueue;
-    std::thread* thread;
-    uint32_t currentOutstandingIOCount;
-
-    DeviceSet deviceList;
-    std::atomic<bool> exit;
-    uint32_t id;
-
-    DeviceDetachTrigger* detachTrigger;
+    void Run(UblockSharedPtr& dev);
 };
-} // namespace pos
+
+}  // namespace pos
+
+#endif  // DEVICE_DETACH_TRIGGER_H_

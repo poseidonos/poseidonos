@@ -30,71 +30,28 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "device_detach_trigger.h"
 
-#include <atomic>
-#include <cstdint>
 #include <thread>
-#include <unordered_set>
-#include <vector>
 
-#include "io_worker_device_operation.h"
-#include "io_worker_device_operation_queue.h"
-#include "src/bio/ubio.h"
+#include "base/ublock_device.h"
+#include "device_identifier.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
+using namespace pos;
+using namespace std;
 
-namespace pos
+void
+DeviceDetachTrigger::Run(UblockSharedPtr& dev)
 {
-class EventScheduler;
-class IOQueue;
-class Ubio;
-class UBlockDevice;
-class DeviceDetachTrigger;
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis Handle bio, interact with devices
- *           Affinited to single core
- */
-/* --------------------------------------------------------------------------*/
-class IOWorker
-{
-public:
-    IOWorker(cpu_set_t cpuSetInput, uint32_t id,
-        DeviceDetachTrigger* detachTrigger = nullptr);
-    virtual ~IOWorker(void);
-
-    virtual void EnqueueUbio(UbioSmartPtr ubio);
-    uint32_t AddDevice(UblockSharedPtr device);
-    uint32_t AddDevices(std::vector<UblockSharedPtr>* inputList);
-    virtual uint32_t RemoveDevice(UblockSharedPtr device);
-    bool HasDevice(UblockSharedPtr device);
-
-    void Run(void);
-
-    void DecreaseCurrentOutstandingIoCount(int count);
-    uint32_t GetWorkerId(void);
-
-private:
-    void _SubmitAsyncIO(UbioSmartPtr ubio);
-    void _CompleteCommand(void);
-    void _DoPeriodicJob(void);
-    void _HandleDeviceOperation(void);
-    void _SubmitPendingIO(void);
-
-    using DeviceSet = std::unordered_set<UblockSharedPtr>;
-    using DeviceSetIter = DeviceSet::iterator;
-
-    IoWorkerDeviceOperationQueue operationQueue;
-    cpu_set_t cpuSet;
-    IOQueue* ioQueue;
-    std::thread* thread;
-    uint32_t currentOutstandingIOCount;
-
-    DeviceSet deviceList;
-    std::atomic<bool> exit;
-    uint32_t id;
-
-    DeviceDetachTrigger* detachTrigger;
-};
-} // namespace pos
+    if (dev->GetType() != DeviceType::SSD)
+    {
+        POS_TRACE_WARN(POS_EVENT_ID::DEVICE_DETACH_TRIGGER_FAIL,
+            "Failed to trigger device detach. Not supported device type.");
+        return;
+    }
+    POS_TRACE_DEBUG(POS_EVENT_ID::DEVICE_DEBUG_MSG,
+        "Device detach triggered manually");
+    thread(DeviceDetachEventHandler, dev->GetSN()).detach();
+}

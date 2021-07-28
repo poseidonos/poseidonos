@@ -178,6 +178,8 @@ UBlockDevice::Open(void)
     returnValue = _OpenDeviceDriver(devCtx);
     if (returnValue == false)
     {
+        _ReleaseDeviceContext(devCtx);
+        _UnRegisterContextToCurrentCore();
         return false;
     }
 

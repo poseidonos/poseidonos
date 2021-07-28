@@ -78,10 +78,7 @@ MonitorStart(DeviceMonitor* monitor)
 }
 
 DeviceManager::DeviceManager(AffinityManager* affinityManager)
-: affinityManager(affinityManager),
-  reactorRegistered(false),
-  deviceEvent(nullptr),
-  ioDispatcher(nullptr)
+: affinityManager(affinityManager)
 {
     _InitDriver();
     _InitMonitor();
@@ -560,27 +557,21 @@ DeviceManager::_PrepareDevices(void)
 {
     for (auto& iter : devices)
     {
-        ioDispatcher->AddDeviceForReactor(iter);
-        cpu_set_t targetCpuSet =
-            affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
-        ioDispatcher->AddDeviceForIOWorker(iter, targetCpuSet);
+        _PrepareDevice(iter);
     }
 }
 
 void
 DeviceManager::_PrepareDevice(UblockSharedPtr dev)
 {
+    /*
+        Device must be added to the reactor before the ioworker.
+        Adding uram to IOworker, it has recovery behavior.
+        Then ioworker issue IO to the uram and then reactor access to uram context
+    */
     ioDispatcher->AddDeviceForReactor(dev);
-    cpu_set_t cpuSet = affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
-    ioDispatcher->AddDeviceForIOWorker(dev, cpuSet);
-    dev->Open();
-}
-
-void
-DeviceManager::_PrepareMockDevice(UblockSharedPtr dev)
-{
-    cpu_set_t cpuSet = affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
-    ioDispatcher->AddDeviceForIOWorker(dev, cpuSet);
+    cpu_set_t ioWorkerCpuSet = affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
+    ioDispatcher->AddDeviceForIOWorker(dev, ioWorkerCpuSet);
 }
 
 void

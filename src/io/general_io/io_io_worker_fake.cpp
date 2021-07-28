@@ -30,6 +30,8 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "src/io_scheduler/io_worker.h"
+
 #include <unistd.h>
 
 #include <algorithm>
@@ -43,7 +45,6 @@
 #include "src/event_scheduler/io_completer.h"
 #include "src/include/memory.h"
 #include "src/io_scheduler/io_queue.h"
-#include "src/io_scheduler/io_worker.h"
 #include "src/bio/ubio.h"
 
 namespace pos
@@ -82,12 +83,14 @@ EmulateRead(UbioSmartPtr ubio)
  * @Param    coreAffinityInput
  */
 /* --------------------------------------------------------------------------*/
-IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id)
+IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id,
+    DeviceDetachTrigger* detachTrigger)
 : cpuSet(cpuSetInput),
   ioQueue(new IOQueue),
   currentOutstandingIOCount(0),
   exit(false),
-  id(id)
+  id(id),
+  detachTrigger(detachTrigger)
 {
     thread = new std::thread(&IOWorker::Run, this);
 
