@@ -2,6 +2,7 @@ package systemcmds
 
 import (
 	"encoding/json"
+	"os"
 
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
@@ -21,6 +22,15 @@ Syntax:
 	poseidonos-cli system stop .
           `,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		if stop_system_isForced == false {
+			conf := displaymgr.AskConfirmation("WARNING: Stopping POS will " +
+				"affect the progressing I/Os.\n\n" +
+				"Are you sure you want to stop POS?")
+			if conf == false {
+				os.Exit(0)
+			}
+		}
 
 		var command = "EXITIBOFOS"
 
@@ -53,6 +63,8 @@ Syntax:
 	},
 }
 
-func init() {
+var stop_system_isForced = false
 
+func init() {
+	StopSystemCmd.Flags().BoolVarP(&stop_system_isForced, "force", "", false, "Execute this command without confirmation")
 }

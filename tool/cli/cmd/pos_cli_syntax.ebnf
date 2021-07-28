@@ -28,18 +28,18 @@ Cmd = ApplicationName WhiteSpace (ArrayCmd | VolumeCmd | DeviceCmd | SystemCmd |
 
 ArrayCmd = "array" WhiteSpace (MountArrayCmd | UnmountArrayCmd | ListArrayCmd | AddSpareCmd | RemoveSpareCmd | DeleteArrayCmd | CreateArrayCmd) .
 MountArrayCmd = "mount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
-UnmountArrayCmd = "unmount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
+UnmountArrayCmd = "unmount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"] .
 ListArrayCmd = "list" [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] .
 AddSpareCmd = "addspare" WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName ("--array-name" | "-a") WhiteSpace ArrayName .
-RemoveSpareCmd = "rmspare" WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName ("--array-name" | "-a")  WhiteSpace ArrayName .
+RemoveSpareCmd = "rmspare" WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName ("--array-name" | "-a")  WhiteSpace ArrayName ["--force"] .
 CreateArrayCmd = "create" ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ("--buffer" | "-b") WhiteSpace DeviceName WhiteSpace ("--data-devs" | "-d") WhiteSpace DeviceNameList [WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName] [WhiteSpace "--raid" WhiteSpace RaidType] .
-DeleteArrayCmd = "delete" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
+DeleteArrayCmd = "delete" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"].
 
 VolumeCmd = "volume" WhiteSpace (VolumeCreateCmd | VolumeDeleteCmd | VolumeMountCmd | VolumeUnmountCmd | VolumeListCmd | VolumeSetPropertyCmd | VolumeRenameCmd) .
 VolumeCreateCmd = "create" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace "--size" WhiteSpace VolumeSize [WhiteSpace "--maxiops" WhiteSpace IOPS] [WhiteSpace "--maxbw" WhiteSpace Bandwidth] .
-VolumeDeleteCmd = "delete" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
+VolumeDeleteCmd = "delete" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"] .
 VolumeMountCmd = "mount" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName [WhiteSpace "--subnqn" WhiteSpace TargetNVMSubsystemNVMeQualifiedName] .
-VolumeUnmountCmd = "unmount" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
+VolumeUnmountCmd = "unmount" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"] .
 VolumeListCmd = "list" [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] .
 VolumeRenameCmd = "rename" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--new-volume-name" | -"n) WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
 
@@ -51,7 +51,7 @@ SMARTCmd = "smart" WhiteSpace ("--device-name" | "-d") WhiteSpace DeviceName .
 
 SystemCmd = "system" WhiteSpace (StartSystemCmd | StopSystemCmd | SystemInfoCmd | SetSystemPropertyCmd) .
 StartSystemCmd = "start" .
-StopSystemCmd = "stop" .
+StopSystemCmd = "stop" ["--force"] .
 SystemInfoCmd = "info" .
 SetSystemPropertyCmd = "set-property" [WhiteSpace "--rebuild-impact" WhiteSpace ("high" | "medium" | "low")] .
 
@@ -68,4 +68,4 @@ QosVolumeResetCmd = "reset" WhiteSpace ("--volume-name" | "-v") WhiteSpace Volum
 QosListCmd = "list" [WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeNameList] [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] .
 
 SubsystemCmd = "subsystem" WhiteSpace (DeleteSubsystemCmd) .
-DeleteSubsystemCmd = "delete" WhiteSpace "--subnqn" WhiteSpace SubsystemNQN .
+DeleteSubsystemCmd = "delete" WhiteSpace "--subnqn" WhiteSpace SubsystemNQN ["--force"] .

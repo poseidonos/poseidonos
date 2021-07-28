@@ -2,6 +2,7 @@ package arraycmds
 
 import (
 	"encoding/json"
+	"os"
 
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
@@ -25,10 +26,23 @@ Example:
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		var warningMsg = "WARNING: After deleting array" + " " +
+			delete_array_arrayName + "," + " " +
+			"you cannot recover the data of the volumes in the array.\n\n" +
+			"Are you sure you want to delete array" + " " +
+			delete_array_arrayName + "?"
+
+		if delete_array_isForced == false {
+			conf := displaymgr.AskConfirmation(warningMsg)
+			if conf == false {
+				os.Exit(0)
+			}
+		}
+
 		var command = "DELETEARRAY"
 
 		deleteArrayParam := messages.DeleteArrayParam{
-			ARRAYNAME: array_delete_arrayName,
+			ARRAYNAME: delete_array_arrayName,
 		}
 
 		req := messages.Request{
@@ -64,9 +78,12 @@ Example:
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
-var array_delete_arrayName = ""
+var delete_array_arrayName = ""
+var delete_array_isForced = false
 
 func init() {
-	DeleteArrayCmd.Flags().StringVarP(&array_delete_arrayName, "array-name", "a", "", "Name of the array to delete")
+	DeleteArrayCmd.Flags().StringVarP(&delete_array_arrayName, "array-name", "a", "", "Name of the array to delete")
 	DeleteArrayCmd.MarkFlagRequired("array-name")
+
+	DeleteArrayCmd.Flags().BoolVarP(&delete_array_isForced, "force", "", false, "Execute this command without confirmation")
 }

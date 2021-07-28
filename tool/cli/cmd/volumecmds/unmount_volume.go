@@ -2,6 +2,7 @@ package volumecmds
 
 import (
 	"encoding/json"
+	"os"
 	"pnconnector/src/log"
 
 	"cli/cmd/displaymgr"
@@ -25,6 +26,20 @@ Example:
 	
          `,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		var warningMsg = "WARNING: After unmounting volume" + " " +
+			unmount_volume_volumeName + " " +
+			"in array " + unmount_volume_arrayName + "," + " " +
+			"the progressing I/Os may fail if any.\n\n" +
+			"Are you sure you want to unmount volume" + " " +
+			unmount_volume_volumeName + "?"
+
+		if unmount_volume_isForced == false {
+			conf := displaymgr.AskConfirmation(warningMsg)
+			if conf == false {
+				os.Exit(0)
+			}
+		}
 
 		var command = "UNMOUNTVOLUME"
 
@@ -68,6 +83,7 @@ Example:
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
 var unmount_volume_volumeName = ""
 var unmount_volume_arrayName = ""
+var unmount_volume_isForced = false
 
 func init() {
 	UnmountVolumeCmd.Flags().StringVarP(&unmount_volume_volumeName, "volume-name", "v", "", "The name of the volume to unmount")
@@ -75,4 +91,6 @@ func init() {
 
 	UnmountVolumeCmd.Flags().StringVarP(&unmount_volume_arrayName, "array-name", "a", "", "The name of the array where the volume belongs to")
 	UnmountVolumeCmd.MarkFlagRequired("array-name")
+
+	UnmountVolumeCmd.Flags().BoolVarP(&unmount_volume_isForced, "force", "", false, "Execute this command without confirmation")
 }

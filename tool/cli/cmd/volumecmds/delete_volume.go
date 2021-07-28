@@ -2,6 +2,7 @@ package volumecmds
 
 import (
 	"encoding/json"
+	"os"
 	"pnconnector/src/log"
 
 	"cli/cmd/displaymgr"
@@ -25,6 +26,22 @@ Example:
 	
           `,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		var warningMsg = "WARNING: After deleting volume" + " " +
+			delete_volume_volumeName + "," + " " +
+			"you cannot recover the data of volume " +
+			delete_volume_volumeName + " " +
+			"in the array " +
+			delete_volume_arrayName + "\n\n" +
+			"Are you sure you want to delete volume" + " " +
+			delete_volume_volumeName + "?"
+
+		if delete_volume_isForced == false {
+			conf := displaymgr.AskConfirmation(warningMsg)
+			if conf == false {
+				os.Exit(0)
+			}
+		}
 
 		var command = "DELETEVOLUME"
 
@@ -68,6 +85,7 @@ Example:
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
 var delete_volume_volumeName = ""
 var delete_volume_arrayName = ""
+var delete_volume_isForced = false
 
 func init() {
 	DeleteVolumeCmd.Flags().StringVarP(&delete_volume_volumeName, "volume-name", "v", "", "The Name of the volume to delete")
@@ -75,4 +93,6 @@ func init() {
 
 	DeleteVolumeCmd.Flags().StringVarP(&delete_volume_arrayName, "array-name", "a", "", "The Name of the array where the volume belongs to")
 	DeleteVolumeCmd.MarkFlagRequired("array-name")
+
+	DeleteVolumeCmd.Flags().BoolVarP(&delete_volume_isForced, "force", "", false, "Execute this command without confirmation")
 }

@@ -2,6 +2,7 @@ package arraycmds
 
 import (
 	"encoding/json"
+	"os"
 
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
@@ -24,6 +25,20 @@ Example:
 	poseidonos-cli array unmount --array-name Array0
           `,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		var warningMsg = "WARNING: After unmounting array" + " " +
+			unmount_array_arrayName + "," + " " +
+			"all the volumes in the array will be unmounted.\n" +
+			"In addition, progressing I/Os may fail if any.\n\n" +
+			"Are you sure you want to unmount array" + " " +
+			unmount_array_arrayName + "?"
+
+		if unmount_array_isForced == false {
+			conf := displaymgr.AskConfirmation(warningMsg)
+			if conf == false {
+				os.Exit(0)
+			}
+		}
 
 		var command = "UNMOUNTARRAY"
 
@@ -65,8 +80,11 @@ Example:
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
 var unmount_array_arrayName = ""
+var unmount_array_isForced = false
 
 func init() {
 	UnmountArrayCmd.Flags().StringVarP(&unmount_array_arrayName, "array-name", "a", "", "The name of the array to unmount")
 	UnmountArrayCmd.MarkFlagRequired("array-name")
+
+	UnmountArrayCmd.Flags().BoolVarP(&unmount_array_isForced, "force", "", false, "Execute this command without confirmation")
 }

@@ -2,6 +2,7 @@ package subsystemcmds
 
 import (
 	"encoding/json"
+	"os"
 
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
@@ -25,10 +26,21 @@ Example:
     `,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		var warningMsg = "Are you sure " +
+			"you want to delete subsystem" + " " +
+			delete_subsystem_subnqn + "?"
+
+		if delete_subsystem_isForced == false {
+			conf := displaymgr.AskConfirmation(warningMsg)
+			if conf == false {
+				os.Exit(0)
+			}
+		}
+
 		var command = "DELETESUBSYSTEM"
 
 		deleteSubsystemParam := messages.DeleteSubsystemParam{
-			SUBNQN: subsystem_delete_subnqn,
+			SUBNQN: delete_subsystem_subnqn,
 		}
 
 		req := messages.Request{
@@ -64,9 +76,12 @@ Example:
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
-var subsystem_delete_subnqn = ""
+var delete_subsystem_subnqn = ""
+var delete_subsystem_isForced = false
 
 func init() {
-	DeleteSubsystemCmd.Flags().StringVarP(&subsystem_delete_subnqn, "subnqn", "", "", "NQN of the subsystem to delete")
+	DeleteSubsystemCmd.Flags().StringVarP(&delete_subsystem_subnqn, "subnqn", "", "", "NQN of the subsystem to delete")
 	DeleteSubsystemCmd.MarkFlagRequired("subnqn")
+
+	DeleteSubsystemCmd.Flags().BoolVarP(&delete_subsystem_isForced, "force", "", false, "Execute this command without confirmation")
 }
