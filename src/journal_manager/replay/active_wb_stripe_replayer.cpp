@@ -32,8 +32,8 @@
 
 #include "active_wb_stripe_replayer.h"
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 #include "src/logger/logger.h"
 
@@ -78,16 +78,16 @@ ActiveWBStripeReplayer::Update(StripeInfo stripeInfo)
             .stripeId = stripeInfo.GetVsid(),
             .offset = stripeInfo.GetLastOffset() + 1};
 
+        ActiveStripeAddr addr(stripeInfo.GetVolumeId(), tailVsa,
+            stripeInfo.GetWbLsid());
+
         if (index == INDEX_NOT_FOUND)
         {
-            pendingStripes.push_back(new PendingStripe(stripeInfo.GetVolumeId(),
-                stripeInfo.GetWbLsid(), tailVsa));
+            pendingActiveStripes.push_back(addr);
         }
         else
         {
-            ActiveStripeAddr tailAddr(stripeInfo.GetVolumeId(), tailVsa,
-                stripeInfo.GetWbLsid());
-            _UpdateWbufTail(index, tailAddr);
+            _UpdateWbufTail(index, addr);
         }
     }
 }
@@ -133,6 +133,37 @@ ActiveWBStripeReplayer::_UpdateWbufTail(int index, ActiveStripeAddr newAddr)
     foundActiveStripes[index].push_back(newAddr);
 }
 
+void
+ActiveWBStripeReplayer::UpdateRevMaps(int volId, StripeId vsid, uint64_t offset, BlkAddr startRba)
+{
+    ActiveStripeAddr* stripe = _FindStripe(volId, vsid);
+    // TODO(cheolho.kang): Change assert code to error code
+    assert(stripe != nullptr);
+    stripe->UpdateRevMap(offset, startRba);
+}
+
+ActiveStripeAddr*
+ActiveWBStripeReplayer::_FindStripe(int index, StripeId vsid)
+{
+    for (auto stripe = foundActiveStripes[index].begin(); stripe != foundActiveStripes[index].end(); stripe++)
+    {
+        if (stripe->IsValid() == true && stripe->GetTail().stripeId == vsid)
+        {
+            return &(*stripe);
+        }
+    }
+
+    for (auto stripe = pendingActiveStripes.begin(); stripe != pendingActiveStripes.end(); stripe++)
+    {
+        if (stripe->IsValid() == true && stripe->GetTail().stripeId == vsid)
+        {
+            return &(*stripe);
+        }
+    }
+
+    return nullptr;
+}
+
 int
 ActiveWBStripeReplayer::Replay(void)
 {
@@ -144,11 +175,12 @@ ActiveWBStripeReplayer::Replay(void)
             continue;
         }
 
-        ActiveStripeAddr current = _ReplayStripesExceptActive(index);
+        ActiveStripeAddr current = _FindTargetActiveStripe(index);
+        _RestorePendingStripes();
         if (current.IsValid() == true)
         {
             int ret = wbStripeAllocator->RestoreActiveStripeTail(index,
-                current.GetTail(), current.GetWbLsid());
+                current.GetTail(), current.GetWbLsid(), current.GetRevMap());
 
             if (ret < 0)
             {
@@ -163,9 +195,9 @@ ActiveWBStripeReplayer::Replay(void)
             {
                 std::ostringstream os;
                 os << "[Replay] Restore active stripe (index " << index
-                    << ", vsid " << current.GetTail().stripeId
-                    << ", wbLsid " << current.GetWbLsid()
-                    << ", offset " << current.GetTail().offset << ")";
+                   << ", vsid " << current.GetTail().stripeId
+                   << ", wbLsid " << current.GetWbLsid()
+                   << ", offset " << current.GetTail().offset << ")";
 
                 POS_TRACE_DEBUG(loggingEventId, os.str());
                 POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, loggingEventId, os.str());
@@ -186,12 +218,12 @@ ActiveWBStripeReplayer::Replay(void)
 }
 
 ActiveStripeAddr
-ActiveWBStripeReplayer::_ReplayStripesExceptActive(int index)
+ActiveWBStripeReplayer::_FindTargetActiveStripe(int index)
 {
     ActiveStripeAddr lastActiveStripe;
 
     for (auto it = foundActiveStripes[index].begin();
-        it != foundActiveStripes[index].end();)
+         it != foundActiveStripes[index].end();)
     {
         if (it->IsValid() == false)
         {
@@ -201,23 +233,7 @@ ActiveWBStripeReplayer::_ReplayStripesExceptActive(int index)
         {
             if (lastActiveStripe.IsValid() == true)
             {
-                int reconstructResult = wbStripeAllocator->ReconstructActiveStripe(lastActiveStripe.GetVolumeId(),
-                    lastActiveStripe.GetWbLsid(), lastActiveStripe.GetTail());
-                if (reconstructResult < 0)
-                {
-                    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH_FAILED);
-                    std::ostringstream os;
-                    os << "Failed to reconstruct active stripe, wb lsid " << it->GetWbLsid()
-                        << ", tail offset " << it->GetTail().offset;
-
-                    POS_TRACE_DEBUG(eventId, os.str());
-                    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
-                }
-                else
-                {
-                    pendingStripes.push_back(new PendingStripe(lastActiveStripe.GetVolumeId(),
-                        lastActiveStripe.GetWbLsid(), lastActiveStripe.GetTail()));
-                }
+                pendingActiveStripes.push_back(lastActiveStripe);
             }
             lastActiveStripe = *it;
             ++it;
@@ -227,4 +243,30 @@ ActiveWBStripeReplayer::_ReplayStripesExceptActive(int index)
     return lastActiveStripe;
 }
 
+void
+ActiveWBStripeReplayer::_RestorePendingStripes(void)
+{
+    for (auto it = pendingActiveStripes.begin();
+         it != pendingActiveStripes.end();)
+    {
+        int reconstructResult = wbStripeAllocator->ReconstructActiveStripe(it->GetVolumeId(),
+            it->GetWbLsid(), it->GetTail(), it->GetRevMap());
+        if (reconstructResult < 0)
+        {
+            int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH_FAILED);
+            std::ostringstream os;
+            os << "Failed to reconstruct active stripe, wb lsid " << it->GetWbLsid()
+               << ", tail offset " << it->GetTail().offset;
+
+            POS_TRACE_DEBUG(eventId, os.str());
+            POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
+        }
+        else
+        {
+            pendingStripes.push_back(new PendingStripe(it->GetVolumeId(),
+                it->GetWbLsid(), it->GetTail()));
+        }
+        it = pendingActiveStripes.erase(it);
+    }
+}
 } // namespace pos

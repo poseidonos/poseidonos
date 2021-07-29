@@ -37,11 +37,10 @@
 
 #include "active_stripe_address.h"
 #include "pending_stripe.h"
-#include "src/journal_manager/statistics/stripe_info.h"
-
-#include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator/i_context_replayer.h"
+#include "src/allocator/i_wbstripe_allocator.h"
 #include "src/include/address_type.h"
+#include "src/journal_manager/statistics/stripe_info.h"
 
 namespace pos
 {
@@ -57,20 +56,28 @@ public:
 
     virtual int Replay(void);
     virtual void Update(StripeInfo info);
+    void UpdateRevMaps(int volId, StripeId vsid, uint64_t offset, BlkAddr startRba);
+
+protected:
+    ActiveStripeAddr* _FindStripe(int index, StripeId vsid);
 
 private:
     int _FindWbufIndex(StripeInfo stripeInfo);
     void _ResetWbufTail(int index);
     void _UpdateWbufTail(int index, ActiveStripeAddr addr);
     bool _IsFlushedStripe(StripeInfo stripeInfo);
-    ActiveStripeAddr _ReplayStripesExceptActive(int index);
+    ActiveStripeAddr _FindTargetActiveStripe(int index);
+
+    void _RestorePendingStripes(void);
 
     const int INDEX_NOT_FOUND = -1;
 
     using PendingActiveStripeList = std::vector<ActiveStripeAddr>;
 
     std::vector<VirtualBlkAddr> readTails;
+
     std::vector<PendingActiveStripeList> foundActiveStripes;
+    PendingActiveStripeList pendingActiveStripes;
 
     PendingStripeList& pendingStripes;
     IContextReplayer* contextReplayer;

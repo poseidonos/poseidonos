@@ -33,6 +33,7 @@
 #pragma once
 
 #include <assert.h>
+#include <map>
 
 #include "src/include/address_type.h"
 
@@ -115,10 +116,23 @@ public:
         return volumeId;
     }
 
+    inline void
+    UpdateRevMap(uint64_t offset, BlkAddr rba)
+    {
+        revMap[offset] = rba;
+    }
+
+    inline std::map<uint64_t, BlkAddr>
+    GetRevMap(void)
+    {
+        return revMap;
+    }
+
 private:
     int volumeId;
     VirtualBlkAddr tail;
     StripeId wbLsid;
+    std::map<uint64_t, BlkAddr> revMap;
 };
 
 } // namespace pos

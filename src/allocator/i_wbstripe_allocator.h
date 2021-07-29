@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <map>
+
 #include "src/allocator/stripe/stripe.h"
 
 namespace pos
@@ -51,9 +53,9 @@ public:
 
     virtual void FlushAllActiveStripes(void) = 0;
 
-    virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa) = 0;
+    virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos) = 0;
     virtual Stripe* FinishReconstructedStripe(StripeId wbLsid, VirtualBlkAddr tail) = 0;
-    virtual int RestoreActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid) = 0;
+    virtual int RestoreActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid, std::map<uint64_t, BlkAddr> revMapInfos) = 0;
     virtual int FlushPendingActiveStripes(void) = 0;
 
     virtual int PrepareRebuild(void) = 0;

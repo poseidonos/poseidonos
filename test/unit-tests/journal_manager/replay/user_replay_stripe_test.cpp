@@ -408,14 +408,14 @@ TEST(UserReplayStripe, Replay_testWhenReplayEventFail)
         .stripeLoc = IN_WRITE_BUFFER_AREA,
         .stripeId = 1023};
     EXPECT_CALL(stripeMap, GetLSA).WillOnce(Return(wbStripe));
-    EXPECT_CALL(*status, IsFlushed).WillOnce(Return(false));
     EXPECT_CALL(*status, GetWbLsid).WillOnce(Return(wbStripe.stripeId));
+    EXPECT_CALL(*status, IsFlushed).WillOnce(Return(false));
 
     NiceMock<MockReplayEvent>* segmentAllocation = new NiceMock<MockReplayEvent>;
     EXPECT_CALL(*factory, CreateSegmentAllocationReplayEvent).WillOnce(Return(segmentAllocation));
 
-    EXPECT_CALL(wbStripeReplayer, Update).Times(0);
-    EXPECT_CALL(userStripeReplayer, Update).Times(0);
+    EXPECT_CALL(wbStripeReplayer, Update).Times(1);
+    EXPECT_CALL(userStripeReplayer, Update).Times(1);
 
     // When
     UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents);

@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -68,9 +69,9 @@ public:
     virtual void DereferLsidCnt(StripeAddr& lsa, uint32_t blockCount) override;
     virtual void FlushAllActiveStripes(void) override;
 
-    virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa) override;
+    virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos) override;
     virtual Stripe* FinishReconstructedStripe(StripeId wbLsid, VirtualBlkAddr tail) override;
-    virtual int RestoreActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid) override;
+    virtual int RestoreActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid, std::map<uint64_t, BlkAddr> revMapInfos) override;
     virtual int FlushPendingActiveStripes(void) override;
     virtual int PrepareRebuild(void) override;
     virtual Stripe* GetStripe(StripeId wbLsid) override;

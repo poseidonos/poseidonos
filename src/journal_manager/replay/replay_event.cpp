@@ -36,6 +36,7 @@
 #include "src/allocator/i_context_replayer.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/include/pos_event_id.h"
+#include "src/journal_manager/replay/active_wb_stripe_replayer.h"
 #include "src/journal_manager/statistics/stripe_replay_status.h"
 #include "src/logger/logger.h"
 #include "src/mapper/i_stripemap.h"
@@ -54,7 +55,7 @@ ReplayEvent::~ReplayEvent(void)
 }
 
 ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, IBlockAllocator* blkAllocator,
-    StripeReplayStatus* status, int volId, BlkAddr startRba, VirtualBlkAddr startVsa,
+    StripeReplayStatus* status, ActiveWBStripeReplayer* wbReplayer, int volId, BlkAddr startRba, VirtualBlkAddr startVsa,
     uint64_t numBlks, bool replaySegmentInfo)
 : ReplayEvent(status),
   vsaMap(vsaMap),
@@ -63,7 +64,8 @@ ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, IBlockAllocator* blk
   startRba(startRba),
   startVsa(startVsa),
   numBlks(numBlks),
-  replaySegmentInfo(replaySegmentInfo)
+  replaySegmentInfo(replaySegmentInfo),
+  wbStripeReplayer(wbReplayer)
 {
 }
 
@@ -106,7 +108,20 @@ ReplayBlockMapUpdate::Replay(void)
         }
     }
 
+    if (status->IsFlushed() == false)
+    {
+        for (uint32_t offset = 0; offset < numBlks; offset++)
+        {
+            _UpdateReverseMap(offset);
+        }
+    }
     return result;
+}
+
+void
+ReplayBlockMapUpdate::_UpdateReverseMap(uint32_t offset)
+{
+    wbStripeReplayer->UpdateRevMaps(volId, startVsa.stripeId, startVsa.offset + offset, startRba + offset);
 }
 
 void

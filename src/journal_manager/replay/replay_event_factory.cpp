@@ -4,13 +4,14 @@ namespace pos
 {
 ReplayEventFactory::ReplayEventFactory(StripeReplayStatus* status,
     IVSAMap* vsaMap, IStripeMap* stripeMap, IContextReplayer* ctxReplayer,
-    IBlockAllocator* blockAllocator, IArrayInfo* info)
+    IBlockAllocator* blockAllocator, IArrayInfo* info, ActiveWBStripeReplayer* wbReplayer)
 : status(status),
   vsaMap(vsaMap),
   stripeMap(stripeMap),
   contextReplayer(ctxReplayer),
   blockAllocator(blockAllocator),
-  arrayInfo(info)
+  arrayInfo(info),
+  wbReplayer(wbReplayer)
 {
 }
 
@@ -19,15 +20,14 @@ ReplayEventFactory::CreateBlockWriteReplayEvent(int volId, BlkAddr startRba,
     VirtualBlkAddr startVsa, uint64_t numBlks, bool replaySegmentInfo)
 {
     ReplayBlockMapUpdate* blockMapUpdate = new ReplayBlockMapUpdate(vsaMap, blockAllocator, status,
-        volId, startRba, startVsa, numBlks, replaySegmentInfo);
+        wbReplayer, volId, startRba, startVsa, numBlks, replaySegmentInfo);
     return blockMapUpdate;
 }
 
 ReplayEvent*
 ReplayEventFactory::CreateStripeMapUpdateReplayEvent(StripeId vsid, StripeAddr dest)
 {
-    ReplayEvent* stripeMapUpdate
-        = new ReplayStripeMapUpdate(stripeMap, status, vsid, dest);
+    ReplayEvent* stripeMapUpdate = new ReplayStripeMapUpdate(stripeMap, status, vsid, dest);
     return stripeMapUpdate;
 }
 

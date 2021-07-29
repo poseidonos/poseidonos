@@ -1,5 +1,6 @@
 #include "test/integration-tests/journal/fixture/replay_test_fixture.h"
 
+using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::InSequence;
 using ::testing::Return;
@@ -22,7 +23,8 @@ void
 ReplayTestFixture::ExpectReturningUnmapStripes(void)
 {
     EXPECT_CALL(*(mapper->GetStripeMapMock()),
-        GetLSA).WillRepeatedly(Return(unmapAddr));
+        GetLSA)
+        .WillRepeatedly(Return(unmapAddr));
 }
 
 void
@@ -88,8 +90,7 @@ ReplayTestFixture::_GetBlock(VirtualBlks blks, uint32_t offset)
 void
 ReplayTestFixture::ExpectReplayStripeFlush(StripeTestFixture stripe)
 {
-    EXPECT_CALL(*(mapper->GetStripeMapMock()), SetLSA(stripe.GetVsid(),
-        stripe.GetUserAddr().stripeId, stripe.GetUserAddr().stripeLoc)).Times(1);
+    EXPECT_CALL(*(mapper->GetStripeMapMock()), SetLSA(stripe.GetVsid(), stripe.GetUserAddr().stripeId, stripe.GetUserAddr().stripeLoc)).Times(1);
 
     EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
         ReplayStripeRelease(stripe.GetWbAddr().stripeId))
@@ -127,8 +128,7 @@ ReplayTestFixture::ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe)
 
     for (auto vsa = writtenVsas.begin(); vsa != writtenVsas.end() - 1; vsa++)
     {
-        for (uint32_t blockOffset = 0; blockOffset < (*vsa).second.numBlks;
-            blockOffset++)
+        for (uint32_t blockOffset = 0; blockOffset < (*vsa).second.numBlks; blockOffset++)
         {
             VirtualBlks blks = _GetBlock((*vsa).second, blockOffset);
             EXPECT_CALL(*(allocator->GetBlockAllocatorMock()), InvalidateBlks(blks));
@@ -140,7 +140,7 @@ void
 ReplayTestFixture::ExpectReplayUnflushedActiveStripe(VirtualBlkAddr tail, StripeTestFixture stripe)
 {
     EXPECT_CALL(*(allocator->GetWBStripeAllocatorMock()),
-        RestoreActiveStripeTail(testInfo->defaultTestVol, tail, stripe.GetWbAddr().stripeId))
+        RestoreActiveStripeTail(testInfo->defaultTestVol, tail, stripe.GetWbAddr().stripeId, stripe.GetRevMap()))
         .Times(1);
     EXPECT_CALL(*(allocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <utility>
 #include <vector>
 
@@ -35,6 +36,8 @@ public:
     BlockMapList GetBlockMapList(void) const;
     void AddBlockMap(BlkAddr rba, VirtualBlks virtualBlks);
 
+    std::map<uint64_t, BlkAddr> GetRevMap(void);
+
 private:
     StripeId vsid;
     int volId;
@@ -43,5 +46,6 @@ private:
     StripeAddr userAddr;
 
     BlockMapList blks;
+    std::map<uint64_t, BlkAddr> revMapInfos;
 };
 } // namespace pos

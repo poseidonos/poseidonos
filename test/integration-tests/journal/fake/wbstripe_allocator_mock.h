@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include "gmock/gmock.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 
@@ -12,9 +14,9 @@ public:
     virtual ~WBStripeAllocatorMock(void) {}
 
     MOCK_METHOD(int, RestoreActiveStripeTail,
-        (uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid), (override));
+        (uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid, (std::map<uint64_t, BlkAddr> revMapInfos)), (override));
     MOCK_METHOD(int, ReconstructActiveStripe,
-        (uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa), (override));
+        (uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, (std::map<uint64_t, BlkAddr> revMapInfos)), (override));
     MOCK_METHOD(Stripe*, FinishReconstructedStripe,
         (StripeId wbLsid, VirtualBlkAddr tail), (override));
 

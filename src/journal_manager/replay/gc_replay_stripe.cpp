@@ -66,7 +66,7 @@ GcReplayStripe::_AddLog(LogHandlerInterface* log)
 
     // This should be true
     // TODO (huijeong.kim) pass the exact type instead of dynamic casting here
-    assert (gcLogHandler != nullptr);
+    assert(gcLogHandler != nullptr);
 
     GcStripeFlushedLog* gcLog = gcLogHandler->GetGcStripeFlushedLog();
     GcBlockMapUpdate* blockLogs = gcLogHandler->GetGcBlockMapUpdateLogs();

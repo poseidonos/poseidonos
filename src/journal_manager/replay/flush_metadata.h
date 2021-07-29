@@ -38,7 +38,6 @@
 
 namespace pos
 {
-
 class FlushMetadata : public ReplayTask
 {
 public:

@@ -15,7 +15,7 @@ TEST(ReplayEventFactory, CreateStripeMapUpdateReplayEvent_)
 TEST(ReplayEventFactory, CreateStripeFlushReplayEvent_testIfReplayEventIsCreatedProperly)
 {
     // Given
-    ReplayEventFactory factory(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    ReplayEventFactory factory(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     StripeId vsid = 200;
     StripeId wbLsid = 10;

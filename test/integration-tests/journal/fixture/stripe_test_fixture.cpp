@@ -75,5 +75,15 @@ void
 StripeTestFixture::AddBlockMap(BlkAddr rba, VirtualBlks virtualBlks)
 {
     blks.push_back(std::make_pair(rba, virtualBlks));
+    for (int offset = 0; offset < virtualBlks.numBlks; offset++)
+    {
+        revMapInfos[virtualBlks.startVsa.offset + offset] = rba + offset;
+    }
+}
+
+std::map<uint64_t, BlkAddr>
+StripeTestFixture::GetRevMap(void)
+{
+    return revMapInfos;
 }
 } // namespace pos

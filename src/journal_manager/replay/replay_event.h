@@ -44,6 +44,7 @@ class IStripeMap;
 class IBlockAllocator;
 class IContextReplayer;
 class StripeReplayStatus;
+class ActiveWBStripeReplayer;
 
 enum class ReplayEventType
 {
@@ -72,7 +73,7 @@ class ReplayBlockMapUpdate : public ReplayEvent
 {
 public:
     ReplayBlockMapUpdate(IVSAMap* ivsaMa, IBlockAllocator* iblkAllocator,
-        StripeReplayStatus* status,
+        StripeReplayStatus* status, ActiveWBStripeReplayer* wbReplayer,
         int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks,
         bool replaySegmentInfo);
     virtual ~ReplayBlockMapUpdate(void);
@@ -90,6 +91,7 @@ private:
 
     void _InvalidateOldBlock(uint32_t offset);
     int _UpdateMap(uint32_t offset);
+    void _UpdateReverseMap(uint32_t offset);
 
     inline VirtualBlkAddr
     _GetVsa(uint32_t offset)
@@ -116,6 +118,7 @@ private:
     std::vector<VirtualBlkAddr> readMap;
 
     bool replaySegmentInfo;
+    ActiveWBStripeReplayer* wbStripeReplayer;
 };
 
 class ReplayStripeMapUpdate : public ReplayEvent

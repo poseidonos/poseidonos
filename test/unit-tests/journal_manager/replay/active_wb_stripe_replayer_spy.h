@@ -32,35 +32,23 @@
 
 #pragma once
 
-#include <map>
-#include <vector>
-
-#include "src/journal_manager/log/log_event.h"
-#include "src/journal_manager/log/log_handler.h"
-#include "src/journal_manager/log/log_list.h"
-#include "src/journal_manager/replay/replay_log.h"
+#include "src/journal_manager/replay/active_wb_stripe_replayer.h"
 
 namespace pos
 {
-class ReplayLogList : public LogList
+class Array;
+class ReplayStripe;
+
+class ActiveWBStripeReplayerSpy : public ActiveWBStripeReplayer
 {
 public:
-    ReplayLogList(void);
-    virtual ~ReplayLogList(void);
+    using ActiveWBStripeReplayer::ActiveWBStripeReplayer;
+    virtual ~ActiveWBStripeReplayerSpy(void) = default;
 
-    virtual void AddLog(LogHandlerInterface* log) override;
-    virtual bool IsEmpty(void) override;
-    virtual void SetLogGroupFooter(uint64_t seqNum, LogGroupFooter footer) override;
-
-    ReplayLogGroup PopReplayLogGroup(void);
-    std::vector<ReplayLog>& GetDeletingLogs(void);
-
-private:
-    uint64_t _GetTime(void);
-
-    std::map<uint64_t, ReplayLogGroup> logGroups; // key = sequence number
-    std::vector<ReplayLog> deletingLogs;
-
-    uint64_t time;
+    ActiveStripeAddr* FindStripe(int index, StripeId vsid)
+    {
+        return ActiveWBStripeReplayer::_FindStripe(index, vsid);
+    }
 };
+
 } // namespace pos

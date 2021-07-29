@@ -31,9 +31,9 @@
  */
 
 #include "src/journal_manager/replay/replay_stripe.h"
-#include "src/journal_manager/replay/replay_event_factory.h"
 
 #include "src/include/pos_event_id.h"
+#include "src/journal_manager/replay/replay_event_factory.h"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -46,7 +46,7 @@ ReplayStripe::ReplayStripe(StripeId vsid, IVSAMap* inputVsaMap, IStripeMap* inpu
 : ReplayStripe(inputVsaMap, inputStripeMap, wbReplayer, userReplayer, nullptr, nullptr, nullptr)
 {
     status = new StripeReplayStatus(vsid);
-    replayEventFactory = new ReplayEventFactory(status, inputVsaMap, inputStripeMap, ctxReplayer, blockAllocator, arrayInfo);
+    replayEventFactory = new ReplayEventFactory(status, inputVsaMap, inputStripeMap, ctxReplayer, blockAllocator, arrayInfo, wbReplayer);
 }
 
 // Constructor for unit test
@@ -125,8 +125,7 @@ ReplayStripe::_CreateStripeFlushReplayEvent(void)
 {
     StripeAddr dest = {
         .stripeLoc = IN_USER_AREA,
-        .stripeId = status->GetUserLsid()
-    };
+        .stripeId = status->GetUserLsid()};
     ReplayEvent* stripeMapUpdate =
         replayEventFactory->CreateStripeMapUpdateReplayEvent(status->GetVsid(), dest);
     replayEvents.push_back(stripeMapUpdate);

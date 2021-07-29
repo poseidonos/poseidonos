@@ -145,7 +145,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayeSeveralUnflushedStripe)
         VirtualBlks writtenLastBlock = partialStripe.GetBlockMapList().back().second;
         VirtualBlkAddr tailVsa = ReplayTestFixture::GetNextBlock(writtenLastBlock);
         EXPECT_CALL(*(testAllocator->GetWBStripeAllocatorMock()),
-            ReconstructActiveStripe(testInfo->defaultTestVol, partialStripe.GetWbAddr().stripeId, tailVsa));
+            ReconstructActiveStripe(testInfo->defaultTestVol, partialStripe.GetWbAddr().stripeId, tailVsa, partialStripe.GetRevMap()));
         EXPECT_CALL(*(testAllocator->GetWBStripeAllocatorMock()),
             FinishReconstructedStripe(partialStripe.GetWbAddr().stripeId, tailVsa));
     }
@@ -161,7 +161,7 @@ TEST_F(ReplayStripeIntegrationTest, ReplayeSeveralUnflushedStripe)
 
         VirtualBlkAddr tail = ReplayTestFixture::GetNextBlock(writtenLastBlock);
         EXPECT_CALL(*(testAllocator->GetWBStripeAllocatorMock()),
-            RestoreActiveStripeTail(testInfo->defaultTestVol, tail, fullStripe.GetWbAddr().stripeId))
+            RestoreActiveStripeTail(testInfo->defaultTestVol, tail, fullStripe.GetWbAddr().stripeId, fullStripe.GetRevMap()))
             .Times(1);
     }
 

@@ -31,12 +31,12 @@
  */
 
 #include "src/journal_manager/replay/replay_log_list.h"
+
 #include "src/journal_manager/log/log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
 
 namespace pos
 {
-
 ReplayLogList::ReplayLogList(void)
 : time(0)
 {
@@ -62,8 +62,7 @@ ReplayLogList::AddLog(LogHandlerInterface* log)
 {
     ReplayLog replayLog = {
         .time = _GetTime(),
-        .log = log
-    };
+        .log = log};
 
     if (log->GetType() == LogType::VOLUME_DELETED)
     {

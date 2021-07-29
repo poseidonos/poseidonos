@@ -496,7 +496,8 @@ TEST(WBStripeManager, RestoreActiveStripeTail_TestwithAllConditions)
     EXPECT_CALL(*wbCtx, SetActiveStripeTail).Times(1);
     VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
     // when
-    wbStripeManager.RestoreActiveStripeTail(0, vsa, 0);
+    std::map<uint64_t, BlkAddr> revMapInfos;
+    wbStripeManager.RestoreActiveStripeTail(0, vsa, 0, revMapInfos);
 
     delete blkManager;
     delete ctxManager;
@@ -764,7 +765,8 @@ TEST(WBStripeManager, ReconstructActiveStripe_TestFunc)
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     wbStripeManager.PushStripeToStripeArray(stripe);
     // when
-    wbStripeManager.ReconstructActiveStripe(0, 0, vsa);
+    std::map<uint64_t, BlkAddr> revMapInfos;
+    wbStripeManager.ReconstructActiveStripe(0, 0, vsa, revMapInfos);
     delete stripe;
     delete reverseMap;
 }

@@ -1,6 +1,7 @@
 #include <gmock/gmock.h>
 
 #include <list>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -20,9 +21,9 @@ public:
     MOCK_METHOD(void, FlushActiveStripes, (uint32_t volumeId), (override));
     MOCK_METHOD(bool, WaitStripesFlushCompletion, (uint32_t volumeId), (override));
     MOCK_METHOD(void, FlushAllActiveStripes, (), (override));
-    MOCK_METHOD(int, ReconstructActiveStripe, (uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa), (override));
+    MOCK_METHOD(int, ReconstructActiveStripe, (uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, (std::map<uint64_t, BlkAddr> revMapInfos)), (override));
     MOCK_METHOD(Stripe*, FinishReconstructedStripe, (StripeId wbLsid, VirtualBlkAddr tail), (override));
-    MOCK_METHOD(int, RestoreActiveStripeTail, (uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid), (override));
+    MOCK_METHOD(int, RestoreActiveStripeTail, (uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid, (std::map<uint64_t, BlkAddr> revMapInfos)), (override));
     MOCK_METHOD(int, FlushPendingActiveStripes, (), (override));
     MOCK_METHOD(int, PrepareRebuild, (), (override));
 };

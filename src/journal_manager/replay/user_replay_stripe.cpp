@@ -98,13 +98,10 @@ UserReplayStripe::Replay(void)
 {
     _CreateStripeEvents();
 
-    int result = ReplayStripe::Replay();
-    if (result == 0)
-    {
-        userStripeReplayer->Update(status->GetUserLsid());
-        wbStripeReplayer->Update(*status);
-    }
+    userStripeReplayer->Update(status->GetUserLsid());
+    wbStripeReplayer->Update(*status);
 
+    int result = ReplayStripe::Replay();
     return result;
 }
 

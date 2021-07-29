@@ -1,4 +1,5 @@
 #include "src/journal_manager/replay/active_wb_stripe_replayer.h"
+#include "active_wb_stripe_replayer_spy.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -10,6 +11,7 @@
 #include "test/unit-tests/allocator/i_context_replayer_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 
+using ::testing::_;
 using testing::NiceMock;
 using ::testing::Return;
 
@@ -75,7 +77,7 @@ TEST(ActiveWBStripeReplayer, Replay_SingleActiveStripe)
     // Then : Will restore the active stipre tail to this stripe
     VirtualBlkAddr tail = GetTail(activeStripe);
     EXPECT_CALL(*(wbStripeAllocator),
-        RestoreActiveStripeTail(activeStripe.GetWbIndex(), tail, activeStripe.GetWbLsid()))
+        RestoreActiveStripeTail(activeStripe.GetWbIndex(), tail, activeStripe.GetWbLsid(), _))
         .Times(1);
 
     wbStripeReplayer->Replay();
@@ -101,7 +103,7 @@ TEST(ActiveWBStripeReplayer, Replay_SingleActiveStripeWhenRestroeActiveStrileTai
     VirtualBlkAddr tail = GetTail(activeStripe);
     int retCode = -1;
     EXPECT_CALL(*(wbStripeAllocator),
-        RestoreActiveStripeTail(activeStripe.GetWbIndex(), tail, activeStripe.GetWbLsid()))
+        RestoreActiveStripeTail(activeStripe.GetWbIndex(), tail, activeStripe.GetWbLsid(), _))
         .WillOnce(Return(retCode));
 
     // Then : Will repaly fail, and return code will be same with restore error code
@@ -162,7 +164,7 @@ TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleStripe)
     // Then : Will restore the active stripe tail to the lastActiveStripe
     VirtualBlkAddr tail = GetTail(lastActiveStripe);
     EXPECT_CALL(*(wbStripeAllocator),
-        RestoreActiveStripeTail(lastActiveStripe.GetWbIndex(), tail, lastActiveStripe.GetWbLsid()))
+        RestoreActiveStripeTail(lastActiveStripe.GetWbIndex(), tail, lastActiveStripe.GetWbLsid(), _))
         .Times(1);
 
     wbStripeReplayer->Replay();
@@ -210,7 +212,7 @@ TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleStripe)
     {
         VirtualBlkAddr tail = GetTail(lastActiveStripe);
         EXPECT_CALL(*(wbStripeAllocator),
-            RestoreActiveStripeTail(lastActiveStripe.GetWbIndex(), tail, lastActiveStripe.GetWbLsid()))
+            RestoreActiveStripeTail(lastActiveStripe.GetWbIndex(), tail, lastActiveStripe.GetWbLsid(), _))
             .Times(1);
     }
     wbStripeReplayer->Replay();
@@ -262,13 +264,13 @@ TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleActiveStripe)
             retCode = 0;
         }
         EXPECT_CALL(*(wbStripeAllocator),
-            ReconstructActiveStripe(it->GetVolumeId(), it->GetWbLsid(), tailVsa))
+            ReconstructActiveStripe(it->GetVolumeId(), it->GetWbLsid(), tailVsa, _))
             .WillOnce(Return(retCode));
     }
     orphanStripes.erase(orphanStripes.begin());
 
     EXPECT_CALL(*(wbStripeAllocator),
-        RestoreActiveStripeTail(lastStripe.GetWbIndex(), GetTail(lastStripe), lastStripe.GetWbLsid()))
+        RestoreActiveStripeTail(lastStripe.GetWbIndex(), GetTail(lastStripe), lastStripe.GetWbLsid(), _))
         .Times(1);
 
     wbStripeReplayer->Replay();
@@ -332,14 +334,14 @@ TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleActiveStripe)
             .offset = pendingStripe.GetLastOffset() + 1};
 
         EXPECT_CALL(*(wbStripeAllocator),
-            ReconstructActiveStripe(pendingStripe.GetVolumeId(), pendingStripe.GetWbLsid(), tailVsa))
+            ReconstructActiveStripe(pendingStripe.GetVolumeId(), pendingStripe.GetWbLsid(), tailVsa, _))
             .Times(1);
     }
     for (auto lastActiveStripe : lastStripesPerVolume)
     {
         VirtualBlkAddr tail = GetTail(lastActiveStripe);
         EXPECT_CALL(*(wbStripeAllocator),
-            RestoreActiveStripeTail(lastActiveStripe.GetWbIndex(), tail, lastActiveStripe.GetWbLsid()))
+            RestoreActiveStripeTail(lastActiveStripe.GetWbIndex(), tail, lastActiveStripe.GetWbLsid(), _))
             .Times(1);
     }
     wbStripeReplayer->Replay();
@@ -363,5 +365,56 @@ TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleActiveStripe)
 
     delete contextReplayer;
     delete wbStripeAllocator;
+}
+
+TEST(ActiveWBStripeReplayer, UpdateRevMaps_MultipleVolumeMultipleActiveStripe)
+{
+    // Given
+    NiceMock<MockIContextReplayer>* contextReplayer = new NiceMock<MockIContextReplayer>;
+    EXPECT_CALL(*contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
+    PendingStripeList pendingStripes;
+    ActiveWBStripeReplayerSpy wbStripeReplayer(contextReplayer, nullptr, pendingStripes);
+
+    // When : Find several unflushed stripes on a single volume
+    int numVolume = 3;
+    int numPendingStripes = 5;
+    std::vector<std::pair<StripeInfo, std::map<uint64_t, BlkAddr>>> expectActiveStripes;
+    for (int volumeId = 0; volumeId < numVolume; volumeId++)
+    {
+        for (int index = 0; index < numPendingStripes; index++)
+        {
+            StripeInfo orphanStripe = GetActiveStripe(volumeId, volumeId);
+            wbStripeReplayer.Update(orphanStripe);
+
+            std::map<uint64_t, BlkAddr> expectRevMapInfos;
+            expectActiveStripes.push_back(make_pair(orphanStripe, expectRevMapInfos));
+        }
+        StripeInfo lastStripe = GetActiveStripe(volumeId, volumeId);
+        wbStripeReplayer.Update(lastStripe);
+
+        std::map<uint64_t, BlkAddr> expectRevMapInfos;
+        expectActiveStripes.push_back(make_pair(lastStripe, expectRevMapInfos));
+    }
+
+    // Then : Update each ReverseMapInfos on pending stripes
+    BlkAddr startRba = 100;
+    for (auto& stripe : expectActiveStripes)
+    {
+        StripeInfo stripeInfo = stripe.first;
+        std::map<uint64_t, BlkAddr>& expectRevMapInfos = stripe.second;
+        for (int offset = 0; offset < stripeInfo.GetLastOffset(); offset++)
+        {
+            wbStripeReplayer.UpdateRevMaps(stripeInfo.GetVolumeId(), stripeInfo.GetVsid(), offset, startRba + offset);
+            expectRevMapInfos[offset] = startRba + offset;
+        }
+    }
+
+    for (auto expectStripe : expectActiveStripes)
+    {
+        ActiveStripeAddr* actualStripe = wbStripeReplayer.FindStripe(expectStripe.first.GetVolumeId(), expectStripe.first.GetVsid());
+        EXPECT_EQ(expectStripe.second, actualStripe->GetRevMap());
+    }
+
+    delete contextReplayer;
 }
 } // namespace pos

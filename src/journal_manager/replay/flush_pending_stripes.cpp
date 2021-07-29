@@ -32,8 +32,8 @@
 
 #include "flush_pending_stripes.h"
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -81,7 +81,7 @@ FlushPendingStripes::Start(void)
         int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH);
         std::ostringstream os;
         os << "[Replay] Request to flush stripe, wb lsid " << pStripe->wbLsid
-            << ", tail offset " << pStripe->tailVsa.offset;
+           << ", tail offset " << pStripe->tailVsa.offset;
 
         POS_TRACE_DEBUG(eventId, os.str());
         POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());

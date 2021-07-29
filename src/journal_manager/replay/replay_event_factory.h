@@ -12,6 +12,7 @@ class IWBStripeCtx;
 class ISegmentCtx;
 class IBlockAllocator;
 class IArrayInfo;
+class ActiveWBStripeReplayer;
 
 class ReplayEventFactory
 {
@@ -19,7 +20,7 @@ public:
     ReplayEventFactory(void) = default;
     ReplayEventFactory(StripeReplayStatus* status, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IContextReplayer* contextReplayer,
-        IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo);
+        IBlockAllocator* blockAllocator, IArrayInfo* arrayInfo, ActiveWBStripeReplayer* wbReplayer);
 
     virtual ~ReplayEventFactory(void) = default;
 
@@ -37,5 +38,6 @@ private:
     IContextReplayer* contextReplayer;
     IBlockAllocator* blockAllocator;
     IArrayInfo* arrayInfo;
+    ActiveWBStripeReplayer* wbReplayer;
 };
 } // namespace pos

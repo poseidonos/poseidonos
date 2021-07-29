@@ -39,7 +39,6 @@
 
 namespace pos
 {
-
 class FlushPendingStripes : public ReplayTask
 {
 public:

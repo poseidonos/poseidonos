@@ -252,7 +252,7 @@ WBStripeManager::FlushAllActiveStripes(void)
 }
 
 int
-WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa)
+WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos)
 {
     Stripe* stripe;
     int ret = _ReconstructAS(tailVsa.stripeId, wbLsid, tailVsa.offset, volumeId, stripe);
@@ -266,10 +266,10 @@ WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, Vir
 }
 
 int
-WBStripeManager::RestoreActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid)
+WBStripeManager::RestoreActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid, std::map<uint64_t, BlkAddr> revMapInfos)
 {
     wbStripeCtx->SetActiveStripeTail(volumeId, tail);
-    return ReconstructActiveStripe(volumeId, wbLsid, tail);
+    return ReconstructActiveStripe(volumeId, wbLsid, tail, revMapInfos);
 }
 
 int
