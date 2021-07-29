@@ -48,7 +48,7 @@ StripeMapContent::StripeMapContent(int mapId, std::string arrayName)
 int
 StripeMapContent::Prepare(uint64_t numEntries, int64_t opt)
 {
-    SetPageSize(arrayName);
+    SetPageSize();
 
     mapHeader->SetEntriesPerMpage(mapHeader->GetMpageSize() / sizeof(StripeAddr));
 

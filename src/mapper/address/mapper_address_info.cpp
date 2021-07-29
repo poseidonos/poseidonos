@@ -55,4 +55,10 @@ MapperAddressInfo::SetupAddressInfo(void)
     numWbStripes = wbSize->totalStripes;
 }
 
+std::string
+MapperAddressInfo::GetArrayName(void)
+{
+    return iArrayInfo->GetName();
+}
+
 } // namespace pos

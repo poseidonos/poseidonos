@@ -226,7 +226,7 @@ MapContent::GetPageSize(void)
 }
 
 int
-MapContent::SetPageSize(std::string aname, StorageOpt storageOpt)
+MapContent::SetPageSize(StorageOpt storageOpt)
 {
 #ifdef IBOF_CONFIG_USE_MOCK_FS
     mapHeader->SetMpageSize(4096);
@@ -239,7 +239,7 @@ MapContent::SetPageSize(std::string aname, StorageOpt storageOpt)
         prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
     }
 
-    MetaFs* metaFs = metaFsService->GetMetaFs(aname);
+    MetaFs* metaFs = metaFsService->GetMetaFs(arrayName);
     if (metaFs == nullptr)
     {
         mapHeader->SetMpageSize(4096);
@@ -277,9 +277,9 @@ MapContent::Init(uint64_t numMpages)
 }
 
 int
-MapContent::Dump(std::string fname, std::string aname)
+MapContent::Dump(std::string fname)
 {
-    MetaFileIntf* linuxFileToStore = new MockFileIntf(fname, aname);
+    MetaFileIntf* linuxFileToStore = new MockFileIntf(fname, arrayName);
     int ret = linuxFileToStore->Create(0);
     linuxFileToStore->Open();
 
@@ -294,9 +294,9 @@ MapContent::Dump(std::string fname, std::string aname)
 }
 
 int
-MapContent::DumpLoad(std::string fname, std::string aname)
+MapContent::DumpLoad(std::string fname)
 {
-    MetaFileIntf* linuxFileFromLoad = new MockFileIntf(fname, aname);
+    MetaFileIntf* linuxFileFromLoad = new MockFileIntf(fname, arrayName);
     int ret = linuxFileFromLoad->Open();
 
     if (ret == 0)

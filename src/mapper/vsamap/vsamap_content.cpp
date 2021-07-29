@@ -62,7 +62,7 @@ VSAMapContent::VSAMapContent(int mapId, std::string arrayName)
 int
 VSAMapContent::Prepare(uint64_t blkCnt, int64_t volid)
 {
-    SetPageSize(arrayName);
+    SetPageSize();
     totalBlks = blkCnt;
 
     mapHeader->SetEntriesPerMpage(mapHeader->GetMpageSize() / sizeof(VirtualBlkAddr));

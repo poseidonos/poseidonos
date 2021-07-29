@@ -76,12 +76,12 @@ public:
     int DeleteMapFile(void);
     bool DoesFileExist(void);
 
-    int Dump(std::string fileName, std::string aname);
-    int DumpLoad(std::string fileName, std::string aname);
+    int Dump(std::string fileName);
+    int DumpLoad(std::string fileName);
 
     int GetId(void);
     uint32_t GetPageSize(void);
-    int SetPageSize(std::string aname, StorageOpt storageOpt = StorageOpt::DEFAULT);
+    int SetPageSize(StorageOpt storageOpt = StorageOpt::DEFAULT);
     uint32_t GetEntriesPerPage(void);
     std::string GetFileName(void);
 
