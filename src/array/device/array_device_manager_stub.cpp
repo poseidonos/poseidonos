@@ -34,12 +34,13 @@
 
 namespace pos
 {
-ArrayDeviceManager::ArrayDeviceManager(DeviceManager* sysDevMgr)
+ArrayDeviceManager::ArrayDeviceManager(DeviceManager* sysDevMgr, string arrayName)
 :
 #ifdef _ADMIN_ENABLED
-  IArrayDevMgr(sysDevMgr),
+    IArrayDevMgr(sysDevMgr),
 #endif
-  sysDevMgr_(sysDevMgr)
+    sysDevMgr_(sysDevMgr),
+    arrayName_(arrayName)
 {
 }
 

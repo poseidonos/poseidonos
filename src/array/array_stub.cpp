@@ -35,7 +35,7 @@
 namespace pos
 {
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
-: devMgr_(new ArrayDeviceManager(nullptr))
+: devMgr_(new ArrayDeviceManager(nullptr, name))
 {
 }
 
