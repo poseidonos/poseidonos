@@ -72,6 +72,7 @@ Syntax:
   poseidonos-cli [global-flags] commands subcommand [flags] .
 		`,
 	Run: func(cmd *cobra.Command, args []string) {
+
 		if len(args) == 0 {
 			cmd.Help()
 			os.Exit(0)
@@ -105,6 +106,7 @@ func init() {
 	RootCmd.AddCommand(FileCmd)
 	RootCmd.AddCommand(WbtCmd)
 	RootCmd.AddCommand(qoscmds.QosCmd)
+	RootCmd.AddCommand(completionCmd)
 }
 
 // TODO(mj): this function remains for wbt and file commands. This needs to be revised.
