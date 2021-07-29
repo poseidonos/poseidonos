@@ -30,36 +30,64 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPDK_RPC_CLIENT_H_
-#define SPDK_RPC_CLIENT_H_
+#include "src/cli/create_transport_command.h"
 
-#include <jsonrpccpp/client.h>
+#include "src/cli/cli_event_code.h"
+#include "src/helper/spdk_rpc_client.h"
 
-#include <string>
-#include <utility>
-
-namespace pos
+namespace pos_cli
 {
-class SpdkRpcClient
+CreateTransportCommand::CreateTransportCommand(void)
 {
-public:
-    SpdkRpcClient(void);
-    virtual ~SpdkRpcClient(void);
-    std::pair<int, std::string> BdevMallocCreate(std::string name, uint32_t numBlocks, uint32_t blockSize);
-    std::pair<int, std::string> SubsystemCreate(std::string subnqn, std::string sn, std::string mn, uint32_t max_namespaces, bool allow_any_host, bool ana_reporting);
-    std::pair<int, std::string> SubsystemDelete(std::string subnqn);
-    std::pair<int, std::string> SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
-    Json::Value SubsystemList(void);
-    std::pair<int, std::string> TransportCreate(std::string trtype, int bufCacheSize, int numSharedBuf);
+}
 
-private:
-    void _SetClient(void);
+CreateTransportCommand::~CreateTransportCommand(void)
+{
+}
 
-    jsonrpc::Client* client;
-    jsonrpc::IClientConnector* connector;
-    static const int SUCCESS = 0;
-};
+string
+CreateTransportCommand::Execute(json& doc, string rid)
+{
+    JsonFormat jFormat;
 
-} // namespace pos
+    int ret = 0;
+    ret = _CreateTransport(doc);
+    if (ret != SUCCESS)
+    {
+        return jFormat.MakeResponse(
+            "CREATETRANSPORT", rid, FAIL,
+            errorMessage, GetPosInfo());
+    }
 
-#endif // SPDK_RPC_CLIENT_H_
+    return jFormat.MakeResponse(
+        "CREATETRANSPORT", rid, SUCCESS,
+        "Transport ( " + doc["param"]["transport_type"].get<string>() + " ) has been created.", GetPosInfo());
+}
+
+int
+CreateTransportCommand::_CreateTransport(json& doc)
+{
+    SpdkRpcClient rpcClient;
+    int bufCacheSize = DEFAULT_BUF_CACHE_SIZE;
+    int numSharedBuf = DEFAULT_NUM_SHARED_BUF;
+
+    if (doc["param"].contains("buf_cache_size"))
+    {
+        bufCacheSize = doc["param"]["buf_cache_size"].get<uint32_t>();
+    }
+    if (doc["param"].contains("num_shared_buf"))
+    {
+        numSharedBuf = doc["param"]["num_shared_buf"].get<uint32_t>();
+    }
+
+    auto ret = rpcClient.TransportCreate(
+        doc["param"]["transport_type"],
+        bufCacheSize,
+        numSharedBuf);
+    if (ret.first != SUCCESS)
+    {
+        errorMessage = "Failed to create transport. " + ret.second;
+    }
+    return ret.first;
+}
+} // namespace pos_cli

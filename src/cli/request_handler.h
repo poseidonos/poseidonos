@@ -31,11 +31,11 @@
  */
 
 #pragma once
-#include "nlohmann/json.hpp"
-#include "src/cli/command.h"
-
 #include <map>
 #include <string>
+
+#include "nlohmann/json.hpp"
+#include "src/cli/command.h"
 
 using namespace std;
 

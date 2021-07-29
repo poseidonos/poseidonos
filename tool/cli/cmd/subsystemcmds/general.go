@@ -22,5 +22,9 @@ Syntax:
 func init() {
 	// Add subcommands to array command.
 	// If you create a new subcommand, add it here.
+	SubsystemCmd.AddCommand(CreateSubsystemCmd)
 	SubsystemCmd.AddCommand(DeleteSubsystemCmd)
+	SubsystemCmd.AddCommand(ListSubsystemCmd)
+	SubsystemCmd.AddCommand(AddListenerCmd)
+	SubsystemCmd.AddCommand(CreateTransportCmd)
 }

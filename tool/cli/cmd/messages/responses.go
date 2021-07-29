@@ -233,3 +233,50 @@ type VolumeQos struct {
 	MINBWGUARANTEE   string `json:"min_bw_guarantee"`
 	MINIOPSGUARANTEE string `json:"min_iops_guarantee"`
 }
+
+// Response for LISTSUBSYSTEM Command
+type ListSubsystemResponse struct {
+	RID     string              `json:"rid"`
+	COMMAND string              `json:"command"`
+	RESULT  ListSubsystemResult `json:"result,omitempty"`
+	INFO    Info                `json:"info"`
+}
+
+type ListSubsystemResult struct {
+	STATUS Status               `json:"status,omitempty"`
+	DATA   ListSubsystemResData `json:"data,omitempty"`
+}
+
+type ListSubsystemResData struct {
+	SUBSYSTEMLIST []Subsystem `json:"subsystemlist"`
+	SUBNQN        string      `json:"target_subnqn,omitempty"`
+}
+
+type Subsystem struct {
+	NQN	            string        `json:"nqn"`
+	SUBTYPE         string        `json:"subtype"`
+	LISTENADDRESSES []AddressInfo `json:"listen_addresses"`
+	ALLOWANYHOST    int           `json:"allow_any_host"`
+	HOSTS           []Host        `json:"hosts"`
+	SERIAL          string        `json:"serial_number,omitempty"`
+	MODEL           string        `json:"model_number,omitempty"`
+	MAXNAMESPACES   int           `json:"max_namespaces,omitempty"`
+	NAMESPACES      []Namespace   `json:"namespaces,omitempty"`	
+}
+
+type AddressInfo struct {
+	TRANSPORTTYPE      string `json:"transport_type"`
+	ADDRESSFAMILY      string `json:"address_family"`
+	TARGETADDRESS      string `json:"target_address"`
+	TRANSPORTSERVICEID string `json:"transport_service_id"`
+}
+
+type Host struct {
+	NQN string `json:"nqn"`
+}
+
+type Namespace struct {
+	NSID     int    `json:"nsid"`
+	BDEVNAME string `json:"bdev_name,omitempty"`
+	UUID     string `json:"uuid,omitempty"`
+}

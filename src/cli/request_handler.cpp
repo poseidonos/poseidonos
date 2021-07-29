@@ -35,6 +35,7 @@
 #include <iostream>
 
 #include "src/cli/add_device_command.h"
+#include "src/cli/add_listener_command.h"
 #include "src/cli/apply_log_filter_command.h"
 #include "src/cli/array_info_command.h"
 #include "src/cli/cli_event_code.h"
@@ -43,6 +44,8 @@
 #include "src/cli/autocreate_array_command.h"
 #include "src/cli/create_device_command.h"
 #include "src/cli/create_qos_volume_policy_command.h"
+#include "src/cli/create_subsystem_command.h"
+#include "src/cli/create_transport_command.h"
 #include "src/cli/create_volume_command.h"
 #include "src/cli/delete_array_command.h"
 #include "src/cli/delete_subsystem_command.h"
@@ -57,6 +60,7 @@
 #include "src/cli/list_array_device_command.h"
 #include "src/cli/list_device_command.h"
 #include "src/cli/list_qos_policies_command.h"
+#include "src/cli/list_subsystem_command.h"
 #include "src/cli/list_volume_command.h"
 #include "src/cli/list_wbt_command.h"
 #include "src/cli/logger_info_command.h"
@@ -96,7 +100,11 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["LISTARRAYDEVICE"] = new ListArrayDeviceCommand();
     cmdDictionary["ARRAYINFO"] = new ArrayInfoCommand();
     cmdDictionary["RESETMBR"] = new ResetMbrCommand();
+    cmdDictionary["CREATESUBSYSTEM"] = new CreateSubsystemCommand();
     cmdDictionary["DELETESUBSYSTEM"] = new DeleteSubsystemCommand();
+    cmdDictionary["LISTSUBSYSTEM"] = new ListSubsystemCommand();
+    cmdDictionary["ADDLISTENER"] = new AddListenerCommand();
+    cmdDictionary["CREATETRANSPORT"] = new CreateTransportCommand();
     cmdDictionary["CREATEVOLUME"] = new CreateVolumeCommand();
     cmdDictionary["DELETEVOLUME"] = new DeleteVolumeCommand();
     cmdDictionary["MOUNTVOLUME"] = new MountVolumeCommand();

@@ -97,6 +97,33 @@ SpdkRpcClient::BdevMallocCreate(string name, uint32_t numBlocks, uint32_t blockS
 }
 
 pair<int, string>
+SpdkRpcClient::SubsystemCreate(string subnqn, string sn, string mn, uint32_t max_namespaces, bool allow_any_host, bool ana_reporting)
+{
+    const int SUCCESS = 0;
+    const string method = "nvmf_create_subsystem";
+
+    Json::Value param;
+    param["nqn"] = subnqn;
+    param["serial_number"] = sn;
+    param["model_number"] = mn;
+    param["allow_any_host"] = allow_any_host;
+    param["ana_reporting"] = ana_reporting;
+    param["max_namespaces"] = max_namespaces;
+
+    Json::Value ret;
+    try
+    {
+        client->CallMethod(method, param);
+    }
+    catch (jsonrpc::JsonRpcException const& e)
+    {
+        return make_pair(e.GetCode(), e.GetMessage());
+    }
+
+    return make_pair(SUCCESS, "");
+}
+
+pair<int, string>
 SpdkRpcClient::SubsystemDelete(string subnqn)
 {
     const int SUCCESS = 0;
@@ -104,6 +131,74 @@ SpdkRpcClient::SubsystemDelete(string subnqn)
 
     Json::Value param;
     param["nqn"] = subnqn;
+
+    Json::Value ret;
+    try
+    {
+        client->CallMethod(method, param);
+    }
+    catch (jsonrpc::JsonRpcException const& e)
+    {
+        return make_pair(e.GetCode(), e.GetMessage());
+    }
+
+    return make_pair(SUCCESS, "");
+}
+
+pair<int, std::string>
+SpdkRpcClient::SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid)
+{
+    const int SUCCESS = 0;
+    const string method = "nvmf_subsystem_add_listener";
+
+    Json::Value listen_address;
+    listen_address["trtype"] = trtype;
+    listen_address["adrfam"] = adrfam;
+    listen_address["traddr"] = traddr;
+    listen_address["trsvcid"] = trsvcid;
+
+    Json::Value param;
+    param["nqn"] = subnqn;
+    param["listen_address"] = listen_address;
+
+    Json::Value ret;
+    try
+    {
+        client->CallMethod(method, param);
+    }
+    catch (jsonrpc::JsonRpcException const& e)
+    {
+        return make_pair(e.GetCode(), e.GetMessage());
+    }
+
+    return make_pair(SUCCESS, "");
+}
+
+Json::Value
+SpdkRpcClient::SubsystemList(void)
+{
+    const string method = "nvmf_get_subsystems";
+
+    Json::Value param;
+
+    Json::Value ret = client->CallMethod(method, param);
+
+    return ret;
+}
+
+pair<int, std::string>
+SpdkRpcClient::TransportCreate(std::string trtype, int bufCacheSize, int numSharedBuf)
+{
+    const int SUCCESS = 0;
+    const string method = "nvmf_create_transport";
+
+    Json::Value param;
+    param["trtype"] = trtype;
+    param["buf_cache_size"] = bufCacheSize;
+    if (numSharedBuf)
+    {
+        param["num_shared_buffers"] = numSharedBuf;
+    }
 
     Json::Value ret;
     try

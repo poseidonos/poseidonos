@@ -30,36 +30,26 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPDK_RPC_CLIENT_H_
-#define SPDK_RPC_CLIENT_H_
-
-#include <jsonrpccpp/client.h>
+#pragma once
 
 #include <string>
-#include <utility>
 
-namespace pos
+#include "src/cli/command.h"
+
+namespace pos_cli
 {
-class SpdkRpcClient
+class AddListenerCommand : public Command
 {
 public:
-    SpdkRpcClient(void);
-    virtual ~SpdkRpcClient(void);
-    std::pair<int, std::string> BdevMallocCreate(std::string name, uint32_t numBlocks, uint32_t blockSize);
-    std::pair<int, std::string> SubsystemCreate(std::string subnqn, std::string sn, std::string mn, uint32_t max_namespaces, bool allow_any_host, bool ana_reporting);
-    std::pair<int, std::string> SubsystemDelete(std::string subnqn);
-    std::pair<int, std::string> SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
-    Json::Value SubsystemList(void);
-    std::pair<int, std::string> TransportCreate(std::string trtype, int bufCacheSize, int numSharedBuf);
+    AddListenerCommand(void);
+    ~AddListenerCommand(void) override;
+    string Execute(json& doc, string rid) override;
 
 private:
-    void _SetClient(void);
-
-    jsonrpc::Client* client;
-    jsonrpc::IClientConnector* connector;
-    static const int SUCCESS = 0;
+    bool _CheckParamValidityAndGetNqn(json& doc);
+    int _AddListener(json& doc);
+    const char* DEFAULT_ADRFAM = "IPv4";
+    string errorMessage;
+    string subnqn;
 };
-
-} // namespace pos
-
-#endif // SPDK_RPC_CLIENT_H_
+}; // namespace pos_cli

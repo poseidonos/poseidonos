@@ -134,6 +134,32 @@ type ListQosParam struct {
 }
 
 // Subsystem request params
+type CreateSubsystemParam struct {
+	SUBNQN        string `json:"name"`
+	SERIAL        string `json:"sn,omitempty"`
+	MODEL         string `json:"mn,omitempty"`
+	MAXNAMESPACES int    `json:"max_namespaces,omitempty"`
+	ALLOWANYHOST  bool   `json:"allow_any_host,omitempty"`
+	ANAREPORTING  bool   `json:"ana_reporting,omitempty"`
+}
+
 type DeleteSubsystemParam struct {
 	SUBNQN string `json:"name"`
+}
+
+type ListSubsystemParam struct {
+	SUBNQN string `json:"name,omitempty"`
+}
+
+type AddListenerParam struct {
+	SUBNQN             string `json:"name"`
+	TRANSPORTTYPE      string `json:"transport_type"`
+	TARGETADDRESS      string `json:"target_address"`
+	TRANSPORTSERVICEID string `json:"transport_service_id"`
+}
+
+type CreateTransportParam struct {
+	TRANSPORTTYPE string `json:"transport_type"`
+	BUFCACHESIZE  int    `json:"buf_cache_size,omitempty"`
+	NUMSHAREDBUF  int    `json:"num_shared_buf,omitempty"`
 }

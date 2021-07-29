@@ -30,36 +30,64 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPDK_RPC_CLIENT_H_
-#define SPDK_RPC_CLIENT_H_
+#include "src/cli/add_listener_command.h"
 
-#include <jsonrpccpp/client.h>
+#include "src/cli/cli_event_code.h"
+#include "src/helper/spdk_rpc_client.h"
+#include "src/network/nvmf_target.h"
 
-#include <string>
-#include <utility>
-
-namespace pos
+namespace pos_cli
 {
-class SpdkRpcClient
+AddListenerCommand::AddListenerCommand(void)
 {
-public:
-    SpdkRpcClient(void);
-    virtual ~SpdkRpcClient(void);
-    std::pair<int, std::string> BdevMallocCreate(std::string name, uint32_t numBlocks, uint32_t blockSize);
-    std::pair<int, std::string> SubsystemCreate(std::string subnqn, std::string sn, std::string mn, uint32_t max_namespaces, bool allow_any_host, bool ana_reporting);
-    std::pair<int, std::string> SubsystemDelete(std::string subnqn);
-    std::pair<int, std::string> SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
-    Json::Value SubsystemList(void);
-    std::pair<int, std::string> TransportCreate(std::string trtype, int bufCacheSize, int numSharedBuf);
+}
 
-private:
-    void _SetClient(void);
+AddListenerCommand::~AddListenerCommand(void)
+{
+}
 
-    jsonrpc::Client* client;
-    jsonrpc::IClientConnector* connector;
-    static const int SUCCESS = 0;
-};
+string
+AddListenerCommand::Execute(json& doc, string rid)
+{
+    JsonFormat jFormat;
 
-} // namespace pos
+    int ret = 0;
+    ret = _AddListener(doc);
+    if (ret != SUCCESS)
+    {
+        return jFormat.MakeResponse(
+            "ADDLISTENER", rid, FAIL,
+            errorMessage, GetPosInfo());
+    }
 
-#endif // SPDK_RPC_CLIENT_H_
+    return jFormat.MakeResponse(
+        "ADDLISTENER", rid, SUCCESS,
+        "Address ( " + doc["param"]["target_address"].get<string>() + " ) added to Subsystem ( " + subnqn + " )", GetPosInfo());
+}
+
+int
+AddListenerCommand::_AddListener(json& doc)
+{
+    SpdkRpcClient rpcClient;
+    NvmfTarget target;
+    subnqn = doc["param"]["name"].get<string>();
+
+    if (nullptr == target.FindSubsystem(subnqn))
+    {
+        errorMessage = "Failed to add listener. Requested Subsystem does not exist or invalid subnqn. ";
+        return FAIL;
+    }
+
+    auto ret = rpcClient.SubsystemAddListener(
+        subnqn,
+        doc["param"]["transport_type"].get<string>(),
+        DEFAULT_ADRFAM,
+        doc["param"]["target_address"].get<string>(),
+        doc["param"]["transport_service_id"].get<string>());
+    if (ret.first != SUCCESS)
+    {
+        errorMessage = "Failed to add listener. " + ret.second;
+    }
+    return ret.first;
+}
+} // namespace pos_cli
