@@ -140,9 +140,9 @@ TEST(IOSubmitHandler, IOSubmitHandler_SubmitAsyncByteIO)
     IODirection direction = IODirection::READ;
 
     // When: IODirection is trim
-    LogicalByteAddr startLSA = {
-        .byteOffset = 0,
-        .byteSize = 8};
+    LogicalByteAddr startLSA;
+    startLSA.byteOffset = 0;
+    startLSA.byteSize = 8;
     IOSubmitHandlerStatus errorToReturn;
     errorToReturn = ioSubmitHandler.SubmitAsyncByteIO(direction, nullptr, startLSA,
         partitionToIO, callback, 0);

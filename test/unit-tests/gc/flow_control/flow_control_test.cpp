@@ -34,7 +34,8 @@ public:
         EXPECT_CALL(*mockIArrayInfo, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
 
         mockIContextManager = new NiceMock<MockIContextManager>;
-        partitionLogicalSize = {.blksPerChunk = 64,
+        partitionLogicalSize = {.minWriteBlkCnt = 0, /* no interesting */
+                                .blksPerChunk = 64,
                                 .blksPerStripe = 2048,
                                 .chunksPerStripe = 32,
                                 .stripesPerSegment = 1024,

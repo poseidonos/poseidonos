@@ -45,9 +45,9 @@ TEST(AsyncByteIO, Byte_Execute)
     MockIIOTranslator mockIIOTranslatorSuccess;
     // Given: io translator is created.
     // When : asyncByteIO is created.
-    LogicalByteAddr startLSA = {
-        .byteOffset = 0,
-        .byteSize = 8};
+    LogicalByteAddr startLSA;
+    startLSA.byteOffset = 0;
+    startLSA.byteSize = 8;
     PartitionType partitionToIO = PartitionType::META_NVM;
     AsyncByteIO asyncByteIO(&mockIIOTranslator);
     DummyCallbackByteIO* dummyCallbackByteIO = new DummyCallbackByteIO(true);
@@ -117,9 +117,9 @@ TEST(AsyncByteIO, GetAddresses_Success_Data_Compare)
     char* buf = static_cast<char*>(malloc(size));
     char* arrayBuf = static_cast<char*>(malloc(size));
 
-    LogicalByteAddr startLSA = {
-        .byteOffset = 0,
-        .byteSize = size};
+    LogicalByteAddr startLSA;
+    startLSA.byteOffset = 0;
+    startLSA.byteSize = size;
 
     memset(buf, 0, size);
     memcpy(arrayBuf, originSentence, size);

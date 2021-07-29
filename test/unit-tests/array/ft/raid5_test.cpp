@@ -207,8 +207,11 @@ TEST(Raid5, AllocResetParityPools_testIfPoolCreateAndDeletedProperlyWithTwoNuma)
 {
     // Given
     const PartitionPhysicalSize physicalSize{
+        .startLba = 0, /* not interesting */
         .blksPerChunk = 27,
-        .chunksPerStripe = 100};
+        .chunksPerStripe = 100,
+        .stripesPerSegment = 0, /* not interesting */
+        .totalSegments = 0}; /* not interesting */
     MockAffinityManager mockAffinityManager;
     MockMemoryManager mockMemoryManager;
     BufferInfo info = {
