@@ -39,10 +39,10 @@ start_and_bringup()
 	sudo pkill -9 poseidonos
 	sshpass -p ${init1_pw} ssh -tt ${init1_id}@${init1_ip} "echo ${init1_pw} | sudo -S pkill -9 fio"
 	sshpass -p ${init2_pw} ssh -tt ${init2_id}@${init2_ip} "echo ${init1_pw} | sudo -S pkill -9 fio"
-	sudo ./6_1_start_pos.sh
+	sudo ../1_psd_bringup/1_start_pos.sh
 
 	echo "bring up start"
-	sudo ./6_2_bring_up.sh -a ${target_ip_1} -b ${target_ip_2} -s ${volume_cnt} -v ${volume_cnt} -S ${volume_byte_size} -n ${target_nic_1} -m ${target_nic_2}
+	sudo ../1_psd_bringup/2_bring_up.sh #-a ${target_ip_1} -b ${target_ip_2} -s ${volume_cnt} -v ${volume_cnt} -S ${volume_byte_size} -n ${target_nic_1} -m ${target_nic_2}
 }
 
 waiting_for_rebuild_complete()
@@ -88,7 +88,7 @@ fi
 
 if [ $need_predata_write = true ]; then
 	echo "write pre data"
-	sudo ./6_3_run_fio.sh -r ${predata_write_time}
+	sudo ./run_fio.sh -r ${predata_write_time}
 	echo "write done"
 	calc_performance
 fi
@@ -97,7 +97,7 @@ echo "setting rebuild performance impact ${impact_level} by cli"
 sudo ${ibof_cli} rebuild perf_impact --level ${impact_level}
 echo "rebuild test start"
 if [ $enable_io_during_rebuild = true ]; then
-	sudo ./6_3_run_fio.sh -r ${rebuild_io_time} &
+	sudo ./run_fio.sh -r ${rebuild_io_time} &
 fi
 echo sleep
 sleep 15
