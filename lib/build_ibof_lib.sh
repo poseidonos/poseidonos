@@ -407,7 +407,7 @@ case "$1" in
 	build_fio
 	build_gperf
 	build_air
-	build_spdk
+	build_spdk_rel
 	build_go
 	build_gtest
 	build_spdlog
