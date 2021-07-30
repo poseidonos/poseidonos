@@ -167,6 +167,11 @@ public:
     {
         return property.cls;
     }
+    virtual int
+    GetNuma(void)
+    {
+        return property.numa;
+    }
     virtual DeviceProperty
     GetProperty(void)
     {

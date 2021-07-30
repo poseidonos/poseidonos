@@ -28,6 +28,7 @@ public:
     MOCK_METHOD(std::string, GetSN, (), (const, override));
     MOCK_METHOD(std::string, GetMN, (), (override));
     MOCK_METHOD(DeviceClass, GetClass, (), (override));
+    MOCK_METHOD(int, GetNuma, (), (override));
     MOCK_METHOD(DeviceProperty, GetProperty, (), (override));
     MOCK_METHOD(void, SetClass, (DeviceClass cls), (override));
     MOCK_METHOD(bool, IsAlive, (), (override));
