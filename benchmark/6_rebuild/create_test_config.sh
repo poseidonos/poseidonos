@@ -113,9 +113,9 @@ make_vdbench_config()
         initiator2_nvme_num=$((initiator2_nvme_num+1))
     done
 
-    GB_TO_KB=$((1024 * 1024))
-    sw_iorate=$((${SW_MAX} * ${GB_TO_KB} / 128 * 7 / 10))
-    rw_iorate=$((${RW_MAX} * ${GB_TO_KB} / 4 * 7 / 10))
+    MB_TO_KB=1024
+    sw_iorate=$((${SW_MAX} * ${MB_TO_KB} / 128 * 7 / 10))
+    rw_iorate=$((${RW_MAX} * ${MB_TO_KB} / 4 * 7 / 10))
     
     echo wd=seq,sd=nvme*,xfersize=4k,rdpct=0,seekpct=0 >> ${file_name}
     echo wd=rand,sd=nvme*,xfersize=4k,rdpct=0,seekpct=100 >> ${file_name}
@@ -133,6 +133,7 @@ make_vdbench_config()
 make_test_script()
 {
     make_fio_config
+    make_vdbench_config
 }
 
 print_help()
