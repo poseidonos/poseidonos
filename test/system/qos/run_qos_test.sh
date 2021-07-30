@@ -228,11 +228,11 @@ reset_spdk(){
 exit_ibofos(){
     #texecc $TARGET_ROOT_DIR/bin/cli request unmount_ibofos
     
-    texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME}
+    texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME} --force
     texecc sleep 10
     echo "Array successfully unmounted"
     #texecc ${ibof_cli} system exit
-    texecc ${ibof_cli} system stop
+    texecc ${ibof_cli} system stop --force
     texecc sleep 10
     
     texecc ps -C poseidonos > /dev/null >> ${logfile}
@@ -255,12 +255,12 @@ exit_ibofos(){
 #**************************************************************************
 exit_ibofos_multi_array(){
 
-    texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME1}
-    texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME2}
+    texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME1} --force
+    texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME2} --force
     texecc sleep 10
     echo "Array successfully unmounted"
     echo ""
-    texecc ${ibof_cli} system stop
+    texecc ${ibof_cli} system stop --force
     texecc sleep 10
 
     texecc ps -C poseidonos > /dev/null >> ${logfile}
@@ -892,7 +892,7 @@ unmount_volume_test()
         ##volIdx=`expr $volIdx + 1`
     ##done
 
-    texecc $TARGET_ROOT_DIR/bin/poseidonos-cli array unmount  --array-name ${ARRAYNAME1} --json-res
+    texecc $TARGET_ROOT_DIR/bin/poseidonos-cli array unmount  --array-name ${ARRAYNAME1} --json-res --force
     texecc sleep 10
     
     #mount volumes and arrays back
@@ -1194,7 +1194,7 @@ show_test_setup_info;
 setup_test_environment;
 
 # Run all the QoS Test Cases
-#run_qos_test_cases;
+run_qos_test_cases;
 
 #run_test_on_multi_array and multi_volume_on_1 subsystem
 run_multi_array_test;
