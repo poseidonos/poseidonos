@@ -37,12 +37,9 @@
 #include <vector>
 
 #include "src/array/array.h"
-#include "src/array_components/meta_mount_sequence.h"
 #include "src/gc/flow_control/flow_control.h"
 #include "src/gc/garbage_collector.h"
 #include "src/io/general_io/rba_state_manager.h"
-#include "src/journal_manager/journal_manager.h"
-#include "src/mapper/mapper.h"
 #include "src/volume/volume_manager.h"
 #include "src/metafs/metafs.h"
 #include "src/network/nvmf.h"
@@ -59,8 +56,8 @@ namespace pos
 class IArrayInfo;
 class IArrayRebuilder;
 class ArrayMountSequence;
-class Allocator;
 class RBAStateManager;
+class Metadata;
 
 class ArrayComponents
 {
@@ -76,9 +73,7 @@ public:
         Array* array,
         VolumeManager* volMgr,
         GarbageCollector* gc,
-        Mapper* mapper,
-        Allocator* allocator,
-        JournalManager* journal,
+        Metadata* meta,
         RBAStateManager* rbaStateMgr,
         function<MetaFs* (Array*, bool)> metaFsFactory,
         Nvmf* nvmf);
@@ -108,10 +103,8 @@ private:
     Array* array = nullptr;
     FlowControl* flowControl = nullptr;
     GarbageCollector* gc = nullptr;
-    JournalManager* journal = nullptr;
+    Metadata* meta = nullptr;
     VolumeManager* volMgr = nullptr;
-    Mapper* mapper = nullptr;
-    Allocator* allocator = nullptr;
     MetaFs* metafs = nullptr;
     RBAStateManager* rbaStateMgr = nullptr;
     Nvmf* nvmf = nullptr;
@@ -119,7 +112,6 @@ private:
     // instantiated internally
     vector<IMountSequence*> mountSequence;
     ArrayMountSequence* arrayMountSequence = nullptr;
-    MetaMountSequence* metaMountSequence = nullptr;
 
     // MetaFs factory: MetaFs creation is not determined during ArrayComponents construction. Hence, we need a lambda.
     function<MetaFs* (Array*, bool)> metaFsFactory = nullptr;

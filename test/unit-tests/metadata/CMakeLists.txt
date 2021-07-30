@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(metadata_ut metadata_test.cpp)

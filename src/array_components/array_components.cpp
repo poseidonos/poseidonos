@@ -33,15 +33,13 @@
 #include "array_components.h"
 
 #include "src/array_components/array_mount_sequence.h"
-#include "src/array_components/meta_mount_sequence.h"
 #include "src/include/array_mgmt_policy.h"
-#include "src/allocator/allocator.h"
 #include "src/io/general_io/rba_state_manager.h"
 #include "src/logger/logger.h"
-#include "src/mapper/mapper.h"
 #include "src/metafs/include/metafs_service.h"
 #include "src/metafs/metafs.h"
 #include "src/state/state_manager.h"
+#include "src/metadata/metadata.h"
 
 namespace pos
 {
@@ -54,9 +52,7 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     nullptr /*array*/,
     nullptr /*volMgr*/,
     nullptr /*gc*/,
-    nullptr /*mapper*/,
-    nullptr /*allocator*/,
-    nullptr /*journal*/,
+    nullptr /*metadata*/,
     nullptr /*rbaStateMgr*/,
     nullptr /*metaFsFactory*/,
     nullptr /*nvmf*/
@@ -87,9 +83,7 @@ ArrayComponents::ArrayComponents(string arrayName,
     Array* array,
     VolumeManager* volMgr,
     GarbageCollector* gc,
-    Mapper* mapper,
-    Allocator* allocator,
-    JournalManager* journal,
+    Metadata* meta,
     RBAStateManager* rbaStateMgr,
     function<MetaFs* (Array*, bool)> metaFsFactory,
     Nvmf* nvmf)
@@ -100,10 +94,8 @@ ArrayComponents::ArrayComponents(string arrayName,
   stateMgr(stateMgr),
   array(array),
   gc(gc),
-  journal(journal),
+  meta(meta),
   volMgr(volMgr),
-  mapper(mapper),
-  allocator(allocator),
   rbaStateMgr(rbaStateMgr),
   nvmf(nvmf),
   metaFsFactory(metaFsFactory)
@@ -216,18 +208,16 @@ ArrayComponents::Delete(void)
 int
 ArrayComponents::PrepareRebuild(bool& resume)
 {
-    IWBStripeAllocator* iWBStripeAllocator = allocator->GetIWBStripeAllocator();
-    IContextManager* ctxmgr = allocator->GetIContextManager();
     int ret = 0;
     gc->Pause();
 
-    if (ctxmgr->NeedRebuildAgain())
+    if (meta->NeedRebuildAgain())
     {
         resume = true;
     }
     else
     {
-        ret = iWBStripeAllocator->PrepareRebuild();
+        ret = meta->PrepareRebuild();
     }
     gc->Resume();
     return ret;
@@ -236,8 +226,7 @@ ArrayComponents::PrepareRebuild(bool& resume)
 void
 ArrayComponents::RebuildDone(void)
 {
-    IContextManager* iContextManager = allocator->GetIContextManager();
-    iContextManager->StopRebuilding();
+    meta->StopRebuilding();
 }
 
 void
@@ -247,7 +236,7 @@ ArrayComponents::_SetMountSequence(unsigned int arrayIndex)
     mountSequence.push_back(nvmf);
     mountSequence.push_back(metafs);
     mountSequence.push_back(volMgr);
-    mountSequence.push_back(metaMountSequence);
+    mountSequence.push_back(meta);
     mountSequence.push_back(flowControl);
     mountSequence.push_back(gc);
 
@@ -265,12 +254,9 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     if (metafs != nullptr
         || volMgr != nullptr
         || nvmf != nullptr
-        || mapper != nullptr
-        || allocator != nullptr
-        || journal != nullptr
+        || meta != nullptr
         || flowControl != nullptr
-        || gc != nullptr
-        || metaMountSequence != nullptr)
+        || gc != nullptr)
     {
         POS_TRACE_WARN(EID(ARRAY_COMPONENTS_LEAK), "Meta Components exist already. Possible memory leak (or is it a mock?). Skipping.");
         return;
@@ -280,26 +266,16 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     metafs = metaFsFactory(array, isArrayLoaded);
     volMgr = new VolumeManager(array, state);
     nvmf = new Nvmf(array->GetName(), array->GetIndex());
-    mapper = new Mapper(array, state);
-    allocator = new Allocator(telPublisher, array, state);
-    journal = new JournalManager(array, state);
+    meta = new Metadata(telPublisher, array, state);
     rbaStateMgr = new RBAStateManager(array->GetName(), array->GetIndex());
     flowControl = new FlowControl(array);
     gc = new GarbageCollector(array, state);
-    metaMountSequence = new MetaMountSequence(arrayName, mapper, allocator, journal); // remember the ref to be able to delete during ~ArrayComponents()
 }
 
 void
 ArrayComponents::_DestructMetaComponentsInOrder(void)
 {
     // Please note that the order of creation should be like the following:
-    if (metaMountSequence != nullptr)
-    {
-        delete metaMountSequence;
-        metaMountSequence = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "MetaMountSequence for {} has been deleted.", arrayName);
-    }
-
     if (gc != nullptr)
     {
         delete gc;
@@ -314,25 +290,11 @@ ArrayComponents::_DestructMetaComponentsInOrder(void)
         POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "FlowControl for {} has been deleted.", arrayName);
     }
 
-    if (journal != nullptr)
+    if (meta != nullptr)
     {
-        delete journal;
-        journal = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "JournalManager for {} has been deleted.", arrayName);
-    }
-
-    if (allocator != nullptr)
-    {
-        delete allocator;
-        allocator = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Allocator for {} has been deleted.", arrayName);
-    }
-
-    if (mapper != nullptr)
-    {
-        delete mapper;
-        mapper = nullptr;
-        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Mapper for {} has been deleted.", arrayName);
+        delete meta;
+        meta = nullptr;
+        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Metadata for {} has been deleted.", arrayName);
     }
 
     if (nvmf != nullptr)

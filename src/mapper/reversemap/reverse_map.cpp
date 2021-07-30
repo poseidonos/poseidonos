@@ -40,6 +40,7 @@
 #include "src/mapper/include/mapper_const.h"
 #include "src/mapper/reversemap/reverse_map.h"
 #include "src/volume/volume_service.h"
+#include "src/meta_file_intf/meta_file_intf.h"
 
 namespace pos
 {
