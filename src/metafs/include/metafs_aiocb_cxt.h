@@ -56,7 +56,6 @@ public:
       buf(buf),
       callback(func),
       rc(POS_EVENT_ID::MFS_END),
-      submitOk(false),
       tagId(0)
     {
         callbackCount = 0;
@@ -71,7 +70,6 @@ public:
       buf(buf),
       callback(func),
       rc(POS_EVENT_ID::MFS_END),
-      submitOk(false),
       tagId(0)
     {
     }
@@ -87,6 +85,7 @@ public:
     {
         return tagId;
     }
+
     bool
     CheckIOError(void)
     {
@@ -179,7 +178,6 @@ private:
     MetaFsAioCallbackPointer callback;
 
     POS_EVENT_ID rc;
-    bool submitOk;
     uint32_t tagId;
     std::atomic<int> callbackCount;
 };

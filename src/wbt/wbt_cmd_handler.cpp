@@ -53,7 +53,6 @@
 #include "get_instant_meta_info_wbt_command.h"
 #include "get_journal_status_wbt_command.h"
 #include "get_map_layout_wbt_command.h"
-#include "get_max_file_size_wbt_command.h"
 #include "get_partition_size_wbt_command.h"
 #include "get_segment_info_wbt_command.h"
 #include "get_segment_valid_block_count_wbt_command.h"
@@ -145,7 +144,6 @@ WbtCmdHandler::PrepareWbtCommands(void)
     wbtCommandMap["mfs_write_file"] = std::make_unique<WriteFileWbtCommand>();
     wbtCommandMap["mfs_dump_inode_info"] = std::make_unique<DumpInodeInfoWbtCommand>();
     wbtCommandMap["mfs_set_inode_info"] = std::make_unique<SetInodeInfoWbtCommand>();
-    wbtCommandMap["mfs_get_max_file_size"] = std::make_unique<GetMaxFileSizeWbtCommand>();
     wbtCommandMap["mfs_get_file_size"] = std::make_unique<GetFileSizeWbtCommand>();
     wbtCommandMap["mfs_get_aligned_file_io_size"] = std::make_unique<GetAlignedFileIoSizeWbtCommand>();
     wbtCommandMap["mfs_setup_meta_fio_test"] = std::make_unique<SetupMetaFioTestWbtCommand>();

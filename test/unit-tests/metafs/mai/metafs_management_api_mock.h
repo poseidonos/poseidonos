@@ -11,15 +11,15 @@ class MockMetaFsManagementApi : public MetaFsManagementApi
 {
 public:
     using MetaFsManagementApi::MetaFsManagementApi;
-    MOCK_METHOD(POS_EVENT_ID, InitializeSystem, (int arrayId, MetaStorageMediaInfoList* mediaInfoList), (override));
-    MOCK_METHOD(POS_EVENT_ID, CloseSystem, (int arrayId), (override));
-    MOCK_METHOD(uint64_t, GetEpochSignature, (), (override));
-    MOCK_METHOD(MetaFsStorageIoInfoList&, GetAllStoragePartitionInfo, (), (override));
-    MOCK_METHOD(MetaLpnType, GetRegionSizeInLpn, (), (override));
-    MOCK_METHOD(POS_EVENT_ID, LoadMbr, (bool& isNPOR), (override));
-    MOCK_METHOD(bool, CreateMbr, (), (override));
-    MOCK_METHOD(MetaStorageSubsystem*, GetMss, (), (override));
-    MOCK_METHOD(void, SetStatus, (bool isNormal), (override));
+    MOCK_METHOD(POS_EVENT_ID, InitializeSystem, (int arrayId, MetaStorageMediaInfoList* mediaInfoList));
+    MOCK_METHOD(POS_EVENT_ID, CloseSystem, (int arrayId));
+    MOCK_METHOD(uint64_t, GetEpochSignature, ());
+    MOCK_METHOD(MetaFsStorageIoInfoList&, GetAllStoragePartitionInfo, ());
+    MOCK_METHOD(MetaLpnType, GetRegionSizeInLpn, ());
+    MOCK_METHOD(POS_EVENT_ID, LoadMbr, (bool& isNPOR));
+    MOCK_METHOD(bool, CreateMbr, ());
+    MOCK_METHOD(MetaStorageSubsystem*, GetMss, ());
+    MOCK_METHOD(void, SetStatus, (bool isNormal));
 };
 
 } // namespace pos

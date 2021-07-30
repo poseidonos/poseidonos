@@ -57,7 +57,6 @@ public:
     MetaIoManager(MetaFsIoScheduler* ioScheduler);
     virtual ~MetaIoManager(void);
 
-    const char* GetModuleName(void) override;
     bool IsSuccess(POS_EVENT_ID rc);
 
     virtual void Init(void);

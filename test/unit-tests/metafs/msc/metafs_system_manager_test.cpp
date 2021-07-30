@@ -12,10 +12,6 @@ TEST(MetaFsSystemManager, GetInstance_)
 {
 }
 
-TEST(MetaFsSystemManager, GetModuleName_)
-{
-}
-
 TEST(MetaFsSystemManager, CheckReqSanity_)
 {
 }

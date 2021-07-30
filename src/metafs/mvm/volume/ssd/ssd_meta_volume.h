@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "meta_volume.h"
+#include "src/metafs/mvm/volume/meta_volume.h"
 
 #include <string>
 
@@ -41,10 +41,9 @@ namespace pos
 class SsdMetaVolume : public MetaVolume
 {
 public:
-    SsdMetaVolume(int arrayId, MetaLpnType maxVolumePageNum);
-    SsdMetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
-            VolumeCatalogManager* catalogMgr, int arrayId,
-            MetaLpnType maxVolumePageNum);
+    SsdMetaVolume(void);
+    SsdMetaVolume(int arrayId, MetaLpnType maxVolumePageNum,
+        InodeManager* inodeMgr = nullptr, CatalogManager* catalogMgr = nullptr);
     ~SsdMetaVolume(void);
     virtual void InitVolumeBaseLpn(void) override;
     virtual bool IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop) override;

@@ -45,7 +45,6 @@ public:
     MockMetaIntegrityManager(void);
 
     static MockMetaIntegrityManager* GetInstance(void);
-    const char* GetModuleName(void);
 
 protected:
     virtual bool _IsSiblingModuleReady(void) override;

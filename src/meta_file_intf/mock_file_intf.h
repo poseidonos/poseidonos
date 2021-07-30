@@ -43,10 +43,13 @@ namespace pos
 class MockFileIntf : public MetaFileIntf
 {
 public:
-    explicit MockFileIntf(std::string fname, std::string aname) : MetaFileIntf(fname, aname) {}
+    explicit MockFileIntf(std::string fname, std::string aname, StorageOpt storageOpt = StorageOpt::DEFAULT)
+    : MetaFileIntf(fname, aname)
+    {
+    }
     virtual ~MockFileIntf(void) = default;
 
-    virtual int Create(uint64_t fileSize, StorageOpt storageOpt) override;
+    virtual int Create(uint64_t fileSize) override;
     virtual bool DoesFileExist(void) override;
     virtual int Delete(void) override;
     virtual uint64_t GetFileSize(void) override;

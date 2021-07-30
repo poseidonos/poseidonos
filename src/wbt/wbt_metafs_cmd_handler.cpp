@@ -46,7 +46,7 @@ namespace pos
 int
 WbtMetafsCmdHandler::DumpFilesList(Args argv)
 {
-    if (argv.size() < 1)
+    if (argv.size() < 3)
     {
         std::cout << "mfs_dump_files_list Command. Too Few Arguments." << std::endl;
         return RESULT_FAILURE;
@@ -56,10 +56,15 @@ WbtMetafsCmdHandler::DumpFilesList(Args argv)
     std::string parsedJson;
     std::string arrayName = argv["array"].get<std::string>();
     std::string outFile = argv["output"].get<std::string>();
+    int type = stoi(argv["type"].get<std::string>());
+
     std::vector<MetaFileInfoDumpCxt> result;
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+    MetaVolumeType volumeType = (MetaVolumeType)type;
 
-    if ((nullptr == metaFs) || (!metaFs->wbt->GetMetaFileList(result)))
+    if ((nullptr == metaFs) ||
+        (type >= (int)MetaVolumeType::Max) ||
+        (!metaFs->wbt->GetMetaFileList(result, volumeType)))
     {
         return RESULT_FAILURE;
     }
@@ -325,35 +330,10 @@ WbtMetafsCmdHandler::GetAlignedFileIOSize(Args argv)
     return fileSize;
 }
 
-int64_t
-WbtMetafsCmdHandler::GetMaxFileSize(Args argv)
-{
-    if (argv.size() < 1)
-    {
-        std::cout << "mfs_get_max_file_size Command. Too few Arguments." << std::endl;
-        return RESULT_FAILURE;
-    }
-
-    uint64_t maxFileSize = 0;
-    std::string arrayName = argv["array"].get<std::string>();
-
-    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
-
-    if (nullptr == metaFs)
-        return RESULT_FAILURE;
-
-    if (false == metaFs->wbt->GetMaxFileSizeLimit(maxFileSize))
-    {
-        return RESULT_FAILURE;
-    }
-
-    return maxFileSize;
-}
-
 int
 WbtMetafsCmdHandler::DumpInodeInfo(Args argv)
 {
-    if (argv.size() < 3)
+    if (argv.size() < 4)
     {
         std::cout << "mfs_dump_inode_info Command. Too few Arguments." << std::endl;
         return RESULT_FAILURE;
@@ -367,12 +347,17 @@ WbtMetafsCmdHandler::DumpInodeInfo(Args argv)
     std::string metaFile = argv["name"].get<std::string>();
     std::string outJsonFile = argv["output"].get<std::string>();
     std::string arrayName = argv["array"].get<std::string>();
+    int type = stoi(argv["type"].get<std::string>());
 
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    if (false == metaFs->wbt->GetMetaFileInode(metaFile, result))
+    MetaVolumeType volumeType = (MetaVolumeType)type;
+    if (type >= (int)MetaVolumeType::Max)
+        return RESULT_FAILURE;
+
+    if (false == metaFs->wbt->GetMetaFileInode(metaFile, result, volumeType))
     {
         return RESULT_FAILURE;
     }
@@ -594,8 +579,8 @@ WbtMetafsCmdHandler::_DumpInodeInfoToJson(MetaFileInodeDumpCxt *data, JsonElemen
     metaInode.SetAttribute(JsonAttribute("dataLocation", std::to_string(static_cast<int>(data->inodeInfo.data.field.dataLocation))));
 
     // Set pageMap
-    fileExtentMap.SetAttribute(JsonAttribute("baseMetaLpn", std::to_string(static_cast<uint64_t>(data->inodeInfo.data.field.extentMap.baseMetaLpn))));
-    fileExtentMap.SetAttribute(JsonAttribute("pageCnt", std::to_string(static_cast<uint64_t>(data->inodeInfo.data.field.extentMap.pageCnt))));
+    fileExtentMap.SetAttribute(JsonAttribute("baseMetaLpn", std::to_string(static_cast<uint64_t>(data->inodeInfo.data.field.extentMap[0].GetStartLpn()))));
+    fileExtentMap.SetAttribute(JsonAttribute("pageCnt", std::to_string(static_cast<uint64_t>(data->inodeInfo.data.field.extentMap[0].GetCount()))));
 
     // Set propertry
     fileProperty.SetAttribute(JsonAttribute("integrity", std::to_string(static_cast<int>(data->inodeInfo.data.field.fileProperty.integrity))));
@@ -632,8 +617,8 @@ WbtMetafsCmdHandler::_SetValuesInMetaFileInode(MetaFileInodeInfo& metaFileInode,
     metaFileInode.data.field.dataChunkSize = static_cast<FileSizeType>(inodeData["dataChunkSize"].GetUint());
     metaFileInode.data.field.dataLocation = static_cast<MetaStorageType>(inodeData["dataLocation"].GetInt());
 
-    metaFileInode.data.field.extentMap.baseMetaLpn = static_cast<MetaLpnType>(extentMap["baseMetaLpn"].GetUint64());
-    metaFileInode.data.field.extentMap.pageCnt = static_cast<MetaLpnType>(extentMap["pageCnt"].GetUint64());
+    metaFileInode.data.field.extentMap[0].SetStartLpn(static_cast<MetaLpnType>(extentMap["baseMetaLpn"].GetUint64()));
+    metaFileInode.data.field.extentMap[0].SetCount(static_cast<MetaLpnType>(extentMap["pageCnt"].GetUint64()));
 
     metaFileInode.data.field.fileProperty.integrity = static_cast<MetaFileIntegrityType>(fileProperty["integrity"].GetInt());
     metaFileInode.data.field.fileProperty.ioAccPattern = static_cast<MetaFileAccessPattern>(fileProperty["ioAccPattern"].GetInt());

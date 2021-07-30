@@ -4,20 +4,13 @@
 
 namespace pos
 {
-TEST(MetaIntegrityManager, MetaIntegrityManager_)
+TEST(MetaIntegrityManager, CheckDefaultMethods)
 {
-}
+    MetaIntegrityManager mgr;
+    MetaFsRequestBase reqMsg;
 
-TEST(MetaIntegrityManager, GetInstance_)
-{
-}
-
-TEST(MetaIntegrityManager, GetModuleName_)
-{
-}
-
-TEST(MetaIntegrityManager, _IsSiblingModuleReady_)
-{
+    EXPECT_EQ(mgr.CheckReqSanity(reqMsg), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(mgr.ProcessNewReq(reqMsg), POS_EVENT_ID::SUCCESS);
 }
 
 } // namespace pos

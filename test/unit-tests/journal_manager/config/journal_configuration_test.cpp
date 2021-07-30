@@ -164,7 +164,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsNotZe
     uint64_t maxPartitionSize = 16 * SIZE_MB;
 
     ON_CALL(metaFsCtrl, EstimateAlignedFileIOSize).WillByDefault(Return(metaPageSize));
-    ON_CALL(metaFsCtrl, GetTheBiggestExtentSize).WillByDefault(Return(maxPartitionSize));
+    ON_CALL(metaFsCtrl, GetAvailableSpace).WillByDefault(Return(maxPartitionSize));
 
     // When
     uint64_t loadedLogBufferSize = 16 * 1024;
@@ -191,7 +191,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLoadedLogBufferSizeIsZero)
     JournalConfiguration config(configManager);
 
     ON_CALL(metaFsCtrl, EstimateAlignedFileIOSize).WillByDefault(Return(metaPageSize));
-    ON_CALL(metaFsCtrl, GetTheBiggestExtentSize).WillByDefault(Return(maxPartitionSize));
+    ON_CALL(metaFsCtrl, GetAvailableSpace).WillByDefault(Return(maxPartitionSize));
 
     // When
     config.Init(0, &metaFsCtrl);
@@ -217,7 +217,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLogBufferSizeIsDefaultValu
     JournalConfiguration config(configManager);
 
     ON_CALL(metaFsCtrl, EstimateAlignedFileIOSize).WillByDefault(Return(metaPageSize));
-    ON_CALL(metaFsCtrl, GetTheBiggestExtentSize).WillByDefault(Return(maxPartitionSize));
+    ON_CALL(metaFsCtrl, GetAvailableSpace).WillByDefault(Return(maxPartitionSize));
 
     // When
     config.Init(0, &metaFsCtrl);
@@ -242,7 +242,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSettedSuccessfully)
     JournalConfiguration config(configManager);
 
     ON_CALL(metaFsCtrl, EstimateAlignedFileIOSize).WillByDefault(Return(metaPageSize));
-    ON_CALL(metaFsCtrl, GetTheBiggestExtentSize).WillByDefault(Return(maxPartitionSize));
+    ON_CALL(metaFsCtrl, GetAvailableSpace).WillByDefault(Return(maxPartitionSize));
 
     // When
     config.Init(0, &metaFsCtrl);
@@ -268,7 +268,7 @@ TEST(JournalConfiguration, Init_testIfLogBufferSetWhenLogBufferSizeIsBiggerThanP
     JournalConfiguration config(configManager);
 
     ON_CALL(metaFsCtrl, EstimateAlignedFileIOSize).WillByDefault(Return(metaPageSize));
-    ON_CALL(metaFsCtrl, GetTheBiggestExtentSize).WillByDefault(Return(maxPartitionSize));
+    ON_CALL(metaFsCtrl, GetAvailableSpace).WillByDefault(Return(maxPartitionSize));
 
     // When
     config.Init(0, &metaFsCtrl);
@@ -293,7 +293,7 @@ TEST(JournalConfiguration, Init_testIfNVRAMSpaceIsNotEnough)
     uint64_t maxPartitionSize = metaPageSize / 2;
 
     ON_CALL(metaFsCtrl, EstimateAlignedFileIOSize).WillByDefault(Return(metaPageSize));
-    ON_CALL(metaFsCtrl, GetTheBiggestExtentSize).WillByDefault(Return(maxPartitionSize));
+    ON_CALL(metaFsCtrl, GetAvailableSpace).WillByDefault(Return(maxPartitionSize));
 
     // When, Then: Will journal configuration return the error code
     int errorReturnCode = static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION) * -1;

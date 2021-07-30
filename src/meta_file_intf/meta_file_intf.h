@@ -34,6 +34,7 @@
 
 #include "src/meta_file_intf/async_context.h"
 #include "src/meta_file_intf/meta_file_include.h"
+#include "src/metafs/include/mf_property.h"
 
 #include <string>
 
@@ -52,11 +53,13 @@ class MetaFileIntf
 {
 public:
     MetaFileIntf(void);
-    explicit MetaFileIntf(std::string fname, std::string aname);
-    explicit MetaFileIntf(std::string fname, int arrayId);
+    explicit MetaFileIntf(std::string fname, std::string aname,
+                        StorageOpt storageOpt = StorageOpt::DEFAULT);
+    explicit MetaFileIntf(std::string fname, int arrayId,
+                        StorageOpt storageOpt = StorageOpt::DEFAULT);
     virtual ~MetaFileIntf(void) = default;
 
-    virtual int Create(uint64_t size, StorageOpt storageOpt = StorageOpt::DEFAULT) = 0;
+    virtual int Create(uint64_t size) = 0;
     virtual bool DoesFileExist(void) = 0;
     virtual int Delete(void) = 0;
     virtual uint64_t GetFileSize(void) = 0;
@@ -68,8 +71,18 @@ public:
     virtual int Close(void);
     virtual bool IsOpened(void);
 
-    virtual int GetFd(void) { return fd; }
-    virtual std::string GetFileName(void) { return fileName; }
+    virtual int GetFd(void)
+    {
+        return fd;
+    }
+    virtual std::string GetFileName(void)
+    {
+        return fileName;
+    }
+    virtual StorageOpt GetStorage(void)
+    {
+        return storage;
+    }
     // SyncIO APIs
     virtual int IssueIO(MetaFsIoOpcode opType, uint64_t fileOffset, uint64_t length, char* buffer);
     virtual int AppendIO(MetaFsIoOpcode opType, uint64_t& offset, uint64_t length, char* buffer);
@@ -84,6 +97,8 @@ protected:
     uint64_t size;
     bool isOpened;
     int fd;
+    StorageOpt storage;
+    MetaFilePropertySet fileProperty;
 };
 
 } // namespace pos

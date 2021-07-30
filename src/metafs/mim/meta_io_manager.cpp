@@ -74,17 +74,10 @@ MetaIoManager::~MetaIoManager(void)
     Finalize();
 }
 
-const char*
-MetaIoManager::GetModuleName(void)
-{
-    return "Meta IO Manager";
-}
-
 POS_EVENT_ID
 MetaIoManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 {
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
-    // MetaFsIoRequest* msg = static_cast<MetaFsIoRequest*>(&reqMsg);
 
     return rc;
 }

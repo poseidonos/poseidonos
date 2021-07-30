@@ -4,56 +4,93 @@
 
 namespace pos
 {
-TEST(MetaFsAioCbCxt, MetaFsAioCbCxt_)
+TEST(MetaFsAioCbCxt, CheckTagId)
 {
+    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
+
+    EXPECT_EQ(cb.GetTagId(), 0);
+
+    cb.SetTagId(10);
+
+    EXPECT_EQ(cb.GetTagId(), 10);
 }
 
-TEST(MetaFsAioCbCxt, SetTagId_)
+TEST(MetaFsAioCbCxt, CheckError_Positive)
 {
+    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
+
+    EXPECT_EQ(cb.CheckIOError(), true);
+
+    MfsError err = { 0, false };
+    cb.SetErrorStatus(err);
+
+    EXPECT_EQ(cb.CheckIOError(), false);
 }
 
-TEST(MetaFsAioCbCxt, GetTagId_)
+TEST(MetaFsAioCbCxt, CheckError_Negative0)
 {
+    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
+
+    EXPECT_EQ(cb.CheckIOError(), true);
+
+    MfsError err = { 1, false };
+    cb.SetErrorStatus(err);
+
+    EXPECT_EQ(cb.CheckIOError(), true);
 }
 
-TEST(MetaFsAioCbCxt, CheckIOError_)
+TEST(MetaFsAioCbCxt, CheckError_Negative1)
 {
+    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
+
+    EXPECT_EQ(cb.CheckIOError(), true);
+
+    MfsError err = { 0, true };
+    cb.SetErrorStatus(err);
+
+    EXPECT_EQ(cb.CheckIOError(), true);
 }
 
-TEST(MetaFsAioCbCxt, SetErrorStatus_)
+TEST(MetaFsAioCbCxt, CheckCallback)
 {
+    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
+
+    cb.SetCallbackCount(10);
+    cb.InvokeCallback();
 }
 
-TEST(MetaFsAioCbCxt, InvokeCallback_)
+TEST(MetaFsAioCbCxt, CheckOpcode)
 {
+    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
+
+    EXPECT_EQ(cb.GetOpCode(), MetaFsIoOpcode::Read);
 }
 
-TEST(MetaFsAioCbCxt, GetOpCode_)
+TEST(MetaFsAioCbCxt, CheckFd)
 {
+    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
+
+    EXPECT_EQ(cb.GetFD(), 0);
 }
 
-TEST(MetaFsAioCbCxt, GetFD_)
+TEST(MetaFsAioCbCxt, CheckOffset)
 {
+    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
+
+    EXPECT_EQ(cb.GetOffset(), 0);
 }
 
-TEST(MetaFsAioCbCxt, GetOffset_)
+TEST(MetaFsAioCbCxt, CheckSize)
 {
+    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
+
+    EXPECT_EQ(cb.GetByteSize(), 0);
 }
 
-TEST(MetaFsAioCbCxt, GetByteSize_)
+TEST(MetaFsAioCbCxt, CheckBuffer)
 {
-}
+    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
 
-TEST(MetaFsAioCbCxt, GetBuffer_)
-{
+    EXPECT_TRUE(cb.GetBuffer() == nullptr);
 }
-
-TEST(MetaFsAioCbCxt, SetUserIo_)
-{
-}
-
-TEST(MetaFsAioCbCxt, SetCallbackCount_)
-{
-}
-
 } // namespace pos

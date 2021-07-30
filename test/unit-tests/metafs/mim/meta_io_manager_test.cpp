@@ -9,14 +9,6 @@ using ::testing::Return;
 
 namespace pos
 {
-TEST(MetaIoManager, CheckModuleName)
-{
-    const std::string name = "Meta IO Manager";
-    MetaIoManager* mgr = new MetaIoManager();
-    EXPECT_EQ(mgr->GetModuleName(), name);
-    delete mgr;
-}
-
 TEST(MetaIoManager, CheckSuccess)
 {
     MetaIoManager* mgr = new MetaIoManager();

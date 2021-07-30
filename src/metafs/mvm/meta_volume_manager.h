@@ -41,13 +41,12 @@
 #include <utility>
 #include "src/metafs/storage/mss.h"
 #include "metafs_manager_base.h"
-#include "file_descriptor_manager.h"
-#include "meta_file_manager.h"
-#include "meta_volume.h"
-#include "volume_catalog_manager.h"
+#include "src/metafs/mvm/volume/file_descriptor_allocator.h"
+#include "src/metafs/mvm/volume/meta_volume.h"
+#include "src/metafs/mvm/volume/catalog_manager.h"
 #include "meta_volume_handler.h"
-#include "meta_volume_context.h"
-#include "mf_inode_mgr.h"
+#include "meta_volume_container.h"
+#include "src/metafs/mvm/volume/inode_manager.h"
 #include "metafs_common.h"
 #include "mk/ibof_config.h"
 #include "metafs_control_request.h"
@@ -65,24 +64,15 @@ public:
     MetaVolumeManager(void);
     virtual ~MetaVolumeManager(void);
 
-    const char* GetModuleName(void) override;
     POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
 
     virtual void InitVolume(MetaVolumeType volType, int arrayId, MetaLpnType maxVolPageNum);
     virtual bool OpenVolume(bool isNPOR);
     virtual bool CloseVolume(bool& resetCxt /*output */);
     virtual bool CreateVolume(MetaVolumeType volType);
-#if (1 == COMPACTION_EN) || not defined COMPACTION_EN
-    virtual bool Compaction(bool isNPOR);
-#endif
 
     // API for MetaFs MGMT API (File meta operation, Utility API to obtain specific file meta info.)
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
-    virtual bool
-    GetVolOpenFlag(int arrayId)
-    {
-        return volContext.GetVolOpenFlag();
-    }
 
     POS_EVENT_ID CheckFileAccessible(FileDescriptorType fd);
     POS_EVENT_ID GetFileSize(FileDescriptorType fd, FileSizeType& outFileByteSize);
@@ -93,16 +83,12 @@ public:
 
 private:
     bool _IsVolumeSpecificRequest(MetaFsFileControlType reqType);
-
-    POS_EVENT_ID _HandleVolumeSpcfRequest(MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID _HandleGlobalMetaRequest(MetaFsFileControlRequest& reqMsg);
-
     void _InitRequestHandler(void);
     int _GetRequestHandlerIndex(MetaFsFileControlType reqType);
     void _RegisterVolumeSpcfReqHandler(MetaFsFileControlType reqType, MetaVolSpcfReqHandler handler);
     void _RegisterGlobalMetaReqHandler(MetaFsFileControlType reqType, GlobalMetaReqHandler handler);
 
-    std::pair<MetaVolumeType, POS_EVENT_ID> _LookupTargetMetaVolume(MetaFsFileControlRequest& reqMsg);
+    std::pair<MetaVolumeType, POS_EVENT_ID> _CheckRequest(MetaFsFileControlRequest& reqMsg);
     bool _IsValidVolumeType(MetaVolumeType volType);
     MetaVolSpcfReqHandler _DispatchVolumeSpcfReqHandler(MetaFsFileControlType reqType);
     GlobalMetaReqHandler _DispatchGlobalMetaReqHandler(MetaFsFileControlType reqType);
@@ -110,13 +96,12 @@ private:
     POS_EVENT_ID _ExecuteGlobalMetaRequest(MetaFsFileControlRequest& reqMsg);
 
     bool _CheckFileCreateReqSanity(MetaVolume& tgtMetaVol, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID _CheckSanityBasic(MetaFsFileControlRequest& reqMsg);
 
     MetaVolSpcfReqHandler volumeSpcfReqHandler[(uint32_t)(MetaFsFileControlType::OnVolumeSpcfReq_Count)];
     GlobalMetaReqHandler globalRequestHandler[(uint32_t)(MetaFsFileControlType::NonVolumeSpcfReq_Count)];
 
     MetaVolumeHandler volHandler;
-    MetaVolumeContext volContext;
+    MetaVolumeContainer volContainer;
     MetaStorageSubsystem* metaStorage;
 };
 } // namespace pos

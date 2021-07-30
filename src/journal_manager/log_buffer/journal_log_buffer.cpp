@@ -56,7 +56,7 @@ JournalLogBuffer::JournalLogBuffer(void)
 JournalLogBuffer::JournalLogBuffer(std::string arrayName)
 : JournalLogBuffer()
 {
-    logFile = new MetaFsFileIntf("JournalLogBuffer", arrayName);
+    logFile = new MetaFsFileIntf("JournalLogBuffer", arrayName, StorageOpt::NVRAM);
 }
 
 JournalLogBuffer::JournalLogBuffer(MetaFileIntf* metaFile)
@@ -118,7 +118,7 @@ JournalLogBuffer::Create(uint64_t logBufferSize)
         return -1 * (int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED;
     }
 
-    int ret = logFile->Create(logBufferSize, StorageOpt::NVRAM);
+    int ret = logFile->Create(logBufferSize);
     if (ret != 0)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED,

@@ -8,10 +8,6 @@ TEST(MetaFsWBTApi, GetMetaFileList_)
 {
 }
 
-TEST(MetaFsWBTApi, GetMaxFileSizeLimit_)
-{
-}
-
 TEST(MetaFsWBTApi, GetMetaFileInode_)
 {
 }

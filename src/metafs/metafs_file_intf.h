@@ -47,12 +47,19 @@ namespace pos
 class MetaFsFileIntf : public MetaFileIntf
 {
 public:
-    explicit MetaFsFileIntf(std::string fname, std::string aname);
-    explicit MetaFsFileIntf(std::string fname, int arrayId);
-    explicit MetaFsFileIntf(std::string fname, int arrayId, MetaFs* metaFs); // only for test
+    explicit MetaFsFileIntf(std::string fname, std::string aname,
+                StorageOpt storageOpt = StorageOpt::DEFAULT);
+    explicit MetaFsFileIntf(std::string fname, int arrayId,
+                StorageOpt storageOpt = StorageOpt::DEFAULT);
+    // only for test
+    explicit MetaFsFileIntf(std::string fname, std::string aname,
+                MetaFs* metaFs, StorageOpt storageOpt = StorageOpt::DEFAULT);
+    // only for test
+    explicit MetaFsFileIntf(std::string fname, int arrayId, MetaFs* metaFs,
+                StorageOpt storageOpt = StorageOpt::DEFAULT);
     virtual ~MetaFsFileIntf(void) override;
 
-    virtual int Create(uint64_t fileSize, StorageOpt storageOpt) override;
+    virtual int Create(uint64_t fileSize) override;
     virtual bool DoesFileExist(void) override;
     virtual int Delete(void) override;
     virtual uint64_t GetFileSize(void) override;
@@ -64,6 +71,7 @@ public:
     virtual int Close(void) override;
 
 protected:
+    virtual void _SetFileProperty(StorageOpt storageOpt);
     virtual int _Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
     virtual int _Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
 

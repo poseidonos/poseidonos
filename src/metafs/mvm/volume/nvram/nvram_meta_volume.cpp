@@ -36,15 +36,15 @@
 
 namespace pos
 {
-NvRamMetaVolume::NvRamMetaVolume(int arrayId, MetaLpnType maxVolumePageNum)
-: MetaVolume(arrayId, MetaVolumeType::NvRamVolume, maxVolumePageNum)
+NvRamMetaVolume::NvRamMetaVolume(void)
+: MetaVolume()
 {
 }
 
-NvRamMetaVolume::NvRamMetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
-        VolumeCatalogManager* catalogMgr, int arrayId,
-        MetaLpnType maxVolumePageNum)
-: MetaVolume(fileMgr, inodeMgr, catalogMgr, arrayId, MetaVolumeType::NvRamVolume, maxVolumePageNum)
+NvRamMetaVolume::NvRamMetaVolume(int arrayId, MetaLpnType maxVolumePageNum,
+            InodeManager* inodeMgr, CatalogManager* catalogMgr)
+: MetaVolume(arrayId, MetaVolumeType::NvRamVolume, maxVolumePageNum,
+                inodeMgr, catalogMgr)
 {
 }
 
@@ -58,13 +58,13 @@ bool
 NvRamMetaVolume::IsFreeSpaceEnough(FileSizeType fileByteSize)
 {
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "NVRAM Space. free space={}, request={}", fileByteSize, GetTheBiggestExtentSize());
+        "NVRAM Space. free space={}, request={}", fileByteSize, GetAvailableSpace());
 
     if (fileByteSize == 0) // MetaFsFileControlType::GetFreeFileRegionSize
     {
         return true;
     }
-    if (GetTheBiggestExtentSize() >= fileByteSize)
+    if (GetAvailableSpace() >= fileByteSize)
     {
         return true;
     }

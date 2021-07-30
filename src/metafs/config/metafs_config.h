@@ -40,23 +40,34 @@ namespace pos
 class MetaFsConfig
 {
 public:
-    static const int32_t MAX_META_FILE_NUM_SUPPORT = 2048;
+    static const uint32_t MAX_META_FILE_NUM_SUPPORT = 1024;
     static const uint32_t TYPICAL_NVRAM_META_FILE_KB_SIZE = 64;
     static const uint32_t MAX_ATOMIC_WRITE_PAGE_CNT = 1;
     static const uint32_t MAX_CONCURRENT_IO_CNT = 1024 * 32; // optimized for 128MB size IO. If requested less than this, user may see performance drop
     static const uint32_t DEFAULT_MAX_CORE_COUNT = 128;
     static const uint32_t DEFAULT_MAX_MPIO_CACHE_COUNT = 32; // MAX_CONCURRENT_IO_CNT has to be greater than this count
     static const uint32_t MAX_ARRAY_CNT = ArrayMgmtPolicy::MAX_ARRAY_CNT;
-
     // 256 volume files per a array, 18 alternative files
     static const uint32_t MAX_VOLUME_CNT = 256 + 18;
+    // the number of LPN per extent = 8, sizeof(extent) = 8 * 4K = 32K
+    static const uint32_t LPN_COUNT_PER_EXTENT = 8;
+    // inode size = 8K = LPN * 2
+    static const uint32_t LPN_COUNT_PER_INODE = 2;
+    // the number of extents per inode
+    static const uint32_t MAX_PAGE_MAP_CNT = 384;
+    // char: A55A
+    static const uint16_t SIGNATURE_INODE_VERSION = 42330;
+    static const uint16_t CURRENT_INODE_VERSION = 1;
 };
 
 class MetaFsIoConfig
 {
 public:
+    // 4K LPN
     static const uint64_t META_PAGE_SIZE_IN_BYTES = 4096;
+    // control info size in a LPN
     static const uint64_t META_PAGE_CONTROL_INFO_SIZE = 64;
+    // 4032B = 4096B - 64B
     static const uint64_t DEFAULT_META_PAGE_DATA_CHUNK_SIZE = META_PAGE_SIZE_IN_BYTES - META_PAGE_CONTROL_INFO_SIZE;
 };
 

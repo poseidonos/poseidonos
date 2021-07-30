@@ -67,7 +67,7 @@ enum class MetaFsFileControlType
     GetFileBaseLpn,
     GetMaxMetaLpn,
 
-    GetTheBiggestExtentSize,
+    GetAvailableSpace,
 
     ArrayCreate,
     ArrayDelete,
@@ -77,7 +77,6 @@ enum class MetaFsFileControlType
     NonVolumeSpcfReq_Base = OnVolumeSpecificReq_Max,
 
     GetMetaFileInfoList = NonVolumeSpcfReq_Base,
-    GetMaxFileSizeLimit,
     GetFileInode,
     EstimateDataChunkSize,
 

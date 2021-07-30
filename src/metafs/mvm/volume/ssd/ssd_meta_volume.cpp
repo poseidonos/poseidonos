@@ -37,14 +37,15 @@
 #include <string>
 namespace pos
 {
-SsdMetaVolume::SsdMetaVolume(int arrayId, MetaLpnType maxVolumePageNum)
-: MetaVolume(arrayId, MetaVolumeType::SsdVolume, maxVolumePageNum)
+SsdMetaVolume::SsdMetaVolume(void)
+: MetaVolume()
 {
 }
 
-SsdMetaVolume::SsdMetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
-        VolumeCatalogManager* catalogMgr, int arrayId, MetaLpnType maxVolumePageNum)
-: MetaVolume(fileMgr, inodeMgr, catalogMgr, arrayId, MetaVolumeType::SsdVolume, maxVolumePageNum)
+SsdMetaVolume::SsdMetaVolume(int arrayId, MetaLpnType maxVolumePageNum,
+            InodeManager* inodeMgr, CatalogManager* catalogMgr)
+: MetaVolume(arrayId, MetaVolumeType::SsdVolume, maxVolumePageNum,
+                inodeMgr, catalogMgr)
 {
 }
 
@@ -63,13 +64,13 @@ SsdMetaVolume::InitVolumeBaseLpn(void)
 bool
 SsdMetaVolume::IsFreeSpaceEnough(FileSizeType fileByteSize)
 {
-    if (GetTheBiggestExtentSize() >= fileByteSize)
+    if (GetAvailableSpace() >= fileByteSize)
     {
         return true;
     }
 
     MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE,
-        "Not Enough SSD Meta Space, freeSpace={}, reqSize={}", GetTheBiggestExtentSize(), fileByteSize);
+        "Not Enough SSD Meta Space, freeSpace={}, reqSize={}", GetAvailableSpace(), fileByteSize);
     return false;
 }
 

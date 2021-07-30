@@ -4,12 +4,15 @@
 
 namespace pos
 {
-TEST(MetaFsFileControlRequest, MetaFsFileControlRequest_)
+TEST(MetaFsFileControlRequest, CheckValidity)
 {
-}
+    MetaFsFileControlRequest req;
 
-TEST(MetaFsFileControlRequest, IsValid_)
-{
+    EXPECT_EQ(req.IsValid(), false);
+
+    req.reqType = MetaFsFileControlType::FileOpen;
+
+    EXPECT_EQ(req.IsValid(), true);
 }
 
 } // namespace pos

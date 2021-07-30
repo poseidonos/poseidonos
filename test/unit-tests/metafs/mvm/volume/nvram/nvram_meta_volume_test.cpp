@@ -1,8 +1,7 @@
 #include "src/metafs/mvm/volume/nvram/nvram_meta_volume.h"
 #include "test/unit-tests/metafs/storage/mss_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/meta_file_manager_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/mf_inode_mgr_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/volume_catalog_manager_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_manager_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/catalog_manager_mock.h"
 #include <string>
 #include <gtest/gtest.h>
 
@@ -17,8 +16,7 @@ class NvRamMetaVolumeTestFixture : public ::testing::Test
 {
 public:
     NvRamMetaVolumeTestFixture(void)
-    : fileMgr(nullptr),
-      inodeMgr(nullptr),
+    : inodeMgr(nullptr),
       catalogMgr(nullptr)
     {
     }
@@ -29,11 +27,10 @@ public:
     virtual void
     SetUp(void)
     {
-        fileMgr = new NiceMock<MetaFileManager>(arrayId);
-        inodeMgr = new NiceMock<MetaFileInodeManager>(arrayId);
-        catalogMgr = new NiceMock<VolumeCatalogManager>(arrayId);
+        inodeMgr = new NiceMock<InodeManager>(arrayId);
+        catalogMgr = new NiceMock<CatalogManager>(arrayId);
 
-        volume = new NvRamMetaVolume(fileMgr, inodeMgr, catalogMgr, arrayId, maxLpn);
+        volume = new NvRamMetaVolume(arrayId, maxLpn, inodeMgr, catalogMgr);
         volume->Init(metaStorage);
         volume->InitVolumeBaseLpn();
     }
@@ -47,9 +44,8 @@ public:
 protected:
     NvRamMetaVolume* volume;
 
-    NiceMock<MetaFileManager>* fileMgr;
-    NiceMock<MetaFileInodeManager>* inodeMgr;
-    NiceMock<VolumeCatalogManager>* catalogMgr;
+    NiceMock<InodeManager>* inodeMgr;
+    NiceMock<CatalogManager>* catalogMgr;
 
     int arrayId = 0;
     MetaLpnType maxLpn = 8192;
@@ -59,36 +55,42 @@ protected:
 
 TEST_F(NvRamMetaVolumeTestFixture, NVRAM_Meta_Volume_Normal)
 {
+    uint64_t chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
+
     // then
     // prop is not suitable
     // the maximum size
-    EXPECT_FALSE(volume->IsOkayToStore(6141 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
-    // expected count of the free lpn: 6142
-    EXPECT_FALSE(volume->IsOkayToStore(6142 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
+    EXPECT_FALSE(volume->IsOkayToStore(6135 * chunkSize, prop));
+    // expected count of the free lpn: 6136
+    EXPECT_FALSE(volume->IsOkayToStore(6136 * chunkSize, prop));
     // more than possible
-    EXPECT_FALSE(volume->IsOkayToStore(6143 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
+    // size is smaller than available but the number is not a multiple 8
+    EXPECT_FALSE(volume->IsOkayToStore(6137 * chunkSize, prop));
 
     // prop is suitable
     prop.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
-    EXPECT_TRUE(volume->IsOkayToStore(6141 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
-    // expected count of the free lpn: 6142
-    EXPECT_TRUE(volume->IsOkayToStore(6142 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(6135 * chunkSize, prop));
+    // expected count of the free lpn: 6136
+    EXPECT_TRUE(volume->IsOkayToStore(6136 * chunkSize, prop));
     // more than possible
-    EXPECT_FALSE(volume->IsOkayToStore(6143 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
+    // size is smaller than available but the number is not a multiple 8
+    EXPECT_FALSE(volume->IsOkayToStore(6137 * chunkSize, prop));
 
     prop.ioAccPattern = MetaFileAccessPattern::SmallSizeBlockIO;
-    EXPECT_TRUE(volume->IsOkayToStore(6141 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
-    // expected count of the free lpn: 6142
-    EXPECT_TRUE(volume->IsOkayToStore(6142 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(6135 * chunkSize, prop));
+    // expected count of the free lpn: 6136
+    EXPECT_TRUE(volume->IsOkayToStore(6136 * chunkSize, prop));
     // more than possible
-    EXPECT_FALSE(volume->IsOkayToStore(6143 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
+    // size is smaller than available but the number is not a multiple 8
+    EXPECT_FALSE(volume->IsOkayToStore(6137 * chunkSize, prop));
 
     prop.ioOpType = MetaFileDominant::WriteDominant;
-    EXPECT_TRUE(volume->IsOkayToStore(6141 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
-    // expected count of the free lpn: 6142
-    EXPECT_TRUE(volume->IsOkayToStore(6142 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(6135 * chunkSize, prop));
+    // expected count of the free lpn: 6136
+    EXPECT_TRUE(volume->IsOkayToStore(6136 * chunkSize, prop));
     // more than possible
-    EXPECT_FALSE(volume->IsOkayToStore(6143 * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE, prop));
+    // size is smaller than available but the number is not a multiple 8
+    EXPECT_FALSE(volume->IsOkayToStore(6137 * chunkSize, prop));
 }
 
 } // namespace pos

@@ -58,12 +58,6 @@ MetaFsSystemManager::~MetaFsSystemManager(void)
         delete mbrMgr;
 }
 
-const char*
-MetaFsSystemManager::GetModuleName(void)
-{
-    return "MetaFs System Manager";
-}
-
 POS_EVENT_ID
 MetaFsSystemManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 {

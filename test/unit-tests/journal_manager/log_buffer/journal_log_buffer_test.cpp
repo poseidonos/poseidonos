@@ -78,7 +78,7 @@ TEST(JournalLogBuffer, Create_testIfExecutedSuccessfully)
     // When, Then
     uint64_t logBufferSize = 1024;
     EXPECT_CALL(*metaFile, DoesFileExist).WillOnce(Return(false));
-    EXPECT_CALL(*metaFile, Create(logBufferSize, StorageOpt::NVRAM)).WillOnce(Return(0));
+    EXPECT_CALL(*metaFile, Create(logBufferSize)).WillOnce(Return(0));
     EXPECT_CALL(*metaFile, Open).WillOnce(Return(0));
     journalLogBuffer.Create(logBufferSize);
 }
@@ -109,7 +109,7 @@ TEST(JournalLogBuffer, Create_testIfLogBufferCreateFailed)
     uint64_t logBufferSize = 1024;
     int retCode = -1;
     EXPECT_CALL(*metaFile, DoesFileExist).WillOnce(Return(false));
-    EXPECT_CALL(*metaFile, Create(logBufferSize, StorageOpt::NVRAM)).WillOnce(Return(retCode));
+    EXPECT_CALL(*metaFile, Create(logBufferSize)).WillOnce(Return(retCode));
     int result = journalLogBuffer.Create(logBufferSize);
 
     // Then: journalLogBuffer will be return error code
@@ -126,7 +126,7 @@ TEST(JournalLogBuffer, Create_testIfLogBufferOpenFailed)
     uint64_t logBufferSize = 1024;
     int retCode = -1;
     EXPECT_CALL(*metaFile, DoesFileExist()).WillOnce(Return(false));
-    EXPECT_CALL(*metaFile, Create(logBufferSize, StorageOpt::NVRAM)).WillOnce(Return(0));
+    EXPECT_CALL(*metaFile, Create(logBufferSize)).WillOnce(Return(0));
     EXPECT_CALL(*metaFile, Open).WillOnce(Return(retCode));
     int result = journalLogBuffer.Create(logBufferSize);
 

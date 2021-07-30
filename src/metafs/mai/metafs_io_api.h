@@ -51,18 +51,23 @@ public:
     MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl);
     virtual ~MetaFsIoApi(void);
 
-    virtual POS_EVENT_ID Read(FileDescriptorType fd, void* buf);
+    virtual POS_EVENT_ID Read(FileDescriptorType fd, void* buf,
+                    MetaStorageType mediaType = MetaStorageType::SSD);
     virtual POS_EVENT_ID Read(FileDescriptorType fd, FileSizeType byteOffset,
-                    FileSizeType byteSize, void* buf);
-    virtual POS_EVENT_ID Write(FileDescriptorType fd, void* buf);
+                    FileSizeType byteSize, void* buf,
+                    MetaStorageType mediaType = MetaStorageType::SSD);
+    virtual POS_EVENT_ID Write(FileDescriptorType fd, void* buf,
+                    MetaStorageType mediaType = MetaStorageType::SSD);
     virtual POS_EVENT_ID Write(FileDescriptorType fd, FileSizeType byteOffset,
-                    FileSizeType byteSize, void* buf);
-    virtual POS_EVENT_ID SubmitIO(MetaFsAioCbCxt* cxt);
+                    FileSizeType byteSize, void* buf,
+                    MetaStorageType mediaType = MetaStorageType::SSD);
+    virtual POS_EVENT_ID SubmitIO(MetaFsAioCbCxt* cxt,
+                    MetaStorageType mediaType = MetaStorageType::SSD);
 
     virtual bool AddArray(int arrayId);
     virtual bool RemoveArray(int arrayId);
 
-    void SetMss(MetaStorageSubsystem* metaStorage);
+    virtual void SetMss(MetaStorageSubsystem* metaStorage);
     virtual void SetStatus(bool isNormal);
 
 private:

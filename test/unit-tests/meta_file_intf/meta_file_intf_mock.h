@@ -12,7 +12,7 @@ class MockMetaFileIntf : public MetaFileIntf
 {
 public:
     using MetaFileIntf::MetaFileIntf;
-    MOCK_METHOD(int, Create, (uint64_t size, StorageOpt storageOpt), (override));
+    MOCK_METHOD(int, Create, (uint64_t size), (override));
     MOCK_METHOD(bool, DoesFileExist, (), (override));
     MOCK_METHOD(int, Delete, (), (override));
     MOCK_METHOD(uint64_t, GetFileSize, (), (override));

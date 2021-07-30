@@ -52,10 +52,6 @@ TEST(WbtMetafsCmdHandler, SetInodeInfo_)
 {
 }
 
-TEST(WbtMetafsCmdHandler, GetMaxFileSize_)
-{
-}
-
 TEST(WbtMetafsCmdHandler, GetFileChecksum_)
 {
 }

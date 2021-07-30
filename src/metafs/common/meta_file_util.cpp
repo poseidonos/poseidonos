@@ -37,15 +37,25 @@
 namespace pos
 {
 static_assert(((int)MetaStorageType::SSD) == 0, "error");
-const MfsMediaToVolume MetaFileUtil::MEDIA_TO_VOLUME[] =
+const MetaFsMediaToVolume MetaFileUtil::MEDIA_TO_VOLUME[] =
     {
         {MetaStorageType::SSD, MetaVolumeType::SsdVolume},
         {MetaStorageType::NVRAM, MetaVolumeType::NvRamVolume}};
 static_assert(((int)MetaVolumeType::SsdVolume) == 0, "error");
-const MfsVolumeToMedia MetaFileUtil::VOLUME_TO_MEDIA[] =
+const MetaFsVolumeToMedia MetaFileUtil::VOLUME_TO_MEDIA[] =
     {
         {MetaVolumeType::SsdVolume, MetaStorageType::SSD},
         {MetaVolumeType::NvRamVolume, MetaStorageType::NVRAM}};
+static_assert(((int)StorageOpt::SSD) == 1, "error");
+const MetaFsStorageOptToMedia MetaFileUtil::OPTION_TO_MEDIA[] =
+    {
+        {StorageOpt::NVRAM, MetaVolumeType::NvRamVolume},
+        {StorageOpt::SSD, MetaVolumeType::SsdVolume}};
+static_assert(((int)StorageOpt::SSD) == 1, "error");
+const MetaFsStorageOptToVolume MetaFileUtil::OPTION_TO_VOLUME[] =
+    {
+        {StorageOpt::NVRAM, MetaStorageType::NVRAM},
+        {StorageOpt::SSD, MetaStorageType::SSD}};
 
 StringHashType
 MetaFileUtil::GetHashKeyFromFileName(const std::string& fileName)
@@ -57,6 +67,18 @@ MetaStorageType
 MetaFileUtil::ConvertToMediaType(MetaVolumeType volume)
 {
     return VOLUME_TO_MEDIA[(uint32_t)volume].media;
+}
+
+MetaStorageType
+MetaFileUtil::ConvertToMediaType(StorageOpt storageOpt)
+{
+    return OPTION_TO_VOLUME[(uint32_t)storageOpt].media;
+}
+
+MetaVolumeType
+MetaFileUtil::ConvertToVolumeType(StorageOpt storageOpt)
+{
+    return OPTION_TO_MEDIA[(uint32_t)storageOpt].volumeType;
 }
 
 std::string
@@ -88,10 +110,10 @@ MetaFileUtil::ConvertToVolumeType(MetaStorageType media)
 }
 
 uint64_t
-MetaFileUtil::GetEpochSignature(void)
+MetaFileUtil::GetEpochSignature(std::time_t t)
 {
     // CreateMBR, Need to add more context
-    std::time_t t = std::time(0); // get time now
+    // std::time_t t = std::time(0); // get time now -> get from param
     std::tm* now = std::localtime(&t);
 
     // 0000_YYYY_MMDD_HHMM_

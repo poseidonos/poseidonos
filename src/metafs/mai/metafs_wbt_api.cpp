@@ -55,12 +55,13 @@ MetaFsWBTApi::~MetaFsWBTApi(void)
 
 // WBT: Load file inode lists for each volume type
 bool
-MetaFsWBTApi::GetMetaFileList(std::vector<MetaFileInfoDumpCxt>& result)
+MetaFsWBTApi::GetMetaFileList(std::vector<MetaFileInfoDumpCxt>& result,
+                                MetaVolumeType volumeType)
 {
     if (!isNormal)
         return false;
 
-    result = ctrl->Wbt_GetMetaFileList();
+    result = ctrl->Wbt_GetMetaFileList(volumeType);
 
     if (0 == result.size())
         return false;
@@ -68,29 +69,15 @@ MetaFsWBTApi::GetMetaFileList(std::vector<MetaFileInfoDumpCxt>& result)
     return true;
 }
 
-// WBT : Get max file size limit (max volume LPN * 95%)
-bool
-MetaFsWBTApi::GetMaxFileSizeLimit(FileSizeType& result)
-{
-    if (!isNormal)
-        return false;
-
-    result = ctrl->Wbt_GetMaxFileSizeLimit();
-
-    if (0 == result)
-        return false;
-
-    return true;
-}
-
 // WBT : Get file inode info. for the given meta file.
 bool
-MetaFsWBTApi::GetMetaFileInode(std::string& fileName, MetaFileInodeDumpCxt& result)
+MetaFsWBTApi::GetMetaFileInode(std::string& fileName,
+                MetaFileInodeDumpCxt& result, MetaVolumeType volumeType)
 {
     if (!isNormal)
         return false;
 
-    MetaFileInodeInfo* info = ctrl->Wbt_GetMetaFileInode(fileName);
+    MetaFileInodeInfo* info = ctrl->Wbt_GetMetaFileInode(fileName, volumeType);
 
     if (nullptr == info)
         return false;

@@ -64,10 +64,10 @@ public:
     MetaFsMBR(MetaFsAnchorRegionType regionType, MetaLpnType baseLpn);
     virtual ~MetaFsMBR(void);
 
-    void CreateMBR(void);
+    virtual void CreateMBR(void);
     void BuildMBR(void);
-    uint64_t GetEpochSignature(void);
-    bool IsValidMBRExist(void);
+    virtual uint64_t GetEpochSignature(void);
+    virtual bool IsValidMBRExist(void);
     virtual bool GetPORStatus(void);
     virtual void SetPORStatus(bool isShutdownOff);
     virtual void InvalidMBRSignature(void);

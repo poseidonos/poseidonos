@@ -31,8 +31,9 @@
  */
 
 #include "mf_inode.h"
-
 #include "metafs_common_const.h"
+
+#define PRINT_INFO 0
 
 namespace pos
 {
@@ -78,13 +79,35 @@ MetaFileInode::BuildNewEntry(MetaFileInodeCreateReq& req, FileSizeType dataChunk
     data.basic.field.fileName = req.fileName;
     data.basic.field.fileByteSize = req.fileByteSize;
     data.basic.field.dataChunkSize = dataChunkSizeInMetaPage;
-
     data.basic.field.ioAttribute.media = req.media;
     data.basic.field.ioAttribute.ioSpecfic = req.ioAttribute;
-    data.basic.field.pagemap = *req.pageMap;
+    data.basic.field.pagemapCnt = req.extentList->size();
     data.basic.field.ctime = GetCurrDateTimestamp();
-
+    data.basic.field.ctimeCopy = data.basic.field.ctime;
+    data.basic.field.age = 0;
+    data.basic.field.ageCopy = 0;
+    data.basic.field.version = MetaFsConfig::CURRENT_INODE_VERSION;
+    data.basic.field.versionSignature = MetaFsConfig::SIGNATURE_INODE_VERSION;
     data.basic.field.inUse = true;
+
+#if (PRINT_INFO == 1)
+    std::cout << "New Inode" << std::endl;
+    std::cout << "fd=" << req.fd<< std::endl;
+    std::cout << "fileName=" << *req.fileName << std::endl;
+    std::cout << "fileByteSize=" << req.fileByteSize << std::endl;
+    std::cout << "pagemapCnt=" << data.basic.field.pagemapCnt << std::endl;
+#endif
+
+    for (int i = 0; i < (int)req.extentList->size(); ++i)
+    {
+        data.basic.field.pagemap[i] = req.extentList->at(i);
+
+#if (PRINT_INFO == 1)
+        std::cout << "pagemap[" << i << "]=";
+        std::cout << data.basic.field.pagemap[i].GetStartLpn();
+        std::cout << ", " << data.basic.field.pagemap[i].GetCount() << std::endl;
+#endif
+    }
 }
 
 void
@@ -121,13 +144,19 @@ MetaFileInode::SetMetaFileInfo(MetaStorageType mediaType, MetaFileInodeInfo& ino
     inodeInfo.data.field.dataChunkSize = data.basic.field.dataChunkSize;
     inodeInfo.data.field.dataLocation = mediaType;
     inodeInfo.data.field.fileProperty = data.basic.field.ioAttribute.ioSpecfic;
-    inodeInfo.data.field.extentMap.baseMetaLpn = data.basic.field.pagemap.baseMetaLpn;
-    inodeInfo.data.field.extentMap.pageCnt = data.basic.field.pagemap.pageCnt;
+    inodeInfo.data.field.extentCnt = data.basic.field.pagemapCnt;
+    for (int i = 0; i < inodeInfo.data.field.extentCnt; ++i)
+        inodeInfo.data.field.extentMap[i] = data.basic.field.pagemap[i];
 }
 
-MetaFilePageMap
+std::vector<MetaFileExtent>
 MetaFileInode::GetInodePageMap(void)
 {
-    return data.basic.field.pagemap;
+    std::vector<MetaFileExtent> ret;
+    for (int i = 0; i < data.basic.field.pagemapCnt; ++i)
+    {
+        ret.push_back(data.basic.field.pagemap[i]);
+    }
+    return ret;
 }
 } // namespace pos

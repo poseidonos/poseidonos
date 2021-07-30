@@ -318,14 +318,6 @@ MetaFs::_OpenMetaVolume(void)
         return POS_EVENT_ID::MFS_META_VOLUME_OPEN_FAILED;
     }
 
-#if (1 == COMPACTION_EN) || not defined COMPACTION_EN
-    if (false == ctrl->Compaction(isNpor))
-    {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "compaction method returns false");
-    }
-#endif
-
     // MetaFsSystemState::Active
     // nothing
 

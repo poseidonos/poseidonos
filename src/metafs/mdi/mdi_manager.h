@@ -46,7 +46,9 @@ class MetaIntegrityManager : public MetaFsManagerBase
 {
 public:
     MetaIntegrityManager(void);
+    virtual ~MetaIntegrityManager(void);
 
-    const char* GetModuleName(void);
+    virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
+    virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
 };
 } // namespace pos

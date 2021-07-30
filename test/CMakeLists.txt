@@ -218,9 +218,6 @@ INCLUDE_DIRECTORIES(
     # for "meta_volume_manager.h"
     ${POS_SRC_ROOT}/metafs/mvm
 
-    # for "meta_file_manager.h"
-    ${POS_SRC_ROOT}/metafs/mvm/volume
-
     # for "nvram_meta_volume.h"
     ${POS_SRC_ROOT}/metafs/mvm/volume/nvram
 

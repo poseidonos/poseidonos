@@ -48,12 +48,6 @@ MockMetaIntegrityManager::GetInstance(void)
     return &metaDIMgr;
 }
 
-const char*
-MockMetaIntegrityManager::GetModuleName(void)
-{
-    return "Meta Data Integrity Manager";
-}
-
 bool
 MockMetaIntegrityManager::_IsSiblingModuleReady(void)
 {

@@ -40,8 +40,8 @@
 #include <string>
 #include <utility>
 #include "metafs_common.h"
-#include "meta_volume.h"
-#include "meta_volume_context.h"
+#include "src/metafs/mvm/volume/meta_volume.h"
+#include "meta_volume_container.h"
 
 namespace pos
 {
@@ -49,41 +49,34 @@ class MetaVolumeHandler
 {
 public:
     MetaVolumeHandler(void);
-    ~MetaVolumeHandler(void);
+    virtual ~MetaVolumeHandler(void);
 
-    void InitHandler(MetaVolumeContext* volContext);
+    virtual void InitHandler(MetaVolumeContainer* volContainer);
 
-    POS_EVENT_ID HandleOpenFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleCloseFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleCreateFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleDeleteFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleGetDataChunkSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleCheckFileAccessibleReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleGetFileSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleGetTargetMediaTypeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleGetFileBaseLpnReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleGetFreeFileRegionSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleCheckFileExist(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleCreateArrayReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleDeleteArrayReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleGetMaxMetaLpnReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleOpenFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleCloseFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleCreateFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleDeleteFileReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetDataChunkSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleCheckFileAccessibleReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetFileSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetTargetMediaTypeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetFileBaseLpnReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetFreeFileRegionSizeReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleCheckFileExist(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleCreateArrayReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleDeleteArrayReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetMaxMetaLpnReq(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
 
     // WBT
-    POS_EVENT_ID HandleGetMetaFileInodeListReq(MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleGetMaxFileSizeLimitReq(MetaFsFileControlRequest& reqMsg);
-    POS_EVENT_ID HandleGetFileInodeReq(MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetMetaFileInodeListReq(MetaFsFileControlRequest& reqMsg);
+    virtual POS_EVENT_ID HandleGetFileInodeReq(MetaFsFileControlRequest& reqMsg);
 
-    POS_EVENT_ID HandleEstimateDataChunkSizeReq(MetaFsFileControlRequest& reqMsg);
-
-    POS_EVENT_ID CheckFileAccessible(FileDescriptorType fd);
-    POS_EVENT_ID GetFileSize(FileDescriptorType fd, FileSizeType& outFileByteSize);
-    POS_EVENT_ID GetDataChunkSize(FileDescriptorType fd, FileSizeType& outDataChunkSize);
-    POS_EVENT_ID GetTargetMediaType(FileDescriptorType fd, MetaStorageType& outTargetMediaType);
-    POS_EVENT_ID GetFileBaseLpn(FileDescriptorType fd, MetaLpnType& outFileBaseLpn);
+    virtual POS_EVENT_ID HandleEstimateDataChunkSizeReq(MetaFsFileControlRequest& reqMsg);
 
 private:
     bool _CheckFileCreateReqSanity(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
 
-    MetaVolumeContext* volContext;
+    MetaVolumeContainer* volContainer;
 };
 } // namespace pos

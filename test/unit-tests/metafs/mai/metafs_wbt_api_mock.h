@@ -12,6 +12,7 @@ class MockMetaFsWBTApi : public MetaFsWBTApi
 {
 public:
     using MetaFsWBTApi::MetaFsWBTApi;
+    MOCK_METHOD(void, SetStatus, (bool isNormal));
 };
 
 } // namespace pos

@@ -57,10 +57,6 @@ TEST_F(UtMetaFsWBT, TestAPI_GetMetaFileList)
     }
 }
 
-TEST_F(UtMetaFsWBT, GetMaxFileSizeLimit)
-{
-}
-
 TEST_F(UtMetaFsWBT, GetMetaFileInode)
 {
 }

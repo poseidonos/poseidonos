@@ -49,10 +49,11 @@ public:
     MetaFsWBTApi(int arrayId, MetaFsFileControlApi* ctrl);
     virtual ~MetaFsWBTApi(void);
 
-    bool GetMetaFileList(std::vector<MetaFileInfoDumpCxt>& result);
-    bool GetMaxFileSizeLimit(FileSizeType& result);
-    bool GetMetaFileInode(std::string& fileName, MetaFileInodeDumpCxt& result);
-    void SetStatus(bool isNormal);
+    virtual bool GetMetaFileList(std::vector<MetaFileInfoDumpCxt>& result,
+                            MetaVolumeType volumeType);
+    virtual bool GetMetaFileInode(std::string& fileName, MetaFileInodeDumpCxt& result,
+                            MetaVolumeType volumeType);
+    virtual void SetStatus(bool isNormal);
 
 private:
     int arrayId = INT32_MAX;

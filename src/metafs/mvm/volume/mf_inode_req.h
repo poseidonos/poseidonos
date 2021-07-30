@@ -34,7 +34,7 @@
 
 #include <string>
 
-#include "mf_pagemap.h"
+#include "src/metafs/include/meta_file_extent.h"
 #include "mf_property.h"
 #include "metafs_control_request.h"
 
@@ -48,7 +48,7 @@ public:
       fileName(nullptr),
       fileByteSize(0),
       media(MetaStorageType::Default),
-      pageMap(nullptr)
+      extentList(nullptr)
     {
         ioAttribute.ioAccPattern = MetaFileAccessPattern::Default;
         ioAttribute.ioOpType = MetaFileDominant::Default;
@@ -56,14 +56,15 @@ public:
     }
 
     void
-    Setup(MetaFsFileControlRequest& reqMsg, FileDescriptorType newFD, MetaStorageType mediaType, MetaFilePageMap& newExtent)
+    Setup(MetaFsFileControlRequest& reqMsg, FileDescriptorType newFD,
+            MetaStorageType mediaType, std::vector<MetaFileExtent>* newExtent)
     {
         fd = newFD;
         fileName = reqMsg.fileName;
         fileByteSize = reqMsg.fileByteSize;
         ioAttribute = reqMsg.fileProperty;
         media = mediaType;
-        pageMap = &newExtent;
+        extentList = newExtent;
     }
 
     FileDescriptorType fd;
@@ -71,6 +72,6 @@ public:
     FileSizeType fileByteSize;
     MetaFilePropertySet ioAttribute;
     MetaStorageType media;
-    MetaFilePageMap* pageMap;
+    std::vector<MetaFileExtent>* extentList;
 };
 } // namespace pos

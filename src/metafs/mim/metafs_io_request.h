@@ -40,6 +40,7 @@
 #include "os_header.h"
 #include "src/metafs/include/meta_file_context.h"
 #include "src/bio/volume_io.h"
+#include "src/metafs/include/meta_file_extent.h"
 
 namespace pos
 {
@@ -112,6 +113,8 @@ public:
 
     uint32_t tagId;
     MetaLpnType baseMetaLpn;
+    MetaFileExtent* extents;
+    int extentsCount;
     MetaFsIoRequest* originalMsg;
     int requestCount;
     MetaFileContext* fileCtx;

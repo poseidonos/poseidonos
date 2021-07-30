@@ -42,17 +42,19 @@ class InodeTableContent : public MetaRegionContent
 {
 public:
     static const uint32_t MAX_META_FILE_INODE_NUM = MetaFsConfig::MAX_META_FILE_NUM_SUPPORT;
-    std::array<MetaFileInode, MAX_META_FILE_INODE_NUM> entries;
+    std::array<MetaFileInode, InodeTableContent::MAX_META_FILE_INODE_NUM> entries;
 };
-using MetaInodeTableArray = std::array<MetaFileInode, InodeTableContent::MAX_META_FILE_INODE_NUM>;
+using MetaFileInodeArray = std::array<MetaFileInode, InodeTableContent::MAX_META_FILE_INODE_NUM>;
 
 class InodeTable : public OnVolumeMetaRegion<MetaRegionType, InodeTableContent>
 {
 public:
     explicit InodeTable(MetaVolumeType volumeType, MetaLpnType startLpn);
-    ~InodeTable(void);
+    virtual ~InodeTable(void);
 
-    void Create(uint32_t maxInodeEntryNum);
-    FileDescriptorType GetFileDescriptor(uint32_t inodeIdx);
+    virtual void Create(uint32_t maxInodeEntryNum);
+    virtual FileDescriptorType GetFileDescriptor(uint32_t inodeIdx);
+    virtual MetaFileInode& GetInode(uint32_t inodeIdx);
+    virtual MetaFileInodeArray& GetInodeArray(void);
 };
 } // namespace pos

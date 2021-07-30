@@ -9,7 +9,6 @@ include $(abspath $(MFS_TOP_DIR)/../../mk)/ibof_config.mk
 #############################################
 # ibofOS target code build
 STANDALONE = 1
-COMPACTION_EN := 0
 OBJDIR=obj_output
 
 ######################################################
@@ -95,7 +94,6 @@ LFLAGS += -lgtest --coverage
 ######################################################
 DEFINE += "-DMFS_DEBUG=$(MFS_DEBUG)"
 DEFINE += "-DMFS_DEBUG_TRACE=$(MFS_DEBUG_TRACE)"
-DEFINE += "-DCOMPACTION_EN=$(COMPACTION_EN)"
 
 $(info Build define: $(DEFINE))
 $(info Object output dir: $(OBJDIR))

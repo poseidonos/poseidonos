@@ -135,7 +135,7 @@ MockFileIntf::CheckIoDoneStatus(void* data)
 }
 
 int
-MockFileIntf::Create(uint64_t fileSize, StorageOpt storageOpt)
+MockFileIntf::Create(uint64_t fileSize)
 {
     size = fileSize;
     fd = creat(fileName.c_str(), 0777);

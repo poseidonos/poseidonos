@@ -47,7 +47,7 @@ InodeTable::~InodeTable(void)
 void
 InodeTable::Create(uint32_t maxInodeEntryNum)
 {
-    MetaInodeTableArray& entries = GetContent()->entries;
+    MetaFileInodeArray& entries = GetContent()->entries;
     for (auto& inode : entries)
     {
         inode.CleanupEntry();
@@ -59,5 +59,17 @@ InodeTable::GetFileDescriptor(uint32_t inodeIdx)
 {
     MetaFileInode& inode = GetContent()->entries[inodeIdx];
     return inode.data.basic.field.fd;
+}
+
+MetaFileInode&
+InodeTable::GetInode(uint32_t inodeIdx)
+{
+    return GetContent()->entries[inodeIdx];
+}
+
+MetaFileInodeArray&
+InodeTable::GetInodeArray(void)
+{
+    return GetContent()->entries;
 }
 } // namespace pos

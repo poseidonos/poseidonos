@@ -12,7 +12,6 @@ class MockMetaIoManager : public MetaIoManager
 {
 public:
     using MetaIoManager::MetaIoManager;
-    MOCK_METHOD(const char*, GetModuleName, (), (override));
     MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD(bool, Bringup, (), (override));
     MOCK_METHOD(POS_EVENT_ID, ProcessNewReq, (MetaFsIoRequest & reqMsg), (override));

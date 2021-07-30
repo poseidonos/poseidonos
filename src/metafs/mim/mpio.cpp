@@ -245,7 +245,6 @@ Mpio::CheckDataIntegrity(void)
         false == mdpage.CheckFileMismatch(io.targetFD))
     {
         integrityOk = false;
-        assert(false);
     }
 #if 0 // MDI implementation
 

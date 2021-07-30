@@ -12,7 +12,6 @@ class MockMetaFsManagerBase : public MetaFsManagerBase
 {
 public:
     using MetaFsManagerBase::MetaFsManagerBase;
-    MOCK_METHOD(const char*, GetModuleName, (), (override));
     MOCK_METHOD(bool, _IsSiblingModuleReady, (), (override));
 };
 

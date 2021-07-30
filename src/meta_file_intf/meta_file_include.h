@@ -40,6 +40,7 @@ enum class StorageOpt
     NVRAM,
     SSD,
     DEFAULT = SSD,
+    MAX
 };
 
 enum class MetaFsIoOpcode

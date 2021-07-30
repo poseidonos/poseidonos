@@ -126,10 +126,31 @@ InodeTableHeader::GetFreeInodeEntryIdx(void)
     return idx;
 }
 
-MetaFileExtent*
-InodeTableHeader::GetFileExtentContentBase(void)
+std::vector<MetaFileExtent>
+InodeTableHeader::GetFileExtentContent(void)
 {
-    return content->allocExtentsList;
+    std::vector<MetaFileExtent> extents;
+
+    for (int i = 0; i < (int)content->allocExtentsList.size(); ++i)
+    {
+        if (content->allocExtentsList[i].GetCount() == 0)
+            break;
+
+        extents.push_back(content->allocExtentsList[i]);
+    }
+
+    return extents;
+}
+
+void
+InodeTableHeader::SetFileExtentContent(std::vector<MetaFileExtent>& extents)
+{
+    assert(extents.size() <= content->allocExtentsList.size());
+
+    for (int i = 0; i < (int)extents.size(); ++i)
+    {
+        content->allocExtentsList[i] = extents[i];
+    }
 }
 
 size_t

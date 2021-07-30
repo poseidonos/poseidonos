@@ -41,6 +41,7 @@
 #include "write_mpio.h"
 
 #include <string>
+// #include <cstdio>
 
 namespace pos
 {
@@ -67,17 +68,47 @@ Mio::~Mio(void)
 {
 }
 
+MetaLpnType
+Mio::_GetCalculateStartLpn(MetaFsIoRequest* ioReq)
+{
+    MetaLpnType start = 0;
+    MetaLpnType offsetInLpn = ioReq->byteOffsetInFile / fileDataChunkSize;
+
+    for (int i = 0; i < ioReq->extentsCount; ++i)
+    {
+        int64_t result = offsetInLpn - ioReq->extents[i].GetCount();
+        if (result < 0)
+        {
+            start = ioReq->extents[i].GetStartLpn() + offsetInLpn;
+            break;
+        }
+        offsetInLpn -= ioReq->extents[i].GetCount();
+    }
+
+    return start;
+}
+
 void
 Mio::Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* metaStorage)
 {
     assert(mpioPool != nullptr);
+    assert(ioReq->extents != nullptr);
+    assert(ioReq->extentsCount != 0);
 
     originReq = ioReq;
     this->metaStorage = metaStorage;
 
     fileDataChunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     opCode = ioOpcodeMap[static_cast<uint32_t>(originReq->reqType)];
-    startLpn = baseLpn + (originReq->byteOffsetInFile / fileDataChunkSize);
+    startLpn = _GetCalculateStartLpn(ioReq);
+
+    // printf("[Mio::Setup] fd=%d, byteOffsetInFile=%lu, extentsCount=%d, startLpn=%lu\n", ioReq->fd, ioReq->byteOffsetInFile, ioReq->extentsCount, startLpn);
+    // for (int i = 0; i < ioReq->extentsCount; ++i)
+    // {
+    //     std::cout << "extents[" << i << "]=";
+    //     std::cout << ioReq->extents[i].GetStartLpn();
+    //     std::cout << ", " << ioReq->extents[i].GetCount() << std::endl;
+    // }
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Mio ][SetupMio   ] type={}, req.tagId={}, fileOffset={}, baseLpn={}, startLpn={}",

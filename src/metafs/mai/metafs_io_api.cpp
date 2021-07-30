@@ -57,7 +57,7 @@ MetaFsIoApi::~MetaFsIoApi(void)
 }
 
 POS_EVENT_ID
-MetaFsIoApi::Read(FileDescriptorType fd, void* buf)
+MetaFsIoApi::Read(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
@@ -72,6 +72,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, void* buf)
     reqMsg.isFullFileIo = true;
     reqMsg.ioMode = MetaIoMode::Sync;
     reqMsg.tagId = aiocbTagIdAllocator();
+    reqMsg.targetMediaType = mediaType;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -92,7 +93,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, void* buf)
 
 POS_EVENT_ID
 MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
-                FileSizeType byteSize, void* buf)
+                FileSizeType byteSize, void* buf, MetaStorageType mediaType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
@@ -109,6 +110,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
     reqMsg.byteOffsetInFile = byteOffset;
     reqMsg.byteSize = byteSize;
     reqMsg.tagId = aiocbTagIdAllocator();
+    reqMsg.targetMediaType = mediaType;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -128,7 +130,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
 }
 
 POS_EVENT_ID
-MetaFsIoApi::Write(FileDescriptorType fd, void* buf)
+MetaFsIoApi::Write(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
@@ -143,6 +145,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, void* buf)
     reqMsg.isFullFileIo = true;
     reqMsg.ioMode = MetaIoMode::Sync;
     reqMsg.tagId = aiocbTagIdAllocator();
+    reqMsg.targetMediaType = mediaType;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -163,7 +166,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, void* buf)
 
 POS_EVENT_ID
 MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
-                FileSizeType byteSize, void* buf)
+                FileSizeType byteSize, void* buf, MetaStorageType mediaType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
@@ -180,6 +183,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
     reqMsg.byteOffsetInFile = byteOffset;
     reqMsg.byteSize = byteSize;
     reqMsg.tagId = aiocbTagIdAllocator();
+    reqMsg.targetMediaType = mediaType;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -199,7 +203,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
 }
 
 POS_EVENT_ID
-MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt)
+MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt, MetaStorageType mediaType)
 {
     if (!isNormal)
         return POS_EVENT_ID::MFS_MODULE_NOT_READY;
@@ -219,6 +223,7 @@ MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt)
     reqMsg.byteSize = cxt->nbytes;
     reqMsg.aiocb = cxt;
     reqMsg.tagId = cxt->tagId;
+    reqMsg.targetMediaType = mediaType;
 
     if (false == _AddFileInfo(reqMsg))
     {
@@ -267,7 +272,8 @@ MetaFsIoApi::SetStatus(bool isNormal)
 bool
 MetaFsIoApi::_AddFileInfo(MetaFsIoRequest& reqMsg)
 {
-    MetaFileContext* fileCtx = ctrlMgr->GetFileInfo(reqMsg.fd);
+    MetaFileContext* fileCtx = ctrlMgr->GetFileInfo(reqMsg.fd,
+                MetaFileUtil::ConvertToVolumeType(reqMsg.targetMediaType));
 
     // the file is not existed.
     if (fileCtx == nullptr)
@@ -288,6 +294,8 @@ MetaFsIoApi::_AddExtraIoReqInfo(MetaFsIoRequest& reqMsg)
     }
 
     reqMsg.targetMediaType = reqMsg.fileCtx->storageType;
+    reqMsg.extentsCount = reqMsg.fileCtx->extentsCount;
+    reqMsg.extents = reqMsg.fileCtx->extents;
 }
 
 POS_EVENT_ID

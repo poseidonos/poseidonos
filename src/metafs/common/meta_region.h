@@ -49,20 +49,20 @@ public:
     virtual ~MetaRegion(void);
     virtual MetaContentT* GetContent(void);
     virtual void SetContent(MetaContentT* content_);
-    const size_t GetSizeOfContent(void);
-    const MetaLpnType GetBaseLpn(void);
-    void* GetDataBuf(void);
-    void* GetDataBuf(MetaLpnType pageOffset);
-    const MetaLpnType GetLpnCntOfRegion(void);
-    void ResetContent(void);
-    void SetMss(MetaStorageSubsystem* mss);
-    bool Load(void);
-    bool Load(MetaStorageType targetMedia, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT);
+    virtual const size_t GetSizeOfContent(void);
+    virtual const MetaLpnType GetBaseLpn(void);
+    virtual void* GetDataBuf(void);
+    virtual void* GetDataBuf(MetaLpnType pageOffset);
+    virtual const MetaLpnType GetLpnCntOfRegion(void);
+    virtual void ResetContent(void);
+    virtual void SetMss(MetaStorageSubsystem* mss);
+    virtual bool Load(void);
+    virtual bool Load(MetaStorageType targetMedia, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT);
 
-    bool Store(void);
-    bool Store(MetaStorageType targetMedia, MetaLpnType startLPN, uint32_t idx, MetaLpnType pageCNT);
+    virtual bool Store(void);
+    virtual bool Store(MetaStorageType targetMedia, MetaLpnType startLPN, uint32_t idx, MetaLpnType pageCNT);
 
-    const MetaLpnType GetLpnCntOfContent(void);
+    virtual const MetaLpnType GetLpnCntOfContent(void);
 
 protected:
     MetaContentT* content;

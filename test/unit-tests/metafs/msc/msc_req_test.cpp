@@ -4,12 +4,18 @@
 
 namespace pos
 {
-TEST(MetaFsControlReqMsg, MetaFsControlReqMsg_)
+TEST(MetaFsControlReqMsg, CreateMSg)
 {
+    MetaFsControlReqMsg msg;
+
+    EXPECT_EQ(msg.reqType, MetaFsControlReqType::Max);
+    EXPECT_EQ(msg.arrayId, INT32_MAX);
 }
 
-TEST(MetaFsControlReqMsg, IsValid_)
+TEST(MetaFsControlReqMsg, CheckValidity)
 {
+    MetaFsControlReqMsg msg;
+    EXPECT_TRUE(msg.IsValid());
 }
 
 } // namespace pos

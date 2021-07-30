@@ -33,7 +33,7 @@
 #pragma once
 
 #include <string>
-#include "meta_volume.h"
+#include "src/metafs/mvm/volume/meta_volume.h"
 #include "nvram_media_type.h"
 
 namespace pos
@@ -43,10 +43,9 @@ namespace pos
 class NvRamMetaVolume : public MetaVolume
 {
 public:
-    NvRamMetaVolume(int arrayId, MetaLpnType maxVolumePageNum);
-    NvRamMetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
-            VolumeCatalogManager* catalogMgr, int arrayId,
-            MetaLpnType maxVolumePageNum);
+    NvRamMetaVolume(void);
+    NvRamMetaVolume(int arrayId, MetaLpnType maxVolumePageNum,
+        InodeManager* inodeMgr = nullptr, CatalogManager* catalogMgr = nullptr);
     ~NvRamMetaVolume(void);
     virtual bool IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop) override;
     virtual void InitVolumeBaseLpn(void) override;

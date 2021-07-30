@@ -54,6 +54,15 @@ struct EnumTypeHash
     }
 };
 
+struct PairHash
+{
+    template <class Type1, class Type2>
+    size_t operator()(const std::pair<Type1, Type2>& pair) const
+    {
+        return std::hash<Type1>()(pair.first) ^ std::hash<Type2>()(pair.second);
+    }
+};
+
 class MetaFsRequestBase
 {
 public:

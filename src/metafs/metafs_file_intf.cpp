@@ -38,25 +38,40 @@
 
 namespace pos
 {
-MetaFsFileIntf::MetaFsFileIntf(std::string fname, std::string aname)
-: MetaFileIntf(fname, aname),
+MetaFsFileIntf::MetaFsFileIntf(std::string fname, std::string aname,
+                                        StorageOpt storageOpt)
+: MetaFileIntf(fname, aname, storageOpt),
   metaFs(nullptr)
 {
     metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(aname);
+    _SetFileProperty(storageOpt);
 }
 
-MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId)
-: MetaFileIntf(fname, arrayId),
+MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId,
+                                        StorageOpt storageOpt)
+: MetaFileIntf(fname, arrayId, storageOpt),
   metaFs(nullptr)
 {
     metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
+    _SetFileProperty(storageOpt);
 }
 
 // only for test
-MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId, MetaFs* metaFs)
-: MetaFileIntf(fname, arrayId),
+MetaFsFileIntf::MetaFsFileIntf(std::string fname, std::string aname,
+                                        MetaFs* metaFs, StorageOpt storageOpt)
+: MetaFileIntf(fname, aname, storageOpt),
   metaFs(metaFs)
 {
+    _SetFileProperty(storageOpt);
+}
+
+// only for test
+MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId, MetaFs* metaFs,
+                                        StorageOpt storageOpt)
+: MetaFileIntf(fname, arrayId, storageOpt),
+  metaFs(metaFs)
+{
+    _SetFileProperty(storageOpt);
 }
 
 MetaFsFileIntf::~MetaFsFileIntf(void)
@@ -66,7 +81,8 @@ MetaFsFileIntf::~MetaFsFileIntf(void)
 int
 MetaFsFileIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 {
-    POS_EVENT_ID rc = metaFs->io->Read(fd, fileOffset, length, buffer);
+    MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(storage);
+    POS_EVENT_ID rc = metaFs->io->Read(fd, fileOffset, length, buffer, storageType);
 
     if (POS_EVENT_ID::SUCCESS != rc)
         return -(int)POS_EVENT_ID::MFS_FILE_READ_FAILED;
@@ -77,7 +93,8 @@ MetaFsFileIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer
 int
 MetaFsFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 {
-    POS_EVENT_ID rc = metaFs->io->Write(fd, fileOffset, length, buffer);
+    MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(storage);
+    POS_EVENT_ID rc = metaFs->io->Write(fd, fileOffset, length, buffer, storageType);
 
     if (POS_EVENT_ID::SUCCESS != rc)
         return -(int)POS_EVENT_ID::MFS_FILE_WRITE_FAILED;
@@ -96,7 +113,8 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
         ctx->fileOffset, ctx->length, (void*)ctx->buffer,
         AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx));
 
-    POS_EVENT_ID rc = metaFs->io->SubmitIO(aioCb);
+    MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(storage);
+    POS_EVENT_ID rc = metaFs->io->SubmitIO(aioCb, storageType);
 
     if (POS_EVENT_ID::SUCCESS != rc)
         return -(int)rc;
@@ -119,21 +137,9 @@ MetaFsFileIntf::CheckIoDoneStatus(void* data)
 }
 
 int
-MetaFsFileIntf::Create(uint64_t fileSize, StorageOpt storageOpt)
+MetaFsFileIntf::Create(uint64_t fileSize)
 {
-    MetaFilePropertySet createProp;
-    if (storageOpt == StorageOpt::NVRAM)
-    {
-        createProp.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
-        createProp.ioOpType = MetaFileDominant::WriteDominant;
-        createProp.integrity = MetaFileIntegrityType::Lvl0_Disable;
-    }
-    else
-    {
-        // Use default
-    }
-
-    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, createProp);
+    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, fileProperty, storage);
     if (POS_EVENT_ID::SUCCESS != rc)
     {
         return -(int)POS_EVENT_ID::MFS_FILE_CREATE_FAILED;
@@ -147,7 +153,7 @@ MetaFsFileIntf::Create(uint64_t fileSize, StorageOpt storageOpt)
 int
 MetaFsFileIntf::Open(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd);
+    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd, storage);
 
     if (POS_EVENT_ID::SUCCESS != rc)
     {
@@ -160,7 +166,7 @@ MetaFsFileIntf::Open(void)
 int
 MetaFsFileIntf::Close(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Close(fd);
+    POS_EVENT_ID rc = metaFs->ctrl->Close(fd, storage);
 
     if (POS_EVENT_ID::SUCCESS != rc)
     {
@@ -173,7 +179,7 @@ MetaFsFileIntf::Close(void)
 bool
 MetaFsFileIntf::DoesFileExist(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(fileName);
+    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(fileName, storage);
 
     return (POS_EVENT_ID::SUCCESS == rc);
 }
@@ -181,7 +187,7 @@ MetaFsFileIntf::DoesFileExist(void)
 int
 MetaFsFileIntf::Delete(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Delete(fileName);
+    POS_EVENT_ID rc = metaFs->ctrl->Delete(fileName, storage);
 
     if (POS_EVENT_ID::SUCCESS != rc)
     {
@@ -194,7 +200,22 @@ MetaFsFileIntf::Delete(void)
 uint64_t
 MetaFsFileIntf::GetFileSize(void)
 {
-    return metaFs->ctrl->GetFileSize(fd);
+    return metaFs->ctrl->GetFileSize(fd, storage);
+}
+
+void
+MetaFsFileIntf::_SetFileProperty(StorageOpt storageOpt)
+{
+    if (storageOpt == StorageOpt::NVRAM)
+    {
+        fileProperty.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
+        fileProperty.ioOpType = MetaFileDominant::WriteDominant;
+        fileProperty.integrity = MetaFileIntegrityType::Lvl0_Disable;
+    }
+    else
+    {
+        // Use default
+    }
 }
 
 } // namespace pos

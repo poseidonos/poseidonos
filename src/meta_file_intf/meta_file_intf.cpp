@@ -47,23 +47,27 @@ MetaFileIntf::MetaFileIntf(void)
   arrayId(INT32_MAX),
   size(0),
   isOpened(false),
-  fd(-1)
+  fd(-1),
+  storage(StorageOpt::SSD),
+  fileProperty(MetaFilePropertySet())
 {
 }
 
-MetaFileIntf::MetaFileIntf(std::string fname, std::string aname)
+MetaFileIntf::MetaFileIntf(std::string fname, std::string aname, StorageOpt storageOpt)
 : MetaFileIntf()
 {
     fileName = fname;
     arrayName = aname;
     arrayId = MetaFsServiceSingleton::Instance()->GetArrayId(aname);
+    storage = storageOpt;
 }
 
-MetaFileIntf::MetaFileIntf(std::string fname, int arrayId)
+MetaFileIntf::MetaFileIntf(std::string fname, int arrayId, StorageOpt storageOpt)
 : MetaFileIntf()
 {
     fileName = fname;
     this->arrayId = arrayId;
+    storage = storageOpt;
 }
 
 int

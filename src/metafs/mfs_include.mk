@@ -2,8 +2,6 @@ ifeq ($(MFS_TOP_DIR),)
 $(error MFS_TOP_DIR not defined...)
 endif
 #############################################
-COMPACTION_EN=0		# inode compaction option 
-
 # DEBUG
 MFS_DEBUG = 0
 ifeq ($(ut),)

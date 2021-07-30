@@ -54,6 +54,8 @@ MetaFsIoRequest::MetaFsIoRequest(void)
   aiocb(nullptr),
   tagId(0),
   baseMetaLpn(0),
+  extents(nullptr),
+  extentsCount(0),
   originalMsg(nullptr),
   requestCount(0),
   fileCtx(nullptr),
@@ -78,6 +80,8 @@ MetaFsIoRequest::CopyUserReqMsg(const MetaFsIoRequest& req)
     this->aiocb = req.aiocb;
     this->tagId = req.tagId;
     this->baseMetaLpn = req.baseMetaLpn;
+    this->extents = req.extents;
+    this->extentsCount = req.extentsCount;
     this->ioDone = false;
     this->error = false;
     this->fileCtx = req.fileCtx;

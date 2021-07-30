@@ -4,16 +4,15 @@
 
 namespace pos
 {
-TEST(InstanceTagIdAllocator, InstanceTagIdAllocator_)
+TEST(InstanceTagIdAllocator, CheckTagId)
 {
-}
+    InstanceTagIdAllocator tag;
 
-TEST(InstanceTagIdAllocator, operator_)
-{
-}
+    EXPECT_EQ(1, tag());
+    EXPECT_EQ(2, tag());
 
-TEST(InstanceTagIdAllocator, Reset_)
-{
-}
+    tag.Reset();
 
+    EXPECT_EQ(1, tag());
+}
 } // namespace pos

@@ -46,7 +46,5 @@ public:
 
     virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg) = 0;
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg) = 0;
-
-    virtual const char* GetModuleName(void) = 0;
 };
 } // namespace pos

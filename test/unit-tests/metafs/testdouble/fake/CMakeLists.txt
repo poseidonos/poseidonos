@@ -1,4 +1,0 @@
-POS_ADD_UNIT_TEST(metafs_io_api_fake_ut metafs_io_api_fake_test.cpp)
-POS_ADD_UNIT_TEST(metafs_management_api_fake_ut metafs_management_api_fake_test.cpp)
-POS_ADD_UNIT_TEST(metafs_file_control_api_fake_ut metafs_file_control_api_fake_test.cpp)
-POS_ADD_UNIT_TEST(metafs_api_wrapper_ut metafs_api_wrapper_test.cpp)

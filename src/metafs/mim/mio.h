@@ -99,36 +99,36 @@ public:
     virtual ~Mio(void);
 
     virtual void InitStateHandler(void) override;
-    void Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* metaStorage);
-    void Reset(void);
+    virtual void Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* metaStorage);
+    virtual void Reset(void);
 
-    void SetMpioDoneNotifier(PartialMpioDoneCb& partialMpioDoneHandler);
-    void SetMpioDonePoller(MpioDonePollerCb& mpioDonePoller);
+    virtual void SetMpioDoneNotifier(PartialMpioDoneCb& partialMpioDoneHandler);
+    virtual void SetMpioDonePoller(MpioDonePollerCb& mpioDonePoller);
 
-    void SetIoCQ(MetaFsIoQ<Mio*>* ioCQ);
+    virtual void SetIoCQ(MetaFsIoQ<Mio*>* ioCQ);
 
     void NotifiyPartialMpioDone(Mpio* mpio);
-    bool IsSyncIO(void);
+    virtual bool IsSyncIO(void);
 
-    const MetaIoOpcode GetOpCode(void);
-    const FileDescriptorType GetFD(void);
-    bool IsRead(void);
-    MetaLpnType GetStartLpn(void);
-    bool IsTargetStorageSSD(void);
-    bool Init(MioState expNextState = MioState::Max);
-    bool Issue(MioState expNextState = MioState::Max);
-    bool Complete(MioState expNextState = MioState::Max);
-    MfsError GetError(void);
-    void* GetClientAioCbCxt(void);
+    virtual const MetaIoOpcode GetOpCode(void);
+    virtual const FileDescriptorType GetFD(void);
+    virtual bool IsRead(void);
+    virtual MetaLpnType GetStartLpn(void);
+    virtual bool IsTargetStorageSSD(void);
+    virtual bool Init(MioState expNextState = MioState::Max);
+    virtual bool Issue(MioState expNextState = MioState::Max);
+    virtual bool Complete(MioState expNextState = MioState::Max);
+    virtual MfsError GetError(void);
+    virtual void* GetClientAioCbCxt(void);
     void NotifyCompletionToClient(void);
-    void SetLocalAioCbCxt(MioAsyncDoneCb& callback);
-    int GetArrayId(void);
+    virtual void SetLocalAioCbCxt(MioAsyncDoneCb& callback);
+    virtual int GetArrayId(void);
 
-    void SetMergedRequestList(std::vector<MetaFsIoRequest*>* list);
-    void ClearMergedRequestList(void);
-    std::vector<MetaFsIoRequest*>* GetMergedRequestList(void);
+    virtual void SetMergedRequestList(std::vector<MetaFsIoRequest*>* list);
+    virtual void ClearMergedRequestList(void);
+    virtual std::vector<MetaFsIoRequest*>* GetMergedRequestList(void);
 
-private:
+protected:
     void _BindMpioPool(MpioPool* mpioPool);
     void _BuildMpioMap(void);
     void _PrepareMpioInfo(MpioIoInfo& mpioIoInfo,
@@ -140,6 +140,7 @@ private:
     Mpio* _AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO);
     void _HandleMpioDone(void* data);
     MpioType _LookupMpioType(MetaIoRequestType type);
+    MetaLpnType _GetCalculateStartLpn(MetaFsIoRequest* ioReq);
 
     MetaFsIoRequest* originReq;
     MetaIoOpcode opCode;

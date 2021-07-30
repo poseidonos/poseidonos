@@ -33,9 +33,11 @@
 #pragma once
 
 #include <queue>
+#include <vector>
+#include <array>
 
 #include "file_descriptor_in_use_map.h"
-#include "mf_extent.h"
+#include "src/metafs/include/meta_file_extent.h"
 #include "metafs_common.h"
 #include "on_volume_meta_region.h"
 
@@ -62,25 +64,26 @@ public:
     size_t inodeEntryByteSize;
     uint32_t totalFileCreated;
     InodeInUseBitmap inodeInUseBitmap;
-    MetaFileExtent allocExtentsList[MetaFsConfig::MAX_VOLUME_CNT];
+    std::array<MetaFileExtent, MetaFsConfig::MAX_VOLUME_CNT> allocExtentsList;
 };
 
 class InodeTableHeader : public OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>
 {
 public:
     explicit InodeTableHeader(MetaVolumeType volumeType, MetaLpnType baseLpn);
-    ~InodeTableHeader(void);
+    virtual ~InodeTableHeader(void);
 
-    void Create(uint32_t totalFileNum);
-    void SetInodeInUse(uint32_t idx);
-    void ClearInodeInUse(uint32_t idx);
-    bool IsFileInodeInUse(uint32_t idx);
-    uint32_t GetTotalAllocatedInodeCnt(void);
-    MetaFileExtent* GetFileExtentContentBase(void);
-    size_t GetFileExtentContentSize(void);
-    void BuildFreeInodeEntryMap(void);
-    uint32_t GetFreeInodeEntryIdx(void);
-    std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& GetInodeInUseBitmap(void);
+    virtual void Create(uint32_t totalFileNum);
+    virtual void SetInodeInUse(uint32_t idx);
+    virtual void ClearInodeInUse(uint32_t idx);
+    virtual bool IsFileInodeInUse(uint32_t idx);
+    virtual uint32_t GetTotalAllocatedInodeCnt(void);
+    virtual std::vector<MetaFileExtent> GetFileExtentContent(void);
+    virtual void SetFileExtentContent(std::vector<MetaFileExtent>& extents);
+    virtual size_t GetFileExtentContentSize(void);
+    virtual void BuildFreeInodeEntryMap(void);
+    virtual uint32_t GetFreeInodeEntryIdx(void);
+    virtual std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& GetInodeInUseBitmap(void);
 
 private:
     std::queue<uint32_t>* freeInodeEntryIdxQ;

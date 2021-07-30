@@ -31,7 +31,8 @@
  */
 
 #include "meta_volume_container.h"
-
+#include "src/metafs/mvm/volume/ssd/ssd_meta_volume.h"
+#include "src/metafs/mvm/volume/nvram/nvram_meta_volume.h"
 #include "meta_file_util.h"
 #include "meta_storage_specific.h"
 #include "metafs_control_request.h"
@@ -61,12 +62,60 @@ MetaVolumeContainer::~MetaVolumeContainer(void)
     }
 }
 
+void
+MetaVolumeContainer::InitContext(MetaVolumeType volumeType, int arrayId,
+                MetaLpnType maxVolPageNum, MetaStorageSubsystem* metaStorage,
+                MetaVolume* vol)
+{
+    MetaVolume* volume = _InitVolume(volumeType, arrayId, maxVolPageNum,
+                                metaStorage, vol);
+    _RegisterVolumeInstance(volumeType, volume);
+
+    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "volType={}", (uint32_t)(volType));
+}
+
+MetaVolume*
+MetaVolumeContainer::_InitVolume(MetaVolumeType volType, int arrayId,
+                MetaLpnType maxLpnNum, MetaStorageSubsystem* metaStorage,
+                MetaVolume* vol)
+{
+    MetaVolume* volume = vol;
+
+    if (MetaVolumeType::SsdVolume == volType)
+    {
+        if (vol == nullptr)
+            volume = new SsdMetaVolume(arrayId, maxLpnNum);
+    }
+    else if (MetaVolumeType::NvRamVolume == volType)
+    {
+        if (vol == nullptr)
+            volume = new NvRamMetaVolume(arrayId, maxLpnNum);
+        nvramMetaVolAvailable = true;
+    }
+    else
+    {
+        MFS_TRACE_CRITICAL((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            "Invalid volume type given!");
+        assert(false);
+    }
+
+    volume->Init(metaStorage);
+
+    return volume;
+}
+
+bool
+MetaVolumeContainer::CreateVolume(MetaVolumeType volumeType)
+{
+    return volumeContainer[volumeType]->CreateVolume();
+}
+
 bool
 MetaVolumeContainer::OpenAllVolumes(bool isNPOR)
 {
-    MetaLpnType* Info = new MetaLpnType[BackupInfo::Max]();
+    MetaLpnType* Info = new MetaLpnType[(int)BackupInfo::Max]();
 
-    bool isSuccess;
     for (auto& item : volumeContainer)
     {
         MetaVolume* volume = item.second;
@@ -76,42 +125,19 @@ MetaVolumeContainer::OpenAllVolumes(bool isNPOR)
             _SetBackupInfo(volume, Info);
         }
 
-        isSuccess = volume->OpenVolume(Info, isNPOR);
-        if (false == isSuccess)
+        if (!volume->OpenVolume(Info, isNPOR))
         {
             MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_OPEN_FAILED,
                 "Meta volume open failed.");
             delete[] Info;
             return false;
         }
-        _BuildFD2VolumeTypeMap(volume);
-        _BuildFileKey2VolumeTypeMap(volume);
     }
 
     allVolumesOpened = true;
     delete[] Info;
     return true;
 }
-
-#if (1 == COMPACTION_EN) || not defined COMPACTION_EN
-bool
-MetaVolumeContainer::Compaction(void)
-{
-    bool isSuccess = true;
-
-    for (auto& item : volumeContainer)
-    {
-        MetaVolume* volume = item.second;
-        MetaVolumeType volType = volume->GetVolumeType();
-        if (volType == MetaVolumeType::SsdVolume)
-        {
-            isSuccess = volume->Compaction();
-        }
-    }
-
-    return isSuccess;
-}
-#endif
 
 bool
 MetaVolumeContainer::CloseAllVolumes(bool& resetContext)
@@ -123,7 +149,7 @@ MetaVolumeContainer::CloseAllVolumes(bool& resetContext)
         return true;
     }
 
-    MetaLpnType* Info = new MetaLpnType[BackupInfo::Max]();
+    MetaLpnType* Info = new MetaLpnType[(int)BackupInfo::Max]();
     bool isSuccess;
     for (auto& item : volumeContainer)
     {
@@ -164,15 +190,15 @@ MetaVolumeContainer::CloseAllVolumes(bool& resetContext)
 void
 MetaVolumeContainer::_SetBackupInfo(MetaVolume* volume, MetaLpnType* info)
 {
-    if (IsNvRamVolumeAvailable())
+    if (nvramMetaVolAvailable)
     {
         info[(uint32_t)BackupInfo::BaseLpn] = volume->GetBaseLpn();
         info[(uint32_t)BackupInfo::CatalogSize] =
-            (const MetaLpnType)volume->GetCatalogInstance().GetRegionSizeInLpn();
+            (const MetaLpnType)volume->GetRegionSizeInLpn(MetaRegionType::VolCatalog);
         info[(uint32_t)BackupInfo::InodeHdrSize] =
-            (const MetaLpnType)volume->GetInodeInstance().GetRegionSizeInLpn(MetaRegionType::FileInodeHdr);
+            (const MetaLpnType)volume->GetRegionSizeInLpn(MetaRegionType::FileInodeHdr);
         info[(uint32_t)BackupInfo::InodeTableSize] =
-            (const MetaLpnType)volume->GetInodeInstance().GetRegionSizeInLpn(MetaRegionType::FileInodeTable);
+            (const MetaLpnType)volume->GetRegionSizeInLpn(MetaRegionType::FileInodeTable);
     }
     else
     {
@@ -183,76 +209,77 @@ MetaVolumeContainer::_SetBackupInfo(MetaVolume* volume, MetaLpnType* info)
 void
 MetaVolumeContainer::_CleanUp(void)
 {
-    fd2VolTypehMap.clear();
-    fileKey2VolTypeMap.clear();
-
     volumeContainer.clear();
 }
 
 void
-MetaVolumeContainer::RegisterVolumeInstance(MetaVolumeType volType, MetaVolume* metaVol)
+MetaVolumeContainer::_RegisterVolumeInstance(MetaVolumeType volType, MetaVolume* metaVol)
 {
     volumeContainer.insert(std::make_pair(volType, metaVol));
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "volType={}", (uint32_t)(volType));
 }
 
-void
-MetaVolumeContainer::SetNvRamVolumeAvailable(void)
+VolumeAndResult
+MetaVolumeContainer::DetermineVolumeToCreateFile(FileSizeType fileByteSize,
+                MetaFilePropertySet& prop, MetaVolumeType volumeType)
 {
-    nvramMetaVolAvailable = true;
-}
+    MetaVolumeType candidateVolType = MetaVolumeType::SsdVolume;
+    POS_EVENT_ID result = POS_EVENT_ID::SUCCESS;
 
-bool
-MetaVolumeContainer::IsNvRamVolumeAvailable(void)
-{
-    return nvramMetaVolAvailable;
-}
-
-std::pair<MetaVolumeType, POS_EVENT_ID>
-MetaVolumeContainer::DetermineVolumeToCreateFile(FileSizeType fileByteSize, MetaFilePropertySet& prop)
-{
-    MetaVolumeType candidateVolType;
-
-    if (IsNvRamVolumeAvailable())
+    if (MetaVolumeType::NvRamVolume == volumeType)
     {
-        bool isOkayToStoreNvRam = false;
-        if (fileByteSize == 0)
+        candidateVolType = volumeType;
+        bool isOkayToStoreNvRam = _CheckOkayToStore(volumeType, fileByteSize, prop);
+        if (true != isOkayToStoreNvRam)
         {
-            auto nvramVolume = volumeContainer.find(MetaVolumeType::NvRamVolume);
-            isOkayToStoreNvRam = (nvramVolume->second)->IsOkayToStore(fileByteSize, prop);
+            result = POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE;
         }
-        else
+    }
+    else
+    {
+        if (nvramMetaVolAvailable)
         {
-            isOkayToStoreNvRam = _CheckOkayToStore(MetaVolumeType::NvRamVolume, fileByteSize, prop);
-        }
+            bool isOkayToStoreNvRam = false;
+            if (fileByteSize == 0)
+            {
+                auto nvramVolume = volumeContainer.find(MetaVolumeType::NvRamVolume);
+                isOkayToStoreNvRam = (nvramVolume->second)->IsOkayToStore(fileByteSize, prop);
+            }
+            else
+            {
+                isOkayToStoreNvRam = _CheckOkayToStore(MetaVolumeType::NvRamVolume, fileByteSize, prop);
+            }
 
-        if (isOkayToStoreNvRam)
-        {
-            candidateVolType = MetaVolumeType::NvRamVolume;
+            if (isOkayToStoreNvRam)
+            {
+                candidateVolType = MetaVolumeType::NvRamVolume;
+            }
+            else
+            {
+                candidateVolType = MetaVolumeType::SsdVolume;
+            }
         }
         else
         {
             candidateVolType = MetaVolumeType::SsdVolume;
         }
-    }
-    else
-    {
-        candidateVolType = MetaVolumeType::SsdVolume;
-    }
 
-    if (candidateVolType == MetaVolumeType::SsdVolume)
-    { // Check free SSD space.
-        bool isOkayToStoreSSD = false;
-        auto ssdVolume = volumeContainer.find(MetaVolumeType::SsdVolume);
-        isOkayToStoreSSD = (ssdVolume->second)->IsOkayToStore(fileByteSize, prop);
-
-        if (isOkayToStoreSSD == false)
+        if (candidateVolType == MetaVolumeType::SsdVolume)
         {
-            return make_pair(candidateVolType, POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE);
+            // Check free SSD space.
+            bool isOkayToStoreSSD = false;
+            auto ssdVolume = volumeContainer.find(MetaVolumeType::SsdVolume);
+            isOkayToStoreSSD = (ssdVolume->second)->IsOkayToStore(fileByteSize, prop);
+
+            if (isOkayToStoreSSD == false)
+            {
+                result = POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE;
+            }
         }
     }
-    return make_pair(candidateVolType, POS_EVENT_ID::SUCCESS);
+
+    return make_pair(candidateVolType, result);
 }
 
 bool
@@ -266,9 +293,9 @@ MetaVolumeContainer::_CheckOkayToStore(MetaVolumeType volumeType, FileSizeType f
 }
 
 bool
-MetaVolumeContainer::IsGivenVolumeExist(MetaVolumeType volumeType)
+MetaVolumeContainer::IsGivenVolumeExist(MetaVolumeType volType)
 {
-    auto search = volumeContainer.find(volumeType);
+    auto search = volumeContainer.find(volType);
     if (volumeContainer.end() == search)
     {
         return false;
@@ -276,105 +303,138 @@ MetaVolumeContainer::IsGivenVolumeExist(MetaVolumeType volumeType)
     return true;
 }
 
-MetaVolume&
-MetaVolumeContainer::GetMetaVolume(MetaVolumeType volumeType)
+bool
+MetaVolumeContainer::TrimData(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
 {
-    auto search = volumeContainer.find(volumeType);
-    assert(search != volumeContainer.end());
+    return volumeContainer[volType]->TrimData(reqMsg);
+}
 
-    MetaVolume* metaVol = search->second;
-    return *metaVol;
+bool
+MetaVolumeContainer::CreateFile(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+{
+    auto result = volumeContainer[volType]->CreateFile(reqMsg);
+
+    return (result.second == POS_EVENT_ID::SUCCESS);
+}
+
+bool
+MetaVolumeContainer::DeleteFile(MetaVolumeType volType, MetaFsFileControlRequest& reqMsg)
+{
+    auto result = volumeContainer[volType]->DeleteFile(reqMsg);
+
+    return (result.second == POS_EVENT_ID::SUCCESS);
+}
+
+size_t
+MetaVolumeContainer::GetAvailableSpace(MetaVolumeType volType)
+{
+    return volumeContainer[volType]->GetAvailableSpace();
+}
+
+bool
+MetaVolumeContainer::CheckFileInActive(MetaVolumeType volType, FileDescriptorType fd)
+{
+    return volumeContainer[volType]->CheckFileInActive(fd);
+}
+
+POS_EVENT_ID
+MetaVolumeContainer::AddFileInActiveList(MetaVolumeType volType, FileDescriptorType fd)
+{
+    return volumeContainer[volType]->AddFileInActiveList(fd);
+}
+
+bool
+MetaVolumeContainer::IsGivenFileCreated(std::string& fileName)
+{
+    StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
+    bool isCreated = false;
+
+    for (auto& vol : volumeContainer)
+    {
+        isCreated = vol.second->IsGivenFileCreated(fileKey);
+        if (isCreated)
+            break;
+    }
+
+    return isCreated;
 }
 
 void
-MetaVolumeContainer::_BuildFD2VolumeTypeMap(MetaVolume* volume)
+MetaVolumeContainer::RemoveFileFromActiveList(MetaVolumeType volType, FileDescriptorType fd)
 {
-    volume->BuildFDMap(fd2VolTypehMap);
+    volumeContainer[volType]->RemoveFileFromActiveList(fd);
+}
+
+FileSizeType
+MetaVolumeContainer::GetFileSize(MetaVolumeType volType, FileDescriptorType fd)
+{
+    return volumeContainer[volType]->GetFileSize(fd);
+}
+
+FileSizeType
+MetaVolumeContainer::GetDataChunkSize(MetaVolumeType volType, FileDescriptorType fd)
+{
+    return volumeContainer[volType]->GetDataChunkSize(fd);
+}
+
+MetaLpnType
+MetaVolumeContainer::GetFileBaseLpn(MetaVolumeType volType, FileDescriptorType fd)
+{
+    return volumeContainer[volType]->GetFileBaseLpn(fd);
+}
+
+MetaLpnType
+MetaVolumeContainer::GetMaxLpn(MetaVolumeType volType)
+{
+    return volumeContainer[volType]->GetMaxLpn();
+}
+
+FileDescriptorType
+MetaVolumeContainer::LookupFileDescByName(std::string& fileName)
+{
+    FileDescriptorType fd = MetaFsCommonConst::INVALID_FD;
+    for (auto& it : volumeContainer)
+    {
+        fd = it.second->LookupDescriptorByName(fileName);
+        if (fd != MetaFsCommonConst::INVALID_FD)
+            break;
+    }
+    return fd;
 }
 
 void
-MetaVolumeContainer::_BuildFileKey2VolumeTypeMap(MetaVolume* volume)
+MetaVolumeContainer::GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList)
 {
-    volume->BuildFileNameMap(fileKey2VolTypeMap);
-}
-
-void
-MetaVolumeContainer::BuildFreeFDMap(std::map<FileDescriptorType, FileDescriptorType>& freeFDMap)
-{
-    for (auto& item : volumeContainer)
+    for (auto& it : volumeContainer)
     {
-        MetaVolume* volume = item.second;
-        volume->BuildFreeFDMap(freeFDMap);
+        it.second->GetInodeList(fileInfoList);
     }
 }
 
-void
-MetaVolumeContainer::BuildFDLookup(std::unordered_map<StringHashType, FileDescriptorType>& fileKeyLookupMap)
+MetaFileInode&
+MetaVolumeContainer::GetInode(FileDescriptorType fd, MetaVolumeType volumeType)
 {
-    for (auto& item : volumeContainer)
-    {
-        MetaVolume* volume = item.second;
-        volume->BuildFDLookupMap(fileKeyLookupMap);
-    }
+    return volumeContainer[volumeType]->GetInode(fd);
 }
 
-std::pair<MetaVolumeType, POS_EVENT_ID>
-MetaVolumeContainer::LookupMetaVolumeType(FileDescriptorType fd)
+POS_EVENT_ID
+MetaVolumeContainer::LookupMetaVolumeType(FileDescriptorType fd, MetaVolumeType volumeType)
 {
-    if (fd2VolTypehMap.empty())
-    {
-        return make_pair(MetaVolumeType::Invalid, POS_EVENT_ID::MFS_FILE_NOT_FOUND);
-    }
+    auto name = volumeContainer[volumeType]->LookupNameByDescriptor(fd);
+    if (name != "")
+        return POS_EVENT_ID::SUCCESS;
 
-    auto item = fd2VolTypehMap.find(fd);
-    if (item == fd2VolTypehMap.end())
-    {
-        return make_pair(MetaVolumeType::Invalid, POS_EVENT_ID::MFS_FILE_NOT_FOUND);
-    }
-
-    return make_pair(item->second, POS_EVENT_ID::SUCCESS);
+    return POS_EVENT_ID::MFS_INVALID_PARAMETER;
 }
 
-std::pair<MetaVolumeType, POS_EVENT_ID>
-MetaVolumeContainer::LookupMetaVolumeType(std::string& fileName)
+POS_EVENT_ID
+MetaVolumeContainer::LookupMetaVolumeType(std::string& fileName, MetaVolumeType volumeType)
 {
-    if (fileKey2VolTypeMap.empty())
-    {
-        return make_pair(MetaVolumeType::Invalid, POS_EVENT_ID::MFS_FILE_NOT_FOUND);
-    }
+    auto fd = volumeContainer[volumeType]->LookupDescriptorByName(fileName);
+    if (fd != MetaFsCommonConst::INVALID_FD)
+        return POS_EVENT_ID::SUCCESS;
 
-    StringHashType hashKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
-    auto item = fileKey2VolTypeMap.find(hashKey);
-    if (item == fileKey2VolTypeMap.end())
-    {
-        return make_pair(MetaVolumeType::Invalid, POS_EVENT_ID::MFS_FILE_NOT_FOUND);
-    }
-
-    return make_pair(item->second, POS_EVENT_ID::SUCCESS);
+    return POS_EVENT_ID::MFS_INVALID_PARAMETER;
 }
 
-void
-MetaVolumeContainer::UpdateVolumeLookupInfo(StringHashType fileHashKey, FileDescriptorType fd, MetaVolumeType volumeType)
-{
-    {
-        auto item = fileKey2VolTypeMap.find(fileHashKey);
-        assert(fileKey2VolTypeMap.end() == item);
-        fileKey2VolTypeMap.insert(std::make_pair(fileHashKey, volumeType));
-    }
-
-    {
-        auto item = fd2VolTypehMap.find(fd);
-        assert(fd2VolTypehMap.end() == item);
-        fd2VolTypehMap.insert(std::make_pair(fd, volumeType));
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "fileHashKey: {}, fd: {}", fileHashKey, fd);
-    }
-}
-
-void
-MetaVolumeContainer::RemoveVolumeLookupInfo(StringHashType fileHashKey, FileDescriptorType fd)
-{
-    fileKey2VolTypeMap.erase(fileHashKey);
-    fd2VolTypehMap.erase(fd);
-}
 } // namespace pos

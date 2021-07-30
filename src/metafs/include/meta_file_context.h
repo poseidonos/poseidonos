@@ -33,6 +33,7 @@
 #pragma once
 
 #include "src/metafs/common/metafs_type.h"
+#include "src/metafs/include/meta_file_extent.h"
 #include "src/metafs/include/meta_storage_specific.h"
 
 namespace pos
@@ -52,6 +53,8 @@ public:
         sizeInByte = 0;
         fileBaseLpn = 0;
         chunkSize = 0;
+        extentsCount = 0;
+        extents = nullptr;
     }
 
     // from MetaFileManager::CheckFileInActive()
@@ -60,5 +63,7 @@ public:
     FileSizeType sizeInByte;
     MetaLpnType fileBaseLpn;
     FileSizeType chunkSize;
+    int extentsCount;
+    MetaFileExtent* extents;
 };
 } // namespace pos

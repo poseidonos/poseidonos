@@ -37,6 +37,8 @@
 #include "metafs_common.h"
 #include "src/metafs/include/meta_storage_specific.h"
 #include "src/metafs/include/mf_property.h"
+#include "src/metafs/include/meta_file_extent.h"
+
 namespace pos
 {
 struct MetaFileInfoDumpCxt
@@ -51,35 +53,10 @@ public:
     std::string location;
 };
 
-class MetaFileExtentMap
-{
-public:
-    MetaLpnType baseMetaLpn;
-    MetaLpnType pageCnt;
-};
-
 class MetaFileInodeInfo
 {
 public:
-    MetaFileInodeInfo(void)
-    {
-    }
-
-    MetaFileInodeInfo&
-    operator=(const MetaFileInodeInfo& inodeInfo)
-    {
-        data.field.inUse = inodeInfo.data.field.inUse;
-        data.field.fd = inodeInfo.data.field.fd;
-        data.field.fileByteSize = inodeInfo.data.field.fileByteSize;
-        data.field.dataChunkSize = inodeInfo.data.field.dataChunkSize;
-        data.field.dataLocation = inodeInfo.data.field.dataLocation;
-        data.field.fileProperty = inodeInfo.data.field.fileProperty;
-        data.field.extentMap = inodeInfo.data.field.extentMap;
-        strncpy(data.field.fileName, inodeInfo.data.field.fileName, 128);
-        return *this;
-    }
-
-    static const uint32_t META_FILE_INODE_INFO_BYTE_SIZE = 4096;
+    static const uint32_t META_FILE_INODE_INFO_BYTE_SIZE = 4096 * 2;
 
     union UData {
         UData(void)
@@ -94,7 +71,8 @@ public:
             FileSizeType dataChunkSize;
             MetaStorageType dataLocation;
             MetaFilePropertySet fileProperty;
-            MetaFileExtentMap extentMap;
+            uint16_t extentCnt;
+            MetaFileExtent extentMap[MetaFsConfig::MAX_PAGE_MAP_CNT];
         } field;
         uint8_t all[META_FILE_INODE_INFO_BYTE_SIZE];
     } data;

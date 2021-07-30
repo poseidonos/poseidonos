@@ -36,10 +36,6 @@ TEST(MetaFsManagerBase, CheckModuleReadiness_)
 {
 }
 
-TEST(MetaFsManagerBase, GetModuleName_)
-{
-}
-
 TEST(MetaFsManagerBase, _IsSiblingModuleReady_)
 {
 }

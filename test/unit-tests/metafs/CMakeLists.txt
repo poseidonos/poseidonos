@@ -1,1 +1,2 @@
+POS_ADD_UNIT_TEST(metafs_ut metafs_test.cpp)
 POS_ADD_UNIT_TEST(metafs_file_intf_ut metafs_file_intf_test.cpp)

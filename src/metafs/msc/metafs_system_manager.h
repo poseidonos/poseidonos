@@ -51,7 +51,6 @@ public:
     explicit MetaFsSystemManager(int arrayId);
     virtual ~MetaFsSystemManager(void);
 
-    const char* GetModuleName(void) override;
     POS_EVENT_ID CheckReqSanity(MetaFsControlReqMsg& reqMsg);
 
     virtual bool Init(MetaStorageMediaInfoList& mediaInfoList);

@@ -33,11 +33,11 @@
 #pragma once
 
 #include <map>
+#include <unordered_map>
 #include <string>
-#include "meta_file_manager.h"
-#include "volume_catalog_manager.h"
+#include "catalog_manager.h"
 #include "meta_volume_state.h"
-#include "mf_inode_mgr.h"
+#include "inode_manager.h"
 
 namespace pos
 {
@@ -46,71 +46,70 @@ enum class MetaRegionManagerType
     First = 0,
     VolCatalogMgr = First,
     InodeMgr,
-    FileMgr,
-    Last = FileMgr,
+    Last = InodeMgr,
 
     Max,
 };
 
+using FileControlResult = std::pair<FileDescriptorType, POS_EVENT_ID>;
+
 class MetaVolume
 {
 public:
-    explicit MetaVolume(int arrayId, MetaVolumeType volumeType, MetaLpnType maxVolumePageNum = 0);
-    explicit MetaVolume(MetaFileManager* fileMgr, MetaFileInodeManager* inodeMgr,
-            VolumeCatalogManager* catalogMgr, int arrayId,
-            MetaVolumeType volumeType, MetaLpnType maxVolumePageNum = 0);
+    MetaVolume(void);
+    MetaVolume(int arrayId, MetaVolumeType volumeType,
+        MetaLpnType maxVolumePageNum = 0, InodeManager* inodeMgr = nullptr,
+        CatalogManager* catalogMgr = nullptr);
     virtual ~MetaVolume(void);
 
     virtual void InitVolumeBaseLpn(void) = 0;
     virtual bool IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop) = 0;
 
-    void Init(MetaStorageSubsystem* metaStorage);
-    bool OpenVolume(MetaLpnType* info, bool isNPOR);
-    bool CloseVolume(MetaLpnType* info, bool& resetContext /*output*/);
-    bool CreateNewVolume(void);
-    bool IsVolumeOpened(void);
-#if (1 == COMPACTION_EN) || not defined COMPACTION_EN
-    bool Compaction(void);
-#endif
-    void BuildFreeFDMap(std::map<FileDescriptorType, FileDescriptorType>& dstFreeFDMap);
-    void BuildFDMap(std::unordered_map<FileDescriptorType, MetaVolumeType>& targetMap);
-    void BuildFileNameMap(std::unordered_map<StringHashType, MetaVolumeType>& targetMap);
-    void BuildFDLookupMap(std::unordered_map<StringHashType, FileDescriptorType>& targetMap);
-    MetaLpnType GetVolumeBaseLpn(void);
-    uint32_t GetUtilizationInPercent(void);
-    MetaVolumeType GetVolumeType(void);
-    size_t GetTheBiggestExtentSize(void);
+    virtual void Init(MetaStorageSubsystem* metaStorage);
 
-    bool CopyExtentContent(void);
+    // control meta volume
+    virtual bool CreateVolume(void);
+    virtual bool OpenVolume(MetaLpnType* info, bool isNPOR);
+    virtual bool CloseVolume(MetaLpnType* info, bool& resetContext /*output*/);
 
-    const MetaLpnType
+    // control files
+    virtual FileControlResult CreateFile(MetaFsFileControlRequest& reqMsg);
+    virtual FileControlResult DeleteFile(MetaFsFileControlRequest& reqMsg);
+    virtual bool CheckFileInActive(FileDescriptorType fd);
+    virtual POS_EVENT_ID AddFileInActiveList(FileDescriptorType fd);
+    virtual void RemoveFileFromActiveList(FileDescriptorType fd);
+
+    // trim or dsm
+    virtual bool TrimData(MetaFsFileControlRequest& reqMsg);
+
+    // interfaces
+    virtual MetaFileInode& GetInode(FileDescriptorType fd);
+    virtual void GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList);
+
+    virtual uint32_t GetUtilizationInPercent(void);
+    virtual size_t GetAvailableSpace(void);
+
+    virtual bool IsGivenFileCreated(StringHashType fileKey);
+    virtual FileSizeType GetFileSize(FileDescriptorType fd);
+    virtual FileSizeType GetDataChunkSize(FileDescriptorType fd);
+    virtual MetaLpnType GetFileBaseLpn(FileDescriptorType fd);
+
+    virtual FileDescriptorType LookupDescriptorByName(std::string& fileName);
+    virtual std::string LookupNameByDescriptor(FileDescriptorType fd);
+
+    virtual MetaLpnType GetRegionSizeInLpn(MetaRegionType regionType);
+    virtual MetaVolumeType GetVolumeType(void);
+
+    virtual MetaLpnType
     GetBaseLpn(void)
     {
         return sumOfRegionBaseLpns;
     }
 
-    const MetaLpnType
+    virtual MetaLpnType
     GetMaxLpn(void)
     {
         return maxVolumeLpn;
-    }
-
-    VolumeCatalogManager&
-    GetCatalogInstance(void)
-    {
-        return *catalogMgr;
-    }
-
-    MetaFileInodeManager&
-    GetInodeInstance(void)
-    {
-        return *inodeMgr;
-    }
-
-    MetaFileManager&
-    GetFileInstance(void)
-    {
-        return *fileMgr;
     }
 
 protected:
@@ -126,18 +125,23 @@ private:
     void _BringupMgrs(void);
     void _FinalizeMgrs(void);
     void _SetupRegionInfoToRegionMgrs(MetaStorageSubsystem* metaStorage);
-    bool _LoadAllVolumeMeta(MetaLpnType* info, bool isNPOR);
-    MetaStorageType _GetVolStorageType(void);
+    bool _LoadVolumeMeta(MetaLpnType* info, bool isNPOR);
+
+    bool _TrimData(MetaStorageType type, MetaLpnType start, MetaLpnType count);
+
+    bool _BackupContents(MetaLpnType* info);
+    bool _RestoreContents(MetaLpnType* info);
 
     std::unordered_map<MetaRegionManagerType, OnVolumeMetaRegionManager*, EnumTypeHash<MetaRegionManagerType>> regionMgrMap;
-    MetaFileManager* fileMgr;
-    MetaFileInodeManager* inodeMgr;
-    VolumeCatalogManager* catalogMgr;
+    InodeManager* inodeMgr;
+    CatalogManager* catalogMgr;
     bool inUse;
 
     MetaLpnType sumOfRegionBaseLpns;
-    bool _BackupContents(MetaLpnType* info);
-    bool _RestoreContents(MetaLpnType* info);
+    MetaStorageSubsystem* metaStorage;
+
+    std::unordered_map<FileDescriptorType, MetaVolumeType> fd2VolTypehMap;
+    std::unordered_map<StringHashType, MetaVolumeType> fileKey2VolTypeMap;
 
     int arrayId;
 };

@@ -35,12 +35,23 @@
 namespace pos
 {
 MetaIntegrityManager::MetaIntegrityManager(void)
+: MetaFsManagerBase()
 {
 }
 
-const char*
-MetaIntegrityManager::GetModuleName(void)
+MetaIntegrityManager::~MetaIntegrityManager(void)
 {
-    return "Meta Data Integrity Manager";
+}
+
+POS_EVENT_ID
+MetaIntegrityManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
+{
+    return POS_EVENT_ID::SUCCESS;
+}
+
+POS_EVENT_ID
+MetaIntegrityManager::ProcessNewReq(MetaFsRequestBase& reqMsg)
+{
+    return POS_EVENT_ID::SUCCESS;
 }
 } // namespace pos

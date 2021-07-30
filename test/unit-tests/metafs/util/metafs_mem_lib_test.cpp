@@ -4,32 +4,59 @@
 
 namespace pos
 {
-TEST(MetaFsMemLib, MetaFsMemLib_)
+class MetaFsMemLibTester
 {
+public:
+    MetaFsMemLibTester(void)
+    {
+    }
+
+    static void CallbackTest(void* obj)
+    {
+    }
+};
+
+TEST(MetaFsMemLib, CheckAvailable)
+{
+    EXPECT_FALSE(MetaFsMemLib::IsResourceAvailable());
 }
 
-TEST(MetaFsMemLib, Init_)
+TEST(MetaFsMemLib, SetResourceAvailable)
 {
+    MetaFsMemLib::EnableResourceUse();
+    EXPECT_TRUE(MetaFsMemLib::IsResourceAvailable());
 }
 
-TEST(MetaFsMemLib, Finalize_)
+TEST(MetaFsMemLib, MemoryCopyAsync)
 {
+    MetaFsMemLibTester tester;
+    MetaFsMemLib::EnableResourceUse();
+    
+    uint64_t src = 0x12121212F0F0F0F0;
+    uint64_t dst = 0;
+
+    MetaFsMemLib::MemCpyAsync((void*)&dst, (void*)&src, sizeof(src), &(tester.CallbackTest), &tester);
+
+#if (1 == METAFS_INTEL_IOAT_EN)
+    EXPECT_EQ(src, dst);
+#else
+    EXPECT_NE(src, dst);
+#endif
 }
 
-TEST(MetaFsMemLib, EnableResourceUse_)
+TEST(MetaFsMemLib, MemorySetZero)
 {
-}
+    MetaFsMemLibTester tester;
+    MetaFsMemLib::EnableResourceUse();
+    
+    uint64_t src = 0x12121212F0F0F0F0;
 
-TEST(MetaFsMemLib, IsResourceAvailable_)
-{
-}
+    MetaFsMemLib::MemSetZero((void*)&src, sizeof(src), &(tester.CallbackTest), &tester);
 
-TEST(MetaFsMemLib, MemCpyAsync_)
-{
+#if (1 == METAFS_INTEL_IOAT_EN)
+    EXPECT_EQ(src, 0);
+#else
+    EXPECT_NE(src, 0);
+#endif
 }
-
-TEST(MetaFsMemLib, MemSetZero_)
-{
-}
-
 } // namespace pos

@@ -8,16 +8,12 @@ namespace pos
 
 namespace pos
 {
-TEST(InodeTable, InodeTable_)
+TEST(InodeTable, CreateTable)
 {
-}
+    InodeTable table(MetaVolumeType::SsdVolume, 0);
 
-TEST(InodeTable, Create_)
-{
-}
+    table.Create(0);
 
-TEST(InodeTable, GetFileDescriptor_)
-{
+    EXPECT_EQ(table.GetFileDescriptor(0), 0);
 }
-
 } // namespace pos

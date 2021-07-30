@@ -14,12 +14,6 @@ public:
     using MetaFileInfoDumpCxt::MetaFileInfoDumpCxt;
 };
 
-class MockMetaFileExtentMap : public MetaFileExtentMap
-{
-public:
-    using MetaFileExtentMap::MetaFileExtentMap;
-};
-
 class MockMetaFileInodeInfo : public MetaFileInodeInfo
 {
 public:

@@ -11,7 +11,6 @@ class MockMetaFsSystemManager : public MetaFsSystemManager
 {
 public:
     using MetaFsSystemManager::MetaFsSystemManager;
-    MOCK_METHOD(const char*, GetModuleName, (), (override));
     MOCK_METHOD(bool, Init, (int arrayId, MetaStorageMediaInfoList & mediaInfoList), (override));
     MOCK_METHOD(bool, Bringup, (int arrayId), (override));
     MOCK_METHOD(POS_EVENT_ID, ProcessNewReq, (MetaFsControlReqMsg & reqMsg), (override));
