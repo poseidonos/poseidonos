@@ -48,8 +48,12 @@ TEST(BlockManager, AllocateWriteBufferBlks_TestFunc)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     BlockManager blkManager(nullptr, nullptr, segCtx, allocCtx, wbCtx, &addrInfo, ctxManager, 0);
     blkManager.Init(iWbstripe);
+    VirtualBlkAddr vsa;
+    vsa.offset = 0;
+    vsa.stripeId = 0;
     std::mutex wbCtxLock;
     EXPECT_CALL(*wbCtx, GetActiveStripeTailLock).WillOnce(ReturnRef(wbCtxLock));
+    EXPECT_CALL(*wbCtx, GetActiveStripeTail).WillOnce(Return(vsa));
     // when 1.
     VirtualBlks ret = blkManager.AllocateWriteBufferBlks(0, 1);
     // then 1.
