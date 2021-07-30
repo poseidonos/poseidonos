@@ -119,7 +119,8 @@ MapperWbt::ReadVsaMapEntry(int volId, BlkAddr rba, std::string fname)
 int
 MapperWbt::WriteVsaMapEntry(int volId, BlkAddr rba, VirtualBlkAddr vsa)
 {
-    VirtualBlks blks = {.startVsa = vsa, .numBlks = 1};
+    VirtualBlks blks = {.startVsa = vsa, 
+                        .numBlks = 1};
     int ret = vsaMapManager->GetVSAMapAPI()->SetVSAsInternal(volId, rba, blks);
     return ret;
 }

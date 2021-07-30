@@ -77,7 +77,6 @@ public:
     int StoreAllMaps(void) override;
 
 private:
-
     MapContent* _GetMapContent(int mapId);
     void _RegisterToMapperService(void);
     void _UnregisterFromMapperService(void);

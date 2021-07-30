@@ -40,6 +40,7 @@ TEST(BlockManager, AllocateWriteBufferBlks_TestFunc)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetstripesPerSegment(10);
+    addrInfo.SetblksPerStripe(5);
     NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
