@@ -40,7 +40,7 @@ sw_tcp_init2.conf
 rw_tcp_init2.conf
 "
 
-# Measured Performance in GB/s
+# Measured Performance in MB/s
 export SW_MAX=14600
 export SR_MAX=23100
 export RW_MAX=9500
