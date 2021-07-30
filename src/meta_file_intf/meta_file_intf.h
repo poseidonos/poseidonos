@@ -65,6 +65,11 @@ public:
     virtual int AppendIO(MetaFsIoOpcode opType, uint64_t& offset, uint64_t length,
         char* buffer);
 
+    int64_t GetIssuedCount(void)
+    {
+        return issuedCount;
+    }
+
 protected:
     virtual int _Read(int fd, uint64_t fileOffset, uint64_t length,
         char* buffer) = 0;
@@ -76,5 +81,6 @@ protected:
     uint64_t size;
     bool isOpened;
     int fd;
+    std::atomic<int64_t> issuedCount;
 };
 } // namespace pos
