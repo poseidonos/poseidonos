@@ -24,7 +24,7 @@ ibofos_root="../.."
 ibof_cli="${ibofos_root}/bin/cli"
 ARRAYNAME=POSArray
 # Test Configuration
-sleep_time=10
+sleep_time=5
 predata_write_time=${REBUILD_PREDATA_WRITE_TIME}
 rebuild_io_time=${REBUILD_IO_DURING_REBUILD_TIME}
 rebuild_test_time=${REBUILD_MAX_REBUILD_TEST_TIME}
@@ -37,12 +37,12 @@ start_and_bringup()
 {
 	echo "pos start"
 	sudo pkill -9 poseidonos
-	sshpass -p ${init1_pw} ssh -tt ${init1_id}@${init1_ip} "echo ${init1_pw} | sudo -S pkill -9 fio"
-	sshpass -p ${init2_pw} ssh -tt ${init2_id}@${init2_ip} "echo ${init1_pw} | sudo -S pkill -9 fio"
+	sshpass -p ${init1_pw} ssh -q -tt ${init1_id}@${init1_ip} "echo ${init1_pw} | sudo -S pkill -9 fio"
+	sshpass -p ${init2_pw} ssh -q -tt ${init2_id}@${init2_ip} "echo ${init1_pw} | sudo -S pkill -9 fio"
 	sudo ../1_psd_bringup/1_start_pos.sh
 
 	echo "bring up start"
-	sudo ../1_psd_bringup/2_bring_up.sh #-a ${target_ip_1} -b ${target_ip_2} -s ${volume_cnt} -v ${volume_cnt} -S ${volume_byte_size} -n ${target_nic_1} -m ${target_nic_2}
+	sudo ../1_psd_bringup/2_bring_up.sh
 }
 
 waiting_for_rebuild_complete()
@@ -68,20 +68,6 @@ waiting_for_rebuild_complete()
 
 }
 
-calc_performance()
-{
-	mkdir -p rebuild_fio_result_init_1
-	mkdir -p rebuild_fio_result_init_2
-	sshpass -p ${init1_pw} scp -o StrictHostKeyChecking=no ${init1_id}@${init1_ip}:${init1_fio_conf_dir}/*.log ./rebuild_fio_result_init_1/
-	sshpass -p ${init2_pw} scp -o StrictHostKeyChecking=no ${init2_id}@${init2_ip}:${init2_fio_conf_dir}/*.log ./rebuild_fio_result_init_2/
-	sshpass -p ${init1_pw} ssh ${init1_id}@${init1_ip} "echo ${init1_pw} | sudo -S rm ${init1_fio_conf_dir}/*.log"
-	sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "echo ${init2_pw} | sudo -S rm ${init2_fio_conf_dir}/*.log"
-	sudo ./calculate_file.py
-
-	echo "performance result"
-	cat rebuild_rand_result.txt
-}
-
 if [ $need_bringup = true ]; then
 	start_and_bringup
 fi
@@ -90,7 +76,6 @@ if [ $need_predata_write = true ]; then
 	echo "write pre data"
 	sudo ./run_fio.sh -r ${predata_write_time}
 	echo "write done"
-	calc_performance
 fi
 
 echo "setting rebuild performance impact ${impact_level} by cli"
@@ -101,14 +86,10 @@ if [ $enable_io_during_rebuild = true ]; then
 fi
 echo sleep
 sleep 15
+echo ""
+echo "Device Detach"
 sudo ${ibofos_root}/test/script/detach_device.sh unvme-ns-0 1
 waiting_for_rebuild_complete
 
 echo "rebuild test finished"
-
-if [ $enable_io_during_rebuild = true ]; then
-	calc_performance
-	sshpass -p ${init1_pw} ssh -tt ${init1_id}@${init1_ip} "echo ${init1_pw} | sudo -S pkill -9 fio"
-	sshpass -p ${init2_pw} ssh -tt ${init2_id}@${init2_ip} "echo ${init1_pw} | sudo -S pkill -9 fio"
-fi
 

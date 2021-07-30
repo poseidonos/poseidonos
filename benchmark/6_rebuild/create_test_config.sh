@@ -18,6 +18,8 @@ DEFAULT_FIO_DIR=/home/psd/fio_conf/
 DEFAULT_FIO_IO_ENGINE="/home/psd/ibofos/lib/spdk/examples/nvme/fio_plugin/fio_plugin"
 DEFAULT_NVME_LIST_1="/dev/nvme0n1 /dev/nvme1n1"
 DEFAULT_NVME_LIST_2="/dev/nvme0n1 /dev/nvme1n1"
+DEFAULT_SW_MAX=14600
+DEFAULT_RW_MAX=9500
 
 ############## ^^^ USER CONFIGURABLES ^^^ #################
 
@@ -37,9 +39,11 @@ make_fio_config()
 {
 sw_files=("sw_tcp_init1.conf" "sw_tcp_init2.conf")
 rw_files=("rw_tcp_init1.conf" "rw_tcp_init2.conf")
-general_configs=("[global]" "ioengine=${FIO_IO_ENGINE}" "size=100%" "thread=1" "serialize_overlap=0" "group_reporting=1" "direct=1" "numjobs=1" "ramp_time=0" "time_based=1" "log_avg_msec=2000")
-sw_configs=("rwmixread=0" "readwrite=rw" "iodepth=4" "runtime=${SEQ_IO_TIME}" "io_size=${VOLUME_SIZE}g" "bs=128k" "write_bw_log=seqrw.log" "write_iops_log=seqrw.log")
-rw_configs=("rwmixread=70" "readwrite=randrw" "iodepth=128" "runtime=${RAND_IO_TIME}" "io_size=${VOLUME_SIZE}g" "bs=4k" "write_bw_log=randrw.log" "write_iops_log=randrw.log")
+sw_rate=$(($SW_MAX * 7 / 10 / 2))
+rw_rate=$(($RW_MAX * 7 / 10 / 2))
+general_configs=("[global]" "ioengine=${FIO_IO_ENGINE}" "size=100%" "thread=1" "serialize_overlap=0" "group_reporting=1" "direct=1" "numjobs=1" "ramp_time=0" "time_based=1" "log_avg_msec=1000")
+sw_configs=("rwmixread=0" "readwrite=rw" "iodepth=4" "runtime=${SEQ_IO_TIME}" "io_size=${VOLUME_SIZE}g" "bs=128k" "write_bw_log=seqrw.log" "write_iops_log=seqrw.log" "rate=$sw_rate")
+rw_configs=("rwmixread=70" "readwrite=randrw" "iodepth=128" "runtime=${RAND_IO_TIME}" "io_size=${VOLUME_SIZE}g" "bs=4k" "write_bw_log=randrw.log" "write_iops_log=randrw.log" "rate=$rw_rate")
 
     for file in ${sw_files[@]}
     do
@@ -76,15 +80,54 @@ rw_configs=("rwmixread=70" "readwrite=randrw" "iodepth=128" "runtime=${RAND_IO_T
         then
             echo [test${i}] >> ${sw_files[0]}
             echo [test${i}] >> ${rw_files[0]}
-            echo filename=trtype=tcp adrfam=ipv4 traddr=${TARGET_IP1} trsvcid=1158 subnqn=nqn.2019-04.ibof\\:subsystem${i} ns=1 >> ${sw_files[0]}
-            echo filename=trtype=tcp adrfam=ipv4 traddr=${TARGET_IP1} trsvcid=1158 subnqn=nqn.2019-04.ibof\\:subsystem${i} ns=1 >> ${rw_files[0]}
+            echo filename=trtype=tcp adrfam=ipv4 traddr=${TARGET_IP1} trsvcid=1158 subnqn=nqn.2019-04.pos\\:subsystem${i} ns=1 >> ${sw_files[0]}
+            echo filename=trtype=tcp adrfam=ipv4 traddr=${TARGET_IP1} trsvcid=1158 subnqn=nqn.2019-04.pos\\:subsystem${i} ns=1 >> ${rw_files[0]}
         else
             echo [test${i}] >> ${sw_files[1]}
             echo [test${i}] >> ${rw_files[1]}
-            echo filename=trtype=tcp adrfam=ipv4 traddr=${TARGET_IP2} trsvcid=1158 subnqn=nqn.2019-04.ibof\\:subsystem${i} ns=1 >> ${sw_files[1]}
-            echo filename=trtype=tcp adrfam=ipv4 traddr=${TARGET_IP2} trsvcid=1158 subnqn=nqn.2019-04.ibof\\:subsystem${i} ns=1 >> ${rw_files[1]}
+            echo filename=trtype=tcp adrfam=ipv4 traddr=${TARGET_IP2} trsvcid=1158 subnqn=nqn.2019-04.pos\\:subsystem${i} ns=1 >> ${sw_files[1]}
+            echo filename=trtype=tcp adrfam=ipv4 traddr=${TARGET_IP2} trsvcid=1158 subnqn=nqn.2019-04.pos\\:subsystem${i} ns=1 >> ${rw_files[1]}
         fi
     done
+}
+
+make_vdbench_config()
+{
+    initiator1_nvme_num=0
+    initiator2_nvme_num=0
+    file_name=longterm_test.vd
+    echo hd=default,jvms=20 > ${file_name}
+    echo hd=localhost >> ${file_name}
+    echo hd=remote,shell=vdbench,system=${VDBENCH_SUB_INITIATOR_IP},vdbench=${VDBENCH_DIR},user=root >> ${file_name}
+
+    for diskname in ${NVME_LIST_1[@]}
+    do
+        echo ${diskname}
+        echo sd=nvme00${initiator1_nvme_num},host=remote,lun=${diskname},openflags=o_direct,size=${VOLUME_SIZE}g >> ${file_name}
+        initiator1_nvme_num=$((initiator1_nvme_num+1))
+    done
+    for diskname in ${NVME_LIST_2[@]}
+    do
+        echo ${diskname}
+        echo sd=nvme10${initiator2_nvme_num},host=localhost,lun=${diskname},openflags=o_direct,size=${VOLUME_SIZE}g >> ${file_name}
+        initiator2_nvme_num=$((initiator2_nvme_num+1))
+    done
+
+    GB_TO_KB=$((1024 * 1024))
+    sw_iorate=$((${SW_MAX} * ${GB_TO_KB} / 128 * 7 / 10))
+    rw_iorate=$((${RW_MAX} * ${GB_TO_KB} / 4 * 7 / 10))
+    
+    echo wd=seq,sd=nvme*,xfersize=4k,rdpct=0,seekpct=0 >> ${file_name}
+    echo wd=rand,sd=nvme*,xfersize=4k,rdpct=0,seekpct=100 >> ${file_name}
+    if [ ${SEQ_IO_TIME} -gt 3 ] 
+    then
+    echo "rd=seq_r,wd=seq,iorate=max,elapsed=${SEQ_IO_TIME},interval=1,warmup=2,pause=5,forxfersize=(128k),forrdpct=(0),forthreads=(4),iorate=${sw_iorate}" >> ${file_name}
+    fi
+    
+    if [ ${RAND_IO_TIME} -gt 3 ]
+    then
+    echo "rd=rand_r,wd=rand,iorate=max,elapsed=${RAND_IO_TIME},interval=1,warmup=2,pause=5,forxfersize=(4k),forrdpct=(70),forthreads=(128),iorate=${rw_iorate}" >> ${file_name}
+    fi
 }
 
 make_test_script()
@@ -116,7 +159,7 @@ Options:
 END_OF_HELP
 }
 
-while getopts a:b:s:v:S:r:p:h:d:f:e:l:L: ARG ; do
+while getopts a:b:s:v:S:r:p:h:d:f:e:l:L:m:n: ARG ; do
 case $ARG in
 a )
 TARGET_IP1=$OPTARG
@@ -153,6 +196,12 @@ NVME_LIST_1=$OPTARG
 ;;
 L )
 NVME_LIST_2=$OPTARG
+;;
+m )
+SW_MAX=$OPTARG
+;;
+n )
+RW_MAX=$OPTARG
 ;;
 h )
 print_help ;
@@ -257,5 +306,25 @@ log_normal "11. NVME_LIST_2 => "$line
 done
 echo ""
 
+if [ -z $SW_MAX ]; then
+SW_MAX=$DEFAULT_SW_MAX
+log_error "12. SW_MAX empty, use default:"
+fi
+for line in ${SW_MAX[@]}
+do
+log_normal "12. SW_MAX => "$line
+done
+echo ""
+
+
+if [ -z $RW_MAX ]; then
+RW_MAX=$DEFAULT_RW_MAX
+log_error "13. RW_MAX empty, use default:"
+fi
+for line in ${RW_MAX[@]}
+do
+log_normal "13. RW_MAX => "$line
+done
+echo ""
 
 make_test_script
