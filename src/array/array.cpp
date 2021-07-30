@@ -49,7 +49,7 @@ namespace pos
 const int Array::LOCK_ACQUIRE_FAILED = -1;
 
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
-: Array(name, rbdr, abr, new ArrayDeviceManager(DeviceManagerSingleton::Instance(), name_), DeviceManagerSingleton::Instance(),
+: Array(name, rbdr, abr, new ArrayDeviceManager(DeviceManagerSingleton::Instance(), name), DeviceManagerSingleton::Instance(),
       new PartitionManager(name, abr), new ArrayState(iState), new ArrayInterface(), EventSchedulerSingleton::Instance())
 {
 }
