@@ -347,6 +347,7 @@ Array::AddSpare(string devName)
     UblockSharedPtr dev = sysDevMgr->GetDev(spareDevName);
     if (dev == nullptr)
     {
+        pthread_rwlock_unlock(&stateLock);
         int eid = (int)POS_EVENT_ID::ARRAY_DEVICE_WRONG_NAME;
         POS_TRACE_ERROR(eid, "Cannot find the requested device named {}", devName);
         return eid;
