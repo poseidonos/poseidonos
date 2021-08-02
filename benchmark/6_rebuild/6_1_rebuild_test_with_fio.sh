@@ -32,6 +32,7 @@ need_bringup=${REBUILD_NEED_BRINGUP}
 need_predata_write=${REBUILD_NEED_PREDATA_WRITE}
 enable_io_during_rebuild=${REBUILD_NEED_IO_DURING_REBUILD}
 impact_level=${REBUILD_IMPACT}
+detach_device=${DETACH_DEVICE}
 
 start_and_bringup()
 {
@@ -88,7 +89,7 @@ echo sleep
 sleep 15
 echo ""
 echo "Device Detach"
-sudo ${ibofos_root}/test/script/detach_device.sh unvme-ns-0 1
+sudo ./detach_device.sh ${detach_device} 1
 waiting_for_rebuild_complete
 
 echo "rebuild test finished"

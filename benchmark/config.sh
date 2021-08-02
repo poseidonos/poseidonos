@@ -92,10 +92,15 @@ export VOL_DEL_RAND_IO_TIME=43200
 
 # Benchmark 6 (Rebuild)
 export REBUILD_NEED_BRINGUP=false               # true | false
-export REBUILD_NEED_PREDATA_WRITE=false         # true | false
+
 export REBUILD_NEED_IO_DURING_REBUILD=false     # true | false
+export REBUILD_IO_DURING_REBUILD_TIME=86400     # seconds to IO during rebuild
+
+export REBUILD_NEED_PREDATA_WRITE=false         # true | false
+export REBUILD_PREDATA_WRITE_TIME=600           # seconds to write pre-data
+
 export REBUILD_IMPACT="high"                    # high | low
 
-export REBUILD_PREDATA_WRITE_TIME=600           # seconds to write pre-data
-export REBUILD_IO_DURING_REBUILD_TIME=86400     # seconds to IO during rebuild
 export REBUILD_MAX_REBUILD_TEST_TIME=86400      # seconds to wait rebuild done
+
+export DETACH_DEVICE=unvme-ns-0                 # device to detach

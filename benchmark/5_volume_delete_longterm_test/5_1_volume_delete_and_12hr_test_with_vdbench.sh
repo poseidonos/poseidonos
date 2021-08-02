@@ -33,6 +33,7 @@ rw_max=${RW_MAX}
 
 volume_delete()
 {
+echo "vol delete"
 for ((i=${deleted_start_volume_num};i<=${volume_cnt};i++))
 do
     if [ `expr ${i} % 2` -eq 1 ]
@@ -55,6 +56,7 @@ done
 
 volume_create_and_mount()
 {
+echo "vol create and mount"
 for ((i=${deleted_start_volume_num};i<=${volume_cnt};i++))
 do
     sudo $root_dir/bin/cli volume create --name vol$i --size $volume_byte_size --maxiops 0 --maxbw 0 --array POSArray
@@ -138,9 +140,6 @@ sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "cd ${init2_vdbench_dir}; ech
 
 longterm_test_after_vol_delete()
 {
-echo "vol delete"
-volume_delete
-
 echo "get nvme list"
 nvmelist1=`sshpass -p ${init1_pw} ssh ${init1_id}@${init1_ip} "echo ${init1_pw} | sudo -S nvme list" | awk '/dev/{print $1}' | awk '{printf("%s ", $0)}'`
 nvmelist2=`sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "echo ${init2_pw} | sudo -S nvme list" | awk '/dev/{print $1}' | awk '{printf("%s ", $0)}'`
@@ -152,7 +151,6 @@ sudo ./create_test_config.sh -a ${target_ip_1} -b ${target_ip_2} -v ${remain_vol
 
 sshpass -p ${init2_pw} scp -o StrictHostKeyChecking=no ./longterm_test.vd ${init2_id}@${init2_ip}:${init2_vdbench_dir}
 sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "cd ${init2_vdbench_dir}; echo ${init2_pw} | sudo -S ./vdbench -f ./longterm_test.vd -o longterm_test_after_volume_delete"
-volume_create_and_mount
 echo "longterm test finish"
 }
 
@@ -163,7 +161,11 @@ connect_nvme
 
 write_fill_pos_before_vol_delete
 
+volume_delete
+
 longterm_test_after_vol_delete
+
+volume_create_and_mount
 
 disconnect_nvme
 
