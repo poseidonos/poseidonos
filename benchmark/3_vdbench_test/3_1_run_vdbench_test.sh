@@ -58,8 +58,10 @@ echo "wd=seq,sd=nvme*,xfersize=4k,rdpct=0,seekpct=0" >> ${vdfile}
 echo "wd=rand,sd=nvme*,xfersize=4k,rdpct=0,seekpct=100" >> ${vdfile}
 
 if [ ${DEMO_TEST} -eq 1 ]; then
-	echo "rd=seq_r,wd=seq,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(4k),forrdpct=(100),forthreads=(1,64)" >> ${vdfile}
-	echo "rd=rand_r,wd=rand,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(4k),forrdpct=(100),forthreads=(1,64)" >> ${vdfile}
+	echo "rd=seq_w,wd=seq,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(128k),forrdpct=(0),forthreads=(4)" >> ${vdfile}
+	echo "rd=seq_r,wd=seq,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(128k),forrdpct=(100),forthreads=(4)" >> ${vdfile}
+	echo "rd=rand_w,wd=rand,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(4k),forrdpct=(0),forthreads=(128)" >> ${vdfile}
+	echo "rd=rand_r,wd=rand,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(4k),forrdpct=(100),forthreads=(128)" >> ${vdfile}
 else
 	if [ ${VD_TEST_SEQUENTIAL} -eq 1 ]; then
 		echo "rd=seq_r,wd=seq,iorate=max,elapsed=15,interval=3,warmup=3,pause=5,forxfersize=(${VD_IOSIZE}),forrdpct=(${VD_READ_RATIO}),forthreads=(${VD_THREAD})" >> ${vdfile}
@@ -86,7 +88,7 @@ pkill -9 sshpass
 sudo sshpass -p ${INIT_1_PW} scp ${INIT_1_ID}@${INIT_1_IP}:${INIT1_VDBENCH_DIR}/rawdata_1ms.csv ./
 
 
-### 8. Disconnect
+### 7. Disconnect
 turn=0
 for i in `seq 1 $VOLUME_CNT`
 do

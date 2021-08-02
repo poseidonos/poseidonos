@@ -53,11 +53,11 @@ export INIT1_FIO_SCRIPT_FILE=perf_200g.py
 export INIT2_FIO_SCRIPT_FILE=perf_200g.py
 export INIT1_PARSE_RESULT_FILE=parse_result.py
 export INIT2_PARSE_RESULT_FILE=parse_result.py
-export RAMP_TIME=5
-export IO_RUN_TIME=20
+export RAMP_TIME=25
+export IO_RUN_TIME=15
 
 #Benchmark3 Vdbench Variables
-export DEMO_TEST=0
+export DEMO_TEST=1
 export VD_TEST_SEQUENTIAL=1
 export VD_TEST_RANDOM=1
 export VD_IOSIZE="4k,8k,16k,128k,256k,512k,1m,4m"
