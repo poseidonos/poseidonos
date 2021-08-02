@@ -84,11 +84,18 @@ sshpass -p ${init2_pw} scp -o StrictHostKeyChecking=no ./longterm_test.vd ${init
 sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "cd ${init2_vdbench_dir}; echo ${init2_pw} | sudo -S ./vdbench -f ./longterm_test.vd -o longterm_test"
 }
 
+copy_benchmark_result()
+{
+echo "copy benchmark result"
+sshpass -p ${init2_pw} scp -r -o StrictHostKeyChecking=no ${init2_id}@${init2_ip}:${init2_vdbench_dir}/longterm_test .
+}
+
 connect_nvme
 #copy_and_unzip_vdbench
 
 echo "test start"
 run_vdbench
+copy_benchmark_result
 disconnect_nvme
 
 echo "longterm test finish"

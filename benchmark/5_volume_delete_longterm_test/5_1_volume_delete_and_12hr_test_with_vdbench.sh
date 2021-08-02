@@ -154,6 +154,13 @@ sshpass -p ${init2_pw} ssh ${init2_id}@${init2_ip} "cd ${init2_vdbench_dir}; ech
 echo "longterm test finish"
 }
 
+
+copy_benchmark_result()
+{
+echo "copy benchmark result"
+sshpass -p ${init2_pw} scp -r -o StrictHostKeyChecking=no ${init2_id}@${init2_ip}:${init2_vdbench_dir}/longterm_test_after_volume_delete .
+}
+
 echo "test start"
 #copy_and_unzip_vdbench
 
@@ -164,6 +171,8 @@ write_fill_pos_before_vol_delete
 volume_delete
 
 longterm_test_after_vol_delete
+
+copy_benchmark_result
 
 volume_create_and_mount
 
