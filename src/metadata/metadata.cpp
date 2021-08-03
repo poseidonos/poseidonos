@@ -36,6 +36,8 @@
 #include "src/journal_manager/journal_manager.h"
 #include "src/logger/logger.h"
 #include "src/mapper/mapper.h"
+#include "src/meta_service/meta_service.h"
+#include "src/metadata/meta_updater.h"
 
 #ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_mgr.h"
@@ -48,7 +50,8 @@ Metadata::Metadata(void)
 : arrayInfo(nullptr),
   mapper(nullptr),
   allocator(nullptr),
-  journal(nullptr)
+  journal(nullptr),
+  metaUpdater(nullptr)
 {
 }
 
@@ -65,7 +68,8 @@ Metadata::Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator,
 : arrayInfo(info),
   mapper(mapper),
   allocator(allocator),
-  journal(journal)
+  journal(journal),
+  metaUpdater(nullptr)
 {
 }
 
@@ -84,6 +88,11 @@ Metadata::~Metadata(void)
     if (mapper != nullptr)
     {
         delete mapper;
+    }
+
+    if (metaUpdater != nullptr)
+    {
+        delete metaUpdater;
     }
 }
 
@@ -122,6 +131,8 @@ Metadata::Init(void)
         return result;
     }
 
+    _CreateMetaServices();
+
 #ifdef _ADMIN_ENABLED
     // TODO (r.saraf) to move this initialize out of meta sequence
     string fileName = "SmartLogPage.bin";
@@ -129,6 +140,16 @@ Metadata::Init(void)
     SmartLogMgrSingleton::Instance()->Init(smartLogFile);
 #endif
     return result;
+}
+
+void
+Metadata::_CreateMetaServices(void)
+{
+    metaUpdater = new MetaUpdater(journal->GetJournalWriter(),
+        mapper->GetIVSAMap(), mapper->GetIStripeMap());
+
+    // MetaServiceSingleton::Instance()->Register(arrayInfo->GetName(),
+    //   arrayInfo->GetIndex(), metaUpdater);
 }
 
 void

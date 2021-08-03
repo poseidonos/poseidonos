@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(meta_service_ut meta_service_test.cpp)

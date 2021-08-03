@@ -32,46 +32,35 @@
 
 #pragma once
 
-#include "src/array_models/interface/i_array_info.h"
-#include "src/array_models/interface/i_mount_sequence.h"
-#include "src/state/interface/i_state_control.h"
+#include <string>
+#include <unordered_map>
+
+#include "src/include/array_mgmt_policy.h"
+#include "src/lib/singleton.h"
+#include "src/meta_service/i_meta_updater.h"
 
 namespace pos
 {
-class TelemetryPublisher;
-class Mapper;
-class Allocator;
-class JournalManager;
-
-class MetaUpdater;
-
-class Metadata : public IMountSequence
+class MetaService
 {
+    friend class Singleton<MetaService>;
+
 public:
-    Metadata(void);
-    Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state);
-    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl);
-    virtual ~Metadata(void);
+    virtual void Register(std::string arrayName, int arrayId,
+        IMetaUpdater* mapUpdater);
+    virtual void Unregister(std::string arrayName);
 
-    virtual int Init(void) override;
-    virtual void Dispose(void) override;
-    virtual void Shutdown(void) override;
-    virtual void Flush(void) override;
+    virtual IMetaUpdater* GetMetaUpdater(std::string arrayName);
+    virtual IMetaUpdater* GetMetaUpdater(int arrayId);
 
-    // TODO (huijeong.kim) Remove rebuild methods and make array components
-    // to get allocator modules directly
-    virtual bool NeedRebuildAgain(void);
-    virtual int PrepareRebuild(void);
-    virtual void StopRebuilding(void);
+protected:
+    MetaService(void);
+    virtual ~MetaService(void);
 
 private:
-    void _CreateMetaServices(void);
-
-    IArrayInfo* arrayInfo;
-    Mapper* mapper;
-    Allocator* allocator;
-    JournalManager* journal;
-
-    MetaUpdater* metaUpdater;
+    std::array<IMetaUpdater*, ArrayMgmtPolicy::MAX_ARRAY_CNT> metaUpdaters;
+    std::unordered_map<std::string, int> arrayNameToId;
 };
+
+using MetaServiceSingleton = Singleton<MetaService>;
 } // namespace pos

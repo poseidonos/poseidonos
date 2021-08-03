@@ -133,6 +133,12 @@ public:
         return journalManagerStatus;
     }
 
+    IJournalWriter*
+    GetJournalWriter(void)
+    {
+        return this;
+    }
+
 protected:
     void _InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush,

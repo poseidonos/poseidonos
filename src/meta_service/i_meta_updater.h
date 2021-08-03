@@ -32,46 +32,17 @@
 
 #pragma once
 
-#include "src/array_models/interface/i_array_info.h"
-#include "src/array_models/interface/i_mount_sequence.h"
-#include "src/state/interface/i_state_control.h"
+#include "src/include/address_type.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
-class TelemetryPublisher;
-class Mapper;
-class Allocator;
-class JournalManager;
+class Stripe;
 
-class MetaUpdater;
-
-class Metadata : public IMountSequence
+class IMetaUpdater
 {
 public:
-    Metadata(void);
-    Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state);
-    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl);
-    virtual ~Metadata(void);
-
-    virtual int Init(void) override;
-    virtual void Dispose(void) override;
-    virtual void Shutdown(void) override;
-    virtual void Flush(void) override;
-
-    // TODO (huijeong.kim) Remove rebuild methods and make array components
-    // to get allocator modules directly
-    virtual bool NeedRebuildAgain(void);
-    virtual int PrepareRebuild(void);
-    virtual void StopRebuilding(void);
-
-private:
-    void _CreateMetaServices(void);
-
-    IArrayInfo* arrayInfo;
-    Mapper* mapper;
-    Allocator* allocator;
-    JournalManager* journal;
-
-    MetaUpdater* metaUpdater;
+    virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, EventSmartPtr callback) = 0;
+    virtual int UpdateStripeMap(Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callback) = 0;
 };
 } // namespace pos

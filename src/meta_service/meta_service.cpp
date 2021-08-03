@@ -30,48 +30,72 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include "src/meta_service/meta_service.h"
 
-#include "src/array_models/interface/i_array_info.h"
-#include "src/array_models/interface/i_mount_sequence.h"
-#include "src/state/interface/i_state_control.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class TelemetryPublisher;
-class Mapper;
-class Allocator;
-class JournalManager;
-
-class MetaUpdater;
-
-class Metadata : public IMountSequence
+MetaService::MetaService(void)
 {
-public:
-    Metadata(void);
-    Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state);
-    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl);
-    virtual ~Metadata(void);
+    metaUpdaters.fill(nullptr);
+}
 
-    virtual int Init(void) override;
-    virtual void Dispose(void) override;
-    virtual void Shutdown(void) override;
-    virtual void Flush(void) override;
+MetaService::~MetaService(void)
+{
+}
 
-    // TODO (huijeong.kim) Remove rebuild methods and make array components
-    // to get allocator modules directly
-    virtual bool NeedRebuildAgain(void);
-    virtual int PrepareRebuild(void);
-    virtual void StopRebuilding(void);
+void
+MetaService::Register(std::string arrayName, int arrayId, IMetaUpdater* mapUpdater)
+{
+    if (arrayNameToId.find(arrayName) == arrayNameToId.end())
+    {
+        arrayNameToId.emplace(arrayName, arrayId);
 
-private:
-    void _CreateMetaServices(void);
+        metaUpdaters[arrayId] = mapUpdater;
+    }
+    else
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::META_ALREADY_REGISTERED,
+            "Meta service for array {} is already registered", arrayName);
+    }
+}
 
-    IArrayInfo* arrayInfo;
-    Mapper* mapper;
-    Allocator* allocator;
-    JournalManager* journal;
+void
+MetaService::Unregister(std::string arrayName)
+{
+    if (arrayNameToId.find(arrayName) != arrayNameToId.end())
+    {
+        int arrayId = arrayNameToId[arrayName];
+        arrayNameToId.erase(arrayName);
 
-    MetaUpdater* metaUpdater;
-};
+        metaUpdaters[arrayId] = nullptr;
+    }
+    else
+    {
+        POS_TRACE_INFO((int)POS_EVENT_ID::META_ALREADY_REGISTERED,
+            "Meta service for array {} already unregistered", arrayName);
+    }
+}
+
+IMetaUpdater*
+MetaService::GetMetaUpdater(std::string arrayName)
+{
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return metaUpdaters[arrayId->second];
+    }
+}
+
+IMetaUpdater*
+MetaService::GetMetaUpdater(int arrayId)
+{
+    return metaUpdaters[arrayId];
+}
 } // namespace pos

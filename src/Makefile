@@ -46,6 +46,7 @@ SUBDIRS = allocator \
         sys_event \
         main \
         metadata \
+        meta_service \
         metafs \
         metafs/common \
         metafs/log \

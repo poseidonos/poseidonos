@@ -30,48 +30,35 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include "src/metadata/meta_updater.h"
 
-#include "src/array_models/interface/i_array_info.h"
-#include "src/array_models/interface/i_mount_sequence.h"
-#include "src/state/interface/i_state_control.h"
+#include "src/bio/volume_io.h"
 
 namespace pos
 {
-class TelemetryPublisher;
-class Mapper;
-class Allocator;
-class JournalManager;
-
-class MetaUpdater;
-
-class Metadata : public IMountSequence
+MetaUpdater::MetaUpdater(IJournalWriter* journalWriter, IVSAMap* vsaMap, IStripeMap* stripeMap)
+: journalWriter(journalWriter),
+  vsaMap(vsaMap),
+  stripeMap(stripeMap)
 {
-public:
-    Metadata(void);
-    Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state);
-    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl);
-    virtual ~Metadata(void);
+}
 
-    virtual int Init(void) override;
-    virtual void Dispose(void) override;
-    virtual void Shutdown(void) override;
-    virtual void Flush(void) override;
+MetaUpdater::~MetaUpdater(void)
+{
+}
 
-    // TODO (huijeong.kim) Remove rebuild methods and make array components
-    // to get allocator modules directly
-    virtual bool NeedRebuildAgain(void);
-    virtual int PrepareRebuild(void);
-    virtual void StopRebuilding(void);
+int
+MetaUpdater::UpdateBlockMap(VolumeIoSmartPtr volumeIo, EventSmartPtr callback)
+{
+    // TODO (huijeong.kim) to update
+    return 0;
+}
 
-private:
-    void _CreateMetaServices(void);
+int
+MetaUpdater::UpdateStripeMap(Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callback)
+{
+    // TODO (huijeong.kim) to update
+    return 0;
+}
 
-    IArrayInfo* arrayInfo;
-    Mapper* mapper;
-    Allocator* allocator;
-    JournalManager* journal;
-
-    MetaUpdater* metaUpdater;
-};
 } // namespace pos
