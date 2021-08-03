@@ -43,6 +43,7 @@ MapHeader::MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_)
   size(0),
   mpageSize(0),
   entriesPerMpage(0),
+  usedBlkCnt(0),
   isInitialized(false)
 {
 }
@@ -87,6 +88,7 @@ MapHeader::SetSize(void)
     uint32_t curOffset = 0;
 
     curOffset += sizeof(mpageData);
+    curOffset += sizeof(usedBlkCnt);
     curOffset += (mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
 
     size = Align(curOffset, mpageSize);
@@ -111,6 +113,8 @@ MapHeader::CopyToBuffer(char* buffer)
 
     memcpy(buffer, (void*)(&mpageData), sizeof(mpageData));
     curOffset += sizeof(mpageData);
+    memcpy(buffer + curOffset, (void*)(&usedBlkCnt), sizeof(usedBlkCnt));
+    curOffset += sizeof(usedBlkCnt);
     memcpy(buffer + curOffset, (void*)mPageMap->GetMapAddr(), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
 
     return 0;
@@ -120,7 +124,7 @@ BitMap*
 MapHeader::GetBitmapFromTempBuffer(char* buffer)
 {
     MpageValidInfo* validInfo = reinterpret_cast<MpageValidInfo*>(buffer);
-    int bitmapOffset = sizeof(mpageData);
+    int bitmapOffset = sizeof(mpageData) + sizeof(usedBlkCnt);
 
     BitMap* copiedBitmap = new BitMap(validInfo->numTotalMpages);
     copiedBitmap->SetNumBitsSet(validInfo->numValidMpages);
@@ -147,6 +151,23 @@ MapHeader::SetMapAllocated(int pageNr)
 {
     std::unique_lock<std::mutex> lock(mpageHeaderLock);
     mPageMap->SetBit(pageNr);
+}
+
+void
+MapHeader::UpdateUsedBlkCnt(VirtualBlkAddr vsa)
+{
+    if (IsUnMapVsa(vsa))
+    {
+        usedBlkCnt--;
+        if (usedBlkCnt < 0)
+        {
+            usedBlkCnt = 0;
+        }
+    }
+    else
+    {
+        usedBlkCnt++;
+    }
 }
 
 }   // namespace pos

@@ -190,29 +190,29 @@ TEST(VSAMapContent, SetEntry_AllocAndSet)
 
 TEST(VSAMapContent, GetNumUsedBlocks_CountOnePage)
 {
-    // Given
-    MockMap* mockMap = new MockMap;
-    char* buf = new char[4032]();
-    EXPECT_CALL(*mockMap, GetMpageWithLock).WillRepeatedly(ReturnPointee(&buf));
+    // // Given
+    // MockMap* mockMap = new MockMap;
+    // char* buf = new char[4032]();
+    // EXPECT_CALL(*mockMap, GetMpageWithLock).WillRepeatedly(ReturnPointee(&buf));
 
-    MockBitMap* mockBitMap = new MockBitMap(1024);
-    EXPECT_CALL(*mockBitMap, FindFirstSet).WillOnce(Return(0)).WillOnce(Return(16));
-    EXPECT_CALL(*mockBitMap, GetNumBits).WillRepeatedly(Return(16));
+    // MockBitMap* mockBitMap = new MockBitMap(1024);
+    // EXPECT_CALL(*mockBitMap, FindFirstSet).WillOnce(Return(0)).WillOnce(Return(16));
+    // EXPECT_CALL(*mockBitMap, GetNumBits).WillRepeatedly(Return(16));
 
-    MockMapHeader* mockMapHeader = new MockMapHeader;
-    EXPECT_CALL(*mockMapHeader, GetMpageMap).WillRepeatedly(ReturnPointee(&mockBitMap));
-    EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(504));
+    // MockMapHeader* mockMapHeader = new MockMapHeader;
+    // EXPECT_CALL(*mockMapHeader, GetMpageMap).WillRepeatedly(ReturnPointee(&mockBitMap));
+    // EXPECT_CALL(*mockMapHeader, GetEntriesPerMpage).WillRepeatedly(Return(504));
 
-    VSAMapContent sut;
-    sut.SetMapHeader(mockMapHeader);
-    sut.SetMap(mockMap);
+    // VSAMapContent sut;
+    // sut.SetMapHeader(mockMapHeader);
+    // sut.SetMap(mockMap);
 
-    // When
-    int64_t reti = sut.GetNumUsedBlocks();
+    // // When
+    // int64_t reti = sut.GetNumUsedBlocks();
 
-    // Then
-    EXPECT_EQ(reti, 504);
-    delete mockBitMap;
+    // // Then
+    // EXPECT_EQ(reti, 504);
+    // delete mockBitMap;
 }
 
 TEST(VSAMapContent, InvalidateAllBlocks_Default)

@@ -56,6 +56,7 @@ VSAMapContent::VSAMapContent(int mapId, std::string arrayName)
 {
     filename = "VSAMap." + std::to_string(mapId) + ".bin";
     this->arrayName = arrayName;
+    totalBlks = 0;
 }
 
 int
@@ -63,7 +64,6 @@ VSAMapContent::Prepare(uint64_t blkCnt, int64_t volid)
 {
     SetPageSize(arrayName);
     totalBlks = blkCnt;
-    usedBlks = 0;
 
     mapHeader->SetEntriesPerMpage(mapHeader->GetMpageSize() / sizeof(VirtualBlkAddr));
     uint64_t mpagesNeeded = DivideUp(totalBlks, mapHeader->GetEntriesPerMpage());
@@ -124,7 +124,7 @@ VSAMapContent::SetEntry(BlkAddr rba, VirtualBlkAddr vsa)
     mpageMap[entNr] = vsa;
 
     mapHeader->GetTouchedMpages()->SetBit(pageNr);
-
+    mapHeader->UpdateUsedBlkCnt(vsa);
     map->ReleaseMpageLock(pageNr);
 
     return 0;
@@ -155,32 +155,7 @@ VSAMapContent::GetDirtyPages(BlkAddr start, uint64_t numEntries)
 int64_t
 VSAMapContent::GetNumUsedBlocks(void)
 {
-    int curMpage = 0;
-    uint32_t mpageId = 0;
-
-    usedBlks = 0;
-    while ((mpageId = mapHeader->GetMpageMap()->FindFirstSet(curMpage)) != mapHeader->GetMpageMap()->GetNumBits())
-    {
-        usedBlks += _GetNumValidEntries(map->GetMpageWithLock(mpageId));
-        curMpage = mpageId + 1;
-    }
-
-    return usedBlks;
-}
-
-uint64_t
-VSAMapContent::_GetNumValidEntries(char* mpage)
-{
-    uint64_t numValid = 0;
-
-    for (uint32_t i = 0; i < mapHeader->GetEntriesPerMpage(); ++i)
-    {
-        if (!IsUnMapVsa(((VirtualBlkAddr*)mpage)[i]))
-        {
-            numValid++;
-        }
-    }
-    return numValid;
+    return mapHeader->GetUsedBlkCnt();
 }
 
 int

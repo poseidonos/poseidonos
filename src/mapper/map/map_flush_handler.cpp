@@ -305,6 +305,8 @@ MapIoHandler::_FillMapHeader(AsyncMetaFileIoCtx* ctx)
     int bufferOffset = 0;
     memcpy(mapHeader->GetMpageDataAddr(), mapHeaderTempBuffer + bufferOffset, mapHeader->GetSizeofMpageData());
     bufferOffset += mapHeader->GetSizeofMpageData();
+    memcpy(mapHeader->GetGetUsedBlkCntAddr(), mapHeaderTempBuffer + bufferOffset, mapHeader->GetSizeofUsedBlkCnt());
+    bufferOffset += mapHeader->GetSizeofUsedBlkCnt();
     memcpy(mapHeader->GetMpageMap()->GetMapAddr(), mapHeaderTempBuffer + bufferOffset, mapHeader->GetMpageMap()->GetNumEntry() * BITMAP_ENTRY_SIZE);
 
     mapHeader->ApplyNumValidMpages();
@@ -312,7 +314,6 @@ MapIoHandler::_FillMapHeader(AsyncMetaFileIoCtx* ctx)
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "fileName:{} Header Load Success, ValidMpages:{} / TotalMpages:{}",
                    file->GetFileName(), mapHeader->GetNumValidMpages(), mapHeader->GetNumTotalMpages());
 }
-
 
 // Executed by meta-fs thread
 void
@@ -357,6 +358,13 @@ MapIoHandler::_IssueHeaderIO(MetaFsIoOpcode opType, MetaFileIntf* inputFile)
     int ret = 0;
 
     ret = inputFile->AppendIO(opType, curOffset, mapHeader->GetSizeofMpageData(), (char*)mapHeader->GetMpageDataAddr());
+    if (ret < 0)
+    {
+        POS_TRACE_ERROR(EID(MFS_SYNCIO_ERROR), "AppendIO Error, retMFS:{}  fd:{}", ret, inputFile->GetFd());
+        return ret;
+    }
+
+    ret = inputFile->AppendIO(opType, curOffset, mapHeader->GetSizeofUsedBlkCnt(), (char*)mapHeader->GetGetUsedBlkCntAddr());
     if (ret < 0)
     {
         POS_TRACE_ERROR(EID(MFS_SYNCIO_ERROR), "AppendIO Error, retMFS:{}  fd:{}", ret, inputFile->GetFd());

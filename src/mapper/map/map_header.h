@@ -32,7 +32,10 @@
 
 #pragma once
 
+#include "src/include/address_type.h"
 #include "src/lib/bitmap.h"
+
+#include <atomic>
 
 namespace pos
 {
@@ -80,6 +83,11 @@ public:
     virtual uint32_t GetEntriesPerMpage(void) { return entriesPerMpage; }
     virtual void SetEntriesPerMpage(uint32_t entriesPerMpage_) { entriesPerMpage = entriesPerMpage_; }
 
+    void UpdateUsedBlkCnt(VirtualBlkAddr vsa);
+    int64_t GetUsedBlkCnt(void) { return usedBlkCnt; }
+    void* GetGetUsedBlkCntAddr(void) { return &usedBlkCnt; }
+    int GetSizeofUsedBlkCnt(void) { return sizeof(usedBlkCnt); }
+
     bool IsInitialized(void) { return isInitialized; }
 
 private:
@@ -89,9 +97,10 @@ private:
     BitMap* touchedMpages;
 
     int mapId;              // by MapContent::Ctor()
-    uint32_t size;          // header size(MpageValidInfo + BitMap), aligned by mpageSize
+    uint32_t size;          // header size(MpageValidInfo + usedBlkCnt + BitMap), aligned by mpageSize
     uint32_t mpageSize;     // by MapContent::SetPageSize()
     uint32_t entriesPerMpage;
+    std::atomic<int64_t> usedBlkCnt;
     bool isInitialized;
 };
 
