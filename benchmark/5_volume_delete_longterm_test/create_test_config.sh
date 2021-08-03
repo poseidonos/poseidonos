@@ -39,8 +39,8 @@ make_fio_config()
 {
 sw_files=("sw_tcp_init1.conf" "sw_tcp_init2.conf")
 rw_files=("rw_tcp_init1.conf" "rw_tcp_init2.conf")
-sw_rate=$(($SW_MAX * 7 / 10 / 2))
-rw_rate=$(($RW_MAX * 7 / 10 / 2))
+sw_rate=$(($SW_MAX * 7 / 10 / 2))M
+rw_rate=$(($RW_MAX * 7 / 10 / 2))M
 general_configs=("[global]" "ioengine=${FIO_IO_ENGINE}" "size=100%" "thread=1" "serialize_overlap=0" "group_reporting=1" "direct=1" "numjobs=1" "ramp_time=0" "time_based=1" "log_avg_msec=1000")
 sw_configs=("rwmixread=0" "readwrite=rw" "iodepth=4" "runtime=${SEQ_IO_TIME}" "io_size=${VOLUME_SIZE}g" "bs=128k" "write_bw_log=seqrw.log" "write_iops_log=seqrw.log" "rate=$sw_rate")
 rw_configs=("rwmixread=70" "readwrite=randrw" "iodepth=128" "runtime=${RAND_IO_TIME}" "io_size=${VOLUME_SIZE}g" "bs=4k" "write_bw_log=randrw.log" "write_iops_log=randrw.log" "rate=$rw_rate")
