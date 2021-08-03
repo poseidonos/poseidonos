@@ -120,12 +120,6 @@ AllocatorFileIoManager::Dispose(void)
             {
                 if (ctxFile[file]->IsOpened() == true)
                 {
-                    while (0 != ctxFile[file]->GetIssuedCount())
-                    {
-                        // wait for done
-                        usleep(1);
-                    }
-
                     ctxFile[file]->Close();
                 }
                 delete ctxFile[file];

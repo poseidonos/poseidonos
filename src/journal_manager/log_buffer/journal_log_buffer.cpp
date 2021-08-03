@@ -153,12 +153,6 @@ JournalLogBuffer::Dispose(void)
 {
     if (logFile->IsOpened() == true)
     {
-        while (0 != logFile->GetIssuedCount())
-        {
-            // wait for done
-            usleep(1);
-        }
-
         int ret = logFile->Close();
         if (ret != 0)
         {

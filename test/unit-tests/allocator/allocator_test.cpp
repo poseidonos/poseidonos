@@ -92,7 +92,7 @@ TEST(Allocator, Shutdown_TestShutdownWithInitializeOrNot)
 
     alloc.Init();
     // given 1.
-    EXPECT_CALL(*ctxManager, Dispose).Times(0);
+    EXPECT_CALL(*ctxManager, Dispose).Times(1);
     // when 1.
     alloc.Shutdown();
 
