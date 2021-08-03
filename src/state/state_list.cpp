@@ -49,7 +49,7 @@ StateList::~StateList()
 void
 StateList::Add(StateContext* ctx)
 {
-    unique_lock<mutex> lock(listMutex);
+    listMutex.lock();
     if (Exists(ctx) == false)
     {
         contextList.push_back(ctx);
@@ -57,14 +57,19 @@ StateList::Add(StateContext* ctx)
             "statecontext added - {}", ctx->GetSituation().ToString());
         sort(contextList.begin(), contextList.end(), _Compare);
         StateContext* next = contextList.front();
+        listMutex.unlock();
         listUpdated(next);
+    }
+    else
+    {
+        listMutex.unlock();
     }
 }
 
 void
 StateList::Remove(StateContext* ctx)
 {
-    unique_lock<mutex> lock(listMutex);
+    listMutex.lock();
     auto it = _Find(ctx);
     if (it != contextList.end())
     {
@@ -72,7 +77,12 @@ StateList::Remove(StateContext* ctx)
             "statecontext removed - {}", (*it)->GetSituation().ToString());
         contextList.erase(it);
         StateContext* next = contextList.front();
+        listMutex.unlock();
         listUpdated(next);
+    }
+    else
+    {
+        listMutex.unlock();
     }
 }
 
