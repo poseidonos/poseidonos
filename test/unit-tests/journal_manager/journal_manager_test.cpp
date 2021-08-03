@@ -13,6 +13,7 @@
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_factory_mock.h"
 #include "test/unit-tests/journal_manager/log_write/buffer_offset_allocator_mock.h"
+#include "test/unit-tests/journal_manager/log_write/journal_event_factory_mock.h"
 #include "test/unit-tests/journal_manager/log_write/journal_volume_event_handler_mock.h"
 #include "test/unit-tests/journal_manager/log_write/log_write_handler_mock.h"
 #include "test/unit-tests/journal_manager/replay/replay_handler_mock.h"
@@ -36,6 +37,7 @@ public:
       statusProvider(nullptr),
       logWriteHandler(nullptr),
       logWriteContextFactory(nullptr),
+      journalEventFactory(nullptr),
       volumeEventHandler(nullptr),
       logBuffer(nullptr),
       bufferAllocator(nullptr),
@@ -59,6 +61,7 @@ public:
         logWriteHandler = new NiceMock<MockLogWriteHandler>;
         journalWriter = new NiceMock<MockJournalWriter>;
         logWriteContextFactory = new NiceMock<MockLogWriteContextFactory>;
+        journalEventFactory = new NiceMock<MockJournalEventFactory>;
         volumeEventHandler = new NiceMock<MockJournalVolumeEventHandler>;
         logBuffer = new NiceMock<MockJournalLogBuffer>;
         bufferAllocator = new NiceMock<MockBufferOffsetAllocator>;
@@ -71,7 +74,8 @@ public:
         service = new NiceMock<MockJournalService>;
 
         journal = new JournalManager(config, statusProvider,
-            logWriteContextFactory, logWriteHandler, volumeEventHandler, journalWriter,
+            logWriteContextFactory, journalEventFactory, logWriteHandler,
+            volumeEventHandler, journalWriter,
             logBuffer, bufferAllocator, logGroupReleaser, dirtyMapManager, logFilledNotifier,
             callbackSequenceController, replayHandler, arrayInfo, service);
     }
@@ -93,6 +97,7 @@ protected:
     NiceMock<MockLogWriteHandler>* logWriteHandler;
     NiceMock<MockJournalWriter>* journalWriter;
     NiceMock<MockLogWriteContextFactory>* logWriteContextFactory;
+    NiceMock<MockJournalEventFactory>* journalEventFactory;
     NiceMock<MockJournalVolumeEventHandler>* volumeEventHandler;
     NiceMock<MockJournalLogBuffer>* logBuffer;
     NiceMock<MockBufferOffsetAllocator>* bufferAllocator;
