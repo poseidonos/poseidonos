@@ -31,36 +31,52 @@
  */
 
 #include "src/gc/flow_control/token_distributer.h"
+#include "src/allocator/i_context_manager.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/array_models/dto/partition_logical_size.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/gc/flow_control/flow_control_configuration.h"
 
 namespace pos
 {
-TokenDistributer::TokenDistributer(uint32_t totalToken, uint32_t gcThreshold)
-: totalToken(totalToken),
-  gcThreshold(gcThreshold)
+TokenDistributer::TokenDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration)
+: TokenDistributer(iArrayInfo, flowControlConfiguration,
+                AllocatorServiceSingleton::Instance()->GetIContextManager(iArrayInfo->GetName()))
 {
+}
+
+TokenDistributer::TokenDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration,
+                                IContextManager* inputIContextManager)
+: iArrayInfo(iArrayInfo),
+  flowControlConfiguration(flowControlConfiguration),
+  iContextManager(inputIContextManager)
+{
+    Init();
 }
 
 TokenDistributer::~TokenDistributer(void)
 {
 }
 
+void
+TokenDistributer::Init(void)
+{
+}
+
 std::tuple<uint32_t, uint32_t>
 TokenDistributer::Distribute(uint32_t freeSegments)
 {
-    uint32_t userToken;
-    uint32_t gcToken;
+    uint32_t totalToken = flowControlConfiguration->GetTotalToken();
+    uint32_t gcThreshold = iContextManager->GetGcThreshold(GcMode::MODE_NORMAL_GC);
 
     if (freeSegments > gcThreshold)
     {
-        userToken = totalToken;
-        gcToken = 0;
+        return std::make_tuple(totalToken, 0);
     }
     else
     {
-        userToken = totalToken / 2;
-        gcToken = totalToken / 2;
+        return std::make_tuple(totalToken / 2, totalToken / 2);
     }
-    return std::make_tuple(userToken, gcToken);
 }
 
 }; // namespace pos

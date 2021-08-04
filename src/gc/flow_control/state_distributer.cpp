@@ -31,29 +31,55 @@
  */
 
 #include "src/gc/flow_control/state_distributer.h"
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-#include "assert.h"
+#include "src/allocator/i_context_manager.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/array_models/dto/partition_logical_size.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/gc/flow_control/flow_control_configuration.h"
 
 namespace pos
 {
-StateDistributer::StateDistributer(uint32_t totalToken, uint32_t gcThreshold,
-                            uint32_t targetSegment, uint32_t targetPercent,
-                            uint32_t urgentSegment, uint32_t urgentPercent,
-                            uint32_t totalTokenInStripe, uint32_t blksPerStripe)
-: totalToken(totalToken),
-  gcThreshold(gcThreshold),
-  targetSegment(targetSegment),
-  targetPercent(targetPercent),
-  urgentSegment(urgentSegment),
-  urgentPercent(urgentPercent),
-  totalTokenInStripe(totalTokenInStripe),
-  blksPerStripe(blksPerStripe)
+StateDistributer::StateDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration)
+: StateDistributer(iArrayInfo, flowControlConfiguration,
+                AllocatorServiceSingleton::Instance()->GetIContextManager(iArrayInfo->GetName()))
 {
+}
+
+StateDistributer::StateDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration,
+                                IContextManager* inputIContextManager)
+: TokenDistributer(iArrayInfo, flowControlConfiguration, inputIContextManager),
+  blksPerStripe(0),
+  totalTokenInStripe(0),
+  totalToken(0),
+  gcThreshold(0),
+  targetSegment(0),
+  targetPercent(0),
+  urgentSegment(0),
+  urgentPercent(0)
+{
+    Init();
 }
 
 StateDistributer::~StateDistributer(void)
 {
+}
+
+void
+StateDistributer::Init(void)
+{
+    const PartitionLogicalSize* sizeInfo = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    blksPerStripe = sizeInfo->blksPerStripe;
+
+    totalTokenInStripe = flowControlConfiguration->GetTotalTokenInStripe();
+    totalToken = flowControlConfiguration->GetTotalToken();
+
+    gcThreshold = iContextManager->GetGcThreshold(GcMode::MODE_NORMAL_GC);
+    gcUrgentThreshold = iContextManager->GetGcThreshold(GcMode::MODE_URGENT_GC);
+
+    targetSegment = flowControlConfiguration->GetTargetSegment();
+    targetPercent = flowControlConfiguration->GetTargetPercent();
+    urgentSegment = flowControlConfiguration->GetUrgentSegment();
+    urgentPercent = flowControlConfiguration->GetUrgentPercent();
 }
 
 std::tuple<uint32_t, uint32_t>
@@ -66,31 +92,23 @@ StateDistributer::Distribute(uint32_t freeSegments)
     if (freeSegments > gcThreshold)
     {
         userToken = totalToken;
-        gcToken = 0;
     }
     else if (freeSegments > targetSegment)
     {
         userStripe = (totalTokenInStripe * targetPercent) / 100;
         userToken =  userStripe * blksPerStripe;
-        gcToken = totalToken - userToken;
     }
     else if (freeSegments > urgentSegment)
     {
         userStripe = (totalTokenInStripe * urgentPercent) / 100;
         userToken =  userStripe * blksPerStripe;
-        gcToken = totalToken - userToken;
     }
     else
     {
         userToken = 0;
-        gcToken = totalToken;
     }
 
-    if ((userToken > totalToken) || (gcToken > totalToken))
-    {
-        POS_TRACE_DEBUG(EID(FC_TOKEN_OVERFLOW), "FlowControl distributed token more than totaltoken totalToken: {}, userToken: {}, gcToken: {}", totalToken, userToken, gcToken);
-        assert(false);
-    }
+    gcToken = totalToken - userToken;
 
     return std::make_tuple(userToken, gcToken);
 }

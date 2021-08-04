@@ -117,11 +117,11 @@ FlowControl::Init(void)
     {
         if (FlowControlStrategy::LINEAR == flowControlStrategy)
         {
-            tokenDistributer = new LinearDistributer(totalToken, gcThreshold, gcUrgentThreshold, totalTokenInStripe, blksPerStripe);
+            tokenDistributer = new LinearDistributer(arrayInfo, flowControlConfiguration);
         }
         else if (FlowControlStrategy::STATE == flowControlStrategy)
         {
-            tokenDistributer = new StateDistributer(totalToken, gcThreshold, targetSegment, targetPercent, urgentSegment, urgentPercent, totalTokenInStripe, blksPerStripe);
+            tokenDistributer = new StateDistributer(arrayInfo, flowControlConfiguration);
         }
     }
 
@@ -218,6 +218,12 @@ FlowControl::ReturnToken(FlowControlType type, int token)
     }
 
     bucket[type].fetch_add(token);
+}
+
+void
+FlowControl::InitDistributer(void)
+{
+    tokenDistributer->Init();
 }
 
 bool

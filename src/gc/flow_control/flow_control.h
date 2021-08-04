@@ -53,7 +53,7 @@ enum FlowControlType : uint32_t
     MAX_FLOW_CONTROL_TYPE
 };
 
-enum class FlowControlState : uint32_t
+enum FlowControlState : uint32_t
 {
     USER_ONLY = 0,
     FLOW_CONTROL_TARGET,
@@ -88,6 +88,7 @@ public:
 
     virtual int GetToken(FlowControlType type, int token);
     virtual void ReturnToken(FlowControlType type, int token);
+    virtual void InitDistributer(void);
 
 private:
     bool _RefillToken(FlowControlType type);

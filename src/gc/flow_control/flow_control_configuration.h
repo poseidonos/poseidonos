@@ -39,7 +39,7 @@
 namespace pos
 {
 
-enum class FlowControlStrategy : uint32_t
+enum FlowControlStrategy : uint32_t
 {
     DISABLE = 0,
     LINEAR,

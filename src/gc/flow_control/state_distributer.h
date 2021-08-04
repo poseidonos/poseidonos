@@ -40,22 +40,22 @@ namespace pos
 class StateDistributer : public TokenDistributer
 {
 public:
-    StateDistributer(uint32_t totalToken, uint32_t gcThreshold,
-                    uint32_t targetSegment, uint32_t targetPercent,
-                    uint32_t urgentSegment, uint32_t urgentPercent,
-                    uint32_t totalTokenInStripe, uint32_t blksPerStripe);
+    StateDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration);
+    StateDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration, IContextManager* iContextManager);
     ~StateDistributer(void) override;
-    std::tuple<uint32_t, uint32_t> Distribute(uint32_t freeSegments) override;
+    virtual void Init(void) override;
+    virtual std::tuple<uint32_t, uint32_t> Distribute(uint32_t freeSegments) override;
 
 private:
-    uint32_t totalToken = 0;
-    uint32_t gcThreshold = 0;
-    uint32_t targetSegment = 0;
-    uint32_t targetPercent = 0;
-    uint32_t urgentSegment = 0;
-    uint32_t urgentPercent = 0;
-    uint32_t totalTokenInStripe = 0;
-    uint32_t blksPerStripe = 0;
+    uint32_t blksPerStripe;
+    uint32_t totalTokenInStripe;
+    uint32_t totalToken;
+    uint32_t gcThreshold;
+    uint32_t gcUrgentThreshold;
+    uint32_t targetSegment;
+    uint32_t targetPercent;
+    uint32_t urgentSegment;
+    uint32_t urgentPercent;
 };
 
 }; // namespace pos

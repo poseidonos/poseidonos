@@ -43,7 +43,7 @@ public:
                                 .totalSegments = 32768};
         mockSystemTimeoutChecker = new NiceMock<MockSystemTimeoutChecker>;
         mockFlowControlService = new NiceMock<MockFlowControlService>;
-        mockTokenDistributer = new NiceMock<MockTokenDistributer>;
+        mockTokenDistributer = new NiceMock<MockTokenDistributer>(nullptr, nullptr, nullptr);
         mockFlowControlConfiguration = new NiceMock<MockFlowControlConfiguration>(mockIArrayInfo, nullptr);
 
         flowControl = new FlowControl(mockIArrayInfo, mockIContextManager,
@@ -400,6 +400,12 @@ TEST_F(FlowControlTestFixture, ReturnToken_testReturnToken)
     FlowControlType type = FlowControlType::USER;
     int token = 30;
     flowControl->ReturnToken(type, token);
+}
+
+TEST_F(FlowControlTestFixture, InitDistributer_testInitDistributer)
+{
+    EXPECT_CALL(*mockTokenDistributer, Init()).WillOnce(Return());
+    flowControl->InitDistributer();
 }
 
 }  // namespace pos

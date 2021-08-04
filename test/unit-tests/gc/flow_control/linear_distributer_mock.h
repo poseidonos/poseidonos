@@ -10,6 +10,7 @@ class MockLinearDistributer : public LinearDistributer
 {
 public:
     using LinearDistributer::LinearDistributer;
+    MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD((std::tuple<uint32_t, uint32_t>), Distribute, (uint32_t freeSegments), (override));
 };
 

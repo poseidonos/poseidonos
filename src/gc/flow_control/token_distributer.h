@@ -36,18 +36,23 @@
 
 namespace pos
 {
+class FlowControlConfiguration;
+class IContextManager;
+class IArrayInfo;
 
 class TokenDistributer
 {
 public:
-    TokenDistributer(void) {};
-    TokenDistributer(uint32_t totalToken, uint32_t gcThreshold);
+    TokenDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration);
+    TokenDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration, IContextManager* iContextManager);
     virtual ~TokenDistributer(void);
+    virtual void Init(void);
     virtual std::tuple<uint32_t, uint32_t> Distribute(uint32_t freeSegments);
 
-private:
-    uint32_t totalToken = 0;
-    uint32_t gcThreshold = 0;
+protected:
+    IArrayInfo* iArrayInfo;
+    FlowControlConfiguration* flowControlConfiguration;
+    IContextManager* iContextManager;
 };
 
 }; // namespace pos

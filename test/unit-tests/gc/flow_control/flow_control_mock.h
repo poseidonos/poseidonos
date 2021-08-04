@@ -16,6 +16,7 @@ public:
     MOCK_METHOD(void, Flush, (), (override));
     MOCK_METHOD(int, GetToken, (FlowControlType type, int token), (override));
     MOCK_METHOD(void, ReturnToken, (FlowControlType type, int token), (override));
+    MOCK_METHOD(void, InitDistributer, (), (override));
 };
 
 } // namespace pos

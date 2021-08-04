@@ -31,55 +31,70 @@
  */
 
 #include "src/gc/flow_control/linear_distributer.h"
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-#include "assert.h"
+#include "src/allocator/i_context_manager.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/array_models/dto/partition_logical_size.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/gc/flow_control/flow_control_configuration.h"
 
 namespace pos
 {
-LinearDistributer::LinearDistributer(uint32_t totalToken, uint32_t gcThreshold, uint32_t gcUrgentThreshold,
-                                    uint32_t totalTokenInStripe, uint32_t blksPerStripe)
-: totalToken(totalToken),
-  gcThreshold(gcThreshold),
-  gcUrgentThreshold(gcUrgentThreshold),
-  totalTokenInStripe(totalTokenInStripe),
-  blksPerStripe(blksPerStripe)
+
+LinearDistributer::LinearDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration)
+: LinearDistributer(iArrayInfo, flowControlConfiguration,
+                AllocatorServiceSingleton::Instance()->GetIContextManager(iArrayInfo->GetName()))
 {
+}
+
+LinearDistributer::LinearDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration,
+                                IContextManager* inputIContextManager)
+: TokenDistributer(iArrayInfo, flowControlConfiguration, inputIContextManager),
+  blksPerStripe(0),
+  totalTokenInStripe(0),
+  totalToken(0),
+  gcThreshold(0),
+  gcUrgentThreshold(0)
+{
+    Init();
 }
 
 LinearDistributer::~LinearDistributer(void)
 {
 }
 
+void
+LinearDistributer::Init(void)
+{
+    const PartitionLogicalSize* sizeInfo = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    blksPerStripe = sizeInfo->blksPerStripe;
+
+    totalTokenInStripe = flowControlConfiguration->GetTotalTokenInStripe();
+    totalToken = flowControlConfiguration->GetTotalToken();
+
+    gcThreshold = iContextManager->GetGcThreshold(GcMode::MODE_NORMAL_GC);
+    gcUrgentThreshold = iContextManager->GetGcThreshold(GcMode::MODE_URGENT_GC);
+}
+
 std::tuple<uint32_t, uint32_t>
 LinearDistributer::Distribute(uint32_t freeSegments)
 {
-    uint32_t userStripe;
     uint32_t userToken;
     uint32_t gcToken;
 
     if (freeSegments > gcThreshold)
     {
         userToken = totalToken;
-        gcToken = 0;
     }
     else if (freeSegments > gcUrgentThreshold)
     {
-        userStripe = (freeSegments - gcUrgentThreshold) * totalTokenInStripe / (gcThreshold - gcUrgentThreshold) / 2;
+        uint32_t userStripe = (freeSegments - gcUrgentThreshold) * totalTokenInStripe / (gcThreshold - gcUrgentThreshold) / 2;
         userToken =  userStripe * blksPerStripe;
-        gcToken = totalToken - userToken;
     }
     else
     {
         userToken = 0;
-        gcToken = totalToken;
     }
-
-    if ((userToken > totalToken) || (gcToken > totalToken))
-    {
-        POS_TRACE_DEBUG(EID(FC_TOKEN_OVERFLOW), "FlowControl distributed token more than totaltoken totalToken: {}, userToken: {}, gcToken: {}", totalToken, userToken, gcToken);
-        assert(false);
-    }
+    gcToken = totalToken - userToken;
 
     return std::make_tuple(userToken, gcToken);
 }

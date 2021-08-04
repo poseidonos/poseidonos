@@ -40,17 +40,18 @@ namespace pos
 class LinearDistributer : public TokenDistributer
 {
 public:
-    LinearDistributer(uint32_t totalToken, uint32_t gcThreshold, uint32_t gcUrgentThreshold,
-                    uint32_t totalTokenInStripe, uint32_t blksPerStripe);
+    LinearDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration);
+    LinearDistributer(IArrayInfo* iArrayInfo, FlowControlConfiguration* flowControlConfiguration, IContextManager* iContextManager);
     ~LinearDistributer(void) override;
-    std::tuple<uint32_t, uint32_t> Distribute(uint32_t freeSegments) override;
+    virtual void Init(void) override;
+    virtual std::tuple<uint32_t, uint32_t> Distribute(uint32_t freeSegments) override;
 
 private:
-    uint32_t totalToken = 0;
-    uint32_t gcThreshold = 0;
-    uint32_t gcUrgentThreshold = 0;
-    uint32_t totalTokenInStripe = 0;
-    uint32_t blksPerStripe = 0;
+    uint32_t blksPerStripe;
+    uint32_t totalTokenInStripe;
+    uint32_t totalToken;
+    uint32_t gcThreshold;
+    uint32_t gcUrgentThreshold;
 };
 
 }; // namespace pos
