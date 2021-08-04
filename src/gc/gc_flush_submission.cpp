@@ -173,6 +173,12 @@ GcFlushSubmission::Execute(void)
         callback,
         arrayName);
 
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_STRIPE_FLUSH_SUBMIT,
+            "gc flush submission, arrayName:{}, stripeUserLsid:{}, result:{}",
+            arrayName,
+            stripe->GetUserLsid(),
+            (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned));
+
     return (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned);
 }
 

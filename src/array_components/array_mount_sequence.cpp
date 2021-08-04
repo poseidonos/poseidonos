@@ -42,8 +42,8 @@
 namespace pos
 {
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
-    IAbrControl* abr, IStateControl* iState, string name, IVolumeManager* volMgr, unsigned int arrIndex)
-: ArrayMountSequence(seq, new MountTemp(abr, name, arrIndex), iState, name, nullptr, nullptr, nullptr, volMgr)
+    IAbrControl* abr, IStateControl* iState, string name, IVolumeManager* volMgr, unsigned int arrIndex, IArrayRebuilder* rbdr)
+: ArrayMountSequence(seq, new MountTemp(abr, name, arrIndex), iState, name, nullptr, nullptr, nullptr, volMgr, rbdr)
 {
     // delegated to other constructor. The other constructor doesn't have IAbrControl in its
     // params because ArrayMountSequence uses IAbrControl just to instantiate MountTemp!
@@ -58,14 +58,15 @@ ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
     MountTemp* mntTmp, IStateControl* iState, string name,
     StateContext* mountState, StateContext* unmountState, StateContext* normalState,
-    IVolumeManager* volMgr)
+    IVolumeManager* volMgr, IArrayRebuilder* rbdr)
 : temp(mntTmp),
   state(iState),
   mountState(mountState),
   unmountState(unmountState),
   normalState(normalState),
   arrayName(name),
-  volMgr(volMgr)
+  volMgr(volMgr),
+  rebuilder(rbdr)
 {
     sequence.assign(seq.begin(), seq.end());
     string sender = typeid(*this).name();
@@ -212,7 +213,13 @@ ArrayMountSequence::Unmount(void)
 void
 ArrayMountSequence::Shutdown(void)
 {
+    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down {} ...", arrayName);
+    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down - wait for rebuilding");
+    rebuilder->StopRebuild(arrayName);
+    rebuilder->WaitRebuildDone(arrayName);
+    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down - rebuild done");
     volMgr->DetachVolumes();
+    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down - volumes detached");
 
     // unmount meta, gc
     auto it = sequence.rbegin();
@@ -223,6 +230,7 @@ ArrayMountSequence::Shutdown(void)
 
     // unmount array
     (*it)->Shutdown();
+    POS_TRACE_DEBUG(EID(ARRAY_SHUTDOWNSEQ_DEBUG_MSG), "shutting down - array shutdowned");
 }
 
 void

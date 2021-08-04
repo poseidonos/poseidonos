@@ -64,7 +64,7 @@ RebuildPerfImpactCommand::Execute(json& doc, string rid)
         }
         else
         {
-            return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, BADREQUEST, "Wrong level", GetPosInfo());
+            return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, BADREQUEST, "This level is unsupported", GetPosInfo());
         }
         newRebuildPolicy.policyChange = true;
         int retVal = QosManagerSingleton::Instance()->UpdateRebuildPolicy(newRebuildPolicy);

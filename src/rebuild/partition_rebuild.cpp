@@ -70,6 +70,7 @@ void PartitionRebuild::Start(RebuildComplete cb)
     completeCb = cb;
     if (bhvr != nullptr)
     {
+        bhvr->GetContext()->result = RebuildState::REBUILDING;
         bhvr->GetContext()->logger->SetPartitionRebuildStart(bhvr->GetContext()->part);
         bhvr->GetContext()->rebuildComplete =
             bind(&PartitionRebuild::_Complete, this, placeholders::_1);

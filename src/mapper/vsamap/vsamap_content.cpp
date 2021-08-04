@@ -40,7 +40,6 @@
 
 namespace pos
 {
-
 VSAMapContent::VSAMapContent(void)
 {
 }
@@ -49,6 +48,7 @@ VSAMapContent::VSAMapContent(int mapId, IBlockAllocator* iBlockAllocator_)
 : MapContent(mapId),
   iBlockAllocator(iBlockAllocator_)
 {
+    totalBlks = 0;
 }
 
 VSAMapContent::VSAMapContent(int mapId, std::string arrayName)

@@ -532,6 +532,8 @@ DeviceManager::_DetachDeviceImpl(UblockSharedPtr dev)
         {
             if (deviceEvent->DeviceDetached(dev) < 0)
             {
+                POS_TRACE_DEBUG(POS_EVENT_ID::DEVICEMGR_DETACH,
+                "Failed to auqire lock for device detach");
                 return LOCK_ACQUIRE_FAILED;
             }
         }

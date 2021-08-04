@@ -79,6 +79,10 @@ StripeCopySubmission::_DoSpecificJob(void)
         {
             meta->GetVictimStripe(copyIndex, index)->LoadValidBlock();
         }
+
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_LOAD_VALID_BLOCKS,
+            "valid blocks loaded, startStripeId:{}", baseStripeId);
+
         isLoaded = true;
     }
 
@@ -101,6 +105,9 @@ StripeCopySubmission::_DoSpecificJob(void)
 
         eventScheduler->EnqueueEvent(stripeCopier);
     }
+
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_STRIPE_COPIER_SUBMIT,
+            "stripe copier submit, startStripeId:{}", baseStripeId);
 
     return true;
 }

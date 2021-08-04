@@ -8,12 +8,12 @@
 #include "src/include/partition_type.h"
 #include "test/unit-tests/array/array_interface_mock.h"
 #include "test/unit-tests/array/array_mock.h"
-#include "test/unit-tests/array/rebuild/i_array_rebuilder_mock.h"
 #include "test/unit-tests/array/device/array_device_manager_mock.h"
 #include "test/unit-tests/array/device/array_device_mock.h"
 #include "test/unit-tests/array/interface/i_abr_control_mock.h"
 #include "test/unit-tests/array/partition/partition_manager_mock.h"
 #include "test/unit-tests/array/service/array_service_layer_mock.h"
+#include "test/unit-tests/array/rebuild/i_array_rebuilder_mock.h"
 #include "test/unit-tests/array/state/array_state_mock.h"
 #include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
@@ -686,35 +686,36 @@ TEST(Array, Delete_testIfArrayNotDeletedWhenArrayBootRecordFailsToBeUpdated)
     delete mockRebuilder;
 }
 
-TEST(Array, Delete_testIfArrayNotDeletedWhenRebuildNotDone)
+TEST(Array, AddSpare_testIfSpareIsAddedWhenInputsAreValid)
 {
-    // Given: a deletable state, but ABR I/O fails
-    int REBUILD_NOT_DONE_FAIL = (int)POS_EVENT_ID::ARRAY_REBUILD_NOT_DONE;
+    // Given: a happy path scenario
     NiceMock<MockIStateControl> mockIStateControl;
-    
-    MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockDeviceManager mockDevMgr;
     MockIAbrControl mockAbrControl;
+    MockEventScheduler mockEventScheduler;
 
-    EXPECT_CALL(*mockRebuilder, IsRebuilding).WillOnce(Return(true));
-    EXPECT_CALL(*mockRebuilder, CleanUp).Times(1);
-    EXPECT_CALL(*mockState, IsDeletable).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrDevMgr, Clear).Times(0);
-    EXPECT_CALL(mockAbrControl, DeleteAbr).Times(0);
-    EXPECT_CALL(*mockState, SetDelete).Times(0); // this should never be called
-    EXPECT_CALL(*mockState, IsBroken).Times(0);
+    string spareDevName = "spareDev";
+    MockUBlockDevice* rawPtr = new MockUBlockDevice(spareDevName, 1024, nullptr);
+    UblockSharedPtr mockSpareDev = shared_ptr<MockUBlockDevice>(rawPtr);
 
-    Array array("mock", mockRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
+    EXPECT_CALL(*mockState, CanAddSpare).WillOnce(Return(0));
+    EXPECT_CALL(*mockArrDevMgr, AddSpare).WillOnce(Return(0));
+    EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
+    EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
+    EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(mockSpareDev));
+    EXPECT_CALL(mockAbrControl, FindArrayWithDeviceSN).WillOnce(Return(""));
+    EXPECT_CALL(*rawPtr, GetSN).WillOnce(Return(""));
+    EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(1);
 
-    // When
-    int actual = array.Delete();
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, NULL, mockState, NULL, &mockEventScheduler, NULL);
 
-    // Then: state should never be set to Delete
-    ASSERT_EQ(REBUILD_NOT_DONE_FAIL, actual);
+    // When: we try to add a spare device
+    int actual = array.AddSpare("mock-spare");
 
-    // CleanUp
-    delete mockRebuilder;
+    // Then: we should receive 0 as a return
+    ASSERT_EQ(0, actual);
 }
 
 TEST(Array, Delete_testIfArrayDeletedWhenArrayIsBrokenAndShutdownNotEnded)
@@ -745,28 +746,36 @@ TEST(Array, Delete_testIfArrayDeletedWhenArrayIsBrokenAndShutdownNotEnded)
     delete mockRebuilder;
 }
 
-TEST(Array, AddSpare_testIfSpareIsAddedWhenInputsAreValid)
+TEST(Array, AddSpare_testIfSpareIsAddedWhenDeviceIsAlreadyInOtherArray)
 {
     // Given: a happy path scenario
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockDeviceManager mockDevMgr;
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
+    int expected = (int)POS_EVENT_ID::MBR_DEVICE_ALREADY_IN_ARRAY;
+    string spareDevName = "spareDev";
+    MockUBlockDevice* rawPtr = new MockUBlockDevice(spareDevName, 1024, nullptr);
+    UblockSharedPtr mockSpareDev = shared_ptr<MockUBlockDevice>(rawPtr);
 
     EXPECT_CALL(*mockState, CanAddSpare).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrDevMgr, AddSpare).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
-    EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
-    EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(1);
+    EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(mockSpareDev));
+    EXPECT_CALL(mockAbrControl, FindArrayWithDeviceSN).WillOnce(Return("OtherArrayName"));
+    EXPECT_CALL(*rawPtr, GetSN).WillOnce(Return(""));
+    EXPECT_CALL(*mockArrDevMgr, AddSpare).Times(0);
+    EXPECT_CALL(*mockArrDevMgr, ExportToMeta).Times(0);
+    EXPECT_CALL(mockAbrControl, SaveAbr).Times(0);
+    EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(0);
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, &mockEventScheduler, NULL);
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, NULL, mockState, NULL, &mockEventScheduler, NULL);
 
     // When: we try to add a spare device
     int actual = array.AddSpare("mock-spare");
 
     // Then: we should receive 0 as a return
-    ASSERT_EQ(0, actual);
+    ASSERT_EQ(expected, actual);
 }
 
 TEST(Array, AddSpare_testIfSpareIsNotAddedWhenStateIsNotProper)
@@ -947,6 +956,7 @@ TEST(Array, DetachDevice_testIfSpareDeviceIsSuccessfullyDetachedFromUnmountedArr
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
     MockDeviceManager mockSysDevMgr(nullptr);
+    MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
 
     string spareDevName = "mock-unvme";
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
@@ -962,7 +972,7 @@ TEST(Array, DetachDevice_testIfSpareDeviceIsSuccessfullyDetachedFromUnmountedArr
     EXPECT_CALL(mockSysDevMgr, RemoveDevice).Times(1);
     EXPECT_CALL(*mockState, IsMounted).WillOnce(Return(false));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockSysDevMgr, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock", mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, &mockSysDevMgr, NULL, mockState, NULL, NULL, NULL);
 
     // When: detachDevice() is invoked
     int actual = array.DetachDevice(fakeUblockSharedPtr);
@@ -980,7 +990,7 @@ TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromUnmountedArra
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
     MockDeviceManager mockSysDevMgr(nullptr);
-
+    MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
     string spareDevName = "mock-unvme";
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
     UblockSharedPtr fakeUblockSharedPtr = make_shared<UnvmeSsd>(spareDevName, 1024, nullptr, fakeNs, "mock-addr"); // ok to use real obj
@@ -998,9 +1008,8 @@ TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromUnmountedArra
     EXPECT_CALL(*mockArrDev, SetUblock).Times(1);
     EXPECT_CALL(*mockState, IsRebuildable).WillOnce(Return(false));
     EXPECT_CALL(*mockState, IsMounted).WillOnce(Return(false));
-    EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockSysDevMgr, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock", mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, &mockSysDevMgr, NULL, mockState, NULL, NULL, NULL);
 
     // When: DetachDevice() is invoked
     int actual = array.DetachDevice(fakeUblockSharedPtr);
@@ -1019,6 +1028,7 @@ TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromMountedArray)
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
     MockDeviceManager mockSysDevMgr(nullptr);
+    MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
 
     string spareDevName = "mock-unvme";
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
@@ -1039,9 +1049,8 @@ TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromMountedArray)
     EXPECT_CALL(*mockState, IsMounted).WillOnce(Return(true));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
-    EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false));
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockSysDevMgr, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock", mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, &mockSysDevMgr, NULL, mockState, NULL, NULL, NULL);
     // When: DetachDevice() is invoked
     int actual = array.DetachDevice(fakeUblockSharedPtr);
 
@@ -1059,6 +1068,7 @@ TEST(Array, DetachDevice_IntegrationTestIfDataDeviceIsNotDetachedFromMountedArra
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
     MockDeviceManager mockSysDevMgr(nullptr);
+    MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
 
     string spareDevName = "mock-unvme";
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
@@ -1073,7 +1083,7 @@ TEST(Array, DetachDevice_IntegrationTestIfDataDeviceIsNotDetachedFromMountedArra
     EXPECT_CALL(*mockArrDev, GetState).WillRepeatedly(Return(ArrayDeviceState::FAULT));
     EXPECT_CALL(*mockState, DataRemoved).Times(0); // should never be called
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockSysDevMgr, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock", mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, &mockSysDevMgr, NULL, mockState, NULL, NULL, NULL);
 
     // When: DetachDevice is invoked
     int actual = array.DetachDevice(fakeUblockSharedPtr);
@@ -1238,11 +1248,12 @@ TEST(Array, IsRecoverable_testIfBrokenArrayIsNotRecoverable)
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
+    MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
 
     EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(true));
     EXPECT_CALL(*mockState, IsRecoverable).Times(0); // should never be called
 
-    Array array("mock-array", NULL, NULL, NULL, NULL, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock-array", mockArrayRebuilder, NULL, NULL, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
     bool actual = array.IsRecoverable(NULL, NULL);
@@ -1258,11 +1269,12 @@ TEST(Array, IsRecoverable_testIfUnmountedArrayIsNotRecoverable)
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDevice* mockArrDev = new MockArrayDevice(NULL);
     MockUBlockDevice* uBlockPtr = new MockUBlockDevice("mock-dev", 1024, NULL);
+    MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
 
     EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false));
     EXPECT_CALL(*mockState, IsMounted).WillOnce(Return(false));
 
-    Array array("mock-array", NULL, NULL, NULL, NULL, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock-array", mockArrayRebuilder, NULL, NULL, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
     bool actual = array.IsRecoverable(mockArrDev, uBlockPtr);
@@ -1278,11 +1290,12 @@ TEST(Array, IsRecoverable_testIfArrayFailingToTranslateIsNotRecoverable)
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDevice* mockArrDev = new MockArrayDevice(NULL);
     MockUBlockDevice* uBlockPtr = nullptr; // Simulate translate/convert failure
+    MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
 
     EXPECT_CALL(*mockState, IsBroken).WillOnce(Return(false));
     EXPECT_CALL(*mockState, IsMounted).WillOnce(Return(true));
 
-    Array array("mock-array", NULL, NULL, NULL, NULL, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock-array", mockArrayRebuilder, NULL, NULL, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
     bool actual = array.IsRecoverable(mockArrDev, uBlockPtr);
@@ -1305,6 +1318,7 @@ TEST(Array, IsRecoverable_testIfMountedHealthyArrayDetachesDataDeviceAndIsRecove
     MockDeviceManager mockSysDevMgr(nullptr);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
+    MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
 
     EXPECT_CALL(*mockState, IsBroken).WillRepeatedly(Return(false));
     EXPECT_CALL(*mockState, IsMounted).WillRepeatedly(Return(true));
@@ -1320,7 +1334,7 @@ TEST(Array, IsRecoverable_testIfMountedHealthyArrayDetachesDataDeviceAndIsRecove
     EXPECT_CALL(*mockState, IsRebuildable).WillOnce(Return(false));
     EXPECT_CALL(*mockState, IsRecoverable).WillOnce(Return(true));
 
-    Array array("mock-array", NULL, &mockAbrControl, mockArrDevMgr, &mockSysDevMgr, NULL, mockState, NULL, NULL, NULL);
+    Array array("mock-array", mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, &mockSysDevMgr, NULL, mockState, NULL, NULL, NULL);
 
     // When
     bool actual = array.IsRecoverable(mockArrDev, mockUblockDevPtr);

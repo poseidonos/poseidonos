@@ -390,6 +390,11 @@ modules:
         message: array boot record delete failed
         problem: no abr with request array name
         solution: check array name
+      - code: 2321
+        level: WARN
+        message: array device is already in other array
+        problem: device cannot be added to two arrays
+        solution: remove device from current array
       - code: 2330
         level: ERROR
         message: Allocate memory fail
