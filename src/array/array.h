@@ -141,7 +141,7 @@ private:
 
     ArrayMeta meta_;
     string name_;
-    unsigned int index_;
+    unsigned int index_ = 0;
     pthread_rwlock_t stateLock;
     ArrayDeviceManager* devMgr_;
     DeviceManager* sysDevMgr = nullptr;
