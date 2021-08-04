@@ -39,14 +39,12 @@ namespace pos
 {
 class IOController
 {
-protected:
+public:
     IOController(void);
     explicit IOController(IODispatcher* ioDispatcher);
     ~IOController(void);
 
     static void _SendVolumeIo(VolumeIoSmartPtr volumeIo);
     static IODispatcher* ioDispatcher;
-
-private:
 };
-} // namespace pos
+}   // namespace pos

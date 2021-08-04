@@ -47,14 +47,11 @@
 #include "src/dump/dump_shared_ptr.h"
 #include "src/dump/dump_shared_ptr.hpp"
 #include "src/event_scheduler/callback.h"
+#include "src/event_scheduler/event.h"
 #include "src/include/address_type.h"
 #include "src/include/io_error_type.h"
 #include "src/include/memory.h"
 #include "src/include/smart_ptr_type.h"
-#include "src/include/io_error_type.h"
-#include "src/bio/data_buffer.h"
-#include "src/event_scheduler/callback.h"
-#include "src/event_scheduler/event.h"
 
 struct pos_io;
 
