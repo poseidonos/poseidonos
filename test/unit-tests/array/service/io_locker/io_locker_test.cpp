@@ -114,14 +114,14 @@ TEST(IOLocker, Unlock_testIfArgumentsAreValid)
 {
     // Given
     IOLocker ioLocker;
-    vector<ArrayDevice*> devs;
-    UblockSharedPtr ublock = make_shared<MockUBlockDevice>("mock-dev", 1024, nullptr);
+    UblockSharedPtr ublock1 = make_shared<MockUBlockDevice>("mock-dev1", 1024, nullptr);
+    UblockSharedPtr ublock2 = make_shared<MockUBlockDevice>("mock-dev2", 1024, nullptr);
     ArrayDeviceState state = ArrayDeviceState::NORMAL;
-    MockArrayDevice* mockArrayDevice = new MockArrayDevice(ublock, state);
-    devs.push_back(mockArrayDevice);
-    ioLocker.Register(devs);
+    MockArrayDevice* mockArrayDevice1 = new MockArrayDevice(ublock1, state);
+    MockArrayDevice* mockArrayDevice2 = new MockArrayDevice(ublock2, state);
+    ioLocker.Register({mockArrayDevice1, mockArrayDevice2});
     std::set<IArrayDevice*> lockDevs;
-    lockDevs.insert(mockArrayDevice);
+    lockDevs.insert(mockArrayDevice1);
     StripeId sId = 0;
     ioLocker.TryLock(lockDevs, sId);
 

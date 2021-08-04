@@ -809,9 +809,14 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToAddSpare)
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockDeviceManager mockDevMgr;
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
 
+    string spareDevName = "spareDev";
+    MockUBlockDevice* rawPtr = new MockUBlockDevice(spareDevName, 1024, nullptr);
+    UblockSharedPtr mockSpareDev = shared_ptr<MockUBlockDevice>(rawPtr);
+    EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(mockSpareDev));
     int FAILED_TO_ADD_SPARE = -1;
     EXPECT_CALL(*mockState, CanAddSpare).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, AddSpare).WillOnce(Return(FAILED_TO_ADD_SPARE));
@@ -819,10 +824,10 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToAddSpare)
     EXPECT_CALL(mockAbrControl, SaveAbr).Times(0);
     EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(0);
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, &mockEventScheduler, NULL);
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, NULL, mockState, NULL, &mockEventScheduler, NULL);
 
     // When: we try to add a spare device
-    int actual = array.AddSpare("mock-spare");
+    int actual = array.AddSpare(spareDevName);
 
     // Then: we should receive 0 as a return
     ASSERT_EQ(FAILED_TO_ADD_SPARE, actual);
@@ -836,6 +841,12 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToFlush)
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
+    MockDeviceManager mockDevMgr;
+
+    string spareDevName = "spareDev";
+    MockUBlockDevice* rawPtr = new MockUBlockDevice(spareDevName, 1024, nullptr);
+    UblockSharedPtr mockSpareDev = shared_ptr<MockUBlockDevice>(rawPtr);
+    EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(mockSpareDev));
 
     int FAILED_TO_FLUSH = -1;
     EXPECT_CALL(*mockState, CanAddSpare).WillOnce(Return(0));
@@ -844,10 +855,10 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToFlush)
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(FAILED_TO_FLUSH));
     EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(0);
 
-    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, &mockEventScheduler, NULL);
+    Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, NULL, mockState, NULL, &mockEventScheduler, NULL);
 
     // When: we try to add a spare device
-    int actual = array.AddSpare("mock-spare");
+    int actual = array.AddSpare(spareDevName);
 
     // Then: we should receive 0 as a return
     ASSERT_EQ(FAILED_TO_FLUSH, actual);
