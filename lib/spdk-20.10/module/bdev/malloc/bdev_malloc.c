@@ -462,7 +462,7 @@ backup_disk_info_for_restore(struct malloc_disk *mdisk, const char *name,
 
 int
 create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_uuid *uuid,
-		   uint64_t num_blocks, uint32_t block_size)
+		   uint64_t num_blocks, uint32_t block_size, uint32_t numa)
 {
 	struct malloc_disk	*mdisk;
 	int rc;
@@ -485,7 +485,7 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
 	 *  from on multi-socket systems.
 	 */
 	mdisk->malloc_buf = spdk_zmalloc(num_blocks * block_size, 2 * 1024 * 1024, NULL,
-					 SPDK_ENV_LCORE_ID_ANY, SPDK_MALLOC_DMA);
+					numa, SPDK_MALLOC_DMA);
 	// TODO: Multi Array Optimization is necessary.
 	// malloc_disk_base = mdisk->malloc_buf;
 	malloc_disk_base = NULL;

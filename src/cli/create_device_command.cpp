@@ -34,100 +34,151 @@
 
 #include "src/cli/cli_event_code.h"
 #include "src/helper/spdk_rpc_client.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 using namespace pos_cli;
 
 CreateDeviceCommand::CreateDeviceCommand(void)
 {
-    _Init();
 }
 
 CreateDeviceCommand::~CreateDeviceCommand(void)
 {
+    if (spdkRpcClient != nullptr)
+    {
+        delete spdkRpcClient;
+    }
 }
 
 void
-CreateDeviceCommand::_Init(void)
+CreateDeviceCommand::Init(
+    AffinityManager* affinityManager, SpdkRpcClient* spdkRpcClient)
 {
+    if (this->affinityManager == nullptr)
+    {
+        this->affinityManager = affinityManager;
+    }
+
+    if (this->spdkRpcClient == nullptr)
+    {
+        if (spdkRpcClient == nullptr)
+        {
+            this->spdkRpcClient = new SpdkRpcClient();
+        }
+        else
+        {
+            this->spdkRpcClient = spdkRpcClient;
+        }
+    }
+
     errorMessage = "Failed to create buffer device. ";
 }
+
 
 string
 CreateDeviceCommand::Execute(json& doc, string rid)
 {
-    _Init();
+    Init();
 
     JsonFormat jFormat;
-    if (_CheckParamValidityAndSetType(doc) == false)
+    CreateDeviceParam param;
+
+    if (!_ParseJsonToParam(param, doc))
     {
         return jFormat.MakeResponse(
-            "CREATEDEVICE", rid, -1, errorMessage, GetPosInfo());
+            "CREATEDEVICE", rid, ERROR_CODE, errorMessage, GetPosInfo());
     }
 
-    if (type == "uram")
+    if (!_CheckParamValidity(param))
     {
-        int ret = 0;
-        ret = _CreateUramDevice(doc);
-        if (ret != 0)
-        {
-            return jFormat.MakeResponse(
-                "CREATEDEVICE", rid, -1, errorMessage, GetPosInfo());
-        }
+        return jFormat.MakeResponse(
+            "CREATEDEVICE", rid, ERROR_CODE, errorMessage, GetPosInfo());
     }
-    /*
-    //TODO : PMEM Creation
-    else if (type == "pmem")
+
+    int ret = _CreateUramDevice(param);
+    if (ret != 0)
     {
+        return jFormat.MakeResponse(
+            "CREATEDEVICE", rid, ERROR_CODE, errorMessage, GetPosInfo());
     }
-*/
 
     return jFormat.MakeResponse(
         "CREATEDEVICE", rid, SUCCESS, "Device has been created", GetPosInfo());
 }
 
 int
-CreateDeviceCommand::_CreateUramDevice(json& doc)
+CreateDeviceCommand::_CreateUramDevice(const CreateDeviceParam& param)
 {
-    SpdkRpcClient rpcClient;
-    auto ret = rpcClient.BdevMallocCreate(
-        doc["param"]["name"].get<string>(),
-        doc["param"]["num_blocks"].get<uint32_t>(),
-        doc["param"]["block_size"].get<uint32_t>());
+    auto ret = spdkRpcClient->BdevMallocCreate(
+        param.name,
+        param.numBlocks,
+        param.blockSize,
+        param.numa);
+
     if (ret.first != 0)
     {
         errorMessage += ret.second;
     }
+
     return ret.first;
 }
 
 bool
-CreateDeviceCommand::_CheckParamValidityAndSetType(json& doc)
+CreateDeviceCommand::_ParseJsonToParam(CreateDeviceParam& param, json& doc)
 {
-    auto param = doc["param"];
-    if (!param.contains("dev_type"))
+    auto jsonReq = doc["param"];
+
+    if (!jsonReq.contains("dev_type"))
     {
-        errorMessage += "Device type must be included";
+        errorMessage += "Device type must be included.";
         return false;
     }
-    type = param["dev_type"].get<string>();
-    if (type != "uram" && type != "pmem")
+    param.devType = jsonReq["dev_type"].get<string>();
+
+    if (!jsonReq.contains("name"))
     {
-        errorMessage += "Device type must be uram or pmem";
+        errorMessage += "Device name must be included.";
         return false;
     }
-    if (!param.contains("name"))
+    param.name = jsonReq["name"];
+
+    if (!jsonReq.contains("num_blocks"))
     {
-        errorMessage += "Device name must be included";
+        errorMessage += "Number of blocks must be included.";
         return false;
     }
-    if (!param.contains("num_blocks"))
+    param.numBlocks = jsonReq["num_blocks"];
+
+    if (!jsonReq.contains("block_size"))
     {
-        errorMessage += "Dumber of blocks must be included";
+        errorMessage += "Block size must be included.";
         return false;
     }
-    if (!param.contains("block_size"))
+    param.blockSize = jsonReq["block_size"];
+
+    if (jsonReq.contains("numa"))
     {
-        errorMessage += "Block size must be included";
+        param.numa =  jsonReq["numa"];
+    }
+
+    return true;
+}
+
+bool
+CreateDeviceCommand::_CheckParamValidity(const CreateDeviceParam& param)
+{
+    if (param.devType != "uram")
+    {
+        errorMessage += "Not supported device type `" + param.devType + "`";
+        return false;
+    }
+
+    uint32_t totalNumaCount = affinityManager->GetNumaCount();
+    if (param.numa >= totalNumaCount)
+    {
+        errorMessage += "Invalid numa node. input= " + to_string(param.numa)
+            + ", system count=" + to_string(totalNumaCount);
         return false;
     }
 

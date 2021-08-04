@@ -1,7 +1,6 @@
-/*-
+/*
  *   BSD LICENSE
- *
- *   Copyright (c) Intel Corporation.
+ *   Copyright (c) 2021 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -31,19 +30,38 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPDK_BDEV_MALLOC_H
-#define SPDK_BDEV_MALLOC_H
+#include "src/cli/create_device_command.h"
 
-#include "spdk/bdev.h"
-#include "spdk/stdinc.h"
+#include <gtest/gtest.h>
 
-typedef void (*spdk_delete_malloc_complete)(void* cb_arg, int bdeverrno);
+namespace pos_cli
+{
+} // namespace pos_cli
 
-void* bdev_malloc_get_buf(void);
+namespace pos_cli
+{
+TEST(CreateDeviceCommand, CreateDeviceCommand_)
+{
+}
 
-int create_malloc_disk(struct spdk_bdev** bdev, const char* name, const struct spdk_uuid* uuid,
-    uint64_t num_blocks, uint32_t block_size, uint32_t numa);
+TEST(CreateDeviceCommand, Init_)
+{
+}
 
-void delete_malloc_disk(struct spdk_bdev* bdev, spdk_delete_malloc_complete cb_fn, void* cb_arg);
+TEST(CreateDeviceCommand, Execute_)
+{
+}
 
-#endif /* SPDK_BDEV_MALLOC_H */
+TEST(CreateDeviceCommand, _ParseJsonToParam_)
+{
+}
+
+TEST(CreateDeviceCommand, _CheckParamValidity_)
+{
+}
+
+TEST(CreateDeviceCommand, _CreateUramDevice_)
+{
+}
+
+} // namespace pos_cli

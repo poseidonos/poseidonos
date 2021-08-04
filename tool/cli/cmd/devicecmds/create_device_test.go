@@ -22,7 +22,7 @@ func TestCreateDeviceCommandReq(t *testing.T) {
 
 	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
-	testmgr.ExecuteCommand(rootCmd, "device", "create", "--device-name", "dev0", "--num-blocks", "512", "--block-size", "4096", "--device-type", "uram", "--json-req")
+	testmgr.ExecuteCommand(rootCmd, "device", "create", "--device-name", "dev0", "--num-blocks", "512", "--block-size", "4096", "--device-type", "uram", "--numa", "0", "--json-req")
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)
@@ -30,8 +30,9 @@ func TestCreateDeviceCommandReq(t *testing.T) {
 
 	// TODO(mj): Currently, we compare strings to test the result.
 	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
-	expected := `{"command":"CREATEDEVICE","rid":"fromfakeclient",` +
-		`"param":{"name":"dev0","num_blocks":512,"block_size":4096,"dev_type":"uram"}}`
+	expected := `{"Request": {"command":"CREATEDEVICE","rid":"fromfakeclient","param":{"name":"dev0","num_blocks":512,"block_size":4096,"dev_type":"uram","numa":0}} }
+`
+
 
 	if expected != string(out) {
 		t.Errorf("Expected: %q Output: %q", expected, string(out))

@@ -1,7 +1,6 @@
-/*-
+/*
  *   BSD LICENSE
- *
- *   Copyright (c) Intel Corporation.
+ *   Copyright (c) 2021 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -31,19 +30,27 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPDK_BDEV_MALLOC_H
-#define SPDK_BDEV_MALLOC_H
+#include <gmock/gmock.h>
 
-#include "spdk/bdev.h"
-#include "spdk/stdinc.h"
+#include <list>
+#include <string>
+#include <vector>
 
-typedef void (*spdk_delete_malloc_complete)(void* cb_arg, int bdeverrno);
+#include "src/cli/create_device_command.h"
 
-void* bdev_malloc_get_buf(void);
+namespace pos_cli
+{
+class MockCreateDeviceParam : public CreateDeviceParam
+{
+public:
+    using CreateDeviceParam::CreateDeviceParam;
+};
 
-int create_malloc_disk(struct spdk_bdev** bdev, const char* name, const struct spdk_uuid* uuid,
-    uint64_t num_blocks, uint32_t block_size, uint32_t numa);
+class MockCreateDeviceCommand : public CreateDeviceCommand
+{
+public:
+    using CreateDeviceCommand::CreateDeviceCommand;
+    MOCK_METHOD(string, Execute, (json & doc, string rid), (override));
+};
 
-void delete_malloc_disk(struct spdk_bdev* bdev, spdk_delete_malloc_complete cb_fn, void* cb_arg);
-
-#endif /* SPDK_BDEV_MALLOC_H */
+} // namespace pos_cli

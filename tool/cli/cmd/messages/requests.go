@@ -63,6 +63,7 @@ type CreateDeviceReqParam struct {
 	NUMBLOCKS  int    `json:"num_blocks"`
 	BLOCKSIZE  int    `json:"block_size"`
 	DEVICETYPE string `json:"dev_type"`
+	NUMA       int	`json:"numa"`
 }
 
 // Loger request params

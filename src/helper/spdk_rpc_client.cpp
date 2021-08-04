@@ -73,7 +73,10 @@ SpdkRpcClient::_SetClient(void)
 }
 
 pair<int, string>
-SpdkRpcClient::BdevMallocCreate(string name, uint32_t numBlocks, uint32_t blockSize)
+SpdkRpcClient::BdevMallocCreate(string name,
+    uint32_t numBlocks,
+    uint32_t blockSize,
+    uint32_t numa)
 {
     const int SUCCESS = 0;
     const string method = "bdev_malloc_create";
@@ -82,6 +85,7 @@ SpdkRpcClient::BdevMallocCreate(string name, uint32_t numBlocks, uint32_t blockS
     param["num_blocks"] = numBlocks;
     param["block_size"] = blockSize;
     param["name"] = name;
+    param["numa"] = numa;
 
     Json::Value ret;
     try

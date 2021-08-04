@@ -1297,6 +1297,11 @@ modules:
         message: Device not found
         problem: Devices not found
         solution: Scan device and try again
+      - code: 5526
+        level: ERROR
+        message: Device creation failed
+        problem: Device creation failed
+        solution:
   - name: "system"
     count: 1000
     idStart: 9000

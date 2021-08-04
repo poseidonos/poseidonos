@@ -36,24 +36,49 @@
 #include <string>
 
 #include "src/cli/command.h"
+#include "src/cpu_affinity/affinity_manager.h"
+#include "src/include/pos_event_id.h"
+
+using namespace pos;
+
+namespace pos
+{
+class SpdkRpcClient;
+} // namespace pos
 
 namespace pos_cli
 {
+
+struct CreateDeviceParam
+{
+    string name;
+    string devType;
+    uint32_t numBlocks = 0;
+    uint32_t blockSize = 0;
+    uint32_t numa = 0;
+};
+
 class CreateDeviceCommand : public Command
 {
 public:
     CreateDeviceCommand(void);
     ~CreateDeviceCommand(void) override;
 
+    void Init(
+        AffinityManager* affinityManager = AffinityManagerSingleton::Instance(),
+        SpdkRpcClient* spdkRpcClient = nullptr);
     string Execute(json& doc, string rid) override;
 
 private:
-    bool _CheckParamValidityAndSetType(json& doc);
-    int _CreateUramDevice(json& doc);
+    bool _ParseJsonToParam(CreateDeviceParam& param, json& doc);
+    bool _CheckParamValidity(const CreateDeviceParam& param);
+    int _CreateUramDevice(const CreateDeviceParam& param);
 
-    void _Init(void);
     string errorMessage;
-    string type;
+    const int ERROR_CODE = static_cast<int>(POS_EVENT_ID::DEVICE_CREATION_FAIL);
+
+    AffinityManager* affinityManager = nullptr;
+    SpdkRpcClient* spdkRpcClient = nullptr;
 };
 
 } // namespace pos_cli

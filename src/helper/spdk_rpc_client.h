@@ -45,7 +45,8 @@ class SpdkRpcClient
 public:
     SpdkRpcClient(void);
     virtual ~SpdkRpcClient(void);
-    std::pair<int, std::string> BdevMallocCreate(std::string name, uint32_t numBlocks, uint32_t blockSize);
+    std::pair<int, std::string> BdevMallocCreate(
+        std::string name, uint32_t numBlocks, uint32_t blockSize, uint32_t numa);
     std::pair<int, std::string> SubsystemCreate(std::string subnqn, std::string sn, std::string mn, uint32_t max_namespaces, bool allow_any_host, bool ana_reporting);
     std::pair<int, std::string> SubsystemDelete(std::string subnqn);
     std::pair<int, std::string> SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
