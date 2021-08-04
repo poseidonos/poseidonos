@@ -23,10 +23,10 @@ func TestListArrayResHumanReadable(t *testing.T) {
 	{"sn": "S4H2NE0M600746","type": "DATA"}],"index": 1,"name": "ARRAY1","status":"Unmounted",
 	"updateDatetime": "2021-04-16 15:52:14 +0900"}]}}}`
 
-	expected := `Index Name       DatetimeCreated           DatetimeUpdated           Status     Devices(Type)
------ ---------- ---------------------     ---------------------     ---------- -----------------------------------
-0     ARRAY0     2021-04-16 15:52:14 +0900 2021-04-16 15:52:14 +0900 Mounted    uram0(BUFFER) S4H2NE0M600736(DATA) S4H2NE0M600745(DATA) S4H2NE0M600763(DATA) 
-1     ARRAY1     2021-04-16 15:52:14 +0900 2021-04-16 15:52:14 +0900 Unmounted  uram1(BUFFER) S4H2NE0M600744(DATA) S4H2NE0M600743(DATA) S4H2NE0M600746(DATA) 
+	expected := `Index |Name       |DatetimeCreated           |DatetimeUpdated           |Status
+----- |---------- |---------------------     |---------------------     |----------
+0     |ARRAY0     |2021-04-16 15:52:14 +0900 |2021-04-16 15:52:14 +0900 |Mounted
+1     |ARRAY1     |2021-04-16 15:52:14 +0900 |2021-04-16 15:52:14 +0900 |Unmounted
 `
 
 	output := hookResponse(command, resJSON, false, false)
@@ -38,12 +38,12 @@ func TestListArrayResHumanReadable(t *testing.T) {
 
 func TestListVolumeResHumanReadable(t *testing.T) {
 	var command = "LISTVOLUME"
-	var resJSON = `{"command":"LISTVOLUME","rid":"fromCLI","result":{"status":{"code":0,"description":"DONE"},"data":{ "array":"POSArray0", "volumes":[{"name":"vol1","id":0,"total":21474836480,"remain":21474836480,"status":"Mounted","maxiops":0,"maxbw":0},{"name":"vol2","id":1,"total":11474836480,"remain":31474836480,"status":"Unmounted","maxiops":0,"maxbw":0}]}}}`
+	var resJSON = `{"command":"LISTVOLUME","rid":"fromCLI","result":{"status":{"code":0,"description":"DONE"},"data":{ "array":"POSArray0", "volumes":[{"name":"vol1","id":0,"total":21474836480,"remain":21474836480,"status":"Mounted","maxiops":0,"maxbw":0},{"name":"vol2","id":1,"total":11474836480,"remain":4474836480,"status":"Unmounted","maxiops":0,"maxbw":0}]}}}`
 
-	expected := `Name      ID    TotalCapacity(byte)          RemainingCapacity(byte)      Status     MaximumIOPS      MaximumBandwith
---------- ----- ---------------------------- ---------------------------- ---------- ---------------- ----------------
-vol1      0     21474836480                  21474836480                  Mounted    0                0
-vol2      1     11474836480                  31474836480                  Unmounted  0                0
+	expected := `Name      |ID    |TotalCapacity(byte)          |RemainingCapacity(byte)      |Used%     |Status     |MaximumIOPS      |MaximumBandwith
+--------- |----- |---------------------------- |---------------------------- |--------- |---------- |---------------- |----------------
+vol1      |0     |21474836480                  |21474836480                  |100%      |Mounted    |0                |0
+vol2      |1     |11474836480                  |4474836480                   |38%       |Unmounted  |0                |0
 `
 	output := hookResponse(command, resJSON, false, false)
 
@@ -153,12 +153,12 @@ func TestListDeviceResHumanReadable(t *testing.T) {
 		}
 	 }`
 
-	expected := `Name           SerialNumber(SN)    Address        Class         MN                         NUMA   Size(byte)
--------------- ------------------- -------------- ------------- -------------------------- ------ ------------------
-unvme-ns-0     VMWare NVME_0002    0000:04:00.0   SYSTEM        VMware Virtual NVMe Disk   0      68719476736
-unvme-ns-1     VMWare NVME_0003    0000:0c:00.0   SYSTEM        VMware Virtual NVMe Disk   0      68719476736
-unvme-ns-2     VMWare NVME_0000    0000:13:00.0   SYSTEM        VMware Virtual NVMe Disk   0      68719476736
-unvme-ns-3     VMWare NVME_0001    0000:1b:00.0   SYSTEM        VMware Virtual NVMe Disk   0      68719476736
+	expected := `Name           |SerialNumber(SN)    |Address        |Class         |MN                         |NUMA   |Size(byte)
+-------------- |------------------- |-------------- |------------- |-------------------------- |------ |------------------
+unvme-ns-0     |VMWare NVME_0002    |0000:04:00.0   |SYSTEM        |VMware Virtual NVMe Disk   |0      |68719476736
+unvme-ns-1     |VMWare NVME_0003    |0000:0c:00.0   |SYSTEM        |VMware Virtual NVMe Disk   |0      |68719476736
+unvme-ns-2     |VMWare NVME_0000    |0000:13:00.0   |SYSTEM        |VMware Virtual NVMe Disk   |0      |68719476736
+unvme-ns-3     |VMWare NVME_0001    |0000:1b:00.0   |SYSTEM        |VMware Virtual NVMe Disk   |0      |68719476736
 `
 	output := hookResponse(command, resJSON, false, false)
 

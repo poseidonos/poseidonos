@@ -1,6 +1,7 @@
 package displaymgr
 
 import (
+	"cli/cmd/globals"
 	"cli/cmd/messages"
 	"encoding/json"
 	"fmt"
@@ -56,21 +57,34 @@ func printResToHumanReadable(command string, resJSON string) {
 		printStatus(res.RESULT.STATUS.CODE)
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-		fmt.Fprintln(w, "Index\tName\tDatetimeCreated\tDatetimeUpdated\tStatus\tDevices(Type)")
-		fmt.Fprintln(w, "-----\t----------\t---------------------\t---------------------\t----------\t-----------------------------------")
 
+		// Header
+		fmt.Fprintln(w,
+			"Index\t"+
+				globals.FieldSeparator+"Name\t"+
+				globals.FieldSeparator+"DatetimeCreated\t"+
+				globals.FieldSeparator+"DatetimeUpdated\t"+
+				globals.FieldSeparator+"Status")
+
+		// Horizontal line
+		fmt.Fprintln(w,
+			"-----\t"+
+				globals.FieldSeparator+"----------\t"+
+				globals.FieldSeparator+"---------------------\t"+
+				globals.FieldSeparator+"---------------------\t"+
+				globals.FieldSeparator+"----------")
+
+		// Data
 		for _, array := range res.RESULT.DATA.ARRAYLIST {
-			fmt.Fprint(w, strconv.Itoa(array.ARRAYINDEX)+"\t"+array.ARRAYNAME+
-				"\t"+array.CREATEDATETIME+"\t"+array.UPDATEDATETIME+"\t"+array.STATUS+"\t")
-
-			for _, device := range array.DEVICELIST {
-				fmt.Fprint(w, device.SERIAL+"(")
-				fmt.Fprint(w, device.DEVICETYPE+") ")
-			}
+			fmt.Fprint(w,
+				strconv.Itoa(array.ARRAYINDEX)+"\t"+
+					globals.FieldSeparator+array.ARRAYNAME+"\t"+
+					globals.FieldSeparator+array.CREATEDATETIME+"\t"+
+					globals.FieldSeparator+array.UPDATEDATETIME+"\t"+
+					globals.FieldSeparator+array.STATUS)
 			fmt.Fprintln(w, "")
 		}
 		w.Flush()
-
 	case "ARRAYINFO":
 		res := messages.ArrayInfoResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
@@ -105,13 +119,39 @@ func printResToHumanReadable(command string, resJSON string) {
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-		fmt.Fprintln(w, "Name\tID\tTotalCapacity(byte)\tRemainingCapacity(byte)\tStatus\tMaximumIOPS\tMaximumBandwith")
-		fmt.Fprintln(w, "---------\t-----\t----------------------------\t----------------------------\t----------\t----------------\t----------------")
+		// Header
+		fmt.Fprintln(w,
+			"Name\t"+
+				globals.FieldSeparator+"ID\t"+
+				globals.FieldSeparator+"TotalCapacity(byte)\t"+
+				globals.FieldSeparator+"RemainingCapacity(byte)\t"+
+				globals.FieldSeparator+"Used%\t"+
+				globals.FieldSeparator+"Status\t"+
+				globals.FieldSeparator+"MaximumIOPS\t"+
+				globals.FieldSeparator+"MaximumBandwith")
 
+		// Horizontal line
+		fmt.Fprintln(w,
+			"---------\t"+
+				globals.FieldSeparator+"-----\t"+
+				globals.FieldSeparator+"----------------------------\t"+
+				globals.FieldSeparator+"----------------------------\t"+
+				globals.FieldSeparator+"---------\t"+
+				globals.FieldSeparator+"----------\t"+
+				globals.FieldSeparator+"----------------\t"+
+				globals.FieldSeparator+"----------------")
+
+		// Data
 		for _, volume := range res.RESULT.DATA.VOLUMELIST {
-			fmt.Fprintln(w, volume.VOLUMENAME+"\t"+strconv.Itoa(volume.VOLUMEID)+
-				"\t"+strconv.Itoa(volume.TOTAL)+"\t"+strconv.Itoa(volume.REMAIN)+"\t"+
-				volume.STATUS+"\t"+strconv.Itoa(volume.MAXIOPS)+"\t"+strconv.Itoa(volume.MAXBW))
+			fmt.Fprintln(w,
+				volume.VOLUMENAME+"\t"+
+					globals.FieldSeparator+strconv.Itoa(volume.VOLUMEID)+"\t"+
+					globals.FieldSeparator+strconv.Itoa(volume.TOTAL)+"\t"+
+					globals.FieldSeparator+strconv.Itoa(volume.REMAIN)+"\t"+
+					globals.FieldSeparator+strconv.Itoa(volume.REMAIN*100/volume.TOTAL)+"%"+"\t"+
+					globals.FieldSeparator+volume.STATUS+"\t"+
+					globals.FieldSeparator+strconv.Itoa(volume.MAXIOPS)+"\t"+
+					globals.FieldSeparator+strconv.Itoa(volume.MAXBW))
 		}
 		w.Flush()
 
@@ -122,12 +162,36 @@ func printResToHumanReadable(command string, resJSON string) {
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-		fmt.Fprintln(w, "Name\tSerialNumber(SN)\tAddress\tClass\tMN\tNUMA\tSize(byte)")
-		fmt.Fprintln(w, "--------------\t-------------------\t--------------\t-------------\t--------------------------\t------\t------------------")
+		// Header
+		fmt.Fprintln(w,
+			"Name\t"+
+				globals.FieldSeparator+"SerialNumber(SN)\t"+
+				globals.FieldSeparator+"Address\t"+
+				globals.FieldSeparator+"Class\t"+
+				globals.FieldSeparator+"MN\t"+
+				globals.FieldSeparator+"NUMA\t"+
+				globals.FieldSeparator+"Size(byte)")
 
+		// Horizontal line
+		fmt.Fprintln(w,
+			"--------------\t"+
+				globals.FieldSeparator+"-------------------\t"+
+				globals.FieldSeparator+"--------------\t"+
+				globals.FieldSeparator+"-------------\t"+
+				globals.FieldSeparator+"--------------------------\t"+
+				globals.FieldSeparator+"------\t"+
+				globals.FieldSeparator+"------------------")
+
+		// Data
 		for _, device := range res.RESULT.DATA.DEVICELIST {
-			fmt.Fprintln(w, device.DEVICENAME+"\t"+device.SERIAL+"\t"+device.ADDRESS+"\t"+device.CLASS+
-				"\t"+device.MN+"\t"+device.NUMA+"\t"+strconv.Itoa(device.SIZE))
+			fmt.Fprintln(w,
+				device.DEVICENAME+"\t"+
+					globals.FieldSeparator+device.SERIAL+"\t"+
+					globals.FieldSeparator+device.ADDRESS+"\t"+
+					globals.FieldSeparator+device.CLASS+"\t"+
+					globals.FieldSeparator+device.MN+"\t"+
+					globals.FieldSeparator+device.NUMA+"\t"+
+					globals.FieldSeparator+strconv.Itoa(device.SIZE))
 		}
 		w.Flush()
 
