@@ -54,6 +54,7 @@ CopierMeta::CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize,
 : inUseBitmap(inputInUseBitmap),
   gcStripeManager(inputGcStripeManager),
   arrayName(array->GetName()),
+  arrayIndex(array->GetIndex()),
   victimStripes(inputVictimStripes),
   gcBufferPool(inputGcBufferPool)
 {
@@ -291,6 +292,12 @@ std::string
 CopierMeta::GetArrayName(void)
 {
     return arrayName;
+}
+
+unsigned int
+CopierMeta::GetArrayIndex(void)
+{
+    return arrayIndex;
 }
 
 } // namespace pos

@@ -53,7 +53,7 @@ namespace pos
 CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe, uint32_t listIndex,
                                             void* buffer, CopierMeta* meta, StripeId stripeId)
 : CopierReadCompletion(victimStripe, listIndex, buffer, meta, stripeId, nullptr,
-                        VolumeServiceSingleton::Instance()->GetVolumeManager(meta->GetArrayName()),
+                        VolumeServiceSingleton::Instance()->GetVolumeManager(meta->GetArrayIndex()),
                         EventSchedulerSingleton::Instance())
 {
 }

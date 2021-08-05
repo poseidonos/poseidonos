@@ -49,7 +49,7 @@ VictimStripe::VictimStripe(IArrayInfo* array)
             MapperServiceSingleton::Instance()->GetIReverseMap(array->GetName())->AllocReverseMapPack(false),
             MapperServiceSingleton::Instance()->GetIVSAMap(array->GetName()),
             MapperServiceSingleton::Instance()->GetIStripeMap(array->GetName()),
-            VolumeServiceSingleton::Instance()->GetVolumeManager(array->GetName()))
+            VolumeServiceSingleton::Instance()->GetVolumeManager(array->GetIndex()))
 {
 }
 

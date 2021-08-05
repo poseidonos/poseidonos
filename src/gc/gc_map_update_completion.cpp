@@ -60,7 +60,7 @@ GcMapUpdateCompletion::GcMapUpdateCompletion(Stripe* stripe, std::string arrayNa
 : GcMapUpdateCompletion(stripe, arrayName, iStripeMap, eventScheduler, gcStripeManager,
                         ArrayMgr::Instance()->GetArrayInfo(arrayName),
                         RBAStateServiceSingleton::Instance()->GetRBAStateManager(arrayName),
-                        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName))
+                        VolumeServiceSingleton::Instance()->GetVolumeManager(ArrayMgr::Instance()->GetArrayInfo(arrayName)->GetIndex()))
 {
 }
 

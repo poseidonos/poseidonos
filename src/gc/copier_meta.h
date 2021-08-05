@@ -79,6 +79,7 @@ public:
 
     virtual GcStripeManager* GetGcStripeManager(void);
     virtual std::string GetArrayName(void);
+    virtual unsigned int GetArrayIndex(void);
 
     static const uint32_t GC_BUFFER_COUNT = 512;
     static const uint32_t GC_CONCURRENT_COUNT = 16;
@@ -103,6 +104,7 @@ private:
     bool firstGc = true;
     std::atomic_flag copyLock = ATOMIC_FLAG_INIT;
     std::string arrayName;
+    unsigned int arrayIndex;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
     std::vector<FreeBufferPool*>* gcBufferPool;
