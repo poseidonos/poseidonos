@@ -49,6 +49,7 @@ StripeMapManager::StripeMapManager(MapperAddressInfo* info, std::string arrayNam
   arrayName(arrayName)
 {
     pthread_rwlock_init(&stripeMapLock, nullptr);
+    mapFlushStatus[STRIPE_MAP_ID] = MapFlushState::FLUSH_DONE;
 }
 
 StripeMapManager::~StripeMapManager(void)
