@@ -39,6 +39,10 @@ namespace pos
 {
 RBAStateService::RBAStateService(void)
 {
+    for (int arrayId = 0 ; arrayId < ArrayMgmtPolicy::MAX_ARRAY_CNT; arrayId++)
+    {
+        items[arrayId] = nullptr;
+    }
 }
 
 RBAStateService::~RBAStateService(void)
@@ -77,9 +81,12 @@ RBAStateService::GetRBAStateManager(std::string arrayName)
 {
     for (int arrayId = 0 ; arrayId < ArrayMgmtPolicy::MAX_ARRAY_CNT; arrayId++)
     {
-        if (items[arrayId]->GetArrayName() == arrayName)
+        if (items[arrayId] != nullptr)
         {
-            return items[arrayId];
+            if (items[arrayId]->GetArrayName() == arrayName)
+            {
+                return items[arrayId];
+            }
         }
     }
     return nullptr;

@@ -52,7 +52,6 @@ public:
     RBAStateManager* GetRBAStateManager(int arrayId);
 
 private:
-    int volumeManagerCnt;
     RBAStateManager* items[ArrayMgmtPolicy::MAX_ARRAY_CNT];
 };
 
