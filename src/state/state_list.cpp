@@ -41,8 +41,17 @@ using namespace std;
 
 namespace pos
 {
-StateList::~StateList()
+
+StateList::StateList(ListUpdatedHandler cb)
 {
+    listUpdated = move(cb);
+    unique_lock<mutex> lock(listMutex);
+    contextList.push_back(&defaultCtx);
+}
+
+StateList::~StateList(void)
+{
+    unique_lock<mutex> lock(listMutex);
     contextList.clear();
 }
 
@@ -52,13 +61,14 @@ StateList::Add(StateContext* ctx)
     listMutex.lock();
     if (Exists(ctx) == false)
     {
+        StateContext* prev = contextList.front();
         contextList.push_back(ctx);
         POS_TRACE_DEBUG((int)POS_EVENT_ID::STATE_CONTEXT_UPDATED,
             "statecontext added - {}", ctx->GetSituation().ToString());
         sort(contextList.begin(), contextList.end(), _Compare);
         StateContext* next = contextList.front();
         listMutex.unlock();
-        listUpdated(next);
+        listUpdated(prev, next);
     }
     else
     {
@@ -75,10 +85,11 @@ StateList::Remove(StateContext* ctx)
     {
         POS_TRACE_DEBUG((int)POS_EVENT_ID::STATE_CONTEXT_UPDATED,
             "statecontext removed - {}", (*it)->GetSituation().ToString());
+        StateContext* prev = contextList.front();
         contextList.erase(it);
         StateContext* next = contextList.front();
         listMutex.unlock();
-        listUpdated(next);
+        listUpdated(prev, next);
     }
     else
     {
@@ -116,6 +127,14 @@ bool StateList::Exists(SituationEnum situ)
     }
     return false;
 }
+
+StateContext*
+StateList::Current(void)
+{
+    unique_lock<mutex> lock(listMutex);
+    return contextList.front();
+}
+
 
 vector<StateContext*>::iterator
 StateList::_Find(StateContext* ctx)

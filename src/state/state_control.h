@@ -48,7 +48,6 @@ class StateControl : public IStateControl
 {
 public:
     StateControl(void);
-    StateControl(StateContext* defaultCtx);
     virtual ~StateControl(void);
     void Subscribe(IStateObserver* sub, string name) override;
     void Unsubscribe(IStateObserver* sub) override;
@@ -60,15 +59,13 @@ public:
 private:
     bool _Exists(StateContext* ctx);
     bool _Exists(StateEnum state);
-    void _ListUpdated(StateContext* front);
+    void _ListUpdated(StateContext* prev, StateContext* next);
     void _UpdateState(void);
     void _ChangeState(StateContext* next);
     void _NotifyState(StateContext* prev, StateContext* next);
 
     StatePublisher* publisher = nullptr;
-    StateContext* curr = nullptr;
     StateList* stateList = nullptr;
     future<void> async_future;
-    StateContext defaultCtx{"StateManager", SituationEnum::DEFAULT};
 };
 } // namespace pos
