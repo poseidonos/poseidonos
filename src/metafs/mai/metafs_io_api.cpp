@@ -40,8 +40,6 @@ namespace pos
 static InstanceTagIdAllocator aiocbTagIdAllocator;
 
 MetaFsIoApi::MetaFsIoApi(void)
-: arrayId(INT32_MAX),
-  ctrlMgr(nullptr)
 {
 }
 

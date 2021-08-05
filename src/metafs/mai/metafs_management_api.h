@@ -65,6 +65,6 @@ public:
 private:
     int arrayId = INT32_MAX;
     bool isNormal = false;
-    MetaFsSystemManager* sysMgr;
+    MetaFsSystemManager* sysMgr = nullptr;
 };
 } // namespace pos

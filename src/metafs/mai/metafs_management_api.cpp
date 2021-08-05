@@ -37,7 +37,6 @@
 namespace pos
 {
 MetaFsManagementApi::MetaFsManagementApi(void)
-: arrayId(INT32_MAX)
 {
 }
 

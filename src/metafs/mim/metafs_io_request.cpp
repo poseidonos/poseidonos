@@ -46,6 +46,7 @@ MetaFsIoRequest::MetaFsIoRequest(void)
   ioMode(MetaIoMode::Max),
   isFullFileIo(true),
   fd(MetaFsCommonConst::INVALID_FD),
+  arrayId(INT32_MAX),
   buf(INVALID_BUF),
   byteOffsetInFile(INVALID_BYTE_OFFSET),
   byteSize(INVALID_BYTE_SIZE),

@@ -59,8 +59,8 @@ public:
 
     bool IsValid(void);
 
-    MetaFsControlReqType reqType;
-    int arrayId;
+    MetaFsControlReqType reqType = MetaFsControlReqType::Max;
+    int arrayId = INT32_MAX;
     MetaStorageMediaInfoList* mediaList = nullptr;
 };
 } // namespace pos

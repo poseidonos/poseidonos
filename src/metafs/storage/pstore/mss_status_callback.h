@@ -54,7 +54,8 @@ class MssAioData
 {
 public:
     MssAioData(void)
-    : media(MetaStorageType::Default),
+    : arrayId(INT32_MAX),
+      media(MetaStorageType::Default),
       metaLpn(MetaFsCommonConst::INVALID_META_LPN),
       lpnCnt(MetaFsCommonConst::INVALID_META_LPN),
       buf(nullptr),

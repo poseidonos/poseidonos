@@ -36,7 +36,6 @@
 namespace pos
 {
 MetaFsControlReqMsg::MetaFsControlReqMsg(void)
-: reqType(MetaFsControlReqType::Max)
 {
 }
 

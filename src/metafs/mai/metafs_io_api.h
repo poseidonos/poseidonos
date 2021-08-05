@@ -74,7 +74,7 @@ private:
 
     int arrayId = INT32_MAX;
     bool isNormal = false;
-    MetaIoManager* ioMgr;
+    MetaIoManager* ioMgr = nullptr;
     MetaFsFileControlApi* ctrlMgr = nullptr;
 };
 } // namespace pos

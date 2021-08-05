@@ -92,7 +92,7 @@ private:
 
     int arrayId = INT32_MAX;
     bool isNormal = false;
-    MetaVolumeManager* volMgr;
+    MetaVolumeManager* volMgr = nullptr;
 
     BitMap* bitmap = nullptr;
     // (fd, array)

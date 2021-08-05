@@ -36,7 +36,6 @@
 namespace pos
 {
 MetaFsFileControlApi::MetaFsFileControlApi(void)
-: arrayId(INT32_MAX)
 {
 }
 
