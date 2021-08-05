@@ -39,6 +39,7 @@ Map::Map(void)
 : pageSize(0),
   numPages(0)
 {
+    mPageArr = nullptr;
 }
 
 Map::Map(int numMpages, int mpageSize)

@@ -42,6 +42,9 @@ namespace pos
 MapperAddressInfo::MapperAddressInfo(IArrayInfo* iArrayInfo_)
 : iArrayInfo(iArrayInfo_)
 {
+    maxVsid = 0;
+    blksPerStripe = 0;
+    numWbStripes = 0;
 }
 
 void
