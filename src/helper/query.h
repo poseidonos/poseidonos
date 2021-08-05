@@ -64,4 +64,39 @@ auto Where(C&& c, Q q)
     }
     return r;
 }
+
+template<typename C/*Container*/, typename Q/*Query*/>
+auto First(C&& c, Q q)
+{
+    using element_t = std::decay_t<decltype(*std::begin(c))>;
+    element_t ret = nullptr;
+    for (auto&& e : c)
+    {
+        if (q(e) == true)
+        {
+            ret = e;
+            break;
+        }
+    }
+    return ret;
+}
+
+template<typename OC/*OuterContainer*/, typename OKS/*OuterKeySelector*/, typename IC/*InnerContainer*/, typename IKS/*InnerKeySelector*/>
+auto Join(OC&& oc, OKS oks, IC&& ic, IKS iks)
+{
+    using element_t = std::decay_t<decltype(*std::begin(oc))>;
+    std::vector<element_t> r;
+    for (auto&& i : ic)
+    {
+        for (auto&& o : oc)
+        {
+            if (iks(i) == oks(o))
+            {
+                r.emplace_back(o);
+            }
+        }
+    }
+    return r;
+}
+
 } // namespace Enumerable

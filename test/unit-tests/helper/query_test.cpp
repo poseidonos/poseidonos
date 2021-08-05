@@ -1,0 +1,122 @@
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include <vector>
+#include <string>
+#include "src/helper/query.h"
+
+using ::testing::_;
+using ::testing::Return;
+
+namespace Enumerable
+{
+
+class Person
+{
+public:
+    Person(std::string n, int i)
+    {
+        name = n;
+        id  = i;
+    }
+    std::string name;
+    int id;
+};
+
+TEST(Query, Query_testGroupBy)
+{
+    // Given
+    std::vector<Person*> v1;
+    v1.push_back(new Person("foo", 10));
+    v1.push_back(new Person("bar", 20));
+    v1.push_back(new Person("foo", 30));
+
+    // When
+    auto&& personByName = Enumerable::GroupBy(v1,
+        [](auto p) { return p->name; });
+
+    // Then
+    ASSERT_EQ(2, personByName.size());
+}
+
+TEST(Query, Query_testWhere)
+{
+    // Given
+    std::vector<Person*> v1;
+    v1.push_back(new Person("foo", 10));
+    v1.push_back(new Person("bar", 20));
+    v1.push_back(new Person("foo", 30));
+
+    // When
+    auto&& personNameisfoo = Enumerable::Where(v1,
+        [](auto p) { return p->name == "foo"; });
+
+    // Then
+    ASSERT_EQ(2, personNameisfoo.size());
+}
+
+TEST(Query, Query_testFirst)
+{
+    // Given
+    std::vector<Person*> v1;
+    v1.push_back(new Person("foo", 10));
+    v1.push_back(new Person("bar", 20));
+    v1.push_back(new Person("foo", 30));
+
+    // When
+    auto&& personNameisfoo = Enumerable::First(v1,
+        [](auto p) { return p->name == "foo"; });
+
+    // Then
+    ASSERT_EQ(10, personNameisfoo->id);
+}
+
+TEST(Query, Query_testFirstNoResult)
+{
+    // Given
+    class Person
+    {
+        public:
+            Person(std::string n, int i)
+            {
+                name = n;
+                id  = i;
+            }
+            std::string name;
+            int id;
+    };
+
+    std::vector<Person*> v1;
+    v1.push_back(new Person("foo", 10));
+    v1.push_back(new Person("bar", 20));
+    v1.push_back(new Person("foo", 30));
+
+    // When
+    auto&& personNameistom = Enumerable::First(v1,
+        [](auto p) { return p->name == "tom"; });
+
+    // Then
+    ASSERT_EQ(nullptr, personNameistom);
+}
+
+TEST(Query, Query_testJoin)
+{
+    // Given
+    std::vector<Person*> v1;
+    v1.push_back(new Person("foo", 10));
+    v1.push_back(new Person("bar", 20));
+    v1.push_back(new Person("foo", 30));
+
+    std::vector<int> v2;
+    v2.push_back(20);
+    v2.push_back(30);
+    v2.push_back(50);
+
+    // When
+    auto&& personJoinById = Enumerable::Join(v1, 
+        [](auto p) { return p->id; }, v2, [](auto i) { return i; });
+
+    // Then
+    ASSERT_EQ(2, personJoinById.size());
+}
+
+}  // namespace Enumerable
