@@ -32,10 +32,15 @@
 
 #pragma once
 
+#include <functional>
+#include <string>
+#include <vector>
+
 #include "src/array/array.h"
 #include "src/array_components/meta_mount_sequence.h"
-#include "src/gc/garbage_collector.h"
 #include "src/gc/flow_control/flow_control.h"
+#include "src/gc/garbage_collector.h"
+#include "src/io/general_io/rba_state_manager.h"
 #include "src/journal_manager/journal_manager.h"
 #include "src/mapper/mapper.h"
 #include "src/volume/volume_manager.h"

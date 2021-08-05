@@ -30,13 +30,13 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/logger/logger.h"
 #include "array_mount_sequence.h"
 
 #include "src/array/interface/i_abr_control.h"
 #include "src/array_components/mount_temp/mount_temp.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 #include "src/volume/volume_manager.h"
 
 namespace pos

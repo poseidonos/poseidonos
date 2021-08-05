@@ -39,7 +39,6 @@
 
 namespace pos
 {
-
 class VolumeMounter : public VolumeInterface
 {
 public:

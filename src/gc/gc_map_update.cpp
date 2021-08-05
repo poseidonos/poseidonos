@@ -139,7 +139,7 @@ GcMapUpdate::Execute(void)
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_MAP_UPDATE_COMPLETION,
         "gc map update, arrayName:{}, stripeUserLsid:{}, result:{}",
-        arrayName, stripe->GetUserLsid(), (event != nullptr));
+        arrayName, currentLsid, (event != nullptr));
 
     return true;
 }

@@ -36,7 +36,6 @@
 
 namespace pos
 {
-
 class IoRecoveryEventFactory;
 
 class Poseidonos

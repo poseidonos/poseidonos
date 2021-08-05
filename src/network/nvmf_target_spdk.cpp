@@ -310,6 +310,11 @@ DetachNamespaceAllPauseDone(struct spdk_nvmf_subsystem* subsystem,
         {
             string bdevName = NvmfTargetSingleton::Instance()->GetBdevName(volId, volsInfo.arrayName);
             ns = NvmfTargetSingleton::Instance()->GetNamespace(subsystem, bdevName);
+            if (ns == nullptr)
+            {
+                SPDK_ERRLOG("Failed to find namespace(%s)\n", bdevName.c_str());
+                continue;
+            }
             nsid = spdk_nvmf_ns_get_id(ns);
             int ret = spdk_nvmf_subsystem_remove_ns(subsystem, nsid);
             if (ret < 0)
