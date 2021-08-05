@@ -9,6 +9,8 @@ import (
 	"pnconnector/src/util"
 	"strconv"
 	"text/tabwriter"
+
+	"github.com/bytefmt-master"
 )
 
 func PrintResponse(command string, resJSON string, isDebug bool, isJSONRes bool) {
@@ -123,8 +125,8 @@ func printResToHumanReadable(command string, resJSON string) {
 		fmt.Fprintln(w,
 			"Name\t"+
 				globals.FieldSeparator+"ID\t"+
-				globals.FieldSeparator+"TotalCapacity(byte)\t"+
-				globals.FieldSeparator+"RemainingCapacity(byte)\t"+
+				globals.FieldSeparator+"TotalCapacity\t"+
+				globals.FieldSeparator+"RemainingCapacity\t"+
 				globals.FieldSeparator+"Used%\t"+
 				globals.FieldSeparator+"Status\t"+
 				globals.FieldSeparator+"MaximumIOPS\t"+
@@ -146,9 +148,9 @@ func printResToHumanReadable(command string, resJSON string) {
 			fmt.Fprintln(w,
 				volume.VOLUMENAME+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.VOLUMEID)+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.TOTAL)+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.REMAIN)+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.REMAIN*100/volume.TOTAL)+"%"+"\t"+
+					globals.FieldSeparator+bytefmt.ByteSize(volume.TOTAL)+"\t"+
+					globals.FieldSeparator+bytefmt.ByteSize(volume.REMAIN)+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(volume.REMAIN*100/volume.TOTAL, 10)+"%"+"\t"+
 					globals.FieldSeparator+volume.STATUS+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.MAXIOPS)+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.MAXBW))

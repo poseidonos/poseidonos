@@ -38,12 +38,18 @@ func TestListArrayResHumanReadable(t *testing.T) {
 
 func TestListVolumeResHumanReadable(t *testing.T) {
 	var command = "LISTVOLUME"
-	var resJSON = `{"command":"LISTVOLUME","rid":"fromCLI","result":{"status":{"code":0,"description":"DONE"},"data":{ "array":"POSArray0", "volumes":[{"name":"vol1","id":0,"total":21474836480,"remain":21474836480,"status":"Mounted","maxiops":0,"maxbw":0},{"name":"vol2","id":1,"total":11474836480,"remain":4474836480,"status":"Unmounted","maxiops":0,"maxbw":0}]}}}`
+	var resJSON = `{"command":"LISTVOLUME","rid":"fromCLI",` +
+		`"result":{"status":{"code":0,"description":"DONE"},` +
+		`"data":{ "array":"POSArray0",` +
+		` "volumes":[{"name":"vol1","id":0,"total":214748364800,` +
+		`"remain":214748364800,"status":"Mounted","maxiops":0,"maxbw":0},` +
+		`{"name":"vol2","id":1,"total":11474836480,"remain":8474836480,` +
+		`"status":"Unmounted","maxiops":0,"maxbw":0}]}}}`
 
-	expected := `Name      |ID    |TotalCapacity(byte)          |RemainingCapacity(byte)      |Used%     |Status     |MaximumIOPS      |MaximumBandwith
+	expected := `Name      |ID    |TotalCapacity                |RemainingCapacity            |Used%     |Status     |MaximumIOPS      |MaximumBandwith
 --------- |----- |---------------------------- |---------------------------- |--------- |---------- |---------------- |----------------
-vol1      |0     |21474836480                  |21474836480                  |100%      |Mounted    |0                |0
-vol2      |1     |11474836480                  |4474836480                   |38%       |Unmounted  |0                |0
+vol1      |0     |200G                         |200G                         |100%      |Mounted    |0                |0
+vol2      |1     |10.7G                        |7.9G                         |73%       |Unmounted  |0                |0
 `
 	output := hookResponse(command, resJSON, false, false)
 
@@ -178,7 +184,7 @@ Tempurature     : 11759
 	output := hookResponse(command, resJSON, false, false)
 
 	if output != expected {
-		t.Errorf("Expected: %q Output: %s", expected, output)
+		t.Errorf("Expected: %q Output: %q", expected, output)
 	}
 
 }

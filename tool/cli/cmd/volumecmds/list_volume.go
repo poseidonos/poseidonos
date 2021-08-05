@@ -70,6 +70,7 @@ var list_volume_arrayName = ""
 
 func init() {
 	ListVolumeCmd.Flags().StringVarP(&list_volume_arrayName, "array-name", "a", "", "The Name of the array of volumes to list")
+	ListVolumeCmd.MarkFlagRequired("array-name")
 }
 
 func PrintResponse(response string) {

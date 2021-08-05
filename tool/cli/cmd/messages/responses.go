@@ -160,8 +160,8 @@ type ListVolumeResData struct {
 type Volume struct {
 	VOLUMENAME string `json:"name"`
 	VOLUMEID   int    `json:"id"`
-	TOTAL      int    `json:"total"`
-	REMAIN     int    `json:"remain"`
+	TOTAL      uint64 `json:"total"`
+	REMAIN     uint64 `json:"remain"`
 	STATUS     string `json:"status"`
 	MAXIOPS    int    `json:"maxiops"`
 	MAXBW      int    `json:"maxbw"`
