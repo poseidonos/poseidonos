@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"cli/cmd/displaymgr"
+	"cli/cmd/globals"
+	"encoding/json"
 	_ "encoding/json"
 	"fmt"
 	"pnconnector/src/errors"
@@ -125,7 +128,14 @@ func WBT(cmd *cobra.Command, args []string) (model.Response, error) {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		PrintReqRes(req, res)
+		reqJSON, _ := json.Marshal(req)
+		displaymgr.PrintRequest(string(reqJSON))
+
+		resJSON, _ := json.Marshal(res)
+		// mj: isDebug is true for WBT commands at default.
+		// If globals.IsJSONRes is true, PrintResponse does not
+		// display the debug output
+		displaymgr.PrintResponse("WBT", string(resJSON), true, globals.IsJSONRes)
 	}
 
 	return res, err

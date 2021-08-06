@@ -14,10 +14,10 @@ import (
 )
 
 func PrintResponse(command string, resJSON string, isDebug bool, isJSONRes bool) {
-	if isDebug {
-		printResToDebug(resJSON)
-	} else if isJSONRes {
+	if isJSONRes {
 		printResInJSON(resJSON)
+	} else if isDebug {
+		printResToDebug(resJSON)
 	} else {
 		printResToHumanReadable(command, resJSON)
 	}
@@ -46,7 +46,7 @@ func printResToDebug(resJSON string) {
 }
 
 func printResInJSON(resJSON string) {
-	fmt.Println(resJSON)
+	fmt.Println("{\"Response\":", resJSON, "}")
 }
 
 // TODO(mj): Currently, the output records may have whitespace.

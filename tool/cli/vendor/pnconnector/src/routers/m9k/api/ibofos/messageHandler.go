@@ -1,11 +1,11 @@
 package ibofos
 
 import (
+	"encoding/json"
+	"errors"
 	"pnconnector/src/handler"
 	"pnconnector/src/log"
 	"pnconnector/src/routers/m9k/model"
-	"encoding/json"
-	"errors"
 	"time"
 )
 
@@ -15,7 +15,7 @@ var (
 	ErrReceiving = errors.New("Receiving error")
 	ErrJson      = errors.New("Json error")
 	ErrRes       = errors.New("Response error")
-	ErrConn      = errors.New("iBoF Connection Error")
+	ErrConn      = errors.New("POS Connection Error")
 	ErrJsonType  = errors.New("Json Type Validation Error")
 	//mutex        = &sync.Mutex{}
 )

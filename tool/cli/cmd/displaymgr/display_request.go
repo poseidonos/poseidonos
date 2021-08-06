@@ -7,6 +7,6 @@ import (
 
 func PrintRequest(reqJSON string) {
 	if globals.IsJSONReq {
-		fmt.Print(string(reqJSON))
+		fmt.Println("{\"Request\":", reqJSON, "}")
 	}
 }
