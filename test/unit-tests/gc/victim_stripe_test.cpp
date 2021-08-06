@@ -92,12 +92,13 @@ protected:
     CallbackSmartPtr reverseMapLoadCompletionPtr;
 
     PartitionLogicalSize partitionLogicalSize = {
+    .minWriteBlkCnt = 0, /* no interesting */
     .blksPerChunk = 64,
     .blksPerStripe = 2048,
     .chunksPerStripe = 32,
     .stripesPerSegment = 1024,
     .totalStripes = 32,
-    .totalSegments = 32768,
+    .totalSegments = 32768
     };
     uint32_t TEST_SEGMENT_1 = 100;
     uint32_t TEST_SEGMENT_1_BASE_STRIPE_ID = TEST_SEGMENT_1 * partitionLogicalSize.stripesPerSegment;

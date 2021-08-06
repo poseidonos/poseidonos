@@ -49,6 +49,17 @@ class VolumeEventPublisher;
 class FreeBufferPool;
 
 using GcWriteBuffer = std::vector<void*>;
+struct GcAllocateBlks
+{
+    uint32_t startOffset;
+    uint32_t numBlks;
+
+    inline bool
+    operator==(GcAllocateBlks input) const
+    {
+        return (input.startOffset == startOffset && input.numBlks == numBlks);
+    }
+};
 
 class GcStripeManager : public VolumeEvent
 {
@@ -56,8 +67,6 @@ public:
     explicit GcStripeManager(IArrayInfo* iArrayInfo);
     GcStripeManager(IArrayInfo* iArrayInfo,
                     FreeBufferPool* inputGcWriteBufferPool,
-                    std::vector<BlkInfo>* inputBlkInfoList,
-                    GcWriteBuffer* inputGcActiveWriteBuffer,
                     VolumeEventPublisher* inputVolumeEventPublisher);
     ~GcStripeManager(void);
 
@@ -69,9 +78,7 @@ public:
     virtual bool VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
     virtual void VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) override;
 
-    virtual bool AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks);
-    virtual void MoveActiveWriteBuffer(uint32_t volumeId, GcWriteBuffer* buffer);
-    virtual std::mutex& GetWriteBufferLock(uint32_t volumeId);
+    virtual GcAllocateBlks AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks);
     virtual void SetFinished(void);
     virtual void ReturnBuffer(GcWriteBuffer* buffer);
     virtual GcWriteBuffer* GetWriteBuffer(uint32_t volumeId);
@@ -91,7 +98,7 @@ private:
     void _SetActiveStripeTail(uint32_t volumeId, uint32_t offset);
     uint32_t _DecreaseActiveStripeRemaining(uint32_t volumeId, uint32_t cnt);
     void _SetActiveStripeRemaining(uint32_t volumeId, uint32_t cnt);
-    bool _AllocateBlks(uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks);
+    GcAllocateBlks _AllocateBlks(uint32_t volumeId, uint32_t numBlks);
     bool _IsWriteBufferFull(uint32_t volumeId);
     void _CreateBlkInfoList(uint32_t volumeId);
 
@@ -109,8 +116,6 @@ private:
     const PartitionLogicalSize* udSize;
     std::atomic<uint32_t> flushedStripeCnt;
 
-    std::vector<BlkInfo>* inputBlkInfoList;
-    GcWriteBuffer* inputGcActiveWriteBuffer;
     VolumeEventPublisher* volumeEventPublisher;
 };
 

@@ -55,22 +55,16 @@ namespace pos
 GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo)
 : GcStripeManager(iArrayInfo,
                 new FreeBufferPool(iArrayInfo->GetSizeInfo(PartitionType::USER_DATA)->chunksPerStripe * GC_WRITE_BUFFER_CONUNT, CHUNK_SIZE),
-                nullptr,
-                nullptr,
                 VolumeEventPublisherSingleton::Instance())
 {
 }
 
 GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
                                 FreeBufferPool* inputGcWriteBufferPool,
-                                std::vector<BlkInfo>* inputBlkInfoList,
-                                GcWriteBuffer* inputGcActiveWriteBuffer,
                                 VolumeEventPublisher* inputVolumeEventPublisher)
 : VolumeEvent("GcStripeManager", iArrayInfo->GetName(), iArrayInfo->GetIndex()),
   iArrayInfo(iArrayInfo),
   gcWriteBufferPool(inputGcWriteBufferPool),
-  inputBlkInfoList(inputBlkInfoList),
-  inputGcActiveWriteBuffer(inputGcActiveWriteBuffer),
   volumeEventPublisher(inputVolumeEventPublisher)
 {
     udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
@@ -165,19 +159,20 @@ GcStripeManager::GetWriteBuffer(uint32_t volumeId)
     return gcActiveWriteBuffers[volumeId];
 }
 
-bool
-GcStripeManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks)
+GcAllocateBlks
+GcStripeManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks)
 {
-    std::unique_lock<std::mutex> bufferLock(GetWriteBufferLock(volumeId));
-    bool ret;
+    std::unique_lock<std::mutex> bufferLock(gcWriteBufferLock[volumeId]);
+    GcAllocateBlks gcAllocateBlks;
 
     if (_IsWriteBufferFull(volumeId))
     {
-        ret = _CreateActiveWriteBuffer(volumeId);
+        bool ret = _CreateActiveWriteBuffer(volumeId);
         if (unlikely(false == ret))
         {
+            gcAllocateBlks.numBlks = 0;
             airlog("CNT_GcSM_AllocWriteBuf", "AIR_FALSE", 0, 1);
-            return false;
+            return gcAllocateBlks;
         }
         flushed[volumeId] = false;
         _SetActiveStripeTail(volumeId, 0);
@@ -185,21 +180,14 @@ GcStripeManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks, ui
         _CreateBlkInfoList(volumeId);
     }
 
-    ret =  _AllocateBlks(volumeId, numBlks, offset, allocatedBlks);
-    if (false == ret)
+    gcAllocateBlks = _AllocateBlks(volumeId, numBlks);
+    if (0 == gcAllocateBlks.numBlks)
     {
         airlog("CNT_GcSM_AllocWriteBuf", "AIR_FALSE", 0, 1);
-        return false;
+        return gcAllocateBlks;
     }
     airlog("CNT_GcSM_AllocWriteBuf", "AIR_TRUE", 0, 1);
-    return true;
-}
-
-void
-GcStripeManager::MoveActiveWriteBuffer(uint32_t volumeId, GcWriteBuffer* buffer)
-{
-    std::unique_lock<std::mutex> bufferLock(GetWriteBufferLock(volumeId));
-    buffer = std::move(gcActiveWriteBuffers[volumeId]);
+    return gcAllocateBlks;
 }
 
 void
@@ -236,16 +224,10 @@ GcStripeManager::GetBlkInfoList(uint32_t volumeId)
     return blkInfoList[volumeId];
 }
 
-std::mutex&
-GcStripeManager::GetWriteBufferLock(uint32_t volumeId)
-{
-    return gcWriteBufferLock[volumeId];
-}
-
 bool
 GcStripeManager::DecreaseRemainingAndCheckIsFull(uint32_t volumeId, uint32_t cnt)
 {
-    std::unique_lock<std::mutex> bufferLock(GetWriteBufferLock(volumeId));
+    std::unique_lock<std::mutex> bufferLock(gcWriteBufferLock[volumeId]);
 
     uint32_t remaining = _DecreaseActiveStripeRemaining(volumeId, cnt);
 
@@ -287,27 +269,13 @@ GcStripeManager::_SetActiveStripeRemaining(uint32_t volumeId, uint32_t cnt)
 void
 GcStripeManager::_CreateBlkInfoList(uint32_t volumeId)
 {
-    if (nullptr == inputBlkInfoList)
-    {
-        blkInfoList[volumeId] = new std::vector<BlkInfo>(udSize->blksPerStripe);
-    }
-    else
-    {
-        blkInfoList[volumeId] = inputBlkInfoList;
-    }
+    blkInfoList[volumeId] = new std::vector<BlkInfo>(udSize->blksPerStripe);
 }
 
 bool
 GcStripeManager::_CreateActiveWriteBuffer(uint32_t volumeId)
 {
-    if (nullptr == inputGcActiveWriteBuffer)
-    {
-        gcActiveWriteBuffers[volumeId] = new GcWriteBuffer();
-    }
-    else
-    {
-        gcActiveWriteBuffers[volumeId] = inputGcActiveWriteBuffer;
-    }
+    gcActiveWriteBuffers[volumeId] = new GcWriteBuffer();
 
     for (uint32_t chunkCnt = 0; chunkCnt < udSize->chunksPerStripe; ++chunkCnt)
     {
@@ -344,29 +312,30 @@ GcStripeManager::_SetActiveStripeTail(uint32_t volumeId, uint32_t offset)
     gcActiveStripeTail[volumeId] = offset;
 }
 
-bool
-GcStripeManager::_AllocateBlks(uint32_t volumeId, uint32_t numBlks, uint32_t& offset, uint32_t& allocatedBlks)
+GcAllocateBlks
+GcStripeManager::_AllocateBlks(uint32_t volumeId, uint32_t numBlks)
 {
     assert(0 != numBlks);
 
-    offset = _GetActiveStripeTail(volumeId);
-    if (udSize->blksPerStripe == offset)
+    GcAllocateBlks gcAllocateBlks;
+    gcAllocateBlks.startOffset = _GetActiveStripeTail(volumeId);
+    if (udSize->blksPerStripe == gcAllocateBlks.startOffset)
     {
-        allocatedBlks = 0;
-        return false;
+        gcAllocateBlks.numBlks = 0;
+        return gcAllocateBlks;
     }
 
-    if (udSize->blksPerStripe < offset + numBlks)
+    if (udSize->blksPerStripe < gcAllocateBlks.startOffset + numBlks)
     {
-        allocatedBlks = udSize->blksPerStripe - offset;
+        gcAllocateBlks.numBlks = udSize->blksPerStripe - gcAllocateBlks.startOffset;
     }
     else
     {
-        allocatedBlks = numBlks;
+        gcAllocateBlks.numBlks = numBlks;
     }
 
-    _SetActiveStripeTail(volumeId, offset + allocatedBlks);
+    _SetActiveStripeTail(volumeId, gcAllocateBlks.startOffset + gcAllocateBlks.numBlks);
 
-    return true;
+    return gcAllocateBlks;
 }
 } // namespace pos

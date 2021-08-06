@@ -73,7 +73,7 @@ public:
         affinityManager = new NiceMock<MockAffinityManager>(BuildDefaultAffinityManagerMock());
         gcWriteBufferPool = new NiceMock<MockFreeBufferPool>(0, 0, affinityManager);
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
-        gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool, nullptr, nullptr, volumeEventPublisher);
+        gcStripeManager = new NiceMock<MockGcStripeManager>(array, gcWriteBufferPool, volumeEventPublisher);
 
         victimStripes = new std::vector<std::vector<VictimStripe*>>;
         victimStripes->resize(GC_VICTIM_SEGMENT_COUNT);

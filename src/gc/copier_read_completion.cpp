@@ -91,14 +91,14 @@ CopierReadCompletion::_DoSpecificJob(void)
     uint32_t remainCnt = blkCnt - allocatedCnt;
     while (remainCnt)
     {
-        uint32_t startOffset;
-        uint32_t numBlks;
-
-        bool ret = gcStripeManager->AllocateWriteBufferBlks(volId, remainCnt, startOffset, numBlks);
-        if (false == ret)
+        GcAllocateBlks gcAllocateBlks =
+            gcStripeManager->AllocateWriteBufferBlks(volId, remainCnt);
+        if (0 == gcAllocateBlks.numBlks)
         {
             return false;
         }
+        uint32_t startOffset = gcAllocateBlks.startOffset;
+        uint32_t numBlks = gcAllocateBlks.numBlks;
 
         GcWriteBuffer* dataBuffer = gcStripeManager->GetWriteBuffer(volId);
 
