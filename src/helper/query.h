@@ -37,60 +37,60 @@
 
 namespace Enumerable
 {
-template<typename C/*Container*/, typename Q/*Query*/>
-auto GroupBy(C&& c, Q q)
+template<typename S/*Source*/, typename K/*Key*/>
+auto GroupBy(S&& s, K k)
 {
-    using element_t = std::decay_t<decltype(*std::begin(c))>;
-    using discriminator_t = decltype(q(*std::begin(c)));
-    std::map<discriminator_t, std::vector<element_t>> r;
-    for (auto&& e : c)
+    using type_t = std::decay_t<decltype(*std::begin(s))>;
+    using discriminator_t = decltype(k(*std::begin(s)));
+    std::map<discriminator_t, std::vector<type_t>> group;
+    for (auto&& i : s)
     {
-        r[q(e)].emplace_back(e);
+        group[k(i)].emplace_back(i);
     }
-    return r;
+    return group;
 }
 
-template<typename C/*Container*/, typename Q/*Query*/>
-auto Where(C&& c, Q q)
+template<typename S/*Source*/, typename F/*Func<bool>*/>
+auto Where(S&& s, F f)
 {
-    using element_t = std::decay_t<decltype(*std::begin(c))>;
-    std::vector<element_t> r;
-    for (auto&& e : c)
+    using type_t = std::decay_t<decltype(*std::begin(s))>;
+    std::vector<type_t> result;
+    for (auto&& i : s)
     {
-        if (q(e) == true)
+        if (f(i) == true)
         {
-            r.emplace_back(e);
+            result.emplace_back(i);
         }
     }
-    return r;
+    return result;
 }
 
-template<typename C/*Container*/, typename Q/*Query*/>
-auto First(C&& c, Q q)
+template<typename S/*Source*/, typename F/*Func<bool>*/>
+auto First(S&& s, F f)
 {
-    using element_t = std::decay_t<decltype(*std::begin(c))>;
-    element_t ret = nullptr;
-    for (auto&& e : c)
+    using type_t = std::decay_t<decltype(*std::begin(s))>;
+    type_t ret = nullptr;
+    for (auto&& i : s)
     {
-        if (q(e) == true)
+        if (f(i) == true)
         {
-            ret = e;
+            ret = i;
             break;
         }
     }
     return ret;
 }
 
-template<typename OC/*OuterContainer*/, typename OKS/*OuterKeySelector*/, typename IC/*InnerContainer*/, typename IKS/*InnerKeySelector*/>
-auto Join(OC&& oc, OKS oks, IC&& ic, IKS iks)
+template<typename OC/*OuterContainer*/, typename OK/*OuterKeySelector*/, typename IC/*InnerContainer*/, typename IK/*InnerKeySelector*/>
+auto Join(OC&& oc, OK ok, IC&& ic, IK ik)
 {
-    using element_t = std::decay_t<decltype(*std::begin(oc))>;
-    std::vector<element_t> r;
+    using type_t = std::decay_t<decltype(*std::begin(oc))>;
+    std::vector<type_t> r;
     for (auto&& i : ic)
     {
         for (auto&& o : oc)
         {
-            if (iks(i) == oks(o))
+            if (ik(i) == ok(o))
             {
                 r.emplace_back(o);
             }

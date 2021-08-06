@@ -112,7 +112,7 @@ TEST(Query, Query_testJoin)
     v2.push_back(50);
 
     // When
-    auto&& personJoinById = Enumerable::Join(v1, 
+    auto&& personJoinById = Enumerable::Join(v1,
         [](auto p) { return p->id; }, v2, [](auto i) { return i; });
 
     // Then
