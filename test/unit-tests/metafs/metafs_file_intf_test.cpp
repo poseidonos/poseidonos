@@ -76,7 +76,7 @@ public:
         _SetFileProperty(storageOpt);
     }
 
-    MetaFilePropertySet& GetFileProperty()
+    MetaFilePropertySet& GetFileProperty(void)
     {
         return fileProperty;
     }

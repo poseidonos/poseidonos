@@ -33,6 +33,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "src/metafs/include/meta_file_extent.h"
 #include "mf_property.h"

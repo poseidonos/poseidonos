@@ -35,6 +35,7 @@
 #include <map>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "meta_storage_specific.h"
 #include "src/metafs/mvm/volume/meta_volume.h"
