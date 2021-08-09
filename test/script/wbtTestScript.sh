@@ -172,115 +172,115 @@ volname="vol1"
 volsize=21474836480
 
 echo -[Map : get_map_layout ]------------------------------------------
-${BIN_DIR}/cli wbt get_map_layout --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt get_map_layout --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : read_vsamap ]------------------------------------------
-${BIN_DIR}/cli wbt read_vsamap --name vol1 --output VSAMap_vol1.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt read_vsamap --name vol1 --output VSAMap_vol1.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : write_vsamap ]------------------------------------------
-${BIN_DIR}/cli wbt write_vsamap --name vol1 --input VSAMap_vol1.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt write_vsamap --name vol1 --input VSAMap_vol1.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : read_vsamap_entry ]------------------------------------------
-${BIN_DIR}/cli wbt read_vsamap_entry --name $volname --rba 0 --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt read_vsamap_entry --name $volname --rba 0 --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : write_vsamap_entry ]------------------------------------------
-${BIN_DIR}/cli wbt write_vsamap_entry --name $volname --rba 0 --vsid 1 --offset 1 --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt write_vsamap_entry --name $volname --rba 0 --vsid 1 --offset 1 --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : read_stripemap ]------------------------------------------
-${BIN_DIR}/cli wbt read_stripemap --output StripeMap.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt read_stripemap --output StripeMap.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : write_stripemap ]------------------------------------------
-${BIN_DIR}/cli wbt write_stripemap --input StripeMap.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt write_stripemap --input StripeMap.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : read_stripemap_entry ]------------------------------------------
-${BIN_DIR}/cli wbt read_stripemap_entry --vsid 0 --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt read_stripemap_entry --vsid 0 --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : write_stripemap_entry ]------------------------------------------
-${BIN_DIR}/cli wbt write_stripemap_entry --vsid 0 --loc 1 --lsid 123 --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt write_stripemap_entry --vsid 0 --loc 1 --lsid 123 --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : read_whole_reverse_map ]------------------------------------------
-${BIN_DIR}/cli wbt read_whole_reverse_map --output ReverseMapWhole.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt read_whole_reverse_map --output ReverseMapWhole.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : write_whole_reverse_map ]------------------------------------------
-${BIN_DIR}/cli wbt write_whole_reverse_map --input ReverseMapWhole.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt write_whole_reverse_map --input ReverseMapWhole.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : read_reverse_map ]------------------------------------------
-${BIN_DIR}/cli wbt read_reverse_map --vsid 0 --output ReverseMap_vsid0.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt read_reverse_map --vsid 0 --output ReverseMap_vsid0.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : write_reverse_map ]------------------------------------------
-${BIN_DIR}/cli wbt write_reverse_map --vsid 0 --input ReverseMap_vsid0.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt write_reverse_map --vsid 0 --input ReverseMap_vsid0.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : read_reverse_map_entry ]------------------------------------------
-${BIN_DIR}/cli wbt read_reverse_map_entry --vsid 0 --offset 0 --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt read_reverse_map_entry --vsid 0 --offset 0 --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : write_reverse_map_entry ]------------------------------------------
-${BIN_DIR}/cli wbt write_reverse_map_entry --vsid 0 --offset 0 --rba 0 --name vol1 --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt write_reverse_map_entry --vsid 0 --offset 0 --rba 0 --name vol1 --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : get_bitmap_layout ]------------------------------------------
-${BIN_DIR}/cli wbt get_bitmap_layout --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt get_bitmap_layout --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : get_instant_meta_info ]------------------------------------------
-${BIN_DIR}/cli wbt get_instant_meta_info --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt get_instant_meta_info --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : get_wb_lsid_bitmap ]------------------------------------------
-${BIN_DIR}/cli wbt get_wb_lsid_bitmap --output wbLsidBitmap.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt get_wb_lsid_bitmap --output wbLsidBitmap.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : set_wb_lsid_bitmap ]------------------------------------------
-${BIN_DIR}/cli wbt set_wb_lsid_bitmap --input wbLsidBitmap.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt set_wb_lsid_bitmap --input wbLsidBitmap.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : get_active_stripe_tail ]------------------------------------------
-${BIN_DIR}/cli wbt get_active_stripe_tail --output activeStripeTail.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt get_active_stripe_tail --output activeStripeTail.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : set_active_stripe_tail ]------------------------------------------
-${BIN_DIR}/cli wbt set_active_stripe_tail --input activeStripeTail.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt set_active_stripe_tail --input activeStripeTail.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : get_current_ssd_lsid ]------------------------------------------
-${BIN_DIR}/cli wbt get_current_ssd_lsid --output currentSsdLsid.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt get_current_ssd_lsid --output currentSsdLsid.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : set_current_ssd_lsid ]------------------------------------------
-${BIN_DIR}/cli wbt set_current_ssd_lsid --input currentSsdLsid.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt set_current_ssd_lsid --input currentSsdLsid.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : get_user_segment_bitmap]------------------------------------------
-${BIN_DIR}/cli wbt get_user_segment_bitmap --output segmentBitmap.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt get_user_segment_bitmap --output segmentBitmap.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : set_user_segment_bitmap]------------------------------------------
-${BIN_DIR}/cli wbt set_user_segment_bitmap --input segmentBitmap.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt set_user_segment_bitmap --input segmentBitmap.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : get_segment_info]------------------------------------------
-${BIN_DIR}/cli wbt get_segment_info --output segmentInfo.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt get_segment_info --output segmentInfo.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : set_segment_info]------------------------------------------
-${BIN_DIR}/cli wbt set_segment_info --input segmentInfo.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt set_segment_info --input segmentInfo.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[Map : get_segment_valid_count]------------------------------------------
-${BIN_DIR}/cli wbt get_segment_valid_count --output segValidCount.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt get_segment_valid_count --output segValidCount.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 
@@ -301,7 +301,7 @@ do
 
     echo -[IO Path : unvme-ns-${count} : wbt write_raw]------------------------------------------
 
-    ${BIN_DIR}/cli wbt write_raw --dev unvme-ns-${count} --lba ${lbaIdx} --count ${lbaCnt} --pattern 0xdeadbeef --output segValidCount.bin --json > ${cliOutput}
+    ${BIN_DIR}/poseidonos-cli wbt write_raw --dev unvme-ns-${count} --lba ${lbaIdx} --count ${lbaCnt} --pattern 0xdeadbeef --output segValidCount.bin --json-res > ${cliOutput}
     check_result 
 
     if [[ "$ip" =~ "$VM_IP_RANGE_1" ]] || [[ "$ip" =~ "$VM_IP_RANGE_2" ]]; then
@@ -312,19 +312,19 @@ do
     else 
 
         echo -[IO Path : unvme-ns-${count} : wbt write_uncorrectable_lba ]------------------------------------------
-        ${BIN_DIR}/cli wbt write_uncorrectable_lba --dev unvme-ns-${count} --lba ${lbaIdx} --output segValidCount.bin --json > ${cliOutput}
+        ${BIN_DIR}/poseidonos-cli wbt write_uncorrectable_lba --dev unvme-ns-${count} --lba ${lbaIdx} --output segValidCount.bin --json-res > ${cliOutput}
         check_result
     fi
 
     echo -[IO Path : unvme-ns-${count} : wbt flush]------------------------------------------
-    ${BIN_DIR}/cli wbt flush --output segValidCount.bin --json > ${cliOutput} --array $ARRAYNAME
+    ${BIN_DIR}/poseidonos-cli wbt flush --output segValidCount.bin --json-res > ${cliOutput} --array $ARRAYNAME
  
     check_result
 
     
 
     echo -[IO Path : unvme-ns-${count} : wbt read_raw]------------------------------------------
-    ${BIN_DIR}/cli wbt read_raw --dev unvme-ns-${count} --lba ${lbaIdx} --count ${lbaCnt} --output dump.bin --output segValidCount.bin --json > ${cliOutput}
+    ${BIN_DIR}/poseidonos-cli wbt read_raw --dev unvme-ns-${count} --lba ${lbaIdx} --count ${lbaCnt} --output dump.bin --output segValidCount.bin --json-res > ${cliOutput}
  
     
     if [[ "$ip" =~ "$VM_IP_RANGE_1" ]] || [[ "$ip" =~ "$VM_IP_RANGE_2" ]]; then
@@ -342,66 +342,60 @@ echo ------------[MetaFs WBT CMDs]------------------------------------------
 echo --------------------------------------------------------------------
 
 echo -[MetaFs : mfs_create_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_create_file --name $fileName1 --size $fileSize1 --integrity 0 --access 2 --operation 2 --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_create_file --name $fileName1 --size $fileSize1 --integrity 0 --access 2 --operation 2 --volume 0 --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_open_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_open_file --name ${fileName1} --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_open_file --name ${fileName1} --volume 0 --array $ARRAYNAME --json-res > ${cliOutput}
 cat ${cliOutput} | jq ".Response.result.data.returnCode" > result.txt
 fileDesc1=$(<result.txt)
 check_result
 
 echo -[MetaFs : mfs_create_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_create_file --name $fileName2 --size $fileSize2 --integrity 0 --access 2 --operation 2 --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_create_file --name $fileName2 --size $fileSize2 --integrity 0 --access 2 --operation 2 --volume 0 --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_open_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_open_file  --name $fileName2 --array $ARRAYNAME --json >  ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_open_file  --name $fileName2 --volume 0 --array $ARRAYNAME --json-res >  ${cliOutput}
 cat ${cliOutput} | jq ".Response.result.data.returnCode" > result.txt
 fileDesc2=$(<result.txt)
 check_result
 
 echo -[MetaFs : mfs_write_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc1 --offset $fileOffset1 --count $dataLength1 --input $inputFile --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_write_file --fd $fileDesc1 --volume 0 --offset $fileOffset1 --count $dataLength1 --input $inputFile --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_read_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc1 --offset $fileOffset1 --count $dataLength1 --output mfs_read_one.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_read_file --fd $fileDesc1 --volume 0 --offset $fileOffset1 --count $dataLength1 --output mfs_read_one.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_write_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --input $inputFile --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_write_file --fd $fileDesc2 --volume 0 --offset $fileOffset2 --count $dataLength2 --input $inputFile --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_read_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --output mfs_read_two.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_read_file --fd $fileDesc2 --volume 0 --offset $fileOffset2 --count $dataLength2 --output mfs_read_two.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_get_file_size ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_get_file_size --fd $fileDesc1 --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_get_file_size --fd $fileDesc1 --volume 0 --array $ARRAYNAME --json-res > ${cliOutput}
 cat ${cliOutput} | jq ".Response.result.data.returnCode" > result.txt
 fileSize=$(<result.txt)
 check_result
 
 echo -[MetaFs : mfs_get_aligned_file_io_size ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_get_aligned_file_io_size --fd $fileDesc1 --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_get_aligned_file_io_size --fd $fileDesc1 --volume 0 --array $ARRAYNAME --json-res > ${cliOutput}
 cat ${cliOutput} | jq ".Response.result.data.returnCode" > result.txt
 AlignedFileIoSize=$(<result.txt)
 check_result
 
-echo -[MetaFs : mfs_get_max_file_size ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_get_max_file_size --array $ARRAYNAME --json > ${cliOutput}
-cat ${cliOutput} | jq ".Response.result.data.returnCode" > result.txt
-MaxFileSize=$(<result.txt)
-check_result
-
 echo -------------------------------------------------------
 echo fileDesc1 = ${fileDesc1} fileDesc2 = ${fileDesc2}
-echo fileSize = ${fileSize}   AlignedFileIOSize = ${AlignedFileIoSize}   MaxFileSize = ${MaxFileSize}
+echo fileSize = ${fileSize}   AlignedFileIOSize = ${AlignedFileIoSize}
 echo -------------------------------------------------------
 
 echo -[MetaFs : mfs_dump_files_list ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_dump_files_list --output $FilesInfoOutput --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_dump_files_list --output $FilesInfoOutput --volume 0 --array $ARRAYNAME --json-res > ${cliOutput}
 echo ------- [opend files] ---------------------------------
 sed 's/},{/\n /g' ../filesInfo.json > result.txt
 cat ${scriptPath}/result.txt
@@ -409,35 +403,35 @@ echo -------------------------------------------------------
 check_result
 
 echo -[MetaFs : mfs_dump_inode_info ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_dump_inode_info --name $fileName1 --output $InodeOutput --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_dump_inode_info --name $fileName1 --volume 0 --output $InodeOutput --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_dump_inode_info ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_dump_inode_info --name $fileName2 --output $InodeOutput --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_dump_inode_info --name $fileName2 --volume 0 --output $InodeOutput --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_write_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc1 --offset $fileOffset1 --count $dataLength1 --input $inputFile --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_write_file --fd $fileDesc1 --volume 0 --offset $fileOffset1 --count $dataLength1 --input $inputFile --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_read_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc1 --offset $fileOffset1 --count $dataLength1 --output mfs_read_one.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_read_file --fd $fileDesc1 --volume 0 --offset $fileOffset1 --count $dataLength1 --output mfs_read_one.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_write_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_write_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --input $inputFile --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_write_file --fd $fileDesc2 --volume 0 --offset $fileOffset2 --count $dataLength2 --input $inputFile --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_read_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_read_file --fd $fileDesc2 --offset $fileOffset2 --count $dataLength2 --output mfs_read_two.bin --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_read_file --fd $fileDesc2 --volume 0 --offset $fileOffset2 --count $dataLength2 --output mfs_read_two.bin --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_close_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_close_file --fd ${fileDesc1} --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_close_file --fd ${fileDesc1} --volume 0 --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_close_file ]------------------------------------------
-${BIN_DIR}/cli wbt mfs_close_file --fd ${fileDesc2} --array $ARRAYNAME --json > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_close_file --fd ${fileDesc2} --volume 0 --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo ------- [Created files] ------------

@@ -37,9 +37,9 @@ namespace pos
 
 enum class StorageOpt
 {
-    NVRAM,
     SSD,
     DEFAULT = SSD,
+    NVRAM,
     MAX
 };
 

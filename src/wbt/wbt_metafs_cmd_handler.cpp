@@ -37,6 +37,7 @@
 #include "src/spdk_wrapper/spdk.hpp"
 #include "src/metafs/tool/fio/meta_scheduler.h"
 #include "src/io/frontend_io/unvmf_io_handler.h"
+#include "src/metafs/common/meta_file_util.h"
 
 #define RESULT_SUCCESS 0
 #define RESULT_FAILURE -1
@@ -56,14 +57,16 @@ WbtMetafsCmdHandler::DumpFilesList(Args argv)
     std::string parsedJson;
     std::string arrayName = argv["array"].get<std::string>();
     std::string outFile = argv["output"].get<std::string>();
-    int type = stoi(argv["type"].get<std::string>());
+    int type = stoi(argv["volume"].get<std::string>());
 
     std::vector<MetaFileInfoDumpCxt> result;
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+
     MetaVolumeType volumeType = (MetaVolumeType)type;
+    if (type >= (int)MetaVolumeType::Max)
+        return RESULT_FAILURE;
 
     if ((nullptr == metaFs) ||
-        (type >= (int)MetaVolumeType::Max) ||
         (!metaFs->wbt->GetMetaFileList(result, volumeType)))
     {
         return RESULT_FAILURE;
@@ -92,7 +95,7 @@ WbtMetafsCmdHandler::DumpFilesList(Args argv)
 int
 WbtMetafsCmdHandler::CreateFile(Args argv)
 {
-    if (argv.size() < 6)
+    if (argv.size() < 7)
     {
         std::cout << "mfs_create_file Command. Too Few Arguments." << std::endl;
         return RESULT_FAILURE;
@@ -106,6 +109,13 @@ WbtMetafsCmdHandler::CreateFile(Args argv)
     int integrityType = stoi(argv["integrity"].get<std::string>());
     int ioAccPatternType = stoi(argv["access"].get<std::string>());
     int ioOpType = stoi(argv["operation"].get<std::string>());
+    int type = stoi(argv["volume"].get<std::string>());
+
+    MetaVolumeType volumeType = (MetaVolumeType)type;
+    if (type >= (int)MetaVolumeType::Max)
+        return RESULT_FAILURE;
+
+    StorageOpt storage = MetaFileUtil::ConvertToStorageOption(volumeType);
 
     fileProperty.integrity = static_cast<MetaFileIntegrityType>(integrityType);
     fileProperty.ioAccPattern = static_cast<MetaFileAccessPattern>(ioAccPatternType);
@@ -115,7 +125,7 @@ WbtMetafsCmdHandler::CreateFile(Args argv)
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSizeBytes, fileProperty);
+    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSizeBytes, fileProperty, storage);
     if (rc != POS_EVENT_ID::SUCCESS)
         return RESULT_FAILURE;
 
@@ -125,7 +135,7 @@ WbtMetafsCmdHandler::CreateFile(Args argv)
 int
 WbtMetafsCmdHandler::OpenFile(Args argv)
 {
-    if (argv.size() < 2)
+    if (argv.size() < 3)
     {
         std::cout << "mfs_open_file Command. Too few Arguments." << std::endl;
         return RESULT_FAILURE;
@@ -135,12 +145,19 @@ WbtMetafsCmdHandler::OpenFile(Args argv)
 
     std::string fileName = argv["name"].get<std::string>();
     std::string arrayName = argv["array"].get<std::string>();
+    int type = stoi(argv["volume"].get<std::string>());
+
+    MetaVolumeType volumeType = (MetaVolumeType)type;
+    if (type >= (int)MetaVolumeType::Max)
+        return RESULT_FAILURE;
+
+    StorageOpt storage = MetaFileUtil::ConvertToStorageOption(volumeType);
 
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd);
+    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd, storage);
     if (rc != POS_EVENT_ID::SUCCESS)
         return RESULT_FAILURE;
 
@@ -150,7 +167,7 @@ WbtMetafsCmdHandler::OpenFile(Args argv)
 int
 WbtMetafsCmdHandler::CloseFile(Args argv)
 {
-    if (argv.size() < 2)
+    if (argv.size() < 3)
     {
         std::cout << "mfs_close_file Command. Too few Arguments." << std::endl;
         return RESULT_FAILURE;
@@ -158,12 +175,19 @@ WbtMetafsCmdHandler::CloseFile(Args argv)
 
     int fd = stoi(argv["fd"].get<std::string>());
     std::string arrayName = argv["array"].get<std::string>();
+    int type = stoi(argv["volume"].get<std::string>());
+
+    MetaVolumeType volumeType = (MetaVolumeType)type;
+    if (type >= (int)MetaVolumeType::Max)
+        return RESULT_FAILURE;
+
+    StorageOpt storage = MetaFileUtil::ConvertToStorageOption(volumeType);
 
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    POS_EVENT_ID rc = metaFs->ctrl->Close(fd);
+    POS_EVENT_ID rc = metaFs->ctrl->Close(fd, storage);
     if (rc != POS_EVENT_ID::SUCCESS)
         return RESULT_FAILURE;
 
@@ -173,7 +197,7 @@ WbtMetafsCmdHandler::CloseFile(Args argv)
 int
 WbtMetafsCmdHandler::ReadFile(Args argv)
 {
-    if (argv.size() < 5)
+    if (argv.size() < 6)
     {
         std::cout << "mfs_read_file Command. Too few Arguments." << std::endl;
         return RESULT_FAILURE;
@@ -191,6 +215,13 @@ WbtMetafsCmdHandler::ReadFile(Args argv)
     uint32_t byteSize = stoi(argv["count"].get<std::string>());
     char* buffer = new char[byteSize];
     std::string outFile = argv["output"].get<std::string>();
+    int type = stoi(argv["volume"].get<std::string>());
+
+    MetaVolumeType volumeType = (MetaVolumeType)type;
+    if (type >= (int)MetaVolumeType::Max)
+        return RESULT_FAILURE;
+
+    MetaStorageType storage = MetaFileUtil::ConvertToMediaType(volumeType);
 
     if (buffer == nullptr)
     {
@@ -200,7 +231,7 @@ WbtMetafsCmdHandler::ReadFile(Args argv)
 
     memset(buffer, 0, byteSize);
 
-    POS_EVENT_ID rc = metaFs->io->Read(fd, byteOffset, byteSize, (void*)buffer);
+    POS_EVENT_ID rc = metaFs->io->Read(fd, byteOffset, byteSize, (void*)buffer, storage);
     if (rc != POS_EVENT_ID::SUCCESS || _WriteBufferInFile(outFile, buffer, byteSize) != RESULT_SUCCESS)
     {
         retVal = false;
@@ -218,7 +249,7 @@ WbtMetafsCmdHandler::ReadFile(Args argv)
 int
 WbtMetafsCmdHandler::WriteFile(Args argv)
 {
-    if (argv.size() < 5)
+    if (argv.size() < 6)
     {
         std::cout << "mfs_write_file Command.Too few Arguments." << std::endl;
         return RESULT_FAILURE;
@@ -236,10 +267,17 @@ WbtMetafsCmdHandler::WriteFile(Args argv)
     uint32_t byteSize = stoi(argv["count"].get<std::string>());
     char* buffer = new char[byteSize];
     std::string inFile = argv["input"].get<std::string>();
+    int type = stoi(argv["volume"].get<std::string>());
+
+    MetaVolumeType volumeType = (MetaVolumeType)type;
+    if (type >= (int)MetaVolumeType::Max)
+        return RESULT_FAILURE;
+
+    MetaStorageType storage = MetaFileUtil::ConvertToMediaType(volumeType);
 
     if (_ReadFileInBuffer(inFile, &buffer, byteSize) == RESULT_SUCCESS)
     {
-        rc = metaFs->io->Write(fd, byteOffset, byteSize, buffer);
+        rc = metaFs->io->Write(fd, byteOffset, byteSize, buffer, storage);
     }
     else
     {
@@ -264,7 +302,7 @@ WbtMetafsCmdHandler::ReadFileAsync(Args argv)
     uint32_t byteSize;
     void *buffer;
     void *callback(int);
-    // metaFsMgr.io.ReadAsync(fd, byteOffset, byteSize, buffer, callback);    
+    // metaFsMgr.io.ReadAsync(fd, byteOffset, byteSize, buffer, callback);
     // As async functionality testing is not enabled yet.
     */
     return RESULT_FAILURE;
@@ -287,7 +325,7 @@ WbtMetafsCmdHandler::WriteFileAsync(Args argv)
 int
 WbtMetafsCmdHandler::GetFileSize(Args argv)
 {
-    if (argv.size() < 2)
+    if (argv.size() < 3)
     {
         std::cout << "mfs_get_file_size Command. Too few Arguments." << std::endl;
         return RESULT_FAILURE;
@@ -295,12 +333,19 @@ WbtMetafsCmdHandler::GetFileSize(Args argv)
 
     int fd = stoi(argv["fd"].get<std::string>());
     std::string arrayName = argv["array"].get<std::string>();
+    int type = stoi(argv["volume"].get<std::string>());
+
+    MetaVolumeType volumeType = (MetaVolumeType)type;
+    if (type >= (int)MetaVolumeType::Max)
+        return RESULT_FAILURE;
+
+    StorageOpt storage = MetaFileUtil::ConvertToStorageOption(volumeType);
 
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    size_t fileSize = metaFs->ctrl->GetFileSize(fd);
+    size_t fileSize = metaFs->ctrl->GetFileSize(fd, storage);
     if (fileSize == 0)
         return RESULT_FAILURE;
 
@@ -310,7 +355,7 @@ WbtMetafsCmdHandler::GetFileSize(Args argv)
 int
 WbtMetafsCmdHandler::GetAlignedFileIOSize(Args argv)
 {
-    if (argv.size() < 2)
+    if (argv.size() < 3)
     {
         std::cout << "mfs_get_aligned_file_io_size Command. Too few Arguments." << std::endl;
         return RESULT_FAILURE;
@@ -318,12 +363,19 @@ WbtMetafsCmdHandler::GetAlignedFileIOSize(Args argv)
 
     int fd = stoi(argv["fd"].get<std::string>());
     std::string arrayName = argv["array"].get<std::string>();
+    int type = stoi(argv["volume"].get<std::string>());
+
+    MetaVolumeType volumeType = (MetaVolumeType)type;
+    if (type >= (int)MetaVolumeType::Max)
+        return RESULT_FAILURE;
+
+    StorageOpt storage = MetaFileUtil::ConvertToStorageOption(volumeType);
 
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    size_t fileSize = metaFs->ctrl->GetAlignedFileIOSize(fd);
+    size_t fileSize = metaFs->ctrl->GetAlignedFileIOSize(fd, storage);
     if (fileSize == 0)
         return RESULT_FAILURE;
 
@@ -347,7 +399,7 @@ WbtMetafsCmdHandler::DumpInodeInfo(Args argv)
     std::string metaFile = argv["name"].get<std::string>();
     std::string outJsonFile = argv["output"].get<std::string>();
     std::string arrayName = argv["array"].get<std::string>();
-    int type = stoi(argv["type"].get<std::string>());
+    int type = stoi(argv["volume"].get<std::string>());
 
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
     if (nullptr == metaFs)

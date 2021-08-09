@@ -133,6 +133,7 @@ type WBTArgv struct {
 	Pil       string `json:"pil,omitempty"`
 	Ses       string `json:"ses,omitempty"`
 	Array     string `json:"array,omitempty"`
+	Volume    string `json:"volume,omitempty"`
 }
 
 type BuildInfo struct {

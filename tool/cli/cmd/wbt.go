@@ -59,6 +59,7 @@ var argList = []arg{
 	{"pil", "", ""},
 	{"ses", "", ""},
 	{"array", "", ""},
+	{"volume", "", ""},
 }
 
 var WbtCmd = &cobra.Command{

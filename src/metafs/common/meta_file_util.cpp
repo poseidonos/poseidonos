@@ -46,16 +46,20 @@ const MetaFsVolumeToMedia MetaFileUtil::VOLUME_TO_MEDIA[] =
     {
         {MetaVolumeType::SsdVolume, MetaStorageType::SSD},
         {MetaVolumeType::NvRamVolume, MetaStorageType::NVRAM}};
-static_assert(((int)StorageOpt::SSD) == 1, "error");
+static_assert(((int)StorageOpt::SSD) == 0, "error");
 const MetaFsStorageOptToMedia MetaFileUtil::OPTION_TO_MEDIA[] =
     {
-        {StorageOpt::NVRAM, MetaVolumeType::NvRamVolume},
-        {StorageOpt::SSD, MetaVolumeType::SsdVolume}};
-static_assert(((int)StorageOpt::SSD) == 1, "error");
+        {StorageOpt::SSD, MetaVolumeType::SsdVolume},
+        {StorageOpt::NVRAM, MetaVolumeType::NvRamVolume}};
+static_assert(((int)StorageOpt::SSD) == 0, "error");
 const MetaFsStorageOptToVolume MetaFileUtil::OPTION_TO_VOLUME[] =
     {
-        {StorageOpt::NVRAM, MetaStorageType::NVRAM},
-        {StorageOpt::SSD, MetaStorageType::SSD}};
+        {StorageOpt::SSD, MetaStorageType::SSD},
+        {StorageOpt::NVRAM, MetaStorageType::NVRAM}};
+const MetaFsVolumeToStorageOpt MetaFileUtil::VOLUME_TO_OPTION[] =
+    {
+        {MetaVolumeType::SsdVolume, StorageOpt::SSD},
+        {MetaVolumeType::NvRamVolume, StorageOpt::NVRAM}};
 
 StringHashType
 MetaFileUtil::GetHashKeyFromFileName(const std::string& fileName)
@@ -73,6 +77,12 @@ MetaStorageType
 MetaFileUtil::ConvertToMediaType(StorageOpt storageOpt)
 {
     return OPTION_TO_VOLUME[(uint32_t)storageOpt].media;
+}
+
+StorageOpt
+MetaFileUtil::ConvertToStorageOption(MetaVolumeType volume)
+{
+    return VOLUME_TO_OPTION[(uint32_t)volume].storageOpt;
 }
 
 MetaVolumeType
