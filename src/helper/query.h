@@ -50,6 +50,21 @@ auto GroupBy(S&& s, K k)
     return group;
 }
 
+template<typename S/*Source*/, typename C/*Comparer*/>
+auto Distinct(S&& s, C c)
+{
+    using type_t = std::decay_t<decltype(*std::begin(s))>;
+    std::vector<type_t> result;
+    for (auto&& i : s)
+    {
+        if (find(result.begin() , result.end(), c(i)) == result.end())
+        {
+            result.emplace_back(i);
+        }
+    }
+    return result;
+}
+
 template<typename S/*Source*/, typename F/*Func<bool>*/>
 auto Where(S&& s, F f)
 {

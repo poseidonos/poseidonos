@@ -110,7 +110,69 @@ TEST(IOLocker, TryLock_testIfArgumentsAreValid)
     ASSERT_TRUE(actual);
 }
 
-TEST(IOLocker, Unlock_testIfArgumentsAreValid)
+TEST(IOLocker, TryLock_testForRollback)
+{
+    // Given
+    IOLocker ioLocker;
+    UblockSharedPtr ublock1 = make_shared<MockUBlockDevice>("mock-dev1", 1024, nullptr);
+    UblockSharedPtr ublock2 = make_shared<MockUBlockDevice>("mock-dev2", 1024, nullptr);
+    UblockSharedPtr ublock3 = make_shared<MockUBlockDevice>("mock-dev3", 1024, nullptr);
+    UblockSharedPtr ublock4 = make_shared<MockUBlockDevice>("mock-dev4", 1024, nullptr);
+    ArrayDeviceState state = ArrayDeviceState::NORMAL;
+    MockArrayDevice* mockArrayDevice1 = new MockArrayDevice(ublock1, state);
+    MockArrayDevice* mockArrayDevice2 = new MockArrayDevice(ublock2, state);
+    MockArrayDevice* mockArrayDevice3 = new MockArrayDevice(ublock3, state);
+    MockArrayDevice* mockArrayDevice4 = new MockArrayDevice(ublock4, state);
+
+    ioLocker.Register({mockArrayDevice1, mockArrayDevice2, mockArrayDevice3, mockArrayDevice4});
+    std::set<IArrayDevice*> alreadyLockedDevs;
+    alreadyLockedDevs.insert(mockArrayDevice4);
+    StripeId sId = 0;
+    bool ret = ioLocker.TryBusyLock(mockArrayDevice4, sId, sId);
+    ASSERT_TRUE(ret);
+
+    // When
+    std::set<IArrayDevice*> rollbackTestDevs;
+    rollbackTestDevs.insert(mockArrayDevice1);
+    rollbackTestDevs.insert(mockArrayDevice2);
+    rollbackTestDevs.insert(mockArrayDevice3);
+    rollbackTestDevs.insert(mockArrayDevice4);
+    ret = ioLocker.TryLock(rollbackTestDevs, sId);
+    ASSERT_FALSE(ret);
+
+    bool alreadyLocked = ioLocker.TryLock(alreadyLockedDevs, sId);
+    std::set<IArrayDevice*> canLockDevs;
+    canLockDevs.insert(mockArrayDevice1);
+    canLockDevs.insert(mockArrayDevice3);
+    bool canLock = ioLocker.TryLock(canLockDevs, sId);
+
+    // Then
+    ASSERT_FALSE(alreadyLocked);
+    ASSERT_TRUE(canLock);
+}
+
+TEST(IOLocker, Unlock_testForSingleDev)
+{
+    // Given
+    IOLocker ioLocker;
+    UblockSharedPtr ublock1 = make_shared<MockUBlockDevice>("mock-dev1", 1024, nullptr);
+    UblockSharedPtr ublock2 = make_shared<MockUBlockDevice>("mock-dev2", 1024, nullptr);
+    ArrayDeviceState state = ArrayDeviceState::NORMAL;
+    MockArrayDevice* mockArrayDevice1 = new MockArrayDevice(ublock1, state);
+    MockArrayDevice* mockArrayDevice2 = new MockArrayDevice(ublock2, state);
+    ioLocker.Register({mockArrayDevice1, mockArrayDevice2});
+    std::set<IArrayDevice*> lockDevs;
+    lockDevs.insert(mockArrayDevice1);
+    StripeId sId = 0;
+    ioLocker.TryLock(lockDevs, sId);
+
+    // When
+    ioLocker.Unlock(mockArrayDevice1, sId);
+
+    // Then
+}
+
+TEST(IOLocker, Unlock_testForMultipleDevs)
 {
     // Given
     IOLocker ioLocker;

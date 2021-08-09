@@ -38,6 +38,25 @@ TEST(Query, Query_testGroupBy)
     ASSERT_EQ(2, personByName.size());
 }
 
+TEST(Query, Query_testDistinct)
+{
+    // Given
+    std::vector<Person*> v1;
+    Person* p1 = new Person("foo", 10);
+    Person* p2 = new Person("bar", 20);
+    Person* p3 = p1;
+    v1.push_back(p1);
+    v1.push_back(p2);
+    v1.push_back(p3);
+
+    // When
+    auto&& uniquePersonList = Enumerable::Distinct(v1,
+        [](auto p) { return p; });
+
+    // Then
+    ASSERT_EQ(2, uniquePersonList.size());
+}
+
 TEST(Query, Query_testWhere)
 {
     // Given
