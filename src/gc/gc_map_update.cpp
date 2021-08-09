@@ -81,6 +81,7 @@ GcMapUpdate::GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpda
   invalidSegCnt(invalidSegCnt),
   arrayName(arrayName),
   mapUpdateInfoList(mapUpdateInfoList),
+  inputEvent(inputEvent),
   iArrayInfo(inputIArrayInfo),
   iVSAMap(inputIVSAMap),
   iContextManager(inputContextManager),
@@ -142,21 +143,6 @@ GcMapUpdate::Execute(void)
         arrayName, currentLsid, (event != nullptr));
 
     return true;
-}
-
-void
-GcMapUpdate::_RegisterInvalidateSegments(VirtualBlkAddr vsa)
-{
-    SegmentId segId = vsa.stripeId / stripesPerSegment;
-    if (invalidSegCnt.find(segId) == invalidSegCnt.end())
-    {
-        uint32_t oneBlockCount = 1;
-        invalidSegCnt.emplace(segId, oneBlockCount);
-    }
-    else
-    {
-        invalidSegCnt[segId]++;
-    }
 }
 
 void

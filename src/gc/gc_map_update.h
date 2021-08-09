@@ -76,7 +76,6 @@ public:
 
 private:
     void _FlushDataMapUpdate(void);
-    void _RegisterInvalidateSegments(VirtualBlkAddr vsa);
     void _InvalidateBlock(void);
     void _ValidateBlock(StripeId stripeId, uint32_t count);
 
