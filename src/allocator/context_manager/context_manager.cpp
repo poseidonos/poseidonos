@@ -173,8 +173,6 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
     POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] sync:{}, start to flush", sync);
     int ret = 0;
     assert(numWriteIoIssued == 0);
-    numWriteIoIssued = NUM_ALLOCATOR_FILES; // Issue 2 contexts(segmentctx, allocatorctx)
-    telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numWriteIoIssued);
     for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
         ret = _Flush(owner, callback);
@@ -317,7 +315,6 @@ ContextManager::ReleaseRebuildSegment(SegmentId segmentId)
     int ret = rebuildCtx->ReleaseRebuildSegment(segmentId);
     if (ret == 1) // need to flush
     {
-        numWriteIoIssued++;
         _Flush(REBUILD_CTX, nullptr);
         ret = 0;
     }
@@ -330,7 +327,6 @@ ContextManager::MakeRebuildTarget(void)
     int ret = rebuildCtx->MakeRebuildTarget();
     if (ret == 1) // need to flush
     {
-        numWriteIoIssued++;
         _Flush(REBUILD_CTX, nullptr);
         ret = rebuildCtx->GetRebuildTargetSegmentCount();
     }
@@ -345,7 +341,6 @@ ContextManager::StopRebuilding(void)
     int ret = rebuildCtx->StopRebuilding();
     if (ret == 1) // need to flush
     {
-        numWriteIoIssued++;
         _Flush(REBUILD_CTX, nullptr);
         ret = 0;
     }
@@ -580,7 +575,6 @@ ContextManager::_LoadContexts(void)
         {
             delete[] buf;
             numReadIoIssued--;
-            numWriteIoIssued++;
             POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] initial flush allocator file:{}, pendingMetaIo:{}", owner, numWriteIoIssued);
             ret = _Flush(owner, nullptr);
             if (ret == 0)
@@ -612,13 +606,16 @@ ContextManager::_Flush(int owner, EventSmartPtr callbackEvent)
     char* buf = new char[size]();
     _PrepareBuffer(owner, buf);
     flushCallback = callbackEvent;
+    ++numWriteIoIssued;
     int ret = fileIoManager->Store(owner, buf, std::bind(&ContextManager::_FlushCompletedThenCB, this, std::placeholders::_1));
     if (ret != 0)
     {
         POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO), "[AllocatorFlush] failed to issue flush allocator files:{} owner:{}", ret, owner);
         delete[] buf;
+        --numWriteIoIssued;
         ret = -1;
     }
+    telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numWriteIoIssued);
     return ret;
 }
 
