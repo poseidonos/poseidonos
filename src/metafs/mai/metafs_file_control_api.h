@@ -41,6 +41,8 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <utility>
+
 #include "src/lib/bitmap.h"
 #include "src/metafs/storage/mss.h"
 #include "src/metafs/util/metafs_spinlock.h"

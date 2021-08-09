@@ -104,10 +104,10 @@ MetaVolumeHandler::HandleCloseFileReq(MetaVolumeType volType, MetaFsFileControlR
 {
     if (!volContainer->CheckFileInActive(volType, reqMsg.fd))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_OPEND,
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_OPENED,
             "The file is not opened, fd={}", reqMsg.fd);
 
-        return POS_EVENT_ID::MFS_FILE_NOT_OPEND;
+        return POS_EVENT_ID::MFS_FILE_NOT_OPENED;
     }
     volContainer->RemoveFileFromActiveList(volType, reqMsg.fd);
 

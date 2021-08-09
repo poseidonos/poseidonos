@@ -54,7 +54,7 @@ void
 ExtentAllocator::Init(MetaLpnType _base, MetaLpnType _last)
 {
     assert(_base < _last);
-    
+
     fileRegionBaseLpnInVolume = _base;
     maxFileRegionLpn = _last;
     availableLpnCount = _last - _base + 1;

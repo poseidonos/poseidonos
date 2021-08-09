@@ -245,8 +245,9 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
             {
                 reqMsg.completionData.openfd = -1;
 
-                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_OPEND,
-                    "Cannot find \'{}\' file in array \'{}\'", *reqMsg.fileName);
+                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_OPENED,
+                    "Cannot find \'{}\' file in array \'{}\'",
+                    *reqMsg.fileName, reqMsg.arrayId);
             }
             break;
 

@@ -42,7 +42,7 @@ namespace pos
 class CatalogManager : public OnVolumeMetaRegionManager
 {
 public:
-    CatalogManager(int arrayId);
+    explicit CatalogManager(int arrayId);
     CatalogManager(Catalog* catalog, int arrayId);
     virtual ~CatalogManager(void);
 

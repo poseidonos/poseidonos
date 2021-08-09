@@ -505,7 +505,7 @@ MetaVolume::TrimData(MetaFsFileControlRequest& reqMsg)
     MetaStorageType type = inode.GetStorageType();
     bool result = true;
 
-    for(auto& it : pageMap)
+    for (auto& it : pageMap)
     {
         MetaLpnType start = it.GetStartLpn();
         MetaLpnType count = it.GetCount();

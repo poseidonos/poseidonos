@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <deque>
 #include <utility>
+#include <vector>
 
 #include "src/metafs/include/meta_file_extent.h"
 

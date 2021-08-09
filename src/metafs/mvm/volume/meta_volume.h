@@ -35,6 +35,8 @@
 #include <map>
 #include <unordered_map>
 #include <string>
+#include <utility>
+#include <vector>
 #include "catalog_manager.h"
 #include "meta_volume_state.h"
 #include "inode_manager.h"

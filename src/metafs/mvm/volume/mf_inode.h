@@ -34,6 +34,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "src/metafs/common/meta_file_name.h"
 #include "mf_inode_req.h"

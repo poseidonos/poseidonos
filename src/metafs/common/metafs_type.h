@@ -34,6 +34,8 @@
 
 #include "os_header.h"
 
+#include <utility>
+
 namespace pos
 {
 using FileDescriptorType = uint32_t;

@@ -34,6 +34,10 @@
 
 #include <map>
 #include <string>
+#include <vector>
+#include <utility>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "mf_inode.h"
 #include "inode_table_header.h"
@@ -55,7 +59,7 @@ using FileHashInVolume = std::unordered_map<StringHashType, MetaVolumeType>;
 class InodeManager : public OnVolumeMetaRegionManager
 {
 public:
-    InodeManager(int arrayId);
+    explicit InodeManager(int arrayId);
     InodeManager(InodeTableHeader* inodeHdr, InodeTable* inodeTable,
         FileDescriptorAllocator* fdAllocator, ExtentAllocator* extentAllocator,
         int arrayId);
@@ -109,13 +113,13 @@ public:
     virtual bool RestoreContent(MetaVolumeType tgtVol, MetaLpnType BaseLpn, MetaLpnType iNodeHdrLpnCnts, MetaLpnType iNodeTableLpnCnts);
 
     // only for test
-    std::unordered_map<FileDescriptorType, MetaFileInode*>& GetInodeMap()
+    std::unordered_map<FileDescriptorType, MetaFileInode*>& GetInodeMap(void)
     {
         return fd2InodeMap;
     }
 
     // only for test
-    std::unordered_set<FileDescriptorType>& GetActiveFiles()
+    std::unordered_set<FileDescriptorType>& GetActiveFiles(void)
     {
         return activeFiles;
     }
