@@ -40,6 +40,7 @@
 #include "src/include/backend_event.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
+#include "src/io/backend_io/flush_count.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 
@@ -84,6 +85,8 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
             POS_EVENT_ID::NFLSH_ERROR_DETECT;
         POS_TRACE_ERROR(static_cast<int>(eventId),
             PosEventId::GetString(eventId), _GetErrorCount());
+        FlushCountSingleton::Instance()->pendingFlush--;
+        FlushCountSingleton::Instance()->callbackNotCalledCount++;
         return true;
     }
 
@@ -92,6 +95,8 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         POS_EVENT_ID eventId = POS_EVENT_ID::NFLSH_STRIPE_NOT_IN_WRITE_BUFFER;
         POS_TRACE_ERROR(static_cast<int>(eventId),
             PosEventId::GetString(eventId), stripe->GetVsid());
+        FlushCountSingleton::Instance()->pendingFlush--;
+        FlushCountSingleton::Instance()->callbackNotCalledCount++;
         return true;
     }
 
@@ -103,6 +108,8 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         message << "FlushCompletion for vsid: " << stripe->GetVsid() << ", wbLsid: " << stripe->GetWbLsid() << ", userAreaLsid: " << stripe->GetUserLsid();
         POS_TRACE_ERROR(static_cast<int>(eventId),
             PosEventId::GetString(eventId), message.str());
+        FlushCountSingleton::Instance()->pendingFlush--;
+        FlushCountSingleton::Instance()->callbackNotCalledCount++;
         return true;
     }
 

@@ -31,7 +31,7 @@
  */
 
 #include "src/io/general_io/internal_read_completion.h"
-
+#include "src/io/general_io/io_submit_handler_count.h"
 namespace pos
 {
 InternalReadCompletion::InternalReadCompletion(
@@ -48,5 +48,11 @@ bool
 InternalReadCompletion::_DoSpecificJob(void)
 {
     return true;
+}
+
+void
+InternalReadCompletion::_PreCallExecuteCallee(void)
+{
+    IOSubmitHandlerCountSingleton::Instance()->pendingRead--;
 }
 } // namespace pos

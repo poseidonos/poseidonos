@@ -97,6 +97,9 @@ private:
     bool _IsInvalidCallee(CallbackSmartPtr inputCallee);
     bool _IsCalleeSet(void);
     virtual bool _DoSpecificJob(void) = 0;
+    // If Every Callback of a callee is called
+    // there can be some neccesity to prepare or finalization of current callback's context.
+    virtual void _PreCallExecuteCallee(void);
     void _InvokeCallee(void);
     virtual bool _RecordCallerCompletionAndCheckOkToCall(uint32_t transferredErrorCount,
         BitMapMutex& inputErrorBitMap, uint32_t transferredWeight);

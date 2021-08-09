@@ -41,10 +41,12 @@
 #include "src/device/unvme/unvme_drv.h"
 #include "src/device/uram/uram_drv.h"
 #include "src/dump/dump_manager.h"
+#include "src/io/backend_io/flush_count.h"
 #include "src/io/frontend_io/aio.h"
 #include "src/io/frontend_io/flush_command_manager.h"
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/io/general_io/command_timeout_handler.h"
+#include "src/io/general_io/io_submit_handler_count.h"
 #include "src/io/general_io/rba_state_service.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
@@ -74,8 +76,10 @@ DebugInfo::DebugInfo(void)
     dumpManager(nullptr),
     eventScheduler(nullptr),
     flushCmdManager(nullptr),
+    flushCount(nullptr),
     garbageCollector(nullptr),
     ioDispatcher(nullptr),
+    ioSubmitHandlerCount(nullptr),
     logger(nullptr),
     mapperService(nullptr),
     metaFsService(nullptr),
@@ -122,5 +126,7 @@ DebugInfo::Update(void)
     metaFsService = MetaFsServiceSingleton::Instance();
     volumeService = VolumeServiceSingleton::Instance();
     nvmfTarget = NvmfTargetSingleton::Instance();
+    ioSubmitHandlerCount = IOSubmitHandlerCountSingleton::Instance();
+    flushCount = FlushCountSingleton::Instance();
 }
 } // namespace pos

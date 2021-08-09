@@ -37,6 +37,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
+#include "src/io/backend_io/flush_count.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 
@@ -85,7 +86,7 @@ FlushCompletion::Execute()
         StripePutEvent event(*stripe, nvmStripeId, arrayId);
 
         bool done = event.Execute();
-
+        FlushCountSingleton::Instance()->pendingFlush--;
         if (false == done)
         {
             EventSmartPtr eventForSchedule(new StripePutEvent(*stripe, nvmStripeId, arrayId));

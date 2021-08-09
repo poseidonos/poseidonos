@@ -41,6 +41,7 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/include/meta_const.h"
 #include "src/include/backend_event.h"
+#include "src/io/backend_io/flush_count.h"
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/logger/logger.h"
 #include "src/array/service/array_service_layer.h"
@@ -91,6 +92,9 @@ FlushSubmission::Execute(void)
         .lba = 0,
         .arrayDev = nullptr};
     void* basePointer = nullptr;
+
+    FlushCountSingleton::Instance()->pendingFlush++;
+
     if (likely(translator != nullptr))
     {
         int ret = translator->Translate(
@@ -100,6 +104,8 @@ FlushSubmission::Execute(void)
             POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;
             POS_TRACE_ERROR(eventId, "translator in Flush Submission has error code : {} stripeId : {}", stripe->GetVsid(), logicalStripeId);
             // No retry
+            FlushCountSingleton::Instance()->pendingFlush--;
+            FlushCountSingleton::Instance()->callbackNotCalledCount++;
             return true;
         }
         if (likely(physicalWriteEntry.arrayDev != nullptr))

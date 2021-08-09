@@ -44,5 +44,6 @@ public:
 
 private:
     bool _DoSpecificJob(void) final;
+    void _PreCallExecuteCallee(void) final;
 };
 } // namespace pos

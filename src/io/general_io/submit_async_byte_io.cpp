@@ -8,6 +8,7 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/accel_engine_api.h"
+#include "src/io/general_io/io_submit_handler_count.h"
 
 namespace pos
 {
@@ -83,6 +84,8 @@ AsyncByteIO::Execute(
     IOSubmitHandlerStatus errorToReturn = IOSubmitHandlerStatus::FAIL;
     if (unlikely(byteCount == 0))
     {
+        IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+        IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
         return errorToReturn;
     }
     if (unlikely(buffer == nullptr))
@@ -90,6 +93,8 @@ AsyncByteIO::Execute(
         int event = static_cast<int>(POS_EVENT_ID::IOSMHDLR_BYTEIO_BUFFER_NULLPTR);
         POS_TRACE_ERROR(event,
             PosEventId::GetString(POS_EVENT_ID::IOSMHDLR_BYTEIO_BUFFER_NULLPTR));
+        IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+        IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
         return errorToReturn;
     }
 
@@ -100,6 +105,8 @@ AsyncByteIO::Execute(
             = static_cast<int>(POS_EVENT_ID::IOSMHDLR_BYTEIO_PARTITION_IS_NOT_BYTE_ACCESSIBLE);
         POS_TRACE_ERROR(event,
             PosEventId::GetString(POS_EVENT_ID::IOSMHDLR_BYTEIO_PARTITION_IS_NOT_BYTE_ACCESSIBLE));
+        IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+        IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
         return errorToReturn;
     }
 
@@ -123,6 +130,8 @@ AsyncByteIO::Execute(
         POS_TRACE_ERROR(event,
             PosEventId::GetString(POS_EVENT_ID::IOSMHDLR_BYTEIO_DIR_NOT_SUPORTTED),
             static_cast<int>(direction));
+        IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+        IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
         return errorToReturn;
     }
 
@@ -132,6 +141,8 @@ AsyncByteIO::Execute(
             = static_cast<int>(POS_EVENT_ID::IOSMHDLR_BYTEIO_PARTITION_TRANSLATE_ERROR);
         POS_TRACE_ERROR(event,
             PosEventId::GetString(POS_EVENT_ID::IOSMHDLR_BYTEIO_PARTITION_TRANSLATE_ERROR));
+        IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+        IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
         return errorToReturn;
     }
     CallbackSmartPtr* callbackSmartPtr = new CallbackSmartPtr(callback);

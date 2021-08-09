@@ -9,6 +9,7 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/io/general_io/array_unlocking.h"
 #include "src/io/general_io/internal_write_completion.h"
+#include "src/io/general_io/io_submit_handler_count.h"
 #include "src/logger/logger.h"
 #include "src/state/state_manager.h"
 /*To do Remove after adding array Idx by Array*/
@@ -45,6 +46,8 @@ SubmitAsyncWrite::Execute(
 
     if (bufferList.empty())
     {
+        IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+        IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
         return errorToReturn;
     }
     LogicalWriteEntry logicalWriteEntry = {
@@ -59,6 +62,8 @@ SubmitAsyncWrite::Execute(
     {
         callback->InformError(IOErrorType::GENERIC_ERROR);
         EventSchedulerSingleton::Instance()->EnqueueEvent(callback);
+        IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+        IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
         return IOSubmitHandlerStatus::SUCCESS;
     }
 
@@ -73,6 +78,8 @@ SubmitAsyncWrite::Execute(
         bool result = locker->TryLock(targetDevices, stripeId);
         if (result == false)
         {
+            IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+            IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
             return IOSubmitHandlerStatus::TRYLOCK_FAIL;
         }
     }

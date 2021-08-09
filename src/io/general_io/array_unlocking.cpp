@@ -34,6 +34,7 @@
 
 #include "src/array/service/array_service_layer.h"
 #include "src/include/branch_prediction.h"
+#include "src/io/general_io/io_submit_handler_count.h"
 
 namespace pos
 {
@@ -58,6 +59,7 @@ bool
 ArrayUnlocking::_DoSpecificJob(void)
 {
     locker->Unlock(lockedDevs, stripeId);
+    IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
     return true;
 }
 } // namespace pos

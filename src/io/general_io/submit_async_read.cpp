@@ -4,6 +4,7 @@
 #include "src/include/branch_prediction.h"
 #include "src/include/memory.h"
 #include "src/include/pos_event_id.hpp"
+#include "src/io/general_io/io_submit_handler_count.h"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -39,6 +40,8 @@ SubmitAsyncRead::Execute(
 
     if (bufferList.empty())
     {
+        IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+        IOSubmitHandlerCountSingleton::Instance()->pendingRead--;
         return errorToReturn;
     }
 
@@ -62,6 +65,8 @@ SubmitAsyncRead::Execute(
         }
         else
         {
+            IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
+            IOSubmitHandlerCountSingleton::Instance()->pendingRead--;
             return errorToReturn;
         }
     }

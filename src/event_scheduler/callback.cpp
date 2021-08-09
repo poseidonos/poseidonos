@@ -145,6 +145,12 @@ Callback::Execute(void)
     return done;
 }
 
+void
+Callback::_PreCallExecuteCallee(void)
+{
+    return;
+}
+
 uint32_t
 Callback::_GetErrorCount(void)
 {
@@ -179,6 +185,7 @@ Callback::_InvokeCallee(void)
             errorCount, errorBitMap, weight);
     if (isOkToCall == true)
     {
+        _PreCallExecuteCallee();
         bool done = callee->Execute();
 
         if (likely(done))

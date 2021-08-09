@@ -31,7 +31,6 @@
  */
 
 #include "src/io/general_io/internal_write_completion.h"
-
 namespace pos
 {
 InternalWriteCompletion::InternalWriteCompletion(BufferEntry& bufferEntry)

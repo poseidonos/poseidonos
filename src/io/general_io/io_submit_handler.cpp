@@ -42,6 +42,7 @@
 #include "src/io/general_io/submit_async_write.h"
 #include "src/io/general_io/submit_async_byte_io.h"
 #include "src/io/general_io/sync_io_completion.h"
+#include "src/io/general_io/io_submit_handler_count.h"
 #include "src/logger/logger.h"
 
 /*To do Remove after adding array Idx by Array*/
@@ -142,12 +143,14 @@ IOSubmitHandler::SubmitAsyncIO(
         if (IODirection::READ == direction)
         {
             SubmitAsyncRead asyncRead(callback);
+            IOSubmitHandlerCountSingleton::Instance()->pendingRead++;
             errorToReturn = asyncRead.Execute(bufferList, startLSA, blockCount, partitionToIO, callback, arrayId);
         }
         else if (IODirection::WRITE == direction)
         {
             SubmitAsyncWrite asyncWrite;
             bool needTrim = false;
+            IOSubmitHandlerCountSingleton::Instance()->pendingWrite++;
             errorToReturn = asyncWrite.Execute(bufferList, startLSA, blockCount,
                 partitionToIO, callback, arrayId, needTrim);
         }
@@ -155,11 +158,13 @@ IOSubmitHandler::SubmitAsyncIO(
         {
             SubmitAsyncWrite asyncWrite;
             bool needTrim = true;
+            IOSubmitHandlerCountSingleton::Instance()->pendingWrite++;
             errorToReturn = asyncWrite.Execute(bufferList, startLSA, blockCount,
                 partitionToIO, callback, arrayId, needTrim);
         }
         else
         {
+            IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
             break;
         }
     } while (false);
@@ -178,6 +183,7 @@ IOSubmitHandler::SubmitAsyncByteIO(
     IOSubmitHandlerStatus errorToReturn = IOSubmitHandlerStatus::FAIL;
 
     AsyncByteIO asyncByteIO;
+    IOSubmitHandlerCountSingleton::Instance()->pendingByteIo++;
     errorToReturn = asyncByteIO.Execute(direction,
         buffer, startLSA, partitionToIO, callback, arrayId);
     return errorToReturn;
