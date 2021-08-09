@@ -81,6 +81,58 @@ TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImported)
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
 
+TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImportedWithMetaSetInformation)
+{
+    // Used when loading array
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
+    DeviceSet<string> nameSet;
+    string nvm1 = "mock-nvm1";
+    string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
+    string spare1 = "mock-spare1";
+
+    nameSet.nvm.push_back(nvm1);
+    nameSet.data.push_back(data1);
+    nameSet.data.push_back(data2);
+    nameSet.data.push_back(data3);
+    nameSet.spares.push_back(spare1);
+    DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
+
+    auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), DeviceType::NVRAM, 805830656); // minNvmSize when logicalChunkCount is 2
+    auto data1UblockDevPtr = MockUblockDevice(data1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data2UblockDevPtr = MockUblockDevice(data2.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data3UblockDevPtr = MockUblockDevice(data3.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto spare1UblockDevPtr = MockUblockDevice(spare1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+
+    EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
+        .WillOnce(Return(nvm1UblockDevPtr))
+        .WillOnce(Return(data1UblockDevPtr))
+        .WillOnce(Return(data2UblockDevPtr))
+        .WillOnce(Return(data3UblockDevPtr))
+        .WillOnce(Return(spare1UblockDevPtr))
+        .WillOnce(Return(nvm1UblockDevPtr))
+        .WillOnce(Return(data1UblockDevPtr))
+        .WillOnce(Return(data2UblockDevPtr))
+        .WillOnce(Return(data3UblockDevPtr))
+        .WillOnce(Return(spare1UblockDevPtr));
+
+    arrDevMgr.Import(nameSet);
+    ArrayMeta arrayMeta;
+    arrayMeta.devs = arrDevMgr.ExportToMeta();
+    arrDevMgr.Clear();
+
+    // When
+    uint32_t missingCnt = 0;
+    uint32_t brokenCnt = 0;
+    int actual = arrDevMgr.Import(arrayMeta.devs, missingCnt, brokenCnt);
+
+    // Then
+    ASSERT_EQ(0, actual);
+    arrDevMgr.Clear(); // to avoid the leakage of mocks
+}
+
 TEST(ArrayDeviceManager, Export_testIfArrayDevMgrIsQueriedAgainst)
 {
     // Given
@@ -457,6 +509,34 @@ TEST(ArrayDeviceManager, GetDev_testIfGetDevFailedMatchIsHandled)
     // Then
     ASSERT_EQ(nullptr, arrDev);
     ASSERT_EQ(ArrayDeviceType::NONE, arrDevType);
+}
+
+TEST(ArrayDeviceManager, GetDev_testIfGetDevDATAIsHandledWithDeviceSerialNumber)
+{
+    // Given
+    MockDeviceManager* mockSysDevMgr = new MockDeviceManager();
+    ArrayDeviceManager arrDevMgr(mockSysDevMgr);
+    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
+    arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
+
+    DeviceSet<ArrayDevice*> deviceSet;
+    auto dataUBlockDev = MockUblockDevice("mock-data");
+    ArrayDevice dataDev(dataUBlockDev);
+    deviceSet.data.push_back(&dataDev);
+
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
+    ArrayDevice* arrDev;
+    ArrayDeviceType arrDevType;
+
+    EXPECT_CALL(*mockSysDevMgr, GetDev).WillOnce(Return(dataUBlockDev));
+
+    // When
+    std::tie(arrDev, arrDevType) = arrDevMgr.GetDev("mock-data-sn");
+
+    // Then
+    ASSERT_EQ(&dataDev, arrDev);
+    ASSERT_EQ(ArrayDeviceType::DATA, arrDevType);
+    delete mockSysDevMgr;
 }
 
 TEST(ArrayDeviceManager, GetFaulty_testIfFaultyArrayDeviceIsReturned)

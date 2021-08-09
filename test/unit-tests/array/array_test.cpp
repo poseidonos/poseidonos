@@ -12,8 +12,8 @@
 #include "test/unit-tests/array/device/array_device_mock.h"
 #include "test/unit-tests/array/interface/i_abr_control_mock.h"
 #include "test/unit-tests/array/partition/partition_manager_mock.h"
-#include "test/unit-tests/array/service/array_service_layer_mock.h"
 #include "test/unit-tests/array/rebuild/i_array_rebuilder_mock.h"
+#include "test/unit-tests/array/service/array_service_layer_mock.h"
 #include "test/unit-tests/array/state/array_state_mock.h"
 #include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
@@ -1104,6 +1104,27 @@ TEST(Array, DetachDevice_IntegrationTestIfDataDeviceIsNotDetachedFromMountedArra
     delete mockArrDev;
 }
 
+TEST(Array, AttachDevice_testWhenDeviceAttachedOnOfflineStateAndThereIsFaultyDev)
+{
+    // Given
+    NiceMock<MockIStateControl> mockIStateControl;
+    MockArrayState* mockState = new MockArrayState(&mockIStateControl);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockDeviceManager mockSysDevMgr(nullptr);
+
+    Array array("mock", NULL, NULL, mockArrDevMgr, &mockSysDevMgr, NULL, mockState, NULL, NULL, NULL);
+    string spareDevName = "mock-unvme";
+    struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
+    UblockSharedPtr fakeUblockSharedPtr = make_shared<UnvmeSsd>(spareDevName, 1024, nullptr, fakeNs, "mock-addr");
+    MockArrayDevice* faultyDev = new MockArrayDevice(NULL, ArrayDeviceState::FAULT);
+
+    EXPECT_CALL(*mockState, GetState).WillOnce(Return(ArrayStateEnum::EXIST_DEGRADED));
+    EXPECT_CALL(*mockArrDevMgr, GetFaulty).WillOnce(Return(faultyDev));
+    // When
+    array.AttachDevice(fakeUblockSharedPtr);
+    // Then
+}
+
 TEST(Array, MountDone_testIfResumeRebuildEventIsSent)
 {
     // Given: an array
@@ -1525,7 +1546,7 @@ TEST(Array, TriggerRebuild_testIfRebuildNotTriggeredWhenFlushFailed)
 
 TEST(Array, ResumeRebuild_testIfResumeRebuildProperly)
 {
-     // Given
+    // Given
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
     NiceMock<MockIStateControl> mockIStateControl;
@@ -1552,7 +1573,7 @@ TEST(Array, ResumeRebuild_testIfResumeRebuildProperly)
 
 TEST(Array, ResumeRebuild_testIfResumeRebuildFailedWhenStateChangeFailed)
 {
-     // Given
+    // Given
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
     NiceMock<MockIStateControl> mockIStateControl;
