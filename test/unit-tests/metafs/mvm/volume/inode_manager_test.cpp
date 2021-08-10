@@ -358,9 +358,6 @@ TEST_F(InodeManagerFixture, CheckFileCreation_Positive)
     EXPECT_CALL(*inodeTable, GetBaseLpn)
             .WillOnce(Return(0));
 
-    EXPECT_CALL(*inodeHdr, GetFileExtentContent);
-    EXPECT_CALL(*extentAllocator, SetAllocatedExtentList);
-
     std::pair<FileDescriptorType, POS_EVENT_ID> result;
     result = inodeMgr->CreateFileInode(reqMsg);
 
