@@ -164,6 +164,18 @@ ContextManager::Close(void)
 }
 
 int
+ContextManager::FlushOneContext(int owner, EventSmartPtr callback, bool sync)
+{
+    numWriteIoIssued++;
+    int ret = _Flush(owner, callback);
+    if (sync == true)
+    {
+        _WaitPendingIo(IOTYPE_WRITE);
+    }
+    return ret;
+}
+
+int
 ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
 {
     if (flushInProgress.exchange(true) == true)
@@ -317,8 +329,7 @@ ContextManager::ReleaseRebuildSegment(SegmentId segmentId)
     int ret = rebuildCtx->ReleaseRebuildSegment(segmentId);
     if (ret == 1) // need to flush
     {
-        numWriteIoIssued++;
-        _Flush(REBUILD_CTX, nullptr);
+        FlushOneContext(REBUILD_CTX, nullptr, false);
         ret = 0;
     }
     return ret;
@@ -330,8 +341,7 @@ ContextManager::MakeRebuildTarget(void)
     int ret = rebuildCtx->MakeRebuildTarget();
     if (ret == 1) // need to flush
     {
-        numWriteIoIssued++;
-        _Flush(REBUILD_CTX, nullptr);
+        FlushOneContext(REBUILD_CTX, nullptr, false);
         ret = rebuildCtx->GetRebuildTargetSegmentCount();
     }
     return ret;
@@ -345,8 +355,7 @@ ContextManager::StopRebuilding(void)
     int ret = rebuildCtx->StopRebuilding();
     if (ret == 1) // need to flush
     {
-        numWriteIoIssued++;
-        _Flush(REBUILD_CTX, nullptr);
+        FlushOneContext(REBUILD_CTX, nullptr, false);
         ret = 0;
     }
     return ret;
@@ -409,8 +418,7 @@ ContextManager::_FreeSegment(SegmentId segId)
     int ret = rebuildCtx->FreeSegmentInRebuildTarget(segId);
     if (ret == 1)
     {
-        numWriteIoIssued++;
-        _Flush(REBUILD_CTX, nullptr);
+        FlushOneContext(REBUILD_CTX, nullptr, false);
     }
 }
 
@@ -583,7 +591,7 @@ ContextManager::_LoadContexts(void)
             numReadIoIssued--;
             numWriteIoIssued++;
             POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] initial flush allocator file:{}, pendingMetaIo:{}", owner, numWriteIoIssued);
-            ret = _Flush(owner, nullptr);
+            FlushOneContext(REBUILD_CTX, nullptr, false);
             if (ret == 0)
             {
                 _WaitPendingIo(IOTYPE_WRITE);
