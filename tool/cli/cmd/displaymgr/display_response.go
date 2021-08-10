@@ -288,80 +288,81 @@ func printResToHumanReadable(command string, resJSON string) {
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-		if "" == res.RESULT.DATA.SUBNQN {
-			// Print all subsystems
-			// Header
-			fmt.Fprintln(w,
-				"Name\t"+
-					globals.FieldSeparator+"Subtype\t"+
-					globals.FieldSeparator+"AddressCount\t"+
-					globals.FieldSeparator+"SerialNumber(SN)\t"+
-					globals.FieldSeparator+"ModelNumber(MN)\t"+
-					globals.FieldSeparator+"NamespaceCount")
+		fmt.Fprintln(w,
+			"Name\t"+
+				globals.FieldSeparator+"Subtype\t"+
+				globals.FieldSeparator+"AddressCount\t"+
+				globals.FieldSeparator+"SerialNumber(SN)\t"+
+				globals.FieldSeparator+"ModelNumber(MN)\t"+
+				globals.FieldSeparator+"NamespaceCount")
 
-			// Horizontal line
-			fmt.Fprintln(w,
-				"-------------------------------------\t"+
-					globals.FieldSeparator+"-----------\t"+
-					globals.FieldSeparator+"------------\t"+
-					globals.FieldSeparator+"---------------------\t"+
-					globals.FieldSeparator+"---------------------\t"+
-					globals.FieldSeparator+"--------------")
+		// Horizontal line
+		fmt.Fprintln(w,
+			"-------------------------------------\t"+
+				globals.FieldSeparator+"-----------\t"+
+				globals.FieldSeparator+"------------\t"+
+				globals.FieldSeparator+"---------------------\t"+
+				globals.FieldSeparator+"---------------------\t"+
+				globals.FieldSeparator+"--------------")
 
-			// Data
-			for _, subsystem := range res.RESULT.DATA.SUBSYSTEMLIST {
-				fmt.Fprintln(w,
-					subsystem.NQN+"\t"+
-						globals.FieldSeparator+subsystem.SUBTYPE+"\t"+
-						globals.FieldSeparator+strconv.Itoa(len(subsystem.LISTENADDRESSES))+"\t"+
-						globals.FieldSeparator+subsystem.SERIAL+"\t"+
-						globals.FieldSeparator+subsystem.MODEL+"\t"+
-						globals.FieldSeparator+strconv.Itoa(len(subsystem.NAMESPACES)))
+		// Data
+		for _, subsystem := range res.RESULT.DATA.SUBSYSTEMLIST {
+			fmt.Fprintln(w,
+				subsystem.NQN+"\t"+
+					globals.FieldSeparator+subsystem.SUBTYPE+"\t"+
+					globals.FieldSeparator+strconv.Itoa(len(subsystem.LISTENADDRESSES))+"\t"+
+					globals.FieldSeparator+subsystem.SERIAL+"\t"+
+					globals.FieldSeparator+subsystem.MODEL+"\t"+
+					globals.FieldSeparator+strconv.Itoa(len(subsystem.NAMESPACES)))
+		}
+
+		w.Flush()
+
+	case "SUBSYSTEMINFO":
+		res := messages.ListSubsystemResponse{}
+		json.Unmarshal([]byte(resJSON), &res)
+		printStatus(res.RESULT.STATUS.CODE)
+
+		if len(res.RESULT.DATA.SUBSYSTEMLIST) != 0 {
+			subsystem := res.RESULT.DATA.SUBSYSTEMLIST[0]
+
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+			fmt.Fprintln(w, "nqn\t: " + subsystem.NQN)
+			fmt.Fprintln(w, "subtype\t: " + subsystem.SUBTYPE)
+			fmt.Fprint(w, "listen_addresses\t: ")
+			for _, address := range subsystem.LISTENADDRESSES {
+				fmt.Fprintln(w, "")
+				fmt.Fprintln(w, "\t  {")
+				fmt.Fprintln(w, "\t    trtype : " + address.TRANSPORTTYPE)
+				fmt.Fprintln(w, "\t    adrfam : " + address.ADDRESSFAMILY)
+				fmt.Fprintln(w, "\t    traddr : " + address.TARGETADDRESS)
+				fmt.Fprintln(w, "\t    trsvcid : " + address.TRANSPORTSERVICEID)
+				fmt.Fprint(w, "\t  }")
 			}
-		} else {
-			// Print specific subsystem
-			for _, subsystem := range res.RESULT.DATA.SUBSYSTEMLIST {
-				if subsystem.NQN != res.RESULT.DATA.SUBNQN {
-					continue
-				}
-				fmt.Fprintln(w, "nqn\t: " + subsystem.NQN)
-				fmt.Fprintln(w, "subtype\t: " + subsystem.SUBTYPE)
-				fmt.Fprint(w, "listen_addresses\t: ")
-				for _, address := range subsystem.LISTENADDRESSES {
+			fmt.Fprintln(w, "")
+			fmt.Fprintln(w, "allow_any_host\t:", subsystem.ALLOWANYHOST != 0)
+			fmt.Fprintln(w, "hosts\t: ")
+			for _, host := range subsystem.HOSTS {
+				fmt.Fprintln(w, "\t  { nqn : " + host.NQN + " }")
+			}
+			if "NVMe" == subsystem.SUBTYPE {
+				fmt.Fprintln(w, "serial_number\t: " + subsystem.SERIAL)
+				fmt.Fprintln(w, "model_number\t: " + subsystem.MODEL)
+				fmt.Fprintln(w, "max_namespaces\t:", subsystem.MAXNAMESPACES)
+				fmt.Fprint(w, "namespaces\t: ")
+				for _, namespace := range subsystem.NAMESPACES {
 					fmt.Fprintln(w, "")
 					fmt.Fprintln(w, "\t  {")
-					fmt.Fprintln(w, "\t    trtype : " + address.TRANSPORTTYPE)
-					fmt.Fprintln(w, "\t    adrfam : " + address.ADDRESSFAMILY)
-					fmt.Fprintln(w, "\t    traddr : " + address.TARGETADDRESS)
-					fmt.Fprintln(w, "\t    trsvcid : " + address.TRANSPORTSERVICEID)
+					fmt.Fprintln(w, "\t    nsid :", namespace.NSID)
+					fmt.Fprintln(w, "\t    bdev_name : " + namespace.BDEVNAME)
+					fmt.Fprintln(w, "\t    uuid : " + namespace.UUID)
 					fmt.Fprint(w, "\t  }")
 				}
 				fmt.Fprintln(w, "")
-				fmt.Fprintln(w, "allow_any_host\t:", subsystem.ALLOWANYHOST != 0)
-				fmt.Fprintln(w, "hosts\t: ")
-				for _, host := range subsystem.HOSTS {
-					fmt.Fprintln(w, "\t  { nqn : " + host.NQN + " }")
-				}
-				if "NVMe" == subsystem.SUBTYPE {
-					fmt.Fprintln(w, "serial_number\t: " + subsystem.SERIAL)
-					fmt.Fprintln(w, "model_number\t: " + subsystem.MODEL)
-					fmt.Fprintln(w, "max_namespaces\t:", subsystem.MAXNAMESPACES)
-					fmt.Fprint(w, "namespaces\t: ")
-					for _, namespace := range subsystem.NAMESPACES {
-						fmt.Fprintln(w, "")
-						fmt.Fprintln(w, "\t  {")
-						fmt.Fprintln(w, "\t    nsid :", namespace.NSID)
-						fmt.Fprintln(w, "\t    bdev_name : " + namespace.BDEVNAME)
-						fmt.Fprintln(w, "\t    uuid : " + namespace.UUID)
-						fmt.Fprint(w, "\t  }")
-					}
-					fmt.Fprintln(w, "")
-				}
-				fmt.Fprintln(w, "")
-				return
 			}
+			w.Flush()
 		}
-		w.Flush()
 
 	default:
 		res := messages.Response{}

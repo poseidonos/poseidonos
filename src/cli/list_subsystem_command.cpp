@@ -34,6 +34,8 @@
 
 #include "src/cli/cli_event_code.h"
 #include "src/helper/spdk_rpc_client.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/logger/logger.h"
 #include "src/network/nvmf_target.h"
 
 namespace pos_cli
@@ -53,12 +55,32 @@ ListSubsystemCommand::Execute(json& doc, string rid)
     JsonFormat jFormat;
     SpdkRpcClient rpcClient;
     NvmfTarget target;
+    JsonElement data("data");
+    string subnqn = "";
+    bool getSubsystemInfo = false;
+    string command = doc["command"].get<std::string>();
+
+    if (command == "SUBSYSTEMINFO" && (doc["param"].contains("name") == true))
+    {
+        subnqn = doc["param"]["name"].get<std::string>();
+        if (nullptr == target.FindSubsystem(subnqn))
+        {
+            POS_EVENT_ID result = POS_EVENT_ID::IONVMF_FAIL_TO_FIND_SUBSYSTEM;
+            return jFormat.MakeResponse(command, rid, static_cast<int>(result),
+                PosEventId::GetString(result), data, GetPosInfo());
+        }
+        getSubsystemInfo = true;
+    }
 
     auto list = rpcClient.SubsystemList();
 
     JsonArray array("subsystemlist");
     for (const auto& subsystem : list)
     {
+        if (true == getSubsystemInfo && (subnqn.compare(subsystem["nqn"].asString()) != 0))
+        {
+            continue;
+        }
         JsonElement elem("");
         elem.SetAttribute(
             JsonAttribute("nqn", "\"" + subsystem["nqn"].asString() + "\""));
@@ -117,18 +139,16 @@ ListSubsystemCommand::Execute(json& doc, string rid)
             elem.SetArray(namespaceArray);
         }
         array.AddElement(elem);
+        if (true == getSubsystemInfo)
+        {
+            break;
+        }
     }
 
-    JsonElement data("data");
     data.SetArray(array);
-    if (doc["param"].contains("name") && nullptr != target.FindSubsystem(doc["param"]["name"].get<string>()))
-    {
-        data.SetAttribute(
-            JsonAttribute("target_subnqn", "\"" + doc["param"]["name"].get<string>() + "\""));
-    }
 
     return jFormat.MakeResponse(
-        "LISTSUBSYSTEM", rid, SUCCESS,
+        command, rid, SUCCESS,
         "list of existing subsystems", data, GetPosInfo());
 }
 }; // namespace pos_cli

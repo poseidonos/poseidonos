@@ -249,7 +249,6 @@ type ListSubsystemResult struct {
 
 type ListSubsystemResData struct {
 	SUBSYSTEMLIST []Subsystem `json:"subsystemlist"`
-	SUBNQN        string      `json:"target_subnqn,omitempty"`
 }
 
 type Subsystem struct {

@@ -103,6 +103,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["CREATESUBSYSTEM"] = new CreateSubsystemCommand();
     cmdDictionary["DELETESUBSYSTEM"] = new DeleteSubsystemCommand();
     cmdDictionary["LISTSUBSYSTEM"] = new ListSubsystemCommand();
+    cmdDictionary["SUBSYSTEMINFO"] = new ListSubsystemCommand();
     cmdDictionary["ADDLISTENER"] = new AddListenerCommand();
     cmdDictionary["CREATETRANSPORT"] = new CreateTransportCommand();
     cmdDictionary["CREATEVOLUME"] = new CreateVolumeCommand();

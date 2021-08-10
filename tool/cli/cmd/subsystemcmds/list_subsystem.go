@@ -20,21 +20,32 @@ var ListSubsystemCmd = &cobra.Command{
 Syntax:
 	poseidonos-cli subsystem list [(--subnqn | -q) SubsystemNQN]
 
-	Example:
+Example 1 (listing all subsystems):
+	poseidonos-cli subsystem list
+
+Example 2 (listing a specific array):
 	poseidonos-cli subsystem list --subnqn nqn.2019-04.pos:subsystem
     `,
 	Run: func(cmd *cobra.Command, args []string) {
+		var command = ""
+		var ListSubsystemReq = messages.Request{}
+		if list_subsystem_subnqn == "" {
+			command = "LISTSUBSYSTEM"
+			ListSubsystemReq = messages.Request{
+				RID:     "fromCLI",
+				COMMAND: command,
+			}
+		} else {
+			command = "SUBSYSTEMINFO"
+			listSubsystemParam := messages.ListSubsystemParam{
+				SUBNQN: list_subsystem_subnqn,
+			}
 
-		var command = "LISTSUBSYSTEM"
-
-		listSubsystemParam := messages.ListSubsystemParam{
-			SUBNQN: list_subsystem_subnqn,
-		}
-
-		ListSubsystemReq := messages.Request{
-			RID:     "fromCLI",
-			COMMAND: command,
-			PARAM:   listSubsystemParam,
+			ListSubsystemReq = messages.Request{
+				RID:     "fromCLI",
+				COMMAND: command,
+				PARAM:   listSubsystemParam,
+			}
 		}
 
 		reqJSON, err := json.Marshal(ListSubsystemReq)
