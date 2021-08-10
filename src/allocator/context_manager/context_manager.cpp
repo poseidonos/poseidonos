@@ -166,11 +166,6 @@ ContextManager::Close(void)
 int
 ContextManager::FlushOneContext(int owner, EventSmartPtr callback, bool sync)
 {
-    if (flushInProgress.exchange(true) == true)
-    {
-        return (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS;
-    }
-    assert(numWriteIoIssued == 0);
     numWriteIoIssued++;
     telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numWriteIoIssued);
     int ret = _Flush(owner, callback);
@@ -334,7 +329,7 @@ ContextManager::ReleaseRebuildSegment(SegmentId segmentId)
     int ret = rebuildCtx->ReleaseRebuildSegment(segmentId);
     if (ret == 1) // need to flush
     {
-        FlushOneContext(REBUILD_CTX, nullptr, false);
+        FlushOneContext(REBUILD_CTX, nullptr, true);
         ret = 0;
     }
     return ret;
@@ -346,7 +341,7 @@ ContextManager::MakeRebuildTarget(void)
     int ret = rebuildCtx->MakeRebuildTarget();
     if (ret == 1) // need to flush
     {
-        FlushOneContext(REBUILD_CTX, nullptr, false);
+        FlushOneContext(REBUILD_CTX, nullptr, true);
         ret = rebuildCtx->GetRebuildTargetSegmentCount();
     }
     return ret;
@@ -360,7 +355,7 @@ ContextManager::StopRebuilding(void)
     int ret = rebuildCtx->StopRebuilding();
     if (ret == 1) // need to flush
     {
-        FlushOneContext(REBUILD_CTX, nullptr, false);
+        FlushOneContext(REBUILD_CTX, nullptr, true);
         ret = 0;
     }
     return ret;
@@ -423,7 +418,7 @@ ContextManager::_FreeSegment(SegmentId segId)
     int ret = rebuildCtx->FreeSegmentInRebuildTarget(segId);
     if (ret == 1)
     {
-        FlushOneContext(REBUILD_CTX, nullptr, false);
+        FlushOneContext(REBUILD_CTX, nullptr, true);
     }
 }
 
@@ -439,7 +434,6 @@ ContextManager::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
     if (header->sig == RebuildCtx::SIG_REBUILD_CTX)
     {
         rebuildCtx->FinalizeIo(ctx);
-        flushInProgress = false;
         POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] Complete to store rebuildCtx file, pendingMetaIo:{}", numWriteIoIssued);
         delete[] ctx->buffer;
         delete ctx;
@@ -593,13 +587,9 @@ ContextManager::_LoadContexts(void)
         {
             delete[] buf;
             numReadIoIssued--;
-            ret = FlushOneContext(REBUILD_CTX, nullptr, false);
-            POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] initial flush allocator file:{}, pendingMetaIo:{}", owner, numWriteIoIssued);            
-            if (ret == 0)
-            {
-                _WaitPendingIo(IOTYPE_WRITE);
-            }
-            else
+            ret = FlushOneContext(owner, nullptr, true);
+            POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] initial flush allocator file:{}, pendingMetaIo:{}", owner, numWriteIoIssued);
+            if (ret < 0)
             {
                 return ret;
             }

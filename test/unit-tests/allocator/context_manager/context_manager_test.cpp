@@ -50,7 +50,9 @@ TEST(ContextManager, Init_TestCaseFormatFormat)
     EXPECT_CALL(*segCtx, Init);
     EXPECT_CALL(*fileMan, Init);
     EXPECT_CALL(*reCtx, Init);
+    EXPECT_CALL(*fileMan, GetFileSize).WillOnce(Return(100)).WillOnce(Return(100)).WillOnce(Return(100)).WillOnce(Return(100)).WillOnce(Return(100)).WillOnce(Return(100));
     EXPECT_CALL(*fileMan, Load).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0));
+    EXPECT_CALL(*fileMan, Store).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0));
     EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true));
     // when 1.
     ctxManager.Init();
@@ -80,9 +82,10 @@ TEST(ContextManager, Init_TestCaseFormatFormatFail)
     EXPECT_CALL(*segCtx, Init);
     EXPECT_CALL(*fileMan, Init);
     EXPECT_CALL(*reCtx, Init);
+    EXPECT_CALL(*fileMan, GetFileSize).WillOnce(Return(100)).WillOnce(Return(100)).WillOnce(Return(100)).WillOnce(Return(100)).WillOnce(Return(100)).WillOnce(Return(100));
     EXPECT_CALL(*fileMan, Load).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0));
     EXPECT_CALL(*fileMan, Store).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(-1));
-    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true));
+    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true));
     // when 1.
     ctxManager.Init();
     delete addrInfo;
@@ -432,26 +435,27 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndVali
 TEST(ContextManager, UpdateOccupiedStripeCount_TestFreeSegment)
 {
     // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetstripesPerSegment(100);
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>();
     NiceMock<MockTelemetryPublisher>* tc = new NiceMock<MockTelemetryPublisher>();
-    ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
+    ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, addrInfo, "");
 
-    int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
+    EXPECT_CALL(*addrInfo, GetstripesPerSegment).WillOnce(Return(100)).WillOnce(Return(100));
+    EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(100));
     std::mutex segStateLock;
     EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
-    EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(0));
     EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD));
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store).WillOnce(Return(0));
+    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     // when
     ctxManager.UpdateOccupiedStripeCount(5);
+    delete addrInfo;
 }
 
 TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndValidCountIsZeroAndSegStateNVRAM)
@@ -724,13 +728,14 @@ TEST(ContextManager, AllocateRebuildTargetSegment_TestSimpleByPassFunc)
 TEST(ContextManager, ReleaseRebuildSegment__TestSimpleByPassFunc)
 {
     // given
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>();
     NiceMock<MockTelemetryPublisher>* tc = new NiceMock<MockTelemetryPublisher>();
-    ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
+    ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, addrInfo, "");
 
     // given 1.
     EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(0));
@@ -749,10 +754,12 @@ TEST(ContextManager, ReleaseRebuildSegment__TestSimpleByPassFunc)
     // given 3.
     EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store).WillOnce(Return(0));
+    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     // when 3.
     ret = ctxManager.ReleaseRebuildSegment(5);
     // then 3.
     EXPECT_EQ(0, ret);
+    delete addrInfo;
 }
 
 TEST(ContextManager, NeedRebuildAgain_TestSimpleByPassFunc)
@@ -1075,13 +1082,14 @@ TEST(ContextManager, NeedRebuildAgain_TestSimpleGetter)
 TEST(ContextManager, MakeRebuildTarget_TestwithFlushOrwithoutFlush)
 {
     // given
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>();
     NiceMock<MockTelemetryPublisher>* tc = new NiceMock<MockTelemetryPublisher>();
-    ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
+    ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, addrInfo, "");
 
     // given 1.
     EXPECT_CALL(*reCtx, MakeRebuildTarget).WillOnce(Return(-1));
@@ -1093,11 +1101,13 @@ TEST(ContextManager, MakeRebuildTarget_TestwithFlushOrwithoutFlush)
     // given 2.
     EXPECT_CALL(*reCtx, MakeRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store).WillOnce(Return(0));
+    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     EXPECT_CALL(*reCtx, GetRebuildTargetSegmentCount).WillOnce(Return(7));
     // when 1.
     ret = ctxManager.MakeRebuildTarget();
     // then 1.
     EXPECT_EQ(7, ret);
+    delete addrInfo;
 }
 
 TEST(ContextManager, GetRebuildTargetSegmentCount_TestwithFlushOrwithoutFlush)
@@ -1120,13 +1130,14 @@ TEST(ContextManager, GetRebuildTargetSegmentCount_TestwithFlushOrwithoutFlush)
 TEST(ContextManager, StopRebuilding_TestwithFlushOrwithoutFlush)
 {
     // given
+    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>();
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>();
     NiceMock<MockTelemetryPublisher>* tc = new NiceMock<MockTelemetryPublisher>();
-    ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
+    ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, addrInfo, "");
 
     // given 1.
     EXPECT_CALL(*reCtx, StopRebuilding).WillOnce(Return(-1));
@@ -1138,10 +1149,12 @@ TEST(ContextManager, StopRebuilding_TestwithFlushOrwithoutFlush)
     // given 2.
     EXPECT_CALL(*reCtx, StopRebuilding).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store).WillOnce(Return(0));
+    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     // when 1.
     ret = ctxManager.StopRebuilding();
     // then 1.
     EXPECT_EQ(0, ret);
+    delete addrInfo;
 }
 
 } // namespace pos
