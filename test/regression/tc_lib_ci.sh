@@ -1001,7 +1001,7 @@ EXPECT_PASS()
         print_result "\"${name}\" passed as expected" 0
     else
         print_result "\"${name}\" failed as unexpected" 1
-        pause
+        # pause
         kill_pos
         exit 1
     fi
