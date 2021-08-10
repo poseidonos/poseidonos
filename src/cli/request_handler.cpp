@@ -40,6 +40,7 @@
 #include "src/cli/cli_event_code.h"
 #include "src/cli/cond_signal_command.h"
 #include "src/cli/create_array_command.h"
+#include "src/cli/autocreate_array_command.h"
 #include "src/cli/create_device_command.h"
 #include "src/cli/create_qos_volume_policy_command.h"
 #include "src/cli/create_volume_command.h"
@@ -88,6 +89,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["CREATEDEVICE"] = new CreateDeviceCommand();
     cmdDictionary["LISTARRAY"] = new ListArrayCommand();
     cmdDictionary["CREATEARRAY"] = new CreateArrayCommand();
+    cmdDictionary["AUTOCREATEARRAY"] = new AutocreateArrayCommand();
     cmdDictionary["DELETEARRAY"] = new DeleteArrayCommand();
     cmdDictionary["MOUNTARRAY"] = new MountArrayCommand();
     cmdDictionary["UNMOUNTARRAY"] = new UnmountArrayCommand();

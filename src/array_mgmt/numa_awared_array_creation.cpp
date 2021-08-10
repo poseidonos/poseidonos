@@ -78,6 +78,7 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
                         sCnt--;
                     }
                 }
+                option.devs.nvm.assign(buffers.begin(), buffers.end());
                 option.capacity = devSize * dataCnt;
                 result.options.push_back(option);
                 result.code = EID(SUCCESS);

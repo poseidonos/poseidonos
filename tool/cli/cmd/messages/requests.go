@@ -25,6 +25,14 @@ type CreateArrayParam struct {
 	RAID      string            `json:"raidtype,omitempty"`
 }
 
+type AutocreateArrayParam struct {
+	ARRAYNAME		string            `json:"name"`
+	BUFFER			[1]DeviceNameList `json:"buffer"`
+	NUMDATADEVS		int               `json:"num_data"`
+	NUMSPAREDEVS	int               `json:"num_spare,omitempty"`
+	RAID			string            `json:"raidtype,omitempty"`
+}
+
 type DeviceNameList struct {
 	DEVICENAME string `json:"deviceName"`
 }

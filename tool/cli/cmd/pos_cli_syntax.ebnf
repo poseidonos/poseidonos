@@ -7,6 +7,7 @@ Letter = "A" | "B" | "C" | "D" | "E" | "F" | "G"
        | "q" | "r" | "s" | "t" | "u" | "v" | "w"
        | "x" | "y" | "z" .
 Digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" .
+Number = Digit {Digit} .
 Symbol = "[" | "]" | "{" | "}" | "(" | ")" | "<" | ">" | "=" | "|" | "." | "," | ";" .
 WhiteSpace = " " .
 ArrayName = Letter {Letter | Digit | "-" | "_"} .
@@ -19,21 +20,22 @@ TargetNVMSubsystemNVMeQualifiedName = Letter {Letter | Digit | "-" | "_"} .
 RaidType = ["RAID5" | "raid5"] .
 SubsystemNQN = Letter {Letter | Digit | "-" | "_"} . 
 
-VolumeSize = {Digit} ("B" | "K" | "KiB" | "KB" | "G" | "GiB" | "GB" | "T" | "TiB" | "TB" | "P" | "PiB" | "PB" | "E" | "EiB" | "EB") .
-IOPS = {Digit} .
-Bandwidth = {Digit} "MB/s".
+VolumeSize = Number ("B" | "K" | "KiB" | "KB" | "G" | "GiB" | "GB" | "T" | "TiB" | "TB" | "P" | "PiB" | "PB" | "E" | "EiB" | "EB") .
+IOPS = Number .
+Bandwidth = Number "MB/s".
 
 ApplicationName = "poseidonos-cli" . 
 Cmd = ApplicationName WhiteSpace (ArrayCmd | VolumeCmd | DeviceCmd | SystemCmd | LoggerCmd | SubsystemCmd | QosCmd) .
 
-ArrayCmd = "array" WhiteSpace (MountArrayCmd | UnmountArrayCmd | ListArrayCmd | AddSpareCmd | RemoveSpareCmd | DeleteArrayCmd | CreateArrayCmd) .
+ArrayCmd = "array" WhiteSpace (MountArrayCmd | UnmountArrayCmd | ListArrayCmd | AddSpareCmd | RemoveSpareCmd | DeleteArrayCmd | CreateArrayCmd | AutoCreateArrayCmd) .
 MountArrayCmd = "mount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
 UnmountArrayCmd = "unmount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"] .
 ListArrayCmd = "list" [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] .
 AddSpareCmd = "addspare" WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName ("--array-name" | "-a") WhiteSpace ArrayName .
 RemoveSpareCmd = "rmspare" WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName ("--array-name" | "-a")  WhiteSpace ArrayName ["--force"] .
 CreateArrayCmd = "create" ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ("--buffer" | "-b") WhiteSpace DeviceName WhiteSpace ("--data-devs" | "-d") WhiteSpace DeviceNameList [WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName] [WhiteSpace "--raid" WhiteSpace RaidType] .
-DeleteArrayCmd = "delete" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"].
+DeleteArrayCmd = "delete" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"] .
+AutoCreateArrayCmd = "autocreate" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ("--num-buffer" | "-b") WhiteSpace Number WhiteSpace ("--num-data-devs" | "-d") WhiteSpace Number WhiteSpace [("--num-spare" | "-s") WhiteSpace Number] WhiteSpace ["--raid" WhiteSpace RaidType] .
 
 VolumeCmd = "volume" WhiteSpace (VolumeCreateCmd | VolumeDeleteCmd | VolumeMountCmd | VolumeUnmountCmd | VolumeListCmd | VolumeSetPropertyCmd | VolumeRenameCmd) .
 VolumeCreateCmd = "create" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace "--size" WhiteSpace VolumeSize [WhiteSpace "--maxiops" WhiteSpace IOPS] [WhiteSpace "--maxbw" WhiteSpace Bandwidth] .

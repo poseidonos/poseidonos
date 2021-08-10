@@ -37,11 +37,11 @@
 
 namespace pos_cli
 {
-class CreateNumaAwaredArrayCommand : public Command
+class AutocreateArrayCommand : public Command
 {
 public:
-    CreateNumaAwaredArrayCommand(void);
-    ~CreateNumaAwaredArrayCommand(void) override;
+    AutocreateArrayCommand(void);
+    ~AutocreateArrayCommand(void) override;
     string Execute(json& doc, string rid) override;
 };
 }; // namespace pos_cli

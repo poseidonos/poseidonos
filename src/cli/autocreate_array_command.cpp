@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/cli/create_numa_awared_array_command.h"
+#include "src/cli/autocreate_array_command.h"
 
 #include "src/cli/cli_event_code.h"
 #include "src/array_mgmt/numa_awared_array_creation.h"
@@ -40,15 +40,15 @@
 
 namespace pos_cli
 {
-CreateNumaAwaredArrayCommand::CreateNumaAwaredArrayCommand(void)
+AutocreateArrayCommand::AutocreateArrayCommand(void)
 {
 }
 
-CreateNumaAwaredArrayCommand::~CreateNumaAwaredArrayCommand(void)
+AutocreateArrayCommand::~AutocreateArrayCommand(void)
 {
 }
 
-string CreateNumaAwaredArrayCommand::Execute(json& doc, string rid)
+string AutocreateArrayCommand::Execute(json& doc, string rid)
 {
     JsonFormat jFormat;
     vector<string> buffers;
@@ -75,15 +75,15 @@ string CreateNumaAwaredArrayCommand::Execute(json& doc, string rid)
     }
 
     int dataCnt = 0;
-    if (doc["param"].contains("data"))
+    if (doc["param"].contains("num_data"))
     {
-        dataCnt = doc["param"]["data"].get<int>();
+        dataCnt = doc["param"]["num_data"].get<int>();
     }
 
     int spareCnt = 0;
-    if (doc["param"].contains("spare"))
+    if (doc["param"].contains("num_spare"))
     {
-        spareCnt = doc["param"]["spare"].get<int>();
+        spareCnt = doc["param"]["num_spare"].get<int>();
     }
 
     NumaAwaredArrayCreation creationDelegate(buffers, dataCnt, spareCnt, DeviceManagerSingleton::Instance());
@@ -91,7 +91,7 @@ string CreateNumaAwaredArrayCommand::Execute(json& doc, string rid)
     if (res.code != 0)
     {
         return jFormat.MakeResponse(
-            "CREATEARRAY", rid, res.code, "failed to create " + arrayName + "(code:" + to_string(res.code) + ")", GetPosInfo());
+            "AUTOCREATEARRAY", rid, res.code, "failed to create " + arrayName + "(code:" + to_string(res.code) + ")", GetPosInfo());
     }
 
     IArrayMgmt* array = ArrayMgr::Instance();
@@ -100,12 +100,12 @@ string CreateNumaAwaredArrayCommand::Execute(json& doc, string rid)
     if (0 != ret)
     {
         return jFormat.MakeResponse(
-            "CREATEARRAY", rid, ret, "failed to create " + arrayName + "(code:" + to_string(ret) + ")", GetPosInfo());
+            "AUTOCREATEARRAY", rid, ret, "failed to create " + arrayName + "(code:" + to_string(ret) + ")", GetPosInfo());
     }
     else
     {
         QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
-        return jFormat.MakeResponse("CREATEARRAY", rid, SUCCESS,
+        return jFormat.MakeResponse("AUTOCREATEARRAY", rid, SUCCESS,
             arrayName + " is created successfully", GetPosInfo());
     }
 }
