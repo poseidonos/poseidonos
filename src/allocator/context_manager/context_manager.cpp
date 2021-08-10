@@ -166,7 +166,13 @@ ContextManager::Close(void)
 int
 ContextManager::FlushOneContext(int owner, EventSmartPtr callback, bool sync)
 {
+    if (flushInProgress.exchange(true) == true)
+    {
+        return (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS;
+    }
+    assert(numWriteIoIssued == 0);
     numWriteIoIssued++;
+    telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numWriteIoIssued);
     int ret = _Flush(owner, callback);
     if (sync == true)
     {
@@ -185,7 +191,7 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
     POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] sync:{}, start to flush", sync);
     int ret = 0;
     assert(numWriteIoIssued == 0);
-    numWriteIoIssued = NUM_ALLOCATOR_FILES; // Issue 2 contexts(segmentctx, allocatorctx)
+    numWriteIoIssued += NUM_ALLOCATOR_FILES; // Issue 2 contexts(segmentctx, allocatorctx)
     telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numWriteIoIssued);
     for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
@@ -195,7 +201,6 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
             break;
         }
     }
-
     if (sync == true)
     {
         _WaitPendingIo(IOTYPE_WRITE);
@@ -426,13 +431,16 @@ void
 ContextManager::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 {
     CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
+    assert(numWriteIoIssued > 0);
+    numWriteIoIssued--;
+    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] Allocator file stored, sig:{}, version:{}, pendingMetaIo:{}", header->sig, header->ctxVersion, numWriteIoIssued);
+    telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numWriteIoIssued);
+
     if (header->sig == RebuildCtx::SIG_REBUILD_CTX)
     {
         rebuildCtx->FinalizeIo(ctx);
-        assert(numWriteIoIssued > 0);
-        numWriteIoIssued--;
+        flushInProgress = false;
         POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] Complete to store rebuildCtx file, pendingMetaIo:{}", numWriteIoIssued);
-        telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numWriteIoIssued);
         delete[] ctx->buffer;
         delete ctx;
         return;
@@ -447,10 +455,6 @@ ContextManager::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
         allocatorCtx->FinalizeIo(reinterpret_cast<AllocatorIoCtx*>(ctx));
     }
 
-    assert(numWriteIoIssued > 0);
-    numWriteIoIssued--;
-    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] Allocator file stored, sig:{}, version:{}, pendingMetaIo:{}", header->sig, header->ctxVersion, numWriteIoIssued);
-    telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numWriteIoIssued);
     if (numWriteIoIssued == 0)
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] Complete to flush allocator files");
@@ -589,9 +593,8 @@ ContextManager::_LoadContexts(void)
         {
             delete[] buf;
             numReadIoIssued--;
-            numWriteIoIssued++;
-            POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] initial flush allocator file:{}, pendingMetaIo:{}", owner, numWriteIoIssued);
-            FlushOneContext(REBUILD_CTX, nullptr, false);
+            ret = FlushOneContext(REBUILD_CTX, nullptr, false);
+            POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] initial flush allocator file:{}, pendingMetaIo:{}", owner, numWriteIoIssued);            
             if (ret == 0)
             {
                 _WaitPendingIo(IOTYPE_WRITE);
