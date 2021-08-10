@@ -106,23 +106,31 @@ def get_uramname(uramId):
     return "uram" + str(uramId)
 
 
-# For pmem
-# def create_pram():
-    # spdk_rpc.send_request("bdev_pmem_create_pool /mnt/pmem0/pmem_pool 1024 512")
-    # spdk_rpc.send_request("bdev_pmem_create /mnt/pmem0/pmem_pool -n pmem0")
+def create_pram():
+    spdk_rpc.send_request("bdev_pmem_create_pool /mnt/pmem0/pmem_pool 1024 512")
+    spdk_rpc.send_request("bdev_pmem_create /mnt/pmem0/pmem_pool -n pmem0")
 
 
 def create_uram(uramId):
     spdk_rpc.send_request("bdev_malloc_create -b " + get_uramname(uramId) + " 1024 512")
+    # cli.create_uram(get_uramname(uramId), "512", "2")
 
 
 def get_device_name(arrayId):
     dataDevice = ""
     spareDevice = ""
-    for index in range(TEST.numSSDPerArray):
-        deviceName = "unvme-ns-" + str(index + arrayId * TEST.numSSDPerArray)
-        dataDevice += ("," + deviceName)
+
+    num_devices = TEST.num_data_ssds_per_array + TEST.num_spare_ssds_per_array
+    for index in range(num_devices):
+        deviceName = "unvme-ns-" + str(index + arrayId * num_devices)
+        if index < TEST.num_data_ssds_per_array:
+            dataDevice += ("," + deviceName)
+        else:
+            spareDevice += ("," + deviceName)
+
     dataDevice = dataDevice[1:]
+    spareDevice = spareDevice[1:]
+
     return (dataDevice, spareDevice)
 
 
@@ -136,7 +144,7 @@ def get_num_ssd():
 
 
 def get_max_num_array():
-    return get_num_ssd() / TEST.numSSDPerArray
+    return get_num_ssd() / (TEST.num_data_ssds_per_array + TEST.num_spare_ssds_per_array)
 
 
 def create_array(arrayId):
@@ -165,7 +173,7 @@ def add_array(arrayId):
     create_array(arrayId)
 
 
-def mount_array(arrayId):
+def mount_array(arrayId=0):
     out = cli.mount_array(get_arrayname(arrayId))
     ret = json_parser.get_response_code(out)
     if ret != 0:
@@ -175,7 +183,7 @@ def mount_array(arrayId):
     TEST_LOG.print_info("* {} mounted".format(get_arrayname(arrayId)))
 
 
-def unmount_array(arrayId):
+def unmount_array(arrayId=0):
     out = cli.unmount_array(get_arrayname(arrayId))
     ret = json_parser.get_response_code(out)
     if ret != 0:

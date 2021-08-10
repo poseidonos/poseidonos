@@ -118,7 +118,7 @@ def get_num_thread():
 
 
 def get_checkpoint_status(arrayId=0):
-    out = cli.send_request("wbt get_journal_status --array " + TEST_SETUP_POS.get_arrayname(arrayId))
+    out = cli.wbt_request("get_journal_status", "--array " + TEST_SETUP_POS.get_arrayname(arrayId))
     if json_parser.get_response_code(out) != 0:
         return -1
     else:
@@ -127,7 +127,7 @@ def get_checkpoint_status(arrayId=0):
 
 
 def get_log_buffer_size(arrayId=0):
-    out = cli.send_request("wbt get_journal_status --array " + TEST_SETUP_POS.get_arrayname(arrayId))
+    out = cli.wbt_request("get_journal_status", "--array " + TEST_SETUP_POS.get_arrayname(arrayId))
     if json_parser.get_response_code(out) != 0:
         return -1
     else:
@@ -152,7 +152,7 @@ def is_journal_enabled():
 
 
 def get_array_capacity(arrayId=0):
-    out = cli.send_request("array info --name " + TEST_SETUP_POS.get_arrayname(arrayId))
+    out = cli.array_info(TEST_SETUP_POS.get_arrayname(arrayId))
     if json_parser.get_response_code(out) != 0:
         return -1
     else:
@@ -184,4 +184,4 @@ def find_process(procname):
 
 
 def get_subsystem_id(arrayId, volumeId):
-    return arrayId * TEST.maxNumVolumePerArray + volumeId
+    return arrayId * TEST.max_num_vol_per_array + volumeId

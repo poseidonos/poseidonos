@@ -13,7 +13,7 @@ import json_parser  # noqa: E402
 
 
 def flush_gcov():
-    out = cli.send_request("wbt flush_gcov")
+    out = cli.wbt_request("flush_gcov", "")
     if json_parser.get_response_code(out) != 0:
         TEST_LOG.print_err("* Gcov flush failed, check WBT option")
     elif json_parser.get_data_code(out) != 0:
@@ -49,7 +49,8 @@ def dump_vsamap(arrayId, volid, dump_file):
         return
 
     volname = TEST_SETUP_POS.get_volname(volid)
-    out = cli.send_request("wbt read_vsamap --name " + volname + " --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + dump_file)
+    arguments = "--name " + volname + " --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + dump_file
+    out = cli.wbt_request("read_vsamap", arguments)
     if json_parser.get_response_code(out) != 0:
         return -1
 
@@ -58,14 +59,16 @@ def dump_stripemap(dump_file):
     if TEST.dump_map == False:
         return
 
-    out = cli.send_request("wbt read_stripemap --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + dump_file)
+    arguments = "--array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + dump_file
+    out = cli.wbt_request("read_stripemap", arguments)
     if json_parser.get_response_code(out) != 0:
         return -1
 
 
 def get_fd(arrayId, filename):
     filesInfo = "filesInfo.json"
-    out = cli.send_request("wbt mfs_dump_files_list" + " --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + filesInfo)
+    arguments = " --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + filesInfo
+    out = cli.wbt_request("mfs_dump_files_list", arguments)
     if json_parser.get_response_code(out) != 0:
         return -1
 
@@ -79,7 +82,8 @@ def get_fd(arrayId, filename):
 
 
 def get_file_size(arrayId, fd):
-    out = cli.send_request("wbt mfs_get_file_size --fd " + str(fd) + " --array " + TEST_SETUP_POS.get_arrayname(arrayId))
+    arguments = "--fd " + str(fd) + " --array " + TEST_SETUP_POS.get_arrayname(arrayId)
+    out = cli.wbt_request("mfs_get_file_size", arguments)
     if json_parser.get_response_code(out) != 0:
         return -1
     else:
@@ -93,7 +97,8 @@ def start_core_dump(trigger_option):
 
 
 def dump_log_buffer(arrayId, fd, filesize, dumpfile):
-    out = cli.send_request("wbt mfs_read_file --fd " + str(fd) + " --offset 0 --count " + str(filesize) + " --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + dumpfile)
+    arguments = "--fd " + str(fd) + " --offset 0 --count " + str(filesize) + " --array " + TEST_SETUP_POS.get_arrayname(arrayId) + " --output " + dumpfile
+    out = cli.wbt_request("mfs_read_file", arguments)
     if json_parser.get_response_code(out) != 0:
         return -1
     return 0
