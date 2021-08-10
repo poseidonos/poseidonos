@@ -166,6 +166,11 @@ ContextManager::Close(void)
 int
 ContextManager::FlushOneContext(int owner, EventSmartPtr callback, bool sync)
 {
+    if (flushInProgress.exchange(true) == true)
+    {
+        return (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS;
+    }
+    assert(numWriteIoIssued == 0);
     numWriteIoIssued++;
     telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numWriteIoIssued);
     int ret = _Flush(owner, callback);
@@ -426,28 +431,23 @@ void
 ContextManager::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 {
     CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
-    assert(numWriteIoIssued > 0);
-    numWriteIoIssued--;
-    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] Allocator file stored, sig:{}, version:{}, pendingMetaIo:{}", header->sig, header->ctxVersion, numWriteIoIssued);
-    telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numWriteIoIssued);
-
-    if (header->sig == RebuildCtx::SIG_REBUILD_CTX)
-    {
-        rebuildCtx->FinalizeIo(ctx);
-        POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] Complete to store rebuildCtx file, pendingMetaIo:{}", numWriteIoIssued);
-        delete[] ctx->buffer;
-        delete ctx;
-        return;
-    }
-
     if (header->sig == SegmentCtx::SIG_SEGMENT_CTX)
     {
         segmentCtx->FinalizeIo(reinterpret_cast<AllocatorIoCtx*>(ctx));
     }
-    else
+    else if (header->sig == AllocatorCtx::SIG_ALLOCATOR_CTX)
     {
         allocatorCtx->FinalizeIo(reinterpret_cast<AllocatorIoCtx*>(ctx));
     }
+    else // (header->sig == RebuildCtx::SIG_REBUILD_CTX)
+    {
+        rebuildCtx->FinalizeIo(reinterpret_cast<AllocatorIoCtx*>(ctx));
+    }
+
+    assert(numWriteIoIssued > 0);
+    numWriteIoIssued--;
+    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] Allocator file stored, sig:{}, version:{}, pendingMetaIo:{}", header->sig, header->ctxVersion, numWriteIoIssued);
+    telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numWriteIoIssued);
 
     if (numWriteIoIssued == 0)
     {
@@ -587,9 +587,14 @@ ContextManager::_LoadContexts(void)
         {
             delete[] buf;
             numReadIoIssued--;
-            ret = FlushOneContext(owner, nullptr, true);
+            numWriteIoIssued++;
             POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] initial flush allocator file:{}, pendingMetaIo:{}", owner, numWriteIoIssued);
-            if (ret < 0)
+            ret = _Flush(owner, nullptr);
+            if (ret == 0)
+            {
+                _WaitPendingIo(IOTYPE_WRITE);
+            }
+            else
             {
                 return ret;
             }

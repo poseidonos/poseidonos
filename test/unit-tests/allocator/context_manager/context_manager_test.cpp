@@ -85,7 +85,7 @@ TEST(ContextManager, Init_TestCaseFormatFormatFail)
     EXPECT_CALL(*fileMan, GetFileSize).WillOnce(Return(100)).WillOnce(Return(100)).WillOnce(Return(100)).WillOnce(Return(100)).WillOnce(Return(100)).WillOnce(Return(100));
     EXPECT_CALL(*fileMan, Load).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0));
     EXPECT_CALL(*fileMan, Store).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(-1));
-    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true));
+    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true));
     // when 1.
     ctxManager.Init();
     delete addrInfo;
