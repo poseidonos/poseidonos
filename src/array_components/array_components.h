@@ -76,7 +76,8 @@ public:
         Metadata* meta,
         RBAStateManager* rbaStateMgr,
         function<MetaFs* (Array*, bool)> metaFsFactory,
-        Nvmf* nvmf);
+        Nvmf* nvmf,
+        ArrayMountSequence* mountSequence = nullptr);
     virtual ~ArrayComponents(void);
     virtual int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
     virtual int Load(void);

@@ -21,9 +21,9 @@ TEST(StripePartition, StripePartition_testIfConstructorSetsLogicalSizeProperly)
 {
     // Given
     PartitionPhysicalSize physicalSize{
-        .startLba = 0/* not interesting */,
+        .startLba = 0 /* not interesting */,
         .blksPerChunk = 10,
-        .chunksPerStripe = 0/* not interesting */,
+        .chunksPerStripe = 0 /* not interesting */,
         .stripesPerSegment = 20,
         .totalSegments = 30};
     MockRaid1* mockRaid1 = new MockRaid1(&physicalSize);
@@ -259,7 +259,9 @@ TEST(StripePartition, ByteTranslate_testFunctionCallForCoverage)
 {
     // Given
     PartitionPhysicalSize physicalSize{
+        .startLba = 0,
         .blksPerChunk = 10,
+        .chunksPerStripe = 0,
         .stripesPerSegment = 20,
         .totalSegments = 30};
     MockRaid1* mockRaid1 = new MockRaid1(&physicalSize);
@@ -279,7 +281,9 @@ TEST(StripePartition, ByteConvert_testFunctionCallForCoverage)
 {
     // Given
     PartitionPhysicalSize physicalSize{
+        .startLba = 0,
         .blksPerChunk = 10,
+        .chunksPerStripe = 0,
         .stripesPerSegment = 20,
         .totalSegments = 30};
     MockRaid1* mockRaid1 = new MockRaid1(&physicalSize);
@@ -299,7 +303,9 @@ TEST(StripePartition, IsByteAccessSupported_testReturnValue)
 {
     // Given
     PartitionPhysicalSize physicalSize{
+        .startLba = 0,
         .blksPerChunk = 10,
+        .chunksPerStripe = 0,
         .stripesPerSegment = 20,
         .totalSegments = 30};
     MockRaid1* mockRaid1 = new MockRaid1(&physicalSize);
@@ -311,6 +317,5 @@ TEST(StripePartition, IsByteAccessSupported_testReturnValue)
     // Then
     EXPECT_FALSE(result);
 }
-
 
 } // namespace pos

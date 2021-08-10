@@ -55,7 +55,8 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     nullptr /*metadata*/,
     nullptr /*rbaStateMgr*/,
     nullptr /*metaFsFactory*/,
-    nullptr /*nvmf*/
+    nullptr /*nvmf*/,
+    nullptr /*arrayMountSequence*/
     )
 {
     // object instantiations for prod
@@ -86,7 +87,8 @@ ArrayComponents::ArrayComponents(string arrayName,
     Metadata* meta,
     RBAStateManager* rbaStateMgr,
     function<MetaFs* (Array*, bool)> metaFsFactory,
-    Nvmf* nvmf)
+    Nvmf* nvmf,
+    ArrayMountSequence* arrayMountSequence)
 : arrayName(arrayName),
   state(state),
   arrayRebuilder(rebuilder),
@@ -98,6 +100,7 @@ ArrayComponents::ArrayComponents(string arrayName,
   volMgr(volMgr),
   rbaStateMgr(rbaStateMgr),
   nvmf(nvmf),
+  arrayMountSequence(arrayMountSequence),
   metaFsFactory(metaFsFactory)
 {
     // dependency injection for ut

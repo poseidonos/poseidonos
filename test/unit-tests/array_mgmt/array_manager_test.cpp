@@ -15,6 +15,15 @@ using ::testing::NiceMock;
 using ::testing::Return;
 namespace pos
 {
+
+TEST(ArrayManager, ArrayManager_testUsingShortConstructor)
+{
+    // Given
+    // When
+    ArrayManager arrayMgr();
+
+    // Then: verify the expect_call
+}
 TEST(ArrayManager, ArrayManager_testIfDeviceManagerRegistersArrayManager)
 {
     // Given
@@ -374,6 +383,28 @@ TEST(ArrayManager, DeviceDetached_testIfZeroIsReturnedWhenNoArrayFoundForGivenSe
     ASSERT_EQ(0, actual);
 }
 
+TEST(ArrayManager, DeviceAttached_testIfTargetArrayCalls)
+{
+    // Given
+    string existingArray = "array1";
+    auto mockArrayComp = BuildMockArrayComponents(existingArray);
+    auto mockAbrMgr = BuildMockAbrManager();
+    auto mockArray = BuildMockArray(existingArray);
+    EXPECT_CALL(*mockAbrMgr, FindArrayWithDeviceSN).WillOnce(Return(existingArray));
+    EXPECT_CALL(*mockArrayComp, GetArray).WillOnce(Return(mockArray.get()));
+    EXPECT_CALL(*mockArray, AttachDevice).Times(1);
+
+    auto mockUBlockSharedPtr = BuildMockUBlockDevice("mock-ublock", "sn");
+    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
+    auto arrayMap = BuildArrayComponentsMap(existingArray, mockArrayComp.get());
+    arrayMgr->SetArrayComponentMap(arrayMap);
+
+    // When
+    arrayMgr->DeviceAttached(mockUBlockSharedPtr);
+
+    // Then
+}
+
 TEST(ArrayManager, PrepareRebuild_testIfTargetArrayCallsPrepareRebuild)
 {
     // Given
@@ -576,6 +607,26 @@ TEST(ArrayManager, GetArrayInfo_testIfTargetArrayCallsGetArray)
 
     // When
     auto actual = arrayMgr->GetArrayInfo(arrayName);
+
+    // Then
+    ASSERT_TRUE(actual != nullptr);
+}
+
+TEST(ArrayManager, GetArrayInfo_testIfTargetArrayCallsGetArrayWithIndex)
+{
+    // Given
+    string arrayName = "array1";
+    unsigned int arrayIndex = 0;
+    auto mockArrayComp = BuildMockArrayComponents(arrayName);
+    auto mockArray = BuildMockArray(arrayName);
+    auto arrayMap = BuildArrayComponentsMap(arrayName, mockArrayComp.get());
+    auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr, nullptr);
+    arrayMgr->SetArrayComponentMap(arrayMap);
+
+    EXPECT_CALL(*mockArrayComp, GetArray).WillRepeatedly(Return(mockArray.get()));
+
+    // When
+    auto actual = arrayMgr->GetArrayInfo(arrayIndex);
 
     // Then
     ASSERT_TRUE(actual != nullptr);

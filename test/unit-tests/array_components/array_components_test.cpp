@@ -13,6 +13,8 @@
 #include "test/unit-tests/state/state_control_mock.h"
 #include "test/unit-tests/state/state_manager_mock.h"
 #include "test/unit-tests/volume/volume_manager_mock.h"
+#include "test/unit-tests/array_components/array_mount_sequence_mock.h"
+#include "test/unit-tests/array/rebuild/i_array_rebuilder_mock.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -22,6 +24,16 @@ namespace pos
 static auto mockMetaFsFactory = [](Array* array, bool isLoaded) {
     return nullptr; // returning null MetaFs intentionally
 };
+
+TEST(ArrayComponents, ArrayComponents_testShortConstructorWithNullPtrs)
+{
+    // Given: nothing
+    NiceMock<MockStateManager> mockStateManager;
+
+    // When
+    ArrayComponents arrayComps("mock-array", nullptr, nullptr);
+    // Then
+}
 
 TEST(ArrayComponents, ArrayComponents_testConstructorWithNullPtrs)
 {
@@ -122,16 +134,53 @@ TEST(ArrayComponents, Load_testIfSuccessfulLoadSetsMountSequence)
     ASSERT_EQ(0, actual);
 }
 
-TEST(ArrayComponents, Mount_skipped)
+TEST(ArrayComponents, Mount_testUsingArrayMountSequenceMock)
 {
-    // TODO(srm): ArrayMountSequence isn't injected from the outside.
-    // Given that the business logic of Mount() is trivial, I will be skipping this test case for now.
+    // Given
+    vector<IMountSequence*> emptySeq;
+    MockStateControl stateControl;
+    MountTemp* mntTmp = nullptr;
+    MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
+    EXPECT_CALL(stateControl, Subscribe).Times(1);
+    EXPECT_CALL(stateControl, Unsubscribe).Times(1);
+    MockArrayMountSequence* mockArrayMountSequence = new MockArrayMountSequence(emptySeq, mntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder);
+    EXPECT_CALL(*mockArrayMountSequence, Mount).WillOnce(Return(0));
+
+    MockStateManager mockStateManager;
+    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    EXPECT_CALL(*mockArray, MountDone).Times(1);
+    ArrayComponents arrayComponents("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
+        nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory, nullptr, mockArrayMountSequence);
+    // When
+    int result = arrayComponents.Mount();
+
+    // Then
+    int SUCCESS = 0;
+    EXPECT_EQ(SUCCESS, result);
 }
 
-TEST(ArrayComponents, Unmount_skipped)
+TEST(ArrayComponents, Unmount_testUsingArrayMountSequenceMock)
 {
-    // TODO(srm): ArrayMountSequence isn't injected from the outside.
-    // Given that the business logic of Unmount() is trivial, I will be skipping this test case for now.
+    // Given
+    vector<IMountSequence*> emptySeq;
+    MockStateControl stateControl;
+    MountTemp* mntTmp = nullptr;
+    MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
+    EXPECT_CALL(stateControl, Subscribe).Times(1);
+    EXPECT_CALL(stateControl, Unsubscribe).Times(1);
+    MockArrayMountSequence* mockArrayMountSequence = new MockArrayMountSequence(emptySeq, mntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder);
+    EXPECT_CALL(*mockArrayMountSequence, Unmount).WillOnce(Return(0));
+
+    MockStateManager mockStateManager;
+    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    ArrayComponents arrayComponents("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
+        nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory, nullptr, mockArrayMountSequence);
+    // When
+    int result = arrayComponents.Unmount();
+
+    // Then
+    int SUCCESS = 0;
+    EXPECT_EQ(SUCCESS, result);
 }
 
 TEST(ArrayComponents, Delete_testIfDeleteResultIsPropagated)
