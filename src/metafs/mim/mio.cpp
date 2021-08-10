@@ -102,14 +102,6 @@ Mio::Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* me
     opCode = ioOpcodeMap[static_cast<uint32_t>(originReq->reqType)];
     startLpn = _GetCalculateStartLpn(ioReq);
 
-    // printf("[Mio::Setup] fd=%d, byteOffsetInFile=%lu, extentsCount=%d, startLpn=%lu\n", ioReq->fd, ioReq->byteOffsetInFile, ioReq->extentsCount, startLpn);
-    // for (int i = 0; i < ioReq->extentsCount; ++i)
-    // {
-    //     std::cout << "extents[" << i << "]=";
-    //     std::cout << ioReq->extents[i].GetStartLpn();
-    //     std::cout << ", " << ioReq->extents[i].GetCount() << std::endl;
-    // }
-
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Mio ][SetupMio   ] type={}, req.tagId={}, fileOffset={}, baseLpn={}, startLpn={}",
         originReq->reqType, originReq->tagId, originReq->byteOffsetInFile, baseLpn, startLpn);

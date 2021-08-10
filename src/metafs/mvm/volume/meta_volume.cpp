@@ -258,14 +258,15 @@ MetaVolume::_LoadVolumeMeta(MetaLpnType* info, bool isNPOR)
         }
     }
     else
-    { // The NVRAM volume meta loads from the backuped meta in SSD volume area.
+    {
+        // The NVRAM volume meta loads from the backuped meta in SSD volume area.
         if (true != _RestoreContents(info))
         {
             return false;
         }
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "All volume meta contents have been loaded. isNPOR={}", isNPOR);
 
     return true;

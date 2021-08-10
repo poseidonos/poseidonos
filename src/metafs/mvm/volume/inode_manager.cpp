@@ -389,30 +389,49 @@ InodeManager::SetMss(MetaStorageSubsystem* metaStorage)
 std::pair<FileDescriptorType, POS_EVENT_ID>
 InodeManager::CreateFileInode(MetaFsFileControlRequest& reqMsg)
 {
+    MetaLpnType totalLpnCount = 0;
     FileDescriptorType fd = fdAllocator->Alloc(*reqMsg.fileName);
     MetaFileInode& newInode = _AllocNewInodeEntry(fd);
 
     FileSizeType userDataChunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
-    MetaLpnType lpnCnt = (reqMsg.fileByteSize + userDataChunkSize - 1) / userDataChunkSize;
-    std::vector<MetaFileExtent> extents = extentAllocator->AllocExtents(lpnCnt);
+    MetaLpnType requestLpnCnt = (reqMsg.fileByteSize + userDataChunkSize - 1) / userDataChunkSize;
+    std::vector<MetaFileExtent> extents = extentAllocator->AllocExtents(requestLpnCnt);
 
 #if (PRINT_INFO == 1)
     std::cout << "========= CreateFileInode: " << *reqMsg.fileName << std::endl;
-    MetaLpnType totalCount = 0;
     for (auto& extent : extents)
     {
         std::cout << "{" << extent.GetStartLpn() << ", ";
         std::cout << extent.GetStartLpn() + extent.GetCount() << "} ";
         std::cout << extent.GetCount() << std::endl;
-        totalCount += extent.GetCount();
+        totalLpnCount += extent.GetCount();
     }
-    std::cout << "lpn count: " << totalCount << std::endl;
+    std::cout << "lpn count: " << totalLpnCount << std::endl;
 #endif
 
     MetaFileInodeCreateReq inodeReq;
     inodeReq.Setup(reqMsg, fd, mediaType, &extents);
 
     newInode.BuildNewEntry(inodeReq, MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
+
+    _UpdateFd2InodeMap(fd, newInode);
+
+    totalLpnCount = 0;
+    for (auto& extent : extents)
+    {
+        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            "[Metadata File] Allocate an extent, startLpn={}, count={}",
+            extent.GetStartLpn(), extent.GetCount());
+            totalLpnCount += extent.GetCount();
+    }
+
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "[Metadata File] Create volType={}, fd={}, fileName={}, totalLpnCnt={}",
+        (int)mediaType, fd, *reqMsg.fileName, totalLpnCount);
+
+    std::vector<pos::MetaFileExtent> usedExtentsInVolume =
+                                    extentAllocator->GetAllocatedExtentList();
+    inodeHdr->SetFileExtentContent(usedExtentsInVolume);
 
     if (true != SaveContent())
     {
@@ -428,32 +447,30 @@ InodeManager::CreateFileInode(MetaFsFileControlRequest& reqMsg)
         return std::make_pair(0, POS_EVENT_ID::MFS_META_SAVE_FAILED);
     }
 
-    _UpdateFd2InodeMap(fd, newInode);
-
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "[Metadata File] Create volType={}, fd={}, fileName={}, totalLpnCnt={}",
-        (int)mediaType, fd, *reqMsg.fileName, lpnCnt);
-
-    for (auto& extent : extents)
-    {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "[Metadata File] Allocate an extent, startLpn={}, count={}",
-            extent.GetStartLpn(), extent.GetCount());
-    }
-
-    std::vector<pos::MetaFileExtent> usedExtentsInVolume =
-                                        inodeHdr->GetFileExtentContent();
-    extentAllocator->SetAllocatedExtentList(usedExtentsInVolume);
-
     return std::make_pair(fd, POS_EVENT_ID::SUCCESS);
 }
 
 std::pair<FileDescriptorType, POS_EVENT_ID>
 InodeManager::DeleteFileInode(MetaFsFileControlRequest& reqMsg)
 {
+    MetaLpnType totalLpnCount = 0;
     std::vector<MetaFileExtent> extents;
     FileDescriptorType fd = LookupDescriptorByName(*reqMsg.fileName);
     MetaLpnType count = GetExtent(fd, extents);
+    assert(count > 0);
+
+#if (PRINT_INFO == 1)
+    std::cout << "========= DeleteFileInode: " << *reqMsg.fileName << std::endl;
+    MetaLpnType totalLpnCount = 0;
+    for (auto& extent : extents)
+    {
+        std::cout << "{" << extent.GetStartLpn() << ", ";
+        std::cout << extent.GetStartLpn() + extent.GetCount() << "} ";
+        std::cout << extent.GetCount() << std::endl;
+        totalLpnCount += extent.GetCount();
+    }
+    std::cout << "lpn count: " << totalLpnCount << std::endl;
+#endif
 
     MetaFileInode& inode = GetFileInode(fd);
     uint32_t entryIdx = inode.GetIndexInInodeTable();
@@ -463,17 +480,7 @@ InodeManager::DeleteFileInode(MetaFsFileControlRequest& reqMsg)
 
     fd2InodeMap.erase(fd);
 
-    if (true != SaveContent())
-    {
-        return std::make_pair(0, POS_EVENT_ID::MFS_META_SAVE_FAILED);
-    }
-
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "[Metadata File] Delete volType={}, fd={}, fileName={}, totalLpnCnt={}",
-        (int)volumeType, fd, *reqMsg.fileName, count);
-
-    fdAllocator->Free(*reqMsg.fileName, fd);
-
+    totalLpnCount = 0;
     for (auto& extent : extents)
     {
         extentAllocator->AddToFreeList(extent.GetStartLpn(), extent.GetCount());
@@ -481,22 +488,25 @@ InodeManager::DeleteFileInode(MetaFsFileControlRequest& reqMsg)
         POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
         "[Metadata File] Release an extent, startLpn={}, count={}",
         extent.GetStartLpn(), extent.GetCount());
+        totalLpnCount += extent.GetCount();
     }
 
-#if (PRINT_INFO == 1)
-    std::cout << "========= DeleteFileInode: " << *reqMsg.fileName << std::endl;
-    MetaLpnType totalCount = 0;
-    for (auto& extent : extents)
-    {
-        std::cout << "{" << extent.GetStartLpn() << ", ";
-        std::cout << extent.GetStartLpn() + extent.GetCount() << "} ";
-        std::cout << extent.GetCount() << std::endl;
-        totalCount += extent.GetCount();
-    }
-    std::cout << "lpn count: " << totalCount << std::endl;
-#endif
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        "[Metadata File] Delete volType={}, fd={}, fileName={}, totalLpnCnt={}",
+        (int)volumeType, fd, *reqMsg.fileName, totalLpnCount);
+
+    fdAllocator->Free(*reqMsg.fileName, fd);
 
     extentAllocator->PrintFreeExtentsList();
+
+    std::vector<pos::MetaFileExtent> usedExtentsInVolume =
+                                    extentAllocator->GetAllocatedExtentList();
+    inodeHdr->SetFileExtentContent(usedExtentsInVolume);
+
+    if (true != SaveContent())
+    {
+        return std::make_pair(0, POS_EVENT_ID::MFS_META_SAVE_FAILED);
+    }
 
     return std::make_pair(fd, POS_EVENT_ID::SUCCESS);
 }

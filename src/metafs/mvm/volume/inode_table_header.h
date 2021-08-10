@@ -84,6 +84,12 @@ public:
     virtual void BuildFreeInodeEntryMap(void);
     virtual uint32_t GetFreeInodeEntryIdx(void);
     virtual std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT>& GetInodeInUseBitmap(void);
+    virtual bool Load(void);
+    virtual bool Load(MetaStorageType media, MetaLpnType baseLPN,
+        uint32_t idx, MetaLpnType pageCNT);
+    virtual bool Store(void);
+    virtual bool Store(MetaStorageType media, MetaLpnType baseLPN,
+        uint32_t idx, MetaLpnType pageCNT);
 
 private:
     std::queue<uint32_t>* freeInodeEntryIdxQ;
