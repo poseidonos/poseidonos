@@ -1,4 +1,4 @@
-package devicecmds_test
+package develcmds_test
 
 import (
 	"cli/cmd"
@@ -10,7 +10,7 @@ import (
 )
 
 // This testing tests if the request is created well in JSON form from the command line.
-func TestScanDeviceCommandReq(t *testing.T) {
+func TestResetMBRCommandReq(t *testing.T) {
 
 	// Command creation
 	rootCmd := cmd.RootCmd
@@ -22,7 +22,7 @@ func TestScanDeviceCommandReq(t *testing.T) {
 
 	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
-	testmgr.ExecuteCommand(rootCmd, "device", "scan", "--json-req")
+	testmgr.ExecuteCommand(rootCmd, "devel", "resetmbr", "--json-req")
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)
@@ -30,10 +30,9 @@ func TestScanDeviceCommandReq(t *testing.T) {
 
 	// TODO(mj): Currently, we compare strings to test the result.
 	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
-	expected := `{"Request": {"command":"SCANDEVICE","rid":"fromfakeclient","param":null} }
-`
+	expected := `{"command":"RESETMBR","rid":"fromfakeclient"s}`
 
 	if expected != string(out) {
-		t.Errorf("Expected: %q Output: %q", expected, string(out))
+		t.Errorf("Expected: %q Output: %s", expected, string(out))
 	}
 }

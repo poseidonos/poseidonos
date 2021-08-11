@@ -16,6 +16,7 @@ import (
 	"github.com/zpatrick/go-bytesize"
 
 	"cli/cmd/arraycmds"
+	"cli/cmd/develcmds"
 	"cli/cmd/devicecmds"
 	"cli/cmd/globals"
 	"cli/cmd/loggercmds"
@@ -104,6 +105,7 @@ func init() {
 	RootCmd.AddCommand(devicecmds.DeviceCmd)
 	RootCmd.AddCommand(loggercmds.LoggerCmd)
 	RootCmd.AddCommand(subsystemcmds.SubsystemCmd)
+	RootCmd.AddCommand(develcmds.DevelCmd)
 	RootCmd.AddCommand(FileCmd)
 	RootCmd.AddCommand(WbtCmd)
 	RootCmd.AddCommand(qoscmds.QosCmd)
