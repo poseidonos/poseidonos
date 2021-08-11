@@ -59,28 +59,18 @@ func buildCreateArrayReq() messages.Request {
 
 	// Split a string (comma separate) that contains comma-separated device names into strings
 	// and add them to a string array.
-	dataDevsListSlice := strings.Split(create_array_dataDevsList, ",")
+	dataDevs := parseDeviceList(create_array_dataDevsList)
+	spareDevs := parseDeviceList(create_array_spareDevsList)
 
-	var dataDevs []messages.DeviceNameList
-	for _, str := range dataDevsListSlice {
-		var devNameList messages.DeviceNameList // Single device name that is splitted
-		devNameList.DEVICENAME = str
-		dataDevs = append(dataDevs, devNameList)
-	}
-
-	// Assume that at most one device is used as a buffer.
 	var buffer [1]messages.DeviceNameList
 	buffer[0].DEVICENAME = create_array_buffer
-
-	var spare [1]messages.DeviceNameList
-	spare[0].DEVICENAME = create_array_spare
 
 	createArrayParam := messages.CreateArrayParam{
 		ARRAYNAME: create_array_arrayName,
 		RAID:      create_array_raid,
 		BUFFER:    buffer,
 		DATA:      dataDevs,
-		SPARE:     spare,
+		SPARE:     spareDevs,
 	}
 
 	req := messages.Request{
@@ -92,13 +82,32 @@ func buildCreateArrayReq() messages.Request {
 	return req
 }
 
+// Parse comma-separated device list string and return the device list
+func parseDeviceList(devsList string) []messages.DeviceNameList {
+
+	if devsList == "" {
+		return nil
+	}
+
+	devsListSlice := strings.Split(devsList, ",")
+
+	var devs []messages.DeviceNameList
+	for _, str := range devsListSlice {
+		var devNameList messages.DeviceNameList // Single device name that is splitted
+		devNameList.DEVICENAME = str
+		devs = append(devs, devNameList)
+	}
+
+	return devs
+}
+
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
 var create_array_arrayName = ""
 var create_array_raid = ""
 var create_array_buffer = ""
-var create_array_spare = ""
+var create_array_spareDevsList = ""
 var create_array_dataDevsList = ""
 
 func init() {
@@ -108,7 +117,7 @@ func init() {
 	CreateArrayCmd.Flags().StringVarP(&create_array_dataDevsList, "data-devs", "d", "", "A comma-separated names of devices to be used as the data devices.")
 	CreateArrayCmd.MarkFlagRequired("data-devs")
 
-	CreateArrayCmd.Flags().StringVarP(&create_array_spare, "spare", "s", "", "Name of device to be used as the spare.")
+	CreateArrayCmd.Flags().StringVarP(&create_array_spareDevsList, "spare", "s", "", "Name of device to be used as the spare.")
 
 	CreateArrayCmd.Flags().StringVarP(&create_array_buffer, "buffer", "b", "", "Name of device to be used as the buffer.")
 	CreateArrayCmd.MarkFlagRequired("buffer")

@@ -4,7 +4,7 @@ package messages
 type Request struct {
 	COMMAND string      `json:"command"`
 	RID     string      `json:"rid"`
-	PARAM   interface{} `json:"param,omitempty"`
+	PARAM   interface{} `json:"param"`
 }
 
 // Array request params
@@ -21,7 +21,7 @@ type CreateArrayParam struct {
 	ARRAYNAME string            `json:"name"`
 	BUFFER    [1]DeviceNameList `json:"buffer"`
 	DATA      []DeviceNameList  `json:"data"`
-	SPARE     [1]DeviceNameList `json:"spare,omitempty"`
+	SPARE     []DeviceNameList  `json:"spare,omitempty"`
 	RAID      string            `json:"raidtype,omitempty"`
 }
 
@@ -34,7 +34,7 @@ type AutocreateArrayParam struct {
 }
 
 type DeviceNameList struct {
-	DEVICENAME string `json:"deviceName"`
+	DEVICENAME string `json:"deviceName,omitempty"`
 }
 
 type DeleteArrayParam struct {
