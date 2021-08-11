@@ -74,7 +74,7 @@ public:
     virtual void Close(void);
 
     virtual int FlushContexts(EventSmartPtr callback, bool sync);
-    virtual int FlushOneContext(int owner, EventSmartPtr callback, bool sync);
+    virtual int FlushRebuildContext(EventSmartPtr callback, bool sync);
     virtual void UpdateOccupiedStripeCount(StripeId lsid);
     virtual SegmentId AllocateFreeSegment(void);
     virtual SegmentId AllocateGCVictimSegment(void);
