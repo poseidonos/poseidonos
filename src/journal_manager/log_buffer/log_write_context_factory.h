@@ -32,19 +32,21 @@
 
 #pragma once
 
+#include <vector>
+
+#include "src/bio/volume_io.h"
+#include "src/event_scheduler/event.h"
+#include "src/include/address_type.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
-#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
-
-#include "src/include/address_type.h"
-#include "src/bio/volume_io.h"
+#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
 #include "src/mapper/include/mpage_info.h"
-#include "src/event_scheduler/event.h"
 
 namespace pos
 {
 class LogGroupResetContext;
+class JournalConfiguration;
 
 class LogWriteContextFactory
 {
@@ -52,13 +54,17 @@ public:
     LogWriteContextFactory(void);
     virtual ~LogWriteContextFactory(void);
 
-    virtual void Init(LogBufferWriteDoneNotifier* target,
+    virtual void Init(JournalConfiguration* config, LogBufferWriteDoneNotifier* target,
         CallbackSequenceController* sequencer);
 
     virtual LogWriteContext* CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
         MpageList dirty, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateStripeMapLogWriteContext(Stripe* stripe,
         StripeAddr oldAddr, MpageList dirty, EventSmartPtr callbackEvent);
+    virtual LogWriteContext* CreateGcBlockMapLogWriteContext(
+        GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
+    virtual std::vector<LogWriteContext*> CreateGcBlockMapLogWriteContexts(GcStripeMapUpdateList mapUpdates,
+        MapPageList dirty, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateGcStripeFlushedLogWriteContext(
         GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateVolumeDeletedLogWriteContext(int volId,
@@ -79,6 +85,9 @@ public:
     }
 
 private:
+    uint64_t _GetMaxNumGcBlockMapUpdateInAContext(void);
+
+    JournalConfiguration* config;
     LogBufferWriteDoneNotifier* notifier;
     CallbackSequenceController* sequenceController;
 };

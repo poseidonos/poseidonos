@@ -37,6 +37,7 @@
 #include <unordered_map>
 
 #include "src/include/array_mgmt_policy.h"
+#include "src/journal_service/i_journal_manager.h"
 #include "src/journal_service/i_journal_status_provider.h"
 #include "src/journal_service/i_journal_writer.h"
 #include "src/journal_service/i_volume_event.h"
@@ -53,7 +54,8 @@ public:
     virtual bool IsEnabled(int arrayId);
 
     virtual void Register(std::string arrayName, int arrayId,
-        IJournalWriter* writer, IVolumeEventHandler* handler, IJournalStatusProvider* provider);
+        IJournalManager* journal, IJournalWriter* writer,
+        IVolumeEventHandler* handler, IJournalStatusProvider* provider);
     virtual void Unregister(std::string arrayName);
 
     virtual IJournalWriter* GetWriter(std::string arrayName);
@@ -69,6 +71,7 @@ protected:
     virtual ~JournalService(void);
 
 private:
+    std::array<IJournalManager*, ArrayMgmtPolicy::MAX_ARRAY_CNT> journalManagers;
     std::array<IJournalWriter*, ArrayMgmtPolicy::MAX_ARRAY_CNT> journalWriters;
     std::array<IVolumeEventHandler*, ArrayMgmtPolicy::MAX_ARRAY_CNT> volEventHandlers;
     std::array<IJournalStatusProvider*, ArrayMgmtPolicy::MAX_ARRAY_CNT> statusProviders;

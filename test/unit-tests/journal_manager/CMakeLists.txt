@@ -1,1 +1,3 @@
+POS_ADD_UNIT_TEST(journaling_status_ut journaling_status_test.cpp)
+POS_ADD_UNIT_TEST(journal_writer_ut journal_writer_test.cpp)
 POS_ADD_UNIT_TEST(journal_manager_ut journal_manager_test.cpp)

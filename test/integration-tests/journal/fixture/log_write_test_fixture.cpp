@@ -95,8 +95,9 @@ LogWriteTestFixture::WriteBlockLog(int volId, BlkAddr rba, VirtualBlks blks)
     volumeIo->SetVsa(blks.startVsa);
     volumeIo->SetLsidEntry(stripeAddr);
 
+    IJournalWriter* writer = journal->GetJournalWriter();
     EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
-    int result = journal->AddBlockMapUpdatedLog(volumeIo, dirty, event);
+    int result = writer->AddBlockMapUpdatedLog(volumeIo, dirty, event);
     if (result == 0)
     {
         testingLogs.AddToWriteList(volumeIo);
@@ -121,8 +122,9 @@ LogWriteTestFixture::WriteStripeLog(StripeId vsid, StripeAddr oldAddr, StripeAdd
     stripe->SetVsid(vsid);
     stripe->SetUserLsid(newAddr.stripeId);
 
+    IJournalWriter* writer = journal->GetJournalWriter();
     EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
-    int result = journal->AddStripeMapUpdatedLog(stripe, oldAddr, dirty, event);
+    int result = writer->AddStripeMapUpdatedLog(stripe, oldAddr, dirty, event);
     if (result == 0)
     {
         testingLogs.AddToWriteList(stripe, oldAddr);
@@ -150,8 +152,9 @@ LogWriteTestFixture::WriteGcStripeLog(int volumeId, StripeId vsid, StripeId wbLs
 
     _GenerateGcBlockLogs(mapUpdates, dirtyMap);
 
+    IJournalWriter* writer = journal->GetJournalWriter();
     EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
-    int result = journal->AddGcStripeFlushedLog(mapUpdates, dirtyMap, event);
+    int result = writer->AddGcStripeFlushedLog(mapUpdates, dirtyMap, event);
     if (result == 0)
     {
         testingLogs.AddToWriteList(mapUpdates);
@@ -178,8 +181,9 @@ LogWriteTestFixture::WriteGcStripeLog(int volumeId, StripeTestFixture& stripe)
 
     _GenerateGcBlockLogs(mapUpdates, dirtyMap);
 
+    IJournalWriter* writer = journal->GetJournalWriter();
     EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
-    int result = journal->AddGcStripeFlushedLog(mapUpdates, dirtyMap, event);
+    int result = writer->AddGcStripeFlushedLog(mapUpdates, dirtyMap, event);
     if (result == 0)
     {
         testingLogs.AddToWriteList(mapUpdates);

@@ -33,11 +33,12 @@
 #include "log_buffer_parser.h"
 
 #include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
 #include "src/journal_manager/log/block_write_done_log_handler.h"
-#include "src/journal_manager/log/stripe_map_updated_log_handler.h"
+#include "src/journal_manager/log/gc_block_write_done_log_handler.h"
 #include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
+#include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -133,9 +134,13 @@ LogBufferParser::_GetLogHandler(char* ptr)
     {
         foundLog = new StripeMapUpdatedLogHandler(*reinterpret_cast<StripeMapUpdatedLog*>(ptr));
     }
+    else if (logPtr->type == LogType::GC_BLOCK_WRITE_DONE)
+    {
+        foundLog = new GcBlockWriteDoneLogHandler(ptr);
+    }
     else if (logPtr->type == LogType::GC_STRIPE_FLUSHED)
     {
-        foundLog = new GcStripeFlushedLogHandler(ptr);
+        foundLog = new GcStripeFlushedLogHandler(*reinterpret_cast<GcStripeFlushedLog*>(ptr));
     }
     else if (logPtr->type == LogType::VOLUME_DELETED)
     {

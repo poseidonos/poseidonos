@@ -24,10 +24,10 @@ public:
     using StripeMapUpdatedLog::StripeMapUpdatedLog;
 };
 
-class MockGcBlockMapUpdate : public GcBlockMapUpdate
+class MockGcBlockWriteDoneLog : public GcBlockWriteDoneLog
 {
 public:
-    using GcBlockMapUpdate::GcBlockMapUpdate;
+    using GcBlockWriteDoneLog::GcBlockWriteDoneLog;
 };
 
 class MockGcStripeFlushedLog : public GcStripeFlushedLog

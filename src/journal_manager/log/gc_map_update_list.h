@@ -45,10 +45,12 @@ struct GcBlockMapUpdate
     VirtualBlkAddr vsa;
 };
 
+using GcBlockMapUpdateList = std::vector<GcBlockMapUpdate>;
+
 struct GcStripeMapUpdateList
 {
     int volumeId;
-    std::vector<GcBlockMapUpdate> blockMapUpdateList;
+    GcBlockMapUpdateList blockMapUpdateList;
     StripeId vsid;
     StripeId wbLsid;
     StripeId userLsid;

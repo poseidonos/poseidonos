@@ -201,11 +201,17 @@ ReplayLogs::_ReplayFinishedStripes(void)
 
             _MoveToReplayedStripe(stripe);
         }
+        else if (log->GetType() == LogType::GC_BLOCK_WRITE_DONE)
+        {
+            ReplayStripe* stripe = _FindGcStripe(log->GetVsid());
+            stripe->AddLog(replayLog);
+
+            int volumeId = reinterpret_cast<GcBlockWriteDoneLog*>(log->GetData())->volId;
+            logDeleteChecker->ReplayedUntil(replayLog.time, volumeId);
+        }
         else if (log->GetType() == LogType::GC_STRIPE_FLUSHED)
         {
-            ReplayStripe* stripe = new GcReplayStripe(log->GetVsid(), vsaMap, stripeMap,
-                contextReplayer, blockAllocator, arrayInfo,
-                wbStripeReplayer, userStripeReplayer);
+            ReplayStripe* stripe = _FindGcStripe(log->GetVsid());
             stripe->AddLog(replayLog);
 
             result = _ReplayStripe(stripe);
@@ -214,10 +220,7 @@ ReplayLogs::_ReplayFinishedStripes(void)
                 break;
             }
 
-            int volumeId = reinterpret_cast<GcStripeFlushedLog*>(log->GetData())->volId;
-            logDeleteChecker->ReplayedUntil(replayLog.time, volumeId);
-
-            replayedStripeList.push_back(stripe);
+            _MoveToReplayedStripe(stripe);
         }
         else
         {
@@ -266,6 +269,26 @@ ReplayLogs::_FindUserStripe(StripeId vsid)
     }
 
     ReplayStripe* stripe = new UserReplayStripe(vsid, vsaMap, stripeMap,
+        contextReplayer, blockAllocator, arrayInfo,
+        wbStripeReplayer, userStripeReplayer);
+
+    replayingStripeList.push_back(stripe);
+
+    return stripe;
+}
+
+ReplayStripe*
+ReplayLogs::_FindGcStripe(StripeId vsid)
+{
+    for (auto stripe : replayingStripeList)
+    {
+        if (stripe->IsFlushed() == false && stripe->GetVsid() == vsid)
+        {
+            return stripe;
+        }
+    }
+
+    ReplayStripe* stripe = new GcReplayStripe(vsid, vsaMap, stripeMap,
         contextReplayer, blockAllocator, arrayInfo,
         wbStripeReplayer, userStripeReplayer);
 

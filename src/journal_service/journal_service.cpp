@@ -58,18 +58,20 @@ JournalService::IsEnabled(std::string arrayName)
     }
     else
     {
-        return journalWriters[arrayId->second]->IsEnabled();
+        return journalManagers[arrayId->second]->IsEnabled();
     }
 }
 
 void
 JournalService::Register(std::string arrayName, int arrayId,
-    IJournalWriter* writer, IVolumeEventHandler* handler, IJournalStatusProvider* provider)
+    IJournalManager* journal, IJournalWriter* writer,
+    IVolumeEventHandler* handler, IJournalStatusProvider* provider)
 {
     if (arrayNameToId.find(arrayName) == arrayNameToId.end())
     {
         arrayNameToId.emplace(arrayName, arrayId);
 
+        journalManagers[arrayId] = journal;
         journalWriters[arrayId] = writer;
         volEventHandlers[arrayId] = handler;
         statusProviders[arrayId] = provider;
@@ -89,6 +91,7 @@ JournalService::Unregister(std::string arrayName)
         int arrayId = arrayNameToId[arrayName];
         arrayNameToId.erase(arrayName);
 
+        journalManagers[arrayId] = nullptr;
         journalWriters[arrayId] = nullptr;
         volEventHandlers[arrayId] = nullptr;
         statusProviders[arrayId] = nullptr;
@@ -151,7 +154,7 @@ JournalService::IsEnabled(int arrayId)
     }
     else
     {
-        return journalWriters[arrayId]->IsEnabled();
+        return journalManagers[arrayId]->IsEnabled();
     }
 }
 

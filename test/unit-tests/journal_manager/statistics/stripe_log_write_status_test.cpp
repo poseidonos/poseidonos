@@ -216,7 +216,7 @@ TEST(StripeLogWriteStatus, GcBlockLogFound_testIfStatusUpdatedWhenGcBlocksAndGcS
     gcStripeLog.vsid = vsid;
     gcStripeLog.wbLsid = wbLsid;
     gcStripeLog.userLsid = userLsid;
-    gcStripeLog.numBlockMaps = numBlockMaps;
+    gcStripeLog.totalNumBlockMaps = numBlockMaps;
 
     StripeLogWriteStatus status(vsid);
 

@@ -45,6 +45,7 @@
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/journal_manager/checkpoint/log_group_releaser.h"
 #include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/journal_writer.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
@@ -66,11 +67,11 @@ JournalManager::JournalManager(void)
   journalService(nullptr),
   config(nullptr),
   statusProvider(nullptr),
-  journalManagerStatus(JOURNAL_INVALID),
   logBuffer(nullptr),
   logFactory(nullptr),
   logWriteHandler(nullptr),
   volumeEventHandler(nullptr),
+  journalWriter(nullptr),
   bufferAllocator(nullptr),
   logGroupReleaser(nullptr),
   checkpointManager(nullptr),
@@ -87,6 +88,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     LogWriteContextFactory* logWriteContextFactory,
     LogWriteHandler* writeHandler,
     JournalVolumeEventHandler* journalVolumeEventHandler,
+    JournalWriter* writer,
     JournalLogBuffer* journalLogBuffer,
     BufferOffsetAllocator* bufferOffsetAllocator,
     LogGroupReleaser* groupReleaser,
@@ -104,6 +106,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     logFactory = logWriteContextFactory;
     logWriteHandler = writeHandler;
     volumeEventHandler = journalVolumeEventHandler;
+    journalWriter = writer;
 
     logBuffer = journalLogBuffer;
     bufferAllocator = bufferOffsetAllocator;
@@ -123,19 +126,20 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
 // Constructor for injecting mock module dependencies in product code
 JournalManager::JournalManager(IArrayInfo* info, IStateControl* state)
 : JournalManager(new JournalConfiguration(),
-      new JournalStatusProvider(),
-      new LogWriteContextFactory(),
-      new LogWriteHandler(),
-      new JournalVolumeEventHandler(),
-      new JournalLogBuffer(info->GetName()),
-      new BufferOffsetAllocator(),
-      new LogGroupReleaser(),
-      new CheckpointManager(),
-      new DirtyMapManager(),
-      new LogBufferWriteDoneNotifier(),
-      new CallbackSequenceController(),
-      new ReplayHandler(state),
-      info, JournalServiceSingleton::Instance())
+    new JournalStatusProvider(),
+    new LogWriteContextFactory(),
+    new LogWriteHandler(),
+    new JournalVolumeEventHandler(),
+    new JournalWriter(),
+    new JournalLogBuffer(info->GetName()),
+    new BufferOffsetAllocator(),
+    new LogGroupReleaser(),
+    new CheckpointManager(),
+    new DirtyMapManager(),
+    new LogBufferWriteDoneNotifier(),
+    new CallbackSequenceController(),
+    new ReplayHandler(state),
+    info, JournalServiceSingleton::Instance())
 {
 }
 
@@ -151,6 +155,7 @@ JournalManager::~JournalManager(void)
     delete bufferAllocator;
     delete logBuffer;
 
+    delete journalWriter;
     delete volumeEventHandler;
     delete logWriteHandler;
     delete logFactory;
@@ -190,6 +195,8 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
 
     if (config->IsEnabled() == true)
     {
+        journalingStatus.Set(JOURNAL_INIT);
+
         result = _InitConfigAndPrepareLogBuffer(metaFsCtrl);
         if (result < 0)
         {
@@ -199,7 +206,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         _InitModules(vsaMap, stripeMap, mapFlush, blockAllocator,
             wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler);
 
-        if (journalManagerStatus == WAITING_TO_BE_REPLAYED)
+        if (journalingStatus.Get() == WAITING_TO_BE_REPLAYED)
         {
             result = _DoRecovery();
         }
@@ -233,7 +240,7 @@ JournalManager::_InitConfigAndPrepareLogBuffer(MetaFsFileControlApi* metaFsCtrl)
         }
         config->Init(loadedLogBufferSize, metaFsCtrl);
 
-        journalManagerStatus = WAITING_TO_BE_REPLAYED;
+        journalingStatus.Set(WAITING_TO_BE_REPLAYED);
     }
     else
     {
@@ -250,33 +257,33 @@ JournalManager::_InitConfigAndPrepareLogBuffer(MetaFsFileControlApi* metaFsCtrl)
 int
 JournalManager::_DoRecovery(void)
 {
-    if (config->IsEnabled() == false || journalManagerStatus == JOURNALING)
+    if (config->IsEnabled() == false || journalingStatus.Get() == JOURNALING)
     {
         return 0;
     }
 
-    if (journalManagerStatus == JOURNAL_INVALID)
+    if (journalingStatus.Get() == JOURNAL_INVALID)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_MANAGER_NOT_INITIALIZED,
             "Journal manager accessed without initialization");
         return -EID(JOURNAL_REPLAY_FAILED);
     }
 
-    if (journalManagerStatus == WAITING_TO_BE_REPLAYED)
+    if (journalingStatus.Get() == WAITING_TO_BE_REPLAYED)
     {
-        journalManagerStatus = REPLAYING_JOURNAL;
+        journalingStatus.Set(REPLAYING_JOURNAL);
 
         POS_TRACE_INFO(EID(JOURNAL_REPLAY_STARTED), "Journal replay started");
 
         int result = replayHandler->Start();
         if (result < 0)
         {
-            journalManagerStatus = JOURNAL_BROKEN;
+            journalingStatus.Set(JOURNAL_BROKEN);
             return -EID(JOURNAL_REPLAY_FAILED);
         }
 
         _ResetModules();
-        journalManagerStatus = JOURNALING;
+        journalingStatus.Set(JOURNALING);
     }
 
     return 0;
@@ -324,7 +331,7 @@ void
 JournalManager::_RegisterServices(void)
 {
     journalService->Register(arrayInfo->GetName(), arrayInfo->GetIndex(),
-        this, volumeEventHandler, statusProvider);
+        this, journalWriter, volumeEventHandler, statusProvider);
 }
 
 void
@@ -339,73 +346,12 @@ JournalManager::IsEnabled(void)
     return config->IsEnabled();
 }
 
-int
-JournalManager::_CanJournalBeWritten(void)
+IJournalWriter*
+JournalManager::GetJournalWriter(void)
 {
-    if (config->IsEnabled() == false)
-    {
-        int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION);
-        return (-1) * eventId;
-    }
-
-    if (journalManagerStatus != JOURNALING)
-    {
-        int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_NOT_READY);
-        return eventId;
-    }
-    return 0;
+    return journalWriter;
 }
 
-int
-JournalManager::AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo,
-    MpageList dirty, EventSmartPtr callbackEvent)
-{
-    int journalWriteStatus = _CanJournalBeWritten();
-    if (journalWriteStatus != 0)
-    {
-        return journalWriteStatus;
-    }
-    else
-    {
-        LogWriteContext* logWriteContext =
-            logFactory->CreateBlockMapLogWriteContext(volumeIo, dirty, callbackEvent);
-        return logWriteHandler->AddLog(logWriteContext);
-    }
-}
-
-int
-JournalManager::AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
-    MpageList dirty, EventSmartPtr callbackEvent)
-{
-    int result = 0;
-    if ((result = _CanJournalBeWritten()) == 0)
-    {
-        LogWriteContext* logWriteContext =
-            logFactory->CreateStripeMapLogWriteContext(stripe, oldAddr, dirty, callbackEvent);
-        return logWriteHandler->AddLog(logWriteContext);
-    }
-    else
-    {
-        return result;
-    }
-}
-
-int
-JournalManager::AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates,
-    MapPageList dirty, EventSmartPtr callbackEvent)
-{
-    int result = 0;
-    if ((result = _CanJournalBeWritten()) == 0)
-    {
-        LogWriteContext* logWriteContext =
-            logFactory->CreateGcStripeFlushedLogWriteContext(mapUpdates, dirty, callbackEvent);
-        return logWriteHandler->AddLog(logWriteContext);
-    }
-    else
-    {
-        return result;
-    }
-}
 int
 JournalManager::_Reset(void)
 {
@@ -416,9 +362,9 @@ JournalManager::_Reset(void)
     {
         POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_MANAGER_INITIALIZED,
             "Journal manager is initialized to status {}",
-            journalManagerStatus);
+            journalingStatus.Get());
 
-        journalManagerStatus = JOURNALING;
+        journalingStatus.Set(JOURNALING);
     }
     return ret;
 }
@@ -436,7 +382,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     dirtyMapManager->Init(config);
     checkpointManager->Init(mapFlush, contextManager, eventScheduler, sequenceController, dirtyMapManager);
 
-    logFactory->Init(logFilledNotifier, sequenceController);
+    logFactory->Init(config, logFilledNotifier, sequenceController);
 
     // Note that bufferAllocator should be notified after dirtyMapManager,
     // and logWriteHandler should be notified after bufferAllocator
@@ -450,6 +396,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
     volumeEventHandler->Init(logFactory, checkpointManager, logWriteHandler, config,
         contextManager, eventScheduler);
+    journalWriter->Init(logWriteHandler, logFactory, &journalingStatus);
 
     replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, blockAllocator,
         wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);

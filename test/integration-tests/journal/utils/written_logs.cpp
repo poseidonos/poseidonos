@@ -1,9 +1,10 @@
 #include "test/integration-tests/journal/utils/written_logs.h"
 
-#include "src/journal_manager/log/log_handler.h"
 #include "src/journal_manager/log/block_write_done_log_handler.h"
-#include "src/journal_manager/log/stripe_map_updated_log_handler.h"
+#include "src/journal_manager/log/gc_block_write_done_log_handler.h"
 #include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
+#include "src/journal_manager/log/log_handler.h"
+#include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
 namespace pos
 {
@@ -65,8 +66,13 @@ WrittenLogs::AddToWriteList(GcStripeMapUpdateList mapUpdates)
 {
     numJournalIssued++;
 
-    LogHandlerInterface* entry = new GcStripeFlushedLogHandler(mapUpdates);
-    _AddToList(entry);
+    LogHandlerInterface* blockLog = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId,
+        mapUpdates.vsid, mapUpdates.blockMapUpdateList);
+    _AddToList(blockLog);
+
+    LogHandlerInterface* stripeLog = new GcStripeFlushedLogHandler(mapUpdates.volumeId, mapUpdates.vsid,
+        mapUpdates.wbLsid, mapUpdates.userLsid, mapUpdates.blockMapUpdateList.size());
+    _AddToList(stripeLog);
 }
 
 bool
@@ -92,12 +98,19 @@ WrittenLogs::CheckLogInTheList(LogHandlerInterface* log)
 
                 exist = (*cmp1 == *cmp2);
             }
-            else if (log->GetType() == LogType::GC_STRIPE_FLUSHED)
+            else if (log->GetType() == LogType::GC_BLOCK_WRITE_DONE)
             {
-                GcStripeFlushedLogHandler cmp1((*it)->GetData());
-                GcStripeFlushedLogHandler cmp2(log->GetData());
+                GcBlockWriteDoneLogHandler cmp1((*it)->GetData());
+                GcBlockWriteDoneLogHandler cmp2(log->GetData());
 
                 exist = (cmp1 == cmp2);
+            }
+            else if (log->GetType() == LogType::GC_STRIPE_FLUSHED)
+            {
+                GcStripeFlushedLogHandler* cmp1 = reinterpret_cast<GcStripeFlushedLogHandler*>(*it);
+                GcStripeFlushedLogHandler* cmp2 = reinterpret_cast<GcStripeFlushedLogHandler*>(log);
+
+                exist = (*cmp1 == *cmp2);
             }
             else if (log->GetType() == LogType::VOLUME_DELETED)
             {
@@ -139,6 +152,6 @@ WrittenLogs::AreAllLogWritesDone(void)
 uint32_t
 WrittenLogs::GetNumLogsInTesting(void)
 {
-    return numJournalIssued;
+    return writeLogList.GetLogs().size();
 }
 } // namespace pos

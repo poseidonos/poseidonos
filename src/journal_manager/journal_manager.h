@@ -33,23 +33,15 @@
 #pragma once
 
 #include "src/allocator/i_context_manager.h"
-#include "src/journal_service/journal_service.h"
-#include "src/journal_service/i_journal_writer.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/include/smart_ptr_type.h"
+#include "src/journal_manager/journaling_status.h"
+#include "src/journal_service/i_journal_manager.h"
+#include "src/journal_service/i_journal_writer.h"
+#include "src/journal_service/journal_service.h"
 
 namespace pos
 {
-enum JournalManagerStatus
-{
-    JOURNAL_INVALID,
-    JOURNAL_INIT,
-    WAITING_TO_BE_REPLAYED,
-    REPLAYING_JOURNAL,
-    JOURNALING,
-    JOURNAL_BROKEN
-};
-
 class JournalConfiguration;
 class JournalLogBuffer;
 
@@ -57,6 +49,7 @@ class LogWriteContextFactory;
 
 class LogWriteHandler;
 class JournalVolumeEventHandler;
+class JournalWriter;
 
 class BufferOffsetAllocator;
 class LogGroupReleaser;
@@ -86,7 +79,7 @@ class IVolumeManager;
 class MetaFsFileControlApi;
 class EventScheduler;
 
-class JournalManager : public IMountSequence, public IJournalWriter
+class JournalManager : public IMountSequence, public IJournalManager
 {
 public:
     JournalManager(void);
@@ -96,6 +89,7 @@ public:
         LogWriteContextFactory* logWriteContextFactory,
         LogWriteHandler* writeHandler,
         JournalVolumeEventHandler* journalVolumeEventHandler,
+        JournalWriter* journalWriter,
         JournalLogBuffer* journalLogBuffer,
         BufferOffsetAllocator* bufferOffsetAllocator,
         LogGroupReleaser* groupReleaser,
@@ -107,14 +101,7 @@ public:
         IArrayInfo* arrayInfo, JournalService* service);
     virtual ~JournalManager(void);
 
-    virtual bool IsEnabled(void);
-    virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo, MpageList dirty,
-        EventSmartPtr callbackEvent) override;
-    virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr,
-        MpageList dirty, EventSmartPtr callbackEvent) override;
-
-    virtual int AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates,
-        MapPageList dirty, EventSmartPtr callbackEvent) override;
+    virtual bool IsEnabled(void) override;
 
     virtual int Init(void) override;
     virtual void Dispose(void) override;
@@ -130,14 +117,10 @@ public:
     JournalManagerStatus
     GetJournalManagerStatus(void)
     {
-        return journalManagerStatus;
+        return journalingStatus.Get();
     }
 
-    IJournalWriter*
-    GetJournalWriter(void)
-    {
-        return this;
-    }
+    IJournalWriter* GetJournalWriter(void);
 
 protected:
     void _InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
@@ -159,18 +142,21 @@ protected:
     void _RegisterServices(void);
     void _UnregisterServices(void);
 
+    void _EnableJournaling(void);
+
     IArrayInfo* arrayInfo;
     JournalService* journalService;
 
     JournalConfiguration* config;
     JournalStatusProvider* statusProvider;
-    JournalManagerStatus journalManagerStatus;
+    JournalingStatus journalingStatus;
 
     JournalLogBuffer* logBuffer;
 
     LogWriteContextFactory* logFactory;
     LogWriteHandler* logWriteHandler;
     JournalVolumeEventHandler* volumeEventHandler;
+    JournalWriter* journalWriter;
 
     BufferOffsetAllocator* bufferAllocator;
     LogGroupReleaser* logGroupReleaser;

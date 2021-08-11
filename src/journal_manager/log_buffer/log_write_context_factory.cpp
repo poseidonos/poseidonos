@@ -33,15 +33,19 @@
 #include "log_write_context_factory.h"
 
 #include "src/allocator/stripe/stripe.h"
+#include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log/block_write_done_log_handler.h"
+#include "src/journal_manager/log/gc_block_write_done_log_handler.h"
 #include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
 #include "src/journal_manager/log_buffer/log_group_reset_context.h"
+
 namespace pos
 {
 LogWriteContextFactory::LogWriteContextFactory(void)
-: notifier(nullptr),
+: config(nullptr),
+  notifier(nullptr),
   sequenceController(nullptr)
 {
 }
@@ -51,8 +55,10 @@ LogWriteContextFactory::~LogWriteContextFactory(void)
 }
 
 void
-LogWriteContextFactory::Init(LogBufferWriteDoneNotifier* target, CallbackSequenceController* sequencer)
+LogWriteContextFactory::Init(JournalConfiguration* journalConfig,
+    LogBufferWriteDoneNotifier* target, CallbackSequenceController* sequencer)
 {
+    config = journalConfig;
     notifier = target;
     sequenceController = sequencer;
 }
@@ -101,10 +107,71 @@ LogWriteContextFactory::CreateStripeMapLogWriteContext(Stripe* stripe,
 }
 
 LogWriteContext*
-LogWriteContextFactory::CreateGcStripeFlushedLogWriteContext(
-    GcStripeMapUpdateList mapUpdates, MapPageList dirty, EventSmartPtr callbackEvent)
+LogWriteContextFactory::CreateGcBlockMapLogWriteContext(GcStripeMapUpdateList mapUpdates,
+    MapPageList dirty, EventSmartPtr callbackEvent)
 {
-    GcStripeFlushedLogHandler* log = new GcStripeFlushedLogHandler(mapUpdates);
+    GcBlockWriteDoneLogHandler* log
+        = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId, mapUpdates.vsid, mapUpdates.blockMapUpdateList);
+
+    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
+        dirty, callbackEvent, notifier, sequenceController);
+
+    return logWriteContext;
+}
+
+std::vector<LogWriteContext*>
+LogWriteContextFactory::CreateGcBlockMapLogWriteContexts(GcStripeMapUpdateList mapUpdates,
+    MapPageList dirty, EventSmartPtr callbackEvent)
+{
+    std::vector<LogWriteContext*> returnList;
+
+    uint64_t maxNumLogsInAContext = _GetMaxNumGcBlockMapUpdateInAContext();
+    uint64_t totalNumBlocks = mapUpdates.blockMapUpdateList.size();
+    uint64_t remainingBlocks = totalNumBlocks;
+
+    while (remainingBlocks != 0)
+    {
+        uint64_t numBlocks = (remainingBlocks > maxNumLogsInAContext) ? (maxNumLogsInAContext) : (remainingBlocks);
+
+        GcBlockMapUpdateList list;
+        int startOffset = totalNumBlocks - remainingBlocks;
+        for (uint64_t offset = 0; offset < numBlocks; offset++)
+        {
+            list.push_back(mapUpdates.blockMapUpdateList[startOffset + offset]);
+        }
+
+        GcBlockWriteDoneLogHandler* log
+            = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId, mapUpdates.vsid, list);
+
+        MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
+            dirty, callbackEvent, notifier, sequenceController);
+
+        returnList.push_back(logWriteContext);
+
+        remainingBlocks -= numBlocks;
+    }
+
+    return returnList;
+}
+
+uint64_t
+LogWriteContextFactory::_GetMaxNumGcBlockMapUpdateInAContext(void)
+{
+    uint64_t logHeaderSize = sizeof(GcBlockWriteDoneLog);
+
+    uint64_t maxLogSize = config->GetMetaPageSize();
+    uint64_t maxNumLogsInAContext = (maxLogSize - logHeaderSize) / sizeof(GcBlockMapUpdate);
+
+    return maxNumLogsInAContext;
+}
+
+LogWriteContext*
+LogWriteContextFactory::CreateGcStripeFlushedLogWriteContext(GcStripeMapUpdateList mapUpdates,
+    MapPageList dirty, EventSmartPtr callbackEvent)
+{
+    GcStripeFlushedLogHandler* log
+        = new GcStripeFlushedLogHandler(mapUpdates.volumeId, mapUpdates.vsid,
+        mapUpdates.wbLsid, mapUpdates.userLsid, mapUpdates.blockMapUpdateList.size());
 
     MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
         dirty, callbackEvent, notifier, sequenceController);
