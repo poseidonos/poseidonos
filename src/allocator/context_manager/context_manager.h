@@ -60,7 +60,8 @@ public:
     enum IOTYPE
     {
         IOTYPE_READ,
-        IOTYPE_WRITE,
+        IOTYPE_FLUSH,
+        IOTYPE_REBUILDFLUSH,
         IOTYPE_ALL
     };
 
@@ -109,8 +110,9 @@ private:
     void _UpdateSectionInfo(void);
     int _LoadContexts(void);
     int _Flush(int owner, EventSmartPtr callback);
-    void _FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
     void _LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx);
+    void _FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
+    void _RebuildFlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
     void _WaitPendingIo(IOTYPE type);
     MetaIoCbPtr _SetCallbackFunc(int owner, EventSmartPtr callbackEvent);
     void _PrepareBuffer(int owner, char* buf);
@@ -120,7 +122,8 @@ private:
     std::string fileNames[NUM_FILES] = {"SegmentContext", "AllocatorContexts", "RebuildContext"};
     IAllocatorFileIoClient* fileOwner[NUM_FILES];
     std::atomic<int> numReadIoIssued;
-    std::atomic<int> numWriteIoIssued;
+    std::atomic<int> numFlushIoIssued;
+    std::atomic<int> numRebuildFlushIoIssued;
     std::atomic<bool> flushInProgress;
     EventSmartPtr flushCallback;
 

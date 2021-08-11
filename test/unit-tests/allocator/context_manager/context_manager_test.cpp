@@ -452,7 +452,6 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestFreeSegment)
     EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD));
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store).WillOnce(Return(0));
-    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     // when
     ctxManager.UpdateOccupiedStripeCount(5);
     delete addrInfo;
@@ -754,7 +753,6 @@ TEST(ContextManager, ReleaseRebuildSegment__TestSimpleByPassFunc)
     // given 3.
     EXPECT_CALL(*reCtx, ReleaseRebuildSegment).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store).WillOnce(Return(0));
-    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     // when 3.
     ret = ctxManager.ReleaseRebuildSegment(5);
     // then 3.
@@ -878,7 +876,7 @@ TEST(ContextManager, TestCallbackFunc_TestFlushCallback)
     reinterpret_cast<CtxHeader*>(buf)->sig = SegmentCtx::SIG_SEGMENT_CTX;
     EXPECT_CALL(*segCtx, FinalizeIo);
     // when 1.
-    ctxManager.TestCallbackFunc(ctx, ContextManager::IOTYPE_WRITE, 2);
+    ctxManager.TestCallbackFunc(ctx, ContextManager::IOTYPE_FLUSH, 2);
 
     // given 2.
     buf = new char[100];
@@ -887,7 +885,7 @@ TEST(ContextManager, TestCallbackFunc_TestFlushCallback)
     reinterpret_cast<CtxHeader*>(buf)->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
     EXPECT_CALL(*allocCtx, FinalizeIo);
     // when 2.
-    ctxManager.TestCallbackFunc(ctx, ContextManager::IOTYPE_WRITE, 1);
+    ctxManager.TestCallbackFunc(ctx, ContextManager::IOTYPE_FLUSH, 1);
 
     // given 3.
     buf = new char[100];
@@ -896,7 +894,7 @@ TEST(ContextManager, TestCallbackFunc_TestFlushCallback)
     reinterpret_cast<CtxHeader*>(buf)->sig = RebuildCtx::SIG_REBUILD_CTX;
     EXPECT_CALL(*reCtx, FinalizeIo);
     // when 3.
-    ctxManager.TestCallbackFunc(ctx, ContextManager::IOTYPE_WRITE, 1);
+    ctxManager.TestCallbackFunc(ctx, ContextManager::IOTYPE_REBUILDFLUSH, 1);
 }
 
 TEST(ContextManager, TestCallbackFunc_TestLoadCallback)
@@ -1101,7 +1099,6 @@ TEST(ContextManager, MakeRebuildTarget_TestwithFlushOrwithoutFlush)
     // given 2.
     EXPECT_CALL(*reCtx, MakeRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store).WillOnce(Return(0));
-    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     EXPECT_CALL(*reCtx, GetRebuildTargetSegmentCount).WillOnce(Return(7));
     // when 1.
     ret = ctxManager.MakeRebuildTarget();
@@ -1149,7 +1146,6 @@ TEST(ContextManager, StopRebuilding_TestwithFlushOrwithoutFlush)
     // given 2.
     EXPECT_CALL(*reCtx, StopRebuilding).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store).WillOnce(Return(0));
-    EXPECT_CALL(*addrInfo, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     // when 1.
     ret = ctxManager.StopRebuilding();
     // then 1.
