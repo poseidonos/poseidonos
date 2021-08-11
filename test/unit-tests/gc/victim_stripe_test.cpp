@@ -46,7 +46,13 @@ public:
         volumeManager = new NiceMock<MockIVolumeManager>;
         reverseMapLoadCompletionPtr = std::make_shared<NiceMock<MockReverseMapLoadCompletion>>();
 
-        PartitionLogicalSize ubSize = {.blksPerStripe = partitionLogicalSize.blksPerStripe};
+        PartitionLogicalSize ubSize = {.minWriteBlkCnt = 0, /* not interesting */
+                                .blksPerChunk = 0, /* not interesting */
+                                .blksPerStripe = partitionLogicalSize.blksPerStripe,
+                                .chunksPerStripe = 0, /* not interesting */
+                                .stripesPerSegment = 0, /* not interesting */
+                                .totalStripes = 0, /* not interesting */
+                                .totalSegments = 0 /* not interesting */};
         EXPECT_CALL(*array, GetSizeInfo(PartitionType::USER_DATA)).WillOnce(Return((const PartitionLogicalSize*)&ubSize));
 
         ON_CALL(*vsaMap, GetVSAInternal(_, _, _)).WillByDefault([this](int volumeId, BlkAddr startRba, int& caller)

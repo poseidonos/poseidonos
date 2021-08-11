@@ -28,7 +28,8 @@ public:
         arrayName = "POSArray";
         mockIArrayInfo = new NiceMock<MockIArrayInfo>;
         EXPECT_CALL(*mockIArrayInfo, GetName()).WillRepeatedly(Return(arrayName));
-        partitionLogicalSize = {.blksPerChunk = 64,
+        partitionLogicalSize = {.minWriteBlkCnt = 0, /* not interesting */
+                                .blksPerChunk = 64,
                                 .blksPerStripe = 2048,
                                 .chunksPerStripe = 32,
                                 .stripesPerSegment = 1024,

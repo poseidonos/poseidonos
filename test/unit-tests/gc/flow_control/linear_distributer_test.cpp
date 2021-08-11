@@ -28,12 +28,14 @@ public:
         arrayName = "POSArray";
         mockIArrayInfo = new NiceMock<MockIArrayInfo>;
         EXPECT_CALL(*mockIArrayInfo, GetName()).WillRepeatedly(Return(arrayName));
-        partitionLogicalSize = {.blksPerChunk = 64,
+        partitionLogicalSize = {.minWriteBlkCnt = 0, /* not interesting */
+                                .blksPerChunk = 64,
                                 .blksPerStripe = 2048,
                                 .chunksPerStripe = 32,
                                 .stripesPerSegment = 1024,
                                 .totalStripes = 32,
                                 .totalSegments = 32768};
+
         EXPECT_CALL(*mockIArrayInfo, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
 
         mockFlowControlConfiguration = new NiceMock<MockFlowControlConfiguration>(mockIArrayInfo, nullptr);
