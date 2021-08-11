@@ -118,8 +118,9 @@ TEST(Stripe, ReconstructReverseMap_TestSimpleInterfaceFunc)
     NiceMock<MockReverseMapPack>* revMap = new NiceMock<MockReverseMapPack>();
     Stripe stripe(revMap, false);
     EXPECT_CALL(*revMap, ReconstructMap).Times(1);
+    std::map<uint64_t, BlkAddr> revMapInfos;
     // when
-    stripe.ReconstructReverseMap(0, 1);
+    stripe.ReconstructReverseMap(0, 1, revMapInfos);
 }
 
 TEST(Stripe, LinkReverseMap_TestwithReverseMap)

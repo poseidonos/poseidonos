@@ -175,33 +175,19 @@ ActiveWBStripeReplayer::Replay(void)
             continue;
         }
 
-        ActiveStripeAddr current = _FindTargetActiveStripe(index);
-        _RestorePendingStripes();
+        ActiveStripeAddr current = _FindTargetActiveStripeAndRestore(index);
         if (current.IsValid() == true)
         {
-            int ret = wbStripeAllocator->RestoreActiveStripeTail(index,
-                current.GetTail(), current.GetWbLsid(), current.GetRevMap());
+            wbStripeAllocator->SetActiveStripeTail(index,
+                current.GetTail(), current.GetWbLsid());
+            std::ostringstream os;
+            os << "[Replay] Restore active stripe (index " << index
+               << ", vsid " << current.GetTail().stripeId
+               << ", wbLsid " << current.GetWbLsid()
+               << ", offset " << current.GetTail().offset << ")";
 
-            if (ret < 0)
-            {
-                std::ostringstream os;
-                os << "Restore active stripe failed";
-
-                POS_TRACE_DEBUG(loggingEventId, os.str());
-                POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, loggingEventId, os.str());
-                return ret;
-            }
-            else
-            {
-                std::ostringstream os;
-                os << "[Replay] Restore active stripe (index " << index
-                   << ", vsid " << current.GetTail().stripeId
-                   << ", wbLsid " << current.GetWbLsid()
-                   << ", offset " << current.GetTail().offset << ")";
-
-                POS_TRACE_DEBUG(loggingEventId, os.str());
-                POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, loggingEventId, os.str());
-            }
+            POS_TRACE_DEBUG(loggingEventId, os.str());
+            POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, loggingEventId, os.str());
         }
         else
         {
@@ -214,11 +200,12 @@ ActiveWBStripeReplayer::Replay(void)
             POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, loggingEventId, os.str());
         }
     }
+    _RestorePendingStripes();
     return 0;
 }
 
 ActiveStripeAddr
-ActiveWBStripeReplayer::_FindTargetActiveStripe(int index)
+ActiveWBStripeReplayer::_FindTargetActiveStripeAndRestore(int index)
 {
     ActiveStripeAddr lastActiveStripe;
 
@@ -231,11 +218,27 @@ ActiveWBStripeReplayer::_FindTargetActiveStripe(int index)
         }
         else
         {
-            if (lastActiveStripe.IsValid() == true)
+            int reconstructResult = wbStripeAllocator->ReconstructActiveStripe(it->GetVolumeId(),
+                it->GetWbLsid(), it->GetTail(), it->GetRevMap());
+            if (reconstructResult < 0)
             {
-                pendingActiveStripes.push_back(lastActiveStripe);
+                int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH_FAILED);
+                std::ostringstream os;
+                os << "Failed to reconstruct active stripe, wb lsid " << it->GetWbLsid()
+                   << ", tail offset " << it->GetTail().offset;
+
+                POS_TRACE_ERROR(eventId, os.str());
+                POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
             }
-            lastActiveStripe = *it;
+            else
+            {
+                if (lastActiveStripe.IsValid() == true)
+                {
+                    pendingStripes.push_back(new PendingStripe(lastActiveStripe.GetVolumeId(),
+                        lastActiveStripe.GetWbLsid(), lastActiveStripe.GetTail()));
+                }
+                lastActiveStripe = *it;
+            }
             ++it;
         }
     }
@@ -258,7 +261,7 @@ ActiveWBStripeReplayer::_RestorePendingStripes(void)
             os << "Failed to reconstruct active stripe, wb lsid " << it->GetWbLsid()
                << ", tail offset " << it->GetTail().offset;
 
-            POS_TRACE_DEBUG(eventId, os.str());
+            POS_TRACE_ERROR(eventId, os.str());
             POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
         }
         else

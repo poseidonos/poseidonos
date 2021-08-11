@@ -261,15 +261,14 @@ WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, Vir
         return ret;
     }
 
-    ret = _ReconstructReverseMap(volumeId, stripe, tailVsa.offset);
+    ret = _ReconstructReverseMap(volumeId, stripe, tailVsa.offset, revMapInfos);
     return ret;
 }
 
-int
-WBStripeManager::RestoreActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid, std::map<uint64_t, BlkAddr> revMapInfos)
+void
+WBStripeManager::SetActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid)
 {
     wbStripeCtx->SetActiveStripeTail(volumeId, tail);
-    return ReconstructActiveStripe(volumeId, wbLsid, tail, revMapInfos);
 }
 
 int
@@ -452,7 +451,7 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
 }
 
 int
-WBStripeManager::_ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount)
+WBStripeManager::_ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos)
 {
     int ret = 0;
     // TODO (jk.man.kim): Don't forget to insert array name in the future.
@@ -463,7 +462,7 @@ WBStripeManager::_ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint6
         return ret;
     }
 
-    ret = stripe->ReconstructReverseMap(volumeId, blockCount);
+    ret = stripe->ReconstructReverseMap(volumeId, blockCount, revMapInfos);
     if (ret < 0)
     {
         POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_NOT_FOUND_RBA), "There was no vsa map entry for some blocks");

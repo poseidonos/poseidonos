@@ -292,9 +292,9 @@ Stripe::SetFinished(bool state)
 }
 
 int
-Stripe::ReconstructReverseMap(uint32_t volumeId, uint64_t blockCount)
+Stripe::ReconstructReverseMap(uint32_t volumeId, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos)
 {
-    return revMapPack->ReconstructMap(volumeId, vsid, wbLsid, blockCount);
+    return revMapPack->ReconstructMap(volumeId, vsid, wbLsid, blockCount, revMapInfos);
 }
 
 bool

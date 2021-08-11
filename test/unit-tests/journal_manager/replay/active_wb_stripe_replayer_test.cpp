@@ -59,6 +59,26 @@ GetTail(StripeInfo stripe)
     return tail;
 }
 
+void
+ExpectReconstructActiveStripe(MockIWBStripeAllocator* wbStripeAllocator, StripeInfo activeStripe, int retCode)
+{
+    VirtualBlkAddr tailVsa = {
+        .stripeId = activeStripe.GetVsid(),
+        .offset = activeStripe.GetLastOffset() + 1};
+    EXPECT_CALL(*(wbStripeAllocator),
+        ReconstructActiveStripe(activeStripe.GetVolumeId(), activeStripe.GetWbLsid(), tailVsa, _))
+        .WillOnce(Return(retCode));
+}
+
+void
+ExpectRestoreActiveStripeTail(MockIWBStripeAllocator* wbStripeAllocator, StripeInfo activeStripe)
+{
+    VirtualBlkAddr tail = GetTail(activeStripe);
+    EXPECT_CALL(*(wbStripeAllocator),
+        SetActiveStripeTail(activeStripe.GetWbIndex(), tail, activeStripe.GetWbLsid()))
+        .Times(1);
+}
+
 TEST(ActiveWBStripeReplayer, Replay_SingleActiveStripe)
 {
     // Given
@@ -75,40 +95,10 @@ TEST(ActiveWBStripeReplayer, Replay_SingleActiveStripe)
     wbStripeReplayer->Update(activeStripe);
 
     // Then : Will restore the active stipre tail to this stripe
-    VirtualBlkAddr tail = GetTail(activeStripe);
-    EXPECT_CALL(*(wbStripeAllocator),
-        RestoreActiveStripeTail(activeStripe.GetWbIndex(), tail, activeStripe.GetWbLsid(), _))
-        .Times(1);
+    ExpectReconstructActiveStripe(wbStripeAllocator, activeStripe, 0);
+    ExpectRestoreActiveStripeTail(wbStripeAllocator, activeStripe);
 
     wbStripeReplayer->Replay();
-
-    delete contextReplayer;
-    delete wbStripeAllocator;
-}
-
-TEST(ActiveWBStripeReplayer, Replay_SingleActiveStripeWhenRestroeActiveStrileTailFail)
-{
-    // Given
-    NiceMock<MockIContextReplayer>* contextReplayer = new NiceMock<MockIContextReplayer>;
-    NiceMock<MockIWBStripeAllocator>* wbStripeAllocator = new NiceMock<MockIWBStripeAllocator>;
-    EXPECT_CALL(*contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
-    PendingStripeList pendingStripes;
-
-    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer, wbStripeAllocator, pendingStripes);
-
-    // When : Find a single active stripe that is not full, and restore fail
-    StripeInfo activeStripe = GetActiveStripe(defaultTestVol, defaultTestVol);
-    wbStripeReplayer->Update(activeStripe);
-
-    VirtualBlkAddr tail = GetTail(activeStripe);
-    int retCode = -1;
-    EXPECT_CALL(*(wbStripeAllocator),
-        RestoreActiveStripeTail(activeStripe.GetWbIndex(), tail, activeStripe.GetWbLsid(), _))
-        .WillOnce(Return(retCode));
-
-    // Then : Will repaly fail, and return code will be same with restore error code
-    int result = wbStripeReplayer->Replay();
-    EXPECT_EQ(retCode, result);
 
     delete contextReplayer;
     delete wbStripeAllocator;
@@ -140,7 +130,7 @@ TEST(ActiveWBStripeReplayer, Replay_SingleFullActiveStripe)
     delete wbStripeAllocator;
 }
 
-TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleStripe)
+TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleFullStripe)
 {
     // Given
     NiceMock<MockIContextReplayer>* contextReplayer = new NiceMock<MockIContextReplayer>;
@@ -162,10 +152,8 @@ TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleStripe)
     wbStripeReplayer->Update(lastActiveStripe);
 
     // Then : Will restore the active stripe tail to the lastActiveStripe
-    VirtualBlkAddr tail = GetTail(lastActiveStripe);
-    EXPECT_CALL(*(wbStripeAllocator),
-        RestoreActiveStripeTail(lastActiveStripe.GetWbIndex(), tail, lastActiveStripe.GetWbLsid(), _))
-        .Times(1);
+    ExpectReconstructActiveStripe(wbStripeAllocator, lastActiveStripe, 0);
+    ExpectRestoreActiveStripeTail(wbStripeAllocator, lastActiveStripe);
 
     wbStripeReplayer->Replay();
 
@@ -173,7 +161,7 @@ TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleStripe)
     delete wbStripeAllocator;
 }
 
-TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleStripe)
+TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleFullStripe)
 {
     // Given
     NiceMock<MockIContextReplayer>* contextReplayer = new NiceMock<MockIContextReplayer>;
@@ -210,10 +198,8 @@ TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleStripe)
     // Then : Will be restored active stripe tail to the last stripe updated for each voulme
     for (auto lastActiveStripe : lastStripesPerVolume)
     {
-        VirtualBlkAddr tail = GetTail(lastActiveStripe);
-        EXPECT_CALL(*(wbStripeAllocator),
-            RestoreActiveStripeTail(lastActiveStripe.GetWbIndex(), tail, lastActiveStripe.GetWbLsid(), _))
-            .Times(1);
+        ExpectReconstructActiveStripe(wbStripeAllocator, lastActiveStripe, 0);
+        ExpectRestoreActiveStripeTail(wbStripeAllocator, lastActiveStripe);
     }
     wbStripeReplayer->Replay();
 
@@ -236,7 +222,6 @@ TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleActiveStripe)
     for (int stripe = 0; stripe < 5; stripe++)
     {
         StripeInfo orphanStripe = GetActiveStripe(defaultTestVol, defaultTestVol);
-
         wbStripeReplayer->Update(orphanStripe);
         orphanStripes.push_back(orphanStripe);
 
@@ -244,45 +229,36 @@ TEST(ActiveWBStripeReplayer, Replay_SingleVolumeMultipleActiveStripe)
         wbStripeReplayer->Update(fullStripe);
     }
 
-    StripeInfo lastStripe = GetActiveStripe(defaultTestVol, defaultTestVol);
-    wbStripeReplayer->Update(lastStripe);
-
     // Then: Reversemap of pending stripes will be reconstructed without first orphan stripe, and restored active stripe tail to the last stripe updated for each voulme
     for (auto it = orphanStripes.begin(); it != orphanStripes.end(); it++)
     {
-        VirtualBlkAddr tailVsa = {
-            .stripeId = it->GetVsid(),
-            .offset = it->GetLastOffset() + 1};
-
-        int retCode = 0;
-        if (it == orphanStripes.begin())
+        if (it->GetVsid() == orphanStripes.back().GetVsid())
         {
-            retCode = -1000;
+            ExpectReconstructActiveStripe(wbStripeAllocator, *it, -1000);
+            it = orphanStripes.erase(it);
+            break;
         }
         else
         {
-            retCode = 0;
+            ExpectReconstructActiveStripe(wbStripeAllocator, *it, 0);
         }
-        EXPECT_CALL(*(wbStripeAllocator),
-            ReconstructActiveStripe(it->GetVolumeId(), it->GetWbLsid(), tailVsa, _))
-            .WillOnce(Return(retCode));
     }
-    orphanStripes.erase(orphanStripes.begin());
-
-    EXPECT_CALL(*(wbStripeAllocator),
-        RestoreActiveStripeTail(lastStripe.GetWbIndex(), GetTail(lastStripe), lastStripe.GetWbLsid(), _))
-        .Times(1);
+    StripeInfo lastActiveStripe = *orphanStripes.rbegin();
+    orphanStripes.pop_back();
+    ExpectRestoreActiveStripeTail(wbStripeAllocator, lastActiveStripe);
 
     wbStripeReplayer->Replay();
 
     // Then: Expected orphan stripes will be matched with pending stripes constructed by replayer
     EXPECT_TRUE(orphanStripes.size() == pendingStripes.size());
 
-    std::sort(orphanStripes.begin(), orphanStripes.end(), [](StripeInfo a, StripeInfo b) {
+    std::sort(orphanStripes.begin(), orphanStripes.end(), [](StripeInfo a, StripeInfo b)
+    {
         return (a.GetWbLsid() < b.GetWbLsid());
     });
 
-    std::sort(pendingStripes.begin(), pendingStripes.end(), [](PendingStripe* a, PendingStripe* b) {
+    std::sort(pendingStripes.begin(), pendingStripes.end(), [](PendingStripe* a, PendingStripe* b)
+    {
         return (a->wbLsid < b->wbLsid);
     });
 
@@ -320,40 +296,85 @@ TEST(ActiveWBStripeReplayer, Replay_MultiVolumeMultipleActiveStripe)
             StripeInfo fullStripe = GetFlushedActiveStripe(volumeId, volumeId);
             wbStripeReplayer->Update(fullStripe);
         }
-
         StripeInfo lastStripe = GetActiveStripe(volumeId, volumeId);
-        lastStripesPerVolume.push_back(lastStripe);
         wbStripeReplayer->Update(lastStripe);
+        lastStripesPerVolume.push_back(lastStripe);
     }
 
     // Then: Reversemap of pending stripes will be reconstructed, and restored active stripe tail to the last stripe updated for each voulme
-    for (auto pendingStripe : orphanStripes)
+    for (auto activeStripe : orphanStripes)
     {
-        VirtualBlkAddr tailVsa = {
-            .stripeId = pendingStripe.GetVsid(),
-            .offset = pendingStripe.GetLastOffset() + 1};
-
-        EXPECT_CALL(*(wbStripeAllocator),
-            ReconstructActiveStripe(pendingStripe.GetVolumeId(), pendingStripe.GetWbLsid(), tailVsa, _))
-            .Times(1);
+        ExpectReconstructActiveStripe(wbStripeAllocator, activeStripe, 0);
     }
     for (auto lastActiveStripe : lastStripesPerVolume)
     {
-        VirtualBlkAddr tail = GetTail(lastActiveStripe);
-        EXPECT_CALL(*(wbStripeAllocator),
-            RestoreActiveStripeTail(lastActiveStripe.GetWbIndex(), tail, lastActiveStripe.GetWbLsid(), _))
-            .Times(1);
+        ExpectReconstructActiveStripe(wbStripeAllocator, lastActiveStripe, 0);
+        ExpectRestoreActiveStripeTail(wbStripeAllocator, lastActiveStripe);
     }
     wbStripeReplayer->Replay();
 
     // Then: Expected orphan stripes will be matched with pending stripes constructed by replayer
     EXPECT_TRUE(orphanStripes.size() == pendingStripes.size());
 
-    std::sort(orphanStripes.begin(), orphanStripes.end(), [](StripeInfo a, StripeInfo b) {
+    std::sort(orphanStripes.begin(), orphanStripes.end(), [](StripeInfo a, StripeInfo b)
+    {
         return (a.GetWbLsid() < b.GetWbLsid());
     });
 
-    std::sort(pendingStripes.begin(), pendingStripes.end(), [](PendingStripe* a, PendingStripe* b) {
+    std::sort(pendingStripes.begin(), pendingStripes.end(), [](PendingStripe* a, PendingStripe* b)
+    {
+        return (a->wbLsid < b->wbLsid);
+    });
+
+    for (uint32_t index = 0; index < orphanStripes.size(); index++)
+    {
+        EXPECT_TRUE(orphanStripes[index].GetWbLsid() == pendingStripes[index]->wbLsid);
+        EXPECT_TRUE(GetTail(orphanStripes[index]) == pendingStripes[index]->tailVsa);
+    }
+
+    delete contextReplayer;
+    delete wbStripeAllocator;
+}
+
+TEST(ActiveWBStripeReplayer, Replay_testIfFoundPendingActiveStripes)
+{
+    // Given
+    NiceMock<MockIContextReplayer>* contextReplayer = new NiceMock<MockIContextReplayer>;
+    NiceMock<MockIWBStripeAllocator>* wbStripeAllocator = new NiceMock<MockIWBStripeAllocator>;
+    EXPECT_CALL(*contextReplayer, GetAllActiveStripeTail()).WillOnce(Return(std::vector<VirtualBlkAddr>(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA)));
+    PendingStripeList pendingStripes;
+
+    ActiveWBStripeReplayer* wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer, wbStripeAllocator, pendingStripes);
+
+    // When : Find several stripes on single volume
+    std::vector<StripeInfo> orphanStripes;
+    for (int stripe = 0; stripe < 5; stripe++)
+    {
+        StripeInfo activeStripe = GetActiveStripe(defaultTestVol, -1);
+        wbStripeReplayer->Update(activeStripe);
+        if (stripe < 4)
+        {
+            ExpectReconstructActiveStripe(wbStripeAllocator, activeStripe, 0);
+            orphanStripes.push_back(activeStripe);
+        }
+        else
+        {
+            ExpectReconstructActiveStripe(wbStripeAllocator, activeStripe, -1000);
+        }
+    }
+    // Then: Pending stripe will be reconstructed, and moved pendingStripes without last stripe which failed to reconstruct
+    wbStripeReplayer->Replay();
+
+    // Then: Expected orphan stripes will be matched with pending stripes constructed by replayer
+    EXPECT_TRUE(orphanStripes.size() == pendingStripes.size());
+
+    std::sort(orphanStripes.begin(), orphanStripes.end(), [](StripeInfo a, StripeInfo b)
+    {
+        return (a.GetWbLsid() < b.GetWbLsid());
+    });
+
+    std::sort(pendingStripes.begin(), pendingStripes.end(), [](PendingStripe* a, PendingStripe* b)
+    {
         return (a->wbLsid < b->wbLsid);
     });
 

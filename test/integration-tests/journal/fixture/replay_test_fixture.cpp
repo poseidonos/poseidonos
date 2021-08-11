@@ -140,7 +140,10 @@ void
 ReplayTestFixture::ExpectReplayUnflushedActiveStripe(VirtualBlkAddr tail, StripeTestFixture stripe)
 {
     EXPECT_CALL(*(allocator->GetWBStripeAllocatorMock()),
-        RestoreActiveStripeTail(testInfo->defaultTestVol, tail, stripe.GetWbAddr().stripeId, stripe.GetRevMap()))
+        ReconstructActiveStripe(testInfo->defaultTestVol, stripe.GetWbAddr().stripeId, tail, stripe.GetRevMap()))
+        .Times(1);
+    EXPECT_CALL(*(allocator->GetWBStripeAllocatorMock()),
+        SetActiveStripeTail(testInfo->defaultTestVol, tail, stripe.GetWbAddr().stripeId))
         .Times(1);
     EXPECT_CALL(*(allocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);
 }

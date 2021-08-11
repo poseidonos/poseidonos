@@ -71,7 +71,7 @@ public:
 
     virtual int ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, VirtualBlkAddr tailVsa, std::map<uint64_t, BlkAddr> revMapInfos) override;
     virtual Stripe* FinishReconstructedStripe(StripeId wbLsid, VirtualBlkAddr tail) override;
-    virtual int RestoreActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid, std::map<uint64_t, BlkAddr> revMapInfos) override;
+    virtual void SetActiveStripeTail(uint32_t volumeId, VirtualBlkAddr tail, StripeId wbLsid) override;
     virtual int FlushPendingActiveStripes(void) override;
     virtual int PrepareRebuild(void) override;
     virtual Stripe* GetStripe(StripeId wbLsid) override;
@@ -90,7 +90,7 @@ protected: // for UT
     Stripe* _FinishRemainingBlocks(VirtualBlks remainingVsaRange);
     virtual int _RequestStripeFlush(Stripe* stripe);
     int _ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCount, ASTailArrayIdx idx, Stripe*& stripe);
-    int _ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount);
+    int _ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
 
     std::vector<Stripe*> wbStripeArray;
     FreeBufferPool* stripeBufferPool;

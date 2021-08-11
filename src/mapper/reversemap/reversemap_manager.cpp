@@ -100,8 +100,9 @@ ReverseMapManager::Init(MapperAddressInfo& info)
     revMapPacks = new ReverseMapPack[info.numWbStripes]();
     for (StripeId wbLsid = 0; wbLsid < info.numWbStripes; ++wbLsid)
     {
-        revMapPacks[wbLsid].Init(mpageSize, numMpagesPerStripe, revMapWholefile, iArrayInfo->GetName());
-        revMapPacks[wbLsid].Init(wbLsid, iVSAMap, iStripeMap);
+        std::string arrName = iArrayInfo->GetName();
+        revMapPacks[wbLsid].Init(mpageSize, numMpagesPerStripe, revMapWholefile, arrName);
+        revMapPacks[wbLsid].Init(VolumeServiceSingleton::Instance()->GetVolumeManager(arrName), wbLsid, iVSAMap, iStripeMap);
     }
 }
 
@@ -135,10 +136,11 @@ ReverseMapPack*
 ReverseMapManager::AllocReverseMapPack(bool gcDest)
 {
     ReverseMapPack* obj = new ReverseMapPack;
-    obj->Init(mpageSize, numMpagesPerStripe, revMapWholefile, iArrayInfo->GetName());
+    std::string arrName = iArrayInfo->GetName();
+    obj->Init(mpageSize, numMpagesPerStripe, revMapWholefile, arrName);
     if (gcDest == true)
     {
-        obj->Init(UNMAP_STRIPE, iVSAMap, iStripeMap);
+        obj->Init(VolumeServiceSingleton::Instance()->GetVolumeManager(arrName), UNMAP_STRIPE, iVSAMap, iStripeMap);
     }
     return obj;
 }

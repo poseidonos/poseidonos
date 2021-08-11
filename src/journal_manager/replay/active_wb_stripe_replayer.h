@@ -66,7 +66,7 @@ private:
     void _ResetWbufTail(int index);
     void _UpdateWbufTail(int index, ActiveStripeAddr addr);
     bool _IsFlushedStripe(StripeInfo stripeInfo);
-    ActiveStripeAddr _FindTargetActiveStripe(int index);
+    ActiveStripeAddr _FindTargetActiveStripeAndRestore(int index);
 
     void _RestorePendingStripes(void);
 

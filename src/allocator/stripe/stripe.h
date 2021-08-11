@@ -36,6 +36,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <map>
 
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/include/allocator_const.h"
@@ -66,7 +67,7 @@ public:
 
     virtual int Flush(EventSmartPtr callback);
     virtual void UpdateReverseMap(uint32_t offset, BlkAddr rba, uint32_t volumeId);
-    virtual int ReconstructReverseMap(uint32_t volumeId, uint64_t blockCount);
+    virtual int ReconstructReverseMap(uint32_t volumeId, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
     virtual int LinkReverseMap(ReverseMapPack* revMapPackToLink);
     virtual int UnLinkReverseMap(void);
     virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint32_t offset);

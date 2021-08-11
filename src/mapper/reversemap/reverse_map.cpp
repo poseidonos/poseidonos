@@ -30,6 +30,8 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "src/mapper/reversemap/reverse_map.h"
+
 #include <list>
 #include <tuple>
 
@@ -38,19 +40,20 @@
 #include "src/include/branch_prediction.h"
 #include "src/include/meta_const.h"
 #include "src/mapper/include/mapper_const.h"
-#include "src/mapper/reversemap/reverse_map.h"
-#include "src/volume/volume_service.h"
 #include "src/meta_file_intf/meta_file_intf.h"
+#include "src/volume/i_volume_manager.h"
+#include "src/volume/volume_service.h"
 
 namespace pos
 {
-
 ReverseMapPack::ReverseMapPack(void)
 : linkedToVsid(false),
   vsid(UINT32_MAX),
   ioError(0),
   ioDirection(0),
-  callback(nullptr)
+  callback(nullptr),
+  totalRbaNum(UINT64_MAX),
+  volumeManager(nullptr)
 {
     wbLsid = UNMAP_STRIPE;
     mpageSize = 0;
@@ -59,10 +62,6 @@ ReverseMapPack::ReverseMapPack(void)
     revMapfile = nullptr;
     iVSAMap = nullptr;
     iStripeMap = nullptr;
-    reconstructStatus.lsid = UNMAP_STRIPE;
-    reconstructStatus.vsid = UNMAP_STRIPE;
-    reconstructStatus.volId = UINT32_MAX;
-    reconstructStatus.totalRbaNum = UINT64_MAX;
 }
 
 ReverseMapPack::~ReverseMapPack(void)
@@ -95,11 +94,12 @@ ReverseMapPack::Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file,
 }
 
 void
-ReverseMapPack::Init(StripeId wblsid, IVSAMap* ivsaMap, IStripeMap* istripeMap)
+ReverseMapPack::Init(IVolumeManager* volumeManager, StripeId wblsid, IVSAMap* ivsaMap, IStripeMap* istripeMap)
 {
     wbLsid = wblsid;
     iVSAMap = ivsaMap;
     iStripeMap = istripeMap;
+    this->volumeManager = volumeManager;
     _HeaderInit(wbLsid);
 }
 
@@ -373,55 +373,60 @@ ReverseMapPack::WbtFileSyncIo(MetaFileIntf* fileLinux, MetaFsIoOpcode IoDirectio
 }
 
 int
-ReverseMapPack::ReconstructMap(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t blockCount)
+ReverseMapPack::ReconstructMap(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos)
 {
     int ret = 0;
-    std::list<BlkAddr> foundRbas;
-
+    BlkAddr lastFoundRba = UINT64_MAX;
     POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_FOUND_RBA),
         "[RMR]START, volumeId:{}  wbLsid:{}  vsid:{}  blockCount:{}",
         volumeId, lsid, vsid, blockCount);
 
-    ret = reconstructStatus.Init(lsid, vsid, volumeId, arrayName);
+    uint64_t volSize = 0;
+    ret = volumeManager->GetVolumeSize(volumeId, volSize);
     if (ret != 0)
     {
-        return ret;
+        POS_TRACE_WARN(EID(GET_VOLUMESIZE_FAILURE), "[RMR]GetVolumeSize failure, volumeId:{}", volumeId);
+        return -(int)EID(GET_VOLUMESIZE_FAILURE);
     }
+    totalRbaNum = DivideUp(volSize, BLOCK_SIZE);
 
-    for (uint64_t offset = 0; offset < blockCount; ++offset)
+    for (uint64_t offset = 0; offset < blockCount; offset++)
     {
-        // Set the RBA to start finding
-        BlkAddr rbaStart = 0;
-        if (0 != foundRbas.size())
+        if (revMapInfos.find(offset) == revMapInfos.end())
         {
-            rbaStart = foundRbas.front() + 1;
-        }
+            // Set the RBA to start finding
+            BlkAddr rbaStart = 0;
+            if (lastFoundRba != UINT64_MAX)
+            {
+                rbaStart = lastFoundRba + 1;
+            }
 
-        BlkAddr foundRba = INVALID_RBA;
-        bool found = _FindRba(offset, rbaStart, foundRba);
-
-        if (found == true)
-        {
-            foundRbas.emplace_front(foundRba);
+            BlkAddr foundRba = INVALID_RBA;
+            bool found = _FindRba(volumeId, vsid, lsid, offset, rbaStart, foundRba);
+            if (found == false)
+            {
+                continue;
+            }
+            revMapInfos.insert(make_pair(offset, foundRba));
+            lastFoundRba = foundRba;
         }
-        SetReverseMapEntry(offset, foundRba, volumeId);
+        SetReverseMapEntry(offset, revMapInfos[offset], volumeId);
     }
 
     POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_FOUND_RBA),
         "[RMR] {}/{} blocks are reconstructed for Stripe(wbLsid:{})",
-        foundRbas.size(), blockCount, lsid);
-
+        revMapInfos.size(), blockCount, lsid);
     return ret;
 }
 
 bool
-ReverseMapPack::_FindRba(uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba)
+ReverseMapPack::_FindRba(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba)
 {
     bool looped = false;
-    for (BlkAddr rbaToCheck = rbaStart; rbaToCheck <= reconstructStatus.totalRbaNum; ++rbaToCheck)
+    for (BlkAddr rbaToCheck = rbaStart; rbaToCheck <= totalRbaNum; ++rbaToCheck)
     {
         // If rbaToCheck exceeds more than totalRbaNum, looped would be set as TRUE
-        if (rbaToCheck == reconstructStatus.totalRbaNum)
+        if (rbaToCheck == totalRbaNum)
         {
             rbaToCheck = 0;
             looped = true;
@@ -433,14 +438,14 @@ ReverseMapPack::_FindRba(uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba)
         }
 
         int caller = CALLER_NOT_EVENT;
-        VirtualBlkAddr vsaToCheck = iVSAMap->GetVSAInternal(reconstructStatus.volId, rbaToCheck, caller);
-        if (vsaToCheck == UNMAP_VSA || vsaToCheck.offset != offset || vsaToCheck.stripeId != reconstructStatus.vsid)
+        VirtualBlkAddr vsaToCheck = iVSAMap->GetVSAInternal(volumeId, rbaToCheck, caller);
+        if (vsaToCheck == UNMAP_VSA || vsaToCheck.offset != offset || vsaToCheck.stripeId != vsid)
         {
             continue;
         }
 
         StripeAddr lsaToCheck = iStripeMap->GetLSA(vsaToCheck.stripeId);
-        if (iStripeMap->IsInUserDataArea(lsaToCheck) || lsaToCheck.stripeId != reconstructStatus.lsid)
+        if (iStripeMap->IsInUserDataArea(lsaToCheck) || lsaToCheck.stripeId != lsid)
         {
             continue;
         }
@@ -451,26 +456,4 @@ ReverseMapPack::_FindRba(uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba)
 
     return false;
 }
-
-int
-ReverseMapPack::ReconstructInfo::Init(StripeId inputLsid, StripeId inputVsid, uint32_t volumeId, std::string arrName)
-{
-    IVolumeManager& volumeManager = *VolumeServiceSingleton::Instance()->GetVolumeManager(arrName);
-
-    uint64_t volSize = 0;
-    int ret = volumeManager.GetVolumeSize(volumeId, volSize);
-    if (ret != 0)
-    {
-        POS_TRACE_WARN(EID(GET_VOLUMESIZE_FAILURE), "[RMR]GetVolumeSize failure, volumeId:{}", volumeId);
-        return -(int)EID(GET_VOLUMESIZE_FAILURE);
-    }
-
-    lsid = inputLsid;
-    vsid = inputVsid;
-    volId = volumeId;
-    totalRbaNum = DivideUp(volSize, BLOCK_SIZE);
-
-    return 0;
-}
-
 } // namespace pos

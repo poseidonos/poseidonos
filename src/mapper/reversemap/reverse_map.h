@@ -32,9 +32,10 @@
 
 #pragma once
 
+#include <map>
+#include <string>
 #include <tuple>
 #include <vector>
-#include <string>
 
 #include "src/mapper/i_stripemap.h"
 #include "src/mapper/i_vsamap.h"
@@ -56,6 +57,7 @@ const int NUM_ENTRIES = REVMAP_SECTOR_SIZE / REVMAP_ENTRY_SIZE; // 21
 
 class MetaFileIntf;
 class Stripe;
+class IVolumeManager;
 
 // The first page can have 21 * (16 - 1) == 315 entries
 // since the second page, it has 21 * 16 = 336 entries
@@ -143,7 +145,7 @@ public:
     virtual ~ReverseMapPack(void);
 
     virtual void Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file, std::string arrName);
-    virtual void Init(StripeId wblsid, IVSAMap* ivsaMap, IStripeMap* istripeMap);
+    virtual void Init(IVolumeManager* volumeManager, StripeId wblsid, IVSAMap* ivsaMap, IStripeMap* istripeMap);
     virtual int LinkVsid(StripeId vsid); // vsid == SSD LSID
     virtual int UnLinkVsid(void);
 
@@ -151,7 +153,7 @@ public:
     virtual int Flush(Stripe* stripe, EventSmartPtr callback);
 
     virtual int SetReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId);
-    virtual int ReconstructMap(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t blockCount);
+    virtual int ReconstructMap(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
     virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint32_t offset);
     virtual int IsAsyncIoDone(void);
     virtual int GetIoError(void);
@@ -163,7 +165,7 @@ private:
     std::tuple<uint32_t, uint32_t, uint32_t> _ReverseMapGeometry(uint64_t offset);
     std::tuple<uint32_t, uint32_t> _GetCurrentTime(void);
     void _RevMapPageIoDone(AsyncMetaFileIoCtx* ctx);
-    bool _FindRba(uint64_t blockOffset, BlkAddr rbaStart, BlkAddr& foundRba);
+    bool _FindRba(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64_t blockOffset, BlkAddr rbaStart, BlkAddr& foundRba);
 
     bool linkedToVsid;
     StripeId vsid;   // SSD LSID
@@ -184,16 +186,8 @@ private:
     IStripeMap* iStripeMap;
     std::string arrayName;
 
-    struct ReconstructInfo
-    {
-        StripeId lsid;
-        StripeId vsid;
-        uint32_t volId;
-        BlkAddr totalRbaNum;
-
-        int Init(StripeId lsid, StripeId vsid, uint32_t volumeId, std::string arrName);
-    };
-    ReconstructInfo reconstructStatus;
+    BlkAddr totalRbaNum;
+    IVolumeManager* volumeManager;
 };
 
 } // namespace pos
