@@ -1,0 +1,6 @@
+export USE_ONE_INITIATOR=1
+export SUBSYSTEM_CNT=16
+export VOLUME_CNT=16
+export RAMP_TIME=5
+export IO_RUN_TIME=5
+

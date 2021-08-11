@@ -23,6 +23,7 @@ TRANSPORT="tcp"
 NUMCPUS="24"
 RESULT=""
 ORDER="1"
+JSON_OUTPUT="/tmp/fio.json"
 
 readwrite=["write","read","randwrite","randread"]
 
@@ -33,12 +34,18 @@ def get_qd_and_filename():
         command += " --name=test" + str(i) + " --iodepth=" + str(args.qd) + " --filename='trtype=" + str(args.transport) + " adrfam=IPv4 traddr=" + str(args.address) + " trsvcid=1158 subnqn=nqn.2019-04.pos\:subsystem"
         if int(args.order) == 1:
             command += str(i*2+1)
+        elif int(args.order) == 2:
+            command += str(i+1)
         else:
             command += str((i+1)*2)
         command += " ns=1 '"
     return command
 
 def run_fio(workload, fio_command_for_each_test, fio_result_fd):
+    global args
+    group_report = 1
+    if (args.volume is True):
+        group_report = 0
     command = "fio" \
             + " --name=global" \
             + " --ioengine=" + str(args.io_engine) + "" \
@@ -48,12 +55,14 @@ def run_fio(workload, fio_command_for_each_test, fio_result_fd):
             + " --bs=" + str(args.blocksize) + "" \
             + " --thread=1" \
             + " --serialize_overlap=0" \
-            + " --group_reporting=1" \
+            + " --group_reporting=" + str(group_report) \
             + " --direct=1" \
             + " --numjobs=" + str(args.numjobs) + "" \
             + " --ramp_time=" + str(args.ramp_time) + "" \
             + " --time_based=" + str(args.time_based) + "" \
             + fio_command_for_each_test + ""
+    if (args.json is True):
+        command += " --output-format=json --output=" + JSON_OUTPUT
     ret = subprocess.call(command,shell=True, stdout=fio_result_fd, stderr=fio_result_fd)
     return ret
 
@@ -94,6 +103,10 @@ def parse_arguments():
             help='Set IP address, default: ' + IP)
     parser.add_argument('-o', '--order', default=ORDER,\
             help='Set initiator order, default: ' + ORDER)
+    parser.add_argument('-v', '--volume', action='store_true',\
+            help='Report for volume')
+    parser.add_argument('-j', '--json', action='store_true',\
+            help='json file output')
     global args
     args = parser.parse_args()
 

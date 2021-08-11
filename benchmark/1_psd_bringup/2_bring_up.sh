@@ -2,6 +2,10 @@
 # Note : increase VOLUME_COUNT & SUBSYSTEM_COUNT will make multiple volumes and namespace (1:1)
 
 source ../config.sh
+USE_ONE_INITIATOR=0
+if [ "$#" -gt 0 ]; then
+    source $1
+fi
 ROOT_DIR=$(readlink -f $(dirname $0))/../../
 SPDK_DIR=$ROOT_DIR/lib/spdk
 
@@ -42,17 +46,17 @@ ibofos_bringup(){
 
     if [ "$TRANSPORT" == "TCP" ] || [ "$TRANSPORT" == "tcp" ]; then 
         sudo $ROOT_DIR/test/system/network/tcp_tune.sh max
-    	if [ "$IRQ_DEDICATION" == "TRUE" ] || [ "$IRQ_DEDICATION" == "true" ];then
+        if [ "$IRQ_DEDICATION" == "TRUE" ] || [ "$IRQ_DEDICATION" == "true" ];then
             sudo systemctl stop irqbalance.service
-	    echo "$ROOT_DIR/test/script/set_irq_affinity_cpulist.sh ${DEFAULT_NET_IRQ_CPULIST1} ${TARGET_NIC1}"
-	    echo "$ROOT_DIR/test/script/set_irq_affinity_cpulist.sh ${DEFAULT_NET_IRQ_CPULIST2} ${TARGET_NIC2}"
+            echo "$ROOT_DIR/test/script/set_irq_affinity_cpulist.sh ${DEFAULT_NET_IRQ_CPULIST1} ${TARGET_NIC1}"
+            echo "$ROOT_DIR/test/script/set_irq_affinity_cpulist.sh ${DEFAULT_NET_IRQ_CPULIST2} ${TARGET_NIC2}"
             sudo $ROOT_DIR/test/script/set_irq_affinity_cpulist.sh ${DEFAULT_NET_IRQ_CPULIST1} ${TARGET_NIC1}
             sudo $ROOT_DIR/test/script/set_irq_affinity_cpulist.sh ${DEFAULT_NET_IRQ_CPULIST2} ${TARGET_NIC2}
-    	fi
-	echo "$SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -b 64 -n 4096"
+        fi
+        echo "$SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -b 64 -n 4096"
         sudo $SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -b 64 -n 4096
     else
-	echo "$SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -u 131072"
+        echo "$SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -u 131072"
         sudo $SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -u 131072
     fi
     echo "$SPDK_DIR/scripts/rpc.py bdev_malloc_create -b uram0 $WRITE_BUFFER_SIZE_IN_MB 512"
@@ -63,15 +67,17 @@ ibofos_bringup(){
     turn=0
     for i in `seq 1 $SUBSYSTEM_COUNT`
     do
-	echo "$SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem$i -m 256 -a -s POS0000000000000$i -d POS_VOLUME_EXTENSION"
+        echo "$SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem$i -m 256 -a -s POS0000000000000$i -d POS_VOLUME_EXTENSION"
         sudo $SPDK_DIR/scripts/rpc.py nvmf_create_subsystem nqn.2019-04.pos:subsystem$i -m 256 -a -s POS0000000000000$i -d POS_VOLUME_EXTENSION
         port=`expr $i % $PORT_COUNT + 1158`
         if [ $turn -eq 0 ]; then
-	    echo "$SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP1 -s $port"
+            echo "$SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP1 -s $port"
             sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP1 -s $port
-            turn=1
+            if [ $USE_ONE_INITIATOR -eq 0 ]; then
+                turn=1
+            fi
         else
-	    echo "$SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP2 -s $port"
+        echo "$SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP2 -s $port"
             sudo $SPDK_DIR/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-04.pos:subsystem$i -t $TRANSPORT -a $TARGET_IP2 -s $port
             turn=0
         fi
@@ -79,11 +85,11 @@ ibofos_bringup(){
 
     if [ "$CLEAN_BRINGUP" -eq 1 ]; then
         echo "poseidonos clean bringup"
-	echo "$ROOT_DIR/bin/cli array reset"
-	sudo $ROOT_DIR/bin/cli array reset
-	echo "$ROOT_DIR/bin/cli array create -b uram0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --name $ARRAYNAME --raidtype RAID5"
+        echo "$ROOT_DIR/bin/cli array reset"
+        sudo $ROOT_DIR/bin/cli array reset
+        echo "$ROOT_DIR/bin/cli array create -b uram0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --name $ARRAYNAME --raidtype RAID5"
         sudo $ROOT_DIR/bin/cli array create -b uram0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --name $ARRAYNAME --raidtype RAID5
-	echo "$ROOT_DIR/bin/cli array mount --name $ARRAYNAME"
+        echo "$ROOT_DIR/bin/cli array mount --name $ARRAYNAME"
         sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME
 
         for i in `seq 1 $VOLUME_COUNT`
@@ -91,7 +97,7 @@ ibofos_bringup(){
             ret=1
             while [ $ret -ne 0 ];
             do
-		echo "$ROOT_DIR/bin/cli --json volume create --name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array $ARRAYNAME"
+                echo "$ROOT_DIR/bin/cli --json volume create --name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array $ARRAYNAME"
                 ret=$(sudo $ROOT_DIR/bin/cli --json volume create --name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array $ARRAYNAME | jq ".Response.result.status.code")
             done
             ret=1
@@ -100,15 +106,15 @@ ibofos_bringup(){
                 ret=$(sudo $ROOT_DIR/bin/cli --json volume mount --name vol$i --array $ARRAYNAME | jq ".Response.result.status.code")
             done
         done
-    else
-        echo "ibofos dirty bringup"
-        #TODO : need to backup uram before load_array
-	echo "$ROOT_DIR/bin/cli array mount --name $ARRAYNAME"
-        sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME
+        else
+            echo "ibofos dirty bringup"
+            #TODO : need to backup uram before load_array
+            echo "$ROOT_DIR/bin/cli array mount --name $ARRAYNAME"
+            sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME
 
         for i in `seq 1 $VOLUME_COUNT`
         do
-	    echo "$ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME"
+            echo "$ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME"
             sudo $ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME
         done
     fi
