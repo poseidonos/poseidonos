@@ -34,7 +34,7 @@ tc_vol_1()
     bringup_pos create
     EXPECT_PASS "bringup" $?
 
-    create_and_check '1' 2147483648 0 0
+    create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     delete_and_check '1'
@@ -58,7 +58,7 @@ tc_vol_2()
     bringup_pos create
     EXPECT_PASS "bringup" $?
 
-    create_and_check '1' 2147483648 0 0
+    create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     mount_and_check '1'
@@ -88,7 +88,7 @@ tc_vol_3()
     bringup_pos create
     EXPECT_PASS "bringup" $?
 
-    create_and_check '1' 2147483648 0 0
+    create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     mount_and_check '1'
@@ -121,13 +121,13 @@ tc_vol_4()
     bringup_pos create
     EXPECT_PASS "bringup" $?
 
-    create_and_check '1' 2147483648 0 0
+    create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     mount_and_check '1'
     EXPECT_PASS "mount_and_check" $?
 
-    create_and_check '2' 2147483648 0 0
+    create_and_check '2' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     mount_and_check '2'
@@ -157,13 +157,13 @@ tc_vol_5()
     bringup_pos create
     EXPECT_PASS "bringup" $?
 
-    create_and_check '1' 2147483648 0 0
+    create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     mount_and_check '1'
     EXPECT_PASS "mount_and_check" $?
 
-    create_and_check '2' 2147483648 0 0
+    create_and_check '2' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     delete_and_check '2'
@@ -190,7 +190,7 @@ tc_npor_0()
     bringup_pos create
     EXPECT_PASS "bringup" $?
 
-    create_and_check '1' 2147483648 0 0
+    create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     mount_and_check '1'
@@ -226,13 +226,13 @@ tc_npor_1()
     bringup_pos create
     EXPECT_PASS "bringup" $?
 
-    create_and_check '1' 2147483648 0 0
+    create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     mount_and_check '1'
     EXPECT_PASS "mount_and_check" $?
 
-    create_and_check '2' 2147483648 0 0
+    create_and_check '2' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     mount_and_check '2'
@@ -277,7 +277,7 @@ tc_npor_2()
     bringup_pos create
     EXPECT_PASS "bringup" $?
 
-    create_and_check '1' 2147483648 0 0
+    create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     mount_and_check '1'
@@ -323,7 +323,7 @@ tc_npor_3()
     bringup_pos create
     EXPECT_PASS "bringup" $?
 
-    create_and_check '1' 2147483648 0 0
+    create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     for fidx in `seq 1 ${tcTestCount}`
@@ -362,10 +362,10 @@ tc_npor_4()
     bringup_pos create
     EXPECT_PASS "bringup" $?
 
-    create_and_check '1' 2147483648 0 0
+    create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
-    create_and_check '2' 2147483648 0 0
+    create_and_check '2' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     delete_and_check '1'
@@ -374,7 +374,7 @@ tc_npor_4()
     npor_and_check_volumes
     EXPECT_PASS "npor_and_check_volumes" $?
 
-    create_and_check '3' 2147483648 0 0
+    create_and_check '3' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     delete_and_check '2'
@@ -386,10 +386,10 @@ tc_npor_4()
     npor_and_check_volumes
     EXPECT_PASS "npor_and_check_volumes" $?
 
-    create_and_check '4' 2147483648 0 0
+    create_and_check '4' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
-    create_and_check '5' 2147483648 0 0
+    create_and_check '5' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     delete_and_check '4'
@@ -398,7 +398,7 @@ tc_npor_4()
     npor_and_check_volumes
     EXPECT_PASS "npor_and_check_volumes" $?
 
-    create_and_check '6' 2147483648 0 0
+    create_and_check '6' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     delete_and_check '6'
@@ -422,7 +422,7 @@ tc_spor_0()
     bringup_pos create
     EXPECT_PASS "bringup" $?
 
-    create_and_check '1' 2147483648 0 0
+    create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
     mount_and_check '1'

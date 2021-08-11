@@ -172,12 +172,12 @@ create_array()
         create_array=1
     fi
 
-    texecc ./bin/cli device scan
+    texecc ./bin/poseidonos-cli device scan
 
     if [ $create_array -eq 1 ]; then
         print_info "Target device list=${target_dev_list}"
-        texecc ./bin/cli array reset
-        texecc ./bin/cli array create -b uram0 -d ${target_dev_list} --name POSArray --json > create_array.txt
+        texecc ./bin/poseidonos-cli devel resetmbr
+        texecc ./bin/poseidonos-cli array create -a POSArray -b uram0 -d ${target_dev_list} --json-res > create_array.txt
     else
         texecc echo "{\"Response\":{\"result\":{\"status\":{\"code\":0}}}}" > create_array.txt
     fi
@@ -208,7 +208,7 @@ mount_array()
 
     iexecc rm -rf mount_array.txt result.txt
 
-    texecc ./bin/cli array mount --name POSArray --json > mount_array.txt
+    texecc ./bin/poseidonos-cli array mount -a POSArray --json-res > mount_array.txt
 
     iexecc cat mount_array.txt | jq ".Response.result.status.code" > result.txt
     result=$(<result.txt)
@@ -236,7 +236,7 @@ unmount_array()
 
     iexecc rm -rf unmount_array.txt result.txt
 
-    texecc ./bin/cli array unmount --name POSArray --json > unmount_array.txt
+    texecc ./bin/poseidonos-cli array unmount -a POSArray --json-res --force > unmount_array.txt
 
     iexecc cat unmount_array.txt | jq ".Response.result.status.code" > result.txt
     result=$(<result.txt)
@@ -264,7 +264,7 @@ delete_array()
 
     iexecc rm -rf delete_array.txt result.txt
 
-    texecc ./bin/cli array delete --name POSArray --json > delete_array.txt
+    texecc ./bin/poseidonos-cli array delete -a POSArray --json-res --force > delete_array.txt
 
     iexecc cat delete_array.txt | jq ".Response.result.status.code" > result.txt
 
@@ -294,7 +294,7 @@ create_volume()
     iexecc rm -rf create_volume.txt result.txt
 
     #issue
-    texecc ./bin/cli volume create --name $1 --size $2 --maxiops $3 --maxbw $4 --array POSArray --json > create_volume.txt
+    texecc ./bin/poseidonos-cli volume create -v $1 --size $2 --maxiops $3 --maxbw $4 -a POSArray --json-res > create_volume.txt
 
     # check response
     iexecc cat create_volume.txt | jq '.Response.result.status.code' > result.txt
@@ -327,7 +327,7 @@ normal_shutdown()
         return 1
     fi
 
-    texecc ./bin/cli system exit --json > shutdown.txt
+    texecc ./bin/poseidonos-cli system stop --json-res --force > shutdown.txt
     
     ps -C poseidonos > /dev/null
     while [[ ${?} == 0 ]]
@@ -383,7 +383,7 @@ graceful_shutdown()
         fi
     fi
 
-    texecc ./bin/cli system exit --json > shutdown.txt
+    texecc ./bin/poseidonos-cli system stop --json-res --force > shutdown.txt
 
     ps -C poseidonos > /dev/null
     while [[ ${?} == 0 ]]
@@ -520,7 +520,7 @@ npor_and_check_volumes()
     print_info "npor and check volumes"
 
     #get status
-    texecc ./bin/cli volume list --array POSArray --json > npor_and_check_volumes0.txt
+    texecc ./bin/poseidonos-cli volume list -a POSArray --json-res > npor_and_check_volumes0.txt
     iexecc cat npor_and_check_volumes0.txt | jq '.Response.result.data.volumes | length' > result0.txt
     result0=$(<result0.txt)
 
@@ -541,7 +541,7 @@ npor_and_check_volumes()
     fi
 
     #get status
-    texecc ./bin/cli volume list --array POSArray --json > npor_and_check_volumes1.txt
+    texecc ./bin/poseidonos-cli volume list -a POSArray --json-res > npor_and_check_volumes1.txt
     iexecc cat npor_and_check_volumes1.txt | jq '.Response.result.data.volumes | length' > result1.txt
     result1=$(<result1.txt)
 
@@ -569,7 +569,7 @@ spor_and_check_volumes()
     print_info "npor and check volumes"
 
     #get status
-    texecc ./bin/cli volume list --array POSArray --json > spor_and_check_volumes0.txt
+    texecc ./bin/poseidonos-cli volume list -a POSArray --json-res > spor_and_check_volumes0.txt
     iexecc cat spor_and_check_volumes0.txt | jq '.Response.result.data.volumes | length' > result0.txt
     result0=$(<result0.txt)
 
@@ -584,7 +584,7 @@ spor_and_check_volumes()
     fi
 
     #get status
-    texecc ./bin/cli volume list --array POSArray --json > spor_and_check_volumes1.txt
+    texecc ./bin/poseidonos-cli volume list -a POSArray --json-res > spor_and_check_volumes1.txt
     iexecc cat spor_and_check_volumes1.txt | jq '.Response.result.data.volumes | length' > result1.txt
     result1=$(<result1.txt)
 
@@ -616,10 +616,10 @@ mount_and_check()
     print_info "mount and check [vol name: ${volName}]"
 
     #issue
-    texecc ./bin/cli volume mount --array POSArray --name ${volName}
+    texecc ./bin/poseidonos-cli volume mount -v ${volName} -a POSArray
 
     #get status
-    texecc ./bin/cli volume list --array POSArray --json > mount_and_check.txt
+    texecc ./bin/poseidonos-cli volume list -a POSArray --json-res > mount_and_check.txt
     iexecc cat mount_and_check.txt | jq -c --arg vol ${volName} '.Response.result.data.volumes[] | select(.name == $vol) | .status' > result.txt
     result=$(<result.txt)
 
@@ -667,10 +667,10 @@ unmount_and_check()
     disconnect_nvmf_contollers ${volNum}
 
     #issue
-    texecc ./bin/cli volume unmount --name ${volName} --array POSArray
+    texecc ./bin/poseidonos-cli volume unmount -v ${volName} -a POSArray --force
 
     #get status
-    texecc ./bin/cli volume list --array POSArray --json > unmount_and_check.txt
+    texecc ./bin/poseidonos-cli volume list -a POSArray --json-res > unmount_and_check.txt
     iexecc cat unmount_and_check.txt | jq -c --arg vol ${volName} '.Response.result.data.volumes[] | select(.name == $vol) | .status' > result.txt
     result=$(<result.txt)
 
@@ -710,7 +710,7 @@ create_and_check()
     print_info "create and check [vol name: ${volName}, byte size: ${byteSize}, max iops: ${maxIops}, max bw: ${maxBw}]"
 
     # get pre-condition
-    texecc ./bin/cli volume list --array POSArray --json > create_and_check0.txt
+    texecc ./bin/poseidonos-cli volume list -a POSArray --json-res > create_and_check0.txt
     iexecc cat create_and_check0.txt | jq '.Response.result.data.volumes | length' > result0.txt
     result0=$(<result0.txt)
 
@@ -724,7 +724,7 @@ create_and_check()
     fi
 
     #get status
-    texecc ./bin/cli volume list --array POSArray --json > create_and_check1.txt
+    texecc ./bin/poseidonos-cli volume list -a POSArray --json-res > create_and_check1.txt
     iexecc cat create_and_check1.txt | jq '.Response.result.data.volumes | length' > result1.txt
     result1=$(<result1.txt)
 
@@ -756,12 +756,12 @@ delete_and_check()
     print_info "delete and check [vol name: ${volName}]"
 
     # get pre-condition
-    texecc ./bin/cli volume list --array POSArray --json > delete_and_check0.txt
+    texecc ./bin/poseidonos-cli volume list -a POSArray --json-res > delete_and_check0.txt
     iexecc cat delete_and_check0.txt | jq '.Response.result.data.volumes | length' > result0.txt
     result0=$(<result0.txt)
 
     #issue
-    texecc ./bin/cli volume delete --name ${volName} --array POSArray --json > delete_and_check1.txt
+    texecc ./bin/poseidonos-cli volume delete -v ${volName} -a POSArray --json-res --force > delete_and_check1.txt
 
     # check response
     iexecc cat delete_and_check1.txt | jq '.Response.result.status.code' > result1.txt
@@ -775,7 +775,7 @@ delete_and_check()
     fi
 
     #get status
-    texecc ./bin/cli volume list --array POSArray --json > delete_and_check1.txt
+    texecc ./bin/poseidonos-cli volume list -a POSArray --json-res > delete_and_check1.txt
     iexecc cat delete_and_check1.txt | jq '.Response.result.data.volumes | length' > result1.txt
     result1=$(<result1.txt)
 
@@ -806,7 +806,7 @@ change_volume_name_and_check()
 
     print_info "change volume name [vol name: ${volName} to ${newVolName}]"
 
-    texecc ./bin/cli volume rename --name ${volName} --newname ${newVolName} --array POSArray --json > change_volume_name_and_check.txt
+    texecc ./bin/poseidonos-cli volume rename -v ${volName} --newname ${newVolName} -a POSArray --json-res > change_volume_name_and_check.txt
     iexecc cat change_volume_name_and_check.txt | jq '.Response.result.status.code' > result.txt
     result=$(<result.txt)
 
