@@ -43,18 +43,15 @@ namespace pos
 class PartitionRebuild
 {
 public:
-    PartitionRebuild(RebuildTarget* t, ArrayDevice* d, RebuildProgress* p, RebuildLogger* l);
-    virtual ~PartitionRebuild();
-    void Start(RebuildComplete cb);
-    void Stop();
-    uint64_t TotalStripes();
+    explicit PartitionRebuild(RebuildBehavior* b);
+    virtual ~PartitionRebuild(void);
+    virtual void Start(RebuildComplete cb);
+    virtual void Stop(void);
+    virtual uint64_t TotalStripes(void);
+    virtual RebuildState GetResult(void);
 
 private:
     void _Complete(RebuildResult res);
-    RebuildBehavior* _GetRebuildBehavior(unique_ptr<RebuildContext> ctx);
-    RebuildState _GetResult();
-    RebuildTarget* targetPart = nullptr;
-    ArrayDevice* targetDev = nullptr;
     RebuildBehavior* bhvr = nullptr;
     RebuildComplete completeCb;
 };

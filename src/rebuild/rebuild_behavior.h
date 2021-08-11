@@ -48,8 +48,8 @@ public:
         MemoryManager* mm = MemoryManagerSingleton::Instance());
     virtual ~RebuildBehavior(void);
 
-    void StopRebuilding(void);
-    RebuildContext* GetContext(void);
+    virtual void StopRebuilding(void);
+    virtual RebuildContext* GetContext(void);
 
     virtual bool Read(void) = 0;
     virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) = 0;

@@ -32,6 +32,7 @@
 
 #include "array_rebuilder.h"
 #include "array_rebuild.h"
+#include "rebuild_behavior_factory.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
@@ -44,14 +45,13 @@ ArrayRebuilder::ArrayRebuilder(IRebuildNotification* noti)
 
 void
 ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
-    RebuildComplete cb, list<RebuildTarget*> tgt)
+    RebuildComplete cb, list<RebuildTarget*>& tgt)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "ArrayRebuilder::Rebuild {}", array);
+        "ArrayRebuilder::Rebuild {}, {}", array, tgt.size());
 
     StopRebuild(array);
     WaitRebuildDone(array);
-
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "ArrayRebuilder::Rebuild, start job");
 
@@ -59,15 +59,22 @@ ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
     bool resume = false;
     int ret = iRebuildNoti->PrepareRebuild(array, resume);
 
+    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+        "ArrayRebuilder::Rebuild, PrepareRebuild, isResume: {}, ret:{}", resume, ret);
     if (resume)
     {
-        // remove meta parttition frome tgt
-        tgt.pop_front();
+        for (auto it : tgt)
+        {
+            if (it->GetType() == PartitionType::META_SSD)
+            {
+                tgt.remove(it);
+                break;
+            }
+        }
     }
-
-    ArrayRebuild* job = new ArrayRebuild(array, dev, cb, tgt);
+    RebuildBehaviorFactory factory(AllocatorServiceSingleton::Instance()->GetIContextManager(array));
+    ArrayRebuild* job = new ArrayRebuild(array, dev, cb, tgt, &factory);
     jobsInProgress.emplace(array, job);
-
     mtxStart.unlock();
     if (ret == 0)
     {
@@ -96,8 +103,9 @@ ArrayRebuilder::StopRebuild(string array)
 }
 
 void
-ArrayRebuilder::RebuildDone(string array)
+ArrayRebuilder::RebuildDone(RebuildResult result)
 {
+    string array = result.array;
     iRebuildNoti->RebuildDone(array);
     unique_lock<mutex> lock(mtxStart);
     ArrayRebuild* job = _Find(array);
@@ -131,20 +139,6 @@ ArrayRebuilder::IsRebuilding(string array)
     }
 
     return false;
-}
-
-void
-ArrayRebuilder::CleanUp(string array)
-{
-    ArrayRebuild* job = _Find(array);
-    if (job != nullptr)
-    {
-        delete job;
-        jobsInProgress.erase(array);
-    }
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "ArrayRebuilder::CleanUp {}, inProgressCnt:{}",
-        array, jobsInProgress.size());
 }
 
 uint32_t

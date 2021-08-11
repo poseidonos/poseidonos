@@ -41,24 +41,12 @@
 
 namespace pos
 {
-PartitionRebuild::PartitionRebuild(RebuildTarget* t, ArrayDevice* d,
-    RebuildProgress* p, RebuildLogger* l)
-: targetPart(t), targetDev(d)
+PartitionRebuild::PartitionRebuild(RebuildBehavior* b)
+: bhvr(b)
 {
-    unique_ptr<RebuildContext> ctx = targetPart->GetRebuildCtx(targetDev);
-    if (ctx)
-    {
-        bhvr = _GetRebuildBehavior(move(ctx));
-        if (bhvr != nullptr)
-        {
-            bhvr->GetContext()->prog = p;
-            bhvr->GetContext()->logger = l;
-            bhvr->UpdateProgress(0);
-        }
-    }
 }
 
-PartitionRebuild::~PartitionRebuild()
+PartitionRebuild::~PartitionRebuild(void)
 {
     delete bhvr;
 }
@@ -87,15 +75,15 @@ void PartitionRebuild::Start(RebuildComplete cb)
     }
 }
 
-void PartitionRebuild::Stop()
+void PartitionRebuild::Stop(void)
 {
-    if (_GetResult() <= RebuildState::REBUILDING && bhvr != nullptr)
+    if (GetResult() <= RebuildState::REBUILDING && bhvr != nullptr)
     {
         bhvr->StopRebuilding();
     }
 }
 
-uint64_t PartitionRebuild::TotalStripes()
+uint64_t PartitionRebuild::TotalStripes(void)
 {
     if (bhvr != nullptr)
     {
@@ -104,35 +92,7 @@ uint64_t PartitionRebuild::TotalStripes()
     return 0;
 }
 
-void PartitionRebuild::_Complete(RebuildResult res)
-{
-    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "PartitionRebuild::_Complete, res {}", res.result);
-
-    res.target = targetDev;
-    completeCb(res);
-}
-
-RebuildBehavior* PartitionRebuild::_GetRebuildBehavior(unique_ptr<RebuildContext> ctx)
-{
-    switch (ctx->raidType)
-    {
-    case RaidTypeEnum::RAID5 :
-    {
-        IContextManager* allocatorSvc =
-            AllocatorServiceSingleton::Instance()->GetIContextManager(ctx->array);
-        return new Raid5Rebuild(move(ctx), allocatorSvc);
-    }
-
-    case RaidTypeEnum::RAID1 :
-        return new Raid1Rebuild(move(ctx));
-
-    default:
-        return nullptr;
-    }
-}
-
-RebuildState PartitionRebuild::_GetResult()
+RebuildState PartitionRebuild::GetResult(void)
 {
     if (bhvr == nullptr)
     {
@@ -141,5 +101,18 @@ RebuildState PartitionRebuild::_GetResult()
     return bhvr->GetContext()->result;
 }
 
+void PartitionRebuild::_Complete(RebuildResult res)
+{
+    POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+        "PartitionRebuild::_Complete, res {}", res.result);
+    if (bhvr != nullptr)
+    {
+        res.target = bhvr->GetContext()->faultDev;
+    }
+    if (completeCb != nullptr)
+    {
+        completeCb(res);
+    }
+}
 
 } // namespace pos

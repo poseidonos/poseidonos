@@ -45,12 +45,11 @@ class IArrayRebuilder
 {
 public:
     virtual void Rebuild(string array, ArrayDevice* dev, RebuildComplete cb,
-                        list<RebuildTarget*> tgt) = 0;
+                        list<RebuildTarget*>& tgt) = 0;
     virtual void StopRebuild(string array) = 0;
-    virtual void RebuildDone(string array) = 0;
+    virtual void RebuildDone(RebuildResult result) = 0;
     virtual void WaitRebuildDone(string array) = 0;
     virtual bool IsRebuilding(string array) = 0;
-    virtual void CleanUp(string array) = 0;
     virtual uint32_t GetRebuildProgress(string array) = 0;
 };
 } // namespace pos

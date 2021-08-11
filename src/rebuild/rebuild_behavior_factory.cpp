@@ -30,21 +30,40 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <cstdint>
+#include "rebuild_behavior_factory.h"
+#include "src/logger/logger.h"
+#include "src/include/pos_event_id.h"
 
 namespace pos
 {
 
-class PartitionPhysicalSize
+RebuildBehaviorFactory::RebuildBehaviorFactory(IContextManager* allocator)
+: allocatorSvc(allocator)
 {
-public:
-    uint64_t startLba = 0;
-    uint32_t blksPerChunk = 0;
-    uint32_t chunksPerStripe = 0;
-    uint32_t stripesPerSegment = 0;
-    uint32_t totalSegments = 0;
-};
+}
 
+RebuildBehavior*
+RebuildBehaviorFactory::CreateRebuildBehavior(unique_ptr<RebuildContext> ctx)
+{
+    switch (ctx->raidType)
+    {
+    case RaidTypeEnum::RAID5 :
+    {
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, Raid5Rebuild Created");
+        return new Raid5Rebuild(move(ctx), allocatorSvc);
+    }
+
+    case RaidTypeEnum::RAID1 :
+    {
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, Raid1Rebuild Created");
+        return new Raid1Rebuild(move(ctx));
+    }
+
+    default:
+    {
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "RebuildBehaviorFactory, nullptr returned");
+        return nullptr;
+    }
+    }
+}
 } // namespace pos

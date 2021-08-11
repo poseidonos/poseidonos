@@ -778,7 +778,7 @@ Array::_RebuildDone(RebuildResult result)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "Array {} rebuild done. result:{}", name_, result.result);
-    rebuilder->RebuildDone(name_);
+    rebuilder->RebuildDone(result);
     pthread_rwlock_wrlock(&stateLock);
     if (result.result != RebuildState::PASS)
     {
@@ -867,7 +867,8 @@ Array::TriggerRebuild(ArrayDevice* target)
     list<RebuildTarget*> tasks = intf->GetRebuildTargets();
     thread t([arrRebuilder, arrName, target, cb, tasks]()
     {
-        arrRebuilder->Rebuild(arrName, target, cb, tasks);
+        list<RebuildTarget*> targets = tasks;
+        arrRebuilder->Rebuild(arrName, target, cb, targets);
     });
 
     t.detach();
@@ -900,7 +901,8 @@ Array::ResumeRebuild(ArrayDevice* target)
     list<RebuildTarget*> tasks = intf->GetRebuildTargets();
     thread t([arrRebuilder, arrName, target, cb, tasks]()
     {
-        arrRebuilder->Rebuild(arrName, target, cb, tasks);
+        list<RebuildTarget*> targets = tasks;
+        arrRebuilder->Rebuild(arrName, target, cb, targets);
     });
 
     t.detach();

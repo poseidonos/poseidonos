@@ -58,7 +58,7 @@ TEST(ArrayInterface, AddRebuildTarget_testIfRebuildTargetHasBeenAdded)
 {
     // Given
     ArrayInterface aIntf;
-    MockRebuildTarget mockRebuildTarget;
+    MockRebuildTarget mockRebuildTarget(PartitionType::USER_DATA);
 
     // When
     aIntf.AddRebuildTarget(&mockRebuildTarget);
@@ -75,7 +75,7 @@ TEST(ArrayInterface, ClearInterface_testIfAllMembersAreCleared)
     ArrayInterface aIntf;
     MockITranslator mockITrans;
     MockIRecover mockIRecover;
-    MockRebuildTarget mockRebuildTarget;
+    MockRebuildTarget mockRebuildTarget(PartitionType::USER_DATA);
 
     aIntf.AddTranslator(PartitionType::USER_DATA, &mockITrans);
     aIntf.AddRecover(PartitionType::USER_DATA, &mockIRecover);

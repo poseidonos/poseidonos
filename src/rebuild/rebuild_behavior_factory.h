@@ -32,19 +32,22 @@
 
 #pragma once
 
-#include <cstdint>
+#include "rebuild_behavior.h"
+#include "raid1_rebuild.h"
+#include "raid5_rebuild.h"
+#include "src/allocator_service/allocator_service.h"
+
+#include <memory>
 
 namespace pos
 {
-
-class PartitionPhysicalSize
+class RebuildBehaviorFactory
 {
 public:
-    uint64_t startLba = 0;
-    uint32_t blksPerChunk = 0;
-    uint32_t chunksPerStripe = 0;
-    uint32_t stripesPerSegment = 0;
-    uint32_t totalSegments = 0;
-};
+    explicit RebuildBehaviorFactory(IContextManager* allocator);
+    virtual RebuildBehavior* CreateRebuildBehavior(unique_ptr<RebuildContext> ctx);
 
+private:
+    IContextManager* allocatorSvc;
+};
 } // namespace pos

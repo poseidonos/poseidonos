@@ -1,9 +1,7 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
 #include "src/rebuild/rebuild_behavior.h"
 
 namespace pos
@@ -16,6 +14,8 @@ public:
     MOCK_METHOD(bool, Write, (uint32_t targetId, UbioSmartPtr ubio), (override));
     MOCK_METHOD(bool, Complete, (uint32_t targetId, UbioSmartPtr ubio), (override));
     MOCK_METHOD(void, UpdateProgress, (uint32_t val), (override));
+    MOCK_METHOD(string, _GetClassName, (), (override));
+    MOCK_METHOD(int, _GetTotalReadChunksForRecovery, (), (override));
 };
 
 } // namespace pos

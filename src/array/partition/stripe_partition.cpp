@@ -71,6 +71,7 @@ StripePartition::StripePartition(
     Method* method,
     IODispatcher* ioDispatcher)
 : Partition(array, arrayIndex, type, physicalSize, devs, method),
+  RebuildTarget(type),
   ioDispatcher_(ioDispatcher)
 {
     _SetLogicalSize();
@@ -316,6 +317,7 @@ unique_ptr<RebuildContext>
 StripePartition::GetRebuildCtx(ArrayDevice* fault)
 {
     int index = FindDevice(fault);
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "GetRebuildCtx devIndex:{}, index");
     if (index >= 0)
     {
         unique_ptr<RebuildContext> ctx(new RebuildContext());
@@ -335,6 +337,7 @@ StripePartition::GetRebuildCtx(ArrayDevice* fault)
         }
         return ctx;
     }
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "GetRebuildCtx return nullptr");
     return nullptr;
 }
 

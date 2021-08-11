@@ -33,6 +33,7 @@
 #pragma once
 
 #include "rebuild_context.h"
+#include "src/include/partition_type.h"
 
 namespace pos
 {
@@ -41,6 +42,11 @@ class ArrayDevice;
 class RebuildTarget
 {
 public:
+    explicit RebuildTarget(PartitionType type) : targetType(type) {}
+    PartitionType GetType(void) { return targetType; }
     virtual unique_ptr<RebuildContext> GetRebuildCtx(ArrayDevice* fault) = 0;
+
+private:
+    PartitionType targetType;
 };
 } // namespace pos

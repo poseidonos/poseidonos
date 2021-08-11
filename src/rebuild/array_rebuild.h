@@ -33,6 +33,7 @@
 #pragma once
 
 #include "src/include/rebuild_state.h"
+#include "rebuild_behavior_factory.h"
 #include "src/array/rebuild/rebuild_progress.h"
 #include "src/array/rebuild/rebuild_context.h"
 
@@ -51,14 +52,17 @@ class RebuildTarget;
 class ArrayRebuild
 {
 public:
+    ArrayRebuild(void) {}
     ArrayRebuild(string array, ArrayDevice* dev, RebuildComplete cb,
-            list<RebuildTarget*> tgt);
+        list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory);
+    virtual void Init(string array, ArrayDevice* dev, RebuildComplete cb,
+        list<PartitionRebuild*> tgt, RebuildProgress* prog, RebuildLogger* logger);
     virtual ~ArrayRebuild(void);
-    void Start(void);
-    void Discard(void);
-    void Stop(void);
-    RebuildState GetState(void);
-    uint64_t GetProgress(void);
+    virtual void Start(void);
+    virtual void Discard(void);
+    virtual void Stop(void);
+    virtual RebuildState GetState(void);
+    virtual uint64_t GetProgress(void);
 
 private:
     void _RebuildNext(void);
@@ -67,11 +71,11 @@ private:
     string arrayName = "";
     ArrayDevice* targetDev = nullptr;
     RebuildState state = RebuildState::READY;
+    RebuildComplete rebuildComplete;
+    list<PartitionRebuild*> tasks;
     RebuildProgress* progress = nullptr;
     RebuildLogger* rebuildLogger = nullptr;
-    RebuildComplete rebuildComplete;
     RebuildComplete rebuildDoneCb;
-    list<PartitionRebuild*> tasks;
     mutex mtx;
 };
 } // namespace pos
