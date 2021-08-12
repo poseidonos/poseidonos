@@ -1559,7 +1559,6 @@ TEST(Array, ResumeRebuild_testIfResumeRebuildProperly)
     int REPLACE_SUCCESS = 0;
     EXPECT_CALL(*mockState, SetRebuild).WillOnce(Return(true));
     EXPECT_CALL(*mockArrayInterface, GetRebuildTargets).WillRepeatedly(Return(emptyTargets));
-    EXPECT_CALL(mockArrayRebuilder, Rebuild).Times(1);
 
     Array array("mock-array", &mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, mockArrayInterface, NULL, NULL);
 
