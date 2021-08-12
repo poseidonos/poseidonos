@@ -92,7 +92,7 @@ EventCpuPolicy::HandlePolicy(void)
  */
 /* --------------------------------------------------------------------------*/
 void
-EventCpuPolicy::_SetRebuildPolicyWeight()
+EventCpuPolicy::_SetRebuildPolicyWeight(void)
 {
     QosUserPolicy& userPolicy = qosContext->GetQosUserPolicy();
     RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();
@@ -121,7 +121,7 @@ EventCpuPolicy::_SetRebuildPolicyWeight()
     }
     QosCorrection& qosCorrection = qosContext->GetQosCorrection();
     QosEventWrrWeight& qosEventWrr = qosCorrection.GetEventWrrWeightPolicy();
-    //if previous set rebuild weigh is same as current weight, do nothing
+    // if previous set rebuild weigh is same as current weight, do nothing
     if (qosEventWrr.CorrectionType(BackendEvent_UserdataRebuild) == rebuildCorrection)
     {
         return;
