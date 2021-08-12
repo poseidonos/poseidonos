@@ -81,7 +81,6 @@ public:
         delete gcMapUpdate;
         delete array;
         delete affinityManager;
-        delete volumeEventPublisher;
         delete gcStripeManager;
         delete stripe;
         delete rbaStateManager;
@@ -91,6 +90,7 @@ public:
         delete eventScheduler;
         delete blockAllocator;
         delete contextManager;
+        delete volumeEventPublisher;
 
         inputEvent = nullptr;
     }

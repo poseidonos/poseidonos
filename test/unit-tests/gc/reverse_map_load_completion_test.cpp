@@ -4,12 +4,11 @@
 
 namespace pos
 {
-TEST(ReverseMapLoadCompletion, ReverseMapLoadCompletion_)
+TEST(ReverseMapLoadCompletion, Execute_Invoke)
 {
-}
-
-TEST(ReverseMapLoadCompletion, _DoSpecificJob_)
-{
+    ReverseMapLoadCompletion* revMapLoadCompletion = new ReverseMapLoadCompletion();
+    EXPECT_TRUE(revMapLoadCompletion->Execute() == true); // trival no op in revMapLoadCompletion
+    delete revMapLoadCompletion;
 }
 
 } // namespace pos
