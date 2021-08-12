@@ -1,4 +1,4 @@
-#include "src/cli/get_ibofos_info_command.h"
+#include "src/cli/get_pos_info_command.h"
 
 #include <gtest/gtest.h>
 

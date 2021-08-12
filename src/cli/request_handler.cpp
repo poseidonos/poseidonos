@@ -52,7 +52,7 @@
 #include "src/cli/delete_volume_command.h"
 #include "src/cli/exit_ibofos_command.h"
 #include "src/cli/get_host_nqn_command.h"
-#include "src/cli/get_ibofos_info_command.h"
+#include "src/cli/get_pos_info_command.h"
 #include "src/cli/get_log_level_command.h"
 #include "src/cli/get_max_volume_count_command.h"
 #include "src/cli/handle_wbt_command.h"
@@ -116,7 +116,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["GETMAXVOLUMECOUNT"] = new GetMaxVolumeCountCommand();
     cmdDictionary["GETHOSTNQN"] = new GetHostNqnCommand();
     cmdDictionary["CONDSIGNAL"] = new CondSignalCommand();
-    cmdDictionary["GETIBOFOSINFO"] = new GetPosInfoCommand();
+    cmdDictionary["GETPOSINFO"] = new GetPosInfoCommand();
     cmdDictionary["EXITIBOFOS"] = new ExitIbofosCommand();
     cmdDictionary["STOPREBUILDING"] = new StopRebuildingCommand();
     cmdDictionary["REBUILDPERFIMPACT"] = new RebuildPerfImpactCommand();

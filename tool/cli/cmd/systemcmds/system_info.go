@@ -22,7 +22,7 @@ Syntax:
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var command = "GETIBOFOSINFO"
+		var command = "GETPOSINFO"
 
 		systemInfoReq := messages.Request{
 			RID:     "fromfakeclient",

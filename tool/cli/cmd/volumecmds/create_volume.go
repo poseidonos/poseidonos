@@ -3,6 +3,7 @@ package volumecmds
 import (
 	"encoding/json"
 	"pnconnector/src/log"
+	"strings"
 
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
@@ -58,7 +59,14 @@ Example:
 
 func formCreateVolumeReq() messages.Request {
 
-	volumeSizeInByte, err := bytefmt.ToBytes(create_volume_volumeSize)
+	volumeSize := strings.TrimSpace(create_volume_volumeSize)
+	volumeSize = strings.ToUpper(create_volume_volumeSize)
+
+	if volumeSize[len(volumeSize)-1:] != "B" {
+		volumeSize += "B"
+	}
+
+	volumeSizeInByte, err := bytefmt.ToBytes(volumeSize)
 	if err != nil {
 		log.Fatal("error:", err)
 	}

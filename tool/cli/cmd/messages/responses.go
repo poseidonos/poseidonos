@@ -22,6 +22,24 @@ type Info struct {
 	VERSION string `json:"version"`
 }
 
+// Respons for SYSTEM commands
+
+type POSInfoResponse struct {
+	RID     string        `json:"rid"`
+	COMMAND string        `json:"command"`
+	RESULT  POSInfoResult `json:"result,omitempty"`
+	INFO    Info          `json:"info"`
+}
+
+type POSInfoResult struct {
+	STATUS Status      `json:"status,omitempty"`
+	DATA   POSInfoData `json:"data,omitempty"`
+}
+
+type POSInfoData struct {
+	VERSION string `json:version"`
+}
+
 // Response for LISTARRAY & ARRAYINFO commands
 type ListArrayResponse struct {
 	RID     string          `json:"rid"`
@@ -252,7 +270,7 @@ type ListSubsystemResData struct {
 }
 
 type Subsystem struct {
-	NQN	            string        `json:"nqn"`
+	NQN             string        `json:"nqn"`
 	SUBTYPE         string        `json:"subtype"`
 	LISTENADDRESSES []AddressInfo `json:"listen_addresses"`
 	ALLOWANYHOST    int           `json:"allow_any_host"`
@@ -260,7 +278,7 @@ type Subsystem struct {
 	SERIAL          string        `json:"serial_number,omitempty"`
 	MODEL           string        `json:"model_number,omitempty"`
 	MAXNAMESPACES   int           `json:"max_namespaces,omitempty"`
-	NAMESPACES      []Namespace   `json:"namespaces,omitempty"`	
+	NAMESPACES      []Namespace   `json:"namespaces,omitempty"`
 }
 
 type AddressInfo struct {

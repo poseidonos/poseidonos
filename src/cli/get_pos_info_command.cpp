@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/cli/get_ibofos_info_command.h"
+#include "src/cli/get_pos_info_command.h"
 
 #include "src/cli/cli_event_code.h"
 
@@ -48,7 +48,7 @@ string
 GetPosInfoCommand::Execute(json& doc, string rid)
 {
     JsonFormat jFormat;
-    return jFormat.MakeResponse("GETIBOFOSINFO", rid, SUCCESS, "DONE",
+    return jFormat.MakeResponse("GETPOSINFO", rid, SUCCESS, "DONE",
         GetPosInfo("data"), GetPosInfo());
 }
 }; // namespace pos_cli

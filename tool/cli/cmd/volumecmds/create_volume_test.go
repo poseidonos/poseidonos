@@ -22,7 +22,7 @@ func TestCreateVolumeCommandReq(t *testing.T) {
 
 	globals.IsTestingReqBld = true
 	// Execute the command to test with argument
-	testmgr.ExecuteCommand(rootCmd, "volume", "create", "--volume-name", "vol01", "--array-name", "Array0", "--size", "4194304", "--maxiops", "5000", "--maxbw", "6000", "--json-req")
+	testmgr.ExecuteCommand(rootCmd, "volume", "create", "--volume-name", "vol01", "--array-name", "Array0", "--size", "4194304gb", "--maxiops", "5000", "--maxbw", "6000", "--json-req")
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)
