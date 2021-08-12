@@ -129,7 +129,7 @@ Poseidonos::_InitAffinity(void)
     pos::AffinityManagerSingleton::Instance()->SetGeneralAffinitySelf();
 
     cpu_set_t air_core = pos::AffinityManagerSingleton::Instance()
-                                 ->GetCpuSet(pos::CoreType::AIR);
+                             ->GetCpuSet(pos::CoreType::AIR);
     long nproc = sysconf(_SC_NPROCESSORS_ONLN);
     for (long i = 0; i < nproc; i++)
     {
@@ -250,14 +250,27 @@ Poseidonos::_SetPerfImpact(void)
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
         qos_rebuild_policy newRebuildPolicy;
-        if (impact.compare("high") == 0)
+        if (impact.compare("highest") == 0)
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_HIGHEST;
+        }
+        else if (impact.compare("high") == 0)
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_HIGH;
+        }
+        else if (impact.compare("medium") == 0)
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_MEDIUM;
         }
         else if (impact.compare("low") == 0)
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_LOW;
         }
+        else if (impact.compare("lowest") == 0)
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_LOWEST;
+        }
+
         else
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_LOW;

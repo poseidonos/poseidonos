@@ -31,7 +31,6 @@
  */
 
 #include "src/qos/user_policy_rebuild.h"
-
 namespace pos
 {
 /* --------------------------------------------------------------------------*/
@@ -99,7 +98,7 @@ RebuildUserPolicy::Reset(void)
 void
 RebuildUserPolicy::SetRebuildImpact(uint8_t impact)
 {
-    if (impact < PRIORITY_HIGH || impact > PRIORITY_LOW)
+    if (impact < PRIORITY_HIGHEST || impact > PRIORITY_LOWEST)
     {
         impact = PRIORITY_DEFAULT;
     }

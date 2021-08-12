@@ -58,6 +58,7 @@ private:
     void _ManageEventCorrectionOnGcState(QosCorrectionDir priority);
     void _CheckMinimum(QosCorrectionDir priority);
     void _StoreContext(void);
+    void _SetRebuildPolicyWeight(void);
     ResourceArray lastArrayState;
     bool lastMimimumPolicy;
     QosContext* qosContext;

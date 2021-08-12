@@ -106,18 +106,26 @@ QosCorrectionManager::_HandleWrrCorrection(void)
             case QosCorrectionDir_Decrease4X:
                 weight += 4 * M_WEIGHT_CHANGE_INDEX;
                 break;
+            case QosCorrectionDir_PriorityHighest:
+                weight = PRIO_WT_HIGHEST;
+                break;
             case QosCorrectionDir_PriorityHigh:
-                weight = PRIO_WT_H2;
+                weight = PRIO_WT_HIGH;
+                break;
+            case QosCorrectionDir_PriorityMedium:
+                weight = PRIO_WT_MEDIUM;
                 break;
             case QosCorrectionDir_PriorityLow:
-                weight = PRIO_WT_L2;
+                weight = PRIO_WT_LOW;
+                break;
+            case QosCorrectionDir_PriorityLowest:
+                weight = PRIO_WT_LOWEST;
                 break;
             case QosCorrectionDir_Reset:
                 weight = PRIO_CRIT_WT_1;
             default:
                 break;
         }
-
         if (weight < M_MAX_NEGATIVE_WEIGHT)
         {
             weight = M_MAX_NEGATIVE_WEIGHT;

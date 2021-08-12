@@ -156,9 +156,7 @@ QosMonitoringManager::_UpdateContextUserVolumePolicy(void)
 void
 QosMonitoringManager::_UpdateContextUserRebuildPolicy(void)
 {
-    QosManager* qosManager = QosManagerSingleton::Instance();
-    uint32_t maxArrays = qosManager->GetNumberOfArrays();
-    for (uint32_t i = 0; i < maxArrays; i++)
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
     {
         qosMonitoringManagerArray[i]->UpdateContextUserRebuildPolicy();
     }

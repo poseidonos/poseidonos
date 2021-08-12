@@ -51,8 +51,6 @@
 #define M_DEFAULT_DEFICIET_WEIGHT (0)
 #define M_RESET_TO_ZERO (0)
 #define M_UINT32MAX (4294967295)
-#define M_DEFAULT_WEIGHT (16)
-#define M_MAX_NEGATIVE_WEIGHT (-1500)
 #define M_WEIGHT_CHANGE_INDEX (1)
 #define M_MAX_NVRAM_STRIPES (1023)
 #define M_PING_PONG_BUFFER (2)
@@ -64,10 +62,12 @@
 const int MAX_REACTOR_WORKER = (M_MAX_REACTORS > MAX_IO_WORKER) ? M_MAX_REACTORS : MAX_IO_WORKER;
 const int MAX_VOLUME_EVENT = (MAX_VOLUME_COUNT > pos::BackendEvent_Count) ? MAX_VOLUME_COUNT : pos::BackendEvent_Count;
 
-const uint8_t PRIORITY_HIGH = 1;
-const uint8_t PRIORITY_MEDIUM = 2;
-const uint8_t PRIORITY_LOW = 3;
-const uint8_t PRIORITY_DEFAULT = PRIORITY_MEDIUM;
+const uint8_t PRIORITY_HIGHEST = 1;
+const uint8_t PRIORITY_HIGH = 2;
+const uint8_t PRIORITY_MEDIUM = 3;
+const uint8_t PRIORITY_LOW = 4;
+const uint8_t PRIORITY_LOWEST = 5;
+const uint8_t PRIORITY_DEFAULT = PRIORITY_HIGHEST;
 
 const int PRIO_CRIT_WT_1 = 16;
 const int PRIO_CRIT_WT_2 = 10;
@@ -78,12 +78,16 @@ const int PRIO_HIGH_WT_3 = -100;
 const int PRIO_LOW_WT_1 = -200;
 const int PRIO_LOW_WT_2 = -400;
 const int PRIO_LOW_WT_3 = -100;
-const int PRIO_WT_H1 = 16;
-const int PRIO_WT_H2 = -10;
-const int PRIO_WT_M1 = -10;
-const int PRIO_WT_M2 = -100;
-const int PRIO_WT_L1 = -100;
-const int PRIO_WT_L2 = -800;
+
+const int PRIO_WT_HIGHEST = 20;
+const int PRIO_WT_HIGH = 10;
+const int PRIO_WT_MEDIUM = 1;
+const int PRIO_WT_LOW = -100;
+const int PRIO_WT_LOWEST = -1000;
+
+
+const int M_DEFAULT_WEIGHT = PRIO_WT_HIGHEST;
+const int M_MAX_NEGATIVE_WEIGHT = PRIO_WT_LOWEST;
 
 const uint16_t INVALID_SUBSYSTEM = 0;
 //const uint16_t M_VALID_SUBSYSTEM = 1;
@@ -174,9 +178,11 @@ enum QosCorrectionDir
     QosCorrectionDir_Decrease2X,
     QosCorrectionDir_Increase4X,
     QosCorrectionDir_Decrease4X,
+    QosCorrectionDir_PriorityHighest,
     QosCorrectionDir_PriorityHigh,
     QosCorrectionDir_PriorityMedium,
     QosCorrectionDir_PriorityLow,
+    QosCorrectionDir_PriorityLowest,
     QosCorrectionDir_Reset,
     QosCorrectionDir_End,
     QosCorrectionDirCount = QosCorrectionDir_End - QosCorrectionDir_Start,

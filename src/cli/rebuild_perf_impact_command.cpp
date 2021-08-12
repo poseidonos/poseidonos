@@ -54,14 +54,27 @@ RebuildPerfImpactCommand::Execute(json& doc, string rid)
     {
         string level = doc["param"]["level"].get<std::string>();
         qos_rebuild_policy newRebuildPolicy;
-        if (level.compare("high") == 0)
+        if (level.compare("highest") == 0)
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_HIGHEST;
+        }
+        else if (level.compare("high") == 0)
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_HIGH;
+        }
+        else if (level.compare("medium") == 0)
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_MEDIUM;
         }
         else if (level.compare("low") == 0)
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_LOW;
         }
+        else if (level.compare("lowest") == 0)
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_LOWEST;
+        }
+
         else
         {
             return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, BADREQUEST, "This level is unsupported", GetPosInfo());
@@ -73,9 +86,9 @@ RebuildPerfImpactCommand::Execute(json& doc, string rid)
             return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, BADREQUEST, "FAILED", GetPosInfo());
         }
         return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, retVal,
-                "rebuild perf impact is set.", GetPosInfo());
+            "rebuild perf impact is set.", GetPosInfo());
     }
     return jFormat.MakeResponse("REBUILDPERFIMPACT", rid, BADREQUEST,
-            "wrong request", GetPosInfo());
+        "wrong request", GetPosInfo());
 }
 }; // namespace pos_cli

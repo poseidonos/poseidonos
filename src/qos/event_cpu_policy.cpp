@@ -31,7 +31,6 @@
  */
 
 #include "src/qos/event_cpu_policy.h"
-
 namespace pos
 {
 /* --------------------------------------------------------------------------*/
@@ -71,7 +70,6 @@ void
 EventCpuPolicy::HandlePolicy(void)
 {
     // This code will be disabled temporary
-
     // QosResource& qosResource = qosContext->GetQosResource();
     // ResourceCpu& cpuState = qosResource.GetResourceCpu();
     // uint32_t rebuildPendingCpu = cpuState.GetEventPendingCpuCount(BackendEvent_UserdataRebuild);
@@ -83,9 +81,56 @@ EventCpuPolicy::HandlePolicy(void)
     // {
     //    _NoRebuildScenario();
     //}
+    _SetRebuildPolicyWeight();
     _StoreContext();
 }
-
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+EventCpuPolicy::_SetRebuildPolicyWeight()
+{
+    QosUserPolicy& userPolicy = qosContext->GetQosUserPolicy();
+    RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();
+    uint8_t priority = rebuildUserPolicy.GetRebuildImpact();
+    // initialise with default priority weight(highest)
+    QosCorrectionDir rebuildCorrection = QosCorrectionDir_PriorityHighest;
+    switch (priority)
+    {
+        case PRIORITY_HIGHEST:
+            rebuildCorrection = QosCorrectionDir_PriorityHighest;
+            break;
+        case PRIORITY_HIGH:
+            rebuildCorrection = QosCorrectionDir_PriorityHigh;
+            break;
+        case PRIORITY_MEDIUM:
+            rebuildCorrection = QosCorrectionDir_PriorityMedium;
+            break;
+        case PRIORITY_LOW:
+            rebuildCorrection = QosCorrectionDir_PriorityLow;
+            break;
+        case PRIORITY_LOWEST:
+            rebuildCorrection = QosCorrectionDir_PriorityLowest;
+            break;
+        default:
+            break;
+    }
+    QosCorrection& qosCorrection = qosContext->GetQosCorrection();
+    QosEventWrrWeight& qosEventWrr = qosCorrection.GetEventWrrWeightPolicy();
+    //if previous set rebuild weigh is same as current weight, do nothing
+    if (qosEventWrr.CorrectionType(BackendEvent_UserdataRebuild) == rebuildCorrection)
+    {
+        return;
+    }
+    qosEventWrr.SetCorrectionType(BackendEvent_UserdataRebuild, rebuildCorrection);
+    qosEventWrr.SetCorrectionType(BackendEvent_MetadataRebuild, rebuildCorrection);
+    qosContext->SetApplyCorrection(true);
+    qosCorrection.SetCorrectionType(QosCorrection_EventWrr, true);
+}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
