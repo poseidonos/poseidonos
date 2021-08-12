@@ -25,6 +25,8 @@ volumetest="none"
 res=0
 array_name="POSArray"
 
+system_stop=0
+
 while getopts "f:t:i:s:c:p:a:r:v:" opt
 do
     case "$opt" in
@@ -52,22 +54,25 @@ sizepervol=`expr $totalsize / $volume_cnt `
 
 shutdown()
 {
-	while :
-	do
-		ps -C poseidonos > /dev/null
-		if [[ ${?} != 0 ]]; then
-			break;
-		fi
+    while :
+    do
+        ps -C poseidonos > /dev/null
+        if [[ ${?} != 0 ]]; then
+            break;
+        fi
 
-		state=$(${rootdir}/bin/cli array info --name ${array_name} --json | jq -r '.Response.result.data.state' 2>/dev/null)
-		if [[ $state = "NORMAL" ]]; then
-			${rootdir}/bin/cli array unmount --name $array_name
-		elif [[ $state = "OFFLINE" ]]; then
-			${rootdir}/bin/cli system exit
-		fi
+        if [[ $system_stop == 0 ]]; then
+            state=$(${rootdir}/bin/poseidonos-cli array list --array-name ${array_name} --json-res | jq -r '.Response.result.data.state' 2>/dev/null)
+            if [[ $state = "NORMAL" ]]; then
+                ${rootdir}/bin/poseidonos-cli array unmount --array-name $array_name --json-res --force
+            elif [[ $state = "OFFLINE" ]]; then
+                ${rootdir}/bin/poseidonos-cli system stop --json-res --force
+                system_stop=1
+            fi
+        fi
 
-		sleep 1s
-	done
+        sleep 1s
+    done
 }
 
 check_result()
@@ -175,9 +180,9 @@ do
         fi
         volName=vol${volume_cnt}
         echo "vol name : $volName"
-        sudo ${rootdir}/bin/cli volume unmount --name $volName --array POSArray
+        sudo ${rootdir}/bin/poseidonos-cli volume unmount -v $volName -a POSArray --force
         if [ $volumetest == "vol_delete" ]; then
-            sudo ${rootdir}/bin/cli volume delete --name $volName --array POSArray
+            sudo ${rootdir}/bin/poseidonos-cli volume delete -v $volName -a POSArray --force
         fi
         volume_cnt=$((volume_cnt-1))
         echo "vol cnt : $volume_cnt"
