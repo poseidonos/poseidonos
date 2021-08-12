@@ -15,7 +15,7 @@ DEFAULT_SUBSYSTEM_COUNT=1
 DEFAULT_WRITE_BUFFER_SIZE_IN_MB=1024
 DEFAULT_NUM_SHARED_BUFFER=4096
 DEFAULT_VOLUME_COUNT=1
-DEFAULT_VOLUME_SIZE=2147483648
+DEFAULT_VOLUME_SIZE=2147483648B
 DEFAULT_IRQ_DEDICATION=FALSE
 DEFAULT_USER_DEVICE_LIST="-d unvme-ns-0,unvme-ns-1,unvme-ns-2"
 DEFAULT_SPARE_DEVICE_LIST="-s unvme-ns-3"
@@ -58,7 +58,7 @@ ibofos_bringup(){
         sudo $SPDK_DIR/scripts/rpc.py bdev_malloc_create -b uram0 $WRITE_BUFFER_SIZE_IN_MB 512
     fi
 	
-    sudo $ROOT_DIR/bin/cli device scan
+    sudo $ROOT_DIR/bin/poseidonos-cli device scan
 
     for i in `seq 1 $SUBSYSTEM_COUNT`
     do
@@ -69,30 +69,36 @@ ibofos_bringup(){
 
     if [ "$CLEAN_BRINGUP" -eq 1 ]; then
         echo "poseidonos clean bringup"
-        sudo $ROOT_DIR/bin/cli array reset
+        sudo $ROOT_DIR/bin/poseidonos-cli devel resetmbr
         if [ ${PMEM_ENABLED} -eq 1 ]; then
-            sudo $ROOT_DIR/bin/cli array create -b pmem0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --name $ARRAYNAME --raidtype RAID5
+            sudo $ROOT_DIR/bin/poseidonos-cli array create -b pmem0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --array-name $ARRAYNAME --raid RAID5
         else
-            sudo $ROOT_DIR/bin/cli array create -b uram0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --name $ARRAYNAME --raidtype RAID5
+            sudo $ROOT_DIR/bin/poseidonos-cli array create -b uram0 $USER_DEVICE_LIST $SPARE_DEVICE_LIST --array-name $ARRAYNAME --raid RAID5
         fi
-        sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME
+        sudo $ROOT_DIR/bin/poseidonos-cli array mount --array-name $ARRAYNAME
 
         for i in `seq 1 $VOLUME_COUNT`
         do
-            sudo $ROOT_DIR/bin/cli volume create --name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array $ARRAYNAME
-            sudo $ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME
+
+            sudo $ROOT_DIR/bin/poseidonos-cli volume create --volume-name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array-name  $ARRAYNAME
+
+
+
+            sudo $ROOT_DIR/bin/poseidonos-cli volume mount --volume-name vol$i --array-name  $ARRAYNAME
         done
     else
         echo "poseidonos dirty bringup"
         #TODO : need to backup uram before load_array
-        sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME
+        sudo $ROOT_DIR/bin/poseidonos-cli array mount --array-name $ARRAYNAME
         for i in `seq 1 $VOLUME_COUNT`
         do
-            sudo $ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME
+            sudo $ROOT_DIR/bin/poseidonos-cli volume mount --volume-name vol$i --array-name  $ARRAYNAME
         done
     fi
+
+            
     sudo $SPDK_DIR/scripts/rpc.py nvmf_get_subsystems
-    sudo $ROOT_DIR/bin/cli logger set_level --level info
+    sudo $ROOT_DIR/bin/poseidonos-cli logger set-level --level warn
 
 }
 

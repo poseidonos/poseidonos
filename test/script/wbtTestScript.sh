@@ -60,7 +60,7 @@ target_ip=10.1.11.254
 target_fabric_ip=10.100.11.254
 target_port=1158
 
-ip="10.100.11.25"
+ip="10.100.11.28"
 test_iteration=2000
 totalsize=100 #pm : 12500
 volcnt=4
@@ -446,8 +446,9 @@ rm -rf result.txt
 rm -rf ${inputFile}
 rm -rf ${cliOutput}
 
-echo "------------[WBT Test End, Kill poseidonos]----------------------------------"
-sudo ${ROOT_DIR}/test/script/kill_poseidonos.sh
+echo "------------[WBT Test End, Close poseidonos]----------------------------------"
+${BIN_DIR}/poseidonos-cli array unmount --array-name $ARRAYNAME --force
+${BIN_DIR}/poseidonos-cli system stop --force
 
 if [ $exit_result -eq 0 ];then
     echo -[ Test Success ] -
