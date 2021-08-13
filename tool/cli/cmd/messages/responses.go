@@ -62,8 +62,8 @@ type Array struct {
 	SITUATION          string   `json:situation,omitempty"`
 	STATE              string   `json:state,omitempty"`
 	REBUILDINGPROGRESS int      `json:rebuilding_progress,omitempty"`
-	CAPACITY           int      `json:capacity,omitempty"`
-	USED               int      `json:used,omitempty"`
+	CAPACITY           uint64      `json:capacity,omitempty"`
+	USED               uint64      `json:used,omitempty"`
 	DEVICELIST         []Device `json:"devicelist"`
 }
 
@@ -74,7 +74,7 @@ type Device struct {
 	CLASS      string `json:"class,omitempty"`
 	MN         string `json:"mn,omitempty"`
 	NUMA       string `json:"numa,omitempty"`
-	SIZE       int    `json:"size,omitempty"`
+	SIZE       uint64    `json:"size,omitempty"`
 	SERIAL     string `json:"sn,omitempty"`
 }
 

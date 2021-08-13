@@ -136,7 +136,7 @@ func WBT(cmd *cobra.Command, args []string) (model.Response, error) {
 		// mj: isDebug is true for WBT commands at default.
 		// If globals.IsJSONRes is true, PrintResponse does not
 		// display the debug output
-		displaymgr.PrintResponse("WBT", string(resJSON), true, globals.IsJSONRes)
+		displaymgr.PrintResponse("WBT", string(resJSON), true, globals.IsJSONRes, globals.DisplayUnit)
 	}
 
 	return res, err

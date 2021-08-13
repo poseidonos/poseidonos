@@ -67,7 +67,7 @@ Example 2 (listing a specific array):
 
 			socketmgr.Close()
 
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes)
+			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
 }

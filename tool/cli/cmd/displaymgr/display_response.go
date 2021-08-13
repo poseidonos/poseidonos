@@ -13,13 +13,21 @@ import (
 	"github.com/bytefmt-master"
 )
 
-func PrintResponse(command string, resJSON string, isDebug bool, isJSONRes bool) {
+func toByte(displayUnit bool, size uint64) string {
+	if displayUnit {
+		return bytefmt.ByteSize(size)
+	}
+
+	return strconv.FormatUint(size, 10)
+}
+
+func PrintResponse(command string, resJSON string, isDebug bool, isJSONRes bool, displayUnit bool) {
 	if isJSONRes {
 		printResInJSON(resJSON)
 	} else if isDebug {
 		printResToDebug(resJSON)
 	} else {
-		printResToHumanReadable(command, resJSON)
+		printResToHumanReadable(command, resJSON, displayUnit)
 	}
 }
 
@@ -51,7 +59,7 @@ func printResInJSON(resJSON string) {
 
 // TODO(mj): Currently, the output records may have whitespace.
 // It should be assured that the output records do not have whitespace to pipeline the data to awk.
-func printResToHumanReadable(command string, resJSON string) {
+func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	switch command {
 	case "LISTARRAY":
 		res := messages.ListArrayResponse{}
@@ -87,6 +95,7 @@ func printResToHumanReadable(command string, resJSON string) {
 			fmt.Fprintln(w, "")
 		}
 		w.Flush()
+
 	case "ARRAYINFO":
 		res := messages.ArrayInfoResponse{}
 		json.Unmarshal([]byte(resJSON), &res)
@@ -101,8 +110,8 @@ func printResToHumanReadable(command string, resJSON string) {
 		fmt.Fprintln(w, "State\t: "+array.STATE)
 		fmt.Fprintln(w, "Situation\t: "+array.SITUATION)
 		fmt.Fprintln(w, "Rebuilding Progress\t:", array.REBUILDINGPROGRESS)
-		fmt.Fprintln(w, "Total(byte)\t:", array.CAPACITY)
-		fmt.Fprintln(w, "Used(byte)\t:", array.USED)
+		fmt.Fprintln(w, "Total\t: "+toByte(displayUnit, array.CAPACITY))
+		fmt.Fprintln(w, "Used\t: "+toByte(displayUnit, array.USED))
 		fmt.Fprintln(w, "")
 		fmt.Fprintln(w, "Devices")
 		fmt.Fprintln(w, "Name\tType")
@@ -148,8 +157,8 @@ func printResToHumanReadable(command string, resJSON string) {
 			fmt.Fprintln(w,
 				volume.VOLUMENAME+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.VOLUMEID)+"\t"+
-					globals.FieldSeparator+bytefmt.ByteSize(volume.TOTAL)+"\t"+
-					globals.FieldSeparator+bytefmt.ByteSize(volume.REMAIN)+"\t"+
+					globals.FieldSeparator+toByte(displayUnit, volume.TOTAL)+"\t"+
+					globals.FieldSeparator+toByte(displayUnit, volume.REMAIN)+"\t"+
 					globals.FieldSeparator+strconv.FormatUint(volume.REMAIN*100/volume.TOTAL, 10)+"%"+"\t"+
 					globals.FieldSeparator+volume.STATUS+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.MAXIOPS)+"\t"+
@@ -172,7 +181,7 @@ func printResToHumanReadable(command string, resJSON string) {
 				globals.FieldSeparator+"Class\t"+
 				globals.FieldSeparator+"MN\t"+
 				globals.FieldSeparator+"NUMA\t"+
-				globals.FieldSeparator+"Size(byte)")
+				globals.FieldSeparator+"Size")
 
 		// Horizontal line
 		fmt.Fprintln(w,
@@ -193,7 +202,7 @@ func printResToHumanReadable(command string, resJSON string) {
 					globals.FieldSeparator+device.CLASS+"\t"+
 					globals.FieldSeparator+device.MN+"\t"+
 					globals.FieldSeparator+device.NUMA+"\t"+
-					globals.FieldSeparator+strconv.Itoa(device.SIZE))
+					globals.FieldSeparator+toByte(displayUnit, device.SIZE))
 		}
 		w.Flush()
 

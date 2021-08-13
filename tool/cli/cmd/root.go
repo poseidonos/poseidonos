@@ -96,6 +96,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&globals.IsDebug, "debug", false, "Print response for debug")
 	RootCmd.PersistentFlags().BoolVar(&globals.IsJSONReq, "json-req", false, "Print request in JSON form")
 	RootCmd.PersistentFlags().BoolVar(&globals.IsJSONRes, "json-res", false, "Print response in JSON form")
+	RootCmd.PersistentFlags().BoolVar(&globals.DisplayUnit, "unit", false, "Display unit (B, KB, MB, ...) when displaying capacity")
 	RootCmd.PersistentFlags().StringVar(&globals.FieldSeparator, "fs", "|", "Field separator for the output")
 
 	// Command categories

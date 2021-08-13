@@ -60,7 +60,7 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 
 			socketmgr.Close()
 
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes)
+			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
 }
