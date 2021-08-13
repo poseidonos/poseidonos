@@ -34,7 +34,6 @@
 #include "src/mapper/map_flushed_event.h"
 #include "src/mapper/vsamap/vsamap_manager.h"
 #include "src/sys_event/volume_event_publisher.h"
-#include "src/journal_service/journal_service.h"
 
 #include <string>
 #include <vector>
@@ -56,7 +55,7 @@ VSAMapManager::VSAMapManager(MapperAddressInfo* info, std::string arrayName, int
     }
     cbMapLoadDoneByCli = std::bind(&VSAMapManager::_MapLoadDoneByCli, this, std::placeholders::_1);
     cbMapLoadDoneByEw = std::bind(&VSAMapManager::_MapLoadDoneByEw, this, std::placeholders::_1);
-    volumeManager = nullptr;
+    journalService = JournalServiceSingleton::Instance();
 }
 
 VSAMapManager::~VSAMapManager(void)
@@ -333,7 +332,8 @@ VSAMapManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* v
 
     vsaMapAPI->DisableVsaMapAccess(volEventBase->volId);
 
-    do
+    bool journalEnabled = journalService->IsEnabled(arrayName);
+    if (journalEnabled == false)
     {
         EventSmartPtr eventVSAMap = std::make_shared<MapFlushedEvent>(volEventBase->volId, this);
         mapFlushStatus[volEventBase->volId] = MapFlushState::FLUSHING;
@@ -344,26 +344,24 @@ VSAMapManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* v
             POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "ret:{} of vsaMap->Unload(), VolumeId:{} @VolumeUnmounted", ret, volEventBase->volId);
         }
         _WaitForMapFlushed(volEventBase->volId);
+    }
 
-        std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volEventBase->volId]);
-        VolMountStateIter iter;
-        if (_IsVolumeExist(volEventBase->volId, iter))
+    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volEventBase->volId]);
+    VolMountStateIter iter;
+    if (_IsVolumeExist(volEventBase->volId, iter))
+    {
+        if (iter->second == VolState::FOREGROUND_MOUNTED)
         {
-            if (iter->second == VolState::FOREGROUND_MOUNTED)
-            {
-                volumeMountState[iter->first] = VolState::BACKGROUND_MOUNTED;
-                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was set as BG_MOUNTED @VolumeUnmounted", volEventBase->volId);
-            }
-            else
-            {
-                POS_TRACE_WARN(EID(VSAMAP_UNMOUNT_FAILURE), "volumeID:{} is Not FG_MOUNTED @VolumeUnmounted", volEventBase->volId);
-            }
+            volumeMountState[iter->first] = VolState::BACKGROUND_MOUNTED;
+            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was set as BG_MOUNTED @VolumeUnmounted", volEventBase->volId);
         }
+        else
+        {
+            POS_TRACE_WARN(EID(VSAMAP_UNMOUNT_FAILURE), "volumeID:{} is Not FG_MOUNTED @VolumeUnmounted", volEventBase->volId);
+        }
+    }
 
-        return true;
-    } while (false);
-
-    return false;
+    return true;
 }
 
 bool

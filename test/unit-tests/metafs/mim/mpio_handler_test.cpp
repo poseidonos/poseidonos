@@ -14,8 +14,9 @@ TEST(MpioHandler, Normal)
 
     MockMpioPool* pool = new MockMpioPool(100);
     EXPECT_CALL(*pool, GetPoolSize);
+#if MPIO_CACHE_EN
     EXPECT_CALL(*pool, ReleaseCache).WillRepeatedly(Return());
-
+#endif
     MockWriteMpio* mpio = new MockWriteMpio(this);
     EXPECT_CALL(*mpio, ExecuteAsyncState).WillRepeatedly(Return());
 

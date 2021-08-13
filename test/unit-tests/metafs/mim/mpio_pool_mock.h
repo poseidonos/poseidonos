@@ -14,7 +14,9 @@ public:
     using MpioPool::MpioPool;
     MOCK_METHOD(size_t, GetPoolSize, (), (override));
     MOCK_METHOD(void, Release, (Mpio* mpio), (override));
+#if MPIO_CACHE_EN
     MOCK_METHOD(void, ReleaseCache, (), (override));
+#endif
 };
 
 } // namespace pos

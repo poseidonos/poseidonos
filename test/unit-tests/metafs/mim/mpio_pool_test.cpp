@@ -74,6 +74,7 @@ TEST(MpioPool, AllocAndReleaseForNvRam)
 
 TEST(MpioPool, AllocAndReleaseForNvRamCache)
 {
+#if MPIO_CACHE_EN
     const uint32_t COUNT = 10;
     int arrayId = 0;
     Mpio* mpioList[10] = { 0, };
@@ -113,6 +114,7 @@ TEST(MpioPool, AllocAndReleaseForNvRamCache)
     }
 
     delete pool;
+#endif
 }
 
 } // namespace pos

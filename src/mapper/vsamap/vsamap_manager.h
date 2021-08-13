@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "src/journal_service/journal_service.h"
 #include "src/mapper/include/mapper_const.h"
 #include "src/mapper/i_map_manager.h"
 #include "src/mapper/i_vsamap.h"
@@ -125,6 +126,7 @@ private:
 
     IVolumeManager* volumeManager;
     VSAMapAPI* vsaMapAPI;
+    JournalService* journalService;
 };
 
 } // namespace pos
