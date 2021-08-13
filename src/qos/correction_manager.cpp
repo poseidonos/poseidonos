@@ -109,6 +109,9 @@ QosCorrectionManager::_HandleWrrCorrection(void)
             case QosCorrectionDir_PriorityHighest:
                 weight = PRIO_WT_HIGHEST;
                 break;
+            case QosCorrectionDir_PriorityHigher:
+                weight = PRIO_WT_HIGHER;
+                break;
             case QosCorrectionDir_PriorityHigh:
                 weight = PRIO_WT_HIGH;
                 break;
@@ -118,21 +121,24 @@ QosCorrectionManager::_HandleWrrCorrection(void)
             case QosCorrectionDir_PriorityLow:
                 weight = PRIO_WT_LOW;
                 break;
+            case QosCorrectionDir_PriorityLower:
+                weight = PRIO_WT_LOWER;
+                break;
             case QosCorrectionDir_PriorityLowest:
                 weight = PRIO_WT_LOWEST;
                 break;
             case QosCorrectionDir_Reset:
-                weight = PRIO_CRIT_WT_1;
+                weight = M_DEFAULT_WEIGHT;
             default:
                 break;
         }
-        if (weight < M_MAX_NEGATIVE_WEIGHT)
+        if (weight <= M_MAX_NEGATIVE_WEIGHT)
         {
             weight = M_MAX_NEGATIVE_WEIGHT;
         }
-        if (weight >= M_DEFAULT_WEIGHT)
+        if (weight >= M_MAX_POSITIVE_WEIGHT)
         {
-            weight = M_DEFAULT_WEIGHT;
+            weight = M_MAX_POSITIVE_WEIGHT;
         }
         qosManager->SetEventWeightWRR((BackendEvent)event, weight);
         eventWrrPolicy.SetEventWrrWeight((BackendEvent)event, weight);

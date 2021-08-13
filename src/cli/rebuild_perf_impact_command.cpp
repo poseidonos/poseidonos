@@ -58,6 +58,10 @@ RebuildPerfImpactCommand::Execute(json& doc, string rid)
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_HIGHEST;
         }
+        else if (level.compare("higher") == 0)
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_HIGHER;
+        }
         else if (level.compare("high") == 0)
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_HIGH;
@@ -69,6 +73,10 @@ RebuildPerfImpactCommand::Execute(json& doc, string rid)
         else if (level.compare("low") == 0)
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_LOW;
+        }
+        else if (level.compare("lower") == 0)
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_LOWER;
         }
         else if (level.compare("lowest") == 0)
         {

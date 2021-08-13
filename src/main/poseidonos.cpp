@@ -254,6 +254,10 @@ Poseidonos::_SetPerfImpact(void)
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_HIGHEST;
         }
+        else if (impact.compare("higher") == 0)
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_HIGHER;
+        }
         else if (impact.compare("high") == 0)
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_HIGH;
@@ -266,6 +270,10 @@ Poseidonos::_SetPerfImpact(void)
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_LOW;
         }
+        else if (impact.compare("lower") == 0)
+        {
+            newRebuildPolicy.rebuildImpact = PRIORITY_LOWER;
+        }
         else if (impact.compare("lowest") == 0)
         {
             newRebuildPolicy.rebuildImpact = PRIORITY_LOWEST;
@@ -273,7 +281,8 @@ Poseidonos::_SetPerfImpact(void)
 
         else
         {
-            newRebuildPolicy.rebuildImpact = PRIORITY_LOW;
+            // changing the default priority to keep the weight value same as old(-800)
+            newRebuildPolicy.rebuildImpact = PRIORITY_LOWER;
             POS_TRACE_INFO(static_cast<uint32_t>(POS_EVENT_ID::QOS_SET_EVENT_POLICY),
                 "Rebuild Perf Impact not supported, Set to default Low");
         }

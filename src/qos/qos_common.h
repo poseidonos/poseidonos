@@ -63,31 +63,25 @@ const int MAX_REACTOR_WORKER = (M_MAX_REACTORS > MAX_IO_WORKER) ? M_MAX_REACTORS
 const int MAX_VOLUME_EVENT = (MAX_VOLUME_COUNT > pos::BackendEvent_Count) ? MAX_VOLUME_COUNT : pos::BackendEvent_Count;
 
 const uint8_t PRIORITY_HIGHEST = 1;
-const uint8_t PRIORITY_HIGH = 2;
-const uint8_t PRIORITY_MEDIUM = 3;
-const uint8_t PRIORITY_LOW = 4;
-const uint8_t PRIORITY_LOWEST = 5;
+const uint8_t PRIORITY_HIGHER = 2;
+const uint8_t PRIORITY_HIGH = 3;
+const uint8_t PRIORITY_MEDIUM = 4;
+const uint8_t PRIORITY_LOW = 5;
+const uint8_t PRIORITY_LOWER = 6;
+const uint8_t PRIORITY_LOWEST = 7;
 const uint8_t PRIORITY_DEFAULT = PRIORITY_HIGHEST;
 
-const int PRIO_CRIT_WT_1 = 16;
-const int PRIO_CRIT_WT_2 = 10;
-const int PRIO_CRIT_WT_3 = 0;
-const int PRIO_HIGH_WT_1 = -4;
-const int PRIO_HIGH_WT_2 = -20;
-const int PRIO_HIGH_WT_3 = -100;
-const int PRIO_LOW_WT_1 = -200;
-const int PRIO_LOW_WT_2 = -400;
-const int PRIO_LOW_WT_3 = -100;
-
 const int PRIO_WT_HIGHEST = 20;
-const int PRIO_WT_HIGH = 10;
+const int PRIO_WT_HIGHER = 10;
+const int PRIO_WT_HIGH = -10;
 const int PRIO_WT_MEDIUM = 1;
 const int PRIO_WT_LOW = -100;
+const int PRIO_WT_LOWER = -800;
 const int PRIO_WT_LOWEST = -1000;
-
 
 const int M_DEFAULT_WEIGHT = PRIO_WT_HIGHEST;
 const int M_MAX_NEGATIVE_WEIGHT = PRIO_WT_LOWEST;
+const int M_MAX_POSITIVE_WEIGHT = PRIO_WT_HIGHEST;
 
 const uint16_t INVALID_SUBSYSTEM = 0;
 //const uint16_t M_VALID_SUBSYSTEM = 1;
@@ -179,9 +173,11 @@ enum QosCorrectionDir
     QosCorrectionDir_Increase4X,
     QosCorrectionDir_Decrease4X,
     QosCorrectionDir_PriorityHighest,
+    QosCorrectionDir_PriorityHigher,
     QosCorrectionDir_PriorityHigh,
     QosCorrectionDir_PriorityMedium,
     QosCorrectionDir_PriorityLow,
+    QosCorrectionDir_PriorityLower,
     QosCorrectionDir_PriorityLowest,
     QosCorrectionDir_Reset,
     QosCorrectionDir_End,
