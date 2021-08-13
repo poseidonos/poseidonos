@@ -119,7 +119,6 @@ iexecc()
     
 }
 
-ibof_phy_volume_size_byte=$((${ibof_phy_volume_size_mb}*${MBtoB}))
 test_volume_size_byte=$((${test_volume_size_mb}*${MBtoB}))
 max_io_range_byte=$((${max_io_range_mb}*${MBtoB}))
 max_io_boundary_byte=$((${test_volume_size_byte} - ${max_io_range_byte}))
@@ -250,11 +249,11 @@ start_pos()
         texecc ${IBOFOS_ROOT}/test/regression/start_poseidonos.sh
     fi
 
-    result=`texecc "${IBOFOS_ROOT}/bin/cli system info --json" | jq '.Response.info.version' 2>/dev/null`
+    result=`texecc "${IBOFOS_ROOT}/bin/poseidonos-cli system info --json-res" | jq '.Response.info.version' 2>/dev/null`
 	while [ -z ${result} ] || [ ${result} == '""' ];
 	do
 		echo "Wait PoseidonOS..."
-		result=`texecc "${IBOFOS_ROOT}/bin/cli system info --json" | jq '.Response.info.version' 2>/dev/null`
+		result=`texecc "${IBOFOS_ROOT}/bin/poseidonos-cli system info --json-res" | jq '.Response.info.version' 2>/dev/null`
 		echo $result
 		sleep 0.5
 	done
@@ -387,8 +386,9 @@ write_pattern()
 shutdown_pos()
 {
     notice "Shutting down PoseidonOS..."
-    texecc ${IBOFOS_ROOT}/bin/cli array unmount --name POSArray
-    texecc ${IBOFOS_ROOT}/bin/cli system exit
+    texecc ${IBOFOS_ROOT}/bin/poseidonos-cli array unmount --array-name POSArray --force
+
+    texecc ${IBOFOS_ROOT}/bin/poseidonos-cli system stop --force
     notice "Shutdown has been completed!"
 	check_stopped
 
@@ -414,26 +414,27 @@ bringup_pos()
     texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss} -a -s POS00000000000001  -d POS_VOLUME #>> ${logfile}
     texecc ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512
 
-    texecc ${IBOFOS_ROOT}/bin/cli device scan >> ${logfile}
-    texecc ${IBOFOS_ROOT}/bin/cli device list >> ${logfile}
+    texecc ${IBOFOS_ROOT}/bin/poseidonos-cli device scan >> ${logfile}
+    texecc ${IBOFOS_ROOT}/bin/poseidonos-cli device list >> ${logfile}
 
 	if [ $create_array -eq 1 ]; then
-        texecc ${IBOFOS_ROOT}/bin/cli array reset
+        texecc ${IBOFOS_ROOT}/bin/poseidonos-cli devel resetmbr
         info "Target device list=${target_dev_list}"        
-        texecc ${IBOFOS_ROOT}/bin/cli array create -b uram0 -d ${target_dev_list} -s ${target_spare_dev} --name POSArray #>> ${logfile}
+        texecc ${IBOFOS_ROOT}/bin/poseidonos-cli array create --array-name POSArray --buffer uram0 --data-devs ${target_dev_list} --spare ${target_spare_dev} >> ${logfile}
 	fi
-	
-	texecc ${IBOFOS_ROOT}/bin/cli array mount --name POSArray
+
+    texecc ${IBOFOS_ROOT}/bin/poseidonos-cli array mount --array-name POSArray >> ${logfile}
 
     if [ ${pos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
-        info "Create volume....${volname}"
-        texecc ${IBOFOS_ROOT}/bin/cli volume create --name ${volname} --size ${ibof_phy_volume_size_byte} >> ${logfile};
+        info "Create volume....${volname}" >> ${logfile}
+        texecc ${IBOFOS_ROOT}/bin/poseidonos-cli volume create --volume-name ${volname} --array-name POSArray --size ${ibof_phy_volume_size_mb}MB >> ${logfile};
+
         check_result_err_from_logfile
     fi
 
     if [ ${pos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
-        texecc ${IBOFOS_ROOT}/bin/cli volume mount --name ${volname} >> ${logfile};
+        texecc ${IBOFOS_ROOT}/bin/poseidonos-cli volume mount --volume-name ${volname} --array-name POSArray >> ${logfile};
         check_result_err_from_logfile
     fi
     
@@ -510,7 +511,7 @@ run_iteration()
 date=
 get_date()
 {
-    date=`date '+%Y-%m-%d %H:%M:%S'`
+    date=`date '+%Y_%m_%d %H:%M:%S'`
 }
 
 info()
