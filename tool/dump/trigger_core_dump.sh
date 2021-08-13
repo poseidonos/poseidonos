@@ -70,6 +70,13 @@ get_first_core_information(){
 
 LOG_ONLY=0
 
+dpkg -l | grep "pigz"
+
+if [ "$?" -ne 0 ]; then
+    log_error "pigz is not installed, please execute script/pkgdep.sh"
+    exit 1
+fi
+
 if [ "$#" -gt 0 ]; then
     FLAG_CRASH=$1
     echo $FLAG_CRASH
@@ -209,10 +216,12 @@ dmesg > $LOG_DIR"/dmesg.log"
 ./collect_binary_info.sh > $BINARY_INFO
 
 if [ $LOG_ONLY -eq 0 ];then
-    tar czf - $CALLSTACK_INFO $PENDINGIO_INFO $IN_MEMORY_LOG_FILE $LOG_DIR $IBOFOS_COPY $BINARY_INFO library.tar.gz | split -b 70m - $CORE_FILE.$LOG_SUFFIX.tar.gz 
-    tar czf - $CORE_FILE $IBOFOS_COPY $BINARY_INFO library.tar.gz | split -b 70m - $CORE_FILE.tar.gz 
+    xz -T0 -c $CORE_FILE > $CORE_FILE.xz
+    tar -c $CORE_FILE.xz $IBOFOS_COPY $BINARY_INFO library.tar.gz | pigz -c | split -b 70m - $CORE_FILE.tar.gz 
+    tar -c $CALLSTACK_INFO $PENDINGIO_INFO $IN_MEMORY_LOG_FILE $LOG_DIR $IBOFOS_COPY $BINARY_INFO library.tar.gz | pigz -c | split -b 70m - $CORE_FILE.log.tar.gz 
+    mv ./$CORE_FILE $DUMP_PATH"/"$CORE_CRASHED
 else	
-    tar czf - $CALLSTACK_INFO $PENDINGIO_INFO $IN_MEMORY_LOG_FILE $LOG_DIR $IBOFOS_COPY $BINARY_INFO library.tar.gz | split -b 70m - $CORE_FILE.tar.gz 
+    tar -c $CALLSTACK_INFO $PENDINGIO_INFO $IN_MEMORY_LOG_FILE $LOG_DIR $IBOFOS_COPY $BINARY_INFO library.tar.gz | pigz -c | split -b 70m - $CORE_FILE.tar.gz 
 fi	
 
 if [ $? -ne 0 ];then
@@ -220,7 +229,7 @@ if [ $? -ne 0 ];then
     exit
 fi
 
-mv ./$CORE_FILE $DUMP_PATH"/"$CORE_CRASHED
+rm ./$CORE_FILE.xz -rf
 rm $LOG_DIR -rf
 
 echo "####### Tar split compression is finished #######"

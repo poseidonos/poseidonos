@@ -58,11 +58,42 @@ def parse_shared_dump_header(ibofos_root):
     return shared_dump_list
 
 
+def next_alpha(s):
+    return ((s + 1 - 97) % 26 + 97)
+
+
+def next_suffix(s_vector):
+    if (s_vector[1] == 'z'):
+        s_vector[0] = next_alpha(s_vector[0])
+    s_vector[1] = next_alpha(s_vector[1])
+    return s_vector
+
+
+def check_split_compressed_file(prefix):
+    file_prefix = prefix + '.tar.gz'
+    file_list = os.listdir(os.path.dirname(os.path.realpath(prefix + "aa")))
+    filename_vector = []
+    for path in file_list:
+        filename = os.path.basename(path)
+        if (os.path.basename(file_prefix) in filename):
+            filename_vector.append(filename)
+            filename_vector.sort()
+    print(filename_vector)
+    s_vector = bytearray(b'aa')
+    flag = True
+    for filename in filename_vector:
+        if (s_vector.decode("utf-8") != filename[-2:]):
+            print(s_vector.decode("utf-8") + " is omitted!")
+            flag = False
+            return flag
+        s_vector = next_suffix(s_vector)
+    return flag
+
 
 def check_module_number_and_change_script():
 
     logger_list = parse_logger_header('../../')
-    print (logger_list)
+    print(logger_list)
     max_count = len(logger_list)
 
     f = open(GDB_SCRIPT)

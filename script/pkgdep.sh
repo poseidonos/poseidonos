@@ -56,6 +56,8 @@ if [ -f /etc/debian_version ]; then
     apt install -y libjsonrpccpp-dev libjsoncpp-dev
     # for grpc
     apt install -y libc-ares-dev pkg-config cmake
+    # for pigz (trigger core dump, load dump)
+    apt install -y pigz
 
 else
     echo "pkgdep: unknown system type."
