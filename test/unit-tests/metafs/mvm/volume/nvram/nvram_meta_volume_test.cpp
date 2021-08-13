@@ -4,6 +4,7 @@
 #include "test/unit-tests/metafs/mvm/volume/catalog_manager_mock.h"
 #include <string>
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 using ::testing::_;
 using ::testing::InSequence;
@@ -20,6 +21,7 @@ public:
       catalogMgr(nullptr)
     {
     }
+
     virtual ~NvRamMetaVolumeTestFixture()
     {
     }
@@ -52,6 +54,12 @@ protected:
     MockMetaStorageSubsystem* metaStorage;
     MetaFilePropertySet prop;
 };
+
+TEST(NvRamMetaVolume, CreateDefault)
+{
+    NvRamMetaVolume* metaVolume = new NvRamMetaVolume();
+    delete metaVolume;
+}
 
 TEST_F(NvRamMetaVolumeTestFixture, NVRAM_Meta_Volume_Normal)
 {
@@ -93,4 +101,36 @@ TEST_F(NvRamMetaVolumeTestFixture, NVRAM_Meta_Volume_Normal)
     EXPECT_FALSE(volume->IsOkayToStore(6137 * chunkSize, prop));
 }
 
+TEST_F(NvRamMetaVolumeTestFixture, IsNVRAMStore_WriteDominant)
+{
+    uint64_t chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
+
+    // expected count of the free lpn: 6136
+    prop.ioAccPattern = MetaFileAccessPattern::NoSpecific;
+    prop.ioOpType = MetaFileDominant::WriteDominant;
+
+    EXPECT_TRUE(volume->IsOkayToStore(6136 * chunkSize, prop));
+}
+
+TEST_F(NvRamMetaVolumeTestFixture, IsOkayToStore_FileSizeZero)
+{
+    // not enough space
+    EXPECT_TRUE(volume->IsFreeSpaceEnough(0));
+}
+
+TEST(NvRamMetaVolume, IsOkayToStore_Negative)
+{
+    NiceMock<MockInodeManager>* inodeMgr = new NiceMock<MockInodeManager>(0);
+    NiceMock<MockCatalogManager>* catalogMgr = new NiceMock<MockCatalogManager>(0);
+    NvRamMetaVolume* volume = new NvRamMetaVolume(0, 8192, inodeMgr, catalogMgr);
+    uint64_t chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
+    MetaFilePropertySet prop;
+
+    EXPECT_CALL(*inodeMgr, GetUtilizationInPercent).WillOnce(Return(99));
+
+    // not enough space
+    EXPECT_FALSE(volume->IsOkayToStore(6136 * chunkSize, prop));
+
+    delete volume;
+}
 } // namespace pos

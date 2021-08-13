@@ -1,6 +1,13 @@
 #include "src/metafs/mvm/volume/inode_table_header.h"
 #include "src/metafs/config/metafs_config.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
+using ::testing::_;
+using ::testing::InSequence;
+using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos
 {
@@ -153,4 +160,115 @@ TEST(InodeTableHeader, CheckExtentsMaxSize)
     delete header;
 }
 
+TEST(InodeTableHeader, CheckLoad0_Positive)
+{
+    InodeTableHeader* header = new InodeTableHeader(MetaVolumeType::SsdVolume, 0);
+    MockMetaStorageSubsystem mss(0);
+
+    header->SetMss(&mss);
+
+    EXPECT_CALL(mss, ReadPage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+
+    EXPECT_TRUE(header->Load());
+
+    delete header;
+}
+
+TEST(InodeTableHeader, CheckLoad0_Negative)
+{
+    InodeTableHeader* header = new InodeTableHeader(MetaVolumeType::SsdVolume, 0);
+    MockMetaStorageSubsystem mss(0);
+
+    header->SetMss(&mss);
+
+    EXPECT_CALL(mss, ReadPage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::MFS_ERROR_UNMOUNTED));
+
+    EXPECT_FALSE(header->Load());
+
+    delete header;
+}
+
+TEST(InodeTableHeader, CheckLoad1_Positive)
+{
+    InodeTableHeader* header = new InodeTableHeader(MetaVolumeType::SsdVolume, 0);
+    MockMetaStorageSubsystem mss(0);
+
+    header->SetMss(&mss);
+
+    EXPECT_CALL(mss, ReadPage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+
+    EXPECT_TRUE(header->Load(MetaStorageType::SSD, 0, 0, 0));
+
+    delete header;
+}
+
+TEST(InodeTableHeader, CheckLoad1_Negative)
+{
+    InodeTableHeader* header = new InodeTableHeader(MetaVolumeType::SsdVolume, 0);
+    MockMetaStorageSubsystem mss(0);
+
+    header->SetMss(&mss);
+
+    EXPECT_CALL(mss, ReadPage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::MFS_ERROR_UNMOUNTED));
+
+    EXPECT_FALSE(header->Load(MetaStorageType::SSD, 0, 0, 0));
+
+    delete header;
+}
+
+TEST(InodeTableHeader, CheckStore0_Positive)
+{
+    InodeTableHeader* header = new InodeTableHeader(MetaVolumeType::SsdVolume, 0);
+    MockMetaStorageSubsystem mss(0);
+
+    header->SetMss(&mss);
+
+    EXPECT_CALL(mss, WritePage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+
+    EXPECT_TRUE(header->Store());
+
+    delete header;
+}
+
+TEST(InodeTableHeader, CheckStore0_Negative)
+{
+    InodeTableHeader* header = new InodeTableHeader(MetaVolumeType::SsdVolume, 0);
+    MockMetaStorageSubsystem mss(0);
+
+    header->SetMss(&mss);
+
+    EXPECT_CALL(mss, WritePage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::MFS_ERROR_UNMOUNTED));
+
+    EXPECT_FALSE(header->Store());
+
+    delete header;
+}
+
+TEST(InodeTableHeader, CheckStore1_Positive)
+{
+    InodeTableHeader* header = new InodeTableHeader(MetaVolumeType::SsdVolume, 0);
+    MockMetaStorageSubsystem mss(0);
+
+    header->SetMss(&mss);
+
+    EXPECT_CALL(mss, WritePage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+
+    EXPECT_TRUE(header->Store(MetaStorageType::SSD, 0, 0, 0));
+
+    delete header;
+}
+
+TEST(InodeTableHeader, CheckStore1_Negative)
+{
+    InodeTableHeader* header = new InodeTableHeader(MetaVolumeType::SsdVolume, 0);
+    MockMetaStorageSubsystem mss(0);
+
+    header->SetMss(&mss);
+
+    EXPECT_CALL(mss, WritePage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::MFS_ERROR_UNMOUNTED));
+
+    EXPECT_FALSE(header->Store(MetaStorageType::SSD, 0, 0, 0));
+
+    delete header;
+}
 } // namespace pos

@@ -71,6 +71,17 @@ public:
     MOCK_METHOD(void, PopulateFileNameWithVolumeType, (FileHashInVolume& dest));
     MOCK_METHOD(uint32_t, GetExtent,
         (const FileDescriptorType fd, std::vector<MetaFileExtent>& extents));
+    MOCK_METHOD(uint32_t, GetUtilizationInPercent, ());
+    MOCK_METHOD(bool, IsFileInodeInUse, (const FileDescriptorType fd));
+    MOCK_METHOD(FileControlResult, CreateFileInode, (MetaFsFileControlRequest& reqMsg));
+    MOCK_METHOD(FileControlResult, DeleteFileInode, (MetaFsFileControlRequest& reqMsg));
+    MOCK_METHOD(bool, IsGivenFileCreated, (StringHashType fileKey));
+    MOCK_METHOD(FileSizeType, GetFileSize, (FileDescriptorType fd));
+    MOCK_METHOD(FileSizeType, GetDataChunkSize, (FileDescriptorType fd));
+    MOCK_METHOD(MetaLpnType, GetFileBaseLpn, (FileDescriptorType fd));
+    MOCK_METHOD(MetaFileInode&, GetFileInode, (const FileDescriptorType fd));
+    MOCK_METHOD(FileDescriptorType, LookupDescriptorByName, (std::string& fileName));
+    MOCK_METHOD(std::string, LookupNameByDescriptor, (FileDescriptorType fd));
 };
 
 } // namespace pos

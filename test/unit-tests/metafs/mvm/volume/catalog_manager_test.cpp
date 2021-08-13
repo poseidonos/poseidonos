@@ -36,40 +36,160 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using testing::_;
-using testing::NiceMock;
-using testing::Return;
+using ::testing::_;
+using ::testing::InSequence;
+using ::testing::NiceMock;
+using ::testing::Return;
+
 namespace pos
 {
-TEST(CatalogManager, CreateObject)
+class CatalogManagerFixture : public ::testing::Test
 {
-    CatalogManager* catalogMgr = new CatalogManager(0);
+public:
+    CatalogManagerFixture(void)
+    : catalogMgr(nullptr),
+      catalog(nullptr)
+    {
+    }
 
-    catalogMgr->Init(MetaVolumeType::SsdVolume, 0, 100);
+    virtual ~CatalogManagerFixture(void)
+    {
+    }
 
-    delete catalogMgr;
-}
+    virtual void
+    SetUp(void)
+    {
+        catalog = new NiceMock<MockCatalog>(volumeType, baseLpn);
 
-TEST(CatalogManager, UnusedMethod)
+        catalogMgr = new CatalogManager(catalog, arrayId);
+
+        catalogMgr->Init(MetaVolumeType::SsdVolume, 0, 100);
+    }
+
+    virtual void
+    TearDown(void)
+    {
+        delete catalogMgr;
+    }
+
+protected:
+    CatalogManager* catalogMgr;
+
+    NiceMock<MockCatalog>* catalog;
+
+    int arrayId = 0;
+    MetaVolumeType volumeType = MetaVolumeType::SsdVolume;
+    MetaLpnType baseLpn = 0;
+};
+
+TEST_F(CatalogManagerFixture, UnusedMethod)
 {
-    CatalogManager* catalogMgr = new CatalogManager(0);
-
     catalogMgr->Bringup();
     catalogMgr->Finalize();
-
-    delete catalogMgr;
 }
 
-TEST(CatalogManager, CreateObject_New)
+TEST_F(CatalogManagerFixture, CreateObject_New)
 {
-    NiceMock<MockCatalog>* catalog = new NiceMock<MockCatalog>(MetaVolumeType::SsdVolume, 0);
-    CatalogManager* catalogMgr = new CatalogManager(catalog, 0);
-
-    catalogMgr->Init(MetaVolumeType::SsdVolume, 0, 100);
-
     EXPECT_EQ(catalogMgr->GetRegionSizeInLpn(), 1);
-
-    delete catalogMgr;
 }
 
+TEST_F(CatalogManagerFixture, SaveContent_Positive)
+{
+    EXPECT_CALL(*catalog, CheckValidity).WillOnce(Return(true));
+    EXPECT_CALL(*catalog, Store()).WillOnce(Return(true));
+
+    EXPECT_EQ(catalogMgr->SaveContent(), true);
+}
+
+TEST_F(CatalogManagerFixture, SaveContent_Negative)
+{
+    EXPECT_CALL(*catalog, CheckValidity).WillOnce(Return(true));
+    EXPECT_CALL(*catalog, Store()).WillOnce(Return(false));
+
+    EXPECT_EQ(catalogMgr->SaveContent(), false);
+}
+
+TEST_F(CatalogManagerFixture, BackupContent_Positive)
+{
+    EXPECT_CALL(*catalog, Store(_, _, _, _)).WillOnce(Return(true));
+
+    EXPECT_EQ(catalogMgr->BackupContent(MetaVolumeType::SsdVolume, 0, 0), true);
+}
+
+TEST_F(CatalogManagerFixture, BackupContent_Negative)
+{
+    EXPECT_CALL(*catalog, Store(_, _, _, _)).WillOnce(Return(false));
+
+    EXPECT_EQ(catalogMgr->BackupContent(MetaVolumeType::SsdVolume, 0, 0), false);
+}
+
+TEST_F(CatalogManagerFixture, CreateCatalog_Positive)
+{
+    EXPECT_CALL(*catalog, Create).Times(2);
+    EXPECT_CALL(*catalog, RegisterRegionInfo).Times(2);
+    EXPECT_CALL(*catalog, CheckValidity).WillOnce(Return(true));
+    EXPECT_CALL(*catalog, Store()).WillOnce(Return(true));
+
+    EXPECT_EQ(catalogMgr->CreateCatalog(0, 0, true), true);
+
+    EXPECT_EQ(catalogMgr->CreateCatalog(0, 0, false), true);
+}
+
+TEST_F(CatalogManagerFixture, CreateCatalog_Negative)
+{
+    EXPECT_CALL(*catalog, Create).Times(2);
+    EXPECT_CALL(*catalog, RegisterRegionInfo).Times(2);
+    EXPECT_CALL(*catalog, CheckValidity).WillOnce(Return(true));
+    EXPECT_CALL(*catalog, Store()).WillOnce(Return(false));
+
+    EXPECT_EQ(catalogMgr->CreateCatalog(0, 0, true), false);
+
+    EXPECT_EQ(catalogMgr->CreateCatalog(0, 0, false), true);
+}
+
+TEST_F(CatalogManagerFixture, LoadCatalog_Positive)
+{
+    EXPECT_CALL(*catalog, Load()).WillOnce(Return(true));
+    EXPECT_CALL(*catalog, CheckValidity).WillOnce(Return(true));
+
+    EXPECT_EQ(catalogMgr->LoadVolCatalog(), true);
+}
+
+TEST_F(CatalogManagerFixture, LoadCatalog_Negative0)
+{
+    EXPECT_CALL(*catalog, Load()).WillOnce(Return(false));
+
+    EXPECT_EQ(catalogMgr->LoadVolCatalog(), false);
+}
+
+TEST_F(CatalogManagerFixture, LoadCatalog_Negative1)
+{
+    EXPECT_CALL(*catalog, Load()).WillOnce(Return(true));
+    EXPECT_CALL(*catalog, CheckValidity).WillOnce(Return(false));
+
+    EXPECT_EQ(catalogMgr->LoadVolCatalog(), false);
+}
+
+TEST_F(CatalogManagerFixture, RestoreContent_Positive)
+{
+    EXPECT_CALL(*catalog, Load(_, _, _, _)).WillOnce(Return(true));
+    EXPECT_CALL(*catalog, CheckValidity).WillOnce(Return(true));
+
+    EXPECT_EQ(catalogMgr->RestoreContent(MetaVolumeType::SsdVolume, 0, 0), true);
+}
+
+TEST_F(CatalogManagerFixture, RestoreContent_Negative0)
+{
+    EXPECT_CALL(*catalog, Load(_, _, _, _)).WillOnce(Return(false));
+
+    EXPECT_EQ(catalogMgr->RestoreContent(MetaVolumeType::SsdVolume, 0, 0), false);
+}
+
+TEST_F(CatalogManagerFixture, RestoreContent_Negative1)
+{
+    EXPECT_CALL(*catalog, Load(_, _, _, _)).WillOnce(Return(true));
+    EXPECT_CALL(*catalog, CheckValidity).WillOnce(Return(false));
+
+    EXPECT_EQ(catalogMgr->RestoreContent(MetaVolumeType::SsdVolume, 0, 0), false);
+}
 } // namespace pos

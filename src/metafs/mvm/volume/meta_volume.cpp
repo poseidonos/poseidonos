@@ -57,10 +57,6 @@ MetaVolume::MetaVolume(int arrayId, MetaVolumeType metaVolumeType,
             CatalogManager* catalogMgr)
 : MetaVolume()
 {
-    maxVolumeLpn = maxVolumePageNum;
-    volumeType = metaVolumeType;
-    this->arrayId = arrayId;
-
     this->inodeMgr = inodeMgr;
     if (nullptr == inodeMgr)
         this->inodeMgr = new InodeManager(arrayId);
@@ -68,6 +64,10 @@ MetaVolume::MetaVolume(int arrayId, MetaVolumeType metaVolumeType,
     this->catalogMgr = catalogMgr;
     if (nullptr == catalogMgr)
         this->catalogMgr = new CatalogManager(arrayId);
+
+    maxVolumeLpn = maxVolumePageNum;
+    volumeType = metaVolumeType;
+    this->arrayId = arrayId;
 }
 
 MetaVolume::~MetaVolume(void)

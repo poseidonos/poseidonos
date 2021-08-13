@@ -167,18 +167,25 @@ InodeTableHeader::Load(void)
     POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "Load InodeTableHeader contents");
 
-    for (uint32_t i = 0; i < MetaFsConfig::MAX_VOLUME_CNT; ++i)
+    if (true == rc)
     {
-        if (0 != content->allocExtentsList[i].GetCount())
+        for (uint32_t i = 0; i < MetaFsConfig::MAX_VOLUME_CNT; ++i)
         {
-            POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-                "Allocated extent[{}]: start={}, count={}",
-                i, content->allocExtentsList[i].GetStartLpn(),
-                content->allocExtentsList[i].GetCount());
+            if (0 != content->allocExtentsList[i].GetCount())
+            {
+                POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                    "Allocated extent[{}]: start={}, count={}",
+                    i, content->allocExtentsList[i].GetStartLpn(),
+                    content->allocExtentsList[i].GetCount());
+            }
         }
-    }
 
-    return rc;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 bool
@@ -192,18 +199,25 @@ Load(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx,
     POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
             "Load InodeTableHeader contents");
 
-    for (uint32_t i = 0; i < MetaFsConfig::MAX_VOLUME_CNT; ++i)
+    if (true == rc)
     {
-        if (0 != content->allocExtentsList[i].GetCount())
+        for (uint32_t i = 0; i < MetaFsConfig::MAX_VOLUME_CNT; ++i)
         {
-            POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-                "Allocated extent[{}]: start={}, count={}",
-                i, content->allocExtentsList[i].GetStartLpn(),
-                content->allocExtentsList[i].GetCount());
+            if (0 != content->allocExtentsList[i].GetCount())
+            {
+                POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                    "Allocated extent[{}]: start={}, count={}",
+                    i, content->allocExtentsList[i].GetStartLpn(),
+                    content->allocExtentsList[i].GetCount());
+            }
         }
-    }
 
-    return rc;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 bool

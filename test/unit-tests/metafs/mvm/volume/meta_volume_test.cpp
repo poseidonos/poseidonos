@@ -49,6 +49,7 @@ using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Matcher;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 using namespace std;
 
@@ -81,6 +82,17 @@ public:
     void SetVolumeState(MetaVolumeState state)
     {
         this->volumeState = state;
+    }
+    MetaLpnType
+    GetBaseLpn(void)
+    {
+        return MetaVolume::GetBaseLpn();
+    }
+
+    MetaLpnType
+    GetMaxLpn(void)
+    {
+        return MetaVolume::GetMaxLpn();
     }
 };
 
@@ -118,6 +130,7 @@ public:
     TearDown(void)
     {
         delete metaVolume;
+        delete metaStorage;
     }
 
 protected:
@@ -416,5 +429,185 @@ TEST_F(MetaVolumeFixture, CheckBaseLpn)
 TEST_F(MetaVolumeFixture, CheckMaxLpn)
 {
     EXPECT_EQ(metaVolume->GetMaxLpn(), 1024);
+}
+
+TEST_F(MetaVolumeFixture, CheckRegionSizeInLpn)
+{
+    EXPECT_CALL(*catalogMgr, GetRegionSizeInLpn).WillOnce(Return(20));
+    EXPECT_CALL(*inodeMgr, GetRegionSizeInLpn(_))
+        .WillOnce(Return(20))
+        .WillOnce(Return(20));
+
+    EXPECT_EQ(metaVolume->GetRegionSizeInLpn(MetaRegionType::VolCatalog), 20);
+    EXPECT_EQ(metaVolume->GetRegionSizeInLpn(MetaRegionType::FileInodeHdr), 20);
+    EXPECT_EQ(metaVolume->GetRegionSizeInLpn(MetaRegionType::FileInodeTable), 20);
+}
+
+TEST_F(MetaVolumeFixture, CheckInodeList_Negative)
+{
+    std::vector<MetaFileInfoDumpCxt>* fileInfoList = nullptr;
+
+    EXPECT_CALL(*inodeMgr, IsFileInodeInUse).WillRepeatedly(Return(false));
+
+    metaVolume->GetInodeList(fileInfoList);
+}
+
+TEST_F(MetaVolumeFixture, CheckFileCreation_Positive)
+{
+    std::string fileName = "TESTFILE";
+    MetaFsFileControlRequest reqMsg;
+    reqMsg.fileName = &fileName;
+    FileControlResult result = {0, POS_EVENT_ID::SUCCESS};
+
+    EXPECT_CALL(*inodeMgr, CreateFileInode).WillOnce(Return(result));
+
+    result = metaVolume->CreateFile(reqMsg);
+
+    EXPECT_EQ(result.first, 0);
+    EXPECT_EQ(result.second, POS_EVENT_ID::SUCCESS);
+}
+
+TEST_F(MetaVolumeFixture, CheckFileCreation_Negative)
+{
+    std::string fileName = "TESTFILE";
+    MetaFsFileControlRequest reqMsg;
+    reqMsg.fileName = &fileName;
+    FileControlResult result = {0, POS_EVENT_ID::MFS_META_SAVE_FAILED};
+
+    EXPECT_CALL(*inodeMgr, CreateFileInode).WillOnce(Return(result));
+
+    result = metaVolume->CreateFile(reqMsg);
+
+    EXPECT_EQ(result.first, 0);
+    EXPECT_EQ(result.second, POS_EVENT_ID::MFS_META_SAVE_FAILED);
+}
+
+TEST_F(MetaVolumeFixture, CheckFileDeletion_Positive)
+{
+    std::string fileName = "TESTFILE";
+    MetaFsFileControlRequest reqMsg;
+    reqMsg.fileName = &fileName;
+    FileControlResult result = {0, POS_EVENT_ID::SUCCESS};
+
+    EXPECT_CALL(*inodeMgr, DeleteFileInode).WillOnce(Return(result));
+
+    result = metaVolume->DeleteFile(reqMsg);
+
+    EXPECT_EQ(result.first, 0);
+    EXPECT_EQ(result.second, POS_EVENT_ID::SUCCESS);
+}
+
+TEST_F(MetaVolumeFixture, CheckFileDeletion_Negative)
+{
+    std::string fileName = "TESTFILE";
+    MetaFsFileControlRequest reqMsg;
+    reqMsg.fileName = &fileName;
+    FileControlResult result = {0, POS_EVENT_ID::MFS_META_SAVE_FAILED};
+
+    EXPECT_CALL(*inodeMgr, DeleteFileInode).WillOnce(Return(result));
+
+    result = metaVolume->DeleteFile(reqMsg);
+
+    EXPECT_EQ(result.first, 0);
+    EXPECT_EQ(result.second, POS_EVENT_ID::MFS_META_SAVE_FAILED);
+}
+
+TEST_F(MetaVolumeFixture, CheckCreatedFile)
+{
+    StringHashType hash = 1234;
+
+    EXPECT_CALL(*inodeMgr, IsGivenFileCreated).WillOnce(Return(true));
+
+    EXPECT_EQ(metaVolume->IsGivenFileCreated(hash), true);
+}
+
+TEST_F(MetaVolumeFixture, CheckFileSize)
+{
+    EXPECT_CALL(*inodeMgr, GetFileSize).WillOnce(Return(1234));
+
+    EXPECT_EQ(metaVolume->GetFileSize(0), 1234);
+}
+
+TEST_F(MetaVolumeFixture, CheckChunkSize)
+{
+    EXPECT_CALL(*inodeMgr, GetDataChunkSize).WillOnce(Return(1234));
+
+    EXPECT_EQ(metaVolume->GetDataChunkSize(0), 1234);
+}
+
+TEST_F(MetaVolumeFixture, CheckFileBaseLpn)
+{
+    EXPECT_CALL(*inodeMgr, GetFileBaseLpn).WillOnce(Return(1234));
+
+    EXPECT_EQ(metaVolume->GetFileBaseLpn(0), 1234);
+}
+
+TEST_F(MetaVolumeFixture, CheckTrim_Positive)
+{
+    std::string fileName = "TESTFILE";
+
+    MetaFsFileControlRequest reqMsg;
+    reqMsg.fileName = &fileName;
+
+    MetaFileInode inode;
+    inode.data.basic.field.ioAttribute.media = MetaStorageType::SSD;
+    inode.data.basic.field.pagemapCnt = 1;
+    inode.data.basic.field.pagemap[0].SetStartLpn(0);
+    inode.data.basic.field.pagemap[0].SetCount(10);
+
+    // Trim
+    EXPECT_CALL(*inodeMgr, LookupDescriptorByName).WillOnce(Return(0));
+    EXPECT_CALL(*inodeMgr, GetFileInode).WillOnce(ReturnRef(inode));
+
+    // _Trim
+    EXPECT_CALL(*metaStorage, TrimFileData)
+        .WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*metaStorage, WritePage)
+        .WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+
+    EXPECT_EQ(metaVolume->TrimData(reqMsg), true);
+}
+
+TEST_F(MetaVolumeFixture, LookupDescriptorByName)
+{
+    std::string fileName = "TESTFILE";
+
+    EXPECT_CALL(*inodeMgr, LookupDescriptorByName).WillOnce(Return(1));
+
+    EXPECT_EQ(metaVolume->LookupDescriptorByName(fileName), 1);
+}
+
+TEST_F(MetaVolumeFixture, LookupNameByDescriptor)
+{
+    std::string fileName = "TESTFILE";
+
+    EXPECT_CALL(*inodeMgr, LookupNameByDescriptor).WillOnce(Return(fileName));
+
+    EXPECT_EQ(metaVolume->LookupNameByDescriptor(0), fileName);
+}
+
+TEST_F(MetaVolumeFixture, CheckInode)
+{
+    MetaFileInode inode;
+    inode.data.basic.field.ioAttribute.media = MetaStorageType::SSD;
+    inode.data.basic.field.pagemapCnt = 1;
+    inode.data.basic.field.pagemap[0].SetStartLpn(0);
+    inode.data.basic.field.pagemap[0].SetCount(10);
+
+    EXPECT_CALL(*inodeMgr, GetFileInode).WillRepeatedly(ReturnRef(inode));
+
+    EXPECT_EQ(metaVolume->GetInode(0).data.basic.field.ioAttribute.media,
+        inode.data.basic.field.ioAttribute.media);
+    EXPECT_EQ(metaVolume->GetInode(0).data.basic.field.pagemapCnt,
+        inode.data.basic.field.pagemapCnt);
+    EXPECT_EQ(metaVolume->GetInode(0).data.basic.field.pagemap[0].GetStartLpn(),
+        inode.data.basic.field.pagemap[0].GetStartLpn());
+    EXPECT_EQ(metaVolume->GetInode(0).data.basic.field.pagemap[0].GetCount(),
+        inode.data.basic.field.pagemap[0].GetCount());
+}
+
+TEST(MetaVolume, Create)
+{
+    MetaVolumeTester vol(0, MetaVolumeType::SsdVolume);
 }
 } // namespace pos

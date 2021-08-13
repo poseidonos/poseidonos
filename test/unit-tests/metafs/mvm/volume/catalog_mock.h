@@ -47,6 +47,12 @@ public:
     MOCK_METHOD(void, Create, (MetaLpnType maxVolumeLpn, uint32_t maxFileNumSupport));
     MOCK_METHOD(void, RegisterRegionInfo, (MetaRegionType regionType, MetaLpnType baseLpn, MetaLpnType maxLpn));
     MOCK_METHOD(bool, CheckValidity, ());
+    MOCK_METHOD(bool, Store, ());
+    MOCK_METHOD(bool, Store, (MetaStorageType targetMedia, MetaLpnType startLPN,
+        uint32_t idx, MetaLpnType pageCNT));
+    MOCK_METHOD(bool, Load, ());
+    MOCK_METHOD(bool, Load, (MetaStorageType targetMedia, MetaLpnType startLPN,
+        uint32_t idx, MetaLpnType pageCNT));
 };
 
 } // namespace pos
