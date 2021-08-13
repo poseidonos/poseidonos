@@ -98,7 +98,7 @@ ibofos_bringup(){
 
             
     sudo $SPDK_DIR/scripts/rpc.py nvmf_get_subsystems
-    sudo $ROOT_DIR/bin/poseidonos-cli logger set-level --level warn
+    sudo $ROOT_DIR/bin/poseidonos-cli logger set-level --level info
 
 }
 
