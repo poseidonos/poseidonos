@@ -59,7 +59,7 @@ GcMapUpdate::GcMapUpdate(Stripe* stripe, std::string& arrayName, GcStripeMapUpda
 : GcMapUpdate(stripe, arrayName, mapUpdateInfoList, invalidSegCnt, iStripeMap, gcStripeManager,
       EventSchedulerSingleton::Instance(),
       nullptr,
-      ArrayMgr()->GetArrayInfo(arrayName),
+      ArrayMgr()->GetInfo(arrayName)->arrayInfo,
       MapperServiceSingleton::Instance()->GetIVSAMap(arrayName),
       AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName),
       AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName))

@@ -57,12 +57,13 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     }
 
     JsonFormat jFormat;
-    IArrayInfo* array = ArrayMgr()->GetArrayInfo(arrayName);
-    if (array == nullptr)
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
     {
         return jFormat.MakeResponse("ARRAYINFO", rid, (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
             arrayName + " does not exist", GetPosInfo());
     }
+    IArrayInfo* array = info->arrayInfo;
 
     JsonElement data("data");
     string state = array->GetStateCtx()->ToStateType().ToString();

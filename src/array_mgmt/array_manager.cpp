@@ -241,13 +241,13 @@ ArrayManager::GetAbrList(std::vector<ArrayBootRecord>& abrList)
     return result;
 }
 
-IArrayInfo*
-ArrayManager::GetArrayInfo(string name)
+ComponentsInfo*
+ArrayManager::GetInfo(string name)
 {
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
     {
-        return array->GetArray();
+        return array->GetInfo();
     }
     else
     {
@@ -256,14 +256,14 @@ ArrayManager::GetArrayInfo(string name)
     }
 }
 
-IArrayInfo*
-ArrayManager::GetArrayInfo(uint32_t arrayIdx)
+ComponentsInfo*
+ArrayManager::GetInfo(uint32_t arrayIdx)
 {
     for (auto iter = arrayList.begin(); iter != arrayList.end(); iter++)
     {
         if (iter->second->GetArray()->GetIndex() == arrayIdx)
         {
-            return iter->second->GetArray();
+            return iter->second->GetInfo();
         }
     }
 

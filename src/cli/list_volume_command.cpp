@@ -58,8 +58,8 @@ ListVolumeCommand::Execute(json& doc, string rid)
 
     JsonFormat jFormat;
 
-    IArrayInfo* array = ArrayMgr()->GetArrayInfo(arrayName);
-    if (array == nullptr)
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
     {
         return jFormat.MakeResponse(
             "LISTVOLUME", rid, (int)POS_EVENT_ID::ARRAY_WRONG_NAME,

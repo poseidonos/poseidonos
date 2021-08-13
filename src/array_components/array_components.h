@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 
+#include "components_info.h"
 #include "src/array/array.h"
 #include "src/gc/flow_control/flow_control.h"
 #include "src/gc/garbage_collector.h"
@@ -79,6 +80,7 @@ public:
         Nvmf* nvmf,
         ArrayMountSequence* mountSequence = nullptr);
     virtual ~ArrayComponents(void);
+    virtual ComponentsInfo* GetInfo(void);
     virtual int Create(DeviceSet<string> nameSet, string dataRaidType = "RAID5");
     virtual int Load(void);
     virtual int Mount(void);
@@ -119,5 +121,6 @@ private:
 
     // telemetry
     TelemetryPublisher* telPublisher = nullptr;
+    ComponentsInfo* info = nullptr;
 };
 } // namespace pos

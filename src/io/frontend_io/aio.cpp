@@ -356,7 +356,7 @@ AIO::SubmitAsyncAdmin(pos_io& io)
     CallbackSmartPtr adminCompletion(new AdminCompletion(&io, ioContext));
     uint32_t originCore = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
     string arrayName = "POSArray";
-    IArrayInfo* info = ArrayMgr()->GetArrayInfo(arrayName);
+    IArrayInfo* info = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
     IDevInfo* devmgr = DeviceManagerSingleton::Instance();
     IIODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
     IArrayDevMgr* arrayDevMgr = info->GetArrayManager();

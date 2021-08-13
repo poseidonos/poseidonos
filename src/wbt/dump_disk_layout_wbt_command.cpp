@@ -67,7 +67,7 @@ DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
         return 0;
     }
     string arrayName = argv["name"].get<std::string>();
-    IArrayInfo* info = ArrayMgr()->GetArrayInfo(arrayName);
+    IArrayInfo* info = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
     unsigned int arrayIndex = info->GetIndex();
 
     LogicalBlkAddr lsa = {.stripeId = 0, .offset = 0};

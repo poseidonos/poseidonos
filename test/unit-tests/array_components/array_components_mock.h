@@ -20,6 +20,7 @@ public:
     MOCK_METHOD(int, PrepareRebuild, (bool& resume), (override));
     MOCK_METHOD(void, RebuildDone, (), (override));
     MOCK_METHOD(Array*, GetArray, (), (override));
+    MOCK_METHOD(ComponentsInfo*, GetInfo, (), (override));
 };
 
 } // namespace pos

@@ -33,7 +33,7 @@
 #pragma once
 
 #include "src/array_models/dto/device_set.h"
-#include "src/array_models/interface/i_array_info.h"
+#include "src/array_components/components_info.h"
 
 #include <string>
 using namespace std;
@@ -49,7 +49,7 @@ public:
     virtual int Unmount(string name) = 0;
     virtual int AddDevice(string name, string dev) = 0;
     virtual int RemoveDevice(string name, string dev) = 0;
-    virtual IArrayInfo* GetArrayInfo(string name) = 0;
-    virtual IArrayInfo* GetArrayInfo(uint32_t arrayIdx) = 0;
+    virtual ComponentsInfo* GetInfo(string name) = 0;
+    virtual ComponentsInfo* GetInfo(uint32_t arrayIdx) = 0;
 };
 } // namespace pos

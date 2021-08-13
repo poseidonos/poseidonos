@@ -2,7 +2,10 @@
 
 #include <gtest/gtest.h>
 #include "src/include/pos_event_id.h"
+#include "test/unit-tests/gc/garbage_collector_mock.h"
+#include "test/unit-tests/state/state_control_mock.h"
 #include "test/unit-tests/array_components/array_components_mock.h"
+#include "test/unit-tests/array_components/components_info_mock.h"
 #include "test/unit-tests/device/device_manager_mock.h"
 #include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
 #include "test/unit-tests/state/state_manager_mock.h"
@@ -561,46 +564,51 @@ TEST(ArrayManager, GetAbrList_testIfAbrManagerIsQueried)
     ASSERT_EQ(ABR_SUCCESS, actual);
 }
 
-TEST(ArrayManager, GetArrayInfo_testIfTargetArrayCallsGetArray)
+TEST(ArrayManager, GetInfo_testIfTargetArrayCallsGetArray)
 {
     // Given
     string arrayName = "array1";
     auto mockArrayComp = BuildMockArrayComponents(arrayName);
     auto mockArray = BuildMockArray(arrayName);
+    auto mockStateControl = new MockStateControl();
+    auto mockGc = new MockGarbageCollector(mockArray.get(), mockStateControl);
+    MockComponentsInfo* mockCompInfo = new MockComponentsInfo(mockArray.get(), mockGc);
     auto arrayMap = BuildArrayComponentsMap(arrayName, mockArrayComp.get());
     auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr, nullptr);
     arrayMgr->SetArrayComponentMap(arrayMap);
-
-    EXPECT_CALL(*mockArrayComp, GetArray).WillOnce(Return(mockArray.get()));
+    EXPECT_CALL(*mockArrayComp, GetInfo).WillOnce(Return(mockCompInfo));
 
     // When
-    auto actual = arrayMgr->GetArrayInfo(arrayName);
+    auto actual = arrayMgr->GetInfo(arrayName);
 
     // Then
     ASSERT_TRUE(actual != nullptr);
 }
 
-TEST(ArrayManager, GetArrayInfo_testIfTargetArrayCallsGetArrayWithIndex)
+TEST(ArrayManager, GetInfo_testIfTargetArrayCallsGetArrayWithIndex)
 {
     // Given
     string arrayName = "array1";
     unsigned int arrayIndex = 0;
     auto mockArrayComp = BuildMockArrayComponents(arrayName);
     auto mockArray = BuildMockArray(arrayName);
+    auto mockStateControl = new MockStateControl();
+    auto mockGc = new MockGarbageCollector(mockArray.get(), mockStateControl);
+    MockComponentsInfo* mockCompInfo = new MockComponentsInfo(mockArray.get(), mockGc);
     auto arrayMap = BuildArrayComponentsMap(arrayName, mockArrayComp.get());
     auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr, nullptr);
     arrayMgr->SetArrayComponentMap(arrayMap);
-
+    EXPECT_CALL(*mockArrayComp, GetInfo).WillOnce(Return(mockCompInfo));
     EXPECT_CALL(*mockArrayComp, GetArray).WillRepeatedly(Return(mockArray.get()));
 
     // When
-    auto actual = arrayMgr->GetArrayInfo(arrayIndex);
+    auto actual = arrayMgr->GetInfo(arrayIndex);
 
     // Then
     ASSERT_TRUE(actual != nullptr);
 }
 
-TEST(ArrayManager, GetArrayInfo_testIfReturnsNullWhenGivenArrayDoesntExist)
+TEST(ArrayManager, GetInfo_testIfReturnsNullWhenGivenArrayDoesntExist)
 {
     // Given
     string arrayName = "array1";
@@ -608,7 +616,7 @@ TEST(ArrayManager, GetArrayInfo_testIfReturnsNullWhenGivenArrayDoesntExist)
     auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr, nullptr);
 
     // When
-    auto actual = arrayMgr->GetArrayInfo(arrayName);
+    auto actual = arrayMgr->GetInfo(arrayName);
 
     // Then
     ASSERT_EQ(nullptr, actual);

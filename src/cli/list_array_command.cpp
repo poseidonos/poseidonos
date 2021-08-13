@@ -95,7 +95,7 @@ ListArrayCommand::Execute(json& doc, string rid)
             string createDatetime(abr.createDatetime);
             string updateDatetime(abr.updateDatetime);
             string arrayStatus("Unmounted");
-            IArrayInfo* info = ArrayMgr()->GetArrayInfo(arrayName);
+            IArrayInfo* info = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
             if (info != nullptr)
             {
                 if (info->GetState() >= ArrayStateEnum::NORMAL)

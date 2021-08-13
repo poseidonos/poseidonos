@@ -47,12 +47,13 @@ class MockTelemetryClient;
 class UBlockDevice;
 class StateManager;
 class ArrayComponents;
+class Array;
 
 // Mock Builders
 MockAffinityManager BuildDefaultAffinityManagerMock(void);
 std::shared_ptr<UBlockDevice> BuildMockUBlockDevice(const char* devName, const std::string& SN);
 std::shared_ptr<MockArray> BuildMockArray(std::string arrayName);
-std::shared_ptr<MockArrayComponents> BuildMockArrayComponents(std::string arrayName);
+std::shared_ptr<MockArrayComponents> BuildMockArrayComponents(std::string arrayName, Array* array = nullptr);
 std::shared_ptr<MockArrayComponents> BuildMockArrayComponents(std::string arrayName, StateManager* stateManager);
 MockArrayComponents* NewMockArrayComponents(std::string arrayName);
 std::shared_ptr<MockAbrManager> BuildMockAbrManager(void);

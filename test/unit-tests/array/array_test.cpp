@@ -1544,32 +1544,6 @@ TEST(Array, TriggerRebuild_testIfRebuildNotTriggeredWhenFlushFailed)
     delete mockArrDev;
 }
 
-TEST(Array, ResumeRebuild_testIfResumeRebuildProperly)
-{
-    // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
-    MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
-    NiceMock<MockIStateControl> mockIStateControl;
-    MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockIAbrControl mockAbrControl;
-    MockArrayInterface* mockArrayInterface = new MockArrayInterface;
-    MockArrayRebuilder mockArrayRebuilder(NULL);
-    std::list<RebuildTarget*> emptyTargets;
-
-    int REPLACE_SUCCESS = 0;
-    EXPECT_CALL(*mockState, SetRebuild).WillOnce(Return(true));
-    EXPECT_CALL(*mockArrayInterface, GetRebuildTargets).WillRepeatedly(Return(emptyTargets));
-
-    Array array("mock-array", &mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, mockArrayInterface, NULL, NULL);
-
-    // When
-    bool actual = array.ResumeRebuild(mockArrDev);
-
-    // Then
-    ASSERT_TRUE(actual);
-    delete mockArrDev;
-}
-
 TEST(Array, ResumeRebuild_testIfResumeRebuildFailedWhenStateChangeFailed)
 {
     // Given
@@ -1594,6 +1568,32 @@ TEST(Array, ResumeRebuild_testIfResumeRebuildFailedWhenStateChangeFailed)
 
     // Then
     ASSERT_FALSE(actual);
+    delete mockArrDev;
+}
+
+TEST(Array, ResumeRebuild_testIfResumeRebuildProperly)
+{
+    // Given
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
+    NiceMock<MockIStateControl> mockIStateControl;
+    MockArrayState* mockState = new MockArrayState(&mockIStateControl);
+    MockIAbrControl mockAbrControl;
+    MockArrayInterface* mockArrayInterface = new MockArrayInterface;
+    MockArrayRebuilder mockArrayRebuilder(NULL);
+    std::list<RebuildTarget*> emptyTargets;
+
+    int REPLACE_SUCCESS = 0;
+    EXPECT_CALL(*mockState, SetRebuild).WillOnce(Return(true));
+    EXPECT_CALL(*mockArrayInterface, GetRebuildTargets).WillRepeatedly(Return(emptyTargets));
+
+    Array array("mock-array", &mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, mockArrayInterface, NULL, NULL);
+
+    // When
+    bool actual = array.ResumeRebuild(mockArrDev);
+
+    // Then
+    ASSERT_TRUE(actual);
     delete mockArrDev;
 }
 

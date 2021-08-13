@@ -84,11 +84,11 @@ BuildMockArrayComponents(std::string arrayName, StateManager* stateManager)
 }
 
 std::shared_ptr<MockArrayComponents>
-BuildMockArrayComponents(std::string arrayName)
+BuildMockArrayComponents(std::string arrayName, Array* array)
 {
     NiceMock<MockStateManager>* mockStateMgr = new NiceMock<MockStateManager>();
     return std::make_shared<MockArrayComponents>(arrayName, nullptr, nullptr,
-        mockStateMgr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        mockStateMgr, nullptr, array, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr);
 }
 

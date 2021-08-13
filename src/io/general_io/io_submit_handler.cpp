@@ -64,7 +64,7 @@ IOSubmitHandler::SyncIO(
     LogicalBlkAddr& startLSA, uint64_t blockCount,
     PartitionType partitionToIO, std::string arrayName)
 {
-    IArrayInfo* info = ArrayMgr()->GetArrayInfo(arrayName);
+    IArrayInfo* info = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
 
     return SyncIO(direction, bufferList, startLSA, blockCount, partitionToIO, info->GetIndex());
 }
@@ -110,7 +110,7 @@ IOSubmitHandler::SubmitAsyncIO(
     CallbackSmartPtr callback,
     std::string arrayName)
 {
-    IArrayInfo* info = ArrayMgr()->GetArrayInfo(arrayName);
+    IArrayInfo* info = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
     return SubmitAsyncIO(direction, bufferList, startLSA, blockCount, partitionToIO, callback, info->GetIndex());
 }
 
@@ -123,7 +123,7 @@ IOSubmitHandler::SubmitAsyncByteIO(
     CallbackSmartPtr callback,
     std::string arrayName)
 {
-    IArrayInfo* info = ArrayMgr()->GetArrayInfo(arrayName);
+    IArrayInfo* info = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
     return SubmitAsyncByteIO(direction, buffer, startLSA, partitionToIO, callback, info->GetIndex());
 }
 

@@ -63,18 +63,13 @@ FlushAllUserDataWbtCommand::Execute(Args& argv, JsonElement& elem)
         return res;
     }
 
-    ArrayComponents* compo = ArrayManagerSingleton::Instance()->_FindArray(arrayName);
-    if (compo == nullptr)
-    {
-        return res;
-    }
-    Array* sysArray = compo->GetArray();
-    if (sysArray == nullptr)
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
     {
         return res;
     }
 
-    ArrayStateType posState = sysArray->GetState();
+    ArrayStateType posState = info->arrayInfo->GetState();
     if (posState == ArrayStateEnum::NORMAL || posState == ArrayStateEnum::DEGRADED ||
         posState == ArrayStateEnum::REBUILD)
     {

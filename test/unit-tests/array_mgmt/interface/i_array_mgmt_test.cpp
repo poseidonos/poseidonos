@@ -28,7 +28,7 @@ TEST(IArrayMgmt, RemoveDevice_)
 {
 }
 
-TEST(IArrayMgmt, GetArrayInfo_)
+TEST(IArrayMgmt, GetInfo_)
 {
 }
 

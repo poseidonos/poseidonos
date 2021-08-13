@@ -37,6 +37,7 @@
 #include "src/gc/copier.h"
 #include "src/gc/gc_status.h"
 #include "src/gc/interface/i_gc_control.h"
+#include "src/gc/interface/i_gc_info.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/state/interface/i_state_control.h"
 #include "src/state/interface/i_state_observer.h"
@@ -48,8 +49,8 @@ class Copier;
 class EventScheduler;
 using CopierSmartPtr = std::shared_ptr<Copier>;
 
-class GarbageCollector : public IGCControl, public IMountSequence,
-                         public IStateObserver
+class GarbageCollector : public IGCControl, public IGCInfo,
+                         public IMountSequence, public IStateObserver
 {
 public:
     explicit GarbageCollector(IArrayInfo* i, IStateControl* s);

@@ -61,12 +61,13 @@ GetPartitionSizeWbtCommand::Execute(Args& argv, JsonElement& elem)
         return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
     }
 
-    IArrayInfo* array = ArrayMgr()->GetArrayInfo(arrayName);
-    if (array == nullptr)
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
     {
         return (int)POS_EVENT_ID::ARRAY_NOT_FOUND;
     }
 
+    IArrayInfo* array = info->arrayInfo;
     string state = array->GetState().ToString();
     if (state == "NORMAL" || state == "DEGRADED" || state == "REBUILD")
     {

@@ -1,2 +1,2 @@
-POS_ADD_UNIT_TEST(array_components_ut array_components_test.cpp)
+POS_ADD_UNIT_TEST(components_info_ut components_info_test.cpp)
 POS_ADD_UNIT_TEST(array_mount_sequence_ut array_mount_sequence_test.cpp)

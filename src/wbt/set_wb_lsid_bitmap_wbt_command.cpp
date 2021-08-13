@@ -59,8 +59,8 @@ SetWbLsidBitmapWbtCommand::Execute(Args &argv, JsonElement &elem)
         return res;
     }
 
-    IArrayInfo* array = ArrayMgr()->GetArrayInfo(arrayName);
-    if (array == nullptr)
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
     {
         return res;
     }

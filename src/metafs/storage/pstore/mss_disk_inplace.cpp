@@ -53,7 +53,7 @@ MssDiskInplace::MssDiskInplace(int arrayId, MetaStorageType mediaType, uint64_t 
         partitionType = pos::PartitionType::META_NVM;
     }
 
-    array = pos::ArrayMgr()->GetArrayInfo(arrayId);
+    array = pos::ArrayMgr()->GetInfo(arrayId)->arrayInfo;
 }
 
 MssDiskInplace::~MssDiskInplace(void)

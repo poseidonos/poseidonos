@@ -56,14 +56,15 @@ ListArrayDeviceCommand::Execute(json& doc, string rid)
 
     JsonFormat jFormat;
 
-    IArrayInfo* array = ArrayMgr()->GetArrayInfo(arrayName);
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
 
-    if (array == nullptr)
+    if (info == nullptr)
     {
         return jFormat.MakeResponse("LISTARRAYDEVICE", rid, (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
             arrayName + " does not exist", GetPosInfo());
     }
 
+    IArrayInfo* array = info->arrayInfo;
     DeviceSet<string> nameSet = array->GetDevNames();
 
     if (nameSet.nvm.size() == 0 && nameSet.data.size() == 0)

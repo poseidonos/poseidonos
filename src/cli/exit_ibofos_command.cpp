@@ -68,7 +68,7 @@ ExitIbofosCommand::Execute(json& doc, string rid)
             POS_TRACE_DEBUG(eventId, "Found {} arrays from abr list", abrList.size());
             for (const auto& abr : abrList)
             {
-                IArrayInfo* arrayInfo = ArrayMgr()->GetArrayInfo(abr.arrayName);
+                IArrayInfo* arrayInfo = ArrayMgr()->GetInfo(abr.arrayName)->arrayInfo;
 
                 if (arrayInfo == nullptr)
                 {

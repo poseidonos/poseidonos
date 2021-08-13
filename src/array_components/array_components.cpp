@@ -110,6 +110,12 @@ ArrayComponents::~ArrayComponents(void)
 {
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "Deleting array component for {}", arrayName);
 
+    if (info != nullptr)
+    {
+        delete info;
+        info = nullptr;
+        POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "ComponentsInfo for {} has been deleted.", arrayName);
+    }
     _DestructMetaComponentsInOrder();
     if (arrayMountSequence != nullptr)
     {
@@ -147,6 +153,12 @@ ArrayComponents::~ArrayComponents(void)
 
     stateMgr->RemoveStateControl(arrayName);
     POS_TRACE_DEBUG(EID(ARRAY_COMPONENTS_DEBUG_MSG), "StateManager has removed StateControl for {}", arrayName);
+}
+
+ComponentsInfo*
+ArrayComponents::GetInfo(void)
+{
+    return info;
 }
 
 int
@@ -259,7 +271,8 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
         || nvmf != nullptr
         || meta != nullptr
         || flowControl != nullptr
-        || gc != nullptr)
+        || gc != nullptr
+        || info != nullptr)
     {
         POS_TRACE_WARN(EID(ARRAY_COMPONENTS_LEAK), "Meta Components exist already. Possible memory leak (or is it a mock?). Skipping.");
         return;
@@ -273,6 +286,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     rbaStateMgr = new RBAStateManager(array->GetName(), array->GetIndex());
     flowControl = new FlowControl(array);
     gc = new GarbageCollector(array, state);
+    info = new ComponentsInfo(array, gc);
 }
 
 void

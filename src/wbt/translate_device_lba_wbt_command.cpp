@@ -73,7 +73,7 @@ TranslateDeviceLbaWbtCommand::Execute(Args& argv, JsonElement& elem)
     if (argv.contains("name"))
     {
         arrayName = argv["name"].get<std::string>();
-        arrayIndex = ArrayMgr()->GetArrayInfo(arrayName)->GetIndex();
+        arrayIndex = ArrayMgr()->GetInfo(arrayName)->arrayInfo->GetIndex();
     }
     else
     {
