@@ -58,7 +58,7 @@ SpaceInfo::OPSize(std::string& arrayName)
 uint64_t
 SpaceInfo::TotalCapacity(std::string& arrayName)
 {
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    IArrayInfo* info = ArrayMgr()->GetArrayInfo(arrayName);
     if (info != nullptr)
     {
         const PartitionLogicalSize* ptnSize =

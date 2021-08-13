@@ -139,7 +139,7 @@ MergedIO::_CheckAsyncReadError(POS_EVENT_ID eventId, int arrayId)
     if (StateEnum::TYPE_COUNT == stateType)
     {
         /*To do Remove after adding array Idx by Array*/
-        IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayId);
+        IArrayInfo* info = ArrayMgr()->GetArrayInfo(arrayId);
 
         IStateControl* stateControl = StateManagerSingleton::Instance()->GetStateControl(info->GetName());
         stateType = stateControl->GetState()->ToStateType();

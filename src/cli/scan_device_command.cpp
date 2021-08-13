@@ -53,7 +53,7 @@ ScanDeviceCommand::Execute(json& doc, string rid)
 {
     list<string> failedArrayList;
     DeviceManagerSingleton::Instance()->ScanDevs();
-    int result = ArrayMgr::Instance()->Load(failedArrayList);
+    int result = ArrayManagerSingleton::Instance()->Load(failedArrayList);
     JsonFormat jFormat;
     if (result != 0)
     {

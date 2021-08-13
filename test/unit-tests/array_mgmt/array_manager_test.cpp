@@ -476,38 +476,6 @@ TEST(ArrayManager, RebuildDone_testIfRebuildDoneIsntInvokedWhenWrongNameIsGiven)
     // Then: verify the expectation
 }
 
-TEST(ArrayManager, ArrayExists_testIfGivenArrayNameExists)
-{
-    // Given
-    string existingArray = "array1";
-    auto mockArrayComp = BuildMockArrayComponents(existingArray);
-    auto arrayMap = BuildArrayComponentsMap(existingArray, mockArrayComp.get());
-    auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr, nullptr);
-    arrayMgr->SetArrayComponentMap(arrayMap);
-
-    // When
-    bool actual = arrayMgr->ArrayExists(existingArray);
-
-    // Then
-    ASSERT_TRUE(actual);
-}
-
-TEST(ArrayManager, ArrayExists_testIfGivenArrayNameDoesntExist)
-{
-    // Given
-    string nonExistentArray = "array1";
-    auto mockArrayComp = BuildMockArrayComponents(nonExistentArray);
-    auto emptyArrayMap = BuildArrayComponentsMap();
-    auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr, nullptr);
-    arrayMgr->SetArrayComponentMap(emptyArrayMap);
-
-    // When
-    bool actual = arrayMgr->ArrayExists(nonExistentArray);
-
-    // Then
-    ASSERT_FALSE(actual);
-}
-
 TEST(ArrayManager, Load_testIfTryToLoadEveryArrayInArrayBootRecordAndReturnFailuresViaOutParam)
 {
     // Given

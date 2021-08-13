@@ -105,7 +105,7 @@ DebugInfo::Update(void)
     logger = LoggerSingleton::Instance();
     dumpManager = DumpManagerSingleton::Instance();
     mapperService = MapperServiceSingleton::Instance();
-    arrayManager = ArrayMgr::Instance();
+    arrayManager = ArrayManagerSingleton::Instance();
     allocatorService = AllocatorServiceSingleton::Instance();
     uramDrv = UramDrvSingleton::Instance();
     unvmeDrv = UnvmeDrvSingleton::Instance();

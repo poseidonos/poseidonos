@@ -59,7 +59,7 @@ RemoveDeviceCommand::Execute(json& doc, string rid)
             arrayName = doc["param"]["array"].get<std::string>();
         }
 
-        IArrayMgmt* array = ArrayMgr::Instance();
+        IArrayMgmt* array = ArrayMgr();
         int ret = array->RemoveDevice(arrayName, devName);
         if (ret == 0)
         {

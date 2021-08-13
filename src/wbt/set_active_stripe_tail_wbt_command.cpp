@@ -58,8 +58,8 @@ SetActiveStripeTailWbtCommand::Execute(Args &argv, JsonElement &elem)
         return res;
     }
 
-    bool arrayExist = ArrayMgr::Instance()->ArrayExists(arrayName);
-    if (arrayExist == false)
+    IArrayInfo* array = ArrayMgr()->GetArrayInfo(arrayName);
+    if (array == nullptr)
     {
         return res;
     }

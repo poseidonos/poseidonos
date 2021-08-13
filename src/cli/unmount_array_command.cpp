@@ -56,7 +56,7 @@ UnmountArrayCommand::Execute(json& doc, string rid)
 
     JsonFormat jFormat;
 
-    IArrayMgmt* array =  ArrayMgr::Instance();
+    IArrayMgmt* array =  ArrayMgr();
     int ret = array->Unmount(arrayName);
     if (ret != 0)
     {

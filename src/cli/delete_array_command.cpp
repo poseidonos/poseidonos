@@ -54,7 +54,7 @@ DeleteArrayCommand::Execute(json& doc, string rid)
         arrayName = doc["param"]["name"].get<std::string>();
     }
 
-    IArrayMgmt* array = ArrayMgr::Instance();
+    IArrayMgmt* array = ArrayMgr();
     int ret = array->Delete(arrayName);
     JsonFormat jFormat;
     if (0 != ret)

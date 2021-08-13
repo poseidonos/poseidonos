@@ -56,7 +56,7 @@ MountArrayCommand::Execute(json& doc, string rid)
 
     JsonFormat jFormat;
 
-    IArrayMgmt* array = ArrayMgr::Instance();
+    IArrayMgmt* array = ArrayMgr();
     int ret = array->Mount(arrayName);
     if (0 != ret)
     {

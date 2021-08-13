@@ -154,7 +154,7 @@ GetGcStatusWbtCommand::Execute(Args &argv, JsonElement &elem)
     gcElem.SetElement(timeElem);
 
     const PartitionLogicalSize* udSize;
-    IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    IArrayInfo* info = ArrayMgr()->GetArrayInfo(arrayName);
     udSize = info->GetSizeInfo(PartitionType::USER_DATA);
     uint32_t totalSegments = udSize->totalSegments;
 

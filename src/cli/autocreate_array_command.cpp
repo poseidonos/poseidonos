@@ -94,7 +94,7 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
             "AUTOCREATEARRAY", rid, res.code, "failed to create " + arrayName + "(code:" + to_string(res.code) + ")", GetPosInfo());
     }
 
-    IArrayMgmt* array = ArrayMgr::Instance();
+    IArrayMgmt* array = ArrayMgr();
     // TODO(SRM): interactive cli to select from multiple-options.
     int ret = array->Create(arrayName, res.options.front().devs, raidType);
     if (0 != ret)

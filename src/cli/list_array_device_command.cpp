@@ -56,7 +56,7 @@ ListArrayDeviceCommand::Execute(json& doc, string rid)
 
     JsonFormat jFormat;
 
-    IArrayInfo* array = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    IArrayInfo* array = ArrayMgr()->GetArrayInfo(arrayName);
 
     if (array == nullptr)
     {

@@ -91,7 +91,7 @@ string CreateArrayCommand::Execute(json& doc, string rid)
         }
     }
 
-    IArrayMgmt* array = ArrayMgr::Instance();
+    IArrayMgmt* array = ArrayMgr();
     ret = array->Create(arrayName, nameSet, raidType);
     if (0 != ret)
     {

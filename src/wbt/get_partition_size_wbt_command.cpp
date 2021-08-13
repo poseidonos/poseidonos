@@ -61,7 +61,7 @@ GetPartitionSizeWbtCommand::Execute(Args& argv, JsonElement& elem)
         return (int)POS_EVENT_ID::ARRAY_WRONG_NAME;
     }
 
-    IArrayInfo* array = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    IArrayInfo* array = ArrayMgr()->GetArrayInfo(arrayName);
     if (array == nullptr)
     {
         return (int)POS_EVENT_ID::ARRAY_NOT_FOUND;

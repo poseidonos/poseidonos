@@ -18,6 +18,8 @@ public:
     MOCK_METHOD(int, Unmount, (string name), (override));
     MOCK_METHOD(int, AddDevice, (string name, string dev), (override));
     MOCK_METHOD(int, RemoveDevice, (string name, string dev), (override));
+    MOCK_METHOD(IArrayInfo*, GetArrayInfo, (string name), (override));
+    MOCK_METHOD(IArrayInfo*, GetArrayInfo, (uint32_t arrayIdx), (override));
 };
 
 } // namespace pos

@@ -234,12 +234,6 @@ ArrayManager::DeviceAttached(UblockSharedPtr dev)
     }
 }
 
-bool
-ArrayManager::ArrayExists(string name)
-{
-    return _FindArray(name) != nullptr;
-}
-
 int
 ArrayManager::GetAbrList(std::vector<ArrayBootRecord>& abrList)
 {

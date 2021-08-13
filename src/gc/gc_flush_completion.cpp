@@ -59,7 +59,7 @@ GcFlushCompletion::GcFlushCompletion(Stripe* stripe, std::string& arrayName, GcS
 : GcFlushCompletion(stripe, arrayName, gcStripeManager, dataBuffer,
                     nullptr,
                     RBAStateServiceSingleton::Instance()->GetRBAStateManager(arrayName),
-                    ArrayMgr::Instance()->GetArrayInfo(arrayName))
+                    ArrayMgr()->GetArrayInfo(arrayName))
 {
 }
 

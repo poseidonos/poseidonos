@@ -66,7 +66,7 @@ GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>
                     AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayName),
                     IIOSubmitHandler::GetInstance(),
                     FlowControlServiceSingleton::Instance()->GetFlowControl(arrayName),
-                    ArrayMgr::Instance()->GetArrayInfo(arrayName))
+                    ArrayMgr()->GetArrayInfo(arrayName))
 {
 }
 

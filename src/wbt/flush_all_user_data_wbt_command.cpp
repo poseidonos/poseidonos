@@ -63,7 +63,7 @@ FlushAllUserDataWbtCommand::Execute(Args& argv, JsonElement& elem)
         return res;
     }
 
-    ArrayComponents* compo = ArrayMgr::Instance()->_FindArray(arrayName);
+    ArrayComponents* compo = ArrayManagerSingleton::Instance()->_FindArray(arrayName);
     if (compo == nullptr)
     {
         return res;

@@ -58,9 +58,9 @@ namespace pos
 GcMapUpdateCompletion::GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
                                             EventScheduler* eventScheduler, GcStripeManager* gcStripeManager)
 : GcMapUpdateCompletion(stripe, arrayName, iStripeMap, eventScheduler, gcStripeManager,
-                        ArrayMgr::Instance()->GetArrayInfo(arrayName),
+                        ArrayMgr()->GetArrayInfo(arrayName),
                         RBAStateServiceSingleton::Instance()->GetRBAStateManager(arrayName),
-                        VolumeServiceSingleton::Instance()->GetVolumeManager(ArrayMgr::Instance()->GetArrayInfo(arrayName)->GetIndex()))
+                        VolumeServiceSingleton::Instance()->GetVolumeManager(ArrayMgr()->GetArrayInfo(arrayName)->GetIndex()))
 {
 }
 

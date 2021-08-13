@@ -77,18 +77,18 @@ public:
     virtual int Unmount(string name) override;
     virtual int AddDevice(string name, string dev) override;
     virtual int RemoveDevice(string name, string dev) override;
+    virtual IArrayInfo* GetArrayInfo(string name) override;
+    virtual IArrayInfo* GetArrayInfo(uint32_t arrayIdx) override;
+
     virtual int DeviceDetached(UblockSharedPtr dev) override;
     virtual void DeviceAttached(UblockSharedPtr dev) override;
 
     virtual int PrepareRebuild(string name, bool& resume) override;
     virtual void RebuildDone(string name) override;
 
-    virtual bool ArrayExists(string name);
     virtual bool AbrExists(string name);
     virtual int Load(list<string>& failedArrayList);
     virtual int GetAbrList(vector<ArrayBootRecord>& abrList);
-    virtual IArrayInfo* GetArrayInfo(string name);
-    virtual IArrayInfo* GetArrayInfo(uint32_t arrayIdx);
     virtual int ResetMbr(void);
 
     // UT helper funcs, not meant for Prod usage
@@ -109,5 +109,11 @@ private:
     TelemetryClient* telClient = nullptr;
     function<ArrayComponents*(string, IArrayRebuilder*, IAbrControl*)> arrayComponentsFactory = nullptr;
 };
-using ArrayMgr = Singleton<ArrayManager>;
+using ArrayManagerSingleton = Singleton<ArrayManager>;
+inline IArrayMgmt*
+ArrayMgr(void)
+{
+    return ArrayManagerSingleton::Instance();
+}
+
 } // namespace pos

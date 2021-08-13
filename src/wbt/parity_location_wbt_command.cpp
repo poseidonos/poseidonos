@@ -71,7 +71,7 @@ ParityLocationWbtCommand::Execute(Args &argv, JsonElement &elem)
     string arrayName = argv["name"].get<std::string>();
 
 
-    ArrayComponents* compo = ArrayMgr::Instance()->_FindArray(arrayName);
+    ArrayComponents* compo = ArrayManagerSingleton::Instance()->_FindArray(arrayName);
     if (compo == nullptr)
     {
         out << "array does not exist" << endl;

@@ -58,7 +58,7 @@ ExitIbofosCommand::Execute(json& doc, string rid)
 
     int ret = 0;
     std::vector<ArrayBootRecord> abrList;
-    ret = ArrayMgr::Instance()->GetAbrList(abrList);
+    ret = ArrayManagerSingleton::Instance()->GetAbrList(abrList);
 
     if (ret == 0)
     {
@@ -68,7 +68,7 @@ ExitIbofosCommand::Execute(json& doc, string rid)
             POS_TRACE_DEBUG(eventId, "Found {} arrays from abr list", abrList.size());
             for (const auto& abr : abrList)
             {
-                IArrayInfo* arrayInfo = ArrayMgr::Instance()->GetArrayInfo(abr.arrayName);
+                IArrayInfo* arrayInfo = ArrayMgr()->GetArrayInfo(abr.arrayName);
 
                 if (arrayInfo == nullptr)
                 {

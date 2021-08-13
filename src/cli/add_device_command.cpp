@@ -58,7 +58,7 @@ AddDeviceCommand::Execute(json& doc, string rid)
     if (doc["param"].contains("spare"))
     {
         string devName = doc["param"]["spare"][0]["deviceName"];
-        IArrayMgmt* array = ArrayMgr::Instance();
+        IArrayMgmt* array = ArrayMgr();
         int ret = array->AddDevice(arrayName, devName);
         if (ret == 0)
         {

@@ -28,4 +28,8 @@ TEST(IArrayMgmt, RemoveDevice_)
 {
 }
 
+TEST(IArrayMgmt, GetArrayInfo_)
+{
+}
+
 } // namespace pos

@@ -92,7 +92,7 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inp
     if (nullptr == inputFlowControl)
     {
         /*To do Remove after adding array Idx by Array*/
-        IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(volumeIo->GetArrayId());
+        IArrayInfo* info = ArrayMgr()->GetArrayInfo(volumeIo->GetArrayId());
 
         flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(info->GetName());
     }
@@ -379,7 +379,7 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
             POS_TRACE_DEBUG(eventId, PosEventId::GetString(eventId));
 
             /*To do Remove after adding array Idx by Array*/
-            IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(volumeIo->GetArrayId());
+            IArrayInfo* info = ArrayMgr()->GetArrayInfo(volumeIo->GetArrayId());
 
             IStateControl* stateControl =
                 StateManagerSingleton::Instance()->GetStateControl(info->GetName());

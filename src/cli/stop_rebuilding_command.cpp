@@ -51,7 +51,7 @@ StopRebuildingCommand::Execute(json& doc, string rid)
 {
     JsonFormat jFormat;
     string arrayName = doc["param"]["name"].get<std::string>();
-    IArrayRebuilder* rebuilder = ArrayMgr::Instance()->arrayRebuilder;
+    IArrayRebuilder* rebuilder = ArrayManagerSingleton::Instance()->arrayRebuilder;
     rebuilder->StopRebuild(arrayName);
     rebuilder->WaitRebuildDone(arrayName);
     return jFormat.MakeResponse("STOPREBUILDING", rid, SUCCESS,

@@ -63,7 +63,7 @@ ListArrayCommand::Execute(json& doc, string rid)
     JsonFormat jFormat;
     JsonElement data("data");
     std::vector<ArrayBootRecord> abrList;
-    int result = ArrayMgr::Instance()->GetAbrList(abrList);
+    int result = ArrayManagerSingleton::Instance()->GetAbrList(abrList);
 
     if (result != 0)
     {
@@ -95,7 +95,7 @@ ListArrayCommand::Execute(json& doc, string rid)
             string createDatetime(abr.createDatetime);
             string updateDatetime(abr.updateDatetime);
             string arrayStatus("Unmounted");
-            IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+            IArrayInfo* info = ArrayMgr()->GetArrayInfo(arrayName);
             if (info != nullptr)
             {
                 if (info->GetState() >= ArrayStateEnum::NORMAL)

@@ -57,16 +57,9 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     }
 
     JsonFormat jFormat;
-    IArrayInfo* array = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    IArrayInfo* array = ArrayMgr()->GetArrayInfo(arrayName);
     if (array == nullptr)
     {
-        int result = ArrayMgr::Instance()->AbrExists(arrayName);
-        if (result)
-        {
-            return jFormat.MakeResponse("ARRAYINFO", rid, (int)POS_EVENT_ID::ARRAY_LOAD_FAIL,
-                "Failed to load" + arrayName, GetPosInfo());
-        }
-
         return jFormat.MakeResponse("ARRAYINFO", rid, (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
             arrayName + " does not exist", GetPosInfo());
     }

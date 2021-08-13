@@ -65,7 +65,7 @@ GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName, Gc
     MapperServiceSingleton::Instance()->GetIVSAMap(arrayName),
     JournalServiceSingleton::Instance(),
     EventSchedulerSingleton::Instance(),
-    ArrayMgr::Instance()->GetArrayInfo(arrayName))
+    ArrayMgr()->GetArrayInfo(arrayName))
 {
 }
 

@@ -57,7 +57,7 @@ GetMaxVolumeCountCommand::Execute(json& doc, string rid)
     JsonElement data("data");
 
     std::vector<ArrayBootRecord> abrList;
-    ArrayMgr::Instance()->GetAbrList(abrList);
+    ArrayManagerSingleton::Instance()->GetAbrList(abrList);
     int arrayCnt = 0;
 
     if (!abrList.empty())

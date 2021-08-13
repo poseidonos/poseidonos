@@ -52,7 +52,7 @@ ResetMbrCommand::Execute(json& doc, string rid)
 {
     JsonFormat jFormat;
     JsonElement data("data");
-    int result = ArrayMgr::Instance()->ResetMbr();
+    int result = ArrayManagerSingleton::Instance()->ResetMbr();
 
     if (result != 0)
     {
