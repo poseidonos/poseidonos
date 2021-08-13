@@ -42,19 +42,8 @@ namespace pos
 {
 StateControl::StateControl(void)
 {
-    curr = &defaultCtx;
     stateList = new StateList(bind(&StateControl::_ListUpdated,
-        this, placeholders::_1));
-    stateList->Add(curr);
-    publisher = new StatePublisher();
-}
-
-StateControl::StateControl(StateContext* defaultCtx)
-{
-    curr = defaultCtx;
-    stateList = new StateList(bind(&StateControl::_ListUpdated,
-        this, placeholders::_1));
-    stateList->Add(defaultCtx);
+        this, placeholders::_1, placeholders::_2));
     publisher = new StatePublisher();
 }
 
@@ -79,7 +68,7 @@ StateControl::Unsubscribe(IStateObserver* sub)
 StateContext*
 StateControl::GetState(void)
 {
-     return curr;
+     return stateList->Current();
 }
 
 void
@@ -113,25 +102,15 @@ StateControl::_Exists(StateEnum state)
 }
 
 void
-StateControl::_ListUpdated(StateContext* front)
+StateControl::_ListUpdated(StateContext* prev, StateContext* next)
 {
-    _ChangeState(front);
-}
-
-void
-StateControl::_ChangeState(StateContext* next)
-{
-    if (curr != next)
+    if (prev != next)
     {
-        string currSitu = curr->GetSituation().ToString();
+        string prevSitu = prev->GetSituation().ToString();
         string nextSitu = next->GetSituation().ToString();
         POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CHANGED,
-            "STATE_CHANGED[{}] -> [{}]", currSitu, nextSitu);
-
-        StateContext* prev = curr;
-        curr = next;
-
-        _NotifyState(prev, curr);
+            "STATE_CHANGED[{}] -> [{}]", prevSitu, nextSitu);
+        _NotifyState(prev, next);
     }
 }
 

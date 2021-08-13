@@ -331,6 +331,7 @@ Mpio::DoIO(MpAioState expNextState)
             if (ret == POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE)
             {
                 errorStopState = true;
+                mssAioData.errorStopState = true;
             }
         }
 

@@ -44,12 +44,13 @@
 
 namespace pos
 {
-ArrayDeviceManager::ArrayDeviceManager(DeviceManager* sysDevMgr)
+ArrayDeviceManager::ArrayDeviceManager(DeviceManager* sysDevMgr, string arrayName)
 :
 #ifdef _ADMIN_ENABLED
-  IArrayDevMgr(sysDevMgr),
+    IArrayDevMgr(sysDevMgr),
 #endif
-  sysDevMgr_(sysDevMgr)
+    sysDevMgr_(sysDevMgr),
+    arrayName_(arrayName)
 {
     devs_ = new ArrayDeviceList();
 }
@@ -314,7 +315,18 @@ ArrayDeviceManager::ExportToMeta(void)
         }
         else
         {
-            deviceMeta.uid = dev->GetUblock()->GetSN();
+            if (dev->GetUblock() != nullptr)
+            {
+                deviceMeta.uid = dev->GetUblock()->GetSN();
+            }
+            else
+            {
+                POS_TRACE_WARN((int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND,
+                    "Array device on array {} is not fault state and its state is {}. but there is no ublock.",
+                    arrayName_, deviceMeta.state);
+                deviceMeta.uid = "";
+                deviceMeta.state = ArrayDeviceState::FAULT;
+            }
         }
         metaSet.data.push_back(deviceMeta);
     }

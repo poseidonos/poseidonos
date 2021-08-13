@@ -208,21 +208,33 @@ ArrayComponents::Delete(void)
 int
 ArrayComponents::PrepareRebuild(bool& resume)
 {
-    IWBStripeAllocator* iWBStripeAllocator = allocator->GetIWBStripeAllocator();
-    IContextManager* ctxmgr = allocator->GetIContextManager();
-    int ret = 0;
-    gc->Pause();
+    StateContext* stateCtx = state->GetState();
+    string currSitu = "null";
+    if (stateCtx != nullptr)
+    {
+        currSitu = stateCtx->GetSituation().ToString();
+        if (stateCtx->GetSituation() == SituationEnum::REBUILDING)
+        {
+            IWBStripeAllocator* iWBStripeAllocator = allocator->GetIWBStripeAllocator();
+            IContextManager* ctxmgr = allocator->GetIContextManager();
+            int ret = 0;
+            gc->Pause();
 
-    if (ctxmgr->NeedRebuildAgain())
-    {
-        resume = true;
+            if (ctxmgr->NeedRebuildAgain())
+            {
+                resume = true;
+            }
+            else
+            {
+                ret = iWBStripeAllocator->PrepareRebuild();
+            }
+            gc->Resume();
+            return ret;
+        }
     }
-    else
-    {
-        ret = iWBStripeAllocator->PrepareRebuild();
-    }
-    gc->Resume();
-    return ret;
+    POS_TRACE_WARN(EID(REBUILD_INVALIDATED),
+        "Rebuild invalidated. Current situation: {} ", currSitu);
+    return EID(REBUILD_INVALIDATED);
 }
 
 void

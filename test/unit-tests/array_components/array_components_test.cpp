@@ -149,16 +149,20 @@ TEST(ArrayComponents, Delete_testIfDeleteResultIsPropagated)
 TEST(ArrayComponents, PrepareRebuild_testIfGcIsPausedAndResumedAroundAllocatorPreparingRebuild)
 {
     // Given
-    NiceMock<MockStateManager> mockStateManager;
+    MockStateManager mockStateManager;
+    NiceMock<MockStateControl> mockStateControl;
     NiceMock<MockIArrayInfo> mockIArrayInfo;
     MockAllocator* mockAllocator = new MockAllocator(nullptr, nullptr, nullptr, nullptr, &mockIArrayInfo, nullptr);
     MockGarbageCollector* mockGc = new MockGarbageCollector(nullptr, nullptr);
     MockIWBStripeAllocator mockIwbStripeAllocator;
     MockIContextManager mockIContextManager;
 
-    ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr,
+    ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, &mockStateControl,
         nullptr, nullptr, mockGc, nullptr, mockAllocator, nullptr, nullptr, mockMetaFsFactory, nullptr);
     int PREPARE_RESULT = 234; // the actual value does not matter
+    StateContext expected("test", SituationEnum::REBUILDING);
+    EXPECT_CALL(mockStateControl, GetState).WillOnce(Return(&expected));
+
     std::string ARRAY_NAME = "mock-array";
     EXPECT_CALL(mockIArrayInfo, GetName).WillRepeatedly(Return(ARRAY_NAME));
     EXPECT_CALL(*mockAllocator, GetIWBStripeAllocator).WillOnce(Return(&mockIwbStripeAllocator));

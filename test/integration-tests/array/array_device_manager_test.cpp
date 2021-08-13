@@ -47,7 +47,7 @@ TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImported)
     // Given
     MockDeviceManager mockSysDevMgr;
 
-    ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, "mockArrayName");
     DeviceSet<string> nameSet;
     string nvm1 = "mock-nvm1";
     string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
@@ -85,7 +85,7 @@ TEST(ArrayDeviceManager, Export_testIfArrayDevMgrIsQueriedAgainst)
 {
     // Given
     MockDeviceManager mockSysDevMgr;
-    ArrayDeviceManager adm(&mockSysDevMgr);
+    ArrayDeviceManager adm(&mockSysDevMgr, "mockArrayName");
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     DeviceSet<ArrayDevice*> emptyDevSet;
 
@@ -101,7 +101,7 @@ TEST(ArrayDeviceManager, Export_testIfArrayDevMgrIsQueriedAgainst)
 TEST(ArrayDeviceManager, ExportToName_testIfEmptyDeviceSetIsReturned)
 {
     // Given
-    ArrayDeviceManager adm(nullptr);
+    ArrayDeviceManager adm(nullptr, "mockArrayName");
 
     // When
     DeviceSet<string> actual = adm.ExportToName();
@@ -115,7 +115,7 @@ TEST(ArrayDeviceManager, ExportToName_testIfEmptyDeviceSetIsReturned)
 TEST(ArrayDeviceManager, ExportToName_testIfArrayDevListIsQueriedAgainst)
 {
     // Given
-    ArrayDeviceManager adm(nullptr);
+    ArrayDeviceManager adm(nullptr, "mockArrayName");
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     adm.SetArrayDeviceList(mockArrayDeviceList);
     DeviceSet<string> emptyDevSet;
@@ -130,7 +130,7 @@ TEST(ArrayDeviceManager, ExportToName_testIfArrayDevListIsQueriedAgainst)
 TEST(ArrayDeviceManager, ExportToMeta_testIfDeviceSetIsExtractedFromArrayDevList)
 {
     // Given
-    ArrayDeviceManager adm(nullptr);
+    ArrayDeviceManager adm(nullptr, "mockArrayName");
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     adm.SetArrayDeviceList(mockArrayDeviceList);
     DeviceSet<ArrayDevice*> deviceSet;
@@ -163,7 +163,7 @@ TEST(ArrayDeviceManager, ExportToMeta_testIfDeviceSetIsExtractedFromArrayDevList
 TEST(ArrayDeviceManager, Clear_testIfNullPtrIsHandled)
 {
     // Given
-    ArrayDeviceManager adm(nullptr);
+    ArrayDeviceManager adm(nullptr, "mockArrayName");
 
     // When
     adm.Clear();
@@ -175,7 +175,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfWrongDevnameIsHandled)
 {
     // Given
     MockDeviceManager mockSysDevMgr;
-    ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, "mockArrayName");
     string devName = "spare1";
 
     EXPECT_CALL(mockSysDevMgr, GetDev).WillOnce(Return(nullptr));
@@ -191,7 +191,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfAddingSpareAgainIsHandled)
 {
     // Given
     MockDeviceManager mockSysDevMgr;
-    ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, "mockArrayName");
     string devName = "spare1";
 
     auto spare1 = MockUblockDevice(devName.c_str());
@@ -209,7 +209,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfNotAliveSpareIsHandled)
 {
     // Given
     MockDeviceManager mockSysDevMgr;
-    ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, "mockArrayName");
     string devName = "spare1";
 
     auto spare1 = MockUblockDevice(devName.c_str());
@@ -228,7 +228,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfWrongCapacityIsHandled)
 {
     // Given
     MockDeviceManager mockSysDevMgr;
-    ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, "mockArrayName");
     string devName = "spare1";
     int EXPECTED_DEV_SIZE = 121212;
     auto data1 = MockUblockDevice("data1");
@@ -258,7 +258,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfSpareIsAddedToArrayDeviceList)
 {
     // Given
     MockDeviceManager mockSysDevMgr;
-    ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, "mockArrayName");
     string devName = "spare1";
     int EXPECTED_DEV_SIZE = 121212;
     auto data1 = MockUblockDevice("data1");
@@ -293,7 +293,7 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalFails)
 {
     // Given
     MockDeviceManager mockSysDevMgr;
-    ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, "mockArrayName");
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
@@ -312,7 +312,7 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalIsSuccessful)
 {
     // Given
     MockDeviceManager mockSysDevMgr;
-    ArrayDeviceManager arrDevMgr(&mockSysDevMgr);
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, "mockArrayName");
 
     auto spare1 = MockUblockDevice("spare1");
     ArrayDevice spare1Dev(spare1, ArrayDeviceState::NORMAL);
@@ -337,7 +337,7 @@ TEST(ArrayDeviceManager, ReplaceWithSpare_testIfArrayDeviceListIsQueriedAgainst)
     // Given
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
 
-    ArrayDeviceManager arrDevMgr(nullptr);
+    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
     int REPLACE_SUCCESS = 0;
@@ -353,7 +353,7 @@ TEST(ArrayDeviceManager, ReplaceWithSpare_testIfArrayDeviceListIsQueriedAgainst)
 TEST(ArrayDeviceManager, GetDev_testIfNullPtrIsHandled)
 {
     // Given
-    ArrayDeviceManager arrDevMgr(nullptr);
+    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
     ArrayDevice* arrDev;
     ArrayDeviceType arrDevType;
     UblockSharedPtr uBlock = nullptr;
@@ -369,7 +369,7 @@ TEST(ArrayDeviceManager, GetDev_testIfNullPtrIsHandled)
 TEST(ArrayDeviceManager, GetDev_testIfGetDevNVMIsHandled)
 {
     // Given
-    ArrayDeviceManager arrDevMgr(nullptr);
+    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
@@ -393,7 +393,7 @@ TEST(ArrayDeviceManager, GetDev_testIfGetDevNVMIsHandled)
 TEST(ArrayDeviceManager, GetDev_testIfGetDevDATAIsHandled)
 {
     // Given
-    ArrayDeviceManager arrDevMgr(nullptr);
+    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
@@ -417,7 +417,7 @@ TEST(ArrayDeviceManager, GetDev_testIfGetDevDATAIsHandled)
 TEST(ArrayDeviceManager, GetDev_testIfGetDevSPAREIsHandled)
 {
     // Given
-    ArrayDeviceManager arrDevMgr(nullptr);
+    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
@@ -441,7 +441,7 @@ TEST(ArrayDeviceManager, GetDev_testIfGetDevSPAREIsHandled)
 TEST(ArrayDeviceManager, GetDev_testIfGetDevFailedMatchIsHandled)
 {
     // Given
-    ArrayDeviceManager arrDevMgr(nullptr);
+    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
@@ -462,7 +462,7 @@ TEST(ArrayDeviceManager, GetDev_testIfGetDevFailedMatchIsHandled)
 TEST(ArrayDeviceManager, GetFaulty_testIfFaultyArrayDeviceIsReturned)
 {
     // Given
-    ArrayDeviceManager arrDevMgr(nullptr);
+    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
@@ -487,7 +487,7 @@ TEST(ArrayDeviceManager, GetFaulty_testIfFaultyArrayDeviceIsReturned)
 TEST(ArrayDeviceManager, GetFaulty_testIfNullptrIsReturnedWhenThereIsNoFaultyDevice)
 {
     // Given
-    ArrayDeviceManager arrDevMgr(nullptr);
+    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
@@ -511,7 +511,7 @@ TEST(ArrayDeviceManager, GetFaulty_testIfNullptrIsReturnedWhenThereIsNoFaultyDev
 TEST(ArrayDeviceManager, GetRebuilding_testIfRebuildDeviceIsReturned)
 {
     // Given
-    ArrayDeviceManager arrDevMgr(nullptr);
+    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 

@@ -64,10 +64,16 @@ DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
     {
         out << "invalid parameter" << endl;
         out.close();
-        return 0;
+        return -1;
     }
     string arrayName = argv["name"].get<std::string>();
     IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo(arrayName);
+    if (nullptr == info)
+    {
+        out << "there is no array with name " + arrayName << endl;
+        out.close();
+        return -1;
+    }
 
     LogicalBlkAddr lsa = {.stripeId = 0, .offset = 0};
 

@@ -47,6 +47,7 @@ MetaFileIntf::MetaFileIntf(std::string fname, std::string aname)
   isOpened(false),
   fd(-1)
 {
+    issuedCount = 0;
 }
 
 int

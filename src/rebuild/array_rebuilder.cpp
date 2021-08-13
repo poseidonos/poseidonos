@@ -59,6 +59,12 @@ ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
     bool resume = false;
     int ret = iRebuildNoti->PrepareRebuild(array, resume);
 
+    if (ret == EID(REBUILD_INVALIDATED))
+    {
+        mtxStart.unlock();
+        return;
+    }
+
     if (resume)
     {
         // remove meta parttition frome tgt

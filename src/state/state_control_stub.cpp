@@ -69,7 +69,7 @@ StateControl::_Exists(StateContext* ctx)
 }
 
 void
-StateControl::_ListUpdated(StateContext* front)
+StateControl::_ListUpdated(StateContext* prev, StateContext* next)
 {
 }
 

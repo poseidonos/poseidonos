@@ -58,7 +58,7 @@ class ArrayDeviceManager
 #endif
 {
 public:
-    ArrayDeviceManager(DeviceManager* sysDevMgr);
+    ArrayDeviceManager(DeviceManager* sysDevMgr, string arrayName);
     virtual ~ArrayDeviceManager(void);
     virtual int Import(DeviceSet<string> nameSet);
     virtual int Import(DeviceSet<DeviceMeta> metaSet,
@@ -94,6 +94,7 @@ private:
 
     ArrayDeviceList* devs_ = nullptr;
     DeviceManager* sysDevMgr_;
+    string arrayName_;
 };
 
 } // namespace pos

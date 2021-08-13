@@ -41,38 +41,59 @@ using namespace std;
 
 namespace pos
 {
-StateList::~StateList()
+
+StateList::StateList(ListUpdatedHandler cb)
 {
+    listUpdated = move(cb);
+    unique_lock<mutex> lock(listMutex);
+    contextList.push_back(&defaultCtx);
+}
+
+StateList::~StateList(void)
+{
+    unique_lock<mutex> lock(listMutex);
     contextList.clear();
 }
 
 void
 StateList::Add(StateContext* ctx)
 {
-    unique_lock<mutex> lock(listMutex);
+    listMutex.lock();
     if (Exists(ctx) == false)
     {
+        StateContext* prev = contextList.front();
         contextList.push_back(ctx);
         POS_TRACE_DEBUG((int)POS_EVENT_ID::STATE_CONTEXT_UPDATED,
             "statecontext added - {}", ctx->GetSituation().ToString());
         sort(contextList.begin(), contextList.end(), _Compare);
         StateContext* next = contextList.front();
-        listUpdated(next);
+        listMutex.unlock();
+        listUpdated(prev, next);
+    }
+    else
+    {
+        listMutex.unlock();
     }
 }
 
 void
 StateList::Remove(StateContext* ctx)
 {
-    unique_lock<mutex> lock(listMutex);
+    listMutex.lock();
     auto it = _Find(ctx);
     if (it != contextList.end())
     {
         POS_TRACE_DEBUG((int)POS_EVENT_ID::STATE_CONTEXT_UPDATED,
             "statecontext removed - {}", (*it)->GetSituation().ToString());
+        StateContext* prev = contextList.front();
         contextList.erase(it);
         StateContext* next = contextList.front();
-        listUpdated(next);
+        listMutex.unlock();
+        listUpdated(prev, next);
+    }
+    else
+    {
+        listMutex.unlock();
     }
 }
 
@@ -106,6 +127,14 @@ bool StateList::Exists(SituationEnum situ)
     }
     return false;
 }
+
+StateContext*
+StateList::Current(void)
+{
+    unique_lock<mutex> lock(listMutex);
+    return contextList.front();
+}
+
 
 vector<StateContext*>::iterator
 StateList::_Find(StateContext* ctx)
