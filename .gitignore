@@ -65,3 +65,4 @@ mdts_detach_test
 lib/dpdk-20.08/*
 lib/filebench-master/*
 nlohmann
+lib/grpc

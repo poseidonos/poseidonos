@@ -353,6 +353,11 @@ clean_go()
     log_normal "clean GO.. done"
 }
 
+build_grpc()
+{
+	./build_grpc.sh
+}
+
 case "$1" in
 all)
 	set -e
@@ -365,6 +370,7 @@ all)
 	build_gtest
 	build_spdlog
     build_filebench
+	build_grpc
 	;;
 ci)
 	set -e
@@ -428,6 +434,10 @@ filebench)
     set -e
     build_filebench
     ;;
+grpc)
+	set -e
+	build_grpc
+	;;
 clean_ci)
 	clean_fio
 	clean_spdk
@@ -449,7 +459,7 @@ clean)
 	;;
 
 *)
-	echo "Usage: build_ibof_lib.sh {all|ci|perf_ci|dpdk|spdk|spdk_rel|gtest|air|spdlog|clean|clean_ci|go|filebench}"
+	echo "Usage: build_ibof_lib.sh {all|ci|perf_ci|dpdk|spdk|spdk_rel|gtest|air|spdlog|clean|clean_ci|go|filebench|grpc}"
 	exit 1
 	;;
 esac
