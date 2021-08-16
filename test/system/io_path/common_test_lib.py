@@ -42,8 +42,8 @@ def bringup_multiple_volume(**args):
 def terminate_pos(ibof_root, stdout_type):
     print("\tTerminate POS")
     if 'ibof_proc' in globals():
-        ibof_cli = ibof_root + "bin/cli"
-        subprocess.call([ibof_cli, "array", "unmount", "--name", "POSArray"],\
+        ibof_cli = ibof_root + "bin/poseidonos-cli"
+        subprocess.call([ibof_cli, "array", "unmount", "--array-name", "POSArray", "--force"],\
             stdout=stdout_type, stderr=subprocess.STDOUT)
         subprocess.call([ibof_cli, "system", "exit"],\
             stdout=stdout_type, stderr=subprocess.STDOUT)

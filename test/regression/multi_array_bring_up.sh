@@ -180,11 +180,11 @@ start_poseidonos()
     notice "Starting poseidonos..."
     texecc ${POS_ROOT}/test/regression/start_poseidonos.sh
 
-	result=`texecc "${POS_ROOT}/bin/cli system info --json" | jq '.Response.data.version' 2>/dev/null`
+	result=`texecc "${POS_ROOT}/bin/poseidonos-cli system info --json-res" | jq '.Response.data.version' 2>/dev/null`
 	while [ -z ${result} ] || [ ${result} == '""' ];
 	do
 		echo "Wait iBoFOS..."
-		result=`texecc "${POS_ROOT}/bin/cli system info --json" | jq '.Response.data.version' 2>/dev/null`
+		result=`texecc "${POS_ROOT}/bin/poseidonos-cli system info --json-res" | jq '.Response.data.version' 2>/dev/null`
 		echo $result
 		sleep 0.5
 	done
@@ -252,9 +252,9 @@ check_result_err_from_logfile()
 shutdown_ibofos()
 {
     notice "Shutting down poseidonos..."
-    texecc ${POS_ROOT}/bin/cli array unmount --name ${target_name_0}
-    texecc ${POS_ROOT}/bin/cli array unmount --name ${target_name_1}
-    texecc ${POS_ROOT}/bin/cli system exit
+    texecc ${POS_ROOT}/bin/poseidonos-cli array unmount --array-name ${target_name_0} --force
+    texecc ${POS_ROOT}/bin/poseidonos-cli array unmount --array-name ${target_name_1} --force
+    texecc ${POS_ROOT}/bin/poseidonos-cli system stop
     notice "Shutdown has been completed!"
 	check_stopped
 
@@ -283,32 +283,32 @@ bringup_poseidonos()
     sleep 5
     texecc ${spdk_rpc_script} bdev_malloc_create -b uram1 1024 512
 
-    texecc ${POS_ROOT}/bin/cli device scan >> ${logfile}
-    texecc ${POS_ROOT}/bin/cli device list >> ${logfile}
+    texecc ${POS_ROOT}/bin/poseidonos-cli device scan >> ${logfile}
+    texecc ${POS_ROOT}/bin/poseidonos-cli device list >> ${logfile}
 
 	if [ $create_array -eq 1 ]; then
-        texecc ${POS_ROOT}/bin/cli array reset
+        texecc ${POS_ROOT}/bin/poseidonos-cli dev resetmbr
         info "Target device list=${target_dev_list_0} , ${target_dev_list_1}"
-        texecc ${POS_ROOT}/bin/cli array create -b uram0 -d ${target_dev_list_0}  --name ${target_name_0}
-        texecc ${POS_ROOT}/bin/cli array create -b uram1 -d ${target_dev_list_1}  --name ${target_name_1}
+        texecc ${POS_ROOT}/bin/poseidonos-cli array create -b uram0 -d ${target_dev_list_0}  --array-name ${target_name_0}
+        texecc ${POS_ROOT}/bin/poseidonos-cli array create -b uram1 -d ${target_dev_list_1}  --array-name ${target_name_1}
         #check_result_err_from_logfile
 	fi
 	
-	texecc ${POS_ROOT}/bin/cli array mount --name ${target_name_0}
-	texecc ${POS_ROOT}/bin/cli array mount --name ${target_name_1}
+	texecc ${POS_ROOT}/bin/poseidonos-cli array mount --array-name ${target_name_0}
+	texecc ${POS_ROOT}/bin/poseidonos-cli array mount --array-name ${target_name_1}
 
 
     if [ ${pos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        texecc ${POS_ROOT}/bin/cli volume create --name ${volname} --size ${pos_phy_volume_size_byte} --array ${target_name_0} >> ${logfile};
-        texecc ${POS_ROOT}/bin/cli volume create --name ${volname} --size ${pos_phy_volume_size_byte} --array ${target_name_1} >> ${logfile};
+        texecc ${POS_ROOT}/bin/poseidonos-cli volume create --volume-name ${volname} --size ${pos_phy_volume_size_byte} --array-name ${target_name_0} >> ${logfile};
+        texecc ${POS_ROOT}/bin/poseidonos-cli volume create --volume-name ${volname} --size ${pos_phy_volume_size_byte} --array-name ${target_name_1} >> ${logfile};
         #check_result_err_from_logfile
     fi
 
     if [ ${pos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
-        texecc ${POS_ROOT}/bin/cli volume mount --name ${volname} --array ${target_name_0} --subnqn ${nss1} >> ${logfile};
-        texecc ${POS_ROOT}/bin/cli volume mount --name ${volname} --array ${target_name_1} --subnqn ${nss2} >> ${logfile};
+        texecc ${POS_ROOT}/bin/poseidonos-cli volume mount --volume-name ${volname} --array-name ${target_name_0} --subnqn ${nss1} >> ${logfile};
+        texecc ${POS_ROOT}/bin/poseidonos-cli volume mount --volume-name ${volname} --array-name ${target_name_1} --subnqn ${nss2} >> ${logfile};
         #check_result_err_from_logfile
     fi
     

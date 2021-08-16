@@ -12,6 +12,7 @@ import pos
 import cli
 import api
 import pos_constant
+import test_result
 import MOUNT_ARRAY_BASIC
 ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
 

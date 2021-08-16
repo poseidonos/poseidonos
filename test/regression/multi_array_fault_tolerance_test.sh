@@ -58,7 +58,7 @@ detach_dev_name_1="unvme-ns-3"
 spare_dev_name_1="unvme-ns-7"
 nvme_cli="nvme"
 root_dir="../../"
-pos_cli="${root_dir}bin/cli "
+pos_cli="${root_dir}bin/poseidonos-cli "
 network_config_file="${root_dir}test/system/network/network_config.sh"
 total_iter=3
 array_name_0="POSArray0"
@@ -178,11 +178,11 @@ start_pos()
     notice "Starting poseidonos..."
     ${root_dir}/test/regression/start_poseidonos.sh
 
-	result=`${root_dir}/bin/cli system info --json | jq '.Response.info.version' 2>/dev/null`
+	result=`${root_dir}/bin/poseidonos-cli system info --json-res | jq '.Response.info.version' 2>/dev/null`
 	while [ -z ${result} ] || [ ${result} == '""' ];
 	do
 		echo "Wait PoseidonOS..."
-		result=`${root_dir}/bin/cli system info --json | jq '.Response.info.version' 2>/dev/null`
+		result=`${root_dir}/bin/poseidonos-cli system info --json-res | jq '.Response.info.version' 2>/dev/null`
 		sleep 0.5
 	done
 
@@ -319,9 +319,9 @@ write_pattern()
 shutdown_pos()
 {
     notice "Shutting down poseidonos..."
-	${pos_cli} array unmount --name $array_name_0
-	${pos_cli} array unmount --name $array_name_1
-	${pos_cli} system exit
+	${pos_cli} array unmount --array-name $array_name_0
+	${pos_cli} array unmount --array-name $array_name_1
+	${pos_cli} system stop
     notice "Shutdown has been completed!"
 
     disconnect_nvmf_contollers;
@@ -360,26 +360,26 @@ bringup_pos()
     ${pos_cli} device list >> ${logfile}
 
 	if [ $create_array -eq 1 ]; then
-        ${root_dir}bin/cli array reset
+        ${root_dir}bin/poseidonos-cli dev resetmbr
 		info "Target device list=${target_dev_list_0} , and ${target_dev_list_1}"
-		${pos_cli} array create -b uram0 -d ${target_dev_list_0} --name $array_name_0
-		${pos_cli} array create -b uram1 -d ${target_dev_list_1} --name $array_name_1
+		${pos_cli} array create -b uram0 -d ${target_dev_list_0} --array-name $array_name_0
+		${pos_cli} array create -b uram1 -d ${target_dev_list_1} --array-name $array_name_1
 	fi
 	
-	${pos_cli} array mount --name $array_name_0
-	${pos_cli} array mount --name $array_name_1
+	${pos_cli} array mount --array-name $array_name_0
+	${pos_cli} array mount --array-name $array_name_1
 
     if [ ${pos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        ${pos_cli} volume create --name ${volname} --size ${pos_phy_volume_size_byte} --array $array_name_0 >> ${logfile};
-        ${pos_cli} volume create --name ${volname} --size ${pos_phy_volume_size_byte} --array $array_name_1 >> ${logfile};
+        ${pos_cli} volume create --volume-name ${volname} --size ${pos_phy_volume_size_byte} --array-name $array_name_0 >> ${logfile};
+        ${pos_cli} volume create --volume-name ${volname} --size ${pos_phy_volume_size_byte} --array-name $array_name_1 >> ${logfile};
         check_result_err_from_logfile
     fi
 
     if [ ${pos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
-        ${pos_cli} volume mount --name ${volname} --array $array_name_0 >> ${logfile};
-        ${pos_cli} volume mount --name ${volname} --array $array_name_1 >> ${logfile};
+        ${pos_cli} volume mount --volume-name ${volname} --array-name $array_name_0 >> ${logfile};
+        ${pos_cli} volume mount --volume-name ${volname} --array-name $array_name_1 >> ${logfile};
         check_result_err_from_logfile
     fi
     
@@ -439,8 +439,8 @@ add_spare()
 {
     notice "add spare device ${spare_dev_name_0} to $array_name_0"
     notice "add spare device ${spare_dev_name_1} to $array_name_1"
-	${pos_cli} array add --spare ${spare_dev_name_0} --array $array_name_0
-	${pos_cli} array add --spare ${spare_dev_name_1} --array $array_name_1
+	${pos_cli} array addspare --spare ${spare_dev_name_0} --array-name $array_name_0
+	${pos_cli} array addspare --spare ${spare_dev_name_1} --array-name $array_name_1
 }
 
 waiting_for_rebuild_complete()
@@ -448,15 +448,15 @@ waiting_for_rebuild_complete()
 	notice "waiting for rebuild complete"
 	while :
 	do
-		state_0=$(${pos_cli} array info --name $array_name_0 --json | jq '.Response.result.data.state')
-		state_1=$(${pos_cli} array info --name $array_name_1 --json | jq '.Response.result.data.state')
+		state_0=$(${pos_cli} array list --array-name $array_name_0 --json-res | jq '.Response.result.data.state')
+		state_1=$(${pos_cli} array list --array-name $array_name_1 --json-res | jq '.Response.result.data.state')
         info "Array State of $array_name_0 : $state_0"
         info "Array State of $array_name_1 : $state_1"
 		if [ $state_0 == "\"NORMAL\"" ] && [ $state_1 == "\"NORMAL\"" ]; then
 			break;
 		else
-            rebuild_progress_0=$(${pos_cli} array info --name $array_name_0 --json | jq '.Response.result.data.rebuildingProgress')
-            rebuild_progress_1=$(${pos_cli} array info --name $array_name_1 --json | jq '.Response.result.data.rebuildingProgress')
+            rebuild_progress_0=$(${pos_cli} array list --array-name $array_name_0 --json-res | jq '.Response.result.data.rebuildingProgress')
+            rebuild_progress_1=$(${pos_cli} array list --array-name $array_name_1 --json-res | jq '.Response.result.data.rebuildingProgress')
             info "Rebuilding Progress $array_name_0 : [${rebuild_progress_0}]"
             info "Rebuilding Progress $array_name_1 : [${rebuild_progress_1}]"
 			sleep 10

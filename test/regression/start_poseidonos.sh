@@ -18,7 +18,7 @@ execute_pos()
 
 check_started()
 {
-    result=`${ROOT_DIR}/bin/cli system info --json | jq '.Response.info.version' 2>/dev/null`
+    result=`${ROOT_DIR}/bin/poseidonos-cli system info --json-res | jq '.Response.info.version' 2>/dev/null`
 
     if [ -z ${result} ] || [ ${result} == '""' ];
     then

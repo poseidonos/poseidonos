@@ -13,6 +13,7 @@ import cli
 import api
 import CREATE_VOL_BASIC_1
 import volume
+import test_result
 
 NAME = CREATE_VOL_BASIC_1.VOL_NAME
 SIZE = CREATE_VOL_BASIC_1.VOL_SIZE

@@ -19,7 +19,7 @@ transport = "tcp"
 target_ip = "10.100.11.11"
 ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
 script_path = ibof_root + "script/"
-ibof_cli = ibof_root + "/bin/cli"
+ibof_cli = ibof_root + "/bin/poseidonos-cli"
 log_path = "pos.log"
 
 nvme_device_0 = "unvme-ns-0"
@@ -94,7 +94,7 @@ def unmount_volume_during_io(read_or_write):
         time.sleep(7 + sleep_time)
 
         print("Volume Unmounted!!!!!")
-        subprocess.call(ibof_cli + " volume unmount --name vol1 --array POSArray", shell="True")
+        subprocess.call(ibof_cli + " volume unmount --volume-name vol1 --array-name POSArray --force", shell="True")
 
         ret = process.wait()
 
@@ -116,9 +116,9 @@ def delete_volume_during_io(read_or_write):
         time.sleep(7 + sleep_time)
 
         print("Volume Unmounted!!!!!")
-        subprocess.call(ibof_cli + " volume unmount --name vol1 --array POSArray", shell="True")
+        subprocess.call(ibof_cli + " volume unmount --volume-name vol1 --array-name POSArray --force", shell="True")
         print("Volume Deleted!!!!!")
-        subprocess.call(ibof_cli + " volume delete --name vol1 --array POSArray", shell="True")
+        subprocess.call(ibof_cli + " volume delete --volume-name vol1 --array-name POSArray --force", shell="True")
 
         ret = process.wait()
 

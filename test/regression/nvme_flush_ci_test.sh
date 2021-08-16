@@ -223,8 +223,8 @@ start_POS()
 exit_POS()
 {
     echo "  Unmounting and Exiting POS"
-    texecc ./bin/cli array unmount --name POSArray >> ${logfile}
-    texecc ./bin/cli system exit >> ${logfile}
+    texecc ./bin/poseidonos-cli array unmount --array-name POSArray --force >> ${logfile}
+    texecc ./bin/poseidonos-cli system stop >> ${logfile}
 
     texecc ps -C poseidonos > /dev/null >> ${logfile}
     while [[ ${?} == 0 ]]
@@ -257,9 +257,9 @@ kill_POS()
 do_spor()
 {
     if [[ $exec_mode -eq 0 ]]; then
-        res_flush_gcov=`./bin/cli --json wbt flush_gcov | tr -d '\n' | sed -e 's/\"/\"/g'`
+        res_flush_gcov=`./bin/poseidonos-cli --json-res wbt flush_gcov | tr -d '\n' | sed -e 's/\"/\"/g'`
     else
-        res_flush_gcov=`sshpass -p $TARGET_PASSWORD ssh -q -tt -o StrictHostKeyChecking=no -q $TARGET_USERNAME@${TARGET_IP} "cd ${TARGET_ROOT_DIR}; sudo ./bin/cli --json wbt flush_gcov | tr -d '\n' | sed -e 's/\"/\"/g'"`
+        res_flush_gcov=`sshpass -p $TARGET_PASSWORD ssh -q -tt -o StrictHostKeyChecking=no -q $TARGET_USERNAME@${TARGET_IP} "cd ${TARGET_ROOT_DIR}; sudo ./bin/poseidonos-cli --json-res wbt flush_gcov | tr -d '\n' | sed -e 's/\"/\"/g'"`
     fi
     python test/system/nvme_flush/flush_gcov.py "$res_flush_gcov" >> ${logfile}
 

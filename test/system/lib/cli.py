@@ -35,7 +35,7 @@ def create_array(buffer, data, spare, array, raid):
         param_str += " -s " + spare
     param_str += " --array-name " + array
     if raid != "":
-        param_str += " --raidtype " + raid
+        param_str += " --raid " + raid
     return send_request("array create " + param_str)
 
 
@@ -68,13 +68,13 @@ def array_info(array):
 def add_device(spare, array):
     param_str = "--spare " + spare
     param_str += " --array-name " + array
-    return send_request("array add " + param_str)
+    return send_request("array addspare " + param_str)
 
 
 def remove_device(spare, array):
     param_str = "--spare " + spare
     param_str += " --array-name " + array
-    return send_request("array remove " + param_str)
+    return send_request("array rmspare " + param_str)
 
 
 def create_volume(vol_name, size, iops, bw, array):

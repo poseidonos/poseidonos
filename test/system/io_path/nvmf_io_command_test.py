@@ -26,7 +26,7 @@ from collections import defaultdict
 
 #subprcess.call ('ls -al', shell=True)
 FIO_BENCH_SCRIPT = './fio_bench.py'
-CLI_CMD = '../../../bin/cli'
+CLI_CMD = '../../../bin/poseidonos-cli'
 POS_ROOT = '../../../'
 IBOFOS_CMD = '../../../bin/poseidonos'
 SETUP_IBOFOS_PATH = '../../../script/'

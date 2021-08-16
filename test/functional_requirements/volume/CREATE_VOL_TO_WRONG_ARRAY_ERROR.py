@@ -14,6 +14,7 @@ import api
 import pos_constant
 import MOUNT_ARRAY_BASIC
 import volume
+import test_result
 
 VOL_NAME = "vol1"
 VOL_SIZE = pos_constant.SIZE_1GB

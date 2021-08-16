@@ -12,6 +12,7 @@ import pos
 import cli
 import api
 import pos_constant
+import test_result
 import CREATE_VOL_BASIC_8
 
 ARRAYNAME = CREATE_VOL_BASIC_8.ARRAYNAME

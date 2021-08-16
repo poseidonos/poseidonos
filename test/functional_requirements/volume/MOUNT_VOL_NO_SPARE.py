@@ -11,6 +11,7 @@ import json_parser
 import pos
 import cli
 import api
+import test_result
 import CREATE_VOL_NO_SPARE
 import MOUNT_ARRAY_NO_SPARE
 

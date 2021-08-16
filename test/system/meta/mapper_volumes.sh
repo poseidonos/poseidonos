@@ -54,7 +54,7 @@ array_create() {
     # WriteBuffer: uram0 
     # DataStorage: unvme-ns-0 ... 2
     # Spare: unvme-ns-3
-    sudo $rootdir/bin/cli array reset
+    sudo $rootdir/bin/cli dev resetmbr
     sudo $rootdir/bin/cli request create_array -b uram0 -d unvme-ns-0,unvme-ns-1,unvme-ns-2 -s unvme-ns-3
 }
 

@@ -58,7 +58,7 @@ fi
 
 sudo $ROOT_DIR/test/system/nvmf/initiator/fio_full_bench.py --iodepth 128 --io_size 10m --file_num $VOLUME_COUNT --ramp_time 0 --run_time 120 --time_based 0 --bs 512,4K,128K,512-128K --trtype $TRANSPORT --traddr $TARGET_IP
 
-${ROOT_DIR}/bin/cli wbt flush_gcov
+${ROOT_DIR}/bin/poseidonos-cli wbt flush_gcov
 
 pkill -9 poseidonos
 check_stopped

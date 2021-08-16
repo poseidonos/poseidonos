@@ -58,7 +58,7 @@ detach_index=0
 attach_index=3
 nvme_cli="nvme"
 root_dir="../../"
-ibof_cli="${root_dir}bin/cli "
+ibof_cli="${root_dir}bin/poseidonos-cli "
 network_config_file="${root_dir}test/system/network/network_config.sh"
 total_iter=3
 array_name="POSArray"
@@ -303,8 +303,8 @@ write_pattern()
 shutdown_ibofos()
 {
     notice "Shutting down poseidonos..."
-	${ibof_cli} array unmount --name $array_name
-	${ibof_cli} system exit
+	${ibof_cli} array unmount --array-name $array_name --force
+	${ibof_cli} system stop
     notice "Shutdown has been completed!"
 
     disconnect_nvmf_contollers;
@@ -342,22 +342,22 @@ bringup_ibofos()
     ${ibof_cli} device list >> ${logfile}
 
 	if [ $create_array -eq 1 ]; then
-        ${ibof_cli} array reset
+        ${ibof_cli} dev resetmbr
 		info "Target device list=${target_dev_list}"
-		${ibof_cli} array create -b uram0 -d ${target_dev_list} --name $array_name
+		${ibof_cli} array create -b uram0 -d ${target_dev_list} --array-name $array_name
 	fi
 	
-	${ibof_cli} array mount --name $array_name
+	${ibof_cli} array mount --array-name $array_name
 
     if [ ${ibofos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        ${ibof_cli} volume create --name ${volname} --size ${ibof_phy_volume_size_byte} --array $array_name >> ${logfile};
+        ${ibof_cli} volume create --volume-name ${volname} --size ${ibof_phy_volume_size_byte} --array-name $array_name >> ${logfile};
         check_result_err_from_logfile
     fi
 
     if [ ${ibofos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
-        ${ibof_cli} volume mount --name ${volname} --array $array_name >> ${logfile};
+        ${ibof_cli} volume mount --volume-name ${volname} --array-name $array_name >> ${logfile};
         check_result_err_from_logfile
     fi
     
@@ -414,7 +414,7 @@ add_spare()
 {
 	local spare_dev_name="unvme-ns-"${attach_index}
     notice "add spare device ${spare_dev_name}"
-	${ibof_cli} array add --spare ${spare_dev_name} --array $array_name
+	${ibof_cli} array addspare --spare ${spare_dev_name} --array-name $array_name
 	attach_index=$((attach_index+1))
 }
 
@@ -423,11 +423,11 @@ waiting_for_rebuild_complete()
 	notice "waiting for rebuild complete"
 	while :
 	do
-		state=$(${ibof_cli} array info --name $array_name --json | jq '.Response.result.data.state')
+		state=$(${ibof_cli} array list --array-name $array_name --json-res | jq '.Response.result.data.state')
 		if [ $state = "\"NORMAL\"" ]; then
 			break;
 		else
-            rebuild_progress=$(${ibof_cli} array info --name $array_name --json | jq '.Response.result.data.rebuildingProgress')
+            rebuild_progress=$(${ibof_cli} array list --array-name $array_name --json-res | jq '.Response.result.data.rebuildingProgress')
             info "Rebuilding Progress [${rebuild_progress}]"
 			sleep 3
 		fi

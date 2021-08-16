@@ -11,6 +11,7 @@ import json_parser
 import pos
 import cli
 import api
+import test_result
 import UNMOUNT_VOL_BASIC_1
 import volume
 

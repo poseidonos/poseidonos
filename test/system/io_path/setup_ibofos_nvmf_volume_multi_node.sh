@@ -64,7 +64,7 @@ ibofos_bringup(){
         sudo $SPDK_DIR/scripts/rpc.py bdev_malloc_create -b uram1 $WRITE_BUFFER_SIZE_IN_MB 512
     fi
 
-    sudo $ROOT_DIR/bin/cli device scan
+    sudo $ROOT_DIR/bin/poseidonos-cli device scan
     let SUBSYSTEM_COUNT_ARRAY_1_START=$SUBSYSTEM_COUNT1+1
     let SUBSYSTEM_COUNT_ARRAY_1_END=$SUBSYSTEM_COUNT1+$SUBSYSTEM_COUNT2
     for i in `seq 1 $SUBSYSTEM_COUNT1`
@@ -82,33 +82,33 @@ ibofos_bringup(){
 
     if [ "$CLEAN_BRINGUP" -eq 1 ]; then
         echo "poseidonos clean bringup"
-        sudo $ROOT_DIR/bin/cli array reset
-        sudo $ROOT_DIR/bin/cli array create -b uram0 $USER_DEVICE_LIST1 --name $ARRAYNAME1 --raidtype RAID5
-        sudo $ROOT_DIR/bin/cli array create -b uram1 $USER_DEVICE_LIST2 --name $ARRAYNAME2 --raidtype RAID5
-        sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME1
-        sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME2
+        sudo $ROOT_DIR/bin/poseidonos-cli dev resetmbr
+        sudo $ROOT_DIR/bin/poseidonos-cli array create -b uram0 $USER_DEVICE_LIST1 --name $ARRAYNAME1 --raid RAID5
+        sudo $ROOT_DIR/bin/poseidonos-cli array create -b uram1 $USER_DEVICE_LIST2 --name $ARRAYNAME2 --raid RAID5
+        sudo $ROOT_DIR/bin/poseidonos-cli array mount --array-name $ARRAYNAME1
+        sudo $ROOT_DIR/bin/poseidonos-cli array mount --array-name $ARRAYNAME2
 
         for i in `seq 1 $SUBSYSTEM_COUNT1`
         do
-            sudo $ROOT_DIR/bin/cli volume create --name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array $ARRAYNAME1
-            sudo $ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME1
+            sudo $ROOT_DIR/bin/poseidonos-cli volume create --volume-name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array-name $ARRAYNAME1
+            sudo $ROOT_DIR/bin/poseidonos-cli volume mount --volume-name vol$i --array-name $ARRAYNAME1
         done
    
         for i in `seq $SUBSYSTEM_COUNT_ARRAY_1_START $SUBSYSTEM_COUNT_ARRAY_1_END`
         do
-            sudo $ROOT_DIR/bin/cli volume create --name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array $ARRAYNAME2
-            sudo $ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME2
+            sudo $ROOT_DIR/bin/poseidonos-cli volume create --volume-name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array-name $ARRAYNAME2
+            sudo $ROOT_DIR/bin/poseidonos-cli volume mount --volume-name vol$i --array-name $ARRAYNAME2
         done
     else
         echo "poseidonos dirty bringup"
-        sudo $ROOT_DIR/bin/cli array mount --name $ARRAYNAME
+        sudo $ROOT_DIR/bin/poseidonos-cli array mount --array-name $ARRAYNAME
         for i in `seq 1 $VOLUME_COUNT`
         do
-            sudo $ROOT_DIR/bin/cli volume mount --name vol$i --array $ARRAYNAME
+            sudo $ROOT_DIR/bin/poseidonos-cli volume mount --volume-name vol$i --array-name $ARRAYNAME
         done
     fi
     sudo $SPDK_DIR/scripts/rpc.py nvmf_get_subsystems
-    sudo $ROOT_DIR/bin/cli logger set_level --level info
+    sudo $ROOT_DIR/bin/poseidonos-cli logger set-level --level info
 
 }
 

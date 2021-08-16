@@ -22,7 +22,7 @@ DEFAULT_SUBSYSTEM=31
 DEFAULT_PORT=1158
 TARGET_ROOT_DIR=$(readlink -f $(dirname $0))/../../..
 TARGET_SPDK_DIR=$TARGET_ROOT_DIR/lib/spdk
-ibof_cli_old="$TARGET_ROOT_DIR/bin/cli"
+ibof_cli_old="$TARGET_ROOT_DIR/bin/poseidonos-cli"
 ibof_cli="$TARGET_ROOT_DIR/bin/poseidonos-cli"
 ARRAYNAME=POSArray
 ARRAYNAME1=POSArray1
@@ -162,9 +162,9 @@ add_spare()
 {
     spare_dev=$1
     print_info "Add Spare device ${spare_dev}"
-    #texecc ${ibof_cli} array add --spare ${spare_dev} --array ${ARRAYNAME}
-    texecc ${ibof_cli} array addspare --spare ${spare_dev} --array ${ARRAYNAME1}
-    texecc ${ibof_cli} array addspare --spare ${spare_dev} --array ${ARRAYNAME2}
+    #texecc ${ibof_cli} array addspare --spare ${spare_dev} --array-name ${ARRAYNAME}
+    texecc ${ibof_cli} array addspare --spare ${spare_dev} --array-name ${ARRAYNAME1}
+    texecc ${ibof_cli} array addspare --spare ${spare_dev} --array-name ${ARRAYNAME2}
 }
 
 pci_rescan()
@@ -231,7 +231,7 @@ exit_ibofos(){
     texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME} --force
     texecc sleep 10
     echo "Array successfully unmounted"
-    #texecc ${ibof_cli} system exit
+    #texecc ${ibof_cli} system stop
     texecc ${ibof_cli} system stop --force
     texecc sleep 10
     

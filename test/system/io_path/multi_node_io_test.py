@@ -177,11 +177,11 @@ def parse_argument():
 
 
 def terminate_ibofos():
-    unmount_ibofos_command = ibofos_root + "/bin/cli array unmount --name POSArray1"
+    unmount_ibofos_command = ibofos_root + "/bin/poseidonos-cli array unmount --array-name POSArray1 --force"
     os.system(unmount_ibofos_command)
-    unmount_ibofos_command = ibofos_root + "/bin/cli array unmount --name POSArray2"
+    unmount_ibofos_command = ibofos_root + "/bin/poseidonos-cli array unmount --array-name POSArray2 --force"
     os.system(unmount_ibofos_command)
-    exit_ibofos_command = ibofos_root + "/bin/cli system exit"
+    exit_ibofos_command = ibofos_root + "/bin/poseidonos-cli system stop"
     os.system(exit_ibofos_command)
     check_ibofos_command = "pgrep -c ibofos"
     result = os.system(check_ibofos_command)
