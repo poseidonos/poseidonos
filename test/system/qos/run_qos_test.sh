@@ -231,7 +231,7 @@ exit_ibofos(){
     texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME} --force
     texecc sleep 10
     echo "Array successfully unmounted"
-    #texecc ${ibof_cli} system stop
+    #texecc ${ibof_cli} system stop --force
     texecc ${ibof_cli} system stop --force
     texecc sleep 10
     

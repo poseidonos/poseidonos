@@ -224,7 +224,7 @@ exit_POS()
 {
     echo "  Unmounting and Exiting POS"
     texecc ./bin/poseidonos-cli array unmount --array-name POSArray --force >> ${logfile}
-    texecc ./bin/poseidonos-cli system stop >> ${logfile}
+    texecc ./bin/poseidonos-cli system stop --force >> ${logfile}
 
     texecc ps -C poseidonos > /dev/null >> ${logfile}
     while [[ ${?} == 0 ]]

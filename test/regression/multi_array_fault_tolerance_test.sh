@@ -321,7 +321,7 @@ shutdown_pos()
     notice "Shutting down poseidonos..."
 	${pos_cli} array unmount --array-name $array_name_0
 	${pos_cli} array unmount --array-name $array_name_1
-	${pos_cli} system stop
+	${pos_cli} system stop --force
     notice "Shutdown has been completed!"
 
     disconnect_nvmf_contollers;
@@ -371,16 +371,14 @@ bringup_pos()
 
     if [ ${pos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        ${pos_cli} volume create --volume-name ${volname} --size ${pos_phy_volume_size_byte} --array-name $array_name_0 >> ${logfile};
-        ${pos_cli} volume create --volume-name ${volname} --size ${pos_phy_volume_size_byte} --array-name $array_name_1 >> ${logfile};
-        check_result_err_from_logfile
+        ${pos_cli} volume create --volume-name ${volname} --size ${pos_phy_volume_size_byte}B --array-name $array_name_0 >> ${logfile};
+        ${pos_cli} volume create --volume-name ${volname} --size ${pos_phy_volume_size_byte}B --array-name $array_name_1 >> ${logfile};
     fi
 
     if [ ${pos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
         ${pos_cli} volume mount --volume-name ${volname} --array-name $array_name_0 >> ${logfile};
         ${pos_cli} volume mount --volume-name ${volname} --array-name $array_name_1 >> ${logfile};
-        check_result_err_from_logfile
     fi
     
     establish_nvmef_target;

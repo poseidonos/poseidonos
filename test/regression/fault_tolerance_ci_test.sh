@@ -310,7 +310,7 @@ shutdown_ibofos()
 {
     notice "Shutting down poseidonos..."
 	${ibof_cli} array unmount --array-name $array_name --force
-	${ibof_cli} system stop
+	${ibof_cli} system stop --force
     notice "Shutdown has been completed!"
 
     disconnect_nvmf_contollers;
@@ -356,16 +356,13 @@ bringup_ibofos()
 
     if [ ${ibofos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        ${ibof_cli} volume create --volume-name ${volname} --size ${ibof_phy_volume_size_byte} --array-name $array_name >> ${logfile};
-        check_result_err_from_logfile
+        ${ibof_cli} volume create --volume-name ${volname} --size ${ibof_phy_volume_size_byte}B --array-name $array_name >> ${logfile};
     fi
 
     if [ ${ibofos_volume_required} -eq 1 ]; then
         info "Mount volume....${volname}"
         ${ibof_cli} volume mount --volume-name ${volname} --array-name $array_name >> ${logfile};
-        check_result_err_from_logfile
     fi
-    
     establish_nvmef_target;
     discover_n_connect_nvme_from_initiator;
     

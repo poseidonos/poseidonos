@@ -151,7 +151,7 @@ normal_shutdown()
     result=$(<result.txt)
 
     texecc ./bin/poseidonos-cli array unmount -a POSARRAY --json-res --force > shutdown.txt
-    texecc ./bin/poseidonos-cli system stop --json-res --force > shutdown.txt
+    texecc ./bin/poseidonos-cli system stop --force --json-res --force > shutdown.txt
     
     tail --pid=${result} -f /dev/null
 

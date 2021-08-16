@@ -5,7 +5,7 @@ import lib
 
 def system_stop(cmd, cli, dir):
     try:
-        cli_cmd = cmd + f"nohup yes | {dir}/bin/{cli} system stop"
+        cli_cmd = cmd + f"nohup yes | {dir}/bin/{cli} system stop --force"
         lib.subproc.popen(cli_cmd)
         return 0
     except Exception as e:

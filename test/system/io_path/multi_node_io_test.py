@@ -181,7 +181,7 @@ def terminate_ibofos():
     os.system(unmount_ibofos_command)
     unmount_ibofos_command = ibofos_root + "/bin/poseidonos-cli array unmount --array-name POSArray2 --force"
     os.system(unmount_ibofos_command)
-    exit_ibofos_command = ibofos_root + "/bin/poseidonos-cli system stop"
+    exit_ibofos_command = ibofos_root + "/bin/poseidonos-cli system stop --force"
     os.system(exit_ibofos_command)
     check_ibofos_command = "pgrep -c ibofos"
     result = os.system(check_ibofos_command)

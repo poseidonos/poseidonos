@@ -254,7 +254,7 @@ shutdown_ibofos()
     notice "Shutting down poseidonos..."
     texecc ${POS_ROOT}/bin/poseidonos-cli array unmount --array-name ${target_name_0} --force
     texecc ${POS_ROOT}/bin/poseidonos-cli array unmount --array-name ${target_name_1} --force
-    texecc ${POS_ROOT}/bin/poseidonos-cli system stop
+    texecc ${POS_ROOT}/bin/poseidonos-cli system stop --force
     notice "Shutdown has been completed!"
 	check_stopped
 
@@ -300,8 +300,8 @@ bringup_poseidonos()
 
     if [ ${pos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
-        texecc ${POS_ROOT}/bin/poseidonos-cli volume create --volume-name ${volname} --size ${pos_phy_volume_size_byte} --array-name ${target_name_0} >> ${logfile};
-        texecc ${POS_ROOT}/bin/poseidonos-cli volume create --volume-name ${volname} --size ${pos_phy_volume_size_byte} --array-name ${target_name_1} >> ${logfile};
+        texecc ${POS_ROOT}/bin/poseidonos-cli volume create --volume-name ${volname} --size ${pos_phy_volume_size_byte}B --array-name ${target_name_0} >> ${logfile};
+        texecc ${POS_ROOT}/bin/poseidonos-cli volume create --volume-name ${volname} --size ${pos_phy_volume_size_byte}B --array-name ${target_name_1} >> ${logfile};
         #check_result_err_from_logfile
     fi
 

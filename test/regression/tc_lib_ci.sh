@@ -289,7 +289,7 @@ delete_array()
 
 create_volume()
 {
-    print_info "create volume [vol name: $1, byte size: $2, max iops: $3, max bw: $4]"
+    print_info "create volume [vol name: $1, byte size: $2B, max iops: $3, max bw: $4]"
 
     iexecc rm -rf create_volume.txt result.txt
 
@@ -327,7 +327,7 @@ normal_shutdown()
         return 1
     fi
 
-    texecc ./bin/poseidonos-cli system stop --json-res --force > shutdown.txt
+    texecc ./bin/poseidonos-cli system stop --force --json-res --force > shutdown.txt
     
     ps -C poseidonos > /dev/null
     while [[ ${?} == 0 ]]
@@ -383,7 +383,7 @@ graceful_shutdown()
         fi
     fi
 
-    texecc ./bin/poseidonos-cli system stop --json-res --force > shutdown.txt
+    texecc ./bin/poseidonos-cli system stop --force --json-res --force > shutdown.txt
 
     ps -C poseidonos > /dev/null
     while [[ ${?} == 0 ]]
