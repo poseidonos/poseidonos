@@ -44,7 +44,7 @@ namespace pos
 {
 Logger::Logger(void)
 {
-    if (IsDirExist(preferences.LogDir()) == false)
+    if (DirExists(preferences.LogDir()) == false)
     {
         MakeDir(preferences.LogDir());
     }
@@ -108,7 +108,7 @@ Logger::_ShouldLog(spdlog::level::level_enum lvl, int id, spdlog::string_view_t 
 
 Reporter::Reporter(void)
 {
-    if (IsDirExist(REPORT_PATH) == false)
+    if (DirExists(REPORT_PATH) == false)
     {
         MakeDir(REPORT_PATH);
     }

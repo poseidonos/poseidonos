@@ -58,7 +58,7 @@ DefaultConfiguration::DefaultConfiguration(void)
 void
 DefaultConfiguration::Restore(void)
 {
-    if (IsDirExist(ConfiguratinDir()) == false)
+    if (DirExists(ConfiguratinDir()) == false)
     {
         MakeDir(ConfiguratinDir());
     }

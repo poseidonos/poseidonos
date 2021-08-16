@@ -39,12 +39,12 @@ JsonFormatSubStringAddTab(JsonFormatType type, string& subString)
     {
         uint32_t pos = 0;
         string newLine = "\n";
-        string tap = "    ";
+        string tab = "    ";
         while (subString.find(newLine, pos) != string::npos)
         {
             uint32_t newLinePos = subString.find(newLine, pos);
             pos = newLinePos + 1;
-            subString.insert(pos, tap);
+            subString.insert(pos, tab);
         }
     }
 };
@@ -63,11 +63,11 @@ static void
 JsonFormatAddNewLineAndTab(JsonFormatType type, string& subString)
 {
     string newLine = "\n";
-    string tap = "    ";
+    string tab = "    ";
     if (JsonFormatType::JSON_FORMAT_TYPE_READABLE == type)
     {
         subString += newLine;
-        subString += tap;
+        subString += tab;
     }
 };
 
@@ -198,33 +198,6 @@ JsonFormat::MakeResponse(
     result.SetElement(status);
     root.SetElement(result);
     root.SetElement(info);
-    return root.ToJson(JSON_FORMAT_TYPE_DEFAULT);
-}
-
-// For WBT
-string
-JsonFormat::MakeResponse(
-    string command, string rid, int code, string description, vector<pair<string, string>> dataAttr, JsonElement info)
-{
-    JsonElement root("");
-    root.SetAttribute(JsonAttribute("command", "\"" + command + "\""));
-    root.SetAttribute(JsonAttribute("rid", "\"" + rid + "\""));
-    JsonElement result = JsonElement("result");
-    JsonElement status = JsonElement("status");
-    JsonElement data = JsonElement("data");
-    status.SetAttribute(JsonAttribute("code", code));
-    status.SetAttribute(JsonAttribute("description", "\"" + description + "\""));
-
-    for (unsigned int i = 0; i < dataAttr.size(); i++)
-    {
-        data.SetAttribute(JsonAttribute(dataAttr[i].first, "\"" + dataAttr[i].second + "\""));
-    }
-
-    result.SetElement(status);
-    result.SetElement(data);
-    root.SetElement(result);
-    root.SetElement(info);
-
     return root.ToJson(JSON_FORMAT_TYPE_DEFAULT);
 }
 

@@ -1,47 +1,58 @@
-#include "src/helper/json_helper.h"
-
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include <string>
+#include "src/helper/json_helper.h"
+#include <iostream>
 
-TEST(JsonAttribute, JsonAttribute_)
+using ::testing::_;
+using ::testing::Return;
+
+TEST(JsonFormat, MakeResponse_testJsonFormatIfElementContainsArray)
 {
+    // Given
+    struct Person
+    {
+        string name;
+        int id;
+    };
+
+    Person people[2] = {{"foo", 1}, {"bar", 2}};
+    JsonFormat jFormat;
+
+    JsonArray array("people");
+    for (size_t i = 0; i < 2; i++)
+    {
+        JsonElement elem("");
+        elem.SetAttribute(
+            JsonAttribute("name", "\"" + people[i].name + "\""));
+        elem.SetAttribute(
+            JsonAttribute("id", people[i].id));
+        array.AddElement(elem);
+    }
+    JsonElement dataElem("data");
+    dataElem.SetArray(array);
+    JsonElement infoElem("sign");
+    infoElem.SetAttribute(JsonAttribute("ver", "\" 1.0 + \""));
+
+    // When
+    string response = jFormat.MakeResponse("PEOPLE", "0000", 0, "List of people", dataElem, infoElem);
+    string expected = "{\"command\":\"PEOPLE\",\"rid\":\"0000\",\"result\":{\"status\":{\"code\":0,\"description\":\"List of people\"},\"data\":{\"people\":[{\"name\":\"foo\",\"id\":1},{\"name\":\"bar\",\"id\":2}]}},\"sign\":{\"ver\":\" 1.0 + \"}}";
+
+    // Then
+    EXPECT_TRUE(response == expected);
 }
 
-TEST(JsonAttribute, ToJson_)
+TEST(JsonFormat, MakeResponse_testJsonFormatIfDataElementIsNotIncluded)
 {
-}
+    // Given
+    JsonFormat jFormat;
+    JsonElement infoElem("sign");
+    infoElem.SetAttribute(JsonAttribute("ver", "\" 1.0 + \""));
 
-TEST(JsonElement, JsonElement_)
-{
-}
+    // When
+    string response = jFormat.MakeResponse("PEOPLE", "1111", 0, "There is no person", infoElem);
+    string expected = "{\"command\":\"PEOPLE\",\"rid\":\"1111\",\"result\":{\"status\":{\"code\":0,\"description\":\"There is no person\"}},\"sign\":{\"ver\":\" 1.0 + \"}}";
 
-TEST(JsonElement, SetAttribute_)
-{
-}
-
-TEST(JsonElement, SetArray_)
-{
-}
-
-TEST(JsonElement, SetElement_)
-{
-}
-
-TEST(JsonElement, ToJson_)
-{
-}
-
-TEST(JsonArray, JsonArray_)
-{
-}
-
-TEST(JsonArray, AddElement_)
-{
-}
-
-TEST(JsonArray, ToJson_)
-{
-}
-
-TEST(JsonFormat, MakeResponse_)
-{
+    // Then
+    EXPECT_TRUE(response == expected);
 }

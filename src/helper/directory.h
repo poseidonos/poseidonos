@@ -40,7 +40,7 @@
 using namespace std;
 
 static bool
-IsDirExist(const std::string& path)
+DirExists(const std::string& path)
 {
     struct stat info;
     if (stat(path.c_str(), &info) != 0)
@@ -70,7 +70,7 @@ MakeDir(const std::string& path)
         }
             return 0 == mkdir(path.c_str(), mode);
         case EEXIST:
-            return IsDirExist(path);
+            return DirExists(path);
 
         default:
             return false;

@@ -124,8 +124,6 @@ public:
     string MakeResponse(
         string command, string rid, int code, string description, JsonElement info);
     string MakeResponse(
-        string command, string rid, int code, string description, vector<pair<string, string>> dataAttr, JsonElement info);
-    string MakeResponse(
         string command, string rid, int code,
         string description, JsonElement dataElem, JsonElement info);
 };
