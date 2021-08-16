@@ -27,7 +27,7 @@ def device_scan(cmd, cli, dir):
 
 def array_reset(cmd, cli, dir):
     try:
-        cli_cmd = cmd + f"nohup {dir}/bin/{cli} dev resetmbr"
+        cli_cmd = cmd + f"nohup {dir}/bin/{cli} devel resetmbr"
         lib.subproc.popen(cli_cmd)
         return 0
     except Exception as e:

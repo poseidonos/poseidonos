@@ -360,7 +360,7 @@ bringup_pos()
     ${pos_cli} device list >> ${logfile}
 
 	if [ $create_array -eq 1 ]; then
-        ${root_dir}bin/poseidonos-cli dev resetmbr
+        ${root_dir}bin/poseidonos-cli devel resetmbr
 		info "Target device list=${target_dev_list_0} , and ${target_dev_list_1}"
 		${pos_cli} array create -b uram0 -d ${target_dev_list_0} --array-name $array_name_0
 		${pos_cli} array create -b uram1 -d ${target_dev_list_1} --array-name $array_name_1

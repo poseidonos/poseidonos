@@ -342,7 +342,7 @@ bringup_ibofos()
     ${ibof_cli} device list >> ${logfile}
 
 	if [ $create_array -eq 1 ]; then
-        ${ibof_cli} dev resetmbr
+        ${ibof_cli} devel resetmbr
 		info "Target device list=${target_dev_list}"
 		${ibof_cli} array create -b uram0 -d ${target_dev_list} --array-name $array_name
 	fi

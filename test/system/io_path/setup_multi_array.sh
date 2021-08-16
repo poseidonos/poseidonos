@@ -71,7 +71,7 @@ ibofos_bringup(){
 
     if [ "$CLEAN_BRINGUP" -eq 1 ]; then
         echo "poseidonos clean bringup"
-        sudo $ROOT_DIR/bin/poseidonos-cli dev resetmbr
+        sudo $ROOT_DIR/bin/poseidonos-cli devel resetmbr
         if [ ${PMEM_ENABLED} -eq 1 ]; then
             sudo $ROOT_DIR/bin/poseidonos-cli array create -b pmem0 $USER_DEVICE_LIST1 $SPARE_DEVICE_LIST --array-name POSArray1 --raid RAID5
             sudo $ROOT_DIR/bin/poseidonos-cli array create -b pmem0 $USER_DEVICE_LIST1 $SPARE_DEVICE_LIST --array-name POSArray2 --raid RAID5

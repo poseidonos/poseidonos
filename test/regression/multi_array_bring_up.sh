@@ -287,7 +287,7 @@ bringup_poseidonos()
     texecc ${POS_ROOT}/bin/poseidonos-cli device list >> ${logfile}
 
 	if [ $create_array -eq 1 ]; then
-        texecc ${POS_ROOT}/bin/poseidonos-cli dev resetmbr
+        texecc ${POS_ROOT}/bin/poseidonos-cli devel resetmbr
         info "Target device list=${target_dev_list_0} , ${target_dev_list_1}"
         texecc ${POS_ROOT}/bin/poseidonos-cli array create -b uram0 -d ${target_dev_list_0}  --array-name ${target_name_0}
         texecc ${POS_ROOT}/bin/poseidonos-cli array create -b uram1 -d ${target_dev_list_1}  --array-name ${target_name_1}

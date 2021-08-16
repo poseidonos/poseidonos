@@ -82,7 +82,7 @@ ibofos_bringup(){
 
     if [ "$CLEAN_BRINGUP" -eq 1 ]; then
         echo "poseidonos clean bringup"
-        sudo $ROOT_DIR/bin/poseidonos-cli dev resetmbr
+        sudo $ROOT_DIR/bin/poseidonos-cli devel resetmbr
         sudo $ROOT_DIR/bin/poseidonos-cli array create -b uram0 $USER_DEVICE_LIST1 --name $ARRAYNAME1 --raid RAID5
         sudo $ROOT_DIR/bin/poseidonos-cli array create -b uram1 $USER_DEVICE_LIST2 --name $ARRAYNAME2 --raid RAID5
         sudo $ROOT_DIR/bin/poseidonos-cli array mount --array-name $ARRAYNAME1
