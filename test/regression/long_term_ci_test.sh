@@ -66,7 +66,7 @@ shutdown()
             if [[ $state = "NORMAL" ]]; then
                 ${rootdir}/bin/poseidonos-cli array unmount --array-name $array_name --json-res --force
             elif [[ $state = "OFFLINE" ]]; then
-                ${rootdir}/bin/poseidonos-cli system stop --force --json-res --force
+                ${rootdir}/bin/poseidonos-cli system stop --json-res --force
                 system_stop=1
             fi
         fi
