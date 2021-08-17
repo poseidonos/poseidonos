@@ -34,7 +34,7 @@ def bringup_multiple_volume(**args):
             "-a", args['target_ip'], \
             "-v", str(args['volume_cnt']), \
             "-s", str(args['subsystem_cnt']), \
-            "-S", str(args['volume_size']), \
+            "-S", str(args['volume_size']) + "B", \
             "-c", str(args['clean'])], \
             stdout=args['stdout_type'], stderr=subprocess.STDOUT)
     print("\tBringup Done")
@@ -45,7 +45,7 @@ def terminate_pos(ibof_root, stdout_type):
         ibof_cli = ibof_root + "bin/poseidonos-cli"
         subprocess.call([ibof_cli, "array", "unmount", "--array-name", "POSArray", "--force"],\
             stdout=stdout_type, stderr=subprocess.STDOUT)
-        subprocess.call([ibof_cli, "system", "exit"],\
+        subprocess.call([ibof_cli, "system", "stop", "--force"],\
             stdout=stdout_type, stderr=subprocess.STDOUT)
         ibof_proc.wait()
     print("\tTerminate POS done")
