@@ -146,7 +146,7 @@ NvmfVolumePos::_VolumeCreateHandler(void* arg1, void* arg2)
         {
             POS_EVENT_ID eventId =
                 POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_POS_BDEV;
-            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId));
+            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
         }
         delete vInfo;
     }

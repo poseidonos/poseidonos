@@ -84,11 +84,22 @@ NvmfTarget::CreatePosBdev(const string& bdevName, const string& uuid, uint32_t i
 
     // spdkCaller->SpdkUuidParse(bdev_uuid, (char *)&uuid);
 
-    struct spdk_bdev* bdev = spdkCaller->SpdkBdevCreatePosDisk(bdevName.c_str(), id, bdev_uuid,
+    struct spdk_bdev* bdev = spdkCaller->SpdkBdevGetByName(bdevName.c_str());
+    if (nullptr != bdev)
+    {
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::IONVMF_BDEV_ALREADY_EXIST;
+        POS_TRACE_INFO(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
+        return false;
+    }
+
+    bdev = spdkCaller->SpdkBdevCreatePosDisk(bdevName.c_str(), id, bdev_uuid,
         numBlocks, blockSize, volumeTypeInMem, arrayName.c_str(), arrayId);
     if (bdev == nullptr)
     {
-        SPDK_ERRLOG("bdev %s does not exist\n", bdevName.c_str());
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_POS_BDEV;
+        POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
         return false;
     }
     struct EventContext* ctx = _CreateEventContext(nullptr, nullptr,

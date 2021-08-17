@@ -55,7 +55,24 @@ TEST(NvmfTarget, CreatePosBdev_CreateBdevSuccess)
     struct spdk_bdev* bdev;
     bool actual, expected{true};
 
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(nullptr));
     ON_CALL(*mockSpdkCaller, SpdkBdevCreatePosDisk(_, _, _, _, _, _, _, _)).WillByDefault(Return(bdev));
+
+    NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
+    actual = nvmfTarget.CreatePosBdev("bdev", "", 0, 1024, 512, false, "array", 0);
+
+    ASSERT_EQ(actual, expected);
+    delete mockSpdkCaller;
+}
+
+TEST(NvmfTarget, CreatePosBdev_BdevAlreadyExist)
+{
+    // Given
+    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    struct spdk_bdev* bdev;
+    bool actual, expected{false};
+
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(bdev));
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
     actual = nvmfTarget.CreatePosBdev("bdev", "", 0, 1024, 512, false, "array", 0);
@@ -70,6 +87,7 @@ TEST(NvmfTarget, CreatePosBdev_CreateBdevFail)
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
     bool actual, expected{false};
 
+    ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(nullptr));
     ON_CALL(*mockSpdkCaller, SpdkBdevCreatePosDisk(_, _, _, _, _, _, _, _)).WillByDefault(Return(nullptr));
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);

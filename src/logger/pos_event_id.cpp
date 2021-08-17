@@ -62,13 +62,14 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::IONVMF_FAIL_TO_FIND_ARRAYNAME, "Fail to parse array name from bdev name"},
             {POS_EVENT_ID::IONVMF_OVERRIDE_UNVMF_IO_HANDLER, "Override unvmf_io_handler"},
             {POS_EVENT_ID::IONVMF_VOLUME_DETACH_COUNT_OVERFLOW, "Volume detached count is bigger than expected volume count"},
-            {POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_POS_BDEV, "Fail to create pos bdev"},
+            {POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_POS_BDEV, "Fail to create pos bdev({})"},
             {POS_EVENT_ID::IONVMF_FAIL_TO_DELETE_POS_BDEV, "Fail to delete pos bdev"},
             {POS_EVENT_ID::IONVMF_FAIL_TO_DETACH_NAMESPACE, "Fail to detach namespace from subsystem"},
             {POS_EVENT_ID::IONVMF_BDEV_DOES_NOT_EXIST, "Fail to find requested bdev"},
             {POS_EVENT_ID::IONVMF_BDEV_UUID_DOES_NOT_EXIST, "Fail to get requeted bdev uuid"},
             {POS_EVENT_ID::IONVMF_FAIL_TO_CONVERT_UUID_INTO_STRING, "Fail to convert uuid into string"},
             {POS_EVENT_ID::IONVMF_FAIL_TO_FIND_SUBSYSTEM, "Subsystem is not found"},
+            {POS_EVENT_ID::IONVMF_BDEV_ALREADY_EXIST, "Requested bdev{} already exist"},
 };
 
 PosEventId::PosEventIdEntry
