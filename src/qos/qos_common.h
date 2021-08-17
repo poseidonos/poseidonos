@@ -73,8 +73,8 @@ const uint8_t PRIORITY_DEFAULT = PRIORITY_HIGHEST;
 
 const int PRIO_WT_HIGHEST = 20;
 const int PRIO_WT_HIGHER = 10;
-const int PRIO_WT_HIGH = -10;
-const int PRIO_WT_MEDIUM = 1;
+const int PRIO_WT_HIGH = 1;
+const int PRIO_WT_MEDIUM = -10;
 const int PRIO_WT_LOW = -100;
 const int PRIO_WT_LOWER = -800;
 const int PRIO_WT_LOWEST = -1000;
