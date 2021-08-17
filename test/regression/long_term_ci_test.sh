@@ -4,7 +4,7 @@ logfile="pos.log"
 rootdir=$(readlink -f $(dirname $0))/../..
 iopathdir=${rootdir}/test/system/io_path
 test_iteration=4
-totalsize=100 #pm : 12500
+totalsize_in_gb=100 #pm : 12500
 volume_cnt=4
 clean_bringup=1
 transport=TCP
@@ -36,7 +36,7 @@ do
             ;;
         i) test_iteration="$OPTARG"
             ;;
-        s) totalsize="$OPTARG"
+        s) totalsize_in_gb="$OPTARG"
             ;;
         c) cpusallowed="$OPTARG"
             ;;
@@ -50,7 +50,7 @@ do
     esac
 done
 
-sizepervol=`expr $totalsize / $volume_cnt `
+sizepervol=`expr $totalsize_in_gb / $volume_cnt `GB
 
 shutdown()
 {
@@ -95,7 +95,7 @@ print_test_configuration()
     echo "  - Target IP:                ${target_ip}"
     echo "  - Total Test Time:          `expr ${test_iteration} \* ${test_time}`"
     echo "  - Volume Count:             ${volume_cnt}"
-    echo "  - Total Size:               ${totalsize}"
+    echo "  - Total Size:               ${totalsize_in_gb}"
     echo "  - Size per Volume:          ${sizepervol}"
     echo "  - Shutdown Option:          ${shutdowntype}"
     echo "  - Array Mode:               ${arraymode}"
@@ -113,7 +113,7 @@ sudo ${rootdir}/test/script/kill_poseidonos.sh
 sudo ${rootdir}/script/start_poseidonos.sh
 sleep 10
 
-sudo ${iopathdir}/setup_ibofos_nvmf_volume.sh -c $clean_bringup -t $transport -a $target_ip -s $subsystem_count -v $volume_cnt -S $((sizepervol*1024*1024*1024))
+sudo ${iopathdir}/setup_ibofos_nvmf_volume.sh -c $clean_bringup -t $transport -a $target_ip -s $subsystem_count -v $volume_cnt -S ${sizepervol}
 clean_bringup=0
 
 iotype="write"
@@ -122,7 +122,7 @@ blocksize="128k"
 timebase=1
 runtime=$test_time
 sudo ${iopathdir}/fio_bench.py --traddr=${target_ip} --trtype=tcp --readwrite=${iotype} \
---io_size=${sizepervol}G --verify=false --bs=${blocksize} --time_based=${timebase} \
+--io_size=${sizepervol} --verify=false --bs=${blocksize} --time_based=${timebase} \
 --run_time=${runtime} --iodepth=4 --file_num=${volume_cnt} --cpus_allowed=${cpusallowed}
 
 res=$?
@@ -164,11 +164,11 @@ do
         done
         sudo ${rootdir}/script/start_poseidonos.sh
         sleep 10
-        sudo ${iopathdir}/setup_ibofos_nvmf_volume.sh -c $clean_bringup -t $transport -a $target_ip -s $subsystem_count -v $volume_cnt -S $((sizepervol*1024*1024*1024))
+        sudo ${iopathdir}/setup_ibofos_nvmf_volume.sh -c $clean_bringup -t $transport -a $target_ip -s $subsystem_count -v $volume_cnt -S ${sizepervol}
     fi
 
     iotype="randwrite"
-    sudo ${iopathdir}/fio_bench.py --traddr=${target_ip} --trtype=tcp --readwrite=${iotype} --io_size=${sizepervol}G \
+    sudo ${iopathdir}/fio_bench.py --traddr=${target_ip} --trtype=tcp --readwrite=${iotype} --io_size=${sizepervol} \
     --verify=true --bs=${blocksize} --time_based=${timebase} --run_time=${runtime} --iodepth=4 --file_num=${volume_cnt} \
     --cpus_allowed=${cpusallowed}
     res=$?
