@@ -29,7 +29,6 @@ SUBDIRS = allocator \
         array/service/io_translator \
         array/state \
         array_components \
-        array_components/mount_temp \
         array_mgmt \
         rebuild \
         volume \

@@ -32,7 +32,6 @@
 
 #pragma once
 
-#include "src/array_components/mount_temp/mount_temp.h"
 #include "src/state/interface/i_state_observer.h"
 #include "src/state/interface/i_state_control.h"
 #include "src/volume/i_volume_manager.h"
@@ -48,15 +47,14 @@ using namespace std;
 namespace pos
 {
 class IMountSequence;
-class IAbrControl;
 class VolumeManager;
 
 class ArrayMountSequence : public IStateObserver
 {
 public:
-    ArrayMountSequence(vector<IMountSequence*> seq, IAbrControl* abr,
-                        IStateControl* iState, string name, IVolumeManager* volMgr, unsigned int arrIndex, IArrayRebuilder* rbdr);
-    ArrayMountSequence(vector<IMountSequence*> seq, MountTemp* mntTmp,
+    ArrayMountSequence(vector<IMountSequence*> seq, IStateControl* iState, string name,
+                        IVolumeManager* volMgr, unsigned int arrIndex, IArrayRebuilder* rbdr);
+    ArrayMountSequence(vector<IMountSequence*> seq,
                         IStateControl* iState, string name,
                         StateContext* mountState,
                         StateContext* unmountState,
@@ -74,7 +72,6 @@ private:
     bool _WaitState(StateContext* goal);
     void _FlushMountSequence(void);
 
-    MountTemp* temp = nullptr;
     IStateControl* state = nullptr;
     vector<IMountSequence*> sequence;
     StateContext* mountState = nullptr;

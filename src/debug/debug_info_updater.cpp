@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/array_components/mount_temp/debug_info_updater.h"
+#include "src/debug/debug_info_updater.h"
 
 namespace pos
 {

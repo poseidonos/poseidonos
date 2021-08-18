@@ -1,4 +1,4 @@
-#include "src/array_components/mount_temp/debug_info_updater.h"
+#include "src/debug/debug_info_updater.h"
 
 #include <gtest/gtest.h>
 

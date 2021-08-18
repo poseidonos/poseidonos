@@ -260,7 +260,7 @@ ArrayComponents::_SetMountSequence(unsigned int arrayIndex)
     {
         POS_TRACE_WARN(EID(ARRAY_COMPONENTS_LEAK), "Memory leakage found for ArrayMountSequence for " + arrayName);
     }
-    arrayMountSequence = new ArrayMountSequence(mountSequence, iAbr, state, arrayName, volMgr, arrayIndex, arrayRebuilder);
+    arrayMountSequence = new ArrayMountSequence(mountSequence, state, arrayName, volMgr, arrayIndex, arrayRebuilder);
 }
 
 void

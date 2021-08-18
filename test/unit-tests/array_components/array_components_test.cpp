@@ -139,7 +139,6 @@ TEST(ArrayComponents, Mount_testUsingArrayMountSequenceMock)
     // Given
     vector<IMountSequence*> emptySeq;
     MockStateControl stateControl;
-    MountTemp* mntTmp = nullptr;
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
     EXPECT_CALL(stateControl, Subscribe).Times(1);
     EXPECT_CALL(stateControl, Unsubscribe).Times(1);
@@ -164,11 +163,10 @@ TEST(ArrayComponents, Unmount_testUsingArrayMountSequenceMock)
     // Given
     vector<IMountSequence*> emptySeq;
     MockStateControl stateControl;
-    MountTemp* mntTmp = nullptr;
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
     EXPECT_CALL(stateControl, Subscribe).Times(1);
     EXPECT_CALL(stateControl, Unsubscribe).Times(1);
-    MockArrayMountSequence* mockArrayMountSequence = new MockArrayMountSequence(emptySeq, mntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder);
+    MockArrayMountSequence* mockArrayMountSequence = new MockArrayMountSequence(emptySeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder);
     EXPECT_CALL(*mockArrayMountSequence, Unmount).WillOnce(Return(0));
 
     MockStateManager mockStateManager;

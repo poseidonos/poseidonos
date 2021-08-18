@@ -2,7 +2,7 @@
 #include <string>
 #include <list>
 #include <vector>
-#include "src/array_components/mount_temp/debug_info_updater.h"
+#include "src/debug/debug_info_updater.h"
 
 namespace pos
 {

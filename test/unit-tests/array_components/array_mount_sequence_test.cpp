@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 #include "src/include/pos_event_id.h"
-#include "test/unit-tests/array_components/mount_temp/mount_temp_mock.h"
 #include "test/unit-tests/array_models/interface/i_mount_sequence_mock.h"
 #include "test/unit-tests/state/state_control_mock.h"
 #include "test/unit-tests/volume/volume_manager_mock.h"
@@ -18,13 +17,12 @@ TEST(ArrayMountSequence, ArrayMountSequence_testConstructor)
     // Given
     vector<IMountSequence*> emptySeq;
     MockStateControl stateControl;
-    MountTemp* mntTmp = nullptr;
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
     EXPECT_CALL(stateControl, Subscribe).Times(1);
     EXPECT_CALL(stateControl, Unsubscribe).Times(1);
 
     // When
-    ArrayMountSequence mntSeq(emptySeq, mntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder);
+    ArrayMountSequence mntSeq(emptySeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder);
 
     // Then
 }
@@ -36,7 +34,6 @@ TEST(ArrayMountSequence, Mount_testIfEverySequenceIsInitialized)
     vector<IMountSequence*> seqVec = {&mockSeq1, &mockSeq2, &mockSeq3};
     MockStateControl stateControl;
     unsigned int arrayIndex;
-    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array", arrayIndex);
     StateContext* mockDefaultState = new StateContext("sender", SituationEnum::DEFAULT);
     StateContext* mockMountState = new StateContext("sender", SituationEnum::TRY_MOUNT);
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
@@ -47,12 +44,11 @@ TEST(ArrayMountSequence, Mount_testIfEverySequenceIsInitialized)
     EXPECT_CALL(stateControl, GetState)
         .WillOnce(Return(mockDefaultState)).WillOnce(Return(mockMountState));
     EXPECT_CALL(mockSeq1, Init).WillOnce(Return(0));
-    EXPECT_CALL(*mockMntTmp, Mount1).WillOnce(Return(0));
     EXPECT_CALL(mockSeq2, Init).WillOnce(Return(0));
     EXPECT_CALL(mockSeq3, Init).WillOnce(Return(0));
     EXPECT_CALL(stateControl, Remove).Times(1);
 
-    ArrayMountSequence mntSeq(seqVec, mockMntTmp, &stateControl, "mock-array", mockMountState, nullptr, nullptr, nullptr, mockRebuilder);
+    ArrayMountSequence mntSeq(seqVec, &stateControl, "mock-array", mockMountState, nullptr, nullptr, nullptr, mockRebuilder);
 
     // When
     int actual = mntSeq.Mount();
@@ -68,7 +64,6 @@ TEST(ArrayMountSequence, Mount_testIfPartiallyFailedSequenceLeadsToDisposeOnEver
     vector<IMountSequence*> seqVec = {&mockSeq1, &mockSeq2, &mockSeq3};
     MockStateControl stateControl;
     unsigned int arrayIndex;
-    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array", arrayIndex);
     StateContext* mockDefaultState = new StateContext("sender", SituationEnum::DEFAULT);
     StateContext* mockMountState = new StateContext("sender", SituationEnum::TRY_MOUNT);
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
@@ -80,7 +75,6 @@ TEST(ArrayMountSequence, Mount_testIfPartiallyFailedSequenceLeadsToDisposeOnEver
     EXPECT_CALL(stateControl, GetState)
         .WillOnce(Return(mockDefaultState)).WillOnce(Return(mockMountState));
     EXPECT_CALL(mockSeq1, Init).WillOnce(Return(0));
-    EXPECT_CALL(*mockMntTmp, Mount1).WillOnce(Return(0));
     EXPECT_CALL(mockSeq2, Init).WillOnce(Return(0));
     EXPECT_CALL(mockSeq3, Init).WillOnce(Return(SEQ3_INIT_FAILURE));
 
@@ -88,9 +82,8 @@ TEST(ArrayMountSequence, Mount_testIfPartiallyFailedSequenceLeadsToDisposeOnEver
     EXPECT_CALL(mockSeq2, Dispose).Times(1);
     EXPECT_CALL(mockSeq3, Dispose).Times(1);
     EXPECT_CALL(stateControl, Remove).Times(1);
-    // TODO(srm): also, don't we need mockMntTmp.Unmount2() for a cleanup scenario like this?
 
-    ArrayMountSequence mntSeq(seqVec, mockMntTmp, &stateControl, "mock-array", mockMountState, nullptr, nullptr, nullptr, mockRebuilder);
+    ArrayMountSequence mntSeq(seqVec, &stateControl, "mock-array", mockMountState, nullptr, nullptr, nullptr, mockRebuilder);
 
     // When
     int actual = mntSeq.Mount();
@@ -109,7 +102,7 @@ TEST(ArrayMountSequence, Unmount_testIfFailsToUnmountWhenInFaultSituation)
 
     EXPECT_CALL(stateControl, GetState).WillOnce(Return(&mockStopState));
 
-    ArrayMountSequence mntSeq(emptySeq, nullptr, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder);
+    ArrayMountSequence mntSeq(emptySeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, nullptr, mockRebuilder);
 
     // When
     int actual = mntSeq.Unmount();
@@ -126,7 +119,6 @@ TEST(ArrayMountSequence, Unmount_testIfEverySequenceIsDisposed)
 
     NiceMock<MockStateControl> stateControl;
     unsigned int arrayIndex;
-    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array", arrayIndex);
     StateContext* mockUnmountState = new StateContext("sender", SituationEnum::TRY_UNMOUNT);
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
     StateContext mockInitialState("sender", SituationEnum::NORMAL);
@@ -139,11 +131,10 @@ TEST(ArrayMountSequence, Unmount_testIfEverySequenceIsDisposed)
     EXPECT_CALL(mockVolMgr, DetachVolumes).Times(1);
     EXPECT_CALL(mockSeq3, Dispose).Times(1);
     EXPECT_CALL(mockSeq2, Dispose).Times(1);
-    EXPECT_CALL(*mockMntTmp, Unmount2).Times(1);
     EXPECT_CALL(mockSeq1, Dispose).Times(1);
     EXPECT_CALL(stateControl, Remove).Times(2);
 
-    ArrayMountSequence mntSeq(seqVec, mockMntTmp, &stateControl, "mock-array", nullptr, mockUnmountState, nullptr, &mockVolMgr, mockRebuilder);
+    ArrayMountSequence mntSeq(seqVec, &stateControl, "mock-array", nullptr, mockUnmountState, nullptr, &mockVolMgr, mockRebuilder);
 
     // When
     int actual = mntSeq.Unmount();
@@ -160,10 +151,9 @@ TEST(ArrayMountSequence, StateChanged_testIfShutdownAndFlushAreInvokedWhenStateC
     NiceMock<MockStateControl> stateControl;
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
     unsigned int arrayIndex;
-    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array", arrayIndex);
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
 
-    ArrayMountSequence mntSeq(arrayMntSeq, mockMntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr, mockRebuilder);
+    ArrayMountSequence mntSeq(arrayMntSeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr, mockRebuilder);
 
     StateContext stopContext("sender", SituationEnum::FAULT);
     StateContext normalContext("sender", SituationEnum::NORMAL);
@@ -187,10 +177,9 @@ TEST(ArrayMountSequence, StateChanged_testIfFlushIsntInvokedWhenStateChangesFrom
     vector<IMountSequence*> arrayMntSeq{&mockSeq1, &mockSeq2, &mockSeq3};
     NiceMock<MockStateControl> stateControl;
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
-    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array", 0);
     MockIArrayRebuilder mockRebuilder;
 
-    ArrayMountSequence mntSeq(arrayMntSeq, mockMntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr, &mockRebuilder);
+    ArrayMountSequence mntSeq(arrayMntSeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr, &mockRebuilder);
 
     StateContext stopContext("sender", SituationEnum::FAULT);
     StateContext offlineContext("sender", SituationEnum::DEFAULT);
@@ -220,10 +209,9 @@ TEST(ArrayMountSequence, DISABLED_StateChanged_testIfShutdownIsNotInvokedWhenNex
     vector<IMountSequence*> arrayMntSeq{&mockSeq1, &mockSeq2, &mockSeq3};
     NiceMock<MockStateControl> stateControl;
     MockVolumeManager mockVolMgr(nullptr, &stateControl);
-    MockMountTemp* mockMntTmp = new MockMountTemp(nullptr, "mock-array", 0);
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
 
-    ArrayMountSequence mntSeq(arrayMntSeq, mockMntTmp, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr, mockRebuilder);
+    ArrayMountSequence mntSeq(arrayMntSeq, &stateControl, "mock-array", nullptr, nullptr, nullptr, &mockVolMgr, mockRebuilder);
 
     StateContext stopContext("sender", SituationEnum::FAULT);
     StateContext offlineContext("sender", SituationEnum::DEFAULT);

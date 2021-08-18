@@ -32,8 +32,6 @@
 
 #include "array_mount_sequence.h"
 
-#include "src/array/interface/i_abr_control.h"
-#include "src/array_components/mount_temp/mount_temp.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -42,11 +40,10 @@
 namespace pos
 {
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
-    IAbrControl* abr, IStateControl* iState, string name, IVolumeManager* volMgr, unsigned int arrIndex, IArrayRebuilder* rbdr)
-: ArrayMountSequence(seq, new MountTemp(abr, name, arrIndex), iState, name, nullptr, nullptr, nullptr, volMgr, rbdr)
+    IStateControl* iState, string name, IVolumeManager* volMgr, unsigned int arrIndex, IArrayRebuilder* rbdr)
+: ArrayMountSequence(seq, iState, name, nullptr, nullptr, nullptr, volMgr, rbdr)
 {
-    // delegated to other constructor. The other constructor doesn't have IAbrControl in its
-    // params because ArrayMountSequence uses IAbrControl just to instantiate MountTemp!
+    // delegated to other constructor.
 
     // Please note that "VolumeServiceSingleton::Instance()->GetVolumeManager(name)" cannot be used in this context,
     // because VolumeManager may not have invoked "Init()" yet, leading to nullptr when we query against VolumeServiceSingleton.
@@ -56,11 +53,10 @@ ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
 }
 
 ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
-    MountTemp* mntTmp, IStateControl* iState, string name,
+    IStateControl* iState, string name,
     StateContext* mountState, StateContext* unmountState, StateContext* normalState,
     IVolumeManager* volMgr, IArrayRebuilder* rbdr)
-: temp(mntTmp),
-  state(iState),
+: state(iState),
   mountState(mountState),
   unmountState(unmountState),
   normalState(normalState),
@@ -82,8 +78,6 @@ ArrayMountSequence::~ArrayMountSequence(void)
         delete unmountState;
     if (mountState != nullptr)
         delete mountState;
-    if (temp != nullptr)
-        delete temp;
     sequence.clear();
 }
 
@@ -117,15 +111,6 @@ ArrayMountSequence::Mount(void)
         goto error;
     }
     POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Initialized the first mount sequence for {}", arrayName);
-
-    // mount temp.mount1
-    POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Mounting MountTemp for {}", arrayName);
-    ret = temp->Mount1();
-    if (ret != 0)
-    {
-        goto error;
-    }
-    POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Mounted MountTemp for {}", arrayName);
 
     // mount meta, gc
     it++;
@@ -199,9 +184,6 @@ ArrayMountSequence::Unmount(void)
         (*it)->Dispose();
         POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Disposed the IMountSequence for {}", arrayName);
     }
-    POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Unmounting MountTemp for {}", arrayName);
-    temp->Unmount2();
-    POS_TRACE_DEBUG(EID(ARRAY_MOUNTSEQ_DEBUG_MSG), "Unmounted MountTemp for {}", arrayName);
     // do array-dispose finally.
     sequence.front()->Dispose();
     state->Remove(normalState);

@@ -33,7 +33,7 @@
 #ifndef DEBUG_INFO_H_
 #define DEBUG_INFO_H_
 
-#include "src/array_components/mount_temp/debug_info_updater.h"
+#include "src/debug/debug_info_updater.h"
 
 namespace pos
 {
