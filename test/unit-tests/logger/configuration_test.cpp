@@ -12,14 +12,6 @@ TEST(Configuration, NumOfLogFilesForRotation_)
 {
 }
 
-TEST(Configuration, IsDeduplicationEnabled_)
-{
-}
-
-TEST(Configuration, DeduplicationSensitivity_)
-{
-}
-
 TEST(Configuration, LogLevel_)
 {
 }

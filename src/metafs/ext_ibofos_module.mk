@@ -50,7 +50,6 @@ SRCS += \
         pos_event_id.cpp \
         logger.cpp \
         configuration.cpp \
-        deduplicator.cpp \
         filter.cpp \
         preferences.cpp \
         default_configuration.cpp \

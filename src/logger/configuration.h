@@ -44,8 +44,6 @@ class Configuration
 public:
     uint32_t LogSizePerFileInMB();
     uint32_t NumOfLogFilesForRotation();
-    bool IsDeduplicationEnabled();
-    uint32_t DeduplicationSensitivity();
     string LogLevel();
 
 private:
@@ -55,8 +53,6 @@ private:
     const uint32_t ROTATION = 20;
     const uint32_t MAX_ROTATION = 100;
     const uint32_t MIN_ROTATION = 1;
-    const bool DEDUPLICATION_ENABLED = true;
-    const uint32_t DEDUPLICATION_SENSITIVITY_MS = 20;
     const string LOG_LEVEL = "debug";
 };
 } // namespace pos_logger

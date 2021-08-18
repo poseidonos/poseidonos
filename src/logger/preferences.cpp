@@ -46,7 +46,6 @@ Preferences::Preferences()
     logRotation = conf.NumOfLogFilesForRotation();
     logLevel = StringToLogLevel(conf.LogLevel());
     ApplyFilter();
-    InitDeduplication(conf.IsDeduplicationEnabled(), conf.DeduplicationSensitivity());
 }
 
 bool
@@ -57,19 +56,7 @@ Preferences::ShouldLog(spdlog::level::level_enum lvl, int id, string msg)
         return false;
     }
 
-    if (filter.ShouldLog(id))
-    {
-        if (deduplicator.IsEnabled() == false)
-        {
-            return true;
-        }
-        else if (deduplicator.IsEnabled() &&
-            deduplicator.IsDuplicated(id, msg) == false)
-        {
-            return true;
-        }
-    }
-    return false;
+    return filter.ShouldLog(id);
 }
 
 int
@@ -96,19 +83,6 @@ Preferences::SetLogLevel(shared_ptr<spdlog::logger> logger, string value)
     }
 }
 
-void
-Preferences::InitDeduplication(bool isEnabled, uint32_t sensitivity)
-{
-    if (isEnabled == true)
-    {
-        EnableDeduplication(sensitivity);
-    }
-    else
-    {
-        DisableDeduplication();
-    }
-}
-
 JsonElement
 Preferences::ToJson()
 {
@@ -118,12 +92,6 @@ Preferences::ToJson()
     data.SetAttribute(JsonAttribute("logfile_size_in_mb", logfileSize));
     data.SetAttribute(JsonAttribute("logfile_rotation_count", logRotation));
     data.SetAttribute(JsonAttribute("min_allowable_log_level", "\"" + LogLevelToString(logLevel) + "\""));
-    data.SetAttribute(JsonAttribute("deduplication_enabled", deduplicator.IsEnabled()));
-    if (deduplicator.IsEnabled() == true)
-    {
-        data.SetAttribute(JsonAttribute("deduplication_sensitivity_in_msec",
-            deduplicator.Sensitivity()));
-    }
     data.SetAttribute(JsonAttribute("filter_enabled", filter.IsFiltered()));
     if (filter.IsFiltered() == true)
     {
@@ -132,21 +100,6 @@ Preferences::ToJson()
     }
 
     return data;
-}
-
-int
-Preferences::EnableDeduplication(uint32_t sensitivity)
-{
-    deduplicator.Enable();
-    deduplicator.UpdateSensitivity(sensitivity);
-    return (int)POS_EVENT_ID::SUCCESS;
-}
-
-int
-Preferences::DisableDeduplication()
-{
-    deduplicator.Disable();
-    return (int)POS_EVENT_ID::SUCCESS;
 }
 
 int

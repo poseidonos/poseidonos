@@ -33,7 +33,6 @@
 #pragma once
 #include <string>
 
-#include "deduplicator.h"
 #include "filter.h"
 #include "spdlog/spdlog.h"
 #include "src/helper/json_helper.h"
@@ -75,16 +74,6 @@ public:
     {
         return logRotation;
     }
-    uint32_t
-    DedupSensitivity()
-    {
-        return deduplicator.Sensitivity();
-    }
-    bool
-    IsDedupEnabled()
-    {
-        return deduplicator.IsEnabled();
-    }
     string
     LogLevel()
     {
@@ -93,9 +82,6 @@ public:
 
     int SetLogLevel(shared_ptr<spdlog::logger> logger, string value);
     JsonElement ToJson();
-    void InitDeduplication(bool isEnabled, uint32_t sensitivity);
-    int EnableDeduplication(uint32_t sensitivity);
-    int DisableDeduplication();
     int ApplyFilter();
     int ApplyFilter(string filePath);
     bool ShouldLog(spdlog::level::level_enum lvl, int id, string msg);
@@ -115,6 +101,5 @@ private:
     uint32_t logRotation;
     spdlog::level::level_enum logLevel;
     Filter filter;
-    Deduplicator deduplicator;
 };
 } // namespace pos_logger

@@ -115,8 +115,6 @@ type LoggerInfoResData struct {
 	LOGFILESIZEINBM                string `json:"logfile_size_in_mb"`
 	LOGFILEROTATIONCOUNT           int    `json:"logfile_rotation_count"`
 	MINALLOWABLELOGLEVEL           string `json:"min_allowable_log_level"`
-	DEDUPLICATIONENABLED           int    `json:"deduplication_enabled"`
-	DEDUPLICATIONSENSITIVITYINMSEC int    `json:"deduplication_sensitivity_in_msec"`
 	FILTERENABLED                  int    `json:"filter_enabled"`
 	FILTERINCLUDED                 string `json:"filter_included"`
 	FILTEREXCLUDED                 string `json:"filter_excluded"`

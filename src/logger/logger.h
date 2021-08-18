@@ -117,7 +117,6 @@ public:
 
 private:
     bool _ShouldLog(spdlog::level::level_enum lvl, int id, spdlog::string_view_t fmt);
-    void _InitDeduplicator();
     const uint32_t MAX_LOGGER_DUMP_SIZE = 1 * 1024 * 1024;
     const uint32_t AVG_LINE = 80;
     DumpModule<DumpBuffer>* dumpModule[static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE)];

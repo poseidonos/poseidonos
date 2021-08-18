@@ -32,14 +32,6 @@ TEST(Preferences, LogRotation_)
 {
 }
 
-TEST(Preferences, DedupSensitivity_)
-{
-}
-
-TEST(Preferences, IsDedupEnabled_)
-{
-}
-
 TEST(Preferences, LogLevel_)
 {
 }
@@ -49,18 +41,6 @@ TEST(Preferences, SetLogLevel_)
 }
 
 TEST(Preferences, ToJson_)
-{
-}
-
-TEST(Preferences, InitDeduplication_)
-{
-}
-
-TEST(Preferences, EnableDeduplication_)
-{
-}
-
-TEST(Preferences, DisableDeduplication_)
 {
 }
 

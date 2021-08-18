@@ -89,8 +89,6 @@ private:
         {"logfile_size_in_mb", "50"},
         {"logfile_rotation_count", "20"},
         {"min_allowable_log_level", "\"debug\""},
-        {"deduplication_enabled", "true"},
-        {"deduplication_sensitivity_in_msec", "20"}
     };
     vector<ConfigKeyValue> debugData = {
         {"memory_checker", "false"}

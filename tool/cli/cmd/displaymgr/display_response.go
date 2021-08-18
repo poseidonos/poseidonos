@@ -238,8 +238,6 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		fmt.Fprintln(w, "logfile_size_in_mb\t: "+loggerInfo.LOGFILESIZEINBM)
 		fmt.Fprintln(w, "logfile_rotation_count\t:", loggerInfo.LOGFILEROTATIONCOUNT)
 		fmt.Fprintln(w, "min_allowable_log_level\t: "+loggerInfo.MINALLOWABLELOGLEVEL)
-		fmt.Fprintln(w, "deduplication_enabled\t:", loggerInfo.DEDUPLICATIONENABLED == 1)
-		fmt.Fprintln(w, "deduplication_sensitivity_in_msec\t:", loggerInfo.DEDUPLICATIONSENSITIVITYINMSEC)
 		fmt.Fprintln(w, "filter_enabled\t:", loggerInfo.FILTERENABLED == 1)
 		fmt.Fprintln(w, "filter_included\t: "+loggerInfo.FILTERINCLUDED)
 		fmt.Fprintln(w, "filter_excluded\t: "+loggerInfo.FILTEREXCLUDED)

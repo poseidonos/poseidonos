@@ -73,36 +73,6 @@ Configuration::NumOfLogFilesForRotation()
     return ROTATION;
 }
 
-bool
-Configuration::IsDeduplicationEnabled()
-{
-    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
-    bool dedup = DEDUPLICATION_ENABLED;
-    int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "deduplication_enabled",
-        &dedup, ConfigType::CONFIG_TYPE_BOOL);
-    if (ret == SUCCESS)
-    {
-        return dedup;
-    }
-
-    return DEDUPLICATION_ENABLED;
-}
-
-uint32_t
-Configuration::DeduplicationSensitivity()
-{
-    int SUCCESS = (int)POS_EVENT_ID::SUCCESS;
-    uint32_t sensitivity = DEDUPLICATION_SENSITIVITY_MS;
-    int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "deduplication_sensitivity_in_msec",
-        &sensitivity, ConfigType::CONFIG_TYPE_UINT32);
-    if (ret == SUCCESS)
-    {
-        return sensitivity;
-    }
-
-    return DEDUPLICATION_SENSITIVITY_MS;
-}
-
 string
 Configuration::LogLevel()
 {
