@@ -23,7 +23,7 @@ def bring_up_pos():
     subprocess.call([bring_up_script,
         "-a", args.fabric_ip,
         "-s", "1",
-        "-S", "21474836480",
+        "-S", "21474836480B",
         "-v", "1",
         "-b", "2048"])
 
