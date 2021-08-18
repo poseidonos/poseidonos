@@ -39,7 +39,7 @@ TEST(JsonFormat, MakeResponse_testJsonFormatIfElementContainsArray)
     string expected = "{\"command\":\"PEOPLE\",\"rid\":\"0000\",\"result\":{\"status\":{\"code\":0,\"description\":\"List of people\"},\"data\":{\"people\":[{\"name\":\"foo\",\"id\":1},{\"name\":\"bar\",\"id\":2}]}},\"sign\":{\"ver\":\" 1.0 + \"}}";
 
     // Then
-    EXPECT_TRUE(response == expected);
+    EXPECT_EQ(response, expected);
 }
 
 TEST(JsonFormat, MakeResponse_testJsonFormatIfDataElementIsNotIncluded)
@@ -54,5 +54,5 @@ TEST(JsonFormat, MakeResponse_testJsonFormatIfDataElementIsNotIncluded)
     string expected = "{\"command\":\"PEOPLE\",\"rid\":\"1111\",\"result\":{\"status\":{\"code\":0,\"description\":\"There is no person\"}},\"sign\":{\"ver\":\" 1.0 + \"}}";
 
     // Then
-    EXPECT_TRUE(response == expected);
+    EXPECT_EQ(response, expected);
 }

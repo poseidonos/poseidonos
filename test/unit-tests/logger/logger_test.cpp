@@ -18,9 +18,7 @@ TEST(Logger, Logger_testWhetherTheResultOfGetlevelAndInputOfSetlevelAreTheSame)
     logger->SetLevel(inputLevel);
     string actualOutput = logger->GetLevel();
 
-    bool actual = expectedOutput == actualOutput;
-
-    ASSERT_TRUE(actual);
+    ASSERT_EQ(expectedOutput, actualOutput);
 }
 
 TEST(Logger, SetLevel_tesIfLevelOffIsSetWhenSetTheWrongLoglevel)
@@ -31,9 +29,7 @@ TEST(Logger, SetLevel_tesIfLevelOffIsSetWhenSetTheWrongLoglevel)
     logger->SetLevel(inputLevel);
     string actualOutput = logger->GetLevel();
 
-    bool actual = expectedOutput == actualOutput;
-
-    ASSERT_TRUE(actual);
+    ASSERT_EQ(expectedOutput, actualOutput);
 }
 
 TEST(Logger, GetLogDir_testIfLogDirIsSameAsPreferences)
@@ -42,9 +38,7 @@ TEST(Logger, GetLogDir_testIfLogDirIsSameAsPreferences)
     string dirInPreferences = "/var/log/pos/";
     string actualOutput = logger->GetLogDir();
 
-    bool actual = dirInPreferences == actualOutput;
-
-    ASSERT_TRUE(actual);
+    ASSERT_EQ(dirInPreferences, actualOutput);
 }
 
 TEST(Logger, PosLog_checkIfPosLogOfLoggerWritesWell)
@@ -139,8 +133,9 @@ TEST(Logger, ApplyFilter_testIfFilterIsAppliedWellByGetPreferencesAfterApplyingT
         filterEnabled = jsonDoc["data"]["filter_enabled"].get<int>();
     }
 
-    bool result = (filterEnabled == 1 && filterIncluded == "1000-1010" && filterExcluded == "1005,1006");
-    ASSERT_TRUE(result);
+    ASSERT_EQ(filterEnabled, 1);
+    ASSERT_EQ(filterIncluded, "1000-1010");
+    ASSERT_EQ(filterExcluded, "1005,1006");
 }
 
 } // namespace pos

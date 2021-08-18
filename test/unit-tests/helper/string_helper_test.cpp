@@ -10,8 +10,7 @@ TEST(StringHelper, Trim_testIfBothLTrimAndRTrimWorksWell)
     // When
     string outStr = trim(testStr);
     string expectedTrimmedStr = "This is a string for trim test.";
-    bool actual = outStr == expectedTrimmedStr;
 
     // Then
-    ASSERT_TRUE(actual);
+    ASSERT_EQ(expectedTrimmedStr, outStr);
 }
