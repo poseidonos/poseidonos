@@ -961,7 +961,7 @@ disable_fe_qos(){
 ###################################################
 # CODE COMPILATION
 ###################################################
-compile_pos(){
+#compile_pos(){
     #commented this as compile is never called with an argument
     #compile_option=$1
     #if [ $compile_option -eq  "pos" ]; then
@@ -969,9 +969,9 @@ compile_pos(){
 	    #texecc make -j$(nproc)
         #echo "compilation starts"
     #else
-    texecc $TARGET_ROOT_DIR/script/build_ibofos.sh
+    #texecc $TARGET_ROOT_DIR/script/build_ibofos.sh
     #fi
-}
+#}
 
 ###################################################
 # TEST CASES
@@ -980,7 +980,6 @@ with_be_qos(){
     tc_name="POS Code, BE Enabled, FE Disabled"
     show_tc_info "${tc_name}"
     start_tc "${tc_name}"
-    compile_pos
     disable_fe_qos
     start_ibofos
     EXPECT_PASS "Successful POS Launch & Configuration" $?
