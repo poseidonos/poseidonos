@@ -1,0 +1,223 @@
+diff --git include/spdlog/common.h include/spdlog/common.h
+index 13fbe970..e51b5835 100644
+--- include/spdlog/common.h
++++ include/spdlog/common.h
+@@ -124,9 +124,9 @@ using level_t = details::null_atomic_int;
+ using level_t = std::atomic<int>;
+ #endif
+ 
+-#define SPDLOG_LEVEL_TRACE 0
+-#define SPDLOG_LEVEL_DEBUG 1
+-#define SPDLOG_LEVEL_INFO 2
++#define SPDLOG_LEVEL_DEBUG 0
++#define SPDLOG_LEVEL_INFO 1
++#define SPDLOG_LEVEL_TRACE 2
+ #define SPDLOG_LEVEL_WARN 3
+ #define SPDLOG_LEVEL_ERROR 4
+ #define SPDLOG_LEVEL_CRITICAL 5
+@@ -140,9 +140,9 @@ using level_t = std::atomic<int>;
+ namespace level {
+ enum level_enum
+ {
+-    trace = SPDLOG_LEVEL_TRACE,
+     debug = SPDLOG_LEVEL_DEBUG,
+     info = SPDLOG_LEVEL_INFO,
++    trace = SPDLOG_LEVEL_TRACE,
+     warn = SPDLOG_LEVEL_WARN,
+     err = SPDLOG_LEVEL_ERROR,
+     critical = SPDLOG_LEVEL_CRITICAL,
+@@ -152,7 +152,7 @@ enum level_enum
+ #if !defined(SPDLOG_LEVEL_NAMES)
+ #define SPDLOG_LEVEL_NAMES                                                                                                                 \
+     {                                                                                                                                      \
+-        "trace", "debug", "info", "warning", "error", "critical", "off"                                                                    \
++        "debug", "info", "trace", "warning", "error", "critical", "off"                                                                    \
+     }
+ #endif
+ 
+@@ -160,7 +160,7 @@ enum level_enum
+ 
+ #define SPDLOG_SHORT_LEVEL_NAMES                                                                                                           \
+     {                                                                                                                                      \
+-        "T", "D", "I", "W", "E", "C", "O"                                                                                                  \
++        "D", "I", "T", "W", "E", "C", "O"                                                                                                  \
+     }
+ #endif
+ 
+diff --git include/spdlog/details/log_msg-inl.h include/spdlog/details/log_msg-inl.h
+index cb130532..6f6fafb8 100644
+--- include/spdlog/details/log_msg-inl.h
++++ include/spdlog/details/log_msg-inl.h
+@@ -12,6 +12,25 @@
+ namespace spdlog {
+ namespace details {
+ 
++SPDLOG_INLINE log_msg::log_msg(spdlog::source_loc loc, string_view_t logger_name, spdlog::level::level_enum lvl, int id, spdlog::string_view_t msg)
++    : logger_name(logger_name)
++    , level(lvl)
++#ifndef SPDLOG_NO_DATETIME
++    , time(os::now())
++#endif
++
++#ifndef SPDLOG_NO_THREAD_ID
++    , thread_id(os::thread_id())
++#endif
++    , event_id(id)
++    , source(loc)
++    , payload(msg)    
++{}
++
++SPDLOG_INLINE log_msg::log_msg(string_view_t logger_name, spdlog::level::level_enum lvl, int id, spdlog::string_view_t msg)
++    : log_msg(source_loc{}, logger_name, lvl, id, msg)
++{}
++
+ SPDLOG_INLINE log_msg::log_msg(spdlog::source_loc loc, string_view_t logger_name, spdlog::level::level_enum lvl, spdlog::string_view_t msg)
+     : logger_name(logger_name)
+     , level(lvl)
+diff --git include/spdlog/details/log_msg.h include/spdlog/details/log_msg.h
+index ccd41ecb..5931c7fd 100644
+--- include/spdlog/details/log_msg.h
++++ include/spdlog/details/log_msg.h
+@@ -11,7 +11,9 @@ namespace details {
+ struct log_msg
+ {
+     log_msg() = default;
++    log_msg(source_loc loc, string_view_t logger_name, level::level_enum lvl, int id,  string_view_t msg);
+     log_msg(source_loc loc, string_view_t logger_name, level::level_enum lvl, string_view_t msg);
++    log_msg(string_view_t logger_name, level::level_enum lvl, int id, string_view_t msg);
+     log_msg(string_view_t logger_name, level::level_enum lvl, string_view_t msg);
+     log_msg(const log_msg &other) = default;
+ 
+@@ -19,6 +21,7 @@ struct log_msg
+     level::level_enum level{level::off};
+     log_clock::time_point time;
+     size_t thread_id{0};
++    int event_id{0};
+ 
+     // wrapping the formatted text with color (updated by pattern_formatter).
+     mutable size_t color_range_start{0};
+diff --git include/spdlog/details/pattern_formatter-inl.h include/spdlog/details/pattern_formatter-inl.h
+index 1b95eb6d..2b98c84d 100644
+--- include/spdlog/details/pattern_formatter-inl.h
++++ include/spdlog/details/pattern_formatter-inl.h
+@@ -889,6 +889,23 @@ protected:
+     log_clock::time_point last_message_time_;
+ };
+ 
++// event id
++template<typename ScopedPadder>
++class q_formatter final : public flag_formatter
++{
++public:
++    explicit q_formatter(padding_info padinfo)
++        : flag_formatter(padinfo)
++    {}
++
++    void format(const details::log_msg &msg, const std::tm &, memory_buf_t &dest) override
++    {
++        const size_t field_size = 4;
++        ScopedPadder p(field_size, padinfo_, dest);        
++        fmt_helper::append_int(msg.event_id, dest);
++    }
++};
++
+ // Full info formatter
+ // pattern: [%Y-%m-%d %H:%M:%S.%e] [%n] [%l] %v
+ class full_formatter final : public flag_formatter
+@@ -1216,6 +1233,10 @@ SPDLOG_INLINE void pattern_formatter::handle_flag_(char flag, details::padding_i
+         formatters_.push_back(details::make_unique<details::elapsed_formatter<Padder, std::chrono::seconds>>(padding));
+         break;
+ 
++    case ('q'): // custom formatter for event id
++        formatters_.push_back(details::make_unique<details::q_formatter<Padder>>(padding));
++        break;
++
+     default: // Unknown flag appears as is
+         auto unknown_flag = details::make_unique<details::aggregate_formatter>();
+         unknown_flag->add_ch('%');
+diff --git include/spdlog/logger.h include/spdlog/logger.h
+index 0e4eaa00..bb16ebbe 100644
+--- include/spdlog/logger.h
++++ include/spdlog/logger.h
+@@ -104,6 +104,12 @@ public:
+         log(source_loc{}, lvl, fmt, args...);
+     }
+ 
++    template<typename... Args>
++    void iboflog(source_loc loc, level::level_enum lvl, int id, string_view_t fmt, const Args &... args)
++    {
++        iboflog_sink(loc, lvl, id, fmt, args...);
++    }
++
+     template<typename... Args>
+     void trace(string_view_t fmt, const Args &... args)
+     {
+@@ -170,6 +176,23 @@ public:
+         SPDLOG_LOGGER_CATCH()
+     }
+ 
++    template<typename... Args>
++    void iboflog_sink(source_loc loc, level::level_enum lvl, int id,  string_view_t fmt, const Args &... args)
++    {
++        if (!should_log(lvl))
++        {
++            return;
++        }
++        try
++        {
++            fmt::memory_buffer buf;
++            fmt::format_to(buf, fmt, args...);            
++            details::log_msg log_msg(loc, name_, lvl, id, string_view_t(buf.data(), buf.size()));
++            sink_it_(log_msg);
++        }        
++        SPDLOG_LOGGER_CATCH()
++    }
++
+     void log(level::level_enum lvl, string_view_t msg)
+     {
+         log(source_loc{}, lvl, msg);
+diff --git include/spdlog/spdlog.h include/spdlog/spdlog.h
+index 3638ba12..87f8aaa8 100644
+--- include/spdlog/spdlog.h
++++ include/spdlog/spdlog.h
+@@ -287,14 +287,6 @@ inline void critical(wstring_view_t fmt, const Args &... args)
+ 
+ #define SPDLOG_LOGGER_CALL(logger, level, ...) logger->log(spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, level, __VA_ARGS__)
+ 
+-#if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_TRACE
+-#define SPDLOG_LOGGER_TRACE(logger, ...) SPDLOG_LOGGER_CALL(logger, spdlog::level::trace, __VA_ARGS__)
+-#define SPDLOG_TRACE(...) SPDLOG_LOGGER_TRACE(spdlog::default_logger_raw(), __VA_ARGS__)
+-#else
+-#define SPDLOG_LOGGER_TRACE(logger, ...) (void)0
+-#define SPDLOG_TRACE(...) (void)0
+-#endif
+-
+ #if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_DEBUG
+ #define SPDLOG_LOGGER_DEBUG(logger, ...) SPDLOG_LOGGER_CALL(logger, spdlog::level::debug, __VA_ARGS__)
+ #define SPDLOG_DEBUG(...) SPDLOG_LOGGER_DEBUG(spdlog::default_logger_raw(), __VA_ARGS__)
+@@ -311,6 +303,14 @@ inline void critical(wstring_view_t fmt, const Args &... args)
+ #define SPDLOG_INFO(...) (void)0
+ #endif
+ 
++#if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_TRACE
++#define SPDLOG_LOGGER_TRACE(logger, ...) SPDLOG_LOGGER_CALL(logger, spdlog::level::trace, __VA_ARGS__)
++#define SPDLOG_TRACE(...) SPDLOG_LOGGER_TRACE(spdlog::default_logger_raw(), __VA_ARGS__)
++#else
++#define SPDLOG_LOGGER_TRACE(logger, ...) (void)0
++#define SPDLOG_TRACE(...) (void)0
++#endif
++
+ #if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_WARN
+ #define SPDLOG_LOGGER_WARN(logger, ...) SPDLOG_LOGGER_CALL(logger, spdlog::level::warn, __VA_ARGS__)
+ #define SPDLOG_WARN(...) SPDLOG_LOGGER_WARN(spdlog::default_logger_raw(), __VA_ARGS__)
+diff --git tests/test_macros.cpp tests/test_macros.cpp
+index 22a5ccbf..1d7e1b54 100644
+--- tests/test_macros.cpp
++++ tests/test_macros.cpp
+@@ -37,5 +37,5 @@ TEST_CASE("debug and trace w/o format string", "[macros]]")
+ 
+ TEST_CASE("disable param evaluation", "[macros]")
+ {
+-    SPDLOG_TRACE("Test message {}", throw std::runtime_error("Should not be evaluated"));
++//SPDLOG_TRACE("Test message {}", throw std::runtime_error("Should not be evaluated"));
+ }

@@ -1,0 +1,13 @@
+diff --git drivers/bus/pci/linux/pci.c drivers/bus/pci/linux/pci.c
+index a2198abf4..a51ad0f88 100644
+--- drivers/bus/pci/linux/pci.c
++++ drivers/bus/pci/linux/pci.c
+@@ -331,7 +331,7 @@ pci_scan_one(const char *dirname, const struct rte_pci_addr *addr)
+ 		else
+ 			dev->kdrv = RTE_KDRV_UNKNOWN;
+ 	} else {
+-		dev->kdrv = RTE_KDRV_NONE;
++		free(dev);
+ 		return 0;
+ 	}
+ 	/* device is valid, add in list (sorted) */
