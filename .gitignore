@@ -66,3 +66,4 @@ lib/dpdk-20.08/*
 lib/filebench-master/*
 nlohmann
 lib/grpc
+proto/generated/*

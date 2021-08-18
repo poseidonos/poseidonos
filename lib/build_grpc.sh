@@ -7,22 +7,60 @@ FORCE_INSTALL=FALSE
 INSTALLED=FALSE
 
 check_installation() {
-	if [[ -d "${INSTALL_DIR}/include/grpc"
-		&& -d "${INSTALL_DIR}/include/absl" ]]
+	if [ -e "${INSTALL_DIR}/bin/grpc_cpp_plugin" ]
 	then
 		INSTALLED=TRUE
 	fi
 }
 
+install_re2()
+{
+	mkdir -p "third_party/re2/cmake/build"
+	pushd "third_party/re2/cmake/build"
+	cmake ../.. \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+		-DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+	make -j ${BUILD_JOBS}
+	make install
+	popd
+}
+
+install_protobuf()
+{
+	mkdir -p third_party/protobuf/cmake/build
+	pushd third_party/protobuf/cmake/build
+	cmake .. \
+		-Dprotobuf_BUILD_TESTS=OFF \
+		-DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+	make -j ${BUILD_JOBS}
+	make install
+	popd
+}
+
 install_grpc()
 {
-	cd grpc
 	mkdir -p cmake/build
 	pushd cmake/build
-	cmake -DgRPC_INSTALL=ON \
-      -DgRPC_BUILD_TESTS=OFF \
-      -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
-      ../..
+	cmake ../..	\
+		-DgRPC_INSTALL=ON	\
+		-DgRPC_BUILD_TESTS=OFF	\
+		-DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}	\
+		-DgRPC_BUILD_GRPC_CSHARP_PLUGIN=OFF	\
+		-DgRPC_BUILD_GRPC_NODE_PLUGIN=OFF	\
+		-DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN=OFF	\
+		-DgRPC_BUILD_GRPC_PHP_PLUGIN=OFF	\
+		-DgRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF	\
+		-DgRPC_BUILD_GRPC_RUBY_PLUGIN=OFF	\
+		-DgRPC_BUILD_CSHARP_EXT=OFF	\
+		-DgRPC_ABSL_PROVIDER=package	\
+		-DgRPC_CARES_PROVIDER=package	\
+		-DgRPC_RE2_PROVIDER=package	\
+		-DgRPC_SSL_PROVIDER=package	\
+		-DgRPC_ZLIB_PROVIDER=package \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DgRPC_PROTOBUF_PROVIDER=package
+
 	make -j ${BUILD_JOBS}
 	make install
 	popd
@@ -53,10 +91,13 @@ main()
 		fi
 	fi
 
+	rm -rf grpc
 	git clone ${GRPC_REPO}
 	cd grpc
-	install_grpc
+	install_re2
+	install_protobuf
 	install_abseil
+	install_grpc
 
 	echo "GRPC installation success"
 }

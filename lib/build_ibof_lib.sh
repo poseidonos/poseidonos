@@ -382,6 +382,7 @@ ci)
 	build_spdlog_ci
 	build_go
     build_filebench
+	build_grpc
 	;;
 perf_ci)
 	set -e
@@ -394,6 +395,7 @@ perf_ci)
 	build_spdlog_ci
 	build_go
 	build_filebench
+	build_grpc
 	;;
 dpdk)
 	set -e

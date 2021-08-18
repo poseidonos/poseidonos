@@ -10,7 +10,6 @@ option(POS_SKIP_UT_BUILD "Skip compiling test/unit-tests/**/*_test.cpp" OFF)
 option(POS_SKIP_IT_BUILD "Skip compiling test/integration-tests/**/*_test.cpp" OFF)
 option(POS_BUILD_SHARED_LIB "Build POS as shared library (vs. static)" ON)
 option(POS_TESTEXEC_WITH_NATIVE_GTEST "Run UTs/ITs by executing gtest binaries directly (vs. ctest)" ON)
-option(POS_BUILD_WITH_TELEMETRY "Build POS with telemetry manager and its protobuf & grpc" OFF)
 
 # By default, we use 4 threads to run unit tests and 1 thread to run integration tests.
 # Those numbers are to limit the tests from consuming too much resource of a build server, 
@@ -18,7 +17,6 @@ option(POS_BUILD_WITH_TELEMETRY "Build POS with telemetry manager and its protob
 # by increasing the parallelism, or throttle by decreasing the value.
 set(POS_PARALLEL_EXEC_UT "4" CACHE STRING "Specify the number of parallel threads to run unit tests")
 set(POS_PARALLEL_EXEC_IT "1" CACHE STRING "Specify the number of parallel threads to run integration tests")
-set(POS_GRPC_HOME "/home/ibof/grpc-bin" CACHE STRING "Specify the location where you have installed grpc and its dependencies")
 
 set(CMAKE_CXX_FLAGS "--coverage -ftest-coverage -fpermissive -fPIC")
 set(CMAKE_SHARED_LINKER_FLAGS "--coverage -ftest-coverage")
@@ -52,12 +50,6 @@ SET(POS_TEST_ROOT ${PROJ_ROOT}/test)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${POS_TEST_ROOT}/build)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${POS_TEST_ROOT}/build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${POS_TEST_ROOT}/build)
-
-# telemetry build configuration (used only when POS_BUILD_WITH_TELEMETRY is ON)
-set(PROTOC_BIN ${POS_GRPC_HOME}/bin/protoc)
-set(GRPC_PLUGIN_BIN ${POS_GRPC_HOME}/bin/grpc_cpp_plugin)
-set(PROTOC_OUTPUT ${POS_SRC_ROOT}/telemetry)
-set(PROTO_FILE telemetry)
 
 MACRO(POS_CMAKE_SUBDIR)
     message("POS_CMAKE_SUBDIR has been deprecated. Skipped.")
@@ -268,9 +260,6 @@ INCLUDE_DIRECTORIES(
     ${PROJ_ROOT}/lib/air/src/api
 
     ${PROJ_ROOT}/lib/spdlog-1.4.2/include
-
-    # for telemetry manager protobuf & grpc (FIXME later)
-    ${POS_GRPC_HOME}/include
 )
 
 # This is to provide "-I" option for unit test file(s) build
@@ -355,7 +344,7 @@ add_definitions(-DPOS_VERSION="pos-0.9.3"
 )
 remove_definitions(-DAIR_BUILD)
 
-file(GLOB_RECURSE dep_src ${POS_SRC_ROOT}/*.cpp LIST_DIRECTORIES true)
+file(GLOB_RECURSE dep_src ${POS_SRC_ROOT}/*.cpp ${PROJ_ROOT}/proto/generated/cpp/*.cc LIST_DIRECTORIES true)
 list(FILTER dep_src EXCLUDE REGEX ".+test.cpp")
 list(FILTER dep_src EXCLUDE REGEX ".+fake.cpp")
 list(FILTER dep_src EXCLUDE REGEX ".+stub.cpp")
@@ -363,10 +352,6 @@ list(FILTER dep_src EXCLUDE REGEX ".+mock.cpp")
 list(FILTER dep_src EXCLUDE REGEX ".+/unit_test/.+")
 list(FILTER dep_src EXCLUDE REGEX ".+/fake/.+")
 list(FILTER dep_src EXCLUDE REGEX ".+/mock/.+")
-
-if(NOT POS_BUILD_WITH_TELEMETRY)
-    list(FILTER dep_src EXCLUDE REGEX ".+/telemetry/grpc/.+.cpp")
-endif(NOT POS_BUILD_WITH_TELEMETRY)
 
 foreach(f ${dep_src})
     #message("picking up ${f} for compile")
@@ -379,26 +364,6 @@ if(POS_BUILD_SHARED_LIB)
 else(POS_BUILD_SHARED_LIB)
     add_library(poslib STATIC ${dep_src})
 endif(POS_BUILD_SHARED_LIB)
-
-if(POS_BUILD_WITH_TELEMETRY)
-    message("Compiling protobuf for telemetry")
-    message("- proto compiler = ${PROTOC_BIN}")
-    message("- grpc plugin    = ${GRPC_PLUGIN_BIN}")
-    message("- proto output   = ${PROTOC_OUTPUT}")
-    message("- proto name     = ${PROTO_FILE}")
-    
-    add_custom_command(TARGET poslib PRE_BUILD 
-        COMMAND ${PROTOC_BIN} --cpp_out=${PROTOC_OUTPUT} 
-            --grpc_out=${PROTOC_OUTPUT} 
-            --plugin=protoc-gen-grpc=${GRPC_PLUGIN_BIN} 
-            --proto_path=${POS_SRC_ROOT}/telemetry/
-            ${PROTO_FILE}.proto
-            && mv ${POS_SRC_ROOT}/telemetry/${PROTO_FILE}.pb.cc ${POS_SRC_ROOT}/telemetry/${PROTO_FILE}.pb.cpp
-            && mv ${POS_SRC_ROOT}/telemetry/${PROTO_FILE}.grpc.pb.cc ${POS_SRC_ROOT}/telemetry/${PROTO_FILE}.grpc.pb.cpp
-            )
-
-endif(POS_BUILD_WITH_TELEMETRY)
-
 
 file(GLOB_RECURSE fixture_src ${POS_TEST_ROOT}/fixtures/*.cpp LIST_DIRECTORIES true)
 file(GLOB_RECURSE utils_src ${POS_TEST_ROOT}/unit-tests/utils/*.cpp LIST_DIRECTORIES true)
@@ -424,9 +389,6 @@ link_directories (
 
     # for libuuid.a, libdl.a
     /usr/lib/x86_64-linux-gnu
-
-    # for telemetry manager protobuf & grpc (FIXME later)
-    ${POS_GRPC_HOME}/lib
 
     /usr/local/lib
 )
@@ -476,14 +438,19 @@ SET(DEP_LIBRARIES
     pmem
 )
 
-if(POS_BUILD_WITH_TELEMETRY)
-    list(APPEND DEP_LIBRARIES protobuf grpc++ grpc++_reflection gpr grpc++_unsecure grpc_unsecure address_sorting cares z)
-    list(APPEND DEP_LIBRARIES absl_strings absl_strings_internal absl_synchronization absl_str_format_internal absl_int128 absl_base)
-    list(APPEND DEP_LIBRARIES absl_log_severity absl_spinlock_wait absl_raw_logging_internal absl_malloc_internal)
-    list(APPEND DEP_LIBRARIES absl_symbolize absl_debugging_internal absl_demangle_internal absl_time absl_time_zone)
-    list(APPEND DEP_LIBRARIES absl_graphcycles_internal absl_stacktrace absl_bad_optional_access absl_status)
-    list(APPEND DEP_LIBRARIES absl_cord absl_throw_delegate absl_statusor upb)
-endif(POS_BUILD_WITH_TELEMETRY)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PROTOBUF REQUIRED protobuf)
+pkg_check_modules(GRPC REQUIRED grpc++)
+
+add_custom_target(
+	protobuf_compile ALL
+	COMMENT "Compile protobuf files"
+	WORKING_DIRECTORY ${PROJ_ROOT}
+	COMMAND make protobuf
+)
+
+list(APPEND DEP_LIBRARIES ${PROTOBUF_LIBRARIES} ${GRPC_LIBRARIES})
+list(APPEND DEP_LIBRARIES grpc++_reflection)
 
 # For on-demand execution
 add_custom_target(
@@ -564,7 +531,7 @@ if(POS_BUILD_LARGE_UT)
 
         add_executable(${ONE_UT_BINARY} ${ut_test_files})
         target_include_directories(${ONE_UT_BINARY} PUBLIC ${POS_UT_INCLUDE_DIRS})
-        target_link_libraries(${ONE_UT_BINARY} PUBLIC ${DEP_LIBRARIES})
+		target_link_libraries(${ONE_UT_BINARY} PUBLIC ${DEP_LIBRARIES})
         gtest_add_tests(TARGET ${ONE_UT_BINARY})
     endif(NOT POS_SKIP_UT_BUILD)
 

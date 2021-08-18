@@ -1,16 +1,18 @@
-IBOF_ROOT_DIR := $(abspath $(CURDIR))
+POS_ROOT_DIR := $(abspath $(CURDIR))
 SPDK_ROOT_DIR := $(abspath $(CURDIR)/lib/spdk)
 SPDLOG_SOURCE := spdlog-1.4.2
 SPDLOG_ROOT_DIR := $(abspath $(CURDIR)/lib/$(SPDLOG_SOURCE))
 
-TOP = $(IBOF_ROOT_DIR)
+TOP = $(POS_ROOT_DIR)
+PROTO_DIR = $(TOP)/proto
+PROTO_CPP_GENERATED_DIR = $(PROTO_DIR)/generated/cpp
 
 DPDK_ROOT_DIR := $(abspath $(CURDIR)/lib/dpdk)
 
 include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
 include $(SPDK_ROOT_DIR)/mk/spdk.modules.mk
 include $(SPDK_ROOT_DIR)/mk/spdk.app_vars.mk
-include $(IBOF_ROOT_DIR)/mk/ibof_config.mk
+include $(POS_ROOT_DIR)/mk/ibof_config.mk
 
 TARGET_SRC_DIR = src fluidos
 
@@ -83,7 +85,7 @@ endif
 
 ifeq ($(CONFIG_GCOV),y)
 CPPFLAGS += --coverage
-IBOF_LDFLAGS += -Wl,--dynamic-list-data
+LDFLAGS += -Wl,--dynamic-list-data
 endif
 
 # Warning exceptions only for external libraries (dpdk, rapidjson ...)
@@ -108,27 +110,29 @@ INCLUDE += $(MFS_INCLUDE_PATH)
 
 INCLUDE += -I$(DPDK_ROOT_DIR)/include/dpdk
 
-$(info $(INCLUDE))
-
 INCLUDE += -I$(TOP)/lib/air -I$(TOP)/lib/air/src/api
-IBOF_LDFLAGS += -L/usr/local/lib -lair
+LDFLAGS += -L/usr/local/lib -lair
 DEFINE += -DAIR_CFG=$(TOP)/config/air.cfg
 
 INCLUDE += -I$(SPDLOG_ROOT_DIR)/include -I$(SPDLOG_ROOT_DIR)/include/spdlog
-IBOF_LDFLAGS += -L./lib/$(SPDLOG_SOURCE)/lib -lspdlog
+LDFLAGS += -L./lib/$(SPDLOG_SOURCE)/lib -lspdlog
 
 CXXFLAGS += $(INCLUDE)
 
-IBOF_LDFLAGS += -ljsoncpp -ljsonrpccpp-common -ljsonrpccpp-client
-IBOF_LDFLAGS += -no-pie -laio -ltcmalloc
-IBOF_LDFLAGS += -lnuma
+LDFLAGS += -ljsoncpp -ljsonrpccpp-common -ljsonrpccpp-client
+LDFLAGS += -no-pie -laio -ltcmalloc
+LDFLAGS += -lnuma
 
 CLI_CERT_DIR = /etc/pos/cert
 CLI_DIR = $(TOP)/tool/cli
 CLI_CERT_FILES = $(CLI_DIR)/cert/cert.key $(CLI_DIR)/cert/cert.crt
 
-IBOF_LDFLAGS += -lssl
-IBOF_LDFLAGS += -lcrypto
+# for grpc
+LDFLAGS += `pkg-config --libs protobuf grpc++`\
+				-lgrpc++_reflection -ldl
+
+LDFLAGS += -lssl -lcrypto
+
 
 # for callstack symbols
 LDEXTRAFLAGS = -rdynamic
@@ -188,8 +192,8 @@ udev_install:
 		echo "Copying udev rule file"; \
 	fi
 	
-	$(IBOF_ROOT_DIR)/tool/udev/generate_udev_rule.sh; \
-	cp $(IBOF_ROOT_DIR)/tool/udev/99-custom-nvme.rules ${UDEV_FILE}; \
+	$(POS_ROOT_DIR)/tool/udev/generate_udev_rule.sh; \
+	cp $(POS_ROOT_DIR)/tool/udev/99-custom-nvme.rules ${UDEV_FILE}; \
 	udevadm control --reload-rules && udevadm trigger; \
 
 udev_uninstall:
@@ -204,12 +208,18 @@ udev_uninstall:
 		echo "No need to remove"; \
 	fi
 
+protobuf:
+	@echo Build protobuf
+	@`[ -d $(PROTO_CPP_GENERATED_DIR) ] || mkdir -p $(PROTO_CPP_GENERATED_DIR)`
+	protoc --cpp_out=$(PROTO_CPP_GENERATED_DIR) --grpc_out=$(PROTO_CPP_GENERATED_DIR) --plugin=protoc-gen-grpc=/usr/local/bin/grpc_cpp_plugin --proto_path=$(PROTO_DIR) $(PROTO_DIR)/*.proto
+	@$(MAKE) -C proto 
+
 sam: makedir
 	@echo SAM Build
 	$(MAKE) -C src sam
 
-$(APP) : $(SPDK_LIB_FILES) poseidonos
-	$(LINK_CXX) $(shell find src/ -name *.o -and ! -name *_test.o -and ! -name *_fake.o -and ! -name *_stub.o -and ! -name *_mock.o -and ! -name *_fixture.o) $(IBOF_LDFLAGS) $(LDEXTRAFLAGS)
+$(APP) : $(SPDK_LIB_FILES) protobuf poseidonos
+	$(LINK_CXX) $(shell find src/ -name *.o -and ! -name *_test.o -and ! -name *_fake.o -and ! -name *_stub.o -and ! -name *_mock.o -and ! -name *_fixture.o) $(PROTO_CPP_GENERATED_DIR)/*.o $(LDFLAGS) $(LDEXTRAFLAGS)
 	rm bin/ibofos -rf
 	ln -s $(shell pwd -P)/bin/poseidonos bin/ibofos
 
@@ -224,6 +234,7 @@ makedir:
 
 clean :
 	@$(MAKE) -C src clean
+	@$(MAKE) -C proto clean
 	@rm -rf $(BINDIR)
 
 .PHONY: all install clean udev_install udev_uninstall makedir
