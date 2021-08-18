@@ -33,7 +33,6 @@
 #include "mount_temp.h"
 
 #include "src/array/interface/i_abr_control.h"
-#include "src/io/frontend_io/flush_command_manager.h"
 #include "src/logger/logger.h"
 #ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_mgr.h"

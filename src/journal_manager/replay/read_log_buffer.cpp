@@ -69,6 +69,10 @@ ReadLogBuffer::~ReadLogBuffer(void)
         free(buffer);
     }
     readLogBuffer.clear();
+    if (parser != nullptr)
+    {
+        delete parser;
+    }
 }
 
 int

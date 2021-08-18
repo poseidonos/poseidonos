@@ -20,16 +20,16 @@ TEST(ReadLogBuffer, Start_testIfReadSuccessWhenLogIsReadFromAllLogGroups)
     NiceMock<MockJournalLogBuffer> logBuffer;
     NiceMock<MockReplayLogList> replayLogList;
     NiceMock<MockReplayProgressReporter> progressReporter;
-    NiceMock<MockLogBufferParser> parser;
+    NiceMock<MockLogBufferParser>* parser = new NiceMock<MockLogBufferParser>;
 
-    ReadLogBuffer readLogBufferTask(&config, &logBuffer, replayLogList, &progressReporter, &parser);
+    ReadLogBuffer readLogBufferTask(&config, &logBuffer, replayLogList, &progressReporter, parser);
 
     // When
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(2));
     ON_CALL(config, GetLogGroupSize).WillByDefault(Return(16 * 1024));
 
     EXPECT_CALL(logBuffer, ReadLogBuffer).WillRepeatedly(Return(0));
-    EXPECT_CALL(parser, GetLogs).WillRepeatedly(Return(0));
+    EXPECT_CALL(*parser, GetLogs).WillRepeatedly(Return(0));
 
     EXPECT_CALL(replayLogList, IsEmpty).WillOnce(Return(false));
 
@@ -46,9 +46,9 @@ TEST(ReadLogBuffer, Start_testIfReadSuccessWhenLogBufferReadFails)
     NiceMock<MockJournalLogBuffer> logBuffer;
     NiceMock<MockReplayLogList> replayLogList;
     NiceMock<MockReplayProgressReporter> progressReporter;
-    NiceMock<MockLogBufferParser> parser;
+    NiceMock<MockLogBufferParser>* parser = new NiceMock<MockLogBufferParser>;
 
-    ReadLogBuffer readLogBufferTask(&config, &logBuffer, replayLogList, &progressReporter, &parser);
+    ReadLogBuffer readLogBufferTask(&config, &logBuffer, replayLogList, &progressReporter, parser);
 
     // When
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(2));
@@ -56,7 +56,7 @@ TEST(ReadLogBuffer, Start_testIfReadSuccessWhenLogBufferReadFails)
 
     int retCode = -1000;
     EXPECT_CALL(logBuffer, ReadLogBuffer).WillOnce(Return(0)).WillOnce(Return(retCode));
-    EXPECT_CALL(parser, GetLogs).WillRepeatedly(Return(0));
+    EXPECT_CALL(*parser, GetLogs).WillRepeatedly(Return(0));
 
     int result = readLogBufferTask.Start();
 
@@ -71,9 +71,9 @@ TEST(ReadLogBuffer, Start_testIfReadSuccessWhenLogBufferParseFails)
     NiceMock<MockJournalLogBuffer> logBuffer;
     NiceMock<MockReplayLogList> replayLogList;
     NiceMock<MockReplayProgressReporter> progressReporter;
-    NiceMock<MockLogBufferParser> parser;
+    NiceMock<MockLogBufferParser>* parser = new NiceMock<MockLogBufferParser>;
 
-    ReadLogBuffer readLogBufferTask(&config, &logBuffer, replayLogList, &progressReporter, &parser);
+    ReadLogBuffer readLogBufferTask(&config, &logBuffer, replayLogList, &progressReporter, parser);
 
     // When
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(2));
@@ -81,7 +81,7 @@ TEST(ReadLogBuffer, Start_testIfReadSuccessWhenLogBufferParseFails)
 
     int retCode = -3000;
     EXPECT_CALL(logBuffer, ReadLogBuffer).WillRepeatedly(Return(0));
-    EXPECT_CALL(parser, GetLogs).WillOnce(Return(0)).WillOnce(Return(retCode));
+    EXPECT_CALL(*parser, GetLogs).WillOnce(Return(0)).WillOnce(Return(retCode));
 
     int result = readLogBufferTask.Start();
 
@@ -96,16 +96,16 @@ TEST(ReadLogBuffer, Start_testIfReadSuccessWhenParsedLogListIsEmpty)
     NiceMock<MockJournalLogBuffer> logBuffer;
     NiceMock<MockReplayLogList> replayLogList;
     NiceMock<MockReplayProgressReporter> progressReporter;
-    NiceMock<MockLogBufferParser> parser;
+    NiceMock<MockLogBufferParser>* parser = new NiceMock<MockLogBufferParser>;
 
-    ReadLogBuffer readLogBufferTask(&config, &logBuffer, replayLogList, &progressReporter, &parser);
+    ReadLogBuffer readLogBufferTask(&config, &logBuffer, replayLogList, &progressReporter, parser);
 
     // When
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(2));
     ON_CALL(config, GetLogGroupSize).WillByDefault(Return(16 * 1024));
 
     EXPECT_CALL(logBuffer, ReadLogBuffer).WillRepeatedly(Return(0));
-    EXPECT_CALL(parser, GetLogs).WillRepeatedly(Return(0));
+    EXPECT_CALL(*parser, GetLogs).WillRepeatedly(Return(0));
 
     EXPECT_CALL(replayLogList, IsEmpty).WillOnce(Return(true));
 

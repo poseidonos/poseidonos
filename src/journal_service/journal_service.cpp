@@ -39,6 +39,7 @@ namespace pos
 {
 JournalService::JournalService(void)
 {
+    journalManagers.fill(nullptr);
     journalWriters.fill(nullptr);
     volEventHandlers.fill(nullptr);
     statusProviders.fill(nullptr);
