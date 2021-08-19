@@ -47,7 +47,8 @@ RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, Allocat
   needContinue(false),
   targetSegmentCount(0),
   currentTarget(UINT32_MAX),
-  allocatorCtx(allocCtx)
+  allocatorCtx(allocCtx),
+  initialized(false)
 {
     if (header != nullptr)
     {
@@ -75,15 +76,25 @@ RebuildCtx::~RebuildCtx(void)
 void
 RebuildCtx::Init(void)
 {
+    if (initialized == true)
+    {
+        return;
+    }
     targetSegmentCount = 0;
     ctxHeader.ctxVersion = 0;
     ctxStoredVersion = 0;
     ctxDirtyVersion = 0;
+    initialized = true;
 }
 
 void
-RebuildCtx::Close(void)
+RebuildCtx::Dispose(void)
 {
+    if (initialized == false)
+    {
+        return;
+    }
+    initialized = false;
 }
 
 void
@@ -300,6 +311,7 @@ RebuildCtx::IsRebuildTargetSegment(SegmentId segId)
 {
     return (targetSegmentList.find(segId) != targetSegmentList.end());
 }
+
 
 uint32_t
 RebuildCtx::GetRebuildTargetSegmentCount(void)

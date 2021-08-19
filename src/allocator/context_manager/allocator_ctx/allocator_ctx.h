@@ -52,7 +52,7 @@ public:
     explicit AllocatorCtx(AllocatorAddressInfo* info);
     virtual ~AllocatorCtx(void);
     virtual void Init(void);
-    virtual void Close(void);
+    virtual void Dispose(void);
 
     virtual void AfterLoad(char* buf);
     virtual void BeforeFlush(int section, char* buf);
@@ -106,6 +106,8 @@ private:
     // Lock
     std::mutex allocCtxLock;
     SegmentLock* segStateLocks;
+
+    bool initialized;
 };
 
 } // namespace pos

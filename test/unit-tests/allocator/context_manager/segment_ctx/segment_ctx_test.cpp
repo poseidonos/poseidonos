@@ -196,7 +196,7 @@ TEST(SegmentCtx, Init_testInitAndClose)
     segCtx.Init();
 
     // then
-    segCtx.Close();
+    segCtx.Dispose();
 }
 
 TEST(SegmentCtx, SetOccupiedStripeCount_TestSimpleSetter)

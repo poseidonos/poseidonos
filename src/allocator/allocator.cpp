@@ -60,7 +60,8 @@ Allocator::Allocator(AllocatorAddressInfo* addrInfo_, ContextManager* contextMan
   wbStripeManager(wbStripeManager_),
   isInitialized(false),
   iArrayInfo(info_),
-  iStateControl(iState_)
+  iStateControl(iState_),
+  arrayName(info_->GetName())
 {
 }
 
@@ -69,28 +70,31 @@ Allocator::Allocator(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* iS
 {
     VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayId);
     _CreateSubmodules(tp);
+    POS_TRACE_INFO(EID(ALLOCATOR_START), "Allocator in Array:{} was Created", arrayName);
 }
 
 Allocator::~Allocator(void)
 {
     VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayId);
     _DeleteSubmodules();
+    POS_TRACE_INFO(EID(ALLOCATOR_START), "Allocator in Array:{} was Destroyed", arrayName);
 }
 
 int
 Allocator::Init(void)
 {
-    if (false == isInitialized)
+    if (isInitialized == true)
     {
-        addrInfo->Init(iArrayInfo);
-        contextManager->Init();
-        blockManager->Init(wbStripeManager);
-        wbStripeManager->Init();
-
-        _RegisterToAllocatorService();
-        isInitialized = true;
+        return 0;
     }
 
+    addrInfo->Init(iArrayInfo);
+    contextManager->Init();
+    blockManager->Init(wbStripeManager);
+    wbStripeManager->Init();
+
+    _RegisterToAllocatorService();
+    isInitialized = true;
     return 0;
 }
 
@@ -121,35 +125,35 @@ Allocator::_UnregisterFromAllocatorService(void)
 void
 Allocator::Dispose(void)
 {
-    if (isInitialized == true)
+    if (isInitialized == false)
     {
-        int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_UNMOUNTING);
-
-        POS_TRACE_INFO(eventId, "Start flushing all active stripes");
-        wbStripeManager->FlushAllActiveStripes();
-        wbStripeManager->Dispose();
-
-        POS_TRACE_INFO(eventId, "Start allocator contexts store");
-        contextManager->FlushContexts(nullptr, true);
-        contextManager->Close();
-
-        _UnregisterFromAllocatorService();
-        isInitialized = false;
+        return;
     }
+
+    int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_UNMOUNTING);
+
+    POS_TRACE_INFO(eventId, "Start flushing all active stripes");
+    wbStripeManager->FlushAllActiveStripes();
+    wbStripeManager->Dispose();
+
+    POS_TRACE_INFO(eventId, "Start allocator contexts store");
+    contextManager->FlushContexts(nullptr, true);
+    contextManager->Dispose();
+
+    _UnregisterFromAllocatorService();
+    isInitialized = false;
 }
 
 void
 Allocator::Shutdown(void)
 {
-    if (isInitialized == true)
+    if (isInitialized == false)
     {
-        int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_UNMOUNTING);
-        POS_TRACE_INFO(eventId, "dispose allocator modules to STOP ARRAY");
-
-        contextManager->Close();
-        _UnregisterFromAllocatorService();
-        isInitialized = false;
+        return;
     }
+
+    _UnregisterFromAllocatorService();
+    isInitialized = false;
 }
 
 void
@@ -196,7 +200,7 @@ Allocator::GetIContextReplayer(void)
 {
     return (IContextReplayer*)contextManager->GetContextReplayer();
 }
-//----------------------------------------------------------------------------//
+
 bool
 Allocator::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {

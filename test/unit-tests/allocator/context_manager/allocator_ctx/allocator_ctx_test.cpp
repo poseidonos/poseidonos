@@ -347,8 +347,7 @@ TEST(AllocatorCtx, Init_InitAndClose)
     AllocatorCtx allocCtx(&addrInfo);
     // when
     allocCtx.Init();
-    allocCtx.Close();
-    allocCtx.Close();
+    allocCtx.Dispose();
 }
 
 TEST(AllocatorCtx, GetUsedSegment_TestGetAllocatedSegment)

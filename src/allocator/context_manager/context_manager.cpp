@@ -155,13 +155,13 @@ ContextManager::FreeUserDataSegment(SegmentId segId)
 }
 
 void
-ContextManager::Close(void)
+ContextManager::Dispose(void)
 {
-    segmentCtx->Close();
-    wbStripeCtx->Close();
-    rebuildCtx->Close();
-    allocatorCtx->Close();
-    fileIoManager->Close();
+    segmentCtx->Dispose();
+    wbStripeCtx->Dispose();
+    rebuildCtx->Dispose();
+    allocatorCtx->Dispose();
+    fileIoManager->Dispose();
 }
 
 int
@@ -411,7 +411,7 @@ ContextManager::GetRebuildTargetSegmentCount(void)
 {
     return rebuildCtx->GetRebuildTargetSegmentCount();
 }
-//----------------------------------------------------------------------------//
+
 void
 ContextManager::_FreeSegment(SegmentId segId)
 {

@@ -72,7 +72,7 @@ public:
     AllocatorFileIoManager(std::string* fileNames, AllocatorAddressInfo* info, std::string arrayName);
     virtual ~AllocatorFileIoManager(void);
     virtual void Init(void);
-    virtual void Close(void);
+    virtual void Dispose(void);
 
     virtual void UpdateSectionInfo(int owner, int section, char* addr, int size, int offset);
 
@@ -93,6 +93,8 @@ private:
     FileInfo fileInfo[NUM_FILES];
     AllocatorAddressInfo* addrInfo;
     std::string arrayName;
+
+    bool initialized;
 };
 
 } // namespace pos

@@ -49,7 +49,8 @@ namespace pos
 AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap_, SegmentStates* segmentStates_, SegmentLock* segStateLocks_, AllocatorAddressInfo* info_)
 : ctxStoredVersion(0),
   ctxDirtyVersion(0),
-  addrInfo(info_)
+  addrInfo(info_),
+  initialized(false)
 {
     allocSegBitmap = allocSegBitmap_; // for UT
     segmentStates = segmentStates_;   // for UT
@@ -78,11 +79,17 @@ AllocatorCtx::AllocatorCtx(AllocatorAddressInfo* info)
 
 AllocatorCtx::~AllocatorCtx(void)
 {
+    Dispose();
 }
 
 void
 AllocatorCtx::Init(void)
 {
+    if (initialized == true)
+    {
+        return;
+    }
+
     uint32_t numSegment = addrInfo->GetnumUserAreaSegments();
     allocSegBitmap = new BitMapMutex(numSegment);
     currentSsdLsid = STRIPES_PER_SEGMENT - 1;
@@ -96,11 +103,17 @@ AllocatorCtx::Init(void)
     ctxHeader.ctxVersion = 0;
     ctxStoredVersion = 0;
     ctxDirtyVersion = 0;
+    initialized = true;
 }
 
 void
-AllocatorCtx::Close(void)
+AllocatorCtx::Dispose(void)
 {
+    if (initialized == false)
+    {
+        return;
+    }
+
     if (segmentStates != nullptr)
     {
         delete[] segmentStates;
@@ -116,6 +129,7 @@ AllocatorCtx::Close(void)
         delete allocSegBitmap;
         allocSegBitmap = nullptr;
     }
+    initialized = false;
 }
 
 void
@@ -362,5 +376,5 @@ AllocatorCtx::GetSegStateLock(SegmentId segId)
 {
     return segStateLocks[segId].GetLock();
 }
-//----------------------------------------------------------------------------//
-} // namespace pos
+
+}  // namespace pos

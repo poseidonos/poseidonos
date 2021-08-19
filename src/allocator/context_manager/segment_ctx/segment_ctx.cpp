@@ -46,6 +46,7 @@ SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, Allo
 : ctxDirtyVersion(0),
   ctxStoredVersion(0),
   numSegments(0),
+  initialized(false),
   addrInfo(addrInfo_)
 {
     segmentInfos = segmentInfo_;
@@ -69,27 +70,40 @@ SegmentCtx::SegmentCtx(AllocatorAddressInfo* info)
 
 SegmentCtx::~SegmentCtx(void)
 {
+    Dispose();
 }
 
 void
 SegmentCtx::Init(void)
 {
+    if (initialized == true)
+    {
+        return;
+    }
+
     ctxHeader.ctxVersion = 0;
     ctxStoredVersion = 0;
     ctxDirtyVersion = 0;
 
     numSegments = addrInfo->GetnumUserAreaSegments();
     segmentInfos = new SegmentInfo[numSegments];
+    initialized = true;
 }
 
 void
-SegmentCtx::Close(void)
+SegmentCtx::Dispose(void)
 {
+    if (initialized == false)
+    {
+        return;
+    }
+
     if (segmentInfos != nullptr)
     {
         delete[] segmentInfos;
         segmentInfos = nullptr;
     }
+    initialized = false;
 }
 
 uint32_t

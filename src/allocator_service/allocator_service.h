@@ -47,6 +47,7 @@ class IRebuildCtx;
 class IAllocatorWbt;
 class IContextManager;
 class IContextReplayer;
+
 class AllocatorService
 {
     friend class Singleton<AllocatorService>;

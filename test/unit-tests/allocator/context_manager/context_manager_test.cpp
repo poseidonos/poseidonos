@@ -180,14 +180,14 @@ TEST(ContextManager, Close_TestAllClosed)
     NiceMock<MockTelemetryPublisher>* tc = new NiceMock<MockTelemetryPublisher>();
     ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, nullptr, "");
 
-    EXPECT_CALL(*allocCtx, Close);
-    EXPECT_CALL(*wbStripeCtx, Close);
-    EXPECT_CALL(*segCtx, Close);
-    EXPECT_CALL(*fileMan, Close);
-    EXPECT_CALL(*reCtx, Close);
+    EXPECT_CALL(*allocCtx, Dispose);
+    EXPECT_CALL(*wbStripeCtx, Dispose);
+    EXPECT_CALL(*segCtx, Dispose);
+    EXPECT_CALL(*fileMan, Dispose);
+    EXPECT_CALL(*reCtx, Dispose);
 
     // when
-    ctxManager.Close();
+    ctxManager.Dispose();
 }
 
 TEST(ContextManager, FlushContexts_IfSyncSuccessAllFile)
@@ -196,14 +196,19 @@ TEST(ContextManager, FlushContexts_IfSyncSuccessAllFile)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetUT(true);
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    ::testing::Mock::AllowLeak(allocCtx);
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>();
+    ::testing::Mock::AllowLeak(wbStripeCtx);
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
+    ::testing::Mock::AllowLeak(segCtx);
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
     NiceMock<MockAllocatorFileIoManager>* fileMan = new NiceMock<MockAllocatorFileIoManager>();
+    ::testing::Mock::AllowLeak(fileMan);
     NiceMock<MockTelemetryPublisher>* tc = new NiceMock<MockTelemetryPublisher>();
     ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
 
     std::mutex segCtxLock, allocCtxLock, wbLsidBitmapLock;
+
     EXPECT_CALL(*segCtx, GetSegmentCtxLock).WillOnce(ReturnRef(segCtxLock));
     EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
     EXPECT_CALL(*wbStripeCtx, GetAllocWbLsidBitmapLock).WillOnce(ReturnRef(wbLsidBitmapLock));

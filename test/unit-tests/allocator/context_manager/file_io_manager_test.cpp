@@ -15,8 +15,8 @@ namespace pos
 {
 TEST(AllocatorFileIoManager, AllocatorFileIoManager_)
 {
-    AllocatorFileIoManager fileManager;
-    fileManager.Init();
+    // AllocatorFileIoManager fileManager;
+    // fileManager.Init();
 
     NiceMock<AllocatorAddressInfo>* addrInfo = new NiceMock<AllocatorAddressInfo>();
     NiceMock<MockMetaFileIntf>* file[NUM_FILES];
@@ -25,6 +25,7 @@ TEST(AllocatorFileIoManager, AllocatorFileIoManager_)
         file[i] = nullptr;
     }
     AllocatorFileIoManager fileManager2((MetaFileIntf**)file, addrInfo);
+    fileManager2.Init();
 }
 
 TEST(AllocatorFileIoManager, Init_TestInitAndClose)
@@ -43,9 +44,9 @@ TEST(AllocatorFileIoManager, Init_TestInitAndClose)
     EXPECT_CALL(*file[0], IsOpened).WillOnce(Return(true));
     EXPECT_CALL(*file[1], IsOpened).WillOnce(Return(false));
     EXPECT_CALL(*file[0], Close);
-    fileManager.Close();
+    fileManager.Dispose();
     // when 2.
-    fileManager.Close();
+    fileManager.Dispose();
 }
 
 TEST(AllocatorFileIoManager, UpdateSectionInfo_TestSimpleSetter)

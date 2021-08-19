@@ -41,7 +41,8 @@
 namespace pos
 {
 AllocatorFileIoManager::AllocatorFileIoManager(MetaFileIntf** fileIntf, AllocatorAddressInfo* info)
-: addrInfo(info)
+: addrInfo(info),
+  initialized(false)
 {
     // This constructor is only for UT !!
     arrayName = "";
@@ -59,7 +60,8 @@ AllocatorFileIoManager::AllocatorFileIoManager(MetaFileIntf** fileIntf, Allocato
 
 AllocatorFileIoManager::AllocatorFileIoManager(std::string* fileNames, AllocatorAddressInfo* info, std::string arrayName)
 : addrInfo(info),
-  arrayName(arrayName)
+  arrayName(arrayName),
+  initialized(false)
 {
     for (int owner = 0; owner < NUM_FILES; owner++)
     {
@@ -72,11 +74,17 @@ AllocatorFileIoManager::AllocatorFileIoManager(std::string* fileNames, Allocator
 
 AllocatorFileIoManager::~AllocatorFileIoManager(void)
 {
+    Dispose();
 }
 
 void
 AllocatorFileIoManager::Init(void)
 {
+    if (initialized == true)
+    {
+        return;
+    }
+
     for (int owner = 0; owner < NUM_FILES; owner++)
     {
         fileInfo[owner].size = 0;
@@ -86,6 +94,7 @@ AllocatorFileIoManager::Init(void)
             fileInfo[owner].file = new FILESTORE(fileInfo[owner].fileName, arrayName);
         }
     }
+    initialized = true;
 }
 
 void
@@ -97,8 +106,13 @@ AllocatorFileIoManager::UpdateSectionInfo(int owner, int section, char* addr, in
 }
 
 void
-AllocatorFileIoManager::Close(void)
+AllocatorFileIoManager::Dispose(void)
 {
+    if (initialized == false)
+    {
+        return;
+    }
+
     for (int owner = 0; owner < NUM_FILES; owner++)
     {
         if (fileInfo[owner].file != nullptr)
@@ -111,6 +125,7 @@ AllocatorFileIoManager::Close(void)
             fileInfo[owner].file = nullptr;
         }
     }
+    initialized = false;
 }
 
 int

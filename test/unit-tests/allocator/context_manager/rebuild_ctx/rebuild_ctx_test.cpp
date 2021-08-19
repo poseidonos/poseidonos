@@ -30,7 +30,7 @@ TEST(RebuildCtx, Close_TestCallEmptyFunc)
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     RebuildCtx rebuildCtx(allocCtx, nullptr);
     // when
-    rebuildCtx.Close();
+    rebuildCtx.Dispose();
     delete allocCtx;
 }
 

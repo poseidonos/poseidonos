@@ -51,7 +51,7 @@ public:
     explicit SegmentCtx(AllocatorAddressInfo* info);
     virtual ~SegmentCtx(void);
     virtual void Init(void);
-    virtual void Close(void);
+    virtual void Dispose(void);
 
     virtual void AfterLoad(char* buf);
     virtual void BeforeFlush(int section, char* buf);
@@ -82,6 +82,7 @@ private:
     std::atomic<uint64_t> ctxStoredVersion;
     SegmentInfo* segmentInfos;
     uint32_t numSegments;
+    bool initialized;
 
     AllocatorAddressInfo* addrInfo;
 

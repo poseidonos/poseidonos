@@ -41,6 +41,7 @@
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_context_replayer.h"
 #include "src/allocator/include/allocator_const.h"
+#include "src/state/interface/i_state_control.h"
 
 namespace pos
 {
@@ -72,7 +73,7 @@ public:
     ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, std::string arrayName);
     virtual ~ContextManager(void);
     virtual void Init(void);
-    virtual void Close(void);
+    virtual void Dispose(void);
 
     virtual int FlushContexts(EventSmartPtr callback, bool sync);
     virtual int FlushRebuildContext(EventSmartPtr callback, bool sync);

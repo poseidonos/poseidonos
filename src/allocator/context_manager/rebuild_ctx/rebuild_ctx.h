@@ -51,7 +51,7 @@ public:
     RebuildCtx(AllocatorCtx* allocCtx, AllocatorAddressInfo* info);
     virtual ~RebuildCtx(void);
     virtual void Init(void);
-    virtual void Close(void);
+    virtual void Dispose(void);
 
     virtual void AfterLoad(char* buf);
     virtual void BeforeFlush(int section, char* buf);
@@ -89,6 +89,7 @@ private:
     std::mutex rebuildLock;
 
     AllocatorCtx* allocatorCtx;
+    bool initialized;
 };
 
 } // namespace pos
