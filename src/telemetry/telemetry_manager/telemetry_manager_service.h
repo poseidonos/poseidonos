@@ -32,37 +32,66 @@
 
 #pragma once
 
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include <list>
 #include <map>
+#include <nlohmann/json.hpp>
 #include <string>
+#include <thread>
 #include <vector>
+
+#include "proto/generated/cpp/telemetry.grpc.pb.h"
+#include "proto/generated/cpp/telemetry.pb.h"
+#include "src/helper/json_helper.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+
+using namespace ::grpc;
 
 namespace pos
 {
-class TelemetryClient
+class TelemetryManagerService final : public TelemetryManager::Service
 {
 public:
-    TelemetryClient(void);
-    virtual ~TelemetryClient(void);
-    virtual int RegisterPublisher(std::string name, TelemetryPublisher* client);
-    virtual int DeregisterPublisher(std::string name);
-    virtual bool StartPublisher(std::string name);
-    virtual bool StopPublisher(std::string name);
-    virtual bool IsPublisherRunning(std::string name);
-    virtual bool StartAllPublisher(void);
-    virtual bool StopAllPublisher(void);
+    TelemetryManagerService(void);
+    virtual ~TelemetryManagerService(void);
 
-    virtual int CollectValue(std::string name, std::string id, TelemetryGeneralMetric& outLog);
-    virtual list<TelemetryGeneralMetric> CollectList(std::string name);
-    virtual TelemetryClient*
-    GetInstance(void)
-    {
-        return this;
-    }
+    virtual ::grpc::Status configure(
+        ::grpc::ServerContext* context,
+        const ConfigureMetadataRequest* request,
+        ConfigureMetadataResponse* response) override;
+
+    virtual ::grpc::Status publish(
+        ::grpc::ServerContext* context,
+        const PublishRequest* request,
+        PublishResponse* response) override;
+
+    virtual ::grpc::Status collect(
+        ::grpc::ServerContext* context,
+        const ::CollectRequest* request,
+        ::CollectResponse* response) override;
+
+    virtual ::grpc::Status enable(
+        ::grpc::ServerContext* context,
+        const ::EnableRequest* request,
+        ::EnableResponse* response) override;
+
+    virtual ::grpc::Status disable(
+        ::grpc::ServerContext* context,
+        const ::DisableRequest* request,
+        ::DisableResponse* response) override;
+
+    void CreateTelemetryServer(std::string address);
+
+    bool StartService(void);
+    bool StopService(void);
+
+protected:
+    std::thread* telemetryManagerServerThread;
+    std::unique_ptr<Server> server;
 
 private:
-    std::map<std::string, TelemetryPublisher*> publisherList;
+    bool enabledService;
+    std::string serverAddress;
 };
-using TeletryClientSingleton = Singleton<TelemetryClient>;
+using TelemetryManagerServiceSingletone = Singleton<TelemetryManagerService>;
 } // namespace pos

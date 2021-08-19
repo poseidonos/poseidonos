@@ -30,39 +30,48 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "protobuf_create_channel.h"
 
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include <list>
-#include <map>
-#include <string>
-#include <vector>
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class TelemetryClient
+ProtoBufCreateChannel::ProtoBufCreateChannel(string serverAddress)
 {
-public:
-    TelemetryClient(void);
-    virtual ~TelemetryClient(void);
-    virtual int RegisterPublisher(std::string name, TelemetryPublisher* client);
-    virtual int DeregisterPublisher(std::string name);
-    virtual bool StartPublisher(std::string name);
-    virtual bool StopPublisher(std::string name);
-    virtual bool IsPublisherRunning(std::string name);
-    virtual bool StartAllPublisher(void);
-    virtual bool StopAllPublisher(void);
+    std::shared_ptr<Channel> channel = grpc::CreateChannel(serverAddress, grpc::InsecureChannelCredentials());
+    stub_ = TelemetryManager::NewStub(channel);
+}
 
-    virtual int CollectValue(std::string name, std::string id, TelemetryGeneralMetric& outLog);
-    virtual list<TelemetryGeneralMetric> CollectList(std::string name);
-    virtual TelemetryClient*
-    GetInstance(void)
+ProtoBufCreateChannel::~ProtoBufCreateChannel(void)
+{
+}
+
+::grpc::Status
+ProtoBufCreateChannel::PublishToServer(void /*send data*/)
+{
+    PublishRequest cliPublishReq;
+    PublishResponse cliPublishRes;
+    ClientContext cliContext;
+
+    // set data ; To do
+
+    const string errorMsg = "mock invalid arg error";
+    Status status = ::grpc::Status(StatusCode::INVALID_ARGUMENT, errorMsg);
+
+    status = stub_->publish(&cliContext, cliPublishReq, &cliPublishRes);
+
+    // debug
+    if (status.ok() == true)
     {
-        return this;
+        // success
+    }
+    else
+    {
+        // fail
     }
 
-private:
-    std::map<std::string, TelemetryPublisher*> publisherList;
-};
-using TeletryClientSingleton = Singleton<TelemetryClient>;
+    return status;
+}
+
 } // namespace pos

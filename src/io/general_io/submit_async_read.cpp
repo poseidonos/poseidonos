@@ -7,6 +7,7 @@
 #include "src/io/general_io/io_submit_handler_count.h"
 #include "src/logger/logger.h"
 
+#define MIN(x, y) (x) > (y) ? (y) : (x)
 namespace pos
 {
 SubmitAsyncRead::SubmitAsyncRead(CallbackSmartPtr callback)
@@ -76,7 +77,7 @@ SubmitAsyncRead::Execute(
         BufferEntry& currentBufferEntry = *it;
 
         uint32_t bufferCount =
-            Min((blockCount - blockIndex), currentBufferEntry.GetBlkCnt());
+            MIN((blockCount - blockIndex), currentBufferEntry.GetBlkCnt());
 
         for (uint32_t bufferIndex = 0; bufferIndex < bufferCount; bufferIndex++)
         {

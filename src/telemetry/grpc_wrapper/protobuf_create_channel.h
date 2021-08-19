@@ -32,37 +32,40 @@
 
 #pragma once
 
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include <grpc/grpc.h>
+#include <grpcpp/grpcpp.h>
+#include <grpcpp/security/server_credentials.h>
+#include <grpcpp/server.h>
+#include <grpcpp/server_builder.h>
+#include <grpcpp/server_context.h>
+
 #include <list>
 #include <map>
+#include <memory>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
+#include "proto/generated/cpp/telemetry.grpc.pb.h"
+#include "proto/generated/cpp/telemetry.pb.h"
+#include "src/helper/json_helper.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+
+using namespace ::grpc;
+
 namespace pos
 {
-class TelemetryClient
+class ProtoBufCreateChannel : public TelemetryManager::Service
 {
 public:
-    TelemetryClient(void);
-    virtual ~TelemetryClient(void);
-    virtual int RegisterPublisher(std::string name, TelemetryPublisher* client);
-    virtual int DeregisterPublisher(std::string name);
-    virtual bool StartPublisher(std::string name);
-    virtual bool StopPublisher(std::string name);
-    virtual bool IsPublisherRunning(std::string name);
-    virtual bool StartAllPublisher(void);
-    virtual bool StopAllPublisher(void);
+    explicit ProtoBufCreateChannel(string serverAddress);
+    virtual ~ProtoBufCreateChannel(void);
 
-    virtual int CollectValue(std::string name, std::string id, TelemetryGeneralMetric& outLog);
-    virtual list<TelemetryGeneralMetric> CollectList(std::string name);
-    virtual TelemetryClient*
-    GetInstance(void)
-    {
-        return this;
-    }
+    ::grpc::Status PublishToServer(void /*send data*/);
 
 private:
-    std::map<std::string, TelemetryPublisher*> publisherList;
+    std::unique_ptr<TelemetryManager::Stub> stub_;
 };
-using TeletryClientSingleton = Singleton<TelemetryClient>;
+
 } // namespace pos

@@ -67,6 +67,7 @@ class VolumeService;
 class MetaFsService;
 class NvmfTarget;
 class TelemetryClient;
+class TelemetryManagerService;
 
 extern DebugInfo* debugInfo;
 
@@ -106,6 +107,7 @@ private:
     VolumeService* volumeService;
     NvmfTarget* nvmfTarget;
     TelemetryClient* telemetryClient;
+    TelemetryManagerService* telemetryManagerService;
 };
 
 } // namespace pos

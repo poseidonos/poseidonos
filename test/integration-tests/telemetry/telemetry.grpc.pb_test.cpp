@@ -1,10 +1,14 @@
-#include <gtest/gtest.h>
+#include "proto/generated/cpp/telemetry.grpc.pb.h"
 
 #include <grpcpp/grpcpp.h>
-#include "src/logger/logger.h"
-#include "src/include/pos_event_id.h"
-#include "proto/generated/cpp/telemetry.pb.h
+#include <gtest/gtest.h>
+
+#include "proto/generated/cpp/telemetry.pb.h"
 #include "proto/generated/cpp/telemetry.grpc.pb.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+#include "src/telemetry/grpc_wrapper/protobuf_create_channel.h"
+#include "src/telemetry/telemetry_manager/telemetry_manager_service.h"
 
 using namespace ::grpc;
 
@@ -124,4 +128,22 @@ TEST(TelemetryManager, testIfGrpcServerIsUpAndShutDownAsExpected)
     server->Shutdown();
 }
 
+TEST(TelemetryManager, testIfGrpcServerClient)
+{
+    string server_address("0.0.0.0:50051");
+
+    // Given: a grpc server
+    TelemetryManagerService* tmServer = new TelemetryManagerService();
+    usleep(1000);
+
+    // Given: a grpc client
+    ProtoBufCreateChannel* tmClient = new ProtoBufCreateChannel(server_address);
+
+    // When 1: publish()
+    Status status;
+    status = tmClient->PublishToServer();
+
+    // Then 1
+    ASSERT_TRUE(status.ok());
+}
 }

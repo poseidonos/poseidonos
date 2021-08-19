@@ -36,31 +36,32 @@
 
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_mgmt/array_manager.h"
+#include "src/cpu_affinity/affinity_manager.h"
 #include "src/device/device_manager.h"
-#include "src/spdk_wrapper/spdk.hpp"
 #include "src/device/unvme/unvme_drv.h"
 #include "src/device/uram/uram_drv.h"
 #include "src/dump/dump_manager.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/io/backend_io/flush_count.h"
 #include "src/io/frontend_io/aio.h"
 #include "src/io/frontend_io/flush_command_manager.h"
-#include "src/cpu_affinity/affinity_manager.h"
 #include "src/io/general_io/command_timeout_handler.h"
 #include "src/io/general_io/io_submit_handler_count.h"
 #include "src/io/general_io/rba_state_service.h"
+#include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/master_context/config_manager.h"
-#include "src/mbr/mbr_manager.h"
 #include "src/master_context/version_provider.h"
+#include "src/mbr/mbr_manager.h"
 #include "src/metafs/include/metafs_service.h"
 #include "src/network/nvmf_target.h"
 #include "src/qos/qos_manager.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/io_scheduler/io_dispatcher.h"
+#include "src/spdk_wrapper/spdk.hpp"
 #include "src/sys_event/volume_event_publisher.h"
-#include "src/volume/volume_service.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
+#include "src/telemetry/telemetry_manager/telemetry_manager_service.h"
+#include "src/volume/volume_service.h"
 
 namespace pos
 {
@@ -68,33 +69,34 @@ namespace pos
 DebugInfo* debugInfo;
 
 DebugInfo::DebugInfo(void)
-:   affinityManager(nullptr),
-    allocatorService(nullptr),
-    arrayManager(nullptr),
-    commandTimeoutHandler(nullptr),
-    configManager(nullptr),
-    deviceManager(nullptr),
-    dumpManager(nullptr),
-    eventScheduler(nullptr),
-    flushCmdManager(nullptr),
-    flushCount(nullptr),
-    garbageCollector(nullptr),
-    ioDispatcher(nullptr),
-    ioSubmitHandlerCount(nullptr),
-    logger(nullptr),
-    mapperService(nullptr),
-    metaFsService(nullptr),
-    qosManager(nullptr),
-    rbaStateService(nullptr),
-    reporter(nullptr),
-    spdk(nullptr),
-    unvmeDrv(nullptr),
-    uramDrv(nullptr),
-    versionProvider(nullptr),
-    volumeEventPublisher(nullptr),
-    volumeService(nullptr),
-    nvmfTarget(nullptr),
-    telemetryClient(nullptr)
+: affinityManager(nullptr),
+  allocatorService(nullptr),
+  arrayManager(nullptr),
+  commandTimeoutHandler(nullptr),
+  configManager(nullptr),
+  deviceManager(nullptr),
+  dumpManager(nullptr),
+  eventScheduler(nullptr),
+  flushCmdManager(nullptr),
+  flushCount(nullptr),
+  garbageCollector(nullptr),
+  ioDispatcher(nullptr),
+  ioSubmitHandlerCount(nullptr),
+  logger(nullptr),
+  mapperService(nullptr),
+  metaFsService(nullptr),
+  qosManager(nullptr),
+  rbaStateService(nullptr),
+  reporter(nullptr),
+  spdk(nullptr),
+  unvmeDrv(nullptr),
+  uramDrv(nullptr),
+  versionProvider(nullptr),
+  volumeEventPublisher(nullptr),
+  volumeService(nullptr),
+  nvmfTarget(nullptr),
+  telemetryClient(nullptr),
+  telemetryManagerService(nullptr)
 {
 }
 
@@ -131,5 +133,6 @@ DebugInfo::Update(void)
     ioSubmitHandlerCount = IOSubmitHandlerCountSingleton::Instance();
     flushCount = FlushCountSingleton::Instance();
     telemetryClient = TeletryClientSingleton::Instance();
+    telemetryManagerService = TelemetryManagerServiceSingletone::Instance();
 }
 } // namespace pos

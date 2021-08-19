@@ -50,8 +50,6 @@
 #define SZ_10MB (10 * SZ_1MB)
 #define SZ_1GB (1 << 30)
 
-#define Min(x, y) (x) > (y) ? (y) : (x) // TODO(하진용) : need to delete
-
 namespace pos
 {
 static const std::size_t BLOCK_SIZE_SHIFT = 12;

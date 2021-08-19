@@ -935,6 +935,7 @@ enum class POS_EVENT_ID
 
     // --------------Telemetry (9500)----------------
     TELEMETRY_DEBUG_MSG = 9500,
+    TELEMETRY_DISABLED = 9501,
 
     DEBUG_START = 10000,
     DEBUG_MEMORY_CHECK_DOUBLE_FREE = DEBUG_START,
