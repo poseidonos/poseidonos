@@ -56,8 +56,9 @@ class MetaFsControlReqMsg : public MetaFsRequestBase
 {
 public:
     MetaFsControlReqMsg(void);
+    virtual ~MetaFsControlReqMsg(void);
 
-    bool IsValid(void);
+    virtual bool IsValid(void);
 
     MetaFsControlReqType reqType = MetaFsControlReqType::Max;
     int arrayId = INT32_MAX;

@@ -39,6 +39,10 @@ MetaFsControlReqMsg::MetaFsControlReqMsg(void)
 {
 }
 
+MetaFsControlReqMsg::~MetaFsControlReqMsg(void)
+{
+}
+
 bool
 MetaFsControlReqMsg::IsValid(void)
 {

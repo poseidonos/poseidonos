@@ -48,22 +48,21 @@ using MetaFsControlReqHandlerPointer = POS_EVENT_ID (MetaFsSystemManager::*)(Met
 class MetaFsSystemManager : public MetaFsManagerBase
 {
 public:
-    explicit MetaFsSystemManager(int arrayId);
+    explicit MetaFsSystemManager(int arrayId, MetaFsMBRManager* mbrMgr = nullptr,
+        MetaStorageSubsystem* metaStorage = nullptr);
     virtual ~MetaFsSystemManager(void);
-
-    POS_EVENT_ID CheckReqSanity(MetaFsControlReqMsg& reqMsg);
 
     virtual bool Init(MetaStorageMediaInfoList& mediaInfoList);
     virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
 
-    uint64_t GetEpochSignature(void);
-    MetaFsStorageIoInfoList& GetAllStoragePartitionInfo(void);
-    MetaLpnType GetRegionSizeInLpn(void);
-    POS_EVENT_ID LoadMbr(bool& isNPOR);
-    bool CreateMbr(void);
-    bool IsMbrClean(void);
-    MetaStorageSubsystem* GetMss(void);
+    virtual uint64_t GetEpochSignature(void);
+    virtual MetaFsStorageIoInfoList& GetAllStoragePartitionInfo(void);
+    virtual MetaLpnType GetRegionSizeInLpn(void);
+    virtual POS_EVENT_ID LoadMbr(bool& isNPOR);
+    virtual bool CreateMbr(void);
+    virtual bool IsMbrClean(void);
+    virtual MetaStorageSubsystem* GetMss(void);
 
 private:
     void _InitReqHandler(void);

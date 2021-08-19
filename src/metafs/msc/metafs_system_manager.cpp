@@ -44,11 +44,15 @@
 
 namespace pos
 {
-MetaFsSystemManager::MetaFsSystemManager(int arrayId)
-: mbrMgr(nullptr),
-  metaStorage(nullptr)
+MetaFsSystemManager::MetaFsSystemManager(int arrayId, MetaFsMBRManager* mbrMgr,
+        MetaStorageSubsystem* metaStorage)
+: mbrMgr(mbrMgr),
+  metaStorage(metaStorage)
 {
-    mbrMgr = new MetaFsMBRManager(arrayId);
+    if (nullptr == this->mbrMgr)
+    {
+        this->mbrMgr = new MetaFsMBRManager(arrayId);
+    }
     _InitReqHandler();
 }
 

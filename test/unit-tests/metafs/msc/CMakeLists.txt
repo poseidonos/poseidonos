@@ -1,3 +1,4 @@
+POS_ADD_UNIT_TEST(metafs_system_manager_ut metafs_system_manager_test.cpp)
 POS_ADD_UNIT_TEST(metafs_mbr_mgr_ut metafs_mbr_mgr_test.cpp)
 POS_ADD_UNIT_TEST(mfs_geometry_ut mfs_geometry_test.cpp)
 POS_ADD_UNIT_TEST(msc_req_ut msc_req_test.cpp)

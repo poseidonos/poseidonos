@@ -12,6 +12,7 @@ class MockMetaFsControlReqMsg : public MetaFsControlReqMsg
 {
 public:
     using MetaFsControlReqMsg::MetaFsControlReqMsg;
+    MOCK_METHOD(bool, IsValid, (), (override));
 };
 
 } // namespace pos

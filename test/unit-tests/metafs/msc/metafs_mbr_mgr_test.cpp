@@ -15,6 +15,20 @@ using namespace ::testing;
 
 namespace pos
 {
+TEST(MetaFsMBRManager, CreateObj)
+{
+    // Given
+    const int arrayId = 0;
+
+    MetaFsMBRContent* metaFsMBRContent = new (1) MetaFsMBRContent;  // meta_region.h:88
+    MockMetaFsMBR* mockMetaFsMBR = new MockMetaFsMBR;
+    mockMetaFsMBR->SetContent(metaFsMBRContent);
+
+    MetaFsMBRManager* obj = new MetaFsMBRManager(arrayId, mockMetaFsMBR);
+
+    delete obj;
+}
+
 TEST(MetaFsMBRManager, RegisterVolumeGeometry_Normal)
 {
     // Given

@@ -55,18 +55,18 @@ public:
     virtual void Finalize(void) override;
     virtual void SetMss(MetaStorageSubsystem* mss);
 
-    bool IsValidMBRExist(void);
-    uint64_t GetEpochSignature(void);
-    bool LoadMBR(void);
-    bool CreateMBR(void);
-    void RegisterVolumeGeometry(MetaStorageInfo& mediaInfo);
-    MetaFsStorageIoInfoList& GetAllStoragePartitionInfo(void);
+    virtual bool IsValidMBRExist(void);
+    virtual uint64_t GetEpochSignature(void);
+    virtual bool LoadMBR(void);
+    virtual bool CreateMBR(void);
+    virtual void RegisterVolumeGeometry(MetaStorageInfo& mediaInfo);
+    virtual MetaFsStorageIoInfoList& GetAllStoragePartitionInfo(void);
 
     static const uint32_t FILESYSTEM_MBR_BASE_LPN = 0;
 
-    void SetPowerStatus(bool isShutDownOff);
-    bool GetPowerStatus(void);
-    void InvalidMBR(void);
+    virtual void SetPowerStatus(bool isShutDownOff);
+    virtual bool GetPowerStatus(void);
+    virtual void InvalidMBR(void);
 
 private:
     MetaFsMBR* mbr;

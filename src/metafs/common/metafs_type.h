@@ -72,7 +72,7 @@ public:
     {
     }
 
-    ~MetaFsRequestBase(void)
+    virtual ~MetaFsRequestBase(void)
     {
     }
 };
