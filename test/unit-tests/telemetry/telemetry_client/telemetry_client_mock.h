@@ -14,13 +14,14 @@ public:
     using TelemetryClient::TelemetryClient;
     MOCK_METHOD(int, RegisterPublisher, (std::string name, TelemetryPublisher* publisher), (override));
     MOCK_METHOD(int, DeregisterPublisher, (std::string name), (override));
-    MOCK_METHOD(void, StartPublisher, (std::string name), (override));
-    MOCK_METHOD(void, StopPublisher, (std::string name), (override));
+    MOCK_METHOD(bool, StartPublisher, (std::string name), (override));
+    MOCK_METHOD(bool, StopPublisher, (std::string name), (override));
     MOCK_METHOD(bool, IsPublisherRunning, (std::string name), (override));
-    MOCK_METHOD(void, StartAllPublisher, (), (override));
-    MOCK_METHOD(void, StopAllPublisher, (), (override));
+    MOCK_METHOD(bool, StartAllPublisher, (), (override));
+    MOCK_METHOD(bool, StopAllPublisher, (), (override));
     MOCK_METHOD(int, CollectValue, (std::string name, std::string id, TelemetryGeneralMetric& outLog), (override));
     MOCK_METHOD(list<TelemetryGeneralMetric>, CollectList, (std::string name), (override));
+    MOCK_METHOD(TelemetryClient*, GetInstance, (), (override));
 };
 
 } // namespace pos

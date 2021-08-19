@@ -60,6 +60,7 @@
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume_service.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 namespace pos
 {
@@ -92,7 +93,8 @@ DebugInfo::DebugInfo(void)
     versionProvider(nullptr),
     volumeEventPublisher(nullptr),
     volumeService(nullptr),
-    nvmfTarget(nullptr)
+    nvmfTarget(nullptr),
+    telemetryClient(nullptr)
 {
 }
 
@@ -128,5 +130,6 @@ DebugInfo::Update(void)
     nvmfTarget = NvmfTargetSingleton::Instance();
     ioSubmitHandlerCount = IOSubmitHandlerCountSingleton::Instance();
     flushCount = FlushCountSingleton::Instance();
+    telemetryClient = TeletryClientSingleton::Instance();
 }
 } // namespace pos

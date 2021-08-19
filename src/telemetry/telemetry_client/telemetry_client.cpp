@@ -75,18 +75,20 @@ TelemetryClient::DeregisterPublisher(std::string name)
     return 0;
 }
 
-void
+bool
 TelemetryClient::StartPublisher(std::string name)
 {
     publisherList[name]->StartPublishing();
     POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start publisher:{}", name);
+    return true;
 }
 
-void
+bool
 TelemetryClient::StopPublisher(std::string name)
 {
     publisherList[name]->StopPublishing();
     POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop publisher:{}", name);
+    return true;
 }
 
 bool
@@ -95,7 +97,7 @@ TelemetryClient::IsPublisherRunning(std::string name)
     return publisherList[name]->IsRunning();
 }
 
-void
+bool
 TelemetryClient::StartAllPublisher(void)
 {
     POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start all publishers");
@@ -104,9 +106,10 @@ TelemetryClient::StartAllPublisher(void)
         p.second->StartPublishing();
         POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] start publisher:{}", p.first);
     }
+    return true;
 }
 
-void
+bool
 TelemetryClient::StopAllPublisher(void)
 {
     POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop all publishers");
@@ -115,6 +118,7 @@ TelemetryClient::StopAllPublisher(void)
         p.second->StopPublishing();
         POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] stop publisher:{}", p.first);
     }
+    return true;
 }
 
 int

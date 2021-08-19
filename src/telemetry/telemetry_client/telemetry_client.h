@@ -47,17 +47,18 @@ public:
     virtual ~TelemetryClient(void);
     virtual int RegisterPublisher(std::string name, TelemetryPublisher* client);
     virtual int DeregisterPublisher(std::string name);
-    virtual void StartPublisher(std::string name);
-    virtual void StopPublisher(std::string name);
+    virtual bool StartPublisher(std::string name);
+    virtual bool StopPublisher(std::string name);
     virtual bool IsPublisherRunning(std::string name);
-    virtual void StartAllPublisher(void);
-    virtual void StopAllPublisher(void);
+    virtual bool StartAllPublisher(void);
+    virtual bool StopAllPublisher(void);
 
     virtual int CollectValue(std::string name, std::string id, TelemetryGeneralMetric& outLog);
     virtual list<TelemetryGeneralMetric> CollectList(std::string name);
+    virtual TelemetryClient* GetInstance(void) { return this; }
 
 private:
     std::map<std::string, TelemetryPublisher*> publisherList;
 };
-using TeletryClientSgt = Singleton<TelemetryClient>;
+using TeletryClientSingleton = Singleton<TelemetryClient>;
 } // namespace pos

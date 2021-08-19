@@ -66,6 +66,7 @@ class VolumeEventPublisher;
 class VolumeService;
 class MetaFsService;
 class NvmfTarget;
+class TelemetryClient;
 
 extern DebugInfo* debugInfo;
 
@@ -104,6 +105,7 @@ private:
     VolumeEventPublisher* volumeEventPublisher;
     VolumeService* volumeService;
     NvmfTarget* nvmfTarget;
+    TelemetryClient* telemetryClient;
 };
 
 } // namespace pos

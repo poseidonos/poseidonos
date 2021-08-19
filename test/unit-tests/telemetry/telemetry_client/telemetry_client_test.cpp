@@ -143,4 +143,15 @@ TEST(TelemetryClient, CollectList_TestData)
     delete tp;
 }
 
+TEST(TelemetryClient, TestGetInstance)
+{
+    // given
+    TelemetryPublisher* tp = new TelemetryPublisher();
+    TelemetryClient telClient;
+    // when
+    TelemetryClient* ref = telClient.GetInstance();
+    // then
+    EXPECT_EQ(ref, &telClient);
+}
+
 } // namespace pos
