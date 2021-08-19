@@ -313,6 +313,7 @@ RebuildCtx::IsRebuildTargetSegment(SegmentId segId)
 }
 
 
+
 uint32_t
 RebuildCtx::GetRebuildTargetSegmentCount(void)
 {

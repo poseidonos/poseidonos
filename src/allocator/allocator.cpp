@@ -151,7 +151,6 @@ Allocator::Shutdown(void)
     {
         return;
     }
-
     _UnregisterFromAllocatorService();
     isInitialized = false;
 }
