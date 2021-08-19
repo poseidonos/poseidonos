@@ -202,6 +202,7 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType, unsigned int& arra
         if (!_CheckIndexIsValid())
         {
             ret = (int)POS_EVENT_ID::ARRAY_INVALID_INDEX;
+            pthread_rwlock_unlock(&stateLock);
             return ret;
         }
     }
