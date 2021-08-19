@@ -170,6 +170,7 @@ GcStripeManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks)
         bool ret = _CreateActiveWriteBuffer(volumeId);
         if (unlikely(false == ret))
         {
+            gcAllocateBlks.startOffset = UINT32_MAX;
             gcAllocateBlks.numBlks = 0;
             airlog("CNT_GcSM_AllocWriteBuf", "AIR_FALSE", 0, 1);
             return gcAllocateBlks;
