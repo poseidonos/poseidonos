@@ -219,7 +219,12 @@ WbtMetafsCmdHandler::ReadFile(Args argv)
 
     MetaVolumeType volumeType = (MetaVolumeType)type;
     if (type >= (int)MetaVolumeType::Max)
+    {
+        if (buffer != nullptr)
+            delete[] buffer;
+
         return RESULT_FAILURE;
+    }
 
     MetaStorageType storage = MetaFileUtil::ConvertToMediaType(volumeType);
 
@@ -271,7 +276,13 @@ WbtMetafsCmdHandler::WriteFile(Args argv)
 
     MetaVolumeType volumeType = (MetaVolumeType)type;
     if (type >= (int)MetaVolumeType::Max)
+    {
+        // MakeSure to delete buffer
+        if (buffer != nullptr)
+            delete[] buffer;
+
         return RESULT_FAILURE;
+    }
 
     MetaStorageType storage = MetaFileUtil::ConvertToMediaType(volumeType);
 
