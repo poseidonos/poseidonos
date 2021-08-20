@@ -66,8 +66,8 @@ public:
         delete gcFlushCompletion;
         delete array;
         delete affinityManager;
-        delete volumeEventPublisher;
         delete gcStripeManager;
+        delete volumeEventPublisher;
         delete stripe;
         delete rbaStateManager;
 

@@ -83,8 +83,8 @@ public:
         delete gcMapUpdateCompletion;
         delete array;
         delete affinityManager;
-        delete volumeEventPublisher;
         delete gcStripeManager;
+        delete volumeEventPublisher;
         delete rbaStateManager;
         delete vsaMap;
         delete journal;
