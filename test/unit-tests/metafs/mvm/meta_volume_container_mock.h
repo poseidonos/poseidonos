@@ -14,7 +14,8 @@ public:
     using MetaVolumeContainer::MetaVolumeContainer;
 
     MOCK_METHOD(void, InitContext, (MetaVolumeType volumeType, int arrayId,
-                MetaLpnType maxVolPageNum, MetaStorageSubsystem* metaStorage));
+                MetaLpnType maxVolPageNum, MetaStorageSubsystem* metaStorage,
+                MetaVolume* vol));
 
     MOCK_METHOD(bool, CreateVolume, (MetaVolumeType volumeType));
     MOCK_METHOD(bool, OpenAllVolumes, (bool isNPOR));

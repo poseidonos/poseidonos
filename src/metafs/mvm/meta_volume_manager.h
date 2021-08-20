@@ -61,7 +61,8 @@ using GlobalMetaReqHandler = POS_EVENT_ID (MetaVolumeHandler::*)(MetaFsFileContr
 class MetaVolumeManager : public MetaFsManagerBase
 {
 public:
-    MetaVolumeManager(void);
+    MetaVolumeManager(MetaVolumeHandler* _volHandler = nullptr,
+        MetaVolumeContainer* _volContainer = nullptr);
     virtual ~MetaVolumeManager(void);
 
     POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
@@ -74,12 +75,17 @@ public:
     // API for MetaFs MGMT API (File meta operation, Utility API to obtain specific file meta info.)
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
 
-    POS_EVENT_ID CheckFileAccessible(FileDescriptorType fd);
-    POS_EVENT_ID GetFileSize(FileDescriptorType fd, FileSizeType& outFileByteSize);
-    POS_EVENT_ID GetDataChunkSize(FileDescriptorType fd, FileSizeType& outDataChunkSize);
-    POS_EVENT_ID GetTargetMediaType(FileDescriptorType fd, MetaStorageType& outTargetMediaType);
-    POS_EVENT_ID GetFileBaseLpn(FileDescriptorType fd, MetaLpnType& outFileBaseLpn);
-    void SetMss(MetaStorageSubsystem* metaStorage);
+    virtual POS_EVENT_ID CheckFileAccessible(FileDescriptorType fd,
+                MetaVolumeType volType);
+    virtual POS_EVENT_ID GetFileSize(FileDescriptorType fd,
+                MetaVolumeType volType, FileSizeType& outFileByteSize);
+    virtual POS_EVENT_ID GetDataChunkSize(FileDescriptorType fd,
+                MetaVolumeType volType, FileSizeType& outDataChunkSize);
+    virtual POS_EVENT_ID GetTargetMediaType(FileDescriptorType fd,
+                MetaVolumeType volType, MetaStorageType& outTargetMediaType);
+    virtual POS_EVENT_ID GetFileBaseLpn(FileDescriptorType fd,
+                MetaVolumeType volType, MetaLpnType& outFileBaseLpn);
+    virtual void SetMss(MetaStorageSubsystem* metaStorage);
 
 private:
     bool _IsVolumeSpecificRequest(MetaFsFileControlType reqType);
@@ -100,8 +106,8 @@ private:
     MetaVolSpcfReqHandler volumeSpcfReqHandler[(uint32_t)(MetaFsFileControlType::OnVolumeSpcfReq_Count)];
     GlobalMetaReqHandler globalRequestHandler[(uint32_t)(MetaFsFileControlType::NonVolumeSpcfReq_Count)];
 
-    MetaVolumeHandler volHandler;
-    MetaVolumeContainer volContainer;
+    MetaVolumeHandler* volHandler;
+    MetaVolumeContainer* volContainer;
     MetaStorageSubsystem* metaStorage;
 };
 } // namespace pos

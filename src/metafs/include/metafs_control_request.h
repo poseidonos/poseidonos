@@ -130,7 +130,7 @@ public:
     {
     }
 
-    bool
+    virtual bool
     IsValid(void)
     {
         if (reqType >= MetaFsFileControlType::Max)

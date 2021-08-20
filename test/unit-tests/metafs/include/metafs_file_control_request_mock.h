@@ -12,6 +12,7 @@ class MockMetaFsFileControlRequest : public MetaFsFileControlRequest
 {
 public:
     using MetaFsFileControlRequest::MetaFsFileControlRequest;
+    MOCK_METHOD(bool, IsValid, ());
 };
 
 } // namespace pos
