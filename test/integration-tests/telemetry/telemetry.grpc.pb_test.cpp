@@ -3,8 +3,8 @@
 #include <grpcpp/grpcpp.h>
 #include "src/logger/logger.h"
 #include "src/include/pos_event_id.h"
-#include "src/telemetry/telemetry.pb.h"
-#include "src/telemetry/telemetry.grpc.pb.h"
+#include "proto/generated/cpp/telemetry.pb.h
+#include "proto/generated/cpp/telemetry.grpc.pb.h"
 
 using namespace ::grpc;
 

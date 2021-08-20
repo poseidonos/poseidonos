@@ -272,6 +272,13 @@ SET(POS_UT_INCLUDE_DIRS
     ${PROJ_ROOT}
 )
 
+add_custom_target(
+	protobuf_compile ALL
+	COMMENT "Compile protobuf files"
+	WORKING_DIRECTORY ${PROJ_ROOT}
+	COMMAND $(MAKE) protobuf
+)
+
 message("Creating nlohmann/json symlink to support both \"nlohmann/json\" and <nlohmann/json>")
 add_custom_target(nlohmann_json ALL
                   COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJ_ROOT}/lib/nlohmann ${PROJ_ROOT}/src/include/nlohmann)
@@ -441,13 +448,6 @@ SET(DEP_LIBRARIES
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PROTOBUF REQUIRED protobuf)
 pkg_check_modules(GRPC REQUIRED grpc++)
-
-add_custom_target(
-	protobuf_compile ALL
-	COMMENT "Compile protobuf files"
-	WORKING_DIRECTORY ${PROJ_ROOT}
-	COMMAND make protobuf
-)
 
 list(APPEND DEP_LIBRARIES ${PROTOBUF_LIBRARIES} ${GRPC_LIBRARIES})
 list(APPEND DEP_LIBRARIES grpc++_reflection)
