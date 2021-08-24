@@ -1,0 +1,1 @@
+POS_ADD_INTEGRATION_TEST(context_manager_it context_manager_integration_test.cpp)

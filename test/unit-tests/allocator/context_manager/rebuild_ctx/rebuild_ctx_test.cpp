@@ -44,7 +44,7 @@ TEST(RebuildCtx, GetRebuildTargetSegment_TestFailtoGetLockCase)
     // when 1.
     int ret = rebuildCtx.GetRebuildTargetSegment();
     // then 1.
-    EXPECT_EQ((int)NEED_TO_RETRY, ret);
+    EXPECT_EQ((int)UINT32_MAX, ret);
     // given 2.
     rebuildCtx.GetLock().unlock();
     // when 1.
@@ -74,7 +74,7 @@ TEST(RebuildCtx, ReleaseRebuildSegment_TestIfSuccessOrNot)
     // when 3.
     ret = rebuildCtx.ReleaseRebuildSegment(0);
     // then 3.
-    EXPECT_EQ(-1, ret);
+    EXPECT_EQ(0, ret);
     delete allocCtx;
 }
 

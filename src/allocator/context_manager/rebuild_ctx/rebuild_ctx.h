@@ -74,18 +74,23 @@ public:
     virtual int MakeRebuildTarget(void);
     virtual int StopRebuilding(void);
 
-    virtual std::mutex& GetLock(void) { return rebuildLock; } // for UT
+    // For Testing
+    virtual std::mutex& GetLock(void) { return rebuildLock; }
+    virtual std::pair<RTSegmentIter, bool> EmplaceRebuildTargetSegment(SegmentId segmentId);
+    virtual void SetTargetSegmentCnt(uint32_t val) { targetSegmentCount = val; }
 
     static const uint32_t SIG_REBUILD_CTX = 0xCFCFCFCF;
 
 private:
+    void _EraseRebuildTargetSegments(RTSegmentIter iter);
+
     AllocatorAddressInfo* addrInfo;
     std::atomic<uint64_t> ctxStoredVersion;
     std::atomic<uint64_t> ctxDirtyVersion;
     RebuildCtxHeader ctxHeader;
     bool needContinue;
-    uint32_t targetSegmentCount;           // for monitor
-    std::set<SegmentId> targetSegmentList; // No lock
+    std::atomic<uint32_t> targetSegmentCount;   // for monitor
+    std::set<SegmentId> targetSegmentList;
     SegmentId currentTarget;
     std::mutex rebuildLock;
 

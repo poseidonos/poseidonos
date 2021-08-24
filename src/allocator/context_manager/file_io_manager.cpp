@@ -225,5 +225,5 @@ AllocatorFileIoManager::GetSectionOffset(int owner, int section)
 {
     return fileInfo[owner].section[section].offset;
 }
-//----------------------------------------------------------------------------//
+
 } // namespace pos

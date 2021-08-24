@@ -90,16 +90,26 @@ AllocatorCtx::Init(void)
         return;
     }
 
+
     uint32_t numSegment = addrInfo->GetnumUserAreaSegments();
-    allocSegBitmap = new BitMapMutex(numSegment);
+    if (allocSegBitmap == nullptr)
+    {
+        allocSegBitmap = new BitMapMutex(numSegment);
+    }
     currentSsdLsid = STRIPES_PER_SEGMENT - 1;
     prevSsdLsid = STRIPES_PER_SEGMENT - 1;
-    segmentStates = new SegmentStates[numSegment];
+    if (segmentStates == nullptr)
+    {
+        segmentStates = new SegmentStates[numSegment];
+    }
     for (uint32_t segmentId = 0; segmentId < numSegment; ++segmentId)
     {
         segmentStates[segmentId].SetSegmentId(segmentId);
     }
-    segStateLocks = new SegmentLock[numSegment];
+    if (segStateLocks == nullptr)
+    {
+        segStateLocks = new SegmentLock[numSegment];
+    }
     ctxHeader.ctxVersion = 0;
     ctxStoredVersion = 0;
     ctxDirtyVersion = 0;
