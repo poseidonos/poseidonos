@@ -64,6 +64,7 @@ public:
         ArrayInterface* intf, uint32_t arrayIndex);
     virtual void DeleteAll(ArrayInterface* intf);
     virtual void FormatMetaPartition(vector<ArrayDevice*> data, ArrayInterface* intf, uint32_t arrayIndex);
+    virtual RaidState GetRaidState(void);
 
 private:
     int _CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf, uint32_t arrayIndex);

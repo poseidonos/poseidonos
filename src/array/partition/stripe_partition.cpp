@@ -30,11 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "stripe_partition.h"
-
 #include <cassert>
 #include <iostream>
 
+#include "stripe_partition.h"
+#include "src/helper/query.h"
 #include "src/bio/ubio.h"
 #include "src/device/base/ublock_device.h"
 #include "src/include/pos_event_id.h"
@@ -351,6 +351,15 @@ bool
 StripePartition::IsByteAccessSupported(void)
 {
     return false;
+}
+
+RaidState
+StripePartition::GetRaidState(void)
+{
+    auto&& deviceStateList = Enumerable::Select(devs_,
+        [](auto d) { return d->GetState(); });
+
+    return method_->GetRaidState(deviceStateList);
 }
 
 void

@@ -15,6 +15,7 @@ public:
     MOCK_METHOD(int, Translate, (FtBlkAddr&, const LogicalBlkAddr&), (override));
     MOCK_METHOD(int, Convert, (list<FtWriteEntry>&, const LogicalWriteEntry&), (override));
     MOCK_METHOD(list<FtBlkAddr>, GetRebuildGroup, (FtBlkAddr fba), (override));
+    MOCK_METHOD(RaidState, GetRaidState, (vector<ArrayDeviceState> devs), (override));
     MOCK_METHOD(void, _BindRecoverFunc, (), (override));
 };
 

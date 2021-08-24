@@ -30,12 +30,12 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "raid1.h"
-
 #include <cassert>
 #include <cstring>
 #include <list>
 
+#include "raid1.h"
+#include "src/helper/query.h"
 #include "src/include/array_config.h"
 #include "src/array_models/dto/partition_physical_size.h"
 
@@ -93,6 +93,26 @@ Raid1::GetRebuildGroup(FtBlkAddr fba)
     fba.offset = mirror * ftSize_.blksPerChunk + offset;
     recoveryGroup.push_back(fba);
     return recoveryGroup;
+}
+
+RaidState
+Raid1::GetRaidState(vector<ArrayDeviceState> devs)
+{
+    RaidState rs = RaidState::NORMAL;
+    for (size_t i = 0; i < devs.size(); i++)
+    {
+        ArrayDeviceState state = devs[i];
+        if (state != ArrayDeviceState::NORMAL)
+        {
+            rs = RaidState::DEGRADED;
+            ArrayDeviceState mirrorState = devs[_GetMirrorIndex(i)];
+            if (mirrorState != ArrayDeviceState::NORMAL)
+            {
+                return RaidState::FAILURE;
+            }
+        }
+    }
+    return rs;
 }
 
 void

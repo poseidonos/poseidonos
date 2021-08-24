@@ -61,6 +61,7 @@ public:
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
+    virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
 
     // This function is for unit testing only
     virtual int GetParityPoolSize();

@@ -74,6 +74,7 @@ public:
     unique_ptr<RebuildContext> GetRebuildCtx(ArrayDevice* fault) override;
     void Format(void) override;
     bool IsByteAccessSupported(void) override;
+    RaidState GetRaidState(void) override;
 
 private:
     FtBlkAddr _P2FTranslate(const PhysicalBlkAddr& pba);

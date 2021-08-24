@@ -34,10 +34,13 @@
 #define METHOD_H_
 
 #include <list>
+#include <vector>
 
 #include "src/include/address_type.h"
 #include "src/include/recover_func.h"
 #include "src/include/raid_type.h"
+#include "src/include/raid_state.h"
+#include "src/include/array_device_state.h"
 
 using namespace std;
 
@@ -68,6 +71,7 @@ public:
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) = 0;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) = 0;
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) = 0;
+    virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) = 0;
     RaidType GetRaidType(void);
 
 protected:

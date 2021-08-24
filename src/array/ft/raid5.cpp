@@ -31,11 +31,11 @@
  */
 
 #include "raid5.h"
-
 #include "src/include/array_config.h"
 #include "src/array_models/dto/partition_physical_size.h"
 #include "src/logger/logger.h"
 #include "src/resource_manager/buffer_pool.h"
+#include "src/helper/query.h"
 
 namespace pos
 {
@@ -93,6 +93,23 @@ Raid5::GetRebuildGroup(FtBlkAddr fba)
     }
 
     return recoveryGroup;
+}
+
+RaidState
+Raid5::GetRaidState(vector<ArrayDeviceState> devs)
+{
+    auto&& abnormalDevs = Enumerable::Where(devs,
+        [](auto d) { return d != ArrayDeviceState::NORMAL; });
+
+    if (abnormalDevs.size() == 0)
+    {
+        return RaidState::NORMAL;
+    }
+    else if (abnormalDevs.size() == 1)
+    {
+        return RaidState::DEGRADED;
+    }
+    return RaidState::FAILURE;
 }
 
 int

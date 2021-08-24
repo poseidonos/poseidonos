@@ -31,6 +31,7 @@
  */
 
 #include "method.h"
+#include "src/helper/query.h"
 
 namespace pos
 {

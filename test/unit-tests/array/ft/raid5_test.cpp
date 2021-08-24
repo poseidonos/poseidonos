@@ -240,4 +240,81 @@ TEST(Raid5, AllocResetParityPools_testIfPoolCreateAndDeletedProperlyWithTwoNuma)
     // Then
     EXPECT_EQ(raid5.GetParityPoolSize(), 0);
 }
+
+TEST(Raid5, GetRaidState_testIfRaid5IsFailure)
+{
+    // Given
+    vector<ArrayDeviceState> devs;
+    devs.push_back(ArrayDeviceState::NORMAL);
+    devs.push_back(ArrayDeviceState::FAULT);
+    devs.push_back(ArrayDeviceState::FAULT);
+    devs.push_back(ArrayDeviceState::NORMAL);
+
+    const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
+        .blksPerChunk = 1234,
+        .chunksPerStripe = 4567,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    Raid5 raid5(&physicalSize, 10 , &mockAffMgr, nullptr);
+
+    // When
+    RaidState actual = raid5.GetRaidState(devs);
+
+    // Then
+    ASSERT_EQ(RaidState::FAILURE, actual);
+}
+
+TEST(Raid5, GetRaidState_testIfRaid5IsDegraded)
+{
+    // Given
+    vector<ArrayDeviceState> devs;
+    devs.push_back(ArrayDeviceState::NORMAL);
+    devs.push_back(ArrayDeviceState::FAULT);
+    devs.push_back(ArrayDeviceState::NORMAL);
+    devs.push_back(ArrayDeviceState::NORMAL);
+
+    const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
+        .blksPerChunk = 1234,
+        .chunksPerStripe = 4567,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    Raid5 raid5(&physicalSize, 10 , &mockAffMgr, nullptr);
+
+    // When
+
+    // When
+    RaidState actual = raid5.GetRaidState(devs);
+
+    // Then
+    ASSERT_EQ(RaidState::DEGRADED, actual);
+}
+
+TEST(Raid5, GetRaidState_testIfRaid5IsNormal)
+{
+    // Given
+    vector<ArrayDeviceState> devs;
+    devs.push_back(ArrayDeviceState::NORMAL);
+    devs.push_back(ArrayDeviceState::NORMAL);
+    devs.push_back(ArrayDeviceState::NORMAL);
+    devs.push_back(ArrayDeviceState::NORMAL);
+
+    const PartitionPhysicalSize physicalSize{
+        .startLba = 0/* not interesting */,
+        .blksPerChunk = 1234,
+        .chunksPerStripe = 4567,
+        .stripesPerSegment = 0/* not interesting */,
+        .totalSegments = 0/* not interesting */};
+    MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
+    Raid5 raid5(&physicalSize, 10 , &mockAffMgr, nullptr);
+
+    // When
+    RaidState actual = raid5.GetRaidState(devs);
+
+    // Then
+    ASSERT_EQ(RaidState::NORMAL, actual);
+}
 } // namespace pos

@@ -34,6 +34,7 @@
 #define RAID1_H_
 
 #include <list>
+#include <vector>
 
 #include "method.h"
 
@@ -51,6 +52,7 @@ public:
     virtual int Translate(FtBlkAddr&, const LogicalBlkAddr&) override;
     virtual int Convert(list<FtWriteEntry>&, const LogicalWriteEntry&) override;
     list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) override;
+    virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
 
 private:
     void _RebuildData(void* dst, void* src, uint32_t size);

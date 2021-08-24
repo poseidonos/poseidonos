@@ -37,27 +37,27 @@
 
 namespace Enumerable
 {
-template<typename S/*Source*/, typename K/*Key*/>
-auto GroupBy(S&& s, K k)
+template<typename S/*Source*/, typename F/*KeySelector*/>
+auto GroupBy(S&& s, F f)
 {
     using type_t = std::decay_t<decltype(*std::begin(s))>;
-    using discriminator_t = decltype(k(*std::begin(s)));
+    using discriminator_t = decltype(f(*std::begin(s)));
     std::map<discriminator_t, std::vector<type_t>> group;
     for (auto&& i : s)
     {
-        group[k(i)].emplace_back(i);
+        group[f(i)].emplace_back(i);
     }
     return group;
 }
 
-template<typename S/*Source*/, typename C/*Comparer*/>
-auto Distinct(S&& s, C c)
+template<typename S/*Source*/, typename F/*Comparer*/>
+auto Distinct(S&& s, F f)
 {
     using type_t = std::decay_t<decltype(*std::begin(s))>;
     std::vector<type_t> result;
     for (auto&& i : s)
     {
-        if (find(result.begin() , result.end(), c(i)) == result.end())
+        if (find(result.begin() , result.end(), f(i)) == result.end())
         {
             result.emplace_back(i);
         }
@@ -80,7 +80,7 @@ auto Where(S&& s, F f)
     return result;
 }
 
-template<typename S/*Source*/, typename F/*Func<bool>*/>
+template<typename S/*Source*/, typename F/*Predicate*/>
 auto First(S&& s, F f)
 {
     using type_t = std::decay_t<decltype(*std::begin(s))>;
@@ -112,6 +112,18 @@ auto Join(OC&& oc, OK ok, IC&& ic, IK ik)
         }
     }
     return r;
+}
+
+template<typename S/*Source*/, typename F/*Selector*/>
+auto Select(S&& s, F f)
+{
+    using type_t = decltype(f(*std::begin(s)));
+    std::vector<type_t> result;
+    for (auto&& i : s)
+    {
+        result.emplace_back(f(i));
+    }
+    return result;
 }
 
 } // namespace Enumerable

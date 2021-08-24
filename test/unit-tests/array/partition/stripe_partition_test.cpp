@@ -318,4 +318,28 @@ TEST(StripePartition, IsByteAccessSupported_testReturnValue)
     EXPECT_FALSE(result);
 }
 
+
+TEST(StripePartition, GetRaidState_testIfExtractDeviceStateListFromArrayDeviceList)
+{
+    // Given
+    PartitionPhysicalSize physicalSize{
+        .startLba = 0,
+        .blksPerChunk = 10,
+        .chunksPerStripe = 4,
+        .stripesPerSegment = 20,
+        .totalSegments = 30};
+    Raid1* raid1 = new Raid1(&physicalSize);
+    vector<ArrayDevice*> devs;
+    devs.push_back(new ArrayDevice(nullptr, ArrayDeviceState::NORMAL));
+    devs.push_back(new ArrayDevice(nullptr, ArrayDeviceState::FAULT));
+    devs.push_back(new ArrayDevice(nullptr, ArrayDeviceState::NORMAL));
+    devs.push_back(new ArrayDevice(nullptr, ArrayDeviceState::NORMAL));
+
+    StripePartition sPartition("mock-array", 0, PartitionType::USER_DATA, physicalSize, devs, raid1);
+    // When
+    RaidState state = sPartition.GetRaidState();
+    // Then
+    ASSERT_EQ(RaidState::DEGRADED, state);
+}
+
 } // namespace pos

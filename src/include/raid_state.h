@@ -30,60 +30,17 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PARTITION_H_
-#define PARTITION_H_
+#pragma once
 
 #include <string>
-#include <vector>
-
-#include "src/include/partition_type.h"
-#include "src/include/address_type.h"
-#include "src/array/device/array_device.h"
-#include "src/array/ft/method.h"
-#include "src/array_models/dto/partition_physical_size.h"
-#include "src/array_models/dto/partition_logical_size.h"
-#include "src/array/service/io_translator/i_translator.h"
 
 using namespace std;
-
 namespace pos
 {
-class Ubio;
-
-class Partition : public ITranslator
+enum RaidState
 {
-public:
-    Partition(
-        string array,
-        uint32_t arrayIndex,
-        PartitionType type,
-        PartitionPhysicalSize physicalSize,
-        vector<ArrayDevice*> devs,
-        Method* method);
-    virtual ~Partition(void);
-
-    int Create(PartitionPhysicalSize size, vector<ArrayDevice*> devs);
-    const PartitionLogicalSize* GetLogicalSize();
-    const PartitionPhysicalSize* GetPhysicalSize();
-    bool IsValidLba(uint64_t lba);
-    int FindDevice(ArrayDevice* dev);
-    Method* GetMethod(void);
-    virtual void Format(void) {}
-    virtual bool IsByteAccessSupported(void) = 0;
-    virtual RaidState GetRaidState(void) { return RaidState::NORMAL; }
-
-protected:
-    bool _IsValidAddress(const LogicalBlkAddr& lsa);
-    bool _IsValidEntry(const LogicalWriteEntry& entry);
-    string arrayName_;
-    uint32_t arrayIndex_;
-    PartitionType type_;
-    PartitionLogicalSize logicalSize_;
-    PartitionPhysicalSize physicalSize_;
-    vector<ArrayDevice*> devs_;
-    Method* method_ = nullptr;
-    uint64_t lastLba_ = 0;
+    NORMAL = 0,
+    DEGRADED = 1,
+    FAILURE = 2
 };
-
 } // namespace pos
-#endif // PARTITION_H_

@@ -122,4 +122,73 @@ TEST(Raid1, GetRebuildGroup_testIfRebuildGroupIsReturnedWhenChunkIndexIsLargerTh
     ASSERT_EQ(expected_offset, front.offset);
 }
 
+TEST(Raid1, GetRaidState_testIfRaid1IsFailure)
+{
+    // Given
+    const PartitionPhysicalSize physicalSize{
+        .startLba = 0,
+        .blksPerChunk = 10,
+        .chunksPerStripe = 4,
+        .stripesPerSegment = 20,
+        .totalSegments = 100};
+    Raid1 raid1(&physicalSize);
+    vector<ArrayDeviceState> devs;
+    devs.push_back(ArrayDeviceState::NORMAL);
+    devs.push_back(ArrayDeviceState::FAULT);
+    devs.push_back(ArrayDeviceState::NORMAL);
+    devs.push_back(ArrayDeviceState::FAULT);
+
+    // When
+    RaidState actual = raid1.GetRaidState(devs);
+
+    // Then
+    ASSERT_EQ(RaidState::FAILURE, actual);
+}
+
+TEST(Raid1, GetRaidState_testIfRaid1IsDegraded)
+{
+    // Given
+    const PartitionPhysicalSize physicalSize{
+        .startLba = 0,
+        .blksPerChunk = 10,
+        .chunksPerStripe = 4,
+        .stripesPerSegment = 20,
+        .totalSegments = 100};
+    Raid1 raid1(&physicalSize);
+    vector<ArrayDeviceState> devs;
+    // note that both the original and mirror devices should be fault, and raid is failure
+    devs.push_back(ArrayDeviceState::NORMAL);
+    devs.push_back(ArrayDeviceState::FAULT);
+    devs.push_back(ArrayDeviceState::FAULT);
+    devs.push_back(ArrayDeviceState::NORMAL);
+
+    // When
+    RaidState actual = raid1.GetRaidState(devs);
+
+    // Then
+    ASSERT_EQ(RaidState::DEGRADED, actual);
+}
+
+TEST(Raid1, GetRaidState_testIfRaid1IsNormal)
+{
+    // Given
+    const PartitionPhysicalSize physicalSize{
+        .startLba = 0,
+        .blksPerChunk = 10,
+        .chunksPerStripe = 4,
+        .stripesPerSegment = 20,
+        .totalSegments = 100};
+    Raid1 raid1(&physicalSize);
+    vector<ArrayDeviceState> devs;
+    devs.push_back(ArrayDeviceState::NORMAL);
+    devs.push_back(ArrayDeviceState::NORMAL);
+    devs.push_back(ArrayDeviceState::NORMAL);
+    devs.push_back(ArrayDeviceState::NORMAL);
+
+    // When
+    RaidState actual = raid1.GetRaidState(devs);
+
+    // Then
+    ASSERT_EQ(RaidState::NORMAL, actual);
+}
 } // namespace pos

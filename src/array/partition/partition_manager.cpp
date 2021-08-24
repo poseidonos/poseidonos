@@ -33,6 +33,7 @@
 #include "partition_manager.h"
 
 #include <functional>
+#include <algorithm>
 
 #include "nvm_partition.h"
 #include "src/array/array_interface.h"
@@ -336,6 +337,15 @@ PartitionManager::FormatMetaPartition(vector<ArrayDevice*> data, ArrayInterface*
     auto partition = partitions_[PartitionType::META_SSD];
     partition->Format();
     DeleteAll(intf);
+}
+
+RaidState
+PartitionManager::GetRaidState(void)
+{
+    RaidState metaRs = partitions_[PartitionType::META_SSD]->GetRaidState();
+    RaidState dataRs = partitions_[PartitionType::USER_DATA]->GetRaidState();
+
+    return max(metaRs, dataRs);
 }
 
 } // namespace pos
