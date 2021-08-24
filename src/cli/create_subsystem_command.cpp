@@ -70,41 +70,47 @@ CreateSubsystemCommand::_CreateSubsystem(json& doc)
 {
     SpdkRpcClient rpcClient;
     NvmfTarget target;
+    subnqn = doc["param"]["name"].get<string>();
 
-    std::string serialNumber = DEFAULT_SERIAL_NUMBER;
-    std::string modelNumber = DEFAULT_MODEL_NUMBER;
-    uint32_t maxNamespaces = DEFAULT_MAX_NAMESPACES;
-    bool allowAnyHost = false;
-    bool anaReporting = false;
-
-    if (nullptr != target.FindSubsystem(doc["param"]["name"]))
+    if ("CREATESUBSYSTEMAUTO" == doc["command"].get<string>())
     {
-        errorMessage = "Failed to create subsystem. Suggested subnqn name already exists. ";
-        return FAIL;
+        if (nullptr != target.FindSubsystem(subnqn))
+        {
+            return SUCCESS;
+        }
+        _SetDefaultOptions(doc);
     }
-    if (doc["param"].contains("sn"))
+    else if ("CREATESUBSYSTEM" == doc["command"].get<string>())
     {
-        serialNumber = doc["param"]["sn"].get<string>();
-    }
-    if (doc["param"].contains("mn"))
-    {
-        modelNumber = doc["param"]["mn"].get<string>();
-    }
-    if (doc["param"].contains("max_namespaces"))
-    {
-        maxNamespaces = doc["param"]["max_namespaces"].get<uint32_t>();
-    }
-    if (doc["param"].contains("allow_any_host"))
-    {
-        allowAnyHost = doc["param"]["allow_any_host"].get<bool>();
-    }
-    if (doc["param"].contains("ana_reporting"))
-    {
-        anaReporting = doc["param"]["ana_reporting"].get<bool>();
+        if (nullptr != target.FindSubsystem(subnqn))
+        {
+            errorMessage = "Failed to create subsystem. Suggested subnqn name already exists. ";
+            return FAIL;
+        }
+        if (doc["param"].contains("sn"))
+        {
+            serialNumber = doc["param"]["sn"].get<string>();
+        }
+        if (doc["param"].contains("mn"))
+        {
+            modelNumber = doc["param"]["mn"].get<string>();
+        }
+        if (doc["param"].contains("max_namespaces"))
+        {
+            maxNamespaces = doc["param"]["max_namespaces"].get<uint32_t>();
+        }
+        if (doc["param"].contains("allow_any_host"))
+        {
+            allowAnyHost = doc["param"]["allow_any_host"].get<bool>();
+        }
+        if (doc["param"].contains("ana_reporting"))
+        {
+            anaReporting = doc["param"]["ana_reporting"].get<bool>();
+        }
     }
 
     auto ret = rpcClient.SubsystemCreate(
-        doc["param"]["name"].get<string>(),
+        subnqn,
         serialNumber,
         modelNumber,
         maxNamespaces,
@@ -115,5 +121,21 @@ CreateSubsystemCommand::_CreateSubsystem(json& doc)
         errorMessage = "Failed to create subsystem. " + ret.second;
     }
     return ret.first;
+}
+
+void
+CreateSubsystemCommand::_SetDefaultOptions(json& doc)
+{
+    string key("subsystem");
+    string number;
+
+    size_t found = subnqn.rfind(key);
+    if (found != string::npos)
+    {
+        size_t index = found + key.length();
+        number = subnqn.substr(index);
+        serialNumber += number;
+    }
+    allowAnyHost = true;
 }
 } // namespace pos_cli

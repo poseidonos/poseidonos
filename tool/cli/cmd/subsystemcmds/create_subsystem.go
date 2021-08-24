@@ -18,10 +18,10 @@ var CreateSubsystemCmd = &cobra.Command{
 	Long: `Create an NVMe-oF subsystem to PoseidonOS.
 
 Syntax:
-	poseidonos-cli subsystem create (--subnqn | -q) SubsystemNQN [--serial_num SerialNumber] [--model_num ModelNumber] [(--max_namespaces | -m) MaxNamespace] [(--allow_any_host | -o)] [(--ana_reporting | -r)]
+	poseidonos-cli subsystem create (--subnqn | -q) SubsystemNQN [--serial-number SerialNumber] [--model-number ModelNumber] [(--max-namespaces | -m) MaxNamespace] [(--allow-any-host | -o)] [(--ana-reporting | -r)]
 
 Example:
-	poseidonos-cli subsystem create --subnqn nqn.2019-04.ibof:subsystem1 --serial_num IBOF00000000000001 --model_num IBOF_VOLUME_EXTENSION -m 256 -o
+	poseidonos-cli subsystem create --subnqn nqn.2019-04.ibof:subsystem1 --serial-number IBOF00000000000001 --model-number IBOF_VOLUME_EXTENSION -m 256 -o
     `,
 	Run: func(cmd *cobra.Command, args []string) {
 

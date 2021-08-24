@@ -47,9 +47,16 @@ public:
 
 private:
     int _CreateSubsystem(json& doc);
-    const char* DEFAULT_SERIAL_NUMBER = "POS00000000000000";
+    void _SetDefaultOptions(json& doc);
+    const char* DEFAULT_SERIAL_NUMBER = "POS0000000000000";
     const char* DEFAULT_MODEL_NUMBER = "POS_VOLUME_EXTENTION";
     uint32_t DEFAULT_MAX_NAMESPACES = 256;
+    string subnqn = "";
+    std::string serialNumber = DEFAULT_SERIAL_NUMBER;
+    std::string modelNumber = DEFAULT_MODEL_NUMBER;
+    uint32_t maxNamespaces = DEFAULT_MAX_NAMESPACES;
+    bool allowAnyHost = false;
+    bool anaReporting = false;
     string errorMessage;
 };
 }; // namespace pos_cli

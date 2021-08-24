@@ -101,6 +101,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["ARRAYINFO"] = new ArrayInfoCommand();
     cmdDictionary["RESETMBR"] = new ResetMbrCommand();
     cmdDictionary["CREATESUBSYSTEM"] = new CreateSubsystemCommand();
+    cmdDictionary["CREATESUBSYSTEMAUTO"] = new CreateSubsystemCommand();
     cmdDictionary["DELETESUBSYSTEM"] = new DeleteSubsystemCommand();
     cmdDictionary["LISTSUBSYSTEM"] = new ListSubsystemCommand();
     cmdDictionary["SUBSYSTEMINFO"] = new ListSubsystemCommand();

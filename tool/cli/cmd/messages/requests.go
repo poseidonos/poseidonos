@@ -144,6 +144,10 @@ type CreateSubsystemParam struct {
 	ANAREPORTING  bool   `json:"ana_reporting,omitempty"`
 }
 
+type CreateSubsystemAutoParam struct {
+	SUBNQN		string	`json:"name"`
+}
+
 type DeleteSubsystemParam struct {
 	SUBNQN string `json:"name"`
 }

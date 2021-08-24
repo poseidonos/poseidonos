@@ -99,31 +99,41 @@ NvmfVolumePos::_NamespaceDetachedAllHandler(void* cbArg, int status)
         status == NvmfCallbackStatus::PARTIAL_FAILED)
     {
         volumeListInfo volsInfo = *(static_cast<volumeListInfo*>(cbArg));
-        string subnqn = volsInfo.subnqn;
         vector<int> volList = volsInfo.vols;
+        string subnqn = volsInfo.subnqn;
 
-        for (auto volId : volList)
-        {
-            string bdevName = target->GetBdevName(volId, volsInfo.arrayName);
-            struct spdk_nvmf_subsystem* subsystem = target->FindSubsystem(subnqn);
-            struct spdk_nvmf_ns* ns = target->GetNamespace(subsystem, bdevName);
-            if (ns != nullptr)
-            {
-                SPDK_NOTICELOG("Requested volume(%s) is still attached\n", bdevName.c_str());
-                failedVolCount++;
-                continue;
-            }
-            volumeDetachedCnt++;
-            spdk_bdev_pos_unregister_io_handler(bdevName.c_str());
-            reset_pos_volume_info(bdevName.c_str());
-        }
-        if (failedVolCount > 0)
+        struct spdk_nvmf_subsystem* subsystem = target->FindSubsystem(subnqn);
+        if (nullptr == subsystem)
         {
             detachFailed = true;
-            SPDK_ERRLOG("Failed to Detach All Volumes in Subsystem(%s)\n",
-                subnqn.c_str());
-            SPDK_NOTICELOG("Only %d out of %lu got detached. Retry Volume Detach\n",
-                failedVolCount, volList.size());
+            POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_FIND_SUBSYSTEM;
+            POS_TRACE_WARN(static_cast<int>(eventId), PosEventId::GetString(eventId),
+                "Requested volumes may have been detached since subsystem does not exist.");
+        }
+        else
+        {
+            for (auto volId : volList)
+            {
+                string bdevName = target->GetBdevName(volId, volsInfo.arrayName);
+                struct spdk_nvmf_ns* ns = target->GetNamespace(subsystem, bdevName);
+                if (ns != nullptr)
+                {
+                    SPDK_NOTICELOG("Requested volume(%s) is still attached\n", bdevName.c_str());
+                    failedVolCount++;
+                    continue;
+                }
+                volumeDetachedCnt++;
+                spdk_bdev_pos_unregister_io_handler(bdevName.c_str());
+                reset_pos_volume_info(bdevName.c_str());
+            }
+            if (failedVolCount > 0)
+            {
+                detachFailed = true;
+                SPDK_ERRLOG("Failed to Detach All Volumes in Subsystem(%s)\n",
+                    subnqn.c_str());
+                SPDK_NOTICELOG("Only %d out of %lu got detached. Retry Volume Detach\n",
+                    failedVolCount, volList.size());
+            }
         }
     }
     else

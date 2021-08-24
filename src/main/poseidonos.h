@@ -31,8 +31,9 @@
  */
 
 #pragma once
+
+#include <cstdint>
 #include "src/debug/debug_info.h"
-#include "src/network/nvmf_volume_pos.h"
 
 namespace pos
 {

@@ -38,8 +38,9 @@
 
 #include <string>
 
-#include "src/include/pos_event_id.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
+#include "src/spdk_wrapper/spdk_thread_caller.h"
 
 using namespace pos;
 using namespace std;
@@ -191,20 +192,29 @@ SpdkRpcClient::SubsystemList(void)
 }
 
 pair<int, std::string>
-SpdkRpcClient::TransportCreate(std::string trtype, int bufCacheSize, int numSharedBuf)
+SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf)
 {
     const int SUCCESS = 0;
     const string method = "nvmf_create_transport";
 
     Json::Value param;
     param["trtype"] = trtype;
-    param["buf_cache_size"] = bufCacheSize;
-    if (numSharedBuf)
+
+    if ("tcp" == trtype)
     {
+        uint32_t coreCount = SpdkThreadCallerSingleton::Instance()->SpdkEnvGetCoreCount();
+        uint32_t minSharedBuffers = coreCount * bufCacheSize;
+        if (minSharedBuffers > numSharedBuf)
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::IONVMF_TRANSPORT_NUM_SHARED_BUFFER_CHANGED;
+            POS_TRACE_INFO(static_cast<int>(eventId), PosEventId::GetString(eventId), numSharedBuf, minSharedBuffers);
+            numSharedBuf = minSharedBuffers;
+        }
+        param["buf_cache_size"] = bufCacheSize;
         param["num_shared_buffers"] = numSharedBuf;
     }
 
-    Json::Value ret;
     try
     {
         client->CallMethod(method, param);

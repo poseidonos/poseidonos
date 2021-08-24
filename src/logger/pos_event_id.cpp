@@ -70,6 +70,9 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::IONVMF_FAIL_TO_CONVERT_UUID_INTO_STRING, "Fail to convert uuid into string"},
             {POS_EVENT_ID::IONVMF_FAIL_TO_FIND_SUBSYSTEM, "Subsystem is not found"},
             {POS_EVENT_ID::IONVMF_BDEV_ALREADY_EXIST, "Requested bdev{} already exist"},
+            {POS_EVENT_ID::IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG, "Fail to read transport config. Will use default setting.{} "},
+            {POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_TRANSPORT, "Fail to create transport : {}"},
+            {POS_EVENT_ID::IONVMF_TRANSPORT_NUM_SHARED_BUFFER_CHANGED, "Transport's num_shared_buffer size has changed from {} to {} due to reactor core number of system"},
 };
 
 PosEventId::PosEventIdEntry

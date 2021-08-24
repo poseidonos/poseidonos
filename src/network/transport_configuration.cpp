@@ -1,0 +1,115 @@
+/*
+ *   BSD LICENSE
+ *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without
+ *   modification, are permitted provided that the following conditions
+ *   are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided with the
+ *       distribution.
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
+ *
+ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+#include "src/network/transport_configuration.h"
+
+#include <algorithm>
+#include <string>
+
+#include "src/helper/spdk_rpc_client.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/logger/logger.h"
+
+namespace pos
+{
+TransportConfiguration::TransportConfiguration(ConfigManager* configManager)
+: configManager(configManager),
+  trtype(DEFAULT_TRANSPORT_TYPE),
+  bufCacheSize(DEFAULT_BUF_CACHE_SIZE),
+  numSharedBuf(DEFAULT_NUM_SHARED_BUFFER)
+{
+}
+
+TransportConfiguration::~TransportConfiguration(void)
+{
+}
+
+void
+TransportConfiguration::ReadConfig(void)
+{
+    int ret = configManager->GetValue("transport", "type", &trtype, ConfigType::CONFIG_TYPE_STRING);
+    if ((int)POS_EVENT_ID::SUCCESS == ret)
+    {
+        ret = configManager->GetValue("transport", "buf_cache_size", &bufCacheSize, ConfigType::CONFIG_TYPE_UINT32);
+        if ((int)POS_EVENT_ID::SUCCESS != ret)
+        {
+            POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG;
+            POS_TRACE_WARN(static_cast<uint32_t>(eventId), PosEventId::GetString(eventId), "Default buf_cache_size: {}", bufCacheSize);
+        }
+        ret = configManager->GetValue("transport", "num_shared_buffer", &numSharedBuf, ConfigType::CONFIG_TYPE_UINT32);
+        if ((int)POS_EVENT_ID::SUCCESS != ret)
+        {
+            POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG;
+            POS_TRACE_WARN(static_cast<uint32_t>(eventId), PosEventId::GetString(eventId),
+                "Default num_shared_buffer: {} (May change according to the env.)", numSharedBuf);
+        }
+    }
+    else
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG;
+        POS_TRACE_WARN(static_cast<uint32_t>(eventId), PosEventId::GetString(eventId), "Default transport type: {}", trtype);
+    }
+}
+
+void
+TransportConfiguration::CreateTransport(void)
+{
+    if (false == _IsEnabled())
+    {
+        return;
+    }
+
+    ReadConfig();
+
+    SpdkRpcClient rpcClient;
+    std::transform(trtype.begin(), trtype.end(), trtype.begin(), ::tolower);
+    auto result = rpcClient.TransportCreate(trtype, bufCacheSize, numSharedBuf);
+    if (result.first != 0)
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_TRANSPORT;
+        POS_TRACE_ERROR(static_cast<uint32_t>(eventId), PosEventId::GetString(eventId), result.second);
+    }
+}
+
+bool
+TransportConfiguration::_IsEnabled(void)
+{
+    bool enabled = false;
+    int ret = configManager->GetValue("transport", "enable", &enabled, ConfigType::CONFIG_TYPE_BOOL);
+    if ((int)POS_EVENT_ID::SUCCESS != ret)
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG;
+        POS_TRACE_WARN(static_cast<uint32_t>(eventId), PosEventId::GetString(eventId), "Need to create tranport manually.");
+        return false;
+    }
+    return enabled;
+}
+} // namespace pos

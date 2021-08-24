@@ -30,37 +30,30 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPDK_RPC_CLIENT_H_
-#define SPDK_RPC_CLIENT_H_
-
-#include <jsonrpccpp/client.h>
-
+#pragma once
 #include <string>
-#include <utility>
+
+#include "src/master_context/config_manager.h"
 
 namespace pos
 {
-class SpdkRpcClient
+class TransportConfiguration
 {
 public:
-    SpdkRpcClient(void);
-    virtual ~SpdkRpcClient(void);
-    std::pair<int, std::string> BdevMallocCreate(
-        std::string name, uint32_t numBlocks, uint32_t blockSize, uint32_t numa);
-    std::pair<int, std::string> SubsystemCreate(std::string subnqn, std::string sn, std::string mn, uint32_t max_namespaces, bool allow_any_host, bool ana_reporting);
-    std::pair<int, std::string> SubsystemDelete(std::string subnqn);
-    std::pair<int, std::string> SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
-    Json::Value SubsystemList(void);
-    std::pair<int, std::string> TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf);
+    TransportConfiguration(ConfigManager* configManager = ConfigManagerSingleton::Instance());
+    virtual ~TransportConfiguration(void);
+
+    virtual void ReadConfig(void);
+    virtual void CreateTransport(void);
 
 private:
-    void _SetClient(void);
-
-    jsonrpc::Client* client;
-    jsonrpc::IClientConnector* connector;
-    static const int SUCCESS = 0;
+    bool _IsEnabled(void);
+    ConfigManager* configManager;
+    std::string trtype = "";
+    uint32_t bufCacheSize = 0;
+    uint32_t numSharedBuf = 0;
+    uint32_t const DEFAULT_NUM_SHARED_BUFFER = 4096;
+    uint32_t const DEFAULT_BUF_CACHE_SIZE = 64;
+    std::string const DEFAULT_TRANSPORT_TYPE = "tcp";
 };
-
 } // namespace pos
-
-#endif // SPDK_RPC_CLIENT_H_

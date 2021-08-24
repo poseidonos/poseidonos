@@ -32,6 +32,9 @@
 
 #include "src/cli/create_transport_command.h"
 
+#include <algorithm>
+#include <string>
+
 #include "src/cli/cli_event_code.h"
 #include "src/helper/spdk_rpc_client.h"
 
@@ -68,8 +71,9 @@ int
 CreateTransportCommand::_CreateTransport(json& doc)
 {
     SpdkRpcClient rpcClient;
-    int bufCacheSize = DEFAULT_BUF_CACHE_SIZE;
-    int numSharedBuf = DEFAULT_NUM_SHARED_BUF;
+    string trtype = doc["param"]["transport_type"].get<string>();
+
+    _SetDefaultConfig(trtype);
 
     if (doc["param"].contains("buf_cache_size"))
     {
@@ -81,7 +85,7 @@ CreateTransportCommand::_CreateTransport(json& doc)
     }
 
     auto ret = rpcClient.TransportCreate(
-        doc["param"]["transport_type"],
+        trtype,
         bufCacheSize,
         numSharedBuf);
     if (ret.first != SUCCESS)
@@ -89,5 +93,16 @@ CreateTransportCommand::_CreateTransport(json& doc)
         errorMessage = "Failed to create transport. " + ret.second;
     }
     return ret.first;
+}
+
+void
+CreateTransportCommand::_SetDefaultConfig(string trtype)
+{
+    std::transform(trtype.begin(), trtype.end(), trtype.begin(), ::tolower);
+    if ("tcp" == trtype)
+    {
+        bufCacheSize = DEFAULT_BUF_CACHE_SIZE;
+        numSharedBuf = DEFAULT_NUM_SHARED_BUF;
+    }
 }
 } // namespace pos_cli

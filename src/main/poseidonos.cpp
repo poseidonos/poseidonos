@@ -61,6 +61,8 @@
 #ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_mgr.h"
 #endif
+#include "src/network/transport_configuration.h"
+#include "src/spdk_wrapper/spdk_thread_caller.h"
 
 namespace pos
 {
@@ -118,6 +120,7 @@ Poseidonos::Terminate(void)
     }
     ArrayManagerSingleton::ResetInstance();
     EventFrameworkApiSingleton::ResetInstance();
+    SpdkThreadCallerSingleton::ResetInstance();
     air_deactivate();
     air_finalize();
 }
@@ -147,6 +150,8 @@ void
 Poseidonos::_InitSpdk(int argc, char** argv)
 {
     pos::SpdkSingleton::Instance()->Init(argc, argv);
+    TransportConfiguration transportConfig;
+    transportConfig.CreateTransport();
 }
 
 void

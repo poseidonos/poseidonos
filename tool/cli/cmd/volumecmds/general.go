@@ -27,4 +27,5 @@ func init() {
 	VolumeCmd.AddCommand(MountVolumeCmd)
 	VolumeCmd.AddCommand(UnmountVolumeCmd)
 	VolumeCmd.AddCommand(RenameVolumeCmd)
+	VolumeCmd.AddCommand(MountVolumeWithSubsystemCmd)
 }

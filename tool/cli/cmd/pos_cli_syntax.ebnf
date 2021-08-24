@@ -37,10 +37,11 @@ CreateArrayCmd = "create" ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpac
 DeleteArrayCmd = "delete" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"] .
 AutoCreateArrayCmd = "autocreate" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ("--num-buffer" | "-b") WhiteSpace Number WhiteSpace ("--num-data-devs" | "-d") WhiteSpace Number WhiteSpace [("--num-spare" | "-s") WhiteSpace Number] WhiteSpace ["--raid" WhiteSpace RaidType] .
 
-VolumeCmd = "volume" WhiteSpace (VolumeCreateCmd | VolumeDeleteCmd | VolumeMountCmd | VolumeUnmountCmd | VolumeListCmd | VolumeSetPropertyCmd | VolumeRenameCmd) .
+VolumeCmd = "volume" WhiteSpace (VolumeCreateCmd | VolumeDeleteCmd | VolumeMountCmd | VolumeMountWithSubsystemCmd | VolumeUnmountCmd | VolumeListCmd | VolumeSetPropertyCmd | VolumeRenameCmd) .
 VolumeCreateCmd = "create" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace "--size" WhiteSpace VolumeSize [WhiteSpace "--maxiops" WhiteSpace IOPS] [WhiteSpace "--maxbw" WhiteSpace Bandwidth] .
 VolumeDeleteCmd = "delete" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"] .
 VolumeMountCmd = "mount" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName [WhiteSpace "--subnqn" WhiteSpace TargetNVMSubsystemNVMeQualifiedName] .
+VolumeMountWithSubsystemCmd = "mount" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--subnqn" | "-q") WhiteSpace SubsystemNQN WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ("--trtype" | "-t") WhiteSpace TransportType WhiteSpace ("--traddr" | "-a") WhiteSpace TargetAddress WhiteSpace ("--trsvcid" | "-p") WhiteSpace TransportServiceId .
 VolumeUnmountCmd = "unmount" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"] .
 VolumeListCmd = "list" [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] .
 VolumeRenameCmd = "rename" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--new-volume-name" | "-n") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .

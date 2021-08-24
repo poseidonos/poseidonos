@@ -472,10 +472,6 @@ NvmfTarget::FindSubsystem(const string& subnqn)
 {
     struct spdk_nvmf_subsystem* subsystem =
         spdkCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, subnqn.c_str());
-    if (nullptr == subsystem)
-    {
-        SPDK_ERRLOG("fail to find subsystem(NQN=%s): it does not exist\n", subnqn.c_str());
-    }
     return subsystem;
 }
 
