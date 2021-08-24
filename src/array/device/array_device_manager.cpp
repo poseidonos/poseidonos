@@ -61,7 +61,7 @@ ArrayDeviceManager::~ArrayDeviceManager(void)
 }
 
 int
-ArrayDeviceManager::Import(DeviceSet<string> nameSet)
+ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
 {
     int ret = 0;
     ArrayDeviceList* devs = new ArrayDeviceList();
@@ -151,7 +151,7 @@ ArrayDeviceManager::Import(DeviceSet<string> nameSet)
 }
 
 int
-ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet, uint32_t& missingCnt, uint32_t& brokenCnt)
+ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
 {
     int ret = 0;
     ArrayDeviceList* devs = new ArrayDeviceList();
@@ -177,19 +177,16 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet, uint32_t& missingCnt, 
         if (ArrayDeviceState::FAULT == meta.state)
         {
             dev = new ArrayDevice(nullptr, ArrayDeviceState::FAULT);
-            brokenCnt++;
         }
         else
         {
             UblockSharedPtr uBlock = sysDevMgr_->GetDev(uid);
             if (uBlock == nullptr)
             {
-                missingCnt++;
                 meta.state = ArrayDeviceState::FAULT;
             }
             else if (ArrayDeviceState::REBUILD == meta.state)
             {
-                brokenCnt++;
                 POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEVICE_REBUILD_STATE,
                     "Rebuilding device found {}", meta.uid);
             }

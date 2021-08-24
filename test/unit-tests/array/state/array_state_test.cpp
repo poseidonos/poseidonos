@@ -57,7 +57,7 @@ TEST(ArrayState, ArrayState_testIfSelfIsSubscribed)
     // Then
 }
 
-TEST(ArrayState, SetLoad_testIfBecomesExistNormalWhenThereIsZeroMissingBrokenDevice)
+TEST(ArrayState, SetLoad_testIfBecomesExistNormalWhenRaidStateIsNormal)
 {
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
@@ -67,14 +67,15 @@ TEST(ArrayState, SetLoad_testIfBecomesExistNormalWhenThereIsZeroMissingBrokenDev
     EXPECT_CALL(mockIStateControl, Invoke).Times(0);
 
     // When
-    arrayState.SetLoad(0, 0);
+    RaidState rs = RaidState::NORMAL;
+    arrayState.SetLoad(rs);
 
     // Then
     ArrayStateType expected(ArrayStateEnum::EXIST_NORMAL);
     ASSERT_EQ(expected, arrayState.GetState());
 }
 
-TEST(ArrayState, SetLoad_testIfBecomesExistDegradedFromNormalWhenThereIsOneBrokenDevice)
+TEST(ArrayState, SetLoad_testIfBecomesExistDegradedFromNormalWhenRaidStateIsDegraded)
 {
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
@@ -82,14 +83,15 @@ TEST(ArrayState, SetLoad_testIfBecomesExistDegradedFromNormalWhenThereIsOneBroke
     arrayState.SetState(ArrayStateEnum::TRY_MOUNT);
 
     // When
-    arrayState.SetLoad(0, 1);
+    RaidState rs = RaidState::DEGRADED;
+    arrayState.SetLoad(rs);
 
     // Then
     ArrayStateType expected(ArrayStateEnum::EXIST_DEGRADED);
     ASSERT_EQ(expected, arrayState.GetState());
 }
 
-TEST(ArrayState, SetLoad_testIfBecomesBrokenFromNormalWhenThereIsOneMissingAndOneBrokenDevice)
+TEST(ArrayState, SetLoad_testIfBecomesBrokenFromNormalWhenRaidStateIsFailure)
 {
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
@@ -104,7 +106,8 @@ TEST(ArrayState, SetLoad_testIfBecomesBrokenFromNormalWhenThereIsOneMissingAndOn
     });
 
     // When
-    arrayState.SetLoad(1, 1);
+    RaidState rs = RaidState::FAILURE;
+    arrayState.SetLoad(rs);
 
     // Then
     ArrayStateType expected(ArrayStateEnum::BROKEN);
@@ -542,32 +545,6 @@ TEST(ArrayState, IsRecoverable_testIfOnlyTwoStatesAreRecoverable)
         else
         {
             ASSERT_FALSE(actual);
-        }
-    }
-}
-
-TEST(ArrayState, DataRemoved_testIfStateChangesProperly)
-{
-    // Given
-    NiceMock<MockIStateControl> mockIStateControl;
-    ArrayState arrayState(&mockIStateControl);
-
-    for (auto const& entry : STATE_TRANSITION_FOR_DATA_REMOVED)
-    {
-        // When
-        arrayState.SetState(entry.first);
-        arrayState.DataRemoved(false);
-
-        // Then
-        ASSERT_EQ(entry.second, arrayState.GetState());
-        if (entry.first == ArrayStateEnum::REBUILD)
-        {
-            // When isRebuildlingDevice is true
-            arrayState.SetState(entry.first);
-            arrayState.DataRemoved(true);
-
-            // Then
-            ASSERT_EQ(ArrayStateEnum::DEGRADED, arrayState.GetState());
         }
     }
 }

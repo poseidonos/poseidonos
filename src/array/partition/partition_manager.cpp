@@ -331,12 +331,17 @@ PartitionManager::_GetBaseline(const vector<ArrayDevice*>& devs)
 }
 
 void
-PartitionManager::FormatMetaPartition(vector<ArrayDevice*> data, ArrayInterface* intf, uint32_t arrayIndex)
+PartitionManager::FormatMetaPartition(void)
 {
-    _CreateMetaSsd(data, intf, arrayIndex);
     auto partition = partitions_[PartitionType::META_SSD];
-    partition->Format();
-    DeleteAll(intf);
+    if (partition != nullptr)
+    {
+        partition->Format();
+    }
+    else
+    {
+        POS_TRACE_ERROR(EID(ARRAY_DEBUG_MSG), "Failed to format meta-partition");
+    }
 }
 
 RaidState
@@ -344,8 +349,9 @@ PartitionManager::GetRaidState(void)
 {
     RaidState metaRs = partitions_[PartitionType::META_SSD]->GetRaidState();
     RaidState dataRs = partitions_[PartitionType::USER_DATA]->GetRaidState();
-
-    return max(metaRs, dataRs);
+    RaidState res = max(metaRs, dataRs);
+    POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "Meta RS: {} , Data RS: {}, Res: {}", metaRs, dataRs, res);
+    return res;
 }
 
 } // namespace pos

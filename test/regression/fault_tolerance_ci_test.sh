@@ -89,7 +89,7 @@ max_io_boundary_byte=$((${test_volume_size_byte} - ${max_io_range_byte}))
 print_test_configuration()
 {
     echo "------------------------------------------"
-    echo "[Fault-Tolerance Test Information]"
+    echo "[Fault-Tolerance CI Test Information]"
     echo "> Test environment:"
     echo "  - Target ${trtype} IP:  ${target_fabric_ip}"
     echo "  - Port:                 ${port}"

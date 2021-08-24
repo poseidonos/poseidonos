@@ -227,11 +227,7 @@ ArrayManager::DeviceDetached(UblockSharedPtr dev)
 void
 ArrayManager::DeviceAttached(UblockSharedPtr dev)
 {
-    ArrayComponents* array = _FindArrayWithDevSN(dev->GetSN());
-    if (array != nullptr)
-    {
-        array->GetArray()->AttachDevice(dev);
-    }
+    // do nothing. reserved for future.
 }
 
 int

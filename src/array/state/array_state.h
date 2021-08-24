@@ -34,6 +34,7 @@
 #define ARRAY_STATE_H_
 
 #include "src/include/array_state_type.h"
+#include "src/include/raid_state.h"
 #include "src/state/interface/i_state_observer.h"
 #include "src/state/interface/i_state_control.h"
 
@@ -50,7 +51,7 @@ public:
     virtual ~ArrayState(void);
 
     virtual void SetState(ArrayStateEnum nextState);
-    virtual void SetLoad(uint32_t missingCnt, uint32_t brokenCnt);
+    virtual void SetLoad(RaidState rs);
     virtual void SetCreate(void);
     virtual void SetDelete(void);
     virtual bool SetRebuild(void);
@@ -68,7 +69,7 @@ public:
     virtual int IsDeletable(void);
     virtual bool IsRebuildable(void);
     virtual bool IsRecoverable(void);
-    virtual void DataRemoved(bool isRebuildingDevice);
+    virtual void RaidStateUpdated(RaidState rs);
     virtual bool Exists(void);
     virtual bool IsMounted(void);
     virtual bool IsBroken(void);
@@ -90,7 +91,6 @@ private:
     std::mutex mtx;
     std::condition_variable cv;
 
-    bool needForceMount = false;
     ArrayStateType state = ArrayStateEnum::NOT_EXIST;
 };
 

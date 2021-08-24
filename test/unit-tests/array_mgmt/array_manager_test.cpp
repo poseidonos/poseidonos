@@ -386,28 +386,6 @@ TEST(ArrayManager, DeviceDetached_testIfZeroIsReturnedWhenNoArrayFoundForGivenSe
     ASSERT_EQ(0, actual);
 }
 
-TEST(ArrayManager, DeviceAttached_testIfTargetArrayCalls)
-{
-    // Given
-    string existingArray = "array1";
-    auto mockArrayComp = BuildMockArrayComponents(existingArray);
-    auto mockAbrMgr = BuildMockAbrManager();
-    auto mockArray = BuildMockArray(existingArray);
-    EXPECT_CALL(*mockAbrMgr, FindArrayWithDeviceSN).WillOnce(Return(existingArray));
-    EXPECT_CALL(*mockArrayComp, GetArray).WillOnce(Return(mockArray.get()));
-    EXPECT_CALL(*mockArray, AttachDevice).Times(1);
-
-    auto mockUBlockSharedPtr = BuildMockUBlockDevice("mock-ublock", "sn");
-    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
-    auto arrayMap = BuildArrayComponentsMap(existingArray, mockArrayComp.get());
-    arrayMgr->SetArrayComponentMap(arrayMap);
-
-    // When
-    arrayMgr->DeviceAttached(mockUBlockSharedPtr);
-
-    // Then
-}
-
 TEST(ArrayManager, PrepareRebuild_testIfTargetArrayCallsPrepareRebuild)
 {
     // Given

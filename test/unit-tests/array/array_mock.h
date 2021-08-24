@@ -20,7 +20,6 @@ public:
     MOCK_METHOD(int, Delete, (), (override));
     MOCK_METHOD(int, AddSpare, (string devName), (override));
     MOCK_METHOD(int, RemoveSpare, (string devName), (override));
-    MOCK_METHOD(void, AttachDevice, (UblockSharedPtr uBlock), (override));
     MOCK_METHOD(int, DetachDevice, (UblockSharedPtr uBlock), (override));
     MOCK_METHOD(void, MountDone, (), (override));
     MOCK_METHOD(int, CheckUnmountable, (), (override));

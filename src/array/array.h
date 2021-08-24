@@ -85,7 +85,6 @@ public:
     virtual int AddSpare(string devName);
     virtual int RemoveSpare(string devName);
     virtual int DetachDevice(UblockSharedPtr uBlock);
-    virtual void AttachDevice(UblockSharedPtr uBlock);
     virtual void MountDone(void);
     virtual int CheckUnmountable(void);
     virtual int CheckDeletable(void);
@@ -123,7 +122,6 @@ private:
     int _LoadImpl(unsigned int& arrayIndex);
     int _CreatePartitions(void);
     void _DeletePartitions(void);
-    void _FormatMetaPartition(void);
     int _Flush(void);
     int _CheckRebuildNecessity(ArrayDevice* target);
     void _RebuildDone(RebuildResult result);

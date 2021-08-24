@@ -32,6 +32,7 @@
 
 #include "raid5.h"
 #include "src/include/array_config.h"
+#include "src/include/pos_event_id.h"
 #include "src/array_models/dto/partition_physical_size.h"
 #include "src/logger/logger.h"
 #include "src/resource_manager/buffer_pool.h"
@@ -101,6 +102,7 @@ Raid5::GetRaidState(vector<ArrayDeviceState> devs)
     auto&& abnormalDevs = Enumerable::Where(devs,
         [](auto d) { return d != ArrayDeviceState::NORMAL; });
 
+    POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "GetRaidState from raid5, abnormal cnt:{} ", abnormalDevs.size());
     if (abnormalDevs.size() == 0)
     {
         return RaidState::NORMAL;

@@ -63,7 +63,7 @@ public:
     virtual int CreateAll(vector<ArrayDevice*> buf, vector<ArrayDevice*> data,
         ArrayInterface* intf, uint32_t arrayIndex);
     virtual void DeleteAll(ArrayInterface* intf);
-    virtual void FormatMetaPartition(vector<ArrayDevice*> data, ArrayInterface* intf, uint32_t arrayIndex);
+    virtual void FormatMetaPartition(void);
     virtual RaidState GetRaidState(void);
 
 private:

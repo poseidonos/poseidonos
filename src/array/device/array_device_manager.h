@@ -60,10 +60,8 @@ class ArrayDeviceManager
 public:
     ArrayDeviceManager(DeviceManager* sysDevMgr, string arrayName);
     virtual ~ArrayDeviceManager(void);
-    virtual int Import(DeviceSet<string> nameSet);
-    virtual int Import(DeviceSet<DeviceMeta> metaSet,
-        uint32_t& missingCnt,
-        uint32_t& brokenCnt);
+    virtual int ImportByName(DeviceSet<string> nameSet);
+    virtual int Import(DeviceSet<DeviceMeta> metaSet);
     virtual DeviceSet<ArrayDevice*>& Export(void);
     virtual DeviceSet<string> ExportToName(void);
     virtual DeviceSet<DeviceMeta> ExportToMeta(void);

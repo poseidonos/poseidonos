@@ -74,7 +74,7 @@ TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImported)
         .WillOnce(Return(spare1UblockDevPtr));
 
     // When
-    int actual = arrDevMgr.Import(nameSet);
+    int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
     ASSERT_EQ(0, actual);
@@ -118,15 +118,13 @@ TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImportedWithMetaS
         .WillOnce(Return(data3UblockDevPtr))
         .WillOnce(Return(spare1UblockDevPtr));
 
-    arrDevMgr.Import(nameSet);
+    arrDevMgr.ImportByName(nameSet);
     ArrayMeta arrayMeta;
     arrayMeta.devs = arrDevMgr.ExportToMeta();
     arrDevMgr.Clear();
 
     // When
-    uint32_t missingCnt = 0;
-    uint32_t brokenCnt = 0;
-    int actual = arrDevMgr.Import(arrayMeta.devs, missingCnt, brokenCnt);
+    int actual = arrDevMgr.Import(arrayMeta.devs);
 
     // Then
     ASSERT_EQ(0, actual);

@@ -131,15 +131,21 @@ Array::_LoadImpl(unsigned int& arrayIndex)
         }
     }
 
-    uint32_t missingCnt = 0;
-    uint32_t brokenCnt = 0;
-    ret = devMgr_->Import(meta_.devs, missingCnt, brokenCnt);
+    ret = devMgr_->Import(meta_.devs);
     if (ret != 0)
     {
         state->SetDelete();
         return ret;
     }
-    state->SetLoad(missingCnt, brokenCnt);
+
+    ret = _CreatePartitions();
+    if (ret != 0)
+    {
+        return ret;
+    }
+
+    RaidState rs = ptnMgr->GetRaidState();
+    state->SetLoad(rs);
     return ret;
 }
 #ifdef _ADMIN_ENABLED
@@ -161,7 +167,7 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType, unsigned int& arra
         goto error;
     }
 
-    ret = devMgr_->Import(nameSet);
+    ret = devMgr_->ImportByName(nameSet);
     if (ret != 0)
     {
         goto error;
@@ -205,7 +211,14 @@ Array::Create(DeviceSet<string> nameSet, string dataRaidType, unsigned int& arra
     {
         goto error;
     }
-    _FormatMetaPartition();
+
+    ret = _CreatePartitions();
+    if (ret != 0)
+    {
+        goto error;
+    }
+
+    ptnMgr->FormatMetaPartition();
 
     state->SetCreate();
     pthread_rwlock_unlock(&stateLock);
@@ -224,30 +237,9 @@ Array::Init(void)
 {
     // TODO_MOUNTSEQUENCE: rollback sequence for array mount
     // pthread_rwlock_wrlock(&stateLock);
-    POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Array {} Init", name_);
-    int ret = 0;
-    unsigned int arrayIndex = -1;
+    POS_TRACE_INFO(EID(ARRAY_DEBUG_MSG), "Array {} Init", name_);
 
-    if (state->Exists() == false)
-    {
-        ret = (int)POS_EVENT_ID::ARRAY_STATE_NOT_EXIST;
-        POS_TRACE_WARN(ret, "Array {} is not exist", name_);
-        goto error;
-    }
-    ret = _LoadImpl(arrayIndex);
-    if (ret != 0)
-    {
-        goto error;
-    }
-    index_ = arrayIndex;
-
-    ret = state->IsMountable();
-    if (ret != 0)
-    {
-        goto error;
-    }
-
-    ret = _CreatePartitions();
+    int ret = state->IsMountable();
     if (ret != 0)
     {
         goto error;
@@ -277,7 +269,6 @@ Array::Dispose(void)
     // pthread_rwlock_wrlock(&stateLock);
     POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Dispose array {}", name_);
     _UnregisterService();
-    _DeletePartitions();
     state->SetUnmount();
     // pthread_rwlock_unlock(&stateLock);
 }
@@ -287,7 +278,6 @@ Array::Shutdown(void)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "Shutdown array {}", name_);
     _UnregisterService();
-    _DeletePartitions();
     shutdownFlag = 1;
 }
 
@@ -339,6 +329,8 @@ Array::Delete(void)
         }
         shutdownFlag = 0;
     }
+
+    _DeletePartitions();
 
     devMgr_->Clear();
     ret = abrControl->DeleteAbr(name_, meta_);
@@ -540,13 +532,6 @@ Array::_DeletePartitions(void)
     ptnMgr->DeleteAll(intf);
 }
 
-void
-Array::_FormatMetaPartition(void)
-{
-    DeviceSet<ArrayDevice*> devs = devMgr_->Export();
-    ptnMgr->FormatMetaPartition(devs.data, intf, index_);
-}
-
 bool
 Array::IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock)
 {
@@ -637,31 +622,10 @@ Array::DetachDevice(UblockSharedPtr uBlock)
 }
 
 void
-Array::AttachDevice(UblockSharedPtr uBlock)
-{
-    pthread_rwlock_wrlock(&stateLock);
-    if (state->GetState() == ArrayStateEnum::EXIST_DEGRADED)
-    {
-        ArrayDevice* dev = devMgr_->GetFaulty();
-        if (dev != nullptr)
-        {
-            int eventId = (int)POS_EVENT_ID::ARRAY_DEVICE_ATTACHED;
-            POS_TRACE_INFO(eventId,
-                "Updating the device class of a newly attached faulty device {} to ARRAY",
-                uBlock->GetSN());
-            state->SetState(ArrayStateEnum::EXIST_NORMAL);
-            uBlock->SetClass(DeviceClass::ARRAY);
-            dev->SetUblock(uBlock);
-            dev->SetState(ArrayDeviceState::NORMAL);
-        }
-    }
-    pthread_rwlock_unlock(&stateLock);
-}
-
-void
 Array::MountDone(void)
 {
     _CheckRebuildNecessity();
+    _Flush();
 }
 
 int
@@ -735,19 +699,15 @@ Array::_DetachData(ArrayDevice* target)
     POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEVICE_DETACHED,
         "Data device {} is detached from array {}", target->GetUblock()->GetName(), name_);
 
-    bool isRebuildingDevice = false;
     ArrayDeviceState devState = target->GetState();
     if (devState == ArrayDeviceState::FAULT)
     {
         return;
     }
-    else if (target->GetState() == ArrayDeviceState::REBUILD)
-    {
-        isRebuildingDevice = true;
-    }
 
-    state->DataRemoved(isRebuildingDevice);
     target->SetState(ArrayDeviceState::FAULT);
+    RaidState rs = ptnMgr->GetRaidState();
+    state->RaidStateUpdated(rs);
     sysDevMgr->RemoveDevice(target->GetUblock());
     target->SetUblock(nullptr);
 
@@ -762,7 +722,7 @@ Array::_DetachData(ArrayDevice* target)
         }
     }
 
-    if (isRebuildingDevice || state->IsBroken())
+    if (target->GetState() == ArrayDeviceState::REBUILD || state->IsBroken())
     {
         rebuilder->StopRebuild(name_);
     }

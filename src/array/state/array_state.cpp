@@ -34,6 +34,7 @@
 
 #include <string>
 
+#include "src/include/raid_state.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
@@ -77,25 +78,20 @@ ArrayState::SetState(ArrayStateEnum nextState)
 }
 
 void
-ArrayState::SetLoad(uint32_t missingCnt, uint32_t brokenCnt)
+ArrayState::SetLoad(RaidState rs)
 {
     ArrayStateType newState;
-    uint32_t abnormalCnt = missingCnt + brokenCnt;
 
-    switch (abnormalCnt)
+    switch (rs)
     {
-        case 0:
+        case RaidState::NORMAL:
         {
             newState = ArrayStateEnum::EXIST_NORMAL;
             break;
         }
-        case 1:
+        case RaidState::DEGRADED :
         {
             newState = ArrayStateEnum::EXIST_DEGRADED;
-            if (missingCnt != 0)
-            {
-                needForceMount = true;
-            }
             break;
         }
         default:
@@ -139,40 +135,34 @@ ArrayState::CanRemoveSpare(void)
 int
 ArrayState::IsMountable(void)
 {
-    int eventId = 0;
-
+    int ret = 0;
     switch (state)
     {
         case ArrayStateEnum::NOT_EXIST:
         {
-            eventId = (int)POS_EVENT_ID::ARRAY_STATE_NOT_EXIST;
-            POS_TRACE_ERROR(eventId, "Failed to mount array. Array is not existed");
-            break;
-        }
-        case ArrayStateEnum::EXIST_DEGRADED:
-        {
-            int degradedEvent = (int)POS_EVENT_ID::ARRAY_STATE_EXIST_DEGRADED;
-            if (needForceMount)
-            {
-                POS_TRACE_WARN(degradedEvent, "Array force-mounted with degraded state");
-            }
-            else
-            {
-                POS_TRACE_WARN(degradedEvent, "Array mounted with degraded state");
-            }
+            ret = EID(ARRAY_STATE_NOT_EXIST);
+            POS_TRACE_ERROR(ret, "Failed to mount array. Array is not existed");
             break;
         }
         case ArrayStateEnum::BROKEN:
         {
-            eventId = (int)POS_EVENT_ID::ARRAY_STATE_BROKEN;
-            POS_TRACE_ERROR(eventId, "Failed to mount array. Array is broken");
+            ret = EID(ARRAY_STATE_BROKEN);
+            POS_TRACE_ERROR(ret, "Failed to mount array. Array is broken");
+            break;
+        }
+        case ArrayStateEnum::EXIST_NORMAL:
+        case ArrayStateEnum::EXIST_DEGRADED:
+        {
+            ret = EID(SUCCESS);
             break;
         }
         default:
         {
+            ret = EID(ARRAY_ALD_MOUNTED);
+            break;
         }
     }
-    return eventId;
+    return ret;
 }
 
 int
@@ -317,49 +307,36 @@ ArrayState::SetUnmount(void)
 }
 
 void
-ArrayState::DataRemoved(bool isRebuildingDevice)
+ArrayState::RaidStateUpdated(RaidState rs)
 {
-    switch (state)
+    if (rs == RaidState::FAILURE)
     {
-        case ArrayStateEnum::EXIST_NORMAL:
+        _SetState(ArrayStateEnum::BROKEN);
+        return;
+    }
+
+    bool isOffline = state < ArrayStateEnum::NORMAL;
+
+    if (isOffline)
+    {
+        if (rs == RaidState::NORMAL)
+        {
+            _SetState(ArrayStateEnum::EXIST_NORMAL);
+        }
+        else if (rs == RaidState::DEGRADED)
         {
             _SetState(ArrayStateEnum::EXIST_DEGRADED);
-            break;
         }
-        case ArrayStateEnum::EXIST_DEGRADED:
+    }
+    else
+    {
+        if (rs == RaidState::NORMAL)
         {
-            _SetState(ArrayStateEnum::BROKEN);
-            break;
+            _SetState(ArrayStateEnum::NORMAL);
         }
-        case ArrayStateEnum::NORMAL:
+        else if (rs == RaidState::DEGRADED)
         {
             _SetState(ArrayStateEnum::DEGRADED);
-            break;
-        }
-        case ArrayStateEnum::REBUILD:
-        {
-            if (isRebuildingDevice)
-            {
-                iStateControl->Remove(rebuildingState);
-                _SetState(ArrayStateEnum::DEGRADED);
-            }
-            else
-            {
-                _SetState(ArrayStateEnum::BROKEN);
-            }
-            break;
-        }
-        case ArrayStateEnum::DEGRADED:
-        {
-            _SetState(ArrayStateEnum::BROKEN);
-            break;
-        }
-        case ArrayStateEnum::NOT_EXIST:
-        {
-            assert(0);
-        }
-        default:
-        {
         }
     }
 }

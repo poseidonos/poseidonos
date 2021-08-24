@@ -13,7 +13,7 @@ class MockArrayState : public ArrayState
 public:
     using ArrayState::ArrayState;
     MOCK_METHOD(void, SetState, (ArrayStateEnum nextState), (override));
-    MOCK_METHOD(void, SetLoad, (uint32_t missingCnt, uint32_t brokenCnt), (override));
+    MOCK_METHOD(void, SetLoad, (RaidState rs), (override));
     MOCK_METHOD(void, SetCreate, (), (override));
     MOCK_METHOD(void, SetDelete, (), (override));
     MOCK_METHOD(bool, SetRebuild, (), (override));
@@ -30,7 +30,7 @@ public:
     MOCK_METHOD(int, IsDeletable, (), (override));
     MOCK_METHOD(bool, IsRebuildable, (), (override));
     MOCK_METHOD(bool, IsRecoverable, (), (override));
-    MOCK_METHOD(void, DataRemoved, (bool isRebuildingDevice), (override));
+    MOCK_METHOD(void, RaidStateUpdated, (RaidState rs), (override));
     MOCK_METHOD(bool, Exists, (), (override));
     MOCK_METHOD(bool, IsMounted, (), (override));
     MOCK_METHOD(bool, IsBroken, (), (override));

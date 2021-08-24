@@ -12,8 +12,8 @@ class MockArrayDeviceManager : public ArrayDeviceManager
 {
 public:
     using ArrayDeviceManager::ArrayDeviceManager;
-    MOCK_METHOD(int, Import, (DeviceSet<string> nameSet), (override));
-    MOCK_METHOD(int, Import, (DeviceSet<DeviceMeta> metaSet, uint32_t& missingCnt, uint32_t& brokenCnt), (override));
+    MOCK_METHOD(int, ImportByName, (DeviceSet<string> nameSet), (override));
+    MOCK_METHOD(int, Import, (DeviceSet<DeviceMeta> metaSet), (override));
     MOCK_METHOD(DeviceSet<ArrayDevice*>&, Export, (), (override));
     MOCK_METHOD(DeviceSet<string>, ExportToName, (), (override));
     MOCK_METHOD(DeviceSet<DeviceMeta>, ExportToMeta, (), (override));
@@ -26,6 +26,7 @@ public:
     MOCK_METHOD((tuple<ArrayDevice*, ArrayDeviceType>), GetDev, (string devSn), (override));
     MOCK_METHOD(ArrayDevice*, GetFaulty, (), (override));
     MOCK_METHOD(ArrayDevice*, GetRebuilding, (), (override));
+    MOCK_METHOD(vector<ArrayDevice*>, GetDataDevices, (), (override));
 };
 
 } // namespace pos
