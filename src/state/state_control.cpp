@@ -113,7 +113,7 @@ StateControl::_ListUpdated(StateContext* prev, StateContext* next)
         string nextSitu = next->GetSituation().ToString();
         POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CHANGED,
             "STATE_CHANGED[{}] -> [{}]", currSitu, nextSitu);
-        _NotifyState(prev, curr);
+        _NotifyState(prev, next);
     }
 }
 

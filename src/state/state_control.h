@@ -65,7 +65,6 @@ private:
     void _NotifyState(StateContext* prev, StateContext* next);
 
     StatePublisher* publisher = nullptr;
-    StateContext* curr = nullptr;
     StateList* stateList = nullptr;
     future<void> async_future;
 };
