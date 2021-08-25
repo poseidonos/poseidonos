@@ -14,7 +14,7 @@ sudo make -j 4
 
 if [ $? -ne 0 ]
 then
-sudo ./script/build_ibofos.sh >> /dev/null
+sudo ./script/build_ibofos.sh internal >> /dev/null
 fi 
 
 cd -;

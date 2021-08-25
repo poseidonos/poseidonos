@@ -6,8 +6,18 @@
 rootdir=$(readlink -f $(dirname $0))/..
 
 cd $rootdir/lib
-./build_ibof_lib.sh clean
-./build_ibof_lib.sh all
+case "$1" in
+internal)
+    cmake . -DSPDK_DEBUG_ENABLE=y -DUSE_LOCAL_REPO=y
+    make clean_all
+    make -j 4
+    ;;
+*)
+    cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=n
+    make clean_all
+    make -j 4
+    ;;
+esac
 
 cd $rootdir
 make clean

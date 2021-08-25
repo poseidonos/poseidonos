@@ -59,9 +59,20 @@ buildTest()
     texecc rm $ibof_root/bin/poseidonos
 
     texecc ./configure $config_option
-    texecc ./lib/build_ibof_lib.sh clean_ci
-    texecc ./lib/build_ibof_lib.sh perf_ci
-    
+    texecc cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y -S lib -B lib
+    if [ $target_type == "VM" ]
+    then
+        echo "Build For VM"
+        texecc make CACHE=Y -j 4 -C lib
+    elif [ $target_type == "PM" ]
+    then
+        echo "Build For PM"
+        texecc make CACHE=Y -j 16 -C lib
+    else 
+        echo "Build For PSD"
+        texecc make CACHE=Y -j 16 -C lib
+    fi
+
     sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -f $ibof_bin/ibofos_${test_rev} ]]
 
     echo "There is no binary with rev ${test_rev}"

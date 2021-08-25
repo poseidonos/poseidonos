@@ -12,5 +12,15 @@ meson build
 
 echo changing to {ibof_home}/lib 
 cd ..
-./build_ibof_lib.sh dpdk
+
+case "$1" in
+internal)
+    cmake . -DSPDK_DEBUG_ENABLE=y -DUSE_LOCAL_REPO=y
+    make -j 4 dpdk
+    ;;
+*)
+    cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=n
+    make -j 4 dpdk
+    ;;
+esac
 

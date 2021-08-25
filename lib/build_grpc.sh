@@ -4,6 +4,7 @@ GRPC_REPO="http://10.227.30.174:7990/scm/ibof/grpc.git"
 INSTALL_DIR="/usr/local"
 BUILD_JOBS=4
 FORCE_INSTALL=FALSE
+BUILD_INTERNAL=FALSE
 INSTALLED=FALSE
 
 check_installation() {
@@ -90,6 +91,10 @@ main()
 			exit 0
 		fi
 	fi
+	if [ ${BUILD_INTERNAL} == FALSE ]
+	then
+		GRPC_REPO="-b v1.38.0 https://github.com/grpc/grpc.git"
+	fi
 
 	rm -rf grpc
 	git clone ${GRPC_REPO}
@@ -109,7 +114,7 @@ help()
 
 }
 
-while getopts "fh" opt
+while getopts "fhi" opt
 do
 	case $opt in
 		f)
@@ -119,6 +124,8 @@ do
 			help
 			exit 0;
 			;;
+		i)
+			BUILD_INTERNAL=TRUE
 	esac
 done
 

@@ -1,4 +1,0 @@
-[submodule "lib/air"]
-	path = lib/air
-	url = ../air.git
-	branch = main

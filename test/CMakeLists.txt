@@ -18,6 +18,8 @@ option(POS_TESTEXEC_WITH_NATIVE_GTEST "Run UTs/ITs by executing gtest binaries d
 set(POS_PARALLEL_EXEC_UT "4" CACHE STRING "Specify the number of parallel threads to run unit tests")
 set(POS_PARALLEL_EXEC_IT "1" CACHE STRING "Specify the number of parallel threads to run integration tests")
 
+set(POS_USE_LOCAL_REPO "n" CACHE STRING "Specify use of local repository, y or n")
+
 set(CMAKE_CXX_FLAGS "--coverage -ftest-coverage -fpermissive -fPIC")
 set(CMAKE_SHARED_LINKER_FLAGS "--coverage -ftest-coverage")
 
@@ -286,14 +288,19 @@ add_custom_target(nlohmann_json ALL
 # Run mock/test generator with cpp_formatter.py automatically
 #message("Running mock/test-skel generator (but without cpp_formatter.py)...")
 #execute_process(COMMAND ./generate_mocks.sh) # commented out until we figure out how to integrate git-clang-format with UT build
+if (${POS_USE_LOCAL_REPO} STREQUAL "y")
+    execute_process(COMMAND ${CMAKE_COMMAND} . -DSPDK_DEBUG_ENABLE=y -DUSE_LOCAL_REPO=y -S ${PROJ_ROOT}/lib -B ${PROJ_ROOT}/lib)
+else()
+    execute_process(COMMAND ${CMAKE_COMMAND} . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=n -S ${PROJ_ROOT}/lib -B ${PROJ_ROOT}/lib)
+endif()
 
 # Build gtest conditionally
-SET(POS_DEP_GTEST ${PROJ_ROOT}/lib/googletest-release-1.10.x)
+SET(POS_DEP_GTEST ${PROJ_ROOT}/lib/gtest)
 if(EXISTS "${POS_DEP_GTEST}")
     message("GTEST build exists: ${POS_DEP_GTEST}. Build skipped.")
 else()
     message("Building GTEST using 'build_ibof_lib.sh gtest'...")
-    execute_process(COMMAND ../lib/build_ibof_lib.sh gtest)
+    execute_process(COMMAND make gtest -j 4 -C ${PROJ_ROOT}/lib)
     POS_ASSERT_FILE_EXIST("${POS_DEP_GTEST}")
 endif()
 
@@ -303,30 +310,30 @@ if(EXISTS "${POS_DEP_SPDLOG}")
     message("SPDLOG build exists: ${POS_DEP_SPDLOG}. Build skipped.")
 else()
     message("Building SPDLOG using 'build_ibof_lib.sh spdlog'...")
-    execute_process(COMMAND ../lib/build_ibof_lib.sh spdlog)
+    execute_process(COMMAND make spdlog -j 4 -C ${PROJ_ROOT}/lib)
     POS_ASSERT_FILE_EXIST("${POS_DEP_SPDLOG}")
 endif()
 
 # Build DPDK conditionally
-SET(POS_DEP_DPDK ${PROJ_ROOT}/lib/dpdk-20.08/build)
+SET(POS_DEP_DPDK ${PROJ_ROOT}/lib/dpdk/bin)
 if(EXISTS "${POS_DEP_DPDK}")
     message("DPDK build exists: ${POS_DEP_DPDK}. Build skipped.")
 else()
     message("DPDK needs to be built")
     message("Building DPDK and generating rte_build_config.h ...")
-    execute_process(COMMAND ./build_dpdk.sh)
+    execute_process(COMMAND make dpdk -j 4 -C ${PROJ_ROOT}/lib)
     POS_ASSERT_FILE_EXIST("${POS_DEP_DPDK}")
     #execute_process(COMMAND ./build_dpdk.sh OUTPUT_VARIABLE cmd_out RESULT_VARIABLE res_var)
     #message("cmd: ${cmd_out}")
 endif()
 
 # Build SPDK conditionally
-SET(POS_DEP_SPDK ${PROJ_ROOT}/lib/spdk/build/lib)
+SET(POS_DEP_SPDK ${PROJ_ROOT}/lib/spdk/include/spdk/pos.h)
 if(EXISTS "${POS_DEP_SPDK}")
     message("SPDK library exists: ${POS_DEP_SPDK}. Build skipped.")
 else()
     message("SPDK library needs to be built")
-    execute_process(COMMAND ../lib/build_ibof_lib.sh spdk)
+    execute_process(COMMAND make spdk -j 4 -C ${PROJ_ROOT}/lib)
     POS_ASSERT_FILE_EXIST("${POS_DEP_SPDK}")
 endif()
 
@@ -336,8 +343,18 @@ if(EXISTS "${POS_DEP_AIR}")
     message("AIR library exists: ${POS_DEP_AIR}. Build skipped.")
 else()
     message("AIR library needs to be built.")
-    execute_process(COMMAND ../lib/build_ibof_lib.sh air)
+    execute_process(COMMAND make air -j 4 -C ${PROJ_ROOT}/lib)
     POS_ASSERT_FILE_EXIST("${POS_DEP_AIR}")
+endif()
+
+# Build fff conditionally
+SET(POS_DEP_FFF "${PROJ_ROOT}/lib/fff/fff.h")
+if(EXISTS "${POS_DEP_FFF}")
+    message("FFF library exists: ${POS_DEP_FFF}. Build skipped.")
+else()
+    message("FFF library needs to be built.")
+    execute_process(COMMAND make fff -j 4 -C ${PROJ_ROOT}/lib)
+    POS_ASSERT_FILE_EXIST("${POS_DEP_FFF}")
 endif()
 
 #maybe we could embed likely() unlikely() macro into add_definitions() for unit-test's build context

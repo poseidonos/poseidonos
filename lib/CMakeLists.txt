@@ -304,7 +304,6 @@ if (${USE_LOCAL_REPO} STREQUAL "y")
 else()
     set(REPO_FILEBENCH "https://github.com/filebench/filebench.git")
 endif()
-message("${REPO_FILEBENCH}")
 # Build filebench conditionally
 ExternalProject_Add(filebench
     GIT_REPOSITORY ${REPO_FILEBENCH}
@@ -351,6 +350,46 @@ ExternalProject_Add(nlohmann
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND cp -r ${PROJ_ROOT}/lib/src/${POS_DEP_NLOHMANN}/include/nlohmann ${PROJ_ROOT}/lib)
+
+# Set fff build options
+set(POS_DEP_FFF "fff")
+if (${USE_LOCAL_REPO} STREQUAL "y")
+    set(REPO_FFF "${LOCAL_REPO}/fff.git")
+else()
+    set(REPO_FFF "https://github.com/meekrosoft/fff.git")
+endif()
+# Build fff conditionally
+ExternalProject_Add(fff
+    GIT_REPOSITORY ${REPO_FFF}
+    GIT_TAG "v1.1"
+    SOURCE_DIR ${PROJ_ROOT}/lib/${POS_DEP_FFF}
+    BUILD_IN_SOURCE 1
+    LOG_DOWNLOAD ON
+    LOG_UPDATE ON
+    LOG_PATCH ON
+    LOG_CONFIGURE ON
+    LOG_BUILD ON
+    LOG_INSTALL ON
+    LOG_OUTPUT_ON_FAILURE ON
+    LOG_MERGED_STDOUTERR ON
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND "")
+
+if (${USE_LOCAL_REPO} STREQUAL "y")
+    add_custom_target(
+        grpc ALL
+        WORKING_DIRECTORY ${PROJ_ROOT}/lib
+        COMMAND ./build_grpc.sh -i
+    )
+else()
+    add_custom_target(
+        grpc ALL
+        WORKING_DIRECTORY ${PROJ_ROOT}/lib
+        COMMAND ./build_grpc.sh
+    )
+endif()
+
 
 add_custom_target(
     clean_air
