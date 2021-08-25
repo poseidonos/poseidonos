@@ -46,18 +46,16 @@ namespace pos
 class StateList
 {
 public:
-    using ListUpdatedHandler = std::function<void(StateContext*)>;
-    StateList(ListUpdatedHandler cb)
-    {
-        listUpdated = move(cb);
-    };
-    virtual ~StateList();
+    using ListUpdatedHandler = std::function<void(StateContext*, StateContext*)>;
+    explicit StateList(ListUpdatedHandler cb);
+    virtual ~StateList(void);
 
     virtual void Add(StateContext* ctx);
     virtual void Remove(StateContext* ctx);
     virtual bool Exists(StateContext* ctx);
     virtual bool Exists(StateEnum state);
     virtual bool Exists(SituationEnum situ);
+    StateContext* Current(void);
 
     // Helpers for UT
     virtual const vector<StateContext*>& GetContextList(void);
@@ -69,5 +67,6 @@ private:
     ListUpdatedHandler listUpdated = nullptr;
     vector<StateContext*> contextList;
     std::mutex listMutex;
+    StateContext defaultCtx{"StateManager", SituationEnum::DEFAULT};
 };
 } // namespace pos

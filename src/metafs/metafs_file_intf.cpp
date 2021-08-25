@@ -119,6 +119,8 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
     if (POS_EVENT_ID::SUCCESS != rc)
         return -(int)rc;
 
+    issuedCount++;
+
     return EID(SUCCESS);
 }
 
@@ -131,6 +133,8 @@ MetaFsFileIntf::CheckIoDoneStatus(void* data)
     {
         error = -(int)POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
     }
+
+    issuedCount--;
 
     delete asyncCtx;
     return error;
@@ -167,6 +171,12 @@ int
 MetaFsFileIntf::Close(void)
 {
     POS_EVENT_ID rc = metaFs->ctrl->Close(fd, storage);
+
+    while (0 != GetIssuedCount())
+    {
+        // wait for done
+        usleep(1);
+    }
 
     if (POS_EVENT_ID::SUCCESS != rc)
     {

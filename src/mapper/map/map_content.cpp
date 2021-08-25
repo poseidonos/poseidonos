@@ -186,15 +186,23 @@ MapContent::FileClose(void)
 }
 
 int
-MapContent::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr event)
+MapContent::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback)
 {
-    return mapIoHandler->FlushDirtyPagesGiven(dirtyPages, event);
+    if (metaFile->IsOpened() == false)
+    {
+        metaFile->Open();
+    }
+    return mapIoHandler->FlushDirtyPagesGiven(dirtyPages, callback);
 }
 
 int
-MapContent::FlushTouchedPages(EventSmartPtr event)
+MapContent::FlushTouchedPages(EventSmartPtr callback)
 {
-    return mapIoHandler->FlushTouchedPages(event);
+    if (metaFile->IsOpened() == false)
+    {
+        metaFile->Open();
+    }
+    return mapIoHandler->FlushTouchedPages(callback);
 }
 
 int

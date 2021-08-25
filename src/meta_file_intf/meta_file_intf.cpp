@@ -68,6 +68,7 @@ MetaFileIntf::MetaFileIntf(std::string fname, int arrayId, StorageOpt storageOpt
     fileName = fname;
     this->arrayId = arrayId;
     storage = storageOpt;
+    issuedCount = 0;
 }
 
 int

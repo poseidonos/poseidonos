@@ -84,7 +84,7 @@ TEST(Array, Init_testIfLoadFailureIsHandledProperly)
     int LOAD_FAILURE = 1;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
     MockArrayServiceLayer* mockArrayService = new MockArrayServiceLayer;
 
@@ -121,7 +121,7 @@ TEST(Array, Init_testIfPartitionRegistrationFailureHandledProperly)
     int PARTITION_REGISTRATION_FAILURE = 1;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
     MockArrayServiceLayer* mockArrayService = new MockArrayServiceLayer;
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
@@ -166,7 +166,7 @@ TEST(Array, Init_testIfWrongStateHandledProperly)
     int PARTITION_REGISTRATION_SUCCESS = 0;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl mockAbrControl;
     MockPartitionManager* mockPartMgr = new MockPartitionManager("mock-part", NULL);
     MockArrayInterface* mockArrayInterface = new MockArrayInterface;
@@ -212,7 +212,7 @@ TEST(Array, Init_testIfArrayServiceRegistrationFailureHandledProperly)
     int PARTITION_REGISTRATION_SUCCESS = 0;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
     MockPartitionManager* mockPartMgr = new MockPartitionManager("mock-part", NULL);
     MockArrayInterface* mockArrayInterface = new MockArrayInterface;
@@ -260,7 +260,7 @@ TEST(Array, Init_testIfInitIsDoneSuccessfully)
     int PARTITION_REGISTRATION_SUCCESS = 0;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl mockAbrControl;
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
     MockPartitionManager* mockPartMgr = new MockPartitionManager("mock-part", NULL, &mockAffMgr);
@@ -335,7 +335,7 @@ TEST(Array, Load_testIfDoneSuccessfully)
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
     MockIAbrControl mockAbrControl;
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
     unsigned int arrayIndex;
 
@@ -378,7 +378,7 @@ TEST(Array, Load_testIfLoadFailsWhenArrayBootRecordFailsToBeLoaded)
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
     unsigned int arrayIndex;
 
@@ -403,7 +403,7 @@ TEST(Array, Load_testIfLoadFailsWhenIndexIsWrong)
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl mockAbrControl;
 
     int LOAD_SUCCESS = 0;
@@ -433,7 +433,7 @@ TEST(Array, Create_testIfArrayCreatedWhenInputsAreValid)
     string mockArrayName = "POSArray";
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, mockArrayName);
     MockIAbrControl* mockAbrControl = new MockIAbrControl();
     MockAffinityManager mockAffMgr = BuildDefaultAffinityManagerMock();
     MockPartitionManager* mockPtnMgr = new MockPartitionManager(mockArrayName, mockAbrControl, &mockAffMgr);
@@ -468,7 +468,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenArrayStateIsNotCreatable)
     DeviceSet<string> emptyDeviceSet;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "goodmockname");
     int STATE_ERROR = EID(ARRAY_STATE_EXIST);
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(STATE_ERROR));
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
@@ -489,7 +489,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenDeviceImportFails)
     DeviceSet<string> emptyDeviceSet;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "goodmockname");
     int IMPORT_ERROR = EID(ARRAY_DEVICE_NOT_FOUND);
     unsigned int arrayIndex;
 
@@ -512,9 +512,9 @@ TEST(Array, Create_testIfErrorIsReturnedWhenArrayNameIsInvalid)
     DeviceSet<string> emptyDeviceSet;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
     string BAD_ARRAY_NAME = "This is really bad array name because it contains multiple whitespaces and is too long";
     unsigned int arrayIndex;
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, BAD_ARRAY_NAME);
 
     EXPECT_CALL(*mockState, IsCreatable).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Import(_)).WillOnce(Return(0));
@@ -535,7 +535,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenRaidTypeIsInvalid)
     DeviceSet<string> emptyDeviceSet;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "goodmockname");
     string BAD_RAID_TYPE = "RAID6"; // 'cause we don't support at the moment
     unsigned int arrayIndex;
 
@@ -559,7 +559,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeCreated)
     DeviceSet<string> emptyDeviceSet;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "goodmockname");
     MockIAbrControl mockAbrControl;
     unsigned int arrayIndex;
 
@@ -586,7 +586,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeSaved)
     DeviceSet<string> emptyDeviceSet;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "goodmockname");
     MockIAbrControl mockAbrControl;
     unsigned int arrayIndex;
 
@@ -617,7 +617,7 @@ TEST(Array, Delete_testIfArrayDeletedSuccessfullyWhenInputsAreValid)
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
 
     EXPECT_CALL(*mockRebuilder, IsRebuilding).WillOnce(Return(false));
@@ -645,7 +645,7 @@ TEST(Array, Delete_testIfArrayNotDeletedWhenStateIsNotDeletable)
     int NON_ZERO = 1;
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
 
     EXPECT_CALL(*mockState, IsDeletable).WillOnce(Return(NON_ZERO));
@@ -667,7 +667,7 @@ TEST(Array, Delete_testIfArrayNotDeletedWhenArrayBootRecordFailsToBeUpdated)
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
 
     EXPECT_CALL(*mockRebuilder, IsRebuilding).WillOnce(Return(false));
@@ -691,7 +691,7 @@ TEST(Array, AddSpare_testIfSpareIsAddedWhenInputsAreValid)
     // Given: a happy path scenario
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockDeviceManager mockDevMgr;
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
@@ -723,7 +723,7 @@ TEST(Array, Delete_testIfArrayDeletedWhenArrayIsBrokenAndShutdownNotEnded)
     // Given: a deletable and broken state
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl mockAbrControl;
     MockIArrayRebuilder* mockRebuilder = new MockIArrayRebuilder();
 
@@ -751,7 +751,7 @@ TEST(Array, AddSpare_testIfSpareIsAddedWhenDeviceIsAlreadyInOtherArray)
     // Given: a happy path scenario
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockDeviceManager mockDevMgr;
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
@@ -783,7 +783,7 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenStateIsNotProper)
     // Given : state which cannot add spare
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
 
@@ -808,7 +808,7 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToAddSpare)
     // Given: when adding spare failed
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockDeviceManager mockDevMgr;
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
@@ -838,7 +838,7 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToFlush)
     // Given: when flush failed
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl mockAbrControl;
     MockEventScheduler mockEventScheduler;
     MockDeviceManager mockDevMgr;
@@ -869,7 +869,7 @@ TEST(Array, RemoveSpare_testIfSpareIsRemovedWhenInputsAreValid)
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
     string mockSpareName = "mock-spare";
 
@@ -892,7 +892,7 @@ TEST(Array, RemoveSpare_testIfSpareIsNotRemovedWhenStateIsNotProper)
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl mockAbrControl;
     string mockSpareName = "mock-spare";
 
@@ -916,7 +916,7 @@ TEST(Array, RemoveSpare_testIfSpareIsNotRemovedWhenFailedToRemoveSpare)
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl mockAbrControl;
     string mockSpareName = "mock-spare";
 
@@ -940,7 +940,7 @@ TEST(Array, RemoveSpare_testIfSpareIsNotRemovedWhenFailedToFlush)
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl mockAbrControl;
     string mockSpareName = "mock-spare";
 
@@ -964,7 +964,7 @@ TEST(Array, DetachDevice_testIfSpareDeviceIsSuccessfullyDetachedFromUnmountedArr
     // Given: a spare device and unmounted array
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
     MockDeviceManager mockSysDevMgr(nullptr);
     MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
@@ -998,7 +998,7 @@ TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromUnmountedArra
     // Given: a data device and unmounted array
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
     MockDeviceManager mockSysDevMgr(nullptr);
     MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
@@ -1036,7 +1036,7 @@ TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromMountedArray)
     // Given: a data device and mounted array
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
     MockDeviceManager mockSysDevMgr(nullptr);
     MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
@@ -1076,7 +1076,7 @@ TEST(Array, DetachDevice_IntegrationTestIfDataDeviceIsNotDetachedFromMountedArra
     // Given: a data device in FAULT state and mounted array
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     MockIAbrControl mockAbrControl;
     MockDeviceManager mockSysDevMgr(nullptr);
     MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
@@ -1109,7 +1109,7 @@ TEST(Array, AttachDevice_testWhenDeviceAttachedOnOfflineStateAndThereIsFaultyDev
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockDeviceManager mockSysDevMgr(nullptr);
 
     Array array("mock", NULL, NULL, mockArrDevMgr, &mockSysDevMgr, NULL, mockState, NULL, NULL, NULL);
@@ -1129,7 +1129,7 @@ TEST(Array, MountDone_testIfResumeRebuildEventIsSent)
 {
     // Given: an array
     MockEventScheduler mockEventScheduler;
-    MockArrayDeviceManager* mockArrayDeviceManager = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrayDeviceManager = new MockArrayDeviceManager(NULL, "mock");
     string mockDevName = "mockDevName";
     MockUBlockDevice* mockUblockDevice = new MockUBlockDevice(mockDevName, 1024, NULL);
     UblockSharedPtr mockUblockSharedPtr = shared_ptr<UBlockDevice>(mockUblockDevice);
@@ -1231,7 +1231,7 @@ TEST(Array, GetSizeInfo_testIfPartitionManagerIsQueriedOn)
 TEST(Array, GetDevNames_testIfArrayDeviceManagerIsQueriedOn)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock");
     EXPECT_CALL(*mockArrDevMgr, ExportToName).Times(1);
     Array array("mock", NULL, NULL, mockArrDevMgr, NULL, NULL, NULL, NULL, NULL, NULL);
 
@@ -1347,8 +1347,8 @@ TEST(Array, IsRecoverable_testIfMountedHealthyArrayDetachesDataDeviceAndIsRecove
     UblockSharedPtr mockUblockSharedPtr = shared_ptr<UBlockDevice>(mockUblockDevPtr);
 
     MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
-    MockDeviceManager mockSysDevMgr(nullptr);
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockDeviceManager mockSysDevMgr;
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock-array");
     MockIAbrControl mockAbrControl;
     MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(NULL);
 
@@ -1379,7 +1379,7 @@ TEST(Array, IsRecoverable_testIfMountedHealthyArrayDetachesDataDeviceAndIsRecove
 TEST(Array, FindDevice_testIfArrayDevMgrIsQueriedAgainst)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock-array");
     string mockSerialNumber = "mock-sn";
 
     EXPECT_CALL(*mockArrDevMgr, GetDev(mockSerialNumber)).WillOnce(Return(make_tuple(nullptr, ArrayDeviceType::DATA)));
@@ -1396,7 +1396,7 @@ TEST(Array, FindDevice_testIfArrayDevMgrIsQueriedAgainst)
 TEST(Array, TriggerRebuild_testIfNullTargetShouldNotBeRetried)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock-array");
 
     EXPECT_CALL(*mockArrDevMgr, GetFaulty).WillOnce(Return(nullptr));
 
@@ -1412,7 +1412,7 @@ TEST(Array, TriggerRebuild_testIfNullTargetShouldNotBeRetried)
 TEST(Array, TriggerRebuild_testIfNonFaultyArrayDeviceCanSuccessfullyTriggerRebuild)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock-array");
     MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
 
     EXPECT_CALL(*mockArrDev, GetState).WillOnce(Return(ArrayDeviceState::NORMAL)); // NORMAL or REBUILD?
@@ -1430,7 +1430,7 @@ TEST(Array, TriggerRebuild_testIfNonFaultyArrayDeviceCanSuccessfullyTriggerRebui
 TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotRetryWhenTheStateIsntSetToRebuild)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock-array");
     MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
@@ -1452,7 +1452,7 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotRetryWhenTheStateIsntSe
 TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotRetryRebuildDueToReplaceFailure)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock-array");
     MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
@@ -1478,7 +1478,7 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotRetryRebuildDueToReplac
 TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotNeedToRetryAfterTriggeringRebuild)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock-array");
     MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
@@ -1513,7 +1513,7 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotNeedToRetryAfterTrigger
 TEST(Array, TriggerRebuild_testIfRebuildNotTriggeredWhenFlushFailed)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
@@ -1547,7 +1547,7 @@ TEST(Array, TriggerRebuild_testIfRebuildNotTriggeredWhenFlushFailed)
 TEST(Array, ResumeRebuild_testIfResumeRebuildFailedWhenStateChangeFailed)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
@@ -1574,7 +1574,7 @@ TEST(Array, ResumeRebuild_testIfResumeRebuildFailedWhenStateChangeFailed)
 TEST(Array, ResumeRebuild_testIfResumeRebuildProperly)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
     NiceMock<MockIStateControl> mockIStateControl;
     MockArrayState* mockState = new MockArrayState(&mockIStateControl);
@@ -1600,7 +1600,7 @@ TEST(Array, ResumeRebuild_testIfResumeRebuildProperly)
 TEST(Array, Shutdown_testIfPartitionManagerCleansUp)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock-array");
     MockIAbrControl* mockAbrControl = new MockIAbrControl();
     MockPartitionManager* mockPtnMgr = new MockPartitionManager("mock-array", mockAbrControl);
     MockArrayServiceLayer* mockArrayService = new MockArrayServiceLayer;
@@ -1625,7 +1625,7 @@ TEST(Array, Shutdown_testIfPartitionManagerCleansUp)
 TEST(Array, Flush_testIfAbrRecordIsSaved)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock-array");
     MockIAbrControl* mockAbrControl = new MockIAbrControl();
     MockPartitionManager* mockPtnMgr = new MockPartitionManager("mock-array", mockAbrControl);
     NiceMock<MockIStateControl> mockStateControl;
@@ -1646,7 +1646,7 @@ TEST(Array, Flush_testIfAbrRecordIsSaved)
 TEST(Array, Flush_testIfAbrRecordIsFailed)
 {
     // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL);
+    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
     MockIAbrControl* mockAbrControl = new MockIAbrControl();
     MockPartitionManager* mockPtnMgr = new MockPartitionManager("mock-array", mockAbrControl);
     NiceMock<MockIStateControl> mockStateControl;

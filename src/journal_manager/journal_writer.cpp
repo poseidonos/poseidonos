@@ -35,6 +35,7 @@
 #include "src/journal_manager/journaling_status.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/journal_manager/log_write/gc_log_write_completed.h"
+#include "src/journal_manager/log_write/journal_event_factory.h"
 #include "src/journal_manager/log_write/log_write_handler.h"
 
 namespace pos
@@ -42,6 +43,7 @@ namespace pos
 JournalWriter::JournalWriter(void)
 : logWriteHandler(nullptr),
   logFactory(nullptr),
+  eventFactory(nullptr),
   status(nullptr)
 {
 }
@@ -51,11 +53,12 @@ JournalWriter::~JournalWriter(void)
 }
 
 int
-JournalWriter::Init(LogWriteHandler* writeHandler, LogWriteContextFactory* factory,
-    JournalingStatus* journalingStatus)
+JournalWriter::Init(LogWriteHandler* writeHandler, LogWriteContextFactory* logWriteEventFactory,
+    JournalEventFactory* journalEventFactory, JournalingStatus* journalingStatus)
 {
     logWriteHandler = writeHandler;
-    logFactory = factory;
+    logFactory = logWriteEventFactory;
+    eventFactory = journalEventFactory;
 
     status = journalingStatus;
 
@@ -140,30 +143,39 @@ JournalWriter::_AddGcLogs(GcStripeMapUpdateList mapUpdates, MapPageList dirty, E
 
     LogWriteContext* stripeFlushedLogWriteContext =
         logFactory->CreateGcStripeFlushedLogWriteContext(mapUpdates, dirty, callbackEvent);
-    GcLogWriteCallback writeHandler = std::bind(&LogWriteHandler::AddLog, logWriteHandler, std::placeholders::_1);
 
-    GcLogWriteCompleted* gcLogCallback = new GcLogWriteCompleted(writeHandler, stripeFlushedLogWriteContext);
+    // TODO (huijeong.kim) change GcLogWriteCompleted to inherit Callback instead of Event
+    EventSmartPtr callback = eventFactory->CreateGcLogWriteCompletedEvent(stripeFlushedLogWriteContext);
+    GcLogWriteCompleted* gcLogCallback = dynamic_cast<GcLogWriteCompleted*>(callback.get());
+    assert(gcLogCallback != nullptr);
 
-    MapPageList dummyList;
-    EventSmartPtr callbackSmartPtr(gcLogCallback);
-    auto blockContexts = logFactory->CreateGcBlockMapLogWriteContexts(mapUpdates, dummyList, callbackSmartPtr);
-
-    gcLogCallback->SetNumLogs(blockContexts.size());
-
-    for (auto it = blockContexts.begin(); it != blockContexts.end(); it++)
+    if (mapUpdates.blockMapUpdateList.size() == 0)
     {
-        result = logWriteHandler->AddLog(*it);
-        if (result < 0)
+        // Write stripe flushed log right away when there's no block map udpates
+        gcLogCallback->SetNumLogs(1);
+        gcLogCallback->Execute();
+    }
+    else
+    {
+        MapPageList dummyList;
+        auto blockContexts = logFactory->CreateGcBlockMapLogWriteContexts(mapUpdates, dummyList, callback);
+        gcLogCallback->SetNumLogs(blockContexts.size());
+
+        for (auto it = blockContexts.begin(); it != blockContexts.end(); it++)
         {
-            for (auto delIt = it + 1; delIt != blockContexts.end(); delIt++)
+            result = logWriteHandler->AddLog(*it);
+            if (result < 0)
             {
-                delete *delIt;
+                for (auto delIt = it + 1; delIt != blockContexts.end(); delIt++)
+                {
+                    delete *delIt;
+                }
+                blockContexts.clear();
+
+                delete stripeFlushedLogWriteContext;
+
+                return result;
             }
-            blockContexts.clear();
-
-            delete stripeFlushedLogWriteContext;
-
-            return result;
         }
     }
 

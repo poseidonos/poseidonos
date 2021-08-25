@@ -223,19 +223,31 @@ ArrayComponents::Delete(void)
 int
 ArrayComponents::PrepareRebuild(bool& resume)
 {
-    int ret = 0;
-    gc->Pause();
+    StateContext* stateCtx = state->GetState();
+    string currSitu = "null";
+    if (stateCtx != nullptr)
+    {
+        currSitu = stateCtx->GetSituation().ToString();
+        if (stateCtx->GetSituation() == SituationEnum::REBUILDING)
+        {
+            int ret = 0;
+            gc->Pause();
 
-    if (meta->NeedRebuildAgain())
-    {
-        resume = true;
+            if (meta->NeedRebuildAgain())
+            {
+                resume = true;
+            }
+            else
+            {
+                ret = meta->PrepareRebuild();
+            }
+            gc->Resume();
+            return ret;
+        }
     }
-    else
-    {
-        ret = meta->PrepareRebuild();
-    }
-    gc->Resume();
-    return ret;
+    POS_TRACE_WARN(EID(REBUILD_INVALIDATED),
+        "Rebuild invalidated. Current situation: {} ", currSitu);
+    return EID(REBUILD_INVALIDATED);
 }
 
 void

@@ -64,11 +64,19 @@ DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
     {
         out << "invalid parameter" << endl;
         out.close();
-        return 0;
+        return -1;
     }
     string arrayName = argv["name"].get<std::string>();
-    IArrayInfo* info = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
-    unsigned int arrayIndex = info->GetIndex();
+    
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (nullptr == info)
+    {
+        out << "there is no array with name " + arrayName << endl;
+        out.close();
+        return -1;
+    }
+
+    unsigned int arrayIndex = info->arrayInfo->GetIndex();
 
     LogicalBlkAddr lsa = {.stripeId = 0, .offset = 0};
 
@@ -76,7 +84,7 @@ DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
     trans->Translate(arrayIndex, META_SSD, pba, lsa);
     out << "meta ssd start lba : " << pba.lba << std::endl;
 
-    const PartitionLogicalSize* logicalSize = info->GetSizeInfo(META_SSD);
+    const PartitionLogicalSize* logicalSize = info->arrayInfo->GetSizeInfo(META_SSD);
     uint64_t blk = (uint64_t)logicalSize->totalStripes *
         logicalSize->blksPerChunk * ArrayConfig::SECTORS_PER_BLOCK;
     out << "meta ssd end lba : " << pba.lba + blk - 1 << std::endl;
@@ -84,7 +92,7 @@ DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
     trans->Translate(arrayIndex, USER_DATA, pba, lsa);
     out << "user data start lba : " << pba.lba << std::endl;
 
-    logicalSize = info->GetSizeInfo(USER_DATA);
+    logicalSize = info->arrayInfo->GetSizeInfo(USER_DATA);
     blk = (uint64_t)logicalSize->totalStripes * logicalSize->blksPerChunk * ArrayConfig::SECTORS_PER_BLOCK;
     out << "user data end lba : " << pba.lba + blk - 1 << std::endl;
 
@@ -93,7 +101,7 @@ DumpDiskLayoutWbtCommand::Execute(Args& argv, JsonElement& elem)
         trans->Translate(arrayIndex, WRITE_BUFFER, pba, lsa);
         out << "write buffer start lba : " << pba.lba << std::endl;
 
-        logicalSize = info->GetSizeInfo(WRITE_BUFFER);
+        logicalSize = info->arrayInfo->GetSizeInfo(WRITE_BUFFER);
         blk = (uint64_t)logicalSize->totalStripes * logicalSize->blksPerChunk * ArrayConfig::SECTORS_PER_BLOCK;
         out << "write buffer end lba : " << pba.lba + blk - 1 << std::endl;
     }

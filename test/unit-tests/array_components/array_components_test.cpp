@@ -202,14 +202,23 @@ TEST(ArrayComponents, Delete_testIfDeleteResultIsPropagated)
 TEST(ArrayComponents, PrepareRebuild_testIfGcIsPausedAndResumedAroundAllocatorPreparingRebuild)
 {
     // Given
-    NiceMock<MockStateManager> mockStateManager;
+    MockStateManager mockStateManager;
+    NiceMock<MockStateControl> mockStateControl;
     NiceMock<MockIArrayInfo> mockIArrayInfo;
     MockMetadata* mockMetadata = new MockMetadata;
     MockGarbageCollector* mockGc = new MockGarbageCollector(nullptr, nullptr);
 
+<<<<<<< HEAD
     ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr, nullptr,
         nullptr, mockGc, mockMetadata, nullptr, mockMetaFsFactory, nullptr);
+=======
+    ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, &mockStateControl,
+        nullptr, nullptr, mockGc, nullptr, mockAllocator, nullptr, nullptr, mockMetaFsFactory, nullptr);
+>>>>>>> 784af78ec
     int PREPARE_RESULT = 234; // the actual value does not matter
+    StateContext expected("test", SituationEnum::REBUILDING);
+    EXPECT_CALL(mockStateControl, GetState).WillOnce(Return(&expected));
+
     std::string ARRAY_NAME = "mock-array";
     EXPECT_CALL(mockIArrayInfo, GetName).WillRepeatedly(Return(ARRAY_NAME));
     EXPECT_CALL(*mockGc, Pause).Times(1);

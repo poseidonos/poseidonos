@@ -61,6 +61,13 @@ ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
 
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "ArrayRebuilder::Rebuild, PrepareRebuild, isResume: {}, ret:{}", resume, ret);
+
+    if (ret == EID(REBUILD_INVALIDATED))
+    {
+        mtxStart.unlock();
+        return;
+    }
+
     if (resume)
     {
         for (auto it : tgt)

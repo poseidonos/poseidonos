@@ -42,6 +42,7 @@ class Stripe;
 
 class LogWriteHandler;
 class LogWriteContextFactory;
+class JournalEventFactory;
 class JournalingStatus;
 
 class JournalWriter : public IJournalWriter
@@ -50,7 +51,8 @@ public:
     JournalWriter(void);
     virtual ~JournalWriter(void);
 
-    virtual int Init(LogWriteHandler* writeHandler, LogWriteContextFactory* factory, JournalingStatus* status);
+    virtual int Init(LogWriteHandler* writeHandler, LogWriteContextFactory* logWriteEventFactory,
+        JournalEventFactory* journalEventFactory, JournalingStatus* status);
 
     virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo,
         MpageList dirty, EventSmartPtr callbackEvent);
@@ -65,6 +67,7 @@ private:
 
     LogWriteHandler* logWriteHandler;
     LogWriteContextFactory* logFactory;
+    JournalEventFactory* eventFactory;
     JournalingStatus* status;
 };
 

@@ -51,6 +51,7 @@
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/journal_manager/log_write/buffer_offset_allocator.h"
+#include "src/journal_manager/log_write/journal_event_factory.h"
 #include "src/journal_manager/log_write/journal_volume_event_handler.h"
 #include "src/journal_manager/log_write/log_write_handler.h"
 #include "src/journal_manager/replay/replay_handler.h"
@@ -69,6 +70,7 @@ JournalManager::JournalManager(void)
   statusProvider(nullptr),
   logBuffer(nullptr),
   logFactory(nullptr),
+  eventFactory(nullptr),
   logWriteHandler(nullptr),
   volumeEventHandler(nullptr),
   journalWriter(nullptr),
@@ -86,6 +88,7 @@ JournalManager::JournalManager(void)
 JournalManager::JournalManager(JournalConfiguration* configuration,
     JournalStatusProvider* journalStatusProvider,
     LogWriteContextFactory* logWriteContextFactory,
+    JournalEventFactory* journalEventFactory,
     LogWriteHandler* writeHandler,
     JournalVolumeEventHandler* journalVolumeEventHandler,
     JournalWriter* writer,
@@ -104,6 +107,8 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     statusProvider = journalStatusProvider;
 
     logFactory = logWriteContextFactory;
+    eventFactory = journalEventFactory;
+
     logWriteHandler = writeHandler;
     volumeEventHandler = journalVolumeEventHandler;
     journalWriter = writer;
@@ -128,6 +133,7 @@ JournalManager::JournalManager(IArrayInfo* info, IStateControl* state)
 : JournalManager(new JournalConfiguration(),
     new JournalStatusProvider(),
     new LogWriteContextFactory(),
+    new JournalEventFactory(),
     new LogWriteHandler(),
     new JournalVolumeEventHandler(),
     new JournalWriter(),
@@ -159,6 +165,7 @@ JournalManager::~JournalManager(void)
     delete volumeEventHandler;
     delete logWriteHandler;
     delete logFactory;
+    delete eventFactory;
 
     delete checkpointManager;
     delete statusProvider;
@@ -383,6 +390,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     checkpointManager->Init(mapFlush, contextManager, eventScheduler, sequenceController, dirtyMapManager);
 
     logFactory->Init(config, logFilledNotifier, sequenceController);
+    eventFactory->Init(logWriteHandler);
 
     // Note that bufferAllocator should be notified after dirtyMapManager,
     // and logWriteHandler should be notified after bufferAllocator
@@ -396,7 +404,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     logWriteHandler->Init(bufferAllocator, logBuffer, config);
     volumeEventHandler->Init(logFactory, checkpointManager, logWriteHandler, config,
         contextManager, eventScheduler);
-    journalWriter->Init(logWriteHandler, logFactory, &journalingStatus);
+    journalWriter->Init(logWriteHandler, logFactory, eventFactory, &journalingStatus);
 
     replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, blockAllocator,
         wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);

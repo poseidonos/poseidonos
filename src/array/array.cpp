@@ -50,7 +50,7 @@ namespace pos
 const int Array::LOCK_ACQUIRE_FAILED = -1;
 
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
-: Array(name, rbdr, abr, new ArrayDeviceManager(DeviceManagerSingleton::Instance()),
+: Array(name, rbdr, abr, new ArrayDeviceManager(DeviceManagerSingleton::Instance(), name),
       DeviceManagerSingleton::Instance(), new PartitionManager(name, abr), new ArrayState(iState),
       new ArrayInterface(), EventSchedulerSingleton::Instance(), ArrayService::Instance())
 {
@@ -794,7 +794,17 @@ Array::_RebuildDone(RebuildResult result)
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "Array {} rebuild done. as success.", name_, result.result);
 
-    result.target->SetState(ArrayDeviceState::NORMAL);
+    if (result.target->GetState() != ArrayDeviceState::FAULT)
+    {
+        result.target->SetState(ArrayDeviceState::NORMAL);
+    }
+    else
+    {
+        POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+            "Array {} rebuild done. but device state is not rebuild state. device state : {}",
+            name_, result.target->GetState());
+    }
+
     state->SetRebuildDone(true);
     int ret = _Flush();
     if (0 != ret)

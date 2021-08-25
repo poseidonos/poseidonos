@@ -15,24 +15,12 @@ TEST(StateControl, StateControl_testIfCompilerCanHandleNullptrDelete)
     delete s;
 }
 
-TEST(StateControl, StateControl_testIfStateContextIsAddedToStateList)
-{
-    // Given
-    MockStateList* mockStateList = new MockStateList(nullptr);
-    EXPECT_CALL(*mockStateList, Add).Times(1);
-
-    // When
-    StateControl sc(nullptr, nullptr, mockStateList);
-
-    // Then: verify the expectation
-}
-
 TEST(StateControl, Subscribe_testIfObserverIsAddedToPublisher)
 {
     // Given
     NiceMock<MockStateList>* mockStateList = new NiceMock<MockStateList>(nullptr);
     MockStatePublisher* mockStatePublisher = new MockStatePublisher();
-    StateControl sc(nullptr, mockStatePublisher, mockStateList);
+    StateControl sc(mockStatePublisher, mockStateList);
     EXPECT_CALL(*mockStatePublisher, Add).Times(1);
 
     // When
@@ -46,7 +34,7 @@ TEST(StateControl, Unsubscribe_testIfObserverIsRemovedFromPublisher)
     // Given
     NiceMock<MockStateList>* mockStateList = new NiceMock<MockStateList>(nullptr);
     MockStatePublisher* mockStatePublisher = new MockStatePublisher();
-    StateControl sc(nullptr, mockStatePublisher, mockStateList);
+    StateControl sc(mockStatePublisher, mockStateList);
     EXPECT_CALL(*mockStatePublisher, Remove).Times(1);
 
     // When
@@ -55,25 +43,11 @@ TEST(StateControl, Unsubscribe_testIfObserverIsRemovedFromPublisher)
     // Then: verify the expectation
 }
 
-TEST(StateControl, GetState_testGetter)
-{
-    // Given
-    NiceMock<MockStateList>* mockStateList = new NiceMock<MockStateList>(nullptr);
-    MockStateContext mockStateContext("sender", SituationEnum::DEFAULT);
-    StateControl sc(&mockStateContext, nullptr, mockStateList);
-
-    // When
-    StateContext* actual = sc.GetState();
-
-    // Then
-    ASSERT_EQ(&mockStateContext, actual);
-}
-
 TEST(StateControl, Invoke_testIfStateIsAddedToList)
 {
     // Given
     NiceMock<MockStateList>* mockStateList = new NiceMock<MockStateList>(nullptr);
-    StateControl sc(nullptr, nullptr, mockStateList);
+    StateControl sc(nullptr, mockStateList);
     EXPECT_CALL(*mockStateList, Add).Times(1);
 
     // When
@@ -87,7 +61,7 @@ TEST(StateControl, Remove_testIfCtxIsRemovedFromStateList)
 {
     // Given
     NiceMock<MockStateList>* mockStateList = new NiceMock<MockStateList>(nullptr);
-    StateControl sc(nullptr, nullptr, mockStateList);
+    StateControl sc(nullptr, mockStateList);
     EXPECT_CALL(*mockStateList, Remove).Times(1);
 
     // When
@@ -100,7 +74,7 @@ TEST(StateControl, Exists_testIfStateListCallsRemove)
 {
     // Given
     NiceMock<MockStateList>* mockStateList = new NiceMock<MockStateList>(nullptr);
-    StateControl sc(nullptr, nullptr, mockStateList);
+    StateControl sc(nullptr, mockStateList);
     EXPECT_CALL(*mockStateList, Exists).Times(1);
 
     // When

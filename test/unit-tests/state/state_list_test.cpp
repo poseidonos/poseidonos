@@ -21,7 +21,7 @@ TEST(StateList, Add_testIfCtxIsAddedInSortedListWhenItDoesNotExistYet)
         &mockExistingStateContext
     };
     int invokeCountForListUpdated = 0;
-    StateList::ListUpdatedHandler mockHandler = [&invokeCountForListUpdated](StateContext* ctx)
+    StateList::ListUpdatedHandler mockHandler = [&invokeCountForListUpdated](StateContext* ctx, StateContext* ctx2)
     {
         invokeCountForListUpdated++;
         return;
@@ -31,6 +31,7 @@ TEST(StateList, Add_testIfCtxIsAddedInSortedListWhenItDoesNotExistYet)
     MockStateContext mockNewStateContext("sender1", SituationEnum::DEFAULT);
     EXPECT_CALL(mockExistingStateContext, GetPriority).WillOnce(Return(100));
     EXPECT_CALL(mockNewStateContext, GetPriority).WillOnce(Return(200));  // i.e., this has higher priority than existing one's
+    EXPECT_CALL(mockNewStateContext, GetSituation).WillOnce(Return(SituationEnum::DEFAULT));
 
     // When
     stateList.Add(&mockNewStateContext);
@@ -53,7 +54,7 @@ TEST(StateList, Add_testIfCtxIsNotAddedWhenItExistsAlready)
         &mockExistingStateContext
     };
     int invokeCountForListUpdated = 0;
-    StateList::ListUpdatedHandler mockHandler = [&invokeCountForListUpdated](StateContext* ctx)
+    StateList::ListUpdatedHandler mockHandler = [&invokeCountForListUpdated](StateContext* ctx, StateContext* ctx2)
     {
         invokeCountForListUpdated++;
         return;
@@ -80,7 +81,7 @@ TEST(StateList, Remove_testIfCtxIsRemovedFromList)
         &mockExistingStateContext
     };
     int invokeCountForListUpdated = 0;
-    StateList::ListUpdatedHandler mockHandler = [&invokeCountForListUpdated](StateContext* ctx)
+    StateList::ListUpdatedHandler mockHandler = [&invokeCountForListUpdated](StateContext* ctx, StateContext* ctx2)
     {
         invokeCountForListUpdated++;
         return;
@@ -105,7 +106,7 @@ TEST(StateList, Remove_testIfListRemainsTheSameWhenRemovalFails)
         &mockExistingStateContext
     };
     int invokeCountForListUpdated = 0;
-    StateList::ListUpdatedHandler mockHandler = [&invokeCountForListUpdated](StateContext* ctx)
+    StateList::ListUpdatedHandler mockHandler = [&invokeCountForListUpdated](StateContext* ctx, StateContext* ctx2)
     {
         invokeCountForListUpdated++;
         return;

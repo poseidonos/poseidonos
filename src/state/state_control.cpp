@@ -42,30 +42,17 @@ namespace pos
 {
 StateControl::StateControl(void)
 : StateControl(
-    &defaultCtx,
     new StatePublisher(),
-    new StateList(bind(&StateControl::_ListUpdated, this, placeholders::_1))
+    new StateList(bind(&StateControl::_ListUpdated, this, placeholders::_1, placeholders::_2))
     )
 {
     // delegated to other constructor
 }
 
-StateControl::StateControl(StateContext* stateCtx)
-: StateControl(
-    stateCtx,
-    new StatePublisher(),
-    new StateList(bind(&StateControl::_ListUpdated, this, placeholders::_1))
-    )
-{
-    // delegated to other constructor
-}
-
-StateControl::StateControl(StateContext* stateCtx, StatePublisher* publisher, StateList* stateList)
+StateControl::StateControl(StatePublisher* publisher, StateList* stateList)
 : publisher(publisher),
-  curr(stateCtx),
   stateList(stateList)
 {
-    stateList->Add(stateCtx);
 }
 
 StateControl::~StateControl(void)
@@ -89,7 +76,7 @@ StateControl::Unsubscribe(IStateObserver* sub)
 StateContext*
 StateControl::GetState(void)
 {
-     return curr;
+     return stateList->Current();
 }
 
 void
@@ -118,24 +105,14 @@ StateControl::Exists(SituationEnum situ)
 }
 
 void
-StateControl::_ListUpdated(StateContext* front)
+StateControl::_ListUpdated(StateContext* prev, StateContext* next)
 {
-    _ChangeState(front);
-}
-
-void
-StateControl::_ChangeState(StateContext* next)
-{
-    if (curr != next)
+    if (prev != next)
     {
-        string currSitu = curr->GetSituation().ToString();
+        string currSitu = prev->GetSituation().ToString();
         string nextSitu = next->GetSituation().ToString();
         POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CHANGED,
             "STATE_CHANGED[{}] -> [{}]", currSitu, nextSitu);
-
-        StateContext* prev = curr;
-        curr = next;
-
         _NotifyState(prev, curr);
     }
 }

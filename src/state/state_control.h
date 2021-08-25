@@ -48,8 +48,7 @@ class StateControl : public IStateControl
 {
 public:
     StateControl(void);
-    explicit StateControl(StateContext* stateCtx);
-    StateControl(StateContext* stateCtx, StatePublisher* publisher, StateList* stateList);
+    StateControl(StatePublisher* publisher, StateList* stateList);
     virtual ~StateControl(void);
     void Subscribe(IStateObserver* sub, string name) override;
     void Unsubscribe(IStateObserver* sub) override;
@@ -62,15 +61,12 @@ public:
     virtual void WaitOnInvokeFuture(void);
 
 private:
-    void _ListUpdated(StateContext* front);
-    void _UpdateState(void);
-    void _ChangeState(StateContext* next);
+    void _ListUpdated(StateContext* prev, StateContext* next);
     void _NotifyState(StateContext* prev, StateContext* next);
 
     StatePublisher* publisher = nullptr;
     StateContext* curr = nullptr;
     StateList* stateList = nullptr;
     future<void> async_future;
-    StateContext defaultCtx{"StateManager", SituationEnum::DEFAULT};
 };
 } // namespace pos

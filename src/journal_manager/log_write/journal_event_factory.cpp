@@ -30,38 +30,25 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include "src/journal_manager/log_write/journal_event_factory.h"
 
-#include <atomic>
 #include <functional>
 
 #include "src/event_scheduler/event.h"
-#include "src/include/smart_ptr_type.h"
-#include "src/mapper/include/mpage_info.h"
+#include "src/journal_manager/log_write/log_write_handler.h"
 
 namespace pos
 {
-class LogWriteContext;
-
-using GcLogWriteCallback = std::function<int(LogWriteContext*)>;
-
-class GcLogWriteCompleted : public Event
+void
+JournalEventFactory::Init(LogWriteHandler* logWriteHandler)
 {
-public:
-    GcLogWriteCompleted(void) = default;
-    GcLogWriteCompleted(GcLogWriteCallback func, LogWriteContext* context);
-    virtual ~GcLogWriteCompleted(void) = default;
+    gcCallbackFunc = std::bind(&LogWriteHandler::AddLog, logWriteHandler, std::placeholders::_1);
+}
 
-    virtual bool Execute(void) override;
-
-    virtual void SetNumLogs(uint64_t val);
-
-private:
-    std::atomic<uint64_t> numLogs;
-    std::atomic<uint64_t> numCompletedLogs;
-
-    GcLogWriteCallback callbackFunc;
-    LogWriteContext* context;
-};
-
+EventSmartPtr
+JournalEventFactory::CreateGcLogWriteCompletedEvent(LogWriteContext* callbackContext)
+{
+    EventSmartPtr event(new GcLogWriteCompleted(gcCallbackFunc, callbackContext));
+    return event;
+}
 } // namespace pos

@@ -1,18 +1,17 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
 #include "src/journal_manager/log_write/gc_log_write_completed.h"
 
 namespace pos
 {
-class MockGcStripeFlushedLogWriteCompleted : public GcStripeFlushedLogWriteCompleted
+class MockGcLogWriteCompleted : public GcLogWriteCompleted
 {
 public:
-    using GcStripeFlushedLogWriteCompleted::GcStripeFlushedLogWriteCompleted;
+    using GcLogWriteCompleted::GcLogWriteCompleted;
     MOCK_METHOD(bool, Execute, (), (override));
+    MOCK_METHOD(void, SetNumLogs, (uint64_t val), (override));
 };
 
 } // namespace pos

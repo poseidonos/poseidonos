@@ -32,36 +32,26 @@
 
 #pragma once
 
-#include <atomic>
-#include <functional>
-
-#include "src/event_scheduler/event.h"
 #include "src/include/smart_ptr_type.h"
-#include "src/mapper/include/mpage_info.h"
+#include "src/journal_manager/log_write/gc_log_write_completed.h"
 
 namespace pos
 {
-class LogWriteContext;
+class LogWriteHandler;
 
-using GcLogWriteCallback = std::function<int(LogWriteContext*)>;
-
-class GcLogWriteCompleted : public Event
+// TODO (huijeong.kim) : move to class to general folder to be used at everywhere in journal
+class JournalEventFactory
 {
 public:
-    GcLogWriteCompleted(void) = default;
-    GcLogWriteCompleted(GcLogWriteCallback func, LogWriteContext* context);
-    virtual ~GcLogWriteCompleted(void) = default;
+    JournalEventFactory(void) = default;
+    virtual ~JournalEventFactory(void) = default;
 
-    virtual bool Execute(void) override;
+    virtual void Init(LogWriteHandler* logWriteHandler);
 
-    virtual void SetNumLogs(uint64_t val);
+    virtual EventSmartPtr CreateGcLogWriteCompletedEvent(LogWriteContext* callbackContext);
 
 private:
-    std::atomic<uint64_t> numLogs;
-    std::atomic<uint64_t> numCompletedLogs;
-
-    GcLogWriteCallback callbackFunc;
-    LogWriteContext* context;
+    GcLogWriteCallback gcCallbackFunc;
 };
 
 } // namespace pos

@@ -149,7 +149,9 @@ Allocator::Shutdown(void)
 {
     if (isInitialized == false)
     {
-        return;
+        contextManager->Dispose();
+        _UnregisterFromAllocatorService();
+        isInitialized = false;
     }
     _UnregisterFromAllocatorService();
     isInitialized = false;
