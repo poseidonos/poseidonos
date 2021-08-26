@@ -35,6 +35,11 @@
 #include "src/cli/command.h"
 #include <string>
 
+namespace pos
+{
+class IGCInfo;
+} // namespace pos
+
 namespace pos_cli
 {
 class ArrayInfoCommand : public Command
@@ -43,5 +48,8 @@ public:
     ArrayInfoCommand(void);
     ~ArrayInfoCommand(void) override;
     string Execute(json& doc, string rid) override;
+
+private:
+    string _GetGCMode(IGCInfo* array, string arrayName);
 };
 }; // namespace pos_cli

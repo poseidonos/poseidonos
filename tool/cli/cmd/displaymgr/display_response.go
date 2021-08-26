@@ -112,6 +112,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		fmt.Fprintln(w, "Rebuilding Progress\t:", array.REBUILDINGPROGRESS)
 		fmt.Fprintln(w, "Total\t: "+toByte(displayUnit, array.CAPACITY))
 		fmt.Fprintln(w, "Used\t: "+toByte(displayUnit, array.USED))
+		fmt.Fprintln(w, "GCMode\t: "+array.GCMODE)
 		fmt.Fprintln(w, "")
 		fmt.Fprintln(w, "Devices")
 		fmt.Fprintln(w, "Name\tType")

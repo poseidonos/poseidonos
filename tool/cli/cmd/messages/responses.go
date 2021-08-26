@@ -80,9 +80,10 @@ type Array struct {
 	SITUATION          string   `json:situation,omitempty"`
 	STATE              string   `json:state,omitempty"`
 	REBUILDINGPROGRESS int      `json:rebuilding_progress,omitempty"`
-	CAPACITY           uint64      `json:capacity,omitempty"`
-	USED               uint64      `json:used,omitempty"`
+	CAPACITY           uint64   `json:capacity,omitempty"`
+	USED               uint64   `json:used,omitempty"`
 	DEVICELIST         []Device `json:"devicelist"`
+	GCMODE             string   `json:gcMode,omitempty"`
 }
 
 type Device struct {
@@ -92,7 +93,7 @@ type Device struct {
 	CLASS      string `json:"class,omitempty"`
 	MN         string `json:"mn,omitempty"`
 	NUMA       string `json:"numa,omitempty"`
-	SIZE       uint64    `json:"size,omitempty"`
+	SIZE       uint64 `json:"size,omitempty"`
 	SERIAL     string `json:"sn,omitempty"`
 }
 
@@ -110,14 +111,14 @@ type LoggerInfoResult struct {
 }
 
 type LoggerInfoResData struct {
-	MINORLOGPATH                   string `json:"minor_log_path"`
-	MAJORLOGPATH                   string `json:"major_log_path"`
-	LOGFILESIZEINBM                string `json:"logfile_size_in_mb"`
-	LOGFILEROTATIONCOUNT           int    `json:"logfile_rotation_count"`
-	MINALLOWABLELOGLEVEL           string `json:"min_allowable_log_level"`
-	FILTERENABLED                  int    `json:"filter_enabled"`
-	FILTERINCLUDED                 string `json:"filter_included"`
-	FILTEREXCLUDED                 string `json:"filter_excluded"`
+	MINORLOGPATH         string `json:"minor_log_path"`
+	MAJORLOGPATH         string `json:"major_log_path"`
+	LOGFILESIZEINBM      string `json:"logfile_size_in_mb"`
+	LOGFILEROTATIONCOUNT int    `json:"logfile_rotation_count"`
+	MINALLOWABLELOGLEVEL string `json:"min_allowable_log_level"`
+	FILTERENABLED        int    `json:"filter_enabled"`
+	FILTERINCLUDED       string `json:"filter_included"`
+	FILTEREXCLUDED       string `json:"filter_excluded"`
 }
 
 // Response for GETLOGLEVEL command

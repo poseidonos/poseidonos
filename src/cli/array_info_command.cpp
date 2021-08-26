@@ -30,9 +30,8 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/cli/array_info_command.h"
-
 #include "src/array_mgmt/array_manager.h"
+#include "src/cli/array_info_command.h"
 #include "src/cli/cli_event_code.h"
 #include "src/mbr/mbr_info.h"
 #include "src/sys_info/space_info.h"
@@ -50,13 +49,19 @@ ArrayInfoCommand::~ArrayInfoCommand(void)
 string
 ArrayInfoCommand::Execute(json& doc, string rid)
 {
-    string arrayName = DEFAULT_ARRAY_NAME;
+    string arrayName = "";
     if (doc["param"].contains("name") == true)
     {
         arrayName = doc["param"]["name"].get<std::string>();
     }
 
     JsonFormat jFormat;
+    if (arrayName == "")
+    {   JsonFormat jFormat;
+        return jFormat.MakeResponse("ARRAYINFO", rid, (int)POS_EVENT_ID::ARRAY_WRONG_NAME,
+            "Please type array name", GetPosInfo());
+    }
+
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
     {
@@ -64,6 +69,7 @@ ArrayInfoCommand::Execute(json& doc, string rid)
             arrayName + " does not exist", GetPosInfo());
     }
     IArrayInfo* array = info->arrayInfo;
+    IGCInfo* gc = info->gcInfo;
 
     JsonElement data("data");
     string state = array->GetStateCtx()->ToStateType().ToString();
@@ -77,6 +83,13 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     data.SetAttribute(JsonAttribute("rebuildingProgress", "\"" + to_string(array->GetRebuildingProgress()) + "\""));
     data.SetAttribute(JsonAttribute("capacity", to_string(SpaceInfo::SystemCapacity(arrayName))));
     data.SetAttribute(JsonAttribute("used", to_string(SpaceInfo::Used(arrayName))));
+
+    if (array->GetState() >= ArrayStateEnum::NORMAL)
+    {
+        data.SetAttribute(JsonAttribute("gcMode", "\"" +
+            _GetGCMode(gc, arrayName) + "\""));
+    }
+
     DeviceSet<string> nameSet = array->GetDevNames();
 
     if (nameSet.nvm.size() == 0 && nameSet.data.size() == 0)
@@ -112,6 +125,41 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     data.SetArray(jsonArray);
     return jFormat.MakeResponse("ARRAYINFO", rid, SUCCESS,
         arrayName + " information", data, GetPosInfo());
+}
+
+std::string
+ArrayInfoCommand::_GetGCMode(IGCInfo* gc, string arrayName)
+{
+    if (arrayName == "")
+    {
+        return "N/A";
+    }
+
+    int isEnabled = gc->IsEnabled();
+    if (0 != isEnabled)
+    {
+        return "N/A";
+    }
+
+    IContextManager* iContextManager = AllocatorServiceSingleton::Instance()->GetIContextManager(arrayName);
+    GcMode gcMode = iContextManager->GetCurrentGcMode();
+
+    std::string strGCMode;
+
+    if (gcMode == GcMode::MODE_URGENT_GC)
+    {
+        strGCMode = "urgent";
+    }
+    else if (gcMode == GcMode::MODE_NORMAL_GC)
+    {
+        strGCMode = "normal";
+    }
+    else
+    {
+        strGCMode = "none";
+    }
+
+    return strGCMode;
 }
 
 }; // namespace pos_cli

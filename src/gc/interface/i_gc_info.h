@@ -37,5 +37,6 @@ namespace pos
 class IGCInfo
 {
 public:
+    virtual int IsEnabled(void) = 0;
 };
 } // namespace pos
