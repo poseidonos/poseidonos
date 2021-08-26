@@ -32,25 +32,38 @@
 
 #pragma once
 
+#include "src/journal_service/i_journal_manager.h"
 #include "src/journal_service/i_journal_writer.h"
 #include "src/mapper/i_stripemap.h"
 #include "src/mapper/i_vsamap.h"
 #include "src/meta_service/i_meta_updater.h"
+#include "src/allocator/i_block_allocator.h"
+#include "src/allocator/i_wbstripe_allocator.h"
 
 namespace pos
 {
+class EventScheduler;
+
 class MetaUpdater : public IMetaUpdater
 {
 public:
-    MetaUpdater(IJournalWriter* journalWriter, IVSAMap* vsaMap, IStripeMap* stripeMap);
+    MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
+        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+        IJournalManager* journal, IJournalWriter* journalWriter, EventScheduler* eventScheduler);
     virtual ~MetaUpdater(void);
 
-    virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, EventSmartPtr callback) override;
+    virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback) override;
     virtual int UpdateStripeMap(Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callback) override;
 
 private:
-    IJournalWriter* journalWriter;
+    MpageList _GetDirtyPages(VolumeIoSmartPtr volumeIo);
+
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
+    IBlockAllocator* blockAllocator;
+    IWBStripeAllocator* wbStripeAllocator;
+    IJournalManager* journal;
+    IJournalWriter* journalWriter;
+    EventScheduler* eventScheduler;
 };
 } // namespace pos

@@ -32,46 +32,31 @@
 
 #pragma once
 
-#include "src/array_models/interface/i_array_info.h"
-#include "src/array_models/interface/i_mount_sequence.h"
-#include "src/state/interface/i_state_control.h"
+#include "src/event_scheduler/callback.h"
+
+#include "src/mapper/i_vsamap.h"
+#include "src/allocator/i_block_allocator.h"
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
-class TelemetryPublisher;
-class Mapper;
-class Allocator;
-class JournalManager;
-
-class MetaUpdater;
-
-class Metadata : public IMountSequence
+class BlockMapUpdate : public Callback
 {
 public:
-    Metadata(void);
-    Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state);
-    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl);
-    virtual ~Metadata(void);
-
-    virtual int Init(void) override;
-    virtual void Dispose(void) override;
-    virtual void Shutdown(void) override;
-    virtual void Flush(void) override;
-
-    // TODO (huijeong.kim) Remove rebuild methods and make array components
-    // to get allocator modules directly
-    virtual bool NeedRebuildAgain(void);
-    virtual int PrepareRebuild(void);
-    virtual void StopRebuilding(void);
+    BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
+        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator);
+    virtual ~BlockMapUpdate(void);
 
 private:
-    void _RegisterMetaUpdater(void);
+    virtual bool _DoSpecificJob(void) override;
 
-    IArrayInfo* arrayInfo;
-    Mapper* mapper;
-    Allocator* allocator;
-    JournalManager* journal;
+    void _UpdateReverseMap(Stripe& stripe);
+    Stripe& _GetStripe(StripeAddr& lsidEntry);
 
-    MetaUpdater* metaUpdater;
+    VolumeIoSmartPtr volumeIo;
+    IVSAMap* vsaMap;
+    IBlockAllocator* blockAllocator;
+    IWBStripeAllocator* wbStripeAllocator;
 };
 } // namespace pos

@@ -34,13 +34,12 @@
 
 #include <functional>
 
-#include "src/allocator_service/allocator_service.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/address_type.h"
-#include "src/io/frontend_io/block_map_update.h"
 #include "src/io/frontend_io/write_completion.h"
+#include "src/meta_service/i_meta_updater.h"
 
 namespace pos
 {
@@ -53,16 +52,18 @@ class BlockMapUpdateRequest : public Callback
 public:
     BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback = nullptr);
     BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback,
-        EventSmartPtr blockMapUpdateEvent, EventScheduler* eventScheduler, bool isReactorNow);
+        CallbackSmartPtr blockMapUpdateCompletionEvent, IMetaUpdater* metaUpdater,
+        EventScheduler* eventScheduler, bool isReactorNow);
     virtual ~BlockMapUpdateRequest(void) override;
 
 private:
     bool _DoSpecificJob(void) override;
-    virtual void _UpdateMeta(void);
+    virtual bool _UpdateMeta(void);
 
     VolumeIoSmartPtr volumeIo;
     CallbackSmartPtr originCallback;
-    EventSmartPtr blockMapUpdateEvent;
+    CallbackSmartPtr blockMapUpdateCompletionEvent;
+    IMetaUpdater* metaUpdater;
     EventScheduler* eventScheduler;
 };
 

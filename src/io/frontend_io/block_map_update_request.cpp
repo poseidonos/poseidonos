@@ -33,33 +33,33 @@
 #include "src/io/frontend_io/block_map_update_request.h"
 
 #include "mk/ibof_config.h"
-#include "src/allocator/i_block_allocator.h"
-#include "src/allocator/i_wbstripe_allocator.h"
-#include "src/array/array.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/io_completer.h"
 #include "src/include/branch_prediction.h"
-#include "src/include/meta_const.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/io/general_io/rba_state_manager.h"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/meta_service/meta_service.h"
+#include "src/io/frontend_io/block_map_update_completion.h"
 
 namespace pos
 {
 BlockMapUpdateRequest::BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback)
-: BlockMapUpdateRequest(volumeIo, originCallback, std::make_shared<BlockMapUpdate>(volumeIo, originCallback),
-      EventSchedulerSingleton::Instance(), EventFrameworkApiSingleton::Instance()->IsReactorNow())
+: BlockMapUpdateRequest(volumeIo, originCallback, std::make_shared<BlockMapUpdateCompletion>(volumeIo, originCallback),
+    MetaServiceSingleton::Instance()->GetMetaUpdater(volumeIo->GetArrayId()),
+    EventSchedulerSingleton::Instance(), EventFrameworkApiSingleton::Instance()->IsReactorNow())
 {
 }
 
 BlockMapUpdateRequest::BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback,
-    EventSmartPtr blockMapUpdateEvent, EventScheduler* eventScheduler, bool isReactorNow)
+    CallbackSmartPtr blockMapUpdateCompletionEvent, IMetaUpdater* metaUpdater,
+    EventScheduler* eventScheduler, bool isReactorNow)
 : Callback(isReactorNow, CallbackType_BlockMapUpdateRequest),
   volumeIo(volumeIo),
   originCallback(originCallback),
-  blockMapUpdateEvent(blockMapUpdateEvent),
+  blockMapUpdateCompletionEvent(blockMapUpdateCompletionEvent),
+  metaUpdater(metaUpdater),
   eventScheduler(eventScheduler)
 {
 }
@@ -71,6 +71,7 @@ BlockMapUpdateRequest::~BlockMapUpdateRequest(void)
 bool
 BlockMapUpdateRequest::_DoSpecificJob(void)
 {
+    bool result = true;
     try
     {
         if (unlikely(_GetErrorCount() > 0))
@@ -80,7 +81,7 @@ BlockMapUpdateRequest::_DoSpecificJob(void)
                 PosEventId::GetString(eventId));
             throw eventId;
         }
-        _UpdateMeta();
+        result = _UpdateMeta();
     }
     catch (...)
     {
@@ -97,30 +98,34 @@ BlockMapUpdateRequest::_DoSpecificJob(void)
         return true;
     }
 
-    volumeIo = nullptr;
-    return true;
+    if (result == true)
+    {
+        volumeIo = nullptr;
+    }
+    return result;
 }
 
-void
+bool
 BlockMapUpdateRequest::_UpdateMeta(void)
 {
-    if (likely(blockMapUpdateEvent != nullptr))
+    if (likely(blockMapUpdateCompletionEvent != nullptr))
     {
-        bool mapUpdateSuccessful = blockMapUpdateEvent->Execute();
-        if (unlikely(false == mapUpdateSuccessful))
+        int result = metaUpdater->UpdateBlockMap(volumeIo, blockMapUpdateCompletionEvent);
+        if (unlikely(result != 0))
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::WRCMP_MAP_UPDATE_FAILED;
             POS_TRACE_ERROR(static_cast<int>(eventId),
                 PosEventId::GetString(eventId));
-            eventScheduler->EnqueueEvent(blockMapUpdateEvent);
+            return false;
         }
     }
     else
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_EVENT_ALLOC_FAILED;
         POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId));
-        eventScheduler->EnqueueEvent(blockMapUpdateEvent);
+        eventScheduler->EnqueueEvent(blockMapUpdateCompletionEvent);
     }
+    return true;
 }
 
 } // namespace pos

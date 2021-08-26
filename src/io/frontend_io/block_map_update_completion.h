@@ -34,10 +34,8 @@
 
 #include <functional>
 
-#include "src/allocator/i_wbstripe_allocator.h"
 #include "src/bio/volume_io.h"
-#include "src/event_scheduler/event.h"
-#include "src/io/general_io/vsa_range_maker.h"
+#include "src/event_scheduler/callback.h"
 
 namespace pos
 {
@@ -47,33 +45,23 @@ class EventScheduler;
 class WriteCompletion;
 class IBlockAllocator;
 
-class BlockMapUpdateCompletion : public Event
+class BlockMapUpdateCompletion : public Callback
 {
 public:
     BlockMapUpdateCompletion(VolumeIoSmartPtr inputVolumeIo, CallbackSmartPtr originCallback);
     BlockMapUpdateCompletion(VolumeIoSmartPtr input, CallbackSmartPtr originCallback,
         bool isReactorNow,
-        IVSAMap* iVSAMap, EventScheduler* eventScheduler,
-        CallbackSmartPtr writeCompletionEvent,
-        IBlockAllocator* iBlockAllocator,
-        IWBStripeAllocator* iWBStripeAllocator,
-        VsaRangeMaker* VsaRangeMaker);
+        EventScheduler* eventScheduler,
+        CallbackSmartPtr writeCompletionEvent);
     virtual ~BlockMapUpdateCompletion(void);
 
-    virtual bool Execute(void) override;
-
 private:
-    Stripe& _GetStripe(StripeAddr& lsidEntry);
-    virtual void _UpdateReverseMap(Stripe& stripe);
+    virtual bool _DoSpecificJob(void) override;
 
     VolumeIoSmartPtr volumeIo;
     CallbackSmartPtr originCallback;
-    IVSAMap* iVSAMap;
     EventScheduler* eventScheduler;
     CallbackSmartPtr writeCompletionEvent;
-    IBlockAllocator* iBlockAllocator;
-    IWBStripeAllocator* iWBStripeAllocator;
-    VsaRangeMaker* vsaRangeMaker;
 };
 
 } // namespace pos

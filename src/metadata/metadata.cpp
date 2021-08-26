@@ -39,6 +39,8 @@
 #include "src/meta_service/meta_service.h"
 #include "src/metadata/meta_updater.h"
 
+#include "src/event_scheduler/event_scheduler.h"
+
 #ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_mgr.h"
 #include "src/meta_file_intf/mock_file_intf.h"
@@ -131,7 +133,7 @@ Metadata::Init(void)
         return result;
     }
 
-    _CreateMetaServices();
+    _RegisterMetaUpdater();
 
 #ifdef _ADMIN_ENABLED
     // TODO (r.saraf) to move this initialize out of meta sequence
@@ -143,13 +145,18 @@ Metadata::Init(void)
 }
 
 void
-Metadata::_CreateMetaServices(void)
+Metadata::_RegisterMetaUpdater(void)
 {
-    metaUpdater = new MetaUpdater(journal->GetJournalWriter(),
-        mapper->GetIVSAMap(), mapper->GetIStripeMap());
+    metaUpdater = new MetaUpdater(mapper->GetIVSAMap(),
+        mapper->GetIStripeMap(),
+        allocator->GetIBlockAllocator(),
+        allocator->GetIWBStripeAllocator(),
+        journal,
+        journal->GetJournalWriter(),
+        EventSchedulerSingleton::Instance());
 
-    // MetaServiceSingleton::Instance()->Register(arrayInfo->GetName(),
-    //   arrayInfo->GetIndex(), metaUpdater);
+    MetaServiceSingleton::Instance()->Register(arrayInfo->GetName(),
+       arrayInfo->GetIndex(), metaUpdater);
 }
 
 void

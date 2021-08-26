@@ -42,7 +42,7 @@ class Stripe;
 class IMetaUpdater
 {
 public:
-    virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, EventSmartPtr callback) = 0;
+    virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback) = 0;
     virtual int UpdateStripeMap(Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callback) = 0;
 };
 } // namespace pos
