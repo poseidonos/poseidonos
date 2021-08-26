@@ -46,10 +46,10 @@ func TestListVolumeResHumanReadable(t *testing.T) {
 		`{"name":"vol2","id":1,"total":11474836480,"remain":8474836480,` +
 		`"status":"Unmounted","maxiops":0,"maxbw":0}]}}}`
 
-	expected := `Name      |ID    |TotalCapacity                |RemainingCapacity            |Used%     |Status     |MaximumIOPS      |MaximumBandwith
---------- |----- |---------------------------- |---------------------------- |--------- |---------- |---------------- |----------------
-vol1      |0     |200G                         |200G                         |100%      |Mounted    |0                |0
-vol2      |1     |10.7G                        |7.9G                         |73%       |Unmounted  |0                |0
+	expected := `Name      |ID    |TotalCapacity                |RemainingCapacity            |Remaining% |Status     |MaximumIOPS      |MaximumBandwith
+--------- |----- |---------------------------- |---------------------------- |---------  |---------- |---------------- |----------------
+vol1      |0     |214748364800                 |214748364800                 |100        |Mounted    |0                |0
+vol2      |1     |11474836480                  |8474836480                   |73         |Unmounted  |0                |0
 `
 	output := hookResponse(command, resJSON, false, false)
 
@@ -221,7 +221,7 @@ func hookResponse(command string, resJSON string, isDebug bool, isJSONRes bool) 
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	displaymgr.PrintResponse(command, resJSON, false, false)
+	displaymgr.PrintResponse(command, resJSON, false, false, false)
 
 	w.Close()
 	out, _ := ioutil.ReadAll(r)

@@ -22,7 +22,8 @@ var CreateVolumeCmd = &cobra.Command{
 Syntax: 
 	poseidonos-cli volume create (--volume-name | -v) VolumeName (--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth] .
 	
-	- VolumeSize: B, K, KB, G, GB, ... (all values are binary units (base-2))
+	- VolumeSize Unit: B, K, KB, G, GB, ... (binary units (base-2))
+	(If the unit is not input, it will be B in default)
 
 Example: 
 	poseidonos-cli volume create --volume-name Volume0 --array-name volume0 --size 1024GB --maxiops 1000 --maxbw 100GB/s

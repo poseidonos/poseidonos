@@ -137,7 +137,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 				globals.FieldSeparator+"ID\t"+
 				globals.FieldSeparator+"TotalCapacity\t"+
 				globals.FieldSeparator+"RemainingCapacity\t"+
-				globals.FieldSeparator+"Used%\t"+
+				globals.FieldSeparator+"Remaining%\t"+
 				globals.FieldSeparator+"Status\t"+
 				globals.FieldSeparator+"MaximumIOPS\t"+
 				globals.FieldSeparator+"MaximumBandwith")
@@ -160,7 +160,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 					globals.FieldSeparator+strconv.Itoa(volume.VOLUMEID)+"\t"+
 					globals.FieldSeparator+toByte(displayUnit, volume.TOTAL)+"\t"+
 					globals.FieldSeparator+toByte(displayUnit, volume.REMAIN)+"\t"+
-					globals.FieldSeparator+strconv.FormatUint(volume.REMAIN*100/volume.TOTAL, 10)+"%"+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(volume.REMAIN*100/volume.TOTAL, 10)+"\t"+
 					globals.FieldSeparator+volume.STATUS+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.MAXIOPS)+"\t"+
 					globals.FieldSeparator+strconv.Itoa(volume.MAXBW))
