@@ -2,7 +2,9 @@
 
 #include "library_unit_test.h"
 #include "src/main/poseidonos.h"
+#include <signal.h>
 #include <sstream>
+#include <unistd.h>
 
 std::ostringstream stringStream;
 
