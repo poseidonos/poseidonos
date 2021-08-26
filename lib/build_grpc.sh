@@ -33,6 +33,7 @@ install_protobuf()
 	pushd third_party/protobuf/cmake/build
 	cmake .. \
 		-Dprotobuf_BUILD_TESTS=OFF \
+		-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
 		-DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
 	make -j ${BUILD_JOBS}
 	make install

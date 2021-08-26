@@ -355,7 +355,7 @@ clean_go()
 
 build_grpc()
 {
-	./build_grpc.sh
+	./build_grpc.sh -f
 }
 
 case "$1" in
