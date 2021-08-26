@@ -37,7 +37,6 @@
 #include "src/metafs/include/mf_property.h"
 
 #include <string>
-#include <atomic>
 
 namespace pos
 {
@@ -88,11 +87,6 @@ public:
     virtual int IssueIO(MetaFsIoOpcode opType, uint64_t fileOffset, uint64_t length, char* buffer);
     virtual int AppendIO(MetaFsIoOpcode opType, uint64_t& offset, uint64_t length, char* buffer);
 
-    int64_t GetIssuedCount(void)
-    {
-        return issuedCount;
-    }
-
 protected:
     virtual int _Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer) = 0;
     virtual int _Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer) = 0;
@@ -105,7 +99,6 @@ protected:
     int fd;
     StorageOpt storage;
     MetaFilePropertySet fileProperty;
-    std::atomic<int64_t> issuedCount;
 };
 
 } // namespace pos
