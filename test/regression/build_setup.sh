@@ -59,7 +59,8 @@ buildTest()
     texecc rm $ibof_root/bin/poseidonos
 
     texecc ./configure $config_option
-    texecc cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y -S lib -B lib
+    cwd=""
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${ibof_root}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y"
     if [ $target_type == "VM" ]
     then
         echo "Build For VM"

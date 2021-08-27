@@ -399,8 +399,8 @@ add_custom_target(
 
 add_custom_target(
     clean_filebench
-    WORKING_DIRECTORY ${PROJ_ROOT}/lib
-    COMMAND rm -rf ${POS_DEP_FILEBENCH}
+    WORKING_DIRECTORY ${PROJ_ROOT}/lib/${POS_DEP_FILEBENCH}
+    COMMAND make clean
 )
 
 add_custom_target(
@@ -444,7 +444,39 @@ add_custom_target(
     COMMAND rm -rf ./go
 )
 
+if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build)
+    list(APPEND CLEAN_ALL_TARGETS clean_air)
+endif()
+
+if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_FILEBENCH}/Makefile)
+    list(APPEND CLEAN_ALL_TARGETS clean_filebench)
+endif()
+
+if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_FIO}/Makefile)
+    list(APPEND CLEAN_ALL_TARGETS clean_fio)
+endif()
+
+if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_SPDK}/Makefile)
+    list(APPEND CLEAN_ALL_TARGETS clean_spdk)
+endif()
+
+if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_DPDK}/x86_64-native-linuxapp-gcc)
+    list(APPEND CLEAN_ALL_TARGETS clean_dpdk)
+endif()
+
+if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_SPDLOG}/_builds)
+    list(APPEND CLEAN_ALL_TARGETS clean_spdlog)
+endif()
+
+if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_GTEST}/libgtest.a)
+    list(APPEND CLEAN_ALL_TARGETS clean_gtest)
+endif()
+
+if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_GO}/go)
+    list(APPEND CLEAN_ALL_TARGETS clean_go)
+endif()
+
 add_custom_target(
     clean_all
-    DEPENDS clean_air clean_filebench clean_fio clean_spdk clean_dpdk clean_spdlog clean_gtest clean_go
+    DEPENDS ${CLEAN_ALL_TARGETS}
 )

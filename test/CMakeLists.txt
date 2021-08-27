@@ -295,7 +295,7 @@ else()
 endif()
 
 # Build gtest conditionally
-SET(POS_DEP_GTEST ${PROJ_ROOT}/lib/gtest)
+SET(POS_DEP_GTEST ${PROJ_ROOT}/lib/gtest/gtest-all.o)
 if(EXISTS "${POS_DEP_GTEST}")
     message("GTEST build exists: ${POS_DEP_GTEST}. Build skipped.")
 else()
