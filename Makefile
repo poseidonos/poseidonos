@@ -226,7 +226,6 @@ $(APP) : $(SPDK_LIB_FILES) protobuf poseidonos
 poseidonos: makedir
 	$(MAKE) -C src
 	$(CLI_DIR)/script/build_cli.sh
-	cp -f $(CLI_DIR)/old-cli $(BINDIR)/cli
 	mv -f $(CLI_DIR)/bin/poseidonos-cli $(BINDIR)/poseidonos-cli
 
 makedir:
