@@ -136,7 +136,7 @@ public:
     void SetUblock(UblockSharedPtr uBlock);
     virtual bool NeedRecovery(void);
 
-    int GetArrayId(void);
+    virtual int GetArrayId(void);
     void SetEventType(BackendEvent event);
     BackendEvent GetEventType(void);
 

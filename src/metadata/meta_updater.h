@@ -43,6 +43,7 @@
 namespace pos
 {
 class EventScheduler;
+class MetaEventFactory;
 
 class MetaUpdater : public IMetaUpdater
 {
@@ -50,6 +51,10 @@ public:
     MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
         IJournalManager* journal, IJournalWriter* journalWriter, EventScheduler* eventScheduler);
+    MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
+        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+        IJournalManager* journal, IJournalWriter* journalWriter, EventScheduler* eventScheduler,
+        MetaEventFactory* eventFactory);
     virtual ~MetaUpdater(void);
 
     virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback) override;
@@ -65,5 +70,6 @@ private:
     IJournalManager* journal;
     IJournalWriter* journalWriter;
     EventScheduler* eventScheduler;
+    MetaEventFactory* metaEventFactory;
 };
 } // namespace pos

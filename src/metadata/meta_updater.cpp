@@ -31,12 +31,14 @@
 */
 
 #include "src/metadata/meta_updater.h"
-#include "src/metadata/block_map_update.h"
+
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
+#include "src/metadata/block_map_update.h"
+#include "src/metadata/meta_event_factory.h"
 
 namespace pos
 {
@@ -44,18 +46,34 @@ MetaUpdater::MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
     IJournalManager* journal, IJournalWriter* journalWriter,
     EventScheduler* eventScheduler)
+: MetaUpdater(vsaMap, stripeMap, blockAllocator, wbStripeAllocator,
+      journal, journalWriter, eventScheduler,
+      new MetaEventFactory(vsaMap, blockAllocator, wbStripeAllocator))
+{
+}
+
+MetaUpdater::MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
+    IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+    IJournalManager* journal, IJournalWriter* journalWriter,
+    EventScheduler* eventScheduler, MetaEventFactory* eventFactory)
 : vsaMap(vsaMap),
   stripeMap(stripeMap),
   blockAllocator(blockAllocator),
   wbStripeAllocator(wbStripeAllocator),
   journal(journal),
   journalWriter(journalWriter),
-  eventScheduler(eventScheduler)
+  eventScheduler(eventScheduler),
+  metaEventFactory(eventFactory)
 {
 }
 
 MetaUpdater::~MetaUpdater(void)
 {
+    if (metaEventFactory != nullptr)
+    {
+        delete metaEventFactory;
+        metaEventFactory = nullptr;
+    }
 }
 
 int
@@ -63,7 +81,8 @@ MetaUpdater::UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback
 {
     int result = 0;
 
-    CallbackSmartPtr blockMapUpdate(new BlockMapUpdate(volumeIo, vsaMap, blockAllocator, wbStripeAllocator));
+    CallbackSmartPtr blockMapUpdate =
+        metaEventFactory->CreateBlockMapUpdateEvent(volumeIo);
     blockMapUpdate->SetCallee(callback);
 
     if (journal->IsEnabled() == true)

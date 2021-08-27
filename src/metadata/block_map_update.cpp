@@ -41,26 +41,39 @@
 namespace pos
 {
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator)
+    IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator)
+: BlockMapUpdate(volumeIo, vsaMap, blockAllocator, wbStripeAllocator,
+      new VsaRangeMaker(volumeIo->GetVolumeId(),
+          ChangeSectorToBlock(volumeIo->GetSectorRba()),
+          DivideUp(volumeIo->GetSize(), BLOCK_SIZE),
+          volumeIo->IsGc(), volumeIo->GetArrayId()))
+{
+}
+
+BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
+    IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
+    VsaRangeMaker* vsaRangeMaker)
 : Callback(EventFrameworkApiSingleton::Instance()->IsReactorNow()),
   volumeIo(volumeIo),
   vsaMap(vsaMap),
   blockAllocator(blockAllocator),
-  wbStripeAllocator(wbStripeAllocator)
+  wbStripeAllocator(wbStripeAllocator),
+  oldVsaRangeMaker(vsaRangeMaker)
 {
 }
 
 BlockMapUpdate::~BlockMapUpdate(void)
 {
+    if (oldVsaRangeMaker != nullptr)
+    {
+        delete oldVsaRangeMaker;
+        oldVsaRangeMaker = nullptr;
+    }
 }
 
 bool
 BlockMapUpdate::_DoSpecificJob(void)
 {
-    VsaRangeMaker vsaRangeMaker(volumeIo->GetVolumeId(),
-        ChangeSectorToBlock(volumeIo->GetSectorRba()),
-        DivideUp(volumeIo->GetSize(), BLOCK_SIZE), volumeIo->IsGc(), volumeIo->GetArrayId());
-
     uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
     VirtualBlks targetVsaRange = {
         .startVsa = volumeIo->GetVsa(),
@@ -72,11 +85,11 @@ BlockMapUpdate::_DoSpecificJob(void)
     Stripe& stripe = _GetStripe(lsidEntry);
     _UpdateReverseMap(stripe);
 
-    uint32_t vsaRangeCount = vsaRangeMaker.GetCount();
+    uint32_t vsaRangeCount = oldVsaRangeMaker->GetCount();
     for (uint32_t vsaRangeIndex = 0; vsaRangeIndex < vsaRangeCount;
          vsaRangeIndex++)
     {
-        VirtualBlks& vsaRange = vsaRangeMaker.GetVsaRange(vsaRangeIndex);
+        VirtualBlks& vsaRange = oldVsaRangeMaker->GetVsaRange(vsaRangeIndex);
         blockAllocator->InvalidateBlks(vsaRange);
     }
 
@@ -84,7 +97,6 @@ BlockMapUpdate::_DoSpecificJob(void)
 
     return true;
 }
-
 
 void
 BlockMapUpdate::_UpdateReverseMap(Stripe& stripe)

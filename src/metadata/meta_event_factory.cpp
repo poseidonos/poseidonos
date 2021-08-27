@@ -30,39 +30,25 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include "src/metadata/meta_event_factory.h"
 
-#include "src/event_scheduler/callback.h"
-
-#include "src/mapper/i_vsamap.h"
-#include "src/allocator/i_block_allocator.h"
-#include "src/allocator/i_wbstripe_allocator.h"
-#include "src/include/smart_ptr_type.h"
+#include "src/metadata/block_map_update.h"
 
 namespace pos
 {
-class VsaRangeMaker;
-
-class BlockMapUpdate : public Callback
+MetaEventFactory::MetaEventFactory(IVSAMap* vsaMap, IBlockAllocator* blockAllocator,
+    IWBStripeAllocator* wbStripeAllocator)
+: vsaMap(vsaMap),
+  blockAllocator(blockAllocator),
+  wbStripeAllocator(wbStripeAllocator)
 {
-public:
-    BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator);
-    BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-        VsaRangeMaker* vsaRangeMaker);
-    virtual ~BlockMapUpdate(void);
+}
 
-private:
-    virtual bool _DoSpecificJob(void) override;
+CallbackSmartPtr
+MetaEventFactory::CreateBlockMapUpdateEvent(VolumeIoSmartPtr volumeIo)
+{
+    CallbackSmartPtr callback(new BlockMapUpdate(volumeIo, vsaMap, blockAllocator, wbStripeAllocator));
+    return callback;
+}
 
-    void _UpdateReverseMap(Stripe& stripe);
-    Stripe& _GetStripe(StripeAddr& lsidEntry);
-
-    VolumeIoSmartPtr volumeIo;
-    IVSAMap* vsaMap;
-    IBlockAllocator* blockAllocator;
-    IWBStripeAllocator* wbStripeAllocator;
-    VsaRangeMaker* oldVsaRangeMaker;
-};
 } // namespace pos

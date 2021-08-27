@@ -33,6 +33,7 @@ public:
     MOCK_METHOD(const VirtualBlkAddr&, GetOldVsa, (), (override));
     MOCK_METHOD(uint64_t, GetSectorRba, (), (override));
     MOCK_METHOD(bool, _IsInvalidLsidEntry, (StripeAddr& inputLsidEntry), (override));
+    MOCK_METHOD(int, GetArrayId, (), (override));
 };
 
 } // namespace pos

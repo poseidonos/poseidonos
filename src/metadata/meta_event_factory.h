@@ -32,37 +32,27 @@
 
 #pragma once
 
-#include "src/event_scheduler/callback.h"
-
-#include "src/mapper/i_vsamap.h"
-#include "src/allocator/i_block_allocator.h"
-#include "src/allocator/i_wbstripe_allocator.h"
 #include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
-class VsaRangeMaker;
+class IVSAMap;
+class IBlockAllocator;
+class IWBStripeAllocator;
 
-class BlockMapUpdate : public Callback
+class MetaEventFactory
 {
 public:
-    BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator);
-    BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-        VsaRangeMaker* vsaRangeMaker);
-    virtual ~BlockMapUpdate(void);
+    MetaEventFactory(void) = default;
+    MetaEventFactory(IVSAMap* vsaMaap, IBlockAllocator* blockAllocator,
+        IWBStripeAllocator* wbStripeAllocator);
+    virtual ~MetaEventFactory(void) = default;
+
+    virtual CallbackSmartPtr CreateBlockMapUpdateEvent(VolumeIoSmartPtr volumeIo);
 
 private:
-    virtual bool _DoSpecificJob(void) override;
-
-    void _UpdateReverseMap(Stripe& stripe);
-    Stripe& _GetStripe(StripeAddr& lsidEntry);
-
-    VolumeIoSmartPtr volumeIo;
     IVSAMap* vsaMap;
     IBlockAllocator* blockAllocator;
     IWBStripeAllocator* wbStripeAllocator;
-    VsaRangeMaker* oldVsaRangeMaker;
 };
 } // namespace pos
