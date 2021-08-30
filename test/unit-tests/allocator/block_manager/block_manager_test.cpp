@@ -82,6 +82,7 @@ TEST(BlockManager, AllocateGcDestStripe_TestFunc)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetstripesPerSegment(10);
+    addrInfo.SetblksPerStripe(32);
     NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
@@ -116,6 +117,7 @@ TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase1)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetstripesPerSegment(10);
+    addrInfo.SetblksPerStripe(32);
     NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
@@ -153,6 +155,7 @@ TEST(BlockManager, AllocateGcDestStripe_TestFuncFailCase2)
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetstripesPerSegment(10);
+    addrInfo.SetblksPerStripe(32);
     NiceMock<MockIWBStripeInternal>* iWbstripe = new NiceMock<MockIWBStripeInternal>();
     NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockWbStripeCtx>* wbCtx = new NiceMock<MockWbStripeCtx>();
