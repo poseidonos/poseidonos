@@ -4,10 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"pnconnector/src/log"
-	"pnconnector/src/routers/m9k/model"
-	"pnconnector/src/setting"
-	"pnconnector/src/util"
 	"strconv"
 	"time"
 
@@ -24,6 +20,10 @@ import (
 	"cli/cmd/subsystemcmds"
 	"cli/cmd/systemcmds"
 	"cli/cmd/volumecmds"
+	"pnconnector/src/log"
+	"pnconnector/src/routers/m9k/model"
+	"pnconnector/src/setting"
+	"pnconnector/src/util"
 )
 
 var isVerbose bool

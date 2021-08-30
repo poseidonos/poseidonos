@@ -10,7 +10,7 @@ import (
 	"cli/cmd/messages"
 	"cli/cmd/socketmgr"
 
-	"github.com/bytefmt-master"
+	"code.cloudfoundry.org/bytefmt"
 	"github.com/spf13/cobra"
 )
 

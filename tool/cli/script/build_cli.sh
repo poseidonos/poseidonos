@@ -9,35 +9,24 @@ if [ -d "../../tool" ]; then
 	export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 fi
 
-:<<END
 wget -q --tries=1 --timeout=3 --spider http://google.com
 
 if [[ $? -eq 0 ]]; then
-	echo "Online"
-	go mod vendor	
-
+	echo "The Internet is available. Use the Internet repository for the libraries."
+	export GOPROXY=
+	export GOSUMDB=
 else
-	echo "Offline"
-	rm -rf vendor/pnconnector
-	cp -rf ../pnconnector ./vendor/
-	rm -rf vendor/dagent
-	mkdir vendor/dagent
-	cp -rf ../dagent/src ./vendor/dagent/
+	echo "The Internet is not available. Use an alternative repository for the libraries."
+	export GOPROXY="http://10.227.253.89:8081/artifactory/api/go/go"
+	export GOSUMDB=off
 fi
-END
 
-if [ -d "../pnconnector" ]; then
-	rm -rf vendor/pnconnector
-	cp -rf ../pnconnector ./vendor/
-	rm -rf vendor/dagent
-	mkdir vendor/dagent
-	cp -rf ../dagent/src ./vendor/dagent/
-fi
+go mod vendor
 
 export GIT_COMMIT_CLI=$(git rev-list -1 HEAD)
 export BUILD_TIME_CLI=$(date +%s)
 
-./vendor/pnconnector/script/build_resource.sh
+lib/pnconnector/script/build_resource.sh
 go build -mod vendor -tags debug,ssloff -ldflags "-X cli/cmd.GitCommit=$GIT_COMMIT_CLI -X cli/cmd.BuildTime=$BUILD_TIME_CLI"
 
 mv ./cli bin/poseidonos-cli

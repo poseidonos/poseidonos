@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/bytefmt-master"
+	"code.cloudfoundry.org/bytefmt"
 )
 
 func toByte(displayUnit bool, size uint64) string {

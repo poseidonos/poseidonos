@@ -8,6 +8,7 @@ import (
 	"cli/cmd/globals"
 	"cli/cmd/messages"
 	"cli/cmd/socketmgr"
+
 	"github.com/spf13/cobra"
 )
 
@@ -28,12 +29,12 @@ Example:
 		var requestList [3]messages.Request
 
 		createSubsystemAutoParam := messages.CreateSubsystemAutoParam{
-			SUBNQN:		mount_volume_with_subsystem_subnqn,
+			SUBNQN: mount_volume_with_subsystem_subnqn,
 		}
 		createSubsystemReq := messages.Request{
-			RID:	  	"fromfakeclient",
-			COMMAND:	"CREATESUBSYSTEMAUTO",
-			PARAM:		createSubsystemAutoParam,
+			RID:     "fromfakeclient",
+			COMMAND: "CREATESUBSYSTEMAUTO",
+			PARAM:   createSubsystemAutoParam,
 		}
 		requestList[0] = createSubsystemReq
 
@@ -44,9 +45,9 @@ Example:
 			TRANSPORTSERVICEID: mount_volume_with_subsystem_trsvcid,
 		}
 		addListenerReq := messages.Request{
-			RID:		"fromCLI",
-			COMMAND:	"ADDLISTENER",
-			PARAM:		addListenerParam,
+			RID:     "fromCLI",
+			COMMAND: "ADDLISTENER",
+			PARAM:   addListenerParam,
 		}
 		requestList[1] = addListenerReq
 
@@ -80,7 +81,7 @@ Example:
 				}
 				socketmgr.Close()
 
-				displaymgr.PrintResponse(request.COMMAND , resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+				displaymgr.PrintResponse(request.COMMAND, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 			}
 		}
 	},
@@ -99,7 +100,7 @@ var mount_volume_with_subsystem_trsvcid = ""
 func init() {
 	MountVolumeWithSubsystemCmd.Flags().StringVarP(&mount_volume_with_subsystem_volumeName, "volume-name", "v", "", "The name of the volume to mount")
 	MountVolumeWithSubsystemCmd.MarkFlagRequired("volume-name")
-	
+
 	MountVolumeWithSubsystemCmd.Flags().StringVarP(&mount_volume_with_subsystem_subnqn, "subnqn", "q", "", "NQN of the subsystem to create")
 	MountVolumeWithSubsystemCmd.MarkFlagRequired("subnqn")
 
@@ -108,10 +109,10 @@ func init() {
 
 	MountVolumeWithSubsystemCmd.Flags().StringVarP(&mount_volume_with_subsystem_trtype, "transport_type", "t", "", "NVMe-oF transport type (ex. tcp)")
 	MountVolumeWithSubsystemCmd.MarkFlagRequired("transport-type")
-	
+
 	MountVolumeWithSubsystemCmd.Flags().StringVarP(&mount_volume_with_subsystem_traddr, "target_address", "i", "", "NVMe-oF target address (ex. 127.0.0.1)")
 	MountVolumeWithSubsystemCmd.MarkFlagRequired("target_address")
-	
+
 	MountVolumeWithSubsystemCmd.Flags().StringVarP(&mount_volume_with_subsystem_trsvcid, "transport_service_id", "p", "", "NVMe-oF transport service id (ex. 1158)")
 	MountVolumeWithSubsystemCmd.MarkFlagRequired("transport-service-id")
 }
