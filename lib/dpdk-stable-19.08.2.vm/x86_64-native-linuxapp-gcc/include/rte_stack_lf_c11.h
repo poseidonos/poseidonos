@@ -1,1 +1,0 @@
-../../lib/librte_stack/rte_stack_lf_c11.h
