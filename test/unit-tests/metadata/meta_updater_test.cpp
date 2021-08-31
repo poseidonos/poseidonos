@@ -6,6 +6,7 @@
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/event_scheduler/callback.h"
 #include "test/unit-tests/allocator/i_block_allocator_mock.h"
+#include "test/unit-tests/allocator/i_context_manager_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/event_scheduler/callback_mock.h"
@@ -33,6 +34,7 @@ TEST(MetaUpdater, MetaUpdater_testIfProductConstructorExecutedSuccessfully)
     // Given
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
+    NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
@@ -40,7 +42,7 @@ TEST(MetaUpdater, MetaUpdater_testIfProductConstructorExecutedSuccessfully)
     NiceMock<MockEventScheduler> eventScheduler;
 
     // When
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &blockAllocator,
+    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
         &wbStripeAllocator, &journal, &journalWriter, &eventScheduler);
 
     // Then : Do nothing
@@ -51,6 +53,7 @@ TEST(MetaUpdater, MetaUpdater_testIfUTConstructorExecutedSuccessfully)
     // Given
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
+    NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
@@ -59,7 +62,7 @@ TEST(MetaUpdater, MetaUpdater_testIfUTConstructorExecutedSuccessfully)
     NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
 
     // When
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &blockAllocator,
+    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
         &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory);
 
     // Then : Do nothing
@@ -68,6 +71,7 @@ TEST(MetaUpdater, UpdateBlockMap_testIfExecutedSuccessullfyWhenJournalEnabled)
 {
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
+    NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
@@ -75,7 +79,7 @@ TEST(MetaUpdater, UpdateBlockMap_testIfExecutedSuccessullfyWhenJournalEnabled)
     NiceMock<MockEventScheduler> eventScheduler;
     NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
 
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &blockAllocator,
+    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
         &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory);
 
     NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>(nullptr, 0, 0);
@@ -100,6 +104,7 @@ TEST(MetaUpdater, UpdateBlockMap_testIfFailsWhenJournalWriteFails)
 {
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
+    NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
@@ -107,7 +112,7 @@ TEST(MetaUpdater, UpdateBlockMap_testIfFailsWhenJournalWriteFails)
     NiceMock<MockEventScheduler> eventScheduler;
     NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
 
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &blockAllocator,
+    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
         &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory);
 
     NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>(nullptr, 0, 0);
@@ -130,6 +135,7 @@ TEST(MetaUpdater, UpdateBlockMap_testIfExecutedSuccessfullyWhenJournalDisabled)
 {
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
+    NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockIBlockAllocator> blockAllocator;
     NiceMock<MockIJournalManager> journal;
@@ -137,7 +143,7 @@ TEST(MetaUpdater, UpdateBlockMap_testIfExecutedSuccessfullyWhenJournalDisabled)
     NiceMock<MockEventScheduler> eventScheduler;
     NiceMock<MockMetaEventFactory>* metaEventFactory = new NiceMock<MockMetaEventFactory>;
 
-    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &blockAllocator,
+    MetaUpdater metaUpdater(&vsaMap, &stripeMap, &contextManager, &blockAllocator,
         &wbStripeAllocator, &journal, &journalWriter, &eventScheduler, metaEventFactory);
 
     NiceMock<MockVolumeIo>* mockVolumeIo = new NiceMock<MockVolumeIo>(nullptr, 0, 0);

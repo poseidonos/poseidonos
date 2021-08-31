@@ -43,7 +43,7 @@ namespace pos
 BlockMapUpdateCompletion::BlockMapUpdateCompletion(
     VolumeIoSmartPtr input, CallbackSmartPtr originCallback,
     bool isReactorNow, EventScheduler* eventScheduler, CallbackSmartPtr writeCompletionEvent)
-: Callback(isReactorNow),
+: Callback(isReactorNow, CallbackType_BlockMapUpdateRequestCompletion),
   volumeIo(input),
   originCallback(originCallback),
   eventScheduler(eventScheduler),

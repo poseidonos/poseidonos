@@ -123,6 +123,10 @@ Metadata::Init(void)
         return result;
     }
 
+    // MetaUpdater should be registered before journal initialized
+    // Meta update will be re-tried when journal is not ready
+    _RegisterMetaUpdater();
+
     POS_TRACE_INFO(eventId, "Start initializing journal of array {}", arrayName);
     result = journal->Init();
     if (result != 0)
@@ -132,8 +136,6 @@ Metadata::Init(void)
         mapper->Dispose();
         return result;
     }
-
-    _RegisterMetaUpdater();
 
 #ifdef _ADMIN_ENABLED
     // TODO (r.saraf) to move this initialize out of meta sequence
@@ -149,6 +151,7 @@ Metadata::_RegisterMetaUpdater(void)
 {
     metaUpdater = new MetaUpdater(mapper->GetIVSAMap(),
         mapper->GetIStripeMap(),
+        allocator->GetIContextManager(),
         allocator->GetIBlockAllocator(),
         allocator->GetIWBStripeAllocator(),
         journal,

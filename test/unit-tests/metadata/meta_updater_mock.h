@@ -11,7 +11,7 @@ class MockMetaUpdater : public MetaUpdater
 public:
     using MetaUpdater::MetaUpdater;
     MOCK_METHOD(int, UpdateBlockMap, (VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback), (override));
-    MOCK_METHOD(int, UpdateStripeMap, (Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callback), (override));
+    MOCK_METHOD(int, UpdateStripeMap, (Stripe* stripe, CallbackSmartPtr callback), (override));
 };
 
 } // namespace pos

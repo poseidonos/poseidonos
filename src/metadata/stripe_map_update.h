@@ -32,48 +32,25 @@
 
 #pragma once
 
-#include "src/allocator/i_block_allocator.h"
 #include "src/allocator/i_context_manager.h"
-#include "src/allocator/i_wbstripe_allocator.h"
-#include "src/journal_service/i_journal_manager.h"
-#include "src/journal_service/i_journal_writer.h"
+#include "src/event_scheduler/callback.h"
 #include "src/mapper/i_stripemap.h"
-#include "src/mapper/i_vsamap.h"
-#include "src/meta_service/i_meta_updater.h"
 
 namespace pos
 {
-class EventScheduler;
-class MetaEventFactory;
+class Stripe;
 
-class MetaUpdater : public IMetaUpdater
+class StripeMapUpdate : public Callback
 {
 public:
-    MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IContextManager* contextManager,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-        IJournalManager* journal, IJournalWriter* journalWriter, EventScheduler* eventScheduler);
-    MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IContextManager* contextManager,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-        IJournalManager* journal, IJournalWriter* journalWriter, EventScheduler* eventScheduler,
-        MetaEventFactory* eventFactory);
-    virtual ~MetaUpdater(void);
-
-    virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback) override;
-    virtual int UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback) override;
+    StripeMapUpdate(Stripe* stripe, IStripeMap* stripeMap, IContextManager* contextManager);
+    virtual ~StripeMapUpdate(void);
 
 private:
-    MpageList _GetDirtyPages(VolumeIoSmartPtr volumeIo);
+    virtual bool _DoSpecificJob(void) override;
 
-    IVSAMap* vsaMap;
+    Stripe* stripe;
     IStripeMap* stripeMap;
     IContextManager* contextManager;
-    IBlockAllocator* blockAllocator;
-    IWBStripeAllocator* wbStripeAllocator;
-    IJournalManager* journal;
-    IJournalWriter* journalWriter;
-    EventScheduler* eventScheduler;
-    MetaEventFactory* metaEventFactory;
 };
 } // namespace pos

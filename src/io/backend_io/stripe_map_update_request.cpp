@@ -41,25 +41,28 @@
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io/backend_io/flush_count.h"
+#include "src/io/backend_io/flush_completion.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
+#include "src/meta_service/meta_service.h"
 
 namespace pos
 {
 StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, int arrayId)
 : StripeMapUpdateRequest(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayId),
-      EventSchedulerSingleton::Instance(), EventSmartPtr(new StripeMapUpdate(stripe, arrayId)), arrayId)
+      MetaServiceSingleton::Instance()->GetMetaUpdater(arrayId),
+      EventSchedulerSingleton::Instance(), make_shared<FlushCompletion>(stripe, arrayId))
 {
-    SetEventType(BackendEvent_Flush);
 }
 
 StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap,
-    EventScheduler* eventScheduler, EventSmartPtr event, int arrayId)
-: Callback(false),
+    IMetaUpdater* metaUpdater, EventScheduler* eventScheduler, CallbackSmartPtr event)
+: Callback(false, CallbackType_StripeMapUpdateRequest),
   stripe(stripe),
   iStripeMap(stripeMap),
+  iMetaUpdater(metaUpdater),
   eventScheduler(eventScheduler),
-  event(event)
+  completionEvent(event)
 {
 }
 
@@ -100,7 +103,7 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         return true;
     }
 
-    if (unlikely(nullptr == event))
+    if (unlikely(nullptr == completionEvent))
     {
         POS_EVENT_ID eventId =
             POS_EVENT_ID::NFLSH_EVENT_ALLOCATION_FAILED;
@@ -113,9 +116,8 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         return true;
     }
 
-    bool mapUpdateSuccessful = event->Execute();
-
-    if (unlikely(false == mapUpdateSuccessful))
+    int result = iMetaUpdater->UpdateStripeMap(stripe, completionEvent);
+    if (unlikely(0 != result))
     {
         POS_EVENT_ID eventId =
             POS_EVENT_ID::NFLSH_EVENT_MAP_UPDATE_FAILED;
@@ -124,8 +126,12 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         POS_TRACE_ERROR(static_cast<int>(eventId),
             PosEventId::GetString(eventId), message.str());
 
-        eventScheduler->EnqueueEvent(event);
+        return false;
     }
+
+    eventId = POS_EVENT_ID::NFLSH_STRIPE_DEBUG_UPDATE;
+    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, PosEventId::GetString(eventId),
+        stripe->GetVsid());
 
     return true;
 }

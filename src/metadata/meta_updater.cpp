@@ -39,25 +39,29 @@
 #include "src/logger/logger.h"
 #include "src/metadata/block_map_update.h"
 #include "src/metadata/meta_event_factory.h"
+#include "src/metadata/stripe_map_update.h"
 
 namespace pos
 {
 MetaUpdater::MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
+    IContextManager* contextManager,
     IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
     IJournalManager* journal, IJournalWriter* journalWriter,
     EventScheduler* eventScheduler)
-: MetaUpdater(vsaMap, stripeMap, blockAllocator, wbStripeAllocator,
+: MetaUpdater(vsaMap, stripeMap, contextManager, blockAllocator, wbStripeAllocator,
       journal, journalWriter, eventScheduler,
       new MetaEventFactory(vsaMap, blockAllocator, wbStripeAllocator))
 {
 }
 
 MetaUpdater::MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
+    IContextManager* contextManager,
     IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
     IJournalManager* journal, IJournalWriter* journalWriter,
     EventScheduler* eventScheduler, MetaEventFactory* eventFactory)
 : vsaMap(vsaMap),
   stripeMap(stripeMap),
+  contextManager(contextManager),
   blockAllocator(blockAllocator),
   wbStripeAllocator(wbStripeAllocator),
   journal(journal),
@@ -92,6 +96,7 @@ MetaUpdater::UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback
     }
     else
     {
+        // TODO (huijeong.kim) change to use ExecuteOrScheduleEvent
         bool executedSuccessfully = blockMapUpdate->Execute();
         if (unlikely(false == executedSuccessfully))
         {
@@ -115,10 +120,35 @@ MetaUpdater::_GetDirtyPages(VolumeIoSmartPtr volumeIo)
 }
 
 int
-MetaUpdater::UpdateStripeMap(Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callback)
+MetaUpdater::UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback)
 {
-    // TODO (huijeong.kim) to update
-    return 0;
+    int result = 0;
+
+    CallbackSmartPtr stripeMapUpdate(new StripeMapUpdate(stripe, stripeMap, contextManager));
+    stripeMapUpdate->SetCallee(callback);
+
+    if (journal->IsEnabled() == true)
+    {
+        MpageList dirty = stripeMap->GetDirtyStripeMapPages(stripe->GetVsid());
+        StripeAddr oldAddr = stripeMap->GetLSA(stripe->GetVsid());
+
+        result = journalWriter->AddStripeMapUpdatedLog(stripe, oldAddr,
+            dirty, stripeMapUpdate);
+    }
+    else
+    {
+        bool executionSuccessful = stripeMapUpdate->Execute();
+        if (unlikely(false == executionSuccessful))
+        {
+            POS_EVENT_ID eventId =
+                POS_EVENT_ID::NFLSH_STRIPE_DEBUG_UPDATE;
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                PosEventId::GetString(eventId));
+
+            eventScheduler->EnqueueEvent(stripeMapUpdate);
+        }
+    }
+    return result;
 }
 
 } // namespace pos

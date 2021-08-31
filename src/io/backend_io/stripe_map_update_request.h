@@ -35,28 +35,30 @@
 #include <string>
 
 #include "src/event_scheduler/callback.h"
-#include "src/io/backend_io/stripe_map_update.h"
 #include "src/io/general_io/io_submit_handler.h"
 
 namespace pos
 {
 class Stripe;
 class IStripeMap;
+class IMetaUpdater;
 class EventScheduler;
 
 class StripeMapUpdateRequest : public Callback
 {
 public:
     explicit StripeMapUpdateRequest(Stripe* stripe, int arrayId);
-    StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap, EventScheduler* eventScheduler, EventSmartPtr event, int arrayId);
+    StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap,
+        IMetaUpdater* metaUpdater, EventScheduler* eventScheduler, CallbackSmartPtr event);
     ~StripeMapUpdateRequest(void) override;
 
 private:
     bool _DoSpecificJob(void) override;
     Stripe* stripe;
     IStripeMap* iStripeMap;
+    IMetaUpdater* iMetaUpdater;
     EventScheduler* eventScheduler;
-    EventSmartPtr event;
+    CallbackSmartPtr completionEvent;
 };
 
 } // namespace pos

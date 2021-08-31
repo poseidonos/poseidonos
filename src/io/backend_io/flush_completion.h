@@ -34,7 +34,7 @@
 
 #include <string>
 
-#include "src/event_scheduler/event.h"
+#include "src/event_scheduler/callback.h"
 
 namespace pos
 {
@@ -43,7 +43,7 @@ class IStripeMap;
 class StripePutEvent;
 class EventScheduler;
 
-class FlushCompletion : public Event
+class FlushCompletion : public Callback
 {
 public:
     FlushCompletion(void) = delete;
@@ -54,9 +54,9 @@ public:
         int arrayId);
     virtual ~FlushCompletion(void);
 
-    virtual bool Execute(void) override;
-
 private:
+    virtual bool _DoSpecificJob(void) override;
+
     Stripe* stripe;
     IStripeMap* iStripeMap;
     EventScheduler* eventScheduler;

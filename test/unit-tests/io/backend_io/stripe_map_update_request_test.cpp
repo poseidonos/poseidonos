@@ -12,8 +12,9 @@
 #include "test/unit-tests/allocator/event/stripe_put_event_mock.h"
 #include "test/unit-tests/allocator/stripe/stripe_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
-#include "test/unit-tests/io/backend_io/stripe_map_update_mock.h"
+#include "test/unit-tests/io/backend_io/flush_completion_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
+#include "test/unit-tests/meta_service/i_meta_updater_mock.h"
 
 using namespace pos;
 using namespace std;
@@ -51,13 +52,14 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_Constructor_ThreeArguments)
     // Given
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
+    NiceMock<MockIMetaUpdater> mockMetaUpdater;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockStripeMapUpdate>* mockStripeMapUpdate = new NiceMock<MockStripeMapUpdate>(&mockStripe, 0);
-    EventSmartPtr event(mockStripeMapUpdate);
+    NiceMock<MockFlushCompletion>* mockFlushCompletion = new NiceMock<MockFlushCompletion>(&mockStripe, 0);
+    CallbackSmartPtr event(mockFlushCompletion);
 
     // When: Try to Create New StripeMapUpdateRequest object with 3 arguments
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockEventScheduler, event, 0);
+        &mockMetaUpdater, &mockEventScheduler, event);
 
     // Then: Do nothing
 }
@@ -67,12 +69,13 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_ExistErrorCoun
     // Given
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
+    NiceMock<MockIMetaUpdater> mockMetaUpdater;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockStripeMapUpdate>* mockStripeMapUpdate = new NiceMock<MockStripeMapUpdate>(&mockStripe, 0);
-    EventSmartPtr event(mockStripeMapUpdate);
+    NiceMock<MockFlushCompletion>* mockFlushCompletion = new NiceMock<MockFlushCompletion>(&mockStripe, 0);
+    CallbackSmartPtr event(mockFlushCompletion);
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockEventScheduler, event, 0);
+        &mockMetaUpdater, &mockEventScheduler, event);
     stripeMapUpdateRequest.InformError(IOErrorType::GENERIC_ERROR);
     bool actual, expected{true};
 
@@ -88,12 +91,13 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_NonUserArea)
     // Given
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
+    NiceMock<MockIMetaUpdater> mockMetaUpdater;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockStripeMapUpdate>* mockStripeMapUpdate = new NiceMock<MockStripeMapUpdate>(&mockStripe, 0);
-    EventSmartPtr event(mockStripeMapUpdate);
+    NiceMock<MockFlushCompletion>* mockFlushCompletion = new NiceMock<MockFlushCompletion>(&mockStripe, 0);
+    CallbackSmartPtr event(mockFlushCompletion);
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockEventScheduler, event, 0);
+        &mockMetaUpdater, &mockEventScheduler, event);
     bool actual, expected{true};
 
     stripeMapUpdateRequest.InformError(IOErrorType::SUCCESS);
@@ -109,17 +113,18 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_NonUserArea)
     ASSERT_EQ(expected, actual);
 }
 
-TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_StripeMapUpdateNull)
+TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_CompletionEventNull)
 {
     // Given
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
+    NiceMock<MockIMetaUpdater> mockMetaUpdater;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    MockStripeMapUpdate* mockStripeMapUpdate = nullptr;
-    EventSmartPtr event(mockStripeMapUpdate);
+    NiceMock<MockFlushCompletion>* mockFlushCompletion = nullptr;
+    CallbackSmartPtr event(mockFlushCompletion);
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockEventScheduler, event, 0);
+        &mockMetaUpdater, &mockEventScheduler, event);
     bool actual, expected{true};
 
     stripeMapUpdateRequest.InformError(IOErrorType::SUCCESS);
@@ -140,22 +145,22 @@ TEST(StripeMapUpdateRequest, StripeMapUpdateRequest_DoSpecificJob_MapUpdateFail)
     // Given
     NiceMock<MockStripe> mockStripe;
     NiceMock<MockIStripeMap> mockIStripeMap;
+    NiceMock<MockIMetaUpdater> mockMetaUpdater;
     NiceMock<MockEventScheduler> mockEventScheduler;
-    NiceMock<MockStripeMapUpdate>* mockStripeMapUpdate = new NiceMock<MockStripeMapUpdate>(&mockStripe, 0);
-    EventSmartPtr event(mockStripeMapUpdate);
+    NiceMock<MockFlushCompletion>* mockFlushCompletion = new NiceMock<MockFlushCompletion>(&mockStripe, 0);
+    CallbackSmartPtr event(mockFlushCompletion);
 
     StripeMapUpdateRequest stripeMapUpdateRequest(&mockStripe, &mockIStripeMap,
-        &mockEventScheduler, event, 0);
-    bool actual, expected{true};
+        &mockMetaUpdater, &mockEventScheduler, event);
+    bool actual, expected{false};
 
     stripeMapUpdateRequest.InformError(IOErrorType::SUCCESS);
     StripeAddr stripeAddr;
     ON_CALL(mockStripe, GetVsid()).WillByDefault(Return(0));
     ON_CALL(mockIStripeMap, GetLSA(_)).WillByDefault(Return(stripeAddr));
     ON_CALL(mockIStripeMap, IsInWriteBufferArea(_)).WillByDefault(Return(true));
-    ON_CALL(*mockStripeMapUpdate, Execute()).WillByDefault(Return(false));
+    ON_CALL(mockMetaUpdater, UpdateStripeMap).WillByDefault(Return(-1));
     ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
-    EXPECT_CALL(mockEventScheduler, EnqueueEvent(_)).Times(1);
 
     // When: Try to Execute() when userArea false
     actual = stripeMapUpdateRequest.Execute();

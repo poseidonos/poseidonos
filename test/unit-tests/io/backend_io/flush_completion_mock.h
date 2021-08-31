@@ -12,7 +12,7 @@ class MockFlushCompletion : public FlushCompletion
 {
 public:
     using FlushCompletion::FlushCompletion;
-    MOCK_METHOD(bool, Execute, (), (override));
+    MOCK_METHOD(bool, _DoSpecificJob, (), (override));
 };
 
 } // namespace pos

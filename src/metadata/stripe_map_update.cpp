@@ -30,50 +30,34 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include "src/metadata/stripe_map_update.h"
 
-#include "src/allocator/i_block_allocator.h"
-#include "src/allocator/i_context_manager.h"
-#include "src/allocator/i_wbstripe_allocator.h"
-#include "src/journal_service/i_journal_manager.h"
-#include "src/journal_service/i_journal_writer.h"
-#include "src/mapper/i_stripemap.h"
-#include "src/mapper/i_vsamap.h"
-#include "src/meta_service/i_meta_updater.h"
+#include "src/allocator/stripe/stripe.h"
+#include "src/include/address_type.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {
-class EventScheduler;
-class MetaEventFactory;
-
-class MetaUpdater : public IMetaUpdater
+StripeMapUpdate::StripeMapUpdate(Stripe* stripe, IStripeMap* stripeMap, IContextManager* contextManager)
+: Callback(EventFrameworkApiSingleton::Instance()->IsReactorNow()),
+  stripe(stripe),
+  stripeMap(stripeMap),
+  contextManager(contextManager)
 {
-public:
-    MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IContextManager* contextManager,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-        IJournalManager* journal, IJournalWriter* journalWriter, EventScheduler* eventScheduler);
-    MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IContextManager* contextManager,
-        IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-        IJournalManager* journal, IJournalWriter* journalWriter, EventScheduler* eventScheduler,
-        MetaEventFactory* eventFactory);
-    virtual ~MetaUpdater(void);
+}
 
-    virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback) override;
-    virtual int UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback) override;
+StripeMapUpdate::~StripeMapUpdate(void)
+{
+}
 
-private:
-    MpageList _GetDirtyPages(VolumeIoSmartPtr volumeIo);
+bool
+StripeMapUpdate::_DoSpecificJob(void)
+{
+    StripeId currentLsid = stripe->GetUserLsid();
+    stripeMap->SetLSA(stripe->GetVsid(), currentLsid, IN_USER_AREA);
+    contextManager->UpdateOccupiedStripeCount(currentLsid);
 
-    IVSAMap* vsaMap;
-    IStripeMap* stripeMap;
-    IContextManager* contextManager;
-    IBlockAllocator* blockAllocator;
-    IWBStripeAllocator* wbStripeAllocator;
-    IJournalManager* journal;
-    IJournalWriter* journalWriter;
-    EventScheduler* eventScheduler;
-    MetaEventFactory* metaEventFactory;
-};
+    return true;
+}
+
 } // namespace pos

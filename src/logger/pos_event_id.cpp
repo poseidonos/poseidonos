@@ -321,7 +321,7 @@ PosEventId::PosEventIdEntry
             {POS_EVENT_ID::NFLSH_EVENT_MAP_UPDATE_FAILED, "Failed to update map: {}"},
             {POS_EVENT_ID::NFLSH_STRIPE_NOT_IN_WRITE_BUFFER, "Stripe #{} is not in WriteBuffer."},
             {POS_EVENT_ID::NFLSH_STRIPE_DEBUG, "Stripe Map Update Request : stripe.vsid : {} writeBufferArea : {} wbStripeid : {}"},
-            {POS_EVENT_ID::NFLSH_STRIPE_DEBUG_UPDATE, "Stripe Map Update Request : stripe.vsid : {} logWriteRequestSuccess : {}"},
+            {POS_EVENT_ID::NFLSH_STRIPE_DEBUG_UPDATE, "Stripe Map Update Request : stripe.vsid : {}"},
 
             {POS_EVENT_ID::FLUSH_WRAPUP_STRIPE_NOT_IN_USER_AREA, "Stripe #{} is not in UserArea."},
             {POS_EVENT_ID::STRIPEPUTEVT_STRIPE_NOT_IN_NORMAL_POOL, "Stripe #{} is not in NormalStripePool."},

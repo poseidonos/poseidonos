@@ -53,7 +53,7 @@ FlushCompletion::FlushCompletion(Stripe* stripe,
     IStripeMap* stripeMap,
     EventScheduler* eventScheduler,
     int arrayId)
-: Event(true),
+: Callback(true, CallbackType_FlushCompletion),
   stripe(stripe),
   iStripeMap(stripeMap),
   eventScheduler(eventScheduler),
@@ -66,7 +66,7 @@ FlushCompletion::~FlushCompletion()
 }
 
 bool
-FlushCompletion::Execute()
+FlushCompletion::_DoSpecificJob()
 {
     bool wrapupSuccessful = true;
 

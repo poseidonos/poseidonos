@@ -1,10 +1,8 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
-#include "src/io/backend_io/stripe_map_update.h"
+#include "src/metadata/stripe_map_update.h"
 
 namespace pos
 {
@@ -12,7 +10,7 @@ class MockStripeMapUpdate : public StripeMapUpdate
 {
 public:
     using StripeMapUpdate::StripeMapUpdate;
-    MOCK_METHOD(bool, Execute, (), (override));
+    MOCK_METHOD(bool, _DoSpecificJob, (), (override));
 };
 
 } // namespace pos
