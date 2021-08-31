@@ -4,7 +4,7 @@ include(ExternalProject)
 set(SPDK_DEBUG_ENABLE "n" CACHE STRING "Specify enablement of SPDK debug build, y or n")
 set(USE_LOCAL_REPO "n" CACHE STRING "Specify use of local repository, y or n")
 #set(LOCAL_REPOSITORY_ADDRESS "example.repo.com" CACHE STRING "Specify address of local repository")
-set(LOCAL_REPO_ADDRESS "http://10.227.30.174:7990" CACHE STRING "Specify address of local repository")
+set(LOCAL_REPO_ADDRESS "https://10.227.30.174:7990" CACHE STRING "Specify address of local repository")
 set(LOCAL_REPO_PROJECT "scm/ibof" CACHE STRING "Specify project name of local repository")
 set(LOCAL_REPO "${LOCAL_REPO_ADDRESS}/${LOCAL_REPO_PROJECT}")
 

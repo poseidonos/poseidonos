@@ -281,17 +281,17 @@ add_custom_target(
 	COMMAND $(MAKE) protobuf
 )
 
-message("Creating nlohmann/json symlink to support both \"nlohmann/json\" and <nlohmann/json>")
-add_custom_target(nlohmann_json ALL
-                  COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJ_ROOT}/lib/nlohmann ${PROJ_ROOT}/src/include/nlohmann)
-
 # Run mock/test generator with cpp_formatter.py automatically
 #message("Running mock/test-skel generator (but without cpp_formatter.py)...")
 #execute_process(COMMAND ./generate_mocks.sh) # commented out until we figure out how to integrate git-clang-format with UT build
 if (${POS_USE_LOCAL_REPO} STREQUAL "y")
-    execute_process(COMMAND ${CMAKE_COMMAND} . -DSPDK_DEBUG_ENABLE=y -DUSE_LOCAL_REPO=y -S ${PROJ_ROOT}/lib -B ${PROJ_ROOT}/lib)
+    execute_process(
+        WORKING_DIRECTORY ${PROJ_ROOT}/lib
+        COMMAND ${CMAKE_COMMAND} . -DSPDK_DEBUG_ENABLE=y -DUSE_LOCAL_REPO=y)
 else()
-    execute_process(COMMAND ${CMAKE_COMMAND} . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=n -S ${PROJ_ROOT}/lib -B ${PROJ_ROOT}/lib)
+    execute_process(
+        WORKING_DIRECTORY ${PROJ_ROOT}/lib
+        COMMAND ${CMAKE_COMMAND} . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=n)
 endif()
 
 # Build gtest conditionally
@@ -356,6 +356,20 @@ else()
     execute_process(COMMAND make fff -j 4 -C ${PROJ_ROOT}/lib)
     POS_ASSERT_FILE_EXIST("${POS_DEP_FFF}")
 endif()
+
+# Build nlohmann conditionally
+SET(POS_DEP_NLOHMANN "${PROJ_ROOT}/lib/nlohmann/json.hpp")
+if(EXISTS "${POS_DEP_NLOHMANN}")
+    message("nlohmann library exists: ${POS_DEP_NLOHMANN}. Build skipped.")
+else()
+    message("nlohmann library needs to be built.")
+    execute_process(COMMAND make nlohmann -j 4 -C ${PROJ_ROOT}/lib)
+    POS_ASSERT_FILE_EXIST("${POS_DEP_NLOHMANN}")
+endif()
+
+message("Creating nlohmann/json symlink to support both \"nlohmann/json\" and <nlohmann/json>")
+add_custom_target(nlohmann_json ALL
+                  COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJ_ROOT}/lib/nlohmann ${PROJ_ROOT}/src/include/nlohmann)
 
 #maybe we could embed likely() unlikely() macro into add_definitions() for unit-test's build context
 #commented out UNVME_BUILD since this requires rte_malloc() to function properly, which is meaningful 
