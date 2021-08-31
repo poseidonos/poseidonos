@@ -133,7 +133,6 @@ EventCpuPolicy::_SetRebuildPolicyWeight(void)
         return;
     }
     qosEventWrr.SetCorrectionType(BackendEvent_UserdataRebuild, rebuildCorrection);
-    qosEventWrr.SetCorrectionType(BackendEvent_MetadataRebuild, rebuildCorrection);
     qosContext->SetApplyCorrection(true);
     qosCorrection.SetCorrectionType(QosCorrection_EventWrr, true);
 }
