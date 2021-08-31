@@ -1,6 +1,7 @@
 #!/bin/bash
-ibof_root="/home/ibof/ibofos"
-ibof_conf="/etc/pos"
+pos_root_dir="/home/ibof/"
+pos_working_dir="${pos_root_dir}ibofos"
+pos_conf="/etc/pos"
 target_ip=127.0.0.1
 target_type="VM"
 trtype="tcp"
@@ -10,7 +11,7 @@ test_rev=0
 texecc()
 {
     echo "[target]" $@;
-    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${ibof_root}; sudo $@"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${pos_working_dir}; sudo $@"
 }
 
 printVariable()
@@ -28,7 +29,7 @@ printVariable()
     echo "Target IP : $target_ip"
     echo "Transport Type : $trtype"
     echo "Port Number : $port"
-    echo "PoseidonOS Root : $ibof_root"
+    echo "PoseidonOS Root : $pos_working_dir"
     echo "Target Type : $target_type"
     echo "Config Option : $config_option"
     echo "Test Revision : $test_rev"
@@ -39,7 +40,7 @@ printVariable()
 processKill()
 {
     echo "Killing previously-running poseidonos..."
-    texecc $ibof_root/test/script/kill_poseidonos.sh
+    texecc $pos_working_dir/test/script/kill_poseidonos.sh
 }
 
 repositorySetup()
@@ -54,13 +55,13 @@ repositorySetup()
 
 buildTest()
 {
-    texecc $ibof_root/script/pkgdep.sh
+    texecc $pos_working_dir/script/pkgdep.sh
     texecc rm -rf /dev/shm/*
-    texecc rm $ibof_root/bin/poseidonos
+    texecc rm $pos_working_dir/bin/poseidonos
 
     texecc ./configure $config_option
     cwd=""
-    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${ibof_root}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${pos_working_dir}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y"
     if [ $target_type == "VM" ]
     then
         echo "Build For VM"
@@ -73,8 +74,6 @@ buildTest()
         echo "Build For PSD"
         texecc make CACHE=Y -j 16 -C lib
     fi
-
-    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -f $ibof_bin/ibofos_${test_rev} ]]
 
     echo "There is no binary with rev ${test_rev}"
     texecc make -j 4 clean
@@ -92,11 +91,11 @@ buildTest()
     fi
     
 
-    texecc rm $ibof_conf/pos.conf
+    texecc rm $pos_conf/pos.conf
     texecc make install
     texecc make udev_install
 
-    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -f $ibof_root/bin/poseidonos ]]
+    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -f $pos_working_dir/bin/poseidonos ]]
     if [ $? -eq 0 ]
     then
         echo "Build Success"
@@ -113,7 +112,7 @@ setupTest()
 
     if [ $target_type == "VM" ]
     then
-        texecc cp $ibof_root/config/ibofos_for_vm_ci.conf $ibof_conf/pos.conf
+        texecc cp $pos_working_dir/config/ibofos_for_vm_ci.conf $pos_conf/pos.conf
     fi
 
     texecc rmmod nvme_tcp
@@ -127,10 +126,10 @@ setupTest()
 print_help()
 {
     echo "Script Must Be Called with Revision Number"
-    echo "./build_setup.sh -i [target_ip=127.0.0.1] -t [target_type=VM] -r [test_revision] -c [config_option]"
+    echo "./build_setup.sh -i [target_ip=127.0.0.1] -t [target_type=VM] -r [test_revision] -c [config_option] -d [working directory]"
 }
 
-while getopts "i:h:t:c:r:" opt
+while getopts "i:h:t:c:r:d:" opt
 do
     case "$opt" in
         h) print_help
@@ -142,6 +141,9 @@ do
         c) config_option="$OPTARG"
             ;;
         r) test_rev="$OPTARG"
+            ;;
+        d) pos_root_dir="$OPTARG"
+            pos_working_dir="${pos_root_dir}/ibofos"
             ;;
         ?) exit 2
             ;;

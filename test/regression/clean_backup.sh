@@ -1,7 +1,8 @@
 #!/bin/bash
-ibof_root="/home/ibof/ibofos"
-ibof_core="/etc/pos/core"
-ibof_log="/etc/pos/log"
+pos_root_dir="/home/ibof/"
+pos_working_dir="${pos_root_dir}/ibofos"
+pos_core="/etc/pos/core"
+pos_log="/etc/pos/log"
 target_ip=0
 trtype="tcp"
 port=1158
@@ -9,7 +10,7 @@ port=1158
 texecc()
 {
     echo "[target]" $@;
-    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${ibof_root}; sudo $@"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${pos_working_dir}; sudo $@"
 }
 
 processCheck()
@@ -35,7 +36,7 @@ printVariable()
     echo "Target IP : $target_ip"
     echo "Transport Type : $trtype"
     echo "Port Number : $port"
-    echo "PoseidonOS Root : $ibof_root"
+    echo "PoseidonOS Root : $pos_working_dir"
     echo "Test Name : $test_name"
     echo "Test Revision : $test_rev"
 }
@@ -44,30 +45,30 @@ coreDump()
 {
     echo "Deleting previously-generated core dump files.."
     texecc pkill -11 poseidonos
-    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd $ibof_root/tool/dump/; sudo ./trigger_core_dump.sh crashed"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd $pos_working_dir/tool/dump/; sudo ./trigger_core_dump.sh crashed"
 
-    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ ! -d $ibof_core/$test_name/$test_rev ]]
+    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ ! -d $pos_core/$test_name/$test_rev ]]
     if [ $? -eq 0 ]
     then
-        texecc mkdir -p $ibof_core/$test_name/$test_rev
+        texecc mkdir -p $pos_core/$test_name/$test_rev
     fi
 
-    echo "Copying core dump files to $ibof_core/$test_name/$test_rev"
-    texecc cp $ibof_root/tool/dump/*.tar.gz* $ibof_core/$test_name/$test_rev
-    texecc rm $ibof_core/*
-    texecc rm $ibof_root/tool/dump/*.tar.gz*
+    echo "Copying core dump files to $pos_core/$test_name/$test_rev"
+    texecc cp $pos_working_dir/tool/dump/*.tar.gz* $pos_core/$test_name/$test_rev
+    texecc rm $pos_core/*
+    texecc rm $pos_working_dir/tool/dump/*.tar.gz*
 }
 
 backupLog()
 {
-    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ ! -d $ibof_log/$test_name/$test_rev ]]
+    sshpass -p bamboo ssh -q -tt root@${target_ip} [[ ! -d $pos_log/$test_name/$test_rev ]]
     if [ $? -eq 0 ]
     then
-        texecc mkdir -p $ibof_log/$test_name/$test_rev
+        texecc mkdir -p $pos_log/$test_name/$test_rev
     fi
 
-    echo "Copying log files to $ibof_log/$test_name/$test_rev"
-    texecc cp /var/log/pos/* $ibof_log/$test_name/$test_rev/
+    echo "Copying log files to $pos_log/$test_name/$test_rev"
+    texecc cp /var/log/pos/* $pos_log/$test_name/$test_rev/
 }
 
 resetConfig()
@@ -80,10 +81,10 @@ resetConfig()
 print_help()
 {
     echo "Script Must Be Called with Variables"
-    echo "./clean_backup.sh -i [target_ip] -n [test_name] -r [revision] "
+    echo "./clean_backup.sh -i [target_ip] -n [test_name] -r [revision] -d [working directory]"
 }
 
-while getopts "i:h:n:r:" opt
+while getopts "i:h:n:r:d:" opt
 do
     case "$opt" in
         h) print_help
@@ -94,6 +95,9 @@ do
             ;;
         r) test_rev="$OPTARG"
             ;;
+        d) pos_root_dir="$OPTARG"
+            pos_working_dir="${pos_root_dir}/ibofos"
+            ;;
         ?) exit 2
             ;;
     esac
@@ -101,8 +105,8 @@ done
 
 processCheck
 printVariable
-coreDump
 backupLog
+coreDump
 resetConfig
 
 echo "Clean and Backup Success"
