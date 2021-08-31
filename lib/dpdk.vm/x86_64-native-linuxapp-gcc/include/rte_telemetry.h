@@ -1,1 +1,0 @@
-../../lib/librte_telemetry/rte_telemetry.h
