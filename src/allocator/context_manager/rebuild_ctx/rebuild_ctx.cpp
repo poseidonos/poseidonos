@@ -40,7 +40,7 @@
 
 namespace pos
 {
-RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, AllocatorAddressInfo* info)
+RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, SegmentCtx* segmentCtx, AllocatorAddressInfo* info)
 : addrInfo(info),
   ctxStoredVersion(0),
   ctxDirtyVersion(0),
@@ -48,6 +48,7 @@ RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, Allocat
   targetSegmentCount(0),
   currentTarget(UINT32_MAX),
   allocatorCtx(allocCtx),
+  segmentCtx(segmentCtx),
   initialized(false)
 {
     if (header != nullptr)
@@ -64,8 +65,8 @@ RebuildCtx::RebuildCtx(RebuildCtxHeader* header, AllocatorCtx* allocCtx, Allocat
         ctxHeader.numTargetSegments = 0;
     }
 }
-RebuildCtx::RebuildCtx(AllocatorCtx* allocCtx, AllocatorAddressInfo* info)
-: RebuildCtx(nullptr, allocCtx, info)
+RebuildCtx::RebuildCtx(AllocatorCtx* allocCtx, SegmentCtx* segCtx, AllocatorAddressInfo* info)
+: RebuildCtx(nullptr, allocCtx, segCtx, info)
 {
 }
 
@@ -218,7 +219,7 @@ RebuildCtx::GetRebuildTargetSegment(void)
         auto iter = targetSegmentList.begin();
         segmentId = *iter;
         // This segment had been freed by GC
-        if (allocatorCtx->GetSegmentState(segmentId, true) == SegmentState::FREE)   // segStateLocks[segId].segLock
+        if (segmentCtx->GetSegmentState(segmentId, true) == SegmentState::FREE)   // segStateLocks[segId].segLock
         {
             POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREED), "Skip Rebuilding segmentId:{}, Already Freed", segmentId);
             _EraseRebuildTargetSegments(iter);

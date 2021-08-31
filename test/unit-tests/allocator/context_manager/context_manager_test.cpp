@@ -383,7 +383,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndVali
 
     int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
     std::mutex segStateLock;
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(100));
     // when
@@ -406,10 +406,10 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndVali
 
     int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
     std::mutex segStateLock;
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(0));
-    EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::FREE));
+    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::FREE));
     // when
     ctxManager.UpdateOccupiedStripeCount(5);
 }
@@ -429,10 +429,10 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndVali
 
     int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
     std::mutex segStateLock;
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(0));
-    EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD));
+    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD));
     // when
     ctxManager.UpdateOccupiedStripeCount(5);
 }
@@ -452,9 +452,9 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestFreeSegment)
     EXPECT_CALL(*addrInfo, GetstripesPerSegment).WillOnce(Return(100)).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(100));
     std::mutex segStateLock;
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(0));
-    EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD));
+    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD));
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store).WillOnce(Return(0));
     // when
@@ -477,10 +477,10 @@ TEST(ContextManager, UpdateOccupiedStripeCount_IfOccupiedStripeCountIsMaxAndVali
     ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
     std::mutex segStateLock;
     int maxOccupiedCount = (int)addrInfo.GetstripesPerSegment();
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(0));
-    EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::NVRAM));
+    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::NVRAM));
     // when
     ctxManager.UpdateOccupiedStripeCount(5);
 }
@@ -526,9 +526,9 @@ TEST(ContextManager, AllocateGCVictimSegment_TestGCVictimAllocationByStateAndVal
     ContextManager ctxManager(tc, allocCtx, segCtx, reCtx, wbStripeCtx, fileMan, nullptr, false, &addrInfo, "");
 
     // given 1.
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(15)).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(13)).WillOnce(Return(10));
-    EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD));
+    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD));
 
     // when 1.
     int ret = ctxManager.AllocateGCVictimSegment();
@@ -536,9 +536,9 @@ TEST(ContextManager, AllocateGCVictimSegment_TestGCVictimAllocationByStateAndVal
     EXPECT_EQ(4, ret);
 
     // given 2.
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(20)).WillOnce(Return(0)).WillOnce(Return(20)).WillOnce(Return(20)).WillOnce(Return(20));
-    EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD));
+    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD));
 
     // when 2.
     ret = ctxManager.AllocateGCVictimSegment();
@@ -663,29 +663,29 @@ TEST(ContextManager, FreeUserDataSegment_TestWhenSegmentStateChangedHowFreeUserD
     std::mutex segStateLock;
 
     // given 1. release free segment
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
-    EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD));
+    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD));
     EXPECT_CALL(*segCtx, GetOccupiedStripeCount).WillOnce(Return(50));
     // when 1.
     ctxManager.FreeUserDataSegment(5);
 
     // given 2. release victim segment as free
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
-    EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::VICTIM));
+    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::VICTIM));
     EXPECT_CALL(*segCtx, GetOccupiedStripeCount).WillOnce(Return(50));
     // when 2.
     ctxManager.FreeUserDataSegment(5);
 
     // given 3. release nvram segment as free
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
-    EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::NVRAM));
+    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::NVRAM));
     EXPECT_CALL(*segCtx, GetOccupiedStripeCount).Times(0);
     // when 3.
     ctxManager.FreeUserDataSegment(5);
 
     // given 4. just exit with free state
-    EXPECT_CALL(*allocCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
-    EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::FREE));
+    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::FREE));
     EXPECT_CALL(*segCtx, GetOccupiedStripeCount).Times(0);
     // when 4.
     ctxManager.FreeUserDataSegment(5);

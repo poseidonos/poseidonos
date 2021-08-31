@@ -6,6 +6,8 @@
 #include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_info_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_lock_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_states_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -148,6 +150,79 @@ TEST(SegmentCtx, IncreaseOccupiedStripeCount)
     delete segInfos;
 }
 
+TEST(SegmentCtx, GetSegmentState_TestSimpleGetter)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetstripesPerSegment(100);
+    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
+    NiceMock<MockSegmentStates>* segStates = new NiceMock<MockSegmentStates>();
+    NiceMock<MockSegmentLock>* segLocks = new NiceMock<MockSegmentLock>();
+    SegmentCtx segCtx(nullptr, segInfos, segStates, segLocks, &addrInfo);
+
+    // given 1.
+    EXPECT_CALL(*segStates, GetState).WillOnce(Return(SegmentState::FREE));
+    // when 1.
+    SegmentState ret = segCtx.GetSegmentState(0, false);
+    // then 1.
+    EXPECT_EQ(SegmentState::FREE, ret);
+
+    // given 2.
+    std::mutex segStateLock;
+    EXPECT_CALL(*segLocks, GetLock).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segStates, GetState).WillOnce(Return(SegmentState::SSD));
+    // when 2.
+    ret = segCtx.GetSegmentState(0, true);
+    // then 2.
+    EXPECT_EQ(SegmentState::SSD, ret);
+
+    delete segStates;
+    delete segLocks;
+}
+
+TEST(SegmentCtx, SetSegmentState_TestSimpleSetter)
+{
+    // given
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetstripesPerSegment(100);
+    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
+    NiceMock<MockSegmentStates>* segStates = new NiceMock<MockSegmentStates>();
+    NiceMock<MockSegmentLock>* segLocks = new NiceMock<MockSegmentLock>();
+    SegmentCtx segCtx(nullptr, segInfos, segStates, segLocks, &addrInfo);
+
+    // given 1.
+    EXPECT_CALL(*segStates, SetState);
+    // when 1.
+    segCtx.SetSegmentState(0, SegmentState::FREE, false);
+
+    // given 2.
+    std::mutex segStateLock;
+    EXPECT_CALL(*segLocks, GetLock).WillOnce(ReturnRef(segStateLock));
+    EXPECT_CALL(*segStates, SetState);
+    // when 2.
+    segCtx.SetSegmentState(0, SegmentState::SSD, true);
+
+    delete segStates;
+    delete segLocks;
+}
+
+TEST(SegmentCtx, GetSegStateLock_TestSimpleGetter)
+{
+    // given
+    NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
+    NiceMock<MockSegmentStates>* segStates = new NiceMock<MockSegmentStates>();
+    NiceMock<MockSegmentLock>* segLocks = new NiceMock<MockSegmentLock>();
+    SegmentCtx allocCtx(nullptr, segInfos, segStates, segLocks, nullptr);
+
+    std::mutex m;
+    EXPECT_CALL(*segLocks, GetLock).WillOnce(ReturnRef(m));
+    // when
+    allocCtx.GetSegStateLock(0);
+
+    delete segStates;
+    delete segLocks;
+}
+
 TEST(SegmentCtx, CopySegmentInfoToBufferforWBT_CheckCopiedBuffer)
 {
     // given
@@ -216,7 +291,9 @@ TEST(SegmentCtx, GetSectionAddr_TestSimpleGetter)
 {
     // given
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
-    SegmentCtx segCtx(nullptr, segInfos, nullptr);
+    NiceMock<MockSegmentStates>* segStates = new NiceMock<MockSegmentStates>();
+    NiceMock<MockSegmentLock>* segLocks = new NiceMock<MockSegmentLock>();
+    SegmentCtx segCtx(nullptr, segInfos, segStates, segLocks, nullptr);
 
     // when 1.
     char* buf = segCtx.GetSectionAddr(SC_HEADER);
@@ -225,7 +302,13 @@ TEST(SegmentCtx, GetSectionAddr_TestSimpleGetter)
     buf = segCtx.GetSectionAddr(SC_SEGMENT_INFO);
     EXPECT_EQ(reinterpret_cast<char*>(segInfos), buf);
 
+    // when 3.
+    buf = segCtx.GetSectionAddr(AC_SEGMENT_STATES);
+    EXPECT_EQ(reinterpret_cast<char*>(segStates), buf);
+
     delete segInfos;
+    delete segStates;
+    delete segLocks;
 }
 
 TEST(SegmentCtx, GetSectionSize_TestSimpleGetter)
@@ -234,6 +317,8 @@ TEST(SegmentCtx, GetSectionSize_TestSimpleGetter)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumUserAreaSegments(10);
     NiceMock<MockSegmentInfo>* segInfos = new NiceMock<MockSegmentInfo>();
+    NiceMock<MockSegmentStates>* segStates = new NiceMock<MockSegmentStates>();
+    NiceMock<MockSegmentLock>* segLocks = new NiceMock<MockSegmentLock>();
     SegmentCtx segCtx(nullptr, segInfos, &addrInfo);
 
     // when 1.
@@ -245,7 +330,13 @@ TEST(SegmentCtx, GetSectionSize_TestSimpleGetter)
     ret = segCtx.GetSectionSize(SC_SEGMENT_INFO);
     EXPECT_EQ(10 * sizeof(SegmentInfo), ret);
 
+    // when 3.
+    ret = segCtx.GetSectionSize(AC_SEGMENT_STATES);
+    EXPECT_EQ(sizeof(SegmentStates) * 10, ret);
+
     delete segInfos;
+    delete segStates;
+    delete segLocks;
 }
 
 TEST(SegmentCtx, GetStoredVersion_TestSimpleGetter)

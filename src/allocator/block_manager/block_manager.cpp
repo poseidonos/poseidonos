@@ -292,7 +292,7 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
     if (_IsSegmentFull(arrayLsid))
     {
         SegmentId segId = arrayLsid / addrInfo->GetstripesPerSegment();
-        allocCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
+        segCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
     }
     StripeId newVsid = arrayLsid;
 

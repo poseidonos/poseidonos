@@ -1,9 +1,7 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 
 namespace pos
@@ -16,7 +14,7 @@ public:
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, AfterLoad, (char* buf), (override));
     MOCK_METHOD(void, BeforeFlush, (int section, char* buf), (override));
-    MOCK_METHOD(void, FinalizeIo, (AsyncMetaFileIoCtx * ctx), (override));
+    MOCK_METHOD(void, FinalizeIo, (AsyncMetaFileIoCtx* ctx), (override));
     MOCK_METHOD(char*, GetSectionAddr, (int section), (override));
     MOCK_METHOD(int, GetSectionSize, (int section), (override));
     MOCK_METHOD(uint64_t, GetStoredVersion, (), (override));
@@ -27,6 +25,9 @@ public:
     MOCK_METHOD(void, SetOccupiedStripeCount, (SegmentId segId, int count), (override));
     MOCK_METHOD(int, GetOccupiedStripeCount, (SegmentId segId), (override));
     MOCK_METHOD(int, IncreaseOccupiedStripeCount, (SegmentId segId), (override));
+    MOCK_METHOD(void, SetSegmentState, (SegmentId segId, SegmentState state, bool needLock), (override));
+    MOCK_METHOD(SegmentState, GetSegmentState, (SegmentId segId, bool needLock), (override));
+    MOCK_METHOD(std::mutex&, GetSegStateLock, (SegmentId segId), (override));
     MOCK_METHOD(SegmentInfo*, GetSegmentInfo, (), (override));
     MOCK_METHOD(std::mutex&, GetSegmentCtxLock, (), (override));
     MOCK_METHOD(void, CopySegmentInfoToBufferforWBT, (WBTAllocatorMetaType type, char* dstBuf), (override));

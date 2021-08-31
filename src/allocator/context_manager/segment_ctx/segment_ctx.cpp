@@ -35,6 +35,8 @@
 #include <mutex>
 
 #include "src/allocator/address/allocator_address_info.h"
+#include "src/allocator/context_manager/segment_ctx/segment_lock.h"
+#include "src/allocator/context_manager/segment_ctx/segment_states.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/include/meta_const.h"
 #include "src/include/pos_event_id.h"
@@ -43,11 +45,20 @@
 namespace pos
 {
 SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_)
+: SegmentCtx(header, segmentInfo_, nullptr, nullptr, addrInfo_)
+{
+}
+
+SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, 
+    SegmentStates* segmentStates_, SegmentLock* segmentStateLocks_,
+    AllocatorAddressInfo* addrInfo_)
 : ctxDirtyVersion(0),
   ctxStoredVersion(0),
+  segmentStates(segmentStates_),
   numSegments(0),
   initialized(false),
-  addrInfo(addrInfo_)
+  addrInfo(addrInfo_),
+  segStateLocks(segmentStateLocks_)
 {
     segmentInfos = segmentInfo_;
     if (header != nullptr)
@@ -87,6 +98,20 @@ SegmentCtx::Init(void)
 
     numSegments = addrInfo->GetnumUserAreaSegments();
     segmentInfos = new SegmentInfo[numSegments];
+
+    if (segmentStates == nullptr)
+    {
+        segmentStates = new SegmentStates[numSegments];
+    }
+    for (uint32_t segmentId = 0; segmentId < numSegments; ++segmentId)
+    {
+        segmentStates[segmentId].SetSegmentId(segmentId);
+    }
+    if (segStateLocks == nullptr)
+    {
+        segStateLocks = new SegmentLock[numSegments];
+    }
+
     initialized = true;
 }
 
@@ -103,6 +128,19 @@ SegmentCtx::Dispose(void)
         delete[] segmentInfos;
         segmentInfos = nullptr;
     }
+
+    if (segmentStates != nullptr)
+    {
+        delete[] segmentStates;
+        segmentStates = nullptr;
+    }
+
+    if (segStateLocks != nullptr)
+    {
+        delete[] segStateLocks;
+        segStateLocks = nullptr;
+    }
+
     initialized = false;
 }
 
@@ -196,6 +234,11 @@ SegmentCtx::GetSectionAddr(int section)
             ret = (char*)segmentInfos;
             break;
         }
+        case AC_SEGMENT_STATES:
+        {
+            ret = (char*)segmentStates;
+            break;
+        }
     }
     return ret;
 }
@@ -216,6 +259,11 @@ SegmentCtx::GetSectionSize(int section)
             ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentInfo);
             break;
         }
+        case AC_SEGMENT_STATES:
+        {
+            ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentStates);
+            break;
+        }
     }
     return ret;
 }
@@ -230,6 +278,40 @@ void
 SegmentCtx::ResetDirtyVersion(void)
 {
     ctxDirtyVersion = 0;
+}
+
+void
+SegmentCtx::SetSegmentState(SegmentId segId, SegmentState state, bool needlock)
+{
+    if (needlock == true)
+    {
+        std::lock_guard<std::mutex> lock(segStateLocks[segId].GetLock());
+        segmentStates[segId].SetState(state);
+    }
+    else
+    {
+        segmentStates[segId].SetState(state);
+    }
+}
+
+SegmentState
+SegmentCtx::GetSegmentState(SegmentId segId, bool needlock)
+{
+    if (needlock == true)
+    {
+        std::lock_guard<std::mutex> lock(segStateLocks[segId].GetLock());
+        return segmentStates[segId].GetState();
+    }
+    else
+    {
+        return segmentStates[segId].GetState();
+    }
+}
+
+std::mutex&
+SegmentCtx::GetSegStateLock(SegmentId segId)
+{
+    return segStateLocks[segId].GetLock();
 }
 
 void

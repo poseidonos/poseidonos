@@ -1,3 +1,1 @@
-POS_ADD_UNIT_TEST(segment_states_ut segment_states_test.cpp)
 POS_ADD_UNIT_TEST(allocator_ctx_ut allocator_ctx_test.cpp)
-POS_ADD_UNIT_TEST(segment_lock_ut segment_lock_test.cpp)

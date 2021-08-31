@@ -37,6 +37,8 @@
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
+#include "src/allocator/context_manager/segment_ctx/segment_states.h"
+#include "src/allocator/context_manager/segment_ctx/segment_lock.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/include/address_type.h"
 #include "src/lib/bitmap.h"
@@ -48,6 +50,9 @@ class SegmentCtx : public IAllocatorFileIoClient
 public:
     SegmentCtx(void) = default;
     SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_);
+    SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, 
+        SegmentStates* segmentStates_, SegmentLock* segmentStateLocks_,
+        AllocatorAddressInfo* addrInfo_);
     explicit SegmentCtx(AllocatorAddressInfo* info);
     virtual ~SegmentCtx(void);
     virtual void Init(void);
@@ -68,6 +73,10 @@ public:
     virtual int GetOccupiedStripeCount(SegmentId segId);
     virtual int IncreaseOccupiedStripeCount(SegmentId segId);
 
+    virtual void SetSegmentState(SegmentId segId, SegmentState state, bool needlock);
+    virtual SegmentState GetSegmentState(SegmentId segId, bool needlock);
+    virtual std::mutex& GetSegStateLock(SegmentId segId);
+
     virtual SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
     virtual std::mutex& GetSegmentCtxLock(void) { return segCtxLock;}
 
@@ -81,12 +90,15 @@ private:
     std::atomic<uint64_t> ctxDirtyVersion;
     std::atomic<uint64_t> ctxStoredVersion;
     SegmentInfo* segmentInfos;
+    SegmentStates* segmentStates;
+
     uint32_t numSegments;
     bool initialized;
 
     AllocatorAddressInfo* addrInfo;
 
     std::mutex segCtxLock;
+    SegmentLock* segStateLocks;
 };
 
 } // namespace pos

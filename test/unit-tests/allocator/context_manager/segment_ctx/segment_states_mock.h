@@ -1,10 +1,8 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
-#include "src/allocator/context_manager/allocator_ctx/segment_states.h"
+#include "src/allocator/context_manager/segment_ctx/segment_states.h"
 
 namespace pos
 {

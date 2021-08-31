@@ -390,7 +390,7 @@ TEST(Allocator, GetInstantMetaInfo_TestSimplePrinter)
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillOnce(Return(segCtx));
     EXPECT_CALL(*ctxManager, GetWbStripeCtx).WillOnce(Return(wbCtx));
     addrInfo->SetnumUserAreaSegments(6);
-    EXPECT_CALL(*allocCtx, GetSegmentState).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE));
+    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::FREE));
     EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(0));
     // when
     alloc.GetInstantMetaInfo("aaa");

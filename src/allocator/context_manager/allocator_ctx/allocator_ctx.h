@@ -35,7 +35,6 @@
 #include <string>
 #include <vector>
 
-#include "src/allocator/context_manager/allocator_ctx/segment_states.h"
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/lib/bitmap.h"
@@ -43,12 +42,12 @@
 namespace pos
 {
 class AllocatorAddressInfo;
-class SegmentLock;
+
 class AllocatorCtx : public IAllocatorFileIoClient
 {
 public:
     AllocatorCtx(void) = default;
-    AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap, SegmentStates* segmentStates, SegmentLock* segStateLock, AllocatorAddressInfo* info);
+    AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap, AllocatorAddressInfo* info);
     explicit AllocatorCtx(AllocatorAddressInfo* info);
     virtual ~AllocatorCtx(void);
     virtual void Init(void);
@@ -76,14 +75,11 @@ public:
     virtual SegmentId GetUsedSegment(SegmentId startSegId);
     virtual uint64_t GetNumOfFreeSegment(void);
     virtual uint64_t GetNumOfFreeSegmentWoLock(void);
-    virtual SegmentState GetSegmentState(SegmentId segmentId, bool needlock);
-    virtual void SetSegmentState(SegmentId segmentId, SegmentState state, bool needlock);
 
     virtual void SetAllocatedSegmentCount(int count);
     virtual int GetAllocatedSegmentCount(void);
     virtual int GetTotalSegmentsCount(void);
 
-    virtual std::mutex& GetSegStateLock(SegmentId segId);
     virtual std::mutex& GetAllocatorCtxLock(void) { return allocCtxLock; }
 
     static const uint32_t SIG_ALLOCATOR_CTX = 0xBFBFBFBF;
@@ -98,14 +94,12 @@ private:
     BitMapMutex* allocSegBitmap; // Unset:Free, Set:Not-Free
     StripeId prevSsdLsid;
     StripeId currentSsdLsid;
-    SegmentStates* segmentStates;
 
     // DOCs
     AllocatorAddressInfo* addrInfo;
 
     // Lock
     std::mutex allocCtxLock;
-    SegmentLock* segStateLocks;
 
     bool initialized;
 };

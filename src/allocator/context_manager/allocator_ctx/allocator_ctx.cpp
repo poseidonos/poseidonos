@@ -36,8 +36,6 @@
 #include <vector>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/context_manager/allocator_ctx/segment_lock.h"
-#include "src/allocator/context_manager/allocator_ctx/segment_states.h"
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 #include "src/include/meta_const.h"
 #include "src/include/pos_event_id.h"
@@ -46,15 +44,13 @@
 
 namespace pos
 {
-AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap_, SegmentStates* segmentStates_, SegmentLock* segStateLocks_, AllocatorAddressInfo* info_)
+AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap_, AllocatorAddressInfo* info_)
 : ctxStoredVersion(0),
   ctxDirtyVersion(0),
   addrInfo(info_),
   initialized(false)
 {
     allocSegBitmap = allocSegBitmap_; // for UT
-    segmentStates = segmentStates_;   // for UT
-    segStateLocks = segStateLocks_;   // for UT
 
     ctxHeader.sig = SIG_ALLOCATOR_CTX;
     ctxHeader.numValidSegment = 0;
@@ -73,7 +69,7 @@ AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitm
 }
 
 AllocatorCtx::AllocatorCtx(AllocatorAddressInfo* info)
-: AllocatorCtx(nullptr, nullptr, nullptr, nullptr, info)
+: AllocatorCtx(nullptr, nullptr, info)
 {
 }
 
@@ -98,18 +94,7 @@ AllocatorCtx::Init(void)
     }
     currentSsdLsid = STRIPES_PER_SEGMENT - 1;
     prevSsdLsid = STRIPES_PER_SEGMENT - 1;
-    if (segmentStates == nullptr)
-    {
-        segmentStates = new SegmentStates[numSegment];
-    }
-    for (uint32_t segmentId = 0; segmentId < numSegment; ++segmentId)
-    {
-        segmentStates[segmentId].SetSegmentId(segmentId);
-    }
-    if (segStateLocks == nullptr)
-    {
-        segStateLocks = new SegmentLock[numSegment];
-    }
+
     ctxHeader.ctxVersion = 0;
     ctxStoredVersion = 0;
     ctxDirtyVersion = 0;
@@ -124,16 +109,6 @@ AllocatorCtx::Dispose(void)
         return;
     }
 
-    if (segmentStates != nullptr)
-    {
-        delete[] segmentStates;
-        segmentStates = nullptr;
-    }
-    if (segStateLocks != nullptr)
-    {
-        delete[] segStateLocks;
-        segStateLocks = nullptr;
-    }
     if (allocSegBitmap != nullptr)
     {
         delete allocSegBitmap;
@@ -190,7 +165,6 @@ AllocatorCtx::SetNextSsdLsid(SegmentId segId)
 {
     prevSsdLsid = currentSsdLsid;
     currentSsdLsid = segId * addrInfo->GetstripesPerSegment();
-    segmentStates[segId].SetState(SegmentState::NVRAM);
 }
 
 StripeId
@@ -240,34 +214,6 @@ uint64_t
 AllocatorCtx::GetNumOfFreeSegmentWoLock(void)
 {
     return allocSegBitmap->GetNumBits() - allocSegBitmap->GetNumBitsSetWoLock();
-}
-
-SegmentState
-AllocatorCtx::GetSegmentState(SegmentId segId, bool needlock)
-{
-    if (needlock == true)
-    {
-        std::lock_guard<std::mutex> lock(segStateLocks[segId].GetLock());
-        return segmentStates[segId].GetState();
-    }
-    else
-    {
-        return segmentStates[segId].GetState();
-    }
-}
-
-void
-AllocatorCtx::SetSegmentState(SegmentId segId, SegmentState state, bool needlock)
-{
-    if (needlock == true)
-    {
-        std::lock_guard<std::mutex> lock(segStateLocks[segId].GetLock());
-        segmentStates[segId].SetState(state);
-    }
-    else
-    {
-        segmentStates[segId].SetState(state);
-    }
 }
 
 void
@@ -330,11 +276,6 @@ AllocatorCtx::GetSectionAddr(int section)
             ret = (char*)&currentSsdLsid;
             break;
         }
-        case AC_SEGMENT_STATES:
-        {
-            ret = (char*)segmentStates;
-            break;
-        }
     }
     return ret;
 }
@@ -360,11 +301,6 @@ AllocatorCtx::GetSectionSize(int section)
             ret = sizeof(currentSsdLsid);
             break;
         }
-        case AC_SEGMENT_STATES:
-        {
-            ret = sizeof(SegmentStates) * addrInfo->GetnumUserAreaSegments();
-            break;
-        }
     }
     return ret;
 }
@@ -379,12 +315,6 @@ void
 AllocatorCtx::ResetDirtyVersion(void)
 {
     ctxDirtyVersion = 0;
-}
-
-std::mutex&
-AllocatorCtx::GetSegStateLock(SegmentId segId)
-{
-    return segStateLocks[segId].GetLock();
 }
 
 }  // namespace pos

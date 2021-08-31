@@ -42,6 +42,7 @@
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_states.h"
 #include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/event_scheduler/event_scheduler.h"
@@ -82,7 +83,7 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
 {
     allocatorCtx = new AllocatorCtx(info);
     segmentCtx = new SegmentCtx(info);
-    rebuildCtx = new RebuildCtx(allocatorCtx, info);
+    rebuildCtx = new RebuildCtx(allocatorCtx, segmentCtx, info);
     wbStripeCtx = new WbStripeCtx(info);
     fileIoManager = new AllocatorFileIoManager(fileNames, info, arrayName);
     contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, wbStripeCtx, info);
@@ -126,10 +127,10 @@ ContextManager::UpdateOccupiedStripeCount(StripeId lsid)
     SegmentId segId = lsid / addrInfo->GetstripesPerSegment();
     if (segmentCtx->IncreaseOccupiedStripeCount(segId) == (int)addrInfo->GetstripesPerSegment())
     {
-        std::lock_guard<std::mutex> lock(allocatorCtx->GetSegStateLock(segId));
+        std::lock_guard<std::mutex> lock(segmentCtx->GetSegStateLock(segId));
         if (segmentCtx->GetValidBlockCount(segId) == 0)
         {
-            SegmentState eState = allocatorCtx->GetSegmentState(segId, false);
+            SegmentState eState = segmentCtx->GetSegmentState(segId, false);
             if (eState != SegmentState::FREE)
             {
                 _FreeSegment(segId);
@@ -137,7 +138,7 @@ ContextManager::UpdateOccupiedStripeCount(StripeId lsid)
         }
         else
         {
-            allocatorCtx->SetSegmentState(segId, SegmentState::SSD, false);
+            segmentCtx->SetSegmentState(segId, SegmentState::SSD, false);
         }
     }
 }
@@ -145,8 +146,8 @@ ContextManager::UpdateOccupiedStripeCount(StripeId lsid)
 void
 ContextManager::FreeUserDataSegment(SegmentId segId)
 {
-    std::lock_guard<std::mutex> lock(allocatorCtx->GetSegStateLock(segId));
-    SegmentState eState = allocatorCtx->GetSegmentState(segId, false);
+    std::lock_guard<std::mutex> lock(segmentCtx->GetSegStateLock(segId));
+    SegmentState eState = segmentCtx->GetSegmentState(segId, false);
     if ((eState == SegmentState::SSD) || (eState == SegmentState::VICTIM))
     {
         assert(segmentCtx->GetOccupiedStripeCount(segId) == (int)addrInfo->GetstripesPerSegment());
@@ -238,8 +239,8 @@ ContextManager::AllocateGCVictimSegment(void)
     for (SegmentId segId = 0; segId < numUserAreaSegments; ++segId)
     {
         uint32_t cnt = segmentCtx->GetValidBlockCount(segId);
-        std::lock_guard<std::mutex> lock(allocatorCtx->GetSegStateLock(segId));
-        if ((allocatorCtx->GetSegmentState(segId, false) != SegmentState::SSD) || (cnt == 0))
+        std::lock_guard<std::mutex> lock(segmentCtx->GetSegStateLock(segId));
+        if ((segmentCtx->GetSegmentState(segId, false) != SegmentState::SSD) || (cnt == 0))
         {
             continue;
         }
@@ -252,7 +253,7 @@ ContextManager::AllocateGCVictimSegment(void)
     }
     if (victimSegment != UNMAP_SEGMENT)
     {
-        allocatorCtx->SetSegmentState(victimSegment, SegmentState::VICTIM, true);
+        segmentCtx->SetSegmentState(victimSegment, SegmentState::VICTIM, true);
         POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "[AllocateSegment] victim segmentId:{}, free segment count:{}", victimSegment, allocatorCtx->GetNumOfFreeSegmentWoLock());
         telPublisher->PublishData(TEL_ALLOCATOR_GCVICTIM_SEGMENT, victimSegment);
     }
@@ -303,6 +304,8 @@ ContextManager::SetNextSsdLsid(void)
         return -EID(ALLOCATOR_NO_FREE_SEGMENT);
     }
     allocatorCtx->SetNextSsdLsid(segId);
+    segmentCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
+
     return 0;
 }
 
@@ -416,7 +419,7 @@ void
 ContextManager::_FreeSegment(SegmentId segId)
 {
     segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */);
-    allocatorCtx->SetSegmentState(segId, SegmentState::FREE, false);
+    segmentCtx->SetSegmentState(segId, SegmentState::FREE, false);
     allocatorCtx->ReleaseSegment(segId);
     int freeSegCount = allocatorCtx->GetNumOfFreeSegmentWoLock();
     telPublisher->PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, freeSegCount);

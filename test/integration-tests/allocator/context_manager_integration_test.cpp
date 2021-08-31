@@ -10,8 +10,8 @@
 #include "test/unit-tests/allocator/context_manager/context_replayer_mock.h"
 #include "test/unit-tests/allocator/context_manager/file_io_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
-#include "test/unit-tests/allocator/context_manager/allocator_ctx/segment_lock_mock.h"
-#include "test/unit-tests/allocator/context_manager/allocator_ctx/segment_states_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_lock_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_states_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/wbstripe_ctx/wbstripe_ctx_mock.h"
 #include "test/unit-tests/lib/bitmap_mock.h"
@@ -45,8 +45,10 @@ TEST(ContextManagerIntegrationTest, GetRebuildTargetSegment_FreeUserDataSegment)
     // SegmentCtx (Mock)
     NiceMock<MockSegmentCtx>* segmentCtx = new NiceMock<MockSegmentCtx>();
     std::mutex segCtxLock;
+    std::mutex segStateLock;
     EXPECT_CALL(*segmentCtx, GetSegmentCtxLock).WillRepeatedly(ReturnRef(segCtxLock));
     EXPECT_CALL(*segmentCtx, GetOccupiedStripeCount).WillRepeatedly(Return(STRIPE_PER_SEGMENT));
+    EXPECT_CALL(*segmentCtx, GetSegStateLock).WillRepeatedly(ReturnRef(segStateLock));
 
     // WbStripeCtx (Mock)
     NiceMock<MockWbStripeCtx>* wbStripeCtx = new NiceMock<MockWbStripeCtx>();
@@ -74,17 +76,10 @@ TEST(ContextManagerIntegrationTest, GetRebuildTargetSegment_FreeUserDataSegment)
 
     // AllocatorCtx (Real)
     NiceMock<MockBitMapMutex>* allocSegBitmap = new NiceMock<MockBitMapMutex>();
-    NiceMock<MockSegmentStates>* segmentStates = new NiceMock<MockSegmentStates>();
-    Mock::AllowLeak(segmentStates);
-    EXPECT_CALL(*segmentStates, GetState).WillRepeatedly(Return(SegmentState::SSD));
-    NiceMock<MockSegmentLock>* segmentLocks = new NiceMock<MockSegmentLock>();
-    Mock::AllowLeak(segmentLocks);
-    std::mutex segLock;
-    EXPECT_CALL(*segmentLocks, GetLock).WillRepeatedly(ReturnRef(segLock));
-    AllocatorCtx* allocatorCtx = new AllocatorCtx(nullptr, allocSegBitmap, segmentStates, segmentLocks, allocatorAddressInfo);
+    AllocatorCtx* allocatorCtx = new AllocatorCtx(nullptr, allocSegBitmap, allocatorAddressInfo);
 
     // RebuildCtx (Real)
-    RebuildCtx* rebuildCtx = new RebuildCtx(allocatorCtx, allocatorAddressInfo);
+    RebuildCtx* rebuildCtx = new RebuildCtx(allocatorCtx, segmentCtx, allocatorAddressInfo);
 
     // ContextManager (Real)
     ContextManager contextManager(telemetryPublisher, allocatorCtx, segmentCtx, rebuildCtx,

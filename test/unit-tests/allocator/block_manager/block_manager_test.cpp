@@ -464,7 +464,7 @@ TEST(BlockManager, _AllocateBlks_TestCase4)
     EXPECT_CALL(*ctxManager, GetCurrentGcMode()).WillOnce(Return(MODE_NO_GC));
     EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(0));
 
-    EXPECT_CALL(*allocCtx, SetSegmentState).Times(1);
+    EXPECT_CALL(*segCtx, SetSegmentState).Times(1);
     EXPECT_CALL(*iWbstripe, GetStripe).WillOnce(Return(stripe));
     EXPECT_CALL(*stripe, Assign).Times(1);
     EXPECT_CALL(*reverseMap, GetReverseMapPack).WillOnce(Return(revMapPack));
@@ -516,7 +516,7 @@ TEST(BlockManager, _AllocateBlks_TestCase5)
     EXPECT_CALL(*ctxManager, GetCurrentGcMode()).WillOnce(Return(MODE_NO_GC));
     EXPECT_CALL(*ctxManager, AllocateFreeSegment).WillOnce(Return(0));
 
-    EXPECT_CALL(*allocCtx, SetSegmentState).Times(1);
+    EXPECT_CALL(*segCtx, SetSegmentState).Times(1);
     EXPECT_CALL(*iWbstripe, GetStripe).WillOnce(Return(stripe));
     EXPECT_CALL(*stripe, Assign).Times(1);
     EXPECT_CALL(*reverseMap, GetReverseMapPack).WillOnce(Return(revMapPack));
