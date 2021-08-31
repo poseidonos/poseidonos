@@ -26,7 +26,15 @@ go mod vendor
 export GIT_COMMIT_CLI=$(git rev-list -1 HEAD)
 export BUILD_TIME_CLI=$(date +%s)
 
+# Build CLI binary
 lib/pnconnector/script/build_resource.sh
 go build -mod vendor -tags debug,ssloff -ldflags "-X cli/cmd.GitCommit=$GIT_COMMIT_CLI -X cli/cmd.BuildTime=$BUILD_TIME_CLI"
-
 mv ./cli bin/poseidonos-cli
+
+# Build CLI markdown documents
+cd docs
+go build -o gen_md
+chmod +x gen_md
+./gen_md
+cd ..
+

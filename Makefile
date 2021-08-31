@@ -21,6 +21,10 @@ TARGET_SRC_DIR = src fluidos
 BINDIR = $(TOP)/bin
 
 #################################################
+# docs directories / doc files
+DOCDIR = $(TOP)/doc
+
+#################################################
 # nvme driver : unvme, libaio
 
 POS_VERSION = pos-0.9.10
@@ -227,6 +231,7 @@ poseidonos: makedir
 	$(MAKE) -C src
 	$(CLI_DIR)/script/build_cli.sh
 	mv -f $(CLI_DIR)/bin/poseidonos-cli $(BINDIR)/poseidonos-cli
+	mv -f $(CLI_DIR)/docs/markdown/* $(DOCDIR)/guides/cli/
 
 makedir:
 	@`[ -d $(BINDIR) ] || mkdir -p $(BINDIR)`
