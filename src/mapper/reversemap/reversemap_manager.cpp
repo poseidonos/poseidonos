@@ -43,7 +43,7 @@
 namespace pos
 {
 
-ReverseMapManager::ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, IArrayInfo* iarrayInfo)
+ReverseMapManager::ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripeMap, IArrayInfo* iarrayInfo)
 : mpageSize(0),
   numMpagesPerStripe(0),
   fileSizePerStripe(0),
@@ -113,17 +113,22 @@ ReverseMapManager::SetDoC(IArrayInfo* iarrayInfo)
 }
 
 void
-ReverseMapManager::Close(void)
+ReverseMapManager::Dispose(void)
 {
     if (revMapWholefile->IsOpened() == true)
     {
         revMapWholefile->Close();
     }
-    delete revMapWholefile;
-    revMapWholefile = nullptr;
-
-    delete [] revMapPacks;
-    revMapPacks = nullptr;
+	if (revMapWholefile != nullptr)
+	{
+	    delete revMapWholefile;
+        revMapWholefile = nullptr;
+	}
+    if (revMapPacks != nullptr)
+	{
+	    delete [] revMapPacks;
+        revMapPacks = nullptr;
+	}
 }
 //----------------------------------------------------------------------------//
 ReverseMapPack*

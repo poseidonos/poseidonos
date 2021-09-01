@@ -12,7 +12,7 @@ class MockIMapManagerInternal : public IMapManagerInternal
 {
 public:
     using IMapManagerInternal::IMapManagerInternal;
-    MOCK_METHOD(void, MapAsyncFlushDone, (int mapId), (override));
+    MOCK_METHOD(void, MapFlushDone, (int mapId), (override));
 };
 
 } // namespace pos

@@ -12,7 +12,6 @@ class MockMapContent : public MapContent
 {
 public:
     using MapContent::MapContent;
-    MOCK_METHOD(int, Prepare, (uint64_t numEntries, int64_t opt), (override));
     MOCK_METHOD(MpageList, GetDirtyPages, (BlkAddr start, uint64_t numEntries), (override));
 };
 

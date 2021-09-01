@@ -32,41 +32,45 @@
 
 #include "event_mpage_async_io.h"
 
-#include "map_flush_handler.h"
+#include "map_io_handler.h"
 
 namespace pos
 {
-EventMpageAsyncIo::EventMpageAsyncIo(MapHeader* mapHeader, Map* map,
-    MetaFileIntf* file, MetaIoCbPtr asyncIoReqCB)
+EventMpageAsyncIo::EventMpageAsyncIo(MapHeader* mapHeader_, Map* map_,
+    MetaFileIntf* file_, MetaIoCbPtr asyncIoReqCB_)
 {
-    mapHeader_ = mapHeader;
-    map_ = map;
-    file_ = file;
-    asyncIoReqCB_ = asyncIoReqCB;
+    mapHeader = mapHeader_;
+    map = map_;
+    file = file_;
+    asyncIoReqCB = asyncIoReqCB_;
+    startMpage = 0;
 }
 
 bool
 EventMpageAsyncIo::Execute(void)
 {
-    int mpageNum = 0;
-    uint64_t numBitsSet = mapHeader_->GetMpageMap()->GetNumBitsSet();
+    int mpageNum = startMpage;
+    uint64_t numBitsSet = mapHeader->GetMpageMap()->GetNumBitsSet();
 
-    for (uint32_t cnt = 0; cnt < numBitsSet; ++cnt)
+    for (uint32_t cnt = startMpage; cnt < numBitsSet; ++cnt)
     {
-        mpageNum = mapHeader_->GetMpageMap()->FindFirstSet(mpageNum);
-        char* mpage = map_->AllocateMpage(mpageNum);
+        mpageNum = mapHeader->GetMpageMap()->FindFirstSet(mpageNum);
+        char* mpage = map->AllocateMpage(mpageNum);
 
         MapFlushIoContext* mPageLoadRequest = new MapFlushIoContext();
         mPageLoadRequest->opcode = MetaFsIoOpcode::Read;
-        mPageLoadRequest->fd = file_->GetFd();
-        mPageLoadRequest->fileOffset = mapHeader_->GetSize() + (mpageNum * mapHeader_->GetMpageSize());
-        mPageLoadRequest->length = mapHeader_->GetMpageSize();
+        mPageLoadRequest->fd = file->GetFd();
+        mPageLoadRequest->fileOffset = mapHeader->GetSize() + (mpageNum * mapHeader->GetMpageSize());
+        mPageLoadRequest->length = mapHeader->GetMpageSize();
         mPageLoadRequest->buffer = mpage;
-        mPageLoadRequest->callback = asyncIoReqCB_;
+        mPageLoadRequest->callback = asyncIoReqCB;
         mPageLoadRequest->startMpage = mpageNum;
         mPageLoadRequest->numMpages = 1;
 
-        file_->AsyncIO(mPageLoadRequest);
+        if (file->AsyncIO(mPageLoadRequest) < 0) // MFS_FAILED_DUE_TO_ERR
+        {
+            return false;
+        }
         mpageNum++;
     }
 

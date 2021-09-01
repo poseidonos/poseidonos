@@ -16,7 +16,7 @@ TEST(IMapFlush, WaitForFlushAllMapsDone_)
 {
 }
 
-TEST(IMapFlush, StoreAllMaps_)
+TEST(IMapFlush, FlushAll_)
 {
 }
 

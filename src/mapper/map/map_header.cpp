@@ -36,20 +36,22 @@
 namespace pos
 {
 
-MapHeader::MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_)
+MapHeader::MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_, int mapId_, int numMpages_, int mpageSize_, int entriesPerPage_)
 : mPageMap(mPageMap_),
   touchedMpages(touchedMpages_),
-  mapId(-1234),
+  mapId(mapId_),
   size(0),
-  mpageSize(0),
-  entriesPerMpage(0),
+  mpageSize(mpageSize_),
+  entriesPerMpage(entriesPerPage_),
   usedBlkCnt(0),
   isInitialized(false)
 {
+    mpageData.numTotalMpages = numMpages_;
+    mpageData.numValidMpages = 0;
 }
 
-MapHeader::MapHeader(void)
-: MapHeader(nullptr, nullptr)
+MapHeader::MapHeader(int mapId_, int numMpages_, int mpageSize_, int entriesPerPage_)
+: MapHeader(nullptr, nullptr, mapId_, numMpages_, mpageSize_, entriesPerPage_)
 {
 }
 
@@ -60,7 +62,6 @@ MapHeader::~MapHeader(void)
         delete mPageMap;
         mPageMap = nullptr;
     }
-
     if (touchedMpages != nullptr)
     {
         delete touchedMpages;
@@ -71,13 +72,10 @@ MapHeader::~MapHeader(void)
 void
 MapHeader::Init(uint64_t numMpages)
 {
-    SetMpageValidInfo(numMpages, 0);
-
     mPageMap = new BitMap(numMpages);
     mPageMap->ResetBitmap();
     touchedMpages = new BitMap(numMpages);
     touchedMpages->ResetBitmap();
-
     SetSize();
     isInitialized = true;
 }
@@ -96,20 +94,14 @@ MapHeader::SetSize(void)
     return 0;
 }
 
-void
-MapHeader::SetMpageValidInfo(uint64_t numPages, uint64_t validPages)
-{
-    mpageData.numTotalMpages = numPages;
-    mpageData.numValidMpages = validPages;
-}
-
 int
 MapHeader::CopyToBuffer(char* buffer)
 {
     int curOffset = 0;
     std::unique_lock<std::mutex> lock(mpageHeaderLock);
 
-    UpdateNumValidMpages();
+    mpageData.numValidMpages = mPageMap->GetNumBitsSet();
+    mpageData.numTotalMpages = mPageMap->GetNumBits();
 
     memcpy(buffer, (void*)(&mpageData), sizeof(mpageData));
     curOffset += sizeof(mpageData);

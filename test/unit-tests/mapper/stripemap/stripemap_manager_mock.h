@@ -12,7 +12,7 @@ class MockStripeMapManager : public StripeMapManager
 {
 public:
     using StripeMapManager::StripeMapManager;
-    MOCK_METHOD(void, MapAsyncFlushDone, (int mapId), (override));
+    MOCK_METHOD(void, MapFlushDone, (int mapId), (override));
     MOCK_METHOD(StripeAddr, GetLSA, (StripeId vsid), (override));
     MOCK_METHOD(LsidRefResult, GetLSAandReferLsid, (StripeId vsid), (override));
     MOCK_METHOD(StripeId, GetRandomLsid, (StripeId vsid), (override));

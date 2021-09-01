@@ -33,64 +33,133 @@
 #pragma once
 
 #include "src/array_models/interface/i_mount_sequence.h"
-
+#include "src/journal_service/journal_service.h"
+#include "src/mapper/address/mapper_address_info.h"
 #include "src/mapper/i_map_flush.h"
 #include "src/mapper/i_mapper_wbt.h"
-#include "src/mapper/address/mapper_address_info.h"
+#include "src/mapper/i_vsamap.h"
 #include "src/mapper/mapper_wbt.h"
-#include "src/mapper/reversemap/reverse_map.h"
 #include "src/mapper/reversemap/reversemap_manager.h"
-#include "src/mapper/stripemap/stripemap_content.h"
 #include "src/mapper/stripemap/stripemap_manager.h"
-#include "src/mapper/vsamap/vsamap_content.h"
 #include "src/mapper/vsamap/vsamap_manager.h"
-
 #include "src/state/interface/i_state_control.h"
+#include "src/sys_event/volume_event.h"
 
 #include <string>
+#include <vector>
 
 namespace pos
 {
-
-class Mapper : public IMapFlush, public IMountSequence
+class IStateControl;
+class MetaFs;
+enum VolState
 {
-    friend class MapperTestFixture;
+    NOT_EXIST,          // Not exist
+    EXIST_UNLOADED,     // Unloaded
+    BACKGROUND_MOUNTED, // Loaded
+    FOREGROUND_MOUNTED, // Loaded
+    VOLUME_LOADING,
+    VOLUME_DELETING, // Deleting
+    MAX_STATE
+};
 
+class VolumeMountState
+{
+public:
+    VolumeMountState(void)
+    {
+        volState = VolState::NOT_EXIST;
+    }
+    ~VolumeMountState(void) {}
+    VolState GetState(void)
+    {
+        return volState;
+    }
+    void SetState(VolState state)
+    {
+        volState = state;
+    }
+    void SetSize(uint64_t size)
+    {
+        volSize = size;
+    }
+    uint64_t GetSize(void)
+    {
+        return volSize;
+    }
+    std::mutex& GetVolStateLock(void)
+    {
+        return volStateLock;
+    }
+
+    VolState volState;
+    uint64_t volSize;
+    std::mutex volStateLock;
+};
+
+class Mapper : public IMapFlush, public IMountSequence, public VolumeEvent, public IVSAMap
+{
 public:
     Mapper(IArrayInfo* iarrayInfo, IStateControl* iState);
     virtual ~Mapper(void);
 
-    virtual int Init(void) override;
-    virtual void Dispose(void) override;
-    virtual void Shutdown(void) override;
-    virtual void Flush(void) override;
+    virtual int Init(void);
+    virtual void Dispose(void);
+    virtual void Shutdown(void);
+    virtual void Flush(void);
 
-    void Close(void);
+    virtual IVSAMap* GetIVSAMap(void) { return this; }
+    virtual IStripeMap* GetIStripeMap(void) { return stripeMapManager; }
+    virtual IReverseMap* GetIReverseMap(void) { return reverseMapManager; }
+    virtual IMapFlush* GetIMapFlush(void) { return this; }
+    virtual IMapperWbt* GetIMapperWbt(void) { return mapperWbt; }
 
-    virtual IVSAMap* GetIVSAMap(void);
-    virtual IStripeMap* GetIStripeMap(void);
-    IReverseMap* GetIReverseMap(void);
-    virtual IMapFlush* GetIMapFlush(void);
-    IMapperWbt* GetIMapperWbt(void);
+    virtual bool VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo);
+    virtual bool VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo);
+    virtual bool VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo);
+    virtual bool VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo);
+    virtual bool VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo);
+    virtual bool VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo);
+    virtual void VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo);
 
-    int FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages = DEFAULT_DIRTYPAGE_SET) override;
-    int StoreAllMaps(void) override;
+    virtual int GetVSAs(int volId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray);
+    virtual int SetVSAs(int volId, BlkAddr startRba, VirtualBlks& virtualBlks);
+    virtual VirtualBlkAddr GetRandomVSA(BlkAddr rba);
+    virtual int64_t GetNumUsedBlocks(int volId);
+    virtual VirtualBlkAddr GetVSAInternal(int volId, BlkAddr rba, int& retry);
+    virtual int SetVSAsInternal(int volId, BlkAddr startRba, VirtualBlks& virtualBlks);
+    virtual VirtualBlkAddr GetVSAforReplay(int volId, BlkAddr rba);
+    virtual int SetVSAsforReplay(int volId, BlkAddr startRba, VirtualBlks& virtualBlks);
+    virtual MpageList GetDirtyVsaMapPages(int volId, BlkAddr startRba, uint64_t numBlks);
+
+    virtual int EnableInternalAccess(int volId);
+
+    virtual int FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages = DEFAULT_DIRTYPAGE_SET);
+    virtual int FlushAll(void);
 
 private:
     MapContent* _GetMapContent(int mapId);
     void _RegisterToMapperService(void);
     void _UnregisterFromMapperService(void);
+    bool _LoadVolumeMeta(int volId, bool delVol = false);
+    void _ClearVolumeState(void);
+    bool _ChangeVolumeStateLoading(int volId);
+    bool _ChangeVolumeStateDeleting(int volId);
+    int _GetMpageSize(void);
 
     MapperAddressInfo* addrInfo;
     VSAMapManager* vsaMapManager;
     StripeMapManager* stripeMapManager;
     ReverseMapManager* reverseMapManager;
     MapperWbt* mapperWbt;
+    JournalService* journalService;
 
     IArrayInfo* iArrayinfo;
     IStateControl* iStateControl;
+    MetaFs* metaFs;
 
     bool isInitialized;
+    VolumeMountState volState[MAX_VOLUME_COUNT];
 };
 
 } // namespace pos

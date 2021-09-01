@@ -33,31 +33,21 @@
 
 #include "src/include/branch_prediction.h"
 #include "src/mapper/stripemap/stripemap_content.h"
-
+#include "src/mapper/map/map_io_handler.h"
 #include <string>
 
 namespace pos
 {
-StripeMapContent::StripeMapContent(int mapId, std::string arrayName)
-: MapContent(mapId)
+StripeMapContent::StripeMapContent(int mapId, int arrayId)
+: MapContent(mapId, arrayId)
 {
-    filename = "StripeMap.bin";
-    this->arrayName = arrayName;
+    fileName = "StripeMap.bin";
 }
 
 int
-StripeMapContent::Prepare(uint64_t numEntries, int64_t opt)
+StripeMapContent::InMemoryInit(uint64_t numEntries, int mpageSize)
 {
-    SetPageSize();
-
-    mapHeader->SetEntriesPerMpage(mapHeader->GetMpageSize() / sizeof(StripeAddr));
-
-    uint64_t numPages = DivideUp(numEntries, mapHeader->GetEntriesPerMpage());
-    _InitHeaderInfo(numPages);
-    int ret = Init(numPages);
-    metaFile = new FILESTORE(filename, arrayName);
-
-    return ret;
+    return Init(numEntries, sizeof(StripeAddr), mpageSize);
 }
 
 StripeAddr

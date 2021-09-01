@@ -51,8 +51,9 @@ public:
 class MapHeader
 {
 public:
-    MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_);   // Ctor for IT
-    MapHeader(void);    // Ctor for Production
+    MapHeader(void) = default;
+    MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_, int mapId, int numMpages_, int mpageSize_, int entriesPerPage_);
+    MapHeader(int mapId, int numMpages_, int mpageSize_, int entriesPerPage_);
     virtual ~MapHeader(void);
     void Init(uint64_t numMpages);
 
@@ -70,18 +71,11 @@ public:
     virtual BitMap* GetMpageMap(void) { return mPageMap; }
     virtual void SetMapAllocated(int pageNr);
     virtual BitMap* GetTouchedMpages(void) { return touchedMpages; }
-
     int GetMapId(void) { return mapId; }
-    void SetMapId(int mapId_) { mapId = mapId_; }
-
     uint32_t GetSize(void) { return size; }
     int SetSize(void);
-
     virtual uint32_t GetMpageSize(void) { return mpageSize; }
-    virtual void SetMpageSize(uint32_t mpageSize_) { mpageSize = mpageSize_; }
-
     virtual uint32_t GetEntriesPerMpage(void) { return entriesPerMpage; }
-    virtual void SetEntriesPerMpage(uint32_t entriesPerMpage_) { entriesPerMpage = entriesPerMpage_; }
 
     void UpdateUsedBlkCnt(VirtualBlkAddr vsa);
     int64_t GetUsedBlkCnt(void) { return usedBlkCnt; }

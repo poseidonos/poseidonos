@@ -120,7 +120,6 @@ ArrayManager::Create(string name, DeviceSet<string> devs, string raidtype)
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
         arrayList.emplace(name, array);
-        ret = telClient->RegisterPublisher(name, array->GetTelemetryPublisher());
     }
     else
     {
@@ -147,7 +146,6 @@ ArrayManager::Delete(string name)
     int ret = array->Delete();
     if (ret == (int)POS_EVENT_ID::SUCCESS)
     {
-        telClient->DeregisterPublisher(name);
         delete array;
         arrayList.erase(name);
     }
@@ -158,6 +156,7 @@ ArrayManager::Delete(string name)
 int
 ArrayManager::Mount(string name)
 {
+    telClient->RegisterPublisher(name, arrayList[name]->GetTelemetryPublisher());
     return _ExecuteOrHandleErrors([](ArrayComponents* array)
     {
         return array->Mount();
@@ -167,6 +166,7 @@ ArrayManager::Mount(string name)
 int
 ArrayManager::Unmount(string name)
 {
+    telClient->DeregisterPublisher(name);
     return _ExecuteOrHandleErrors([](ArrayComponents* array)
     {
         return array->Unmount();

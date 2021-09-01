@@ -53,7 +53,12 @@ public:
     StripeMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId);
     virtual ~StripeMapManager(void);
 
+    int Init(void);
+    void Dispose(void);
+    int LoadStripeMapFile(void);
+    int FlushMap(void);
     void MapFlushDone(int mapId) override;
+    void WaitAllPendingIoDone(void);
 
     StripeAddr GetLSA(StripeId vsid) override;
     LsidRefResult GetLSAandReferLsid(StripeId vsid) override;
@@ -63,23 +68,20 @@ public:
     bool IsInWriteBufferArea(StripeAddr entry) override { return entry.stripeLoc == IN_WRITE_BUFFER_AREA; }
     MpageList GetDirtyStripeMapPages(int vsid) override;
 
-    void Init(MapperAddressInfo& info);
-    int StoreMap(void);
-    void Close(void);
-
     StripeMapContent* GetStripeMapContent(void);
     bool AllMapsFlushedDone(void);
 
 private:
     int _FlushMap(void);
-    void _MapLoadDone(int volID);
+    void _MapLoadDone(int param);
+    void _WaitLoadIoDone(void);
 
-    std::atomic<bool> isMapLoadDone;
-    std::map<int, MapFlushState> mapFlushStatus;
     StripeMapContent* stripeMap;
     pthread_rwlock_t stripeMapLock;
-
     MapperAddressInfo* addrInfo;
+    std::atomic<int> numLoadIssuedCount;
+    std::atomic<int> numWriteIssuedCount;
+
     std::string arrayName;
     int arrayId;
 };

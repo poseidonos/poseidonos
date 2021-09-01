@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "src/bio/ubio.h"
 #include <map>
 #include <set>
 
@@ -43,5 +44,6 @@ const int STRIPE_MAP_ID = -1;
 using MpageNum = uint64_t;
 using MpageList = std::set<MpageNum>;
 using MapPageList = std::map<int, MpageList>; // K: mapId
+using VsaArray = std::array<VirtualBlkAddr, MAX_PROCESSABLE_BLOCK_COUNT>;
 
 } // namespace pos

@@ -1,7 +1,6 @@
 #include <gmock/gmock.h>
 
 #include <list>
-#include <map>
 #include <string>
 #include <vector>
 
@@ -38,7 +37,7 @@ class MockReverseMapPack : public ReverseMapPack
 public:
     using ReverseMapPack::ReverseMapPack;
     MOCK_METHOD(void, Init, (uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file, std::string arrName), (override));
-    MOCK_METHOD(void, Init, (IVolumeManager* volumeManager, StripeId wblsid, IVSAMap* ivsaMap, IStripeMap* istripeMap), (override));
+    MOCK_METHOD(void, Init, (IVolumeManager * volumeManager, StripeId wblsid, VSAMapManager* ivsaMap, IStripeMap* istripeMap), (override));
     MOCK_METHOD(int, LinkVsid, (StripeId vsid), (override));
     MOCK_METHOD(int, UnLinkVsid, (), (override));
     MOCK_METHOD(int, Load, (EventSmartPtr callback), (override));

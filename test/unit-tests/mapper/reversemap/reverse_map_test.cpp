@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
-#include "test/unit-tests/mapper/i_vsamap_mock.h"
+#include "test/unit-tests/mapper/vsamap/vsamap_manager_mock.h"
 #include "test/unit-tests/volume/i_volume_manager_mock.h"
 
 using ::testing::_;
@@ -43,23 +43,22 @@ GenerateReverseMapInfo(int startOffset, int endOffset)
 }
 
 void
-ExpectGetMapInfo(MockIVolumeManager& volumeManager, MockIVSAMap& ivsaMap, MockIStripeMap& iStripeMap,
+ExpectGetMapInfo(MockIVolumeManager& volumeManager, MockVSAMapManager& ivsaMap, MockIStripeMap& iStripeMap,
     uint32_t volumeId, StripeId vsid, StripeId lsid)
 {
     const uint64_t volumeSize = 128 * BLOCK_SIZE;
 
-    EXPECT_CALL(volumeManager, GetVolumeSize).WillOnce([](int volId, uint64_t& volSize) -> int
-        {
-            volSize = volumeSize;
-            return (int)POS_EVENT_ID::SUCCESS;
-        });
+    EXPECT_CALL(volumeManager, GetVolumeSize).WillOnce([](int volId, uint64_t& volSize) -> int {
+        volSize = volumeSize;
+        return (int)POS_EVENT_ID::SUCCESS;
+    });
     for (BlkOffset offset = 0; offset < NUM_BLKS_PER_STRIPE; offset++)
     {
         BlkAddr startRba = offset;
         VirtualBlkAddr vsaToCheck{
             .stripeId = vsid,
             .offset = offset};
-        ON_CALL(ivsaMap, GetVSAInternal(volumeId, startRba, _)).WillByDefault(Return(vsaToCheck));
+        ON_CALL(ivsaMap, GetVSAWoCond(volumeId, startRba)).WillByDefault(Return(vsaToCheck));
     }
     StripeAddr lsaToCheck{
         .stripeLoc = IN_WRITE_BUFFER_AREA,
@@ -101,7 +100,7 @@ TEST(ReverseMapPack, ReconstructMap_testIfFailToGetVolumeSize)
     ReverseMapPack revMapPack;
 
     NiceMock<MockIVolumeManager> volumeManager;
-    NiceMock<MockIVSAMap> ivsaMap;
+    NiceMock<MockVSAMapManager> ivsaMap;
     NiceMock<MockIStripeMap> iStripeMap;
 
     const uint64_t numMpagesPerStripe = 1024;
@@ -127,7 +126,7 @@ TEST(ReverseMapPack, ReconstructMap_testIfExecutedSuccesfullyWithEmptyReverseMap
     ReverseMapPack revMapPack;
 
     NiceMock<MockIVolumeManager> volumeManager;
-    NiceMock<MockIVSAMap> ivsaMap;
+    NiceMock<MockVSAMapManager> ivsaMap;
     NiceMock<MockIStripeMap> iStripeMap;
 
     const uint64_t numMpagesPerStripe = 1024;
@@ -162,7 +161,7 @@ TEST(ReverseMapPack, ReconstructMap_testIfFailToGetMapInfoWithEmptyReverseMapInf
     ReverseMapPack revMapPack;
 
     NiceMock<MockIVolumeManager> volumeManager;
-    NiceMock<MockIVSAMap> ivsaMap;
+    NiceMock<MockVSAMapManager> ivsaMap;
     NiceMock<MockIStripeMap> iStripeMap;
 
     const uint64_t numMpagesPerStripe = 1024;
@@ -175,12 +174,11 @@ TEST(ReverseMapPack, ReconstructMap_testIfFailToGetMapInfoWithEmptyReverseMapInf
     std::map<uint64_t, BlkAddr> revMapInfos = GenerateReverseMapInfo(startOffset, endOffset);
 
     const uint64_t volumeSize = 128 * BLOCK_SIZE;
-    EXPECT_CALL(volumeManager, GetVolumeSize).WillOnce([](int volId, uint64_t& volSize) -> int
-        {
-            volSize = volumeSize;
-            return (int)POS_EVENT_ID::SUCCESS;
-        });
-    ON_CALL(ivsaMap, GetVSAInternal).WillByDefault(Return(UNMAP_VSA));
+    EXPECT_CALL(volumeManager, GetVolumeSize).WillOnce([](int volId, uint64_t& volSize) -> int {
+        volSize = volumeSize;
+        return (int)POS_EVENT_ID::SUCCESS;
+    });
+    ON_CALL(ivsaMap, GetVSAWoCond).WillByDefault(Return(UNMAP_VSA));
 
     StripeId vsid = 100;
     StripeId lsid = 1000;
@@ -204,7 +202,7 @@ TEST(ReverseMapPack, ReconstructMap_testIfExecutedSuccesfullyWithFullReverseMapI
     ReverseMapPack revMapPack;
 
     NiceMock<MockIVolumeManager> volumeManager;
-    NiceMock<MockIVSAMap> ivsaMap;
+    NiceMock<MockVSAMapManager> ivsaMap;
     NiceMock<MockIStripeMap> iStripeMap;
 
     const uint64_t numMpagesPerStripe = 1024;
@@ -240,7 +238,7 @@ TEST(ReverseMapPack, ReconstructMap_testIfExecutedSuccesfullyWithPartialReverseM
     ReverseMapPack revMapPack;
 
     NiceMock<MockIVolumeManager> volumeManager;
-    NiceMock<MockIVSAMap> ivsaMap;
+    NiceMock<MockVSAMapManager> ivsaMap;
     NiceMock<MockIStripeMap> iStripeMap;
 
     const uint64_t numMpagesPerStripe = 1024;
@@ -276,7 +274,7 @@ TEST(ReverseMapPack, ReconstructMap_testIfExecutedSuccesfullyWithPartialReverseM
     ReverseMapPack revMapPack;
 
     NiceMock<MockIVolumeManager> volumeManager;
-    NiceMock<MockIVSAMap> ivsaMap;
+    NiceMock<MockVSAMapManager> ivsaMap;
     NiceMock<MockIStripeMap> iStripeMap;
 
     const uint64_t numMpagesPerStripe = 1024;
@@ -312,7 +310,7 @@ TEST(ReverseMapPack, ReconstructMap_testIfExecutedSuccesfullyWithPartialReverseM
     ReverseMapPack revMapPack;
 
     NiceMock<MockIVolumeManager> volumeManager;
-    NiceMock<MockIVSAMap> ivsaMap;
+    NiceMock<MockVSAMapManager> ivsaMap;
     NiceMock<MockIStripeMap> iStripeMap;
 
     const uint64_t numMpagesPerStripe = 1024;
@@ -348,7 +346,7 @@ TEST(ReverseMapPack, ReconstructMap_testIfExecutedSuccesfullyWithSeveralPartialR
     ReverseMapPack revMapPack;
 
     NiceMock<MockIVolumeManager> volumeManager;
-    NiceMock<MockIVSAMap> ivsaMap;
+    NiceMock<MockVSAMapManager> ivsaMap;
     NiceMock<MockIStripeMap> iStripeMap;
 
     const uint64_t numMpagesPerStripe = 1024;

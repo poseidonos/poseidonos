@@ -28,6 +28,9 @@ public:
         VirtualBlks& virtualBlks) override;
     virtual VirtualBlkAddr GetRandomVSA(BlkAddr rba) override;
     virtual int64_t GetNumUsedBlocks(int volId) override;
+    virtual VirtualBlkAddr GetVSAforReplay(int volId, BlkAddr rba) override;
+    virtual int SetVSAsforReplay(int volId, BlkAddr startRba, VirtualBlks& virtualBlks) override;
+    
 
 private:
     int _SetVSAsInternal(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks);

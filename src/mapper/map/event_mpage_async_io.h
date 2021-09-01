@@ -47,10 +47,11 @@ public:
     bool Execute(void) override;
 
 private:
-    MapHeader* mapHeader_;
-    Map* map_;
-    MetaFileIntf* file_;
-    MetaIoCbPtr asyncIoReqCB_;
+    MapHeader* mapHeader;
+    Map* map;
+    MetaFileIntf* file;
+    MetaIoCbPtr asyncIoReqCB;
+    int startMpage;
 };
 
 } // namespace pos

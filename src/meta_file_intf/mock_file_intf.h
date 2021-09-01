@@ -43,6 +43,10 @@ namespace pos
 class MockFileIntf : public MetaFileIntf
 {
 public:
+    explicit MockFileIntf(std::string fname, int arrayId, StorageOpt storageOpt = StorageOpt::DEFAULT)
+    : MetaFileIntf(fname, arrayId)
+    {
+    }
     explicit MockFileIntf(std::string fname, std::string aname, StorageOpt storageOpt = StorageOpt::DEFAULT)
     : MetaFileIntf(fname, aname)
     {

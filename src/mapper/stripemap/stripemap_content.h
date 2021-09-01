@@ -41,10 +41,10 @@ namespace pos
 class StripeMapContent : public MapContent
 {
 public:
-    explicit StripeMapContent(int mapId, std::string arrayName);
+    StripeMapContent(int mapId, int arrayId);
     virtual ~StripeMapContent(void) = default;
 
-    virtual int Prepare(uint64_t size, int64_t opt = 0) override;
+    int InMemoryInit(uint64_t entrySize, int mpageSize);
     virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries) override;
 
     StripeAddr GetEntry(StripeId vsid);

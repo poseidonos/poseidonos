@@ -40,45 +40,24 @@
 
 namespace pos
 {
-VSAMapContent::VSAMapContent(void)
-{
-}
-
-VSAMapContent::VSAMapContent(int mapId, IBlockAllocator* iBlockAllocator_)
-: MapContent(mapId),
+VSAMapContent::VSAMapContent(int mapId, int arrayId, IBlockAllocator* iBlockAllocator_)
+: MapContent(mapId, arrayId),
   iBlockAllocator(iBlockAllocator_)
 {
+    fileName = "VSAMap." + std::to_string(mapId) + ".bin";
     totalBlks = 0;
 }
 
-VSAMapContent::VSAMapContent(int mapId, std::string arrayName)
-: VSAMapContent(mapId, AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName))
+VSAMapContent::VSAMapContent(int mapId, int arrayId)
+: VSAMapContent(mapId, arrayId, AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayId))
 {
-    filename = "VSAMap." + std::to_string(mapId) + ".bin";
-    this->arrayName = arrayName;
-    totalBlks = 0;
 }
 
 int
-VSAMapContent::Prepare(uint64_t blkCnt, int64_t volid)
-{
-    SetPageSize();
-    totalBlks = blkCnt;
-
-    mapHeader->SetEntriesPerMpage(mapHeader->GetMpageSize() / sizeof(VirtualBlkAddr));
-    uint64_t mpagesNeeded = DivideUp(totalBlks, mapHeader->GetEntriesPerMpage());
-    _InitHeaderInfo(mpagesNeeded);
-
-    return 0;
-}
-
-int
-VSAMapContent::InMemoryInit(uint64_t blkCnt, uint64_t volid)
+VSAMapContent::InMemoryInit(uint64_t volId, uint64_t blkCnt, int mpageSize)
 {
     totalBlks = blkCnt;
-    uint64_t pages = DivideUp(totalBlks, mapHeader->GetEntriesPerMpage());
-    int ret = Init(pages);
-    return ret;
+    return Init(totalBlks, sizeof(VirtualBlkAddr), mpageSize);
 }
 
 VirtualBlkAddr

@@ -94,4 +94,26 @@ VSAMapMock::GetNumUsedBlocks(int volId)
 {
     return 0;
 }
+
+VirtualBlkAddr
+VSAMapMock::GetVSAforReplay(int volId, BlkAddr rba)
+{
+    assert(volId < testInfo->maxNumVolume);
+    assert(rba < testInfo->maxVolumeSizeInBlock);
+
+    return map[volId][rba];
+}
+int
+VSAMapMock::SetVSAsforReplay(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
+{
+    assert(volId < testInfo->maxNumVolume);
+    for (uint32_t blkCount = 0; blkCount < virtualBlks.numBlks; blkCount++)
+    {
+        assert(startRba + blkCount < testInfo->maxVolumeSizeInBlock);
+        map[volId][startRba + blkCount].stripeId = virtualBlks.startVsa.stripeId;
+        map[volId][startRba + blkCount].offset = virtualBlks.startVsa.offset + blkCount;
+    }
+    return 0;
+}
+
 } // namespace pos

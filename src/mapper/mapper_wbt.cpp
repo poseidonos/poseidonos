@@ -103,7 +103,7 @@ int
 MapperWbt::ReadVsaMapEntry(int volId, BlkAddr rba, std::string fname)
 {
     VsaArray vsaArray;
-    vsaMapManager->GetIVSAMap()->GetVSAs(volId, rba, 1, vsaArray); // todo
+    vsaMapManager->GetVSAs(volId, rba, 1, vsaArray); // todo
     VirtualBlkAddr vsa = vsaArray[0];
 
     ofstream out(fname.c_str(), std::ofstream::app);
@@ -121,7 +121,7 @@ MapperWbt::WriteVsaMapEntry(int volId, BlkAddr rba, VirtualBlkAddr vsa)
 {
     VirtualBlks blks = {.startVsa = vsa,
                         .numBlks = 1};
-    int ret = vsaMapManager->GetVSAMapAPI()->SetVSAsInternal(volId, rba, blks);
+    int ret = vsaMapManager->SetVSAsWoCond(volId, rba, blks);
     return ret;
 }
 
@@ -322,7 +322,7 @@ MapperWbt::GetMapLayout(std::string fname)
     }
     else
     {
-        out << "Meta page size: 0x" << std::hex << stripeMapManager->GetStripeMapContent()->GetPageSize() << std::endl;
+        out << "Meta page size: 0x" << std::hex << addrInfo->GetMpageSize() << std::endl;
         out << "Stripe map entries per mpage: 0x" << std::hex << stripeMapManager->GetStripeMapContent()->GetEntriesPerPage() << std::endl;
 
         VSAMapContent* validVsaMap = _GetFirstValidVolume();

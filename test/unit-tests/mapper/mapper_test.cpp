@@ -52,7 +52,7 @@ TEST(Mapper, WaitForFlushAllMapsDone_)
 {
 }
 
-TEST(Mapper, StoreAllMaps_)
+TEST(Mapper, FlushAll_)
 {
 }
 

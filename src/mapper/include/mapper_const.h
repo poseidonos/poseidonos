@@ -41,7 +41,7 @@ enum class MapFlushState
     FLUSH_DONE,
 };
 
-enum LoadFlag
+enum MapLoadState
 {
     NOT_LOADED = 0,
     LOADING,

@@ -36,6 +36,7 @@
 
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/array/service/io_translator/io_translator.h"
+#include "src/mapper/i_vsamap.h"
 #include "src/include/address_type.h"
 #include "src/include/partition_type.h"
 

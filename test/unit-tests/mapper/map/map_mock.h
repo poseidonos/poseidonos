@@ -8,7 +8,6 @@
 
 namespace pos
 {
-
 class MockMpage : public Mpage
 {
 public:

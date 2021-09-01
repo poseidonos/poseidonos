@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/mapper/map/map_flush_handler.h"
+#include "src/mapper/map/map_io_handler.h"
 
 #include "test/integration-tests/mapper/map/map_io_handler_it_test.h"
 
@@ -136,7 +136,7 @@ TEST_F(MapIoHandlerTest, StoreVSAMap)
         _SetVSAs(TEST_VOL_ID, rba, (StripeId)(test / 128), (BlkOffset)(test % 128));
     }
 
-    mapperSUT->StoreAllMaps();  // store stripMap & vsamap[vol]
+    mapperSUT->FlushAll();  // store stripMap & vsamap[vol]
 
     _SimulateSPOR();
 
@@ -159,7 +159,7 @@ TEST_F(MapIoHandlerTest, StoreStripeMap)
         _SetLSA(test, test * 2, loc);
     }
 
-    mapperSUT->StoreAllMaps();
+    mapperSUT->FlushAll();
 
     _SimulateSPOR();
 

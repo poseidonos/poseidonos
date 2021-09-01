@@ -42,14 +42,13 @@ namespace pos
 class VSAMapContent : public MapContent
 {
 public:
-    VSAMapContent(void);    // Ctor for UT
-    VSAMapContent(int mapId, IBlockAllocator* iBlockAllocator_);   // Ctor for UT
-    VSAMapContent(int mapId, std::string arrayName);    // Ctor for Production
+    VSAMapContent(void) = default;
+    VSAMapContent(int mapId, int arrayId, IBlockAllocator* iBlockAllocator_);
+    VSAMapContent(int mapId, int arrayId);
 
-    virtual int Prepare(uint64_t size, int64_t opt = 0) override;
     virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries) override;
 
-    int InMemoryInit(uint64_t numEntries, uint64_t volid);
+    int InMemoryInit(uint64_t volId, uint64_t numEntries, int mpageSize);
     virtual VirtualBlkAddr GetEntry(BlkAddr rba);
     virtual int SetEntry(BlkAddr rba, VirtualBlkAddr vsa);
 

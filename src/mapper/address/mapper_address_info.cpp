@@ -48,7 +48,7 @@ MapperAddressInfo::MapperAddressInfo(IArrayInfo* iArrayInfo_)
 }
 
 void
-MapperAddressInfo::SetupAddressInfo(void)
+MapperAddressInfo::SetupAddressInfo(int mpageSize_)
 {
     const PartitionLogicalSize* udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
     const PartitionLogicalSize* wbSize = iArrayInfo->GetSizeInfo(PartitionType::WRITE_BUFFER);
@@ -56,12 +56,25 @@ MapperAddressInfo::SetupAddressInfo(void)
     maxVsid = udSize->totalStripes;
     blksPerStripe = udSize->blksPerStripe;
     numWbStripes = wbSize->totalStripes;
+    mpageSize = mpageSize_;
+}
+
+int
+MapperAddressInfo::GetMpageSize(void)
+{
+    return mpageSize;
 }
 
 std::string
 MapperAddressInfo::GetArrayName(void)
 {
     return iArrayInfo->GetName();
+}
+
+int
+MapperAddressInfo::GetArrayId(void)
+{
+    return iArrayInfo->GetIndex();
 }
 
 } // namespace pos

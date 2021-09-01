@@ -80,9 +80,7 @@ ReplayBlockMapUpdate::_ReadBlockMap(void)
 
     for (uint32_t offset = 0; offset < numBlks; offset++)
     {
-        int shouldRetry = CALLER_NOT_EVENT;
-        readMap[offset] = vsaMap->GetVSAInternal(volId, startRba + offset, shouldRetry);
-        assert(shouldRetry == OK_READY);
+        readMap[offset] = vsaMap->GetVSAforReplay(volId, startRba + offset);
     }
 }
 
@@ -147,7 +145,7 @@ ReplayBlockMapUpdate::_UpdateMap(uint32_t offset)
         .startVsa = _GetVsa(offset),
         .numBlks = 1};
 
-    int result = vsaMap->SetVSAsInternal(volId, rba, virtualBlks);
+    int result = vsaMap->SetVSAsforReplay(volId, rba, virtualBlks);
     if (replaySegmentInfo == true)
     {
         blockAllocator->ValidateBlks(virtualBlks);

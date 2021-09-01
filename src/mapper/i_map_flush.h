@@ -42,7 +42,7 @@ class IMapFlush
 {
 public:
     virtual int FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages = DEFAULT_DIRTYPAGE_SET) = 0;
-    virtual int StoreAllMaps(void) = 0;
+    virtual int FlushAll(void) = 0;
 
     static MpageList DEFAULT_DIRTYPAGE_SET;
 };

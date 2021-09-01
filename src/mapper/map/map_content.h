@@ -50,58 +50,39 @@ class MapIoHandler;
 class MapContent
 {
 public:
-    MapContent(void);                               // Ctor for UT
-    MapContent(MapHeader* mapHeader_, MetaFsService* metaFsService_);     // Ctor for UT
-    explicit MapContent(int mapId);                 // Ctor for Production
+    MapContent(int mapId_, int arrayId_);
     virtual ~MapContent(void);
 
-    virtual int Prepare(uint64_t numEntries, int64_t opt = 0) = 0;
     virtual MpageList GetDirtyPages(BlkAddr start, uint64_t numEntries) = 0;
 
-    int Init(uint64_t numMpages);
+    int Init(uint64_t numEntries, int entrySize, int mpageSize);
+    void Dispose(void);
+    int Load(AsyncLoadCallBack& cb);
 
-    int CreateMapFile(void);
-    int FileOpen(void);
-    bool IsFileOpened(void);
-
-    int Load(AsyncLoadCallBack& cb, bool eventWorkerTH = false);
-    bool IsLoaded(void);
-
-    int FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr event);
-    int FlushTouchedPages(EventSmartPtr event);
-    int Store(void);
-    void SetAllFlushed(void) { allFlushed = true; }
-
-    int FileClose(void);
+    int OpenMapFile(void);
     int DeleteMapFile(void);
     bool DoesFileExist(void);
+
+    int FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback);
+    int FlushTouchedPages(EventSmartPtr callback);
+    int FlushHeader(EventSmartPtr callback);
 
     int Dump(std::string fileName);
     int DumpLoad(std::string fileName);
 
     int GetId(void);
-    uint32_t GetPageSize(void);
-    int SetPageSize(StorageOpt storageOpt = StorageOpt::DEFAULT);
     uint32_t GetEntriesPerPage(void);
-    std::string GetFileName(void);
-
     void SetMapHeader(MapHeader* mapHeader_) { mapHeader = mapHeader_; }
     void SetMap(Map* map_) { map = map_; }
-    void SetMetaFsService(MetaFsService* metaFsService_) { metaFsService = metaFsService_; }
 
 protected:
-    void _InitHeaderInfo(uint64_t numMpages);
-    int _PrepareMetaFile(void);
-
-    MapHeader* mapHeader;           // by InitHeaderInfo()
-    Map* map;                       // by Init()
-    MapIoHandler* mapIoHandler;     // Created by Init()
-    MetaFileIntf* metaFile;         // assigned by CreateMapFile() ...
-    std::string filename;           // by Ctor() of derived class
-    std::string arrayName;
-    MetaFsService* metaFsService;
-    bool loaded;
-    bool allFlushed;
+    MapHeader* mapHeader;
+    Map* map;
+    MapIoHandler* mapIoHandler;
+    std::string fileName;
+    int mapId;
+    int arrayId;
+    bool isInitialized;
 };
 
 } // namespace pos

@@ -70,7 +70,7 @@ MockMapper::GetIMapFlush(void)
 }
 
 int
-MockMapper::StoreAllMaps(void)
+MockMapper::FlushAll(void)
 {
     return 0;
 }

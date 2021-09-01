@@ -94,7 +94,7 @@ ReverseMapPack::Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file,
 }
 
 void
-ReverseMapPack::Init(IVolumeManager* volumeManager, StripeId wblsid, IVSAMap* ivsaMap, IStripeMap* istripeMap)
+ReverseMapPack::Init(IVolumeManager* volumeManager, StripeId wblsid, VSAMapManager* ivsaMap, IStripeMap* istripeMap)
 {
     wbLsid = wblsid;
     iVSAMap = ivsaMap;
@@ -437,8 +437,7 @@ ReverseMapPack::_FindRba(uint32_t volumeId, StripeId vsid, StripeId lsid, uint64
             return false;
         }
 
-        int caller = CALLER_NOT_EVENT;
-        VirtualBlkAddr vsaToCheck = iVSAMap->GetVSAInternal(volumeId, rbaToCheck, caller);
+        VirtualBlkAddr vsaToCheck = iVSAMap->GetVSAWoCond(volumeId, rbaToCheck);
         if (vsaToCheck == UNMAP_VSA || vsaToCheck.offset != offset || vsaToCheck.stripeId != vsid)
         {
             continue;

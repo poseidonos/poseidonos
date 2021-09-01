@@ -32,15 +32,11 @@
 
 #pragma once
 
-#include "src/journal_service/journal_service.h"
 #include "src/mapper/include/mapper_const.h"
 #include "src/mapper/i_map_manager.h"
-#include "src/mapper/i_vsamap.h"
-#include "src/mapper/vsamap/i_vsamap_internal.h"
-#include "src/mapper/vsamap/vsamap_api.h"
 #include "src/mapper/vsamap/vsamap_content.h"
-#include "src/sys_event/volume_event.h"
-#include "src/volume/volume_service.h"
+#include "src/mapper/address/mapper_address_info.h"
+#include "src/volume/volume_base.h"
 
 #include <condition_variable>
 #include <map>
@@ -49,84 +45,54 @@
 
 namespace pos
 {
-
-const uint64_t UNKNOWN_SIZE_BECAUSEOF_INTERNAL_LOAD = 0;
-
-enum class VolState
-{
-    NOT_EXIST,          // Not exist
-    EXIST_UNLOADED,     // Unloaded
-    JUST_CREATED,       // Loaded
-    BACKGROUND_MOUNTED, // Loaded
-    FOREGROUND_MOUNTED, // Loaded
-    VOLUME_DELETING, // Deleting
-    MAX_STATE
-};
-
-using VolMountStateIter = std::map<int, VolState>::iterator;
-
-class VSAMapManager : public IMapManagerInternal, public IVSAMapInternal, public VolumeEvent
+class VSAMapManager : public IMapManagerInternal
 {
 public:
-    VSAMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId);
+    VSAMapManager(void) = default;
+    explicit VSAMapManager(MapperAddressInfo* info);
     virtual ~VSAMapManager(void);
+    virtual int Init(void);
+    virtual void Dispose(void);
 
-    void MapFlushDone(int mapId) override;
+    virtual bool CreateVsaMapContent(int volId, uint64_t volSizeByte, bool delVol);
+    virtual int LoadVSAMapFile(int volId);
+    virtual int FlushMap(int volId);
+    virtual int FlushAllMaps(void);
+    virtual void WaitAllPendingIoDone(void);
+    virtual void WaitPendingIoDone(int volId);
+    virtual void MapFlushDone(int mapId);
 
-    int EnableInternalAccess(int volID, int caller) override;
-    std::atomic<int>& GetLoadDoneFlag(int volumeId) override;
+    virtual int GetVSAs(int volumeId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray);
+    virtual int SetVSAs(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks);
+    virtual VirtualBlkAddr GetRandomVSA(BlkAddr rba);
+    virtual int64_t GetNumUsedBlocks(int volId);
+    virtual VirtualBlkAddr GetVSAWoCond(int volumeId, BlkAddr rba);
+    virtual int SetVSAsWoCond(int volumeId, BlkAddr startfRba, VirtualBlks& virtualBlks);
+    virtual MpageList GetDirtyVsaMapPages(int volId, BlkAddr startRba, uint64_t numBlks);
+    virtual VSAMapContent*& GetVSAMapContent(int volId) { return vsaMaps[volId]; }
 
-    bool VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
-    bool VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
-    bool VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
-    bool VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
-    bool VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
-    bool VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
-    void VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) override;
+    virtual int NeedToDeleteVolume(int volId);
+    virtual int InvalidateAllBlocks(int volId);
+    virtual int DeleteVSAMap(int volId);
 
-    void Init(void);
-    int StoreAllMaps(void);
-    void Close(void);
-
-    VSAMapContent*& GetVSAMapContent(int volID);
-    bool AllMapsFlushedDone(void);
-    void SetVolumeManagerObject(IVolumeManager* volumeManagerToUse);
-
-    IVSAMap* GetIVSAMap(void);
-    VSAMapAPI* GetVSAMapAPI(void);
+    virtual bool IsVsaMapAccessible(int volId);
+    virtual void EnableVsaMapAccess(int volId);
+    virtual void DisableVsaMapAccess(int volId);
+    virtual void EnableVsaMapInternalAccess(int volId);
+    virtual void DisableVsaMapInternalAccess(int volId);
 
 private:
-    bool _PrepareVsaMapAndHeader(int volID, uint64_t& volSizeByte, bool isUnknownVolSize);
-    bool _PrepareInMemoryData(int volID, uint64_t volSizeByte);
-    bool _VSAMapFileCreate(int volID);
-    int _VSAMapFileLoadByCliThread(int volID);
-    int _VSAMapFileLoadbyEwThread(int volID);
-    bool _VSAMapFileStore(int volID);
-    void _MapLoadDoneByCli(int volID);
-    void _MapLoadDoneByEw(int volID);
-    bool _IsVolumeExist(int volID, VolMountStateIter& iter);
-    bool _LoadVolumeMeta(std::string volName, int volID, uint64_t volSizeByte, bool isUnknownVolSize);
-    void _WaitForMapFlushed(int volId);
-    int _FlushMaps(void);
+    void _MapLoadDone(int volId);
+    int _UpdateVsaMap(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks);
 
-    bool _ChangeVolumeStateDeleting(uint32_t volumeId);
-    VolState _GetVolumeState(uint32_t volumeId);
-    void _HandleVolumeCreationFail(int volID);
-
-    std::map<int, VolState> volumeMountState;
-    std::recursive_mutex volMountStateLock[MAX_VOLUME_COUNT];
-
-    std::mutex volLoadLock;
-    std::condition_variable cvLoadDone;
-    std::atomic<int> loadDoneFlag[MAX_VOLUME_COUNT];
-    AsyncLoadCallBack cbMapLoadDoneByCli;
-    AsyncLoadCallBack cbMapLoadDoneByEw;
-
-    std::map<int, MapFlushState> mapFlushStatus;
-
-    IVolumeManager* volumeManager;
-    VSAMapAPI* vsaMapAPI;
-    JournalService* journalService;
+    MapperAddressInfo* addrInfo;
+    VSAMapContent* vsaMaps[MAX_VOLUME_COUNT];
+    MapFlushState mapFlushState[MAX_VOLUME_COUNT];
+    MapLoadState mapLoadState[MAX_VOLUME_COUNT];
+    std::atomic<bool> isVsaMapAccessable[MAX_VOLUME_COUNT];
+    std::atomic<bool> isVsaMapInternalAccessable[MAX_VOLUME_COUNT];
+    std::atomic<int> numWriteIssuedCount;
+    std::atomic<int> numLoadIssuedCount;
 };
 
 } // namespace pos

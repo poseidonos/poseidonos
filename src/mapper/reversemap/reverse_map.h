@@ -38,7 +38,7 @@
 #include <vector>
 
 #include "src/mapper/i_stripemap.h"
-#include "src/mapper/i_vsamap.h"
+#include "src/mapper/vsamap/vsamap_manager.h"
 #include "src/meta_file_intf/async_context.h"
 
 namespace pos
@@ -145,7 +145,7 @@ public:
     virtual ~ReverseMapPack(void);
 
     virtual void Init(uint64_t mpsize, uint64_t nmpPerStripe, MetaFileIntf* file, std::string arrName);
-    virtual void Init(IVolumeManager* volumeManager, StripeId wblsid, IVSAMap* ivsaMap, IStripeMap* istripeMap);
+    virtual void Init(IVolumeManager* volumeManager, StripeId wblsid, VSAMapManager* ivsaMap, IStripeMap* istripeMap);
     virtual int LinkVsid(StripeId vsid); // vsid == SSD LSID
     virtual int UnLinkVsid(void);
 
@@ -182,7 +182,7 @@ private:
     std::vector<RevMap*> revMaps;
     EventSmartPtr callback;
 
-    IVSAMap* iVSAMap;
+    VSAMapManager* iVSAMap;
     IStripeMap* iStripeMap;
     std::string arrayName;
 

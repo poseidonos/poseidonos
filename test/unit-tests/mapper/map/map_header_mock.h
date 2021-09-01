@@ -22,9 +22,7 @@ public:
     MOCK_METHOD(void, SetMapAllocated, (int pageNr), (override));
     MOCK_METHOD(BitMap*, GetTouchedMpages, (), (override));
     MOCK_METHOD(uint32_t, GetMpageSize, (), (override));
-    MOCK_METHOD(void, SetMpageSize, (uint32_t mpageSize_), (override));
     MOCK_METHOD(uint32_t, GetEntriesPerMpage, (), (override));
-    MOCK_METHOD(void, SetEntriesPerMpage, (uint32_t entriesPerMpage_), (override));
 };
 
-}   // namespace pos
+} // namespace pos

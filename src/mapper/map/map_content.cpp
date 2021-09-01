@@ -32,268 +32,140 @@
 
 #include "src/include/memory.h"
 #include "src/metafs/include/metafs_service.h"
-#include "src/mapper/map/event_map_flush_completed.h"
 #include "src/mapper/map/map_content.h"
-#include "src/mapper/map/map_flush_handler.h"
+#include "src/mapper/map/map_io_handler.h"
 
 #include <string>
 
 namespace pos
 {
-MapContent::MapContent(void)
+MapContent::MapContent(int mapId_, int arrayId_)
 : mapHeader(nullptr),
   map(nullptr),
   mapIoHandler(nullptr),
-  metaFile(nullptr),
-  metaFsService(nullptr),
-  loaded(false),
-  allFlushed(false)
+  mapId(mapId_),
+  arrayId(arrayId_),
+  isInitialized(false)
 {
-}
-
-MapContent::MapContent(MapHeader* mapHeader_, MetaFsService* metaFsService_)
-: mapHeader(mapHeader_),
-  map(nullptr),
-  mapIoHandler(nullptr),
-  metaFile(nullptr),
-  metaFsService(metaFsService_),
-  loaded(false),
-  allFlushed(false)
-{
-}
-
-MapContent::MapContent(int mapId)
-: MapContent(new MapHeader, MetaFsServiceSingleton::Instance())
-{
-    mapHeader->SetMapId(mapId);
 }
 
 MapContent::~MapContent(void)
 {
-    if (metaFile != nullptr)
+    Dispose();
+}
+
+int
+MapContent::Init(uint64_t numEntries, int entrySize, int mpageSize)
+{
+    if (isInitialized == false)
     {
-        if (metaFile->IsOpened())
+        isInitialized = true;
+        int entriesPerPage = mpageSize / entrySize;
+        int numMpages = DivideUp(numEntries, entriesPerPage);
+        if (mapHeader == nullptr)
         {
-            metaFile->Close();
+            mapHeader = new MapHeader(mapId, numMpages, mpageSize, entriesPerPage);
+            mapHeader->Init(numMpages);
         }
-        delete metaFile;
-        metaFile = nullptr;
+        if (map == nullptr)
+        {
+            map = new Map(numMpages, mpageSize);
+        }
+        if (mapIoHandler == nullptr)
+        {
+            mapIoHandler = new MapIoHandler(map, mapHeader, arrayId);
+        }
     }
-    if (map != nullptr)
-    {
-        delete map;
-        map = nullptr;
-    }
-    if (mapIoHandler != nullptr)
-    {
-        delete mapIoHandler;
-        mapIoHandler = nullptr;
-    }
-    if (mapHeader != nullptr)
-    {
-        delete mapHeader;
-        mapHeader = nullptr;
-    }
+    return 0;
 }
 
 int
-MapContent::CreateMapFile(void)
+MapContent::OpenMapFile(void)
 {
-    if (mapHeader->IsInitialized() == false)
-    {
-        return -EID(MAPCONTENT_HEADER_NOT_INITIALIZED);
-    }
-    if (metaFile == nullptr)
-    {
-        metaFile = new FILESTORE(filename, arrayName);
-    }
-
     uint64_t fileSize = mapHeader->GetSize() + mapHeader->GetMpageSize() * mapHeader->GetNumTotalMpages();
-
-    int ret = metaFile->Create(fileSize);
+    int ret = mapIoHandler->OpenFile(fileName, fileSize);
+    if (ret == EID(NEED_TO_INITIAL_STORE))
+    {
+        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper] Need to Initial Store fileName:{}, arrayId:{}", fileName, arrayId);
+    }
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(MFS_FILE_CREATE_FAILED), "Map file creation failed, fileName:{}", filename);
-    }
-    else if (ret == 0)
-    {
-        POS_TRACE_INFO(EID(MFS_START), "Map file created, fileName:{}", filename);
-        loaded = true;
-    }
-
-    return ret;
-}
-
-int
-MapContent::DeleteMapFile(void)
-{
-    int ret = metaFile->Delete();
-    if (ret < 0)
-    {
-        POS_TRACE_ERROR(EID(MFS_FILE_DELETE_FAILED), "MFS File:{} delete failed",
-            filename);
-        return ret;
-    }
-    delete metaFile;
-    metaFile = nullptr;
-
-    if (mapIoHandler != nullptr)
-    {
-        delete mapIoHandler;
-        mapIoHandler = nullptr;
-    }
-
-    return ret;
-}
-
-bool
-MapContent::DoesFileExist(void)
-{
-    return metaFile->DoesFileExist();
-}
-
-int
-MapContent::Load(AsyncLoadCallBack& cb, bool eventWorkerTH)
-{
-    int ret = _PrepareMetaFile();
-    mapIoHandler->RegisterFile(metaFile);
-    if (eventWorkerTH)
-    {
-        ret = mapIoHandler->LoadByEwThread(cb);
-    }
-    else
-    {
-        ret = mapIoHandler->LoadByCliThread(cb);
+        POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper] failed to save Header fileName:{}, arrayId:{}", fileName, arrayId);
     }
     return ret;
 }
 
-bool
-MapContent::IsLoaded(void)
+void
+MapContent::Dispose(void)
 {
-    return loaded;
+    if (isInitialized == true)
+    {
+        if (mapIoHandler != nullptr)
+        {
+            delete mapIoHandler;
+            mapIoHandler = nullptr;
+        }
+        if (mapHeader != nullptr)
+        {
+            delete mapHeader;
+            mapHeader = nullptr;
+        }
+        if (map != nullptr)
+        {
+            delete map;
+            map = nullptr;
+        }
+        isInitialized = false;
+    }
 }
 
 int
-MapContent::FileClose(void)
+MapContent::Load(AsyncLoadCallBack& cb)
 {
-    int ret = metaFile->Close();
-    if (ret == 0)
-    {
-        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE), "File name:{} has been closed", filename);
-    }
+    int ret = mapIoHandler->Load(cb);
     return ret;
 }
 
 int
 MapContent::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback)
 {
-    if (metaFile->IsOpened() == false)
-    {
-        metaFile->Open();
-    }
     return mapIoHandler->FlushDirtyPagesGiven(dirtyPages, callback);
 }
 
 int
 MapContent::FlushTouchedPages(EventSmartPtr callback)
 {
-    if (metaFile->IsOpened() == false)
-    {
-        metaFile->Open();
-    }
     return mapIoHandler->FlushTouchedPages(callback);
 }
 
 int
-MapContent::Store(void)
+MapContent::FlushHeader(EventSmartPtr callback)
 {
-    int ret = _PrepareMetaFile();
-    mapIoHandler->RegisterFile(metaFile);
-
-    allFlushed = false;
-    EventSmartPtr event(new EventMapFlushCompleted(this));
-
-    do
-    {
-        ret = mapIoHandler->FlushAllPages(event);
-    } while (ret == -EID(MAP_FLUSH_IN_PROGRESS));
-
-    while (allFlushed == false)
-    {
-        usleep(1);
-    }
-
-    return ret;
-}
-
-uint32_t
-MapContent::GetPageSize(void)
-{
-    return mapHeader->GetMpageSize();
+    return mapIoHandler->FlushHeader(callback);
 }
 
 int
-MapContent::SetPageSize(StorageOpt storageOpt)
+MapContent::DeleteMapFile(void)
 {
-#ifdef IBOF_CONFIG_USE_MOCK_FS
-    mapHeader->SetMpageSize(4096);
-#else
-    MetaFilePropertySet prop;
-    if (storageOpt == StorageOpt::NVRAM)
-    {
-        prop.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
-        prop.ioOpType = MetaFileDominant::WriteDominant;
-        prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
-    }
-
-    MetaFs* metaFs = metaFsService->GetMetaFs(arrayName);
-    if (metaFs == nullptr)
-    {
-        mapHeader->SetMpageSize(4096);
-    }
-    else
-    {
-        mapHeader->SetMpageSize(metaFs->ctrl->EstimateAlignedFileIOSize(prop));
-    }
-#endif
-    return 0;
+    return mapIoHandler->DeleteFile();
 }
 
-uint32_t
-MapContent::GetEntriesPerPage(void)
+bool
+MapContent::DoesFileExist(void)
 {
-    return mapHeader->GetEntriesPerMpage();
-}
-
-std::string
-MapContent::GetFileName(void)
-{
-    return filename;
-}
-
-int
-MapContent::Init(uint64_t numMpages)
-{
-    map = new Map(numMpages, mapHeader->GetMpageSize());
-    if (mapIoHandler == nullptr)
-    {
-        mapIoHandler = new MapIoHandler(map, mapHeader);
-    }
-
-    return 0;
+    return mapIoHandler->DoesFileExist();
 }
 
 int
 MapContent::Dump(std::string fname)
 {
-    MetaFileIntf* linuxFileToStore = new MockFileIntf(fname, arrayName);
+    MetaFileIntf* linuxFileToStore = new MockFileIntf(fname, arrayId);
     int ret = linuxFileToStore->Create(0);
     linuxFileToStore->Open();
 
     if (ret == 0)
     {
-        ret = mapIoHandler->SyncStore(linuxFileToStore);
+        ret = mapIoHandler->StoreForWBT(linuxFileToStore);
     }
 
     linuxFileToStore->Close();
@@ -304,13 +176,13 @@ MapContent::Dump(std::string fname)
 int
 MapContent::DumpLoad(std::string fname)
 {
-    MetaFileIntf* linuxFileFromLoad = new MockFileIntf(fname, arrayName);
+    MetaFileIntf* linuxFileFromLoad = new MockFileIntf(fname, arrayId);
     int ret = linuxFileFromLoad->Open();
 
     if (ret == 0)
     {
-        ret = mapIoHandler->SyncLoad(linuxFileFromLoad);
-        ret = mapIoHandler->StoreToMFS();
+        ret = mapIoHandler->LoadForWBT(linuxFileFromLoad);
+        ret = mapIoHandler->StoreForWBT(nullptr);
     }
 
     linuxFileFromLoad->Close();
@@ -324,33 +196,10 @@ MapContent::GetId(void)
     return mapHeader->GetMapId();
 }
 
-bool
-MapContent::IsFileOpened(void)
+uint32_t
+MapContent::GetEntriesPerPage(void)
 {
-    return metaFile->IsOpened();
-}
-
-int
-MapContent::FileOpen(void)
-{
-    return metaFile->Open();
-}
-
-
-void
-MapContent::_InitHeaderInfo(uint64_t numPages)
-{
-    mapHeader->Init(numPages);
-}
-
-int
-MapContent::_PrepareMetaFile(void)
-{
-    if (metaFile == nullptr)
-    {
-        metaFile = new FILESTORE(filename, arrayName);
-    }
-    return metaFile->Open();
+    return mapHeader->GetEntriesPerMpage();
 }
 
 } // namespace pos

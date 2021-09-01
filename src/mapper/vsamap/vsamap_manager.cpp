@@ -40,737 +40,356 @@
 
 namespace pos
 {
-VSAMapManager::VSAMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId)
-: VolumeEvent("Mapper", arrayName, arrayId),
-  volumeManager(nullptr)
+VSAMapManager::VSAMapManager(MapperAddressInfo* info)
+: addrInfo(info),
+  numWriteIssuedCount(0),
+  numLoadIssuedCount(0)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayId);
-
-    vsaMapAPI = new VSAMapAPI(this, info);
-
-    volumeMountState.clear();
-    for (int volumeId = 0; volumeId < MAX_VOLUME_COUNT; ++volumeId)
+    for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
     {
-        loadDoneFlag[volumeId] = NOT_LOADED;
+        vsaMaps[volId] = nullptr;
     }
-    cbMapLoadDoneByCli = std::bind(&VSAMapManager::_MapLoadDoneByCli, this, std::placeholders::_1);
-    cbMapLoadDoneByEw = std::bind(&VSAMapManager::_MapLoadDoneByEw, this, std::placeholders::_1);
-    journalService = JournalServiceSingleton::Instance();
 }
 
 VSAMapManager::~VSAMapManager(void)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayId);
-
-    if (vsaMapAPI != nullptr)
-    {
-        delete vsaMapAPI;
-        vsaMapAPI = nullptr;
-    }
-}
-
-void
-VSAMapManager::Init(void)
-{
+    Dispose();
 }
 
 int
-VSAMapManager::StoreAllMaps(void)
+VSAMapManager::Init(void)
 {
-    int ret = _FlushMaps();
-    if (ret < 0)
+    for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
     {
-        return ret;
+        isVsaMapAccessable[volId] = false;
+        isVsaMapInternalAccessable[volId] = true;
+        mapFlushState[volId] = MapFlushState::FLUSH_DONE;
+        mapLoadState[volId] = MapLoadState::LOAD_DONE;
     }
-
-    while (AllMapsFlushedDone() == false)
-    {
-        usleep(1);
-    }
+    numWriteIssuedCount = 0;
+    numLoadIssuedCount = 0;
     return 0;
 }
 
 void
-VSAMapManager::Close(void)
+VSAMapManager::Dispose(void)
 {
-    for (int volumeId = 0; volumeId < MAX_VOLUME_COUNT; ++volumeId)
+    WaitAllPendingIoDone();
+    for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
     {
-        if ((GetVSAMapContent(volumeId) != nullptr) && (GetVSAMapContent(volumeId)->IsFileOpened()))
+        if (vsaMaps[volId] != nullptr)
         {
-            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "Mapper closes MFS file for volumeId:{}", volumeId);
-            GetVSAMapContent(volumeId)->FileClose();
+            delete vsaMaps[volId];
+            vsaMaps[volId] = nullptr;
         }
     }
-}
-
-int
-VSAMapManager::EnableInternalAccess(int volID, int caller)
-{
-    int ret = 0;
-    VolMountStateIter iter;
-    if (_IsVolumeExist(volID, iter) == false)
-    {
-        return -EID(VSAMAP_LOAD_FAILURE);
-    }
-
-    if (_GetVolumeState(volID) == VolState::VOLUME_DELETING)
-    {
-        return -EID(VSAMAP_LOAD_FAILURE);
-    }
-
-    // Unloaded volume case: Load & BG Mount
-    if (iter->second == VolState::EXIST_UNLOADED)
-    {
-        // If another thread has already started loading
-        if (volMountStateLock[volID].try_lock() == false)
-        {
-            if (CALLER_EVENT == caller)
-            {
-                ret = -EID(MAP_LOAD_ONGOING);
-            }
-            else
-            {
-                while (loadDoneFlag[volID] != LOAD_DONE)
-                {
-                    usleep(1);
-                }
-                ret = 0;
-            }
-            return ret;
-        }
-
-        std::string volName = "";
-        if (NOT_LOADED == loadDoneFlag[volID])
-        {
-            if (CALLER_EVENT == caller)
-            {
-                volName = "CALLER_EVENT";
-            }
-        }
-        else    // LOADING, LOAD_DONE
-        {
-            volMountStateLock[volID].unlock();
-            if (CALLER_EVENT == caller)
-            {
-                return -EID(MAP_LOAD_ONGOING);
-            }
-            else
-            {
-                while (loadDoneFlag[volID] != LOAD_DONE)
-                {
-                    usleep(1);
-                }
-                return 0;
-            }
-        }
-
-        // In case of internal-loading, we don't know the volume size
-        VolumeEventBase volumeEventBase;
-        SetVolumeBase(&volumeEventBase, volID, UNKNOWN_SIZE_BECAUSEOF_INTERNAL_LOAD, volName, "", "");
-        VolumeEventPerf volumeMountPerf;
-        SetVolumePerf(&volumeMountPerf, 0, 0);
-        VolumeArrayInfo volumeArrayInfo;
-        SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
-
-        if (VolumeMounted(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo))
-        {
-            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} Internal Mount Request Succeeded", volID);
-        }
-        else
-        {
-            POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "VolumeId:{} Internal Mount Request Failed", volID);
-            ret = -EID(VSAMAP_LOAD_FAILURE);
-        }
-
-        volMountStateLock[volID].unlock();
-    }
-    // Just Created volume case: BG Mount
-    else if (iter->second == VolState::JUST_CREATED)
-    {
-        std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
-        volumeMountState[iter->first] = VolState::BACKGROUND_MOUNTED;
-        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was set as BG mounted", volID);
-    }
-    else // VolState::BACKGROUND_MOUNTED or VolState::FOREGROUND_MOUNTED
-    {
-        // Do nothing
-    }
-
-    return ret;
-}
-
-std::atomic<int>&
-VSAMapManager::GetLoadDoneFlag(int volumeId)
-{
-    return loadDoneFlag[volumeId];
-}
-
-VSAMapContent*&
-VSAMapManager::GetVSAMapContent(int volID)
-{
-    return vsaMapAPI->GetVSAMapContent(volID);
 }
 
 bool
-VSAMapManager::AllMapsFlushedDone(void)
+VSAMapManager::CreateVsaMapContent(int volId, uint64_t volSizeByte, bool delVol)
 {
-    bool allFlushedDone = true;
-
-    for (auto& mapStatus : mapFlushStatus)
+    assert(vsaMaps[volId] == nullptr);
+    vsaMaps[volId] = new VSAMapContent(volId, addrInfo->GetArrayId());
+    uint64_t blkCnt = DivideUp(volSizeByte, pos::BLOCK_SIZE);
+    do
     {
-        if (mapStatus.second != MapFlushState::FLUSH_DONE)
+        if (vsaMaps[volId]->InMemoryInit(volId, blkCnt, addrInfo->GetMpageSize()) != 0)
         {
-            allFlushedDone = false;
+            POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VSAMap] Vsa map In-memory Data Prepare Failed, volume:{} array:{}", volId, addrInfo->GetArrayName());
             break;
         }
-    }
+        int ret = vsaMaps[volId]->OpenMapFile();
+        if ((delVol == false) && (ret == EID(NEED_TO_INITIAL_STORE)))
+        {
+            EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volId, this);
+            mapFlushState[volId] = MapFlushState::FLUSHING;
+            numWriteIssuedCount++;
+            POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap] Issue Flush Header, volume:{} array:{}", volId, addrInfo->GetArrayName());
+            ret = vsaMaps[volId]->FlushHeader(callBackVSAMap);
+            if (ret < 0)
+            {
+                numWriteIssuedCount--;
+                mapFlushState[volId] = MapFlushState::FLUSH_DONE;
+                POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VSAMap] Failed to Initial Store VSAMap File, array:{}", addrInfo->GetArrayName());
+                break;
+            }
+            else
+            {
+                WaitPendingIoDone(volId);
+                return true;
+            }
+        }
+        else if (ret < 0)
+        {
+            POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VSAMap] failed to create Vsa map File, volume:{}, array:{}", volId, addrInfo->GetArrayName());
+            break;
+        }
+        else
+        {
+            return true;
+        }
+    } while (false);
 
-    return allFlushedDone;
+    delete vsaMaps[volId];
+    vsaMaps[volId] = nullptr;
+    return false;
+}
+
+int
+VSAMapManager::LoadVSAMapFile(int volId)
+{
+    assert(vsaMaps[volId] != nullptr);
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VSAMap] Issue Load VSAMap, volId:{}, array:{}", volId, addrInfo->GetArrayName());
+    AsyncLoadCallBack cbLoadDone = std::bind(&VSAMapManager::_MapLoadDone, this, std::placeholders::_1);
+    mapLoadState[volId] = MapLoadState::LOADING;
+    numLoadIssuedCount++;
+    int ret = vsaMaps[volId]->Load(cbLoadDone);
+    if (ret < 0)
+    {
+        mapLoadState[volId] = MapLoadState::LOAD_DONE;
+        numLoadIssuedCount--;
+        if (-EID(MAP_LOAD_COMPLETED) == ret)
+        {
+            mapLoadState[volId] = LOAD_DONE;
+            ret = 0; // This is a normal case
+            POS_TRACE_INFO(EID(MAPPER_START), "[Mapper VSAMap] No mpage to Load, so VSAMap Load Finished, volId:{}, array:{}", volId, addrInfo->GetArrayName());
+        }
+        else
+        {
+            POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VSAMap] Error on Load trigger, volId:{}, array:{}, ret:{}", volId, addrInfo->GetArrayName(), ret);
+        }
+    }
+    return ret;
+}
+
+int
+VSAMapManager::FlushMap(int volId)
+{
+    EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volId, this);
+    mapFlushState[volId] = MapFlushState::FLUSHING;
+    numWriteIssuedCount++;
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap] Issue Flush VSAMap, volume :{}, array:{}", volId, addrInfo->GetArrayName());
+    int ret = vsaMaps[volId]->FlushTouchedPages(callBackVSAMap);
+    if (ret < 0)
+    {
+        mapFlushState[volId] = MapFlushState::FLUSH_DONE;
+        numWriteIssuedCount--;
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VSAMap] failed to flush vsamap, volumeId:{}, array:{}", volId, addrInfo->GetArrayName());
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VSAMap] flush vsamp started volumeId:{}, array:{}", volId, addrInfo->GetArrayName());
+    }
+    return ret;
+}
+
+int
+VSAMapManager::FlushAllMaps(void)
+{
+    int ret = 0;
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap] Issue Flush All VSAMaps, array:{}", addrInfo->GetArrayName());
+    for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
+    {
+        if (isVsaMapAccessable[volId] == true)
+        {
+            EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volId, this);
+            mapFlushState[volId] = MapFlushState::FLUSHING;
+            numWriteIssuedCount++;
+            ret = vsaMaps[volId]->FlushTouchedPages(callBackVSAMap);
+            if (ret < 0)
+            {
+                mapFlushState[volId] = MapFlushState::FLUSH_DONE;
+                numWriteIssuedCount--;
+                POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VSAMap] failed to flush vsamap, volumeId:{}, array:{}", volId, addrInfo->GetArrayName());
+            }
+            else
+            {
+                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VSAMap] flush vsamp started volumeId:{}, array:{}", volId, addrInfo->GetArrayName());
+            }
+        }
+    }
+    return ret;
+}
+
+int
+VSAMapManager::InvalidateAllBlocks(int volId)
+{
+    return vsaMaps[volId]->InvalidateAllBlocks();
+}
+
+int
+VSAMapManager::NeedToDeleteVolume(int volId)
+{
+    if (vsaMaps[volId]->DoesFileExist() == false)
+    {
+        return false;
+    }
+    return true;
+}
+
+int
+VSAMapManager::DeleteVSAMap(int volId)
+{
+    int ret = vsaMaps[volId]->DeleteMapFile();
+    if (ret == 0)
+    {
+        delete vsaMaps[volId];
+        vsaMaps[volId] = nullptr;
+    }
+    return ret;
 }
 
 void
-VSAMapManager::SetVolumeManagerObject(IVolumeManager* volumeManagerToUse)
+VSAMapManager::WaitAllPendingIoDone(void)
 {
-    volumeManager = volumeManagerToUse;
+    while ((numWriteIssuedCount + numLoadIssuedCount) != 0);
 }
 
-IVSAMap*
-VSAMapManager::GetIVSAMap(void)
+void
+VSAMapManager::WaitPendingIoDone(int volId)
 {
-    return vsaMapAPI;
-}
-
-VSAMapAPI*
-VSAMapManager::GetVSAMapAPI(void)
-{
-    return vsaMapAPI;
+    while ((mapLoadState[volId] != MapLoadState::LOAD_DONE) && (mapFlushState[volId] != MapFlushState::FLUSH_DONE));
 }
 
 void
 VSAMapManager::MapFlushDone(int mapId)
 {
-    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "mapId:{} Flushed @MapAsyncFlushed", mapId);
-    mapFlushStatus[mapId] = MapFlushState::FLUSH_DONE;
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] mapId:{} Flushed Done", mapId);
+    assert(numWriteIssuedCount > 0);
+    numWriteIssuedCount--;
+    mapFlushState[mapId] = MapFlushState::FLUSH_DONE;
 }
 
-bool
-VSAMapManager::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
+int
+VSAMapManager::GetVSAs(int volId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray)
 {
-    do
+    if (false == isVsaMapAccessable[volId])
     {
-        if (false == _PrepareVsaMapAndHeader(volEventBase->volId, volEventBase->volSizeByte, false))
+        POS_TRACE_WARN(EID(VSAMAP_NOT_ACCESSIBLE), "[Mapper VSAMap] VolumeId:{}, array:{} is not accessible, maybe unmounted", volId, addrInfo->GetArrayName());
+        for (uint32_t blkIdx = 0; blkIdx < numBlks; ++blkIdx)
         {
-            POS_TRACE_ERROR(EID(MAPPER_FAILED), "Vsa map & Header Prepare Failed");
-            break;
+            vsaArray[blkIdx] = UNMAP_VSA;
         }
-        if (false == _PrepareInMemoryData(volEventBase->volId, volEventBase->volSizeByte))
-        {
-            POS_TRACE_ERROR(EID(MAPPER_FAILED), "In-memory Data Prepare Failed");
-            break;
-        }
-        if (false == _VSAMapFileCreate(volEventBase->volId))
-        {
-            POS_TRACE_ERROR(EID(MAPPER_FAILED), "Vsa map File Creation Failed");
-            break;
-        }
-        if (false == _VSAMapFileStore(volEventBase->volId))
-        {
-            POS_TRACE_ERROR(EID(MAPPER_FAILED), "Vsa map File Store Failed");
-            break;
-        }
-
-        std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volEventBase->volId]);
-        volumeMountState.emplace(volEventBase->volId, VolState::JUST_CREATED);
-        vsaMapAPI->EnableVsaMapInternalAccess(volEventBase->volId);
-        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} JUST_CREATED", volEventBase->volId);
-        return true;
-    }
-    while (false);
-    _HandleVolumeCreationFail(volEventBase->volId);
-    return false;
-}
-
-bool
-VSAMapManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
-{
-    if (_GetVolumeState(volEventBase->volId) == VolState::VOLUME_DELETING)
-    {
-        return false;
+        return -EID(VSAMAP_NOT_ACCESSIBLE);
     }
 
-    bool isUnknownSize = (volEventBase->volSizeByte == UNKNOWN_SIZE_BECAUSEOF_INTERNAL_LOAD);
-    return _LoadVolumeMeta(volEventBase->volName, volEventBase->volId, volEventBase->volSizeByte, isUnknownSize);
+    VSAMapContent* vsaMap = vsaMaps[volId];
+    for (uint32_t blkIdx = 0; blkIdx < numBlks; ++blkIdx)
+    {
+        BlkAddr targetRba = startRba + blkIdx;
+        vsaArray[blkIdx] = vsaMap->GetEntry(targetRba);
+    }
+    return 0;
 }
 
-bool
-VSAMapManager::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
+int
+VSAMapManager::SetVSAs(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
 {
-    if (_GetVolumeState(volEventBase->volId) == VolState::VOLUME_DELETING)
+    if (false == isVsaMapAccessable[volId])
     {
-        return false;
+        POS_TRACE_WARN(EID(VSAMAP_NOT_ACCESSIBLE), "[Mapper VSAMap] VolumeId:{} is not accessible, maybe unmounted", volId);
+        return -EID(VSAMAP_NOT_ACCESSIBLE);
+    }
+    return _UpdateVsaMap(volId, startRba, virtualBlks);
+}
+
+VirtualBlkAddr
+VSAMapManager::GetVSAWoCond(int volId, BlkAddr rba)
+{
+    return vsaMaps[volId]->GetEntry(rba);
+}
+
+int
+VSAMapManager::SetVSAsWoCond(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
+{
+    return _UpdateVsaMap(volId, startRba, virtualBlks);
+}
+
+VirtualBlkAddr
+VSAMapManager::GetRandomVSA(BlkAddr rba)
+{
+    VirtualBlkAddr vsa;
+    vsa.stripeId = rba / addrInfo->blksPerStripe;
+    vsa.offset = rba % addrInfo->blksPerStripe;
+    return vsa;
+}
+
+MpageList
+VSAMapManager::GetDirtyVsaMapPages(int volumeId, BlkAddr startRba, uint64_t numBlks)
+{
+    return vsaMaps[volumeId]->GetDirtyPages(startRba, numBlks);
+}
+
+int64_t
+VSAMapManager::GetNumUsedBlocks(int volId)
+{
+    VSAMapContent* vsaMap = vsaMaps[volId];
+    if (vsaMap == nullptr)
+    {
+        return -(int64_t)POS_EVENT_ID::VSAMAP_NULL_PTR;
     }
 
-    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volEventBase->volId]);
-    volumeMountState.emplace(volEventBase->volId, VolState::EXIST_UNLOADED);
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} is inserted to volumeMountState as EXIST_UNLOADED @VolumeLoaded", volEventBase->volId);
-    return true;
+    return vsaMap->GetNumUsedBlocks();
 }
 
 bool
-VSAMapManager::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
+VSAMapManager::IsVsaMapAccessible(int volId)
 {
-    return true;
+    return isVsaMapAccessable[volId];
 }
 
-bool
-VSAMapManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
+void
+VSAMapManager::EnableVsaMapAccess(int volId)
 {
-    if (_GetVolumeState(volEventBase->volId) == VolState::VOLUME_DELETING)
+    isVsaMapAccessable[volId] = true;
+}
+
+void
+VSAMapManager::DisableVsaMapAccess(int volId)
+{
+    isVsaMapAccessable[volId] = false;
+}
+
+void
+VSAMapManager::EnableVsaMapInternalAccess(int volId)
+{
+    // POS_TRACE_INFO(EID(DELETE_VOLUME), "[Mapper VSAMap] Enable Internal VsaMap Access volumeId:{}, array:{}", volId, addrInfo->GetArrayName());
+    isVsaMapInternalAccessable[volId] = true;
+}
+
+void
+VSAMapManager::DisableVsaMapInternalAccess(int volId)
+{
+    // POS_TRACE_INFO(EID(DELETE_VOLUME), "[Mapper VSAMap] Disable Internal VsaMap Access volumeId:{}, array:{}", volId, addrInfo->GetArrayName());
+    isVsaMapInternalAccessable[volId] = false;
+}
+
+void
+VSAMapManager::_MapLoadDone(int volId)
+{
+    POS_TRACE_INFO(EID(MAP_LOAD_COMPLETED), "[Mapper VSAMap] Load Done volId:{} array:{}", volId, addrInfo->GetArrayName());
+    assert(numLoadIssuedCount > 0);
+    numLoadIssuedCount--;
+    mapLoadState[volId] = LOAD_DONE;
+}
+
+int
+VSAMapManager::_UpdateVsaMap(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks)
+{
+    int ret = 0;
+    VSAMapContent* vsaMap = vsaMaps[volumeId];
+
+    for (uint32_t blkIdx = 0; blkIdx < virtualBlks.numBlks; blkIdx++)
     {
-        return false;
-    }
-
-    vsaMapAPI->DisableVsaMapAccess(volEventBase->volId);
-
-    bool journalEnabled = journalService->IsEnabled(arrayName);
-    if (journalEnabled == false)
-    {
-        EventSmartPtr eventVSAMap = std::make_shared<MapFlushedEvent>(volEventBase->volId, this);
-        mapFlushStatus[volEventBase->volId] = MapFlushState::FLUSHING;
-
-        int ret = GetVSAMapContent(volEventBase->volId)->FlushTouchedPages(eventVSAMap);
+        VirtualBlkAddr targetVsa = {.stripeId = virtualBlks.startVsa.stripeId,
+            .offset = virtualBlks.startVsa.offset + blkIdx};
+        BlkAddr targetRba = startRba + blkIdx;
+        ret = vsaMap->SetEntry(targetRba, targetVsa);
         if (ret < 0)
         {
-            POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "ret:{} of vsaMap->Unload(), VolumeId:{} @VolumeUnmounted", ret, volEventBase->volId);
-        }
-        _WaitForMapFlushed(volEventBase->volId);
-    }
-
-    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volEventBase->volId]);
-    VolMountStateIter iter;
-    if (_IsVolumeExist(volEventBase->volId, iter))
-    {
-        if (iter->second == VolState::FOREGROUND_MOUNTED)
-        {
-            volumeMountState[iter->first] = VolState::BACKGROUND_MOUNTED;
-            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was set as BG_MOUNTED @VolumeUnmounted", volEventBase->volId);
-        }
-        else
-        {
-            POS_TRACE_WARN(EID(VSAMAP_UNMOUNT_FAILURE), "volumeID:{} is Not FG_MOUNTED @VolumeUnmounted", volEventBase->volId);
-        }
-    }
-
-    return true;
-}
-
-bool
-VSAMapManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
-{
-    // std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "Starting VolumeDelete: volID:{}  volSizeByte:{}", volEventBase->volId, volEventBase->volSizeByte);
-
-    VSAMapContent*& vsaMap = GetVSAMapContent(volEventBase->volId);
-
-    // Unloaded case: Load & BG Mount
-    if (nullptr == vsaMap)
-    {
-        // We know the volume size but deal with internal loading
-        if (false == _LoadVolumeMeta(volEventBase->volName, volEventBase->volId, volEventBase->volSizeByte, true))
-        {
-            POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "VSAMap load failed, volumeID:{} @VolumeDeleted", volEventBase->volId);
-            return false;
-        }
-    }
-
-    if (_ChangeVolumeStateDeleting(volEventBase->volId) == false)
-    {
-        POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "Another thread started to delete volumeID:{} @VolumeDeleted", volEventBase->volId);
-        return true;
-    }
-
-    if (vsaMap->IsFileOpened() == false)
-    {
-        if (0 != vsaMap->FileOpen())
-        {
-            POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "VSAMap load failed, volumeID:{} @VolumeDeleted", volEventBase->volId);
-        }
-    }
-
-    if (vsaMap->DoesFileExist() == false)
-    {
-        // VolumeDeleted can be notified again when pos crashes during volume deletion
-        POS_TRACE_DEBUG(EID(NO_BLOCKMAP_MFS_FILE), "No MFS filename:{} for volName:{} @VolumeDeleted", vsaMap->GetFileName(), volEventBase->volName);
-        return true;
-    }
-
-    IVolumeEventHandler* journalVolumeHandler = JournalServiceSingleton::Instance()->GetVolumeEventHandler(arrayName);
-    // Write log for deleted volume
-    if (0 != journalVolumeHandler->WriteVolumeDeletedLog(volEventBase->volId))
-    {
-        return false;
-    }
-
-    // Mark all blocks in this volume up as Invalidated
-    if (0 != vsaMap->InvalidateAllBlocks())
-    {
-        POS_TRACE_WARN(EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE), "VSAMap Invalidate all blocks Failed, volumeID:{} @VolumeDeleted", volEventBase->volId);
-        return false;
-    }
-
-    // Flush metadata
-    if (0 != journalVolumeHandler->TriggerMetadataFlush())
-    {
-        return false;
-    }
-
-    // file close and delete
-    if (0 != vsaMap->FileClose())
-    {
-        POS_TRACE_WARN(EID(MFS_FILE_CLOSE_FAILED), "VSAMap File close failed, volumeID:{} @VolumeDeleted", volEventBase->volId);
-        return false;
-    }
-    if (0 != vsaMap->DeleteMapFile())
-    {
-        POS_TRACE_WARN(EID(MFS_FILE_DELETE_FAILED), "VSAMap File delete failed, volumeID:{} @VolumeDeleted", volEventBase->volId);
-        return false;
-    }
-
-    // clean up contents in dram
-    delete vsaMap;
-    vsaMap = nullptr;
-    volumeMountState.erase(volEventBase->volId);
-
-    return true;
-}
-
-void
-VSAMapManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
-{
-    for (int volumeId : volList)
-    {
-        vsaMapAPI->DisableVsaMapAccess(volumeId);
-        if (_GetVolumeState(volumeId) == VolState::VOLUME_DELETING)
-        {
-            continue;
-        }
-
-        std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volumeId]);
-
-        VolMountStateIter iter;
-        if (_IsVolumeExist(volumeId, iter))
-        {
-            if (iter->second == VolState::FOREGROUND_MOUNTED)
-            {
-                volumeMountState[iter->first] = VolState::BACKGROUND_MOUNTED;
-                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was set as BG_MOUNTED @VolumeDetached", volumeId);
-            }
-            else
-            {
-                POS_TRACE_WARN(EID(VSAMAP_UNMOUNT_FAILURE), "volumeId:{} is Not FG_MOUNTED @VolumeDetached", volumeId);
-            }
-        }
-    }
-}
-
-bool
-VSAMapManager::_ChangeVolumeStateDeleting(uint32_t volID)
-{
-    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
-    VolMountStateIter it = volumeMountState.find(volID);
-    if (volumeMountState[it->first] == VolState::VOLUME_DELETING)
-    {
-        return false;
-    }
-    volumeMountState[it->first] = VolState::VOLUME_DELETING;
-    vsaMapAPI->DisableVsaMapInternalAccess(volID);
-    return true;
-}
-
-VolState
-VSAMapManager::_GetVolumeState(uint32_t volID)
-{
-    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
-    VolMountStateIter it = volumeMountState.find(volID);
-    if (it == volumeMountState.end())
-    {
-        return VolState::NOT_EXIST;
-    }
-    else
-    {
-        return volumeMountState[it->first];
-    }
-}
-
-bool
-VSAMapManager::_PrepareVsaMapAndHeader(int volID, uint64_t& volSizeByte, bool isUnknownVolSize)
-{
-    int ret = 0;
-    VSAMapContent*& vsaMapRef = vsaMapAPI->GetVSAMapContent(volID);
-    assert(vsaMapRef == nullptr);
-
-    vsaMapRef = new VSAMapContent(volID, arrayName);
-    if (isUnknownVolSize && (volSizeByte == 0)) // Internal loading case
-    {
-        uint64_t volSizebyVolMgr = 0;
-
-        if (volumeManager == nullptr)
-        {
-            IVolumeManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-            ret = volMgr->GetVolumeSize(volID, volSizebyVolMgr);
-        }
-        else
-        {
-            ret = volumeManager->GetVolumeSize(volID, volSizebyVolMgr);
-        }
-        if (ret != 0)
-        {
-            POS_TRACE_WARN(EID(VSAMAP_HEADER_LOAD_FAILURE), "Getting volume Size failed, volumeID:{}  volSizebyVolMgr:{}", volID, volSizebyVolMgr);
-            return false;
-        }
-
-        volSizeByte = volSizebyVolMgr;
-        POS_TRACE_INFO(9999, "volID:{}  volSizebyVolMgr:{}", volID, volSizebyVolMgr);
-    }
-    uint64_t blkCnt = DivideUp(volSizeByte, pos::BLOCK_SIZE);
-
-    return (0 == vsaMapRef->Prepare(blkCnt, volID));
-}
-
-bool
-VSAMapManager::_PrepareInMemoryData(int volID, uint64_t volSizeByte)
-{
-    VSAMapContent*& vsaMapRef = vsaMapAPI->GetVSAMapContent(volID);
-    assert(vsaMapRef != nullptr);
-
-    uint64_t blkCnt = DivideUp(volSizeByte, pos::BLOCK_SIZE);
-
-    return (0 == vsaMapRef->InMemoryInit(blkCnt, volID));
-}
-
-bool
-VSAMapManager::_VSAMapFileCreate(int volID)
-{
-    VSAMapContent*& vsaMapRef = vsaMapAPI->GetVSAMapContent(volID);
-    assert(vsaMapRef != nullptr);
-
-    return (0 == vsaMapRef->CreateMapFile());
-}
-
-void
-VSAMapManager::_HandleVolumeCreationFail(int volID)
-{
-    VSAMapContent*& vsaMapRef = GetVSAMapContent(volID);
-    if (vsaMapRef != nullptr)
-    {
-        delete vsaMapRef;
-        vsaMapRef = nullptr;
-    }
-}
-
-int
-VSAMapManager::_VSAMapFileLoadByCliThread(int volID)
-{
-    VSAMapContent*& vsaMapRef = vsaMapAPI->GetVSAMapContent(volID);
-    assert(vsaMapRef != nullptr);
-
-    unique_lock<std::mutex> lock(volLoadLock);
-    loadDoneFlag[volID] = NOT_LOADED;
-
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VSAMap Load Started, volID:{} @_VSAMapFileLoadByCliThread", volID);
-    int ret = vsaMapRef->Load(cbMapLoadDoneByCli);
-    if (ret < 0)
-    {
-        if (-EID(MAP_LOAD_COMPLETED) == ret)
-        {
-            loadDoneFlag[volID] = LOAD_DONE;
-            ret = 0; // This is a normal case
-            POS_TRACE_INFO(EID(MAPPER_START), "No mpage to Load, so VSAMap Load Finished, volID:{} @_VSAMapFileLoadByCliThread", volID);
-        }
-        else
-        {
-            POS_TRACE_ERROR(EID(MAPPER_FAILED), "Error on Load trigger, volID:{}  ret:{} @_VSAMapFileLoadByCliThread", volID, ret);
-        }
-    }
-    else
-    {
-        cvLoadDone.wait(lock, [&] { return LOAD_DONE == loadDoneFlag[volID]; });
-        POS_TRACE_INFO(EID(MAPPER_START), "after waking up, VSAMap Load Finished, volID:{} @_VSAMapFileLoadByCliThread", volID);
-    }
-
-    return ret;
-}
-
-int
-VSAMapManager::_VSAMapFileLoadbyEwThread(int volID)
-{
-    VSAMapContent*& vsaMapRef = vsaMapAPI->GetVSAMapContent(volID);
-    assert(vsaMapRef != nullptr);
-
-    loadDoneFlag[volID] = LOADING;
-
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VSAMap Load Started, volID:{} @_VSAMapFileLoadbyEwThread", volID);
-    int ret = vsaMapRef->Load(cbMapLoadDoneByEw, true);
-    if (ret < 0)
-    {
-        POS_TRACE_ERROR(EID(MAPPER_FAILED), "Error on Load trigger, volID:{}  ret:{} @_VSAMapFileLoadbyEwThread", volID, ret);
-    }
-
-    return ret;
-}
-
-bool
-VSAMapManager::_VSAMapFileStore(int volID)
-{
-    VSAMapContent*& vsaMapRef = vsaMapAPI->GetVSAMapContent(volID);
-    assert(vsaMapRef != nullptr);
-
-    return (0 == vsaMapRef->Store());
-}
-
-void
-VSAMapManager::_MapLoadDoneByCli(int volID)
-{
-    std::unique_lock<std::mutex> lock(volLoadLock);
-    POS_TRACE_INFO(EID(MAP_LOAD_COMPLETED), "volID:{} async load done, so wake up! @_WakeUpAfterLoadDone", volID);
-    loadDoneFlag[volID] = LOAD_DONE;
-    cvLoadDone.notify_all();
-}
-
-void
-VSAMapManager::_MapLoadDoneByEw(int volID)
-{
-    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
-
-    loadDoneFlag[volID] = LOAD_DONE;
-    POS_TRACE_INFO(EID(MAP_LOAD_COMPLETED), "volID:{} async load done @_AfterLoadDone", volID);
-
-    volumeMountState[volID] = VolState::BACKGROUND_MOUNTED;
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was loaded and set as BG_MOUNTED @_AfterLoadDone", volID);
-}
-
-bool
-VSAMapManager::_IsVolumeExist(int volID, VolMountStateIter& iter)
-{
-    VolMountStateIter it = volumeMountState.find(volID);
-    iter = it;
-
-    if (it == volumeMountState.end())
-    {
-        POS_TRACE_DEBUG(EID(VSAMAP_LOAD_FAILURE), "VolumeId:{} is not in volumeMountState", volID);
-        return false;
-    }
-
-    return true;
-}
-
-bool
-VSAMapManager::_LoadVolumeMeta(std::string volName, int volID, uint64_t volSizeByte, bool isUnknownVolSize)
-{
-    // If GC(EventWorker thread) is already loading the VSAMap of volID, CLI thread has to wait until loading done
-    while (false == isUnknownVolSize && LOADING == loadDoneFlag[volID])
-    {
-        usleep(1);
-    }
-
-    std::unique_lock<std::recursive_mutex> lock(volMountStateLock[volID]);
-    VolMountStateIter iter;
-    if (_IsVolumeExist(volID, iter) == false)
-    {
-        return false;
-    }
-
-    // Created or BG mounted volume case: FG Mount
-    if ((iter->second == VolState::JUST_CREATED || iter->second == VolState::BACKGROUND_MOUNTED) && (false == isUnknownVolSize))
-    {
-        volumeMountState[iter->first] = VolState::FOREGROUND_MOUNTED;
-        vsaMapAPI->EnableVsaMapAccess(volID);
-        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was set as FG_MOUNTED @VolumeMounted", volID);
-        return true;
-    }
-
-    // Unloaded volume case: Load & Mount
-    do
-    {
-        if (iter->second == VolState::EXIST_UNLOADED)
-        {
-            if (_PrepareVsaMapAndHeader(volID, volSizeByte, isUnknownVolSize) == false)
-            {
-                POS_TRACE_ERROR(EID(MAPPER_FAILED), "Vsa map & Header Prepare Failed @VolumeMounted");
-                break;
-            }
-            if (_PrepareInMemoryData(volID, volSizeByte) == false)
-            {
-                POS_TRACE_ERROR(EID(MAPPER_FAILED), "In-memory Data Prepare Failed @VolumeMounted");
-                break;
-            }
-            // GC: EventWorker thread
-            if (isUnknownVolSize && ("CALLER_EVENT" == volName))
-            {
-                if (_VSAMapFileLoadbyEwThread(volID) != 0)
-                {
-                    POS_TRACE_ERROR(EID(MAPPER_FAILED), "Vsa map File Async Load Trigger Failed @VolumeMounted");
-                    break;
-                }
-            }
-            else
-            {
-                if (_VSAMapFileLoadByCliThread(volID) != 0)
-                {
-                    POS_TRACE_ERROR(EID(MAPPER_FAILED), "Vsa map File Async Load Failed @VolumeMounted");
-                    break;
-                }
-                // Replay: CLI thread
-                if (isUnknownVolSize)
-                {
-                    volumeMountState[iter->first] = VolState::BACKGROUND_MOUNTED;
-                    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was loaded and set as BG_MOUNTED @VolumeMounted", volID);
-                }
-                // User Action: CLI thread
-                else
-                {
-                    volumeMountState[iter->first] = VolState::FOREGROUND_MOUNTED;
-                    vsaMapAPI->EnableVsaMapAccess(volID);
-                    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "VolumeId:{} was loaded and set as FG_MOUNTED @VolumeMounted", volID);
-                }
-            }
-
-            return true;
-        }
-    } while (false);
-
-    return false;
-}
-
-void
-VSAMapManager::_WaitForMapFlushed(int volId)
-{
-    while (mapFlushStatus[volId] != MapFlushState::FLUSH_DONE)
-    {
-        usleep(1);
-    }
-}
-
-int
-VSAMapManager::_FlushMaps(void)
-{
-    int ret = 0;
-    for (auto& volState : volumeMountState)
-    {
-        if (VolState::EXIST_UNLOADED != volState.second)
-        {
-            int volumeId = volState.first;
-            EventSmartPtr eventVSAMap = std::make_shared<MapFlushedEvent>(volumeId, this);
-            mapFlushStatus[volumeId] = MapFlushState::FLUSHING;
-            ret = GetVSAMapContent(volumeId)->FlushTouchedPages(eventVSAMap);
-            if (unlikely(ret < 0))
-            {
-                POS_TRACE_ERROR(EID(MAPPER_FAILED), "_FlushMaps() for volumeId:{} Failed", volumeId);
-            }
-            else
-            {
-                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "_FlushMaps() for volumeId:{} Started", volumeId);
-            }
+            POS_TRACE_ERROR((int)POS_EVENT_ID::VSAMAP_SET_FAILURE, "[Mapper VSAMap] failed to update VSAMap Info, volumeId:{}  targetRba:{}  targetVsa.sid:{}  targetVsa.offset:{}",
+                            volumeId, targetRba, targetVsa.stripeId, targetVsa.offset);
+            break;
         }
     }
     return ret;

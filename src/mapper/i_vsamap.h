@@ -32,13 +32,10 @@
 
 #pragma once
 
-#include "src/bio/ubio.h"
 #include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
-
-using VsaArray = std::array<VirtualBlkAddr, MAX_PROCESSABLE_BLOCK_COUNT>;
 
 class IVSAMap
 {
@@ -47,7 +44,10 @@ public:
     virtual int SetVSAs(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks) = 0;
     virtual VirtualBlkAddr GetVSAInternal(int volumeId, BlkAddr rba, int& caller) = 0;
     virtual int SetVSAsInternal(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks) = 0;
+    virtual VirtualBlkAddr GetVSAforReplay(int volumeId, BlkAddr rba) = 0;
+    virtual int SetVSAsforReplay(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks) = 0;
     virtual VirtualBlkAddr GetRandomVSA(BlkAddr rba) = 0;   // will be deprecated
+    
 
     virtual MpageList GetDirtyVsaMapPages(int volumeId, BlkAddr startRba, uint64_t numBlks) = 0;
     virtual int64_t GetNumUsedBlocks(int volId) = 0;

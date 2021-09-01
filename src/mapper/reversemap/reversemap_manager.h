@@ -35,7 +35,7 @@
 #include "src/array_models/interface/i_array_info.h"
 #include "src/mapper/i_reversemap.h"
 #include "src/mapper/i_stripemap.h"
-#include "src/mapper/i_vsamap.h"
+#include "src/mapper/vsamap/vsamap_manager.h"
 #include "src/mapper/address/mapper_address_info.h"
 #include "src/mapper/reversemap/reverse_map.h"
 #include "src/meta_file_intf/meta_file_include.h"
@@ -47,12 +47,12 @@ class ReverseMapManager : public IReverseMap
 {
 public:
     ReverseMapManager(void) = default;
-    ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, IArrayInfo* iarrayInfo);
+    ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripeMap, IArrayInfo* iarrayInfo);
     virtual ~ReverseMapManager(void);
 
     void Init(MapperAddressInfo& info);
     void SetDoC(IArrayInfo* iarrayInfo);
-    void Close(void);
+    void Dispose(void);
 
     ReverseMapPack* GetReverseMapPack(StripeId wbLsid) override;
     ReverseMapPack* AllocReverseMapPack(bool gcDest) override;
@@ -74,7 +74,7 @@ private:
     ReverseMapPack* revMapPacks;
     MetaFileIntf* revMapWholefile;
 
-    IVSAMap* iVSAMap;
+    VSAMapManager* iVSAMap;
     IStripeMap* iStripeMap;
     IArrayInfo* iArrayInfo;
 };
