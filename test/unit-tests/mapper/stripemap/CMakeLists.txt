@@ -1,2 +1,2 @@
-POS_ADD_UNIT_TEST(stripemap_manager_ut stripemap_manager_test.cpp)
 POS_ADD_UNIT_TEST(stripemap_content_ut stripemap_content_test.cpp)
+POS_ADD_UNIT_TEST(stripemap_manager_ut stripemap_manager_test.cpp)

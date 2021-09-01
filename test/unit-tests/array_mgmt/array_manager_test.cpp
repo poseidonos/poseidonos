@@ -136,7 +136,6 @@ TEST(ArrayManager, Create_testIfArrayMapUpdatedWhenCreationSucceeds)
     arrayMgr->SetArrayComponentMap(emptyArrayMap);
 
     EXPECT_CALL(*mockArrayComp, Create).WillOnce(Return(0));  // success
-    EXPECT_CALL(*mockTelClient, RegisterPublisher).WillOnce(Return(0));  // success
 
     // When
     int actual = arrayMgr->Create(arrayName, DeviceSet<string>(), "some-raid");
@@ -204,7 +203,6 @@ TEST(ArrayManager, Delete_testIfArrayComponentMapIsUpdatedWhenDeleteSucceeds)
 
     const int DELETE_SUCCESS = EID(SUCCESS);
     EXPECT_CALL(*mockArrayComp, Delete).WillOnce(Return(DELETE_SUCCESS));
-    EXPECT_CALL(*mockTelClient, DeregisterPublisher).Times(1);
 
     // When
     int actual = arrayMgr->Delete(existingArray);
@@ -221,12 +219,14 @@ TEST(ArrayManager, Mount_testIfTargetArrayCallsMount)
     auto mockArrayComp = BuildMockArrayComponents(existingArray);
     auto arrayMap = BuildArrayComponentsMap(existingArray, mockArrayComp.get());
     auto mockAbrMgr = BuildMockAbrManager();
-    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
+    auto mockTelClient = BuildMockTelemetryClient();
+
+    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, mockTelClient.get(), nullptr);
     arrayMgr->SetArrayComponentMap(arrayMap);
 
     const int MOUNT_SUCCESS = 0;
     EXPECT_CALL(*mockArrayComp, Mount).WillOnce(Return(MOUNT_SUCCESS));
-
+    EXPECT_CALL(*mockTelClient, RegisterPublisher).WillOnce(Return(0));  // success
     // When
     int actual = arrayMgr->Mount(existingArray);
 
@@ -240,7 +240,8 @@ TEST(ArrayManager, Mount_testIfLoadFailureIsReturnedWhenTargetArrayHasArrayBootR
     string arrayName = "array1";
     auto emptyArrayMap = BuildArrayComponentsMap();
     auto mockAbrMgr = BuildMockAbrManager();
-    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
+    auto mockTelClient = BuildMockTelemetryClient();
+    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, mockTelClient.get(), nullptr);
     arrayMgr->SetArrayComponentMap(emptyArrayMap);
 
     EXPECT_CALL(*mockAbrMgr, GetAbrList).WillOnce([&arrayName](std::vector<ArrayBootRecord>& abrList)
@@ -264,7 +265,8 @@ TEST(ArrayManager, Mount_testIfErrorIsReturnedWhenGivenArrayNameIsWrong)
     string arrayName = "array1";
     auto emptyArrayMap = BuildArrayComponentsMap();
     auto mockAbrMgr = BuildMockAbrManager();
-    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
+    auto mockTelClient = BuildMockTelemetryClient();
+    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, mockTelClient.get(), nullptr);
     arrayMgr->SetArrayComponentMap(emptyArrayMap);
 
     EXPECT_CALL(*mockAbrMgr, GetAbrList).WillOnce([&arrayName](std::vector<ArrayBootRecord>& abrList)
@@ -290,10 +292,14 @@ TEST(ArrayManager, Unmount_testIfTargetArrayCallsUnmount)
     auto mockArrayComp = BuildMockArrayComponents(existingArray);
     auto arrayMap = BuildArrayComponentsMap(existingArray, mockArrayComp.get());
     auto mockAbrMgr = BuildMockAbrManager();
+    auto mockTelClient = BuildMockTelemetryClient();
 
     EXPECT_CALL(*mockArrayComp, Unmount).WillOnce(Return(EID(SUCCESS)));
+    EXPECT_CALL(*mockTelClient, DeregisterPublisher).Times(1);
 
-    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
+    auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, mockTelClient.get(), nullptr);
+    
+
     arrayMgr->SetArrayComponentMap(arrayMap);
 
     // When

@@ -13,7 +13,7 @@ class MockIMapFlush : public IMapFlush
 public:
     using IMapFlush::IMapFlush;
     MOCK_METHOD(int, FlushDirtyMpages, (int mapId, EventSmartPtr callback, MpageList dirtyPages), (override));
-    MOCK_METHOD(int, StoreAllMaps, (), (override));
+    MOCK_METHOD(int, FlushAll, (), (override));
 };
 
 } // namespace pos

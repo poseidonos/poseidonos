@@ -104,4 +104,4 @@ TEST(MapHeader, IsInitialized_)
 {
 }
 
-}   // namespace pos
+} // namespace pos
