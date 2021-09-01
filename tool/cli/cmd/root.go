@@ -73,7 +73,6 @@ Syntax:
   poseidonos-cli [global-flags] commands subcommand [flags] .
 		`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		if len(args) == 0 {
 			cmd.Help()
 			os.Exit(0)

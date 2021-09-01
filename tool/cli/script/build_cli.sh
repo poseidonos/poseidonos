@@ -9,7 +9,7 @@ if [ -d "../../tool" ]; then
 	export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 fi
 
-wget -q --tries=1 --timeout=3 --spider http://google.com
+wget -q --tries=1 --timeout=1 --spider http://google.com
 
 if [[ $? -eq 0 ]]; then
 	echo "The Internet is available. Use the Internet repository for the libraries."
@@ -31,10 +31,16 @@ lib/pnconnector/script/build_resource.sh
 go build -mod vendor -tags debug,ssloff -ldflags "-X cli/cmd.GitCommit=$GIT_COMMIT_CLI -X cli/cmd.BuildTime=$BUILD_TIME_CLI"
 mv ./cli bin/poseidonos-cli
 
-# Build CLI markdown documents
+# Build CLI markdown and manpage documents
 cd docs
-go build -o gen_md
-chmod +x gen_md
-./gen_md
+rm markdown manpage -rf
+mkdir markdown manpage
+go build -o ../bin/gen_md gen_md.go
+go build -o ../bin/gen_man gen_man.go
+chmod +x ../bin/gen_md ../bin/gen_man
+../bin/gen_md
+../bin/gen_man
+
+# Return to the cli directory
 cd ..
 

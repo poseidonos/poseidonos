@@ -58,6 +58,8 @@ if [ -f /etc/debian_version ]; then
     apt install -y libc-ares-dev pkg-config cmake
     # for pigz (trigger core dump, load dump)
     apt install -y pigz
+    # for cli man page
+    apt-get install -y mandoc
 
 else
     echo "pkgdep: unknown system type."

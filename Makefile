@@ -79,6 +79,9 @@ else
 APP = $(BINDIR)/poseidonos
 endif
 
+# PoseidonOS CLI
+CLI_APP_NAME = poseidonos-cli
+
 CPPFLAGS = -g -Wall -O2 -std=c++14 -Werror
 ifeq ($(CONFIG_LIBRARY_BUILD), y)
 CPPFLAGS += -fPIC
@@ -184,7 +187,13 @@ install:
 		cp ${CLI_CERT_FILES} ${CLI_CERT_DIR}; \
 	fi
 	@install -m 755 $(APP) $(INSTALL_DIR)
-	@install -m 755 $(BINDIR)/cli $(INSTALL_DIR)
+	@install -m 755 $(BINDIR)/${CLI_APP_NAME} $(INSTALL_DIR)
+
+	# Register CLI man page
+	gzip --force $(CLI_DIR)/docs/manpage/*
+	rm /usr/share/man/man3/poseidonos*
+	mv $(CLI_DIR)/docs/manpage/* /usr/share/man/man3/
+	makewhatis
 
 udev_install:
 	@echo "Try to copy udev bind rule file" 
@@ -230,7 +239,7 @@ $(APP) : $(SPDK_LIB_FILES) protobuf poseidonos
 poseidonos: makedir
 	$(MAKE) -C src
 	$(CLI_DIR)/script/build_cli.sh
-	mv -f $(CLI_DIR)/bin/poseidonos-cli $(BINDIR)/poseidonos-cli
+	mv -f $(CLI_DIR)/bin/${CLI_APP_NAME} $(BINDIR)/${CLI_APP_NAME}
 	mv -f $(CLI_DIR)/docs/markdown/* $(DOCDIR)/guides/cli/
 
 makedir:
