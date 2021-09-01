@@ -132,31 +132,31 @@ TelemetryManagerService::collect(
     const ::CollectRequest* request,
     ::CollectResponse* response)
 {
-    ConfigureMetadataRequest collectReq;
+    ConfigureMetadataRequest* collectReq = new ConfigureMetadataRequest();
     ::grpc::Status ret = ::grpc::Status::OK;
 
     if (enabledService == true)
     {
-        collectReq.set_git_hash("some-git");
-        collectReq.set_host_name("some-host");
-        collectReq.set_host_type("some-type");
-        collectReq.set_ip_addr("some-ip");
-        collectReq.set_application_name("some-app");
+        collectReq->set_git_hash("some-git");
+        collectReq->set_host_name("some-host");
+        collectReq->set_host_type("some-type");
+        collectReq->set_ip_addr("some-ip");
+        collectReq->set_application_name("some-app");
     }
     else
     {
-        collectReq.set_git_hash("");
-        collectReq.set_host_name("");
-        collectReq.set_host_type("");
-        collectReq.set_ip_addr("");
-        collectReq.set_application_name("");
+        collectReq->set_git_hash("");
+        collectReq->set_host_name("");
+        collectReq->set_host_type("");
+        collectReq->set_ip_addr("");
+        collectReq->set_application_name("");
 
         POS_TRACE_DEBUG(EID(TELEMETRY_DISABLED), "Disabled Telemetry Manager");
         const string errorMsg = "Disabled Telemetry Manager";
         ret = ::grpc::Status(StatusCode::UNIMPLEMENTED, errorMsg);
     }
 
-    response->set_allocated_metadata(&collectReq);
+    response->set_allocated_metadata(collectReq);
 
     POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG), "collect has been called");
     return ret;

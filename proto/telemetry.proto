@@ -1,4 +1,6 @@
 syntax="proto2";
+
+option go_package = "pos.telemetry";
  
 // GRPC service definition
 service TelemetryManager {
