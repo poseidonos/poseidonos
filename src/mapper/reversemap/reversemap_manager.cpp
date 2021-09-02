@@ -119,16 +119,16 @@ ReverseMapManager::Dispose(void)
     {
         revMapWholefile->Close();
     }
-	if (revMapWholefile != nullptr)
-	{
-	    delete revMapWholefile;
+    if (revMapWholefile != nullptr)
+    {
+        delete revMapWholefile;
         revMapWholefile = nullptr;
-	}
+    }
     if (revMapPacks != nullptr)
-	{
-	    delete [] revMapPacks;
+    {
+        delete [] revMapPacks;
         revMapPacks = nullptr;
-	}
+    }
 }
 //----------------------------------------------------------------------------//
 ReverseMapPack*

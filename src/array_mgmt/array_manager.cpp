@@ -156,9 +156,9 @@ ArrayManager::Delete(string name)
 int
 ArrayManager::Mount(string name)
 {
-    telClient->RegisterPublisher(name, arrayList[name]->GetTelemetryPublisher());
-    return _ExecuteOrHandleErrors([](ArrayComponents* array)
+    return _ExecuteOrHandleErrors([&](ArrayComponents* array)
     {
+        telClient->RegisterPublisher(name, array->GetTelemetryPublisher());
         return array->Mount();
     }, name);
 }
@@ -166,9 +166,9 @@ ArrayManager::Mount(string name)
 int
 ArrayManager::Unmount(string name)
 {
-    telClient->DeregisterPublisher(name);
-    return _ExecuteOrHandleErrors([](ArrayComponents* array)
+    return _ExecuteOrHandleErrors([&](ArrayComponents* array)
     {
+        telClient->DeregisterPublisher(name);
         return array->Unmount();
     }, name);
 }

@@ -115,7 +115,7 @@ VSAMapManager::CreateVsaMapContent(int volId, uint64_t volSizeByte, bool delVol)
             }
             else
             {
-                WaitPendingIoDone(volId);
+                WaitVolumePendingIoDone(volId);
                 return true;
             }
         }
@@ -150,7 +150,6 @@ VSAMapManager::LoadVSAMapFile(int volId)
         numLoadIssuedCount--;
         if (-EID(MAP_LOAD_COMPLETED) == ret)
         {
-            mapLoadState[volId] = LOAD_DONE;
             ret = 0; // This is a normal case
             POS_TRACE_INFO(EID(MAPPER_START), "[Mapper VSAMap] No mpage to Load, so VSAMap Load Finished, volId:{}, array:{}", volId, addrInfo->GetArrayName());
         }
@@ -246,15 +245,28 @@ VSAMapManager::WaitAllPendingIoDone(void)
 }
 
 void
-VSAMapManager::WaitPendingIoDone(int volId)
+VSAMapManager::WaitLoadPendingIoDone(void)
 {
-    while ((mapLoadState[volId] != MapLoadState::LOAD_DONE) && (mapFlushState[volId] != MapFlushState::FLUSH_DONE));
+    while (numLoadIssuedCount != 0);
+}
+
+void
+VSAMapManager::WaitWritePendingIoDone(void)
+{
+    while (numWriteIssuedCount != 0);
+}
+
+void
+VSAMapManager::WaitVolumePendingIoDone(int volId)
+{
+    POS_TRACE_ERROR(EID(MAP_FLUSH_COMPLETED), "PendingWriteCnt:{}, PendingReadCnt:{}, state:{}", numWriteIssuedCount, numLoadIssuedCount, mapLoadState[volId]);
+    while ((mapLoadState[volId] != MapLoadState::LOAD_DONE) || (mapFlushState[volId] != MapFlushState::FLUSH_DONE));
 }
 
 void
 VSAMapManager::MapFlushDone(int mapId)
 {
-    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] mapId:{} Flushed Done", mapId);
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] mapId:{} WritePendingCnt:{} Flushed Done", mapId, numWriteIssuedCount);
     assert(numWriteIssuedCount > 0);
     numWriteIssuedCount--;
     mapFlushState[mapId] = MapFlushState::FLUSH_DONE;
@@ -296,12 +308,14 @@ VSAMapManager::SetVSAs(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
 VirtualBlkAddr
 VSAMapManager::GetVSAWoCond(int volId, BlkAddr rba)
 {
+    assert(mapLoadState[volId] == MapLoadState::LOAD_DONE);
     return vsaMaps[volId]->GetEntry(rba);
 }
 
 int
 VSAMapManager::SetVSAsWoCond(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
 {
+    assert(mapLoadState[volId] == MapLoadState::LOAD_DONE);
     return _UpdateVsaMap(volId, startRba, virtualBlks);
 }
 
@@ -367,10 +381,10 @@ VSAMapManager::DisableVsaMapInternalAccess(int volId)
 void
 VSAMapManager::_MapLoadDone(int volId)
 {
-    POS_TRACE_INFO(EID(MAP_LOAD_COMPLETED), "[Mapper VSAMap] Load Done volId:{} array:{}", volId, addrInfo->GetArrayName());
+    POS_TRACE_INFO(EID(MAP_LOAD_COMPLETED), "[Mapper VSAMap] Load Done volId:{} array:{}, ReadPendingCnt:{}", volId, addrInfo->GetArrayName(), numLoadIssuedCount);
     assert(numLoadIssuedCount > 0);
     numLoadIssuedCount--;
-    mapLoadState[volId] = LOAD_DONE;
+    mapLoadState[volId] = MapLoadState::LOAD_DONE;
 }
 
 int

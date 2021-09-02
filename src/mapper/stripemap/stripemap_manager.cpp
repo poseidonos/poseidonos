@@ -70,7 +70,6 @@ StripeMapManager::Init(void)
     {
         EventSmartPtr eventStripeMap = std::make_shared<MapFlushedEvent>(STRIPE_MAP_ID, this);
         numWriteIssuedCount++;
-        //stripeMap->FlushTouchedPages(eventStripeMap);
         POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap] Issue Flush Header, array:{}", addrInfo->GetArrayName());
         ret = stripeMap->FlushHeader(eventStripeMap);
         if (ret < 0)
@@ -146,7 +145,7 @@ StripeMapManager::FlushMap(void)
 void
 StripeMapManager::MapFlushDone(int mapId)
 {
-    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] StripeMap Flush Done @MapAsyncFlushDone", mapId);
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] StripeMap Flush Done, WritePendingCnt:{} @MapAsyncFlushDone", mapId, numWriteIssuedCount);
     assert(numWriteIssuedCount > 0);
     numWriteIssuedCount--;
 }
@@ -155,6 +154,12 @@ void
 StripeMapManager::WaitAllPendingIoDone(void)
 {
     while ((numWriteIssuedCount + numLoadIssuedCount) != 0);
+}
+
+void
+StripeMapManager::WaitWritePendingIoDone(void)
+{
+    while (numWriteIssuedCount != 0);
 }
 
 StripeMapContent*

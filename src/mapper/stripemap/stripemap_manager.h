@@ -59,14 +59,16 @@ public:
     int FlushMap(void);
     void MapFlushDone(int mapId) override;
     void WaitAllPendingIoDone(void);
+    void WaitWritePendingIoDone(void);
 
-    StripeAddr GetLSA(StripeId vsid) override;
-    LsidRefResult GetLSAandReferLsid(StripeId vsid) override;
+
+    StripeAddr GetLSA(StripeId vsid);
+    LsidRefResult GetLSAandReferLsid(StripeId vsid);
     StripeId GetRandomLsid(StripeId vsid) override;
-    int SetLSA(StripeId vsid, StripeId lsid, StripeLoc loc) override;
-    bool IsInUserDataArea(StripeAddr entry) override { return entry.stripeLoc == IN_USER_AREA; }
-    bool IsInWriteBufferArea(StripeAddr entry) override { return entry.stripeLoc == IN_WRITE_BUFFER_AREA; }
-    MpageList GetDirtyStripeMapPages(int vsid) override;
+    int SetLSA(StripeId vsid, StripeId lsid, StripeLoc loc);
+    bool IsInUserDataArea(StripeAddr entry) { return entry.stripeLoc == IN_USER_AREA; }
+    bool IsInWriteBufferArea(StripeAddr entry) { return entry.stripeLoc == IN_WRITE_BUFFER_AREA; }
+    MpageList GetDirtyStripeMapPages(int vsid);
 
     StripeMapContent* GetStripeMapContent(void);
     bool AllMapsFlushedDone(void);

@@ -59,7 +59,9 @@ public:
     virtual int FlushMap(int volId);
     virtual int FlushAllMaps(void);
     virtual void WaitAllPendingIoDone(void);
-    virtual void WaitPendingIoDone(int volId);
+    virtual void WaitLoadPendingIoDone(void);
+    virtual void WaitWritePendingIoDone(void);
+    virtual void WaitVolumePendingIoDone(int volId);
     virtual void MapFlushDone(int mapId);
 
     virtual int GetVSAs(int volumeId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray);
@@ -87,8 +89,8 @@ private:
 
     MapperAddressInfo* addrInfo;
     VSAMapContent* vsaMaps[MAX_VOLUME_COUNT];
-    MapFlushState mapFlushState[MAX_VOLUME_COUNT];
-    MapLoadState mapLoadState[MAX_VOLUME_COUNT];
+    std::atomic<MapFlushState> mapFlushState[MAX_VOLUME_COUNT];
+    std::atomic<MapLoadState> mapLoadState[MAX_VOLUME_COUNT];
     std::atomic<bool> isVsaMapAccessable[MAX_VOLUME_COUNT];
     std::atomic<bool> isVsaMapInternalAccessable[MAX_VOLUME_COUNT];
     std::atomic<int> numWriteIssuedCount;
