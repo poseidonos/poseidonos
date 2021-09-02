@@ -216,8 +216,8 @@ VSAMapManager::InvalidateAllBlocks(int volId)
     return vsaMaps[volId]->InvalidateAllBlocks();
 }
 
-int
-VSAMapManager::NeedToDeleteVolume(int volId)
+bool
+VSAMapManager::NeedToDeleteFile(int volId)
 {
     if (vsaMaps[volId]->DoesFileExist() == false)
     {
@@ -229,7 +229,7 @@ VSAMapManager::NeedToDeleteVolume(int volId)
 int
 VSAMapManager::DeleteVSAMap(int volId)
 {
-    int ret = vsaMaps[volId]->DeleteMapFile();
+    bool ret = vsaMaps[volId]->DeleteMapFile();
     if (ret == 0)
     {
         delete vsaMaps[volId];
@@ -241,6 +241,7 @@ VSAMapManager::DeleteVSAMap(int volId)
 void
 VSAMapManager::WaitAllPendingIoDone(void)
 {
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] PendingWriteCnt:{}, PendingReadCnt:{}", numWriteIssuedCount, numLoadIssuedCount);
     while ((numWriteIssuedCount + numLoadIssuedCount) != 0);
 }
 
@@ -259,7 +260,7 @@ VSAMapManager::WaitWritePendingIoDone(void)
 void
 VSAMapManager::WaitVolumePendingIoDone(int volId)
 {
-    POS_TRACE_ERROR(EID(MAP_FLUSH_COMPLETED), "PendingWriteCnt:{}, PendingReadCnt:{}, state:{}", numWriteIssuedCount, numLoadIssuedCount, mapLoadState[volId]);
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper VSAMap] PendingWriteCnt:{}, PendingReadCnt:{}", numWriteIssuedCount, numLoadIssuedCount);
     while ((mapLoadState[volId] != MapLoadState::LOAD_DONE) || (mapFlushState[volId] != MapFlushState::FLUSH_DONE));
 }
 

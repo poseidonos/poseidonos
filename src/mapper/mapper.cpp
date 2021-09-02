@@ -424,35 +424,35 @@ Mapper::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayIn
         vsaMapManager->WaitVolumePendingIoDone(volId);
     }
 
-    if (vsaMapManager->NeedToDeleteVolume(volId) == false)
+    if (vsaMapManager->NeedToDeleteFile(volId) == false)
     {
         POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDeleted] VolumeId:{} array:{} Volume VSA File does not exist", volId, addrInfo->GetArrayName());
-        return true;
     }
-
-    if (_ChangeVolumeStateDeleting(volId) == false)
+    else
     {
-        POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "[Mapper VolumeDeleted] Another thread started to delete volumeID:{} array:{} @VolumeDeleted", volId, addrInfo->GetArrayName());
-        return true;
-    }
+        if (_ChangeVolumeStateDeleting(volId) == false)
+        {
+            POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "[Mapper VolumeDeleted] Another thread started to delete volumeID:{} array:{} @VolumeDeleted", volId, addrInfo->GetArrayName());
+            return false;
+        }
 
-    IVolumeEventHandler* journalVolumeHandler = JournalServiceSingleton::Instance()->GetVolumeEventHandler(arrayName);    // Write log for deleted volume
-    if (0 != journalVolumeHandler->WriteVolumeDeletedLog(volId))
-    {
-        return false;
-    }
+        IVolumeEventHandler* journalVolumeHandler = JournalServiceSingleton::Instance()->GetVolumeEventHandler(arrayName);    // Write log for deleted volume
+        if (0 != journalVolumeHandler->WriteVolumeDeletedLog(volId))
+        {
+            return false;
+        }
 
-    // Mark all blocks in this volume up as Invalidated
-    if (0 != vsaMapManager->InvalidateAllBlocks(volId))
-    {
-        POS_TRACE_WARN(EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE), "[Mapper VolumeDeleted] VSAMap Invalidate all blocks Failed, volumeID:{} array:{} @VolumeDeleted", volId, addrInfo->GetArrayName());
-        return false;
-    }
+        // Mark all blocks in this volume up as Invalidated
+        if (0 != vsaMapManager->InvalidateAllBlocks(volId))
+        {
+            POS_TRACE_WARN(EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE), "[Mapper VolumeDeleted] VSAMap Invalidate all blocks Failed, volumeID:{} array:{} @VolumeDeleted", volId, addrInfo->GetArrayName());
+            return false;
+        }
 
-    // Flush metadata
-    if (0 != journalVolumeHandler->TriggerMetadataFlush())
-    {
-        return false;
+        if (0 != journalVolumeHandler->TriggerMetadataFlush())
+        {
+            return false;
+        }
     }
 
     if (0 != vsaMapManager->DeleteVSAMap(volId))

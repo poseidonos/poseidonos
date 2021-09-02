@@ -72,7 +72,7 @@ public:
     int OpenFile(std::string fileName, int fileSize);
     int DeleteFile(void);
     int Load(AsyncLoadCallBack& cb);
-    int DoesFileExist(void);
+    bool DoesFileExist(void);
 
     int FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback);
     int FlushTouchedPages(EventSmartPtr callback);

@@ -102,12 +102,16 @@ MapIoHandler::Dispose(void)
 int
 MapIoHandler::DeleteFile(void)
 {
+    int ret = 0;
+    if (file->DoesFileExist() == false)
+    {
+        return ret;
+    }
     if (file->IsOpened() == true)
     {
         file->Close();
     }
-
-    int ret = file->Delete();
+    ret = file->Delete();
     if (ret < 0)
     {
         POS_TRACE_ERROR(EID(MFS_FILE_DELETE_FAILED), "MFS File:{} delete failed", file->GetFileName());
@@ -118,14 +122,14 @@ MapIoHandler::DeleteFile(void)
     return ret;
 }
 
-int
+bool
 MapIoHandler::DoesFileExist(void)
 {
     if ((file == nullptr) || (file->DoesFileExist() == false))
     {
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }
 
 int

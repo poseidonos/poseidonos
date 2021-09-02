@@ -73,7 +73,7 @@ public:
     virtual MpageList GetDirtyVsaMapPages(int volId, BlkAddr startRba, uint64_t numBlks);
     virtual VSAMapContent*& GetVSAMapContent(int volId) { return vsaMaps[volId]; }
 
-    virtual int NeedToDeleteVolume(int volId);
+    virtual bool NeedToDeleteFile(int volId);
     virtual int InvalidateAllBlocks(int volId);
     virtual int DeleteVSAMap(int volId);
 

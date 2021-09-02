@@ -19,7 +19,9 @@ public:
     MOCK_METHOD(int, FlushMap, (int volId), (override));
     MOCK_METHOD(int, FlushAllMaps, (), (override));
     MOCK_METHOD(void, WaitAllPendingIoDone, (), (override));
-    MOCK_METHOD(void, WaitPendingIoDone, (int volId), (override));
+    MOCK_METHOD(void, WaitLoadPendingIoDone, (), (override));
+    MOCK_METHOD(void, WaitWritePendingIoDone, (), (override));
+    MOCK_METHOD(void, WaitVolumePendingIoDone, (int volId), (override));
     MOCK_METHOD(void, MapFlushDone, (int mapId), (override));
     MOCK_METHOD(int, GetVSAs, (int volumeId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray), (override));
     MOCK_METHOD(int, SetVSAs, (int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks), (override));
