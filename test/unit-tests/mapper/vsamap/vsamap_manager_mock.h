@@ -31,7 +31,7 @@ public:
     MOCK_METHOD(int, SetVSAsWoCond, (int volumeId, BlkAddr startfRba, VirtualBlks& virtualBlks), (override));
     MOCK_METHOD(MpageList, GetDirtyVsaMapPages, (int volId, BlkAddr startRba, uint64_t numBlks), (override));
     MOCK_METHOD(VSAMapContent*&, GetVSAMapContent, (int volId), (override));
-    MOCK_METHOD(int, NeedToDeleteVolume, (int volId), (override));
+    MOCK_METHOD(bool, NeedToDeleteFile, (int volId), (override));
     MOCK_METHOD(int, InvalidateAllBlocks, (int volId), (override));
     MOCK_METHOD(int, DeleteVSAMap, (int volId), (override));
     MOCK_METHOD(bool, IsVsaMapAccessible, (int volId), (override));

@@ -159,7 +159,12 @@ ArrayManager::Mount(string name)
     return _ExecuteOrHandleErrors([&](ArrayComponents* array)
     {
         telClient->RegisterPublisher(name, array->GetTelemetryPublisher());
-        return array->Mount();
+        int ret = array->Mount();
+        if (ret !=  EID(SUCCESS))
+        {
+            telClient->DeregisterPublisher(name);
+        }
+        return ret;
     }, name);
 }
 
@@ -168,8 +173,12 @@ ArrayManager::Unmount(string name)
 {
     return _ExecuteOrHandleErrors([&](ArrayComponents* array)
     {
-        telClient->DeregisterPublisher(name);
-        return array->Unmount();
+        int ret = array->Unmount();
+        if (ret == EID(SUCCESS))
+        {
+            telClient->DeregisterPublisher(name);
+        }
+        return ret;
     }, name);
 }
 
