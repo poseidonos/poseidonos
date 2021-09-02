@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GRPC_REPO="http://10.227.30.174:7990/scm/ibof/grpc.git"
+GRPC_REPO="https://10.227.30.174:7990/scm/ibof/grpc.git"
 INSTALL_DIR="/usr/local"
 BUILD_JOBS=4
 FORCE_INSTALL=FALSE

@@ -380,13 +380,13 @@ if (${USE_LOCAL_REPO} STREQUAL "y")
     add_custom_target(
         grpc ALL
         WORKING_DIRECTORY ${PROJ_ROOT}/lib
-        COMMAND ./build_grpc.sh -i
+        COMMAND ./build_grpc.sh -i -f
     )
 else()
     add_custom_target(
         grpc ALL
         WORKING_DIRECTORY ${PROJ_ROOT}/lib
-        COMMAND ./build_grpc.sh
+        COMMAND ./build_grpc.sh -f
     )
 endif()
 
