@@ -227,7 +227,7 @@ protobuf:
 	protoc --cpp_out=$(PROTO_CPP_GENERATED_DIR) --grpc_out=$(PROTO_CPP_GENERATED_DIR) --plugin=protoc-gen-grpc=/usr/local/bin/grpc_cpp_plugin --proto_path=$(PROTO_DIR) $(PROTO_DIR)/*.proto
 	@$(MAKE) -C proto 
 
-sam: makedir
+sam: makedir protobuf
 	@echo SAM Build
 	$(MAKE) -C src sam
 
