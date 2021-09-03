@@ -32,32 +32,17 @@
 
 #pragma once
 
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include <list>
-#include <map>
+#include "src/cli/command.h"
 #include <string>
-#include <vector>
 
-namespace pos
+namespace pos_cli
 {
-class TelemetryClient
+class StartTelemetryCommand : public Command
 {
 public:
-    TelemetryClient(void);
-    virtual ~TelemetryClient(void);
-    virtual int RegisterPublisher(std::string name, TelemetryPublisher* client);
-    virtual int DeregisterPublisher(std::string name);
-    virtual bool StartPublisher(std::string name);
-    virtual bool StopPublisher(std::string name);
-    virtual bool IsPublisherRunning(std::string name);
-    virtual bool StartAllPublisher(void);
-    virtual bool StopAllPublisher(void);
-
-    virtual int CollectValue(std::string name, std::string id, TelemetryGeneralMetric& outLog);
-    virtual list<TelemetryGeneralMetric> CollectList(std::string name);
-
-private:
-    std::map<std::string, TelemetryPublisher*> publisherList;
+    StartTelemetryCommand(void);
+    ~StartTelemetryCommand(void) override;
+    string Execute(json& doc, string rid) override;
 };
-using TelemetryClientSingleton = Singleton<TelemetryClient>;
-} // namespace pos
+}; // namespace pos_cli
+

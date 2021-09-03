@@ -78,6 +78,8 @@
 #include "src/cli/stop_rebuilding_command.h"
 #include "src/cli/unmount_array_command.h"
 #include "src/cli/unmount_volume_command.h"
+#include "src/cli/start_telemetry_command.h"
+#include "src/cli/stop_telemetry_command.h"
 
 namespace pos_cli
 {
@@ -129,6 +131,8 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["LISTQOSPOLICIES"] = new QosListPoliciesCommand();
     cmdDictionary["CREATEQOSVOLUMEPOLICY"] = new QosCreateVolumePolicyCommand();
     cmdDictionary["RESETQOSVOLUMEPOLICY"] = new QosResetVolumePolicyCommand();
+    cmdDictionary["STARTTELEMETRY"] = new StartTelemetryCommand();
+    cmdDictionary["STOPTELEMETRY"] = new StopTelemetryCommand();
 }
 
 RequestHandler::~RequestHandler(void)

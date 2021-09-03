@@ -43,7 +43,7 @@ namespace pos
 {
 ArrayManager::ArrayManager()
 : ArrayManager(new ArrayRebuilder(this), new AbrManager(), DeviceManagerSingleton::Instance(),
-    TeletryClientSingleton::Instance(),
+    TelemetryClientSingleton::Instance(),
     [](string name, IArrayRebuilder* arrayRebuilder, IAbrControl* iAbrControl)
     {
         return new ArrayComponents(name, arrayRebuilder, iAbrControl);

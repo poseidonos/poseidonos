@@ -132,7 +132,7 @@ DebugInfo::Update(void)
     nvmfTarget = NvmfTargetSingleton::Instance();
     ioSubmitHandlerCount = IOSubmitHandlerCountSingleton::Instance();
     flushCount = FlushCountSingleton::Instance();
-    telemetryClient = TeletryClientSingleton::Instance();
+    telemetryClient = TelemetryClientSingleton::Instance();
     telemetryManagerService = TelemetryManagerServiceSingletone::Instance();
 }
 } // namespace pos

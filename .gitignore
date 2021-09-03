@@ -89,5 +89,6 @@ lib/spdk/
 lib/spdlog-1.4.2/
 lib/spdlog-prefix/
 tool/cli/vendor
+tool/cli/docs/manpage
 tool/pkg/
 tool/cli/lib/pnconnector/src/util/resource.go

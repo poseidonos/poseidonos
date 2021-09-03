@@ -30,34 +30,42 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/cli/stop_telemetry_command.h"
 
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include <list>
-#include <map>
-#include <string>
 #include <vector>
 
-namespace pos
-{
-class TelemetryClient
-{
-public:
-    TelemetryClient(void);
-    virtual ~TelemetryClient(void);
-    virtual int RegisterPublisher(std::string name, TelemetryPublisher* client);
-    virtual int DeregisterPublisher(std::string name);
-    virtual bool StartPublisher(std::string name);
-    virtual bool StopPublisher(std::string name);
-    virtual bool IsPublisherRunning(std::string name);
-    virtual bool StartAllPublisher(void);
-    virtual bool StopAllPublisher(void);
+#include "src/array_mgmt/array_manager.h"
+#include "src/cli/cli_event_code.h"
+#include "src/cli/request_handler.h"
+#include "src/logger/logger.h"
+#include "src/mbr/mbr_info.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 
-    virtual int CollectValue(std::string name, std::string id, TelemetryGeneralMetric& outLog);
-    virtual list<TelemetryGeneralMetric> CollectList(std::string name);
+namespace pos_cli
+{
+StopTelemetryCommand::StopTelemetryCommand(void)
+{
+}
 
-private:
-    std::map<std::string, TelemetryPublisher*> publisherList;
-};
-using TelemetryClientSingleton = Singleton<TelemetryClient>;
-} // namespace pos
+StopTelemetryCommand::~StopTelemetryCommand(void)
+{
+}
+
+string
+StopTelemetryCommand::Execute(json& doc, string rid)
+{
+    JsonFormat jFormat;
+    JsonElement data("data");
+
+    TelemetryClient* tc = TelemetryClientSingleton::Instance();
+    bool result = tc->StopAllPublisher();
+    if (!result)
+    {
+        return jFormat.MakeResponse("STOPTELEMETRY", rid, result,
+            "Telemetry could not stop ", data, GetPosInfo());
+    }
+
+    return jFormat.MakeResponse("STOPTELEMETRY", rid, SUCCESS,
+        "Telemetry has stopped ", data, GetPosInfo());
+}
+}; // namespace pos_cli

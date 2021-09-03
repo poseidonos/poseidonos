@@ -43,6 +43,7 @@ poseidonos-cli [flags]
 * [poseidonos-cli qos](poseidonos-cli_qos.md)	 - Qos commands for PoseidonOS.
 * [poseidonos-cli subsystem](poseidonos-cli_subsystem.md)	 - Subsystem Command for PoseidonOS.
 * [poseidonos-cli system](poseidonos-cli_system.md)	 - System commands for PoseidonOS.
+* [poseidonos-cli telemetry](poseidonos-cli_telemetry.md)	 - Telemetry commands for PoseidonOS.
 * [poseidonos-cli volume](poseidonos-cli_volume.md)	 - Volume commands for PoseidonOS.
 * [poseidonos-cli wbt](poseidonos-cli_wbt.md)	 - White box test (WBT) commands for Poseidon OS
 

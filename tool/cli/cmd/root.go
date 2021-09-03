@@ -19,6 +19,7 @@ import (
 	"cli/cmd/qoscmds"
 	"cli/cmd/subsystemcmds"
 	"cli/cmd/systemcmds"
+	"cli/cmd/telemetrycmds"
 	"cli/cmd/volumecmds"
 	"pnconnector/src/log"
 	"pnconnector/src/routers/m9k/model"
@@ -87,7 +88,11 @@ func Execute() {
 }
 
 func init() {
+	regGlobalFlags()
+	addCmd()
+}
 
+func regGlobalFlags() {
 	// Global flags
 	// TODO(mj): Add verbose and quiet modes
 	RootCmd.PersistentFlags().StringVar(&globals.IPv4, "ip", "127.0.0.1", "Set IPv4 address to PoseidonOS for this command")
@@ -97,7 +102,9 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&globals.IsJSONRes, "json-res", false, "Print response in JSON form")
 	RootCmd.PersistentFlags().BoolVar(&globals.DisplayUnit, "unit", false, "Display unit (B, KB, MB, ...) when displaying capacity")
 	RootCmd.PersistentFlags().StringVar(&globals.FieldSeparator, "fs", "|", "Field separator for the output")
+}
 
+func addCmd() {
 	// Command categories
 	RootCmd.AddCommand(arraycmds.ArrayCmd)
 	RootCmd.AddCommand(volumecmds.VolumeCmd)
@@ -109,6 +116,7 @@ func init() {
 	RootCmd.AddCommand(FileCmd)
 	RootCmd.AddCommand(WbtCmd)
 	RootCmd.AddCommand(qoscmds.QosCmd)
+	RootCmd.AddCommand(telemetrycmds.TelemetryCmd)
 	RootCmd.AddCommand(completionCmd)
 }
 

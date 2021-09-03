@@ -30,34 +30,42 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/cli/start_telemetry_command.h"
 
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include <list>
-#include <map>
-#include <string>
 #include <vector>
 
-namespace pos
-{
-class TelemetryClient
-{
-public:
-    TelemetryClient(void);
-    virtual ~TelemetryClient(void);
-    virtual int RegisterPublisher(std::string name, TelemetryPublisher* client);
-    virtual int DeregisterPublisher(std::string name);
-    virtual bool StartPublisher(std::string name);
-    virtual bool StopPublisher(std::string name);
-    virtual bool IsPublisherRunning(std::string name);
-    virtual bool StartAllPublisher(void);
-    virtual bool StopAllPublisher(void);
+#include "src/array_mgmt/array_manager.h"
+#include "src/cli/cli_event_code.h"
+#include "src/cli/request_handler.h"
+#include "src/logger/logger.h"
+#include "src/mbr/mbr_info.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 
-    virtual int CollectValue(std::string name, std::string id, TelemetryGeneralMetric& outLog);
-    virtual list<TelemetryGeneralMetric> CollectList(std::string name);
+namespace pos_cli
+{
+StartTelemetryCommand::StartTelemetryCommand(void)
+{
+}
 
-private:
-    std::map<std::string, TelemetryPublisher*> publisherList;
-};
-using TelemetryClientSingleton = Singleton<TelemetryClient>;
-} // namespace pos
+StartTelemetryCommand::~StartTelemetryCommand(void)
+{
+}
+
+string
+StartTelemetryCommand::Execute(json& doc, string rid)
+{
+    JsonFormat jFormat;
+    JsonElement data("data");
+
+    TelemetryClient* tc = TelemetryClientSingleton::Instance();
+    bool result = tc->StartAllPublisher();
+    if (!result)
+    {
+        return jFormat.MakeResponse("STARTTELEMETRY", rid, result,
+            "Telemetry could not start ", data, GetPosInfo());
+    }
+
+    return jFormat.MakeResponse("STARTTELEMETRY", rid, SUCCESS,
+        "Telemetry has started ", data, GetPosInfo());
+}
+}; // namespace pos_cli
