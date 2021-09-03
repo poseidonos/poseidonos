@@ -45,7 +45,7 @@ public:
     MOCK_METHOD(MpageList, GetDirtyVsaMapPages, (int volId, BlkAddr startRba, uint64_t numBlks), (override));
     MOCK_METHOD(int, EnableInternalAccess, (int volId), (override));
     MOCK_METHOD(int, FlushDirtyMpages, (int mapId, EventSmartPtr callback, MpageList dirtyPages), (override));
-    MOCK_METHOD(int, FlushAll, (), (override));
+    MOCK_METHOD(int, StoreAll, (), (override));
 };
 
 } // namespace pos
