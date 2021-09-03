@@ -44,8 +44,8 @@ public:
     virtual int SetVSAs(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks) = 0;
     virtual VirtualBlkAddr GetVSAInternal(int volumeId, BlkAddr rba, int& caller) = 0;
     virtual int SetVSAsInternal(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks) = 0;
-    virtual VirtualBlkAddr GetVSAforReplay(int volumeId, BlkAddr rba) = 0;
-    virtual int SetVSAsforReplay(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks) = 0;
+    virtual VirtualBlkAddr GetVSAWithSyncOpen(int volumeId, BlkAddr rba) = 0;
+    virtual int SetVSAsWithSyncOpen(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks) = 0;
     virtual VirtualBlkAddr GetRandomVSA(BlkAddr rba) = 0;   // will be deprecated
 
     virtual MpageList GetDirtyVsaMapPages(int volumeId, BlkAddr startRba, uint64_t numBlks) = 0;

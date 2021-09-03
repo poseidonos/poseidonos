@@ -103,22 +103,24 @@ int
 MapIoHandler::DeleteFile(void)
 {
     int ret = 0;
-    if (file->DoesFileExist() == false)
+    if (file->DoesFileExist() == true)
     {
-        return ret;
+        if (file->IsOpened() == true)
+        {
+            file->Close();
+        }
+        ret = file->Delete();
+        if (ret < 0)
+        {
+            POS_TRACE_ERROR(EID(MFS_FILE_DELETE_FAILED), "MFS File:{} delete failed", file->GetFileName());
+            return ret;
+        }
     }
-    if (file->IsOpened() == true)
+    if (file != nullptr)
     {
-        file->Close();
+        delete file;
+        file = nullptr;
     }
-    ret = file->Delete();
-    if (ret < 0)
-    {
-        POS_TRACE_ERROR(EID(MFS_FILE_DELETE_FAILED), "MFS File:{} delete failed", file->GetFileName());
-        return ret;
-    }
-    delete file;
-    file = nullptr;
     return ret;
 }
 
@@ -208,6 +210,7 @@ MapIoHandler::FlushTouchedPages(EventSmartPtr callback)
 {
     if (_PrepareFlush(callback) == false)
     {
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER FLUSH] Failed to Issue Flush, Another Flush is still progressing, mapId:{}, status:{}", mapHeader->GetMapId(), status);
         return -EID(MAP_FLUSH_IN_PROGRESS);
     }
 
@@ -218,14 +221,14 @@ MapIoHandler::FlushTouchedPages(EventSmartPtr callback)
 
     if (touchedPages->GetNumBitsSet() != 0)
     {
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_STARTED), "FlushTouchedPages mapId:{} started", mapHeader->GetMapId());
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_STARTED), "[MAPPER FlushTouchedPages mapId:{}] started", mapHeader->GetMapId());
         numPagesToAsyncIo = touchedPages->GetNumBitsSet();
         SequentialPageFinder finder(touchedPages);
         result = _Flush(finder);
     }
     else
     {
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "mapId:{} FlushTouchedPages completed, W/O any pages to flush", mapHeader->GetMapId());
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER FlushTouchedPages mapId:{}] completed, W/O any pages to flush", mapHeader->GetMapId());
         _CompleteFlush();
         // TODO(r.saraf) Handle callback returning false value (callback executed in _CompleteFlush)
     }
@@ -305,7 +308,7 @@ MapIoHandler::_HeaderAsyncLoaded(AsyncMetaFileIoCtx* ctx)
     mapHeader->ApplyNumValidMpages();
     status = LOADING_HEADER_DONE;
     POS_TRACE_INFO(EID(MAPPER_SUCCESS),
-        "fileName:{} Header Sync Load Success, Valid:{} / Total:{}",
+        "fileName:{} Header Async Load Done, Valid:{} / Total:{}",
         file->GetFileName(), mapHeader->GetNumValidMpages(), mapHeader->GetNumTotalMpages());
 
     if (0 == mapHeader->GetNumValidMpages())

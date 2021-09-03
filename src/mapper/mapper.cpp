@@ -64,13 +64,31 @@ Mapper::Mapper(IArrayInfo* iarrayInfo, IStateControl* iState)
 Mapper::~Mapper(void)
 {
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Destructor] in Array:{} was Destroyed", addrInfo->GetArrayName());
-    Dispose();
+    _Dispose();
     delete mapperWbt;
     delete reverseMapManager;
     delete stripeMapManager;
     delete vsaMapManager;
     delete addrInfo;
     VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, iArrayinfo->GetName(), iArrayinfo->GetIndex());
+}
+
+void
+Mapper::Dispose(void)
+{
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Dispose] MAPPER Disposed, init:{} array:{}", isInitialized, addrInfo->GetArrayName());
+    if (isInitialized == true)
+    {
+        StoreAll();
+        _Dispose();
+    }
+}
+
+void
+Mapper::Shutdown(void)
+{
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Shutdown] MAPPER Shutdown, init:{} array:{}", isInitialized, addrInfo->GetArrayName());
+    _Dispose();
 }
 
 int
@@ -107,29 +125,6 @@ Mapper::Init(void)
 }
 
 void
-Mapper::Dispose(void)
-{
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Dispose] MAPPER Disposed, init:{} array:{}", isInitialized, addrInfo->GetArrayName());
-    if (isInitialized == true)
-    {
-        FlushAll();
-        vsaMapManager->Dispose();
-        stripeMapManager->Dispose();
-        reverseMapManager->Dispose();
-        _UnregisterFromMapperService();
-        _ClearVolumeState();
-        isInitialized = false;
-    }
-}
-
-void
-Mapper::Shutdown(void)
-{
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Shutdown] MAPPER Shutdown, init:{} array:{}", isInitialized, addrInfo->GetArrayName());
-    Dispose();
-}
-
-void
 Mapper::Flush(void)
 {
     // no-op for IMountSequence
@@ -157,7 +152,7 @@ Mapper::FlushDirtyMpages(int mapId, EventSmartPtr event, MpageList dirtyPages)
 }
 
 int
-Mapper::FlushAll(void)
+Mapper::StoreAll(void)
 {
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper FlushAll] Flush All Synchronously, array:{}", addrInfo->GetArrayName());
     int ret = stripeMapManager->FlushMap();
@@ -231,12 +226,12 @@ Mapper::SetVSAsInternal(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
 }
 
 VirtualBlkAddr
-Mapper::GetVSAforReplay(int volId, BlkAddr rba)
+Mapper::GetVSAWithSyncOpen(int volId, BlkAddr rba)
 {
     int ret = EnableInternalAccess(volId);
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper GetVSAforReplay] Failed to Load VolumeId:{} array:{}", volId, addrInfo->GetArrayName());
+        POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper GetVSAWithSyncOpen] Failed to Load VolumeId:{} array:{}", volId, addrInfo->GetArrayName());
         assert(false);
         return UNMAP_VSA;
     }
@@ -248,13 +243,12 @@ Mapper::GetVSAforReplay(int volId, BlkAddr rba)
 }
 
 int
-Mapper::SetVSAsforReplay(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
+Mapper::SetVSAsWithSyncOpen(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
 {
     int ret = EnableInternalAccess(volId);
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper SetVSAsforReplay] Failed to Load VolumeId:{} array:{}", volId, addrInfo->GetArrayName());
-        assert(false);
+        POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper SetVSAsWithSyncOpen] Failed to Load VolumeId:{} array:{}", volId, addrInfo->GetArrayName());
         return ret;
     }
     if (ret == NEED_RETRY)
@@ -479,6 +473,20 @@ Mapper::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
     }
 }
 
+void
+Mapper::_Dispose(void)
+{
+    if (isInitialized == true)
+    {
+        vsaMapManager->Dispose();
+        stripeMapManager->Dispose();
+        reverseMapManager->Dispose();
+        _UnregisterFromMapperService();
+        _ClearVolumeState();
+        isInitialized = false;
+    }
+}
+
 bool
 Mapper::_LoadVolumeMeta(int volId, bool delVol)
 {
@@ -586,7 +594,6 @@ Mapper::_ChangeVolumeStateDeleting(int volId)
         return false;
     }
     volState[volId].SetState(VolState::VOLUME_DELETING);
-    vsaMapManager->DisableVsaMapInternalAccess(volId);
     return true;
 }
 
@@ -594,17 +601,11 @@ int
 Mapper::_GetMpageSize(void)
 {
     int mpageSize = 4096;
-#ifndef IBOF_CONFIG_USE_MOCK_FS
-    const StorageOpt STORAGE_OPT = StorageOpt::DEFAULT;
     MetaFilePropertySet prop;
-    if (STORAGE_OPT == StorageOpt::NVRAM)
-    {
-        prop.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
-        prop.ioOpType = MetaFileDominant::WriteDominant;
-        prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
-    }
+    prop.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
+    prop.ioOpType = MetaFileDominant::WriteDominant;
+    prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
     mpageSize = metaFs->ctrl->EstimateAlignedFileIOSize(prop);
-#endif
     return mpageSize;
 }
 

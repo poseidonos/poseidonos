@@ -96,7 +96,7 @@ VSAMapMock::GetNumUsedBlocks(int volId)
 }
 
 VirtualBlkAddr
-VSAMapMock::GetVSAforReplay(int volId, BlkAddr rba)
+VSAMapMock::GetVSAWithSyncOpen(int volId, BlkAddr rba)
 {
     assert(volId < testInfo->maxNumVolume);
     assert(rba < testInfo->maxVolumeSizeInBlock);
@@ -104,7 +104,7 @@ VSAMapMock::GetVSAforReplay(int volId, BlkAddr rba)
     return map[volId][rba];
 }
 int
-VSAMapMock::SetVSAsforReplay(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
+VSAMapMock::SetVSAsWithSyncOpen(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
 {
     assert(volId < testInfo->maxNumVolume);
     for (uint32_t blkCount = 0; blkCount < virtualBlks.numBlks; blkCount++)

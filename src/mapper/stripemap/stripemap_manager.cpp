@@ -145,7 +145,7 @@ StripeMapManager::FlushMap(void)
 void
 StripeMapManager::MapFlushDone(int mapId)
 {
-    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] StripeMap Flush Done, WritePendingCnt:{} @MapAsyncFlushDone", mapId, numWriteIssuedCount);
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] StripeMap Flush Done, WritePendingCnt:{} @MapAsyncFlushDone", numWriteIssuedCount);
     assert(numWriteIssuedCount > 0);
     numWriteIssuedCount--;
 }

@@ -34,7 +34,7 @@ public:
     VSAMapMock* GetVSAMapMock(void);
     StripeMapMock* GetStripeMapMock(void);
 
-    virtual int FlushAll(void) override;
+    virtual int StoreAll(void) override;
 
 private:
     int _FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages);

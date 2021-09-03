@@ -128,16 +128,17 @@ public:
     virtual int64_t GetNumUsedBlocks(int volId);
     virtual VirtualBlkAddr GetVSAInternal(int volId, BlkAddr rba, int& retry);
     virtual int SetVSAsInternal(int volId, BlkAddr startRba, VirtualBlks& virtualBlks);
-    virtual VirtualBlkAddr GetVSAforReplay(int volId, BlkAddr rba);
-    virtual int SetVSAsforReplay(int volId, BlkAddr startRba, VirtualBlks& virtualBlks);
+    virtual VirtualBlkAddr GetVSAWithSyncOpen(int volId, BlkAddr rba);
+    virtual int SetVSAsWithSyncOpen(int volId, BlkAddr startRba, VirtualBlks& virtualBlks);
     virtual MpageList GetDirtyVsaMapPages(int volId, BlkAddr startRba, uint64_t numBlks);
 
     virtual int EnableInternalAccess(int volId);
 
     virtual int FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages = DEFAULT_DIRTYPAGE_SET);
-    virtual int FlushAll(void);
+    virtual int StoreAll(void);
 
 private:
+    void _Dispose(void);
     MapContent* _GetMapContent(int mapId);
     void _RegisterToMapperService(void);
     void _UnregisterFromMapperService(void);

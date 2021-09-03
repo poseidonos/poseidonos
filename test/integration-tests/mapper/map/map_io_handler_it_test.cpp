@@ -136,7 +136,7 @@ TEST_F(MapIoHandlerTest, StoreVSAMap)
         _SetVSAs(TEST_VOL_ID, rba, (StripeId)(test / 128), (BlkOffset)(test % 128));
     }
 
-    mapperSUT->FlushAll();  // store stripMap & vsamap[vol]
+    mapperSUT->StoreAll();  // store stripMap & vsamap[vol]
 
     _SimulateSPOR();
 
@@ -159,7 +159,7 @@ TEST_F(MapIoHandlerTest, StoreStripeMap)
         _SetLSA(test, test * 2, loc);
     }
 
-    mapperSUT->FlushAll();
+    mapperSUT->StoreAll();
 
     _SimulateSPOR();
 
