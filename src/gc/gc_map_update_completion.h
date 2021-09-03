@@ -39,7 +39,6 @@
 #include <vector>
 
 #include "src/include/address_type.h"
-#include "src/event_scheduler/event.h"
 #include "src/event_scheduler/callback.h"
 #include "src/journal_service/journal_service.h"
 #include "src/mapper/i_vsamap.h"
@@ -56,7 +55,7 @@ class IArrayInfo;
 class RBAStateManager;
 class IVolumeManager;
 
-class GcMapUpdateCompletion : public Event
+class GcMapUpdateCompletion : public Callback
 {
 public:
     explicit GcMapUpdateCompletion(Stripe* stripe, std::string arrayName, IStripeMap* iStripeMap,
@@ -67,9 +66,10 @@ public:
                         RBAStateManager* inputRbaStateManager,
                         IVolumeManager* inputVolumeManager);
     ~GcMapUpdateCompletion(void) override;
-    bool Execute(void) override;
 
 private:
+    bool _DoSpecificJob(void) override;
+
     Stripe* stripe;
     std::string arrayName;
     IStripeMap* iStripeMap;

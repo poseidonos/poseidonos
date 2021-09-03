@@ -32,8 +32,11 @@
 
 #pragma once
 
+#include <map>
+
 #include "src/include/address_type.h"
 #include "src/include/smart_ptr_type.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
 
 namespace pos
 {
@@ -44,5 +47,6 @@ class IMetaUpdater
 public:
     virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback) = 0;
     virtual int UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback) = 0;
+    virtual int UpdateGcMap(Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t > invalidSegCnt, CallbackSmartPtr callback) = 0;
 };
 } // namespace pos

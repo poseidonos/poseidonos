@@ -30,41 +30,47 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "src/metadata/meta_event_factory.h"
+#pragma once
 
-#include "src/allocator/i_block_allocator.h"
-#include "src/allocator/i_context_manager.h"
-#include "src/allocator/i_wbstripe_allocator.h"
-#include "src/mapper/i_stripemap.h"
-#include "src/mapper/i_vsamap.h"
-#include "src/metadata/block_map_update.h"
-#include "src/metadata/gc_map_update.h"
+#include <map>
+#include <string>
 
+#include "src/event_scheduler/callback.h"
+#include "src/include/address_type.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
 namespace pos
 {
-MetaEventFactory::MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap, IBlockAllocator* blockAllocator,
-    IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IArrayInfo* arrayInfo)
-: vsaMap(vsaMap),
-  stripeMap(stripeMap),
-  blockAllocator(blockAllocator),
-  wbStripeAllocator(wbStripeAllocator),
-  contextManager(contextManager),
-  arrayInfo(arrayInfo)
-{
-}
+class Stripe;
+class IVSAMap;
+class IStripeMap;
+class IContextManager;
+class IBlockAllocator;
+class IArrayInfo;
 
-CallbackSmartPtr
-MetaEventFactory::CreateBlockMapUpdateEvent(VolumeIoSmartPtr volumeIo)
+class GcMapUpdate : public Callback
 {
-    CallbackSmartPtr callback(new BlockMapUpdate(volumeIo, vsaMap, blockAllocator, wbStripeAllocator));
-    return callback;
-}
+public:
+    GcMapUpdate(void);
+    GcMapUpdate(IVSAMap* vsaMap, IStripeMap* stripeMap,
+        IBlockAllocator* blockAllocator, IContextManager* contextManager,
+        IArrayInfo* arrayInfo, Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList,
+        std::map<SegmentId, uint32_t> invalidSegCnt);
+    virtual ~GcMapUpdate(void);
 
-CallbackSmartPtr
-MetaEventFactory::CreateGcMapUpdateEvent(Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt)
-{
-    CallbackSmartPtr callback(new GcMapUpdate(vsaMap, stripeMap, blockAllocator, contextManager, arrayInfo, stripe, mapUpdateInfoList, invalidSegCnt));
-    return callback;
-}
+private:
+    virtual bool _DoSpecificJob(void) override;
+    void _InvalidateBlock(void);
+    void _ValidateBlock(StripeId stripeId, uint32_t cnt);
 
+    IVSAMap* vsaMap;
+    IStripeMap* stripeMap;
+    IBlockAllocator* blockAllocator;
+    IContextManager* contextManager;
+    IArrayInfo* arrayInfo;
+
+    Stripe* stripe;
+    GcStripeMapUpdateList mapUpdateInfoList;
+    std::map<SegmentId, uint32_t> invalidSegCnt;
+    uint32_t stripesPerSegment;
+};
 } // namespace pos

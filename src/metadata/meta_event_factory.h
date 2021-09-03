@@ -32,27 +32,38 @@
 
 #pragma once
 
+#include <map>
+
 #include "src/include/smart_ptr_type.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
 
 namespace pos
 {
 class IVSAMap;
+class IStripeMap;
 class IBlockAllocator;
 class IWBStripeAllocator;
+class IContextManager;
+class IArrayInfo;
+class Stripe;
 
 class MetaEventFactory
 {
 public:
     MetaEventFactory(void) = default;
-    MetaEventFactory(IVSAMap* vsaMaap, IBlockAllocator* blockAllocator,
-        IWBStripeAllocator* wbStripeAllocator);
+    MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap, IBlockAllocator* blockAllocator,
+        IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager, IArrayInfo* arrayInfo);
     virtual ~MetaEventFactory(void) = default;
 
     virtual CallbackSmartPtr CreateBlockMapUpdateEvent(VolumeIoSmartPtr volumeIo);
+    virtual CallbackSmartPtr CreateGcMapUpdateEvent(Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt);
 
 private:
     IVSAMap* vsaMap;
+    IStripeMap* stripeMap;
     IBlockAllocator* blockAllocator;
     IWBStripeAllocator* wbStripeAllocator;
+    IContextManager* contextManager;
+    IArrayInfo* arrayInfo;
 };
 } // namespace pos

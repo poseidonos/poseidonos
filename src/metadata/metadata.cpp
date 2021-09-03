@@ -156,7 +156,8 @@ Metadata::_RegisterMetaUpdater(void)
         allocator->GetIWBStripeAllocator(),
         journal,
         journal->GetJournalWriter(),
-        EventSchedulerSingleton::Instance());
+        EventSchedulerSingleton::Instance(),
+        arrayInfo);
 
     MetaServiceSingleton::Instance()->Register(arrayInfo->GetName(),
        arrayInfo->GetIndex(), metaUpdater);

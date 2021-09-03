@@ -69,7 +69,7 @@ GcMapUpdateCompletion::GcMapUpdateCompletion(Stripe* stripe, std::string arrayNa
                                             IArrayInfo* inputIArrayInfo,
                                             RBAStateManager* inputRbaStateManager,
                                             IVolumeManager* inputVolumeManager)
-: Event(false),
+: Callback(false),
   stripe(stripe),
   arrayName(arrayName),
   iStripeMap(iStripeMap),
@@ -89,7 +89,7 @@ GcMapUpdateCompletion::~GcMapUpdateCompletion(void)
 }
 
 bool
-GcMapUpdateCompletion::Execute(void)
+GcMapUpdateCompletion::_DoSpecificJob(void)
 {
     BlkAddr rba;
     uint32_t volId;

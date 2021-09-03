@@ -31,82 +31,88 @@
  */
 
 #include "src/gc/gc_map_update_request.h"
-#include "src/gc/gc_map_update.h"
 
-#include "src/logger/logger.h"
-#include "src/spdk_wrapper/free_buffer_pool.h"
-#include "src/include/backend_event.h"
+#include <list>
+#include <string>
+
 #include "Air.h"
 #include "src/allocator/allocator.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/gc/copier_meta.h"
+#include "src/gc/gc_map_update_completion.h"
 #include "src/gc/gc_stripe_manager.h"
+#include "src/include/backend_event.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/io/backend_io/flush_completion.h"
 #include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/io/general_io/rba_state_manager.h"
 #include "src/io/general_io/rba_state_service.h"
+#include "src/logger/logger.h"
 #include "src/mapper/mapper.h"
 #include "src/mapper_service/mapper_service.h"
-
-#include <list>
-#include <string>
+#include "src/meta_service/meta_service.h"
+#include "src/spdk_wrapper/free_buffer_pool.h"
 
 namespace pos
 {
 GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager)
-: GcMapUpdateRequest(
-    stripe,
-    arrayName,
-    gcStripeManager,
-    nullptr,
-    MapperServiceSingleton::Instance()->GetIStripeMap(arrayName),
-    MapperServiceSingleton::Instance()->GetIVSAMap(arrayName),
-    JournalServiceSingleton::Instance(),
-    EventSchedulerSingleton::Instance(),
-    ArrayMgr()->GetInfo(arrayName)->arrayInfo)
+: GcMapUpdateRequest(stripe,
+      std::make_shared<GcMapUpdateCompletion>(stripe, arrayName, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName), EventSchedulerSingleton::Instance(), gcStripeManager),
+      MapperServiceSingleton::Instance()->GetIVSAMap(arrayName),
+      ArrayMgr()->GetInfo(arrayName)->arrayInfo,
+      MetaServiceSingleton::Instance()->GetMetaUpdater(arrayName))
 {
 }
 
-GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager, EventSmartPtr inputEvent,
-                    IStripeMap* inputIStripeMap,
-                    IVSAMap* inputIVSAMap,
-                    JournalService* inputJournalService,
-                    EventScheduler* inputEventScheduler,
-                    IArrayInfo* inputIArrayInfo)
+GcMapUpdateRequest::GcMapUpdateRequest(Stripe* stripe,
+    CallbackSmartPtr completionEvent,
+    IVSAMap* inputIVSAMap,
+    IArrayInfo* inputIArrayInfo,
+    IMetaUpdater* inputMetaUpdater)
 : Event(false),
   stripe(stripe),
-  arrayName(arrayName),
-  gcStripeManager(gcStripeManager),
-  inputEvent(inputEvent),
-  iStripeMap(inputIStripeMap),
+  completionEvent(completionEvent),
   iVSAMap(inputIVSAMap),
-  journalService(inputJournalService),
-  eventScheduler(inputEventScheduler),
-  iArrayInfo(inputIArrayInfo)
+  iArrayInfo(inputIArrayInfo),
+  metaUpdater(inputMetaUpdater)
 {
     const PartitionLogicalSize* udSize =
         iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
     totalBlksPerUserStripe = udSize->blksPerStripe;
-    stripesPerSegment = udSize->stripesPerSegment;;
+    stripesPerSegment = udSize->stripesPerSegment;
 
-    stripeOffset = 0;
+    currentStripeOffset = 0;
 }
 
 bool
 GcMapUpdateRequest::Execute(void)
+{
+    bool result = true;
+    result = _BuildMeta();
+    if (unlikely(result != true))
+    {
+        return result;
+    }
+
+    result = _UpdateMeta();
+
+    return result;
+}
+
+bool
+GcMapUpdateRequest::_BuildMeta(void)
 {
     StripeId stripeId = stripe->GetVsid();
     BlkAddr rba;
     uint32_t volId;
     VirtualBlkAddr currentVsa;
     bool isValidData = false;
-    bool executionSuccessful = false;
 
-    for (; stripeOffset < totalBlksPerUserStripe; stripeOffset++)
+    for (; currentStripeOffset < totalBlksPerUserStripe; currentStripeOffset++)
     {
-        std::tie(rba, volId) = stripe->GetReverseMapEntry(stripeOffset);
+        std::tie(rba, volId) = stripe->GetReverseMapEntry(currentStripeOffset);
         if (likely(INVALID_RBA != rba))
         {
             int shouldRetry = CALLER_EVENT;
@@ -116,59 +122,44 @@ GcMapUpdateRequest::Execute(void)
             {
                 return false;
             }
-            VirtualBlkAddr oldVsa = stripe->GetVictimVsa(stripeOffset);
+            VirtualBlkAddr oldVsa = stripe->GetVictimVsa(currentStripeOffset);
             isValidData = (currentVsa == oldVsa);
 
-            VirtualBlkAddr writeVsa = {stripeId, stripeOffset};
+            VirtualBlkAddr writeVsa = {stripeId, currentStripeOffset};
 
             if (isValidData == true)
             {
                 _AddBlockMapUpdateLog(rba, writeVsa);
-                _GetDirtyPages(volId, rba);
                 _RegisterInvalidateSegments(currentVsa);
             }
         }
     }
 
     std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
-
     mapUpdates.volumeId = volId;
     mapUpdates.vsid = stripeId;
     mapUpdates.wbLsid = stripe->GetWbLsid();
     mapUpdates.userLsid = stripe->GetUserLsid();
 
-    EventSmartPtr event;
-    if (nullptr == inputEvent)
-    {
-        event = std::make_shared<GcMapUpdate>(stripe, arrayName, mapUpdates, invalidSegCnt, iStripeMap, gcStripeManager);
-    }
-    else
-    {
-        event = inputEvent;
-    }
+    return true;
+}
 
-    if (journalService->IsEnabled(arrayName))
+bool
+GcMapUpdateRequest::_UpdateMeta(void)
+{
+    int result = metaUpdater->UpdateGcMap(stripe, mapUpdates, invalidSegCnt, completionEvent);
+    if (unlikely(0 != result))
     {
-        MapPageList dirtyMap;
-        dirtyMap[volId] = volumeDirtyList;
-        dirtyMap[STRIPE_MAP_ID] = iStripeMap->GetDirtyStripeMapPages(stripeId);
-
-        IJournalWriter* journal = journalService->GetWriter(arrayName);
-        journal->AddGcStripeFlushedLog(mapUpdates, dirtyMap, event);
-
-        executionSuccessful = true;
-    }
-    else
-    {
-        eventScheduler->EnqueueEvent(event);
-        executionSuccessful = true;
+        POS_EVENT_ID eventId = POS_EVENT_ID::GC_MAP_UPDATE_FAILED;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            PosEventId::GetString(eventId));
+        return false;
     }
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_MAP_UPDATE_REQUEST,
-        "gc map update request, arrayName:{}, stripeUserLsid:{}, result:{}",
-        arrayName, mapUpdates.userLsid, executionSuccessful);
-
-    return executionSuccessful;
+        "gc map update request, arrayName:{}, stripeUserLsid:{}",
+        iArrayInfo->GetName(), mapUpdates.userLsid);
+    return true;
 }
 
 void
@@ -178,14 +169,6 @@ GcMapUpdateRequest::_AddBlockMapUpdateLog(BlkAddr rba, VirtualBlkAddr writeVsa)
     mapUpdate.rba = rba;
     mapUpdate.vsa = writeVsa;
     mapUpdates.blockMapUpdateList.push_back(mapUpdate);
-}
-
-void
-GcMapUpdateRequest::_GetDirtyPages(uint32_t volId, BlkAddr rba)
-{
-    uint32_t blockCount = 1;
-    auto dirty = iVSAMap->GetDirtyVsaMapPages(volId, rba, blockCount);
-    volumeDirtyList.insert(dirty.begin(), dirty.end());
 }
 
 void

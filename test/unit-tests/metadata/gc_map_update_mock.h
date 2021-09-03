@@ -30,66 +30,21 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
 
-#include <atomic>
-#include <cstdint>
-#include <map>
+#include <list>
 #include <string>
 #include <vector>
 
-#include "gc_map_update_completion.h"
-#include "src/event_scheduler/callback.h"
-#include "src/event_scheduler/event.h"
-#include "src/include/address_type.h"
-#include "src/journal_manager/log/gc_map_update_list.h"
-#include "src/journal_service/journal_service.h"
-#include "src/mapper/i_vsamap.h"
-#include "src/mapper/include/mpage_info.h"
-#include "src/meta_service/i_meta_updater.h"
+#include "src/metadata/gc_map_update.h"
 
 namespace pos
 {
-class Stripe;
-class IStripeMap;
-class EventScheduler;
-class GcStripeManager;
-class IArrayInfo;
-
-class GcMapUpdateRequest : public Event
+class MockGcMapUpdate : public GcMapUpdate
 {
 public:
-    explicit GcMapUpdateRequest(Stripe* stripe, std::string arrayName, GcStripeManager* gcStripeManager);
-    GcMapUpdateRequest(Stripe* stripe,
-        CallbackSmartPtr completionEvent,
-        IVSAMap* inputIVSAMap,
-        IArrayInfo* inputIArrayInfo,
-        IMetaUpdater* inputMetaUpdater);
-    virtual bool Execute(void) override;
-
-private:
-    bool _BuildMeta(void);
-    bool _UpdateMeta(void);
-    void _AddBlockMapUpdateLog(BlkAddr rba, VirtualBlkAddr writeVsa);
-    void _GetDirtyPages(uint32_t volId, BlkAddr rba);
-    void _AddVsaMapUpdateLog(uint32_t volId, BlkAddr rba, VirtualBlks writeVsaRange);
-    void _RegisterInvalidateSegments(VirtualBlkAddr vsa);
-
-    Stripe* stripe;
-
-    CallbackSmartPtr completionEvent;
-    IVSAMap* iVSAMap;
-    IArrayInfo* iArrayInfo;
-    IMetaUpdater* metaUpdater;
-
-    uint32_t totalBlksPerUserStripe;
-    uint32_t stripesPerSegment;
-    uint32_t currentStripeOffset;
-
-    std::map<SegmentId, uint32_t > invalidSegCnt;
-
-    MpageList volumeDirtyList;
-    GcStripeMapUpdateList mapUpdates;
+    using GcMapUpdate::GcMapUpdate;
+    MOCK_METHOD(bool, _DoSpecificJob, (), (override));
 };
-} // namespace pos
 
+} // namespace pos

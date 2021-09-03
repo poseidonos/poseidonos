@@ -62,8 +62,7 @@ public:
         stripe = new NiceMock<MockStripe>();
         rbaStateManager = new NiceMock<MockRBAStateManager>(arrayName, 0);
 
-        inputEvent = std::make_shared<MockGcMapUpdateRequest>(stripe, arrayName, gcStripeManager,
-                        nullptr, nullptr, nullptr, nullptr, nullptr, array);
+        inputEvent = std::make_shared<MockGcMapUpdateRequest>(stripe, nullptr, nullptr, array, nullptr);
 
         blockAllocator = new NiceMock<MockIBlockAllocator>();
         wbStripeAllocator = new NiceMock<MockIWBStripeAllocator>();

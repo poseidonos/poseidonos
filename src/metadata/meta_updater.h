@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <map>
+
 #include "src/allocator/i_block_allocator.h"
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_wbstripe_allocator.h"
@@ -45,6 +47,9 @@ namespace pos
 {
 class EventScheduler;
 class MetaEventFactory;
+class GcStripeManager;
+class IArrayInfo;
+class IContextManager;
 
 class MetaUpdater : public IMetaUpdater
 {
@@ -52,19 +57,23 @@ public:
     MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IContextManager* contextManager,
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-        IJournalManager* journal, IJournalWriter* journalWriter, EventScheduler* eventScheduler);
+        IJournalManager* journal, IJournalWriter* journalWriter,
+        EventScheduler* eventScheduler, IArrayInfo* arrayInfo);
     MetaUpdater(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IContextManager* contextManager,
         IBlockAllocator* blockAllocator, IWBStripeAllocator* wbStripeAllocator,
-        IJournalManager* journal, IJournalWriter* journalWriter, EventScheduler* eventScheduler,
-        MetaEventFactory* eventFactory);
+        IJournalManager* journal, IJournalWriter* journalWriter,
+        EventScheduler* eventScheduler,
+        MetaEventFactory* eventFactory, IArrayInfo* arrayInfo);
     virtual ~MetaUpdater(void);
 
     virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback) override;
     virtual int UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback) override;
+    virtual int UpdateGcMap(Stripe* stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt, CallbackSmartPtr callback) override;
 
 private:
     MpageList _GetDirtyPages(VolumeIoSmartPtr volumeIo);
+    MpageList _GetDirtyPages(BlkAddr rba, uint32_t volId);
 
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
@@ -75,5 +84,6 @@ private:
     IJournalWriter* journalWriter;
     EventScheduler* eventScheduler;
     MetaEventFactory* metaEventFactory;
+    IArrayInfo* arrayInfo;
 };
 } // namespace pos
