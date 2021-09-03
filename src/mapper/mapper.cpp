@@ -126,15 +126,7 @@ void
 Mapper::Shutdown(void)
 {
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Shutdown] MAPPER Shutdown, init:{} array:{}", isInitialized, addrInfo->GetArrayName());
-    if (isInitialized == true)
-    {
-        vsaMapManager->Dispose();
-        stripeMapManager->Dispose();
-        reverseMapManager->Dispose();
-        _UnregisterFromMapperService();
-        _ClearVolumeState();
-        isInitialized = false;
-    }
+    Dispose();
 }
 
 void
@@ -171,11 +163,13 @@ Mapper::FlushAll(void)
     int ret = stripeMapManager->FlushMap();
     if (ret < 0)
     {
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper FlushAll] Failed To Flush All StripeMap, array:{}", addrInfo->GetArrayName());
         return ret;
     }
     ret = vsaMapManager->FlushAllMaps();
     if (ret < 0)
     {
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper FlushAll] Failed To Flush All VSAMap, array:{}", addrInfo->GetArrayName());
         return ret;
     }
     stripeMapManager->WaitAllPendingIoDone();
@@ -359,6 +353,7 @@ Mapper::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPer
     }
     volState[volId].SetState(VolState::EXIST_UNLOADED);
     volState[volId].SetSize(volEventBase->volSizeByte);
+    vsaMapManager->EnableVsaMapInternalAccess(volId);
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeLoaded] VolumeId:{} array:{} state:EXIST_UNLOADED @VolumeLoaded", volId, addrInfo->GetArrayName());
     return true;
 }

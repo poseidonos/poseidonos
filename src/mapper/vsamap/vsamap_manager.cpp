@@ -62,7 +62,7 @@ VSAMapManager::Init(void)
     for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
     {
         isVsaMapAccessable[volId] = false;
-        isVsaMapInternalAccessable[volId] = true;
+        isVsaMapInternalAccessable[volId] = false;
         mapFlushState[volId] = MapFlushState::FLUSH_DONE;
         mapLoadState[volId] = MapLoadState::LOAD_DONE;
     }
@@ -189,7 +189,7 @@ VSAMapManager::FlushAllMaps(void)
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap] Issue Flush All VSAMaps, array:{}", addrInfo->GetArrayName());
     for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
     {
-        if (isVsaMapAccessable[volId] == true)
+        if (isVsaMapInternalAccessable[volId] == true)
         {
             EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volId, this);
             mapFlushState[volId] = MapFlushState::FLUSHING;
