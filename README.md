@@ -33,7 +33,7 @@ sudo ./pkgdep.sh
 
 ```bash
 cd lib
-sudo ./build_ibof_lib.sh all
+sudo ./build_lib.sh
 ```
 
 ### 2. Build Source Code
