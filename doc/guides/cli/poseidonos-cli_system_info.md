@@ -1,13 +1,14 @@
 ## poseidonos-cli system info
 
-Show information of PoseidonOS.
+Display information of PoseidonOS.
 
 ### Synopsis
 
-Show information of PoseidonOS.
+
+Display the information of PoseidonOS.
 
 Syntax:
-	poseidonos-cli system stop .
+	poseidonos-cli system info .
           
 
 ```
@@ -23,13 +24,13 @@ poseidonos-cli system info [flags]
 ### Options inherited from parent commands
 
 ```
-      --debug         Print response for debug
-      --fs string     Field separator for the output (default "|")
-      --ip string     Set IPv4 address to PoseidonOS for this command (default "127.0.0.1")
-      --json-req      Print request in JSON form
-      --json-res      Print response in JSON form
-      --port string   Set the port number to PoseidonOS for this command (default "18716")
-      --unit          Display unit (B, KB, MB, ...) when displaying capacity
+      --debug         Print response for debug.
+      --fs string     Field separator for the output. (default "|")
+      --ip string     Set IPv4 address to PoseidonOS for this command. (default "127.0.0.1")
+      --json-req      Print request in JSON form.
+      --json-res      Print response in JSON form.
+      --port string   Set the port number to PoseidonOS for this command. (default "18716")
+      --unit          Display unit (B, KB, MB, ...) when displaying capacity.
 ```
 
 ### SEE ALSO

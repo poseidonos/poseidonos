@@ -7,7 +7,11 @@ import (
 var TelemetryCmd = &cobra.Command{
 	Use:   "telemetry",
 	Short: "Telemetry commands for PoseidonOS.",
-	Long: `Telemetry commands for PoseidonOS.
+	Long: `
+Telemetry commands for PoseidonOS. Use this command category to
+start/stop or configure the telemetry of PoseidonOS. For example,
+PoseidonOS will not gather the internal statistics once you execute
+the temeletry stop command.  
 
 Syntax: 
   poseidonos-cli telemetry [start|stop]

@@ -16,14 +16,16 @@ import (
 var CreateArrayCmd = &cobra.Command{
 	Use:   "create [flags]",
 	Short: "Create an array for PoseidonOS.",
-	Long: `Create an array for PoseidonOS.
+	Long: `
+Create an array for PoseidonOS. 
 
 Syntax: 
 	poseidonos-cli array create (--array-name | -a) ArrayName (--buffer | -b) DeviceName 
 	(--data-devs | -d) DeviceNameList (--spare | -s) DeviceName [--raid RaidType] .
 
 Example: 
-	poseidonos-cli array create --array-name Array0 --buffer device0 --data-devs nvme-device0,nvme-device1,nvme-device2,nvme-device3 --spare nvme-device4 --raid RAID5
+	poseidonos-cli array create --array-name Array0 --buffer device0 
+	--data-devs nvme-device0,nvme-device1,nvme-device2,nvme-device3 --spare nvme-device4 --raid RAID5
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -111,17 +113,23 @@ var create_array_spareDevsList = ""
 var create_array_dataDevsList = ""
 
 func init() {
-	CreateArrayCmd.Flags().StringVarP(&create_array_arrayName, "array-name", "a", "", "Name of the array to create.")
+	CreateArrayCmd.Flags().StringVarP(&create_array_arrayName,
+		"array-name", "a", "", "The name of the array to create.")
 	CreateArrayCmd.MarkFlagRequired("array-name")
 
-	CreateArrayCmd.Flags().StringVarP(&create_array_dataDevsList, "data-devs", "d", "", "A comma-separated names of devices to be used as the data devices.")
+	CreateArrayCmd.Flags().StringVarP(&create_array_dataDevsList,
+		"data-devs", "d", "",
+		"A comma-separated list of devices to be used as the data devices.")
 	CreateArrayCmd.MarkFlagRequired("data-devs")
 
-	CreateArrayCmd.Flags().StringVarP(&create_array_spareDevsList, "spare", "s", "", "Name of device to be used as the spare.")
+	CreateArrayCmd.Flags().StringVarP(&create_array_spareDevsList,
+		"spare", "s", "", "The name of device to be used as the spare.")
 
-	CreateArrayCmd.Flags().StringVarP(&create_array_buffer, "buffer", "b", "", "Name of device to be used as the buffer.")
+	CreateArrayCmd.Flags().StringVarP(&create_array_buffer,
+		"buffer", "b", "", "The name of device to be used as the buffer.")
 	CreateArrayCmd.MarkFlagRequired("buffer")
 
-	CreateArrayCmd.Flags().StringVarP(&create_array_raid, "raid", "r", "RAID5", "RAID Type of the array to create. Default is RAID5")
-
+	CreateArrayCmd.Flags().StringVarP(&create_array_raid,
+		"raid", "r", "RAID5",
+		"The RAID type of the array to create. RAID5 is used when not specified.")
 }

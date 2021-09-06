@@ -16,17 +16,17 @@ import (
 
 var CreateVolumeCmd = &cobra.Command{
 	Use:   "create [flags]",
-	Short: "Create a volume from an Array for PoseidonOS.",
-	Long: `Create a volume from an Array for PoseidonOS.
+	Short: "Create a volume from an array in PoseidonOS.",
+	Long: `
+Create a volume from an array in PoseidonOS.
 
 Syntax: 
-	poseidonos-cli volume create (--volume-name | -v) VolumeName (--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth] .
-	
-	- VolumeSize Unit: B, K, KB, G, GB, ... (binary units (base-2))
-	(If the unit is not input, it will be B in default)
+	poseidonos-cli volume create (--volume-name | -v) VolumeName 
+	(--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth] .
 
 Example: 
-	poseidonos-cli volume create --volume-name Volume0 --array-name volume0 --size 1024GB --maxiops 1000 --maxbw 100GB/s
+	poseidonos-cli volume create --volume-name Volume0 --array-name volume0 
+	--size 1024GB --maxiops 1000 --maxbw 100GB/s
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -99,15 +99,26 @@ var create_volume_maxIOPS = 0
 var create_volume_maxBandwidth = 0
 
 func init() {
-	CreateVolumeCmd.Flags().StringVarP(&create_volume_volumeName, "volume-name", "v", "", "Name of the volume to create")
+	CreateVolumeCmd.Flags().StringVarP(&create_volume_volumeName,
+		"volume-name", "v", "",
+		"The name of the volume to create.")
 	CreateVolumeCmd.MarkFlagRequired("volume-name")
 
-	CreateVolumeCmd.Flags().StringVarP(&create_volume_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
+	CreateVolumeCmd.Flags().StringVarP(&create_volume_arrayName,
+		"array-name", "a", "",
+		"The name of the array where the volume is created from.")
 	CreateVolumeCmd.MarkFlagRequired("array-name")
 
-	CreateVolumeCmd.Flags().StringVarP(&create_volume_volumeSize, "size", "", "0", "The size of the volume. KB, MB, GB, TB, PB, and EB are supported")
+	CreateVolumeCmd.Flags().StringVarP(&create_volume_volumeSize,
+		"size", "", "0",
+		`The size of the volume in B, K, KB, G, GB, ... (binary units (base-2))
+If you do not specify the unit, it will be B in default.`)
 	CreateVolumeCmd.MarkFlagRequired("size")
 
-	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxIOPS, "maxiops", "", 0, "The maximum IOPS for the volume in Kilo")
-	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxBandwidth, "maxbw", "", 0, "The maximum bandwidth for the volume in MB/s")
+	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxIOPS,
+		"maxiops", "", 0,
+		"The maximum IOPS for the volume in Kilo.")
+	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxBandwidth,
+		"maxbw", "", 0,
+		"The maximum bandwidth for the volume in MB/s.")
 }

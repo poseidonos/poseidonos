@@ -15,10 +15,11 @@ import (
 var SetLevelCmd = &cobra.Command{
 	Use:   "set-level",
 	Short: "Set the filtering level of logger.",
-	Long: `Set the filtering level of logger.
+	Long: `
+Set the filtering level of logger.
 
 Syntax:
-	poseidonos-cli logger set-level --level [error | debug | warn | err | critical]
+	poseidonos-cli logger set-level --level [debug | info | warn | err | critical]
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -64,7 +65,15 @@ Syntax:
 var set_level_loggerLevel = ""
 
 func init() {
-	//LogLevel = "error" | "debug" | "warn" | "err" | "critical"
-	SetLevelCmd.Flags().StringVarP(&set_level_loggerLevel, "level", "", "", "The level of logger to set")
+	SetLevelCmd.Flags().StringVarP(&set_level_loggerLevel,
+		"level", "", "",
+		`The level of logger to set.
+	
+- critical: events that make the system not available.
+- err: events when PoseidonOS cannot process the request
+	because of an internal problem. 
+- warn: events when unexpected user input has been detected. 
+- debug: logs when the system is working properly.
+- info: logs for debug binary.`)
 	SetLevelCmd.MarkFlagRequired("level")
 }

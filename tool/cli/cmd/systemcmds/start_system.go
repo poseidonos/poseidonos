@@ -20,7 +20,8 @@ import (
 var StartSystemCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start PoseidonOS.",
-	Long: `Start PoseidonOS.
+	Long: `
+Start PoseidonOS.
 
 Syntax:
 	poseidonos-cli system start .

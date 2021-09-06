@@ -14,11 +14,12 @@ import (
 
 var SystemInfoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "Show information of PoseidonOS.",
-	Long: `Show information of PoseidonOS.
+	Short: "Display information of PoseidonOS.",
+	Long: `
+Display the information of PoseidonOS.
 
 Syntax:
-	poseidonos-cli system stop .
+	poseidonos-cli system info .
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 

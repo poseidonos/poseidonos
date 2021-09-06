@@ -15,7 +15,8 @@ import (
 var RemoveSpareCmd = &cobra.Command{
 	Use:   "rmspare [flags]",
 	Short: "Remove a spare device from an array of PoseidonOS.",
-	Long: `Remove a spare device from an array of PoseidonOS.
+	Long: `
+Remove a spare device from an array of PoseidonOS.
 
 Syntax:
 	poseidonos-cli array rmspare (--spare | -s) DeviceName (--array-name | -a) ArrayName
@@ -72,9 +73,13 @@ var remove_spare_spareDevName = ""
 var remove_spare_arrayName = ""
 
 func init() {
-	RemoveSpareCmd.Flags().StringVarP(&remove_spare_arrayName, "array-name", "a", "", "Name of the array to remove a spare device")
+	RemoveSpareCmd.Flags().StringVarP(&remove_spare_arrayName, "array-name",
+		"a", "",
+		"The name of the array to remove the specified spare device.")
 	RemoveSpareCmd.MarkFlagRequired("array-name")
 
-	RemoveSpareCmd.Flags().StringVarP(&remove_spare_spareDevName, "spare", "s", "", "Name of the device to remove to an array")
+	RemoveSpareCmd.Flags().StringVarP(&remove_spare_spareDevName,
+		"spare", "s", "",
+		"The name of the device to remove from the array.")
 	RemoveSpareCmd.MarkFlagRequired("spare")
 }

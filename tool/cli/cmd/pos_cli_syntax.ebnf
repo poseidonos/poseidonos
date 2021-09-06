@@ -16,7 +16,8 @@ DeviceType = "uram" | "pram" .
 DeviceNameList = DeviceName [{"," DeviceName}] .
 VolumeName = Letter {Letter | Digit | "-" | "_"} . 
 VolumeNameList = VolumeName [{"," VolumeName}] . 
-TargetNVMSubsystemNVMeQualifiedName = Letter {Letter | Digit | "-" | "_"} .
+TargetNVMSubsystemNVMeQualifiedName = Letter {Letter | Digit 
+| "-" | "_"} .
 RaidType = ["RAID5" | "raid5"] .
 SubsystemNQN = Letter {Letter | Digit | "-" | "_"} .
 
@@ -25,24 +26,25 @@ IOPS = Number .
 Bandwidth = Number "MB/s".
 
 ApplicationName = "poseidonos-cli" . 
-Cmd = ApplicationName WhiteSpace (ArrayCmd | VolumeCmd | DeviceCmd | SystemCmd | LoggerCmd | SubsystemCmd | QosCmd) .
+Cmd = ApplicationName WhiteSpace (ArrayCmd | VolumeCmd | DeviceCmd | 
+SystemCmd | LoggerCmd | SubsystemCmd | QosCmd | TelemetryCmd) .
 
 ArrayCmd = "array" WhiteSpace (MountArrayCmd | UnmountArrayCmd | ListArrayCmd | AddSpareCmd | RemoveSpareCmd | DeleteArrayCmd | CreateArrayCmd | AutoCreateArrayCmd) .
 MountArrayCmd = "mount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
 UnmountArrayCmd = "unmount" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"] .
 ListArrayCmd = "list" [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] .
 AddSpareCmd = "addspare" WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName ("--array-name" | "-a") WhiteSpace ArrayName .
-RemoveSpareCmd = "rmspare" WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName ("--array-name" | "-a")  WhiteSpace ArrayName ["--force"] .
+RemoveSpareCmd = "rmspare" WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName ("--array-name" | "-a")  WhiteSpace ArrayName WhiteSpace ["--force"] .
+DeleteArrayCmd = "delete" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ["--force"] .
 CreateArrayCmd = "create" ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ("--buffer" | "-b") WhiteSpace DeviceName WhiteSpace ("--data-devs" | "-d") WhiteSpace DeviceNameList [WhiteSpace ("--spare" | "-s") WhiteSpace DeviceName] [WhiteSpace "--raid" WhiteSpace RaidType] .
-DeleteArrayCmd = "delete" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"] .
 AutoCreateArrayCmd = "autocreate" WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ("--num-buffer" | "-b") WhiteSpace Number WhiteSpace ("--num-data-devs" | "-d") WhiteSpace Number WhiteSpace [("--num-spare" | "-s") WhiteSpace Number] WhiteSpace ["--raid" WhiteSpace RaidType] .
 
-VolumeCmd = "volume" WhiteSpace (VolumeCreateCmd | VolumeDeleteCmd | VolumeMountCmd | VolumeMountWithSubsystemCmd | VolumeUnmountCmd | VolumeListCmd | VolumeSetPropertyCmd | VolumeRenameCmd) .
+VolumeCmd = "volume" WhiteSpace (VolumeCreateCmd | VolumeDeleteCmd | VolumeMountCmd | VolumeMountWithSubsystemCmd | VolumeUnmountCmd | VolumeListCmd | VolumeRenameCmd) .
 VolumeCreateCmd = "create" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace "--size" WhiteSpace VolumeSize [WhiteSpace "--maxiops" WhiteSpace IOPS] [WhiteSpace "--maxbw" WhiteSpace Bandwidth] .
-VolumeDeleteCmd = "delete" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"] .
+VolumeDeleteCmd = "delete" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ["--force"] .
 VolumeMountCmd = "mount" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName [WhiteSpace "--subnqn" WhiteSpace TargetNVMSubsystemNVMeQualifiedName] .
 VolumeMountWithSubsystemCmd = "mount" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--subnqn" | "-q") WhiteSpace SubsystemNQN WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ("--trtype" | "-t") WhiteSpace TransportType WhiteSpace ("--traddr" | "-a") WhiteSpace TargetAddress WhiteSpace ("--trsvcid" | "-p") WhiteSpace TransportServiceId .
-VolumeUnmountCmd = "unmount" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName ["--force"] .
+VolumeUnmountCmd = "unmount" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName WhiteSpace ["--force"] .
 VolumeListCmd = "list" [WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName] .
 VolumeRenameCmd = "rename" WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeName WhiteSpace ("--new-volume-name" | "-n") WhiteSpace VolumeName WhiteSpace ("--array-name" | "-a") WhiteSpace ArrayName .
 
@@ -54,13 +56,13 @@ SMARTCmd = "smart" WhiteSpace ("--device-name" | "-d") WhiteSpace DeviceName .
 
 SystemCmd = "system" WhiteSpace (StartSystemCmd | StopSystemCmd | SystemInfoCmd | SetSystemPropertyCmd) .
 StartSystemCmd = "start" .
-StopSystemCmd = "stop" ["--force"] .
+StopSystemCmd = "stop" WhiteSpace ["--force"] .
 SystemInfoCmd = "info" .
 SetSystemPropertyCmd = "set-property" [WhiteSpace "--rebuild-impact" WhiteSpace ("high" | "low")] .
 
 LoggerCmd = "logger" (SetLogLevelCmd | GetLogLeveCmd | ApplyLogFilterCmd | LoggerInfoCmd) .
 SetLogLevelCmd = "set-level" WhiteSpace "--level" LogLevel . 
-LogLevel = "error" | "debug" | "warn" | "err" | "critical" .
+LogLevel = "info" | "debug" | "warn" | "err" | "critical" .
 GetLogLeveCmd = "get-level" .
 ApplyLogFilterCmd = "apply-filter" .
 LoggerInfoCmd = "info" .
@@ -72,7 +74,7 @@ QosListCmd = "list" [WhiteSpace ("--volume-name" | "-v") WhiteSpace VolumeNameLi
 
 SubsystemCmd = "subsystem" WhiteSpace (CreateSubsystemCmd | DeleteSubsystemCmd | ListSubsystemCmd | AddListenerCmd | CreateTransportCmd) .
 CreateSubsystemCmd = "create" WhiteSpace ("--subnqn" | "-q") WhiteSpace SubsystemNQN [WhiteSpace "--serial-number" WhiteSpace SerialNumber] [WhiteSpace "--model-number" WhiteSpace ModelNumber] [WhiteSpace ("--max-namespaces" | "-m") WhiteSpace MaxNamespaces] [WhiteSpace ("--allow-any-host" | "-o")] [WhiteSpace ("--ana-reporting" | "-r")] .
-DeleteSubsystemCmd = "delete" WhiteSpace ("--subnqn" | "-q") WhiteSpace SubsystemNQN ["--force"] .
+DeleteSubsystemCmd = "delete" WhiteSpace ("--subnqn" | "-q") WhiteSpace SubsystemNQN WhiteSpace ["--force"] .
 ListSubsystemCmd = "list" [WhiteSpace ("--subnqn" | "-q") WhiteSpace SubsystemNQN] .
 AddListenerCmd = "add-listener" WhiteSpace ("--subnqn" | "-q") WhiteSpace SubsystemNQN WhiteSpace ("--trtype" | "-t") WhiteSpace TransportType WhiteSpace ("--traddr" | "-i") WhiteSpace TargetAddress WhiteSpace ("--trsvcid" | "-p") TransportServiceId .
 CreateTransportCmd = "create-transport" WhiteSpace ("--trtype" | "-t") WhiteSpace TransportType [WhiteSpace ("--buf-cache-size" | "-c") WhiteSpace BufCacheSize] [WhiteSpace "--num-shared-buf" WhiteSpace NumSharedBuffers] .

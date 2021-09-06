@@ -15,7 +15,11 @@ import (
 var AutocreateArrayCmd = &cobra.Command{
 	Use:   "autocreate [flags]",
 	Short: "Automatically create an array for PoseidonOS.",
-	Long: `Automatically create an array for PoseidonOS.
+	Long: `
+Automatically create an array for PoseidonOS with the number of 
+devices the user specifies. Use this command when you do not care 
+which devices are included to the array. This command will automatically
+create an array with the devices in the same NUMA.
 
 Syntax: 
 	AutoCreateArrayCmd = "autocreate" ("--array-name" | "-a") ArrayName ("--num-buffer" | "-b") Number 
@@ -61,11 +65,11 @@ func buildAutocreateArrayReq() messages.Request {
 	buffer[0].DEVICENAME = autocreate_array_buffer
 
 	AutocreateArrayParam := messages.AutocreateArrayParam{
-		ARRAYNAME:		autocreate_array_arrayName,
-		RAID:			autocreate_array_raid,
-		BUFFER:			buffer,
-		NUMDATADEVS:    autocreate_array_dataDevs,
-		NUMSPAREDEVS:	autocreate_array_spare,
+		ARRAYNAME:    autocreate_array_arrayName,
+		RAID:         autocreate_array_raid,
+		BUFFER:       buffer,
+		NUMDATADEVS:  autocreate_array_dataDevs,
+		NUMSPAREDEVS: autocreate_array_spare,
 	}
 
 	req := messages.Request{
@@ -87,17 +91,27 @@ var autocreate_array_spare = 0
 var autocreate_array_dataDevs = 0
 
 func init() {
-	AutocreateArrayCmd.Flags().StringVarP(&autocreate_array_arrayName, "array-name", "a", "", "Name of the array to create.")
+	AutocreateArrayCmd.Flags().StringVarP(&autocreate_array_arrayName,
+		"array-name", "a", "",
+		"The name of the array to create.")
 	AutocreateArrayCmd.MarkFlagRequired("array-name")
 
-	AutocreateArrayCmd.Flags().IntVarP(&autocreate_array_dataDevs, "num-data-devs", "d", 0, "Number of devices to be used as the data devices.")
+	AutocreateArrayCmd.Flags().IntVarP(&autocreate_array_dataDevs,
+		"num-data-devs", "d", 0,
+		`The number of of the data devices. POS will select the data
+		devices in the same NUMA as possible.`)
 	AutocreateArrayCmd.MarkFlagRequired("data-devs")
 
-	AutocreateArrayCmd.Flags().IntVarP(&autocreate_array_spare, "num-spare", "s", 0, "Number of devices to be used as the spare.")
+	AutocreateArrayCmd.Flags().IntVarP(&autocreate_array_spare,
+		"num-spare", "s", 0,
+		"Number of devices to be used as the spare.")
 
-	AutocreateArrayCmd.Flags().StringVarP(&autocreate_array_buffer, "buffer", "b", "", "Name of device to be used as the buffer.")
+	AutocreateArrayCmd.Flags().StringVarP(&autocreate_array_buffer,
+		"buffer", "b", "", "The name of device to be used as buffer.")
 	AutocreateArrayCmd.MarkFlagRequired("buffer")
 
-	AutocreateArrayCmd.Flags().StringVarP(&autocreate_array_raid, "raid", "r", "RAID5", "RAID Type of the array to create. Default is RAID5")
+	AutocreateArrayCmd.Flags().StringVarP(&autocreate_array_raid,
+		"raid", "r", "RAID5",
+		"The RAID type of the array to create. RAID5 is used when not specified.")
 
 }

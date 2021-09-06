@@ -14,8 +14,9 @@ import (
 
 var SMARTCmd = &cobra.Command{
 	Use:   "smart",
-	Short: "Show SMART information from an NVMe log page.",
-	Long: `Show SMART information from an NVMe log page.
+	Short: "Display SMART information.",
+	Long: `
+Display SMART information of a device.
 
 Syntax:
 	poseidonos-cli device smart (--device-name | -d) DeviceName .
@@ -64,6 +65,8 @@ Syntax:
 var smart_deviceName = ""
 
 func init() {
-	SMARTCmd.Flags().StringVarP(&smart_deviceName, "device-name", "d", "", "The name of device to get the SMART information")
+	SMARTCmd.Flags().StringVarP(&smart_deviceName,
+		"device-name", "d", "",
+		"The name of the device to display the SMART information.")
 	SMARTCmd.MarkFlagRequired("device-name")
 }

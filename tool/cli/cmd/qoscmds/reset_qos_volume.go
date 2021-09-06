@@ -15,8 +15,9 @@ import (
 
 var VolumeResetCmd = &cobra.Command{
 	Use:   "reset [flags]",
-	Short: "Reset qos policy for a volume(s) of PoseidonOS.",
-	Long: `Reset qos policy for a volume of PoseidonOS.
+	Short: "Reset QoS policy for a volume(s) of PoseidonOS.",
+	Long: `
+Reset QoS policy for a volume of PoseidonOS.
 
 Syntax: 
 	poseidonos-cli qos reset (--volume-name | -v) VolumeName (--array-name | -a) ArrayName .
@@ -85,9 +86,13 @@ var volumeReset_volumeNameList = ""
 var volumeReset_arrayName = ""
 
 func init() {
-	VolumeResetCmd.Flags().StringVarP(&volumeReset_volumeNameList, "volume-name", "v", "", "A comma-seperated names of volumes to set qos policy for")
+	VolumeResetCmd.Flags().StringVarP(&volumeReset_volumeNameList,
+		"volume-name", "v", "",
+		"A comma-seperated list of volumes to set qos policy for")
 	VolumeResetCmd.MarkFlagRequired("volume-name")
 
-	VolumeResetCmd.Flags().StringVarP(&volumeReset_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
+	VolumeResetCmd.Flags().StringVarP(&volumeReset_arrayName,
+		"array-name", "a", "",
+		"The name of the array where the volume is created from")
 	VolumeResetCmd.MarkFlagRequired("array-name")
 }

@@ -17,10 +17,14 @@ import (
 var ListArrayCmd = &cobra.Command{
 	Use:   "list [flags]",
 	Short: "List arrays of PoseidonOS.",
-	Long: `List arrays of PoseidonOS.
+	Long: `
+List arrays in PoseidonOS. When you specify the name of a specific
+array, this command will display the detailed information about 
+the array. Otherwise, this command will display the brief information
+about all the arrays in PoseidonOS. 
 
 Syntax:
-	poseidonos-cli array list [(--array-name | -a) ArrayName].
+	poseidonos-cli array list [(--array-name | -a) ArrayName] .
 
 Example 1 (listing all arrays): 
 	poseidonos-cli array list
@@ -84,7 +88,10 @@ Example 2 (listing a specific array):
 var list_array_arrayName = ""
 
 func init() {
-	ListArrayCmd.Flags().StringVarP(&list_array_arrayName, "array-name", "a", "", "The Name of the array to list")
+	ListArrayCmd.Flags().StringVarP(&list_array_arrayName,
+		"array-name", "a", "",
+		`The name of the array to list. If not specified, all arrays
+		will be displayed.`)
 	//TODO(mj): function for --detail flag will be implemented
 	//ListArrayCommand.Flags().BoolVarP(&showDetail, "detail", "d", false, "Show detail information of the array")
 }

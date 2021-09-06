@@ -14,11 +14,13 @@ import (
 
 var MountVolumeCmd = &cobra.Command{
 	Use:   "mount [flags]",
-	Short: "Mount a volume to Host.",
-	Long: `Mount a volume to Host.
+	Short: "Mount a volume to the host.",
+	Long: `
+Mount a volume to the host.
 
 Syntax:
-	mount (--volume-name | -v) VolumeName (--array-name | -a) ArrayName [--subnqn TargetNVMSubsystemNVMeQualifiedName]
+	mount (--volume-name | -v) VolumeName (--array-name | -a) ArrayName
+	[--subnqn TargetNVMSubsystemNVMeQualifiedName]
 
 Example: 
 	poseidonos-cli volume mount --volume-name Volume0 --array-name Volume0
@@ -72,11 +74,17 @@ var mount_volume_arrayName = ""
 var mount_volume_subNqnName = ""
 
 func init() {
-	MountVolumeCmd.Flags().StringVarP(&mount_volume_volumeName, "volume-name", "v", "", "The name of the volume to mount")
+	MountVolumeCmd.Flags().StringVarP(&mount_volume_volumeName,
+		"volume-name", "v", "",
+		"The name of the volume to mount.")
 	MountVolumeCmd.MarkFlagRequired("volume-name")
 
-	MountVolumeCmd.Flags().StringVarP(&mount_volume_arrayName, "array-name", "a", "", "The name of the array where the volume belongs to")
+	MountVolumeCmd.Flags().StringVarP(&mount_volume_arrayName,
+		"array-name", "a", "",
+		"The name of the array where the volume belongs to.")
 	MountVolumeCmd.MarkFlagRequired("array-name")
 
-	MountVolumeCmd.Flags().StringVarP(&mount_volume_subNqnName, "subnqn", "", "", "NVMe qualified name of target NVM subsystem")
+	MountVolumeCmd.Flags().StringVarP(&mount_volume_subNqnName,
+		"subnqn", "", "",
+		"NVMe qualified name of target NVM subsystem.")
 }

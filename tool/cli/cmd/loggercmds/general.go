@@ -7,7 +7,9 @@ import (
 var LoggerCmd = &cobra.Command{
 	Use:   "logger",
 	Short: "Logger commands for PoseidonOS.",
-	Long: `Logger commands for PoseidonOS.
+	Long: `
+Logger commands for PoseidonOS. Use this command category to
+control and display information about logger. 
 
 Syntax: 
   poseidonos-cli logger [set-level|get-level|apply-filter|info]

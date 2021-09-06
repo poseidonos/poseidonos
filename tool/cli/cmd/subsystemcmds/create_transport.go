@@ -15,7 +15,8 @@ import (
 var CreateTransportCmd = &cobra.Command{
 	Use:   "create-transport [flags]",
 	Short: "Create NVMf transport to PoseidonOS.",
-	Long: `Create NVMf transport to PoseidonOS.
+	Long: `
+Create NVMf transport to PoseidonOS.
 
 Syntax:
 	poseidonos-cli subsystem create-transport (--trtype | -t) TransportType [(--buf-cache-size | -c) BufCacheSize] [--num-shared-buf NumSharedBuffers]
@@ -71,9 +72,15 @@ var transport_create_bufcachesize = 0
 var transport_create_numsharedbuf = 0
 
 func init() {
-	CreateTransportCmd.Flags().StringVarP(&transport_create_trtype, "trtype", "t", "", "Transport type (ex. TCP)")
+	CreateTransportCmd.Flags().StringVarP(&transport_create_trtype,
+		"trtype", "t", "",
+		"Transport type (ex. TCP).")
 	CreateTransportCmd.MarkFlagRequired("trtype")
 
-	CreateTransportCmd.Flags().IntVarP(&transport_create_bufcachesize, "buf-cache-size", "c", 0, "The number of shared buffers to reserve for each poll group, Default : 64")
-	CreateTransportCmd.Flags().IntVarP(&transport_create_numsharedbuf, "num-shared-buf", "", 0, "The number of pooled data buffers available to the transport")
+	CreateTransportCmd.Flags().IntVarP(&transport_create_bufcachesize,
+		"buf-cache-size", "c", 0,
+		"The number of shared buffers to reserve for each poll group (default : 64).")
+	CreateTransportCmd.Flags().IntVarP(&transport_create_numsharedbuf,
+		"num-shared-buf", "", 0,
+		"The number of pooled data buffers available to the transport.")
 }

@@ -16,8 +16,9 @@ import (
 
 var ListQosCmd = &cobra.Command{
 	Use:   "list [flags]",
-	Short: "List qos policy for a volume(s) of PoseidonOS.",
-	Long: `List qos policy for a volume of PoseidonOS.
+	Short: "List QoS policy for a volume(s) of PoseidonOS.",
+	Long: `
+List QoS policy for a volume of PoseidonOS.
 
 Syntax: 
 	poseidonos-cli qos list [(--volume-name | -v) VolumeName] [(--array-name | -a) ArrayName] .
@@ -86,10 +87,14 @@ var listQos_volumeNameList = ""
 var listQos_arrayName = ""
 
 func init() {
-	ListQosCmd.Flags().StringVarP(&listQos_volumeNameList, "volume-name", "v", "", "A comma-seperated names of volumes to set qos policy for")
+	ListQosCmd.Flags().StringVarP(&listQos_volumeNameList,
+		"volume-name", "v", "",
+		"A comma-seperated list of volumes to set qos policy for.")
 	ListQosCmd.MarkFlagRequired("volume-name")
 
-	ListQosCmd.Flags().StringVarP(&listQos_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
+	ListQosCmd.Flags().StringVarP(&listQos_arrayName,
+		"array-name", "a", "",
+		"The name of the array where the volume is created from.")
 	ListQosCmd.MarkFlagRequired("array-name")
 }
 

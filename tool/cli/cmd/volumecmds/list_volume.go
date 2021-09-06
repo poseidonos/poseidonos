@@ -17,7 +17,8 @@ import (
 var ListVolumeCmd = &cobra.Command{
 	Use:   "list [flags]",
 	Short: "List all volumes of an array.",
-	Long: `List all volumes of an array.
+	Long: `
+List all volumes of an array.
 
 Syntax:
 	poseidonos-cli volume list [(--array-name | -a) ArrayName] .
@@ -69,7 +70,9 @@ Example (listing volumes from a specific array):
 var list_volume_arrayName = ""
 
 func init() {
-	ListVolumeCmd.Flags().StringVarP(&list_volume_arrayName, "array-name", "a", "", "The Name of the array of volumes to list")
+	ListVolumeCmd.Flags().StringVarP(&list_volume_arrayName,
+		"array-name", "a", "",
+		"The Name of the array of volumes to list")
 	ListVolumeCmd.MarkFlagRequired("array-name")
 }
 

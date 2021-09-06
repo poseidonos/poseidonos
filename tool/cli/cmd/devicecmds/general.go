@@ -7,10 +7,12 @@ import (
 var DeviceCmd = &cobra.Command{
 	Use:   "device",
 	Short: "Device commands for PoseidonOS.",
-	Long: `Device commands for PoseidonOS.
+	Long: `
+Device commands for PoseidonOS. Use this command category to create,
+delete, and display devices. 
 
 Syntax: 
-  poseidonos-cli device [scan|list|smart]
+  poseidonos-cli device [create|scan|list|smart] .
 
 Example (to scan devices in the system):
   poseidonos-cli device scan

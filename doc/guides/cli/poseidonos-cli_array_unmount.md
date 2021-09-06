@@ -4,6 +4,7 @@ Unmount an array from PoseidonOS.
 
 ### Synopsis
 
+
 Unmount an array from PoseidonOS.
 
 Syntax:
@@ -20,21 +21,21 @@ poseidonos-cli array unmount [flags]
 ### Options
 
 ```
-  -a, --array-name string   The name of the array to unmount
-      --force               Execute this command without confirmation
+  -a, --array-name string   The name of the array to unmount.
+      --force               Force to unmount this array.
   -h, --help                help for unmount
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --debug         Print response for debug
-      --fs string     Field separator for the output (default "|")
-      --ip string     Set IPv4 address to PoseidonOS for this command (default "127.0.0.1")
-      --json-req      Print request in JSON form
-      --json-res      Print response in JSON form
-      --port string   Set the port number to PoseidonOS for this command (default "18716")
-      --unit          Display unit (B, KB, MB, ...) when displaying capacity
+      --debug         Print response for debug.
+      --fs string     Field separator for the output. (default "|")
+      --ip string     Set IPv4 address to PoseidonOS for this command. (default "127.0.0.1")
+      --json-req      Print request in JSON form.
+      --json-res      Print response in JSON form.
+      --port string   Set the port number to PoseidonOS for this command. (default "18716")
+      --unit          Display unit (B, KB, MB, ...) when displaying capacity.
 ```
 
 ### SEE ALSO

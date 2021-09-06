@@ -7,7 +7,9 @@ import (
 var SystemCmd = &cobra.Command{
 	Use:   "system",
 	Short: "System commands for PoseidonOS.",
-	Long: `System commands for PoseidonOS.
+	Long: `
+System commands for PoseidonOS. Use this command category to start/stop
+PoseidonOS or get the information of PoseidonOS.
 
 Syntax: 
   poseidonos-cli system [start|stop|info|set-property]

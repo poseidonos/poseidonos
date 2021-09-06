@@ -16,7 +16,8 @@ import (
 var DeleteVolumeCmd = &cobra.Command{
 	Use:   "delete [flags]",
 	Short: "Delete a volume from PoseidonOS.",
-	Long: `Delete a volume from PoseidonOS.
+	Long: `
+Delete a volume from an array in PoseidonOS.
 
 Syntax:
 	poseidonos-cli volume delete (--volume-name | -v) VolumeName (--array-name | -a) ArrayName
@@ -88,11 +89,17 @@ var delete_volume_arrayName = ""
 var delete_volume_isForced = false
 
 func init() {
-	DeleteVolumeCmd.Flags().StringVarP(&delete_volume_volumeName, "volume-name", "v", "", "The Name of the volume to delete")
+	DeleteVolumeCmd.Flags().StringVarP(&delete_volume_volumeName,
+		"volume-name", "v", "",
+		"The Name of the volume to delete.")
 	DeleteVolumeCmd.MarkFlagRequired("volume-name")
 
-	DeleteVolumeCmd.Flags().StringVarP(&delete_volume_arrayName, "array-name", "a", "", "The Name of the array where the volume belongs to")
+	DeleteVolumeCmd.Flags().StringVarP(&delete_volume_arrayName,
+		"array-name", "a", "",
+		"The Name of the array where the volume belongs to.")
 	DeleteVolumeCmd.MarkFlagRequired("array-name")
 
-	DeleteVolumeCmd.Flags().BoolVarP(&delete_volume_isForced, "force", "", false, "Execute this command without confirmation")
+	DeleteVolumeCmd.Flags().BoolVarP(&delete_volume_isForced,
+		"force", "", false,
+		"Force to delete the volume.")
 }

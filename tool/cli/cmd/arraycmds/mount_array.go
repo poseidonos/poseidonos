@@ -15,7 +15,9 @@ import (
 var MountArrayCmd = &cobra.Command{
 	Use:   "mount [flags]",
 	Short: "Mount an array to PoseidonOS.",
-	Long: `Mount an array to PoseidonOS.
+	Long: `
+Mount an array to PoseidonOS. Use this command before creating a volume.
+You can create a volume from an array only when the array is mounted. 
 
 Syntax:
 	mount (--array-name | -a) ArrayName
@@ -68,6 +70,8 @@ Example:
 var mount_array_arrayName = ""
 
 func init() {
-	MountArrayCmd.Flags().StringVarP(&mount_array_arrayName, "array-name", "a", "", "The name of the array to mount")
+	MountArrayCmd.Flags().StringVarP(&mount_array_arrayName,
+		"array-name", "a", "",
+		"The name of the array to mount")
 	MountArrayCmd.MarkFlagRequired("array-name")
 }

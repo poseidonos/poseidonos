@@ -16,7 +16,8 @@ import (
 var DeleteSubsystemCmd = &cobra.Command{
 	Use:   "delete [flags]",
 	Short: "Delete a subsystem from PoseidonOS.",
-	Long: `Delete a subsystem from PoseidonOS.
+	Long: `
+Delete a subsystem from PoseidonOS.
 
 Syntax:
 	poseidonos-cli subsystem delete (--subnqn | -q) SubsystemNQN
@@ -80,8 +81,11 @@ var delete_subsystem_subnqn = ""
 var delete_subsystem_isForced = false
 
 func init() {
-	DeleteSubsystemCmd.Flags().StringVarP(&delete_subsystem_subnqn, "subnqn", "q", "", "NQN of the subsystem to delete")
+	DeleteSubsystemCmd.Flags().StringVarP(&delete_subsystem_subnqn,
+		"subnqn", "q", "",
+		"NQN of the subsystem to delete.")
 	DeleteSubsystemCmd.MarkFlagRequired("subnqn")
 
-	DeleteSubsystemCmd.Flags().BoolVarP(&delete_subsystem_isForced, "force", "", false, "Execute this command without confirmation")
+	DeleteSubsystemCmd.Flags().BoolVarP(&delete_subsystem_isForced,
+		"force", "", false, "Force to delete this subsystem.")
 }

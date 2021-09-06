@@ -16,8 +16,10 @@ import (
 var ResetMBRCmd = &cobra.Command{
 	Use:   "resetmbr",
 	Short: "Reset MBR information of PoseidonOS.",
-	Long: `Reset MBR information of PoseidonOS.
-	(Previously: Array Reset command)
+	Long: `
+Reset MBR information of PoseidonOS (Previously: Array Reset command).
+Use this command when you need to remove the all the arrays and 
+reset the states of the devices. 
 
 Syntax:
 	poseidonos-cli devel resetmbr .

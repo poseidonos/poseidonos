@@ -14,8 +14,9 @@ import (
 
 var ListSubsystemCmd = &cobra.Command{
 	Use:   "list",
-	Short: "Get a list of subsystems from PoseidonOS.",
-	Long: `Get a list of subsystems from PoseidonOS.
+	Short: "List subsystems from PoseidonOS.",
+	Long: `
+List subsystems from PoseidonOS.
 
 Syntax:
 	poseidonos-cli subsystem list [(--subnqn | -q) SubsystemNQN]
@@ -78,5 +79,7 @@ Example 2 (listing a specific array):
 var list_subsystem_subnqn = ""
 
 func init() {
-	ListSubsystemCmd.Flags().StringVarP(&list_subsystem_subnqn, "subnqn", "q", "", "NQN of the subsystem to list spec")
+	ListSubsystemCmd.Flags().StringVarP(&list_subsystem_subnqn,
+		"subnqn", "q", "",
+		"NQN of the subsystem to list spec")
 }

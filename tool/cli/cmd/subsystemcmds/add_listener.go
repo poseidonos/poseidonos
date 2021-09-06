@@ -15,7 +15,8 @@ import (
 var AddListenerCmd = &cobra.Command{
 	Use:   "add-listener [flags]",
 	Short: "Add a listener to an NVMe-oF subsystem",
-	Long: `Add a listener to an NVMe-oF subsystem
+	Long: `
+Add a listener to an NVMe-oF subsystem.
 
 Syntax:
 poseidonos-cli subsystem add-listener (--subnqn | -q) SubsystemNQN (--trtype | -t) TransportType (--traddr | -i) TargetAddress (--trsvcid | -p) TransportServiceId
@@ -74,16 +75,24 @@ var subsystem_addlistener_traddr = ""
 var subsystem_addlistener_trsvcid = ""
 
 func init() {
-	AddListenerCmd.Flags().StringVarP(&subsystem_addlistener_subnqn, "subnqn", "q", "", "NQN of the subsystem to add listener")
+	AddListenerCmd.Flags().StringVarP(&subsystem_addlistener_subnqn,
+		"subnqn", "q", "",
+		"The NQN of the subsystem to add listener.")
 	AddListenerCmd.MarkFlagRequired("subnqn")
 
-	AddListenerCmd.Flags().StringVarP(&subsystem_addlistener_trtype, "trtype", "t", "", "NVMe-oF transport type: e.g., tcp")
+	AddListenerCmd.Flags().StringVarP(&subsystem_addlistener_trtype,
+		"trtype", "t", "",
+		"NVMe-oF transport type: e.g., tcp")
 	AddListenerCmd.MarkFlagRequired("trtype")
 
-	AddListenerCmd.Flags().StringVarP(&subsystem_addlistener_traddr, "traddr", "i", "", "NVMe-oF target address: e.g., an ip address")
+	AddListenerCmd.Flags().StringVarP(&subsystem_addlistener_traddr,
+		"traddr", "i", "",
+		"NVMe-oF target address: e.g., an ip address")
 	AddListenerCmd.MarkFlagRequired("traddr")
 
-	AddListenerCmd.Flags().StringVarP(&subsystem_addlistener_trsvcid, "trsvcid", "p", "", "NVMe-oF transport service id: e.g., a port number")
+	AddListenerCmd.Flags().StringVarP(&subsystem_addlistener_trsvcid,
+		"trsvcid", "p", "",
+		"NVMe-oF transport service id: e.g., a port number")
 	AddListenerCmd.MarkFlagRequired("trsvcid")
 
 }

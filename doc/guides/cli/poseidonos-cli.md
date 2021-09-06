@@ -22,25 +22,24 @@ poseidonos-cli [flags]
 ### Options
 
 ```
-      --debug         Print response for debug
-      --fs string     Field separator for the output (default "|")
+      --debug         Print response for debug.
+      --fs string     Field separator for the output. (default "|")
   -h, --help          help for poseidonos-cli
-      --ip string     Set IPv4 address to PoseidonOS for this command (default "127.0.0.1")
-      --json-req      Print request in JSON form
-      --json-res      Print response in JSON form
-      --port string   Set the port number to PoseidonOS for this command (default "18716")
-      --unit          Display unit (B, KB, MB, ...) when displaying capacity
+      --ip string     Set IPv4 address to PoseidonOS for this command. (default "127.0.0.1")
+      --json-req      Print request in JSON form.
+      --json-res      Print response in JSON form.
+      --port string   Set the port number to PoseidonOS for this command. (default "18716")
+      --unit          Display unit (B, KB, MB, ...) when displaying capacity.
 ```
 
 ### SEE ALSO
 
 * [poseidonos-cli array](poseidonos-cli_array.md)	 - Array command for PoseidonOS.
 * [poseidonos-cli completion](poseidonos-cli_completion.md)	 - Generate completion script
-* [poseidonos-cli devel](poseidonos-cli_devel.md)	 - Commands for PoseidonOS Developers.
+* [poseidonos-cli devel](poseidonos-cli_devel.md)	 - Commands for PoseidonOS developers.
 * [poseidonos-cli device](poseidonos-cli_device.md)	 - Device commands for PoseidonOS.
-* [poseidonos-cli file](poseidonos-cli_file.md)	 - JSON file input for Poseidon OS
 * [poseidonos-cli logger](poseidonos-cli_logger.md)	 - Logger commands for PoseidonOS.
-* [poseidonos-cli qos](poseidonos-cli_qos.md)	 - Qos commands for PoseidonOS.
+* [poseidonos-cli qos](poseidonos-cli_qos.md)	 - QoS commands for PoseidonOS.
 * [poseidonos-cli subsystem](poseidonos-cli_subsystem.md)	 - Subsystem Command for PoseidonOS.
 * [poseidonos-cli system](poseidonos-cli_system.md)	 - System commands for PoseidonOS.
 * [poseidonos-cli telemetry](poseidonos-cli_telemetry.md)	 - Telemetry commands for PoseidonOS.

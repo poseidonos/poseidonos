@@ -16,7 +16,8 @@ import (
 var UnmountArrayCmd = &cobra.Command{
 	Use:   "unmount [flags]",
 	Short: "Unmount an array from PoseidonOS.",
-	Long: `Unmount an array from PoseidonOS.
+	Long: `
+Unmount an array from PoseidonOS.
 
 Syntax:
 	unmount (--array-name | -a) ArrayName
@@ -83,8 +84,12 @@ var unmount_array_arrayName = ""
 var unmount_array_isForced = false
 
 func init() {
-	UnmountArrayCmd.Flags().StringVarP(&unmount_array_arrayName, "array-name", "a", "", "The name of the array to unmount")
+	UnmountArrayCmd.Flags().StringVarP(&unmount_array_arrayName,
+		"array-name", "a", "",
+		"The name of the array to unmount.")
 	UnmountArrayCmd.MarkFlagRequired("array-name")
 
-	UnmountArrayCmd.Flags().BoolVarP(&unmount_array_isForced, "force", "", false, "Execute this command without confirmation")
+	UnmountArrayCmd.Flags().BoolVarP(&unmount_array_isForced,
+		"force", "", false,
+		"Force to unmount this array.")
 }

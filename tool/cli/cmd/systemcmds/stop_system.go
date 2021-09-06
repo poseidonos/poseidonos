@@ -16,7 +16,8 @@ import (
 var StopSystemCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "Stop PoseidonOS.",
-	Long: `Stop PoseidonOS.
+	Long: `
+Stop PoseidonOS.
 
 Syntax:
 	poseidonos-cli system stop .
@@ -66,5 +67,7 @@ Syntax:
 var stop_system_isForced = false
 
 func init() {
-	StopSystemCmd.Flags().BoolVarP(&stop_system_isForced, "force", "", false, "Execute this command without confirmation")
+	StopSystemCmd.Flags().BoolVarP(&stop_system_isForced,
+		"force", "", false,
+		"Force to stop PoseidonOS.")
 }

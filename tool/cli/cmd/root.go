@@ -95,13 +95,13 @@ func init() {
 func regGlobalFlags() {
 	// Global flags
 	// TODO(mj): Add verbose and quiet modes
-	RootCmd.PersistentFlags().StringVar(&globals.IPv4, "ip", "127.0.0.1", "Set IPv4 address to PoseidonOS for this command")
-	RootCmd.PersistentFlags().StringVar(&globals.Port, "port", "18716", "Set the port number to PoseidonOS for this command")
-	RootCmd.PersistentFlags().BoolVar(&globals.IsDebug, "debug", false, "Print response for debug")
-	RootCmd.PersistentFlags().BoolVar(&globals.IsJSONReq, "json-req", false, "Print request in JSON form")
-	RootCmd.PersistentFlags().BoolVar(&globals.IsJSONRes, "json-res", false, "Print response in JSON form")
-	RootCmd.PersistentFlags().BoolVar(&globals.DisplayUnit, "unit", false, "Display unit (B, KB, MB, ...) when displaying capacity")
-	RootCmd.PersistentFlags().StringVar(&globals.FieldSeparator, "fs", "|", "Field separator for the output")
+	RootCmd.PersistentFlags().StringVar(&globals.IPv4, "ip", "127.0.0.1", "Set IPv4 address to PoseidonOS for this command.")
+	RootCmd.PersistentFlags().StringVar(&globals.Port, "port", "18716", "Set the port number to PoseidonOS for this command.")
+	RootCmd.PersistentFlags().BoolVar(&globals.IsDebug, "debug", false, "Print response for debug.")
+	RootCmd.PersistentFlags().BoolVar(&globals.IsJSONReq, "json-req", false, "Print request in JSON form.")
+	RootCmd.PersistentFlags().BoolVar(&globals.IsJSONRes, "json-res", false, "Print response in JSON form.")
+	RootCmd.PersistentFlags().BoolVar(&globals.DisplayUnit, "unit", false, "Display unit (B, KB, MB, ...) when displaying capacity.")
+	RootCmd.PersistentFlags().StringVar(&globals.FieldSeparator, "fs", "|", "Field separator for the output.")
 }
 
 func addCmd() {
@@ -113,7 +113,6 @@ func addCmd() {
 	RootCmd.AddCommand(loggercmds.LoggerCmd)
 	RootCmd.AddCommand(subsystemcmds.SubsystemCmd)
 	RootCmd.AddCommand(develcmds.DevelCmd)
-	RootCmd.AddCommand(FileCmd)
 	RootCmd.AddCommand(WbtCmd)
 	RootCmd.AddCommand(qoscmds.QosCmd)
 	RootCmd.AddCommand(telemetrycmds.TelemetryCmd)

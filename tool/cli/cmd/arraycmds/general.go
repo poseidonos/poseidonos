@@ -9,13 +9,13 @@ import (
 var ArrayCmd = &cobra.Command{
 	Use:   "array",
 	Short: "Array command for PoseidonOS.",
-	Long: `Array command for PoseidonOS.
+	Long: `Array command for PoseidonOS. Use this command to create, delete, and control arrays.
 
 Syntax: 
-  poseidonos-cli array [create|delete|mount|unmount|list|addspare|rmspare] [flags]
+  poseidonos-cli array [create|delete|mount|unmount|list|addspare|rmspare] [flags] .
 
 Example (to create an array):
-  poseidonos-cli array create --array-name Array0 --buffer udev0 --data-devs nvme0,nvme1,nvme2,nvme3 --spare nvme4
+  poseidonos-cli array create --array-name array0 --buffer udev0 --data-devs nvme0,nvme1,nvme2,nvme3 --spare nvme4
 	  `,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {

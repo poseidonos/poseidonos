@@ -16,16 +16,20 @@ import (
 var VolumePolicyCmd = &cobra.Command{
 	Use:   "create [flags]",
 	Short: "Create qos policy for a volume(s) of PoseidonOS.",
-	Long: `Create qos policy for a volume of PoseidonOS.
+	Long: `
+Create qos policy for a volume of PoseidonOS.
 
 Syntax: 
-	poseidonos-cli qos create (--volume-name | -v) VolumeName (--array-name | -a) ArrayName [--maxiops" IOPS] [--maxbw Bandwidth] .
+	poseidonos-cli qos create (--volume-name | -v) VolumeName
+	(--array-name | -a) ArrayName [--maxiops" IOPS] [--maxbw Bandwidth] .
 
 Example: 
 	poseidonos-cli qos create --volume-name vol1 --array-name Array0 --maxiops 500 --maxbw 100
 
-NOTE!!!!
-    Current design of Qos supports only 1 Volume per Subsystem. If throttling values are set for more than one volume in a single subsystem, the throttling will be take effect only for the first mounted volume in the subsystem.
+NOTE:
+    Current design of Qos supports only 1 Volume per Subsystem.
+	If throttling values are set for more than one volume in a single subsystem,
+	the throttling will be take effect only for the first mounted volume in the subsystem.
           `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -100,14 +104,26 @@ var volumePolicy_minBandwidth = -1
 var volumePolicy_maxBandwidth = -1
 
 func init() {
-	VolumePolicyCmd.Flags().StringVarP(&volumePolicy_volumeNameList, "volume-name", "v", "", "A comma-seperated names of volumes to set qos policy for")
+	VolumePolicyCmd.Flags().StringVarP(&volumePolicy_volumeNameList,
+		"volume-name", "v", "",
+		"A comma-seperated list of volumes to set qos policy for.")
 	VolumePolicyCmd.MarkFlagRequired("volume-name")
 
-	VolumePolicyCmd.Flags().StringVarP(&volumePolicy_arrayName, "array-name", "a", "", "Name of the array where the volume is created from")
+	VolumePolicyCmd.Flags().StringVarP(&volumePolicy_arrayName,
+		"array-name", "a", "",
+		"The name of the array where the volume is created from.")
 	VolumePolicyCmd.MarkFlagRequired("array-name")
 
-	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_minIOPS, "miniops", "", -1, "The minimum IOPS for the volume in KIOPS")
-	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_maxIOPS, "maxiops", "", -1, "The maximum IOPS for the volume in KIOPS")
-	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_minBandwidth, "minbw", "", -1, "The minimum bandwidth for the volume in MiB/s")
-	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_maxBandwidth, "maxbw", "", -1, "The maximum bandwidth for the volume in MiB/s")
+	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_minIOPS,
+		"miniops", "", -1,
+		"The minimum IOPS for the volume in KIOPS.")
+	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_maxIOPS,
+		"maxiops", "", -1,
+		"The maximum IOPS for the volume in KIOPS.")
+	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_minBandwidth,
+		"minbw", "", -1,
+		"The minimum bandwidth for the volume in MiB/s.")
+	VolumePolicyCmd.Flags().IntVarP(&volumePolicy_maxBandwidth,
+		"maxbw", "", -1,
+		"The maximum bandwidth for the volume in MiB/s.")
 }

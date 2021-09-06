@@ -17,7 +17,8 @@ import (
 var SetSystemPropCmd = &cobra.Command{
 	Use:   "set-property",
 	Short: "Set the property of PoseidonOS.",
-	Long: `Set the property of PoseidonOS.
+	Long: `
+Set the property of PoseidonOS. 
 
 Syntax:
 	poseidonos-cli system set-property [--rebuild-impact "highest"|"higher"|"high"|"medium"|"low"|"lower"|"lowest"] .
@@ -71,6 +72,11 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 var set_system_property_level = ""
 
 func init() {
-	SetSystemPropCmd.Flags().StringVarP(&set_system_property_level, "rebuild-impact",
-		"", "", "The impact of rebuilding process on the I/O performance")
+	SetSystemPropCmd.Flags().StringVarP(&set_system_property_level,
+		"rebuild-impact", "", "",
+		`The impact of rebuilding process on the I/O performance.
+With high rebuilding-impact, the rebuilding process may
+interfere with I/O operations more. Therefore, I/O operations may
+slow down although rebuilding process becomes accelerated. 
+`)
 }

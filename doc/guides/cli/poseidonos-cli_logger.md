@@ -4,7 +4,9 @@ Logger commands for PoseidonOS.
 
 ### Synopsis
 
-Logger commands for PoseidonOS.
+
+Logger commands for PoseidonOS. Use this command category to
+control and display information about logger. 
 
 Syntax: 
   poseidonos-cli logger [set-level|get-level|apply-filter|info]
@@ -26,13 +28,13 @@ poseidonos-cli logger [flags]
 ### Options inherited from parent commands
 
 ```
-      --debug         Print response for debug
-      --fs string     Field separator for the output (default "|")
-      --ip string     Set IPv4 address to PoseidonOS for this command (default "127.0.0.1")
-      --json-req      Print request in JSON form
-      --json-res      Print response in JSON form
-      --port string   Set the port number to PoseidonOS for this command (default "18716")
-      --unit          Display unit (B, KB, MB, ...) when displaying capacity
+      --debug         Print response for debug.
+      --fs string     Field separator for the output. (default "|")
+      --ip string     Set IPv4 address to PoseidonOS for this command. (default "127.0.0.1")
+      --json-req      Print request in JSON form.
+      --json-res      Print response in JSON form.
+      --port string   Set the port number to PoseidonOS for this command. (default "18716")
+      --unit          Display unit (B, KB, MB, ...) when displaying capacity.
 ```
 
 ### SEE ALSO

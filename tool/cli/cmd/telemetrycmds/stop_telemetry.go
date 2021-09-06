@@ -15,7 +15,8 @@ import (
 var StopTelemetryCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "Stop the collection of telemetry data in PoseidonOS.",
-	Long: `Stop the collection of telemetry data in PoseidonOS.
+	Long: `
+Stop the collection of telemetry data in PoseidonOS.
 
 Syntax:
 	poseidonos-cli telemetry stop .

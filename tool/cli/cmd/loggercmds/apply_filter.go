@@ -15,7 +15,8 @@ import (
 var ApplyFilterCmd = &cobra.Command{
 	Use:   "apply-filter",
 	Short: "Apply a filtering policy to the logger.",
-	Long: `Apply a filtering policy to the logger.
+	Long: `
+Apply a filtering policy to the logger.
 
 Syntax:
 	poseidonos-cli logger apply-filter .

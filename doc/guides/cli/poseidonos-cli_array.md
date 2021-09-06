@@ -4,13 +4,13 @@ Array command for PoseidonOS.
 
 ### Synopsis
 
-Array command for PoseidonOS.
+Array command for PoseidonOS. Use this command to create, delete, and control arrays.
 
 Syntax: 
-  poseidonos-cli array [create|delete|mount|unmount|list|addspare|rmspare] [flags]
+  poseidonos-cli array [create|delete|mount|unmount|list|addspare|rmspare] [flags] .
 
 Example (to create an array):
-  poseidonos-cli array create --array-name Array0 --buffer udev0 --data-devs nvme0,nvme1,nvme2,nvme3 --spare nvme4
+  poseidonos-cli array create --array-name array0 --buffer udev0 --data-devs nvme0,nvme1,nvme2,nvme3 --spare nvme4
 	  
 
 ```
@@ -26,19 +26,19 @@ poseidonos-cli array [flags]
 ### Options inherited from parent commands
 
 ```
-      --debug         Print response for debug
-      --fs string     Field separator for the output (default "|")
-      --ip string     Set IPv4 address to PoseidonOS for this command (default "127.0.0.1")
-      --json-req      Print request in JSON form
-      --json-res      Print response in JSON form
-      --port string   Set the port number to PoseidonOS for this command (default "18716")
-      --unit          Display unit (B, KB, MB, ...) when displaying capacity
+      --debug         Print response for debug.
+      --fs string     Field separator for the output. (default "|")
+      --ip string     Set IPv4 address to PoseidonOS for this command. (default "127.0.0.1")
+      --json-req      Print request in JSON form.
+      --json-res      Print response in JSON form.
+      --port string   Set the port number to PoseidonOS for this command. (default "18716")
+      --unit          Display unit (B, KB, MB, ...) when displaying capacity.
 ```
 
 ### SEE ALSO
 
 * [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS [version 0.7]
-* [poseidonos-cli array addspare](poseidonos-cli_array_addspare.md)	 - Add a device as spare to an array.
+* [poseidonos-cli array addspare](poseidonos-cli_array_addspare.md)	 - Add a device as a spare to an array.
 * [poseidonos-cli array autocreate](poseidonos-cli_array_autocreate.md)	 - Automatically create an array for PoseidonOS.
 * [poseidonos-cli array create](poseidonos-cli_array_create.md)	 - Create an array for PoseidonOS.
 * [poseidonos-cli array delete](poseidonos-cli_array_delete.md)	 - Delete an array from PoseidonOS.

@@ -16,7 +16,9 @@ import (
 var DeleteArrayCmd = &cobra.Command{
 	Use:   "delete [flags]",
 	Short: "Delete an array from PoseidonOS.",
-	Long: `Delete an array from PoseidonOS.
+	Long: `
+Delete an array from PoseidonOS. After executing this command, 
+the data and volumes in the array will be deleted too.
 
 Syntax:
 	poseidonos-cli array delete (--array-name | -a) ArrayName
@@ -82,8 +84,11 @@ var delete_array_arrayName = ""
 var delete_array_isForced = false
 
 func init() {
-	DeleteArrayCmd.Flags().StringVarP(&delete_array_arrayName, "array-name", "a", "", "Name of the array to delete")
+	DeleteArrayCmd.Flags().StringVarP(&delete_array_arrayName,
+		"array-name", "a", "", "The name of the array to delete")
 	DeleteArrayCmd.MarkFlagRequired("array-name")
 
-	DeleteArrayCmd.Flags().BoolVarP(&delete_array_isForced, "force", "", false, "Execute this command without confirmation")
+	DeleteArrayCmd.Flags().BoolVarP(&delete_array_isForced,
+		"force", "", false,
+		"Force to delete this array.")
 }

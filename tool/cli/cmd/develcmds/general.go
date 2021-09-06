@@ -6,8 +6,11 @@ import (
 
 var DevelCmd = &cobra.Command{
 	Use:   "devel",
-	Short: "Commands for PoseidonOS Developers.",
-	Long: `Commands for PoseidonOS Developers.
+	Short: "Commands for PoseidonOS developers.",
+	Long: `
+Commands for PoseidonOS Developers. This command category will affect
+the system seriously. Therefore, this command category must be carefully used
+by developers. 
 
 Syntax: 
   poseidonos-cli devel [resetmbr]

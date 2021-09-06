@@ -9,7 +9,11 @@ import (
 var completionCmd = &cobra.Command{
 	Use:   "completion [bash|zsh]",
 	Short: "Generate completion script",
-	Long: `To load completions:
+	Long: `
+This command generates the auto completion script for bash or zsh
+shelles.
+
+To load completions:
 
 Bash:
 
@@ -19,7 +23,9 @@ Bash:
   # Linux:
   $ sudo -s
   $ poseidonos-cli completion bash > /etc/bash_completion.d/poseidonos-cli
-  # Restart session.
+  $ exit
+  $ exec bash (restart session).
+
   # macOS:
   $ poseidonos-cli completion bash > /usr/local/etc/bash_completion.d/poseidonos-cli
 
@@ -32,6 +38,9 @@ Zsh:
 
   # To load completions for each session, execute once:
   $ poseidonos-cli completion zsh > "${fpath[1]}/_poseidonos-cli"
+  
+  If the command above does not work, try
+  $ poseidonos-cli completion zsh > "/usr/local/share/zsh/site-functions/_poseidonos-cli"
 
   # You will need to start a new shell for this setup to take effect.
 `,

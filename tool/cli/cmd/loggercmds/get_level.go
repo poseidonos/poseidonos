@@ -16,7 +16,8 @@ import (
 var GetLevelCmd = &cobra.Command{
 	Use:   "get-level",
 	Short: "Get the filtering level of logger.",
-	Long: `Get the filtering level of logger.
+	Long: `
+Get the filtering level of logger.
 
 Syntax:
 	poseidonos-cli logger get-level .

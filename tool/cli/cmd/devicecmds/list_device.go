@@ -15,7 +15,10 @@ import (
 var ListDeviceCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all devices in the system.",
-	Long: `List all devices in the system.
+	Long: `
+List all devices in the system. If you cannot see any device, 
+try executing the device scan command and execute this command
+again. 
 
 Syntax:
 	poseidonos-cli device list .

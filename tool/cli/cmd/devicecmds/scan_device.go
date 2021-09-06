@@ -17,7 +17,9 @@ import (
 var ScanDeviceCmd = &cobra.Command{
 	Use:   "scan",
 	Short: "Scan devices in the system.",
-	Long: `Scan devices in the system.
+	Long: `
+Scan devices in the system. Use this command when PoseidonOS has 
+(re)started.
 
 Syntax:
 	poseidonos-cli device scan .

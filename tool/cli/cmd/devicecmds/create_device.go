@@ -15,7 +15,8 @@ import (
 var CreateDeviceCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a buffer device.",
-	Long: `Create a buffer device.
+	Long: `
+Create a buffer device.
 
 Syntax:
 	poseidonos-cli device create (--device-name | -d) DeviceName --num-blocks NumBlocks --block-size BlockSize --device-type ["uram"|"pram"] --numa NumaNode.
@@ -29,7 +30,7 @@ Syntax:
 			NUMBLOCKS:  create_device_numBlocks,
 			BLOCKSIZE:  create_device_blockSize,
 			DEVICETYPE: create_device_deviceType,
-			NUMA: create_device_numa,
+			NUMA:       create_device_numa,
 		}
 
 		createDeviceReq := messages.Request{
@@ -72,17 +73,27 @@ var create_device_deviceType = ""
 var create_device_numa = 0
 
 func init() {
-	CreateDeviceCmd.Flags().StringVarP(&create_device_deviceName, "device-name", "d", "", "The name of device to create")
+	CreateDeviceCmd.Flags().StringVarP(&create_device_deviceName,
+		"device-name", "d", "",
+		"The name of the buffer device to create.")
 	CreateDeviceCmd.MarkFlagRequired("device-name")
 
-	CreateDeviceCmd.Flags().StringVarP(&create_device_deviceType, "device-type", "", "", "The type of device to create")
+	CreateDeviceCmd.Flags().StringVarP(&create_device_deviceType,
+		"device-type", "", "",
+		"The type of the buffer device to create.")
 	CreateDeviceCmd.MarkFlagRequired("device-type")
 
-	CreateDeviceCmd.Flags().IntVarP(&create_device_numBlocks, "num-blocks", "", 0, "The number of blocks in the device")
+	CreateDeviceCmd.Flags().IntVarP(&create_device_numBlocks,
+		"num-blocks", "", 0,
+		"The number of blocks of the buffer device.")
 	CreateDeviceCmd.MarkFlagRequired("num-blocks")
 
-	CreateDeviceCmd.Flags().IntVarP(&create_device_blockSize, "block-size", "", 0, "The block size of the device")
+	CreateDeviceCmd.Flags().IntVarP(&create_device_blockSize,
+		"block-size", "", 0,
+		"The block size of the buffer device.")
 	CreateDeviceCmd.MarkFlagRequired("block-size")
 
-	CreateDeviceCmd.Flags().IntVarP(&create_device_numa, "numa", "", 0, "The numa node of the device")
+	CreateDeviceCmd.Flags().IntVarP(&create_device_numa,
+		"numa", "", 0,
+		"The NUMA node of the buffer device.")
 }

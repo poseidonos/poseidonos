@@ -15,7 +15,8 @@ import (
 var StartTelemetryCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start the collection of telemetry data in PoseidonOS.",
-	Long: `Start the collection of telemetry data in PoseidonOS.
+	Long: `
+Start the collection of telemetry data in PoseidonOS.
 
 Syntax:
 	poseidonos-cli telemetry start .
