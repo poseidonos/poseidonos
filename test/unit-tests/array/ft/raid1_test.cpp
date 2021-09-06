@@ -9,6 +9,24 @@
 
 namespace pos
 {
+TEST(Raid1, Raid1_testWithHeapAllocation)
+{
+    // Given a set of constructor params
+    const PartitionPhysicalSize physicalSize{
+        .startLba = 0,
+        .blksPerChunk = 10,
+        .chunksPerStripe = 5,
+        .stripesPerSegment = 20,
+        .totalSegments = 100};
+
+    // When
+    Raid1* raid1 = new Raid1(&physicalSize);
+
+    // Then
+    ASSERT_EQ(RaidTypeEnum::RAID1, raid1->GetRaidType());
+    delete raid1;
+}
+
 TEST(Raid1, Raid1_testIfObjectIsInstantiated)
 {
     // Given a set of constructor params

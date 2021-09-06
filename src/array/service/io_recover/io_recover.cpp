@@ -61,7 +61,14 @@ IORecover::Register(unsigned int arrayIndex, ArrayRecover recov)
 {
     if (recoveries[arrayIndex].empty())
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::RECOVER_DEBUG_MSG,
+        int eventId = (int)POS_EVENT_ID::RECOVER_DEBUG_MSG;
+        if (recov.empty())
+        {
+            POS_TRACE_WARN(eventId,
+                "IORecover::Register, no recover exists, array:{} size:{}",
+                arrayIndex, recov.size());
+        }
+        POS_TRACE_INFO(eventId,
             "IORecover::Register, array:{} size:{}", arrayIndex, recov.size());
         recoveries[arrayIndex] = recov;
         return true;

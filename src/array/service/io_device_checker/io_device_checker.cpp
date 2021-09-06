@@ -66,7 +66,15 @@ IODeviceChecker::Register(unsigned int arrayIndex, IDeviceChecker* checker)
 {
     if (devCheckers[arrayIndex] == nullptr)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::DEV_CHECKER_DEBUG_MSG,
+        int eventId = (int)POS_EVENT_ID::DEV_CHECKER_DEBUG_MSG;
+        if (checker == nullptr)
+        {
+            POS_TRACE_WARN(eventId,
+                "IODeviceChecker::Register, no checker exists, array:{}",
+                arrayIndex);
+            return false;
+        }
+        POS_TRACE_INFO(eventId,
             "IODeviceChecker::Register, array:{}", arrayIndex);
         devCheckers[arrayIndex] = checker;
         return true;

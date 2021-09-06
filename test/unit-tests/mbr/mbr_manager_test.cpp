@@ -5,9 +5,9 @@
 #include "src/array/device/array_device_list.h"
 #include "src/master_context/version_provider.h"
 #include "src/mbr/mbr_info.h"
-#include "test/unit-tests/mbr/mbr_manager_test_fixture.h"
 #include "test/unit-tests/device/device_manager_mock.h"
 #include "test/unit-tests/master_context/e2e_protect_mock.h"
+#include "test/unit-tests/mbr/mbr_manager_test_fixture.h"
 #include "test/unit-tests/mbr/mbr_map_manager_mock.h"
 
 using ::testing::_;
@@ -83,6 +83,14 @@ buildArrayBootRecordFrom(const ArrayMeta& arrayMeta)
     }
 
     return abr;
+}
+
+TEST(MbrManager, MbrManager_testDefaultConstructor)
+{
+    // Given
+    // When
+    MbrManager mbrManager;
+    // Then
 }
 
 TEST(MbrManager, MbrManager_testIfConstructorInitializesMBRWithZeros)

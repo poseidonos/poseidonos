@@ -81,6 +81,259 @@ TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImported)
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
 
+TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceHasNoUblock)
+{
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+    string mockArrayname = "mockArray";
+
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayname);
+    DeviceSet<string> nameSet;
+    string nvm1 = "mock-nvm1";
+    string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
+    string spare1 = "mock-spare1";
+
+    nameSet.nvm.push_back(nvm1);
+    nameSet.data.push_back(data1);
+    nameSet.data.push_back(data2);
+    nameSet.data.push_back(data3);
+    nameSet.spares.push_back(spare1);
+    DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
+
+    auto nvm1UblockDevPtr = nullptr;
+
+    EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
+        .WillOnce(Return(nvm1UblockDevPtr));
+
+    // When
+    int actual = arrDevMgr.ImportByName(nameSet);
+
+    // Then
+    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+    ASSERT_EQ(expected, actual);
+    arrDevMgr.Clear(); // to avoid the leakage of mocks
+}
+
+TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceIsActuallySSDDevice)
+{
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+    string mockArrayName = "mockArray";
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
+    DeviceSet<string> nameSet;
+    string nvm1 = "mock-nvm1";
+    string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
+    string spare1 = "mock-spare1";
+
+    nameSet.nvm.push_back(nvm1);
+    nameSet.data.push_back(data1);
+    nameSet.data.push_back(data2);
+    nameSet.data.push_back(data3);
+    nameSet.spares.push_back(spare1);
+    DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
+
+    auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), DeviceType::SSD, 805830656); // minNvmSize when logicalChunkCount is 2
+
+    EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
+        .WillOnce(Return(nvm1UblockDevPtr));
+
+    // When
+    int actual = arrDevMgr.ImportByName(nameSet);
+
+    // Then
+    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
+    ASSERT_EQ(expected, actual);
+    arrDevMgr.Clear(); // to avoid the leakage of mocks
+}
+
+TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceHasNoUblock)
+{
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+    string mockArrayName = "mockArray";
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
+    DeviceSet<string> nameSet;
+    string nvm1 = "mock-nvm1";
+    string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
+    string spare1 = "mock-spare1";
+
+    nameSet.nvm.push_back(nvm1);
+    nameSet.data.push_back(data1);
+    nameSet.data.push_back(data2);
+    nameSet.data.push_back(data3);
+    nameSet.spares.push_back(spare1);
+    DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
+
+    auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), DeviceType::NVRAM, 805830656); // minNvmSize when logicalChunkCount is 2
+    auto data1UblockDevPtr = nullptr;
+
+    EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
+        .WillOnce(Return(nvm1UblockDevPtr))
+        .WillOnce(Return(data1UblockDevPtr));
+
+    // When
+    int actual = arrDevMgr.ImportByName(nameSet);
+
+    // Then
+    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+    ASSERT_EQ(expected, actual);
+    arrDevMgr.Clear(); // to avoid the leakage of mocks
+}
+
+TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceIsActuallyNVMDevice)
+{
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+    string mockArrayName = "mockArray";
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
+    DeviceSet<string> nameSet;
+    string nvm1 = "mock-nvm1";
+    string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
+    string spare1 = "mock-spare1";
+
+    nameSet.nvm.push_back(nvm1);
+    nameSet.data.push_back(data1);
+    nameSet.data.push_back(data2);
+    nameSet.data.push_back(data3);
+    nameSet.spares.push_back(spare1);
+    DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
+
+    auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), DeviceType::NVRAM, 805830656); // minNvmSize when logicalChunkCount is 2
+    auto data1UblockDevPtr = MockUblockDevice(data1.c_str(), DeviceType::NVRAM, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+
+    EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
+        .WillOnce(Return(nvm1UblockDevPtr))
+        .WillOnce(Return(data1UblockDevPtr));
+
+    // When
+    int actual = arrDevMgr.ImportByName(nameSet);
+
+    // Then
+    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
+    ASSERT_EQ(expected, actual);
+    arrDevMgr.Clear(); // to avoid the leakage of mocks
+}
+
+TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceHasNoUblock)
+{
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+    string mockArrayName = "mockArray";
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
+    DeviceSet<string> nameSet;
+    string nvm1 = "mock-nvm1";
+    string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
+    string spare1 = "mock-spare1";
+
+    nameSet.nvm.push_back(nvm1);
+    nameSet.data.push_back(data1);
+    nameSet.data.push_back(data2);
+    nameSet.data.push_back(data3);
+    nameSet.spares.push_back(spare1);
+    DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
+
+    auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), DeviceType::NVRAM, 805830656); // minNvmSize when logicalChunkCount is 2
+    auto data1UblockDevPtr = MockUblockDevice(data1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data2UblockDevPtr = MockUblockDevice(data2.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data3UblockDevPtr = MockUblockDevice(data3.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto spare1UblockDevPtr = nullptr;
+
+    EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
+        .WillOnce(Return(nvm1UblockDevPtr))
+        .WillOnce(Return(data1UblockDevPtr))
+        .WillOnce(Return(data2UblockDevPtr))
+        .WillOnce(Return(data3UblockDevPtr))
+        .WillOnce(Return(spare1UblockDevPtr));
+
+    // When
+    int actual = arrDevMgr.ImportByName(nameSet);
+
+    // Then
+    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
+    ASSERT_EQ(expected, actual);
+    arrDevMgr.Clear(); // to avoid the leakage of mocks
+}
+
+TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceIsActuallyNVMDevice)
+{
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+    string mockArrayName = "mockArray";
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
+    DeviceSet<string> nameSet;
+    string nvm1 = "mock-nvm1";
+    string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
+    string spare1 = "mock-spare1";
+
+    nameSet.nvm.push_back(nvm1);
+    nameSet.data.push_back(data1);
+    nameSet.data.push_back(data2);
+    nameSet.data.push_back(data3);
+    nameSet.spares.push_back(spare1);
+    DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
+
+    auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), DeviceType::NVRAM, 805830656); // minNvmSize when logicalChunkCount is 2
+    auto data1UblockDevPtr = MockUblockDevice(data1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data2UblockDevPtr = MockUblockDevice(data2.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data3UblockDevPtr = MockUblockDevice(data3.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto spare1UblockDevPtr = MockUblockDevice(spare1.c_str(), DeviceType::NVRAM, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+
+    EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
+        .WillOnce(Return(nvm1UblockDevPtr))
+        .WillOnce(Return(data1UblockDevPtr))
+        .WillOnce(Return(data2UblockDevPtr))
+        .WillOnce(Return(data3UblockDevPtr))
+        .WillOnce(Return(spare1UblockDevPtr));
+
+    // When
+    int actual = arrDevMgr.ImportByName(nameSet);
+
+    // Then
+    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
+    ASSERT_EQ(expected, actual);
+    arrDevMgr.Clear(); // to avoid the leakage of mocks
+}
+
+TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceIsTooSmall)
+{
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+    string mockArrayName = "mockArray";
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
+    DeviceSet<string> nameSet;
+    string nvm1 = "mock-nvm1";
+    string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
+    string spare1 = "mock-spare1";
+
+    nameSet.nvm.push_back(nvm1);
+    nameSet.data.push_back(data1);
+    nameSet.data.push_back(data2);
+    nameSet.data.push_back(data3);
+    nameSet.spares.push_back(spare1);
+    DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
+
+    auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), DeviceType::NVRAM, 0); // minNvmSize when logicalChunkCount is 2
+    auto data1UblockDevPtr = MockUblockDevice(data1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data2UblockDevPtr = MockUblockDevice(data2.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data3UblockDevPtr = MockUblockDevice(data3.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto spare1UblockDevPtr = MockUblockDevice(spare1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+
+    EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
+        .WillOnce(Return(nvm1UblockDevPtr))
+        .WillOnce(Return(data1UblockDevPtr))
+        .WillOnce(Return(data2UblockDevPtr))
+        .WillOnce(Return(data3UblockDevPtr))
+        .WillOnce(Return(spare1UblockDevPtr));
+
+    // When
+    int actual = arrDevMgr.ImportByName(nameSet);
+
+    // Then
+    int expected = (int)POS_EVENT_ID::ARRAY_NVM_CAPACITY_ERROR;
+    ASSERT_EQ(expected, actual);
+    arrDevMgr.Clear(); // to avoid the leakage of mocks
+}
+
 TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImportedWithMetaSetInformation)
 {
     // Used when loading array
@@ -104,6 +357,150 @@ TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImportedWithMetaS
     auto data1UblockDevPtr = MockUblockDevice(data1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
     auto data2UblockDevPtr = MockUblockDevice(data2.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
     auto data3UblockDevPtr = MockUblockDevice(data3.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto spare1UblockDevPtr = MockUblockDevice(spare1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+
+    EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
+        .WillOnce(Return(nvm1UblockDevPtr))
+        .WillOnce(Return(data1UblockDevPtr))
+        .WillOnce(Return(data2UblockDevPtr))
+        .WillOnce(Return(data3UblockDevPtr))
+        .WillOnce(Return(spare1UblockDevPtr))
+        .WillOnce(Return(nvm1UblockDevPtr))
+        .WillOnce(Return(data1UblockDevPtr))
+        .WillOnce(Return(data2UblockDevPtr))
+        .WillOnce(Return(data3UblockDevPtr))
+        .WillOnce(Return(spare1UblockDevPtr));
+
+    arrDevMgr.ImportByName(nameSet);
+    ArrayMeta arrayMeta;
+    arrayMeta.devs = arrDevMgr.ExportToMeta();
+    arrDevMgr.Clear();
+
+    // When
+    int actual = arrDevMgr.Import(arrayMeta.devs);
+
+    // Then
+    ASSERT_EQ(0, actual);
+    arrDevMgr.Clear(); // to avoid the leakage of mocks
+}
+
+TEST(ArrayDeviceManager, Import_testIfNVMDeviceHasNoUblockWithMetaSetInformation)
+{
+    // Used when loading array
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+    string mockArrayName = "mockArray";
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
+    DeviceSet<string> nameSet;
+    string nvm1 = "mock-nvm1";
+    string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
+    string spare1 = "mock-spare1";
+
+    nameSet.nvm.push_back(nvm1);
+    nameSet.data.push_back(data1);
+    nameSet.data.push_back(data2);
+    nameSet.data.push_back(data3);
+    nameSet.spares.push_back(spare1);
+    DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
+
+    auto nvm1UblockDevPtr = nullptr;
+
+    EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
+        .WillOnce(Return(nvm1UblockDevPtr));
+
+    arrDevMgr.ImportByName(nameSet);
+    ArrayMeta arrayMeta;
+    arrayMeta.devs = arrDevMgr.ExportToMeta();
+    arrDevMgr.Clear();
+
+    // When
+    uint32_t missingCnt = 0;
+    uint32_t brokenCnt = 0;
+    int actual = arrDevMgr.Import(arrayMeta.devs);
+
+    // Then
+    int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_NVM_NOT_FOUND;
+    ASSERT_EQ(expected, actual);
+    arrDevMgr.Clear(); // to avoid the leakage of mocks
+}
+
+TEST(ArrayDeviceManager, Import_testIfDataDeviceIsFaultState)
+{
+    // Used when loading array
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+    string mockArrayName = "mockArray";
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
+    DeviceSet<string> nameSet;
+    string nvm1 = "mock-nvm1";
+    string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
+    string spare1 = "mock-spare1";
+
+    nameSet.nvm.push_back(nvm1);
+    nameSet.data.push_back(data1);
+    nameSet.data.push_back(data2);
+    nameSet.data.push_back(data3);
+    nameSet.spares.push_back(spare1);
+    DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
+
+    auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), DeviceType::NVRAM, 805830656); // minNvmSize when logicalChunkCount is 2
+    auto data1UblockDevPtr = MockUblockDevice(data1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data2UblockDevPtr = MockUblockDevice(data2.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data3UblockDevPtr = MockUblockDevice(data3.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto spare1UblockDevPtr = MockUblockDevice(spare1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+
+    EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
+        .WillOnce(Return(nvm1UblockDevPtr))
+        .WillOnce(Return(data1UblockDevPtr))
+        .WillOnce(Return(data2UblockDevPtr))
+        .WillOnce(Return(data3UblockDevPtr))
+        .WillOnce(Return(spare1UblockDevPtr))
+        .WillOnce(Return(nvm1UblockDevPtr))
+        .WillOnce(Return(data1UblockDevPtr))
+        .WillOnce(Return(data2UblockDevPtr))
+        .WillOnce(Return(data3UblockDevPtr))
+        .WillOnce(Return(spare1UblockDevPtr));
+
+    arrDevMgr.ImportByName(nameSet);
+    ArrayMeta arrayMeta;
+    arrayMeta.devs = arrDevMgr.ExportToMeta();
+    for (DeviceMeta meta : arrayMeta.devs.data)
+    {
+        meta.state = ArrayDeviceState::FAULT;
+    }
+    arrDevMgr.Clear();
+
+    // When
+    int actual = arrDevMgr.Import(arrayMeta.devs);
+
+    // Then
+    ASSERT_EQ(0, actual);
+    arrDevMgr.Clear(); // to avoid the leakage of mocks
+}
+
+TEST(ArrayDeviceManager, Import_testIfDataDeviceHasNoUblockWithMetaSetInformation)
+{
+    // Used when loading array
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+    string mockArrayName = "mockArray";
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
+    DeviceSet<string> nameSet;
+    string nvm1 = "mock-nvm1";
+    string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
+    string spare1 = "mock-spare1";
+
+    nameSet.nvm.push_back(nvm1);
+    nameSet.data.push_back(data1);
+    nameSet.data.push_back(data2);
+    nameSet.data.push_back(data3);
+    nameSet.spares.push_back(spare1);
+    DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
+
+    auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), DeviceType::NVRAM, 805830656); // minNvmSize when logicalChunkCount is 2
+    auto data1UblockDevPtr = nullptr;
+    auto data2UblockDevPtr = nullptr;
+    auto data3UblockDevPtr = nullptr;
     auto spare1UblockDevPtr = MockUblockDevice(spare1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
 
     EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
@@ -383,6 +780,31 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalIsSuccessful)
     ASSERT_EQ(0, actual);
 }
 
+TEST(ArrayDeviceManager, RemoveSpare_testWithPassingArrayDevice)
+{
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+    string mockArrayName = "mockArray";
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
+
+    auto spare1 = MockUblockDevice("spare1");
+    ArrayDevice spare1Dev(spare1, ArrayDeviceState::NORMAL);
+    DeviceSet<ArrayDevice*> deviceSet;
+    deviceSet.spares.push_back(&spare1Dev);
+    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
+    arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
+
+    EXPECT_CALL(mockSysDevMgr, GetDev).WillOnce(Return(spare1));
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
+    EXPECT_CALL(*mockArrayDeviceList, RemoveSpare).WillOnce(Return(0));
+
+    // When
+    int actual = arrDevMgr.RemoveSpare(&spare1Dev);
+
+    // Then
+    ASSERT_EQ(0, actual);
+}
+
 TEST(ArrayDeviceManager, ReplaceWithSpare_testIfArrayDeviceListIsQueriedAgainst)
 {
     // Given
@@ -608,6 +1030,30 @@ TEST(ArrayDeviceManager, GetRebuilding_testIfRebuildDeviceIsReturned)
 
     // Then
     ASSERT_EQ(&rebuildDev, actual);
+}
+
+TEST(ArrayDeviceManager, GetRebuilding_testIfRebuildDeviceIsNotRebuildState)
+{
+    // Given
+    string mockArrayName = "mockArray";
+    ArrayDeviceManager arrDevMgr(nullptr, mockArrayName);
+    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
+    arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
+
+    DeviceSet<ArrayDevice*> deviceSet;
+    auto normalUBlockDev = MockUblockDevice("mock-data-normal");
+    auto rebuildUBlockDev = MockUblockDevice("mock-data-rebuild");
+    ArrayDevice normalDev(normalUBlockDev, ArrayDeviceState::NORMAL);
+    ArrayDevice rebuildDev(rebuildUBlockDev, ArrayDeviceState::NORMAL);
+    deviceSet.data.push_back(&normalDev);
+    deviceSet.data.push_back(&rebuildDev);
+
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
+    // When
+    ArrayDevice* actual = arrDevMgr.GetRebuilding();
+
+    // Then
+    ASSERT_EQ(nullptr, actual);
 }
 
 } // namespace pos

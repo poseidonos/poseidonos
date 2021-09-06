@@ -1,9 +1,10 @@
 #include "src/state/state_control.h"
 
 #include <gtest/gtest.h>
+
+#include "test/unit-tests/state/state_context_mock.h"
 #include "test/unit-tests/state/state_list_mock.h"
 #include "test/unit-tests/state/state_publisher_mock.h"
-#include "test/unit-tests/state/state_context_mock.h"
 
 using ::testing::NiceMock;
 namespace pos
@@ -12,6 +13,17 @@ TEST(StateControl, StateControl_testIfCompilerCanHandleNullptrDelete)
 {
     // Just to validate if our compiler can handle this
     StateControl* s = nullptr;
+    delete s;
+}
+
+TEST(StateControl, StateControl_testIfArgumentsAreGiven)
+{
+    // Given
+    MockStatePublisher* mockStatePublisher = new MockStatePublisher();
+    StateList* stateList = new StateList(nullptr);
+    // When
+    StateControl* s = new StateControl(mockStatePublisher, stateList);
+    // Then
     delete s;
 }
 

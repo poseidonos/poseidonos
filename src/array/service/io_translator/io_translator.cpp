@@ -59,7 +59,14 @@ IOTranslator::Register(unsigned int arrayIndex, ArrayTranslator trans)
 {
     if (translators[arrayIndex].empty())
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::TRANSLATOR_DEBUG_MSG,
+        int eventId = (int)POS_EVENT_ID::TRANSLATOR_DEBUG_MSG;
+        if (trans.empty())
+        {
+            POS_TRACE_WARN(eventId,
+                "IOTranslator::Register, no translator exists, array:{} size:{}",
+                arrayIndex, trans.size());
+        }
+        POS_TRACE_INFO(eventId,
             "IOTranslator::Register, array:{} size:{}",
             arrayIndex, trans.size());
         translators[arrayIndex] = trans;

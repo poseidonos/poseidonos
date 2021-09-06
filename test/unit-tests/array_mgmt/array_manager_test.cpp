@@ -1,16 +1,18 @@
 #include "src/array_mgmt/array_manager.h"
 
 #include <gtest/gtest.h>
+
 #include "src/include/pos_event_id.h"
 #include "test/unit-tests/gc/garbage_collector_mock.h"
 #include "test/unit-tests/state/state_control_mock.h"
 #include "test/unit-tests/array_components/array_components_mock.h"
 #include "test/unit-tests/array_components/components_info_mock.h"
 #include "test/unit-tests/device/device_manager_mock.h"
-#include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
-#include "test/unit-tests/state/state_manager_mock.h"
-#include "test/unit-tests/mbr/abr_manager_mock.h"
 #include "test/unit-tests/array/array_mock.h"
+#include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
+#include "test/unit-tests/mbr/abr_manager_mock.h"
+#include "test/unit-tests/rebuild/array_rebuilder_mock.h"
+#include "test/unit-tests/state/state_manager_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
 #include "test/unit-tests/utils/mock_builder.h"
 
@@ -18,15 +20,31 @@ using ::testing::NiceMock;
 using ::testing::Return;
 namespace pos
 {
-
 TEST(ArrayManager, ArrayManager_testUsingShortConstructor)
 {
     // Given
     // When
-    ArrayManager arrayMgr();
+    ArrayManager arrayMgr;
 
-    // Then: verify the expect_call
+    // Then
 }
+
+TEST(ArrayManager, ArrayManager_testDestructorDeletingComponents)
+{
+    // Given
+    MockAffinityManager mockAffinityMgr = BuildDefaultAffinityManagerMock();
+    MockDeviceManager mockDevMgr(&mockAffinityMgr);
+    MockArrayRebuilder* mockArrayRebuilder = new MockArrayRebuilder(nullptr);
+    MockAbrManager* mockAbrManager = new MockAbrManager();
+
+    EXPECT_CALL(mockDevMgr, SetDeviceEventCallback).Times(1);
+
+    // When
+    ArrayManager arrayMgr(mockArrayRebuilder, mockAbrManager, &mockDevMgr, nullptr, nullptr);
+
+    // Then
+}
+
 TEST(ArrayManager, ArrayManager_testIfDeviceManagerRegistersArrayManager)
 {
     // Given
@@ -46,10 +64,10 @@ TEST(ArrayManager, ArrayManager_testDestructor)
     // Given
     auto mockArrayComp = NewMockArrayComponents("array1");
     map<string, ArrayComponents*> arrayMap =
-    {
-        {"array1", mockArrayComp},
-        {"array2", nullptr}
-    };
+        {
+            {"array1", mockArrayComp},
+            {"array2", nullptr}
+        };
     auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr, nullptr);
     arrayMgr->SetArrayComponentMap(arrayMap);
 
@@ -80,7 +98,7 @@ TEST(ArrayManager, Create_testIfFailsToCreateArrayWhenMaxArrayCntIsReached)
     // Given
     NiceMock<MockStateManager> mockStateMgr;
     map<string, ArrayComponents*> arrayMap;
-    for (int i=0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
+    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
     {
         string arrayName = "array" + i;
         auto mockArrayComp = BuildMockArrayComponents(arrayName);
@@ -135,7 +153,8 @@ TEST(ArrayManager, Create_testIfArrayMapUpdatedWhenCreationSucceeds)
     auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, mockTelClient.get(), mockArrayComponentFactory);
     arrayMgr->SetArrayComponentMap(emptyArrayMap);
 
-    EXPECT_CALL(*mockArrayComp, Create).WillOnce(Return(0));  // success
+    EXPECT_CALL(*mockArrayComp, Create).WillOnce(Return(0));            // success
+    EXPECT_CALL(*mockTelClient, RegisterPublisher).WillOnce(Return(0)); // success
 
     // When
     int actual = arrayMgr->Create(arrayName, DeviceSet<string>(), "some-raid");
@@ -194,7 +213,7 @@ TEST(ArrayManager, Delete_testIfArrayComponentMapIsUpdatedWhenDeleteSucceeds)
 {
     // Given
     string existingArray = "array1";
-    auto mockArrayComp = NewMockArrayComponents(existingArray);  // use New* instead of Build* since arrayMgr->Delete() actually tries to delete
+    auto mockArrayComp = NewMockArrayComponents(existingArray); // use New* instead of Build* since arrayMgr->Delete() actually tries to delete
     auto arrayMap = BuildArrayComponentsMap(existingArray, mockArrayComp);
     auto mockAbrMgr = BuildMockAbrManager();
     auto mockTelClient = BuildMockTelemetryClient();
@@ -409,7 +428,7 @@ TEST(ArrayManager, PrepareRebuild_testIfTargetArrayCallsPrepareRebuild)
 
     // When
     bool boolOutParam = false;
-    int actual = arrayMgr->PrepareRebuild(existingArray, boolOutParam/*don't care*/);
+    int actual = arrayMgr->PrepareRebuild(existingArray, boolOutParam /*don't care*/);
 
     // Then
     ASSERT_EQ(PREPARE_RESULT, actual);
@@ -426,7 +445,7 @@ TEST(ArrayManager, PrepareRebuild_testIfFailToPrepareRebuildWhenWrongNameIsGiven
 
     // When
     bool boolOutParam = false;
-    int actual = arrayMgr->PrepareRebuild("array2"/* != array1 */, boolOutParam/* don't care */);
+    int actual = arrayMgr->PrepareRebuild("array2" /* != array1 */, boolOutParam /* don't care */);
 
     // Then
     ASSERT_EQ(EID(ARRAY_WRONG_NAME), actual);
@@ -699,7 +718,7 @@ TEST(ArrayManager, ResetMbr_testIfSomeArrayDeletionsFailAndAbrManagerDoesntReset
     EXPECT_CALL(*mockArrayComp1Deletable, Delete).WillOnce(Return(0));
     int DELETE_FAILURE = 1234;
     EXPECT_CALL(*mockArrayComp2NotDeletable, Delete).WillOnce(Return(DELETE_FAILURE));
-    EXPECT_CALL(*mockAbrMgr, ResetMbr).Times(0);  // this must not be called because there's one array unable to delete
+    EXPECT_CALL(*mockAbrMgr, ResetMbr).Times(0); // this must not be called because there's one array unable to delete
 
     // When
     int actual = arrayMgr->ResetMbr();

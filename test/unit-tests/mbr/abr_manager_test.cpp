@@ -2,13 +2,13 @@
 
 #include <gtest/gtest.h>
 
+#include "test/unit-tests/device/device_manager_mock.h"
 #include "test/unit-tests/mbr/mbr_manager_mock.h"
 #include "test/unit-tests/mbr/mbr_map_manager_mock.h"
-#include "test/unit-tests/device/device_manager_mock.h"
 
 using ::testing::_;
-using ::testing::NiceMock;
 using ::testing::AtLeast;
+using ::testing::NiceMock;
 using ::testing::Return;
 namespace pos
 {
@@ -34,6 +34,15 @@ buildArrayMeta(string arrayName, int numDataDevices, int numBufferDevices)
 
     return arrayMeta;
 }
+
+TEST(AbrManager, AbrManager_testDefaultConstructor)
+{
+    // Given
+    // When
+    AbrManager abrManager;
+    // Then
+}
+
 TEST(AbrManager, AbrManager_testIfAbrManagerCreatedSuccessfully)
 {
     // Given : Nothing

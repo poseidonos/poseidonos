@@ -42,7 +42,8 @@ TEST(ArrayMountSequence, Mount_testIfEverySequenceIsInitialized)
     EXPECT_CALL(stateControl, Unsubscribe).Times(1);
     EXPECT_CALL(stateControl, Invoke).Times(2); // first for mount and second for normal. Ideally, I'd like to capture the param and assert on it, but in a later PR
     EXPECT_CALL(stateControl, GetState)
-        .WillOnce(Return(mockDefaultState)).WillOnce(Return(mockMountState));
+        .WillOnce(Return(mockDefaultState))
+        .WillOnce(Return(mockMountState));
     EXPECT_CALL(mockSeq1, Init).WillOnce(Return(0));
     EXPECT_CALL(mockSeq2, Init).WillOnce(Return(0));
     EXPECT_CALL(mockSeq3, Init).WillOnce(Return(0));
@@ -73,7 +74,8 @@ TEST(ArrayMountSequence, Mount_testIfPartiallyFailedSequenceLeadsToDisposeOnEver
     EXPECT_CALL(stateControl, Unsubscribe).Times(1);
     EXPECT_CALL(stateControl, Invoke).Times(1); // only for mount (unlike all success case)
     EXPECT_CALL(stateControl, GetState)
-        .WillOnce(Return(mockDefaultState)).WillOnce(Return(mockMountState));
+        .WillOnce(Return(mockDefaultState))
+        .WillOnce(Return(mockMountState));
     EXPECT_CALL(mockSeq1, Init).WillOnce(Return(0));
     EXPECT_CALL(mockSeq2, Init).WillOnce(Return(0));
     EXPECT_CALL(mockSeq3, Init).WillOnce(Return(SEQ3_INIT_FAILURE));
