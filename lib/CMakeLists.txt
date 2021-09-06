@@ -3,6 +3,7 @@ include(ExternalProject)
 
 set(SPDK_DEBUG_ENABLE "n" CACHE STRING "Specify enablement of SPDK debug build, y or n")
 set(USE_LOCAL_REPO "n" CACHE STRING "Specify use of local repository, y or n")
+set(NUM_BUILD_CORE "4" CACHE STRING "Specify numboer of cpu core being used for build")
 #set(LOCAL_REPOSITORY_ADDRESS "example.repo.com" CACHE STRING "Specify address of local repository")
 set(LOCAL_REPO_ADDRESS "https://10.227.30.174:7990" CACHE STRING "Specify address of local repository")
 set(LOCAL_REPO_PROJECT "scm/ibof" CACHE STRING "Specify project name of local repository")
@@ -66,7 +67,7 @@ ExternalProject_Add(air
     LOG_MERGED_STDOUTERR ON
     UPDATE_COMMAND mkdir -p ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build
     CONFIGURE_COMMAND cmake -DCONFIG=../../config/air.cfg
-    BUILD_COMMAND make -j 4
+    BUILD_COMMAND make -j ${NUM_BUILD_CORE}
     COMMAND mkdir -p ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build/src
     COMMAND cp ${PROJ_ROOT}/lib/${POS_DEP_AIR}/src/libair.a ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build/src
     INSTALL_COMMAND make install)
@@ -127,7 +128,7 @@ ExternalProject_Add(fio
     LOG_MERGED_STDOUTERR ON
     PATCH_COMMAND patch -t -p0 < ${PROJ_ROOT}/lib/fio-3.1.patch
     CONFIGURE_COMMAND "" 
-    BUILD_COMMAND make -j 4)
+    BUILD_COMMAND make -j ${NUM_BUILD_CORE})
 
 # Set SPDK build options
 set(POS_DEP_SPDK "spdk")
@@ -163,7 +164,8 @@ ExternalProject_Add(spdk
     LOG_MERGED_STDOUTERR ON
     PATCH_COMMAND patch -t -p0 < ${PROJ_ROOT}/lib/spdk-20.10.patch
     CONFIGURE_COMMAND ./configure --with-dpdk=${PROJ_ROOT}/lib/${POS_DEP_DPDK} --with-rdma --with-fio=${PROJ_ROOT}/lib/${POS_DEP_FIO} --with-pos --without-isal --without-vhost --with-pmdk ${ENABLE_DEBUG}
-    BUILD_COMMAND make -j 4
+    BUILD_COMMAND ./scripts/pkgdep.sh
+    COMMAND make -j ${NUM_BUILD_CORE}
     INSTALL_COMMAND cp ${PROJ_ROOT}/lib/${POS_DEP_SPDK}/build/fio/spdk_nvme ${PROJ_ROOT}/lib/${POS_DEP_SPDK}/examples/nvme/fio_plugin/fio_plugin)
 
 # Set gperf build options
@@ -190,7 +192,7 @@ ExternalProject_Add(gperf
     LOG_MERGED_STDOUTERR ON
     CONFIGURE_COMMAND ./autogen.sh
     COMMAND ./configure
-    BUILD_COMMAND make -j 4
+    BUILD_COMMAND make -j ${NUM_BUILD_CORE}
     COMMAND make install
     COMMAND ldconfig)
 
@@ -324,7 +326,7 @@ ExternalProject_Add(filebench
     COMMAND automake --add-missing
     COMMAND autoconf
     COMMAND ./configure
-    BUILD_COMMAND make -j 4
+    BUILD_COMMAND make -j ${NUM_BUILD_CORE}
     INSTALL_COMMAND make install)
 
 # Set nlohmann build options

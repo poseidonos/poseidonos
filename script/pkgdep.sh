@@ -38,8 +38,6 @@ if [ -f /etc/debian_version ]; then
     apt-get install -y libmnl-dev
     # For filebench
     apt install -y automake autoconf libtool bison flex python3-paramiko
-    # for SPDK
-    $SPDK_ROOT/scripts/pkgdep.sh
     # For xfs
     apt install -y xfsprogs
     # for clang-format
