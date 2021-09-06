@@ -27,10 +27,9 @@ shared_ptr<MockUBlockDevice>
 MockUblockDevice(const char* devName, DeviceType type, size_t devSize)
 {
     MockUBlockDevice* rawPtr = new MockUBlockDevice(devName, 1024, nullptr);
-    EXPECT_CALL(*rawPtr, GetType).WillOnce(Return(type));
+    EXPECT_CALL(*rawPtr, GetType).WillRepeatedly(Return(type));
     EXPECT_CALL(*rawPtr, GetName).WillRepeatedly(Return(devName));
-    EXPECT_CALL(*rawPtr, SetClass).Times(AtLeast(1));
-    EXPECT_CALL(*rawPtr, IsAlive).WillOnce(Return(true));
+    EXPECT_CALL(*rawPtr, IsAlive).WillRepeatedly(Return(true));
     EXPECT_CALL(*rawPtr, GetSize).WillRepeatedly(Return(devSize));
     return shared_ptr<MockUBlockDevice>(rawPtr);
 }
@@ -403,10 +402,19 @@ TEST(ArrayDeviceManager, Import_testIfNVMDeviceHasNoUblockWithMetaSetInformation
     nameSet.spares.push_back(spare1);
     DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
 
-    auto nvm1UblockDevPtr = nullptr;
+    auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), DeviceType::NVRAM, 805830656); // minNvmSize when logicalChunkCount is 2
+    auto data1UblockDevPtr = MockUblockDevice(data1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data2UblockDevPtr = MockUblockDevice(data2.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data3UblockDevPtr = MockUblockDevice(data3.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto spare1UblockDevPtr = MockUblockDevice(spare1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
 
     EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
-        .WillOnce(Return(nvm1UblockDevPtr));
+        .WillOnce(Return(nvm1UblockDevPtr))
+        .WillOnce(Return(data1UblockDevPtr))
+        .WillOnce(Return(data2UblockDevPtr))
+        .WillOnce(Return(data3UblockDevPtr))
+        .WillOnce(Return(spare1UblockDevPtr))
+        .WillOnce(Return(nullptr));
 
     arrDevMgr.ImportByName(nameSet);
     ArrayMeta arrayMeta;
@@ -498,9 +506,9 @@ TEST(ArrayDeviceManager, Import_testIfDataDeviceHasNoUblockWithMetaSetInformatio
     DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
 
     auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), DeviceType::NVRAM, 805830656); // minNvmSize when logicalChunkCount is 2
-    auto data1UblockDevPtr = nullptr;
-    auto data2UblockDevPtr = nullptr;
-    auto data3UblockDevPtr = nullptr;
+    auto data1UblockDevPtr = MockUblockDevice(data1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data2UblockDevPtr = MockUblockDevice(data2.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
+    auto data3UblockDevPtr = MockUblockDevice(data3.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
     auto spare1UblockDevPtr = MockUblockDevice(spare1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
 
     EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
@@ -510,10 +518,10 @@ TEST(ArrayDeviceManager, Import_testIfDataDeviceHasNoUblockWithMetaSetInformatio
         .WillOnce(Return(data3UblockDevPtr))
         .WillOnce(Return(spare1UblockDevPtr))
         .WillOnce(Return(nvm1UblockDevPtr))
-        .WillOnce(Return(data1UblockDevPtr))
-        .WillOnce(Return(data2UblockDevPtr))
-        .WillOnce(Return(data3UblockDevPtr))
-        .WillOnce(Return(spare1UblockDevPtr));
+        .WillOnce(Return(nullptr))
+        .WillOnce(Return(nullptr))
+        .WillOnce(Return(nullptr))
+        .WillOnce(Return(nullptr));
 
     arrDevMgr.ImportByName(nameSet);
     ArrayMeta arrayMeta;
@@ -794,8 +802,6 @@ TEST(ArrayDeviceManager, RemoveSpare_testWithPassingArrayDevice)
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
-    EXPECT_CALL(mockSysDevMgr, GetDev).WillOnce(Return(spare1));
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
     EXPECT_CALL(*mockArrayDeviceList, RemoveSpare).WillOnce(Return(0));
 
     // When
