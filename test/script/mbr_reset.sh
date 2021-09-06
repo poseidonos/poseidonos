@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 rootdir=$(readlink -f $(dirname $0))/../..
-spdkdir=$rootdir/lib/spdk-19.10/scripts/
+spdkdir=$rootdir/lib/spdk-20.10/scripts/
 
 function pci_can_use() {
 	local i

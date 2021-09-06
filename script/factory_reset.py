@@ -42,7 +42,7 @@ def udev_rule_reset():
     udev_rule_reset_script = path +"reset_udev_rule.sh" 
     
     if os.path.isfile(udev_rule_reset_script) == False: 
-        print("cannot find udev_rule_reset.sh") 
+        print("cannot find reset_udev_rule.sh") 
         return False 
     else: 
         subprocess.call([udev_rule_reset_script])
