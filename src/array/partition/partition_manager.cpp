@@ -69,6 +69,19 @@ PartitionManager::PartitionManager(
 
 PartitionManager::~PartitionManager()
 {
+    _DeleteAllPartitions();
+}
+
+void PartitionManager::_DeleteAllPartitions()
+{
+    for (uint32_t i = 0; i < partitions_.size(); i++)
+    {
+        if (nullptr != partitions_[i])
+        {
+            delete partitions_[i];
+            partitions_[i] = nullptr;
+        }
+    }
 }
 
 const PartitionLogicalSize*
@@ -300,14 +313,7 @@ PartitionManager::_CreateUserData(const vector<ArrayDevice*> devs,
 void
 PartitionManager::DeleteAll(ArrayInterface* intf)
 {
-    for (uint32_t i = 0; i < partitions_.size(); i++)
-    {
-        if (nullptr != partitions_[i])
-        {
-            delete partitions_[i];
-            partitions_[i] = nullptr;
-        }
-    }
+    _DeleteAllPartitions();
     intf->ClearInterface();
 }
 
