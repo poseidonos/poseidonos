@@ -42,21 +42,32 @@ endif()
 
 # Download required packages
 
-# Build AIR conditionally
+# Build AIR with conditional repository
 set(POS_DEP_AIR "air")
 if (${USE_LOCAL_REPO} STREQUAL "y")
     set(REPO_AIR "${LOCAL_REPO}/air.git")
-    set(TAG_AIR "0.6.3-beta")
+    set(TAG_AIR "v0.7.0-beta")
 else()
     set(REPO_AIR "https://github.com/poseidonos/air.git")
     set(TAG_AIR "v0.6.3-beta")
 endif()
 
 ExternalProject_Add(air
+#---Download step-----------------
     GIT_REPOSITORY ${REPO_AIR}
     GIT_TAG ${TAG_AIR}
+#---Update/Patch step-------------
+    UPDATE_COMMAND mkdir -p ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build
+#---Configure step----------------
     SOURCE_DIR ${PROJ_ROOT}/lib/${POS_DEP_AIR}
-    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND cmake .. -DCONFIG=${PROJ_ROOT}/config/air.cfg
+#---Build step--------------------
+    BINARY_DIR ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build
+    BUILD_COMMAND make
+#---Install step------------------
+    INSTALL_COMMAND make install
+#---Test step---------------------
+#---Output logging----------------
     LOG_DOWNLOAD ON
     LOG_UPDATE ON
     LOG_PATCH ON
@@ -65,13 +76,7 @@ ExternalProject_Add(air
     LOG_INSTALL ON
     LOG_OUTPUT_ON_FAILURE ON
     LOG_MERGED_STDOUTERR ON
-    UPDATE_COMMAND mkdir -p ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build
-    CONFIGURE_COMMAND cmake -DCONFIG=../../config/air.cfg
-    BUILD_COMMAND make -j ${NUM_BUILD_CORE}
-    COMMAND mkdir -p ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build/src
-    COMMAND cp ${PROJ_ROOT}/lib/${POS_DEP_AIR}/src/libair.a ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build/src
-    INSTALL_COMMAND make install)
-
+)
 
 # Set DPDK build options
 set(POS_DEP_DPDK "dpdk")

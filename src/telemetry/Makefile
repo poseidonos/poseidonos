@@ -1,6 +1,7 @@
 TOP := $(abspath $(CURDIR)/../..)
 TELEMETRY_SUB_DIR= . \
 grpc_wrapper \
+telemetry_air \
 telemetry_client \
 telemetry_manager
 

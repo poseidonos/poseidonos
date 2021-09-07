@@ -32,41 +32,27 @@
 
 #pragma once
 
-#include <cstdint>
-#include "src/debug/debug_info.h"
+#include <mutex>
 
 namespace pos
 {
-class IoRecoveryEventFactory;
-class TelemetryAirDelegator;
+class TelemetryClient;
 class TelemetryPublisher;
 
-class Poseidonos
+class TelemetryAirDelegator
 {
 public:
-    void Init(int argc, char** argv);
-    void Run(void);
-    void Terminate(void);
+    TelemetryAirDelegator(TelemetryClient* telClient, TelemetryPublisher* telPub);
+    virtual ~TelemetryAirDelegator(void);
+    void StartDelegation(void);
+    void StopDelegation(void);
 
 private:
-    void _InitDebugInfo(void);
-    void _InitSpdk(int argc, char** argv);
-
-    void _InitAffinity(void);
-    void _InitIOInterface(void);
-    void _LoadVersion(void);
-
-    void _InitAIR(void);
-    void _InitMemoryChecker(void);
-
-    void _SetPerfImpact(void);
-    void _LoadConfiguration(void);
-    void _RunCLIService(void);
-    void _SetupThreadModel(void);
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
-
-    IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
-    TelemetryAirDelegator* telemetryAirDelegator = nullptr;
-    TelemetryPublisher* telemtryPublisherForAir = nullptr;
+    TelemetryClient* telClient{nullptr};
+    TelemetryPublisher* telPub{nullptr};
+    const int stateRun{0};
+    const int stateEnd{1};
+    int returnState{0};
+    std::mutex mutex;
 };
 } // namespace pos

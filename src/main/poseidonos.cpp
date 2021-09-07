@@ -63,6 +63,9 @@
 #endif
 #include "src/network/transport_configuration.h"
 #include "src/spdk_wrapper/spdk_thread_caller.h"
+#include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
@@ -76,6 +79,7 @@ Poseidonos::Init(int argc, char** argv)
     _SetupThreadModel();
     _SetPerfImpact();
     _InitDebugInfo();
+    _InitAIR();
     _InitIOInterface();
     _InitMemoryChecker();
 }
@@ -121,8 +125,53 @@ Poseidonos::Terminate(void)
     ArrayManagerSingleton::ResetInstance();
     EventFrameworkApiSingleton::ResetInstance();
     SpdkThreadCallerSingleton::ResetInstance();
+
     air_deactivate();
     air_finalize();
+    if (nullptr != telemetryAirDelegator)
+    {
+        telemetryAirDelegator->StopDelegation();
+        delete telemetryAirDelegator;
+        telemetryAirDelegator = nullptr;
+    }
+    if (nullptr != telemtryPublisherForAir)
+    {
+        telemtryPublisherForAir->StopPublishing();
+        TelemetryClientSingleton::Instance()->DeregisterPublisher("air_deletator");
+        delete telemtryPublisherForAir;
+        telemtryPublisherForAir = nullptr;
+    }
+}
+
+void
+Poseidonos::_InitAIR(void)
+{
+    cpu_set_t air_cpu_set = pos::AffinityManagerSingleton::Instance()->GetCpuSet(pos::CoreType::AIR);
+    long nproc = sysconf(_SC_NPROCESSORS_ONLN);
+    unsigned int air_target_core = 0;
+    for (long i = 0; i < nproc; i++)
+    {
+        if (1 == CPU_ISSET(i, &air_cpu_set))
+        {
+            std::cout << "CPU ID: " << i << "       Usage: AIR\n";
+            air_target_core = (unsigned int)i;
+            break;
+        }
+    }
+    air_initialize(air_target_core);
+    air_activate();
+
+    if (nullptr == telemtryPublisherForAir)
+    {
+        telemtryPublisherForAir = new TelemetryPublisher{};
+        telemtryPublisherForAir->StartPublishing();
+        TelemetryClientSingleton::Instance()->RegisterPublisher("air_deletator", telemtryPublisherForAir);
+    }
+    if (nullptr == telemetryAirDelegator)
+    {
+        telemetryAirDelegator = new TelemetryAirDelegator{TelemetryClientSingleton::Instance(), telemtryPublisherForAir};
+        telemetryAirDelegator->StartDelegation();
+    }
 }
 
 void
@@ -130,20 +179,6 @@ Poseidonos::_InitAffinity(void)
 {
     pos::AffinityViewer::Print();
     pos::AffinityManagerSingleton::Instance()->SetGeneralAffinitySelf();
-
-    cpu_set_t air_core = pos::AffinityManagerSingleton::Instance()
-                             ->GetCpuSet(pos::CoreType::AIR);
-    long nproc = sysconf(_SC_NPROCESSORS_ONLN);
-    for (long i = 0; i < nproc; i++)
-    {
-        if (1 == CPU_ISSET(i, &air_core))
-        {
-            std::cout << "CPU ID: " << i << "       Usage: AIR\n";
-            air_initialize((unsigned int)i);
-            air_activate();
-            break;
-        }
-    }
 }
 
 void

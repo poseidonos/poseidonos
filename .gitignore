@@ -44,11 +44,6 @@ lib/dpdk-stable-19.08.2/
 lib/spdlog-1.4.2/lib
 lib/spdlog-1.4.2/_builds
 lib/go
-lib/air/bin
-lib/air/lib
-lib/air/include/
-lib/air/src/api/Air_c.cpp
-lib/air/src/api/Air_c.h
 test/regression/*.state
 test/regression/*.csv
 PYTHON_COMMAND

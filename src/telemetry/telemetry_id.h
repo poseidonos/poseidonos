@@ -39,5 +39,5 @@ namespace pos
     static const std::string TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT = "alct_allocctx_pendio_count";
     static const std::string TEL_ALLOCATOR_GCVICTIM_SEGMENT = "alct_gcvictim_segmentid";
     static const std::string TEL_ALLOCATOR_GCMODE = "alct_gcmode";
+    static const std::string TEL_VOLUME_IOPS_READ = "volume_iops_read";
 } // namespace pos
-
