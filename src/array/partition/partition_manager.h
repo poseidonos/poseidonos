@@ -58,7 +58,7 @@ public:
         IAbrControl* abr,
         AffinityManager* affinityManager = AffinityManagerSingleton::Instance(),
         IODispatcher* ioDispatcher = IODispatcherSingleton::Instance());
-    virtual ~PartitionManager();
+    virtual ~PartitionManager(void);
     virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type);
     virtual int CreateAll(vector<ArrayDevice*> buf, vector<ArrayDevice*> data,
         ArrayInterface* intf, uint32_t arrayIndex);

@@ -67,7 +67,7 @@ PartitionManager::PartitionManager(
     abrControl = abr;
 }
 
-PartitionManager::~PartitionManager()
+PartitionManager::~PartitionManager(void)
 {
     _DeleteAllPartitions();
 }
