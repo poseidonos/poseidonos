@@ -98,7 +98,7 @@ def mount_volume(vol_name, array, subnqn):
     param_str = "--volume-name " + vol_name
     param_str += " --array-name " + array
     if subnqn != "":
-        param_str += " --subnqn " + subnqn
+        param_str += " --subnqn " + subnqn + " --force"
     return send_request("volume mount " + param_str)
 
 

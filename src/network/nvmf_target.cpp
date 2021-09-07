@@ -35,9 +35,11 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <map>
 
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/include/pos_event_id.hpp"
+#include "src/include/array_mgmt_policy.h"
 #include "src/lib/system_timeout_checker.h"
 #include "src/logger/logger.h"
 #include "src/network/nvmf_target_spdk.h"
@@ -407,17 +409,30 @@ NvmfTarget::GetSubsystemNsCnt(struct spdk_nvmf_subsystem* subsystem)
 }
 
 struct spdk_nvmf_subsystem*
-NvmfTarget::AllocateSubsystem(void)
+NvmfTarget::AllocateSubsystem(string& arrayName, uint64_t arrayId)
 {
-    static uint32_t allowedNsCnt = nrVolumePerSubsystem;
+    bool subsystemExist = false;
+    static uint32_t allowedNsCnt[MAX_ARRAY_COUNT];
+    for (uint32_t i = 0; i < MAX_ARRAY_COUNT; i++)
+    {
+        allowedNsCnt[i] = nrVolumePerSubsystem;
+    }
 
     struct spdk_nvmf_subsystem* subsystem = spdkCaller->SpdkNvmfSubsystemGetFirst(g_spdk_nvmf_tgt);
     while (subsystem != nullptr)
     {
+        string subnqn = GetVolumeNqn(subsystem);
+        string subnqnArrayName = GetSubsystemArrayName(subnqn);
+        if (arrayName == subnqnArrayName)
+        {
+            subsystemExist = true;
+        }
+
         if (spdkCaller->SpdkNvmfSubsystemGetType(subsystem) == SPDK_NVMF_SUBTYPE_NVME)
         {
             uint32_t nsCnt = GetSubsystemNsCnt(subsystem);
-            if (nsCnt < allowedNsCnt)
+            bool suitableArrayName = (("" == subnqnArrayName) || (subnqnArrayName == arrayName));
+            if ((nsCnt < allowedNsCnt[arrayId]) && (true == suitableArrayName))
             {
                 return subsystem;
             }
@@ -425,13 +440,13 @@ NvmfTarget::AllocateSubsystem(void)
         struct spdk_nvmf_subsystem* nextSubsystem = spdkCaller->SpdkNvmfSubsystemGetNext(subsystem);
         if (nextSubsystem == nullptr)
         {
-            nextSubsystem = spdkCaller->SpdkNvmfSubsystemGetFirst(g_spdk_nvmf_tgt);
-            if (!nextSubsystem || spdkCaller->SpdkNvmfSubsystemGetNext(nextSubsystem) == nullptr)
+            if (false == subsystemExist)
             {
                 SPDK_ERRLOG("failed to allocate subsystem : next subsystem does not exist\n");
                 return nullptr;
             }
-            allowedNsCnt += nrVolumePerSubsystem;
+            nextSubsystem = spdkCaller->SpdkNvmfSubsystemGetFirst(g_spdk_nvmf_tgt);
+            allowedNsCnt[arrayId] += nrVolumePerSubsystem;
         }
         subsystem = nextSubsystem;
     }
@@ -646,4 +661,38 @@ NvmfTarget::GetPosBdevUuid(uint32_t id, string arrayName)
     }
     return uuidStr;
 }
+
+bool
+NvmfTarget::SetSubsystemArrayName(string& subnqn, string& arrayName)
+{
+    auto search = subsystemToArrayName.find(subnqn);
+    if (subsystemToArrayName.end() != search)
+    {
+        return false;
+    }
+    subsystemToArrayName[subnqn] = arrayName;
+    return true;
+}
+
+string
+NvmfTarget::GetSubsystemArrayName(string& subnqn)
+{
+    auto search = subsystemToArrayName.find(subnqn);
+    if (subsystemToArrayName.end() == search)
+    {
+        return "";
+    }
+    return subsystemToArrayName[subnqn];
+}
+
+void
+NvmfTarget::RemoveSubsystemArrayName(string& subnqn)
+{
+    struct spdk_nvmf_subsystem* subsystem = FindSubsystem(subnqn);
+    if ((nullptr != subsystem) && (0 == GetSubsystemNsCnt(subsystem)))
+    {
+        subsystemToArrayName.erase(subnqn);
+    }
+}
+
 } // namespace pos

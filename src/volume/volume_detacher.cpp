@@ -96,6 +96,8 @@ VolumeDetacher::DoAll(void)
     {
         vol = volumeList.GetVolume(volId);
         vol->Unmount();
+        string subnqn = vol->GetSubnqn();
+        nvmfTarget->RemoveSubsystemArrayName(subnqn);
         vol->SetSubnqn("");
     }
 }

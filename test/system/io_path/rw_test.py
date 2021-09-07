@@ -17,20 +17,22 @@ default_volume_size_gb = 16
 default_print_on = False
 #######################################################################################
 
+
 def execute_fio(readwrite, offset, verify):
     print("\tExecute FIO")
     fio_bench = pos_root + "test/system/io_path/fio_bench.py"
-    ret = subprocess.call([fio_bench, \
-        "--bs", "4k", \
-        "--readwrite", readwrite, \
-        "-t", args.transport, \
-        "-i", args.fabric_ip, \
-        "--offset", str(offset), \
-        "--io_size", "4k", \
-        "--verify", str(verify)],\
-        stdout=stdout_type, stderr=subprocess.STDOUT)
+    ret = subprocess.call([fio_bench,
+                           "--bs", "4k",
+                           "--readwrite", readwrite,
+                           "-t", args.transport,
+                           "-i", args.fabric_ip,
+                           "--offset", str(offset),
+                           "--io_size", "4k",
+                           "--verify", str(verify)],
+                          stdout=stdout_type, stderr=subprocess.STDOUT)
     print("\tFIO done")
     return ret
+
 
 def write_test():
     test_name = "Write"
@@ -44,6 +46,7 @@ def write_test():
     common_test_lib.print_result(test_name, success)
     return success
 
+
 def write_out_range_fail_test():
     test_name = "Write out of range"
     common_test_lib.print_start(test_name)
@@ -55,6 +58,7 @@ def write_out_range_fail_test():
     success = (ret == 1)
     common_test_lib.print_result(test_name, success)
     return success
+
 
 def verify_test():
     test_name = "Verify"
@@ -68,6 +72,7 @@ def verify_test():
     common_test_lib.print_result(test_name, success)
     return success
 
+
 def read_test():
     test_name = "Read"
     common_test_lib.print_start(test_name)
@@ -79,6 +84,7 @@ def read_test():
     success = (ret == 0)
     common_test_lib.print_result(test_name, success)
     return success
+
 
 def read_out_range_fail_test():
     test_name = "Read out of range"
@@ -92,20 +98,22 @@ def read_out_range_fail_test():
     common_test_lib.print_result(test_name, success)
     return success
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Test normal read/write IO')
-    parser.add_argument('-f', '--fabric_ip', default=default_target_ip,\
-            help='Set target IP, default: ' + default_target_ip)
-    parser.add_argument('-l', '--log_path', default=default_log_path,\
-            help='Set path for log file, default: ' + default_log_path)
+    parser.add_argument('-f', '--fabric_ip', default=default_target_ip,
+                        help='Set target IP, default: ' + default_target_ip)
+    parser.add_argument('-l', '--log_path', default=default_log_path,
+                        help='Set path for log file, default: ' + default_log_path)
     parser.add_argument('-t', '--transport', default=default_transport,
-            help='Set transport, default: ' + default_transport)
+                        help='Set transport, default: ' + default_transport)
     parser.add_argument('-s', '--volume_size', default=default_volume_size_gb,
-            help='Set volume size(GB), default: ' + str(default_volume_size_gb))
+                        help='Set volume size(GB), default: ' + str(default_volume_size_gb))
     parser.add_argument('-p', '--print_log', default=default_print_on,
-            help='Set printing log or not, default: ' + str(default_print_on))
+                        help='Set printing log or not, default: ' + str(default_print_on))
     global args
     args = parser.parse_args()
+
 
 def get_argument():
     gb_to_byte_shift = 30
@@ -118,14 +126,15 @@ def get_argument():
         stdout_type = subprocess.DEVNULL
 
     bringup_argument = {
-        'log_path' : args.log_path,
-        'ibof_root' : pos_root,
-        'transport' : args.transport,
-        'target_ip' : args.fabric_ip,
-        'volume_size' : volume_size,
-        'stdout_type' : stdout_type}
-    print (args)
-    return bringup_argument;
+        'log_path': args.log_path,
+        'pos_root': pos_root,
+        'transport': args.transport,
+        'target_ip': args.fabric_ip,
+        'volume_size': volume_size,
+        'stdout_type': stdout_type}
+    print(args)
+    return bringup_argument
+
 
 if __name__ == "__main__":
     parse_arguments()

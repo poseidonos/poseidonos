@@ -2,8 +2,8 @@ package volumecmds
 
 import (
 	"encoding/json"
+	"os"
 	"pnconnector/src/log"
-
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/messages"
@@ -20,15 +20,57 @@ Mount a volume to the host.
 
 Syntax:
 	mount (--volume-name | -v) VolumeName (--array-name | -a) ArrayName
-	[--subnqn TargetNVMSubsystemNVMeQualifiedName]
+	[(--subnqn | -q) TargetNVMSubsystemNVMeQualifiedName] [(--trtype | -t) TransportType]
+	[(--traddr | -i) TargetAddress] [(--trsvcid | -p) TransportServiceId]
 
 Example: 
 	poseidonos-cli volume mount --volume-name Volume0 --array-name Volume0
 	
          `,
 	Run: func(cmd *cobra.Command, args []string) {
+		var requestList []messages.Request
 
-		var command = "MOUNTVOLUME"
+		CheckSubsystemParam(cmd)
+
+	    if mount_volume_ready_to_create_subsystem == true {
+			var warningMsg = "WARNING: Are you sure you want to mount volume to the subsystem:" +
+				" " + mount_volume_subNqnName + "?\n" + 
+				"If requsted subsystem does not exist, it will be automatically created."
+
+			if mount_volume_isForced == false {
+				conf := displaymgr.AskConfirmation(warningMsg)
+				if conf == false {
+					os.Exit(0)
+				}
+			}
+
+			createSubsystemAutoParam := messages.CreateSubsystemAutoParam{
+				SUBNQN:		mount_volume_subNqnName,
+			}
+
+			createSubsystemReq := messages.Request{
+				RID:	  	"fromfakeclient",
+				COMMAND:	"CREATESUBSYSTEMAUTO",
+				PARAM:		createSubsystemAutoParam,
+			}
+			requestList = append(requestList, createSubsystemReq)
+		}
+
+		if mount_volume_ready_to_add_Listener == true {
+			addListenerParam := messages.AddListenerParam{
+				SUBNQN:             mount_volume_subNqnName,
+				TRANSPORTTYPE:      mount_volume_trtype,
+				TARGETADDRESS:      mount_volume_traddr,
+				TRANSPORTSERVICEID: mount_volume_trsvcid,
+			}
+
+			addListenerReq := messages.Request{
+				RID:		"fromCLI",
+				COMMAND:	"ADDLISTENER",
+				PARAM:		addListenerParam,
+			}
+			requestList = append(requestList, addListenerReq)
+		}
 
 		mountVolumeParam := messages.MountVolumeParam{
 			VOLUMENAME: mount_volume_volumeName,
@@ -38,32 +80,46 @@ Example:
 
 		mountVolumeReq := messages.Request{
 			RID:     "fromfakeclient",
-			COMMAND: command,
+			COMMAND: "MOUNTVOLUME",
 			PARAM:   mountVolumeParam,
 		}
-
-		reqJSON, err := json.Marshal(mountVolumeReq)
-		if err != nil {
-			log.Debug("error:", err)
-		}
-
-		displaymgr.PrintRequest(string(reqJSON))
+		requestList = append(requestList, mountVolumeReq)
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			socketmgr.Connect()
+			for _, request := range requestList {
+				socketmgr.Connect()
 
-			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
-			if err != nil {
-				log.Debug("error:", err)
-				return
+				reqJSON, err := json.Marshal(request)
+				if err != nil {
+					log.Debug("error:", err)
+				}
+
+				displaymgr.PrintRequest(string(reqJSON))
+
+				resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+				if err != nil {
+					log.Debug("error:", err)
+					return
+				}
+
+				socketmgr.Close()
+
+				displaymgr.PrintResponse(request.COMMAND, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 			}
-
-			socketmgr.Close()
-
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
+}
+
+func CheckSubsystemParam(cmd *cobra.Command) {
+	if cmd.Flags().Changed("subnqn") {
+		mount_volume_ready_to_create_subsystem = true
+		if (cmd.Flags().Changed("transport-type") &&
+			cmd.Flags().Changed("target-address") &&
+			cmd.Flags().Changed("transport-service-id")) {
+			mount_volume_ready_to_add_Listener = true
+		}
+	}
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
@@ -72,6 +128,12 @@ Example:
 var mount_volume_volumeName = ""
 var mount_volume_arrayName = ""
 var mount_volume_subNqnName = ""
+var mount_volume_trtype = ""
+var mount_volume_traddr = ""
+var mount_volume_trsvcid = ""
+var mount_volume_ready_to_create_subsystem = false
+var mount_volume_ready_to_add_Listener = false
+var mount_volume_isForced = false
 
 func init() {
 	MountVolumeCmd.Flags().StringVarP(&mount_volume_volumeName,
@@ -85,6 +147,22 @@ func init() {
 	MountVolumeCmd.MarkFlagRequired("array-name")
 
 	MountVolumeCmd.Flags().StringVarP(&mount_volume_subNqnName,
-		"subnqn", "", "",
-		"NVMe qualified name of target NVM subsystem.")
+		"subnqn", "q", "",
+		"NVMe qualified name of target NVM subsystem")
+	
+	MountVolumeCmd.Flags().StringVarP(&mount_volume_trtype,
+		"transport-type", "t", "",
+		"NVMe-oF transport type (ex. tcp)")
+	
+	MountVolumeCmd.Flags().StringVarP(&mount_volume_traddr,
+		"target-address", "i", "",
+		"NVMe-oF target address (ex. 127.0.0.1)")
+	
+	MountVolumeCmd.Flags().StringVarP(&mount_volume_trsvcid,
+		"transport-service-id", "p", "",
+		"NVMe-oF transport service id (ex. 1158)")
+
+	MountVolumeCmd.Flags().BoolVarP(&mount_volume_isForced,
+		"force", "", false,
+		"Execute this command without confirmation")
 }

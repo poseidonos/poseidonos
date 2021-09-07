@@ -9,7 +9,8 @@ Mount a volume to the host.
 
 Syntax:
 	mount (--volume-name | -v) VolumeName (--array-name | -a) ArrayName
-	[--subnqn TargetNVMSubsystemNVMeQualifiedName]
+	[(--subnqn | -q) TargetNVMSubsystemNVMeQualifiedName] [(--trtype | -t) TransportType]
+	[(--traddr | -i) TargetAddress] [(--trsvcid | -p) TransportServiceId]
 
 Example: 
 	poseidonos-cli volume mount --volume-name Volume0 --array-name Volume0
@@ -23,10 +24,14 @@ poseidonos-cli volume mount [flags]
 ### Options
 
 ```
-  -a, --array-name string    The name of the array where the volume belongs to.
-  -h, --help                 help for mount
-      --subnqn string        NVMe qualified name of target NVM subsystem.
-  -v, --volume-name string   The name of the volume to mount.
+  -a, --array-name string             The name of the array where the volume belongs to.
+      --force                         Execute this command without confirmation
+  -h, --help                          help for mount
+  -q, --subnqn string                 NVMe qualified name of target NVM subsystem
+  -i, --target-address string         NVMe-oF target address (ex. 127.0.0.1)
+  -p, --transport-service-id string   NVMe-oF transport service id (ex. 1158)
+  -t, --transport-type string         NVMe-oF transport type (ex. tcp)
+  -v, --volume-name string            The name of the volume to mount.
 ```
 
 ### Options inherited from parent commands

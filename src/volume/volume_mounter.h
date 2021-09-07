@@ -52,8 +52,10 @@ private:
     bool _CheckFailStatus(int checkValue);
     int _CheckIfExistVolume(VolumeBase* vol);
     int _CheckIfExistSubsystem(string subnqn);
+    string _GetSubsystemToMount(string arrayName, int arrayID);
     int _MountVolume(VolumeBase* vol, string subnqn);
     int _RollBackVolumeMount(VolumeBase* vol, string subnqn);
+    int _CheckAndSetSubsystemToArray(string subnqn, string arrayName);
 };
 
 } // namespace pos

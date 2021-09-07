@@ -36,6 +36,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <map>
 
 #include "src/include/nvmf_const.h"
 #include "src/lib/singleton.h"
@@ -70,7 +71,7 @@ public:
         void* cbArg);
 
     uint32_t GetSubsystemNsCnt(struct spdk_nvmf_subsystem* subsystem);
-    struct spdk_nvmf_subsystem* AllocateSubsystem(void);
+    struct spdk_nvmf_subsystem* AllocateSubsystem(string& arrayName, uint64_t arrayId);
     virtual struct spdk_nvmf_ns* GetNamespace(struct spdk_nvmf_subsystem* subsystem,
         const string& bdevName);
 
@@ -89,6 +90,9 @@ public:
     static bool AttachNamespace(const string& nqn, const string& bdevName,
         PosNvmfEventDoneCallback_t cb, void* cbArg);
     string GetPosBdevUuid(uint32_t id, string arrayName);
+    bool SetSubsystemArrayName(string& subnqn, string& arrayName);
+    string GetSubsystemArrayName(string& subnqn);
+    void RemoveSubsystemArrayName(string& subnqn);
 
 private:
     static struct NvmfTargetCallbacks nvmfCallbacks;
@@ -98,6 +102,7 @@ private:
     SpdkCaller* spdkCaller;
     bool feQosEnable;
     EventFrameworkApi* eventFrameworkApi;
+    map<string, string> subsystemToArrayName;
     static struct EventContext* _CreateEventContext(PosNvmfEventDoneCallback_t callback,
         void* userArg, void* eventArg1, void* eventArg2);
     static bool _IsTargetExist(void);
@@ -111,4 +116,5 @@ private:
 };
 
 using NvmfTargetSingleton = Singleton<NvmfTarget>;
+
 } // namespace pos

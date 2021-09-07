@@ -436,26 +436,14 @@ TEST(NvmfTarget, AllocateSubsystem_Success)
     struct spdk_nvmf_subsystem* subsystem[1];
 
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirst(_)).WillByDefault(Return(subsystem[0]));
+    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetNqn(_)).WillByDefault(Return("subnqn"));
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetType(_)).WillByDefault(Return(SPDK_NVMF_SUBTYPE_NVME));
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirstNs(_)).WillByDefault(Return(nullptr));
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
-    struct spdk_nvmf_subsystem* actual = nvmfTarget.AllocateSubsystem();
+    string arrayName = "POSArray";
+    struct spdk_nvmf_subsystem* actual = nvmfTarget.AllocateSubsystem(arrayName, 0);
     ASSERT_EQ(actual, subsystem[0]);
-    delete mockSpdkCaller;
-}
-
-TEST(NvmfTarget, AllocateSubsystem_AllocateFirstSubsystem)
-{
-    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
-    struct spdk_nvmf_subsystem* subsystem[1];
-
-    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirst(_)).WillByDefault(Return(subsystem[0]));
-    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetType(_)).WillByDefault(Return(SPDK_NVMF_SUBTYPE_NVME));
-    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirstNs(_)).WillByDefault(Return(nullptr));
-
-    NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
-    struct spdk_nvmf_subsystem* actual = nvmfTarget.AllocateSubsystem();
     delete mockSpdkCaller;
 }
 
@@ -464,19 +452,23 @@ TEST(NvmfTarget, AllocateSubsystem_AllocateNextSubsystem)
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
     struct spdk_nvmf_subsystem* subsystem[1];
     struct spdk_nvmf_ns* ns[1];
+    string subnqn = "subnqn";
 
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirst(_)).WillByDefault(Return(subsystem[0]));
+    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetNqn(_)).WillByDefault(Return(subnqn.c_str()));
+
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetType(_)).WillByDefault(Return(SPDK_NVMF_SUBTYPE_NVME));
     EXPECT_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirstNs(_))
         .WillOnce(Return(ns[0]))
         .WillOnce(Return(nullptr));
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetNextNs(_, _)).WillByDefault(Return(nullptr));
     EXPECT_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetNext(_))
-        .WillOnce(Return(nullptr))
-        .WillOnce(Return(subsystem[0]));
+        .WillOnce(Return(nullptr));
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
-    struct spdk_nvmf_subsystem* actual = nvmfTarget.AllocateSubsystem();
+    string arrayName = "POSArray";
+    nvmfTarget.SetSubsystemArrayName(subnqn, arrayName);
+    struct spdk_nvmf_subsystem* actual = nvmfTarget.AllocateSubsystem(arrayName, 0);
     ASSERT_EQ(actual, subsystem[0]);
     delete mockSpdkCaller;
 }
@@ -488,15 +480,14 @@ TEST(NvmfTarget, AllocateSubsystem_FailToAllocateSubsystem)
     struct spdk_nvmf_ns* ns[1];
 
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirst(_)).WillByDefault(Return(subsystem[0]));
+    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetNqn(_)).WillByDefault(Return("subnqn"));
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetType(_)).WillByDefault(Return(SPDK_NVMF_SUBTYPE_DISCOVERY));
     EXPECT_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetNext(_))
-        .WillOnce(Return(nullptr))
-        .WillOnce(Return(subsystem[0]))
-        .WillOnce(Return(nullptr))
         .WillOnce(Return(nullptr));
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
-    struct spdk_nvmf_subsystem* actual = nvmfTarget.AllocateSubsystem();
+    string arrayName = "POSArray";
+    struct spdk_nvmf_subsystem* actual = nvmfTarget.AllocateSubsystem(arrayName, 0);
     ASSERT_EQ(actual, nullptr);
     delete mockSpdkCaller;
 }
@@ -508,7 +499,8 @@ TEST(NvmfTarget, AllocateSubsystem_FailToGetFirstSubsystem)
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirst(_)).WillByDefault(Return(nullptr));
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
-    struct spdk_nvmf_subsystem* actual = nvmfTarget.AllocateSubsystem();
+    string arrayName = "POSArray";
+    struct spdk_nvmf_subsystem* actual = nvmfTarget.AllocateSubsystem(arrayName, 0);
     ASSERT_EQ(actual, expected);
     delete mockSpdkCaller;
 }
@@ -880,6 +872,71 @@ TEST(NvmfTarget, GetPosBdevUuid_FailToConvertUuidToString)
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
     string actual = nvmfTarget.GetPosBdevUuid(0, "array");
 
+    ASSERT_EQ(actual, expected);
+    delete mockSpdkCaller;
+}
+
+TEST(NvmfTarget, SetSubsystemArrayName_Success)
+{
+    string subnqn = "subnqn";
+    string arrayName = "POSArray";
+    NvmfTarget nvmfTarget(nullptr, false, nullptr);
+    bool actual = nvmfTarget.SetSubsystemArrayName(subnqn, arrayName);
+    bool expected = true;
+
+    ASSERT_EQ(actual, expected);
+}
+
+TEST(NvmfTarget, SetSubsystemArrayName_Fail)
+{
+    string subnqn = "subnqn";
+    string arrayName1 = "POSArray1";
+    string arrayName2 = "POSArray2";
+    NvmfTarget nvmfTarget(nullptr, false, nullptr);
+    nvmfTarget.SetSubsystemArrayName(subnqn, arrayName1);
+    bool actual = nvmfTarget.SetSubsystemArrayName(subnqn, arrayName2);
+    bool expected = false;
+    ASSERT_EQ(actual, expected);
+}
+
+TEST(NvmfTarget, GetSubsystemArrayName_Success)
+{
+    string subnqn = "subnqn";
+    string arrayName = "POSArray";
+    NvmfTarget nvmfTarget(nullptr, false, nullptr);
+    nvmfTarget.SetSubsystemArrayName(subnqn, arrayName);
+    string actual = nvmfTarget.GetSubsystemArrayName(subnqn);
+
+    ASSERT_EQ(actual, arrayName);
+}
+
+TEST(NvmfTarget, GetSubsystemArrayName_Fail)
+{
+    string subnqn1 = "subnqn1";
+    string subnqn2 = "subnqn2";
+    string arrayName = "POSArray";
+    NvmfTarget nvmfTarget(nullptr, false, nullptr);
+    nvmfTarget.SetSubsystemArrayName(subnqn1, arrayName);
+    string actual = nvmfTarget.GetSubsystemArrayName(subnqn2);
+    string expected = "";
+    ASSERT_EQ(actual, expected);
+}
+
+TEST(NvmfTarget, RemoveSubsystemArrayName_Success)
+{
+    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    string subnqn = "subnqn";
+    string arrayName = "POSArray";
+    struct spdk_nvmf_subsystem* subsystem[1];
+    ON_CALL(*mockSpdkCaller, SpdkNvmfTgtFindSubsystem(_, _)).WillByDefault(Return(subsystem[0]));
+    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirstNs(_)).WillByDefault(Return(nullptr));
+
+    NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
+    nvmfTarget.SetSubsystemArrayName(subnqn, arrayName);
+    nvmfTarget.RemoveSubsystemArrayName(subnqn);
+
+    string actual = nvmfTarget.GetSubsystemArrayName(subnqn);
+    string expected = "";
     ASSERT_EQ(actual, expected);
     delete mockSpdkCaller;
 }

@@ -130,12 +130,16 @@ VolumeDeleteCmd = "delete" , ( "--volume-name" | "-v" ) ,
 
 VolumeMountCmd = "mount" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
-  [ "--subnqn" , TargetNVMSubsystemNVMeQualifiedName ] ;
+  [ "--subnqn" , TargetNVMSubsystemNVMeQualifiedName ],
+  [ ( "--trtype" | "-t" ) , TransportType ],
+  [ ( "--traddr" | "-i" ) , TargetAddress ],
+  [ ( "--trsvcid" | "-p" ) , TransportServiceId ],
+  [ "--force" ] ;
 
 VolumeMountWithSubsystemCmd = "mount" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--subnqn" | "-q" ) , SubsystemNQN ,
   ( "--array-name" | "-a" ) , ArrayName , ( "--trtype" | "-t" ) ,
-  TransportType , ( "--traddr" | "-a" ) , TargetAddress ,
+  TransportType , ( "--traddr" | "-i" ) , TargetAddress ,
   ( "--trsvcid" | "-p" ) , TransportServiceId ;
 
 VolumeUnmountCmd = "unmount" , ( "--volume-name" | "-v" ) ,

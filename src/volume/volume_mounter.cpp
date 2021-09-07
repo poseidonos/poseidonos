@@ -34,7 +34,7 @@
 
 #include <string>
 
-#include "src/include/pos_event_id.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume.h"
@@ -73,10 +73,26 @@ VolumeMounter::Do(string name, string subnqn)
         return ret;
     }
 
-    if (subnqn.empty())
+    if (true == subnqn.empty())
     {
-        struct spdk_nvmf_subsystem* subsystem = nvmfTarget->AllocateSubsystem();
-        subnqn = nvmfTarget->GetVolumeNqn(subsystem);
+        subnqn = _GetSubsystemToMount(arrayName, arrayID);
+        if ("" == subnqn)
+        {
+            ret = static_cast<int>(POS_EVENT_ID::SUBSYSTEM_NOT_CREATED);
+            POS_TRACE_WARN(ret, "No mataching subsystem exist for the volume in array:{}", arrayName);
+        }
+    }
+
+    if (_CheckFailStatus(ret))
+    {
+        return ret;
+    }
+
+    ret = _CheckAndSetSubsystemToArray(subnqn, arrayName);
+
+    if (_CheckFailStatus(ret))
+    {
+        return ret;
     }
 
     ret = _MountVolume(vol, subnqn);
@@ -139,6 +155,20 @@ VolumeMounter::_CheckIfExistSubsystem(string subnqn)
     }
 
     return ret;
+}
+
+string
+VolumeMounter::_GetSubsystemToMount(string arrayName, int arrayID)
+{
+    string subnqn = "";
+    struct spdk_nvmf_subsystem* subsystem = nvmfTarget->AllocateSubsystem(arrayName, arrayID);
+    if (nullptr == subsystem)
+    {
+        return subnqn;
+    }
+    subnqn = nvmfTarget->GetVolumeNqn(subsystem);
+
+    return subnqn;
 }
 
 int
@@ -209,6 +239,34 @@ VolumeMounter::_RollBackVolumeMount(VolumeBase* vol, string subnqn)
     POS_TRACE_WARN(ret, "Can't extend more nsid to subsystem:{}", subnqn);
 
     vol->UnlockStatus();
+
+    return ret;
+}
+
+int
+VolumeMounter::_CheckAndSetSubsystemToArray(string subnqn, string volumeArrayName)
+{
+    int ret = static_cast<int>(POS_EVENT_ID::SUCCESS);
+    string subnqnArrayName = nvmfTarget->GetSubsystemArrayName(subnqn);
+    if (subnqnArrayName == "")
+    {
+        bool result = nvmfTarget->SetSubsystemArrayName(subnqn, volumeArrayName);
+        if (false == result)
+        {
+            ret = static_cast<int>(POS_EVENT_ID::SUBSYSTEM_ALREADY_SET_ARRAY);
+            POS_TRACE_ERROR(ret, "Fail to set array:{} to subsystem:{}. It already has configured an array", arrayName, subnqn);
+        }
+        else
+        {
+            POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_SET_ARRAY_TO_SUBSYSTEM;
+            POS_TRACE_INFO(static_cast<int>(eventId), PosEventId::GetString(eventId), volumeArrayName, subnqn);
+        }
+    }
+    else if (subnqnArrayName != volumeArrayName)
+    {
+        ret = static_cast<int>(POS_EVENT_ID::SUBSYSTEM_ARRAY_DOES_NOT_MATCH_VOLUME_ARRAY);
+        POS_TRACE_ERROR(ret, "Subsystem's array:{} doesn't match volume's array:{}", subnqnArrayName, volumeArrayName);
+    }
 
     return ret;
 }

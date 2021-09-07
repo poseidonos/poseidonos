@@ -47,7 +47,8 @@ namespace pos
 {
 
 VolumeUnmounter::VolumeUnmounter(VolumeList& volumeList, std::string arrayName, int arrayID)
-: VolumeInterface(volumeList, arrayName, arrayID)
+: VolumeInterface(volumeList, arrayName, arrayID),
+  nvmfTarget(NvmfTargetSingleton::Instance())
 {
 }
 
@@ -97,6 +98,9 @@ VolumeUnmounter::Do(string name)
     {
         return static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
     }
+
+    string subnqn = vol->GetSubnqn();
+    nvmfTarget->RemoveSubsystemArrayName(subnqn);
     vol->SetSubnqn("");
     return ret;
 }

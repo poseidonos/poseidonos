@@ -46,6 +46,9 @@ public:
     ~VolumeUnmounter(void) override;
 
     int Do(string name);
+
+private:
+    NvmfTarget* nvmfTarget;
 };
 
 } // namespace pos

@@ -76,9 +76,6 @@ VolumeDeleter::Do(string name)
 
     volumeList.WaitUntilIdle(volID, VolumeStatus::Unmounted);
 
-    vol->SetValid(false); // remove tempo.
-    vol->SetSubnqn("");
-
     _SetVolumeEventBase(vol);
     _SetVolumeArrayInfo();
 
@@ -88,6 +85,9 @@ VolumeDeleter::Do(string name)
     {
         return static_cast<int>(POS_EVENT_ID::DONE_WITH_ERROR);
     }
+
+    vol->SetValid(false); // remove tempo.
+    vol->SetSubnqn("");
 
     int ret = _SaveVolumes();
     if (ret == static_cast<int>(POS_EVENT_ID::SUCCESS))
