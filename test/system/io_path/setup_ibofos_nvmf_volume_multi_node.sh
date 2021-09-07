@@ -6,12 +6,14 @@ SPDK_DIR=$ROOT_DIR/lib/spdk
 
 PORT_COUNT=1
 # Note: In case of tcp transport, network io irq can be manually controlled for better performance by issueing an option, "-i true" with given TARGET_NIC and NET_IRQ_CPULIST 
-DEFAULT_TARGET_NIC=enp59s0
-DEFAULT_NET_IRQ_CPULIST=66-71,90-95
+DEFAULT_TARGET_NIC1=ens5f0
+DEFAULT_TARGET_NIC2=ens17f0
+DEFAULT_NET_IRQ_CPULIST1=67-71
+DEFAULT_NET_IRQ_CPULIST2=90-95
 DEFAULT_CLEAN_BRINGUP=1
 DEFAULT_TRANSPORT=TCP
-DEFAULT_TARGET_IP1=10.100.3.16 # CI Server VM IP
-DEFAULT_TARGET_IP2=10.100.2.16 # CI Server VM IP
+DEFAULT_TARGET_IP1=10.100.2.16 # CI Server VM IP
+DEFAULT_TARGET_IP2=10.100.3.16 # CI Server VM IP
 DEFAULT_SUBSYSTEM_COUNT1=33
 DEFAULT_SUBSYSTEM_COUNT2=32
 DEFAULT_VOLUME_COUNT1=33
@@ -19,7 +21,7 @@ DEFAULT_VOLUME_COUNT2=32
 DEFAULT_WRITE_BUFFER_SIZE_IN_MB=4096
 DEFAULT_NUM_SHARED_BUFFER=8192
 DEFAULT_VOLUME_SIZE=2147483648
-DEFAULT_IRQ_DEDICATION=FALSE
+DEFAULT_IRQ_DEDICATION=TRUE
 DEFAULT_USER_DEVICE_LIST1="-d unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3,unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7,unvme-ns-8,unvme-ns-9,unvme-ns-10,unvme-ns-11,unvme-ns-12,unvme-ns-13,unvme-ns-14,unvme-ns-15"
 DEFAULT_USER_DEVICE_LIST2="-d unvme-ns-16,unvme-ns-17,unvme-ns-18,unvme-ns-19,unvme-ns-20,unvme-ns-21,unvme-ns-22,unvme-ns-23,unvme-ns-24,unvme-ns-25,unvme-ns-26,unvme-ns-27,unvme-ns-28,unvme-ns-29,unvme-ns-30,unvme-ns-31"
 DEFAULT_SPARE_DEVICE_LIST=""
@@ -46,7 +48,8 @@ ibofos_bringup(){
         sudo $ROOT_DIR/test/system/network/tcp_tune.sh max
         if [ "$IRQ_DEDICATION" == "TRUE" ] || [ "$IRQ_DEDICATION" == "true" ];then
             sudo systemctl stop irqbalance.service
-            sudo $ROOT_DIR/test/script/set_irq_affinity_cpulist.sh ${NET_IRQ_CPULIST} ${TARGET_NIC}
+            sudo $ROOT_DIR/test/script/set_irq_affinity_cpulist.sh ${NET_IRQ_CPULIST1} ${TARGET_NIC1}
+            sudo $ROOT_DIR/test/script/set_irq_affinity_cpulist.sh ${NET_IRQ_CPULIST2} ${TARGET_NIC2}
         fi
         sudo $SPDK_DIR/scripts/rpc.py nvmf_create_transport -t $TRANSPORT -b 64 -n ${NUM_SHARED_BUFFER}
     else
@@ -60,8 +63,8 @@ ibofos_bringup(){
         fi
         sudo $SPDK_DIR/scripts/rpc.py bdev_pmem_create ${PMEM_POOL} -n pmem0
     else
-        sudo $SPDK_DIR/scripts/rpc.py bdev_malloc_create -b uram0 $WRITE_BUFFER_SIZE_IN_MB 512
-        sudo $SPDK_DIR/scripts/rpc.py bdev_malloc_create -b uram1 $WRITE_BUFFER_SIZE_IN_MB 512
+        sudo $ROOT_DIR/bin/poseidonos-cli device create --device-name uram0 --num-blocks 8388608 --block-size 512 --device-type uram --numa 0
+        sudo $ROOT_DIR/bin/poseidonos-cli device create --device-name uram1 --num-blocks 8388608 --block-size 512 --device-type uram --numa 1
     fi
 
     sudo $ROOT_DIR/bin/poseidonos-cli device scan
@@ -83,8 +86,8 @@ ibofos_bringup(){
     if [ "$CLEAN_BRINGUP" -eq 1 ]; then
         echo "poseidonos clean bringup"
         sudo $ROOT_DIR/bin/poseidonos-cli devel resetmbr
-        sudo $ROOT_DIR/bin/poseidonos-cli array create -b uram0 $USER_DEVICE_LIST1 --name $ARRAYNAME1 --raid RAID5
-        sudo $ROOT_DIR/bin/poseidonos-cli array create -b uram1 $USER_DEVICE_LIST2 --name $ARRAYNAME2 --raid RAID5
+        sudo $ROOT_DIR/bin/poseidonos-cli array create -b uram0 $USER_DEVICE_LIST1 --array-name $ARRAYNAME1 --raid RAID5
+        sudo $ROOT_DIR/bin/poseidonos-cli array create -b uram1 $USER_DEVICE_LIST2 --array-name $ARRAYNAME2 --raid RAID5
         sudo $ROOT_DIR/bin/poseidonos-cli array mount --array-name $ARRAYNAME1
         sudo $ROOT_DIR/bin/poseidonos-cli array mount --array-name $ARRAYNAME2
 
@@ -108,7 +111,7 @@ ibofos_bringup(){
         done
     fi
     sudo $SPDK_DIR/scripts/rpc.py nvmf_get_subsystems
-    sudo $ROOT_DIR/bin/poseidonos-cli logger set-level --level info
+    sudo $ROOT_DIR/bin/poseidonos-cli logger set-level --level warning
 
 }
 
@@ -192,7 +195,7 @@ while getopts c:t:a:A:s:S:w:v:V:B:i:u:U:p:q:n:b:m:h: ARG ; do
             NET_IRQ_CPULIST=$OPTARG
             ;;
         n ) 
-            TARGET_NIC=$OPTARG
+            TARGET_NIC1=$OPTARG
             ;;
         b )
             NUM_SHARED_BUFFER=$OPTARG
@@ -309,14 +312,16 @@ log_normal "13. USER_DEVICE_LIST2 => "${USER_DEVICE_LIST2:3}
 echo ""
 
 if [ -z $TARGET_NIC ];then
-TARGET_NIC=$DEFAULT_TARGET_NIC
+TARGET_NIC1=$DEFAULT_TARGET_NIC1
+TARGET_NIC2=$DEFAULT_TARGET_NIC2
 log_error "14. TARGET_NIC empty. use default:"
 fi
 log_normal "14. TARGET_NIC => "$TARGET_NIC
 echo ""
 
 if [ -z $NET_IRQ_CPULIST ];then
-NET_IRQ_CPULIST=$DEFAULT_NET_IRQ_CPULIST
+NET_IRQ_CPULIST1=$DEFAULT_NET_IRQ_CPULIST1
+NET_IRQ_CPULIST2=$DEFAULT_NET_IRQ_CPULIST2
 log_error "15. DEFAULT_NET_IRQ empty. use default:"
 fi
 log_normal "15. NET_IRQ_CPULIST => "$NET_IRQ_CPULIST

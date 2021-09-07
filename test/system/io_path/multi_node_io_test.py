@@ -8,6 +8,7 @@ import sys
 import paramiko
 import time
 import threading
+import remote_control
 
 default_fabric_ip = ["10.100.2.16", "10.100.3.16"]
 default_initiator_ip = ["10.1.2.30", "10.1.2.31"]
@@ -22,58 +23,17 @@ initiator_ip = []
 default_ibofos_root = "/home/ibof/ibofos"
 config_dir = "/etc/pos/"
 
-
-def _remote_execute(ip, id, pw, command, stderr_report=False):
-    cli = paramiko.SSHClient()
-    cli.load_system_host_keys()
-    cli.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    cli.connect(ip, port=22, username=id, password=pw)
-    stdin, stdout, stderr = cli.exec_command(command)
-    result = ""
-    if (stderr_report is True):
-        for line in iter(stderr.readline, ""):
-            print(line, end="")
-            result += line
-    for line in iter(stdout.readline, ""):
-        print(line, end="")
-        result += line
-    cli.close()
-    return result
-
-
-class Worker(threading.Thread):
-    def __init__(self, name):
-        super().__init__()
-        self.name = name
-
-    def run(self):
-        global thread_param_ip, thread_param_id, thread_param_pw, thread_param_command
-        print("sub thread start ", threading.currentThread().getName())
-        remote_execute(thread_param_ip, thread_param_id, thread_param_pw, thread_param_command)
-        print("sub thread end ", threading.currentThread().getName())
-
-
-def remote_execute(ip, id, pw, command, stderr_report=False, asyncflag=False):
-    if (asyncflag is False):
-        return _remote_execute(ip, id, pw, command, stderr_report)
-    else:
-        global thread_param_ip, thread_param_id, thread_param_pw, thread_param_command
-        thread_param_ip = ip
-        thread_param_id = id
-        thread_param_pw = pw
-        thread_param_command = command
-        t = Worker("async thread")
-        t.start()
-        return t
-
-
 ibofos_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
 
 
 def bring_up_ibofos_target():
     global args, fabric_ip
     start_ibofos_script = ibofos_root + "test/regression/start_poseidonos.sh"
+#   start_ibofos_script = ibofos_root + "/bin/poseidonos --wait-for-rpc &"
+#   os.system(start_ibofos_script)
     subprocess.call(start_ibofos_script)
+#   time.sleep(30)
+#   os.system(ibofos_root + "/lib/spdk/scripts/rpc.py framework_start_init")
     bring_up_script = ibofos_root + "/test/system/io_path/setup_ibofos_nvmf_volume_multi_node.sh"
     subprocess.call([bring_up_script,
                      "-a", fabric_ip[0],
@@ -110,20 +70,25 @@ def get_performance_bandwith_MB(node, ioType):
     global args, initiator_ip
     initiator_script = args.ibofos_root + \
         "/test/system/io_path/fio_output_parser.py -t " + ioType
-    result = remote_execute(
-        initiator_ip[node], args.initiator_id, args.initiator_pw, initiator_script, False, False).split()[0]
-    bw = int(result.rstrip("\n"), 0) / 1000
-    print("result : %s " % (bw) + "MB/s")
+    result_str = remote_control.remote_execute(
+        initiator_ip[node], args.initiator_id, args.initiator_pw, initiator_script, False, False).split()
+    result1 = result_str[0]
+    result2 = result_str[3]
+    result3 = result_str[2]
+    bw = int(result1.rstrip("\n"), 0) / 1000
+    latency_99_99 = int(result2.rstrip("\n"), 0) / 1000
+    latency_mean = float(result3.rstrip("\n")) / 1000
+    print("result : %.2f MB/s %.2f %.2f " % (bw, latency_99_99, latency_mean) + "us")
 
-    return bw
+    return (bw, latency_99_99, latency_mean)
 
 
 def execute_fio_in_initiator(readwrite, block_size, qd, node):
     global args, initiator_ip, fabric_ip
     print("Execute fio at initiator readwrite=%s block_size=%s qd=%s" %
           (readwrite, block_size, qd))
-    ramp_time = "15"
-    run_time = "5"
+    ramp_time = "30"
+    run_time = "30"
     num_jobs = "1"
 
     if (node == 0):
@@ -132,7 +97,7 @@ def execute_fio_in_initiator(readwrite, block_size, qd, node):
         file_num = "32"
     # initiator's result file
     result_file = "/tmp/fio_output.json"
-    remote_execute(initiator_ip[node], args.initiator_id,
+    remote_control.remote_execute(initiator_ip[node], args.initiator_id,
                    args.initiator_pw, "rm -rf " + result_file)
     initiator_script = args.ibofos_root + "/test/system/io_path/fio_bench.py -i " + fabric_ip[node] + " --readwrite=" + readwrite +\
         " --ramp_time=" + ramp_time + " --bs=" + block_size + " --run_time=" + run_time + " --time_based=1 " + " --file_num=" + file_num + " --verify=" + "false" +\
@@ -142,7 +107,7 @@ def execute_fio_in_initiator(readwrite, block_size, qd, node):
 
     initiator_script += " --json_output_file=" + result_file
     print(initiator_script)
-    t = remote_execute(initiator_ip[node], args.initiator_id,
+    t = remote_control.remote_execute(initiator_ip[node], args.initiator_id,
                        args.initiator_pw, initiator_script, False, True)
     time.sleep(1)
     return t
@@ -204,23 +169,27 @@ def test_scenario():
     if (args.auto_bringup == True):
         bring_up_ibofos()
 
-    readwrite = ["write", "read", "randwrite", "randread"]
-    io_depth = ["4", "4", "128", "128"]
-    block_size = ["128k", "128k", "4k", "4k"]
+    readwrite = ["write", "read", "randwrite", "randread", "randwrite", "randread", "randwrite", "randread"]
+    io_depth = ["4", "4", "128", "128", "1", "1", "32", "32"]
+    block_size = ["128k", "128k", "4k", "4k", "4k", "4k", "4k", "4k"]
     dict_real = {}
-    for index in range(0, 4):
+    dict_real_latency = {}
+    for index in range(0, 8):
         t1 = execute_fio_in_initiator(readwrite[index], block_size[index], io_depth[index], 0)
         t2 = execute_fio_in_initiator(readwrite[index], block_size[index], io_depth[index], 1)
         t1.join()
         t2.join()
-        bw1 = get_performance_bandwith_MB(0, readwrite[index])
-        bw2 = get_performance_bandwith_MB(1, readwrite[index])
-        bw = bw1 + bw2
-        dict_real[readwrite[index]] = bw
+        (bw1, latency_99_99_1, latency_1) = get_performance_bandwith_MB(0, readwrite[index])
+        (bw2, latency_99_99_2, latency_2) = get_performance_bandwith_MB(1, readwrite[index])
+
+        latency_99_99 = (latency_99_99_1 + latency_99_99_2) / 2
+        latency = (latency_1 + latency_2) / 2
+        bw = (bw1 + bw2)
+        dict_real[readwrite[index] + '_' + io_depth[index] + '_' + block_size[index]] = (bw, latency, latency_99_99)
 
     print("############ Result ##############")
     for key in dict_real:
-        print(key, "BW = ", dict_real[key], "MiB/s")
+        print(key, "BW (MB/s), avg latency (us), 99.99 (us) = ", dict_real[key])
 
 
 if __name__ == "__main__":

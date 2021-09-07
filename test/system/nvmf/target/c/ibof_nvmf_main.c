@@ -55,9 +55,8 @@ nvmf_tgt_started(void *arg1)
 		fflush(stdout);
 	}
 
-	spdk_log_set_level(SPDK_LOG_DEBUG);
-	spdk_log_set_print_level(SPDK_LOG_DEBUG);
-	spdk_log_set_flag("all");
+	spdk_log_set_level(SPDK_LOG_WARN);
+	spdk_log_set_print_level(SPDK_LOG_WARN);
 	spdk_log_clear_flag("reactor");
 
 	/* tracepoints nvmf <-> nvme 

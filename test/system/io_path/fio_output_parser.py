@@ -42,17 +42,18 @@ with open(str(fio_output_file)) as jsonFile:
     if(ioType == "read" or ioType == "randread"):
         bwValue = data['jobs'][job_pos]['read']['bw']
         iopsValue = data['jobs'][job_pos]['read']['iops']
-        print(bwValue, iopsValue)
+        latency_mean = data['jobs'][job_pos]['read']['clat_ns']['mean']
+        latency_99 = data['jobs'][job_pos]['read']['clat_ns']['percentile']['99.000000']
+        latency_99_9 = data['jobs'][job_pos]['read']['clat_ns']['percentile']['99.900000']
+        latency_99_99 = data['jobs'][job_pos]['read']['clat_ns']['percentile']['99.990000']
+        print(bwValue, iopsValue, latency_mean, latency_99_99, latency_99)
+
     if(ioType == "write" or ioType == "randwrite"):
         bwValue = data['jobs'][job_pos]['write']['bw']
         iopsValue = data['jobs'][job_pos]['write']['iops']
-        print(bwValue, iopsValue)
-    if(ioType == "readwrite"):
-        bwValue = data['jobs'][job_pos]['read']['bw']
-        iopsValue = data['jobs'][job_pos]['read']['iops']
-        print(bwValue, iopsValue)
-        bwValue = data['jobs'][job_pos]['write']['bw']
-        iopsValue = data['jobs'][job_pos]['write']['iops']
-        print(bwValue, iopsValue)
-
+        latency_mean = data['jobs'][job_pos]['write']['clat_ns']['mean']
+        latency_99 = data['jobs'][job_pos]['write']['clat_ns']['percentile']['99.000000']
+        latency_99_9 = data['jobs'][job_pos]['write']['clat_ns']['percentile']['99.900000']
+        latency_99_99 = data['jobs'][job_pos]['write']['clat_ns']['percentile']['99.990000']
+        print(bwValue, iopsValue, latency_mean, latency_99_99, latency_99)
 
