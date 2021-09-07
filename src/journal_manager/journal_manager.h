@@ -63,6 +63,7 @@ class CheckpointManager;
 class DirtyMapManager;
 class LogBufferWriteDoneNotifier;
 class CallbackSequenceController;
+class BufferedSegmentContextManager;
 
 class Stripe;
 
@@ -96,6 +97,7 @@ public:
         BufferOffsetAllocator* bufferOffsetAllocator,
         LogGroupReleaser* groupReleaser,
         CheckpointManager* checkpointManager,
+        BufferedSegmentContextManager* bufferedSegCtxManager,
         DirtyMapManager* dirtyManager,
         LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
         CallbackSequenceController* sequenceController,
@@ -165,6 +167,7 @@ protected:
     LogGroupReleaser* logGroupReleaser;
 
     CheckpointManager* checkpointManager;
+    BufferedSegmentContextManager* bufferedSegCtxManager;
     DirtyMapManager* dirtyMapManager;
     LogBufferWriteDoneNotifier* logFilledNotifier;
     CallbackSequenceController* sequenceController;

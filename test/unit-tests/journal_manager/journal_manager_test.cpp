@@ -8,6 +8,7 @@
 #include "test/unit-tests/journal_manager/checkpoint/dirty_map_manager_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/log_group_releaser_mock.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/buffered_segment_context_manager_mock.h"
 #include "test/unit-tests/journal_manager/journal_writer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
@@ -43,6 +44,7 @@ public:
       logBuffer(nullptr),
       bufferAllocator(nullptr),
       logGroupReleaser(nullptr),
+      bufferedSegmentContext(nullptr),
       dirtyMapManager(nullptr),
       logFilledNotifier(nullptr),
       replayHandler(nullptr),
@@ -68,6 +70,7 @@ public:
         bufferAllocator = new NiceMock<MockBufferOffsetAllocator>;
         logGroupReleaser = new NiceMock<MockLogGroupReleaser>;
         checkpointManager = new NiceMock<MockCheckpointManager>;
+        bufferedSegmentContext = new NiceMock<MockBufferedSegmentContextManager>;
         dirtyMapManager = new NiceMock<MockDirtyMapManager>;
         logFilledNotifier = new NiceMock<MockLogBufferWriteDoneNotifier>;
         callbackSequenceController = new NiceMock<MockCallbackSequenceController>;
@@ -79,7 +82,7 @@ public:
             logWriteContextFactory, journalEventFactory, logWriteHandler,
             volumeEventHandler, journalWriter,
             logBuffer, bufferAllocator, logGroupReleaser, checkpointManager,
-            dirtyMapManager, logFilledNotifier,
+            bufferedSegmentContext, dirtyMapManager, logFilledNotifier,
             callbackSequenceController, replayHandler, arrayInfo, service);
     }
 
@@ -106,6 +109,7 @@ protected:
     NiceMock<MockBufferOffsetAllocator>* bufferAllocator;
     NiceMock<MockLogGroupReleaser>* logGroupReleaser;
     NiceMock<MockCheckpointManager>* checkpointManager;
+    NiceMock<MockBufferedSegmentContextManager>* bufferedSegmentContext;
     NiceMock<MockDirtyMapManager>* dirtyMapManager;
     NiceMock<MockLogBufferWriteDoneNotifier>* logFilledNotifier;
     NiceMock<MockCallbackSequenceController>* callbackSequenceController;

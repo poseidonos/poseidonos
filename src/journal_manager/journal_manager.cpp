@@ -47,6 +47,7 @@
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/journal_writer.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/buffered_segment_context_manager.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
@@ -96,6 +97,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     BufferOffsetAllocator* bufferOffsetAllocator,
     LogGroupReleaser* groupReleaser,
     CheckpointManager* cpManager,
+    BufferedSegmentContextManager* bufSegCtxManager,
     DirtyMapManager* dirtyManager,
     LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
     CallbackSequenceController* callbackSequenceController,
@@ -118,6 +120,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     logGroupReleaser = groupReleaser;
 
     checkpointManager = cpManager;
+    bufferedSegCtxManager = bufSegCtxManager;
     dirtyMapManager = dirtyManager;
     logFilledNotifier = logBufferWriteDoneNotifier;
     sequenceController = callbackSequenceController;
@@ -141,6 +144,7 @@ JournalManager::JournalManager(IArrayInfo* info, IStateControl* state)
     new BufferOffsetAllocator(),
     new LogGroupReleaser(),
     new CheckpointManager(),
+    new BufferedSegmentContextManager(),
     new DirtyMapManager(),
     new LogBufferWriteDoneNotifier(),
     new CallbackSequenceController(),
@@ -388,6 +392,7 @@ JournalManager::_InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
     bufferAllocator->Init(logGroupReleaser, config);
     dirtyMapManager->Init(config);
     checkpointManager->Init(mapFlush, contextManager, eventScheduler, sequenceController, dirtyMapManager);
+    bufferedSegCtxManager->Init(config);
 
     logFactory->Init(config, logFilledNotifier, sequenceController);
     eventFactory->Init(logWriteHandler);
