@@ -62,6 +62,7 @@
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_manager/telemetry_manager_service.h"
 #include "src/volume/volume_service.h"
+#include "src/resource_manager/memory_manager.h"
 
 namespace pos
 {
@@ -96,7 +97,8 @@ DebugInfo::DebugInfo(void)
   volumeService(nullptr),
   nvmfTarget(nullptr),
   telemetryClient(nullptr),
-  telemetryManagerService(nullptr)
+  telemetryManagerService(nullptr),
+  memoryManager(nullptr)
 {
 }
 
@@ -134,5 +136,6 @@ DebugInfo::Update(void)
     flushCount = FlushCountSingleton::Instance();
     telemetryClient = TelemetryClientSingleton::Instance();
     telemetryManagerService = TelemetryManagerServiceSingletone::Instance();
+    memoryManager = MemoryManagerSingleton::Instance();
 }
 } // namespace pos

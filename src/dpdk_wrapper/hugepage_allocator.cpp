@@ -64,6 +64,7 @@ void
 HugepageAllocator::Free(void* addr)
 {
     rte_free(addr);
+    addr = nullptr;
 }
 
 uint32_t
