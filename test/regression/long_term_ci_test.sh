@@ -64,6 +64,7 @@ shutdown()
         if [[ $system_stop == 0 ]]; then
             state=$(${rootdir}/bin/poseidonos-cli array list --array-name ${array_name} --json-res | jq -r '.Response.result.data.state' 2>/dev/null)
             if [[ $state = "NORMAL" ]]; then
+                ${rootdir}/bin/poseidonos-cli wbt flush_gcov
                 ${rootdir}/bin/poseidonos-cli array unmount --array-name $array_name --json-res --force
             elif [[ $state = "OFFLINE" ]]; then
                 ${rootdir}/bin/poseidonos-cli system stop --json-res --force

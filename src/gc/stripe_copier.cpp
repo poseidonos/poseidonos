@@ -157,27 +157,13 @@ StripeCopier::CopyEvent::CopyEvent(void* buffer,
     CopierMeta* meta,
     uint32_t stripeId,
     uint32_t copyIndex)
-: CopyEvent(buffer, lsa, listIndex, meta, stripeId, copyIndex,
-            nullptr, IIOSubmitHandler::GetInstance())
-{
-}
-
-StripeCopier::CopyEvent::CopyEvent(void* buffer,
-    LogicalBlkAddr lsa,
-    uint32_t listIndex,
-    CopierMeta* meta,
-    uint32_t stripeId,
-    uint32_t copyIndex,
-    CallbackSmartPtr inputCallback,
-    IIOSubmitHandler* inputIIOSubmitHandle)
 : buffer(buffer),
   lsa(lsa),
   listIndex(listIndex),
   meta(meta),
   stripeId(stripeId),
   copyIndex(copyIndex),
-  inputCallback(inputCallback),
-  iIOSubmitHandler(inputIIOSubmitHandle)
+  iIOSubmitHandler(IIOSubmitHandler::GetInstance())
 {
 }
 
@@ -199,15 +185,8 @@ StripeCopier::CopyEvent::Execute(void)
     PartitionType partitionType = PartitionType::USER_DATA;
 
     CallbackSmartPtr callback;
-    if (nullptr == inputCallback)
-    {
-        callback = std::make_shared<CopierReadCompletion>(meta->GetVictimStripe(copyIndex, stripeId % meta->GetStripePerSegment()),
-                                                        listIndex, buffer, meta, stripeId);
-    }
-    else
-    {
-        callback = inputCallback;
-    }
+    callback = std::make_shared<CopierReadCompletion>(meta->GetVictimStripe(copyIndex, stripeId % meta->GetStripePerSegment()),
+                                                    listIndex, buffer, meta, stripeId);
     callback->SetEventType(BackendEvent_GC);
 
     iIOSubmitHandler->SubmitAsyncIO(IODirection::READ,
