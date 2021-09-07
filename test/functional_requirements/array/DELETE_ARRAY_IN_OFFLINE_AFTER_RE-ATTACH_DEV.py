@@ -3,7 +3,8 @@ import subprocess
 import time
 import os
 import sys
-sys.path.append("../lib/")
+sys.path.append("../")
+sys.path.append("../../system/lib/")
 
 import json_parser
 import pos
@@ -13,6 +14,7 @@ import pos_util
 import CREATE_ARRAY_NO_SPARE
 
 ARRAYNAME = CREATE_ARRAY_NO_SPARE.ARRAYNAME
+
 
 def set_result(detail):
     code = json_parser.get_response_code(detail)

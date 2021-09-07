@@ -31,13 +31,19 @@ def execute():
             out = cli.add_device(FIRST_SPARE, ARRAYNAME)
             code = json_parser.get_response_code(out)
             print ("add spare response: " + str(code))
-    print("spare added")
-    cli.add_device(SECOND_SPARE, ARRAYNAME)
+    print(FIRST_SPARE + " is added as a spare")
+    out = cli.add_device(SECOND_SPARE, ARRAYNAME)
+    code = json_parser.get_response_code(out)
+    if code == 0:
+        print(SECOND_SPARE + " is added as a spare")
 
     if api.wait_situation(ARRAYNAME, "REBUILDING") is True:
         print("1st rebuilding")
         api.detach_ssd(FIRST_SPARE)
+        print(FIRST_SPARE + " detachment is triggered")
         timeout = 80000 #80s
+        if api.is_device_exists(FIRST_SPARE) is False:
+            print(FIRST_SPARE + " is detached")
         if api.wait_situation(ARRAYNAME, "DEGRADED", timeout) is True:
             print("1st rebuilding stopped")
             if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) is True:

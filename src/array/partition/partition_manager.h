@@ -71,8 +71,8 @@ private:
     int _CreateUserData(const vector<ArrayDevice*> devs, ArrayDevice* nvm, ArrayInterface* intf, uint32_t arrayIndex);
     int _CreateMetaNvm(ArrayDevice* dev, ArrayInterface* intf, uint32_t arrayIndex);
     int _CreateWriteBuffer(ArrayDevice* dev, ArrayInterface* intf, uint32_t arrayIndex);
+    void _DeleteAllPartitions(void);
     ArrayDevice* _GetBaseline(const vector<ArrayDevice*>& devs);
-    void _DeleteAllPartitions();
 
     string arrayName_ = "";
     array<Partition*, PartitionType::PARTITION_TYPE_MAX> partitions_;

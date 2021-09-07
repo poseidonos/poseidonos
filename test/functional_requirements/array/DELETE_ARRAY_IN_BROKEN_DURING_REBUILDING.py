@@ -3,13 +3,15 @@ import subprocess
 import os
 import sys
 import time
-sys.path.append("../lib/")
-sys.path.append("../volume/")
 
-import json_parser
-import pos
-import pos_util
+sys.path.append("../")
+sys.path.append("../volume/")
+sys.path.append("../../system/lib/")
+
+import api
 import cli
+import pos
+import json_parser
 import test_result
 import fio
 import MOUNT_VOL_BASIC_1
@@ -26,12 +28,12 @@ def set_result(detail):
 
 
 def execute():
-    pos_util.pci_rescan()
+    api.rescan_ssd()
     MOUNT_VOL_BASIC_1.execute()
     fio_proc = fio.start_fio(0, 60)
     fio.wait_fio(fio_proc)
-    pos_util.pci_detach(MOUNT_VOL_BASIC_1.ANY_DATA)
-    pos_util.pci_detach("unvme-ns-1")
+    api.detach_ssd(MOUNT_VOL_BASIC_1.ANY_DATA)
+    api.detach_ssd("unvme-ns-1")
     time.sleep(1)
     out = cli.delete_array(ARRAYNAME)
     return out
@@ -42,4 +44,3 @@ if __name__ == "__main__":
     out = execute()
     set_result(out)
     pos.kill_pos()
-    pos_util.pci_rescan()

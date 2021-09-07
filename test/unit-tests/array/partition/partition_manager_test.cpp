@@ -60,8 +60,8 @@ TEST(PartitionManager, CreateAll_DeleteAll_testIfAllPartitionsAreNewlyCreatedAnd
 
     MockArrayDevice dataDev1(nullptr), dataDev2(nullptr), dataDev3(nullptr), dataDev4(nullptr);
     vector<ArrayDevice*> data = {&dataDev1, &dataDev2, &dataDev3, &dataDev4};
-    shared_ptr<MockUBlockDevice> ptrMockUblockDev = make_shared<MockUBlockDevice>("mock-dataDev4", 0, nullptr);
-    EXPECT_CALL(dataDev4, GetUblock).WillRepeatedly(Return(ptrMockUblockDev)); // 'cause this would become "baseline"
+    shared_ptr<MockUBlockDevice> ptrMockUblockDev = make_shared<MockUBlockDevice>("mock-dataDev1", 0, nullptr);
+    EXPECT_CALL(dataDev1, GetUblock).WillRepeatedly(Return(ptrMockUblockDev)); // 'cause this would become "baseline"
 
     MockArrayDevice bufDev(nullptr);
     vector<ArrayDevice*> buf = {&bufDev};

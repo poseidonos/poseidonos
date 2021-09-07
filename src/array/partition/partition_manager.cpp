@@ -44,6 +44,7 @@
 #include "src/device/base/ublock_device.h"
 #include "src/include/array_config.h"
 #include "src/logger/logger.h"
+#include "src/helper/query.h"
 #include "stripe_partition.h"
 
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
@@ -72,7 +73,7 @@ PartitionManager::~PartitionManager(void)
     _DeleteAllPartitions();
 }
 
-void PartitionManager::_DeleteAllPartitions()
+void PartitionManager::_DeleteAllPartitions(void)
 {
     for (uint32_t i = 0; i < partitions_.size(); i++)
     {
@@ -155,12 +156,6 @@ PartitionManager::_CreateMetaNvm(ArrayDevice* dev, ArrayInterface* intf, uint32_
 
     Partition* partition = new NvmPartition(arrayName_, arrayIndex,
         partType, physicalSize, nvm);
-    if (nullptr == partition)
-    {
-        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
-        POS_TRACE_ERROR(eventId, "Failed to create partition \"META_NVM\"");
-        return eventId;
-    }
     partitions_[partType] = partition;
     intf->AddTranslator(partType, partition);
     return 0;
@@ -222,6 +217,13 @@ PartitionManager::_CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf
 
     ArrayDevice* baseline = _GetBaseline(devs);
 
+    if (baseline == nullptr)
+    {
+        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
+        POS_TRACE_ERROR(eventId, "Failed to create partition \"META_SSD\"");
+        return eventId;
+    }
+
     PartitionPhysicalSize physicalSize;
     physicalSize.startLba = ArrayConfig::META_SSD_START_LBA;
     physicalSize.blksPerChunk = ArrayConfig::BLOCKS_PER_CHUNK;
@@ -235,14 +237,6 @@ PartitionManager::_CreateMetaSsd(vector<ArrayDevice*> devs, ArrayInterface* intf
     Method* method = new Raid1(&physicalSize);
     StripePartition* partition = new StripePartition(arrayName_, arrayIndex,
         partType, physicalSize, devs, method, ioDispatcher);
-
-    if (nullptr == partition)
-    {
-        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
-        POS_TRACE_ERROR(eventId, "Failed to create partition \"META_SSD\"");
-        return eventId;
-    }
-
     partitions_[partType] = partition;
     intf->AddTranslator(partType, partition);
     intf->AddRecover(partType, partition);
@@ -272,7 +266,16 @@ PartitionManager::_CreateUserData(const vector<ArrayDevice*> devs,
     physicalSize.blksPerChunk = ArrayConfig::BLOCKS_PER_CHUNK;
     physicalSize.chunksPerStripe = devs.size();
     physicalSize.stripesPerSegment = ArrayConfig::STRIPES_PER_SEGMENT;
+
     ArrayDevice* baseline = _GetBaseline(devs);
+
+    if (baseline == nullptr)
+    {
+        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_CREATION_ERROR;
+        POS_TRACE_ERROR(eventId, "Failed to create partition \"USER_DATA\"");
+        return eventId;
+    }
+
     uint64_t ssdTotalSegments =
         baseline->GetUblock()->GetSize() / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
     uint64_t mbrSegments =
@@ -295,14 +298,6 @@ PartitionManager::_CreateUserData(const vector<ArrayDevice*> devs,
         return eventId;
     }
     StripePartition* partition = new StripePartition(arrayName_, arrayIndex, type, physicalSize, devs, method);
-    if (nullptr == partition)
-    {
-        delete method;
-        int eventId = (int)POS_EVENT_ID::ARRAY_PARTITION_LOAD_ERROR;
-        POS_TRACE_ERROR(eventId, "Failed to create partition \"USER_DATA\"");
-        return eventId;
-    }
-
     partitions_[partType] = partition;
     intf->AddTranslator(partType, partition);
     intf->AddRecover(partType, partition);
@@ -320,20 +315,8 @@ PartitionManager::DeleteAll(ArrayInterface* intf)
 ArrayDevice*
 PartitionManager::_GetBaseline(const vector<ArrayDevice*>& devs)
 {
-    ArrayDevice* baseline = nullptr;
-    for (ArrayDevice* dev : devs)
-    {
-        if (ArrayDeviceState::FAULT != dev->GetState())
-        {
-            baseline = dev;
-        }
-    }
-    if (nullptr == baseline)
-    {
-        assert(0);
-    }
-
-    return baseline;
+    return Enumerable::First(devs,
+        [](auto p) { return p->GetState() == ArrayDeviceState::NORMAL; });
 }
 
 void

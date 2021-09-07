@@ -362,6 +362,7 @@ ArrayState::IsBroken(void)
 bool
 ArrayState::SetRebuild(void)
 {
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "SetRebuild, CurrState:{}", state.ToString());
     if (IsRebuildable() == false)
     {
         return false;
@@ -440,6 +441,7 @@ ArrayState::StateChanged(StateContext* prev, StateContext* next)
 void
 ArrayState::_SetState(ArrayStateEnum newState)
 {
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_DEBUG_MSG, "_SetState, CurrState:{}, NewState:{}", state.ToString(), newState);
     if (state != newState)
     {
         if (newState == ArrayStateEnum::DEGRADED)
@@ -457,7 +459,7 @@ ArrayState::_SetState(ArrayStateEnum newState)
 
         state = newState;
         POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_STATE_CHANGED,
-            "Array state changed to {}",
+            "Array state is changed to {}",
             state.ToString());
     }
 }
