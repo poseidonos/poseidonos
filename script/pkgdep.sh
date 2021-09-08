@@ -2,9 +2,9 @@
 # Please run this script as root.
 
 SYSTEM=`uname -s`
-POS_ROOT=`pwd`/../
-SPDK_DIR=spdk
-SPDK_ROOT=${POS_ROOT}/lib/${SPDK_DIR}/
+POS_ROOT=$(readlink -f $(dirname $0))/..
+
+${POS_ROOT}/script/install_go.sh
 
 if [ -f /etc/debian_version ]; then
     # Includes Ubuntu, Debian

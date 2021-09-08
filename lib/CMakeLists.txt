@@ -201,46 +201,6 @@ ExternalProject_Add(gperf
     COMMAND make install
     COMMAND ldconfig)
 
-# Set go build options
-set(POS_DEP_GO "go")
-set(GO_SOURCE "go1.14.4.linux-amd64.tar.gz")
-# Build go conditionally
-if(${USE_LOCAL_REPO} STREQUAL "y")
-    set(REPO_GO "${LOCAL_REPO}/go.git")
-    ExternalProject_Add(go
-        GIT_REPOSITORY ${REPO_GO}
-        SOURCE_DIR ${PROJ_ROOT}/lib/${POS_DEP_GO}
-        BUILD_IN_SOURCE 1
-        LOG_DOWNLOAD ON
-        LOG_UPDATE ON
-        LOG_PATCH ON
-        LOG_CONFIGURE ON
-        LOG_BUILD ON
-        LOG_INSTALL ON
-        LOG_OUTPUT_ON_FAILURE ON
-        LOG_MERGED_STDOUTERR ON
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND "")
-else()
-    set(REPO_GO "https://golang.org/dl/${GO_SOURCE}")
-    ExternalProject_Add(go
-        URL ${REPO_GO}
-        SOURCE_DIR ${PROJ_ROOT}/lib/${POS_DEP_GO}
-        BUILD_IN_SOURCE 1
-        LOG_DOWNLOAD ON
-        LOG_UPDATE ON
-        LOG_PATCH ON
-        LOG_CONFIGURE ON
-        LOG_BUILD ON
-        LOG_INSTALL ON
-        LOG_OUTPUT_ON_FAILURE ON
-        LOG_MERGED_STDOUTERR ON
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND "")
-endif()
-
 # Set gtest build options
 set(POS_DEP_GTEST "gtest")
 set(GTEST_DIR "googletest")
@@ -387,13 +347,13 @@ if (${USE_LOCAL_REPO} STREQUAL "y")
     add_custom_target(
         grpc ALL
         WORKING_DIRECTORY ${PROJ_ROOT}/lib
-        COMMAND ./build_grpc.sh -i -f
+        COMMAND ./build_grpc.sh -i
     )
 else()
     add_custom_target(
         grpc ALL
         WORKING_DIRECTORY ${PROJ_ROOT}/lib
-        COMMAND ./build_grpc.sh -f
+        COMMAND ./build_grpc.sh
     )
 endif()
 
@@ -445,12 +405,6 @@ add_custom_target(
     COMMAND rm -rf ${GTEST_TARGET_LIB_DIR}/libgmock_main.a
 )
 
-add_custom_target(
-    clean_go
-    WORKING_DIRECTORY ${PROJ_ROOT}/lib/${POS_DEP_GO}
-    COMMAND rm -rf ./go
-)
-
 if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build)
     list(APPEND CLEAN_ALL_TARGETS clean_air)
 endif()
@@ -477,10 +431,6 @@ endif()
 
 if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_GTEST}/libgtest.a)
     list(APPEND CLEAN_ALL_TARGETS clean_gtest)
-endif()
-
-if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_GO}/go)
-    list(APPEND CLEAN_ALL_TARGETS clean_go)
 endif()
 
 add_custom_target(
