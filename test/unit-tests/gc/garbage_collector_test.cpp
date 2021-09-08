@@ -39,8 +39,15 @@ public:
                 &partitionLogicalSize, nullptr, nullptr, nullptr, nullptr, nullptr);
         eventScheduler = new NiceMock<MockEventScheduler>;
         stateControl = new NiceMock<MockIStateControl>;
+
         copierPtr = shared_ptr<Copier>(copier);
-        gc = new GarbageCollector(array, stateControl, copierPtr, eventScheduler);
+
+        copierFactory = [](GcStatus* gcStatus, IArrayInfo* array, CopierSmartPtr inputEvent)
+        {
+            return inputEvent;
+        };
+
+        gc = new GarbageCollector(array, stateControl, copierPtr, copierFactory, eventScheduler);
     }
 
     virtual void
@@ -60,6 +67,7 @@ protected:
     NiceMock<MockEventScheduler>* eventScheduler;
     NiceMock<MockIStateControl>* stateControl;
     CopierSmartPtr copierPtr;
+    function<CopierSmartPtr(GcStatus*, IArrayInfo*, CopierSmartPtr)> copierFactory;
 
     const PartitionLogicalSize* udSize = &partitionLogicalSize;
 
@@ -73,6 +81,17 @@ protected:
     .totalSegments = 32768
     };
 };
+
+TEST_F(GarbageCollectorTestFixture, GarbageCollector_testIfMakeCopierPtrFailWhenGarbageCollectorInit)
+{
+    // given nullptr injection for copier smart ptr
+    GarbageCollector* testGc = new GarbageCollector(array, stateControl, nullptr, copierFactory, eventScheduler);
+
+    // when garbage collector init
+    // then return fail with "gc cannot create copier" event id
+    EXPECT_TRUE(testGc->Init() == static_cast<int>(POS_EVENT_ID::GC_CANNOT_CREATE_COPIER));
+    delete testGc;
+}
 
 TEST_F(GarbageCollectorTestFixture, GarbageCollector_testIfStateSubscribeAndEnqueueCopierEventWhenGarbageCollectorInit)
 {

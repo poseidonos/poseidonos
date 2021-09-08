@@ -55,7 +55,9 @@ class GarbageCollector : public IGCControl, public IGCInfo,
 public:
     explicit GarbageCollector(IArrayInfo* i, IStateControl* s);
     GarbageCollector(IArrayInfo* i, IStateControl* s,
-                    CopierSmartPtr inputEvent, EventScheduler* inputEventScheduler);
+                    CopierSmartPtr inputEvent,
+                    function<CopierSmartPtr(GcStatus*, IArrayInfo*, CopierSmartPtr)> CopierFactory,
+                    EventScheduler* inputEventScheduler);
     virtual ~GarbageCollector(void) {}
     virtual int Start(void) override;
     virtual void End(void) override;
@@ -78,7 +80,7 @@ public:
     virtual struct timeval GetEndTime(void) { return gcStatus.GetEndTime(); }
 
 private:
-    void _DoGC(void);
+    int _DoGC(void);
     void _GCdone(void);
     bool isRunning = false;
 
@@ -87,6 +89,7 @@ private:
     GcStatus gcStatus;
     CopierSmartPtr copierPtr;
 
+    function<CopierSmartPtr(GcStatus*, IArrayInfo*, CopierSmartPtr)> copierFactory = nullptr;
     CopierSmartPtr inputEvent;
     EventScheduler* eventScheduler;
 };

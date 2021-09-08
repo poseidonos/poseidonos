@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <future>
 
+#include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/event_scheduler/event.h"
@@ -43,15 +44,22 @@
 namespace pos
 {
 GarbageCollector::GarbageCollector(IArrayInfo* i, IStateControl* s)
-: GarbageCollector(i, s, nullptr, EventSchedulerSingleton::Instance())
+: GarbageCollector(i, s, nullptr, nullptr, EventSchedulerSingleton::Instance())
 {
+    this->copierFactory = [](GcStatus* gcStatus, IArrayInfo* array, CopierSmartPtr inputEvent)
+    {
+        return std::make_shared<Copier>(UNMAP_SEGMENT, UNMAP_SEGMENT, gcStatus, array);
+    };
 }
 
 GarbageCollector::GarbageCollector(IArrayInfo* i, IStateControl* s,
-                                CopierSmartPtr inputEvent, EventScheduler* inputEventScheduler)
+                                CopierSmartPtr inputEvent,
+                                function<CopierSmartPtr(GcStatus*, IArrayInfo*, CopierSmartPtr)> copierFactory,
+                                EventScheduler* inputEventScheduler)
 : arrayInfo(i),
   state(s),
   gcStatus(),
+  copierFactory(copierFactory),
   inputEvent(inputEvent),
   eventScheduler(inputEventScheduler)
 {
@@ -60,7 +68,12 @@ GarbageCollector::GarbageCollector(IArrayInfo* i, IStateControl* s,
 int GarbageCollector::Init(void)
 {
     state->Subscribe(this, typeid(*this).name());
-    return Start();
+    int returnVal = Start();
+    if (unlikely(returnVal != EID(SUCCESS)))
+    {
+        state->Unsubscribe(this);
+    }
+    return returnVal;
 }
 
 void GarbageCollector::Dispose(void)
@@ -87,7 +100,7 @@ void GarbageCollector::Pause(void)
     }
     else
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_COPIER_NOT_EXIST), "gc copierPtr not exist");
+        POS_TRACE_INFO(EID(GC_COPIER_NOT_EXIST), "gc copierPtr not exist");
     }
 }
 
@@ -99,7 +112,7 @@ void GarbageCollector::Resume(void)
     }
     else
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_COPIER_NOT_EXIST), "gc copierPtr not exist");
+        POS_TRACE_INFO(EID(GC_COPIER_NOT_EXIST), "gc copierPtr not exist");
     }
 }
 
@@ -112,7 +125,7 @@ bool GarbageCollector::IsPaused(void)
     }
     else
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_COPIER_NOT_EXIST), "gc copierPtr not exist");
+        POS_TRACE_INFO(EID(GC_COPIER_NOT_EXIST), "gc copierPtr not exist");
     }
     return ret;
 }
@@ -125,7 +138,7 @@ void GarbageCollector::StateChanged(StateContext* prev, StateContext* next)
 int
 GarbageCollector::IsEnabled(void)
 {
-    int returnVal = static_cast<int>(POS_EVENT_ID::SUCCESS);
+    int returnVal = EID(SUCCESS);
 
     StateEnum currState = state->GetState()->ToStateType();
 
@@ -134,13 +147,13 @@ GarbageCollector::IsEnabled(void)
 
     if (false == isEnabled)
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_CANNOT_START), "cannot start gc");
-        return static_cast<int>(POS_EVENT_ID::GC_CANNOT_START);
+        POS_TRACE_INFO(EID(GC_CANNOT_START), "cannot start gc");
+        return EID(GC_CANNOT_START);
     }
 
     if (true == isRunning)
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_STARTED), "gc already running");
+        POS_TRACE_INFO(EID(GC_STARTED), "gc already running");
     }
 
     return returnVal;
@@ -153,15 +166,17 @@ GarbageCollector::Start(void)
 
     if (false == isRunning)
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_STARTED), "gc started");
-        _DoGC();
-        isRunning = true;
-        returnVal = static_cast<int>(POS_EVENT_ID::SUCCESS);
+        POS_TRACE_INFO(EID(GC_STARTED), "gc started");
+        returnVal = _DoGC();
+        if (likely(returnVal == EID(SUCCESS)))
+        {
+            isRunning = true;
+        }
     }
     else
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_STARTED), "gc already running");
-        returnVal = static_cast<int>(POS_EVENT_ID::SUCCESS);
+        POS_TRACE_INFO(EID(GC_STARTED), "gc already running");
+        returnVal = EID(SUCCESS);
     }
 
     return returnVal;
@@ -195,22 +210,23 @@ GarbageCollector::End(void)
     }
 }
 
-void
+int
 GarbageCollector::_DoGC(void)
 {
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_STARTED), "GC started");
+    POS_TRACE_INFO(EID(GC_STARTED), "GC started");
 
     CopierSmartPtr event;
-    if (nullptr == inputEvent)
+    event = copierFactory(&gcStatus, arrayInfo, inputEvent);
+
+    if (unlikely(event == nullptr))
     {
-        event = std::make_shared<Copier>(UNMAP_SEGMENT, UNMAP_SEGMENT, &gcStatus, arrayInfo);
-    }
-    else
-    {
-        event = inputEvent;
+        POS_TRACE_ERROR(EID(GC_CANNOT_CREATE_COPIER),
+            "gc can not create copier event");
+        return EID(GC_CANNOT_CREATE_COPIER);
     }
     eventScheduler->EnqueueEvent(event);
     copierPtr = event;
+    return EID(SUCCESS);
 }
 
 void
@@ -218,6 +234,6 @@ GarbageCollector::_GCdone(void)
 {
     copierPtr->ReadyToEnd();
     copierPtr = nullptr;
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::GC_DONE), "GC done");
+    POS_TRACE_INFO(EID(GC_DONE), "GC done");
 }
 } // namespace pos
