@@ -105,7 +105,7 @@ private:
     std::vector<Stripe*> gcStripeArray;
     IArrayInfo* iArrayInfo;
 
-    FreeBufferPool* gcWriteBufferPool;
+    FreeBufferPool* gcWriteBufferPool = nullptr;
     GcWriteBuffer* gcActiveWriteBuffers[GC_VOLUME_COUNT];
     uint32_t gcActiveStripeTail[GC_VOLUME_COUNT];
     uint32_t gcActiveStripeRemaining[GC_VOLUME_COUNT];

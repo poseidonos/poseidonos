@@ -118,7 +118,7 @@ private:
 
     AffinityManager* affinityManager;
     IDeviceEvent* deviceEvent = nullptr;
-    IIODispatcher* ioDispatcher;
+    IIODispatcher* ioDispatcher = nullptr;
 };
 
 void DeviceDetachEventHandler(string sn);

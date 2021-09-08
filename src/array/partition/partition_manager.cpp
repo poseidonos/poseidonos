@@ -60,7 +60,7 @@ PartitionManager::PartitionManager(
   affinityManager(affinityManager),
   ioDispatcher(ioDispatcher)
 {
-    for (uint32_t i = 0; i < PartitionType::PARTITION_TYPE_MAX; i++)
+    for (uint32_t i = 0; i < partitions_.size(); i++)
     {
         partitions_[i] = nullptr;
     }

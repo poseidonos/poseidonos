@@ -148,7 +148,7 @@ private:
     IAbrControl* abrControl = nullptr;
     EventScheduler* eventScheduler = nullptr;
     int shutdownFlag = 0;
-    ArrayServiceLayer* arrayService;
+    ArrayServiceLayer* arrayService = nullptr;
 };
 } // namespace pos
 #endif // ARRAY_H_
