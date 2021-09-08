@@ -44,14 +44,14 @@ public:
     UnvmeDeviceContext(void) = delete;
     explicit UnvmeDeviceContext(spdk_nvme_ns* ns);
 
-    void IncAdminCommandCount();
-    void DecAdminCommandCount();
+    void IncAdminCommandCount(void);
+    void DecAdminCommandCount(void);
 
     struct spdk_nvme_ns* ns;
     struct spdk_nvme_qpair* ioQPair;
     uint32_t ioCompletionCount = 0;
     uint32_t adminCommandPending = 0;
-    bool IsAdminCommandPendingZero();
+    bool IsAdminCommandPendingZero(void);
 };
 } // namespace pos
 

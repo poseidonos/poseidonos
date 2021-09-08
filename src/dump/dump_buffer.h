@@ -51,9 +51,9 @@ struct DumpBufferDeleter
 class DumpBuffer
 {
 public:
-    DumpBuffer();
+    DumpBuffer(void);
     DumpBuffer(void* inputPtr, size_t size, AbstractDumpModule* module);
-    ~DumpBuffer();
+    ~DumpBuffer(void);
 
 private:
     std::shared_ptr<uint8_t> ptr;

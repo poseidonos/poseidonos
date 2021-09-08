@@ -50,7 +50,7 @@ using namespace std;
 class DumpManager
 {
 public:
-    DumpManager();
+    DumpManager(void);
     ~DumpManager(void);
     int RegisterDump(string moduleName, AbstractDumpModule* dumpModule);
     int SetEnableModuleByCLI(string moduleStr, bool enable);

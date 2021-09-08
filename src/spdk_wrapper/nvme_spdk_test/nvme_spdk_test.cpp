@@ -57,7 +57,7 @@ volatile int errCount = 0;
 // Test 1 Indicates
 
 void
-clean_test()
+clean_test(void)
 {
     testCount = 0;
     errCount = 0;
@@ -83,7 +83,7 @@ test_success(int i, bool success)
 }
 
 void
-test1_subsystem_reset()
+test1_subsystem_reset(void)
 {
     test_start(1);
     std::vector<UblockSharedPtr> devs = DeviceManagerSingleton::Instance()->GetDevs();
@@ -127,7 +127,7 @@ test1_subsystem_reset()
 }
 
 void
-test2_ctrl_reset()
+test2_ctrl_reset(void)
 {
     test_start(2);
     std::vector<UblockSharedPtr> devs = DeviceManagerSingleton::Instance()->GetDevs();
@@ -195,7 +195,7 @@ test2_ctrl_reset()
 } // namespace pos
 
 int
-main()
+main(void)
 {
     char* argvPtr = argv;
     std::future<int> f = std::async(std::launch::async, initialize_ibofos, argc, &argvPtr);

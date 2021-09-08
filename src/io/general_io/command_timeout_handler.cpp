@@ -59,7 +59,7 @@ DeviceIterFunc CommandTimeoutHandler::resetDevice;
 const uint64_t
     CommandTimeoutHandler::ABORT_TIMEOUT_IN_NS = 8000000000ULL;
 
-CommandTimeoutHandler::CommandTimeoutHandler()
+CommandTimeoutHandler::CommandTimeoutHandler(void)
 {
     timeoutAbortHandler = bind(&CommandTimeoutHandler::_TimeoutActionAbortHandler, this, _1, _2, _3);
     resetHandler = bind(&CommandTimeoutHandler::_ResetHandler, this, _1, _2, _3);
@@ -85,7 +85,7 @@ CommandTimeoutHandler::_ResetDevice(UblockSharedPtr dev, void* ctx)
 }
 
 void
-CommandTimeoutHandler::AbortSubmitHandler::DiskIO(UblockSharedPtr dev, void *ctx)
+CommandTimeoutHandler::__AbortSubmitHandler::DiskIO(UblockSharedPtr dev, void *ctx)
 {
     const struct spdk_nvme_ctrlr_data* ctrlrData = spdk_nvme_ctrlr_get_data(abortContext->ctrlr);
     string devSerial = dev->GetSN();
@@ -104,7 +104,7 @@ CommandTimeoutHandler::AbortSubmitHandler::DiskIO(UblockSharedPtr dev, void *ctx
     }
 }
 
-CommandTimeoutHandler::AbortSubmitHandler::AbortSubmitHandler(AbortContext* inputAbortContext, DeviceManager* devMgr)
+CommandTimeoutHandler::__AbortSubmitHandler::__AbortSubmitHandler(AbortContext* inputAbortContext, DeviceManager* devMgr)
 : abortContext(inputAbortContext),
   devMgr(devMgr)
 {
@@ -118,9 +118,9 @@ CommandTimeoutHandler::IsPendingAbortZero(void)
 }
 
 bool
-CommandTimeoutHandler::AbortSubmitHandler::Execute(void)
+CommandTimeoutHandler::__AbortSubmitHandler::Execute(void)
 {
-    driverFunc = bind(&CommandTimeoutHandler::AbortSubmitHandler::DiskIO, this, _1, _2);
+    driverFunc = bind(&CommandTimeoutHandler::__AbortSubmitHandler::DiskIO, this, _1, _2);
     devMgr->IterateDevicesAndDoFunc(driverFunc, nullptr);
     return true;
 }
@@ -212,7 +212,7 @@ CommandTimeoutHandler::_TimeoutActionAbortHandler(
         ctrlrData->sn, reinterpret_cast<uint64_t>(qpair), cid);
 
     AbortContext* abortContext = new AbortContext(ctrlr, qpair, cid);
-    EventSmartPtr event(new AbortSubmitHandler(abortContext));
+    EventSmartPtr event(new __AbortSubmitHandler(abortContext));
     EventSchedulerSingleton::Instance()->EnqueueEvent(event);
 }
 

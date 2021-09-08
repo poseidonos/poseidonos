@@ -114,7 +114,7 @@ DumpSharedModule<T, moduleNumber>::DumpSharedModule(std::string moduleName, bool
 }
 
 template<typename T, int moduleNumber>
-DumpSharedModuleInstance<T, moduleNumber>::DumpSharedModuleInstance()
+DumpSharedModuleInstance<T, moduleNumber>::DumpSharedModuleInstance(void)
 {
     std::string str = "SharedPointer";
     str += to_string(moduleNumber);
@@ -127,20 +127,20 @@ DumpSharedModuleInstance<T, moduleNumber>::DumpSharedModuleInstance()
 }
 
 template<typename T, int moduleNumber>
-DumpSharedModuleInstance<T, moduleNumber>::~DumpSharedModuleInstance()
+DumpSharedModuleInstance<T, moduleNumber>::~DumpSharedModuleInstance(void)
 {
     delete dumpSharedInstance;
 }
 
 template<typename T, int moduleNumber>
 DumpSharedModule<T, moduleNumber>*
-DumpSharedModuleInstance<T, moduleNumber>::DumpInstance()
+DumpSharedModuleInstance<T, moduleNumber>::DumpInstance(void)
 {
     return dumpSharedInstance;
 }
 
 template<typename T, int moduleNumber>
-DumpSharedModule<T, moduleNumber>::~DumpSharedModule()
+DumpSharedModule<T, moduleNumber>::~DumpSharedModule(void)
 {
 }
 

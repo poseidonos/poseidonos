@@ -56,10 +56,10 @@ void UramRestoreCompletion::IncreasePendingUbio(void)
 
 void UramRestoreCompletion::WaitPendingUbioZero(void)
 {
-     while (pendingUbio != 0)
-     {
-         usleep(1);
-     }
+    while (pendingUbio != 0)
+    {
+        usleep(1);
+    }
 }
 
 

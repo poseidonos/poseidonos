@@ -92,7 +92,7 @@ Nvme::RegisterTimeoutHandlerFunc(TimeoutHandlerFunction timeoutAbortFunc,
 }
 
 void
-Nvme::_Initialize()
+Nvme::_Initialize(void)
 {
     ConfigManager& configManager = *ConfigManagerSingleton::Instance();
     std::string module("user_nvme_driver");
@@ -169,7 +169,7 @@ Nvme::GetRetryCount(RetryType retryType)
 }
 
 void
-Nvme::Start()
+Nvme::Start(void)
 {
     if (isRunning == false)
     {
@@ -180,7 +180,7 @@ Nvme::Start()
 }
 
 void
-Nvme::Stop()
+Nvme::Stop(void)
 {
     Resume();
     if (isRunning == true)
@@ -191,7 +191,7 @@ Nvme::Stop()
 }
 
 void
-Nvme::_Monitoring()
+Nvme::_Monitoring(void)
 {
     POS_TRACE_INFO(POS_EVENT_ID::UNVME_DAEMON_START, "spdk daemon monitoring started");
     AffinityManagerSingleton::Instance()->SetGeneralAffinitySelf();
@@ -375,19 +375,19 @@ Nvme::_AttachCallback(void* cbCtx,
 }
 
 bool
-Nvme::IsPaused()
+Nvme::IsPaused(void)
 {
     return (paused);
 }
 
 void
-Nvme::Pause()
+Nvme::Pause(void)
 {
     paused = true;
 }
 
 void
-Nvme::Resume()
+Nvme::Resume(void)
 {
     paused = false;
 }
@@ -436,7 +436,7 @@ Nvme::SpdkDetach(void* arg1)
 
     std::lock_guard<std::mutex> guard(nvmeMutex);
     for (std::list<NsEntry*>::iterator iter = namespaces.begin();
-         iter != namespaces.end(); iter++)
+        iter != namespaces.end(); iter++)
     {
         if ((*iter)->u.nvme.ns == ns)
         {
@@ -475,13 +475,13 @@ Nvme::Cleanup(void* arg1)
     POS_TRACE_INFO(POS_EVENT_ID::UNVME_CLEAN_UP, "Detaching SPDK controlllers!");
 
     for (std::list<NsEntry*>::iterator iter = namespaces.begin();
-         iter != namespaces.end(); iter++)
+        iter != namespaces.end(); iter++)
     {
         free(*iter);
     }
 
     for (std::list<CtrlrEntry*>::iterator iter = controllers.begin();
-         iter != controllers.end(); iter++)
+        iter != controllers.end(); iter++)
     {
         spdk_nvme_detach((*iter)->ctrlr);
         free(*iter);

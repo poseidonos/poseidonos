@@ -67,13 +67,13 @@ public:
       ubio(ubio)
     {
     }
-    ~DummyCallbackHandler() override{};
+    ~DummyCallbackHandler(void) override{};
 
 private:
     bool completeOrigin;
     UbioSmartPtr ubio;
     bool
-    _DoSpecificJob()
+    _DoSpecificJob(void)
     {
         testCount++;
         errCount = _GetErrorCount();

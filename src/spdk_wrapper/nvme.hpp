@@ -119,11 +119,11 @@ public:
 
     std::list<NsEntry*>* InitController(void);
 
-    void Start() override;
-    void Stop() override;
-    void Pause() override;
-    void Resume() override;
-    bool IsPaused() override;
+    void Start(void) override;
+    void Stop(void) override;
+    void Pause(void) override;
+    void Resume(void) override;
+    bool IsPaused(void) override;
 
     void
     SetCallback(SpdkAttachEvent attach, SpdkDetachEvent detach)
@@ -132,7 +132,7 @@ public:
         detachCb = detach;
     }
 
-    Nvme(string monitor_name)
+    explicit Nvme(string monitor_name)
     : DeviceMonitor(monitor_name)
     {
     }

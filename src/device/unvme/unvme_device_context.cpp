@@ -42,19 +42,19 @@ UnvmeDeviceContext::UnvmeDeviceContext(spdk_nvme_ns* ns)
 }
 
 void
-UnvmeDeviceContext::IncAdminCommandCount()
+UnvmeDeviceContext::IncAdminCommandCount(void)
 {
     adminCommandPending++;
 }
 
 void
-UnvmeDeviceContext::DecAdminCommandCount()
+UnvmeDeviceContext::DecAdminCommandCount(void)
 {
     adminCommandPending--;
 }
 
 bool
-UnvmeDeviceContext::IsAdminCommandPendingZero()
+UnvmeDeviceContext::IsAdminCommandPendingZero(void)
 {
     return (adminCommandPending == 0);
 }

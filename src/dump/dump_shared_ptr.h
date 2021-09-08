@@ -82,7 +82,7 @@ class DumpSharedModule : public DumpModule<T>
 {
 public:
     DumpSharedModule(std::string moduleName, bool defaultEnable);
-    ~DumpSharedModule() override;
+    ~DumpSharedModule(void) override;
     std::unordered_map<uint64_t, DumpObject<T>> dumpMap;
     int Add(T t, bool lock_enable = true);
     int Delete(T t, bool lock_enable = true);
@@ -98,9 +98,9 @@ template<typename T, int moduleNumber>
 class DumpSharedModuleInstance
 {
 public:
-    DumpSharedModuleInstance();
-    ~DumpSharedModuleInstance();
-    DumpSharedModule<T, moduleNumber>* DumpInstance();
+    DumpSharedModuleInstance(void);
+    ~DumpSharedModuleInstance(void);
+    DumpSharedModule<T, moduleNumber>* DumpInstance(void);
 
 private:
     DumpSharedModule<T, moduleNumber>* dumpSharedInstance;

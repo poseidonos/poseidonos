@@ -52,7 +52,7 @@ public:
     FlushSubmission(Stripe* inputStripe, int arrayId);
     FlushSubmission(Stripe* inputStripe, IWBStripeAllocator* wbStripeAllocator, IIOSubmitHandler* ioSubmitHandler, int arrayId,
         IIOTranslator* translator);
-    ~FlushSubmission() override;
+    ~FlushSubmission(void) override;
     bool Execute(void) override;
     uint32_t GetBufferListSize(void);
 

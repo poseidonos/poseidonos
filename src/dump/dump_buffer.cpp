@@ -36,7 +36,7 @@
 
 namespace pos
 {
-DumpBuffer::DumpBuffer()
+DumpBuffer::DumpBuffer(void)
 : ptr(nullptr),
   dumpModule(nullptr)
 {
@@ -55,7 +55,7 @@ DumpBuffer::DumpBuffer(void* inputPtr, size_t size, AbstractDumpModule* module)
     }
 }
 
-DumpBuffer::~DumpBuffer()
+DumpBuffer::~DumpBuffer(void)
 {
 }
 

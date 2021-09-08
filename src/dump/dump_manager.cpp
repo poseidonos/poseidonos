@@ -36,12 +36,12 @@
 
 namespace pos
 {
-DumpManager::DumpManager()
+DumpManager::DumpManager(void)
 {
     usedMemorySize = 0;
 }
 
-DumpManager::~DumpManager()
+DumpManager::~DumpManager(void)
 {
 }
 

@@ -3,6 +3,7 @@
 #include "src/io/general_io/submit_async_byte_io.h"
 
 #include "src/array/service/array_service_layer.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/memory.h"
 #include "src/include/pos_event_id.hpp"
@@ -32,7 +33,11 @@ AsyncByteIO::_CallbackFunc(void *callbackPtr)
     CallbackSmartPtr* callbackSmartPtr = static_cast<CallbackSmartPtr *>(callbackPtr);
     if (callbackPtr != nullptr)
     {
-        (*callbackSmartPtr)->Execute();
+        bool flag = (*callbackSmartPtr)->Execute();
+        if (unlikely(flag == false))
+        {
+            EventSchedulerSingleton::Instance()->EnqueueEvent(*callbackSmartPtr);
+        }
         delete callbackSmartPtr;
     }
 }

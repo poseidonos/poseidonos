@@ -61,12 +61,12 @@ FlushCompletion::FlushCompletion(Stripe* stripe,
 {
 }
 
-FlushCompletion::~FlushCompletion()
+FlushCompletion::~FlushCompletion(void)
 {
 }
 
 bool
-FlushCompletion::_DoSpecificJob()
+FlushCompletion::_DoSpecificJob(void)
 {
     bool wrapupSuccessful = true;
 

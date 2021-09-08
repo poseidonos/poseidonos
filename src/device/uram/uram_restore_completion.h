@@ -42,7 +42,7 @@ namespace pos
 class UramRestoreCompletion : public Callback
 {
 public:
-    UramRestoreCompletion(UbioSmartPtr ubio);
+    explicit UramRestoreCompletion(UbioSmartPtr ubio);
 
     ~UramRestoreCompletion(void) override;
 

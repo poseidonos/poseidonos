@@ -46,7 +46,7 @@ class DumpSharedPtr;
 namespace pos
 {
 template<typename T>
-DumpObject<T>::DumpObject()
+DumpObject<T>::DumpObject(void)
 : buffer{},
   userSpecificData(0)
 {

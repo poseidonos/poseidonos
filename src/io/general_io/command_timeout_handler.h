@@ -50,20 +50,20 @@ public:
     // Find device lock and increase pending io of deviceContext.
     // Without lock, that device can be removed at that time.
     // device->ioQpair is generated, ioQpair to device is generated.
-    CommandTimeoutHandler();
+    CommandTimeoutHandler(void);
 
     // test usage. pending abort zero is automatically checked by device context.
-    bool IsPendingAbortZero();
+    bool IsPendingAbortZero(void);
 
     // We abort handling by "event", because the entry point of handler is "ioworker"
     // If abort and detach process are simulatneously happen, io worker requires "array state lock" and,
     // Event also requires "array state lock" and submit i/o to io worker and waiting with "array state lock"
     // That condition is prominently "dead lock" condition. To avoid dead lock, we submit abort command as "event"
 
-    class AbortSubmitHandler : public Event
+    class __AbortSubmitHandler : public Event
     {
     public:
-        AbortSubmitHandler(AbortContext* inputAbortContext, DeviceManager* devMgr = DeviceManagerSingleton::Instance());
+        __AbortSubmitHandler(AbortContext* inputAbortContext, DeviceManager* devMgr = DeviceManagerSingleton::Instance());
         void DiskIO(UblockSharedPtr dev, void* ctx);
         bool Execute(void) override;
 
@@ -77,7 +77,7 @@ private:
     class AbortCompletionHandler : public Callback
     {
     public:
-        AbortCompletionHandler(AbortContext* inputAbortContext);
+        explicit AbortCompletionHandler(AbortContext* inputAbortContext);
 
     private:
         bool _DoSpecificJob(void) override;

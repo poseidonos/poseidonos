@@ -144,22 +144,22 @@ TEST_F(CommandTimeoutHandlerFixture, IsPendingAbortZero)
     delete commandTimeoutHandler;
 }
 
-TEST_F(CommandTimeoutHandlerFixture, AbortSubmitHandler_Constructor)
+TEST_F(CommandTimeoutHandlerFixture, __AbortSubmitHandler_Constructor)
 {
     // Given : Abort Context is initialized
     AbortContext abortContext(nullptr, nullptr, 0);
-    // When : AbortSubmitHandler Constructor, Destructor
-    CommandTimeoutHandler::AbortSubmitHandler* commandAbortEvent = new CommandTimeoutHandler::AbortSubmitHandler(&abortContext, devMgr);
+    // When : __AbortSubmitHandler Constructor, Destructor
+    CommandTimeoutHandler::__AbortSubmitHandler* commandAbortEvent = new CommandTimeoutHandler::__AbortSubmitHandler(&abortContext, devMgr);
     delete commandAbortEvent;
     // Then : Nothing
 }
 
-TEST_F(CommandTimeoutHandlerFixture, AbortSubmitHandler_DiskIO)
+TEST_F(CommandTimeoutHandlerFixture, __AbortSubmitHandler_DiskIO)
 {
     // Given : Abort Context is initialized
     AbortContext* abortContext = new AbortContext(nullptr, nullptr, 0);
-    // When : AbortSubmitHandler Constructor
-    CommandTimeoutHandler::AbortSubmitHandler* commandAbortEvent = new CommandTimeoutHandler::AbortSubmitHandler(abortContext, devMgr);
+    // When : __AbortSubmitHandler Constructor
+    CommandTimeoutHandler::__AbortSubmitHandler* commandAbortEvent = new CommandTimeoutHandler::__AbortSubmitHandler(abortContext, devMgr);
     DevName name("dev");
     UblockSharedPtr ptr(devMgr->GetDev(name));
     commandAbortEvent->DiskIO(ptr, nullptr);
@@ -169,7 +169,7 @@ TEST_F(CommandTimeoutHandlerFixture, AbortSubmitHandler_DiskIO)
     delete abortContext;
 }
 
-TEST_F(CommandTimeoutHandlerFixture, AbortSubmitHandler_Execute)
+TEST_F(CommandTimeoutHandlerFixture, __AbortSubmitHandler_Execute)
 {
     // When : Timeout occured (cfs is not set)
     ctrlr.is_failed = false;
@@ -205,8 +205,8 @@ TEST_F(CommandTimeoutHandlerFixture, AbortSubmitHandler_Execute)
 
     // Given : Abort Context is initialized
     AbortContext* abortContext = new AbortContext(&ctrlr, &qpair, 0);
-    // When : AbortSubmitHandler is executed
-    CommandTimeoutHandler::AbortSubmitHandler* commandAbortEvent = new CommandTimeoutHandler::AbortSubmitHandler(abortContext, devMgr);
+    // When : __AbortSubmitHandler is executed
+    CommandTimeoutHandler::__AbortSubmitHandler* commandAbortEvent = new CommandTimeoutHandler::__AbortSubmitHandler(abortContext, devMgr);
     bool actual = commandAbortEvent->Execute();
     // Then: Abort execution succeeds
     ASSERT_EQ(actual, true);

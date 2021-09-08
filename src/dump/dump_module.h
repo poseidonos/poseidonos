@@ -50,9 +50,9 @@ template<typename T>
 class DumpObject
 {
 public:
-    DumpObject();
+    DumpObject(void);
     DumpObject(T& t, uint64_t userSpecific);
-    ~DumpObject();
+    ~DumpObject(void);
     T buffer;
     uint64_t userSpecificData;
     struct timeval date; // 8 byte
@@ -62,24 +62,24 @@ class AbstractDumpModule
 {
 public:
     virtual void SetEnable(bool enable) = 0;
-    virtual bool IsEnable() = 0;
-    virtual uint32_t GetPoolSize() = 0;
+    virtual bool IsEnable(void) = 0;
+    virtual uint32_t GetPoolSize(void) = 0;
 };
 
 template<typename T>
 class DumpModule : public AbstractDumpModule
 {
 public:
-    DumpModule();
+    DumpModule(void);
 
     DumpModule(std::string moduleName,
         uint32_t num, bool enable);
-    virtual ~DumpModule();
+    virtual ~DumpModule(void);
     std::mutex dumpQueueLock;
     int AddDump(T& t, uint64_t userSpecific, bool lock_enable = true);
     virtual void SetEnable(bool enable);
-    virtual bool IsEnable();
-    virtual uint32_t GetPoolSize();
+    virtual bool IsEnable(void);
+    virtual uint32_t GetPoolSize(void);
 
     static const int MAX_ENTRIES_FOR_CALLBACK_ERROR = 10000; // temporary value
 

@@ -89,16 +89,13 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inp
   rbaStateManager(inputRbaStateManager),
   iBlockAllocator(inputIBlockAllocator)
 {
-    if (nullptr == inputFlowControl)
+    flowControl = inputFlowControl;
+    if (nullptr == flowControl)
     {
         /*To do Remove after adding array Idx by Array*/
         IArrayInfo* info = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
 
         flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(info->GetName());
-    }
-    else
-    {
-        flowControl = inputFlowControl;
     }
 }
 

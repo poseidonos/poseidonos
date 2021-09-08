@@ -627,7 +627,7 @@ Array::MountDone(void)
 {
     _CheckRebuildNecessity();
     int ret = _Flush();
-    assert (ret == 0);
+    assert(ret == 0);
 }
 
 int

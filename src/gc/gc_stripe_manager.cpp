@@ -96,9 +96,7 @@ GcStripeManager::~GcStripeManager(void)
             delete gcActiveWriteBuffers[volumeId];
         }
     }
-
     delete gcWriteBufferPool;
-    
     volumeEventPublisher->RemoveSubscriber(this, arrayName, arrayId);
 }
 
