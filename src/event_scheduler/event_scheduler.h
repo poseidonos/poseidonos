@@ -51,6 +51,7 @@ class ISchedulerPolicy;
 class EventQueue;
 class EventWorker;
 class SchedulerQueue;
+class QosManager;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis Schedule events to Event worker
@@ -60,7 +61,7 @@ class SchedulerQueue;
 class EventScheduler
 {
 public:
-    EventScheduler(void);
+    EventScheduler(QosManager* qosManager = nullptr);
     void Initialize(uint32_t workerCountInput, cpu_set_t schedulerCPUInput,
             cpu_set_t eventCPUSetInput);
     virtual ~EventScheduler(void);
@@ -89,6 +90,7 @@ private:
     int32_t oldWeight[BackendEvent_Count] = {0};
     int32_t runningWeight[BackendEvent_Count] = {0};
     bool numaDedicatedSchedulingPolicy;
+    QosManager* qosManager;
 };
 
 using EventSchedulerSingleton = Singleton<EventScheduler>;

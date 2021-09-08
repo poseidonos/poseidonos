@@ -76,7 +76,7 @@ class QosManager : public ExitQosHandler
 {
 public:
     QosManager(void);
-    ~QosManager(void);
+    virtual ~QosManager(void);
     void Initialize(void);
     int IOWorkerPoller(uint32_t id, SubmissionAdapter* ioSubmission);
     void HandleEventUbioSubmission(SubmissionAdapter* ioSubmission,
@@ -86,7 +86,7 @@ public:
     bw_iops_parameter DequeueVolumeParams(uint32_t reactor, uint32_t volId, uint32_t arrayId);
     bw_iops_parameter DequeueEventParams(uint32_t workerId, BackendEvent event);
     void SetEventWeightWRR(BackendEvent event, int64_t weight);
-    int64_t GetEventWeightWRR(BackendEvent event);
+    virtual int64_t GetEventWeightWRR(BackendEvent event);
     uint32_t GetUsedStripeCnt(uint32_t arrayId);
     void IncreaseUsedStripeCnt(uint32_t arrayId);
     void DecreaseUsedStripeCnt(std::string arrayName);
@@ -100,7 +100,7 @@ public:
     void CopyEventPolicy(void);
     void HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, pos_io* io);
     int VolumeQosPoller(poller_structure* param, IbofIoSubmissionAdapter* aioSubmission);
-    bool IsFeQosEnabled(void);
+    virtual bool IsFeQosEnabled(void);
     qos_rebuild_policy GetRebuildPolicy(std::string arrayName);
     int UpdateRebuildPolicy(qos_rebuild_policy rebuildPolicy);
     void SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops, uint32_t arrayId);
@@ -117,7 +117,7 @@ public:
     void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap, uint32_t arrayId);
 
 private:
-    void _Finalize(void);
+    virtual void _Finalize(void);
     void _QosWorker(void);
     QosInternalManager* _GetNextInternalManager(QosInternalManagerType internalManagerType);
     std::thread* qosThread;

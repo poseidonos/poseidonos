@@ -45,8 +45,13 @@ namespace pos
  * @Synopsis Constructor 
  */
 /* --------------------------------------------------------------------------*/
-SchedulerQueue::SchedulerQueue(void)
+SchedulerQueue::SchedulerQueue(QosManager* qosManager_)
+: qosManager(qosManager_)
 {
+    if (nullptr == qosManager)
+    {
+        qosManager = QosManagerSingleton::Instance();
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -98,7 +103,6 @@ SchedulerQueue::EnqueueEvent(EventSmartPtr input)
     {
         queue.push(input);
     }
-    QosManager* qosManager = QosManagerSingleton::Instance();
     if (true == qosManager->IsFeQosEnabled())
     {
         if ((input->IsFrontEnd() == false))

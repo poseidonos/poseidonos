@@ -75,7 +75,7 @@ std::thread* cliThread = nullptr;
 atomic<bool> notifyDone(false);
 string threadRes(MAX_BUFF_SZ, 0);
 
-RequestHandler reqHandler;
+RequestHandler* reqHandler = nullptr;
 
 void
 Wait()
@@ -87,6 +87,11 @@ Wait()
     }
 
     cliThread->join();
+    if (nullptr != reqHandler)
+    {
+        delete reqHandler;
+        reqHandler = nullptr;
+    }
     int event = (int)POS_EVENT_ID::SERVER_THREAD_JOINED;
     POS_TRACE_INFO(event, cliEventDic.at(event));
 }
@@ -173,7 +178,7 @@ TryProcessing(char* msg)
     notifyDone = false;
 
     thread t([&msg]() {
-        string res = reqHandler.ProcessCommand(msg);
+        string res = reqHandler->ProcessCommand(msg);
 
         if (!notifyDone)
             threadRes = res;
@@ -236,7 +241,7 @@ ClientThread(void* arg)
             {
                 int event = (int)POS_EVENT_ID::TIMED_OUT;
                 POS_TRACE_INFO(event, cliEventDic.at(event));
-                SendMsg(clnt, reqHandler.TimedOut(clnt->recv_buff));
+                SendMsg(clnt, reqHandler->TimedOut(clnt->recv_buff));
             }
             else
             {
@@ -246,9 +251,9 @@ ClientThread(void* arg)
         else
         {
             clnt->recv_buff[str_len] = 0;
-            SendMsg(clnt, reqHandler.PosBusy(clnt->recv_buff));
+            SendMsg(clnt, reqHandler->PosBusy(clnt->recv_buff));
         }
-        if (reqHandler.IsExit() == true)
+        if (reqHandler->IsExit() == true)
         {
             Exit();
         }
@@ -469,7 +474,7 @@ CLIServer()
             if (event[i].data.fd == 0)
             {
                 int cli_fd = accept(sock_fd, (struct sockaddr*)&cli_addr, &clilen);
-                if (cli_fd < 0 || reqHandler.IsExit())
+                if (cli_fd < 0 || reqHandler->IsExit())
                 {
                     int event = (int)POS_EVENT_ID::SOCK_ACCEPT_FAILED;
                     POS_TRACE_WARN(event, cliEventDic.at(event));
@@ -517,6 +522,7 @@ CLIServer()
 void
 CLIServerMain()
 {
+    reqHandler = new RequestHandler;
     cliThread = new std::thread(CLIServer);
 }
 }; // namespace pos_cli

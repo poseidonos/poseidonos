@@ -41,6 +41,7 @@
 namespace pos
 {
 class Event;
+class QosManager;
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -50,7 +51,7 @@ class Event;
 class SchedulerQueue
 {
 public:
-    SchedulerQueue(void);
+    SchedulerQueue(QosManager* qosManager = nullptr);
     ~SchedulerQueue(void);
 
     EventSmartPtr DequeueEvent(void);
@@ -58,6 +59,7 @@ public:
 
 private:
     std::queue<EventSmartPtr> queue;
+    QosManager* qosManager;
 };
 } // namespace pos
 

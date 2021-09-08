@@ -42,7 +42,14 @@ PosEventId::PosEventIdEntry
 PosEventId::PosEventIdEntry
     PosEventId::QOS_EVENT_ENTRY[(uint32_t)POS_EVENT_ID::QOS_COUNT] =
         {
+            {POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER, "TBD"},
+            {POS_EVENT_ID::QOS_CLI_FE_QOS_DISABLED, "TBD"},
+            {POS_EVENT_ID::QOS_SET_EVENT_POLICY, "TBD"},
+            {POS_EVENT_ID::QOS_NOT_SUPPORTED, "TBD"},
+            {POS_EVENT_ID::QOS_FINALIZATION, "TBD"},
+            {POS_EVENT_ID::QOS_POLLER_REGISTRATION, "TBD"},
             {POS_EVENT_ID::QOS_POLLER_REGISTRATION_FAILED, "Failed to register Qos poller on reactor #: {}"},
+            {POS_EVENT_ID::QOS_POLLER_UNREGISTRATION, "TBD"},
             {POS_EVENT_ID::QOS_POLLER_UNREGISTRATION_FAILED, "Failed to un-register Qos poller on reactor #: {}"},
 };
 

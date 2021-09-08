@@ -49,12 +49,13 @@
 
 namespace pos
 {
-EventScheduler::EventScheduler(void)
+EventScheduler::EventScheduler(QosManager* qosManager_)
 : policy(nullptr),
   exit(false),
   workerCount(UINT32_MAX),
   schedulerThread(nullptr),
-  numaDedicatedSchedulingPolicy(false)
+  numaDedicatedSchedulingPolicy(false),
+  qosManager(qosManager_)
 {
     CPU_ZERO(&schedulerCPUSet);
     bool enable = false;
@@ -65,10 +66,15 @@ EventScheduler::EventScheduler(void)
         numaDedicatedSchedulingPolicy = enable;
     }
 
+    if (nullptr == qosManager)
+    {
+        qosManager = QosManagerSingleton::Instance();
+    }
+
     for (unsigned int event = 0; (BackendEvent)event < BackendEvent_Count;
          event++)
     {
-        eventQueue[event] = new SchedulerQueue;
+        eventQueue[event] = new SchedulerQueue{qosManager};
     }
     for (uint32_t numa = 0; numa < MAX_NUMA; numa++)
     {
@@ -308,7 +314,7 @@ EventScheduler::DequeueEvents(void)
             }
             else
             {
-                eventWeight = QosManagerSingleton::Instance()->GetEventWeightWRR((BackendEvent)eventType);
+                eventWeight = qosManager->GetEventWeightWRR((BackendEvent)eventType);
                 if (eventWeight < 0)
                 {
                     if (eventWeight != oldWeight[(BackendEvent)eventType])
