@@ -55,7 +55,11 @@ TelemetryAirDelegator::~TelemetryAirDelegator(void)
 void
 TelemetryAirDelegator::StartDelegation(void)
 {
-    returnState = stateRun;
+    {
+        const std::lock_guard<std::mutex> lock(mutex);
+        returnState = stateRun;
+    }
+
     air_request_data({"PERF_ARR_VOL"},
         [this](const air::JSONdoc& data) -> int {
             const std::lock_guard<std::mutex> lock(this->mutex);
