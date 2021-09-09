@@ -76,7 +76,6 @@ private:
     RBAStateManager* rbaStateManager;
     IBlockAllocator* iBlockAllocator;
     FlowControl* flowControl;
-    bool isReactorNow;
 
     void _SendVolumeIo(VolumeIoSmartPtr volumeIo);
     bool _ProcessOwnedWrite(void);
