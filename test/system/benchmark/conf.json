@@ -12,10 +12,12 @@
             },
             "SPDK":
             {
-                "DIR": "/home/ibof/ibofos/lib/spdk",
-                "TRANSPORT": "tcp",
-                "NUM_SHARED_BUFFER": 4096,
-                "WRITE_BUFFER_SIZE_IN_MB": 1024,
+                "DIR": "/home/ibofos/lib/spdk",
+                "TRANSPORT": 
+                {
+                    "TYPE": "tcp",
+                    "NUM_SHARED_BUFFER": 4096
+                },
                 "SUBSYSTEMs":
                 [
                     {
@@ -40,9 +42,9 @@
             },
             "POS":
             {
-                "DIR": "/home/ibof/ibofos",
+                "DIR": "/home/ibofos",
                 "BIN": "poseidonos",
-                "CLI": "cli",
+                "CLI": "poseidonos-cli",
                 "CFG": "pos.conf",
                 "LOG": "pos.log",
                 "ARRAYs":
@@ -52,6 +54,14 @@
                         "RAID_TYPE": "RAID5",
                         "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2",
                         "SPARE_DEVICE_LIST": "unvme-ns-3",
+                        "BUFFER_DEVICE":
+                        {
+                            "NAME": "uram0",
+                            "TYPE": "uram",
+                            "NUM_BLOCKS": 2097152,
+                            "BLOCK_SIZE": 512,
+                            "NUMA": 0
+                        },
                         "VOLUMEs":
                         [
                             {
@@ -87,7 +97,7 @@
             },
             "SPDK":
             {
-                "DIR": "/home/ibof/ibofos/lib/spdk",
+                "DIR": "/home/ibofos/lib/spdk",
                 "TRANSPORT": "tcp"
             }
         }
@@ -96,7 +106,7 @@
     [
         {
             "NAME": "precommit",
-            "OUTPUT_DIR": "/home/ibof/ibofos/test/system/benchmark/output"
+            "OUTPUT_DIR": "/home/ibofos/test/system/benchmark/output"
         }
     ]
 }

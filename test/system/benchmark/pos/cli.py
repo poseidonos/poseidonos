@@ -89,3 +89,57 @@ def volume_mount(cmd, cli, dir, vol_name, subnqn, arr_name):
         lib.printer.red(cli_cmd)
         lib.printer.red(f"{__name__} [Error] {e}")
         return -1
+
+
+def bdev_malloc_create(cmd, cli, dir, dev_name, dev_type, num_blk, blk_size, numa):
+    try:
+        cli_cmd = cmd + f"nohup {dir}/bin/{cli} device create --device-name {dev_name} --device-type {dev_type} --num-blocks {num_blk} --block-size {blk_size} --numa {numa}"
+        lib.subproc.popen(cli_cmd)
+        return 0
+    except Exception as e:
+        lib.printer.red(cli_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+        return -1
+
+
+def transport_create(cmd, cli, dir, trtype, num_shared_buf):
+    try:
+        cli_cmd = cmd + f"nohup {dir}/bin/{cli} subsystem create-transport --trtype {trtype} -c 64 --num-shared-buf {num_shared_buf}"
+        lib.subproc.popen(cli_cmd)
+        return 0
+    except Exception as e:
+        lib.printer.red(cli_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+        return -1
+
+
+def subsystem_create(cmd, cli, dir, nqn, sn):
+    try:
+        cli_cmd = cmd + f"nohup {dir}/bin/{cli} subsystem create --subnqn {nqn} --serial-number {sn} --model-number POS_VOLUME_EXTENSION -m 256 -o"
+        lib.subproc.popen(cli_cmd)
+        return 0
+    except Exception as e:
+        lib.printer.red(cli_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+        return -1
+
+
+def subsystem_add_listener(cmd, cli, dir, nqn, trtype, ip, port):
+    try:
+        cli_cmd = cmd + f"nohup {dir}/bin/{cli} subsystem add-listener --subnqn {nqn} -t {trtype} -i {ip} -p {port}"
+        lib.subproc.popen(cli_cmd)
+        return 0
+    except Exception as e:
+        lib.printer.red(cli_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+        return -1
+
+
+def subsystem_list(cmd, cli, dir):
+    try:
+        cli_cmd = cmd + f"nohup {dir}/bin/{cli} subsystem list"
+        return lib.subproc.popen(cli_cmd)
+    except Exception as e:
+        lib.printer.red(cli_cmd)
+        lib.printer.red(f"{__name__} [Error] {e}")
+        return -1

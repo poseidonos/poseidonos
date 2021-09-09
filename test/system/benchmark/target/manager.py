@@ -15,9 +15,8 @@ class Target:
         self.list_cmd = ["sshpass", "-p", self.pw, "ssh", f"{self.id}@{self.nic_ssh}"]
         self.cmd = f"sshpass -p {self.pw} ssh {self.id}@{self.nic_ssh} echo {self.pw} | sudo -s "
         self.spdk_dir = json["SPDK"]["DIR"]
-        self.spdk_tp = json["SPDK"]["TRANSPORT"]
-        self.spdk_no_shd_buf = json["SPDK"]["NUM_SHARED_BUFFER"]
-        self.spdk_write_buf_size_in_mb = json["SPDK"]["WRITE_BUFFER_SIZE_IN_MB"]
+        self.spdk_tp = json["SPDK"]["TRANSPORT"]["TYPE"]
+        self.spdk_no_shd_buf = json["SPDK"]["TRANSPORT"]["NUM_SHARED_BUFFER"]
         self.pos_dir = json["POS"]["DIR"]
         self.pos_bin = json["POS"]["BIN"]
         self.pos_cli = json["POS"]["CLI"]
@@ -42,18 +41,21 @@ class Target:
         time.sleep(1)
 
         # spdk setting
-        if -1 == pos.spdk.nvmf_create_transport(self.cmd, self.spdk_dir, self.spdk_tp, self.spdk_no_shd_buf):
-            return False
-        if -1 == pos.spdk.bdev_malloc_create(self.cmd, self.spdk_dir, self.spdk_write_buf_size_in_mb):
+        if -1 == pos.cli.transport_create(self.cmd, self.pos_cli, self.pos_dir, self.spdk_tp, self.spdk_no_shd_buf):
             return False
         for subsys in self.json["SPDK"]["SUBSYSTEMs"]:
-            if -1 == pos.spdk.nvmf_create_subsystem(self.cmd, self.spdk_dir, subsys["NQN"], subsys["SN"]):
+            if -1 == pos.cli.subsystem_create(self.cmd, self.pos_cli, self.pos_dir, subsys["NQN"], subsys["SN"]):
                 return False
-            if -1 == pos.spdk.nvmf_subsystem_add_listener(self.cmd, self.spdk_dir, subsys["NQN"], self.spdk_tp,
-                                                          self.json["NIC"][subsys["IP"]], subsys["PORT"]):
+            if -1 == pos.cli.subsystem_add_listener(self.cmd, self.pos_cli, self.pos_dir, subsys["NQN"], self.spdk_tp,
+                                                    self.json["NIC"][subsys["IP"]], subsys["PORT"]):
                 return False
 
         # pos setting
+        for array in self.json["POS"]["ARRAYs"]:
+            buf_dev = array["BUFFER_DEVICE"]
+            if -1 == pos.cli.bdev_malloc_create(self.cmd, self.pos_cli, self.pos_dir, buf_dev["NAME"],
+                                                buf_dev["TYPE"], buf_dev["NUM_BLOCKS"], buf_dev["BLOCK_SIZE"], buf_dev["NUMA"]):
+                return False
         if -1 == pos.cli.device_scan(self.cmd, self.pos_cli, self.pos_dir):
             return False
         if -1 == pos.cli.array_reset(self.cmd, self.pos_cli, self.pos_dir):
@@ -73,8 +75,9 @@ class Target:
                     return False
 
         # spdk get subsystems
-        str_subsys = pos.spdk.nvmf_get_subsystems(self.cmd, self.spdk_dir)
-        self.subsystems = json.loads(str_subsys)
+        str_subsys = pos.cli.subsystem_list(self.cmd, self.pos_cli, self.pos_dir)
+        self.subsystems = str_subsys
+        print(self.subsystems)
 
         lib.printer.green(f" '{self.name}' prepared")
         return True

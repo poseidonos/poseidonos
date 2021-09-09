@@ -48,7 +48,6 @@ def play(json_targets, json_inits, json_scenario):
             skip_workload = True
             break
         initiators[init_name] = init_obj
-
     # run workload
     if not skip_workload:
         lib.printer.green(f" fio start")
