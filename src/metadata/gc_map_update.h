@@ -38,6 +38,8 @@
 #include "src/event_scheduler/callback.h"
 #include "src/include/address_type.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
+#include "src/mapper/i_vsamap.h"
+
 namespace pos
 {
 class Stripe;
