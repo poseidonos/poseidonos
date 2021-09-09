@@ -40,12 +40,12 @@ class GcCtx
 {
 public:
     GcCtx(void);
-    ~GcCtx(void) = default;
+    virtual ~GcCtx(void) = default;
     int GetNormalGcThreshold(void);
     int GetUrgentThreshold(void);
     void SetNormalGcThreshold(int inputThreshold);
     void SetUrgentThreshold(int inputThreshold);
-    GcMode GetCurrentGcMode(int numFreeSegments);
+    virtual GcMode GetCurrentGcMode(int numFreeSegments);
 
     static const int DEFAULT_GC_THRESHOLD = 20;
     static const int DEFAULT_URGENT_THRESHOLD = 5;

@@ -34,8 +34,8 @@
 
 #include <string>
 
+#include "src/allocator/context_manager/block_allocation_status.h"
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
-#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/context_manager/wbstripe_ctx/wbstripe_ctx.h"
 #include "src/allocator/stripe/stripe.h"
 #include "src/include/branch_prediction.h"
@@ -45,14 +45,13 @@
 
 namespace pos
 {
-BlockManager::BlockManager(IStripeMap* stripeMap_, IReverseMap* iReverseMap_, SegmentCtx* segCtx_, AllocatorCtx* allocCtx_, WbStripeCtx* wbCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
-: userBlkAllocProhibited(false),
-  addrInfo(info),
+BlockManager::BlockManager(IStripeMap* stripeMap_, IReverseMap* iReverseMap_, AllocatorCtx* allocCtx_, WbStripeCtx* wbCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
+: addrInfo(info),
   contextManager(ctxMgr),
   iWBStripeInternal(nullptr),
+  allocStatus(allocStatus),
   arrayId(arrayId)
 {
-    segCtx = segCtx_;
     allocCtx = allocCtx_;
     wbStripeCtx = wbCtx_;
     iReverseMap = iReverseMap_;
@@ -62,9 +61,9 @@ BlockManager::BlockManager(IStripeMap* stripeMap_, IReverseMap* iReverseMap_, Se
 BlockManager::BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId)
 : BlockManager(nullptr, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, arrayId)
 {
-    segCtx = contextManager->GetSegmentCtx();
     allocCtx = contextManager->GetAllocatorCtx();
     wbStripeCtx = contextManager->GetWbStripeCtx();
+    allocStatus = contextManager->GetAllocationStatus();
 }
 
 void
@@ -79,11 +78,6 @@ BlockManager::Init(IWBStripeInternal* iwbstripeInternal)
     {
         iStripeMap = MapperServiceSingleton::Instance()->GetIStripeMap(arrayId);
     }
-
-    for (int volume = 0; volume < MAX_VOLUME_COUNT; volume++)
-    {
-        blkAllocProhibited[volume] = false;
-    }
 }
 
 VirtualBlks
@@ -91,7 +85,7 @@ BlockManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks)
 {
     VirtualBlks allocatedBlks;
 
-    if ((blkAllocProhibited[volumeId] == true) || (userBlkAllocProhibited == true))
+    if (allocStatus->IsUserBlockAllocationProhibited(volumeId) == true)
     {
         allocatedBlks.startVsa = UNMAP_VSA;
         allocatedBlks.numBlks = 0;
@@ -105,7 +99,7 @@ BlockManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks)
 Stripe*
 BlockManager::AllocateGcDestStripe(uint32_t volumeId)
 {
-    if (blkAllocProhibited[volumeId] == true)
+    if (allocStatus->IsBlockAllocationProhibited(volumeId))
     {
         return nullptr;
     }
@@ -135,68 +129,50 @@ void
 BlockManager::InvalidateBlks(VirtualBlks blks)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    uint32_t validCount = segCtx->DecreaseValidBlockCount(segId, blks.numBlks);
-    if (validCount == 0)
-    {
-        contextManager->FreeUserDataSegment(segId);
-        GcMode gcMode = contextManager->GetCurrentGcMode();
-        if (gcMode != MODE_URGENT_GC)
-        {
-            PermitUserBlkAlloc();
-        }
-    }
+    contextManager->DecreaseValidBlockCount(segId, blks.numBlks);
 }
 
 void
 BlockManager::ValidateBlks(VirtualBlks blks)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
-    segCtx->IncreaseValidBlockCount(segId, blks.numBlks);
+    contextManager->IncreaseValidBlockCount(segId, blks.numBlks);
 }
 
 void
 BlockManager::ProhibitUserBlkAlloc(void)
 {
-    userBlkAllocProhibited = true;
+    allocStatus->ProhibitUserBlockAllocation();
 }
 
 void
 BlockManager::PermitUserBlkAlloc(void)
 {
-    userBlkAllocProhibited = false;
+    allocStatus->PermitUserBlockAllocation();
 }
 
 bool
 BlockManager::BlockAllocating(uint32_t volumeId)
 {
-    return (blkAllocProhibited[volumeId].exchange(true) == false);
+    return allocStatus->TryProhibitBlockAllocation(volumeId);
 }
 
 void
 BlockManager::UnblockAllocating(uint32_t volumeId)
 {
-    blkAllocProhibited[volumeId] = false;
+    allocStatus->PermitBlockAllocation(volumeId);
 }
 
 void
 BlockManager::TurnOffBlkAllocation(void)
 {
-    for (auto i = 0; i < MAX_VOLUME_COUNT; i++)
-    {
-        // Wait for flag to be reset
-        while (blkAllocProhibited[i].exchange(true) == true)
-        {
-        }
-    }
+    allocStatus->ProhibitBlockAllocation();
 }
 
 void
 BlockManager::TurnOnBlkAllocation(void)
 {
-    for (auto i = 0; i < MAX_VOLUME_COUNT; i++)
-    {
-        blkAllocProhibited[i] = false;
-    }
+    allocStatus->PermitBlockAllocation();
 }
 //----------------------------------------------------------------------------//
 VirtualBlks
@@ -285,15 +261,10 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
     if (IsUnMapStripe(arrayLsid))
     {
         std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
-        _RollBackStripeIdAllocation(wbLsid, UINT32_MAX);
+        _RollBackStripeIdAllocation(wbLsid);
         return -EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE);
     }
-    // If arrayLsid is the front and first stripe of Segment
-    if (_IsSegmentFull(arrayLsid))
-    {
-        SegmentId segId = arrayLsid / addrInfo->GetstripesPerSegment();
-        segCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
-    }
+
     StripeId newVsid = arrayLsid;
 
     // 3. Get Stripe object for wbLsid and link it with reverse map for vsid
@@ -302,8 +273,9 @@ BlockManager::_AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid)
 
     if (unlikely(stripe->LinkReverseMap(iReverseMap->GetReverseMapPack(wbLsid)) < 0))
     {
+        // LinkReverseMap fails when the wbLsid is allocated before it's released (NOT POSSIBLE)
         std::lock_guard<std::mutex> lock(contextManager->GetCtxLock());
-        _RollBackStripeIdAllocation(wbLsid, arrayLsid);
+        _RollBackStripeIdAllocation(wbLsid);
         return -EID(ALLOCATOR_CANNOT_LINK_REVERSE_MAP);
     }
 
@@ -326,7 +298,7 @@ BlockManager::_AllocateUserDataStripeIdInternal(bool isUserStripeAlloc)
     {
         if (contextManager->GetCurrentGcMode() == MODE_URGENT_GC)
         {
-            userBlkAllocProhibited = true;
+            allocStatus->ProhibitUserBlockAllocation();
             if (isUserStripeAlloc)
             {
                 return UNMAP_STRIPE;
@@ -360,21 +332,11 @@ BlockManager::_AllocateUserDataStripeIdInternal(bool isUserStripeAlloc)
 }
 
 void
-BlockManager::_RollBackStripeIdAllocation(StripeId wbLsid, StripeId arrayLsid)
+BlockManager::_RollBackStripeIdAllocation(StripeId wbLsid)
 {
     if (wbLsid != UINT32_MAX)
     {
         wbStripeCtx->ReleaseWbStripe(wbLsid);
-    }
-
-    if (arrayLsid != UINT32_MAX)
-    {
-        if (_IsSegmentFull(arrayLsid))
-        {
-            SegmentId SegmentIdToClear = arrayLsid / addrInfo->GetstripesPerSegment();
-            contextManager->FreeUserDataSegment(SegmentIdToClear);
-        }
-        allocCtx->RollbackCurrentSsdLsid();
     }
 }
 

@@ -20,13 +20,13 @@ public:
     MOCK_METHOD(uint64_t, GetStoredVersion, (), (override));
     MOCK_METHOD(void, ResetDirtyVersion, (), (override));
     MOCK_METHOD(uint32_t, IncreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
-    MOCK_METHOD(int32_t, DecreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
+    MOCK_METHOD(bool, DecreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(uint32_t, GetValidBlockCount, (SegmentId segId), (override));
     MOCK_METHOD(void, SetOccupiedStripeCount, (SegmentId segId, int count), (override));
     MOCK_METHOD(int, GetOccupiedStripeCount, (SegmentId segId), (override));
-    MOCK_METHOD(int, IncreaseOccupiedStripeCount, (SegmentId segId), (override));
-    MOCK_METHOD(void, SetSegmentState, (SegmentId segId, SegmentState state, bool needLock), (override));
-    MOCK_METHOD(SegmentState, GetSegmentState, (SegmentId segId, bool needLock), (override));
+    MOCK_METHOD(bool, IncreaseOccupiedStripeCount, (SegmentId segId), (override));
+    MOCK_METHOD(void, SetSegmentState, (SegmentId segId, SegmentState state, bool needlock), (override));
+    MOCK_METHOD(SegmentState, GetSegmentState, (SegmentId segId, bool needlock), (override));
     MOCK_METHOD(std::mutex&, GetSegStateLock, (SegmentId segId), (override));
     MOCK_METHOD(SegmentInfo*, GetSegmentInfo, (), (override));
     MOCK_METHOD(std::mutex&, GetSegmentCtxLock, (), (override));

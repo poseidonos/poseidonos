@@ -204,7 +204,7 @@ ReplayStripeAllocation::Replay(void)
         return result;
     }
 
-    contextReplayer->ReplayStripeAllocation(wbLsid);
+    contextReplayer->ReplayStripeAllocation(wbLsid, vsid);
     status->StripeAllocated();
     return result;
 }

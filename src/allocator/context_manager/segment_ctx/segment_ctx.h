@@ -67,11 +67,11 @@ public:
     virtual void ResetDirtyVersion(void);
 
     virtual uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    virtual int32_t DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
+    virtual bool DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
     virtual uint32_t GetValidBlockCount(SegmentId segId);
     virtual void SetOccupiedStripeCount(SegmentId segId, int count);
     virtual int GetOccupiedStripeCount(SegmentId segId);
-    virtual int IncreaseOccupiedStripeCount(SegmentId segId);
+    virtual bool IncreaseOccupiedStripeCount(SegmentId segId);
 
     virtual void SetSegmentState(SegmentId segId, SegmentState state, bool needlock);
     virtual SegmentState GetSegmentState(SegmentId segId, bool needlock);

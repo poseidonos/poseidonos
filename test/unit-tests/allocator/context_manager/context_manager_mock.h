@@ -15,6 +15,7 @@ public:
     MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync), (override));
+    MOCK_METHOD(int, FlushRebuildContext, (EventSmartPtr callback, bool sync), (override));
     MOCK_METHOD(void, UpdateOccupiedStripeCount, (StripeId lsid), (override));
     MOCK_METHOD(SegmentId, AllocateFreeSegment, (), (override));
     MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));
@@ -28,7 +29,8 @@ public:
     MOCK_METHOD(GcMode, GetCurrentGcMode, (), (override));
     MOCK_METHOD(int, GetGcThreshold, (GcMode mode), (override));
     MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));
-    MOCK_METHOD(void, FreeUserDataSegment, (SegmentId segId), (override));
+    MOCK_METHOD(void, IncreaseValidBlockCount, (SegmentId segId, uint32_t count), (override));
+    MOCK_METHOD(void, DecreaseValidBlockCount, (SegmentId segId, uint32_t count), (override));
     MOCK_METHOD(int, SetNextSsdLsid, (), (override));
     MOCK_METHOD(char*, GetContextSectionAddr, (int owner, int section), (override));
     MOCK_METHOD(int, GetContextSectionSize, (int owner, int section), (override));
@@ -39,6 +41,7 @@ public:
     MOCK_METHOD(ContextReplayer*, GetContextReplayer, (), (override));
     MOCK_METHOD(GcCtx*, GetGcCtx, (), (override));
     MOCK_METHOD(std::mutex&, GetCtxLock, (), (override));
+    MOCK_METHOD(BlockAllocationStatus*, GetAllocationStatus, (), (override));
 };
 
 } // namespace pos

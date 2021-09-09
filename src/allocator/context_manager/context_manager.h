@@ -36,6 +36,7 @@
 #include <vector>
 
 #include "src/allocator/address/allocator_address_info.h"
+#include "src/allocator/context_manager/block_allocation_status.h"
 #include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/i_context_manager.h"
@@ -68,7 +69,8 @@ public:
 
     ContextManager(void) = default;
     ContextManager(TelemetryPublisher* tp, AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
-        WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileMananager_,
+        WbStripeCtx* wbstripeCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
+        AllocatorFileIoManager* fileMananager_,
         ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_);
     ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, std::string arrayName);
     virtual ~ContextManager(void);
@@ -91,7 +93,9 @@ public:
     virtual int GetGcThreshold(GcMode mode);
     virtual uint64_t GetStoredContextVersion(int owner);
 
-    virtual void FreeUserDataSegment(SegmentId segId);
+    virtual void IncreaseValidBlockCount(SegmentId segId, uint32_t count);
+    virtual void DecreaseValidBlockCount(SegmentId segId, uint32_t count);
+
     virtual int SetNextSsdLsid(void);
     virtual char* GetContextSectionAddr(int owner, int section);
     virtual int GetContextSectionSize(int owner, int section);
@@ -101,9 +105,12 @@ public:
     virtual AllocatorCtx* GetAllocatorCtx(void) { return allocatorCtx; }
     virtual WbStripeCtx* GetWbStripeCtx(void) { return wbStripeCtx; }
     virtual ContextReplayer* GetContextReplayer(void) { return contextReplayer; }
-    virtual GcCtx* GetGcCtx(void) { return &gcCtx; }
+    virtual GcCtx* GetGcCtx(void) { return gcCtx; }
     virtual std::mutex& GetCtxLock(void) { return ctxLock; }
-// for UT
+
+    virtual BlockAllocationStatus* GetAllocationStatus(void) { return blockAllocStatus; }
+
+    // for UT
     void SetCallbackFunc(EventSmartPtr callback);
     void TestCallbackFunc(AsyncMetaFileIoCtx* ctx, IOTYPE type, int cnt);
 
@@ -118,7 +125,7 @@ private:
     MetaIoCbPtr _SetCallbackFunc(int owner, EventSmartPtr callbackEvent);
     void _PrepareBuffer(int owner, char* buf);
     void _ResetSegmentStates(void);
-    void _FreeSegment(SegmentId segId);
+    void _NotifySegmentFreed(SegmentId segId);
 
     std::string fileNames[NUM_FILES] = {"SegmentContext", "AllocatorContexts", "RebuildContext"};
     IAllocatorFileIoClient* fileOwner[NUM_FILES];
@@ -135,9 +142,10 @@ private:
     WbStripeCtx* wbStripeCtx;
     RebuildCtx* rebuildCtx;
     ContextReplayer* contextReplayer;
-    GcCtx gcCtx;
+    GcCtx* gcCtx;
     GcMode curGcMode;
     GcMode prevGcMode;
+    BlockAllocationStatus* blockAllocStatus;
 
     std::string arrayName;
     std::mutex ctxLock;

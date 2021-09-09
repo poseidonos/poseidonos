@@ -53,7 +53,8 @@
 namespace pos
 {
 ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
-    WbStripeCtx* wbstripeCtx_, AllocatorFileIoManager* fileManager_,
+    WbStripeCtx* wbstripeCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
+    AllocatorFileIoManager* fileManager_,
     ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_)
 : numReadIoIssued(0),
   numFlushIoIssued(0),
@@ -69,6 +70,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorCtx* allocCtx_, 
     segmentCtx = segCtx_;
     rebuildCtx = rebuildCtx_;
     wbStripeCtx = wbstripeCtx_;
+    gcCtx = gcCtx_;
+    blockAllocStatus = blockAllocStatus_;
     fileIoManager = fileManager_;
     contextReplayer = ctxReplayer_;
     fileOwner[SEGMENT_CTX] = segCtx_;
@@ -79,12 +82,14 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorCtx* allocCtx_, 
 }
 
 ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, std::string arrayName)
-: ContextManager(tp, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false, info, arrayName)
+: ContextManager(tp, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false, info, arrayName)
 {
     allocatorCtx = new AllocatorCtx(info);
     segmentCtx = new SegmentCtx(info);
     rebuildCtx = new RebuildCtx(allocatorCtx, segmentCtx, info);
     wbStripeCtx = new WbStripeCtx(info);
+    gcCtx = new GcCtx();
+    blockAllocStatus = new BlockAllocationStatus();
     fileIoManager = new AllocatorFileIoManager(fileNames, info, arrayName);
     contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, wbStripeCtx, info);
     fileOwner[SEGMENT_CTX] = segmentCtx;
@@ -98,6 +103,8 @@ ContextManager::~ContextManager(void)
     delete rebuildCtx;
     delete wbStripeCtx;
     delete allocatorCtx;
+    delete gcCtx;
+    delete blockAllocStatus;
     delete fileIoManager;
     delete contextReplayer;
 }
@@ -125,33 +132,27 @@ void
 ContextManager::UpdateOccupiedStripeCount(StripeId lsid)
 {
     SegmentId segId = lsid / addrInfo->GetstripesPerSegment();
-    if (segmentCtx->IncreaseOccupiedStripeCount(segId) == (int)addrInfo->GetstripesPerSegment())
+    bool segmentFreed = segmentCtx->IncreaseOccupiedStripeCount(segId);
+
+    if (segmentFreed == true)
     {
-        std::lock_guard<std::mutex> lock(segmentCtx->GetSegStateLock(segId));
-        if (segmentCtx->GetValidBlockCount(segId) == 0)
-        {
-            SegmentState eState = segmentCtx->GetSegmentState(segId, false);
-            if (eState != SegmentState::FREE)
-            {
-                _FreeSegment(segId);
-            }
-        }
-        else
-        {
-            segmentCtx->SetSegmentState(segId, SegmentState::SSD, false);
-        }
+        _NotifySegmentFreed(segId);
     }
 }
 
 void
-ContextManager::FreeUserDataSegment(SegmentId segId)
+ContextManager::IncreaseValidBlockCount(SegmentId segId, uint32_t count)
 {
-    std::lock_guard<std::mutex> lock(segmentCtx->GetSegStateLock(segId));
-    SegmentState eState = segmentCtx->GetSegmentState(segId, false);
-    if ((eState == SegmentState::SSD) || (eState == SegmentState::VICTIM))
+    segmentCtx->IncreaseValidBlockCount(segId, count);
+}
+
+void
+ContextManager::DecreaseValidBlockCount(SegmentId segId, uint32_t count)
+{
+    bool segmentFreed = segmentCtx->DecreaseValidBlockCount(segId, count);
+    if (segmentFreed == true)
     {
-        assert(segmentCtx->GetOccupiedStripeCount(segId) == (int)addrInfo->GetstripesPerSegment());
-        _FreeSegment(segId);
+        _NotifySegmentFreed(segId);
     }
 }
 
@@ -227,6 +228,8 @@ ContextManager::AllocateFreeSegment(void)
         POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] free segmentId:{}, free segment count:{}", segId, freeSegCount);
     }
     telPublisher->PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, freeSegCount);
+
+    segmentCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
     return segId;
 }
 
@@ -266,7 +269,7 @@ ContextManager::GetCurrentGcMode(void)
     int numFreeSegments = allocatorCtx->GetNumOfFreeSegment();
     QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments, arrayName);
     prevGcMode = curGcMode;
-    curGcMode = gcCtx.GetCurrentGcMode(numFreeSegments);
+    curGcMode = gcCtx->GetCurrentGcMode(numFreeSegments);
     if (prevGcMode != curGcMode)
     {
         telPublisher->PublishData(TEL_ALLOCATOR_GCMODE, curGcMode);
@@ -277,7 +280,7 @@ ContextManager::GetCurrentGcMode(void)
 int
 ContextManager::GetGcThreshold(GcMode mode)
 {
-    return mode == MODE_NORMAL_GC ? gcCtx.GetNormalGcThreshold() : gcCtx.GetUrgentThreshold();
+    return mode == MODE_NORMAL_GC ? gcCtx->GetNormalGcThreshold() : gcCtx->GetUrgentThreshold();
 }
 
 int
@@ -416,10 +419,8 @@ ContextManager::GetRebuildTargetSegmentCount(void)
 }
 
 void
-ContextManager::_FreeSegment(SegmentId segId)
+ContextManager::_NotifySegmentFreed(SegmentId segId)
 {
-    segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */);
-    segmentCtx->SetSegmentState(segId, SegmentState::FREE, false);
     allocatorCtx->ReleaseSegment(segId);
     int freeSegCount = allocatorCtx->GetNumOfFreeSegmentWoLock();
     telPublisher->PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, freeSegCount);
@@ -428,6 +429,10 @@ ContextManager::_FreeSegment(SegmentId segId)
     if (ret == 1)
     {
         FlushRebuildContext(nullptr, false);
+    }
+    if (GetCurrentGcMode() != MODE_URGENT_GC)
+    {
+        blockAllocStatus->PermitUserBlockAllocation();
     }
 }
 

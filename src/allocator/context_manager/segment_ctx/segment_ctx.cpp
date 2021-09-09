@@ -160,9 +160,11 @@ SegmentCtx::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
     return validCount;
 }
 
-int32_t
+bool
 SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
+    bool segmentFreed = false;
+
     int32_t validCount = segmentInfos[segId].DecreaseValidBlockCount(cnt);
     if (validCount < 0)
     {
@@ -172,7 +174,23 @@ SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
             usleep(1); // assert(false);
         }
     }
-    return validCount;
+
+    if (validCount == 0)
+    {
+        std::lock_guard<std::mutex> lock(segStateLocks[segId].GetLock());
+        SegmentState state = segmentStates[segId].GetState();
+        if ((state == SegmentState::SSD) || (state == SegmentState::VICTIM))
+        {
+            assert(segmentInfos[segId].GetOccupiedStripeCount() == addrInfo->GetstripesPerSegment());
+
+            segmentInfos[segId].SetOccupiedStripeCount(0);
+            segmentStates[segId].SetState(SegmentState::FREE);
+
+            segmentFreed = true;
+        }
+    }
+
+    return segmentFreed;
 }
 
 uint32_t
@@ -193,10 +211,28 @@ SegmentCtx::GetOccupiedStripeCount(SegmentId segId)
     return segmentInfos[segId].GetOccupiedStripeCount();
 }
 
-int
+bool
 SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
 {
-    return segmentInfos[segId].IncreaseOccupiedStripeCount();
+    bool segmentFreed = false;
+
+    uint32_t occupiedStripeCount = segmentInfos[segId].IncreaseOccupiedStripeCount();
+    if (occupiedStripeCount == addrInfo->GetstripesPerSegment())
+    {
+        std::lock_guard<std::mutex> lock(segStateLocks[segId].GetLock());
+        if (segmentInfos[segId].GetValidBlockCount() == 0)
+        {
+            if (segmentStates[segId].GetState() != SegmentState::FREE)
+            {
+                segmentInfos[segId].SetOccupiedStripeCount(0);
+                segmentStates[segId].SetState(SegmentState::FREE);
+
+                segmentFreed = true;
+            }
+        }
+    }
+
+    return segmentFreed;
 }
 
 void

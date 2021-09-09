@@ -60,9 +60,9 @@ public:
         return BlockManager::_AllocateStripe(asTailArrayIdx, vsid);
     }
     void
-    _RollBackStripeIdAllocation(StripeId wbLsid = UINT32_MAX, StripeId arrayLsid = UINT32_MAX)
+    _RollBackStripeIdAllocation(StripeId wbLsid = UINT32_MAX)
     {
-        return BlockManager::_RollBackStripeIdAllocation(wbLsid, arrayLsid);
+        return BlockManager::_RollBackStripeIdAllocation(wbLsid);
     }
 };
 

@@ -42,11 +42,13 @@
 namespace pos
 {
 class IReverseMap;
+class BlockAllocationStatus;
+
 class BlockManager : public IBlockAllocator
 {
 public:
     BlockManager(void) = default;
-    BlockManager(IStripeMap* stripeMap, IReverseMap* iReverseMap_, SegmentCtx* segCtx_, AllocatorCtx* alloCtx_, WbStripeCtx* wbCtx_, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
+    BlockManager(IStripeMap* stripeMap, IReverseMap* iReverseMap_, AllocatorCtx* alloCtx_, WbStripeCtx* wbCtx_, BlockAllocationStatus* allocStatus, AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
     BlockManager(AllocatorAddressInfo* info, ContextManager* ctxMgr, int arrayId);
     virtual ~BlockManager(void) = default;
     virtual void Init(IWBStripeInternal* iwbstripeInternal);
@@ -69,7 +71,7 @@ protected: // for UT
     int _AllocateStripe(ASTailArrayIdx asTailArrayIdx, StripeId& vsid);
     StripeId _AllocateWriteBufferStripeId(void);
     StripeId _AllocateUserDataStripeIdInternal(bool stopAtUrgent);
-    void _RollBackStripeIdAllocation(StripeId wbLsid = UINT32_MAX, StripeId arrayLsid = UINT32_MAX);
+    void _RollBackStripeIdAllocation(StripeId wbLsid = UINT32_MAX);
     void _IncreaseInvCount(SegmentId segId, int count = 1);
 
     bool _IsSegmentFull(StripeId stripeId)
@@ -89,16 +91,14 @@ protected: // for UT
         return (asTailArrayIdx < MAX_VOLUME_COUNT);
     }
 
-    std::atomic<bool> blkAllocProhibited[MAX_VOLUME_COUNT];
-    std::atomic<bool> userBlkAllocProhibited;
-
     // DOCs
     AllocatorAddressInfo* addrInfo;
     ContextManager* contextManager;
     IWBStripeInternal* iWBStripeInternal;
+    BlockAllocationStatus* allocStatus;
+
     int arrayId;
 
-    SegmentCtx* segCtx;
     AllocatorCtx* allocCtx;
     WbStripeCtx* wbStripeCtx;
     IReverseMap* iReverseMap;

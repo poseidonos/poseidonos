@@ -51,7 +51,7 @@ ReplayTestFixture::ExpectReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
         SetLSA(vsid, wbLsid, IN_WRITE_BUFFER_AREA))
         .Times(1);
     EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
-        ReplayStripeAllocation(wbLsid))
+        ReplayStripeAllocation(wbLsid, vsid))
         .Times(1);
 }
 
