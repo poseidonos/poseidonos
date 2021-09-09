@@ -45,6 +45,7 @@ class ISegmentCtx;
 class IBlockAllocator;
 class IArrayInfo;
 class ActiveWBStripeReplayer;
+class IContextReplayer;
 
 class ReplayEventFactory
 {

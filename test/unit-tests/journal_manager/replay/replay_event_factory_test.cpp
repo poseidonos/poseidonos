@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include "src/journal_manager/replay/replay_stripe_flush.h"
+
 namespace pos
 {
 TEST(ReplayEventFactory, CreateBlockWriteReplayEvent_)

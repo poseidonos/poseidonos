@@ -41,11 +41,15 @@ ReplayStateChanger::ReplayStateChanger(void)
 }
 
 ReplayStateChanger::ReplayStateChanger(IStateControl* iState)
+: ReplayStateChanger(iState, new StateContext(typeid(this).name(), SituationEnum::JOURNAL_RECOVERY))
 {
-    state = iState;
-    string sender = typeid(ReplayStateChanger).name();
-    recoverCtx = new StateContext(sender, SituationEnum::JOURNAL_RECOVERY);
-    state->Subscribe(this, sender);
+}
+
+ReplayStateChanger::ReplayStateChanger(IStateControl* iState, StateContext* stateContext)
+: recoverCtx(stateContext),
+  state(iState)
+{
+    state->Subscribe(this, typeid(this).name());
 }
 
 ReplayStateChanger::~ReplayStateChanger(void)

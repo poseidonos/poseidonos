@@ -39,53 +39,6 @@
 
 namespace pos
 {
-TaskProgress::TaskProgress(int weight)
-: numSubTasks(0),
-  numSubTasksCompleted(0),
-  weight(weight)
-{
-}
-
-TaskProgress::~TaskProgress(void)
-{
-}
-
-void
-TaskProgress::Start(int num)
-{
-    numSubTasks = num;
-}
-
-void
-TaskProgress::SubTaskCompleted(int numCompleted)
-{
-    numSubTasksCompleted += numCompleted;
-
-    if (numSubTasksCompleted > numSubTasks)
-    {
-        numSubTasksCompleted = numSubTasks;
-    }
-}
-
-void
-TaskProgress::Complete(void)
-{
-    numSubTasksCompleted = numSubTasks;
-}
-
-int
-TaskProgress::GetCurerntProgress(void)
-{
-    if (numSubTasks == 0)
-    {
-        return 0;
-    }
-    else
-    {
-        return (numSubTasksCompleted * weight) / numSubTasks;
-    }
-}
-
 ReplayProgressReporter::ReplayProgressReporter(void)
 : totalWeight(0),
   progress(0),
@@ -134,6 +87,30 @@ ReplayProgressReporter::CompleteAll(void)
     progress = totalWeight;
     currentTaskProgress = 0;
     _ReportProgress();
+}
+
+int
+ReplayProgressReporter::GetProgress(void)
+{
+    return currentTaskProgress;
+}
+
+int
+ReplayProgressReporter::GetReportedProgress(void)
+{
+    return reportedProgress;
+}
+
+int
+ReplayProgressReporter::GetTotalWeight(void)
+{
+    return totalWeight;
+}
+
+const TaskProgress
+ReplayProgressReporter::GetTaskProgress(ReplayTaskId taskId)
+{
+    return taskProgressList[taskId];
 }
 
 void

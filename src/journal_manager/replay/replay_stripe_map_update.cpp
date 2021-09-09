@@ -30,49 +30,28 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-#include <map>
-
-#include "src/journal_manager/replay/task_progress.h"
+#include "src/journal_manager/replay/replay_stripe_map_update.h"
 
 namespace pos
 {
-enum class ReplayTaskId
+ReplayStripeMapUpdate::ReplayStripeMapUpdate(IStripeMap* stripeMap,
+    StripeReplayStatus* status, StripeId vsid, StripeAddr dest)
+: ReplayEvent(status),
+  stripeMap(stripeMap),
+  vsid(vsid),
+  dest(dest)
 {
-    READ_LOG_BUFFER,
-    REPLAY_LOGS,
-    REPLAY_VOLUME_DELETION,
-    FLUSH_METADATA,
-    RESET_LOG_BUFFER,
-    FLUSH_PENDING_STRIPES
-};
+}
 
-class ReplayProgressReporter
+ReplayStripeMapUpdate::~ReplayStripeMapUpdate(void)
 {
-public:
-    ReplayProgressReporter(void);
+}
 
-    void RegisterTask(ReplayTaskId taskId, int taskWeight);
-    void TaskStarted(ReplayTaskId taskId, int numSubTasks);
-    void SubTaskCompleted(ReplayTaskId taskId, int numCompleted = 1);
-    void TaskCompleted(ReplayTaskId taskId);
-
-    void CompleteAll(void);
-
-    int GetProgress(void);
-    int GetReportedProgress(void);
-    int GetTotalWeight(void);
-    const TaskProgress GetTaskProgress(ReplayTaskId taskId);
-
-private:
-    void _ReportProgress(void);
-
-    std::map<ReplayTaskId, TaskProgress> taskProgressList;
-    int totalWeight;
-
-    int progress;
-    int currentTaskProgress;
-    int reportedProgress;
-};
-
+int
+ReplayStripeMapUpdate::Replay(void)
+{
+    int ret = stripeMap->SetLSA(vsid, dest.stripeId, dest.stripeLoc);
+    // TODO(huijeong.kim) notify replay status that stripe map is updated
+    return ret;
+}
 } // namespace pos

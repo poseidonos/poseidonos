@@ -32,6 +32,12 @@
 
 #include "src/journal_manager/replay/replay_event_factory.h"
 
+#include "src/journal_manager/replay/replay_block_map_update.h"
+#include "src/journal_manager/replay/replay_segment_allocation.h"
+#include "src/journal_manager/replay/replay_stripe_allocation.h"
+#include "src/journal_manager/replay/replay_stripe_flush.h"
+#include "src/journal_manager/replay/replay_stripe_map_update.h"
+
 namespace pos
 {
 ReplayEventFactory::ReplayEventFactory(StripeReplayStatus* status,

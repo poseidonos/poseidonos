@@ -36,6 +36,31 @@ TEST(ActiveStripeAddr, UpdateWbLsid_testIfWbLsidUpdated)
     EXPECT_EQ(addr.GetWbLsid(), wbLsid);
 }
 
+TEST(ActiveStripeAddr, UpdateWbLsid_testIfItFailsWhenWbLsidUpdatedTwice)
+{
+    // Given
+    ActiveStripeAddr addr;
+
+    // When 1
+    StripeId wbLsid = 5;
+    addr.UpdateWbLsid(wbLsid);
+
+    // Then 1
+    EXPECT_EQ(addr.GetWbLsid(), wbLsid);
+
+    // When 2
+    addr.UpdateWbLsid(wbLsid);
+
+    // Then 2: Nothing
+
+    // When/Then 3
+    ASSERT_DEATH(
+        {
+            addr.UpdateWbLsid(100);
+        },
+        "");
+}
+
 TEST(ActiveStripeAddr, UpdateTail_testIfTailUpdated)
 {
     // Given
@@ -49,6 +74,32 @@ TEST(ActiveStripeAddr, UpdateTail_testIfTailUpdated)
 
     // Then
     EXPECT_EQ(addr.GetTail(), tail);
+}
+
+TEST(ActiveStripeAddr, UpdateTail_testLastTailOffsetIsUpdated)
+{
+    // Given
+    ActiveStripeAddr addr;
+
+    VirtualBlkAddr tail = {
+        .stripeId = 200,
+        .offset = 0};
+
+    // When
+    tail.offset = 20;
+    addr.UpdateTail(tail);
+
+    tail.offset = 50;
+    addr.UpdateTail(tail);
+
+    tail.offset = 0;
+    addr.UpdateTail(tail);
+
+    VirtualBlkAddr expected = {
+        .stripeId = tail.stripeId,
+        .offset = 50};
+
+    EXPECT_EQ(addr.GetTail(), expected);
 }
 
 TEST(ActiveStripeAddr, IsValid_testWhenTailIsValid)

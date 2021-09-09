@@ -30,49 +30,41 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-#include <map>
+#include "src/journal_manager/replay/replay_stripe_allocation.h"
 
-#include "src/journal_manager/replay/task_progress.h"
+#include "src/journal_manager/statistics/stripe_replay_status.h"
 
 namespace pos
 {
-enum class ReplayTaskId
+ReplayStripeAllocation::ReplayStripeAllocation(IStripeMap* stripeMap,
+    IContextReplayer* ctxReplayer, StripeReplayStatus* status,
+    StripeId vsid, StripeId wbLsid)
+: ReplayEvent(status),
+  stripeMap(stripeMap),
+  contextReplayer(ctxReplayer),
+  vsid(vsid),
+  wbLsid(wbLsid)
 {
-    READ_LOG_BUFFER,
-    REPLAY_LOGS,
-    REPLAY_VOLUME_DELETION,
-    FLUSH_METADATA,
-    RESET_LOG_BUFFER,
-    FLUSH_PENDING_STRIPES
-};
+}
 
-class ReplayProgressReporter
+ReplayStripeAllocation::~ReplayStripeAllocation(void)
 {
-public:
-    ReplayProgressReporter(void);
+}
 
-    void RegisterTask(ReplayTaskId taskId, int taskWeight);
-    void TaskStarted(ReplayTaskId taskId, int numSubTasks);
-    void SubTaskCompleted(ReplayTaskId taskId, int numCompleted = 1);
-    void TaskCompleted(ReplayTaskId taskId);
+int
+ReplayStripeAllocation::Replay(void)
+{
+    int result = 0;
 
-    void CompleteAll(void);
+    result = stripeMap->SetLSA(vsid, wbLsid, IN_WRITE_BUFFER_AREA);
 
-    int GetProgress(void);
-    int GetReportedProgress(void);
-    int GetTotalWeight(void);
-    const TaskProgress GetTaskProgress(ReplayTaskId taskId);
+    if (result != 0)
+    {
+        return result;
+    }
 
-private:
-    void _ReportProgress(void);
-
-    std::map<ReplayTaskId, TaskProgress> taskProgressList;
-    int totalWeight;
-
-    int progress;
-    int currentTaskProgress;
-    int reportedProgress;
-};
-
+    contextReplayer->ReplayStripeAllocation(wbLsid, vsid);
+    status->StripeAllocated();
+    return result;
+}
 } // namespace pos

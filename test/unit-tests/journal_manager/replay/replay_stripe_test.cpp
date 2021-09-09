@@ -50,9 +50,19 @@ TEST(ReplayStripe, ReplayStripe_testIfConstructedSuccessfully)
     ReplayStripe stripeForProductCode(0, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     // Test constructor for unit test code
-    NiceMock<MockStripeReplayStatus>* status = new NiceMock<MockStripeReplayStatus>;
-    NiceMock<MockReplayEventFactory>* factory = new NiceMock<MockReplayEventFactory>;
-    ReplayStripe stripeForUt(nullptr, nullptr, nullptr, nullptr, status, factory, nullptr);
+    {
+        NiceMock<MockStripeReplayStatus>* status = new NiceMock<MockStripeReplayStatus>;
+        NiceMock<MockReplayEventFactory>* factory = new NiceMock<MockReplayEventFactory>;
+        ReplayStripe stripeForUt(nullptr, nullptr, nullptr, nullptr, status, factory, nullptr);
+    }
+
+    {
+        NiceMock<MockStripeReplayStatus>* status = new NiceMock<MockStripeReplayStatus>;
+        NiceMock<MockReplayEventFactory>* factory = new NiceMock<MockReplayEventFactory>;
+        ReplayStripe* stripe = new ReplayStripe(nullptr, nullptr, nullptr, nullptr, status, factory, nullptr);
+
+        delete stripe;
+    }
 }
 
 TEST(ReplayStripe, AddLog_testAddLogWhenSegInfoFlushed)

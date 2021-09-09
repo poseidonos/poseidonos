@@ -31,48 +31,33 @@
  */
 
 #pragma once
-#include <map>
 
-#include "src/journal_manager/replay/task_progress.h"
+#include "src/allocator/i_context_replayer.h"
+#include "src/include/address_type.h"
+#include "src/journal_manager/replay/replay_event.h"
+#include "src/mapper/i_stripemap.h"
 
 namespace pos
 {
-enum class ReplayTaskId
-{
-    READ_LOG_BUFFER,
-    REPLAY_LOGS,
-    REPLAY_VOLUME_DELETION,
-    FLUSH_METADATA,
-    RESET_LOG_BUFFER,
-    FLUSH_PENDING_STRIPES
-};
-
-class ReplayProgressReporter
+class ReplayStripeAllocation : public ReplayEvent
 {
 public:
-    ReplayProgressReporter(void);
+    ReplayStripeAllocation(IStripeMap* istripeMap, IContextReplayer* ctxReplayer,
+        StripeReplayStatus* status, StripeId vsid, StripeId wbLsid);
+    virtual ~ReplayStripeAllocation(void);
 
-    void RegisterTask(ReplayTaskId taskId, int taskWeight);
-    void TaskStarted(ReplayTaskId taskId, int numSubTasks);
-    void SubTaskCompleted(ReplayTaskId taskId, int numCompleted = 1);
-    void TaskCompleted(ReplayTaskId taskId);
+    virtual int Replay(void) override;
 
-    void CompleteAll(void);
-
-    int GetProgress(void);
-    int GetReportedProgress(void);
-    int GetTotalWeight(void);
-    const TaskProgress GetTaskProgress(ReplayTaskId taskId);
+    inline ReplayEventType
+    GetType(void)
+    {
+        return ReplayEventType::STRIPE_ALLOCATION;
+    }
 
 private:
-    void _ReportProgress(void);
-
-    std::map<ReplayTaskId, TaskProgress> taskProgressList;
-    int totalWeight;
-
-    int progress;
-    int currentTaskProgress;
-    int reportedProgress;
+    IStripeMap* stripeMap;
+    IContextReplayer* contextReplayer;
+    StripeId vsid;
+    StripeId wbLsid;
 };
-
 } // namespace pos

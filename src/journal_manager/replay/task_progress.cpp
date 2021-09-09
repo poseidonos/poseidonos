@@ -30,49 +30,72 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-#include <map>
-
 #include "src/journal_manager/replay/task_progress.h"
 
 namespace pos
 {
-enum class ReplayTaskId
+TaskProgress::TaskProgress(int weight)
+: numSubTasks(0),
+  numSubTasksCompleted(0),
+  weight(weight)
 {
-    READ_LOG_BUFFER,
-    REPLAY_LOGS,
-    REPLAY_VOLUME_DELETION,
-    FLUSH_METADATA,
-    RESET_LOG_BUFFER,
-    FLUSH_PENDING_STRIPES
-};
+}
 
-class ReplayProgressReporter
+TaskProgress::~TaskProgress(void)
 {
-public:
-    ReplayProgressReporter(void);
+}
 
-    void RegisterTask(ReplayTaskId taskId, int taskWeight);
-    void TaskStarted(ReplayTaskId taskId, int numSubTasks);
-    void SubTaskCompleted(ReplayTaskId taskId, int numCompleted = 1);
-    void TaskCompleted(ReplayTaskId taskId);
+void
+TaskProgress::Start(int num)
+{
+    numSubTasks = num;
+}
 
-    void CompleteAll(void);
+void
+TaskProgress::SubTaskCompleted(int numCompleted)
+{
+    numSubTasksCompleted += numCompleted;
 
-    int GetProgress(void);
-    int GetReportedProgress(void);
-    int GetTotalWeight(void);
-    const TaskProgress GetTaskProgress(ReplayTaskId taskId);
+    if (numSubTasksCompleted > numSubTasks)
+    {
+        numSubTasksCompleted = numSubTasks;
+    }
+}
 
-private:
-    void _ReportProgress(void);
+void
+TaskProgress::Complete(void)
+{
+    numSubTasksCompleted = numSubTasks;
+}
 
-    std::map<ReplayTaskId, TaskProgress> taskProgressList;
-    int totalWeight;
+int
+TaskProgress::GetCurerntProgress(void)
+{
+    if (numSubTasks == 0)
+    {
+        return 0;
+    }
+    else
+    {
+        return (numSubTasksCompleted * weight) / numSubTasks;
+    }
+}
 
-    int progress;
-    int currentTaskProgress;
-    int reportedProgress;
-};
+int
+TaskProgress::GetNumSubTasks(void)
+{
+    return numSubTasks;
+}
 
+int
+TaskProgress::GetNumCompletedSubTasks(void)
+{
+    return numSubTasksCompleted;
+}
+
+int
+TaskProgress::GetWeight(void)
+{
+    return weight;
+}
 } // namespace pos

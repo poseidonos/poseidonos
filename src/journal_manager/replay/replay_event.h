@@ -32,19 +32,11 @@
 
 #pragma once
 
-#include <vector>
-
-#include "../log/log_event.h"
+#include "src/journal_manager/log/log_event.h"
 
 namespace pos
 {
-class IArrayInfo;
-class IVSAMap;
-class IStripeMap;
-class IBlockAllocator;
-class IContextReplayer;
 class StripeReplayStatus;
-class ActiveWBStripeReplayer;
 
 enum class ReplayEventType
 {
@@ -59,8 +51,11 @@ class ReplayEvent
 {
 public:
     ReplayEvent(void) = default;
-    explicit ReplayEvent(StripeReplayStatus* status);
-    virtual ~ReplayEvent(void);
+    explicit ReplayEvent(StripeReplayStatus* status)
+    : status(status)
+    {
+    }
+    virtual ~ReplayEvent(void) = default;
 
     virtual int Replay(void) = 0;
     virtual ReplayEventType GetType(void) = 0;
@@ -68,162 +63,4 @@ public:
 protected:
     StripeReplayStatus* status;
 };
-
-class ReplayBlockMapUpdate : public ReplayEvent
-{
-public:
-    ReplayBlockMapUpdate(IVSAMap* ivsaMa, IBlockAllocator* iblkAllocator,
-        StripeReplayStatus* status, ActiveWBStripeReplayer* wbReplayer,
-        int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks,
-        bool replaySegmentInfo);
-    virtual ~ReplayBlockMapUpdate(void);
-
-    virtual int Replay(void) override;
-
-    inline ReplayEventType
-    GetType(void)
-    {
-        return ReplayEventType::BLOCK_MAP_UPDATE;
-    }
-
-private:
-    void _ReadBlockMap(void);
-
-    void _InvalidateOldBlock(uint32_t offset);
-    int _UpdateMap(uint32_t offset);
-    void _UpdateReverseMap(uint32_t offset);
-
-    inline VirtualBlkAddr
-    _GetVsa(uint32_t offset)
-    {
-        VirtualBlkAddr vsa = startVsa;
-        vsa.offset += offset;
-        return vsa;
-    }
-
-    inline BlkAddr
-    _GetRba(uint32_t offset)
-    {
-        return startRba + offset;
-    }
-
-    IVSAMap* vsaMap;
-    IBlockAllocator* blockAllocator;
-
-    int volId;
-    BlkAddr startRba;
-    VirtualBlkAddr startVsa;
-    uint64_t numBlks;
-
-    std::vector<VirtualBlkAddr> readMap;
-
-    bool replaySegmentInfo;
-    ActiveWBStripeReplayer* wbStripeReplayer;
-};
-
-class ReplayStripeMapUpdate : public ReplayEvent
-{
-public:
-    ReplayStripeMapUpdate(IStripeMap* stripeMap, StripeReplayStatus* status,
-        StripeId vsid, StripeAddr dest);
-    virtual ~ReplayStripeMapUpdate(void);
-
-    virtual int Replay(void) override;
-
-    inline ReplayEventType
-    GetType(void)
-    {
-        return ReplayEventType::STRIPE_MAP_UPDATE;
-    }
-
-private:
-    IStripeMap* stripeMap;
-
-    StripeId vsid;
-    StripeAddr dest;
-};
-
-class ReplayStripeAllocation : public ReplayEvent
-{
-public:
-    ReplayStripeAllocation(IStripeMap* istripeMap, IContextReplayer* ctxReplayer,
-        StripeReplayStatus* status, StripeId vsid, StripeId wbLsid);
-    virtual ~ReplayStripeAllocation(void);
-
-    virtual int Replay(void) override;
-
-    inline ReplayEventType
-    GetType(void)
-    {
-        return ReplayEventType::STRIPE_ALLOCATION;
-    }
-
-private:
-    IStripeMap* stripeMap;
-    IContextReplayer* contextReplayer;
-    StripeId vsid;
-    StripeId wbLsid;
-};
-
-class ReplaySegmentAllocation : public ReplayEvent
-{
-public:
-    ReplaySegmentAllocation(IContextReplayer* ctxReplayer, IArrayInfo* arrayInfo,
-        StripeReplayStatus* status, StripeId stripeId);
-    virtual ~ReplaySegmentAllocation(void);
-
-    virtual int Replay(void) override;
-
-    inline ReplayEventType
-    GetType(void)
-    {
-        return ReplayEventType::SEGMENT_ALLOCATION;
-    }
-
-private:
-    IContextReplayer* contextReplayer;
-    IArrayInfo* arrayInfo;
-    StripeId userLsid;
-};
-
-class ReplayStripeFlush : public ReplayEvent
-{
-public:
-    ReplayStripeFlush(IContextReplayer* ctxReplayer,
-        StripeReplayStatus* status, StripeId vsid, StripeId wbLsid, StripeId userLsid);
-    virtual ~ReplayStripeFlush(void);
-
-    virtual int Replay(void) override;
-
-    inline ReplayEventType
-    GetType(void)
-    {
-        return ReplayEventType::STRIPE_FLUSH;
-    }
-
-    StripeId
-    GetVsid(void)
-    {
-        return vsid;
-    }
-
-    StripeId
-    GetWbLsid(void)
-    {
-        return wbLsid;
-    }
-
-    StripeId
-    GetUserLsid(void)
-    {
-        return userLsid;
-    }
-
-private:
-    IContextReplayer* contextReplayer;
-    StripeId vsid;
-    StripeId wbLsid;
-    StripeId userLsid;
-};
-
 } // namespace pos

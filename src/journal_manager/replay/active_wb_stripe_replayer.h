@@ -56,7 +56,7 @@ public:
 
     virtual int Replay(void);
     virtual void Update(StripeInfo info);
-    void UpdateRevMaps(int volId, StripeId vsid, uint64_t offset, BlkAddr startRba);
+    virtual void UpdateRevMaps(int volId, StripeId vsid, uint64_t offset, BlkAddr startRba);
 
 protected:
     ActiveStripeAddr* _FindStripe(int index, StripeId vsid);

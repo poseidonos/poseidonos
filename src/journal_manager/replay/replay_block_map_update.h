@@ -31,48 +31,67 @@
  */
 
 #pragma once
-#include <map>
 
-#include "src/journal_manager/replay/task_progress.h"
+#include <vector>
+
+#include "src/allocator/i_block_allocator.h"
+#include "src/include/address_type.h"
+#include "src/journal_manager/replay/replay_event.h"
+#include "src/mapper/i_vsamap.h"
+#include "src/mapper/include/mapper_const.h"
 
 namespace pos
 {
-enum class ReplayTaskId
-{
-    READ_LOG_BUFFER,
-    REPLAY_LOGS,
-    REPLAY_VOLUME_DELETION,
-    FLUSH_METADATA,
-    RESET_LOG_BUFFER,
-    FLUSH_PENDING_STRIPES
-};
-
-class ReplayProgressReporter
+class ActiveWBStripeReplayer;
+class ReplayBlockMapUpdate : public ReplayEvent
 {
 public:
-    ReplayProgressReporter(void);
+    ReplayBlockMapUpdate(IVSAMap* ivsaMa, IBlockAllocator* iblkAllocator,
+        StripeReplayStatus* status, ActiveWBStripeReplayer* wbReplayer,
+        int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks,
+        bool replaySegmentInfo);
+    virtual ~ReplayBlockMapUpdate(void);
 
-    void RegisterTask(ReplayTaskId taskId, int taskWeight);
-    void TaskStarted(ReplayTaskId taskId, int numSubTasks);
-    void SubTaskCompleted(ReplayTaskId taskId, int numCompleted = 1);
-    void TaskCompleted(ReplayTaskId taskId);
+    virtual int Replay(void) override;
 
-    void CompleteAll(void);
-
-    int GetProgress(void);
-    int GetReportedProgress(void);
-    int GetTotalWeight(void);
-    const TaskProgress GetTaskProgress(ReplayTaskId taskId);
+    inline ReplayEventType
+    GetType(void)
+    {
+        return ReplayEventType::BLOCK_MAP_UPDATE;
+    }
 
 private:
-    void _ReportProgress(void);
+    void _ReadBlockMap(void);
 
-    std::map<ReplayTaskId, TaskProgress> taskProgressList;
-    int totalWeight;
+    void _InvalidateOldBlock(uint32_t offset);
+    int _UpdateMap(uint32_t offset);
+    void _UpdateReverseMap(uint32_t offset);
 
-    int progress;
-    int currentTaskProgress;
-    int reportedProgress;
+    inline VirtualBlkAddr
+    _GetVsa(uint32_t offset)
+    {
+        VirtualBlkAddr vsa = startVsa;
+        vsa.offset += offset;
+        return vsa;
+    }
+
+    inline BlkAddr
+    _GetRba(uint32_t offset)
+    {
+        return startRba + offset;
+    }
+
+    IVSAMap* vsaMap;
+    IBlockAllocator* blockAllocator;
+
+    int volId;
+    BlkAddr startRba;
+    VirtualBlkAddr startVsa;
+    uint64_t numBlks;
+
+    std::vector<VirtualBlkAddr> readMap;
+
+    bool replaySegmentInfo;
+    ActiveWBStripeReplayer* wbStripeReplayer;
 };
-
 } // namespace pos

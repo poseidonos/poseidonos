@@ -46,6 +46,7 @@ class ReplayStateChanger : public IStateObserver
 public:
     ReplayStateChanger(void);
     explicit ReplayStateChanger(IStateControl* iState);
+    ReplayStateChanger(IStateControl* iState, StateContext* stateContext);
     virtual ~ReplayStateChanger(void);
 
     int GetRecoverState(void);

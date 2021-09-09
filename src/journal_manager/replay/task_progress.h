@@ -33,46 +33,27 @@
 #pragma once
 #include <map>
 
-#include "src/journal_manager/replay/task_progress.h"
-
 namespace pos
 {
-enum class ReplayTaskId
-{
-    READ_LOG_BUFFER,
-    REPLAY_LOGS,
-    REPLAY_VOLUME_DELETION,
-    FLUSH_METADATA,
-    RESET_LOG_BUFFER,
-    FLUSH_PENDING_STRIPES
-};
-
-class ReplayProgressReporter
+class TaskProgress
 {
 public:
-    ReplayProgressReporter(void);
+    TaskProgress(void) = default;
+    explicit TaskProgress(int weight);
+    virtual ~TaskProgress(void);
 
-    void RegisterTask(ReplayTaskId taskId, int taskWeight);
-    void TaskStarted(ReplayTaskId taskId, int numSubTasks);
-    void SubTaskCompleted(ReplayTaskId taskId, int numCompleted = 1);
-    void TaskCompleted(ReplayTaskId taskId);
+    void Start(int numSubTasks);
+    void SubTaskCompleted(int numCompleted);
+    void Complete(void);
 
-    void CompleteAll(void);
-
-    int GetProgress(void);
-    int GetReportedProgress(void);
-    int GetTotalWeight(void);
-    const TaskProgress GetTaskProgress(ReplayTaskId taskId);
+    int GetCurerntProgress(void);
+    int GetNumSubTasks(void);
+    int GetNumCompletedSubTasks(void);
+    int GetWeight(void);
 
 private:
-    void _ReportProgress(void);
-
-    std::map<ReplayTaskId, TaskProgress> taskProgressList;
-    int totalWeight;
-
-    int progress;
-    int currentTaskProgress;
-    int reportedProgress;
+    int numSubTasks;
+    int numSubTasksCompleted;
+    int weight;
 };
-
 } // namespace pos

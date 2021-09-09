@@ -30,49 +30,35 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-#include <map>
+#include "src/journal_manager/replay/replay_segment_allocation.h"
 
-#include "src/journal_manager/replay/task_progress.h"
+#include "src/journal_manager/statistics/stripe_replay_status.h"
 
 namespace pos
 {
-enum class ReplayTaskId
+ReplaySegmentAllocation::ReplaySegmentAllocation(IContextReplayer* ctxReplayer,
+    IArrayInfo* iarrayInfo, StripeReplayStatus* status, StripeId stripeId)
+: ReplayEvent(status),
+  contextReplayer(ctxReplayer),
+  arrayInfo(iarrayInfo),
+  userLsid(stripeId)
 {
-    READ_LOG_BUFFER,
-    REPLAY_LOGS,
-    REPLAY_VOLUME_DELETION,
-    FLUSH_METADATA,
-    RESET_LOG_BUFFER,
-    FLUSH_PENDING_STRIPES
-};
+}
 
-class ReplayProgressReporter
+ReplaySegmentAllocation::~ReplaySegmentAllocation(void)
 {
-public:
-    ReplayProgressReporter(void);
+}
 
-    void RegisterTask(ReplayTaskId taskId, int taskWeight);
-    void TaskStarted(ReplayTaskId taskId, int numSubTasks);
-    void SubTaskCompleted(ReplayTaskId taskId, int numCompleted = 1);
-    void TaskCompleted(ReplayTaskId taskId);
+int
+ReplaySegmentAllocation::Replay(void)
+{
+    uint32_t numStripesPerSegment = arrayInfo->GetSizeInfo(PartitionType::USER_DATA)->stripesPerSegment;
+    SegmentId segmentId = userLsid / numStripesPerSegment;
+    StripeId firstStripe = segmentId * numStripesPerSegment;
 
-    void CompleteAll(void);
-
-    int GetProgress(void);
-    int GetReportedProgress(void);
-    int GetTotalWeight(void);
-    const TaskProgress GetTaskProgress(ReplayTaskId taskId);
-
-private:
-    void _ReportProgress(void);
-
-    std::map<ReplayTaskId, TaskProgress> taskProgressList;
-    int totalWeight;
-
-    int progress;
-    int currentTaskProgress;
-    int reportedProgress;
-};
+    contextReplayer->ReplaySegmentAllocation(firstStripe);
+    status->SegmentAllocated();
+    return 0;
+}
 
 } // namespace pos

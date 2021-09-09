@@ -30,30 +30,14 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "replay_event.h"
+#include "src/journal_manager/replay/replay_block_map_update.h"
 
-#include "src/allocator/allocator.h"
-#include "src/allocator/i_context_replayer.h"
-#include "src/array_models/interface/i_array_info.h"
-#include "src/include/pos_event_id.h"
+#include "src/allocator/i_block_allocator.h"
 #include "src/journal_manager/replay/active_wb_stripe_replayer.h"
 #include "src/journal_manager/statistics/stripe_replay_status.h"
-#include "src/logger/logger.h"
-#include "src/mapper/i_stripemap.h"
-#include "src/mapper/i_vsamap.h"
-#include "src/mapper/include/mapper_const.h"
 
 namespace pos
 {
-ReplayEvent::ReplayEvent(StripeReplayStatus* status)
-: status(status)
-{
-}
-
-ReplayEvent::~ReplayEvent(void)
-{
-}
-
 ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, IBlockAllocator* blkAllocator,
     StripeReplayStatus* status, ActiveWBStripeReplayer* wbReplayer, int volId, BlkAddr startRba, VirtualBlkAddr startVsa,
     uint64_t numBlks, bool replaySegmentInfo)
@@ -95,6 +79,7 @@ ReplayBlockMapUpdate::Replay(void)
         VirtualBlkAddr currentVsa = _GetVsa(offset);
         VirtualBlkAddr read = readMap[offset];
 
+        // TODO (huijeong.kim) Read vsa can be the latest one than current vsa in the log
         if (IsSameVsa(read, currentVsa) == false)
         {
             if (replaySegmentInfo == true)
@@ -156,111 +141,6 @@ ReplayBlockMapUpdate::_UpdateMap(uint32_t offset)
     status->BlockWritten(virtualBlks.startVsa.offset, virtualBlks.numBlks);
 
     return result;
-}
-
-ReplayStripeMapUpdate::ReplayStripeMapUpdate(IStripeMap* stripeMap,
-    StripeReplayStatus* status, StripeId vsid, StripeAddr dest)
-: ReplayEvent(status),
-  stripeMap(stripeMap),
-  vsid(vsid),
-  dest(dest)
-{
-}
-
-ReplayStripeMapUpdate::~ReplayStripeMapUpdate(void)
-{
-}
-
-int
-ReplayStripeMapUpdate::Replay(void)
-{
-    int ret = stripeMap->SetLSA(vsid, dest.stripeId, dest.stripeLoc);
-    // TODO(huijeong.kim) notify replay status that stripe map is updated
-    return ret;
-}
-
-ReplayStripeAllocation::ReplayStripeAllocation(IStripeMap* stripeMap,
-    IContextReplayer* ctxReplayer, StripeReplayStatus* status,
-    StripeId vsid, StripeId wbLsid)
-: ReplayEvent(status),
-  stripeMap(stripeMap),
-  contextReplayer(ctxReplayer),
-  vsid(vsid),
-  wbLsid(wbLsid)
-{
-}
-
-ReplayStripeAllocation::~ReplayStripeAllocation(void)
-{
-}
-
-int
-ReplayStripeAllocation::Replay(void)
-{
-    int result = 0;
-
-    result = stripeMap->SetLSA(vsid, wbLsid, IN_WRITE_BUFFER_AREA);
-
-    if (result != 0)
-    {
-        return result;
-    }
-
-    contextReplayer->ReplayStripeAllocation(wbLsid, vsid);
-    status->StripeAllocated();
-    return result;
-}
-
-ReplaySegmentAllocation::ReplaySegmentAllocation(IContextReplayer* ctxReplayer,
-    IArrayInfo* iarrayInfo, StripeReplayStatus* status, StripeId stripeId)
-: ReplayEvent(status),
-  contextReplayer(ctxReplayer),
-  arrayInfo(iarrayInfo),
-  userLsid(stripeId)
-{
-}
-
-ReplaySegmentAllocation::~ReplaySegmentAllocation(void)
-{
-}
-
-int
-ReplaySegmentAllocation::Replay(void)
-{
-    uint32_t numStripesPerSegment = arrayInfo->GetSizeInfo(PartitionType::USER_DATA)->stripesPerSegment;
-    SegmentId segmentId = userLsid / numStripesPerSegment;
-    StripeId firstStripe = segmentId * numStripesPerSegment;
-
-    contextReplayer->ReplaySegmentAllocation(firstStripe);
-    status->SegmentAllocated();
-    return 0;
-}
-
-ReplayStripeFlush::ReplayStripeFlush(IContextReplayer* ctxReplayer,
-    StripeReplayStatus* status, StripeId vsid, StripeId wbLsid, StripeId userLsid)
-: ReplayEvent(status),
-  contextReplayer(ctxReplayer),
-  vsid(vsid),
-  wbLsid(wbLsid),
-  userLsid(userLsid)
-{
-}
-
-ReplayStripeFlush::~ReplayStripeFlush(void)
-{
-}
-
-int
-ReplayStripeFlush::Replay(void)
-{
-    if (wbLsid != UNMAP_STRIPE)
-    {
-        contextReplayer->ReplayStripeRelease(wbLsid);
-    }
-    contextReplayer->ReplayStripeFlushed(userLsid);
-    status->StripeFlushed();
-
-    return 0;
 }
 
 } // namespace pos

@@ -11,6 +11,16 @@ using ::testing::Return;
 
 namespace pos
 {
+TEST(ReplayLogList, ReplayLogList_testIfConstructedSuccessfully)
+{
+    ReplayLogList logList;
+
+    {
+        ReplayLogList* logList = new ReplayLogList();
+        delete logList;
+    }
+}
+
 TEST(ReplayLogList, AddLog_testIfMapUpdatedLogIsAdded)
 {
     uint64_t seqNum = 10;

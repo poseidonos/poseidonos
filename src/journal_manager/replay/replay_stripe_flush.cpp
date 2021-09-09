@@ -30,49 +30,37 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-#include <map>
+#include "src/journal_manager/replay/replay_stripe_flush.h"
 
-#include "src/journal_manager/replay/task_progress.h"
+#include "src/journal_manager/statistics/stripe_replay_status.h"
 
 namespace pos
 {
-enum class ReplayTaskId
+ReplayStripeFlush::ReplayStripeFlush(IContextReplayer* ctxReplayer,
+    StripeReplayStatus* status, StripeId vsid, StripeId wbLsid, StripeId userLsid)
+: ReplayEvent(status),
+  contextReplayer(ctxReplayer),
+  vsid(vsid),
+  wbLsid(wbLsid),
+  userLsid(userLsid)
 {
-    READ_LOG_BUFFER,
-    REPLAY_LOGS,
-    REPLAY_VOLUME_DELETION,
-    FLUSH_METADATA,
-    RESET_LOG_BUFFER,
-    FLUSH_PENDING_STRIPES
-};
+}
 
-class ReplayProgressReporter
+ReplayStripeFlush::~ReplayStripeFlush(void)
 {
-public:
-    ReplayProgressReporter(void);
+}
 
-    void RegisterTask(ReplayTaskId taskId, int taskWeight);
-    void TaskStarted(ReplayTaskId taskId, int numSubTasks);
-    void SubTaskCompleted(ReplayTaskId taskId, int numCompleted = 1);
-    void TaskCompleted(ReplayTaskId taskId);
+int
+ReplayStripeFlush::Replay(void)
+{
+    if (wbLsid != UNMAP_STRIPE)
+    {
+        contextReplayer->ReplayStripeRelease(wbLsid);
+    }
+    contextReplayer->ReplayStripeFlushed(userLsid);
+    status->StripeFlushed();
 
-    void CompleteAll(void);
-
-    int GetProgress(void);
-    int GetReportedProgress(void);
-    int GetTotalWeight(void);
-    const TaskProgress GetTaskProgress(ReplayTaskId taskId);
-
-private:
-    void _ReportProgress(void);
-
-    std::map<ReplayTaskId, TaskProgress> taskProgressList;
-    int totalWeight;
-
-    int progress;
-    int currentTaskProgress;
-    int reportedProgress;
-};
+    return 0;
+}
 
 } // namespace pos
