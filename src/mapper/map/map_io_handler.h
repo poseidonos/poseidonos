@@ -65,7 +65,7 @@ public:
 class MapIoHandler
 {
 public:
-    MapIoHandler(Map* mapData, MapHeader* mapHeaderData, int arrayId_);
+    MapIoHandler(Map* mapData, MapHeader* mapHeaderData, int mapId, int arrayId_);
     ~MapIoHandler(void);
 
     void Dispose(void);
@@ -99,9 +99,10 @@ private:
     int _IssueFlush(char* buffer, MpageNum startMpage, int numMpages);
     int _IssueFlushHeader(void);
     int _Flush(SequentialPageFinder& sequentialPages);
-    int _IssueHeaderIoByMockFs(MetaFsIoOpcode opType, MetaFileIntf* fileToIo);
+    int _IssueHeaderIoByMockFs(MetaFsIoOpcode opType, MetaFileIntf* fileToIo, char* headerBuf);
     int _IssueMpageIoByMockFs(MetaFsIoOpcode opType, MetaFileIntf* fileToIo);
 
+    int mapId;
     Map* map;
     MapHeader* mapHeader;
     MetaFileIntf* file;

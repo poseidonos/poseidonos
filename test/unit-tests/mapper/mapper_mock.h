@@ -37,7 +37,7 @@ public:
     MOCK_METHOD(int, GetVSAs, (int volId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray), (override));
     MOCK_METHOD(int, SetVSAs, (int volId, BlkAddr startRba, VirtualBlks& virtualBlks), (override));
     MOCK_METHOD(VirtualBlkAddr, GetRandomVSA, (BlkAddr rba), (override));
-    MOCK_METHOD(int64_t, GetNumUsedBlocks, (int volId), (override));
+    MOCK_METHOD(int64_t, GetNumUsedBlks, (int volId), (override));
     MOCK_METHOD(VirtualBlkAddr, GetVSAInternal, (int volId, BlkAddr rba, int& retry), (override));
     MOCK_METHOD(int, SetVSAsInternal, (int volId, BlkAddr startRba, VirtualBlks& virtualBlks), (override));
     MOCK_METHOD(VirtualBlkAddr, GetVSAWithSyncOpen, (int volId, BlkAddr rba), (override));

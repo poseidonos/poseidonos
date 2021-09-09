@@ -189,7 +189,7 @@ uint64_t
 VolumeBase::UsedSize(void)
 {
     IVSAMap* iVSAMap = MapperServiceSingleton::Instance()->GetIVSAMap(array);
-    return iVSAMap->GetNumUsedBlocks(ID) * BLOCK_SIZE;
+    return iVSAMap->GetNumUsedBlks(ID) * BLOCK_SIZE;
 }
 
 uint64_t

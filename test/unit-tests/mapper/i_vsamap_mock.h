@@ -20,7 +20,7 @@ public:
     MOCK_METHOD(int, SetVSAsWithSyncOpen, (int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks), (override));
     MOCK_METHOD(VirtualBlkAddr, GetRandomVSA, (BlkAddr rba), (override));
     MOCK_METHOD(MpageList, GetDirtyVsaMapPages, (int volumeId, BlkAddr startRba, uint64_t numBlks), (override));
-    MOCK_METHOD(int64_t, GetNumUsedBlocks, (int volId), (override));
+    MOCK_METHOD(int64_t, GetNumUsedBlks, (int volId), (override));
 };
 
 } // namespace pos

@@ -64,6 +64,8 @@ public:
     Map(int numPages, int pageSize);
     virtual ~Map(void);
 
+    virtual int GetSize(void);
+    virtual int GetNumMpages(void);
     virtual char* GetMpage(int pageNr);
     virtual char* GetMpageWithLock(int pageNr);
     virtual char* AllocateMpage(int pageNr);

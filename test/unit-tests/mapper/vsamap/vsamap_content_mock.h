@@ -15,7 +15,7 @@ public:
     MOCK_METHOD(MpageList, GetDirtyPages, (uint64_t start, uint64_t numEntries), (override));
     MOCK_METHOD(VirtualBlkAddr, GetEntry, (BlkAddr rba), (override));
     MOCK_METHOD(int, SetEntry, (BlkAddr rba, VirtualBlkAddr vsa), (override));
-    MOCK_METHOD(int64_t, GetNumUsedBlocks, (), (override));
+    MOCK_METHOD(int64_t, GetNumUsedBlks, (), (override));
 };
 
 } // namespace pos

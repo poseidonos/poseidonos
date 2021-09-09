@@ -283,9 +283,29 @@ Mapper::GetRandomVSA(BlkAddr rba)
 }
 
 int64_t
-Mapper::GetNumUsedBlocks(int volId)
+Mapper::GetNumUsedBlks(int volId)
 {
-    return vsaMapManager->GetNumUsedBlocks(volId);
+    VolState state = volState[volId].GetState();
+    if (state != VolState::NOT_EXIST)
+    {
+        int ret = EnableInternalAccess(volId);
+        if (ret < 0)
+        {
+            POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper GetNumUsedBlks] Failed to Load VolumeId:{} array:{}", volId, addrInfo->GetArrayName());
+            return -1;
+        }
+        if (ret == NEED_RETRY)
+        {
+            vsaMapManager->WaitVolumePendingIoDone(volId);
+        }
+        return vsaMapManager->GetNumUsedBlks(volId);
+    }
+    else
+    {
+        // if volume doesn't exist, there is no used block.
+        return 0;
+    }
+    
 }
 
 bool
@@ -296,7 +316,7 @@ Mapper::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPe
     VolState state = volState[volId].GetState();
     if (state != VolState::NOT_EXIST)
     {
-        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeCreate] Volume:{} array:{} is already exist, state:{}", volId, addrInfo->GetArrayName(), volState[volId].GetState());
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeCreate] Volume:{} array:{} already exist, state:{}", volId, addrInfo->GetArrayName(), volState[volId].GetState());
         return false;
     }
     if (vsaMapManager->CreateVsaMapContent(volId, volEventBase->volSizeByte, false) == false)

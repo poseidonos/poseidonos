@@ -27,7 +27,7 @@ public:
     virtual int SetVSAs(int volumeId, BlkAddr startRba,
         VirtualBlks& virtualBlks) override;
     virtual VirtualBlkAddr GetRandomVSA(BlkAddr rba) override;
-    virtual int64_t GetNumUsedBlocks(int volId) override;
+    virtual int64_t GetNumUsedBlks(int volId) override;
     virtual VirtualBlkAddr GetVSAWithSyncOpen(int volId, BlkAddr rba) override;
     virtual int SetVSAsWithSyncOpen(int volId, BlkAddr startRba, VirtualBlks& virtualBlks) override;
 

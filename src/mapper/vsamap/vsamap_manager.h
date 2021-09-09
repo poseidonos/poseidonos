@@ -67,7 +67,7 @@ public:
     virtual int GetVSAs(int volumeId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray);
     virtual int SetVSAs(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks);
     virtual VirtualBlkAddr GetRandomVSA(BlkAddr rba);
-    virtual int64_t GetNumUsedBlocks(int volId);
+    virtual int64_t GetNumUsedBlks(int volId);
     virtual VirtualBlkAddr GetVSAWoCond(int volumeId, BlkAddr rba);
     virtual int SetVSAsWoCond(int volumeId, BlkAddr startfRba, VirtualBlks& virtualBlks);
     virtual MpageList GetDirtyVsaMapPages(int volId, BlkAddr startRba, uint64_t numBlks);

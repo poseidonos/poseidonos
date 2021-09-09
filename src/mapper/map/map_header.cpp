@@ -36,22 +36,16 @@
 namespace pos
 {
 
-MapHeader::MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_, int mapId_, int numMpages_, int mpageSize_, int entriesPerPage_)
-: mPageMap(mPageMap_),
-  touchedMpages(touchedMpages_),
-  mapId(mapId_),
-  size(0),
-  mpageSize(mpageSize_),
-  entriesPerMpage(entriesPerPage_),
-  usedBlkCnt(0),
-  isInitialized(false)
+MapHeader::MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_)
+: size(0),
+  numUsedBlks(0),
+  mPageMap(mPageMap_),
+  touchedMpages(touchedMpages_)
 {
-    mpageData.numTotalMpages = numMpages_;
-    mpageData.numValidMpages = 0;
 }
 
-MapHeader::MapHeader(int mapId_, int numMpages_, int mpageSize_, int entriesPerPage_)
-: MapHeader(nullptr, nullptr, mapId_, numMpages_, mpageSize_, entriesPerPage_)
+MapHeader::MapHeader(void)
+: MapHeader(nullptr, nullptr)
 {
 }
 
@@ -70,72 +64,50 @@ MapHeader::~MapHeader(void)
 }
 
 void
-MapHeader::Init(uint64_t numMpages)
+MapHeader::Init(uint64_t numMpages, int mpageSize)
 {
     mPageMap = new BitMap(numMpages);
     mPageMap->ResetBitmap();
     touchedMpages = new BitMap(numMpages);
     touchedMpages->ResetBitmap();
-    SetSize();
-    isInitialized = true;
-}
 
-int
-MapHeader::SetSize(void)
-{
-    uint32_t curOffset = 0;
-
-    curOffset += sizeof(mpageData);
-    curOffset += sizeof(usedBlkCnt);
-    curOffset += (mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
-
-    size = Align(curOffset, mpageSize);
-
-    return 0;
+    size = sizeof(MpageInfo) + (mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
+    size = Align(size, mpageSize);
 }
 
 int
 MapHeader::CopyToBuffer(char* buffer)
 {
-    int curOffset = 0;
     std::unique_lock<std::mutex> lock(mpageHeaderLock);
+    MpageInfo* header = reinterpret_cast<MpageInfo*>(buffer);
 
-    mpageData.numValidMpages = mPageMap->GetNumBitsSet();
-    mpageData.numTotalMpages = mPageMap->GetNumBits();
-
-    memcpy(buffer, (void*)(&mpageData), sizeof(mpageData));
-    curOffset += sizeof(mpageData);
-    memcpy(buffer + curOffset, (void*)(&usedBlkCnt), sizeof(usedBlkCnt));
-    curOffset += sizeof(usedBlkCnt);
-    memcpy(buffer + curOffset, (void*)mPageMap->GetMapAddr(), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
-
+    header->numValidMpages = mPageMap->GetNumBitsSet();
+    header->numTotalMpages = mPageMap->GetNumBits();
+    header->numUsedBlks = numUsedBlks;
+    memcpy((buffer + sizeof(MpageInfo)), (void*)mPageMap->GetMapAddr(), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
     return 0;
 }
 
 BitMap*
 MapHeader::GetBitmapFromTempBuffer(char* buffer)
 {
-    MpageValidInfo* validInfo = reinterpret_cast<MpageValidInfo*>(buffer);
-    int bitmapOffset = sizeof(mpageData) + sizeof(usedBlkCnt);
+    MpageInfo* info = reinterpret_cast<MpageInfo*>(buffer);
+    int bitmapOffset = sizeof(MpageInfo);
 
-    BitMap* copiedBitmap = new BitMap(validInfo->numTotalMpages);
-    copiedBitmap->SetNumBitsSet(validInfo->numValidMpages);
+    BitMap* copiedBitmap = new BitMap(info->numTotalMpages);
+    copiedBitmap->SetNumBitsSet(info->numValidMpages);
     memcpy(copiedBitmap->GetMapAddr(), buffer + bitmapOffset, copiedBitmap->GetNumEntry() * BITMAP_ENTRY_SIZE);
-
     return copiedBitmap;
 }
 
 void
-MapHeader::UpdateNumValidMpages(void)
+MapHeader::ApplyHeader(char* buffer)
 {
-    mpageData.numValidMpages = mPageMap->GetNumBitsSet();
-    mpageData.numTotalMpages = mPageMap->GetNumBits();
-}
-
-bool
-MapHeader::ApplyNumValidMpages(void)
-{
-    return mPageMap->SetNumBitsSet(mpageData.numValidMpages);
+    MpageInfo* header = reinterpret_cast<MpageInfo*>(buffer);
+    assert(mPageMap->GetNumBits() == header->numTotalMpages);
+    numUsedBlks = header->numUsedBlks;
+    mPageMap->SetNumBitsSet(header->numValidMpages);
+    memcpy(mPageMap->GetMapAddr(), buffer + sizeof(MpageInfo), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
 }
 
 void
@@ -146,19 +118,11 @@ MapHeader::SetMapAllocated(int pageNr)
 }
 
 void
-MapHeader::UpdateUsedBlkCnt(VirtualBlkAddr vsa)
+MapHeader::UpdateNumUsedBlks(VirtualBlkAddr oldVsa)
 {
-    if (IsUnMapVsa(vsa))
+    if (IsUnMapVsa(oldVsa) == true)
     {
-        usedBlkCnt--;
-        if (usedBlkCnt < 0)
-        {
-            usedBlkCnt = 0;
-        }
-    }
-    else
-    {
-        usedBlkCnt++;
+        numUsedBlks++;
     }
 }
 

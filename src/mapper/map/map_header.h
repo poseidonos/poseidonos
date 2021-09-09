@@ -40,62 +40,45 @@
 namespace pos
 {
 
-class MpageValidInfo
+class MpageInfo
 {
 public:
-    MpageValidInfo(void) : numValidMpages(UINT64_MAX), numTotalMpages(UINT64_MAX) {}
+    MpageInfo(void) : numValidMpages(UINT64_MAX), numTotalMpages(UINT64_MAX), numUsedBlks(0), reserved(0) {}
     uint64_t numValidMpages;
     uint64_t numTotalMpages;
+    uint64_t numUsedBlks;
+    uint64_t reserved;
 };
 
 class MapHeader
 {
 public:
-    MapHeader(void) = default;
-    MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_, int mapId, int numMpages_, int mpageSize_, int entriesPerPage_);
-    MapHeader(int mapId, int numMpages_, int mpageSize_, int entriesPerPage_);
+    MapHeader(void);
+    MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_);
     virtual ~MapHeader(void);
-    void Init(uint64_t numMpages);
+    void Init(uint64_t numMpages, int mpageSize);
 
     int CopyToBuffer(char* buffer);
     BitMap* GetBitmapFromTempBuffer(char* buffer);
 
-    void UpdateNumValidMpages(void);
-    bool ApplyNumValidMpages(void);
-    void* GetMpageDataAddr(void) { return &mpageData; }
-    int GetSizeofMpageData(void) { return sizeof(mpageData); }
-    uint64_t GetNumValidMpages(void) { return mpageData.numValidMpages; }
-    uint64_t GetNumTotalMpages(void) { return mpageData.numTotalMpages; }
-    void SetMpageValidInfo(uint64_t numPages, uint64_t ValidPages);
+    int GetSize(void) { return size; }
+    void ApplyHeader(char* srcBuf);
+    uint64_t GetNumValidMpages(void) { return mPageMap->GetNumBitsSet(); }
 
     virtual BitMap* GetMpageMap(void) { return mPageMap; }
     virtual void SetMapAllocated(int pageNr);
     virtual BitMap* GetTouchedMpages(void) { return touchedMpages; }
-    int GetMapId(void) { return mapId; }
-    uint32_t GetSize(void) { return size; }
-    int SetSize(void);
-    virtual uint32_t GetMpageSize(void) { return mpageSize; }
-    virtual uint32_t GetEntriesPerMpage(void) { return entriesPerMpage; }
 
-    void UpdateUsedBlkCnt(VirtualBlkAddr vsa);
-    int64_t GetUsedBlkCnt(void) { return usedBlkCnt; }
-    void* GetGetUsedBlkCntAddr(void) { return &usedBlkCnt; }
-    int GetSizeofUsedBlkCnt(void) { return sizeof(usedBlkCnt); }
-
-    bool IsInitialized(void) { return isInitialized; }
+    void UpdateNumUsedBlks(VirtualBlkAddr vsa);
+    uint64_t GetNumUsedBlks(void) { return numUsedBlks; }
 
 private:
     std::mutex mpageHeaderLock;
-    MpageValidInfo mpageData;
+
+    int size;
+    std::atomic<uint64_t> numUsedBlks;
     BitMap* mPageMap;
     BitMap* touchedMpages;
-
-    int mapId;              // by MapContent::Ctor()
-    uint32_t size;          // header size(MpageValidInfo + usedBlkCnt + BitMap), aligned by mpageSize
-    uint32_t mpageSize;     // by MapContent::SetPageSize()
-    uint32_t entriesPerMpage;
-    std::atomic<int64_t> usedBlkCnt;
-    bool isInitialized;
 };
 
 }   // namespace pos

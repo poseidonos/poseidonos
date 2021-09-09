@@ -126,4 +126,16 @@ Map::GetMpageWithLock(int pageNr)
     return mPageArr[pageNr].data;
 }
 
+int
+Map::GetSize(void)
+{
+    return pageSize;
+}
+
+int
+Map::GetNumMpages(void)
+{
+    return numPages;
+}
+
 } // namespace pos

@@ -81,6 +81,7 @@ protected:
     MapIoHandler* mapIoHandler;
     std::string fileName;
     int mapId;
+    uint32_t entriesPerMpage;
     int arrayId;
     bool isInitialized;
 };

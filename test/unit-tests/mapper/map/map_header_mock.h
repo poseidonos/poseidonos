@@ -8,10 +8,10 @@
 
 namespace pos
 {
-class MockMpageValidInfo : public MpageValidInfo
+class MockMpageInfo : public MpageInfo
 {
 public:
-    using MpageValidInfo::MpageValidInfo;
+    using MpageInfo::MpageInfo;
 };
 
 class MockMapHeader : public MapHeader
@@ -21,8 +21,6 @@ public:
     MOCK_METHOD(BitMap*, GetMpageMap, (), (override));
     MOCK_METHOD(void, SetMapAllocated, (int pageNr), (override));
     MOCK_METHOD(BitMap*, GetTouchedMpages, (), (override));
-    MOCK_METHOD(uint32_t, GetMpageSize, (), (override));
-    MOCK_METHOD(uint32_t, GetEntriesPerMpage, (), (override));
 };
 
 } // namespace pos

@@ -60,8 +60,8 @@ EventMpageAsyncIo::Execute(void)
         MapFlushIoContext* mPageLoadRequest = new MapFlushIoContext();
         mPageLoadRequest->opcode = MetaFsIoOpcode::Read;
         mPageLoadRequest->fd = file->GetFd();
-        mPageLoadRequest->fileOffset = mapHeader->GetSize() + (mpageNum * mapHeader->GetMpageSize());
-        mPageLoadRequest->length = mapHeader->GetMpageSize();
+        mPageLoadRequest->fileOffset = mapHeader->GetSize() + (mpageNum * map->GetSize());
+        mPageLoadRequest->length = map->GetSize();
         mPageLoadRequest->buffer = mpage;
         mPageLoadRequest->callback = asyncIoReqCB;
         mPageLoadRequest->startMpage = mpageNum;

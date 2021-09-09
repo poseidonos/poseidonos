@@ -125,7 +125,7 @@ public:
     virtual int GetVSAs(int volId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray);
     virtual int SetVSAs(int volId, BlkAddr startRba, VirtualBlks& virtualBlks);
     virtual VirtualBlkAddr GetRandomVSA(BlkAddr rba);
-    virtual int64_t GetNumUsedBlocks(int volId);
+    virtual int64_t GetNumUsedBlks(int volId);
     virtual VirtualBlkAddr GetVSAInternal(int volId, BlkAddr rba, int& retry);
     virtual int SetVSAsInternal(int volId, BlkAddr startRba, VirtualBlks& virtualBlks);
     virtual VirtualBlkAddr GetVSAWithSyncOpen(int volId, BlkAddr rba);

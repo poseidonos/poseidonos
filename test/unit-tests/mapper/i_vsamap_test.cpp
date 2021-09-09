@@ -28,7 +28,7 @@ TEST(IVSAMap, GetDirtyVsaMapPages_)
 {
 }
 
-TEST(IVSAMap, GetNumUsedBlocks_)
+TEST(IVSAMap, GetNumUsedBlks_)
 {
 }
 

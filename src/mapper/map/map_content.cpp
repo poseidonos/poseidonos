@@ -44,6 +44,7 @@ MapContent::MapContent(int mapId_, int arrayId_)
   map(nullptr),
   mapIoHandler(nullptr),
   mapId(mapId_),
+  entriesPerMpage(0),
   arrayId(arrayId_),
   isInitialized(false)
 {
@@ -60,20 +61,20 @@ MapContent::Init(uint64_t numEntries, int entrySize, int mpageSize)
     if (isInitialized == false)
     {
         isInitialized = true;
-        int entriesPerPage = mpageSize / entrySize;
-        int numMpages = DivideUp(numEntries, entriesPerPage);
-        if (mapHeader == nullptr)
-        {
-            mapHeader = new MapHeader(mapId, numMpages, mpageSize, entriesPerPage);
-            mapHeader->Init(numMpages);
-        }
+        entriesPerMpage = mpageSize / entrySize;
+        int numMpages = DivideUp(numEntries, entriesPerMpage);
         if (map == nullptr)
         {
             map = new Map(numMpages, mpageSize);
         }
+        if (mapHeader == nullptr)
+        {
+            mapHeader = new MapHeader();
+            mapHeader->Init(numMpages, mpageSize);
+        }
         if (mapIoHandler == nullptr)
         {
-            mapIoHandler = new MapIoHandler(map, mapHeader, arrayId);
+            mapIoHandler = new MapIoHandler(map, mapHeader, mapId, arrayId);
         }
     }
     return 0;
@@ -82,7 +83,7 @@ MapContent::Init(uint64_t numEntries, int entrySize, int mpageSize)
 int
 MapContent::OpenMapFile(void)
 {
-    uint64_t fileSize = mapHeader->GetSize() + mapHeader->GetMpageSize() * mapHeader->GetNumTotalMpages();
+    uint64_t fileSize = mapHeader->GetSize() + map->GetSize() * map->GetNumMpages();
     int ret = mapIoHandler->OpenFile(fileName, fileSize);
     if (ret == EID(NEED_TO_INITIAL_STORE))
     {
@@ -190,16 +191,10 @@ MapContent::DumpLoad(std::string fname)
     return ret;
 }
 
-int
-MapContent::GetId(void)
-{
-    return mapHeader->GetMapId();
-}
-
 uint32_t
 MapContent::GetEntriesPerPage(void)
 {
-    return mapHeader->GetEntriesPerMpage();
+    return entriesPerMpage;
 }
 
 } // namespace pos

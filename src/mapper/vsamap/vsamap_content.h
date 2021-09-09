@@ -52,7 +52,7 @@ public:
     virtual VirtualBlkAddr GetEntry(BlkAddr rba);
     virtual int SetEntry(BlkAddr rba, VirtualBlkAddr vsa);
 
-    virtual int64_t GetNumUsedBlocks(void);
+    virtual int64_t GetNumUsedBlks(void);
     int InvalidateAllBlocks(void);
 
 private:

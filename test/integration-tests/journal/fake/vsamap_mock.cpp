@@ -90,7 +90,7 @@ VSAMapMock::GetRandomVSA(BlkAddr rba)
 }
 
 int64_t
-VSAMapMock::GetNumUsedBlocks(int volId)
+VSAMapMock::GetNumUsedBlks(int volId)
 {
     return 0;
 }

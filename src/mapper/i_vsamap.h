@@ -49,7 +49,7 @@ public:
     virtual VirtualBlkAddr GetRandomVSA(BlkAddr rba) = 0;   // will be deprecated
 
     virtual MpageList GetDirtyVsaMapPages(int volumeId, BlkAddr startRba, uint64_t numBlks) = 0;
-    virtual int64_t GetNumUsedBlocks(int volId) = 0;
+    virtual int64_t GetNumUsedBlks(int volId) = 0;
 };
 
 } // namespace pos

@@ -330,21 +330,15 @@ VSAMapManager::GetRandomVSA(BlkAddr rba)
 }
 
 MpageList
-VSAMapManager::GetDirtyVsaMapPages(int volumeId, BlkAddr startRba, uint64_t numBlks)
+VSAMapManager::GetDirtyVsaMapPages(int volId, BlkAddr startRba, uint64_t numBlks)
 {
-    return vsaMaps[volumeId]->GetDirtyPages(startRba, numBlks);
+    return vsaMaps[volId]->GetDirtyPages(startRba, numBlks);
 }
 
 int64_t
-VSAMapManager::GetNumUsedBlocks(int volId)
+VSAMapManager::GetNumUsedBlks(int volId)
 {
-    VSAMapContent* vsaMap = vsaMaps[volId];
-    if (vsaMap == nullptr)
-    {
-        return -(int64_t)POS_EVENT_ID::VSAMAP_NULL_PTR;
-    }
-
-    return vsaMap->GetNumUsedBlocks();
+    return vsaMaps[volId]->GetNumUsedBlks();
 }
 
 bool
