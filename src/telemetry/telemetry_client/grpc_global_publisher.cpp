@@ -86,17 +86,12 @@ GrpcGlobalPublisher::_SendMessage(PublishRequest& cliPublishReq)
     const string errorMsg = "[TelemetryClient] gRPC Publishing Error";
     Status status = ::grpc::Status(StatusCode::INVALID_ARGUMENT, errorMsg);
     status = telemetryManager->publish(&cliContext, cliPublishReq, &cliPublishRes);
-
-    if (status.ok() == true)
-    {
-        POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] SUCCESS to send PublishRequest by gRPC");
-        return 0;
-    }
-    else
+    if (status.ok() != true)
     {
         POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] Failed to send PublishRequest by gRPC, errorcode:{}, errormsg:{}", status.error_code(), status.error_message());
         return -1;
     }
+    return 0;
 }
 
 } // namespace pos
