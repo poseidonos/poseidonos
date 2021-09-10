@@ -32,12 +32,12 @@ $POS_HOME/script/start_poseidonos.sh
 
 2. Device scan
 ```
-$POS_HOME/bin/cli device scan
+$POS_HOME/bin/poseidonos-cli device scan
 ```
 
 3. Check device list
 ```
-$POS_HOME/bin/cli device list
+$POS_HOME/bin/poseidonos-cli device list
 ```
 
 4. Detach one pci device
@@ -47,7 +47,7 @@ echo 1 > /sys/bus/pci/devices/${bdf}/remove
 
 5. Check device removed
 ```
-$POS_HOME/bin/cli device list
+$POS_HOME/bin/poseidonos-cli device list
 ```
 
 6. Re-attach the device with PCI rescan
@@ -57,7 +57,7 @@ echo 1 > /sys/bus/pci/rescan
 
 7. Check device attached
 ```
-$POS_HOME/bin/cli device list
+$POS_HOME/bin/poseidonos-cli device list
 ```
 
 You can test hotplug by unplug and replug physical device

@@ -22,7 +22,7 @@ $ sudo $POS_MGMT_HOME /m9k/run_all.sh
 # 3. restarts influxdb, kapacitor, and start-iBofMtool (i..e, mtool)
 ```
 
-Once all of the processes start up to run, you could access the GUI tool as described in [GUI](http://globalwiki.itplatform.sec.samsung.net:8099/display/ibof/GUI) section in POS end-user guide. 
+Once all of the processes start up to run, you could access the GUI tool.
 
 ## Uninstall
 The following will stop the services and delete their soft-links:

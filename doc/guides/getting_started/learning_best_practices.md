@@ -8,13 +8,13 @@ initiator$ sudo service stop client-service-name
 initiator$ sudo umount /mnt
  
 # Unmount the POS volume (assumption: the volume name is vol1 and created within Array called POSArray)
-target$ cli volume unmount --name vol1 --array POSArray
+target$ poseidonos-cli volume unmount --volume-name vol1 --array-name POSArray
  
 # Unmount the POS array
-target$ cli array unmount --name POSArray
+target$ poseidonos-cli array unmount --array-name POSArray
 
-# Kill the POS
-target$ cli system exit
+# Stop POS
+target$ poseidonos-cli system stop
 ```
 
 If you don't stop user I/Os before unmounting POS volume or array, there is a risk of write failures. 
@@ -39,10 +39,10 @@ $ sudo ./script/backup_latest_hugepages_for_uram.sh
 $ sudo ./script/start_poseidonos.sh
  
 # Create write buffer. Please make sure the same parameters should be used as before the crash.
-$ ./lib/spdk-20.10/scripts/rpc.py bdev_malloc_create -b uram0 8192 512
+$ ./poseidonos-cli device create --device-name uram0 --device-type uram --num-blocks 16777216 --block-size 512
  
 # Scan the devices and load the array automatically
-$ bin/cli device scan
+$ bin/poseidonos-cli device scan
   
 # POS will perform the recovery and become mountable.
 ```

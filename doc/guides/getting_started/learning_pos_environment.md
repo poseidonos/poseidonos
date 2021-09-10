@@ -67,7 +67,6 @@ sysctl -w net.ipv4.tcp_slow_start_after_idle="0"
 * The recommended total_size and block_size for a PSD server is 8192 and 512 for now.
 
 ### NVM Subsystem
-
 * presents a collection of controller(s) which are used to access NVM namespaces.
 * can be configured by a RPC call
   - ```$POS_HOME/lib/spdk-20.10/scripts/rpc.py nvmf_create_subsystem  {nqn }```

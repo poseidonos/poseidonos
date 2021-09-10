@@ -1,33 +1,32 @@
 # Poseidon OS
 
-Poseidon OS (POS) is a light-weight storage OS that offers the best performance and valuable features over storage network. POS exploits the benefit of NVMe SSDs by optimizing storage stack and leveraging the state-of-the-art high speed interface. Please find project details at documentations page.
+PoseidonOS (POS) is a light-weight storage OS that offers the best performance and valuable features over storage network. POS exploits the benefit of NVMe SSDs by optimizing storage stack and leveraging the state-of-the-art high speed interface. Please find project details at documentations page.
 
 
 # Table of Contents
-- [Source Code](#source-code)
-- [How to Build](#how-to-build)
-- [Preparation](#preparation)
+- [Download the Source Code](#download-the-source-code)
+- [Install Prerequisites](#install-prerequisites)
+- [Build POS](#build-pos)
 - [Run POS](#run-pos)
-- [Learning POS Commands](#learning-pos-commands)
+- [Learn POS Commands](#learn-pos-commands)
 
 
-## Source Code
+## Download the Source Code
 
 ```bash
 git clone https://github.com/poseidonos/poseidonos.git
-
 ```
 
-## Prerequisites
+## Install Prerequisites
 
-This script will automatically install the minimum dependencies required to build Poseidon OS.
+pkgdep.sh will automatically install the packages required to build POS.
 
 ```bash
 cd script
 sudo ./pkgdep.sh
 ```
 
-## How to Build
+## Build POS
 
 ### 1. Build Library
 
@@ -49,27 +48,15 @@ cd script/
 sudo ./start_poseidonos.sh
 ```
 
-## Learning POS Commands
+## Learn POS Commands
 
-This document demonstrates how to start up POS and manage storage resources. The target audience is whoever wants to learn about POS and explore its capabilities. The minimum knowledge of Linux administration would be sufficient.
+This guide introduces the basics of POS. We demonstrate how to manage storage resources (e.g., POS devices, arrays, and volumes) using POS. The target audience is anyone who wants to learn about POS and explore its capabilities. The prerequisite knowledge is the minimum skill of Linux administration.
 
 ### Environments
-The following configs are used for this demonstration, but may change as this document gets revised.
-| Config | Value |
-| ------ | ----- |
-| OS     | Ubuntu 5.3.0-24-generic      |
-| POS location | $POS_HOME/bin/poseidonos <br/> $POS_HOME/bin/cli |
-| POS config | /etc/pos/pos.conf |
-| POS scripts |  $POS_HOME/script/start_poseidonos.sh <br/> $POS_HOME/lib/spdk-20.10/script/rpc.py <br/> $POS_HOME/test/script/set_irq_affinity_cpulist.sh <br/> $POS_HOME/test/script/common_irq_affinity.sh <br/> $POS_HOME/script/setup_env.sh <br/> $POS_HOME/lib/spdk-20.10/scripts/setup.sh <br/> $POS_HOME/lib/spdk-20.10/scripts/common.sh |
-| POS log | /var/log/pos/pos.log |
-| POS dump | /etc/pos/core/poseidonos.core |
-| SPDK RPC Server UDS | /var/tmp/spdk.sock |
-| Hugepage information | /tmp/uram_hugepage |
-
-The following hardware has been used for evaluation.
+The following hardware and configurations are used in this guide. These may change as this guide gets revised.
 ```bash
 Hardware: Poseidon server
- - Reference server h/w implementation engineered by Samsung and Inspur
+ - Reference server hardware implementation engineered by Samsung and Inspur
  - The number of processors: 2
  - The number of memory slots: 32
  - Memory speed: 3200 MT/s
@@ -77,12 +64,27 @@ Hardware: Poseidon server
  - PCIe generation: gen4
  - Storage: E1.S SSD * 32 ea
 ```
-We provide the step-by-step guide to run POS commands with actual outputs. In the example, $POS_HOME is set to "/poseidonos" and the host name to "R2U14-PSD-3". The same could be achieved through web interface called M-Tool. Managing POS with M-Tool is explained in GUI section.
+
+| Config | Value |
+| ------ | ----- |
+| OS     | Ubuntu 5.3.0-24-generic      |
+| Hostname | R2U14-PSD-3 |
+| $POS_HOME | /poseidonos |
+| POS location | $POS_HOME/bin/poseidonos <br/> $POS_HOME/bin/poseidonos-cli |
+| POS config | /etc/pos/pos.conf |
+| POS scripts |  $POS_HOME/script/start_poseidonos.sh <br/> $POS_HOME/lib/spdk-20.10/script/rpc.py <br/> $POS_HOME/test/script/set_irq_affinity_cpulist.sh <br/> $POS_HOME/test/script/common_irq_affinity.sh <br/> $POS_HOME/script/setup_env.sh <br/> $POS_HOME/lib/spdk-20.10/scripts/setup.sh <br/> $POS_HOME/lib/spdk-20.10/scripts/common.sh |
+| POS log | /var/log/pos/pos.log |
+| POS dump | /etc/pos/core/poseidonos.core |
+| SPDK RPC Server UDS | /var/tmp/spdk.sock |
+| Hugepage information | /tmp/uram_hugepage |
+
+
+- Note: POS also provides a web-based graphical user interface (GUI) called PoseidonOS-GUI. It will be explained in the GUI section.
 
 ### Step 1. Start POS application
 
+Become a root user and check if you have local NVMe devices attached to the OS with its kernel device driver.
 ```bash
-# Become a root user and check if you have local NVMe devices attached to the OS with its Kernel Device Driver.
 ibof@R2U14-PSD-3:~$ su -
 Password:
 root@R2U14-PSD-3:~# cd /poseidonos
@@ -119,8 +121,10 @@ Disk /dev/nvme24n1: 3.5 TiB, 3840755982336 bytes, 7501476528 sectors
 Disk /dev/nvme21n1: 3.5 TiB, 3840755982336 bytes, 7501476528 sectors
 Disk /dev/nvme27n1: 3.5 TiB, 3840755982336 bytes, 7501476528 sectors
 Disk /dev/nvme30n1: 3.5 TiB, 3840755982336 bytes, 7501476528 sectors
+```
 
-# Start POS and check if the NVMe devices are detached from Linux kernel and attached to SPDK (user level application)
+Start POS and check if the NVMe devices are detached from Linux kernel and attached to SPDK (a user-level application).
+```bash
 root@R2U14-PSD-3:/poseidonos# cd script/
 root@R2U14-PSD-3:/poseidonos/script# ls -al
 root@R2U14-PSD-3:/poseidonos/script# ./start_poseidonos.sh
@@ -231,1883 +235,452 @@ Wait poseidonos
 Wait poseidonos
 Wait poseidonos
 poseidonos is running in background...logfile=pos.log
+root@R2U14-PSD-3:/poseidonos/script#
+```
+- Note:  Instead of "Wait poseidonos", "Error: cannot connect to the PoseidonOS server!" message can be displayed temporarily. If "poseidonos is running in background" has been displayed, PoseidonOS has successfully started.
 
+```bash
 # Verify if the application is up and running
 root@R2U14-PSD-3:/poseidonos/script# ps -ef | grep poseidonos | grep -v grep
 root     90998     1 99 20:09 pts/7    01:15:34 /root/doc_center/ibofos/script/..//bin/poseidonos
 
 # Unlike in the the previous execution, you shouldn't see the NVMe devices from the fdisk output since all of them must have been reattached from OS to SPDK.
-root@R2U14-PSD-3:/poseidonos/script# fdisk -l |grep nvme
+root@R2U14-PSD-3:/poseidonos/script# fdisk -l | grep nvme
 ```
 
 ### Step 2. Create Write Buffer within DRAM
-
+Create a write buffer within DRAM using the device create command. This write buffer will be included to a POS array later. 
+ 
+This command will create write buffer with the total size of 8192 MB, the block size of 512 B, and the name of "uram0". The command will request a SPDK server to create a SPDK block device called "malloc bdev", which is a userspace ramdisk.
 ```bash
-root@R2U14-PSD-3:/poseidonos/script# cd ../lib/spdk-20.10/scripts/
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts#
- 
-# Check the usage to create write buffer for POS array
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py bdev_malloc_create -h
-usage: rpc.py [options] bdev_malloc_create [-h] [-b NAME] [-u UUID]
-                                           total_size block_size
- 
-positional arguments:
-  total_size            Size of malloc bdev in MB (float > 0)
-  block_size            Block size for this bdev
- 
-optional arguments:
-  -h, --help            show this help message and exit
-  -b NAME, --name NAME  Name of the bdev
-  -u UUID, --uuid UUID  UUID of the bdev
- 
-# Create write buffer with the total size of 8192 MB, the block size of 512 B, and the name of "uram0".
-# Technically, the command is sent to SPDK server and creates a SPDK block device called "malloc bdev", which is a userspace ramdisk.
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py bdev_malloc_create -b uram0 8192 512
-uram0
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli device create --device-name uram0 --device-type uram --num-blocks 16777216 --block-size 512
 ```
 
-```bash
-The recommended size of uram0 may differ by environment. Please refer to "bdev" section in Learning POS Environment for further details.
-```
+- Note: the recommended size of uram0 may differ by environment. Please refer to "bdev" section in Learning POS Environment for further details.
 
-### Step 3. Check POS information and version
 
+### Step 3. Check POS version
+You can check the version of POS using the system info command. 
 ```bash
 # The actual output may differ by env where the command is executed.
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# cd /poseidonos/bin/
-root@R2U14-PSD-3:/poseidonos/bin# ./cli system info
- 
- 
-Request to Poseidon OS
-    xrId        :  7dac37be-d93e-11eb-b677-a0369f78dee4
-    command     :  GETIBOFOSINFO
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "version": "pos-0.9.2"
-}
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli system info
+pos-0.9.10
 ```
 
 ### Step 4. Scan NVMe Devices
-
+Let's check the list of the devices in the system. Because you haven't executed the device scan command since POS started, you wouldn't see any device showing up in the output as in the following.
 ```bash
-# If this is the first run, you wouldn't see any devices showing up in the output as in the following.
-root@R2U14-PSD-3:/poseidonos/bin# ./cli device list
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli device list
+Name           |SerialNumber(SN)    |Address        |Class         |MN                         |NUMA   |Size
+-------------- |------------------- |-------------- |------------- |-------------------------- |------ |------------------
+```
  
+Let's scan devices using the device scan command.
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli device scan
+```
  
-Request to Poseidon OS
-    xrId        :  fa29b0b0-d93e-11eb-8fce-a0369f78dee4
-    command     :  LISTDEVICE
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
-# Let's run the scan so that POS can detect devices.
-root@R2U14-PSD-3:/poseidonos/bin# ./cli device scan
- 
- 
-Request to Poseidon OS
-    xrId        :  fc44f1aa-d93e-11eb-9e3d-a0369f78dee4
-    command     :  SCANDEVICE
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
-# This time, we should see a full list of devices
-root@R2U14-PSD-3:/poseidonos/bin# ./cli device list
- 
- 
-Request to Poseidon OS
-    xrId        :  fe4b9b38-d93e-11eb-ae7a-a0369f78dee4
-    command     :  LISTDEVICE
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "devicelist": [
-        {
-            "addr": "0000:4d:00.0",
-            "class": "SYSTEM",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-0",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045104      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:4e:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-1",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045041      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:4f:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-2",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045050      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:50:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-3",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045038      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:51:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-4",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045107      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:52:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-5",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045042      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:53:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-6",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045040      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:54:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-7",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045083      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:67:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-8",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045049      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:68:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-9",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045096      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:69:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-10",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045032      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:6a:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-11",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045071      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:6b:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-12",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045099      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:6c:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-13",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045098      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:6d:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-14",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045084      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:6e:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-15",
-            "numa": "0",
-            "size": 3840755982336,
-            "sn": "A000032M045105      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:cc:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-16",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045220      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:cd:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-17",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045088      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:ce:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-18",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045090      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:cf:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-19",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045078      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:d0:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-20",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045077      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:d1:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-21",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045051      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:d2:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-22",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045034      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:d3:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-23",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045085      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:e5:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-24",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045053      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:e6:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-25",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045054      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:e7:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-26",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045048      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:e8:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-27",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045039      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:e9:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-28",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045087      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:ea:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-29",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045086      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:eb:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-30",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045100      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "0000:ec:00.0",
-            "class": "ARRAY",
-            "mn": "SAMSUNG NVMe SSD PM9A3                  ",
-            "name": "unvme-ns-31",
-            "numa": "1",
-            "size": 3840755982336,
-            "sn": "A000032M045055      ",
-            "type": "SSD"
-        },
-        {
-            "addr": "",
-            "class": "ARRAY",
-            "mn": "uram0",
-            "name": "uram0",
-            "numa": "UNKNOWN",
-            "size": 8589934592,
-            "sn": "uram0",
-            "type": "NVRAM"
-        }
-    ]
-}
+This time, you can see the list of NVMe and uram devices existing in the system. 
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli device list --unit
+Name           |SerialNumber(SN)     |Address        |Class         |MN                                       |NUMA    |Size
+-------------- |-------------------  |-------------- |------------- |--------------------------               |------  |------------------
+unvme-ns-0     |A000032M045220       |0000:4d:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-1     |A000032M045032       |0000:4e:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-2     |A000032M045090       |0000:4f:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-3     |A000032M045096       |0000:50:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-4     |A000032M045107       |0000:51:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-5     |A000032M045078       |0000:52:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-6     |A000032M045077       |0000:53:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-7     |A000032M045099       |0000:54:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-8     |A000032M045084       |0000:67:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-9     |A000032M045105       |0000:68:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-10    |A000032M045100       |0000:69:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-11    |A000032M045104       |0000:6a:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-12    |A000032M045050       |0000:6b:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-13    |A000032M045054       |0000:6c:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-14    |A000032M045087       |0000:6d:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-15    |A000032M045088       |0000:6e:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |0       |3.5T
+unvme-ns-16    |A000032M045038       |0000:cc:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-17    |A000032M045086       |0000:cd:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-18    |A000032M045048       |0000:ce:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-19    |A000032M045049       |0000:cf:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-20    |A000032M045039       |0000:d0:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-21    |A000032M045034       |0000:d1:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-22    |A000032M045042       |0000:d2:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-23    |A000032M045085       |0000:d3:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-24    |A000032M045041       |0000:e5:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-25    |A000032M045051       |0000:e6:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-26    |A000032M045040       |0000:e7:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-27    |A000032M045071       |0000:e8:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-28    |A000032M045055       |0000:e9:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-29    |A000032M045083       |0000:ea:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-30    |A000032M045098       |0000:eb:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+unvme-ns-31    |A000032M045053       |0000:ec:00.0   |SYSTEM        |SAMSUNG NVMe SSD PM9A3                   |1       |3.5T
+uram0          |uram0                |               |SYSTEM        |uram0                                    |UNKNOWN |8G
 ```
 
-### Step 5. Import POS Array
+### Step 5. Create POS Array
 
-If you have not created any POS array before, you could start with a new one and import into the POS (Step 5a). Otherwise, you could skip this step. 
+In this step, we describe how to create a POS array.
 
-### 5a. Create new POS Array
-
-Now that POS has completed the scanning, it should be able to create POS array with a set of block devices we choose.
-
-```bash
-root@R2U14-PSD-3:/poseidonos/bin#  ./cli array create -b uram0 -d unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3,unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7,unvme-ns-8,unvme-ns-9,unvme-ns-10,unvme-ns-11,unvme-ns-12,unvme-ns-13,unvme-ns-14,unvme-ns-15,unvme-ns-16,unvme-ns-17,unvme-ns-18,unvme-ns-19,unvme-ns-20,unvme-ns-21,unvme-ns-22,unvme-ns-23,unvme-ns-24,unvme-ns-25,unvme-ns-26,unvme-ns-27,unvme-ns-28 -s unvme-ns-29,unvme-ns-30,unvme-ns-31 --name POSArray --raidtype RAID5
- 
- 
-Request to Poseidon OS
-    xrId        :  5512d085-d940-11eb-a518-a0369f78dee4
-    command     :  CREATEARRAY
-    Param       :
-{
-    "name": "POSArray",
-    "raidtype": "RAID5",
-    "buffer": [
-        {
-            "deviceName": "uram0"
-        }
-    ],
-    "data": [
-        {
-            "deviceName": "unvme-ns-0"
-        },
-        {
-            "deviceName": "unvme-ns-1"
-        },
-        {
-            "deviceName": "unvme-ns-2"
-        },
-        {
-            "deviceName": "unvme-ns-3"
-        },
-        {
-            "deviceName": "unvme-ns-4"
-        },
-        {
-            "deviceName": "unvme-ns-5"
-        },
-        {
-            "deviceName": "unvme-ns-6"
-        },
-        {
-            "deviceName": "unvme-ns-7"
-        },
-        {
-            "deviceName": "unvme-ns-8"
-        },
-        {
-            "deviceName": "unvme-ns-9"
-        },
-        {
-            "deviceName": "unvme-ns-10"
-        },
-        {
-            "deviceName": "unvme-ns-11"
-        },
-        {
-            "deviceName": "unvme-ns-12"
-        },
-        {
-            "deviceName": "unvme-ns-13"
-        },
-        {
-            "deviceName": "unvme-ns-14"
-        },
-        {
-            "deviceName": "unvme-ns-15"
-        },
-        {
-            "deviceName": "unvme-ns-16"
-        },
-        {
-            "deviceName": "unvme-ns-17"
-        },
-        {
-            "deviceName": "unvme-ns-18"
-        },
-        {
-            "deviceName": "unvme-ns-19"
-        },
-        {
-            "deviceName": "unvme-ns-20"
-        },
-        {
-            "deviceName": "unvme-ns-21"
-        },
-        {
-            "deviceName": "unvme-ns-22"
-        },
-        {
-            "deviceName": "unvme-ns-23"
-        },
-        {
-            "deviceName": "unvme-ns-24"
-        },
-        {
-            "deviceName": "unvme-ns-25"
-        },
-        {
-            "deviceName": "unvme-ns-26"
-        },
-        {
-            "deviceName": "unvme-ns-27"
-        },
-        {
-            "deviceName": "unvme-ns-28"
-        }
-    ],
-    "spare": [
-        {
-            "deviceName": "unvme-ns-29"
-        },
-        {
-            "deviceName": "unvme-ns-30"
-        },
-        {
-            "deviceName": "unvme-ns-31"
-        }
-    ]
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-```
-
-As you may have noticed, some of the parameters should be passed in from the output of the previous step ("cli device list" command).
- - The write buffer device (-b) should be the name of a device whose "type" is "NVRAM".
- - The data devices (-d) should be comma-separated list of devices, the type of which being "SSD".
- - The name of POS array must comply with a naming convention described in Creating POS Array. 
- - The available RAID types (--raidtype) are only ["RAID5"]
-
-Once POS array has been created, you could query the POS array information as in the following:
+Create POS array using the array create command. The array create command requires the following parameters.
+ - The name of device to be used as the write buffer (--buffer).
+ - The comma-separated list of the data (--data-devs) and spare (--spare) devices. SSD devices must be used only.
+ - The name of POS array must follow the naming convention rule. It is described in **[Device and Array](doc/concepts/device_and_array.md)** in detail. 
+ - The RAID type the POS array will use (--raid).
 
 ```bash
-root@R2U14-PSD-3:/poseidonos/bin# ./cli array list_device --name POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  8d74f019-d940-11eb-a553-a0369f78dee4
-    command     :  LISTARRAYDEVICE
-    Param       :
-{
-    "name": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "devicelist": [
-        {
-            "name": "uram0",
-            "type": "BUFFER"
-        },
-        {
-            "name": "unvme-ns-0",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-1",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-2",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-3",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-4",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-5",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-6",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-7",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-8",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-9",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-10",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-11",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-12",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-13",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-14",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-15",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-16",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-17",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-18",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-19",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-20",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-21",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-22",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-23",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-24",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-25",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-26",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-27",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-28",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-29",
-            "type": "SPARE"
-        },
-        {
-            "name": "unvme-ns-30",
-            "type": "SPARE"
-        },
-        {
-            "name": "unvme-ns-31",
-            "type": "SPARE"
-        }
-    ]
-}
+root@R2U14-PSD-3:/poseidonos/bin#./poseidonos-cli array create --array-name POSArray --buffer uram0 --data-devs unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3,unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7,unvme-ns-8,unvme-ns-9,unvme-ns-10,unvme-ns-11,unvme-ns-12,unvme-ns-13,unvme-ns-14,unvme-ns-15,unvme-ns-16,unvme-ns-17,unvme-ns-18,unvme-ns-19,unvme-ns-20,unvme-ns-21,unvme-ns-22,unvme-ns-23,unvme-ns-24,unvme-ns-25,unvme-ns-26,unvme-ns-27,unvme-ns-28 --spare unvme-ns-29,unvme-ns-30,unvme-ns-31 --raid RAID5
 ```
 
-### Step 5b. Load existing POS Array
 
-This step is not needed any more since POS version 0.9.2. In earlier version, "load" command was explicitly used to read MBR information and put array in unmounted state. This procedure has become part of "scan" command, where POS will automatically read MBR and load the array during "scan" command execution. 
+Once a POS array has been created, you can list the POS array using the array list command as follows.
+
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array list
+Index |Name       |DatetimeCreated           |DatetimeUpdated           |Status
+----- |---------- |---------------------     |---------------------     |----------
+0     |POSArray   |2021-09-10 16:25:04 +0900 |2021-09-10 16:25:04 +0900 |Unmounted
+```
+
+If you want to see the detailed information about the array, specify the array as in the following. 
+
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array list --array-name POSArray --unit
+Array : POSArray
+------------------------------------
+Index               : 0
+State               : OFFLINE
+Situation           : DEFAULT
+Rebuilding Progress : 0
+Total               : 86.2T
+Used                : 0B
+GCMode              :
+
+Devices
+Name        Type
+----        ------
+uram0       BUFFER
+unvme-ns-0  DATA
+unvme-ns-1  DATA
+unvme-ns-2  DATA
+unvme-ns-3  DATA
+unvme-ns-4  DATA
+unvme-ns-5  DATA
+unvme-ns-6  DATA
+unvme-ns-7  DATA
+unvme-ns-8  DATA
+unvme-ns-9  DATA
+unvme-ns-10 DATA
+unvme-ns-11 DATA
+unvme-ns-12 DATA
+unvme-ns-13 DATA
+unvme-ns-14 DATA
+unvme-ns-15 DATA
+unvme-ns-16 DATA
+unvme-ns-17 DATA
+unvme-ns-18 DATA
+unvme-ns-19 DATA
+unvme-ns-20 DATA
+unvme-ns-21 DATA
+unvme-ns-22 DATA
+unvme-ns-23 DATA
+unvme-ns-24 DATA
+unvme-ns-25 DATA
+unvme-ns-26 DATA
+unvme-ns-27 DATA
+unvme-ns-28 DATA
+unvme-ns-29 SPARE
+unvme-ns-30 SPARE
+unvme-ns-31 SPARE
+```
+
 
 ### Step 6. Mount POS Array 
-Even though we have POS array provisioned, we can't use it until it is mounted. Let's check out what happens with system state around POS array mount.
+To create a POS volume from the POS array created in the previous step, you must mount it first. Let's check out the status of the POS array.
 
+The array list command will display the status of POS arrays. You can see that POSArray is being unmounted.
 ```bash
-# Check if the array information is valid
-root@R2U14-PSD-3:/poseidonos/bin# ./cli array info --name POSArray
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array list
+Index |Name       |DatetimeCreated           |DatetimeUpdated           |Status
+----- |---------- |---------------------     |---------------------     |----------
+0     |POSArray   |2021-09-10 16:25:04 +0900 |2021-09-10 16:25:04 +0900 |Unmounted
+```
  
+Mount POSArray using the array mount command. It may take some time.
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array mount --array-name POSArray
+```
  
-Request to Poseidon OS
-    xrId        :  6f7060b8-d943-11eb-978d-a0369f78dee4
-    command     :  ARRAYINFO
-    Param       :
-{
-    "name": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "capacity": "0GB (0B)",
-    "createDatetime": "2021-06-30 10:35:00 +0900",
-    "devicelist": [
-        {
-            "name": "uram0",
-            "type": "BUFFER"
-        },
-        {
-            "name": "unvme-ns-0",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-1",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-2",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-3",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-4",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-5",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-6",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-7",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-8",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-9",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-10",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-11",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-12",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-13",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-14",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-15",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-16",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-17",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-18",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-19",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-20",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-21",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-22",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-23",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-24",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-25",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-26",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-27",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-28",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-29",
-            "type": "SPARE"
-        },
-        {
-            "name": "unvme-ns-30",
-            "type": "SPARE"
-        },
-        {
-            "name": "unvme-ns-31",
-            "type": "SPARE"
-        }
-    ],
-    "name": "POSArray",
-    "rebuildingProgress": "0",
-    "situation": "DEFAULT",
-    "state": "OFFLINE",
-    "updateDatetime": "2021-06-30 10:35:00 +0900",
-    "used": "0GB (0B)"
-}
- 
-# Let's mount the array
-root@R2U14-PSD-3:/poseidonos/bin# ./cli array mount --name POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  8d9303e4-d943-11eb-88b5-a0369f78dee4
-    command     :  MOUNTARRAY
-    Param       :
-{
-    "name": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
- 
-# Check if the array state has become "NORMAL"
-root@R2U14-PSD-3:/poseidonos/bin# ./cli array info --name POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  adbfa8e0-d943-11eb-93e3-a0369f78dee4
-    command     :  ARRAYINFO
-    Param       :
-{
-    "name": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "capacity": "94.832555773133TB (94832555773133B)",
-    "createDatetime": "2021-06-30 10:35:00 +0900",
-    "devicelist": [
-        {
-            "name": "uram0",
-            "type": "BUFFER"
-        },
-        {
-            "name": "unvme-ns-0",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-1",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-2",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-3",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-4",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-5",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-6",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-7",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-8",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-9",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-10",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-11",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-12",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-13",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-14",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-15",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-16",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-17",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-18",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-19",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-20",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-21",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-22",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-23",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-24",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-25",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-26",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-27",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-28",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-29",
-            "type": "SPARE"
-        },
-        {
-            "name": "unvme-ns-30",
-            "type": "SPARE"
-        },
-        {
-            "name": "unvme-ns-31",
-            "type": "SPARE"
-        }
-    ],
-    "name": "POSArray",
-    "rebuildingProgress": "0",
-    "situation": "NORMAL",
-    "state": "NORMAL",
-    "updateDatetime": "2021-06-30 10:35:00 +0900",
-    "used": "0GB (0B)"
-}
+Check if the status of POSArray has changed to "Mounted".
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array list
+Index |Name       |DatetimeCreated           |DatetimeUpdated           |Status
+----- |---------- |---------------------     |---------------------     |----------
+0     |POSArray   |2021-09-10 16:25:04 +0900 |2021-09-10 16:33:34 +0900 |Mounted
 ```
 
-Please note that state field in the output has changed from OFFLINE to NORMAL. Also, "capacity" is now reflecting the size of the NVMe storage pool available to POS. 
+
+Let's check the detailed information about POSArray again. After POSArray is mounted, you can see that its state has changed from OFFLINE to NORMAL, which indicates that the array is ready to create POS volumes. 
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array list --array-name POSArray --unit
+Array : POSArray
+------------------------------------
+Index               : 0
+State               : NORMAL
+Situation           : NORMAL
+Rebuilding Progress : 0
+Total               : 86.2T
+Used                : 0B
+GCMode              : none
+
+Devices
+Name        Type
+----        ------
+uram0       BUFFER
+unvme-ns-0  DATA
+unvme-ns-1  DATA
+unvme-ns-2  DATA
+unvme-ns-3  DATA
+unvme-ns-4  DATA
+unvme-ns-5  DATA
+unvme-ns-6  DATA
+unvme-ns-7  DATA
+unvme-ns-8  DATA
+unvme-ns-9  DATA
+unvme-ns-10 DATA
+unvme-ns-11 DATA
+unvme-ns-12 DATA
+unvme-ns-13 DATA
+unvme-ns-14 DATA
+unvme-ns-15 DATA
+unvme-ns-16 DATA
+unvme-ns-17 DATA
+unvme-ns-18 DATA
+unvme-ns-19 DATA
+unvme-ns-20 DATA
+unvme-ns-21 DATA
+unvme-ns-22 DATA
+unvme-ns-23 DATA
+unvme-ns-24 DATA
+unvme-ns-25 DATA
+unvme-ns-26 DATA
+unvme-ns-27 DATA
+unvme-ns-28 DATA
+unvme-ns-29 SPARE
+unvme-ns-30 SPARE
+unvme-ns-31 SPARE
+```
 
 ### Step 7. Configure NVM Subsystems for NVMe Over Fabric Target
-POS is ready to perform volume management task, but still unable to expose its volume over network since we haven't configured an NVM subsystem yet. POS is not ready to expose its volume over network since it does not have NVM subsystem in which NVM namespaces(s) are created. Creating NVM subsystem remains in manual fashion  (vs. running automatically during POS startup) by design. Administrators need to understand its functionality so that they can easily come up with a workaround when needed. Once we have enough understanding about various user environments, this step could be automated in a future release.
+POSArray is ready to create a POS volume. Before we create a POS volume, we are going to create and configure an NVM subsystem first. The NVM subsystem will allow us to expose the POS volume to initiators over network. 
 
 #### Create NVMe-oF Subsystem
+Create an NVMe-oF subsystem using the subsystem create command.
 ```bash
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# cd /poseidonos/bin/
-root@R2U14-PSD-3:/poseidonos/bin# cd /poseidonos/lib/spdk-20.10/scripts/
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_create_subsystem -h
-usage: rpc.py [options] nvmf_create_subsystem [-h] [-t TGT_NAME]
-                                              [-s SERIAL_NUMBER]
-                                              [-d MODEL_NUMBER] [-a]
-                                              [-m MAX_NAMESPACES] [-r]
-                                              nqn
- 
-positional arguments:
-  nqn                   Subsystem NQN (ASCII)
- 
-optional arguments:
-  -h, --help            show this help message and exit
-  -t TGT_NAME, --tgt_name TGT_NAME
-                        The name of the parent NVMe-oF target (optional)
-  -s SERIAL_NUMBER, --serial-number SERIAL_NUMBER
-                        Format: 'sn' etc Example: 'SPDK00000000000001'
-  -d MODEL_NUMBER, --model-number MODEL_NUMBER
-                        Format: 'mn' etc Example: 'SPDK Controller'
-  -a, --allow-any-host  Allow any host to connect (don't enforce host NQN
-                        whitelist)
-  -m MAX_NAMESPACES, --max-namespaces MAX_NAMESPACES
-                        Maximum number of namespaces allowed
-  -r, --ana-reporting   Enable ANA reporting feature
-  
- 
-# If successful, the following doesn't print out any response
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_create_subsystem nqn.2019-04.ibof:subsystem1 -a -s IBOF00000000000001 -d IBOF_VOLUME_EXTENSION -m 256
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli subsystem create --subnqn nqn.2019-04.ibof:subsystem1 --serial-number IBOF00000000000001 --model-number IBOF_VOLUME_EXTENSION --max-namespaces 256 -o
 ```
-
-The following command configures TCP transport to use when network connection is established between an initiator and a target. is between initiator and target. 
-
 #### Create NVMe-oF Transport
+Create an NVMf transport using the subsystem create-transport command.
 ```bash
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_create_transport -h
-usage: rpc.py [options] nvmf_create_transport [-h] -t TRTYPE [-g TGT_NAME]
-                                              [-q MAX_QUEUE_DEPTH]
-                                              [-p MAX_QPAIRS_PER_CTRLR]
-                                              [-m MAX_IO_QPAIRS_PER_CTRLR]
-                                              [-c IN_CAPSULE_DATA_SIZE]
-                                              [-i MAX_IO_SIZE]
-                                              [-u IO_UNIT_SIZE]
-                                              [-a MAX_AQ_DEPTH]
-                                              [-n NUM_SHARED_BUFFERS]
-                                              [-b BUF_CACHE_SIZE]
-                                              [-s MAX_SRQ_DEPTH] [-r] [-o]
-                                              [-f] [-y SOCK_PRIORITY]
-                                              [-l ACCEPTOR_BACKLOG]
-                                              [-x ABORT_TIMEOUT_SEC] [-w]
- 
-optional arguments:
-  -h, --help            show this help message and exit
-  -t TRTYPE, --trtype TRTYPE
-                        Transport type (ex. RDMA)
-  -g TGT_NAME, --tgt_name TGT_NAME
-                        The name of the parent NVMe-oF target (optional)
-  -q MAX_QUEUE_DEPTH, --max-queue-depth MAX_QUEUE_DEPTH
-                        Max number of outstanding I/O per queue
-  -p MAX_QPAIRS_PER_CTRLR, --max-qpairs-per-ctrlr MAX_QPAIRS_PER_CTRLR
-                        Max number of SQ and CQ per controller. Deprecated,
-                        use max-io-qpairs-per-ctrlr
-  -m MAX_IO_QPAIRS_PER_CTRLR, --max-io-qpairs-per-ctrlr MAX_IO_QPAIRS_PER_CTRLR
-                        Max number of IO qpairs per controller
-  -c IN_CAPSULE_DATA_SIZE, --in-capsule-data-size IN_CAPSULE_DATA_SIZE
-                        Max number of in-capsule data size
-  -i MAX_IO_SIZE, --max-io-size MAX_IO_SIZE
-                        Max I/O size (bytes)
-  -u IO_UNIT_SIZE, --io-unit-size IO_UNIT_SIZE
-                        I/O unit size (bytes)
-  -a MAX_AQ_DEPTH, --max-aq-depth MAX_AQ_DEPTH
-                        Max number of admin cmds per AQ
-  -n NUM_SHARED_BUFFERS, --num-shared-buffers NUM_SHARED_BUFFERS
-                        The number of pooled data buffers available to the
-                        transport
-  -b BUF_CACHE_SIZE, --buf-cache-size BUF_CACHE_SIZE
-                        The number of shared buffers to reserve for each poll
-                        group
-  -s MAX_SRQ_DEPTH, --max-srq-depth MAX_SRQ_DEPTH
-                        Max number of outstanding I/O per SRQ. Relevant only
-                        for RDMA transport
-  -r, --no-srq          Disable per-thread shared receive queue. Relevant only
-                        for RDMA transport
-  -o, --c2h-success     Disable C2H success optimization. Relevant only for
-                        TCP transport
-  -f, --dif-insert-or-strip
-                        Enable DIF insert/strip. Relevant only for TCP
-                        transport
-  -y SOCK_PRIORITY, --sock-priority SOCK_PRIORITY
-                        The sock priority of the tcp connection. Relevant only
-                        for TCP transport
-  -l ACCEPTOR_BACKLOG, --acceptor_backlog ACCEPTOR_BACKLOG
-                        Pending connections allowed at one time. Relevant only
-                        for RDMA transport
-  -x ABORT_TIMEOUT_SEC, --abort-timeout-sec ABORT_TIMEOUT_SEC
-                        Abort execution timeout value, in seconds
-  -w, --no-wr-batching  Disable work requests batching. Relevant only for RDMA
-                        transport
- 
- 
-# If successful, the following doesn't print out any response
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_create_transport -t tcp -b 64 -n 4096
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli subsystem create-transport --trtype tcp -c 64 --num-shared-buf 4096
 ```
-
-The following command makes a given NVM subsystem listen on a TCP port and serve incoming NVMe-oF requests. 
 
 #### Add NVMe-oF Subsystem Listener
+The subsystem add-listener command binds an NVM subsystem to a socket address. This allows the NVM subsystem to listen on a TCP port and serve incoming NVMe-oF requests. 
+ 
+Check the available NICs on this host.
 ```bash
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_subsystem_add_listener -h
-usage: rpc.py [options] nvmf_subsystem_add_listener [-h] -t TRTYPE -a TRADDR
-                                                    [-p TGT_NAME] [-f ADRFAM]
-                                                    [-s TRSVCID]
-                                                    nqn
- 
-positional arguments:
-  nqn                   NVMe-oF subsystem NQN
- 
-optional arguments:
-  -h, --help            show this help message and exit
-  -t TRTYPE, --trtype TRTYPE
-                        NVMe-oF transport type: e.g., rdma
-  -a TRADDR, --traddr TRADDR
-                        NVMe-oF transport address: e.g., an ip address
-  -p TGT_NAME, --tgt_name TGT_NAME
-                        The name of the parent NVMe-oF target (optional)
-  -f ADRFAM, --adrfam ADRFAM
-                        NVMe-oF transport adrfam: e.g., ipv4, ipv6, ib, fc,
-                        intra_host
-  -s TRSVCID, --trsvcid TRSVCID
-                        NVMe-oF transport service id: e.g., a port number
- 
- 
-# Check out what NICs are available on this host
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ifconfig
-enp0s20f0u8u3c2: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
-        ether c6:a7:37:55:cd:ff  txqueuelen 1000  (Ethernet)
-        RX packets 0  bytes 0 (0.0 B)
-        RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 9714  bytes 1626100 (1.6 MB)
-        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
- 
-ens17f0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 9000
-        inet 10.100.2.14  netmask 255.255.255.0  broadcast 10.100.2.255
-        inet6 fe80::63f:72ff:febf:38de  prefixlen 64  scopeid 0x20<link>
-        ether 04:3f:72:bf:38:de  txqueuelen 1000  (Ethernet)
-        RX packets 15380  bytes 4253283 (4.2 MB)
-        RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 524  bytes 46571 (46.5 KB)
-        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
- 
-ens17f1: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 9000
-        inet 10.100.3.14  netmask 255.255.255.0  broadcast 10.100.3.255
-        inet6 fe80::63f:72ff:febf:38df  prefixlen 64  scopeid 0x20<link>
-        ether 04:3f:72:bf:38:df  txqueuelen 1000  (Ethernet)
-        RX packets 15382  bytes 4253753 (4.2 MB)
-        RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 522  bytes 46494 (46.4 KB)
-        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
- 
+root@R2U14-PSD-3:/poseidonos/bin# ifconfig
 ens21f0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         inet 10.1.2.14  netmask 255.255.0.0  broadcast 10.1.255.255
         inet6 fe80::a236:9fff:fe78:dee4  prefixlen 64  scopeid 0x20<link>
         ether a0:36:9f:78:de:e4  txqueuelen 1000  (Ethernet)
-        RX packets 282894  bytes 29772255 (29.7 MB)
-        RX errors 0  dropped 286  overruns 0  frame 0
-        TX packets 9347  bytes 1226074 (1.2 MB)
+        RX packets 10922807  bytes 4337740510 (4.3 GB)
+        RX errors 0  dropped 748811  overruns 0  frame 0
+        TX packets 830274  bytes 71577491 (71.5 MB)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
- 
-ens21f1: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
-        ether a0:36:9f:78:de:e6  txqueuelen 1000  (Ethernet)
-        RX packets 0  bytes 0 (0.0 B)
-        RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 0  bytes 0 (0.0 B)
-        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
- 
+
 lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
         inet 127.0.0.1  netmask 255.0.0.0
         inet6 ::1  prefixlen 128  scopeid 0x10<host>
         loop  txqueuelen 1000  (Local Loopback)
-        RX packets 30454  bytes 2290385 (2.2 MB)
+        RX packets 235840  bytes 16797914 (16.7 MB)
         RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 30454  bytes 2290385 (2.2 MB)
+        TX packets 235840  bytes 16797914 (16.7 MB)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
- 
-# Pick up one of the NICs (e.g., ens17f0) and pass it to -a option. If successful, the following doesn't print out any response
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_subsystem_add_listener nqn.2019-04.ibof:subsystem1 -t tcp -a 10.100.2.14 -s 1158
 ```
-In the above example, the NVM subsystem called "nqn.2019-04.ibof:subsystem1" has been configured to listen on (10.100.2.14, 1158) and use TCP transport. If you miss this step, POS wouldn't be able to mount POS volumes even though it could create new ones. 
-At this point, you should be able to retrieve the configured NVM subsystem like in the following:
+ 
+Execute the add-listener command with the IP address and the port number of one of the available NICs (e.g., ens21f0).
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli subsystem add-listener -q nqn.2019-04.ibof:subsystem1 -t tcp -i 10.1.2.14 -p 1158
+```
+In the above example, the NVM subsystem "nqn.2019-04.ibof:subsystem1" has been configured to listen on socket address "10.1.2.14:1158" using TCP. If you omit this step, POS wouldn't be able to mount POS volumes. 
 
 #### Retrieve NVM subsystem information
+At this point, you should be able to retrieve the configured NVM subsystem as in the following:
 ```bash
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_get_subsystems
-[
-  {
-    "nqn": "nqn.2014-08.org.nvmexpress.discovery",
-    "subtype": "Discovery",
-    "listen_addresses": [],
-    "allow_any_host": true,
-    "hosts": []
-  },
-  {
-    "nqn": "nqn.2019-04.ibof:subsystem1",
-    "subtype": "NVMe",
-    "listen_addresses": [
-      {
-        "transport": "TCP",
-        "trtype": "TCP",
-        "adrfam": "IPv4",
-        "traddr": "10.100.2.14",
-        "trsvcid": "1158"
-      }
-    ],
-    "allow_any_host": true,
-    "hosts": [],
-    "serial_number": "IBOF00000000000001",
-    "model_number": "IBOF_VOLUME_EXTENSION",
-    "max_namespaces": 256,
-    "namespaces": []
-  }
-]
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli subsystem list
+Name                                  |Subtype     |AddressCount |SerialNumber(SN)      |ModelNumber(MN)       |NamespaceCount
+------------------------------------- |----------- |------------ |--------------------- |--------------------- |--------------
+nqn.2014-08.org.nvmexpress.discovery  |Discovery   |0            |                      |                      |0
+nqn.2019-04.ibof:subsystem1           |NVMe        |1            |IBOF00000000000001    |IBOF_VOLUME_EXTENSION |0
 ```
 
 ### Step 8. Create POS Volume
 
-This step is to create a logical entry point of the target side IO which will be shown as a namespace in an NVM subsystem. POS volume is wrapped as a "bdev" and can be attached to a particular NVM subsystem. "bdev" is a block device abstraction offered by SPDK library. 
+In this step, we are going to create a POS volume, which is a logical entry point of the target side IO that will be shown as a namespace in an NVM subsystem. A POS volume is wrapped as a "bdev" and can be attached to an NVM subsystem. "bdev" is a block device abstraction offered by the SPDK library. 
 
 #### Create a volume
+
+Create a volume of 50-TB.
 ```bash
-# Create a 50-TB volume
-root@R2U14-PSD-3:/poseidonos/bin# ./cli volume create --name vol1 --size 54975581388800 --maxiops 0 --maxbw 0 --array POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  aee4416b-dac1-11eb-b080-a0369f78dee4
-    command     :  CREATEVOLUME
-    Param       :
-{
-    "name": "vol1",
-    "array": "POSArray",
-    "size": 54975581388800
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
- 
-# Check the volume information
-root@R2U14-PSD-3:/poseidonos/bin# ./cli volume list --array POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  f7b3d6ec-dac1-11eb-b9f7-a0369f78dee4
-    command     :  LISTVOLUME
-    Param       :
-{
-    "array": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "volumes": [
-        {
-            "id": 0,
-            "maxbw": 0,
-            "maxiops": 0,
-            "name": "vol1",
-            "status": "Unmounted",
-            "total": "54.9755813888TB (54975581388800B)"
-        }
-    ]
-}
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume create --volume-name vol1 --array-name POSArray --size 50TB --maxiops 0 --maxbw 0
 ```
 
-Please note that the initial status of POS volume is Unmounted. 
+Let's check the information of the volume using the volume list command.
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume list --array-name POSArray --unit
+Name      |ID    |TotalCapacity                |RemainingCapacity            |Remaining% |Status     |MaximumIOPS      |MaximumBandwith
+--------- |----- |---------------------------- |---------------------------- |---------  |---------- |---------------- |----------------
+vol1      |0     |50T                          |0B                           |0          |Unmounted  |0                |0
+```
+- Note 1: the initial status of a POS volume after created is "Unmounted".
+- Note 2: the remaining capacity is shown as 0B. This is because the volume is being unmounted.
 
 ### Step 9. Mount POS Volume
 
-This is to make a particular POS volume ready to perform IO. After this step, POS volume is attached as bdev to an NVM subsystem and seen as an NVM namespace. 
-```bash
-# Mount the volume
-root@R2U14-PSD-3:/poseidonos/bin# ./cli volume mount --name vol1 --array POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  32527ba5-dac2-11eb-870b-a0369f78dee4
-    command     :  MOUNTVOLUME
-    Param       :
-{
-    "name": "vol1",
-    "array": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
- 
-# Check if the volume status is "Mounted" and the size is 50 TB
-root@R2U14-PSD-3:/poseidonos/bin# ./cli volume list --array POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  4f8680aa-dac2-11eb-9f74-a0369f78dee4
-    command     :  LISTVOLUME
-    Param       :
-{
-    "array": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "volumes": [
-        {
-            "id": 0,
-            "maxbw": 0,
-            "maxiops": 0,
-            "name": "vol1",
-            "remain": "54.9755813888TB (54975581388800B)",
-            "status": "Mounted",
-            "total": "54.9755813888TB (54975581388800B)"
-        }
-    ]
-}
-```
+A POS volume must be mounted to perform IO operations. After mounted, the POS volume will be attached to an NVM subsystem as a block device (bdev). Also, it will be seen as an NVM namespace. 
 
-Please note that the status of the volume has become Mounted.  If we check the NVM subsystem again, we can notice an NVM namespace has been added to an NVM subsystem with its bdev_name as follows.
+Mount the volume.
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume mount --volume-name vol1 --array-name POSArray
+```
+ 
+Check if the status and the remaning capacity of the volume have changed to "Mounted" and 50 TB, respectively.
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume list --array-name POSArray --unit
+Name      |ID    |TotalCapacity                |RemainingCapacity            |Remaining% |Status     |MaximumIOPS      |MaximumBandwith
+--------- |----- |---------------------------- |---------------------------- |---------  |---------- |---------------- |----------------
+vol1      |0     |50T                          |50T                          |100        |Mounted    |0                |0
+```
 
 #### Retrieve NVM subsystem information
+Using the subsystem list command, you can see that the NVM namespace has been added to the NVM subsystem with its bdev_name.
+
+Check if the NVM namespace information contains "bdev_0_POSArray" using the subsystem list command.
 ```bash
-# Check if nvmf_get_subsystems() command shows NVM namespace information that contains "bdev_0_POSArray"
-root@R2U14-PSD-3:/poseidonos/bin# cd /poseidonos/lib/spdk-20.10/scripts/
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# ./rpc.py nvmf_get_subsystems
-[
-  {
-    "nqn": "nqn.2014-08.org.nvmexpress.discovery",
-    "subtype": "Discovery",
-    "listen_addresses": [],
-    "allow_any_host": true,
-    "hosts": []
-  },
-  {
-    "nqn": "nqn.2019-04.ibof:subsystem1",
-    "subtype": "NVMe",
-    "listen_addresses": [
-      {
-        "transport": "TCP",
-        "trtype": "TCP",
-        "adrfam": "IPv4",
-        "traddr": "10.100.2.14",
-        "trsvcid": "1158"
-      }
-    ],
-    "allow_any_host": true,
-    "hosts": [],
-    "serial_number": "IBOF00000000000001",
-    "model_number": "IBOF_VOLUME_EXTENSION",
-    "max_namespaces": 256,
-    "namespaces": [
-      {
-        "nsid": 1,
-        "bdev_name": "bdev_0_POSArray",
-        "name": "bdev_0_POSArray",
-        "uuid": "c5705687-d266-4a1b-99b1-bb204ab0e3b8"
-      }
-    ]
-  }
-]
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli subsystem list --subnqn nqn.2019-04.ibof:subsystem1
+nqn              : nqn.2019-04.ibof:subsystem1
+subtype          : NVMe
+listen_addresses :
+                   {
+                     trtype : TCP
+                     adrfam : IPv4
+                     traddr : 10.1.2.14
+                     trsvcid : 1158
+                   }
+allow_any_host   : true
+hosts            :
+serial_number    : IBOF00000000000001
+model_number     : IBOF_VOLUME_EXTENSION
+max_namespaces   : 256
+namespaces       :
+                   {
+                     nsid : 1
+                     bdev_name : bdev_0_POSArray
+                     uuid : ddbacc0d-aec2-47e3-8654-4aa560fd549c
+                   }
 ```
 
-```bash
 Once mounted, the connection is established between an initiator and an NVM subsystem. Then, POS volume becomes accessible over network by an initiator.
-```
+
 
 ### Step 10. Unmount POS Volume
+Unmount the volume.
 ```bash
-# Unmount the volume
-root@R2U14-PSD-3:/poseidonos/lib/spdk-20.10/scripts# cd /poseidonos/bin/
-root@R2U14-PSD-3:/poseidonos/bin# ./cli volume unmount --name vol1 --array POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  d90aa185-dac2-11eb-8e19-a0369f78dee4
-    command     :  UNMOUNTVOLUME
-    Param       :
-{
-    "name": "vol1",
-    "array": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
- 
-# Check if the volume status is now "Unmounted"
-root@R2U14-PSD-3:/poseidonos/bin# ./cli volume list --array POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  e0589732-dac2-11eb-97e7-a0369f78dee4
-    command     :  LISTVOLUME
-    Param       :
-{
-    "array": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "volumes": [
-        {
-            "id": 0,
-            "maxbw": 0,
-            "maxiops": 0,
-            "name": "vol1",
-            "status": "Unmounted",
-            "total": "54.9755813888TB (54975581388800B)"
-        }
-    ]
-} 
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume unmount --volume-name vol1 --array-name POSArray
+WARNING: After unmounting volume vol1 in array POSArray, the progressing I/Os may fail if any.
+
+Are you sure you want to unmount volume vol1? (y/n):y
 ```
-Please note that the status of the POS volume has changed from "Mounted" to "Unmounted".
+ 
+ 
+Check if the volume status is now "Unmounted".
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume list --array-name POSArray --unit
+Name      |ID    |TotalCapacity                |RemainingCapacity            |Remaining% |Status     |MaximumIOPS      |MaximumBandwith
+--------- |----- |---------------------------- |---------------------------- |---------  |---------- |---------------- |----------------
+vol1      |0     |50T                          |0B                           |0          |Unmounted  |0                |0
+```
 
 
 ### Step 11. Delete POS Volume
+Delete the volume.
 ```bash
-# Delete the volume
-root@R2U14-PSD-3:/poseidonos/bin# ./cli volume delete --name vol1 --array POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  15274937-dac3-11eb-9c21-a0369f78dee4
-    command     :  DELETEVOLUME
-    Param       :
-{
-    "name": "vol1",
-    "array": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
- 
-# Make sure the volume list output does not contain "vol1" anymore
-root@R2U14-PSD-3:/poseidonos/bin# ./cli volume list --array POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  6266b333-dac4-11eb-8fa7-a0369f78dee4
-    command     :  LISTVOLUME
-    Param       :
-{
-    "array": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume delete --volume-name vol1 --array-name POSArray
+WARNING: After deleting volume vol1, you cannot recover the data of volume vol1 in the array POSArray
+
+Are you sure you want to delete volume vol1? (y/n):y
 ```
-POS volume can be deleted only when it is in Unmounted state. 
+
+ 
+Make sure that the volume list command does not display "vol1".
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume list --array-name POSArray --unit
+Name      |ID    |TotalCapacity                |RemainingCapacity            |Remaining% |Status     |MaximumIOPS      |MaximumBandwith
+--------- |----- |---------------------------- |---------------------------- |---------  |---------- |---------------- |----------------
+```
+POS volume can be deleted only when it is in the Unmounted state. 
 
 ### Step 12. Unmount POS Array
+Unmount the array.
 ```bash
-# Unmount the array
-root@R2U14-PSD-3:/poseidonos/bin# ./cli array unmount --name POSArray
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array unmount --array-name POSArray
+WARNING: After unmounting array POSArray, all the volumes in the array will be unmounted.
+In addition, progressing I/Os may fail if any.
+
+Are you sure you want to unmount array POSArray? (y/n):y
+```
  
  
-Request to Poseidon OS
-    xrId        :  b66e9e2b-dac4-11eb-b50e-a0369f78dee4
-    command     :  UNMOUNTARRAY
-    Param       :
-{
-    "name": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
- 
-# Make sure the array is now in "OFFLINE" state
-root@R2U14-PSD-3:/poseidonos/bin# ./cli array info --name POSArray
- 
- 
-Request to Poseidon OS
-    xrId        :  c4c60226-dac4-11eb-a661-a0369f78dee4
-    command     :  ARRAYINFO
-    Param       :
-{
-    "name": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "capacity": "0GB (0B)",
-    "createDatetime": "2021-07-02 08:08:23 +0900",
-    "devicelist": [
-        {
-            "name": "uram0",
-            "type": "BUFFER"
-        },
-        {
-            "name": "unvme-ns-0",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-1",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-2",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-3",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-4",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-5",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-6",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-7",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-8",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-9",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-10",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-11",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-12",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-13",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-14",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-15",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-16",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-17",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-18",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-19",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-20",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-21",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-22",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-23",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-24",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-25",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-26",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-27",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-28",
-            "type": "DATA"
-        },
-        {
-            "name": "unvme-ns-29",
-            "type": "SPARE"
-        },
-        {
-            "name": "unvme-ns-30",
-            "type": "SPARE"
-        },
-        {
-            "name": "unvme-ns-31",
-            "type": "SPARE"
-        }
-    ],
-    "name": "POSArray",
-    "rebuildingProgress": "0",
-    "situation": "DEFAULT",
-    "state": "OFFLINE",
-    "updateDatetime": "2021-07-02 08:08:23 +0900",
-    "used": "0GB (0B)"
-}
+Make sure that the status of POSArray is now "Unmounted".
+```bash
+Index |Name       |DatetimeCreated           |DatetimeUpdated           |Status
+----- |---------- |---------------------     |---------------------     |----------
+0     |POSArray   |2021-09-10 16:25:04 +0900 |2021-09-10 16:33:34 +0900 |Unmounted
 ```
 
 ### Step 13. Delete POS Array
+Delete the array. It make take a few minutes to fininsh. In this demonstration, it took 6 minutes.
 ```bash
-# Delete the array. It make take a few minutes to fininsh. In this demonstration, it took 6 minutes.
-root@R2U14-PSD-3:/poseidonos/bin# ./cli array delete --name POSArray
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array delete --array-name POSArray
+WARNING: After deleting array POSArray, you cannot recover the data of the volumes in the array.
+
+Are you sure you want to delete array POSArray? (y/n):y
+```
  
  
-Request to Poseidon OS
-    xrId        :  ff26cfef-dac4-11eb-afce-a0369f78dee4
-    command     :  DELETEARRAY
-    Param       :
-{
-    "name": "POSArray"
-}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
- 
-# Make sure that POSArray does not show up in array list command
-root@R2U14-PSD-3:/poseidonos/bin# ./cli array list
- 
- 
-Request to Poseidon OS
-    xrId        :  0210a23c-dac5-11eb-bc89-a0369f78dee4
-    command     :  LISTARRAY
-    Param       :
-{}
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
-    Data         :
- {
-    "arrayList": "There is no array"
-}
+Make sure that the array list command does not display POSArray.
+```bash
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array list
+Index |Name       |DatetimeCreated       |DatetimeUpdated       |Status
+----- |---------- |--------------------- |--------------------- |----------
 ```
 POS array can be deleted only when it is in OFFLINE state.
 
-### Step 14. Shut down POS application
+### Step 14. Stop POS
+Shutdown pos using the system stop commnad. The shutdown process may take a few minutes.
 ```bash
-# Trigger a shutdown. The command does not block on the shutdown result.
-root@R2U14-PSD-3:/poseidonos/bin# ./cli system exit
+root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli system stop
+WARNING: Stopping POS will affect the progressing I/Os.
+
+Are you sure you want to stop POS? (y/n):y
+```
+
  
- 
-Request to Poseidon OS
-    xrId        :  a42c5e59-dac5-11eb-9b94-a0369f78dee4
-    command     :  EXITIBOFOS
- 
- 
-Response from Poseidon OS
-    Code         :  0
-    Level        :  INFO
-    Description  :  Success
-    Problem      :
-    Solution     :
- 
-# Check if the poseidonos process is not shown from ps output. The shutdown process may take a few minutes to finish.
+Check if the process of POS has been terminated using the command below.
+```bash
 root@R2U14-PSD-3:/poseidonos/bin# ps -ef | grep poseidon | grep -v grep
 ```
