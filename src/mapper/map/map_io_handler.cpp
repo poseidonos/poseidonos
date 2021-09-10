@@ -104,21 +104,21 @@ int
 MapIoHandler::DeleteFile(void)
 {
     int ret = 0;
-    if (file->DoesFileExist() == true)
-    {
-        if (file->IsOpened() == true)
-        {
-            file->Close();
-        }
-        ret = file->Delete();
-        if (ret < 0)
-        {
-            POS_TRACE_ERROR(EID(MFS_FILE_DELETE_FAILED), "MFS File:{} delete failed", file->GetFileName());
-            return ret;
-        }
-    }
     if (file != nullptr)
     {
+        if (file->DoesFileExist() == true)
+        {
+            if (file->IsOpened() == true)
+            {
+                file->Close();
+            }
+            ret = file->Delete();
+            if (ret < 0)
+            {
+                POS_TRACE_ERROR(EID(MFS_FILE_DELETE_FAILED), "MFS File:{} delete failed", file->GetFileName());
+                return ret;
+            }
+        }
         delete file;
         file = nullptr;
     }

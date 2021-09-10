@@ -59,6 +59,7 @@ Mapper::Mapper(IArrayInfo* iarrayInfo, IStateControl* iState)
     reverseMapManager = new ReverseMapManager(vsaMapManager, stripeMapManager, iArrayinfo);
     mapperWbt = new MapperWbt(addrInfo, vsaMapManager, stripeMapManager, reverseMapManager);
     metaFs = nullptr;
+    journalService = nullptr;
 }
 
 Mapper::~Mapper(void)
@@ -148,6 +149,11 @@ Mapper::FlushDirtyMpages(int mapId, EventSmartPtr event, MpageList dirtyPages)
     else
     {
         return map->FlushDirtyPagesGiven(dirtyPages, event);
+    }
+    bool journalEnabled = journalService->IsEnabled(arrayName);
+    if (journalEnabled == false)
+    {
+        vsaMapManager->WaitVolumePendingIoDone(mapId);
     }
 }
 

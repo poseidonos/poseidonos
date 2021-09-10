@@ -115,12 +115,12 @@ ReverseMapManager::SetDoC(IArrayInfo* iarrayInfo)
 void
 ReverseMapManager::Dispose(void)
 {
-    if (revMapWholefile->IsOpened() == true)
-    {
-        revMapWholefile->Close();
-    }
     if (revMapWholefile != nullptr)
     {
+        if (revMapWholefile->IsOpened() == true)
+        {
+            revMapWholefile->Close();
+        }
         delete revMapWholefile;
         revMapWholefile = nullptr;
     }
@@ -129,6 +129,7 @@ ReverseMapManager::Dispose(void)
         delete [] revMapPacks;
         revMapPacks = nullptr;
     }
+
 }
 //----------------------------------------------------------------------------//
 ReverseMapPack*

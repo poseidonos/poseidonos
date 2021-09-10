@@ -45,6 +45,7 @@ MapperAddressInfo::MapperAddressInfo(IArrayInfo* iArrayInfo_)
     maxVsid = 0;
     blksPerStripe = 0;
     numWbStripes = 0;
+    mpageSize = 0;
 }
 
 void

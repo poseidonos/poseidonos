@@ -126,7 +126,7 @@ Map::GetMpageWithLock(int pageNr)
     return mPageArr[pageNr].data;
 }
 
-int
+uint64_t
 Map::GetSize(void)
 {
     return pageSize;

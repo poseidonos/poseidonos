@@ -69,6 +69,7 @@ public:
     VolumeMountState(void)
     {
         volState = VolState::NOT_EXIST;
+        volSize = 0;
     }
     ~VolumeMountState(void) {}
     VolState GetState(void)

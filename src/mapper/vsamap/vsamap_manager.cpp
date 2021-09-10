@@ -48,6 +48,9 @@ VSAMapManager::VSAMapManager(MapperAddressInfo* info)
     for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
     {
         vsaMaps[volId] = nullptr;
+        mapFlushState[volId] = MapFlushState::FLUSH_DONE;
+        mapLoadState[volId] = MapLoadState::LOAD_DONE;
+        isVsaMapInternalAccessable[volId] = false;
     }
 }
 
@@ -62,7 +65,6 @@ VSAMapManager::Init(void)
     for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
     {
         isVsaMapAccessable[volId] = false;
-        isVsaMapInternalAccessable[volId] = false;
         mapFlushState[volId] = MapFlushState::FLUSH_DONE;
         mapLoadState[volId] = MapLoadState::LOAD_DONE;
     }
