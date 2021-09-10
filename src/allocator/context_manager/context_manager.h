@@ -53,6 +53,7 @@ class SegmentCtx;
 class WbStripeCtx;
 class ContextReplayer;
 class TelemetryPublisher;
+class EventScheduler;
 
 const int NO_REBUILD_TARGET_USER_SEGMENT = 0;
 
@@ -68,7 +69,13 @@ public:
     };
 
     ContextManager(void) = default;
-    ContextManager(TelemetryPublisher* tp, AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
+    ContextManager(TelemetryPublisher* tp,
+        AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
+        WbStripeCtx* wbstripeCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
+        AllocatorFileIoManager* fileMananager_,
+        ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_);
+    ContextManager(TelemetryPublisher* tp, EventScheduler* eventScheduler_,
+        AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
         WbStripeCtx* wbstripeCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
         AllocatorFileIoManager* fileMananager_,
         ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_);
@@ -117,7 +124,7 @@ public:
 private:
     void _UpdateSectionInfo(void);
     int _LoadContexts(void);
-    int _Flush(int owner, EventSmartPtr callback);
+    int _Flush(int owner);
     void _LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx);
     void _FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
     void _RebuildFlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
@@ -151,6 +158,7 @@ private:
     std::mutex ctxLock;
 
     TelemetryPublisher* telPublisher;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos
