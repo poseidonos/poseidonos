@@ -154,7 +154,7 @@ TEST(ArrayManager, Create_testIfArrayMapUpdatedWhenCreationSucceeds)
     arrayMgr->SetArrayComponentMap(emptyArrayMap);
 
     EXPECT_CALL(*mockArrayComp, Create).WillOnce(Return(0));            // success
-    EXPECT_CALL(*mockTelClient, RegisterPublisher).WillOnce(Return(0)); // success
+    // EXPECT_CALL(*mockTelClient, RegisterPublisher).WillOnce(Return(0)); // success
 
     // When
     int actual = arrayMgr->Create(arrayName, DeviceSet<string>(), "some-raid");
