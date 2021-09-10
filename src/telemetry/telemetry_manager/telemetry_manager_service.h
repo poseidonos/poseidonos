@@ -85,6 +85,8 @@ public:
     bool StartService(void);
     bool StopService(void);
 
+    std::string GetServerAddr(void);
+
 protected:
     std::thread* telemetryManagerServerThread;
     std::unique_ptr<Server> server;

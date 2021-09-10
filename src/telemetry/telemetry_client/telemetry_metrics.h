@@ -32,29 +32,68 @@
 
 #pragma once
 
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-#include "src/telemetry/telemetry_client/telemetry_data_pool.h"
-#include "src/telemetry/telemetry_client/telemetry_metrics.h"
+#include <map>
+#include <chrono>
+#include <iomanip>
+#include <list>
+#include <sstream>
+#include <string>
 
 namespace pos
 {
-class TelemetryDataPool
+class Metric
 {
 public:
-    TelemetryDataPool(void);
-    ~TelemetryDataPool(void);
-    void SetMaxEntryLimit(int limit);
-    int SetLog(MetricUint32& metric);
-    int GetLog(std::string id, MetricUint32& outLog);
-    list<MetricUint32> GetAll(void);
-    int GetNumEntries(void);
+    Metric(void) {}
+    ~Metric(void) {}    
+    virtual std::string GetId(void) { return id; }
+    virtual tm GetTime(void) { return loggedTime; }
+    virtual std::string GetTimeString(void) { return loggedStrTime; }
+    virtual void SetCommonMetric(std::string id_, tm t_)
+    {
+        id = id_;
+        loggedTime = t_;
+        std::ostringstream oss;
+        oss << std::put_time(&loggedTime, "%Y-%m-%d %H:%M:%S");
+        loggedStrTime = oss.str();
+    }
 
-    static const int LIMIT_NUM_MAX_ENTRY = 100000;
+protected:
+    std::string id;
+    tm loggedTime;
+    std::string loggedStrTime;
+};
+
+class MetricUint32 : public Metric
+{
+public:
+    MetricUint32(void) {}
+    ~MetricUint32(void) {}
+    uint32_t GetValue(void) { return value; }
+    void SetMetric(std::string id_, tm t_, uint32_t v_)
+    {
+        SetCommonMetric(id_, t_);
+        value = v_;
+    }
 
 private:
-    std::map<std::string, MetricUint32> pool;
-    int maxEntry;
+    uint32_t value;
+};
+
+class MetricString : public Metric
+{
+public:
+    MetricString(void) {}
+    ~MetricString(void) {}
+    std::string GetValue(void) { return value; }
+    void SetMetric(std::string id_, tm t_, std::string v_)
+    {
+        SetCommonMetric(id_, t_);
+        value = v_;
+    }
+
+private:
+    std::string value;
 };
 
 } // namespace pos

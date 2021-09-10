@@ -32,29 +32,15 @@
 
 #pragma once
 
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-#include "src/telemetry/telemetry_client/telemetry_data_pool.h"
 #include "src/telemetry/telemetry_client/telemetry_metrics.h"
 
 namespace pos
 {
-class TelemetryDataPool
+class IGlobalPublisher
 {
 public:
-    TelemetryDataPool(void);
-    ~TelemetryDataPool(void);
-    void SetMaxEntryLimit(int limit);
-    int SetLog(MetricUint32& metric);
-    int GetLog(std::string id, MetricUint32& outLog);
-    list<MetricUint32> GetAll(void);
-    int GetNumEntries(void);
-
-    static const int LIMIT_NUM_MAX_ENTRY = 100000;
-
-private:
-    std::map<std::string, MetricUint32> pool;
-    int maxEntry;
+    virtual int PublishToServer(MetricUint32& metric) = 0;
+    virtual int PublishToServer(MetricString& metric) = 0;
 };
 
 } // namespace pos

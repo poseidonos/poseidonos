@@ -22,7 +22,7 @@ TEST(TelemetryPublisher, PublishData_TestUpdateAndCollectItem)
     // given 3.
     tp.PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, 10);
     tp.PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, 9);
-    TelemetryGeneralMetric log;
+    MetricUint32 log;
     // when 3.
     ret = tp.CollectData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, log);
     // then 3.
@@ -50,7 +50,7 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
     ret = tp.PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, 300);
     // then 2.
     EXPECT_EQ(0, ret);
-    TelemetryGeneralMetric log;
+    MetricUint32 log;
     tp.CollectData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, log);
     EXPECT_EQ(300, log.GetValue());
 }

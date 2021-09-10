@@ -16,8 +16,8 @@ public:
     MOCK_METHOD(void, StopPublishing, (), (override));
     MOCK_METHOD(bool, IsRunning, (), (override));
     MOCK_METHOD(int, PublishData, (std::string id, uint32_t value), (override));
-    MOCK_METHOD(int, CollectData, (std::string id, TelemetryGeneralMetric& outLog), (override));
-    MOCK_METHOD(list<TelemetryGeneralMetric>, CollectAll, (), (override));
+    MOCK_METHOD(int, CollectData, (std::string id, MetricUint32& outLog), (override));
+    MOCK_METHOD(list<MetricUint32>, CollectAll, (), (override));
 };
 
 } // namespace pos

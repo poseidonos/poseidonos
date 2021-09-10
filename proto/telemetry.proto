@@ -153,6 +153,13 @@ message TelemetryGeneralMetric
   required int32 value = 3; // monitoring value
 }
  
+message TelemetryGeneralMetricString
+{
+  required string id = 1; // e.g., alct_freesegment_count
+  required string time = 2; // logged time
+  required string value = 3; // monitoring value
+}
+
 message WbtProto
 {
   // TBD

@@ -33,6 +33,7 @@
 #pragma once
 
 #include <list>
+#include "src/telemetry/telemetry_client/i_global_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_data_pool.h"
 #include "src/telemetry/telemetry_id.h"
 #include <string>
@@ -49,11 +50,18 @@ public:
     virtual bool IsRunning(void);
     virtual void SetMaxEntryLimit(int limit);
     virtual int GetNumEntries(void);
+
     virtual int PublishData(std::string id, uint32_t value);
-    virtual int CollectData(std::string id, TelemetryGeneralMetric& outLog);
-    virtual list<TelemetryGeneralMetric> CollectAll(void);
+    virtual int PublishData(std::string id, std::string value);
+
+    virtual int CollectData(std::string id, MetricUint32& outLog);
+    virtual list<MetricUint32> CollectAll(void);
+    virtual void SetGlobalPublisher(IGlobalPublisher* gp);
 
 private:
+    tm _GetCurTime(void);
+
+    IGlobalPublisher* globalPublisher;
     TelemetryDataPool dataPool;
     bool turnOn;
 };

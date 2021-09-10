@@ -89,7 +89,7 @@ TEST(TelemetryClient, CollectValue_TestData)
     telClient.RegisterPublisher("a", tp);
     telClient.StartPublisher("a");
     tp->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, 10);
-    TelemetryGeneralMetric log;
+    MetricUint32 log;
     // when 1.
     int ret = telClient.CollectValue("a", TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, log);
     // then 1.
@@ -119,7 +119,7 @@ TEST(TelemetryClient, CollectList_TestData)
     tp->PublishData(TEL_ALLOCATOR_GCVICTIM_SEGMENT, 30);
     tp->PublishData(TEL_ALLOCATOR_GCMODE, 1);
     // when
-    list<TelemetryGeneralMetric> retList = telClient.CollectList("a");
+    list<MetricUint32> retList = telClient.CollectList("a");
     // then
     for (auto &p : retList)
     {

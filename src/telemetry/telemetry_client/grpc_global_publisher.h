@@ -32,29 +32,34 @@
 
 #pragma once
 
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-#include "src/telemetry/telemetry_client/telemetry_data_pool.h"
-#include "src/telemetry/telemetry_client/telemetry_metrics.h"
+#include <grpc/grpc.h>
+#include <grpcpp/grpcpp.h>
+#include <grpcpp/security/server_credentials.h>
+#include <grpcpp/server.h>
+#include <grpcpp/server_builder.h>
+#include <grpcpp/server_context.h>
 
+#include <nlohmann/json.hpp>
+
+#include "proto/generated/cpp/telemetry.grpc.pb.h"
+#include "proto/generated/cpp/telemetry.pb.h"
+#include "src/helper/json_helper.h"
+#include "src/telemetry/telemetry_client/i_global_publisher.h"
+
+using namespace ::grpc;
 namespace pos
 {
-class TelemetryDataPool
+class GrpcGlobalPublisher : public IGlobalPublisher
 {
 public:
-    TelemetryDataPool(void);
-    ~TelemetryDataPool(void);
-    void SetMaxEntryLimit(int limit);
-    int SetLog(MetricUint32& metric);
-    int GetLog(std::string id, MetricUint32& outLog);
-    list<MetricUint32> GetAll(void);
-    int GetNumEntries(void);
-
-    static const int LIMIT_NUM_MAX_ENTRY = 100000;
+    GrpcGlobalPublisher(void);
+    virtual ~GrpcGlobalPublisher(void);
+    virtual int PublishToServer(MetricUint32& metric);
+    virtual int PublishToServer(MetricString& metric);
 
 private:
-    std::map<std::string, MetricUint32> pool;
-    int maxEntry;
+    int _SendMessage(PublishRequest& req);
+    std::unique_ptr<TelemetryManager::Stub> telemetryManager;
 };
 
 } // namespace pos

@@ -29,12 +29,14 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
 TelemetryPublisher::TelemetryPublisher(void)
-: turnOn(false) // todo: change default true or using config
+: globalPublisher(nullptr),
+  turnOn(false) // todo: change default true or using config
 {
 }
 
@@ -79,20 +81,58 @@ TelemetryPublisher::PublishData(std::string id, uint32_t value)
     {
         return -1;
     }
-    dataPool.SetLog(id, value);
-    return 0;
+    MetricUint32 metric;
+    tm curTime = _GetCurTime();
+    metric.SetMetric(id, curTime, value);
+
+    dataPool.SetLog(metric);
+    int ret = globalPublisher->PublishToServer(metric);
+
+    return ret;
 }
 
 int
-TelemetryPublisher::CollectData(std::string id, TelemetryGeneralMetric& outLog)
+TelemetryPublisher::PublishData(std::string id, std::string value)
+{
+    if (turnOn == false)
+    {
+        return -1;
+    }
+    MetricString metric;
+    tm curTime = _GetCurTime();
+    metric.SetMetric(id, curTime, value);
+
+    // string type log wouldn't be stored in client's data pool to minimize the memory usage
+    // dataPool.SetLog(metric);
+    int ret = globalPublisher->PublishToServer(metric);
+
+    return ret;
+}
+
+int
+TelemetryPublisher::CollectData(std::string id, MetricUint32& outLog)
 {
     return dataPool.GetLog(id, outLog);
 }
 
-list<TelemetryGeneralMetric>
+list<MetricUint32>
 TelemetryPublisher::CollectAll(void)
 {
     return dataPool.GetAll();
+}
+
+void
+TelemetryPublisher::SetGlobalPublisher(IGlobalPublisher* gp)
+{
+    globalPublisher = gp;
+}
+
+tm
+TelemetryPublisher::_GetCurTime(void)
+{
+    auto t = std::time(nullptr);
+    tm ret = *std::localtime(&t);
+    return ret;
 }
 
 } // namespace pos

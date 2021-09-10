@@ -31,7 +31,6 @@
  */
 
 #pragma once
-
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include <list>
 #include <map>
@@ -40,6 +39,8 @@
 
 namespace pos
 {
+class GrpcGlobalPublisher;
+
 class TelemetryClient
 {
 public:
@@ -53,11 +54,14 @@ public:
     virtual bool StartAllPublisher(void);
     virtual bool StopAllPublisher(void);
 
-    virtual int CollectValue(std::string name, std::string id, TelemetryGeneralMetric& outLog);
-    virtual list<TelemetryGeneralMetric> CollectList(std::string name);
+    virtual int CollectValue(std::string name, std::string id, MetricUint32& outLog);
+    virtual list<MetricUint32> CollectList(std::string name);
 
 private:
     std::map<std::string, TelemetryPublisher*> publisherList;
+    GrpcGlobalPublisher* globalPublisher;
 };
+
 using TelemetryClientSingleton = Singleton<TelemetryClient>;
+
 } // namespace pos

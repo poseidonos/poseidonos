@@ -11,7 +11,7 @@ TEST(TelemetryDataPool, DataPool_TestAll)
     TelemetryDataPool pool;
     pool.SetLog("aaa", 5);
     pool.SetLog("bbb", 6);
-    TelemetryGeneralMetric log;
+    MetricUint32 log;
     pool.GetLog("aaa", log);
     tm t = log.GetTime();
     std::string st = log.GetTimeString();

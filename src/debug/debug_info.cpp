@@ -136,9 +136,9 @@ DebugInfo::Update(void)
     nvmfTarget = NvmfTargetSingleton::Instance();
     ioSubmitHandlerCount = IOSubmitHandlerCountSingleton::Instance();
     flushCount = FlushCountSingleton::Instance();
-    telemetryClient = TelemetryClientSingleton::Instance();
     telemetryManagerService = TelemetryManagerServiceSingletone::Instance();
     telemetryConfig = TelemetryConfigSingleton::Instance();
     memoryManager = MemoryManagerSingleton::Instance();
+    telemetryClient = TelemetryClientSingleton::Instance();
 }
 } // namespace pos

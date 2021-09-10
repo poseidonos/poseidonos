@@ -227,4 +227,10 @@ TelemetryManagerService::StopService(void)
     return true;
 }
 
+std::string
+TelemetryManagerService::GetServerAddr(void)
+{
+    return serverAddress;
+}
+
 } // namespace pos

@@ -31,16 +31,19 @@
  */
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/telemetry/telemetry_client/grpc_global_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 
 namespace pos
 {
 TelemetryClient::TelemetryClient(void)
 {
+    globalPublisher = new GrpcGlobalPublisher();
 }
 
 TelemetryClient::~TelemetryClient(void)
 {
+    delete globalPublisher;
 }
 
 int
@@ -55,6 +58,7 @@ TelemetryClient::RegisterPublisher(std::string name, TelemetryPublisher* publish
     else
     {
         publisherList.emplace(name, publisher);
+        publisher->SetGlobalPublisher(globalPublisher);
         POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] new publisher:{} is registered, numPublishers:{}", name, publisherList.size());
         return 0;
     }
@@ -122,7 +126,7 @@ TelemetryClient::StopAllPublisher(void)
 }
 
 int
-TelemetryClient::CollectValue(std::string name, std::string id, TelemetryGeneralMetric& outLog)
+TelemetryClient::CollectValue(std::string name, std::string id, MetricUint32& outLog)
 {
     auto it = publisherList.find(name);
     if (it == publisherList.end())
@@ -136,7 +140,7 @@ TelemetryClient::CollectValue(std::string name, std::string id, TelemetryGeneral
     }
 }
 
-list<TelemetryGeneralMetric>
+list<MetricUint32>
 TelemetryClient::CollectList(std::string name)
 {
     return publisherList[name]->CollectAll();
