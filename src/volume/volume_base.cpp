@@ -195,7 +195,21 @@ VolumeBase::UsedSize(void)
 uint64_t
 VolumeBase::RemainingSize(void)
 {
-    return TotalSize() - UsedSize();
+    uint64_t totalSize = TotalSize();
+    uint64_t usedSize = UsedSize();
+    if (usedSize > totalSize)
+    {
+        POS_TRACE_ERROR(POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED,
+            "[NUSE ERROR] Volume:{}'s UsedSize:{} exceeds TotalSize:{}", ID, usedSize, totalSize);
+        assert(false);
+        return -1;
+    }
+    else
+    {
+        POS_TRACE_INFO(POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED,
+            "[NUSE Volume:{}] UsedSize:{}, TotalSize:{}", ID, usedSize, totalSize);
+        return (totalSize - usedSize);
+    }
 }
 
 } // namespace pos

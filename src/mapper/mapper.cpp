@@ -305,7 +305,6 @@ Mapper::GetNumUsedBlks(int volId)
         // if volume doesn't exist, there is no used block.
         return 0;
     }
-    
 }
 
 bool

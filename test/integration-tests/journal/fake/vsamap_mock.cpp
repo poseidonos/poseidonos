@@ -18,6 +18,8 @@ VSAMapMock::VSAMapMock(TestInfo* testInfo)
 
     ON_CALL(*this, SetVSAsInternal).WillByDefault(::testing::Invoke(this,
         &VSAMapMock::_SetVSAsInternal));
+    ON_CALL(*this, SetVSAsWithSyncOpen).WillByDefault(::testing::Invoke(this,
+        &VSAMapMock::_SetVSAsWithSyncOpen));
 }
 
 VSAMapMock::~VSAMapMock(void)
@@ -103,8 +105,9 @@ VSAMapMock::GetVSAWithSyncOpen(int volId, BlkAddr rba)
 
     return map[volId][rba];
 }
+
 int
-VSAMapMock::SetVSAsWithSyncOpen(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
+VSAMapMock::_SetVSAsWithSyncOpen(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
 {
     assert(volId < testInfo->maxNumVolume);
     for (uint32_t blkCount = 0; blkCount < virtualBlks.numBlks; blkCount++)

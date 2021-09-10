@@ -70,7 +70,7 @@ ReplayTestFixture::ExpectReplayBlockLogsForStripe(int volId, BlockMapList blksTo
         for (uint32_t offset = 0; offset < blks.numBlks; offset++)
         {
             VirtualBlks blk = _GetBlock(blks, offset);
-            EXPECT_CALL(*(mapper->GetVSAMapMock()), SetVSAsInternal(volId, rba + offset, blk));
+            EXPECT_CALL(*(mapper->GetVSAMapMock()), SetVSAsWithSyncOpen(volId, rba + offset, blk));
             EXPECT_CALL(*(allocator->GetBlockAllocatorMock()), ValidateBlks(blk));
         }
     }
