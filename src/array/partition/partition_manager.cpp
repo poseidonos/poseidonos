@@ -61,10 +61,7 @@ PartitionManager::PartitionManager(
   affinityManager(affinityManager),
   ioDispatcher(ioDispatcher)
 {
-    for (uint32_t i = 0; i < partitions_.size(); i++)
-    {
-        partitions_[i] = nullptr;
-    }
+    partitions_.fill(nullptr);
     abrControl = abr;
 }
 
