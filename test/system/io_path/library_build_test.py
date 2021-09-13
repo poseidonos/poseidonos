@@ -13,7 +13,7 @@ ibof_root = os.path.dirname(os.path.abspath(__file__)) + "/../../../"
 #######################################################################################
 
 stdout_type = subprocess.STDOUT
-unittest_path = ["src/bio/ubio_error_test", "src/device/unvme/mdts_detach_test"]
+unittest_path = ["ubio_error_test", "mdts_detach_test"]
 
 def build_ibofos_library_option():
     current_path = os.getcwd()
@@ -34,9 +34,9 @@ def build_and_test(fabric_ip):
     current_path = os.getcwd()
     
     for test_path in unittest_path:
+        test_path = current_path + "/" + test_path
         common_test_lib.print_start(test_path);
-        os.chdir(ibof_root)
-        os.chdir(ibof_root+test_path)
+        os.chdir(test_path)
         
         ret = subprocess.call(["make"])            
         if(ret != 0):
