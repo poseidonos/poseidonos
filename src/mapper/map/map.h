@@ -61,21 +61,21 @@ class Map
 {
 public:
     Map(void);
-    Map(int numPages, int pageSize);
+    Map(uint64_t numPages, uint64_t pageSize);
     virtual ~Map(void);
 
     virtual uint64_t GetSize(void);
-    virtual int GetNumMpages(void);
-    virtual char* GetMpage(int pageNr);
-    virtual char* GetMpageWithLock(int pageNr);
-    virtual char* AllocateMpage(int pageNr);
+    virtual uint64_t GetNumMpages(void);
+    virtual char* GetMpage(uint64_t pageNr);
+    virtual char* GetMpageWithLock(uint64_t pageNr);
+    virtual char* AllocateMpage(uint64_t pageNr);
 
-    virtual void GetMpageLock(int pageNr);
-    virtual void ReleaseMpageLock(int pageNr);
+    virtual void GetMpageLock(uint64_t pageNr);
+    virtual void ReleaseMpageLock(uint64_t pageNr);
 
     Mpage* mPageArr;
-    uint32_t pageSize;
-    int numPages;
+    uint64_t pageSize;
+    uint64_t numPages;
 };
 
 } // namespace pos

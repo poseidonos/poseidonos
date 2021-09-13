@@ -55,7 +55,7 @@ public:
 
     virtual MpageList GetDirtyPages(BlkAddr start, uint64_t numEntries) = 0;
 
-    int Init(uint64_t numEntries, int entrySize, int mpageSize);
+    int Init(uint64_t numEntries, uint64_t entrySize, uint64_t mpageSize);
     void Dispose(void);
     int Load(AsyncLoadCallBack& cb);
 
@@ -71,7 +71,7 @@ public:
     int DumpLoad(std::string fileName);
 
     int GetId(void);
-    uint32_t GetEntriesPerPage(void);
+    uint64_t GetEntriesPerPage(void);
     void SetMapHeader(MapHeader* mapHeader_) { mapHeader = mapHeader_; }
     void SetMap(Map* map_) { map = map_; }
 
@@ -81,7 +81,7 @@ protected:
     MapIoHandler* mapIoHandler;
     std::string fileName;
     int mapId;
-    uint32_t entriesPerMpage;
+    uint64_t entriesPerMpage;
     int arrayId;
     bool isInitialized;
 };

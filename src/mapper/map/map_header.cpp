@@ -37,7 +37,8 @@ namespace pos
 {
 
 MapHeader::MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_)
-: size(0),
+: age(0),
+  size(0),
   numUsedBlks(0),
   mPageMap(mPageMap_),
   touchedMpages(touchedMpages_)
@@ -64,7 +65,7 @@ MapHeader::~MapHeader(void)
 }
 
 void
-MapHeader::Init(uint64_t numMpages, int mpageSize)
+MapHeader::Init(uint64_t numMpages, uint64_t mpageSize)
 {
     mPageMap = new BitMap(numMpages);
     mPageMap->ResetBitmap();
@@ -84,6 +85,7 @@ MapHeader::CopyToBuffer(char* buffer)
     header->numValidMpages = mPageMap->GetNumBitsSet();
     header->numTotalMpages = mPageMap->GetNumBits();
     header->numUsedBlks = numUsedBlks;
+    header->reserved = ++age;
     memcpy((buffer + sizeof(MpageInfo)), (void*)mPageMap->GetMapAddr(), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
     return 0;
 }
@@ -106,6 +108,7 @@ MapHeader::ApplyHeader(char* buffer)
     MpageInfo* header = reinterpret_cast<MpageInfo*>(buffer);
     assert(mPageMap->GetNumBits() == header->numTotalMpages);
     numUsedBlks = header->numUsedBlks;
+    age = header->reserved;
     mPageMap->SetNumBitsSet(header->numValidMpages);
     memcpy(mPageMap->GetMapAddr(), buffer + sizeof(MpageInfo), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
 }

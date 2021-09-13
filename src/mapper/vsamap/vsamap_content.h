@@ -48,7 +48,7 @@ public:
 
     virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries) override;
 
-    int InMemoryInit(uint64_t volId, uint64_t numEntries, int mpageSize);
+    int InMemoryInit(uint64_t volId, uint64_t numEntries, uint64_t mpageSize);
     virtual VirtualBlkAddr GetEntry(BlkAddr rba);
     virtual int SetEntry(BlkAddr rba, VirtualBlkAddr vsa);
 

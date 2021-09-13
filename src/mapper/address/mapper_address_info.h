@@ -44,7 +44,7 @@ class MapperAddressInfo
 public:
     explicit MapperAddressInfo(IArrayInfo* iArrayInfo_);
     void SetupAddressInfo(int mpageSize_);
-    int GetMpageSize(void);
+    uint64_t GetMpageSize(void);
     std::string GetArrayName(void);
     int GetArrayId(void);
 

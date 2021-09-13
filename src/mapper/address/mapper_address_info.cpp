@@ -60,7 +60,7 @@ MapperAddressInfo::SetupAddressInfo(int mpageSize_)
     mpageSize = mpageSize_;
 }
 
-int
+uint64_t
 MapperAddressInfo::GetMpageSize(void)
 {
     return mpageSize;

@@ -69,7 +69,7 @@ public:
     ~MapIoHandler(void);
 
     void Dispose(void);
-    int OpenFile(std::string fileName, int fileSize);
+    int OpenFile(std::string fileName, uint64_t fileSize);
     int DeleteFile(void);
     int Load(AsyncLoadCallBack& cb);
     bool DoesFileExist(void);

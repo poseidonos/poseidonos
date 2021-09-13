@@ -44,7 +44,7 @@ public:
     StripeMapContent(int mapId, int arrayId);
     virtual ~StripeMapContent(void) = default;
 
-    int InMemoryInit(uint64_t entrySize, int mpageSize);
+    int InMemoryInit(uint64_t entrySize, uint64_t mpageSize);
     virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries) override;
 
     StripeAddr GetEntry(StripeId vsid);

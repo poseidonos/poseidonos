@@ -317,7 +317,7 @@ bool
 Mapper::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     int volId = volEventBase->volId;
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeEvent] CREATE_VOLUME Volume:{} array:{}", volId, addrInfo->GetArrayName());
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeEvent] CREATE_VOLUME Volume:{}, size:{} array:{}", volId, volEventBase->volSizeByte, addrInfo->GetArrayName());
     VolState state = volState[volId].GetState();
     if (state != VolState::NOT_EXIST)
     {
@@ -365,7 +365,7 @@ bool
 Mapper::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     int volId = volEventBase->volId;
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeEvent] LOAD_VOLUME Volume:{} array:{}", volId, addrInfo->GetArrayName());
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeEvent] LOAD VOLUME Volume:{} size:{} array:{}", volId, volEventBase->volSizeByte, addrInfo->GetArrayName());
     if (volState[volId].GetState() == VolState::VOLUME_DELETING)
     {
         return false;

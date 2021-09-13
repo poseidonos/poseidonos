@@ -56,12 +56,12 @@ public:
     MapHeader(void);
     MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_);
     virtual ~MapHeader(void);
-    void Init(uint64_t numMpages, int mpageSize);
+    void Init(uint64_t numMpages, uint64_t mpageSize);
 
     int CopyToBuffer(char* buffer);
     BitMap* GetBitmapFromTempBuffer(char* buffer);
 
-    int GetSize(void) { return size; }
+    uint64_t GetSize(void) { return size; }
     void ApplyHeader(char* srcBuf);
     uint64_t GetNumValidMpages(void) { return mPageMap->GetNumBitsSet(); }
 
@@ -75,6 +75,7 @@ public:
 private:
     std::mutex mpageHeaderLock;
 
+    int age;
     int size;
     std::atomic<uint64_t> numUsedBlks;
     BitMap* mPageMap;

@@ -54,7 +54,7 @@ VSAMapContent::VSAMapContent(int mapId, int arrayId)
 }
 
 int
-VSAMapContent::InMemoryInit(uint64_t volId, uint64_t blkCnt, int mpageSize)
+VSAMapContent::InMemoryInit(uint64_t volId, uint64_t blkCnt, uint64_t mpageSize)
 {
     totalBlks = blkCnt;
     return Init(totalBlks, sizeof(VirtualBlkAddr), mpageSize);

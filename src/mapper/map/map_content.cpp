@@ -56,13 +56,13 @@ MapContent::~MapContent(void)
 }
 
 int
-MapContent::Init(uint64_t numEntries, int entrySize, int mpageSize)
+MapContent::Init(uint64_t numEntries, uint64_t entrySize, uint64_t mpageSize)
 {
     if (isInitialized == false)
     {
         isInitialized = true;
         entriesPerMpage = mpageSize / entrySize;
-        int numMpages = DivideUp(numEntries, entriesPerMpage);
+        uint64_t numMpages = DivideUp(numEntries, entriesPerMpage);
         if (map == nullptr)
         {
             map = new Map(numMpages, mpageSize);
@@ -191,7 +191,7 @@ MapContent::DumpLoad(std::string fname)
     return ret;
 }
 
-uint32_t
+uint64_t
 MapContent::GetEntriesPerPage(void)
 {
     return entriesPerMpage;

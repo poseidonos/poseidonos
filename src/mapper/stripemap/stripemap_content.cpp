@@ -45,7 +45,7 @@ StripeMapContent::StripeMapContent(int mapId, int arrayId)
 }
 
 int
-StripeMapContent::InMemoryInit(uint64_t numEntries, int mpageSize)
+StripeMapContent::InMemoryInit(uint64_t numEntries, uint64_t mpageSize)
 {
     return Init(numEntries, sizeof(StripeAddr), mpageSize);
 }

@@ -92,7 +92,7 @@ VSAMapManager::CreateVsaMapContent(int volId, uint64_t volSizeByte, bool delVol)
 {
     assert(vsaMaps[volId] == nullptr);
     vsaMaps[volId] = new VSAMapContent(volId, addrInfo->GetArrayId());
-    uint64_t blkCnt = DivideUp(volSizeByte, pos::BLOCK_SIZE);
+    uint64_t blkCnt = DivideUp(volSizeByte, (uint64_t)pos::BLOCK_SIZE);
     do
     {
         if (vsaMaps[volId]->InMemoryInit(volId, blkCnt, addrInfo->GetMpageSize()) != 0)

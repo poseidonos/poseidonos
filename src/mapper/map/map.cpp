@@ -42,10 +42,10 @@ Map::Map(void)
     mPageArr = nullptr;
 }
 
-Map::Map(int numMpages, int mpageSize)
+Map::Map(uint64_t numMpages, uint64_t mpageSize)
 {
     mPageArr = new Mpage[numMpages]();
-    for (int mpage = 0; mpage < numMpages; ++mpage)
+    for (uint64_t mpage = 0; mpage < numMpages; ++mpage)
     {
         mPageArr[mpage].mpageNr = mpage;
     }
@@ -56,7 +56,7 @@ Map::Map(int numMpages, int mpageSize)
 
 Map::~Map(void)
 {
-    for (int pageNr = 0; pageNr < numPages; ++pageNr)
+    for (uint64_t pageNr = 0; pageNr < numPages; ++pageNr)
     {
         if (mPageArr[pageNr].data != nullptr)
         {
@@ -67,7 +67,7 @@ Map::~Map(void)
 }
 
 char*
-Map::AllocateMpage(int pageNr)
+Map::AllocateMpage(uint64_t pageNr)
 {
     if (mPageArr[pageNr].data != nullptr)
     {
@@ -94,19 +94,19 @@ Map::AllocateMpage(int pageNr)
 }
 
 void
-Map::GetMpageLock(int pageNr)
+Map::GetMpageLock(uint64_t pageNr)
 {
     mPageArr[pageNr].lock.lock();
 }
 
 void
-Map::ReleaseMpageLock(int pageNr)
+Map::ReleaseMpageLock(uint64_t pageNr)
 {
     mPageArr[pageNr].lock.unlock();
 }
 
 char*
-Map::GetMpage(int pageNr)
+Map::GetMpage(uint64_t pageNr)
 {
     if (pageNr >= numPages)
     {
@@ -116,7 +116,7 @@ Map::GetMpage(int pageNr)
 }
 
 char*
-Map::GetMpageWithLock(int pageNr)
+Map::GetMpageWithLock(uint64_t pageNr)
 {
     if (pageNr >= numPages)
     {
@@ -132,7 +132,7 @@ Map::GetSize(void)
     return pageSize;
 }
 
-int
+uint64_t
 Map::GetNumMpages(void)
 {
     return numPages;

@@ -60,7 +60,7 @@ MapIoHandler::~MapIoHandler(void)
 }
 
 int
-MapIoHandler::OpenFile(std::string fileName, int fileSize)
+MapIoHandler::OpenFile(std::string fileName, uint64_t fileSize)
 {
     assert(file == nullptr);
     file = new FILESTORE(fileName, arrayId);
