@@ -53,8 +53,6 @@ PYTHON_COMMAND
 *.json
 !test/system/benchmark/*.json
 *.sqlite
-*.pb.h
-*.pb.cpp
 *.pb.go
 ubio_error_test
 mdts_detach_test
@@ -62,7 +60,6 @@ lib/dpdk-20.08/*
 lib/filebench-master/*
 nlohmann
 lib/grpc
-proto/generated/*
 lib/Makefile
 lib/air-prefix/
 lib/air/

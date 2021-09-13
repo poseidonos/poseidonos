@@ -269,18 +269,6 @@ SET(POS_UT_INCLUDE_DIRS
     ${PROJ_ROOT}
 )
 
-# This is to provide "-I" option for unit test file(s) build
-SET(POS_UT_INCLUDE_DIRS
-    ${PROJ_ROOT}
-)
-
-add_custom_target(
-	protobuf_compile ALL
-	COMMENT "Compile protobuf files"
-	WORKING_DIRECTORY ${PROJ_ROOT}
-	COMMAND $(MAKE) protobuf
-)
-
 # Run mock/test generator with cpp_formatter.py automatically
 #message("Running mock/test-skel generator (but without cpp_formatter.py)...")
 #execute_process(COMMAND ./generate_mocks.sh) # commented out until we figure out how to integrate git-clang-format with UT build

@@ -221,11 +221,10 @@ udev_uninstall:
 		echo "No need to remove"; \
 	fi
 
-protobuf:
+gen_proto:
 	@echo Build protobuf
 	@`[ -d $(PROTO_CPP_GENERATED_DIR) ] || mkdir -p $(PROTO_CPP_GENERATED_DIR)`
 	protoc --cpp_out=$(PROTO_CPP_GENERATED_DIR) --grpc_out=$(PROTO_CPP_GENERATED_DIR) --plugin=protoc-gen-grpc=/usr/local/bin/grpc_cpp_plugin --proto_path=$(PROTO_DIR) $(PROTO_DIR)/*.proto
-	$(MAKE) -C proto
 
 collector:
 	@echo Build Telemetry Collector
@@ -233,16 +232,17 @@ collector:
 	mv tool/collector/collector $(BINDIR)
 	@cd $(TOP)
 
-sam: makedir protobuf
+sam: makedir
 	@echo SAM Build
 	$(MAKE) -C src sam
 
-$(APP) : $(SPDK_LIB_FILES) protobuf poseidonos
+$(APP) : $(SPDK_LIB_FILES) poseidonos
 	$(LINK_CXX) $(shell find src/ -name *.o -and ! -name *_test.o -and ! -name *_fake.o -and ! -name *_stub.o -and ! -name *_mock.o -and ! -name *_fixture.o) $(PROTO_CPP_GENERATED_DIR)/*.o $(LDFLAGS) $(LDEXTRAFLAGS)
 	rm bin/ibofos -rf
 	ln -s $(shell pwd -P)/bin/poseidonos bin/ibofos
 
 poseidonos: makedir
+	$(MAKE) -C proto
 	$(MAKE) -C src
 	$(CLI_DIR)/script/build_cli.sh
 	mv -f $(CLI_DIR)/bin/${CLI_APP_NAME} $(BINDIR)/${CLI_APP_NAME}
