@@ -129,7 +129,6 @@ ReverseMapManager::Dispose(void)
         delete [] revMapPacks;
         revMapPacks = nullptr;
     }
-
 }
 //----------------------------------------------------------------------------//
 ReverseMapPack*

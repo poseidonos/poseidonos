@@ -62,6 +62,7 @@ public:
     virtual void WaitLoadPendingIoDone(void);
     virtual void WaitWritePendingIoDone(void);
     virtual void WaitVolumePendingIoDone(int volId);
+    bool IsVolumeLoaded(int volId);
     virtual void MapFlushDone(int mapId);
 
     virtual int GetVSAs(int volumeId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray);

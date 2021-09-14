@@ -32,6 +32,8 @@
 
 #include "src/include/memory.h"
 #include "src/mapper/map/map_header.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -85,7 +87,8 @@ MapHeader::CopyToBuffer(char* buffer)
     header->numValidMpages = mPageMap->GetNumBitsSet();
     header->numTotalMpages = mPageMap->GetNumBits();
     header->numUsedBlks = numUsedBlks;
-    header->reserved = ++age;
+    header->age = ++age;
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper MapHeader] Store, age:{}, numValidPgs:{}, numUsedBlks:{}", header->age, header->numUsedBlks, header->numValidMpages);
     memcpy((buffer + sizeof(MpageInfo)), (void*)mPageMap->GetMapAddr(), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
     return 0;
 }
@@ -108,8 +111,9 @@ MapHeader::ApplyHeader(char* buffer)
     MpageInfo* header = reinterpret_cast<MpageInfo*>(buffer);
     assert(mPageMap->GetNumBits() == header->numTotalMpages);
     numUsedBlks = header->numUsedBlks;
-    age = header->reserved;
+    age = header->age;
     mPageMap->SetNumBitsSet(header->numValidMpages);
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper MapHeader] Load, age:{}, numValidPgs:{}, numUsedBlks:{}", header->age, header->numUsedBlks, header->numValidMpages);
     memcpy(mPageMap->GetMapAddr(), buffer + sizeof(MpageInfo), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
 }
 

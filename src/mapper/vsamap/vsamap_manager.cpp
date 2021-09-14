@@ -266,6 +266,12 @@ VSAMapManager::WaitVolumePendingIoDone(int volId)
     while ((mapLoadState[volId] != MapLoadState::LOAD_DONE) || (mapFlushState[volId] != MapFlushState::FLUSH_DONE));
 }
 
+bool
+VSAMapManager::IsVolumeLoaded(int volId)
+{
+    return (mapLoadState[volId] == MapLoadState::LOAD_DONE);
+}
+
 void
 VSAMapManager::MapFlushDone(int mapId)
 {

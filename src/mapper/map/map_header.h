@@ -47,7 +47,7 @@ public:
     uint64_t numValidMpages;
     uint64_t numTotalMpages;
     uint64_t numUsedBlks;
-    uint64_t reserved;
+    uint64_t age;
 };
 
 class MapHeader
@@ -75,8 +75,8 @@ public:
 private:
     std::mutex mpageHeaderLock;
 
-    int age;
-    int size;
+    uint64_t age;
+    uint64_t size;
     std::atomic<uint64_t> numUsedBlks;
     BitMap* mPageMap;
     BitMap* touchedMpages;

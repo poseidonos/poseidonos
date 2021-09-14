@@ -199,6 +199,18 @@ Mapper::EnableInternalAccess(int volId)
             return NEED_RETRY;
         }
     }
+    else if (VolState::VOLUME_LOADING == state)
+    {
+        if (vsaMapManager->IsVolumeLoaded(volId) == true)
+        {
+            volState[volId].SetState(VolState::BACKGROUND_MOUNTED);
+            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper EnableInternalAccess] VolumeId:{} was loaded and set as BG_MOUNTED, arrayName:{} @VolumeMounted", volId, addrInfo->GetArrayName());
+        }
+        else
+        {
+            return NEED_RETRY;
+        }
+    }
     return 0;
 }
 
@@ -549,8 +561,6 @@ Mapper::_LoadVolumeMeta(int volId, bool delVol)
         POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper LoadVolMeta] failed to Load Trigger VolumeId:{}, arrayName:{} @VolumeMounted", volId, addrInfo->GetArrayName());
         return false;
     }
-    volState[volId].SetState(VolState::BACKGROUND_MOUNTED);
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper LoadVolMeta] VolumeId:{} was loaded and set as BG_MOUNTED, arrayName:{} @VolumeMounted", volId, addrInfo->GetArrayName());
     return true;
 }
 
