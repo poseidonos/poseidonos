@@ -47,10 +47,6 @@ public:
     : MetaFileIntf(fname, arrayId)
     {
     }
-    explicit MockFileIntf(std::string fname, std::string aname, StorageOpt storageOpt = StorageOpt::DEFAULT)
-    : MetaFileIntf(fname, aname)
-    {
-    }
     virtual ~MockFileIntf(void) = default;
 
     virtual int Create(uint64_t fileSize) override;

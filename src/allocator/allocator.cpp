@@ -102,7 +102,7 @@ void
 Allocator::_CreateSubmodules(TelemetryPublisher* tp)
 {
     addrInfo = new AllocatorAddressInfo();
-    contextManager = new ContextManager(tp, addrInfo, arrayName);
+    contextManager = new ContextManager(tp, addrInfo, iArrayInfo->GetIndex());
     blockManager = new BlockManager(addrInfo, contextManager, iArrayInfo->GetIndex());
     wbStripeManager = new WBStripeManager(addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());
 }
@@ -232,7 +232,7 @@ Allocator::SetUrgentThreshold(uint32_t inputThreshold)
 int
 Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file)
 {
-    MetaFileIntf* dumpFile = new MockFileIntf(fname, arrayName);
+    MetaFileIntf* dumpFile = new MockFileIntf(fname, iArrayInfo->GetIndex());
     if (file != nullptr)
     {
         delete dumpFile;
@@ -288,7 +288,7 @@ Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
 int
 Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file)
 {
-    MetaFileIntf* fileProvided = new MockFileIntf(fname, arrayName);
+    MetaFileIntf* fileProvided = new MockFileIntf(fname, iArrayInfo->GetIndex());
     if (file != nullptr)
     {
         delete fileProvided;

@@ -43,7 +43,7 @@ JournalLogBufferIntegrationTest::SetUp(void)
     // TODO(huijeong.kim) This injected modules should be deleted
     factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
 
-    logBuffer = new JournalLogBuffer(new MockFileIntf(GetLogFileName(), "POSArray"));
+    logBuffer = new JournalLogBuffer(new MockFileIntf(GetLogFileName(), 0));
     logBuffer->Delete();
 
     _PrepareLogBuffer();
@@ -69,7 +69,7 @@ void
 JournalLogBufferIntegrationTest::SimulateSPOR(void)
 {
     delete logBuffer;
-    logBuffer = new JournalLogBuffer(new MockFileIntf(GetLogFileName(), "POSArray"));
+    logBuffer = new JournalLogBuffer(new MockFileIntf(GetLogFileName(), 0));
     _PrepareLogBuffer();
     logBuffer->Init(&config, &factory);
 }

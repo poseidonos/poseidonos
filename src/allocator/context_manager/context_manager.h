@@ -73,13 +73,13 @@ public:
         AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
         WbStripeCtx* wbstripeCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
         AllocatorFileIoManager* fileMananager_,
-        ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_);
+        ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, uint32_t arrayId_);
     ContextManager(TelemetryPublisher* tp, EventScheduler* eventScheduler_,
         AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
         WbStripeCtx* wbstripeCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
         AllocatorFileIoManager* fileMananager_,
-        ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_);
-    ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, std::string arrayName);
+        ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, uint32_t arrayId_);
+    ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, uint32_t arrayId_);
     virtual ~ContextManager(void);
     virtual void Init(void);
     virtual void Dispose(void);
@@ -154,7 +154,7 @@ private:
     GcMode prevGcMode;
     BlockAllocationStatus* blockAllocStatus;
 
-    std::string arrayName;
+    uint32_t arrayId;
     std::mutex ctxLock;
 
     TelemetryPublisher* telPublisher;

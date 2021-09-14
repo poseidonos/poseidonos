@@ -51,7 +51,7 @@ class JournalLogBuffer : public ILogGroupResetCompleted
 {
 public:
     JournalLogBuffer(void);
-    explicit JournalLogBuffer(std::string arrayName);
+    explicit JournalLogBuffer(int arrayId);
     explicit JournalLogBuffer(MetaFileIntf* metaFile);
     virtual ~JournalLogBuffer(void);
 

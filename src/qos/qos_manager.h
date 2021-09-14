@@ -106,7 +106,7 @@ public:
     void SetVolumeLimit(uint32_t reactor, uint32_t volId, int64_t weight, bool iops, uint32_t arrayId);
     int64_t GetVolumeLimit(uint32_t reactor, uint32_t volId, bool iops, uint32_t arrayId);
     bool IsVolumePolicyUpdated(uint32_t arrayId);
-    void SetGcFreeSegment(uint32_t count, std::string arrayName);
+    void SetGcFreeSegment(uint32_t count, uint32_t arrayId);
     uint32_t GetGcFreeSegment(uint32_t arrayId);
     void GetVolumePolicyMap(uint32_t arrayId, std::map<uint32_t, qos_vol_policy>& volumePolicyMapCopy);
     std::vector<int> GetVolumeFromActiveSubsystem(uint32_t nqnId, uint32_t arrayId);

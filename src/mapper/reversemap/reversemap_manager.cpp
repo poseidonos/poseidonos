@@ -81,7 +81,7 @@ ReverseMapManager::Init(MapperAddressInfo& info)
     fileSizeWholeRevermap = fileSizePerStripe * info.maxVsid;
 
     // Create MFS and Open the file for whole reverse map
-    revMapWholefile = new FILESTORE("RevMapWhole", iArrayInfo->GetName());
+    revMapWholefile = new FILESTORE("RevMapWhole", iArrayInfo->GetIndex());
     if (revMapWholefile->DoesFileExist() == false)
     {
         POS_TRACE_INFO(EID(REVMAP_FILE_SIZE), "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",

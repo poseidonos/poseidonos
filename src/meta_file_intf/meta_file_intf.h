@@ -53,8 +53,6 @@ class MetaFileIntf
 {
 public:
     MetaFileIntf(void);
-    explicit MetaFileIntf(std::string fname, std::string aname,
-                        StorageOpt storageOpt = StorageOpt::DEFAULT);
     explicit MetaFileIntf(std::string fname, int arrayId,
                         StorageOpt storageOpt = StorageOpt::DEFAULT);
     virtual ~MetaFileIntf(void) = default;
@@ -92,7 +90,6 @@ protected:
     virtual int _Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer) = 0;
 
     std::string fileName;
-    std::string arrayName;
     int arrayId;
     uint64_t size;
     bool isOpened;

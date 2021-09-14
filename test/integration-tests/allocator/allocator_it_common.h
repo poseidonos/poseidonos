@@ -7,7 +7,7 @@
 namespace pos
 {
 
-const char ARRAY_NAME[] = "POSArray";
+const uint32_t ARRAY_ID = 0;
 
 const uint32_t BLK_PER_CHUNK = 32;
 const uint32_t CHUNK_PER_STRIPE = 4;

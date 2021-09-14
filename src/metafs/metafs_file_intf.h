@@ -47,13 +47,8 @@ namespace pos
 class MetaFsFileIntf : public MetaFileIntf
 {
 public:
-    explicit MetaFsFileIntf(std::string fname, std::string aname,
-                StorageOpt storageOpt = StorageOpt::DEFAULT);
     explicit MetaFsFileIntf(std::string fname, int arrayId,
                 StorageOpt storageOpt = StorageOpt::DEFAULT);
-    // only for test
-    explicit MetaFsFileIntf(std::string fname, std::string aname,
-                MetaFs* metaFs, StorageOpt storageOpt = StorageOpt::DEFAULT);
     // only for test
     explicit MetaFsFileIntf(std::string fname, int arrayId, MetaFs* metaFs,
                 StorageOpt storageOpt = StorageOpt::DEFAULT);

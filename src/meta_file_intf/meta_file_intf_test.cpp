@@ -220,7 +220,7 @@ MetaFileTest::_AsyncFileWrite(void)
 void
 MockFileTest::SetUp(void)
 {
-    metaFileStore = new MockFileIntf(filename, arrayname);
+    metaFileStore = new MockFileIntf(filename, 0);
     MetaFileTest::SetUp();
 }
 

@@ -11,11 +11,6 @@ public:
     : MetaFileIntf()
     {
     }
-    MetaFileIntfTester(std::string fname, std::string aname,
-                        StorageOpt storageOpt = StorageOpt::DEFAULT)
-    : MetaFileIntf(fname, aname, storageOpt)
-    {
-    }
     MetaFileIntfTester(std::string fname, int arrayId,
                         StorageOpt storageOpt = StorageOpt::DEFAULT)
     : MetaFileIntf(fname, arrayId, storageOpt)

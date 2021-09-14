@@ -79,11 +79,11 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     NiceMock<MockEventScheduler> eventScheduler;
 
     // AllocatorFileIoManager (Real)
-    MockFileIntf* file = new MockFileIntf("RebuildContext", ARRAY_NAME);    // "RebuildContext" file
+    MockFileIntf* file = new MockFileIntf("RebuildContext", ARRAY_ID);    // "RebuildContext" file
     MetaFileIntf* fileArr[NUM_FILES];
     for (int i = 0; i < NUM_FILES; ++i)
     {
-        fileArr[i] = new NiceMock<MockMetaFileIntf>("fileName", ARRAY_NAME);
+        fileArr[i] = new NiceMock<MockMetaFileIntf>("fileName", ARRAY_ID);
         if (i == REBUILD_CTX)
         {
             fileArr[REBUILD_CTX] = file;
@@ -101,7 +101,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     // ContextManager (Real)
     ContextManager contextManager(telemetryPublisher, &eventScheduler, allocatorCtx, segmentCtx, rebuildCtx,
                                   wbStripeCtx, gcCtx, blockAllocStatus, allocatorFileIoManager,
-                                  contextReplayer, false, allocatorAddressInfo, ARRAY_NAME);
+                                  contextReplayer, false, allocatorAddressInfo, ARRAY_ID);
 
     // Prepare Test
     contextManager.Init();
@@ -145,7 +145,7 @@ TEST(ContextManagerIntegrationTest, FlushContexts_FlushRebuildContext)
 
     ContextManager contextManager(&telemetryPublisher, &eventScheduler, allocatorCtx, segmentCtx, rebuildCtx,
                                   wbStripeCtx, gcCtx, blockAllocStatus, allocatorFileIoManager,
-                                  contextReplayer, false, &allocatorAddressInfo, ARRAY_NAME);
+                                  contextReplayer, false, &allocatorAddressInfo, ARRAY_ID);
 
     std::mutex allocatorLock, segmentLock, wbLsidBitmapLock;
     EXPECT_CALL(*allocatorCtx, GetAllocatorCtxLock).WillRepeatedly(ReturnRef(allocatorLock));

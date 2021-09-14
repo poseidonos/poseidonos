@@ -160,7 +160,7 @@ MapperWbt::ReadReverseMap(StripeId vsid, std::string fname)
     }
 
     // Store ReverseMap of vsid to Linux file(fname)
-    MetaFileIntf* fileToStore = new MockFileIntf(fname, addrInfo->GetArrayName());
+    MetaFileIntf* fileToStore = new MockFileIntf(fname, addrInfo->GetArrayId());
     fileToStore->Create(reverseMapManager->GetReverseMapPerStripeFileSize());
     fileToStore->Open();
 
@@ -188,7 +188,7 @@ MapperWbt::WriteReverseMap(StripeId vsid, std::string fname)
     }
 
     // Load ReverseMap from Linux file(fname)
-    MetaFileIntf* fileFromLoad = new MockFileIntf(fname, addrInfo->GetArrayName());
+    MetaFileIntf* fileFromLoad = new MockFileIntf(fname, addrInfo->GetArrayId());
     fileFromLoad->Open();
 
     ret = reverseMapPack->WbtFileSyncIo(fileFromLoad, MetaFsIoOpcode::Read);
@@ -222,7 +222,7 @@ MapperWbt::ReadWholeReverseMap(std::string fname)
     }
 
     // Store Whole ReverseMap to Linux file(fname)
-    MetaFileIntf* fileToStore = new MockFileIntf(fname, addrInfo->GetArrayName());
+    MetaFileIntf* fileToStore = new MockFileIntf(fname, addrInfo->GetArrayId());
     POS_TRACE_INFO((int)POS_EVENT_ID::REVMAP_FILE_SIZE, "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
                     reverseMapManager->GetReverseMapPerStripeFileSize(), addrInfo->maxVsid, fileSize);
     fileToStore->Create(fileSize);
@@ -244,7 +244,7 @@ MapperWbt::WriteWholeReverseMap(std::string fname)
     char* buffer = new char[fileSize]();
 
     // Load Whole ReverseMap from Linux file(fname)
-    MetaFileIntf* filefromLoad = new MockFileIntf(fname, addrInfo->GetArrayName());
+    MetaFileIntf* filefromLoad = new MockFileIntf(fname, addrInfo->GetArrayId());
     filefromLoad->Open();
     filefromLoad->IssueIO(MetaFsIoOpcode::Read, 0, fileSize, buffer);
     filefromLoad->Close();

@@ -38,30 +38,12 @@
 
 namespace pos
 {
-MetaFsFileIntf::MetaFsFileIntf(std::string fname, std::string aname,
-                                        StorageOpt storageOpt)
-: MetaFileIntf(fname, aname, storageOpt),
-  metaFs(nullptr)
-{
-    metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(aname);
-    _SetFileProperty(storageOpt);
-}
-
 MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId,
                                         StorageOpt storageOpt)
 : MetaFileIntf(fname, arrayId, storageOpt),
   metaFs(nullptr)
 {
     metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
-    _SetFileProperty(storageOpt);
-}
-
-// only for test
-MetaFsFileIntf::MetaFsFileIntf(std::string fname, std::string aname,
-                                        MetaFs* metaFs, StorageOpt storageOpt)
-: MetaFileIntf(fname, aname, storageOpt),
-  metaFs(metaFs)
-{
     _SetFileProperty(storageOpt);
 }
 
@@ -109,8 +91,7 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
         std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
 
     MetaFsAioCbCxt* aioCb = new MetaFsAioCbCxt(ctx->opcode, ctx->fd,
-        MetaFsServiceSingleton::Instance()->GetArrayId(arrayName),
-        ctx->fileOffset, ctx->length, (void*)ctx->buffer,
+        arrayId, ctx->fileOffset, ctx->length, (void*)ctx->buffer,
         AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx));
 
     MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(storage);

@@ -69,7 +69,7 @@ class AllocatorFileIoManager
 public:
     AllocatorFileIoManager(void) = default;
     AllocatorFileIoManager(MetaFileIntf** file, AllocatorAddressInfo* info); // only for UT
-    AllocatorFileIoManager(std::string* fileNames, AllocatorAddressInfo* info, std::string arrayName);
+    AllocatorFileIoManager(std::string* fileNames, AllocatorAddressInfo* info, uint32_t arrayId);
     virtual ~AllocatorFileIoManager(void);
     virtual void Init(void);
     virtual void Dispose(void);
@@ -92,7 +92,7 @@ private:
 
     FileInfo fileInfo[NUM_FILES];
     AllocatorAddressInfo* addrInfo;
-    std::string arrayName;
+    uint32_t arrayId;
 
     bool initialized;
 };

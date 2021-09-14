@@ -45,7 +45,7 @@ AllocatorFileIoManager::AllocatorFileIoManager(MetaFileIntf** fileIntf, Allocato
   initialized(false)
 {
     // This constructor is only for UT !!
-    arrayName = "";
+    arrayId = UINT32_MAX;
     for (int owner = 0; owner < NUM_FILES; owner++)
     {
         fileInfo[owner].fileName = "";
@@ -58,9 +58,9 @@ AllocatorFileIoManager::AllocatorFileIoManager(MetaFileIntf** fileIntf, Allocato
     }
 }
 
-AllocatorFileIoManager::AllocatorFileIoManager(std::string* fileNames, AllocatorAddressInfo* info, std::string arrayName)
+AllocatorFileIoManager::AllocatorFileIoManager(std::string* fileNames, AllocatorAddressInfo* info, uint32_t arrayId)
 : addrInfo(info),
-  arrayName(arrayName),
+  arrayId(arrayId),
   initialized(false)
 {
     for (int owner = 0; owner < NUM_FILES; owner++)
@@ -91,7 +91,7 @@ AllocatorFileIoManager::Init(void)
         fileInfo[owner].numSections = 0;
         if (fileInfo[owner].file == nullptr)
         {
-            fileInfo[owner].file = new FILESTORE(fileInfo[owner].fileName, arrayName);
+            fileInfo[owner].file = new FILESTORE(fileInfo[owner].fileName, arrayId);
         }
     }
     initialized = true;

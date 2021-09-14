@@ -54,10 +54,10 @@ JournalLogBuffer::JournalLogBuffer(void)
 {
 }
 
-JournalLogBuffer::JournalLogBuffer(std::string arrayName)
+JournalLogBuffer::JournalLogBuffer(int arrayId)
 : JournalLogBuffer()
 {
-    logFile = new MetaFsFileIntf("JournalLogBuffer", arrayName, StorageOpt::NVRAM);
+    logFile = new MetaFsFileIntf("JournalLogBuffer", arrayId, StorageOpt::NVRAM);
 }
 
 JournalLogBuffer::JournalLogBuffer(MetaFileIntf* metaFile)

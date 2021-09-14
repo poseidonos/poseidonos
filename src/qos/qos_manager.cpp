@@ -656,9 +656,8 @@ QosManager::IsVolumePolicyUpdated(uint32_t arrayId)
  */
 /* --------------------------------------------------------------------------*/
 void
-QosManager::SetGcFreeSegment(uint32_t freeSegments, std::string arrayName)
+QosManager::SetGcFreeSegment(uint32_t freeSegments, uint32_t arrayId)
 {
-    uint32_t arrayId = arrayNameMap[arrayName];
     qosArrayManager[arrayId]->SetGcFreeSegment(freeSegments);
 }
 

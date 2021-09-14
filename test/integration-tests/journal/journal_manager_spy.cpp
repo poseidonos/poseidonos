@@ -27,8 +27,8 @@ JournalManagerSpy::JournalManagerSpy(IArrayInfo* array, IStateControl* stateSub,
     logGroupReleaser = new LogGroupReleaserSpy();
 
     delete logBuffer;
-    std::string arr_name{"arr_name"};
-    logBuffer = new JournalLogBuffer(new MockFileIntf(logFileName, arr_name));
+    uint32_t arrayId = 0;
+    logBuffer = new JournalLogBuffer(new MockFileIntf(logFileName, arrayId));
 
     eventScheduler = new NiceMock<MockEventScheduler>;
     ON_CALL(*eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event) {

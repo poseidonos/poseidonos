@@ -43,7 +43,6 @@ namespace pos
 {
 MetaFileIntf::MetaFileIntf(void)
 : fileName(""),
-  arrayName(""),
   arrayId(INT32_MAX),
   size(0),
   isOpened(false),
@@ -51,15 +50,6 @@ MetaFileIntf::MetaFileIntf(void)
   storage(StorageOpt::SSD),
   fileProperty(MetaFilePropertySet())
 {
-}
-
-MetaFileIntf::MetaFileIntf(std::string fname, std::string aname, StorageOpt storageOpt)
-: MetaFileIntf()
-{
-    fileName = fname;
-    arrayName = aname;
-    arrayId = MetaFsServiceSingleton::Instance()->GetArrayId(aname);
-    storage = storageOpt;
 }
 
 MetaFileIntf::MetaFileIntf(std::string fname, int arrayId, StorageOpt storageOpt)

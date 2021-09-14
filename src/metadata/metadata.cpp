@@ -140,7 +140,7 @@ Metadata::Init(void)
 #ifdef _ADMIN_ENABLED
     // TODO (r.saraf) to move this initialize out of meta sequence
     string fileName = "SmartLogPage.bin";
-    MetaFileIntf* smartLogFile = new FILESTORE(fileName, "");
+    MetaFileIntf* smartLogFile = new FILESTORE(fileName, arrayInfo->GetIndex());
     SmartLogMgrSingleton::Instance()->Init(smartLogFile);
 #endif
     return result;

@@ -137,7 +137,7 @@ JournalManager::JournalManager(IArrayInfo* info, IStateControl* state)
     new LogWriteHandler(),
     new JournalVolumeEventHandler(),
     new JournalWriter(),
-    new JournalLogBuffer(info->GetName()),
+    new JournalLogBuffer(info->GetIndex()),
     new BufferOffsetAllocator(),
     new LogGroupReleaser(),
     new CheckpointManager(),

@@ -56,9 +56,9 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
     AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
     WbStripeCtx* wbstripeCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
     AllocatorFileIoManager* fileManager_,
-    ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_)
+    ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, uint32_t arrayId_)
 : ContextManager(tp, EventSchedulerSingleton::Instance(), allocCtx_, segCtx_,
-    rebuildCtx_, wbstripeCtx_, gcCtx_, blockAllocStatus_, fileManager_, ctxReplayer_, flushProgress, info_, arrayName_)
+    rebuildCtx_, wbstripeCtx_, gcCtx_, blockAllocStatus_, fileManager_, ctxReplayer_, flushProgress, info_, arrayId_)
 {
 }
 
@@ -66,7 +66,7 @@ ContextManager::ContextManager(TelemetryPublisher* tp, EventScheduler* eventSche
     AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
     WbStripeCtx* wbstripeCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
     AllocatorFileIoManager* fileManager_,
-    ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, std::string arrayName_)
+    ContextReplayer* ctxReplayer_, bool flushProgress, AllocatorAddressInfo* info_, uint32_t arrayId_)
 : numReadIoIssued(0),
   numFlushIoIssued(0),
   numRebuildFlushIoIssued(0),
@@ -74,7 +74,7 @@ ContextManager::ContextManager(TelemetryPublisher* tp, EventScheduler* eventSche
   addrInfo(info_),
   curGcMode(MODE_NO_GC),
   prevGcMode(MODE_NO_GC),
-  arrayName(arrayName_)
+  arrayId(arrayId_)
 {
     // for UT
     allocatorCtx = allocCtx_;
@@ -93,8 +93,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp, EventScheduler* eventSche
     eventScheduler = eventScheduler_;
 }
 
-ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, std::string arrayName)
-: ContextManager(tp, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false, info, arrayName)
+ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, uint32_t arrayId_)
+: ContextManager(tp, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false, info, arrayId_)
 {
     allocatorCtx = new AllocatorCtx(info);
     segmentCtx = new SegmentCtx(info);
@@ -102,7 +102,7 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
     wbStripeCtx = new WbStripeCtx(info);
     gcCtx = new GcCtx();
     blockAllocStatus = new BlockAllocationStatus();
-    fileIoManager = new AllocatorFileIoManager(fileNames, info, arrayName);
+    fileIoManager = new AllocatorFileIoManager(fileNames, info, arrayId);
     contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, wbStripeCtx, info);
     fileOwner[SEGMENT_CTX] = segmentCtx;
     fileOwner[ALLOCATOR_CTX] = allocatorCtx;
@@ -282,7 +282,7 @@ GcMode
 ContextManager::GetCurrentGcMode(void)
 {
     int numFreeSegments = allocatorCtx->GetNumOfFreeSegment();
-    QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments, arrayName);
+    QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments, arrayId);
     prevGcMode = curGcMode;
     curGcMode = gcCtx->GetCurrentGcMode(numFreeSegments);
     if (prevGcMode != curGcMode)
