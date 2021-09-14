@@ -18,11 +18,13 @@ class MockMap : public Map
 {
 public:
     using Map::Map;
-    MOCK_METHOD(char*, GetMpage, (int pageNr), (override));
-    MOCK_METHOD(char*, GetMpageWithLock, (int pageNr), (override));
-    MOCK_METHOD(char*, AllocateMpage, (int pageNr), (override));
-    MOCK_METHOD(void, GetMpageLock, (int pageNr), (override));
-    MOCK_METHOD(void, ReleaseMpageLock, (int pageNr), (override));
+    MOCK_METHOD(uint64_t, GetSize, (), (override));
+    MOCK_METHOD(uint64_t, GetNumMpages, (), (override));
+    MOCK_METHOD(char*, GetMpage, (uint64_t pageNr), (override));
+    MOCK_METHOD(char*, GetMpageWithLock, (uint64_t pageNr), (override));
+    MOCK_METHOD(char*, AllocateMpage, (uint64_t pageNr), (override));
+    MOCK_METHOD(void, GetMpageLock, (uint64_t pageNr), (override));
+    MOCK_METHOD(void, ReleaseMpageLock, (uint64_t pageNr), (override));
 };
 
 } // namespace pos
