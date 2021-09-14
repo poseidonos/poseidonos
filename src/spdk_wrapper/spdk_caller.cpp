@@ -115,9 +115,10 @@ SpdkCaller::SpdkNvmfSubsystemGetNextNs(struct spdk_nvmf_subsystem* subsystem,
 
 int
 SpdkCaller::SpdkNvmfSubsystemPause(struct spdk_nvmf_subsystem* subsystem,
+    uint32_t nsid,
     spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg)
 {
-    return spdk_nvmf_subsystem_pause(subsystem, cbFunc, cbArg);
+    return spdk_nvmf_subsystem_pause(subsystem, nsid, cbFunc, cbArg);
 }
 
 int

@@ -200,7 +200,7 @@ AttachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int s
             uint32_t newNsid = 0;
             memset((char*)&opt, 0, sizeof(struct spdk_nvmf_ns_opts));
             opt.nsid = atoi(nsid);
-            newNsid = spdk_nvmf_subsystem_add_ns(subsystem, bdev, &opt, sizeof(opt), NULL);
+            newNsid = spdk_nvmf_subsystem_add_ns_ext(subsystem, bdevName, &opt, sizeof(opt), NULL);
             free(ctx->eventArg2);
             ctx->eventArg2 = spdk_sprintf_alloc("%u", newNsid);
             if (newNsid > 0)
@@ -338,83 +338,6 @@ DetachNamespaceAllPauseDone(struct spdk_nvmf_subsystem* subsystem,
     }
 }
 
-static void
-ListenDoneCallback(void* arg, int status)
-{
-    // This will for adjusting function api (spdk_nvmf_subsystem_add_listener)
-}
-
-static void
-TargetListenDone(void* arg, int status)
-{
-    struct EventContext* ctx = (struct EventContext*)arg;
-    struct spdk_nvme_transport_id* trid = (struct spdk_nvme_transport_id*)ctx->eventArg1;
-    struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)ctx->eventArg2;
-    int ret = 0;
-    if (status == NvmfCallbackStatus::SUCCESS)
-    {
-        spdk_nvmf_subsystem_add_listener(subsystem, trid,
-            ListenDoneCallback, nullptr);
-    }
-    else
-    {
-        SPDK_ERRLOG("fail to add listener %s status=%d\n", __FUNCTION__, status);
-    }
-
-    ctx->eventArg2 = NULL;
-    ret = spdk_nvmf_subsystem_resume(subsystem, SubsystemResumeDone, ctx);
-    if (ret != 0)
-    {
-        SPDK_ERRLOG("fail to resume subsystem(%s) during attach listener \n",
-            spdk_nvmf_subsystem_get_nqn(subsystem));
-    }
-}
-
-static void
-AttachListenerPauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
-{
-    struct EventContext* ctx = (struct EventContext*)arg;
-    if (status == NvmfCallbackStatus::SUCCESS)
-    {
-        struct spdk_nvme_transport_id* trid = (struct spdk_nvme_transport_id*)ctx->eventArg1;
-        ctx->eventArg2 = subsystem;
-        spdk_nvmf_tgt_listen(g_spdk_nvmf_tgt, trid);
-    }
-    else
-    {
-        GenericCallback(__FUNCTION__, arg, NvmfCallbackStatus::FAILED);
-        ActivateSubsystem(subsystem);
-    }
-}
-
-static void
-DetachListenerPauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
-{
-    struct EventContext* ctx = (struct EventContext*)arg;
-    if (status == NvmfCallbackStatus::SUCCESS)
-    {
-        struct spdk_nvme_transport_id* trid = (struct spdk_nvme_transport_id*)ctx->eventArg1;
-        int ret = 0;
-        ret = spdk_nvmf_subsystem_remove_listener(subsystem, trid);
-        if (ret < 0)
-        {
-            SPDK_ERRLOG("fail to remove listener : %s \n", __FUNCTION__);
-        }
-
-        ret = spdk_nvmf_subsystem_resume(subsystem, SubsystemResumeDone, ctx);
-        if (ret != 0)
-        {
-            SPDK_ERRLOG("fail to resume subsystem(%s) during detach listener \n",
-                spdk_nvmf_subsystem_get_nqn(subsystem));
-        }
-    }
-    else
-    {
-        GenericCallback(__FUNCTION__, arg, NvmfCallbackStatus::FAILED);
-        ActivateSubsystem(subsystem);
-    }
-}
-
 void
 InitNvmfCallbacks(struct NvmfTargetCallbacks* nvmfCallbacks)
 {
@@ -432,9 +355,6 @@ InitNvmfCallbacks(struct NvmfTargetCallbacks* nvmfCallbacks)
         nvmfCallbacks->detachNamespaceResumeDone = DetachNamespaceResumeDone;
         nvmfCallbacks->detachNamespaceAllPauseDone = DetachNamespaceAllPauseDone;
         nvmfCallbacks->detachNamespaceAllResumeDone = DetachNamespaceAllResumeDone;
-        nvmfCallbacks->attachListenerPauseDone = AttachListenerPauseDone;
-        nvmfCallbacks->targetListenDone = TargetListenDone;
-        nvmfCallbacks->detachListenerPauseDone = DetachListenerPauseDone;
     }
 }
 

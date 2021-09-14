@@ -57,7 +57,7 @@ public:
     virtual struct spdk_nvmf_ns* SpdkNvmfSubsystemGetFirstNs(struct spdk_nvmf_subsystem* subsystem);
     virtual struct spdk_nvmf_ns* SpdkNvmfSubsystemGetNextNs(struct spdk_nvmf_subsystem* subsystem,
         struct spdk_nvmf_ns* prevNs);
-    virtual int SpdkNvmfSubsystemPause(struct spdk_nvmf_subsystem* subsystem, spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg);
+    virtual int SpdkNvmfSubsystemPause(struct spdk_nvmf_subsystem* subsystem, uint32_t nsid, spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg);
     virtual int SpdkNvmfSubsystemResume(struct spdk_nvmf_subsystem* subsystem, spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg);
     virtual struct spdk_bdev* SpdkNvmfNsGetBdev(struct spdk_nvmf_ns* ns);
     virtual uint32_t SpdkNvmfNsGetId(const struct spdk_nvmf_ns* ns);

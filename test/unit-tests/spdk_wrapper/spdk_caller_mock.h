@@ -23,7 +23,7 @@ public:
     MOCK_METHOD(struct spdk_nvmf_ctrlr*, SpdkNvmfSubsystemGetNextCtrlr, (struct spdk_nvmf_subsystem * subsystem, struct spdk_nvmf_ctrlr* prevCtrlr), (override));
     MOCK_METHOD(struct spdk_nvmf_ns*, SpdkNvmfSubsystemGetFirstNs, (struct spdk_nvmf_subsystem * subsystem), (override));
     MOCK_METHOD(struct spdk_nvmf_ns*, SpdkNvmfSubsystemGetNextNs, (struct spdk_nvmf_subsystem * subsystem, struct spdk_nvmf_ns* prevNs), (override));
-    MOCK_METHOD(int, SpdkNvmfSubsystemPause, (struct spdk_nvmf_subsystem * subsystem, spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg), (override));
+    MOCK_METHOD(int, SpdkNvmfSubsystemPause, (struct spdk_nvmf_subsystem * subsystem, uint32_t nsid, spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg), (override));
     MOCK_METHOD(int, SpdkNvmfSubsystemResume, (struct spdk_nvmf_subsystem * subsystem, spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg), (override));
     MOCK_METHOD(struct spdk_bdev*, SpdkNvmfNsGetBdev, (struct spdk_nvmf_ns * ns), (override));
     MOCK_METHOD(uint32_t, SpdkNvmfNsGetId, (const struct spdk_nvmf_ns* ns), (override));

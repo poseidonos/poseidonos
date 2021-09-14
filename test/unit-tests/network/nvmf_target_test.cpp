@@ -310,7 +310,7 @@ TEST(NvmfTarget, DetachNamespace_GetNsSuccess)
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetNextNs(_, _)).WillByDefault(Return(ns[0]));
     ON_CALL(*mockSpdkCaller, SpdkNvmfNsGetBdev(_)).WillByDefault(Return(bdev));
     ON_CALL(*mockSpdkCaller, SpdkNvmfNsGetId(_)).WillByDefault(Return(1));
-    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemPause(_, _, _)).WillByDefault(Return(0));
+    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemPause(_, _, _, _)).WillByDefault(Return(0));
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
     struct pos_volume_info* vInfo = new pos_volume_info;
@@ -378,7 +378,7 @@ TEST(NvmfTarget, DetachNamespaceAll_Sucess)
     g_spdk_nvmf_tgt = nvmf_tgt[0];
     struct spdk_nvmf_subsystem* subsystem[1];
     ON_CALL(*mockSpdkCaller, SpdkNvmfTgtFindSubsystem(_, _)).WillByDefault(Return(subsystem[0]));
-    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemPause(_, _, _)).WillByDefault(Return(0));
+    ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemPause(_, _, _, _)).WillByDefault(Return(0));
     bool expected{true};
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);

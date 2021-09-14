@@ -37,9 +37,5 @@ extern "C"
 }
 namespace pos
 {
-void* BdevApi::GetBufferPointer(void)
-{
-    return bdev_malloc_get_buf();
-}
 } // namespace pos
 

@@ -54,6 +54,14 @@
 namespace pos
 {
 static void
+BdevOpenComplete(enum spdk_bdev_event_type type, struct spdk_bdev *bdev,
+		 void *event_ctx)
+{
+	SPDK_NOTICELOG("Unsupported bdev event: type %d\n", type);
+}
+
+
+static void
 AsyncIOComplete(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
 {
     UramIOContext* ioCtx = static_cast<UramIOContext*>(cb_arg);
@@ -162,6 +170,7 @@ UramDrv::ScanDevs(std::vector<UblockSharedPtr>* devs)
     return addedDeviceCount;
 }
 
+
 bool
 UramDrv::_OpenBdev(UramDeviceContext* devCtx)
 {
@@ -178,7 +187,7 @@ UramDrv::_OpenBdev(UramDeviceContext* devCtx)
         return false;
     }
     SPDK_NOTICELOG("Opening the bdev %s\n", devCtx->name);
-    int rc = spdk_bdev_open(devCtx->bdev, true, NULL, NULL, &bdev_desc);
+    int rc = spdk_bdev_open_ext(devCtx->name, true, BdevOpenComplete, NULL, &bdev_desc);
     if (rc)
     {
         SPDK_ERRLOG("Could not open bdev: %s\n", devCtx->name);

@@ -120,13 +120,13 @@ Spdk::_InitWorker(int argc, char** argv)
     struct spdk_app_opts opts = {};
 
     /* default value in opts */
-    spdk_app_opts_init(&opts);
+    spdk_app_opts_init(&opts, sizeof(opts));/*TODO*/
     opts.name = "ibof_nvmf";
     opts.mem_channel = -1;
     AffinityManager& affinityManager = *AffinityManagerSingleton::Instance();
     std::string reactorMaskString = affinityManager.GetReactorCPUSetString();
     opts.reactor_mask = reactorMaskString.c_str();
-    opts.master_core = affinityManager.GetMasterReactorCore();
+    opts.main_core = affinityManager.GetMasterReactorCore();
     opts.print_level = SPDK_LOG_INFO;
 
     rc = spdk_app_parse_args(argc,

@@ -31,7 +31,7 @@
  */
 
 #include "src/qos/qos_spdk_manager.h"
-
+#include "spdk/util.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/include/branch_prediction.h"
 #include "src/io/frontend_io/aio_submission_adapter.h"
