@@ -34,6 +34,7 @@ SUBDIRS = allocator \
         volume \
         device \
         spdk_wrapper \
+		spdk_wrapper/caller \
         mbr \
         bio \
         device/unvme \
@@ -68,7 +69,7 @@ SUBDIRS = allocator \
         wbt \
         admin \
         resource_manager \
-	telemetry \
+        telemetry \
         dpdk_wrapper \
         memory_checker
 

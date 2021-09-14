@@ -49,46 +49,43 @@ class Ubio;
 class IOContext : public DumpSharedPtr<IOContext*, static_cast<int>(DumpSharedPtrType::IO_CONTEXT)>
 {
 public:
-    IOContext(void) = delete;
-    explicit IOContext(UbioSmartPtr inputUbio, uint32_t inputRetry);
+    IOContext() {} // For MockClass
+    IOContext(UbioSmartPtr inputUbio, uint32_t inputRetry);
     virtual ~IOContext(void);
 
-    void SetIOKey(std::list<IOContext*>::iterator it);
-    std::pair<std::list<IOContext*>::iterator, bool> GetIOKey(void);
+    virtual void SetIOKey(std::list<IOContext*>::iterator it);
+    virtual std::pair<std::list<IOContext*>::iterator, bool> GetIOKey(void);
 
-    void SetErrorKey(std::list<IOContext*>::iterator it);
-    std::pair<std::list<IOContext*>::iterator, bool> GetErrorKey(void);
+    virtual void SetErrorKey(std::list<IOContext*>::iterator it);
+    virtual std::pair<std::list<IOContext*>::iterator, bool> GetErrorKey(void);
 
-    std::string GetDeviceName(void);
+    virtual std::string GetDeviceName(void);
 
-    UbioDir GetOpcode(void);
+    virtual UbioDir GetOpcode(void);
 
-    void* GetBuffer(void);
+    virtual void* GetBuffer(void);
 
-    uint64_t GetStartByteOffset(void);
-    uint64_t GetByteCount(void);
+    virtual uint64_t GetStartByteOffset(void);
+    virtual uint64_t GetByteCount(void);
 
-    uint64_t GetStartSectorOffset(void);
-    uint64_t GetSectorCount(void);
+    virtual uint64_t GetStartSectorOffset(void);
+    virtual uint64_t GetSectorCount(void);
 
-    void AddPendingErrorCount(uint32_t errorCountToAdd = 1);
-    void SubtractPendingErrorCount(uint32_t errorCountToSubtract = 1);
+    virtual void AddPendingErrorCount(uint32_t errorCountToAdd = 1);
+    virtual void SubtractPendingErrorCount(uint32_t errorCountToSubtract = 1);
 
-    bool CheckErrorDisregard(void);
+    virtual bool CheckErrorDisregard(void);
 
-    void CompleteIo(IOErrorType error);
-    void SetAsyncIOCompleted(void);
-    void ClearAsyncIOCompleted(void);
-    bool IsAsyncIOCompleted(void);
-    bool CheckAndDecreaseRetryCount();
-    void ClearRetryCount(void);
+    virtual void CompleteIo(IOErrorType error);
+    virtual void SetAsyncIOCompleted(void);
+    virtual void ClearAsyncIOCompleted(void);
+    virtual bool IsAsyncIOCompleted(void);
+    virtual bool CheckAndDecreaseRetryCount();
+    virtual void ClearRetryCount(void);
 
-    void IncSubmitRetryCount(void);
-    void ClearSubmitRetryCount(void);
-    uint32_t GetSubmitRetryCount(void);
-    void SetAdminCommand(void);
-
-    Ubio* GetUbio(void);
+    virtual void IncSubmitRetryCount(void);
+    virtual void ClearSubmitRetryCount(void);
+    virtual uint32_t GetSubmitRetryCount(void);
 
 private:
     UbioSmartPtr ubio;

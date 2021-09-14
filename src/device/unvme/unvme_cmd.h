@@ -42,21 +42,14 @@ namespace pos
 {
 class UnvmeDeviceContext;
 class UnvmeIOContext;
-
-class AbortContext
-{
-public:
-    AbortContext(struct spdk_nvme_ctrlr* ctrlr,
-        struct spdk_nvme_qpair* qpair, uint16_t cid);
-
-    struct spdk_nvme_ctrlr* ctrlr;
-    struct spdk_nvme_qpair* qpair;
-    uint16_t cid;
-};
+class AbortContext;
+class SpdkNvmeCaller;
 
 class UnvmeCmd
 {
 public:
+    UnvmeCmd(SpdkNvmeCaller* spdkNvmeCaller = nullptr);
+    ~UnvmeCmd(void);
     int RequestIO(UnvmeDeviceContext* deviceContext,
         spdk_nvme_cmd_cb callbackFunc,
         UnvmeIOContext* ioContext);
@@ -77,5 +70,7 @@ private:
     int _RequestNvmeCli(UnvmeDeviceContext* deviceContext,
         spdk_nvme_cmd_cb callbackFunc,
         UnvmeIOContext* ioContext);
+
+    SpdkNvmeCaller* spdkNvmeCaller;
 };
 } // namespace pos

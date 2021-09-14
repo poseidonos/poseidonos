@@ -49,14 +49,14 @@ public:
     DeviceContext(void);
     virtual ~DeviceContext(void);
 
-    void IncreasePendingIO(void);
-    void DecreasePendingIO(void);
-    uint32_t GetPendingIOCount(void);
+    virtual void IncreasePendingIO(void);
+    virtual void DecreasePendingIO(void);
+    virtual uint32_t GetPendingIOCount(void);
 
-    void AddPendingError(IOContext& errorToAdd);
-    void RemovePendingError(IOContext& errorToRemove);
-    uint32_t GetPendingErrorCount(void);
-    std::pair<IOContext*, bool> GetPendingError(void);
+    virtual void AddPendingError(IOContext& errorToAdd);
+    virtual void RemovePendingError(IOContext& errorToRemove);
+    virtual uint32_t GetPendingErrorCount(void);
+    virtual std::pair<IOContext*, bool> GetPendingError(void);
 
 private:
     bool _CheckErrorReady(IOContext& ioCtx);

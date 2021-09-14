@@ -30,34 +30,50 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/spdk_wrapper/caller/spdk_nvme_caller.h"
 
-#include "src/device/base/io_context.h"
+#include <gtest/gtest.h>
 
 namespace pos
 {
-class Ubio;
-class UnvmeDeviceContext;
-
-class UnvmeIOContext : public IOContext
+TEST(SpdkNvmeCaller, SpdkNvmeCaller_)
 {
-public:
-    UnvmeIOContext(void) {} // For MockClass
-    UnvmeIOContext(UnvmeDeviceContext* inputDevCtx,
-        UbioSmartPtr inputUbio, uint32_t inputRetry = 0,
-        bool inputFrontEnd = false);
+}
 
-    virtual ~UnvmeIOContext(void);
+TEST(SpdkNvmeCaller, SpdkNvmeNsGetId_)
+{
+}
 
-    virtual UnvmeDeviceContext* GetDeviceContext(void);
-    virtual bool IsFrontEnd(void);
+TEST(SpdkNvmeCaller, SpdkNvmeNsGetCtrlr_)
+{
+}
 
-    virtual void SetAdminCommand(void);
-    virtual bool IsAdminCommand(void);
+TEST(SpdkNvmeCaller, SpdkNvmeNsCmdDatasetManagement_)
+{
+}
 
-private:
-    UnvmeDeviceContext* devCtx;
-    bool frontEnd;
-    bool adminCommand;
-};
+TEST(SpdkNvmeCaller, SpdkNvmeNsCmdRead_)
+{
+}
+
+TEST(SpdkNvmeCaller, SpdkNvmeNsCmdWrite_)
+{
+}
+
+TEST(SpdkNvmeCaller, SpdkNvmeCtrlrCmdAbort_)
+{
+}
+
+TEST(SpdkNvmeCaller, SpdkNvmeCtrlrCmdIoRaw_)
+{
+}
+
+TEST(SpdkNvmeCaller, SpdkNvmeCtrlrCmdAdminRaw_)
+{
+}
+
+TEST(SpdkNvmeCaller, SpdkNvmeCtrlrCmdGetLogPage_)
+{
+}
+
 } // namespace pos

@@ -32,32 +32,21 @@
 
 #pragma once
 
-#include "src/device/base/io_context.h"
+#include <cstdint>
+#include "spdk/nvme.h"
 
 namespace pos
 {
-class Ubio;
-class UnvmeDeviceContext;
 
-class UnvmeIOContext : public IOContext
+class AbortContext
 {
 public:
-    UnvmeIOContext(void) {} // For MockClass
-    UnvmeIOContext(UnvmeDeviceContext* inputDevCtx,
-        UbioSmartPtr inputUbio, uint32_t inputRetry = 0,
-        bool inputFrontEnd = false);
+    AbortContext(struct spdk_nvme_ctrlr* ctrlr,
+        struct spdk_nvme_qpair* qpair, uint16_t cid);
 
-    virtual ~UnvmeIOContext(void);
-
-    virtual UnvmeDeviceContext* GetDeviceContext(void);
-    virtual bool IsFrontEnd(void);
-
-    virtual void SetAdminCommand(void);
-    virtual bool IsAdminCommand(void);
-
-private:
-    UnvmeDeviceContext* devCtx;
-    bool frontEnd;
-    bool adminCommand;
+    struct spdk_nvme_ctrlr* ctrlr;
+    struct spdk_nvme_qpair* qpair;
+    uint16_t cid;
 };
+
 } // namespace pos

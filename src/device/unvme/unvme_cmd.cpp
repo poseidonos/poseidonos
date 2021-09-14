@@ -35,6 +35,8 @@
 #include "src/bio/ubio.h"
 #include "src/include/pos_error_code.hpp"
 #include "src/logger/logger.h"
+#include "src/spdk_wrapper/abort_context.h"
+#include "src/spdk_wrapper/caller/spdk_nvme_caller.h"
 #include "unvme_device_context.h"
 #include "unvme_io_context.h"
 #ifdef _ADMIN_ENABLED
@@ -43,12 +45,21 @@
 #endif
 namespace pos
 {
-AbortContext::AbortContext(struct spdk_nvme_ctrlr* inputCtrlr,
-    struct spdk_nvme_qpair* inputQpair, uint16_t inputCid)
-: ctrlr(inputCtrlr),
-  qpair(inputQpair),
-  cid(inputCid)
+UnvmeCmd::UnvmeCmd(SpdkNvmeCaller* spdkNvmeCaller)
+: spdkNvmeCaller(spdkNvmeCaller)
 {
+    if (this->spdkNvmeCaller == nullptr)
+    {
+        this->spdkNvmeCaller = new SpdkNvmeCaller();
+    }
+}
+
+UnvmeCmd::~UnvmeCmd(void)
+{
+    if (spdkNvmeCaller != nullptr)
+    {
+        delete spdkNvmeCaller;
+    }
 }
 
 int
@@ -69,14 +80,14 @@ UnvmeCmd::RequestIO(UnvmeDeviceContext* deviceContext,
     {
         case UbioDir::Read:
         {
-            ret = spdk_nvme_ns_cmd_read(ns, ioqpair, data,
+            ret = spdkNvmeCaller->SpdkNvmeNsCmdRead(ns, ioqpair, data,
                 startLBA, sectorCount,
                 callbackFunc, static_cast<void*>(ioCtx), 0);
             break;
         }
         case UbioDir::Write:
         {
-            ret = spdk_nvme_ns_cmd_write(ns, ioqpair, data,
+            ret = spdkNvmeCaller->SpdkNvmeNsCmdWrite(ns, ioqpair, data,
                 startLBA, sectorCount,
                 callbackFunc, static_cast<void*>(ioCtx), 0);
             break;
@@ -99,12 +110,13 @@ UnvmeCmd::RequestIO(UnvmeDeviceContext* deviceContext,
             deviceContext->IncAdminCommandCount();
             ioCtx->SetAdminCommand();
 
-            ret = spdk_nvme_ctrlr_cmd_abort(abortContext->ctrlr,
+            ret = spdkNvmeCaller->SpdkNvmeCtrlrCmdAbort(abortContext->ctrlr,
                 abortContext->qpair,
                 abortContext->cid,
                 callbackFunc, ioCtx);
             break;
         }
+            /* Comment out for test coverage.
 #ifdef _ADMIN_ENABLED
         case UbioDir::GetLogPage:
         {
@@ -122,6 +134,7 @@ UnvmeCmd::RequestIO(UnvmeDeviceContext* deviceContext,
             break;
         }
 #endif
+*/
         case UbioDir::AdminPassTh:
         {
             deviceContext->IncAdminCommandCount();
@@ -134,16 +147,6 @@ UnvmeCmd::RequestIO(UnvmeDeviceContext* deviceContext,
             deviceContext->IncAdminCommandCount();
             ioCtx->SetAdminCommand();
             ret = _RequestNvmeCli(deviceContext, callbackFunc, ioCtx);
-            break;
-        }
-        default:
-        {
-            POS_EVENT_ID eventId =
-                POS_EVENT_ID::UNVME_OPERATION_NOT_SUPPORTED;
-            POS_TRACE_WARN(static_cast<int>(eventId),
-                PosEventId::GetString(eventId),
-                static_cast<int>(dir));
-            ret = UNVME_OPERATION_NOT_SUPPORTED_ERROR;
             break;
         }
     }
@@ -165,9 +168,10 @@ UnvmeCmd::_RequestWriteUncorrectable(UnvmeDeviceContext* deviceContext,
     uint64_t startingLBA = ioCtx->GetStartSectorOffset();
     uint32_t NumberOfLogicalBlocks = ioCtx->GetSectorCount() - 1; // Zero-based
 
-    struct spdk_nvme_ctrlr* ctrlr = spdk_nvme_ns_get_ctrlr(deviceContext->ns);
+    struct spdk_nvme_ctrlr* ctrlr =
+        spdkNvmeCaller->SpdkNvmeNsGetCtrlr(deviceContext->ns);
     struct spdk_nvme_qpair* ioqpair = deviceContext->ioQPair;
-    uint32_t namespaceID = spdk_nvme_ns_get_id(deviceContext->ns);
+    uint32_t namespaceID = spdkNvmeCaller->SpdkNvmeNsGetId(deviceContext->ns);
     struct spdk_nvme_cmd cmd;
     {
         memset(&cmd, 0, sizeof(cmd));
@@ -179,7 +183,8 @@ UnvmeCmd::_RequestWriteUncorrectable(UnvmeDeviceContext* deviceContext,
     }
     // The method copies spdk_nvme_cmd(cmd) inside the API,
     // so we don't need to allocate it for async io.
-    int returnValue = spdk_nvme_ctrlr_cmd_io_raw(ctrlr, ioqpair, &cmd,
+    int returnValue = spdkNvmeCaller->SpdkNvmeCtrlrCmdIoRaw(
+        ctrlr, ioqpair, &cmd,
         nullptr, 0, callbackFunc,
         static_cast<void*>(ioCtx));
     return returnValue;
@@ -214,7 +219,8 @@ UnvmeCmd::_RequestDeallocate(UnvmeDeviceContext* deviceContext,
 
     uint16_t num_range = 1;
 
-    int returnValue = spdk_nvme_ns_cmd_dataset_management(ns, ioqpair, SPDK_NVME_DSM_ATTR_DEALLOCATE,
+    int returnValue = spdkNvmeCaller->SpdkNvmeNsCmdDatasetManagement(
+        ns, ioqpair, SPDK_NVME_DSM_ATTR_DEALLOCATE,
         rangeDefinition, num_range, callbackFunc, static_cast<void*>(ioCtx));
     POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_PARTITION_TRIM,
         "Requesting Trimming from {} with block number : {}", startingLBA, NumberOfLogicalBlocks);
@@ -225,7 +231,8 @@ int
 UnvmeCmd::_RequestAdminPassThu(UnvmeDeviceContext* deviceContext,
     spdk_nvme_cmd_cb callbackFunc, UnvmeIOContext* ioCtx)
 {
-    struct spdk_nvme_ctrlr* ctrlr = spdk_nvme_ns_get_ctrlr(deviceContext->ns);
+    struct spdk_nvme_ctrlr* ctrlr = spdkNvmeCaller->SpdkNvmeNsGetCtrlr(
+        deviceContext->ns);
     struct spdk_nvme_cmd cmd;
     {
         memcpy(&cmd, ioCtx->GetBuffer(), sizeof(cmd));
@@ -233,12 +240,12 @@ UnvmeCmd::_RequestAdminPassThu(UnvmeDeviceContext* deviceContext,
 
     // The method copies spdk_nvme_cmd(cmd) inside the API,
     // so we don't need to allocate it for async io.
-    int returnValue = spdk_nvme_ctrlr_cmd_admin_raw(ctrlr,
-                                                    &cmd,
-                                                    nullptr,
-                                                    0,
-                                                    callbackFunc,
-                                                    static_cast<void*>(ioCtx));
+    int returnValue = spdkNvmeCaller->SpdkNvmeCtrlrCmdAdminRaw(ctrlr,
+        &cmd,
+        nullptr,
+        0,
+        callbackFunc,
+        static_cast<void*>(ioCtx));
 
     return returnValue;
 }
@@ -247,7 +254,8 @@ int
 UnvmeCmd::_RequestNvmeCli(UnvmeDeviceContext* deviceContext,
     spdk_nvme_cmd_cb callbackFunc, UnvmeIOContext* ioCtx)
 {
-    struct spdk_nvme_ctrlr* ctrlr = spdk_nvme_ns_get_ctrlr(deviceContext->ns);
+    struct spdk_nvme_ctrlr* ctrlr =
+        spdkNvmeCaller->SpdkNvmeNsGetCtrlr(deviceContext->ns);
     struct spdk_nvme_cmd cmd;
 
     memcpy(&cmd, ioCtx->GetBuffer(), sizeof(cmd));
@@ -258,15 +266,16 @@ UnvmeCmd::_RequestNvmeCli(UnvmeDeviceContext* deviceContext,
     {
         case spdk_nvme_admin_opcode::SPDK_NVME_OPC_GET_LOG_PAGE:
         {
-            returnValue = spdk_nvme_ctrlr_cmd_get_log_page(
-                ctrlr /*spdk_nvme_ctrlr*/,
-                cmd.cdw10 /*log_page*/,
-                SPDK_NVME_GLOBAL_NS_TAG,
-                ioCtx->GetBuffer(),
-                ioCtx->GetByteCount(),
-                0,
-                callbackFunc,
-                static_cast<void*>(ioCtx));
+            returnValue =
+                spdkNvmeCaller->SpdkNvmeCtrlrCmdGetLogPage(
+                    ctrlr /*spdk_nvme_ctrlr*/,
+                    cmd.cdw10 /*log_page*/,
+                    SPDK_NVME_GLOBAL_NS_TAG,
+                    ioCtx->GetBuffer(),
+                    ioCtx->GetByteCount(),
+                    0,
+                    callbackFunc,
+                    static_cast<void*>(ioCtx));
             break;
         }
     }

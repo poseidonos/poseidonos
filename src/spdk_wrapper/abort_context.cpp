@@ -30,34 +30,14 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "abort_context.h"
 
-#include "src/device/base/io_context.h"
+using namespace pos;
 
-namespace pos
+AbortContext::AbortContext(struct spdk_nvme_ctrlr* inputCtrlr,
+    struct spdk_nvme_qpair* inputQpair, uint16_t inputCid)
+: ctrlr(inputCtrlr),
+  qpair(inputQpair),
+  cid(inputCid)
 {
-class Ubio;
-class UnvmeDeviceContext;
-
-class UnvmeIOContext : public IOContext
-{
-public:
-    UnvmeIOContext(void) {} // For MockClass
-    UnvmeIOContext(UnvmeDeviceContext* inputDevCtx,
-        UbioSmartPtr inputUbio, uint32_t inputRetry = 0,
-        bool inputFrontEnd = false);
-
-    virtual ~UnvmeIOContext(void);
-
-    virtual UnvmeDeviceContext* GetDeviceContext(void);
-    virtual bool IsFrontEnd(void);
-
-    virtual void SetAdminCommand(void);
-    virtual bool IsAdminCommand(void);
-
-private:
-    UnvmeDeviceContext* devCtx;
-    bool frontEnd;
-    bool adminCommand;
-};
-} // namespace pos
+}

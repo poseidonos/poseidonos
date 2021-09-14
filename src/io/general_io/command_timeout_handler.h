@@ -43,6 +43,7 @@
 namespace pos
 {
 class UBlockDevice;
+class AbortContext;
 
 class CommandTimeoutHandler
 {

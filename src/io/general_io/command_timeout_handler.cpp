@@ -46,6 +46,7 @@
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/io_scheduler/io_dispatcher.h"
+#include "src/spdk_wrapper/abort_context.h"
 
 using namespace std;
 using namespace std::placeholders;
