@@ -146,6 +146,8 @@ ReplayBlockMapUpdate::_UpdateMap(uint32_t offset)
         .numBlks = 1};
 
     int result = vsaMap->SetVSAsWithSyncOpen(volId, rba, virtualBlks);
+    assert(result >= 0);
+
     if (replaySegmentInfo == true)
     {
         blockAllocator->ValidateBlks(virtualBlks);

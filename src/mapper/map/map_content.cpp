@@ -84,6 +84,8 @@ int
 MapContent::OpenMapFile(void)
 {
     uint64_t fileSize = mapHeader->GetSize() + map->GetSize() * map->GetNumMpages();
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper] Open MapFile fileName:{}, size:{}, arrayId:{}", fileName, fileSize, arrayId);
+    assert(fileSize > 0);
     int ret = mapIoHandler->OpenFile(fileName, fileSize);
     if (ret == EID(NEED_TO_INITIAL_STORE))
     {
