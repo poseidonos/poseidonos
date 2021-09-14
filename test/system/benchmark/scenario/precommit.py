@@ -1,8 +1,8 @@
+import fio
+import initiator
 import json
 import lib
 import target
-import initiator
-import fio
 from datetime import datetime
 
 
@@ -48,14 +48,13 @@ def play(json_targets, json_inits, json_scenario):
             skip_workload = True
             break
         initiators[init_name] = init_obj
+
     # run workload
     if not skip_workload:
         lib.printer.green(f" fio start")
-        test_target = targets["Target01"]
-        test_init = initiators["Initiator01"]
-        test_fio = fio.manager.Fio()
-
-        test_fio.cmd = test_init.fio_cmd
+        test_target = targets[next(iter(targets))]
+        test_init = initiators[next(iter(initiators))]
+        test_fio = fio.manager.Fio(test_init.id, test_init.pw, test_init.nic_ssh)
 
         test_fio.opt["ioengine"] = f"{test_init.spdk_dir}/examples/nvme/fio_plugin/fio_plugin"
         test_fio.opt["runtime"] = "120"
@@ -71,16 +70,14 @@ def play(json_targets, json_inits, json_scenario):
         test_fio.opt["direct"] = "1"
         # test_fio.opt["output-format"] = "json"
 
-        test_fio.jobs.append(f" --name=precommit_test_01 --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 \
-        traddr={test_target.nic_ip1} trsvcid=1158 subnqn=nqn.2020-10.pos\\:subsystem01 ns=1\"")
-        test_fio.jobs.append(f" --name=precommit_test_02 --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 \
-        traddr={test_target.nic_ip1} trsvcid=1158 subnqn=nqn.2020-10.pos\\:subsystem02 ns=1\"")
-        test_fio.jobs.append(f" --name=precommit_test_03 --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 \
-        traddr={test_target.nic_ip1} trsvcid=1158 subnqn=nqn.2020-10.pos\\:subsystem03 ns=1\"")
+        for subsys in test_target.json["SPDK"]["SUBSYSTEMs"]:
+            test_fio.jobs.append(f" --name=job_{subsys['SN']} --filename=\"trtype={test_target.spdk_tp} adrfam=IPv4 traddr={test_target.json['NIC'][subsys['IP']]} trsvcid={subsys['PORT']} subnqn={subsys['NQN']} ns=1\"")
 
         block_size = ["512", "4k", "128k", "512-128k"]
         readwrite = ["write", "randwrite", "randrw"]
         for bs in block_size:
+            if skip_workload:
+                break
             for rw in readwrite:
                 test_fio.opt["bs"] = bs
                 test_fio.opt["readwrite"] = rw
@@ -97,17 +94,24 @@ def play(json_targets, json_inits, json_scenario):
                     if test_fio.opt.get("bsrange"):
                         del test_fio.opt["bsrange"]
 
-                if test_fio.SyncRun():
-                    print(f" {now_date}_precommit_fio_{bs}_{rw} done")
-                    try:
-                        lib.subproc.popen(f"sshpass -p {test_init.pw} scp {test_init.id}@{test_init.nic_ssh}:{test_fio.opt['output']} {json_scenario['OUTPUT_DIR']}")
-                    except Exception as e:
-                        lib.printer.red(f"{__name__} [Error] {e}")
-                else:
+                if not test_fio.Prepare():
                     skip_workload = True
                     break
-            if skip_workload:
-                break
+
+                try:
+                    print(f" run -> {now_date}_precommit_fio_{bs}_{rw}")
+                    fio.manager.parallel_run([test_fio.cmd])
+                except Exception as e:
+                    lib.printer.red(f"{__name__} [Error] {e}")
+                    skip_workload = True
+                    break
+
+                try:
+                    lib.subproc.sync_run(f"sshpass -p {test_init.pw} scp {test_init.id}@{test_init.nic_ssh}:{test_fio.opt['output']} {json_scenario['OUTPUT_DIR']}")
+                except Exception as e:
+                    lib.printer.red(f"{__name__} [Error] {e}")
+                    skip_workload = True
+                    break
 
         lib.printer.green(f" fio end")
 

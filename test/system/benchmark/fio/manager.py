@@ -1,28 +1,36 @@
+import asyncio
 import copy
 import lib
 
 
 class Fio:
-    def __init__(self):
+    def __init__(self, id, pw, nic_ssh):
+        self.id = id
+        self.pw = pw
+        self.nic_ssh = nic_ssh
         self.opt = {}
-        self.cmd = ""
         self.jobs = []
+        self.cmd = ""
 
-    def SyncRun(self):
+    def Prepare(self):
         try:
-            cmd = copy.deepcopy(self.cmd)
-            subcmd = "fio"
+            self.cmd = f"sshpass -p {self.pw} ssh {self.id}@{self.nic_ssh} nohup 'fio"
             for key in self.opt:
-                subcmd += f" --{key}"
-                subcmd += f"={self.opt[key]}"
-
+                self.cmd += f" --{key}={self.opt[key]}"
             for job in self.jobs:
-                subcmd += job
-
-            cmd.extend(["nohup", subcmd])
-            lib.subproc.popen(cmd, True, False)
+                self.cmd += job
+            self.cmd += "'"
             return True
         except Exception as e:
-            lib.printer.red(cmd)
             lib.printer.red(f"{__name__} [Error] {e}")
             return False
+
+
+def parallel_run(cmd_list):
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    loop = asyncio.get_event_loop()
+    tasks = asyncio.gather(*[
+        lib.subproc.async_run(cmd, True) for cmd in cmd_list
+    ])
+    loop.run_until_complete(tasks)
+    loop.close()

@@ -16,6 +16,7 @@
 CMakeCache.txt
 test/Testing/
 test/build/
+test/system/benchmark/output/
 test/**/Makefile
 test/**/test_detail.xml
 aaa
