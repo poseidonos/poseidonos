@@ -69,7 +69,9 @@ SUBDIRS = allocator \
         wbt \
         admin \
         resource_manager \
-        telemetry \
+	telemetry \
+        telemetry/common \
+        telemetry/telemetry_config \
         dpdk_wrapper \
         memory_checker
 

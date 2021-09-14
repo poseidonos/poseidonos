@@ -61,6 +61,7 @@
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_manager/telemetry_manager_service.h"
+#include "src/telemetry/telemetry_config/telemetry_config.h"
 #include "src/volume/volume_service.h"
 #include "src/resource_manager/memory_manager.h"
 
@@ -98,6 +99,7 @@ DebugInfo::DebugInfo(void)
   nvmfTarget(nullptr),
   telemetryClient(nullptr),
   telemetryManagerService(nullptr),
+  telemetryConfig(nullptr),
   memoryManager(nullptr)
 {
 }
@@ -136,6 +138,7 @@ DebugInfo::Update(void)
     flushCount = FlushCountSingleton::Instance();
     telemetryClient = TelemetryClientSingleton::Instance();
     telemetryManagerService = TelemetryManagerServiceSingletone::Instance();
+    telemetryConfig = TelemetryConfigSingleton::Instance();
     memoryManager = MemoryManagerSingleton::Instance();
 }
 } // namespace pos

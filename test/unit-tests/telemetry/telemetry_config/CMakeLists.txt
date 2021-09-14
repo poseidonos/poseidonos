@@ -1,0 +1,8 @@
+POS_ADD_UNIT_TEST(telemetry_config_ut telemetry_config_test.cpp)
+POS_ADD_UNIT_TEST(cli_config_reader_ut cli_config_reader_test.cpp)
+POS_ADD_UNIT_TEST(env_variable_config_reader_ut env_variable_config_reader_test.cpp)
+POS_ADD_UNIT_TEST(file_config_reader_ut file_config_reader_test.cpp)
+POS_ADD_UNIT_TEST(target_ut target_test.cpp)
+POS_ADD_UNIT_TEST(server_ut server_test.cpp)
+POS_ADD_UNIT_TEST(client_ut client_test.cpp)
+POS_ADD_UNIT_TEST(buffer_size_ut buffer_size_test.cpp)

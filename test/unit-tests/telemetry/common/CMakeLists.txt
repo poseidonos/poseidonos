@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(config_reader_ut config_reader_test.cpp)

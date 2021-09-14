@@ -129,6 +129,7 @@ CXXFLAGS += $(INCLUDE)
 LDFLAGS += -ljsoncpp -ljsonrpccpp-common -ljsonrpccpp-client
 LDFLAGS += -no-pie -laio -ltcmalloc
 LDFLAGS += -lnuma
+LDFLAGS += -lyaml-cpp
 
 CLI_CERT_DIR = /etc/pos/cert
 CLI_DIR = $(TOP)/tool/cli

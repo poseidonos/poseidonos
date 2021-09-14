@@ -68,6 +68,7 @@ class MetaFsService;
 class NvmfTarget;
 class TelemetryClient;
 class TelemetryManagerService;
+class TelemetryConfig;
 class MemoryManager;
 
 extern DebugInfo* debugInfo;
@@ -109,6 +110,7 @@ private:
     NvmfTarget* nvmfTarget;
     TelemetryClient* telemetryClient;
     TelemetryManagerService* telemetryManagerService;
+    TelemetryConfig* telemetryConfig;
     MemoryManager* memoryManager;
 };
 

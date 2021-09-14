@@ -1,0 +1,54 @@
+system:
+    journal:
+        enable: false
+        buffer_size_in_mb: 0
+    logger:
+        logfile_size_in_mb: 50
+        logfile_rotation_count: 20
+        min_allowable_log_level: debug
+        deduplication_enabled: true
+        deduplication_sensitivity_in_msec: 20
+    debug:
+        memory_checker: true
+    ioat:
+        enable: true
+        ioat_cnt_numa0: 8
+        ioat_cnt_numa1: 8
+    affinity_manager:
+        use_config: true
+        reactor: 0
+        udd_io_worker: 1
+        event_scheduler: 2
+        event_worker: 3-5
+        general_usage: 6
+        qos: 7
+        meta_scheduler: 8
+        meta_io: 9
+    user_nvme_driver:
+        use_config: true
+        ssd_timeout_us: 8000000
+        retry_count_backend_io: 5
+        retry_count_frontend_io: 3
+    perf_impact:
+        gc: high
+        rebuild: low
+telemetry:
+    client:
+        target:                       # client -> manager 간에 GRPC 를 안하게 되면, (ip, port) 는 당분간 필요없을듯.
+            ip: localhost
+            port: 10101
+        enabled: true                 # false 일 경우, TelemetryPublisher가 data 를 보내도, 완전 무시하도록 할 수 있는 옵션. 즉 map collection 에 저장하지 않음.
+        rate_limit: 60                # 애초에는 client 가 dumb 이어서 buffering 이 없는 모델이었기 때문에, manager 로 너무 많은 요청이 가지 않도록 하는게 목적이었음. 현재는 buffering 을 하기 때문에, rate_limit 은 일단 필요없을듯.
+        timeout_sec: 1                # GRPC 를 안하게 되므로, 당분간 필요없을듯.
+        circuit_break_policy: none    # GRPC 를 안하게 되므로, 당분간 필요없을듯.
+    server:
+        ip: localhost
+        port: 10101
+        enabled: true                 # true 이면, POS startup sequence 에서 grpc 서버를 시작할 수 있어야 함. false 이면 grpc 서버를 시작하지 않음.
+        buffer_size:                  # 이 부분은 manager 의 memory usage 를 제한할 수 있는 안전 장치였는데, client 가 buffering 을 하므로 client config 로 옮겨야 할 수도. 논의 필요.
+            counters: 10000
+            histograms: 10000
+            gauges: 10000
+            latencies: 10000
+            typed_objects: 10000
+            influxdb_rows: 10000
