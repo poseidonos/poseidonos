@@ -43,7 +43,7 @@ namespace pos
 class MpageInfo
 {
 public:
-    MpageInfo(void) : numValidMpages(UINT64_MAX), numTotalMpages(UINT64_MAX), numUsedBlks(0), reserved(0) {}
+    MpageInfo(void) : numValidMpages(UINT64_MAX), numTotalMpages(UINT64_MAX), numUsedBlks(0), age(0) {}
     uint64_t numValidMpages;
     uint64_t numTotalMpages;
     uint64_t numUsedBlks;
