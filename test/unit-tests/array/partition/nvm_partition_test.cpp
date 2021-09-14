@@ -5,7 +5,10 @@
 #include "src/include/array_config.h"
 #include "src/include/pos_event_id.h"
 #include "test/unit-tests/array/ft/buffer_entry_mock.h"
+#include "test/unit-tests/device/base/ublock_device_mock.h"
+#include "test/unit-tests/array/device/array_device_mock.h"
 
+using ::testing::Return;
 namespace pos
 {
 static LogicalBlkAddr
@@ -213,7 +216,13 @@ TEST(NvmPartition, ByteTranslate_testIfValidAddressIsFilledIn)
     validAddr.byteOffset = testByteOffset;
     validAddr.byteSize = 10;
     vector<ArrayDevice*> devs;
-    devs.push_back(nullptr);  // putting dummy 'cause I'm not interested
+    string mockDevName = "mockDev";
+    MockUBlockDevice* mockUblockDevice = new MockUBlockDevice(mockDevName, 1024, NULL);
+    MockArrayDevice* mockArrayDevice = new MockArrayDevice(NULL);
+    devs.push_back(mockArrayDevice);
+
+    EXPECT_CALL(*mockArrayDevice, GetUblockPtr).WillRepeatedly(Return(mockUblockDevice));
+    EXPECT_CALL(*mockUblockDevice, GetByteAddress).WillOnce(Return((void*)0));
 
     NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     PhysicalByteAddr dest;
@@ -227,6 +236,9 @@ TEST(NvmPartition, ByteTranslate_testIfValidAddressIsFilledIn)
     int expectedSrcSector = expectedSrcBlock * ArrayConfig::SECTORS_PER_BLOCK;
     int expectedDestByte = (expectedSrcSector + partPhySize.startLba) * ArrayConfig::SECTOR_SIZE_BYTE + testByteOffset;
     ASSERT_EQ(expectedDestByte, dest.byteAddress);
+
+    delete mockArrayDevice;
+    delete mockUblockDevice;
 }
 
 TEST(NvmPartition, Convert_testIfInvalidEntryReturnsError)
@@ -293,7 +305,14 @@ TEST(NvmPartition, ByteConvert_testIfValidEntryIsFilledIn)
     uint32_t blkCnt = 10; // bytes to convert
     LogicalByteWriteEntry validEntry = buildValidLogicalByteWriteEntry(totalStripes, blkCnt);
     vector<ArrayDevice*> devs;
-    devs.push_back(nullptr); // 'cause I'm not interested
+    string mockDevName = "mockDev";
+    MockUBlockDevice* mockUblockDevice = new MockUBlockDevice(mockDevName, 1024, NULL);
+    MockArrayDevice* mockArrayDevice = new MockArrayDevice(NULL);
+    devs.push_back(mockArrayDevice);
+
+    EXPECT_CALL(*mockArrayDevice, GetUblockPtr).WillRepeatedly(Return(mockUblockDevice));
+    EXPECT_CALL(*mockUblockDevice, GetByteAddress).WillOnce(Return((void*)0));
+
     NvmPartition nvmPart("mock-array", 0, PartitionType::META_NVM, partPhySize, devs);
     std::list<PhysicalByteWriteEntry> dest;
 
@@ -305,6 +324,9 @@ TEST(NvmPartition, ByteConvert_testIfValidEntryIsFilledIn)
     PhysicalByteWriteEntry pWriteEntry = dest.front();
     ASSERT_EQ(validEntry.byteCnt, pWriteEntry.byteCnt);
     PhysicalByteAddr phyByteAddr = pWriteEntry.addr;
+
+    delete mockArrayDevice;
+    delete mockUblockDevice;
 }
 
 TEST(NvmPartition, IsByteAccessSupported_testIfReturnValueCorrect)

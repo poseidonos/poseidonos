@@ -41,6 +41,7 @@ public:
     MOCK_METHOD(DeviceContext*, _AllocateDeviceContext, (), (override));
     MOCK_METHOD(void, _ReleaseDeviceContext, (DeviceContext * deviceContextToRelease), (override));
     MOCK_METHOD(bool, _WrapupOpenDeviceSpecific, (DeviceContext * devicecontext), (override));
+    MOCK_METHOD(void*, GetByteAddress, (), (override));
 };
 
 } // namespace pos
