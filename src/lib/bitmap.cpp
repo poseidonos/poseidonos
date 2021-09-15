@@ -368,7 +368,7 @@ BitMap::FindFirstZero(uint64_t begin, uint64_t end)
     }
     offset += (row * BITMAP_ENTRY_BITS) - 1;
 
-    if (unlikely(IsValidBit(offset) || (offset > end)))
+    if (unlikely(!IsValidBit(offset) || (offset > end)))
     {
         return numBits;
     }
