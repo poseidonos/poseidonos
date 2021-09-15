@@ -199,7 +199,7 @@ SpdkCaller::SpdkUuidFmtLower(char* uuid_str, size_t uuid_str_size, const struct 
 }
 
 int
-SpdkCaller::SpdkUuidParse(struct spdk_uuid *uuid, const char *uuid_str)
+SpdkCaller::SpdkUuidParse(struct spdk_uuid* uuid, const char* uuid_str)
 {
     return spdk_uuid_parse(uuid, uuid_str);
 }

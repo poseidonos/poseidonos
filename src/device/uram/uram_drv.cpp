@@ -39,27 +39,26 @@
 #include "Air.h"
 #include "spdk/log.h"
 #include "spdk/thread.h"
-#include "src/spdk_wrapper/event_framework_api.h"
-#include "src/include/pos_event_id.hpp"
+#include "src/bio/ubio.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/memory.h"
-#include "src/bio/ubio.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 #include "uram.h"
-#include "uram_io_context.h"
 #include "uram_device_context.h"
+#include "uram_io_context.h"
 
 #define BDEV_NAME "uram"
 
 namespace pos
 {
 static void
-BdevOpenComplete(enum spdk_bdev_event_type type, struct spdk_bdev *bdev,
-		 void *event_ctx)
+BdevOpenComplete(enum spdk_bdev_event_type type, struct spdk_bdev* bdev,
+    void* event_ctx)
 {
-	SPDK_NOTICELOG("Unsupported bdev event: type %d\n", type);
+    SPDK_NOTICELOG("Unsupported bdev event: type %d\n", type);
 }
-
 
 static void
 AsyncIOComplete(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
@@ -169,7 +168,6 @@ UramDrv::ScanDevs(std::vector<UblockSharedPtr>* devs)
 
     return addedDeviceCount;
 }
-
 
 bool
 UramDrv::_OpenBdev(UramDeviceContext* devCtx)

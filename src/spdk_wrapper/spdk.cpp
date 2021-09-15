@@ -34,8 +34,8 @@
 
 #include <string>
 
-#include "src/spdk_wrapper/accel_engine_api.h"
 #include "src/cpu_affinity/affinity_manager.h"
+#include "src/spdk_wrapper/accel_engine_api.h"
 
 using namespace std;
 
@@ -120,7 +120,7 @@ Spdk::_InitWorker(int argc, char** argv)
     struct spdk_app_opts opts = {};
 
     /* default value in opts */
-    spdk_app_opts_init(&opts, sizeof(opts));/*TODO*/
+    spdk_app_opts_init(&opts, sizeof(opts));
     opts.name = "ibof_nvmf";
     opts.mem_channel = -1;
     AffinityManager& affinityManager = *AffinityManagerSingleton::Instance();

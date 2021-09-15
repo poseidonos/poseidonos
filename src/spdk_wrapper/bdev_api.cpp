@@ -38,4 +38,3 @@ extern "C"
 namespace pos
 {
 } // namespace pos
-

@@ -31,16 +31,17 @@
  */
 
 #include "src/qos/qos_spdk_manager.h"
+
 #include "spdk/util.h"
-#include "src/include/pos_event_id.hpp"
 #include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/aio_submission_adapter.h"
 #include "src/logger/logger.h"
 #include "src/qos/qos_context.h"
 #include "src/qos/qos_manager.h"
+#include "src/spdk_wrapper/connection_management.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/poller_management.h"
-#include "src/spdk_wrapper/connection_management.h"
 
 namespace pos
 {

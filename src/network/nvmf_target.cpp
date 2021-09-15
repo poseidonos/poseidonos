@@ -231,7 +231,7 @@ void
 NvmfTarget::_AttachNamespaceWithPause(void* arg1, void* arg2)
 {
     struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
-    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem, 0 /*TODO*/, nvmfCallbacks.attachNamespacePauseDone, (void*)arg2);
+    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem, 0, nvmfCallbacks.attachNamespacePauseDone, (void*)arg2);
     if (ret != 0)
     {
         SPDK_NOTICELOG("failed to pause subsystem during attaching namespace : retrying \n");
@@ -338,7 +338,7 @@ NvmfTarget::_DetachNamespaceWithPause(void* arg1, void* arg2)
 {
     struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
 
-    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem, 0/*TODO*/,
+    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem, 0,
         nvmfCallbacks.detachNamespacePauseDone, (void*)arg2);
     if (ret != 0)
     {
@@ -371,7 +371,7 @@ NvmfTarget::DetachNamespaceAll(const string& nqn,
         return false;
     }
 
-    int ret = spdkCaller->SpdkNvmfSubsystemPause(subsystem, 0/*TODO*/, nvmfCallbacks.detachNamespaceAllPauseDone, ctx);
+    int ret = spdkCaller->SpdkNvmfSubsystemPause(subsystem, 0, nvmfCallbacks.detachNamespaceAllPauseDone, ctx);
     if (ret != 0)
     {
         _DetachNamespaceAllWithPause(subsystem, ctx);
@@ -385,7 +385,7 @@ NvmfTarget::_DetachNamespaceAllWithPause(void* arg1, void* arg2)
 {
     struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
 
-    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem, 0 /*TODO*/,
+    int ret = SpdkCallerSingleton::Instance()->SpdkNvmfSubsystemPause(subsystem, 0,
         nvmfCallbacks.detachNamespaceAllPauseDone, (void*)arg2);
 
     if (ret != 0)
