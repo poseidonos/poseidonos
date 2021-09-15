@@ -126,7 +126,7 @@ def update_volume_qos(vol_name, iops, bw, array):
 
 
 def rename_volume(vol_name, new_name, array):
-    param_str = "--name " + vol_name + " --newname " + new_name
+    param_str = "--volume-name " + vol_name + " --new-volume-name " + new_name
     param_str += " --array-name " + array
 
     return send_request("volume rename " + param_str)

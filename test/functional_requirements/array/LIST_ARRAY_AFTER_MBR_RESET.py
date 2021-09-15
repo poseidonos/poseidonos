@@ -34,10 +34,12 @@ def execute():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) >= 2:
+        pos.set_addr(sys.argv[1])
     api.clear_result(__file__)
     out = execute()
     result = check_result(out)
     ret = api.set_result_manually(out, result, __file__)
-    pos.kill_pos()
+    pos.flush_and_kill_pos()
     exit(ret)
     

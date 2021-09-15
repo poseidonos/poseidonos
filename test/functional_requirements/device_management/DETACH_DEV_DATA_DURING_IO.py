@@ -35,9 +35,11 @@ def execute():
     return fio_proc
 
 if __name__ == "__main__":
+    if len(sys.argv) >= 2:
+        pos.set_addr(sys.argv[1])
     fio_proc = execute()
     fio.wait_fio(fio_proc)
     result = check_result()
     ret = api.set_result_manually(cli.array_info(ARRAYNAME), result, __file__)
-    pos.kill_pos()
+    pos.flush_and_kill_pos()
     exit(ret)

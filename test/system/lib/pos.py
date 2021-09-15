@@ -54,3 +54,7 @@ def kill_pos():
     global isExecuted
     isExecuted = False
     subprocess.call("echo 1 > /sys/bus/pci/rescan",shell=True)
+
+def flush_and_kill_pos():
+    cli.wbt_request("flush_gcov","")
+    kill_pos()

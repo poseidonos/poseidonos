@@ -27,8 +27,10 @@ def execute():
     return out
 
 if __name__ == "__main__":
+    if len(sys.argv) >= 2:
+        pos.set_addr(sys.argv[1])
     api.clear_result(__file__)
     out = execute()
     ret = api.set_result_by_situation_eq(ARRAYNAME, out, "DEGRADED", __file__)
-    pos.kill_pos()
+    pos.flush_and_kill_pos()
     exit(ret)

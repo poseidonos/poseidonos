@@ -15,10 +15,11 @@ import pos_util
 import MOUNT_ARRAY_BASIC
 
 ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
+SPARE = MOUNT_ARRAY_BASIC.SPARE
 
 def check_result(out):
     if api.is_online(ARRAYNAME) == True:
-        if api.is_spare_device(ARRAYNAME, CREATE_ARRAY_BASIC.SPARE) == False:
+        if api.is_spare_device(ARRAYNAME, SPARE) == False:
             return "pass"
     return "fail"
 
@@ -31,9 +32,11 @@ def execute():
     return out
 
 if __name__ == "__main__":
+    if len(sys.argv) >= 2:
+        pos.set_addr(sys.argv[1])
     api.clear_result(__file__)
     out = execute()
     result = check_result(out)
     ret = api.set_result_manually(out, result, __file__)
-    pos.kill_pos()
+    pos.flush_and_kill_pos()
     exit(ret)

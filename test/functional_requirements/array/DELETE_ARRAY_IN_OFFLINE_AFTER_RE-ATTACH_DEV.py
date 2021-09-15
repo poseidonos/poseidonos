@@ -37,7 +37,9 @@ def execute():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) >= 2:
+        pos.set_addr(sys.argv[1])
     test_result.clear_result(__file__)
     out = execute()
     set_result(out)
-    pos.kill_pos()
+    pos.flush_and_kill_pos()

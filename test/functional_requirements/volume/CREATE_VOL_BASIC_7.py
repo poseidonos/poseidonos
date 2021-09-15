@@ -15,7 +15,7 @@ import pos_constant
 import MOUNT_ARRAY_BASIC
 import volume
 
-ARRAYNAM = MOUNT_ARRAY_BASIC.ARRAYNAME
+ARRAYNAME = MOUNT_ARRAY_BASIC.ARRAYNAME
 VOL_NAME = "vol7"
 VOL_SIZE = pos_constant.SIZE_1GB * 5
 VOL_IOPS = (2**64-1) // 1000    # Refer to SRS: http://globalwiki.itplatform.sec.samsung.net:8099/display/ibof/2.3.1+%5BIBOFOS_SW_FRID_0301%5D+Create+Volume
@@ -62,6 +62,8 @@ def execute():
     return out
 
 if __name__ == "__main__":
+    if len(sys.argv) >= 2:
+        pos.set_addr(sys.argv[1])
     out = execute()
     set_result(out)
-    pos.kill_pos()
+    pos.flush_and_kill_pos()

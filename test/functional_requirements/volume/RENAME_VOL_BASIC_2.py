@@ -62,6 +62,8 @@ def execute():
     return out
 
 if __name__ == "__main__":
+    if len(sys.argv) >= 2:
+        pos.set_addr(sys.argv[1])
     execute()
     set_result()
-    pos.kill_pos()
+    pos.flush_and_kill_pos()

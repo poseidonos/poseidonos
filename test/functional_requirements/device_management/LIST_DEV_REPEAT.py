@@ -26,8 +26,10 @@ def execute():
     return out1, out2
 
 if __name__ == "__main__":
+    if len(sys.argv) >= 2:
+        pos.set_addr(sys.argv[1])
     out1, out2 = execute()
     result = check_result(out1, out2)
     ret = api.set_result_manually(cli.list_device(), result, __file__)
-    pos.kill_pos()
+    pos.flush_and_kill_pos()
     exit(ret)
