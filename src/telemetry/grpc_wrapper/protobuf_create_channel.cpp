@@ -42,35 +42,64 @@ ProtoBufCreateChannel::ProtoBufCreateChannel(string serverAddress)
     std::shared_ptr<Channel> channel = grpc::CreateChannel(serverAddress, grpc::InsecureChannelCredentials());
     stub_ = TelemetryManager::NewStub(channel);
 }
-
 ProtoBufCreateChannel::~ProtoBufCreateChannel(void)
 {
 }
-
 ::grpc::Status
-ProtoBufCreateChannel::PublishToServer(void /*send data*/)
+ProtoBufCreateChannel::PublishToServer(void)
 {
-    PublishRequest cliPublishReq;
-    PublishResponse cliPublishRes;
-    ClientContext cliContext;
-
+    PublishRequest clientReq;
+    PublishResponse clientRes;
+    ClientContext clientContext;
     // set data ; To do
 
-    const string errorMsg = "mock invalid arg error";
-    Status status = ::grpc::Status(StatusCode::INVALID_ARGUMENT, errorMsg);
+    Status status = stub_->publish(&clientContext, clientReq, &clientRes);
+    return status;
+}
+::grpc::Status
+ProtoBufCreateChannel::ConfigureToServer(void)
+{
+    ClientContext clientContext;
+    ConfigureMetadataRequest clientReq;
+    ConfigureMetadataResponse clientRes;
 
-    status = stub_->publish(&cliContext, cliPublishReq, &cliPublishRes);
+    clientReq.set_git_hash("some-git");
+    clientReq.set_host_name("some-host");
+    clientReq.set_host_type("some-type");
+    clientReq.set_ip_addr("some-ip");
+    clientReq.set_application_name("poseidon");
 
-    // debug
-    if (status.ok() == true)
-    {
-        // success
-    }
-    else
-    {
-        // fail
-    }
+    Status status = stub_->configure(&clientContext, clientReq, &clientRes);
+    return status;
+}
+::grpc::Status
+ProtoBufCreateChannel::CollectToServer(void)
+{
+    ClientContext clientContext;
+    CollectRequest clientReq;
+    CollectResponse clientRes;
 
+    Status status = stub_->collect(&clientContext, clientReq, &clientRes);
+    return status;
+}
+::grpc::Status
+ProtoBufCreateChannel::EnableToServer(void)
+{
+    ClientContext clientContext;
+    EnableRequest clientReq;
+    EnableResponse clientRes;
+
+    Status status = stub_->enable(&clientContext, clientReq, &clientRes);
+    return status;
+}
+::grpc::Status
+ProtoBufCreateChannel::DisableToServer(void)
+{
+    ClientContext clientContext;
+    DisableRequest clientReq;
+    DisableResponse clientRes;
+
+    Status status = stub_->disable(&clientContext, clientReq, &clientRes);
     return status;
 }
 

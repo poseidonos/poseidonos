@@ -4,10 +4,9 @@
 
 namespace pos
 {
-TEST(VolumeDeleter, VolumeDeleter_)
+TEST(VolumeDeleter, VolumeCreator_)
 {
 }
-
 TEST(VolumeDeleter, Do_)
 {
 }

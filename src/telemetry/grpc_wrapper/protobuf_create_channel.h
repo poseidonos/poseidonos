@@ -62,7 +62,12 @@ public:
     explicit ProtoBufCreateChannel(string serverAddress);
     virtual ~ProtoBufCreateChannel(void);
 
-    ::grpc::Status PublishToServer(void /*send data*/);
+    /* for grpc Test */
+    ::grpc::Status PublishToServer(void);
+    ::grpc::Status ConfigureToServer(void);
+    ::grpc::Status CollectToServer(void);
+    ::grpc::Status EnableToServer(void);
+    ::grpc::Status DisableToServer(void);
 
 private:
     std::unique_ptr<TelemetryManager::Stub> stub_;
