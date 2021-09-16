@@ -46,11 +46,10 @@ endif()
 set(POS_DEP_AIR "air")
 if (${USE_LOCAL_REPO} STREQUAL "y")
     set(REPO_AIR "${LOCAL_REPO}/air.git")
-    set(TAG_AIR "v0.7.0-beta")
 else()
     set(REPO_AIR "https://github.com/poseidonos/air.git")
-    set(TAG_AIR "v0.6.3-beta")
 endif()
+set(TAG_AIR "v0.7.0-beta")
 
 ExternalProject_Add(air
 #---Download step-----------------
