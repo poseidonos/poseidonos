@@ -230,6 +230,10 @@ SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
                 segmentFreed = true;
             }
         }
+        else
+        {
+            segmentStates[segId].SetState(SegmentState::SSD);
+        }
     }
 
     return segmentFreed;
