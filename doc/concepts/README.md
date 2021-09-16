@@ -1,5 +1,5 @@
 # PoseidonOS Concepts
-This documents will walk you through the basic concepts and terms to understand Poseidon OS (POS) with a few illustrative examples of the network architecture and software stack.
+This document will walk you through the basic concepts and terms to understand Poseidon OS (POS) with a few illustrative examples of the network architecture and software stack.
 
 **[PoseidonOS](poseidonos.md)**
 
@@ -10,4 +10,3 @@ This documents will walk you through the basic concepts and terms to understand 
 **[Volume](volume.md)**
 
 **[Data Persistence and Consistency](data_persistence_and_consistency.md)**
-
