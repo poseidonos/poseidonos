@@ -103,7 +103,7 @@ ExternalProject_Add(dpdk
     LOG_INSTALL ON
     LOG_OUTPUT_ON_FAILURE ON
     LOG_MERGED_STDOUTERR ON
-    PATCH_COMMAND patch -t -p0 < ${PROJ_ROOT}/lib/dpdk-20.08.patch
+    PATCH_COMMAND patch -t -p0 -i ${PROJ_ROOT}/lib/dpdk-20.08.patch
     CONFIGURE_COMMAND "" 
     BUILD_COMMAND make install MAKE_PAUSE=n T=${TARGET} EXTRA_CFLAGS=${EXTRA_CFLAGS} DESTDIR=. -j 4
     INSTALL_COMMAND "")
@@ -131,7 +131,7 @@ ExternalProject_Add(fio
     LOG_INSTALL ON
     LOG_OUTPUT_ON_FAILURE ON
     LOG_MERGED_STDOUTERR ON
-    PATCH_COMMAND patch -t -p0 < ${PROJ_ROOT}/lib/fio-3.1.patch
+    PATCH_COMMAND patch -t -p0 -i ${PROJ_ROOT}/lib/fio-3.1.patch
     CONFIGURE_COMMAND "" 
     BUILD_COMMAND make -j ${NUM_BUILD_CORE})
 
@@ -167,7 +167,7 @@ ExternalProject_Add(spdk
     LOG_INSTALL ON
     LOG_OUTPUT_ON_FAILURE ON
     LOG_MERGED_STDOUTERR ON
-    PATCH_COMMAND patch -t -p0 < ${PROJ_ROOT}/lib/spdk-20.10.patch
+    PATCH_COMMAND patch -t -p0 -i ${PROJ_ROOT}/lib/spdk-20.10.patch
     CONFIGURE_COMMAND ./configure --with-dpdk=${PROJ_ROOT}/lib/${POS_DEP_DPDK} --with-rdma --with-fio=${PROJ_ROOT}/lib/${POS_DEP_FIO} --with-pos --without-isal --without-vhost --with-pmdk ${ENABLE_DEBUG}
     BUILD_COMMAND ./scripts/pkgdep.sh
     COMMAND make -j ${NUM_BUILD_CORE}
@@ -259,7 +259,7 @@ ExternalProject_Add(spdlog
     LOG_INSTALL ON
     LOG_OUTPUT_ON_FAILURE ON
     LOG_MERGED_STDOUTERR ON
-    PATCH_COMMAND patch -t -p0 < ${PROJ_ROOT}/lib/spdlog-1.4.2.patch
+    PATCH_COMMAND patch -t -p0 -i ${PROJ_ROOT}/lib/spdlog-1.4.2.patch
     CONFIGURE_COMMAND cmake -H. -B_builds -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
     BUILD_COMMAND cmake --build _builds --target install
     INSTALL_COMMAND "")
