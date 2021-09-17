@@ -27,6 +27,9 @@ jobs:
     - name: Download required packages
       working-directory: ${{github.workspace}}/script
       run: sudo ./pkgdep.sh
+      
+    - name: list jsonrpccpp
+      run: sudo find /usr | grep jsonrpc
 
     - name: Build dependent libraries
       working-directory: ${{github.workspace}}/lib
