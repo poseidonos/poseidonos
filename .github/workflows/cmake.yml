@@ -29,13 +29,21 @@ jobs:
       working-directory: ${{github.workspace}}/lib
       run: sudo bash -C "./build_lib.sh"
       
+    - name: Configure src
+      working-directory: ${{github.workspace}}/
+      run: sudo bash -C "./configure"
+
     - name: Build src
       working-directory: ${{github.workspace}}/
-      run: sudo bash -C "./configure ; make -j 4"
-      
+      run: sudo bash -C "make -j 4"
+
+    - name: Configure test
+      working-directory: ${{github.workspace}}/test
+      run: sudo bash -C "cmake ."
+
     - name: Build test
       working-directory: ${{github.workspace}}/test
-      run: sudo bash -C "cmake . ; make -j 4"
+      run: sudo bash -C "make -j 4"
       
     - name: Run Unit Tests
       working-directory: ${{github.workspace}}/test
