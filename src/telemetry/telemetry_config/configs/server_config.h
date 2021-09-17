@@ -30,34 +30,30 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <yaml-cpp/yaml.h>
+
 #include <string>
 #include <unordered_map>
 
 #include "src/telemetry/common/config_grain.h"
+#include "src/telemetry/telemetry_config/configs/buffer_size_config.h"
 
 namespace pos
 {
-class Target : public ConfigGrain
+class ServerConfig : public ConfigGrain
 {
 public:
-    Target(void)
-    {
-    }
+    ServerConfig(void);
+    virtual ~ServerConfig(void);
 
-    virtual ~Target(void)
-    {
-    }
+    virtual bool Init(YAML::Node& node);
 
-    virtual std::string GetIp(void)
-    {
-        std::string key = "ip";
-        return _GetValue(key);
-    }
+    virtual std::string GetIp(void);
+    virtual uint64_t GetPort(void);
+    virtual bool IsEnabled(void);
+    virtual BufferSizeConfig& GetBufferSize(void);
 
-    virtual std::string GetPort(void)
-    {
-        std::string key = "port";
-        return _GetValue(key);
-    }
+protected:
+    BufferSizeConfig bufferSize;
 };
 } // namespace pos

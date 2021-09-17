@@ -48,17 +48,17 @@ class TelemetryConfig
 {
 public:
     TelemetryConfig(void);
-    TelemetryConfig(std::string fileName);
+    explicit TelemetryConfig(std::string fileName);
     virtual ~TelemetryConfig(void);
 
     virtual bool Register(std::string key, ConfigObserver* observer);
 
-    virtual Client& GetClient(void)
+    virtual ClientConfig& GetClient(void)
     {
         return fileReader->GetClient();
     }
 
-    virtual Server& GetServer(void)
+    virtual ServerConfig& GetServer(void)
     {
         return fileReader->GetServer();
     }

@@ -72,8 +72,8 @@ TEST(FileConfigReader, LoadClientValue_Positive)
     EXPECT_EQ(reader->Init(fileName), true);
 
     EXPECT_EQ(reader->GetClient().GetTarget().GetIp(), "localhost");
-    EXPECT_EQ(reader->GetClient().GetTarget().GetPort(), "10101");
-    EXPECT_EQ(reader->GetClient().GetRateLimit(), "60");
+    EXPECT_EQ(reader->GetClient().GetTarget().GetPort(), 10101);
+    EXPECT_EQ(reader->GetClient().GetRateLimit(), 60);
 
     delete reader;
 }
@@ -86,9 +86,9 @@ TEST(FileConfigReader, LoadServerValue_Positive)
     EXPECT_EQ(reader->Init(fileName), true);
 
     EXPECT_EQ(reader->GetServer().GetIp(), "localhost");
-    EXPECT_EQ(reader->GetServer().GetPort(), "10101");
-    EXPECT_EQ(reader->GetServer().GetBufferSize().GetCounters(), "10000");
-    EXPECT_EQ(reader->GetServer().GetBufferSize().GetGauges(), "10000");
+    EXPECT_EQ(reader->GetServer().GetPort(), 10101);
+    EXPECT_EQ(reader->GetServer().GetBufferSize().GetCounters(), 10000);
+    EXPECT_EQ(reader->GetServer().GetBufferSize().GetGauges(), 10000);
 
     delete reader;
 }

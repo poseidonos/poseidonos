@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/telemetry/telemetry_config/server.h"
+#include "src/telemetry/telemetry_config/configs/server_config.h"
 
 #include <string>
 #include <unordered_map>
@@ -40,17 +40,17 @@
 
 namespace pos
 {
-Server::Server(void)
+ServerConfig::ServerConfig(void)
 {
     values.clear();
 }
 
-Server::~Server(void)
+ServerConfig::~ServerConfig(void)
 {
 }
 
 bool
-Server::Init(YAML::Node& node)
+ServerConfig::Init(YAML::Node& node)
 {
     try
     {
@@ -102,28 +102,29 @@ Server::Init(YAML::Node& node)
 }
 
 std::string
-Server::GetIp(void)
+ServerConfig::GetIp(void)
 {
-    std::string key = "ip";
-    return _GetValue(key);
+    return _GetValue("ip");
 }
 
-std::string
-Server::GetPort(void)
+uint64_t
+ServerConfig::GetPort(void)
 {
-    std::string key = "port";
-    return _GetValue(key);
+    std::string value = _GetValue("port");
+
+    return (value == DEFAULT_YAML_VALUE) ? 0 : std::stoi(value);
 }
 
-std::string
-Server::GetEnabled(void)
+bool
+ServerConfig::IsEnabled(void)
 {
-    std::string key = "enabled";
-    return _GetValue(key);
+    std::string value = _GetValue("enabled");
+
+    return (value == DEFAULT_YAML_VALUE) ? false : true;
 }
 
-BufferSize&
-Server::GetBufferSize(void)
+BufferSizeConfig&
+ServerConfig::GetBufferSize(void)
 {
     return bufferSize;
 }

@@ -30,45 +30,34 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/telemetry/telemetry_config/client.h"
-
-#include <gtest/gtest.h>
-
 #include <string>
+#include <unordered_map>
 
-#include "yaml-cpp/yaml.h"
+#include "src/telemetry/common/config_grain.h"
 
 namespace pos
 {
-TEST(Client, Creation)
+class TargetConfig : public ConfigGrain
 {
-    Client* client = new Client();
-    delete client;
-}
+public:
+    TargetConfig(void)
+    {
+    }
 
-TEST(Client, CheckDefaultMethod)
-{
-    Client client;
+    virtual ~TargetConfig(void)
+    {
+    }
 
-    std::string key = "rate_limit";
-    std::string value = "rate_limit";
-    client.UpdateConfig(key, value);
+    virtual std::string GetIp(void)
+    {
+        return _GetValue("ip");
+    }
 
-    key = "timeout_sec";
-    value = "timeout_sec";
-    client.UpdateConfig(key, value);
+    virtual uint64_t GetPort(void)
+    {
+        std::string value = _GetValue("port");
 
-    key = "circuit_break_policy";
-    value = "circuit_break_policy";
-    client.UpdateConfig(key, value);
-
-    key = "enabled";
-    value = "enabled";
-    client.UpdateConfig(key, value);
-
-    EXPECT_EQ(client.GetRateLimit(), "rate_limit");
-    EXPECT_EQ(client.GetTimeoutSec(), "timeout_sec");
-    EXPECT_EQ(client.GetCircuitBreakPolicy(), "circuit_break_policy");
-    EXPECT_EQ(client.GetEnabled(), "enabled");
-}
+        return (value == DEFAULT_YAML_VALUE) ? 0 : std::stoi(value);
+    }
+};
 } // namespace pos

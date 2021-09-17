@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/telemetry/telemetry_config/server.h"
+#include "src/telemetry/telemetry_config/configs/buffer_size_config.h"
 
 #include <gtest/gtest.h>
 
@@ -40,30 +40,40 @@
 
 namespace pos
 {
-TEST(Server, Creation)
+TEST(BufferSizeConfig, Create_testIfBufferSizeConfigCanBeCreated)
 {
-    Server* server = new Server();
-    delete server;
+    BufferSizeConfig* bufferSize = new BufferSizeConfig();
+    delete bufferSize;
 }
 
-TEST(Server, CheckDefaultMethod)
+TEST(BufferSizeConfig, Update_testIfBufferSizeConfigCanContainOwnValues)
 {
-    Server server;
+    BufferSizeConfig obj;
 
-    std::string key = "ip";
-    std::string value = "ip";
-    server.UpdateConfig(key, value);
+    std::string key = "counters";
+    uint64_t value = 10000;
+    obj.UpdateConfig(key, value);
 
-    key = "port";
-    value = "port";
-    server.UpdateConfig(key, value);
+    key = "gauges";
+    obj.UpdateConfig(key, value);
 
-    key = "enabled";
-    value = "enabled";
-    server.UpdateConfig(key, value);
+    key = "histograms";
+    obj.UpdateConfig(key, value);
 
-    EXPECT_EQ(server.GetIp(), "ip");
-    EXPECT_EQ(server.GetPort(), "port");
-    EXPECT_EQ(server.GetEnabled(), "enabled");
+    key = "influxdb_rows";
+    obj.UpdateConfig(key, value);
+
+    key = "latencies";
+    obj.UpdateConfig(key, value);
+
+    key = "typed_objects";
+    obj.UpdateConfig(key, value);
+
+    EXPECT_EQ(obj.GetCounters(), value);
+    EXPECT_EQ(obj.GetGauges(), value);
+    EXPECT_EQ(obj.GetHistograms(), value);
+    EXPECT_EQ(obj.GetInfluxdb_rows(), value);
+    EXPECT_EQ(obj.GetLatencies(), value);
+    EXPECT_EQ(obj.GetTyped_objects(), value);
 }
 } // namespace pos

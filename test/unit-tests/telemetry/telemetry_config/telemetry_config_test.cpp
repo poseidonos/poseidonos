@@ -75,24 +75,31 @@ protected:
     std::string fileName = "./unit-tests/telemetry/telemetry_config/test.yaml";
 };
 
-TEST_F(TelemetryConfigFixture, CheckObserver_Positive)
+TEST_F(TelemetryConfigFixture, Register_testIfTheSameObserverCanBeAddedTwiceWithDifferentKeys)
 {
     MockConfigObserver* observer = new MockConfigObserver();
+    MockConfigObserver* observer2 = new MockConfigObserver();
     std::multimap<std::string, ConfigObserver*>& oMap = config->GetObserversMap();
 
     std::string key1 = "key1";
     std::string key2 = "key2";
+    std::string key3 = "key3";
+    std::string key4 = "key4";
 
     EXPECT_EQ(config->Register(key1, observer), true);
     EXPECT_EQ(config->Register(key2, observer), true);
+    EXPECT_EQ(config->Register(key3, observer), true);
+    EXPECT_EQ(config->Register(key3, observer2), true);
 
     EXPECT_EQ(oMap.count(key1), 1);
     EXPECT_EQ(oMap.count(key2), 1);
+    EXPECT_EQ(oMap.count(key3), 2);
+    EXPECT_EQ(oMap.count(key4), 0);
 
     delete observer;
 }
 
-TEST_F(TelemetryConfigFixture, CheckObserver_Negative)
+TEST_F(TelemetryConfigFixture, Register_testIfTheSameObserverCannotBeRegisteredTwice)
 {
     MockConfigObserver* observer = new MockConfigObserver();
     std::multimap<std::string, ConfigObserver*>& oMap = config->GetObserversMap();
@@ -105,13 +112,13 @@ TEST_F(TelemetryConfigFixture, CheckObserver_Negative)
     delete observer;
 }
 
-TEST_F(TelemetryConfigFixture, CheckClient_Positive)
+TEST_F(TelemetryConfigFixture, Getter_testIfGrpcClientIsEnabledByDefault)
 {
-    EXPECT_EQ(config->GetClient().GetEnabled(), "true");
+    EXPECT_EQ(config->GetClient().IsEnabled(), true);
 }
 
-TEST_F(TelemetryConfigFixture, CheckServer_Positive)
+TEST_F(TelemetryConfigFixture, Getter_testIfGrpcServerIsEnabledByDefault)
 {
-    EXPECT_EQ(config->GetServer().GetEnabled(), "true");
+    EXPECT_EQ(config->GetServer().IsEnabled(), true);
 }
 } // namespace pos

@@ -37,52 +37,58 @@
 
 namespace pos
 {
-class BufferSize : public ConfigGrain
+class BufferSizeConfig : public ConfigGrain
 {
 public:
-    BufferSize(void)
+    BufferSizeConfig(void)
     {
         values.clear();
     }
 
-    virtual ~BufferSize(void)
+    virtual ~BufferSizeConfig(void)
     {
     }
 
-    virtual std::string GetCounters(void)
+    virtual uint64_t GetCounters(void)
     {
-        std::string key = "counters";
-        return _GetValue(key);
+        std::string value = _GetValue("counters");
+
+        return (value == DEFAULT_YAML_VALUE) ? 0 : std::stoi(value);
     }
 
-    virtual std::string GetHistograms(void)
+    virtual uint64_t GetHistograms(void)
     {
-        std::string key = "histograms";
-        return _GetValue(key);
+        std::string value = _GetValue("histograms");
+
+        return (value == DEFAULT_YAML_VALUE) ? 0 : std::stoi(value);
     }
 
-    virtual std::string GetGauges(void)
+    virtual uint64_t GetGauges(void)
     {
-        std::string key = "gauges";
-        return _GetValue(key);
+        std::string value = _GetValue("gauges");
+
+        return (value == DEFAULT_YAML_VALUE) ? 0 : std::stoi(value);
     }
 
-    virtual std::string GetLatencies(void)
+    virtual uint64_t GetLatencies(void)
     {
-        std::string key = "latencies";
-        return _GetValue(key);
+        std::string value = _GetValue("latencies");
+
+        return (value == DEFAULT_YAML_VALUE) ? 0 : std::stoi(value);
     }
 
-    virtual std::string GetTyped_objects(void)
+    virtual uint64_t GetTyped_objects(void)
     {
-        std::string key = "typed_objects";
-        return _GetValue(key);
+        std::string value = _GetValue("typed_objects");
+
+        return (value == DEFAULT_YAML_VALUE) ? 0 : std::stoi(value);
     }
 
-    virtual std::string GetInfluxdb_rows(void)
+    virtual uint64_t GetInfluxdb_rows(void)
     {
-        std::string key = "influxdb_rows";
-        return _GetValue(key);
+        std::string value = _GetValue("influxdb_rows");
+
+        return (value == DEFAULT_YAML_VALUE) ? 0 : std::stoi(value);
     }
 };
 } // namespace pos

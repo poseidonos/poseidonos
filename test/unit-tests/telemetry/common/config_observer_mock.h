@@ -31,6 +31,7 @@
  */
 
 #include <gmock/gmock.h>
+#include <string>
 
 #include "src/telemetry/common/config_observer.h"
 

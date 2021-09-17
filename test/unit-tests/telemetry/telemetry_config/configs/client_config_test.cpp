@@ -30,30 +30,44 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <yaml-cpp/yaml.h>
+#include "src/telemetry/telemetry_config/configs/client_config.h"
+
+#include <gtest/gtest.h>
 
 #include <string>
-#include <unordered_map>
 
-#include "src/telemetry/common/config_grain.h"
-#include "src/telemetry/telemetry_config/target.h"
+#include "yaml-cpp/yaml.h"
 
 namespace pos
 {
-class Client : public ConfigGrain
+TEST(ClientConfig, Create_testIfClientConfigCanBeCreated)
 {
-public:
-    Client(void);
-    virtual ~Client(void);
+    ClientConfig* client = new ClientConfig();
+    delete client;
+}
 
-    virtual bool Init(YAML::Node& node);
-    virtual std::string GetRateLimit(void);
-    virtual std::string GetTimeoutSec(void);
-    virtual std::string GetCircuitBreakPolicy(void);
-    virtual std::string GetEnabled(void);
-    virtual Target& GetTarget(void);
+TEST(ClientConfig, Update_testIfClientConfigCanContainOwnValues)
+{
+    ClientConfig client;
 
-protected:
-    Target target;
-};
+    std::string key = "rate_limit";
+    uint64_t value_int = 10;
+    client.UpdateConfig(key, value_int);
+
+    key = "timeout_sec";
+    value_int = 1;
+    client.UpdateConfig(key, value_int);
+
+    key = "circuit_break_policy";
+    std::string value_str = "circuit_break_policy";
+    client.UpdateConfig(key, value_str);
+
+    key = "enabled";
+    client.UpdateConfig(key, true);
+
+    EXPECT_EQ(client.GetRateLimit(), 10);
+    EXPECT_EQ(client.GetTimeoutSec(), 1);
+    EXPECT_EQ(client.GetCircuitBreakPolicy(), "circuit_break_policy");
+    EXPECT_EQ(client.IsEnabled(), true);
+}
 } // namespace pos

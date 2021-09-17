@@ -1,0 +1,4 @@
+POS_ADD_UNIT_TEST(target_config_ut target_config_test.cpp)
+POS_ADD_UNIT_TEST(server_config_ut server_config_test.cpp)
+POS_ADD_UNIT_TEST(client_config_ut client_config_test.cpp)
+POS_ADD_UNIT_TEST(buffer_size_config_ut buffer_size_config_test.cpp)

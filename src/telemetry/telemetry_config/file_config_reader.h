@@ -36,8 +36,8 @@
 #include <vector>
 
 #include "src/telemetry/common/config_reader.h"
-#include "src/telemetry/telemetry_config/client.h"
-#include "src/telemetry/telemetry_config/server.h"
+#include "src/telemetry/telemetry_config/configs/client_config.h"
+#include "src/telemetry/telemetry_config/configs/server_config.h"
 
 namespace pos
 {
@@ -48,11 +48,11 @@ public:
     virtual ~FileConfigReader(void);
 
     virtual bool Init(std::string fileName);
-    virtual Client& GetClient(void)
+    virtual ClientConfig& GetClient(void)
     {
         return client;
     }
-    virtual Server& GetServer(void)
+    virtual ServerConfig& GetServer(void)
     {
         return server;
     }
@@ -61,7 +61,7 @@ protected:
     const std::string ROOT = "telemetry";
 
     std::string fileName;
-    Client client;
-    Server server;
+    ClientConfig client;
+    ServerConfig server;
 };
 } // namespace pos

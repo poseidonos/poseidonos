@@ -72,6 +72,12 @@ FileConfigReader::Init(std::string fileName)
             {
                 server.Init(it->second);
             }
+            else
+            {
+                POS_TRACE_ERROR((int)POS_EVENT_ID::TELEMETRY_CONFIG_INVALID_FIELD,
+                    "Invalid config file: {}, invalid tag: {}", fileName, tag);
+                return false;
+            }
         }
     }
     catch (YAML::BadFile& e)

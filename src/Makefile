@@ -72,6 +72,7 @@ SUBDIRS = allocator \
 	telemetry \
         telemetry/common \
         telemetry/telemetry_config \
+        telemetry/telemetry_config/configs \
         dpdk_wrapper \
         memory_checker
 

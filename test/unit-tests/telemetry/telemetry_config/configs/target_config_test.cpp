@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/telemetry/telemetry_config/target.h"
+#include "src/telemetry/telemetry_config/configs/target_config.h"
 
 #include <gtest/gtest.h>
 
@@ -40,39 +40,43 @@
 
 namespace pos
 {
-TEST(Target, CheckUpdate0)
+TEST(TargetConfig, Update_testIfTargetConfigCanContainOwnValues0)
 {
-    Target target;
+    TargetConfig target;
 
     std::string test1 = "ip";
+    std::string test1_value = "10.10.10.10";
     std::string test2 = "port";
+    uint64_t test2_value = 1234;
 
-    EXPECT_EQ(target.UpdateConfig(test1, test1), true);
-    EXPECT_EQ(target.UpdateConfig(test2, test2), true);
+    EXPECT_EQ(target.UpdateConfig(test1, test1_value), true);
+    EXPECT_EQ(target.UpdateConfig(test2, test2_value), true);
 
-    EXPECT_EQ(target.GetIp(), test1);
-    EXPECT_EQ(target.GetPort(), test2);
+    EXPECT_EQ(target.GetIp(), test1_value);
+    EXPECT_EQ(target.GetPort(), test2_value);
 }
 
-TEST(Target, CheckUpdate1)
+TEST(TargetConfig, Update_testIfTargetConfigCanContainOwnValues1)
 {
-    Target* target = new Target();
+    TargetConfig* target = new TargetConfig();
 
     std::string test1 = "ip";
+    std::string test1_value = "10.10.10.10";
     std::string test2 = "port";
+    uint64_t test2_value = 1234;
 
-    EXPECT_EQ(target->UpdateConfig(test1, test1), true);
-    EXPECT_EQ(target->UpdateConfig(test2, test2), true);
+    EXPECT_EQ(target->UpdateConfig(test1, test1_value), true);
+    EXPECT_EQ(target->UpdateConfig(test2, test2_value), true);
 
-    EXPECT_EQ(target->GetIp(), test1);
-    EXPECT_EQ(target->GetPort(), test2);
+    EXPECT_EQ(target->GetIp(), test1_value);
+    EXPECT_EQ(target->GetPort(), test2_value);
 
     delete target;
 }
 
-TEST(Target, CheckValue_Negative)
+TEST(TargetConfig, Getter_testIfTargetConfigReturnsInvalidValue)
 {
-    Target target;
+    TargetConfig target;
 
     EXPECT_EQ(target.GetIp(), "");
 }

@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/telemetry/telemetry_config/client.h"
+#include "src/telemetry/telemetry_config/configs/client_config.h"
 
 #include <string>
 #include <unordered_map>
@@ -40,17 +40,17 @@
 
 namespace pos
 {
-Client::Client(void)
+ClientConfig::ClientConfig(void)
 {
     values.clear();
 }
 
-Client::~Client(void)
+ClientConfig::~ClientConfig(void)
 {
 }
 
 bool
-Client::Init(YAML::Node& node)
+ClientConfig::Init(YAML::Node& node)
 {
     try
     {
@@ -89,36 +89,38 @@ Client::Init(YAML::Node& node)
     return true;
 }
 
-std::string
-Client::GetRateLimit(void)
+uint64_t
+ClientConfig::GetRateLimit(void)
 {
-    std::string key = "rate_limit";
-    return _GetValue(key);
+    std::string value = _GetValue("rate_limit");
+
+    return (value == DEFAULT_YAML_VALUE) ? 0 : std::stoi(value);
+}
+
+uint64_t
+ClientConfig::GetTimeoutSec(void)
+{
+    std::string value = _GetValue("timeout_sec");
+
+    return (value == DEFAULT_YAML_VALUE) ? 0 : std::stoi(value);
 }
 
 std::string
-Client::GetTimeoutSec(void)
+ClientConfig::GetCircuitBreakPolicy(void)
 {
-    std::string key = "timeout_sec";
-    return _GetValue(key);
+    return _GetValue("circuit_break_policy");
 }
 
-std::string
-Client::GetCircuitBreakPolicy(void)
+bool
+ClientConfig::IsEnabled(void)
 {
-    std::string key = "circuit_break_policy";
-    return _GetValue(key);
+    std::string value = _GetValue("enabled");
+
+    return (value == DEFAULT_YAML_VALUE) ? false : true;
 }
 
-std::string
-Client::GetEnabled(void)
-{
-    std::string key = "enabled";
-    return _GetValue(key);
-}
-
-Target&
-Client::GetTarget(void)
+TargetConfig&
+ClientConfig::GetTarget(void)
 {
     return target;
 }

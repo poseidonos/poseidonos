@@ -30,30 +30,40 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <yaml-cpp/yaml.h>
+#include "src/telemetry/telemetry_config/configs/server_config.h"
+
+#include <gtest/gtest.h>
 
 #include <string>
-#include <unordered_map>
 
-#include "src/telemetry/common/config_grain.h"
-#include "src/telemetry/telemetry_config/buffer_size.h"
+#include "yaml-cpp/yaml.h"
 
 namespace pos
 {
-class Server : public ConfigGrain
+TEST(ServerConfig, Create_testIfServerConfigCanBeCreated)
 {
-public:
-    Server(void);
-    virtual ~Server(void);
+    ServerConfig* server = new ServerConfig();
+    delete server;
+}
 
-    virtual bool Init(YAML::Node& node);
+TEST(ServerConfig, Update_testIfServerConfigCanContainOwnValues)
+{
+    ServerConfig server;
 
-    virtual std::string GetIp(void);
-    virtual std::string GetPort(void);
-    virtual std::string GetEnabled(void);
-    virtual BufferSize& GetBufferSize(void);
+    std::string key_1 = "ip";
+    std::string value_1 = "10.10.10.10";
+    server.UpdateConfig(key_1, value_1);
 
-protected:
-    BufferSize bufferSize;
-};
+    std::string key_2 = "port";
+    uint64_t value_2 = 1234;
+    server.UpdateConfig(key_2, value_2);
+
+    std::string key_3 = "enabled";
+    bool value_3 = true;
+    server.UpdateConfig(key_3, value_3);
+
+    EXPECT_EQ(server.GetIp(), value_1);
+    EXPECT_EQ(server.GetPort(), value_2);
+    EXPECT_EQ(server.IsEnabled(), value_3);
+}
 } // namespace pos

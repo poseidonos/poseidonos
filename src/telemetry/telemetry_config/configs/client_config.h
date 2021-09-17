@@ -30,55 +30,30 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/telemetry/telemetry_config/buffer_size.h"
-
-#include <gtest/gtest.h>
+#include <yaml-cpp/yaml.h>
 
 #include <string>
+#include <unordered_map>
 
-#include "yaml-cpp/yaml.h"
+#include "src/telemetry/common/config_grain.h"
+#include "src/telemetry/telemetry_config/configs/target_config.h"
 
 namespace pos
 {
-TEST(BufferSize, Creation)
+class ClientConfig : public ConfigGrain
 {
-    BufferSize* bufferSize = new BufferSize();
-    delete bufferSize;
-}
+public:
+    ClientConfig(void);
+    virtual ~ClientConfig(void);
 
-TEST(BufferSize, CheckDefaultMethod)
-{
-    BufferSize obj;
+    virtual bool Init(YAML::Node& node);
+    virtual uint64_t GetRateLimit(void);
+    virtual uint64_t GetTimeoutSec(void);
+    virtual std::string GetCircuitBreakPolicy(void);
+    virtual bool IsEnabled(void);
+    virtual TargetConfig& GetTarget(void);
 
-    std::string key = "counters";
-    std::string value = "counters";
-    obj.UpdateConfig(key, value);
-
-    key = "gauges";
-    value = "gauges";
-    obj.UpdateConfig(key, value);
-
-    key = "histograms";
-    value = "histograms";
-    obj.UpdateConfig(key, value);
-
-    key = "influxdb_rows";
-    value = "influxdb_rows";
-    obj.UpdateConfig(key, value);
-
-    key = "latencies";
-    value = "latencies";
-    obj.UpdateConfig(key, value);
-
-    key = "typed_objects";
-    value = "typed_objects";
-    obj.UpdateConfig(key, value);
-
-    EXPECT_EQ(obj.GetCounters(), "counters");
-    EXPECT_EQ(obj.GetGauges(), "gauges");
-    EXPECT_EQ(obj.GetHistograms(), "histograms");
-    EXPECT_EQ(obj.GetInfluxdb_rows(), "influxdb_rows");
-    EXPECT_EQ(obj.GetLatencies(), "latencies");
-    EXPECT_EQ(obj.GetTyped_objects(), "typed_objects");
-}
+protected:
+    TargetConfig target;
+};
 } // namespace pos

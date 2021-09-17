@@ -35,6 +35,8 @@
 #include <string>
 #include <unordered_map>
 
+#define DEFAULT_YAML_VALUE ""
+
 namespace pos
 {
 class ConfigGrain
@@ -49,9 +51,22 @@ public:
     {
     }
 
-    virtual bool UpdateConfig(std::string& key, std::string& value)
+    virtual bool UpdateConfig(std::string key, std::string value)
     {
         auto result = values.insert({ key, value });
+        return result.second;
+    }
+
+    virtual bool UpdateConfig(std::string key, uint64_t value)
+    {
+        auto result = values.insert({ key, std::to_string(value) });
+        return result.second;
+    }
+
+    virtual bool UpdateConfig(std::string key, bool value)
+    {
+        std::string str = value ? "true" : "false";
+        auto result = values.insert({ key, str });
         return result.second;
     }
 
@@ -60,6 +75,8 @@ public:
     {
         return values;
     }
+
+    static const std::string DEFAULT_VALUE;
 
 protected:
     std::string _GetValue(std::string key)
