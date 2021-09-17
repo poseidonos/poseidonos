@@ -50,8 +50,8 @@ if [ -f /etc/debian_version ]; then
     apt install -y python3-tz
     # for gdb
     apt install -y gdb
-    # rpc client for cpp for invoke spdk rpc
-    apt install -y libjsonrpccpp-dev libjsoncpp-dev
+    # rpc client for cpp for invoke spdk rpc (--fix-missing for github action)
+    apt install -y libjsonrpccpp-dev libjsoncpp-dev --fix-missing
     # for grpc
     apt install -y libc-ares-dev pkg-config cmake
     # for pigz (trigger core dump, load dump)
