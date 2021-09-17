@@ -26,33 +26,33 @@ jobs:
 
     - name: Download required packages
       working-directory: ${{github.workspace}}/script
-      run: sudo bash -C "./pkgdep.sh"
+      run: sudo ./pkgdep.sh
 
     - name: Build dependent libraries
       working-directory: ${{github.workspace}}/lib
-      run: sudo bash -C "./build_lib.sh"
+      run: sudo ./build_lib.sh
       
     - name: Configure src
       working-directory: ${{github.workspace}}/
-      run: sudo bash -C "./configure"
+      run: sudo ./configure
 
     - name: Build src
       working-directory: ${{github.workspace}}/
-      run: sudo bash -C "make -j 4"
+      run: sudo make -j 4
 
     - name: Configure test
       working-directory: ${{github.workspace}}/test
-      run: sudo bash -C "cmake ."
+      run: sudo cmake .
 
     - name: Build test
       working-directory: ${{github.workspace}}/test
-      run: sudo bash -C "make -j 4"
+      run: sudo make -j 4
       
     - name: Run Unit Tests
       working-directory: ${{github.workspace}}/test
-      run: sudo bash -C "make run_ut"
+      run: sudo make run_ut
       
     - name: Run Integration Tests
       working-directory: ${{github.workspace}}/test
-      run: sudo bash -C "make run_it"
+      run: sudo make run_it
       
