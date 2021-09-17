@@ -22,7 +22,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install build tool
-      run: sudo bash -C "apt-get install -y build-essential python wget libssl-dev libaio-dev vim git"
+      run: sudo apt-get install -y build-essential python wget libssl-dev libaio-dev vim git
 
     - name: Download required packages
       working-directory: ${{github.workspace}}/script
