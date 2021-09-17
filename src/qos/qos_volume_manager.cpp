@@ -33,6 +33,7 @@
 #include "src/qos/qos_volume_manager.h"
 
 #include "src/include/array_mgmt_policy.h"
+#include "src/include/pos_event_id.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/aio_submission_adapter.h"
 #include "src/logger/logger.h"
@@ -316,11 +317,11 @@ QosVolumeManager::_UpdateVolumeMaxQos(int volId, uint64_t maxiops, uint64_t maxb
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-bool
+int
 QosVolumeManager::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     _UpdateVolumeMaxQos(volEventBase->volId, volEventPerf->maxiops, volEventPerf->maxbw, volArrayInfo->arrayName);
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -330,13 +331,13 @@ QosVolumeManager::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* 
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-bool
+int
 QosVolumeManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     qos_vol_policy volumePolicy;
     volumePolicy.policyChange = true;
     qosArrayManager->UpdateVolumePolicy(volEventBase->volId, volumePolicy);
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -346,14 +347,14 @@ QosVolumeManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* 
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-bool
+int
 QosVolumeManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     string bdevName = _GetBdevName(volEventBase->volId, volArrayInfo->arrayName);
     uint32_t nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
     UpdateSubsystemToVolumeMap(nqnId, volEventBase->volId);
     _UpdateVolumeMaxQos(volEventBase->volId, volEventPerf->maxiops, volEventPerf->maxbw, volArrayInfo->arrayName);
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -363,12 +364,12 @@ QosVolumeManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* 
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-bool
+int
 QosVolumeManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     if (false == feQosEnabled)
     {
-        return true;
+        return (int)POS_EVENT_ID::VOL_EVENT_OK;
     }
     string bdevName = _GetBdevName(volEventBase->volId, volArrayInfo->arrayName);
     uint32_t nqnId = SpdkConnection::GetAttachedSubsystemId(bdevName.c_str());
@@ -378,7 +379,7 @@ QosVolumeManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo
         nqnVolumeMap[nqnId].erase(position);
     }
     _ClearVolumeParameters(volEventBase->volId);
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -388,11 +389,11 @@ QosVolumeManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-bool
+int
 QosVolumeManager::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     _UpdateVolumeMaxQos(volEventBase->volId, volEventPerf->maxiops, volEventPerf->maxbw, volArrayInfo->arrayName);
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -402,20 +403,20 @@ QosVolumeManager::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* v
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-bool
+int
 QosVolumeManager::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     qos_vol_policy volumePolicy = qosArrayManager->GetVolumePolicy(volEventBase->volId);
     if ((volumePolicy.maxBw == volEventPerf->maxbw) && (volumePolicy.maxIops == volEventPerf->maxiops))
     {
-        return true;
+        return (int)POS_EVENT_ID::VOL_EVENT_OK;
     }
     std::string arrName = GetArrayName();
     if (0 == arrayName.compare(arrName))
     {
         _UpdateVolumeMaxQos(volEventBase->volId, volEventPerf->maxiops, volEventPerf->maxbw, arrayName);
     }
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -425,7 +426,7 @@ QosVolumeManager::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* 
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-void
+int
 QosVolumeManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
 {
     for (auto volId : volList)
@@ -440,6 +441,8 @@ QosVolumeManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayI
 
         _ClearVolumeParameters(volId);
     }
+
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
 /* --------------------------------------------------------------------------*/

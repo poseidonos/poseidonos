@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/include/pos_event_id.h"
 #include "test/unit-tests/allocator/allocator_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/journal_manager/log_write/i_journal_volume_event_handler_mock.h"
@@ -38,10 +39,11 @@ TEST(MetaVolumeEventHandler, VolumeCreated_testIfCreateSuccess)
         .uuid = "",
         .subnqn = ""};
 
-    EXPECT_CALL(mapper, VolumeCreated(volumeEvent.volId, volumeEvent.volSizeByte)).WillOnce(Return(true));
+    EXPECT_CALL(mapper, VolumeCreated(volumeEvent.volId, volumeEvent.volSizeByte)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_OK));
 
-    bool result = handler.VolumeCreated(&volumeEvent, nullptr, nullptr);
-    EXPECT_EQ(result, true);
+    int result = handler.VolumeCreated(&volumeEvent, nullptr, nullptr);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_OK;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeCreated_testIfCreateFails)
@@ -59,10 +61,11 @@ TEST(MetaVolumeEventHandler, VolumeCreated_testIfCreateFails)
         .uuid = "",
         .subnqn = ""};
 
-    EXPECT_CALL(mapper, VolumeCreated(volumeEvent.volId, volumeEvent.volSizeByte)).WillOnce(Return(false));
+    EXPECT_CALL(mapper, VolumeCreated(volumeEvent.volId, volumeEvent.volSizeByte)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
 
-    bool result = handler.VolumeCreated(&volumeEvent, nullptr, nullptr);
-    EXPECT_EQ(result, false);
+    int result = handler.VolumeCreated(&volumeEvent, nullptr, nullptr);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeMounted_testIfMountSuccess)
@@ -80,10 +83,11 @@ TEST(MetaVolumeEventHandler, VolumeMounted_testIfMountSuccess)
         .uuid = "",
         .subnqn = ""};
 
-    EXPECT_CALL(mapper, VolumeMounted(volumeEvent.volId, volumeEvent.volSizeByte)).WillOnce(Return(true));
+    EXPECT_CALL(mapper, VolumeMounted(volumeEvent.volId, volumeEvent.volSizeByte)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_OK));
 
-    bool result = handler.VolumeMounted(&volumeEvent, nullptr, nullptr);
-    EXPECT_EQ(result, true);
+    int result = handler.VolumeMounted(&volumeEvent, nullptr, nullptr);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_OK;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeMounted_testIfMountFails)
@@ -101,10 +105,11 @@ TEST(MetaVolumeEventHandler, VolumeMounted_testIfMountFails)
         .uuid = "",
         .subnqn = ""};
 
-    EXPECT_CALL(mapper, VolumeMounted(volumeEvent.volId, volumeEvent.volSizeByte)).WillOnce(Return(false));
+    EXPECT_CALL(mapper, VolumeMounted(volumeEvent.volId, volumeEvent.volSizeByte)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
 
-    bool result = handler.VolumeMounted(&volumeEvent, nullptr, nullptr);
-    EXPECT_EQ(result, false);
+    int result = handler.VolumeMounted(&volumeEvent, nullptr, nullptr);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeLoaded_testIfLoadSuccess)
@@ -122,10 +127,11 @@ TEST(MetaVolumeEventHandler, VolumeLoaded_testIfLoadSuccess)
         .uuid = "",
         .subnqn = ""};
 
-    EXPECT_CALL(mapper, VolumeLoaded(volumeEvent.volId, volumeEvent.volSizeByte)).WillOnce(Return(true));
+    EXPECT_CALL(mapper, VolumeLoaded(volumeEvent.volId, volumeEvent.volSizeByte)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_OK));
 
-    bool result = handler.VolumeLoaded(&volumeEvent, nullptr, nullptr);
-    EXPECT_EQ(result, true);
+    int result = handler.VolumeLoaded(&volumeEvent, nullptr, nullptr);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_OK;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeLoaded_testIfLoadFails)
@@ -143,10 +149,11 @@ TEST(MetaVolumeEventHandler, VolumeLoaded_testIfLoadFails)
         .uuid = "",
         .subnqn = ""};
 
-    EXPECT_CALL(mapper, VolumeLoaded(volumeEvent.volId, volumeEvent.volSizeByte)).WillOnce(Return(false));
+    EXPECT_CALL(mapper, VolumeLoaded(volumeEvent.volId, volumeEvent.volSizeByte)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
 
-    bool result = handler.VolumeLoaded(&volumeEvent, nullptr, nullptr);
-    EXPECT_EQ(result, false);
+    int result = handler.VolumeLoaded(&volumeEvent, nullptr, nullptr);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeUpdated_testIfExecutedSuccessfully)
@@ -164,8 +171,9 @@ TEST(MetaVolumeEventHandler, VolumeUpdated_testIfExecutedSuccessfully)
         .uuid = "",
         .subnqn = ""};
 
-    bool result = handler.VolumeUpdated(&volumeEvent, nullptr, nullptr);
-    EXPECT_EQ(result, true);
+    int result = handler.VolumeUpdated(&volumeEvent, nullptr, nullptr);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_OK;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountSuccess)
@@ -186,11 +194,12 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountSuccess)
     {
         InSequence s;
         EXPECT_CALL(allocator, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(true));
-        EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, false)).WillOnce(Return(true));
+        EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, false)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_OK));
     }
 
-    bool result = handler.VolumeUnmounted(&volumeEvent, nullptr);
-    EXPECT_EQ(result, true);
+    int result = handler.VolumeUnmounted(&volumeEvent, nullptr);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_OK;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountFailsWhenActiveStripeFlushFails)
@@ -210,9 +219,10 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountFailsWhenActiveStripeF
 
     EXPECT_CALL(allocator, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(false));
     EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, false)).Times(0);
-    bool result = handler.VolumeUnmounted(&volumeEvent, nullptr);
+    int result = handler.VolumeUnmounted(&volumeEvent, nullptr);
 
-    EXPECT_EQ(result, false);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountFailsWhenVolumeMapUnmountFails)
@@ -231,10 +241,11 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfUnmountFailsWhenVolumeMapUnmo
         .subnqn = ""};
 
     EXPECT_CALL(allocator, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(true));
-    EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, false)).WillOnce(Return(false));
-    bool result = handler.VolumeUnmounted(&volumeEvent, nullptr);
+    EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, false)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
+    int result = handler.VolumeUnmounted(&volumeEvent, nullptr);
 
-    EXPECT_EQ(result, false);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfMapFlushIsNotRequestedWhenJournalIsDisabled)
@@ -254,10 +265,11 @@ TEST(MetaVolumeEventHandler, VolumeUnmounted_testIfMapFlushIsNotRequestedWhenJou
     EXPECT_CALL(allocator, FinalizeActiveStripes(volumeEvent.volId)).WillOnce(Return(true));
 
     // flushMapRequired should be TRUE when journal disabled
-    EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, true)).WillOnce(Return(false));
-    bool result = handler.VolumeUnmounted(&volumeEvent, nullptr);
+    EXPECT_CALL(mapper, VolumeUnmounted(volumeEvent.volId, true)).WillOnce(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
+    int result = handler.VolumeUnmounted(&volumeEvent, nullptr);
 
-    EXPECT_EQ(result, false);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteSuccessWhenJournalDisabled)
@@ -281,7 +293,8 @@ TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteSuccessWhenJournalD
     }
 
     int result = handler.VolumeDeleted(&volumeEvent, nullptr);
-    EXPECT_EQ(result, true);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_OK;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteSuccessWhenJournalEnabled)
@@ -308,7 +321,8 @@ TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteSuccessWhenJournalE
     }
 
     int result = handler.VolumeDeleted(&volumeEvent, nullptr);
-    EXPECT_EQ(result, true);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_OK;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteFailsWhenMapperPrepareFails)
@@ -332,7 +346,8 @@ TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteFailsWhenMapperPrep
     EXPECT_CALL(mapper, DeleteVolumeMap(volumeEvent.volId)).Times(0);
 
     int result = handler.VolumeDeleted(&volumeEvent, nullptr);
-    EXPECT_EQ(result, false);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteFailsWhenJournalWriteFails)
@@ -360,7 +375,8 @@ TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteFailsWhenJournalWri
     EXPECT_CALL(mapper, DeleteVolumeMap(volumeEvent.volId)).Times(0);
 
     int result = handler.VolumeDeleted(&volumeEvent, nullptr);
-    EXPECT_EQ(result, false);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteFailsWhenMetaFlushFails)
@@ -387,7 +403,8 @@ TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteFailsWhenMetaFlushF
     EXPECT_CALL(mapper, DeleteVolumeMap(volumeEvent.volId)).Times(0);
 
     int result = handler.VolumeDeleted(&volumeEvent, nullptr);
-    EXPECT_EQ(result, false);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteFailsWhenDeleteVolumeMapFails)
@@ -414,7 +431,8 @@ TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteFailsWhenDeleteVolu
     }
 
     int result = handler.VolumeDeleted(&volumeEvent, nullptr);
-    EXPECT_EQ(result, false);
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MetaVolumeEventHandler, VolumeDetached_testIfMapDetachedSuccessfully)

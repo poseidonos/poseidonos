@@ -39,6 +39,7 @@
 using namespace std;
 namespace pos
 {
+
 struct VolumeEventBase
 {
     int volId;
@@ -59,6 +60,7 @@ struct VolumeArrayInfo
     int arrayId;
     string arrayName;
 };
+
 class VolumeEvent
 {
 public:
@@ -69,13 +71,13 @@ public:
     void SetVolumePerf(VolumeEventPerf* volEventPerf, uint64_t maxiops, uint64_t maxbw);
     void SetVolumeArrayInfo(VolumeArrayInfo* volArrayInfo, int arrayId, string arrayName);
 
-    virtual bool VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) = 0;
-    virtual bool VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) = 0;
-    virtual bool VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) = 0;
-    virtual bool VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) = 0;
-    virtual bool VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) = 0;
-    virtual bool VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) = 0;
-    virtual void VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual int VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual int VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual int VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual int VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual int VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual int VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) = 0;
+    virtual int VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) = 0;
 
 protected:
     string arrayName = "";

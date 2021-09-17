@@ -91,8 +91,8 @@ VolumeEventPublisher::NotifyVolumeCreated(VolumeEventBase* volEventBase, VolumeE
                 "NotifyVolumeCreated to {} : {} {} {} {} {}",
                 it->second->Tag(), volEventBase->volName, volEventBase->volId, volEventBase->volSizeByte,
                 volEventPerf->maxiops, volEventPerf->maxbw);
-            bool res = it->second->VolumeCreated(volEventBase, volEventPerf, volArrayInfo);
-            if (res == false)
+            int res = it->second->VolumeCreated(volEventBase, volEventPerf, volArrayInfo);
+            if (res != (int)POS_EVENT_ID::VOL_EVENT_OK)
             {
                 ret = false;
             }
@@ -122,8 +122,8 @@ VolumeEventPublisher::NotifyVolumeUpdated(VolumeEventBase* volEventBase, VolumeE
                 "NotifyVolumeUpdated to {} : {} {} {} {}",
                 it->second->Tag(), volEventBase->volName, volEventBase->volId,
                 volEventPerf->maxiops, volEventPerf->maxbw);
-            bool res = it->second->VolumeUpdated(volEventBase, volEventPerf, volArrayInfo);
-            if (res == false)
+            int res = it->second->VolumeUpdated(volEventBase, volEventPerf, volArrayInfo);
+            if (res != (int)POS_EVENT_ID::VOL_EVENT_OK)
             {
                 ret = false;
             }
@@ -152,8 +152,8 @@ VolumeEventPublisher::NotifyVolumeDeleted(VolumeEventBase* volEventBase, VolumeA
             POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
                 "NotifyVolumeDeleted to {} : {} {} {}",
                 it->second->Tag(), volEventBase->volName, volEventBase->volId, volEventBase->volSizeByte);
-            bool res = it->second->VolumeDeleted(volEventBase, volArrayInfo);
-            if (res == false)
+            int res = it->second->VolumeDeleted(volEventBase, volArrayInfo);
+            if (res != (int)POS_EVENT_ID::VOL_EVENT_OK)
             {
                 ret = false;
             }
@@ -183,8 +183,8 @@ VolumeEventPublisher::NotifyVolumeMounted(VolumeEventBase* volEventBase, VolumeE
                 "NotifyVolumeMounted to {} : {} {} {} {} {} {}",
                 it->second->Tag(), volEventBase->volName, volEventBase->subnqn, volEventBase->volId, volEventBase->volSizeByte,
                 volEventPerf->maxiops, volEventPerf->maxbw);
-            bool res = it->second->VolumeMounted(volEventBase, volEventPerf, volArrayInfo);
-            if (res == false)
+            int res = it->second->VolumeMounted(volEventBase, volEventPerf, volArrayInfo);
+            if (res != (int)POS_EVENT_ID::VOL_EVENT_OK)
             {
                 ret = false;
             }
@@ -212,8 +212,8 @@ VolumeEventPublisher::NotifyVolumeUnmounted(VolumeEventBase* volEventBase, Volum
             POS_TRACE_DEBUG((int)POS_EVENT_ID::VOLUME_EVENT,
                 "NotifyVolumeUnmounted to {} : {} {}",
                 it->second->Tag(), volEventBase->volName, volEventBase->volId);
-            bool res = it->second->VolumeUnmounted(volEventBase, volArrayInfo);
-            if (res == false)
+            int res = it->second->VolumeUnmounted(volEventBase, volArrayInfo);
+            if (res != (int)POS_EVENT_ID::VOL_EVENT_OK)
             {
                 ret = false;
             }
@@ -243,8 +243,8 @@ VolumeEventPublisher::NotifyVolumeLoaded(VolumeEventBase* volEventBase, VolumeEv
                 "NotifyVolumeLoaded to {} : {} {} {} {} {}",
                 it->second->Tag(), volEventBase->volName, volEventBase->volId, volEventBase->volSizeByte,
                 volEventPerf->maxiops, volEventPerf->maxbw);
-            bool res = it->second->VolumeLoaded(volEventBase, volEventPerf, volArrayInfo);
-            if (res == false)
+            int res = it->second->VolumeLoaded(volEventBase, volEventPerf, volArrayInfo);
+            if (res != (int)POS_EVENT_ID::VOL_EVENT_OK)
             {
                 ret = false;
             }

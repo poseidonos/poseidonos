@@ -56,47 +56,52 @@ MetaVolumeEventHandler::~MetaVolumeEventHandler(void)
     VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayInfo->GetName(), arrayInfo->GetIndex());
 }
 
-bool
+int
 MetaVolumeEventHandler::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    bool result = mapper->VolumeCreated(volEventBase->volId, volEventBase->volSizeByte);
+    int result = mapper->VolumeCreated(volEventBase->volId, volEventBase->volSizeByte);
     return result;
 }
 
-bool
+int
 MetaVolumeEventHandler::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    bool result = mapper->VolumeMounted(volEventBase->volId, volEventBase->volSizeByte);
+    int result = mapper->VolumeMounted(volEventBase->volId, volEventBase->volSizeByte);
     return result;
 }
 
-bool
+int
 MetaVolumeEventHandler::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    bool result = mapper->VolumeLoaded(volEventBase->volId, volEventBase->volSizeByte);
+    int result = mapper->VolumeLoaded(volEventBase->volId, volEventBase->volSizeByte);
     return result;
 }
 
-bool
+int
 MetaVolumeEventHandler::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     // Do nothing
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-bool
+int
 MetaVolumeEventHandler::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
-    bool result = allocator->FinalizeActiveStripes(volEventBase->volId);
-    if (result == true)
+    int result;
+    bool preResult = allocator->FinalizeActiveStripes(volEventBase->volId);
+    if (preResult == true)
     {
         bool flushMapRequired = (journal == nullptr);
         result = mapper->VolumeUnmounted(volEventBase->volId, flushMapRequired);
     }
+    else
+    {
+        result = (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    }
     return result;
 }
 
-bool
+int
 MetaVolumeEventHandler::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     int result = 0;
@@ -105,7 +110,7 @@ MetaVolumeEventHandler::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArray
     result = mapper->PrepareVolumeDelete(volEventBase->volId);
     if (result != 0)
     {
-        return false;
+        return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
     }
 
     if (journal != nullptr)
@@ -114,14 +119,14 @@ MetaVolumeEventHandler::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArray
         result = journal->WriteVolumeDeletedLog(volEventBase->volId);
         if (result != 0)
         {
-            return false;
+            return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
         }
 
         // Trigger flushing metadata
         result = journal->TriggerMetadataFlush();
         if (result != 0)
         {
-            return false;
+            return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
         }
     }
 
@@ -129,16 +134,18 @@ MetaVolumeEventHandler::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArray
     result = mapper->DeleteVolumeMap(volEventBase->volId);
     if (result != 0)
     {
-        return false;
+        return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
     }
 
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-void
+int
 MetaVolumeEventHandler::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
 {
-    mapper->VolumeDetached(volList);
+    int result = mapper->VolumeDetached(volList);
+
+    return result;
 }
 
 } // namespace pos

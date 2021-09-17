@@ -39,11 +39,11 @@ namespace pos
 class IMapperVolumeEventHandler
 {
 public:
-    virtual bool VolumeCreated(int volId, uint64_t volSizeByte) = 0;
-    virtual bool VolumeMounted(int volId, uint64_t volSizeByte) = 0;
-    virtual bool VolumeLoaded(int volId, uint64_t volSizeByte) = 0;
-    virtual bool VolumeUnmounted(int volId, bool flushMapRequired) = 0;
-    virtual void VolumeDetached(vector<int> volList) = 0;
+    virtual int VolumeCreated(int volId, uint64_t volSizeByte) = 0;
+    virtual int VolumeMounted(int volId, uint64_t volSizeByte) = 0;
+    virtual int VolumeLoaded(int volId, uint64_t volSizeByte) = 0;
+    virtual int VolumeUnmounted(int volId, bool flushMapRequired) = 0;
+    virtual int VolumeDetached(vector<int> volList) = 0;
 
     virtual int PrepareVolumeDelete(int volId) = 0;
 

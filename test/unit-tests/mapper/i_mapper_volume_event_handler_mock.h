@@ -10,13 +10,13 @@ class MockIMapperVolumeEventHandler : public IMapperVolumeEventHandler
 {
 public:
     using IMapperVolumeEventHandler::IMapperVolumeEventHandler;
-    MOCK_METHOD(bool, VolumeCreated, (int volId, uint64_t volSizeByte), (override));
-    MOCK_METHOD(bool, VolumeMounted, (int volId, uint64_t volSizeByte), (override));
-    MOCK_METHOD(bool, VolumeLoaded, (int volId, uint64_t volSizeByte), (override));
-    MOCK_METHOD(bool, VolumeUnmounted, (int volId, bool flushMapRequired), (override));
+    MOCK_METHOD(int, VolumeCreated, (int volId, uint64_t volSizeByte), (override));
+    MOCK_METHOD(int, VolumeMounted, (int volId, uint64_t volSizeByte), (override));
+    MOCK_METHOD(int, VolumeLoaded, (int volId, uint64_t volSizeByte), (override));
+    MOCK_METHOD(int, VolumeUnmounted, (int volId, bool flushMapRequired), (override));
     MOCK_METHOD(int, PrepareVolumeDelete, (int volId), (override));
     MOCK_METHOD(int, DeleteVolumeMap, (int volId), (override));
-    MOCK_METHOD(void, VolumeDetached, (vector<int> volList), (override));
+    MOCK_METHOD(int, VolumeDetached, (vector<int> volList), (override));
 };
 
 } // namespace pos

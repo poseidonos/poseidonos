@@ -26,13 +26,13 @@ public:
     MOCK_METHOD(IMapFlush*, GetIMapFlush, (), (override));
     MOCK_METHOD(IMapperWbt*, GetIMapperWbt, (), (override));
     MOCK_METHOD(IMapperVolumeEventHandler*, GetVolumeEventHandler, (), (override));
-    MOCK_METHOD(bool, VolumeCreated, (int volId, uint64_t volSizeByte), (override));
-    MOCK_METHOD(bool, VolumeMounted, (int volId, uint64_t volSizeByte), (override));
-    MOCK_METHOD(bool, VolumeLoaded, (int volId, uint64_t volSizeByte), (override));
-    MOCK_METHOD(bool, VolumeUnmounted, (int volId, bool flushMapRequired), (override));
+    MOCK_METHOD(int, VolumeCreated, (int volId, uint64_t volSizeByte), (override));
+    MOCK_METHOD(int, VolumeMounted, (int volId, uint64_t volSizeByte), (override));
+    MOCK_METHOD(int, VolumeLoaded, (int volId, uint64_t volSizeByte), (override));
+    MOCK_METHOD(int, VolumeUnmounted, (int volId, bool flushMapRequired), (override));
     MOCK_METHOD(int, PrepareVolumeDelete, (int volId), (override));
     MOCK_METHOD(int, DeleteVolumeMap, (int volumeId), (override));
-    MOCK_METHOD(void, VolumeDetached, (vector<int> volList), (override));
+    MOCK_METHOD(int, VolumeDetached, (vector<int> volList), (override));
     MOCK_METHOD(int, GetVSAs, (int volId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray), (override));
     MOCK_METHOD(int, SetVSAs, (int volId, BlkAddr startRba, VirtualBlks& virtualBlks), (override));
     MOCK_METHOD(VirtualBlkAddr, GetRandomVSA, (BlkAddr rba), (override));

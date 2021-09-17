@@ -116,13 +116,13 @@ public:
     virtual IMapperWbt* GetIMapperWbt(void) { return mapperWbt; }
     virtual IMapperVolumeEventHandler* GetVolumeEventHandler(void) { return this; }
 
-    virtual bool VolumeCreated(int volId, uint64_t volSizeByte) override;
-    virtual bool VolumeMounted(int volId, uint64_t volSizeByte) override;
-    virtual bool VolumeLoaded(int volId, uint64_t volSizeByte) override;
-    virtual bool VolumeUnmounted(int volId, bool flushMapRequired) override;
+    virtual int VolumeCreated(int volId, uint64_t volSizeByte) override;
+    virtual int VolumeMounted(int volId, uint64_t volSizeByte) override;
+    virtual int VolumeLoaded(int volId, uint64_t volSizeByte) override;
+    virtual int VolumeUnmounted(int volId, bool flushMapRequired) override;
     virtual int PrepareVolumeDelete(int volId) override;
     virtual int DeleteVolumeMap(int volumeId) override;
-    virtual void VolumeDetached(vector<int> volList) override;
+    virtual int VolumeDetached(vector<int> volList) override;
 
     virtual int GetVSAs(int volId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray);
     virtual int SetVSAs(int volId, BlkAddr startRba, VirtualBlks& virtualBlks);

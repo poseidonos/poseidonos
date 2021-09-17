@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 #include <src/include/address_type.h>
+#include "src/include/pos_event_id.h"
 #include <test/unit-tests/array_models/interface/i_array_info_mock.h>
 #include <test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h>
 #include <test/unit-tests/cpu_affinity/affinity_manager_mock.h>
@@ -212,7 +213,9 @@ TEST_F(GcStripeManagerTestFixture, VolumeEvent_testVolumeDeleteWhenSetBlkInfo)
     volumeEventBase.volId = volId;
     VolumeEventPerf volumeMountPerf;
     VolumeArrayInfo volumeArrayInfo;
-    EXPECT_TRUE(gcStripeManager->VolumeDeleted(&volumeEventBase, &volumeArrayInfo) == true);
+
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_OK;
+    EXPECT_TRUE(gcStripeManager->VolumeDeleted(&volumeEventBase, &volumeArrayInfo) == expected);
 
     // then delete blk Info list and write buffer
     blkInfoList = gcStripeManager->GetBlkInfoList(volId);
@@ -227,11 +230,14 @@ TEST_F(GcStripeManagerTestFixture, VolumeEvent_Invoke)
     volumeEventBase.volId = 1;
     VolumeEventPerf volumeMountPerf;
     VolumeArrayInfo volumeArrayInfo;
-    EXPECT_TRUE(gcStripeManager->VolumeCreated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo) == true); // trival volume create
-    EXPECT_TRUE(gcStripeManager->VolumeMounted(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo) == true); // trival volume mounted
-    EXPECT_TRUE(gcStripeManager->VolumeUnmounted(&volumeEventBase, &volumeArrayInfo) == true); // trival volume unmounted
-    EXPECT_TRUE(gcStripeManager->VolumeLoaded(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo) == true); // trival volume loaded
-    EXPECT_TRUE(gcStripeManager->VolumeUpdated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo) == true); // trival volume updated
+
+    int expected = (int)POS_EVENT_ID::VOL_EVENT_OK;
+
+    EXPECT_TRUE(gcStripeManager->VolumeCreated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo) == expected); // trival volume create
+    EXPECT_TRUE(gcStripeManager->VolumeMounted(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo) == expected); // trival volume mounted
+    EXPECT_TRUE(gcStripeManager->VolumeUnmounted(&volumeEventBase, &volumeArrayInfo) == expected); // trival volume unmounted
+    EXPECT_TRUE(gcStripeManager->VolumeLoaded(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo) == expected); // trival volume loaded
+    EXPECT_TRUE(gcStripeManager->VolumeUpdated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo) == expected); // trival volume updated
     std::vector<int> volList;
     gcStripeManager->VolumeDetached(volList, &volumeArrayInfo); // trival volume detached
 }

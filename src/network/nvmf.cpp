@@ -134,7 +134,7 @@ Nvmf::_CopyVolumeArrayInfo(pos_volume_info* vInfo, VolumeArrayInfo* volArrayInfo
     _CopyVolumeInfo(vInfo->array_name, arrayName.c_str(), arrayName.size());
 }
 
-bool
+int
 Nvmf::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
@@ -145,12 +145,12 @@ Nvmf::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf
         _CopyVolumeArrayInfo(vInfo, volArrayInfo);
 
         volume->VolumeCreated(vInfo);
-        return true;
+        return (int)POS_EVENT_ID::VOL_EVENT_OK;
     }
-    return false;
+    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
 }
 
-bool
+int
 Nvmf::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
@@ -160,12 +160,12 @@ Nvmf::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo
         _CopyVolumeArrayInfo(vInfo, volArrayInfo);
 
         volume->VolumeDeleted(vInfo);
-        return true;
+        return (int)POS_EVENT_ID::VOL_EVENT_OK;
     }
-    return false;
+    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
 }
 
-bool
+int
 Nvmf::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
@@ -176,12 +176,12 @@ Nvmf::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf
         _CopyVolumeArrayInfo(vInfo, volArrayInfo);
 
         volume->VolumeMounted(vInfo);
-        return true;
+        return (int)POS_EVENT_ID::VOL_EVENT_OK;
     }
-    return false;
+    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
 }
 
-bool
+int
 Nvmf::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
@@ -191,18 +191,18 @@ Nvmf::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayIn
         _CopyVolumeArrayInfo(vInfo, volArrayInfo);
 
         volume->VolumeUnmounted(vInfo);
-        return true;
+        return (int)POS_EVENT_ID::VOL_EVENT_OK;
     }
-    return false;
+    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
 }
 
-bool
+int
 Nvmf::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     return VolumeCreated(volEventBase, volEventPerf, volArrayInfo);
 }
 
-bool
+int
 Nvmf::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     struct pos_volume_info* vInfo = new pos_volume_info;
@@ -213,16 +213,16 @@ Nvmf::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf
         _CopyVolumeArrayInfo(vInfo, volArrayInfo);
 
         volume->VolumeUpdated(vInfo);
-        return true;
+        return (int)POS_EVENT_ID::VOL_EVENT_OK;
     }
-    return false;
+    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
 }
 
-void
+int
 Nvmf::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
 {
     volume->VolumeDetached(volList, volArrayInfo->arrayName);
-    return;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
 } // namespace pos

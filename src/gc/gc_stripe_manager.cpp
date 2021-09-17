@@ -104,13 +104,13 @@ GcStripeManager::~GcStripeManager(void)
     volumeEventPublisher->RemoveSubscriber(this, arrayName, arrayId);
 }
 
-bool
+int
 GcStripeManager::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-bool
+int
 GcStripeManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     if (false == _IsWriteBufferFull(volEventBase->volId))
@@ -121,36 +121,37 @@ GcStripeManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* v
         ReturnBuffer(writeBuffers);
         SetFinished();
     }
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-bool
+int
 GcStripeManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-bool
+int
 GcStripeManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-bool
+int
 GcStripeManager::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-bool
+int
 GcStripeManager::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-void
+int
 GcStripeManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
 {
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
 GcWriteBuffer*

@@ -254,48 +254,49 @@ RBAStateManager::RBAStatesInVolume::_IsAccessibleRba(BlkAddr endRba)
     return size > endRba;
 }
 
-bool
+int
 RBAStateManager::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     CreateRBAState(volEventBase->volId, ChangeByteToBlock(volEventBase->volSizeByte));
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-bool
+int
 RBAStateManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     DeleteRBAState(volEventBase->volId);
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-bool
+int
 RBAStateManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-bool
+int
 RBAStateManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-bool
+int
 RBAStateManager::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     CreateRBAState(volEventBase->volId, ChangeByteToBlock(volEventBase->volSizeByte));
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-bool
+int
 RBAStateManager::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    return true;
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-void
+int
 RBAStateManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
 {
+    return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
 std::string
