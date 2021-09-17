@@ -1,3 +1,5 @@
+![Build Status](https://github.com/poseidonos/poseidonos/actions/workflows/cmake.yml/badge.svg)
+
 # Poseidon OS
 
 Poseidon OS (POS) is a light-weight storage OS that offers the best performance and valuable features over storage network. POS exploits the benefit of NVMe SSDs by optimizing storage stack and leveraging the state-of-the-art high speed interface. Please find project details at documentations page.
