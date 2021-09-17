@@ -60,6 +60,7 @@ TelemetryAirDelegator::StartDelegation(void)
         returnState = stateRun;
     }
 
+#ifdef TELEMETRY_FOR_AIR_IS_ENABLED
     air_request_data({"PERF_ARR_VOL"},
         [this](const air::JSONdoc& data) -> int {
             const std::lock_guard<std::mutex> lock(this->mutex);
@@ -98,6 +99,7 @@ TelemetryAirDelegator::StartDelegation(void)
             }
             return this->returnState;
         });
+#endif
 }
 
 void
