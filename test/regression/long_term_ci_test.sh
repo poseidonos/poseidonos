@@ -111,7 +111,7 @@ print_test_configuration()
 print_test_configuration
 
 sudo ${rootdir}/test/script/kill_poseidonos.sh
-sudo ${rootdir}/script/start_poseidonos.sh
+sudo ${rootdir}/test/regression/start_poseidonos.sh
 sleep 10
 
 sudo ${iopathdir}/setup_ibofos_nvmf_volume.sh -c $clean_bringup -t $transport -a $target_ip -s $subsystem_count -v $volume_cnt -S ${sizepervol}
