@@ -124,9 +124,6 @@ DEFINE += -DAIR_CFG=$(TOP)/config/air.cfg
 INCLUDE += -I$(SPDLOG_ROOT_DIR)/include -I$(SPDLOG_ROOT_DIR)/include/spdlog
 LDFLAGS += -L./lib/$(SPDLOG_SOURCE)/lib -lspdlog
 
-# Include <jsonrpccpp/client.h>
-INCLUDE += -I/usr/include
-
 CXXFLAGS += $(INCLUDE)
 
 LDFLAGS += -ljsoncpp -ljsonrpccpp-common -ljsonrpccpp-client
