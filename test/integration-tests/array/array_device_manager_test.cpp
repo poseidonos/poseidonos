@@ -177,6 +177,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceHasNoUblock)
     int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
+    delete nvm1UblockDevPtr.get();
 }
 
 TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceIsActuallyNVMDevice)
@@ -211,6 +212,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceIsActuallyNVMDevice)
     int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
+    delete nvm1UblockDevPtr.get();
 }
 
 TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceHasNoUblock)
@@ -251,6 +253,10 @@ TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceHasNoUblock)
     int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_NOT_FOUND;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
+    delete nvm1UblockDevPtr.get();
+    delete data1UblockDevPtr.get();
+    delete data2UblockDevPtr.get();
+    delete data3UblockDevPtr.get();
 }
 
 TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceIsActuallyNVMDevice)
@@ -291,6 +297,10 @@ TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceIsActuallyNVMDevice)
     int expected = (int)POS_EVENT_ID::ARRAY_DEVICE_TYPE_ERROR;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
+    delete nvm1UblockDevPtr.get();
+    delete data1UblockDevPtr.get();
+    delete data2UblockDevPtr.get();
+    delete data3UblockDevPtr.get();
 }
 
 TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceIsTooSmall)
@@ -331,6 +341,11 @@ TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceIsTooSmall)
     int expected = (int)POS_EVENT_ID::ARRAY_NVM_CAPACITY_ERROR;
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
+    delete nvm1UblockDevPtr.get();
+    delete data1UblockDevPtr.get();
+    delete data2UblockDevPtr.get();
+    delete data3UblockDevPtr.get();
+    delete spare1UblockDevPtr.get();
 }
 
 TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImportedWithMetaSetInformation)
