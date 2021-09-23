@@ -12,14 +12,16 @@ class Target:
         self.pw = json["PW"]
         self.nic_ssh = json["NIC"]["SSH"]
         self.nic_ip1 = json["NIC"]["IP1"]
-        self.spdk_dir = json["SPDK"]["DIR"]
+        self.spdk_dir = json["DIR"] + "/lib/spdk"
         self.spdk_tp = json["SPDK"]["TRANSPORT"]["TYPE"]
         self.spdk_no_shd_buf = json["SPDK"]["TRANSPORT"]["NUM_SHARED_BUFFER"]
-        self.pos_dir = json["POS"]["DIR"]
+        self.pos_dir = json["DIR"]
         self.pos_bin = json["POS"]["BIN"]
         self.pos_cli = json["POS"]["CLI"]
         self.pos_cfg = json["POS"]["CFG"]
         self.pos_log = json["POS"]["LOG"]
+        self.use_autogen = json["AUTO_GENERATE"]["USE"]
+        self.subsystem_list = []
 
     def Prepare(self):
         # env setting
@@ -40,12 +42,29 @@ class Target:
         # spdk setting
         if -1 == pos.cli.transport_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, self.spdk_tp, self.spdk_no_shd_buf):
             return False
-        for subsys in self.json["SPDK"]["SUBSYSTEMs"]:
-            if -1 == pos.cli.subsystem_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, subsys["NQN"], subsys["SN"]):
-                return False
-            if -1 == pos.cli.subsystem_add_listener(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, subsys["NQN"],
-                                                    self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"]):
-                return False
+
+        if "yes" == self.use_autogen:
+            nqn_base = 0
+            for subsys in self.json["AUTO_GENERATE"]["SUBSYSTEMs"]:
+                for i in range(subsys["NUM"]):
+                    nqn = f"nqn.2020-10.pos\\:subsystem{i+nqn_base+1:02d}"
+                    sn = f"POS000000000000{i+nqn_base+1:02d}"
+                    if -1 == pos.cli.subsystem_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, nqn, sn):
+                        return False
+                    if -1 == pos.cli.subsystem_add_listener(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, nqn,
+                                                            self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"]):
+                        return False
+                    subsystem_tmp = [subsys["INITIATOR"], nqn, sn, self.json["NIC"][subsys["IP"]], subsys["PORT"]]
+                    self.subsystem_list.append(subsystem_tmp)
+                nqn_base += subsys["NUM"]
+
+        else:
+            for subsys in self.json["SPDK"]["SUBSYSTEMs"]:
+                if -1 == pos.cli.subsystem_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, subsys["NQN"], subsys["SN"]):
+                    return False
+                if -1 == pos.cli.subsystem_add_listener(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, subsys["NQN"],
+                                                        self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"]):
+                    return False
 
         # pos setting
         for array in self.json["POS"]["ARRAYs"]:
@@ -58,18 +77,35 @@ class Target:
         if -1 == pos.cli.array_reset(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir):
             return False
         for array in self.json["POS"]["ARRAYs"]:
-            if -1 == pos.cli.array_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, array["USER_DEVICE_LIST"],
+            if -1 == pos.cli.array_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, array["BUFFER_DEVICE"]["NAME"], array["USER_DEVICE_LIST"],
                                           array["SPARE_DEVICE_LIST"], array["NAME"], array["RAID_TYPE"]):
                 return False
             if -1 == pos.cli.array_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, array["NAME"]):
                 return False
-            for volume in array["VOLUMEs"]:
-                if -1 == pos.cli.volume_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume["NAME"],
-                                               volume["SIZE"], array["NAME"]):
-                    return False
-                if -1 == pos.cli.volume_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume["NAME"],
-                                              volume["SUBNQN"], array["NAME"]):
-                    return False
+            if "yes" != self.use_autogen:
+                for volume in array["VOLUMEs"]:
+                    if -1 == pos.cli.volume_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume["NAME"],
+                                                   volume["SIZE"], array["NAME"]):
+                        return False
+                    if -1 == pos.cli.volume_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume["NAME"],
+                                                  volume["SUBNQN"], array["NAME"]):
+                        return False
+
+        # create, mount volume(auto)
+        if "yes" == self.use_autogen:
+            nqn_base = 0
+            for subsys in self.json["AUTO_GENERATE"]["SUBSYSTEMs"]:
+                for vol in subsys["VOLUMEs"]:
+                    for i in range(vol["NUM"]):
+                        nqn = f"nqn.2020-10.pos:subsystem{i+nqn_base+1:02d}"
+                        volume_name = f"VOL{i+nqn_base+1}"
+                        if -1 == pos.cli.volume_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume_name,
+                                                       vol["SIZE"], vol["ARRAY"]):
+                            return False
+                        if -1 == pos.cli.volume_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume_name,
+                                                      nqn, vol["ARRAY"]):
+                            return False
+                    nqn_base += vol["NUM"]
 
         # print subsystems
         subsys = pos.cli.subsystem_list(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)

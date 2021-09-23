@@ -1,0 +1,145 @@
+{
+    "Targets":
+    [
+        {
+            "NAME": "Target01",
+            "ID": "root",
+            "PW": "psd",
+            "DIR": "/home/psd/ibofos/",
+            "NIC":
+            {
+                "SSH": "10.1.2.14",
+                "IP1": "10.100.2.30",
+                "IP2": "10.100.3.31"
+            },
+            "SPDK":
+            {
+                "TRANSPORT": 
+                {
+                    "TYPE": "tcp",
+                    "NUM_SHARED_BUFFER": 4096
+                },                
+                "SUBSYSTEMs":
+                [
+                ]
+            },
+            "POS":
+            {
+                "BIN": "poseidonos",
+                "CLI": "poseidonos-cli",
+                "CFG": "ibofos_for_perf_psd.conf",
+                "LOG": "pos.log",
+                "ARRAYs":
+                [
+                    {
+                        "NAME": "ARR0",
+                        "RAID_TYPE": "RAID5",
+                        "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3",
+                        "SPARE_DEVICE_LIST": "",
+                        "BUFFER_DEVICE":
+                        {
+                            "NAME": "uram0",
+                            "TYPE": "uram",
+                            "NUM_BLOCKS": 16777216,
+                            "BLOCK_SIZE": 512,
+                            "NUMA": 0
+                        },
+                        "VOLUMEs":
+                        [
+                        ]
+                    },
+                    {
+                        "NAME": "ARR1",
+                        "RAID_TYPE": "RAID5",
+                        "USER_DEVICE_LIST": "unvme-ns-4,unvme-ns-5,unvme-ns-6,unvme-ns-7",
+                        "SPARE_DEVICE_LIST": "",
+                        "BUFFER_DEVICE":
+                        {
+                            "NAME": "uram1",
+                            "TYPE": "uram",
+                            "NUM_BLOCKS": 16777216,
+                            "BLOCK_SIZE": 512,
+                            "NUMA": 1
+                        },
+                        "VOLUMEs":
+                        [
+                        ]
+                    }
+                ]
+            },
+            "AUTO_GENERATE":
+            {
+                "USE": "yes",
+                "SUBSYSTEMs":
+                [
+                    {
+                        "NUM": 5,
+                        "IP": "IP1",
+                        "PORT": 1158,
+                        "INITIATOR": "Initiator01",
+                        "VOLUMEs":
+                        [
+                            {
+                                "ARRAY": "ARR0",
+                                "NUM": 5,
+                                "SIZE": 214748364800
+                            }
+                        ]
+                    },
+                    {
+                        "NUM": 6,
+                        "IP": "IP2",
+                        "PORT": 1159,
+                        "INITIATOR": "Initiator02",
+                        "VOLUMEs":
+                        [
+                            {
+                                "ARRAY": "ARR1",
+                                "NUM": 6,
+                                "SIZE": 214748364800
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ],
+    "Initiators":
+    [
+        {
+            "NAME": "Initiator01",
+            "ID": "root",
+            "PW": "psd",
+            "NIC":
+            {
+                "SSH": "10.1.2.30"
+            },
+            "SPDK":
+            {
+                "DIR": "/home/psd/ibofos/lib/spdk",
+                "TRANSPORT": "tcp"
+            }
+        },
+        {
+            "NAME": "Initiator02",
+            "ID": "root",
+            "PW": "psd",
+            "NIC":
+            {
+                "SSH": "10.1.2.31"
+            },
+            "SPDK":
+            {
+                "DIR": "/home/psd/ibofos/lib/spdk",
+                "TRANSPORT": "tcp"
+            }
+        }
+    ],
+    "Scenarios":
+    [
+        {
+            "NAME": "fio_udd",
+            "OUTPUT_DIR": "/home/psd/ibofos/test/system/benchmark/output"
+        }
+    ]
+}

@@ -35,9 +35,12 @@ def array_reset(id, pw, ip, cli, dir):
         return -1
 
 
-def array_create(id, pw, ip, cli, dir, user_devs, spare_devs, arr_name, raid_type):
+def array_create(id, pw, ip, cli, dir, buffer_dev, user_devs, spare_devs, arr_name, raid_type):
     try:
-        cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} array create -b uram0 -d {user_devs} -s {spare_devs} --array-name {arr_name} --raid {raid_type}"
+        if 0 == len(spare_devs):
+            cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} array create -b {buffer_dev} -d {user_devs} --array-name {arr_name} --raid {raid_type}"
+        else:
+            cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} array create -b {buffer_dev} -d {user_devs} -s {spare_devs} --array-name {arr_name} --raid {raid_type}"
         lib.subproc.sync_run(cli_cmd)
         return 0
     except Exception as e:
