@@ -38,7 +38,7 @@
 
 extern "C"
 {
-#include "accel/ioat/accel_engine_ioat.h"
+#include "accel/ioat/pos_accel_engine_ioat.h"
 }
 
 #include "spdk/ioat.h"

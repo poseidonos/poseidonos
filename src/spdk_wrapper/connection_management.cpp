@@ -36,6 +36,7 @@
 #include "spdk/thread.h"
 #include "spdk/nvmf.h"
 #include "spdk/pos.h"
+#include "spdk/pos_nvmf.h"
 #include "spdk/pos_volume.h"
 
 namespace pos
