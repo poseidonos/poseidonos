@@ -48,7 +48,7 @@ TEST_F(CheckpointIntegrationTest, TriggerCheckpoint)
     MapPageList dirtyPages = writeTester->GetDirtyMap();
 
     // This is dummy writes
-    writeTester->WriteLogsWithSize(logGroupSize);
+    writeTester->WriteLogsWithSize(logGroupSize / 2);
     writeTester->WaitForAllLogWriteDone();
 
     EXPECT_TRUE(journal->GetNumDirtyMap(0) == static_cast<int>(dirtyPages.size()));

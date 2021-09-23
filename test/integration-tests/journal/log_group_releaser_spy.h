@@ -86,6 +86,12 @@ public:
         _TriggerCheckpoint();
     }
 
+    bool
+    IsFlushCompleted(void)
+    {
+        return (flushingLogGroupId == -1) && (_HasFullLogGroup() == false);
+    }
+
 protected:
     virtual void
     _FlushNextLogGroup(void) override

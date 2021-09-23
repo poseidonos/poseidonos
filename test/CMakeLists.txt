@@ -10,6 +10,7 @@ option(POS_SKIP_UT_BUILD "Skip compiling test/unit-tests/**/*_test.cpp" OFF)
 option(POS_SKIP_IT_BUILD "Skip compiling test/integration-tests/**/*_test.cpp" OFF)
 option(POS_BUILD_SHARED_LIB "Build POS as shared library (vs. static)" ON)
 option(POS_TESTEXEC_WITH_NATIVE_GTEST "Run UTs/ITs by executing gtest binaries directly (vs. ctest)" ON)
+option(POS_DISABLE_LOGGING "Disable the POS logger while running UTs/ITs" ON)
 
 # By default, we use 4 threads to run unit tests and 1 thread to run integration tests.
 # Those numbers are to limit the tests from consuming too much resource of a build server, 
@@ -366,9 +367,12 @@ add_definitions(-DPOS_VERSION="pos-0.9.3"
     -DSPDLOG_COMPILED_LIB
     -D_ADMIN_ENABLED
     -DAIR_CFG=${PROJ_ROOT}/config/air.cfg
-    -DPOS_UT_SUPPRESS_LOGMSG
 )
 remove_definitions(-DAIR_BUILD)
+
+if(POS_DISABLE_LOGGING)
+    add_definitions(-DPOS_UT_SUPPRESS_LOGMSG)
+endif(POS_DISABLE_LOGGING)
 
 file(GLOB_RECURSE dep_src ${POS_SRC_ROOT}/*.cpp ${PROJ_ROOT}/proto/generated/cpp/*.cc LIST_DIRECTORIES true)
 list(FILTER dep_src EXCLUDE REGEX ".+test.cpp")

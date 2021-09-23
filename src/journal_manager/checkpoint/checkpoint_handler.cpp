@@ -41,7 +41,6 @@
 
 namespace pos
 {
-
 // Constructor for unit test mocking
 CheckpointHandler::CheckpointHandler(void)
 : CheckpointHandler(0, 0, nullptr)
@@ -120,6 +119,7 @@ CheckpointHandler::Start(MapPageList pendingDirtyPages, EventSmartPtr callback)
             "Failed to start flushing allocator meta pages");
     }
 
+    std::unique_lock<std::mutex> lock(completionLock);
     if (status != COMPLETED)
     {
         _SetStatus(WAITING_FOR_FLUSH_DONE);
@@ -172,6 +172,9 @@ CheckpointHandler::_TryToComplete(void)
     {
         // check status to complete checkpoint only once
         _SetStatus(COMPLETED);
+
+        // completed status must not be changed by ohter threads
+        assert(status == COMPLETED);
 
         scheduler->EnqueueEvent(checkpointCompletionCallback);
         POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "Checkpoint completed");

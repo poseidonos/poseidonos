@@ -136,7 +136,8 @@ JournalManagerSpy::IsCheckpointCompleted(void)
 {
     CheckpointStatus status = logGroupReleaser->GetStatus();
 
-    return ((status == CheckpointStatus::INIT) || (status == CheckpointStatus::COMPLETED));
+    return ((status == CheckpointStatus::INIT) || (status == CheckpointStatus::COMPLETED)
+        && ((LogGroupReleaserSpy*)(logGroupReleaser))->IsFlushCompleted());
 }
 
 int
