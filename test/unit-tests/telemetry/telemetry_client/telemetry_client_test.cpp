@@ -1,22 +1,13 @@
-#include "src/telemetry/telemetry_client/telemetry_client.h"
-
 #include <gtest/gtest.h>
-
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
-
-using ::testing::_;
-using ::testing::AtLeast;
-using testing::NiceMock;
-using ::testing::Return;
-using ::testing::ReturnRef;
 
 namespace pos
 {
 TEST(TelemetryClient, RegisterClient_TestRegisterDeregister)
 {
     // given
-    NiceMock<TelemetryPublisher>* tc = new NiceMock<TelemetryPublisher>();
+    TelemetryPublisher* tc = new TelemetryPublisher();
     TelemetryClient telClient;
     // when 1.
     int ret = telClient.RegisterPublisher("a", tc);

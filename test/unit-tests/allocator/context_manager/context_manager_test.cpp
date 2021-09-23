@@ -495,7 +495,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAn
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store(REBUILD_CTX, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_URGENT_GC));
-    EXPECT_CALL(tc, PublishData(TEL_ALLOCATOR_GCMODE, _)).Times(1);
+    EXPECT_CALL(tc, PublishData(TEL_ALLOCATOR_GCMODE, 10)).Times(1);
 
     // when
     ctxManager.UpdateOccupiedStripeCount(5);
@@ -525,7 +525,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAn
     EXPECT_CALL(*fileMan, Store(REBUILD_CTX, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NORMAL_GC));
     EXPECT_CALL(*blockAllocStatus, PermitUserBlockAllocation).Times(1);
-    EXPECT_CALL(tc, PublishData(TEL_ALLOCATOR_GCMODE, _)).Times(1);
+    EXPECT_CALL(tc, PublishData(TEL_ALLOCATOR_GCMODE, 50)).Times(1);
 
     // when
     ctxManager.UpdateOccupiedStripeCount(5);
