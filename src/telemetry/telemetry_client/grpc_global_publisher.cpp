@@ -53,10 +53,12 @@ GrpcGlobalPublisher::PublishToServer(MetricUint32& metric)
 {
     PublishRequest cliPublishReq;
     // set data
-    TelemetryGeneralMetric gmReq;
-    gmReq.set_id(metric.GetId());
-    gmReq.set_time(metric.GetTimeString());
-    gmReq.set_value(metric.GetValue());
+    TelemetryGeneralMetric *gmReq = new TelemetryGeneralMetric();
+    gmReq->set_id(metric.GetId());
+    gmReq->set_time(metric.GetTimeString());
+    gmReq->set_value(metric.GetValue());
+
+    cliPublishReq.set_allocated_generalmetric(gmReq);
 
     return _SendMessage(cliPublishReq);
 }
@@ -64,14 +66,12 @@ GrpcGlobalPublisher::PublishToServer(MetricUint32& metric)
 int
 GrpcGlobalPublisher::PublishToServer(MetricString& metric)
 {
-    ////// TODO for String type value
-    // TODO: need new type of ProtoBuf for string value
     PublishRequest cliPublishReq;
     // set data
-    TelemetryGeneralMetricString gmReq;
-    gmReq.set_id(metric.GetId());
-    gmReq.set_time(metric.GetTimeString());
-    gmReq.set_value(metric.GetValue());
+    TelemetryGeneralMetricString *gmReq = new TelemetryGeneralMetricString();
+    gmReq->set_id(metric.GetId());
+    gmReq->set_time(metric.GetTimeString());
+    gmReq->set_value(metric.GetValue());
 
     return _SendMessage(cliPublishReq);
 }
@@ -79,7 +79,6 @@ GrpcGlobalPublisher::PublishToServer(MetricString& metric)
 int
 GrpcGlobalPublisher::_SendMessage(PublishRequest& cliPublishReq)
 {
-    // TODO: TelemetryGeneralMetric -> PublishRequest
     PublishResponse cliPublishRes;
     ClientContext cliContext;
 
