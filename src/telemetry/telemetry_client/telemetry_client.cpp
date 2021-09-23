@@ -31,14 +31,20 @@
  */
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/telemetry/telemetry_client/grpc_global_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 
 namespace pos
 {
-TelemetryClient::TelemetryClient(void)
+
+TelemetryClient::TelemetryClient(TelemetryManagerService* telemetryManager_, std::shared_ptr<Channel> channel_)
 {
-    globalPublisher = new GrpcGlobalPublisher();
+    globalPublisher = new GrpcGlobalPublisher(telemetryManager_, channel_);
+}
+
+TelemetryClient::TelemetryClient(void)
+//: TelemetryClient(nullptr, nullptr)
+{
+    globalPublisher = new GrpcGlobalPublisher(nullptr, nullptr);
 }
 
 TelemetryClient::~TelemetryClient(void)

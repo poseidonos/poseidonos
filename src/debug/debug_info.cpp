@@ -97,8 +97,8 @@ DebugInfo::DebugInfo(void)
   volumeEventPublisher(nullptr),
   volumeService(nullptr),
   nvmfTarget(nullptr),
-  telemetryClient(nullptr),
   telemetryManagerService(nullptr),
+  telemetryClient(nullptr),
   telemetryConfig(nullptr),
   memoryManager(nullptr)
 {
@@ -137,8 +137,8 @@ DebugInfo::Update(void)
     ioSubmitHandlerCount = IOSubmitHandlerCountSingleton::Instance();
     flushCount = FlushCountSingleton::Instance();
     telemetryManagerService = TelemetryManagerServiceSingletone::Instance();
+    telemetryClient = TelemetryClientSingleton::Instance();
     telemetryConfig = TelemetryConfigSingleton::Instance();
     memoryManager = MemoryManagerSingleton::Instance();
-    telemetryClient = TelemetryClientSingleton::Instance();
 }
 } // namespace pos

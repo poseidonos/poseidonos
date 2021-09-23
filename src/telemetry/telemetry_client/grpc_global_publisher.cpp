@@ -33,15 +33,24 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/grpc_global_publisher.h"
-#include "src/telemetry/telemetry_manager/telemetry_manager_service.h"
+#include <google/protobuf/timestamp.pb.h>
 
 namespace pos
 {
-GrpcGlobalPublisher::GrpcGlobalPublisher(void)
+GrpcGlobalPublisher::GrpcGlobalPublisher(TelemetryManagerService* telemetryManager_, std::shared_ptr<Channel> channel_)
 {
-    std::string serverAddr = TelemetryManagerServiceSingletone::Instance()->GetServerAddr();
-    std::shared_ptr<Channel> channel = grpc::CreateChannel(serverAddr, grpc::InsecureChannelCredentials());
-    telemetryManager = TelemetryManager::NewStub(channel);
+    telemetryManager = telemetryManager_;
+    if (telemetryManager == nullptr)
+    {
+        telemetryManager = TelemetryManagerServiceSingletone::Instance();
+    }
+    std::string serverAddr = telemetryManager->GetServerAddr();
+    std::shared_ptr<Channel> channel = channel_;
+    if (channel == nullptr)
+    {
+        channel = grpc::CreateChannel(serverAddr, grpc::InsecureChannelCredentials());
+    }
+    tmStub = TelemetryManager::NewStub(channel);
 }
 
 GrpcGlobalPublisher::~GrpcGlobalPublisher(void)
@@ -51,44 +60,57 @@ GrpcGlobalPublisher::~GrpcGlobalPublisher(void)
 int
 GrpcGlobalPublisher::PublishToServer(MetricUint32& metric)
 {
-    PublishRequest cliPublishReq;
-    // set data
-    TelemetryGeneralMetric *gmReq = new TelemetryGeneralMetric();
+    PublishRequest* cliPublishReq = new PublishRequest;
+    TelemetryGeneralMetric* gmReq = new TelemetryGeneralMetric();
+    google::protobuf::Timestamp* tt = new google::protobuf::Timestamp();
+    tt->set_seconds(metric.GetTime());
+    gmReq->set_allocated_time(tt);
     gmReq->set_id(metric.GetId());
-    gmReq->set_time(metric.GetTimeString());
     gmReq->set_value(metric.GetValue());
 
-    cliPublishReq.set_allocated_generalmetric(gmReq);
-
-    return _SendMessage(cliPublishReq);
+    cliPublishReq->set_allocated_generalmetric(gmReq);
+    int ret = _SendMessage(cliPublishReq);
+    delete cliPublishReq;
+    return ret;
 }
 
 int
 GrpcGlobalPublisher::PublishToServer(MetricString& metric)
 {
-    PublishRequest cliPublishReq;
-    // set data
-    TelemetryGeneralMetricString *gmReq = new TelemetryGeneralMetricString();
+    PublishRequest* cliPublishReq = new PublishRequest;
+    TelemetryGeneralMetricString* gmReq = new TelemetryGeneralMetricString();
+    google::protobuf::Timestamp* tt = new google::protobuf::Timestamp();
+    tt->set_seconds(metric.GetTime());
+    gmReq->set_allocated_time(tt);
     gmReq->set_id(metric.GetId());
-    gmReq->set_time(metric.GetTimeString());
     gmReq->set_value(metric.GetValue());
 
-    return _SendMessage(cliPublishReq);
+    cliPublishReq->set_allocated_generalmetricstring(gmReq);
+    int ret = _SendMessage(cliPublishReq);
+    delete cliPublishReq;
+    return ret;
 }
 
 int
-GrpcGlobalPublisher::_SendMessage(PublishRequest& cliPublishReq)
+GrpcGlobalPublisher::_SendMessage(PublishRequest* cliPublishReq)
 {
     PublishResponse cliPublishRes;
     ClientContext cliContext;
 
-    const string errorMsg = "[TelemetryClient] gRPC Publishing Error";
-    Status status = ::grpc::Status(StatusCode::INVALID_ARGUMENT, errorMsg);
-    status = telemetryManager->publish(&cliContext, cliPublishReq, &cliPublishRes);
+    Status status = tmStub->publish(&cliContext, *cliPublishReq, &cliPublishRes);
     if (status.ok() != true)
     {
         POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] Failed to send PublishRequest by gRPC, errorcode:{}, errormsg:{}", status.error_code(), status.error_message());
         return -1;
+    }
+    else
+    {
+        if (cliPublishRes.successful() == false)
+        {
+            POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] Telemetry Master notified packet data error");
+            return -1;
+        }
+
     }
     return 0;
 }

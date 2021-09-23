@@ -15,9 +15,13 @@ public:
     MOCK_METHOD(void, StartPublishing, (), (override));
     MOCK_METHOD(void, StopPublishing, (), (override));
     MOCK_METHOD(bool, IsRunning, (), (override));
+    MOCK_METHOD(void, SetMaxEntryLimit, (int limit), (override));
+    MOCK_METHOD(int, GetNumEntries, (), (override));
     MOCK_METHOD(int, PublishData, (std::string id, uint32_t value), (override));
+    MOCK_METHOD(int, PublishData, (std::string id, std::string value), (override));
     MOCK_METHOD(int, CollectData, (std::string id, MetricUint32& outLog), (override));
     MOCK_METHOD(list<MetricUint32>, CollectAll, (), (override));
+    MOCK_METHOD(void, SetGlobalPublisher, (IGlobalPublisher * gp), (override));
 };
 
 } // namespace pos

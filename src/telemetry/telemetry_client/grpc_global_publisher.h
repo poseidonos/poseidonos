@@ -39,27 +39,30 @@
 #include <grpcpp/server_builder.h>
 #include <grpcpp/server_context.h>
 
+#include <memory>
 #include <nlohmann/json.hpp>
 
 #include "proto/generated/cpp/telemetry.grpc.pb.h"
 #include "proto/generated/cpp/telemetry.pb.h"
 #include "src/helper/json_helper.h"
 #include "src/telemetry/telemetry_client/i_global_publisher.h"
+#include "src/telemetry/telemetry_manager/telemetry_manager_service.h"
 
-using namespace ::grpc;
 namespace pos
 {
+class TelemetryManagerService;
 class GrpcGlobalPublisher : public IGlobalPublisher
 {
 public:
-    GrpcGlobalPublisher(void);
+    GrpcGlobalPublisher(TelemetryManagerService* telemetryManager_, std::shared_ptr<Channel> channel_);
     virtual ~GrpcGlobalPublisher(void);
     virtual int PublishToServer(MetricUint32& metric);
     virtual int PublishToServer(MetricString& metric);
 
 private:
-    int _SendMessage(PublishRequest& req);
-    std::unique_ptr<TelemetryManager::Stub> telemetryManager;
+    int _SendMessage(PublishRequest* req);
+    std::unique_ptr<TelemetryManager::Stub> tmStub;
+    TelemetryManagerService* telemetryManager;
 };
 
 } // namespace pos

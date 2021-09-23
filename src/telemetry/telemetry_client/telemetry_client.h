@@ -31,6 +31,7 @@
  */
 
 #pragma once
+#include "src/telemetry/telemetry_client/grpc_global_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include <list>
 #include <map>
@@ -44,6 +45,7 @@ class GrpcGlobalPublisher;
 class TelemetryClient
 {
 public:
+    TelemetryClient(TelemetryManagerService* telemetryManager_, std::shared_ptr<Channel> channel_);
     TelemetryClient(void);
     virtual ~TelemetryClient(void);
     virtual int RegisterPublisher(std::string name, TelemetryPublisher* client);

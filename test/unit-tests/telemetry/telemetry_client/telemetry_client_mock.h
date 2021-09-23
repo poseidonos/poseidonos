@@ -12,7 +12,7 @@ class MockTelemetryClient : public TelemetryClient
 {
 public:
     using TelemetryClient::TelemetryClient;
-    MOCK_METHOD(int, RegisterPublisher, (std::string name, TelemetryPublisher* publisher), (override));
+    MOCK_METHOD(int, RegisterPublisher, (std::string name, TelemetryPublisher* client), (override));
     MOCK_METHOD(int, DeregisterPublisher, (std::string name), (override));
     MOCK_METHOD(bool, StartPublisher, (std::string name), (override));
     MOCK_METHOD(bool, StopPublisher, (std::string name), (override));

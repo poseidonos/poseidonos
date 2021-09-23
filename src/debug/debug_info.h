@@ -108,8 +108,8 @@ private:
     VolumeEventPublisher* volumeEventPublisher;
     VolumeService* volumeService;
     NvmfTarget* nvmfTarget;
-    TelemetryClient* telemetryClient;
     TelemetryManagerService* telemetryManagerService;
+    TelemetryClient* telemetryClient;
     TelemetryConfig* telemetryConfig;
     MemoryManager* memoryManager;
 };

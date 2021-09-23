@@ -31,6 +31,7 @@
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: export
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
 #include <google/protobuf/unknown_field_set.h>
+#include <google/protobuf/timestamp.pb.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
 #define PROTOBUF_INTERNAL_EXPORT_telemetry_2eproto
@@ -46,7 +47,7 @@ struct TableStruct_telemetry_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[19]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[20]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -108,6 +109,9 @@ extern PublishResponseDefaultTypeInternal _PublishResponse_default_instance_;
 class TelemetryGeneralMetric;
 struct TelemetryGeneralMetricDefaultTypeInternal;
 extern TelemetryGeneralMetricDefaultTypeInternal _TelemetryGeneralMetric_default_instance_;
+class TelemetryGeneralMetricString;
+struct TelemetryGeneralMetricStringDefaultTypeInternal;
+extern TelemetryGeneralMetricStringDefaultTypeInternal _TelemetryGeneralMetricString_default_instance_;
 class WbtProto;
 struct WbtProtoDefaultTypeInternal;
 extern WbtProtoDefaultTypeInternal _WbtProto_default_instance_;
@@ -130,6 +134,7 @@ template<> ::LatencyProto* Arena::CreateMaybeMessage<::LatencyProto>(Arena*);
 template<> ::PublishRequest* Arena::CreateMaybeMessage<::PublishRequest>(Arena*);
 template<> ::PublishResponse* Arena::CreateMaybeMessage<::PublishResponse>(Arena*);
 template<> ::TelemetryGeneralMetric* Arena::CreateMaybeMessage<::TelemetryGeneralMetric>(Arena*);
+template<> ::TelemetryGeneralMetricString* Arena::CreateMaybeMessage<::TelemetryGeneralMetricString>(Arena*);
 template<> ::WbtProto* Arena::CreateMaybeMessage<::WbtProto>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 
@@ -159,13 +164,6 @@ class PublishRequest PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -260,10 +258,11 @@ class PublishRequest PROTOBUF_FINAL :
     kGaugesFieldNumber = 4,
     kHistogramsFieldNumber = 5,
     kLatenciesFieldNumber = 6,
-    kGeneralMetricFieldNumber = 7,
-    kWbtProtoFieldNumber = 8,
+    kWbtProtoFieldNumber = 7,
+    kGeneralMetricFieldNumber = 8,
+    kGeneralMetricStringFieldNumber = 9,
   };
-  // optional .InfluxStorageProto influx = 2;
+  // .InfluxStorageProto influx = 2;
   bool has_influx() const;
   private:
   bool _internal_has_influx() const;
@@ -281,7 +280,7 @@ class PublishRequest PROTOBUF_FINAL :
       ::InfluxStorageProto* influx);
   ::InfluxStorageProto* unsafe_arena_release_influx();
 
-  // optional .CounterProto counters = 3;
+  // .CounterProto counters = 3;
   bool has_counters() const;
   private:
   bool _internal_has_counters() const;
@@ -299,7 +298,7 @@ class PublishRequest PROTOBUF_FINAL :
       ::CounterProto* counters);
   ::CounterProto* unsafe_arena_release_counters();
 
-  // optional .GaugeProto gauges = 4;
+  // .GaugeProto gauges = 4;
   bool has_gauges() const;
   private:
   bool _internal_has_gauges() const;
@@ -317,7 +316,7 @@ class PublishRequest PROTOBUF_FINAL :
       ::GaugeProto* gauges);
   ::GaugeProto* unsafe_arena_release_gauges();
 
-  // optional .HistogramProto histograms = 5;
+  // .HistogramProto histograms = 5;
   bool has_histograms() const;
   private:
   bool _internal_has_histograms() const;
@@ -335,7 +334,7 @@ class PublishRequest PROTOBUF_FINAL :
       ::HistogramProto* histograms);
   ::HistogramProto* unsafe_arena_release_histograms();
 
-  // optional .LatencyProto latencies = 6;
+  // .LatencyProto latencies = 6;
   bool has_latencies() const;
   private:
   bool _internal_has_latencies() const;
@@ -353,25 +352,7 @@ class PublishRequest PROTOBUF_FINAL :
       ::LatencyProto* latencies);
   ::LatencyProto* unsafe_arena_release_latencies();
 
-  // optional .TelemetryGeneralMetric generalMetric = 7;
-  bool has_generalmetric() const;
-  private:
-  bool _internal_has_generalmetric() const;
-  public:
-  void clear_generalmetric();
-  const ::TelemetryGeneralMetric& generalmetric() const;
-  ::TelemetryGeneralMetric* release_generalmetric();
-  ::TelemetryGeneralMetric* mutable_generalmetric();
-  void set_allocated_generalmetric(::TelemetryGeneralMetric* generalmetric);
-  private:
-  const ::TelemetryGeneralMetric& _internal_generalmetric() const;
-  ::TelemetryGeneralMetric* _internal_mutable_generalmetric();
-  public:
-  void unsafe_arena_set_allocated_generalmetric(
-      ::TelemetryGeneralMetric* generalmetric);
-  ::TelemetryGeneralMetric* unsafe_arena_release_generalmetric();
-
-  // optional .WbtProto wbtProto = 8;
+  // .WbtProto wbtProto = 7;
   bool has_wbtproto() const;
   private:
   bool _internal_has_wbtproto() const;
@@ -389,6 +370,42 @@ class PublishRequest PROTOBUF_FINAL :
       ::WbtProto* wbtproto);
   ::WbtProto* unsafe_arena_release_wbtproto();
 
+  // .TelemetryGeneralMetric generalMetric = 8;
+  bool has_generalmetric() const;
+  private:
+  bool _internal_has_generalmetric() const;
+  public:
+  void clear_generalmetric();
+  const ::TelemetryGeneralMetric& generalmetric() const;
+  ::TelemetryGeneralMetric* release_generalmetric();
+  ::TelemetryGeneralMetric* mutable_generalmetric();
+  void set_allocated_generalmetric(::TelemetryGeneralMetric* generalmetric);
+  private:
+  const ::TelemetryGeneralMetric& _internal_generalmetric() const;
+  ::TelemetryGeneralMetric* _internal_mutable_generalmetric();
+  public:
+  void unsafe_arena_set_allocated_generalmetric(
+      ::TelemetryGeneralMetric* generalmetric);
+  ::TelemetryGeneralMetric* unsafe_arena_release_generalmetric();
+
+  // .TelemetryGeneralMetricString generalMetricString = 9;
+  bool has_generalmetricstring() const;
+  private:
+  bool _internal_has_generalmetricstring() const;
+  public:
+  void clear_generalmetricstring();
+  const ::TelemetryGeneralMetricString& generalmetricstring() const;
+  ::TelemetryGeneralMetricString* release_generalmetricstring();
+  ::TelemetryGeneralMetricString* mutable_generalmetricstring();
+  void set_allocated_generalmetricstring(::TelemetryGeneralMetricString* generalmetricstring);
+  private:
+  const ::TelemetryGeneralMetricString& _internal_generalmetricstring() const;
+  ::TelemetryGeneralMetricString* _internal_mutable_generalmetricstring();
+  public:
+  void unsafe_arena_set_allocated_generalmetricstring(
+      ::TelemetryGeneralMetricString* generalmetricstring);
+  ::TelemetryGeneralMetricString* unsafe_arena_release_generalmetricstring();
+
   // @@protoc_insertion_point(class_scope:PublishRequest)
  private:
   class _Internal;
@@ -403,8 +420,9 @@ class PublishRequest PROTOBUF_FINAL :
   ::GaugeProto* gauges_;
   ::HistogramProto* histograms_;
   ::LatencyProto* latencies_;
-  ::TelemetryGeneralMetric* generalmetric_;
   ::WbtProto* wbtproto_;
+  ::TelemetryGeneralMetric* generalmetric_;
+  ::TelemetryGeneralMetricString* generalmetricstring_;
   friend struct ::TableStruct_telemetry_2eproto;
 };
 // -------------------------------------------------------------------
@@ -433,13 +451,6 @@ class PublishResponse PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -532,7 +543,7 @@ class PublishResponse PROTOBUF_FINAL :
     kReasonFieldNumber = 2,
     kSuccessfulFieldNumber = 1,
   };
-  // optional string reason = 2;
+  // string reason = 2;
   bool has_reason() const;
   private:
   bool _internal_has_reason() const;
@@ -552,11 +563,7 @@ class PublishResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_reason();
   public:
 
-  // required bool successful = 1;
-  bool has_successful() const;
-  private:
-  bool _internal_has_successful() const;
-  public:
+  // bool successful = 1;
   void clear_successful();
   bool successful() const;
   void set_successful(bool value);
@@ -604,13 +611,6 @@ class CollectRequest PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -737,13 +737,6 @@ class CollectResponse PROTOBUF_FINAL :
     return *this;
   }
 
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-  }
-
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
     return GetDescriptor();
   }
@@ -837,8 +830,9 @@ class CollectResponse PROTOBUF_FINAL :
     kHistogramsFieldNumber = 5,
     kLatenciesFieldNumber = 6,
     kMetadataFieldNumber = 1,
-    kGeneralMetricFieldNumber = 7,
-    kWbtProtoFieldNumber = 8,
+    kWbtProtoFieldNumber = 7,
+    kGeneralMetricFieldNumber = 8,
+    kGeneralMetricStringFieldNumber = 9,
   };
   // repeated .InfluxStorageProto influx = 2;
   int influx_size() const;
@@ -930,7 +924,7 @@ class CollectResponse PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::LatencyProto >&
       latencies() const;
 
-  // required .ConfigureMetadataRequest metadata = 1;
+  // .ConfigureMetadataRequest metadata = 1;
   bool has_metadata() const;
   private:
   bool _internal_has_metadata() const;
@@ -948,25 +942,7 @@ class CollectResponse PROTOBUF_FINAL :
       ::ConfigureMetadataRequest* metadata);
   ::ConfigureMetadataRequest* unsafe_arena_release_metadata();
 
-  // optional .TelemetryGeneralMetric generalMetric = 7;
-  bool has_generalmetric() const;
-  private:
-  bool _internal_has_generalmetric() const;
-  public:
-  void clear_generalmetric();
-  const ::TelemetryGeneralMetric& generalmetric() const;
-  ::TelemetryGeneralMetric* release_generalmetric();
-  ::TelemetryGeneralMetric* mutable_generalmetric();
-  void set_allocated_generalmetric(::TelemetryGeneralMetric* generalmetric);
-  private:
-  const ::TelemetryGeneralMetric& _internal_generalmetric() const;
-  ::TelemetryGeneralMetric* _internal_mutable_generalmetric();
-  public:
-  void unsafe_arena_set_allocated_generalmetric(
-      ::TelemetryGeneralMetric* generalmetric);
-  ::TelemetryGeneralMetric* unsafe_arena_release_generalmetric();
-
-  // optional .WbtProto wbtProto = 8;
+  // .WbtProto wbtProto = 7;
   bool has_wbtproto() const;
   private:
   bool _internal_has_wbtproto() const;
@@ -984,6 +960,42 @@ class CollectResponse PROTOBUF_FINAL :
       ::WbtProto* wbtproto);
   ::WbtProto* unsafe_arena_release_wbtproto();
 
+  // .TelemetryGeneralMetric generalMetric = 8;
+  bool has_generalmetric() const;
+  private:
+  bool _internal_has_generalmetric() const;
+  public:
+  void clear_generalmetric();
+  const ::TelemetryGeneralMetric& generalmetric() const;
+  ::TelemetryGeneralMetric* release_generalmetric();
+  ::TelemetryGeneralMetric* mutable_generalmetric();
+  void set_allocated_generalmetric(::TelemetryGeneralMetric* generalmetric);
+  private:
+  const ::TelemetryGeneralMetric& _internal_generalmetric() const;
+  ::TelemetryGeneralMetric* _internal_mutable_generalmetric();
+  public:
+  void unsafe_arena_set_allocated_generalmetric(
+      ::TelemetryGeneralMetric* generalmetric);
+  ::TelemetryGeneralMetric* unsafe_arena_release_generalmetric();
+
+  // .TelemetryGeneralMetricString generalMetricString = 9;
+  bool has_generalmetricstring() const;
+  private:
+  bool _internal_has_generalmetricstring() const;
+  public:
+  void clear_generalmetricstring();
+  const ::TelemetryGeneralMetricString& generalmetricstring() const;
+  ::TelemetryGeneralMetricString* release_generalmetricstring();
+  ::TelemetryGeneralMetricString* mutable_generalmetricstring();
+  void set_allocated_generalmetricstring(::TelemetryGeneralMetricString* generalmetricstring);
+  private:
+  const ::TelemetryGeneralMetricString& _internal_generalmetricstring() const;
+  ::TelemetryGeneralMetricString* _internal_mutable_generalmetricstring();
+  public:
+  void unsafe_arena_set_allocated_generalmetricstring(
+      ::TelemetryGeneralMetricString* generalmetricstring);
+  ::TelemetryGeneralMetricString* unsafe_arena_release_generalmetricstring();
+
   // @@protoc_insertion_point(class_scope:CollectResponse)
  private:
   class _Internal;
@@ -999,8 +1011,9 @@ class CollectResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::HistogramProto > histograms_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::LatencyProto > latencies_;
   ::ConfigureMetadataRequest* metadata_;
-  ::TelemetryGeneralMetric* generalmetric_;
   ::WbtProto* wbtproto_;
+  ::TelemetryGeneralMetric* generalmetric_;
+  ::TelemetryGeneralMetricString* generalmetricstring_;
   friend struct ::TableStruct_telemetry_2eproto;
 };
 // -------------------------------------------------------------------
@@ -1029,13 +1042,6 @@ class EnableRequest PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -1162,13 +1168,6 @@ class EnableResponse PROTOBUF_FINAL :
     return *this;
   }
 
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-  }
-
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
     return GetDescriptor();
   }
@@ -1259,7 +1258,7 @@ class EnableResponse PROTOBUF_FINAL :
     kReasonFieldNumber = 2,
     kSuccessfulFieldNumber = 1,
   };
-  // optional string reason = 2;
+  // string reason = 2;
   bool has_reason() const;
   private:
   bool _internal_has_reason() const;
@@ -1279,11 +1278,7 @@ class EnableResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_reason();
   public:
 
-  // required bool successful = 1;
-  bool has_successful() const;
-  private:
-  bool _internal_has_successful() const;
-  public:
+  // bool successful = 1;
   void clear_successful();
   bool successful() const;
   void set_successful(bool value);
@@ -1331,13 +1326,6 @@ class DisableRequest PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -1464,13 +1452,6 @@ class DisableResponse PROTOBUF_FINAL :
     return *this;
   }
 
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-  }
-
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
     return GetDescriptor();
   }
@@ -1561,7 +1542,7 @@ class DisableResponse PROTOBUF_FINAL :
     kReasonFieldNumber = 2,
     kSuccessfulFieldNumber = 1,
   };
-  // optional string reason = 2;
+  // string reason = 2;
   bool has_reason() const;
   private:
   bool _internal_has_reason() const;
@@ -1581,11 +1562,7 @@ class DisableResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_reason();
   public:
 
-  // required bool successful = 1;
-  bool has_successful() const;
-  private:
-  bool _internal_has_successful() const;
-  public:
+  // bool successful = 1;
   void clear_successful();
   bool successful() const;
   void set_successful(bool value);
@@ -1633,13 +1610,6 @@ class ConfigureMetadataRequest PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -1735,11 +1705,7 @@ class ConfigureMetadataRequest PROTOBUF_FINAL :
     kIpAddrFieldNumber = 4,
     kApplicationNameFieldNumber = 5,
   };
-  // required string git_hash = 1;
-  bool has_git_hash() const;
-  private:
-  bool _internal_has_git_hash() const;
-  public:
+  // string git_hash = 1;
   void clear_git_hash();
   const std::string& git_hash() const;
   void set_git_hash(const std::string& value);
@@ -1755,11 +1721,7 @@ class ConfigureMetadataRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_git_hash();
   public:
 
-  // required string host_name = 2;
-  bool has_host_name() const;
-  private:
-  bool _internal_has_host_name() const;
-  public:
+  // string host_name = 2;
   void clear_host_name();
   const std::string& host_name() const;
   void set_host_name(const std::string& value);
@@ -1775,11 +1737,7 @@ class ConfigureMetadataRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_host_name();
   public:
 
-  // required string host_type = 3;
-  bool has_host_type() const;
-  private:
-  bool _internal_has_host_type() const;
-  public:
+  // string host_type = 3;
   void clear_host_type();
   const std::string& host_type() const;
   void set_host_type(const std::string& value);
@@ -1795,11 +1753,7 @@ class ConfigureMetadataRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_host_type();
   public:
 
-  // required string ip_addr = 4;
-  bool has_ip_addr() const;
-  private:
-  bool _internal_has_ip_addr() const;
-  public:
+  // string ip_addr = 4;
   void clear_ip_addr();
   const std::string& ip_addr() const;
   void set_ip_addr(const std::string& value);
@@ -1815,11 +1769,7 @@ class ConfigureMetadataRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_ip_addr();
   public:
 
-  // required string application_name = 5;
-  bool has_application_name() const;
-  private:
-  bool _internal_has_application_name() const;
-  public:
+  // string application_name = 5;
   void clear_application_name();
   const std::string& application_name() const;
   void set_application_name(const std::string& value);
@@ -1839,19 +1789,15 @@ class ConfigureMetadataRequest PROTOBUF_FINAL :
  private:
   class _Internal;
 
-  // helper for ByteSizeLong()
-  size_t RequiredFieldsByteSizeFallback() const;
-
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr git_hash_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr host_name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr host_type_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr ip_addr_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr application_name_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_telemetry_2eproto;
 };
 // -------------------------------------------------------------------
@@ -1880,13 +1826,6 @@ class ConfigureMetadataResponse PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -1980,7 +1919,7 @@ class ConfigureMetadataResponse PROTOBUF_FINAL :
     kSuccessfulFieldNumber = 1,
     kCollectLatencyMsFieldNumber = 2,
   };
-  // optional string reason = 3;
+  // string reason = 3;
   bool has_reason() const;
   private:
   bool _internal_has_reason() const;
@@ -2000,11 +1939,7 @@ class ConfigureMetadataResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_reason();
   public:
 
-  // required bool successful = 1;
-  bool has_successful() const;
-  private:
-  bool _internal_has_successful() const;
-  public:
+  // bool successful = 1;
   void clear_successful();
   bool successful() const;
   void set_successful(bool value);
@@ -2013,11 +1948,7 @@ class ConfigureMetadataResponse PROTOBUF_FINAL :
   void _internal_set_successful(bool value);
   public:
 
-  // required int32 collect_latency_ms = 2;
-  bool has_collect_latency_ms() const;
-  private:
-  bool _internal_has_collect_latency_ms() const;
-  public:
+  // int32 collect_latency_ms = 2;
   void clear_collect_latency_ms();
   ::PROTOBUF_NAMESPACE_ID::int32 collect_latency_ms() const;
   void set_collect_latency_ms(::PROTOBUF_NAMESPACE_ID::int32 value);
@@ -2029,9 +1960,6 @@ class ConfigureMetadataResponse PROTOBUF_FINAL :
   // @@protoc_insertion_point(class_scope:ConfigureMetadataResponse)
  private:
   class _Internal;
-
-  // helper for ByteSizeLong()
-  size_t RequiredFieldsByteSizeFallback() const;
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
@@ -2069,13 +1997,6 @@ class InfluxStorageProto_Tag PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -2168,11 +2089,7 @@ class InfluxStorageProto_Tag PROTOBUF_FINAL :
     kTagNameFieldNumber = 1,
     kTagValueFieldNumber = 2,
   };
-  // required string tag_name = 1;
-  bool has_tag_name() const;
-  private:
-  bool _internal_has_tag_name() const;
-  public:
+  // string tag_name = 1;
   void clear_tag_name();
   const std::string& tag_name() const;
   void set_tag_name(const std::string& value);
@@ -2188,11 +2105,7 @@ class InfluxStorageProto_Tag PROTOBUF_FINAL :
   std::string* _internal_mutable_tag_name();
   public:
 
-  // required string tag_value = 2;
-  bool has_tag_value() const;
-  private:
-  bool _internal_has_tag_value() const;
-  public:
+  // string tag_value = 2;
   void clear_tag_value();
   const std::string& tag_value() const;
   void set_tag_value(const std::string& value);
@@ -2212,16 +2125,12 @@ class InfluxStorageProto_Tag PROTOBUF_FINAL :
  private:
   class _Internal;
 
-  // helper for ByteSizeLong()
-  size_t RequiredFieldsByteSizeFallback() const;
-
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tag_name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tag_value_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_telemetry_2eproto;
 };
 // -------------------------------------------------------------------
@@ -2250,13 +2159,6 @@ class InfluxStorageProto_Field PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -2349,11 +2251,7 @@ class InfluxStorageProto_Field PROTOBUF_FINAL :
     kFieldNameFieldNumber = 1,
     kFieldValueFieldNumber = 2,
   };
-  // required string field_name = 1;
-  bool has_field_name() const;
-  private:
-  bool _internal_has_field_name() const;
-  public:
+  // string field_name = 1;
   void clear_field_name();
   const std::string& field_name() const;
   void set_field_name(const std::string& value);
@@ -2369,11 +2267,7 @@ class InfluxStorageProto_Field PROTOBUF_FINAL :
   std::string* _internal_mutable_field_name();
   public:
 
-  // required string field_value = 2;
-  bool has_field_value() const;
-  private:
-  bool _internal_has_field_value() const;
-  public:
+  // string field_value = 2;
   void clear_field_value();
   const std::string& field_value() const;
   void set_field_value(const std::string& value);
@@ -2393,16 +2287,12 @@ class InfluxStorageProto_Field PROTOBUF_FINAL :
  private:
   class _Internal;
 
-  // helper for ByteSizeLong()
-  size_t RequiredFieldsByteSizeFallback() const;
-
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr field_name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr field_value_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_telemetry_2eproto;
 };
 // -------------------------------------------------------------------
@@ -2431,13 +2321,6 @@ class InfluxStorageProto PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -2571,11 +2454,7 @@ class InfluxStorageProto PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::InfluxStorageProto_Field >&
       fields() const;
 
-  // required string measurement = 1;
-  bool has_measurement() const;
-  private:
-  bool _internal_has_measurement() const;
-  public:
+  // string measurement = 1;
   void clear_measurement();
   const std::string& measurement() const;
   void set_measurement(const std::string& value);
@@ -2591,7 +2470,7 @@ class InfluxStorageProto PROTOBUF_FINAL :
   std::string* _internal_mutable_measurement();
   public:
 
-  // optional int64 timestamp = 4;
+  // int64 timestamp = 4;
   bool has_timestamp() const;
   private:
   bool _internal_has_timestamp() const;
@@ -2645,13 +2524,6 @@ class CounterProto PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -2744,11 +2616,7 @@ class CounterProto PROTOBUF_FINAL :
     kKeyFieldNumber = 1,
     kValueFieldNumber = 2,
   };
-  // required string key = 1;
-  bool has_key() const;
-  private:
-  bool _internal_has_key() const;
-  public:
+  // string key = 1;
   void clear_key();
   const std::string& key() const;
   void set_key(const std::string& value);
@@ -2764,11 +2632,7 @@ class CounterProto PROTOBUF_FINAL :
   std::string* _internal_mutable_key();
   public:
 
-  // required int64 value = 2;
-  bool has_value() const;
-  private:
-  bool _internal_has_value() const;
-  public:
+  // int64 value = 2;
   void clear_value();
   ::PROTOBUF_NAMESPACE_ID::int64 value() const;
   void set_value(::PROTOBUF_NAMESPACE_ID::int64 value);
@@ -2781,16 +2645,12 @@ class CounterProto PROTOBUF_FINAL :
  private:
   class _Internal;
 
-  // helper for ByteSizeLong()
-  size_t RequiredFieldsByteSizeFallback() const;
-
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr key_;
   ::PROTOBUF_NAMESPACE_ID::int64 value_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_telemetry_2eproto;
 };
 // -------------------------------------------------------------------
@@ -2819,13 +2679,6 @@ class GaugeProto PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -2918,11 +2771,7 @@ class GaugeProto PROTOBUF_FINAL :
     kKeyFieldNumber = 1,
     kValueFieldNumber = 2,
   };
-  // required string key = 1;
-  bool has_key() const;
-  private:
-  bool _internal_has_key() const;
-  public:
+  // string key = 1;
   void clear_key();
   const std::string& key() const;
   void set_key(const std::string& value);
@@ -2938,11 +2787,7 @@ class GaugeProto PROTOBUF_FINAL :
   std::string* _internal_mutable_key();
   public:
 
-  // required int64 value = 2;
-  bool has_value() const;
-  private:
-  bool _internal_has_value() const;
-  public:
+  // int64 value = 2;
   void clear_value();
   ::PROTOBUF_NAMESPACE_ID::int64 value() const;
   void set_value(::PROTOBUF_NAMESPACE_ID::int64 value);
@@ -2955,16 +2800,12 @@ class GaugeProto PROTOBUF_FINAL :
  private:
   class _Internal;
 
-  // helper for ByteSizeLong()
-  size_t RequiredFieldsByteSizeFallback() const;
-
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr key_;
   ::PROTOBUF_NAMESPACE_ID::int64 value_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_telemetry_2eproto;
 };
 // -------------------------------------------------------------------
@@ -2993,13 +2834,6 @@ class HistogramProto PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -3115,11 +2949,7 @@ class HistogramProto PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >*
       mutable_buckets();
 
-  // required string key = 1;
-  bool has_key() const;
-  private:
-  bool _internal_has_key() const;
-  public:
+  // string key = 1;
   void clear_key();
   const std::string& key() const;
   void set_key(const std::string& value);
@@ -3135,11 +2965,7 @@ class HistogramProto PROTOBUF_FINAL :
   std::string* _internal_mutable_key();
   public:
 
-  // required int64 num_buckets = 2;
-  bool has_num_buckets() const;
-  private:
-  bool _internal_has_num_buckets() const;
-  public:
+  // int64 num_buckets = 2;
   void clear_num_buckets();
   ::PROTOBUF_NAMESPACE_ID::int64 num_buckets() const;
   void set_num_buckets(::PROTOBUF_NAMESPACE_ID::int64 value);
@@ -3152,17 +2978,14 @@ class HistogramProto PROTOBUF_FINAL :
  private:
   class _Internal;
 
-  // helper for ByteSizeLong()
-  size_t RequiredFieldsByteSizeFallback() const;
-
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 > buckets_;
+  mutable std::atomic<int> _buckets_cached_byte_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr key_;
   ::PROTOBUF_NAMESPACE_ID::int64 num_buckets_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_telemetry_2eproto;
 };
 // -------------------------------------------------------------------
@@ -3191,13 +3014,6 @@ class LatencyProto PROTOBUF_FINAL :
       CopyFrom(from);
     }
     return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
   }
 
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
@@ -3313,11 +3129,7 @@ class LatencyProto PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >*
       mutable_latencies();
 
-  // required string key = 1;
-  bool has_key() const;
-  private:
-  bool _internal_has_key() const;
-  public:
+  // string key = 1;
   void clear_key();
   const std::string& key() const;
   void set_key(const std::string& value);
@@ -3333,11 +3145,7 @@ class LatencyProto PROTOBUF_FINAL :
   std::string* _internal_mutable_key();
   public:
 
-  // required int64 num_stages = 2;
-  bool has_num_stages() const;
-  private:
-  bool _internal_has_num_stages() const;
-  public:
+  // int64 num_stages = 2;
   void clear_num_stages();
   ::PROTOBUF_NAMESPACE_ID::int64 num_stages() const;
   void set_num_stages(::PROTOBUF_NAMESPACE_ID::int64 value);
@@ -3350,213 +3158,14 @@ class LatencyProto PROTOBUF_FINAL :
  private:
   class _Internal;
 
-  // helper for ByteSizeLong()
-  size_t RequiredFieldsByteSizeFallback() const;
-
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 > latencies_;
+  mutable std::atomic<int> _latencies_cached_byte_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr key_;
   ::PROTOBUF_NAMESPACE_ID::int64 num_stages_;
-  friend struct ::TableStruct_telemetry_2eproto;
-};
-// -------------------------------------------------------------------
-
-class TelemetryGeneralMetric PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:TelemetryGeneralMetric) */ {
- public:
-  inline TelemetryGeneralMetric() : TelemetryGeneralMetric(nullptr) {}
-  virtual ~TelemetryGeneralMetric();
-  explicit constexpr TelemetryGeneralMetric(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  TelemetryGeneralMetric(const TelemetryGeneralMetric& from);
-  TelemetryGeneralMetric(TelemetryGeneralMetric&& from) noexcept
-    : TelemetryGeneralMetric() {
-    *this = ::std::move(from);
-  }
-
-  inline TelemetryGeneralMetric& operator=(const TelemetryGeneralMetric& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline TelemetryGeneralMetric& operator=(TelemetryGeneralMetric&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const TelemetryGeneralMetric& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const TelemetryGeneralMetric* internal_default_instance() {
-    return reinterpret_cast<const TelemetryGeneralMetric*>(
-               &_TelemetryGeneralMetric_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    17;
-
-  friend void swap(TelemetryGeneralMetric& a, TelemetryGeneralMetric& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(TelemetryGeneralMetric* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(TelemetryGeneralMetric* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline TelemetryGeneralMetric* New() const final {
-    return CreateMaybeMessage<TelemetryGeneralMetric>(nullptr);
-  }
-
-  TelemetryGeneralMetric* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<TelemetryGeneralMetric>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const TelemetryGeneralMetric& from);
-  void MergeFrom(const TelemetryGeneralMetric& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(TelemetryGeneralMetric* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "TelemetryGeneralMetric";
-  }
-  protected:
-  explicit TelemetryGeneralMetric(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_telemetry_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kIdFieldNumber = 1,
-    kTimeFieldNumber = 2,
-    kValueFieldNumber = 3,
-  };
-  // required string id = 1;
-  bool has_id() const;
-  private:
-  bool _internal_has_id() const;
-  public:
-  void clear_id();
-  const std::string& id() const;
-  void set_id(const std::string& value);
-  void set_id(std::string&& value);
-  void set_id(const char* value);
-  void set_id(const char* value, size_t size);
-  std::string* mutable_id();
-  std::string* release_id();
-  void set_allocated_id(std::string* id);
-  private:
-  const std::string& _internal_id() const;
-  void _internal_set_id(const std::string& value);
-  std::string* _internal_mutable_id();
-  public:
-
-  // required string time = 2;
-  bool has_time() const;
-  private:
-  bool _internal_has_time() const;
-  public:
-  void clear_time();
-  const std::string& time() const;
-  void set_time(const std::string& value);
-  void set_time(std::string&& value);
-  void set_time(const char* value);
-  void set_time(const char* value, size_t size);
-  std::string* mutable_time();
-  std::string* release_time();
-  void set_allocated_time(std::string* time);
-  private:
-  const std::string& _internal_time() const;
-  void _internal_set_time(const std::string& value);
-  std::string* _internal_mutable_time();
-  public:
-
-  // required int32 value = 3;
-  bool has_value() const;
-  private:
-  bool _internal_has_value() const;
-  public:
-  void clear_value();
-  ::PROTOBUF_NAMESPACE_ID::int32 value() const;
-  void set_value(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_value() const;
-  void _internal_set_value(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:TelemetryGeneralMetric)
- private:
-  class _Internal;
-
-  // helper for ByteSizeLong()
-  size_t RequiredFieldsByteSizeFallback() const;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr time_;
-  ::PROTOBUF_NAMESPACE_ID::int32 value_;
   friend struct ::TableStruct_telemetry_2eproto;
 };
 // -------------------------------------------------------------------
@@ -3587,13 +3196,6 @@ class WbtProto PROTOBUF_FINAL :
     return *this;
   }
 
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-  }
-
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
     return GetDescriptor();
   }
@@ -3611,7 +3213,7 @@ class WbtProto PROTOBUF_FINAL :
                &_WbtProto_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    17;
 
   friend void swap(WbtProto& a, WbtProto& b) {
     a.Swap(&b);
@@ -3690,6 +3292,363 @@ class WbtProto PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_telemetry_2eproto;
 };
+// -------------------------------------------------------------------
+
+class TelemetryGeneralMetric PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:TelemetryGeneralMetric) */ {
+ public:
+  inline TelemetryGeneralMetric() : TelemetryGeneralMetric(nullptr) {}
+  virtual ~TelemetryGeneralMetric();
+  explicit constexpr TelemetryGeneralMetric(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  TelemetryGeneralMetric(const TelemetryGeneralMetric& from);
+  TelemetryGeneralMetric(TelemetryGeneralMetric&& from) noexcept
+    : TelemetryGeneralMetric() {
+    *this = ::std::move(from);
+  }
+
+  inline TelemetryGeneralMetric& operator=(const TelemetryGeneralMetric& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline TelemetryGeneralMetric& operator=(TelemetryGeneralMetric&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const TelemetryGeneralMetric& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const TelemetryGeneralMetric* internal_default_instance() {
+    return reinterpret_cast<const TelemetryGeneralMetric*>(
+               &_TelemetryGeneralMetric_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    18;
+
+  friend void swap(TelemetryGeneralMetric& a, TelemetryGeneralMetric& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(TelemetryGeneralMetric* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(TelemetryGeneralMetric* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline TelemetryGeneralMetric* New() const final {
+    return CreateMaybeMessage<TelemetryGeneralMetric>(nullptr);
+  }
+
+  TelemetryGeneralMetric* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<TelemetryGeneralMetric>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const TelemetryGeneralMetric& from);
+  void MergeFrom(const TelemetryGeneralMetric& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(TelemetryGeneralMetric* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "TelemetryGeneralMetric";
+  }
+  protected:
+  explicit TelemetryGeneralMetric(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_telemetry_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kIdFieldNumber = 1,
+    kTimeFieldNumber = 2,
+    kValueFieldNumber = 3,
+  };
+  // string id = 1;
+  void clear_id();
+  const std::string& id() const;
+  void set_id(const std::string& value);
+  void set_id(std::string&& value);
+  void set_id(const char* value);
+  void set_id(const char* value, size_t size);
+  std::string* mutable_id();
+  std::string* release_id();
+  void set_allocated_id(std::string* id);
+  private:
+  const std::string& _internal_id() const;
+  void _internal_set_id(const std::string& value);
+  std::string* _internal_mutable_id();
+  public:
+
+  // .google.protobuf.Timestamp time = 2;
+  bool has_time() const;
+  private:
+  bool _internal_has_time() const;
+  public:
+  void clear_time();
+  const PROTOBUF_NAMESPACE_ID::Timestamp& time() const;
+  PROTOBUF_NAMESPACE_ID::Timestamp* release_time();
+  PROTOBUF_NAMESPACE_ID::Timestamp* mutable_time();
+  void set_allocated_time(PROTOBUF_NAMESPACE_ID::Timestamp* time);
+  private:
+  const PROTOBUF_NAMESPACE_ID::Timestamp& _internal_time() const;
+  PROTOBUF_NAMESPACE_ID::Timestamp* _internal_mutable_time();
+  public:
+  void unsafe_arena_set_allocated_time(
+      PROTOBUF_NAMESPACE_ID::Timestamp* time);
+  PROTOBUF_NAMESPACE_ID::Timestamp* unsafe_arena_release_time();
+
+  // int32 value = 3;
+  void clear_value();
+  ::PROTOBUF_NAMESPACE_ID::int32 value() const;
+  void set_value(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_value() const;
+  void _internal_set_value(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:TelemetryGeneralMetric)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
+  PROTOBUF_NAMESPACE_ID::Timestamp* time_;
+  ::PROTOBUF_NAMESPACE_ID::int32 value_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_telemetry_2eproto;
+};
+// -------------------------------------------------------------------
+
+class TelemetryGeneralMetricString PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:TelemetryGeneralMetricString) */ {
+ public:
+  inline TelemetryGeneralMetricString() : TelemetryGeneralMetricString(nullptr) {}
+  virtual ~TelemetryGeneralMetricString();
+  explicit constexpr TelemetryGeneralMetricString(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  TelemetryGeneralMetricString(const TelemetryGeneralMetricString& from);
+  TelemetryGeneralMetricString(TelemetryGeneralMetricString&& from) noexcept
+    : TelemetryGeneralMetricString() {
+    *this = ::std::move(from);
+  }
+
+  inline TelemetryGeneralMetricString& operator=(const TelemetryGeneralMetricString& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline TelemetryGeneralMetricString& operator=(TelemetryGeneralMetricString&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const TelemetryGeneralMetricString& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const TelemetryGeneralMetricString* internal_default_instance() {
+    return reinterpret_cast<const TelemetryGeneralMetricString*>(
+               &_TelemetryGeneralMetricString_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    19;
+
+  friend void swap(TelemetryGeneralMetricString& a, TelemetryGeneralMetricString& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(TelemetryGeneralMetricString* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(TelemetryGeneralMetricString* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline TelemetryGeneralMetricString* New() const final {
+    return CreateMaybeMessage<TelemetryGeneralMetricString>(nullptr);
+  }
+
+  TelemetryGeneralMetricString* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<TelemetryGeneralMetricString>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const TelemetryGeneralMetricString& from);
+  void MergeFrom(const TelemetryGeneralMetricString& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(TelemetryGeneralMetricString* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "TelemetryGeneralMetricString";
+  }
+  protected:
+  explicit TelemetryGeneralMetricString(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_telemetry_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kIdFieldNumber = 1,
+    kValueFieldNumber = 3,
+    kTimeFieldNumber = 2,
+  };
+  // string id = 1;
+  void clear_id();
+  const std::string& id() const;
+  void set_id(const std::string& value);
+  void set_id(std::string&& value);
+  void set_id(const char* value);
+  void set_id(const char* value, size_t size);
+  std::string* mutable_id();
+  std::string* release_id();
+  void set_allocated_id(std::string* id);
+  private:
+  const std::string& _internal_id() const;
+  void _internal_set_id(const std::string& value);
+  std::string* _internal_mutable_id();
+  public:
+
+  // string value = 3;
+  void clear_value();
+  const std::string& value() const;
+  void set_value(const std::string& value);
+  void set_value(std::string&& value);
+  void set_value(const char* value);
+  void set_value(const char* value, size_t size);
+  std::string* mutable_value();
+  std::string* release_value();
+  void set_allocated_value(std::string* value);
+  private:
+  const std::string& _internal_value() const;
+  void _internal_set_value(const std::string& value);
+  std::string* _internal_mutable_value();
+  public:
+
+  // .google.protobuf.Timestamp time = 2;
+  bool has_time() const;
+  private:
+  bool _internal_has_time() const;
+  public:
+  void clear_time();
+  const PROTOBUF_NAMESPACE_ID::Timestamp& time() const;
+  PROTOBUF_NAMESPACE_ID::Timestamp* release_time();
+  PROTOBUF_NAMESPACE_ID::Timestamp* mutable_time();
+  void set_allocated_time(PROTOBUF_NAMESPACE_ID::Timestamp* time);
+  private:
+  const PROTOBUF_NAMESPACE_ID::Timestamp& _internal_time() const;
+  PROTOBUF_NAMESPACE_ID::Timestamp* _internal_mutable_time();
+  public:
+  void unsafe_arena_set_allocated_time(
+      PROTOBUF_NAMESPACE_ID::Timestamp* time);
+  PROTOBUF_NAMESPACE_ID::Timestamp* unsafe_arena_release_time();
+
+  // @@protoc_insertion_point(class_scope:TelemetryGeneralMetricString)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr value_;
+  PROTOBUF_NAMESPACE_ID::Timestamp* time_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_telemetry_2eproto;
+};
 // ===================================================================
 
 
@@ -3701,7 +3660,7 @@ class WbtProto PROTOBUF_FINAL :
 #endif  // __GNUC__
 // PublishRequest
 
-// optional .InfluxStorageProto influx = 2;
+// .InfluxStorageProto influx = 2;
 inline bool PublishRequest::_internal_has_influx() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   PROTOBUF_ASSUME(!value || influx_ != nullptr);
@@ -3711,7 +3670,10 @@ inline bool PublishRequest::has_influx() const {
   return _internal_has_influx();
 }
 inline void PublishRequest::clear_influx() {
-  if (influx_ != nullptr) influx_->Clear();
+  if (GetArena() == nullptr && influx_ != nullptr) {
+    delete influx_;
+  }
+  influx_ = nullptr;
   _has_bits_[0] &= ~0x00000001u;
 }
 inline const ::InfluxStorageProto& PublishRequest::_internal_influx() const {
@@ -3784,7 +3746,7 @@ inline void PublishRequest::set_allocated_influx(::InfluxStorageProto* influx) {
   // @@protoc_insertion_point(field_set_allocated:PublishRequest.influx)
 }
 
-// optional .CounterProto counters = 3;
+// .CounterProto counters = 3;
 inline bool PublishRequest::_internal_has_counters() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   PROTOBUF_ASSUME(!value || counters_ != nullptr);
@@ -3794,7 +3756,10 @@ inline bool PublishRequest::has_counters() const {
   return _internal_has_counters();
 }
 inline void PublishRequest::clear_counters() {
-  if (counters_ != nullptr) counters_->Clear();
+  if (GetArena() == nullptr && counters_ != nullptr) {
+    delete counters_;
+  }
+  counters_ = nullptr;
   _has_bits_[0] &= ~0x00000002u;
 }
 inline const ::CounterProto& PublishRequest::_internal_counters() const {
@@ -3867,7 +3832,7 @@ inline void PublishRequest::set_allocated_counters(::CounterProto* counters) {
   // @@protoc_insertion_point(field_set_allocated:PublishRequest.counters)
 }
 
-// optional .GaugeProto gauges = 4;
+// .GaugeProto gauges = 4;
 inline bool PublishRequest::_internal_has_gauges() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   PROTOBUF_ASSUME(!value || gauges_ != nullptr);
@@ -3877,7 +3842,10 @@ inline bool PublishRequest::has_gauges() const {
   return _internal_has_gauges();
 }
 inline void PublishRequest::clear_gauges() {
-  if (gauges_ != nullptr) gauges_->Clear();
+  if (GetArena() == nullptr && gauges_ != nullptr) {
+    delete gauges_;
+  }
+  gauges_ = nullptr;
   _has_bits_[0] &= ~0x00000004u;
 }
 inline const ::GaugeProto& PublishRequest::_internal_gauges() const {
@@ -3950,7 +3918,7 @@ inline void PublishRequest::set_allocated_gauges(::GaugeProto* gauges) {
   // @@protoc_insertion_point(field_set_allocated:PublishRequest.gauges)
 }
 
-// optional .HistogramProto histograms = 5;
+// .HistogramProto histograms = 5;
 inline bool PublishRequest::_internal_has_histograms() const {
   bool value = (_has_bits_[0] & 0x00000008u) != 0;
   PROTOBUF_ASSUME(!value || histograms_ != nullptr);
@@ -3960,7 +3928,10 @@ inline bool PublishRequest::has_histograms() const {
   return _internal_has_histograms();
 }
 inline void PublishRequest::clear_histograms() {
-  if (histograms_ != nullptr) histograms_->Clear();
+  if (GetArena() == nullptr && histograms_ != nullptr) {
+    delete histograms_;
+  }
+  histograms_ = nullptr;
   _has_bits_[0] &= ~0x00000008u;
 }
 inline const ::HistogramProto& PublishRequest::_internal_histograms() const {
@@ -4033,7 +4004,7 @@ inline void PublishRequest::set_allocated_histograms(::HistogramProto* histogram
   // @@protoc_insertion_point(field_set_allocated:PublishRequest.histograms)
 }
 
-// optional .LatencyProto latencies = 6;
+// .LatencyProto latencies = 6;
 inline bool PublishRequest::_internal_has_latencies() const {
   bool value = (_has_bits_[0] & 0x00000010u) != 0;
   PROTOBUF_ASSUME(!value || latencies_ != nullptr);
@@ -4043,7 +4014,10 @@ inline bool PublishRequest::has_latencies() const {
   return _internal_has_latencies();
 }
 inline void PublishRequest::clear_latencies() {
-  if (latencies_ != nullptr) latencies_->Clear();
+  if (GetArena() == nullptr && latencies_ != nullptr) {
+    delete latencies_;
+  }
+  latencies_ = nullptr;
   _has_bits_[0] &= ~0x00000010u;
 }
 inline const ::LatencyProto& PublishRequest::_internal_latencies() const {
@@ -4116,92 +4090,9 @@ inline void PublishRequest::set_allocated_latencies(::LatencyProto* latencies) {
   // @@protoc_insertion_point(field_set_allocated:PublishRequest.latencies)
 }
 
-// optional .TelemetryGeneralMetric generalMetric = 7;
-inline bool PublishRequest::_internal_has_generalmetric() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
-  PROTOBUF_ASSUME(!value || generalmetric_ != nullptr);
-  return value;
-}
-inline bool PublishRequest::has_generalmetric() const {
-  return _internal_has_generalmetric();
-}
-inline void PublishRequest::clear_generalmetric() {
-  if (generalmetric_ != nullptr) generalmetric_->Clear();
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline const ::TelemetryGeneralMetric& PublishRequest::_internal_generalmetric() const {
-  const ::TelemetryGeneralMetric* p = generalmetric_;
-  return p != nullptr ? *p : reinterpret_cast<const ::TelemetryGeneralMetric&>(
-      ::_TelemetryGeneralMetric_default_instance_);
-}
-inline const ::TelemetryGeneralMetric& PublishRequest::generalmetric() const {
-  // @@protoc_insertion_point(field_get:PublishRequest.generalMetric)
-  return _internal_generalmetric();
-}
-inline void PublishRequest::unsafe_arena_set_allocated_generalmetric(
-    ::TelemetryGeneralMetric* generalmetric) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(generalmetric_);
-  }
-  generalmetric_ = generalmetric;
-  if (generalmetric) {
-    _has_bits_[0] |= 0x00000020u;
-  } else {
-    _has_bits_[0] &= ~0x00000020u;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:PublishRequest.generalMetric)
-}
-inline ::TelemetryGeneralMetric* PublishRequest::release_generalmetric() {
-  _has_bits_[0] &= ~0x00000020u;
-  ::TelemetryGeneralMetric* temp = generalmetric_;
-  generalmetric_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::TelemetryGeneralMetric* PublishRequest::unsafe_arena_release_generalmetric() {
-  // @@protoc_insertion_point(field_release:PublishRequest.generalMetric)
-  _has_bits_[0] &= ~0x00000020u;
-  ::TelemetryGeneralMetric* temp = generalmetric_;
-  generalmetric_ = nullptr;
-  return temp;
-}
-inline ::TelemetryGeneralMetric* PublishRequest::_internal_mutable_generalmetric() {
-  _has_bits_[0] |= 0x00000020u;
-  if (generalmetric_ == nullptr) {
-    auto* p = CreateMaybeMessage<::TelemetryGeneralMetric>(GetArena());
-    generalmetric_ = p;
-  }
-  return generalmetric_;
-}
-inline ::TelemetryGeneralMetric* PublishRequest::mutable_generalmetric() {
-  // @@protoc_insertion_point(field_mutable:PublishRequest.generalMetric)
-  return _internal_mutable_generalmetric();
-}
-inline void PublishRequest::set_allocated_generalmetric(::TelemetryGeneralMetric* generalmetric) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete generalmetric_;
-  }
-  if (generalmetric) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(generalmetric);
-    if (message_arena != submessage_arena) {
-      generalmetric = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, generalmetric, submessage_arena);
-    }
-    _has_bits_[0] |= 0x00000020u;
-  } else {
-    _has_bits_[0] &= ~0x00000020u;
-  }
-  generalmetric_ = generalmetric;
-  // @@protoc_insertion_point(field_set_allocated:PublishRequest.generalMetric)
-}
-
-// optional .WbtProto wbtProto = 8;
+// .WbtProto wbtProto = 7;
 inline bool PublishRequest::_internal_has_wbtproto() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   PROTOBUF_ASSUME(!value || wbtproto_ != nullptr);
   return value;
 }
@@ -4209,8 +4100,11 @@ inline bool PublishRequest::has_wbtproto() const {
   return _internal_has_wbtproto();
 }
 inline void PublishRequest::clear_wbtproto() {
-  if (wbtproto_ != nullptr) wbtproto_->Clear();
-  _has_bits_[0] &= ~0x00000040u;
+  if (GetArena() == nullptr && wbtproto_ != nullptr) {
+    delete wbtproto_;
+  }
+  wbtproto_ = nullptr;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline const ::WbtProto& PublishRequest::_internal_wbtproto() const {
   const ::WbtProto* p = wbtproto_;
@@ -4228,14 +4122,14 @@ inline void PublishRequest::unsafe_arena_set_allocated_wbtproto(
   }
   wbtproto_ = wbtproto;
   if (wbtproto) {
-    _has_bits_[0] |= 0x00000040u;
+    _has_bits_[0] |= 0x00000020u;
   } else {
-    _has_bits_[0] &= ~0x00000040u;
+    _has_bits_[0] &= ~0x00000020u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:PublishRequest.wbtProto)
 }
 inline ::WbtProto* PublishRequest::release_wbtproto() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000020u;
   ::WbtProto* temp = wbtproto_;
   wbtproto_ = nullptr;
   if (GetArena() != nullptr) {
@@ -4245,13 +4139,13 @@ inline ::WbtProto* PublishRequest::release_wbtproto() {
 }
 inline ::WbtProto* PublishRequest::unsafe_arena_release_wbtproto() {
   // @@protoc_insertion_point(field_release:PublishRequest.wbtProto)
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000020u;
   ::WbtProto* temp = wbtproto_;
   wbtproto_ = nullptr;
   return temp;
 }
 inline ::WbtProto* PublishRequest::_internal_mutable_wbtproto() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000020u;
   if (wbtproto_ == nullptr) {
     auto* p = CreateMaybeMessage<::WbtProto>(GetArena());
     wbtproto_ = p;
@@ -4274,29 +4168,193 @@ inline void PublishRequest::set_allocated_wbtproto(::WbtProto* wbtproto) {
       wbtproto = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, wbtproto, submessage_arena);
     }
+    _has_bits_[0] |= 0x00000020u;
+  } else {
+    _has_bits_[0] &= ~0x00000020u;
+  }
+  wbtproto_ = wbtproto;
+  // @@protoc_insertion_point(field_set_allocated:PublishRequest.wbtProto)
+}
+
+// .TelemetryGeneralMetric generalMetric = 8;
+inline bool PublishRequest::_internal_has_generalmetric() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  PROTOBUF_ASSUME(!value || generalmetric_ != nullptr);
+  return value;
+}
+inline bool PublishRequest::has_generalmetric() const {
+  return _internal_has_generalmetric();
+}
+inline void PublishRequest::clear_generalmetric() {
+  if (GetArena() == nullptr && generalmetric_ != nullptr) {
+    delete generalmetric_;
+  }
+  generalmetric_ = nullptr;
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline const ::TelemetryGeneralMetric& PublishRequest::_internal_generalmetric() const {
+  const ::TelemetryGeneralMetric* p = generalmetric_;
+  return p != nullptr ? *p : reinterpret_cast<const ::TelemetryGeneralMetric&>(
+      ::_TelemetryGeneralMetric_default_instance_);
+}
+inline const ::TelemetryGeneralMetric& PublishRequest::generalmetric() const {
+  // @@protoc_insertion_point(field_get:PublishRequest.generalMetric)
+  return _internal_generalmetric();
+}
+inline void PublishRequest::unsafe_arena_set_allocated_generalmetric(
+    ::TelemetryGeneralMetric* generalmetric) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(generalmetric_);
+  }
+  generalmetric_ = generalmetric;
+  if (generalmetric) {
     _has_bits_[0] |= 0x00000040u;
   } else {
     _has_bits_[0] &= ~0x00000040u;
   }
-  wbtproto_ = wbtproto;
-  // @@protoc_insertion_point(field_set_allocated:PublishRequest.wbtProto)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:PublishRequest.generalMetric)
+}
+inline ::TelemetryGeneralMetric* PublishRequest::release_generalmetric() {
+  _has_bits_[0] &= ~0x00000040u;
+  ::TelemetryGeneralMetric* temp = generalmetric_;
+  generalmetric_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::TelemetryGeneralMetric* PublishRequest::unsafe_arena_release_generalmetric() {
+  // @@protoc_insertion_point(field_release:PublishRequest.generalMetric)
+  _has_bits_[0] &= ~0x00000040u;
+  ::TelemetryGeneralMetric* temp = generalmetric_;
+  generalmetric_ = nullptr;
+  return temp;
+}
+inline ::TelemetryGeneralMetric* PublishRequest::_internal_mutable_generalmetric() {
+  _has_bits_[0] |= 0x00000040u;
+  if (generalmetric_ == nullptr) {
+    auto* p = CreateMaybeMessage<::TelemetryGeneralMetric>(GetArena());
+    generalmetric_ = p;
+  }
+  return generalmetric_;
+}
+inline ::TelemetryGeneralMetric* PublishRequest::mutable_generalmetric() {
+  // @@protoc_insertion_point(field_mutable:PublishRequest.generalMetric)
+  return _internal_mutable_generalmetric();
+}
+inline void PublishRequest::set_allocated_generalmetric(::TelemetryGeneralMetric* generalmetric) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete generalmetric_;
+  }
+  if (generalmetric) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(generalmetric);
+    if (message_arena != submessage_arena) {
+      generalmetric = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, generalmetric, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000040u;
+  } else {
+    _has_bits_[0] &= ~0x00000040u;
+  }
+  generalmetric_ = generalmetric;
+  // @@protoc_insertion_point(field_set_allocated:PublishRequest.generalMetric)
+}
+
+// .TelemetryGeneralMetricString generalMetricString = 9;
+inline bool PublishRequest::_internal_has_generalmetricstring() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  PROTOBUF_ASSUME(!value || generalmetricstring_ != nullptr);
+  return value;
+}
+inline bool PublishRequest::has_generalmetricstring() const {
+  return _internal_has_generalmetricstring();
+}
+inline void PublishRequest::clear_generalmetricstring() {
+  if (GetArena() == nullptr && generalmetricstring_ != nullptr) {
+    delete generalmetricstring_;
+  }
+  generalmetricstring_ = nullptr;
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline const ::TelemetryGeneralMetricString& PublishRequest::_internal_generalmetricstring() const {
+  const ::TelemetryGeneralMetricString* p = generalmetricstring_;
+  return p != nullptr ? *p : reinterpret_cast<const ::TelemetryGeneralMetricString&>(
+      ::_TelemetryGeneralMetricString_default_instance_);
+}
+inline const ::TelemetryGeneralMetricString& PublishRequest::generalmetricstring() const {
+  // @@protoc_insertion_point(field_get:PublishRequest.generalMetricString)
+  return _internal_generalmetricstring();
+}
+inline void PublishRequest::unsafe_arena_set_allocated_generalmetricstring(
+    ::TelemetryGeneralMetricString* generalmetricstring) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(generalmetricstring_);
+  }
+  generalmetricstring_ = generalmetricstring;
+  if (generalmetricstring) {
+    _has_bits_[0] |= 0x00000080u;
+  } else {
+    _has_bits_[0] &= ~0x00000080u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:PublishRequest.generalMetricString)
+}
+inline ::TelemetryGeneralMetricString* PublishRequest::release_generalmetricstring() {
+  _has_bits_[0] &= ~0x00000080u;
+  ::TelemetryGeneralMetricString* temp = generalmetricstring_;
+  generalmetricstring_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::TelemetryGeneralMetricString* PublishRequest::unsafe_arena_release_generalmetricstring() {
+  // @@protoc_insertion_point(field_release:PublishRequest.generalMetricString)
+  _has_bits_[0] &= ~0x00000080u;
+  ::TelemetryGeneralMetricString* temp = generalmetricstring_;
+  generalmetricstring_ = nullptr;
+  return temp;
+}
+inline ::TelemetryGeneralMetricString* PublishRequest::_internal_mutable_generalmetricstring() {
+  _has_bits_[0] |= 0x00000080u;
+  if (generalmetricstring_ == nullptr) {
+    auto* p = CreateMaybeMessage<::TelemetryGeneralMetricString>(GetArena());
+    generalmetricstring_ = p;
+  }
+  return generalmetricstring_;
+}
+inline ::TelemetryGeneralMetricString* PublishRequest::mutable_generalmetricstring() {
+  // @@protoc_insertion_point(field_mutable:PublishRequest.generalMetricString)
+  return _internal_mutable_generalmetricstring();
+}
+inline void PublishRequest::set_allocated_generalmetricstring(::TelemetryGeneralMetricString* generalmetricstring) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete generalmetricstring_;
+  }
+  if (generalmetricstring) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(generalmetricstring);
+    if (message_arena != submessage_arena) {
+      generalmetricstring = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, generalmetricstring, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000080u;
+  } else {
+    _has_bits_[0] &= ~0x00000080u;
+  }
+  generalmetricstring_ = generalmetricstring;
+  // @@protoc_insertion_point(field_set_allocated:PublishRequest.generalMetricString)
 }
 
 // -------------------------------------------------------------------
 
 // PublishResponse
 
-// required bool successful = 1;
-inline bool PublishResponse::_internal_has_successful() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool PublishResponse::has_successful() const {
-  return _internal_has_successful();
-}
+// bool successful = 1;
 inline void PublishResponse::clear_successful() {
   successful_ = false;
-  _has_bits_[0] &= ~0x00000002u;
 }
 inline bool PublishResponse::_internal_successful() const {
   return successful_;
@@ -4306,7 +4364,7 @@ inline bool PublishResponse::successful() const {
   return _internal_successful();
 }
 inline void PublishResponse::_internal_set_successful(bool value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   successful_ = value;
 }
 inline void PublishResponse::set_successful(bool value) {
@@ -4314,7 +4372,7 @@ inline void PublishResponse::set_successful(bool value) {
   // @@protoc_insertion_point(field_set:PublishResponse.successful)
 }
 
-// optional string reason = 2;
+// string reason = 2;
 inline bool PublishResponse::_internal_has_reason() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -4395,18 +4453,18 @@ inline void PublishResponse::set_allocated_reason(std::string* reason) {
 
 // CollectResponse
 
-// required .ConfigureMetadataRequest metadata = 1;
+// .ConfigureMetadataRequest metadata = 1;
 inline bool CollectResponse::_internal_has_metadata() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  PROTOBUF_ASSUME(!value || metadata_ != nullptr);
-  return value;
+  return this != internal_default_instance() && metadata_ != nullptr;
 }
 inline bool CollectResponse::has_metadata() const {
   return _internal_has_metadata();
 }
 inline void CollectResponse::clear_metadata() {
-  if (metadata_ != nullptr) metadata_->Clear();
-  _has_bits_[0] &= ~0x00000001u;
+  if (GetArena() == nullptr && metadata_ != nullptr) {
+    delete metadata_;
+  }
+  metadata_ = nullptr;
 }
 inline const ::ConfigureMetadataRequest& CollectResponse::_internal_metadata() const {
   const ::ConfigureMetadataRequest* p = metadata_;
@@ -4424,14 +4482,14 @@ inline void CollectResponse::unsafe_arena_set_allocated_metadata(
   }
   metadata_ = metadata;
   if (metadata) {
-    _has_bits_[0] |= 0x00000001u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:CollectResponse.metadata)
 }
 inline ::ConfigureMetadataRequest* CollectResponse::release_metadata() {
-  _has_bits_[0] &= ~0x00000001u;
+  
   ::ConfigureMetadataRequest* temp = metadata_;
   metadata_ = nullptr;
   if (GetArena() != nullptr) {
@@ -4441,13 +4499,13 @@ inline ::ConfigureMetadataRequest* CollectResponse::release_metadata() {
 }
 inline ::ConfigureMetadataRequest* CollectResponse::unsafe_arena_release_metadata() {
   // @@protoc_insertion_point(field_release:CollectResponse.metadata)
-  _has_bits_[0] &= ~0x00000001u;
+  
   ::ConfigureMetadataRequest* temp = metadata_;
   metadata_ = nullptr;
   return temp;
 }
 inline ::ConfigureMetadataRequest* CollectResponse::_internal_mutable_metadata() {
-  _has_bits_[0] |= 0x00000001u;
+  
   if (metadata_ == nullptr) {
     auto* p = CreateMaybeMessage<::ConfigureMetadataRequest>(GetArena());
     metadata_ = p;
@@ -4470,9 +4528,9 @@ inline void CollectResponse::set_allocated_metadata(::ConfigureMetadataRequest* 
       metadata = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, metadata, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000001u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    
   }
   metadata_ = metadata;
   // @@protoc_insertion_point(field_set_allocated:CollectResponse.metadata)
@@ -4673,7 +4731,93 @@ CollectResponse::latencies() const {
   return latencies_;
 }
 
-// optional .TelemetryGeneralMetric generalMetric = 7;
+// .WbtProto wbtProto = 7;
+inline bool CollectResponse::_internal_has_wbtproto() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || wbtproto_ != nullptr);
+  return value;
+}
+inline bool CollectResponse::has_wbtproto() const {
+  return _internal_has_wbtproto();
+}
+inline void CollectResponse::clear_wbtproto() {
+  if (GetArena() == nullptr && wbtproto_ != nullptr) {
+    delete wbtproto_;
+  }
+  wbtproto_ = nullptr;
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const ::WbtProto& CollectResponse::_internal_wbtproto() const {
+  const ::WbtProto* p = wbtproto_;
+  return p != nullptr ? *p : reinterpret_cast<const ::WbtProto&>(
+      ::_WbtProto_default_instance_);
+}
+inline const ::WbtProto& CollectResponse::wbtproto() const {
+  // @@protoc_insertion_point(field_get:CollectResponse.wbtProto)
+  return _internal_wbtproto();
+}
+inline void CollectResponse::unsafe_arena_set_allocated_wbtproto(
+    ::WbtProto* wbtproto) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(wbtproto_);
+  }
+  wbtproto_ = wbtproto;
+  if (wbtproto) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:CollectResponse.wbtProto)
+}
+inline ::WbtProto* CollectResponse::release_wbtproto() {
+  _has_bits_[0] &= ~0x00000001u;
+  ::WbtProto* temp = wbtproto_;
+  wbtproto_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::WbtProto* CollectResponse::unsafe_arena_release_wbtproto() {
+  // @@protoc_insertion_point(field_release:CollectResponse.wbtProto)
+  _has_bits_[0] &= ~0x00000001u;
+  ::WbtProto* temp = wbtproto_;
+  wbtproto_ = nullptr;
+  return temp;
+}
+inline ::WbtProto* CollectResponse::_internal_mutable_wbtproto() {
+  _has_bits_[0] |= 0x00000001u;
+  if (wbtproto_ == nullptr) {
+    auto* p = CreateMaybeMessage<::WbtProto>(GetArena());
+    wbtproto_ = p;
+  }
+  return wbtproto_;
+}
+inline ::WbtProto* CollectResponse::mutable_wbtproto() {
+  // @@protoc_insertion_point(field_mutable:CollectResponse.wbtProto)
+  return _internal_mutable_wbtproto();
+}
+inline void CollectResponse::set_allocated_wbtproto(::WbtProto* wbtproto) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete wbtproto_;
+  }
+  if (wbtproto) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(wbtproto);
+    if (message_arena != submessage_arena) {
+      wbtproto = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, wbtproto, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  wbtproto_ = wbtproto;
+  // @@protoc_insertion_point(field_set_allocated:CollectResponse.wbtProto)
+}
+
+// .TelemetryGeneralMetric generalMetric = 8;
 inline bool CollectResponse::_internal_has_generalmetric() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   PROTOBUF_ASSUME(!value || generalmetric_ != nullptr);
@@ -4683,7 +4827,10 @@ inline bool CollectResponse::has_generalmetric() const {
   return _internal_has_generalmetric();
 }
 inline void CollectResponse::clear_generalmetric() {
-  if (generalmetric_ != nullptr) generalmetric_->Clear();
+  if (GetArena() == nullptr && generalmetric_ != nullptr) {
+    delete generalmetric_;
+  }
+  generalmetric_ = nullptr;
   _has_bits_[0] &= ~0x00000002u;
 }
 inline const ::TelemetryGeneralMetric& CollectResponse::_internal_generalmetric() const {
@@ -4756,87 +4903,90 @@ inline void CollectResponse::set_allocated_generalmetric(::TelemetryGeneralMetri
   // @@protoc_insertion_point(field_set_allocated:CollectResponse.generalMetric)
 }
 
-// optional .WbtProto wbtProto = 8;
-inline bool CollectResponse::_internal_has_wbtproto() const {
+// .TelemetryGeneralMetricString generalMetricString = 9;
+inline bool CollectResponse::_internal_has_generalmetricstring() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
-  PROTOBUF_ASSUME(!value || wbtproto_ != nullptr);
+  PROTOBUF_ASSUME(!value || generalmetricstring_ != nullptr);
   return value;
 }
-inline bool CollectResponse::has_wbtproto() const {
-  return _internal_has_wbtproto();
+inline bool CollectResponse::has_generalmetricstring() const {
+  return _internal_has_generalmetricstring();
 }
-inline void CollectResponse::clear_wbtproto() {
-  if (wbtproto_ != nullptr) wbtproto_->Clear();
+inline void CollectResponse::clear_generalmetricstring() {
+  if (GetArena() == nullptr && generalmetricstring_ != nullptr) {
+    delete generalmetricstring_;
+  }
+  generalmetricstring_ = nullptr;
   _has_bits_[0] &= ~0x00000004u;
 }
-inline const ::WbtProto& CollectResponse::_internal_wbtproto() const {
-  const ::WbtProto* p = wbtproto_;
-  return p != nullptr ? *p : reinterpret_cast<const ::WbtProto&>(
-      ::_WbtProto_default_instance_);
+inline const ::TelemetryGeneralMetricString& CollectResponse::_internal_generalmetricstring() const {
+  const ::TelemetryGeneralMetricString* p = generalmetricstring_;
+  return p != nullptr ? *p : reinterpret_cast<const ::TelemetryGeneralMetricString&>(
+      ::_TelemetryGeneralMetricString_default_instance_);
 }
-inline const ::WbtProto& CollectResponse::wbtproto() const {
-  // @@protoc_insertion_point(field_get:CollectResponse.wbtProto)
-  return _internal_wbtproto();
+inline const ::TelemetryGeneralMetricString& CollectResponse::generalmetricstring() const {
+  // @@protoc_insertion_point(field_get:CollectResponse.generalMetricString)
+  return _internal_generalmetricstring();
 }
-inline void CollectResponse::unsafe_arena_set_allocated_wbtproto(
-    ::WbtProto* wbtproto) {
+inline void CollectResponse::unsafe_arena_set_allocated_generalmetricstring(
+    ::TelemetryGeneralMetricString* generalmetricstring) {
   if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(wbtproto_);
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(generalmetricstring_);
   }
-  wbtproto_ = wbtproto;
-  if (wbtproto) {
+  generalmetricstring_ = generalmetricstring;
+  if (generalmetricstring) {
     _has_bits_[0] |= 0x00000004u;
   } else {
     _has_bits_[0] &= ~0x00000004u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:CollectResponse.wbtProto)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:CollectResponse.generalMetricString)
 }
-inline ::WbtProto* CollectResponse::release_wbtproto() {
+inline ::TelemetryGeneralMetricString* CollectResponse::release_generalmetricstring() {
   _has_bits_[0] &= ~0x00000004u;
-  ::WbtProto* temp = wbtproto_;
-  wbtproto_ = nullptr;
+  ::TelemetryGeneralMetricString* temp = generalmetricstring_;
+  generalmetricstring_ = nullptr;
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::WbtProto* CollectResponse::unsafe_arena_release_wbtproto() {
-  // @@protoc_insertion_point(field_release:CollectResponse.wbtProto)
+inline ::TelemetryGeneralMetricString* CollectResponse::unsafe_arena_release_generalmetricstring() {
+  // @@protoc_insertion_point(field_release:CollectResponse.generalMetricString)
   _has_bits_[0] &= ~0x00000004u;
-  ::WbtProto* temp = wbtproto_;
-  wbtproto_ = nullptr;
+  ::TelemetryGeneralMetricString* temp = generalmetricstring_;
+  generalmetricstring_ = nullptr;
   return temp;
 }
-inline ::WbtProto* CollectResponse::_internal_mutable_wbtproto() {
+inline ::TelemetryGeneralMetricString* CollectResponse::_internal_mutable_generalmetricstring() {
   _has_bits_[0] |= 0x00000004u;
-  if (wbtproto_ == nullptr) {
-    auto* p = CreateMaybeMessage<::WbtProto>(GetArena());
-    wbtproto_ = p;
+  if (generalmetricstring_ == nullptr) {
+    auto* p = CreateMaybeMessage<::TelemetryGeneralMetricString>(GetArena());
+    generalmetricstring_ = p;
   }
-  return wbtproto_;
+  return generalmetricstring_;
 }
-inline ::WbtProto* CollectResponse::mutable_wbtproto() {
-  // @@protoc_insertion_point(field_mutable:CollectResponse.wbtProto)
-  return _internal_mutable_wbtproto();
+inline ::TelemetryGeneralMetricString* CollectResponse::mutable_generalmetricstring() {
+  // @@protoc_insertion_point(field_mutable:CollectResponse.generalMetricString)
+  return _internal_mutable_generalmetricstring();
 }
-inline void CollectResponse::set_allocated_wbtproto(::WbtProto* wbtproto) {
+inline void CollectResponse::set_allocated_generalmetricstring(::TelemetryGeneralMetricString* generalmetricstring) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
-    delete wbtproto_;
+    delete generalmetricstring_;
   }
-  if (wbtproto) {
+  if (generalmetricstring) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(wbtproto);
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(generalmetricstring);
     if (message_arena != submessage_arena) {
-      wbtproto = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, wbtproto, submessage_arena);
+      generalmetricstring = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, generalmetricstring, submessage_arena);
     }
     _has_bits_[0] |= 0x00000004u;
   } else {
     _has_bits_[0] &= ~0x00000004u;
   }
-  wbtproto_ = wbtproto;
-  // @@protoc_insertion_point(field_set_allocated:CollectResponse.wbtProto)
+  generalmetricstring_ = generalmetricstring;
+  // @@protoc_insertion_point(field_set_allocated:CollectResponse.generalMetricString)
 }
 
 // -------------------------------------------------------------------
@@ -4847,17 +4997,9 @@ inline void CollectResponse::set_allocated_wbtproto(::WbtProto* wbtproto) {
 
 // EnableResponse
 
-// required bool successful = 1;
-inline bool EnableResponse::_internal_has_successful() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool EnableResponse::has_successful() const {
-  return _internal_has_successful();
-}
+// bool successful = 1;
 inline void EnableResponse::clear_successful() {
   successful_ = false;
-  _has_bits_[0] &= ~0x00000002u;
 }
 inline bool EnableResponse::_internal_successful() const {
   return successful_;
@@ -4867,7 +5009,7 @@ inline bool EnableResponse::successful() const {
   return _internal_successful();
 }
 inline void EnableResponse::_internal_set_successful(bool value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   successful_ = value;
 }
 inline void EnableResponse::set_successful(bool value) {
@@ -4875,7 +5017,7 @@ inline void EnableResponse::set_successful(bool value) {
   // @@protoc_insertion_point(field_set:EnableResponse.successful)
 }
 
-// optional string reason = 2;
+// string reason = 2;
 inline bool EnableResponse::_internal_has_reason() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -4956,17 +5098,9 @@ inline void EnableResponse::set_allocated_reason(std::string* reason) {
 
 // DisableResponse
 
-// required bool successful = 1;
-inline bool DisableResponse::_internal_has_successful() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool DisableResponse::has_successful() const {
-  return _internal_has_successful();
-}
+// bool successful = 1;
 inline void DisableResponse::clear_successful() {
   successful_ = false;
-  _has_bits_[0] &= ~0x00000002u;
 }
 inline bool DisableResponse::_internal_successful() const {
   return successful_;
@@ -4976,7 +5110,7 @@ inline bool DisableResponse::successful() const {
   return _internal_successful();
 }
 inline void DisableResponse::_internal_set_successful(bool value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   successful_ = value;
 }
 inline void DisableResponse::set_successful(bool value) {
@@ -4984,7 +5118,7 @@ inline void DisableResponse::set_successful(bool value) {
   // @@protoc_insertion_point(field_set:DisableResponse.successful)
 }
 
-// optional string reason = 2;
+// string reason = 2;
 inline bool DisableResponse::_internal_has_reason() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -5061,17 +5195,9 @@ inline void DisableResponse::set_allocated_reason(std::string* reason) {
 
 // ConfigureMetadataRequest
 
-// required string git_hash = 1;
-inline bool ConfigureMetadataRequest::_internal_has_git_hash() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool ConfigureMetadataRequest::has_git_hash() const {
-  return _internal_has_git_hash();
-}
+// string git_hash = 1;
 inline void ConfigureMetadataRequest::clear_git_hash() {
   git_hash_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& ConfigureMetadataRequest::git_hash() const {
   // @@protoc_insertion_point(field_get:ConfigureMetadataRequest.git_hash)
@@ -5089,62 +5215,50 @@ inline const std::string& ConfigureMetadataRequest::_internal_git_hash() const {
   return git_hash_.Get();
 }
 inline void ConfigureMetadataRequest::_internal_set_git_hash(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   git_hash_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void ConfigureMetadataRequest::set_git_hash(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   git_hash_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:ConfigureMetadataRequest.git_hash)
 }
 inline void ConfigureMetadataRequest::set_git_hash(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
+  
   git_hash_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:ConfigureMetadataRequest.git_hash)
 }
 inline void ConfigureMetadataRequest::set_git_hash(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000001u;
+  
   git_hash_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:ConfigureMetadataRequest.git_hash)
 }
 inline std::string* ConfigureMetadataRequest::_internal_mutable_git_hash() {
-  _has_bits_[0] |= 0x00000001u;
+  
   return git_hash_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* ConfigureMetadataRequest::release_git_hash() {
   // @@protoc_insertion_point(field_release:ConfigureMetadataRequest.git_hash)
-  if (!_internal_has_git_hash()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return git_hash_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return git_hash_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void ConfigureMetadataRequest::set_allocated_git_hash(std::string* git_hash) {
   if (git_hash != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    
   }
   git_hash_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), git_hash,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:ConfigureMetadataRequest.git_hash)
 }
 
-// required string host_name = 2;
-inline bool ConfigureMetadataRequest::_internal_has_host_name() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool ConfigureMetadataRequest::has_host_name() const {
-  return _internal_has_host_name();
-}
+// string host_name = 2;
 inline void ConfigureMetadataRequest::clear_host_name() {
   host_name_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000002u;
 }
 inline const std::string& ConfigureMetadataRequest::host_name() const {
   // @@protoc_insertion_point(field_get:ConfigureMetadataRequest.host_name)
@@ -5162,62 +5276,50 @@ inline const std::string& ConfigureMetadataRequest::_internal_host_name() const 
   return host_name_.Get();
 }
 inline void ConfigureMetadataRequest::_internal_set_host_name(const std::string& value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   host_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void ConfigureMetadataRequest::set_host_name(std::string&& value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   host_name_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:ConfigureMetadataRequest.host_name)
 }
 inline void ConfigureMetadataRequest::set_host_name(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000002u;
+  
   host_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:ConfigureMetadataRequest.host_name)
 }
 inline void ConfigureMetadataRequest::set_host_name(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000002u;
+  
   host_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:ConfigureMetadataRequest.host_name)
 }
 inline std::string* ConfigureMetadataRequest::_internal_mutable_host_name() {
-  _has_bits_[0] |= 0x00000002u;
+  
   return host_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* ConfigureMetadataRequest::release_host_name() {
   // @@protoc_insertion_point(field_release:ConfigureMetadataRequest.host_name)
-  if (!_internal_has_host_name()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000002u;
-  return host_name_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return host_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void ConfigureMetadataRequest::set_allocated_host_name(std::string* host_name) {
   if (host_name != nullptr) {
-    _has_bits_[0] |= 0x00000002u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    
   }
   host_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), host_name,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:ConfigureMetadataRequest.host_name)
 }
 
-// required string host_type = 3;
-inline bool ConfigureMetadataRequest::_internal_has_host_type() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
-  return value;
-}
-inline bool ConfigureMetadataRequest::has_host_type() const {
-  return _internal_has_host_type();
-}
+// string host_type = 3;
 inline void ConfigureMetadataRequest::clear_host_type() {
   host_type_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000004u;
 }
 inline const std::string& ConfigureMetadataRequest::host_type() const {
   // @@protoc_insertion_point(field_get:ConfigureMetadataRequest.host_type)
@@ -5235,62 +5337,50 @@ inline const std::string& ConfigureMetadataRequest::_internal_host_type() const 
   return host_type_.Get();
 }
 inline void ConfigureMetadataRequest::_internal_set_host_type(const std::string& value) {
-  _has_bits_[0] |= 0x00000004u;
+  
   host_type_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void ConfigureMetadataRequest::set_host_type(std::string&& value) {
-  _has_bits_[0] |= 0x00000004u;
+  
   host_type_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:ConfigureMetadataRequest.host_type)
 }
 inline void ConfigureMetadataRequest::set_host_type(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000004u;
+  
   host_type_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:ConfigureMetadataRequest.host_type)
 }
 inline void ConfigureMetadataRequest::set_host_type(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000004u;
+  
   host_type_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:ConfigureMetadataRequest.host_type)
 }
 inline std::string* ConfigureMetadataRequest::_internal_mutable_host_type() {
-  _has_bits_[0] |= 0x00000004u;
+  
   return host_type_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* ConfigureMetadataRequest::release_host_type() {
   // @@protoc_insertion_point(field_release:ConfigureMetadataRequest.host_type)
-  if (!_internal_has_host_type()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000004u;
-  return host_type_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return host_type_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void ConfigureMetadataRequest::set_allocated_host_type(std::string* host_type) {
   if (host_type != nullptr) {
-    _has_bits_[0] |= 0x00000004u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000004u;
+    
   }
   host_type_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), host_type,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:ConfigureMetadataRequest.host_type)
 }
 
-// required string ip_addr = 4;
-inline bool ConfigureMetadataRequest::_internal_has_ip_addr() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
-  return value;
-}
-inline bool ConfigureMetadataRequest::has_ip_addr() const {
-  return _internal_has_ip_addr();
-}
+// string ip_addr = 4;
 inline void ConfigureMetadataRequest::clear_ip_addr() {
   ip_addr_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000008u;
 }
 inline const std::string& ConfigureMetadataRequest::ip_addr() const {
   // @@protoc_insertion_point(field_get:ConfigureMetadataRequest.ip_addr)
@@ -5308,62 +5398,50 @@ inline const std::string& ConfigureMetadataRequest::_internal_ip_addr() const {
   return ip_addr_.Get();
 }
 inline void ConfigureMetadataRequest::_internal_set_ip_addr(const std::string& value) {
-  _has_bits_[0] |= 0x00000008u;
+  
   ip_addr_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void ConfigureMetadataRequest::set_ip_addr(std::string&& value) {
-  _has_bits_[0] |= 0x00000008u;
+  
   ip_addr_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:ConfigureMetadataRequest.ip_addr)
 }
 inline void ConfigureMetadataRequest::set_ip_addr(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000008u;
+  
   ip_addr_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:ConfigureMetadataRequest.ip_addr)
 }
 inline void ConfigureMetadataRequest::set_ip_addr(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000008u;
+  
   ip_addr_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:ConfigureMetadataRequest.ip_addr)
 }
 inline std::string* ConfigureMetadataRequest::_internal_mutable_ip_addr() {
-  _has_bits_[0] |= 0x00000008u;
+  
   return ip_addr_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* ConfigureMetadataRequest::release_ip_addr() {
   // @@protoc_insertion_point(field_release:ConfigureMetadataRequest.ip_addr)
-  if (!_internal_has_ip_addr()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000008u;
-  return ip_addr_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return ip_addr_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void ConfigureMetadataRequest::set_allocated_ip_addr(std::string* ip_addr) {
   if (ip_addr != nullptr) {
-    _has_bits_[0] |= 0x00000008u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000008u;
+    
   }
   ip_addr_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ip_addr,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:ConfigureMetadataRequest.ip_addr)
 }
 
-// required string application_name = 5;
-inline bool ConfigureMetadataRequest::_internal_has_application_name() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
-  return value;
-}
-inline bool ConfigureMetadataRequest::has_application_name() const {
-  return _internal_has_application_name();
-}
+// string application_name = 5;
 inline void ConfigureMetadataRequest::clear_application_name() {
   application_name_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000010u;
 }
 inline const std::string& ConfigureMetadataRequest::application_name() const {
   // @@protoc_insertion_point(field_get:ConfigureMetadataRequest.application_name)
@@ -5381,45 +5459,41 @@ inline const std::string& ConfigureMetadataRequest::_internal_application_name()
   return application_name_.Get();
 }
 inline void ConfigureMetadataRequest::_internal_set_application_name(const std::string& value) {
-  _has_bits_[0] |= 0x00000010u;
+  
   application_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void ConfigureMetadataRequest::set_application_name(std::string&& value) {
-  _has_bits_[0] |= 0x00000010u;
+  
   application_name_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:ConfigureMetadataRequest.application_name)
 }
 inline void ConfigureMetadataRequest::set_application_name(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000010u;
+  
   application_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:ConfigureMetadataRequest.application_name)
 }
 inline void ConfigureMetadataRequest::set_application_name(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000010u;
+  
   application_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:ConfigureMetadataRequest.application_name)
 }
 inline std::string* ConfigureMetadataRequest::_internal_mutable_application_name() {
-  _has_bits_[0] |= 0x00000010u;
+  
   return application_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* ConfigureMetadataRequest::release_application_name() {
   // @@protoc_insertion_point(field_release:ConfigureMetadataRequest.application_name)
-  if (!_internal_has_application_name()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000010u;
-  return application_name_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return application_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void ConfigureMetadataRequest::set_allocated_application_name(std::string* application_name) {
   if (application_name != nullptr) {
-    _has_bits_[0] |= 0x00000010u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000010u;
+    
   }
   application_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), application_name,
       GetArena());
@@ -5430,17 +5504,9 @@ inline void ConfigureMetadataRequest::set_allocated_application_name(std::string
 
 // ConfigureMetadataResponse
 
-// required bool successful = 1;
-inline bool ConfigureMetadataResponse::_internal_has_successful() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool ConfigureMetadataResponse::has_successful() const {
-  return _internal_has_successful();
-}
+// bool successful = 1;
 inline void ConfigureMetadataResponse::clear_successful() {
   successful_ = false;
-  _has_bits_[0] &= ~0x00000002u;
 }
 inline bool ConfigureMetadataResponse::_internal_successful() const {
   return successful_;
@@ -5450,7 +5516,7 @@ inline bool ConfigureMetadataResponse::successful() const {
   return _internal_successful();
 }
 inline void ConfigureMetadataResponse::_internal_set_successful(bool value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   successful_ = value;
 }
 inline void ConfigureMetadataResponse::set_successful(bool value) {
@@ -5458,17 +5524,9 @@ inline void ConfigureMetadataResponse::set_successful(bool value) {
   // @@protoc_insertion_point(field_set:ConfigureMetadataResponse.successful)
 }
 
-// required int32 collect_latency_ms = 2;
-inline bool ConfigureMetadataResponse::_internal_has_collect_latency_ms() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
-  return value;
-}
-inline bool ConfigureMetadataResponse::has_collect_latency_ms() const {
-  return _internal_has_collect_latency_ms();
-}
+// int32 collect_latency_ms = 2;
 inline void ConfigureMetadataResponse::clear_collect_latency_ms() {
   collect_latency_ms_ = 0;
-  _has_bits_[0] &= ~0x00000004u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 ConfigureMetadataResponse::_internal_collect_latency_ms() const {
   return collect_latency_ms_;
@@ -5478,7 +5536,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 ConfigureMetadataResponse::collect_latency
   return _internal_collect_latency_ms();
 }
 inline void ConfigureMetadataResponse::_internal_set_collect_latency_ms(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000004u;
+  
   collect_latency_ms_ = value;
 }
 inline void ConfigureMetadataResponse::set_collect_latency_ms(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -5486,7 +5544,7 @@ inline void ConfigureMetadataResponse::set_collect_latency_ms(::PROTOBUF_NAMESPA
   // @@protoc_insertion_point(field_set:ConfigureMetadataResponse.collect_latency_ms)
 }
 
-// optional string reason = 3;
+// string reason = 3;
 inline bool ConfigureMetadataResponse::_internal_has_reason() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -5563,17 +5621,9 @@ inline void ConfigureMetadataResponse::set_allocated_reason(std::string* reason)
 
 // InfluxStorageProto_Tag
 
-// required string tag_name = 1;
-inline bool InfluxStorageProto_Tag::_internal_has_tag_name() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool InfluxStorageProto_Tag::has_tag_name() const {
-  return _internal_has_tag_name();
-}
+// string tag_name = 1;
 inline void InfluxStorageProto_Tag::clear_tag_name() {
   tag_name_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& InfluxStorageProto_Tag::tag_name() const {
   // @@protoc_insertion_point(field_get:InfluxStorageProto.Tag.tag_name)
@@ -5591,62 +5641,50 @@ inline const std::string& InfluxStorageProto_Tag::_internal_tag_name() const {
   return tag_name_.Get();
 }
 inline void InfluxStorageProto_Tag::_internal_set_tag_name(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   tag_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void InfluxStorageProto_Tag::set_tag_name(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   tag_name_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:InfluxStorageProto.Tag.tag_name)
 }
 inline void InfluxStorageProto_Tag::set_tag_name(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
+  
   tag_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:InfluxStorageProto.Tag.tag_name)
 }
 inline void InfluxStorageProto_Tag::set_tag_name(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000001u;
+  
   tag_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:InfluxStorageProto.Tag.tag_name)
 }
 inline std::string* InfluxStorageProto_Tag::_internal_mutable_tag_name() {
-  _has_bits_[0] |= 0x00000001u;
+  
   return tag_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* InfluxStorageProto_Tag::release_tag_name() {
   // @@protoc_insertion_point(field_release:InfluxStorageProto.Tag.tag_name)
-  if (!_internal_has_tag_name()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return tag_name_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return tag_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void InfluxStorageProto_Tag::set_allocated_tag_name(std::string* tag_name) {
   if (tag_name != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    
   }
   tag_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), tag_name,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:InfluxStorageProto.Tag.tag_name)
 }
 
-// required string tag_value = 2;
-inline bool InfluxStorageProto_Tag::_internal_has_tag_value() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool InfluxStorageProto_Tag::has_tag_value() const {
-  return _internal_has_tag_value();
-}
+// string tag_value = 2;
 inline void InfluxStorageProto_Tag::clear_tag_value() {
   tag_value_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000002u;
 }
 inline const std::string& InfluxStorageProto_Tag::tag_value() const {
   // @@protoc_insertion_point(field_get:InfluxStorageProto.Tag.tag_value)
@@ -5664,45 +5702,41 @@ inline const std::string& InfluxStorageProto_Tag::_internal_tag_value() const {
   return tag_value_.Get();
 }
 inline void InfluxStorageProto_Tag::_internal_set_tag_value(const std::string& value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   tag_value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void InfluxStorageProto_Tag::set_tag_value(std::string&& value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   tag_value_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:InfluxStorageProto.Tag.tag_value)
 }
 inline void InfluxStorageProto_Tag::set_tag_value(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000002u;
+  
   tag_value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:InfluxStorageProto.Tag.tag_value)
 }
 inline void InfluxStorageProto_Tag::set_tag_value(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000002u;
+  
   tag_value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:InfluxStorageProto.Tag.tag_value)
 }
 inline std::string* InfluxStorageProto_Tag::_internal_mutable_tag_value() {
-  _has_bits_[0] |= 0x00000002u;
+  
   return tag_value_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* InfluxStorageProto_Tag::release_tag_value() {
   // @@protoc_insertion_point(field_release:InfluxStorageProto.Tag.tag_value)
-  if (!_internal_has_tag_value()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000002u;
-  return tag_value_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return tag_value_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void InfluxStorageProto_Tag::set_allocated_tag_value(std::string* tag_value) {
   if (tag_value != nullptr) {
-    _has_bits_[0] |= 0x00000002u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    
   }
   tag_value_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), tag_value,
       GetArena());
@@ -5713,17 +5747,9 @@ inline void InfluxStorageProto_Tag::set_allocated_tag_value(std::string* tag_val
 
 // InfluxStorageProto_Field
 
-// required string field_name = 1;
-inline bool InfluxStorageProto_Field::_internal_has_field_name() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool InfluxStorageProto_Field::has_field_name() const {
-  return _internal_has_field_name();
-}
+// string field_name = 1;
 inline void InfluxStorageProto_Field::clear_field_name() {
   field_name_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& InfluxStorageProto_Field::field_name() const {
   // @@protoc_insertion_point(field_get:InfluxStorageProto.Field.field_name)
@@ -5741,62 +5767,50 @@ inline const std::string& InfluxStorageProto_Field::_internal_field_name() const
   return field_name_.Get();
 }
 inline void InfluxStorageProto_Field::_internal_set_field_name(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   field_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void InfluxStorageProto_Field::set_field_name(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   field_name_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:InfluxStorageProto.Field.field_name)
 }
 inline void InfluxStorageProto_Field::set_field_name(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
+  
   field_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:InfluxStorageProto.Field.field_name)
 }
 inline void InfluxStorageProto_Field::set_field_name(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000001u;
+  
   field_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:InfluxStorageProto.Field.field_name)
 }
 inline std::string* InfluxStorageProto_Field::_internal_mutable_field_name() {
-  _has_bits_[0] |= 0x00000001u;
+  
   return field_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* InfluxStorageProto_Field::release_field_name() {
   // @@protoc_insertion_point(field_release:InfluxStorageProto.Field.field_name)
-  if (!_internal_has_field_name()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return field_name_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return field_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void InfluxStorageProto_Field::set_allocated_field_name(std::string* field_name) {
   if (field_name != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    
   }
   field_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), field_name,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:InfluxStorageProto.Field.field_name)
 }
 
-// required string field_value = 2;
-inline bool InfluxStorageProto_Field::_internal_has_field_value() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool InfluxStorageProto_Field::has_field_value() const {
-  return _internal_has_field_value();
-}
+// string field_value = 2;
 inline void InfluxStorageProto_Field::clear_field_value() {
   field_value_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000002u;
 }
 inline const std::string& InfluxStorageProto_Field::field_value() const {
   // @@protoc_insertion_point(field_get:InfluxStorageProto.Field.field_value)
@@ -5814,45 +5828,41 @@ inline const std::string& InfluxStorageProto_Field::_internal_field_value() cons
   return field_value_.Get();
 }
 inline void InfluxStorageProto_Field::_internal_set_field_value(const std::string& value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   field_value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void InfluxStorageProto_Field::set_field_value(std::string&& value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   field_value_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:InfluxStorageProto.Field.field_value)
 }
 inline void InfluxStorageProto_Field::set_field_value(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000002u;
+  
   field_value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:InfluxStorageProto.Field.field_value)
 }
 inline void InfluxStorageProto_Field::set_field_value(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000002u;
+  
   field_value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:InfluxStorageProto.Field.field_value)
 }
 inline std::string* InfluxStorageProto_Field::_internal_mutable_field_value() {
-  _has_bits_[0] |= 0x00000002u;
+  
   return field_value_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* InfluxStorageProto_Field::release_field_value() {
   // @@protoc_insertion_point(field_release:InfluxStorageProto.Field.field_value)
-  if (!_internal_has_field_value()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000002u;
-  return field_value_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return field_value_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void InfluxStorageProto_Field::set_allocated_field_value(std::string* field_value) {
   if (field_value != nullptr) {
-    _has_bits_[0] |= 0x00000002u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    
   }
   field_value_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), field_value,
       GetArena());
@@ -5863,17 +5873,9 @@ inline void InfluxStorageProto_Field::set_allocated_field_value(std::string* fie
 
 // InfluxStorageProto
 
-// required string measurement = 1;
-inline bool InfluxStorageProto::_internal_has_measurement() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool InfluxStorageProto::has_measurement() const {
-  return _internal_has_measurement();
-}
+// string measurement = 1;
 inline void InfluxStorageProto::clear_measurement() {
   measurement_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& InfluxStorageProto::measurement() const {
   // @@protoc_insertion_point(field_get:InfluxStorageProto.measurement)
@@ -5891,45 +5893,41 @@ inline const std::string& InfluxStorageProto::_internal_measurement() const {
   return measurement_.Get();
 }
 inline void InfluxStorageProto::_internal_set_measurement(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   measurement_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void InfluxStorageProto::set_measurement(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   measurement_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:InfluxStorageProto.measurement)
 }
 inline void InfluxStorageProto::set_measurement(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
+  
   measurement_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:InfluxStorageProto.measurement)
 }
 inline void InfluxStorageProto::set_measurement(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000001u;
+  
   measurement_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:InfluxStorageProto.measurement)
 }
 inline std::string* InfluxStorageProto::_internal_mutable_measurement() {
-  _has_bits_[0] |= 0x00000001u;
+  
   return measurement_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* InfluxStorageProto::release_measurement() {
   // @@protoc_insertion_point(field_release:InfluxStorageProto.measurement)
-  if (!_internal_has_measurement()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return measurement_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return measurement_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void InfluxStorageProto::set_allocated_measurement(std::string* measurement) {
   if (measurement != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    
   }
   measurement_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), measurement,
       GetArena());
@@ -6014,9 +6012,9 @@ InfluxStorageProto::fields() const {
   return fields_;
 }
 
-// optional int64 timestamp = 4;
+// int64 timestamp = 4;
 inline bool InfluxStorageProto::_internal_has_timestamp() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
 inline bool InfluxStorageProto::has_timestamp() const {
@@ -6024,7 +6022,7 @@ inline bool InfluxStorageProto::has_timestamp() const {
 }
 inline void InfluxStorageProto::clear_timestamp() {
   timestamp_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 InfluxStorageProto::_internal_timestamp() const {
   return timestamp_;
@@ -6034,7 +6032,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 InfluxStorageProto::timestamp() const {
   return _internal_timestamp();
 }
 inline void InfluxStorageProto::_internal_set_timestamp(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   timestamp_ = value;
 }
 inline void InfluxStorageProto::set_timestamp(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -6046,17 +6044,9 @@ inline void InfluxStorageProto::set_timestamp(::PROTOBUF_NAMESPACE_ID::int64 val
 
 // CounterProto
 
-// required string key = 1;
-inline bool CounterProto::_internal_has_key() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool CounterProto::has_key() const {
-  return _internal_has_key();
-}
+// string key = 1;
 inline void CounterProto::clear_key() {
   key_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& CounterProto::key() const {
   // @@protoc_insertion_point(field_get:CounterProto.key)
@@ -6074,62 +6064,50 @@ inline const std::string& CounterProto::_internal_key() const {
   return key_.Get();
 }
 inline void CounterProto::_internal_set_key(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void CounterProto::set_key(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:CounterProto.key)
 }
 inline void CounterProto::set_key(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:CounterProto.key)
 }
 inline void CounterProto::set_key(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:CounterProto.key)
 }
 inline std::string* CounterProto::_internal_mutable_key() {
-  _has_bits_[0] |= 0x00000001u;
+  
   return key_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* CounterProto::release_key() {
   // @@protoc_insertion_point(field_release:CounterProto.key)
-  if (!_internal_has_key()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return key_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return key_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void CounterProto::set_allocated_key(std::string* key) {
   if (key != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    
   }
   key_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), key,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:CounterProto.key)
 }
 
-// required int64 value = 2;
-inline bool CounterProto::_internal_has_value() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool CounterProto::has_value() const {
-  return _internal_has_value();
-}
+// int64 value = 2;
 inline void CounterProto::clear_value() {
   value_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 CounterProto::_internal_value() const {
   return value_;
@@ -6139,7 +6117,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 CounterProto::value() const {
   return _internal_value();
 }
 inline void CounterProto::_internal_set_value(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   value_ = value;
 }
 inline void CounterProto::set_value(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -6151,17 +6129,9 @@ inline void CounterProto::set_value(::PROTOBUF_NAMESPACE_ID::int64 value) {
 
 // GaugeProto
 
-// required string key = 1;
-inline bool GaugeProto::_internal_has_key() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool GaugeProto::has_key() const {
-  return _internal_has_key();
-}
+// string key = 1;
 inline void GaugeProto::clear_key() {
   key_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& GaugeProto::key() const {
   // @@protoc_insertion_point(field_get:GaugeProto.key)
@@ -6179,62 +6149,50 @@ inline const std::string& GaugeProto::_internal_key() const {
   return key_.Get();
 }
 inline void GaugeProto::_internal_set_key(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void GaugeProto::set_key(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:GaugeProto.key)
 }
 inline void GaugeProto::set_key(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:GaugeProto.key)
 }
 inline void GaugeProto::set_key(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:GaugeProto.key)
 }
 inline std::string* GaugeProto::_internal_mutable_key() {
-  _has_bits_[0] |= 0x00000001u;
+  
   return key_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* GaugeProto::release_key() {
   // @@protoc_insertion_point(field_release:GaugeProto.key)
-  if (!_internal_has_key()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return key_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return key_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void GaugeProto::set_allocated_key(std::string* key) {
   if (key != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    
   }
   key_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), key,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:GaugeProto.key)
 }
 
-// required int64 value = 2;
-inline bool GaugeProto::_internal_has_value() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool GaugeProto::has_value() const {
-  return _internal_has_value();
-}
+// int64 value = 2;
 inline void GaugeProto::clear_value() {
   value_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 GaugeProto::_internal_value() const {
   return value_;
@@ -6244,7 +6202,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 GaugeProto::value() const {
   return _internal_value();
 }
 inline void GaugeProto::_internal_set_value(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   value_ = value;
 }
 inline void GaugeProto::set_value(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -6256,17 +6214,9 @@ inline void GaugeProto::set_value(::PROTOBUF_NAMESPACE_ID::int64 value) {
 
 // HistogramProto
 
-// required string key = 1;
-inline bool HistogramProto::_internal_has_key() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool HistogramProto::has_key() const {
-  return _internal_has_key();
-}
+// string key = 1;
 inline void HistogramProto::clear_key() {
   key_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& HistogramProto::key() const {
   // @@protoc_insertion_point(field_get:HistogramProto.key)
@@ -6284,62 +6234,50 @@ inline const std::string& HistogramProto::_internal_key() const {
   return key_.Get();
 }
 inline void HistogramProto::_internal_set_key(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void HistogramProto::set_key(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:HistogramProto.key)
 }
 inline void HistogramProto::set_key(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:HistogramProto.key)
 }
 inline void HistogramProto::set_key(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:HistogramProto.key)
 }
 inline std::string* HistogramProto::_internal_mutable_key() {
-  _has_bits_[0] |= 0x00000001u;
+  
   return key_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* HistogramProto::release_key() {
   // @@protoc_insertion_point(field_release:HistogramProto.key)
-  if (!_internal_has_key()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return key_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return key_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void HistogramProto::set_allocated_key(std::string* key) {
   if (key != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    
   }
   key_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), key,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:HistogramProto.key)
 }
 
-// required int64 num_buckets = 2;
-inline bool HistogramProto::_internal_has_num_buckets() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool HistogramProto::has_num_buckets() const {
-  return _internal_has_num_buckets();
-}
+// int64 num_buckets = 2;
 inline void HistogramProto::clear_num_buckets() {
   num_buckets_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramProto::_internal_num_buckets() const {
   return num_buckets_;
@@ -6349,7 +6287,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 HistogramProto::num_buckets() const {
   return _internal_num_buckets();
 }
 inline void HistogramProto::_internal_set_num_buckets(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   num_buckets_ = value;
 }
 inline void HistogramProto::set_num_buckets(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -6408,17 +6346,9 @@ HistogramProto::mutable_buckets() {
 
 // LatencyProto
 
-// required string key = 1;
-inline bool LatencyProto::_internal_has_key() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool LatencyProto::has_key() const {
-  return _internal_has_key();
-}
+// string key = 1;
 inline void LatencyProto::clear_key() {
   key_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& LatencyProto::key() const {
   // @@protoc_insertion_point(field_get:LatencyProto.key)
@@ -6436,62 +6366,50 @@ inline const std::string& LatencyProto::_internal_key() const {
   return key_.Get();
 }
 inline void LatencyProto::_internal_set_key(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void LatencyProto::set_key(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:LatencyProto.key)
 }
 inline void LatencyProto::set_key(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:LatencyProto.key)
 }
 inline void LatencyProto::set_key(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000001u;
+  
   key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:LatencyProto.key)
 }
 inline std::string* LatencyProto::_internal_mutable_key() {
-  _has_bits_[0] |= 0x00000001u;
+  
   return key_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* LatencyProto::release_key() {
   // @@protoc_insertion_point(field_release:LatencyProto.key)
-  if (!_internal_has_key()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return key_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return key_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void LatencyProto::set_allocated_key(std::string* key) {
   if (key != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    
   }
   key_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), key,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:LatencyProto.key)
 }
 
-// required int64 num_stages = 2;
-inline bool LatencyProto::_internal_has_num_stages() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool LatencyProto::has_num_stages() const {
-  return _internal_has_num_stages();
-}
+// int64 num_stages = 2;
 inline void LatencyProto::clear_num_stages() {
   num_stages_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 LatencyProto::_internal_num_stages() const {
   return num_stages_;
@@ -6501,7 +6419,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 LatencyProto::num_stages() const {
   return _internal_num_stages();
 }
 inline void LatencyProto::_internal_set_num_stages(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000002u;
+  
   num_stages_ = value;
 }
 inline void LatencyProto::set_num_stages(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -6558,19 +6476,15 @@ LatencyProto::mutable_latencies() {
 
 // -------------------------------------------------------------------
 
+// WbtProto
+
+// -------------------------------------------------------------------
+
 // TelemetryGeneralMetric
 
-// required string id = 1;
-inline bool TelemetryGeneralMetric::_internal_has_id() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool TelemetryGeneralMetric::has_id() const {
-  return _internal_has_id();
-}
+// string id = 1;
 inline void TelemetryGeneralMetric::clear_id() {
   id_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& TelemetryGeneralMetric::id() const {
   // @@protoc_insertion_point(field_get:TelemetryGeneralMetric.id)
@@ -6588,135 +6502,127 @@ inline const std::string& TelemetryGeneralMetric::_internal_id() const {
   return id_.Get();
 }
 inline void TelemetryGeneralMetric::_internal_set_id(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void TelemetryGeneralMetric::set_id(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
+  
   id_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:TelemetryGeneralMetric.id)
 }
 inline void TelemetryGeneralMetric::set_id(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
+  
   id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:TelemetryGeneralMetric.id)
 }
 inline void TelemetryGeneralMetric::set_id(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000001u;
+  
   id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:TelemetryGeneralMetric.id)
 }
 inline std::string* TelemetryGeneralMetric::_internal_mutable_id() {
-  _has_bits_[0] |= 0x00000001u;
+  
   return id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* TelemetryGeneralMetric::release_id() {
   // @@protoc_insertion_point(field_release:TelemetryGeneralMetric.id)
-  if (!_internal_has_id()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return id_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void TelemetryGeneralMetric::set_allocated_id(std::string* id) {
   if (id != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
+    
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    
   }
   id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), id,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:TelemetryGeneralMetric.id)
 }
 
-// required string time = 2;
+// .google.protobuf.Timestamp time = 2;
 inline bool TelemetryGeneralMetric::_internal_has_time() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
+  return this != internal_default_instance() && time_ != nullptr;
 }
 inline bool TelemetryGeneralMetric::has_time() const {
   return _internal_has_time();
 }
-inline void TelemetryGeneralMetric::clear_time() {
-  time_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000002u;
+inline const PROTOBUF_NAMESPACE_ID::Timestamp& TelemetryGeneralMetric::_internal_time() const {
+  const PROTOBUF_NAMESPACE_ID::Timestamp* p = time_;
+  return p != nullptr ? *p : reinterpret_cast<const PROTOBUF_NAMESPACE_ID::Timestamp&>(
+      PROTOBUF_NAMESPACE_ID::_Timestamp_default_instance_);
 }
-inline const std::string& TelemetryGeneralMetric::time() const {
+inline const PROTOBUF_NAMESPACE_ID::Timestamp& TelemetryGeneralMetric::time() const {
   // @@protoc_insertion_point(field_get:TelemetryGeneralMetric.time)
   return _internal_time();
 }
-inline void TelemetryGeneralMetric::set_time(const std::string& value) {
-  _internal_set_time(value);
-  // @@protoc_insertion_point(field_set:TelemetryGeneralMetric.time)
+inline void TelemetryGeneralMetric::unsafe_arena_set_allocated_time(
+    PROTOBUF_NAMESPACE_ID::Timestamp* time) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(time_);
+  }
+  time_ = time;
+  if (time) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:TelemetryGeneralMetric.time)
 }
-inline std::string* TelemetryGeneralMetric::mutable_time() {
+inline PROTOBUF_NAMESPACE_ID::Timestamp* TelemetryGeneralMetric::release_time() {
+  
+  PROTOBUF_NAMESPACE_ID::Timestamp* temp = time_;
+  time_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline PROTOBUF_NAMESPACE_ID::Timestamp* TelemetryGeneralMetric::unsafe_arena_release_time() {
+  // @@protoc_insertion_point(field_release:TelemetryGeneralMetric.time)
+  
+  PROTOBUF_NAMESPACE_ID::Timestamp* temp = time_;
+  time_ = nullptr;
+  return temp;
+}
+inline PROTOBUF_NAMESPACE_ID::Timestamp* TelemetryGeneralMetric::_internal_mutable_time() {
+  
+  if (time_ == nullptr) {
+    auto* p = CreateMaybeMessage<PROTOBUF_NAMESPACE_ID::Timestamp>(GetArena());
+    time_ = p;
+  }
+  return time_;
+}
+inline PROTOBUF_NAMESPACE_ID::Timestamp* TelemetryGeneralMetric::mutable_time() {
   // @@protoc_insertion_point(field_mutable:TelemetryGeneralMetric.time)
   return _internal_mutable_time();
 }
-inline const std::string& TelemetryGeneralMetric::_internal_time() const {
-  return time_.Get();
-}
-inline void TelemetryGeneralMetric::_internal_set_time(const std::string& value) {
-  _has_bits_[0] |= 0x00000002u;
-  time_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void TelemetryGeneralMetric::set_time(std::string&& value) {
-  _has_bits_[0] |= 0x00000002u;
-  time_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:TelemetryGeneralMetric.time)
-}
-inline void TelemetryGeneralMetric::set_time(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000002u;
-  time_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:TelemetryGeneralMetric.time)
-}
-inline void TelemetryGeneralMetric::set_time(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000002u;
-  time_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:TelemetryGeneralMetric.time)
-}
-inline std::string* TelemetryGeneralMetric::_internal_mutable_time() {
-  _has_bits_[0] |= 0x00000002u;
-  return time_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* TelemetryGeneralMetric::release_time() {
-  // @@protoc_insertion_point(field_release:TelemetryGeneralMetric.time)
-  if (!_internal_has_time()) {
-    return nullptr;
+inline void TelemetryGeneralMetric::set_allocated_time(PROTOBUF_NAMESPACE_ID::Timestamp* time) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(time_);
   }
-  _has_bits_[0] &= ~0x00000002u;
-  return time_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void TelemetryGeneralMetric::set_allocated_time(std::string* time) {
-  if (time != nullptr) {
-    _has_bits_[0] |= 0x00000002u;
+  if (time) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(time)->GetArena();
+    if (message_arena != submessage_arena) {
+      time = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, time, submessage_arena);
+    }
+    
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    
   }
-  time_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), time,
-      GetArena());
+  time_ = time;
   // @@protoc_insertion_point(field_set_allocated:TelemetryGeneralMetric.time)
 }
 
-// required int32 value = 3;
-inline bool TelemetryGeneralMetric::_internal_has_value() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
-  return value;
-}
-inline bool TelemetryGeneralMetric::has_value() const {
-  return _internal_has_value();
-}
+// int32 value = 3;
 inline void TelemetryGeneralMetric::clear_value() {
   value_ = 0;
-  _has_bits_[0] &= ~0x00000004u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 TelemetryGeneralMetric::_internal_value() const {
   return value_;
@@ -6726,7 +6632,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 TelemetryGeneralMetric::value() const {
   return _internal_value();
 }
 inline void TelemetryGeneralMetric::_internal_set_value(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000004u;
+  
   value_ = value;
 }
 inline void TelemetryGeneralMetric::set_value(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -6736,11 +6642,212 @@ inline void TelemetryGeneralMetric::set_value(::PROTOBUF_NAMESPACE_ID::int32 val
 
 // -------------------------------------------------------------------
 
-// WbtProto
+// TelemetryGeneralMetricString
+
+// string id = 1;
+inline void TelemetryGeneralMetricString::clear_id() {
+  id_.ClearToEmpty();
+}
+inline const std::string& TelemetryGeneralMetricString::id() const {
+  // @@protoc_insertion_point(field_get:TelemetryGeneralMetricString.id)
+  return _internal_id();
+}
+inline void TelemetryGeneralMetricString::set_id(const std::string& value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:TelemetryGeneralMetricString.id)
+}
+inline std::string* TelemetryGeneralMetricString::mutable_id() {
+  // @@protoc_insertion_point(field_mutable:TelemetryGeneralMetricString.id)
+  return _internal_mutable_id();
+}
+inline const std::string& TelemetryGeneralMetricString::_internal_id() const {
+  return id_.Get();
+}
+inline void TelemetryGeneralMetricString::_internal_set_id(const std::string& value) {
+  
+  id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TelemetryGeneralMetricString::set_id(std::string&& value) {
+  
+  id_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:TelemetryGeneralMetricString.id)
+}
+inline void TelemetryGeneralMetricString::set_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:TelemetryGeneralMetricString.id)
+}
+inline void TelemetryGeneralMetricString::set_id(const char* value,
+    size_t size) {
+  
+  id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:TelemetryGeneralMetricString.id)
+}
+inline std::string* TelemetryGeneralMetricString::_internal_mutable_id() {
+  
+  return id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TelemetryGeneralMetricString::release_id() {
+  // @@protoc_insertion_point(field_release:TelemetryGeneralMetricString.id)
+  return id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TelemetryGeneralMetricString::set_allocated_id(std::string* id) {
+  if (id != nullptr) {
+    
+  } else {
+    
+  }
+  id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:TelemetryGeneralMetricString.id)
+}
+
+// .google.protobuf.Timestamp time = 2;
+inline bool TelemetryGeneralMetricString::_internal_has_time() const {
+  return this != internal_default_instance() && time_ != nullptr;
+}
+inline bool TelemetryGeneralMetricString::has_time() const {
+  return _internal_has_time();
+}
+inline const PROTOBUF_NAMESPACE_ID::Timestamp& TelemetryGeneralMetricString::_internal_time() const {
+  const PROTOBUF_NAMESPACE_ID::Timestamp* p = time_;
+  return p != nullptr ? *p : reinterpret_cast<const PROTOBUF_NAMESPACE_ID::Timestamp&>(
+      PROTOBUF_NAMESPACE_ID::_Timestamp_default_instance_);
+}
+inline const PROTOBUF_NAMESPACE_ID::Timestamp& TelemetryGeneralMetricString::time() const {
+  // @@protoc_insertion_point(field_get:TelemetryGeneralMetricString.time)
+  return _internal_time();
+}
+inline void TelemetryGeneralMetricString::unsafe_arena_set_allocated_time(
+    PROTOBUF_NAMESPACE_ID::Timestamp* time) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(time_);
+  }
+  time_ = time;
+  if (time) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:TelemetryGeneralMetricString.time)
+}
+inline PROTOBUF_NAMESPACE_ID::Timestamp* TelemetryGeneralMetricString::release_time() {
+  
+  PROTOBUF_NAMESPACE_ID::Timestamp* temp = time_;
+  time_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline PROTOBUF_NAMESPACE_ID::Timestamp* TelemetryGeneralMetricString::unsafe_arena_release_time() {
+  // @@protoc_insertion_point(field_release:TelemetryGeneralMetricString.time)
+  
+  PROTOBUF_NAMESPACE_ID::Timestamp* temp = time_;
+  time_ = nullptr;
+  return temp;
+}
+inline PROTOBUF_NAMESPACE_ID::Timestamp* TelemetryGeneralMetricString::_internal_mutable_time() {
+  
+  if (time_ == nullptr) {
+    auto* p = CreateMaybeMessage<PROTOBUF_NAMESPACE_ID::Timestamp>(GetArena());
+    time_ = p;
+  }
+  return time_;
+}
+inline PROTOBUF_NAMESPACE_ID::Timestamp* TelemetryGeneralMetricString::mutable_time() {
+  // @@protoc_insertion_point(field_mutable:TelemetryGeneralMetricString.time)
+  return _internal_mutable_time();
+}
+inline void TelemetryGeneralMetricString::set_allocated_time(PROTOBUF_NAMESPACE_ID::Timestamp* time) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(time_);
+  }
+  if (time) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(time)->GetArena();
+    if (message_arena != submessage_arena) {
+      time = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, time, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  time_ = time;
+  // @@protoc_insertion_point(field_set_allocated:TelemetryGeneralMetricString.time)
+}
+
+// string value = 3;
+inline void TelemetryGeneralMetricString::clear_value() {
+  value_.ClearToEmpty();
+}
+inline const std::string& TelemetryGeneralMetricString::value() const {
+  // @@protoc_insertion_point(field_get:TelemetryGeneralMetricString.value)
+  return _internal_value();
+}
+inline void TelemetryGeneralMetricString::set_value(const std::string& value) {
+  _internal_set_value(value);
+  // @@protoc_insertion_point(field_set:TelemetryGeneralMetricString.value)
+}
+inline std::string* TelemetryGeneralMetricString::mutable_value() {
+  // @@protoc_insertion_point(field_mutable:TelemetryGeneralMetricString.value)
+  return _internal_mutable_value();
+}
+inline const std::string& TelemetryGeneralMetricString::_internal_value() const {
+  return value_.Get();
+}
+inline void TelemetryGeneralMetricString::_internal_set_value(const std::string& value) {
+  
+  value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TelemetryGeneralMetricString::set_value(std::string&& value) {
+  
+  value_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:TelemetryGeneralMetricString.value)
+}
+inline void TelemetryGeneralMetricString::set_value(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:TelemetryGeneralMetricString.value)
+}
+inline void TelemetryGeneralMetricString::set_value(const char* value,
+    size_t size) {
+  
+  value_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:TelemetryGeneralMetricString.value)
+}
+inline std::string* TelemetryGeneralMetricString::_internal_mutable_value() {
+  
+  return value_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TelemetryGeneralMetricString::release_value() {
+  // @@protoc_insertion_point(field_release:TelemetryGeneralMetricString.value)
+  return value_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TelemetryGeneralMetricString::set_allocated_value(std::string* value) {
+  if (value != nullptr) {
+    
+  } else {
+    
+  }
+  value_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:TelemetryGeneralMetricString.value)
+}
 
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

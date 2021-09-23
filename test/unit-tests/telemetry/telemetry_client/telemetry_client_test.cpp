@@ -121,7 +121,7 @@ TEST(TelemetryClient, CollectList_TestData)
     // when
     list<MetricUint32> retList = telClient.CollectList("a");
     // then
-    for (auto &p : retList)
+    for (auto& p : retList)
     {
         if (p.GetId() == TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT)
         {

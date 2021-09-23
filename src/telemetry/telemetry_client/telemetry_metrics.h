@@ -45,23 +45,21 @@ class Metric
 {
 public:
     Metric(void) {}
-    ~Metric(void) {}    
+    ~Metric(void) {}
     virtual std::string GetId(void) { return id; }
-    virtual tm GetTime(void) { return loggedTime; }
-    virtual std::string GetTimeString(void) { return loggedStrTime; }
-    virtual void SetCommonMetric(std::string id_, tm t_)
+    virtual time_t GetTime(void) { return time; }
+    virtual std::string GetTimeString(void) { return strTime; }
+    virtual void SetCommonMetric(std::string id_, time_t t_, std::string st_)
     {
         id = id_;
-        loggedTime = t_;
-        std::ostringstream oss;
-        oss << std::put_time(&loggedTime, "%Y-%m-%d %H:%M:%S");
-        loggedStrTime = oss.str();
+        time = t_;
+        strTime = st_;
     }
 
 protected:
     std::string id;
-    tm loggedTime;
-    std::string loggedStrTime;
+    time_t time;
+    std::string strTime;
 };
 
 class MetricUint32 : public Metric
@@ -70,9 +68,9 @@ public:
     MetricUint32(void) {}
     ~MetricUint32(void) {}
     uint32_t GetValue(void) { return value; }
-    void SetMetric(std::string id_, tm t_, uint32_t v_)
+    void SetMetric(std::string id_, time_t t_, uint32_t v_, std::string st_)
     {
-        SetCommonMetric(id_, t_);
+        SetCommonMetric(id_, t_, st_);
         value = v_;
     }
 
@@ -86,9 +84,9 @@ public:
     MetricString(void) {}
     ~MetricString(void) {}
     std::string GetValue(void) { return value; }
-    void SetMetric(std::string id_, tm t_, std::string v_)
+    void SetMetric(std::string id_, time_t t_, std::string v_, std::string st_)
     {
-        SetCommonMetric(id_, t_);
+        SetCommonMetric(id_, t_, st_);
         value = v_;
     }
 

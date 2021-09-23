@@ -8,12 +8,6 @@
 
 namespace pos
 {
-class MockMetricUint32 : public MetricUint32
-{
-public:
-    using MetricUint32::MetricUint32;
-};
-
 class MockTelemetryDataPool : public TelemetryDataPool
 {
 public:

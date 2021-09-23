@@ -59,7 +59,7 @@ public:
     virtual void SetGlobalPublisher(IGlobalPublisher* gp);
 
 private:
-    tm _GetCurTime(void);
+    std::string _GetTimeString(time_t time);
 
     IGlobalPublisher* globalPublisher;
     TelemetryDataPool dataPool;

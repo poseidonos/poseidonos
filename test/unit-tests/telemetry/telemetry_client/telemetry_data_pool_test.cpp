@@ -1,7 +1,8 @@
 #include "src/telemetry/telemetry_client/telemetry_data_pool.h"
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_data_pool_mock.h"
 
 #include <gtest/gtest.h>
+
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_data_pool_mock.h"
 
 namespace pos
 {

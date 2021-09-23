@@ -81,9 +81,10 @@ TelemetryPublisher::PublishData(std::string id, uint32_t value)
     {
         return -1;
     }
+
     MetricUint32 metric;
-    tm curTime = _GetCurTime();
-    metric.SetMetric(id, curTime, value);
+    time_t time = std::time(nullptr);
+    metric.SetMetric(id, time, value, _GetTimeString(time));
 
     dataPool.SetLog(metric);
     int ret = globalPublisher->PublishToServer(metric);
@@ -98,9 +99,10 @@ TelemetryPublisher::PublishData(std::string id, std::string value)
     {
         return -1;
     }
+
     MetricString metric;
-    tm curTime = _GetCurTime();
-    metric.SetMetric(id, curTime, value);
+    time_t time = std::time(nullptr);
+    metric.SetMetric(id, time, value, _GetTimeString(time));
 
     // string type log wouldn't be stored in client's data pool to minimize the memory usage
     // dataPool.SetLog(metric);
@@ -127,12 +129,13 @@ TelemetryPublisher::SetGlobalPublisher(IGlobalPublisher* gp)
     globalPublisher = gp;
 }
 
-tm
-TelemetryPublisher::_GetCurTime(void)
+std::string
+TelemetryPublisher::_GetTimeString(time_t time)
 {
-    auto t = std::time(nullptr);
-    tm ret = *std::localtime(&t);
-    return ret;
+    tm curTime = *std::localtime(&time);
+    std::ostringstream oss;
+    oss << std::put_time(&curTime, "%Y-%m-%d %H:%M:%S");
+    return oss.str();
 }
 
 } // namespace pos
