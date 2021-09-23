@@ -71,7 +71,6 @@
 #include "src/cli/rename_volume_command.h"
 #include "src/cli/reset_mbr_command.h"
 #include "src/cli/reset_qos_volume_policy_command.h"
-#include "src/cli/resize_volume_command.h"
 #include "src/cli/scan_device_command.h"
 #include "src/cli/set_log_level_command.h"
 #include "src/cli/smart_command.h"
@@ -115,7 +114,6 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["UNMOUNTVOLUME"] = new UnmountVolumeCommand();
     cmdDictionary["LISTVOLUME"] = new ListVolumeCommand();
     cmdDictionary["RENAMEVOLUME"] = new RenameVolumeCommand();
-    cmdDictionary["RESIZEVOLUME"] = new ResizeVolumeCommand();
     cmdDictionary["GETMAXVOLUMECOUNT"] = new GetMaxVolumeCountCommand();
     cmdDictionary["GETHOSTNQN"] = new GetHostNqnCommand();
     cmdDictionary["CONDSIGNAL"] = new CondSignalCommand();

@@ -18,7 +18,6 @@ public:
     MOCK_METHOD(int, Unmount, (std::string name), (override));
     MOCK_METHOD(int, UpdateQoS, (std::string name, uint64_t maxiops, uint64_t maxbw), (override));
     MOCK_METHOD(int, Rename, (std::string oldname, std::string newname), (override));
-    MOCK_METHOD(int, Resize, (std::string name, uint64_t newsize), (override));
     MOCK_METHOD(int, UpdateVolumePolicy, (std::string volName, qos_vol_policy volPolicy), (override));
     MOCK_METHOD(qos_vol_policy, GetVolumePolicy, (std::string volName), (override));
     MOCK_METHOD(void, DetachVolumes, (), (override));

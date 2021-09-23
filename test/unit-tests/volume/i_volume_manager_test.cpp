@@ -28,10 +28,6 @@ TEST(IVolumeManager, Rename_)
 {
 }
 
-TEST(IVolumeManager, Resize_)
-{
-}
-
 TEST(IVolumeManager, UpdateVolumePolicy_)
 {
 }

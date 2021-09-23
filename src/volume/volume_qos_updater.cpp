@@ -41,8 +41,8 @@
 
 namespace pos
 {
-VolumeQosUpdater::VolumeQosUpdater(VolumeList& volumeList, std::string arrayName, int arrayID)
-: VolumeInterface(volumeList, arrayName, arrayID)
+VolumeQosUpdater::VolumeQosUpdater(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher)
+: VolumeInterface(volumeList, arrayName, arrayID, volumeEventPublisher)
 {
 }
 
@@ -69,7 +69,7 @@ VolumeQosUpdater::Do(string name, uint64_t maxiops, uint64_t maxbw)
     _SetVolumeEventPerf(vol);
     _SetVolumeArrayInfo();
 
-    bool res = VolumeEventPublisherSingleton::Instance()->NotifyVolumeUpdated(&volumeEventBase, &volumeEventPerf, &volumeArrayInfo);
+    bool res = eventPublisher->NotifyVolumeUpdated(&volumeEventBase, &volumeEventPerf, &volumeArrayInfo);
 
     if (res == false)
     {

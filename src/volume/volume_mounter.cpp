@@ -43,10 +43,17 @@
 namespace pos
 {
 
-VolumeMounter::VolumeMounter(VolumeList& volumeList, std::string arrayName, int arrayID)
-: VolumeInterface(volumeList, arrayName, arrayID),
-  nvmfTarget(NvmfTargetSingleton::Instance())
+VolumeMounter::VolumeMounter(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher, NvmfTarget* nvmfTarget_)
+: VolumeInterface(volumeList, arrayName, arrayID, volumeEventPublisher)
 {
+    if (nvmfTarget_ == nullptr)
+    {
+        nvmfTarget = NvmfTargetSingleton::Instance();
+    }
+    else
+    {
+        nvmfTarget = nvmfTarget_;
+    }
 }
 
 VolumeMounter::~VolumeMounter(void)
@@ -185,7 +192,7 @@ VolumeMounter::_MountVolume(VolumeBase* vol, string subnqn)
         _SetVolumeEventPerf(vol);
         _SetVolumeArrayInfo();
 
-        done = VolumeEventPublisherSingleton::Instance()->NotifyVolumeMounted(&volumeEventBase, &volumeEventPerf, &volumeArrayInfo);
+        done = eventPublisher->NotifyVolumeMounted(&volumeEventBase, &volumeEventPerf, &volumeArrayInfo);
 
         if (done == true)
         {
@@ -219,7 +226,7 @@ VolumeMounter::_RollBackVolumeMount(VolumeBase* vol, string subnqn)
     _SetVolumeEventBase(vol);
     _SetVolumeArrayInfo();
 
-    done = VolumeEventPublisherSingleton::Instance()->NotifyVolumeUnmounted(&volumeEventBase, &volumeArrayInfo);
+    done = eventPublisher->NotifyVolumeUnmounted(&volumeEventBase, &volumeArrayInfo);
 
     if (done == false)
     {

@@ -43,8 +43,8 @@
 
 namespace pos
 {
-VolumeLoader::VolumeLoader(VolumeList& volumeList, std::string arrayName, int arrayID)
-: VolumeInterface(volumeList, arrayName, arrayID)
+VolumeLoader::VolumeLoader(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher)
+: VolumeInterface(volumeList, arrayName, arrayID, volumeEventPublisher)
 {
 }
 

@@ -6,98 +6,59 @@ namespace pos
 {
 TEST(VolumeBase, VolumeBase_)
 {
-}
+    // Given
+    std::string arrayName = "";
+    int arrayID = 0;
+    std::string name = "volumetest";
+    std::string newName = "abcd";
+    std::string uuid = "TestTest";
+    uint64_t size = 1024;
+    uint64_t maxIops = 100;
+    uint64_t maxBw = 100;
 
-TEST(VolumeBase, Mount_)
-{
-}
+    std::string actual;
+    std::string expected;
+    VolumeStatus actualstatus;
+    VolumeStatus expectedstatus;
+    uint64_t actualvalue;
+    uint64_t expectedvalue;
 
-TEST(VolumeBase, Unmount_)
-{
-}
+    // When
+    VolumeBase* vol = new VolumeBase(arrayName, arrayID, name, size);
+    vol->SetUuid(uuid);
+    vol->SetMaxIOPS(maxBw);
+    vol->SetMaxBW(maxIops);
 
-TEST(VolumeBase, LockStatus_)
-{
-}
+    // Then
+    actual = vol->GetName();
+    expected = "volumetest";
+    ASSERT_EQ(actual, expected);
 
-TEST(VolumeBase, UnlockStatus_)
-{
-}
+    actual = vol->GetUuid();
+    expected = uuid;
+    ASSERT_EQ(actual, expected);
 
-TEST(VolumeBase, TotalSize_)
-{
-}
+    actual = vol->GetArrayName();
+    expected = arrayName;
+    ASSERT_EQ(actual, expected);
 
-TEST(VolumeBase, UsedSize_)
-{
-}
+    actualstatus = vol->GetStatus();
+    expectedstatus = VolumeStatus::Unmounted;
+    ASSERT_EQ(actualstatus, expectedstatus);
 
-TEST(VolumeBase, RemainingSize_)
-{
-}
+    actualvalue = vol->MaxIOPS();
+    expectedvalue = maxIops;
+    ASSERT_EQ(actualvalue, expectedvalue);
 
-TEST(VolumeBase, GetName_)
-{
-}
+    actualvalue = vol->MaxBW();
+    expectedvalue = maxBw;
+    ASSERT_EQ(actualvalue, expectedvalue);
 
-TEST(VolumeBase, GetArray_)
-{
-}
+    vol->Rename(newName);
+    actual = newName;
+    expected = vol->GetName();
+    ASSERT_EQ(actual, expected);
 
-TEST(VolumeBase, GetSubnqn_)
-{
+    delete vol;
 }
-
-TEST(VolumeBase, SetSubnqn_)
-{
-}
-
-TEST(VolumeBase, GetStatus_)
-{
-}
-
-TEST(VolumeBase, IsValid_)
-{
-}
-
-TEST(VolumeBase, SetValid_)
-{
-}
-
-TEST(VolumeBase, MaxIOPS_)
-{
-}
-
-TEST(VolumeBase, MaxBW_)
-{
-}
-
-TEST(VolumeBase, SetMaxIOPS_)
-{
-}
-
-TEST(VolumeBase, SetMaxBW_)
-{
-}
-
-TEST(VolumeBase, Rename_)
-{
-}
-
-TEST(VolumeBase, Resize_)
-{
-}
-
-TEST(VolumeBase, IncreasePendingIOCount_)
-{
-}
-
-TEST(VolumeBase, DecreasePendingIOCount_)
-{
-}
-
-TEST(VolumeBase, CheckIdle_)
-{
-}
-
 } // namespace pos

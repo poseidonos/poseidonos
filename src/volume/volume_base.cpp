@@ -154,7 +154,7 @@ VolumeBase::SetUuid(std::string inputUuid)
         POS_TRACE_INFO(POS_EVENT_ID::VOL_ALD_SET_SUBNQN,
             "The volume has set uuid {}", inputUuid);
     }
-    subNqn = uuid;
+    uuid = inputUuid;
 }
 
 int

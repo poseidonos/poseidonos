@@ -83,16 +83,16 @@ public:
     virtual int32_t GetVolumeNqnId(const string& subnqn);
     virtual spdk_nvmf_subsystem* FindSubsystem(const string& subnqn);
     vector<string> GetHostNqn(string subnqn);
-    bool TryToAttachNamespace(const string& nqn, int volId, string& arrayName, uint64_t time = NS_ATTACH_TIMEOUT);
-    bool CheckSubsystemExistance(void);
+    virtual bool TryToAttachNamespace(const string& nqn, int volId, string& arrayName, uint64_t time = NS_ATTACH_TIMEOUT);
+    virtual bool CheckSubsystemExistance(void);
     virtual bool CheckVolumeAttached(int volId, string arrayName);
     vector<pair<int, string>> GetAttachedVolumeList(string& nqn);
     static bool AttachNamespace(const string& nqn, const string& bdevName,
         PosNvmfEventDoneCallback_t cb, void* cbArg);
     string GetPosBdevUuid(uint32_t id, string arrayName);
-    bool SetSubsystemArrayName(string& subnqn, string& arrayName);
-    string GetSubsystemArrayName(string& subnqn);
-    void RemoveSubsystemArrayName(string& subnqn);
+    virtual bool SetSubsystemArrayName(string& subnqn, string& arrayName);
+    virtual string GetSubsystemArrayName(string& subnqn);
+    virtual void RemoveSubsystemArrayName(string& subnqn);
 
 protected:
     static struct NvmfTargetCallbacks nvmfCallbacks;

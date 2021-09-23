@@ -40,10 +40,6 @@ TEST(VolumeManager, Rename_)
 {
 }
 
-TEST(VolumeManager, Resize_)
-{
-}
-
 TEST(VolumeManager, UpdateVolumePolicy_)
 {
 }

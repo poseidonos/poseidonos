@@ -230,40 +230,6 @@ TEST_F(VolumeTest, TryToUpdateInvalidVolumeNameTest)
     volMgr->Delete(oldVolName);
 }
 
-TEST_F(VolumeTest, ResizeNormalTest)
-{
-    pos::IVolumeManager* volMgr = pos::VolumeServiceSingleton::Instance()->GetVolumeManager(ARRAY_NAME);
-    std::string volName = "testvol";
-    volMgr->Create(volName, SIZE, 0, 0);
-
-    int res = volMgr->Resize(volName, 2 * SIZE);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::SUCCESS);
-
-    res = volMgr->Resize(volName, 3 * SIZE);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::SUCCESS);
-    // cleanup for next test
-    volMgr->Delete(volName);
-}
-
-TEST_F(VolumeTest, TryToUpdateInvalidVolumeSizeTest)
-{
-    pos::IVolumeManager* volMgr = pos::VolumeServiceSingleton::Instance()->GetVolumeManager(ARRAY_NAME);
-    std::string volName = "testvol";
-    volMgr->Create(volName, SIZE, 0, 0);
-
-    int res = volMgr->Resize(volName, BIG_SIZE);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_SIZE_EXCEEDED);
-
-    res = volMgr->Resize(volName, NOT_ALIGNED_SIZE);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_SIZE_NOT_ALIGNED);
-
-    uint64_t smallSize = SIZE / 4; // UsedSize is size/2
-    res = volMgr->Resize(volName, smallSize);
-    EXPECT_TRUE(res == (int)POS_EVENT_ID::VOL_SIZE_TOO_SMALL);
-    // cleanup for next test
-    volMgr->Delete(volName);
-}
-
 TEST_F(VolumeTest, MountVolumeNormalTest)
 {
     pos::IVolumeManager* volMgr = pos::VolumeServiceSingleton::Instance()->GetVolumeManager(ARRAY_NAME);

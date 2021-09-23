@@ -43,12 +43,19 @@
 namespace pos
 {
 
-VolumeInterface::VolumeInterface(VolumeList& volumeList, std::string arrayName, int arrayID)
+VolumeInterface::VolumeInterface(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher)
 : volumeList(volumeList),
   arrayName(arrayName),
-  arrayID(arrayID),
-  eventPublisher(VolumeEventPublisherSingleton::Instance())
+  arrayID(arrayID)
 {
+    if (volumeEventPublisher == nullptr)
+    {
+        eventPublisher = VolumeEventPublisherSingleton::Instance();
+    }
+    else
+    {
+        eventPublisher = volumeEventPublisher;
+    }
 }
 
 VolumeInterface::~VolumeInterface(void)

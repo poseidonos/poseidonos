@@ -1,7 +1,6 @@
 POS_ADD_UNIT_TEST(unmount_volume_command_ut unmount_volume_command_test.cpp)
 POS_ADD_UNIT_TEST(array_info_command_ut array_info_command_test.cpp)
 POS_ADD_UNIT_TEST(stop_pos_command_ut stop_pos_command_test.cpp)
-POS_ADD_UNIT_TEST(resize_volume_command_ut resize_volume_command_test.cpp)
 POS_ADD_UNIT_TEST(list_array_command_ut list_array_command_test.cpp)
 POS_ADD_UNIT_TEST(add_device_command_ut add_device_command_test.cpp)
 POS_ADD_UNIT_TEST(get_max_volume_count_command_ut get_max_volume_count_command_test.cpp)

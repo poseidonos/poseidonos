@@ -46,10 +46,17 @@
 
 namespace pos
 {
-VolumeDetacher::VolumeDetacher(VolumeList& volumeList, std::string arrayName, int arrayID)
-: VolumeInterface(volumeList, arrayName, arrayID),
-  nvmfTarget(NvmfTargetSingleton::Instance())
+VolumeDetacher::VolumeDetacher(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher, NvmfTarget* nvmfTarget_)
+: VolumeInterface(volumeList, arrayName, arrayID, volumeEventPublisher)
 {
+    if (nvmfTarget_ == nullptr)
+    {
+        nvmfTarget = NvmfTargetSingleton::Instance();
+    }
+    else
+    {
+        nvmfTarget = nvmfTarget_;
+    }
 }
 
 VolumeDetacher::~VolumeDetacher(void)

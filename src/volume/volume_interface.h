@@ -49,7 +49,7 @@ class VolumeEventPublisher;
 class VolumeInterface
 {
 public:
-    explicit VolumeInterface(VolumeList& volumeList, std::string arrayName, int arrayID);
+    explicit VolumeInterface(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr);
     virtual ~VolumeInterface(void);
 
 protected:

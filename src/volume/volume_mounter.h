@@ -42,7 +42,7 @@ namespace pos
 class VolumeMounter : public VolumeInterface
 {
 public:
-    explicit VolumeMounter(VolumeList& volumeList, std::string arrayName, int arrayID);
+    explicit VolumeMounter(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr, NvmfTarget* nvmfTarget_ = nullptr);
     ~VolumeMounter(void) override;
 
     int Do(string name, string subnqn);

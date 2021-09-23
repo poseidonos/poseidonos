@@ -40,7 +40,7 @@ namespace pos
 class VolumeLoader : public VolumeInterface
 {
 public:
-    explicit VolumeLoader(VolumeList& volumeList, std::string arrayName, int arrayID);
+    explicit VolumeLoader(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr);
     ~VolumeLoader(void) override;
 
     int Do(void);

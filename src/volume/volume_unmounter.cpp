@@ -46,10 +46,17 @@
 namespace pos
 {
 
-VolumeUnmounter::VolumeUnmounter(VolumeList& volumeList, std::string arrayName, int arrayID)
-: VolumeInterface(volumeList, arrayName, arrayID),
-  nvmfTarget(NvmfTargetSingleton::Instance())
+VolumeUnmounter::VolumeUnmounter(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher, NvmfTarget* nvmfTarget_)
+: VolumeInterface(volumeList, arrayName, arrayID, volumeEventPublisher)
 {
+    if (nvmfTarget_ == nullptr)
+    {
+        nvmfTarget = NvmfTargetSingleton::Instance();
+    }
+    else
+    {
+        nvmfTarget = nvmfTarget_;
+    }
 }
 
 VolumeUnmounter::~VolumeUnmounter(void)
@@ -75,7 +82,7 @@ VolumeUnmounter::Do(string name)
         _SetVolumeEventBase(vol);
         _SetVolumeEventPerf(vol);
         _SetVolumeArrayInfo();
-        res = VolumeEventPublisherSingleton::Instance()->NotifyVolumeUnmounted(&volumeEventBase, &volumeArrayInfo);
+        res = eventPublisher->NotifyVolumeUnmounted(&volumeEventBase, &volumeArrayInfo);
 
         bool volumeUnmounted = NvmfVolumePos::WaitRequestedVolumesDetached(1);
         if (volumeUnmounted == false)

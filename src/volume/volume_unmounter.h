@@ -42,7 +42,7 @@ namespace pos
 class VolumeUnmounter : public VolumeInterface
 {
 public:
-    explicit VolumeUnmounter(VolumeList& volumeList, std::string arrayName, int arrayID);
+    explicit VolumeUnmounter(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr, NvmfTarget* nvmfTarget_ = nullptr);
     ~VolumeUnmounter(void) override;
 
     int Do(string name);

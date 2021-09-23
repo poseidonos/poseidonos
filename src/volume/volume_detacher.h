@@ -44,14 +44,12 @@ namespace pos
 class VolumeDetacher : public VolumeInterface
 {
 public:
-    explicit VolumeDetacher(VolumeList& volumeList, std::string arrayName, int arrayID);
+    explicit VolumeDetacher(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr, NvmfTarget* nvmfTarget_ = nullptr);
     ~VolumeDetacher(void) override;
 
     void DoAll(void);
 
 private:
-    void _UnregisterDetachedVolume(vector<int>& mountedVols);
-    bool _NeedIOHandlerUnregister(int volId, vector<int>& mountedVols);
     NvmfTarget* nvmfTarget;
 };
 

@@ -51,7 +51,6 @@
 #include "src/volume/volume_loader.h"
 #include "src/volume/volume_unmounter.h"
 #include "src/volume/volume_meta_intf.h"
-#include "src/volume/volume_resizer.h"
 #include "src/volume/volume_renamer.h"
 #include "src/volume/volume_qos_updater.h"
 
@@ -237,19 +236,6 @@ VolumeManager::Rename(std::string oldName, std::string newName)
 
     VolumeRenamer volumeRenamer(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
     return volumeRenamer.Do(oldName, newName);
-}
-
-int
-VolumeManager::Resize(std::string name, uint64_t newSize)
-{
-    int ret = _CheckPrerequisite();
-    if (ret != (int)POS_EVENT_ID::SUCCESS)
-    {
-        return ret;
-    }
-
-    VolumeResizer volumeResizer(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
-    return volumeResizer.Do(name, newSize);
 }
 
 int

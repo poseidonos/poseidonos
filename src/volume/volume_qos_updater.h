@@ -41,7 +41,7 @@ namespace pos
 class VolumeQosUpdater : public VolumeInterface
 {
 public:
-    explicit VolumeQosUpdater(VolumeList& volumeList, std::string arrayName, int arrayID);
+    explicit VolumeQosUpdater(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr);
     ~VolumeQosUpdater(void) override;
 
     int Do(string name, uint64_t maxIops, uint64_t maxBw);

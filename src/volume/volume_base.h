@@ -130,11 +130,6 @@ public:
     {
         name = val;
     }
-    void
-    Resize(uint64_t val)
-    {
-        totalSize = val;
-    }
 
     int ID;
 

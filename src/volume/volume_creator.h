@@ -41,7 +41,7 @@ namespace pos
 class VolumeCreator : public VolumeInterface
 {
 public:
-    explicit VolumeCreator(VolumeList& volumeList, std::string arrayName, int arrayID);
+    explicit VolumeCreator(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr);
     ~VolumeCreator(void) override;
 
     int Do(string name, uint64_t size, uint64_t maxIops, uint64_t maxBw);
