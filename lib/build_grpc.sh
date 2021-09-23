@@ -101,6 +101,15 @@ main()
 	rm -rf grpc
 	git clone ${GRPC_REPO}
 	cd grpc
+	if [ ${BUILD_INTERNAL} == FALSE ]
+	then
+		echo "Cleaning up existing dirs in grpc/third_party/(re2, abseil-cpp, protobuf)"
+		rm -rf third_party/re2 third_party/abseil-cpp third_party/protobuf
+
+		echo "Checking out GRPC submodules..."
+		git submodule update --init
+	fi
+	
 	install_re2
 	install_protobuf
 	install_abseil
