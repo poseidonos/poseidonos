@@ -34,22 +34,35 @@
 #include <algorithm>
 #include <string>
 
-#include "src/helper/spdk_rpc_client.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 
 namespace pos
 {
 TransportConfiguration::TransportConfiguration(ConfigManager* configManager)
+: TransportConfiguration(configManager, nullptr)
+{
+}
+
+TransportConfiguration::TransportConfiguration(ConfigManager* configManager, SpdkRpcClient* inputRpcClient)
 : configManager(configManager),
   trtype(DEFAULT_TRANSPORT_TYPE),
   bufCacheSize(DEFAULT_BUF_CACHE_SIZE),
-  numSharedBuf(DEFAULT_NUM_SHARED_BUFFER)
+  numSharedBuf(DEFAULT_NUM_SHARED_BUFFER),
+  rpcClient(inputRpcClient)
 {
+    if (nullptr == rpcClient)
+    {
+        rpcClient = new SpdkRpcClient();
+    }
 }
 
 TransportConfiguration::~TransportConfiguration(void)
 {
+    if (nullptr != rpcClient)
+    {
+        delete rpcClient;
+    }
 }
 
 void
@@ -89,9 +102,8 @@ TransportConfiguration::CreateTransport(void)
 
     ReadConfig();
 
-    SpdkRpcClient rpcClient;
     std::transform(trtype.begin(), trtype.end(), trtype.begin(), ::tolower);
-    auto result = rpcClient.TransportCreate(trtype, bufCacheSize, numSharedBuf);
+    auto result = rpcClient->TransportCreate(trtype, bufCacheSize, numSharedBuf);
     if (result.first != 0)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_TRANSPORT;

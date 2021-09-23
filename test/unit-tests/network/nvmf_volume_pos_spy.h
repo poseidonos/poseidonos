@@ -32,8 +32,8 @@
 
 #pragma once
 
-#include "src/network/nvmf_volume_pos.h"
 #include "src/network/nvmf_target.h"
+#include "src/network/nvmf_volume_pos.h"
 namespace pos
 {
 class NvmfVolumePosSpy : public NvmfVolumePos

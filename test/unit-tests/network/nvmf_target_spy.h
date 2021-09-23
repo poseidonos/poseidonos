@@ -31,32 +31,33 @@
  */
 
 #pragma once
-#include <string>
 
-#include "src/helper/spdk_rpc_client.h"
-#include "src/master_context/config_manager.h"
+#include "src/network/nvmf_target.h"
 
 namespace pos
 {
-class TransportConfiguration
+class NvmfTargetSpy : public NvmfTarget
 {
 public:
-    TransportConfiguration(ConfigManager* configManager = ConfigManagerSingleton::Instance());
-    TransportConfiguration(ConfigManager* configManager, SpdkRpcClient* rpcClient);
-    virtual ~TransportConfiguration(void);
+    using NvmfTarget::NvmfTarget;
+    NvmfTargetSpy(SpdkCaller* spdkCaller, bool feQosEnable, EventFrameworkApi* eventFrameworkApi)
+    : NvmfTarget(spdkCaller, feQosEnable, eventFrameworkApi)
+    {
+    }
 
-    virtual void ReadConfig(void);
-    virtual void CreateTransport(void);
+    void AttachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
+    {
+        nvmfCallbacks.attachNamespacePauseDone(subsystem, arg, status);
+    }
 
-private:
-    uint32_t const DEFAULT_NUM_SHARED_BUFFER = 4096;
-    uint32_t const DEFAULT_BUF_CACHE_SIZE = 64;
-    std::string const DEFAULT_TRANSPORT_TYPE = "tcp";
-    ConfigManager* configManager;
-    std::string trtype = "";
-    uint32_t bufCacheSize = 0;
-    uint32_t numSharedBuf = 0;
-    SpdkRpcClient* rpcClient;
-    bool _IsEnabled(void);
+    void DetachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
+    {
+        nvmfCallbacks.detachNamespacePauseDone(subsystem, arg, status);
+    }
+
+    void DetachNamespaceAllPauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int status)
+    {
+        nvmfCallbacks.detachNamespaceAllPauseDone(subsystem, arg, status);
+    }
 };
 } // namespace pos

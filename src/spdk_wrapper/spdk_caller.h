@@ -54,11 +54,15 @@ public:
     virtual struct spdk_nvmf_ctrlr* SpdkNvmfSubsystemGetFirstCtrlr(struct spdk_nvmf_subsystem* subsystem);
     virtual struct spdk_nvmf_ctrlr* SpdkNvmfSubsystemGetNextCtrlr(struct spdk_nvmf_subsystem* subsystem,
         struct spdk_nvmf_ctrlr* prevCtrlr);
+    virtual struct spdk_nvmf_ns *SpdkNvmfSubsystemGetNs(struct spdk_nvmf_subsystem *subsystem, uint32_t nsid);
     virtual struct spdk_nvmf_ns* SpdkNvmfSubsystemGetFirstNs(struct spdk_nvmf_subsystem* subsystem);
     virtual struct spdk_nvmf_ns* SpdkNvmfSubsystemGetNextNs(struct spdk_nvmf_subsystem* subsystem,
         struct spdk_nvmf_ns* prevNs);
+    virtual uint32_t SpdkNvmfSubsystemAddNs(struct spdk_nvmf_subsystem* subsystem, const char* bdevName,  const struct spdk_nvmf_ns_opts* user_opts, size_t opts_size, const char* ptpl_file);
+    virtual int SpdkNvmfSubsystemRemoveNs(struct spdk_nvmf_subsystem* subsystem, uint32_t nsid);
     virtual int SpdkNvmfSubsystemPause(struct spdk_nvmf_subsystem* subsystem, uint32_t nsid, spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg);
     virtual int SpdkNvmfSubsystemResume(struct spdk_nvmf_subsystem* subsystem, spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg);
+    virtual int SpdkNvmfSubsystemSetPauseDirectly(struct spdk_nvmf_subsystem *subsystem);
     virtual struct spdk_bdev* SpdkNvmfNsGetBdev(struct spdk_nvmf_ns* ns);
     virtual uint32_t SpdkNvmfNsGetId(const struct spdk_nvmf_ns* ns);
     virtual uint32_t SpdkNvmfSubsystemGetId(spdk_nvmf_subsystem* subsystem);

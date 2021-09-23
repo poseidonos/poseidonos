@@ -100,6 +100,12 @@ SpdkCaller::SpdkNvmfSubsystemGetNextCtrlr(struct spdk_nvmf_subsystem* subsystem,
     return spdk_nvmf_subsystem_get_next_ctrlr(subsystem, prevCtrlr);
 }
 
+struct spdk_nvmf_ns *
+SpdkCaller::SpdkNvmfSubsystemGetNs(struct spdk_nvmf_subsystem *subsystem, uint32_t nsid)
+{
+    return spdk_nvmf_subsystem_get_ns(subsystem, nsid);
+}
+
 struct spdk_nvmf_ns*
 SpdkCaller::SpdkNvmfSubsystemGetFirstNs(struct spdk_nvmf_subsystem* subsystem)
 {
@@ -111,6 +117,19 @@ SpdkCaller::SpdkNvmfSubsystemGetNextNs(struct spdk_nvmf_subsystem* subsystem,
     struct spdk_nvmf_ns* prevNs)
 {
     return spdk_nvmf_subsystem_get_next_ns(subsystem, prevNs);
+}
+
+uint32_t
+SpdkCaller::SpdkNvmfSubsystemAddNs(struct spdk_nvmf_subsystem *subsystem, const char* bdevName,
+   const struct spdk_nvmf_ns_opts *user_opts, size_t opts_size, const char *ptpl_file)
+{
+    return spdk_nvmf_subsystem_add_ns_ext(subsystem, bdevName, user_opts, opts_size, ptpl_file);
+}
+
+int
+SpdkCaller::SpdkNvmfSubsystemRemoveNs(struct spdk_nvmf_subsystem* subsystem, uint32_t nsid)
+{
+    return spdk_nvmf_subsystem_remove_ns(subsystem, nsid);
 }
 
 int
@@ -126,6 +145,12 @@ SpdkCaller::SpdkNvmfSubsystemResume(struct spdk_nvmf_subsystem* subsystem,
     spdk_nvmf_subsystem_state_change_done cbFunc, void* cbArg)
 {
     return spdk_nvmf_subsystem_resume(subsystem, cbFunc, cbArg);
+}
+
+int
+SpdkCaller::SpdkNvmfSubsystemSetPauseDirectly(struct spdk_nvmf_subsystem *subsystem)
+{
+    return spdk_nvmf_subsystem_set_pause_state_directly(subsystem);
 }
 
 struct spdk_bdev*

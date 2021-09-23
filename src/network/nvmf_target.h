@@ -94,8 +94,10 @@ public:
     string GetSubsystemArrayName(string& subnqn);
     void RemoveSubsystemArrayName(string& subnqn);
 
-private:
+protected:
     static struct NvmfTargetCallbacks nvmfCallbacks;
+
+private:
     uint32_t nrVolumePerSubsystem = 1;
     static const char* BDEV_NAME_PREFIX;
     static atomic<int> attachedNsid;

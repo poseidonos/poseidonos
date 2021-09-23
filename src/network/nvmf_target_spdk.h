@@ -41,6 +41,7 @@
 #include "spdk/nvmf.h"
 #include "spdk/stdinc.h"
 #include "spdk/string.h"
+#include "src/spdk_wrapper/spdk_caller.h"
 
 typedef void (*PosNvmfEventDoneCallback_t)(void* cb_arg, int status);
 
@@ -62,10 +63,6 @@ struct NvmfTargetCallbacks
     void (*createPosBdevDone)(void* arg, int status);
     void (*deletePosBdevDone)(void* arg, int status);
 
-    void (*createTransportDone)(void* arg, int status);
-
-    void (*subsystemStartDone)(struct spdk_nvmf_subsystem* subsystem, void* arg, int status);
-    void (*subsystemStopDone)(struct spdk_nvmf_subsystem* subsystem, void* arg, int status);
     void (*subsystemResumeDone)(struct spdk_nvmf_subsystem* subsystem, void* arg, int status);
 
     void (*attachNamespacePauseDone)(struct spdk_nvmf_subsystem* subsystem, void* arg, int status);
@@ -83,6 +80,6 @@ struct NvmfTargetCallbacks
 void InitNvmfCallbacks(struct NvmfTargetCallbacks* nvmfCallbacks);
 struct EventContext* AllocEventContext(PosNvmfEventDoneCallback_t callback, void* userArg);
 void FreeEventContext(struct EventContext* e);
-void ActivateSubsystem(void* arg1, void* arg2);
+void ActivateSubsystem(void* arg1);
 
 } // namespace pos

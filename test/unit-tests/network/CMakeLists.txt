@@ -1,3 +1,4 @@
-POS_ADD_UNIT_TEST(nvmf_target_ut nvmf_target_test.cpp)
 POS_ADD_UNIT_TEST(nvmf_volume_pos_ut nvmf_volume_pos_test.cpp)
+POS_ADD_UNIT_TEST(transport_configuration_ut transport_configuration_test.cpp)
 POS_ADD_UNIT_TEST(nvmf_ut nvmf_test.cpp)
+POS_ADD_UNIT_TEST(nvmf_target_ut nvmf_target_test.cpp)

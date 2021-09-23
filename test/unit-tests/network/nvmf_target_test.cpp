@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/network/nvmf_target_mock.h"
+#include "test/unit-tests/network/nvmf_target_spy.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
 #include "test/unit-tests/spdk_wrapper/spdk_caller_mock.h"
 
@@ -188,9 +189,9 @@ TEST(NvmfTarget, GetNamespace_Success_Iter)
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
     string bdevName{"bdev"};
     struct spdk_nvmf_ns* ns[1];
-    ns[0] = reinterpret_cast<struct spdk_nvmf_ns*>(0x1);  // to make it non-null
+    ns[0] = reinterpret_cast<struct spdk_nvmf_ns*>(0x1); // to make it non-null
     struct spdk_bdev* targetBdev[1];
-    targetBdev[0] = reinterpret_cast<struct spdk_bdev*>(0x1);  // to make it non-null
+    targetBdev[0] = reinterpret_cast<struct spdk_bdev*>(0x1); // to make it non-null
     ON_CALL(*mockSpdkCaller, SpdkBdevGetByName(_)).WillByDefault(Return(targetBdev[0]));
     ON_CALL(*mockSpdkCaller, SpdkNvmfSubsystemGetFirstNs(_)).WillByDefault(Return(ns[0]));
     EXPECT_CALL(*mockSpdkCaller, SpdkNvmfNsGetBdev(_))
@@ -726,9 +727,9 @@ TEST(NvmfTarget, GetAttachedVolumeList_Success)
     vector<pair<int, string>> expected;
     expected.push_back(make_pair(0, "array"));
     struct spdk_nvmf_subsystem* subsystem[0];
-    subsystem[0] = reinterpret_cast<struct spdk_nvmf_subsystem*>(0x1);  // to make it non-null
+    subsystem[0] = reinterpret_cast<struct spdk_nvmf_subsystem*>(0x1); // to make it non-null
     struct spdk_nvmf_ns* ns[1];
-    ns[0] = reinterpret_cast<struct spdk_nvmf_ns*>(0x1);  // to make it non-null
+    ns[0] = reinterpret_cast<struct spdk_nvmf_ns*>(0x1); // to make it non-null
     struct spdk_bdev* bdev;
     string bdevName = "bdev_0_array";
     ON_CALL(*mockSpdkCaller, SpdkNvmfTgtFindSubsystem(_, _)).WillByDefault(Return(subsystem[0]));
@@ -939,5 +940,26 @@ TEST(NvmfTarget, RemoveSubsystemArrayName_Success)
     string expected = "";
     ASSERT_EQ(actual, expected);
     delete mockSpdkCaller;
+}
+
+TEST(NvmfTargetSpdk, NvmfTargetSpdk_AttachNamespacePauseDone)
+{
+    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    NvmfTargetSpy nvmfTarget(mockSpdkCaller, false, nullptr);
+    nvmfTarget.AttachNamespacePauseDone(nullptr, nullptr, NvmfCallbackStatus::FAILED);
+}
+
+TEST(NvmfTargetSpdk, NvmfTargetSpdk_DetachNamespacePauseDone)
+{
+    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    NvmfTargetSpy nvmfTarget(mockSpdkCaller, false, nullptr);
+    nvmfTarget.DetachNamespacePauseDone(nullptr, nullptr, NvmfCallbackStatus::FAILED);
+}
+
+TEST(NvmfTargetSpdk, NvmfTargetSpdk_DetachNamespaceAllPauseDone)
+{
+    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    NvmfTargetSpy nvmfTarget(mockSpdkCaller, false, nullptr);
+    nvmfTarget.DetachNamespaceAllPauseDone(nullptr, nullptr, NvmfCallbackStatus::FAILED);
 }
 } // namespace pos

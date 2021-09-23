@@ -30,33 +30,22 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
+
+#include <list>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "src/helper/spdk_rpc_client.h"
-#include "src/master_context/config_manager.h"
 
 namespace pos
 {
-class TransportConfiguration
+class MockSpdkRpcClient : public SpdkRpcClient
 {
 public:
-    TransportConfiguration(ConfigManager* configManager = ConfigManagerSingleton::Instance());
-    TransportConfiguration(ConfigManager* configManager, SpdkRpcClient* rpcClient);
-    virtual ~TransportConfiguration(void);
-
-    virtual void ReadConfig(void);
-    virtual void CreateTransport(void);
-
-private:
-    uint32_t const DEFAULT_NUM_SHARED_BUFFER = 4096;
-    uint32_t const DEFAULT_BUF_CACHE_SIZE = 64;
-    std::string const DEFAULT_TRANSPORT_TYPE = "tcp";
-    ConfigManager* configManager;
-    std::string trtype = "";
-    uint32_t bufCacheSize = 0;
-    uint32_t numSharedBuf = 0;
-    SpdkRpcClient* rpcClient;
-    bool _IsEnabled(void);
+    using SpdkRpcClient::SpdkRpcClient;
+    MOCK_METHOD((std::pair<int, std::string>), TransportCreate, (std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf), (override));
 };
+
 } // namespace pos
