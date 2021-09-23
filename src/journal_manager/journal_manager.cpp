@@ -78,6 +78,7 @@ JournalManager::JournalManager(void)
   bufferAllocator(nullptr),
   logGroupReleaser(nullptr),
   checkpointManager(nullptr),
+  bufferedSegCtxManager(nullptr),
   dirtyMapManager(nullptr),
   logFilledNotifier(nullptr),
   sequenceController(nullptr),
@@ -172,6 +173,7 @@ JournalManager::~JournalManager(void)
     delete eventFactory;
 
     delete checkpointManager;
+    delete bufferedSegCtxManager;
     delete statusProvider;
     delete config;
 }
