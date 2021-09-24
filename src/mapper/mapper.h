@@ -32,10 +32,14 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/journal_service/journal_service.h"
 #include "src/mapper/address/mapper_address_info.h"
 #include "src/mapper/i_map_flush.h"
+#include "src/mapper/i_mapper_volume_event_handler.h"
 #include "src/mapper/i_mapper_wbt.h"
 #include "src/mapper/i_vsamap.h"
 #include "src/mapper/mapper_wbt.h"
@@ -43,10 +47,6 @@
 #include "src/mapper/stripemap/stripemap_manager.h"
 #include "src/mapper/vsamap/vsamap_manager.h"
 #include "src/state/interface/i_state_control.h"
-#include "src/sys_event/volume_event.h"
-
-#include <string>
-#include <vector>
 
 namespace pos
 {
@@ -98,7 +98,7 @@ public:
     std::mutex stateLock;
 };
 
-class Mapper : public IMapFlush, public IMountSequence, public VolumeEvent, public IVSAMap
+class Mapper : public IMapFlush, public IMountSequence, public IMapperVolumeEventHandler, public IVSAMap
 {
 public:
     Mapper(IArrayInfo* iarrayInfo, IStateControl* iState);
@@ -114,14 +114,15 @@ public:
     virtual IReverseMap* GetIReverseMap(void) { return reverseMapManager; }
     virtual IMapFlush* GetIMapFlush(void) { return this; }
     virtual IMapperWbt* GetIMapperWbt(void) { return mapperWbt; }
+    virtual IMapperVolumeEventHandler* GetVolumeEventHandler(void) { return this; }
 
-    virtual bool VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo);
-    virtual bool VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo);
-    virtual bool VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo);
-    virtual bool VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo);
-    virtual bool VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo);
-    virtual bool VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo);
-    virtual void VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo);
+    virtual bool VolumeCreated(int volId, uint64_t volSizeByte) override;
+    virtual bool VolumeMounted(int volId, uint64_t volSizeByte) override;
+    virtual bool VolumeLoaded(int volId, uint64_t volSizeByte) override;
+    virtual bool VolumeUnmounted(int volId, bool flushMapRequired) override;
+    virtual int PrepareVolumeDelete(int volId) override;
+    virtual int DeleteVolumeMap(int volumeId) override;
+    virtual void VolumeDetached(vector<int> volList) override;
 
     virtual int GetVSAs(int volId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray);
     virtual int SetVSAs(int volId, BlkAddr startRba, VirtualBlks& virtualBlks);

@@ -53,8 +53,7 @@ namespace pos
 {
 Allocator::Allocator(AllocatorAddressInfo* addrInfo_, ContextManager* contextManager_, BlockManager* blockManager_,
     WBStripeManager* wbStripeManager_, IArrayInfo* info_, IStateControl* iState_)
-: VolumeEvent("Allocator", info_->GetName(), info_->GetIndex()),
-  addrInfo(addrInfo_),
+: addrInfo(addrInfo_),
   contextManager(contextManager_),
   blockManager(blockManager_),
   wbStripeManager(wbStripeManager_),
@@ -68,14 +67,12 @@ Allocator::Allocator(AllocatorAddressInfo* addrInfo_, ContextManager* contextMan
 Allocator::Allocator(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* iState)
 : Allocator(nullptr, nullptr, nullptr, nullptr, info, iState)
 {
-    VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayId);
     _CreateSubmodules(tp);
     POS_TRACE_INFO(EID(ALLOCATOR_START), "Allocator in Array:{} was Created", arrayName);
 }
 
 Allocator::~Allocator(void)
 {
-    VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayId);
     _DeleteSubmodules();
     POS_TRACE_INFO(EID(ALLOCATOR_START), "Allocator in Array:{} was Destroyed", arrayName);
 }
@@ -203,14 +200,14 @@ Allocator::GetIContextReplayer(void)
 }
 
 bool
-Allocator::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
+Allocator::FinalizeActiveStripes(int volumeId)
 {
     std::vector<Stripe*> stripesToFlush;
     std::vector<StripeId> vsidToCheckFlushDone;
 
     {
         std::unique_lock<std::mutex> lock(contextManager->GetCtxLock());
-        wbStripeManager->PickActiveStripe(volEventBase->volId, stripesToFlush, vsidToCheckFlushDone);
+        wbStripeManager->PickActiveStripe(volumeId, stripesToFlush, vsidToCheckFlushDone);
     }
 
     wbStripeManager->FinalizeWriteIO(stripesToFlush, vsidToCheckFlushDone);

@@ -56,9 +56,10 @@ const uint32_t BUFFER_ALLOCATION_SIZE = 2 * 1024 * 1024;
 const uint32_t CHUNK_PER_BUFFER_ALLOCATION = BUFFER_ALLOCATION_SIZE / CHUNK_SIZE;
 const int BLOCKS_PER_GROUP = 8;
 
-class Allocator : public IAllocatorWbt, public VolumeEvent, public IMountSequence
+class Allocator : public IAllocatorWbt, public IMountSequence
 {
 public:
+    Allocator(void) = default;
     Allocator(AllocatorAddressInfo* addrInfo, ContextManager* contextManager, BlockManager* blockManager,
         WBStripeManager* wbStripeManager, IArrayInfo* info, IStateControl* iState);
     Allocator(TelemetryPublisher* telPublisher, IArrayInfo* info, IStateControl* iState);
@@ -69,36 +70,7 @@ public:
     virtual void Shutdown(void) override;
     virtual void Flush(void) override;
 
-    bool
-    VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override
-    {
-        return true;
-    }
-    bool
-    VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override
-    {
-        return true;
-    }
-    bool
-    VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override
-    {
-        return true;
-    }
-    bool
-    VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override
-    {
-        return true;
-    }
-    void
-    VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) override
-    {
-    }
-    bool
-    VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override
-    {
-        return true;
-    }
-    bool VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
+    virtual bool FinalizeActiveStripes(int volumeId);
 
     void SetNormalGcThreshold(uint32_t inputThreshold) override;
     void SetUrgentThreshold(uint32_t inputThreshold) override;

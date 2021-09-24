@@ -44,7 +44,7 @@ JournalServiceIntegrationTest::InitializeAndRegisterJournal(std::string arrayNam
 
     JournalManagerSpy* journal = fixtures[arrayName]->GetJournal();
     JournalServiceSingleton::Instance()->Register(arrayName, arrayId,
-        journal, journal->GetJournalWriter(), journal->GetVolumeEventHandler(), journal->GetStatusProvider());
+        journal, journal->GetJournalWriter(), journal->GetStatusProvider());
 }
 
 void

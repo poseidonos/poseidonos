@@ -38,9 +38,9 @@
 #include <string>
 #include <vector>
 
-#include "src/journal_manager/checkpoint/meta_flush_completed.h"
 #include "src/allocator/i_context_manager.h"
-#include "src/journal_service/i_volume_event.h"
+#include "src/journal_manager/checkpoint/meta_flush_completed.h"
+#include "src/journal_manager/log_write/i_journal_volume_event_handler.h"
 
 namespace pos
 {
@@ -50,7 +50,7 @@ class CheckpointManager;
 class LogWriteHandler;
 class JournalConfiguration;
 
-class JournalVolumeEventHandler : public IVolumeEventHandler, public IMetaFlushCompleted
+class JournalVolumeEventHandler : public IJournalVolumeEventHandler, public IMetaFlushCompleted
 {
 public:
     JournalVolumeEventHandler(void);

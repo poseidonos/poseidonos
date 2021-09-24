@@ -32,48 +32,41 @@
 
 #pragma once
 
+#include <vector>
+
 #include "src/array_models/interface/i_array_info.h"
-#include "src/array_models/interface/i_mount_sequence.h"
-#include "src/state/interface/i_state_control.h"
+#include "src/journal_manager/log_write/i_journal_volume_event_handler.h"
+#include "src/mapper/i_mapper_volume_event_handler.h"
+#include "src/sys_event/volume_event.h"
 
 namespace pos
 {
-class TelemetryPublisher;
-class Mapper;
 class Allocator;
-class JournalManager;
 
-class MetaUpdater;
-class MetaVolumeEventHandler;
-
-class Metadata : public IMountSequence
+class MetaVolumeEventHandler : public VolumeEvent
 {
 public:
-    Metadata(void);
-    Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state);
-    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl);
-    virtual ~Metadata(void);
+    MetaVolumeEventHandler(IArrayInfo* arrayInfo,
+        IMapperVolumeEventHandler* mapper,
+        Allocator* allocator,
+        IJournalVolumeEventHandler* journal);
+    virtual ~MetaVolumeEventHandler(void);
 
-    virtual int Init(void) override;
-    virtual void Dispose(void) override;
-    virtual void Shutdown(void) override;
-    virtual void Flush(void) override;
-
-    // TODO (huijeong.kim) Remove rebuild methods and make array components
-    // to get allocator modules directly
-    virtual bool NeedRebuildAgain(void);
-    virtual int PrepareRebuild(void);
-    virtual void StopRebuilding(void);
+    virtual bool VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
+    virtual bool VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
+    virtual bool VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
+    virtual bool VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
+    virtual bool VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
+    virtual bool VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
+    virtual void VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) override;
 
 private:
-    void _RegisterMetaUpdater(void);
-
     IArrayInfo* arrayInfo;
-    Mapper* mapper;
-    Allocator* allocator;
-    JournalManager* journal;
 
-    MetaUpdater* metaUpdater;
-    MetaVolumeEventHandler* volumeEventHandler;
+    bool isJournalEnabled;
+    IMapperVolumeEventHandler* mapper;
+    Allocator* allocator;
+    IJournalVolumeEventHandler* journal;
 };
+
 } // namespace pos

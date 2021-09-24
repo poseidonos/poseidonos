@@ -224,12 +224,6 @@ JournalManagerSpy::GetJournalWriter(void)
     return journalWriter;
 }
 
-IVolumeEventHandler*
-JournalManagerSpy::GetVolumeEventHandler(void)
-{
-    return volumeEventHandler;
-}
-
 IJournalStatusProvider*
 JournalManagerSpy::GetStatusProvider(void)
 {

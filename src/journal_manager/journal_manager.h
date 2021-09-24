@@ -36,6 +36,7 @@
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/journaling_status.h"
+#include "src/journal_manager/log_write/i_journal_volume_event_handler.h"
 #include "src/journal_service/i_journal_manager.h"
 #include "src/journal_service/i_journal_writer.h"
 #include "src/journal_service/journal_service.h"
@@ -125,6 +126,8 @@ public:
     }
 
     IJournalWriter* GetJournalWriter(void);
+
+    IJournalVolumeEventHandler* GetVolumeEventHandler(void);
 
 protected:
     void _InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,

@@ -109,7 +109,7 @@ TEST(Allocator, Shutdown_TestShutdownWithInitializeOrNot)
     alloc.Shutdown();
 }
 
-TEST(Allocator, VolumeUnmounted_TestSimpleCall)
+TEST(Allocator, FinalizeActiveStripes_TestSimpleCall)
 {
     // given
     NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
@@ -125,13 +125,9 @@ TEST(Allocator, VolumeUnmounted_TestSimpleCall)
     EXPECT_CALL(*wbManager, FinalizeWriteIO);
     EXPECT_CALL(*ctxManager, GetCtxLock).WillOnce(ReturnRef(ctxLock));
 
-    VolumeEventBase volumeEventBase;
-    alloc.SetVolumeBase(&volumeEventBase, 0, 0, "", "", "");
-    VolumeArrayInfo volumeArrayInfo;
-    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
-
     // when
-    alloc.VolumeUnmounted(&volumeEventBase, &volumeArrayInfo);
+    int volumeId = 0;
+    alloc.FinalizeActiveStripes(volumeId);
 }
 
 TEST(Allocator, SetNormalGcThreshold_TestSimpleSetter)
@@ -498,129 +494,4 @@ TEST(Allocator, GetIAllocatorWbt_TestSimpleGetter)
     IAllocatorWbt* ret = alloc.GetIAllocatorWbt();
 }
 
-TEST(Allocator, VolumeCreated_TestSimpleCallEmptyFunc)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
-    NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
-
-    VolumeEventBase volumeEventBase;
-    alloc.SetVolumeBase(&volumeEventBase, 0, 0, "", "", "");
-    VolumeEventPerf volumeMountPerf;
-    alloc.SetVolumePerf(&volumeMountPerf, 0, 0);
-    VolumeArrayInfo volumeArrayInfo;
-    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
-
-    // when
-    alloc.VolumeCreated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo);
-}
-
-TEST(Allocator, VolumeLoaded_TestSimpleCallEmptyFunc)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
-    NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
-
-    VolumeEventBase volumeEventBase;
-    alloc.SetVolumeBase(&volumeEventBase, 0, 0, "", "", "");
-    VolumeEventPerf volumeMountPerf;
-    alloc.SetVolumePerf(&volumeMountPerf, 0, 0);
-    VolumeArrayInfo volumeArrayInfo;
-    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
-    // when
-    alloc.VolumeLoaded(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo);
-}
-
-TEST(Allocator, VolumeUpdated_TestSimpleCallEmptyFunc)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
-    NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
-
-    VolumeEventBase volumeEventBase;
-    alloc.SetVolumeBase(&volumeEventBase, 0, 0, "", "", "");
-    VolumeEventPerf volumeMountPerf;
-    alloc.SetVolumePerf(&volumeMountPerf, 0, 0);
-    VolumeArrayInfo volumeArrayInfo;
-    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
-
-    // when
-    alloc.VolumeUpdated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo);
-}
-
-TEST(Allocator, VolumeMounted_TestSimpleCallEmptyFunc)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
-    NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
-
-    VolumeEventBase volumeEventBase;
-    alloc.SetVolumeBase(&volumeEventBase, 0, 0, "", "", "");
-    VolumeEventPerf volumeMountPerf;
-    alloc.SetVolumePerf(&volumeMountPerf, 0, 0);
-    VolumeArrayInfo volumeArrayInfo;
-    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
-
-    // when
-    alloc.VolumeMounted(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo);
-}
-
-TEST(Allocator, VolumeDetached_TestSimpleCallEmptyFunc)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
-    NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
-
-    VolumeArrayInfo volumeArrayInfo;
-    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
-
-    // when
-    std::vector<int> param;
-    alloc.VolumeDetached(param, &volumeArrayInfo);
-}
-
-TEST(Allocator, VolumeDeleted_TestSimpleCallEmptyFunc)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>();
-    NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
-    NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
-    NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
-    NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
-
-    VolumeEventBase volumeEventBase;
-    alloc.SetVolumeBase(&volumeEventBase, 0, 0, "", "", "");
-    VolumeArrayInfo volumeArrayInfo;
-    alloc.SetVolumeArrayInfo(&volumeArrayInfo, 0, "");
-
-    // when
-    alloc.VolumeDeleted(&volumeEventBase, &volumeArrayInfo);
-}
 } // namespace pos

@@ -33,13 +33,13 @@
 #include "src/metadata/metadata.h"
 
 #include "src/allocator/allocator.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/journal_manager/journal_manager.h"
 #include "src/logger/logger.h"
 #include "src/mapper/mapper.h"
 #include "src/meta_service/meta_service.h"
 #include "src/metadata/meta_updater.h"
-
-#include "src/event_scheduler/event_scheduler.h"
+#include "src/metadata/meta_volume_event_handler.h"
 
 #ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_mgr.h"
@@ -73,6 +73,10 @@ Metadata::Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator,
   journal(journal),
   metaUpdater(nullptr)
 {
+    volumeEventHandler = new MetaVolumeEventHandler(arrayInfo,
+        mapper->GetVolumeEventHandler(),
+        allocator,
+        (journal->IsEnabled() ? journal->GetVolumeEventHandler() : nullptr));
 }
 
 Metadata::~Metadata(void)
@@ -95,6 +99,11 @@ Metadata::~Metadata(void)
     if (metaUpdater != nullptr)
     {
         delete metaUpdater;
+    }
+
+    if (volumeEventHandler != nullptr)
+    {
+        delete volumeEventHandler;
     }
 }
 

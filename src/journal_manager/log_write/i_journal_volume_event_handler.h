@@ -34,7 +34,7 @@
 
 namespace pos
 {
-class IVolumeEventHandler
+class IJournalVolumeEventHandler
 {
 public:
     virtual int WriteVolumeDeletedLog(int volId) = 0;

@@ -49,7 +49,6 @@ public:
     uint64_t GetNextOffset(void);
 
     IJournalWriter* GetJournalWriter(void);
-    IVolumeEventHandler* GetVolumeEventHandler(void);
     IJournalStatusProvider* GetStatusProvider(void);
 
 private:

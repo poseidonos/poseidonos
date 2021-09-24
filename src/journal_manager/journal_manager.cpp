@@ -344,7 +344,7 @@ void
 JournalManager::_RegisterServices(void)
 {
     journalService->Register(arrayInfo->GetName(), arrayInfo->GetIndex(),
-        this, journalWriter, volumeEventHandler, statusProvider);
+        this, journalWriter, statusProvider);
 }
 
 void
@@ -363,6 +363,12 @@ IJournalWriter*
 JournalManager::GetJournalWriter(void)
 {
     return journalWriter;
+}
+
+IJournalVolumeEventHandler*
+JournalManager::GetVolumeEventHandler(void)
+{
+    return volumeEventHandler;
 }
 
 int

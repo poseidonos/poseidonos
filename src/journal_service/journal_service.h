@@ -40,7 +40,6 @@
 #include "src/journal_service/i_journal_manager.h"
 #include "src/journal_service/i_journal_status_provider.h"
 #include "src/journal_service/i_journal_writer.h"
-#include "src/journal_service/i_volume_event.h"
 #include "src/lib/singleton.h"
 
 namespace pos
@@ -55,15 +54,13 @@ public:
 
     virtual void Register(std::string arrayName, int arrayId,
         IJournalManager* journal, IJournalWriter* writer,
-        IVolumeEventHandler* handler, IJournalStatusProvider* provider);
+        IJournalStatusProvider* provider);
     virtual void Unregister(std::string arrayName);
 
     virtual IJournalWriter* GetWriter(std::string arrayName);
-    IVolumeEventHandler* GetVolumeEventHandler(std::string arrayName);
     IJournalStatusProvider* GetStatusProvider(std::string arrayName);
 
     virtual IJournalWriter* GetWriter(int arrayId);
-    IVolumeEventHandler* GetVolumeEventHandler(int arrayId);
     IJournalStatusProvider* GetStatusProvider(int arrayId);
 
 protected:
@@ -73,7 +70,6 @@ protected:
 private:
     std::array<IJournalManager*, ArrayMgmtPolicy::MAX_ARRAY_CNT> journalManagers;
     std::array<IJournalWriter*, ArrayMgmtPolicy::MAX_ARRAY_CNT> journalWriters;
-    std::array<IVolumeEventHandler*, ArrayMgmtPolicy::MAX_ARRAY_CNT> volEventHandlers;
     std::array<IJournalStatusProvider*, ArrayMgmtPolicy::MAX_ARRAY_CNT> statusProviders;
 
     std::unordered_map<std::string, int> arrayNameToId;

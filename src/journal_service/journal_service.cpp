@@ -41,7 +41,6 @@ JournalService::JournalService(void)
 {
     journalManagers.fill(nullptr);
     journalWriters.fill(nullptr);
-    volEventHandlers.fill(nullptr);
     statusProviders.fill(nullptr);
 }
 
@@ -66,7 +65,7 @@ JournalService::IsEnabled(std::string arrayName)
 void
 JournalService::Register(std::string arrayName, int arrayId,
     IJournalManager* journal, IJournalWriter* writer,
-    IVolumeEventHandler* handler, IJournalStatusProvider* provider)
+    IJournalStatusProvider* provider)
 {
     if (arrayNameToId.find(arrayName) == arrayNameToId.end())
     {
@@ -74,7 +73,6 @@ JournalService::Register(std::string arrayName, int arrayId,
 
         journalManagers[arrayId] = journal;
         journalWriters[arrayId] = writer;
-        volEventHandlers[arrayId] = handler;
         statusProviders[arrayId] = provider;
     }
     else
@@ -94,7 +92,6 @@ JournalService::Unregister(std::string arrayName)
 
         journalManagers[arrayId] = nullptr;
         journalWriters[arrayId] = nullptr;
-        volEventHandlers[arrayId] = nullptr;
         statusProviders[arrayId] = nullptr;
     }
     else
@@ -115,20 +112,6 @@ JournalService::GetWriter(std::string arrayName)
     else
     {
         return journalWriters[arrayId->second];
-    }
-}
-
-IVolumeEventHandler*
-JournalService::GetVolumeEventHandler(std::string arrayName)
-{
-    auto arrayId = arrayNameToId.find(arrayName);
-    if (arrayId == arrayNameToId.end())
-    {
-        return nullptr;
-    }
-    else
-    {
-        return volEventHandlers[arrayId->second];
     }
 }
 
@@ -163,12 +146,6 @@ IJournalWriter*
 JournalService::GetWriter(int arrayId)
 {
     return journalWriters[arrayId];
-}
-
-IVolumeEventHandler*
-JournalService::GetVolumeEventHandler(int arrayId)
-{
-    return volEventHandlers[arrayId];
 }
 
 IJournalStatusProvider*
