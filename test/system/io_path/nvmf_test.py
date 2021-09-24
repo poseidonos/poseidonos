@@ -84,7 +84,7 @@ def volume_mount_with_subsystem_create_test():
     common_test_lib.create_volume(pos_root, stdout_type, "vol4", array_list[1])
     ret = nvmf.mount_volume_with_subsystem(stdout_type, "vol4", array_list[1], "")
     common_test_lib.expect_false(ret, "Failed to volume mount. No subsystem exist to mount.")
-    success = (ret is True)
+    success = (ret is False)
     result &= success
     common_test_lib.print_result("[ Volume Mount Failed ]", success)
 
@@ -207,6 +207,8 @@ if __name__ == "__main__":
     success &= volume_mount_with_subsystem_create_test()
 
     if success:
+        print("NVMF TEST SUCCESS")
         exit(0)
     else:
+        print("NVMF TEST FAIL")
         exit(-1)
