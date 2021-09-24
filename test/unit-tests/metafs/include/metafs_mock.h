@@ -13,6 +13,7 @@ class MockMetaFs : public MetaFs
 public:
     using MetaFs::MetaFs;
     MOCK_METHOD(uint64_t, GetEpochSignature, (), (override));
+    MOCK_METHOD(StripeId, GetTheLastValidStripeId, ());
 };
 
 } // namespace pos

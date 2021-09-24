@@ -446,4 +446,12 @@ MssRamdisk::TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* 
 
     return POS_EVENT_ID::SUCCESS;
 }
+
+LogicalBlkAddr
+MssRamdisk::TranslateAddress(MetaStorageType type, MetaLpnType theLpn)
+{
+    LogicalBlkAddr addr = {0, 0};
+
+    return addr;
+}
 } // namespace pos

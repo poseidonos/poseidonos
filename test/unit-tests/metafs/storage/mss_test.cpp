@@ -54,6 +54,10 @@ public:
     {
         return POS_EVENT_ID::MFS_ARRAY_CREATE_FAILED;
     }
+    LogicalBlkAddr TranslateAddress(MetaStorageType type, MetaLpnType theLpn)
+    {
+        return {0, 0};
+    }
 };
 
 TEST(MssTester, CheckRead)
@@ -129,4 +133,13 @@ TEST(MssTester, CheckWrite_Async)
     delete mss;
 }
 
+TEST(MssTester, CheckTranslate)
+{
+    MssTester* mss = new MssTester(0);
+
+    EXPECT_EQ(mss->TranslateAddress(MetaStorageType::SSD, 0).stripeId, 0);
+    EXPECT_EQ(mss->TranslateAddress(MetaStorageType::SSD, 0).offset, 0);
+
+    delete mss;
+}
 } // namespace pos

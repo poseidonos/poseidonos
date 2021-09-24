@@ -473,4 +473,10 @@ MetaVolumeManager::SetMss(MetaStorageSubsystem* metaStorage)
 {
     this->metaStorage = metaStorage;
 }
+
+MetaLpnType
+MetaVolumeManager::GetTheLastValidLpn(MetaVolumeType volType)
+{
+    return volContainer->GetTheLastValidLpn(volType);
+}
 } // namespace pos

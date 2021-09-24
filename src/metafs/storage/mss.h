@@ -37,6 +37,8 @@
 #include "mss_opcode.h"
 #include "mss_state.h"
 #include "mss_status_callback.h"
+#include "src/include/address_type.h"
+#include "src/include/partition_type.h"
 
 namespace pos
 {
@@ -62,6 +64,7 @@ public:
     virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) = 0;
 
     virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) = 0;
+    virtual LogicalBlkAddr TranslateAddress(MetaStorageType type, MetaLpnType theLpn) = 0;
 
     POS_EVENT_ID DoPageIO(MssOpcode opcode, MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer,
         MetaLpnType numPages, uint32_t mpio_id, uint32_t tagid);

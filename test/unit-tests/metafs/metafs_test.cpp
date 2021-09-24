@@ -80,7 +80,7 @@ public:
             mediaInfoList[i].valid = false;
         }
 
-        metaFs = new MetaFs(arrayInfo, false, mgmt, ctrl, io, wbt);
+        metaFs = new MetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss);
     }
 
     virtual void
@@ -110,9 +110,6 @@ TEST_F(MetaFsFixture, InitMetaFs)
 {
     EXPECT_CALL(*mgmt, InitializeSystem(_, _))
         .WillOnce(Return(POS_EVENT_ID::SUCCESS));
-    EXPECT_CALL(*mgmt, GetMss).WillOnce(Return(mss));
-    EXPECT_CALL(*io, SetMss);
-    EXPECT_CALL(*ctrl, SetMss);
     EXPECT_CALL(*arrayInfo, GetSizeInfo).WillRepeatedly(Return(&ptnSize));
     EXPECT_CALL(*mgmt, GetAllStoragePartitionInfo)
         .WillRepeatedly(ReturnRef(mediaInfoList));
@@ -155,7 +152,6 @@ TEST_F(MetaFsFixture, CheckShutdown_With_Storage)
 {
     EXPECT_CALL(*mgmt, InitializeSystem(_, _))
         .WillOnce(Return(POS_EVENT_ID::SUCCESS));
-    EXPECT_CALL(*mgmt, GetMss).WillOnce(Return(mss));
     EXPECT_CALL(*io, SetMss).WillRepeatedly(Return());
     EXPECT_CALL(*ctrl, SetMss).WillRepeatedly(Return());
     EXPECT_CALL(*arrayInfo, GetSizeInfo).WillRepeatedly(Return(&ptnSize));
@@ -187,4 +183,15 @@ TEST_F(MetaFsFixture, CheckEpochSignature)
     EXPECT_EQ(metaFs->GetEpochSignature(), 123456);
 }
 
+TEST_F(MetaFsFixture, CheckTheLastStripeId)
+{
+    LogicalBlkAddr addr = {1, 10};
+
+    EXPECT_CALL(*ctrl, GetTheLastValidLpn(_)).WillOnce(Return(100));
+    EXPECT_CALL(*mss, TranslateAddress(_, _)).WillOnce(Return(addr));
+
+    EXPECT_EQ(metaFs->GetTheLastValidStripeId(), 1);
+
+    delete mss;
+}
 } // namespace pos

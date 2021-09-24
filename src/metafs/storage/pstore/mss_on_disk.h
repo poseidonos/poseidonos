@@ -104,6 +104,7 @@ public:
     virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) override;
 
     virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) override;
+    virtual LogicalBlkAddr TranslateAddress(MetaStorageType type, MetaLpnType theLpn) override;
 
 private:
     bool _CheckSanityErr(MetaLpnType pageNumber, uint64_t arrayCapacity);

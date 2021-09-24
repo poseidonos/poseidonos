@@ -67,6 +67,7 @@ public:
     virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) override;
     virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) override;
     virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) override;
+    virtual LogicalBlkAddr TranslateAddress(MetaStorageType type, MetaLpnType theLpn) override;
 
     POS_EVENT_ID EraseAllData(MetaStorageType mediaType);
     uint64_t GetCapacity(MetaStorageType mediaType);

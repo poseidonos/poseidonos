@@ -86,6 +86,7 @@ public:
     virtual POS_EVENT_ID GetFileBaseLpn(FileDescriptorType fd,
                 MetaVolumeType volType, MetaLpnType& outFileBaseLpn);
     virtual void SetMss(MetaStorageSubsystem* metaStorage);
+    virtual MetaLpnType GetTheLastValidLpn(MetaVolumeType volType);
 
 private:
     bool _IsVolumeSpecificRequest(MetaFsFileControlType reqType);

@@ -98,7 +98,7 @@ public:
         io = new NiceMock<MockMetaFsIoApi>;
         wbt = new NiceMock<MockMetaFsWBTApi>;
 
-        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt);
+        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, nullptr);
 
         metaFile = new MetaFsFileIntfTester(fileName, arrayId, metaFs);
     }

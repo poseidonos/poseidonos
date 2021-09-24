@@ -80,7 +80,11 @@ public:
                 StorageOpt storage = StorageOpt::DEFAULT);
     virtual size_t GetMaxMetaLpn(MetaVolumeType type);
     virtual void SetStatus(bool isNormal);
-    MetaFileContext* GetFileInfo(FileDescriptorType fd, MetaVolumeType type);
+    virtual MetaFileContext* GetFileInfo(FileDescriptorType fd, MetaVolumeType type);
+    virtual MetaLpnType GetTheLastValidLpn(MetaVolumeType type)
+    {
+        return volMgr->GetTheLastValidLpn(type);
+    }
 
     // for wbt commands
     virtual std::vector<MetaFileInfoDumpCxt> Wbt_GetMetaFileList(MetaVolumeType type);

@@ -50,6 +50,7 @@ public:
                     (FileDescriptorType fd, MetaVolumeType volumeType));
     MOCK_METHOD(POS_EVENT_ID, LookupMetaVolumeType,
                     (std::string& fileName, MetaVolumeType volumeType));
+    MOCK_METHOD(MetaLpnType, GetTheLastValidLpn, (MetaVolumeType volumeType));
 };
 
 } // namespace pos

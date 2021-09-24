@@ -444,4 +444,10 @@ MetaVolumeContainer::LookupMetaVolumeType(std::string& fileName, MetaVolumeType 
     return POS_EVENT_ID::MFS_INVALID_PARAMETER;
 }
 
+MetaLpnType
+MetaVolumeContainer::GetTheLastValidLpn(MetaVolumeType volumeType)
+{
+    return volumeContainer[volumeType]->GetTheLastValidLpn();
+}
+
 } // namespace pos

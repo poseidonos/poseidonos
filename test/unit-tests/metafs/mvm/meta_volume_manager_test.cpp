@@ -290,4 +290,13 @@ TEST_F(MetaVolumeManagerFixture, GetFileBaseLpn_Positive)
     EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
     EXPECT_EQ(outFileBaseLpn, 0);
 }
+
+TEST_F(MetaVolumeManagerFixture, CheckTheLastLpn)
+{
+    MetaVolumeType volType = MetaVolumeType::SsdVolume;
+
+    EXPECT_CALL(*volContainer, GetTheLastValidLpn(_)).WillOnce(Return(100));
+
+    EXPECT_EQ(volumeMgr->GetTheLastValidLpn(volType), 100);
+}
 } // namespace pos

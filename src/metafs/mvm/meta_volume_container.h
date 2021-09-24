@@ -102,6 +102,7 @@ public:
                     MetaVolumeType volumeType);
     virtual POS_EVENT_ID LookupMetaVolumeType(std::string& fileName,
                     MetaVolumeType volumeType);
+    virtual MetaLpnType GetTheLastValidLpn(MetaVolumeType volumeType);
 
 private:
     MetaVolume* _InitVolume(MetaVolumeType volType, int arrayId,

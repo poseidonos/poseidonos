@@ -34,6 +34,7 @@
 #include "metafs.h"
 #include "src/metafs/log/metafs_log.h"
 #include "src/metafs/include/metafs_service.h"
+#include "src/include/partition_type.h"
 #include "src/include/array_config.h"
 
 namespace pos
@@ -67,7 +68,8 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
 }
 
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
-        MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt)
+        MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
+        MetaStorageSubsystem* metaStorage)
 : MetaFs()
 {
     this->isLoaded = isLoaded;
@@ -80,6 +82,7 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
     this->ctrl = ctrl;
     this->io = io;
     this->wbt = wbt;
+    this->metaStorage = metaStorage;
 
     MetaFsServiceSingleton::Instance()->Register(arrayName, arrayId, this);
 }
@@ -182,6 +185,18 @@ uint64_t
 MetaFs::GetEpochSignature(void)
 {
     return mgmt->GetEpochSignature();
+}
+
+StripeId
+MetaFs::GetTheLastValidStripeId(void)
+{
+    if ((nullptr == metaStorage) || (nullptr == ctrl))
+        return 0;
+
+    MetaLpnType theLastLpn = ctrl->GetTheLastValidLpn(MetaVolumeType::SsdVolume);
+    LogicalBlkAddr addr = metaStorage->TranslateAddress(MetaStorageType::SSD, theLastLpn);
+
+    return addr.stripeId;
 }
 
 MetaStorageSubsystem*

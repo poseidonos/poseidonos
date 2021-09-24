@@ -104,6 +104,8 @@ public:
     virtual MetaLpnType GetRegionSizeInLpn(MetaRegionType regionType);
     virtual MetaVolumeType GetVolumeType(void);
 
+    virtual MetaLpnType GetTheLastValidLpn(void);
+
     virtual MetaLpnType
     GetBaseLpn(void)
     {

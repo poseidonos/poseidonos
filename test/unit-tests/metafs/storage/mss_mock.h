@@ -22,6 +22,7 @@ public:
     MOCK_METHOD(POS_EVENT_ID, ReadPageAsync, (MssAioCbCxt * cb), (override));
     MOCK_METHOD(POS_EVENT_ID, WritePageAsync, (MssAioCbCxt * cb), (override));
     MOCK_METHOD(POS_EVENT_ID, TrimFileData, (MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages), (override));
+    MOCK_METHOD(LogicalBlkAddr, TranslateAddress, (MetaStorageType type, MetaLpnType theLpn), (override));
 };
 
 } // namespace pos

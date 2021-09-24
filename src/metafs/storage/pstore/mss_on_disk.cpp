@@ -390,6 +390,15 @@ MssOnDisk::_SendAsyncRequest(IODirection direction, MssAioCbCxt* cb)
     return status;
 }
 
+LogicalBlkAddr
+MssOnDisk::TranslateAddress(MetaStorageType type, MetaLpnType theLpn)
+{
+    MssDiskPlace* storagelld = mssDiskPlace[(int)type];
+    pos::LogicalBlkAddr blkAddr = storagelld->CalculateOnDiskAddress(theLpn);
+
+    return blkAddr;
+}
+
 bool
 MssOnDisk::IsAIOSupport(void)
 {

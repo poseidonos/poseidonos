@@ -765,4 +765,18 @@ InodeManager::GetTotalAllocatedInodeCnt(void)
 {
     return inodeHdr->GetTotalAllocatedInodeCnt();
 }
+
+MetaLpnType
+InodeManager::GetTheLastValidLpn(void)
+{
+    std::vector<MetaFileExtent> extents = inodeHdr->GetFileExtentContent();
+
+    if (extents.size() == 0)
+        return 0;
+
+    MetaLpnType lpn = extents[extents.size() - 1].GetStartLpn();
+    lpn += extents[extents.size() - 1].GetCount() - 1;
+
+    return lpn;
+}
 } // namespace pos

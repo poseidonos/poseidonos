@@ -54,6 +54,7 @@ public:
     MOCK_METHOD(bool, CreateVolume, (MetaVolumeType volType), (override));
     MOCK_METHOD(bool, OpenVolume, (bool isNPOR), (override));
     MOCK_METHOD(bool, CloseVolume, (bool& isNPOR), (override));
+    MOCK_METHOD(MetaLpnType, GetTheLastValidLpn, (MetaVolumeType type));
 };
 
 } // namespace pos

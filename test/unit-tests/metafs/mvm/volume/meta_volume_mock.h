@@ -18,6 +18,7 @@ public:
     MOCK_METHOD(void, Init, (MetaStorageSubsystem* metaStorage));
     MOCK_METHOD(bool, CreateVolume, ());
     MOCK_METHOD(MetaVolumeType, GetVolumeType, ());
+    MOCK_METHOD(MetaLpnType, GetTheLastValidLpn, ());
     MOCK_METHOD(MetaLpnType, GetBaseLpn, ());
     MOCK_METHOD(MetaLpnType, GetRegionSizeInLpn, (MetaRegionType regionType));
     MOCK_METHOD(bool, OpenVolume, (MetaLpnType* info, bool isNPOR));

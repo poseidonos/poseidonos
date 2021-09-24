@@ -63,7 +63,7 @@ public:
         ctrl = new MockMetaFsFileControlApi();
         wbt = new MockMetaFsWBTApi(arrayInfo->GetIndex(), ctrl);
         io = new MockMetaFsIoApi(arrayInfo->GetIndex(), ctrl);
-        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt);
+        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, nullptr);
 
         handler = new MioHandler(0, 0, ioSQ, ioCQ, mpioPool, mioPool);
     }

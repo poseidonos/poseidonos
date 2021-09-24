@@ -757,4 +757,29 @@ TEST_F(InodeManagerFixture, RestoreContent_Negative1)
 
     EXPECT_EQ(inodeMgr->RestoreContent(type, 0, 0, 0), false);
 }
+
+TEST_F(InodeManagerFixture, RestoreContent_CheckTheLastLpn)
+{
+    MetaVolumeType type = MetaVolumeType::SsdVolume;
+    std::vector<pos::MetaFileExtent> extentList;
+
+    EXPECT_CALL(*inodeHdr, GetFileExtentContent)
+            .WillOnce(Return(extentList));
+
+    EXPECT_EQ(inodeMgr->GetTheLastValidLpn(), 0);
+
+    extentList.push_back({0, 100});     // 0 to 99
+
+    EXPECT_CALL(*inodeHdr, GetFileExtentContent)
+            .WillOnce(Return(extentList));
+
+    EXPECT_EQ(inodeMgr->GetTheLastValidLpn(), 99);
+
+    extentList.push_back({200, 100});   // 200 to 299
+
+    EXPECT_CALL(*inodeHdr, GetFileExtentContent)
+            .WillOnce(Return(extentList));
+
+    EXPECT_EQ(inodeMgr->GetTheLastValidLpn(), 299);
+}
 } // namespace pos

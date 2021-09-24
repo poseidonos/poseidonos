@@ -401,6 +401,12 @@ MetaVolume::GetVolumeType(void)
     return volumeType;
 }
 
+MetaLpnType
+MetaVolume::GetTheLastValidLpn(void)
+{
+    return inodeMgr->GetTheLastValidLpn();
+}
+
 void
 MetaVolume::GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList)
 {

@@ -67,6 +67,7 @@ public:
     MOCK_METHOD(bool, CheckFileInActive, (FileDescriptorType fd));
     MOCK_METHOD(void, RemoveFileFromActiveList, (FileDescriptorType fd));
     MOCK_METHOD(size_t, GetFileCountInActive, ());
+    MOCK_METHOD(MetaLpnType, GetTheLastValidLpn, ());
     MOCK_METHOD(void, PopulateFDMapWithVolumeType, (FileDescriptorInVolume& dest));
     MOCK_METHOD(void, PopulateFileNameWithVolumeType, (FileHashInVolume& dest));
     MOCK_METHOD(uint32_t, GetExtent,

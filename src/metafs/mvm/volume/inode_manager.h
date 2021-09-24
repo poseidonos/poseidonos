@@ -108,6 +108,7 @@ public:
     virtual MetaFileInode& GetInodeEntry(const uint32_t entryIdx);
     virtual bool IsFileInodeInUse(const FileDescriptorType fd);
     virtual size_t GetTotalAllocatedInodeCnt(void);
+    virtual MetaLpnType GetTheLastValidLpn(void);
 
     virtual bool BackupContent(MetaVolumeType tgtVol, MetaLpnType BaseLpn, MetaLpnType iNodeHdrLpnCnts, MetaLpnType iNodeTableLpnCnts);
     virtual bool RestoreContent(MetaVolumeType tgtVol, MetaLpnType BaseLpn, MetaLpnType iNodeHdrLpnCnts, MetaLpnType iNodeTableLpnCnts);

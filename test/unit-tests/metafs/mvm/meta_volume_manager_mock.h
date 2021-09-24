@@ -21,6 +21,7 @@ public:
     MOCK_METHOD(MetaLpnType, GetMaxMetaLpn, (MetaVolumeType mediaType), (override));
     MOCK_METHOD(POS_EVENT_ID, ProcessNewReq, (MetaFsFileControlRequest & reqMsg), (override));
     MOCK_METHOD(bool, _IsSiblingModuleReady, (), (override));
+    MOCK_METHOD(MetaLpnType, GetTheLastValidLpn, (MetaVolumeType volType));
 };
 
 } // namespace pos

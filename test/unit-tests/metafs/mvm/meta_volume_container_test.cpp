@@ -518,4 +518,16 @@ TEST_F(MetaVolumeContainerTexture, DetermineVolume_Positive1)
     delete ssdVolume;
     delete nvramVolume;
 }
+
+TEST_F(MetaVolumeContainerTexture, CheckTheLastLpn)
+{
+    MetaVolumeType type = MetaVolumeType::SsdVolume;
+
+    EXPECT_CALL(*ssdVolume, GetTheLastValidLpn).WillOnce(Return(100));
+
+    EXPECT_EQ(container->GetTheLastValidLpn(type), 100);
+
+    delete ssdVolume;
+    delete nvramVolume;
+}
 } // namespace pos

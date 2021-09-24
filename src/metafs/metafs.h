@@ -43,6 +43,7 @@
 
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/array_models/interface/i_array_info.h"
+#include "src/include/address_type.h"
 
 namespace pos
 {
@@ -52,7 +53,8 @@ public:
     MetaFs(void);
     MetaFs(IArrayInfo* arrayInfo, bool isLoaded);
     MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
-            MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt);
+            MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
+            MetaStorageSubsystem* metaStorage);
     virtual ~MetaFs(void);
 
     virtual int Init(void) override;
@@ -61,6 +63,7 @@ public:
     virtual void Flush(void) override;
 
     virtual uint64_t GetEpochSignature(void);
+    virtual StripeId GetTheLastValidStripeId(void);
     MetaStorageSubsystem* GetMss(void);
 
     MetaFsManagementApi* mgmt = nullptr;
