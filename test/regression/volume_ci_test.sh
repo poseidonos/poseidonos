@@ -190,7 +190,7 @@ tc_vol_6()
     bringup_pos create
     EXPECT_PASS "bringup_pos" $?
 
-    tcTestCount=10
+    tcTestCount=2
     for fidx in `seq 1 ${tcTestCount}`
     do           
         print_notice "TC=${tcName} : All test count =  ${fidx}, total = ${tcTestCount}"    
@@ -244,7 +244,7 @@ tc_vol_7()
     create_and_check '2' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
-    tcTestCount=10
+    tcTestCount=2
     for fidx in `seq 1 ${tcTestCount}`
     do           
         print_notice "TC=${tcName} : All test count =  ${fidx}, total = ${tcTestCount}"    
@@ -286,7 +286,7 @@ tc_vol_8()
 
     create_subsystem
 
-    tcTestCount=10
+    tcTestCount=2
     for fidx in `seq 1 ${tcTestCount}`
     do
         print_notice "${tcName}: test count=${fidx}, total=${tcTestCount}"
@@ -475,7 +475,7 @@ tc_npor_3()
     create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
-    tcTestCount=50
+    tcTestCount=5
     for fidx in `seq 1 ${tcTestCount}`
     do
         print_notice "TC=${tcName} : All test count=${fidx}, total=${tcTestCount}"
