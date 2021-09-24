@@ -31,7 +31,7 @@ else
 fi
 
 let hugemem_nr=${hugemem_kb}/2/1024;
-sudo NRHUGE=${hugemem_nr} ./setup.sh; 
+sudo HUGE_EVEN_ALLOC=yes NRHUGE=${hugemem_nr} ./setup.sh; 
 cd -;
 
 #SETUP_CORE_DUMP
