@@ -1,4 +1,3 @@
 POS_ADD_INTEGRATION_TEST(telemetry_data_pool_test telemetry_data_pool_test.cpp)
 POS_ADD_INTEGRATION_TEST(telemetry.grpc.pb_test telemetry.grpc.pb_test.cpp)
 POS_ADD_INTEGRATION_TEST(grpc_global_publisher_test grpc_global_publisher_test.cpp)
-POS_ADD_INTEGRATION_TEST(telemetry.grpc.pb_test telemetry.grpc.pb_test.cpp)
