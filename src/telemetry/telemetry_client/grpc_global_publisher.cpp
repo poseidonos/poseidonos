@@ -37,7 +37,7 @@
 
 namespace pos
 {
-GrpcGlobalPublisher::GrpcGlobalPublisher(TelemetryManagerService* telemetryManager_, std::shared_ptr<Channel> channel_)
+GrpcGlobalPublisher::GrpcGlobalPublisher(TelemetryManagerService* telemetryManager_, std::shared_ptr<grpc::Channel> channel_)
 {
     telemetryManager = telemetryManager_;
     if (telemetryManager == nullptr)
@@ -45,7 +45,7 @@ GrpcGlobalPublisher::GrpcGlobalPublisher(TelemetryManagerService* telemetryManag
         telemetryManager = TelemetryManagerServiceSingletone::Instance();
     }
     std::string serverAddr = telemetryManager->GetServerAddr();
-    std::shared_ptr<Channel> channel = channel_;
+    std::shared_ptr<grpc::Channel> channel = channel_;
     if (channel == nullptr)
     {
         channel = grpc::CreateChannel(serverAddr, grpc::InsecureChannelCredentials());
@@ -95,9 +95,9 @@ int
 GrpcGlobalPublisher::_SendMessage(PublishRequest* cliPublishReq)
 {
     PublishResponse cliPublishRes;
-    ClientContext cliContext;
+    grpc::ClientContext cliContext;
 
-    Status status = tmStub->publish(&cliContext, *cliPublishReq, &cliPublishRes);
+    grpc::Status status = tmStub->publish(&cliContext, *cliPublishReq, &cliPublishRes);
     if (status.ok() != true)
     {
         POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] Failed to send PublishRequest by gRPC, errorcode:{}, errormsg:{}", status.error_code(), status.error_message());
@@ -107,7 +107,7 @@ GrpcGlobalPublisher::_SendMessage(PublishRequest* cliPublishReq)
     {
         if (cliPublishRes.successful() == false)
         {
-            POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] Telemetry Master notified packet data error");
+            POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] Telemetry Manager notified packet data error");
             return -1;
         }
 

@@ -1,12 +1,20 @@
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-
+#include "test/unit-tests/telemetry/telemetry_client/i_global_publisher_mock.h"
 #include <gtest/gtest.h>
+
+using ::testing::_;
+using ::testing::AtLeast;
+using testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnRef;
 namespace pos
 {
 TEST(TelemetryPublisher, PublishData_TestUpdateAndCollectItem)
 {
     // given
     TelemetryPublisher tp;
+    NiceMock<MockIGlobalPublisher>* igp = new NiceMock<MockIGlobalPublisher>();
+    tp.SetGlobalPublisher(igp);
     // given 1.
     tp.StopPublishing();
     // when 1.
@@ -39,6 +47,10 @@ TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)
     TelemetryPublisher tp;
     tp.SetMaxEntryLimit(2);
     tp.StartPublishing();
+
+    NiceMock<MockIGlobalPublisher>* igp = new NiceMock<MockIGlobalPublisher>();
+    tp.SetGlobalPublisher(igp);
+    // given 1.
     int ret = tp.PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, 100);
     ret = tp.PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, 200);
     // when 1.

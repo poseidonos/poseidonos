@@ -54,7 +54,8 @@ class TelemetryManagerService;
 class GrpcGlobalPublisher : public IGlobalPublisher
 {
 public:
-    GrpcGlobalPublisher(TelemetryManagerService* telemetryManager_, std::shared_ptr<Channel> channel_);
+    GrpcGlobalPublisher(void) = default;
+    GrpcGlobalPublisher(TelemetryManagerService* telemetryManager_, std::shared_ptr<grpc::Channel> channel_);
     virtual ~GrpcGlobalPublisher(void);
     virtual int PublishToServer(MetricUint32& metric);
     virtual int PublishToServer(MetricString& metric);

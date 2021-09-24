@@ -45,7 +45,7 @@ class GrpcGlobalPublisher;
 class TelemetryClient
 {
 public:
-    TelemetryClient(TelemetryManagerService* telemetryManager_, std::shared_ptr<Channel> channel_);
+    TelemetryClient(TelemetryManagerService* telemetryManager_, std::shared_ptr<grpc::Channel> channel_);
     TelemetryClient(void);
     virtual ~TelemetryClient(void);
     virtual int RegisterPublisher(std::string name, TelemetryPublisher* client);

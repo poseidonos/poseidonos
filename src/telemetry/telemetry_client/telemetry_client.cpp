@@ -36,15 +36,14 @@
 namespace pos
 {
 
-TelemetryClient::TelemetryClient(TelemetryManagerService* telemetryManager_, std::shared_ptr<Channel> channel_)
+TelemetryClient::TelemetryClient(TelemetryManagerService* telemetryManager_, std::shared_ptr<grpc::Channel> channel_)
 {
     globalPublisher = new GrpcGlobalPublisher(telemetryManager_, channel_);
 }
 
 TelemetryClient::TelemetryClient(void)
-//: TelemetryClient(nullptr, nullptr)
+: TelemetryClient(nullptr, nullptr)
 {
-    globalPublisher = new GrpcGlobalPublisher(nullptr, nullptr);
 }
 
 TelemetryClient::~TelemetryClient(void)

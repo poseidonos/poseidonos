@@ -66,7 +66,7 @@ TelemetryManagerService::~TelemetryManagerService(void)
 void
 TelemetryManagerService::CreateTelemetryServer(std::string address)
 {
-    ServerBuilder builder;
+    ::grpc::ServerBuilder builder;
     builder.AddListeningPort(address, grpc::InsecureServerCredentials());
     builder.RegisterService(this);
 
@@ -95,7 +95,7 @@ TelemetryManagerService::configure(
 
         POS_TRACE_DEBUG(EID(TELEMETRY_DISABLED), "Disabled Telemetry Manager");
         const string errorMsg = "Disabled Telemetry Manager";
-        ret = ::grpc::Status(StatusCode::UNIMPLEMENTED, errorMsg);
+        ret = ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, errorMsg);
     }
 
     return ret;
@@ -120,7 +120,7 @@ TelemetryManagerService::publish(
 
         POS_TRACE_DEBUG(EID(TELEMETRY_DISABLED), "Disabled Telemetry Manager");
         const string errorMsg = "Disabled Telemetry Manager";
-        ret = ::grpc::Status(StatusCode::UNIMPLEMENTED, errorMsg);
+        ret = ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, errorMsg);
     }
 
     return ret;
@@ -153,7 +153,7 @@ TelemetryManagerService::collect(
 
         POS_TRACE_DEBUG(EID(TELEMETRY_DISABLED), "Disabled Telemetry Manager");
         const string errorMsg = "Disabled Telemetry Manager";
-        ret = ::grpc::Status(StatusCode::UNIMPLEMENTED, errorMsg);
+        ret = ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, errorMsg);
     }
 
     response->set_allocated_metadata(collectReq);
@@ -181,7 +181,7 @@ TelemetryManagerService::enable(
 
         POS_TRACE_DEBUG(EID(TELEMETRY_DISABLED), "Disabled Telemetry Manager");
         const string errorMsg = "Disabled Telemetry Manager";
-        ret = ::grpc::Status(StatusCode::UNIMPLEMENTED, errorMsg);
+        ret = ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, errorMsg);
     }
 
     return ret;
@@ -206,7 +206,7 @@ TelemetryManagerService::disable(
 
         POS_TRACE_DEBUG(EID(TELEMETRY_DISABLED), "Disabled Telemetry Manager");
         const string errorMsg = "Disabled Telemetry Manager";
-        ret = ::grpc::Status(StatusCode::UNIMPLEMENTED, errorMsg);
+        ret = ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, errorMsg);
     }
 
     return ret;

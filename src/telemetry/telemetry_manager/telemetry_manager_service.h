@@ -45,8 +45,6 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-using namespace ::grpc;
-
 namespace pos
 {
 class TelemetryManagerService final : public TelemetryManager::Service
@@ -89,7 +87,7 @@ public:
 
 protected:
     std::thread* telemetryManagerServerThread;
-    std::unique_ptr<Server> server;
+    std::unique_ptr<::grpc::Server> server;
 
 private:
     bool enabledService;
