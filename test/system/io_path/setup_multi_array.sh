@@ -85,12 +85,12 @@ ibofos_bringup(){
         for i in `seq 1 $VOLUME_COUNT`
         do
             sudo $ROOT_DIR/bin/poseidonos-cli volume create --volume-name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array-name POSArray1
-            sudo $ROOT_DIR/bin/poseidonos-cli volume mount --volume-name vol$i --array-name POSArray1
+            sudo $ROOT_DIR/bin/poseidonos-cli volume mount --volume-name vol$i --array-name POSArray1 --subnqn nqn.2019-04.pos:subsystem1 --force
         done
         for i in `seq 1 $VOLUME_COUNT`
         do
             sudo $ROOT_DIR/bin/poseidonos-cli volume create --volume-name vol$i --size $VOLUME_SIZE --maxiops 0 --maxbw 0 --array-name POSArray2
-            sudo $ROOT_DIR/bin/poseidonos-cli volume mount --volume-name vol$i --array-name POSArray2
+            sudo $ROOT_DIR/bin/poseidonos-cli volume mount --volume-name vol$i --array-name POSArray2 --subnqn nqn.2019-04.pos:subsystem2 --force
         done
 
     else
