@@ -68,17 +68,17 @@ class VolumeMountState
 public:
     VolumeMountState(void)
     {
-        volState = VolState::NOT_EXIST;
+        state = VolState::NOT_EXIST;
         volSize = 0;
     }
     ~VolumeMountState(void) {}
     VolState GetState(void)
     {
-        return volState;
+        return state;
     }
-    void SetState(VolState state)
+    void SetState(VolState state_)
     {
-        volState = state;
+        state = state_;
     }
     void SetSize(uint64_t size)
     {
@@ -90,12 +90,12 @@ public:
     }
     std::mutex& GetVolStateLock(void)
     {
-        return volStateLock;
+        return stateLock;
     }
 
-    VolState volState;
+    VolState state;
     uint64_t volSize;
-    std::mutex volStateLock;
+    std::mutex stateLock;
 };
 
 class Mapper : public IMapFlush, public IMountSequence, public VolumeEvent, public IVSAMap
@@ -145,7 +145,6 @@ private:
     void _UnregisterFromMapperService(void);
     bool _LoadVolumeMeta(int volId, bool delVol = false);
     void _ClearVolumeState(void);
-    bool _ChangeVolumeStateLoading(int volId);
     bool _ChangeVolumeStateDeleting(int volId);
     int _GetMpageSize(void);
 
