@@ -35,7 +35,7 @@
 namespace pos
 {
     // ID = "modulecode_itemname_collectiontype(count/history)"
-    static const std::string TEL001_ALCT_FREE_SEGM_CNT = "alct_freesegment_count";
+    static const std::string TEL001_ALCT_FREE_SEG_CNT = "alct_freesegment_count";
     static const std::string TEL002_ALCT_ALLOCRCTX_PENDINGIO_CNT = "alct_allocctx_pendio_count";
     static const std::string TEL003_ALCT_GCVICTIM_SEG = "alct_gcvictim_segmentid";
     static const std::string TEL004_ALCT_GCMODE = "alct_gcmode";
