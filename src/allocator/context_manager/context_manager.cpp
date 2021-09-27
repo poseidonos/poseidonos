@@ -205,7 +205,7 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
     assert(numFlushIoIssued == 0);
     numFlushIoIssued += NUM_ALLOCATOR_FILES; // Issue 2 contexts(segmentctx, allocatorctx)
     flushCallback = callback;
-    telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numFlushIoIssued);
+    telPublisher->PublishData(TEL002_ALCT_ALCTX_PENDINGIO_CNT, numFlushIoIssued);
     for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
         ret = _Flush(owner);
@@ -242,7 +242,7 @@ ContextManager::AllocateFreeSegment(void)
     {
         POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] free segmentId:{}, free segment count:{}", segId, freeSegCount);
     }
-    telPublisher->PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, freeSegCount);
+    telPublisher->PublishData(TEL001_ALCT_FREE_SEG_CNT, freeSegCount);
 
     segmentCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
     return segId;
@@ -273,7 +273,7 @@ ContextManager::AllocateGCVictimSegment(void)
     {
         segmentCtx->SetSegmentState(victimSegment, SegmentState::VICTIM, true);
         POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "[AllocateSegment] victim segmentId:{}, free segment count:{}", victimSegment, allocatorCtx->GetNumOfFreeSegmentWoLock());
-        telPublisher->PublishData(TEL_ALLOCATOR_GCVICTIM_SEGMENT, victimSegment);
+        telPublisher->PublishData(TEL003_ALCT_GCVICTIM_SEG, victimSegment);
     }
     return victimSegment;
 }
@@ -287,7 +287,7 @@ ContextManager::GetCurrentGcMode(void)
     curGcMode = gcCtx->GetCurrentGcMode(numFreeSegments);
     if (prevGcMode != curGcMode)
     {
-        telPublisher->PublishData(TEL_ALLOCATOR_GCMODE, curGcMode);
+        telPublisher->PublishData(TEL004_ALCT_GCMODE, curGcMode);
     }
     return curGcMode;
 }
@@ -438,7 +438,7 @@ ContextManager::_NotifySegmentFreed(SegmentId segId)
 {
     allocatorCtx->ReleaseSegment(segId);
     int freeSegCount = allocatorCtx->GetNumOfFreeSegmentWoLock();
-    telPublisher->PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, freeSegCount);
+    telPublisher->PublishData(TEL001_ALCT_FREE_SEG_CNT, freeSegCount);
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "[FreeSegment] segmentId:{} was freed, free segment count:{}", segId, freeSegCount);
     int ret = rebuildCtx->FreeSegmentInRebuildTarget(segId);
     if (ret == 1)
@@ -470,7 +470,7 @@ ContextManager::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 {
     CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
     assert(numFlushIoIssued > 0);
-    telPublisher->PublishData(TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT, numFlushIoIssued);
+    telPublisher->PublishData(TEL002_ALCT_ALCTX_PENDINGIO_CNT, numFlushIoIssued);
     POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] Allocator file stored, sig:{}, version:{}, pendingMetaIo:{}", header->sig, header->ctxVersion, numFlushIoIssued);
     if (header->sig == SegmentCtx::SIG_SEGMENT_CTX)
     {
