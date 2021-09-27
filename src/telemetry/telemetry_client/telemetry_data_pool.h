@@ -53,6 +53,7 @@ public:
     static const int LIMIT_NUM_MAX_ENTRY = 100000;
 
 private:
+    std::mutex poolLock;
     std::map<std::string, MetricUint32> pool;
     int maxEntry;
 };

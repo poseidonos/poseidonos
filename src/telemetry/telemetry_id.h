@@ -35,9 +35,9 @@
 namespace pos
 {
     // ID = "modulecode_itemname_collectiontype(count/history)"
-    static const std::string TEL_ALLOCATOR_FREE_SEGMENT_COUNT = "alct_freesegment_count";
-    static const std::string TEL_ALLOCATOR_ALLOCATORCTX_PENDING_IO_COUNT = "alct_allocctx_pendio_count";
-    static const std::string TEL_ALLOCATOR_GCVICTIM_SEGMENT = "alct_gcvictim_segmentid";
-    static const std::string TEL_ALLOCATOR_GCMODE = "alct_gcmode";
-    static const std::string TEL_VOLUME_IOPS_READ = "volume_iops_read";
+    static const std::string TEL001_ALCT_FREE_SEGM_CNT = "alct_freesegment_count";
+    static const std::string TEL002_ALCT_ALLOCRCTX_PENDINGIO_CNT = "alct_allocctx_pendio_count";
+    static const std::string TEL003_ALCT_GCVICTIM_SEG = "alct_gcvictim_segmentid";
+    static const std::string TEL004_ALCT_GCMODE = "alct_gcmode";
+    static const std::string TEL005_VOLUME_IOPS_READ = "volume_iops_read";
 } // namespace pos

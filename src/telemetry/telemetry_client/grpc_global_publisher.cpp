@@ -107,10 +107,9 @@ GrpcGlobalPublisher::_SendMessage(PublishRequest* cliPublishReq)
     {
         if (cliPublishRes.successful() == false)
         {
-            POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] Telemetry Manager notified packet data error");
+            POS_TRACE_ERROR(EID(TELEMETRY_CLIENT_ERROR), "[TelemetryClient] TelemetryManager responsed with packet data error");
             return -1;
         }
-
     }
     return 0;
 }

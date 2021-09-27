@@ -68,9 +68,10 @@ TelemetryDataPool::SetLog(MetricUint32& metric)
         }
         else
         {
+            std::lock_guard<std::mutex> lock(poolLock);
+            pool.emplace(id, metric);
             POS_TRACE_INFO(EID(TELEMETRY_CLIENT_ERROR), "[Telemetry] new entry added, id:{}, num of entries:{}", id, (pool.size() + 1));
         }
-        pool.emplace(id, metric);
     }
     else
     {
