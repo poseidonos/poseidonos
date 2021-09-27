@@ -30,16 +30,15 @@ public:
     MOCK_METHOD(uint64_t, GetSectorCount, (), (override));
     MOCK_METHOD(void, AddPendingErrorCount, (uint32_t errorCountToAdd), (override));
     MOCK_METHOD(void, SubtractPendingErrorCount, (uint32_t errorCountToSubtract), (override));
-    MOCK_METHOD(bool, CheckErrorDisregard, (), (override));
     MOCK_METHOD(void, CompleteIo, (IOErrorType error), (override));
     MOCK_METHOD(void, SetAsyncIOCompleted, (), (override));
     MOCK_METHOD(void, ClearAsyncIOCompleted, (), (override));
     MOCK_METHOD(bool, IsAsyncIOCompleted, (), (override));
-    MOCK_METHOD(bool, CheckAndDecreaseRetryCount, (), (override));
-    MOCK_METHOD(void, ClearRetryCount, (), (override));
-    MOCK_METHOD(void, IncSubmitRetryCount, (), (override));
-    MOCK_METHOD(void, ClearSubmitRetryCount, (), (override));
-    MOCK_METHOD(uint32_t, GetSubmitRetryCount, (), (override));
+    MOCK_METHOD(bool, CheckAndDecreaseErrorRetryCount, (), (override));
+    MOCK_METHOD(void, ClearErrorRetryCount, (), (override));
+    MOCK_METHOD(void, IncOutOfMemoryRetryCount, (), (override));
+    MOCK_METHOD(void, ClearOutOfMemoryRetryCount, (), (override));
+    MOCK_METHOD(uint32_t, GetOutOfMemoryRetryCount, (), (override));
 };
 
 } // namespace pos

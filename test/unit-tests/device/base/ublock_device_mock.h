@@ -36,8 +36,6 @@ public:
     MOCK_METHOD(void, AddPendingErrorCount, (uint32_t errorsToAdd), (override));
     MOCK_METHOD(void, SubtractPendingErrorCount, (uint32_t errorsToSubtract), (override));
     MOCK_METHOD(uint32_t, GetPendingErrorCount, (), (override));
-    MOCK_METHOD(void, SetErrorDisregard, (bool errorAsSuccess), (override));
-    MOCK_METHOD(bool, GetErrorDisregard, (), (override));
     MOCK_METHOD(void, SetDedicatedIOWorker, (IOWorker * ioWorker), (override));
     MOCK_METHOD(IOWorker*, GetDedicatedIOWorker, (), (override));
     MOCK_METHOD(DeviceContext*, _AllocateDeviceContext, (), (override));

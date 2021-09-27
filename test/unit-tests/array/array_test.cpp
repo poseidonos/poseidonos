@@ -32,17 +32,6 @@ using ::testing::ReturnRef;
 
 namespace pos
 {
-TEST(Array, Array_testIfConstructedProperlyWithDefaultConstructor)
-{
-    // Given: mockStateControl
-    NiceMock<MockIStateControl> mockIStateControl;
-    // When: testing construct signature (trivial)
-    EXPECT_CALL(mockIStateControl, Subscribe).Times(1);
-    Array array("mock", NULL, NULL, &mockIStateControl);
-
-    // Then: nothing
-}
-
 TEST(Array, Array_testIfConstructedProperly)
 {
     // Given: nothing
@@ -190,16 +179,15 @@ TEST(Array, Load_testIfDoneSuccessfully)
 
     EXPECT_CALL(*mockState, IsLoadable).WillOnce(Return(0)); // isLoadable will be true
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);             // devMgr_ will be able to invoked once
-    EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce([=](string arrayName, ArrayMeta meta, unsigned int& arrayIndex)
-    {
+    EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce([=](string arrayName, ArrayMeta meta, unsigned int& arrayIndex) {
         arrayIndex = 0;
         return 0;
-    });                                                               // loading array boot record will be successful
-    EXPECT_CALL(*mockArrDevMgr, Import).WillOnce(Return(0)); // import will be successful
-    EXPECT_CALL(*mockState, SetLoad).Times(1);                        // SetLoad will be invoked once
-    EXPECT_CALL(*mockPtnMgr, CreateAll).WillOnce(Return(0)); // partition creation will be successful
-    EXPECT_CALL(*mockPtnMgr, GetRaidState).WillOnce(Return(RaidState::NORMAL)); // raid state will be normal
-    EXPECT_CALL(*mockArrDevMgr, Export).WillOnce(ReturnRef(emptyArrayDeviceSet));  // devMgr_ will be able to invoked once
+    });                                                                           // loading array boot record will be successful
+    EXPECT_CALL(*mockArrDevMgr, Import).WillOnce(Return(0));                      // import will be successful
+    EXPECT_CALL(*mockState, SetLoad).Times(1);                                    // SetLoad will be invoked once
+    EXPECT_CALL(*mockPtnMgr, CreateAll).WillOnce(Return(0));                      // partition creation will be successful
+    EXPECT_CALL(*mockPtnMgr, GetRaidState).WillOnce(Return(RaidState::NORMAL));   // raid state will be normal
+    EXPECT_CALL(*mockArrDevMgr, Export).WillOnce(ReturnRef(emptyArrayDeviceSet)); // devMgr_ will be able to invoked once
 
     // When: array is loaded
     int actual = array.Load(arrayIndex);
@@ -263,8 +251,7 @@ TEST(Array, Load_testIfLoadFailsWhenIndexIsWrong)
     int LOAD_SUCCESS = 0;
     int INVALID_INDEX = EID(ARRAY_INVALID_INDEX);
     EXPECT_CALL(*mockState, IsLoadable).WillOnce(Return(LOAD_SUCCESS));
-    EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce([](string name, ArrayMeta meta, unsigned int& index)
-    {
+    EXPECT_CALL(mockAbrControl, LoadAbr).WillOnce([](string name, ArrayMeta meta, unsigned int& index) {
         index = 100;
         return 0;
     });
@@ -297,8 +284,7 @@ TEST(Array, Create_testIfArrayCreatedWhenInputsAreValid)
     EXPECT_CALL(*mockArrDevMgr, ImportByName).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Export).WillOnce(ReturnRef(emptyArrayDeviceSet));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillRepeatedly(Return(DeviceSet<DeviceMeta>()));
-    EXPECT_CALL(*mockAbrControl, CreateAbr).WillOnce([=](string arrayName, ArrayMeta& meta, unsigned int& arrayIndex)
-    {
+    EXPECT_CALL(*mockAbrControl, CreateAbr).WillOnce([=](string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) {
         arrayIndex = 0;
         return 0;
     });
@@ -450,8 +436,7 @@ TEST(Array, Create_testIfErrorIsReturnedWhenAbrFailsToBeSaved)
     EXPECT_CALL(*mockArrDevMgr, ImportByName).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillRepeatedly(Return(DeviceSet<DeviceMeta>()));
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
-    EXPECT_CALL(mockAbrControl, CreateAbr).WillOnce([=](string arrayName, ArrayMeta& meta, unsigned int& arrayIndex)
-    {
+    EXPECT_CALL(mockAbrControl, CreateAbr).WillOnce([=](string arrayName, ArrayMeta& meta, unsigned int& arrayIndex) {
         arrayIndex = 0;
         return 0;
     });

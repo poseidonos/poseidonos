@@ -35,15 +35,15 @@
 #include <sched.h>
 
 #include "Air.h"
+#include "src/cpu_affinity/affinity_manager.h"
 #include "src/device/base/device_context.h"
 #include "src/device/base/device_driver.h"
-#include "src/spdk_wrapper/event_framework_api.h"
+#include "src/event_scheduler/io_completer.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/cpu_affinity/affinity_manager.h"
-#include "src/logger/logger.h"
 #include "src/io_scheduler/io_dispatcher.h"
-#include "src/event_scheduler/io_completer.h"
+#include "src/logger/logger.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {
@@ -335,18 +335,6 @@ uint32_t
 UBlockDevice::GetPendingErrorCount(void)
 {
     return pendingErrorCount;
-}
-
-void
-UBlockDevice::SetErrorDisregard(bool errorAsSuccess)
-{
-    completeErrorAsSuccess = errorAsSuccess;
-}
-
-bool
-UBlockDevice::GetErrorDisregard(void)
-{
-    return completeErrorAsSuccess;
 }
 
 void

@@ -189,8 +189,6 @@ public:
     virtual void AddPendingErrorCount(uint32_t errorsToAdd = 1);
     virtual void SubtractPendingErrorCount(uint32_t errorsToSubtract = 1);
     virtual uint32_t GetPendingErrorCount(void);
-    virtual void SetErrorDisregard(bool errorAsSuccess);
-    virtual bool GetErrorDisregard(void);
 
     virtual void SetDedicatedIOWorker(IOWorker* ioWorker);
     virtual IOWorker* GetDedicatedIOWorker(void);

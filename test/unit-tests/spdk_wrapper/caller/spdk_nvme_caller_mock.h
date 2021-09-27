@@ -48,6 +48,10 @@ public:
     MOCK_METHOD(int, SpdkNvmeCtrlrCmdIoRaw, (struct spdk_nvme_ctrlr * ctrlr, struct spdk_nvme_qpair* qpair, struct spdk_nvme_cmd* cmd, void* buf, uint32_t len, spdk_nvme_cmd_cb cb_fn, void* cb_arg), (override));
     MOCK_METHOD(int, SpdkNvmeCtrlrCmdAdminRaw, (struct spdk_nvme_ctrlr * ctrlr, struct spdk_nvme_cmd* cmd, void* buf, uint32_t len, spdk_nvme_cmd_cb cb_fn, void* cb_arg), (override));
     MOCK_METHOD(int, SpdkNvmeCtrlrCmdGetLogPage, (struct spdk_nvme_ctrlr * ctrlr, uint8_t log_page, uint32_t nsid, void* payload, uint32_t payload_size, uint64_t offset, spdk_nvme_cmd_cb cb_fn, void* cb_arg), (override));
+    MOCK_METHOD(bool, SpdkNvmeCtrlrIsFailed, (struct spdk_nvme_ctrlr * ctrlr), (override));
+    MOCK_METHOD(int32_t, SpdkNvmeCtrlrProcessAdminCompletions, (struct spdk_nvme_ctrlr * ctrlr), (override));
+    MOCK_METHOD(int32_t, SpdkNvmeQpairProcessCompletions, (struct spdk_nvme_qpair * qpair, uint32_t max_completions), (override));
+    MOCK_METHOD(uint64_t, SpdkNvmeNsGetSize, (struct spdk_nvme_ns * ns), (override));
 };
 
 } // namespace pos

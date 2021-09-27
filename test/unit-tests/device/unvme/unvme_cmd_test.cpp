@@ -2,18 +2,17 @@
 
 #include <gtest/gtest.h>
 
-#include "test/unit-tests/spdk_wrapper/caller/spdk_nvme_caller_mock.h"
-#include "test/unit-tests/device/unvme/unvme_io_context_mock.h"
-#include "test/unit-tests/device/unvme/unvme_device_context_mock.h"
 #include "src/spdk_wrapper/abort_context.h"
+#include "test/unit-tests/device/unvme/unvme_device_context_mock.h"
+#include "test/unit-tests/device/unvme/unvme_io_context_mock.h"
+#include "test/unit-tests/spdk_wrapper/caller/spdk_nvme_caller_mock.h"
 
+using testing::_;
 using testing::NiceMock;
 using testing::Return;
-using testing::_;
 
 namespace pos
 {
-
 TEST(UnvmeCmd, RequestIO_testIfUbioDirIsWriteUncorAndWorksProperly)
 {
     // Given
@@ -94,6 +93,7 @@ TEST(UnvmeCmd, RequestIO_testIfUbioDirIsNvmeCliAndWorksProperly)
     EXPECT_CALL(mockIoContext, SetAdminCommand).Times(1);
     EXPECT_CALL(mockIoContext, GetOpcode).WillOnce(Return(UbioDir::NvmeCli));
     struct spdk_nvme_cmd cmd;
+    cmd.opc = spdk_nvme_admin_opcode::SPDK_NVME_OPC_GET_LOG_PAGE;
     EXPECT_CALL(mockIoContext, GetBuffer).Times(3).WillRepeatedly(Return(&cmd));
 
     NiceMock<MockSpdkNvmeCaller>* mockCaller = new NiceMock<MockSpdkNvmeCaller>();
@@ -106,6 +106,42 @@ TEST(UnvmeCmd, RequestIO_testIfUbioDirIsNvmeCliAndWorksProperly)
 
     // Then
     EXPECT_EQ(ret, 0);
+}
+
+TEST(UnvmeCmd, RequestIO_testIfUbioDirIsDeallocateAndLbaIsNotAligned)
+{
+    // Given
+    NiceMock<MockUnvmeIOContext> mockIoContext;
+    EXPECT_CALL(mockIoContext, GetStartSectorOffset).WillRepeatedly(Return(1));
+    NiceMock<MockUnvmeDeviceContext> mockDevContext;
+    EXPECT_CALL(mockIoContext, GetOpcode).WillOnce(Return(UbioDir::Deallocate));
+    NiceMock<MockSpdkNvmeCaller>* mockCaller = new NiceMock<MockSpdkNvmeCaller>();
+
+    UnvmeCmd unvmeCmd(mockCaller);
+
+    // When
+    int ret = unvmeCmd.RequestIO(&mockDevContext, nullptr, &mockIoContext);
+
+    // Then
+    EXPECT_EQ(ret, -EFAULT);
+}
+
+TEST(UnvmeCmd, RequestIO_testIfUbioDirIsDeallocateAndSectorCountIsNotAligned)
+{
+    // Given
+    NiceMock<MockUnvmeIOContext> mockIoContext;
+    EXPECT_CALL(mockIoContext, GetSectorCount).WillRepeatedly(Return(1));
+    NiceMock<MockUnvmeDeviceContext> mockDevContext;
+    EXPECT_CALL(mockIoContext, GetOpcode).WillOnce(Return(UbioDir::Deallocate));
+    NiceMock<MockSpdkNvmeCaller>* mockCaller = new NiceMock<MockSpdkNvmeCaller>();
+
+    UnvmeCmd unvmeCmd(mockCaller);
+
+    // When
+    int ret = unvmeCmd.RequestIO(&mockDevContext, nullptr, &mockIoContext);
+
+    // Then
+    EXPECT_EQ(ret, -EFAULT);
 }
 
 } // namespace pos

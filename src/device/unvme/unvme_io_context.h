@@ -42,7 +42,9 @@ class UnvmeDeviceContext;
 class UnvmeIOContext : public IOContext
 {
 public:
-    UnvmeIOContext(void) {} // For MockClass
+    UnvmeIOContext(void)
+    {
+    } // For MockClass
     UnvmeIOContext(UnvmeDeviceContext* inputDevCtx,
         UbioSmartPtr inputUbio, uint32_t inputRetry = 0,
         bool inputFrontEnd = false);
@@ -55,8 +57,12 @@ public:
     virtual void SetAdminCommand(void);
     virtual bool IsAdminCommand(void);
 
+    virtual void SetOutOfMemoryError(bool);
+    virtual bool HasOutOfMemoryError(void);
+
 private:
     UnvmeDeviceContext* devCtx;
+    bool outOfMemoryError = false;
     bool frontEnd;
     bool adminCommand;
 };

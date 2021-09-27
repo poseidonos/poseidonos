@@ -32,12 +32,12 @@
 
 #include "io_context.h"
 
+#include "src/bio/ubio.h"
 #include "src/device/base/ublock_device.h"
-#include "src/include/branch_prediction.h"
-#include "src/include/pos_event_id.hpp"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/io_completer.h"
-#include "src/bio/ubio.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -46,9 +46,9 @@ IOContext::IOContext(UbioSmartPtr inputUbio, uint32_t inputRetry)
 : ubio(inputUbio),
   keyForPendingIOListSet(false),
   keyForPendingErrorListSet(false),
-  retryCount(inputRetry)
+  remainingErrorRetryCount(inputRetry)
 {
-    submitRetryCount = 0;
+    outOfMemoryRetryCount = 0;
     completeCalled = false;
 }
 
@@ -74,36 +74,36 @@ IOContext::IsAsyncIOCompleted(void)
 }
 
 void
-IOContext::ClearRetryCount(void)
+IOContext::ClearErrorRetryCount(void)
 {
-    retryCount = 0;
+    remainingErrorRetryCount = 0;
 }
 
 void
-IOContext::IncSubmitRetryCount(void)
+IOContext::IncOutOfMemoryRetryCount(void)
 {
-    submitRetryCount++;
+    outOfMemoryRetryCount++;
 }
 
 void
-IOContext::ClearSubmitRetryCount(void)
+IOContext::ClearOutOfMemoryRetryCount(void)
 {
-    submitRetryCount = 0;
+    outOfMemoryRetryCount = 0;
 }
 
 uint32_t
-IOContext::GetSubmitRetryCount(void)
+IOContext::GetOutOfMemoryRetryCount(void)
 {
-    return submitRetryCount;
+    return outOfMemoryRetryCount;
 }
 
 bool
-IOContext::CheckAndDecreaseRetryCount(void)
+IOContext::CheckAndDecreaseErrorRetryCount(void)
 {
-    bool isPositive = (retryCount > 0);
+    bool isPositive = (remainingErrorRetryCount > 0);
     if (isPositive)
     {
-        retryCount--;
+        remainingErrorRetryCount--;
     }
     return (isPositive);
 }
@@ -188,12 +188,6 @@ uint64_t
 IOContext::GetSectorCount(void)
 {
     return ChangeByteToSector(ubio->GetSize());
-}
-
-bool
-IOContext::CheckErrorDisregard(void)
-{
-    return ubio->GetUBlock()->GetErrorDisregard();
 }
 
 void

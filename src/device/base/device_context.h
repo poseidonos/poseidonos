@@ -37,12 +37,11 @@
 #include <list>
 #include <utility>
 
+#include "src/device/base/io_context.h"
 #include "src/lib/system_timeout_checker.h"
 
 namespace pos
 {
-class IOContext;
-
 class DeviceContext
 {
 public:
@@ -56,7 +55,7 @@ public:
     virtual void AddPendingError(IOContext& errorToAdd);
     virtual void RemovePendingError(IOContext& errorToRemove);
     virtual uint32_t GetPendingErrorCount(void);
-    virtual std::pair<IOContext*, bool> GetPendingError(void);
+    virtual IOContext* GetPendingError(void);
 
 private:
     bool _CheckErrorReady(IOContext& ioCtx);

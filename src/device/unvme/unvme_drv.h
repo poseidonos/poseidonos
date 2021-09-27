@@ -37,7 +37,6 @@
 #include <vector>
 
 #include "spdk/nvme.h"
-
 #include "src/device/base/device_driver.h"
 #include "src/device/unvme/unvme_cmd.h"
 #include "src/device/unvme/unvme_mgmt.h"
@@ -53,11 +52,13 @@ class Ubio;
 
 class UnvmeDeviceContext;
 class UnvmeIOContext;
+class SpdkNvmeCaller;
 
 class UnvmeDrv : public DeviceDriver
 {
 public:
-    UnvmeDrv(void);
+    UnvmeDrv(UnvmeCmd* unvmeCmd = nullptr,
+        SpdkNvmeCaller* spdkNvmeCaller = nullptr);
     ~UnvmeDrv(void) override;
     int ScanDevs(std::vector<UblockSharedPtr>* devs) override;
 
@@ -70,9 +71,9 @@ public:
     int SubmitAsyncIO(DeviceContext* deviceContext, UbioSmartPtr bio) override;
 
     DeviceMonitor* GetDaemon(void);
-    void DeviceAttached(struct spdk_nvme_ns* ns, int num_devs,
+    int DeviceAttached(struct spdk_nvme_ns* ns, int num_devs,
         const spdk_nvme_transport_id* trid);
-    void DeviceDetached(std::string sn);
+    int DeviceDetached(std::string sn);
 
 private:
     int _RequestIO(UnvmeDeviceContext* deviceContext,
@@ -92,11 +93,13 @@ private:
 
     int _CompleteIOs(DeviceContext* deviceContext, UnvmeIOContext* ioCtxToSkip);
 
-    static const uint32_t SUBMISSION_RETRY_LIMIT;
     Nvme* nvmeSsd;
     UnvmeMgmt unvmeMgmt;
-    UnvmeCmd unvmeCmd;
+    UnvmeCmd* unvmeCmd;
+    SpdkNvmeCaller* spdkNvmeCaller;
 };
+
+const uint32_t UNVME_DRV_OUT_OF_MEMORY_RETRY_LIMIT = 10000000;
 
 using UnvmeDrvSingleton = Singleton<UnvmeDrv>;
 } // namespace pos

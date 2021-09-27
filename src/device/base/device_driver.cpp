@@ -43,6 +43,8 @@ DeviceDriver::DeviceDriver(void)
 
 DeviceDriver::~DeviceDriver(void)
 {
+    attach_event = nullptr;
+    detach_event = nullptr;
 }
 
 int

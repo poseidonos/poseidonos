@@ -20,7 +20,7 @@ public:
     MOCK_METHOD(void, AddPendingError, (IOContext & errorToAdd), (override));
     MOCK_METHOD(void, RemovePendingError, (IOContext & errorToRemove), (override));
     MOCK_METHOD(uint32_t, GetPendingErrorCount, (), (override));
-    MOCK_METHOD((std::pair<IOContext*, bool>), GetPendingError, (), (override));
+    MOCK_METHOD(IOContext*, GetPendingError, (), (override));
 };
 
 } // namespace pos

@@ -36,37 +36,56 @@
 
 #include "Air.h"
 #include "spdk/thread.h"
-#include "src/spdk_wrapper/nvme.hpp"
-#include "src/event_scheduler/callback.h"
 #include "src/bio/ubio.h"
 #include "src/device/unvme/unvme_device_context.h"
 #include "src/device/unvme/unvme_io_context.h"
 #include "src/device/unvme/unvme_ssd.h"
-#include "src/include/pos_event_id.h"
+#include "src/event_scheduler/callback.h"
 #include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
+#include "src/spdk_wrapper/caller/spdk_nvme_caller.h"
+#include "src/spdk_wrapper/nvme.hpp"
 
 namespace pos
 {
 static void
 UpdateRetryAndRecovery(const struct spdk_nvme_cpl* completion, UnvmeIOContext* ioCtx)
 {
-    bool retrySkipSctGeneric = (completion->status.sct == SPDK_NVME_SCT_GENERIC &&
-        completion->status.sc != SPDK_NVME_SC_ABORTED_BY_REQUEST);
+    bool retrySkipSctGeneric =
+        (completion->status.sct == SPDK_NVME_SCT_GENERIC &&
+            completion->status.sc != SPDK_NVME_SC_ABORTED_BY_REQUEST);
 
-    bool retrySkipCmdError = (completion->status.sct == SPDK_NVME_SCT_COMMAND_SPECIFIC);
+    bool retrySkipCmdError =
+        (completion->status.sct == SPDK_NVME_SCT_COMMAND_SPECIFIC);
 
-    bool retrySkipMediaError = (completion->status.sct == SPDK_NVME_SCT_MEDIA_ERROR &&
-        (completion->status.sc == SPDK_NVME_SC_COMPARE_FAILURE ||
-            completion->status.sc == SPDK_NVME_SC_DEALLOCATED_OR_UNWRITTEN_BLOCK));
+    bool retrySkipMediaError =
+        (completion->status.sct == SPDK_NVME_SCT_MEDIA_ERROR &&
+            (completion->status.sc == SPDK_NVME_SC_COMPARE_FAILURE ||
+                completion->status.sc == SPDK_NVME_SC_DEALLOCATED_OR_UNWRITTEN_BLOCK));
 
-    bool retrySkipPathError = (completion->status.sct == SPDK_NVME_SCT_PATH && (completion->status.sc != SPDK_NVME_SC_ABORTED_BY_HOST));
+    bool retrySkipPathError =
+        (completion->status.sct == SPDK_NVME_SCT_PATH &&
+            (completion->status.sc != SPDK_NVME_SC_ABORTED_BY_HOST));
 
-    if (retrySkipSctGeneric || retrySkipCmdError || retrySkipMediaError || retrySkipPathError)
+    if (retrySkipSctGeneric || retrySkipCmdError ||
+        retrySkipMediaError || retrySkipPathError)
     {
-        ioCtx->ClearRetryCount();
+        ioCtx->ClearErrorRetryCount();
     }
+}
+
+static void
+_CollectAirReadLog(uint64_t size, uint64_t ssdId)
+{
+    airlog("PERF_SSD", "AIR_READ", ssdId, size);
+}
+
+static void
+_CollectAirWriteLog(uint64_t size, uint64_t ssdId)
+{
+    airlog("PERF_SSD", "AIR_WRITE", ssdId, size);
 }
 
 static void
@@ -96,14 +115,15 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
 
         ioCtx->SetAsyncIOCompleted();
 
-        if (completion->status.sct == SPDK_NVME_SCT_VENDOR_SPECIFIC)
+        if (ioCtx->HasOutOfMemoryError())
         {
             // if continueous submit retry for same io context accumulates its submit retry count.
-            ioCtx->IncSubmitRetryCount();
+            ioCtx->IncOutOfMemoryRetryCount();
+            ioCtx->SetOutOfMemoryError(false);
         }
         else
         {
-            ioCtx->ClearSubmitRetryCount();
+            ioCtx->ClearOutOfMemoryRetryCount();
         }
 
         if (unlikely(spdk_nvme_cpl_is_error(completion)))
@@ -115,14 +135,15 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
         {
             auto dir = ioCtx->GetOpcode();
             uint64_t size = ioCtx->GetByteCount();
-            uint64_t ssd_id = reinterpret_cast<uint64_t>(ioCtx->GetDeviceContext());
+            uint64_t ssdId =
+                reinterpret_cast<uint64_t>(ioCtx->GetDeviceContext());
             if (UbioDir::Read == dir)
             {
-                airlog("PERF_SSD", "AIR_READ", ssd_id, size);
+                _CollectAirReadLog(size, ssdId);
             }
             else if (UbioDir::Write == dir)
             {
-                airlog("PERF_SSD", "AIR_WRITE", ssd_id, size);
+                _CollectAirWriteLog(size, ssdId);
             }
 
             devCtx->ioCompletionCount++;
@@ -145,14 +166,21 @@ SpdkAttachEventHandler(struct spdk_nvme_ns* ns, int num_devs,
     UnvmeDrvSingleton::Instance()->DeviceAttached(ns, num_devs, trid);
 }
 
-const uint32_t
-    UnvmeDrv::SUBMISSION_RETRY_LIMIT = 10000000;
-
-UnvmeDrv::UnvmeDrv(void)
-: nvmeSsd(new Nvme("spdk_daemon"))
+UnvmeDrv::UnvmeDrv(UnvmeCmd* unvmeCmd, SpdkNvmeCaller* spdkNvmeCaller)
+: nvmeSsd(new Nvme("spdk_daemon")),
+  unvmeCmd(unvmeCmd),
+  spdkNvmeCaller(spdkNvmeCaller)
 {
     name = "UnvmeDrv";
     nvmeSsd->SetCallback(SpdkAttachEventHandler, SpdkDetachEventHandler);
+    if (this->unvmeCmd == nullptr)
+    {
+        this->unvmeCmd = new UnvmeCmd();
+    }
+    if (this->spdkNvmeCaller == nullptr)
+    {
+        this->spdkNvmeCaller = new SpdkNvmeCaller();
+    }
 }
 
 UnvmeDrv::~UnvmeDrv(void)
@@ -160,6 +188,14 @@ UnvmeDrv::~UnvmeDrv(void)
     if (nullptr != nvmeSsd)
     {
         nvmeSsd->Stop();
+    }
+    if (nullptr != unvmeCmd)
+    {
+        delete unvmeCmd;
+    }
+    if (nullptr != spdkNvmeCaller)
+    {
+        delete spdkNvmeCaller;
     }
 }
 
@@ -169,45 +205,44 @@ UnvmeDrv::GetDaemon(void)
     return nvmeSsd;
 }
 
-void
+int
 UnvmeDrv::DeviceDetached(std::string sn)
 {
-    if (nullptr != detach_event)
+    if (nullptr == detach_event)
     {
-        detach_event(sn);
+        POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_DETACH_NOTIFICATION_FAILED;
+        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId), sn);
+        return (int)eventId;
     }
-    else
-    {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::UNVME_SSD_DETACH_NOTIFICATION_FAILED,
-            PosEventId::GetString(POS_EVENT_ID::UNVME_SSD_DETACH_NOTIFICATION_FAILED),
-            sn);
-    }
+    detach_event(sn);
+    return 0;
 }
 
-void
+int
 UnvmeDrv::DeviceAttached(struct spdk_nvme_ns* ns, int nsid,
     const spdk_nvme_transport_id* trid)
 {
+    int ret = 0;
     std::string deviceName = DEVICE_NAME_PREFIX + std::to_string(nsid);
 
     if (nullptr != attach_event)
     {
-        uint64_t diskSize = spdk_nvme_ns_get_size(ns);
-
+        uint64_t diskSize = spdkNvmeCaller->SpdkNvmeNsGetSize(ns);
         UblockSharedPtr dev = make_shared<UnvmeSsd>(deviceName, diskSize, this,
             ns, trid->traddr);
-
         POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_DEBUG_CREATED;
         POS_TRACE_DEBUG(eventId, PosEventId::GetString(eventId), deviceName);
         attach_event(dev);
     }
     else
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::UNVME_SSD_ATTACH_NOTIFICATION_FAILED,
-            PosEventId::GetString(POS_EVENT_ID::UNVME_SSD_ATTACH_NOTIFICATION_FAILED),
-            deviceName);
+        POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_ATTACH_NOTIFICATION_FAILED;
+        POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId), deviceName);
+        ret = (int)eventId;
     }
+
     nvmeSsd->Resume();
+    return ret;
 }
 
 int
@@ -238,10 +273,11 @@ UnvmeDrv::_SubmitAsyncIOInternal(UnvmeDeviceContext* deviceContext,
     ioCtx->ClearAsyncIOCompleted();
     deviceContext->IncreasePendingIO();
 
-    if (unlikely(-ENOMEM ==
-            (retValue = unvmeCmd.RequestIO(deviceContext, AsyncIOComplete, ioCtx))))
+    retValue = unvmeCmd->RequestIO(deviceContext, AsyncIOComplete, ioCtx);
+    if (unlikely(-ENOMEM == retValue)) // Usually ENOMEM means the submissuion queue is full
     {
-        if (unlikely(SUBMISSION_RETRY_LIMIT == ioCtx->GetSubmitRetryCount()))
+        if (unlikely(UNVME_DRV_OUT_OF_MEMORY_RETRY_LIMIT ==
+                ioCtx->GetOutOfMemoryRetryCount()))
         {
             // submission timed out.
             POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SUBMISSION_RETRY_EXCEED;
@@ -255,7 +291,7 @@ UnvmeDrv::_SubmitAsyncIOInternal(UnvmeDeviceContext* deviceContext,
                 offset,
                 sectorCount,
                 ioCtx->GetDeviceName(),
-                spdk_nvme_ns_get_id(deviceContext->ns));
+                spdkNvmeCaller->SpdkNvmeNsGetId(deviceContext->ns));
         }
 
         retValueComplete = _CompleteIOs(deviceContext, ioCtx);
@@ -265,8 +301,9 @@ UnvmeDrv::_SubmitAsyncIOInternal(UnvmeDeviceContext* deviceContext,
         }
         else
         {
-            spdk_nvme_ctrlr* ctrl = spdk_nvme_ns_get_ctrlr(deviceContext->ns);
-            if (spdk_nvme_ctrlr_is_failed(ctrl))
+            spdk_nvme_ctrlr* ctrl =
+                spdkNvmeCaller->SpdkNvmeNsGetCtrlr(deviceContext->ns);
+            if (spdkNvmeCaller->SpdkNvmeCtrlrIsFailed(ctrl))
             {
                 retValue = -ENXIO;
             }
@@ -280,7 +317,7 @@ UnvmeDrv::_SubmitAsyncIOInternal(UnvmeDeviceContext* deviceContext,
         completion.status.sc = SPDK_NVME_SC_INTERNAL_DEVICE_ERROR;
         if (likely(retValue == -ENOMEM))
         {
-            completion.status.sct = SPDK_NVME_SCT_VENDOR_SPECIFIC;
+            ioCtx->SetOutOfMemoryError(true);
         }
         AsyncIOComplete(ioCtx, &completion);
     }
@@ -311,7 +348,8 @@ UnvmeDrv::SubmitAsyncIO(DeviceContext* deviceContext, UbioSmartPtr bio)
         retryCount = nvmeSsd->GetRetryCount(RetryType::RETRY_TYPE_BACKEND);
     }
 
-    UnvmeIOContext* ioCtx = new UnvmeIOContext(devCtx, bio, retryCount, frontEnd);
+    UnvmeIOContext* ioCtx =
+        new UnvmeIOContext(devCtx, bio, retryCount, frontEnd);
 
     return _SubmitAsyncIOInternal(devCtx, ioCtx);
 }
@@ -323,7 +361,8 @@ UnvmeDrv::CompleteIOs(DeviceContext* deviceContext)
 }
 
 int
-UnvmeDrv::_CompleteIOs(DeviceContext* deviceContext, UnvmeIOContext* ioCtxToSkip)
+UnvmeDrv::_CompleteIOs(DeviceContext* deviceContext,
+    UnvmeIOContext* ioCtxToSkip)
 {
     UnvmeDeviceContext* devCtx =
         static_cast<UnvmeDeviceContext*>(deviceContext);
@@ -333,8 +372,10 @@ UnvmeDrv::_CompleteIOs(DeviceContext* deviceContext, UnvmeIOContext* ioCtxToSkip
 
     if (unlikely(!devCtx->IsAdminCommandPendingZero()))
     {
-        spdk_nvme_ctrlr* ctrlr = spdk_nvme_ns_get_ctrlr(devCtx->ns);
-        returnCode = spdk_nvme_ctrlr_process_admin_completions(ctrlr);
+        spdk_nvme_ctrlr* ctrlr =
+            spdkNvmeCaller->SpdkNvmeNsGetCtrlr(devCtx->ns);
+        returnCode =
+            spdkNvmeCaller->SpdkNvmeCtrlrProcessAdminCompletions(ctrlr);
         if (0 < returnCode)
         {
             completionCount = devCtx->ioCompletionCount;
@@ -345,7 +386,8 @@ UnvmeDrv::_CompleteIOs(DeviceContext* deviceContext, UnvmeIOContext* ioCtxToSkip
     // if admin command is failed to completion (including not-yet-processed)
     // Also try to complete io.
 
-    returnCode = spdk_nvme_qpair_process_completions(devCtx->ioQPair, 0);
+    returnCode =
+        spdkNvmeCaller->SpdkNvmeQpairProcessCompletions(devCtx->ioQPair, 0);
 
     if (likely(0 <= returnCode))
     {
@@ -359,55 +401,43 @@ int
 UnvmeDrv::CompleteErrors(DeviceContext* deviceContext)
 {
     int completionCount = 0;
-    std::pair<IOContext*, bool> pendingError = deviceContext->GetPendingError();
 
-    IOContext* ioCtx = pendingError.first;
-    bool disregardError = pendingError.second;
+    IOContext* ioCtx = deviceContext->GetPendingError();
 
     if (nullptr != ioCtx)
     {
-        uint32_t errorCount = 0;
-
         deviceContext->RemovePendingError(*ioCtx);
-
-        if (false == disregardError)
+        if (ioCtx->GetOutOfMemoryRetryCount() != 0)
         {
-            errorCount++;
+            UnvmeDeviceContext* unvmeDevCtx =
+                static_cast<UnvmeDeviceContext*>(deviceContext);
+            UnvmeIOContext* unvmeIoCtx = static_cast<UnvmeIOContext*>(ioCtx);
+            completionCount = _SubmitAsyncIOInternal(unvmeDevCtx, unvmeIoCtx);
+
+            return completionCount;
         }
-
-        if (errorCount > 0)
+        else if (ioCtx->CheckAndDecreaseErrorRetryCount() == true)
         {
-            if (ioCtx->GetSubmitRetryCount() != 0)
-            {
-                UnvmeDeviceContext* unvmeDevCtx = static_cast<UnvmeDeviceContext*>(deviceContext);
-                UnvmeIOContext* unvmeIoCtx = static_cast<UnvmeIOContext*>(ioCtx);
-                completionCount = _SubmitAsyncIOInternal(unvmeDevCtx, unvmeIoCtx);
+            POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_DEBUG_RETRY_IO;
+            POS_TRACE_INFO(eventId, PosEventId::GetString(eventId),
+                ioCtx->GetStartSectorOffset(),
+                ioCtx->GetSectorCount(),
+                static_cast<int>(ioCtx->GetOpcode()),
+                ioCtx->GetDeviceName());
 
-                return completionCount;
-            }
-            else if (ioCtx->CheckAndDecreaseRetryCount() == true)
-            {
-                UnvmeDeviceContext* unvmeDevCtx = static_cast<UnvmeDeviceContext*>(deviceContext);
-                UnvmeIOContext* unvmeIoCtx = static_cast<UnvmeIOContext*>(ioCtx);
-                POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_DEBUG_RETRY_IO;
+            UnvmeDeviceContext* unvmeDevCtx =
+                static_cast<UnvmeDeviceContext*>(deviceContext);
+            UnvmeIOContext* unvmeIoCtx = static_cast<UnvmeIOContext*>(ioCtx);
+            completionCount = _SubmitAsyncIOInternal(unvmeDevCtx, unvmeIoCtx);
 
-                POS_TRACE_WARN(eventId, PosEventId::GetString(eventId),
-                    ioCtx->GetStartSectorOffset(),
-                    ioCtx->GetSectorCount(),
-                    static_cast<int>(ioCtx->GetOpcode()),
-                    ioCtx->GetDeviceName());
-                completionCount = _SubmitAsyncIOInternal(unvmeDevCtx, unvmeIoCtx);
-
-                return completionCount;
-            }
-            else
-            {
-                ioCtx->CompleteIo(IOErrorType::GENERIC_ERROR);
-            }
+            return completionCount;
+        }
+        else
+        {
+            ioCtx->CompleteIo(IOErrorType::GENERIC_ERROR);
         }
 
         delete ioCtx;
-
         completionCount++;
     }
 

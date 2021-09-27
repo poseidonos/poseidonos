@@ -149,3 +149,29 @@ SpdkNvmeCaller::SpdkNvmeCtrlrCmdGetLogPage(
     return spdk_nvme_ctrlr_cmd_get_log_page(
         ctrlr, log_page, nsid, payload, payload_size, offset, cb_fn, cb_arg);
 }
+
+bool
+SpdkNvmeCaller::SpdkNvmeCtrlrIsFailed(struct spdk_nvme_ctrlr* ctrlr)
+{
+    return spdk_nvme_ctrlr_is_failed(ctrlr);
+}
+
+int32_t
+SpdkNvmeCaller::SpdkNvmeCtrlrProcessAdminCompletions(
+    struct spdk_nvme_ctrlr* ctrlr)
+{
+    return spdk_nvme_ctrlr_process_admin_completions(ctrlr);
+}
+
+int32_t
+SpdkNvmeCaller::SpdkNvmeQpairProcessCompletions(
+    struct spdk_nvme_qpair* qpair, uint32_t max_completions)
+{
+    return spdk_nvme_qpair_process_completions(qpair, max_completions);
+}
+
+uint64_t
+SpdkNvmeCaller::SpdkNvmeNsGetSize(struct spdk_nvme_ns* ns)
+{
+    return spdk_nvme_ns_get_size(ns);
+}

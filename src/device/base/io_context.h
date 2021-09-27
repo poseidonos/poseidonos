@@ -36,10 +36,10 @@
 #include <string>
 #include <utility>
 
+#include "src/bio/ubio.h"
 #include "src/dump/dump_shared_ptr.h"
 #include "src/dump/dump_shared_ptr.hpp"
 #include "src/include/io_error_type.h"
-#include "src/bio/ubio.h"
 
 namespace pos
 {
@@ -49,7 +49,9 @@ class Ubio;
 class IOContext : public DumpSharedPtr<IOContext*, static_cast<int>(DumpSharedPtrType::IO_CONTEXT)>
 {
 public:
-    IOContext() {} // For MockClass
+    IOContext()
+    {
+    } // For MockClass
     IOContext(UbioSmartPtr inputUbio, uint32_t inputRetry);
     virtual ~IOContext(void);
 
@@ -74,18 +76,16 @@ public:
     virtual void AddPendingErrorCount(uint32_t errorCountToAdd = 1);
     virtual void SubtractPendingErrorCount(uint32_t errorCountToSubtract = 1);
 
-    virtual bool CheckErrorDisregard(void);
-
     virtual void CompleteIo(IOErrorType error);
     virtual void SetAsyncIOCompleted(void);
     virtual void ClearAsyncIOCompleted(void);
     virtual bool IsAsyncIOCompleted(void);
-    virtual bool CheckAndDecreaseRetryCount();
-    virtual void ClearRetryCount(void);
+    virtual bool CheckAndDecreaseErrorRetryCount();
+    virtual void ClearErrorRetryCount(void);
 
-    virtual void IncSubmitRetryCount(void);
-    virtual void ClearSubmitRetryCount(void);
-    virtual uint32_t GetSubmitRetryCount(void);
+    virtual void IncOutOfMemoryRetryCount(void);
+    virtual void ClearOutOfMemoryRetryCount(void);
+    virtual uint32_t GetOutOfMemoryRetryCount(void);
 
 private:
     UbioSmartPtr ubio;
@@ -94,7 +94,7 @@ private:
     bool keyForPendingIOListSet;
     bool keyForPendingErrorListSet;
     bool completeCalled;
-    uint32_t submitRetryCount;
-    uint32_t retryCount;
+    uint32_t outOfMemoryRetryCount;
+    uint32_t remainingErrorRetryCount;
 };
 } // namespace pos

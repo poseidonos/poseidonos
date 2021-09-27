@@ -32,7 +32,6 @@
 
 #include "src/device/base/device_context.h"
 
-#include "io_context.h"
 #include "src/include/branch_prediction.h"
 
 namespace pos
@@ -131,37 +130,25 @@ DeviceContext::_ReadyCurrentRemainingError(void)
     }
 }
 
-std::pair<IOContext*, bool>
+IOContext*
 DeviceContext::GetPendingError(void)
 {
     IOContext* ioCtx = _GetPendingIOContext(pendingErrorList);
-    bool errorDisregard = false;
 
     if (nullptr != ioCtx)
     {
-        errorDisregard = ioCtx->CheckErrorDisregard();
-        if (false == errorDisregard)
+        if (timeoutChecker.CheckTimeout())
         {
-            if (timeoutChecker.CheckTimeout())
-            {
-                _ReadyAllRemainingErrors();
-            }
-
-            if (false == _CheckErrorReady(*ioCtx))
-            {
-                ioCtx = nullptr;
-            }
+            _ReadyAllRemainingErrors();
         }
-        else
+
+        if (false == _CheckErrorReady(*ioCtx))
         {
-            if (false == _CheckErrorReady(*ioCtx))
-            {
-                _ReadyCurrentRemainingError();
-            }
+            ioCtx = nullptr;
         }
     }
 
-    return std::make_pair(ioCtx, errorDisregard);
+    return ioCtx;
 }
 
 bool

@@ -38,70 +38,76 @@
 
 namespace pos
 {
-
 class SpdkNvmeCaller
 {
 public:
     SpdkNvmeCaller(void);
     virtual ~SpdkNvmeCaller(void);
-    virtual uint32_t SpdkNvmeNsGetId(struct spdk_nvme_ns *ns);
-    virtual struct spdk_nvme_ctrlr * SpdkNvmeNsGetCtrlr(struct spdk_nvme_ns *ns);
+    virtual uint32_t SpdkNvmeNsGetId(struct spdk_nvme_ns* ns);
+    virtual struct spdk_nvme_ctrlr* SpdkNvmeNsGetCtrlr(
+        struct spdk_nvme_ns* ns);
     virtual int SpdkNvmeNsCmdDatasetManagement(
-        struct spdk_nvme_ns *ns,
-        struct spdk_nvme_qpair *qpair,
+        struct spdk_nvme_ns* ns,
+        struct spdk_nvme_qpair* qpair,
         uint32_t type,
-        const struct spdk_nvme_dsm_range *range,
+        const struct spdk_nvme_dsm_range* range,
         uint16_t num_ranges,
         spdk_nvme_cmd_cb cb_fn,
-        void *cb_arg);
+        void* cb_arg);
     virtual int SpdkNvmeNsCmdRead(
-        struct spdk_nvme_ns *ns,
-        struct spdk_nvme_qpair *qpair,
-        void *buffer,
+        struct spdk_nvme_ns* ns,
+        struct spdk_nvme_qpair* qpair,
+        void* buffer,
         uint64_t lba,
         uint32_t lba_count,
         spdk_nvme_cmd_cb cb_fn,
-        void *cb_arg,
+        void* cb_arg,
         uint32_t io_flags);
     virtual int SpdkNvmeNsCmdWrite(
-        struct spdk_nvme_ns *ns,
-        struct spdk_nvme_qpair *qpair,
-        void *buffer,
+        struct spdk_nvme_ns* ns,
+        struct spdk_nvme_qpair* qpair,
+        void* buffer,
         uint64_t lba,
         uint32_t lba_count,
         spdk_nvme_cmd_cb cb_fn,
-        void *cb_arg,
+        void* cb_arg,
         uint32_t io_flags);
     virtual int SpdkNvmeCtrlrCmdAbort(
-        struct spdk_nvme_ctrlr *ctrlr,
-        struct spdk_nvme_qpair *qpair,
+        struct spdk_nvme_ctrlr* ctrlr,
+        struct spdk_nvme_qpair* qpair,
         uint16_t cid,
         spdk_nvme_cmd_cb cb_fn,
-        void *cb_arg);
+        void* cb_arg);
     virtual int SpdkNvmeCtrlrCmdIoRaw(
-        struct spdk_nvme_ctrlr *ctrlr,
-        struct spdk_nvme_qpair *qpair,
-        struct spdk_nvme_cmd *cmd,
-        void *buf,
+        struct spdk_nvme_ctrlr* ctrlr,
+        struct spdk_nvme_qpair* qpair,
+        struct spdk_nvme_cmd* cmd,
+        void* buf,
         uint32_t len,
         spdk_nvme_cmd_cb cb_fn,
-        void *cb_arg);
+        void* cb_arg);
     virtual int SpdkNvmeCtrlrCmdAdminRaw(
-        struct spdk_nvme_ctrlr *ctrlr,
-        struct spdk_nvme_cmd *cmd,
-        void *buf,
+        struct spdk_nvme_ctrlr* ctrlr,
+        struct spdk_nvme_cmd* cmd,
+        void* buf,
         uint32_t len,
         spdk_nvme_cmd_cb cb_fn,
-        void *cb_arg);
+        void* cb_arg);
     virtual int SpdkNvmeCtrlrCmdGetLogPage(
-        struct spdk_nvme_ctrlr *ctrlr,
+        struct spdk_nvme_ctrlr* ctrlr,
         uint8_t log_page,
         uint32_t nsid,
-        void *payload,
+        void* payload,
         uint32_t payload_size,
         uint64_t offset,
         spdk_nvme_cmd_cb cb_fn,
-        void *cb_arg);
+        void* cb_arg);
+    virtual bool SpdkNvmeCtrlrIsFailed(struct spdk_nvme_ctrlr* ctrlr);
+    virtual int32_t SpdkNvmeCtrlrProcessAdminCompletions(
+        struct spdk_nvme_ctrlr* ctrlr);
+    virtual int32_t SpdkNvmeQpairProcessCompletions(
+        struct spdk_nvme_qpair* qpair, uint32_t max_completions);
+    virtual uint64_t SpdkNvmeNsGetSize(struct spdk_nvme_ns* ns);
 };
 
 } // namespace pos

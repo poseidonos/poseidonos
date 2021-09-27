@@ -49,8 +49,8 @@ class UnvmeCmd
 {
 public:
     UnvmeCmd(SpdkNvmeCaller* spdkNvmeCaller = nullptr);
-    ~UnvmeCmd(void);
-    int RequestIO(UnvmeDeviceContext* deviceContext,
+    virtual ~UnvmeCmd(void);
+    virtual int RequestIO(UnvmeDeviceContext* deviceContext,
         spdk_nvme_cmd_cb callbackFunc,
         UnvmeIOContext* ioContext);
 

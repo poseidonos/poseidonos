@@ -72,4 +72,16 @@ UnvmeIOContext::IsAdminCommand(void)
     return adminCommand;
 }
 
+void
+UnvmeIOContext::SetOutOfMemoryError(bool oom)
+{
+    outOfMemoryError = oom;
+}
+
+bool
+UnvmeIOContext::HasOutOfMemoryError(void)
+{
+    return outOfMemoryError;
+}
+
 } // namespace pos
