@@ -81,7 +81,12 @@ FlushCmdHandler::Execute(void)
 
     switch (flushIo->GetState())
     {
-        case FLUSH__BLOCK_ALLOCATION:
+        case FLUSH__BLOCKING_ALLOCATION:
+            if (flushCmdManager->TrySetFlushInProgress(volumeId) == false)
+            {
+                return false;
+            }
+
             // Block allocation for new writes
             if (iBlockAllocator->BlockAllocating(volumeId) == false)
             {
@@ -91,17 +96,21 @@ FlushCmdHandler::Execute(void)
             POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
                 "Flush command started on volume {}", volumeId);
 
-            flushIo->SetState(FLUSH__FINISH_ACTIVE_STRIPES);
-        case FLUSH__FINISH_ACTIVE_STRIPES:
             // Get all active stripes for flush
             iWBStripeAllocator->FlushActiveStripes(volumeId);
 
-            flushIo->SetState(FLUSH__STRIPE_FLUSH_IN_PROGRESS);
-        case FLUSH__STRIPE_FLUSH_IN_PROGRESS:
+            // Get all Wb stripes belonging to input volumeId
+            iWBStripeAllocator->GetWbStripes(flushIo);
+
+            // Unblock allocation
+            iBlockAllocator->UnblockAllocating(volumeId);
+            flushIo->StripesScanComplete();
+
+            flushIo->SetState(FLUSH__VSAMAP);
+        case FLUSH__VSAMAP:
             // Check is all stripes flush are complete
-            if (iWBStripeAllocator->WaitStripesFlushCompletion(volumeId) == false)
+            if (flushIo->IsStripesFlushComplete() == false)
             {
-                // All stripe(s) flush not complete.
                 return false;
             }
             POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
@@ -111,8 +120,6 @@ FlushCmdHandler::Execute(void)
                 POS_EVENT_ID::FLUSH_CMD_ONGOING,
                 "User data flush for volume {} completed", volumeId);
 
-            flushIo->SetState(FLUSH__VSAMAP);
-        case FLUSH__VSAMAP:
         {
             int ret = 0;
             EventSmartPtr eventVSAMap(new MapFlushCompleteEvent(volumeId, flushIo));
@@ -126,11 +133,15 @@ FlushCmdHandler::Execute(void)
                 else
                 {
                     POS_TRACE_ERROR((int)POS_EVENT_ID::FLUSH_CMD_MAPPER_FLUSH_FAILED,
-                        "Failed to start flushing dirty vsamap pages");
-                    flushIo->GetCallback()->InformError(IOErrorType::GENERIC_ERROR);
-                    IoCompleter ioCompleter(flushIo);
-                    ioCompleter.CompleteUbio(IOErrorType::SUCCESS, true);
-                    iBlockAllocator->UnblockAllocating(volumeId);
+                            "Failed to start flushing dirty vsamap pages");
+                    if (flushIo->IsInternalFlush() == false)
+                    {
+                        flushIo->GetCallback()->InformError(IOErrorType::GENERIC_ERROR);
+                        IoCompleter ioCompleter(flushIo);
+                        ioCompleter.CompleteUbio(IOErrorType::SUCCESS, true);
+                        iBlockAllocator->UnblockAllocating(volumeId);
+                    }
+                    flushCmdManager->ResetFlushInProgress(volumeId, flushIo->IsInternalFlush());
                     return true;
                 }
             }
@@ -138,73 +149,77 @@ FlushCmdHandler::Execute(void)
                 "VSA Map flush requested");
         }
 
-            // Unblock allocation
-            iBlockAllocator->UnblockAllocating(volumeId);
             flushIo->SetState(FLUSH__STRIPEMAP_ALLOCATOR);
 
-            if (flushCmdManager->CanFlushMeta(flushIo->GetOriginCore(), flushIo) == false)
+            if (flushCmdManager->CanFlushMeta(flushIo) == false)
             {
                 return true;
             }
         case FLUSH__STRIPEMAP_ALLOCATOR:
-        {
-            int ret = 0;
-            bool stripeMapFlushFailed = false;
-
-            if (stripeMapFlushIssued != true)
             {
-                // Stripe Map Flush
-                EventSmartPtr eventStripeMap(new MapFlushCompleteEvent(STRIPE_MAP_ID, flushIo));
-                ret = iMapFlush->FlushDirtyMpages(STRIPE_MAP_ID, eventStripeMap);
+                int ret = 0;
+                bool stripeMapFlushFailed = false;
 
-                if (ret != 0)
+                if (stripeMapFlushIssued != true)
                 {
-                    if (ret == -EID(MAP_FLUSH_IN_PROGRESS))
+                    // Stripe Map Flush
+                    EventSmartPtr eventStripeMap(new MapFlushCompleteEvent(STRIPE_MAP_ID, flushIo));
+                    ret = iMapFlush->FlushDirtyMpages(STRIPE_MAP_ID, eventStripeMap);
+
+                    if (ret != 0)
                     {
-                        return false;
+                        if (ret == -EID(MAP_FLUSH_IN_PROGRESS))
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            POS_TRACE_ERROR((int)POS_EVENT_ID::FLUSH_CMD_MAPPER_FLUSH_FAILED,
+                                    "Failed to start flushing dirty stripe map pages. Error code {}", ret);
+                            if (flushIo->IsInternalFlush() == false)
+                            {
+                                flushIo->GetCallback()->InformError(IOErrorType::GENERIC_ERROR);
+                            }
+                            flushIo->SetStripeMapFlushComplete(true);
+                            stripeMapFlushFailed = true;
+                        }
                     }
-                    else
+                    stripeMapFlushIssued = true;
+
+                    POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
+                            "Stripe Map flush requested");
+                }
+
+                if (stripeMapFlushFailed == false)
+                {
+                    // Allocator Flush
+                    EventSmartPtr callbackAllocator(new AllocatorFlushDoneEvent(flushIo));
+                    ret = icontextManager->FlushContexts(callbackAllocator, false);
+                    if (ret != 0)
                     {
-                        POS_TRACE_ERROR((int)POS_EVENT_ID::FLUSH_CMD_MAPPER_FLUSH_FAILED,
-                            "Failed to start flushing dirty stripe map pages. Error code {}", ret);
-                        flushIo->GetCallback()->InformError(IOErrorType::GENERIC_ERROR);
-                        flushIo->SetStripeMapFlushComplete(true);
-                        stripeMapFlushFailed = true;
+                        if (ret == (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS)
+                        {
+                            return false;
+                        }
+
+                        POS_TRACE_ERROR((int)POS_EVENT_ID::FLUSH_CMD_ALLOCATOR_FLUSH_FAILED,
+                                "Failed to start flushing allocator meta pages. Error code {}", ret);
+                        if (flushIo->IsInternalFlush() == false)
+                        {
+                            flushIo->GetCallback()->InformError(IOErrorType::GENERIC_ERROR);
+                        }
+                        flushIo->SetAllocatorFlushComplete(true);
                     }
                 }
-                stripeMapFlushIssued = true;
-
-                POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
-                    "Stripe Map flush requested");
-            }
-
-            if (stripeMapFlushFailed == false)
-            {
-                // Allocator Flush
-                EventSmartPtr callbackAllocator(new AllocatorFlushDoneEvent(flushIo));
-                ret = icontextManager->FlushContexts(callbackAllocator, false);
-                if (ret != 0)
+                else
                 {
-                    if (ret == (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS)
-                    {
-                        return false;
-                    }
-
-                    POS_TRACE_ERROR((int)POS_EVENT_ID::FLUSH_CMD_ALLOCATOR_FLUSH_FAILED,
-                        "Failed to start flushing allocator meta pages. Error code {}", ret);
-                    flushIo->GetCallback()->InformError(IOErrorType::GENERIC_ERROR);
                     flushIo->SetAllocatorFlushComplete(true);
                 }
-            }
-            else
-            {
-                flushIo->SetAllocatorFlushComplete(true);
-            }
 
-            POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
-                POS_EVENT_ID::FLUSH_CMD_ONGOING,
-                "Meta data flush for volume {} is requested", volumeId);
-        }
+                POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
+                        POS_EVENT_ID::FLUSH_CMD_ONGOING,
+                        "Meta data flush for volume {} is requested", volumeId);
+            }
 
             flushIo->SetState(FLUSH__META_FLUSH_IN_PROGRESS);
         case FLUSH__META_FLUSH_IN_PROGRESS:
@@ -228,10 +243,13 @@ FlushCmdHandler::Execute(void)
             }
 
             // Call Complete
+            if (flushIo->IsInternalFlush() == false)
             {
                 IoCompleter ioCompleter(flushIo);
                 ioCompleter.CompleteUbio(IOErrorType::SUCCESS, true);
             }
+
+            flushCmdManager->ResetFlushInProgress(volumeId, flushIo->IsInternalFlush());
 
             POS_TRACE_INFO((int)POS_EVENT_ID::SUCCESS, "NVMe Flush Command Complete");
         default:

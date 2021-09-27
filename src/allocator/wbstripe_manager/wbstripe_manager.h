@@ -63,7 +63,7 @@ public:
     virtual void FreeWBStripeId(StripeId lsid) override;
 
     virtual void FlushActiveStripes(uint32_t volumeId) override;
-    virtual bool WaitStripesFlushCompletion(uint32_t volumeId) override;
+    virtual void GetWbStripes(FlushIoSmartPtr flushIo) override;
 
     virtual bool ReferLsidCnt(StripeAddr& lsa) override;
     virtual void DereferLsidCnt(StripeAddr& lsa, uint32_t blockCount) override;

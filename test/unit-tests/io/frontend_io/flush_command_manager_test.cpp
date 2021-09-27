@@ -54,13 +54,13 @@ TEST(FlushCmdManager, FlushCmdManager_CanFlushMeta_CheckTrueFalse)
     FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
 
     // When : CanFlushMeta is called first time
-    bool actual = flushCmdManager.CanFlushMeta(0, flushIo);
+    bool actual = flushCmdManager.CanFlushMeta(flushIo);
 
     // Then : Check if return true
     EXPECT_EQ(actual, true);
 
     // When : CanFlushMeta is called again
-    actual = flushCmdManager.CanFlushMeta(0, flushIo);
+    actual = flushCmdManager.CanFlushMeta(flushIo);
 
     // Then : Check if return false
     EXPECT_EQ(actual, false);
@@ -77,18 +77,48 @@ TEST(FlushCmdManager, FlushCmdManager_FinishMetaFlush_CheckWithCanFlushMeta)
     flushCmdManager.FinishMetaFlush();
 
     // Then : CanFlushMeta should return true
-    bool actual = flushCmdManager.CanFlushMeta(0, flushIo);
+    bool actual = flushCmdManager.CanFlushMeta(flushIo);
     ASSERT_EQ(actual, true);
 
     // When : FinishMetaFlush is called where flushEvents exist
-    actual = flushCmdManager.CanFlushMeta(0, flushIo);
+    actual = flushCmdManager.CanFlushMeta(flushIo);
     ASSERT_EQ(actual, false);
 
     flushCmdManager.FinishMetaFlush();
 
     // Then : CanFlushMeta should return false
-    actual = flushCmdManager.CanFlushMeta(0, flushIo);
+    actual = flushCmdManager.CanFlushMeta(flushIo);
     EXPECT_EQ(actual, false);
+}
+
+TEST(FlushCmdManager, FlushCmdManager_UpdateVSANewEntries_Normal)
+{
+    FlushCmdManager flushCmdManager;
+    flushCmdManager.UpdateVSANewEntries(0, 0);
+}
+
+TEST(FlushCmdManager, FlushCmdManager_IsInternalFlushEnabled_Normal)
+{
+    FlushCmdManager flushCmdManager;
+    flushCmdManager.IsInternalFlushEnabled();
+}
+
+TEST(FlushCmdManager, FlushCmdManager_GetInternalFlushThreshold_Normal)
+{
+    FlushCmdManager flushCmdManager;
+    flushCmdManager.GetInternalFlushThreshold();
+}
+
+TEST(FlushCmdManager, FlushCmdManager_TrySetFlushInProgress_Normal)
+{
+    FlushCmdManager flushCmdManager;
+    flushCmdManager.TrySetFlushInProgress(0);
+}
+
+TEST(FlushCmdManager, FlushCmdManager_ResetFlushInProgress_Normal)
+{
+    FlushCmdManager flushCmdManager;
+    flushCmdManager.ResetFlushInProgress(0, true);
 }
 
 } // namespace pos

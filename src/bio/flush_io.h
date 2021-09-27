@@ -65,10 +65,24 @@ public:
     bool IsStripeMapAllocatorFlushComplete(void);
     void SetStripeMapAllocatorFlushComplete(bool metaFlushComplete);
 
+    void IncreaseStripeCnt(void);
+    void DecreaseStripeCnt(void);
+
+    void StripesScanComplete(void);
+
+    bool IsInternalFlush(void);
+    void SetInternalFlush(bool isInternalFlush);
+
+    bool IsStripesFlushComplete(void);
+
 private:
     uint32_t volumeId;
     uint32_t originCore;
     FlushState state;
+    bool isInternalFlush;
+    std::atomic<int32_t> stripeCnt;
+    std::atomic<bool> stripesScanComplete;
+    std::atomic<bool> stripesFlushComplete;
     std::atomic<bool> vsaMapFlushComplete;
     std::atomic<bool> stripeMapFlushComplete;
     std::atomic<bool> allocatorFlushComplete;

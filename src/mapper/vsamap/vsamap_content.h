@@ -33,12 +33,16 @@
 #pragma once
 
 #include "src/allocator/i_block_allocator.h"
+#include "src/io/frontend_io/flush_command_manager.h"
 #include "src/mapper/map/map_content.h"
 
 #include <string>
 
 namespace pos
 {
+
+static const uint64_t HUNDRED_PERCENT = 100;
+
 class VSAMapContent : public MapContent
 {
 public:
@@ -59,7 +63,14 @@ private:
     void _UpdateUsedBlkCnt(VirtualBlkAddr vsa);
 
     int64_t totalBlks;
+
+    FlushCmdManager* flushCmdManager;
+    uint32_t flushThreshold;
+    bool internalFlushEnabled;
+
     IBlockAllocator* iBlockAllocator;
+
+    int arrayId;
 };
 
 } // namespace pos

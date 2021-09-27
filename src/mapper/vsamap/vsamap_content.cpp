@@ -35,17 +35,21 @@
 #include "src/allocator_service/allocator_service.h"
 #include "src/include/branch_prediction.h"
 #include "src/mapper/vsamap/vsamap_content.h"
-
+#include "src/io/frontend_io/flush_command_manager.h"
 #include <string>
 
 namespace pos
 {
 VSAMapContent::VSAMapContent(int mapId, int arrayId, IBlockAllocator* iBlockAllocator_)
 : MapContent(mapId, arrayId),
+  flushCmdManager(FlushCmdManagerSingleton::Instance()),
+  flushThreshold(FlushCmdManagerSingleton::Instance()->GetInternalFlushThreshold()),
+  internalFlushEnabled(FlushCmdManagerSingleton::Instance()->IsInternalFlushEnabled()),
   iBlockAllocator(iBlockAllocator_)
 {
     fileName = "VSAMap." + std::to_string(mapId) + ".bin";
     totalBlks = 0;
+    this->arrayId = arrayId;
 }
 
 VSAMapContent::VSAMapContent(int mapId, int arrayId)
@@ -106,6 +110,18 @@ VSAMapContent::SetEntry(BlkAddr rba, VirtualBlkAddr vsa)
     mpageMap[entNr] = vsa;
 
     mapHeader->GetTouchedMpages()->SetBit(pageNr);
+
+    if (internalFlushEnabled == true)
+    {
+        uint32_t numBitsSet = mapHeader->GetTouchedMpages()->GetNumBitsSet();
+        uint32_t totalNumBits =  mapHeader->GetTouchedMpages()->GetNumBits();
+
+        if (((HUNDRED_PERCENT * numBitsSet) / totalNumBits) > flushThreshold)
+        {
+            flushCmdManager->UpdateVSANewEntries(mapHeader->GetMapId(), arrayId);
+        }
+    }
+
     map->ReleaseMpageLock(pageNr);
 
     return 0;

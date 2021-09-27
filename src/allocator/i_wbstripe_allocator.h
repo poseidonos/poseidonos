@@ -49,7 +49,7 @@ public:
     virtual void DereferLsidCnt(StripeAddr& lsa, uint32_t blockCount) = 0;
 
     virtual void FlushActiveStripes(uint32_t volumeId) = 0;
-    virtual bool WaitStripesFlushCompletion(uint32_t volumeId) = 0;
+    virtual void GetWbStripes(FlushIoSmartPtr flushIo) = 0;
 
     virtual void FlushAllActiveStripes(void) = 0;
 

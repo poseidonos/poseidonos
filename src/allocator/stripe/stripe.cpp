@@ -59,6 +59,7 @@ Stripe::Stripe(ReverseMapPack* revMap, bool withDataBuffer_)
     {
         POS_TRACE_INFO(EID(GC_STRIPE_ALLOCATED), "Gc stripe is allocated!");
     }
+    flushIo = nullptr;
 }
 
 Stripe::Stripe(bool withDataBuffer_, AllocatorAddressInfo* allocatorAddressInfo)
@@ -288,7 +289,14 @@ Stripe::IsFinished(void)
 void
 Stripe::SetFinished(bool state)
 {
+    std::unique_lock<std::mutex> lock(flushIoUpdate);
     finished = state;
+
+    if (flushIo != nullptr)
+    {
+        flushIo->DecreaseStripeCnt();
+        flushIo = nullptr;
+    }
 }
 
 int
@@ -301,6 +309,18 @@ bool
 Stripe::IsGcDestStripe(void)
 {
     return (!withDataBuffer);
+}
+
+void
+Stripe::UpdateFlushIo(FlushIoSmartPtr flushIo)
+{
+    std::unique_lock<std::mutex> lock(flushIoUpdate);
+
+    if (finished == false)
+    {
+        flushIo->IncreaseStripeCnt();
+        this->flushIo = flushIo;
+    }
 }
 
 } // namespace pos

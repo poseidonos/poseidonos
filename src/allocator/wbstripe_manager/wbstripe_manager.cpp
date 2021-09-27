@@ -175,9 +175,10 @@ WBStripeManager::FlushActiveStripes(uint32_t volumeId)
     vsidToCheckFlushDone4FlushCmd[volumeId].clear();
 }
 
-bool
-WBStripeManager::WaitStripesFlushCompletion(uint32_t volumeId)
+void
+WBStripeManager::GetWbStripes(FlushIoSmartPtr flushIo)
 {
+    uint32_t volumeId = flushIo->GetVolumeId();
     for (auto it = wbStripeArray.begin(); it != wbStripeArray.end(); ++it)
     {
         Stripe* arrStripe = *it;
@@ -185,24 +186,8 @@ WBStripeManager::WaitStripesFlushCompletion(uint32_t volumeId)
         {
             continue;
         }
-        if (arrStripe->GetBlksRemaining() > 0)
-        {
-            if (arrStripe->GetBlksRemaining() + wbStripeCtx->GetActiveStripeTail(volumeId).offset == addrInfo->GetblksPerStripe())
-            {
-                continue;
-            }
-        }
-
-        StripeAddr lsa = iStripeMap->GetLSA(arrStripe->GetVsid());
-        Stripe* stripe = GetStripe(lsa);
-
-        if (stripe != nullptr)
-        {
-            return false;
-        }
+        arrStripe->UpdateFlushIo(flushIo);
     }
-
-    return true;
 }
 
 bool

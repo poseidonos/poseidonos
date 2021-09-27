@@ -49,6 +49,31 @@ TEST(FlushCmdHandler, FlushCmdHandler_Constructor_WithOneArgument_Heap)
     delete flushCmdHandler;
 }
 
+TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseTrySetFlushInProgressReturnFalse)
+{
+    // Given: case FLUSH__BLOCK_ALLOCATION, flushCmdManager->IsFlushInProgress(volumeId) == false
+    std::string arr_name = "arr_name";
+    FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
+    NiceMock<MockFlushCmdManager> mockFlushCmdManager;
+    NiceMock<MockIBlockAllocator> mockIBlockAllocator;
+    NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
+    NiceMock<MockIContextManager> mockIContextManager;
+    NiceMock<MockIMapFlush> mockIMapFlush;
+    FlushCmdHandler flushCmdHandler(flushIo, &mockFlushCmdManager, &mockIBlockAllocator,
+        &mockIWBStripeAllocator, &mockIContextManager, &mockIMapFlush);
+
+    ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
+    ON_CALL(mockFlushCmdManager, TrySetFlushInProgress(_)).WillByDefault(Return(false));
+
+    bool actual, expected{false};
+
+    // When: Execute
+    actual = flushCmdHandler.Execute();
+
+    // Then: return false
+    ASSERT_EQ(expected, actual);
+}
+
 TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseBlockAllocation_BlockAllocatingReturnFalse)
 {
     // Given: case FLUSH__BLOCK_ALLOCATION, iBlockAllocator->BlockAllocating(volumeId) == false
@@ -63,6 +88,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseBlockAllocation_BlockAllocatin
         &mockIWBStripeAllocator, &mockIContextManager, &mockIMapFlush);
 
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
+    ON_CALL(mockFlushCmdManager, TrySetFlushInProgress(_)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(false));
 
     bool actual, expected{false};
@@ -74,9 +100,9 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseBlockAllocation_BlockAllocatin
     ASSERT_EQ(expected, actual);
 }
 
-TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseStripeFlushInProgress_WaitStripesFlushCompletionReturnFalse)
+TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseVSAMAP_FlushDirtyMpagesReturnNonZero_ErrorCase)
 {
-    // Given : case FLUSH__STRIPE_FLUSH_IN_PROGRESS, iWBStripeAllocator->WaitStripesFlushCompletion(volumeId) == false
+    // Given: case FLUSH__VSAMAP, flushCmdManager->CanFlushMeta(flushIo) == false
     std::string arr_name = "arr_name";
     FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
     NiceMock<MockFlushCmdManager> mockFlushCmdManager;
@@ -88,10 +114,14 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseStripeFlushInProgress_WaitStri
         &mockIWBStripeAllocator, &mockIContextManager, &mockIMapFlush);
 
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
+    ON_CALL(mockFlushCmdManager, TrySetFlushInProgress(_)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
     ON_CALL(mockIWBStripeAllocator, FlushActiveStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIWBStripeAllocator, WaitStripesFlushCompletion(_)).WillByDefault(Return(false));
+    ON_CALL(mockIWBStripeAllocator, GetWbStripes(_)).WillByDefault(Return());
+    ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _, _)).WillByDefault(Return(-EID(MAP_FLUSH_IN_PROGRESS)));
+    ON_CALL(mockFlushCmdManager, ResetFlushInProgress(_, _)).WillByDefault(Return());
 
+    flushIo->SetInternalFlush(true);
     bool actual, expected{false};
 
     // When: Execute
@@ -99,11 +129,20 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseStripeFlushInProgress_WaitStri
 
     // Then: return false
     ASSERT_EQ(expected, actual);
+
+    ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _, _)).WillByDefault(Return(-1));
+
+    // When: Execute
+    expected = true;
+    actual = flushCmdHandler.Execute();
+
+    // Then: return false
+    ASSERT_EQ(expected, actual);
 }
 
-TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseVSAMAP_FlushDirtyMpagesReturnZeroAndCanFlushMetaReturnFalse)
+TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseVSAMAP_FlushDirtyMpagesReturnZeroAndCanFlushMetaReturnTrueFalse)
 {
-    // Given: case FLUSH__VSAMAP, flushCmdManager->CanFlushMeta(flushIo->GetOriginCore(), flushIo) == false
+    // Given: case FLUSH__VSAMAP, flushCmdManager->CanFlushMeta(flushIo) == false
     std::string arr_name = "arr_name";
     FlushIoSmartPtr flushIo = std::make_shared<FlushIo>(0);
     NiceMock<MockFlushCmdManager> mockFlushCmdManager;
@@ -115,16 +154,26 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseVSAMAP_FlushDirtyMpagesReturnZ
         &mockIWBStripeAllocator, &mockIContextManager, &mockIMapFlush);
 
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
+    ON_CALL(mockFlushCmdManager, TrySetFlushInProgress(_)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
     ON_CALL(mockIWBStripeAllocator, FlushActiveStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIWBStripeAllocator, WaitStripesFlushCompletion(_)).WillByDefault(Return(true));
+    ON_CALL(mockIWBStripeAllocator, GetWbStripes(_)).WillByDefault(Return());
     ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _, _)).WillByDefault(Return(0));
     ON_CALL(mockIBlockAllocator, UnblockAllocating(_)).WillByDefault(Return());
-    ON_CALL(mockFlushCmdManager, CanFlushMeta(_, _)).WillByDefault(Return(false));
+    ON_CALL(mockFlushCmdManager, CanFlushMeta(_)).WillByDefault(Return(false));
 
-    bool actual, expected{true};
+    bool actual, expected{false};
 
     // When: Execute
+    flushIo->IncreaseStripeCnt();
+    actual = flushCmdHandler.Execute();
+
+    // Then: return false
+    ASSERT_EQ(expected, actual);
+
+    expected = true;
+    // When: Execute
+    flushIo->DecreaseStripeCnt();
     actual = flushCmdHandler.Execute();
 
     // Then: return true
@@ -145,13 +194,16 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseMetaFlushInProgress_IsStripeMa
         &mockIWBStripeAllocator, &mockIContextManager, &mockIMapFlush);
 
     ON_CALL(mockFlushCmdManager, IsFlushEnabled()).WillByDefault(Return(true));
+    ON_CALL(mockFlushCmdManager, TrySetFlushInProgress(_)).WillByDefault(Return(true));
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
     ON_CALL(mockIWBStripeAllocator, FlushActiveStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIWBStripeAllocator, WaitStripesFlushCompletion(_)).WillByDefault(Return(true));
+    ON_CALL(mockIWBStripeAllocator, GetWbStripes(_)).WillByDefault(Return());
     ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _, _)).WillByDefault(Return(0));
     ON_CALL(mockIBlockAllocator, UnblockAllocating(_)).WillByDefault(Return());
-    ON_CALL(mockFlushCmdManager, CanFlushMeta(_, _)).WillByDefault(Return(true));
+    ON_CALL(mockFlushCmdManager, CanFlushMeta(_)).WillByDefault(Return(true));
     ON_CALL(mockIContextManager, FlushContexts(_, false)).WillByDefault(Return(0));
+    ON_CALL(mockFlushCmdManager, FinishMetaFlush()).WillByDefault(Return());
+    ON_CALL(mockFlushCmdManager, ResetFlushInProgress(_, _)).WillByDefault(Return());
 
     bool actual, expected{false};
 
@@ -159,6 +211,25 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseMetaFlushInProgress_IsStripeMa
     actual = flushCmdHandler.Execute();
 
     // Then: return false
+    ASSERT_EQ(expected, actual);
+
+    flushIo->SetStripeMapFlushComplete(true);
+    flushIo->SetAllocatorFlushComplete(true);
+
+    // When: Execute
+    actual = flushCmdHandler.Execute();
+
+    // Then: return false
+    ASSERT_EQ(expected, actual);
+
+    flushIo->SetVsaMapFlushComplete(true);
+    flushIo->SetInternalFlush(true);
+
+    // When: Execute
+    expected = true;
+    actual = flushCmdHandler.Execute();
+
+    // Then: return true
     ASSERT_EQ(expected, actual);
 }
 

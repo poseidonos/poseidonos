@@ -71,6 +71,7 @@ MapContent::Init(uint64_t numEntries, uint64_t entrySize, uint64_t mpageSize)
         {
             mapHeader = new MapHeader();
             mapHeader->Init(numMpages, mpageSize);
+            mapHeader->SetMapId(mapId);
         }
         if (mapIoHandler == nullptr)
         {

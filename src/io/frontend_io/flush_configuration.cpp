@@ -45,6 +45,8 @@ FlushConfiguration::FlushConfiguration(void)
 
 FlushConfiguration::FlushConfiguration(ConfigManager* configManager)
 : enabled(false),
+  internalFlushEnabled(false),
+  internalFlushThreshold(100),
   configManager(configManager)
 {
     bool flushEnableInConfig = _ReadFlushEnableFromConfig();
@@ -64,6 +66,8 @@ FlushConfiguration::FlushConfiguration(ConfigManager* configManager)
         if (enabled == true)
         {
             POS_TRACE_INFO(EID(FLUSH_HANDLING_ENABLED), "Flush command handling is enabled");
+            internalFlushThreshold = _ReadFlushInternalThresholdFromConfig();
+            internalFlushEnabled = _ReadInternalFlushEnableFromConfig();
         }
         else
         {
@@ -101,9 +105,49 @@ FlushConfiguration::_ReadJournalEnableFromConfig(void)
 }
 
 bool
+FlushConfiguration::_ReadInternalFlushEnableFromConfig(void)
+{
+    bool enabled;
+    int ret = configManager->GetValue("flush", "internal_flush_enable",
+        static_cast<void*>(&enabled), CONFIG_TYPE_BOOL);
+
+    if (ret != 0)
+    {
+        enabled = false;
+    }
+    return enabled;
+}
+
+int
+FlushConfiguration::_ReadFlushInternalThresholdFromConfig(void)
+{
+    int threshold;
+    int ret = configManager->GetValue("flush", "internal_flush_threshold",
+        static_cast<void*>(&threshold), CONFIG_TYPE_INT);
+
+    if (ret != 0)
+    {
+        threshold = 100;
+    }
+    return threshold;
+}
+
+bool
 FlushConfiguration::IsEnabled(void)
 {
     return enabled;
+}
+
+bool
+FlushConfiguration::IsInternalFlushEnabled(void)
+{
+    return internalFlushEnabled;
+}
+
+int
+FlushConfiguration::GetInternalFlushThreshold(void)
+{
+    return internalFlushThreshold;
 }
 
 } // namespace pos

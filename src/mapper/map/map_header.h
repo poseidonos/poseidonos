@@ -72,6 +72,9 @@ public:
     void UpdateNumUsedBlks(VirtualBlkAddr vsa);
     uint64_t GetNumUsedBlks(void) { return numUsedBlks; }
 
+    int GetMapId(void) { return mapId; }
+    void SetMapId(int mapId_) { mapId = mapId_; }
+
 private:
     std::mutex mpageHeaderLock;
 
@@ -80,6 +83,8 @@ private:
     std::atomic<uint64_t> numUsedBlks;
     BitMap* mPageMap;
     BitMap* touchedMpages;
+
+    int mapId;
 };
 
 }   // namespace pos

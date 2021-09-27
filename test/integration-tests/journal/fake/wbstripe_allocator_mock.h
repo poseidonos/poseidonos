@@ -28,7 +28,7 @@ public:
     virtual void DereferLsidCnt(StripeAddr& lsa, uint32_t blockCount) override {}
 
     virtual void FlushActiveStripes(uint32_t volumeId) {}
-    virtual bool WaitStripesFlushCompletion(uint32_t volumeId) { return true; }
+    virtual void GetWbStripes(FlushIoSmartPtr flushIo) {}
 
     virtual void FlushAllActiveStripes(void) override {}
     virtual int FlushPendingActiveStripes(void) { return 0; }

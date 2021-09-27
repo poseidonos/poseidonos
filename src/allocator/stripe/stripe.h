@@ -40,6 +40,7 @@
 
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/include/allocator_const.h"
+#include "src/bio/flush_io.h"
 #include "src/mapper/reversemap/reverse_map.h"
 
 namespace pos
@@ -89,6 +90,8 @@ public:
     virtual DataBufferIter DataBufferEnd(void);
     virtual bool IsGcDestStripe(void);
 
+    virtual void UpdateFlushIo(FlushIoSmartPtr flushIo);
+
 protected: // for UT
     ASTailArrayIdx asTailArrayIdx;
     StripeId vsid; // SSD LSID, Actually User Area LSID
@@ -103,6 +106,9 @@ protected: // for UT
     std::vector<VirtualBlkAddr> oldVsaList;
     uint32_t totalBlksPerUserStripe;
     bool withDataBuffer;
+
+    FlushIoSmartPtr flushIo;
+    std::mutex flushIoUpdate;
 };
 
 } // namespace pos

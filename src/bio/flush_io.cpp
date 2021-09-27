@@ -40,7 +40,11 @@ FlushIo::FlushIo(int arrayId)
 : Ubio(nullptr, 0, arrayId),
   volumeId(MAX_VOLUME_COUNT),
   originCore(EventFrameworkApiSingleton::Instance()->GetCurrentReactor()),
-  state(FLUSH__BLOCK_ALLOCATION),
+  state(FLUSH__BLOCKING_ALLOCATION),
+  isInternalFlush(false),
+  stripeCnt(0),
+  stripesScanComplete(false),
+  stripesFlushComplete(false),
   vsaMapFlushComplete(false),
   stripeMapFlushComplete(false),
   allocatorFlushComplete(false),
@@ -128,6 +132,52 @@ void
 FlushIo::SetStripeMapAllocatorFlushComplete(bool metaFlushComplete)
 {
     this->metaFlushComplete = metaFlushComplete;
+}
+
+void
+FlushIo::IncreaseStripeCnt(void)
+{
+    stripeCnt++;
+}
+
+void
+FlushIo::DecreaseStripeCnt(void)
+{
+    stripeCnt--;
+
+    if (stripeCnt == 0 && stripesScanComplete == true)
+    {
+        stripesFlushComplete = true;
+    }
+}
+
+void
+FlushIo::StripesScanComplete(void)
+{
+    stripesScanComplete = true;
+
+    if (stripeCnt == 0)
+    {
+        stripesFlushComplete = true;
+    }
+}
+
+bool
+FlushIo::IsStripesFlushComplete(void)
+{
+    return stripesFlushComplete;
+}
+
+bool
+FlushIo::IsInternalFlush(void)
+{
+    return isInternalFlush;
+}
+
+void
+FlushIo::SetInternalFlush(bool isInternalFlush)
+{
+    this->isInternalFlush = isInternalFlush;
 }
 
 } // namespace pos

@@ -28,7 +28,7 @@ TEST(IWBStripeAllocator, FlushActiveStripes_)
 {
 }
 
-TEST(IWBStripeAllocator, WaitStripesFlushCompletion_)
+TEST(IWBStripeAllocator, GetWbStripes_)
 {
 }
 

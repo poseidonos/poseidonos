@@ -32,14 +32,22 @@
 
 #include "src/io/frontend_io/flush_command_manager.h"
 
+#include "src/array_mgmt/array_manager.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/io/frontend_io/flush_command_handler.h"
 
 namespace pos
 {
+static const uint64_t MAX_THRESHOLD = 100;
+
 FlushCmdManager::FlushCmdManager(void)
 : metaFlushInProgress(false)
 {
+    for (int i = 0; i< MAX_VOLUME_COUNT; i++)
+    {
+        flushInProgress[i] = false;
+    }
 }
 
 FlushCmdManager::~FlushCmdManager(void)
@@ -53,7 +61,7 @@ FlushCmdManager::IsFlushEnabled(void)
 }
 
 bool
-FlushCmdManager::CanFlushMeta(int core, FlushIoSmartPtr flushIo)
+FlushCmdManager::CanFlushMeta(FlushIoSmartPtr flushIo)
 {
     std::unique_lock<std::mutex> lock(metaFlushLock);
 
@@ -85,7 +93,63 @@ FlushCmdManager::FinishMetaFlush(void)
         EventSmartPtr flushCmdHandler =
                 std::make_shared<FlushCmdHandler>(flushIo);
 
-        SpdkEventScheduler::SendSpdkEvent(flushIo->GetOriginCore(), flushCmdHandler);
+        if (flushIo->IsInternalFlush() == true)
+        {
+            EventSchedulerSingleton::Instance()->EnqueueEvent(flushCmdHandler);
+        }
+        else
+        {
+            SpdkEventScheduler::SendSpdkEvent(flushIo->GetOriginCore(), flushCmdHandler);
+        }
+    }
+}
+
+void
+FlushCmdManager::UpdateVSANewEntries(uint32_t volId, int arrayId)
+{
+    {
+        std::unique_lock<std::mutex> lock(createAndExecFlushLock);
+        if (backendFlushInProgress[volId] == true)
+        {
+            return;
+        }
+        backendFlushInProgress[volId] = true;
+    }
+
+    FlushIoSmartPtr flushIo(new FlushIo(arrayId));
+    flushIo->SetVolumeId(volId);
+    flushIo->SetInternalFlush(true);
+
+    EventSmartPtr flushCmdHandler(new FlushCmdHandler(flushIo));
+    EventSchedulerSingleton::Instance()->EnqueueEvent(flushCmdHandler);
+}
+
+bool
+FlushCmdManager::IsInternalFlushEnabled(void)
+{
+    return config.IsInternalFlushEnabled();
+}
+
+int
+FlushCmdManager::GetInternalFlushThreshold(void)
+{
+    return config.GetInternalFlushThreshold();
+}
+
+bool
+FlushCmdManager::TrySetFlushInProgress(uint32_t volId)
+{
+    return (flushInProgress[volId].exchange(true) == false);
+}
+
+void
+FlushCmdManager::ResetFlushInProgress(uint32_t volId, bool isBackendFlush)
+{
+    flushInProgress[volId] = false;
+
+    if (isBackendFlush == true)
+    {
+        backendFlushInProgress[volId] = false;
     }
 }
 

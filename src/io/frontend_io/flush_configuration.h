@@ -42,11 +42,17 @@ public:
     FlushConfiguration(void);
     explicit FlushConfiguration(ConfigManager* configManager);
     bool IsEnabled(void);
+    bool IsInternalFlushEnabled(void);
+    int GetInternalFlushThreshold(void);
 
 private:
     bool _ReadFlushEnableFromConfig(void);
     bool _ReadJournalEnableFromConfig(void);
+    bool _ReadInternalFlushEnableFromConfig(void);
+    int _ReadFlushInternalThresholdFromConfig(void);
     bool enabled;
+    bool internalFlushEnabled;
+    int internalFlushThreshold;
     ConfigManager* configManager;
 };
 

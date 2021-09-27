@@ -35,10 +35,10 @@
 #include <list>
 #include <mutex>
 
-#include "src/allocator/stripe/stripe.h"
 #include "src/bio/flush_io.h"
 #include "src/io/frontend_io/flush_configuration.h"
 #include "src/lib/singleton.h"
+#include "src/volume/volume_base.h"
 
 namespace pos
 {
@@ -48,12 +48,20 @@ public:
     FlushCmdManager(void);
     virtual ~FlushCmdManager(void);
     virtual bool IsFlushEnabled(void);
-    virtual bool CanFlushMeta(int core, FlushIoSmartPtr flushIo);
+    virtual bool CanFlushMeta(FlushIoSmartPtr flushIo);
     virtual void FinishMetaFlush(void);
+    virtual void UpdateVSANewEntries(uint32_t volId, int arrayId);
+    virtual bool IsInternalFlushEnabled(void);
+    virtual int GetInternalFlushThreshold(void);
+    virtual bool TrySetFlushInProgress(uint32_t volId);
+    virtual void ResetFlushInProgress(uint32_t volId, bool isBackendFlush);
 
 private:
     std::mutex metaFlushLock;
+    std::mutex createAndExecFlushLock;
+    std::atomic<bool> flushInProgress[MAX_VOLUME_COUNT];
     std::list<FlushIoSmartPtr> flushEvents;
+    bool backendFlushInProgress[MAX_VOLUME_COUNT];
     bool metaFlushInProgress;
     FlushConfiguration config;
 };
