@@ -13,11 +13,11 @@ TEST(Metric, GetId_)
     Metric* basetype = new Metric();
     time_t cur = std::time(nullptr);
     std::string timestring = "time";
-    basetype->SetCommonMetric(TEL_ALLOCATOR_GCVICTIM_SEGMENT, cur, timestring);
+    basetype->SetCommonMetric(TEL003_ALCT_GCVICTIM_SEG, cur, timestring);
     // when
     std::string ret = basetype->GetId();
     // then
-    EXPECT_EQ(TEL_ALLOCATOR_GCVICTIM_SEGMENT, ret);
+    EXPECT_EQ(TEL003_ALCT_GCVICTIM_SEG, ret);
     delete basetype;
 }
 
@@ -27,7 +27,7 @@ TEST(Metric, GetTime_)
     Metric* basetype = new Metric();
     time_t cur = std::time(nullptr);
     std::string timestring = "time";
-    basetype->SetCommonMetric(TEL_ALLOCATOR_GCVICTIM_SEGMENT, cur, timestring);
+    basetype->SetCommonMetric(TEL003_ALCT_GCVICTIM_SEG, cur, timestring);
     // when
     time_t ret = basetype->GetTime();
     // then
@@ -41,7 +41,7 @@ TEST(Metric, GetTimeString_)
     Metric* basetype = new Metric();
     time_t cur = std::time(nullptr);
     std::string timestring = "time";
-    basetype->SetCommonMetric(TEL_ALLOCATOR_GCVICTIM_SEGMENT, cur, timestring);
+    basetype->SetCommonMetric(TEL003_ALCT_GCVICTIM_SEG, cur, timestring);
     // when
     std::string ret = basetype->GetTimeString();
     // then
@@ -59,7 +59,7 @@ TEST(MetricUint32, GetValue_)
     MetricUint32* metric = new MetricUint32();
     time_t cur = std::time(nullptr);
     std::string timestring = "time";
-    metric->SetMetric(TEL_ALLOCATOR_GCVICTIM_SEGMENT, cur, 50, timestring);
+    metric->SetMetric(TEL003_ALCT_GCVICTIM_SEG, cur, 50, timestring);
     // when
     uint32_t ret = metric->GetValue();
     // then

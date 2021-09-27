@@ -491,11 +491,11 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAn
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
     EXPECT_CALL(*allocCtx, ReleaseSegment).Times(1);
     EXPECT_CALL(*allocCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
-    EXPECT_CALL(tc, PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, 10)).Times(1);
+    EXPECT_CALL(tc, PublishData(TEL001_ALCT_FREE_SEG_CNT, 10)).Times(1);
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store(REBUILD_CTX, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_URGENT_GC));
-    EXPECT_CALL(tc, PublishData(TEL_ALLOCATOR_GCMODE, _)).Times(1);
+    EXPECT_CALL(tc, PublishData(TEL004_ALCT_GCMODE, _)).Times(1);
 
     // when
     ctxManager.UpdateOccupiedStripeCount(5);
@@ -520,12 +520,12 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAn
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
     EXPECT_CALL(*allocCtx, ReleaseSegment).Times(1);
     EXPECT_CALL(*allocCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
-    EXPECT_CALL(tc, PublishData(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, 10)).Times(1);
+    EXPECT_CALL(tc, PublishData(TEL001_ALCT_FREE_SEG_CNT, 10)).Times(1);
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store(REBUILD_CTX, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NORMAL_GC));
     EXPECT_CALL(*blockAllocStatus, PermitUserBlockAllocation).Times(1);
-    EXPECT_CALL(tc, PublishData(TEL_ALLOCATOR_GCMODE, _)).Times(1);
+    EXPECT_CALL(tc, PublishData(TEL004_ALCT_GCMODE, _)).Times(1);
 
     // when
     ctxManager.UpdateOccupiedStripeCount(5);

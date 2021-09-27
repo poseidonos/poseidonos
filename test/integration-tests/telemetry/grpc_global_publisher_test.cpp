@@ -20,7 +20,7 @@ TEST(GrpcGlobalPublisher, GrpcGlobalPublisher_TestPublishServerWithUint32Metric)
     // Given: a grpc client
     GrpcGlobalPublisher* grpcClient = new GrpcGlobalPublisher(tmServer, nullptr);
     MetricUint32 metric;
-    metric.SetMetric(TEL_ALLOCATOR_FREE_SEGMENT_COUNT, std::time(nullptr), 10, "time");
+    metric.SetMetric(TEL001_ALCT_FREE_SEG_CNT, std::time(nullptr), 10, "time");
 
     // When 1: publish()
     int ret = grpcClient->PublishToServer(metric);

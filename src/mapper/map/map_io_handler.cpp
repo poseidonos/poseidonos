@@ -344,9 +344,6 @@ MapIoHandler::_MpageAsyncLoaded(AsyncMetaFileIoCtx* ctx)
         ioError = mPageLoadReqCtx->error;
         POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "MFS AsyncIO error, ioError:{}  startMpage:{} numMpages:{}", ioError, startMpage, numMpages);
     }
-
-    POS_TRACE_DEBUG(EID(MAP_LOAD_ONGOING), "mapId:{}  startMpage:{} numMpages:{} async load completed ", mapId, startMpage, numMpages);
-
     bool loadCompleted = _IncreaseAsyncIoDonePageNum(numMpages);
     if (loadCompleted)
     {
