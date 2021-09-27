@@ -404,6 +404,38 @@ TEST_F(MetaVolumeContainerTexture, CheckInode)
     delete nvramVolume;
 }
 
+TEST_F(MetaVolumeContainerTexture, CopyInode_testIfTheInodeInfoIsNullptr)
+{
+    std::string fileName = "TESTFILE";
+    MetaFileInodeInfo* inodeInfo = nullptr;
+
+    EXPECT_CALL(*ssdVolume, CopyInodeToInodeInfo).WillOnce(Return(false));
+
+    bool result = container->CopyInodeToInodeInfo(0, MetaVolumeType::SsdVolume, inodeInfo);
+    EXPECT_EQ(result, false);
+
+    delete ssdVolume;
+    delete nvramVolume;
+}
+
+TEST_F(MetaVolumeContainerTexture, CopyInode_testIfCopyMethodWillBeSuccess)
+{
+    std::string fileName = "TESTFILE";
+    MetaFileInodeInfo inodeInfo;
+    MetaFileInode inode;
+    inode.data.basic.field.fileName = &fileName;
+    inode.data.basic.field.fd = 0;
+
+    EXPECT_CALL(*ssdVolume, CopyInodeToInodeInfo).WillOnce(Return(true));
+
+    bool result = container->CopyInodeToInodeInfo(0, MetaVolumeType::SsdVolume, &inodeInfo);
+
+    EXPECT_EQ(result, true);
+
+    delete ssdVolume;
+    delete nvramVolume;
+}
+
 TEST_F(MetaVolumeContainerTexture, CheckLookupFile0_Positive)
 {
     EXPECT_CALL(*ssdVolume, LookupNameByDescriptor).WillOnce(Return("1"));

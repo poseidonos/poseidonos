@@ -606,6 +606,32 @@ TEST_F(MetaVolumeFixture, CheckInode)
         inode.data.basic.field.pagemap[0].GetCount());
 }
 
+TEST_F(MetaVolumeFixture, CopyInode_testIfTheInodeInfoIsNullptr)
+{
+    std::string fileName = "TESTFILE";
+    MetaFileInodeInfo* inodeInfo = nullptr;
+
+    bool result = metaVolume->CopyInodeToInodeInfo(0, inodeInfo);
+    EXPECT_EQ(result, false);
+}
+
+TEST_F(MetaVolumeFixture, CopyInode_testIfCopyMethodWillBeSuccess)
+{
+    std::string fileName = "TESTFILE";
+    MetaFileInodeInfo inodeInfo;
+    MetaFileInode inode;
+    inode.data.basic.field.fileName = &fileName;
+    inode.data.basic.field.fd = 0;
+
+    EXPECT_CALL(*inodeMgr, GetFileInode).WillOnce(ReturnRef(inode));
+
+    bool result = metaVolume->CopyInodeToInodeInfo(0, &inodeInfo);
+
+    EXPECT_EQ(result, true);
+    EXPECT_EQ((fileName == inodeInfo.data.field.fileName) ? true : false, true);
+    EXPECT_EQ(inodeInfo.data.field.fd, 0);
+}
+
 TEST(MetaVolume, Create)
 {
     MetaVolumeTester vol(0, MetaVolumeType::SsdVolume);

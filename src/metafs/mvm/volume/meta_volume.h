@@ -87,6 +87,8 @@ public:
     // interfaces
     virtual MetaFileInode& GetInode(FileDescriptorType fd);
     virtual void GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList);
+    virtual bool CopyInodeToInodeInfo(FileDescriptorType fd,
+        MetaFileInodeInfo* inodeInfo /* output */);
 
     virtual uint32_t GetUtilizationInPercent(void);
     virtual size_t GetAvailableSpace(void);

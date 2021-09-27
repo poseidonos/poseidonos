@@ -393,6 +393,8 @@ TEST_F(MetaVolumeHandlerFixture, GetInode_Positive)
             .WillRepeatedly(Return(0));
     EXPECT_CALL(*container, GetInode)
             .WillRepeatedly(ReturnRef(inode));
+    EXPECT_CALL(*container, CopyInodeToInodeInfo)
+            .WillOnce(Return(true));
 
     EXPECT_EQ(handler->HandleGetFileInodeReq(msg),
         POS_EVENT_ID::SUCCESS);

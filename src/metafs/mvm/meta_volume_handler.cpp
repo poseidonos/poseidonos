@@ -278,12 +278,20 @@ MetaVolumeHandler::HandleGetFileInodeReq(MetaFsFileControlRequest& reqMsg)
 
     MetaFileInodeInfo* inodeInfo = new MetaFileInodeInfo();
     FileDescriptorType fd = volContainer->LookupFileDescByName(*reqMsg.fileName);
-    MetaFileInode& inode = volContainer->GetInode(fd, volumeType);
-    inode.SetMetaFileInfo(MetaFileUtil::ConvertToMediaType(volumeType), *inodeInfo);
 
-    reqMsg.completionData.inodeInfoPointer = inodeInfo;
+    if (true == volContainer->CopyInodeToInodeInfo(fd, volumeType, inodeInfo))
+    {
+        reqMsg.completionData.inodeInfoPointer = inodeInfo;
+    }
+    else
+    {
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            "The inodeInfo is not valid.");
 
-    return POS_EVENT_ID::SUCCESS;
+        rc = POS_EVENT_ID::MFS_INVALID_PARAMETER;
+    }
+
+    return rc;
 }
 
 POS_EVENT_ID

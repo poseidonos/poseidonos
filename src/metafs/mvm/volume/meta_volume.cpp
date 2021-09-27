@@ -109,9 +109,10 @@ MetaVolume::_SetupRegionInfoToRegionMgrs(MetaStorageSubsystem* metaStorage)
         catalogMgr | inodeMgr->Header | inodeMgr->table
         fileMgr starts from here! => sumOfRegionBaseLpn
      ************************************************************/
-    for (auto region : Enum<MetaRegionManagerType>()) // catalogMgr/inodeMgr/fileMgr
+    // catalogMgr/inodeMgr/fileMgr
+    for (int idx = (int)MetaRegionManagerType::First; idx <= (int)MetaRegionManagerType::Last; ++idx)
     {
-        OnVolumeMetaRegionManager& regionMgr = _GetRegionMgr(region);
+        OnVolumeMetaRegionManager& regionMgr = _GetRegionMgr((MetaRegionManagerType)idx);
         regionMgr.Init(volumeType, targetBaseLpn, maxVolumeLpn);
         regionMgr.SetMss(metaStorage);
 
@@ -149,9 +150,9 @@ MetaVolume::_RegisterRegionMgr(MetaRegionManagerType region, OnVolumeMetaRegionM
 void
 MetaVolume::_BringupMgrs(void)
 {
-    for (auto region : Enum<MetaRegionManagerType>())
+    for (int idx = (int)MetaRegionManagerType::First; idx <= (int)MetaRegionManagerType::Last; ++idx)
     {
-        MetaRegionManager& regionMgr = _GetRegionMgr(region);
+        MetaRegionManager& regionMgr = _GetRegionMgr((MetaRegionManagerType)idx);
         regionMgr.Bringup();
     }
 
@@ -162,9 +163,9 @@ MetaVolume::_BringupMgrs(void)
 void
 MetaVolume::_FinalizeMgrs(void)
 {
-    for (auto region : Enum<MetaRegionManagerType>())
+    for (int idx = (int)MetaRegionManagerType::First; idx <= (int)MetaRegionManagerType::Last; ++idx)
     {
-        MetaRegionManager& regionMgr = _GetRegionMgr(region);
+        MetaRegionManager& regionMgr = _GetRegionMgr((MetaRegionManagerType)idx);
         regionMgr.Finalize();
     }
 
@@ -336,6 +337,23 @@ MetaFileInode&
 MetaVolume::GetInode(FileDescriptorType fd)
 {
     return inodeMgr->GetFileInode(fd);
+}
+
+bool
+MetaVolume::CopyInodeToInodeInfo(FileDescriptorType fd,
+    MetaFileInodeInfo* inodeInfo /* output */)
+{
+    bool result = false;
+
+    if (nullptr != inodeInfo)
+    {
+        MetaFileInode& inode = GetInode(fd);
+        inode.SetMetaFileInfo(MetaFileUtil::ConvertToMediaType(volumeType), *inodeInfo);
+
+        result = true;
+    }
+
+    return result;
 }
 
 uint32_t

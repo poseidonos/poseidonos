@@ -34,7 +34,6 @@
 
 #include <vector>
 
-#include "enum_iterator.h"
 #include "metafs_common.h"
 #include "read_mpio.h"
 #include "write_mpio.h"
@@ -52,14 +51,14 @@ MpioPool::MpioPool(uint32_t poolSize)
     mdPageBufPool = new MDPageBufPool(poolSize * (uint32_t)MpioType::Max);
     mdPageBufPool->Init();
 
-    for (auto type : Enum<MpioType>())
+    for (int idx = (int)MpioType::First; idx <= (int)MpioType::Last; ++idx)
     {
         int numMpio = poolSize;
         while (numMpio-- != 0)
         {
             Mpio* mpio;
             void* mdPageBuf = mdPageBufPool->PopNewBuf();
-            switch (type)
+            switch ((MpioType)idx)
             {
                 case MpioType::Read:
                 {
@@ -75,7 +74,7 @@ MpioPool::MpioPool(uint32_t poolSize)
                     assert(false);
             }
             mpio->InitStateHandler();
-            mpioList[(uint32_t)type].push_back(mpio);
+            mpioList[idx].push_back(mpio);
         }
     }
 
@@ -91,10 +90,10 @@ MpioPool::~MpioPool(void)
 #endif
 
     delete mdPageBufPool;
-    for (auto type : Enum<MpioType>())
+    for (int idx = (int)MpioType::First; idx <= (int)MpioType::Last; ++idx)
     {
-        _FreeAllMpioinPool(type);
-        mpioList[(uint32_t)type].clear();
+        _FreeAllMpioinPool((MpioType)idx);
+        mpioList[idx].clear();
     }
 }
 

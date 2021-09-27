@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/metafs/util/enum_iterator.h"
+#include "src/metafs/mim/enum_iterator.h"
 
 namespace pos
 {

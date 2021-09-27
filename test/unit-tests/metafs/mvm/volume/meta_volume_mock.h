@@ -44,6 +44,8 @@ public:
         (std::vector<MetaFileInfoDumpCxt>*& fileInfoList));
     MOCK_METHOD(MetaFileInode&, GetInode,
         (FileDescriptorType fd));
+    MOCK_METHOD(bool, CopyInodeToInodeInfo,
+        (FileDescriptorType fd, MetaFileInodeInfo* inodeInfo /* output */));
     MOCK_METHOD(std::string, LookupNameByDescriptor,
         (FileDescriptorType fd));
     MOCK_METHOD(FileDescriptorType, LookupDescriptorByName,

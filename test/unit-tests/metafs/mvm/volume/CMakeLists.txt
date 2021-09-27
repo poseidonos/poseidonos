@@ -1,5 +1,4 @@
 POS_ADD_UNIT_TEST(inode_table_header_ut inode_table_header_test.cpp)
-POS_ADD_UNIT_TEST(meta_region_type_ut meta_region_type_test.cpp)
 POS_ADD_UNIT_TEST(meta_volume_ut meta_volume_test.cpp)
 POS_ADD_UNIT_TEST(catalog_ut catalog_test.cpp)
 POS_ADD_UNIT_TEST(meta_volume_state_ut meta_volume_state_test.cpp)

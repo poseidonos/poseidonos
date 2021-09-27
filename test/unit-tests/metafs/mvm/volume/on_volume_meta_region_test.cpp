@@ -1,5 +1,5 @@
 #include "src/metafs/mvm/volume/on_volume_meta_region.h"
-#include "src/metafs/mvm/volume/meta_region_type.h"
+#include "src/metafs/mvm/meta_region_type.h"
 #include "src/metafs/mvm/volume/catalog.h"
 #include "src/metafs/mvm/volume/inode_table.h"
 #include "src/metafs/mvm/volume/inode_table_header.h"

@@ -31,7 +31,8 @@
  */
 
 #pragma once
-#include "src/metafs/util/enum_iterator.h"
+#include "src/metafs/mim/enum_iterator.h"
+
 namespace pos
 {
 // MetaFS AIO functionality: client <-> metafs <-> mss.pstore

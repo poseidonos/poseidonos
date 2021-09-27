@@ -417,6 +417,13 @@ MetaVolumeContainer::GetInode(FileDescriptorType fd, MetaVolumeType volumeType)
     return volumeContainer[volumeType]->GetInode(fd);
 }
 
+bool
+MetaVolumeContainer::CopyInodeToInodeInfo(FileDescriptorType fd,
+        MetaVolumeType volumeType, MetaFileInodeInfo* inodeInfo /* output */)
+{
+    return volumeContainer[volumeType]->CopyInodeToInodeInfo(fd, inodeInfo);
+}
+
 POS_EVENT_ID
 MetaVolumeContainer::LookupMetaVolumeType(FileDescriptorType fd, MetaVolumeType volumeType)
 {

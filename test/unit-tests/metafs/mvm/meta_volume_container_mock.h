@@ -39,6 +39,9 @@ public:
     MOCK_METHOD(FileDescriptorType, LookupFileDescByName, (std::string& fileName));
     MOCK_METHOD(MetaFileInode&, GetInode, (FileDescriptorType fd, MetaVolumeType volumeType));
     MOCK_METHOD(void, GetInodeList, (std::vector<MetaFileInfoDumpCxt>*& fileInfoList));
+    MOCK_METHOD(bool, CopyInodeToInodeInfo,
+                    (FileDescriptorType fd, MetaVolumeType volumeType,
+                    MetaFileInodeInfo* inodeInfo /* output */));
 
     MOCK_METHOD(VolumeAndResult, DetermineVolumeToCreateFile,
                     (FileSizeType fileByteSize, MetaFilePropertySet& prop,

@@ -92,6 +92,8 @@ public:
     virtual FileDescriptorType LookupFileDescByName(std::string& fileName);
     virtual MetaFileInode& GetInode(FileDescriptorType fd, MetaVolumeType volumeType);
     virtual void GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList);
+    virtual bool CopyInodeToInodeInfo(FileDescriptorType fd,
+                    MetaVolumeType volumeType, MetaFileInodeInfo* inodeInfo /* output */);
 
     virtual VolumeAndResult DetermineVolumeToCreateFile(
                     FileSizeType fileByteSize, MetaFilePropertySet& prop,
