@@ -23,7 +23,7 @@ poseidonos-cli array delete [flags]
 
 ```
   -a, --array-name string   The name of the array to delete
-      --force               Force to delete this array.
+      --force               Force to delete this array (array must be unmounted first).
   -h, --help                help for delete
 ```
 

@@ -90,5 +90,5 @@ func init() {
 
 	DeleteArrayCmd.Flags().BoolVarP(&delete_array_isForced,
 		"force", "", false,
-		"Force to delete this array.")
+		"Force to delete this array (array must be unmounted first).")
 }

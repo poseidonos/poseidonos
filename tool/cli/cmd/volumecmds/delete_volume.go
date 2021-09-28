@@ -101,5 +101,5 @@ func init() {
 
 	DeleteVolumeCmd.Flags().BoolVarP(&delete_volume_isForced,
 		"force", "", false,
-		"Force to delete the volume.")
+		"Force to delete the volume (volume must be unmounted first).")
 }

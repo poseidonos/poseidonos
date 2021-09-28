@@ -23,7 +23,7 @@ poseidonos-cli volume delete [flags]
 
 ```
   -a, --array-name string    The Name of the array where the volume belongs to.
-      --force                Force to delete the volume.
+      --force                Force to delete the volume (volume must be unmounted first).
   -h, --help                 help for delete
   -v, --volume-name string   The Name of the volume to delete.
 ```
