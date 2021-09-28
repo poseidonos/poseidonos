@@ -60,7 +60,7 @@ target_ip=10.1.11.254
 target_fabric_ip=10.100.11.254
 target_port=1158
 
-ip="10.100.11.28"
+ip=`hostname -I | awk '{print $NF}'`
 test_iteration=2000
 totalsize=100 #pm : 12500
 volcnt=4
@@ -455,6 +455,22 @@ sed 's/},{/\n /g' $FilesInfoOutput > result.txt
 cat ${scriptPath}/result.txt
 
 echo ----------------------------------
+
+echo --------------------------------------------------------------------
+
+echo ------------[JournalManager WBT CMDs]-------------------------------
+echo --------------------------------------------------------------------
+
+echo -[JournalManager : get_journal_status ]-----------------------------
+${BIN_DIR}/poseidonos-cli wbt get_journal_status --array $ARRAYNAME --json-res > ${cliOutput}
+check_result
+
+echo --------------------------------------------------------------------
+echo ------- [WBT list] -------------------------------------------------
+${BIN_DIR}/poseidonos-cli wbt list_wbt --json-res > ${cliOutput}
+check_result
+
+${BIN_DIR}/poseidonos-cli wbt flush_gcov
 
 rm -rf result.txt
 rm -rf ${inputFile}
