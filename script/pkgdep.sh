@@ -59,7 +59,7 @@ if [ -f /etc/debian_version ]; then
     # for cli man page
     apt-get install -y mandoc
     # for yaml cpp
-    apt-get install -y libyaml-cpp0.5v5 libyaml-cpp-dev
+    apt-get install -y libyaml-cpp-dev
 
 else
     echo "pkgdep: unknown system type."

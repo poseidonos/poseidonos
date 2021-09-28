@@ -67,7 +67,8 @@ Hardware: Poseidon server
 
 | Config | Value |
 | ------ | ----- |
-| OS     | Ubuntu 5.3.0-24-generic      |
+| OS  | Ubuntu 18.04 |
+| Kernel     | 5.3.0-24-generic      |
 | Hostname | R2U14-PSD-3 |
 | $POS_HOME | /poseidonos |
 | POS location | $POS_HOME/bin/poseidonos <br/> $POS_HOME/bin/poseidonos-cli |
