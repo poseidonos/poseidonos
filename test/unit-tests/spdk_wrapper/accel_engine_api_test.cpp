@@ -1,79 +1,64 @@
 #include "src/spdk_wrapper/accel_engine_api.h"
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
+
+using namespace std;
+using ::testing::_;
+using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos
 {
-TEST(IoatArgument, IoatArgument_)
+TEST(IoatArgument, IoatArgument_Stack)
 {
+    IoatArgument ioatArgument(nullptr, nullptr, 0, nullptr, nullptr);
+}
+
+TEST(IoatArgument, IoatArgument_Heap)
+{
+    IoatArgument* ioatArgument = new IoatArgument(nullptr, nullptr, 0, nullptr, nullptr);
+    delete ioatArgument;
 }
 
 } // namespace pos
 
 namespace pos
 {
-TEST(AccelEngineApi, Initialize_)
+TEST(AccelEngineApi, Finalize_Fail)
 {
+    NiceMock<MockEventFrameworkApi>* mockEventFrameworkApi = new NiceMock<MockEventFrameworkApi>;
+    EXPECT_CALL(*mockEventFrameworkApi, GetFirstReactor()).WillOnce(Return(0));
+    EXPECT_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, _, _)).WillOnce(Return(false));
+    AccelEngineApi::Finalize(mockEventFrameworkApi);
 }
 
-TEST(AccelEngineApi, SubmitCopy_)
+TEST(AccelEngineApi, IsIoatEnable_Success)
 {
+    bool expected = false;
+    bool actual = AccelEngineApi::IsIoatEnable();
+    EXPECT_EQ(expected, actual);
 }
 
-TEST(AccelEngineApi, Finalize_)
+TEST(AccelEngineApi, GetIoatReactorByIndex_InvalidReactor)
 {
+    int expected = -1;
+    int actual = AccelEngineApi::GetIoatReactorByIndex(2);
+    EXPECT_EQ(expected, actual);
 }
 
-TEST(AccelEngineApi, IsIoatEnable_)
+TEST(AccelEngineApi, GetReactorByIndex_InvalidReactor)
 {
+    int expected = -1;
+    int actual = AccelEngineApi::GetReactorByIndex(3);
 }
 
-TEST(AccelEngineApi, GetIoatReactorByIndex_)
+TEST(AccelEngineApi, GetIoatReactorCount_Success)
 {
-}
-
-TEST(AccelEngineApi, GetReactorByIndex_)
-{
-}
-
-TEST(AccelEngineApi, GetIoatReactorCount_)
-{
-}
-
-TEST(AccelEngineApi, GetReactorCount_)
-{
-}
-
-TEST(AccelEngineApi, GetIoatReactorCountPerNode_)
-{
-}
-
-TEST(AccelEngineApi, _HandleInitialize_)
-{
-}
-
-TEST(AccelEngineApi, _HandleCopy_)
-{
-}
-
-TEST(AccelEngineApi, _HandleFinalize_)
-{
-}
-
-TEST(AccelEngineApi, _IsChannelValid_)
-{
-}
-
-TEST(AccelEngineApi, _SetChannel_)
-{
-}
-
-TEST(AccelEngineApi, _PutChannel_)
-{
-}
-
-TEST(AccelEngineApi, _SetIoat_)
-{
+    uint32_t expected = 0;
+    uint32_t actual = AccelEngineApi::GetIoatReactorCount();
+    EXPECT_EQ(expected, actual);
 }
 
 } // namespace pos

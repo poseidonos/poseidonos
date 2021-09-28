@@ -77,7 +77,6 @@ uint32_t AccelEngineApi::detected_numa_count = 0;
 std::atomic<uint32_t> AccelEngineApi::ioatReactorCount;
 std::atomic<uint32_t> AccelEngineApi::ioatReactorCountPerNode[RTE_MAX_NUMA_NODES];
 std::atomic<uint32_t> AccelEngineApi::reactorCount;
-
 void
 AccelEngineApi::Initialize(void)
 {
@@ -314,11 +313,15 @@ AccelEngineApi::_HandleFinalize(void* arg1)
 }
 
 void
-AccelEngineApi::Finalize(void)
+AccelEngineApi::Finalize(EventFrameworkApi* eventFrameworkApi)
 {
+    if (nullptr == eventFrameworkApi)
+    {
+        eventFrameworkApi = EventFrameworkApiSingleton::Instance();
+    }
     finalized = false;
-    uint32_t firstReactor = EventFrameworkApiSingleton::Instance()->GetFirstReactor();
-    bool success = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(firstReactor,
+    uint32_t firstReactor = eventFrameworkApi->GetFirstReactor();
+    bool success = eventFrameworkApi->SendSpdkEvent(firstReactor,
         _HandleFinalize, nullptr);
 
     if (unlikely(false == success))

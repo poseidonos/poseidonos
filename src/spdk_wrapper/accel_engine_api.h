@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "rte_config.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
 struct spdk_io_channel;
 
@@ -71,7 +72,7 @@ public:
         uint64_t bytes,
         IoatCb cbFunction,
         void* cbArgument);
-    static void Finalize(void);
+    static void Finalize(EventFrameworkApi* eventFrameworkApi = nullptr);
     static bool IsIoatEnable(void);
     static int GetIoatReactorByIndex(uint32_t index);
     static int GetReactorByIndex(uint32_t index);
