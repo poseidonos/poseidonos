@@ -46,6 +46,11 @@ TEST(Preferences, ToJson_)
 
 TEST(Preferences, ApplyFilter_)
 {
+    // Given
+    Preferences pref;
+    // When
+    pref.ApplyFilter("");
+    // Then
 }
 
 TEST(Preferences, ShouldLog_)

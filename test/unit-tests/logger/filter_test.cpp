@@ -16,8 +16,14 @@ TEST(Filter, ApplyFilter_)
 {
 }
 
-TEST(Filter, ShouldLog_)
+TEST(Filter, ShouldLog_testIfEventIdIsZero)
 {
+    // Given
+    Filter filter;
+    // When
+    bool ret = filter.ShouldLog(0);
+    // Then
+    EXPECT_TRUE(ret);
 }
 
 TEST(Filter, IncludeRule_)
