@@ -46,7 +46,7 @@ class MetaFsManagementApi
 {
 public:
     MetaFsManagementApi(void);
-    explicit MetaFsManagementApi(int arrayId);
+    explicit MetaFsManagementApi(int arrayId, MetaFsSystemManager* sysMgr = nullptr);
     virtual ~MetaFsManagementApi(void);
 
     virtual POS_EVENT_ID InitializeSystem(int arrayId,

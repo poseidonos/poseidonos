@@ -40,11 +40,11 @@ MetaFsManagementApi::MetaFsManagementApi(void)
 {
 }
 
-MetaFsManagementApi::MetaFsManagementApi(int arrayId)
+MetaFsManagementApi::MetaFsManagementApi(int arrayId, MetaFsSystemManager* sysMgr)
 : MetaFsManagementApi()
 {
     this->arrayId = arrayId;
-    sysMgr = new MetaFsSystemManager(arrayId);
+    this->sysMgr = (nullptr == sysMgr) ? new MetaFsSystemManager(arrayId) : sysMgr;
 }
 
 MetaFsManagementApi::~MetaFsManagementApi(void)

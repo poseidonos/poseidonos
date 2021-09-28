@@ -1,23 +1,67 @@
+/*
+ *   BSD LICENSE
+ *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without
+ *   modification, are permitted provided that the following conditions
+ *   are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided with the
+ *       distribution.
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
+ *
+ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "src/metafs/mai/metafs_management_api.h"
+#include "test/unit-tests/metafs/msc/metafs_system_manager_mock.h"
+#include "test/unit-tests/metafs/msc/metafs_mbr_mgr_mock.h"
+#include "test/unit-tests/metafs/msc/mbr/metafs_mbr_mock.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
 
 #include <gtest/gtest.h>
 
+#include <vector>
+#include <string>
+
+using ::testing::_;
+using ::testing::NiceMock;
+using ::testing::Return;
+
 namespace pos
 {
-TEST(MetaFsManagementApi, Mount_)
+TEST(MetaFsManagementApi, Check_testIfTheMbrIsCleaned)
 {
-}
+    int arrayId = 0;
+    NiceMock<MockMetaFsMBR>* mbr = new NiceMock<MockMetaFsMBR>(MetaFsAnchorRegionType::MasterBootRecord, 0);
+    NiceMock<MockMetaFsMBRManager>* mbrMgr = new NiceMock<MockMetaFsMBRManager>(arrayId, mbr);
+    NiceMock<MockMetaStorageSubsystem>* metaStorage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
+    NiceMock<MockMetaFsSystemManager>* sysMgr = new NiceMock<MockMetaFsSystemManager>(arrayId, mbrMgr, metaStorage);
 
-TEST(MetaFsManagementApi, Unmount_)
-{
-}
+    MetaFsManagementApi api(arrayId, sysMgr);
 
-TEST(MetaFsManagementApi, Create_)
-{
-}
+    EXPECT_CALL(*sysMgr, IsMbrClean).WillOnce(Return(true));
+    // EXPECT_CALL(*mbrMgr, GetEpochSignature()).WillOnce(Return(0));
 
-TEST(MetaFsManagementApi, IsMounted_)
-{
-}
+    EXPECT_EQ(api.IsMbrClean(), true);
 
+    delete metaStorage;
+}
 } // namespace pos

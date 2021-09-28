@@ -48,7 +48,7 @@ class MetaFsIoApi
 {
 public:
     MetaFsIoApi(void);
-    MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl);
+    MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl, MetaIoManager* io = nullptr);
     virtual ~MetaFsIoApi(void);
 
     virtual POS_EVENT_ID Read(FileDescriptorType fd, void* buf,

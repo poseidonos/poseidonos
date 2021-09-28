@@ -43,12 +43,12 @@ MetaFsIoApi::MetaFsIoApi(void)
 {
 }
 
-MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl)
+MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl, MetaIoManager* io)
 : MetaFsIoApi()
 {
     this->arrayId = arrayId;
     ctrlMgr = ctrl;
-    ioMgr = new MetaIoManager();
+    ioMgr = (nullptr == io) ? new MetaIoManager() : io;
 }
 
 MetaFsIoApi::~MetaFsIoApi(void)

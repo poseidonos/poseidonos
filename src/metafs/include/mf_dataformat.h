@@ -56,6 +56,11 @@ public:
 class MetaFileInodeInfo
 {
 public:
+    MetaFileInodeInfo(void)
+    {
+        memset(data.all, 0, META_FILE_INODE_INFO_BYTE_SIZE);
+    }
+
     static const uint32_t META_FILE_INODE_INFO_BYTE_SIZE = 4096 * 2;
 
     union UData {

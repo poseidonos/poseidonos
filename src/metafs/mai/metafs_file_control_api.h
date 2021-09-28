@@ -56,7 +56,7 @@ class MetaFsFileControlApi
 {
 public:
     MetaFsFileControlApi(void);
-    explicit MetaFsFileControlApi(int arrayId);
+    explicit MetaFsFileControlApi(int arrayId, MetaVolumeManager* volMgr = nullptr);
     virtual ~MetaFsFileControlApi(void);
 
     virtual POS_EVENT_ID Create(std::string& fileName, uint64_t fileByteSize,

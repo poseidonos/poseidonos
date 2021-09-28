@@ -39,7 +39,7 @@ MetaFsFileControlApi::MetaFsFileControlApi(void)
 {
 }
 
-MetaFsFileControlApi::MetaFsFileControlApi(int arrayId)
+MetaFsFileControlApi::MetaFsFileControlApi(int arrayId, MetaVolumeManager* volMgr)
 : MetaFsFileControlApi()
 {
     this->arrayId = arrayId;
@@ -50,7 +50,7 @@ MetaFsFileControlApi::MetaFsFileControlApi(int arrayId)
     nameMapByfd.clear();
     idxMapByName.clear();
 
-    volMgr = new MetaVolumeManager();
+    this->volMgr = (nullptr == volMgr) ? new MetaVolumeManager() : volMgr;
 }
 
 MetaFsFileControlApi::~MetaFsFileControlApi(void)
