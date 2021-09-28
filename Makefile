@@ -192,7 +192,6 @@ install:
 
 	# Register CLI man page
 	gzip --force $(CLI_DIR)/docs/manpage/*
-	rm /usr/share/man/man3/poseidonos*
 	mv $(CLI_DIR)/docs/manpage/* /usr/share/man/man3/
 	makewhatis
 
