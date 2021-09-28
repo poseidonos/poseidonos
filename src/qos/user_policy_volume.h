@@ -57,12 +57,16 @@ public:
     uint64_t GetMaxIops(void);
     void SetMinIops(uint64_t iops);
     uint64_t GetMinIops(void);
+    bool IsMinimumVolume(void);
+    bool IsBwPolicySet(void);
 
 private:
     uint64_t minBandwidth;
     uint64_t maxBandwidth;
     uint64_t minIops;
     uint64_t maxIops;
+    bool isMinVol;
+    bool bwPolicy;
 };
 
 } // namespace pos

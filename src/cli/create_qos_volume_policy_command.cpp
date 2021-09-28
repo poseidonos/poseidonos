@@ -74,11 +74,6 @@ QosCreateVolumePolicyCommand::Execute(json& doc, string rid)
     {
         return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "vol, Parameter Missing", GetPosInfo());
     }
-    validInput = _VerifyMultiVolumeInput(doc);
-    if (false == validInput)
-    {
-        return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
-    }
     retVal = _HandleVolumePolicy(doc);
     if (SUCCESS != retVal)
     {
@@ -130,34 +125,6 @@ QosCreateVolumePolicyCommand::_HandleInputVolumes(json& doc)
     return true;
 }
 
-bool
-QosCreateVolumePolicyCommand::_VerifyMultiVolumeInput(json& doc)
-{
-    int64_t minVal = 0;
-    if (validVolumes.size() > 1)
-    {
-        if (doc["param"].contains("minbw"))
-        {
-            minVal = doc["param"]["minbw"].get<int64_t>();
-            if (-1 != minVal)
-            {
-                errorMsg = "Multiple Volume Minimim Bw Not Supported";
-                return false;
-            }
-        }
-        if (doc["param"].contains("miniops"))
-        {
-            minVal = doc["param"]["miniops"].get<int64_t>();
-            if (-1 != minVal)
-            {
-                errorMsg = "Multiple Volume Minimim Iops Not Supported";
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 uint32_t
 QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
 {
@@ -188,9 +155,6 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 {
                     newVolPolicy.policyChange = true;
                 }
-                newVolPolicy.minBwGuarantee = false;  // TODO(s3.paliwal): Multi Array Qos does not support min vol guarantee
-                errorMsg = "Minimum Bandwidth not supported";
-                return static_cast<int>(POS_EVENT_ID::QOS_NOT_SUPPORTED);
             }
         }
 
@@ -232,9 +196,6 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 {
                     newVolPolicy.policyChange = true;
                 }
-                newVolPolicy.minIopsGuarantee = false;  // TODO(s3.paliwal): Multi Array Qos does not support min vol guarantee
-                errorMsg = "Minimum Iops not supported";
-                return static_cast<int>(POS_EVENT_ID::QOS_NOT_SUPPORTED);
             }
         }
 

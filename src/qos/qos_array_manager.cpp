@@ -34,6 +34,7 @@
 
 #include "src/master_context/config_manager.h"
 #include "src/qos/qos_volume_manager.h"
+#include "src/qos/qos_manager.h"
 
 namespace pos
 {
@@ -106,47 +107,77 @@ QosArrayManager::GetVolumePolicy(uint32_t volId)
 int
 QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
 {
-    uint32_t minGuaranteeVol = minGuaranteeVolume;
     bool minBwPolicy = minBwGuarantee;
     bool minPolicyInEffect = volMinPolicyInEffect;
     qos_vol_policy cliPolicy = policy;
 
     bool minPolicyReceived = ((true == policy.minBwGuarantee) || (true == policy.minIopsGuarantee));
+    bool existingPolicyChange = false;
 
     if (true == volMinPolicyInEffect)
     {
         if (true == minPolicyReceived)
         {
-            if (minGuaranteeVolume != volId)
+            if (true == minBwPolicy)
             {
-                // Min Volume set, trying to set minimum for diff volume
-                return QosReturnCode::ONE_MINIMUM_GUARANTEE_SUPPORTED;
+                if (true == policy.minIopsGuarantee)
+                {
+                    std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+                    auto it = minGuaranteeVolume.begin();
+                    for (it = minGuaranteeVolume.begin(); it != minGuaranteeVolume.end(); ++it)
+                    {
+                        if (*it == volId)
+                        {
+                            return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
+                        }
+                    }
+                }
             }
             else
             {
-                if (true == minBwPolicy)
+                if (true == policy.minBwGuarantee)
                 {
-                    if (true == policy.minIopsGuarantee)
+                    std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+                    auto it = minGuaranteeVolume.begin();
+                    for (it = minGuaranteeVolume.begin(); it != minGuaranteeVolume.end(); ++it)
                     {
-                        // Min BW set, trying to set Min IOPS
-                        return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
-                    }
-                }
-                else
-                {
-                    if (true == policy.minBwGuarantee)
-                    {
-                        // Min IOPS set, trying to set Min BW
-                        return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
+                        if (*it == volId)
+                        {
+                            return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
+                        }
                     }
                 }
             }
+            // Check if change in min policy or new volume policy
+            std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+            auto it = minGuaranteeVolume.begin();
+            for (it = minGuaranteeVolume.begin(); it != minGuaranteeVolume.end(); ++it)
+            {
+                if (*it == volId)
+                {
+                    existingPolicyChange = true;
+                }
+            }
+            minGuaranteeVolume.push_back(volId);
+            minPolicyInEffect = true;
         }
         else
         {
-            if (minGuaranteeVolume == volId)
+            std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+            auto it = minGuaranteeVolume.begin();
+            for (it = minGuaranteeVolume.begin(); it != minGuaranteeVolume.end(); ++it)
             {
-                minGuaranteeVol = DEFAULT_MIN_VOL;
+                if (*it == volId)
+                {
+                    break;
+                }
+            }
+            if (it != minGuaranteeVolume.end())
+            {
+                minGuaranteeVolume.erase(it);
+            }
+            if (minGuaranteeVolume.size() == 0)
+            {
                 minPolicyInEffect = false;
                 minBwPolicy = false;
             }
@@ -156,7 +187,8 @@ QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
     {
         if (true == minPolicyReceived)
         {
-            minGuaranteeVol = volId;
+            std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
+            minGuaranteeVolume.push_back(volId);
             minPolicyInEffect = true;
 
             if (true == policy.minBwGuarantee)
@@ -169,7 +201,6 @@ QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
             }
         }
     }
-
     if (0 == policy.maxBw)
     {
         policy.maxBw = DEFAULT_MAX_BW_IOPS;
@@ -226,10 +257,13 @@ QosArrayManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy)
         std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
         volPolicyCli[volId] = cliPolicy;
         volumePolicyMapCli[volId] = policy;
-        minGuaranteeVolume = minGuaranteeVol;
         minBwGuarantee = minBwPolicy;
         volMinPolicyInEffect = minPolicyInEffect;
         volumePolicyUpdated = true;
+    }
+    if (existingPolicyChange == true)
+    {
+        QosManagerSingleton::Instance()->ResetCorrection();
     }
     return QosReturnCode::SUCCESS;
 }

@@ -52,5 +52,6 @@ public:
     virtual ~QosInternalManager(void) {}
     virtual void Execute(void) = 0;
     virtual QosInternalManagerType GetNextManagerType(void) = 0;
+    virtual void Reset() {}
 };
 } // namespace pos

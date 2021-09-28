@@ -31,25 +31,33 @@
  */
 
 #pragma once
-#include "src/qos/internal_manager.h"
-#include "src/qos/qos_common.h"
+
+#include <cstdint>
 
 namespace pos
 {
-class QosContext;
-class PolicyHandler;
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Interface Class for Minimum policy Throttling Logic for Correction Manager
+ *
+ */
+/* --------------------------------------------------------------------------*/
 
-class QosPolicyManagerArray
+class VolumeThrottle;
+class IThrottlingLogic
 {
 public:
-    QosPolicyManagerArray(QosContext* qosCtx, uint32_t arrayIndex);
-    ~QosPolicyManagerArray(void);
-    void Execute(void);
+    IThrottlingLogic(void)
+    {
+    }
 
-private:
-    QosContext* qosContext;
-    PolicyHandler* volumePolicy;
-    uint32_t arrayId;
+    virtual ~IThrottlingLogic(void)
+    {
+    }
+
+    virtual unsigned int GetNewWeight(uint32_t volId, uint32_t arrayId, VolumeThrottle* volumeThrottle) = 0;
+    virtual bool GetCorrectionType(uint32_t volId, uint32_t arrayId) = 0;
+    virtual void Reset(void) = 0;
+    virtual void IncrementCycleCount(void) = 0;
 };
-
 } // namespace pos

@@ -118,6 +118,8 @@ public:
     void UpdateArrayMap(string arrayName);
     void GetSubsystemVolumeMap(std::unordered_map<int32_t, std::vector<int>>& subsysVolMap, uint32_t arrayId);
     uint32_t GetNoContentionCycles(void);
+    bool IsMinimumPolicyInEffectInSystem(void);
+    void ResetCorrection(void);
 
 private:
     virtual void _Finalize(void);
@@ -145,6 +147,7 @@ private:
     QosInternalManager* correctionManager;
     uint32_t currentNumberOfArrays;
     std::mutex mapUpdateLock;
+    bool systemMinPolicy;
 };
 
 using QosManagerSingleton = Singleton<QosManager>;

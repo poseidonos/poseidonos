@@ -35,6 +35,7 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/qos/qos_context.h"
 #include "src/qos/qos_manager.h"
+#include "src/qos/throttling_policy_deficit.h"
 
 namespace pos
 {
@@ -49,6 +50,7 @@ QosCorrectionManager::QosCorrectionManager(QosContext* qosCtx)
 {
     qosContext = qosCtx;
     nextManagerType = QosInternalManager_Unknown;
+    throttlingLogic = new ThrottlingPolicyDeficit(qosCtx);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -60,6 +62,7 @@ QosCorrectionManager::QosCorrectionManager(QosContext* qosCtx)
 /* --------------------------------------------------------------------------*/
 QosCorrectionManager::~QosCorrectionManager(void)
 {
+    delete throttlingLogic;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -152,23 +155,97 @@ QosCorrectionManager::_HandleWrrCorrection(void)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-
-uint64_t
-QosCorrectionManager::_InitialValueCheck(uint64_t value, bool iops, VolumeParameter& volParameter, VolumeUserPolicy& volUserPolicy)
+void
+QosCorrectionManager::Reset(void)
 {
-    uint64_t userSetMaxBw = volUserPolicy.GetMaxBandwidth();
-    uint64_t userSetMaxIops = volUserPolicy.GetMaxIops();
+    throttlingLogic->Reset();
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosCorrectionManager::_HandleMinThrottling(std::vector<std::pair<uint32_t, uint32_t>> minVolId)
+{
+    QosCorrection& qosCorrection = qosContext->GetQosCorrection();
+    AllVolumeThrottle& allVolumeThrottle = qosCorrection.GetVolumeThrottlePolicy();
+    std::map<uint32_t, map<uint32_t, uint32_t>> volReactorMap = qosContext->GetActiveVolumeReactors();
+    QosParameters qosParameters = qosContext->GetQosParameters();
+    QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
+    AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
+
+    std::map<std::pair<uint32_t, uint32_t>, VolumeThrottle>& volumeThrottleMap = allVolumeThrottle.GetVolumeThrottleMap();
+    throttlingLogic->IncrementCycleCount();
+    for (auto it = volumeThrottleMap.begin(); it != volumeThrottleMap.end(); it++)
+    {
+        VolumeThrottle& volThrottle = it->second;
+
+        uint32_t arrayId = it->first.first;
+        uint32_t volId = it->first.second;
+        uint32_t globalVolId = arrayId * MAX_VOLUME_COUNT + volId;
+        uint64_t newWeight = 0;
+        uint32_t totalConnection = qosContext->GetTotalConnection(globalVolId);
+
+        VolumeUserPolicy* volumeUserPolicy = allVolUserPolicy.GetVolumeUserPolicy(arrayId, volId);
+        if (volumeUserPolicy == nullptr)
+        {
+            continue;
+        }
+
+        newWeight = throttlingLogic->GetNewWeight(volId, arrayId, &volThrottle);
+
+        if (newWeight == 0)
+        {
+            continue;
+        }
+
+        for (map<uint32_t, uint32_t>::iterator it = volReactorMap[globalVolId].begin(); it != volReactorMap[globalVolId].end(); ++it)
+        {
+            bool correctionTypeBw = throttlingLogic->GetCorrectionType(volId, arrayId);
+            if (true == correctionTypeBw)
+            {
+                _ApplyCorrection(newWeight, false, globalVolId, it->first, it->second, totalConnection);
+            }
+            else
+            {
+                _ApplyCorrection(newWeight, true, globalVolId, it->first, it->second, totalConnection);
+            }
+        }
+    }
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosCorrectionManager::_ApplyCorrection(uint64_t value, bool iops, uint64_t globalVolId, uint64_t reactor, uint64_t count, uint64_t totalConnection)
+{
+    QosManager* qosManager = QosManagerSingleton::Instance();
+    uint32_t volId = globalVolId % MAX_VOLUME_COUNT;
+    uint32_t arrayId = globalVolId / MAX_VOLUME_COUNT;
     if (true == iops)
     {
-        return ((value >= userSetMaxIops) ? volParameter.GetAvgIops() : value);
+        value = (value <= DEFAULT_MIN_IO_PCS) ? DEFAULT_MIN_IO_PCS : value;
+        int64_t weight = (value * count) / totalConnection;
+        if (0 == weight)
+        {
+            weight = 1;
+        }
+        qosManager->SetVolumeLimit(reactor, volId, weight, true, arrayId);
     }
     else
     {
-        return ((value >= userSetMaxBw) ? volParameter.GetAvgBandwidth() : value);
+        value = (value <= DEFAULT_MIN_BW_PCS) ? DEFAULT_MIN_BW_PCS : value;
+        qosManager->SetVolumeLimit(reactor, volId, (int64_t)(value * (count)) / (totalConnection), false, arrayId);
     }
-    return 0;
 }
-
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -184,7 +261,7 @@ QosCorrectionManager::_HandleMaxThrottling(void)
     std::map<uint32_t, map<uint32_t, uint32_t>> volReactorMap = qosContext->GetActiveVolumeReactors();
     QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
     AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
-    std::pair<uint32_t, uint32_t> minVolId = allVolUserPolicy.GetMinimumGuaranteeVolume();
+    std::vector<std::pair<uint32_t, uint32_t>> minVolId = allVolUserPolicy.GetMinimumGuaranteeVolume();
     QosCorrection qosCorrection = qosContext->GetQosCorrection();
 
     QosParameters qosParameters = qosContext->GetQosParameters();
@@ -213,7 +290,7 @@ QosCorrectionManager::_HandleMaxThrottling(void)
 
         for (map<uint32_t, uint32_t>::iterator it = volReactorMap[volId].begin(); it != volReactorMap[volId].end(); ++it)
         {
-            if (minVolId.first != DEFAULT_MIN_VOL)
+            if (minVolId.size() != 0)
             {
                 currentBwWeight = currentBwWeight >= userSetBwWeight ? userSetBwWeight : currentBwWeight;
                 currentIopsWeight = currentIopsWeight >= userSetIopsWeight ? userSetIopsWeight : currentIopsWeight;
@@ -246,11 +323,10 @@ QosCorrectionManager::_HandleVolumeCorrection(void)
 {
     QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
     AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
-    std::pair<uint32_t, uint32_t> minVolId = allVolUserPolicy.GetMinimumGuaranteeVolume();
-    if (minVolId.first != DEFAULT_MIN_VOL)
+    std::vector<std::pair<uint32_t, uint32_t>> minVolId = allVolUserPolicy.GetMinimumGuaranteeVolume();
+    if (minVolId.size() != 0)
     {
-        // _HandleMinThrottling(minVolId);
-        // Min Throttling not supported in multi array
+        _HandleMinThrottling(minVolId);
     }
     _HandleMaxThrottling();
 }

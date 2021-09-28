@@ -98,6 +98,9 @@ QosProcessingManagerArray::Execute(uint32_t volId)
 {
     QosParameters& qosParam = qosContext->GetQosParameters();
     AllVolumeParameter& allVolParam = qosParam.GetAllVolumeParameter();
+    QosUserPolicy& userPolicy = qosContext->GetQosUserPolicy();
+    AllVolumeUserPolicy& allVolumePolicy = userPolicy.GetAllVolumeUserPolicy();
+
     uint64_t bw = 0;
     uint64_t iops = 0;
     if (false == allVolParam.VolumeExists(arrayId, volId))
@@ -113,5 +116,13 @@ QosProcessingManagerArray::Execute(uint32_t volId)
         volParam.SetAvgBandwidth(movingAvgCompute->GetMovingAvgBw(volId));
         volParam.SetAvgIops(movingAvgCompute->GetMovingAvgIops(volId) / PARAMETER_COLLECTION_INTERVAL);
     }
+    uint64_t avgBw = volParam.GetAvgBandwidth();
+
+    VolumeUserPolicy* volPolicy = allVolumePolicy.GetVolumeUserPolicy(arrayId, volId);
+    if (volPolicy->IsMinimumVolume() == true)
+    {
+        allVolParam.IncrementMinVolumesBw(arrayId, avgBw);
+    }
+    allVolParam.IncrementTotalBw(arrayId, avgBw);
 }
 } // namespace pos

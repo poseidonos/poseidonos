@@ -87,6 +87,7 @@ QosManager::QosManager(void)
     {
         feQosEnabled = enabled;
     }
+
     SpdkConnection::SetQosInSpdk(feQosEnabled);
     initialized = false;
     try
@@ -108,6 +109,7 @@ QosManager::QosManager(void)
         assert(0);
     }
     currentNumberOfArrays = 0;
+    systemMinPolicy = false;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -128,6 +130,7 @@ QosManager::~QosManager(void)
     delete policyManager;
     delete processingManager;
     delete correctionManager;
+    delete qosContext;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -490,9 +493,40 @@ QosManager::IOWorkerPoller(uint32_t id, SubmissionAdapter* ioSubmission)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
+
+bool
+QosManager::IsMinimumPolicyInEffectInSystem(void)
+{
+    return systemMinPolicy;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosManager::ResetCorrection(void)
+{
+    correctionManager->Reset();
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
 int
 QosManager::UpdateVolumePolicy(uint32_t volId, qos_vol_policy policy, uint32_t arrayId)
 {
+    if (systemMinPolicy == false)
+    {
+        systemMinPolicy = ((true == policy.minBwGuarantee) || (true == policy.minIopsGuarantee));
+    }
     qosArrayManager[arrayId]->UpdateVolumePolicy(volId, policy);
     return QosReturnCode::SUCCESS;
 }

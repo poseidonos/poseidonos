@@ -35,7 +35,6 @@
 #include <map>
 
 #include "src/qos/internal_manager.h"
-#include "src/qos/policy_manager_array.h"
 #include "src/qos/qos_common.h"
 
 namespace pos
@@ -59,9 +58,8 @@ public:
 private:
     void _SetNextManagerType(void);
     QosContext* qosContext;
-
     QosInternalManagerType nextManagerType;
-    QosPolicyManagerArray* qosPolicyManagerArray[MAX_ARRAY_COUNT];
     PolicyHandler* eventCpuPolicy;
+    PolicyHandler* volumePolicy;
 };
 } // namespace pos

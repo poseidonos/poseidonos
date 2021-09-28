@@ -57,17 +57,18 @@ public:
     void SetAvgIops(uint64_t iops);
     uint64_t GetAvgBandwidth(void);
     uint64_t GetAvgIops(void);
-
     bool IsReactorExists(uint32_t reactor);
     ReactorParameter& GetReactorParameter(uint32_t reactor);
     void InsertReactorParameter(uint32_t reactor, const ReactorParameter& reactorParameter);
     std::map<uint32_t, ReactorParameter>& GetReactorParameterMap(void);
-
+    void SetBlockSize(uint64_t blkSz);
+    uint64_t GetBlockSize(void);
 private:
     std::map<uint32_t, ReactorParameter> reactorParameterMap;
     uint64_t bandwidth;
     uint64_t avgBandwidth;
     uint64_t avgIops;
     uint64_t iops;
+    uint64_t blockSize;
 };
 } // namespace pos

@@ -54,8 +54,14 @@ public:
     void InsertVolumeParameter(uint32_t arrayId, uint32_t volId, const VolumeParameter& volParam);
     bool VolumeExists(uint32_t arrayId, uint32_t volId);
     VolumeParameter& GetVolumeParameter(uint32_t arrayId, uint32_t volId);
+    void IncrementTotalBw(uint32_t arrayId, uint64_t totalBw);
+    uint64_t GetTotalBw(uint32_t arrayId);
+    void IncrementMinVolumesBw(uint32_t arrayId, uint64_t bw);
+    uint64_t GetMinVolBw(uint32_t arrayId);
 
 private:
     std::map<std::pair<uint32_t, uint32_t>, VolumeParameter> volumeParameterMap;
+    std::map<uint32_t, uint64_t> totalBwMap;
+    std::map<uint32_t, uint64_t> totalMinVolBwMap;
 };
 } // namespace pos

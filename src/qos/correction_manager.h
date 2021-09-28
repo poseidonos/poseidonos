@@ -33,6 +33,8 @@
 #pragma once
 
 #include <map>
+#include <utility>
+#include <vector>
 
 #include "src/qos/internal_manager.h"
 #include "src/qos/qos_common.h"
@@ -42,6 +44,7 @@ namespace pos
 class QosContext;
 class VolumeParameter;
 class VolumeUserPolicy;
+class IThrottlingLogic;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -55,14 +58,18 @@ public:
     ~QosCorrectionManager(void);
     void Execute(void) override;
     QosInternalManagerType GetNextManagerType(void) override;
+    void Reset(void) override;
 
 private:
     void _SetNextManagerType(void);
     void _HandleVolumeCorrection(void);
     void _HandleMaxThrottling(void);
+    void _HandleMinThrottling(std::vector<std::pair<uint32_t, uint32_t>> volId);
     void _HandleWrrCorrection(void);
     uint64_t _InitialValueCheck(uint64_t value, bool iops, VolumeParameter& volParameter, VolumeUserPolicy& volUserPolicy);
+    void _ApplyCorrection(uint64_t value, bool iops, uint64_t volId, uint64_t reactor, uint64_t count, uint64_t totalConnection);
     QosContext* qosContext;
     QosInternalManagerType nextManagerType;
+    IThrottlingLogic *throttlingLogic;
 };
 } // namespace pos

@@ -70,6 +70,8 @@ void
 AllVolumeParameter::Reset(void)
 {
     volumeParameterMap.clear();
+    totalBwMap.clear();
+    totalMinVolBwMap.clear();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -119,5 +121,82 @@ AllVolumeParameter::GetVolumeParameter(uint32_t arrayId, uint32_t volId)
         return search->second;
     }
     throw QosReturnCode::VOLUME_NOT_PRESENT;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+AllVolumeParameter::IncrementMinVolumesBw(uint32_t arrayId, uint64_t bw)
+{
+    uint64_t bandwidth = 0;
+    auto search = totalMinVolBwMap.find(arrayId);
+    if (search!=  totalMinVolBwMap.end())
+    {
+        bandwidth = search->second;
+    }
+    bandwidth += bw;
+    totalMinVolBwMap[arrayId] = bandwidth;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+
+void
+AllVolumeParameter::IncrementTotalBw(uint32_t arrayId, uint64_t totalBw)
+{
+    uint64_t bw = 0;
+    auto search = totalBwMap.find(arrayId);
+    if (search != totalBwMap.end())
+    {
+        bw = search->second;
+    }
+    bw = bw + totalBw;
+    totalBwMap[arrayId] = bw;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+uint64_t
+AllVolumeParameter::GetTotalBw(uint32_t arrayId)
+{
+    auto search = totalBwMap.find(arrayId);
+    if (search != totalBwMap.end())
+    {
+        return search->second;
+    }
+    return 0;
+}
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+
+uint64_t
+AllVolumeParameter::GetMinVolBw(uint32_t arrayId)
+{
+    auto search = totalMinVolBwMap.find(arrayId);
+    if (search!= totalMinVolBwMap.end())
+    {
+        return search->second;
+    }
+    else
+    {
+        return 0;
+    }
 }
 } // namespace pos

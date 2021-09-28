@@ -83,11 +83,11 @@ public:
     AIO(void);
     void SubmitAsyncIO(pos_io& posIo);
     void CompleteIOs(void);
+    VolumeIoSmartPtr CreateVolumeIo(pos_io& posIo);
     void SubmitAsyncAdmin(pos_io& io);
 
 private:
     static thread_local IOCtx ioContext;
-    VolumeIoSmartPtr _CreateVolumeIo(pos_io& posIo);
     FlushIoSmartPtr _CreateFlushIo(pos_io& posIo);
 };
 class AdminCompletion : public Callback,

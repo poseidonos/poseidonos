@@ -67,11 +67,13 @@ private:
     void _GatherActiveEventParameters(void);
     void _UpdateEventParameter(BackendEvent event);
     void _ComputeTotalActiveConnection(void);
+    bool _CheckChangeInActiveVolumes(void);
     QosContext* qosContext;
     QosInternalManagerType nextManagerType;
     std::map<uint32_t, map<uint32_t, uint32_t>> volReactorMap;
     std::map<uint32_t, map<uint32_t, uint32_t>> reactorVolMap;
     bw_iops_parameter eventParams[BackendEvent_Count];
     QosMonitoringManagerArray* qosMonitoringManagerArray[MAX_ARRAY_COUNT];
+    std::map<uint32_t, uint32_t> prevActiveVolumeMap;
 };
 } // namespace pos

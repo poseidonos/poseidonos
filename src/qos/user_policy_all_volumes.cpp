@@ -74,8 +74,6 @@ AllVolumeUserPolicy::Reset(void)
     volumeUserPolicyMap.clear();
     minInEffect = false;
     minBwGuarantee = false;
-    minGuaranteeVolume.first = DEFAULT_MIN_VOL;
-    minGuaranteeVolume.second = DEFAULT_MIN_ARRAY;
     maxThrottlingChanged = false;
 }
 
@@ -164,8 +162,12 @@ AllVolumeUserPolicy::GetVolumeUserPolicy(uint32_t array, uint32_t vol)
 void
 AllVolumeUserPolicy::SetMinimumGuaranteeVolume(uint32_t volId, uint32_t arrayId)
 {
-    minGuaranteeVolume.first = volId;
-    minGuaranteeVolume.second = arrayId;
+    for (auto i : minGuaranteeVolume)
+    {
+        if (i.first == arrayId && i.second == volId)
+            return;
+    }
+    minGuaranteeVolume.push_back(std::make_pair(arrayId, volId));
 }
 
 /* --------------------------------------------------------------------------*/
@@ -175,7 +177,7 @@ AllVolumeUserPolicy::SetMinimumGuaranteeVolume(uint32_t volId, uint32_t arrayId)
  * @Returns
  */
 /* --------------------------------------------------------------------------*/
-std::pair<uint32_t, uint32_t>
+std::vector<std::pair<uint32_t, uint32_t>>
 AllVolumeUserPolicy::GetMinimumGuaranteeVolume(void)
 {
     return minGuaranteeVolume;

@@ -120,7 +120,8 @@ QosMonitoringManagerArray::UpdateContextUserVolumePolicy(void)
     QosUserPolicy& userPolicy = qosContext->GetQosUserPolicy();
     AllVolumeUserPolicy& allVolumeUserPolicy = userPolicy.GetAllVolumeUserPolicy();
     allVolumeUserPolicy.SetMaxThrottlingChanged(false);
-    std::pair<uint32_t, uint32_t> currentMinPolicyVolume = allVolumeUserPolicy.GetMinimumGuaranteeVolume();
+
+    std::vector<std::pair<uint32_t, uint32_t>> currentMinPolicyVolume = allVolumeUserPolicy.GetMinimumGuaranteeVolume();
 
     bool currentMinPolicyInEffect = allVolumeUserPolicy.IsMinPolicyInEffect();
     bool currentMinBwPolicy = allVolumeUserPolicy.IsMinBwPolicyInEffect();
@@ -164,21 +165,35 @@ QosMonitoringManagerArray::UpdateContextUserVolumePolicy(void)
             {
                 currentMinBwPolicy = false;
             }
-            currentMinPolicyVolume.first = vol->first;
-            currentMinPolicyVolume.second = arrayId;
+            currentMinPolicyVolume.push_back(std::make_pair(arrayId, vol->first));
         }
         else
         {
-            if (currentMinPolicyVolume.first == vol->first && currentMinPolicyVolume.second == arrayId)
+            auto it = currentMinPolicyVolume.begin();
+            for (it = currentMinPolicyVolume.begin(); it != currentMinPolicyVolume.end(); ++it)
+            {
+                uint32_t volumeId = vol->first;
+                if (it->second == volumeId)
+                {
+                    break;
+                }
+            }
+
+            if (it != currentMinPolicyVolume.end())
+            {
+                currentMinPolicyVolume.erase(it);
+            }
+            if (currentMinPolicyVolume.size() == 0)
             {
                 currentMinPolicyInEffect = false;
                 currentMinBwPolicy = false;
-                currentMinPolicyVolume.first = DEFAULT_MIN_VOL;
-                currentMinPolicyVolume.second = MAX_ARRAY_COUNT + 1;
             }
         }
     }
-    allVolumeUserPolicy.SetMinimumGuaranteeVolume(currentMinPolicyVolume.first, currentMinPolicyVolume.second);
+    for (auto i : currentMinPolicyVolume)
+    {
+        allVolumeUserPolicy.SetMinimumGuaranteeVolume(i.second, i.first);
+    }
     allVolumeUserPolicy.SetMinimumPolicyInEffect(currentMinPolicyInEffect);
     allVolumeUserPolicy.SetMinimumPolicyType(currentMinBwPolicy);
     if (true == maxThrottlingChanged)
@@ -206,6 +221,7 @@ QosMonitoringManagerArray::VolParamActivities(uint32_t volId, uint32_t reactor)
         _UpdateContextActiveReactorVolumes(reactor, volId);
         volParams[volId].valid = M_INVALID_ENTRY;
         _UpdateVolumeReactorParameter(volId, reactor);
+        _UpdateVolumeBlockSize(volId, volParams[volId].blockSize);
         return true;
     }
     return false;
@@ -268,6 +284,22 @@ QosMonitoringManagerArray::_UpdateContextVolumeThrottle(uint32_t volId)
     VolumeThrottle volThottle;
     volThottle.Reset();
     allVolumeThrottle.InsertVolumeThrottle(arrayId, volId, volThottle);
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+void
+QosMonitoringManagerArray::_UpdateVolumeBlockSize(uint32_t volId, uint64_t blockSize)
+{
+    QosParameters& qosParameters = qosContext->GetQosParameters();
+    AllVolumeParameter& allVolumeParameter = qosParameters.GetAllVolumeParameter();
+    VolumeParameter& volParam = allVolumeParameter.GetVolumeParameter(arrayId, volId);
+    volParam.SetBlockSize(blockSize);
 }
 
 /* --------------------------------------------------------------------------*/

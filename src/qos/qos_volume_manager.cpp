@@ -192,8 +192,12 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
     uint32_t volId = volIo->volume_id;
     uint64_t currentBw = 0;
     uint64_t currentIO = 0;
+    uint32_t blockSize = 0;
+
     currentBw = volumeQosParam[reactorId][volId].currentBW;
     currentIO = volumeQosParam[reactorId][volId].currentIOs;
+    blockSize  = volIo->length;
+
     if ((pendingIO[reactorId][volId] == 0) && (_RateLimit(reactorId, volId) == false))
     {
         currentBw = currentBw + volIo->length;
@@ -226,6 +230,7 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
     }
     volumeQosParam[reactorId][volId].currentBW = currentBw;
     volumeQosParam[reactorId][volId].currentIOs = currentIO;
+    volumeQosParam[reactorId][volId].blockSize = blockSize;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -625,10 +630,10 @@ QosVolumeManager::VolumeQosPoller(uint32_t reactor, IbofIoSubmissionAdapter* aio
             volList[reactor][subsys] = GetVolumeFromActiveSubsystem(subsys);
         }
     }
-
     for (auto subsystem = volList[reactor].begin(); subsystem != volList[reactor].end(); subsystem++)
     {
         std::vector<int> volumeList = volList[reactor][subsystem->first];
+
         for (uint32_t i = 0; i < volumeList.size(); i++)
         {
             int volId = volumeList[i];
@@ -672,7 +677,7 @@ QosVolumeManager::_EnqueueVolumeParameter(uint32_t reactor, uint32_t volId, doub
 {
     uint64_t currentBW = volumeQosParam[reactor][volId].currentBW / offset;
     uint64_t currentIops = volumeQosParam[reactor][volId].currentIOs / offset;
-    bool minimumPolicyInEffect = qosArrayManager->IsMinimumPolicyInEffect();
+    bool minimumPolicyInEffect = QosManagerSingleton::Instance()->IsMinimumPolicyInEffectInSystem();
     qos_vol_policy volPolicy = qosArrayManager->GetVolumePolicy(volId);
     bool enqueueParameters = false;
 

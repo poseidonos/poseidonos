@@ -34,6 +34,7 @@
 
 #include <map>
 #include <utility>
+#include <vector>
 
 #include "src/qos/user_policy_volume.h"
 
@@ -56,7 +57,7 @@ public:
     void InsertVolumeUserPolicy(uint32_t array, uint32_t vol, const VolumeUserPolicy& userPolicy);
     VolumeUserPolicy* GetVolumeUserPolicy(uint32_t array, uint32_t vol);
     void SetMinimumGuaranteeVolume(uint32_t volId, uint32_t arrayId);
-    std::pair<uint32_t, uint32_t> GetMinimumGuaranteeVolume(void);
+    std::vector<std::pair<uint32_t, uint32_t>> GetMinimumGuaranteeVolume(void);
     void SetMinimumPolicyInEffect(bool value);
     void SetMinimumPolicyType(bool minBw);
     bool IsMinPolicyInEffect(void);
@@ -66,7 +67,7 @@ public:
 
 private:
     std::map<std::pair<uint32_t, uint32_t>, VolumeUserPolicy> volumeUserPolicyMap;
-    std::pair<uint32_t, uint32_t> minGuaranteeVolume;
+    std::vector<std::pair<uint32_t, uint32_t>> minGuaranteeVolume;
     bool maxThrottlingChanged;
     bool minInEffect;
     bool minBwGuarantee;

@@ -29,6 +29,8 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "src/volume/volume_manager.h"
+#include "src/event_scheduler/io_completer.h"
 
 #include "src/io/frontend_io/unvmf_io_handler.h"
 
@@ -83,17 +85,46 @@ UNVMfSubmitHandler(struct pos_io* io)
             aio.SubmitAsyncAdmin(*io);
             return POS_IO_STATUS_SUCCESS;
         }
-        if (io->ioType != IO_TYPE::FLUSH)
+        switch (io->ioType)
         {
-            if (unlikely(1 != io->iovcnt))
+            case IO_TYPE::READ:
+            case IO_TYPE::WRITE:
             {
-                POS_EVENT_ID eventId = POS_EVENT_ID::SCHEDAPI_WRONG_BUFFER;
-                POS_TRACE_ERROR(static_cast<int>(eventId),
-                    PosEventId::GetString(eventId));
+                if (unlikely(1 != io->iovcnt))
+                {
+                    POS_EVENT_ID eventId = POS_EVENT_ID::SCHEDAPI_WRONG_BUFFER;
+                    POS_TRACE_ERROR(static_cast<int>(eventId),
+                            PosEventId::GetString(eventId));
+                    throw eventId;
+                }
+                break;
+            }
+            case IO_TYPE::FLUSH:
+                break;
+
+            default:
+            {
+                POS_EVENT_ID eventId = POS_EVENT_ID::BLKHDLR_WRONG_IO_DIRECTION;
+                POS_TRACE_ERROR(eventId, PosEventId::GetString(eventId));
                 throw eventId;
+                break;
             }
         }
+
         QosManager* qosManager = QosManagerSingleton::Instance();
+
+        IVolumeManager* volumeManager
+            = VolumeServiceSingleton::Instance()->GetVolumeManager(io->array_id);
+
+        if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(io->volume_id)))
+        {
+            AIO aio;
+            VolumeIoSmartPtr volumeIo = aio.CreateVolumeIo(*io);
+            IoCompleter ioCompleter(volumeIo);
+            ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::VOLUME_UMOUNTED, true);
+            return POS_IO_STATUS_SUCCESS;
+        }
+
         if (true == qosManager->IsFeQosEnabled())
         {
             AioSubmissionAdapter aioSubmission;

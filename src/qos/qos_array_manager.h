@@ -84,7 +84,7 @@ private:
     void _Finalize(void);
     std::mutex policyUpdateLock;
     std::atomic<uint32_t> usedStripeCnt;
-    std::atomic<uint32_t> minGuaranteeVolume;
+    std::vector<uint32_t> minGuaranteeVolume;
     std::atomic<bool> volMinPolicyInEffect;
     std::atomic<bool> minBwGuarantee;
     std::atomic<bool> volumePolicyUpdated;

@@ -71,6 +71,8 @@ VolumeUserPolicy::Reset(void)
     maxBandwidth = 0;
     minIops = 0;
     maxIops = 0;
+    isMinVol = false;
+    bwPolicy = false;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -114,6 +116,11 @@ void
 VolumeUserPolicy::SetMinBandwidth(uint64_t minBw)
 {
     minBandwidth = minBw;
+    if (minBw != DEFAULT_MIN_BW_PCS)
+    {
+        isMinVol = true;
+        bwPolicy = true;
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -179,6 +186,11 @@ void
 VolumeUserPolicy::SetMinIops(uint64_t iops)
 {
     minIops = iops;
+    if (minIops != DEFAULT_MIN_IOPS)
+    {
+        isMinVol = true;
+        bwPolicy = false;
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -205,5 +217,23 @@ uint64_t
 VolumeUserPolicy::GetMinIops(void)
 {
     return minIops;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+VolumeUserPolicy::IsBwPolicySet(void)
+{
+    return bwPolicy;
+}
+bool
+VolumeUserPolicy::IsMinimumVolume(void)
+{
+    return isMinVol;
 }
 } // namespace pos

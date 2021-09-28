@@ -189,7 +189,7 @@ AioCompletion::_SendUserCompletion(void)
 }
 
 VolumeIoSmartPtr
-AIO::_CreateVolumeIo(pos_io& posIo)
+AIO::CreateVolumeIo(pos_io& posIo)
 {
     uint64_t sectorSize = ChangeByteToSector(posIo.length);
     void* buffer = nullptr;
@@ -265,17 +265,13 @@ AIO::SubmitAsyncIO(pos_io& posIo)
         return;
     }
 
-    VolumeIoSmartPtr volumeIo = _CreateVolumeIo(posIo);
+    VolumeIoSmartPtr volumeIo = CreateVolumeIo(posIo);
 
     ioContext.cnt++;
     if (volumeIo->IsPollingNecessary())
     {
         ioContext.needPollingCount++;
     }
-
-    IVolumeManager* volumeManager
-        = VolumeServiceSingleton::Instance()->GetVolumeManager(volumeIo->GetArrayId());
-
     uint32_t core = volumeIo->GetOriginCore();
     uint32_t arr_vol_id = posIo.volume_id + (posIo.array_id << 8);
     switch (volumeIo->dir)
@@ -283,33 +279,19 @@ AIO::SubmitAsyncIO(pos_io& posIo)
         case UbioDir::Write:
         {
             airlog("PERF_ARR_VOL", "AIR_WRITE", arr_vol_id, posIo.length);
-            if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volumeIo->GetVolumeId())))
-            {
-                IoCompleter ioCompleter(volumeIo);
-                ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::VOLUME_UMOUNTED, true);
-            }
-            else
-            {
-                SpdkEventScheduler::ExecuteOrScheduleEvent(core,
-                    std::make_shared<WriteSubmission>(volumeIo));
-            }
-            break;
+            SpdkEventScheduler::ExecuteOrScheduleEvent(core,
+                std::make_shared<WriteSubmission>(volumeIo));
         }
+        break;
+
         case UbioDir::Read:
         {
             airlog("PERF_ARR_VOL", "AIR_READ", arr_vol_id, posIo.length);
-            if (unlikely(static_cast<int>(POS_EVENT_ID::SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volumeIo->GetVolumeId())))
-            {
-                IoCompleter ioCompleter(volumeIo);
-                ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::VOLUME_UMOUNTED, true);
-            }
-            else
-            {
-                SpdkEventScheduler::ExecuteOrScheduleEvent(core,
-                    std::make_shared<ReadSubmission>(volumeIo));
-            }
-            break;
+            SpdkEventScheduler::ExecuteOrScheduleEvent(core,
+                std::make_shared<ReadSubmission>(volumeIo));
         }
+        break;
+
         default:
         {
             POS_EVENT_ID eventId = POS_EVENT_ID::BLKHDLR_WRONG_IO_DIRECTION;

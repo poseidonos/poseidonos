@@ -88,7 +88,7 @@ const uint16_t INVALID_SUBSYSTEM = 0;
 
 const uint32_t PENDING_CPU_THRESHOLD = 20;
 
-const uint32_t DEFAULT_MIN_BW_MBPS = 100;
+const uint32_t DEFAULT_MIN_BW_MBPS = 50;
 const uint32_t DEFAULT_MIN_IOPS = 1000;
 const int64_t DEFAULT_MIN_BW_PCS = DEFAULT_MIN_BW_MBPS * (M_KBYTES * M_KBYTES / (PARAMETER_COLLECTION_INTERVAL));
 const int64_t DEFAULT_MIN_IO_PCS = DEFAULT_MIN_IOPS / PARAMETER_COLLECTION_INTERVAL;
@@ -169,6 +169,7 @@ enum QosCorrectionDir
     QosCorrectionDir_NoChange = QosCorrectionDir_Start,
     QosCorrectionDir_Increase,
     QosCorrectionDir_Decrease,
+    QosCorrectionDir_SetMaxLimit,
     QosCorrectionDir_Increase2X,
     QosCorrectionDir_Decrease2X,
     QosCorrectionDir_Increase4X,
@@ -216,6 +217,7 @@ struct bw_iops_parameter
         currentBW = 0;
         currentIOs = 0;
         valid = 0;
+        blockSize = 0;
         for (uint8_t i = 0; i < 11; i++)
         {
             pad[i] = 0;
@@ -224,6 +226,7 @@ struct bw_iops_parameter
     uint64_t currentBW;  // per milli second
     uint64_t currentIOs; // per milli second
     uint32_t valid;
+    uint32_t blockSize;
     uint32_t pad[11];
 };
 

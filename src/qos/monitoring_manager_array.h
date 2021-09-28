@@ -68,5 +68,6 @@ private:
     void _UpdateContextVolumeParameter(uint32_t volId);
     bw_iops_parameter volParams[MAX_VOLUME_COUNT];
     void _UpdateVolumeReactorParameter(uint32_t volId, uint32_t reactor);
+    void _UpdateVolumeBlockSize(uint32_t volId, uint64_t blockSize);
 };
 } // namespace pos

@@ -30,56 +30,48 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/qos/policy_manager_array.h"
+#pragma once
 
-#include "src/include/pos_event_id.hpp"
-#include "src/qos/correction_manager.h"
+#include <map>
+#include <utility>
+
+#include "src/qos/parameters_volume.h"
+#include "src/qos/qos_common.h"
 #include "src/qos/qos_context.h"
-#include "src/qos/qos_manager.h"
-#include "src/qos/volume_policy.h"
+#include "src/qos/throttling_logic.h"
+#include "src/qos/user_policy_volume.h"
 
 namespace pos
 {
-/* --------------------------------------------------------------------------*/
-/**
-  * @Synopsis
-  *
-  * @Returns
-  */
-/* --------------------------------------------------------------------------*/
-QosPolicyManagerArray::QosPolicyManagerArray(QosContext* qosCtx, uint32_t arrayIndex)
+class VolumeThrottle;
+class ThrottlingPolicyDeficit : public IThrottlingLogic
 {
-    qosContext = qosCtx;
-    arrayId = arrayIndex;
-    volumePolicy = new VolumePolicy(qosCtx);
-}
-/* --------------------------------------------------------------------------*/
-/**
-  * @Synopsis
-  *
-  * @Returns
-  */
-/* --------------------------------------------------------------------------*/
-QosPolicyManagerArray::~QosPolicyManagerArray(void)
-{
-    delete volumePolicy;
-}
-/* --------------------------------------------------------------------------*/
-/**
-  * @Synopsis
-  *
-  * @Returns
-  */
-/* --------------------------------------------------------------------------*/
-void
-QosPolicyManagerArray::Execute(void)
-{
-    qosContext->SetApplyCorrection(false);
-    QosCorrection& qosCorrection = qosContext->GetQosCorrection();
-    qosCorrection.SetCorrectionType(QosCorrection_VolumeThrottle, false);
-    if (true == QosManagerSingleton::Instance()->IsFeQosEnabled())
+public:
+    explicit ThrottlingPolicyDeficit(QosContext* qosCtx);
+    virtual ~ThrottlingPolicyDeficit(void)
     {
-        volumePolicy->HandlePolicy();
     }
-}
+    virtual unsigned int GetNewWeight(uint32_t volId, uint32_t arrayId, VolumeThrottle* volumeThrottle) override;
+    virtual bool GetCorrectionType(uint32_t volId, uint32_t arrayId) override;
+    virtual void Reset(void) override;
+    virtual void IncrementCycleCount(void) override;
+
+private:
+    QosContext* qosContext;
+    std::map<std::pair<uint32_t, uint32_t>, bool> correctionType;
+    void _GetBwIopsCorrection(int64_t& bwCorrection, int64_t& iopsCorrection, uint32_t volId, uint32_t arrayId, VolumeThrottle* volthrottle);
+    uint64_t _InitialValueCheck(uint64_t value, bool iops, VolumeParameter& volParameter, VolumeUserPolicy& volUserPolicy);
+    uint64_t _MinimumVolumeCorrection(VolumeThrottle* volumeThrottle, VolumeUserPolicy* volumeUserPolicy);
+    bool _CheckValidInput(void);
+    void _CalculateDeficit(int64_t& bwCorrection, int64_t& iopsCorrection);
+    AllVolumeParameter& _GetAllVolumeParameters(void);
+    AllVolumeUserPolicy& _GetUserPolicy(void);
+    uint64_t storeCorrection;
+    bool resetFlag;
+    bool beginAgain;
+    int noOfCycles;
+    int64_t prevDeficit;
+    int64_t totalDeficit;
+    uint32_t totalCycleIter;
+};
 } // namespace pos

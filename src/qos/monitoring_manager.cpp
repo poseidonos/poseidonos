@@ -314,9 +314,63 @@ QosMonitoringManager::_GatherActiveVolumeParameters(void)
         _UpdateContextActiveVolumeReactors(volReactorMap);
         changeDetected = true;
     }
+
+    if (_CheckChangeInActiveVolumes() == true)
+    {
+        QosManagerSingleton::Instance()->ResetCorrection();
+    }
     return changeDetected;
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis
+ *
+ * @Returns
+ */
+/* --------------------------------------------------------------------------*/
+bool
+QosMonitoringManager::_CheckChangeInActiveVolumes(void)
+{
+    static int stabilityCycleCheck = 0;
+    std::map<uint32_t, uint32_t> activeVolumeMap = qosContext->GetActiveVolumes();
+    bool ret = false;
+    if (stabilityCycleCheck == 0)
+    {
+        if (prevActiveVolumeMap == activeVolumeMap)
+        {
+            ret = false;
+        }
+        else
+        {
+            stabilityCycleCheck++;
+            ret = false;
+        }
+    }
+    else
+    {
+        if (prevActiveVolumeMap == activeVolumeMap)
+        {
+            stabilityCycleCheck++;
+            if (stabilityCycleCheck == 10)
+            {
+                stabilityCycleCheck = 0;
+                ret = true;
+            }
+            else
+            {
+                ret = false;
+            }
+        }
+        else
+        {
+            stabilityCycleCheck = 0;
+            ret = false;
+        }
+    }
+    prevActiveVolumeMap = activeVolumeMap;
+    return ret;
+}
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
