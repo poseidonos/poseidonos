@@ -19,6 +19,7 @@ class Fio:
                 self.cmd += f" --{key}={self.opt[key]}"
             for job in self.jobs:
                 self.cmd += job
+            self.cmd += f" > {self.opt['output']}.eta"
             self.cmd += "'"
             return True
         except Exception as e:
