@@ -42,9 +42,7 @@
 #include "src/array/meta/device_meta.h"
 #include "src/array_models/dto/device_set.h"
 #include "src/device/device_identifier.h"
-#ifdef _ADMIN_ENABLED
 #include "src/array/device/i_array_device_manager.h"
-#endif
 using namespace std;
 
 namespace pos
@@ -52,10 +50,7 @@ namespace pos
 class DeviceManager;
 class DeviceMeta;
 
-class ArrayDeviceManager
-#ifdef _ADMIN_ENABLED
-: public IArrayDevMgr
-#endif
+class ArrayDeviceManager : public IArrayDevMgr
 {
 public:
     ArrayDeviceManager(DeviceManager* sysDevMgr, string arrayName);

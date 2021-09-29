@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #include "src/admin/admin_command_complete_handler.h"
 
 #include <iostream>
@@ -44,7 +43,7 @@ using namespace std;
 namespace pos
 {
 AdminCommandCompleteHandler::AdminCommandCompleteHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback)
-: Callback(false, CallbackType_AdminCommandCompleteHandler),
+: Callback(false),
   io(posIo),
   originCore(originCore),
   callback(callback)
@@ -57,10 +56,7 @@ AdminCommandCompleteHandler::~AdminCommandCompleteHandler(void)
 bool
 AdminCommandCompleteHandler::_DoSpecificJob(void)
 {
-    bool keepCurrentReactor = EventFrameworkApiSingleton::Instance()->IsSameReactorNow(originCore);
-    assert(keepCurrentReactor == true);
     callback->Execute();
     return true;
 }
 } // namespace pos
-#endif

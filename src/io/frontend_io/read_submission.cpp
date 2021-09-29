@@ -41,9 +41,7 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/callback.h"
-#ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_mgr.h"
-#endif
 
 namespace pos
 {
@@ -92,11 +90,10 @@ ReadSubmission::~ReadSubmission()
 bool
 ReadSubmission::Execute(void)
 {
-#ifdef _ADMIN_ENABLED
     uint32_t volId = volumeIo->GetVolumeId();
-    SmartLogMgrSingleton::Instance()->IncreaseReadCmds(volId);
-    SmartLogMgrSingleton::Instance()->IncreaseReadBytes(blockAlignment->GetBlockCount(), volId);
-#endif
+    uint32_t arrayId = volumeIo->GetArrayId();
+    SmartLogMgrSingleton::Instance()->IncreaseReadCmds(volId, arrayId);
+    SmartLogMgrSingleton::Instance()->IncreaseReadBytes(blockAlignment->GetBlockCount(), volId, arrayId);
     bool isInSingleBlock = (blockAlignment->GetBlockCount() == 1);
     if (isInSingleBlock)
     {

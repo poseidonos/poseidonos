@@ -42,6 +42,7 @@ class TelemetryPublisher;
 class Mapper;
 class Allocator;
 class JournalManager;
+class SmartLogMetaIo;
 
 class MetaUpdater;
 class MetaVolumeEventHandler;
@@ -51,7 +52,7 @@ class Metadata : public IMountSequence
 public:
     Metadata(void);
     Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state);
-    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl);
+    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl, SmartLogMetaIo* smartLogMetaIo);
     virtual ~Metadata(void);
 
     virtual int Init(void) override;
@@ -72,7 +73,7 @@ private:
     Mapper* mapper;
     Allocator* allocator;
     JournalManager* journal;
-
+    SmartLogMetaIo* smartLogMetaIo;
     MetaUpdater* metaUpdater;
     MetaVolumeEventHandler* volumeEventHandler;
 };

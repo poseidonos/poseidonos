@@ -47,9 +47,7 @@
 #include "src/spdk_wrapper/device_monitor.h"
 #include "src/include/memory.h"
 #include "src/lib/singleton.h"
-#ifdef _ADMIN_ENABLED
 #include "src/device/i_dev_info.h"
-#endif
 
 using namespace std;
 
@@ -64,9 +62,7 @@ class IIODispatcher;
 using DeviceIterFunc = function<void(UblockSharedPtr, void*)>;
 
 class DeviceManager
-#ifdef _ADMIN_ENABLED
 : public IDevInfo
-#endif
 {
 public:
     DeviceManager(AffinityManager* affinityManager = AffinityManagerSingleton::Instance());

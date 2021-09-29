@@ -40,9 +40,7 @@
 #include "src/include/partition_type.h"
 #include "src/state/state_context.h"
 
-#ifdef _ADMIN_ENABLED
 #include "src/array/device/i_array_device_manager.h"
-#endif
 using namespace std;
 
 namespace pos
@@ -61,8 +59,6 @@ public:
     virtual ArrayStateType GetState(void) = 0;
     virtual StateContext* GetStateCtx(void) = 0;
     virtual uint32_t GetRebuildingProgress(void) = 0;
-#ifdef _ADMIN_ENABLED
     virtual IArrayDevMgr* GetArrayManager(void) = 0;
-#endif
 };
 } // namespace pos

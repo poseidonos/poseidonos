@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_page_handler.h"
 
 #include "lib/spdk/include/spdk/bdev_module.h"
@@ -78,4 +77,3 @@ SmartLogPageHandler::Execute(void)
 }
 
 } // namespace pos
-#endif

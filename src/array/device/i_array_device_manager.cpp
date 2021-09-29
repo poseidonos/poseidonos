@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 
 #include "i_array_device_manager.h"
 
@@ -40,4 +39,3 @@ IArrayDevMgr::IArrayDevMgr(DeviceManager* sysDevMgr)
 {
 }
 } // namespace pos
-#endif

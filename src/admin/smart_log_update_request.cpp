@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #include "smart_log_update_request.h"
 
 #include <sstream>
@@ -127,4 +126,3 @@ SmartLogUpdateRequest::_CalculateVarBasedVal(void)
 }
 
 } // namespace pos
-#endif

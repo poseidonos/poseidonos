@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #pragma once
 
 #include "spdk/pos.h"
@@ -56,4 +55,3 @@ private:
     CallbackSmartPtr callback;
 };
 } // namespace pos
-#endif

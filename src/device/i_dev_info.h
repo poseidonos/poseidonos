@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #pragma once
 
 #include <string>
@@ -48,4 +47,3 @@ public:
     virtual UblockSharedPtr GetDev(DeviceIdentifier& devID) = 0;
 };
 } // namespace pos
-#endif

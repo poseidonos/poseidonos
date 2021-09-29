@@ -31,30 +31,50 @@
  */
 
 #pragma once
-#include <iostream>
-#include <stdexcept>
 #include <string>
+#include "src/meta_file_intf/async_context.h"
+#include "src/meta_file_intf/meta_file_include.h"
+#include "src/meta_file_intf/meta_file_intf.h"
+#include "src/admin/smart_log_mgr.h"
+#include "src/array_models/interface/i_mount_sequence.h"
+#include "src/volume/volume_list.h"
+#include "src/array_models/interface/i_array_info.h"
+
+using namespace std;
+
 namespace pos
 {
-static const int MILLI = 1000;
-static const int BUF_SIZE = 64;
-static const int ALLOWED_THERMAL_ZONES = 9;
-const char TEMPERATURE_COMMAND_1[] = "/sys/class/thermal/thermal_zone";
-const char TEMPERATURE_COMMAND_2[] = "/temp";
-class ComponentManager
+class LogPageFlushIoCtx : public AsyncMetaFileIoCtx
 {
 public:
-    ComponentManager(void);
-    ~ComponentManager(void);
-    bool FindCpuTemperature(void);
-    uint64_t GetCpuTemperature(void);
+    int mpageNum;
+};
+class SmartLogMetaIo : public IMountSequence
+{
+public:
+    explicit SmartLogMetaIo(IArrayInfo* arrayInfo);
+    virtual ~SmartLogMetaIo(void);
+    virtual int Init(void) override;
+    virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
+    virtual void Flush(void) override;
 
 private:
-    void _CalculateAvgTemp(uint64_t temp);
-    uint64_t cpuTemperature;
-    uint64_t sumCpuTemperature;
-    uint64_t thermalZoneCount;
-    std::string filePath;
-    bool fileOpened;
+    // Meta File
+    int _CreateSmartLogFile(void);
+    int _StoreLogData(void);
+    int _LoadLogData(void);
+    int _OpenFile(void);
+    bool _IsFileOpened(void);
+    int _CloseFile(void);
+    int _DeleteSmartLogFile(void);
+    void _CompleteSmartLogIo(AsyncMetaFileIoCtx* ctx);
+    int _DoMfsOperation(int Direction);
+    bool loaded;
+    IArrayInfo* arrayInfo;
+    std::string fileName;
+    MetaFileIntf* smartLogFile;
+    uint32_t arrayId;
+    int ioError = 0;
 };
 } // namespace pos

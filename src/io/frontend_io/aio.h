@@ -52,11 +52,9 @@ struct IOCtx
 };
 
 class VolumeManager;
-#ifdef _ADMIN_ENABLED
 class IArrayInfo;
 class IDevInfo;
 class IIODispatcher;
-#endif
 class AioCompletion : public Callback,
                       public std::enable_shared_from_this<AioCompletion>
 {
@@ -85,28 +83,25 @@ public:
     AIO(void);
     void SubmitAsyncIO(pos_io& posIo);
     void CompleteIOs(void);
-#ifdef _ADMIN_ENABLED
     void SubmitAsyncAdmin(pos_io& io);
-#endif
 
 private:
     static thread_local IOCtx ioContext;
     VolumeIoSmartPtr _CreateVolumeIo(pos_io& posIo);
     FlushIoSmartPtr _CreateFlushIo(pos_io& posIo);
 };
-#ifdef _ADMIN_ENABLED
 class AdminCompletion : public Callback,
                         public std::enable_shared_from_this<AdminCompletion>
 
 {
 public:
-    AdminCompletion(pos_io* posIo, IOCtx& ioContext);
+    AdminCompletion(pos_io* posIo, IOCtx& ioContext, uint32_t originCore);
     ~AdminCompletion(void) override;
 
 private:
     bool _DoSpecificJob(void) override;
     pos_io* io;
     IOCtx& ioContext;
+    uint32_t originCore;
 };
-#endif
 } // namespace pos

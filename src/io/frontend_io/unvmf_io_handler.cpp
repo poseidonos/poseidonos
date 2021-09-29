@@ -77,14 +77,12 @@ UNVMfSubmitHandler(struct pos_io* io)
                 PosEventId::GetString(eventId));
             throw eventId;
         }
-#ifdef _ADMIN_ENABLED
         if (io->ioType > IO_TYPE::ADMIN)
         {
             AIO aio;
             aio.SubmitAsyncAdmin(*io);
             return POS_IO_STATUS_SUCCESS;
         }
-#endif
         if (io->ioType != IO_TYPE::FLUSH)
         {
             if (unlikely(1 != io->iovcnt))

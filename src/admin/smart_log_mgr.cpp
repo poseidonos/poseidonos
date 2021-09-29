@@ -30,194 +30,113 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_mgr.h"
-
+#include "src/master_context/config_manager.h"
+#include "src/include/pos_event_id.hpp"
 #include <spdk/nvme_spec.h>
 
-#include "meta_direction.h"
 namespace pos
 {
 SmartLogMgr::SmartLogMgr(void)
-: loaded(false)
 {
-    fileName = "SmartLogPage.bin";
 }
 
 SmartLogMgr::~SmartLogMgr(void)
 {
 }
 
-// Meta file Interfaces
 void
-SmartLogMgr::Init(MetaFileIntf* metaFileIntf)
+SmartLogMgr::Init(void)
 {
+    bool enabled = false;
+    smartLogEnable = false;
+    ConfigManager& configManager = *ConfigManagerSingleton::Instance();
+    int ret = configManager.GetValue("admin", "smart_log_page", &enabled, CONFIG_TYPE_BOOL);
+    if (ret == (int)POS_EVENT_ID::SUCCESS)
+    {
+        smartLogEnable = enabled;
+    }
     memset(logPage, 0, MAX_VOLUME_COUNT * sizeof(struct SmartLogEntry));
-    smartLogFile = metaFileIntf;
-    CreateSmartLogFile();
 }
-int
-SmartLogMgr::CreateSmartLogFile(void)
-{
-    int ret = 0;
-    bool result = smartLogFile->DoesFileExist();
-    if (result == false)
-    {
-        uint64_t fileSize = MAX_VOLUME_COUNT * sizeof(struct SmartLogEntry);
 
-        ret = smartLogFile->Create(fileSize);
-        if (ret < 0)
-        {
-            POS_TRACE_ERROR(EID(MFS_FILE_CREATE_FAILED),
-                "Map file creation failed, fileName:{}", fileName);
-        }
-        else if (ret == 0)
-        {
-            loaded = true;
-        }
-    }
-    else
-    {
-        LoadLogData();
-    }
-    return ret;
-}
-int
-SmartLogMgr::OpenFile(void)
-{
-    int ret = smartLogFile->Open();
-    return ret;
-}
 bool
-SmartLogMgr::IsFileOpened(void)
+SmartLogMgr::GetSmartLogEnabled(void)
 {
-    return smartLogFile->IsOpened();
-}
-int
-SmartLogMgr::CloseFile(void)
-{
-    int ret = smartLogFile->Close();
-    if (ret == 0)
-    {
-        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE), "{} file has been closed", fileName);
-    }
-    return ret;
-}
-int
-SmartLogMgr::DeleteSmartLogFile(void)
-{
-    int ret = 0;
-    ret = smartLogFile->Delete();
-    if (ret < 0)
-    {
-        POS_TRACE_ERROR(EID(MFS_FILE_DELETE_FAILED), "MFS File:{} delete failed",
-            fileName);
-        return ret;
-    }
-    delete smartLogFile;
-    smartLogFile = nullptr;
-    return ret;
+    return smartLogEnable;
 }
 
-int
-SmartLogMgr::_DoMfsOperation(int direction)
+void*
+SmartLogMgr::GetLogPages(uint32_t arrayId)
 {
-    ioError = 0;
-    bool Isopened = smartLogFile->IsOpened();
-    if (!Isopened)
-    {
-        OpenFile();
-    }
-    LogPageFlushIoCtx* logpageFlushReq = new LogPageFlushIoCtx();
-    if (direction == FLUSH)
-        logpageFlushReq->opcode = MetaFsIoOpcode::Write;
-    else
-        logpageFlushReq->opcode = MetaFsIoOpcode::Read;
-    logpageFlushReq->fd = smartLogFile->GetFd();
-    logpageFlushReq->fileOffset = 0;
-    logpageFlushReq->length = MAX_VOLUME_COUNT * sizeof(struct SmartLogEntry);
-    logpageFlushReq->buffer = (char*)logPage;
-    logpageFlushReq->callback = std::bind(&SmartLogMgr::CompleteSmartLogIo, this, std::placeholders::_1);
-    int ret = smartLogFile->AsyncIO(logpageFlushReq);
-    if (ret < 0)
-    {
-        // add log for error in mpage flush
-        ioError = ret;
-    }
-    CloseFile();
-    return ioError;
-}
-int
-SmartLogMgr::StoreLogData(void)
-{
-    return _DoMfsOperation(FLUSH);
-}
-int
-SmartLogMgr::LoadLogData(void)
-{
-    return _DoMfsOperation(LOAD);
+    return (void *)logPage[arrayId];
 }
 
 void
-SmartLogMgr::CompleteSmartLogIo(AsyncMetaFileIoCtx* ctx)
+SmartLogMgr::IncreaseReadCmds(uint32_t volId, uint32_t arrayId)
 {
-    LogPageFlushIoCtx* reqCtx = static_cast<LogPageFlushIoCtx*>(ctx);
-    if (reqCtx->error != 0)
+    if (smartLogEnable == false)
     {
-        ioError = reqCtx->error;
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ASYNCIO_ERROR,
-            "MFS AsyncIO error, ioError:{}  mpageNum:{}", ioError, reqCtx->mpageNum);
+        return;
     }
-    delete ctx;
-}
-
-void
-SmartLogMgr::IncreaseReadCmds(uint32_t volId)
-{
-    logPage[volId].hostReadCommands = logPage[volId].hostReadCommands + 1;
-    return;
-}
-void
-SmartLogMgr::IncreaseWriteCmds(uint32_t volId)
-{
-    logPage[volId].hostWriteCommands = logPage[volId].hostWriteCommands + 1;
-    return;
-}
-uint64_t
-SmartLogMgr::GetWriteCmds(uint32_t volId)
-{
-    return logPage[volId].hostWriteCommands;
-}
-uint64_t
-SmartLogMgr::GetReadCmds(uint32_t volId)
-{
-    return logPage[volId].hostReadCommands;
-}
-void
-SmartLogMgr::IncreaseReadBytes(uint64_t blkCnt, uint32_t volId)
-{
-    logPage[volId].bytesRead = logPage[volId].bytesRead + blkCnt * BLOCK_SIZE_SMART;
+    logPage[arrayId][volId].hostReadCommands = logPage[arrayId][volId].hostReadCommands + 1;
     return;
 }
 
 void
-SmartLogMgr::IncreaseWriteBytes(uint64_t blkCnt, uint32_t volId)
+SmartLogMgr::IncreaseWriteCmds(uint32_t volId, uint32_t arrayId)
 {
-    logPage[volId].bytesWritten = logPage[volId].bytesWritten + blkCnt * BLOCK_SIZE_SMART;
+    if (smartLogEnable == false)
+    {
+        return;
+    }
+    logPage[arrayId][volId].hostWriteCommands = logPage[arrayId][volId].hostWriteCommands + 1;
     return;
 }
 
 uint64_t
-SmartLogMgr::GetReadBytes(uint32_t volId)
+SmartLogMgr::GetWriteCmds(uint32_t volId, uint32_t arrayId)
 {
-    return logPage[volId].bytesRead;
+    return logPage[arrayId][volId].hostWriteCommands;
 }
 
 uint64_t
-SmartLogMgr::GetWriteBytes(uint32_t volId)
+SmartLogMgr::GetReadCmds(uint32_t volId, uint32_t arrayId)
 {
-    return logPage[volId].bytesWritten;
+    return logPage[arrayId][volId].hostReadCommands;
+}
+
+void
+SmartLogMgr::IncreaseReadBytes(uint64_t blkCnt, uint32_t volId, uint32_t arrayId)
+{
+    if (smartLogEnable == false)
+    {
+        return;
+    }
+    logPage[arrayId][volId].bytesRead = logPage[arrayId][volId].bytesRead + blkCnt * BLOCK_SIZE_SMART;
+    return;
+}
+
+void
+SmartLogMgr::IncreaseWriteBytes(uint64_t blkCnt, uint32_t volId, uint32_t arrayId)
+{
+    if (smartLogEnable == false)
+    {
+        return;
+    }
+    logPage[arrayId][volId].bytesWritten = logPage[arrayId][volId].bytesWritten + blkCnt * BLOCK_SIZE_SMART;
+    return;
+}
+
+uint64_t
+SmartLogMgr::GetReadBytes(uint32_t volId, uint32_t arrayId)
+{
+    return logPage[arrayId][volId].bytesRead;
+}
+
+uint64_t
+SmartLogMgr::GetWriteBytes(uint32_t volId, uint32_t arrayId)
+{
+    return logPage[arrayId][volId].bytesWritten;
 }
 
 } // namespace pos
-#endif

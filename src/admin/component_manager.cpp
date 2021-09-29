@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #include "src/admin/component_manager.h"
 
 #include <stdio.h>
@@ -100,4 +99,3 @@ ComponentManager::GetCpuTemperature(void)
     return cpuTemperature / MILLI;
 }
 } // namespace pos
-#endif

@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #pragma once
 
 #include "spdk/pos.h"
@@ -49,7 +48,7 @@ static const int KELVIN_TO_CELSIUS = 273;
 class DiskSmartCompleteHandler : public Callback
 {
 public:
-    DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t origincore, pos_io* io, CallbackSmartPtr callback);
+    DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t arrayId, uint32_t origincore, pos_io* io, CallbackSmartPtr callback);
     ~DiskSmartCompleteHandler(void) override;
 
 private:
@@ -58,9 +57,9 @@ private:
     void _SetValfromSmartLogMgr(void);
     struct spdk_nvme_health_information_page* resultPage;
     uint32_t volId;
+    uint32_t arrayId;
     uint32_t originCore;
     pos_io* io;
     CallbackSmartPtr callback;
 };
 } // namespace pos
-#endif

@@ -39,10 +39,8 @@
 #include "src/spdk_wrapper/caller/spdk_nvme_caller.h"
 #include "unvme_device_context.h"
 #include "unvme_io_context.h"
-#ifdef _ADMIN_ENABLED
 #include "spdk/include/spdk/nvme_spec.h"
 #include "src/admin/disk_query_manager.h"
-#endif
 namespace pos
 {
 UnvmeCmd::UnvmeCmd(SpdkNvmeCaller* spdkNvmeCaller)
@@ -116,8 +114,6 @@ UnvmeCmd::RequestIO(UnvmeDeviceContext* deviceContext,
                 callbackFunc, ioCtx);
             break;
         }
-            /* Comment out for test coverage.
-#ifdef _ADMIN_ENABLED
         case UbioDir::GetLogPage:
         {
             deviceContext->IncAdminCommandCount();
@@ -126,15 +122,14 @@ UnvmeCmd::RequestIO(UnvmeDeviceContext* deviceContext,
             if (pageContext->lid == SPDK_NVME_LOG_HEALTH_INFORMATION)
             {
                 struct spdk_nvme_ctrlr* ctrlr = spdk_nvme_ns_get_ctrlr(deviceContext->ns);
-                ret = spdk_nvme_ctrlr_cmd_get_log_page(ctrlr, pageContext->lid,
+                ret = spdkNvmeCaller->SpdkNvmeCtrlrCmdGetLogPage(ctrlr, pageContext->lid,
                     SPDK_NVME_GLOBAL_NS_TAG, pageContext->payload,
                     sizeof(struct spdk_nvme_health_information_page),
                     0, callbackFunc, ioCtx);
             }
             break;
         }
-#endif
-*/
+
         case UbioDir::AdminPassTh:
         {
             deviceContext->IncAdminCommandCount();

@@ -60,11 +60,8 @@
 #include "src/volume/volume_manager.h"
 #include "src/volume/volume_service.h"
 #include "src/event_scheduler/io_completer.h"
-
-#ifdef _ADMIN_ENABLED
 #include "src/admin/admin_command_handler.h"
 #include "src/io_scheduler/io_dispatcher.h"
-#endif
 
 namespace pos
 {
@@ -334,7 +331,6 @@ AIO::CompleteIOs(void)
         DeviceManagerSingleton::Instance()->HandleCompletedCommand();
     }
 }
-#ifdef _ADMIN_ENABLED
 void
 AIO::SubmitAsyncAdmin(pos_io& io)
 {
@@ -353,9 +349,9 @@ AIO::SubmitAsyncAdmin(pos_io& io)
             ioContext.needPollingCount++;
         }
     }
-    CallbackSmartPtr adminCompletion(new AdminCompletion(&io, ioContext));
     uint32_t originCore = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
-    string arrayName = "POSArray";
+    CallbackSmartPtr adminCompletion(new AdminCompletion(&io, ioContext, originCore));
+    std::string arrayName(io.arrayName);
     IArrayInfo* info = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
     IDevInfo* devmgr = DeviceManagerSingleton::Instance();
     IIODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
@@ -365,10 +361,11 @@ AIO::SubmitAsyncAdmin(pos_io& io)
     return;
 }
 
-AdminCompletion::AdminCompletion(pos_io* posIo, IOCtx& ioContext)
+AdminCompletion::AdminCompletion(pos_io* posIo, IOCtx& ioContext, uint32_t originCore)
 : Callback(false, CallbackType_AdminCompletion),
   io(posIo),
-  ioContext(ioContext)
+  ioContext(ioContext),
+  originCore(originCore)
 {
 }
 AdminCompletion::~AdminCompletion(void)
@@ -378,6 +375,8 @@ AdminCompletion::~AdminCompletion(void)
 bool
 AdminCompletion::_DoSpecificJob(void)
 {
+    bool keepCurrentReactor = EventFrameworkApiSingleton::Instance()->IsSameReactorNow(originCore);
+    assert(keepCurrentReactor == true);
     if (ioContext.needPollingCount > 0)
     {
         ioContext.needPollingCount--;
@@ -386,5 +385,4 @@ AdminCompletion::_DoSpecificJob(void)
     return true;
 }
 
-#endif
 } // namespace pos

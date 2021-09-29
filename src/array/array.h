@@ -50,10 +50,8 @@
 #include "src/include/address_type.h"
 #include "src/include/array_config.h"
 #include "src/array/service/array_service_layer.h"
-
-#ifdef _ADMIN_ENABLED
 #include "src/array/device/i_array_device_manager.h"
-#endif
+
 using namespace std;
 
 namespace pos
@@ -114,9 +112,7 @@ public:
     IArrayDevice* FindDevice(string devSn) override;
     virtual bool TriggerRebuild(ArrayDevice* target);
     virtual bool ResumeRebuild(ArrayDevice* target);
-#ifdef _ADMIN_ENABLED
     IArrayDevMgr* GetArrayManager(void);
-#endif
 
 private:
     int _LoadImpl(unsigned int& arrayIndex);

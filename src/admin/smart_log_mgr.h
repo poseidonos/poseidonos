@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #pragma once
 #include <atomic>
 #include <mutex>
@@ -39,18 +38,16 @@
 #include "src/include/memory.h"
 #include "src/lib/singleton.h"
 #include "src/logger/logger.h"
-#include "src/meta_file_intf/async_context.h"
-#include "src/meta_file_intf/meta_file_include.h"
-#include "src/meta_file_intf/meta_file_intf.h"
-#ifndef IBOF_CONFIG_USE_MOCK_FS
-#include "src/metafs/metafs_file_intf.h"
-#endif
 #include "src/volume/volume_list.h"
+#include "src/include/array_mgmt_policy.h"
+
 using namespace std;
 
 namespace pos
 {
 static const uint64_t BLOCK_SIZE_SMART = pos::BLOCK_SIZE;
+static const uint32_t MAX_ARRAYS = ArrayMgmtPolicy::MAX_ARRAY_CNT;
+
 struct SmartLogEntry
 {
     std::atomic<std::uint64_t> volId;
@@ -60,49 +57,29 @@ struct SmartLogEntry
     std::atomic<std::uint64_t> bytesRead;
 };
 
-class LogPageFlushIoCtx : public AsyncMetaFileIoCtx
-{
-public:
-    int mpageNum;
-};
-
 class SmartLogMgr
 {
 public:
     SmartLogMgr(void);
     ~SmartLogMgr(void);
 
-    void Init(MetaFileIntf* metaFileIntf);
-    int StoreLogData(void);
-    int LoadLogData(void);
-    void IncreaseReadCmds(uint32_t volId);
-    void IncreaseWriteCmds(uint32_t volId);
-    uint64_t GetWriteCmds(uint32_t volId);
-    uint64_t GetReadCmds(uint32_t volId);
 
-    void IncreaseReadBytes(uint64_t blkCnt, uint32_t volId);
-    void IncreaseWriteBytes(uint64_t blkCnt, uint32_t volId);
-    uint64_t GetWriteBytes(uint32_t volId);
-    uint64_t GetReadBytes(uint32_t volId);
-    // Meta file
-    int CreateSmartLogFile(void);
-    int OpenFile(void);
-    bool IsFileOpened(void);
-    int CloseFile(void);
-    int DeleteSmartLogFile(void);
-    void CompleteSmartLogIo(AsyncMetaFileIoCtx* ctx);
+    void Init(void);
+    bool GetSmartLogEnabled(void);
+    void IncreaseReadCmds(uint32_t volId, uint32_t arrayId);
+    void IncreaseWriteCmds(uint32_t volId, uint32_t arrayId);
+    uint64_t GetWriteCmds(uint32_t volId, uint32_t arrayId);
+    uint64_t GetReadCmds(uint32_t volId, uint32_t arrayId);
+
+    void IncreaseReadBytes(uint64_t blkCnt, uint32_t volId, uint32_t arrayId);
+    void IncreaseWriteBytes(uint64_t blkCnt, uint32_t volId, uint32_t arrayId);
+    uint64_t GetWriteBytes(uint32_t volId, uint32_t arrayId);
+    uint64_t GetReadBytes(uint32_t volId, uint32_t arrayId);
+    void* GetLogPages(uint32_t arrayId);
 
 private:
-    // Meta File
-    int _DoMfsOperation(int Direction);
-    MetaFileIntf* smartLogFile;
-    std::string fileName;
-    // SmartLogMetafs *smartLogMetafs;
-    struct SmartLogEntry logPage[MAX_VOLUME_COUNT];
-    bool loaded;
-    int ioError = 0;
-    int ioDirection = 0;
+    struct SmartLogEntry logPage[MAX_ARRAYS][MAX_VOLUME_COUNT];
+    bool smartLogEnable;
 };
 using SmartLogMgrSingleton = Singleton<SmartLogMgr>;
 } // namespace pos
-#endif

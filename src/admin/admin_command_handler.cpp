@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #include "src/admin/admin_command_handler.h"
 
 #include "Air.h"
@@ -42,6 +41,8 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/admin/smart_log_mgr.h"
+
 namespace pos
 {
 AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo, IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr)
@@ -76,11 +77,19 @@ AdminCommandHandler::Execute(void)
             lid = cmd->cdw10 & 0xFF;
             if (lid == SPDK_NVME_LOG_HEALTH_INFORMATION)
             {
-                // Increase polling count as the command will be submitted to disk
-                EventSmartPtr event(new SmartLogPageHandler(cmd, io, req->data, originCore, callback, arrayInfo, devInfo, dispatcher, arrayDevMgr));
-                bool result = event->Execute();
-                if (result == false)
-                    EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+                if (SmartLogMgrSingleton::Instance()->GetSmartLogEnabled() == true)
+                {
+                    EventSmartPtr event(new SmartLogPageHandler(cmd, io, req->data, originCore, callback, arrayInfo, devInfo, dispatcher, arrayDevMgr));
+                    bool result = event->Execute();
+                    if (result == false)
+                        EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+                }
+                else
+                {
+                    EventSmartPtr event(new AdminCommandCompleteHandler(io, originCore, callback));
+                    bool success = SpdkEventScheduler::SendSpdkEvent(originCore, event);
+                    return success;
+                }
             }
         }
         break;
@@ -92,4 +101,3 @@ AdminCommandHandler::Execute(void)
     return true;
 }
 } // namespace pos
-#endif

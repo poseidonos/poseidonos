@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #pragma once
 #include <mutex>
 
@@ -57,4 +56,3 @@ private:
     std::mutex updateMutex;
 };
 } // namespace pos
-#endif

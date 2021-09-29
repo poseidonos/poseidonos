@@ -58,9 +58,7 @@
 #include "src/logger/logger.h"
 #include "src/state/state_manager.h"
 #include "Air.h"
-#ifdef _ADMIN_ENABLED
 #include "src/admin/smart_log_mgr.h"
-#endif
 
 /*To do Remove after adding array Idx by Array*/
 #include "src/array_mgmt/array_manager.h"
@@ -134,11 +132,10 @@ WriteSubmission::Execute(void)
         }
         else
         {
+            uint32_t arrayId = volumeIo->GetArrayId();
+            SmartLogMgrSingleton::Instance()->IncreaseWriteBytes(blockCount, volumeId, arrayId);
+            SmartLogMgrSingleton::Instance()->IncreaseWriteCmds(volumeId, arrayId);
             volumeIo = nullptr;
-#ifdef _ADMIN_ENABLED
-            SmartLogMgrSingleton::Instance()->IncreaseWriteBytes(blockCount, volumeId);
-            SmartLogMgrSingleton::Instance()->IncreaseWriteCmds(volumeId);
-#endif
         }
 
         return done;

@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #include "disk_smart_complete_handler.h"
 
 #include "src/admin/admin_command_complete_handler.h"
@@ -38,10 +37,11 @@
 #include "src/event_scheduler/spdk_event_scheduler.h"
 namespace pos
 {
-DiskSmartCompleteHandler::DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t originCore, pos_io* io, CallbackSmartPtr callback)
+DiskSmartCompleteHandler::DiskSmartCompleteHandler(struct spdk_nvme_health_information_page* resultPage, uint32_t volId, uint32_t arrayId, uint32_t originCore, pos_io* io, CallbackSmartPtr callback)
 : Callback(false, CallbackType_DiskSmartCompleteHandler),
   resultPage(resultPage),
   volId(volId),
+  arrayId(arrayId),
   originCore(originCore),
   io(io),
   callback(callback)
@@ -75,19 +75,19 @@ DiskSmartCompleteHandler::_AddComponentTemperature(void)
 void
 DiskSmartCompleteHandler::_SetValfromSmartLogMgr(void)
 {
-    resultPage->host_read_commands[0] = SmartLogMgrSingleton::Instance()->GetReadCmds(volId);
-    resultPage->host_write_commands[0] = SmartLogMgrSingleton::Instance()->GetWriteCmds(volId);
+    resultPage->host_read_commands[0] = SmartLogMgrSingleton::Instance()->GetReadCmds(volId, arrayId);
+    resultPage->host_write_commands[0] = SmartLogMgrSingleton::Instance()->GetWriteCmds(volId, arrayId);
 
     resultPage->host_read_commands[1] = 0;
     resultPage->host_write_commands[1] = 0;
 
-    uint64_t dataBytesRead = SmartLogMgrSingleton::Instance()->GetReadBytes(volId);
+    uint64_t dataBytesRead = SmartLogMgrSingleton::Instance()->GetReadBytes(volId, arrayId);
     if (dataBytesRead == 0)
         resultPage->data_units_read[0] = 0;
     else
         resultPage->data_units_read[0] = dataBytesRead / NVME_SPEC_BYTE_UNIT + 1;
 
-    uint64_t dataBytesWritten = SmartLogMgrSingleton::Instance()->GetWriteBytes(volId);
+    uint64_t dataBytesWritten = SmartLogMgrSingleton::Instance()->GetWriteBytes(volId, arrayId);
     if (dataBytesWritten == 0)
         resultPage->data_units_written[0] = 0;
     else
@@ -109,4 +109,3 @@ DiskSmartCompleteHandler::_DoSpecificJob(void)
     // return true;
 }
 } // namespace pos
-#endif

@@ -58,9 +58,6 @@
 #include "src/network/nvmf_target.h"
 #include "src/qos/qos_manager.h"
 #include "src/spdk_wrapper/spdk.hpp"
-#ifdef _ADMIN_ENABLED
-#include "src/admin/smart_log_mgr.h"
-#endif
 #include "src/network/transport_configuration.h"
 #include "src/spdk_wrapper/spdk_thread_caller.h"
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
@@ -111,9 +108,6 @@ Poseidonos::Terminate(void)
     IODispatcherSingleton::ResetInstance();
     EventSchedulerSingleton::ResetInstance();
     QosManagerSingleton::ResetInstance();
-#ifdef _ADMIN_ENABLED
-    SmartLogMgrSingleton::ResetInstance();
-#endif
     FlushCmdManagerSingleton::ResetInstance();
     delete debugInfo;
     IOSubmitHandler* submitHandler = static_cast<IOSubmitHandler*>(IIOSubmitHandler::GetInstance());

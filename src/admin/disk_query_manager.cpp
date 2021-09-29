@@ -29,8 +29,6 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifdef _ADMIN_ENABLED
 #include "disk_query_manager.h"
 
 #include <iostream>
@@ -77,7 +75,6 @@ bool
 DiskQueryManager::SendSmartCommandtoDisk(void)
 {
     vector<UblockSharedPtr> devices;
-    string arrayName = "POSArray";
     DeviceSet<string> nameSet = arrayInfo->GetDevNames();
     for (string deviceName : nameSet.data)
     {
@@ -92,7 +89,7 @@ DiskQueryManager::SendSmartCommandtoDisk(void)
             "No Device in Array");
         return true;
     }
-    CallbackSmartPtr callback(new DiskSmartCompleteHandler(resultPage, io->volume_id, originCore, io, cb));
+    CallbackSmartPtr callback(new DiskSmartCompleteHandler(resultPage, io->volume_id, arrayInfo->GetIndex(), originCore, io, cb));
     callback->SetWaitingCount(devices.size());
     for (size_t i = 0; i < devices.size(); i++)
     {
@@ -143,4 +140,3 @@ DiskQueryManager::Execute(void)
 }
 
 } // namespace pos
-#endif

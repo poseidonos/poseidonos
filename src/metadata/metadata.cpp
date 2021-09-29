@@ -39,12 +39,8 @@
 #include "src/mapper/mapper.h"
 #include "src/meta_service/meta_service.h"
 #include "src/metadata/meta_updater.h"
-#include "src/metadata/meta_volume_event_handler.h"
-
-#ifdef _ADMIN_ENABLED
-#include "src/admin/smart_log_mgr.h"
-#include "src/meta_file_intf/mock_file_intf.h"
-#endif
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/admin/smart_log_meta_io.h"
 
 namespace pos
 {
@@ -53,6 +49,7 @@ Metadata::Metadata(void)
   mapper(nullptr),
   allocator(nullptr),
   journal(nullptr),
+  smartLogMetaIo(nullptr),
   metaUpdater(nullptr)
 {
 }
@@ -61,16 +58,18 @@ Metadata::Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* stat
 : Metadata(info,
       new Mapper(info, state),
       new Allocator(tp, info, state),
-      new JournalManager(info, state))
+      new JournalManager(info, state),
+      new SmartLogMetaIo(info))
 {
 }
 
 Metadata::Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator,
-    JournalManager* journal)
+    JournalManager* journal, SmartLogMetaIo* smartLogMetaIo)
 : arrayInfo(info),
   mapper(mapper),
   allocator(allocator),
   journal(journal),
+  smartLogMetaIo(smartLogMetaIo),
   metaUpdater(nullptr)
 {
     volumeEventHandler = new MetaVolumeEventHandler(arrayInfo,
@@ -146,12 +145,16 @@ Metadata::Init(void)
         return result;
     }
 
-#ifdef _ADMIN_ENABLED
-    // TODO (r.saraf) to move this initialize out of meta sequence
-    string fileName = "SmartLogPage.bin";
-    MetaFileIntf* smartLogFile = new FILESTORE(fileName, arrayInfo->GetIndex());
-    SmartLogMgrSingleton::Instance()->Init(smartLogFile);
-#endif
+    POS_TRACE_INFO(eventId, "Start initializing smart Log metafs");
+    result = smartLogMetaIo->Init();
+    if (result != 0)
+    {
+        journal->Dispose();
+        allocator->Dispose();
+        mapper->Dispose();
+        return result;
+    }
+
     return result;
 }
 
@@ -177,6 +180,9 @@ Metadata::Dispose(void)
 {
     int eventId = static_cast<int>(POS_EVENT_ID::ARRAY_UNMOUNTING);
     std::string arrayName = arrayInfo->GetName();
+
+    POS_TRACE_INFO(eventId, "start disposing smart log metafs");
+    smartLogMetaIo->Dispose();
 
     POS_TRACE_INFO(eventId, "Start disposing allocator of array {}", arrayName);
     allocator->Dispose();

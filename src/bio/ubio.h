@@ -65,11 +65,8 @@ enum class UbioDir
     Deallocate,
     Abort,
     NvmeCli,
-    AdminPassTh
-#ifdef _ADMIN_ENABLED
-    ,
+    AdminPassTh,
     GetLogPage
-#endif
 };
 
 struct DeviceLba;

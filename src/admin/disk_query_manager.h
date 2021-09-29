@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _ADMIN_ENABLED
 #pragma once
 #include "lib/spdk/lib/nvmf/nvmf_internal.h"
 #include "spdk/pos.h"
@@ -78,4 +77,3 @@ private:
     IArrayDevMgr* arrayDevMgr;
 };
 } // namespace pos
-#endif

@@ -148,13 +148,11 @@ Array::_LoadImpl(unsigned int& arrayIndex)
     state->SetLoad(rs);
     return ret;
 }
-#ifdef _ADMIN_ENABLED
 IArrayDevMgr*
 Array::GetArrayManager(void)
 {
     return devMgr_;
 }
-#endif
 int
 Array::Create(DeviceSet<string> nameSet, string dataRaidType, unsigned int& arrayIndex)
 {
