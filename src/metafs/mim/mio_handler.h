@@ -78,7 +78,9 @@ private:
     void _HandleRetryQDeferred(void);
     void _DiscoverIORangeOverlap(void);
     bool _IsPendedRange(MetaFsIoRequest* reqMsg);
+#if MPIO_CACHE_EN
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
+#endif
 
     MetaFsIoQ<MetaFsIoRequest*>* ioSQ;
     MetaFsIoQ<Mio*>* ioCQ;

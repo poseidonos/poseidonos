@@ -174,12 +174,6 @@ MetaFsIoScheduler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
     return isQueued;
 }
 
-int
-MetaFsIoScheduler::GetMioHandlerCount(void)
-{
-    return totalMioHandlerCnt;
-}
-
 bool
 MetaFsIoScheduler::AddArrayInfo(int arrayId)
 {

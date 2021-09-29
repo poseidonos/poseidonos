@@ -223,6 +223,7 @@ MioHandler::_DiscoverIORangeOverlap(void)
     }
 }
 
+#if MPIO_CACHE_EN
 bool
 MioHandler::_ExecutePendedIo(MetaFsIoRequest* reqMsg)
 {
@@ -256,6 +257,7 @@ MioHandler::_ExecutePendedIo(MetaFsIoRequest* reqMsg)
 
     return true;
 }
+#endif
 
 bool
 MioHandler::_IsPendedRange(MetaFsIoRequest* reqMsg)

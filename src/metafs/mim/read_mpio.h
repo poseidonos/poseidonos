@@ -50,10 +50,12 @@ public:
     }
     virtual void InitStateHandler(void) override;
 
+protected:
+    bool _HandleError(MpAioState expNextState);
+
 private:
     bool _Init(MpAioState expNextState);
     bool _MakeReady(MpAioState expNextState);
-    bool _HandleError(MpAioState expNextState);
     bool _CompleteIO(MpAioState expNextState);
     bool _CopyToUserBuf(void);
 };

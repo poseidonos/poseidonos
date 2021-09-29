@@ -1,139 +1,80 @@
+/*
+ *   BSD LICENSE
+ *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without
+ *   modification, are permitted provided that the following conditions
+ *   are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided with the
+ *       distribution.
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
+ *
+ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "src/metafs/mim/mpio.h"
 
 #include <gtest/gtest.h>
 
 namespace pos
 {
-TEST(Mpio, Mpio_)
+class MpioTester : public Mpio
 {
-}
+public:
+    explicit MpioTester(void* mdPageBuf)
+    : Mpio(mdPageBuf)
+    {
+    }
 
-TEST(Mpio, Reset_)
+    MpioTester(void* mdPageBuf, MetaStorageType targetMediaType,
+        MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
+    : Mpio(mdPageBuf, targetMediaType, mpioIoInfo, partialIO, forceSyncIO)
+    {
+    }
+
+    ~MpioTester(void)
+    {
+    }
+
+    MpioType GetType(void)
+    {
+        return MpioType::Read;
+    }
+
+    void InitStateHandler(void)
+    {
+    }
+};
+
+TEST(MpioTester, Mpio_testConstructor)
 {
-}
+    MetaStorageType type = MetaStorageType::SSD;
+    MpioIoInfo ioInfo;
+    bool partialIO = true;
+    bool forceSyncIO = true;
+    char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+    memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
 
-TEST(Mpio, Setup_)
-{
-}
+    MpioTester mpio(buf, type, ioInfo, partialIO, forceSyncIO);
 
-TEST(Mpio, SetLocalAioCbCxt_)
-{
+    EXPECT_EQ(mpio.GetCurrState(), MpAioState::Init);
 }
-
-TEST(Mpio, GetType_)
-{
-}
-
-TEST(Mpio, InitStateHandler_)
-{
-}
-
-TEST(Mpio, SetPartialDoneNotifier_)
-{
-}
-
-TEST(Mpio, GetId_)
-{
-}
-
-TEST(Mpio, SetId_)
-{
-}
-
-TEST(Mpio, IsAIOMode_)
-{
-}
-
-TEST(Mpio, IsPartialIO_)
-{
-}
-
-TEST(Mpio, GetCacheState_)
-{
-}
-
-TEST(Mpio, SetCacheState_)
-{
-}
-
-TEST(Mpio, GetOpcode_)
-{
-}
-
-TEST(Mpio, AllocateMDPage_)
-{
-}
-
-TEST(Mpio, BuildCompositeMDPage_)
-{
-}
-
-TEST(Mpio, IsValidPage_)
-{
-}
-
-TEST(Mpio, CheckDataIntegrity_)
-{
-}
-
-TEST(Mpio, GetMDPageDataBuf_)
-{
-}
-
-TEST(Mpio, GetUserDataBuf_)
-{
-}
-
-TEST(Mpio, Issue_)
-{
-}
-
-TEST(Mpio, DoIO_)
-{
-}
-
-TEST(Mpio, DoE2ECheck_)
-{
-}
-
-TEST(Mpio, CheckReadStatus_)
-{
-}
-
-TEST(Mpio, CheckWriteStatus_)
-{
-}
-
-TEST(Mpio, GetErrorStatus_)
-{
-}
-
-TEST(Mpio, _DoMemCpy_)
-{
-}
-
-TEST(Mpio, _DoMemSetZero_)
-{
-}
-
-TEST(Mpio, _HandleAsyncMemOpDone_)
-{
-}
-
-TEST(Mpio, _HandlePartialDone_)
-{
-}
-
-TEST(Mpio, _ConvertToMssOpcode_)
-{
-}
-
-TEST(Mpio, _CheckIOStatus_)
-{
-}
-
-TEST(Mpio, _BackupMssAioCbCxtPointer_)
-{
-}
-
 } // namespace pos

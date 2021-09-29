@@ -110,15 +110,6 @@ MetaIoManager::Init(void)
 }
 
 void
-MetaIoManager::Close(void)
-{
-    Finalize();
-
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "Meta Io Mgr has been closed");
-}
-
-void
 MetaIoManager::Finalize(void)
 {
     if (finalized == false)

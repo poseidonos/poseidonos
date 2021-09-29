@@ -51,7 +51,6 @@ public:
     void RegisterMioHandler(ScalableMetaIoWorker* mioHandler);
     bool IssueRequest(MetaFsIoRequest* reqMsg);
     virtual bool EnqueueNewReq(MetaFsIoRequest* reqMsg);
-    int GetMioHandlerCount(void);
 
     virtual bool AddArrayInfo(int arrayId);
     virtual bool RemoveArrayInfo(int arrayId);

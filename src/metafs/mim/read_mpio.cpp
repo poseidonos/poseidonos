@@ -87,7 +87,9 @@ ReadMpio::_MakeReady(MpAioState expNextState)
 bool
 ReadMpio::_HandleError(MpAioState expNextState)
 {
-    assert(false);
+    MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_DATA_CORRUPTED,
+        "[Mpio][RdMpioError] ReadMpio Error...req.tagId={}, mpio_id={}",
+        io.tagId, io.mpioId);
     SetNextState(expNextState);
     return true;
 }
@@ -97,7 +99,8 @@ ReadMpio::_CompleteIO(MpAioState expNextState)
     bool contd2NextRun = _CopyToUserBuf();
 
     MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-        "[Mpio][RdMpioDone ] ReadMpio Complete...req.tagId={}, mpio_id={}", io.tagId, io.mpioId);
+        "[Mpio][RdMpioDone ] ReadMpio Complete...req.tagId={}, mpio_id={}",
+        io.tagId, io.mpioId);
 
     SetNextState(expNextState);
 

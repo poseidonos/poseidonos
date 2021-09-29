@@ -110,8 +110,6 @@ public:
     void NotifiyPartialMpioDone(Mpio* mpio);
     virtual bool IsSyncIO(void);
 
-    virtual const MetaIoOpcode GetOpCode(void);
-    virtual const FileDescriptorType GetFD(void);
     virtual bool IsRead(void);
     virtual MetaLpnType GetStartLpn(void);
     virtual bool IsTargetStorageSSD(void);
@@ -124,9 +122,11 @@ public:
     virtual void SetLocalAioCbCxt(MioAsyncDoneCb& callback);
     virtual int GetArrayId(void);
 
+#if MPIO_CACHE_EN
     virtual void SetMergedRequestList(std::vector<MetaFsIoRequest*>* list);
     virtual void ClearMergedRequestList(void);
     virtual std::vector<MetaFsIoRequest*>* GetMergedRequestList(void);
+#endif
 
 protected:
     void _BindMpioPool(MpioPool* mpioPool);
@@ -151,7 +151,9 @@ protected:
     MetaFsIoQ<Mio*>* ioCQ;
     MpioPool* mpioPool;
     MetaAsyncCbCxt aioCbCxt;
-    std::vector<MetaFsIoRequest*>* mergedRequestList;
+#if MPIO_CACHE_EN
+    std::vector<MetaFsIoRequest*>* mergedRequestList = nullptr;
+#endif
 
     static const MetaIoOpcode ioOpcodeMap[static_cast<uint32_t>(MetaIoRequestType::Max)];
     MetaFsSpinLock mpioListCxtLock;

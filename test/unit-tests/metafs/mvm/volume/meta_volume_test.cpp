@@ -197,6 +197,8 @@ TEST_F(MetaVolumeFixture, OpenVolumePositive)
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
 
     EXPECT_TRUE(metaVolume->OpenVolume(info, false));
 }
@@ -211,6 +213,8 @@ TEST_F(MetaVolumeFixture, OpenVolumeNegative_DueTo_LoadVolCatalog)
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
 
     EXPECT_FALSE(metaVolume->OpenVolume(info, false));
 }
@@ -225,6 +229,8 @@ TEST_F(MetaVolumeFixture, OpenVolumeNegative_DueTo_LoadInodeContent)
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
 
     EXPECT_FALSE(metaVolume->OpenVolume(info, false));
 }
@@ -239,6 +245,8 @@ TEST_F(MetaVolumeFixture, OpenVolumePositive_Even_If_RestoreContent_CatalogMgr)
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
 
     EXPECT_TRUE(metaVolume->OpenVolume(info, false));
 }
@@ -253,6 +261,8 @@ TEST_F(MetaVolumeFixture, OpenVolumePositive_Even_If_RestoreContent_InodeMgr)
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
 
     EXPECT_TRUE(metaVolume->OpenVolume(info, false));
 }
@@ -267,6 +277,8 @@ TEST_F(MetaVolumeFixture, OpenVolumeNegative_DueTo_RestoreContent_CatalogMgr)
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
     metaVolume->SetVolumeType(MetaVolumeType::NvRamVolume);
 
     EXPECT_FALSE(metaVolume->OpenVolume(info, true));
@@ -282,6 +294,8 @@ TEST_F(MetaVolumeFixture, OpenVolumeNegative_DueTo_RestoreContent_InodeMgr)
     EXPECT_CALL(*inodeMgr, Bringup()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
     metaVolume->SetVolumeType(MetaVolumeType::NvRamVolume);
 
     EXPECT_FALSE(metaVolume->OpenVolume(info, true));
@@ -298,6 +312,8 @@ TEST_F(MetaVolumeFixture, CloseVolumePositive)
     EXPECT_CALL(*catalogMgr, Finalize()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
     bool resetContext = false;
     metaVolume->SetVolumeState(MetaVolumeState::Open);
 
@@ -307,6 +323,8 @@ TEST_F(MetaVolumeFixture, CloseVolumePositive)
 TEST_F(MetaVolumeFixture, CloseVolumePositive_VolumeIsNotClosed)
 {
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
     bool resetContext = false;
 
     EXPECT_TRUE(metaVolume->CloseVolume(info, resetContext));
@@ -323,6 +341,8 @@ TEST_F(MetaVolumeFixture, CloseVolumeNegative_GetFileCountInActive)
     EXPECT_CALL(*catalogMgr, Finalize()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
     bool resetContext = false;
     metaVolume->SetVolumeState(MetaVolumeState::Open);
 
@@ -340,6 +360,8 @@ TEST_F(MetaVolumeFixture, CloseVolumeNegative_SaveContent_CatalogMgr)
     EXPECT_CALL(*catalogMgr, Finalize()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
     bool resetContext = false;
     metaVolume->SetVolumeState(MetaVolumeState::Open);
 
@@ -357,6 +379,8 @@ TEST_F(MetaVolumeFixture, CloseVolumeNegative_SaveContent_InodeMgr)
     EXPECT_CALL(*catalogMgr, Finalize()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
     bool resetContext = false;
     metaVolume->SetVolumeState(MetaVolumeState::Open);
 
@@ -374,6 +398,8 @@ TEST_F(MetaVolumeFixture, CloseVolumeNegative_BackupContent_CatalogMgr)
     EXPECT_CALL(*catalogMgr, Finalize()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
     bool resetContext = false;
     metaVolume->SetVolumeState(MetaVolumeState::Open);
     metaVolume->SetVolumeType(MetaVolumeType::NvRamVolume);
@@ -392,6 +418,8 @@ TEST_F(MetaVolumeFixture, CloseVolumeNegative_BackupContent_InodeMgr)
     EXPECT_CALL(*catalogMgr, Finalize()).WillRepeatedly(Return());
 
     MetaLpnType* info = new MetaLpnType[2]();
+    info[0] = 0;
+    info[1] = 0;
     bool resetContext = false;
     metaVolume->SetVolumeState(MetaVolumeState::Open);
     metaVolume->SetVolumeType(MetaVolumeType::NvRamVolume);

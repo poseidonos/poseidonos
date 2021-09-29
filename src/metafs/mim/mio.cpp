@@ -54,8 +54,7 @@ Mio::Mio(MpioPool* mpioPool)
   fileDataChunkSize(0),
   error(0, false),
   ioCQ(nullptr),
-  mpioPool(nullptr),
-  mergedRequestList(nullptr)
+  mpioPool(nullptr)
 {
     opCode = MetaIoOpcode::Max;
     startLpn = 0;
@@ -114,10 +113,12 @@ Mio::Reset(void)
     fileDataChunkSize = 0;
     error = std::make_pair(0, false);
 
+#if MPIO_CACHE_EN
     if (nullptr != mergedRequestList)
     {
         ClearMergedRequestList();
     }
+#endif
 
     if (originReq)
     {
@@ -231,6 +232,7 @@ Mio::_AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO)
     return mpio;
 }
 
+#if MPIO_CACHE_EN
 void
 Mio::SetMergedRequestList(std::vector<MetaFsIoRequest*>* list)
 {
@@ -254,6 +256,7 @@ Mio::GetMergedRequestList(void)
 {
     return mergedRequestList;
 }
+#endif
 
 void
 Mio::_PrepareMpioInfo(MpioIoInfo& mpioIoInfo,
@@ -405,18 +408,6 @@ Mio::_MarkMpioComplete(Mpio& mpio)
 {
     SPIN_LOCK_GUARD_IN_SCOPE(mpioListCxtLock);
     mpioListCxt.MarkMpioCompletion(mpio);
-}
-
-const MetaIoOpcode
-Mio::GetOpCode(void)
-{
-    return opCode;
-}
-
-const FileDescriptorType
-Mio::GetFD(void)
-{
-    return originReq->fd;
 }
 
 bool

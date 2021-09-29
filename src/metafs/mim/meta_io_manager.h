@@ -60,7 +60,6 @@ public:
     bool IsSuccess(POS_EVENT_ID rc);
 
     virtual void Init(void);
-    void Close(void);
     virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg);
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg);
     void SetMss(MetaStorageSubsystem* metaStorage);

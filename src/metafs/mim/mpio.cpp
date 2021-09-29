@@ -103,24 +103,6 @@ Mpio::SetLocalAioCbCxt(MpioAsyncDoneCb& callback)
     SetAsyncCbCxt(&aioCbCxt, false);
 }
 
-uint32_t
-Mpio::GetId(void)
-{
-    return io.mpioId;
-}
-
-void
-Mpio::SetId(uint32_t id)
-{
-    io.mpioId = id;
-}
-
-bool
-Mpio::IsAIOMode(void)
-{
-    return aioModeEnabled;
-}
-
 MfsError
 Mpio::GetErrorStatus(void)
 {
@@ -153,13 +135,6 @@ Mpio::SetCacheState(MpioCacheState state)
     cacheState = state;
 }
 #endif
-
-void
-Mpio::Issue(void)
-{
-    assert(GetStateInExecution() == MpAioState::Init);
-    ExecuteAsyncState();
-}
 
 bool
 Mpio::CheckReadStatus(MpAioState expNextState)

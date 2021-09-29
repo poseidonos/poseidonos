@@ -84,9 +84,6 @@ public:
     virtual void InitStateHandler(void) = 0;
 
     void SetPartialDoneNotifier(PartialMpioDoneCb& partialMpioDoneNotifier);
-    uint32_t GetId(void);
-    void SetId(uint32_t id);
-    bool IsAIOMode(void);
     bool IsPartialIO(void);
 
 #if MPIO_CACHE_EN
@@ -100,7 +97,6 @@ public:
     bool CheckDataIntegrity(void);
     void* GetMDPageDataBuf(void);
     void* GetUserDataBuf(void);
-    void Issue(void);
 
     bool DoIO(MpAioState expNextState);
     bool DoE2ECheck(MpAioState expNextState);
