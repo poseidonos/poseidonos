@@ -7,6 +7,8 @@ target_type="VM"
 trtype="tcp"
 port=1158
 test_rev=0
+master_bin_path="/psdData/pos-bin"
+pos_bin_filename="poseidonos"
 
 texecc()
 {
@@ -22,6 +24,7 @@ printVariable()
         exit 1
     fi
 
+    master_bin_path+=/${test_rev}
     echo "*****************************************************************"
     echo "*****     Script Info - Build Setup for CI                  *****"
     echo "*****     Must Main Variables Be Given                      *****"
@@ -33,6 +36,7 @@ printVariable()
     echo "Target Type : $target_type"
     echo "Config Option : $config_option"
     echo "Test Revision : $test_rev"
+    echo "Master Bin Path: ${master_bin_path}"  
     echo "*****************************************************************"
     echo "*****************************************************************"
 }
@@ -62,34 +66,74 @@ buildTest()
     texecc ./configure $config_option
     cwd=""
     sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${pos_working_dir}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y"
-    if [ $target_type == "VM" ]
-    then
-        echo "Build For VM"
-        texecc make CACHE=Y -j 4 -C lib
-    elif [ $target_type == "PM" ]
-    then
-        echo "Build For PM"
-        texecc make CACHE=Y -j 16 -C lib
-    else 
-        echo "Build For PSD"
-        texecc make CACHE=Y -j 16 -C lib
-    fi
-
-    echo "There is no binary with rev ${test_rev}"
     texecc make -j 4 clean
-    if [ $target_type == "VM" ]
+
+    if [ $target_type == "PM" ]
     then
-        echo "Build For VM"
-        texecc make CACHE=Y -j 4
-    elif [ $target_type == "PM" ]
-    then
+        echo "Build lib For PM"
+        texecc make CACHE=Y -j 16 -C lib
         echo "Build For PM"
         texecc make CACHE=Y -j 16
-    else 
+    elif [ $target_type == "PSD" ]
+    then
+        echo "Build lib For PSD"
+        texecc make CACHE=Y -j 16 -C lib
         echo "Build For PSD"
         texecc make CACHE=Y -j 16
+    elif [ $target_type == "VM" ]
+    then
+        echo "copy air.cfg"
+        texecc cp -f ${pos_working_dir}/config/air_ci.cfg ${pos_working_dir}/config/air.cfg
+
+        echo "Build lib For VM"
+        texecc make CACHE=Y -j 4 -C lib
+        echo "Build For VM"
+        echo "#### CHECK BINARY IN MASTER : ${master_bin_path}/${pos_bin_filename} ####"
+        if [ ! -d ${master_bin_path} ]
+        then
+            echo "## mkdir ${master_bin_path}"
+            sudo mkdir ${master_bin_path}
+        fi
+        if [ -f ${master_bin_path}/${pos_bin_filename} ]
+        then
+            echo "## START TO COPY BIN FILES INTO VM : from ${master_bin_path} to ${target_ip}:${pos_working_dir}/bin ##"
+            sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -d ${pos_working_dir}/bin ]]
+            if [ ! $? -eq 0 ]
+            then
+                echo "## mkdir ${target_ip}:${pos_working_dir}/bin"
+                texecc mkdir ${pos_working_dir}/bin
+            else
+                echo "## rm old ${target_ip}:${pos_working_dir}/bin files"
+                texecc rm ${pos_working_dir}/bin/*
+            fi
+            sshpass -p bamboo sudo scp ${master_bin_path}/* root@${target_ip}:${pos_working_dir}/bin
+        else
+            echo "There is no binary with rev ${test_rev}"
+            echo "Build For VM"
+            texecc make CACHE=Y -j 4
+
+            sshpass -p bamboo ssh -q -tt root@${target_ip} [[ -f ${pos_working_dir}/bin/${pos_bin_filename} ]]
+            if [ ! $? -eq 0 ]
+            then
+                echo "## ERROR: NO BUILT BINARY  ${target_ip}:/${pos_working_dir}/bin/${pos_bin_filename} "
+                exit 1
+            fi
+
+            echo "## START TO COPY BIN FILES INTO MASTER : from ${target_ip}:${pos_working_dir}/bin to ${master_bin_path} ##"
+            sshpass -p bamboo sudo scp root@${target_ip}:${pos_working_dir}/bin/* ${master_bin_path}/
+
+            if [ -f ${master_bin_path}/${pos_bin_filename} ]
+            then
+                echo "#### COMPLETE TO COPY BINARY INTO MASTER ${master_bin_path}/${pos_bin_filename} "
+            else
+                echo "## ERROR: NO COPIED BINARY  ${master_bin_path}/${pos_bin_filename} "
+                exit 1
+            fi
+        fi
+    else
+        echo "## ERROR: incorrect target type(VM/PM/PSD)"
+        exit 1
     fi
-    
 
     texecc rm $pos_conf/pos.conf
     texecc make install
