@@ -33,7 +33,7 @@
 #pragma once
 
 #include "src/mapper/map/sequential_page_finder.h"
-#include "test/integration-tests/mapper/mapper_testfixture.h"
+#include "test/integration-tests/mapper/fixtures/mapper_test_fixture.h"
 
 #include "gtest/gtest.h"
 

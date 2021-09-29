@@ -65,6 +65,7 @@ public:
     virtual uint64_t GetEpochSignature(void);
     virtual StripeId GetTheLastValidStripeId(void);
     MetaStorageSubsystem* GetMss(void);
+    virtual int EstimateAlignedFileIOSize(MetaFilePropertySet& prop);
 
     MetaFsManagementApi* mgmt = nullptr;
     MetaFsIoApi* io = nullptr;

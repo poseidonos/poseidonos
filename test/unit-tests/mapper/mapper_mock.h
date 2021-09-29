@@ -1,7 +1,9 @@
 #include <gmock/gmock.h>
-#include <string>
+
 #include <list>
+#include <string>
 #include <vector>
+
 #include "src/mapper/mapper.h"
 
 namespace pos
@@ -20,6 +22,9 @@ public:
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));
     MOCK_METHOD(void, Flush, (), (override));
+    MOCK_METHOD(VSAMapManager*, GetVSAMapManager, (), (override));
+    MOCK_METHOD(StripeMapManager*, GetStripeMapManager, (), (override));
+    MOCK_METHOD(ReverseMapManager*, GetReverseMapManager, (), (override));
     MOCK_METHOD(IVSAMap*, GetIVSAMap, (), (override));
     MOCK_METHOD(IStripeMap*, GetIStripeMap, (), (override));
     MOCK_METHOD(IReverseMap*, GetIReverseMap, (), (override));
@@ -43,7 +48,8 @@ public:
     MOCK_METHOD(int, SetVSAsWithSyncOpen, (int volId, BlkAddr startRba, VirtualBlks& virtualBlks), (override));
     MOCK_METHOD(MpageList, GetDirtyVsaMapPages, (int volId, BlkAddr startRba, uint64_t numBlks), (override));
     MOCK_METHOD(int, EnableInternalAccess, (int volId), (override));
-    MOCK_METHOD(int, FlushDirtyMpages, (int mapId, EventSmartPtr callback, MpageList dirtyPages), (override));
+    MOCK_METHOD(int, FlushDirtyMpages, (int mapId, EventSmartPtr callback), (override));
+    MOCK_METHOD(int, FlushDirtyMpagesGiven, (int mapId, EventSmartPtr callback, MpageList dirtyPages), (override));
     MOCK_METHOD(int, StoreAll, (), (override));
 };
 

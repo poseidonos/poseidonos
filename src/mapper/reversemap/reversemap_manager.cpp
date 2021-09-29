@@ -43,7 +43,7 @@
 namespace pos
 {
 
-ReverseMapManager::ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripeMap, IArrayInfo* iarrayInfo)
+ReverseMapManager::ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripeMap, IVolumeManager* vol, MapperAddressInfo* addrInfo_)
 : mpageSize(0),
   numMpagesPerStripe(0),
   fileSizePerStripe(0),
@@ -52,7 +52,8 @@ ReverseMapManager::ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripe
   revMapWholefile(nullptr),
   iVSAMap(ivsaMap),
   iStripeMap(istripeMap),
-  iArrayInfo(iarrayInfo)
+  volumeManager(vol),
+  addrInfo(addrInfo_)
 {
 }
 
@@ -73,19 +74,32 @@ ReverseMapManager::~ReverseMapManager(void)
 }
 
 void
-ReverseMapManager::Init(MapperAddressInfo& info)
+ReverseMapManager::Init(void)
 {
-    _SetPageSize();
+    if (volumeManager == nullptr)
+    {
+        volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(addrInfo->GetArrayName());
+    }
+
+    mpageSize = addrInfo->GetMpageSize();
     _SetNumMpages();
 
-    fileSizeWholeRevermap = fileSizePerStripe * info.maxVsid;
+    int maxVsid = addrInfo->GetMaxVSID();
+    fileSizeWholeRevermap = fileSizePerStripe * maxVsid;
 
     // Create MFS and Open the file for whole reverse map
-    revMapWholefile = new FILESTORE("RevMapWhole", iArrayInfo->GetIndex());
+    if (addrInfo->IsUT() == false)
+    {
+        revMapWholefile = new FILESTORE("RevMapWhole", addrInfo->GetArrayId());
+    }
+    else
+    {
+        revMapWholefile = new MockFileIntf("RevMapWhole", addrInfo->GetArrayId());
+    }
     if (revMapWholefile->DoesFileExist() == false)
     {
         POS_TRACE_INFO(EID(REVMAP_FILE_SIZE), "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
-                        fileSizePerStripe, info.maxVsid, fileSizeWholeRevermap);
+                        fileSizePerStripe, maxVsid, fileSizeWholeRevermap);
 
         int ret = revMapWholefile->Create(fileSizeWholeRevermap);
         if (ret != 0)
@@ -97,19 +111,14 @@ ReverseMapManager::Init(MapperAddressInfo& info)
     revMapWholefile->Open();
 
     // Make ReverseMapPack:: objects by the number of WriteBuffer stripes
-    revMapPacks = new ReverseMapPack[info.numWbStripes]();
-    for (StripeId wbLsid = 0; wbLsid < info.numWbStripes; ++wbLsid)
+    uint32_t numWbStripes = addrInfo->GetNumWbStripes();
+    revMapPacks = new ReverseMapPack[numWbStripes]();
+    for (StripeId wbLsid = 0; wbLsid < numWbStripes; ++wbLsid)
     {
-        std::string arrName = iArrayInfo->GetName();
+        std::string arrName = addrInfo->GetArrayName();
         revMapPacks[wbLsid].Init(mpageSize, numMpagesPerStripe, revMapWholefile, arrName);
-        revMapPacks[wbLsid].Init(VolumeServiceSingleton::Instance()->GetVolumeManager(arrName), wbLsid, iVSAMap, iStripeMap);
+        revMapPacks[wbLsid].Init(volumeManager, wbLsid, iVSAMap, iStripeMap);
     }
-}
-
-void
-ReverseMapManager::SetDoC(IArrayInfo* iarrayInfo)
-{
-    iArrayInfo = iarrayInfo;
 }
 
 void
@@ -141,11 +150,11 @@ ReverseMapPack*
 ReverseMapManager::AllocReverseMapPack(bool gcDest)
 {
     ReverseMapPack* obj = new ReverseMapPack;
-    std::string arrName = iArrayInfo->GetName();
+    std::string arrName = addrInfo->GetArrayName();
     obj->Init(mpageSize, numMpagesPerStripe, revMapWholefile, arrName);
     if (gcDest == true)
     {
-        obj->Init(VolumeServiceSingleton::Instance()->GetVolumeManager(arrName), UNMAP_STRIPE, iVSAMap, iStripeMap);
+        obj->Init(volumeManager, UNMAP_STRIPE, iVSAMap, iStripeMap);
     }
     return obj;
 }
@@ -177,46 +186,19 @@ ReverseMapManager::StoreWholeReverseMap(char* pBuffer)
 }
 
 int
-ReverseMapManager::_SetPageSize(StorageOpt storageOpt)
-{
-#ifdef IBOF_CONFIG_USE_MOCK_FS
-    mpageSize = DEFAULT_REVMAP_PAGE_SIZE;
-#else
-    MetaFilePropertySet prop;
-    if (storageOpt == StorageOpt::NVRAM)
-    {
-        prop.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
-        prop.ioOpType = MetaFileDominant::WriteDominant;
-        prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
-    }
-
-    std::string arrayName = iArrayInfo->GetName();
-    mpageSize = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->ctrl->EstimateAlignedFileIOSize(prop);
-    if (mpageSize == 0)
-    {
-        POS_TRACE_CRITICAL(EID(REVMAP_GET_MFS_ALIGNED_IOSIZE_FAILURE), "MFS returned failure value");
-        return -EID(REVMAP_GET_MFS_ALIGNED_IOSIZE_FAILURE);
-    }
-#endif
-    POS_TRACE_INFO(EID(REVMAP_FILE_SIZE), "mPageSize for ReverseMap:{}", mpageSize);
-    return 0;
-}
-
-int
 ReverseMapManager::_SetNumMpages(void)
 {
-    const PartitionLogicalSize* udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-
+    uint32_t blksPerStripe = addrInfo->GetBlksPerStripe();
     uint32_t entriesPerNormalPage = (mpageSize / REVMAP_SECTOR_SIZE) * (REVMAP_SECTOR_SIZE / REVMAP_ENTRY_SIZE);
     uint32_t entriesPerFirstPage = entriesPerNormalPage - (REVMAP_SECTOR_SIZE / REVMAP_ENTRY_SIZE);
 
-    if (udSize->blksPerStripe <= entriesPerFirstPage)
+    if (blksPerStripe <= entriesPerFirstPage)
     {
         numMpagesPerStripe = 1;
     }
     else
     {
-        numMpagesPerStripe = 1 + DivideUp(udSize->blksPerStripe - entriesPerFirstPage, entriesPerNormalPage);
+        numMpagesPerStripe = 1 + DivideUp(blksPerStripe - entriesPerFirstPage, entriesPerNormalPage);
     }
 
     // Set fileSize

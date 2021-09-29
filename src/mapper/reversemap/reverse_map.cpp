@@ -62,6 +62,8 @@ ReverseMapPack::ReverseMapPack(void)
     revMapfile = nullptr;
     iVSAMap = nullptr;
     iStripeMap = nullptr;
+    numWriteIssued = 0;
+    numLoadIssued = 0;
 }
 
 ReverseMapPack::~ReverseMapPack(void)
@@ -157,6 +159,8 @@ ReverseMapPack::Load(EventSmartPtr inputCallback)
 
     mfsAsyncIoDonePages = 0;
     int pageNum = 0;
+    assert(callback == nullptr);
+    assert(numWriteIssued == 0);
     callback = inputCallback;
 
     for (auto& revMap : revMaps)
@@ -171,7 +175,7 @@ ReverseMapPack::Load(EventSmartPtr inputCallback)
             this, std::placeholders::_1);
 
         revMapPageAsyncIoReq->mpageNum = pageNum++;
-
+        numLoadIssued++;
         int ret = revMapfile->AsyncIO(revMapPageAsyncIoReq);
         if (ret < 0)
         {
@@ -200,7 +204,8 @@ ReverseMapPack::Flush(Stripe* stripe, EventSmartPtr inputCallback)
 
     mfsAsyncIoDonePages = 0;
     int pageNum = 0;
-
+    assert(callback == nullptr);
+    assert(numLoadIssued == 0);
     callback = inputCallback;
 
     for (auto& revMap : revMaps)
@@ -216,7 +221,7 @@ ReverseMapPack::Flush(Stripe* stripe, EventSmartPtr inputCallback)
 
         revMapPageAsyncIoReq->mpageNum = pageNum++;
         revMapPageAsyncIoReq->stripeToFlush = stripe;
-
+        numWriteIssued++;
         int ret = revMapfile->AsyncIO(revMapPageAsyncIoReq);
         if (ret < 0)
         {
@@ -235,6 +240,10 @@ void
 ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
 {
     RevMapPageAsyncIoCtx* revMapPageAsyncIoReq = static_cast<RevMapPageAsyncIoCtx*>(ctx);
+    POS_TRACE_INFO(EID(MFS_ASYNCIO_ERROR),
+            "[ReverseMap DoneHandler] numWriteIssued:{}, numReadIssued:{}, DoneIo", numWriteIssued, numLoadIssued);
+    numWriteIssued = 0;
+    numLoadIssued = 0;
     if (revMapPageAsyncIoReq->error != 0)
     {
         ioError = revMapPageAsyncIoReq->error;
@@ -378,14 +387,15 @@ ReverseMapPack::ReconstructMap(uint32_t volumeId, StripeId vsid, StripeId lsid, 
     int ret = 0;
     BlkAddr lastFoundRba = UINT64_MAX;
     POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_FOUND_RBA),
-        "[RMR]START, volumeId:{}  wbLsid:{}  vsid:{}  blockCount:{}",
+        "[ReconstructMap]START, volumeId:{}  wbLsid:{}  vsid:{}  blockCount:{}",
         volumeId, lsid, vsid, blockCount);
 
     uint64_t volSize = 0;
+    assert(volumeManager != nullptr);
     ret = volumeManager->GetVolumeSize(volumeId, volSize);
     if (ret != 0)
     {
-        POS_TRACE_WARN(EID(GET_VOLUMESIZE_FAILURE), "[RMR]GetVolumeSize failure, volumeId:{}", volumeId);
+        POS_TRACE_WARN(EID(GET_VOLUMESIZE_FAILURE), "[ReconstructMap]GetVolumeSize failure, volumeId:{}", volumeId);
         return -(int)EID(GET_VOLUMESIZE_FAILURE);
     }
     totalRbaNum = DivideUp(volSize, BLOCK_SIZE);
@@ -414,7 +424,7 @@ ReverseMapPack::ReconstructMap(uint32_t volumeId, StripeId vsid, StripeId lsid, 
     }
 
     POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_FOUND_RBA),
-        "[RMR] {}/{} blocks are reconstructed for Stripe(wbLsid:{})",
+        "[ReconstructMap] {}/{} blocks are reconstructed for Stripe(wbLsid:{})",
         revMapInfos.size(), blockCount, lsid);
     return ret;
 }

@@ -35,12 +35,11 @@
 
 namespace pos
 {
-EventScheduler::EventScheduler(void)
+EventScheduler::EventScheduler(QosManager* qosManager_)
 : policy(nullptr),
   exit(false),
   workerCount(UINT32_MAX),
-  schedulerThread(nullptr),
-  eventQueue {0, }
+  schedulerThread(nullptr)
 {
     CPU_ZERO(&schedulerCPUSet);
 }

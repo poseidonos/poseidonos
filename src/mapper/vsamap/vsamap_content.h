@@ -47,8 +47,8 @@ class VSAMapContent : public MapContent
 {
 public:
     VSAMapContent(void) = default;
-    VSAMapContent(int mapId, int arrayId, IBlockAllocator* iBlockAllocator_);
-    VSAMapContent(int mapId, int arrayId);
+    VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAllocator* iBlockAllocator_);
+    VSAMapContent(int mapId, MapperAddressInfo* addrInfo);
 
     virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries) override;
 

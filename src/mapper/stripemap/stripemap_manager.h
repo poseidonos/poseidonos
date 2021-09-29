@@ -46,32 +46,37 @@
 
 namespace pos
 {
+class EventScheduler;
 
 class StripeMapManager : public IMapManagerInternal, public IStripeMap
 {
 public:
-    StripeMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId);
+    StripeMapManager(void) = default;
+    explicit StripeMapManager(EventScheduler* eventSched, MapperAddressInfo* info);
     virtual ~StripeMapManager(void);
 
-    int Init(void);
-    void Dispose(void);
-    int LoadStripeMapFile(void);
-    int FlushMap(void);
-    void MapFlushDone(int mapId) override;
-    void WaitAllPendingIoDone(void);
-    void WaitWritePendingIoDone(void);
+    virtual int Init(void);
+    virtual void Dispose(void);
+    virtual int LoadStripeMapFile(void);
+    virtual int FlushDirtyPagesGiven(MpageList list, EventSmartPtr cb);
+    virtual int FlushTouchedPages(EventSmartPtr cb);
+    virtual void MapFlushDone(int mapId) override;
+    virtual void WaitAllPendingIoDone(void);
+    virtual void WaitWritePendingIoDone(void);
 
+    virtual StripeAddr GetLSA(StripeId vsid);
+    virtual LsidRefResult GetLSAandReferLsid(StripeId vsid);
+    virtual StripeId GetRandomLsid(StripeId vsid) override;
+    virtual int SetLSA(StripeId vsid, StripeId lsid, StripeLoc loc);
+    virtual bool IsInUserDataArea(StripeAddr entry) { return entry.stripeLoc == IN_USER_AREA; }
+    virtual bool IsInWriteBufferArea(StripeAddr entry) { return entry.stripeLoc == IN_WRITE_BUFFER_AREA; }
+    virtual MpageList GetDirtyStripeMapPages(int vsid);
 
-    StripeAddr GetLSA(StripeId vsid);
-    LsidRefResult GetLSAandReferLsid(StripeId vsid);
-    StripeId GetRandomLsid(StripeId vsid) override;
-    int SetLSA(StripeId vsid, StripeId lsid, StripeLoc loc);
-    bool IsInUserDataArea(StripeAddr entry) { return entry.stripeLoc == IN_USER_AREA; }
-    bool IsInWriteBufferArea(StripeAddr entry) { return entry.stripeLoc == IN_WRITE_BUFFER_AREA; }
-    MpageList GetDirtyStripeMapPages(int vsid);
+    virtual StripeMapContent* GetStripeMapContent(void);
+    virtual void SetStripeMapContent(StripeMapContent* content);
 
-    StripeMapContent* GetStripeMapContent(void);
-    bool AllMapsFlushedDone(void);
+    virtual int Dump(std::string fileName);
+    virtual int DumpLoad(std::string fileName);
 
 private:
     int _FlushMap(void);
@@ -84,8 +89,8 @@ private:
     std::atomic<int> numLoadIssuedCount;
     std::atomic<int> numWriteIssuedCount;
 
-    std::string arrayName;
-    int arrayId;
+    EventSmartPtr callback;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos

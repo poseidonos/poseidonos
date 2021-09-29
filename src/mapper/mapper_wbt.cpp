@@ -49,10 +49,6 @@ MapperWbt::MapperWbt(MapperAddressInfo* addrInfo_, VSAMapManager* vsaMapMgr, Str
 {
 }
 
-MapperWbt::~MapperWbt(void)
-{
-}
-
 /*
  * File("fname") Format
  *
@@ -74,29 +70,25 @@ MapperWbt::~MapperWbt(void)
 int
 MapperWbt::ReadVsaMap(int volId, std::string fname)
 {
-    VSAMapContent* vsaMap = vsaMapManager->GetVSAMapContent(volId);
-    return vsaMap->Dump(fname);
+    return vsaMapManager->Dump(volId, fname);
 }
 
 int
 MapperWbt::WriteVsaMap(int volId, std::string fname)
 {
-    VSAMapContent* vsaMap = vsaMapManager->GetVSAMapContent(volId);
-    return vsaMap->DumpLoad(fname);
+    return vsaMapManager->DumpLoad(volId, fname);
 }
 
 int
 MapperWbt::ReadStripeMap(std::string fname)
 {
-    StripeMapContent* stripeMap = stripeMapManager->GetStripeMapContent();
-    return stripeMap->Dump(fname);
+    return stripeMapManager->Dump(fname);
 }
 
 int
 MapperWbt::WriteStripeMap(std::string fname)
 {
-    StripeMapContent* stripeMap = stripeMapManager->GetStripeMapContent();
-    return stripeMap->DumpLoad(fname);
+    return stripeMapManager->DumpLoad(fname);
 }
 
 int
@@ -224,7 +216,7 @@ MapperWbt::ReadWholeReverseMap(std::string fname)
     // Store Whole ReverseMap to Linux file(fname)
     MetaFileIntf* fileToStore = new MockFileIntf(fname, addrInfo->GetArrayId());
     POS_TRACE_INFO((int)POS_EVENT_ID::REVMAP_FILE_SIZE, "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
-                    reverseMapManager->GetReverseMapPerStripeFileSize(), addrInfo->maxVsid, fileSize);
+                    reverseMapManager->GetReverseMapPerStripeFileSize(), addrInfo->GetMaxVSID(), fileSize);
     fileToStore->Create(fileSize);
     fileToStore->Open();
 
@@ -315,46 +307,13 @@ MapperWbt::GetMapLayout(std::string fname)
     out << "VSA block offset bit length: " << BLOCK_OFFSET_BIT_LEN << std::endl;
     out << "Stripe map location bit length: " << STRIPE_LOC_BIT_LEN << std::endl;
     out << "Stripe map stripe id bit length: " << STRIPE_ID_BIT_LEN << std::endl;
-
-    if (stripeMapManager->GetStripeMapContent() == nullptr)
-    {
-        out << "Please create array and mount poseidonos to see stripe map mpage info" << std::endl;
-    }
-    else
-    {
-        out << "Meta page size: 0x" << std::hex << addrInfo->GetMpageSize() << std::endl;
-        out << "Stripe map entries per mpage: 0x" << std::hex << stripeMapManager->GetStripeMapContent()->GetEntriesPerPage() << std::endl;
-
-        VSAMapContent* validVsaMap = _GetFirstValidVolume();
-        if (validVsaMap == nullptr)
-        {
-            out << "Please create volume to see volume map mpage info" << std::endl;
-        }
-        else
-        {
-            out << "VSA map entries per mpage: 0x" << std::hex << validVsaMap->GetEntriesPerPage() << std::endl;
-        }
-    }
+    out << "Meta page size: 0x" << std::hex << addrInfo->GetMpageSize() << std::endl;
+    out << "Stripe map entries per mpage: 0x" << std::hex << addrInfo->GetMpageSize()/sizeof(StripeAddr) << std::endl;
+    out << "VSA map entries per mpage: 0x" << std::hex << addrInfo->GetMpageSize()/sizeof(VirtualBlkAddr) << std::endl;
 
     out << std::endl;
     out.close();
     return 0;
-}
-
-VSAMapContent*
-MapperWbt::_GetFirstValidVolume(void)
-{
-    VSAMapContent* vsaMap = nullptr;
-
-    for (int volumeId = 0; volumeId < MAX_VOLUME_COUNT; ++volumeId)
-    {
-        vsaMap = vsaMapManager->GetVSAMapContent(volumeId);
-        if (vsaMap != nullptr)
-        {
-            return vsaMap;
-        }
-    }
-    return nullptr;
 }
 
 int

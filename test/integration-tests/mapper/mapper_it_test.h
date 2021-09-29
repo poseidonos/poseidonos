@@ -37,7 +37,7 @@
 namespace pos
 {
 
-class VSAMapManagerTest : public MapperTestFixture
+class MapperTest : public MapperTestFixture
 {
 protected:
     void SetUp(void) override;
@@ -47,7 +47,7 @@ protected:
 class AccessRequest
 {
 public:
-    void CLIThreadFunc(IVSAMap* iVSAMap, BlkAddr rba);
+    void CLIThreadFunc(VSAMapManager* iVSAMap, BlkAddr rba);
 };
 
 }   // namespace pos

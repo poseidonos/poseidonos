@@ -1,1 +1,1 @@
-# POS_ADD_INTEGRATION_TEST(vsamap_manager_it_test vsamap_manager_it_test.cpp)
+#POS_ADD_INTEGRATION_TEST(mapper_it_test mapper_it_test.cpp)

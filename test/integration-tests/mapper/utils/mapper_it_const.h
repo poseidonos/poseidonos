@@ -46,6 +46,7 @@ const int RET_INT_SUCCESS = 0;
 const int TEST_VOL_ID = 0;
 const uint64_t TEST_VOL_SIZE = 0x40000000;  // 1GB;
 const int NUM_MAP_ENTRY = 128;
+const int BLK_SIZE = 4096;
 
 const BlkAddr TEST_RBA_MAX = (TEST_VOL_SIZE / PAGE_SIZE_IT) - 1;
 const StripeId TEST_VSID_MAX = 1024 * 1024 - 1;

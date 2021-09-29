@@ -41,7 +41,8 @@ namespace pos
 class IMapFlush
 {
 public:
-    virtual int FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages = DEFAULT_DIRTYPAGE_SET) = 0;
+    virtual int FlushDirtyMpages(int mapId, EventSmartPtr callback) = 0;
+    virtual int FlushDirtyMpagesGiven(int mapId, EventSmartPtr callback, MpageList dirtyPages) = 0;
     virtual int StoreAll(void) = 0;
 
     static MpageList DEFAULT_DIRTYPAGE_SET;

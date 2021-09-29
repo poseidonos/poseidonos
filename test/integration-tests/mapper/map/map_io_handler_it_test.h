@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "test/integration-tests/mapper/mapper_testfixture.h"
+#include "test/integration-tests/mapper/fixtures/mapper_test_fixture.h"
 
 namespace pos
 {

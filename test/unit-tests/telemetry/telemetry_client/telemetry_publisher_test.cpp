@@ -1,6 +1,8 @@
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include "test/unit-tests/telemetry/telemetry_client/i_global_publisher_mock.h"
+
 #include <gtest/gtest.h>
+
+#include "test/unit-tests/telemetry/telemetry_client/i_global_publisher_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -39,6 +41,22 @@ TEST(TelemetryPublisher, PublishData_TestUpdateAndCollectItem)
     ret = tp.CollectData("ccc", log);
     // then 4.
     EXPECT_EQ(-1, ret);
+}
+
+TEST(TelemetryPublisher, PublishData_TestStringMetric)
+{
+    // given
+    TelemetryPublisher tp;
+    NiceMock<MockIGlobalPublisher>* igp = new NiceMock<MockIGlobalPublisher>();
+    tp.SetGlobalPublisher(igp);
+    // given.
+    tp.StartPublishing();
+    std::string v;
+    v = "hello world";
+    // when
+    int ret = tp.PublishData("string_id", v);
+    // then.
+    EXPECT_EQ(0, ret);
 }
 
 TEST(TelemetryPublisher, PublishData_TestExceedEntryLimit)

@@ -41,14 +41,14 @@ namespace pos
 class StripeMapContent : public MapContent
 {
 public:
-    StripeMapContent(int mapId, int arrayId);
+    StripeMapContent(int mapId, MapperAddressInfo* addrInfo);
     virtual ~StripeMapContent(void) = default;
 
-    int InMemoryInit(uint64_t entrySize, uint64_t mpageSize);
-    virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries) override;
+    virtual int InMemoryInit(uint64_t entrySize, uint64_t mpageSize);
+    virtual MpageList GetDirtyPages(uint64_t start, uint64_t numEntries);
 
-    StripeAddr GetEntry(StripeId vsid);
-    int SetEntry(StripeId vsid, StripeAddr entry);
+    virtual StripeAddr GetEntry(StripeId vsid);
+    virtual int SetEntry(StripeId vsid, StripeAddr entry);
 };
 
 } // namespace pos

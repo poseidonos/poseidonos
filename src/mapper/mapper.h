@@ -46,11 +46,13 @@
 #include "src/mapper/stripemap/stripemap_manager.h"
 #include "src/mapper/vsamap/vsamap_manager.h"
 #include "src/state/interface/i_state_control.h"
+#include "src/metafs/metafs.h"
 
 namespace pos
 {
 class IStateControl;
 class MetaFs;
+
 enum VolState
 {
     NOT_EXIST,          // Not exist
@@ -100,13 +102,18 @@ public:
 class Mapper : public IMapFlush, public IMountSequence, public IMapperVolumeEventHandler, public IVSAMap
 {
 public:
-    Mapper(IArrayInfo* iarrayInfo, IStateControl* iState);
+    Mapper(MapperWbt* mapperWbt_, VSAMapManager* vsaMapMan, StripeMapManager* stripeMan, ReverseMapManager* revMapMan, MapperAddressInfo* addrInfo_, IArrayInfo* iarrayInfo, MetaFs* metaFs_);
+    Mapper(IArrayInfo* iarrayInfo, MetaFs* metaFs_);
     virtual ~Mapper(void);
 
     virtual int Init(void);
     virtual void Dispose(void);
     virtual void Shutdown(void);
     virtual void Flush(void);
+
+    virtual VSAMapManager* GetVSAMapManager(void) { return vsaMapManager; }
+    virtual StripeMapManager* GetStripeMapManager(void) { return stripeMapManager; }
+    virtual ReverseMapManager* GetReverseMapManager(void) { return reverseMapManager; }
 
     virtual IVSAMap* GetIVSAMap(void) { return this; }
     virtual IStripeMap* GetIStripeMap(void) { return stripeMapManager; }
@@ -135,12 +142,12 @@ public:
 
     virtual int EnableInternalAccess(int volId);
 
-    virtual int FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages = DEFAULT_DIRTYPAGE_SET);
+    virtual int FlushDirtyMpages(int mapId, EventSmartPtr callback);
+    virtual int FlushDirtyMpagesGiven(int mapId, EventSmartPtr callback, MpageList dirtyPages);
     virtual int StoreAll(void);
 
 private:
     void _Dispose(void);
-    MapContent* _GetMapContent(int mapId);
     void _RegisterToMapperService(void);
     void _UnregisterFromMapperService(void);
     bool _LoadVolumeMeta(int volId, bool delVol = false);
@@ -153,13 +160,11 @@ private:
     StripeMapManager* stripeMapManager;
     ReverseMapManager* reverseMapManager;
     MapperWbt* mapperWbt;
-
-    IArrayInfo* iArrayinfo;
-    IStateControl* iStateControl;
     MetaFs* metaFs;
 
     bool isInitialized;
     VolumeMountState volState[MAX_VOLUME_COUNT];
+    std::string arrayName;
 };
 
 } // namespace pos

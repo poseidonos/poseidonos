@@ -46,7 +46,7 @@ JournalVolumeIntegrationTest::WriteStripes(int numVolumes)
 void
 JournalVolumeIntegrationTest::DeleteVolumes(Volumes &volumesToDelete)
 {
-    EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
+    EXPECT_CALL(*testMapper, FlushDirtyMpagesGiven).Times(AtLeast(1));
     EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContexts(_, false)).Times(volumesToDelete.size());
     for (auto volId : volumesToDelete)
     {

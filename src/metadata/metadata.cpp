@@ -55,7 +55,7 @@ Metadata::Metadata(void)
 
 Metadata::Metadata(TelemetryPublisher* tp, IArrayInfo* info, IStateControl* state)
 : Metadata(info,
-      new Mapper(info, state),
+      new Mapper(info, nullptr),
       new Allocator(tp, info, state),
       new JournalManager(info, state))
 {
@@ -115,6 +115,7 @@ Metadata::Init(void)
     result = mapper->Init();
     if (result != 0)
     {
+        POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Mapper, array {}", arrayName);
         mapper->Dispose();
         return result;
     }
@@ -123,6 +124,7 @@ Metadata::Init(void)
     result = allocator->Init();
     if (result != 0)
     {
+        POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Allocator, array {}", arrayName);
         allocator->Dispose();
         mapper->Dispose();
         return result;
@@ -138,6 +140,7 @@ Metadata::Init(void)
     result = journal->Init();
     if (result != 0)
     {
+        POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Journal, array {}", arrayName);
         journal->Dispose();
         allocator->Dispose();
         mapper->Dispose();

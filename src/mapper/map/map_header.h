@@ -53,8 +53,8 @@ public:
 class MapHeader
 {
 public:
-    MapHeader(void);
-    MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_);
+    explicit MapHeader(int mapId);
+    MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_, int mapId_);
     virtual ~MapHeader(void);
     void Init(uint64_t numMpages, uint64_t mpageSize);
 
@@ -73,7 +73,6 @@ public:
     uint64_t GetNumUsedBlks(void) { return numUsedBlks; }
 
     int GetMapId(void) { return mapId; }
-    void SetMapId(int mapId_) { mapId = mapId_; }
 
 private:
     std::mutex mpageHeaderLock;

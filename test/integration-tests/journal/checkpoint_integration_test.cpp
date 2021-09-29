@@ -55,7 +55,7 @@ TEST_F(CheckpointIntegrationTest, TriggerCheckpoint)
     for (auto it = dirtyPages.begin(); it != dirtyPages.end(); it++)
     {
         EXPECT_CALL(*testMapper,
-            FlushDirtyMpages(it->first, ::_, it->second)).Times(1);
+            FlushDirtyMpagesGiven(it->first, ::_, it->second)).Times(1);
     }
     EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContexts(_, false)).Times(1);
 

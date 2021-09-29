@@ -9,7 +9,7 @@ using ::testing::StrictMock;
 namespace pos
 {
 MockMapper::MockMapper(TestInfo* testInfo, IArrayInfo* info, IStateControl* iState)
-: Mapper(info, iState),
+: Mapper(info, nullptr),
   testInfo(testInfo)
 {
     flushHandler.resize(testInfo->numMap);
@@ -20,8 +20,8 @@ MockMapper::MockMapper(TestInfo* testInfo, IArrayInfo* info, IStateControl* iSta
 
     stripeMapFlushHandler = new MapFlushHandlerMock(STRIPE_MAP_ID);
 
-    ON_CALL(*this, FlushDirtyMpages).WillByDefault(::testing::Invoke(this,
-        &MockMapper::_FlushDirtyMpages));
+    ON_CALL(*this, FlushDirtyMpagesGiven).WillByDefault(::testing::Invoke(this,
+        &MockMapper::_FlushDirtyMpagesGiven));
 
     vsaMap = new StrictMock<VSAMapMock>(testInfo);
     stripeMap = new StrictMock<StripeMapMock>(testInfo);
@@ -76,7 +76,7 @@ MockMapper::StoreAll(void)
 }
 
 int
-MockMapper::_FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages)
+MockMapper::_FlushDirtyMpagesGiven(int mapId, EventSmartPtr callback, MpageList dirtyPages)
 {
     if (mapId == -1)
     {

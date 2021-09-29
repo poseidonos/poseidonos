@@ -1,5 +1,7 @@
-#include <gtest/gtest.h>
 #include "src/telemetry/telemetry_client/telemetry_client.h"
+
+#include <gtest/gtest.h>
+
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos

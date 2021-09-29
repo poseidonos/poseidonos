@@ -42,17 +42,32 @@ namespace pos
 class MapperAddressInfo
 {
 public:
+    MapperAddressInfo(void) = default;
     explicit MapperAddressInfo(IArrayInfo* iArrayInfo_);
-    void SetupAddressInfo(int mpageSize_);
-    uint64_t GetMpageSize(void);
-    std::string GetArrayName(void);
-    int GetArrayId(void);
+    virtual ~MapperAddressInfo(void) {}
+    virtual void SetupAddressInfo(int mpageSize_);
+    virtual std::string GetArrayName(void);
+    virtual int GetArrayId(void);
+    virtual bool IsUT(void) { return isUT; }
 
+    virtual uint32_t GetBlksPerStripe(void) { return blksPerStripe; }
+    virtual uint32_t GetNumWbStripes(void) { return numWbStripes; }
+    virtual uint32_t GetMaxVSID(void) { return maxVsid; }
+    virtual uint64_t GetMpageSize(void);
+
+    void SetMaxVSID(uint32_t cnt) { maxVsid = cnt; }
+    void SetBlksPerStripe(uint32_t cnt) { blksPerStripe = cnt; }
+    void SetNumWbStripes(uint32_t cnt) { numWbStripes = cnt; }
+    void SetMPageSize(uint32_t cnt) { mpageSize = cnt; }
+    void SetIsUT(bool ut) { isUT = ut; }
+
+private:
     uint32_t maxVsid;
     uint32_t blksPerStripe;
     uint32_t numWbStripes;
     uint32_t mpageSize;
     IArrayInfo* iArrayInfo;
+    bool isUT;
 };
 
 } // namespace pos

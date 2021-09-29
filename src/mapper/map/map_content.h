@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "src/mapper/address/mapper_address_info.h"
 #include "src/mapper/include/mpage_info.h"
 #include "src/mapper/map/map.h"
 #include "src/mapper/map/map_header.h"
@@ -50,30 +51,30 @@ class MapIoHandler;
 class MapContent
 {
 public:
-    MapContent(int mapId_, int arrayId_);
+    MapContent(void) = default;
+    MapContent(int mapId_, MapperAddressInfo* addrInfo);
     virtual ~MapContent(void);
 
     virtual MpageList GetDirtyPages(BlkAddr start, uint64_t numEntries) = 0;
 
-    int Init(uint64_t numEntries, uint64_t entrySize, uint64_t mpageSize);
-    void Dispose(void);
-    int Load(AsyncLoadCallBack& cb);
+    virtual int Init(uint64_t numEntries, uint64_t entrySize, uint64_t mpageSize);
+    virtual void Dispose(void);
+    virtual int Load(AsyncLoadCallBack& cb);
 
-    int OpenMapFile(void);
-    int DeleteMapFile(void);
-    bool DoesFileExist(void);
+    virtual int OpenMapFile(void);
+    virtual int DeleteMapFile(void);
+    virtual bool DoesFileExist(void);
 
-    int FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback);
-    int FlushTouchedPages(EventSmartPtr callback);
-    int FlushHeader(EventSmartPtr callback);
+    virtual int FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback);
+    virtual int FlushTouchedPages(EventSmartPtr callback);
+    virtual int FlushHeader(EventSmartPtr callback);
 
-    int Dump(std::string fileName);
-    int DumpLoad(std::string fileName);
+    virtual int Dump(std::string fileName);
+    virtual int DumpLoad(std::string fileName);
 
-    int GetId(void);
-    uint64_t GetEntriesPerPage(void);
-    void SetMapHeader(MapHeader* mapHeader_) { mapHeader = mapHeader_; }
-    void SetMap(Map* map_) { map = map_; }
+    virtual uint64_t GetEntriesPerPage(void);
+    virtual void SetMapHeader(MapHeader* mapHeader_) { mapHeader = mapHeader_; }
+    virtual void SetMap(Map* map_) { map = map_; }
 
 protected:
     MapHeader* mapHeader;
@@ -82,7 +83,7 @@ protected:
     std::string fileName;
     int mapId;
     uint64_t entriesPerMpage;
-    int arrayId;
+    MapperAddressInfo* addrInfo;
     bool isInitialized;
 };
 

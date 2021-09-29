@@ -188,6 +188,8 @@ private:
 
     BlkAddr totalRbaNum;
     IVolumeManager* volumeManager;
+    std::atomic<uint32_t> numWriteIssued;
+    std::atomic<uint32_t> numLoadIssued;
 };
 
 } // namespace pos

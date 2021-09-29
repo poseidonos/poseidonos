@@ -38,19 +38,24 @@
 
 namespace pos
 {
-MapIoHandler::MapIoHandler(Map* mapData, MapHeader* mapHeaderData, int mapId_, int arrayId_)
+MapIoHandler::MapIoHandler(MetaFileIntf* file_, Map* mapData, MapHeader* mapHeaderData, int mapId_, MapperAddressInfo* addrInfo_)
 : touchedPages(nullptr),
   mapId(mapId_),
   map(mapData),
   mapHeader(mapHeaderData),
-  file(nullptr),
+  file(file_),
   mapHeaderTempBuffer(nullptr),
   status(IDLE),
   numPagesToAsyncIo(0),
   numPagesAsyncIoDone(0),
   flushInProgress(false),
   ioError(0),
-  arrayId(arrayId_)
+  addrInfo(addrInfo_)
+{
+}
+
+MapIoHandler::MapIoHandler(Map* mapData, MapHeader* mapHeaderData, int mapId_, MapperAddressInfo* addrInfo_)
+: MapIoHandler(nullptr,  mapData, mapHeaderData, mapId_, addrInfo_)
 {
 }
 
@@ -63,19 +68,26 @@ int
 MapIoHandler::OpenFile(std::string fileName, uint64_t fileSize)
 {
     assert(file == nullptr);
-    file = new FILESTORE(fileName, arrayId);
+    if (addrInfo->IsUT() == false)
+    {
+        file = new FILESTORE(fileName, addrInfo->GetArrayId());
+    }
+    else
+    {
+        file = new MockFileIntf(fileName, addrInfo->GetArrayId());
+    }
 
     if (file->DoesFileExist() == false)
     {
         int ret = file->Create(fileSize);
         if (ret < 0)
         {
-            POS_TRACE_ERROR(EID(MFS_FILE_CREATE_FAILED), "Map file creation failed, fileName:{}, array:{}", fileName, arrayId);
+            POS_TRACE_ERROR(EID(MFS_FILE_CREATE_FAILED), "Map file creation failed, fileName:{}, array:{}", fileName, addrInfo->GetArrayId());
             delete file;
             file = nullptr;
             return ret;
         }
-        POS_TRACE_INFO(EID(MFS_START), "Map file created, fileName:{}, array:{}", fileName, arrayId);
+        POS_TRACE_INFO(EID(MFS_START), "Map file created, fileName:{}, array:{}", fileName, addrInfo->GetArrayId());
         file->Open();
         return EID(NEED_TO_INITIAL_STORE); // SaveHeader
     }
@@ -214,12 +226,10 @@ MapIoHandler::FlushTouchedPages(EventSmartPtr callback)
         POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER FLUSH] Failed to Issue Flush, Another Flush is still progressing, mapId:{}, status:{}", mapId, status);
         return -EID(MAP_FLUSH_IN_PROGRESS);
     }
-
     int result = EID(SUCCESS);
     BitMap* copiedBitmap = mapHeader->GetBitmapFromTempBuffer(mapHeaderTempBuffer);
     _GetTouchedPages(copiedBitmap);
     delete copiedBitmap;
-
     if (touchedPages->GetNumBitsSet() != 0)
     {
         POS_TRACE_DEBUG(EID(MAP_FLUSH_STARTED), "[MAPPER FlushTouchedPages mapId:{}] started", mapId);

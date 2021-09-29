@@ -38,8 +38,8 @@
 
 namespace pos
 {
-StripeMapContent::StripeMapContent(int mapId, int arrayId)
-: MapContent(mapId, arrayId)
+StripeMapContent::StripeMapContent(int mapId, MapperAddressInfo* addrInfo)
+: MapContent(mapId, addrInfo)
 {
     fileName = "StripeMap.bin";
 }

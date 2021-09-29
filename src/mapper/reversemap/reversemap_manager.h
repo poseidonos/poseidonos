@@ -39,7 +39,7 @@
 #include "src/mapper/address/mapper_address_info.h"
 #include "src/mapper/reversemap/reverse_map.h"
 #include "src/meta_file_intf/meta_file_include.h"
-
+#include "src/volume/i_volume_manager.h"
 namespace pos
 {
 
@@ -47,23 +47,21 @@ class ReverseMapManager : public IReverseMap
 {
 public:
     ReverseMapManager(void) = default;
-    ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripeMap, IArrayInfo* iarrayInfo);
+    ReverseMapManager(VSAMapManager* ivsaMap, IStripeMap* istripeMap, IVolumeManager* vol, MapperAddressInfo* addrInfo_);
     virtual ~ReverseMapManager(void);
 
-    void Init(MapperAddressInfo& info);
-    void SetDoC(IArrayInfo* iarrayInfo);
-    void Dispose(void);
+    virtual void Init(void);
+    virtual void Dispose(void);
 
-    ReverseMapPack* GetReverseMapPack(StripeId wbLsid) override;
-    ReverseMapPack* AllocReverseMapPack(bool gcDest) override;
+    virtual ReverseMapPack* GetReverseMapPack(StripeId wbLsid) override;
+    virtual ReverseMapPack* AllocReverseMapPack(bool gcDest) override;
 
-    uint64_t GetReverseMapPerStripeFileSize(void);
-    uint64_t GetWholeReverseMapFileSize(void);
-    int LoadWholeReverseMap(char* pBuffer);
-    int StoreWholeReverseMap(char* pBuffer);
+    virtual uint64_t GetReverseMapPerStripeFileSize(void);
+    virtual uint64_t GetWholeReverseMapFileSize(void);
+    virtual int LoadWholeReverseMap(char* pBuffer);
+    virtual int StoreWholeReverseMap(char* pBuffer);
 
 private:
-    int _SetPageSize(StorageOpt storageOpt = StorageOpt::DEFAULT);
     int _SetNumMpages(void);
 
     uint64_t mpageSize;          // Optimal page size for each FS (MFS, legacy)
@@ -76,7 +74,8 @@ private:
 
     VSAMapManager* iVSAMap;
     IStripeMap* iStripeMap;
-    IArrayInfo* iArrayInfo;
+    IVolumeManager* volumeManager;
+    MapperAddressInfo* addrInfo;
 };
 
 } // namespace pos

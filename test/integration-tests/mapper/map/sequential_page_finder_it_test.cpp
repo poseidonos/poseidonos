@@ -66,10 +66,10 @@ TEST_F(SequentialPageFinderTest, SequentialPages)
 
     SequentialPageFinder finder(pages);
     MpageSet currentSet = finder.PopNextMpageSet();
-    EXPECT_TRUE(currentSet.numMpages == 100);
+    EXPECT_TRUE(currentSet.numMpages == 1);
     EXPECT_TRUE(currentSet.startMpage == 0);
 
-    EXPECT_TRUE(finder.IsRemaining() == false);
+    EXPECT_TRUE(finder.IsRemaining() == true);
 }
 
 TEST_F(SequentialPageFinderTest, SequentialPagesWithBitmap)
@@ -82,10 +82,10 @@ TEST_F(SequentialPageFinderTest, SequentialPagesWithBitmap)
 
     SequentialPageFinder finder(bitmap);
     MpageSet currentSet = finder.PopNextMpageSet();
-    EXPECT_TRUE(currentSet.numMpages == 100);
+    EXPECT_TRUE(currentSet.numMpages == 1);
     EXPECT_TRUE(currentSet.startMpage == 0);
 
-    EXPECT_TRUE(finder.IsRemaining() == false);
+    EXPECT_TRUE(finder.IsRemaining() == true);
 }
 
 TEST_F(SequentialPageFinderTest, LargeSequentialPages)
@@ -126,11 +126,9 @@ TEST_F(SequentialPageFinderTest, SeveralSequentialPages)
 
     for (int count = 0; count < numSetsToTest; count++)
     {
-        MpageSet currentSet =
-        {
-            .startMpage = currentPage,
-            .numMpages = std::rand() % (MAX_MPAGES_PER_SET - 1) + 1
-        };
+        MpageSet currentSet;
+        currentSet.startMpage = currentPage;
+        currentSet.numMpages = std::rand() % (MAX_MPAGES_PER_SET - 1) + 1;
 
         currentPage += currentSet.numMpages;
         currentPage += (std::rand() % (maxInterval - 1) + 1);

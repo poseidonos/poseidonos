@@ -36,20 +36,25 @@
 #include "src/mapper/address/mapper_address_info.h"
 #include "src/mapper/stripemap/stripemap_manager.h"
 #include "src/allocator/i_wbstripe_allocator.h"
+#include "src/event_scheduler/event_scheduler.h"
 
 #include <string>
 #include <tuple>
 
 namespace pos
 {
-StripeMapManager::StripeMapManager(MapperAddressInfo* info, std::string arrayName, int arrayId)
+StripeMapManager::StripeMapManager(EventScheduler* eventSched, MapperAddressInfo* info)
 : stripeMap(nullptr),
   addrInfo(info),
   numLoadIssuedCount(0),
   numWriteIssuedCount(0),
-  arrayName(arrayName),
-  arrayId(arrayId)
+  callback(nullptr)
 {
+    eventScheduler = eventSched;
+    if (eventScheduler == nullptr)
+    {
+        eventScheduler = EventSchedulerSingleton::Instance();
+    }
     pthread_rwlock_init(&stripeMapLock, nullptr);
 }
 
@@ -63,8 +68,8 @@ StripeMapManager::Init(void)
 {
     numWriteIssuedCount = 0;
     numLoadIssuedCount = 0;
-    stripeMap = new StripeMapContent(STRIPE_MAP_ID, arrayId);
-    stripeMap->InMemoryInit(addrInfo->maxVsid, addrInfo->GetMpageSize());
+    stripeMap = new StripeMapContent(STRIPE_MAP_ID, addrInfo);
+    stripeMap->InMemoryInit(addrInfo->GetMaxVSID(), addrInfo->GetMpageSize());
     int ret = stripeMap->OpenMapFile();
     if (ret == EID(NEED_TO_INITIAL_STORE))
     {
@@ -100,7 +105,6 @@ StripeMapManager::Init(void)
 void
 StripeMapManager::Dispose(void)
 {
-    WaitAllPendingIoDone();
     if (stripeMap != nullptr)
     {
         delete stripeMap;
@@ -127,17 +131,49 @@ StripeMapManager::LoadStripeMapFile(void)
     return ret;
 }
 
+
 int
-StripeMapManager::FlushMap(void)
+StripeMapManager::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr cb)
 {
+    if (numWriteIssuedCount != 0)
+    {
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER StripeMap FlushDirtyPagesGiven] Failed to Issue Flush, Another Flush is still progressing, issuedCount:{}", numWriteIssuedCount);
+        return -EID(MAP_FLUSH_IN_PROGRESS);
+    }
+
+    assert(callback == nullptr);
+    callback = cb;
     EventSmartPtr eventStripeMap = std::make_shared<MapFlushedEvent>(STRIPE_MAP_ID, this);
     numWriteIssuedCount++;
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap] Issue Flush StripeMap, array:{}", addrInfo->GetArrayName());
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap FlushDirtyPagesGiven] Issue Flush StripeMap, array:{}", addrInfo->GetArrayName());
+    int ret = stripeMap->FlushDirtyPagesGiven(dirtyPages, eventStripeMap);
+    if (ret < 0)
+    {
+        numWriteIssuedCount--;
+        POS_TRACE_ERROR(EID(STRIPEMAP_STORE_FAILURE), "[Mapper StripeMap FlushDirtyPagesGiven] failed to FlushMap for stripeMap Failed");
+    }
+    return ret;
+}
+
+int
+StripeMapManager::FlushTouchedPages(EventSmartPtr cb)
+{
+    if (numWriteIssuedCount != 0)
+    {
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER StripeMap FlushTouchedPages] Failed to Issue Flush, Another Flush is still progressing, issuedCount:{}", numWriteIssuedCount);
+        return -EID(MAP_FLUSH_IN_PROGRESS);
+    }
+
+    assert(callback == nullptr);
+    callback = cb;
+    EventSmartPtr eventStripeMap = std::make_shared<MapFlushedEvent>(STRIPE_MAP_ID, this);
+    numWriteIssuedCount++;
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap FlushTouchedPages] Issue Flush StripeMap, array:{}", addrInfo->GetArrayName());
     int ret = stripeMap->FlushTouchedPages(eventStripeMap);
     if (ret < 0)
     {
         numWriteIssuedCount--;
-        POS_TRACE_ERROR(EID(STRIPEMAP_STORE_FAILURE), "[Mapper StripeMap] failed to FlushMap for stripeMap Failed");
+        POS_TRACE_ERROR(EID(STRIPEMAP_STORE_FAILURE), "[Mapper StripeMap FlushTouchedPages] failed to FlushMap for stripeMap Failed");
     }
     return ret;
 }
@@ -146,6 +182,11 @@ void
 StripeMapManager::MapFlushDone(int mapId)
 {
     POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] StripeMap Flush Done, WritePendingCnt:{} @MapAsyncFlushDone", numWriteIssuedCount);
+    if (callback != nullptr)
+    {
+        eventScheduler->EnqueueEvent(callback);
+        callback = nullptr;
+    }
     assert(numWriteIssuedCount > 0);
     numWriteIssuedCount--;
 }
@@ -160,13 +201,24 @@ StripeMapManager::WaitAllPendingIoDone(void)
 void
 StripeMapManager::WaitWritePendingIoDone(void)
 {
-    while (numWriteIssuedCount != 0);
+    while ((addrInfo->IsUT() == false) && (numWriteIssuedCount != 0));
 }
 
 StripeMapContent*
 StripeMapManager::GetStripeMapContent(void)
 {
     return stripeMap;
+}
+
+void
+StripeMapManager::SetStripeMapContent(StripeMapContent* content)
+{
+    // only for UT
+    if (stripeMap != nullptr)
+    {
+        delete stripeMap;
+    }
+    stripeMap = content;
 }
 
 StripeAddr
@@ -183,7 +235,7 @@ StripeMapManager::GetLSAandReferLsid(StripeId vsid)
 {
     pthread_rwlock_rdlock(&stripeMapLock);
     StripeAddr stripeAddr = stripeMap->GetEntry(vsid);
-    IWBStripeAllocator* iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayId);
+    IWBStripeAllocator* iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(addrInfo->GetArrayId());
     bool referenced = iWBStripeAllocator->ReferLsidCnt(stripeAddr);
     pthread_rwlock_unlock(&stripeMapLock);
 
@@ -193,7 +245,7 @@ StripeMapManager::GetLSAandReferLsid(StripeId vsid)
 StripeId
 StripeMapManager::GetRandomLsid(StripeId vsid)
 {
-    return vsid + addrInfo->numWbStripes;
+    return vsid + addrInfo->GetNumWbStripes();
 }
 
 int
@@ -221,6 +273,18 @@ StripeMapManager::GetDirtyStripeMapPages(int vsid)
     return stripeMap->GetDirtyPages(vsid, 1);
 }
 
+int
+StripeMapManager::Dump(std::string fileName)
+{
+    return stripeMap->Dump(fileName);
+}
+
+int
+StripeMapManager::DumpLoad(std::string fileName)
+{
+    return stripeMap->DumpLoad(fileName);
+}
+
 void
 StripeMapManager::_MapLoadDone(int param)
 {
@@ -232,7 +296,7 @@ StripeMapManager::_MapLoadDone(int param)
 void
 StripeMapManager::_WaitLoadIoDone()
 {
-    while (numLoadIssuedCount != 0);
+    while ((addrInfo->IsUT() == false) && (numLoadIssuedCount != 0));
 }
 
 } // namespace pos

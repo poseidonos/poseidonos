@@ -65,7 +65,8 @@ public:
 class MapIoHandler
 {
 public:
-    MapIoHandler(Map* mapData, MapHeader* mapHeaderData, int mapId, int arrayId_);
+    MapIoHandler(MetaFileIntf* file, Map* mapData, MapHeader* mapHeaderData, int mapId, MapperAddressInfo* addrInfo_);
+    MapIoHandler(Map* mapData, MapHeader* mapHeaderData, int mapId, MapperAddressInfo* addrInfo_);
     ~MapIoHandler(void);
 
     void Dispose(void);
@@ -79,9 +80,6 @@ public:
     int FlushHeader(EventSmartPtr callback);
     int LoadForWBT(MetaFileIntf* fileFromLoad);
     int StoreForWBT(MetaFileIntf* fileToStore);
-
-protected:
-    BitMap* touchedPages;
 
 private:
     int _MakeFileReady(void);
@@ -102,6 +100,7 @@ private:
     int _IssueHeaderIoByMockFs(MetaFsIoOpcode opType, MetaFileIntf* fileToIo, char* headerBuf);
     int _IssueMpageIoByMockFs(MetaFsIoOpcode opType, MetaFileIntf* fileToIo);
 
+    BitMap* touchedPages;
     int mapId;
     Map* map;
     MapHeader* mapHeader;
@@ -115,7 +114,7 @@ private:
     AsyncLoadCallBack loadFinishedCallBack;
     EventSmartPtr flushDoneCallBack;
     int ioError;
-    int arrayId;
+    MapperAddressInfo* addrInfo;
 };
 
 } // namespace pos

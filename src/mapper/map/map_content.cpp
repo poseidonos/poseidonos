@@ -39,13 +39,13 @@
 
 namespace pos
 {
-MapContent::MapContent(int mapId_, int arrayId_)
+MapContent::MapContent(int mapId_, MapperAddressInfo* addrInfo_)
 : mapHeader(nullptr),
   map(nullptr),
   mapIoHandler(nullptr),
   mapId(mapId_),
   entriesPerMpage(0),
-  arrayId(arrayId_),
+  addrInfo(addrInfo_),
   isInitialized(false)
 {
 }
@@ -69,13 +69,12 @@ MapContent::Init(uint64_t numEntries, uint64_t entrySize, uint64_t mpageSize)
         }
         if (mapHeader == nullptr)
         {
-            mapHeader = new MapHeader();
+            mapHeader = new MapHeader(mapId);
             mapHeader->Init(numMpages, mpageSize);
-            mapHeader->SetMapId(mapId);
         }
         if (mapIoHandler == nullptr)
         {
-            mapIoHandler = new MapIoHandler(map, mapHeader, mapId, arrayId);
+            mapIoHandler = new MapIoHandler(map, mapHeader, mapId, addrInfo);
         }
     }
     return 0;
@@ -85,16 +84,16 @@ int
 MapContent::OpenMapFile(void)
 {
     uint64_t fileSize = mapHeader->GetSize() + map->GetSize() * map->GetNumMpages();
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper] Open MapFile fileName:{}, size:{}, arrayId:{}", fileName, fileSize, arrayId);
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper] Open MapFile fileName:{}, size:{}, arrayId:{}", fileName, fileSize, addrInfo->GetArrayId());
     assert(fileSize > 0);
     int ret = mapIoHandler->OpenFile(fileName, fileSize);
     if (ret == EID(NEED_TO_INITIAL_STORE))
     {
-        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper] Need to Initial Store fileName:{}, arrayId:{}", fileName, arrayId);
+        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper] Need to Initial Store fileName:{}, arrayId:{}", fileName, addrInfo->GetArrayId());
     }
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper] failed to save Header fileName:{}, arrayId:{}", fileName, arrayId);
+        POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper] failed to save Header fileName:{}, arrayId:{}", fileName, addrInfo->GetArrayId());
     }
     return ret;
 }
@@ -163,7 +162,7 @@ MapContent::DoesFileExist(void)
 int
 MapContent::Dump(std::string fname)
 {
-    MetaFileIntf* linuxFileToStore = new MockFileIntf(fname, arrayId);
+    MetaFileIntf* linuxFileToStore = new MockFileIntf(fname, addrInfo->GetArrayId());
     int ret = linuxFileToStore->Create(0);
     linuxFileToStore->Open();
 
@@ -180,7 +179,7 @@ MapContent::Dump(std::string fname)
 int
 MapContent::DumpLoad(std::string fname)
 {
-    MetaFileIntf* linuxFileFromLoad = new MockFileIntf(fname, arrayId);
+    MetaFileIntf* linuxFileFromLoad = new MockFileIntf(fname, addrInfo->GetArrayId());
     int ret = linuxFileFromLoad->Open();
 
     if (ret == 0)

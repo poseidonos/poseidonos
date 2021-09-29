@@ -33,6 +33,7 @@
 #include "src/mapper/map/map_io_handler.h"
 
 #include "test/integration-tests/mapper/map/map_io_handler_it_test.h"
+#include "test/integration-tests/mapper/utils/mapper_it_const.h"
 
 namespace pos
 {
@@ -43,11 +44,9 @@ MapIoHandlerTest::SetUp(void)
     MapperTestFixture::SetUp();
     _CreateRandVolume(0);
     _MountVolume(0);
-    _SetupMockEventScheduler();
-
     map = new Map(NUM_PAGES_IN_MAP, MPAGE_SIZE);
     mapHeader = new MapHeader(new BitMap(NUM_PAGES_IN_MAP), new BitMap(NUM_PAGES_IN_MAP));
-    mapIoHandler = new MapIoHandler(map, mapHeader);
+    mapIoHandler = new MapIoHandler(map, mapHeader, TEST_VOL_ID, 0);
 
     mapHeader->GetMpageMap()->ResetBitmap();
     mapHeader->GetTouchedMpages()->ResetBitmap();
@@ -58,68 +57,11 @@ MapIoHandlerTest::TearDown(void)
 {
     delete map;
     delete mapHeader;
-
-    delete mapIoHandler->touchedPages;
     delete mapIoHandler;
 
     _UnmountVolume(0);
     _DeleteVolume(0);
     MapperTestFixture::TearDown();
-    _ResetMockEventScheduler();
-}
-
-void
-MapIoHandlerTest::_GetTouchedPages(BitMap* validPages)
-{
-    mapIoHandler->touchedPages = new BitMap(NUM_PAGES_IN_MAP);
-    mapIoHandler->_GetTouchedPages(validPages);
-}
-
-void
-MapIoHandlerTest::_CheckFlushingPagesBitmap(void)
-{
-    BitMap* flushingPages = mapIoHandler->touchedPages;
-
-    EXPECT_EQ(flushingPages->GetNumBitsSet(), mapHeader->GetTouchedMpages()->GetNumBitsSet());
-    EXPECT_EQ(flushingPages->GetNumEntry(), mapHeader->GetTouchedMpages()->GetNumEntry());
-    EXPECT_TRUE(flushingPages->GetNumEntry() != 0);
-
-    int reti = memcmp(flushingPages->GetMapAddr(), mapHeader->GetTouchedMpages()->GetMapAddr(), mapHeader->GetMpageMap()->GetNumEntry() * BITMAP_ENTRY_SIZE);
-    EXPECT_EQ(reti, 0);
-}
-
-
-TEST_F(MapIoHandlerTest, GetDirtyPagesWithEmptyMap)
-{
-    _GetTouchedPages(mapHeader->bitmap);
-    _CheckFlushingPagesBitmap();
-}
-
-TEST_F(MapIoHandlerTest, GetDirtyPagesWithFlushedMap)
-{
-    for (int pageNum = 0; pageNum < NUM_PAGES_IN_MAP; pageNum++)
-    {
-        mapHeader->bitmap->SetBit(pageNum);
-    }
-
-    _GetTouchedPages(mapHeader->bitmap);
-    _CheckFlushingPagesBitmap();
-}
-
-TEST_F(MapIoHandlerTest, GetDirtyPages)
-{
-    for (int pageNum = 0; pageNum < NUM_PAGES_IN_MAP; pageNum += 2)
-    {
-        mapHeader->bitmap->SetBit(pageNum);
-    }
-
-    for (int pageNum = 0; pageNum < NUM_PAGES_IN_MAP; pageNum += 4)
-    {
-        mapHeader->bitmap->SetBit(pageNum);
-    }
-
-    _GetTouchedPages(mapHeader->bitmap);
-    _CheckFlushingPagesBitmap();
 }
 
 // [VSAMap Validity /w POR]
@@ -357,12 +299,12 @@ TEST_F(MapIoHandlerTest, AsnyFlushMapSeveralMpages)
 
     for (int testCnt = 0; testCnt < numMpagesToTest; testCnt++)
     {
-        _GetAndCompareVSA(TEST_VOL_ID, (BlkAddr)(testCnt * (PAGE_SIZE / 8)), (StripeId)testCnt / 128, (BlkOffset)testCnt % 128);
+        _GetAndCompareVSA(TEST_VOL_ID, (BlkAddr)(testCnt * (BLK_SIZE / 8)), (StripeId)testCnt / 128, (BlkOffset)testCnt % 128);
     }
 
     for (int testCnt = 0; testCnt < numMpagesToTest; testCnt++)
     {
-        StripeId vsid = (StripeId)(testCnt * (PAGE_SIZE / 4));
+        StripeId vsid = (StripeId)(testCnt * (BLK_SIZE / 4));
         StripeId lsid = (StripeId)testCnt % 128;
         _GetAndCompareLSA(vsid, lsid, IN_WRITE_BUFFER_AREA);
     }

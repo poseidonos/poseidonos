@@ -45,24 +45,27 @@
 
 namespace pos
 {
+class EventScheduler;
 class VSAMapManager : public IMapManagerInternal
 {
 public:
     VSAMapManager(void) = default;
+    VSAMapManager(EventScheduler* eventSched, VSAMapContent* vsaMap, MapperAddressInfo* info);
     explicit VSAMapManager(MapperAddressInfo* info);
     virtual ~VSAMapManager(void);
     virtual int Init(void);
     virtual void Dispose(void);
 
-    virtual bool CreateVsaMapContent(int volId, uint64_t volSizeByte, bool delVol);
+    virtual int CreateVsaMapContent(int volId, uint64_t volSizeByte, bool delVol);
     virtual int LoadVSAMapFile(int volId);
-    virtual int FlushMap(int volId);
+    virtual int FlushDirtyPagesGiven(int volId, MpageList list, EventSmartPtr cb);
+    virtual int FlushTouchedPages(int volId, EventSmartPtr cb);
     virtual int FlushAllMaps(void);
     virtual void WaitAllPendingIoDone(void);
     virtual void WaitLoadPendingIoDone(void);
     virtual void WaitWritePendingIoDone(void);
     virtual void WaitVolumePendingIoDone(int volId);
-    bool IsVolumeLoaded(int volId);
+    virtual bool IsVolumeLoaded(int volId);
     virtual void MapFlushDone(int mapId);
 
     virtual int GetVSAs(int volumeId, BlkAddr startRba, uint32_t numBlks, VsaArray& vsaArray);
@@ -72,7 +75,8 @@ public:
     virtual VirtualBlkAddr GetVSAWoCond(int volumeId, BlkAddr rba);
     virtual int SetVSAsWoCond(int volumeId, BlkAddr startfRba, VirtualBlks& virtualBlks);
     virtual MpageList GetDirtyVsaMapPages(int volId, BlkAddr startRba, uint64_t numBlks);
-    virtual VSAMapContent*& GetVSAMapContent(int volId) { return vsaMaps[volId]; }
+    virtual VSAMapContent* GetVSAMapContent(int volId);
+    virtual void SetVSAMapContent(int volId, VSAMapContent* content);
 
     virtual bool NeedToDeleteFile(int volId);
     virtual int InvalidateAllBlocks(int volId);
@@ -81,8 +85,12 @@ public:
     virtual bool IsVsaMapAccessible(int volId);
     virtual void EnableVsaMapAccess(int volId);
     virtual void DisableVsaMapAccess(int volId);
+    virtual bool IsVsaMapInternalAccesible(int volId);
     virtual void EnableVsaMapInternalAccess(int volId);
     virtual void DisableVsaMapInternalAccess(int volId);
+
+    virtual int Dump(int volId, std::string fileName);
+    virtual int DumpLoad(int volId, std::string fileName);
 
 private:
     void _MapLoadDone(int volId);
@@ -96,6 +104,8 @@ private:
     std::atomic<bool> isVsaMapInternalAccessable[MAX_VOLUME_COUNT];
     std::atomic<int> numWriteIssuedCount;
     std::atomic<int> numLoadIssuedCount;
+    EventSmartPtr callback;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos

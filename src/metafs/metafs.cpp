@@ -205,6 +205,12 @@ MetaFs::GetMss(void)
     return metaStorage;
 }
 
+int
+MetaFs::EstimateAlignedFileIOSize(MetaFilePropertySet& prop)
+{
+    return ctrl->EstimateAlignedFileIOSize(prop);
+}
+
 bool
 MetaFs::_Initialize(void)
 {

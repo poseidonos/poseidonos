@@ -41,10 +41,20 @@ namespace pos
 MockArrayInfo::MockArrayInfo(void)
 {
     pls = new PartitionLogicalSize();
+#if 0
+    pls->blksPerChunk = 1;
+    pls->blksPerStripe = 10;
+    pls->stripesPerSegment = 1;
+    pls->totalSegments = 1;
+    pls->totalStripes = 3;
+    pls->chunksPerStripe = 10;
+    pls->minWriteBlkCnt = 1;
+#else
     pls->totalStripes = 131072;
     pls->blksPerStripe = 512;
     pls->totalSegments = 128;
     pls->stripesPerSegment = 1024;
+#endif
 }
 
 MockArrayInfo::~MockArrayInfo(void)

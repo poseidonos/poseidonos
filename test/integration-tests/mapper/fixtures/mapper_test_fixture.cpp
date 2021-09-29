@@ -31,7 +31,7 @@
  */
 
 #include "src/include/smart_ptr_type.h"
-
+#include "src/metafs/include/metafs_service.h"
 #include "test/integration-tests/mapper/fixtures/mapper_test_fixture.h"
 #include "test/integration-tests/mapper/utils/mapper_it_const.h"
 #include "test/integration-tests/mapper/test_doubles/map_flush_done_event_mock.h"
@@ -50,28 +50,21 @@ void
 MapperTestFixture::SetUp(void)
 {
     mockArrayInfo = new MockArrayInfo;
-
-    mapperSUT = new Mapper(mockArrayInfo, nullptr);
-    mapperSUT->reverseMapManager->SetDoC(mockArrayInfo);
+    StateControl is;
+    addrInfo = new MapperAddressInfo(mockArrayInfo);
+    volManager = new VolumeManager(mockArrayInfo, &is);
+    vsaMapManagerSUT = new VSAMapManager(nullptr, nullptr, addrInfo);
+    stripeMapManagerSUT = new StripeMapManager(nullptr, addrInfo);
+    reverseMapManagerSUT = new ReverseMapManager(vsaMapManagerSUT, stripeMapManagerSUT, volManager, addrInfo);
+    addrInfo->SetIsUT(true);
+    mapperSUT = new Mapper(nullptr, vsaMapManagerSUT, stripeMapManagerSUT, reverseMapManagerSUT, addrInfo, mockArrayInfo, nullptr);
     mapperSUT->Init();
-
-    vsaMapManagerSUT = mapperSUT->vsaMapManager;
-    stripeMapManagerSUT = mapperSUT->stripeMapManager;
-    reverseMapManagerSUT = mapperSUT->reverseMapManager;
-
-    // MockIArrayInfo* mockIArrayInfo = new MockIArrayInfo;
-    // EXPECT_CALL(*mockIArrayInfo, GetName).WillRepeatedly(Return(""));
-    // EXPECT_CALL(*mockIArrayInfo, ).WillRepeatedly(Return(""));
-    allocator = new Allocator(mockArrayInfo, nullptr);
-    allocator->Init();
 }
 
 void
 MapperTestFixture::TearDown(void)
 {
-    // allocator->Dispose();
-    delete allocator;
-    // mapperSUT->Dispose();
+    mapperSUT->Dispose();
     delete mapperSUT;
     delete mockArrayInfo;
 }
@@ -90,30 +83,17 @@ MapperTestFixture::_CreateRandVolume(int volId)
     uint64_t volSizeByte = _GetRandomSection(10, 20) * SZ_1M;
     POS_TRACE_WARN(9999, "Volume Name:{}  Size(Byte):{}", volName, volSizeByte);
 
-    bool reb = mapperSUT->vsaMapManager->VolumeCreated(volName, volId, volSizeByte, 0, 0, "");
+    bool reb = mapperSUT->VolumeCreated(volId, volSizeByte);
     EXPECT_EQ(reb, true);
     createdVolumeInfo.emplace(volId, volSizeByte);
 }
 
 void
-MapperTestFixture::_UseMockVolumeManager(void)
-{
-    mockVolumeManager = new MockVolumeManager();
-    EXPECT_CALL(*mockVolumeManager, GetVolumeSize(_, _)).WillRepeatedly(Invoke(this, &MapperTestFixture::GetSavedVolumeSize));
-    mapperSUT->vsaMapManager->SetVolumeManagerObject(mockVolumeManager);
-}
-
-void
-MapperTestFixture::_DeleteMockVolumeManager(void)
-{
-    delete mockVolumeManager;
-    mockVolumeManager = nullptr;
-}
-
-void
 MapperTestFixture::_LoadVolume(int volId)
 {
-    bool retb = mapperSUT->vsaMapManager->VolumeLoaded("", volId, 0, 0, 0, "");
+    uint64_t volSizeByte = _GetRandomSection(10, 20) * SZ_1M;
+    uint64_t volSizeByte = 5 * SZ_1M;
+    bool retb = mapperSUT->VolumeLoaded(volId, volSizeByte);
     EXPECT_EQ(retb, true);
 }
 
@@ -121,7 +101,8 @@ void
 MapperTestFixture::_MountVolume(int volId)
 {
     std::string volName = "Vol" + std::to_string(volId);
-    bool retb = mapperSUT->vsaMapManager->VolumeMounted(volName, "", volId, createdVolumeInfo[volId], 0, 0, "");
+    uint64_t volSizeByte = _GetRandomSection(10, 20) * SZ_1M;
+    bool retb = mapperSUT->VolumeMounted(volId, volSizeByte);
     EXPECT_EQ(retb, true);
 }
 
@@ -129,7 +110,7 @@ void
 MapperTestFixture::_UnmountVolume(int volId)
 {
     std::string volName = "Vol" + std::to_string(volId);
-    bool retb = mapperSUT->vsaMapManager->VolumeUnmounted(volName, volId, "");
+    bool retb = mapperSUT->VolumeUnmounted(volId, false);
     EXPECT_EQ(retb, true);
 }
 
@@ -137,8 +118,10 @@ void
 MapperTestFixture::_DeleteVolume(int volId)
 {
     std::string volName = "Vol" + std::to_string(volId);
-    bool retb = mapperSUT->vsaMapManager->VolumeDeleted(volName, volId, createdVolumeInfo[volId], "");
-    EXPECT_EQ(retb, true);
+    int retb = mapperSUT->PrepareVolumeDelete(volId);
+    EXPECT_EQ(retb, 0);
+    retb = mapperSUT->DeleteVolumeMap(volId);
+    EXPECT_EQ(retb, 0);
     createdVolumeInfo.erase(volId);
 }
 
@@ -188,28 +171,12 @@ MapperTestFixture::_GetAndCompareLSA(StripeId vsid, StripeId lsidOrig, StripeLoc
 }
 
 void
-MapperTestFixture::_SetupMockEventScheduler(void)
-{
-    // cpu_set_t zeroed;
-    // CPU_ZERO(&zeroed);
-
-    // EventArgument::SetStaticMember(new EventScheduler(1, zeroed, zeroed), nullptr);
-}
-
-void
-MapperTestFixture::_ResetMockEventScheduler(void)
-{
-    // delete EventArgument::GetEventScheduler();
-}
-
-void
 MapperTestFixture::_SimulateNPOR(void)
 {
     _UnmountVolume(0);
     delete mapperSUT;
 
     mapperSUT = new Mapper(mockArrayInfo, nullptr);
-    mapperSUT->reverseMapManager->SetDoC(mockArrayInfo);
     mapperSUT->Init();
     _LoadVolume(0);
     _MountVolume(0);
@@ -221,7 +188,6 @@ MapperTestFixture::_SimulateSPOR(void)
     delete mapperSUT;
 
     mapperSUT = new Mapper(mockArrayInfo, nullptr);
-    mapperSUT->reverseMapManager->SetDoC(mockArrayInfo);
     mapperSUT->Init();
     _LoadVolume(0);
     _MountVolume(0);
@@ -231,14 +197,14 @@ void
 MapperTestFixture::_VSAMapDirtyUpdateTester(int volId, BlkAddr rba, StripeId vsidOrig, BlkOffset offsetOrig, MpageList& dirtyPages)
 {
     _SetVSAs(volId, rba, vsidOrig, offsetOrig);
-    _AddToDirtyPages(dirtyPages, mapperSUT->vsaMapManager->GetVSAMapContent(volId)->GetDirtyPages(rba, 1));
+    _AddToDirtyPages(dirtyPages, vsaMapManagerSUT->GetVSAMapContent(volId)->GetDirtyPages(rba, 1));
 }
 
 void
 MapperTestFixture::_StripeMapDirtyUpdateTester(StripeId vsid, StripeId lsid, StripeLoc loc, MpageList& dirtyPages)
 {
     _SetLSA(vsid, lsid, loc);
-    _AddToDirtyPages(dirtyPages, mapperSUT->stripeMapManager->GetStripeMapContent()->GetDirtyPages(vsid, 1));
+    _AddToDirtyPages(dirtyPages, stripeMapManagerSUT->GetStripeMapContent()->GetDirtyPages(vsid, 1));
 }
 
 void
@@ -251,7 +217,7 @@ void
 MapperTestFixture::_FlushDirtyPagesGiven(int mapId, MpageList& dirtyPages)
 {
     EventSmartPtr callback(new MapFlushDoneEvent(mapId, this));
-    mapperSUT->FlushDirtyMpages(mapId, callback, dirtyPages);
+    mapperSUT->FlushDirtyMpagesGiven(mapId, callback, dirtyPages);
 }
 
 void

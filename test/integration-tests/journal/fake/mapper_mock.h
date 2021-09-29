@@ -24,7 +24,7 @@ public:
     MpageList GetVsaMapDirtyPages(int volId, BlkAddr rba, uint32_t numBlks);
     MpageList GetStripeMapDirtyPages(StripeId vsid);
 
-    MOCK_METHOD(int, FlushDirtyMpages,
+    MOCK_METHOD(int, FlushDirtyMpagesGiven,
         (int mapId, EventSmartPtr callback, MpageList dirtyPages), (override));
 
     IVSAMap* GetIVSAMap(void) override;
@@ -37,7 +37,7 @@ public:
     virtual int StoreAll(void) override;
 
 private:
-    int _FlushDirtyMpages(int mapId, EventSmartPtr callback, MpageList dirtyPages);
+    int _FlushDirtyMpagesGiven(int mapId, EventSmartPtr callback, MpageList dirtyPages);
 
     TestInfo* testInfo;
 

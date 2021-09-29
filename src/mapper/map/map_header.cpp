@@ -38,17 +38,18 @@
 namespace pos
 {
 
-MapHeader::MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_)
+MapHeader::MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_, int mapId_)
 : age(0),
   size(0),
   numUsedBlks(0),
   mPageMap(mPageMap_),
-  touchedMpages(touchedMpages_)
+  touchedMpages(touchedMpages_),
+  mapId(mapId_)
 {
 }
 
-MapHeader::MapHeader(void)
-: MapHeader(nullptr, nullptr)
+MapHeader::MapHeader(int mapId_)
+: MapHeader(nullptr, nullptr, mapId_)
 {
 }
 
@@ -109,7 +110,6 @@ void
 MapHeader::ApplyHeader(char* buffer)
 {
     MpageInfo* header = reinterpret_cast<MpageInfo*>(buffer);
-    assert(mPageMap->GetNumBits() == header->numTotalMpages);
     numUsedBlks = header->numUsedBlks;
     age = header->age;
     mPageMap->SetNumBitsSet(header->numValidMpages);

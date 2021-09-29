@@ -99,7 +99,7 @@ CheckpointHandler::Start(MapPageList pendingDirtyPages, EventSmartPtr callback)
                 mapIt->first, (mapIt->second).size());
 
             EventSmartPtr eventMapFlush(new CheckpointMetaFlushCompleted(this, mapIt->first));
-            ret = mapFlush->FlushDirtyMpages(mapIt->first, eventMapFlush, mapIt->second);
+            ret = mapFlush->FlushDirtyMpagesGiven(mapIt->first, eventMapFlush, mapIt->second);
             if (ret != 0)
             {
                 // TODO(Cheolho.kang): Add status that can additionally indicate checkpoint status

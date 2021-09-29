@@ -31,35 +31,34 @@
  */
 
 #include "test/integration-tests/mapper/utils/mapper_it_const.h"
-#include "test/integration-tests/mapper/vsamap_manager_it_test.h"
+#include "test/integration-tests/mapper/mapper_it_test.h"
 
 namespace pos
 {
-
+#define IBOF_CONFIG_USE_MOCK_FS
 void
-VSAMapManagerTest::SetUp(void)
+MapperTest::SetUp(void)
 {
     MapperTestFixture::SetUp();
 }
 
 void
-VSAMapManagerTest::TearDown(void)
+MapperTest::TearDown(void)
 {
     MapperTestFixture::TearDown();
 }
 
 void
-AccessRequest::CLIThreadFunc(IVSAMap* iVSAMap, BlkAddr rba)
+AccessRequest::CLIThreadFunc(VSAMapManager* iVSAMap, BlkAddr rba)
 {
     POS_TRACE_INFO(9999, "Call GetVSAInternal(), CLI");
-    int caller = CALLER_NOT_EVENT;
-    iVSAMap->GetVSAInternal(0, rba, caller);
+    VirtualBlkAddr vsa;
+    vsa = iVSAMap->GetVSAWoCond(0, 0);
     POS_TRACE_INFO(9999, "CLI Done");
 }
 
 //------------------------------------------------------------------------------
-
-TEST_F(VSAMapManagerTest, SetAndStore)
+TEST_F(MapperTestFixture, SetAndStore)
 {
     POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.SetAndStore ********************");
     int reti = 0;
@@ -77,12 +76,12 @@ TEST_F(VSAMapManagerTest, SetAndStore)
         _SetVSAs(0, rbas0[i], vsids0[i], offsets0[i]);
     }
 
-    reti = vsaMapManagerSUT->StoreMaps();
+    reti = mapperSUT->StoreAll();
     EXPECT_EQ(reti, RET_INT_SUCCESS);
     _UnmountVolume(0);
 }
 
-TEST_F(VSAMapManagerTest, LoadAndGet)
+TEST_F(MapperTestFixture, LoadAndGet)
 {
     POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.LoadAndGet ********************");
     _LoadVolume(0);
@@ -99,32 +98,28 @@ TEST_F(VSAMapManagerTest, LoadAndGet)
     _CreateRandVolume(1);
 }
 
-TEST_F(VSAMapManagerTest, EmptyVSAMapInternalLoading)
+TEST_F(MapperTestFixture, EmptyVSAMapInternalLoading)
 {
     POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.EmptyVSAMapInternalLoading ********************");
-    _UseMockVolumeManager();
+
     _LoadVolume(0);
     _LoadVolume(1);
     VirtualBlkAddr vsa;
-    int caller;
-    IVSAMap* iVSAMap = vsaMapManagerSUT->GetIVSAMap();
-
+    int retry = false;
     do
     {
         usleep(1);
         POS_TRACE_INFO(9999, "Call GetVSAInternal(), event");
-        caller = CALLER_EVENT;
-        vsa = iVSAMap->GetVSAInternal(0, 0, caller);
-    } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
+        vsa = mapperSUT->GetVSAInternal(0, 0, retry);
+    } while (UNMAP_VSA == vsa);
     EXPECT_EQ(vsa, UNMAP_VSA);
 
     do
     {
         usleep(1);
         POS_TRACE_INFO(9999, "Call GetVSAInternal(), not event");
-        caller = CALLER_NOT_EVENT;
-        vsa = iVSAMap->GetVSAInternal(1, 0, caller);
-    } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
+        vsa = mapperSUT->GetVSAInternal(1, 0, retry);
+    } while (UNMAP_VSA == vsa);
     EXPECT_EQ(vsa, UNMAP_VSA);
 
     // Pre-setting for next test
@@ -145,26 +140,21 @@ TEST_F(VSAMapManagerTest, EmptyVSAMapInternalLoading)
 
     _UnmountVolume(0);
     _UnmountVolume(1);
-    _DeleteMockVolumeManager();
 }
 
-TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_1)
+TEST_F(MapperTestFixture, RandomWrittenVSAMapInternalLoading_1)
 {
     POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.RandomWrittenVSAMapInternalLoading_1 ********************");
-    _UseMockVolumeManager();
     _LoadVolume(0);
     _LoadVolume(1);
     VirtualBlkAddr vsa;
-    int caller;
-    IVSAMap* iVSAMap = vsaMapManagerSUT->GetIVSAMap();
-
+    int retry = false;
     do
     {
         usleep(1);
         POS_TRACE_INFO(9999, "Call GetVSAInternal(), event");
-        caller = CALLER_EVENT;
-        vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
-    } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
+        vsa = mapperSUT->GetVSAInternal(0, rbas0[0], retry);
+    } while (UNMAP_VSA == vsa);
     VirtualBlkAddr vsaOrig = { .stripeId = vsids0[0], .offset = offsets0[0] };
     EXPECT_EQ(vsa, vsaOrig);
 
@@ -172,86 +162,70 @@ TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_1)
     {
         usleep(1);
         POS_TRACE_INFO(9999, "Call GetVSAInternal(), not event");
-        caller = CALLER_NOT_EVENT;
-        vsa = iVSAMap->GetVSAInternal(1, rbas1[0], caller);
-    } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
+        vsa = mapperSUT->GetVSAInternal(0, rbas1[1], retry);
+    } while (UNMAP_VSA == vsa);
     vsaOrig = { .stripeId = vsids1[0], .offset = offsets1[0] };
     EXPECT_EQ(vsa, vsaOrig);
 
     // Pre-setting for next test
     _UnmountVolume(0);
     _UnmountVolume(1);
-    _DeleteMockVolumeManager();
 }
 
-TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_2)
+TEST_F(MapperTestFixture, RandomWrittenVSAMapInternalLoading_2)
 {
     POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.RandomWrittenVSAMapInternalLoading_2 ********************");
-    _UseMockVolumeManager();
     _LoadVolume(0);
     VirtualBlkAddr vsa;
-    int caller;
-    IVSAMap* iVSAMap = vsaMapManagerSUT->GetIVSAMap();
-
     POS_TRACE_INFO(9999, "Call GetVSAInternal(), event_1");
-    caller = CALLER_EVENT;
-    vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
+    int retry = false;
+    vsa = mapperSUT->GetVSAInternal(0, rbas0[0], retry);
 
     do
     {
         POS_TRACE_INFO(9999, "Call GetVSAInternal(), event_2");
-        caller = CALLER_EVENT;
-        vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
-    } while (UNMAP_VSA == vsa && NEED_RETRY == caller);
+        vsa = mapperSUT->GetVSAInternal(0, rbas0[0], retry);
+    } while (UNMAP_VSA == vsa);
     VirtualBlkAddr vsaOrig = { .stripeId = vsids0[0], .offset = offsets0[0] };
     EXPECT_EQ(vsa, vsaOrig);
 
     // Pre-setting for next test
     _UnmountVolume(0);
-    _DeleteMockVolumeManager();
 }
 
-TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_3)
+TEST_F(MapperTestFixture, RandomWrittenVSAMapInternalLoading_3)
 {
     POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.RandomWrittenVSAMapInternalLoading_3 ********************");
-    _UseMockVolumeManager();
     _LoadVolume(0);
     VirtualBlkAddr vsa;
-    int caller;
-    IVSAMap* iVSAMap = vsaMapManagerSUT->GetIVSAMap();
 
     POS_TRACE_INFO(9999, "Call GetVSAInternal(), event");
-    caller = CALLER_EVENT;
-    vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
+    int retry = false;
+    vsa = mapperSUT->GetVSAInternal(0, rbas0[0], retry);
 
     POS_TRACE_INFO(9999, "Call GetVSAInternal(), NOT event");
-    caller = CALLER_NOT_EVENT;
-    vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
+    vsa = mapperSUT->GetVSAInternal(0, rbas0[0], retry);
 
     VirtualBlkAddr vsaOrig = { .stripeId = vsids0[0], .offset = offsets0[0] };
     EXPECT_EQ(vsa, vsaOrig);
 
     // Pre-setting for next test
     _UnmountVolume(0);
-    _DeleteMockVolumeManager();
 }
 
-TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_4)
+TEST_F(MapperTestFixture, RandomWrittenVSAMapInternalLoading_4)
 {
     POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.RandomWrittenVSAMapInternalLoading_4 ********************");
-    _UseMockVolumeManager();
     _LoadVolume(0);
     VirtualBlkAddr vsa;
-    int caller;
-    IVSAMap* iVSAMap = vsaMapManagerSUT->GetIVSAMap();
 
     AccessRequest req;
-    std::thread t{&AccessRequest::CLIThreadFunc, &req, iVSAMap, rbas0[0]};
+    std::thread t{&AccessRequest::CLIThreadFunc, &req, vsaMapManagerSUT, rbas0[0]};
 
     usleep(200);
     POS_TRACE_INFO(9999, "Call GetVSAInternal(), NOT event");
-    caller = CALLER_NOT_EVENT;
-    vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
+    int retry = false;
+    vsa = mapperSUT->GetVSAInternal(0, rbas0[0], retry);
     POS_TRACE_INFO(9999, "Let's check");
     VirtualBlkAddr vsaOrig = { .stripeId = vsids0[0], .offset = offsets0[0] };
     EXPECT_EQ(vsa, vsaOrig);
@@ -259,29 +233,23 @@ TEST_F(VSAMapManagerTest, RandomWrittenVSAMapInternalLoading_4)
     t.join();
     // Pre-setting for next test
     _UnmountVolume(0);
-    _DeleteMockVolumeManager();
 }
 
-TEST_F(VSAMapManagerTest, InternalLoadingAndFGMount)
+TEST_F(MapperTestFixture, InternalLoadingAndFGMount)
 {
     POS_TRACE_INFO(9999, "******************** VSAMapManagerTest.InternalLoadingAndFGMount ********************");
-    _UseMockVolumeManager();
     _LoadVolume(0);
     _LoadVolume(1);
 
     VirtualBlkAddr vsa;
-    int caller;
-    IVSAMap* iVSAMap = vsaMapManagerSUT->GetIVSAMap();
-
-    caller = CALLER_EVENT;
-    vsa = iVSAMap->GetVSAInternal(0, rbas0[0], caller);
+    int retry = false;
+    vsa = mapperSUT->GetVSAInternal(0, rbas0[0], retry);
     _MountVolume(0);
 
     // Pre-setting for next test
     _UnmountVolume(0);
     _DeleteVolume(0);
     _DeleteVolume(1);
-    _DeleteMockVolumeManager();
 }
 
 }   // namespace pos

@@ -40,8 +40,8 @@
 
 namespace pos
 {
-VSAMapContent::VSAMapContent(int mapId, int arrayId, IBlockAllocator* iBlockAllocator_)
-: MapContent(mapId, arrayId),
+VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo, IBlockAllocator* iBlockAllocator_)
+: MapContent(mapId, addrInfo),
   flushCmdManager(FlushCmdManagerSingleton::Instance()),
   flushThreshold(FlushCmdManagerSingleton::Instance()->GetInternalFlushThreshold()),
   internalFlushEnabled(FlushCmdManagerSingleton::Instance()->IsInternalFlushEnabled()),
@@ -52,8 +52,8 @@ VSAMapContent::VSAMapContent(int mapId, int arrayId, IBlockAllocator* iBlockAllo
     this->arrayId = arrayId;
 }
 
-VSAMapContent::VSAMapContent(int mapId, int arrayId)
-: VSAMapContent(mapId, arrayId, AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayId))
+VSAMapContent::VSAMapContent(int mapId, MapperAddressInfo* addrInfo)
+: VSAMapContent(mapId, addrInfo, AllocatorServiceSingleton::Instance()->GetIBlockAllocator(addrInfo->GetArrayId()))
 {
 }
 

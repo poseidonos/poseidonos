@@ -65,7 +65,7 @@ protected:
 class MetricUint32 : public Metric
 {
 public:
-    MetricUint32(void) {}
+    MetricUint32(void) { value = 0; }
     ~MetricUint32(void) {}
     uint32_t GetValue(void) { return value; }
     void SetMetric(std::string id_, time_t t_, uint32_t v_, std::string st_)
@@ -81,7 +81,7 @@ private:
 class MetricString : public Metric
 {
 public:
-    MetricString(void) {}
+    MetricString(void) { value = ""; }
     ~MetricString(void) {}
     std::string GetValue(void) { return value; }
     void SetMetric(std::string id_, time_t t_, std::string v_, std::string st_)

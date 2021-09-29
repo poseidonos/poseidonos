@@ -46,6 +46,7 @@ MapperAddressInfo::MapperAddressInfo(IArrayInfo* iArrayInfo_)
     blksPerStripe = 0;
     numWbStripes = 0;
     mpageSize = 0;
+    isUT = false;
 }
 
 void

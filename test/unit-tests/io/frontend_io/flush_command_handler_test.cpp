@@ -118,7 +118,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseVSAMAP_FlushDirtyMpagesReturnN
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
     ON_CALL(mockIWBStripeAllocator, FlushActiveStripes(_)).WillByDefault(Return());
     ON_CALL(mockIWBStripeAllocator, GetWbStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _, _)).WillByDefault(Return(-EID(MAP_FLUSH_IN_PROGRESS)));
+    ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _)).WillByDefault(Return(-EID(MAP_FLUSH_IN_PROGRESS)));
     ON_CALL(mockFlushCmdManager, ResetFlushInProgress(_, _)).WillByDefault(Return());
 
     flushIo->SetInternalFlush(true);
@@ -130,7 +130,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseVSAMAP_FlushDirtyMpagesReturnN
     // Then: return false
     ASSERT_EQ(expected, actual);
 
-    ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _, _)).WillByDefault(Return(-1));
+    ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _)).WillByDefault(Return(-1));
 
     // When: Execute
     expected = true;
@@ -158,7 +158,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseVSAMAP_FlushDirtyMpagesReturnZ
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
     ON_CALL(mockIWBStripeAllocator, FlushActiveStripes(_)).WillByDefault(Return());
     ON_CALL(mockIWBStripeAllocator, GetWbStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _, _)).WillByDefault(Return(0));
+    ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _)).WillByDefault(Return(0));
     ON_CALL(mockIBlockAllocator, UnblockAllocating(_)).WillByDefault(Return());
     ON_CALL(mockFlushCmdManager, CanFlushMeta(_)).WillByDefault(Return(false));
 
@@ -198,7 +198,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseMetaFlushInProgress_IsStripeMa
     ON_CALL(mockIBlockAllocator, BlockAllocating(_)).WillByDefault(Return(true));
     ON_CALL(mockIWBStripeAllocator, FlushActiveStripes(_)).WillByDefault(Return());
     ON_CALL(mockIWBStripeAllocator, GetWbStripes(_)).WillByDefault(Return());
-    ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _, _)).WillByDefault(Return(0));
+    ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _)).WillByDefault(Return(0));
     ON_CALL(mockIBlockAllocator, UnblockAllocating(_)).WillByDefault(Return());
     ON_CALL(mockFlushCmdManager, CanFlushMeta(_)).WillByDefault(Return(true));
     ON_CALL(mockIContextManager, FlushContexts(_, false)).WillByDefault(Return(0));

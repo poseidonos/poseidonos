@@ -106,7 +106,7 @@ JournalManagerTestFixture::SetTriggerCheckpoint(bool isCheckpointEnabled)
 void
 JournalManagerTestFixture::ExpectCheckpointTriggered(void)
 {
-    EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
+    EXPECT_CALL(*testMapper, FlushDirtyMpagesGiven).Times(AtLeast(1));
     EXPECT_CALL(*(testAllocator->GetIContextManagerMock()),
         FlushContexts)
         .Times(AtLeast(1));
