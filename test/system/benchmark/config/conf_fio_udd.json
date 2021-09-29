@@ -9,8 +9,8 @@
             "NIC":
             {
                 "SSH": "10.1.2.14",
-                "IP1": "10.100.2.30",
-                "IP2": "10.100.3.31"
+                "IP1": "10.100.2.15",
+                "IP2": "10.100.2.14"
             },
             "SPDK":
             {
@@ -112,11 +112,11 @@
             "PW": "psd",
             "NIC":
             {
-                "SSH": "10.1.2.30"
+                "SSH": "10.1.2.39"
             },
             "SPDK":
             {
-                "DIR": "/home/psd/ibofos/lib/spdk",
+                "DIR": "/home/bamboo/ibofos/lib/spdk",
                 "TRANSPORT": "tcp"
             }
         },
@@ -126,11 +126,11 @@
             "PW": "psd",
             "NIC":
             {
-                "SSH": "10.1.2.31"
+                "SSH": "10.1.2.40"
             },
             "SPDK":
             {
-                "DIR": "/home/psd/ibofos/lib/spdk",
+                "DIR": "/home/bamboo/ibofos/lib/spdk",
                 "TRANSPORT": "tcp"
             }
         }

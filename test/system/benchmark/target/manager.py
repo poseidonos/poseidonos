@@ -126,3 +126,76 @@ class Target:
     def ForcedExit(self):
         pos.env.kill_pos(self.id, self.pw, self.nic_ssh, self.pos_bin)
         time.sleep(1)
+
+    def DirtyBringup(self):
+        if -1 == pos.env.copy_pos_config(self.id, self.pw, self.nic_ssh, self.pos_dir, self.pos_cfg):
+            return False
+
+        if -1 == pos.env.execute_pos(self.id, self.pw, self.nic_ssh, self.pos_bin, self.pos_dir, self.pos_log):
+            return False
+        time.sleep(1)
+
+        # spdk setting
+        if -1 == pos.cli.transport_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, self.spdk_tp, self.spdk_no_shd_buf):
+            return False
+
+        if "yes" == self.use_autogen:
+            nqn_base = 0
+            for subsys in self.json["AUTO_GENERATE"]["SUBSYSTEMs"]:
+                for i in range(subsys["NUM"]):
+                    nqn = f"nqn.2020-10.pos\\:subsystem{i+nqn_base+1:02d}"
+                    sn = f"POS000000000000{i+nqn_base+1:02d}"
+                    if -1 == pos.cli.subsystem_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, nqn, sn):
+                        return False
+                    if -1 == pos.cli.subsystem_add_listener(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, nqn,
+                                                            self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"]):
+                        return False
+                    subsystem_tmp = [subsys["INITIATOR"], nqn, sn, self.json["NIC"][subsys["IP"]], subsys["PORT"]]
+                    self.subsystem_list.append(subsystem_tmp)
+                nqn_base += subsys["NUM"]
+        else:
+            for subsys in self.json["SPDK"]["SUBSYSTEMs"]:
+                if -1 == pos.cli.subsystem_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, subsys["NQN"], subsys["SN"]):
+                    return False
+                if -1 == pos.cli.subsystem_add_listener(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, subsys["NQN"],
+                                                        self.spdk_tp, self.json["NIC"][subsys["IP"]], subsys["PORT"]):
+                    return False
+
+        # pos setting
+        for array in self.json["POS"]["ARRAYs"]:
+            buf_dev = array["BUFFER_DEVICE"]
+            if -1 == pos.cli.bdev_malloc_create(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, buf_dev["NAME"],
+                                                buf_dev["TYPE"], buf_dev["NUM_BLOCKS"], buf_dev["BLOCK_SIZE"], buf_dev["NUMA"]):
+                return False
+        if -1 == pos.cli.device_scan(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir):
+            return False
+
+        # pos setting
+        for array in self.json["POS"]["ARRAYs"]:
+            if -1 == pos.cli.array_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, array["NAME"]):
+                return False
+            if "yes" != self.use_autogen:
+                for volume in array["VOLUMEs"]:
+                    if -1 == pos.cli.volume_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume["NAME"],
+                                                  volume["SUBNQN"], array["NAME"]):
+                        return False
+
+        # create, mount volume(auto)
+        if "yes" == self.use_autogen:
+            nqn_base = 0
+            for subsys in self.json["AUTO_GENERATE"]["SUBSYSTEMs"]:
+                for vol in subsys["VOLUMEs"]:
+                    for i in range(vol["NUM"]):
+                        nqn = f"nqn.2020-10.pos:subsystem{i+nqn_base+1:02d}"
+                        volume_name = f"VOL{i+nqn_base+1}"
+                        if -1 == pos.cli.volume_mount(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir, volume_name,
+                                                      nqn, vol["ARRAY"]):
+                            return False
+                    nqn_base += vol["NUM"]
+
+        # print subsystems
+        subsys = pos.cli.subsystem_list(self.id, self.pw, self.nic_ssh, self.pos_cli, self.pos_dir)
+        print(subsys)
+
+        lib.printer.green(f" '{self.name}' prepared")
+        return True

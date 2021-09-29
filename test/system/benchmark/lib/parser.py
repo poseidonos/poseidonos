@@ -12,7 +12,7 @@ class ArgParser:
         curr_dir = os.path.dirname(os.path.abspath(__file__))
         root_dir = curr_dir[0:len(curr_dir) - 25]
         if args.config is None:
-            ArgParser.config = root_dir + "test/system/benchmark/conf.json"
+            ArgParser.config = root_dir + "test/system/benchmark/config/conf.json"
         else:
             ArgParser.config = root_dir + "test/system/benchmark/" + args.config
 

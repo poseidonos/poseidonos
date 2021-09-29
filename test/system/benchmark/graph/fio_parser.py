@@ -29,6 +29,8 @@ def GetEtaData(data, file, title):
             strings = line.split("[")
             if (6 <= len(strings)):
                 percentage = strings[2].split("%")[0]
+                if "-" in percentage:
+                    continue
                 bandwidth = strings[3].split(",")
                 bw_read = bandwidth[0].split("=")[1].split("iB/s")[0]
                 bw_write = bandwidth[1].split("=")[1].split("iB/s")[0]

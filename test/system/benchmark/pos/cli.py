@@ -84,7 +84,7 @@ def volume_create(id, pw, ip, cli, dir, vol_name, vol_size, arr_name):
 
 def volume_mount(id, pw, ip, cli, dir, vol_name, subnqn, arr_name):
     try:
-        cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} volume mount --volume-name {vol_name} --array-name {arr_name} --subnqn {subnqn}"
+        cli_cmd = f"sshpass -p {pw} ssh -o StrictHostKeyChecking=no {id}@{ip} sudo nohup {dir}/bin/{cli} volume mount --volume-name {vol_name} --array-name {arr_name} --subnqn {subnqn} --force"
         lib.subproc.sync_run(cli_cmd)
         return 0
     except Exception as e:
