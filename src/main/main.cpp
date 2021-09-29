@@ -82,10 +82,10 @@ extern "C"
       because, system already has used up this value for parsing fio's argument */
         optind = 0;
         char* argvPtr = argv;
-        signal(SIGINT, INThandler);
 
         pos::Poseidonos _pos;
         _pos.Init(argc, &argvPtr);
+        signal(SIGINT, INThandler);
         _pos.Run();
         _pos.Terminate();
 
@@ -102,10 +102,10 @@ main(int argc, char* argv[])
     {
         return ret;
     }
-    signal(SIGINT, INThandler);
 
     pos::Poseidonos _pos;
     _pos.Init(argc, argv);
+    signal(SIGINT, INThandler);
     _pos.Run();
     _pos.Terminate();
 
@@ -118,7 +118,7 @@ INThandler(int sig)
 {
     signal(sig, SIG_IGN);
     std::cout << "You cannot close FA server abruptly. Close it via client. "
-                 "Ex: ./cli_client exit\n";
+                 "Ex: ./poseidonos-cli system stop\n";
 }
 
 void
