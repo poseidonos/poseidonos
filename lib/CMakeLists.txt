@@ -167,7 +167,7 @@ ExternalProject_Add(spdk
     LOG_OUTPUT_ON_FAILURE ON
     LOG_MERGED_STDOUTERR ON
     PATCH_COMMAND patch -t -p0 -i ${PROJ_ROOT}/lib/spdk-21.04.patch
-    CONFIGURE_COMMAND ./configure --with-dpdk=${PROJ_ROOT}/lib/${POS_DEP_DPDK} --with-rdma --with-fio=${PROJ_ROOT}/lib/${POS_DEP_FIO} --with-pos --without-isal --without-vhost --with-pmdk ${ENABLE_DEBUG}
+    CONFIGURE_COMMAND ./configure --with-dpdk=${PROJ_ROOT}/lib/${POS_DEP_DPDK} --with-rdma --with-fio=${PROJ_ROOT}/lib/${POS_DEP_FIO} --with-pos --without-isal --without-vhost ${ENABLE_DEBUG}
     BUILD_COMMAND ./scripts/pkgdep.sh
     COMMAND make -j ${NUM_BUILD_CORE}
     INSTALL_COMMAND cp ${PROJ_ROOT}/lib/${POS_DEP_SPDK}/build/fio/spdk_nvme ${PROJ_ROOT}/lib/${POS_DEP_SPDK}/examples/nvme/fio_plugin/fio_plugin)
@@ -346,7 +346,7 @@ if (${USE_LOCAL_REPO} STREQUAL "y")
     add_custom_target(
         grpc ALL
         WORKING_DIRECTORY ${PROJ_ROOT}/lib
-        COMMAND ./build_grpc.sh -i -f
+        COMMAND ./build_grpc.sh -i
     )
 else()
     add_custom_target(

@@ -30,11 +30,34 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "bdev_api.h"
-extern "C"
-{
-#include "bdev/malloc/bdev_malloc.h"
-}
+#pragma once
+
+#include <cstdint>
+#include <spdk/bdev.h>
+
 namespace pos
 {
+
+class SpdkBdevCaller
+{
+public:
+    SpdkBdevCaller() {}
+    virtual ~SpdkBdevCaller() {}
+    virtual struct spdk_bdev* SpdkBdevFirst(void);
+    virtual struct spdk_bdev* SpdkBdevNext(struct spdk_bdev* bdev);
+    virtual struct spdk_bdev* SpdkBdevGetByName(const char* name);
+    virtual int SpdkBdevOpenExt(const char* bdev_name,
+        bool write,
+        spdk_bdev_event_cb_t event_cb,
+        void* event_ctx,
+        struct spdk_bdev_desc** desc);
+    virtual struct spdk_io_channel* SpdkBdevGetIoChannel(
+        struct spdk_bdev_desc* desc);
+    virtual void SpdkBdevClose(struct spdk_bdev_desc* desc);
+    virtual uint32_t SpdkBdevGetBlockSize(const struct spdk_bdev* bdev);
+    virtual uint64_t SpdkBdevGetNumBlocks(const struct spdk_bdev* bdev);
+
+    virtual uint32_t SpdkPosMallocBdevGetNuma(struct spdk_bdev* bdev);
+};
+
 } // namespace pos

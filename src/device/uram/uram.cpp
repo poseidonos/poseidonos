@@ -63,33 +63,34 @@
 
 namespace pos
 {
-uint32_t UramBdev::reactorCount;
-uint32_t UramBdev::ioatReactorCountNuma0;
-uint32_t UramBdev::ioatReactorCountNuma1;
+uint32_t Uram::reactorCount;
+uint32_t Uram::ioatReactorCountNuma0;
+uint32_t Uram::ioatReactorCountNuma1;
 
-UramBdev::UramBdev(std::string name,
+Uram::Uram(std::string name,
     uint64_t size,
     UramDrv* driverToUse,
-    bool isPersistent)
+    uint32_t numa)
 : UBlockDevice(name, size, driverToUse),
-  isPersistent(isPersistent),
   baseByteAddress(nullptr)
 {
     property.type = DeviceType::NVRAM;
     property.mn = name;
     property.sn = name;
+    property.numa = numa;
+
     // Uram dev only offload the ios to node 0
     reactorCount = AccelEngineApi::GetReactorCount();
     ioatReactorCountNuma0 = AccelEngineApi::GetIoatReactorCountPerNode(0);
     ioatReactorCountNuma1 = AccelEngineApi::GetIoatReactorCountPerNode(1);
 }
 
-UramBdev::~UramBdev(void)
+Uram::~Uram(void)
 {
 }
 
 bool
-UramBdev::_RecoverBackup(DeviceContext* deviceContext)
+Uram::_RecoverBackup(DeviceContext* deviceContext)
 {
     bool restoreSuccessful = true;
 
@@ -186,13 +187,13 @@ UramBdev::_RecoverBackup(DeviceContext* deviceContext)
 }
 
 void*
-UramBdev::GetByteAddress(void)
+Uram::GetByteAddress(void)
 {
     return baseByteAddress;
 }
 
 void
-UramBdev::_InitByteAddress(void)
+Uram::_InitByteAddress(void)
 {
     std::string backupDir = "/tmp/";
     std::string backupFilePostfix = ".uram.info";
@@ -214,7 +215,7 @@ UramBdev::_InitByteAddress(void)
     baseByteAddress = reinterpret_cast<void *>(byteAddressInt);
 }
 bool
-UramBdev::_WrapupOpenDeviceSpecific(DeviceContext* deviceContext)
+Uram::_WrapupOpenDeviceSpecific(DeviceContext* deviceContext)
 {
     // Reactor cannot handle Async operation for Uram in current implementation.
     // ioat poll cannot be called in Empty(), so, we restore the contents by IO worker.
@@ -223,28 +224,20 @@ UramBdev::_WrapupOpenDeviceSpecific(DeviceContext* deviceContext)
         return true;
     }
 
-    bool restoreSuccessful = false;
-    if (isPersistent == true)
-    {
-        restoreSuccessful = true;
-    }
-    else
-    {
-        restoreSuccessful = _RecoverBackup(deviceContext);
-    }
+    bool restoreSuccessful = _RecoverBackup(deviceContext);
     _InitByteAddress();
     return restoreSuccessful;
 }
 
 DeviceContext*
-UramBdev::_AllocateDeviceContext(void)
+Uram::_AllocateDeviceContext(void)
 {
     DeviceContext* deviceContext = new UramDeviceContext(GetName());
     return deviceContext;
 }
 
 void
-UramBdev::_ReleaseDeviceContext(DeviceContext* deviceContextToRelease)
+Uram::_ReleaseDeviceContext(DeviceContext* deviceContextToRelease)
 {
     if (nullptr != deviceContextToRelease)
     {
@@ -255,7 +248,7 @@ UramBdev::_ReleaseDeviceContext(DeviceContext* deviceContextToRelease)
 }
 
 int
-UramBdev::SubmitAsyncIO(UbioSmartPtr ubio)
+Uram::SubmitAsyncIO(UbioSmartPtr ubio)
 {
     UramDeviceContext* devCtx =
         static_cast<UramDeviceContext*>(_GetDeviceContext());
@@ -287,7 +280,7 @@ UramBdev::SubmitAsyncIO(UbioSmartPtr ubio)
 }
 
 void
-UramBdev::_RequestAsyncIo(void* arg1)
+Uram::_RequestAsyncIo(void* arg1)
 {
     UbioSmartPtr ubio = *static_cast<UbioSmartPtr*>(arg1);
     UBlockDevice* dev = ubio->GetUBlock();

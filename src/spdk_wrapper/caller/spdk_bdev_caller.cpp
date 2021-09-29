@@ -30,14 +30,72 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "spdk_bdev_caller.h"
 
-namespace pos
+
+extern "C" {
+#include "spdk/module/bdev/malloc/pos_bdev_malloc.h"
+}
+
+
+using namespace pos;
+
+struct spdk_bdev*
+SpdkBdevCaller::SpdkBdevFirst(void)
 {
-class BdevApi
+    return spdk_bdev_first();
+}
+
+struct spdk_bdev*
+SpdkBdevCaller::SpdkBdevNext(struct spdk_bdev* bdev)
 {
-public:
-    static void* GetBufferPointer(void);
-};
-} // namespace pos
+    return spdk_bdev_next(bdev);
+}
+
+struct spdk_bdev*
+SpdkBdevCaller::SpdkBdevGetByName(const char* name)
+{
+    return spdk_bdev_get_by_name(name);
+}
+
+uint32_t
+SpdkBdevCaller::SpdkPosMallocBdevGetNuma(struct spdk_bdev* bdev)
+{
+    return spdk_pos_malloc_bdev_get_numa(bdev);
+}
+
+struct spdk_io_channel*
+SpdkBdevCaller::SpdkBdevGetIoChannel(struct spdk_bdev_desc* desc)
+{
+    return spdk_bdev_get_io_channel(desc);
+}
+
+void
+SpdkBdevCaller::SpdkBdevClose(struct spdk_bdev_desc *desc)
+{
+    spdk_bdev_close(desc);
+}
+
+uint32_t
+SpdkBdevCaller::SpdkBdevGetBlockSize(const struct spdk_bdev* bdev)
+{
+    return spdk_bdev_get_block_size(bdev);
+}
+
+uint64_t
+SpdkBdevCaller::SpdkBdevGetNumBlocks(const struct spdk_bdev* bdev)
+{
+    return spdk_bdev_get_num_blocks(bdev);
+}
+
+int
+SpdkBdevCaller::SpdkBdevOpenExt(const char* bdev_name,
+    bool write,
+    spdk_bdev_event_cb_t event_cb,
+    void* event_ctx,
+    struct spdk_bdev_desc** desc)
+{
+    return spdk_bdev_open_ext(bdev_name, write, event_cb, event_ctx, desc);
+}
+
 

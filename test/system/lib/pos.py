@@ -16,9 +16,12 @@ def set_addr(addr):
     global TR_ADDR
     TR_ADDR = addr
 
-def start_pos():
+
+def start_pos_without_bringup():
     global isExecuted
+    print("start pos")
     if isExecuted == True:
+        print("pos is already runnning")
         return
 
     global pos_proc
@@ -28,8 +31,13 @@ def start_pos():
                 stdout=output_file, stderr=output_file)
         isExecuted = True
     subprocess.call(["sleep", "3"])
+
+
+def start_pos():
+    start_pos_without_bringup()
     pos_bringup = POS_ROOT + "/test/system/lib/bring_up.sh"
     subprocess.call([pos_bringup, "-t", TR_TYPE, "-a", TR_ADDR])
+
 
 def exit_pos():
     out = cli.exit_pos()

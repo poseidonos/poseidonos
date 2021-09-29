@@ -42,12 +42,15 @@ namespace pos
 class DeviceContext;
 class UramDrv;
 
-class UramBdev : public UBlockDevice,
-                   public std::enable_shared_from_this<UramBdev>
+class Uram : public UBlockDevice,
+                   public std::enable_shared_from_this<Uram>
 {
 public:
-    explicit UramBdev(std::string name, uint64_t size, UramDrv* driverToUse, bool isPersistent);
-    ~UramBdev(void) override;
+    explicit Uram(std::string name,
+        uint64_t size,
+        UramDrv* driverToUse,
+        uint32_t numa);
+    ~Uram(void) override;
     int SubmitAsyncIO(UbioSmartPtr ubio) override;
     void* GetByteAddress(void) override;
 
@@ -64,7 +67,6 @@ private:
     void _InitByteAddress(void);
     static void _RequestAsyncIo(void* arg1);
     bool _RecoverBackup(DeviceContext* deviceContext);
-    bool isPersistent;
     void *baseByteAddress;
 };
 

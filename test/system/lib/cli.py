@@ -157,9 +157,11 @@ def stop_rebuilding(array):
     return send_request("internal stop_rebuilding " + param_str)
 
 
-def create_uram(devname, block_size, num_blocks):
+def create_uram(devname, block_size, num_blocks, numa=0):
     param_str = "--device-type uram"
     param_str += " --device-name " + devname
     param_str += " --block-size " + block_size
     param_str += " --num-blocks " + num_blocks
+    param_str += " --numa " + str(numa)
+
     return send_request("device create " + param_str)

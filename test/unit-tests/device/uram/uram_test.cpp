@@ -4,31 +4,31 @@
 
 namespace pos
 {
-TEST(UramBdev, UramBdev_)
+TEST(Uram, UramBdev_)
 {
 }
 
-TEST(UramBdev, SubmitAsyncIO_)
+TEST(Uram, SubmitAsyncIO_)
 {
 }
 
-TEST(UramBdev, _AllocateDeviceContext_)
+TEST(Uram, _AllocateDeviceContext_)
 {
 }
 
-TEST(UramBdev, _ReleaseDeviceContext_)
+TEST(Uram, _ReleaseDeviceContext_)
 {
 }
 
-TEST(UramBdev, _WrapupOpenDeviceSpecific_)
+TEST(Uram, _WrapupOpenDeviceSpecific_)
 {
 }
 
-TEST(UramBdev, _RequestAsyncIo_)
+TEST(Uram, _RequestAsyncIo_)
 {
 }
 
-TEST(UramBdev, _RecoverBackup_)
+TEST(Uram, _RecoverBackup_)
 {
 }
 

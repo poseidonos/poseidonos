@@ -8,10 +8,10 @@
 
 namespace pos
 {
-class MockUramBdev : public UramBdev
+class MockUram : public Uram
 {
 public:
-    using UramBdev::UramBdev;
+    using Uram::Uram;
     MOCK_METHOD(int, SubmitAsyncIO, (UbioSmartPtr ubio), (override));
     MOCK_METHOD(DeviceContext*, _AllocateDeviceContext, (), (override));
     MOCK_METHOD(void, _ReleaseDeviceContext, (DeviceContext * deviceContextToRelease), (override));

@@ -100,22 +100,26 @@ RetryIO(void* arg)
     }
 }
 
-UramDrv::UramDrv(void)
+UramDrv::UramDrv(SpdkBdevCaller* bdevCaller)
+: bdevCaller(bdevCaller)
 {
     name = "UramDrv";
 }
 
 UramDrv::~UramDrv(void)
 {
+    if (bdevCaller != nullptr)
+    {
+        delete bdevCaller;
+    }
 }
 
 int
 UramDrv::ScanDevs(std::vector<UblockSharedPtr>* devs)
 {
     uint32_t addedDeviceCount = 0;
-    struct spdk_bdev* bdev = spdk_bdev_first();
+    struct spdk_bdev* bdev = bdevCaller->SpdkBdevFirst();
     string ssd_prefix = "unvme-ns-";
-    bool isPersistent = false;
 
     while (nullptr != bdev)
     {
@@ -123,22 +127,15 @@ UramDrv::ScanDevs(std::vector<UblockSharedPtr>* devs)
         if (bdev_name.compare(0, ssd_prefix.length(), ssd_prefix) == 0)
         {
             POS_TRACE_WARN((uint32_t)POS_EVENT_ID::ARRAY_DEVICE_WRONG_NAME, "URAM's name does not conform to the naming rule\n");
-            bdev = spdk_bdev_next(bdev);
+            bdev = bdevCaller->SpdkBdevNext(bdev);
             continue;
         }
 
         string bdev_product_name(bdev->product_name);
         if (bdev_product_name.compare("Malloc disk") != 0)
         {
-            if (bdev_product_name.compare("pmemblk disk") == 0)
-            {
-                isPersistent = true;
-            }
-            else
-            {
-                bdev = spdk_bdev_next(bdev);
-                continue;
-            }
+            bdev = bdevCaller->SpdkBdevNext(bdev);
+            continue;
         }
 
         bool isExist = false; // check if in devs
@@ -153,17 +150,19 @@ UramDrv::ScanDevs(std::vector<UblockSharedPtr>* devs)
 
         if (false == isExist)
         {
-            uint64_t blockSize = spdk_bdev_get_block_size(bdev);
-            uint64_t blockCount = spdk_bdev_get_num_blocks(bdev);
+            uint32_t blockSize = bdevCaller->SpdkBdevGetBlockSize(bdev);
+            uint32_t blockCount = bdevCaller->SpdkBdevGetNumBlocks(bdev);
             uint64_t bdevSize = blockSize * blockCount;
+            uint32_t numa = bdevCaller->SpdkPosMallocBdevGetNuma(bdev);
 
-            UblockSharedPtr dev = make_shared<UramBdev>(bdev->name, bdevSize, this, isPersistent);
+            UblockSharedPtr dev =
+                make_shared<Uram>(bdev->name, bdevSize, this, numa);
             std::cout << "name: " << dev->GetName() << std::endl;
             devs->push_back(dev);
             addedDeviceCount++;
         }
 
-        bdev = spdk_bdev_next(bdev);
+        bdev = bdevCaller->SpdkBdevNext(bdev);
     }
 
     return addedDeviceCount;
@@ -178,14 +177,15 @@ UramDrv::_OpenBdev(UramDeviceContext* devCtx)
     }
     spdk_bdev_desc* bdev_desc = nullptr;
 
-    devCtx->bdev = spdk_bdev_get_by_name(devCtx->name);
+    devCtx->bdev = bdevCaller->SpdkBdevGetByName(devCtx->name);
     if (NULL == devCtx->bdev)
     {
         SPDK_ERRLOG("Could not find the bdev: %s\n", devCtx->name);
         return false;
     }
     SPDK_NOTICELOG("Opening the bdev %s\n", devCtx->name);
-    int rc = spdk_bdev_open_ext(devCtx->name, true, BdevOpenComplete, NULL, &bdev_desc);
+    int rc = bdevCaller->SpdkBdevOpenExt(
+        devCtx->name, true, BdevOpenComplete, NULL, &bdev_desc);
     if (rc)
     {
         SPDK_ERRLOG("Could not open bdev: %s\n", devCtx->name);
@@ -193,11 +193,11 @@ UramDrv::_OpenBdev(UramDeviceContext* devCtx)
     }
 
     devCtx->bdev_desc = bdev_desc;
-    devCtx->bdev_io_channel = spdk_bdev_get_io_channel(devCtx->bdev_desc);
+    devCtx->bdev_io_channel = bdevCaller->SpdkBdevGetIoChannel(devCtx->bdev_desc);
     if (devCtx->bdev_io_channel == NULL)
     {
         SPDK_NOTICELOG("Bdev opened, but not enough io channel\n");
-        spdk_bdev_close(devCtx->bdev_desc);
+        bdevCaller->SpdkBdevClose(devCtx->bdev_desc);
         devCtx->bdev_desc = nullptr;
     }
     devCtx->opened = true;
@@ -218,7 +218,7 @@ UramDrv::_CloseBdev(UramDeviceContext* devCtx)
 
         if (nullptr != devCtx->bdev_desc)
         {
-            spdk_bdev_close(devCtx->bdev_desc);
+            bdevCaller->SpdkBdevClose(devCtx->bdev_desc);
             devCtx->bdev_desc = nullptr;
         }
 

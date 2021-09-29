@@ -1573,7 +1573,7 @@ index 4db73241a..982ccd965 100644
  
  SPDK_MAP_FILE = $(SPDK_ROOT_DIR)/mk/spdk_blank.map
 diff --git module/bdev/malloc/bdev_malloc.c module/bdev/malloc/bdev_malloc.c
-index 3f5f65e59..f7934ca28 100644
+index 3f5f65e59..b8683373b 100644
 --- module/bdev/malloc/bdev_malloc.c
 +++ module/bdev/malloc/bdev_malloc.c
 @@ -34,6 +34,7 @@
@@ -1615,7 +1615,7 @@ index 3f5f65e59..f7934ca28 100644
  {
  	struct malloc_disk	*mdisk;
  	int rc;
-@@ -405,13 +400,19 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
+@@ -405,7 +400,8 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
  	 *  from on multi-socket systems.
  	 */
  	mdisk->malloc_buf = spdk_zmalloc(num_blocks * block_size, 2 * 1024 * 1024, NULL,
@@ -1625,22 +1625,32 @@ index 3f5f65e59..f7934ca28 100644
  	if (!mdisk->malloc_buf) {
  		SPDK_ERRLOG("malloc_buf spdk_zmalloc() failed\n");
  		malloc_disk_free(mdisk);
+@@ -424,7 +420,7 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
  		return -ENOMEM;
  	}
+ 	mdisk->disk.product_name = "Malloc disk";
+-
++	mdisk->numa = numa;
+ 	mdisk->disk.write_cache = 1;
+ 	mdisk->disk.blocklen = block_size;
+ 	mdisk->disk.blockcnt = num_blocks;
+@@ -444,6 +440,11 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
+ 		return rc;
+ 	}
  
-+	rc = backup_disk_info_for_restore(mdisk, name, num_blocks, block_size);
++	rc = backup_disk_info_for_restore(mdisk);
 +	if (rc != 0) {
 +		return rc;
 +	}
 +
- 	if (name) {
- 		mdisk->disk.name = strdup(name);
- 	} else {
+ 	*bdev = &(mdisk->disk);
+ 
+ 	TAILQ_INSERT_TAIL(&g_malloc_disks, mdisk, link);
 diff --git module/bdev/malloc/bdev_malloc.h module/bdev/malloc/bdev_malloc.h
-index b683b1062..8a57e248f 100644
+index b683b1062..d263e5efd 100644
 --- module/bdev/malloc/bdev_malloc.h
 +++ module/bdev/malloc/bdev_malloc.h
-@@ -35,13 +35,20 @@
+@@ -35,13 +35,21 @@
  #define SPDK_BDEV_MALLOC_H
  
  #include "spdk/stdinc.h"
@@ -1651,6 +1661,7 @@ index b683b1062..8a57e248f 100644
 +	struct spdk_bdev		disk;
 +	void				*malloc_buf;
 +	TAILQ_ENTRY(malloc_disk)	link;
++	uint32_t numa;
 +};
  
  typedef void (*spdk_delete_malloc_complete)(void *cb_arg, int bdeverrno);
@@ -1694,10 +1705,10 @@ index 940f9ca11..528e66adb 100644
  		goto cleanup;
 diff --git module/bdev/malloc/pos_bdev_malloc.c module/bdev/malloc/pos_bdev_malloc.c
 new file mode 100644
-index 000000000..67308f904
+index 000000000..0dc48859c
 --- /dev/null
 +++ module/bdev/malloc/pos_bdev_malloc.c
-@@ -0,0 +1,111 @@
+@@ -0,0 +1,123 @@
 +/*
 + *   BSD LICENSE
 + *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -1746,10 +1757,22 @@ index 000000000..67308f904
 +#include "spdk/bdev_module.h"
 +#include "spdk/log.h"
 +
-+int
-+backup_disk_info_for_restore(struct malloc_disk *mdisk, const char *name,
-+			     uint64_t num_blocks, uint64_t block_size)
++__attribute__((used))
++uint32_t
++spdk_pos_malloc_bdev_get_numa(struct spdk_bdev* bdev)
 +{
++	struct malloc_disk* mdisk = (struct malloc_disk*)bdev;
++	return mdisk->numa;
++}
++
++int
++backup_disk_info_for_restore(struct malloc_disk *mdisk)
++{
++	struct spdk_bdev* bdev = &mdisk->disk;
++	const char *name = spdk_bdev_get_name(bdev);
++	uint64_t num_blocks = spdk_bdev_get_num_blocks(bdev);
++	uint64_t block_size = spdk_bdev_get_block_size(bdev);
++
 +	int rc = 0;
 +	char *file_name;
 +	const char *backup_dir = "/tmp/";
@@ -1811,10 +1834,10 @@ index 000000000..67308f904
 +}
 diff --git module/bdev/malloc/pos_bdev_malloc.h module/bdev/malloc/pos_bdev_malloc.h
 new file mode 100644
-index 000000000..bf07b9897
+index 000000000..cca38696d
 --- /dev/null
 +++ module/bdev/malloc/pos_bdev_malloc.h
-@@ -0,0 +1,42 @@
+@@ -0,0 +1,43 @@
 +/*
 + *   BSD LICENSE
 + *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -1853,8 +1876,9 @@ index 000000000..bf07b9897
 +#include "spdk/bdev.h"
 +#include "spdk/stdinc.h"
 +
-+int backup_disk_info_for_restore(struct malloc_disk *mdisk, const char *name,
-+			     uint64_t num_blocks, uint64_t block_size);
++int backup_disk_info_for_restore(struct malloc_disk *mdisk);
++
++uint32_t spdk_pos_malloc_bdev_get_numa(struct spdk_bdev* bdev);
 +
 +#endif /* POS_BDEV_MALLOC_H */
 diff --git module/bdev/pos/Makefile module/bdev/pos/Makefile

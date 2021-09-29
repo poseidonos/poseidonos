@@ -42,7 +42,7 @@ class Event;
 class Callback;
 class UBlockDevice;
 class UnvmeSsd;
-class UramBdev;
+class Uram;
 
 using UbioSmartPtr = std::shared_ptr<Ubio>;
 using VolumeIoSmartPtr = std::shared_ptr<VolumeIo>;
@@ -50,6 +50,6 @@ using EventSmartPtr = std::shared_ptr<Event>;
 using CallbackSmartPtr = std::shared_ptr<Callback>;
 using UblockSharedPtr = std::shared_ptr<UBlockDevice>;
 using UnvmeSsdSharedPtr = std::shared_ptr<UnvmeSsd>;
-using UramSharedPtr = std::shared_ptr<UramBdev>;
+using UramSharedPtr = std::shared_ptr<Uram>;
 
 } // namespace pos

@@ -77,18 +77,6 @@ UpdateRetryAndRecovery(const struct spdk_nvme_cpl* completion, UnvmeIOContext* i
 }
 
 static void
-_CollectAirReadLog(uint64_t size, uint64_t ssdId)
-{
-    airlog("PERF_SSD", "AIR_READ", ssdId, size);
-}
-
-static void
-_CollectAirWriteLog(uint64_t size, uint64_t ssdId)
-{
-    airlog("PERF_SSD", "AIR_WRITE", ssdId, size);
-}
-
-static void
 AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
 {
     UnvmeIOContext* ioCtx = static_cast<UnvmeIOContext*>(ctx);
@@ -139,11 +127,11 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
                 reinterpret_cast<uint64_t>(ioCtx->GetDeviceContext());
             if (UbioDir::Read == dir)
             {
-                _CollectAirReadLog(size, ssdId);
+                airlog("PERF_SSD", "AIR_READ", ssdId, size);
             }
             else if (UbioDir::Write == dir)
             {
-                _CollectAirWriteLog(size, ssdId);
+                airlog("PERF_SSD", "AIR_WRITE", ssdId, size);
             }
 
             devCtx->ioCompletionCount++;

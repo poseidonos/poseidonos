@@ -36,6 +36,7 @@
 
 #include "spdk/bdev.h"
 #include "src/device/base/device_driver.h"
+#include "src/spdk_wrapper/caller/spdk_bdev_caller.h"
 #include "src/lib/singleton.h"
 
 #define RETRYLIMIT (1)
@@ -51,7 +52,7 @@ class UramIOContext;
 class UramDrv : public DeviceDriver
 {
 public:
-    UramDrv();
+    UramDrv(SpdkBdevCaller* bdevCaller = new SpdkBdevCaller());
     ~UramDrv() override;
     int ScanDevs(std::vector<UblockSharedPtr>* devs) override;
 
@@ -72,6 +73,8 @@ private:
         UramIOContext* ioCtx);
     bool _OpenBdev(UramDeviceContext* bdevCtx);
     void _CloseBdev(UramDeviceContext* bdevCtx);
+
+    SpdkBdevCaller* bdevCaller;
 };
 
 using UramDrvSingleton = Singleton<UramDrv>;

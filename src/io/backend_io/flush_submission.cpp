@@ -46,7 +46,6 @@
 #include "src/logger/logger.h"
 #include "src/array/service/array_service_layer.h"
 #include "src/include/i_array_device.h"
-#include "src/spdk_wrapper/bdev_api.h"
 #include "src/include/array_config.h"
 #include "src/device/base/ublock_device.h"
 
