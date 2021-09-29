@@ -120,12 +120,11 @@ MetaIoHandler::MetaFsIOSubmitHandler(struct pos_io* io, int fd)
     uint32_t alignedIOSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     uint64_t soffset = ((io->offset / alignedIOSize) * alignedIOSize);
     uint32_t reactor = pos::EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
-    std::string arrayName = io->arrayName;
-    int arrayId = MetaFsServiceSingleton::Instance()->GetArrayId(arrayName);
+    int arrayId = io->array_id;
     MetaFsAioCbCxt* aiocb = new MetaFioAIOCxt(opcode, fd, arrayId, soffset, alignedIOSize, io->iov->iov_base,
         AsEntryPointParam1(&MetaIOScheduler::HandleIOCallback, &metaioScheduler),
         io, reactor);
-    rc_io = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName)->io->SubmitIO(aiocb);
+    rc_io = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->io->SubmitIO(aiocb);
     g_meta_outstandingCmd++;
 
 #else // testing for sync io

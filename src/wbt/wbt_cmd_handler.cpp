@@ -73,7 +73,6 @@
 #include "set_active_stripe_tail_wbt_command.h"
 #include "set_current_ssd_lsid_wbt_command.h"
 #include "set_gc_threshold_wbt_command.h"
-#include "set_inode_info_wbt_command.h"
 #include "set_segment_info_wbt_command.h"
 #include "set_user_segment_bitmap_wbt_command.h"
 #include "set_wb_lsid_bitmap_wbt_command.h"
@@ -143,7 +142,6 @@ WbtCmdHandler::PrepareWbtCommands(void)
     wbtCommandMap["mfs_read_file"] = std::make_unique<ReadFileWbtCommand>();
     wbtCommandMap["mfs_write_file"] = std::make_unique<WriteFileWbtCommand>();
     wbtCommandMap["mfs_dump_inode_info"] = std::make_unique<DumpInodeInfoWbtCommand>();
-    wbtCommandMap["mfs_set_inode_info"] = std::make_unique<SetInodeInfoWbtCommand>();
     wbtCommandMap["mfs_get_file_size"] = std::make_unique<GetFileSizeWbtCommand>();
     wbtCommandMap["mfs_get_aligned_file_io_size"] = std::make_unique<GetAlignedFileIoSizeWbtCommand>();
     wbtCommandMap["mfs_setup_meta_fio_test"] = std::make_unique<SetupMetaFioTestWbtCommand>();

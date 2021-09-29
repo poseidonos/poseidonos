@@ -33,7 +33,7 @@ q_depth=['128']
 # To add 64K IOs set io_size = ['4096', '65536'] and block_size = [ '512', '1024', '4096', '512-128k' ]
 io_size_bytes=['20m']
 
-block_size=['4032']
+block_size=['4096']
 
 # type of I/O pattern : write, read, trim, randread, randwrite, randtrim, readwrite, rw, randrw
 readwrite=['write']

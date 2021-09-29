@@ -68,7 +68,6 @@ public:
     int GetAlignedFileIOSize(Args argv);
 
     int DumpInodeInfo(Args argv);
-    int SetInodeInfo(Args argv);
     int64_t GetMaxFileSize(Args argv);
     int GetFileChecksum(Args argv);
 

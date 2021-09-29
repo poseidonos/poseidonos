@@ -437,54 +437,6 @@ WbtMetafsCmdHandler::DumpInodeInfo(Args argv)
 }
 
 int
-WbtMetafsCmdHandler::SetInodeInfo(Args argv)
-{
-#if 0
-    int res = RESULT_SUCCESS;
-    std::string metaFileName = argv["name"].get<std::string>();
-    std::string jsonFileName = argv["input"].get<std::string>();
-    char* buffer = NULL;
-    uint32_t fileSize = 0;
-    MetaFileInodeInfo metaFileInode;
-
-    // Declare inode
-    if (_ReadFileInBuffer(jsonFileName, &buffer, fileSize) == RESULT_SUCCESS)
-    {
-        for (uint32_t i = 0; i < fileSize; i++)
-        {
-            std::cout << buffer[i];
-        }
-        buffer[fileSize] = '\0';
-        rapidjson::Document jsonDoc;
-        jsonDoc.Parse<0>(buffer);
-
-        if (jsonDoc.HasParseError())
-        {
-            std::cout << "[Error] JSON parse error\n";
-            std::cout << jsonDoc.GetParseError() << "\nError Offset ";
-            std::cout << jsonDoc.GetErrorOffset() << "\n";
-            delete[] buffer;
-            return RESULT_FAILURE;
-        }
-        if (jsonDoc["metaInodeInfo"].IsObject())
-        {
-            _SetValuesInMetaFileInode(metaFileInode, jsonDoc["metaInodeInfo"]);
-        }
-    }
-    else
-    {
-        res = RESULT_FAILURE;
-    }
-
-    if (buffer != NULL)
-        delete[] buffer;
-
-    return res;
-#endif
-    return RESULT_FAILURE;     // not support yet
-}
-
-int
 WbtMetafsCmdHandler::GetFileChecksum(Args argv)
 {
     return RESULT_FAILURE;

@@ -48,10 +48,6 @@ TEST(WbtMetafsCmdHandler, DumpInodeInfo_)
 {
 }
 
-TEST(WbtMetafsCmdHandler, SetInodeInfo_)
-{
-}
-
 TEST(WbtMetafsCmdHandler, GetFileChecksum_)
 {
 }
