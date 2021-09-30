@@ -36,7 +36,7 @@ Example:
 		req := buildAutocreateArrayReq()
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -46,7 +46,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 
@@ -64,7 +64,7 @@ func buildAutocreateArrayReq() messages.Request {
 	var buffer [1]messages.DeviceNameList
 	buffer[0].DEVICENAME = autocreate_array_buffer
 
-	AutocreateArrayParam := messages.AutocreateArrayParam{
+	param := messages.AutocreateArrayParam{
 		ARRAYNAME:    autocreate_array_arrayName,
 		RAID:         autocreate_array_raid,
 		BUFFER:       buffer,
@@ -72,10 +72,12 @@ func buildAutocreateArrayReq() messages.Request {
 		NUMSPAREDEVS: autocreate_array_spare,
 	}
 
+	uuid := globals.GenerateUUID()
+
 	req := messages.Request{
-		RID:     "fromfakeclient",
+		RID:     uuid,
 		COMMAND: "AUTOCREATEARRAY",
-		PARAM:   AutocreateArrayParam,
+		PARAM:   param,
 	}
 
 	return req

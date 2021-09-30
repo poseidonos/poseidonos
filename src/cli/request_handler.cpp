@@ -50,7 +50,7 @@
 #include "src/cli/delete_array_command.h"
 #include "src/cli/delete_subsystem_command.h"
 #include "src/cli/delete_volume_command.h"
-#include "src/cli/exit_ibofos_command.h"
+#include "src/cli/stop_pos_command.h"
 #include "src/cli/get_host_nqn_command.h"
 #include "src/cli/get_pos_info_command.h"
 #include "src/cli/get_log_level_command.h"
@@ -120,7 +120,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["GETHOSTNQN"] = new GetHostNqnCommand();
     cmdDictionary["CONDSIGNAL"] = new CondSignalCommand();
     cmdDictionary["GETPOSINFO"] = new GetPosInfoCommand();
-    cmdDictionary["EXITIBOFOS"] = new ExitIbofosCommand();
+    cmdDictionary["STOPPOS"] = new StopPosCommand();
     cmdDictionary["STOPREBUILDING"] = new StopRebuildingCommand();
     cmdDictionary["REBUILDPERFIMPACT"] = new RebuildPerfImpactCommand();
     cmdDictionary["APPLYLOGFILTER"] = new ApplyLogFilterCommand();

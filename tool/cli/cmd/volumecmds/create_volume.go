@@ -33,10 +33,10 @@ Example:
 
 		var command = "CREATEVOLUME"
 
-		createVolumeReq := formCreateVolumeReq()
-		reqJSON, err := json.Marshal(createVolumeReq)
+		req := formCreateVolumeReq()
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -47,7 +47,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 
@@ -72,7 +72,7 @@ func formCreateVolumeReq() messages.Request {
 		log.Fatal("error:", err)
 	}
 
-	createVolumeParam := messages.CreateVolumeParam{
+	param := messages.CreateVolumeParam{
 		VOLUMENAME:   create_volume_volumeName,
 		VOLUMESIZE:   volumeSizeInByte,
 		MAXIOPS:      create_volume_maxIOPS,
@@ -80,13 +80,15 @@ func formCreateVolumeReq() messages.Request {
 		ARRAYNAME:    create_volume_arrayName,
 	}
 
-	createVolumeReq := messages.Request{
-		RID:     "fromfakeclient",
+	uuid := globals.GenerateUUID()
+
+	req := messages.Request{
+		RID:     uuid,
 		COMMAND: "CREATEVOLUME",
-		PARAM:   createVolumeParam,
+		PARAM:   param,
 	}
 
-	return createVolumeReq
+	return req
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

@@ -36,10 +36,10 @@ NOTE:
 
 		var command = "CREATEQOSVOLUMEPOLICY"
 
-		volumePolicyReq := formVolumePolicyReq()
-		reqJSON, err := json.Marshal(volumePolicyReq)
+		req := formVolumePolicyReq()
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -50,7 +50,7 @@ NOTE:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 
@@ -70,7 +70,7 @@ func formVolumePolicyReq() messages.Request {
 		volumeNameList.VOLUMENAME = str
 		volumeNames = append(volumeNames, volumeNameList)
 	}
-	volumePolicyParam := messages.VolumePolicyParam{
+	param := messages.VolumePolicyParam{
 		VOLUMENAME:   volumeNames,
 		MINIOPS:      volumePolicy_minIOPS,
 		MAXIOPS:      volumePolicy_maxIOPS,
@@ -79,13 +79,15 @@ func formVolumePolicyReq() messages.Request {
 		ARRAYNAME:    volumePolicy_arrayName,
 	}
 
-	volumePolicyReq := messages.Request{
-		RID:     "fromCLI",
+	uuid := globals.GenerateUUID()
+
+	req := messages.Request{
+		RID:     uuid,
 		COMMAND: "CREATEQOSVOLUMEPOLICY",
-		PARAM:   volumePolicyParam,
+		PARAM:   param,
 	}
 
-	return volumePolicyReq
+	return req
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

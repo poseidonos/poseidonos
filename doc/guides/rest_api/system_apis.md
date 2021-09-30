@@ -1,5 +1,5 @@
 # System APIs
-## EXITIBOFOS
+## STOPPOS
 | REST element | Value                                |
 |:------------:|:------------------------------------:|
 | Method       | DELETE                               |

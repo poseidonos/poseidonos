@@ -16,7 +16,7 @@ func Connect() {
 	var err error
 	conn, err = net.Dial("tcp", globals.IPv4+":"+globals.Port)
 	if err != nil {
-		log.Debug("error:", err)
+		log.Error("error:", err)
 	}
 }
 

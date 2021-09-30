@@ -1,18 +1,18 @@
 package ibofos
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"pnconnector/src/log"
 	"pnconnector/src/routers/m9k/model"
 	"pnconnector/src/setting"
 	"pnconnector/src/util"
-	"fmt"
-	"os"
-	"path/filepath"
 	"time"
 )
 
-func ExitiBoFOS(xrId string, param interface{}) (model.Request, model.Response, error) {
-	return systemSender(xrId, param, "EXITIBOFOS")
+func StopPosCommand(xrId string, param interface{}) (model.Request, model.Response, error) {
+	return systemSender(xrId, param, "STOPPOS")
 }
 
 func RuniBoFOS(xrId string, param interface{}) (model.Request, model.Response, error) {

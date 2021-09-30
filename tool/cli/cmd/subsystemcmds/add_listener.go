@@ -29,22 +29,24 @@ Example:
 
 		var command = "ADDLISTENER"
 
-		addListenerParam := messages.AddListenerParam{
+		param := messages.AddListenerParam{
 			SUBNQN:             subsystem_addlistener_subnqn,
 			TRANSPORTTYPE:      subsystem_addlistener_trtype,
 			TARGETADDRESS:      subsystem_addlistener_traddr,
 			TRANSPORTSERVICEID: subsystem_addlistener_trsvcid,
 		}
 
+		uuid := globals.GenerateUUID()
+
 		req := messages.Request{
-			RID:     "fromCLI",
+			RID:     uuid,
 			COMMAND: command,
-			PARAM:   addListenerParam,
+			PARAM:   param,
 		}
 
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -55,7 +57,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

@@ -12,7 +12,7 @@ func AskConfirmation(message string) bool {
 	fmt.Print(message + " (y/n):")
 	_, err := fmt.Scan(&input)
 	if err != nil {
-		log.Debug("error:", err)
+		log.Error("error:", err)
 		panic(err)
 	}
 

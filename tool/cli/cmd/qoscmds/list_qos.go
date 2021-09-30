@@ -31,10 +31,10 @@ Example:
 
 		var command = "LISTQOSPOLICIES"
 
-		qosListReq := formListQosReq()
-		reqJSON, err := json.Marshal(qosListReq)
+		req := formListQosReq()
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -45,7 +45,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 
@@ -66,15 +66,17 @@ func formListQosReq() messages.Request {
 		volumeNames = append(volumeNames, volumeNameList)
 	}
 
-	listQosParam := messages.VolumePolicyParam{
+	param := messages.VolumePolicyParam{
 		VOLUMENAME: volumeNames,
 		ARRAYNAME:  listQos_arrayName,
 	}
 
+	uuid := globals.GenerateUUID()
+
 	qosListReq := messages.Request{
-		RID:     "fromCLI",
+		RID:     uuid,
 		COMMAND: "LISTQOSPOLICIES",
-		PARAM:   listQosParam,
+		PARAM:   param,
 	}
 
 	return qosListReq

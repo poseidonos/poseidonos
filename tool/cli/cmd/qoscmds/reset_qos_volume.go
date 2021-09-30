@@ -30,10 +30,10 @@ Example:
 
 		var command = "RESETQOSVOLUMEPOLICY"
 
-		volumeResetReq := formVolumeResetReq()
-		reqJSON, err := json.Marshal(volumeResetReq)
+		req := formVolumeResetReq()
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -44,7 +44,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 
@@ -65,18 +65,20 @@ func formVolumeResetReq() messages.Request {
 		volumeNames = append(volumeNames, volumeNameList)
 	}
 
-	volumeResetParam := messages.VolumePolicyParam{
+	param := messages.VolumePolicyParam{
 		VOLUMENAME: volumeNames,
 		ARRAYNAME:  volumeReset_arrayName,
 	}
 
-	volumeResetReq := messages.Request{
-		RID:     "fromCLI",
+	uuid := globals.GenerateUUID()
+
+	req := messages.Request{
+		RID:     uuid,
 		COMMAND: "RESETQOSVOLUMEPOLICY",
-		PARAM:   volumeResetParam,
+		PARAM:   param,
 	}
 
-	return volumeResetReq
+	return req
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

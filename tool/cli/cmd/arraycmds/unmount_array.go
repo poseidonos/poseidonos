@@ -43,19 +43,21 @@ Example:
 
 		var command = "UNMOUNTARRAY"
 
-		unmountArrayParam := messages.UnmountArrayParam{
+		param := messages.UnmountArrayParam{
 			ARRAYNAME: unmount_array_arrayName,
 		}
 
-		unmountArrayReq := messages.Request{
-			RID:     "fromCLI",
+		uuid := globals.GenerateUUID()
+
+		req := messages.Request{
+			RID:     uuid,
 			COMMAND: command,
-			PARAM:   unmountArrayParam,
+			PARAM:   param,
 		}
 
-		reqJSON, err := json.Marshal(unmountArrayReq)
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -66,7 +68,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

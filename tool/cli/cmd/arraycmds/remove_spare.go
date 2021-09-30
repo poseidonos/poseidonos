@@ -31,20 +31,22 @@ Example:
 		var spareDevName [1]messages.SpareDeviceName
 		spareDevName[0].SPARENAME = remove_spare_spareDevName
 
-		removeSpareParam := messages.SpareParam{
+		param := messages.SpareParam{
 			ARRAYNAME: remove_spare_arrayName,
 			SPARENAME: spareDevName,
 		}
 
-		removeSpareReq := messages.Request{
-			RID:     "fromCLI",
+		uuid := globals.GenerateUUID()
+
+		req := messages.Request{
+			RID:     uuid,
 			COMMAND: command,
-			PARAM:   removeSpareParam,
+			PARAM:   param,
 		}
 
-		reqJSON, err := json.Marshal(removeSpareReq)
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -55,7 +57,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

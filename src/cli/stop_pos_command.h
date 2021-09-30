@@ -37,11 +37,11 @@
 
 namespace pos_cli
 {
-class ExitIbofosCommand : public Command
+class StopPosCommand : public Command
 {
 public:
-    ExitIbofosCommand(void);
-    ~ExitIbofosCommand(void) override;
+    StopPosCommand(void);
+    ~StopPosCommand(void) override;
     string Execute(json& doc, string rid) override;
 };
 }; // namespace pos_cli

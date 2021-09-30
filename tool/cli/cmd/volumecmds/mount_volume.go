@@ -1,13 +1,13 @@
 package volumecmds
 
 import (
-	"encoding/json"
-	"os"
-	"pnconnector/src/log"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/messages"
 	"cli/cmd/socketmgr"
+	"encoding/json"
+	"os"
+	"pnconnector/src/log"
 
 	"github.com/spf13/cobra"
 )
@@ -32,9 +32,9 @@ Example:
 
 		CheckSubsystemParam(cmd)
 
-	    if mount_volume_ready_to_create_subsystem == true {
+		if mount_volume_ready_to_create_subsystem == true {
 			var warningMsg = "WARNING: Are you sure you want to mount volume to the subsystem:" +
-				" " + mount_volume_subNqnName + "?\n" + 
+				" " + mount_volume_subNqnName + "?\n" +
 				"If requsted subsystem does not exist, it will be automatically created."
 
 			if mount_volume_isForced == false {
@@ -45,13 +45,15 @@ Example:
 			}
 
 			createSubsystemAutoParam := messages.CreateSubsystemAutoParam{
-				SUBNQN:		mount_volume_subNqnName,
+				SUBNQN: mount_volume_subNqnName,
 			}
 
+			uuid := globals.GenerateUUID()
+
 			createSubsystemReq := messages.Request{
-				RID:	  	"fromfakeclient",
-				COMMAND:	"CREATESUBSYSTEMAUTO",
-				PARAM:		createSubsystemAutoParam,
+				RID:     uuid,
+				COMMAND: "CREATESUBSYSTEMAUTO",
+				PARAM:   createSubsystemAutoParam,
 			}
 			requestList = append(requestList, createSubsystemReq)
 		}
@@ -64,10 +66,12 @@ Example:
 				TRANSPORTSERVICEID: mount_volume_trsvcid,
 			}
 
+			uuid := globals.GenerateUUID()
+
 			addListenerReq := messages.Request{
-				RID:		"fromCLI",
-				COMMAND:	"ADDLISTENER",
-				PARAM:		addListenerParam,
+				RID:     uuid,
+				COMMAND: "ADDLISTENER",
+				PARAM:   addListenerParam,
 			}
 			requestList = append(requestList, addListenerReq)
 		}
@@ -78,8 +82,10 @@ Example:
 			ARRAYNAME:  mount_volume_arrayName,
 		}
 
+		uuid := globals.GenerateUUID()
+
 		mountVolumeReq := messages.Request{
-			RID:     "fromfakeclient",
+			RID:     uuid,
 			COMMAND: "MOUNTVOLUME",
 			PARAM:   mountVolumeParam,
 		}
@@ -92,14 +98,14 @@ Example:
 
 				reqJSON, err := json.Marshal(request)
 				if err != nil {
-					log.Debug("error:", err)
+					log.Error("error:", err)
 				}
 
 				displaymgr.PrintRequest(string(reqJSON))
 
 				resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 				if err != nil {
-					log.Debug("error:", err)
+					log.Error("error:", err)
 					return
 				}
 
@@ -114,9 +120,9 @@ Example:
 func CheckSubsystemParam(cmd *cobra.Command) {
 	if cmd.Flags().Changed("subnqn") {
 		mount_volume_ready_to_create_subsystem = true
-		if (cmd.Flags().Changed("transport-type") &&
+		if cmd.Flags().Changed("transport-type") &&
 			cmd.Flags().Changed("target-address") &&
-			cmd.Flags().Changed("transport-service-id")) {
+			cmd.Flags().Changed("transport-service-id") {
 			mount_volume_ready_to_add_Listener = true
 		}
 	}
@@ -149,15 +155,15 @@ func init() {
 	MountVolumeCmd.Flags().StringVarP(&mount_volume_subNqnName,
 		"subnqn", "q", "",
 		"NVMe qualified name of target NVM subsystem")
-	
+
 	MountVolumeCmd.Flags().StringVarP(&mount_volume_trtype,
 		"transport-type", "t", "",
 		"NVMe-oF transport type (ex. tcp)")
-	
+
 	MountVolumeCmd.Flags().StringVarP(&mount_volume_traddr,
 		"target-address", "i", "",
 		"NVMe-oF target address (ex. 127.0.0.1)")
-	
+
 	MountVolumeCmd.Flags().StringVarP(&mount_volume_trsvcid,
 		"transport-service-id", "p", "",
 		"NVMe-oF transport service id (ex. 1158)")

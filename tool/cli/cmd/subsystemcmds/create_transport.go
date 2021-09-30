@@ -28,21 +28,23 @@ Example:
 
 		var command = "CREATETRANSPORT"
 
-		createTransportParam := messages.CreateTransportParam{
+		param := messages.CreateTransportParam{
 			TRANSPORTTYPE: transport_create_trtype,
 			BUFCACHESIZE:  transport_create_bufcachesize,
 			NUMSHAREDBUF:  transport_create_numsharedbuf,
 		}
 
+		uuid := globals.GenerateUUID()
+
 		req := messages.Request{
-			RID:     "fromCLI",
+			RID:     uuid,
 			COMMAND: command,
-			PARAM:   createTransportParam,
+			PARAM:   param,
 		}
 
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -53,7 +55,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/cli/exit_ibofos_command.h"
+#include "src/cli/stop_pos_command.h"
 
 #include <vector>
 
@@ -42,16 +42,16 @@
 
 namespace pos_cli
 {
-ExitIbofosCommand::ExitIbofosCommand(void)
+StopPosCommand::StopPosCommand(void)
 {
 }
 
-ExitIbofosCommand::~ExitIbofosCommand(void)
+StopPosCommand::~StopPosCommand(void)
 {
 }
 
 string
-ExitIbofosCommand::Execute(json& doc, string rid)
+StopPosCommand::Execute(json& doc, string rid)
 {
     JsonFormat jFormat;
     RequestHandler requestHandler;
@@ -89,7 +89,7 @@ ExitIbofosCommand::Execute(json& doc, string rid)
                             abr.arrayName, arrayInfo->GetState().ToString());
 
                         return jFormat.MakeResponse(
-                            "EXITIBOFOS", rid, eventId,
+                            "STOPPOS", rid, eventId,
                             "failed to terminate POS (code:" + to_string(eventId) + ")",
                             GetPosInfo());
                     }
@@ -117,12 +117,12 @@ ExitIbofosCommand::Execute(json& doc, string rid)
     if (requestHandler.IsExit() == false)
     {
         requestHandler.SetExit(true);
-        return jFormat.MakeResponse("EXITIBOFOS", rid, SUCCESS,
+        return jFormat.MakeResponse("STOPPOS", rid, SUCCESS,
             "POS will be terminated soon", GetPosInfo());
     }
     else
     {
-        return jFormat.MakeResponse("EXITIBOFOS", rid, SUCCESS,
+        return jFormat.MakeResponse("STOPPOS", rid, SUCCESS,
             "POS is now terminating", GetPosInfo());
     }
 }

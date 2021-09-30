@@ -25,14 +25,16 @@ Syntax:
 
 		var command = "LOGGERINFO"
 
+		uuid := globals.GenerateUUID()
+
 		logerInfoReq := messages.Request{
-			RID:     "fromCLI",
+			RID:     uuid,
 			COMMAND: command,
 		}
 
 		reqJSON, err := json.Marshal(logerInfoReq)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -43,7 +45,7 @@ Syntax:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

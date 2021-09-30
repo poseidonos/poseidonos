@@ -45,20 +45,22 @@ Example:
 
 		var command = "UNMOUNTVOLUME"
 
-		unmountVolumeParam := messages.UnmountVolumeParam{
+		param := messages.UnmountVolumeParam{
 			VOLUMENAME: unmount_volume_volumeName,
 			ARRAYNAME:  unmount_volume_arrayName,
 		}
 
-		unmountVolumeReq := messages.Request{
-			RID:     "fromfakeclient",
+		uuid := globals.GenerateUUID()
+
+		req := messages.Request{
+			RID:     uuid,
 			COMMAND: command,
-			PARAM:   unmountVolumeParam,
+			PARAM:   param,
 		}
 
-		reqJSON, err := json.Marshal(unmountVolumeReq)
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -69,7 +71,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

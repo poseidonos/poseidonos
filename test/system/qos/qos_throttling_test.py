@@ -122,8 +122,8 @@ def parse_argument():
 
 
 def terminate_ibofos():
-    exit_ibofos_command = ibofos_root + "/bin/poseidonos-cli system stop --force"
-    os.system(exit_ibofos_command)
+    stop_pos_command = ibofos_root + "/bin/poseidonos-cli system stop --force"
+    os.system(stop_pos_command)
     check_ibofos_command = "pgrep -c poseidonos"
     result = os.system(check_ibofos_command)
     print("Wait exit")

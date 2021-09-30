@@ -30,7 +30,7 @@ Example:
 
 		var command = "CREATESUBSYSTEM"
 
-		createSubsystemParam := messages.CreateSubsystemParam{
+		param := messages.CreateSubsystemParam{
 			SUBNQN:        subsystem_create_subnqn,
 			SERIAL:        subsystem_create_serial,
 			MODEL:         subsystem_create_model,
@@ -39,15 +39,17 @@ Example:
 			ANAREPORTING:  subsystem_create_anareporting,
 		}
 
+		uuid := globals.GenerateUUID()
+
 		req := messages.Request{
-			RID:     "fromCLI",
+			RID:     uuid,
 			COMMAND: command,
-			PARAM:   createSubsystemParam,
+			PARAM:   param,
 		}
 
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -58,7 +60,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

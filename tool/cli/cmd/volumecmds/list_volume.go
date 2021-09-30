@@ -42,7 +42,7 @@ Example (listing volumes from a specific array):
 
 		reqJSON, err := json.Marshal(listVolumeReq)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -53,7 +53,7 @@ Example (listing volumes from a specific array):
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

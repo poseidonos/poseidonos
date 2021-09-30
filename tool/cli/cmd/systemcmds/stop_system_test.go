@@ -30,7 +30,7 @@ func TestStopSystemCommandReq(t *testing.T) {
 
 	// TODO(mj): Currently, we compare strings to test the result.
 	// This needs to change. i) Parsing the JSON request and compare each variable with desired values.
-	expected := `{"command":"EXITIBOFOS","rid":"fromfakeclient"}`
+	expected := `{"command":"STOPPOS","rid":"fromfakeclient"}`
 
 	if expected != string(out) {
 		t.Errorf("Expected: %q Output: %q", expected, string(out))

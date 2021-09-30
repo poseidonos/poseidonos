@@ -28,16 +28,18 @@ Syntax:
           `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var command = "RUNIBOFOS"
+		var command = "RUNPOS"
 
-		startSystemReq := messages.Request{
-			RID:     "fromfakeclient",
+		uuid := globals.GenerateUUID()
+
+		req := messages.Request{
+			RID:     uuid,
 			COMMAND: command,
 		}
 
-		reqJSON, err := json.Marshal(startSystemReq)
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))

@@ -43,19 +43,21 @@ Example:
 
 		var command = "DELETEARRAY"
 
-		deleteArrayParam := messages.DeleteArrayParam{
+		param := messages.DeleteArrayParam{
 			ARRAYNAME: delete_array_arrayName,
 		}
 
+		uuid := globals.GenerateUUID()
+
 		req := messages.Request{
-			RID:     "fromCLI",
+			RID:     uuid,
 			COMMAND: command,
-			PARAM:   deleteArrayParam,
+			PARAM:   param,
 		}
 
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -66,7 +68,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

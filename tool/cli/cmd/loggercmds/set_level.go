@@ -29,15 +29,17 @@ Syntax:
 			LEVEL: set_level_loggerLevel,
 		}
 
+		uuid := globals.GenerateUUID()
+
 		setLevelReq := messages.Request{
-			RID:     "fromCLI",
+			RID:     uuid,
 			COMMAND: command,
 			PARAM:   setLevelReqParam,
 		}
 
 		reqJSON, err := json.Marshal(setLevelReq)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -48,7 +50,7 @@ Syntax:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

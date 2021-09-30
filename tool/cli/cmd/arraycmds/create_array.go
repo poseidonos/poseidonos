@@ -35,7 +35,7 @@ Example:
 		req := buildCreateArrayReq()
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -45,7 +45,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 
@@ -67,7 +67,7 @@ func buildCreateArrayReq() messages.Request {
 	var buffer [1]messages.DeviceNameList
 	buffer[0].DEVICENAME = create_array_buffer
 
-	createArrayParam := messages.CreateArrayParam{
+	param := messages.CreateArrayParam{
 		ARRAYNAME: create_array_arrayName,
 		RAID:      create_array_raid,
 		BUFFER:    buffer,
@@ -75,10 +75,12 @@ func buildCreateArrayReq() messages.Request {
 		SPARE:     spareDevs,
 	}
 
+	uuid := globals.GenerateUUID()
+
 	req := messages.Request{
-		RID:     "fromfakeclient",
+		RID:     uuid,
 		COMMAND: "CREATEARRAY",
-		PARAM:   createArrayParam,
+		PARAM:   param,
 	}
 
 	return req

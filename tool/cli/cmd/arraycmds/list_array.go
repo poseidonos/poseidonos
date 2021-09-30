@@ -38,29 +38,34 @@ Example 2 (listing a specific array):
 		// when an array is specified.
 		// Those commands will be merged later.
 		var command = ""
-		var listArrayReq = messages.Request{}
+		var req = messages.Request{}
 		if list_array_arrayName == "" {
 			command = "LISTARRAY"
-			listArrayReq = messages.Request{
-				RID:     "fromCLI",
+
+			uuid := globals.GenerateUUID()
+
+			req = messages.Request{
+				RID:     uuid,
 				COMMAND: command,
 			}
 		} else {
 			command = "ARRAYINFO"
-			listArrayParam := messages.ListArrayParam{
+			param := messages.ListArrayParam{
 				ARRAYNAME: list_array_arrayName,
 			}
 
-			listArrayReq = messages.Request{
-				RID:     "fromCLI",
+			uuid := globals.GenerateUUID()
+
+			req = messages.Request{
+				RID:     uuid,
 				COMMAND: command,
-				PARAM:   listArrayParam,
+				PARAM:   param,
 			}
 		}
 
-		reqJSON, err := json.Marshal(listArrayReq)
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -71,7 +76,7 @@ Example 2 (listing a specific array):
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

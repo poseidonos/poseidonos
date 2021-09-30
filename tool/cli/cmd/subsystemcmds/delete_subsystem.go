@@ -40,19 +40,21 @@ Example:
 
 		var command = "DELETESUBSYSTEM"
 
-		deleteSubsystemParam := messages.DeleteSubsystemParam{
+		param := messages.DeleteSubsystemParam{
 			SUBNQN: delete_subsystem_subnqn,
 		}
 
+		uuid := globals.GenerateUUID()
+
 		req := messages.Request{
-			RID:     "fromCLI",
+			RID:     uuid,
 			COMMAND: command,
-			PARAM:   deleteSubsystemParam,
+			PARAM:   param,
 		}
 
 		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -63,7 +65,7 @@ Example:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

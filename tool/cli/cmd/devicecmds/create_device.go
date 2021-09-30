@@ -25,7 +25,7 @@ Syntax:
 
 		var command = "CREATEDEVICE"
 
-		createDeviceReqParam := messages.CreateDeviceReqParam{
+		param := messages.CreateDeviceReqParam{
 			DEVICENAME: create_device_deviceName,
 			NUMBLOCKS:  create_device_numBlocks,
 			BLOCKSIZE:  create_device_blockSize,
@@ -33,15 +33,17 @@ Syntax:
 			NUMA:       create_device_numa,
 		}
 
-		createDeviceReq := messages.Request{
-			RID:     "fromfakeclient",
+		uuid := globals.GenerateUUID()
+
+		req := messages.Request{
+			RID:     uuid,
 			COMMAND: command,
-			PARAM:   createDeviceReqParam,
+			PARAM:   param,
 		}
 
-		reqJSON, err := json.Marshal(createDeviceReq)
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -52,7 +54,7 @@ Syntax:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

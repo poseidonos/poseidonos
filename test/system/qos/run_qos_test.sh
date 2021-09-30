@@ -225,7 +225,7 @@ reset_spdk(){
 #**************************************************************************
 # EXIT POS
 #**************************************************************************
-exit_ibofos(){
+stop_pos(){
     #texecc $TARGET_ROOT_DIR/bin/cli request unmount_ibofos
     
     texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME} --force
@@ -253,7 +253,7 @@ exit_ibofos(){
 #**************************************************************************
 # EXIT POS
 #**************************************************************************
-exit_ibofos_multi_array(){
+stop_pos_multi_array(){
 
     texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME1} --force
     texecc ${ibof_cli} array unmount --array-name ${ARRAYNAME2} --force
@@ -988,7 +988,7 @@ with_be_qos(){
     texecc sleep 10
     EXPECT_PASS "${tc_name}" $?
     end_tc "${tc_name}"
-    exit_ibofos
+    stop_pos
 }
 
 with_fe_qos(){
@@ -1007,7 +1007,7 @@ with_fe_qos(){
     EXPECT_PASS "${tc_name}" $?
     disable_fe_qos
     end_tc "${tc_name}"
-    exit_ibofos
+    stop_pos
 }
 
 
@@ -1028,7 +1028,7 @@ with_fe_qos_multi_array(){
     EXPECT_PASS "${tc_name}" $?
     disable_fe_qos
     end_tc "${tc_name}"
-    exit_ibofos_multi_array
+    stop_pos_multi_array
 }
 ###################################################
 # SANITY TESTS

@@ -25,19 +25,21 @@ Syntax:
 
 		var command = "SMART"
 
-		smartReqParam := messages.SMARTReqParam{
+		param := messages.SMARTReqParam{
 			DEVICENAME: smart_deviceName,
 		}
 
-		smartReq := messages.Request{
-			RID:     "fromfakeclient",
+		uuid := globals.GenerateUUID()
+
+		req := messages.Request{
+			RID:     uuid,
 			COMMAND: command,
-			PARAM:   smartReqParam,
+			PARAM:   param,
 		}
 
-		reqJSON, err := json.Marshal(smartReq)
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -48,7 +50,7 @@ Syntax:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

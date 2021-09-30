@@ -30,21 +30,23 @@ Example (renaming a volume):
 
 		var command = "RENAMEVOLUME"
 
-		renameVolumeParam := messages.RenameVolumeParam{
+		param := messages.RenameVolumeParam{
 			ARRAYNAME:     rename_volume_arrayName,
 			VOLUMENAME:    rename_volume_volumeName,
 			NEWVOLUMENAME: rename_volume_newVolumeName,
 		}
 
-		renameVolumeReq := messages.Request{
-			RID:     "fromCLI",
+		uuid := globals.GenerateUUID()
+
+		req := messages.Request{
+			RID:     uuid,
 			COMMAND: command,
-			PARAM:   renameVolumeParam,
+			PARAM:   param,
 		}
 
-		reqJSON, err := json.Marshal(renameVolumeReq)
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -55,7 +57,7 @@ Example (renaming a volume):
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

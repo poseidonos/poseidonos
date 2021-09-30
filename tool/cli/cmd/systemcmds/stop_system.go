@@ -33,16 +33,18 @@ Syntax:
 			}
 		}
 
-		var command = "EXITIBOFOS"
+		var command = "STOPPOS"
 
-		stopSystemReq := messages.Request{
-			RID:     "fromfakeclient",
+		uuid := globals.GenerateUUID()
+
+		req := messages.Request{
+			RID:     uuid,
 			COMMAND: command,
 		}
 
-		reqJSON, err := json.Marshal(stopSystemReq)
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -53,7 +55,7 @@ Syntax:
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

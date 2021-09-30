@@ -32,19 +32,21 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 
 		var command = "REBUILDPERFIMPACT"
 
-		setSystemPropReqParam := messages.SetSystemPropReqParam{
+		param := messages.SetSystemPropReqParam{
 			LEVEL: set_system_property_level,
 		}
 
-		setSystemPropReq := messages.Request{
-			RID:     "fromfakeclient",
+		uuid := globals.GenerateUUID()
+
+		req := messages.Request{
+			RID:     uuid,
 			COMMAND: command,
-			PARAM:   setSystemPropReqParam,
+			PARAM:   param,
 		}
 
-		reqJSON, err := json.Marshal(setSystemPropReq)
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -55,7 +57,7 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 

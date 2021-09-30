@@ -34,8 +34,11 @@ Example:
 		createSubsystemAutoParam := messages.CreateSubsystemAutoParam{
 			SUBNQN: mount_volume_with_subsystem_subnqn,
 		}
+
+		uuid := globals.GenerateUUID()
+
 		createSubsystemReq := messages.Request{
-			RID:     "fromfakeclient",
+			RID:     uuid,
 			COMMAND: "CREATESUBSYSTEMAUTO",
 			PARAM:   createSubsystemAutoParam,
 		}
@@ -47,8 +50,11 @@ Example:
 			TARGETADDRESS:      mount_volume_with_subsystem_traddr,
 			TRANSPORTSERVICEID: mount_volume_with_subsystem_trsvcid,
 		}
+
+		uuid = globals.GenerateUUID()
+
 		addListenerReq := messages.Request{
-			RID:     "fromCLI",
+			RID:     uuid,
 			COMMAND: "ADDLISTENER",
 			PARAM:   addListenerParam,
 		}
@@ -59,8 +65,11 @@ Example:
 			SUBNQN:     mount_volume_with_subsystem_subnqn,
 			ARRAYNAME:  mount_volume_with_subsystem_arrayName,
 		}
+
+		uuid = globals.GenerateUUID()
+
 		mountVolumeReq := messages.Request{
-			RID:     "fromfakeclient",
+			RID:     uuid,
 			COMMAND: "MOUNTVOLUME",
 			PARAM:   mountVolumeParam,
 		}
@@ -72,14 +81,14 @@ Example:
 				socketmgr.Connect()
 				reqJSON, err := json.Marshal(request)
 				if err != nil {
-					log.Debug("error:", err)
+					log.Error("error:", err)
 				}
 
 				displaymgr.PrintRequest(string(reqJSON))
 
 				resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 				if err != nil {
-					log.Debug("error:", err)
+					log.Error("error:", err)
 					return
 				}
 				socketmgr.Close()

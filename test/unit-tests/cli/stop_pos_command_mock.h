@@ -4,14 +4,14 @@
 #include <string>
 #include <vector>
 
-#include "src/cli/exit_ibofos_command.h"
+#include "src/cli/stop_pos_command.h"
 
 namespace pos_cli
 {
-class MockExitIbofosCommand : public ExitIbofosCommand
+class MockStopPosCommand : public StopPosCommand
 {
 public:
-    using ExitIbofosCommand::ExitIbofosCommand;
+    using StopPosCommand::StopPosCommand;
     MOCK_METHOD(string, Execute, (json & doc, string rid), (override));
 };
 

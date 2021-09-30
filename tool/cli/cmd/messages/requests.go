@@ -26,11 +26,11 @@ type CreateArrayParam struct {
 }
 
 type AutocreateArrayParam struct {
-	ARRAYNAME		string            `json:"name"`
-	BUFFER			[1]DeviceNameList `json:"buffer"`
-	NUMDATADEVS		int               `json:"num_data"`
-	NUMSPAREDEVS	int               `json:"num_spare,omitempty"`
-	RAID			string            `json:"raidtype,omitempty"`
+	ARRAYNAME    string            `json:"name"`
+	BUFFER       [1]DeviceNameList `json:"buffer"`
+	NUMDATADEVS  int               `json:"num_data"`
+	NUMSPAREDEVS int               `json:"num_spare,omitempty"`
+	RAID         string            `json:"raidtype,omitempty"`
 }
 
 type DeviceNameList struct {
@@ -63,7 +63,7 @@ type CreateDeviceReqParam struct {
 	NUMBLOCKS  int    `json:"num_blocks"`
 	BLOCKSIZE  int    `json:"block_size"`
 	DEVICETYPE string `json:"dev_type"`
-	NUMA       int	`json:"numa"`
+	NUMA       int    `json:"numa"`
 }
 
 // Loger request params
@@ -145,7 +145,7 @@ type CreateSubsystemParam struct {
 }
 
 type CreateSubsystemAutoParam struct {
-	SUBNQN		string	`json:"name"`
+	SUBNQN string `json:"name"`
 }
 
 type DeleteSubsystemParam struct {

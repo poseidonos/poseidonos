@@ -32,8 +32,11 @@ Example 2 (listing a specific array):
 		var ListSubsystemReq = messages.Request{}
 		if list_subsystem_subnqn == "" {
 			command = "LISTSUBSYSTEM"
+
+			uuid := globals.GenerateUUID()
+
 			ListSubsystemReq = messages.Request{
-				RID:     "fromCLI",
+				RID:     uuid,
 				COMMAND: command,
 			}
 		} else {
@@ -42,8 +45,10 @@ Example 2 (listing a specific array):
 				SUBNQN: list_subsystem_subnqn,
 			}
 
+			uuid := globals.GenerateUUID()
+
 			ListSubsystemReq = messages.Request{
-				RID:     "fromCLI",
+				RID:     uuid,
 				COMMAND: command,
 				PARAM:   listSubsystemParam,
 			}
@@ -51,7 +56,7 @@ Example 2 (listing a specific array):
 
 		reqJSON, err := json.Marshal(ListSubsystemReq)
 		if err != nil {
-			log.Debug("error:", err)
+			log.Error("error:", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -62,7 +67,7 @@ Example 2 (listing a specific array):
 
 			resJSON, err := socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			if err != nil {
-				log.Debug("error:", err)
+				log.Error("error:", err)
 				return
 			}
 
