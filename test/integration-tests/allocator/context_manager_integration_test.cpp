@@ -91,7 +91,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     AllocatorFileIoManager* allocatorFileIoManager = new AllocatorFileIoManager(fileArr, allocatorAddressInfo);
 
     // AllocatorCtx (Real)
-    NiceMock<MockBitMapMutex>* allocSegBitmap = new NiceMock<MockBitMapMutex>();
+    NiceMock<MockBitMapMutex>* allocSegBitmap = new NiceMock<MockBitMapMutex>(16);
     AllocatorCtx* allocatorCtx = new AllocatorCtx(nullptr, allocSegBitmap, allocatorAddressInfo);
 
     // RebuildCtx (Real)

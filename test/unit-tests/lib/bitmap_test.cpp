@@ -344,6 +344,9 @@ TEST(BitMapMutex, GetNumBitsSet_)
 
     //Then: Num of bits set should be 3
     EXPECT_EQ(bitMapSUT.GetNumBitsSet(), 3);
+
+    //Then: Num of bits set between bit 2 and 14 should be 3
+    EXPECT_EQ(bitMapSUT.GetNumBitsSet(2, 14), 1);
 }
 
 TEST(BitMapMutex, GetNumBitsSetWoLock_)
