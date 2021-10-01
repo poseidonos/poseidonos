@@ -37,6 +37,8 @@
 #include "src/include/array_config.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/device/base/ublock_device.h"
+
 namespace pos
 {
 NvmPartition::NvmPartition(string array,
@@ -91,7 +93,8 @@ NvmPartition::ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src)
     }
 
     dst.arrayDev = devs_.front();
-    dst.byteAddress = (physicalSize_.startLba +
+    void* base = dst.arrayDev->GetUblockPtr()->GetByteAddress();
+    dst.byteAddress = reinterpret_cast<uint64_t>(base) + (physicalSize_.startLba +
         (src.blkAddr.stripeId * logicalSize_.blksPerStripe + src.blkAddr.offset) *
         ArrayConfig::SECTORS_PER_BLOCK) * ArrayConfig::SECTOR_SIZE_BYTE +
         src.byteOffset;

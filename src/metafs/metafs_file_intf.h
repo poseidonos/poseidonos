@@ -70,7 +70,15 @@ protected:
     virtual int _Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
     virtual int _Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
 
+#if NVRAM_BYTE_ACCESS_DIRECT_EN
+    uint32_t _GetMaxLpnCntPerIOSubmit(PartitionType type);
+    MetaLpnType _GetBaseLpn(MetaVolumeType type);
+    pos::LogicalByteAddr _CalculateByteAddress(uint64_t pageNumber, uint64_t offset, uint64_t size);
+#endif
+
     MetaFs* metaFs;
+    uint32_t blksPerStripe;
+    MetaLpnType baseLpn;
 };
 
 } // namespace pos

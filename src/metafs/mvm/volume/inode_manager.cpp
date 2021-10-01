@@ -461,7 +461,6 @@ InodeManager::DeleteFileInode(MetaFsFileControlRequest& reqMsg)
 
 #if (PRINT_INFO == 1)
     std::cout << "========= DeleteFileInode: " << *reqMsg.fileName << std::endl;
-    MetaLpnType totalLpnCount = 0;
     for (auto& extent : extents)
     {
         std::cout << "{" << extent.GetStartLpn() << ", ";

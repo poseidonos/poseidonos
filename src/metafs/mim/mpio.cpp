@@ -247,8 +247,13 @@ Mpio::DoE2ECheck(MpAioState expNextState)
     }
     else
     {
-        // require to memset for invalid page?
-        _DoMemSetZero(GetMDPageDataBuf(), mdpage.GetDefaultDataChunkSize());
+#if NVRAM_BYTE_ACCESS_DIRECT_EN
+        if (MetaStorageType::NVRAM != io.targetMediaType)
+#endif
+        {
+            // require to memset for invalid page?
+            _DoMemSetZero(GetMDPageDataBuf(), mdpage.GetDefaultDataChunkSize());
+        }
     }
     SetNextState(expNextState);
 

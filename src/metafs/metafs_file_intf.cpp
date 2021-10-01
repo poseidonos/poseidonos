@@ -32,6 +32,11 @@
 
 #include "metafs_file_intf.h"
 #include "src/metafs/include/metafs_service.h"
+#include "src/metafs/nvram_io_completion.h"
+#include "src/array_mgmt/array_manager.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/io_submit_interface/i_io_submit_handler.h"
+
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
@@ -41,7 +46,9 @@ namespace pos
 MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId,
                                         StorageOpt storageOpt)
 : MetaFileIntf(fname, arrayId, storageOpt),
-  metaFs(nullptr)
+  metaFs(nullptr),
+  blksPerStripe(0),
+  baseLpn(UINT64_MAX)
 {
     metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId);
     _SetFileProperty(storageOpt);
@@ -51,7 +58,9 @@ MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId,
 MetaFsFileIntf::MetaFsFileIntf(std::string fname, int arrayId, MetaFs* metaFs,
                                         StorageOpt storageOpt)
 : MetaFileIntf(fname, arrayId, storageOpt),
-  metaFs(metaFs)
+  metaFs(metaFs),
+  blksPerStripe(0),
+  baseLpn(UINT64_MAX)
 {
     _SetFileProperty(storageOpt);
 }
@@ -84,21 +93,93 @@ MetaFsFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffe
     return (int)POS_EVENT_ID::SUCCESS;
 }
 
+#if NVRAM_BYTE_ACCESS_DIRECT_EN
+uint32_t
+MetaFsFileIntf::_GetMaxLpnCntPerIOSubmit(PartitionType type)
+{
+    if (0 == blksPerStripe)
+    {
+        IArrayInfo* array = pos::ArrayMgr()->GetInfo(arrayId)->arrayInfo;
+        blksPerStripe = array->GetSizeInfo(type)->blksPerStripe;
+    }
+
+    return blksPerStripe;
+}
+
+MetaLpnType
+MetaFsFileIntf::_GetBaseLpn(MetaVolumeType type)
+{
+    if (UINT64_MAX == baseLpn)
+    {
+        MetaFileContext* ctx = metaFs->ctrl->GetFileInfo(fd, type);
+
+        assert(nullptr != ctx);
+        assert(ctx->extentsCount != 0);
+
+        baseLpn = ctx->extents[0].GetStartLpn();
+    }
+
+    return baseLpn;
+}
+
+pos::LogicalByteAddr
+MetaFsFileIntf::_CalculateByteAddress(uint64_t pageNumber, uint64_t offset,
+    uint64_t size)
+{
+    pos::LogicalByteAddr logicalAddr;
+    uint32_t blksPerStripe = _GetMaxLpnCntPerIOSubmit(PartitionType::META_NVM);
+
+    logicalAddr.blkAddr.stripeId = pageNumber / blksPerStripe;
+    logicalAddr.blkAddr.offset = pageNumber % blksPerStripe;
+    logicalAddr.byteOffset = offset;
+    logicalAddr.byteSize = size;
+
+    return logicalAddr;
+}
+#endif
+
 int
 MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 {
-    ctx->ioDoneCheckCallback =
-        std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
+#if NVRAM_BYTE_ACCESS_DIRECT_EN
+    if (ctx->opcode == MetaFsIoOpcode::Write &&
+        storage == StorageOpt::NVRAM &&
+        ctx->length < MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE)
+    {
+        MetaLpnType pageNumber = _GetBaseLpn(MetaVolumeType::NvRamVolume) +
+            (ctx->fileOffset / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
+        pageNumber = pageNumber * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES /
+            ArrayConfig::BLOCK_SIZE_BYTE;
 
-    MetaFsAioCbCxt* aioCb = new MetaFsAioCbCxt(ctx->opcode, ctx->fd,
-        arrayId, ctx->fileOffset, ctx->length, (void*)ctx->buffer,
-        AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx));
+        pos::LogicalByteAddr byteAddr = _CalculateByteAddress(pageNumber,
+            ctx->fileOffset % MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE,
+            ctx->length);
 
-    MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(storage);
-    POS_EVENT_ID rc = metaFs->io->SubmitIO(aioCb, storageType);
+        CallbackSmartPtr callback(new NvramIoCompletion(ctx));
 
-    if (POS_EVENT_ID::SUCCESS != rc)
-        return -(int)rc;
+        IOSubmitHandlerStatus ioStatus =
+            IIOSubmitHandler::GetInstance()->SubmitAsyncByteIO(
+                IODirection::WRITE, (void*)ctx->buffer, byteAddr,
+                PartitionType::META_NVM, callback, arrayId);
+
+        assert(IOSubmitHandlerStatus::SUCCESS == ioStatus);
+    }
+    else
+#endif
+    {
+        ctx->ioDoneCheckCallback =
+            std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
+
+        MetaFsAioCbCxt* aioCb = new MetaFsAioCbCxt(ctx->opcode, ctx->fd,
+            arrayId, ctx->fileOffset, ctx->length, (void*)ctx->buffer,
+            AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx));
+
+        MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(storage);
+        POS_EVENT_ID rc = metaFs->io->SubmitIO(aioCb, storageType);
+
+        if (POS_EVENT_ID::SUCCESS != rc)
+            return -(int)rc;
+    }
 
     return EID(SUCCESS);
 }

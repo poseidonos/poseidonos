@@ -50,6 +50,7 @@ extern "C"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/include/array_config.h"
 
 namespace pos
 {
@@ -266,7 +267,7 @@ void
 AccelEngineApi::SubmitCopy(void* dst, void* src, uint64_t bytes, IoatCb cbFunction,
     void* cbArgument)
 {
-    if (likely(_IsChannelValid()))
+    if (likely(_IsChannelValid()) && !(bytes % ArrayConfig::SECTOR_SIZE_BYTE))
     {
         IoatArgument* ioatArg = new IoatArgument(dst, src, bytes, cbFunction, cbArgument);
         spdk_accel_submit_copy(spdkChannel, dst, src, bytes, CopyDone, ioatArg);

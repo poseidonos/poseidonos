@@ -74,6 +74,7 @@ enum CallbackType
     CallbackType_InternalWriteCompletion,
     CallbackType_SyncIoCompletion,
     CallbackType_MssIoCompletion,
+    CallbackType_NvramIoCompletion,
     CallbackType_UpdateDataCompleteHandler,
     CallbackType_UpdateDataHandler,
     CallbackType_BlockMapUpdateRequestCompletion,
