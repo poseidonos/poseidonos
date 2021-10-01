@@ -36,10 +36,11 @@
 namespace pos
 {
 Map::Map(void)
-: pageSize(0),
+: memPool(nullptr),
+  mPageArr(nullptr),
+  pageSize(0),
   numPages(0)
 {
-    mPageArr = nullptr;
 }
 
 Map::Map(uint64_t numMpages, uint64_t mpageSize)
@@ -52,23 +53,33 @@ Map::Map(uint64_t numMpages, uint64_t mpageSize)
 
     pageSize = mpageSize;
     numPages = numMpages;
+    uint64_t totalSize = pageSize * numPages;
+    int ret = posix_memalign((void**)&memPool, pos::SECTOR_SIZE, totalSize);
+    if (ret != 0)
+    {
+        POS_TRACE_ERROR(EID(MPAGE_MEMORY_ALLOC_FAILURE), "[Mapper Map] Failed to Allocate memPool size:{}, posix_memalign() failure, ret:{}", totalSize, ret);
+        assert(false);
+    }
 }
 
 Map::~Map(void)
 {
-    for (uint64_t pageNr = 0; pageNr < numPages; ++pageNr)
+    if (memPool != nullptr)
     {
-        if (mPageArr[pageNr].data != nullptr)
-        {
-            free(mPageArr[pageNr].data);
-        }
+        free(memPool);
+        memPool = nullptr;
     }
-    delete[] mPageArr;
+    if (mPageArr != nullptr)
+    {
+        delete[] mPageArr;
+        mPageArr = nullptr;
+    }
 }
 
 char*
 Map::AllocateMpage(uint64_t pageNr)
 {
+    assert(pageNr < numPages);
     if (mPageArr[pageNr].data != nullptr)
     {
         POS_TRACE_ERROR(EID(MPAGE_ALREADY_EXIST),
@@ -77,16 +88,8 @@ Map::AllocateMpage(uint64_t pageNr)
         return nullptr;
     }
 
-    char* mpage;
-    int ret = posix_memalign((void**)&mpage, pos::SECTOR_SIZE,
-        pageSize);
-    if (ret != 0)
-    {
-        POS_TRACE_ERROR(EID(MPAGE_MEMORY_ALLOC_FAILURE),
-            "posix_memalign() failure, ret:{}", ret);
-        return nullptr;
-    }
-
+    uint64_t memOffset = pageSize * pageNr;
+    char* mpage = memPool + memOffset;
     memset(mpage, 0xFF, pageSize);
     mPageArr[pageNr].data = mpage;
 

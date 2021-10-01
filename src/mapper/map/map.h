@@ -73,6 +73,7 @@ public:
     virtual void GetMpageLock(uint64_t pageNr);
     virtual void ReleaseMpageLock(uint64_t pageNr);
 
+    char* memPool;
     Mpage* mPageArr;
     uint64_t pageSize;
     uint64_t numPages;
