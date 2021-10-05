@@ -198,7 +198,9 @@ WriteMpio::_HandleError(MpAioState expNextState)
 
     if (rc.first != 0)
     {
-        assert(false);
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MEDIA_WRITE_FAILED,
+            "[Mpio][WrMpioError] WriteMpio Error...req.tagId={}, mpio_id={}",
+            io.tagId, io.mpioId);
     }
 
     SetNextState(expNextState);

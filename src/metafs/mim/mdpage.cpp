@@ -119,8 +119,27 @@ MDPage::CheckValid(int arrayId)
 {
     // detect mdpage validity by combining two signatures
     // note that it has to have additional logic to detect signature corruption case later on
-    return (ctrlInfo->mfsSignature == MDPageControlInfo::MDPAGE_CTRL_INFO_SIG &&
-        ctrlInfo->epochSignature == MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->GetEpochSignature());
+    if (ctrlInfo->mfsSignature != MDPageControlInfo::MDPAGE_CTRL_INFO_SIG)
+    {
+        uint32_t signature = MDPageControlInfo::MDPAGE_CTRL_INFO_SIG;
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            "The mdpage signature in the control is invalid, ideal sig: {}, sig: {}",
+            signature, ctrlInfo->mfsSignature);
+
+        return false;
+    }
+
+    uint64_t signature = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->GetEpochSignature();
+    if (ctrlInfo->epochSignature != signature)
+    {
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            "The epoch signature in the control is invalid, ideal sig: {}, sig: {}",
+            signature, ctrlInfo->epochSignature);
+
+        return false;
+    }
+
+    return true;
 }
 
 bool
@@ -129,7 +148,7 @@ MDPage::CheckLpnMismatch(MetaLpnType srcLpn)
     if (ctrlInfo->metaLpn != srcLpn)
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-            "Lpn mismatch detected: target_lpn={}, saved lpn={}",
+            "Lpn mismatch detected: ideal lpn: {}, lpn: {}",
             srcLpn, ctrlInfo->metaLpn);
 
         return false;
@@ -143,7 +162,7 @@ MDPage::CheckFileMismatch(FileDescriptorType fd)
     if (ctrlInfo->fd != fd)
     {
         MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-            "FD mismatch detected: target FD={}, saved FD={}, lpn={}",
+            "FD mismatch detected: ideal fd: {}, fd: {}, lpn: {}",
             fd, ctrlInfo->fd, ctrlInfo->metaLpn);
         return false;
     }

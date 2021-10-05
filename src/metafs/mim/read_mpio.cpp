@@ -90,9 +90,11 @@ ReadMpio::_HandleError(MpAioState expNextState)
     MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_DATA_CORRUPTED,
         "[Mpio][RdMpioError] ReadMpio Error...req.tagId={}, mpio_id={}",
         io.tagId, io.mpioId);
+
     SetNextState(expNextState);
     return true;
 }
+
 bool
 ReadMpio::_CompleteIO(MpAioState expNextState)
 {

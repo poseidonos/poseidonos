@@ -195,19 +195,7 @@ Mpio::IsValidPage(void)
 {
     mdpage.AttachControlInfo();
 
-    if ((mdpage.GetMfsSignature() == 0) && (GetOpcode() == MetaIoOpcode::Read))
-    {
-        // clean page , need to change read state machin.
-    }
-
-    bool isValid = mdpage.CheckValid(io.arrayId);
-    if (!isValid)
-    {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
-            "it's empty or invalid mdpage");
-        return false;
-    }
-    return true;
+    return mdpage.CheckValid(io.arrayId);
 }
 
 bool
@@ -240,7 +228,9 @@ Mpio::DoE2ECheck(MpAioState expNextState)
         if (false == CheckDataIntegrity())
         {
             MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_INFORMATION,
-                "E2E Check fail!!!!");
+                "[Mpio][DoE2ECheck ] E2E Check fail!, arrayId={}, mediaType={}, lpn={}",
+                io.arrayId, (int)io.targetMediaType, io.metaLpn);
+
             // FIXME: need to handle error
             assert(false);
         }
@@ -251,6 +241,10 @@ Mpio::DoE2ECheck(MpAioState expNextState)
         if (MetaStorageType::NVRAM != io.targetMediaType)
 #endif
         {
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                "[Mpio][DoE2ECheck ] Read data will be cleared due to invalid data, arrayId={}, mediaType={}, lpn={}, oldData={}",
+                io.arrayId, (int)io.targetMediaType, io.metaLpn, *(uint64_t*)GetMDPageDataBuf());
+
             // require to memset for invalid page?
             _DoMemSetZero(GetMDPageDataBuf(), mdpage.GetDefaultDataChunkSize());
         }
