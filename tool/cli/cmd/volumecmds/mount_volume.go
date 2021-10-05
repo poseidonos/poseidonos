@@ -16,7 +16,7 @@ var MountVolumeCmd = &cobra.Command{
 	Use:   "mount [flags]",
 	Short: "Mount a volume to the host.",
 	Long: `
-Mount a volume to the host.
+Mount a volume to the host. 
 
 Syntax:
 	mount (--volume-name | -v) VolumeName (--array-name | -a) ArrayName
@@ -32,10 +32,13 @@ Example:
 
 		CheckSubsystemParam(cmd)
 
+		// Execute create subsystem or add listener command
+		// if related flag is input.
 		if mount_volume_ready_to_create_subsystem == true {
 			var warningMsg = "WARNING: Are you sure you want to mount volume to the subsystem:" +
 				" " + mount_volume_subNqnName + "?\n" +
-				"If requsted subsystem does not exist, it will be automatically created."
+				`If the specified subsystem does not exist, a new subsystem will be created,
+				and this volume will be mounted to it.`
 
 			if mount_volume_isForced == false {
 				conf := displaymgr.AskConfirmation(warningMsg)
@@ -154,7 +157,10 @@ func init() {
 
 	MountVolumeCmd.Flags().StringVarP(&mount_volume_subNqnName,
 		"subnqn", "q", "",
-		"NVMe qualified name of target NVM subsystem")
+		`NVMe qualified name of target NVM subsystem. When this flag is specified,
+		POS will check if the specified NVM subsystem exists. If it exists, 
+		POS will mount this volume to it. Otherwise, POS will create a new
+		NVM subsystem and mount this volume to it.`)
 
 	MountVolumeCmd.Flags().StringVarP(&mount_volume_trtype,
 		"transport-type", "t", "",
@@ -170,5 +176,5 @@ func init() {
 
 	MountVolumeCmd.Flags().BoolVarP(&mount_volume_isForced,
 		"force", "", false,
-		"Execute this command without confirmation")
+		"Force to mount this volume.")
 }

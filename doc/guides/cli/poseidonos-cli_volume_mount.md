@@ -5,7 +5,7 @@ Mount a volume to the host.
 ### Synopsis
 
 
-Mount a volume to the host.
+Mount a volume to the host. 
 
 Syntax:
 	mount (--volume-name | -v) VolumeName (--array-name | -a) ArrayName
@@ -25,9 +25,12 @@ poseidonos-cli volume mount [flags]
 
 ```
   -a, --array-name string             The name of the array where the volume belongs to.
-      --force                         Execute this command without confirmation
+      --force                         Force to mount this volume.
   -h, --help                          help for mount
-  -q, --subnqn string                 NVMe qualified name of target NVM subsystem
+  -q, --subnqn string                 NVMe qualified name of target NVM subsystem. When this flag is specified,
+                                      		POS will check if the specified NVM subsystem exists. If it exists, 
+                                      		POS will mount this volume to it. Otherwise, POS will create a new
+                                      		NVM subsystem and mount this volume to it.
   -i, --target-address string         NVMe-oF target address (ex. 127.0.0.1)
   -p, --transport-service-id string   NVMe-oF transport service id (ex. 1158)
   -t, --transport-type string         NVMe-oF transport type (ex. tcp)

@@ -48,5 +48,8 @@ POS validates the configuration and uses it only when they are within an expecte
 ## Mounting POS Volume
 "Mount" operation establishes NVMe-oF connection between an initiator and a target. If storage administrator does not specify an NVM subsystem to attach POS volume to, POS chooses the next available NVM subsystem in a round-robin fashion. 
 
+Restriction: A subsystem can only be associated with a single array, wheras an array can be associated with multiple subsystems. The association between an array and a subsystem is established when a volume of the array is first mounted to the subsystem. Once an association is established, the volumes of the other arrays cannot be mounted to that subsystem.
+
+
 ## Unmounting Volume
 "Unmount" operation detaches POS volume from its corresponding NVM subsystem, stopping I/O requests between an initiator and a target.
