@@ -121,10 +121,9 @@ MDPage::CheckValid(int arrayId)
     // note that it has to have additional logic to detect signature corruption case later on
     if (ctrlInfo->mfsSignature != MDPageControlInfo::MDPAGE_CTRL_INFO_SIG)
     {
-        uint32_t signature = MDPageControlInfo::MDPAGE_CTRL_INFO_SIG;
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
-            "The mdpage signature in the control is invalid, ideal sig: {}, sig: {}",
-            signature, ctrlInfo->mfsSignature);
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            "The mdpage signature in the control is invalid, sig: {}",
+            ctrlInfo->mfsSignature);
 
         return false;
     }
@@ -132,7 +131,7 @@ MDPage::CheckValid(int arrayId)
     uint64_t signature = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->GetEpochSignature();
     if (ctrlInfo->epochSignature != signature)
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
             "The epoch signature in the control is invalid, ideal sig: {}, sig: {}",
             signature, ctrlInfo->epochSignature);
 

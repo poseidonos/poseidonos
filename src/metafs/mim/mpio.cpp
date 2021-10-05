@@ -241,7 +241,7 @@ Mpio::DoE2ECheck(MpAioState expNextState)
         if (MetaStorageType::NVRAM != io.targetMediaType)
 #endif
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
                 "[Mpio][DoE2ECheck ] Read data will be cleared due to invalid data, arrayId={}, mediaType={}, lpn={}, oldData={}",
                 io.arrayId, (int)io.targetMediaType, io.metaLpn, *(uint64_t*)GetMDPageDataBuf());
 
