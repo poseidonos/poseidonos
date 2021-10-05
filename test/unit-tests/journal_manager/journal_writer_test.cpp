@@ -1,3 +1,35 @@
+/*
+ *   BSD LICENSE
+ *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without
+ *   modification, are permitted provided that the following conditions
+ *   are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided with the
+ *       distribution.
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
+ *
+ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "src/journal_manager/journal_writer.h"
 
 #include <gtest/gtest.h>
@@ -22,6 +54,20 @@ TEST(JournalWriter, Init_testIfInitializedSuccessfully)
 
     JournalWriter writer;
     writer.Init(&writeHandler, &factory, &eventFactory, &status);
+}
+
+TEST(JournalWriter, AddBlockMapUpdatedLog_testIfExectedWithoutInitialilzation)
+{
+    // Given
+    JournalWriter writer;
+
+    // When: Journal is requested to write block write done log without initialization
+    MpageList dummyList;
+    int actualReturnCode = writer.AddBlockMapUpdatedLog(nullptr, dummyList, nullptr);
+
+    // Then: JournalWriter return the error code;
+    int expectedReturnCode = -EID(JOURNAL_INVALID);
+    EXPECT_EQ(expectedReturnCode, actualReturnCode);
 }
 
 TEST(JournalWriter, AddBlockMapUpdatedLog_testIfSuccessWhenStatusIsJournaling)
@@ -161,8 +207,7 @@ TEST(JournalWriter, AddGcStripeFlushedLog_testIfSuccessWhenStatusIsJournaling)
     writer.Init(&writeHandler, &factory, &eventFactory, &status);
 
     EventSmartPtr callbackEvent(new MockGcLogWriteCompleted());
-    ON_CALL(eventFactory, CreateGcLogWriteCompletedEvent).
-        WillByDefault(Return(callbackEvent));
+    ON_CALL(eventFactory, CreateGcLogWriteCompletedEvent).WillByDefault(Return(callbackEvent));
 
     auto eventPtr = dynamic_cast<MockGcLogWriteCompleted*>(callbackEvent.get());
     assert(eventPtr != nullptr);
@@ -236,8 +281,7 @@ TEST(JournalWriter, AddGcStripeFlushedLog_testIfGcLogWriteCompletionCallbackIsEx
     writer.Init(&writeHandler, &factory, &eventFactory, &status);
 
     EventSmartPtr callbackEvent(new MockGcLogWriteCompleted());
-    ON_CALL(eventFactory, CreateGcLogWriteCompletedEvent).
-        WillByDefault(Return(callbackEvent));
+    ON_CALL(eventFactory, CreateGcLogWriteCompletedEvent).WillByDefault(Return(callbackEvent));
 
     auto eventPtr = dynamic_cast<MockGcLogWriteCompleted*>(callbackEvent.get());
     assert(eventPtr != nullptr);
@@ -249,5 +293,44 @@ TEST(JournalWriter, AddGcStripeFlushedLog_testIfGcLogWriteCompletionCallbackIsEx
     GcStripeMapUpdateList emptyMapUpdates;
     MapPageList dummyList;
     EXPECT_TRUE(writer.AddGcStripeFlushedLog(emptyMapUpdates, dummyList, nullptr) == 0);
+}
+
+TEST(JournalWriter, AddGcStripeFlushedLog_testIfFailedToAddLog)
+{
+    // Given
+    NiceMock<MockLogWriteHandler> writeHandler;
+    NiceMock<MockLogWriteContextFactory> factory;
+    NiceMock<MockJournalEventFactory> eventFactory;
+    NiceMock<MockJournalingStatus> status;
+
+    ON_CALL(status, Get).WillByDefault(Return(JOURNALING));
+
+    JournalWriter writer;
+    writer.Init(&writeHandler, &factory, &eventFactory, &status);
+
+    EventSmartPtr callbackEvent(new MockGcLogWriteCompleted());
+    ON_CALL(eventFactory, CreateGcLogWriteCompletedEvent).WillByDefault(Return(callbackEvent));
+
+    // When
+    GcStripeMapUpdateList mapUpdates;
+    GcBlockMapUpdate dummyUpdate = {
+        .rba = 0,
+        .vsa = UNMAP_VSA};
+    mapUpdates.blockMapUpdateList.assign(5, dummyUpdate);
+    MapPageList dummyList;
+
+    std::vector<LogWriteContext*> blockContexts;
+    MapUpdateLogWriteContext logWriteContext;
+    blockContexts.push_back(&logWriteContext);
+    int numDummyContexts = 4;
+    for (int index = 0; index < numDummyContexts; index++)
+    {
+        MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext;
+        blockContexts.push_back(logWriteContext);
+    }
+    EXPECT_CALL(factory, CreateGcBlockMapLogWriteContexts).WillOnce(Return(blockContexts));
+    EXPECT_CALL(writeHandler, AddLog).WillRepeatedly(Return(-1));
+
+    EXPECT_TRUE(writer.AddGcStripeFlushedLog(mapUpdates, dummyList, nullptr) == -1);
 }
 } // namespace pos

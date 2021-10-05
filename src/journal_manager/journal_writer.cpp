@@ -72,20 +72,23 @@ JournalWriter::_CanBeWritten(void)
     {
         return (-1) * static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID);
     }
-    else if (status->Get() == JOURNALING)
+
+    int returnCode = 0;
+    JournalManagerStatus currentStatus = status->Get();
+    if (currentStatus == JOURNALING)
     {
-        return 0;
+        returnCode = 0;
     }
-    else if (status->Get() == JOURNAL_INVALID)
+    else if (currentStatus == JOURNAL_INVALID)
     {
-        return (-1) * static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID);
+        returnCode = (-1) * static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID);
     }
-    else if (status->Get() != JOURNALING)
+    else if (currentStatus != JOURNALING)
     {
-        return static_cast<int>(POS_EVENT_ID::JOURNAL_NOT_READY);
+        returnCode = static_cast<int>(POS_EVENT_ID::JOURNAL_NOT_READY);
     }
 
-    return -1;
+    return returnCode;
 }
 
 int
