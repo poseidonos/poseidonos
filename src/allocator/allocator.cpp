@@ -340,8 +340,8 @@ Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
             }
             else
             {
-                AllocatorCtx* allocCtx = contextManager->GetAllocatorCtx();
-                allocCtx->SetAllocatedSegmentCount(numBitsSet);
+                SegmentCtx* segCtx = contextManager->GetSegmentCtx();
+                segCtx->SetAllocatedSegmentCount(numBitsSet);
             }
         }
         // ACTIVE_STRIPE_TAIL, CURRENT_SSD_LSID, SEGMENT_STATE
@@ -385,7 +385,7 @@ Allocator::GetInstantMetaInfo(std::string fname)
     oss << std::endl;
 
     oss << "<< Segments >>" << std::endl;
-    oss << "Set:" << std::dec << allocCtx->GetAllocatedSegmentCount() << " / ToTal:" << allocCtx->GetTotalSegmentsCount() << std::endl;
+    oss << "Set:" << std::dec << segCtx->GetAllocatedSegmentCount() << " / ToTal:" << segCtx->GetTotalSegmentsCount() << std::endl;
     oss << "currentSsdLsid: " << allocCtx->GetCurrentSsdLsid() << std::endl;
     for (uint32_t segmentId = 0; segmentId < addrInfo->GetnumUserAreaSegments(); ++segmentId)
     {

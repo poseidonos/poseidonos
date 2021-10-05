@@ -50,8 +50,9 @@ class SegmentCtx : public IAllocatorFileIoClient
 public:
     SegmentCtx(void) = default;
     SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_);
-    SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, 
+    SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
         SegmentStates* segmentStates_, SegmentLock* segmentStateLocks_,
+        BitMapMutex* segmentBitmap,
         AllocatorAddressInfo* addrInfo_);
     explicit SegmentCtx(AllocatorAddressInfo* info);
     virtual ~SegmentCtx(void);
@@ -69,7 +70,6 @@ public:
     virtual uint32_t IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
     virtual bool DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
     virtual uint32_t GetValidBlockCount(SegmentId segId);
-    virtual void SetOccupiedStripeCount(SegmentId segId, int count);
     virtual int GetOccupiedStripeCount(SegmentId segId);
     virtual bool IncreaseOccupiedStripeCount(SegmentId segId);
 
@@ -80,17 +80,36 @@ public:
     virtual SegmentInfo* GetSegmentInfo(void) { return segmentInfos;}
     virtual std::mutex& GetSegmentCtxLock(void) { return segCtxLock;}
 
+    virtual void AllocateSegment(SegmentId segId);
+    virtual void ReleaseSegment(SegmentId segId);
+    virtual SegmentId AllocateFreeSegment(SegmentId startSegId);
+
+    virtual SegmentId GetUsedSegment(SegmentId startSegId);
+    virtual uint64_t GetNumOfFreeSegment(void);
+    virtual uint64_t GetNumOfFreeSegmentWoLock(void);
+    virtual void SetAllocatedSegmentCount(int count);
+    virtual int GetAllocatedSegmentCount(void);
+    virtual int GetTotalSegmentsCount(void);
+
+    virtual SegmentId FindMostInvalidSSDSegment(void);
+
     virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
     static const uint32_t SIG_SEGMENT_CTX = 0xAFAFAFAF;
 
 private:
+    void _SetOccupiedStripeCount(SegmentId segId, int count);
+    void _FreeSegment(SegmentId segId);
+
     SegmentCtxHeader ctxHeader;
     std::atomic<uint64_t> ctxDirtyVersion;
     std::atomic<uint64_t> ctxStoredVersion;
+
     SegmentInfo* segmentInfos;
     SegmentStates* segmentStates;
+
+    BitMapMutex* allocSegBitmap; // Unset:Free, Set:Not-Free
 
     uint32_t numSegments;
     bool initialized;

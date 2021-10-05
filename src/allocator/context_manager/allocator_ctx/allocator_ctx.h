@@ -47,7 +47,7 @@ class AllocatorCtx : public IAllocatorFileIoClient
 {
 public:
     AllocatorCtx(void) = default;
-    AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap, AllocatorAddressInfo* info);
+    AllocatorCtx(AllocatorCtxHeader* header, AllocatorAddressInfo* info);
     explicit AllocatorCtx(AllocatorAddressInfo* info);
     virtual ~AllocatorCtx(void);
     virtual void Init(void);
@@ -69,17 +69,6 @@ public:
     virtual void SetPrevSsdLsid(StripeId stripeId);
     virtual void SetNextSsdLsid(SegmentId segId);
 
-    virtual void AllocateSegment(SegmentId segId);
-    virtual void ReleaseSegment(SegmentId segId);
-    virtual SegmentId AllocateFreeSegment(SegmentId startSegId);
-    virtual SegmentId GetUsedSegment(SegmentId startSegId);
-    virtual uint64_t GetNumOfFreeSegment(void);
-    virtual uint64_t GetNumOfFreeSegmentWoLock(void);
-
-    virtual void SetAllocatedSegmentCount(int count);
-    virtual int GetAllocatedSegmentCount(void);
-    virtual int GetTotalSegmentsCount(void);
-
     virtual std::mutex& GetAllocatorCtxLock(void) { return allocCtxLock; }
 
     static const uint32_t SIG_ALLOCATOR_CTX = 0xBFBFBFBF;
@@ -90,8 +79,6 @@ private:
     std::atomic<uint64_t> ctxStoredVersion;
     std::atomic<uint64_t> ctxDirtyVersion;
 
-    // Segment Allocation
-    BitMapMutex* allocSegBitmap; // Unset:Free, Set:Not-Free
     StripeId prevSsdLsid;
     StripeId currentSsdLsid;
 

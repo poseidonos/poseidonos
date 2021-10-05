@@ -44,16 +44,13 @@
 
 namespace pos
 {
-AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitmap_, AllocatorAddressInfo* info_)
+AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, AllocatorAddressInfo* info_)
 : ctxStoredVersion(0),
   ctxDirtyVersion(0),
   addrInfo(info_),
   initialized(false)
 {
-    allocSegBitmap = allocSegBitmap_; // for UT
-
     ctxHeader.sig = SIG_ALLOCATOR_CTX;
-    ctxHeader.numValidSegment = 0;
     ctxHeader.numValidWbLsid = 0;
     ctxHeader.ctxVersion = 0;
     prevSsdLsid = 0;
@@ -62,14 +59,13 @@ AllocatorCtx::AllocatorCtx(AllocatorCtxHeader* header, BitMapMutex* allocSegBitm
     if (header != nullptr)
     {
         ctxHeader.sig = header->sig;
-        ctxHeader.numValidSegment = header->numValidSegment;
         ctxHeader.numValidWbLsid = header->numValidWbLsid;
         ctxHeader.ctxVersion = header->ctxVersion;
     }
 }
 
 AllocatorCtx::AllocatorCtx(AllocatorAddressInfo* info)
-: AllocatorCtx(nullptr, nullptr, info)
+: AllocatorCtx(nullptr, info)
 {
 }
 
@@ -86,12 +82,6 @@ AllocatorCtx::Init(void)
         return;
     }
 
-
-    uint32_t numSegment = addrInfo->GetnumUserAreaSegments();
-    if (allocSegBitmap == nullptr)
-    {
-        allocSegBitmap = new BitMapMutex(numSegment);
-    }
     currentSsdLsid = STRIPES_PER_SEGMENT - 1;
     prevSsdLsid = STRIPES_PER_SEGMENT - 1;
 
@@ -109,56 +99,10 @@ AllocatorCtx::Dispose(void)
         return;
     }
 
-    if (allocSegBitmap != nullptr)
-    {
-        delete allocSegBitmap;
-        allocSegBitmap = nullptr;
-    }
     initialized = false;
 }
 
-void
-AllocatorCtx::AllocateSegment(SegmentId segId)
-{
-    allocSegBitmap->SetBit(segId);
-}
 
-void
-AllocatorCtx::ReleaseSegment(SegmentId segId)
-{
-    allocSegBitmap->ClearBit(segId);
-}
-
-SegmentId
-AllocatorCtx::AllocateFreeSegment(SegmentId startSegId)
-{
-    SegmentId segId;
-    if (startSegId == UNMAP_SEGMENT)
-    {
-        segId = allocSegBitmap->SetNextZeroBit();
-    }
-    else
-    {
-        segId = allocSegBitmap->SetFirstZeroBit(startSegId);
-    }
-
-    if (allocSegBitmap->IsValidBit(segId) == false)
-    {
-        segId = UNMAP_SEGMENT;
-    }
-    return segId;
-}
-
-SegmentId
-AllocatorCtx::GetUsedSegment(SegmentId startSegId)
-{
-    SegmentId segId = allocSegBitmap->FindFirstSetBit(startSegId);
-    if (allocSegBitmap->IsValidBit(segId) == false)
-    {
-        segId = UNMAP_SEGMENT;
-    }
-    return segId;
-}
 
 void
 AllocatorCtx::SetNextSsdLsid(SegmentId segId)
@@ -204,41 +148,10 @@ AllocatorCtx::RollbackCurrentSsdLsid(void)
     currentSsdLsid = prevSsdLsid;
 }
 
-uint64_t
-AllocatorCtx::GetNumOfFreeSegment(void)
-{
-    return allocSegBitmap->GetNumBits() - allocSegBitmap->GetNumBitsSet();
-}
-
-uint64_t
-AllocatorCtx::GetNumOfFreeSegmentWoLock(void)
-{
-    return allocSegBitmap->GetNumBits() - allocSegBitmap->GetNumBitsSetWoLock();
-}
-
-void
-AllocatorCtx::SetAllocatedSegmentCount(int count)
-{
-    allocSegBitmap->SetNumBitsSet(count);
-}
-
-int
-AllocatorCtx::GetAllocatedSegmentCount(void)
-{
-    return allocSegBitmap->GetNumBitsSet();
-}
-
-int
-AllocatorCtx::GetTotalSegmentsCount(void)
-{
-    return allocSegBitmap->GetNumBits();
-}
-
 void
 AllocatorCtx::AfterLoad(char* buf)
 {
-    POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "AllocatorCtx file loaded:{}, {}", ctxHeader.ctxVersion, ctxHeader.numValidSegment);
-    allocSegBitmap->SetNumBitsSet(ctxHeader.numValidSegment);
+    POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "AllocatorCtx file loaded:{}", ctxHeader.ctxVersion);
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
 }
 
@@ -246,7 +159,6 @@ void
 AllocatorCtx::BeforeFlush(int section, char* buf)
 {
     ctxHeader.ctxVersion = ctxDirtyVersion++;
-    ctxHeader.numValidSegment = allocSegBitmap->GetNumBitsSet();
 }
 
 void
@@ -264,11 +176,6 @@ AllocatorCtx::GetSectionAddr(int section)
         case AC_HEADER:
         {
             ret = (char*)&ctxHeader;
-            break;
-        }
-        case AC_ALLOCATE_SEGMENT_BITMAP:
-        {
-            ret = (char*)allocSegBitmap->GetMapAddr();
             break;
         }
         case AC_CURRENT_SSD_LSID:
@@ -289,11 +196,6 @@ AllocatorCtx::GetSectionSize(int section)
         case AC_HEADER:
         {
             ret = sizeof(AllocatorCtxHeader);
-            break;
-        }
-        case AC_ALLOCATE_SEGMENT_BITMAP:
-        {
-            ret = allocSegBitmap->GetNumEntry() * BITMAP_ENTRY_SIZE;
             break;
         }
         case AC_CURRENT_SSD_LSID:

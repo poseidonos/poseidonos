@@ -339,7 +339,7 @@ RebuildCtx::MakeRebuildTarget(void)
     SegmentId segmentId = 0;
     while (true)
     {
-        segmentId = allocatorCtx->GetUsedSegment(segmentId);
+        segmentId = segmentCtx->GetUsedSegment(segmentId);
         if (segmentId == UNMAP_SEGMENT)
         {
             break;

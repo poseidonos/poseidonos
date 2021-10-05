@@ -45,16 +45,18 @@
 namespace pos
 {
 SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, AllocatorAddressInfo* addrInfo_)
-: SegmentCtx(header, segmentInfo_, nullptr, nullptr, addrInfo_)
+: SegmentCtx(header, segmentInfo_, nullptr, nullptr, nullptr, addrInfo_)
 {
 }
 
-SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_, 
+SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
     SegmentStates* segmentStates_, SegmentLock* segmentStateLocks_,
+    BitMapMutex* segmentBitmap_,
     AllocatorAddressInfo* addrInfo_)
 : ctxDirtyVersion(0),
   ctxStoredVersion(0),
   segmentStates(segmentStates_),
+  allocSegBitmap(segmentBitmap_),
   numSegments(0),
   initialized(false),
   addrInfo(addrInfo_),
@@ -66,6 +68,7 @@ SegmentCtx::SegmentCtx(SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
         // for UT
         ctxHeader.sig = header->sig;
         ctxHeader.ctxVersion = header->ctxVersion;
+        ctxHeader.numValidSegment = header->numValidSegment;
     }
     else
     {
@@ -111,6 +114,10 @@ SegmentCtx::Init(void)
     {
         segStateLocks = new SegmentLock[numSegments];
     }
+    if (allocSegBitmap == nullptr)
+    {
+        allocSegBitmap = new BitMapMutex(numSegments);
+    }
 
     initialized = true;
 }
@@ -139,6 +146,12 @@ SegmentCtx::Dispose(void)
     {
         delete[] segStateLocks;
         segStateLocks = nullptr;
+    }
+
+    if (allocSegBitmap != nullptr)
+    {
+        delete allocSegBitmap;
+        allocSegBitmap = nullptr;
     }
 
     initialized = false;
@@ -183,9 +196,7 @@ SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
         {
             assert(segmentInfos[segId].GetOccupiedStripeCount() == addrInfo->GetstripesPerSegment());
 
-            segmentInfos[segId].SetOccupiedStripeCount(0);
-            segmentStates[segId].SetState(SegmentState::FREE);
-
+            _FreeSegment(segId);
             segmentFreed = true;
         }
     }
@@ -193,22 +204,18 @@ SegmentCtx::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
     return segmentFreed;
 }
 
+void
+SegmentCtx::_FreeSegment(SegmentId segId)
+{
+    segmentInfos[segId].SetOccupiedStripeCount(0);
+    segmentStates[segId].SetState(SegmentState::FREE);
+    allocSegBitmap->ClearBit(segId);
+}
+
 uint32_t
 SegmentCtx::GetValidBlockCount(SegmentId segId)
 {
     return segmentInfos[segId].GetValidBlockCount();
-}
-
-void
-SegmentCtx::SetOccupiedStripeCount(SegmentId segId, int count)
-{
-    segmentInfos[segId].SetOccupiedStripeCount(count);
-}
-
-int
-SegmentCtx::GetOccupiedStripeCount(SegmentId segId)
-{
-    return segmentInfos[segId].GetOccupiedStripeCount();
 }
 
 bool
@@ -224,9 +231,7 @@ SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
         {
             if (segmentStates[segId].GetState() != SegmentState::FREE)
             {
-                segmentInfos[segId].SetOccupiedStripeCount(0);
-                segmentStates[segId].SetState(SegmentState::FREE);
-
+                _FreeSegment(segId);
                 segmentFreed = true;
             }
         }
@@ -239,10 +244,17 @@ SegmentCtx::IncreaseOccupiedStripeCount(SegmentId segId)
     return segmentFreed;
 }
 
+int
+SegmentCtx::GetOccupiedStripeCount(SegmentId segId)
+{
+    return segmentInfos[segId].GetOccupiedStripeCount();
+}
+
 void
 SegmentCtx::AfterLoad(char* buf)
 {
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "SegmentCtx file loaded:{}", ctxHeader.ctxVersion);
+    allocSegBitmap->SetNumBitsSet(ctxHeader.numValidSegment);
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
 }
 
@@ -250,6 +262,7 @@ void
 SegmentCtx::BeforeFlush(int section, char* buf)
 {
     ctxHeader.ctxVersion = ctxDirtyVersion++;
+    ctxHeader.numValidSegment = allocSegBitmap->GetNumBitsSet();
 }
 
 void
@@ -279,6 +292,11 @@ SegmentCtx::GetSectionAddr(int section)
             ret = (char*)segmentStates;
             break;
         }
+        case AC_ALLOCATE_SEGMENT_BITMAP:
+        {
+            ret = (char*)allocSegBitmap->GetMapAddr();
+            break;
+        }
     }
     return ret;
 }
@@ -302,6 +320,11 @@ SegmentCtx::GetSectionSize(int section)
         case AC_SEGMENT_STATES:
         {
             ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentStates);
+            break;
+        }
+        case AC_ALLOCATE_SEGMENT_BITMAP:
+        {
+            ret = allocSegBitmap->GetNumEntry() * BITMAP_ENTRY_SIZE;
             break;
         }
     }
@@ -352,6 +375,115 @@ std::mutex&
 SegmentCtx::GetSegStateLock(SegmentId segId)
 {
     return segStateLocks[segId].GetLock();
+}
+
+void
+SegmentCtx::AllocateSegment(SegmentId segId)
+{
+    segmentStates[segId].SetState(SegmentState::NVRAM);
+    allocSegBitmap->SetBit(segId);
+}
+
+void
+SegmentCtx::ReleaseSegment(SegmentId segId)
+{
+    allocSegBitmap->ClearBit(segId);
+    segmentStates[segId].SetState(SegmentState::FREE);
+
+    segmentInfos[segId].SetOccupiedStripeCount(0);
+    segmentInfos[segId].SetValidBlockCount(0);
+}
+
+SegmentId
+SegmentCtx::AllocateFreeSegment(SegmentId startSegId)
+{
+    SegmentId segId;
+    if (startSegId == UNMAP_SEGMENT)
+    {
+        segId = allocSegBitmap->SetNextZeroBit();
+    }
+    else
+    {
+        segId = allocSegBitmap->SetFirstZeroBit(startSegId);
+    }
+
+    if (allocSegBitmap->IsValidBit(segId) == false)
+    {
+        segId = UNMAP_SEGMENT;
+        POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "[AllocateSegment] failed to allocate segment, free segment count:{}", GetNumOfFreeSegmentWoLock());
+    }
+    else
+    {
+        segmentStates[segId].SetState(SegmentState::NVRAM);
+    }
+
+    return segId;
+}
+
+SegmentId
+SegmentCtx::GetUsedSegment(SegmentId startSegId)
+{
+    SegmentId segId = allocSegBitmap->FindFirstSetBit(startSegId);
+    if (allocSegBitmap->IsValidBit(segId) == false)
+    {
+        segId = UNMAP_SEGMENT;
+    }
+    return segId;
+}
+
+uint64_t
+SegmentCtx::GetNumOfFreeSegment(void)
+{
+    return allocSegBitmap->GetNumBits() - allocSegBitmap->GetNumBitsSet();
+}
+
+uint64_t
+SegmentCtx::GetNumOfFreeSegmentWoLock(void)
+{
+    return allocSegBitmap->GetNumBits() - allocSegBitmap->GetNumBitsSetWoLock();
+}
+
+void
+SegmentCtx::SetAllocatedSegmentCount(int count)
+{
+    allocSegBitmap->SetNumBitsSet(count);
+}
+
+int
+SegmentCtx::GetAllocatedSegmentCount(void)
+{
+    return allocSegBitmap->GetNumBitsSet();
+}
+
+int
+SegmentCtx::GetTotalSegmentsCount(void)
+{
+    return allocSegBitmap->GetNumBits();
+}
+
+SegmentId
+SegmentCtx::FindMostInvalidSSDSegment(void)
+{
+    uint32_t numUserAreaSegments = addrInfo->GetnumUserAreaSegments();
+    SegmentId victimSegment = UNMAP_SEGMENT;
+    uint32_t minValidCount = addrInfo->GetblksPerSegment();
+    for (SegmentId segId = 0; segId < numUserAreaSegments; ++segId)
+    {
+        uint32_t cnt = segmentInfos[segId].GetValidBlockCount();
+        std::lock_guard<std::mutex> lock(segStateLocks[segId].GetLock());
+        if ((segmentStates[segId].GetState() != SegmentState::SSD) || (cnt == 0))
+        {
+            continue;
+        }
+
+        if (cnt < minValidCount)
+        {
+            victimSegment = segId;
+            minValidCount = cnt;
+        }
+    }
+
+    return victimSegment;
 }
 
 void

@@ -276,7 +276,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(0));
     EXPECT_CALL(*file, Close);
-    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillOnce(Return(segCtx));
+    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
     // when 2.
     ret = alloc.SetMeta(WBT_SEGMENT_OCCUPIED_STRIPE, "", file);
     // then 2.
@@ -312,7 +312,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(-1));
     EXPECT_CALL(*file, Close);
     EXPECT_CALL(*ctxManager, GetAllocatorCtx).Times(0);
-    EXPECT_CALL(*allocCtx, SetAllocatedSegmentCount).Times(0);
+    EXPECT_CALL(*segCtx, SetAllocatedSegmentCount).Times(0);
     // when 5.
     ret = alloc.SetMeta(WBT_SEGMENT_BITMAP, "", file);
     // then 5.
@@ -323,8 +323,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(0));
     EXPECT_CALL(*file, Close);
-    EXPECT_CALL(*ctxManager, GetAllocatorCtx).WillOnce(Return(allocCtx));
-    EXPECT_CALL(*allocCtx, SetAllocatedSegmentCount);
+    EXPECT_CALL(*segCtx, SetAllocatedSegmentCount);
     // when 6.
     ret = alloc.SetMeta(WBT_SEGMENT_BITMAP, "", file);
     // then 6.

@@ -406,8 +406,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreed)
     // expect
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(1024));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-    EXPECT_CALL(*allocCtx, ReleaseSegment).Times(1);
-    EXPECT_CALL(*allocCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
+    EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
     EXPECT_CALL(tc, PublishData(_, 10)).Times(1);
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(0));
     EXPECT_CALL(*gcCtx, GetCurrentGcMode).WillOnce(Return(MODE_NO_GC));
@@ -433,8 +432,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAn
     // expect
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-    EXPECT_CALL(*allocCtx, ReleaseSegment).Times(1);
-    EXPECT_CALL(*allocCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
+    EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
     EXPECT_CALL(tc, PublishData(_, 10)).Times(1);
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store(REBUILD_CTX, _, _)).WillOnce(Return(0));
@@ -461,8 +459,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAn
     // expect
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-    EXPECT_CALL(*allocCtx, ReleaseSegment).Times(1);
-    EXPECT_CALL(*allocCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
+    EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
     EXPECT_CALL(tc, PublishData(_, 10)).Times(1);
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store(REBUILD_CTX, _, _)).WillOnce(Return(-1));
@@ -489,8 +486,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAn
     // expect
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-    EXPECT_CALL(*allocCtx, ReleaseSegment).Times(1);
-    EXPECT_CALL(*allocCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
+    EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
     EXPECT_CALL(tc, PublishData(TEL001_ALCT_FREE_SEG_CNT, 10)).Times(1);
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store(REBUILD_CTX, _, _)).WillOnce(Return(0));
@@ -518,8 +514,7 @@ TEST(ContextManager, UpdateOccupiedStripeCount_TestCountUpdateWhenSegmentFreedAn
     // expect
     EXPECT_CALL(addrInfo, GetstripesPerSegment).WillOnce(Return(100));
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount).WillOnce(Return(true));
-    EXPECT_CALL(*allocCtx, ReleaseSegment).Times(1);
-    EXPECT_CALL(*allocCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
+    EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(10));
     EXPECT_CALL(tc, PublishData(TEL001_ALCT_FREE_SEG_CNT, 10)).Times(1);
     EXPECT_CALL(*reCtx, FreeSegmentInRebuildTarget).WillOnce(Return(1));
     EXPECT_CALL(*fileMan, Store(REBUILD_CTX, _, _)).WillOnce(Return(0));
@@ -545,18 +540,18 @@ TEST(ContextManager, AllocateFreeSegment_TestFreeSegmentAllocationByState)
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, wbStripeCtx, gcCtx, blockAllocStatus, fileMan, nullptr, false, nullptr, 0);
 
     // given 1.
-    EXPECT_CALL(*allocCtx, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
+    EXPECT_CALL(*segCtx, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
     // when 1.
     ctxManager.AllocateFreeSegment();
 
     // given 2. first failed, second success
-    EXPECT_CALL(*allocCtx, AllocateFreeSegment).WillOnce(Return(5)).WillOnce(Return(11));
+    EXPECT_CALL(*segCtx, AllocateFreeSegment).WillOnce(Return(5)).WillOnce(Return(11));
     EXPECT_CALL(*reCtx, IsRebuildTargetSegment).WillOnce(Return(true)).WillOnce(Return(false));
     // when 2.
     ctxManager.AllocateFreeSegment();
 }
 
-TEST(ContextManager, AllocateGCVictimSegment_TestGCVictimAllocationByStateAndValidBlockCount)
+TEST(ContextManager, AllocateGCVictimSegment_TestIfVictimIsUpdated)
 {
     // given
     AllocatorAddressInfo addrInfo;
@@ -575,20 +570,18 @@ TEST(ContextManager, AllocateGCVictimSegment_TestGCVictimAllocationByStateAndVal
     NiceMock<MockTelemetryPublisher> tc;
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, wbStripeCtx, gcCtx, blockAllocStatus, fileMan, nullptr, false, &addrInfo, 0);
 
-    // given 1.
-    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock));
-    EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(15)).WillOnce(Return(0)).WillOnce(Return(0)).WillOnce(Return(13)).WillOnce(Return(10));
-    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD));
+    EXPECT_CALL(*segCtx, FindMostInvalidSSDSegment).WillOnce(Return(15));
+    EXPECT_CALL(*segCtx, SetSegmentState(15, SegmentState::VICTIM, true));
+    EXPECT_CALL(tc, PublishData(TEL003_ALCT_GCVICTIM_SEG, 15));
 
-    // when 1.
+    // when 1
     int ret = ctxManager.AllocateGCVictimSegment();
-    // then 2.
-    EXPECT_EQ(4, ret);
+    // then
+    EXPECT_EQ(15, ret);
 
-    // given 2.
-    EXPECT_CALL(*segCtx, GetSegStateLock).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock)).WillOnce(ReturnRef(segStateLock));
-    EXPECT_CALL(*segCtx, GetValidBlockCount).WillOnce(Return(20)).WillOnce(Return(0)).WillOnce(Return(20)).WillOnce(Return(20)).WillOnce(Return(20));
-    EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::FREE)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD)).WillOnce(Return(SegmentState::SSD));
+    EXPECT_CALL(*segCtx, FindMostInvalidSSDSegment).WillOnce(Return(UNMAP_SEGMENT));
+    EXPECT_CALL(*segCtx, SetSegmentState).Times(0);
+    EXPECT_CALL(tc, PublishData(TEL003_ALCT_GCVICTIM_SEG, _)).Times(0);
 
     // when 2.
     ret = ctxManager.AllocateGCVictimSegment();
@@ -609,13 +602,13 @@ TEST(ContextManager, GetNumOfFreeSegment_TestSimpleGetter)
     NiceMock<MockTelemetryPublisher> tc;
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, wbStripeCtx, gcCtx, blockAllocStatus, fileMan, nullptr, false, nullptr, 0);
 
-    EXPECT_CALL(*allocCtx, GetNumOfFreeSegment).WillOnce(Return(50));
+    EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(50));
     // when 1.
     int ret = ctxManager.GetNumOfFreeSegment(true);
     // then 1.
     EXPECT_EQ(50, ret);
     // given 2.
-    EXPECT_CALL(*allocCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(50));
+    EXPECT_CALL(*segCtx, GetNumOfFreeSegmentWoLock).WillOnce(Return(50));
     // when 2.
     ret = ctxManager.GetNumOfFreeSegment(false);
     // then 2.
@@ -639,35 +632,35 @@ TEST(ContextManager, GetCurrentGcMode_TestGetCurrentGcMode_ByNumberOfFreeSegment
     gcCtx->SetUrgentThreshold(5);
 
     // given 1.
-    EXPECT_CALL(*allocCtx, GetNumOfFreeSegment).WillOnce(Return(11));
+    EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(11));
     // when 1.
     GcMode ret = ctxManager.GetCurrentGcMode();
     // then 1.
     EXPECT_EQ(MODE_NO_GC, ret);
 
     // given 2.
-    EXPECT_CALL(*allocCtx, GetNumOfFreeSegment).WillOnce(Return(10));
+    EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(10));
     // when 2.
     ret = ctxManager.GetCurrentGcMode();
     // then 2.
     EXPECT_EQ(MODE_NORMAL_GC, ret);
 
     // given 3.
-    EXPECT_CALL(*allocCtx, GetNumOfFreeSegment).WillOnce(Return(9));
+    EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(9));
     // when 3.
     ret = ctxManager.GetCurrentGcMode();
     // then 3.
     EXPECT_EQ(MODE_NORMAL_GC, ret);
 
     // given 4.
-    EXPECT_CALL(*allocCtx, GetNumOfFreeSegment).WillOnce(Return(5));
+    EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(5));
     // when 4.
     ret = ctxManager.GetCurrentGcMode();
     // then 4.
     EXPECT_EQ(MODE_URGENT_GC, ret);
 
     // given 5.
-    EXPECT_CALL(*allocCtx, GetNumOfFreeSegment).WillOnce(Return(4));
+    EXPECT_CALL(*segCtx, GetNumOfFreeSegment).WillOnce(Return(4));
     // when 5.
     ret = ctxManager.GetCurrentGcMode();
     // then 5.
@@ -1017,19 +1010,20 @@ TEST(ContextManager, SetNextSsdLsid_TestCheckReturnedSegmentId)
     ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, wbStripeCtx, gcCtx, blockAllocStatus, fileMan, nullptr, false, nullptr, 0);
 
     // given 1.
-    std::mutex allocCtxLock;
-    EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
-    EXPECT_CALL(*allocCtx, AllocateFreeSegment).WillOnce(Return(5));
+    EXPECT_CALL(*segCtx, AllocateFreeSegment).WillOnce(Return(5));
     EXPECT_CALL(*reCtx, IsRebuildTargetSegment).WillOnce(Return(false));
     EXPECT_CALL(*allocCtx, SetNextSsdLsid(5));
+
+    std::mutex allocCtxLock;
+    EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
+
     // when 1.
     int ret = ctxManager.SetNextSsdLsid();
     // then 1.
     EXPECT_EQ(0, ret);
 
     // given 2.
-    EXPECT_CALL(*allocCtx, GetAllocatorCtxLock).WillOnce(ReturnRef(allocCtxLock));
-    EXPECT_CALL(*allocCtx, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
+    EXPECT_CALL(*segCtx, AllocateFreeSegment).WillOnce(Return(UNMAP_SEGMENT));
     // when 2.
     ret = ctxManager.SetNextSsdLsid();
     // then 2.

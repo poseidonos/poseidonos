@@ -59,13 +59,13 @@ enum SegmentCtxSection
     SC_HEADER = 0,
     SC_SEGMENT_INFO,
     AC_SEGMENT_STATES,
+    AC_ALLOCATE_SEGMENT_BITMAP,
     NUM_SEGMENT_CTX_SECTION
 };
 
 enum AllocatorCtxSection
 {
     AC_HEADER = 0,
-    AC_ALLOCATE_SEGMENT_BITMAP,
     AC_CURRENT_SSD_LSID,
     NUM_ALLOCATION_INFO,
     AC_ALLOCATE_WBLSID_BITMAP = NUM_ALLOCATION_INFO,
@@ -104,12 +104,12 @@ class AllocatorCtxHeader : public CtxHeader
 {
 public:
     uint32_t numValidWbLsid;
-    uint32_t numValidSegment;
 };
 
 class SegmentCtxHeader : public CtxHeader
 {
 public:
+    uint32_t numValidSegment;
 };
 
 class RebuildCtxHeader : public CtxHeader

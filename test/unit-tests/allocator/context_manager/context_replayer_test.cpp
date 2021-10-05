@@ -85,8 +85,7 @@ TEST(ContextReplayer, ReplaySegmentAllocation_TestAllocSegmentWithSegmentState)
     // given 2.
     addrInfo.SetstripesPerSegment(100);
     EXPECT_CALL(*segCtx, GetSegmentState).WillOnce(Return(SegmentState::FREE));
-    EXPECT_CALL(*segCtx, SetSegmentState);
-    EXPECT_CALL(*allocCtx, AllocateSegment);
+    EXPECT_CALL(*segCtx, AllocateSegment);
 
     // when 2.
     ctxReplayer.ReplaySegmentAllocation(10);
@@ -108,8 +107,8 @@ TEST(ContextReplayer, ReplayStripeAllocation_TestSimpleSetter)
     NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
 
     ContextReplayer ctxReplayer(allocCtx, segCtx, wbStripeCtx, &addrInfo);
-    EXPECT_CALL(*wbStripeCtx, AllocWbStripe);
-    EXPECT_CALL(*segCtx, SetSegmentState(_, SegmentState::NVRAM, _));
+    EXPECT_CALL(*wbStripeCtx, AllocWbStripe(0));
+    EXPECT_CALL(*segCtx, AllocateSegment(0));
 
     // when
     ctxReplayer.ReplayStripeAllocation(0, 0);
@@ -159,7 +158,7 @@ TEST(ContextReplayer, ReplayStripeFlushed_TestStripeFlushedWithSeveralConditions
 
     // given 2.
     EXPECT_CALL(*segCtx, IncreaseOccupiedStripeCount(1)).WillOnce(Return(true));
-    EXPECT_CALL(*allocCtx, ReleaseSegment).Times(1);
+    EXPECT_CALL(*segCtx, ReleaseSegment).Times(1);
     // when
     ctxReplayer.ReplayStripeFlushed(10);
 

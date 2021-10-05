@@ -82,8 +82,7 @@ ContextReplayer::ReplaySegmentAllocation(StripeId userLsid)
     SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
     if (segmentCtx->GetSegmentState(segId, false) == SegmentState::FREE)
     {
-        segmentCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
-        allocatorCtx->AllocateSegment(segId);
+        segmentCtx->AllocateSegment(segId);
         POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_REPLAY_STATUS, "SegmentId:{} is allocated", segId);
     }
 }
@@ -95,7 +94,7 @@ ContextReplayer::ReplayStripeAllocation(StripeId wbLsid, StripeId userLsid)
     wbStripeCtx->AllocWbStripe(wbLsid);
 
     SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
-    segmentCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
+    segmentCtx->AllocateSegment(segId);
 }
 
 void
@@ -113,7 +112,7 @@ ContextReplayer::ReplayStripeFlushed(StripeId userLsid)
     bool segmentFreed = segmentCtx->IncreaseOccupiedStripeCount(segId);
     if (segmentFreed == true)
     {
-        allocatorCtx->ReleaseSegment(segId);
+        segmentCtx->ReleaseSegment(segId);
         POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was freed by allocator", segId);
     }
 }
@@ -144,9 +143,7 @@ ContextReplayer::ResetSegmentsStates(void)
         }
         if ((segmentCtx->GetValidBlockCount(segId) == 0) && (state == SegmentState::SSD))
         {
-            segmentCtx->SetOccupiedStripeCount(segId, 0 /* count */);
-            segmentCtx->SetSegmentState(segId, SegmentState::FREE, false);
-            allocatorCtx->ReleaseSegment(segId);
+            segmentCtx->ReleaseSegment(segId);
             POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "segmentId:{} was All Invalidated, so changed to FREE", segId);
         }
     }

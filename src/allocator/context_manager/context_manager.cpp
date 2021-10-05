@@ -224,55 +224,34 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
 SegmentId
 ContextManager::AllocateFreeSegment(void)
 {
-    SegmentId segId = allocatorCtx->AllocateFreeSegment(UNMAP_SEGMENT /*scan free segment from last allocated segId*/);
+    SegmentId segId = segmentCtx->AllocateFreeSegment(UNMAP_SEGMENT /*scan free segment from last allocated segId*/);
     while ((segId != UNMAP_SEGMENT) && (rebuildCtx->IsRebuildTargetSegment(segId) == true))
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_REBUILDING_SEGMENT), "[AllocateSegment] segmentId:{} is already rebuild target!", segId);
-        allocatorCtx->ReleaseSegment(segId);
+        segmentCtx->ReleaseSegment(segId);
         ++segId;
-        segId = allocatorCtx->AllocateFreeSegment(segId);
+        segId = segmentCtx->AllocateFreeSegment(segId);
     }
 
-    int freeSegCount = allocatorCtx->GetNumOfFreeSegmentWoLock();
-    if (segId == UNMAP_SEGMENT)
-    {
-        POS_TRACE_ERROR(EID(ALLOCATOR_NO_FREE_SEGMENT), "[AllocateSegment] failed to allocate segment, free segment count:{}", freeSegCount);
-    }
-    else
+    int freeSegCount = segmentCtx->GetNumOfFreeSegmentWoLock();
+    if (segId != UNMAP_SEGMENT)
     {
         POS_TRACE_INFO(EID(ALLOCATOR_START), "[AllocateSegment] free segmentId:{}, free segment count:{}", segId, freeSegCount);
     }
     telPublisher->PublishData(TEL001_ALCT_FREE_SEG_CNT, freeSegCount);
 
-    segmentCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
     return segId;
 }
 
 SegmentId
 ContextManager::AllocateGCVictimSegment(void)
 {
-    uint32_t numUserAreaSegments = addrInfo->GetnumUserAreaSegments();
-    SegmentId victimSegment = UNMAP_SEGMENT;
-    uint32_t minValidCount = addrInfo->GetblksPerSegment();
-    for (SegmentId segId = 0; segId < numUserAreaSegments; ++segId)
-    {
-        uint32_t cnt = segmentCtx->GetValidBlockCount(segId);
-        std::lock_guard<std::mutex> lock(segmentCtx->GetSegStateLock(segId));
-        if ((segmentCtx->GetSegmentState(segId, false) != SegmentState::SSD) || (cnt == 0))
-        {
-            continue;
-        }
-
-        if (cnt < minValidCount)
-        {
-            victimSegment = segId;
-            minValidCount = cnt;
-        }
-    }
+    SegmentId victimSegment = segmentCtx->FindMostInvalidSSDSegment();
     if (victimSegment != UNMAP_SEGMENT)
     {
         segmentCtx->SetSegmentState(victimSegment, SegmentState::VICTIM, true);
-        POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "[AllocateSegment] victim segmentId:{}, free segment count:{}", victimSegment, allocatorCtx->GetNumOfFreeSegmentWoLock());
+
+        POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM), "[AllocateSegment] victim segmentId:{}, free segment count:{}", victimSegment, segmentCtx->GetNumOfFreeSegmentWoLock());
         telPublisher->PublishData(TEL003_ALCT_GCVICTIM_SEG, victimSegment);
     }
     return victimSegment;
@@ -281,7 +260,7 @@ ContextManager::AllocateGCVictimSegment(void)
 GcMode
 ContextManager::GetCurrentGcMode(void)
 {
-    int numFreeSegments = allocatorCtx->GetNumOfFreeSegment();
+    int numFreeSegments = segmentCtx->GetNumOfFreeSegment();
     QosManagerSingleton::Instance()->SetGcFreeSegment(numFreeSegments, arrayId);
     prevGcMode = curGcMode;
     curGcMode = gcCtx->GetCurrentGcMode(numFreeSegments);
@@ -303,26 +282,26 @@ ContextManager::GetNumOfFreeSegment(bool needLock)
 {
     if (needLock == true)
     {
-        return allocatorCtx->GetNumOfFreeSegment();
+        return segmentCtx->GetNumOfFreeSegment();
     }
     else
     {
-        return allocatorCtx->GetNumOfFreeSegmentWoLock();
+        return segmentCtx->GetNumOfFreeSegmentWoLock();
     }
 }
 
 int
 ContextManager::SetNextSsdLsid(void)
 {
-    std::unique_lock<std::mutex> lock(allocatorCtx->GetAllocatorCtxLock());
     POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "@SetNextSsdLsid");
     SegmentId segId = AllocateFreeSegment();
     if (segId == UNMAP_SEGMENT)
     {
         return -EID(ALLOCATOR_NO_FREE_SEGMENT);
     }
+
+    std::unique_lock<std::mutex> lock(allocatorCtx->GetAllocatorCtxLock());
     allocatorCtx->SetNextSsdLsid(segId);
-    segmentCtx->SetSegmentState(segId, SegmentState::NVRAM, false);
 
     return 0;
 }
@@ -436,8 +415,7 @@ ContextManager::GetRebuildTargetSegmentCount(void)
 void
 ContextManager::_NotifySegmentFreed(SegmentId segId)
 {
-    allocatorCtx->ReleaseSegment(segId);
-    int freeSegCount = allocatorCtx->GetNumOfFreeSegmentWoLock();
+    int freeSegCount = segmentCtx->GetNumOfFreeSegmentWoLock();
     telPublisher->PublishData(TEL001_ALCT_FREE_SEG_CNT, freeSegCount);
     POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREED), "[FreeSegment] segmentId:{} was freed, free segment count:{}", segId, freeSegCount);
     int ret = rebuildCtx->FreeSegmentInRebuildTarget(segId);
