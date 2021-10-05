@@ -141,6 +141,8 @@ MetaFsFileIntf::_CalculateByteAddress(uint64_t pageNumber, uint64_t offset,
 int
 MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 {
+    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+
 #if NVRAM_BYTE_ACCESS_DIRECT_EN
     if (ctx->opcode == MetaFsIoOpcode::Write &&
         storage == StorageOpt::NVRAM &&
@@ -162,7 +164,13 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
                 IODirection::WRITE, (void*)ctx->buffer, byteAddr,
                 PartitionType::META_NVM, callback, arrayId);
 
-        assert(IOSubmitHandlerStatus::SUCCESS == ioStatus);
+        if (IOSubmitHandlerStatus::SUCCESS != ioStatus)
+        {
+            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR,
+                "It is failed to submit the write request to NVRAM using direct method");
+
+            rc = POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
+        }
     }
     else
 #endif
@@ -175,11 +183,11 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
             AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx));
 
         MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(storage);
-        POS_EVENT_ID rc = metaFs->io->SubmitIO(aioCb, storageType);
-
-        if (POS_EVENT_ID::SUCCESS != rc)
-            return -(int)rc;
+        rc = metaFs->io->SubmitIO(aioCb, storageType);
     }
+
+    if (POS_EVENT_ID::SUCCESS != rc)
+        return -(int)rc;
 
     return EID(SUCCESS);
 }
