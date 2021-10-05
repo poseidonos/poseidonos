@@ -69,6 +69,17 @@ TEST(MetaFileUtil, Convert_StorageOpt_To_MetaVolumeType)
     EXPECT_EQ(volumeType, MetaVolumeType::SsdVolume);
 }
 
+TEST(MetaFileUtil, Convert_MetaVolumeType_To_StorageOpt)
+{
+    StorageOpt storage = StorageOpt::MAX;
+
+    storage = MetaFileUtil::ConvertToStorageOption(MetaVolumeType::NvRamVolume);
+    EXPECT_EQ(storage, StorageOpt::NVRAM);
+
+    storage = MetaFileUtil::ConvertToStorageOption(MetaVolumeType::SsdVolume);
+    EXPECT_EQ(storage, StorageOpt::SSD);
+}
+
 TEST(MetaFileUtil, Check_EpochSignature)
 {
     std::time_t t = std::time(0);
