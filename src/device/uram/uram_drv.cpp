@@ -151,7 +151,7 @@ UramDrv::ScanDevs(std::vector<UblockSharedPtr>* devs)
         if (false == isExist)
         {
             uint32_t blockSize = bdevCaller->SpdkBdevGetBlockSize(bdev);
-            uint32_t blockCount = bdevCaller->SpdkBdevGetNumBlocks(bdev);
+            uint64_t blockCount = bdevCaller->SpdkBdevGetNumBlocks(bdev);
             uint64_t bdevSize = blockSize * blockCount;
             uint32_t numa = bdevCaller->SpdkPosMallocBdevGetNuma(bdev);
 
