@@ -191,7 +191,7 @@ VSAMapManager::FlushAllMaps(void)
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap] Issue Flush All VSAMaps, array:{}", addrInfo->GetArrayName());
     for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
     {
-        if (isVsaMapInternalAccessable[volId] == true)
+        if ((isVsaMapInternalAccessable[volId] == true) && (vsaMaps[volId] != nullptr))
         {
             EventSmartPtr callBackVSAMap = std::make_shared<MapFlushedEvent>(volId, this);
             mapFlushState[volId] = MapFlushState::FLUSHING;
@@ -215,12 +215,14 @@ VSAMapManager::FlushAllMaps(void)
 int
 VSAMapManager::InvalidateAllBlocks(int volId)
 {
+    assert(vsaMaps[volId] != nullptr);
     return vsaMaps[volId]->InvalidateAllBlocks();
 }
 
 bool
 VSAMapManager::NeedToDeleteFile(int volId)
 {
+    assert(vsaMaps[volId] != nullptr);
     if (vsaMaps[volId]->DoesFileExist() == false)
     {
         return false;
@@ -231,6 +233,7 @@ VSAMapManager::NeedToDeleteFile(int volId)
 int
 VSAMapManager::DeleteVSAMap(int volId)
 {
+    assert(vsaMaps[volId] != nullptr);
     bool ret = vsaMaps[volId]->DeleteMapFile();
     if (ret == 0)
     {
@@ -340,12 +343,14 @@ VSAMapManager::GetRandomVSA(BlkAddr rba)
 MpageList
 VSAMapManager::GetDirtyVsaMapPages(int volId, BlkAddr startRba, uint64_t numBlks)
 {
+    assert(vsaMaps[volId] != nullptr);
     return vsaMaps[volId]->GetDirtyPages(startRba, numBlks);
 }
 
 int64_t
 VSAMapManager::GetNumUsedBlks(int volId)
 {
+    assert(vsaMaps[volId] != nullptr);
     return vsaMaps[volId]->GetNumUsedBlks();
 }
 
