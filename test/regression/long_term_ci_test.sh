@@ -3,6 +3,7 @@
 logfile="pos.log"
 rootdir=$(readlink -f $(dirname $0))/../..
 iopathdir=${rootdir}/test/system/io_path
+configPath=/etc/pos/pos.conf
 test_iteration=4
 totalsize_in_gb=100 #pm : 12500
 volume_cnt=4
@@ -11,7 +12,6 @@ transport=TCP
 target_ip=127.0.0.1
 subsystem_count=4
 test_time=300
-cpusallowed="10-11"
 
 # array mode [normal, degraded]
 arraymode="normal"
@@ -19,6 +19,9 @@ arraymode="normal"
 shutdowntype="none"
 # rebuild mode [none, rebuild_before_gc, rebuild_after_gc]
 rebuild="none"
+# flow control enable [none, true, false]
+flow_control_enable="none"
+original_flow_control_enable=""
 
 # volume test [none, vol_unmount, vol_delete]
 volumetest="none"
@@ -38,7 +41,7 @@ do
             ;;
         s) totalsize_in_gb="$OPTARG"
             ;;
-        c) cpusallowed="$OPTARG"
+        c) flow_control_enable="$OPTARG"
             ;;
         p) shutdowntype="$OPTARG"
             ;;
@@ -108,9 +111,31 @@ print_test_configuration()
 
 }
 
+change_flow_control()
+{
+    if [ $1 == "true" ]; then
+        jq -r '.flow_control.enable |= true' ${configPath} > temp.conf; mv temp.conf ${configPath}
+    elif [ $1 == "false" ]; then
+        jq -r '.flow_control.enable |= false' ${configPath} > temp.conf; mv temp.conf ${configPath}
+    else
+        echo "config not changed"
+    fi
+}
+
+get_flow_control_enable()
+{
+    local res=$(jq -r '.flow_control.enable' ${configPath})
+    echo ${res}
+}
+
 print_test_configuration
 
 sudo ${rootdir}/test/script/kill_poseidonos.sh
+sleep 10
+
+original_flow_control_enable=$(get_flow_control_enable)
+change_flow_control ${flow_control_enable}
+
 sudo ${rootdir}/test/regression/start_poseidonos.sh
 sleep 10
 
@@ -124,7 +149,7 @@ timebase=1
 runtime=$test_time
 sudo ${iopathdir}/fio_bench.py --traddr=${target_ip} --trtype=tcp --readwrite=${iotype} \
 --io_size=${sizepervol} --verify=false --bs=${blocksize} --time_based=${timebase} \
---run_time=${runtime} --iodepth=4 --file_num=${volume_cnt} --cpus_allowed=${cpusallowed}
+--run_time=${runtime} --iodepth=4 --file_num=${volume_cnt}
 
 res=$?
 check_result
@@ -147,7 +172,7 @@ do
 
     if [ $shutdowntype != "none" ]; then
         if [ $shutdowntype == "npor" ]; then
-			shutdown
+            shutdown
         else
             echo "add spor test"
             sudo ${rootdir}/test/script/kill_poseidonos.sh
@@ -170,8 +195,7 @@ do
 
     iotype="randwrite"
     sudo ${iopathdir}/fio_bench.py --traddr=${target_ip} --trtype=tcp --readwrite=${iotype} --io_size=${sizepervol} \
-    --verify=true --bs=${blocksize} --time_based=${timebase} --run_time=${runtime} --iodepth=4 --file_num=${volume_cnt} \
-    --cpus_allowed=${cpusallowed}
+    --verify=true --bs=${blocksize} --time_based=${timebase} --run_time=${runtime} --iodepth=4 --file_num=${volume_cnt}
     res=$?
     check_result
 
@@ -200,4 +224,6 @@ done
 
 #sudo ${rootdir}/test/script/kill_poseidonos.sh
 shutdown
+
+change_flow_control ${original_flow_control_enable}
 echo "test end"
