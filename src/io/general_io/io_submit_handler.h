@@ -55,26 +55,9 @@ public:
         LogicalBlkAddr& startLSA, uint64_t blockCount,
         PartitionType partitionToIO, int arrayId);
 
-    IOSubmitHandlerStatus SyncIO(IODirection direction,
-        std::list<BufferEntry>& bufferList,
-        LogicalBlkAddr& startLSA, uint64_t blockCount,
-        PartitionType partitionToIO, std::string arrayName);
-
     IOSubmitHandlerStatus SubmitAsyncIO(IODirection direction,
         std::list<BufferEntry>& bufferList,
         LogicalBlkAddr& startLSA, uint64_t blockCount,
-        PartitionType partitionToIO,
-        CallbackSmartPtr callback, int arrayId);
-
-    IOSubmitHandlerStatus SubmitAsyncIO(IODirection direction,
-        std::list<BufferEntry>& bufferList,
-        LogicalBlkAddr& startLSA, uint64_t blockCount,
-        PartitionType partitionToIO,
-        CallbackSmartPtr callback, std::string arrayName);
-
-    IOSubmitHandlerStatus SubmitAsyncByteIO(IODirection direction,
-        void* buffer,
-        LogicalByteAddr& startLSA,
         PartitionType partitionToIO,
         CallbackSmartPtr callback, int arrayId);
 
@@ -82,7 +65,7 @@ public:
         void* buffer,
         LogicalByteAddr& startLSA,
         PartitionType partitionToIO,
-        CallbackSmartPtr callback, std::string arrayName);
+        CallbackSmartPtr callback, int arrayId);
 };
 
 } // namespace pos

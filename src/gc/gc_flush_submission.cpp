@@ -171,7 +171,7 @@ GcFlushSubmission::Execute(void)
         startLSA, blocksInStripe,
         USER_DATA,
         callback,
-        arrayName);
+        iArrayInfo->GetIndex());
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_STRIPE_FLUSH_SUBMIT,
             "gc flush submission, arrayName:{}, stripeUserLsid:{}, result:{}",

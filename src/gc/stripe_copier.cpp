@@ -174,7 +174,7 @@ bool
 StripeCopier::CopyEvent::Execute(void)
 {
     uint64_t numPage;
-    const string& arrayName = meta->GetArrayName();
+    uint32_t arrayIndex = meta->GetArrayIndex();
 
     numPage = BLOCKS_IN_CHUNK;
 
@@ -191,7 +191,7 @@ StripeCopier::CopyEvent::Execute(void)
 
     iIOSubmitHandler->SubmitAsyncIO(IODirection::READ,
                                     bufferList, lsa, numPage,
-                                    partitionType, callback, arrayName);
+                                    partitionType, callback, arrayIndex);
     return true;
 }
 

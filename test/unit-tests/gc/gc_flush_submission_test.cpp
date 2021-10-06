@@ -50,6 +50,7 @@ public:
     {
         testVolumeId = 1;
         arrayName = "POSArray";
+        arrayIndex = 0;
 
         array = new NiceMock<MockIArrayInfo>;
         EXPECT_CALL(*array, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
@@ -94,6 +95,7 @@ protected:
 
     uint32_t testVolumeId;
     std::string arrayName;
+    int arrayIndex;
 
     NiceMock<MockIArrayInfo>* array;
     NiceMock<MockVolumeEventPublisher>* volumeEventPublisher;
@@ -180,7 +182,7 @@ TEST_F(GcFlushSubmissionTestFixture, Execute_testIfExecuteWhenGetTokenAndAllocat
 
     EXPECT_CALL(*wbStripeAllocator, AllocateUserDataStripeId(_)).WillOnce(Return(vsid));
     EXPECT_CALL(*stripe, SetUserLsid(vsid)).Times(1);
-    EXPECT_CALL(*ioSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayName)).WillOnce(Return(IOSubmitHandlerStatus::SUCCESS));
+    EXPECT_CALL(*ioSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayIndex)).WillOnce(Return(IOSubmitHandlerStatus::SUCCESS));
 
     // when execute
     // then submit async io for gc stripe flush

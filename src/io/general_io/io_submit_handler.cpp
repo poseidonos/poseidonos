@@ -45,9 +45,6 @@
 #include "src/io/general_io/io_submit_handler_count.h"
 #include "src/logger/logger.h"
 
-/*To do Remove after adding array Idx by Array*/
-#include "src/array_mgmt/array_manager.h"
-
 namespace pos
 {
 IOSubmitHandler::IOSubmitHandler(void)
@@ -56,18 +53,6 @@ IOSubmitHandler::IOSubmitHandler(void)
 
 IOSubmitHandler::~IOSubmitHandler(void)
 {
-}
-
-IOSubmitHandlerStatus
-IOSubmitHandler::SyncIO(
-    IODirection direction,
-    std::list<BufferEntry>& bufferList,
-    LogicalBlkAddr& startLSA, uint64_t blockCount,
-    PartitionType partitionToIO, std::string arrayName)
-{
-    IArrayInfo* info = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
-
-    return SyncIO(direction, bufferList, startLSA, blockCount, partitionToIO, info->GetIndex());
 }
 
 IOSubmitHandlerStatus
@@ -100,32 +85,6 @@ IOSubmitHandler::SyncIO(
     }
 
     return errorToReturn;
-}
-
-IOSubmitHandlerStatus
-IOSubmitHandler::SubmitAsyncIO(
-    IODirection direction,
-    std::list<BufferEntry>& bufferList,
-    LogicalBlkAddr& startLSA, uint64_t blockCount,
-    PartitionType partitionToIO,
-    CallbackSmartPtr callback,
-    std::string arrayName)
-{
-    IArrayInfo* info = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
-    return SubmitAsyncIO(direction, bufferList, startLSA, blockCount, partitionToIO, callback, info->GetIndex());
-}
-
-IOSubmitHandlerStatus
-IOSubmitHandler::SubmitAsyncByteIO(
-    IODirection direction,
-    void* buffer,
-    LogicalByteAddr& startLSA,
-    PartitionType partitionToIO,
-    CallbackSmartPtr callback,
-    std::string arrayName)
-{
-    IArrayInfo* info = ArrayMgr()->GetInfo(arrayName)->arrayInfo;
-    return SubmitAsyncByteIO(direction, buffer, startLSA, partitionToIO, callback, info->GetIndex());
 }
 
 IOSubmitHandlerStatus
