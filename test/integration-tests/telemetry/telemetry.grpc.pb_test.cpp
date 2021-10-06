@@ -138,6 +138,44 @@ TEST(TelemetryManager, testIfGrpcServerClient)
     status = tmClient->DisableToServer();
     // Then 5
     ASSERT_TRUE(status.ok());
+
+    delete tmClient;
+    delete tmServer;
+}
+
+TEST(TelemetryManager, testIfGrpcServerClient_fail)
+{
+    string server_address("0.0.0.0:50051");
+    // Given: a grpc server
+    TelemetryManagerService* tmServer = new TelemetryManagerService();
+    usleep(1000);
+    // Given: a grpc client
+    ProtoBufCreateChannel* tmClient = new ProtoBufCreateChannel(server_address);
+    tmServer->StopService();
+    // When 1: publish()
+    Status status;
+    status = tmClient->PublishToServer();
+    // Then 1
+    ASSERT_FALSE(status.ok());
+    // When 2: configure()
+    status = tmClient->ConfigureToServer();
+    // Then 2
+    ASSERT_FALSE(status.ok());
+    // When 3: collect()
+    status = tmClient->CollectToServer();
+    // Then 3
+    ASSERT_FALSE(status.ok());
+    // When 4: enable()
+    status = tmClient->EnableToServer();
+    // Then 4
+    ASSERT_FALSE(status.ok());
+    // When 5: disable()
+    status = tmClient->DisableToServer();
+    // Then 5
+    ASSERT_FALSE(status.ok());
+
+    delete tmClient;
+    delete tmServer;
 }
 
 }
