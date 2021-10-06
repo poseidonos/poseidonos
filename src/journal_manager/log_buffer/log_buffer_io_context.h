@@ -46,7 +46,6 @@ class LogBufferIoContext : public AsyncMetaFileIoCtx, public DumpSharedPtr<LogBu
 public:
     LogBufferIoContext(void) = default;
     LogBufferIoContext(int logGroupId, EventSmartPtr clientCallback);
-    virtual ~LogBufferIoContext(void) = default;
 
     virtual void SetInternalCallback(MetaIoCbPtr cb);
     virtual void SetFile(int fileDescriptor);

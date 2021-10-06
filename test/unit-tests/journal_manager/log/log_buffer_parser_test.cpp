@@ -5,6 +5,7 @@
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "test/unit-tests/journal_manager/log/log_list_mock.h"
 
+using ::testing::_;
 using ::testing::NiceMock;
 
 namespace pos
@@ -12,6 +13,14 @@ namespace pos
 MATCHER_P(EqLog, expected, "Equality matcher for log")
 {
     return (memcmp(expected, arg->GetData(), arg->GetSize()) == 0);
+}
+
+TEST(LogBufferParser, LogBufferParser_testIfConstructedSuccessfully)
+{
+    LogBufferParser parser;
+
+    LogBufferParser* parserInHeap = new LogBufferParser();
+    delete parserInHeap;
 }
 
 TEST(LogBufferParser, GetLogs_testIfBlockWriteDoneLogIsParsed)
@@ -201,4 +210,50 @@ TEST(LogBufferParser, GetLogs_testIfLogsAreParsed)
     free(logBuffer);
 }
 
+TEST(LogBufferParser, GetLogs_testIfLogsAndLogBufferFooterAreParsed)
+{
+    // Given
+    uint64_t logBufferSize = sizeof(BlockWriteDoneLog) * 10 + sizeof(LogGroupFooter);
+    void* logBuffer = malloc(logBufferSize);
+
+    NiceMock<MockLogList> logList;
+
+    uint64_t currentOffset = 0;
+    for (int count = 0; count < 10; count++)
+    {
+        BlockWriteDoneLog log;
+        log.type = LogType::BLOCK_WRITE_DONE;
+        log.volId = 1;
+        log.startRba = currentOffset;
+        log.numBlks = 0;
+        log.startVsa = {
+            .stripeId = 0,
+            .offset = 0};
+        log.wbIndex = 0;
+        log.writeBufferStripeAddress = {
+            .stripeLoc = IN_WRITE_BUFFER_AREA,
+            .stripeId = 0};
+
+        char* targetBuffer = (char*)logBuffer + currentOffset;
+        memcpy(targetBuffer, &log, sizeof(log));
+
+        EXPECT_CALL(logList, AddLog(EqLog(targetBuffer)));
+
+        currentOffset += sizeof(BlockWriteDoneLog);
+    }
+
+    LogGroupFooter footer;
+    footer.lastCheckpointedSeginfoVersion = 13;
+
+    char* targetBuffer = (char*)logBuffer + currentOffset;
+    memcpy(targetBuffer, &footer, sizeof(LogGroupFooter));
+
+    EXPECT_CALL(logList, SetLogGroupFooter(_, footer)).Times(1);
+
+    // When
+    LogBufferParser parser;
+    parser.GetLogs(logBuffer, logBufferSize, logList);
+
+    free(logBuffer);
+}
 } // namespace pos

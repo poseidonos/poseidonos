@@ -53,8 +53,6 @@ private:
     {
     public:
         ValidMarkFinder(char* bufferPtr, uint64_t maxOffset);
-        virtual ~ValidMarkFinder(void) = default;
-
         bool GetNextValidMarkOffset(uint64_t startOffset, uint64_t& foundOffset);
 
     private:

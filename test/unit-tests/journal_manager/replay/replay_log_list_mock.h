@@ -1,9 +1,7 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
 #include "src/journal_manager/replay/replay_log_list.h"
 
 namespace pos
@@ -15,6 +13,7 @@ public:
     MOCK_METHOD(void, AddLog, (LogHandlerInterface* log), (override));
     MOCK_METHOD(bool, IsEmpty, (), (override));
     MOCK_METHOD(void, SetLogGroupFooter, (uint64_t seqNum, LogGroupFooter footer), (override));
+    MOCK_METHOD(ReplayLogGroup, PopReplayLogGroup, (), (override));
 };
 
 } // namespace pos

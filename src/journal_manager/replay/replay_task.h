@@ -43,9 +43,7 @@ public:
     : reporter(reporter)
     {
     }
-    virtual ~ReplayTask(void)
-    {
-    }
+    virtual ~ReplayTask(void) = default;
 
     virtual int Start(void) = 0;
     virtual ReplayTaskId GetId(void) = 0;

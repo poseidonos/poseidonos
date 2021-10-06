@@ -51,7 +51,6 @@ public:
     : status(JOURNAL_INVALID)
     {
     }
-    virtual ~JournalingStatus(void) = default;
 
     virtual JournalManagerStatus
     Get(void)
