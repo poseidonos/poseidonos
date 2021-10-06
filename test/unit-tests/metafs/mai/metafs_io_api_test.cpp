@@ -42,7 +42,7 @@ using ::testing::Return;
 
 namespace pos
 {
-TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenTheModuleIsAbnormal)
+TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenTheModuleIsAbnormal_Fully)
 {
     int arrayId = 0;
     FileDescriptorType fd = 0;
@@ -58,7 +58,23 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenTheModuleIsAbnormal)
     delete ctrl;
 }
 
-TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenThereIsNoFileInfo)
+TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenTheModuleIsAbnormal_Partially)
+{
+    int arrayId = 0;
+    FileDescriptorType fd = 0;
+    MetaStorageType type = MetaStorageType::SSD;
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>();
+
+    MetaFsIoApi api(arrayId, ctrl);
+
+    api.SetStatus(false);
+
+    EXPECT_EQ(api.Read(fd, 0, 0, nullptr, type), POS_EVENT_ID::MFS_MODULE_NOT_READY);
+
+    delete ctrl;
+}
+
+TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenThereIsNoFileInfo_Fully)
 {
     int arrayId = 0;
     FileDescriptorType fd = 0;
@@ -76,7 +92,25 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenThereIsNoFileInfo)
     delete ctrl;
 }
 
-TEST(MetaFsIoApi, Read_testIfDataWillBeReturned)
+TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenThereIsNoFileInfo_Partially)
+{
+    int arrayId = 0;
+    FileDescriptorType fd = 0;
+    MetaStorageType type = MetaStorageType::SSD;
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>();
+
+    MetaFsIoApi api(arrayId, ctrl);
+
+    api.SetStatus(true);
+
+    EXPECT_CALL(*ctrl, GetFileInfo).WillOnce(Return(nullptr));
+
+    EXPECT_EQ(api.Read(fd, 0, 0, nullptr, type), POS_EVENT_ID::MFS_FILE_NOT_FOUND);
+
+    delete ctrl;
+}
+
+TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Fully)
 {
     int arrayId = 0;
     FileDescriptorType fd = 0;
@@ -115,7 +149,46 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned)
     delete ctrl;
 }
 
-TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenTheModuleIsAbnormal)
+TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Partially)
+{
+    int arrayId = 0;
+    FileDescriptorType fd = 0;
+    MetaStorageType type = MetaStorageType::SSD;
+    MetaLpnType lpnSize = 5;
+    NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId);
+
+    MetaFsIoApi api(arrayId, ctrl, io);
+
+    api.SetStatus(true);
+
+    MetaFileExtent extent;
+    extent.SetStartLpn(0);
+    extent.SetCount(lpnSize);
+
+    MetaFileContext fileCtx;
+    fileCtx.chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
+    fileCtx.extents = &extent;
+    fileCtx.extentsCount = 1;
+    fileCtx.fileBaseLpn = 0;
+    fileCtx.isActivated = true;
+    fileCtx.sizeInByte = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE * lpnSize;
+    fileCtx.storageType = MetaStorageType::SSD;
+
+    EXPECT_CALL(*ctrl, GetFileInfo).WillOnce(Return(&fileCtx));
+    EXPECT_CALL(*io, CheckReqSanity).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*io, ProcessNewReq).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+
+    char* rBuf = (char*)malloc(fileCtx.sizeInByte);
+    memset(rBuf, 0, fileCtx.sizeInByte);
+
+    EXPECT_EQ(api.Read(fd, 0, 0, rBuf, type), POS_EVENT_ID::SUCCESS);
+
+    free(rBuf);
+    delete ctrl;
+}
+
+TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenTheModuleIsAbnormal_Fully)
 {
     int arrayId = 0;
     FileDescriptorType fd = 0;
@@ -131,7 +204,23 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenTheModuleIsAbnormal)
     delete ctrl;
 }
 
-TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenThereIsNoFileInfo)
+TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenTheModuleIsAbnormal_Partially)
+{
+    int arrayId = 0;
+    FileDescriptorType fd = 0;
+    MetaStorageType type = MetaStorageType::SSD;
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>();
+
+    MetaFsIoApi api(arrayId, ctrl);
+
+    api.SetStatus(false);
+
+    EXPECT_EQ(api.Write(fd, nullptr, type), POS_EVENT_ID::MFS_MODULE_NOT_READY);
+
+    delete ctrl;
+}
+
+TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenThereIsNoFileInfo_Fully)
 {
     int arrayId = 0;
     FileDescriptorType fd = 0;
@@ -149,7 +238,64 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenThereIsNoFileInfo)
     delete ctrl;
 }
 
-TEST(MetaFsIoApi, Write_testIfDataWillBeStored)
+TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenThereIsNoFileInfo_Partially)
+{
+    int arrayId = 0;
+    FileDescriptorType fd = 0;
+    MetaStorageType type = MetaStorageType::SSD;
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>();
+
+    MetaFsIoApi api(arrayId, ctrl);
+
+    api.SetStatus(true);
+
+    EXPECT_CALL(*ctrl, GetFileInfo).WillOnce(Return(nullptr));
+
+    EXPECT_EQ(api.Write(fd, nullptr, type), POS_EVENT_ID::MFS_FILE_NOT_FOUND);
+
+    delete ctrl;
+}
+
+TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Fully)
+{
+    int arrayId = 0;
+    FileDescriptorType fd = 0;
+    MetaStorageType type = MetaStorageType::SSD;
+    MetaLpnType lpnSize = 5;
+    NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
+    NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId);
+
+    MetaFsIoApi api(arrayId, ctrl, io);
+
+    api.SetStatus(true);
+
+    MetaFileExtent extent;
+    extent.SetStartLpn(0);
+    extent.SetCount(lpnSize);
+
+    MetaFileContext fileCtx;
+    fileCtx.chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
+    fileCtx.extents = &extent;
+    fileCtx.extentsCount = 1;
+    fileCtx.fileBaseLpn = 0;
+    fileCtx.isActivated = true;
+    fileCtx.sizeInByte = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE * lpnSize;
+    fileCtx.storageType = MetaStorageType::SSD;
+
+    EXPECT_CALL(*ctrl, GetFileInfo).WillOnce(Return(&fileCtx));
+    EXPECT_CALL(*io, CheckReqSanity).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*io, ProcessNewReq).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+
+    char* rBuf = (char*)malloc(fileCtx.sizeInByte);
+    memset(rBuf, 0, fileCtx.sizeInByte);
+
+    EXPECT_EQ(api.Write(fd, rBuf, type), POS_EVENT_ID::SUCCESS);
+
+    free(rBuf);
+    delete ctrl;
+}
+
+TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Partially)
 {
     int arrayId = 0;
     FileDescriptorType fd = 0;

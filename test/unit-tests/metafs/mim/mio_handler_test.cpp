@@ -5,6 +5,7 @@
 #include "test/unit-tests/metafs/mim/mpio_pool_mock.h"
 #include "test/unit-tests/metafs/mim/mpio_handler_mock.h"
 #include "test/unit-tests/metafs/mim/metafs_io_request_mock.h"
+#include "test/unit-tests/metafs/mim/mfs_io_range_overlap_chker_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/metafs/include/metafs_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_file_control_api_mock.h"
@@ -102,15 +103,18 @@ TEST_F(MioHandlerTestFixture, Normal)
 
     bool result = false;
 
+    MockMetaFsIoRequest* msg = new MockMetaFsIoRequest();
+    msg->reqType = MetaIoRequestType::Read;
+
+    EXPECT_CALL(*msg, SetRetryFlag).WillRepeatedly(Return());
     EXPECT_CALL(*ioSQ, Enqueue).WillRepeatedly(Return(true));
+    EXPECT_CALL(*ioSQ, Dequeue).WillRepeatedly(Return(msg));
     EXPECT_CALL(*doneQ, Init);
     EXPECT_CALL(*ctrl, GetMaxMetaLpn).WillRepeatedly(Return(100));
 
     handler->BindPartialMpioHandler(bottomhalfHandler);
     result = handler->AddArrayInfo(arrayInfo->GetIndex());
     EXPECT_TRUE(result);
-
-    MockMetaFsIoRequest* msg = new MockMetaFsIoRequest();
 
     for (int i = 0; i < MAX_COUNT; i++)
     {
@@ -125,6 +129,42 @@ TEST_F(MioHandlerTestFixture, Normal)
 
     result = handler->RemoveArrayInfo(arrayInfo->GetIndex());
     EXPECT_TRUE(result);
+
+    delete msg;
+}
+
+TEST_F(MioHandlerTestFixture, Normal_PushToRetryQueue)
+{
+    const int MAX_COUNT = 5;
+
+    bool result = false;
+    MockMetaFsIoRangeOverlapChker* checker = new MockMetaFsIoRangeOverlapChker();
+
+    MockMetaFsIoRequest* msg = new MockMetaFsIoRequest();
+    msg->reqType = MetaIoRequestType::Write;
+    msg->arrayId = 0;
+    msg->targetMediaType = MetaStorageType::SSD;
+
+    EXPECT_CALL(*msg, SetRetryFlag).WillRepeatedly(Return());
+    EXPECT_CALL(*ioSQ, Enqueue).WillRepeatedly(Return(true));
+    EXPECT_CALL(*ioSQ, Dequeue).Times(MAX_COUNT).WillRepeatedly(Return(msg));
+    EXPECT_CALL(*doneQ, Init);
+    EXPECT_CALL(*checker, IsRangeOverlapConflicted).WillRepeatedly(Return(true));
+
+    handler->BindPartialMpioHandler(bottomhalfHandler);
+    result = handler->AddArrayInfo(arrayInfo->GetIndex(), MetaStorageType::SSD, checker);
+    EXPECT_TRUE(result);
+
+    for (int i = 0; i < MAX_COUNT; i++)
+    {
+        result = handler->EnqueueNewReq(msg);
+        EXPECT_TRUE(result);
+    }
+
+    for (int i = 0; i < MAX_COUNT; i++)
+    {
+        handler->TophalfMioProcessing();
+    }
 
     delete msg;
 }

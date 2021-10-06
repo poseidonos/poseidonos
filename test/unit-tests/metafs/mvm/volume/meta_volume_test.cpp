@@ -660,6 +660,15 @@ TEST_F(MetaVolumeFixture, CopyInode_testIfCopyMethodWillBeSuccess)
     EXPECT_EQ(inodeInfo.data.field.fd, 0);
 }
 
+TEST_F(MetaVolumeFixture, Get_TheLastValidLpn)
+{
+    EXPECT_CALL(*inodeMgr, GetTheLastValidLpn).WillOnce(Return(100));
+
+    MetaLpnType result = metaVolume->GetTheLastValidLpn();
+
+    EXPECT_EQ(result, 100);
+}
+
 TEST(MetaVolume, Create)
 {
     MetaVolumeTester vol(0, MetaVolumeType::SsdVolume);

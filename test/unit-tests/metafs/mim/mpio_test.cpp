@@ -62,6 +62,18 @@ public:
     void InitStateHandler(void)
     {
     }
+
+    void HandleAsyncMemOpDone(void)
+    {
+        Mpio::_HandleAsyncMemOpDone(this);
+    }
+
+    void CallbackTest(Mpio* mpio)
+    {
+        ((MpioTester*)mpio)->cbTestResult = true;
+    }
+
+    bool cbTestResult = false;
 };
 
 TEST(MpioTester, Mpio_testConstructor)
@@ -76,5 +88,23 @@ TEST(MpioTester, Mpio_testConstructor)
     MpioTester mpio(buf, type, ioInfo, partialIO, forceSyncIO);
 
     EXPECT_EQ(mpio.GetCurrState(), MpAioState::Init);
+}
+
+TEST(MpioTester, Mpio_testCallbackForMemcpy)
+{
+    MetaStorageType type = MetaStorageType::SSD;
+    MpioIoInfo ioInfo;
+    bool partialIO = true;
+    bool forceSyncIO = true;
+    char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+    memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+
+    MpioTester mpio(buf, type, ioInfo, partialIO, forceSyncIO);
+
+    PartialMpioDoneCb notifier = AsEntryPointParam1(&MpioTester::CallbackTest, &mpio);
+    mpio.SetPartialDoneNotifier(notifier);
+    mpio.HandleAsyncMemOpDone();
+
+    EXPECT_EQ(mpio.cbTestResult, true);
 }
 } // namespace pos

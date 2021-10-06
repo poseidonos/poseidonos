@@ -1,3 +1,4 @@
+
 /*
  *   BSD LICENSE
  *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -409,6 +410,15 @@ MioHandler::AddArrayInfo(int arrayId)
         ioRangeOverlapChker[arrayId][storage] = new MetaFsIoRangeOverlapChker();
         ioRangeOverlapChker[arrayId][storage]->Init(maxLpn);
     }
+
+    return true;
+}
+
+// for test
+bool
+MioHandler::AddArrayInfo(int arrayId, MetaStorageType type, MetaFsIoRangeOverlapChker* checker)
+{
+    ioRangeOverlapChker[arrayId][(int)type] = checker;
 
     return true;
 }

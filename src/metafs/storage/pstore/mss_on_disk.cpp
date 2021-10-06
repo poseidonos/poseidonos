@@ -399,6 +399,12 @@ MssOnDisk::TranslateAddress(MetaStorageType type, MetaLpnType theLpn)
     return blkAddr;
 }
 
+std::vector<MssDiskPlace*>&
+MssOnDisk::GetMssDiskPlace(void)
+{
+    return mssDiskPlace;
+}
+
 bool
 MssOnDisk::IsAIOSupport(void)
 {

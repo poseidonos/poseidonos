@@ -106,6 +106,9 @@ public:
     virtual POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages) override;
     virtual LogicalBlkAddr TranslateAddress(MetaStorageType type, MetaLpnType theLpn) override;
 
+    // for test
+    virtual std::vector<MssDiskPlace*>& GetMssDiskPlace(void);
+
 private:
     bool _CheckSanityErr(MetaLpnType pageNumber, uint64_t arrayCapacity);
     POS_EVENT_ID _SendSyncRequest(IODirection direction, MetaStorageType mediaType, MetaLpnType pageNumber, MetaLpnType numPages, void* buffer);

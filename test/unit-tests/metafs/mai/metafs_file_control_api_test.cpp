@@ -94,4 +94,18 @@ TEST(MetaFsFileControlApi, Get_testIfFileIoSizeCanBeRetrieved)
 
     EXPECT_EQ(size, 0);
 }
+
+TEST(MetaFsFileControlApi, Get_TheLastValidLpn)
+{
+    int arrayId = 0;
+    int fd = 0;
+    StorageOpt type = StorageOpt::SSD;
+    NiceMock<MockMetaVolumeManager>* volMgr = new NiceMock<MockMetaVolumeManager>;
+
+    MetaFsFileControlApi api(arrayId, volMgr);
+
+    EXPECT_CALL(*volMgr, GetTheLastValidLpn).WillOnce(Return(0));
+
+    EXPECT_EQ(api.GetTheLastValidLpn(MetaVolumeType::SsdVolume), 0);
+}
 } // namespace pos

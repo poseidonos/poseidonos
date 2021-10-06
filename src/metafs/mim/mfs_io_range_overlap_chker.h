@@ -45,14 +45,14 @@ class MetaFsIoRangeOverlapChker
 public:
     MetaFsIoRangeOverlapChker(void);
     MetaFsIoRangeOverlapChker(BitMap* outstandingIoMap);
-    ~MetaFsIoRangeOverlapChker(void);
-    void Init(MetaLpnType maxLpn);
+    virtual ~MetaFsIoRangeOverlapChker(void);
+    virtual void Init(MetaLpnType maxLpn);
 
-    bool IsRangeOverlapConflicted(MetaFsIoRequest* newReq);
-    void FreeLockContext(uint64_t startLpn, bool isRead);
-    void PushReqToRangeLockMap(MetaFsIoRequest* newReq);
-    BitMap* GetOutstandingMioMap(void);
-    uint64_t GetOutstandingMioCount(void);
+    virtual bool IsRangeOverlapConflicted(MetaFsIoRequest* newReq);
+    virtual void FreeLockContext(uint64_t startLpn, bool isRead);
+    virtual void PushReqToRangeLockMap(MetaFsIoRequest* newReq);
+    virtual BitMap* GetOutstandingMioMap(void);
+    virtual uint64_t GetOutstandingMioCount(void);
 
 private:
     BitMap* outstandingIoMap;

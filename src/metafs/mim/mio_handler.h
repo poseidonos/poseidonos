@@ -64,6 +64,9 @@ public:
     bool AddArrayInfo(int arrayId);
     bool RemoveArrayInfo(int arrayId);
 
+    // for test
+    bool AddArrayInfo(int arrayId, MetaStorageType type, MetaFsIoRangeOverlapChker* checker);
+
 private:
     void _HandleIoSQ(void);
     void _PushToRetry(MetaFsIoRequest* reqMsg);

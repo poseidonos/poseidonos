@@ -464,10 +464,15 @@ echo "------------[WBT Test End, Close poseidonos]------------------------------
 ${BIN_DIR}/poseidonos-cli array unmount --array-name $ARRAYNAME --force
 ${BIN_DIR}/poseidonos-cli system stop --force
 
+echo "------------[MetaFs Performance Test Starts]----------------------------------"
+sleep 5
+${ROOT_DIR}/test/script/run_metafs_fio_test.sh -f ${ip}
+echo "------------[MetaFs Performance Test Done]----------------------------------"
+
 if [ $exit_result -eq 0 ]; then
-    echo -[ Test Success] -
+    echo -[ Test Success ] -
 else
-    echo -[ Test Fail] -
+    echo -[ Test Fail ] -
 fi
 
 exit $exit_result

@@ -37,10 +37,13 @@
 
 namespace pos
 {
+MssDiskInplace::MssDiskInplace(void)
+{
+    mediaType = MetaStorageType::Max;
+    partitionType = PartitionType::PARTITION_TYPE_MAX;
+    array = nullptr;
+}
 
-/**
- * Constructor
- */
 MssDiskInplace::MssDiskInplace(int arrayId, MetaStorageType mediaType, uint64_t capacity)
 {
     this->mediaType = mediaType;

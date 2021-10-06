@@ -51,7 +51,6 @@ namespace pos
 class MssDiskPlace
 {
 public:
-    // MssDiskPlace( MetaStorageType mediaType, uint64_t capacity);
     virtual ~MssDiskPlace(void);
     virtual const pos::PartitionLogicalSize* GetPartitionSizeInfo(void);
     virtual uint64_t GetMetaDiskCapacity(void);

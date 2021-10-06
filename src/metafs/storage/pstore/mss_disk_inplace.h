@@ -46,11 +46,12 @@ namespace pos
 class MssDiskInplace : public MssDiskPlace
 {
 public:
+    MssDiskInplace(void);
     MssDiskInplace(int arrayId, MetaStorageType mediaType, uint64_t capcacity);
     virtual ~MssDiskInplace(void);
 
     // Only inherit function whose defination will change
-    pos::LogicalBlkAddr CalculateOnDiskAddress(uint64_t metaLpn);
+    virtual pos::LogicalBlkAddr CalculateOnDiskAddress(uint64_t metaLpn);
     virtual uint32_t GetMaxLpnCntPerIOSubmit(void);
 };
 } // namespace pos

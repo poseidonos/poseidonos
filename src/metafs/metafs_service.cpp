@@ -111,12 +111,6 @@ MetaFsService::GetMetaFs(int arrayId)
     return fileSystems[arrayId];
 }
 
-int
-MetaFsService::GetArrayId(std::string& arrayName)
-{
-    return arrayNameToId[arrayName];
-}
-
 void
 MetaFsService::_PrepareThreads(uint32_t totalCount, cpu_set_t schedSet, cpu_set_t workSet)
 {

@@ -13,6 +13,7 @@ class MockMssDiskInplace : public MssDiskInplace
 public:
     using MssDiskInplace::MssDiskInplace;
     MOCK_METHOD(uint32_t, GetMaxLpnCntPerIOSubmit, (), (override));
+    MOCK_METHOD(LogicalBlkAddr, CalculateOnDiskAddress, (uint64_t metaLpn));
 };
 
 } // namespace pos
