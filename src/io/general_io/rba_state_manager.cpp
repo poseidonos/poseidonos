@@ -299,10 +299,4 @@ RBAStateManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayIn
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
-std::string
-RBAStateManager::GetArrayName(void)
-{
-    return arrayName;
-}
-
 } // namespace pos

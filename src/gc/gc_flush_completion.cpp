@@ -58,7 +58,7 @@ namespace pos
 GcFlushCompletion::GcFlushCompletion(Stripe* stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer)
 : GcFlushCompletion(stripe, arrayName, gcStripeManager, dataBuffer,
                     nullptr,
-                    RBAStateServiceSingleton::Instance()->GetRBAStateManager(arrayName),
+                    RBAStateServiceSingleton::Instance()->GetRBAStateManager(ArrayMgr()->GetInfo(arrayName)->arrayInfo->GetIndex()),
                     ArrayMgr()->GetInfo(arrayName)->arrayInfo)
 {
 }

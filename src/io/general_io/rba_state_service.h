@@ -48,7 +48,6 @@ public:
     virtual ~RBAStateService(void);
     void Register(int arrayId, RBAStateManager* writer);
     void Unregister(int arrayId);
-    RBAStateManager* GetRBAStateManager(std::string arrayName);
     RBAStateManager* GetRBAStateManager(int arrayId);
 
 private:

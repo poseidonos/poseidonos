@@ -77,22 +77,6 @@ RBAStateService::Unregister(int arrayId)
 }
 
 RBAStateManager*
-RBAStateService::GetRBAStateManager(std::string arrayName)
-{
-    for (int arrayId = 0 ; arrayId < ArrayMgmtPolicy::MAX_ARRAY_CNT; arrayId++)
-    {
-        if (items[arrayId] != nullptr)
-        {
-            if (items[arrayId]->GetArrayName() == arrayName)
-            {
-                return items[arrayId];
-            }
-        }
-    }
-    return nullptr;
-}
-
-RBAStateManager*
 RBAStateService::GetRBAStateManager(int arrayId)
 {
     return items[arrayId];

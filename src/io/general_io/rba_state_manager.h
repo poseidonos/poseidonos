@@ -77,8 +77,6 @@ public:
     int VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
     int VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) override;
 
-    std::string GetArrayName(void);
-
 private:
     class RBAState
     {
