@@ -2,18 +2,39 @@
 
 #include <gtest/gtest.h>
 
+
 namespace pos
 {
-TEST(DumpBufferDeleter, operator_)
+class DummyBufferTest
 {
+private:
+    int i;
+    int j;
+};
+
+TEST(DumpBufferDeleter, operator)
+{
+    DumpBufferDeleter dumpBufferDeleter;
+    uint8_t* buf = new uint8_t[10];
+    dumpBufferDeleter(buf);
 }
 
-} // namespace pos
+TEST(DumpBuffer, Constructor)
+{
+    // Given : New DummyBufferTest is created and dump module is created
+    DummyBufferTest* dummyBuffer = new DummyBufferTest;
+    DumpModule<DumpBuffer> dumpModule("test", 10, true);
+    // When : DumpBuffer is created with dump Module
+    DumpBuffer dumpBuffer(dummyBuffer, 10, &dumpModule);
 
-namespace pos
-{
-TEST(DumpBuffer, DumpBuffer_)
-{
+    // Then : New dumpBuffer is created without param
+    DumpBuffer dumpBuffer3;
+
+    // Given : New dumpModule is created
+    DumpModule<DumpBuffer> dumpModule2("test2", 10, false);
+    // When : DumpBuffer is created with dump Module
+    DumpBuffer dumpBuffer2(dummyBuffer, 10, &dumpModule2);
+    delete dummyBuffer;
 }
 
 } // namespace pos

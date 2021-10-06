@@ -152,28 +152,24 @@ DumpSharedModule<T, moduleNumber>::Add(T t, bool lock_enable)
 
     if (DumpSharedModuleInstanceEnable::debugLevelEnable)
     {
-        if (this->isEnabled)
+        if (lock_enable)
         {
-            if (lock_enable)
-            {
-                this->dumpQueueLock.lock();
-            }
-
-            uint64_t key = reinterpret_cast<uint64_t>(t);
-
-            if (dumpMap.find(key) == dumpMap.end())
-            {
-                DumpObject<T> dumpObj(t, 0);
-                dumpMap[key] = dumpObj;
-            }
-
-            if (lock_enable)
-            {
-                this->dumpQueueLock.unlock();
-            }
-
-            return 0;
+            this->dumpQueueLock.lock();
         }
+
+        uint64_t key = reinterpret_cast<uint64_t>(t);
+
+        if (dumpMap.find(key) == dumpMap.end())
+        {
+            DumpObject<T> dumpObj(t, 0);
+            dumpMap[key] = dumpObj;
+        }
+
+        if (lock_enable)
+        {
+            this->dumpQueueLock.unlock();
+        }
+        return 0;
     }
     return -1;
 }
@@ -186,27 +182,24 @@ DumpSharedModule<T, moduleNumber>::Delete(T t, bool lock_enable)
 
     if (DumpSharedModuleInstanceEnable::debugLevelEnable)
     {
-        if (this->isEnabled)
+        if (lock_enable)
         {
-            if (lock_enable)
-            {
-                this->dumpQueueLock.lock();
-            }
-
-            uint64_t key = reinterpret_cast<uint64_t>(t);
-
-            if ((dumpMap.find(key) != dumpMap.end()))
-            {
-                dumpMap.erase(key);
-            }
-
-            if (lock_enable)
-            {
-                this->dumpQueueLock.unlock();
-            }
-
-            return 0;
+            this->dumpQueueLock.lock();
         }
+
+        uint64_t key = reinterpret_cast<uint64_t>(t);
+
+        if ((dumpMap.find(key) != dumpMap.end()))
+        {
+            dumpMap.erase(key);
+        }
+
+        if (lock_enable)
+        {
+            this->dumpQueueLock.unlock();
+        }
+
+        return 0;
     }
     return -1;
 }

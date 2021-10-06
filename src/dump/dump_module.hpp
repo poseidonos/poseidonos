@@ -89,7 +89,7 @@ DumpModule<T>::~DumpModule()
 }
 
 template<typename T>
-uint32_t
+uint64_t
 DumpModule<T>::GetPoolSize()
 {
     return entryMaxNum * (entryBufSize + sizeof(DumpObject<T>));

@@ -63,7 +63,7 @@ class AbstractDumpModule
 public:
     virtual void SetEnable(bool enable) = 0;
     virtual bool IsEnable(void) = 0;
-    virtual uint32_t GetPoolSize(void) = 0;
+    virtual uint64_t GetPoolSize(void) = 0;
 };
 
 template<typename T>
@@ -79,7 +79,7 @@ public:
     int AddDump(T& t, uint64_t userSpecific, bool lock_enable = true);
     virtual void SetEnable(bool enable);
     virtual bool IsEnable(void);
-    virtual uint32_t GetPoolSize(void);
+    virtual uint64_t GetPoolSize(void);
 
     static const int MAX_ENTRIES_FOR_CALLBACK_ERROR = 10000; // temporary value
 
