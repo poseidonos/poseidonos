@@ -113,16 +113,17 @@ Raid5Rebuild::Read(void)
     }
     UpdateProgress(0);
 
+    RebuildState state = ctx->GetResult();
     if (segId == ctx->size->totalSegments ||
-        ctx->result >= RebuildState::CANCELLED)
+        state >= RebuildState::CANCELLED)
     {
-        if (ctx->result == RebuildState::CANCELLED)
+        if (state == RebuildState::CANCELLED)
         {
             POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_STOPPED,
                 "Partition {} (RAID5) rebuilding stopped",
                 ctx->part);
         }
-        else if (ctx->result == RebuildState::FAIL)
+        else if (state == RebuildState::FAIL)
         {
             POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_FAILED,
                 "Partition {} (RAID5) rebuilding failed",
@@ -133,7 +134,7 @@ Raid5Rebuild::Read(void)
             POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
                 "Partition {} (RAID5) rebuilding done",
                 ctx->part);
-            ctx->result = RebuildState::PASS;
+            ctx->SetResult(RebuildState::PASS);
         }
 
         EventSmartPtr complete(new RebuildCompleted(this));
@@ -172,7 +173,7 @@ Raid5Rebuild::Read(void)
             POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
                 "Failed to recover stripe {} in Partition {} (RAID5)",
                 stripeId, ctx->part);
-            ctx->result = RebuildState::FAIL;
+            ctx->SetResult(RebuildState::FAIL);
         }
     }
 
@@ -194,7 +195,7 @@ bool Raid5Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
     ubio->ClearCallback();
     ubio->SetCallback(event);
 
-    if (likely(ctx->result == RebuildState::REBUILDING))
+    if (likely(ctx->GetResult() == RebuildState::REBUILDING))
     {
         ioDisp->Submit(ubio);
     }

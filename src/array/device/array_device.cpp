@@ -81,7 +81,14 @@ ArrayDevice::GetState(void)
 void
 ArrayDevice::SetState(ArrayDeviceState input)
 {
+    string devName = "nullptr";
+    if (uBlock != nullptr)
+    {
+        devName = uBlock->GetName();
+    }
     state = input;
+    POS_TRACE_INFO(EID(ARRAY_DEVICE_STATE_CHANGED),
+        "Array device [" + devName + "]'s state is changed to {} (0=normal, 1=fault, 2=rebuild)", input);
 }
 
 } // namespace pos

@@ -55,7 +55,7 @@ UpdateDataCompleteHandler::_DoSpecificJob()
         POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
                 "Failed to update data during rebuild - Array:{}, Partition:{}, ID:{}",
                 rebuildCtx->array , rebuildCtx->part, targetId);
-        rebuildCtx->result = RebuildState::FAIL;
+        rebuildCtx->SetResult(RebuildState::FAIL);
     }
 
     return behavior->Complete(targetId, ubio);

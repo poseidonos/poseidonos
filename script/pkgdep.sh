@@ -60,6 +60,9 @@ if [ -f /etc/debian_version ]; then
     apt-get install -y mandoc
     # for yaml cpp
     apt-get install -y libyaml-cpp-dev
+    # for numa test
+    apt-get install -y numactl
+
 
 else
     echo "pkgdep: unknown system type."

@@ -93,7 +93,7 @@ Raid1Rebuild::Read(void)
     UpdateProgress(baseStripe);
 
     if (baseStripe >= maxStripeId ||
-        ctx->result >= RebuildState::CANCELLED)
+        ctx->GetResult() >= RebuildState::CANCELLED)
     {
         if (locker->ResetBusyLock(ctx->faultDev) == false)
         {
@@ -102,13 +102,13 @@ Raid1Rebuild::Read(void)
                 ctx->part);
             return false;
         }
-        if (ctx->result == RebuildState::CANCELLED)
+        if (ctx->GetResult() == RebuildState::CANCELLED)
         {
             POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_STOPPED,
                 "Partition {} (RAID1) rebuilding stopped",
                 ctx->part);
         }
-        else if (ctx->result == RebuildState::FAIL)
+        else if (ctx->GetResult() == RebuildState::FAIL)
         {
             POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_FAILED,
                 "Partition {} (RAID1) rebuilding failed",
@@ -119,7 +119,7 @@ Raid1Rebuild::Read(void)
             POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
                 "Partition {} (RAID1) rebuilding done",
                 ctx->part);
-            ctx->result = RebuildState::PASS;
+            ctx->SetResult(RebuildState::PASS);
             UpdateProgress(ctx->stripeCnt);
         }
 
@@ -171,7 +171,7 @@ Raid1Rebuild::Read(void)
             POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
                 "Failed to recover stripe {} in Partition {} (RAID1), maxStripes:{}",
                 stripeId, ctx->part, maxStripeId);
-            ctx->result = RebuildState::FAIL;
+            ctx->SetResult(RebuildState::FAIL);
         }
     }
 
@@ -190,7 +190,7 @@ bool Raid1Rebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
     ubio->ClearCallback();
     ubio->SetCallback(event);
 
-    if (likely(ctx->result == RebuildState::REBUILDING))
+    if (likely(ctx->GetResult() == RebuildState::REBUILDING))
     {
         ioDisp->Submit(ubio);
     }

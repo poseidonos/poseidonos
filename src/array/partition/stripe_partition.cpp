@@ -329,7 +329,6 @@ StripePartition::GetRebuildCtx(ArrayDevice* fault)
         ctx->faultIdx = index;
         ctx->faultDev = fault;
         ctx->stripeCnt = logicalSize_.totalStripes;
-        ctx->result = RebuildState::READY;
         ctx->size = GetPhysicalSize();
         {
             using namespace std::placeholders;

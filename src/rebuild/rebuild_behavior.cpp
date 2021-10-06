@@ -55,7 +55,7 @@ RebuildBehavior::~RebuildBehavior(void)
 void
 RebuildBehavior::StopRebuilding(void)
 {
-    ctx->result = RebuildState::CANCELLED;
+    ctx->SetResult(RebuildState::CANCELLED);
 }
 
 RebuildContext*

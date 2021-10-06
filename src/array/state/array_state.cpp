@@ -418,16 +418,6 @@ ArrayState::SetRebuildDone(bool isSuccess)
             iStateControl->Remove(degradedState);
             _SetState(ArrayStateEnum::NORMAL);
         }
-        else if (state != ArrayStateEnum::BROKEN)
-        {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::ARRAY_STATE_CHANGE_ERROR,
-                "Unknown State Transition " + state.ToString());
-        }
-        else
-        {
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::ARRAY_STATE_BROKEN,
-                "Rebuild done on exist broken state");
-        }
     }
 }
 

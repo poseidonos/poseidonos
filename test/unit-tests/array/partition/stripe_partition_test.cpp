@@ -181,7 +181,7 @@ TEST(StripePartition, GetRebuildCtx_testIfRebuildContextIsFilledInWithFaultyDevi
     // Then
     ASSERT_TRUE(rebuildCtx != nullptr);
     ASSERT_TRUE(raid1->GetRaidType() == rebuildCtx->raidType);
-    ASSERT_TRUE(RebuildState::READY == rebuildCtx->result); // gtest doesn't allow the use of enum class?
+    ASSERT_TRUE(RebuildState::READY == rebuildCtx->GetResult()); // gtest doesn't allow the use of enum class?
     ASSERT_EQ(3, rebuildCtx->faultIdx);
     ASSERT_EQ(ARRAY_NAME, rebuildCtx->array);
     int expectedLogicalTotalStripes = sPartition.GetLogicalSize()->totalStripes;

@@ -398,8 +398,11 @@ Array::AddSpare(string devName)
         return ret;
     }
 
-    EventSmartPtr event(new RebuildHandler(this, nullptr));
-    eventScheduler->EnqueueEvent(event);
+    if (state->IsRebuildable())
+    {
+        EventSmartPtr event(new RebuildHandler(this, nullptr));
+        eventScheduler->EnqueueEvent(event);
+    }
     pthread_rwlock_unlock(&stateLock);
     POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEVICE_ADDED, "Spare device was successfully added to array {}", name_);
 
@@ -705,13 +708,12 @@ Array::_DetachData(ArrayDevice* target)
         return;
     }
 
+    bool needStopRebuild = target->GetState() == ArrayDeviceState::REBUILD;
     target->SetState(ArrayDeviceState::FAULT);
     RaidState rs = ptnMgr->GetRaidState();
     state->RaidStateUpdated(rs);
     sysDevMgr->RemoveDevice(target->GetUblock());
     target->SetUblock(nullptr);
-
-    bool isRebuildable = state->IsRebuildable();
 
     if (state->IsMounted())
     {
@@ -722,11 +724,13 @@ Array::_DetachData(ArrayDevice* target)
         }
     }
 
-    if (target->GetState() == ArrayDeviceState::REBUILD || state->IsBroken())
+    if (needStopRebuild || state->IsBroken())
     {
+        POS_TRACE_INFO((int)POS_EVENT_ID::ARRAY_DEVICE_DETACHED,
+            "Stop the rebuild due to detachment of the rebuild target device or Array broken");
         rebuilder->StopRebuild(name_);
     }
-    else if (isRebuildable)
+    else if (state->IsRebuildable())
     {
         EventSmartPtr event(new RebuildHandler(this, target));
         eventScheduler->EnqueueEvent(event);
@@ -754,22 +758,29 @@ Array::_RebuildDone(RebuildResult result)
     POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "Array {} rebuild done. as success.", name_, result.result);
 
+    bool needRebuildAgain = false;
     if (result.target->GetState() != ArrayDeviceState::FAULT)
     {
         result.target->SetState(ArrayDeviceState::NORMAL);
     }
     else
     {
+        needRebuildAgain = true;
         POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-            "Array {} rebuild done. but device state is not rebuild state. device state : {}",
-            name_, result.target->GetState());
+            "The rebuild {} is done, but it needs to rebuild again since the target device was detached during a rebuilding.",
+            name_);
     }
 
     state->SetRebuildDone(true);
     int ret = _Flush();
     if (0 != ret)
     {
-        POS_TRACE_ERROR(ret, "Array {} failed to save the device state from rebuild to normal", name_);
+        POS_TRACE_ERROR(ret, "Array {} failed to update the device state", name_);
+    }
+    if (needRebuildAgain)
+    {
+        EventSmartPtr event(new RebuildHandler(this, nullptr));
+        eventScheduler->EnqueueEvent(event);
     }
     pthread_rwlock_unlock(&stateLock);
 }

@@ -555,7 +555,7 @@ TEST(Array, AddSpare_testIfSpareIsAddedWhenInputsAreValid)
     EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(mockSpareDev));
     EXPECT_CALL(mockAbrControl, FindArrayWithDeviceSN).WillOnce(Return(""));
     EXPECT_CALL(*rawPtr, GetSN).WillOnce(Return(""));
-    EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(1);
+    EXPECT_CALL(*mockState, IsRebuildable).WillOnce(Return(false));
 
     Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, NULL, mockState, NULL, &mockEventScheduler, NULL);
 

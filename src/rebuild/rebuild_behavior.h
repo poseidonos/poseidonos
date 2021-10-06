@@ -50,7 +50,6 @@ public:
 
     virtual void StopRebuilding(void);
     virtual RebuildContext* GetContext(void);
-
     virtual bool Read(void) = 0;
     virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) = 0;
     virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) = 0;

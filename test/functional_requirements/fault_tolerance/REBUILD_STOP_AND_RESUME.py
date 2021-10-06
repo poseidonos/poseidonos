@@ -24,7 +24,6 @@ def execute():
     MOUNT_VOL_NO_SPARE.execute()
     fio_proc = fio.start_fio(0, 30)
     fio.wait_fio(fio_proc)
-    fio_proc = fio.start_fio(0, 30)
     api.detach_ssd_and_attach(DETACH_TARGET_DEV)
     code = -1
     while code != 0:
@@ -41,14 +40,20 @@ def execute():
         print("1st rebuilding")
         api.detach_ssd(FIRST_SPARE)
         print(FIRST_SPARE + " detachment is triggered")
-        timeout = 80000 #80s
         if api.is_device_exists(FIRST_SPARE) is False:
             print(FIRST_SPARE + " is detached")
-        if api.wait_situation(ARRAYNAME, "DEGRADED", timeout) is True:
-            print("1st rebuilding stopped")
-            if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) is True:
-                print("2nd rebuilding")
-                return "pass"
+        timeout = 80000  # 80s
+        elapsed_ms = 0
+        while api.is_spare_device(ARRAYNAME, SECOND_SPARE) is True:
+            print("Wait for 2nd rebuilding")
+            time.sleep(0.01)
+            elapsed_ms += 10
+            if elapsed_ms > timeout:
+                return "fail"
+        print("2nd rebuilding started")
+        maxRebuildTimeout = 300 * 1000  # 300s
+        if api.wait_situation(ARRAYNAME, "NORMAL", maxRebuildTimeout) is True:
+            return "pass"
     return "fail"
 
 

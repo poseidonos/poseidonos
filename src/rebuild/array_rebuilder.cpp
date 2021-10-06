@@ -48,10 +48,14 @@ ArrayRebuilder::Rebuild(string array, ArrayDevice* dev,
     RebuildComplete cb, list<RebuildTarget*>& tgt)
 {
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
-        "ArrayRebuilder::Rebuild {}, {}", array, tgt.size());
+        "ArrayRebuilder::Rebuild {}, {} target partitions", array, tgt.size());
 
-    StopRebuild(array);
-    WaitRebuildDone(array);
+    if (_Find(array) != nullptr)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
+            "The rebuild of the same Array is not completed and a new rebuild is submitted");
+        return;
+    }
     POS_TRACE_INFO((int)POS_EVENT_ID::REBUILD_DEBUG_MSG,
         "ArrayRebuilder::Rebuild, start job");
 

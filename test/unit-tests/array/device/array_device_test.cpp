@@ -23,11 +23,13 @@ TEST(ArrayDevice, ArrayDevice_testIfGettersSettersAreProperlyInvoked)
     ASSERT_EQ(mockUblockDevPtr, actualPtr);
 
     // When
-    UblockSharedPtr mockUblockDevPtrVer2 = make_shared<MockUBlockDevice>("mock-dev", 1024, nullptr);
-    arrDev.SetUblock(mockUblockDevPtrVer2);
+    struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
+    UblockSharedPtr fakeUblockSharedPtr = make_shared<UnvmeSsd>("mock-dev", 1024, nullptr, fakeNs, "mock-addr");
+    ArrayDevice arrayDev(fakeUblockSharedPtr, ArrayDeviceState::NORMAL);
+    arrDev.SetUblock(fakeUblockSharedPtr);
 
     // Then
-    ASSERT_EQ(mockUblockDevPtrVer2, arrDev.GetUblock());
+    ASSERT_EQ(fakeUblockSharedPtr, arrDev.GetUblock());
 
     // When
     arrDev.SetState(ArrayDeviceState::REBUILD);

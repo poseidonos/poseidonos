@@ -35,6 +35,7 @@
 #include <atomic>
 #include <functional>
 #include <string>
+#include <mutex>
 
 #include "rebuild_result.h"
 #include "rebuild_progress.h"
@@ -65,10 +66,33 @@ public:
     uint64_t stripeCnt = 0;
     atomic<uint32_t> taskCnt;
     const PartitionPhysicalSize* size = nullptr;
-    RebuildState result = RebuildState::READY;
     RebuildProgress* prog = nullptr;
     RebuildLogger* logger = nullptr;
     F2PTranslator translate;
     RebuildComplete rebuildComplete;
+    RebuildState GetResult()
+    {
+        unique_lock<mutex> lock(mtx);
+        return result;
+    }
+    void SetResult(RebuildState reqState)
+    {
+        unique_lock<mutex> lock(mtx);
+        if (reqState == RebuildState::REBUILDING)
+        {
+            if (result == RebuildState::READY)
+            {
+                result = RebuildState::REBUILDING;
+            }
+        }
+        else
+        {
+            result = reqState;
+        }
+    }
+
+private:
+    RebuildState result = RebuildState::READY;
+    mutex mtx;
 };
 } // namespace pos

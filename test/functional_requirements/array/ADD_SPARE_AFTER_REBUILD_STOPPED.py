@@ -20,7 +20,10 @@ ARRAYNAME = REBUILD_STOP_BASIC.ARRAYNAME
 def execute():
     REBUILD_STOP_BASIC.execute()
     api.rescan_ssd()
+    time.sleep(1)
+    print("rescan done")
     out = cli.add_device(REBUILD_STOP_BASIC.REMAINING_DEV, ARRAYNAME)
+    print("device added")
     api.wait_situation(ARRAYNAME, "REBUILDING")
     return out
 

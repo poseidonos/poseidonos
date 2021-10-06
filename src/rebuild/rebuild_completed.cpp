@@ -42,7 +42,7 @@ RebuildCompleted::Execute()
     RebuildContext* ctx = behavior->GetContext();
     RebuildResult res;
     res.array = ctx->array;
-    res.result = ctx->result;
+    res.result = ctx->GetResult();
     ctx->rebuildComplete(res);
 
     return true;

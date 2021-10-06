@@ -49,7 +49,7 @@ TEST(PartitionRebuild, StopRebuild_testIfRebuildStateIsCancelled)
     unique_ptr<RebuildContext> ctx = make_unique<RebuildContext>();
     ctx->logger = new RebuildLogger(arrayName);
     ctx->prog  = new RebuildProgress(arrayName);
-    ctx->result = RebuildState::REBUILDING;
+    ctx->SetResult(RebuildState::REBUILDING);
     MockRebuildBehavior* bhvr = new MockRebuildBehavior(move(ctx), nullptr);
     PartitionRebuild* partRebuild = new PartitionRebuild(bhvr);
 

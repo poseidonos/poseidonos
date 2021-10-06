@@ -104,7 +104,7 @@ uint32_t RebuildProgress::Current(void)
         done += partProg->done;
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_PROGRESS,
+    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_PROGRESS_DETAIL,
         "array:{}, done:{}, total:{}", arrayName, done, total);
 
     if (total == 0)
