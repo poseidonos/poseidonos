@@ -39,12 +39,11 @@
 #endif
 namespace pos
 {
-SmartLogMetaIo::SmartLogMetaIo(IArrayInfo* arrayInfo)
+SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex)
 : loaded(false),
-  arrayInfo(arrayInfo)
+  arrayId(arrayIndex)
 {
     fileName = "SmartLogPage.bin";
-    arrayId = arrayInfo->GetIndex();
 }
 
 SmartLogMetaIo::~SmartLogMetaIo(void)
@@ -58,14 +57,14 @@ SmartLogMetaIo::Init(void)
     {
         return 0;
     }
-    smartLogFile = new FILESTORE(fileName, arrayInfo->GetIndex());
+    smartLogFile = new FILESTORE(fileName, arrayId);
     _CreateSmartLogFile();
     return 0;
 }
 void
 SmartLogMetaIo::Dispose(void)
 {
-    if (SmartLogMgrSingleton::Instance()->GetSmartLogEnabled() == false) i
+    if (SmartLogMgrSingleton::Instance()->GetSmartLogEnabled() == false)
     {
         return;
     }

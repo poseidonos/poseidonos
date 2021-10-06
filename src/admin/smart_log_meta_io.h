@@ -52,7 +52,7 @@ public:
 class SmartLogMetaIo : public IMountSequence
 {
 public:
-    explicit SmartLogMetaIo(IArrayInfo* arrayInfo);
+    explicit SmartLogMetaIo(uint32_t arrayIndex);
     virtual ~SmartLogMetaIo(void);
     virtual int Init(void) override;
     virtual void Dispose(void) override;
@@ -71,7 +71,6 @@ private:
     void _CompleteSmartLogIo(AsyncMetaFileIoCtx* ctx);
     int _DoMfsOperation(int Direction);
     bool loaded;
-    IArrayInfo* arrayInfo;
     std::string fileName;
     MetaFileIntf* smartLogFile;
     uint32_t arrayId;

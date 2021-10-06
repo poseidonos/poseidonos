@@ -46,6 +46,7 @@ DiskSmartCompleteHandler::DiskSmartCompleteHandler(struct spdk_nvme_health_infor
   io(io),
   callback(callback)
 {
+    smartLogMgr = SmartLogMgrSingleton::Instance();
 }
 DiskSmartCompleteHandler::~DiskSmartCompleteHandler(void)
 {
@@ -75,19 +76,19 @@ DiskSmartCompleteHandler::_AddComponentTemperature(void)
 void
 DiskSmartCompleteHandler::_SetValfromSmartLogMgr(void)
 {
-    resultPage->host_read_commands[0] = SmartLogMgrSingleton::Instance()->GetReadCmds(volId, arrayId);
-    resultPage->host_write_commands[0] = SmartLogMgrSingleton::Instance()->GetWriteCmds(volId, arrayId);
+    resultPage->host_read_commands[0] = smartLogMgr->GetReadCmds(volId, arrayId);
+    resultPage->host_write_commands[0] = smartLogMgr->GetWriteCmds(volId, arrayId);
 
     resultPage->host_read_commands[1] = 0;
     resultPage->host_write_commands[1] = 0;
 
-    uint64_t dataBytesRead = SmartLogMgrSingleton::Instance()->GetReadBytes(volId, arrayId);
+    uint64_t dataBytesRead = smartLogMgr->GetReadBytes(volId, arrayId);
     if (dataBytesRead == 0)
         resultPage->data_units_read[0] = 0;
     else
         resultPage->data_units_read[0] = dataBytesRead / NVME_SPEC_BYTE_UNIT + 1;
 
-    uint64_t dataBytesWritten = SmartLogMgrSingleton::Instance()->GetWriteBytes(volId, arrayId);
+    uint64_t dataBytesWritten = smartLogMgr->GetWriteBytes(volId, arrayId);
     if (dataBytesWritten == 0)
         resultPage->data_units_written[0] = 0;
     else

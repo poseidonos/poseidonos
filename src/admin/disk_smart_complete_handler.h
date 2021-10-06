@@ -55,6 +55,7 @@ private:
     bool _DoSpecificJob(void) override;
     void _AddComponentTemperature(void);
     void _SetValfromSmartLogMgr(void);
+    SmartLogMgr* smartLogMgr;
     struct spdk_nvme_health_information_page* resultPage;
     uint32_t volId;
     uint32_t arrayId;

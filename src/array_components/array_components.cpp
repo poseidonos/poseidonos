@@ -40,7 +40,6 @@
 #include "src/metafs/metafs.h"
 #include "src/state/state_manager.h"
 #include "src/metadata/metadata.h"
-
 namespace pos
 {
 ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, IAbrControl* abr)
@@ -56,6 +55,7 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     nullptr /*rbaStateMgr*/,
     nullptr /*metaFsFactory*/,
     nullptr /*nvmf*/,
+    nullptr /*smartLogMetaIo*/,
     nullptr /*arrayMountSequence*/
     )
 {
@@ -88,6 +88,7 @@ ArrayComponents::ArrayComponents(string arrayName,
     RBAStateManager* rbaStateMgr,
     function<MetaFs* (Array*, bool)> metaFsFactory,
     Nvmf* nvmf,
+    SmartLogMetaIo* smartLogMetaIo,
     ArrayMountSequence* arrayMountSequence)
 : arrayName(arrayName),
   state(state),
@@ -100,6 +101,7 @@ ArrayComponents::ArrayComponents(string arrayName,
   volMgr(volMgr),
   rbaStateMgr(rbaStateMgr),
   nvmf(nvmf),
+  smartLogMetaIo(smartLogMetaIo),
   arrayMountSequence(arrayMountSequence),
   metaFsFactory(metaFsFactory)
 {
@@ -266,7 +268,7 @@ ArrayComponents::_SetMountSequence(unsigned int arrayIndex)
     mountSequence.push_back(meta);
     mountSequence.push_back(flowControl);
     mountSequence.push_back(gc);
-
+    mountSequence.push_back(smartLogMetaIo);
     IStateControl* state = stateMgr->GetStateControl(arrayName);
     if (arrayMountSequence != nullptr)
     {
@@ -284,7 +286,8 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
         || meta != nullptr
         || flowControl != nullptr
         || gc != nullptr
-        || info != nullptr)
+        || info != nullptr
+        || smartLogMetaIo != nullptr)
     {
         POS_TRACE_WARN(EID(ARRAY_COMPONENTS_LEAK), "Meta Components exist already. Possible memory leak (or is it a mock?). Skipping.");
         return;
@@ -298,6 +301,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     rbaStateMgr = new RBAStateManager(array->GetName(), array->GetIndex());
     flowControl = new FlowControl(array);
     gc = new GarbageCollector(array, state);
+    smartLogMetaIo = new SmartLogMetaIo(array->GetIndex());
     info = new ComponentsInfo(array, gc);
 }
 

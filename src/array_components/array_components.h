@@ -45,6 +45,7 @@
 #include "src/metafs/metafs.h"
 #include "src/network/nvmf.h"
 #include "src/io/general_io/rba_state_manager.h"
+#include "src/admin/smart_log_meta_io.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include <vector>
 #include <string>
@@ -78,6 +79,7 @@ public:
         RBAStateManager* rbaStateMgr,
         function<MetaFs* (Array*, bool)> metaFsFactory,
         Nvmf* nvmf,
+        SmartLogMetaIo* smartLogMetaIo,
         ArrayMountSequence* mountSequence = nullptr);
     virtual ~ArrayComponents(void);
     virtual ComponentsInfo* GetInfo(void);
@@ -111,7 +113,7 @@ private:
     MetaFs* metafs = nullptr;
     RBAStateManager* rbaStateMgr = nullptr;
     Nvmf* nvmf = nullptr;
-
+    SmartLogMetaIo* smartLogMetaIo = nullptr;
     // instantiated internally
     vector<IMountSequence*> mountSequence;
     ArrayMountSequence* arrayMountSequence = nullptr;
