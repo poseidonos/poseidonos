@@ -36,7 +36,6 @@
 #include <vector>
 
 #include "src/array_models/interface/i_mount_sequence.h"
-#include "src/journal_service/journal_service.h"
 #include "src/mapper/address/mapper_address_info.h"
 #include "src/mapper/i_map_flush.h"
 #include "src/mapper/i_mapper_volume_event_handler.h"
@@ -154,7 +153,6 @@ private:
     StripeMapManager* stripeMapManager;
     ReverseMapManager* reverseMapManager;
     MapperWbt* mapperWbt;
-    JournalService* journalService;
 
     IArrayInfo* iArrayinfo;
     IStateControl* iStateControl;

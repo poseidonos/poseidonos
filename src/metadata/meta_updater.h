@@ -37,10 +37,10 @@
 #include "src/allocator/i_block_allocator.h"
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_wbstripe_allocator.h"
-#include "src/journal_service/i_journal_manager.h"
-#include "src/journal_service/i_journal_writer.h"
 #include "src/mapper/i_stripemap.h"
 #include "src/mapper/i_vsamap.h"
+#include "src/journal_manager/i_journal_manager.h"
+#include "src/journal_manager/i_journal_writer.h"
 #include "src/meta_service/i_meta_updater.h"
 
 namespace pos

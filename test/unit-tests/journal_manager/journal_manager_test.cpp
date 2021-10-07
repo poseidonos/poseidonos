@@ -53,7 +53,6 @@
 #include "test/unit-tests/journal_manager/log_write/log_write_handler_mock.h"
 #include "test/unit-tests/journal_manager/replay/replay_handler_mock.h"
 #include "test/unit-tests/journal_manager/status/journal_status_provider_mock.h"
-#include "test/unit-tests/journal_service/journal_service_mock.h"
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -81,8 +80,7 @@ public:
       dirtyMapManager(nullptr),
       logFilledNotifier(nullptr),
       replayHandler(nullptr),
-      arrayInfo(nullptr),
-      service(nullptr)
+      arrayInfo(nullptr)
     {
     }
     virtual ~JournalManagerTestFixture()
@@ -109,14 +107,13 @@ public:
         callbackSequenceController = new NiceMock<MockCallbackSequenceController>;
         replayHandler = new NiceMock<MockReplayHandler>;
         arrayInfo = new NiceMock<MockIArrayInfo>;
-        service = new NiceMock<MockJournalService>;
 
         journal = new JournalManager(config, statusProvider,
             logWriteContextFactory, journalEventFactory, logWriteHandler,
             volumeEventHandler, journalWriter,
             logBuffer, bufferAllocator, logGroupReleaser, checkpointManager,
             bufferedSegmentContext, dirtyMapManager, logFilledNotifier,
-            callbackSequenceController, replayHandler, arrayInfo, service);
+            callbackSequenceController, replayHandler, arrayInfo);
     }
 
     virtual void
@@ -124,7 +121,6 @@ public:
     {
         delete journal;
         delete arrayInfo;
-        delete service;
     }
 
 protected:
@@ -148,7 +144,6 @@ protected:
     NiceMock<MockCallbackSequenceController>* callbackSequenceController;
     NiceMock<MockReplayHandler>* replayHandler;
     NiceMock<MockIArrayInfo>* arrayInfo;
-    NiceMock<MockJournalService>* service;
 };
 
 TEST_F(JournalManagerTestFixture, Init_testWithJournalDisabled)
@@ -280,7 +275,7 @@ TEST(JournalManager, _DoRecovery_testIfExecutedWithoutInialization)
 {
     // Given
     NiceMock<MockJournalConfiguration>* config = new NiceMock<MockJournalConfiguration>;
-    JournalManagerSpy journal(config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    JournalManagerSpy journal(config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     ON_CALL(*config, IsEnabled()).WillByDefault(Return(true));
 
     // When: Recovery is executed without journal initiailization
@@ -314,9 +309,6 @@ TEST_F(JournalManagerTestFixture, Dispose_testWithJournalDisabled)
     // Given: Journal config manager is configured to be disabled
     EXPECT_CALL(*config, IsEnabled).WillRepeatedly(Return(false));
 
-    // Then: Journal should be un-registered
-    EXPECT_CALL(*service, Unregister);
-
     // When: Journal is disposed
     journal->Dispose();
 }
@@ -326,8 +318,7 @@ TEST_F(JournalManagerTestFixture, Dispose_testWithJournalEnabled)
     // Given: Journal config manager is configured to be enabled
     EXPECT_CALL(*config, IsEnabled).WillRepeatedly(Return(true));
 
-    // Then: Journal should be un-registered and log buffer should be disposed
-    EXPECT_CALL(*service, Unregister);
+    // Then: Log buffer should be disposed
     EXPECT_CALL(*logBuffer, Dispose);
 
     // When: Journal is disposed
@@ -339,9 +330,7 @@ TEST_F(JournalManagerTestFixture, Shutdown_testWithJournalDisabled)
     // Given: Journal config manager is configured to be disabled
     EXPECT_CALL(*config, IsEnabled).WillRepeatedly(Return(false));
 
-    // Then: Journal should be un-registered and
-    // log buffer should not be disposed, nor reset to log buffer
-    EXPECT_CALL(*service, Unregister);
+    // Then: Log buffer should not be disposed, nor reset to log buffer
     EXPECT_CALL(*logBuffer, SyncResetAll).Times(0);
     EXPECT_CALL(*logBuffer, Dispose).Times(0);
 
@@ -354,8 +343,7 @@ TEST_F(JournalManagerTestFixture, Shutdown_testWithJournalEnabled)
     // Given: Journal config manager is configured to be enabled
     EXPECT_CALL(*config, IsEnabled).WillRepeatedly(Return(true));
 
-    // Then: Journal should be un-registered and log buffer should be disposed after reset
-    EXPECT_CALL(*service, Unregister);
+    // Then: Log buffer should be disposed after reset
     {
         InSequence s;
 
@@ -375,10 +363,9 @@ TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferNotExist)
     // When: Log buffer is not loaded
     EXPECT_CALL(*logBuffer, DoesLogFileExist).WillOnce(Return(false));
 
-    // Then: Expect log buffer to be reset and journal to be registered to the service
+    // Then: Expect log buffer to be reset
     EXPECT_CALL(*logBuffer, Create).WillOnce(Return(0));
     EXPECT_CALL(*logBuffer, SyncResetAll).WillOnce(Return(0));
-    EXPECT_CALL(*service, Register);
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,
@@ -396,10 +383,9 @@ TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferLoaded)
     // When: Log buffer is loaded
     EXPECT_CALL(*logBuffer, DoesLogFileExist).WillOnce(Return(true));
 
-    // Then: Expect to start replay, and journal to be registered to the service
+    // Then: Expect to start replay
     EXPECT_CALL(*logBuffer, Open).WillOnce(Return(0));
     EXPECT_CALL(*replayHandler, Start).WillOnce(Return(0));
-    EXPECT_CALL(*service, Register);
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr,

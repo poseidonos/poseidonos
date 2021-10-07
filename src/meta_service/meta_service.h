@@ -38,6 +38,7 @@
 #include "src/include/array_mgmt_policy.h"
 #include "src/lib/singleton.h"
 #include "src/meta_service/i_meta_updater.h"
+#include "src/journal_manager/i_journal_status_provider.h"
 
 namespace pos
 {
@@ -47,11 +48,14 @@ class MetaService
 
 public:
     virtual void Register(std::string arrayName, int arrayId,
-        IMetaUpdater* mapUpdater);
+        IMetaUpdater* mapUpdater, IJournalStatusProvider* journalStatusProvider);
     virtual void Unregister(std::string arrayName);
 
     virtual IMetaUpdater* GetMetaUpdater(std::string arrayName);
     virtual IMetaUpdater* GetMetaUpdater(int arrayId);
+
+    virtual IJournalStatusProvider* GetJournalStatusProvider(std::string arrayName);
+    virtual IJournalStatusProvider* GetJournalStatusProvider(int arrayId);
 
 protected:
     MetaService(void);
@@ -59,6 +63,7 @@ protected:
 
 private:
     std::array<IMetaUpdater*, ArrayMgmtPolicy::MAX_ARRAY_CNT> metaUpdaters;
+    std::array<IJournalStatusProvider*, ArrayMgmtPolicy::MAX_ARRAY_CNT> journalStatusProviders;
     std::unordered_map<std::string, int> arrayNameToId;
 };
 

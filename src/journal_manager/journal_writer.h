@@ -33,7 +33,7 @@
 #pragma once
 
 #include "src/journal_manager/log/gc_map_update_list.h"
-#include "src/journal_service/i_journal_writer.h"
+#include "src/journal_manager/i_journal_writer.h"
 #include "src/mapper/include/mpage_info.h"
 
 namespace pos

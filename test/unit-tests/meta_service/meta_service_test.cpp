@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/meta_service/i_meta_updater_mock.h"
+#include "test/unit-tests/journal_manager/i_journal_status_provider_mock.h"
 
 using ::testing::NiceMock;
 
@@ -15,13 +16,16 @@ TEST(MetaService, Register_testIfMapUpdaterIsRegisteredSuccessfully)
     std::string arrayName = "POSArray";
     int arrayId = 1;
     NiceMock<MockIMetaUpdater> metaUpdater;
-    service->Register(arrayName, arrayId, &metaUpdater);
+    NiceMock<MockIJournalStatusProvider> journalStatus;
+    service->Register(arrayName, arrayId, &metaUpdater, &journalStatus);
 
-    auto actualById = service->GetMetaUpdater(arrayId);
-    EXPECT_EQ(actualById, &metaUpdater);
+    EXPECT_EQ(service->GetMetaUpdater(arrayId), &metaUpdater);
+    EXPECT_EQ(service->GetJournalStatusProvider(arrayId), &journalStatus);
 
-    auto actualByName = service->GetMetaUpdater(arrayName);
-    EXPECT_EQ(actualByName, &metaUpdater);
+    EXPECT_EQ(service->GetMetaUpdater(arrayName), &metaUpdater);
+    EXPECT_EQ(service->GetJournalStatusProvider(arrayName), &journalStatus);
+
+    MetaServiceSingleton::ResetInstance();
 }
 
 TEST(MetaService, Register_testIfExecutedSuccessfullyWhenRegisteredTwice)
@@ -31,11 +35,17 @@ TEST(MetaService, Register_testIfExecutedSuccessfullyWhenRegisteredTwice)
     std::string arrayName = "POSArray";
     int arrayId = 1;
     NiceMock<MockIMetaUpdater> metaUpdater;
-    service->Register(arrayName, arrayId, &metaUpdater);
-    service->Register(arrayName, arrayId, &metaUpdater);
+    NiceMock<MockIJournalStatusProvider> journalStatus;
+    service->Register(arrayName, arrayId, &metaUpdater, &journalStatus);
+    service->Register(arrayName, arrayId, &metaUpdater, &journalStatus);
 
-    auto actualById = service->GetMetaUpdater(arrayId);
-    EXPECT_EQ(actualById, &metaUpdater);
+    EXPECT_EQ(service->GetMetaUpdater(arrayId), &metaUpdater);
+    EXPECT_EQ(service->GetJournalStatusProvider(arrayId), &journalStatus);
+
+    EXPECT_EQ(service->GetMetaUpdater(arrayName), &metaUpdater);
+    EXPECT_EQ(service->GetJournalStatusProvider(arrayName), &journalStatus);
+
+    MetaServiceSingleton::ResetInstance();
 }
 
 TEST(MetaService, Unregister_testIfMapUpdaterIsUnregisteredSuccessfully)
@@ -45,14 +55,17 @@ TEST(MetaService, Unregister_testIfMapUpdaterIsUnregisteredSuccessfully)
     std::string arrayName = "POSArray";
     int arrayId = 1;
     NiceMock<MockIMetaUpdater> metaUpdater;
-    service->Register(arrayName, arrayId, &metaUpdater);
+    NiceMock<MockIJournalStatusProvider> journalStatus;
+    service->Register(arrayName, arrayId, &metaUpdater, &journalStatus);
     service->Unregister(arrayName);
 
-    auto actualById = service->GetMetaUpdater(arrayId);
-    EXPECT_EQ(actualById, nullptr);
+    EXPECT_EQ(service->GetMetaUpdater(arrayId), nullptr);
+    EXPECT_EQ(service->GetJournalStatusProvider(arrayId), nullptr);
 
-    auto actualByName = service->GetMetaUpdater(arrayName);
-    EXPECT_EQ(actualByName, nullptr);
+    EXPECT_EQ(service->GetMetaUpdater(arrayName), nullptr);
+    EXPECT_EQ(service->GetJournalStatusProvider(arrayName), nullptr);
+
+    MetaServiceSingleton::ResetInstance();
 }
 
 TEST(MetaService, Unregister_testIfExecutedSuccessfullyWhenUnregisteredTwice)
@@ -62,11 +75,17 @@ TEST(MetaService, Unregister_testIfExecutedSuccessfullyWhenUnregisteredTwice)
     std::string arrayName = "POSArray";
     int arrayId = 1;
     NiceMock<MockIMetaUpdater> metaUpdater;
-    service->Register(arrayName, arrayId, &metaUpdater);
+    NiceMock<MockIJournalStatusProvider> journalStatus;
+    service->Register(arrayName, arrayId, &metaUpdater, &journalStatus);
     service->Unregister(arrayName);
     service->Unregister(arrayName);
 
-    auto actualById = service->GetMetaUpdater(arrayId);
-    EXPECT_EQ(actualById, nullptr);
+    EXPECT_EQ(service->GetMetaUpdater(arrayId), nullptr);
+    EXPECT_EQ(service->GetJournalStatusProvider(arrayId), nullptr);
+
+    EXPECT_EQ(service->GetMetaUpdater(arrayName), nullptr);
+    EXPECT_EQ(service->GetJournalStatusProvider(arrayName), nullptr);
+
+    MetaServiceSingleton::ResetInstance();
 }
 } // namespace pos

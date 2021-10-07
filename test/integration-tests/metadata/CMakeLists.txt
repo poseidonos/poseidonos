@@ -1,0 +1,1 @@
+POS_ADD_INTEGRATION_TEST(metadata_integration_it meta_service_integration_test.cpp)

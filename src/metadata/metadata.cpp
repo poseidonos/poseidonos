@@ -128,8 +128,10 @@ Metadata::Init(void)
     }
 
     // MetaUpdater should be registered before journal initialized
+    //  as journal might request stripe flush and meta udpate in journal recovery
     // Meta update will be re-tried when journal is not ready
-    _RegisterMetaUpdater();
+    // TODO (huijeong.kim) Split journal initialization and recovery
+    _RegisterMetaServices();
 
     POS_TRACE_INFO(eventId, "Start initializing journal of array {}", arrayName);
     result = journal->Init();
@@ -145,7 +147,7 @@ Metadata::Init(void)
 }
 
 void
-Metadata::_RegisterMetaUpdater(void)
+Metadata::_RegisterMetaServices(void)
 {
     metaUpdater = new MetaUpdater(mapper->GetIVSAMap(),
         mapper->GetIStripeMap(),
@@ -158,7 +160,7 @@ Metadata::_RegisterMetaUpdater(void)
         arrayInfo);
 
     MetaServiceSingleton::Instance()->Register(arrayInfo->GetName(),
-       arrayInfo->GetIndex(), metaUpdater);
+       arrayInfo->GetIndex(), metaUpdater, journal->GetJournalStatusProvider());
 }
 
 void

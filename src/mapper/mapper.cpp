@@ -57,7 +57,6 @@ Mapper::Mapper(IArrayInfo* iarrayInfo, IStateControl* iState)
     reverseMapManager = new ReverseMapManager(vsaMapManager, stripeMapManager, iArrayinfo);
     mapperWbt = new MapperWbt(addrInfo, vsaMapManager, stripeMapManager, reverseMapManager);
     metaFs = nullptr;
-    journalService = nullptr;
     _ClearVolumeState();
 }
 
@@ -116,7 +115,6 @@ Mapper::Init(void)
         }
         reverseMapManager->Init(*addrInfo);
         _RegisterToMapperService();
-        journalService = JournalServiceSingleton::Instance();
         isInitialized = true;
     }
     assert(ret == 0);

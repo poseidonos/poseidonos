@@ -32,49 +32,18 @@
 
 #pragma once
 
-#include <array>
-#include <string>
-#include <unordered_map>
+#include <list>
 
-#include "src/include/array_mgmt_policy.h"
-#include "src/journal_service/i_journal_manager.h"
-#include "src/journal_service/i_journal_status_provider.h"
-#include "src/journal_service/i_journal_writer.h"
-#include "src/lib/singleton.h"
-
+#include "src/helper/json_helper.h"
 namespace pos
 {
-class JournalService
+using ElementList = std::list<JsonElement>;
+
+class IJournalStatusProvider
 {
-    friend class Singleton<JournalService>;
-
 public:
-    virtual bool IsEnabled(std::string arrayName);
-    virtual bool IsEnabled(int arrayId);
-
-    virtual void Register(std::string arrayName, int arrayId,
-        IJournalManager* journal, IJournalWriter* writer,
-        IJournalStatusProvider* provider);
-    virtual void Unregister(std::string arrayName);
-
-    virtual IJournalWriter* GetWriter(std::string arrayName);
-    IJournalStatusProvider* GetStatusProvider(std::string arrayName);
-
-    virtual IJournalWriter* GetWriter(int arrayId);
-    IJournalStatusProvider* GetStatusProvider(int arrayId);
-
-protected:
-    JournalService(void);
-    virtual ~JournalService(void);
-
-private:
-    std::array<IJournalManager*, ArrayMgmtPolicy::MAX_ARRAY_CNT> journalManagers;
-    std::array<IJournalWriter*, ArrayMgmtPolicy::MAX_ARRAY_CNT> journalWriters;
-    std::array<IJournalStatusProvider*, ArrayMgmtPolicy::MAX_ARRAY_CNT> statusProviders;
-
-    std::unordered_map<std::string, int> arrayNameToId;
+    virtual bool IsJournalEnabled(void) = 0;
+    virtual ElementList GetJournalStatus(void) = 0;
 };
-
-using JournalServiceSingleton = Singleton<JournalService>;
 
 } // namespace pos

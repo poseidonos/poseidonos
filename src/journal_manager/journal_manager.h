@@ -37,9 +37,9 @@
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/journaling_status.h"
 #include "src/journal_manager/log_write/i_journal_volume_event_handler.h"
-#include "src/journal_service/i_journal_manager.h"
-#include "src/journal_service/i_journal_writer.h"
-#include "src/journal_service/journal_service.h"
+#include "src/journal_manager/i_journal_manager.h"
+#include "src/journal_manager/i_journal_writer.h"
+#include "src/journal_manager/i_journal_status_provider.h"
 
 namespace pos
 {
@@ -103,7 +103,7 @@ public:
         LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
         CallbackSequenceController* sequenceController,
         ReplayHandler* replayHandler,
-        IArrayInfo* arrayInfo, JournalService* service);
+        IArrayInfo* arrayInfo);
     virtual ~JournalManager(void);
 
     virtual bool IsEnabled(void) override;
@@ -126,8 +126,8 @@ public:
     }
 
     IJournalWriter* GetJournalWriter(void);
-
     IJournalVolumeEventHandler* GetVolumeEventHandler(void);
+    IJournalStatusProvider* GetJournalStatusProvider(void);
 
 protected:
     void _InitModules(IVSAMap* vsaMap, IStripeMap* stripeMap,
@@ -146,13 +146,9 @@ protected:
 
     int _CanJournalBeWritten(void);
 
-    void _RegisterServices(void);
-    void _UnregisterServices(void);
-
     void _EnableJournaling(void);
 
     IArrayInfo* arrayInfo;
-    JournalService* journalService;
 
     JournalConfiguration* config;
     JournalStatusProvider* statusProvider;

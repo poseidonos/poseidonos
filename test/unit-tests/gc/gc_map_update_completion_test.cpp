@@ -11,8 +11,6 @@
 #include <test/unit-tests/gc/gc_map_update_request_mock.h>
 #include <test/unit-tests/gc/gc_stripe_manager_mock.h>
 #include <test/unit-tests/io/general_io/rba_state_manager_mock.h>
-#include <test/unit-tests/journal_service/i_journal_writer_mock.h>
-#include <test/unit-tests/journal_service/journal_service_mock.h>
 #include <test/unit-tests/mapper/i_stripemap_mock.h>
 #include <test/unit-tests/mapper/i_vsamap_mock.h>
 #include <test/unit-tests/spdk_wrapper/free_buffer_pool_mock.h>
@@ -64,7 +62,6 @@ public:
 
         stripeMap = new NiceMock<MockIStripeMap>;
         vsaMap = new NiceMock<MockIVSAMap>;
-        journal = new NiceMock<MockJournalService>;
         eventScheduler = new NiceMock<MockEventScheduler>;
 
         contextManager = new NiceMock<MockIContextManager>;
@@ -82,7 +79,6 @@ public:
         delete volumeEventPublisher;
         delete rbaStateManager;
         delete vsaMap;
-        delete journal;
         delete stripeMap;
         delete eventScheduler;
         delete blockAllocator;
@@ -108,7 +104,6 @@ protected:
 
     NiceMock<MockIStripeMap>* stripeMap;
     NiceMock<MockIVSAMap>* vsaMap;
-    NiceMock<MockJournalService>* journal;
     NiceMock<MockEventScheduler>* eventScheduler;
     NiceMock<MockIContextManager>* contextManager;
     NiceMock<MockIBlockAllocator>* blockAllocator;

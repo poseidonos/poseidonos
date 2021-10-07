@@ -1,10 +1,8 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
-#include "src/journal_service/i_journal_manager.h"
+#include "src/journal_manager/i_journal_manager.h"
 
 namespace pos
 {

@@ -1,4 +1,4 @@
-#include "src/journal_service/journal_service.h"
+#include "src/meta_service/meta_service.h"
 
 #include <string>
 
@@ -7,7 +7,7 @@
 
 namespace pos
 {
-class JournalServiceIntegrationTest : public ::testing::Test
+class MetaServiceIntegrationTest : public ::testing::Test
 {
 public:
     void InitializeAndRegisterJournal(std::string arrayName, int arrayId, JournalConfigurationSpy* config);
@@ -25,17 +25,17 @@ protected:
 };
 
 void
-JournalServiceIntegrationTest::SetUp(void)
+MetaServiceIntegrationTest::SetUp(void)
 {
 }
 
 void
-JournalServiceIntegrationTest::TearDown(void)
+MetaServiceIntegrationTest::TearDown(void)
 {
 }
 
 void
-JournalServiceIntegrationTest::InitializeAndRegisterJournal(std::string arrayName, int arrayId, JournalConfigurationSpy* config)
+MetaServiceIntegrationTest::InitializeAndRegisterJournal(std::string arrayName, int arrayId, JournalConfigurationSpy* config)
 {
     std::string logFileName = arrayName + "_" + GetLogFileName();
     JournalManagerTestFixture* testFixture = new JournalManagerTestFixture(logFileName);
@@ -43,14 +43,13 @@ JournalServiceIntegrationTest::InitializeAndRegisterJournal(std::string arrayNam
     fixtures[arrayName] = testFixture;
 
     JournalManagerSpy* journal = fixtures[arrayName]->GetJournal();
-    JournalServiceSingleton::Instance()->Register(arrayName, arrayId,
-        journal, journal->GetJournalWriter(), journal->GetStatusProvider());
+    MetaServiceSingleton::Instance()->Register(arrayName, arrayId, nullptr, journal->GetStatusProvider());
 }
 
 void
-JournalServiceIntegrationTest::ResetAndUnregisterJournal(std::string arrayName)
+MetaServiceIntegrationTest::ResetAndUnregisterJournal(std::string arrayName)
 {
-    JournalServiceSingleton::Instance()->Unregister(arrayName);
+    MetaServiceSingleton::Instance()->Unregister(arrayName);
 
     if (fixtures.find(arrayName) != fixtures.end())
     {
@@ -60,7 +59,7 @@ JournalServiceIntegrationTest::ResetAndUnregisterJournal(std::string arrayName)
     }
 }
 
-TEST_F(JournalServiceIntegrationTest, RegisterEnabledJournal)
+TEST_F(MetaServiceIntegrationTest, RegisterEnabledJournal)
 {
     std::string arrayName = "POSArray";
     int arrayId = 0;
@@ -69,7 +68,8 @@ TEST_F(JournalServiceIntegrationTest, RegisterEnabledJournal)
 
     InitializeAndRegisterJournal(arrayName, arrayId, builder.Build());
 
-    EXPECT_TRUE(JournalServiceSingleton::Instance()->IsEnabled(arrayName) == true);
+    auto statusProvider = MetaServiceSingleton::Instance()->GetJournalStatusProvider(arrayId);
+    EXPECT_TRUE(statusProvider->IsJournalEnabled() == true);
 
     int logWriteResult = fixtures[arrayName]->AddDummyLog();
     EXPECT_TRUE(logWriteResult == 0);
@@ -77,7 +77,7 @@ TEST_F(JournalServiceIntegrationTest, RegisterEnabledJournal)
     ResetAndUnregisterJournal(arrayName);
 }
 
-TEST_F(JournalServiceIntegrationTest, RegisterDisabledJournal)
+TEST_F(MetaServiceIntegrationTest, RegisterDisabledJournal)
 {
     std::string arrayName = "POSArray";
     int arrayId = 0;
@@ -87,7 +87,8 @@ TEST_F(JournalServiceIntegrationTest, RegisterDisabledJournal)
 
     InitializeAndRegisterJournal(arrayName, arrayId, builder.Build());
 
-    EXPECT_TRUE(JournalServiceSingleton::Instance()->IsEnabled(arrayName) == false);
+    auto statusProvider = MetaServiceSingleton::Instance()->GetJournalStatusProvider(arrayId);
+    EXPECT_TRUE(statusProvider->IsJournalEnabled() == false);
 
     int logWriteResult = fixtures[arrayName]->AddDummyLog();
     EXPECT_TRUE(logWriteResult != 0);
@@ -95,7 +96,7 @@ TEST_F(JournalServiceIntegrationTest, RegisterDisabledJournal)
     ResetAndUnregisterJournal(arrayName);
 }
 
-TEST_F(JournalServiceIntegrationTest, RegisterEnabledJournals)
+TEST_F(MetaServiceIntegrationTest, RegisterEnabledJournals)
 {
     JournalConfigurationBuilder builder(&testInfo);
     builder.SetJournalEnable(true);
@@ -110,7 +111,8 @@ TEST_F(JournalServiceIntegrationTest, RegisterEnabledJournals)
     for (int id = 0; id < numArrays; id++)
     {
         std::string arrayName = "array" + std::to_string(id);
-        EXPECT_TRUE(JournalServiceSingleton::Instance()->IsEnabled(arrayName) == true);
+        auto statusProvider = MetaServiceSingleton::Instance()->GetJournalStatusProvider(arrayName);
+        EXPECT_TRUE(statusProvider->IsJournalEnabled() == true);
 
         int logWriteResult = fixtures[arrayName]->AddDummyLog();
         EXPECT_TRUE(logWriteResult == 0);
@@ -123,7 +125,7 @@ TEST_F(JournalServiceIntegrationTest, RegisterEnabledJournals)
     }
 }
 
-TEST_F(JournalServiceIntegrationTest, RegisterDisabledJournals)
+TEST_F(MetaServiceIntegrationTest, RegisterDisabledJournals)
 {
     JournalConfigurationBuilder builder(&testInfo);
     builder.SetJournalEnable(false);
@@ -138,7 +140,8 @@ TEST_F(JournalServiceIntegrationTest, RegisterDisabledJournals)
     for (int id = 0; id < numArrays; id++)
     {
         std::string arrayName = "array" + std::to_string(id);
-        EXPECT_TRUE(JournalServiceSingleton::Instance()->IsEnabled(arrayName) == false);
+        auto statusProvider = MetaServiceSingleton::Instance()->GetJournalStatusProvider(arrayName);
+        EXPECT_TRUE(statusProvider->IsJournalEnabled() == false);
 
         int logWriteResult = fixtures[arrayName]->AddDummyLog();
         EXPECT_TRUE(logWriteResult < 0);
@@ -151,7 +154,7 @@ TEST_F(JournalServiceIntegrationTest, RegisterDisabledJournals)
     }
 }
 
-TEST_F(JournalServiceIntegrationTest, GetServiceById)
+TEST_F(MetaServiceIntegrationTest, GetServiceById)
 {
     JournalConfigurationBuilder builder(&testInfo);
     builder.SetJournalEnable(true);
@@ -167,8 +170,8 @@ TEST_F(JournalServiceIntegrationTest, GetServiceById)
     {
         std::string arrayName = "array" + std::to_string(id);
 
-        IJournalWriter* journalByName = JournalServiceSingleton::Instance()->GetWriter(arrayName);
-        IJournalWriter* journalById = JournalServiceSingleton::Instance()->GetWriter(id);
+        IJournalStatusProvider* journalByName = MetaServiceSingleton::Instance()->GetJournalStatusProvider(arrayName);
+        IJournalStatusProvider* journalById = MetaServiceSingleton::Instance()->GetJournalStatusProvider(id);
 
         EXPECT_EQ(journalByName, journalById);
     }

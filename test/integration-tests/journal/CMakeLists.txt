@@ -1,5 +1,4 @@
 POS_ADD_INTEGRATION_TEST(checkpoint_integration_it checkpoint_integration_test.cpp)
-POS_ADD_INTEGRATION_TEST(journal_service_it journal_service_integration_test.cpp)
 POS_ADD_INTEGRATION_TEST(journal_volume_it journal_volume_integration_test.cpp)
 POS_ADD_INTEGRATION_TEST(log_buffer_it log_buffer_integration_test.cpp)
 POS_ADD_INTEGRATION_TEST(log_write_it log_write_integration_test.cpp)

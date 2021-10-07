@@ -60,7 +60,6 @@ SUBDIRS = allocator \
         logger \
         meta_file_intf \
         journal_manager \
-        journal_service \
         helper \
         sys_info \
         dump \

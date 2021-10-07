@@ -66,7 +66,6 @@ namespace pos
 {
 JournalManager::JournalManager(void)
 : arrayInfo(nullptr),
-  journalService(nullptr),
   config(nullptr),
   statusProvider(nullptr),
   logBuffer(nullptr),
@@ -103,7 +102,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
     CallbackSequenceController* callbackSequenceController,
     ReplayHandler* replay,
-    IArrayInfo* info, JournalService* service)
+    IArrayInfo* info)
 : JournalManager()
 {
     config = configuration;
@@ -129,7 +128,6 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     replayHandler = replay;
 
     arrayInfo = info;
-    journalService = service;
 }
 
 // Constructor for injecting mock module dependencies in product code
@@ -150,7 +148,7 @@ JournalManager::JournalManager(IArrayInfo* info, IStateControl* state)
     new LogBufferWriteDoneNotifier(),
     new CallbackSequenceController(),
     new ReplayHandler(state),
-    info, JournalServiceSingleton::Instance())
+    info)
 {
 }
 
@@ -229,10 +227,6 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         }
     }
 
-    if (result == 0)
-    {
-        _RegisterServices();
-    }
     return result;
 }
 
@@ -305,8 +299,6 @@ JournalManager::_DoRecovery(void)
 void
 JournalManager::Dispose(void)
 {
-    _UnregisterServices();
-
     if (config->IsEnabled() == true)
     {
         _Reset();
@@ -327,7 +319,6 @@ JournalManager::_DisposeModules(void)
 void
 JournalManager::Shutdown(void)
 {
-    _UnregisterServices();
     if (config->IsEnabled() == true)
     {
         logBuffer->Dispose();
@@ -338,19 +329,6 @@ void
 JournalManager::Flush(void)
 {
     // no-op for IMountSequence
-}
-
-void
-JournalManager::_RegisterServices(void)
-{
-    journalService->Register(arrayInfo->GetName(), arrayInfo->GetIndex(),
-        this, journalWriter, statusProvider);
-}
-
-void
-JournalManager::_UnregisterServices(void)
-{
-    journalService->Unregister(arrayInfo->GetName());
 }
 
 bool
@@ -369,6 +347,12 @@ IJournalVolumeEventHandler*
 JournalManager::GetVolumeEventHandler(void)
 {
     return volumeEventHandler;
+}
+
+IJournalStatusProvider*
+JournalManager::GetJournalStatusProvider(void)
+{
+    return statusProvider;
 }
 
 int

@@ -66,7 +66,7 @@ public:
     virtual void StopRebuilding(void);
 
 private:
-    void _RegisterMetaUpdater(void);
+    void _RegisterMetaServices(void);
 
     IArrayInfo* arrayInfo;
     Mapper* mapper;

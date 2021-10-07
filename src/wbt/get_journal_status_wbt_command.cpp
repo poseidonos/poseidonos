@@ -34,7 +34,7 @@
 
 #include <string>
 
-#include "src/journal_service/journal_service.h"
+#include "src/meta_service/meta_service.h"
 
 namespace pos
 {
@@ -53,11 +53,11 @@ GetJournalStatusWbtCommand::Execute(Args& argv, JsonElement& elem)
     JsonElement journalStatusElem("journalStatus");
     std::string arrayName = _GetParameter(argv, "array");
 
-    bool isEnabled = JournalServiceSingleton::Instance()->IsEnabled(arrayName);
+    IJournalStatusProvider* status = MetaServiceSingleton::Instance()->GetJournalStatusProvider(arrayName);
+    bool isEnabled = status->IsJournalEnabled();
     journalStatusElem.SetAttribute(JsonAttribute("enabled", std::to_string(isEnabled)));
     if (isEnabled == true)
     {
-        IJournalStatusProvider* status = JournalServiceSingleton::Instance()->GetStatusProvider(arrayName);
         ElementList statusList = status->GetJournalStatus();
 
         for (auto element : statusList)

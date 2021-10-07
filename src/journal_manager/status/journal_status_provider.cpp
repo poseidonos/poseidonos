@@ -71,6 +71,20 @@ JournalStatusProvider::Init(ILogBufferStatus* bufferStatusProvider, JournalConfi
     checkpointStatusMap[CheckpointStatus::COMPLETED] = "COMPLETED";
 }
 
+bool
+JournalStatusProvider::IsJournalEnabled(void)
+{
+    // TODO (huijeong.kim) to initialize module when journal disabled
+    if (config == nullptr)
+    {
+        return false;
+    }
+    else
+    {
+        return config->IsEnabled();
+    }
+}
+
 ElementList
 JournalStatusProvider::GetJournalStatus(void)
 {

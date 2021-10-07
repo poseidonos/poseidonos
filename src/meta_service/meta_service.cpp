@@ -40,6 +40,7 @@ namespace pos
 MetaService::MetaService(void)
 {
     metaUpdaters.fill(nullptr);
+    journalStatusProviders.fill(nullptr);
 }
 
 MetaService::~MetaService(void)
@@ -47,13 +48,14 @@ MetaService::~MetaService(void)
 }
 
 void
-MetaService::Register(std::string arrayName, int arrayId, IMetaUpdater* mapUpdater)
+MetaService::Register(std::string arrayName, int arrayId, IMetaUpdater* mapUpdater, IJournalStatusProvider* journalStatus)
 {
     if (arrayNameToId.find(arrayName) == arrayNameToId.end())
     {
         arrayNameToId.emplace(arrayName, arrayId);
 
         metaUpdaters[arrayId] = mapUpdater;
+        journalStatusProviders[arrayId] = journalStatus;
     }
     else
     {
@@ -71,6 +73,7 @@ MetaService::Unregister(std::string arrayName)
         arrayNameToId.erase(arrayName);
 
         metaUpdaters[arrayId] = nullptr;
+        journalStatusProviders[arrayId] = nullptr;
     }
     else
     {
@@ -98,4 +101,25 @@ MetaService::GetMetaUpdater(int arrayId)
 {
     return metaUpdaters[arrayId];
 }
+
+IJournalStatusProvider*
+MetaService::GetJournalStatusProvider(std::string arrayName)
+{
+    auto arrayId = arrayNameToId.find(arrayName);
+    if (arrayId == arrayNameToId.end())
+    {
+        return nullptr;
+    }
+    else
+    {
+        return journalStatusProviders[arrayId->second];
+    }
+}
+
+IJournalStatusProvider*
+MetaService::GetJournalStatusProvider(int arrayId)
+{
+    return journalStatusProviders[arrayId];
+}
+
 } // namespace pos

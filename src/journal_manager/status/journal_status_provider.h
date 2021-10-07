@@ -37,7 +37,7 @@
 
 #include "src/journal_manager/checkpoint/checkpoint_status.h"
 #include "src/journal_manager/log_write/log_group_buffer_status.h"
-#include "src/journal_service/i_journal_status_provider.h"
+#include "src/journal_manager/i_journal_status_provider.h"
 
 namespace pos
 {
@@ -53,6 +53,7 @@ public:
     virtual void Init(ILogBufferStatus* bufferStatusProvider, JournalConfiguration* journalConfig,
         ICheckpointStatus* checkpointStatusProvider);
 
+    virtual bool IsJournalEnabled(void) override;
     virtual ElementList GetJournalStatus(void) override;
 
 private:

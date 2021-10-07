@@ -40,7 +40,6 @@
 
 #include "src/include/address_type.h"
 #include "src/event_scheduler/callback.h"
-#include "src/journal_service/journal_service.h"
 #include "src/mapper/i_vsamap.h"
 #include "src/mapper/include/mpage_info.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
